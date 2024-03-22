@@ -1,6 +1,19 @@
 package components
 
-import "strings"
+import (
+	"log"
+	"os"
+	"os/user"
+	"strings"
+)
+
+func getHomeDir() string {
+	user, err := user.Current()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return user.HomeDir
+}
 
 func getFolder() []folder {
 	folders := []folder{
@@ -21,5 +34,29 @@ func getFolder() []folder {
 }
 
 func repeatString(s string, count int) string {
-    return strings.Repeat(s, count)
+	return strings.Repeat(s, count)
+}
+
+func returnFocusType(sideBarFocus bool) filePanelFocusType {
+	if sideBarFocus {
+		return secondFocus
+	} else {
+		return focus
+	}
+}
+
+func returnFolderElement(location string) (folderElement []element) {
+	files, err := os.ReadDir(location)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, file := range files {
+		folderElement = append(folderElement, element{
+			name: file.Name(), 
+			location: location + file.Name(),
+			folder: file.IsDir(),
+		})
+	}
+	return folderElement
 }

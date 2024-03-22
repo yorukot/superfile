@@ -2,10 +2,17 @@ package components
 
 type fileState uint
 type sideBarStatus uint
+type filePanelFocusType uint
 
 const (
 	selectDisk sideBarStatus = iota
 	selectPinned
+)
+
+const (
+	noneFocus filePanelFocusType = iota
+	secondFocus
+	focus 
 )
 
 const (
@@ -15,20 +22,36 @@ const (
 
 // main model
 type model struct {
-	fileModel    fileModel
-	sideBarModel sideBarModel
+	fileModel       fileModel
+	sideBarModel    sideBarModel
+	filePanelFocusIndex int
+	sideBarFocus bool
 	mainPanelHeight int
 }
 
 /* FILE WINDOWS TYPE START*/
 type fileModel struct {
-	fileWindows    []fileWindows
-	width int
+	filePanels []filePanel
+	width       int
 }
 
-type fileWindows struct {
+type filePanel struct {
+	cursor int
+	focusType filePanelFocusType
 	location  string
 	fileState fileState
+	selected []selectedElement
+	element []element
+}
+
+type selectedElement struct {
+	location string
+}
+
+type element struct {
+	name string
+	location string
+	folder bool
 }
 /* FILE WINDOWS TYPE END*/
 
@@ -47,9 +70,24 @@ type pinnedModel struct {
 }
 
 type folder struct {
-	location string
-	name     string
+	location  string
+	name      string
 	endPinned bool
 }
 
 /* SIDE BAR COMPONENTS TYPE END*/
+
+/*PROCESS BAR COMPONENTS TYPE START*/
+
+type processBar struct {
+	process []process
+}
+
+type process struct {
+	name        string
+	process     int
+	description string
+	command     string
+}
+
+/*PROCESS BAR COMPONENTS TYPE END*/
