@@ -1,5 +1,7 @@
 package components
 
+import "time"
+
 type fileState uint
 type sideBarStatus uint
 type filePanelFocusType uint
@@ -12,7 +14,7 @@ const (
 const (
 	noneFocus filePanelFocusType = iota
 	secondFocus
-	focus 
+	focus
 )
 
 const (
@@ -22,26 +24,30 @@ const (
 
 // main model
 type model struct {
-	fileModel       fileModel
-	sideBarModel    sideBarModel
+	fileModel           fileModel
+	sideBarModel        sideBarModel
 	filePanelFocusIndex int
-	sideBarFocus bool
-	mainPanelHeight int
+	sideBarFocus        bool
+	mainPanelHeight     int
+	test                string
+	fullWidth           int
+	fullHeight          int
 }
 
 /* FILE WINDOWS TYPE START*/
 type fileModel struct {
 	filePanels []filePanel
-	width       int
+	width      int
 }
 
 type filePanel struct {
-	cursor int
+	cursor    int
+	render    int
 	focusType filePanelFocusType
 	location  string
 	fileState fileState
-	selected []selectedElement
-	element []element
+	selected  []selectedElement
+	element   []element
 }
 
 type selectedElement struct {
@@ -49,10 +55,13 @@ type selectedElement struct {
 }
 
 type element struct {
-	name string
-	location string
-	folder bool
+	name       string
+	location   string
+	folder     bool
+	size       int64
+	updateTime time.Time
 }
+
 /* FILE WINDOWS TYPE END*/
 
 /* SIDE BAR COMPONENTS TYPE START*/
@@ -91,3 +100,8 @@ type process struct {
 }
 
 /*PROCESS BAR COMPONENTS TYPE END*/
+
+type iconStyle struct {
+	icon  string
+	color string
+}

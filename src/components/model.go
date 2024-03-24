@@ -20,12 +20,11 @@ func InitialModel() model {
 		},
 		fileModel: fileModel{
 			filePanels: []filePanel{
-				{location: HomeDir + "/Documents/code/", fileState: normal, focusType: secondFocus},
-				{location: HomeDir + "/Documents/code/", fileState: normal, focusType: noneFocus},
-				{location: HomeDir + "/Documents/code/", fileState: normal, focusType: noneFocus},
+				{render: 0, cursor: 0, location: HomeDir + "/Documents/code", fileState: normal, focusType: secondFocus},
 			},
 			width: 10,
 		},
+		test: "",
 	}
 }
 
@@ -37,6 +36,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.mainPanelHeight = msg.Height - downBarHeight
 		m.fileModel.width = (msg.Width - sideBarWidth - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
+		m.fullHeight = msg.Height
+		m.fullWidth = msg.Width
 		return m, nil
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -46,22 +47,31 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		/* LIST CONTROLLER START */
 		// up list
 		case "up", "k":
-			if m.sideBarModel.cursor > 0 {
-				m.sideBarModel.cursor--
+			if m.sideBarFocus {
+				m = ControllerSideBarListUp(m)
 			} else {
-				m.sideBarModel.cursor = len(m.sideBarModel.pinnedModel.folder) - 1
+				m = ControllerFilePanelListUp(m)
 			}
 		// down list
 		case "down", "j":
-			if m.sideBarModel.cursor < len(m.sideBarModel.pinnedModel.folder)-1 {
-				m.sideBarModel.cursor++
+			if m.sideBarFocus {
+				m = ControllerSideBarListDown(m)
 			} else {
-				m.sideBarModel.cursor = 0
+				m = ControllerFilePanelListDown(m)
 			}
 		// select file or disk or folder
 		case "enter", " ":
-			m.sideBarModel.pinnedModel.selected = m.sideBarModel.pinnedModel.folder[m.sideBarModel.cursor].location
+			if m.sideBarFocus {
+				m = SideBarSelectFolder(m)
+			} else {
+				m = EnterPanel(m)
+			}
+		case "b":
+			if !m.sideBarFocus {
+				m = ParentFolder(m)
+			}
 		/* LIST CONTROLLER END */
+
 		/* NAVIGATION CONTROLLER START */
 		// change file panel
 		case "shift+right", "tab":
@@ -91,7 +101,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.filePanelFocusIndex != 0 {
 					m.filePanelFocusIndex--
 				}
-
+				m.fileModel.width = (m.fullWidth - sideBarWidth - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
 				m.fileModel.filePanels[m.filePanelFocusIndex].focusType = returnFocusType(m.sideBarFocus)
 			}
 		// create new file panel
@@ -101,7 +111,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 				m.fileModel.filePanels[m.filePanelFocusIndex].focusType = noneFocus
 				m.fileModel.filePanels[m.filePanelFocusIndex+1].focusType = returnFocusType(m.sideBarFocus)
-
+				m.fileModel.width = (m.fullWidth - sideBarWidth - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
 				m.filePanelFocusIndex++
 
 			}
@@ -130,7 +140,7 @@ func (m model) View() string {
 			cursor = ""
 		}
 
-		if m.sideBarModel.pinnedModel.selected == folder.location {
+		if folder.location == m.fileModel.filePanels[m.filePanelFocusIndex].location {
 			s += cursorStyle.Render(cursor) + " " + selectedItemStyle.Render(TruncateText(folder.name, sideBarWidth-2)) + "" + "\n"
 		} else {
 			s += cursorStyle.Render(cursor) + " " + itemStyle.Render(TruncateText(folder.name, sideBarWidth-2)) + "" + "\n"
@@ -149,13 +159,18 @@ func (m model) View() string {
 
 	f := make([]string, 3)
 	for i, filePanel := range m.fileModel.filePanels {
-		filePanel.element = returnFolderElement(filePanel.location)
+		fileElenent := returnFolderElement(filePanel.location)
+		filePanel.element = fileElenent
+		m.fileModel.filePanels[i].element = fileElenent
 		f[i] += fileIconStyle.Render("   ") + fileLocation.Render(TruncateTextBeginning(filePanel.location, m.fileModel.width-4)) + "\n"
 		f[i] += FilePanelDividerStyle(filePanel.focusType).Render(repeatString("─", m.fileModel.width)) + "\n"
-		for _, file := range filePanel.element {
+		for h := filePanel.render; h < filePanel.render+PanelElementHeight(m.mainPanelHeight) && h < len(filePanel.element); h++ {
 			cursor := " "
-
-			f[i] += cursorStyle.Render(cursor) + " " + itemStyle.Render(TruncateText(file.name, m.fileModel.width-2)) + "" + "\n"
+			if h == filePanel.cursor {
+				cursor = ""
+			}
+			m.test = filePanel.element[h].name
+			f[i] += cursorStyle.Render(cursor) + " " + PrettierName(TruncateText(filePanel.element[h].name, m.fileModel.width-5), filePanel.element[h].folder) + "\n"
 		}
 		f[i] = FilePanelBoardStyle(m.mainPanelHeight, m.fileModel.width, filePanel.focusType).Render(f[i])
 	}
@@ -164,6 +179,5 @@ func (m model) View() string {
 	for _, f := range f {
 		finalRender = lipgloss.JoinHorizontal(lipgloss.Top, finalRender, f)
 	}
-
-	return finalRender
+	return lipgloss.JoinVertical(lipgloss.Top, finalRender, m.test)
 }
