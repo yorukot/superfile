@@ -1,8 +1,6 @@
 package components
 
 type ThemeType struct {
-	Background string
-
 	Border string
 	Cursor       string
 
