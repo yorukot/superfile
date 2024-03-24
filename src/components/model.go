@@ -1,13 +1,30 @@
 package components
 
 import (
+	"encoding/json"
+	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"log"
+	"os"
+	"strconv"
 )
 
 var HomeDir = getHomeDir()
 
+var theme ThemeType
+
 func InitialModel() model {
+	data, err := os.ReadFile("./.superfile/theme/theme.json")
+	if err != nil {
+		log.Fatalf("Theme file not exist: %v", err)
+	}
+
+	err = json.Unmarshal(data, &theme)
+	if err != nil {
+		log.Fatalf("Error decoding theme json(your json file may be errors): %v", err)
+	}
+	LoadThemeConfig()
 	return model{
 		filePanelFocusIndex: 0,
 		sideBarFocus:        false,
@@ -115,7 +132,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+n":
 			if len(m.fileModel.filePanels) != 4 {
 				m.fileModel.filePanels = append(m.fileModel.filePanels, filePanel{
-					location:     HomeDir + "/",
+					location:     HomeDir,
 					fileState:    normal,
 					focusType:    secondFocus,
 					folderRecord: make(map[string]folderRecord),
@@ -144,51 +161,86 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	s := projectTitleStyle.Render("    Super Files     ")
-	s += "\n"
-	for i, folder := range m.sideBarModel.pinnedModel.folder {
-		cursor := " "
-		if m.sideBarModel.cursor == i && m.sideBarFocus {
-			cursor = ""
+	if m.fullHeight < minimumHeight || m.fullWidth < minimumWidth {
+		focusedModelStyle := lipgloss.NewStyle().
+			Height(m.fullHeight).
+			Width(m.fullWidth).
+			Align(lipgloss.Center, lipgloss.Center).
+			BorderForeground(lipgloss.Color("69"))
+		fullWidthString := strconv.Itoa(m.fullWidth)
+		fullHeightString := strconv.Itoa(m.fullHeight)
+		minimumWidthString := strconv.Itoa(minimumWidth)
+		minimumHeightString := strconv.Itoa(minimumHeight)
+		if m.fullHeight < minimumHeight {
+			fullHeightString = terminalTooSmall.Render(fullHeightString)
 		}
-
-		if folder.location == m.fileModel.filePanels[m.filePanelFocusIndex].location {
-			s += cursorStyle.Render(cursor) + " " + selectedItemStyle.Render(TruncateText(folder.name, sideBarWidth-2)) + "" + "\n"
-		} else {
-			s += cursorStyle.Render(cursor) + " " + itemStyle.Render(TruncateText(folder.name, sideBarWidth-2)) + "" + "\n"
+		if m.fullWidth < minimumWidth {
+			fullWidthString = terminalTooSmall.Render(fullWidthString)
 		}
+		fullHeightString = terminalMinimumSize.Render(fullHeightString)
+		fullWidthString = terminalMinimumSize.Render(fullWidthString)
 
-		if i == 4 {
-			s += "\n" + pinnedTextStyle.Render("󰐃 Pinned") + pinnedLineStyle.Render(" ───────────") + "\n\n"
-		}
+		return focusedModelStyle.Render(`Terminal size too small:` + "\n" +
+			"Width = " + fullWidthString +
+			" Height = " + fullHeightString + "\n\n" +
 
-		if folder.endPinned {
-			s += "\n" + pinnedTextStyle.Render("󱇰 Disk") + pinnedLineStyle.Render(" ─────────────") + "\n\n"
-		}
-	}
+			"Needed for current config:" + "\n" +
+			"Width = " + terminalMinimumSize.Render(minimumWidthString) +
+			" Height = " + terminalMinimumSize.Render(minimumHeightString))
+	} else {
 
-	s = SideBarBoardStyle(m.mainPanelHeight, m.sideBarFocus).Render(s)
-
-	f := make([]string, 4)
-	for i, filePanel := range m.fileModel.filePanels {
-		fileElenent := returnFolderElement(filePanel.location)
-		filePanel.element = fileElenent
-		m.fileModel.filePanels[i].element = fileElenent
-		f[i] += fileIconStyle.Render("   ") + fileLocation.Render(TruncateTextBeginning(filePanel.location, m.fileModel.width-4)) + "\n"
-		f[i] += FilePanelDividerStyle(filePanel.focusType).Render(repeatString("─", m.fileModel.width)) + "\n"
-		for h := filePanel.render; h < filePanel.render+PanelElementHeight(m.mainPanelHeight) && h < len(filePanel.element); h++ {
+		s := sideBarTitle.Render("    Super Files     ")
+		s += "\n"
+		for i, folder := range m.sideBarModel.pinnedModel.folder {
 			cursor := " "
-			if h == filePanel.cursor {
+			if m.sideBarModel.cursor == i && m.sideBarFocus {
 				cursor = ""
 			}
-			f[i] += cursorStyle.Render(cursor) + " " + PrettierName(TruncateText(filePanel.element[h].name, m.fileModel.width-5), filePanel.element[h].folder) + "\n"
+			if folder.location == m.fileModel.filePanels[m.filePanelFocusIndex].location {
+				s += cursorStyle.Render(cursor) + " " + sideBarSelected.Render(TruncateText(folder.name, sideBarWidth-2)) + "" + "\n"
+			} else {
+				s += cursorStyle.Render(cursor) + " " + sideBarItem.Render(TruncateText(folder.name, sideBarWidth-2)) + "" + "\n"
+			}
+			if i == 4 {
+				s += "\n" + sideBarTitle.Render("󰐃 Pinned") + borderStyle.Render(" ───────────") + "\n\n"
+			}
+			if folder.endPinned {
+				s += "\n" + sideBarTitle.Render("󱇰 Disk") + borderStyle.Render(" ─────────────") + "\n\n"
+			}
 		}
-		f[i] = FilePanelBoardStyle(m.mainPanelHeight, m.fileModel.width, filePanel.focusType).Render(f[i])
-	}
-	finalRender := lipgloss.JoinHorizontal(lipgloss.Top, s)
 
-	for _, f := range f {
-		finalRender = lipgloss.JoinHorizontal(lipgloss.Top, finalRender, f)
+		s = SideBarBoardStyle(m.mainPanelHeight, m.sideBarFocus).Render(s)
+
+		f := make([]string, 4)
+		for i, filePanel := range m.fileModel.filePanels {
+			fileElenent := returnFolderElement(filePanel.location)
+			filePanel.element = fileElenent
+			m.fileModel.filePanels[i].element = fileElenent
+			f[i] += filePanelTopFolderIcon.Render("   ") + filePanelTopPath.Render(TruncateTextBeginning(filePanel.location, m.fileModel.width-4)) + "\n"
+			f[i] += FilePanelDividerStyle(filePanel.focusType).Render(repeatString("━", m.fileModel.width)) + "\n"
+			if len(filePanel.element) == 0 {
+				f[i] += "   No any file or folder"
+				bottomBorder := GenerateFilePanelBottomBorder("┫0/0┣", m.fileModel.width+3)
+				f[i] = FilePanelBoardStyle(m.mainPanelHeight, m.fileModel.width, filePanel.focusType, bottomBorder).Render(f[i])
+			} else {
+				for h := filePanel.render; h < filePanel.render+PanelElementHeight(m.mainPanelHeight) && h < len(filePanel.element); h++ {
+					cursor := " "
+					if h == filePanel.cursor {
+						cursor = ""
+					}
+					f[i] += cursorStyle.Render(cursor) + " " + PrettierName(TruncateText(filePanel.element[h].name, m.fileModel.width-5), filePanel.element[h].folder) + "\n"
+				}
+				cursorPosition := strconv.Itoa(filePanel.cursor + 1)
+				totalElement := strconv.Itoa(len(filePanel.element))
+				bottomBorder := GenerateFilePanelBottomBorder(fmt.Sprintf("┫%s/%s┣", cursorPosition, totalElement), m.fileModel.width+3)
+				f[i] = FilePanelBoardStyle(m.mainPanelHeight, m.fileModel.width, filePanel.focusType, bottomBorder).Render(f[i])
+			}
+		}
+		finalRender := lipgloss.JoinHorizontal(lipgloss.Top, s)
+
+		for _, f := range f {
+			finalRender = lipgloss.JoinHorizontal(lipgloss.Top, finalRender, f)
+		}
+		return lipgloss.JoinVertical(lipgloss.Top, finalRender, m.test)
 	}
-	return lipgloss.JoinVertical(lipgloss.Top, finalRender, m.test)
 }
