@@ -48,6 +48,12 @@ type filePanel struct {
 	fileState fileState
 	selected  []selectedElement
 	element   []element
+	folderRecord map[string]folderRecord
+}
+
+type folderRecord struct {
+	folderCursor int
+	folderRender int
 }
 
 type selectedElement struct {

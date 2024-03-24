@@ -70,19 +70,41 @@ func SideBarSelectFolder(m model) model {
 func EnterPanel(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	if len(panel.element) > 0 && panel.element[panel.cursor].folder {
+		panel.folderRecord[panel.location] = folderRecord{
+			folderCursor: panel.cursor,
+			folderRender: panel.render,
+		}
 		panel.location = panel.element[panel.cursor].location
-		m.fileModel.filePanels[m.filePanelFocusIndex] = panel
-		m.fileModel.filePanels[m.filePanelFocusIndex].cursor = 0
-		m.fileModel.filePanels[m.filePanelFocusIndex].render = 0
+		folderRecord, hasRecord := panel.folderRecord[panel.location]
+		if hasRecord {
+			panel.cursor = folderRecord.folderCursor
+			panel.render = folderRecord.folderRender
+		} else {
+			panel.cursor = 0
+			panel.render = 0
+		}
 	}
+	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m
 }
 
 func ParentFolder(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel.folderRecord[panel.location] = folderRecord{
+		folderCursor: panel.cursor,
+		folderRender: panel.render,
+	}
 	fullPath := panel.location
 	parentDir := path.Dir(fullPath)
 	panel.location = parentDir
+	folderRecord, hasRecord := panel.folderRecord[panel.location]
+	if hasRecord {
+		panel.cursor = folderRecord.folderCursor
+		panel.render = folderRecord.folderRender
+	} else {
+		panel.cursor = 0
+		panel.render = 0
+	}
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m
 }

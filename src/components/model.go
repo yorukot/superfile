@@ -10,7 +10,7 @@ var HomeDir = getHomeDir()
 func InitialModel() model {
 	return model{
 		filePanelFocusIndex: 0,
-		sideBarFocus:        true,
+		sideBarFocus:        false,
 		sideBarModel: sideBarModel{
 			pinnedModel: pinnedModel{
 				folder: getFolder(),
@@ -20,7 +20,14 @@ func InitialModel() model {
 		},
 		fileModel: fileModel{
 			filePanels: []filePanel{
-				{render: 0, cursor: 0, location: HomeDir + "/Documents/code", fileState: normal, focusType: secondFocus},
+				{
+					render:       0,
+					cursor:       0,
+					location:     HomeDir,
+					fileState:    normal,
+					focusType:    focus,
+					folderRecord: make(map[string]folderRecord),
+				},
 			},
 			width: 10,
 		},
@@ -106,8 +113,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		// create new file panel
 		case "ctrl+n":
-			if len(m.fileModel.filePanels) != 3 {
-				m.fileModel.filePanels = append(m.fileModel.filePanels, filePanel{location: HomeDir + "/", fileState: normal, focusType: secondFocus})
+			if len(m.fileModel.filePanels) != 4 {
+				m.fileModel.filePanels = append(m.fileModel.filePanels, filePanel{
+					location:     HomeDir + "/",
+					fileState:    normal,
+					focusType:    secondFocus,
+					folderRecord: make(map[string]folderRecord),
+				})
 
 				m.fileModel.filePanels[m.filePanelFocusIndex].focusType = noneFocus
 				m.fileModel.filePanels[m.filePanelFocusIndex+1].focusType = returnFocusType(m.sideBarFocus)
@@ -157,7 +169,7 @@ func (m model) View() string {
 
 	s = SideBarBoardStyle(m.mainPanelHeight, m.sideBarFocus).Render(s)
 
-	f := make([]string, 3)
+	f := make([]string, 4)
 	for i, filePanel := range m.fileModel.filePanels {
 		fileElenent := returnFolderElement(filePanel.location)
 		filePanel.element = fileElenent
@@ -169,7 +181,6 @@ func (m model) View() string {
 			if h == filePanel.cursor {
 				cursor = ""
 			}
-			m.test = filePanel.element[h].name
 			f[i] += cursorStyle.Render(cursor) + " " + PrettierName(TruncateText(filePanel.element[h].name, m.fileModel.width-5), filePanel.element[h].folder) + "\n"
 		}
 		f[i] = FilePanelBoardStyle(m.mainPanelHeight, m.fileModel.width, filePanel.focusType).Render(f[i])
