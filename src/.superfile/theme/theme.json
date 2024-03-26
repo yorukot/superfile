@@ -4,6 +4,9 @@
 
     "terminalTooSmallError": "#fb4934",
     "terminalSizeCurrect": "#8ec07c",
+    
+    "browserMode": "#E8751A",
+    "selectMode": "#8EC07C",
 
     "sideBarTitle": "#CC241D",
     "sideBarItem": "#EBDBB2",
@@ -13,5 +16,6 @@
     "filePanelFocus": "#FFF1C5",
     "filePanelTopFolderIcon": "#8EC07C",
     "filePanelTopPath": "#458588",
-    "filePanelItem": "#EBDBB2"
+    "filePanelItem": "#EBDBB2",
+    "filePanelItemSelected": "#D3869B"
 }

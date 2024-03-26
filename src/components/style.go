@@ -5,9 +5,9 @@ import (
 )
 
 var (
-	minimumHeight = 35
-	minimumWidth  = 96
-	downBarHeight = 13
+	minimumHeight   = 35
+	minimumWidth    = 96
+	bottomBarHeight = 13
 
 	terminalTooSmall    lipgloss.Style
 	terminalMinimumSize lipgloss.Style
@@ -27,6 +27,7 @@ var (
 	filePanelTopFolderIcon lipgloss.Style
 	filePanelTopPath       lipgloss.Style
 	filePanelItem          lipgloss.Style
+	filePanelItemSelected  lipgloss.Style
 )
 
 func LoadThemeConfig() {
@@ -44,6 +45,7 @@ func LoadThemeConfig() {
 	filePanelTopFolderIcon = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.FilePanelTopFolderIcon)).Bold(true)
 	filePanelTopPath = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.FilePanelTopPath)).Bold(true)
 	filePanelItem = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.FilePanelItem))
+	filePanelItemSelected = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.FilePanelItemSelected))
 
 }
 func SideBarBoardStyle(height int, focus bool) lipgloss.Style {
@@ -91,7 +93,25 @@ func FilePanelBoardStyle(height int, width int, focusType filePanelFocusType, bo
 		Border(filePanelBottomBoard, true, true, true, true).
 		BorderForeground(lipgloss.Color(FilePanelFocusColor(focusType))).
 		Width(width).
-		Height(height).Bold(true)
+		Height(height)
+}
+
+func ProcsssBarBoarder(height int, width int, focusType bool, borderBottom string) lipgloss.Style {
+	filePanelBottomBoard := lipgloss.Border{
+		Top:         "━",
+		Bottom:      borderBottom,
+		Left:        "┃",
+		Right:       "┃",
+		TopLeft:     "┏",
+		TopRight:    "┓",
+		BottomLeft:  "┗",
+		BottomRight: "┛",
+	}
+	return lipgloss.NewStyle().
+		Border(filePanelBottomBoard, true, true, true, true).
+		BorderForeground(lipgloss.Color(theme.Border)).
+		Width(width).
+		Height(height)
 }
 
 func FilePanelDividerStyle(focusType filePanelFocusType) lipgloss.Style {
@@ -115,9 +135,13 @@ func TruncateTextBeginning(text string, maxChars int) string {
 	return string(truncatedRunes)
 }
 
-func PrettierName(name string, isDir bool) string {
+func PrettierName(name string, isDir bool, isSelected bool) string {
 	style := getElementIcon(name, isDir)
-	return StringColorRender(style.color).Render(style.icon) + "  " + filePanelItem.Render(name)
+	if isSelected {
+		return StringColorRender(style.color).Render(style.icon) + "  " + filePanelItemSelected.Render(name)
+	} else {
+		return StringColorRender(style.color).Render(style.icon) + "  " + filePanelItem.Render(name)
+	}
 }
 
 // CHOOSE STYLE FUNCTION
@@ -137,12 +161,12 @@ func FilePanelBoard(focusType filePanelFocusType) lipgloss.Border {
 	}
 }
 
-func GenerateFilePanelBottomBorder(countString string, width int) string {
+func GenerateBottomBorder(countString string, width int) string {
 	result := ""
 	for i := 0; i < width-len(countString); i++ {
 		result += "━"
 	}
-	return result + countString
+	return result + "┫" + countString + "┣"
 }
 
 func StringColorRender(color string) lipgloss.Style {

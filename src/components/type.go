@@ -1,15 +1,14 @@
 package components
 
-import "time"
+import (
+	"time"
 
-type fileState uint
-type sideBarStatus uint
-type filePanelFocusType uint
-
-const (
-	selectDisk sideBarStatus = iota
-	selectPinned
+	"github.com/charmbracelet/bubbles/progress"
 )
+
+type panelMode uint
+type filePanelFocusType uint
+type processState int
 
 const (
 	noneFocus filePanelFocusType = iota
@@ -18,18 +17,28 @@ const (
 )
 
 const (
-	selectMultipleFileMode fileState = iota
-	normal
+	selectMode panelMode = iota
+	browserMode
+)
+
+const (
+	copying processState = iota
+	deleting
+	moving
+	successful
+	cancel
+	failure
 )
 
 // main model
 type model struct {
 	fileModel           fileModel
 	sideBarModel        sideBarModel
+	processBar          processBar
 	filePanelFocusIndex int
 	sideBarFocus        bool
+	procsssBarFocus     bool
 	mainPanelHeight     int
-	test                string
 	fullWidth           int
 	fullHeight          int
 }
@@ -41,23 +50,19 @@ type fileModel struct {
 }
 
 type filePanel struct {
-	cursor    int
-	render    int
-	focusType filePanelFocusType
-	location  string
-	fileState fileState
-	selected  []selectedElement
-	element   []element
+	cursor       int
+	render       int
+	focusType    filePanelFocusType
+	location     string
+	panelMode    panelMode
+	selected     []string
+	element      []element
 	folderRecord map[string]folderRecord
 }
 
 type folderRecord struct {
 	folderCursor int
 	folderRender int
-}
-
-type selectedElement struct {
-	location string
 }
 
 type element struct {
@@ -73,8 +78,6 @@ type element struct {
 /* SIDE BAR COMPONENTS TYPE START*/
 type sideBarModel struct {
 	pinnedModel pinnedModel
-	choice      string
-	state       sideBarStatus
 	cursor      int
 }
 
@@ -95,14 +98,14 @@ type folder struct {
 /*PROCESS BAR COMPONENTS TYPE START*/
 
 type processBar struct {
+	cursor  int
 	process []process
 }
 
 type process struct {
-	name        string
-	process     int
-	description string
-	command     string
+	name     string
+	progress progress.Model
+	state processState
 }
 
 /*PROCESS BAR COMPONENTS TYPE END*/
@@ -110,4 +113,54 @@ type process struct {
 type iconStyle struct {
 	icon  string
 	color string
+}
+
+type ThemeType struct {
+	Border string
+	Cursor string
+
+	TerminalTooSmallError string
+	TerminalSizeCurrect   string
+
+	BrowserMode string
+	SelectMode  string
+
+	SideBarTitle    string
+	SideBarItem     string
+	SideBarSelected string
+	SideBarFocus    string
+
+	FilePanelFocus         string
+	FilePanelTopFolderIcon string
+	FilePanelTopPath       string
+	FilePanelItem          string
+	FilePanelItemSelected  string
+}
+
+type ConfigType struct {
+	TrashCanPath string
+
+	// HotKey setting
+	Quit     [2]string
+	ListUp   [2]string
+	ListDown [2]string
+
+	NextFilePanel      [2]string
+	PreviousFilePanel  [2]string
+	CloseFilePanel     [2]string
+	CreateNewFilePanel [2]string
+	FocusOnSideBar     [2]string
+
+	ChangePanelMode [2]string
+
+	DeleteItem   [2]string
+	SelectItem   [2]string
+	ParentFolder [2]string
+
+	FilePanelSelectModeItemSingleSelect [2]string
+	FilePanelSelectModeItemSelectDown   [2]string
+	FilePanelSelectModeItemSelectUp     [2]string
+	FilePanelSelectModeItemDelete       [2]string
+	FilePanelFolderCreate               [2]string
+	FilePanelFileCreate                 [2]string
 }

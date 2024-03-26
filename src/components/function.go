@@ -93,3 +93,35 @@ func returnFolderElement(location string) (folderElement []element) {
 func PanelElementHeight(mainPanelHeight int) int {
 	return mainPanelHeight - 3
 }
+
+func ArrayContains(s []string, str string) bool {
+    for _, v := range s {
+        if v == str {
+            return true
+        }
+    }
+    return false
+}
+
+func OutputLog(value any) {
+	log.SetOutput(logOutput)
+	log.Println(value)
+}
+
+func RemoveElementByValue(slice []string, value string) []string {
+    newSlice := []string{}
+    for _, v := range slice {
+        if v != value {
+            newSlice = append(newSlice, v)
+        }
+    }
+    return newSlice
+}
+
+func MoveFile(source string, destination string) error {
+    err := os.Rename(source, destination)
+    if err != nil {
+        OutputLog(err)
+    }
+	return err
+}

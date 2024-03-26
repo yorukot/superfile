@@ -1,0 +1,36 @@
+{   
+    "trashCanPath": "./.superfile/trash",
+
+    "_COMMIT_HOTKEY": "",
+
+    "_COMMIT_global_hotkey": "Here is global, all global key cant conflicts with other hotkeys",
+    "quit": ["esc", "q"],
+    "listUp": ["up", "k"],
+    "listDown": ["down", "j"],
+
+    "nextFilePanel": ["shift+right", "tab"],
+    "previousFilePanel": ["shift+left", ""],
+    "closeFilePanel": ["ctrl+w", ""],
+    "createNewFilePanel": ["ctrl+n", ""],
+
+    "changePanelMode": ["v", ""],
+
+    "focusOnProcessBar": ["p", ""],
+    "focusOnSideBar": ["b", ""],
+
+    "_COMMIT_normal_mode_hotkey": "Here is normal mode hotkey you can conflicts with other mode (cant conflicts with global hotkey)",
+    "deleteItem": ["d", ""],
+    "selectItem": ["enter", "l"],
+    "parentFolder": ["h", ""],
+
+    "_COMMIT_select_mode_hotkey": "Here is select mode hotkey you can conflicts with other mode (cant conflicts with global hotkey)",
+    "filePanelSelectModeItemSingleSelect": ["enter", "l"],
+    "filePanelSelectModeItemSelectDown": ["shift+down", ""],
+    "filePanelSelectModeItemSelectUp": ["shift+up", ""],
+    "filePanelSelectModeItemDelete": ["d", ""],
+    "filePanelFolderCreate": ["f", ""],
+    "filePanelFileCreate": ["c", ""],
+
+    "_COMMIT_process_bar_hotkey": "Here is process bar panel hotkey you can conflicts with other mode (cant conflicts global hotkey)",
+    "cancelProcess": ""
+}

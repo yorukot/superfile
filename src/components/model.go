@@ -13,27 +13,62 @@ import (
 var HomeDir = getHomeDir()
 
 var theme ThemeType
+var Config ConfigType
+
+var logOutput *os.File
+
+var (
+	appStyle = lipgloss.NewStyle().Padding(1, 2)
+
+	titleStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#FFFDF5")).
+			Background(lipgloss.Color("#25A065")).
+			Padding(0, 1)
+
+	statusMessageStyle = lipgloss.NewStyle().
+				Foreground(lipgloss.AdaptiveColor{Light: "#04B575", Dark: "#04B575"}).
+				Render
+)
 
 func InitialModel() model {
-	data, err := os.ReadFile("./.superfile/theme/theme.json")
+	var err error
+	logOutput, err = os.OpenFile("superfile.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("error opening file: %v", err)
+	}
+
+	data, err := os.ReadFile("./.superfile/config/config.json")
+	if err != nil {
+		log.Fatalf("HotKey file not exist: %v", err)
+	}
+
+	err = json.Unmarshal(data, &Config)
+	if err != nil {
+		log.Fatalf("Error decoding HotKey json(your config  file may be errors): %v", err)
+	}
+
+	data, err = os.ReadFile("./.superfile/theme/theme.json")
 	if err != nil {
 		log.Fatalf("Theme file not exist: %v", err)
 	}
 
 	err = json.Unmarshal(data, &theme)
 	if err != nil {
-		log.Fatalf("Error decoding theme json(your json file may be errors): %v", err)
+		log.Fatalf("Error decoding theme json(your theme file may be errors): %v", err)
 	}
 	LoadThemeConfig()
 	return model{
 		filePanelFocusIndex: 0,
 		sideBarFocus:        false,
+		procsssBarFocus:     false,
+		processBar: processBar{
+			process: []process{},
+			cursor:  0,
+		},
 		sideBarModel: sideBarModel{
 			pinnedModel: pinnedModel{
 				folder: getFolder(),
 			},
-			choice: "default choice",
-			state:  selectDisk,
 		},
 		fileModel: fileModel{
 			filePanels: []filePanel{
@@ -41,14 +76,13 @@ func InitialModel() model {
 					render:       0,
 					cursor:       0,
 					location:     HomeDir,
-					fileState:    normal,
+					panelMode:    browserMode,
 					focusType:    focus,
 					folderRecord: make(map[string]folderRecord),
 				},
 			},
 			width: 10,
 		},
-		test: "",
 	}
 }
 
@@ -58,7 +92,7 @@ func (m model) Init() tea.Cmd {
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		m.mainPanelHeight = msg.Height - downBarHeight
+		m.mainPanelHeight = msg.Height - bottomBarHeight
 		m.fileModel.width = (msg.Width - sideBarWidth - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
 		m.fullHeight = msg.Height
 		m.fullWidth = msg.Width
@@ -66,94 +100,69 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		// return superfile
-		case "ctrl+c", "q":
+		case Config.Quit[0], Config.Quit[1]:
 			return m, tea.Quit
 		/* LIST CONTROLLER START */
 		// up list
-		case "up", "k":
+		case Config.ListUp[0], Config.ListUp[1]:
 			if m.sideBarFocus {
 				m = ControllerSideBarListUp(m)
 			} else {
 				m = ControllerFilePanelListUp(m)
 			}
 		// down list
-		case "down", "j":
+		case Config.ListDown[0], Config.ListDown[1]:
 			if m.sideBarFocus {
 				m = ControllerSideBarListDown(m)
 			} else {
 				m = ControllerFilePanelListDown(m)
 			}
-		// select file or disk or folder
-		case "enter", " ":
-			if m.sideBarFocus {
-				m = SideBarSelectFolder(m)
-			} else {
-				m = EnterPanel(m)
-			}
-		case "b":
-			if !m.sideBarFocus {
-				m = ParentFolder(m)
-			}
 		/* LIST CONTROLLER END */
-
+		case Config.ChangePanelMode[0], Config.ChangePanelMode[1]:
+			m = SelectedMode(m)
 		/* NAVIGATION CONTROLLER START */
 		// change file panel
-		case "shift+right", "tab":
-			m.fileModel.filePanels[m.filePanelFocusIndex].focusType = noneFocus
-			if m.filePanelFocusIndex == (len(m.fileModel.filePanels) - 1) {
-				m.filePanelFocusIndex = 0
-			} else {
-				m.filePanelFocusIndex++
-			}
-
-			m.fileModel.filePanels[m.filePanelFocusIndex].focusType = returnFocusType(m.sideBarFocus)
+		case Config.NextFilePanel[0], Config.NextFilePanel[1]:
+			m = NextFilePanel(m)
 		// change file panel
-		case "shift+left":
-			m.fileModel.filePanels[m.filePanelFocusIndex].focusType = noneFocus
-			if m.filePanelFocusIndex == (len(m.fileModel.filePanels) - 1) {
-				m.filePanelFocusIndex = 0
-			} else {
-				m.filePanelFocusIndex++
-			}
-
-			m.fileModel.filePanels[m.filePanelFocusIndex].focusType = returnFocusType(m.sideBarFocus)
+		case Config.PreviousFilePanel[0], Config.PreviousFilePanel[1]:
+			m = PreviousFilePanel(m)
 		// close file panel
-		case "ctrl+w":
-			if len(m.fileModel.filePanels) != 1 {
-				m.fileModel.filePanels = append(m.fileModel.filePanels[:m.filePanelFocusIndex], m.fileModel.filePanels[m.filePanelFocusIndex+1:]...)
-
-				if m.filePanelFocusIndex != 0 {
-					m.filePanelFocusIndex--
-				}
-				m.fileModel.width = (m.fullWidth - sideBarWidth - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
-				m.fileModel.filePanels[m.filePanelFocusIndex].focusType = returnFocusType(m.sideBarFocus)
-			}
+		case Config.CloseFilePanel[0], Config.CloseFilePanel[1]:
+			m = CloseFilePanel(m)
 		// create new file panel
-		case "ctrl+n":
-			if len(m.fileModel.filePanels) != 4 {
-				m.fileModel.filePanels = append(m.fileModel.filePanels, filePanel{
-					location:     HomeDir,
-					fileState:    normal,
-					focusType:    secondFocus,
-					folderRecord: make(map[string]folderRecord),
-				})
-
-				m.fileModel.filePanels[m.filePanelFocusIndex].focusType = noneFocus
-				m.fileModel.filePanels[m.filePanelFocusIndex+1].focusType = returnFocusType(m.sideBarFocus)
-				m.fileModel.width = (m.fullWidth - sideBarWidth - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
-				m.filePanelFocusIndex++
-
-			}
+		case Config.CreateNewFilePanel[0], Config.CreateNewFilePanel[1]:
+			m = CreateNewFilePanel(m)
 		// focus to sidebar or file panel
-		case "ctrl+b":
-			if m.sideBarFocus {
-				m.sideBarFocus = false
-				m.fileModel.filePanels[m.filePanelFocusIndex].focusType = focus
-			} else {
-				m.sideBarFocus = true
-				m.fileModel.filePanels[m.filePanelFocusIndex].focusType = secondFocus
-			}
+		case Config.FocusOnSideBar[0], Config.FocusOnSideBar[1]:
+			m = FocusOnSideBar(m)
 			/* NAVIGATION CONTROLLER END */
+		default:
+			if m.fileModel.filePanels[m.filePanelFocusIndex].focusType == focus && m.fileModel.filePanels[m.filePanelFocusIndex].panelMode == selectMode {
+				switch msg.String() {
+				case Config.FilePanelSelectModeItemSingleSelect[0], Config.FilePanelSelectModeItemSingleSelect[1]:
+					m = SingleItemSelect(m)
+				case Config.FilePanelSelectModeItemSelectUp[0], Config.FilePanelSelectModeItemSelectUp[1]:
+					m = ItemSelectUp(m)
+				case Config.FilePanelSelectModeItemSelectDown[0], Config.FilePanelSelectModeItemSelectDown[1]:
+					m = ItemSelectDown(m)
+				}
+			} else {
+				switch msg.String() {
+				// select file or disk or folder
+				case Config.SelectItem[0], Config.SelectItem[1]:
+					if m.sideBarFocus {
+						m = SideBarSelectFolder(m)
+					} else {
+						m = EnterPanel(m)
+					}
+				/* LIST CONTROLLER END */
+				case Config.ParentFolder[0], Config.ParentFolder[1]:
+					m = ParentFolder(m)
+				case Config.DeleteItem[0], Config.DeleteItem[1]:
+					m = DeleteSingleItem(m)
+				}
+			}
 		}
 	}
 
@@ -220,7 +229,7 @@ func (m model) View() string {
 			f[i] += FilePanelDividerStyle(filePanel.focusType).Render(repeatString("━", m.fileModel.width)) + "\n"
 			if len(filePanel.element) == 0 {
 				f[i] += "   No any file or folder"
-				bottomBorder := GenerateFilePanelBottomBorder("┫0/0┣", m.fileModel.width+3)
+				bottomBorder := GenerateBottomBorder("0/0", m.fileModel.width+5)
 				f[i] = FilePanelBoardStyle(m.mainPanelHeight, m.fileModel.width, filePanel.focusType, bottomBorder).Render(f[i])
 			} else {
 				for h := filePanel.render; h < filePanel.render+PanelElementHeight(m.mainPanelHeight) && h < len(filePanel.element); h++ {
@@ -228,19 +237,45 @@ func (m model) View() string {
 					if h == filePanel.cursor {
 						cursor = ""
 					}
-					f[i] += cursorStyle.Render(cursor) + " " + PrettierName(TruncateText(filePanel.element[h].name, m.fileModel.width-5), filePanel.element[h].folder) + "\n"
+					isItemSelected := ArrayContains(filePanel.selected, filePanel.element[h].location)
+					f[i] += cursorStyle.Render(cursor) + " " + PrettierName(TruncateText(filePanel.element[h].name, m.fileModel.width-5), filePanel.element[h].folder, isItemSelected) + "\n"
 				}
 				cursorPosition := strconv.Itoa(filePanel.cursor + 1)
 				totalElement := strconv.Itoa(len(filePanel.element))
-				bottomBorder := GenerateFilePanelBottomBorder(fmt.Sprintf("┫%s/%s┣", cursorPosition, totalElement), m.fileModel.width+3)
+				panelModeString := ""
+				if filePanel.panelMode == browserMode {
+					panelModeString = "󰈈 Browser"
+				} else if filePanel.panelMode == selectMode {
+					panelModeString = "󰆽 Select"
+				}
+				bottomBorder := GenerateBottomBorder(fmt.Sprintf("%s┣━┫%s/%s", panelModeString, cursorPosition, totalElement), m.fileModel.width+6)
 				f[i] = FilePanelBoardStyle(m.mainPanelHeight, m.fileModel.width, filePanel.focusType, bottomBorder).Render(f[i])
 			}
 		}
-		finalRender := lipgloss.JoinHorizontal(lipgloss.Top, s)
-
+		bottomBorder := GenerateBottomBorder(fmt.Sprintf("%s┣━┫%s/%s", "100sec", "100", "100"), m.fileModel.width+6)
+		finalRender := s
 		for _, f := range f {
 			finalRender = lipgloss.JoinHorizontal(lipgloss.Top, finalRender, f)
 		}
-		return lipgloss.JoinVertical(lipgloss.Top, finalRender, m.test)
+		processRender := ""
+		for _, process := range m.processBar.process {
+			process.progress.Width = m.fullWidth/3 - 3
+			symbol := ""
+			line := ""
+			if process.state == failure {
+				symbol = StringColorRender("#FFAE00").Render("")
+				line = StringColorRender("#FFAE00").Render("│ ")
+			} else if process.state == successful {
+				symbol = StringColorRender("#77FF00").Render("")
+				line = StringColorRender("#77FF00").Render("│ ")
+			} else {
+				symbol = StringColorRender("#A1A1A1").Render("")
+				line = StringColorRender("#A1A1A1").Render("│ ")
+			}
+			processRender += line + TruncateText(process.name, m.fullWidth/3-7) + " " + symbol + "\n"
+			processRender += line + process.progress.ViewAs(1) + "\n\n"
+		}
+		finalRender = lipgloss.JoinVertical(0, finalRender, ProcsssBarBoarder(bottomBarHeight-5, m.fullWidth/3, m.procsssBarFocus, bottomBorder).Render(processRender))
+		return lipgloss.JoinVertical(lipgloss.Top, finalRender)
 	}
 }
