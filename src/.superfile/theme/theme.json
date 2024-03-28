@@ -17,5 +17,13 @@
     "filePanelTopFolderIcon": "#8EC07C",
     "filePanelTopPath": "#458588",
     "filePanelItem": "#EBDBB2",
-    "filePanelItemSelected": "#D3869B"
+    "filePanelItemSelected": "#D3869B",
+
+    "bottomBarFocus": "#D79921",
+
+	"processBarSideLine": "#D8D8D8",
+    "processBarGradient": ["#ea6962", "#ea6962"],
+    "done": "#8ec07c",
+    "fali": "#FF6969",
+    "cancel": "#838383"
 }

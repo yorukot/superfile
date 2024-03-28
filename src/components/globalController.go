@@ -61,7 +61,7 @@ func ControllerFilePanelListDown(m model) model {
 func SideBarSelectFolder(m model) model {
 	m.sideBarModel.pinnedModel.selected = m.sideBarModel.pinnedModel.folder[m.sideBarModel.cursor].location
 	m.fileModel.filePanels[m.filePanelFocusIndex].location = m.sideBarModel.pinnedModel.selected
-	m.sideBarFocus = false
+	m.focusPanel = nonePanelFocus
 	m.fileModel.filePanels[m.filePanelFocusIndex].focusType = focus
 	m.fileModel.filePanels[m.filePanelFocusIndex].cursor = 0
 	return m
@@ -89,7 +89,7 @@ func NextFilePanel(m model) model {
 		m.filePanelFocusIndex++
 	}
 
-	m.fileModel.filePanels[m.filePanelFocusIndex].focusType = returnFocusType(m.sideBarFocus)
+	m.fileModel.filePanels[m.filePanelFocusIndex].focusType = returnFocusType(m.focusPanel)
 	return m
 }
 
@@ -101,7 +101,7 @@ func PreviousFilePanel(m model) model {
 		m.filePanelFocusIndex--
 	}
 
-	m.fileModel.filePanels[m.filePanelFocusIndex].focusType = returnFocusType(m.sideBarFocus)
+	m.fileModel.filePanels[m.filePanelFocusIndex].focusType = returnFocusType(m.focusPanel)
 	return m
 }
 
@@ -113,7 +113,7 @@ func CloseFilePanel(m model) model {
 			m.filePanelFocusIndex--
 		}
 		m.fileModel.width = (m.fullWidth - sideBarWidth - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
-		m.fileModel.filePanels[m.filePanelFocusIndex].focusType = returnFocusType(m.sideBarFocus)
+		m.fileModel.filePanels[m.filePanelFocusIndex].focusType = returnFocusType(m.focusPanel)
 	}
 	return m
 }
@@ -127,7 +127,7 @@ func CreateNewFilePanel(m model) model {
 		})
 
 		m.fileModel.filePanels[m.filePanelFocusIndex].focusType = noneFocus
-		m.fileModel.filePanels[m.filePanelFocusIndex+1].focusType = returnFocusType(m.sideBarFocus)
+		m.fileModel.filePanels[m.filePanelFocusIndex+1].focusType = returnFocusType(m.focusPanel)
 		m.fileModel.width = (m.fullWidth - sideBarWidth - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
 		m.filePanelFocusIndex++
 	}
@@ -135,11 +135,22 @@ func CreateNewFilePanel(m model) model {
 }
 
 func FocusOnSideBar(m model) model {
-	if m.sideBarFocus {
-		m.sideBarFocus = false
+	if m.focusPanel == sideBarFocus {
+		m.focusPanel = nonePanelFocus
 		m.fileModel.filePanels[m.filePanelFocusIndex].focusType = focus
 	} else {
-		m.sideBarFocus = true
+		m.focusPanel = sideBarFocus
+		m.fileModel.filePanels[m.filePanelFocusIndex].focusType = secondFocus
+	}
+	return m
+}
+
+func FocusOnProcessBar(m model) model {
+	if m.focusPanel == processBarFocus {
+		m.focusPanel = nonePanelFocus
+		m.fileModel.filePanels[m.filePanelFocusIndex].focusType = focus
+	} else {
+		m.focusPanel = processBarFocus
 		m.fileModel.filePanels[m.filePanelFocusIndex].focusType = secondFocus
 	}
 	return m

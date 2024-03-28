@@ -9,6 +9,13 @@ import (
 type panelMode uint
 type filePanelFocusType uint
 type processState int
+type focusPanelType int
+
+const (
+	nonePanelFocus focusPanelType = iota
+	processBarFocus
+	sideBarFocus
+)
 
 const (
 	noneFocus filePanelFocusType = iota
@@ -34,10 +41,9 @@ const (
 type model struct {
 	fileModel           fileModel
 	sideBarModel        sideBarModel
-	processBar          processBar
+	processBarModel     processBarModel
+	focusPanel          focusPanelType
 	filePanelFocusIndex int
-	sideBarFocus        bool
-	procsssBarFocus     bool
 	mainPanelHeight     int
 	fullWidth           int
 	fullHeight          int
@@ -97,7 +103,7 @@ type folder struct {
 
 /*PROCESS BAR COMPONENTS TYPE START*/
 
-type processBar struct {
+type processBarModel struct {
 	cursor  int
 	process []process
 }
@@ -105,7 +111,7 @@ type processBar struct {
 type process struct {
 	name     string
 	progress progress.Model
-	state processState
+	state    processState
 }
 
 /*PROCESS BAR COMPONENTS TYPE END*/
@@ -135,6 +141,15 @@ type ThemeType struct {
 	FilePanelTopPath       string
 	FilePanelItem          string
 	FilePanelItemSelected  string
+
+	BottomBarFocus string
+
+	ProcessBarSideLine string
+	ProcessBarGradient [2]string
+	Done   string
+	Fail   string
+	Cancel string
+
 }
 
 type ConfigType struct {
@@ -150,6 +165,7 @@ type ConfigType struct {
 	CloseFilePanel     [2]string
 	CreateNewFilePanel [2]string
 	FocusOnSideBar     [2]string
+	FocusOnProcessBar  [2]string
 
 	ChangePanelMode [2]string
 

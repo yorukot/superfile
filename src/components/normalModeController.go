@@ -52,18 +52,18 @@ func ParentFolder(m model) model {
 
 func DeleteSingleItem(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	prog := progress.New(progress.WithScaledGradient("#FF7CCB", "#FDFF8C"))
-	m.processBar.process = append(m.processBar.process, process{
-		name:     StringColorRender("#FF6969").Render("󰆴 Delete ") + panel.element[panel.cursor].name,
+	prog := progress.New(progress.WithScaledGradient(theme.ProcessBarGradient[0], theme.ProcessBarGradient[1]))
+	m.processBarModel.process = append(m.processBarModel.process, process{
+		name:     "󰆴 " + panel.element[panel.cursor].name,
 		progress: prog,
 		state:    deleting,
 	})
 	err := MoveFile(panel.element[panel.cursor].location, Config.TrashCanPath+"/"+panel.element[panel.cursor].name)
 	if err != nil {
-		m.processBar.process[0].state = failure
+		m.processBarModel.process[0].state = failure
 	} else {
-		m.processBar.process[0].state = successful
-		m.processBar.process[0].progress.IncrPercent(1)
+		m.processBarModel.process[0].state = successful
+		m.processBarModel.process[0].progress.IncrPercent(1)
 	}
 	return m
 }

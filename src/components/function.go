@@ -38,11 +38,11 @@ func repeatString(s string, count int) string {
 	return strings.Repeat(s, count)
 }
 
-func returnFocusType(sideBarFocus bool) filePanelFocusType {
-	if sideBarFocus {
-		return secondFocus
+func returnFocusType(focusPanel focusPanelType) filePanelFocusType {
+	if focusPanel == nonePanelFocus {
+		return focus 
 	} else {
-		return focus
+		return secondFocus
 	}
 }
 

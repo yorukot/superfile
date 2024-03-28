@@ -48,23 +48,19 @@ func LoadThemeConfig() {
 	filePanelItemSelected = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.FilePanelItemSelected))
 
 }
-func SideBarBoardStyle(height int, focus bool) lipgloss.Style {
-	if focus {
+func SideBarBoardStyle(height int, focus focusPanelType) lipgloss.Style {
+	if focus == sideBarFocus {
 		return lipgloss.NewStyle().
 			BorderStyle(lipgloss.ThickBorder()).
 			BorderForeground(lipgloss.Color(theme.SideBarFocus)).
-			MaxWidth(height).
 			Width(sideBarWidth).
 			Height(height).Bold(true)
 	} else {
 		return lipgloss.NewStyle().
 			BorderStyle(lipgloss.HiddenBorder()).
-			BorderForeground(lipgloss.Color(theme.Border)).
-			MaxWidth(height).
 			Width(sideBarWidth).
 			Height(height).Bold(true)
 	}
-
 }
 
 func FilePanelBoardStyle(height int, width int, focusType filePanelFocusType, borderBottom string) lipgloss.Style {
@@ -96,7 +92,7 @@ func FilePanelBoardStyle(height int, width int, focusType filePanelFocusType, bo
 		Height(height)
 }
 
-func ProcsssBarBoarder(height int, width int, focusType bool, borderBottom string) lipgloss.Style {
+func ProcsssBarBoarder(height int, width int, borderBottom string, focusType focusPanelType) lipgloss.Style {
 	filePanelBottomBoard := lipgloss.Border{
 		Top:         "━",
 		Bottom:      borderBottom,
@@ -107,11 +103,19 @@ func ProcsssBarBoarder(height int, width int, focusType bool, borderBottom strin
 		BottomLeft:  "┗",
 		BottomRight: "┛",
 	}
-	return lipgloss.NewStyle().
-		Border(filePanelBottomBoard, true, true, true, true).
-		BorderForeground(lipgloss.Color(theme.Border)).
-		Width(width).
-		Height(height)
+	if focusType == processBarFocus {
+		return lipgloss.NewStyle().
+			Border(filePanelBottomBoard, true, true, true, true).
+			BorderForeground(lipgloss.Color(theme.BottomBarFocus)).
+			Width(width).
+			Height(height).Bold(true)
+	} else {
+		return lipgloss.NewStyle().
+			Border(filePanelBottomBoard, true, true, true, true).
+			BorderForeground(lipgloss.Color(theme.Border)).
+			Width(width).
+			Height(height).Bold(true)
+	}
 }
 
 func FilePanelDividerStyle(focusType filePanelFocusType) lipgloss.Style {
@@ -135,12 +139,12 @@ func TruncateTextBeginning(text string, maxChars int) string {
 	return string(truncatedRunes)
 }
 
-func PrettierName(name string, isDir bool, isSelected bool) string {
+func PrettierName(name string, width int, isDir bool, isSelected bool) string {
 	style := getElementIcon(name, isDir)
 	if isSelected {
-		return StringColorRender(style.color).Render(style.icon) + "  " + filePanelItemSelected.Render(name)
+		return StringColorRender(style.color).Render(style.icon) + "  " + filePanelItemSelected.Render(TruncateText(name, width))
 	} else {
-		return StringColorRender(style.color).Render(style.icon) + "  " + filePanelItem.Render(name)
+		return StringColorRender(style.color).Render(style.icon) + "  " + filePanelItem.Render(TruncateText(name, width))
 	}
 }
 

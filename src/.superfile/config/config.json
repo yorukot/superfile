@@ -18,6 +18,9 @@
     "focusOnProcessBar": ["p", ""],
     "focusOnSideBar": ["b", ""],
 
+    "copy": ["ctrl+c", ""],
+    "past": ["ctrl+v", ""],
+    
     "_COMMIT_normal_mode_hotkey": "Here is normal mode hotkey you can conflicts with other mode (cant conflicts with global hotkey)",
     "deleteItem": ["d", ""],
     "selectItem": ["enter", "l"],
