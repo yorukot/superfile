@@ -43,10 +43,22 @@ type model struct {
 	sideBarModel        sideBarModel
 	processBarModel     processBarModel
 	focusPanel          focusPanelType
+	copyItems           copyItems
 	filePanelFocusIndex int
 	mainPanelHeight     int
 	fullWidth           int
 	fullHeight          int
+}
+
+type copyItems struct {
+	items         []string
+	oringnalPanel orignalPanel
+	cut           bool
+}
+
+type orignalPanel struct {
+	index    int
+	location string
 }
 
 /* FILE WINDOWS TYPE START*/
@@ -146,10 +158,9 @@ type ThemeType struct {
 
 	ProcessBarSideLine string
 	ProcessBarGradient [2]string
-	Done   string
-	Fail   string
-	Cancel string
-
+	Done               string
+	Fail               string
+	Cancel             string
 }
 
 type ConfigType struct {
@@ -169,9 +180,13 @@ type ConfigType struct {
 
 	ChangePanelMode [2]string
 
-	DeleteItem   [2]string
-	SelectItem   [2]string
-	ParentFolder [2]string
+	PasteItem [2]string
+
+	DeleteItem     [2]string
+	SelectItem     [2]string
+	ParentFolder   [2]string
+	CopySingleItem [2]string
+	CutSingleItem  [2]string
 
 	FilePanelSelectModeItemSingleSelect [2]string
 	FilePanelSelectModeItemSelectDown   [2]string
@@ -179,4 +194,8 @@ type ConfigType struct {
 	FilePanelSelectModeItemDelete       [2]string
 	FilePanelFolderCreate               [2]string
 	FilePanelFileCreate                 [2]string
+	FilePanelSelectModeItemCopy         [2]string
+	FilePanelSelectModeItemPast         [2]string
+	FilePanelSelectModeItemCut          [2]string
+	FilePanelSelectAll                  [2]string
 }

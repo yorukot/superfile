@@ -130,6 +130,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			/* NAVIGATION CONTROLLER END */
 		case Config.FocusOnProcessBar[0], Config.FocusOnProcessBar[0]:
 			m = FocusOnProcessBar(m)
+		case Config.PasteItem[0], Config.PasteItem[1]:
+			m = PasteItem(m)
 		default:
 			// check if it's the select mode
 			if m.fileModel.filePanels[m.filePanelFocusIndex].focusType == focus && m.fileModel.filePanels[m.filePanelFocusIndex].panelMode == selectMode {
@@ -142,11 +144,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m = ItemSelectDown(m)
 				case Config.FilePanelSelectModeItemDelete[0], Config.FilePanelSelectModeItemDelete[1]:
 					m = DeleteMultipleItem(m)
+				case Config.FilePanelSelectModeItemCopy[0], Config.FilePanelSelectModeItemCopy[1]:
+					m = CopyMultipleItem(m)
+				case Config.FilePanelSelectModeItemCut[0], Config.FilePanelSelectModeItemCut[1]:
+					m = CutMultipleItem(m)
 				}
 				// else
 			} else {
 				switch msg.String() {
-				// select file or disk or folder
 				case Config.SelectItem[0], Config.SelectItem[1]:
 					if m.focusPanel == sideBarFocus {
 						m = SideBarSelectFolder(m)
@@ -155,11 +160,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					} else {
 						m = EnterPanel(m)
 					}
-				/* LIST CONTROLLER END */
 				case Config.ParentFolder[0], Config.ParentFolder[1]:
 					m = ParentFolder(m)
 				case Config.DeleteItem[0], Config.DeleteItem[1]:
 					m = DeleteSingleItem(m)
+				case Config.CopySingleItem[0], Config.CopySingleItem[1]:
+					m = CopySingleItem(m)
+				case Config.CutSingleItem[0], Config.CutSingleItem[1]:
+					m = CutSingleItem(m)
 				}
 			}
 		}

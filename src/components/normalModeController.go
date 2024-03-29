@@ -65,5 +65,25 @@ func DeleteSingleItem(m model) model {
 		m.processBarModel.process[0].state = successful
 		m.processBarModel.process[0].progress.IncrPercent(1)
 	}
+	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+	return m
+}
+
+func CopySingleItem(m model) model {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	m.copyItems.items = append(m.copyItems.items, panel.element[panel.cursor].location)
+	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+	return m
+}
+
+func CutSingleItem(m model) model {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	m.copyItems.items = append(m.copyItems.items, panel.element[panel.cursor].location)
+	m.copyItems.cut = true
+	m.copyItems.oringnalPanel = orignalPanel{
+		index: m.filePanelFocusIndex,
+		location: panel.location,
+	}
+	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m
 }

@@ -1,5 +1,7 @@
 package components
 
+import "path"
+
 /* CURSOR CONTROLLER START */
 func ControllerSideBarListUp(m model) model {
 	if m.sideBarModel.cursor > 0 {
@@ -153,5 +155,29 @@ func FocusOnProcessBar(m model) model {
 		m.focusPanel = processBarFocus
 		m.fileModel.filePanels[m.filePanelFocusIndex].focusType = secondFocus
 	}
+	return m
+}
+
+func PasteItem(m model) model {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	for _, item := range m.copyItems.items {
+		filePath := item
+		PasteFile(item, panel.location+"/"+path.Base(filePath))
+	}
+	if m.copyItems.cut {
+		for _, item := range m.copyItems.items {
+			filePath := item
+			err := MoveFile(item, Config.TrashCanPath+"/"+path.Base(filePath))
+			if err != nil {
+				OutputLog("Error delete multiple item")
+				OutputLog(err)
+			}
+		}
+		if m.fileModel.filePanels[m.copyItems.oringnalPanel.index].location == m.copyItems.oringnalPanel.location {
+			m.fileModel.filePanels[m.copyItems.oringnalPanel.index].selected = panel.selected[:0]
+		}
+	}
+	m.copyItems.cut = false
+	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m
 }

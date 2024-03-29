@@ -125,3 +125,18 @@ func MoveFile(source string, destination string) error {
     }
 	return err
 }
+
+func PasteFile(src string, dst string) {
+    // Read all content of src to data, may cause OOM for a large file.
+    data, err := os.ReadFile(src)
+    CheckErr(err)
+    // Write data to dst
+    err = os.WriteFile(dst, data, 0644)
+    CheckErr(err)
+}
+
+func CheckErr(err error) {
+    if err != nil {
+        OutputLog(err)
+    }
+}

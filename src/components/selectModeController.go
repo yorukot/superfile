@@ -65,12 +65,31 @@ func DeleteMultipleItem(m model) model {
 	if len(panel.selected) != 0 {
 		for _, item := range panel.selected {
 			filePath := item
-			err := MoveFile(item, Config.TrashCanPath+"/"+path.Base(filePath))			
+			err := MoveFile(item, Config.TrashCanPath+"/"+path.Base(filePath))
 			if err != nil {
 				OutputLog("Error delete multiple item")
 				OutputLog(err)
 			}
 		}
+	}
+	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+	return m
+}
+
+func CopyMultipleItem(m model) model {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	m.copyItems.items = panel.selected
+	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+	return m
+}
+
+func CutMultipleItem(m model) model {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	m.copyItems.items = panel.selected
+	m.copyItems.cut = true
+	m.copyItems.oringnalPanel = orignalPanel{
+		index: m.filePanelFocusIndex,
+		location: panel.location,
 	}
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m
