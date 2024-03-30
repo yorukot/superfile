@@ -88,8 +88,17 @@ func CutMultipleItem(m model) model {
 	m.copyItems.items = panel.selected
 	m.copyItems.cut = true
 	m.copyItems.oringnalPanel = orignalPanel{
-		index: m.filePanelFocusIndex,
+		index:    m.filePanelFocusIndex,
 		location: panel.location,
+	}
+	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+	return m
+}
+
+func SelectAllItem(m model) model {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	for _, item := range panel.element {
+		panel.selected = append(panel.selected, item.location)
 	}
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m

@@ -166,11 +166,7 @@ func FilePanelBoard(focusType filePanelFocusType) lipgloss.Border {
 }
 
 func GenerateBottomBorder(countString string, width int) string {
-	result := ""
-	for i := 0; i < width-len(countString); i++ {
-		result += "━"
-	}
-	return result + "┫" + countString + "┣"
+	return repeatString("━", width-len(countString)) + "┫" + countString + "┣"
 }
 
 func StringColorRender(color string) lipgloss.Style {

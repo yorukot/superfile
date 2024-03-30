@@ -197,5 +197,5 @@ type ConfigType struct {
 	FilePanelSelectModeItemCopy         [2]string
 	FilePanelSelectModeItemPast         [2]string
 	FilePanelSelectModeItemCut          [2]string
-	FilePanelSelectAll                  [2]string
+	FilePanelSelectAllItem                  [2]string
 }

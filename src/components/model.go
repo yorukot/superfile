@@ -127,13 +127,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// focus to sidebar or file panel
 		case Config.FocusOnSideBar[0], Config.FocusOnSideBar[1]:
 			m = FocusOnSideBar(m)
-			/* NAVIGATION CONTROLLER END */
+		/* NAVIGATION CONTROLLER END */
 		case Config.FocusOnProcessBar[0], Config.FocusOnProcessBar[0]:
 			m = FocusOnProcessBar(m)
 		case Config.PasteItem[0], Config.PasteItem[1]:
-			m = PasteItem(m)
+			go func() {
+				m = PasteItem(m)
+			}()
 		default:
-			// check if it's the select mode
+		// check if it's the select mode
 			if m.fileModel.filePanels[m.filePanelFocusIndex].focusType == focus && m.fileModel.filePanels[m.filePanelFocusIndex].panelMode == selectMode {
 				switch msg.String() {
 				case Config.FilePanelSelectModeItemSingleSelect[0], Config.FilePanelSelectModeItemSingleSelect[1]:
@@ -143,13 +145,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				case Config.FilePanelSelectModeItemSelectDown[0], Config.FilePanelSelectModeItemSelectDown[1]:
 					m = ItemSelectDown(m)
 				case Config.FilePanelSelectModeItemDelete[0], Config.FilePanelSelectModeItemDelete[1]:
-					m = DeleteMultipleItem(m)
+					go func() {
+						m = DeleteMultipleItem(m)
+					}()
 				case Config.FilePanelSelectModeItemCopy[0], Config.FilePanelSelectModeItemCopy[1]:
 					m = CopyMultipleItem(m)
 				case Config.FilePanelSelectModeItemCut[0], Config.FilePanelSelectModeItemCut[1]:
 					m = CutMultipleItem(m)
+				case Config.FilePanelSelectAllItem[0], Config.FilePanelSelectAllItem[1]:
+					m = SelectAllItem(m)
 				}
-				// else
+		// else
 			} else {
 				switch msg.String() {
 				case Config.SelectItem[0], Config.SelectItem[1]:
@@ -163,7 +169,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				case Config.ParentFolder[0], Config.ParentFolder[1]:
 					m = ParentFolder(m)
 				case Config.DeleteItem[0], Config.DeleteItem[1]:
-					m = DeleteSingleItem(m)
+					go func() {
+						m = DeleteSingleItem(m)
+					}()
 				case Config.CopySingleItem[0], Config.CopySingleItem[1]:
 					m = CopySingleItem(m)
 				case Config.CutSingleItem[0], Config.CutSingleItem[1]:

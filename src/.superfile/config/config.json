@@ -37,7 +37,7 @@
     "filePanelSelectModeItemCut": ["ctrl+x", ""],
     "filePanelFolderCreate": ["f", ""],
     "filePanelFileCreate": ["c", ""],
-    "FilePanelSelectAllItem": ["ctrl+a", ""],
+    "filePanelSelectAllItem": ["ctrl+a", ""],
 
     "_COMMIT_process_bar_hotkey": "Here is process bar panel hotkey you can conflicts with other mode (cant conflicts global hotkey)",
     "cancelProcess": ""
