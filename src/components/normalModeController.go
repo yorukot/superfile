@@ -1,8 +1,10 @@
 package components
 
 import (
+	"os"
 	"path"
 
+	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/progress"
 )
 
@@ -72,6 +74,23 @@ func DeleteSingleItem(m model) model {
 func CopySingleItem(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	m.copyItems.items = append(m.copyItems.items, panel.element[panel.cursor].location)
+	fileInfo, err := os.Stat(panel.element[panel.cursor].location)
+	if err != nil {
+		OutputLog("Can't find this file or folder")
+		OutputLog(panel.element[panel.cursor].location)
+		OutputLog(err)
+	}
+
+	if !fileInfo.IsDir() && float64(fileInfo.Size())/(1024*1024) < 250 {
+		fileContent, err := os.ReadFile(panel.element[panel.cursor].location)
+
+		if err != nil {
+			OutputLog(err)
+		}
+		if err := clipboard.WriteAll(string(fileContent)); err != nil {
+			OutputLog(err)
+		}
+	}
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m
 }
@@ -81,7 +100,7 @@ func CutSingleItem(m model) model {
 	m.copyItems.items = append(m.copyItems.items, panel.element[panel.cursor].location)
 	m.copyItems.cut = true
 	m.copyItems.oringnalPanel = orignalPanel{
-		index: m.filePanelFocusIndex,
+		index:    m.filePanelFocusIndex,
 		location: panel.location,
 	}
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel

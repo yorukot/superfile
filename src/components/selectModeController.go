@@ -1,6 +1,10 @@
 package components
 
-import "path"
+import (
+	"github.com/atotto/clipboard"
+	"os"
+	"path"
+)
 
 func SingleItemSelect(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
@@ -79,6 +83,23 @@ func DeleteMultipleItem(m model) model {
 func CopyMultipleItem(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	m.copyItems.items = panel.selected
+	fileInfo, err := os.Stat(panel.selected[0])
+	if err != nil {
+		OutputLog("Can't find this file or folder")
+		OutputLog(panel.selected[0])
+		OutputLog(err)
+	}
+
+	if !fileInfo.IsDir() && float64(fileInfo.Size())/(1024*1024) < 250 {
+		fileContent, err := os.ReadFile(panel.selected[0])
+
+		if err != nil {
+			OutputLog(err)
+		}
+		if err := clipboard.WriteAll(string(fileContent)); err != nil {
+			OutputLog(err)
+		}
+	}
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m
 }
