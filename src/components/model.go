@@ -3,11 +3,13 @@ package components
 import (
 	"encoding/json"
 	"fmt"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"log"
 	"os"
 	"strconv"
+
+	"github.com/charmbracelet/bubbles/textinput"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 var HomeDir = getHomeDir()
@@ -74,9 +76,14 @@ func InitialModel() model {
 }
 
 func (m model) Init() tea.Cmd {
-	return tea.SetWindowTitle("SuperFile")
+	return tea.Batch(
+		tea.SetWindowTitle("SuperFile"),
+		textinput.Blink, // Assuming textinput.Blink is a valid command
+	)
 }
+
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.mainPanelHeight = msg.Height - bottomBarHeight
@@ -85,103 +92,117 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.fullWidth = msg.Width
 		return m, nil
 	case tea.KeyMsg:
-		switch msg.String() {
-		// return superfile
-		case Config.Quit[0], Config.Quit[1]:
-			return m, tea.Quit
-		/* LIST CONTROLLER START */
-		// up list
-		case Config.ListUp[0], Config.ListUp[1]:
-			if m.focusPanel == sideBarFocus {
-				m = ControllerSideBarListUp(m)
-			} else if m.focusPanel == processBarFocus {
-
-			} else {
-				m = ControllerFilePanelListUp(m)
+		if m.createNewItem.open {
+			switch msg.String() {
+			case Config.Cancel[0], Config.Cancel[1]:
+				m = CancelModal(m)
+			case Config.Confirm[0], Config.Confirm[1]:
+				m = CreateItem(m)
 			}
-		// down list
-		case Config.ListDown[0], Config.ListDown[1]:
-			if m.focusPanel == sideBarFocus {
-				m = ControllerSideBarListDown(m)
-			} else if m.focusPanel == processBarFocus {
+		} else {
 
-			} else {
-				m = ControllerFilePanelListDown(m)
-			}
-		/* LIST CONTROLLER END */
-		case Config.ChangePanelMode[0], Config.ChangePanelMode[1]:
-			m = SelectedMode(m)
-		/* NAVIGATION CONTROLLER START */
-		// change file panel
-		case Config.NextFilePanel[0], Config.NextFilePanel[1]:
-			m = NextFilePanel(m)
-		// change file panel
-		case Config.PreviousFilePanel[0], Config.PreviousFilePanel[1]:
-			m = PreviousFilePanel(m)
-		// close file panel
-		case Config.CloseFilePanel[0], Config.CloseFilePanel[1]:
-			m = CloseFilePanel(m)
-		// create new file panel
-		case Config.CreateNewFilePanel[0], Config.CreateNewFilePanel[1]:
-			m = CreateNewFilePanel(m)
-		// focus to sidebar or file panel
-		case Config.FocusOnSideBar[0], Config.FocusOnSideBar[1]:
-			m = FocusOnSideBar(m)
-		/* NAVIGATION CONTROLLER END */
-		case Config.FocusOnProcessBar[0], Config.FocusOnProcessBar[0]:
-			m = FocusOnProcessBar(m)
-		case Config.PasteItem[0], Config.PasteItem[1]:
-			go func() {
-				m = PasteItem(m)
-			}()
-		default:
-		// check if it's the select mode
-			if m.fileModel.filePanels[m.filePanelFocusIndex].focusType == focus && m.fileModel.filePanels[m.filePanelFocusIndex].panelMode == selectMode {
-				switch msg.String() {
-				case Config.FilePanelSelectModeItemSingleSelect[0], Config.FilePanelSelectModeItemSingleSelect[1]:
-					m = SingleItemSelect(m)
-				case Config.FilePanelSelectModeItemSelectUp[0], Config.FilePanelSelectModeItemSelectUp[1]:
-					m = ItemSelectUp(m)
-				case Config.FilePanelSelectModeItemSelectDown[0], Config.FilePanelSelectModeItemSelectDown[1]:
-					m = ItemSelectDown(m)
-				case Config.FilePanelSelectModeItemDelete[0], Config.FilePanelSelectModeItemDelete[1]:
-					go func() {
-						m = DeleteMultipleItem(m)
-					}()
-				case Config.FilePanelSelectModeItemCopy[0], Config.FilePanelSelectModeItemCopy[1]:
-					m = CopyMultipleItem(m)
-				case Config.FilePanelSelectModeItemCut[0], Config.FilePanelSelectModeItemCut[1]:
-					m = CutMultipleItem(m)
-				case Config.FilePanelSelectAllItem[0], Config.FilePanelSelectAllItem[1]:
-					m = SelectAllItem(m)
+			switch msg.String() {
+			// return superfile
+			case Config.Quit[0], Config.Quit[1]:
+				return m, tea.Quit
+			/* LIST CONTROLLER START */
+			// up list
+			case Config.ListUp[0], Config.ListUp[1]:
+				if m.focusPanel == sideBarFocus {
+					m = ControllerSideBarListUp(m)
+				} else if m.focusPanel == processBarFocus {
+
+				} else {
+					m = ControllerFilePanelListUp(m)
 				}
-		// else
-			} else {
-				switch msg.String() {
-				case Config.SelectItem[0], Config.SelectItem[1]:
-					if m.focusPanel == sideBarFocus {
-						m = SideBarSelectFolder(m)
-					} else if m.focusPanel == processBarFocus {
+			// down list
+			case Config.ListDown[0], Config.ListDown[1]:
+				if m.focusPanel == sideBarFocus {
+					m = ControllerSideBarListDown(m)
+				} else if m.focusPanel == processBarFocus {
 
-					} else {
-						m = EnterPanel(m)
+				} else {
+					m = ControllerFilePanelListDown(m)
+				}
+			/* LIST CONTROLLER END */
+			case Config.ChangePanelMode[0], Config.ChangePanelMode[1]:
+				m = SelectedMode(m)
+			/* NAVIGATION CONTROLLER START */
+			// change file panel
+			case Config.NextFilePanel[0], Config.NextFilePanel[1]:
+				m = NextFilePanel(m)
+			// change file panel
+			case Config.PreviousFilePanel[0], Config.PreviousFilePanel[1]:
+				m = PreviousFilePanel(m)
+			// close file panel
+			case Config.CloseFilePanel[0], Config.CloseFilePanel[1]:
+				m = CloseFilePanel(m)
+			// create new file panel
+			case Config.CreateNewFilePanel[0], Config.CreateNewFilePanel[1]:
+				m = CreateNewFilePanel(m)
+			// focus to sidebar or file panel
+			case Config.FocusOnSideBar[0], Config.FocusOnSideBar[1]:
+				m = FocusOnSideBar(m)
+			/* NAVIGATION CONTROLLER END */
+			case Config.FocusOnProcessBar[0], Config.FocusOnProcessBar[0]:
+				m = FocusOnProcessBar(m)
+			case Config.PasteItem[0], Config.PasteItem[1]:
+				go func() {
+					m = PasteItem(m)
+				}()
+			case Config.FilePanelFileCreate[0], Config.FilePanelFileCreate[1]:
+				m = PanelCreateNewFile(m)
+			case Config.FilePanelFolderCreate[0], Config.FilePanelFolderCreate[1]:
+				m = PanelCreateNewFolder(m)
+			default:
+				// check if it's the select mode
+				if m.fileModel.filePanels[m.filePanelFocusIndex].focusType == focus && m.fileModel.filePanels[m.filePanelFocusIndex].panelMode == selectMode {
+					switch msg.String() {
+					case Config.FilePanelSelectModeItemSingleSelect[0], Config.FilePanelSelectModeItemSingleSelect[1]:
+						m = SingleItemSelect(m)
+					case Config.FilePanelSelectModeItemSelectUp[0], Config.FilePanelSelectModeItemSelectUp[1]:
+						m = ItemSelectUp(m)
+					case Config.FilePanelSelectModeItemSelectDown[0], Config.FilePanelSelectModeItemSelectDown[1]:
+						m = ItemSelectDown(m)
+					case Config.FilePanelSelectModeItemDelete[0], Config.FilePanelSelectModeItemDelete[1]:
+						go func() {
+							m = DeleteMultipleItem(m)
+						}()
+					case Config.FilePanelSelectModeItemCopy[0], Config.FilePanelSelectModeItemCopy[1]:
+						m = CopyMultipleItem(m)
+					case Config.FilePanelSelectModeItemCut[0], Config.FilePanelSelectModeItemCut[1]:
+						m = CutMultipleItem(m)
+					case Config.FilePanelSelectAllItem[0], Config.FilePanelSelectAllItem[1]:
+						m = SelectAllItem(m)
 					}
-				case Config.ParentFolder[0], Config.ParentFolder[1]:
-					m = ParentFolder(m)
-				case Config.DeleteItem[0], Config.DeleteItem[1]:
-					go func() {
-						m = DeleteSingleItem(m)
-					}()
-				case Config.CopySingleItem[0], Config.CopySingleItem[1]:
-					m = CopySingleItem(m)
-				case Config.CutSingleItem[0], Config.CutSingleItem[1]:
-					m = CutSingleItem(m)
+					// else
+				} else {
+					switch msg.String() {
+					case Config.SelectItem[0], Config.SelectItem[1]:
+						if m.focusPanel == sideBarFocus {
+							m = SideBarSelectFolder(m)
+						} else if m.focusPanel == processBarFocus {
+
+						} else {
+							m = EnterPanel(m)
+						}
+					case Config.ParentFolder[0], Config.ParentFolder[1]:
+						m = ParentFolder(m)
+					case Config.DeleteItem[0], Config.DeleteItem[1]:
+						go func() {
+							m = DeleteSingleItem(m)
+						}()
+					case Config.CopySingleItem[0], Config.CopySingleItem[1]:
+						m = CopySingleItem(m)
+					case Config.CutSingleItem[0], Config.CutSingleItem[1]:
+						m = CutSingleItem(m)
+					}
 				}
 			}
 		}
 	}
-
-	return m, nil
+	m.createNewItem.textInput, cmd = m.createNewItem.textInput.Update(msg)
+	return m, cmd
 }
 
 func (m model) View() string {
@@ -212,6 +233,14 @@ func (m model) View() string {
 			"Needed for current config:" + "\n" +
 			"Width = " + terminalMinimumSize.Render(minimumWidthString) +
 			" Height = " + terminalMinimumSize.Render(minimumHeightString))
+	} else if m.createNewItem.open {
+
+		fileLocation := filePanelTopFolderIcon.Render("   ") + filePanelTopPath.Render(TruncateTextBeginning(m.createNewItem.location+"/"+m.createNewItem.textInput.Value(), modalWidth-4)) + "\n"
+		confirm := modalConfirm.Render("(" + Config.Confirm[0] + ") Confirm")
+		cancel := modalCancel.Render("(" + Config.Cancel[0] + ") Cancel")
+		tip := confirm + "           " + cancel
+		return FullScreenStyle(m.fullHeight, m.fullWidth).Render(FocusedModalStyle(modalHeight, modalWidth).Render(fileLocation + "\n" + m.createNewItem.textInput.View() + "\n\n" + tip))
+
 	} else {
 		// side bar
 		s := sideBarTitle.Render("    Super Files     ")
@@ -294,7 +323,6 @@ func (m model) View() string {
 		}
 		bottomBorder := GenerateBottomBorder(fmt.Sprintf("%s┣━┫%s/%s", "100sec", "100", "100"), m.fullWidth/3+2)
 		processRender = ProcsssBarBoarder(bottomBarHeight-5, m.fullWidth/3, bottomBorder, m.focusPanel).Render(processRender)
-
 		// final render
 		finalRender := lipgloss.JoinVertical(0, filePanelRender, processRender)
 		return lipgloss.JoinVertical(lipgloss.Top, finalRender)

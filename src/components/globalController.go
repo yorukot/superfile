@@ -1,6 +1,10 @@
 package components
 
-import "path"
+import (
+	"path"
+
+	"github.com/charmbracelet/bubbles/textinput"
+)
 
 /* CURSOR CONTROLLER START */
 func ControllerSideBarListUp(m model) model {
@@ -179,5 +183,41 @@ func PasteItem(m model) model {
 	}
 	m.copyItems.cut = false
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+	return m
+}
+
+func PanelCreateNewFile(m model) model {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	ti := textinput.New()
+	ti.Placeholder = "File name"
+	ti.Focus()
+	ti.CharLimit = 156
+	ti.Width = modalWidth - 10
+
+	m.createNewItem.location = panel.location
+	m.createNewItem.itemType = newFile
+	m.createNewItem.open = true
+	m.createNewItem.textInput = ti
+
+	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+
+	return m
+}
+
+func PanelCreateNewFolder(m model) model {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	ti := textinput.New()
+	ti.Placeholder = "Folder name"
+	ti.Focus()
+	ti.CharLimit = 156
+	ti.Width = modalWidth - 10
+
+	m.createNewItem.location = panel.location
+	m.createNewItem.itemType = newFolder
+	m.createNewItem.open = true
+	m.createNewItem.textInput = ti
+
+	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+
 	return m
 }

@@ -4,13 +4,19 @@ import (
 	"time"
 
 	"github.com/charmbracelet/bubbles/progress"
+	"github.com/charmbracelet/bubbles/textinput"
 )
 
 type panelMode uint
 type filePanelFocusType uint
 type processState int
 type focusPanelType int
+type itemType int
 
+const (
+	newFile itemType = iota
+	newFolder
+)
 const (
 	nonePanelFocus focusPanelType = iota
 	processBarFocus
@@ -44,10 +50,18 @@ type model struct {
 	processBarModel     processBarModel
 	focusPanel          focusPanelType
 	copyItems           copyItems
+	createNewItem       createNewItemModal
 	filePanelFocusIndex int
 	mainPanelHeight     int
 	fullWidth           int
 	fullHeight          int
+}
+
+type createNewItemModal struct {
+	location  string
+	open      bool
+	itemType  itemType
+	textInput textinput.Model
 }
 
 type copyItems struct {
@@ -161,6 +175,10 @@ type ThemeType struct {
 	Done               string
 	Fail               string
 	Cancel             string
+
+	ModalForeground string
+	ModalCancel     string
+	ModalConfirm    string
 }
 
 type ConfigType struct {
@@ -182,20 +200,24 @@ type ConfigType struct {
 
 	PasteItem [2]string
 
+	Cancel  [2]string
+	Confirm [2]string
+
 	DeleteItem     [2]string
 	SelectItem     [2]string
 	ParentFolder   [2]string
 	CopySingleItem [2]string
 	CutSingleItem  [2]string
 
+	FilePanelFolderCreate [2]string
+	FilePanelFileCreate   [2]string
+
 	FilePanelSelectModeItemSingleSelect [2]string
 	FilePanelSelectModeItemSelectDown   [2]string
 	FilePanelSelectModeItemSelectUp     [2]string
 	FilePanelSelectModeItemDelete       [2]string
-	FilePanelFolderCreate               [2]string
-	FilePanelFileCreate                 [2]string
 	FilePanelSelectModeItemCopy         [2]string
 	FilePanelSelectModeItemPast         [2]string
 	FilePanelSelectModeItemCut          [2]string
-	FilePanelSelectAllItem                  [2]string
+	FilePanelSelectAllItem              [2]string
 }

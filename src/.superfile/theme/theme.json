@@ -25,5 +25,9 @@
     "processBarGradient": ["#ea6962", "#ea6962"],
     "done": "#8ec07c",
     "fali": "#FF6969",
-    "cancel": "#838383"
+    "cancel": "#838383",
+
+    "modalForeground": "#EBDBB2",
+    "modalCancel": "#6D6D6D",
+    "modalConfirm": "#E8751A"
 }

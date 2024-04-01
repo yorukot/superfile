@@ -5,10 +5,11 @@ import (
 )
 
 var (
-	minimumHeight   = 35
-	minimumWidth    = 96
-	bottomBarHeight = 13
-
+	minimumHeight       = 35
+	minimumWidth        = 96
+	bottomBarHeight     = 13
+	modalWidth          = 60
+	modalHeight         = 7
 	terminalTooSmall    lipgloss.Style
 	terminalMinimumSize lipgloss.Style
 
@@ -30,6 +31,11 @@ var (
 	filePanelItemSelected  lipgloss.Style
 )
 
+var (
+	modalCancel  lipgloss.Style
+	modalConfirm lipgloss.Style
+)
+
 func LoadThemeConfig() {
 	terminalTooSmall = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.TerminalTooSmallError))
 	terminalMinimumSize = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.TerminalSizeCurrect))
@@ -47,7 +53,22 @@ func LoadThemeConfig() {
 	filePanelItem = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.FilePanelItem))
 	filePanelItemSelected = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.FilePanelItemSelected))
 
+	modalCancel = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.ModalForeground)).Background(lipgloss.Color(theme.ModalCancel))
+	modalConfirm = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.ModalForeground)).Background(lipgloss.Color(theme.ModalConfirm))
 }
+
+func FullScreenStyle(height int, width int) lipgloss.Style {
+	return lipgloss.NewStyle().Height(height).Width(width).Align(lipgloss.Center, lipgloss.Center)
+}
+
+func FocusedModalStyle(height int, width int) lipgloss.Style {
+	return lipgloss.NewStyle().Height(height).
+		Width(width).
+		Align(lipgloss.Center, lipgloss.Center).
+		Border(lipgloss.ThickBorder()).
+		BorderForeground(lipgloss.Color(theme.FilePanelFocus))
+}
+
 func SideBarBoardStyle(height int, focus focusPanelType) lipgloss.Style {
 	if focus == sideBarFocus {
 		return lipgloss.NewStyle().
