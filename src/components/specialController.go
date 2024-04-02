@@ -33,3 +33,8 @@ func CreateItem(m model) model {
 	m.createNewItem.textInput.Blur()
 	return m
 }
+
+func CancelReanem(m model) model {
+	m.rename = false
+	return m
+}

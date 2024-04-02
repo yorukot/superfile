@@ -99,8 +99,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case Config.Confirm[0], Config.Confirm[1]:
 				m = CreateItem(m)
 			}
+		} else if m.rename {
+			switch msg.String() {
+			case Config.Cancel[0], Config.Cancel[1]:
+				m = CancelReanem(m)
+			}
 		} else {
-
 			switch msg.String() {
 			// return superfile
 			case Config.Quit[0], Config.Quit[1]:
@@ -196,12 +200,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						m = CopySingleItem(m)
 					case Config.CutSingleItem[0], Config.CutSingleItem[1]:
 						m = CutSingleItem(m)
+					case Config.FilePanelItemRename[0], Config.FilePanelItemRename[1]:
+						m = PanelItemRename(m)
 					}
 				}
 			}
 		}
 	}
-	m.createNewItem.textInput, cmd = m.createNewItem.textInput.Update(msg)
+	if m.rename {
+		m.fileModel.filePanels[m.filePanelFocusIndex].rename, cmd = m.fileModel.filePanels[m.filePanelFocusIndex].rename.Update(msg)
+	} else {
+		m.createNewItem.textInput, cmd = m.createNewItem.textInput.Update(msg)
+
+	}
 	return m, cmd
 }
 
@@ -234,13 +245,20 @@ func (m model) View() string {
 			"Width = " + terminalMinimumSize.Render(minimumWidthString) +
 			" Height = " + terminalMinimumSize.Render(minimumHeightString))
 	} else if m.createNewItem.open {
+		if m.createNewItem.itemType == rename {
+			fileLocation := filePanelTopFolderIcon.Render("   ") + filePanelTopPath.Render(TruncateTextBeginning(m.createNewItem.location+"/"+m.createNewItem.textInput.Value(), modalWidth-4)) + "\n"
+			confirm := modalConfirm.Render("(" + Config.Confirm[0] + ") Confirm")
+			cancel := modalCancel.Render("(" + Config.Cancel[0] + ") Cancel")
+			tip := confirm + "           " + cancel
+			return FullScreenStyle(m.fullHeight, m.fullWidth).Render(FocusedModalStyle(modalHeight, modalWidth).Render(fileLocation + "\n" + m.createNewItem.textInput.View() + "\n\n" + tip))
 
-		fileLocation := filePanelTopFolderIcon.Render("   ") + filePanelTopPath.Render(TruncateTextBeginning(m.createNewItem.location+"/"+m.createNewItem.textInput.Value(), modalWidth-4)) + "\n"
-		confirm := modalConfirm.Render("(" + Config.Confirm[0] + ") Confirm")
-		cancel := modalCancel.Render("(" + Config.Cancel[0] + ") Cancel")
-		tip := confirm + "           " + cancel
-		return FullScreenStyle(m.fullHeight, m.fullWidth).Render(FocusedModalStyle(modalHeight, modalWidth).Render(fileLocation + "\n" + m.createNewItem.textInput.View() + "\n\n" + tip))
-
+		} else {
+			fileLocation := filePanelTopFolderIcon.Render("   ") + filePanelTopPath.Render(TruncateTextBeginning(m.createNewItem.location+"/"+m.createNewItem.textInput.Value(), modalWidth-4)) + "\n"
+			confirm := modalConfirm.Render("(" + Config.Confirm[0] + ") Confirm")
+			cancel := modalCancel.Render("(" + Config.Cancel[0] + ") Cancel")
+			tip := confirm + "           " + cancel
+			return FullScreenStyle(m.fullHeight, m.fullWidth).Render(FocusedModalStyle(modalHeight, modalWidth).Render(fileLocation + "\n" + m.createNewItem.textInput.View() + "\n\n" + tip))
+		}
 	} else {
 		// side bar
 		s := sideBarTitle.Render("    Super Files     ")
@@ -284,7 +302,11 @@ func (m model) View() string {
 						cursor = ""
 					}
 					isItemSelected := ArrayContains(filePanel.selected, filePanel.element[h].location)
-					f[i] += cursorStyle.Render(cursor) + " " + PrettierName(filePanel.element[h].name, m.fileModel.width-5, filePanel.element[h].folder, isItemSelected) + "\n"
+					if m.rename && h == filePanel.cursor{
+						f[i] += cursorStyle.Render(cursor) + " " + filePanel.rename.View() + "\n"
+					} else {
+						f[i] += cursorStyle.Render(cursor) + " " + PrettierName(filePanel.element[h].name, m.fileModel.width-5, filePanel.element[h].folder, isItemSelected) + "\n"
+					}
 				}
 				cursorPosition := strconv.Itoa(filePanel.cursor + 1)
 				totalElement := strconv.Itoa(len(filePanel.element))

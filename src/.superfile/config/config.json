@@ -22,7 +22,8 @@
     
     "filePanelFolderCreate": ["f", ""],
     "filePanelFileCreate": ["c", ""],
-    
+    "filePanelItemRename": ["r", ""],
+
     "_COMMIT_popup_modal_hotkey": "These hotkeys do not conflict with any other keys (including global hotkey)",
     "cancel": ["ctrl+c", ""],
     "confirm": ["enter"], 

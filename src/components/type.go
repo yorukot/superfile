@@ -16,7 +16,9 @@ type itemType int
 const (
 	newFile itemType = iota
 	newFolder
+	rename
 )
+
 const (
 	nonePanelFocus focusPanelType = iota
 	processBarFocus
@@ -51,6 +53,7 @@ type model struct {
 	focusPanel          focusPanelType
 	copyItems           copyItems
 	createNewItem       createNewItemModal
+	rename              bool
 	filePanelFocusIndex int
 	mainPanelHeight     int
 	fullWidth           int
@@ -90,6 +93,7 @@ type filePanel struct {
 	selected     []string
 	element      []element
 	folderRecord map[string]folderRecord
+	rename       textinput.Model
 }
 
 type folderRecord struct {
@@ -211,6 +215,7 @@ type ConfigType struct {
 
 	FilePanelFolderCreate [2]string
 	FilePanelFileCreate   [2]string
+	FilePanelItemRename   [2]string
 
 	FilePanelSelectModeItemSingleSelect [2]string
 	FilePanelSelectModeItemSelectDown   [2]string
