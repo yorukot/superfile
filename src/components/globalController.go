@@ -198,6 +198,7 @@ func PanelCreateNewFile(m model) model {
 	m.createNewItem.itemType = newFile
 	m.createNewItem.open = true
 	m.createNewItem.textInput = ti
+	m.firstTextInput = true
 
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 
@@ -216,23 +217,9 @@ func PanelCreateNewFolder(m model) model {
 	m.createNewItem.itemType = newFolder
 	m.createNewItem.open = true
 	m.createNewItem.textInput = ti
+	m.firstTextInput = true
 
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 
-	return m
-}
-
-func PanelItemRename(m model) model {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	ti := textinput.New()
-	ti.Placeholder = "New name"
-	ti.SetValue(panel.element[panel.cursor].name)
-	ti.Focus()
-	ti.CharLimit = 156
-	ti.Width = m.fileModel.width-4
-
-	m.rename = true
-	panel.rename = ti
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m
 }

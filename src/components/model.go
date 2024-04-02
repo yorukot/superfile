@@ -99,10 +99,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case Config.Confirm[0], Config.Confirm[1]:
 				m = CreateItem(m)
 			}
-		} else if m.rename {
+		} else if m.fileModel.renaming {
 			switch msg.String() {
 			case Config.Cancel[0], Config.Cancel[1]:
 				m = CancelReanem(m)
+			case Config.Confirm[0], Config.Confirm[1]:
+				m = ConfirmRename(m)
 			}
 		} else {
 			switch msg.String() {
@@ -207,7 +209,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 	}
-	if m.rename {
+	if m.firstTextInput {
+		m.firstTextInput = false
+	} else if m.fileModel.renaming {
 		m.fileModel.filePanels[m.filePanelFocusIndex].rename, cmd = m.fileModel.filePanels[m.filePanelFocusIndex].rename.Update(msg)
 	} else {
 		m.createNewItem.textInput, cmd = m.createNewItem.textInput.Update(msg)
@@ -247,15 +251,15 @@ func (m model) View() string {
 	} else if m.createNewItem.open {
 		if m.createNewItem.itemType == rename {
 			fileLocation := filePanelTopFolderIcon.Render("   ") + filePanelTopPath.Render(TruncateTextBeginning(m.createNewItem.location+"/"+m.createNewItem.textInput.Value(), modalWidth-4)) + "\n"
-			confirm := modalConfirm.Render("(" + Config.Confirm[0] + ") Confirm")
-			cancel := modalCancel.Render("(" + Config.Cancel[0] + ") Cancel")
+			confirm := modalConfirm.Render(" (" + Config.Confirm[0] + ") Confirm ")
+			cancel := modalCancel.Render(" (" + Config.Cancel[0] + ") Cancel ")
 			tip := confirm + "           " + cancel
 			return FullScreenStyle(m.fullHeight, m.fullWidth).Render(FocusedModalStyle(modalHeight, modalWidth).Render(fileLocation + "\n" + m.createNewItem.textInput.View() + "\n\n" + tip))
 
 		} else {
 			fileLocation := filePanelTopFolderIcon.Render("   ") + filePanelTopPath.Render(TruncateTextBeginning(m.createNewItem.location+"/"+m.createNewItem.textInput.Value(), modalWidth-4)) + "\n"
-			confirm := modalConfirm.Render("(" + Config.Confirm[0] + ") Confirm")
-			cancel := modalCancel.Render("(" + Config.Cancel[0] + ") Cancel")
+			confirm := modalConfirm.Render(" (" + Config.Confirm[0] + ") Confirm ")
+			cancel := modalCancel.Render(" (" + Config.Cancel[0] + ") Cancel ")
 			tip := confirm + "           " + cancel
 			return FullScreenStyle(m.fullHeight, m.fullWidth).Render(FocusedModalStyle(modalHeight, modalWidth).Render(fileLocation + "\n" + m.createNewItem.textInput.View() + "\n\n" + tip))
 		}
@@ -302,8 +306,8 @@ func (m model) View() string {
 						cursor = ""
 					}
 					isItemSelected := ArrayContains(filePanel.selected, filePanel.element[h].location)
-					if m.rename && h == filePanel.cursor{
-						f[i] += cursorStyle.Render(cursor) + " " + filePanel.rename.View() + "\n"
+					if filePanel.renaming && h == filePanel.cursor {
+						f[i] += filePanel.rename.View() + "\n"
 					} else {
 						f[i] += cursorStyle.Render(cursor) + " " + PrettierName(filePanel.element[h].name, m.fileModel.width-5, filePanel.element[h].folder, isItemSelected) + "\n"
 					}

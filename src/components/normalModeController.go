@@ -6,6 +6,7 @@ import (
 
 	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/progress"
+	"github.com/charmbracelet/bubbles/textinput"
 )
 
 func EnterPanel(m model) model {
@@ -103,6 +104,23 @@ func CutSingleItem(m model) model {
 		index:    m.filePanelFocusIndex,
 		location: panel.location,
 	}
+	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+	return m
+}
+
+func PanelItemRename(m model) model {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	ti := textinput.New()
+	ti.Placeholder = "New name"
+	ti.SetValue(panel.element[panel.cursor].name)
+	ti.Focus()
+	ti.CharLimit = 156
+	ti.Width = m.fileModel.width-4
+
+	m.fileModel.renaming = true
+	panel.renaming = true
+	m.firstTextInput = true
+	panel.rename = ti
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m
 }

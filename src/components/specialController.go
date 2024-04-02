@@ -35,6 +35,27 @@ func CreateItem(m model) model {
 }
 
 func CancelReanem(m model) model {
-	m.rename = false
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel.rename.Blur()
+	panel.renaming = false
+	m.fileModel.renaming = false
+	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+	return m
+}
+
+func ConfirmRename(m model) model {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	oldPath := panel.element[panel.cursor].location
+    newPath := panel.location + "/" + panel.rename.Value()        
+    
+    // Rename the file
+    err := os.Rename(oldPath, newPath)
+    if err != nil {
+		OutputLog(err)
+    }
+	m.fileModel.renaming = false
+	panel.rename.Blur()
+	panel.renaming = false
+	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m
 }

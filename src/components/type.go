@@ -53,7 +53,7 @@ type model struct {
 	focusPanel          focusPanelType
 	copyItems           copyItems
 	createNewItem       createNewItemModal
-	rename              bool
+	firstTextInput      bool
 	filePanelFocusIndex int
 	mainPanelHeight     int
 	fullWidth           int
@@ -82,6 +82,7 @@ type orignalPanel struct {
 type fileModel struct {
 	filePanels []filePanel
 	width      int
+	renaming   bool
 }
 
 type filePanel struct {
@@ -94,6 +95,7 @@ type filePanel struct {
 	element      []element
 	folderRecord map[string]folderRecord
 	rename       textinput.Model
+	renaming     bool
 }
 
 type folderRecord struct {
