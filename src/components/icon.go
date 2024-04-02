@@ -425,12 +425,3 @@ var folders = map[string]iconStyle{
 	"hidden":                {icon: "\uf023", color: "NONE"},
 	"node_modules":          {icon: "\ue5fa", color: "NONE"},
 }
-
-var otherIcons = map[string]string{
-	"link":       "\uf0c1",
-	"linkDir":    "\uf0c1",
-	"brokenLink": "\uf127",
-	"device":     "\uf0a0",
-	"socket":     "\uf1e6",
-	"pipe":       "\ufce3",
-}

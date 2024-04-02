@@ -10,8 +10,6 @@ var (
 	bottomBarHeight     = 13
 	modalWidth          = 60
 	modalHeight         = 7
-	renameModalWidth    = 60
-	renameModalHeight   = 9
 	terminalTooSmall    lipgloss.Style
 	terminalMinimumSize lipgloss.Style
 
