@@ -9,8 +9,6 @@ require (
 	github.com/charmbracelet/lipgloss v0.9.1
 )
 
-require github.com/deepakjois/gousbdrivedetector v0.0.0-20220514003247-ea439de1c459 // indirect
-
 require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/charmbracelet/harmonica v0.2.0 // indirect
