@@ -2,6 +2,7 @@ package components
 
 import (
 	"encoding/json"
+	"io"
 	"log"
 	"os"
 	"os/user"
@@ -21,20 +22,20 @@ func getHomeDir() string {
 func getFolder() []folder {
 	var paths []string
 
-    // 读取文件夹内容
+	// 读取文件夹内容
 	currentUser, err := user.Current()
 	CheckErr(err)
-    username := currentUser.Username
+	username := currentUser.Username
 
-    folderPath := filepath.Join("/run/media", username)
-    entries, err := os.ReadDir(folderPath)
+	folderPath := filepath.Join("/run/media", username)
+	entries, err := os.ReadDir(folderPath)
 	CheckErr(err)
 
-    for _, entry := range entries {
-        if entry.IsDir() {
-            paths = append(paths, filepath.Join(folderPath, entry.Name()))
-        }
-    }
+	for _, entry := range entries {
+		if entry.IsDir() {
+			paths = append(paths, filepath.Join(folderPath, entry.Name()))
+		}
+	}
 	CheckErr(err)
 
 	jsonData, err := os.ReadFile("./.superfile/data/superfile.json")
@@ -60,7 +61,6 @@ func getFolder() []folder {
 			folders = append(folders, folder{location: path, name: folderName})
 		}
 	}
-	OutputLog(paths)
 	for _, path := range paths {
 		folderName := filepath.Base(path)
 		folders = append(folders, folder{location: path, name: folderName})
@@ -161,11 +161,15 @@ func MoveFile(source string, destination string) error {
 }
 
 func PasteFile(src string, dst string) {
-	// Read all content of src to data, may cause OOM for a large file.
-	data, err := os.ReadFile(src)
+	srcFile, err := os.Open(src)
 	CheckErr(err)
-	// Write data to dst
-	err = os.WriteFile(dst, data, 0644)
+	defer srcFile.Close()
+
+	dstFile, err := os.Create(dst)
+	CheckErr(err)
+	defer dstFile.Close()
+
+	_, err = io.Copy(dstFile, srcFile)
 	CheckErr(err)
 }
 
