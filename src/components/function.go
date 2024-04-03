@@ -1,9 +1,11 @@
 package components
 
 import (
+	"encoding/json"
 	"log"
 	"os"
 	"os/user"
+	"path/filepath"
 	"sort"
 	"strings"
 )
@@ -11,24 +13,57 @@ import (
 func getHomeDir() string {
 	user, err := user.Current()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("can't get home dir")
 	}
 	return user.HomeDir
 }
 
 func getFolder() []folder {
+	var paths []string
+
+    // 读取文件夹内容
+	currentUser, err := user.Current()
+	CheckErr(err)
+    username := currentUser.Username
+
+    folderPath := filepath.Join("/run/media", username)
+    entries, err := os.ReadDir(folderPath)
+	CheckErr(err)
+
+    for _, entry := range entries {
+        if entry.IsDir() {
+            paths = append(paths, filepath.Join(folderPath, entry.Name()))
+        }
+    }
+	CheckErr(err)
+
+	jsonData, err := os.ReadFile("./.superfile/data/superfile.json")
+	CheckErr(err)
+
+	var pinnedFolder []string
+	err = json.Unmarshal(jsonData, &pinnedFolder)
+	CheckErr(err)
+
 	folders := []folder{
 		{location: HomeDir, name: "󰋜 Home"},
 		{location: HomeDir + "/Downloads", name: "󰏔 Downloads"},
 		{location: HomeDir + "/Documents", name: "󰈙 Documents"},
 		{location: HomeDir + "/Pictures", name: "󰋩 Pictures"},
 		{location: HomeDir + "/Videos", name: "󰎁 Videos"},
-		{location: HomeDir + "/Documents/code", name: "code"},
-		{location: HomeDir + "/Documents/code/returnone", name: "returnone"},
-		{location: HomeDir + "/Documents/code/returnone/website", name: "website"},
-		{location: HomeDir + "/Documents/code/returnone/backend", name: "backend", endPinned: true},
-		{location: HomeDir + "/Documents/code/returnone/backend/dsa", name: "Movie disk"},
-		{location: HomeDir + "/Documents/code/returnone/backend/dsaa", name: "USB 3.2 SanDisk"},
+	}
+
+	for i, path := range pinnedFolder {
+		folderName := filepath.Base(path)
+		if i == len(pinnedFolder)-1 {
+			folders = append(folders, folder{location: path, name: folderName, endPinned: true})
+		} else {
+			folders = append(folders, folder{location: path, name: folderName})
+		}
+	}
+	OutputLog(paths)
+	for _, path := range paths {
+		folderName := filepath.Base(path)
+		folders = append(folders, folder{location: path, name: folderName})
 	}
 
 	return folders
@@ -40,7 +75,7 @@ func repeatString(s string, count int) string {
 
 func returnFocusType(focusPanel focusPanelType) filePanelFocusType {
 	if focusPanel == nonePanelFocus {
-		return focus 
+		return focus
 	} else {
 		return secondFocus
 	}
@@ -51,12 +86,13 @@ func returnFolderElement(location string) (folderElement []element) {
 	var files []element
 
 	items, err := os.ReadDir(location)
-	if err != nil {
-		log.Fatal(err)
-	}
+	CheckErr(err)
 
 	for _, item := range items {
 		fileInfo, _ := item.Info()
+		if fileInfo == nil {
+			continue
+		}
 		newElement := element{
 			name:       item.Name(),
 			folder:     item.IsDir(),
@@ -95,12 +131,12 @@ func PanelElementHeight(mainPanelHeight int) int {
 }
 
 func ArrayContains(s []string, str string) bool {
-    for _, v := range s {
-        if v == str {
-            return true
-        }
-    }
-    return false
+	for _, v := range s {
+		if v == str {
+			return true
+		}
+	}
+	return false
 }
 
 func OutputLog(value any) {
@@ -109,34 +145,42 @@ func OutputLog(value any) {
 }
 
 func RemoveElementByValue(slice []string, value string) []string {
-    newSlice := []string{}
-    for _, v := range slice {
-        if v != value {
-            newSlice = append(newSlice, v)
-        }
-    }
-    return newSlice
+	newSlice := []string{}
+	for _, v := range slice {
+		if v != value {
+			newSlice = append(newSlice, v)
+		}
+	}
+	return newSlice
 }
 
 func MoveFile(source string, destination string) error {
-    err := os.Rename(source, destination)
-    if err != nil {
-        OutputLog(err)
-    }
+	err := os.Rename(source, destination)
+	CheckErr(err)
 	return err
 }
 
 func PasteFile(src string, dst string) {
-    // Read all content of src to data, may cause OOM for a large file.
-    data, err := os.ReadFile(src)
-    CheckErr(err)
-    // Write data to dst
-    err = os.WriteFile(dst, data, 0644)
-    CheckErr(err)
+	// Read all content of src to data, may cause OOM for a large file.
+	data, err := os.ReadFile(src)
+	CheckErr(err)
+	// Write data to dst
+	err = os.WriteFile(dst, data, 0644)
+	CheckErr(err)
 }
 
 func CheckErr(err error) {
-    if err != nil {
-        OutputLog(err)
-    }
+	if err != nil {
+		OutputLog(err)
+	}
+}
+
+func contains(s []string, str string) bool {
+	for _, v := range s {
+		if v == str {
+			return true
+		}
+	}
+
+	return false
 }

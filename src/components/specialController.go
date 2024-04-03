@@ -18,16 +18,14 @@ func CreateItem(m model) model {
 			OutputLog(err)
 		}
 		f, err := os.Create(path)
-		if err != nil {
-			OutputLog(err)
-		}
+		CheckErr(err)
+
 		defer f.Close()
 	} else {
 		path := m.createNewItem.location + "/" + m.createNewItem.textInput.Value()
 		err := os.MkdirAll(path, 0755)
-		if err != nil {
-			OutputLog(err)
-		}
+		CheckErr(err)
+
 	}
 	m.createNewItem.open = false
 	m.createNewItem.textInput.Blur()
@@ -50,9 +48,8 @@ func ConfirmRename(m model) model {
     
     // Rename the file
     err := os.Rename(oldPath, newPath)
-    if err != nil {
-		OutputLog(err)
-    }
+	CheckErr(err)
+
 	m.fileModel.renaming = false
 	panel.rename.Blur()
 	panel.renaming = false

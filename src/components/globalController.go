@@ -1,6 +1,8 @@
 package components
 
 import (
+	"encoding/json"
+	"os"
 	"path"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -172,10 +174,7 @@ func PasteItem(m model) model {
 		for _, item := range m.copyItems.items {
 			filePath := item
 			err := MoveFile(item, Config.TrashCanPath+"/"+path.Base(filePath))
-			if err != nil {
-				OutputLog("Error delete multiple item")
-				OutputLog(err)
-			}
+			CheckErr(err)
 		}
 		if m.fileModel.filePanels[m.copyItems.oringnalPanel.index].location == m.copyItems.oringnalPanel.location {
 			m.fileModel.filePanels[m.copyItems.oringnalPanel.index].selected = panel.selected[:0]
@@ -221,5 +220,37 @@ func PanelCreateNewFolder(m model) model {
 
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 
+	return m
+}
+
+func PinnedFolder(m model) model {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+
+	unPinned := false
+
+	jsonData, err := os.ReadFile("./.superfile/data/superfile.json")
+	CheckErr(err)
+	
+	var pinnedFolder []string
+	err = json.Unmarshal(jsonData, &pinnedFolder)
+	CheckErr(err)
+	for i, other := range pinnedFolder {
+        if other == panel.location {
+            pinnedFolder = append(pinnedFolder[:i], pinnedFolder[i+1:]...)
+			unPinned = true
+        }
+    }
+	
+	if !contains(pinnedFolder, panel.location) && !unPinned {
+		pinnedFolder = append(pinnedFolder, panel.location)
+	}
+	
+	updatedData, err := json.Marshal(pinnedFolder)
+	CheckErr(err)
+
+	err = os.WriteFile("./.superfile/data/superfile.json", updatedData, 0644)
+	CheckErr(err)
+
+	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m
 }

@@ -82,6 +82,9 @@ func DeleteMultipleItem(m model) model {
 
 func CopyMultipleItem(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	if len(panel.selected) == 0 {
+		return m
+	}
 	m.copyItems.items = panel.selected
 	fileInfo, err := os.Stat(panel.selected[0])
 	if err != nil {
@@ -93,9 +96,8 @@ func CopyMultipleItem(m model) model {
 	if !fileInfo.IsDir() && float64(fileInfo.Size())/(1024*1024) < 250 {
 		fileContent, err := os.ReadFile(panel.selected[0])
 
-		if err != nil {
-			OutputLog(err)
-		}
+		CheckErr(err)
+
 		if err := clipboard.WriteAll(string(fileContent)); err != nil {
 			OutputLog(err)
 		}
@@ -106,6 +108,9 @@ func CopyMultipleItem(m model) model {
 
 func CutMultipleItem(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	if len(panel.selected) == 0 {
+		return m
+	}
 	m.copyItems.items = panel.selected
 	m.copyItems.cut = true
 	m.copyItems.oringnalPanel = orignalPanel{

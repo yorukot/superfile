@@ -55,6 +55,9 @@ func ParentFolder(m model) model {
 
 func DeleteSingleItem(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	if len(panel.element) == 0 {
+		return m
+	}
 	prog := progress.New(progress.WithScaledGradient(theme.ProcessBarGradient[0], theme.ProcessBarGradient[1]))
 	m.processBarModel.process = append(m.processBarModel.process, process{
 		name:     "󰆴 " + panel.element[panel.cursor].name,
@@ -74,6 +77,9 @@ func DeleteSingleItem(m model) model {
 
 func CopySingleItem(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	if len(panel.element) == 0 {
+		return m
+	}
 	m.copyItems.items = append(m.copyItems.items, panel.element[panel.cursor].location)
 	fileInfo, err := os.Stat(panel.element[panel.cursor].location)
 	if err != nil {
@@ -85,9 +91,8 @@ func CopySingleItem(m model) model {
 	if !fileInfo.IsDir() && float64(fileInfo.Size())/(1024*1024) < 250 {
 		fileContent, err := os.ReadFile(panel.element[panel.cursor].location)
 
-		if err != nil {
-			OutputLog(err)
-		}
+		CheckErr(err)
+
 		if err := clipboard.WriteAll(string(fileContent)); err != nil {
 			OutputLog(err)
 		}
@@ -98,6 +103,9 @@ func CopySingleItem(m model) model {
 
 func CutSingleItem(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	if len(panel.element) == 0 {
+		return m
+	}
 	m.copyItems.items = append(m.copyItems.items, panel.element[panel.cursor].location)
 	m.copyItems.cut = true
 	m.copyItems.oringnalPanel = orignalPanel{
@@ -110,12 +118,15 @@ func CutSingleItem(m model) model {
 
 func PanelItemRename(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	if len(panel.element) == 0 {
+		return m
+	}
 	ti := textinput.New()
 	ti.Placeholder = "New name"
 	ti.SetValue(panel.element[panel.cursor].name)
 	ti.Focus()
 	ti.CharLimit = 156
-	ti.Width = m.fileModel.width-4
+	ti.Width = m.fileModel.width - 4
 
 	m.fileModel.renaming = true
 	panel.renaming = true

@@ -3,13 +3,12 @@ package components
 import (
 	"encoding/json"
 	"fmt"
-	"log"
-	"os"
-	"strconv"
-
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"log"
+	"os"
+	"strconv"
 )
 
 var HomeDir = getHomeDir()
@@ -92,6 +91,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.fullWidth = msg.Width
 		return m, nil
 	case tea.KeyMsg:
+		// if in the create item modal
 		if m.createNewItem.open {
 			switch msg.String() {
 			case Config.Cancel[0], Config.Cancel[1]:
@@ -99,6 +99,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case Config.Confirm[0], Config.Confirm[1]:
 				m = CreateItem(m)
 			}
+			// if in the renaming mode
 		} else if m.fileModel.renaming {
 			switch msg.String() {
 			case Config.Cancel[0], Config.Cancel[1]:
@@ -109,6 +110,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		} else {
 			switch msg.String() {
 			// return superfile
+			case Config.Reload[0], Config.Reload[1]:
+				//just do nothing
 			case Config.Quit[0], Config.Quit[1]:
 				return m, tea.Quit
 			/* LIST CONTROLLER START */
@@ -160,6 +163,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m = PanelCreateNewFile(m)
 			case Config.FilePanelFolderCreate[0], Config.FilePanelFolderCreate[1]:
 				m = PanelCreateNewFolder(m)
+			case Config.PinnedFolder[0], Config.PinnedFolder[1]:
+				m = PinnedFolder(m)
 			default:
 				// check if it's the select mode
 				if m.fileModel.filePanels[m.filePanelFocusIndex].focusType == focus && m.fileModel.filePanels[m.filePanelFocusIndex].panelMode == selectMode {
@@ -217,6 +222,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.createNewItem.textInput, cmd = m.createNewItem.textInput.Update(msg)
 
 	}
+	m.sideBarModel.pinnedModel.folder = getFolder()
 	return m, cmd
 }
 

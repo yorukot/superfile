@@ -126,9 +126,9 @@ type pinnedModel struct {
 }
 
 type folder struct {
-	location  string
+	location  string 
 	name      string
-	endPinned bool
+	endPinned bool	
 }
 
 /* SIDE BAR COMPONENTS TYPE END*/
@@ -191,6 +191,8 @@ type ConfigType struct {
 	TrashCanPath string
 
 	// HotKey setting
+	Reload   [2]string
+
 	Quit     [2]string
 	ListUp   [2]string
 	ListDown [2]string
@@ -199,12 +201,19 @@ type ConfigType struct {
 	PreviousFilePanel  [2]string
 	CloseFilePanel     [2]string
 	CreateNewFilePanel [2]string
-	FocusOnSideBar     [2]string
-	FocusOnProcessBar  [2]string
 
 	ChangePanelMode [2]string
 
+	FocusOnSideBar     [2]string
+	FocusOnProcessBar  [2]string
+
 	PasteItem [2]string
+
+	FilePanelFolderCreate [2]string
+	FilePanelFileCreate   [2]string
+	FilePanelItemRename   [2]string
+
+	PinnedFolder [2]string
 
 	Cancel  [2]string
 	Confirm [2]string
@@ -214,10 +223,6 @@ type ConfigType struct {
 	ParentFolder   [2]string
 	CopySingleItem [2]string
 	CutSingleItem  [2]string
-
-	FilePanelFolderCreate [2]string
-	FilePanelFileCreate   [2]string
-	FilePanelItemRename   [2]string
 
 	FilePanelSelectModeItemSingleSelect [2]string
 	FilePanelSelectModeItemSelectDown   [2]string
