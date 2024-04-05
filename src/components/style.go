@@ -139,6 +139,32 @@ func ProcsssBarBoarder(height int, width int, borderBottom string, focusType foc
 	}
 }
 
+func MetaDataBoarder(height int, width int, borderBottom string, focusType focusPanelType) lipgloss.Style {
+	filePanelBottomBoard := lipgloss.Border{
+		Top:         "━",
+		Bottom:      borderBottom,
+		Left:        "┃",
+		Right:       "┃",
+		TopLeft:     "┏",
+		TopRight:    "┓",
+		BottomLeft:  "┗",
+		BottomRight: "┛",
+	}
+	if focusType == metaDataFocus {
+		return lipgloss.NewStyle().
+			Border(filePanelBottomBoard, true, true, true, true).
+			BorderForeground(lipgloss.Color(theme.BottomBarFocus)).
+			Width(width).
+			Height(height).Bold(true)
+	} else {
+		return lipgloss.NewStyle().
+			Border(filePanelBottomBoard, true, true, true, true).
+			BorderForeground(lipgloss.Color(theme.Border)).
+			Width(width).
+			Height(height).Bold(true)
+	}
+}
+
 func FilePanelDividerStyle(focusType filePanelFocusType) lipgloss.Style {
 	return lipgloss.NewStyle().Foreground(lipgloss.Color(FilePanelFocusColor(focusType))).Bold(true)
 }
@@ -158,6 +184,18 @@ func TruncateTextBeginning(text string, maxChars int) string {
 	charsToKeep := maxChars - 3
 	truncatedRunes := append([]rune("..."), runes[len(runes)-charsToKeep:]...)
 	return string(truncatedRunes)
+}
+
+func TruncateMiddleText(text string, maxChars int) string {
+	if len(text) <= maxChars {
+		return text
+	}
+
+	halfEllipsisLength := (maxChars - 3) / 2
+
+	truncatedText := text[:halfEllipsisLength] + "..." + text[len(text)-halfEllipsisLength:]
+
+	return truncatedText
 }
 
 func PrettierName(name string, width int, isDir bool, isSelected bool) string {

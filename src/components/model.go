@@ -2,13 +2,12 @@ package components
 
 import (
 	"encoding/json"
-	"fmt"
+	"github.com/barasher/go-exiftool"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"log"
 	"os"
-	"strconv"
 )
 
 var HomeDir = getHomeDir()
@@ -17,6 +16,10 @@ var theme ThemeType
 var Config ConfigType
 
 var logOutput *os.File
+
+var et *exiftool.Exiftool
+
+var processBarChannel = make(chan processBarMessage, 100)
 
 func InitialModel() model {
 	var err error
@@ -46,11 +49,13 @@ func InitialModel() model {
 		log.Fatalf("Error decoding theme json(your theme file may be errors): %v", err)
 	}
 	LoadThemeConfig()
+	et, err = exiftool.NewExiftool()
+	CheckErr(err)
 	return model{
 		filePanelFocusIndex: 0,
 		focusPanel:          nonePanelFocus,
 		processBarModel: processBarModel{
-			process: []process{},
+			process: make(map[string]process),
 			cursor:  0,
 		},
 		sideBarModel: sideBarModel{
@@ -74,16 +79,33 @@ func InitialModel() model {
 	}
 }
 
+func listenForProcessBarMessage(msg chan processBarMessage) tea.Cmd {
+	return func() tea.Msg {
+		select {
+		case m := <-msg:
+			return m // 返回从通道中接收到的消息
+		default:
+			return nil // 没有消息可用时返回 nil
+		}
+	}
+}
+
 func (m model) Init() tea.Cmd {
 	return tea.Batch(
 		tea.SetWindowTitle("SuperFile"),
 		textinput.Blink, // Assuming textinput.Blink is a valid command
+		listenForProcessBarMessage(processBarChannel),
 	)
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
+	case processBarMessage:
+		if !contains(m.processBarModel.processList, msg.processId) {
+			m.processBarModel.processList = append(m.processBarModel.processList, msg.processId)
+		}
+		m.processBarModel.process[msg.processId] = msg.processNewState
 	case tea.WindowSizeMsg:
 		m.mainPanelHeight = msg.Height - bottomBarHeight
 		m.fileModel.width = (msg.Width - sideBarWidth - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
@@ -121,8 +143,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m = ControllerSideBarListUp(m)
 				} else if m.focusPanel == processBarFocus {
 
+				} else if m.focusPanel == metaDataFocus {
+					m = ControllerMetaDataListUp(m)
 				} else {
 					m = ControllerFilePanelListUp(m)
+					m = returnMetaData(m)
 				}
 			// down list
 			case Config.ListDown[0], Config.ListDown[1]:
@@ -130,8 +155,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m = ControllerSideBarListDown(m)
 				} else if m.focusPanel == processBarFocus {
 
+				} else if m.focusPanel == metaDataFocus {
+					m = ControllerMetaDataListDown(m)
 				} else {
 					m = ControllerFilePanelListDown(m)
+					m = returnMetaData(m)
 				}
 			/* LIST CONTROLLER END */
 			case Config.ChangePanelMode[0], Config.ChangePanelMode[1]:
@@ -153,8 +181,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case Config.FocusOnSideBar[0], Config.FocusOnSideBar[1]:
 				m = FocusOnSideBar(m)
 			/* NAVIGATION CONTROLLER END */
-			case Config.FocusOnProcessBar[0], Config.FocusOnProcessBar[0]:
+			case Config.FocusOnProcessBar[0], Config.FocusOnProcessBar[1]:
 				m = FocusOnProcessBar(m)
+			case Config.FocusOnMetaData[0], Config.FocusOnMetaData[1]:
+				m = FocusOnMetaData(m)
 			case Config.PasteItem[0], Config.PasteItem[1]:
 				go func() {
 					m = PasteItem(m)
@@ -178,6 +208,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					case Config.FilePanelSelectModeItemDelete[0], Config.FilePanelSelectModeItemDelete[1]:
 						go func() {
 							m = DeleteMultipleItem(m)
+							m.fileModel.filePanels[m.filePanelFocusIndex].selected = m.fileModel.filePanels[m.filePanelFocusIndex].selected[:0]
 						}()
 					case Config.FilePanelSelectModeItemCopy[0], Config.FilePanelSelectModeItemCopy[1]:
 						m = CopyMultipleItem(m)
@@ -210,6 +241,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					case Config.FilePanelItemRename[0], Config.FilePanelItemRename[1]:
 						m = PanelItemRename(m)
 					}
+
 				}
 			}
 		}
@@ -220,8 +252,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.fileModel.filePanels[m.filePanelFocusIndex].rename, cmd = m.fileModel.filePanels[m.filePanelFocusIndex].rename.Update(msg)
 	} else {
 		m.createNewItem.textInput, cmd = m.createNewItem.textInput.Update(msg)
-
 	}
+
+	if m.fileModel.filePanels[m.filePanelFocusIndex].cursor > len(m.fileModel.filePanels[m.filePanelFocusIndex].element) {
+		m.fileModel.filePanels[m.filePanelFocusIndex].cursor = len(m.fileModel.filePanels[m.filePanelFocusIndex].element) - 1
+	} else if m.fileModel.filePanels[m.filePanelFocusIndex].cursor < 0 {
+		m.fileModel.filePanels[m.filePanelFocusIndex].cursor = 0
+	}
+	cmd = tea.Batch(cmd, listenForProcessBarMessage(processBarChannel))
 	m.sideBarModel.pinnedModel.folder = getFolder()
 	return m, cmd
 }
@@ -229,134 +267,23 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m model) View() string {
 	// check is the terminal size enough
 	if m.fullHeight < minimumHeight || m.fullWidth < minimumWidth {
-		focusedModelStyle := lipgloss.NewStyle().
-			Height(m.fullHeight).
-			Width(m.fullWidth).
-			Align(lipgloss.Center, lipgloss.Center).
-			BorderForeground(lipgloss.Color("69"))
-		fullWidthString := strconv.Itoa(m.fullWidth)
-		fullHeightString := strconv.Itoa(m.fullHeight)
-		minimumWidthString := strconv.Itoa(minimumWidth)
-		minimumHeightString := strconv.Itoa(minimumHeight)
-		if m.fullHeight < minimumHeight {
-			fullHeightString = terminalTooSmall.Render(fullHeightString)
-		}
-		if m.fullWidth < minimumWidth {
-			fullWidthString = terminalTooSmall.Render(fullWidthString)
-		}
-		fullHeightString = terminalMinimumSize.Render(fullHeightString)
-		fullWidthString = terminalMinimumSize.Render(fullWidthString)
-
-		return focusedModelStyle.Render(`Terminal size too small:` + "\n" +
-			"Width = " + fullWidthString +
-			" Height = " + fullHeightString + "\n\n" +
-
-			"Needed for current config:" + "\n" +
-			"Width = " + terminalMinimumSize.Render(minimumWidthString) +
-			" Height = " + terminalMinimumSize.Render(minimumHeightString))
+		return TerminalSizeWarnRender(m)
 	} else if m.createNewItem.open {
-		if m.createNewItem.itemType == rename {
-			fileLocation := filePanelTopFolderIcon.Render("   ") + filePanelTopPath.Render(TruncateTextBeginning(m.createNewItem.location+"/"+m.createNewItem.textInput.Value(), modalWidth-4)) + "\n"
-			confirm := modalConfirm.Render(" (" + Config.Confirm[0] + ") Confirm ")
-			cancel := modalCancel.Render(" (" + Config.Cancel[0] + ") Cancel ")
-			tip := confirm + "           " + cancel
-			return FullScreenStyle(m.fullHeight, m.fullWidth).Render(FocusedModalStyle(modalHeight, modalWidth).Render(fileLocation + "\n" + m.createNewItem.textInput.View() + "\n\n" + tip))
-
-		} else {
-			fileLocation := filePanelTopFolderIcon.Render("   ") + filePanelTopPath.Render(TruncateTextBeginning(m.createNewItem.location+"/"+m.createNewItem.textInput.Value(), modalWidth-4)) + "\n"
-			confirm := modalConfirm.Render(" (" + Config.Confirm[0] + ") Confirm ")
-			cancel := modalCancel.Render(" (" + Config.Cancel[0] + ") Cancel ")
-			tip := confirm + "           " + cancel
-			return FullScreenStyle(m.fullHeight, m.fullWidth).Render(FocusedModalStyle(modalHeight, modalWidth).Render(fileLocation + "\n" + m.createNewItem.textInput.View() + "\n\n" + tip))
-		}
+		return ModalRender(m)
 	} else {
-		// side bar
-		s := sideBarTitle.Render("    Super Files     ")
-		s += "\n"
-		for i, folder := range m.sideBarModel.pinnedModel.folder {
-			cursor := " "
-			if m.sideBarModel.cursor == i && m.focusPanel == sideBarFocus {
-				cursor = ""
-			}
-			if folder.location == m.fileModel.filePanels[m.filePanelFocusIndex].location {
-				s += cursorStyle.Render(cursor) + " " + sideBarSelected.Render(TruncateText(folder.name, sideBarWidth-2)) + "" + "\n"
-			} else {
-				s += cursorStyle.Render(cursor) + " " + sideBarItem.Render(TruncateText(folder.name, sideBarWidth-2)) + "" + "\n"
-			}
-			if i == 4 {
-				s += "\n" + sideBarTitle.Render("󰐃 Pinned") + borderStyle.Render(" ───────────") + "\n\n"
-			}
-			if folder.endPinned {
-				s += "\n" + sideBarTitle.Render("󱇰 Disk") + borderStyle.Render(" ─────────────") + "\n\n"
-			}
-		}
+		sideBar := SideBarRender(m)
 
-		s = SideBarBoardStyle(m.mainPanelHeight, m.focusPanel).Render(s)
+		filePanel := FilePanelRender(m, sideBar)
 
-		// file panel
-		f := make([]string, 4)
-		for i, filePanel := range m.fileModel.filePanels {
-			fileElenent := returnFolderElement(filePanel.location)
-			filePanel.element = fileElenent
-			m.fileModel.filePanels[i].element = fileElenent
-			f[i] += filePanelTopFolderIcon.Render("   ") + filePanelTopPath.Render(TruncateTextBeginning(filePanel.location, m.fileModel.width-4)) + "\n"
-			f[i] += FilePanelDividerStyle(filePanel.focusType).Render(repeatString("━", m.fileModel.width)) + "\n"
-			if len(filePanel.element) == 0 {
-				f[i] += "   No any file or folder"
-				bottomBorder := GenerateBottomBorder("0/0", m.fileModel.width+5)
-				f[i] = FilePanelBoardStyle(m.mainPanelHeight, m.fileModel.width, filePanel.focusType, bottomBorder).Render(f[i])
-			} else {
-				for h := filePanel.render; h < filePanel.render+PanelElementHeight(m.mainPanelHeight) && h < len(filePanel.element); h++ {
-					cursor := " "
-					if h == filePanel.cursor {
-						cursor = ""
-					}
-					isItemSelected := ArrayContains(filePanel.selected, filePanel.element[h].location)
-					if filePanel.renaming && h == filePanel.cursor {
-						f[i] += filePanel.rename.View() + "\n"
-					} else {
-						f[i] += cursorStyle.Render(cursor) + " " + PrettierName(filePanel.element[h].name, m.fileModel.width-5, filePanel.element[h].folder, isItemSelected) + "\n"
-					}
-				}
-				cursorPosition := strconv.Itoa(filePanel.cursor + 1)
-				totalElement := strconv.Itoa(len(filePanel.element))
-				panelModeString := ""
-				if filePanel.panelMode == browserMode {
-					panelModeString = "󰈈 Browser"
-				} else if filePanel.panelMode == selectMode {
-					panelModeString = "󰆽 Select"
-				}
-				bottomBorder := GenerateBottomBorder(fmt.Sprintf("%s┣━┫%s/%s", panelModeString, cursorPosition, totalElement), m.fileModel.width+6)
-				f[i] = FilePanelBoardStyle(m.mainPanelHeight, m.fileModel.width, filePanel.focusType, bottomBorder).Render(f[i])
-			}
-		}
+		processBar := ProcessBarRender(m)
 
-		// file panel render togther
-		filePanelRender := s
-		for _, f := range f {
-			filePanelRender = lipgloss.JoinHorizontal(lipgloss.Top, filePanelRender, f)
-		}
+		metaData := MetaDataRender(m)
 
-		// process bar
-		processRender := ""
-		for _, process := range m.processBarModel.process {
-			process.progress.Width = m.fullWidth/3 - 3
-			symbol := ""
-			line := StringColorRender(theme.ProcessBarSideLine).Render("│ ")
-			if process.state == failure {
-				symbol = StringColorRender(theme.Fail).Render("")
-			} else if process.state == successful {
-				symbol = StringColorRender(theme.Done).Render("")
-			} else {
-				symbol = StringColorRender(theme.Cancel).Render("")
-			}
-			processRender += line + TruncateText(process.name, m.fullWidth/3-7) + " " + symbol + "\n"
-			processRender += line + process.progress.ViewAs(1) + "\n\n"
-		}
-		bottomBorder := GenerateBottomBorder(fmt.Sprintf("%s┣━┫%s/%s", "100sec", "100", "100"), m.fullWidth/3+2)
-		processRender = ProcsssBarBoarder(bottomBarHeight-5, m.fullWidth/3, bottomBorder, m.focusPanel).Render(processRender)
+		bottomBar := lipgloss.JoinHorizontal(0, processBar, metaData)
+
 		// final render
-		finalRender := lipgloss.JoinVertical(0, filePanelRender, processRender)
+		finalRender := lipgloss.JoinVertical(0, filePanel, bottomBar)
+
 		return lipgloss.JoinVertical(lipgloss.Top, finalRender)
 	}
 }

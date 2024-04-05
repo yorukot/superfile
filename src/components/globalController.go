@@ -4,8 +4,11 @@ import (
 	"encoding/json"
 	"os"
 	"path"
+	"path/filepath"
 
+	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/textinput"
+	"github.com/lithammer/shortuuid"
 )
 
 /* CURSOR CONTROLLER START */
@@ -27,6 +30,24 @@ func ControllerSideBarListDown(m model) model {
 	return m
 }
 
+func ControllerMetaDataListUp(m model) model {
+	if m.fileMetaData.renderIndex > 0 {
+		m.fileMetaData.renderIndex--
+	} else {
+		m.fileMetaData.renderIndex = len(m.fileMetaData.metaData) - 1
+	}
+	return m
+}
+
+func ControllerMetaDataListDown(m model) model {
+	if m.fileMetaData.renderIndex < len(m.fileMetaData.metaData)-1 {
+		m.fileMetaData.renderIndex++
+	} else {
+		m.fileMetaData.renderIndex = 0
+	}
+	return m
+}
+
 func ControllerFilePanelListUp(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	if panel.cursor > 0 {
@@ -42,7 +63,9 @@ func ControllerFilePanelListUp(m model) model {
 			panel.cursor = len(panel.element) - 1
 		}
 	}
+
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+
 	return m
 }
 
@@ -57,8 +80,8 @@ func ControllerFilePanelListDown(m model) model {
 		panel.render = 0
 		panel.cursor = 0
 	}
-
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+
 	return m
 }
 
@@ -164,11 +187,93 @@ func FocusOnProcessBar(m model) model {
 	return m
 }
 
+func FocusOnMetaData(m model) model {
+	if m.focusPanel == metaDataFocus {
+		m.focusPanel = nonePanelFocus
+		m.fileModel.filePanels[m.filePanelFocusIndex].focusType = focus
+	} else {
+		m.focusPanel = metaDataFocus
+		m.fileModel.filePanels[m.filePanelFocusIndex].focusType = secondFocus
+	}
+	return m
+}
+
 func PasteItem(m model) model {
+	id := shortuuid.New()
+	if len(m.copyItems.items) == 0 {
+		return m
+	}
+	totalFiles := 0
+	for _, folderPath := range m.copyItems.items {
+		count, err := countFiles(folderPath)
+		if err != nil {
+			continue
+		}
+		totalFiles += count
+	}
+
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	for _, item := range m.copyItems.items {
-		filePath := item
-		PasteFile(item, panel.location+"/"+path.Base(filePath))
+	prog := progress.New(progress.WithScaledGradient(theme.ProcessBarGradient[0], theme.ProcessBarGradient[1]))
+	newProcess := process{}
+
+	if m.copyItems.cut {
+		newProcess = process{
+			name:     "󰆐 " + filepath.Base(m.copyItems.items[0]),
+			progress: prog,
+			state:    inOperation,
+			total:    totalFiles,
+			done:     0,
+		}
+	} else {
+		newProcess = process{
+			name:     "󰆏 " + filepath.Base(m.copyItems.items[0]),
+			progress: prog,
+			state:    inOperation,
+			total:    totalFiles,
+			done:     0,
+		}
+	}
+
+	m.processBarModel.process[id] = newProcess
+
+	processBarChannel <- processBarMessage{
+		processId:       id,
+		processNewState: newProcess,
+	}
+
+	for _, filePath := range m.copyItems.items {
+		OutputLog(filePath)
+		p := m.processBarModel.process[id]
+		if m.copyItems.cut {
+			p.name = "󰆐 " + filepath.Base(filePath)
+		} else {
+			p.name = "󰆏 " + filepath.Base(filePath)
+		}
+
+		newModel, err := PasteDir(filePath, panel.location+"/"+path.Base(filePath), id, m)
+		m = newModel
+		p = m.processBarModel.process[id]
+		if err != nil {
+			p.state = failure
+			processBarChannel <- processBarMessage{
+				processId:       id,
+				processNewState: p,
+			}
+			OutputLog("Error delete multiple item")
+			OutputLog(err)
+			m.processBarModel.process[id] = p
+			break
+		} else {
+			if p.done == p.total {
+				p.state = successful
+				p.done = totalFiles
+				processBarChannel <- processBarMessage{
+					processId:       id,
+					processNewState: p,
+				}
+			}
+			m.processBarModel.process[id] = p
+		}
 	}
 	if m.copyItems.cut {
 		for _, item := range m.copyItems.items {
@@ -230,21 +335,21 @@ func PinnedFolder(m model) model {
 
 	jsonData, err := os.ReadFile("./.superfile/data/superfile.json")
 	CheckErr(err)
-	
+
 	var pinnedFolder []string
 	err = json.Unmarshal(jsonData, &pinnedFolder)
 	CheckErr(err)
 	for i, other := range pinnedFolder {
-        if other == panel.location {
-            pinnedFolder = append(pinnedFolder[:i], pinnedFolder[i+1:]...)
+		if other == panel.location {
+			pinnedFolder = append(pinnedFolder[:i], pinnedFolder[i+1:]...)
 			unPinned = true
-        }
-    }
-	
+		}
+	}
+
 	if !contains(pinnedFolder, panel.location) && !unPinned {
 		pinnedFolder = append(pinnedFolder, panel.location)
 	}
-	
+
 	updatedData, err := json.Marshal(pinnedFolder)
 	CheckErr(err)
 

@@ -1,8 +1,6 @@
 package components
 
 import (
-	"time"
-
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/textinput"
 )
@@ -16,13 +14,13 @@ type itemType int
 const (
 	newFile itemType = iota
 	newFolder
-	rename
 )
 
 const (
 	nonePanelFocus focusPanelType = iota
 	processBarFocus
 	sideBarFocus
+	metaDataFocus
 )
 
 const (
@@ -37,9 +35,7 @@ const (
 )
 
 const (
-	copying processState = iota
-	deleting
-	moving
+	inOperation processState = iota
 	successful
 	cancel
 	failure
@@ -53,11 +49,22 @@ type model struct {
 	focusPanel          focusPanelType
 	copyItems           copyItems
 	createNewItem       createNewItemModal
+	fileMetaData        fileMetaData
 	firstTextInput      bool
 	filePanelFocusIndex int
 	mainPanelHeight     int
 	fullWidth           int
 	fullHeight          int
+}
+
+type processBarMessage struct {
+	processId       string
+	processNewState process
+}
+
+type fileMetaData struct {
+	metaData    [][2]string
+	renderIndex int
 }
 
 type createNewItemModal struct {
@@ -104,11 +111,9 @@ type folderRecord struct {
 }
 
 type element struct {
-	name       string
-	location   string
-	folder     bool
-	size       int64
-	updateTime time.Time
+	name     string
+	location string
+	folder   bool
 }
 
 /* FILE WINDOWS TYPE END*/
@@ -126,9 +131,9 @@ type pinnedModel struct {
 }
 
 type folder struct {
-	location  string 
+	location  string
 	name      string
-	endPinned bool	
+	endPinned bool
 }
 
 /* SIDE BAR COMPONENTS TYPE END*/
@@ -136,14 +141,18 @@ type folder struct {
 /*PROCESS BAR COMPONENTS TYPE START*/
 
 type processBarModel struct {
-	cursor  int
-	process []process
+	cursor      int
+	processList []string
+	process     map[string]process
 }
 
 type process struct {
 	name     string
 	progress progress.Model
 	state    processState
+	speed    string
+	total     int
+	done     int
 }
 
 /*PROCESS BAR COMPONENTS TYPE END*/
@@ -191,7 +200,7 @@ type ConfigType struct {
 	TrashCanPath string
 
 	// HotKey setting
-	Reload   [2]string
+	Reload [2]string
 
 	Quit     [2]string
 	ListUp   [2]string
@@ -204,8 +213,9 @@ type ConfigType struct {
 
 	ChangePanelMode [2]string
 
-	FocusOnSideBar     [2]string
-	FocusOnProcessBar  [2]string
+	FocusOnSideBar    [2]string
+	FocusOnProcessBar [2]string
+	FocusOnMetaData   [2]string
 
 	PasteItem [2]string
 

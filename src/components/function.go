@@ -2,12 +2,15 @@ package components
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
+	"math"
 	"os"
 	"os/user"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -22,7 +25,6 @@ func getHomeDir() string {
 func getFolder() []folder {
 	var paths []string
 
-	// 读取文件夹内容
 	currentUser, err := user.Current()
 	CheckErr(err)
 	username := currentUser.Username
@@ -94,10 +96,8 @@ func returnFolderElement(location string) (folderElement []element) {
 			continue
 		}
 		newElement := element{
-			name:       item.Name(),
-			folder:     item.IsDir(),
-			size:       fileInfo.Size(),
-			updateTime: fileInfo.ModTime(),
+			name:   item.Name(),
+			folder: item.IsDir(),
 		}
 		if location == "/" {
 			newElement.location = location + item.Name()
@@ -160,17 +160,113 @@ func MoveFile(source string, destination string) error {
 	return err
 }
 
-func PasteFile(src string, dst string) {
+func PasteFile(src string, dst string) error {
 	srcFile, err := os.Open(src)
 	CheckErr(err)
 	defer srcFile.Close()
 
-	dstFile, err := os.Create(dst)
+	dstDir := filepath.Dir(dst)
+	baseName := filepath.Base(dst)
+	ext := filepath.Ext(baseName)
+	fileName := strings.TrimSuffix(baseName, ext)
+
+	newFileName := fileName
+	newDst := dst
+	i := 1
+	for {
+		_, err := os.Stat(newDst)
+		if os.IsNotExist(err) {
+			break
+		}
+
+		newFileName = fileName + "(" + strconv.Itoa(i) + ")"
+		newDst = filepath.Join(dstDir, newFileName+ext)
+		i++
+	}
+
+	dstFile, err := os.Create(newDst)
 	CheckErr(err)
+	if err != nil {
+		return err
+	}
 	defer dstFile.Close()
 
 	_, err = io.Copy(dstFile, srcFile)
 	CheckErr(err)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func PasteDir(src, dst string, id string, m model) (model, error) {
+
+	err := filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		relPath, err := filepath.Rel(src, path)
+		if err != nil {
+			return err
+		}
+
+		newPath := filepath.Join(dst, relPath)
+
+		if info.IsDir() {
+			_, err := os.Stat(newPath)
+			if err == nil {
+				for i := 1; ; i++ {
+					newDir := fmt.Sprintf("%s(%d)", newPath, i)
+					_, err := os.Stat(newDir)
+					if err != nil {
+						newPath = newDir
+						break
+					}
+				}
+			}
+			err = os.MkdirAll(newPath, info.Mode())
+			if err != nil {
+				return err
+			}
+		} else {
+			p := m.processBarModel.process[id]
+			if m.copyItems.cut {
+				p.name = "󰆐 " + filepath.Base(path)
+			} else {
+				p.name = "󰆏 " + filepath.Base(path)
+			}
+
+			processBarChannel <- processBarMessage{
+				processId:       id,
+				processNewState: p,
+			}
+
+			err := PasteFile(path, newPath)
+			if err != nil {
+				p.state = failure
+				processBarChannel <- processBarMessage{
+					processId:       id,
+					processNewState: p,
+				}
+				return err
+			}
+			p.done++
+			processBarChannel <- processBarMessage{
+				processId:       id,
+				processNewState: p,
+			}
+			m.processBarModel.process[id] = p
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return m, err
+	}
+
+	return m, nil
 }
 
 func CheckErr(err error) {
@@ -185,6 +281,81 @@ func contains(s []string, str string) bool {
 			return true
 		}
 	}
-
 	return false
+}
+
+func returnMetaData(m model) model {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	m.fileMetaData.metaData = m.fileMetaData.metaData[:0]
+	filePath := panel.element[panel.cursor].location
+
+	fileInfo, err := os.Stat(filePath)
+	CheckErr(err)
+
+	if fileInfo.IsDir() {
+		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"FolderName", fileInfo.Name()})
+		if m.focusPanel == metaDataFocus {
+			m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"FolderSize", FormatFileSize(DirSize(filePath))})
+		}
+		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"FolderModifyDate", fileInfo.ModTime().String()})
+		return m
+	}
+
+	fileInfos := et.ExtractMetadata(filePath)
+	for _, fileInfo := range fileInfos {
+		if fileInfo.Err != nil {
+			OutputLog(fileInfo.Err)
+			OutputLog(fileInfo)
+			continue
+		}
+
+		for k, v := range fileInfo.Fields {
+			temp := [2]string{k, fmt.Sprintf("%v", v)}
+			m.fileMetaData.metaData = append(m.fileMetaData.metaData, temp)
+		}
+	}
+	return m
+}
+
+func FormatFileSize(size int64) string {
+	units := []string{" bytes", " kB", " MB", " GB", " TB", " PB", " EB"}
+
+	if size == 0 {
+		return "0B"
+	}
+
+	unitIndex := int(math.Floor(math.Log(float64(size)) / math.Log(1024)))
+	adjustedSize := float64(size) / math.Pow(1024, float64(unitIndex))
+
+	return fmt.Sprintf("%.2f%s", adjustedSize, units[unitIndex])
+}
+
+func DirSize(path string) int64 {
+	var size int64
+	filepath.Walk(path, func(_ string, info os.FileInfo, err error) error {
+		if err != nil {
+			OutputLog(err)
+		}
+		if !info.IsDir() {
+			size += info.Size()
+		}
+		return err
+	})
+	return size
+}
+
+func countFiles(dirPath string) (int, error) {
+	count := 0
+
+	err := filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			count++
+		}
+		return nil
+	})
+
+	return count, err
 }

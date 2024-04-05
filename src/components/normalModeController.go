@@ -7,6 +7,7 @@ import (
 	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/textinput"
+	"github.com/lithammer/shortuuid"
 )
 
 func EnterPanel(m model) model {
@@ -54,22 +55,45 @@ func ParentFolder(m model) model {
 }
 
 func DeleteSingleItem(m model) model {
+	id := shortuuid.New()
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	if len(panel.element) == 0 {
 		return m
 	}
 	prog := progress.New(progress.WithScaledGradient(theme.ProcessBarGradient[0], theme.ProcessBarGradient[1]))
-	m.processBarModel.process = append(m.processBarModel.process, process{
+	newProcess := process{
 		name:     "󰆴 " + panel.element[panel.cursor].name,
 		progress: prog,
-		state:    deleting,
-	})
+		state:    inOperation,
+		total: 1,
+		done: 0,
+	}
+	m.processBarModel.process[id] = newProcess
+	
+	processBarChannel <- processBarMessage{
+		processId: id,
+		processNewState: newProcess,
+	}
+	
 	err := MoveFile(panel.element[panel.cursor].location, Config.TrashCanPath+"/"+panel.element[panel.cursor].name)
 	if err != nil {
-		m.processBarModel.process[0].state = failure
+		p := m.processBarModel.process[id]
+		p.state = failure
+		processBarChannel <- processBarMessage{
+			processId: id,
+			processNewState: p,
+		}
 	} else {
-		m.processBarModel.process[0].state = successful
-		m.processBarModel.process[0].progress.IncrPercent(1)
+		p := m.processBarModel.process[id]
+		p.done = 1
+		p.state = successful
+		processBarChannel <- processBarMessage{
+			processId: id,
+			processNewState: p,
+		}
+	}
+	if panel.cursor == len(panel.element)-1 {
+		panel.cursor--
 	}
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m
@@ -77,6 +101,7 @@ func DeleteSingleItem(m model) model {
 
 func CopySingleItem(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	m.copyItems.items = m.copyItems.items[:0]
 	if len(panel.element) == 0 {
 		return m
 	}
@@ -103,6 +128,7 @@ func CopySingleItem(m model) model {
 
 func CutSingleItem(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	m.copyItems.items = m.copyItems.items[:0]
 	if len(panel.element) == 0 {
 		return m
 	}

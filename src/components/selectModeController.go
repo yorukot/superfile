@@ -1,9 +1,13 @@
 package components
 
 import (
-	"github.com/atotto/clipboard"
 	"os"
 	"path"
+	"path/filepath"
+
+	"github.com/atotto/clipboard"
+	"github.com/charmbracelet/bubbles/progress"
+	"github.com/lithammer/shortuuid"
 )
 
 func SingleItemSelect(m model) model {
@@ -67,14 +71,60 @@ func ItemSelectDown(m model) model {
 func DeleteMultipleItem(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	if len(panel.selected) != 0 {
-		for _, item := range panel.selected {
-			filePath := item
-			err := MoveFile(item, Config.TrashCanPath+"/"+path.Base(filePath))
+		id := shortuuid.New()
+		prog := progress.New(progress.WithScaledGradient(theme.ProcessBarGradient[0], theme.ProcessBarGradient[1]))
+		newProcess := process{
+			name:     "󰆴 " + filepath.Base(panel.selected[0]),
+			progress: prog,
+			state:    inOperation,
+			total:    len(panel.selected),
+			done:     0,
+		}
+
+		m.processBarModel.process[id] = newProcess
+
+		processBarChannel <- processBarMessage{
+			processId:       id,
+			processNewState: newProcess,
+		}
+
+		for _, filePath := range panel.selected {
+
+			p := m.processBarModel.process[id]
+			p.name = "󰆴 " + filepath.Base(filePath)
+			p.done++
+			p.state = inOperation
+			processBarChannel <- processBarMessage{
+				processId:       id,
+				processNewState: p,
+			}
+
+			err := MoveFile(filePath, Config.TrashCanPath+"/"+path.Base(filePath))
+
 			if err != nil {
+				p.state = failure
+				processBarChannel <- processBarMessage{
+					processId:       id,
+					processNewState: p,
+				}
 				OutputLog("Error delete multiple item")
 				OutputLog(err)
+				m.processBarModel.process[id] = p
+				break
+			} else {
+				if p.done == p.total {
+					p.state = successful
+					processBarChannel <- processBarMessage{
+						processId:       id,
+						processNewState: p,
+					}
+				}
+				m.processBarModel.process[id] = p
 			}
 		}
+	}
+	if panel.cursor >= len(panel.element)-1 {
+		panel.cursor--
 	}
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m
@@ -82,6 +132,7 @@ func DeleteMultipleItem(m model) model {
 
 func CopyMultipleItem(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	m.copyItems.items = m.copyItems.items[:0]
 	if len(panel.selected) == 0 {
 		return m
 	}
@@ -108,6 +159,7 @@ func CopyMultipleItem(m model) model {
 
 func CutMultipleItem(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	m.copyItems.items = m.copyItems.items[:0]
 	if len(panel.selected) == 0 {
 		return m
 	}

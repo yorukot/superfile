@@ -1,5 +1,6 @@
 {   
     "trashCanPath": "./.superfile/trash",
+    "helpBar": false,
 
     "_COMMIT_HOTKEY": "",
 
@@ -19,6 +20,7 @@
 
     "focusOnProcessBar": ["p", ""],
     "focusOnSideBar": ["b", ""],
+    "focusOnMetaData": ["m", ""],
 
     "pasteItem": ["ctrl+v", ""],
     
