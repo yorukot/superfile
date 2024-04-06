@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
+	"os/user"
 	"path/filepath"
 	"time"
 
@@ -14,11 +16,22 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+var HomeDir = getHomeDir()
+
 const (
 	currentVersion      = "v0.1.0-beta"
 	latestVersionURL    = "https://api.github.com/repos/MHNightCat/superfile/releases/latest"
 	latestVersionGithub = "github.com//MHNightCat/superfile/releases/latest"
-	dir                 = "./.superfile/data/lastCheckVersion"
+	themeZip           = "https://github.com/MHNightCat/superfile/raw/main/theme.zip"
+)
+
+const (
+	lastCheckVersion    = "/data/lastCheckVersion"
+	config              = "/config/config.json"
+	pinned	   			= "/config/pinned.json"
+	data                = "/data"
+	theme               = "/theme"
+	trash               = "/trash"
 )
 
 func main() {
@@ -29,6 +42,14 @@ func main() {
 		os.Exit(1)
 	}
 	CheckForUpdates()
+}
+
+func getHomeDir() string {
+	user, err := user.Current()
+	if err != nil {
+		log.Fatal("can't get home dir")
+	}
+	return user.HomeDir
 }
 
 func CheckForUpdates() {
