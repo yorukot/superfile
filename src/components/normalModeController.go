@@ -3,6 +3,7 @@ package components
 import (
 	"os"
 	"path"
+	"time"
 
 	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/progress"
@@ -65,30 +66,31 @@ func DeleteSingleItem(m model) model {
 		name:     "󰆴 " + panel.element[panel.cursor].name,
 		progress: prog,
 		state:    inOperation,
-		total: 1,
-		done: 0,
+		total:    1,
+		done:     0,
 	}
 	m.processBarModel.process[id] = newProcess
-	
+
 	processBarChannel <- processBarMessage{
-		processId: id,
+		processId:       id,
 		processNewState: newProcess,
 	}
-	
+
 	err := MoveFile(panel.element[panel.cursor].location, Config.TrashCanPath+"/"+panel.element[panel.cursor].name)
 	if err != nil {
 		p := m.processBarModel.process[id]
 		p.state = failure
 		processBarChannel <- processBarMessage{
-			processId: id,
+			processId:       id,
 			processNewState: p,
 		}
 	} else {
 		p := m.processBarModel.process[id]
 		p.done = 1
 		p.state = successful
+		p.doneTime = time.Now()
 		processBarChannel <- processBarMessage{
-			processId: id,
+			processId:       id,
 			processNewState: p,
 		}
 	}
@@ -101,6 +103,7 @@ func DeleteSingleItem(m model) model {
 
 func CopySingleItem(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	m.copyItems.cut = false
 	m.copyItems.items = m.copyItems.items[:0]
 	if len(panel.element) == 0 {
 		return m
@@ -108,18 +111,18 @@ func CopySingleItem(m model) model {
 	m.copyItems.items = append(m.copyItems.items, panel.element[panel.cursor].location)
 	fileInfo, err := os.Stat(panel.element[panel.cursor].location)
 	if err != nil {
-		OutputLog("Can't find this file or folder")
-		OutputLog(panel.element[panel.cursor].location)
-		OutputLog(err)
+		OutPutLog("Copy single item get file state error", panel.element[panel.cursor].location, err)
 	}
 
 	if !fileInfo.IsDir() && float64(fileInfo.Size())/(1024*1024) < 250 {
 		fileContent, err := os.ReadFile(panel.element[panel.cursor].location)
 
-		CheckErr(err)
+		if err != nil {
+			OutPutLog("Copy single item read file error", panel.element[panel.cursor].location, err)
+		}
 
 		if err := clipboard.WriteAll(string(fileContent)); err != nil {
-			OutputLog(err)
+			OutPutLog("Copy single item write file error", panel.element[panel.cursor].location, err)
 		}
 	}
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
@@ -134,7 +137,7 @@ func CutSingleItem(m model) model {
 	}
 	m.copyItems.items = append(m.copyItems.items, panel.element[panel.cursor].location)
 	m.copyItems.cut = true
-	m.copyItems.oringnalPanel = orignalPanel{
+	m.copyItems.originalPanel = originalPanel{
 		index:    m.filePanelFocusIndex,
 		location: panel.location,
 	}

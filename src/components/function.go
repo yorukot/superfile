@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -26,27 +27,32 @@ func getFolder() []folder {
 	var paths []string
 
 	currentUser, err := user.Current()
-	CheckErr(err)
+	if err != nil {
+		OutPutLog("Get user path error", err)
+	}
 	username := currentUser.Username
 
 	folderPath := filepath.Join("/run/media", username)
 	entries, err := os.ReadDir(folderPath)
-	CheckErr(err)
+
+	if err != nil {
+		OutPutLog("Get external media error", err)
+	}
 
 	for _, entry := range entries {
 		if entry.IsDir() {
 			paths = append(paths, filepath.Join(folderPath, entry.Name()))
 		}
 	}
-	CheckErr(err)
-
 	jsonData, err := os.ReadFile("./.superfile/data/superfile.json")
-	CheckErr(err)
-
+	if err != nil {
+		OutPutLog("Read superfile data error", err)
+	}
 	var pinnedFolder []string
 	err = json.Unmarshal(jsonData, &pinnedFolder)
-	CheckErr(err)
-
+	if err != nil {
+		OutPutLog("Unmarshal superfile data error", err)
+	}
 	folders := []folder{
 		{location: HomeDir, name: "󰋜 Home"},
 		{location: HomeDir + "/Downloads", name: "󰏔 Downloads"},
@@ -88,7 +94,9 @@ func returnFolderElement(location string) (folderElement []element) {
 	var files []element
 
 	items, err := os.ReadDir(location)
-	CheckErr(err)
+	if err != nil {
+		OutPutLog("Return folder element function error", err)
+	}
 
 	for _, item := range items {
 		fileInfo, _ := item.Info()
@@ -130,6 +138,10 @@ func PanelElementHeight(mainPanelHeight int) int {
 	return mainPanelHeight - 3
 }
 
+func BottomElementHight(bottomElementHight int) int {
+	return bottomElementHight - 5
+}
+
 func ArrayContains(s []string, str string) bool {
 	for _, v := range s {
 		if v == str {
@@ -139,9 +151,11 @@ func ArrayContains(s []string, str string) bool {
 	return false
 }
 
-func OutputLog(value any) {
+func OutPutLog(values ...interface{}) {
 	log.SetOutput(logOutput)
-	log.Println(value)
+	for _, value := range values {
+		log.Println(value)
+	}
 }
 
 func RemoveElementByValue(slice []string, value string) []string {
@@ -154,45 +168,106 @@ func RemoveElementByValue(slice []string, value string) []string {
 	return newSlice
 }
 
+func RenameIfDuplicate(destination string) (string, error) {
+	// 检测目标文件是否存在
+	info, err := os.Stat(destination)
+	if os.IsNotExist(err) {
+		// 如果不存在，直接返回目的地
+		return destination, nil
+	} else if err != nil {
+		// 其他错误
+		return "", err
+	}
+
+	// 检测是文件还是文件夹
+	if info.IsDir() {
+		// 如果是文件夹，检测文件夹的结尾是否包含(?)
+		match := regexp.MustCompile(`\((\d+)\)$`).FindStringSubmatch(info.Name())
+		if len(match) > 1 {
+			// 如果包含，更改里面的数字重复直到目标目录不存在
+			number, _ := strconv.Atoi(match[1])
+			for {
+				number++
+				newDirName := fmt.Sprintf("%s(%d)", info.Name()[:len(info.Name())-len(match[0])], number)
+				newPath := filepath.Join(filepath.Dir(destination), newDirName)
+				if _, err := os.Stat(newPath); os.IsNotExist(err) {
+					return newPath, nil
+				}
+			}
+		} else {
+			// 如果不包含，自行添加 -> 更改里面的数字重复直到目标目录不存在
+			for i := 1; ; i++ {
+				newDirName := fmt.Sprintf("%s(%d)", info.Name(), i)
+				newPath := filepath.Join(filepath.Dir(destination), newDirName)
+				if _, err := os.Stat(newPath); os.IsNotExist(err) {
+					return newPath, nil
+				}
+			}
+		}
+	} else {
+		// 如果是文件，检测文件的结尾是否包含(?)
+		baseName := filepath.Base(destination)
+		ext := filepath.Ext(baseName)
+		fileName := baseName[:len(baseName)-len(ext)]
+		match := regexp.MustCompile(`\((\d+)\)$`).FindStringSubmatch(fileName)
+		if len(match) > 1 {
+			// 如果包含，更改里面的数字重复直到目标文件不存在
+			number, _ := strconv.Atoi(match[1])
+			for {
+				number++
+				newFileName := fmt.Sprintf("%s(%d)%s", fileName[:len(fileName)-len(match[0])], number, ext)
+				newPath := filepath.Join(filepath.Dir(destination), newFileName)
+				if _, err := os.Stat(newPath); os.IsNotExist(err) {
+					return newPath, nil
+				}
+			}
+		} else {
+			// 如果不包含，自行添加在文件后面 -> 更改里面的数字重复直到目标文件不存在
+			for i := 1; ; i++ {
+				newFileName := fmt.Sprintf("%s(%d)%s", fileName, i, ext)
+				newPath := filepath.Join(filepath.Dir(destination), newFileName)
+				if _, err := os.Stat(newPath); os.IsNotExist(err) {
+					return newPath, nil
+				}
+			}
+		}
+	}
+}
+
 func MoveFile(source string, destination string) error {
-	err := os.Rename(source, destination)
-	CheckErr(err)
+	destination, err := RenameIfDuplicate(destination)
+
+	err = os.Rename(source, destination)
+	if err != nil {
+		OutPutLog("Move file function error", err)
+	}
 	return err
 }
 
 func PasteFile(src string, dst string) error {
 	srcFile, err := os.Open(src)
-	CheckErr(err)
+	if err != nil {
+		OutPutLog("Paste file function open file error", err)
+	}
 	defer srcFile.Close()
 
-	dstDir := filepath.Dir(dst)
-	baseName := filepath.Base(dst)
-	ext := filepath.Ext(baseName)
-	fileName := strings.TrimSuffix(baseName, ext)
-
-	newFileName := fileName
-	newDst := dst
-	i := 1
-	for {
-		_, err := os.Stat(newDst)
-		if os.IsNotExist(err) {
-			break
-		}
-
-		newFileName = fileName + "(" + strconv.Itoa(i) + ")"
-		newDst = filepath.Join(dstDir, newFileName+ext)
-		i++
+	dst, err = RenameIfDuplicate(dst)
+	if err != nil {
+		OutPutLog("Paste file function rename error", err)
 	}
-
-	dstFile, err := os.Create(newDst)
-	CheckErr(err)
+	dstFile, err := os.Create(dst)
+	if err != nil {
+		OutPutLog("Paste file function create file error", err)
+	}
 	if err != nil {
 		return err
 	}
 	defer dstFile.Close()
 
 	_, err = io.Copy(dstFile, srcFile)
-	CheckErr(err)
+	if err != nil {
+		OutPutLog("Paste file function copy file error", err)
+	}
 	if err != nil {
 		return err
 	}
@@ -200,8 +275,13 @@ func PasteFile(src string, dst string) error {
 }
 
 func PasteDir(src, dst string, id string, m model) (model, error) {
+	// Check if destination directory already exists
+	dst, err := RenameIfDuplicate(dst)
+	if err != nil {
+		return m, err
+	}
 
-	err := filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
+	err = filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -214,16 +294,9 @@ func PasteDir(src, dst string, id string, m model) (model, error) {
 		newPath := filepath.Join(dst, relPath)
 
 		if info.IsDir() {
-			_, err := os.Stat(newPath)
-			if err == nil {
-				for i := 1; ; i++ {
-					newDir := fmt.Sprintf("%s(%d)", newPath, i)
-					_, err := os.Stat(newDir)
-					if err != nil {
-						newPath = newDir
-						break
-					}
-				}
+			newPath, err = RenameIfDuplicate(newPath)
+			if err != nil {
+				return err
 			}
 			err = os.MkdirAll(newPath, info.Mode())
 			if err != nil {
@@ -237,9 +310,11 @@ func PasteDir(src, dst string, id string, m model) (model, error) {
 				p.name = "󰆏 " + filepath.Base(path)
 			}
 
-			processBarChannel <- processBarMessage{
-				processId:       id,
-				processNewState: p,
+			if len(processBarChannel) < 5 {
+				processBarChannel <- processBarMessage{
+					processId:       id,
+					processNewState: p,
+				}
 			}
 
 			err := PasteFile(path, newPath)
@@ -252,9 +327,11 @@ func PasteDir(src, dst string, id string, m model) (model, error) {
 				return err
 			}
 			p.done++
-			processBarChannel <- processBarMessage{
-				processId:       id,
-				processNewState: p,
+			if len(processBarChannel) < 5 {
+				processBarChannel <- processBarMessage{
+					processId:       id,
+					processNewState: p,
+				}
 			}
 			m.processBarModel.process[id] = p
 		}
@@ -269,12 +346,6 @@ func PasteDir(src, dst string, id string, m model) (model, error) {
 	return m, nil
 }
 
-func CheckErr(err error) {
-	if err != nil {
-		OutputLog(err)
-	}
-}
-
 func contains(s []string, str string) bool {
 	for _, v := range s {
 		if v == str {
@@ -286,12 +357,20 @@ func contains(s []string, str string) bool {
 
 func returnMetaData(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	if len(panel.element[panel.cursor].metaData) != 0 {
+		m.fileMetaData.metaData = panel.element[panel.cursor].metaData
+		return m
+	}
+	if len(panel.element) == 0 {
+		return m
+	}
 	m.fileMetaData.metaData = m.fileMetaData.metaData[:0]
 	filePath := panel.element[panel.cursor].location
 
 	fileInfo, err := os.Stat(filePath)
-	CheckErr(err)
-
+	if err != nil {
+		OutPutLog("Return meta data function get file state error", err)
+	}
 	if fileInfo.IsDir() {
 		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"FolderName", fileInfo.Name()})
 		if m.focusPanel == metaDataFocus {
@@ -304,8 +383,7 @@ func returnMetaData(m model) model {
 	fileInfos := et.ExtractMetadata(filePath)
 	for _, fileInfo := range fileInfos {
 		if fileInfo.Err != nil {
-			OutputLog(fileInfo.Err)
-			OutputLog(fileInfo)
+			OutPutLog("Return meta data function error", fileInfo, fileInfo.Err)
 			continue
 		}
 
@@ -314,6 +392,7 @@ func returnMetaData(m model) model {
 			m.fileMetaData.metaData = append(m.fileMetaData.metaData, temp)
 		}
 	}
+	panel.element[panel.cursor].metaData = m.fileMetaData.metaData
 	return m
 }
 
@@ -334,7 +413,7 @@ func DirSize(path string) int64 {
 	var size int64
 	filepath.Walk(path, func(_ string, info os.FileInfo, err error) error {
 		if err != nil {
-			OutputLog(err)
+			OutPutLog("Dir size function error", err)
 		}
 		if !info.IsDir() {
 			size += info.Size()

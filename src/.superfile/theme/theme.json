@@ -22,9 +22,10 @@
     "bottomBarFocus": "#D79921",
 
 	"processBarSideLine": "#D8D8D8",
-    "processBarGradient": ["#ea6962", "#ea6962"],
+    "processBarGradient": ["#689d6a", "#fb4934"],
+    "inOperation": "#468588",
     "done": "#8ec07c",
-    "fali": "#FF6969",
+    "fail": "#FF6969",
     "cancel": "#838383",
 
     "modalForeground": "#EBDBB2",

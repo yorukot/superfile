@@ -1,6 +1,8 @@
 package components
 
 import (
+	"unicode/utf8"
+
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -38,7 +40,7 @@ var (
 
 func LoadThemeConfig() {
 	terminalTooSmall = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.TerminalTooSmallError))
-	terminalMinimumSize = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.TerminalSizeCurrect))
+	terminalMinimumSize = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.TerminalSizeCorrect))
 
 	borderStyle = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.Border))
 	cursorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.Cursor)).Bold(true)
@@ -115,7 +117,7 @@ func FilePanelBoardStyle(height int, width int, focusType filePanelFocusType, bo
 
 func ProcsssBarBoarder(height int, width int, borderBottom string, focusType focusPanelType) lipgloss.Style {
 	filePanelBottomBoard := lipgloss.Border{
-		Top:         "━",
+		Top:         "━┫Processes┣" + repeatString("━", width),
 		Bottom:      borderBottom,
 		Left:        "┃",
 		Right:       "┃",
@@ -141,7 +143,7 @@ func ProcsssBarBoarder(height int, width int, borderBottom string, focusType foc
 
 func MetaDataBoarder(height int, width int, borderBottom string, focusType focusPanelType) lipgloss.Style {
 	filePanelBottomBoard := lipgloss.Border{
-		Top:         "━",
+		Top:         "━┫Metadata┣" + repeatString("━", width),
 		Bottom:      borderBottom,
 		Left:        "┃",
 		Right:       "┃",
@@ -165,19 +167,39 @@ func MetaDataBoarder(height int, width int, borderBottom string, focusType focus
 	}
 }
 
+func ClipboardBoarder(height int, width int, borderBottom string) lipgloss.Style {
+	filePanelBottomBoard := lipgloss.Border{
+		Top:         "━┫Clipboard┣" + repeatString("━", width),
+		Bottom:      borderBottom,
+		Left:        "┃",
+		Right:       "┃",
+		TopLeft:     "┏",
+		TopRight:    "┓",
+		BottomLeft:  "┗",
+		BottomRight: "┛",
+	}
+
+	return lipgloss.NewStyle().
+		Border(filePanelBottomBoard, true, true, true, true).
+		BorderForeground(lipgloss.Color(theme.Border)).
+		Width(width).
+		Height(height).Bold(true)
+
+}
+
 func FilePanelDividerStyle(focusType filePanelFocusType) lipgloss.Style {
 	return lipgloss.NewStyle().Foreground(lipgloss.Color(FilePanelFocusColor(focusType))).Bold(true)
 }
 
 func TruncateText(text string, maxChars int) string {
-	if len(text) <= maxChars {
+	if utf8.RuneCountInString(text) <= maxChars {
 		return text
 	}
 	return text[:maxChars-3] + "..."
 }
 
 func TruncateTextBeginning(text string, maxChars int) string {
-	if len(text) <= maxChars {
+	if utf8.RuneCountInString(text) <= maxChars {
 		return text
 	}
 	runes := []rune(text)
@@ -187,13 +209,13 @@ func TruncateTextBeginning(text string, maxChars int) string {
 }
 
 func TruncateMiddleText(text string, maxChars int) string {
-	if len(text) <= maxChars {
+	if utf8.RuneCountInString(text) <= maxChars {
 		return text
 	}
 
 	halfEllipsisLength := (maxChars - 3) / 2
 
-	truncatedText := text[:halfEllipsisLength] + "..." + text[len(text)-halfEllipsisLength:]
+	truncatedText := text[:halfEllipsisLength] + "..." + text[utf8.RuneCountInString(text)-halfEllipsisLength:]
 
 	return truncatedText
 }
@@ -204,6 +226,15 @@ func PrettierName(name string, width int, isDir bool, isSelected bool) string {
 		return StringColorRender(style.color).Render(style.icon) + "  " + filePanelItemSelected.Render(TruncateText(name, width))
 	} else {
 		return StringColorRender(style.color).Render(style.icon) + "  " + filePanelItem.Render(TruncateText(name, width))
+	}
+}
+
+func ClipboardPrettierName(name string, width int, isDir bool, isSelected bool) string {
+	style := getElementIcon(name, isDir)
+	if isSelected {
+		return StringColorRender(style.color).Render(style.icon) + "  " + filePanelItemSelected.Render(TruncateTextBeginning(name, width))
+	} else {
+		return StringColorRender(style.color).Render(style.icon) + "  " + filePanelItem.Render(TruncateTextBeginning(name, width))
 	}
 }
 
@@ -230,4 +261,8 @@ func GenerateBottomBorder(countString string, width int) string {
 
 func StringColorRender(color string) lipgloss.Style {
 	return lipgloss.NewStyle().Foreground(lipgloss.Color(color))
+}
+
+func BottomWidth(fullWidth int) int {
+	return fullWidth/3 - 2
 }

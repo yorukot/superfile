@@ -19,7 +19,7 @@ var logOutput *os.File
 
 var et *exiftool.Exiftool
 
-var processBarChannel = make(chan processBarMessage, 100)
+var processBarChannel = make(chan processBarMessage, 1000)
 
 func InitialModel() model {
 	var err error
@@ -50,13 +50,16 @@ func InitialModel() model {
 	}
 	LoadThemeConfig()
 	et, err = exiftool.NewExiftool()
-	CheckErr(err)
+	if err != nil {
+		OutPutLog("Initia model function init exiftool error", err)
+	}
 	return model{
 		filePanelFocusIndex: 0,
 		focusPanel:          nonePanelFocus,
 		processBarModel: processBarModel{
 			process: make(map[string]process),
 			cursor:  0,
+			render:  0,
 		},
 		sideBarModel: sideBarModel{
 			pinnedModel: pinnedModel{
@@ -142,7 +145,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.focusPanel == sideBarFocus {
 					m = ControllerSideBarListUp(m)
 				} else if m.focusPanel == processBarFocus {
-
+					m = ContollerProcessBarListUp(m)
 				} else if m.focusPanel == metaDataFocus {
 					m = ControllerMetaDataListUp(m)
 				} else {
@@ -154,7 +157,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.focusPanel == sideBarFocus {
 					m = ControllerSideBarListDown(m)
 				} else if m.focusPanel == processBarFocus {
-
+					m = ContollerProcessBarListDown(m)
 				} else if m.focusPanel == metaDataFocus {
 					m = ControllerMetaDataListDown(m)
 				} else {
@@ -225,7 +228,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 							m = SideBarSelectFolder(m)
 						} else if m.focusPanel == processBarFocus {
 
-						} else {
+						} else if m.focusPanel == nonePanelFocus {
 							m = EnterPanel(m)
 						}
 					case Config.ParentFolder[0], Config.ParentFolder[1]:
@@ -254,11 +257,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.createNewItem.textInput, cmd = m.createNewItem.textInput.Update(msg)
 	}
 
-	if m.fileModel.filePanels[m.filePanelFocusIndex].cursor > len(m.fileModel.filePanels[m.filePanelFocusIndex].element) {
-		m.fileModel.filePanels[m.filePanelFocusIndex].cursor = len(m.fileModel.filePanels[m.filePanelFocusIndex].element) - 1
-	} else if m.fileModel.filePanels[m.filePanelFocusIndex].cursor < 0 {
-		m.fileModel.filePanels[m.filePanelFocusIndex].cursor = 0
-	}
 	cmd = tea.Batch(cmd, listenForProcessBarMessage(processBarChannel))
 	m.sideBarModel.pinnedModel.folder = getFolder()
 	return m, cmd
@@ -273,16 +271,20 @@ func (m model) View() string {
 	} else {
 		sideBar := SideBarRender(m)
 
-		filePanel := FilePanelRender(m, sideBar)
+		filePanel := FilePanelRender(m)
+
+		mainPanel := lipgloss.JoinHorizontal(0, sideBar, filePanel)
 
 		processBar := ProcessBarRender(m)
 
 		metaData := MetaDataRender(m)
 
-		bottomBar := lipgloss.JoinHorizontal(0, processBar, metaData)
+		clipboardBar := ClipboardRender(m)
+
+		bottomBar := lipgloss.JoinHorizontal(0, processBar, metaData, clipboardBar)
 
 		// final render
-		finalRender := lipgloss.JoinVertical(0, filePanel, bottomBar)
+		finalRender := lipgloss.JoinVertical(0, mainPanel, bottomBar)
 
 		return lipgloss.JoinVertical(lipgloss.Top, finalRender)
 	}

@@ -94,9 +94,11 @@ func DeleteMultipleItem(m model) model {
 			p.name = "󰆴 " + filepath.Base(filePath)
 			p.done++
 			p.state = inOperation
-			processBarChannel <- processBarMessage{
-				processId:       id,
-				processNewState: p,
+			if len(processBarChannel) < 5 {
+				processBarChannel <- processBarMessage{
+					processId:       id,
+					processNewState: p,
+				}
 			}
 
 			err := MoveFile(filePath, Config.TrashCanPath+"/"+path.Base(filePath))
@@ -107,8 +109,7 @@ func DeleteMultipleItem(m model) model {
 					processId:       id,
 					processNewState: p,
 				}
-				OutputLog("Error delete multiple item")
-				OutputLog(err)
+				OutPutLog("Delete multiple item function error", err)
 				m.processBarModel.process[id] = p
 				break
 			} else {
@@ -132,6 +133,7 @@ func DeleteMultipleItem(m model) model {
 
 func CopyMultipleItem(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	m.copyItems.cut = false
 	m.copyItems.items = m.copyItems.items[:0]
 	if len(panel.selected) == 0 {
 		return m
@@ -139,18 +141,18 @@ func CopyMultipleItem(m model) model {
 	m.copyItems.items = panel.selected
 	fileInfo, err := os.Stat(panel.selected[0])
 	if err != nil {
-		OutputLog("Can't find this file or folder")
-		OutputLog(panel.selected[0])
-		OutputLog(err)
+		OutPutLog("Copy multiple item function get file state error", panel.selected[0], err)
 	}
 
 	if !fileInfo.IsDir() && float64(fileInfo.Size())/(1024*1024) < 250 {
 		fileContent, err := os.ReadFile(panel.selected[0])
 
-		CheckErr(err)
+		if err != nil {
+			OutPutLog("Copy multiple item function read file error", err)
+		}
 
 		if err := clipboard.WriteAll(string(fileContent)); err != nil {
-			OutputLog(err)
+			OutPutLog("Copy multiple item function write file to clipboard error", err)
 		}
 	}
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
@@ -165,7 +167,7 @@ func CutMultipleItem(m model) model {
 	}
 	m.copyItems.items = panel.selected
 	m.copyItems.cut = true
-	m.copyItems.oringnalPanel = orignalPanel{
+	m.copyItems.originalPanel = originalPanel{
 		index:    m.filePanelFocusIndex,
 		location: panel.location,
 	}

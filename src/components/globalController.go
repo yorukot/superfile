@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"time"
 
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -50,6 +51,9 @@ func ControllerMetaDataListDown(m model) model {
 
 func ControllerFilePanelListUp(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	if len(panel.element) == 0 {
+		return m
+	}
 	if panel.cursor > 0 {
 		panel.cursor--
 		if panel.cursor < panel.render {
@@ -71,6 +75,9 @@ func ControllerFilePanelListUp(m model) model {
 
 func ControllerFilePanelListDown(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	if len(panel.element) == 0 {
+		return m
+	}
 	if panel.cursor < len(panel.element)-1 {
 		panel.cursor++
 		if panel.cursor > panel.render+PanelElementHeight(m.mainPanelHeight)-1 {
@@ -85,16 +92,67 @@ func ControllerFilePanelListDown(m model) model {
 	return m
 }
 
+func ContollerProcessBarListUp(m model) model {
+	if len(m.processBarModel.processList) == 0 {
+		return m
+	}
+	if m.processBarModel.cursor > 0 {
+		m.processBarModel.cursor--
+		if m.processBarModel.cursor < m.processBarModel.render {
+			m.processBarModel.render--
+		}
+	} else {
+		if len(m.processBarModel.processList) <= 3 {
+			m.processBarModel.cursor = len(m.processBarModel.processList) - 1
+		} else {
+			m.processBarModel.render = len(m.processBarModel.processList) - 3
+			m.processBarModel.cursor = len(m.processBarModel.processList) - 1
+		}
+	}
+
+	return m
+}
+
+func ContollerProcessBarListDown(m model) model {
+	if len(m.processBarModel.processList) == 0 {
+		return m
+	}
+	if m.processBarModel.cursor < len(m.processBarModel.processList)-1 {
+		m.processBarModel.cursor++
+		if m.processBarModel.cursor > m.processBarModel.render+2 {
+			m.processBarModel.render++
+		}
+	} else {
+		m.processBarModel.render = 0
+		m.processBarModel.cursor = 0
+	}
+	return m
+}
+
 /* CURSOR CONTROLLER END */
 
 /* LIST CONTROLLER START */
 
 func SideBarSelectFolder(m model) model {
-	m.sideBarModel.pinnedModel.selected = m.sideBarModel.pinnedModel.folder[m.sideBarModel.cursor].location
-	m.fileModel.filePanels[m.filePanelFocusIndex].location = m.sideBarModel.pinnedModel.selected
 	m.focusPanel = nonePanelFocus
-	m.fileModel.filePanels[m.filePanelFocusIndex].focusType = focus
-	m.fileModel.filePanels[m.filePanelFocusIndex].cursor = 0
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+
+	panel.folderRecord[panel.location] = folderRecord{
+		folderCursor: panel.cursor,
+		folderRender: panel.render,
+	}
+
+	panel.location = m.sideBarModel.pinnedModel.folder[m.sideBarModel.cursor].location
+	folderRecord, hasRecord := panel.folderRecord[panel.location]
+	if hasRecord {
+		panel.cursor = folderRecord.folderCursor
+		panel.render = folderRecord.folderRender
+	} else {
+		panel.cursor = 0
+		panel.render = 0
+	}
+	panel.focusType = focus
+	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m
 }
 
@@ -242,7 +300,6 @@ func PasteItem(m model) model {
 	}
 
 	for _, filePath := range m.copyItems.items {
-		OutputLog(filePath)
 		p := m.processBarModel.process[id]
 		if m.copyItems.cut {
 			p.name = "󰆐 " + filepath.Base(filePath)
@@ -259,14 +316,14 @@ func PasteItem(m model) model {
 				processId:       id,
 				processNewState: p,
 			}
-			OutputLog("Error delete multiple item")
-			OutputLog(err)
+			OutPutLog("Pasted item error", err)
 			m.processBarModel.process[id] = p
 			break
 		} else {
 			if p.done == p.total {
 				p.state = successful
 				p.done = totalFiles
+				p.doneTime = time.Now()
 				processBarChannel <- processBarMessage{
 					processId:       id,
 					processNewState: p,
@@ -279,10 +336,12 @@ func PasteItem(m model) model {
 		for _, item := range m.copyItems.items {
 			filePath := item
 			err := MoveFile(item, Config.TrashCanPath+"/"+path.Base(filePath))
-			CheckErr(err)
+			if err != nil {
+				OutPutLog("Paste item function move file to trash can error", err)
+			}
 		}
-		if m.fileModel.filePanels[m.copyItems.oringnalPanel.index].location == m.copyItems.oringnalPanel.location {
-			m.fileModel.filePanels[m.copyItems.oringnalPanel.index].selected = panel.selected[:0]
+		if m.fileModel.filePanels[m.copyItems.originalPanel.index].location == m.copyItems.originalPanel.location {
+			m.fileModel.filePanels[m.copyItems.originalPanel.index].selected = panel.selected[:0]
 		}
 	}
 	m.copyItems.cut = false
@@ -334,11 +393,14 @@ func PinnedFolder(m model) model {
 	unPinned := false
 
 	jsonData, err := os.ReadFile("./.superfile/data/superfile.json")
-	CheckErr(err)
-
+	if err != nil {
+		OutPutLog("Pinned folder function read superfile data error", err)
+	}
 	var pinnedFolder []string
 	err = json.Unmarshal(jsonData, &pinnedFolder)
-	CheckErr(err)
+	if err != nil {
+		OutPutLog("Pinned folder function unmarshal superfile data error", err)
+	}
 	for i, other := range pinnedFolder {
 		if other == panel.location {
 			pinnedFolder = append(pinnedFolder[:i], pinnedFolder[i+1:]...)
@@ -351,10 +413,14 @@ func PinnedFolder(m model) model {
 	}
 
 	updatedData, err := json.Marshal(pinnedFolder)
-	CheckErr(err)
+	if err != nil {
+		OutPutLog("Pinned folder function updatedData superfile data error", err)
+	}
 
 	err = os.WriteFile("./.superfile/data/superfile.json", updatedData, 0644)
-	CheckErr(err)
+	if err != nil {
+		OutPutLog("Pinned folder function updatedData superfile data error", err)
+	}
 
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m
