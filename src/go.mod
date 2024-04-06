@@ -1,4 +1,4 @@
-module superfile
+module github.com/MHNightCat/superfile
 
 go 1.21.8
 

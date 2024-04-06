@@ -6,7 +6,7 @@ Set Height 1560
 Set Shell zsh
 Set FontFamily "Comic Mono, RobotoMono Nerd Font"
 
-Type "./main"
+Type "superfile"
 Sleep 1500ms
 Enter
 Sleep 700ms

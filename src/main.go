@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
-	"superfile/components"
+	"github.com/MHNightCat/superfile/components"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
