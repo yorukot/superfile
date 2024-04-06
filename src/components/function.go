@@ -169,22 +169,16 @@ func RemoveElementByValue(slice []string, value string) []string {
 }
 
 func RenameIfDuplicate(destination string) (string, error) {
-	// 检测目标文件是否存在
 	info, err := os.Stat(destination)
 	if os.IsNotExist(err) {
-		// 如果不存在，直接返回目的地
 		return destination, nil
 	} else if err != nil {
-		// 其他错误
 		return "", err
 	}
 
-	// 检测是文件还是文件夹
 	if info.IsDir() {
-		// 如果是文件夹，检测文件夹的结尾是否包含(?)
 		match := regexp.MustCompile(`\((\d+)\)$`).FindStringSubmatch(info.Name())
 		if len(match) > 1 {
-			// 如果包含，更改里面的数字重复直到目标目录不存在
 			number, _ := strconv.Atoi(match[1])
 			for {
 				number++
@@ -195,7 +189,6 @@ func RenameIfDuplicate(destination string) (string, error) {
 				}
 			}
 		} else {
-			// 如果不包含，自行添加 -> 更改里面的数字重复直到目标目录不存在
 			for i := 1; ; i++ {
 				newDirName := fmt.Sprintf("%s(%d)", info.Name(), i)
 				newPath := filepath.Join(filepath.Dir(destination), newDirName)
@@ -205,13 +198,11 @@ func RenameIfDuplicate(destination string) (string, error) {
 			}
 		}
 	} else {
-		// 如果是文件，检测文件的结尾是否包含(?)
 		baseName := filepath.Base(destination)
 		ext := filepath.Ext(baseName)
 		fileName := baseName[:len(baseName)-len(ext)]
 		match := regexp.MustCompile(`\((\d+)\)$`).FindStringSubmatch(fileName)
 		if len(match) > 1 {
-			// 如果包含，更改里面的数字重复直到目标文件不存在
 			number, _ := strconv.Atoi(match[1])
 			for {
 				number++
@@ -222,7 +213,6 @@ func RenameIfDuplicate(destination string) (string, error) {
 				}
 			}
 		} else {
-			// 如果不包含，自行添加在文件后面 -> 更改里面的数字重复直到目标文件不存在
 			for i := 1; ; i++ {
 				newFileName := fmt.Sprintf("%s(%d)%s", fileName, i, ext)
 				newPath := filepath.Join(filepath.Dir(destination), newFileName)
