@@ -347,7 +347,7 @@ func contains(s []string, str string) bool {
 
 func returnMetaData(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	if len(panel.element[panel.cursor].metaData) != 0 {
+	if len(panel.element[panel.cursor].metaData) != 0 && m.focusPanel != metaDataFocus {
 		m.fileMetaData.metaData = panel.element[panel.cursor].metaData
 		return m
 	}

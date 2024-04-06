@@ -185,7 +185,7 @@ func ProcessBarRender(m model) string {
 func MetaDataRender(m model) string {
 	// process bar
 	metaDataBar := ""
-	if len(m.fileMetaData.metaData) == 0 && len(m.fileModel.filePanels[m.filePanelFocusIndex].element) > 0 {
+	if len(m.fileMetaData.metaData) == 0 && len(m.fileModel.filePanels[m.filePanelFocusIndex].element) > 0 && !m.fileModel.renaming {
 		m = returnMetaData(m)
 	}
 

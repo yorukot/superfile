@@ -162,7 +162,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m = ContollerProcessBarListUp(m)
 				} else if m.focusPanel == metaDataFocus {
 					m = ControllerMetaDataListUp(m)
-				} else {
+				} else if m.focusPanel == nonePanelFocus {
 					m = ControllerFilePanelListUp(m)
 					m = returnMetaData(m)
 				}
@@ -174,7 +174,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m = ContollerProcessBarListDown(m)
 				} else if m.focusPanel == metaDataFocus {
 					m = ControllerMetaDataListDown(m)
-				} else {
+				} else if m.focusPanel == nonePanelFocus {
 					m = ControllerFilePanelListDown(m)
 					m = returnMetaData(m)
 				}
@@ -202,6 +202,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m = FocusOnProcessBar(m)
 			case Config.FocusOnMetaData[0], Config.FocusOnMetaData[1]:
 				m = FocusOnMetaData(m)
+				m = returnMetaData(m)
 			case Config.PasteItem[0], Config.PasteItem[1]:
 				go func() {
 					m = PasteItem(m)

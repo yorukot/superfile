@@ -22,7 +22,7 @@ var SuperFileMainDir = HomeDir + "/.superfile"
 const (
 	currentVersion      string = "v1.0.0"
 	latestVersionURL    string = "https://api.github.com/repos/MHNightCat/superfile/releases/latest"
-	latestVersionGithub string = "github.com//MHNightCat/superfile/releases/latest"
+	latestVersionGithub string = "github.com/MHNightCat/superfile/releases/latest"
 	themeZip            string = "https://github.com/MHNightCat/superfile/raw/main/theme.zip"
 )
 
@@ -281,7 +281,6 @@ func Unzip(src, dest string) error {
 
 const configJsonString string = `{   
     "theme": "gruvbox",
-    "trashCanPath": "./.superfile/trash",
 
     "_COMMIT_HOTKEY": "",
 
@@ -316,9 +315,9 @@ const configJsonString string = `{
     "confirm": ["enter"], 
 
     "_COMMIT_normal_mode_hotkey": "Here is normal mode hotkey you can conflicts with other mode (cant conflicts with global hotkey)",
-    "deleteItem": ["d", ""],
+    "deleteItem": ["ctrl+d", ""],
     "selectItem": ["enter", "l"],
-    "parentFolder": ["h", ""],
+    "parentFolder": ["h", "backspace"],
     "copySingleItem": ["ctrl+c", ""],
     "cutSingleItem": ["ctrl+x", ""],
 
@@ -326,12 +325,11 @@ const configJsonString string = `{
     "filePanelSelectModeItemSingleSelect": ["enter", "l"],
     "filePanelSelectModeItemSelectDown": ["shift+down", "J"],
     "filePanelSelectModeItemSelectUp": ["shift+up", "K"],
-    "filePanelSelectModeItemDelete": ["d", ""],
+    "filePanelSelectModeItemDelete": ["ctrl+d", "delete"],
     "filePanelSelectModeItemCopy": ["ctrl+c", ""],
     "filePanelSelectModeItemPast": ["ctrl+v", ""],
     "filePanelSelectModeItemCut": ["ctrl+x", ""],
     "filePanelSelectAllItem": ["ctrl+a", ""],
     
-    "_COMMIT_process_bar_hotkey": "Here is process bar panel hotkey you can conflicts with other mode (cant conflicts global hotkey)",
-    "cancelProcess": ""
+    "_COMMIT_process_bar_hotkey": "Here is process bar panel hotkey you can conflicts with other mode (cant conflicts global hotkey)"
 }`
