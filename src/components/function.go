@@ -44,7 +44,7 @@ func getFolder() []folder {
 			paths = append(paths, filepath.Join(folderPath, entry.Name()))
 		}
 	}
-	jsonData, err := os.ReadFile("./.superfile/data/superfile.json")
+	jsonData, err := os.ReadFile(pinnedDir)
 	if err != nil {
 		OutPutLog("Read superfile data error", err)
 	}

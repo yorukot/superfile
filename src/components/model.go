@@ -19,9 +19,12 @@ var logOutput *os.File
 
 var et *exiftool.Exiftool
 
+var pinnedDir = "./.superfile/data/pinned.json"
+
 var processBarChannel = make(chan processBarMessage, 1000)
 
 func InitialModel() model {
+	OutPutLog("test")
 	var err error
 	logOutput, err = os.OpenFile("superfile.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
@@ -39,7 +42,8 @@ func InitialModel() model {
 		log.Fatalf("Error decoding HotKey json(your config  file may be errors): %v", err)
 	}
 
-	data, err = os.ReadFile("./.superfile/theme/theme.json")
+	data, err = os.ReadFile("./.superfile/theme/" + Config.Theme + ".json")
+
 	if err != nil {
 		log.Fatalf("Theme file not exist: %v", err)
 	}
@@ -48,6 +52,7 @@ func InitialModel() model {
 	if err != nil {
 		log.Fatalf("Error decoding theme json(your theme file may be errors): %v", err)
 	}
+
 	LoadThemeConfig()
 	et, err = exiftool.NewExiftool()
 	if err != nil {

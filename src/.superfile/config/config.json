@@ -1,6 +1,6 @@
 {   
+    "theme": "gruvbox",
     "trashCanPath": "./.superfile/trash",
-    "helpBar": false,
 
     "_COMMIT_HOTKEY": "",
 

@@ -12,6 +12,12 @@ import (
 func SideBarRender(m model) string {
 	s := sideBarTitle.Render("    Super Files     ")
 	s += "\n"
+	noPinnedFolder := true
+	for _, folder := range m.sideBarModel.pinnedModel.folder {
+		if folder.endPinned {
+			noPinnedFolder = false
+		}
+	}
 	for i, folder := range m.sideBarModel.pinnedModel.folder {
 		cursor := " "
 		if m.sideBarModel.cursor == i && m.focusPanel == sideBarFocus {
@@ -24,10 +30,14 @@ func SideBarRender(m model) string {
 		}
 		if i == 4 {
 			s += "\n" + sideBarTitle.Render("󰐃 Pinned") + borderStyle.Render(" ───────────") + "\n\n"
+			if noPinnedFolder {
+				s += "\n" + sideBarTitle.Render("󱇰 Disk") + borderStyle.Render(" ─────────────") + "\n\n"
+			}
 		}
 		if folder.endPinned {
 			s += "\n" + sideBarTitle.Render("󱇰 Disk") + borderStyle.Render(" ─────────────") + "\n\n"
 		}
+
 	}
 
 	s = SideBarBoardStyle(m.mainPanelHeight, m.focusPanel).Render(s)

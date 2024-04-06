@@ -392,7 +392,7 @@ func PinnedFolder(m model) model {
 
 	unPinned := false
 
-	jsonData, err := os.ReadFile("./.superfile/data/superfile.json")
+	jsonData, err := os.ReadFile(pinnedDir)
 	if err != nil {
 		OutPutLog("Pinned folder function read superfile data error", err)
 	}
@@ -417,7 +417,7 @@ func PinnedFolder(m model) model {
 		OutPutLog("Pinned folder function updatedData superfile data error", err)
 	}
 
-	err = os.WriteFile("./.superfile/data/superfile.json", updatedData, 0644)
+	err = os.WriteFile(pinnedDir, updatedData, 0644)
 	if err != nil {
 		OutPutLog("Pinned folder function updatedData superfile data error", err)
 	}
