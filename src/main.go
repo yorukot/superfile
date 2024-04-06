@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/MHNightCat/superfile/components"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/urfave/cli/v2"
 	"io"
 	"log"
 	"net/http"
@@ -43,13 +44,29 @@ type GitHubRelease struct {
 }
 
 func main() {
-	InitConfigFile()
-	p := tea.NewProgram(components.InitialModel(), tea.WithAltScreen())
-	if _, err := p.Run(); err != nil {
-		fmt.Printf("Alas, there's been an error: %v", err)
+	app := &cli.App{
+		Name:    "superfile",
+		Version: currentVersion,
+		Description: "A Modern file manager with golang",
+		Flags:   []cli.Flag{},
+		Action: func(c *cli.Context) error {
+			InitConfigFile()
+			p := tea.NewProgram(components.InitialModel(), tea.WithAltScreen())
+			if _, err := p.Run(); err != nil {
+				fmt.Printf("Alas, there's been an error: %v", err)
+				os.Exit(1)
+			}
+			CheckForUpdates()
+			return nil
+
+		},
+	}
+
+	err := app.Run(os.Args)
+	if err != nil {
+		fmt.Println(err)
 		os.Exit(1)
 	}
-	CheckForUpdates()
 }
 
 func getHomeDir() string {

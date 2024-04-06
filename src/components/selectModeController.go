@@ -124,9 +124,14 @@ func DeleteMultipleItem(m model) model {
 			}
 		}
 	}
-	if panel.cursor >= len(panel.element)-1 {
-		panel.cursor--
+
+	if panel.cursor >= len(panel.element)-len(panel.selected)-1 {
+		panel.cursor = len(panel.element) - len(panel.selected) - 1
+		if panel.cursor < 0 {
+			panel.cursor = 0
+		}
 	}
+	panel.selected = panel.selected[:0]
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m
 }

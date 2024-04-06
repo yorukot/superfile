@@ -272,6 +272,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.createNewItem.textInput, cmd = m.createNewItem.textInput.Update(msg)
 	}
 
+	if m.fileModel.filePanels[m.filePanelFocusIndex].cursor < 0 {
+		
+	}
+
 	cmd = tea.Batch(cmd, listenForProcessBarMessage(processBarChannel))
 	m.sideBarModel.pinnedModel.folder = getFolder()
 	return m, cmd
