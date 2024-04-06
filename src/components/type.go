@@ -231,7 +231,6 @@ type ThemeType struct {
 
 // Configuration settings
 type ConfigType struct {
-	TrashCanPath string
 	Theme string
 	
 	// HotKey setting

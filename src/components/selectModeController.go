@@ -101,7 +101,7 @@ func DeleteMultipleItem(m model) model {
 				}
 			}
 
-			err := MoveFile(filePath, Config.TrashCanPath+"/"+path.Base(filePath))
+			err := MoveFile(filePath, SuperFileMainDir+trashFolder+"/"+path.Base(filePath))
 
 			if err != nil {
 				p.state = failure

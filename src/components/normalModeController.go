@@ -76,7 +76,7 @@ func DeleteSingleItem(m model) model {
 		processNewState: newProcess,
 	}
 
-	err := MoveFile(panel.element[panel.cursor].location, Config.TrashCanPath+"/"+panel.element[panel.cursor].name)
+	err := MoveFile(panel.element[panel.cursor].location, SuperFileMainDir+trashFolder+"/"+panel.element[panel.cursor].name)
 	if err != nil {
 		p := m.processBarModel.process[id]
 		p.state = failure

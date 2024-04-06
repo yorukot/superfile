@@ -4,38 +4,46 @@ import (
 	"archive/zip"
 	"encoding/json"
 	"fmt"
+	"github.com/MHNightCat/superfile/components"
+	tea "github.com/charmbracelet/bubbletea"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"os/user"
 	"path/filepath"
+	"strings"
 	"time"
-
-	"github.com/MHNightCat/superfile/components"
-	tea "github.com/charmbracelet/bubbletea"
 )
 
 var HomeDir = getHomeDir()
+var SuperFileMainDir = HomeDir + "/.superfile"
 
 const (
-	currentVersion      = "v0.1.0-beta"
-	latestVersionURL    = "https://api.github.com/repos/MHNightCat/superfile/releases/latest"
-	latestVersionGithub = "github.com//MHNightCat/superfile/releases/latest"
-	themeZip           = "https://github.com/MHNightCat/superfile/raw/main/theme.zip"
+	currentVersion      string = "v1.0.0"
+	latestVersionURL    string = "https://api.github.com/repos/MHNightCat/superfile/releases/latest"
+	latestVersionGithub string = "github.com//MHNightCat/superfile/releases/latest"
+	themeZip            string = "https://github.com/MHNightCat/superfile/raw/main/theme.zip"
 )
 
 const (
-	lastCheckVersion    = "/data/lastCheckVersion"
-	config              = "/config/config.json"
-	pinned	   			= "/config/pinned.json"
-	data                = "/data"
-	theme               = "/theme"
-	trash               = "/trash"
+	configFolder     string = "/config"
+	themeFolder      string = "/theme"
+	trashFolder      string = "/trash"
+	dataFolder       string = "/data"
+	lastCheckVersion string = "/data/lastCheckVersion"
+	pinnedFile       string = "/data/pinned.json"
+	configFile       string = "/config/config.json"
+	themeZipName     string = "/theme.zip"
+	logFile          string = "/superfile.log"
 )
+
+type GitHubRelease struct {
+	TagName string `json:"tag_name"`
+}
 
 func main() {
-
+	InitConfigFile()
 	p := tea.NewProgram(components.InitialModel(), tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Alas, there's been an error: %v", err)
@@ -52,8 +60,100 @@ func getHomeDir() string {
 	return user.HomeDir
 }
 
+func InitConfigFile() {
+	var err error
+
+	// create main folder
+	err = CreateFolderIfNotExist(SuperFileMainDir)
+	if err != nil {
+		log.Fatalln("Can't Create Superfile main config folder:", SuperFileMainDir, err)
+	}
+	// create trash can folder
+	err = CreateFolderIfNotExist(SuperFileMainDir + trashFolder)
+	if err != nil {
+		log.Fatalln("Can't Create Superfile trash folder:", SuperFileMainDir+trashFolder, err)
+	}
+	// create data folder
+	err = CreateFolderIfNotExist(SuperFileMainDir + dataFolder)
+	if err != nil {
+		log.Fatalln("Can't Create Superfile data folder:", SuperFileMainDir+dataFolder, err)
+	}
+	// create config folder
+	err = CreateFolderIfNotExist(SuperFileMainDir + configFolder)
+	if err != nil {
+		log.Fatalln("Can't Create Superfile data folder:", SuperFileMainDir+configFolder, err)
+	}
+	// create pinned.json file
+	err = CreateFileIfNotExist(SuperFileMainDir + pinnedFile)
+	if err != nil {
+		log.Fatalln("Can't Create Superfile pinned file:", SuperFileMainDir+pinnedFile, err)
+	}
+	// create superfile.log file
+	err = CreateFileIfNotExist(SuperFileMainDir + logFile)
+	if err != nil {
+		log.Fatalln("Can't Create Superfile log file:", SuperFileMainDir+logFile, err)
+	}
+	// write config.json file
+	if _, err := os.Stat(SuperFileMainDir + configFile); os.IsNotExist(err) {
+		configJsonByte := []byte(configJsonString)
+		err = os.WriteFile(SuperFileMainDir+configFile, configJsonByte, 0644)
+		if err != nil {
+			log.Fatalln("Can't Create Or Write Download Superfile config file:", SuperFileMainDir+configFile, err)
+		}
+	}
+	if err != nil {
+		log.Fatalln("Can't Create Or Write Download Superfile config file:", SuperFileMainDir+configFile, err)
+	}
+	// download theme and unzip it
+	if _, err := os.Stat(SuperFileMainDir + themeFolder); os.IsNotExist(err) {
+		fmt.Println("First initialize the superfile configuration.\nNeed to download the theme.\nPlease make sure you have internet access.\nAnd this may take some time(<10s).")
+		err := DownloadFile(SuperFileMainDir+themeZipName, themeZip)
+		if err != nil {
+			return
+		}
+
+		err = Unzip(SuperFileMainDir+themeZipName, SuperFileMainDir)
+		if err != nil {
+			return
+		}
+
+		err = os.Remove(SuperFileMainDir + themeZipName)
+		if err != nil {
+			return
+		}
+
+	}
+
+	if err != nil {
+		log.Fatalln("Can't Auto Download Superfile theme folder:", SuperFileMainDir+themeFolder, err)
+		return
+	}
+
+}
+
+func CreateFolderIfNotExist(dir string) error {
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		err := os.MkdirAll(dir, 0755)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func CreateFileIfNotExist(filePath string) error {
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		file, err := os.Create(filePath)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+	}
+	return nil
+}
+
 func CheckForUpdates() {
-	lastTime, err := readFromFile(dir)
+	lastTime, err := ReadFromFile(SuperFileMainDir + lastCheckVersion)
 	if err != nil && !os.IsNotExist(err) {
 		fmt.Println("Error reading from file:", err)
 		return
@@ -79,11 +179,13 @@ func CheckForUpdates() {
 			return
 		}
 		if release.TagName != currentVersion {
-			fmt.Printf("A new version %s is available.\nPlease update.\n┏\n\n        %s\n\n                                                               ┛\n", release.TagName, latestVersionGithub)
+			fmt.Printf("A new version %s is available.\n", release.TagName)
+			fmt.Printf("Please update.\n┏\n\n        %s\n\n", latestVersionGithub)
+			fmt.Printf("                                                               ┛\n")
 		}
 
 		timeStr := currentTime.Format(time.RFC3339)
-		err = writeToFile(dir, timeStr)
+		err = WriteToFile(SuperFileMainDir+lastCheckVersion, timeStr)
 		if err != nil {
 			fmt.Println("Error writing to file:", err)
 			return
@@ -91,7 +193,7 @@ func CheckForUpdates() {
 	}
 }
 
-func readFromFile(filename string) (time.Time, error) {
+func ReadFromFile(filename string) (time.Time, error) {
 	content, err := os.ReadFile(filename)
 	if err != nil {
 		return time.Time{}, err
@@ -107,7 +209,7 @@ func readFromFile(filename string) (time.Time, error) {
 	return lastTime, nil
 }
 
-func writeToFile(filename, content string) error {
+func WriteToFile(filename, content string) error {
 	file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
 		return err
@@ -122,18 +224,14 @@ func writeToFile(filename, content string) error {
 	return nil
 }
 
-type GitHubRelease struct {
-	TagName string `json:"tag_name"`
-}
-
-func downloadFile(url string, destination string) error {
+func DownloadFile(filepath string, url string) error {
 	resp, err := http.Get(url)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
 
-	out, err := os.Create(destination)
+	out, err := os.Create(filepath)
 	if err != nil {
 		return err
 	}
@@ -143,7 +241,7 @@ func downloadFile(url string, destination string) error {
 	return err
 }
 
-func unzip(src, dest string) error {
+func Unzip(src, dest string) error {
 	r, err := zip.OpenReader(src)
 	if err != nil {
 		return err
@@ -151,18 +249,21 @@ func unzip(src, dest string) error {
 	defer r.Close()
 
 	for _, f := range r.File {
-		rc, err := f.Open()
-		if err != nil {
-			return err
-		}
-		defer rc.Close()
-
 		path := filepath.Join(dest, f.Name)
+		if !strings.HasPrefix(path, filepath.Clean(dest)+string(os.PathSeparator)) {
+			return fmt.Errorf("%s: illegal file path", path)
+		}
 
 		if f.FileInfo().IsDir() {
 			os.MkdirAll(path, f.Mode())
 		} else {
-			os.MkdirAll(filepath.Dir(path), os.ModePerm)
+			rc, err := f.Open()
+			if err != nil {
+				return err
+			}
+			defer rc.Close()
+
+			os.MkdirAll(filepath.Dir(path), f.Mode())
 			f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
 			if err != nil {
 				return err
@@ -175,6 +276,62 @@ func unzip(src, dest string) error {
 			}
 		}
 	}
-
 	return nil
 }
+
+const configJsonString string = `{   
+    "theme": "gruvbox",
+    "trashCanPath": "./.superfile/trash",
+
+    "_COMMIT_HOTKEY": "",
+
+    "_COMMIT_global_hotkey": "Here is global, all global key cant conflicts with other hotkeys",
+    "reload": ["ctrl+r", ""],
+
+    "quit": ["esc", "q"],
+    "listUp": ["up", "k"],
+    "listDown": ["down", "j"],
+
+    "nextFilePanel": ["tab", ""],
+    "previousFilePanel": ["shift+left", ""],
+    "closeFilePanel": ["ctrl+w", ""],
+    "createNewFilePanel": ["ctrl+n", ""],
+
+    "changePanelMode": ["v", ""],
+
+    "focusOnProcessBar": ["p", ""],
+    "focusOnSideBar": ["b", ""],
+    "focusOnMetaData": ["m", ""],
+
+    "pasteItem": ["ctrl+v", ""],
+    
+    "filePanelFolderCreate": ["f", ""],
+    "filePanelFileCreate": ["c", ""],
+    "filePanelItemRename": ["r", ""],
+    
+    "pinnedFolder": ["ctrl+p", ""],
+
+    "_COMMIT_popup_modal_hotkey": "These hotkeys do not conflict with any other keys (including global hotkey)",
+    "cancel": ["ctrl+c", "esc"],
+    "confirm": ["enter"], 
+
+    "_COMMIT_normal_mode_hotkey": "Here is normal mode hotkey you can conflicts with other mode (cant conflicts with global hotkey)",
+    "deleteItem": ["d", ""],
+    "selectItem": ["enter", "l"],
+    "parentFolder": ["h", ""],
+    "copySingleItem": ["ctrl+c", ""],
+    "cutSingleItem": ["ctrl+x", ""],
+
+    "_COMMIT_select_mode_hotkey": "Here is select mode hotkey you can conflicts with other mode (cant conflicts with global hotkey)",
+    "filePanelSelectModeItemSingleSelect": ["enter", "l"],
+    "filePanelSelectModeItemSelectDown": ["shift+down", "J"],
+    "filePanelSelectModeItemSelectUp": ["shift+up", "K"],
+    "filePanelSelectModeItemDelete": ["d", ""],
+    "filePanelSelectModeItemCopy": ["ctrl+c", ""],
+    "filePanelSelectModeItemPast": ["ctrl+v", ""],
+    "filePanelSelectModeItemCut": ["ctrl+x", ""],
+    "filePanelSelectAllItem": ["ctrl+a", ""],
+    
+    "_COMMIT_process_bar_hotkey": "Here is process bar panel hotkey you can conflicts with other mode (cant conflicts global hotkey)",
+    "cancelProcess": ""
+}`

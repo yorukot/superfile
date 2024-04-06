@@ -10,39 +10,48 @@ import (
 	"os"
 )
 
+const (
+	configFolder     string = "/config"
+	themeFolder      string = "/theme"
+	trashFolder      string = "/trash"
+	dataFolder       string = "/data"
+	lastCheckVersion string = "/data/lastCheckVersion"
+	pinnedFile       string = "/data/pinned.json"
+	configFile       string = "/config/config.json"
+	themeZipName     string = "/theme.zip"
+	logFile          string = "/superfile.log"
+)
+
 var HomeDir = getHomeDir()
+var SuperFileMainDir = HomeDir + "/.superfile"
 
 var theme ThemeType
 var Config ConfigType
 
 var logOutput *os.File
-
 var et *exiftool.Exiftool
-
-var pinnedDir = "./.superfile/data/pinned.json"
 
 var processBarChannel = make(chan processBarMessage, 1000)
 
 func InitialModel() model {
-	OutPutLog("test")
 	var err error
-	logOutput, err = os.OpenFile("superfile.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	logOutput, err = os.OpenFile(SuperFileMainDir+logFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
-		log.Fatalf("error opening file: %v", err)
+		log.Fatalf("error opening superfile.log file: %v", err)
 	}
 
-	data, err := os.ReadFile("./.superfile/config/config.json")
+	data, err := os.ReadFile(SuperFileMainDir + configFile)
 	if err != nil {
-		log.Fatalf("HotKey file not exist: %v", err)
+		log.Fatalf("config file not exist: %v", err)
 	}
 
 	err = json.Unmarshal(data, &Config)
 
 	if err != nil {
-		log.Fatalf("Error decoding HotKey json(your config  file may be errors): %v", err)
+		log.Fatalf("Error decoding config json(your config  file may be errors): %v", err)
 	}
 
-	data, err = os.ReadFile("./.superfile/theme/" + Config.Theme + ".json")
+	data, err = os.ReadFile(SuperFileMainDir + themeFolder + "/" + Config.Theme + ".json")
 
 	if err != nil {
 		log.Fatalf("Theme file not exist: %v", err)

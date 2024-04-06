@@ -335,7 +335,7 @@ func PasteItem(m model) model {
 	if m.copyItems.cut {
 		for _, item := range m.copyItems.items {
 			filePath := item
-			err := MoveFile(item, Config.TrashCanPath+"/"+path.Base(filePath))
+			err := MoveFile(item, SuperFileMainDir+trashFolder+"/"+path.Base(filePath))
 			if err != nil {
 				OutPutLog("Paste item function move file to trash can error", err)
 			}
@@ -392,7 +392,7 @@ func PinnedFolder(m model) model {
 
 	unPinned := false
 
-	jsonData, err := os.ReadFile(pinnedDir)
+	jsonData, err := os.ReadFile(SuperFileMainDir + pinnedFile)
 	if err != nil {
 		OutPutLog("Pinned folder function read superfile data error", err)
 	}
@@ -417,7 +417,7 @@ func PinnedFolder(m model) model {
 		OutPutLog("Pinned folder function updatedData superfile data error", err)
 	}
 
-	err = os.WriteFile(pinnedDir, updatedData, 0644)
+	err = os.WriteFile(SuperFileMainDir+pinnedFile, updatedData, 0644)
 	if err != nil {
 		OutPutLog("Pinned folder function updatedData superfile data error", err)
 	}

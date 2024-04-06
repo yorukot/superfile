@@ -89,7 +89,7 @@ var icons = map[string]iconStyle{
 	"gb":           {icon: "\ue272", color: "#f1c40f"},
 	"gform":        {icon: "\uf298", color: "#9b59b6"},
 	"git":          {icon: "\ue702", color: "#e67e22"},
-	"go":           {icon: "", color: "#2ecc71"},
+	"go":           {icon: "", color: "#6ed8e5"},
 	"graphql":      {icon: "\ue662", color: "#e74c3c"},
 	"glp":          {icon: "󰆧", color: "#3498db"},
 	"groovy":       {icon: "\ue775", color: "#2ecc71"},
@@ -424,4 +424,6 @@ var folders = map[string]iconStyle{
 	"folder":                {icon: "", color: "NONE"},         // Generic folder - Dark yellowish
 	"hidden":                {icon: "\uf023", color: "#75715e"}, // Hidden folder - Dark yellowish
 	"node_modules":          {icon: "\ue5fa", color: "#cb3837"}, // Node modules folder - Red
+
+	".superfile": {icon: "󰚝", color: "#FF6F00"},
 }
