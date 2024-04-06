@@ -279,7 +279,7 @@ func Unzip(src, dest string) error {
 	return nil
 }
 
-const configJsonString string = `{   
+const configJsonString string = `{
     "theme": "gruvbox",
 
     "_COMMIT_HOTKEY": "",
@@ -303,16 +303,16 @@ const configJsonString string = `{
     "focusOnMetaData": ["m", ""],
 
     "pasteItem": ["ctrl+v", ""],
-    
+
     "filePanelFolderCreate": ["f", ""],
     "filePanelFileCreate": ["c", ""],
     "filePanelItemRename": ["r", ""],
-    
+
     "pinnedFolder": ["ctrl+p", ""],
 
     "_COMMIT_popup_modal_hotkey": "These hotkeys do not conflict with any other keys (including global hotkey)",
     "cancel": ["ctrl+c", "esc"],
-    "confirm": ["enter"], 
+    "confirm": ["enter"],
 
     "_COMMIT_normal_mode_hotkey": "Here is normal mode hotkey you can conflicts with other mode (cant conflicts with global hotkey)",
     "deleteItem": ["ctrl+d", ""],
@@ -330,6 +330,6 @@ const configJsonString string = `{
     "filePanelSelectModeItemPast": ["ctrl+v", ""],
     "filePanelSelectModeItemCut": ["ctrl+x", ""],
     "filePanelSelectAllItem": ["ctrl+a", ""],
-    
+
     "_COMMIT_process_bar_hotkey": "Here is process bar panel hotkey you can conflicts with other mode (cant conflicts global hotkey)"
 }`
