@@ -286,33 +286,32 @@ const configJsonString string = `{
 
     "_COMMIT_global_hotkey": "Here is global, all global key cant conflicts with other hotkeys",
     "reload": ["ctrl+r", ""],
-
     "quit": ["esc", "q"],
+
     "listUp": ["up", "k"],
     "listDown": ["down", "j"],
 
-    "nextFilePanel": ["tab", ""],
-    "previousFilePanel": ["shift+left", ""],
+    "pinnedFolder": ["ctrl+p", ""],
+
     "closeFilePanel": ["ctrl+w", ""],
     "createNewFilePanel": ["ctrl+n", ""],
 
-    "changePanelMode": ["v", ""],
-
+    "nextFilePanel": ["tab", ""],
+    "previousFilePanel": ["shift+left", ""],
     "focusOnProcessBar": ["p", ""],
     "focusOnSideBar": ["b", ""],
     "focusOnMetaData": ["m", ""],
 
-    "pasteItem": ["ctrl+v", ""],
+    "changePanelMode": ["v", ""],
 
     "filePanelFolderCreate": ["f", ""],
     "filePanelFileCreate": ["c", ""],
     "filePanelItemRename": ["r", ""],
+    "pasteItem": ["ctrl+v", ""],
 
-    "pinnedFolder": ["ctrl+p", ""],
-
-    "_COMMIT_popup_modal_hotkey": "These hotkeys do not conflict with any other keys (including global hotkey)",
+    "_COMMIT_special_hotkey": "These hotkeys do not conflict with any other keys (including global hotkey)",
     "cancel": ["ctrl+c", "esc"],
-    "confirm": ["enter"],
+    "confirm": ["enter", ""],
 
     "_COMMIT_normal_mode_hotkey": "Here is normal mode hotkey you can conflicts with other mode (cant conflicts with global hotkey)",
     "deleteItem": ["ctrl+d", ""],
@@ -327,7 +326,6 @@ const configJsonString string = `{
     "filePanelSelectModeItemSelectUp": ["shift+up", "K"],
     "filePanelSelectModeItemDelete": ["ctrl+d", "delete"],
     "filePanelSelectModeItemCopy": ["ctrl+c", ""],
-    "filePanelSelectModeItemPast": ["ctrl+v", ""],
     "filePanelSelectModeItemCut": ["ctrl+x", ""],
     "filePanelSelectAllItem": ["ctrl+a", ""],
 
