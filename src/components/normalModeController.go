@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/lithammer/shortuuid"
+	"github.com/rkoesters/xdg/trash"
 )
 
 func EnterPanel(m model) model {
@@ -76,7 +77,11 @@ func DeleteSingleItem(m model) model {
 		processNewState: newProcess,
 	}
 
-	err := MoveFile(panel.element[panel.cursor].location, SuperFileMainDir+trashFolder+"/"+panel.element[panel.cursor].name)
+	err := trash.Trash(panel.element[panel.cursor].location)
+	if err != nil {
+		OutPutLog("Delete single item function move file to trash can error", err)
+	}
+	
 	if err != nil {
 		p := m.processBarModel.process[id]
 		p.state = failure

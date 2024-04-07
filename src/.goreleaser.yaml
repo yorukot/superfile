@@ -1,0 +1,40 @@
+version: 1
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - main: ./main.go
+    id: "superfile"
+    binary: spf
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm
+      - arm64
+      
+nfpms:
+  - maintainer: NightCat <nightcat.dev@proton.me>
+    file_name_template: >-
+      {{ .PackageName }}-{{ .Version }}-{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}-{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}
+    description:  Pretty fancy and modern file manager in terminal .
+    homepage: https://github.com/MHNightCat/superfile
+    bindir: /usr/bin
+    license: MIT
+    formats:
+      - deb
+      - rpm
+      - archlinux 
+
+archives:
+  - format: tar.gz
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}

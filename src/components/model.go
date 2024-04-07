@@ -13,17 +13,16 @@ import (
 const (
 	configFolder     string = "/config"
 	themeFolder      string = "/theme"
-	trashFolder      string = "/trash"
 	dataFolder       string = "/data"
 	lastCheckVersion string = "/data/lastCheckVersion"
 	pinnedFile       string = "/data/pinned.json"
+	logFile          string = "/data/superfile.log"
 	configFile       string = "/config/config.json"
 	themeZipName     string = "/theme.zip"
-	logFile          string = "/superfile.log"
 )
 
 var HomeDir = getHomeDir()
-var SuperFileMainDir = HomeDir + "/.superfile"
+var SuperFileMainDir = HomeDir + "/.config/superfile"
 
 var theme ThemeType
 var Config ConfigType

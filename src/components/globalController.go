@@ -10,6 +10,7 @@ import (
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/lithammer/shortuuid"
+	"github.com/rkoesters/xdg/trash"
 )
 
 /* CURSOR CONTROLLER START */
@@ -334,8 +335,7 @@ func PasteItem(m model) model {
 	}
 	if m.copyItems.cut {
 		for _, item := range m.copyItems.items {
-			filePath := item
-			err := MoveFile(item, SuperFileMainDir+trashFolder+"/"+path.Base(filePath))
+			err := trash.Trash(item)
 			if err != nil {
 				OutPutLog("Paste item function move file to trash can error", err)
 			}

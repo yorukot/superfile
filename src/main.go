@@ -18,7 +18,7 @@ import (
 )
 
 var HomeDir = getHomeDir()
-var SuperFileMainDir = HomeDir + "/.superfile"
+var SuperFileMainDir = HomeDir + "/.config/superfile"
 
 const (
 	currentVersion      string = "v1.0.1"
@@ -84,11 +84,6 @@ func InitConfigFile() {
 	err = CreateFolderIfNotExist(SuperFileMainDir)
 	if err != nil {
 		log.Fatalln("Can't Create Superfile main config folder:", SuperFileMainDir, err)
-	}
-	// create trash can folder
-	err = CreateFolderIfNotExist(SuperFileMainDir + trashFolder)
-	if err != nil {
-		log.Fatalln("Can't Create Superfile trash folder:", SuperFileMainDir+trashFolder, err)
 	}
 	// create data folder
 	err = CreateFolderIfNotExist(SuperFileMainDir + dataFolder)

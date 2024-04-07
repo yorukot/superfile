@@ -2,12 +2,11 @@ package components
 
 import (
 	"os"
-	"path"
 	"path/filepath"
-
 	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/lithammer/shortuuid"
+	"github.com/rkoesters/xdg/trash"
 )
 
 func SingleItemSelect(m model) model {
@@ -100,8 +99,10 @@ func DeleteMultipleItem(m model) model {
 					processNewState: p,
 				}
 			}
-
-			err := MoveFile(filePath, SuperFileMainDir+trashFolder+"/"+path.Base(filePath))
+			err := trash.Trash(filePath)
+			if err != nil {
+				OutPutLog("Delete single item function move file to trash can error", err)
+			}
 
 			if err != nil {
 				p.state = failure
