@@ -49,7 +49,7 @@
 > I am still try to make more install method! Like `HomeBrew` or `snap`
 
 > [!IMPORTANT]
-> Befor you install `superfile` please make sure you already install [`exiftool`](#exiftool)
+> Befor you install `superfile` please make sure you already install [`exiftool`](#exiftool) <br/>
 > After install please go to make sure your pc have [`Nerd font`](#font)
 ### Homebrew
 
