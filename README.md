@@ -50,7 +50,7 @@
 
 > [!IMPORTANT]
 > Befor you install `superfile` please make sure you already install [`exiftool`](#exiftool)
-
+> After install please go to make sure your pc have [`Nerd font`](#font)
 ### Homebrew
 
 Download [this homebrew file](https://github.com/MHNightCat/superfile/blob/main/superfile.rb)
@@ -61,15 +61,9 @@ And type
 brew install ~/Download/superfile.rb
 ```
 
-> [!IMPORTANT]
-> After install you still need make sure you install Nerd font [font](#font)
-
 ### Linux
 
 You can go to [latest release](https://github.com/MHNightCat/superfile/releases/latest) and download binary file
-
-> [!IMPORTANT]
-> cd to download and move binary to bin after that please install [font](#font)
 
 ```bash
 cd ~/Download
