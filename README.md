@@ -15,7 +15,8 @@
 ## Content
 
 - [Features](#features)
-- [Download](#download)
+- [Install](#download)
+  - [Font](#font)
 - [Support system](#support-system)
 - [Themes](#themes)
   - [Use an existing theme](#use-an-existing-theme)
@@ -36,7 +37,7 @@
 - Easy to use 
 - Trash can
 
-## Download
+## Install
 
 > I am still try to make more install method! Like `HomeBrew` or `snap`
 
@@ -45,8 +46,16 @@ You can go to [latest release](https://github.com/MHNightCat/superfile/releases/
 cd to download and move binary to bin
 ```bash
 cd ~/Download
+chmod +x ./spf
 sudo mv ./spf /bin/
 ```
+
+### Font
+
+You **MUST** install [nerd font](https://www.nerdfonts.com/font-downloads)
+
+If after install it still not working
+Please check your terminal preference setting
 
 ## Support system
 
