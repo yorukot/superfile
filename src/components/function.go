@@ -226,7 +226,9 @@ func RenameIfDuplicate(destination string) (string, error) {
 
 func MoveFile(source string, destination string) error {
 	destination, err := RenameIfDuplicate(destination)
-
+	if err != nil {
+		OutPutLog("Move file function error", err)
+	}
 	err = os.Rename(source, destination)
 	if err != nil {
 		OutPutLog("Move file function error", err)

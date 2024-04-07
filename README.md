@@ -230,6 +230,8 @@ You can go to [here](https://github.com/MHNightCat/superfile/discussions/new?cat
 **I hope i can complete all this todo list haha**
 
 - [x] Auto init config file
+- [ ] Open file with enter key
+- [ ] Open terminal in the focused file panel location
 - [ ] Compress and decompress files
 - [ ] Can cancel the progress of the process bar
 - [ ] Undo function
