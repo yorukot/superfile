@@ -16,6 +16,7 @@
 
 - [Features](#features)
 - [Installation](#install)
+  - [Homebrew](#homebrew)
   - [Linux](#linux)
   - [Font](#font)
 - [Build](#build)
