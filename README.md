@@ -58,17 +58,6 @@ chmod +x ./spf
 sudo mv ./spf /bin/
 ```
 
-#### MacOs
-
-Clone whole repo and run `build.sh`
-```bash
-git clone https://github.com/MHNightCat/superfile
-cd ./superfile
-./build.sh
-```
-
-After that please install [font](#font)
-
 ### Font
 
 > [!WARNING]
@@ -91,21 +80,21 @@ git clone https://github.com/MHNightCat/superfile.git
 ```
 
 Enter the directory:
-```
+```bash
 cd superfile
 ```
 
-Run the build.sh file:
-```
+Run the `build.sh` file:
+```bash
 sh build.sh
 ```
 
 Move the binary file to /bin (on Linux):
-```
+```bash
 mv ./bin/spf /bin
 ```
 or on OSX
-```
+```bash
 mv ./bin/spf /usr/local/bin
 ```
 
