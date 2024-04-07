@@ -250,6 +250,7 @@ You can go to [here](https://github.com/MHNightCat/superfile/discussions/new?cat
 
 - [x] Auto init config file
 - [ ] File panel search / filter
+- [ ] Add help bar down below bottom bar
 - [ ] Open file with enter key
 - [ ] Open terminal in the focused file panel location
 - [ ] Compress and decompress files
