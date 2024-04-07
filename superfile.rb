@@ -15,4 +15,3 @@ class Superfile < Formula
     assert_match("superfile version v1.0.0", output)
   end
 end
-  
