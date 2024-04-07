@@ -21,7 +21,7 @@ var HomeDir = getHomeDir()
 var SuperFileMainDir = HomeDir + "/.superfile"
 
 const (
-	currentVersion      string = "v1.0.0"
+	currentVersion      string = "v1.0.1"
 	latestVersionURL    string = "https://api.github.com/repos/MHNightCat/superfile/releases/latest"
 	latestVersionGithub string = "github.com/MHNightCat/superfile/releases/latest"
 	themeZip            string = "https://github.com/MHNightCat/superfile/raw/main/theme.zip"

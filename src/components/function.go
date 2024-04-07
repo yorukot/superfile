@@ -361,8 +361,9 @@ func returnMetaData(m model) model {
 	filePath := panel.element[panel.cursor].location
 
 	fileInfo, err := os.Stat(filePath)
-	if err != nil {
+	if os.IsNotExist(err) {
 		OutPutLog("Return meta data function get file state error", err)
+		return m
 	}
 	if fileInfo.IsDir() {
 		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"FolderName", fileInfo.Name()})

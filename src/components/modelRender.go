@@ -171,7 +171,7 @@ func ProcessBarRender(m model) string {
 		processRender += "\n   No any process"
 	}
 	courseNumber := 0
-	if m.processBarModel.cursor == 0 {
+	if len(m.processBarModel.processList) == 0 {
 		courseNumber = 0
 	} else {
 		courseNumber = m.processBarModel.cursor + 1

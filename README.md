@@ -16,6 +16,7 @@
 
 - [Features](#features)
 - [Install](#install)
+  - [Linux](#linux)
   - [Font](#font)
 - [Build](#build)
 - [Support system](#support-system)
@@ -46,6 +47,8 @@
 
 > I am still try to make more install method! Like `HomeBrew` or `snap`
 
+#### Linux
+
 You can go to [latest release](https://github.com/MHNightCat/superfile/releases/latest) and download binary file
 
 cd to download and move binary to bin after that please install [font](#font)
@@ -54,6 +57,17 @@ cd ~/Download
 chmod +x ./spf
 sudo mv ./spf /bin/
 ```
+
+#### MacOs
+
+Clone whole repo and run `build.sh`
+```bash
+git clone https://github.com/MHNightCat/superfile
+cd ./superfile
+./build.sh
+```
+
+After that please install [font](#font)
 
 ### Font
 
