@@ -14,7 +14,7 @@ All notable changes to this project will be documented in this file. Dates are d
 #### Bug fix
 
 - Fix processes bar cursor index display error [`f6eb9d8`](https://github.com/MHNightCat/superfile/commit/f6eb9d879f9f7ef31859e3f84c8792e2f0fc543a)
-- Fix [Crash when selecting a broken symlink](https://github.com/MHNightCat/superfile/issues/9) [``]()
+- Fix [Crash when selecting a broken symlink](https://github.com/MHNightCat/superfile/issues/9) [`e89722b`](https://github.com/MHNightCat/superfile/commit/e89722b3717cc669c2e14bb310d1b96c1727b63f)
 
 # [**v1.0.0**](https://github.com/MHNightCat/superfile/releases/tag/v1.0.0)
 
