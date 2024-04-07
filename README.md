@@ -36,6 +36,7 @@
 - Easy to use 
 - Trash can
 - Metadata detil
+- Copy file to the clipboard
 
 ## Install
 
