@@ -17,6 +17,7 @@
 - [Features](#features)
 - [Install](#install)
   - [Font](#font)
+- [Build](#build)
 - [Support system](#support-system)
 - [Themes](#themes)
   - [Use an existing theme](#use-an-existing-theme)
@@ -64,10 +65,40 @@ sudo mv ./spf /bin/
 If after install it still not working
 Please check your terminal preference setting
 
+## Build
+
+You can build the source code by yourself through the following steps:
+
+Firstly and foremost, Ensure that you have [golang](https://go.dev/) installed and running on your system. [Install golang](https://go.dev/doc/install)
+
+Then clone this repo using the following command:
+```
+git clone https://github.com/MHNightCat/superfile.git
+```
+
+Enter the directory:
+```
+cd superfile
+```
+
+Run the build.sh file:
+```
+sh build.sh
+```
+
+Move the binary file to /bin (on Linux):
+```
+mv ./bin/spf /bin
+```
+or on OSX
+```
+mv ./bin/spf /usr/local/bin
+```
+
 ## Support system
 
 - [X] Linux  
-- [X] Macos - Not tested, but should work
+- [X] MacOS
 - [ ] Windows - Not support
 
 ## Themes
