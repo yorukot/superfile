@@ -345,7 +345,7 @@ func contains(s []string, str string) bool {
 	return false
 }
 
-func returnMetaData(m model) model {
+func ReturnMetaData(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	if len(panel.element) == 0 {
 		return m
@@ -361,9 +361,8 @@ func returnMetaData(m model) model {
 	filePath := panel.element[panel.cursor].location
 
 	fileInfo, err := os.Stat(filePath)
-	if os.IsNotExist(err) {
+	if err != nil {
 		OutPutLog("Return meta data function get file state error", err)
-		return m
 	}
 	if fileInfo.IsDir() {
 		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"FolderName", fileInfo.Name()})

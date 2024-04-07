@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file. Dates are d
 
 #### Update
 #### Bug fix
-- Fix processes bar cursor index display error[``]()
+- Fix processes bar cursor index display error[`f6eb9d8`](https://github.com/MHNightCat/superfile/commit/f6eb9d879f9f7ef31859e3f84c8792e2f0fc543a)
 
 # [**v1.0.0**](https://github.com/MHNightCat/superfile/releases/tag/v1.0.0)
 

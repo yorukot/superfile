@@ -164,7 +164,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m = ControllerMetaDataListUp(m)
 				} else if m.focusPanel == nonePanelFocus {
 					m = ControllerFilePanelListUp(m)
-					m = returnMetaData(m)
+					m = ReturnMetaData(m)
 				}
 			// down list
 			case Config.ListDown[0], Config.ListDown[1]:
@@ -176,7 +176,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m = ControllerMetaDataListDown(m)
 				} else if m.focusPanel == nonePanelFocus {
 					m = ControllerFilePanelListDown(m)
-					m = returnMetaData(m)
+					m = ReturnMetaData(m)
 				}
 			/* LIST CONTROLLER END */
 			case Config.ChangePanelMode[0], Config.ChangePanelMode[1]:
@@ -202,7 +202,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m = FocusOnProcessBar(m)
 			case Config.FocusOnMetaData[0], Config.FocusOnMetaData[1]:
 				m = FocusOnMetaData(m)
-				m = returnMetaData(m)
+				m = ReturnMetaData(m)
 			case Config.PasteItem[0], Config.PasteItem[1]:
 				go func() {
 					m = PasteItem(m)
@@ -273,7 +273,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	if m.fileModel.filePanels[m.filePanelFocusIndex].cursor < 0 {
-		
+		m.fileModel.filePanels[m.filePanelFocusIndex].cursor = 0
 	}
 
 	cmd = tea.Batch(cmd, listenForProcessBarMessage(processBarChannel))

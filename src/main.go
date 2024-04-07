@@ -4,7 +4,7 @@ import (
 	"archive/zip"
 	"encoding/json"
 	"fmt"
-	"github.com/MHNightCat/superfile/components"
+	components "github.com/MHNightCat/superfile/components"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/urfave/cli/v2"
 	"io"
@@ -45,10 +45,10 @@ type GitHubRelease struct {
 
 func main() {
 	app := &cli.App{
-		Name:    "superfile",
-		Version: currentVersion,
+		Name:        "superfile",
+		Version:     currentVersion,
 		Description: "A Modern file manager with golang",
-		Flags:   []cli.Flag{},
+		Flags:       []cli.Flag{},
 		Action: func(c *cli.Context) error {
 			InitConfigFile()
 			p := tea.NewProgram(components.InitialModel(), tea.WithAltScreen())
