@@ -35,6 +35,7 @@
 - Vim's selection mode
 - Easy to use 
 - Trash can
+- Metadata detil
 
 ## Install
 
