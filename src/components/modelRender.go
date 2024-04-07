@@ -168,7 +168,7 @@ func ProcessBarRender(m model) string {
 	}
 
 	if len(processes) == 0 {
-		processRender += "\n   No any process in clipboard"
+		processRender += "\n   No any process"
 	}
 	courseNumber := 0
 	if m.processBarModel.cursor == 0 {
