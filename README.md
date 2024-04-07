@@ -50,7 +50,7 @@
 > [!IMPORTANT]
 > Befor you install `superfile` please make sure you already install [`exiftool`](#exiftool)
 
-#### Linux
+### Linux
 
 You can go to [latest release](https://github.com/MHNightCat/superfile/releases/latest) and download binary file
 
@@ -62,7 +62,7 @@ chmod +x ./spf
 sudo mv ./spf /bin/
 ```
 
-#### Exiftool
+### Exiftool
 
 [`exiftool`](https://github.com/exiftool/exiftool) is a tool used to obtain file metadata. If it is not installed, it will cause errors.
 
