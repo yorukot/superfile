@@ -81,7 +81,7 @@ func DeleteSingleItem(m model) model {
 	if err != nil {
 		OutPutLog("Delete single item function move file to trash can error", err)
 	}
-	
+
 	if err != nil {
 		p := m.processBarModel.process[id]
 		p.state = failure
@@ -115,6 +115,10 @@ func CopySingleItem(m model) model {
 	}
 	m.copyItems.items = append(m.copyItems.items, panel.element[panel.cursor].location)
 	fileInfo, err := os.Stat(panel.element[panel.cursor].location)
+	if os.IsNotExist(err) {
+		m.copyItems.items = m.copyItems.items[:0]
+		return m
+	}
 	if err != nil {
 		OutPutLog("Copy single item get file state error", panel.element[panel.cursor].location, err)
 	}
@@ -136,15 +140,31 @@ func CopySingleItem(m model) model {
 
 func CutSingleItem(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	m.copyItems.cut = true
 	m.copyItems.items = m.copyItems.items[:0]
 	if len(panel.element) == 0 {
 		return m
 	}
 	m.copyItems.items = append(m.copyItems.items, panel.element[panel.cursor].location)
-	m.copyItems.cut = true
-	m.copyItems.originalPanel = originalPanel{
-		index:    m.filePanelFocusIndex,
-		location: panel.location,
+	fileInfo, err := os.Stat(panel.element[panel.cursor].location)
+	if os.IsNotExist(err) {
+		m.copyItems.items = m.copyItems.items[:0]
+		return m
+	}
+	if err != nil {
+		OutPutLog("Cut single item get file state error", panel.element[panel.cursor].location, err)
+	}
+
+	if !fileInfo.IsDir() && float64(fileInfo.Size())/(1024*1024) < 250 {
+		fileContent, err := os.ReadFile(panel.element[panel.cursor].location)
+
+		if err != nil {
+			OutPutLog("Cut single item read file error", panel.element[panel.cursor].location, err)
+		}
+
+		if err := clipboard.WriteAll(string(fileContent)); err != nil {
+			OutPutLog("Cut single item write file error", panel.element[panel.cursor].location, err)
+		}
 	}
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m

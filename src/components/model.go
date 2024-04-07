@@ -206,12 +206,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				go func() {
 					m = PasteItem(m)
 				}()
+			case Config.Extract[0], Config.Extract[1]:
+				go func() {
+					m = ExtractFile(m)
+				}()
 			case Config.FilePanelFileCreate[0], Config.FilePanelFileCreate[1]:
 				m = PanelCreateNewFile(m)
 			case Config.FilePanelFolderCreate[0], Config.FilePanelFolderCreate[1]:
 				m = PanelCreateNewFolder(m)
 			case Config.PinnedFolder[0], Config.PinnedFolder[1]:
 				m = PinnedFolder(m)
+
 			default:
 				// check if it's the select mode
 				if m.fileModel.filePanels[m.filePanelFocusIndex].focusType == focus && m.fileModel.filePanels[m.filePanelFocusIndex].panelMode == selectMode {

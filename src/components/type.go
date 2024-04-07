@@ -147,7 +147,7 @@ type sideBarModel struct {
 
 // Model for pinned items in sidebar
 type pinnedModel struct {
-	folder   []folder
+	folder []folder
 }
 
 // Folder within pinned items
@@ -232,32 +232,31 @@ type ThemeType struct {
 // Configuration settings
 type ConfigType struct {
 	Theme string
-	
-	// HotKey setting
-	Reload [2]string
 
-	Quit     [2]string
+	Reload [2]string
+	Quit   [2]string
+
 	ListUp   [2]string
 	ListDown [2]string
 
-	NextFilePanel      [2]string
-	PreviousFilePanel  [2]string
+	PinnedFolder [2]string
+
 	CloseFilePanel     [2]string
 	CreateNewFilePanel [2]string
 
-	ChangePanelMode [2]string
-
-	FocusOnSideBar    [2]string
+	NextFilePanel     [2]string
+	PreviousFilePanel [2]string
 	FocusOnProcessBar [2]string
+	FocusOnSideBar    [2]string
 	FocusOnMetaData   [2]string
 
-	PasteItem [2]string
+	ChangePanelMode [2]string
 
 	FilePanelFolderCreate [2]string
 	FilePanelFileCreate   [2]string
 	FilePanelItemRename   [2]string
-
-	PinnedFolder [2]string
+	PasteItem             [2]string
+	Extract               [2]string
 
 	Cancel  [2]string
 	Confirm [2]string
@@ -273,7 +272,6 @@ type ConfigType struct {
 	FilePanelSelectModeItemSelectUp     [2]string
 	FilePanelSelectModeItemDelete       [2]string
 	FilePanelSelectModeItemCopy         [2]string
-	FilePanelSelectModeItemPast         [2]string
 	FilePanelSelectModeItemCut          [2]string
 	FilePanelSelectAllItem              [2]string
 }

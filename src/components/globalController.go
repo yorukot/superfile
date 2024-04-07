@@ -349,6 +349,13 @@ func PasteItem(m model) model {
 	return m
 }
 
+func ExtractFile(m model) model {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+
+	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+	return m
+}
+
 func PanelCreateNewFile(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	ti := textinput.New()

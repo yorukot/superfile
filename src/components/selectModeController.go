@@ -1,12 +1,12 @@
 package components
 
 import (
-	"os"
-	"path/filepath"
 	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/lithammer/shortuuid"
 	"github.com/rkoesters/xdg/trash"
+	"os"
+	"path/filepath"
 )
 
 func SingleItemSelect(m model) model {
@@ -146,6 +146,9 @@ func CopyMultipleItem(m model) model {
 	}
 	m.copyItems.items = panel.selected
 	fileInfo, err := os.Stat(panel.selected[0])
+	if os.IsNotExist(err) {
+		return m
+	}
 	if err != nil {
 		OutPutLog("Copy multiple item function get file state error", panel.selected[0], err)
 	}
@@ -167,15 +170,30 @@ func CopyMultipleItem(m model) model {
 
 func CutMultipleItem(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	m.copyItems.cut = true
 	m.copyItems.items = m.copyItems.items[:0]
 	if len(panel.selected) == 0 {
 		return m
 	}
 	m.copyItems.items = panel.selected
-	m.copyItems.cut = true
-	m.copyItems.originalPanel = originalPanel{
-		index:    m.filePanelFocusIndex,
-		location: panel.location,
+	fileInfo, err := os.Stat(panel.selected[0])
+	if os.IsNotExist(err) {
+		return m
+	}
+	if err != nil {
+		OutPutLog("Copy multiple item function get file state error", panel.selected[0], err)
+	}
+
+	if !fileInfo.IsDir() && float64(fileInfo.Size())/(1024*1024) < 250 {
+		fileContent, err := os.ReadFile(panel.selected[0])
+
+		if err != nil {
+			OutPutLog("Copy multiple item function read file error", err)
+		}
+
+		if err := clipboard.WriteAll(string(fileContent)); err != nil {
+			OutPutLog("Copy multiple item function write file to clipboard error", err)
+		}
 	}
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m

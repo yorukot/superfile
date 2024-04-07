@@ -425,5 +425,5 @@ var folders = map[string]iconStyle{
 	"hidden":                {icon: "\uf023", color: "#75715e"}, // Hidden folder - Dark yellowish
 	"node_modules":          {icon: "\ue5fa", color: "#cb3837"}, // Node modules folder - Red
 
-	".superfile": {icon: "󰚝", color: "#FF6F00"},
+	"superfile": {icon: "󰚝", color: "#FF6F00"},
 }
