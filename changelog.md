@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file. Dates are d
 
 #### Update
 
-- Update $HOME/.superfile to $HOME/.config/superfile [`886dbfb`](https://github.com/MHNightCat/superfile/commit/886dbfb276407db36e9fb7369ec31053e7aabcf4)
+- Update `$HOME/.superfile` to `$HOME/.config/superfile` [`886dbfb`](https://github.com/MHNightCat/superfile/commit/886dbfb276407db36e9fb7369ec31053e7aabcf4)
 - Follow [The FreeDesktop.org Trash specification](https://specifications.freedesktop.org/trash-spec/trashspec-1.0.html) to update the trash bin path [`886dbfb`](https://github.com/MHNightCat/superfile/commit/886dbfb276407db36e9fb7369ec31053e7aabcf4)
 
 #### Bug fix
