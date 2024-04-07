@@ -364,7 +364,7 @@ func ReturnMetaData(m model) model {
 
 	fileInfo, err := os.Stat(filePath)
 	if os.IsNotExist(err) {
-		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"Link file is broken!(you cant only delete this file)", ""})
+		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"Link file is broken!(you can only delete this file)", ""})
 		return m
 	}
 	if err != nil {
