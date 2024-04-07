@@ -244,22 +244,27 @@ and create a pull request!
 If you really want to share your theme but you don't know how to do it
 You can go to [here](https://github.com/MHNightCat/superfile/discussions/new?category=theme) create a discussion and i will help you(if i have time)
 
-## Todo list
+## Todo list 
 
 **I hope i can complete all this todo list haha**
 
+#### 1.1
 - [x] Auto init config file
 - [x] Open terminal in the focused file panel location
 - [x] Open file with enter key
-- [ ] Extract files
+- [x] Update hotkey list
 - [ ] File panel search / filter
 - [ ] Add help bar down below bottom bar
+- [ ] Extract files
 - [ ] Compress files
-- [ ] Can cancel the progress of the process bar
 - [ ] Undo function
-- [ ] Auto clear trash can
-- [ ] AES encryption and decryption
 - [ ] Add more theme
+
+#### 1.2
+
+- [ ] AES encryption and decryption
+- [ ] Auto clear trash can
+- [ ] Can cancel the progress of the process bar
 
 ## Star History
 
