@@ -184,8 +184,6 @@ You can go to [here](https://github.com/MHNightCat/superfile/discussions/new?cat
 
 **THANKS FOR All OF YOUR STAR!**
 
-## Star History
-
 <a href="https://star-history.com/#MHNightCat/superfile&Date">
  <picture>
    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=MHNightCat/superfile&type=Date&theme=dark" />
