@@ -47,15 +47,38 @@
 
 > I am still try to make more install method! Like `HomeBrew` or `snap`
 
+> [!IMPORTANT]
+> Befor you install `superfile` please make sure you already install [`exiftool`](#exiftool)
+
 #### Linux
 
 You can go to [latest release](https://github.com/MHNightCat/superfile/releases/latest) and download binary file
 
+> [!]
 cd to download and move binary to bin after that please install [font](#font)
 ```bash
 cd ~/Download
 chmod +x ./spf
 sudo mv ./spf /bin/
+```
+
+#### Exiftool
+
+[`exiftool`](https://github.com/exiftool/exiftool) is a tool used to obtain file metadata. If it is not installed, it will cause errors.
+
+**Install:**
+```bash
+# Homebrew:
+brew install exiftool
+
+# Fedora:
+sudo dnf install perl-Image-ExifTool
+
+# Ubuntu:
+sudo apt install exiftool 
+
+# Archlinux:
+sudo pacman -S perl-image-exiftool 
 ```
 
 ### Font
