@@ -30,12 +30,13 @@
   - [Share your themes](#share-your-themes)
 - [Todo list](#todo-list)
 - [Star History](#star-history)
+
 ## Features
 
 - Fancy gui
 - Fully customizable
 - Vim's selection mode
-- Easy to use 
+- Easy to use
 - Trash can
 - Metadata detil
 - Copy file to the clipboard
@@ -50,12 +51,26 @@
 > [!IMPORTANT]
 > Befor you install `superfile` please make sure you already install [`exiftool`](#exiftool)
 
+### Homebrew
+
+Download [this homebrew file](https://github.com/MHNightCat/superfile/blob/main/superfile.rb)
+
+And type
+
+```bash
+brew install ~/Download/superfile.rb
+```
+
+> [!IMPORTANT]
+> After install you still need make sure you install Nerd font [font](#font)
+
 ### Linux
 
 You can go to [latest release](https://github.com/MHNightCat/superfile/releases/latest) and download binary file
 
-> [!]
-cd to download and move binary to bin after that please install [font](#font)
+> [!IMPORTANT]
+> cd to download and move binary to bin after that please install [font](#font)
+
 ```bash
 cd ~/Download
 chmod +x ./spf
@@ -67,6 +82,7 @@ sudo mv ./spf /bin/
 [`exiftool`](https://github.com/exiftool/exiftool) is a tool used to obtain file metadata. If it is not installed, it will cause errors.
 
 **Install:**
+
 ```bash
 # Homebrew:
 brew install exiftool
@@ -75,10 +91,10 @@ brew install exiftool
 sudo dnf install perl-Image-ExifTool
 
 # Ubuntu:
-sudo apt install exiftool 
+sudo apt install exiftool
 
 # Archlinux:
-sudo pacman -S perl-image-exiftool 
+sudo pacman -S perl-image-exiftool
 ```
 
 ### Font
@@ -98,38 +114,45 @@ You can build the source code by yourself through the following steps:
 Firstly and foremost, Ensure that you have [golang](https://go.dev/) installed and running on your system. [Install golang](https://go.dev/doc/install)
 
 Then clone this repo using the following command:
+
 ```
 git clone https://github.com/MHNightCat/superfile.git
 ```
 
 Enter the directory:
+
 ```bash
 cd superfile
 ```
 
 Run the `build.sh` file:
+
 ```bash
 sh build.sh
 ```
 
 Move the binary file to /bin (on Linux):
+
 ```bash
 mv ./bin/spf /bin
 ```
+
 or on OSX
+
 ```bash
 mv ./bin/spf /usr/local/bin
 ```
 
 ## Support system
 
-- [X] Linux  
-- [X] MacOS
+- [x] Linux
+- [x] MacOS
 - [ ] Windows - Not support
 
 ## Themes
 
 ### Use an existing theme
+
 You can go to [theme list](https://github.com/MHNightCat/superfile/blob/main/THEMELIST.md) to find which is you liked!
 
 > We only have a few themes at the moment, we will be making more over the next time! [Or you can public your own theme](https://github.com/MHNightCat/superfile/pulls)!
@@ -148,11 +171,12 @@ Edit config.json using `Vim`:
 vim ~/.superfile/config/config.json
 ```
 
-change 
+change
 
 ```json
 "theme": "gruvbox",
 ```
+
 to
 
 ```json
@@ -171,6 +195,7 @@ And if you complete your theme you can change
 ```json
 "theme": "gruvbox",
 ```
+
 to
 
 ```json
@@ -208,6 +233,7 @@ The hotkey ranges I wrote in config.json
 [**Click me to learn how to contribute**](https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-a-project)
 
 ### Share your idea
+
 [**I have some idea but i don't know how to contribute**](https://github.com/MHNightCat/superfile/discussions)
 
 > We welcome anyone with any ideas about superfile!!
@@ -223,7 +249,6 @@ and create a pull request!
 
 If you really want to share your theme but you don't know how to do it
 You can go to [here](https://github.com/MHNightCat/superfile/discussions/new?category=theme) create a discussion and i will help you(if i have time)
-
 
 ## Todo list
 
