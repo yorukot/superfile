@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"runtime"
 	"time"
 
 	"github.com/charmbracelet/bubbles/progress"
@@ -428,6 +429,8 @@ func PinnedFolder(m model) model {
 	return m
 }
 
+
+// I can't test all of the os system so if you have any problem or want to add support please create new pull request!
 func OpenTerminal(m model) model {
 
 	currentDir := m.fileModel.filePanels[m.filePanelFocusIndex].location
@@ -442,6 +445,17 @@ func OpenTerminal(m model) model {
 		return m
 	}
 
+	if runtime.GOOS == "darwin" {
+		terminal = "Terminal.app"
+        workDirSet = "--working-directory="
+		cmd := exec.Command(terminal, workDirSet+currentDir)
+		err := cmd.Start()
+		if err != nil {
+			OutPutLog("Error opening"+terminal+":", err)
+		}
+		return m
+    }
+	
 	desktopEnv := os.Getenv("XDG_CURRENT_DESKTOP")
 	switch desktopEnv {
 	case "GNOME":
@@ -484,7 +498,6 @@ func OpenTerminal(m model) model {
 		log.Fatalf("We can't find your default terminal please go to ~/.config/superfile/config/config.json setting your default terminal and terminalWorkDirFlag!")
 	}
 	
-	OutPutLog(currentDir)
 	cmd := exec.Command(terminal, workDirSet+currentDir)
 	err := cmd.Start()
 	if err != nil {

@@ -249,9 +249,9 @@ You can go to [here](https://github.com/MHNightCat/superfile/discussions/new?cat
 **I hope i can complete all this todo list haha**
 
 - [x] Auto init config file
+- [x] Open terminal in the focused file panel location
+- [x] Open file with enter key
 - [ ] Extract files
-- [ ] Open terminal in the focused file panel location
-- [ ] Open file with enter key
 - [ ] File panel search / filter
 - [ ] Add help bar down below bottom bar
 - [ ] Compress files
