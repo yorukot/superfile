@@ -232,12 +232,16 @@ type ThemeType struct {
 // Configuration settings
 type ConfigType struct {
 	Theme string
-
+	Terminal string
+	TerminalWorkDir string
+	
 	Reload [2]string
 	Quit   [2]string
 
 	ListUp   [2]string
 	ListDown [2]string
+
+	OpenTerminal [2]string
 
 	PinnedFolder [2]string
 
@@ -256,7 +260,6 @@ type ConfigType struct {
 	FilePanelFileCreate   [2]string
 	FilePanelItemRename   [2]string
 	PasteItem             [2]string
-	Extract               [2]string
 
 	Cancel  [2]string
 	Confirm [2]string

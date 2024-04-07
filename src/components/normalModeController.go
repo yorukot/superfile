@@ -10,6 +10,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/lithammer/shortuuid"
 	"github.com/rkoesters/xdg/trash"
+	"os/exec"
 )
 
 func EnterPanel(m model) model {
@@ -29,8 +30,14 @@ func EnterPanel(m model) model {
 			panel.cursor = 0
 			panel.render = 0
 		}
+	} else if len(panel.element) > 0 && !panel.element[panel.cursor].folder {
+		cmd := exec.Command("xdg-open", panel.element[panel.cursor].location)
+		_, err := cmd.Output()
+		if err != nil {
+			OutPutLog("err when open file with xdg-open:", err)
+		}
 	}
-
+	
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m
 }

@@ -2,7 +2,9 @@ package components
 
 import (
 	"encoding/json"
+	"log"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"time"
@@ -349,13 +351,6 @@ func PasteItem(m model) model {
 	return m
 }
 
-func ExtractFile(m model) model {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
-	return m
-}
-
 func PanelCreateNewFile(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	ti := textinput.New()
@@ -430,5 +425,71 @@ func PinnedFolder(m model) model {
 	}
 
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+	return m
+}
+
+func OpenTerminal(m model) model {
+
+	currentDir := m.fileModel.filePanels[m.filePanelFocusIndex].location
+	terminal := Config.Terminal
+	workDirSet := Config.TerminalWorkDir
+	if terminal != "" {
+		cmd := exec.Command(terminal, workDirSet+currentDir)
+		err := cmd.Start()
+		if err != nil {
+			OutPutLog("Error opening"+terminal+":", err)
+		}
+		return m
+	}
+
+	desktopEnv := os.Getenv("XDG_CURRENT_DESKTOP")
+	switch desktopEnv {
+	case "GNOME":
+		terminal = "gnome-terminal"
+		workDirSet = "--working-directory="
+	case "KDE":
+		terminal = "konsole"
+		workDirSet = "--workdir="
+	case "XFCE":
+		terminal = "xfce4-terminal"
+		workDirSet = "--working-directory="
+	case "LXDE":
+		terminal = "lxterminal"
+		workDirSet = "--working-directory="
+	case "CINNAMON":
+		terminal = "gnome-terminal"
+		workDirSet = "--working-directory="
+	case "MATE":
+		terminal = "mate-terminal"
+		workDirSet = "--working-directory="
+	case "LXQT":
+		terminal = "qterminal"
+		workDirSet = "--working-directory="
+	case "BUDGIE":
+		terminal = "gnome-terminal"
+		workDirSet = "--working-directory="
+	case "PANTHEON":
+		terminal = "pantheon-terminal"
+		workDirSet = "--working-directory="
+	case "DEEPIN":
+		terminal = "deepin-terminal"
+		workDirSet = "--working-directory="
+	case "ENLIGHTENMENT":
+		terminal = "terminology"
+		workDirSet = "--working-directory="
+	case "UNITY":
+		terminal = "gnome-terminal"
+		workDirSet = "--working-directory="
+	default:
+		log.Fatalf("We can't find your default terminal please go to ~/.config/superfile/config/config.json setting your default terminal and terminalWorkDirFlag!")
+	}
+	
+	OutPutLog(currentDir)
+	cmd := exec.Command(terminal, workDirSet+currentDir)
+	err := cmd.Start()
+	if err != nil {
+		OutPutLog("Error opening"+terminal+":", err)
+	}
+
 	return m
 }

@@ -10,8 +10,9 @@ All notable changes to this project will be documented in this file. Dates are d
 
 - Update `$HOME/.superfile` to `$HOME/.config/superfile` [`886dbfb`](https://github.com/MHNightCat/superfile/commit/886dbfb276407db36e9fb7369ec31053e7aabcf4)
 - Follow [The FreeDesktop.org Trash specification](https://specifications.freedesktop.org/trash-spec/trashspec-1.0.html) to update the trash bin path [`886dbfb`](https://github.com/MHNightCat/superfile/commit/886dbfb276407db36e9fb7369ec31053e7aabcf4)
-- Follow [The FreeDesktop.org Trash specification](https://specifications.freedesktop.org/trash-spec/trashspec-1.0.html) to update the trash bin path [`886dbfb`](https://github.com/MHNightCat/superfile/commit/886dbfb276407db36e9fb7369ec31053e7aabcf4)
 - The user can enter the path, which will be the path of the first file panel [`14620b3`](https://github.com/MHNightCat/superfile/commit/14620b33b09edfce80a95e1f52f7f66b3686a9d0)
+- Make user can open file with default browser text-editor etc [``]()
+- Can open terminal in focused file panel path [``]()
 
 #### Bug fix
 
