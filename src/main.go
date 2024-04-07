@@ -46,19 +46,27 @@ type GitHubRelease struct {
 func main() {
 	app := &cli.App{
 		Name:        "superfile",
-		Version:     currentVersion,
+		Version:     currentVersion, // 假设你有一个变量currentVersion
 		Description: "A Modern file manager with golang",
-		Flags:       []cli.Flag{},
+		ArgsUsage:   "[path]", // 定义命令行参数的使用方式
 		Action: func(c *cli.Context) error {
+			// 获取用户输入的路径，如果没有输入，则默认为当前目录
+			path := ""
+			if c.Args().Present() {
+				path = c.Args().First()
+			}
+
+			// 初始化配置文件
 			InitConfigFile()
-			p := tea.NewProgram(components.InitialModel(), tea.WithAltScreen())
+
+			// 使用获取到的路径初始化你的文件管理器
+			p := tea.NewProgram(components.InitialModel(path), tea.WithAltScreen())
 			if _, err := p.Run(); err != nil {
 				fmt.Printf("Alas, there's been an error: %v", err)
 				os.Exit(1)
 			}
 			CheckForUpdates()
 			return nil
-
 		},
 	}
 

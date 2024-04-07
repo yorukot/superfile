@@ -2,12 +2,14 @@ package components
 
 import (
 	"encoding/json"
+	"log"
+	"os"
+	"path/filepath"
+
 	"github.com/barasher/go-exiftool"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"log"
-	"os"
 )
 
 const (
@@ -32,7 +34,7 @@ var et *exiftool.Exiftool
 
 var processBarChannel = make(chan processBarMessage, 1000)
 
-func InitialModel() model {
+func InitialModel(dir string) model {
 	var err error
 	logOutput, err = os.OpenFile(SuperFileMainDir+logFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
@@ -66,6 +68,13 @@ func InitialModel() model {
 	if err != nil {
 		OutPutLog("Initia model function init exiftool error", err)
 	}
+	firstFilePanelDir := HomeDir
+	if dir != "" {
+		firstFilePanelDir, err = filepath.Abs(dir)
+		if err != nil {
+			firstFilePanelDir = HomeDir
+		}
+	}
 	return model{
 		filePanelFocusIndex: 0,
 		focusPanel:          nonePanelFocus,
@@ -84,7 +93,7 @@ func InitialModel() model {
 				{
 					render:       0,
 					cursor:       0,
-					location:     HomeDir,
+					location:     firstFilePanelDir,
 					panelMode:    browserMode,
 					focusType:    focus,
 					folderRecord: make(map[string]folderRecord),
