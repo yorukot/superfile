@@ -98,7 +98,7 @@ mv ./bin/spf /usr/local/bin
 ## Support system
 
 - [X] Linux  
-- [X] Macos - Not tested, but should work
+- [X] MacOS
 - [ ] Windows - Not support
 
 ## Themes
