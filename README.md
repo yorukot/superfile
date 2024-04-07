@@ -15,13 +15,12 @@
 ## Content
 
 - [Features](#features)
-- [Install](#download)
+- [Install](#install)
   - [Font](#font)
 - [Support system](#support-system)
 - [Themes](#themes)
   - [Use an existing theme](#use-an-existing-theme)
   - [Completely customize your theme](#completely-customize-your-theme)
-- [Download](#download)
 - [Hotkey](#hotkey)
 - [Contribute](#contribute)
   - [Share your idea](#share-your-idea)
@@ -43,7 +42,7 @@
 
 You can go to [latest release](https://github.com/MHNightCat/superfile/releases/latest) and download binary file
 
-cd to download and move binary to bin
+cd to download and move binary to bin after that please install [font](#font)
 ```bash
 cd ~/Download
 chmod +x ./spf
@@ -52,6 +51,8 @@ sudo mv ./spf /bin/
 
 ### Font
 
+You **MUST** install [nerd font](https://www.nerdfonts.com/font-downloads)
+You **MUST** install [nerd font](https://www.nerdfonts.com/font-downloads)
 You **MUST** install [nerd font](https://www.nerdfonts.com/font-downloads)
 
 If after install it still not working
