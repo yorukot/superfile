@@ -16,6 +16,7 @@
 
 - [Features](#features)
 - [Install](#install)
+  - [Homebrew](#homebrew)
   - [Linux](#linux)
   - [Font](#font)
 - [Build](#build)
@@ -41,8 +42,10 @@
 - Metadata detil
 - Copy file to the clipboard
 - Copy and paste file
-- Auto rename file or folder
+- Auto rename file or folder when duplicate
 - Rename files in a modern way
+- Open file with default app
+- Open terminal with current path
 
 ## Install
 
