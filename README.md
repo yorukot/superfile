@@ -37,6 +37,9 @@
 - Trash can
 - Metadata detil
 - Copy file to the clipboard
+- Copy and paste file
+- Auto rename file or folder
+- Rename files in a modern way
 
 ## Install
 
@@ -96,7 +99,7 @@ change
 to
 
 ```json
-"theme": "you like theme name",
+"theme": "theme_name",
 ```
 
 ### Completely customize your theme
@@ -175,6 +178,7 @@ You can go to [here](https://github.com/MHNightCat/superfile/discussions/new?cat
 - [ ] Undo function
 - [ ] Auto clear trash can
 - [ ] AES encryption and decryption
+- [ ] Add more theme
 
 ## Star History
 
