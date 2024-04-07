@@ -55,6 +55,7 @@ sudo mv ./spf /bin/
 > You **MUST** install [Nerd font](https://www.nerdfonts.com/font-downloads)
 
 [Nerd font](https://www.nerdfonts.com/font-downloads)
+
 If after install it still not working
 Please check your terminal preference setting
 
