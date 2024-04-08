@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC(YYYY/MM/DD).
 
-# v1.0.1
+# [**v1.0.1**](https://github.com/MHNightCat/superfile/releases/tag/v1.0.1)
 
 > 2024/04/08
 
