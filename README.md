@@ -57,15 +57,15 @@
 
 ### Homebrew
 
-Download [this homebrew file](https://github.com/MHNightCat/superfile/blob/main/superfile.rb) and enter the following in your terminal:
+If you want to use homebrew please install `go` first!
 
 ```bash
-brew install ~/Download/superfile.rb
+brew tap mhnightcat/superfile https://github.com/MHNightCat/homebrew-superfile.git && brew install superfile
 ```
 
 ### Linux
 
-You can go to the [latest release](https://github.com/MHNightCat/superfile/releases/latest) and download the binary file. Once it is downloaded enter the following in your terminal:
+You can go to the [latest release](https://github.com/MHNightCat/superfile/releases/latest) and download the binary file. Once it is downloaded please excrate the file after that enter the following in your terminal:
 
 ```bash
 cd ~/Download
