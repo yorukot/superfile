@@ -25,9 +25,7 @@
   - [Use an existing theme](#use-an-existing-theme)
   - [Create your own theme](#create-your-own-theme)
 - [Hotkeys](#hotkeys)
-- [Contribute](#contribute)
-  - [Share your idea](#share-your-idea)
-  - [Bug report](#bug-report)
+- [Contributing](#contributing)
 - [Todo list](#todo-list)
 - [Star History](#star-history)
 
@@ -258,21 +256,10 @@ Global hotkeys cannot conflict with other hotkeys (The only exception is the spe
 
 The hotkey ranges are found in `config.json`
 
-## Contribute
+## Contributing
 
-[**Click me to learn how to contribute**](https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-a-project)
-
-> For example, add your custom themes to `/themes` and submit a pull request
-
-### Share your idea
-
-[**I have some ideas but i don't know how to contribute**](https://github.com/MHNightCat/superfile/discussions)
-
-> We welcome anyone with any ideas about superfile!!
-
-### Bug report
-
-[**Submit a bug report here**](https://github.com/MHNightCat/superfile/issues)
+If you want to contribute please follow this contributing guide for this project.
+[**Contributing**](./CONTRIBUTING.md)
 
 ## Todo list
 
