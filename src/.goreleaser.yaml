@@ -18,16 +18,43 @@ builds:
       
 nfpms:
   - maintainer: NightCat <nightcat.dev@proton.me>
+    id: dev
     file_name_template: >-
       {{ .PackageName }}-{{ .Version }}-{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}-{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}
-    description:  Pretty fancy and modern file manager in terminal .
+    description: Pretty fancy and modern file manager in terminal .
     homepage: https://github.com/MHNightCat/superfile
     bindir: /usr/bin
     license: MIT
     formats:
       - deb
+    dependencies:
+      - exiftool
+
+  - maintainer: NightCat <nightcat.dev@proton.me>
+    id: rpm
+    file_name_template: >-
+      {{ .PackageName }}-{{ .Version }}-{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}-{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}
+    description: Pretty fancy and modern file manager in terminal .
+    homepage: https://github.com/MHNightCat/superfile
+    bindir: /usr/bin
+    license: MIT
+    formats:
       - rpm
-      - archlinux 
+    dependencies:
+      - perl-Image-ExifTool
+
+  - maintainer: NightCat <nightcat.dev@proton.me>
+    id: archlinux
+    file_name_template: >-
+      {{ .PackageName }}-{{ .Version}}-{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}-{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}
+    description: Pretty fancy and modern file manager in terminal .
+    homepage: https://github.com/MHNightCat/superfile
+    bindir: /usr/bin
+    license: MIT
+    formats:
+      - archlinux
+    dependencies:
+      - perl-image-exiftool
 
 archives:
   - format: tar.gz
