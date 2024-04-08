@@ -41,8 +41,10 @@
 - Metadata detil
 - Copy file to the clipboard
 - Copy and paste file
-- Auto rename file or folder
+- Auto rename file or folder when duplicate
 - Rename files in a modern way
+- Open file with default app
+- Open terminal with current path
 
 ## Install
 
@@ -235,7 +237,7 @@ The hotkey ranges are found in `config.json`
 
 [**Submit a bug report here**](https://github.com/MHNightCat/superfile/issues)
 
-## Todo list
+## Todo list 
 
 **I will do my best to complete this list haha**
 
@@ -251,6 +253,12 @@ The hotkey ranges are found in `config.json`
 - \[ \] Auto clear trash can
 - \[ \] AES encryption and decryption
 - \[ \] Add more theme
+
+#### 1.2
+
+- [ ] AES encryption and decryption
+- [ ] Auto clear trash can
+- [ ] Can cancel the progress of the process bar
 
 ## Star History
 

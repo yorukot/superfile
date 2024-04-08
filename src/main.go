@@ -298,6 +298,8 @@ func Unzip(src, dest string) error {
 
 const configJsonString string = `{
 	"theme": "gruvbox",
+	"terminal": "",
+	"terminalWorkDirFlag": "",
   
 	"_COMMIT_HOTKEY": "",
   
@@ -307,6 +309,8 @@ const configJsonString string = `{
   
 	"listUp": ["up", "k"],
 	"listDown": ["down", "j"],
+  
+	"openTerminal": ["ctrl+t", ""],
   
 	"pinnedFolder": ["ctrl+p", ""],
   
@@ -325,7 +329,6 @@ const configJsonString string = `{
 	"filePanelFileCreate": ["c", ""],
 	"filePanelItemRename": ["r", ""],
 	"pasteItem": ["ctrl+v", ""],
-	"extract": ["ctrl+u", ""],
   
 	"_COMMIT_special_hotkey": "These hotkeys do not conflict with any other keys (including global hotkey)",
 	"cancel": ["ctrl+c", "esc"],
