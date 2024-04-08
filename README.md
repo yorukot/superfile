@@ -275,6 +275,7 @@ If you want to contribute please follow this contributing guide for this project
 - \[ \] Add help bar down below bottom bar
 - \[ \] Extract files
 - \[ \] Compress files
+- \[ \] Toggle the visibility of hidden folders
 - \[ \] Can cancel the progress of the process bar
 - \[ \] Undo function
 - \[ \] Auto clear trash can
