@@ -10,7 +10,7 @@
 
 | Function                                                   | Key               | Variable name        |
 | ---------------------------------------------------------- | ----------------- | -------------------- |
-| Pinned or Unpinned folder to sidebar and can be auto saved | `ctrl+p`          | `pinnedFolder`       |
+| Pin or Unpin folder to sidebar (can be auto saved) | `ctrl+p`          | `pinnedFolder`       |
 | Create new file panel                                      | `ctrl+n`          | `createNewFilePanel` |
 | Close the focused file panel                               | `ctrl+w`          | `closeFilePanel`     |
 | Focus on the file panel                                    | `tab`             | `nextFilePanel`      |
@@ -23,15 +23,15 @@
 
 | Function                                            | Key                        | Variable name                                                      |
 | --------------------------------------------------- | -------------------------- | ------------------------------------------------------------------ |
-| Change to selection mode or normal mode             | `v`                        | `changePanelMode`                                                  |
+| Change between selection mode or normal mode             | `v`                        | `changePanelMode`                                                  |
 | Up                                                  | `up`, `k`                  | `listUp`                                                           |
 | Down                                                | `down`, `j`                | `listDown`                                                         |
 | Go to folder                                        | `enter`, `l`               | `selectItem`                                                       |
 | Return to parent folder                             | `h`, `backspace`           | `parentFolder`                                                     |
-| Select all item in focused file panel               | `ctrl+a`                   | `filePanelSelectAllItem`(only work on selection mode)              |
-| Select with your course                             | `shift+up`, `K`(shift+k)   | `filePanelSelectModeItemSelectUp`(only work on selection mode)     |
-| Select with your course                             | `shift+left`, `j`(shift+j) | `filePanelSelectModeItemSelectDown`(only work on selection mode)   |
-| Select the item where the current cursor is located | `enter`, `l`               | `filePanelSelectModeItemSingleSelect`(only work on selection mode) |
+| Select all items in focused file panel               | `ctrl+a`                   | `filePanelSelectAllItem`(only works in selection mode)              |
+| Select with your course                             | `shift+up`, `K`(shift+k)   | `filePanelSelectModeItemSelectUp`(only works in selection mode)     |
+| Select with your course                             | `shift+left`, `j`(shift+j) | `filePanelSelectModeItemSelectDown`(only works in selection mode)   |
+| Select the item where the current cursor is located | `enter`, `l`               | `filePanelSelectModeItemSingleSelect`(only works in selection mode) |
 
 ## File operations
 
@@ -40,9 +40,9 @@
 | Create a new folder              | `f`      | `filePanelFolderCreate`                                                       |
 | Create a new file                | `c`      | `filePanelFileCreate`                                                         |
 | Rename file or folder            | `r`      | `filePanelItemRename`                                                         |
-| Delete file or folder or both    | `ctrl+d` | `deleteItem`(normal mode) <br> `filePanelSelectModeItemDelete`(select mode)   |
-| Copy file or folder or both      | `ctrl+c` | `copySingleItem`(normal mode) <br> `filePanelSelectModeItemCopy`(select mode) |
-| Paste all item in your clipboard | `ctrl+v` | `pasteItem`                                                                   |
+| Delete file or folder (or both)    | `ctrl+d` | `deleteItem`(normal mode) <br> `filePanelSelectModeItemDelete`(select mode)   |
+| Copy file or folder (or both)      | `ctrl+c` | `copySingleItem`(normal mode) <br> `filePanelSelectModeItemCopy`(select mode) |
+| Paste all items in your clipboard | `ctrl+v` | `pasteItem`                                                                   |
 
 ## Special
 

@@ -15,20 +15,19 @@
 ## Content
 
 - [Features](#features)
-- [Install](#install)
+- [Installation](#install)
   - [Homebrew](#homebrew)
   - [Linux](#linux)
   - [Font](#font)
 - [Build](#build)
-- [Support system](#support-system)
+- [Supported Systems](#supported-systems)
 - [Themes](#themes)
   - [Use an existing theme](#use-an-existing-theme)
-  - [Completely customize your theme](#completely-customize-your-theme)
-- [Hotkey](#hotkey)
+  - [Create your own theme](#create-your-own-theme)
+- [Hotkeys](#hotkeys)
 - [Contribute](#contribute)
   - [Share your idea](#share-your-idea)
   - [Bug report](#bug-report)
-  - [Share your themes](#share-your-themes)
 - [Todo list](#todo-list)
 - [Star History](#star-history)
 
@@ -49,16 +48,16 @@
 
 ## Install
 
-> I am still try to make more install method! Like `HomeBrew` or `snap`
+> I am still working on different installation methods like `homebrew` and `snap`
 
-> [!IMPORTANT]
-> Befor you install `superfile` please make sure you already install [`exiftool`](#exiftool) <br/>
-> After install please go to make sure your pc have [`Nerd font`](#font)
+**Requirements**
+
+- [`Exiftool`](#exiftool)
+- Any [`Nerd Font`](#font)
+
 ### Homebrew
 
-Download [this homebrew file](https://github.com/MHNightCat/superfile/blob/main/superfile.rb)
-
-And type
+Download [this homebrew file](https://github.com/MHNightCat/superfile/blob/main/superfile.rb) and enter the following in your terminal:
 
 ```bash
 brew install ~/Download/superfile.rb
@@ -66,7 +65,7 @@ brew install ~/Download/superfile.rb
 
 ### Linux
 
-You can go to [latest release](https://github.com/MHNightCat/superfile/releases/latest) and download binary file
+You can go to the [latest release](https://github.com/MHNightCat/superfile/releases/latest) and download the binary file. Once it is downloaded enter the following in your terminal:
 
 ```bash
 cd ~/Download
@@ -78,7 +77,7 @@ sudo mv ./spf /bin/
 
 [`exiftool`](https://github.com/exiftool/exiftool) is a tool used to obtain file metadata. If it is not installed, it will cause errors.
 
-**Install:**
+**Installation:**
 
 ```bash
 # Homebrew:
@@ -96,27 +95,27 @@ sudo pacman -S perl-image-exiftool
 
 ### Font
 
-> [!WARNING]
-> You **MUST** install [Nerd font](https://www.nerdfonts.com/font-downloads)
+> WARNING: This is a reminder that you must use a [Nerd font](https://www.nerdfonts.com/font-downloads)
 
-[Nerd font](https://www.nerdfonts.com/font-downloads)
-
-If after install it still not working
-Please check your terminal preference setting
+Once the font is installed if `superfile` isn't working make sure to update your terminal preferences to use the font.
 
 ## Build
 
-You can build the source code by yourself through the following steps:
+You can build the source code yourself by using these steps:
 
-Firstly and foremost, Ensure that you have [golang](https://go.dev/) installed and running on your system. [Install golang](https://go.dev/doc/install)
+**Requirements**
 
-Then clone this repo using the following command:
+- [golang](https://go.dev/doc/install)
+
+**Build Steps**
+
+Clone this repo using the following command:
 
 ```
 git clone https://github.com/MHNightCat/superfile.git
 ```
 
-Enter the directory:
+Enter the downloaded directory:
 
 ```bash
 cd superfile
@@ -134,27 +133,25 @@ Move the binary file to /bin (on Linux):
 mv ./bin/spf /bin
 ```
 
-or on OSX
+or on OSX:
 
 ```bash
 mv ./bin/spf /usr/local/bin
 ```
 
-## Support system
+## Supported Systems
 
-- [x] Linux
-- [x] MacOS
-- [ ] Windows - Not support
+- \[x\] Linux
+- \[x\] MacOS
+- \[ \] Windows
 
 ## Themes
 
 ### Use an existing theme
 
-You can go to [theme list](https://github.com/MHNightCat/superfile/blob/main/THEMELIST.md) to find which is you liked!
+You can go to [theme list](https://github.com/MHNightCat/superfile/blob/main/THEMELIST.md) to find one you like!
 
-> We only have a few themes at the moment, we will be making more over the next time! [Or you can public your own theme](https://github.com/MHNightCat/superfile/pulls)!
-
-and editor `~/.superfile/config/config.json`
+> We only have a few themes at the moment, but we will be making more over time! You can also [submit a pull request](https://github.com/MHNightCat/superfile/pulls) for your own theme!
 
 Edit config.json using `Nano`:
 
@@ -168,32 +165,31 @@ Edit config.json using `Vim`:
 vim ~/.superfile/config/config.json
 ```
 
-change
+then change:
 
 ```json
 "theme": "gruvbox",
 ```
 
-to
+to:
 
 ```json
 "theme": "theme_name",
 ```
 
-### Completely customize your theme
+### Create your own theme
 
-If you want to customize your own theme, you can go to `~/.superfile/theme/YOUR_THEME_NAME.json`
-and copy the existing themes json to your own theme file
+If you want to customize your own theme, you can go to `~/.superfile/theme/YOUR_THEME_NAME.json` and copy the existing theme's json to your own theme file
 
 Now you can customize your own theme!!
 
-And if you complete your theme you can change
+And if you complete your theme you can change:
 
 ```json
 "theme": "gruvbox",
 ```
 
-to
+to:
 
 ```json
 "theme": "YOUR_THEME_NAME",
@@ -201,11 +197,11 @@ to
 
 [If you are satisfied with your theme, you might as well put it into the default theme list!](#contribute)
 
-## Hotkey
+## Hotkeys
 
-[**Click me to watch the hotkey list**](https://github.com/MHNightCat/superfile/blob/main/HOTKEY.md)
+[**Click me to see the hotkey list**](https://github.com/MHNightCat/superfile/blob/main/HOTKEYS.md)
 
-**You can change the all hotkey in** `~/.superfile/config/config.json`
+**You can change all hotkeys in** `~/.superfile/config/config.json`
 
 Edit config.json using `Nano`:
 
@@ -219,49 +215,44 @@ Edit config.json using `Vim`:
 vim ~/.superfile/config/config.json
 ```
 
-> normal mode mean browser mode
+> "Normal mode" is the default browsing mode
 
-All global hotkeys cannot conflict with other hotkeys(Except special hotkey).
+Global hotkeys cannot conflict with other hotkeys (The only exception is the special hotkey).
 
-The hotkey ranges I wrote in config.json
+The hotkey ranges are found in `config.json`
 
 ## Contribute
 
 [**Click me to learn how to contribute**](https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-a-project)
 
+> For example, add your custom themes to `/themes` and submit a pull request
+
 ### Share your idea
 
-[**I have some idea but i don't know how to contribute**](https://github.com/MHNightCat/superfile/discussions)
+[**I have some ideas but i don't know how to contribute**](https://github.com/MHNightCat/superfile/discussions)
 
 > We welcome anyone with any ideas about superfile!!
 
 ### Bug report
 
-[**Bug report in here~**](https://github.com/MHNightCat/superfile/issues)
-
-### Share your themes
-
-Same as contribution. Just put your own theme into `/themes`
-and create a pull request!
-
-If you really want to share your theme but you don't know how to do it
-You can go to [here](https://github.com/MHNightCat/superfile/discussions/new?category=theme) create a discussion and i will help you(if i have time)
+[**Submit a bug report here**](https://github.com/MHNightCat/superfile/issues)
 
 ## Todo list 
 
-**I hope i can complete all this todo list haha**
+**I will do my best to complete this list haha**
 
-#### 1.1
-- [x] Auto init config file
-- [x] Open terminal in the focused file panel location
-- [x] Open file with enter key
-- [x] Update hotkey list
-- [ ] File panel search / filter
-- [ ] Add help bar down below bottom bar
-- [ ] Extract files
-- [ ] Compress files
-- [ ] Undo function
-- [ ] Add more theme
+- \[x\] Auto init config file
+- \[ \] Extract files
+- \[ \] Open terminal in the focused file panel location
+- \[ \] Open file with enter key
+- \[ \] File panel search / filter
+- \[ \] Add help bar down below bottom bar
+- \[ \] Compress files
+- \[ \] Can cancel the progress of the process bar
+- \[ \] Undo function
+- \[ \] Auto clear trash can
+- \[ \] AES encryption and decryption
+- \[ \] Add more theme
 
 #### 1.2
 
@@ -271,7 +262,7 @@ You can go to [here](https://github.com/MHNightCat/superfile/discussions/new?cat
 
 ## Star History
 
-**THANKS FOR All OF YOUR STAR!**
+**THANKS FOR All OF YOUR STARS!**
 
 <a href="https://star-history.com/#MHNightCat/superfile&Date">
  <picture>
