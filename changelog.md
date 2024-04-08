@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file. Dates are d
 
 # v1.0.1
 
-> 2024/04/xx
+> 2024/04/08
 
 #### Update
 
