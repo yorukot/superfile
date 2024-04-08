@@ -93,6 +93,36 @@ sudo apt install exiftool
 sudo pacman -S perl-image-exiftool
 ```
 
+<h4>
+     NixOS
+</h4>
+
+<details><summary>Click to expand</summary>
+<p>
+
+Add superfile to your flake inputs:
+```nix
+inputs = {
+  superfile = {
+    url = "github:MHNightCat/superfile";
+  };
+  # ...
+};
+```
+
+Then you can add it to your packages:
+```nix
+let
+  system = "x86_64-linux";
+in {
+  environment.systemPackages = with pkgs; [
+    # ...
+    inputs.superfile.packages.${system}.default  ];
+}
+```
+
+</details>
+
 ### Font
 
 > WARNING: This is a reminder that you must use a [Nerd font](https://www.nerdfonts.com/font-downloads)
@@ -237,7 +267,7 @@ The hotkey ranges are found in `config.json`
 
 [**Submit a bug report here**](https://github.com/MHNightCat/superfile/issues)
 
-## Todo list 
+## Todo list
 
 **I will do my best to complete this list haha**
 
