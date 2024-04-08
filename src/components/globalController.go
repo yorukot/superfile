@@ -2,6 +2,10 @@ package components
 
 import (
 	"encoding/json"
+	"github.com/charmbracelet/bubbles/progress"
+	"github.com/charmbracelet/bubbles/textinput"
+	"github.com/lithammer/shortuuid"
+	"github.com/rkoesters/xdg/trash"
 	"log"
 	"os"
 	"os/exec"
@@ -9,11 +13,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"time"
-
-	"github.com/charmbracelet/bubbles/progress"
-	"github.com/charmbracelet/bubbles/textinput"
-	"github.com/lithammer/shortuuid"
-	"github.com/rkoesters/xdg/trash"
 )
 
 /* CURSOR CONTROLLER START */
@@ -338,6 +337,7 @@ func PasteItem(m model) model {
 	}
 	if m.copyItems.cut {
 		for _, item := range m.copyItems.items {
+
 			err := trash.Trash(item)
 			if err != nil {
 				OutPutLog("Paste item function move file to trash can error", err)
@@ -429,7 +429,6 @@ func PinnedFolder(m model) model {
 	return m
 }
 
-
 // I can't test all of the os system so if you have any problem or want to add support please create new pull request!
 func OpenTerminal(m model) model {
 
@@ -447,15 +446,15 @@ func OpenTerminal(m model) model {
 
 	if runtime.GOOS == "darwin" {
 		terminal = "Terminal.app"
-        workDirSet = "--working-directory="
+		workDirSet = "--working-directory="
 		cmd := exec.Command(terminal, workDirSet+currentDir)
 		err := cmd.Start()
 		if err != nil {
 			OutPutLog("Error opening"+terminal+":", err)
 		}
 		return m
-    }
-	
+	}
+
 	desktopEnv := os.Getenv("XDG_CURRENT_DESKTOP")
 	switch desktopEnv {
 	case "GNOME":
@@ -497,7 +496,7 @@ func OpenTerminal(m model) model {
 	default:
 		log.Fatalf("We can't find your default terminal please go to ~/.config/superfile/config/config.json setting your default terminal and terminalWorkDirFlag!")
 	}
-	
+
 	cmd := exec.Command(terminal, workDirSet+currentDir)
 	err := cmd.Start()
 	if err != nil {

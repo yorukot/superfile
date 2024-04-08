@@ -13,15 +13,9 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-)
 
-func getHomeDir() string {
-	user, err := user.Current()
-	if err != nil {
-		log.Fatal("can't get home dir")
-	}
-	return user.HomeDir
-}
+	"github.com/rkoesters/xdg/userdirs"
+)
 
 func getFolder() []folder {
 	var paths []string
@@ -55,10 +49,10 @@ func getFolder() []folder {
 	}
 	folders := []folder{
 		{location: HomeDir, name: "󰋜 Home"},
-		{location: HomeDir + "/Downloads", name: "󰏔 Downloads"},
-		{location: HomeDir + "/Documents", name: "󰈙 Documents"},
-		{location: HomeDir + "/Pictures", name: "󰋩 Pictures"},
-		{location: HomeDir + "/Videos", name: "󰎁 Videos"},
+		{location: userdirs.Download, name: "󰏔 Downloads"},
+		{location: userdirs.Documents, name: "󰈙 Documents"},
+		{location: userdirs.Pictures, name: "󰋩 Pictures"},
+		{location: userdirs.Videos, name: "󰎁 Videos"},
 	}
 
 	for i, path := range pinnedFolder {

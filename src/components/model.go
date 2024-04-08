@@ -10,6 +10,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/rkoesters/xdg/basedir"
 )
 
 const (
@@ -18,13 +19,13 @@ const (
 	dataFolder       string = "/data"
 	lastCheckVersion string = "/data/lastCheckVersion"
 	pinnedFile       string = "/data/pinned.json"
-	logFile          string = "/data/superfile.log"
+	logFile          string = "/superfile.log"
 	configFile       string = "/config/config.json"
 	themeZipName     string = "/theme.zip"
 )
 
-var HomeDir = getHomeDir()
-var SuperFileMainDir = HomeDir + "/.config/superfile"
+var HomeDir = basedir.Home
+var SuperFileMainDir = basedir.ConfigHome + "/superfile"
 
 var theme ThemeType
 var Config ConfigType
@@ -108,9 +109,9 @@ func listenForProcessBarMessage(msg chan processBarMessage) tea.Cmd {
 	return func() tea.Msg {
 		select {
 		case m := <-msg:
-			return m // 返回从通道中接收到的消息
+			return m
 		default:
-			return nil // 没有消息可用时返回 nil
+			return nil
 		}
 	}
 }

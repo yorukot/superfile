@@ -4,9 +4,6 @@ import (
 	"archive/zip"
 	"encoding/json"
 	"fmt"
-	components "github.com/MHNightCat/superfile/components"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/urfave/cli/v2"
 	"io"
 	"log"
 	"net/http"
@@ -15,10 +12,15 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	components "github.com/MHNightCat/superfile/components"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/rkoesters/xdg/basedir"
+	"github.com/urfave/cli/v2"
 )
 
-var HomeDir = getHomeDir()
-var SuperFileMainDir = HomeDir + "/.config/superfile"
+var HomeDir = basedir.Home
+var SuperFileMainDir = basedir.ConfigHome + "/superfile"
 
 const (
 	currentVersion      string = "v1.0.1"
@@ -30,7 +32,6 @@ const (
 const (
 	configFolder     string = "/config"
 	themeFolder      string = "/theme"
-	trashFolder      string = "/trash"
 	dataFolder       string = "/data"
 	lastCheckVersion string = "/data/lastCheckVersion"
 	pinnedFile       string = "/data/pinned.json"
