@@ -1,12 +1,13 @@
 package components
 
 import (
+	"os"
+	"path/filepath"
+
 	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/lithammer/shortuuid"
 	"github.com/rkoesters/xdg/trash"
-	"os"
-	"path/filepath"
 )
 
 func SingleItemSelect(m model) model {
@@ -67,7 +68,7 @@ func ItemSelectDown(m model) model {
 	return m
 }
 
-func DeleteMultipleItem(m model) model {
+func CompletelyDeleteMultipleFile(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	if len(panel.selected) != 0 {
 		id := shortuuid.New()
@@ -82,7 +83,89 @@ func DeleteMultipleItem(m model) model {
 
 		m.processBarModel.process[id] = newProcess
 
-		processBarChannel <- processBarMessage{
+		channel <- channelMessage{
+			processId:       id,
+			processNewState: newProcess,
+		}
+		for _, filePath := range panel.selected {
+
+			p := m.processBarModel.process[id]
+			p.name = "󰆴 " + filepath.Base(filePath)
+			p.done++
+			p.state = inOperation
+			if len(channel) < 5 {
+				channel <- channelMessage{
+					processId:       id,
+					processNewState: p,
+				}
+			}
+			err := os.RemoveAll(filePath)
+			if err != nil {
+				OutPutLog("Completely delete multiple item function remove file error", err)
+			}
+
+			if err != nil {
+				p.state = failure
+				channel <- channelMessage{
+					processId:       id,
+					processNewState: p,
+				}
+				OutPutLog("Completely delete multiple item function error", err)
+				m.processBarModel.process[id] = p
+				break
+			} else {
+				if p.done == p.total {
+					p.state = successful
+					channel <- channelMessage{
+						processId:       id,
+						processNewState: p,
+					}
+				}
+				m.processBarModel.process[id] = p
+			}
+		}
+	}
+
+	if panel.cursor >= len(panel.element)-len(panel.selected)-1 {
+		panel.cursor = len(panel.element) - len(panel.selected) - 1
+		if panel.cursor < 0 {
+			panel.cursor = 0
+		}
+	}
+	panel.selected = panel.selected[:0]
+	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+	return m
+}
+
+func DeleteMultipleItem(m model) model {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	if len(panel.selected) != 0 {
+		id := shortuuid.New()
+		if IsExternalPath(panel.location) {
+			channel <- channelMessage{
+				processId:       id,
+				returnWarnModal: true,
+				warnModal: warnModal{
+					open:     true,
+					title:    "Are you sure you want to completely delete",
+					content:  "This operation cannot be undone and your data will be completely lost.",
+					warnType: confirmDeleteItem,
+				},
+			}
+			return m
+		}
+		prog := progress.New(progress.WithScaledGradient(theme.ProcessBarGradient[0], theme.ProcessBarGradient[1]))
+		newProcess := process{
+			name:     "󰆴 " + filepath.Base(panel.selected[0]),
+			progress: prog,
+			state:    inOperation,
+			total:    len(panel.selected),
+			done:     0,
+		}
+
+		m.processBarModel.process[id] = newProcess
+
+		channel <- channelMessage{
 			processId:       id,
 			processNewState: newProcess,
 		}
@@ -93,8 +176,8 @@ func DeleteMultipleItem(m model) model {
 			p.name = "󰆴 " + filepath.Base(filePath)
 			p.done++
 			p.state = inOperation
-			if len(processBarChannel) < 5 {
-				processBarChannel <- processBarMessage{
+			if len(channel) < 5 {
+				channel <- channelMessage{
 					processId:       id,
 					processNewState: p,
 				}
@@ -106,7 +189,7 @@ func DeleteMultipleItem(m model) model {
 
 			if err != nil {
 				p.state = failure
-				processBarChannel <- processBarMessage{
+				channel <- channelMessage{
 					processId:       id,
 					processNewState: p,
 				}
@@ -116,7 +199,7 @@ func DeleteMultipleItem(m model) model {
 			} else {
 				if p.done == p.total {
 					p.state = successful
-					processBarChannel <- processBarMessage{
+					channel <- channelMessage{
 						processId:       id,
 						processNewState: p,
 					}

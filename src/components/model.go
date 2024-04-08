@@ -33,7 +33,7 @@ var Config ConfigType
 var logOutput *os.File
 var et *exiftool.Exiftool
 
-var processBarChannel = make(chan processBarMessage, 1000)
+var channel = make(chan channelMessage, 1000)
 
 func InitialModel(dir string) model {
 	var err error
@@ -105,7 +105,7 @@ func InitialModel(dir string) model {
 	}
 }
 
-func listenForProcessBarMessage(msg chan processBarMessage) tea.Cmd {
+func listenForchannelMessage(msg chan channelMessage) tea.Cmd {
 	return func() tea.Msg {
 		select {
 		case m := <-msg:
@@ -120,18 +120,22 @@ func (m model) Init() tea.Cmd {
 	return tea.Batch(
 		tea.SetWindowTitle("SuperFile"),
 		textinput.Blink, // Assuming textinput.Blink is a valid command
-		listenForProcessBarMessage(processBarChannel),
+		listenForchannelMessage(channel),
 	)
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
-	case processBarMessage:
-		if !contains(m.processBarModel.processList, msg.processId) {
-			m.processBarModel.processList = append(m.processBarModel.processList, msg.processId)
+	case channelMessage:
+		if msg.returnWarnModal {
+			m.warnModal = msg.warnModal
+		} else {
+			if !contains(m.processBarModel.processList, msg.processId) {
+				m.processBarModel.processList = append(m.processBarModel.processList, msg.processId)
+			}
+			m.processBarModel.process[msg.processId] = msg.processNewState
 		}
-		m.processBarModel.process[msg.processId] = msg.processNewState
 	case tea.WindowSizeMsg:
 		m.mainPanelHeight = msg.Height - bottomBarHeight
 		m.fileModel.width = (msg.Width - sideBarWidth - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
@@ -140,12 +144,30 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 	case tea.KeyMsg:
 		// if in the create item modal
-		if m.createNewItem.open {
+		if m.typingModal.open {
 			switch msg.String() {
 			case Config.Cancel[0], Config.Cancel[1]:
-				m = CancelModal(m)
+				m = CancelTypingModal(m)
 			case Config.Confirm[0], Config.Confirm[1]:
 				m = CreateItem(m)
+			}
+			// if in the renaming mode
+		} else if m.warnModal.open {
+			switch msg.String() {
+			case Config.Cancel[0], Config.Cancel[1]:
+				m = CancelWarnModal(m)
+			case Config.Confirm[0], Config.Confirm[1]:
+				m.warnModal.open = false
+				if m.fileModel.filePanels[m.filePanelFocusIndex].panelMode == selectMode {
+					go func() {
+						m = CompletelyDeleteMultipleFile(m)
+						m.fileModel.filePanels[m.filePanelFocusIndex].selected = m.fileModel.filePanels[m.filePanelFocusIndex].selected[:0]
+					}()
+				} else {
+					go func() {
+						m = CompletelyDeleteSingleFile(m)
+					}()
+				}
 			}
 			// if in the renaming mode
 		} else if m.fileModel.renaming {
@@ -237,7 +259,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					case Config.FilePanelSelectModeItemDelete[0], Config.FilePanelSelectModeItemDelete[1]:
 						go func() {
 							m = DeleteMultipleItem(m)
-							m.fileModel.filePanels[m.filePanelFocusIndex].selected = m.fileModel.filePanels[m.filePanelFocusIndex].selected[:0]
+							if !IsExternalPath(m.fileModel.filePanels[m.filePanelFocusIndex].location) {
+								m.fileModel.filePanels[m.filePanelFocusIndex].selected = m.fileModel.filePanels[m.filePanelFocusIndex].selected[:0]
+							}
 						}()
 					case Config.FilePanelSelectModeItemCopy[0], Config.FilePanelSelectModeItemCopy[1]:
 						m = CopyMultipleItem(m)
@@ -280,14 +304,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	} else if m.fileModel.renaming {
 		m.fileModel.filePanels[m.filePanelFocusIndex].rename, cmd = m.fileModel.filePanels[m.filePanelFocusIndex].rename.Update(msg)
 	} else {
-		m.createNewItem.textInput, cmd = m.createNewItem.textInput.Update(msg)
+		m.typingModal.textInput, cmd = m.typingModal.textInput.Update(msg)
 	}
 
 	if m.fileModel.filePanels[m.filePanelFocusIndex].cursor < 0 {
 		m.fileModel.filePanels[m.filePanelFocusIndex].cursor = 0
 	}
 
-	cmd = tea.Batch(cmd, listenForProcessBarMessage(processBarChannel))
+	cmd = tea.Batch(cmd, listenForchannelMessage(channel))
 	m.sideBarModel.pinnedModel.folder = getFolder()
 	return m, cmd
 }
@@ -296,8 +320,10 @@ func (m model) View() string {
 	// check is the terminal size enough
 	if m.fullHeight < minimumHeight || m.fullWidth < minimumWidth {
 		return TerminalSizeWarnRender(m)
-	} else if m.createNewItem.open {
-		return ModalRender(m)
+	} else if m.typingModal.open {
+		return TypineModalRender(m)
+	} else if m.warnModal.open {
+		return WarnModalRender(m)
 	} else {
 		sideBar := SideBarRender(m)
 

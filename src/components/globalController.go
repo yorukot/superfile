@@ -2,10 +2,6 @@ package components
 
 import (
 	"encoding/json"
-	"github.com/charmbracelet/bubbles/progress"
-	"github.com/charmbracelet/bubbles/textinput"
-	"github.com/lithammer/shortuuid"
-	"github.com/rkoesters/xdg/trash"
 	"log"
 	"os"
 	"os/exec"
@@ -13,6 +9,11 @@ import (
 	"path/filepath"
 	"runtime"
 	"time"
+
+	"github.com/charmbracelet/bubbles/progress"
+	"github.com/charmbracelet/bubbles/textinput"
+	"github.com/lithammer/shortuuid"
+	"github.com/rkoesters/xdg/trash"
 )
 
 /* CURSOR CONTROLLER START */
@@ -297,7 +298,7 @@ func PasteItem(m model) model {
 
 	m.processBarModel.process[id] = newProcess
 
-	processBarChannel <- processBarMessage{
+	channel <- channelMessage{
 		processId:       id,
 		processNewState: newProcess,
 	}
@@ -315,7 +316,7 @@ func PasteItem(m model) model {
 		p = m.processBarModel.process[id]
 		if err != nil {
 			p.state = failure
-			processBarChannel <- processBarMessage{
+			channel <- channelMessage{
 				processId:       id,
 				processNewState: p,
 			}
@@ -327,7 +328,7 @@ func PasteItem(m model) model {
 				p.state = successful
 				p.done = totalFiles
 				p.doneTime = time.Now()
-				processBarChannel <- processBarMessage{
+				channel <- channelMessage{
 					processId:       id,
 					processNewState: p,
 				}
@@ -360,10 +361,10 @@ func PanelCreateNewFile(m model) model {
 	ti.CharLimit = 156
 	ti.Width = modalWidth - 10
 
-	m.createNewItem.location = panel.location
-	m.createNewItem.itemType = newFile
-	m.createNewItem.open = true
-	m.createNewItem.textInput = ti
+	m.typingModal.location = panel.location
+	m.typingModal.itemType = newFile
+	m.typingModal.open = true
+	m.typingModal.textInput = ti
 	m.firstTextInput = true
 
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
@@ -379,10 +380,10 @@ func PanelCreateNewFolder(m model) model {
 	ti.CharLimit = 156
 	ti.Width = modalWidth - 10
 
-	m.createNewItem.location = panel.location
-	m.createNewItem.itemType = newFolder
-	m.createNewItem.open = true
-	m.createNewItem.textInput = ti
+	m.typingModal.location = panel.location
+	m.typingModal.itemType = newFolder
+	m.typingModal.open = true
+	m.typingModal.textInput = ti
 	m.firstTextInput = true
 
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel

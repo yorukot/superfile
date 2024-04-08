@@ -302,18 +302,27 @@ func TerminalSizeWarnRender(m model) string {
 		" Height = " + terminalMinimumSize.Render(minimumHeightString))
 }
 
-func ModalRender(m model) string {
-	if m.createNewItem.itemType == newFile {
-		fileLocation := filePanelTopFolderIcon.Render("   ") + filePanelTopPath.Render(TruncateTextBeginning(m.createNewItem.location+"/"+m.createNewItem.textInput.Value(), modalWidth-4)) + "\n"
+func TypineModalRender(m model) string {
+	if m.typingModal.itemType == newFile {
+		fileLocation := filePanelTopFolderIcon.Render("   ") + filePanelTopPath.Render(TruncateTextBeginning(m.typingModal.location+"/"+m.typingModal.textInput.Value(), modalWidth-4)) + "\n"
 		confirm := modalConfirm.Render(" (" + Config.Confirm[0] + ") New File ")
 		cancel := modalCancel.Render(" (" + Config.Cancel[0] + ") Cancel ")
 		tip := confirm + "           " + cancel
-		return FullScreenStyle(m.fullHeight, m.fullWidth).Render(FocusedModalStyle(modalHeight, modalWidth).Render(fileLocation + "\n" + m.createNewItem.textInput.View() + "\n\n" + tip))
+		return FullScreenStyle(m.fullHeight, m.fullWidth).Render(FocusedModalStyle(modalHeight, modalWidth).Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip))
 	} else {
-		fileLocation := filePanelTopFolderIcon.Render("   ") + filePanelTopPath.Render(TruncateTextBeginning(m.createNewItem.location+"/"+m.createNewItem.textInput.Value(), modalWidth-4)) + "\n"
+		fileLocation := filePanelTopFolderIcon.Render("   ") + filePanelTopPath.Render(TruncateTextBeginning(m.typingModal.location+"/"+m.typingModal.textInput.Value(), modalWidth-4)) + "\n"
 		confirm := modalConfirm.Render(" (" + Config.Confirm[0] + ") New Folder ")
 		cancel := modalCancel.Render(" (" + Config.Cancel[0] + ") Cancel ")
 		tip := confirm + "           " + cancel
-		return FullScreenStyle(m.fullHeight, m.fullWidth).Render(FocusedModalStyle(modalHeight, modalWidth).Render(fileLocation + "\n" + m.createNewItem.textInput.View() + "\n\n" + tip))
+		return FullScreenStyle(m.fullHeight, m.fullWidth).Render(FocusedModalStyle(modalHeight, modalWidth).Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip))
 	}
+}
+
+func WarnModalRender(m model) string {
+	title := m.warnModal.title
+	content := m.warnModal.content
+	confirm := modalCancel.Render(" (" + Config.Confirm[0] + ") Cofnirm ")
+	cancel := modalCancel.Render(" (" + Config.Cancel[0] + ") Cancel ")
+	tip := confirm + "           " + cancel
+	return FullScreenStyle(m.fullHeight, m.fullWidth).Render(FocusedModalStyle(modalHeight, modalWidth).Render(title + "\n\n" + content + "\n\n" + tip))
 }

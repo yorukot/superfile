@@ -5,15 +5,20 @@ import (
 	"path/filepath"
 )
 
-func CancelModal(m model) model {
-	m.createNewItem.textInput.Blur()
-	m.createNewItem.open = false
+func CancelTypingModal(m model) model {
+	m.typingModal.textInput.Blur()
+	m.typingModal.open = false
+	return m
+}
+
+func CancelWarnModal(m model) model {
+	m.warnModal.open = false
 	return m
 }
 
 func CreateItem(m model) model {
-	if m.createNewItem.itemType == newFile {
-		path := m.createNewItem.location + "/" + m.createNewItem.textInput.Value()
+	if m.typingModal.itemType == newFile {
+		path := m.typingModal.location + "/" + m.typingModal.textInput.Value()
 		if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
 			OutPutLog("Create item function error", err)
 		}
@@ -23,14 +28,14 @@ func CreateItem(m model) model {
 		}
 		defer f.Close()
 	} else {
-		path := m.createNewItem.location + "/" + m.createNewItem.textInput.Value()
+		path := m.typingModal.location + "/" + m.typingModal.textInput.Value()
 		err := os.MkdirAll(path, 0755)
 		if err != nil {
 			OutPutLog("Create item function create folder error", err)
 		}
 	}
-	m.createNewItem.open = false
-	m.createNewItem.textInput.Blur()
+	m.typingModal.open = false
+	m.typingModal.textInput.Blur()
 	return m
 }
 

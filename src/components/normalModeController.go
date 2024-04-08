@@ -5,12 +5,13 @@ import (
 	"path"
 	"time"
 
+	"os/exec"
+
 	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/lithammer/shortuuid"
 	"github.com/rkoesters/xdg/trash"
-	"os/exec"
 )
 
 func EnterPanel(m model) model {
@@ -37,7 +38,7 @@ func EnterPanel(m model) model {
 			OutPutLog("err when open file with xdg-open:", err)
 		}
 	}
-	
+
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m
 }
@@ -63,12 +64,14 @@ func ParentFolder(m model) model {
 	return m
 }
 
-func DeleteSingleItem(m model) model {
+func CompletelyDeleteSingleFile(m model) model {
 	id := shortuuid.New()
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+
 	if len(panel.element) == 0 {
 		return m
 	}
+
 	prog := progress.New(progress.WithScaledGradient(theme.ProcessBarGradient[0], theme.ProcessBarGradient[1]))
 	newProcess := process{
 		name:     "󰆴 " + panel.element[panel.cursor].name,
@@ -79,7 +82,73 @@ func DeleteSingleItem(m model) model {
 	}
 	m.processBarModel.process[id] = newProcess
 
-	processBarChannel <- processBarMessage{
+	channel <- channelMessage{
+		processId:       id,
+		processNewState: newProcess,
+	}
+
+	err := os.RemoveAll(panel.element[panel.cursor].location)
+	if err != nil {
+		OutPutLog("Completely delete single item function remove file error", err)
+	}
+
+	if err != nil {
+		p := m.processBarModel.process[id]
+		p.state = failure
+		channel <- channelMessage{
+			processId:       id,
+			processNewState: p,
+		}
+	} else {
+		p := m.processBarModel.process[id]
+		p.done = 1
+		p.state = successful
+		p.doneTime = time.Now()
+		channel <- channelMessage{
+			processId:       id,
+			processNewState: p,
+		}
+	}
+	if panel.cursor == len(panel.element)-1 {
+		panel.cursor--
+	}
+	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+	return m
+}
+
+func DeleteSingleItem(m model) model {
+	id := shortuuid.New()
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+
+	if len(panel.element) == 0 {
+		return m
+	}
+
+	if IsExternalPath(panel.location) {
+		channel <- channelMessage{
+			processId:       id,
+			returnWarnModal: true,
+			warnModal: warnModal{
+				open:     true,
+				title:    "Are you sure you want to completely delete",
+				content:  "This operation cannot be undone and your data will be completely lost.",
+				warnType: confirmDeleteItem,
+			},
+		}
+		return m
+	}
+
+	prog := progress.New(progress.WithScaledGradient(theme.ProcessBarGradient[0], theme.ProcessBarGradient[1]))
+	newProcess := process{
+		name:     "󰆴 " + panel.element[panel.cursor].name,
+		progress: prog,
+		state:    inOperation,
+		total:    1,
+		done:     0,
+	}
+	m.processBarModel.process[id] = newProcess
+
+	channel <- channelMessage{
 		processId:       id,
 		processNewState: newProcess,
 	}
@@ -92,7 +161,7 @@ func DeleteSingleItem(m model) model {
 	if err != nil {
 		p := m.processBarModel.process[id]
 		p.state = failure
-		processBarChannel <- processBarMessage{
+		channel <- channelMessage{
 			processId:       id,
 			processNewState: p,
 		}
@@ -101,7 +170,7 @@ func DeleteSingleItem(m model) model {
 		p.done = 1
 		p.state = successful
 		p.doneTime = time.Now()
-		processBarChannel <- processBarMessage{
+		channel <- channelMessage{
 			processId:       id,
 			processNewState: p,
 		}

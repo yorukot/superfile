@@ -3,6 +3,7 @@ package components
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/rkoesters/xdg/userdirs"
 	"io"
 	"log"
 	"math"
@@ -13,8 +14,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-
-	"github.com/rkoesters/xdg/userdirs"
 )
 
 func getFolder() []folder {
@@ -43,10 +42,7 @@ func getFolder() []folder {
 		OutPutLog("Read superfile data error", err)
 	}
 	var pinnedFolder []string
-	err = json.Unmarshal(jsonData, &pinnedFolder)
-	if err != nil {
-		OutPutLog("Unmarshal superfile data error", err)
-	}
+	json.Unmarshal(jsonData, &pinnedFolder)
 	folders := []folder{
 		{location: HomeDir, name: "󰋜 Home"},
 		{location: userdirs.Download, name: "󰏔 Downloads"},
@@ -296,8 +292,8 @@ func PasteDir(src, dst string, id string, m model) (model, error) {
 				p.name = "󰆏 " + filepath.Base(path)
 			}
 
-			if len(processBarChannel) < 5 {
-				processBarChannel <- processBarMessage{
+			if len(channel) < 5 {
+				channel <- channelMessage{
 					processId:       id,
 					processNewState: p,
 				}
@@ -306,15 +302,15 @@ func PasteDir(src, dst string, id string, m model) (model, error) {
 			err := PasteFile(path, newPath)
 			if err != nil {
 				p.state = failure
-				processBarChannel <- processBarMessage{
+				channel <- channelMessage{
 					processId:       id,
 					processNewState: p,
 				}
 				return err
 			}
 			p.done++
-			if len(processBarChannel) < 5 {
-				processBarChannel <- processBarMessage{
+			if len(channel) < 5 {
+				channel <- channelMessage{
 					processId:       id,
 					processNewState: p,
 				}
@@ -430,4 +426,8 @@ func countFiles(dirPath string) (int, error) {
 	})
 
 	return count, err
+}
+
+func IsExternalPath(path string) bool {
+	return strings.HasPrefix(path, "/run/media")
 }

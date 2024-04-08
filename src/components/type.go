@@ -22,6 +22,12 @@ type focusPanelType int
 // Type representing the type of item
 type itemType int
 
+type warnType int
+
+const (
+	confirmDeleteItem warnType = iota
+)
+
 // Constants for new file or new folder
 const (
 	newFile itemType = iota
@@ -64,7 +70,8 @@ type model struct {
 	processBarModel     processBarModel
 	focusPanel          focusPanelType
 	copyItems           copyItems
-	createNewItem       createNewItemModal
+	typingModal         typingModal
+	warnModal           warnModal
 	fileMetaData        fileMetaData
 	firstTextInput      bool
 	filePanelFocusIndex int
@@ -73,8 +80,16 @@ type model struct {
 	fullHeight          int
 }
 
-// Modal for creating a new item
-type createNewItemModal struct {
+// Modal
+
+type warnModal struct {
+	open     bool
+	warnType warnType
+	title    string
+	content  string
+}
+
+type typingModal struct {
 	location  string
 	open      bool
 	itemType  itemType
@@ -180,9 +195,11 @@ type process struct {
 }
 
 // Message for process bar
-type processBarMessage struct {
+type channelMessage struct {
 	processId       string
 	processNewState process
+	returnWarnModal bool
+	warnModal       warnModal
 }
 
 /*PROCESS BAR COMPONENTS TYPE END*/
@@ -223,6 +240,7 @@ type ThemeType struct {
 	Done               string
 	Fail               string
 	Cancel             string
+	Warn               string
 
 	ModalForeground string
 	ModalCancel     string
@@ -231,10 +249,10 @@ type ThemeType struct {
 
 // Configuration settings
 type ConfigType struct {
-	Theme string
-	Terminal string
+	Theme           string
+	Terminal        string
 	TerminalWorkDir string
-	
+
 	Reload [2]string
 	Quit   [2]string
 
