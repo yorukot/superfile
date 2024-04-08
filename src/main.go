@@ -4,19 +4,17 @@ import (
 	"archive/zip"
 	"encoding/json"
 	"fmt"
-	"io"
-	"log"
-	"net/http"
-	"os"
-	"os/user"
-	"path/filepath"
-	"strings"
-	"time"
-
 	components "github.com/MHNightCat/superfile/components"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/rkoesters/xdg/basedir"
 	"github.com/urfave/cli/v2"
+	"io"
+	"log"
+	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
 )
 
 var HomeDir = basedir.Home
@@ -73,14 +71,6 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-}
-
-func getHomeDir() string {
-	user, err := user.Current()
-	if err != nil {
-		log.Fatal("can't get home dir")
-	}
-	return user.HomeDir
 }
 
 func InitConfigFile() {

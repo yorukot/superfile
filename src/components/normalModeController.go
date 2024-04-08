@@ -3,6 +3,7 @@ package components
 import (
 	"os"
 	"path"
+	"runtime"
 	"time"
 
 	"os/exec"
@@ -124,7 +125,7 @@ func DeleteSingleItem(m model) model {
 		return m
 	}
 
-	if IsExternalPath(panel.location) {
+	if IsExternalPath(panel.location) || runtime.GOOS == "darwin"{
 		channel <- channelMessage{
 			processId:       id,
 			returnWarnModal: true,

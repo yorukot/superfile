@@ -9,11 +9,12 @@ All notable changes to this project will be documented in this file. Dates are d
 #### Update
 
 - Update `$HOME/.superfile` to `$XDG_CONFIG_HOME/superfile` [`886dbfb`](https://github.com/MHNightCat/superfile/commit/886dbfb276407db36e9fb7369ec31053e7aabcf4)
-- Follow [The FreeDesktop.org Trash specification](https://specifications.freedesktop.org/trash-spec/trashspec-1.0.html) to update the trash bin path [`886dbfb`](https://github.com/MHNightCat/superfile/commit/886dbfb276407db36e9fb7369ec31053e7aabcf4)
+- Follow [The FreeDesktop.org Trash specification](https://specifications.freedesktop.org/trash-spec/trashspec-1.0.html) to update the trash bin path in local path [`886dbfb`](https://github.com/MHNightCat/superfile/commit/886dbfb276407db36e9fb7369ec31053e7aabcf4)
+- The external hard drive will be deleted directly ,But macOs for now not support trash can[`a4232a8`](https://github.com/MHNightCat/superfile/commit/a4232a88bef4b5c3e99456fd198eabb953dc324c)
 - The user can enter the path, which will be the path of the first file panel [`14620b3`](https://github.com/MHNightCat/superfile/commit/14620b33b09edfce80a95e1f52f7f66b3686a9d0)
 - Make user can open file with default browser text-editor etc [`f47d291`](https://github.com/MHNightCat/superfile/commit/f47d2915bf637da0cf99a4b15fa0bea8edc8d380)
 - Can open terminal in focused file panel path [`f47d291`](https://github.com/MHNightCat/superfile/commit/f47d2915bf637da0cf99a4b15fa0bea8edc8d380)
-- The external hard drive will be deleted directly (a confirmation message will be displayed) [``]()
+
 #### Bug fix
 
 - Fix processes bar cursor index display error [`f6eb9d8`](https://github.com/MHNightCat/superfile/commit/f6eb9d879f9f7ef31859e3f84c8792e2f0fc543a)

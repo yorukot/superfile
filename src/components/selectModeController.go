@@ -3,6 +3,7 @@ package components
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 
 	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/progress"
@@ -141,7 +142,7 @@ func DeleteMultipleItem(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	if len(panel.selected) != 0 {
 		id := shortuuid.New()
-		if IsExternalPath(panel.location) {
+		if IsExternalPath(panel.location) || runtime.GOOS == "darwin" {
 			channel <- channelMessage{
 				processId:       id,
 				returnWarnModal: true,
