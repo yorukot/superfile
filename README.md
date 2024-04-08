@@ -289,10 +289,10 @@ If you want to contribute please follow this contributing guide for this project
 
 **THANKS FOR All OF YOUR STARS!**
 
-<a href="https://star-history.com/#MHNightCat/superfile&Date">
+<a href="https://star-history.com/#MHNightCat/superfile&Timeline">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=MHNightCat/superfile&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=MHNightCat/superfile&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=MHNightCat/superfile&type=Date" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=MHNightCat/superfile&type=Timeline&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=MHNightCat/superfile&type=Timeline" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=MHNightCat/superfile&type=Timeline" />
  </picture>
 </a>
