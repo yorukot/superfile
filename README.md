@@ -101,6 +101,7 @@ sudo pacman -S perl-image-exiftool
 <p>
 
 Add superfile to your flake inputs:
+
 ```nix
 inputs = {
   superfile = {
@@ -111,6 +112,7 @@ inputs = {
 ```
 
 Then you can add it to your packages:
+
 ```nix
 let
   system = "x86_64-linux";
@@ -183,16 +185,21 @@ You can go to [theme list](https://github.com/MHNightCat/superfile/blob/main/THE
 
 > We only have a few themes at the moment, but we will be making more over time! You can also [submit a pull request](https://github.com/MHNightCat/superfile/pulls) for your own theme!
 
+copy `theme_name` in:
+```
+theme name in config: theme_name
+```
+
 Edit config.json using `Nano`:
 
 ```
-nano ~/.superfile/config/config.json
+nano ~/.config/superfile/config/config.json
 ```
 
 Edit config.json using `Vim`:
 
 ```
-vim ~/.superfile/config/config.json
+vim ~/.config/superfile/config/config.json
 ```
 
 then change:
@@ -209,7 +216,7 @@ to:
 
 ### Create your own theme
 
-If you want to customize your own theme, you can go to `~/.superfile/theme/YOUR_THEME_NAME.json` and copy the existing theme's json to your own theme file
+If you want to customize your own theme, you can go to `~/.config/superfile/theme/YOUR_THEME_NAME.json` and copy the existing theme's json to your own theme file
 
 Now you can customize your own theme!!
 
@@ -231,18 +238,18 @@ to:
 
 [**Click me to see the hotkey list**](https://github.com/MHNightCat/superfile/blob/main/HOTKEYS.md)
 
-**You can change all hotkeys in** `~/.superfile/config/config.json`
+**You can change all hotkeys in** `~/.config/superfile/config/config.json`
 
 Edit config.json using `Nano`:
 
 ```
-nano ~/.superfile/config/config.json
+nano ~/.config/superfile/config/config.json
 ```
 
 Edit config.json using `Vim`:
 
 ```
-vim ~/.superfile/config/config.json
+vim ~/.config/superfile/config/config.json
 ```
 
 > "Normal mode" is the default browsing mode
@@ -271,24 +278,25 @@ The hotkey ranges are found in `config.json`
 
 **I will do my best to complete this list haha**
 
+#### 1.1
+
 - \[x\] Auto init config file
-- \[ \] Extract files
-- \[ \] Open terminal in the focused file panel location
-- \[ \] Open file with enter key
+- \[x\] Add more theme
+- \[x\] Open terminal in the focused file panel location
+- \[x\] Open file with enter key
 - \[ \] File panel search / filter
 - \[ \] Add help bar down below bottom bar
+- \[ \] Extract files
 - \[ \] Compress files
 - \[ \] Can cancel the progress of the process bar
 - \[ \] Undo function
 - \[ \] Auto clear trash can
-- \[ \] AES encryption and decryption
-- \[ \] Add more theme
 
 #### 1.2
 
-- [ ] AES encryption and decryption
-- [ ] Auto clear trash can
-- [ ] Can cancel the progress of the process bar
+- \[ \] AES encryption and decryption
+- \[ \] Auto clear trash can
+- \[ \] Can cancel the progress of the process bar
 
 ## Star History
 

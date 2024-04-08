@@ -1,0 +1,36 @@
+{   
+    "_AUTHOR": "github.com/tanbinislam43",
+    
+    "border": "#403d52",
+    "cursor": "#9ccfd8",
+
+    "terminalTooSmallError": "#eb6f92",
+    "terminalSizeCurrect": "#8ec07c",
+    
+    "browserMode": "#f6c177",
+    "selectMode": "#8EC07C",
+
+    "sideBarTitle": "#6e6a86",
+    "sideBarItem": "#908caa",
+    "sideBarSelected": "#f6c177",
+    "sideBarFocus": "#c4a7e7",
+    
+    "filePanelFocus": "#6e6a86",
+    "filePanelTopFolderIcon": "#9ccfd8",
+    "filePanelTopPath": "#ebbcba",
+    "filePanelItem": "#e0def4",
+    "filePanelItemSelected": "#c4a7e7",
+
+    "bottomBarFocus": "#f6c177",
+
+	"processBarSideLine": "#908caa",
+    "processBarGradient": ["#31748f", "#eb6f92"],
+    "inOperation":"#31748f",
+    "done": "#8ec07c",
+    "fail": "#FF6969",
+    "cancel": "#838383",
+
+    "modalForeground": "#e0def4",
+    "modalCancel": "#524f67",
+    "modalConfirm": "#eb6f92"
+}

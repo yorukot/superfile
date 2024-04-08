@@ -1,17 +1,27 @@
-## gruvbox
+## Kaolin
 
-- AUTHOR: github.com/MHNightCat
+- theme name in config:`nord`
+- Author: github.com/AnshumanNeon
 
-![](/asset/theme/gruvbox.png)
+![](/asset/theme/kaolin.png)
 
-## nord 
+## Nord
 
-- AUTHOR: github.com/ramses-eltany
+- theme name in config:`nord`
+- Author: github.com/ramses-eltany
 
 ![](/asset/theme/nord.png)
 
 ## Rosé Pine
 
-- AUTHOR: github.com/tanbinislam43/
+- theme name in config:`rose-pine`
+- Author: github.com/tanbinislam43/
 
-![](/asset/theme/rosepine.png)
+![](/asset/theme/rose-pine.png)
+
+## Gruvbox
+
+- theme name in config:`gruvbox`
+- Author: github.com/MHNightCat
+
+![](/asset/theme/gruvbox.png)
