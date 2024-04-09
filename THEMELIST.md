@@ -1,3 +1,10 @@
+## Dracula
+
+- Theme name: `dracula`
+- Author: github.com/BeanieBarrow
+
+![](/asset/theme/dracula.png)
+
 ## Kaolin
 
 - Theme name: `nord`
