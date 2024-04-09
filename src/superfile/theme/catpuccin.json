@@ -1,0 +1,33 @@
+{
+  "_AUTHOR": "github.com/AnshumanNeon",
+
+  "border": "#6c7086",
+  "cursor": "#f5e0dc",
+
+  "terminalTooSmallError": "#c74a4d",
+  "terminalSizeCurrect": "#4EB8CA",
+  
+  "sideBarTitle": "#74c7ec",
+  "sideBarItem": "#a6adc8",
+  "sideBarSelected": "#cba6f7",
+  "sideBarFocus": "#f38ba8",
+
+  "filePanelFocus": "#b4befe",
+  "filePanelTopFolderIcon": "#a6e3a1",
+  "filePanelTopPath": "#89b5fa",
+  "filePanelItem": "#a6adc8",
+  "filePanelItemSelected": "#9399b2",
+
+  "bottomBarFocus": "#a6e3a1",
+
+  "processBarSideLine": "#74c7ec",
+  "processBarGradient": [ "#89b4fa", "#a6e3a1", "#eba0ac", "#cba6f7" ],
+  "inOperation": "#74c7ec",
+  "done": "#a6e3a1",
+  "fail": "#f38ba8",
+  "cancel": "#eba0ac",
+
+  "modalForeground": "#313244",
+  "modalCancel": "#eba0ac",
+  "modalConfirm": "#89dceb"
+}
