@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC(YYYY/MM/DD).
 
-# [**v1.1**]()
+# [**v1.x**]()
 
 > 2024/xx/xx
 
