@@ -13,14 +13,13 @@ import (
 )
 
 const (
-	configFolder     string = "/config"
 	themeFolder      string = "/theme"
 	dataFolder       string = "/data"
 	lastCheckVersion string = "/lastCheckVersion"
 	pinnedFile       string = "/pinned.json"
 	toggleDotFile    string = "/toggleDotFile"
 	logFile          string = "/superfile.log"
-	configFile       string = "/config/config.json"
+	configFile       string = "/config.json"
 	themeZipName     string = "/theme.zip"
 )
 
@@ -38,8 +37,8 @@ var channel = make(chan channelMessage, 1000)
 
 func InitialModel(dir string) model {
 	var err error
-	logOutput, err = os.OpenFile(SuperFileCacheDir + logFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-  
+	logOutput, err = os.OpenFile(SuperFileCacheDir+logFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+
 	if err != nil {
 		log.Fatalf("Error while opening superfile.log file: %v", err)
 	}
@@ -52,7 +51,7 @@ func InitialModel(dir string) model {
 	err = json.Unmarshal(data, &Config)
 
 	if err != nil {
-		log.Fatalf("Error decoding config json( your config file may have misconfigured ): %v", err)
+		log.Fatalf("Error decoding config json (your config file may have misconfigured): %v", err)
 	}
 
 	data, err = os.ReadFile(SuperFileMainDir + themeFolder + "/" + Config.Theme + ".json")
