@@ -39,35 +39,35 @@ func InitialModel(dir string) model {
 	var err error
 	logOutput, err = os.OpenFile(SuperFileMainDir+logFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
-		log.Fatalf("error opening superfile.log file: %v", err)
+		log.Fatalf("Error while opening superfile.log file: %v", err)
 	}
 
 	data, err := os.ReadFile(SuperFileMainDir + configFile)
 	if err != nil {
-		log.Fatalf("config file not exist: %v", err)
+		log.Fatalf("Config file doesn't exist: %v", err)
 	}
 
 	err = json.Unmarshal(data, &Config)
 
 	if err != nil {
-		log.Fatalf("Error decoding config json(your config  file may be errors): %v", err)
+		log.Fatalf("Error decoding config json( your config file may have misconfigured ): %v", err)
 	}
 
 	data, err = os.ReadFile(SuperFileMainDir + themeFolder + "/" + Config.Theme + ".json")
 
 	if err != nil {
-		log.Fatalf("Theme file not exist: %v", err)
+		log.Fatalf("Theme file doesn't exist: %v", err)
 	}
 
 	err = json.Unmarshal(data, &theme)
 	if err != nil {
-		log.Fatalf("Error decoding theme json(your theme file may be errors): %v", err)
+		log.Fatalf("Error while decoding theme json( Your theme file may have errors ): %v", err)
 	}
 
 	LoadThemeConfig()
 	et, err = exiftool.NewExiftool()
 	if err != nil {
-		OutPutLog("Initia model function init exiftool error", err)
+		OutPutLog("Initial model function init exiftool error", err)
 	}
 	firstFilePanelDir := HomeDir
 	if dir != "" {

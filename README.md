@@ -185,7 +185,7 @@ You can go to [theme list](https://github.com/MHNightCat/superfile/blob/main/THE
 
 copy `theme_name` in:
 ```
-theme name in config: theme_name
+Theme name: theme_name
 ```
 
 Edit config.json using `Nano`:
