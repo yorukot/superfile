@@ -31,13 +31,13 @@
 
 ## Features
 
-- Fancy gui
+- Fancy GUI
 - Fully customizable
-- Vim's selection mode
+- Vim keybindings
 - Easy to use
 - Trash can
-- Metadata detil
-- Copy file to the clipboard
+- Metadata detail
+- Clipboard viewer
 - Copy and paste file
 - Auto rename file or folder when duplicate
 - Rename files in a modern way
