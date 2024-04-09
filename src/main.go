@@ -19,6 +19,7 @@ import (
 
 var HomeDir = basedir.Home
 var SuperFileMainDir = basedir.ConfigHome + "/superfile"
+var SuperFileCacheDir = basedir.CacheHome + "/superfile"
 
 const (
 	currentVersion      string = "v1.0.1"
@@ -97,9 +98,9 @@ func InitConfigFile() {
 		log.Fatalln("Can't Create Superfile pinned file:", SuperFileMainDir+pinnedFile, err)
 	}
 	// create superfile.log file
-	err = CreateFileIfNotExist(SuperFileMainDir + logFile)
+	err = CreateFileIfNotExist(SuperFileCacheDir + logFile)
 	if err != nil {
-		log.Fatalln("Can't Create Superfile log file:", SuperFileMainDir+logFile, err)
+		log.Fatalln("Can't Create Superfile log file:", SuperFileCacheDir+logFile, err)
 	}
 	// write config.json file
 	if _, err := os.Stat(SuperFileMainDir + configFile); os.IsNotExist(err) {
