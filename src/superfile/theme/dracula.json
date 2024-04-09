@@ -1,0 +1,36 @@
+{
+  "_AUTHOR": "github.com/BeanieBarrow",
+
+  "border": "#6272A4",
+  "cursor": "#FF79C6",
+
+  "terminalTooSmallError": "#FF5555",
+  "terminalSizeCurrect": "#50FA7B",
+
+  "browserMode": "#FFB86C",
+  "selectMode": "#50FA7B",
+
+  "sideBarTitle": "#BD93F9",
+  "sideBarItem": "#F8F8F2",
+  "sideBarSelected": "#FFB86C",
+  "sideBarFocus": "#44475A",
+
+  "filePanelFocus": "#44475A",
+  "filePanelTopFolderIcon": "#50FA7B",
+  "filePanelTopPath": "#8BE9FD",
+  "filePanelItem": "#F8F8F2",
+  "filePanelItemSelected": "#FFB86C",
+
+  "bottomBarFocus": "#44475A",
+
+  "processBarSideLine": "#F8F8F2",
+  "processBarGradient": ["#50FA7B", "#FF5555"],
+  "inOperation": "#8BE9FD",
+  "done": "#50FA7B",
+  "fail": "#FF5555",
+  "cancel": "#6272A4",
+
+  "modalForeground": "#F8F8F2",
+  "modalCancel": "#6272A4",
+  "modalConfirm": "#FFB86C"
+}
