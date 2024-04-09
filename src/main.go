@@ -87,6 +87,11 @@ func InitConfigFile() {
 	if err != nil {
 		log.Fatalln("Can't Create Superfile data folder:", SuperFileMainDir+dataFolder, err)
 	}
+  // create cache folder
+  err = CreateFolderIfNotExist(SuperFileCacheDir)
+  if err != nil {
+    log.Fatalln("Can't Create Superfile log data folder:", SuperFileCacheDir, err)
+  }
 	// create config folder
 	err = CreateFolderIfNotExist(SuperFileMainDir + configFolder)
 	if err != nil {
