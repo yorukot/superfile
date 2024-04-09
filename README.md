@@ -157,13 +157,7 @@ Run the `build.sh` file:
 sh build.sh
 ```
 
-Move the binary file to /bin (on Linux):
-
-```bash
-mv ./bin/spf /bin
-```
-
-or on OSX:
+Add the binary file to your $PATH, e.g. in `/usr/local/bin`:
 
 ```bash
 mv ./bin/spf /usr/local/bin
@@ -188,19 +182,13 @@ copy `theme_name` in:
 Theme name: theme_name
 ```
 
-Edit config.json using `Nano`:
+Edit `config.json` using your preferred editor:
 
 ```
-nano ~/.config/superfile/config/config.json
+$EDITOR ~/.config/superfile/config/config.json
 ```
 
-Edit config.json using `Vim`:
-
-```
-vim ~/.config/superfile/config/config.json
-```
-
-then change:
+and change:
 
 ```json
 "theme": "gruvbox",
@@ -209,26 +197,15 @@ then change:
 to:
 
 ```json
-"theme": "theme_name",
+"theme": "theme-name",
 ```
 
 ### Create your own theme
 
 If you want to customize your own theme, you can go to `~/.config/superfile/theme/YOUR_THEME_NAME.json` and copy the existing theme's json to your own theme file
 
-Now you can customize your own theme!!
+Don't forget to change the `theme` variable in `config.json` to your theme name.
 
-And if you complete your theme you can change:
-
-```json
-"theme": "gruvbox",
-```
-
-to:
-
-```json
-"theme": "YOUR_THEME_NAME",
-```
 
 [If you are satisfied with your theme, you might as well put it into the default theme list!](#contribute)
 
@@ -238,17 +215,6 @@ to:
 
 **You can change all hotkeys in** `~/.config/superfile/config/config.json`
 
-Edit config.json using `Nano`:
-
-```
-nano ~/.config/superfile/config/config.json
-```
-
-Edit config.json using `Vim`:
-
-```
-vim ~/.config/superfile/config/config.json
-```
 
 > "Normal mode" is the default browsing mode
 
@@ -258,12 +224,9 @@ The hotkey ranges are found in `config.json`
 
 ## Contributing
 
-If you want to contribute please follow this contributing guide for this project.
-[**Contributing**](./CONTRIBUTING.md)
+If you want to contribute please follow the [contribution guide](./CONTRIBUTING.md)
 
 ## Todo list
-
-**I will do my best to complete this list haha**
 
 #### 1.1
 
@@ -283,7 +246,7 @@ If you want to contribute please follow this contributing guide for this project
 #### 1.2
 
 - \[ \] AES encryption and decryption
-- \[ \] Auto clear trash can
+- \[ \] Auto clear trash
 - \[ \] Can cancel the progress of the process bar
 
 ## Star History
