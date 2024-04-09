@@ -7,7 +7,7 @@
 
 ## Kaolin
 
-- Theme name: `nord`
+- Theme name: `kaolin`
 - Author: github.com/AnshumanNeon
 
 ![](/asset/theme/kaolin.png)
