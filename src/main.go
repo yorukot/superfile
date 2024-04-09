@@ -19,6 +19,7 @@ import (
 
 var HomeDir = basedir.Home
 var SuperFileMainDir = basedir.ConfigHome + "/superfile"
+var SuperFileDataDir = basedir.DataHome + "/superfile"
 
 const (
 	currentVersion      string = "v1.0.1"
@@ -30,10 +31,10 @@ const (
 const (
 	configFolder     string = "/config"
 	themeFolder      string = "/theme"
-	dataFolder       string = "/data"
-	lastCheckVersion string = "/data/lastCheckVersion"
-	pinnedFile       string = "/data/pinned.json"
+	lastCheckVersion string = "/lastCheckVersion"
+	pinnedFile       string = "/pinned.json"
 	configFile       string = "/config/config.json"
+	toggleDotFile    string = "/toggleDotFile"
 	themeZipName     string = "/theme.zip"
 	logFile          string = "/superfile.log"
 )
@@ -82,24 +83,29 @@ func InitConfigFile() {
 		log.Fatalln("Can't Create Superfile main config folder:", SuperFileMainDir, err)
 	}
 	// create data folder
-	err = CreateFolderIfNotExist(SuperFileMainDir + dataFolder)
+	err = CreateFolderIfNotExist(SuperFileDataDir)
 	if err != nil {
-		log.Fatalln("Can't Create Superfile data folder:", SuperFileMainDir+dataFolder, err)
+		log.Fatalln("Can't Create Superfile data folder:", SuperFileDataDir, err)
 	}
 	// create config folder
 	err = CreateFolderIfNotExist(SuperFileMainDir + configFolder)
 	if err != nil {
-		log.Fatalln("Can't Create Superfile data folder:", SuperFileMainDir+configFolder, err)
+		log.Fatalln("Can't Create Superfile data folder:", SuperFileDataDir+configFolder, err)
 	}
 	// create pinned.json file
-	err = CreateFileIfNotExist(SuperFileMainDir + pinnedFile)
+	err = CreateFileIfNotExist(SuperFileDataDir + pinnedFile)
 	if err != nil {
-		log.Fatalln("Can't Create Superfile pinned file:", SuperFileMainDir+pinnedFile, err)
+		log.Fatalln("Can't Create Superfile pinned file:", SuperFileDataDir+pinnedFile, err)
+	}
+	// create toggleDotFile file
+	err = CreateFileIfNotExist(SuperFileDataDir + toggleDotFile)
+	if err != nil {
+		log.Fatalln("Can't Create Superfile toggleDotFile:", SuperFileDataDir+toggleDotFile, err)
 	}
 	// create superfile.log file
-	err = CreateFileIfNotExist(SuperFileMainDir + logFile)
+	err = CreateFileIfNotExist(SuperFileDataDir + logFile)
 	if err != nil {
-		log.Fatalln("Can't Create Superfile log file:", SuperFileMainDir+logFile, err)
+		log.Fatalln("Can't Create Superfile log file:", SuperFileDataDir+logFile, err)
 	}
 	// write config.json file
 	if _, err := os.Stat(SuperFileMainDir + configFile); os.IsNotExist(err) {
@@ -161,7 +167,7 @@ func CreateFileIfNotExist(filePath string) error {
 }
 
 func CheckForUpdates() {
-	lastTime, err := ReadFromFile(SuperFileMainDir + lastCheckVersion)
+	lastTime, err := ReadFromFile(SuperFileDataDir + lastCheckVersion)
 	if err != nil && !os.IsNotExist(err) {
 		fmt.Println("Error reading from file:", err)
 		return
@@ -193,7 +199,7 @@ func CheckForUpdates() {
 		}
 
 		timeStr := currentTime.Format(time.RFC3339)
-		err = WriteToFile(SuperFileMainDir+lastCheckVersion, timeStr)
+		err = WriteToFile(SuperFileDataDir+lastCheckVersion, timeStr)
 		if err != nil {
 			fmt.Println("Error writing to file:", err)
 			return
@@ -320,6 +326,7 @@ const configJsonString string = `{
 	"filePanelFileCreate": ["c", ""],
 	"filePanelItemRename": ["r", ""],
 	"pasteItem": ["ctrl+v", ""],
+	"toggleDotFile": ["ctrl+h", ""],
   
 	"_COMMIT_special_hotkey": "These hotkeys do not conflict with any other keys (including global hotkey)",
 	"cancel": ["ctrl+c", "esc"],

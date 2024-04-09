@@ -2,23 +2,23 @@ package components
 
 import (
 	"encoding/json"
-	"log"
-	"os"
-	"path/filepath"
-
 	"github.com/barasher/go-exiftool"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/rkoesters/xdg/basedir"
+	"log"
+	"os"
+	"path/filepath"
 )
 
 const (
 	configFolder     string = "/config"
 	themeFolder      string = "/theme"
 	dataFolder       string = "/data"
-	lastCheckVersion string = "/data/lastCheckVersion"
-	pinnedFile       string = "/data/pinned.json"
+	lastCheckVersion string = "/lastCheckVersion"
+	pinnedFile       string = "/pinned.json"
+	toggleDotFile    string = "/toggleDotFile"
 	logFile          string = "/superfile.log"
 	configFile       string = "/config/config.json"
 	themeZipName     string = "/theme.zip"
@@ -26,7 +26,7 @@ const (
 
 var HomeDir = basedir.Home
 var SuperFileMainDir = basedir.ConfigHome + "/superfile"
-
+var SuperFileDataDir = basedir.DataHome + "/superfile"
 var theme ThemeType
 var Config ConfigType
 
@@ -37,7 +37,7 @@ var channel = make(chan channelMessage, 1000)
 
 func InitialModel(dir string) model {
 	var err error
-	logOutput, err = os.OpenFile(SuperFileMainDir+logFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	logOutput, err = os.OpenFile(SuperFileDataDir+logFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666) // I don't know wtf is this
 	if err != nil {
 		log.Fatalf("Error while opening superfile.log file: %v", err)
 	}
@@ -63,7 +63,16 @@ func InitialModel(dir string) model {
 	if err != nil {
 		log.Fatalf("Error while decoding theme json( Your theme file may have errors ): %v", err)
 	}
-
+	toggleDotFileData, err := os.ReadFile(SuperFileDataDir + toggleDotFile)
+	if err != nil {
+		OutPutLog("Error while reading toggleDotFile data error:", err)
+	}
+	var toggleDotFileBool bool
+	if string(toggleDotFileData) == "true" {
+		toggleDotFileBool = true
+	} else if string(toggleDotFileData) == "false" {
+		toggleDotFileBool = false
+	}
 	LoadThemeConfig()
 	et, err = exiftool.NewExiftool()
 	if err != nil {
@@ -102,6 +111,7 @@ func InitialModel(dir string) model {
 			},
 			width: 10,
 		},
+		toggleDotFile: toggleDotFileBool,
 	}
 }
 
@@ -246,6 +256,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m = PinnedFolder(m)
 			case Config.OpenTerminal[0], Config.OpenTerminal[1]:
 				m = OpenTerminal(m)
+			case Config.ToggleDotFile[0], Config.ToggleDotFile[1]:
+				m = ToggleDotFile(m)
 			default:
 				// check if it's the select mode
 				if m.fileModel.filePanels[m.filePanelFocusIndex].focusType == focus && m.fileModel.filePanels[m.filePanelFocusIndex].panelMode == selectMode {
