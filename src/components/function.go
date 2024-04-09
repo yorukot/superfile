@@ -51,8 +51,8 @@ func getFolder() []folder {
 		{location: userdirs.Pictures, name: "󰋩 " + filepath.Base(userdirs.Pictures)},
 		{location: userdirs.Videos, name: "󰎁 " + filepath.Base(userdirs.Videos)},
 		{location: userdirs.Music, name: "♬ " + filepath.Base(userdirs.Music)},
-		{location: userdirs.Templates, name: "📝 " + filepath.Base(userdirs.Templates)},
-		{location: userdirs.PublicShare, name: "🌐 " + filepath.Base(userdirs.PublicShare)},
+		{location: userdirs.Templates, name: "󰏢 " + filepath.Base(userdirs.Templates)},
+		{location: userdirs.PublicShare, name: " " + filepath.Base(userdirs.PublicShare)},
 	}
 
 	for i, path := range pinnedFolder {
