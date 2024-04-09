@@ -37,7 +37,7 @@ func getFolder() []folder {
 			paths = append(paths, filepath.Join(folderPath, entry.Name()))
 		}
 	}
-	jsonData, err := os.ReadFile(SuperFileMainDir + pinnedFile)
+	jsonData, err := os.ReadFile(SuperFileDataDir + pinnedFile)
 	if err != nil {
 		OutPutLog("Read superfile data error", err)
 	}
@@ -79,7 +79,7 @@ func returnFocusType(focusPanel focusPanelType) filePanelFocusType {
 	}
 }
 
-func returnFolderElement(location string) (folderElement []element) {
+func returnFolderElement(location string, displayDotFile bool) (folderElement []element) {
 	var folders []element
 	var files []element
 
@@ -90,6 +90,9 @@ func returnFolderElement(location string) (folderElement []element) {
 
 	for _, item := range items {
 		fileInfo, _ := item.Info()
+		if !displayDotFile && strings.HasPrefix(fileInfo.Name(), ".") {
+			continue
+		} 
 		if fileInfo == nil {
 			continue
 		}

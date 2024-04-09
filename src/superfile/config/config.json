@@ -31,6 +31,7 @@
   "filePanelFileCreate": ["c", ""],
   "filePanelItemRename": ["r", ""],
   "pasteItem": ["ctrl+v", ""],
+  "toggleDotFile": ["ctrl+h", ""],
 
   "_COMMIT_special_hotkey": "These hotkeys do not conflict with any other keys (including global hotkey)",
   "cancel": ["ctrl+c", "esc"],

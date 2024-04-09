@@ -49,7 +49,7 @@ func FilePanelRender(m model) string {
 	// file panel
 	f := make([]string, 4)
 	for i, filePanel := range m.fileModel.filePanels {
-		fileElenent := returnFolderElement(filePanel.location)
+		fileElenent := returnFolderElement(filePanel.location, m.toggleDotFile)
 		filePanel.element = fileElenent
 		m.fileModel.filePanels[i].element = fileElenent
 

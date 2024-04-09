@@ -396,7 +396,7 @@ func PinnedFolder(m model) model {
 
 	unPinned := false
 
-	jsonData, err := os.ReadFile(SuperFileMainDir + pinnedFile)
+	jsonData, err := os.ReadFile(SuperFileDataDir + pinnedFile)
 	if err != nil {
 		OutPutLog("Pinned folder function read superfile data error", err)
 	}
@@ -421,7 +421,7 @@ func PinnedFolder(m model) model {
 		OutPutLog("Pinned folder function updatedData superfile data error", err)
 	}
 
-	err = os.WriteFile(SuperFileMainDir+pinnedFile, updatedData, 0644)
+	err = os.WriteFile(SuperFileDataDir+pinnedFile, updatedData, 0644)
 	if err != nil {
 		OutPutLog("Pinned folder function updatedData superfile data error", err)
 	}
@@ -495,14 +495,30 @@ func OpenTerminal(m model) model {
 		terminal = "gnome-terminal"
 		workDirSet = "--working-directory="
 	default:
-		log.Fatalf("We can't find your default terminal please go to ~/.config/superfile/config/config.json setting your default terminal and terminalWorkDirFlag!")
+		log.Fatalf("Couldn't find your default terminal, please go to ~/.config/superfile/config/config.json to set your default terminal and terminalWorkDirFlag!")
 	}
 
 	cmd := exec.Command(terminal, workDirSet+currentDir)
 	err := cmd.Start()
 	if err != nil {
-		OutPutLog("Error opening"+terminal+":", err)
+		OutPutLog("Error opening "+terminal+":", err)
 	}
 
+	return m
+}
+
+func ToggleDotFile(m model) model {
+	newToggleDotFile := ""
+	if m.toggleDotFile {
+		newToggleDotFile = "false"
+		m.toggleDotFile = false
+	} else {
+		newToggleDotFile = "true"
+		m.toggleDotFile = true
+	}
+	err := os.WriteFile(SuperFileDataDir+toggleDotFile, []byte(newToggleDotFile), 0644)
+	if err != nil {
+		OutPutLog("Pinned folder function updatedData superfile data error", err)
+	}
 	return m
 }

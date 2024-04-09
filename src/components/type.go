@@ -74,6 +74,7 @@ type model struct {
 	warnModal           warnModal
 	fileMetaData        fileMetaData
 	firstTextInput      bool
+	toggleDotFile       bool
 	filePanelFocusIndex int
 	mainPanelHeight     int
 	fullWidth           int
@@ -278,6 +279,7 @@ type ConfigType struct {
 	FilePanelFileCreate   [2]string
 	FilePanelItemRename   [2]string
 	PasteItem             [2]string
+	ToggleDotFile         [2]string
 
 	Cancel  [2]string
 	Confirm [2]string

@@ -12,6 +12,13 @@
 
 ![](/asset/theme/kaolin.png)
 
+## Catpuccin
+
+- Theme name: `catpuccin`
+- Author: github.com/AnshumanNeon
+
+![](/asset/theme/catpuccin.png)
+
 ## Nord
 
 - Theme name: `nord`
