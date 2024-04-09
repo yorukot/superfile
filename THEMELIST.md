@@ -1,3 +1,12 @@
+> Sort by A-Z
+
+## Catpuccin
+
+- Theme name: `catpuccin`
+- Author: github.com/AnshumanNeon
+
+![](/asset/theme/catpuccin.png)
+
 ## Dracula
 
 - Theme name: `dracula`
@@ -11,13 +20,6 @@
 - Author: github.com/AnshumanNeon
 
 ![](/asset/theme/kaolin.png)
-
-## Catpuccin
-
-- Theme name: `catpuccin`
-- Author: github.com/AnshumanNeon
-
-![](/asset/theme/catpuccin.png)
 
 ## Nord
 
