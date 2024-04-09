@@ -10,7 +10,7 @@ import (
 )
 
 func SideBarRender(m model) string {
-	s := sideBarTitle.Render("    Super Files     ")
+	s := sideBarTitle.Render("    Super Files")
 	s += "\n"
 	noPinnedFolder := true
 	for _, folder := range m.sideBarModel.pinnedModel.folder {
@@ -28,14 +28,14 @@ func SideBarRender(m model) string {
 		} else {
 			s += cursorStyle.Render(cursor) + " " + sideBarItem.Render(TruncateText(folder.name, sideBarWidth-2)) + "" + "\n"
 		}
-		if i == 4 {
+		if i == 7 {
 			s += "\n" + sideBarTitle.Render("󰐃 Pinned") + borderStyle.Render(" ───────────") + "\n\n"
 			if noPinnedFolder {
-				s += "\n" + sideBarTitle.Render("󱇰 Disk") + borderStyle.Render(" ─────────────") + "\n\n"
+				s += "\n" + sideBarTitle.Render("󱇰 Disks") + borderStyle.Render(" ─────────────") + "\n\n"
 			}
 		}
 		if folder.endPinned {
-			s += "\n" + sideBarTitle.Render("󱇰 Disk") + borderStyle.Render(" ─────────────") + "\n\n"
+			s += "\n" + sideBarTitle.Render("󱇰 Disks") + borderStyle.Render(" ─────────────") + "\n\n"
 		}
 
 	}
