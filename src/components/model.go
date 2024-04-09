@@ -38,8 +38,8 @@ var channel = make(chan channelMessage, 1000)
 
 func InitialModel(dir string) model {
 	var err error
-	logOutput, err = os.OpenFile(SuperFileCacheDir + logFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-  
+	logOutput, err = os.OpenFile(SuperFileCacheDir+logFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+
 	if err != nil {
 		log.Fatalf("Error while opening superfile.log file: %v", err)
 	}
@@ -69,12 +69,7 @@ func InitialModel(dir string) model {
 	if err != nil {
 		OutPutLog("Error while reading toggleDotFile data error:", err)
 	}
-	var toggleDotFileBool bool
-	if string(toggleDotFileData) == "true" {
-		toggleDotFileBool = true
-	} else if string(toggleDotFileData) == "false" {
-		toggleDotFileBool = false
-	}
+	var toggleDotFileBool = string(toggleDotFileData) == "true"
 	LoadThemeConfig()
 	et, err = exiftool.NewExiftool()
 	if err != nil {
@@ -331,7 +326,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	// check is the terminal size enough
+	// Check if terminal dimensions are big enough
 	if m.fullHeight < minimumHeight || m.fullWidth < minimumWidth {
 		return TerminalSizeWarnRender(m)
 	} else if m.typingModal.open {
@@ -340,20 +335,12 @@ func (m model) View() string {
 		return WarnModalRender(m)
 	} else {
 		sideBar := SideBarRender(m)
-
 		filePanel := FilePanelRender(m)
-
 		mainPanel := lipgloss.JoinHorizontal(0, sideBar, filePanel)
-
 		processBar := ProcessBarRender(m)
-
 		metaData := MetaDataRender(m)
-
 		clipboardBar := ClipboardRender(m)
-
 		bottomBar := lipgloss.JoinHorizontal(0, processBar, metaData, clipboardBar)
-
-		// final render
 		finalRender := lipgloss.JoinVertical(0, mainPanel, bottomBar)
 
 		return lipgloss.JoinVertical(lipgloss.Top, finalRender)
