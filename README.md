@@ -228,26 +228,7 @@ If you want to contribute please follow the [contribution guide](./CONTRIBUTING.
 
 ## Todo list
 
-#### 1.1
-
-- \[x\] Auto init config file
-- \[x\] Add more theme
-- \[x\] Open terminal in the focused file panel location
-- \[x\] Open file with enter key
-- \[ \] File panel search / filter
-- \[ \] Add help bar down below bottom bar
-- \[ \] Extract files
-- \[ \] Compress files
-- \[ \] Toggle the visibility of hidden folders
-- \[ \] Can cancel the progress of the process bar
-- \[ \] Undo function
-- \[ \] Auto clear trash can
-
-#### 1.2
-
-- \[ \] AES encryption and decryption
-- \[ \] Auto clear trash
-- \[ \] Can cancel the progress of the process bar
+See the todo list in [here](https://github.com/MHNightCat/superfile/blob/main/TODOLIST.md)
 
 ## Star History
 
