@@ -154,7 +154,7 @@ cd superfile
 Run the `build.sh` file:
 
 ```bash
-sh build.sh
+./build.sh
 ```
 
 Add the binary file to your $PATH, e.g. in `/usr/local/bin`:
