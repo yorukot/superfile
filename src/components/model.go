@@ -37,8 +37,8 @@ var channel = make(chan channelMessage, 1000)
 
 func InitialModel(dir string) model {
 	var err error
-	logOutput, err = os.OpenFile(SuperFileCacheDir+logFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 
+	logOutput, err = os.OpenFile(SuperFileCacheDir+logFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("Error while opening superfile.log file: %v", err)
 	}
@@ -47,15 +47,12 @@ func InitialModel(dir string) model {
 	if err != nil {
 		log.Fatalf("Config file doesn't exist: %v", err)
 	}
-
 	err = json.Unmarshal(data, &Config)
-
 	if err != nil {
 		log.Fatalf("Error decoding config json (your config file may have misconfigured): %v", err)
 	}
 
 	data, err = os.ReadFile(SuperFileMainDir + themeFolder + "/" + Config.Theme + ".json")
-
 	if err != nil {
 		log.Fatalf("Theme file doesn't exist: %v", err)
 	}
@@ -90,9 +87,10 @@ func InitialModel(dir string) model {
 			render:  0,
 		},
 		sideBarModel: sideBarModel{
-			pinnedModel: pinnedModel{
-				directory: getDirectories(),
-			},
+			directories: getDirectories(),
+			// wellKnownModel: getWellKnownDirectories(),
+			// pinnedModel:    getPinnedDirectories(),
+			// disksModel:     getExternalMediaFolders(),
 		},
 		fileModel: fileModel{
 			filePanels: []filePanel{
@@ -111,7 +109,7 @@ func InitialModel(dir string) model {
 	}
 }
 
-func listenForchannelMessage(msg chan channelMessage) tea.Cmd {
+func listenForChannelMessage(msg chan channelMessage) tea.Cmd {
 	return func() tea.Msg {
 		select {
 		case m := <-msg:
@@ -126,7 +124,7 @@ func (m model) Init() tea.Cmd {
 	return tea.Batch(
 		tea.SetWindowTitle("SuperFile"),
 		textinput.Blink, // Assuming textinput.Blink is a valid command
-		listenForchannelMessage(channel),
+		listenForChannelMessage(channel),
 	)
 }
 
@@ -319,8 +317,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.fileModel.filePanels[m.filePanelFocusIndex].cursor = 0
 	}
 
-	cmd = tea.Batch(cmd, listenForchannelMessage(channel))
-	m.sideBarModel.pinnedModel.directory = getDirectories()
+	cmd = tea.Batch(cmd, listenForChannelMessage(channel))
+	m.sideBarModel.directories = getDirectories()
+	// m.sideBarModel.wellKnownModel = getWellKnownDirectories()
+	// m.sideBarModel.pinnedModel = getPinnedDirectories()
+	// m.sideBarModel.disksModel = getExternalMediaFolders()
 	return m, cmd
 }
 

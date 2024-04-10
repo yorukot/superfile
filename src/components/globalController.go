@@ -21,13 +21,14 @@ func ControllerSideBarListUp(m model) model {
 	if m.sideBarModel.cursor > 0 {
 		m.sideBarModel.cursor--
 	} else {
-		m.sideBarModel.cursor = len(m.sideBarModel.pinnedModel.directory) - 1
+		m.sideBarModel.cursor = len(m.sideBarModel.directories) - 1
 	}
 	return m
 }
 
 func ControllerSideBarListDown(m model) model {
-	if m.sideBarModel.cursor < len(m.sideBarModel.pinnedModel.directory)-1 {
+	lenDirs := len(m.sideBarModel.directories)
+	if m.sideBarModel.cursor < lenDirs-1 {
 		m.sideBarModel.cursor++
 	} else {
 		m.sideBarModel.cursor = 0
@@ -146,7 +147,7 @@ func SideBarSelectFolder(m model) model {
 		directoryRender: panel.render,
 	}
 
-	panel.location = m.sideBarModel.pinnedModel.directory[m.sideBarModel.cursor].location
+	panel.location = m.sideBarModel.directories[m.sideBarModel.cursor].location
 	directoryRecord, hasRecord := panel.directoryRecord[panel.location]
 	if hasRecord {
 		panel.cursor = directoryRecord.directoryCursor

@@ -20,15 +20,15 @@ import (
 func getDirectories() []directory {
 	directories := []directory{}
 
-	addWellKnownDirectories(&directories)
-	addPinnedDirectories(&directories)
-	addExternalMediaFolders(&directories)
+	directories = append(directories, getWellKnownDirectories()...)
+	directories = append(directories, getPinnedDirectories()...)
+	directories = append(directories, getExternalMediaFolders()...)
 
 	return directories
 }
 
-// Helper functions for each step
-func addWellKnownDirectories(directories *[]directory) {
+func getWellKnownDirectories() []directory {
+	directories := []directory{}
 	wellKnownDirectories := []directory{
 		{location: HomeDir, name: "󰋜 Home"},
 		{location: userdirs.Download, name: "󰏔 " + filepath.Base(userdirs.Download)},
@@ -42,12 +42,14 @@ func addWellKnownDirectories(directories *[]directory) {
 	for _, dir := range wellKnownDirectories {
 		if _, err := os.Stat(dir.location); !os.IsNotExist(err) {
 			// Directory exists
-			*directories = append(*directories, dir)
+			directories = append(directories, dir)
 		}
 	}
+	return directories
 }
 
-func addPinnedDirectories(directories *[]directory) {
+func getPinnedDirectories() []directory {
+	directories := []directory{}
 	var paths []string
 
 	jsonData, err := os.ReadFile(SuperFileDataDir + pinnedFile)
@@ -57,22 +59,16 @@ func addPinnedDirectories(directories *[]directory) {
 
 	json.Unmarshal(jsonData, &paths)
 
-	for i, path := range paths {
-		directoryName := filepath.Base(path)
-		if i == len(paths)-1 {
-			*directories = append(*directories, directory{location: path, name: directoryName, endPinned: true})
-		} else {
-			*directories = append(*directories, directory{location: path, name: directoryName})
-		}
-	}
 	for _, path := range paths {
 		directoryName := filepath.Base(path)
-		*directories = append(*directories, directory{location: path, name: directoryName})
+		directories = append(directories, directory{location: path, name: directoryName})
 	}
+	return directories
 }
 
-func addExternalMediaFolders(directories *[]directory) {
+func getExternalMediaFolders() []directory {
 	var paths []string
+	directories := []directory{}
 
 	currentUser, err := user.Current()
 	if err != nil {
@@ -90,8 +86,11 @@ func addExternalMediaFolders(directories *[]directory) {
 			paths = append(paths, filepath.Join(folderPath, entry.Name()))
 		}
 	}
+	return directories
 }
 
+// TODO: Remove this function
+// This gets the award for most redundant function seen by @lescx ever
 func repeatString(s string, count int) string {
 	return strings.Repeat(s, count)
 }
@@ -99,9 +98,8 @@ func repeatString(s string, count int) string {
 func returnFocusType(focusPanel focusPanelType) filePanelFocusType {
 	if focusPanel == nonePanelFocus {
 		return focus
-	} else {
-		return secondFocus
 	}
+	return secondFocus
 }
 
 func returnFolderElement(location string, displayDotFile bool) (folderElement []element) {

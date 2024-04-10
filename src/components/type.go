@@ -157,20 +157,16 @@ type element struct {
 /* SIDE BAR COMPONENTS TYPE START*/
 // Model for sidebar components
 type sideBarModel struct {
-	pinnedModel pinnedModel
-	cursor      int
+	directories []directory
+	// wellKnownModel []directory
+	// pinnedModel    []directory
+	// disksModel     []directory
+	cursor int
 }
 
-// Model for pinned items in sidebar
-type pinnedModel struct {
-	directory []directory
-}
-
-// Directory within pinned items
 type directory struct {
-	location  string
-	name      string
-	endPinned bool
+	location string
+	name     string
 }
 
 /* SIDE BAR COMPONENTS TYPE END*/
