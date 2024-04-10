@@ -24,9 +24,9 @@ func SideBarRender(m model) string {
 			cursor = ""
 		}
 		if folder.location == m.fileModel.filePanels[m.filePanelFocusIndex].location {
-			s += cursorStyle.Render(cursor) + " " + sideBarSelected.Render(TruncateText(folder.name, sideBarWidth-2)) + "" + "\n"
+			s += cursorStyle.Render(cursor) + lipgloss.NewStyle().Background(backgroundWindow).Render(" ") + sideBarSelected.Render(TruncateText(folder.name, sideBarWidth-2)) + "" + "\n"
 		} else {
-			s += cursorStyle.Render(cursor) + " " + sideBarItem.Render(TruncateText(folder.name, sideBarWidth-2)) + "" + "\n"
+			s += cursorStyle.Render(cursor) + lipgloss.NewStyle().Background(backgroundWindow).Render(" ") + sideBarItem.Render(TruncateText(folder.name, sideBarWidth-2)) + "" + "\n"
 		}
 		if i == 4 {
 			s += "\n" + sideBarTitle.Render("󰐃 Pinned") + borderStyle.Render(" ───────────") + "\n\n"
@@ -78,7 +78,7 @@ func FilePanelRender(m model) string {
 				if filePanel.renaming && h == filePanel.cursor {
 					f[i] += filePanel.rename.View() + "\n"
 				} else {
-					f[i] += cursorStyle.Render(cursor) + " " + PrettierName(filePanel.element[h].name, m.fileModel.width-5, filePanel.element[h].folder, isItemSelected) + "\n"
+					f[i] += cursorStyle.Render(cursor) + lipgloss.NewStyle().Background(backgroundWindow).Render(" ") + PrettierName(filePanel.element[h].name, m.fileModel.width-5, filePanel.element[h].folder, isItemSelected) + "\n"
 				}
 			}
 			cursorPosition := strconv.Itoa(filePanel.cursor + 1)
@@ -307,13 +307,13 @@ func TypineModalRender(m model) string {
 		fileLocation := filePanelTopFolderIcon.Render("   ") + filePanelTopPath.Render(TruncateTextBeginning(m.typingModal.location+"/"+m.typingModal.textInput.Value(), modalWidth-4)) + "\n"
 		confirm := modalConfirm.Render(" (" + Config.Confirm[0] + ") New File ")
 		cancel := modalCancel.Render(" (" + Config.Cancel[0] + ") Cancel ")
-		tip := confirm + "           " + cancel
+		tip := confirm + lipgloss.NewStyle().Background(backgroundWindow).Render("           ") + cancel
 		return FullScreenStyle(m.fullHeight, m.fullWidth).Render(FocusedModalStyle(modalHeight, modalWidth).Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip))
 	} else {
 		fileLocation := filePanelTopFolderIcon.Render("   ") + filePanelTopPath.Render(TruncateTextBeginning(m.typingModal.location+"/"+m.typingModal.textInput.Value(), modalWidth-4)) + "\n"
 		confirm := modalConfirm.Render(" (" + Config.Confirm[0] + ") New Folder ")
 		cancel := modalCancel.Render(" (" + Config.Cancel[0] + ") Cancel ")
-		tip := confirm + "           " + cancel
+		tip := confirm + lipgloss.NewStyle().Background(backgroundWindow).Render("           ") + cancel
 		return FullScreenStyle(m.fullHeight, m.fullWidth).Render(FocusedModalStyle(modalHeight, modalWidth).Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip))
 	}
 }
@@ -323,6 +323,6 @@ func WarnModalRender(m model) string {
 	content := m.warnModal.content
 	confirm := modalCancel.Render(" (" + Config.Confirm[0] + ") Cofnirm ")
 	cancel := modalCancel.Render(" (" + Config.Cancel[0] + ") Cancel ")
-	tip := confirm + "           " + cancel
+	tip := confirm + lipgloss.NewStyle().Background(backgroundWindow).Render("           ") + cancel
 	return FullScreenStyle(m.fullHeight, m.fullWidth).Render(FocusedModalStyle(modalHeight, modalWidth).Render(title + "\n\n" + content + "\n\n" + tip))
 }

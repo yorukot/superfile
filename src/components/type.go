@@ -212,8 +212,9 @@ type iconStyle struct {
 
 // Theme configuration
 type ThemeType struct {
-	Border string
-	Cursor string
+	Border            string
+	Cursor            string
+  BackgroundWindow  string
 
 	TerminalTooSmallError string
 	TerminalSizeCorrect   string
