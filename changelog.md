@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file. Dates are d
 
 # [**v1.x**]()
 
-> 2024/xx/xx
+> xxxx/xx/xx
 
 #### Update
 
@@ -14,6 +14,8 @@ All notable changes to this project will be documented in this file. Dates are d
 - Update theme background [`#42`](https://github.com/MHNightCat/superfile/pull/42)
 
 #### Bug fix
+
+- Fix interface lag when selecting zip files or large files [`#29`](https://github.com/MHNightCat/superfile/issues/29)
 
 # [**v1.0.1**](https://github.com/MHNightCat/superfile/releases/tag/v1.0.1)
 
