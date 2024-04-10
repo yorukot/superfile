@@ -3,6 +3,7 @@
 
   "border": "#74B09A",
   "cursor": "#F5C791",
+  "backgroundWindow": "#17171a",
 
   "terminalTooSmallError": "#c74a4d",
   "terminalSizeCurrect": "#4EB8CA",
