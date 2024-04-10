@@ -102,7 +102,7 @@ func InitialModel(dir string) model {
 		},
 		sideBarModel: sideBarModel{
 			pinnedModel: pinnedModel{
-				folder: getFolder(),
+				folder: GetFolder(),
 			},
 		},
 		fileModel: fileModel{
@@ -170,7 +170,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case Config.Confirm[0], Config.Confirm[1]:
 				m = CreateItem(m)
 			}
-		// if in the renaming mode
+			// if in the renaming mode
 		} else if m.warnModal.open {
 			switch msg.String() {
 			case Config.Cancel[0], Config.Cancel[1]:
@@ -188,7 +188,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					}()
 				}
 			}
-		// if in the renaming mode
+			// if in the renaming mode
 		} else if m.fileModel.renaming {
 			switch msg.String() {
 			case Config.Cancel[0], Config.Cancel[1]:
@@ -288,7 +288,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					case Config.FilePanelSelectModeItemDelete[0], Config.FilePanelSelectModeItemDelete[1]:
 						go func() {
 							m = DeleteMultipleItem(m)
-							if !IsExternalPath(m.fileModel.filePanels[m.filePanelFocusIndex].location) {
+							if !IsExternalDiskPath(m.fileModel.filePanels[m.filePanelFocusIndex].location) {
 								m.fileModel.filePanels[m.filePanelFocusIndex].selected = m.fileModel.filePanels[m.filePanelFocusIndex].selected[:0]
 							}
 						}()
@@ -344,7 +344,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	} else {
 		cmd = tea.Batch(cmd, listenForchannelMessage(channel))
 	}
-	m.sideBarModel.pinnedModel.folder = getFolder()
+	m.sideBarModel.pinnedModel.folder = GetFolder()
 	return m, cmd
 }
 
