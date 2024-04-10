@@ -16,7 +16,8 @@ All notable changes to this project will be documented in this file. Dates are d
 #### Bug fix
 
 - Fix interface lag when selecting zip files or large files [`#29`](https://github.com/MHNightCat/superfile/issues/29)
-
+- Fix external media error [`#46`](https://github.com/MHNightCat/superfile/pull/46)
+ 
 # [**v1.0.1**](https://github.com/MHNightCat/superfile/releases/tag/v1.0.1)
 
 > 2024/04/08
