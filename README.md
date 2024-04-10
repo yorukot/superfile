@@ -154,7 +154,7 @@ cd superfile
 Run the `build.sh` file:
 
 ```bash
-sh build.sh
+./build.sh
 ```
 
 Add the binary file to your $PATH, e.g. in `/usr/local/bin`:
@@ -185,7 +185,7 @@ Theme name: theme_name
 Edit `config.json` using your preferred editor:
 
 ```
-$EDITOR ~/.config/superfile/config/config.json
+$EDITOR ~/.config/superfile/config.json
 ```
 
 and change:
@@ -213,7 +213,7 @@ Don't forget to change the `theme` variable in `config.json` to your theme name.
 
 [**Click me to see the hotkey list**](https://github.com/MHNightCat/superfile/blob/main/HOTKEYS.md)
 
-**You can change all hotkeys in** `~/.config/superfile/config/config.json`
+**You can change all hotkeys in** `~/.config/superfile/config.json`
 
 
 > "Normal mode" is the default browsing mode
