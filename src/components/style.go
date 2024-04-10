@@ -15,15 +15,16 @@ var (
 	terminalTooSmall    lipgloss.Style
 	terminalMinimumSize lipgloss.Style
 
-	borderStyle lipgloss.Style
-	cursorStyle lipgloss.Style
+	borderStyle         lipgloss.Style
+	cursorStyle         lipgloss.Style
+	backgroundWindow    lipgloss.Color
 )
 
 var (
-	sideBarWidth    = 20
-	sideBarTitle    lipgloss.Style
-	sideBarItem     lipgloss.Style
-	sideBarSelected lipgloss.Style
+	sideBarWidth        = 20
+	sideBarTitle        lipgloss.Style
+	sideBarItem         lipgloss.Style
+	sideBarSelected     lipgloss.Style
 )
 
 var (
@@ -39,28 +40,30 @@ var (
 )
 
 func LoadThemeConfig() {
-	terminalTooSmall = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.TerminalTooSmallError))
-	terminalMinimumSize = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.TerminalSizeCorrect))
+	backgroundWindow = lipgloss.Color(theme.BackgroundWindow)
 
-	borderStyle = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.Border))
-	cursorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.Cursor)).Bold(true)
+	terminalTooSmall = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.TerminalTooSmallError)).Background(backgroundWindow)
+	terminalMinimumSize = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.TerminalSizeCorrect)).Background(backgroundWindow)
 
-	sideBarTitle = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.SideBarTitle)).Bold(true)
-	sideBarItem = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.SideBarItem))
+	borderStyle = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.Border)).Background(backgroundWindow)
+	cursorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.Cursor)).Bold(true).Background(backgroundWindow)
 
-	sideBarSelected = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.SideBarSelected)).Bold(true)
+	sideBarTitle = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.SideBarTitle)).Bold(true).Background(backgroundWindow)
+	sideBarItem = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.SideBarItem)).Background(backgroundWindow)
 
-	filePanelTopFolderIcon = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.FilePanelTopFolderIcon)).Bold(true)
-	filePanelTopPath = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.FilePanelTopPath)).Bold(true)
-	filePanelItem = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.FilePanelItem))
-	filePanelItemSelected = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.FilePanelItemSelected))
+	sideBarSelected = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.SideBarSelected)).Bold(true).Background(backgroundWindow)
+
+	filePanelTopFolderIcon = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.FilePanelTopFolderIcon)).Bold(true).Background(backgroundWindow)
+	filePanelTopPath = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.FilePanelTopPath)).Bold(true).Background(backgroundWindow)
+	filePanelItem = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.FilePanelItem)).Background(backgroundWindow)
+	filePanelItemSelected = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.FilePanelItemSelected)).Background(backgroundWindow)
 
 	modalCancel = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.ModalForeground)).Background(lipgloss.Color(theme.ModalCancel))
 	modalConfirm = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.ModalForeground)).Background(lipgloss.Color(theme.ModalConfirm))
 }
 
 func FullScreenStyle(height int, width int) lipgloss.Style {
-	return lipgloss.NewStyle().Height(height).Width(width).Align(lipgloss.Center, lipgloss.Center)
+	return lipgloss.NewStyle().Height(height).Width(width).Align(lipgloss.Center, lipgloss.Center).Background(backgroundWindow)
 }
 
 func FocusedModalStyle(height int, width int) lipgloss.Style {
@@ -68,7 +71,7 @@ func FocusedModalStyle(height int, width int) lipgloss.Style {
 		Width(width).
 		Align(lipgloss.Center, lipgloss.Center).
 		Border(lipgloss.ThickBorder()).
-		BorderForeground(lipgloss.Color(theme.FilePanelFocus))
+		BorderForeground(lipgloss.Color(theme.FilePanelFocus)).BorderBackground(backgroundWindow).Background(backgroundWindow)
 }
 
 func SideBarBoardStyle(height int, focus focusPanelType) lipgloss.Style {
@@ -76,13 +79,15 @@ func SideBarBoardStyle(height int, focus focusPanelType) lipgloss.Style {
 		return lipgloss.NewStyle().
 			BorderStyle(lipgloss.ThickBorder()).
 			BorderForeground(lipgloss.Color(theme.SideBarFocus)).
+			BorderBackground(backgroundWindow).
 			Width(sideBarWidth).
-			Height(height).Bold(true)
+			Height(height).Bold(true).Background(backgroundWindow)
 	} else {
 		return lipgloss.NewStyle().
 			BorderStyle(lipgloss.HiddenBorder()).
+			BorderBackground(backgroundWindow).
 			Width(sideBarWidth).
-			Height(height).Bold(true)
+			Height(height).Bold(true).Background(backgroundWindow)
 	}
 }
 
@@ -111,8 +116,9 @@ func FilePanelBoardStyle(height int, width int, focusType filePanelFocusType, bo
 	return lipgloss.NewStyle().
 		Border(filePanelBottomBoard, true, true, true, true).
 		BorderForeground(lipgloss.Color(FilePanelFocusColor(focusType))).
+		BorderBackground(backgroundWindow).
 		Width(width).
-		Height(height)
+		Height(height).Background(backgroundWindow)
 }
 
 func ProcsssBarBoarder(height int, width int, borderBottom string, focusType focusPanelType) lipgloss.Style {
@@ -130,14 +136,16 @@ func ProcsssBarBoarder(height int, width int, borderBottom string, focusType foc
 		return lipgloss.NewStyle().
 			Border(filePanelBottomBoard, true, true, true, true).
 			BorderForeground(lipgloss.Color(theme.BottomBarFocus)).
+			BorderBackground(backgroundWindow).
 			Width(width).
-			Height(height).Bold(true)
+			Height(height).Bold(true).Background(backgroundWindow)
 	} else {
 		return lipgloss.NewStyle().
 			Border(filePanelBottomBoard, true, true, true, true).
 			BorderForeground(lipgloss.Color(theme.Border)).
+			BorderBackground(backgroundWindow).
 			Width(width).
-			Height(height).Bold(true)
+			Height(height).Bold(true).Background(backgroundWindow)
 	}
 }
 
@@ -156,14 +164,16 @@ func MetaDataBoarder(height int, width int, borderBottom string, focusType focus
 		return lipgloss.NewStyle().
 			Border(filePanelBottomBoard, true, true, true, true).
 			BorderForeground(lipgloss.Color(theme.BottomBarFocus)).
+			BorderBackground(backgroundWindow).
 			Width(width).
-			Height(height).Bold(true)
+			Height(height).Bold(true).Background(backgroundWindow)
 	} else {
 		return lipgloss.NewStyle().
 			Border(filePanelBottomBoard, true, true, true, true).
 			BorderForeground(lipgloss.Color(theme.Border)).
+			BorderBackground(backgroundWindow).
 			Width(width).
-			Height(height).Bold(true)
+			Height(height).Bold(true).Background(backgroundWindow)
 	}
 }
 
@@ -182,13 +192,14 @@ func ClipboardBoarder(height int, width int, borderBottom string) lipgloss.Style
 	return lipgloss.NewStyle().
 		Border(filePanelBottomBoard, true, true, true, true).
 		BorderForeground(lipgloss.Color(theme.Border)).
+		BorderBackground(backgroundWindow).
 		Width(width).
-		Height(height).Bold(true)
+		Height(height).Bold(true).Background(backgroundWindow)
 
 }
 
 func FilePanelDividerStyle(focusType filePanelFocusType) lipgloss.Style {
-	return lipgloss.NewStyle().Foreground(lipgloss.Color(FilePanelFocusColor(focusType))).Bold(true)
+	return lipgloss.NewStyle().Foreground(lipgloss.Color(FilePanelFocusColor(focusType))).Bold(true).Background(backgroundWindow)
 }
 
 func TruncateText(text string, maxChars int) string {
@@ -223,18 +234,18 @@ func TruncateMiddleText(text string, maxChars int) string {
 func PrettierName(name string, width int, isDir bool, isSelected bool) string {
 	style := getElementIcon(name, isDir)
 	if isSelected {
-		return StringColorRender(style.color).Render(style.icon) + "  " + filePanelItemSelected.Render(TruncateText(name, width))
+		return StringColorRender(style.color).Background(backgroundWindow).Render(style.icon) + lipgloss.NewStyle().Background(backgroundWindow).Render("  ") + filePanelItemSelected.Render(TruncateText(name, width))
 	} else {
-		return StringColorRender(style.color).Render(style.icon) + "  " + filePanelItem.Render(TruncateText(name, width))
+		return StringColorRender(style.color).Background(backgroundWindow).Render(style.icon) + lipgloss.NewStyle().Background(backgroundWindow).Render("  ") + filePanelItem.Render(TruncateText(name, width))
 	}
 }
 
 func ClipboardPrettierName(name string, width int, isDir bool, isSelected bool) string {
 	style := getElementIcon(name, isDir)
 	if isSelected {
-		return StringColorRender(style.color).Render(style.icon) + "  " + filePanelItemSelected.Render(TruncateTextBeginning(name, width))
+		return StringColorRender(style.color).Background(backgroundWindow).Render(style.icon) + lipgloss.NewStyle().Background(backgroundWindow).Render("  ") + filePanelItemSelected.Render(TruncateTextBeginning(name, width))
 	} else {
-		return StringColorRender(style.color).Render(style.icon) + "  " + filePanelItem.Render(TruncateTextBeginning(name, width))
+		return StringColorRender(style.color).Background(backgroundWindow).Render(style.icon) + lipgloss.NewStyle().Background(backgroundWindow).Render("  ") + filePanelItem.Render(TruncateTextBeginning(name, width))
 	}
 }
 
