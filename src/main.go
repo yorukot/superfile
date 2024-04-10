@@ -309,8 +309,6 @@ func Unzip(src, dest string) error {
 
 const configJsonString string = `{
 	"theme": "gruvbox",
-	"terminal": "",
-	"terminalWorkDirFlag": "",
   
 	"_COMMIT_HOTKEY": "",
   
