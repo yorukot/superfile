@@ -5,14 +5,10 @@
 - \[ \] Add help bar down below bottom bar
 - \[ \] Extract files
 - \[ \] Compress files
-- \[ \] Toggle the visibility of hidden folders
 - \[ \] Can cancel the progress of the process bar
 - \[ \] Undo function
 - \[ \] Auto clear trash can
 - \[ \] Preview image or file
-- \[ \] AES encryption and decryption
-- \[ \] Auto clear trash
-- \[ \] Can cancel the progress of the process bar
 
 #### Bug fix
 
@@ -21,11 +17,10 @@
 - \[ \] External media error when moving cursor [#22](https://github.com/MHNightCat/superfile/issues/22)
 - \[ \] Update macos user directories in sidebar [#30](https://github.com/MHNightCat/superfile/issues/30)
 
-
 #### Will do but no plan for now
 
 - \[ \] Changing theme live [[#34](https://github.com/MHNightCat/superfile/issues/34)] 
-
+- \[ \] AES encryption and decryption
 
 #### Done
 
@@ -33,3 +28,4 @@
 - \[x\] Add more theme
 - \[x\] Open terminal in the focused file panel location
 - \[x\] Open file with enter key
+- \[x\] Toggle the visibility of hidden folders
