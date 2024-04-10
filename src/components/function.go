@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/lithammer/shortuuid"
 	"github.com/rkoesters/xdg/userdirs"
 )
 
@@ -301,7 +302,7 @@ func PasteDir(src, dst string, id string, m model) (model, error) {
 
 			if len(channel) < 5 {
 				channel <- channelMessage{
-					processId:       id,
+					messageId:       id,
 					processNewState: p,
 				}
 			}
@@ -310,7 +311,7 @@ func PasteDir(src, dst string, id string, m model) (model, error) {
 			if err != nil {
 				p.state = failure
 				channel <- channelMessage{
-					processId:       id,
+					messageId:       id,
 					processNewState: p,
 				}
 				return err
@@ -318,7 +319,7 @@ func PasteDir(src, dst string, id string, m model) (model, error) {
 			p.done++
 			if len(channel) < 5 {
 				channel <- channelMessage{
-					processId:       id,
+					messageId:       id,
 					processNewState: p,
 				}
 			}
@@ -346,17 +347,25 @@ func contains(s []string, str string) bool {
 
 func ReturnMetaData(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	m.fileMetaData.metaData = m.fileMetaData.metaData[:0]
+	id := shortuuid.New()
 	if len(panel.element) == 0 {
+		channel <- channelMessage{
+			messageId:    id,
+			loadMetadata: true,
+			metadata:     m.fileMetaData.metaData,
+		}
 		return m
 	}
 	if len(panel.element[panel.cursor].metaData) != 0 && m.focusPanel != metaDataFocus {
 		m.fileMetaData.metaData = panel.element[panel.cursor].metaData
+		channel <- channelMessage{
+			messageId:    id,
+			loadMetadata: true,
+			metadata:     m.fileMetaData.metaData,
+		}
 		return m
 	}
-	if len(panel.element) == 0 {
-		return m
-	}
-	m.fileMetaData.metaData = m.fileMetaData.metaData[:0]
 	filePath := panel.element[panel.cursor].location
 
 	fileInfo, err := os.Stat(filePath)
@@ -373,6 +382,11 @@ func ReturnMetaData(m model) model {
 			m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"FolderSize", FormatFileSize(DirSize(filePath))})
 		}
 		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"FolderModifyDate", fileInfo.ModTime().String()})
+		channel <- channelMessage{
+			messageId:    id,
+			loadMetadata: true,
+			metadata:     m.fileMetaData.metaData,
+		}
 		return m
 	}
 
@@ -387,6 +401,11 @@ func ReturnMetaData(m model) model {
 			temp := [2]string{k, fmt.Sprintf("%v", v)}
 			m.fileMetaData.metaData = append(m.fileMetaData.metaData, temp)
 		}
+	}
+	channel <- channelMessage{
+		messageId:    id,
+		loadMetadata: true,
+		metadata:     m.fileMetaData.metaData,
 	}
 	panel.element[panel.cursor].metaData = m.fileMetaData.metaData
 	return m

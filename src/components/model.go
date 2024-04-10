@@ -2,14 +2,15 @@ package components
 
 import (
 	"encoding/json"
+	"log"
+	"os"
+	"path/filepath"
+
 	"github.com/barasher/go-exiftool"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/rkoesters/xdg/basedir"
-	"log"
-	"os"
-	"path/filepath"
 )
 
 const (
@@ -142,11 +143,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case channelMessage:
 		if msg.returnWarnModal {
 			m.warnModal = msg.warnModal
+		} else if msg.loadMetadata {
+			m.fileMetaData.metaData = msg.metadata
 		} else {
-			if !contains(m.processBarModel.processList, msg.processId) {
-				m.processBarModel.processList = append(m.processBarModel.processList, msg.processId)
+			if !contains(m.processBarModel.processList, msg.messageId) {
+				m.processBarModel.processList = append(m.processBarModel.processList, msg.messageId)
 			}
-			m.processBarModel.process[msg.processId] = msg.processNewState
+			m.processBarModel.process[msg.messageId] = msg.processNewState
 		}
 	case tea.WindowSizeMsg:
 		m.mainPanelHeight = msg.Height - bottomBarHeight + 1
@@ -207,7 +210,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m = ControllerMetaDataListUp(m)
 				} else if m.focusPanel == nonePanelFocus {
 					m = ControllerFilePanelListUp(m)
-					m = ReturnMetaData(m)
+					m.fileMetaData.renderIndex = 0
+					go func() {
+						m = ReturnMetaData(m)
+					}()
 				}
 			// down list
 			case Config.ListDown[0], Config.ListDown[1]:
@@ -219,7 +225,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m = ControllerMetaDataListDown(m)
 				} else if m.focusPanel == nonePanelFocus {
 					m = ControllerFilePanelListDown(m)
-					m = ReturnMetaData(m)
+					m.fileMetaData.renderIndex = 0
+					go func() {
+						m = ReturnMetaData(m)
+					}()
 				}
 			/* LIST CONTROLLER END */
 			case Config.ChangePanelMode[0], Config.ChangePanelMode[1]:
@@ -245,7 +254,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m = FocusOnProcessBar(m)
 			case Config.FocusOnMetaData[0], Config.FocusOnMetaData[1]:
 				m = FocusOnMetaData(m)
-				m = ReturnMetaData(m)
+				go func() {
+					m = ReturnMetaData(m)
+				}()
 			case Config.PasteItem[0], Config.PasteItem[1]:
 				go func() {
 					m = PasteItem(m)

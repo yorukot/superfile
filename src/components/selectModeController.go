@@ -85,7 +85,7 @@ func CompletelyDeleteMultipleFile(m model) model {
 		m.processBarModel.process[id] = newProcess
 
 		channel <- channelMessage{
-			processId:       id,
+			messageId:       id,
 			processNewState: newProcess,
 		}
 		for _, filePath := range panel.selected {
@@ -96,7 +96,7 @@ func CompletelyDeleteMultipleFile(m model) model {
 			p.state = inOperation
 			if len(channel) < 5 {
 				channel <- channelMessage{
-					processId:       id,
+					messageId:       id,
 					processNewState: p,
 				}
 			}
@@ -108,7 +108,7 @@ func CompletelyDeleteMultipleFile(m model) model {
 			if err != nil {
 				p.state = failure
 				channel <- channelMessage{
-					processId:       id,
+					messageId:       id,
 					processNewState: p,
 				}
 				OutPutLog("Completely delete multiple item function error", err)
@@ -118,7 +118,7 @@ func CompletelyDeleteMultipleFile(m model) model {
 				if p.done == p.total {
 					p.state = successful
 					channel <- channelMessage{
-						processId:       id,
+						messageId:       id,
 						processNewState: p,
 					}
 				}
@@ -144,7 +144,7 @@ func DeleteMultipleItem(m model) model {
 		id := shortuuid.New()
 		if IsExternalPath(panel.location) || runtime.GOOS == "darwin" {
 			channel <- channelMessage{
-				processId:       id,
+				messageId:       id,
 				returnWarnModal: true,
 				warnModal: warnModal{
 					open:     true,
@@ -167,7 +167,7 @@ func DeleteMultipleItem(m model) model {
 		m.processBarModel.process[id] = newProcess
 
 		channel <- channelMessage{
-			processId:       id,
+			messageId:       id,
 			processNewState: newProcess,
 		}
 
@@ -179,7 +179,7 @@ func DeleteMultipleItem(m model) model {
 			p.state = inOperation
 			if len(channel) < 5 {
 				channel <- channelMessage{
-					processId:       id,
+					messageId:       id,
 					processNewState: p,
 				}
 			}
@@ -191,7 +191,7 @@ func DeleteMultipleItem(m model) model {
 			if err != nil {
 				p.state = failure
 				channel <- channelMessage{
-					processId:       id,
+					messageId:       id,
 					processNewState: p,
 				}
 				OutPutLog("Delete multiple item function error", err)
@@ -201,7 +201,7 @@ func DeleteMultipleItem(m model) model {
 				if p.done == p.total {
 					p.state = successful
 					channel <- channelMessage{
-						processId:       id,
+						messageId:       id,
 						processNewState: p,
 					}
 				}

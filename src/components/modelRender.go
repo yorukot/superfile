@@ -186,9 +186,12 @@ func MetaDataRender(m model) string {
 	// process bar
 	metaDataBar := ""
 	if len(m.fileMetaData.metaData) == 0 && len(m.fileModel.filePanels[m.filePanelFocusIndex].element) > 0 && !m.fileModel.renaming {
-		m = ReturnMetaData(m)
+		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"", ""})
+		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{" 󰥔  Loading metadata...", ""})
+		go func() {
+			m = ReturnMetaData(m)
+		}()
 	}
-
 	maxKeyLength := 0
 	sort.Slice(m.fileMetaData.metaData, func(i, j int) bool {
 		if m.fileMetaData.metaData[i][0] == "FileName" {

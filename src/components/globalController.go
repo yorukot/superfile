@@ -299,7 +299,7 @@ func PasteItem(m model) model {
 	m.processBarModel.process[id] = newProcess
 
 	channel <- channelMessage{
-		processId:       id,
+		messageId:       id,
 		processNewState: newProcess,
 	}
 
@@ -317,7 +317,7 @@ func PasteItem(m model) model {
 		if err != nil {
 			p.state = failure
 			channel <- channelMessage{
-				processId:       id,
+				messageId:       id,
 				processNewState: p,
 			}
 			OutPutLog("Pasted item error", err)
@@ -329,7 +329,7 @@ func PasteItem(m model) model {
 				p.done = totalFiles
 				p.doneTime = time.Now()
 				channel <- channelMessage{
-					processId:       id,
+					messageId:       id,
 					processNewState: p,
 				}
 			}
