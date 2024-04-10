@@ -31,11 +31,11 @@ func SideBarRender(m model) string {
 		if i == 7 {
 			s += "\n" + sideBarTitle.Render("󰐃 Pinned") + borderStyle.Render(" ───────────") + "\n\n"
 			if noPinnedFolder {
-				s += "\n" + sideBarTitle.Render("󱇰 Disks") + borderStyle.Render(" ─────────────") + "\n\n"
+				s += "\n" + sideBarTitle.Render("󱇰 Disks") + borderStyle.Render(" ────────────") + "\n\n"
 			}
 		}
 		if folder.endPinned {
-			s += "\n" + sideBarTitle.Render("󱇰 Disks") + borderStyle.Render(" ─────────────") + "\n\n"
+			s += "\n" + sideBarTitle.Render("󱇰 Disks") + borderStyle.Render(" ────────────") + "\n\n"
 		}
 
 	}

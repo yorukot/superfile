@@ -13,13 +13,14 @@ import (
 )
 
 const (
+	configFolder     string = "/config"
 	themeFolder      string = "/theme"
 	dataFolder       string = "/data"
 	lastCheckVersion string = "/lastCheckVersion"
 	pinnedFile       string = "/pinned.json"
 	toggleDotFile    string = "/toggleDotFile"
 	logFile          string = "/superfile.log"
-	configFile       string = "/config.json"
+	configFile       string = "/config/config.json"
 	themeZipName     string = "/theme.zip"
 )
 
@@ -37,8 +38,8 @@ var channel = make(chan channelMessage, 1000)
 
 func InitialModel(dir string) model {
 	var err error
-	logOutput, err = os.OpenFile(SuperFileCacheDir+logFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-
+	logOutput, err = os.OpenFile(SuperFileCacheDir + logFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+  
 	if err != nil {
 		log.Fatalf("Error while opening superfile.log file: %v", err)
 	}
@@ -51,7 +52,7 @@ func InitialModel(dir string) model {
 	err = json.Unmarshal(data, &Config)
 
 	if err != nil {
-		log.Fatalf("Error decoding config json (your config file may have misconfigured): %v", err)
+		log.Fatalf("Error decoding config json( your config file may have misconfigured ): %v", err)
 	}
 
 	data, err = os.ReadFile(SuperFileMainDir + themeFolder + "/" + Config.Theme + ".json")
@@ -68,7 +69,12 @@ func InitialModel(dir string) model {
 	if err != nil {
 		OutPutLog("Error while reading toggleDotFile data error:", err)
 	}
-	var toggleDotFileBool = string(toggleDotFileData) == "true"
+	var toggleDotFileBool bool
+	if string(toggleDotFileData) == "true" {
+		toggleDotFileBool = true
+	} else if string(toggleDotFileData) == "false" {
+		toggleDotFileBool = false
+	}
 	LoadThemeConfig()
 	et, err = exiftool.NewExiftool()
 	if err != nil {
@@ -325,7 +331,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	// Check if terminal dimensions are big enough
+	// check is the terminal size enough
 	if m.fullHeight < minimumHeight || m.fullWidth < minimumWidth {
 		return TerminalSizeWarnRender(m)
 	} else if m.typingModal.open {
@@ -334,12 +340,20 @@ func (m model) View() string {
 		return WarnModalRender(m)
 	} else {
 		sideBar := SideBarRender(m)
+
 		filePanel := FilePanelRender(m)
+
 		mainPanel := lipgloss.JoinHorizontal(0, sideBar, filePanel)
+
 		processBar := ProcessBarRender(m)
+
 		metaData := MetaDataRender(m)
+
 		clipboardBar := ClipboardRender(m)
+
 		bottomBar := lipgloss.JoinHorizontal(0, processBar, metaData, clipboardBar)
+
+		// final render
 		finalRender := lipgloss.JoinVertical(0, mainPanel, bottomBar)
 
 		return lipgloss.JoinVertical(lipgloss.Top, finalRender)
