@@ -9,7 +9,7 @@ import (
 var (
 	minimumHeight       = 35
 	minimumWidth        = 96
-	bottomBarHeight     = 13
+	bottomBarHeight     = 14
 	modalWidth          = 60
 	modalHeight         = 7
 	terminalTooSmall    lipgloss.Style

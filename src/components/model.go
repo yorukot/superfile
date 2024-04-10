@@ -38,8 +38,8 @@ var channel = make(chan channelMessage, 1000)
 
 func InitialModel(dir string) model {
 	var err error
-	logOutput, err = os.OpenFile(SuperFileCacheDir + logFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-  
+	logOutput, err = os.OpenFile(SuperFileCacheDir+logFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+
 	if err != nil {
 		log.Fatalf("Error while opening superfile.log file: %v", err)
 	}
@@ -149,7 +149,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.processBarModel.process[msg.processId] = msg.processNewState
 		}
 	case tea.WindowSizeMsg:
-		m.mainPanelHeight = msg.Height - bottomBarHeight
+		m.mainPanelHeight = msg.Height - bottomBarHeight + 1
 		m.fileModel.width = (msg.Width - sideBarWidth - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
 		m.fullHeight = msg.Height
 		m.fullWidth = msg.Width

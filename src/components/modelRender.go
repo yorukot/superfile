@@ -265,7 +265,7 @@ func ClipboardRender(m model) string {
 	bottomWidth := 0
 
 	if m.fullWidth%3 != 0 {
-		bottomWidth = BottomWidth(m.fullWidth + 2)
+		bottomWidth = BottomWidth(m.fullWidth + m.fullWidth%3 + 2)
 	} else {
 		bottomWidth = BottomWidth(m.fullWidth)
 	}
