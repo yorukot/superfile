@@ -28,7 +28,7 @@ const (
 	currentVersion      string = "v1.0.2"
 	latestVersionURL    string = "https://api.github.com/repos/MHNightCat/superfile/releases/latest"
 	latestVersionGithub string = "github.com/MHNightCat/superfile/releases/latest"
-	themeZip            string = "https://github.com/MHNightCat/superfile/raw/main/theme.zip"
+	themeZip            string = "https://github.com/MHNightCat/superfile/raw/main/themeZip/theme-1.0.2.zip"
 )
 
 const (
