@@ -10,15 +10,15 @@ import (
 )
 
 func SideBarRender(m model) string {
-	s := sideBarTitle.Render("    Super Files")
+	s := sideBarTitle.Render(" Super Files")
 	s += "\n"
 	noPinnedFolder := true
-	for _, folder := range m.sideBarModel.pinnedModel.folder {
+	for _, folder := range m.sideBarModel.pinnedModel.directory {
 		if folder.endPinned {
 			noPinnedFolder = false
 		}
 	}
-	for i, folder := range m.sideBarModel.pinnedModel.folder {
+	for i, folder := range m.sideBarModel.pinnedModel.directory {
 		cursor := " "
 		if m.sideBarModel.cursor == i && m.focusPanel == sideBarFocus {
 			cursor = ""
@@ -78,7 +78,7 @@ func FilePanelRender(m model) string {
 				if filePanel.renaming && h == filePanel.cursor {
 					f[i] += filePanel.rename.View() + "\n"
 				} else {
-					f[i] += cursorStyle.Render(cursor) + " " + PrettierName(filePanel.element[h].name, m.fileModel.width-5, filePanel.element[h].folder, isItemSelected) + "\n"
+					f[i] += cursorStyle.Render(cursor) + " " + PrettierName(filePanel.element[h].name, m.fileModel.width-5, filePanel.element[h].directory, isItemSelected) + "\n"
 				}
 			}
 			cursorPosition := strconv.Itoa(filePanel.cursor + 1)

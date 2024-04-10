@@ -91,18 +91,18 @@ func InitialModel(dir string) model {
 		},
 		sideBarModel: sideBarModel{
 			pinnedModel: pinnedModel{
-				folder: getFolder(),
+				directory: getDirectories(),
 			},
 		},
 		fileModel: fileModel{
 			filePanels: []filePanel{
 				{
-					render:       0,
-					cursor:       0,
-					location:     firstFilePanelDir,
-					panelMode:    browserMode,
-					focusType:    focus,
-					folderRecord: make(map[string]folderRecord),
+					render:          0,
+					cursor:          0,
+					location:        firstFilePanelDir,
+					panelMode:       browserMode,
+					focusType:       focus,
+					directoryRecord: make(map[string]directoryRecord),
 				},
 			},
 			width: 10,
@@ -246,9 +246,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}()
 			case Config.FilePanelFileCreate[0], Config.FilePanelFileCreate[1]:
 				m = PanelCreateNewFile(m)
-			case Config.FilePanelFolderCreate[0], Config.FilePanelFolderCreate[1]:
+			case Config.FilePanelDirectoryCreate[0], Config.FilePanelDirectoryCreate[1]:
 				m = PanelCreateNewFolder(m)
-			case Config.PinnedFolder[0], Config.PinnedFolder[1]:
+			case Config.PinnedDirectory[0], Config.PinnedDirectory[1]:
 				m = PinnedFolder(m)
 			case Config.OpenTerminal[0], Config.OpenTerminal[1]:
 				m = OpenTerminal(m)
@@ -289,7 +289,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						} else if m.focusPanel == nonePanelFocus {
 							m = EnterPanel(m)
 						}
-					case Config.ParentFolder[0], Config.ParentFolder[1]:
+					case Config.ParentDirectory[0], Config.ParentDirectory[1]:
 						m = ParentFolder(m)
 					case Config.DeleteItem[0], Config.DeleteItem[1]:
 						go func() {
@@ -320,7 +320,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	cmd = tea.Batch(cmd, listenForchannelMessage(channel))
-	m.sideBarModel.pinnedModel.folder = getFolder()
+	m.sideBarModel.pinnedModel.directory = getDirectories()
 	return m, cmd
 }
 

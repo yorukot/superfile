@@ -17,34 +17,19 @@ import (
 	"github.com/rkoesters/xdg/userdirs"
 )
 
-func getFolder() []folder {
-	var paths []string
+func getDirectories() []directory {
+	directories := []directory{}
 
-	currentUser, err := user.Current()
-	if err != nil {
-		OutPutLog("Get user path error", err)
-	}
-	username := currentUser.Username
+	addWellKnownDirectories(&directories)
+	addPinnedDirectories(&directories)
+	addExternalMediaFolders(&directories)
 
-	folderPath := filepath.Join("/run/media", username)
-	entries, err := os.ReadDir(folderPath)
+	return directories
+}
 
-	if err != nil {
-		OutPutLog("Get external media error", err)
-	}
-
-	for _, entry := range entries {
-		if entry.IsDir() {
-			paths = append(paths, filepath.Join(folderPath, entry.Name()))
-		}
-	}
-	jsonData, err := os.ReadFile(SuperFileDataDir + pinnedFile)
-	if err != nil {
-		OutPutLog("Read superfile data error", err)
-	}
-	var pinnedFolder []string
-	json.Unmarshal(jsonData, &pinnedFolder)
-	folders := []folder{
+// Helper functions for each step
+func addWellKnownDirectories(directories *[]directory) {
+	wellKnownDirectories := []directory{
 		{location: HomeDir, name: "󰋜 Home"},
 		{location: userdirs.Download, name: "󰏔 " + filepath.Base(userdirs.Download)},
 		{location: userdirs.Documents, name: "󰈙 " + filepath.Base(userdirs.Documents)},
@@ -54,21 +39,57 @@ func getFolder() []folder {
 		{location: userdirs.Templates, name: "󰏢 " + filepath.Base(userdirs.Templates)},
 		{location: userdirs.PublicShare, name: " " + filepath.Base(userdirs.PublicShare)},
 	}
+	for _, dir := range wellKnownDirectories {
+		if _, err := os.Stat(dir.location); !os.IsNotExist(err) {
+			// Directory exists
+			*directories = append(*directories, dir)
+		}
+	}
+}
 
-	for i, path := range pinnedFolder {
-		folderName := filepath.Base(path)
-		if i == len(pinnedFolder)-1 {
-			folders = append(folders, folder{location: path, name: folderName, endPinned: true})
+func addPinnedDirectories(directories *[]directory) {
+	var paths []string
+
+	jsonData, err := os.ReadFile(SuperFileDataDir + pinnedFile)
+	if err != nil {
+		OutPutLog("Read superfile data error", err)
+	}
+
+	json.Unmarshal(jsonData, &paths)
+
+	for i, path := range paths {
+		directoryName := filepath.Base(path)
+		if i == len(paths)-1 {
+			*directories = append(*directories, directory{location: path, name: directoryName, endPinned: true})
 		} else {
-			folders = append(folders, folder{location: path, name: folderName})
+			*directories = append(*directories, directory{location: path, name: directoryName})
 		}
 	}
 	for _, path := range paths {
-		folderName := filepath.Base(path)
-		folders = append(folders, folder{location: path, name: folderName})
+		directoryName := filepath.Base(path)
+		*directories = append(*directories, directory{location: path, name: directoryName})
 	}
+}
 
-	return folders
+func addExternalMediaFolders(directories *[]directory) {
+	var paths []string
+
+	currentUser, err := user.Current()
+	if err != nil {
+		OutPutLog("Get user path error", err)
+	}
+	username := currentUser.Username
+
+	folderPath := filepath.Join("/run/media", username)
+	entries, err := os.ReadDir(filepath.Join("/run/media", username))
+	if err != nil {
+		OutPutLog("Get external media error", err)
+	}
+	for _, entry := range entries {
+		if entry.IsDir() {
+			paths = append(paths, filepath.Join(folderPath, entry.Name()))
+		}
+	}
 }
 
 func repeatString(s string, count int) string {
@@ -84,8 +105,8 @@ func returnFocusType(focusPanel focusPanelType) filePanelFocusType {
 }
 
 func returnFolderElement(location string, displayDotFile bool) (folderElement []element) {
-	var folders []element
 	var files []element
+	var folders []element
 
 	items, err := os.ReadDir(location)
 	if err != nil {
@@ -101,8 +122,8 @@ func returnFolderElement(location string, displayDotFile bool) (folderElement []
 			continue
 		}
 		newElement := element{
-			name:   item.Name(),
-			folder: item.IsDir(),
+			name:      item.Name(),
+			directory: item.IsDir(),
 		}
 		if location == "/" {
 			newElement.location = location + item.Name()

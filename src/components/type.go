@@ -28,10 +28,10 @@ const (
 	confirmDeleteItem warnType = iota
 )
 
-// Constants for new file or new folder
+// Constants for new file or new directory
 const (
 	newFile itemType = iota
-	newFolder
+	newDirectory
 )
 
 // Constants for panel with no focus
@@ -126,30 +126,30 @@ type fileModel struct {
 
 // Panel representing a file
 type filePanel struct {
-	cursor       int
-	render       int
-	focusType    filePanelFocusType
-	location     string
-	panelMode    panelMode
-	selected     []string
-	element      []element
-	folderRecord map[string]folderRecord
-	rename       textinput.Model
-	renaming     bool
+	cursor          int
+	render          int
+	focusType       filePanelFocusType
+	location        string
+	panelMode       panelMode
+	selected        []string
+	element         []element
+	directoryRecord map[string]directoryRecord
+	rename          textinput.Model
+	renaming        bool
 }
 
-// Record for folder navigation
-type folderRecord struct {
-	folderCursor int
-	folderRender int
+// Record for directory navigation
+type directoryRecord struct {
+	directoryCursor int
+	directoryRender int
 }
 
 // Element within a file panel
 type element struct {
-	name     string
-	location string
-	folder   bool
-	metaData [][2]string
+	name      string
+	location  string
+	directory bool
+	metaData  [][2]string
 }
 
 /* FILE WINDOWS TYPE END*/
@@ -163,11 +163,11 @@ type sideBarModel struct {
 
 // Model for pinned items in sidebar
 type pinnedModel struct {
-	folder []folder
+	directory []directory
 }
 
-// Folder within pinned items
-type folder struct {
+// Directory within pinned items
+type directory struct {
 	location  string
 	name      string
 	endPinned bool
@@ -227,11 +227,11 @@ type ThemeType struct {
 	SideBarSelected string
 	SideBarFocus    string
 
-	FilePanelFocus         string
-	FilePanelTopFolderIcon string
-	FilePanelTopPath       string
-	FilePanelItem          string
-	FilePanelItemSelected  string
+	FilePanelFocus            string
+	FilePanelTopDirectoryIcon string
+	FilePanelTopPath          string
+	FilePanelItem             string
+	FilePanelItemSelected     string
 
 	BottomBarFocus string
 
@@ -262,7 +262,7 @@ type ConfigType struct {
 
 	OpenTerminal [2]string
 
-	PinnedFolder [2]string
+	PinnedDirectory [2]string
 
 	CloseFilePanel     [2]string
 	CreateNewFilePanel [2]string
@@ -275,20 +275,20 @@ type ConfigType struct {
 
 	ChangePanelMode [2]string
 
-	FilePanelFolderCreate [2]string
-	FilePanelFileCreate   [2]string
-	FilePanelItemRename   [2]string
-	PasteItem             [2]string
-	ToggleDotFile         [2]string
+	FilePanelDirectoryCreate [2]string
+	FilePanelFileCreate      [2]string
+	FilePanelItemRename      [2]string
+	PasteItem                [2]string
+	ToggleDotFile            [2]string
 
 	Cancel  [2]string
 	Confirm [2]string
 
-	DeleteItem     [2]string
-	SelectItem     [2]string
-	ParentFolder   [2]string
-	CopySingleItem [2]string
-	CutSingleItem  [2]string
+	DeleteItem      [2]string
+	SelectItem      [2]string
+	ParentDirectory [2]string
+	CopySingleItem  [2]string
+	CutSingleItem   [2]string
 
 	FilePanelSelectModeItemSingleSelect [2]string
 	FilePanelSelectModeItemSelectDown   [2]string
