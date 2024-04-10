@@ -3,7 +3,6 @@ package components
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/rkoesters/xdg/userdirs"
 	"io"
 	"log"
 	"math"
@@ -14,6 +13,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/rkoesters/xdg/userdirs"
 )
 
 func getFolder() []folder {
@@ -45,10 +46,13 @@ func getFolder() []folder {
 	json.Unmarshal(jsonData, &pinnedFolder)
 	folders := []folder{
 		{location: HomeDir, name: "󰋜 Home"},
-		{location: userdirs.Download, name: "󰏔 Downloads"},
-		{location: userdirs.Documents, name: "󰈙 Documents"},
-		{location: userdirs.Pictures, name: "󰋩 Pictures"},
-		{location: userdirs.Videos, name: "󰎁 Videos"},
+		{location: userdirs.Download, name: "󰏔 " + filepath.Base(userdirs.Download)},
+		{location: userdirs.Documents, name: "󰈙 " + filepath.Base(userdirs.Documents)},
+		{location: userdirs.Pictures, name: "󰋩 " + filepath.Base(userdirs.Pictures)},
+		{location: userdirs.Videos, name: "󰎁 " + filepath.Base(userdirs.Videos)},
+		{location: userdirs.Music, name: "♬ " + filepath.Base(userdirs.Music)},
+		{location: userdirs.Templates, name: "󰏢 " + filepath.Base(userdirs.Templates)},
+		{location: userdirs.PublicShare, name: " " + filepath.Base(userdirs.PublicShare)},
 	}
 
 	for i, path := range pinnedFolder {
@@ -92,7 +96,7 @@ func returnFolderElement(location string, displayDotFile bool) (folderElement []
 		fileInfo, _ := item.Info()
 		if !displayDotFile && strings.HasPrefix(fileInfo.Name(), ".") {
 			continue
-		} 
+		}
 		if fileInfo == nil {
 			continue
 		}
@@ -389,16 +393,16 @@ func ReturnMetaData(m model) model {
 }
 
 func FormatFileSize(size int64) string {
-	units := []string{" bytes", " kB", " MB", " GB", " TB", " PB", " EB"}
-
 	if size == 0 {
 		return "0B"
 	}
 
+	units := []string{"B", "KB", "MB", "GB", "TB", "PB", "EB"}
+
 	unitIndex := int(math.Floor(math.Log(float64(size)) / math.Log(1024)))
 	adjustedSize := float64(size) / math.Pow(1024, float64(unitIndex))
 
-	return fmt.Sprintf("%.2f%s", adjustedSize, units[unitIndex])
+	return fmt.Sprintf("%.2f %s", adjustedSize, units[unitIndex])
 }
 
 func DirSize(path string) int64 {
