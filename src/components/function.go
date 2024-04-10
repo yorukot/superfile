@@ -7,7 +7,6 @@ import (
 	"log"
 	"math"
 	"os"
-	"os/user"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -17,29 +16,16 @@ import (
 
 	"github.com/lithammer/shortuuid"
 	"github.com/rkoesters/xdg/userdirs"
+	"github.com/shirou/gopsutil/disk"
 )
 
-func getFolder() []folder {
-	var paths []string
+func GetFolder() []folder {
 
-	currentUser, err := user.Current()
-	if err != nil {
-		OutPutLog("Get user path error", err)
-	}
-	username := currentUser.Username
-
-	folderPath := filepath.Join("/run/media", username)
-	entries, err := os.ReadDir(folderPath)
-
+	disks, err := GetExternalDisk()
 	if err != nil {
 		OutPutLog("Get external media error", err)
 	}
 
-	for _, entry := range entries {
-		if entry.IsDir() {
-			paths = append(paths, filepath.Join(folderPath, entry.Name()))
-		}
-	}
 	jsonData, err := os.ReadFile(SuperFileDataDir + pinnedFile)
 	if err != nil {
 		OutPutLog("Read superfile data error", err)
@@ -65,12 +51,36 @@ func getFolder() []folder {
 			folders = append(folders, folder{location: path, name: folderName})
 		}
 	}
-	for _, path := range paths {
-		folderName := filepath.Base(path)
-		folders = append(folders, folder{location: path, name: folderName})
+
+	for _, disk := range disks {
+		folderName := filepath.Base(disk.Mountpoint)
+		folders = append(folders, folder{location: disk.Mountpoint, name: folderName})
 	}
 
 	return folders
+}
+
+func GetExternalDisk() (disks []disk.PartitionStat, err error) {
+	parts, err := disk.Partitions(true)
+
+	if err != nil {
+		return []disk.PartitionStat{}, err
+	}
+	for _, disk := range parts {
+		if IsExternalDiskPath(disk.Mountpoint) {
+		disks = append(disks, disk)
+		}
+	}
+
+	return disks, err
+}
+
+func IsExternalDiskPath(path string) bool {
+	dir := filepath.Dir(path)
+	return strings.HasPrefix(dir, "/mnt") ||
+		strings.HasPrefix(dir, "/media") ||
+		strings.HasPrefix(dir, "/run/media") ||
+		strings.HasPrefix(dir, "/Volumes")
 }
 
 func repeatString(s string, count int) string {
@@ -460,8 +470,4 @@ func countFiles(dirPath string) (int, error) {
 	})
 
 	return count, err
-}
-
-func IsExternalPath(path string) bool {
-	return strings.HasPrefix(path, "/run/media")
 }

@@ -125,7 +125,7 @@ func DeleteSingleItem(m model) model {
 		return m
 	}
 
-	if IsExternalPath(panel.location) || runtime.GOOS == "darwin" {
+	if IsExternalDiskPath(panel.location) || runtime.GOOS == "darwin" {
 		channel <- channelMessage{
 			messageId:       id,
 			returnWarnModal: true,
