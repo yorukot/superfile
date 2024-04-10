@@ -10,7 +10,7 @@ import (
 )
 
 func SideBarRender(m model) string {
-	s := sideBarTitle.Render("    Super Files     ")
+	s := sideBarTitle.Render("    Super Files")
 	s += "\n"
 	noPinnedFolder := true
 	for _, folder := range m.sideBarModel.pinnedModel.folder {
@@ -28,14 +28,14 @@ func SideBarRender(m model) string {
 		} else {
 			s += cursorStyle.Render(cursor) + lipgloss.NewStyle().Background(backgroundWindow).Render(" ") + sideBarItem.Render(TruncateText(folder.name, sideBarWidth-2)) + "" + "\n"
 		}
-		if i == 4 {
+		if i == 7 {
 			s += "\n" + sideBarTitle.Render("󰐃 Pinned") + borderStyle.Render(" ───────────") + "\n\n"
 			if noPinnedFolder {
-				s += "\n" + sideBarTitle.Render("󱇰 Disk") + borderStyle.Render(" ─────────────") + "\n\n"
+				s += "\n" + sideBarTitle.Render("󱇰 Disks") + borderStyle.Render(" ─────────────") + "\n\n"
 			}
 		}
 		if folder.endPinned {
-			s += "\n" + sideBarTitle.Render("󱇰 Disk") + borderStyle.Render(" ─────────────") + "\n\n"
+			s += "\n" + sideBarTitle.Render("󱇰 Disks") + borderStyle.Render(" ─────────────") + "\n\n"
 		}
 
 	}
@@ -49,7 +49,7 @@ func FilePanelRender(m model) string {
 	// file panel
 	f := make([]string, 4)
 	for i, filePanel := range m.fileModel.filePanels {
-		fileElenent := returnFolderElement(filePanel.location)
+		fileElenent := returnFolderElement(filePanel.location, m.toggleDotFile)
 		filePanel.element = fileElenent
 		m.fileModel.filePanels[i].element = fileElenent
 
@@ -65,7 +65,7 @@ func FilePanelRender(m model) string {
 		}
 		f[i] += FilePanelDividerStyle(filePanel.focusType).Render(repeatString("━", filePanelWidth)) + "\n"
 		if len(filePanel.element) == 0 {
-			f[i] += "   No any file or folder"
+			f[i] += "   No such file or directory"
 			bottomBorder := GenerateBottomBorder("0/0", m.fileModel.width+5)
 			f[i] = FilePanelBoardStyle(m.mainPanelHeight, m.fileModel.width, filePanel.focusType, bottomBorder).Render(f[i])
 		} else {
@@ -168,7 +168,7 @@ func ProcessBarRender(m model) string {
 	}
 
 	if len(processes) == 0 {
-		processRender += "\n   No any process"
+		processRender += "\n   No processes running"
 	}
 	courseNumber := 0
 	if len(m.processBarModel.processList) == 0 {
@@ -243,7 +243,7 @@ func ClipboardRender(m model) string {
 	// render
 	clipboardRender := ""
 	if len(m.copyItems.items) == 0 {
-		clipboardRender += "\n   No any content in clipboard"
+		clipboardRender += "\n   No content in clipboard"
 	} else {
 		for i := 0; i < len(m.copyItems.items) && i < BottomElementHight(bottomBarHeight); i++ {
 			if i == BottomElementHight(bottomBarHeight)-1 {
@@ -321,7 +321,7 @@ func TypineModalRender(m model) string {
 func WarnModalRender(m model) string {
 	title := m.warnModal.title
 	content := m.warnModal.content
-	confirm := modalCancel.Render(" (" + Config.Confirm[0] + ") Cofnirm ")
+	confirm := modalCancel.Render(" (" + Config.Confirm[0] + ") Confirm ")
 	cancel := modalCancel.Render(" (" + Config.Cancel[0] + ") Cancel ")
 	tip := confirm + lipgloss.NewStyle().Background(backgroundWindow).Render("           ") + cancel
 	return FullScreenStyle(m.fullHeight, m.fullWidth).Render(FocusedModalStyle(modalHeight, modalWidth).Render(title + "\n\n" + content + "\n\n" + tip))

@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC(YYYY/MM/DD).
 
+# [**v1.x**]()
+
+> 2024/xx/xx
+
+#### Update
+
+- Update data folder from `$XDG_CONFIG_HOME/superfile/data` to `$XDG_DATA_HOME/superfile` [`9fff97a`](https://github.com/MHNightCat/superfile/commit/9fff97a362bcd5bec1c19709b7a5aeb59cdeaa34)
+- Toggle dot file display [`9fff97a`](https://github.com/MHNightCat/superfile/commit/9fff97a362bcd5bec1c19709b7a5aeb59cdeaa34/9fff97a362bcd5bec1c19709b7a5aeb59cdeaa34)
+- Update log file from `$XDG_CONFIG_HOME/superfile/data/superfile.log` to `$XDG_CACH_DATA` [`#27`](https://github.com/MHNightCat/superfile/pull/27)
+
+#### Bug fix
+
 # [**v1.0.1**](https://github.com/MHNightCat/superfile/releases/tag/v1.0.1)
 
 > 2024/04/08
