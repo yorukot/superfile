@@ -20,7 +20,7 @@ const (
 	pinnedFile       string = "/pinned.json"
 	toggleDotFile    string = "/toggleDotFile"
 	logFile          string = "/superfile.log"
-	configFile       string = "/config/config.json"
+	configFile       string = "/config.json"
 	themeZipName     string = "/theme.zip"
 )
 
