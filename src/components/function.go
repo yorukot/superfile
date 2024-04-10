@@ -13,6 +13,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/lithammer/shortuuid"
 	"github.com/rkoesters/xdg/userdirs"
@@ -347,6 +348,12 @@ func contains(s []string, str string) bool {
 
 func ReturnMetaData(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	cursor := panel.cursor
+	LastTimeCursorMove = [2]int{int(time.Now().UnixMicro()), cursor}
+	time.Sleep(150 * time.Millisecond)
+	if LastTimeCursorMove[1] != cursor && m.focusPanel != metaDataFocus {
+		return m
+	}
 	m.fileMetaData.metaData = m.fileMetaData.metaData[:0]
 	id := shortuuid.New()
 	if len(panel.element) == 0 {
@@ -407,6 +414,7 @@ func ReturnMetaData(m model) model {
 		loadMetadata: true,
 		metadata:     m.fileMetaData.metaData,
 	}
+
 	panel.element[panel.cursor].metaData = m.fileMetaData.metaData
 	return m
 }

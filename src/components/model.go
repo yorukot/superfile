@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/barasher/go-exiftool"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -24,6 +25,9 @@ const (
 	configFile       string = "/config.json"
 	themeZipName     string = "/theme.zip"
 )
+
+var LastTimeCursorMove = [2]int{int(time.Now().UnixMicro()), 0}
+var ListeningMessage = true
 
 var HomeDir = basedir.Home
 var SuperFileMainDir = basedir.ConfigHome + "/superfile"
@@ -120,12 +124,9 @@ func InitialModel(dir string) model {
 
 func listenForchannelMessage(msg chan channelMessage) tea.Cmd {
 	return func() tea.Msg {
-		select {
-		case m := <-msg:
-			return m
-		default:
-			return nil
-		}
+		m := <-msg
+		ListeningMessage = false
+		return m
 	}
 }
 
@@ -140,6 +141,7 @@ func (m model) Init() tea.Cmd {
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
+	// check is the message by thread
 	case channelMessage:
 		if msg.returnWarnModal {
 			m.warnModal = msg.warnModal
@@ -151,12 +153,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			m.processBarModel.process[msg.messageId] = msg.processNewState
 		}
+	// if the message by windows size change
 	case tea.WindowSizeMsg:
 		m.mainPanelHeight = msg.Height - bottomBarHeight + 1
 		m.fileModel.width = (msg.Width - sideBarWidth - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
 		m.fullHeight = msg.Height
 		m.fullWidth = msg.Width
 		return m, nil
+	// if just user press key
 	case tea.KeyMsg:
 		// if in the create item modal
 		if m.typingModal.open {
@@ -166,7 +170,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case Config.Confirm[0], Config.Confirm[1]:
 				m = CreateItem(m)
 			}
-			// if in the renaming mode
+		// if in the renaming mode
 		} else if m.warnModal.open {
 			switch msg.String() {
 			case Config.Cancel[0], Config.Cancel[1]:
@@ -184,7 +188,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					}()
 				}
 			}
-			// if in the renaming mode
+		// if in the renaming mode
 		} else if m.fileModel.renaming {
 			switch msg.String() {
 			case Config.Cancel[0], Config.Cancel[1]:
@@ -335,8 +339,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if m.fileModel.filePanels[m.filePanelFocusIndex].cursor < 0 {
 		m.fileModel.filePanels[m.filePanelFocusIndex].cursor = 0
 	}
-
-	cmd = tea.Batch(cmd, listenForchannelMessage(channel))
+	if ListeningMessage {
+		cmd = tea.Batch(cmd)
+	} else {
+		cmd = tea.Batch(cmd, listenForchannelMessage(channel))
+	}
 	m.sideBarModel.pinnedModel.folder = getFolder()
 	return m, cmd
 }
