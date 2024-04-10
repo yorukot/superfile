@@ -1,6 +1,6 @@
 <div align="center">
 
-![superfile](/asset/SUPERFILE.png)
+![superfile](/asset/superfilelogobg.png)
 
 ![](/asset/demo.png)
 
