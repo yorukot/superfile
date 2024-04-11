@@ -445,3 +445,10 @@ func toggleDotFileController(m model) model {
 	}
 	return m
 }
+
+func extractFile(m model) model {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	unzip(panel.element[panel.cursor].location, filepath.Dir(panel.element[panel.cursor].location))
+	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+	return m
+}
