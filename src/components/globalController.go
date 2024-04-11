@@ -18,13 +18,14 @@ func ControllerSideBarListUp(m model) model {
 	if m.sideBarModel.cursor > 0 {
 		m.sideBarModel.cursor--
 	} else {
-		m.sideBarModel.cursor = len(m.sideBarModel.pinnedModel.folder) - 1
+		m.sideBarModel.cursor = len(m.sideBarModel.directories) - 1
 	}
 	return m
 }
 
 func ControllerSideBarListDown(m model) model {
-	if m.sideBarModel.cursor < len(m.sideBarModel.pinnedModel.folder)-1 {
+	lenDirs := len(m.sideBarModel.directories)
+	if m.sideBarModel.cursor < lenDirs-1 {
 		m.sideBarModel.cursor++
 	} else {
 		m.sideBarModel.cursor = 0
@@ -138,16 +139,16 @@ func SideBarSelectFolder(m model) model {
 	m.focusPanel = nonePanelFocus
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 
-	panel.folderRecord[panel.location] = folderRecord{
-		folderCursor: panel.cursor,
-		folderRender: panel.render,
+	panel.directoryRecord[panel.location] = directoryRecord{
+		directoryCursor: panel.cursor,
+		directoryRender: panel.render,
 	}
 
-	panel.location = m.sideBarModel.pinnedModel.folder[m.sideBarModel.cursor].location
-	folderRecord, hasRecord := panel.folderRecord[panel.location]
+	panel.location = m.sideBarModel.directories[m.sideBarModel.cursor].location
+	directoryRecord, hasRecord := panel.directoryRecord[panel.location]
 	if hasRecord {
-		panel.cursor = folderRecord.folderCursor
-		panel.render = folderRecord.folderRender
+		panel.cursor = directoryRecord.directoryCursor
+		panel.render = directoryRecord.directoryRender
 	} else {
 		panel.cursor = 0
 		panel.render = 0
@@ -210,10 +211,10 @@ func CloseFilePanel(m model) model {
 func CreateNewFilePanel(m model) model {
 	if len(m.fileModel.filePanels) != 4 {
 		m.fileModel.filePanels = append(m.fileModel.filePanels, filePanel{
-			location:     HomeDir,
-			panelMode:    browserMode,
-			focusType:    secondFocus,
-			folderRecord: make(map[string]folderRecord),
+			location:        HomeDir,
+			panelMode:       browserMode,
+			focusType:       secondFocus,
+			directoryRecord: make(map[string]directoryRecord),
 		})
 
 		m.fileModel.filePanels[m.filePanelFocusIndex].focusType = noneFocus
@@ -378,7 +379,7 @@ func PanelCreateNewFolder(m model) model {
 	ti.Width = modalWidth - 10
 
 	m.typingModal.location = panel.location
-	m.typingModal.itemType = newFolder
+	m.typingModal.itemType = newDirectory
 	m.typingModal.open = true
 	m.typingModal.textInput = ti
 	m.firstTextInput = true

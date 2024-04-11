@@ -18,21 +18,21 @@ import (
 func EnterPanel(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 
-	if len(panel.element) > 0 && panel.element[panel.cursor].folder {
-		panel.folderRecord[panel.location] = folderRecord{
-			folderCursor: panel.cursor,
-			folderRender: panel.render,
+	if len(panel.element) > 0 && panel.element[panel.cursor].directory {
+		panel.directoryRecord[panel.location] = directoryRecord{
+			directoryCursor: panel.cursor,
+			directoryRender: panel.render,
 		}
 		panel.location = panel.element[panel.cursor].location
-		folderRecord, hasRecord := panel.folderRecord[panel.location]
+		directoryRecord, hasRecord := panel.directoryRecord[panel.location]
 		if hasRecord {
-			panel.cursor = folderRecord.folderCursor
-			panel.render = folderRecord.folderRender
+			panel.cursor = directoryRecord.directoryCursor
+			panel.render = directoryRecord.directoryRender
 		} else {
 			panel.cursor = 0
 			panel.render = 0
 		}
-	} else if len(panel.element) > 0 && !panel.element[panel.cursor].folder {
+	} else if len(panel.element) > 0 && !panel.element[panel.cursor].directory {
 		cmd := exec.Command("xdg-open", panel.element[panel.cursor].location)
 		_, err := cmd.Output()
 		if err != nil {
@@ -46,17 +46,17 @@ func EnterPanel(m model) model {
 
 func ParentFolder(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	panel.folderRecord[panel.location] = folderRecord{
-		folderCursor: panel.cursor,
-		folderRender: panel.render,
+	panel.directoryRecord[panel.location] = directoryRecord{
+		directoryCursor: panel.cursor,
+		directoryRender: panel.render,
 	}
 	fullPath := panel.location
 	parentDir := path.Dir(fullPath)
 	panel.location = parentDir
-	folderRecord, hasRecord := panel.folderRecord[panel.location]
+	directoryRecord, hasRecord := panel.directoryRecord[panel.location]
 	if hasRecord {
-		panel.cursor = folderRecord.folderCursor
-		panel.render = folderRecord.folderRender
+		panel.cursor = directoryRecord.directoryCursor
+		panel.render = directoryRecord.directoryRender
 	} else {
 		panel.cursor = 0
 		panel.render = 0
@@ -125,7 +125,7 @@ func DeleteSingleItem(m model) model {
 		return m
 	}
 
-	if IsExternalDiskPath(panel.location) || runtime.GOOS == "darwin" {
+	if IsExternalPath(panel.location) || runtime.GOOS == "darwin" {
 		channel <- channelMessage{
 			messageId:       id,
 			returnWarnModal: true,

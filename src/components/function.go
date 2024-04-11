@@ -19,20 +19,19 @@ import (
 	"github.com/shirou/gopsutil/disk"
 )
 
-func GetFolder() []folder {
+func getDirectories() []directory {
+	directories := []directory{}
 
-	disks, err := GetExternalDisk()
-	if err != nil {
-		OutPutLog("Get external media error", err)
-	}
+	directories = append(directories, getWellKnownDirectories()...)
+	directories = append(directories, getPinnedDirectories()...)
+	directories = append(directories, getExternalMediaFolders()...)
 
-	jsonData, err := os.ReadFile(SuperFileDataDir + pinnedFile)
-	if err != nil {
-		OutPutLog("Read superfile data error", err)
-	}
-	var pinnedFolder []string
-	json.Unmarshal(jsonData, &pinnedFolder)
-	folders := []folder{
+	return directories
+}
+
+func getWellKnownDirectories() []directory {
+	directories := []directory{}
+	wellKnownDirectories := []directory{
 		{location: HomeDir, name: "󰋜 Home"},
 		{location: userdirs.Download, name: "󰏔 " + filepath.Base(userdirs.Download)},
 		{location: userdirs.Documents, name: "󰈙 " + filepath.Base(userdirs.Documents)},
@@ -42,22 +41,54 @@ func GetFolder() []folder {
 		{location: userdirs.Templates, name: "󰏢 " + filepath.Base(userdirs.Templates)},
 		{location: userdirs.PublicShare, name: " " + filepath.Base(userdirs.PublicShare)},
 	}
-
-	for i, path := range pinnedFolder {
-		folderName := filepath.Base(path)
-		if i == len(pinnedFolder)-1 {
-			folders = append(folders, folder{location: path, name: folderName, endPinned: true})
-		} else {
-			folders = append(folders, folder{location: path, name: folderName})
+	for _, dir := range wellKnownDirectories {
+		if _, err := os.Stat(dir.location); !os.IsNotExist(err) {
+			// Directory exists
+			directories = append(directories, dir)
 		}
 	}
+	return directories
+}
 
-	for _, disk := range disks {
-		folderName := filepath.Base(disk.Mountpoint)
-		folders = append(folders, folder{location: disk.Mountpoint, name: folderName})
+func getPinnedDirectories() []directory {
+	directories := []directory{}
+	var paths []string
+
+	jsonData, err := os.ReadFile(SuperFileDataDir + pinnedFile)
+	if err != nil {
+		OutPutLog("Read superfile data error", err)
 	}
 
-	return folders
+	json.Unmarshal(jsonData, &paths)
+
+	for _, path := range paths {
+		directoryName := filepath.Base(path)
+		directories = append(directories, directory{location: path, name: directoryName})
+	}
+	return directories
+}
+
+func getExternalMediaFolders() []directory {
+	var paths []string
+	directories := []directory{}
+
+	currentUser, err := user.Current()
+	if err != nil {
+		OutPutLog("Get user path error", err)
+	}
+	username := currentUser.Username
+
+	folderPath := filepath.Join("/run/media", username)
+	entries, err := os.ReadDir(filepath.Join("/run/media", username))
+	if err != nil {
+		OutPutLog("Get external media error", err)
+	}
+	for _, entry := range entries {
+		if entry.IsDir() {
+			paths = append(paths, filepath.Join(folderPath, entry.Name()))
+		}
+	}
+	return directories
 }
 
 func GetExternalDisk() (disks []disk.PartitionStat, err error) {
@@ -83,6 +114,8 @@ func IsExternalDiskPath(path string) bool {
 		strings.HasPrefix(dir, "/Volumes")
 }
 
+  // TODO: Remove this function
+// This gets the award for most redundant function seen by @lescx ever
 func repeatString(s string, count int) string {
 	return strings.Repeat(s, count)
 }
@@ -90,14 +123,13 @@ func repeatString(s string, count int) string {
 func returnFocusType(focusPanel focusPanelType) filePanelFocusType {
 	if focusPanel == nonePanelFocus {
 		return focus
-	} else {
-		return secondFocus
 	}
+	return secondFocus
 }
 
 func returnFolderElement(location string, displayDotFile bool) (folderElement []element) {
-	var folders []element
 	var files []element
+	var folders []element
 
 	items, err := os.ReadDir(location)
 	if err != nil {
@@ -113,8 +145,8 @@ func returnFolderElement(location string, displayDotFile bool) (folderElement []
 			continue
 		}
 		newElement := element{
-			name:   item.Name(),
-			folder: item.IsDir(),
+			name:      item.Name(),
+			directory: item.IsDir(),
 		}
 		if location == "/" {
 			newElement.location = location + item.Name()

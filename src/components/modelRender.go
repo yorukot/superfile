@@ -10,23 +10,32 @@ import (
 )
 
 func SideBarRender(m model) string {
-	s := sideBarTitle.Render("    Super Files")
-	s += "\n"
-	noPinnedFolder := true
-	for _, folder := range m.sideBarModel.pinnedModel.folder {
-		if folder.endPinned {
-			noPinnedFolder = false
+	s := sideBarTitle.Render(" Super Files")
+	s += "\n\n"
+
+	// Ugly shit workaround from hell code, made by @lescx
+	amountWellKnownDirectories := len(getWellKnownDirectories())
+	amountPinnedDirectories := len(getPinnedDirectories())
+	pinnedRendered := false
+	externalRendered := false
+
+	for i, directory := range m.sideBarModel.directories {
+		if i == amountWellKnownDirectories && !pinnedRendered {
+			s += "\n" + sideBarTitle.Render("󰐃 Pinned") + borderStyle.Render(" ───────────") + "\n\n"
+			pinnedRendered = true
 		}
-	}
-	for i, folder := range m.sideBarModel.pinnedModel.folder {
+		if i == amountPinnedDirectories+amountWellKnownDirectories && !externalRendered {
+			s += "\n" + sideBarTitle.Render("󱇰 Disks") + borderStyle.Render(" ────────────") + "\n\n"
+			externalRendered = true
+		}
 		cursor := " "
 		if m.sideBarModel.cursor == i && m.focusPanel == sideBarFocus {
 			cursor = ""
 		}
-		if folder.location == m.fileModel.filePanels[m.filePanelFocusIndex].location {
-			s += cursorStyle.Render(cursor) + lipgloss.NewStyle().Background(backgroundWindow).Render(" ") + sideBarSelected.Render(TruncateText(folder.name, sideBarWidth-2)) + "" + "\n"
+		if directory.location == m.fileModel.filePanels[m.filePanelFocusIndex].location {
+			s += cursorStyle.Render(cursor) + " " + sideBarSelected.Render(TruncateText(directory.name, sideBarWidth-2)) + "\n"
 		} else {
-			s += cursorStyle.Render(cursor) + lipgloss.NewStyle().Background(backgroundWindow).Render(" ") + sideBarItem.Render(TruncateText(folder.name, sideBarWidth-2)) + "" + "\n"
+			s += cursorStyle.Render(cursor) + " " + sideBarItem.Render(TruncateText(directory.name, sideBarWidth-2)) + "\n"
 		}
 		if i == 7 {
 			s += "\n" + sideBarTitle.Render("󰐃 Pinned") + borderStyle.Render(" ───────────") + "\n\n"
@@ -37,12 +46,18 @@ func SideBarRender(m model) string {
 		if folder.endPinned {
 			s += "\n" + sideBarTitle.Render("󱇰 Disks") + borderStyle.Render(" ────────────") + "\n\n"
 		}
-
 	}
 
-	s = SideBarBoardStyle(m.mainPanelHeight, m.focusPanel).Render(s)
+	// In case no pinned directories or external drives are pinned,
+	// list menu item at the bottom
+	if !pinnedRendered {
+		s += "\n" + sideBarTitle.Render("󰐃 Pinned") + borderStyle.Render(" ───────────") + "\n\n"
+	}
+	if !externalRendered {
+		s += "\n" + sideBarTitle.Render("󱇰 Disks") + borderStyle.Render(" ────────────") + "\n\n"
+	}
 
-	return s
+	return SideBarBoardStyle(m.mainPanelHeight, m.focusPanel).Render(s)
 }
 
 func FilePanelRender(m model) string {
@@ -78,7 +93,7 @@ func FilePanelRender(m model) string {
 				if filePanel.renaming && h == filePanel.cursor {
 					f[i] += filePanel.rename.View() + "\n"
 				} else {
-					f[i] += cursorStyle.Render(cursor) + lipgloss.NewStyle().Background(backgroundWindow).Render(" ") + PrettierName(filePanel.element[h].name, m.fileModel.width-5, filePanel.element[h].folder, isItemSelected) + "\n"
+					f[i] += cursorStyle.Render(cursor) + " " + PrettierName(filePanel.element[h].name, m.fileModel.width-5, filePanel.element[h].directory, isItemSelected) + "\n"
 				}
 			}
 			cursorPosition := strconv.Itoa(filePanel.cursor + 1)
@@ -194,33 +209,18 @@ func MetaDataRender(m model) string {
 	}
 	maxKeyLength := 0
 	sort.Slice(m.fileMetaData.metaData, func(i, j int) bool {
-		if m.fileMetaData.metaData[i][0] == "FileName" {
-			return true
-		} else if m.fileMetaData.metaData[j][0] == "FileName" {
-			return false
-		} else if m.fileMetaData.metaData[i][0] == "FileSize" {
-			return true
-		} else if m.fileMetaData.metaData[j][0] == "FileSize" {
-			return false
-		} else if m.fileMetaData.metaData[i][0] == "FolderName" {
-			return true
-		} else if m.fileMetaData.metaData[j][0] == "FolderName" {
-			return false
-		} else if m.fileMetaData.metaData[i][0] == "FolderSize" {
-			return true
-		} else if m.fileMetaData.metaData[j][0] == "FolderSize" {
-			return false
-		} else if m.fileMetaData.metaData[i][0] == "FileModifyDate" {
-			return true
-		} else if m.fileMetaData.metaData[j][0] == "FileModifyDate" {
-			return false
-		} else if m.fileMetaData.metaData[i][0] == "FileAccessDate" {
-			return true
-		} else if m.fileMetaData.metaData[j][0] == "FileAccessDate" {
-			return false
-		} else {
-			return m.fileMetaData.metaData[i][0] < m.fileMetaData.metaData[j][0]
+		comparisonFields := []string{"FileName", "FileSize", "FolderName", "FolderSize", "FileModifyDate", "FileAccessDate"}
+
+		for _, field := range comparisonFields {
+			if m.fileMetaData.metaData[i][0] == field {
+				return true
+			} else if m.fileMetaData.metaData[j][0] == field {
+				return false
+			}
 		}
+
+		// Default comparison
+		return m.fileMetaData.metaData[i][0] < m.fileMetaData.metaData[j][0]
 	})
 
 	for _, data := range m.fileMetaData.metaData {

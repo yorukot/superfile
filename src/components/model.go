@@ -43,8 +43,8 @@ var channel = make(chan channelMessage, 1000)
 
 func InitialModel(dir string) model {
 	var err error
-	logOutput, err = os.OpenFile(SuperFileCacheDir+logFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 
+	logOutput, err = os.OpenFile(SuperFileCacheDir+logFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("Error while opening superfile.log file: %v", err)
 	}
@@ -53,15 +53,12 @@ func InitialModel(dir string) model {
 	if err != nil {
 		log.Fatalf("Config file doesn't exist: %v", err)
 	}
-
 	err = json.Unmarshal(data, &Config)
-
 	if err != nil {
 		log.Fatalf("Error decoding config json( your config file may have misconfigured ): %v", err)
 	}
 
 	data, err = os.ReadFile(SuperFileMainDir + themeFolder + "/" + Config.Theme + ".json")
-
 	if err != nil {
 		log.Fatalf("Theme file doesn't exist: %v", err)
 	}
@@ -101,19 +98,20 @@ func InitialModel(dir string) model {
 			render:  0,
 		},
 		sideBarModel: sideBarModel{
-			pinnedModel: pinnedModel{
-				folder: GetFolder(),
-			},
+			directories: getDirectories(),
+			// wellKnownModel: getWellKnownDirectories(),
+			// pinnedModel:    getPinnedDirectories(),
+			// disksModel:     getExternalMediaFolders(),
 		},
 		fileModel: fileModel{
 			filePanels: []filePanel{
 				{
-					render:       0,
-					cursor:       0,
-					location:     firstFilePanelDir,
-					panelMode:    browserMode,
-					focusType:    focus,
-					folderRecord: make(map[string]folderRecord),
+					render:          0,
+					cursor:          0,
+					location:        firstFilePanelDir,
+					panelMode:       browserMode,
+					focusType:       focus,
+					directoryRecord: make(map[string]directoryRecord),
 				},
 			},
 			width: 10,
@@ -122,7 +120,7 @@ func InitialModel(dir string) model {
 	}
 }
 
-func listenForchannelMessage(msg chan channelMessage) tea.Cmd {
+func listenForChannelMessage(msg chan channelMessage) tea.Cmd {
 	return func() tea.Msg {
 		m := <-msg
 		ListeningMessage = false
@@ -134,7 +132,7 @@ func (m model) Init() tea.Cmd {
 	return tea.Batch(
 		tea.SetWindowTitle("SuperFile"),
 		textinput.Blink, // Assuming textinput.Blink is a valid command
-		listenForchannelMessage(channel),
+		listenForChannelMessage(channel),
 	)
 }
 
@@ -267,9 +265,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}()
 			case Config.FilePanelFileCreate[0], Config.FilePanelFileCreate[1]:
 				m = PanelCreateNewFile(m)
-			case Config.FilePanelFolderCreate[0], Config.FilePanelFolderCreate[1]:
+			case Config.FilePanelDirectoryCreate[0], Config.FilePanelDirectoryCreate[1]:
 				m = PanelCreateNewFolder(m)
-			case Config.PinnedFolder[0], Config.PinnedFolder[1]:
+			case Config.PinnedDirectory[0], Config.PinnedDirectory[1]:
 				m = PinnedFolder(m)
 			case Config.ToggleDotFile[0], Config.ToggleDotFile[1]:
 				m = ToggleDotFile(m)
@@ -308,7 +306,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						} else if m.focusPanel == nonePanelFocus {
 							m = EnterPanel(m)
 						}
-					case Config.ParentFolder[0], Config.ParentFolder[1]:
+					case Config.ParentDirectory[0], Config.ParentDirectory[1]:
 						m = ParentFolder(m)
 					case Config.DeleteItem[0], Config.DeleteItem[1]:
 						go func() {
@@ -337,12 +335,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if m.fileModel.filePanels[m.filePanelFocusIndex].cursor < 0 {
 		m.fileModel.filePanels[m.filePanelFocusIndex].cursor = 0
 	}
+  
+	cmd = tea.Batch(cmd, listenForChannelMessage(channel))
+	m.sideBarModel.directories = getDirectories()
+	// m.sideBarModel.wellKnownModel = getWellKnownDirectories()
+	// m.sideBarModel.pinnedModel = getPinnedDirectories()
+	// m.sideBarModel.disksModel = getExternalMediaFolders()
+  
 	if ListeningMessage {
 		cmd = tea.Batch(cmd)
 	} else {
 		cmd = tea.Batch(cmd, listenForchannelMessage(channel))
 	}
-	m.sideBarModel.pinnedModel.folder = GetFolder()
 	return m, cmd
 }
 
