@@ -121,7 +121,7 @@ func InitConfigFile() {
 
 	// Download and install theme
 
-	if err := downloadAndInstallTheme(config.MainDir, config.ThemeZipName, themeZip); err != nil {
+	if err := downloadAndInstallTheme(config.MainDir, config.ThemeZipName, themeZip, config.ThemeFolder); err != nil {
 		log.Fatalln("Error downloading theme:", err)
 	}
 
@@ -164,8 +164,8 @@ func writeConfigFile(path, data string) error {
 	return nil
 }
 
-func downloadAndInstallTheme(dir, zipName, zipUrl string) error {
-	if _, err := os.Stat(filepath.Join(dir, zipName)); os.IsNotExist(err) {
+func downloadAndInstallTheme(dir, zipName, zipUrl, zipFolder string) error {
+	if _, err := os.Stat(filepath.Join(dir, zipFolder)); os.IsNotExist(err) {
 
 		err := DownloadFile(filepath.Join(SuperFileMainDir, zipName), zipUrl)
 		if err != nil {
