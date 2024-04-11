@@ -14,6 +14,7 @@ import (
 
 	components "github.com/MHNightCat/superfile/components"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/muesli/termenv"
 	"github.com/rkoesters/xdg/basedir"
 	"github.com/urfave/cli/v2"
 )
@@ -27,7 +28,7 @@ const (
 	currentVersion      string = "v1.0.2"
 	latestVersionURL    string = "https://api.github.com/repos/MHNightCat/superfile/releases/latest"
 	latestVersionGithub string = "github.com/MHNightCat/superfile/releases/latest"
-	themeZip            string = "https://github.com/MHNightCat/superfile/raw/main/theme.zip"
+	themeZip            string = "https://github.com/MHNightCat/superfile/raw/main/themeZip/theme-1.0.2.zip"
 )
 
 const (
@@ -45,6 +46,8 @@ type GitHubRelease struct {
 }
 
 func main() {
+	output := termenv.NewOutput(os.Stdout)
+	terminalBackgroundColor := output.BackgroundColor()
 	app := &cli.App{
 		Name:        "superfile",
 		Version:     currentVersion,
@@ -60,6 +63,7 @@ func main() {
 
 			p := tea.NewProgram(components.InitialModel(path), tea.WithAltScreen())
 			if _, err := p.Run(); err != nil {
+				output.SetBackgroundColor(terminalBackgroundColor)
 				log.Fatalf("Alas, there's been an error: %v", err)
 				os.Exit(1)
 			}
@@ -96,7 +100,6 @@ func InitConfigFile() {
 		ThemeFolder:  themeFolder,
 		ThemeZipName: themeZipName,
 	}
-
 	// Create directories
 	if err := createDirectories(config.MainDir, config.DataDir, config.CacheDir); err != nil {
 		log.Fatalln("Error creating directories:", err)
@@ -117,6 +120,7 @@ func InitConfigFile() {
 	}
 
 	// Download and install theme
+
 	if err := downloadAndInstallTheme(config.MainDir, config.ThemeZipName, themeZip); err != nil {
 		log.Fatalln("Error downloading theme:", err)
 	}
@@ -161,8 +165,18 @@ func writeConfigFile(path, data string) error {
 }
 
 func downloadAndInstallTheme(dir, zipName, zipUrl string) error {
-	// ... Implementation for downloading and unzipping the theme (same as before)
-	// ... Add appropriate error handling within this function.
+	if _, err := os.Stat(filepath.Join(dir, zipName)); os.IsNotExist(err) {
+
+		err := DownloadFile(filepath.Join(SuperFileMainDir, zipName), zipUrl)
+		if err != nil {
+			return err
+		}
+		err = Unzip(filepath.Join(SuperFileMainDir, zipName), dir)
+		if err != nil {
+			return err
+		}
+		os.Remove(filepath.Join(SuperFileMainDir, zipName))
+	}
 	return nil
 }
 
@@ -295,8 +309,6 @@ func Unzip(src, dest string) error {
 
 const configJsonString string = `{
 	"theme": "gruvbox",
-	"terminal": "",
-	"terminalWorkDirFlag": "",
   
 	"_COMMIT_HOTKEY": "",
   

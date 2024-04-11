@@ -3,6 +3,9 @@
   "terminal": "",
   "terminalWorkDirFlag": "",
 
+  "_COMMIT_bottom_panel": "This is currently of no use",
+  "bottomPanelList": ["processes", "metadata", "clipboard"],
+
   "_COMMIT_HOTKEY": "",
 
   "_COMMIT_global_hotkey": "Here is global, all global key cant conflicts with other hotkeys",
@@ -11,8 +14,6 @@
 
   "listUp": ["up", "k"],
   "listDown": ["down", "j"],
-
-  "openTerminal": ["ctrl+t", ""],
 
   "pinnedFolder": ["ctrl+p", ""],
 

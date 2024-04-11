@@ -2,12 +2,9 @@ package components
 
 import (
 	"encoding/json"
-	"log"
 	"os"
-	"os/exec"
 	"path"
 	"path/filepath"
-	"runtime"
 	"time"
 
 	"github.com/charmbracelet/bubbles/progress"
@@ -300,7 +297,7 @@ func PasteItem(m model) model {
 	m.processBarModel.process[id] = newProcess
 
 	channel <- channelMessage{
-		processId:       id,
+		messageId:       id,
 		processNewState: newProcess,
 	}
 
@@ -318,7 +315,7 @@ func PasteItem(m model) model {
 		if err != nil {
 			p.state = failure
 			channel <- channelMessage{
-				processId:       id,
+				messageId:       id,
 				processNewState: p,
 			}
 			OutPutLog("Pasted item error", err)
@@ -330,7 +327,7 @@ func PasteItem(m model) model {
 				p.done = totalFiles
 				p.doneTime = time.Now()
 				channel <- channelMessage{
-					processId:       id,
+					messageId:       id,
 					processNewState: p,
 				}
 			}
@@ -428,83 +425,6 @@ func PinnedFolder(m model) model {
 	}
 
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
-	return m
-}
-
-// I can't test all of the os system so if you have any problem or want to add support please create new pull request!
-func OpenTerminal(m model) model {
-
-	currentDir := m.fileModel.filePanels[m.filePanelFocusIndex].location
-	terminal := Config.Terminal
-	workDirSet := Config.TerminalWorkDir
-	if terminal != "" {
-		cmd := exec.Command(terminal, workDirSet+currentDir)
-		err := cmd.Start()
-		if err != nil {
-			OutPutLog("Error opening"+terminal+":", err)
-		}
-		return m
-	}
-
-	if runtime.GOOS == "darwin" {
-		terminal = "Terminal.app"
-		workDirSet = "--working-directory="
-		cmd := exec.Command(terminal, workDirSet+currentDir)
-		err := cmd.Start()
-		if err != nil {
-			OutPutLog("Error opening"+terminal+":", err)
-		}
-		return m
-	}
-
-	desktopEnv := os.Getenv("XDG_CURRENT_DESKTOP")
-	switch desktopEnv {
-	case "GNOME":
-		terminal = "gnome-terminal"
-		workDirSet = "--working-directory="
-	case "KDE":
-		terminal = "konsole"
-		workDirSet = "--workdir="
-	case "XFCE":
-		terminal = "xfce4-terminal"
-		workDirSet = "--working-directory="
-	case "LXDE":
-		terminal = "lxterminal"
-		workDirSet = "--working-directory="
-	case "CINNAMON":
-		terminal = "gnome-terminal"
-		workDirSet = "--working-directory="
-	case "MATE":
-		terminal = "mate-terminal"
-		workDirSet = "--working-directory="
-	case "LXQT":
-		terminal = "qterminal"
-		workDirSet = "--working-directory="
-	case "BUDGIE":
-		terminal = "gnome-terminal"
-		workDirSet = "--working-directory="
-	case "PANTHEON":
-		terminal = "pantheon-terminal"
-		workDirSet = "--working-directory="
-	case "DEEPIN":
-		terminal = "deepin-terminal"
-		workDirSet = "--working-directory="
-	case "ENLIGHTENMENT":
-		terminal = "terminology"
-		workDirSet = "--working-directory="
-	case "UNITY":
-		terminal = "gnome-terminal"
-		workDirSet = "--working-directory="
-	default:
-		log.Fatalf("Couldn't find your default terminal, please go to ~/.config/superfile/config/config.json to set your default terminal and terminalWorkDirFlag!")
-	}
-
-	cmd := exec.Command(terminal, workDirSet+currentDir)
-	err := cmd.Start()
-	if err != nil {
-		OutPutLog("Error opening "+terminal+":", err)
-	}
-
 	return m
 }
 

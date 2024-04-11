@@ -193,10 +193,12 @@ type process struct {
 
 // Message for process bar
 type channelMessage struct {
-	processId       string
+	messageId       string
 	processNewState process
 	returnWarnModal bool
 	warnModal       warnModal
+	loadMetadata    bool
+	metadata        [][2]string
 }
 
 /*PROCESS BAR COMPONENTS TYPE END*/
@@ -209,8 +211,9 @@ type iconStyle struct {
 
 // Theme configuration
 type ThemeType struct {
-	Border string
-	Cursor string
+	Border           string
+	Cursor           string
+	BackgroundWindow string
 
 	TerminalTooSmallError string
 	TerminalSizeCorrect   string

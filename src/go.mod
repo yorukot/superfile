@@ -11,6 +11,7 @@ require (
 	github.com/lithammer/shortuuid v2.0.3+incompatible
 	github.com/muesli/termenv v0.15.2
 	github.com/rkoesters/xdg v0.0.1
+	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/urfave/cli/v2 v2.27.1
 )
 
@@ -20,6 +21,7 @@ require (
 	github.com/containerd/console v1.0.4-0.20230313162750-1ae8d489ac81 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
+	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-isatty v0.0.18 // indirect
@@ -34,6 +36,7 @@ require (
 	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/stretchr/testify v1.8.4 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
+	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	golang.org/x/sync v0.5.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect
 	golang.org/x/term v0.6.0 // indirect

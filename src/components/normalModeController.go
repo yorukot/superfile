@@ -84,7 +84,7 @@ func CompletelyDeleteSingleFile(m model) model {
 	m.processBarModel.process[id] = newProcess
 
 	channel <- channelMessage{
-		processId:       id,
+		messageId:       id,
 		processNewState: newProcess,
 	}
 
@@ -97,7 +97,7 @@ func CompletelyDeleteSingleFile(m model) model {
 		p := m.processBarModel.process[id]
 		p.state = failure
 		channel <- channelMessage{
-			processId:       id,
+			messageId:       id,
 			processNewState: p,
 		}
 	} else {
@@ -106,7 +106,7 @@ func CompletelyDeleteSingleFile(m model) model {
 		p.state = successful
 		p.doneTime = time.Now()
 		channel <- channelMessage{
-			processId:       id,
+			messageId:       id,
 			processNewState: p,
 		}
 	}
@@ -127,7 +127,7 @@ func DeleteSingleItem(m model) model {
 
 	if IsExternalPath(panel.location) || runtime.GOOS == "darwin" {
 		channel <- channelMessage{
-			processId:       id,
+			messageId:       id,
 			returnWarnModal: true,
 			warnModal: warnModal{
 				open:     true,
@@ -150,7 +150,7 @@ func DeleteSingleItem(m model) model {
 	m.processBarModel.process[id] = newProcess
 
 	channel <- channelMessage{
-		processId:       id,
+		messageId:       id,
 		processNewState: newProcess,
 	}
 
@@ -163,7 +163,7 @@ func DeleteSingleItem(m model) model {
 		p := m.processBarModel.process[id]
 		p.state = failure
 		channel <- channelMessage{
-			processId:       id,
+			messageId:       id,
 			processNewState: p,
 		}
 	} else {
@@ -172,7 +172,7 @@ func DeleteSingleItem(m model) model {
 		p.state = successful
 		p.doneTime = time.Now()
 		channel <- channelMessage{
-			processId:       id,
+			messageId:       id,
 			processNewState: p,
 		}
 	}

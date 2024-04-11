@@ -1,6 +1,10 @@
 <div align="center">
 
-![superfile](/asset/SUPERFILE.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="/asset/superfilelogowhite.png" />
+  <source media="(prefers-color-scheme: light)" srcset="/asset/superfilelogoblack.png" />
+  <img alt="superfile LOGO" src="/asset/superfilelogowhite.png" />
+</picture>
 
 ![](/asset/demo.png)
 

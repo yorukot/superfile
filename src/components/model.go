@@ -2,17 +2,20 @@ package components
 
 import (
 	"encoding/json"
+	"log"
+	"os"
+	"path/filepath"
+	"time"
+
 	"github.com/barasher/go-exiftool"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/rkoesters/xdg/basedir"
-	"log"
-	"os"
-	"path/filepath"
 )
 
 const (
+	configFolder     string = "/config"
 	themeFolder      string = "/theme"
 	dataFolder       string = "/data"
 	lastCheckVersion string = "/lastCheckVersion"
@@ -22,6 +25,9 @@ const (
 	configFile       string = "/config.json"
 	themeZipName     string = "/theme.zip"
 )
+
+var LastTimeCursorMove = [2]int{int(time.Now().UnixMicro()), 0}
+var ListeningMessage = true
 
 var HomeDir = basedir.Home
 var SuperFileMainDir = basedir.ConfigHome + "/superfile"
@@ -49,7 +55,7 @@ func InitialModel(dir string) model {
 	}
 	err = json.Unmarshal(data, &Config)
 	if err != nil {
-		log.Fatalf("Error decoding config json (your config file may have misconfigured): %v", err)
+		log.Fatalf("Error decoding config json( your config file may have misconfigured ): %v", err)
 	}
 
 	data, err = os.ReadFile(SuperFileMainDir + themeFolder + "/" + Config.Theme + ".json")
@@ -65,7 +71,12 @@ func InitialModel(dir string) model {
 	if err != nil {
 		OutPutLog("Error while reading toggleDotFile data error:", err)
 	}
-	var toggleDotFileBool = string(toggleDotFileData) == "true"
+	var toggleDotFileBool bool
+	if string(toggleDotFileData) == "true" {
+		toggleDotFileBool = true
+	} else if string(toggleDotFileData) == "false" {
+		toggleDotFileBool = false
+	}
 	LoadThemeConfig()
 	et, err = exiftool.NewExiftool()
 	if err != nil {
@@ -111,12 +122,9 @@ func InitialModel(dir string) model {
 
 func listenForChannelMessage(msg chan channelMessage) tea.Cmd {
 	return func() tea.Msg {
-		select {
-		case m := <-msg:
-			return m
-		default:
-			return nil
-		}
+		m := <-msg
+		ListeningMessage = false
+		return m
 	}
 }
 
@@ -131,21 +139,26 @@ func (m model) Init() tea.Cmd {
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
+	// check is the message by thread
 	case channelMessage:
 		if msg.returnWarnModal {
 			m.warnModal = msg.warnModal
+		} else if msg.loadMetadata {
+			m.fileMetaData.metaData = msg.metadata
 		} else {
-			if !contains(m.processBarModel.processList, msg.processId) {
-				m.processBarModel.processList = append(m.processBarModel.processList, msg.processId)
+			if !contains(m.processBarModel.processList, msg.messageId) {
+				m.processBarModel.processList = append(m.processBarModel.processList, msg.messageId)
 			}
-			m.processBarModel.process[msg.processId] = msg.processNewState
+			m.processBarModel.process[msg.messageId] = msg.processNewState
 		}
+	// if the message by windows size change
 	case tea.WindowSizeMsg:
-		m.mainPanelHeight = msg.Height - bottomBarHeight
+		m.mainPanelHeight = msg.Height - bottomBarHeight + 1
 		m.fileModel.width = (msg.Width - sideBarWidth - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
 		m.fullHeight = msg.Height
 		m.fullWidth = msg.Width
 		return m, nil
+	// if just user press key
 	case tea.KeyMsg:
 		// if in the create item modal
 		if m.typingModal.open {
@@ -199,7 +212,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m = ControllerMetaDataListUp(m)
 				} else if m.focusPanel == nonePanelFocus {
 					m = ControllerFilePanelListUp(m)
-					m = ReturnMetaData(m)
+					m.fileMetaData.renderIndex = 0
+					go func() {
+						m = ReturnMetaData(m)
+					}()
 				}
 			// down list
 			case Config.ListDown[0], Config.ListDown[1]:
@@ -211,7 +227,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m = ControllerMetaDataListDown(m)
 				} else if m.focusPanel == nonePanelFocus {
 					m = ControllerFilePanelListDown(m)
-					m = ReturnMetaData(m)
+					m.fileMetaData.renderIndex = 0
+					go func() {
+						m = ReturnMetaData(m)
+					}()
 				}
 			/* LIST CONTROLLER END */
 			case Config.ChangePanelMode[0], Config.ChangePanelMode[1]:
@@ -237,7 +256,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m = FocusOnProcessBar(m)
 			case Config.FocusOnMetaData[0], Config.FocusOnMetaData[1]:
 				m = FocusOnMetaData(m)
-				m = ReturnMetaData(m)
+				go func() {
+					m = ReturnMetaData(m)
+				}()
 			case Config.PasteItem[0], Config.PasteItem[1]:
 				go func() {
 					m = PasteItem(m)
@@ -248,8 +269,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m = PanelCreateNewFolder(m)
 			case Config.PinnedDirectory[0], Config.PinnedDirectory[1]:
 				m = PinnedFolder(m)
-			case Config.OpenTerminal[0], Config.OpenTerminal[1]:
-				m = OpenTerminal(m)
 			case Config.ToggleDotFile[0], Config.ToggleDotFile[1]:
 				m = ToggleDotFile(m)
 			default:
@@ -265,7 +284,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					case Config.FilePanelSelectModeItemDelete[0], Config.FilePanelSelectModeItemDelete[1]:
 						go func() {
 							m = DeleteMultipleItem(m)
-							if !IsExternalPath(m.fileModel.filePanels[m.filePanelFocusIndex].location) {
+							if !IsExternalDiskPath(m.fileModel.filePanels[m.filePanelFocusIndex].location) {
 								m.fileModel.filePanels[m.filePanelFocusIndex].selected = m.fileModel.filePanels[m.filePanelFocusIndex].selected[:0]
 							}
 						}()
@@ -316,17 +335,23 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if m.fileModel.filePanels[m.filePanelFocusIndex].cursor < 0 {
 		m.fileModel.filePanels[m.filePanelFocusIndex].cursor = 0
 	}
-
+  
 	cmd = tea.Batch(cmd, listenForChannelMessage(channel))
 	m.sideBarModel.directories = getDirectories()
 	// m.sideBarModel.wellKnownModel = getWellKnownDirectories()
 	// m.sideBarModel.pinnedModel = getPinnedDirectories()
 	// m.sideBarModel.disksModel = getExternalMediaFolders()
+  
+	if ListeningMessage {
+		cmd = tea.Batch(cmd)
+	} else {
+		cmd = tea.Batch(cmd, listenForchannelMessage(channel))
+	}
 	return m, cmd
 }
 
 func (m model) View() string {
-	// Check if terminal dimensions are big enough
+	// check is the terminal size enough
 	if m.fullHeight < minimumHeight || m.fullWidth < minimumWidth {
 		return TerminalSizeWarnRender(m)
 	} else if m.typingModal.open {
@@ -335,12 +360,20 @@ func (m model) View() string {
 		return WarnModalRender(m)
 	} else {
 		sideBar := SideBarRender(m)
+
 		filePanel := FilePanelRender(m)
+
 		mainPanel := lipgloss.JoinHorizontal(0, sideBar, filePanel)
+
 		processBar := ProcessBarRender(m)
+
 		metaData := MetaDataRender(m)
+
 		clipboardBar := ClipboardRender(m)
+
 		bottomBar := lipgloss.JoinHorizontal(0, processBar, metaData, clipboardBar)
+
+		// final render
 		finalRender := lipgloss.JoinVertical(0, mainPanel, bottomBar)
 
 		return lipgloss.JoinVertical(lipgloss.Top, finalRender)
