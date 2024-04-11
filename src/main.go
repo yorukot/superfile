@@ -110,9 +110,9 @@ func InitConfigFile() {
 	if err := createDirectories(
 		config.MainDir, config.DataDir,
 		config.CacheDir,
-		config.DataDir+trashDirectory,
-		config.DataDir+trashDirectoryFiles,
-		config.DataDir+trashDirectoryInfo,
+		basedir.DataHome+trashDirectory,
+		basedir.DataHome+trashDirectoryFiles,
+		basedir.DataHome+trashDirectoryInfo,
 	); err != nil {
 		log.Fatalln("Error creating directories:", err)
 	}

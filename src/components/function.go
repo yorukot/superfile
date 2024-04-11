@@ -242,17 +242,17 @@ func renameIfDuplicate(destination string) (string, error) {
 	}
 }
 
-func moveFile(source string, destination string) error {
-	destination, err := renameIfDuplicate(destination)
-	if err != nil {
-		outPutLog("Move file function error", err)
-	}
-	err = os.Rename(source, destination)
-	if err != nil {
-		outPutLog("Move file function error", err)
-	}
-	return err
-}
+// func moveFile(source string, destination string) error {
+// 	destination, err := renameIfDuplicate(destination)
+// 	if err != nil {
+// 		outPutLog("Move file function error", err)
+// 	}
+// 	err = os.Rename(source, destination)
+// 	if err != nil {
+// 		outPutLog("Move file function error", err)
+// 	}
+// 	return err
+// }
 
 func pasteFile(src string, dst string) error {
 	srcFile, err := os.Open(src)
