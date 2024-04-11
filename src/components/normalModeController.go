@@ -74,6 +74,8 @@ func CompletelyDeleteSingleFile(m model) model {
 	}
 
 	prog := progress.New(progress.WithScaledGradient(theme.ProcessBarGradient[0], theme.ProcessBarGradient[1]))
+	prog.PercentageStyle = textStyle
+	
 	newProcess := process{
 		name:     "󰆴 " + panel.element[panel.cursor].name,
 		progress: prog,
@@ -140,6 +142,8 @@ func DeleteSingleItem(m model) model {
 	}
 
 	prog := progress.New(progress.WithScaledGradient(theme.ProcessBarGradient[0], theme.ProcessBarGradient[1]))
+	prog.PercentageStyle = textStyle
+
 	newProcess := process{
 		name:     "󰆴 " + panel.element[panel.cursor].name,
 		progress: prog,

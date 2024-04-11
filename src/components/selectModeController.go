@@ -74,6 +74,8 @@ func CompletelyDeleteMultipleFile(m model) model {
 	if len(panel.selected) != 0 {
 		id := shortuuid.New()
 		prog := progress.New(progress.WithScaledGradient(theme.ProcessBarGradient[0], theme.ProcessBarGradient[1]))
+		prog.PercentageStyle = textStyle
+
 		newProcess := process{
 			name:     "󰆴 " + filepath.Base(panel.selected[0]),
 			progress: prog,
@@ -156,6 +158,8 @@ func DeleteMultipleItem(m model) model {
 			return m
 		}
 		prog := progress.New(progress.WithScaledGradient(theme.ProcessBarGradient[0], theme.ProcessBarGradient[1]))
+		prog.PercentageStyle = textStyle
+
 		newProcess := process{
 			name:     "󰆴 " + filepath.Base(panel.selected[0]),
 			progress: prog,

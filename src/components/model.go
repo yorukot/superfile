@@ -336,13 +336,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if m.fileModel.filePanels[m.filePanelFocusIndex].cursor < 0 {
 		m.fileModel.filePanels[m.filePanelFocusIndex].cursor = 0
 	}
-  
+
 	cmd = tea.Batch(cmd, listenForChannelMessage(channel))
 	m.sideBarModel.directories = getDirectories()
-	// m.sideBarModel.wellKnownModel = getWellKnownDirectories()
-	// m.sideBarModel.pinnedModel = getPinnedDirectories()
-	// m.sideBarModel.disksModel = getExternalMediaFolders()
-  
+
 	if ListeningMessage {
 		cmd = tea.Batch(cmd)
 	} else {

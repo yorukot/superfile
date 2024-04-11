@@ -274,6 +274,8 @@ func PasteItem(m model) model {
 
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	prog := progress.New(progress.WithScaledGradient(theme.ProcessBarGradient[0], theme.ProcessBarGradient[1]))
+	prog.PercentageStyle = textStyle
+
 	newProcess := process{}
 
 	if m.copyItems.cut {

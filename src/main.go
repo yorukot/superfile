@@ -309,6 +309,11 @@ func Unzip(src, dest string) error {
 
 const configJsonString string = `{
 	"theme": "gruvbox",
+	"terminal": "",
+	"terminalWorkDirFlag": "",
+  
+	"_COMMIT_bottom_panel": "This is currently of no use",
+	"bottomPanelList": ["processes", "metadata", "clipboard"],
   
 	"_COMMIT_HOTKEY": "",
   
@@ -319,9 +324,7 @@ const configJsonString string = `{
 	"listUp": ["up", "k"],
 	"listDown": ["down", "j"],
   
-	"openTerminal": ["ctrl+t", ""],
-  
-	"pinnedFolder": ["ctrl+p", ""],
+	"pinnedDirectory": ["ctrl+p", ""],
   
 	"closeFilePanel": ["ctrl+w", ""],
 	"createNewFilePanel": ["ctrl+n", ""],
