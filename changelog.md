@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file. Dates are d
 - Toggle dot file display [`9fff97a`](https://github.com/MHNightCat/superfile/commit/9fff97a362bcd5bec1c19709b7a5aeb59cdeaa34/9fff97a362bcd5bec1c19709b7a5aeb59cdeaa34)
 - Update log file from `$XDG_CONFIG_HOME/superfile/data/superfile.log` to `$XDG_CACH_DATA` [`#27`](https://github.com/MHNightCat/superfile/pull/27)
 - Update theme background [`#42`](https://github.com/MHNightCat/superfile/pull/42)
+- Update unzip function [`#55`](https://github.com/MHNightCat/superfile/pull/55)
 
 #### Bug fix
 
