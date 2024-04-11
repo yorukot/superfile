@@ -41,6 +41,12 @@ const (
 	logFile          string = "/superfile.log"
 )
 
+const (
+	trashDirectory      string = "/Trash"
+	trashDirectoryFiles string = "/Trash/files"
+	trashDirectoryInfo  string = "/Trash/info"
+)
+
 type GitHubRelease struct {
 	TagName string `json:"tag_name"`
 }
@@ -101,7 +107,13 @@ func InitConfigFile() {
 		ThemeZipName: themeZipName,
 	}
 	// Create directories
-	if err := createDirectories(config.MainDir, config.DataDir, config.CacheDir); err != nil {
+	if err := createDirectories(
+		config.MainDir, config.DataDir,
+		config.CacheDir,
+		config.DataDir+trashDirectory,
+		config.DataDir+trashDirectoryFiles,
+		config.DataDir+trashDirectoryInfo,
+	); err != nil {
 		log.Fatalln("Error creating directories:", err)
 	}
 

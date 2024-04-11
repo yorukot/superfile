@@ -1,10 +1,7 @@
 package components
 
 import (
-	"encoding/json"
-	"log"
 	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/barasher/go-exiftool"
@@ -42,53 +39,7 @@ var et *exiftool.Exiftool
 var channel = make(chan channelMessage, 1000)
 
 func InitialModel(dir string) model {
-	var err error
-
-	logOutput, err = os.OpenFile(SuperFileCacheDir+logFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatalf("Error while opening superfile.log file: %v", err)
-	}
-
-	data, err := os.ReadFile(SuperFileMainDir + configFile)
-	if err != nil {
-		log.Fatalf("Config file doesn't exist: %v", err)
-	}
-	err = json.Unmarshal(data, &Config)
-	if err != nil {
-		log.Fatalf("Error decoding config json( your config file may have misconfigured ): %v", err)
-	}
-
-	data, err = os.ReadFile(SuperFileMainDir + themeFolder + "/" + Config.Theme + ".json")
-	if err != nil {
-		log.Fatalf("Theme file doesn't exist: %v", err)
-	}
-
-	err = json.Unmarshal(data, &theme)
-	if err != nil {
-		log.Fatalf("Error while decoding theme json( Your theme file may have errors ): %v", err)
-	}
-	toggleDotFileData, err := os.ReadFile(SuperFileDataDir + toggleDotFile)
-	if err != nil {
-		OutPutLog("Error while reading toggleDotFile data error:", err)
-	}
-	var toggleDotFileBool bool
-	if string(toggleDotFileData) == "true" {
-		toggleDotFileBool = true
-	} else if string(toggleDotFileData) == "false" {
-		toggleDotFileBool = false
-	}
-	LoadThemeConfig()
-	et, err = exiftool.NewExiftool()
-	if err != nil {
-		OutPutLog("Initial model function init exiftool error", err)
-	}
-	firstFilePanelDir := HomeDir
-	if dir != "" {
-		firstFilePanelDir, err = filepath.Abs(dir)
-		if err != nil {
-			firstFilePanelDir = HomeDir
-		}
-	}
+	toggleDotFileBool, firstFilePanelDir := loadConfigFile(dir)
 	return model{
 		filePanelFocusIndex: 0,
 		focusPanel:          nonePanelFocus,
@@ -146,7 +97,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		} else if msg.loadMetadata {
 			m.fileMetaData.metaData = msg.metadata
 		} else {
-			if !contains(m.processBarModel.processList, msg.messageId) {
+			if !arrayContains(m.processBarModel.processList, msg.messageId) {
 				m.processBarModel.processList = append(m.processBarModel.processList, msg.messageId)
 			}
 			m.processBarModel.process[msg.messageId] = msg.processNewState
@@ -177,12 +128,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.warnModal.open = false
 				if m.fileModel.filePanels[m.filePanelFocusIndex].panelMode == selectMode {
 					go func() {
-						m = CompletelyDeleteMultipleFile(m)
+						m = completelyDeleteMultipleFile(m)
 						m.fileModel.filePanels[m.filePanelFocusIndex].selected = m.fileModel.filePanels[m.filePanelFocusIndex].selected[:0]
 					}()
 				} else {
 					go func() {
-						m = CompletelyDeleteSingleFile(m)
+						m = completelyDeleteSingleFile(m)
 					}()
 				}
 			}
@@ -205,120 +156,120 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// up list
 			case Config.ListUp[0], Config.ListUp[1]:
 				if m.focusPanel == sideBarFocus {
-					m = ControllerSideBarListUp(m)
+					m = controllerSideBarListUp(m)
 				} else if m.focusPanel == processBarFocus {
-					m = ContollerProcessBarListUp(m)
+					m = contollerProcessBarListUp(m)
 				} else if m.focusPanel == metaDataFocus {
-					m = ControllerMetaDataListUp(m)
+					m = controllerMetaDataListUp(m)
 				} else if m.focusPanel == nonePanelFocus {
-					m = ControllerFilePanelListUp(m)
+					m = controllerFilePanelListUp(m)
 					m.fileMetaData.renderIndex = 0
 					go func() {
-						m = ReturnMetaData(m)
+						m = returnMetaData(m)
 					}()
 				}
 			// down list
 			case Config.ListDown[0], Config.ListDown[1]:
 				if m.focusPanel == sideBarFocus {
-					m = ControllerSideBarListDown(m)
+					m = controllerSideBarListDown(m)
 				} else if m.focusPanel == processBarFocus {
-					m = ContollerProcessBarListDown(m)
+					m = contollerProcessBarListDown(m)
 				} else if m.focusPanel == metaDataFocus {
-					m = ControllerMetaDataListDown(m)
+					m = controllerMetaDataListDown(m)
 				} else if m.focusPanel == nonePanelFocus {
-					m = ControllerFilePanelListDown(m)
+					m = controllerFilePanelListDown(m)
 					m.fileMetaData.renderIndex = 0
 					go func() {
-						m = ReturnMetaData(m)
+						m = returnMetaData(m)
 					}()
 				}
 			/* LIST CONTROLLER END */
 			case Config.ChangePanelMode[0], Config.ChangePanelMode[1]:
-				m = SelectedMode(m)
+				m = selectedMode(m)
 			/* NAVIGATION CONTROLLER START */
 			// change file panel
 			case Config.NextFilePanel[0], Config.NextFilePanel[1]:
-				m = NextFilePanel(m)
+				m = nextFilePanel(m)
 			// change file panel
 			case Config.PreviousFilePanel[0], Config.PreviousFilePanel[1]:
-				m = PreviousFilePanel(m)
+				m = previousFilePanel(m)
 			// close file panel
 			case Config.CloseFilePanel[0], Config.CloseFilePanel[1]:
-				m = CloseFilePanel(m)
+				m = closeFilePanel(m)
 			// create new file panel
 			case Config.CreateNewFilePanel[0], Config.CreateNewFilePanel[1]:
-				m = CreateNewFilePanel(m)
+				m = createNewFilePanel(m)
 			// focus to sidebar or file panel
 			case Config.FocusOnSideBar[0], Config.FocusOnSideBar[1]:
-				m = FocusOnSideBar(m)
+				m = focusOnSideBar(m)
 			/* NAVIGATION CONTROLLER END */
 			case Config.FocusOnProcessBar[0], Config.FocusOnProcessBar[1]:
-				m = FocusOnProcessBar(m)
+				m = focusOnProcessBar(m)
 			case Config.FocusOnMetaData[0], Config.FocusOnMetaData[1]:
-				m = FocusOnMetaData(m)
+				m = focusOnMetaData(m)
 				go func() {
-					m = ReturnMetaData(m)
+					m = returnMetaData(m)
 				}()
 			case Config.PasteItem[0], Config.PasteItem[1]:
 				go func() {
-					m = PasteItem(m)
+					m = pasteItem(m)
 				}()
 			case Config.FilePanelFileCreate[0], Config.FilePanelFileCreate[1]:
-				m = PanelCreateNewFile(m)
+				m = panelCreateNewFile(m)
 			case Config.FilePanelDirectoryCreate[0], Config.FilePanelDirectoryCreate[1]:
-				m = PanelCreateNewFolder(m)
+				m = panelCreateNewFolder(m)
 			case Config.PinnedDirectory[0], Config.PinnedDirectory[1]:
-				OutPutLog("test")
-				m = PinnedFolder(m)
+				outPutLog("test")
+				m = pinnedFolder(m)
 			case Config.ToggleDotFile[0], Config.ToggleDotFile[1]:
-				m = ToggleDotFile(m)
+				m = toggleDotFileController(m)
 			default:
 				// check if it's the select mode
 				if m.fileModel.filePanels[m.filePanelFocusIndex].focusType == focus && m.fileModel.filePanels[m.filePanelFocusIndex].panelMode == selectMode {
 					switch msg.String() {
 					case Config.FilePanelSelectModeItemSingleSelect[0], Config.FilePanelSelectModeItemSingleSelect[1]:
-						m = SingleItemSelect(m)
+						m = singleItemSelect(m)
 					case Config.FilePanelSelectModeItemSelectUp[0], Config.FilePanelSelectModeItemSelectUp[1]:
-						m = ItemSelectUp(m)
+						m = itemSelectUp(m)
 					case Config.FilePanelSelectModeItemSelectDown[0], Config.FilePanelSelectModeItemSelectDown[1]:
-						m = ItemSelectDown(m)
+						m = itemSelectDown(m)
 					case Config.FilePanelSelectModeItemDelete[0], Config.FilePanelSelectModeItemDelete[1]:
 						go func() {
-							m = DeleteMultipleItem(m)
-							if !IsExternalDiskPath(m.fileModel.filePanels[m.filePanelFocusIndex].location) {
+							m = deleteMultipleItem(m)
+							if !isExternalDiskPath(m.fileModel.filePanels[m.filePanelFocusIndex].location) {
 								m.fileModel.filePanels[m.filePanelFocusIndex].selected = m.fileModel.filePanels[m.filePanelFocusIndex].selected[:0]
 							}
 						}()
 					case Config.FilePanelSelectModeItemCopy[0], Config.FilePanelSelectModeItemCopy[1]:
-						m = CopyMultipleItem(m)
+						m = copyMultipleItem(m)
 					case Config.FilePanelSelectModeItemCut[0], Config.FilePanelSelectModeItemCut[1]:
-						m = CutMultipleItem(m)
+						m = cutMultipleItem(m)
 					case Config.FilePanelSelectAllItem[0], Config.FilePanelSelectAllItem[1]:
-						m = SelectAllItem(m)
+						m = selectAllItem(m)
 					}
 					// else
 				} else {
 					switch msg.String() {
 					case Config.SelectItem[0], Config.SelectItem[1]:
 						if m.focusPanel == sideBarFocus {
-							m = SideBarSelectFolder(m)
+							m = sideBarSelectFolder(m)
 						} else if m.focusPanel == processBarFocus {
 
 						} else if m.focusPanel == nonePanelFocus {
-							m = EnterPanel(m)
+							m = enterPanel(m)
 						}
 					case Config.ParentDirectory[0], Config.ParentDirectory[1]:
-						m = ParentFolder(m)
+						m = parentFolder(m)
 					case Config.DeleteItem[0], Config.DeleteItem[1]:
 						go func() {
-							m = DeleteSingleItem(m)
+							m = deleteSingleItem(m)
 						}()
 					case Config.CopySingleItem[0], Config.CopySingleItem[1]:
-						m = CopySingleItem(m)
+						m = copySingleItem(m)
 					case Config.CutSingleItem[0], Config.CutSingleItem[1]:
-						m = CutSingleItem(m)
+						m = cutSingleItem(m)
 					case Config.FilePanelItemRename[0], Config.FilePanelItemRename[1]:
-						m = PanelItemRename(m)
+						m = panelItemRename(m)
 					}
 
 				}

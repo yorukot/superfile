@@ -11,10 +11,10 @@ import (
 	"github.com/rkoesters/xdg/trash"
 )
 
-func SingleItemSelect(m model) model {
+func singleItemSelect(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	if ArrayContains(panel.selected, panel.element[panel.cursor].location) {
-		panel.selected = RemoveElementByValue(panel.selected, panel.element[panel.cursor].location)
+	if arrayContains(panel.selected, panel.element[panel.cursor].location) {
+		panel.selected = removeElementByValue(panel.selected, panel.element[panel.cursor].location)
 	} else {
 		panel.selected = append(panel.selected, panel.element[panel.cursor].location)
 	}
@@ -23,7 +23,7 @@ func SingleItemSelect(m model) model {
 	return m
 }
 
-func ItemSelectUp(m model) model {
+func itemSelectUp(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	if panel.cursor > 0 {
 		panel.cursor--
@@ -31,15 +31,15 @@ func ItemSelectUp(m model) model {
 			panel.render--
 		}
 	} else {
-		if len(panel.element) > PanelElementHeight(m.mainPanelHeight) {
-			panel.render = len(panel.element) - PanelElementHeight(m.mainPanelHeight)
+		if len(panel.element) > panelElementHeight(m.mainPanelHeight) {
+			panel.render = len(panel.element) - panelElementHeight(m.mainPanelHeight)
 			panel.cursor = len(panel.element) - 1
 		} else {
 			panel.cursor = len(panel.element) - 1
 		}
 	}
-	if ArrayContains(panel.selected, panel.element[panel.cursor].location) {
-		panel.selected = RemoveElementByValue(panel.selected, panel.element[panel.cursor].location)
+	if arrayContains(panel.selected, panel.element[panel.cursor].location) {
+		panel.selected = removeElementByValue(panel.selected, panel.element[panel.cursor].location)
 	} else {
 		panel.selected = append(panel.selected, panel.element[panel.cursor].location)
 	}
@@ -48,19 +48,19 @@ func ItemSelectUp(m model) model {
 	return m
 }
 
-func ItemSelectDown(m model) model {
+func itemSelectDown(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	if panel.cursor < len(panel.element)-1 {
 		panel.cursor++
-		if panel.cursor > panel.render+PanelElementHeight(m.mainPanelHeight)-1 {
+		if panel.cursor > panel.render+panelElementHeight(m.mainPanelHeight)-1 {
 			panel.render++
 		}
 	} else {
 		panel.render = 0
 		panel.cursor = 0
 	}
-	if ArrayContains(panel.selected, panel.element[panel.cursor].location) {
-		panel.selected = RemoveElementByValue(panel.selected, panel.element[panel.cursor].location)
+	if arrayContains(panel.selected, panel.element[panel.cursor].location) {
+		panel.selected = removeElementByValue(panel.selected, panel.element[panel.cursor].location)
 	} else {
 		panel.selected = append(panel.selected, panel.element[panel.cursor].location)
 	}
@@ -69,7 +69,7 @@ func ItemSelectDown(m model) model {
 	return m
 }
 
-func CompletelyDeleteMultipleFile(m model) model {
+func completelyDeleteMultipleFile(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	if len(panel.selected) != 0 {
 		id := shortuuid.New()
@@ -104,7 +104,7 @@ func CompletelyDeleteMultipleFile(m model) model {
 			}
 			err := os.RemoveAll(filePath)
 			if err != nil {
-				OutPutLog("Completely delete multiple item function remove file error", err)
+				outPutLog("Completely delete multiple item function remove file error", err)
 			}
 
 			if err != nil {
@@ -113,7 +113,7 @@ func CompletelyDeleteMultipleFile(m model) model {
 					messageId:       id,
 					processNewState: p,
 				}
-				OutPutLog("Completely delete multiple item function error", err)
+				outPutLog("Completely delete multiple item function error", err)
 				m.processBarModel.process[id] = p
 				break
 			} else {
@@ -140,11 +140,11 @@ func CompletelyDeleteMultipleFile(m model) model {
 	return m
 }
 
-func DeleteMultipleItem(m model) model {
+func deleteMultipleItem(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	if len(panel.selected) != 0 {
 		id := shortuuid.New()
-		if IsExternalDiskPath(panel.location) || runtime.GOOS == "darwin" {
+		if isExternalDiskPath(panel.location) || runtime.GOOS == "darwin" {
 			channel <- channelMessage{
 				messageId:       id,
 				returnWarnModal: true,
@@ -189,7 +189,7 @@ func DeleteMultipleItem(m model) model {
 			}
 			err := trash.Trash(filePath)
 			if err != nil {
-				OutPutLog("Delete single item function move file to trash can error", err)
+				outPutLog("Delete single item function move file to trash can error", err)
 			}
 
 			if err != nil {
@@ -198,7 +198,7 @@ func DeleteMultipleItem(m model) model {
 					messageId:       id,
 					processNewState: p,
 				}
-				OutPutLog("Delete multiple item function error", err)
+				outPutLog("Delete multiple item function error", err)
 				m.processBarModel.process[id] = p
 				break
 			} else {
@@ -225,7 +225,7 @@ func DeleteMultipleItem(m model) model {
 	return m
 }
 
-func CopyMultipleItem(m model) model {
+func copyMultipleItem(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	m.copyItems.cut = false
 	m.copyItems.items = m.copyItems.items[:0]
@@ -238,25 +238,25 @@ func CopyMultipleItem(m model) model {
 		return m
 	}
 	if err != nil {
-		OutPutLog("Copy multiple item function get file state error", panel.selected[0], err)
+		outPutLog("Copy multiple item function get file state error", panel.selected[0], err)
 	}
 
 	if !fileInfo.IsDir() && float64(fileInfo.Size())/(1024*1024) < 250 {
 		fileContent, err := os.ReadFile(panel.selected[0])
 
 		if err != nil {
-			OutPutLog("Copy multiple item function read file error", err)
+			outPutLog("Copy multiple item function read file error", err)
 		}
 
 		if err := clipboard.WriteAll(string(fileContent)); err != nil {
-			OutPutLog("Copy multiple item function write file to clipboard error", err)
+			outPutLog("Copy multiple item function write file to clipboard error", err)
 		}
 	}
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m
 }
 
-func CutMultipleItem(m model) model {
+func cutMultipleItem(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	m.copyItems.cut = true
 	m.copyItems.items = m.copyItems.items[:0]
@@ -269,25 +269,25 @@ func CutMultipleItem(m model) model {
 		return m
 	}
 	if err != nil {
-		OutPutLog("Copy multiple item function get file state error", panel.selected[0], err)
+		outPutLog("Copy multiple item function get file state error", panel.selected[0], err)
 	}
 
 	if !fileInfo.IsDir() && float64(fileInfo.Size())/(1024*1024) < 250 {
 		fileContent, err := os.ReadFile(panel.selected[0])
 
 		if err != nil {
-			OutPutLog("Copy multiple item function read file error", err)
+			outPutLog("Copy multiple item function read file error", err)
 		}
 
 		if err := clipboard.WriteAll(string(fileContent)); err != nil {
-			OutPutLog("Copy multiple item function write file to clipboard error", err)
+			outPutLog("Copy multiple item function write file to clipboard error", err)
 		}
 	}
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m
 }
 
-func SelectAllItem(m model) model {
+func selectAllItem(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	for _, item := range panel.element {
 		panel.selected = append(panel.selected, item.location)

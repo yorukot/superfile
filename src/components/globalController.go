@@ -14,7 +14,7 @@ import (
 )
 
 /* CURSOR CONTROLLER START */
-func ControllerSideBarListUp(m model) model {
+func controllerSideBarListUp(m model) model {
 	if m.sideBarModel.cursor > 0 {
 		m.sideBarModel.cursor--
 	} else {
@@ -23,7 +23,7 @@ func ControllerSideBarListUp(m model) model {
 	return m
 }
 
-func ControllerSideBarListDown(m model) model {
+func controllerSideBarListDown(m model) model {
 	lenDirs := len(m.sideBarModel.directories)
 	if m.sideBarModel.cursor < lenDirs-1 {
 		m.sideBarModel.cursor++
@@ -33,7 +33,7 @@ func ControllerSideBarListDown(m model) model {
 	return m
 }
 
-func ControllerMetaDataListUp(m model) model {
+func controllerMetaDataListUp(m model) model {
 	if m.fileMetaData.renderIndex > 0 {
 		m.fileMetaData.renderIndex--
 	} else {
@@ -42,7 +42,7 @@ func ControllerMetaDataListUp(m model) model {
 	return m
 }
 
-func ControllerMetaDataListDown(m model) model {
+func controllerMetaDataListDown(m model) model {
 	if m.fileMetaData.renderIndex < len(m.fileMetaData.metaData)-1 {
 		m.fileMetaData.renderIndex++
 	} else {
@@ -51,7 +51,7 @@ func ControllerMetaDataListDown(m model) model {
 	return m
 }
 
-func ControllerFilePanelListUp(m model) model {
+func controllerFilePanelListUp(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	if len(panel.element) == 0 {
 		return m
@@ -62,8 +62,8 @@ func ControllerFilePanelListUp(m model) model {
 			panel.render--
 		}
 	} else {
-		if len(panel.element) > PanelElementHeight(m.mainPanelHeight) {
-			panel.render = len(panel.element) - PanelElementHeight(m.mainPanelHeight)
+		if len(panel.element) > panelElementHeight(m.mainPanelHeight) {
+			panel.render = len(panel.element) - panelElementHeight(m.mainPanelHeight)
 			panel.cursor = len(panel.element) - 1
 		} else {
 			panel.cursor = len(panel.element) - 1
@@ -75,14 +75,14 @@ func ControllerFilePanelListUp(m model) model {
 	return m
 }
 
-func ControllerFilePanelListDown(m model) model {
+func controllerFilePanelListDown(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	if len(panel.element) == 0 {
 		return m
 	}
 	if panel.cursor < len(panel.element)-1 {
 		panel.cursor++
-		if panel.cursor > panel.render+PanelElementHeight(m.mainPanelHeight)-1 {
+		if panel.cursor > panel.render+panelElementHeight(m.mainPanelHeight)-1 {
 			panel.render++
 		}
 	} else {
@@ -94,7 +94,7 @@ func ControllerFilePanelListDown(m model) model {
 	return m
 }
 
-func ContollerProcessBarListUp(m model) model {
+func contollerProcessBarListUp(m model) model {
 	if len(m.processBarModel.processList) == 0 {
 		return m
 	}
@@ -115,7 +115,7 @@ func ContollerProcessBarListUp(m model) model {
 	return m
 }
 
-func ContollerProcessBarListDown(m model) model {
+func contollerProcessBarListDown(m model) model {
 	if len(m.processBarModel.processList) == 0 {
 		return m
 	}
@@ -135,7 +135,7 @@ func ContollerProcessBarListDown(m model) model {
 
 /* LIST CONTROLLER START */
 
-func SideBarSelectFolder(m model) model {
+func sideBarSelectFolder(m model) model {
 	m.focusPanel = nonePanelFocus
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 
@@ -158,7 +158,7 @@ func SideBarSelectFolder(m model) model {
 	return m
 }
 
-func SelectedMode(m model) model {
+func selectedMode(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	if panel.panelMode == selectMode {
 		panel.selected = panel.selected[:0]
@@ -172,7 +172,7 @@ func SelectedMode(m model) model {
 
 /* LIST CONTROLLER END */
 
-func NextFilePanel(m model) model {
+func nextFilePanel(m model) model {
 	m.fileModel.filePanels[m.filePanelFocusIndex].focusType = noneFocus
 	if m.filePanelFocusIndex == (len(m.fileModel.filePanels) - 1) {
 		m.filePanelFocusIndex = 0
@@ -184,7 +184,7 @@ func NextFilePanel(m model) model {
 	return m
 }
 
-func PreviousFilePanel(m model) model {
+func previousFilePanel(m model) model {
 	m.fileModel.filePanels[m.filePanelFocusIndex].focusType = noneFocus
 	if m.filePanelFocusIndex == 0 {
 		m.filePanelFocusIndex = (len(m.fileModel.filePanels) - 1)
@@ -196,7 +196,7 @@ func PreviousFilePanel(m model) model {
 	return m
 }
 
-func CloseFilePanel(m model) model {
+func closeFilePanel(m model) model {
 	if len(m.fileModel.filePanels) != 1 {
 		m.fileModel.filePanels = append(m.fileModel.filePanels[:m.filePanelFocusIndex], m.fileModel.filePanels[m.filePanelFocusIndex+1:]...)
 
@@ -208,7 +208,7 @@ func CloseFilePanel(m model) model {
 	}
 	return m
 }
-func CreateNewFilePanel(m model) model {
+func createNewFilePanel(m model) model {
 	if len(m.fileModel.filePanels) != 4 {
 		m.fileModel.filePanels = append(m.fileModel.filePanels, filePanel{
 			location:        HomeDir,
@@ -225,7 +225,7 @@ func CreateNewFilePanel(m model) model {
 	return m
 }
 
-func FocusOnSideBar(m model) model {
+func focusOnSideBar(m model) model {
 	if m.focusPanel == sideBarFocus {
 		m.focusPanel = nonePanelFocus
 		m.fileModel.filePanels[m.filePanelFocusIndex].focusType = focus
@@ -236,7 +236,7 @@ func FocusOnSideBar(m model) model {
 	return m
 }
 
-func FocusOnProcessBar(m model) model {
+func focusOnProcessBar(m model) model {
 	if m.focusPanel == processBarFocus {
 		m.focusPanel = nonePanelFocus
 		m.fileModel.filePanels[m.filePanelFocusIndex].focusType = focus
@@ -247,7 +247,7 @@ func FocusOnProcessBar(m model) model {
 	return m
 }
 
-func FocusOnMetaData(m model) model {
+func focusOnMetaData(m model) model {
 	if m.focusPanel == metaDataFocus {
 		m.focusPanel = nonePanelFocus
 		m.fileModel.filePanels[m.filePanelFocusIndex].focusType = focus
@@ -258,7 +258,7 @@ func FocusOnMetaData(m model) model {
 	return m
 }
 
-func PasteItem(m model) model {
+func pasteItem(m model) model {
 	id := shortuuid.New()
 	if len(m.copyItems.items) == 0 {
 		return m
@@ -311,7 +311,7 @@ func PasteItem(m model) model {
 			p.name = "󰆏 " + filepath.Base(filePath)
 		}
 
-		newModel, err := PasteDir(filePath, panel.location+"/"+path.Base(filePath), id, m)
+		newModel, err := pasteDir(filePath, panel.location+"/"+path.Base(filePath), id, m)
 		m = newModel
 		p = m.processBarModel.process[id]
 		if err != nil {
@@ -320,7 +320,7 @@ func PasteItem(m model) model {
 				messageId:       id,
 				processNewState: p,
 			}
-			OutPutLog("Pasted item error", err)
+			outPutLog("Pasted item error", err)
 			m.processBarModel.process[id] = p
 			break
 		} else {
@@ -341,7 +341,7 @@ func PasteItem(m model) model {
 
 			err := trash.Trash(item)
 			if err != nil {
-				OutPutLog("Paste item function move file to trash can error", err)
+				outPutLog("Paste item function move file to trash can error", err)
 			}
 		}
 		if m.fileModel.filePanels[m.copyItems.originalPanel.index].location == m.copyItems.originalPanel.location {
@@ -353,7 +353,7 @@ func PasteItem(m model) model {
 	return m
 }
 
-func PanelCreateNewFile(m model) model {
+func panelCreateNewFile(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	ti := textinput.New()
 	ti.Placeholder = "File name"
@@ -372,7 +372,7 @@ func PanelCreateNewFile(m model) model {
 	return m
 }
 
-func PanelCreateNewFolder(m model) model {
+func panelCreateNewFolder(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	ti := textinput.New()
 	ti.Placeholder = "Folder name"
@@ -391,19 +391,19 @@ func PanelCreateNewFolder(m model) model {
 	return m
 }
 
-func PinnedFolder(m model) model {
+func pinnedFolder(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 
 	unPinned := false
 
 	jsonData, err := os.ReadFile(SuperFileDataDir + pinnedFile)
 	if err != nil {
-		OutPutLog("Pinned folder function read superfile data error", err)
+		outPutLog("Pinned folder function read superfile data error", err)
 	}
 	var pinnedFolder []string
 	err = json.Unmarshal(jsonData, &pinnedFolder)
 	if err != nil {
-		OutPutLog("Pinned folder function unmarshal superfile data error", err)
+		outPutLog("Pinned folder function unmarshal superfile data error", err)
 	}
 	for i, other := range pinnedFolder {
 		if other == panel.location {
@@ -412,25 +412,25 @@ func PinnedFolder(m model) model {
 		}
 	}
 
-	if !contains(pinnedFolder, panel.location) && !unPinned {
+	if !arrayContains(pinnedFolder, panel.location) && !unPinned {
 		pinnedFolder = append(pinnedFolder, panel.location)
 	}
 
 	updatedData, err := json.Marshal(pinnedFolder)
 	if err != nil {
-		OutPutLog("Pinned folder function updatedData superfile data error", err)
+		outPutLog("Pinned folder function updatedData superfile data error", err)
 	}
 
 	err = os.WriteFile(SuperFileDataDir+pinnedFile, updatedData, 0644)
 	if err != nil {
-		OutPutLog("Pinned folder function updatedData superfile data error", err)
+		outPutLog("Pinned folder function updatedData superfile data error", err)
 	}
 
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m
 }
 
-func ToggleDotFile(m model) model {
+func toggleDotFileController(m model) model {
 	newToggleDotFile := ""
 	if m.toggleDotFile {
 		newToggleDotFile = "false"
@@ -441,7 +441,7 @@ func ToggleDotFile(m model) model {
 	}
 	err := os.WriteFile(SuperFileDataDir+toggleDotFile, []byte(newToggleDotFile), 0644)
 	if err != nil {
-		OutPutLog("Pinned folder function updatedData superfile data error", err)
+		outPutLog("Pinned folder function updatedData superfile data error", err)
 	}
 	return m
 }

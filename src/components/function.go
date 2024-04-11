@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/barasher/go-exiftool"
 	"github.com/lithammer/shortuuid"
 	"github.com/rkoesters/xdg/userdirs"
 	"github.com/shirou/gopsutil/disk"
@@ -56,7 +57,7 @@ func getPinnedDirectories() []directory {
 
 	jsonData, err := os.ReadFile(SuperFileDataDir + pinnedFile)
 	if err != nil {
-		OutPutLog("Read superfile data error", err)
+		outPutLog("Read superfile data error", err)
 	}
 
 	json.Unmarshal(jsonData, &paths)
@@ -72,23 +73,23 @@ func getExternalMediaFolders() (disks []directory) {
 	parts, err := disk.Partitions(true)
 
 	if err != nil {
-		OutPutLog("Error while getting external media: ", err)
+		outPutLog("Error while getting external media: ", err)
 	}
 	for _, disk := range parts {
-		if IsExternalDiskPath(disk.Mountpoint) {
-		disks = append(disks, directory{
-			name: filepath.Base(disk.Mountpoint),
-			location: disk.Mountpoint,
-		})
+		if isExternalDiskPath(disk.Mountpoint) {
+			disks = append(disks, directory{
+				name:     filepath.Base(disk.Mountpoint),
+				location: disk.Mountpoint,
+			})
 		}
 	}
 	if err != nil {
-		OutPutLog("Error while getting external media: ", err)
+		outPutLog("Error while getting external media: ", err)
 	}
 	return disks
 }
 
-func IsExternalDiskPath(path string) bool {
+func isExternalDiskPath(path string) bool {
 	dir := filepath.Dir(path)
 	return strings.HasPrefix(dir, "/mnt") ||
 		strings.HasPrefix(dir, "/media") ||
@@ -109,7 +110,7 @@ func returnFolderElement(location string, displayDotFile bool) (folderElement []
 
 	items, err := os.ReadDir(location)
 	if err != nil {
-		OutPutLog("Return folder element function error", err)
+		outPutLog("Return folder element function error", err)
 	}
 
 	for _, item := range items {
@@ -151,15 +152,15 @@ func returnFolderElement(location string, displayDotFile bool) (folderElement []
 	return folderElement
 }
 
-func PanelElementHeight(mainPanelHeight int) int {
+func panelElementHeight(mainPanelHeight int) int {
 	return mainPanelHeight - 3
 }
 
-func BottomElementHight(bottomElementHight int) int {
+func bottomElementHight(bottomElementHight int) int {
 	return bottomElementHight - 5
 }
 
-func ArrayContains(s []string, str string) bool {
+func arrayContains(s []string, str string) bool {
 	for _, v := range s {
 		if v == str {
 			return true
@@ -168,14 +169,14 @@ func ArrayContains(s []string, str string) bool {
 	return false
 }
 
-func OutPutLog(values ...interface{}) {
+func outPutLog(values ...interface{}) {
 	log.SetOutput(logOutput)
 	for _, value := range values {
 		log.Println(value)
 	}
 }
 
-func RemoveElementByValue(slice []string, value string) []string {
+func removeElementByValue(slice []string, value string) []string {
 	newSlice := []string{}
 	for _, v := range slice {
 		if v != value {
@@ -185,7 +186,7 @@ func RemoveElementByValue(slice []string, value string) []string {
 	return newSlice
 }
 
-func RenameIfDuplicate(destination string) (string, error) {
+func renameIfDuplicate(destination string) (string, error) {
 	info, err := os.Stat(destination)
 	if os.IsNotExist(err) {
 		return destination, nil
@@ -241,32 +242,32 @@ func RenameIfDuplicate(destination string) (string, error) {
 	}
 }
 
-func MoveFile(source string, destination string) error {
-	destination, err := RenameIfDuplicate(destination)
+func moveFile(source string, destination string) error {
+	destination, err := renameIfDuplicate(destination)
 	if err != nil {
-		OutPutLog("Move file function error", err)
+		outPutLog("Move file function error", err)
 	}
 	err = os.Rename(source, destination)
 	if err != nil {
-		OutPutLog("Move file function error", err)
+		outPutLog("Move file function error", err)
 	}
 	return err
 }
 
-func PasteFile(src string, dst string) error {
+func pasteFile(src string, dst string) error {
 	srcFile, err := os.Open(src)
 	if err != nil {
-		OutPutLog("Paste file function open file error", err)
+		outPutLog("Paste file function open file error", err)
 	}
 	defer srcFile.Close()
 
-	dst, err = RenameIfDuplicate(dst)
+	dst, err = renameIfDuplicate(dst)
 	if err != nil {
-		OutPutLog("Paste file function rename error", err)
+		outPutLog("Paste file function rename error", err)
 	}
 	dstFile, err := os.Create(dst)
 	if err != nil {
-		OutPutLog("Paste file function create file error", err)
+		outPutLog("Paste file function create file error", err)
 	}
 	if err != nil {
 		return err
@@ -275,7 +276,7 @@ func PasteFile(src string, dst string) error {
 
 	_, err = io.Copy(dstFile, srcFile)
 	if err != nil {
-		OutPutLog("Paste file function copy file error", err)
+		outPutLog("Paste file function copy file error", err)
 	}
 	if err != nil {
 		return err
@@ -283,9 +284,9 @@ func PasteFile(src string, dst string) error {
 	return nil
 }
 
-func PasteDir(src, dst string, id string, m model) (model, error) {
+func pasteDir(src, dst string, id string, m model) (model, error) {
 	// Check if destination directory already exists
-	dst, err := RenameIfDuplicate(dst)
+	dst, err := renameIfDuplicate(dst)
 	if err != nil {
 		return m, err
 	}
@@ -303,7 +304,7 @@ func PasteDir(src, dst string, id string, m model) (model, error) {
 		newPath := filepath.Join(dst, relPath)
 
 		if info.IsDir() {
-			newPath, err = RenameIfDuplicate(newPath)
+			newPath, err = renameIfDuplicate(newPath)
 			if err != nil {
 				return err
 			}
@@ -326,7 +327,7 @@ func PasteDir(src, dst string, id string, m model) (model, error) {
 				}
 			}
 
-			err := PasteFile(path, newPath)
+			err := pasteFile(path, newPath)
 			if err != nil {
 				p.state = failure
 				channel <- channelMessage{
@@ -355,16 +356,7 @@ func PasteDir(src, dst string, id string, m model) (model, error) {
 	return m, nil
 }
 
-func contains(s []string, str string) bool {
-	for _, v := range s {
-		if v == str {
-			return true
-		}
-	}
-	return false
-}
-
-func ReturnMetaData(m model) model {
+func returnMetaData(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	cursor := panel.cursor
 	LastTimeCursorMove = [2]int{int(time.Now().UnixMicro()), cursor}
@@ -399,12 +391,12 @@ func ReturnMetaData(m model) model {
 		return m
 	}
 	if err != nil {
-		OutPutLog("Return meta data function get file state error", err)
+		outPutLog("Return meta data function get file state error", err)
 	}
 	if fileInfo.IsDir() {
 		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"FolderName", fileInfo.Name()})
 		if m.focusPanel == metaDataFocus {
-			m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"FolderSize", FormatFileSize(DirSize(filePath))})
+			m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"FolderSize", formatFileSize(dirSize(filePath))})
 		}
 		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"FolderModifyDate", fileInfo.ModTime().String()})
 		channel <- channelMessage{
@@ -418,7 +410,7 @@ func ReturnMetaData(m model) model {
 	fileInfos := et.ExtractMetadata(filePath)
 	for _, fileInfo := range fileInfos {
 		if fileInfo.Err != nil {
-			OutPutLog("Return meta data function error", fileInfo, fileInfo.Err)
+			outPutLog("Return meta data function error", fileInfo, fileInfo.Err)
 			continue
 		}
 
@@ -437,7 +429,7 @@ func ReturnMetaData(m model) model {
 	return m
 }
 
-func FormatFileSize(size int64) string {
+func formatFileSize(size int64) string {
 	if size == 0 {
 		return "0B"
 	}
@@ -450,11 +442,11 @@ func FormatFileSize(size int64) string {
 	return fmt.Sprintf("%.2f %s", adjustedSize, units[unitIndex])
 }
 
-func DirSize(path string) int64 {
+func dirSize(path string) int64 {
 	var size int64
 	filepath.Walk(path, func(_ string, info os.FileInfo, err error) error {
 		if err != nil {
-			OutPutLog("Dir size function error", err)
+			outPutLog("Dir size function error", err)
 		}
 		if !info.IsDir() {
 			size += info.Size()
@@ -478,4 +470,54 @@ func countFiles(dirPath string) (int, error) {
 	})
 
 	return count, err
+}
+
+func loadConfigFile(dir string) (toggleDotFileBool bool, firstFilePanelDir string) {
+	var err error
+
+	logOutput, err = os.OpenFile(SuperFileCacheDir+logFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("Error while opening superfile.log file: %v", err)
+	}
+
+	data, err := os.ReadFile(SuperFileMainDir + configFile)
+	if err != nil {
+		log.Fatalf("Config file doesn't exist: %v", err)
+	}
+	err = json.Unmarshal(data, &Config)
+	if err != nil {
+		log.Fatalf("Error decoding config json( your config file may have misconfigured ): %v", err)
+	}
+
+	data, err = os.ReadFile(SuperFileMainDir + themeFolder + "/" + Config.Theme + ".json")
+	if err != nil {
+		log.Fatalf("Theme file doesn't exist: %v", err)
+	}
+
+	err = json.Unmarshal(data, &theme)
+	if err != nil {
+		log.Fatalf("Error while decoding theme json( Your theme file may have errors ): %v", err)
+	}
+	toggleDotFileData, err := os.ReadFile(SuperFileDataDir + toggleDotFile)
+	if err != nil {
+		outPutLog("Error while reading toggleDotFile data error:", err)
+	}
+	if string(toggleDotFileData) == "true" {
+		toggleDotFileBool = true
+	} else if string(toggleDotFileData) == "false" {
+		toggleDotFileBool = false
+	}
+	LoadThemeConfig()
+	et, err = exiftool.NewExiftool()
+	if err != nil {
+		outPutLog("Initial model function init exiftool error", err)
+	}
+	firstFilePanelDir = HomeDir
+	if dir != "" {
+		firstFilePanelDir, err = filepath.Abs(dir)
+		if err != nil {
+			firstFilePanelDir = HomeDir
+		}
+	}
+	return toggleDotFileBool, firstFilePanelDir
 }

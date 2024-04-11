@@ -20,18 +20,18 @@ func CreateItem(m model) model {
 	if m.typingModal.itemType == newFile {
 		path := m.typingModal.location + "/" + m.typingModal.textInput.Value()
 		if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
-			OutPutLog("Create item function error", err)
+			outPutLog("Create item function error", err)
 		}
 		f, err := os.Create(path)
 		if err != nil {
-			OutPutLog("Create item function create file error", err)
+			outPutLog("Create item function create file error", err)
 		}
 		defer f.Close()
 	} else {
 		path := m.typingModal.location + "/" + m.typingModal.textInput.Value()
 		err := os.MkdirAll(path, 0755)
 		if err != nil {
-			OutPutLog("Create item function create folder error", err)
+			outPutLog("Create item function create folder error", err)
 		}
 	}
 	m.typingModal.open = false
@@ -56,7 +56,7 @@ func ConfirmRename(m model) model {
 	// Rename the file
 	err := os.Rename(oldPath, newPath)
 	if err != nil {
-		OutPutLog("Confirm function rename error", err)
+		outPutLog("Confirm function rename error", err)
 	}
 
 	m.fileModel.renaming = false

@@ -76,12 +76,12 @@ func FilePanelRender(m model) string {
 			bottomBorder := GenerateBottomBorder("0/0", m.fileModel.width+5)
 			f[i] = FilePanelBoardStyle(m.mainPanelHeight, m.fileModel.width, filePanel.focusType, bottomBorder).Render(f[i])
 		} else {
-			for h := filePanel.render; h < filePanel.render+PanelElementHeight(m.mainPanelHeight) && h < len(filePanel.element); h++ {
+			for h := filePanel.render; h < filePanel.render+panelElementHeight(m.mainPanelHeight) && h < len(filePanel.element); h++ {
 				cursor := " "
 				if h == filePanel.cursor {
 					cursor = ""
 				}
-				isItemSelected := ArrayContains(filePanel.selected, filePanel.element[h].location)
+				isItemSelected := arrayContains(filePanel.selected, filePanel.element[h].location)
 				if filePanel.renaming && h == filePanel.cursor {
 					f[i] += filePanel.rename.View() + "\n"
 				} else {
@@ -165,7 +165,7 @@ func ProcessBarRender(m model) string {
 			symbol = StringColorRender(theme.Cancel).Render("")
 		}
 
-		processRender += cursor +  textStyle.Render(TruncateText(process.name, BottomWidth(m.fullWidth)-7) + " ") + symbol + "\n"
+		processRender += cursor + textStyle.Render(TruncateText(process.name, BottomWidth(m.fullWidth)-7)+" ") + symbol + "\n"
 		if renderTimes == 2 {
 			processRender += cursor + process.progress.ViewAs(float64(process.done)/float64(process.total)) + ""
 		} else {
@@ -184,7 +184,7 @@ func ProcessBarRender(m model) string {
 		courseNumber = m.processBarModel.cursor + 1
 	}
 	bottomBorder := GenerateBottomBorder(fmt.Sprintf("%s/%s", strconv.Itoa(courseNumber), strconv.Itoa(len(m.processBarModel.processList))), BottomWidth(m.fullWidth)-3)
-	processRender = ProcsssBarBoarder(BottomElementHight(bottomBarHeight), BottomWidth(m.fullWidth), bottomBorder, m.focusPanel).Render(processRender)
+	processRender = ProcsssBarBoarder(bottomElementHight(bottomBarHeight), BottomWidth(m.fullWidth), bottomBorder, m.focusPanel).Render(processRender)
 
 	return processRender
 }
@@ -196,7 +196,7 @@ func MetaDataRender(m model) string {
 		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"", ""})
 		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{" 󰥔  Loading metadata...", ""})
 		go func() {
-			m = ReturnMetaData(m)
+			m = returnMetaData(m)
 		}()
 	}
 	maxKeyLength := 0
@@ -220,7 +220,7 @@ func MetaDataRender(m model) string {
 			maxKeyLength = len(data[0])
 		}
 	}
-	for i := m.fileMetaData.renderIndex; i < BottomElementHight(bottomBarHeight)+m.fileMetaData.renderIndex && i < len(m.fileMetaData.metaData); i++ {
+	for i := m.fileMetaData.renderIndex; i < bottomElementHight(bottomBarHeight)+m.fileMetaData.renderIndex && i < len(m.fileMetaData.metaData); i++ {
 		if i != m.fileMetaData.renderIndex {
 			metaDataBar += "\n"
 		}
@@ -228,7 +228,7 @@ func MetaDataRender(m model) string {
 		metaDataBar += fmt.Sprintf("%-*s %s", maxKeyLength+1, m.fileMetaData.metaData[i][0], data)
 	}
 	bottomBorder := GenerateBottomBorder(fmt.Sprintf("%s/%s", strconv.Itoa(m.fileMetaData.renderIndex+1), strconv.Itoa(len(m.fileMetaData.metaData))), BottomWidth(m.fullWidth)-3)
-	metaDataBar = MetaDataBoarder(BottomElementHight(bottomBarHeight), BottomWidth(m.fullWidth), bottomBorder, m.focusPanel).Render(metaDataBar)
+	metaDataBar = MetaDataBoarder(bottomElementHight(bottomBarHeight), BottomWidth(m.fullWidth), bottomBorder, m.focusPanel).Render(metaDataBar)
 
 	return metaDataBar
 }
@@ -240,13 +240,13 @@ func ClipboardRender(m model) string {
 	if len(m.copyItems.items) == 0 {
 		clipboardRender += "\n   No content in clipboard"
 	} else {
-		for i := 0; i < len(m.copyItems.items) && i < BottomElementHight(bottomBarHeight); i++ {
-			if i == BottomElementHight(bottomBarHeight)-1 {
+		for i := 0; i < len(m.copyItems.items) && i < bottomElementHight(bottomBarHeight); i++ {
+			if i == bottomElementHight(bottomBarHeight)-1 {
 				clipboardRender += strconv.Itoa(len(m.copyItems.items)-i+1) + " item left...."
 			} else {
 				fileInfo, err := os.Stat(m.copyItems.items[i])
 				if err != nil {
-					OutPutLog("Clipboard render function get item state error", err)
+					outPutLog("Clipboard render function get item state error", err)
 				}
 				if !os.IsNotExist(err) {
 					clipboardRender += ClipboardPrettierName(m.copyItems.items[i], BottomWidth(m.fullWidth)-3, fileInfo.IsDir(), false) + "\n"
@@ -264,7 +264,7 @@ func ClipboardRender(m model) string {
 	} else {
 		bottomWidth = BottomWidth(m.fullWidth)
 	}
-	clipboardRender = ClipboardBoarder(BottomElementHight(bottomBarHeight), bottomWidth, "━").Render(clipboardRender)
+	clipboardRender = ClipboardBoarder(bottomElementHight(bottomBarHeight), bottomWidth, "━").Render(clipboardRender)
 
 	return clipboardRender
 }

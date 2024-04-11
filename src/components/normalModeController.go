@@ -15,7 +15,7 @@ import (
 	"github.com/rkoesters/xdg/trash"
 )
 
-func EnterPanel(m model) model {
+func enterPanel(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 
 	if len(panel.element) > 0 && panel.element[panel.cursor].directory {
@@ -36,7 +36,7 @@ func EnterPanel(m model) model {
 		cmd := exec.Command("xdg-open", panel.element[panel.cursor].location)
 		_, err := cmd.Output()
 		if err != nil {
-			OutPutLog("err when open file with xdg-open:", err)
+			outPutLog("err when open file with xdg-open:", err)
 		}
 	}
 
@@ -44,7 +44,7 @@ func EnterPanel(m model) model {
 	return m
 }
 
-func ParentFolder(m model) model {
+func parentFolder(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	panel.directoryRecord[panel.location] = directoryRecord{
 		directoryCursor: panel.cursor,
@@ -65,7 +65,7 @@ func ParentFolder(m model) model {
 	return m
 }
 
-func CompletelyDeleteSingleFile(m model) model {
+func completelyDeleteSingleFile(m model) model {
 	id := shortuuid.New()
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 
@@ -75,7 +75,7 @@ func CompletelyDeleteSingleFile(m model) model {
 
 	prog := progress.New(progress.WithScaledGradient(theme.ProcessBarGradient[0], theme.ProcessBarGradient[1]))
 	prog.PercentageStyle = textStyle
-	
+
 	newProcess := process{
 		name:     "󰆴 " + panel.element[panel.cursor].name,
 		progress: prog,
@@ -92,7 +92,7 @@ func CompletelyDeleteSingleFile(m model) model {
 
 	err := os.RemoveAll(panel.element[panel.cursor].location)
 	if err != nil {
-		OutPutLog("Completely delete single item function remove file error", err)
+		outPutLog("Completely delete single item function remove file error", err)
 	}
 
 	if err != nil {
@@ -119,7 +119,7 @@ func CompletelyDeleteSingleFile(m model) model {
 	return m
 }
 
-func DeleteSingleItem(m model) model {
+func deleteSingleItem(m model) model {
 	id := shortuuid.New()
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 
@@ -127,7 +127,7 @@ func DeleteSingleItem(m model) model {
 		return m
 	}
 
-	if IsExternalDiskPath(panel.location) || runtime.GOOS == "darwin" {
+	if isExternalDiskPath(panel.location) || runtime.GOOS == "darwin" {
 		channel <- channelMessage{
 			messageId:       id,
 			returnWarnModal: true,
@@ -160,7 +160,7 @@ func DeleteSingleItem(m model) model {
 
 	err := trash.Trash(panel.element[panel.cursor].location)
 	if err != nil {
-		OutPutLog("Delete single item function move file to trash can error", err)
+		outPutLog("Delete single item function move file to trash can error", err)
 	}
 
 	if err != nil {
@@ -187,7 +187,7 @@ func DeleteSingleItem(m model) model {
 	return m
 }
 
-func CopySingleItem(m model) model {
+func copySingleItem(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	m.copyItems.cut = false
 	m.copyItems.items = m.copyItems.items[:0]
@@ -201,25 +201,25 @@ func CopySingleItem(m model) model {
 		return m
 	}
 	if err != nil {
-		OutPutLog("Copy single item get file state error", panel.element[panel.cursor].location, err)
+		outPutLog("Copy single item get file state error", panel.element[panel.cursor].location, err)
 	}
 
 	if !fileInfo.IsDir() && float64(fileInfo.Size())/(1024*1024) < 250 {
 		fileContent, err := os.ReadFile(panel.element[panel.cursor].location)
 
 		if err != nil {
-			OutPutLog("Copy single item read file error", panel.element[panel.cursor].location, err)
+			outPutLog("Copy single item read file error", panel.element[panel.cursor].location, err)
 		}
 
 		if err := clipboard.WriteAll(string(fileContent)); err != nil {
-			OutPutLog("Copy single item write file error", panel.element[panel.cursor].location, err)
+			outPutLog("Copy single item write file error", panel.element[panel.cursor].location, err)
 		}
 	}
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m
 }
 
-func CutSingleItem(m model) model {
+func cutSingleItem(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	m.copyItems.cut = true
 	m.copyItems.items = m.copyItems.items[:0]
@@ -233,25 +233,25 @@ func CutSingleItem(m model) model {
 		return m
 	}
 	if err != nil {
-		OutPutLog("Cut single item get file state error", panel.element[panel.cursor].location, err)
+		outPutLog("Cut single item get file state error", panel.element[panel.cursor].location, err)
 	}
 
 	if !fileInfo.IsDir() && float64(fileInfo.Size())/(1024*1024) < 250 {
 		fileContent, err := os.ReadFile(panel.element[panel.cursor].location)
 
 		if err != nil {
-			OutPutLog("Cut single item read file error", panel.element[panel.cursor].location, err)
+			outPutLog("Cut single item read file error", panel.element[panel.cursor].location, err)
 		}
 
 		if err := clipboard.WriteAll(string(fileContent)); err != nil {
-			OutPutLog("Cut single item write file error", panel.element[panel.cursor].location, err)
+			outPutLog("Cut single item write file error", panel.element[panel.cursor].location, err)
 		}
 	}
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m
 }
 
-func PanelItemRename(m model) model {
+func panelItemRename(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	if len(panel.element) == 0 {
 		return m
