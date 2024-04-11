@@ -278,7 +278,10 @@ type ConfigType struct {
 	FilePanelFileCreate      [2]string
 	FilePanelItemRename      [2]string
 	PasteItem                [2]string
-	ToggleDotFile            [2]string
+	ExtractFile              [2]string
+	CompressFile             [2]string
+
+	ToggleDotFile [2]string
 
 	Cancel  [2]string
 	Confirm [2]string
