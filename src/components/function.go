@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+  "runtime"
 
 	"github.com/barasher/go-exiftool"
 	"github.com/lithammer/shortuuid"
@@ -34,14 +35,24 @@ func getWellKnownDirectories() []directory {
 	directories := []directory{}
 	wellKnownDirectories := []directory{
 		{location: HomeDir, name: "󰋜 Home"},
-		{location: userdirs.Download, name: "󰏔 " + filepath.Base(userdirs.Download)},
-		{location: userdirs.Documents, name: "󰈙 " + filepath.Base(userdirs.Documents)},
-		{location: userdirs.Pictures, name: "󰋩 " + filepath.Base(userdirs.Pictures)},
-		{location: userdirs.Videos, name: "󰎁 " + filepath.Base(userdirs.Videos)},
-		{location: userdirs.Music, name: "♬ " + filepath.Base(userdirs.Music)},
-		{location: userdirs.Templates, name: "󰏢 " + filepath.Base(userdirs.Templates)},
-		{location: userdirs.PublicShare, name: " " + filepath.Base(userdirs.PublicShare)},
+		{location: userdirs.Download, name: "󰏔 " + "Downloads"},
+		{location: userdirs.Documents, name: "󰈙 " + "Documents"},
+		{location: userdirs.Pictures, name: "󰋩 " + "Pictures"},
+		{location: userdirs.Videos, name: "󰎁 " + "Videos"},
+		{location: userdirs.Music, name: "♬ " + "Music"},
+		{location: userdirs.Templates, name: "󰏢 " + "Templates"},
+		{location: userdirs.PublicShare, name: " " + "PublicShare"},
 	}
+
+  if runtime.GOOS == "darwin" {
+    wellKnownDirectories[1].location = HomeDir+"/Downloads/"
+    wellKnownDirectories[2].location = HomeDir+"/Documents/"
+    wellKnownDirectories[3].location = HomeDir+"/Pictures/"
+    wellKnownDirectories[4].location = HomeDir+"/Movies/"
+    wellKnownDirectories[5].location = HomeDir+"/Music/"
+    wellKnownDirectories[7].location = HomeDir+"/Public/"
+  }
+
 	for _, dir := range wellKnownDirectories {
 		if _, err := os.Stat(dir.location); !os.IsNotExist(err) {
 			// Directory exists
