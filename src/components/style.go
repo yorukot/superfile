@@ -1,6 +1,7 @@
 package components
 
 import (
+	"strings"
 	"unicode/utf8"
 
 	"github.com/charmbracelet/lipgloss"
@@ -15,16 +16,18 @@ var (
 	terminalTooSmall    lipgloss.Style
 	terminalMinimumSize lipgloss.Style
 
-	borderStyle         lipgloss.Style
-	cursorStyle         lipgloss.Style
-	backgroundWindow    lipgloss.Color
+	borderStyle      lipgloss.Style
+	cursorStyle      lipgloss.Style
+	backgroundWindow lipgloss.Color
+
+	textStyle lipgloss.Style
 )
 
 var (
-	sideBarWidth        = 20
-	sideBarTitle        lipgloss.Style
-	sideBarItem         lipgloss.Style
-	sideBarSelected     lipgloss.Style
+	sideBarWidth    = 20
+	sideBarTitle    lipgloss.Style
+	sideBarItem     lipgloss.Style
+	sideBarSelected lipgloss.Style
 )
 
 var (
@@ -60,6 +63,8 @@ func LoadThemeConfig() {
 
 	modalCancel = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.ModalForeground)).Background(lipgloss.Color(theme.ModalCancel))
 	modalConfirm = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.ModalForeground)).Background(lipgloss.Color(theme.ModalConfirm))
+
+	textStyle = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.ModalForeground)).Background(backgroundWindow)
 }
 
 func FullScreenStyle(height int, width int) lipgloss.Style {
@@ -123,7 +128,7 @@ func FilePanelBoardStyle(height int, width int, focusType filePanelFocusType, bo
 
 func ProcsssBarBoarder(height int, width int, borderBottom string, focusType focusPanelType) lipgloss.Style {
 	filePanelBottomBoard := lipgloss.Border{
-		Top:         "━┫Processes┣" + repeatString("━", width),
+		Top:         "━┫Processes┣" + strings.Repeat("━", width),
 		Bottom:      borderBottom,
 		Left:        "┃",
 		Right:       "┃",
@@ -151,7 +156,7 @@ func ProcsssBarBoarder(height int, width int, borderBottom string, focusType foc
 
 func MetaDataBoarder(height int, width int, borderBottom string, focusType focusPanelType) lipgloss.Style {
 	filePanelBottomBoard := lipgloss.Border{
-		Top:         "━┫Metadata┣" + repeatString("━", width),
+		Top:         "━┫Metadata┣" + strings.Repeat("━", width),
 		Bottom:      borderBottom,
 		Left:        "┃",
 		Right:       "┃",
@@ -179,7 +184,7 @@ func MetaDataBoarder(height int, width int, borderBottom string, focusType focus
 
 func ClipboardBoarder(height int, width int, borderBottom string) lipgloss.Style {
 	filePanelBottomBoard := lipgloss.Border{
-		Top:         "━┫Clipboard┣" + repeatString("━", width),
+		Top:         "━┫Clipboard┣" + strings.Repeat("━", width),
 		Bottom:      borderBottom,
 		Left:        "┃",
 		Right:       "┃",
@@ -267,11 +272,11 @@ func FilePanelBoard(focusType filePanelFocusType) lipgloss.Border {
 }
 
 func GenerateBottomBorder(countString string, width int) string {
-	return repeatString("━", width-len(countString)) + "┫" + countString + "┣"
+	return strings.Repeat("━", width-len(countString)) + "┫" + countString + "┣"
 }
 
 func StringColorRender(color string) lipgloss.Style {
-	return lipgloss.NewStyle().Foreground(lipgloss.Color(color))
+	return lipgloss.NewStyle().Foreground(lipgloss.Color(color)).Background(backgroundWindow)
 }
 
 func BottomWidth(fullWidth int) int {

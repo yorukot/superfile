@@ -96,12 +96,6 @@ func IsExternalDiskPath(path string) bool {
 		strings.HasPrefix(dir, "/Volumes")
 }
 
-  // TODO: Remove this function
-// This gets the award for most redundant function seen by @lescx ever
-func repeatString(s string, count int) string {
-	return strings.Repeat(s, count)
-}
-
 func returnFocusType(focusPanel focusPanelType) filePanelFocusType {
 	if focusPanel == nonePanelFocus {
 		return focus

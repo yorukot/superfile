@@ -5,6 +5,7 @@ import (
 	"os"
 	"sort"
 	"strconv"
+	"strings"
 
 	"github.com/charmbracelet/lipgloss"
 )
@@ -69,7 +70,7 @@ func FilePanelRender(m model) string {
 			filePanelWidth = m.fileModel.width
 			bottomBorderWidth = m.fileModel.width + 6
 		}
-		f[i] += FilePanelDividerStyle(filePanel.focusType).Render(repeatString("━", filePanelWidth)) + "\n"
+		f[i] += FilePanelDividerStyle(filePanel.focusType).Render(strings.Repeat("━", filePanelWidth)) + "\n"
 		if len(filePanel.element) == 0 {
 			f[i] += "   No such file or directory"
 			bottomBorder := GenerateBottomBorder("0/0", m.fileModel.width+5)
@@ -164,7 +165,7 @@ func ProcessBarRender(m model) string {
 			symbol = StringColorRender(theme.Cancel).Render("")
 		}
 
-		processRender += cursor + TruncateText(process.name, BottomWidth(m.fullWidth)-7) + " " + symbol + "\n"
+		processRender += cursor +  textStyle.Render(TruncateText(process.name, BottomWidth(m.fullWidth)-7) + " ") + symbol + "\n"
 		if renderTimes == 2 {
 			processRender += cursor + process.progress.ViewAs(float64(process.done)/float64(process.total)) + ""
 		} else {
