@@ -35,13 +35,13 @@ func getWellKnownDirectories() []directory {
 	directories := []directory{}
 	wellKnownDirectories := []directory{
 		{location: HomeDir, name: "󰋜 Home"},
-		{location: userdirs.Download, name: "󰏔 " + "Downloads"},
-		{location: userdirs.Documents, name: "󰈙 " + "Documents"},
-		{location: userdirs.Pictures, name: "󰋩 " + "Pictures"},
-		{location: userdirs.Videos, name: "󰎁 " + "Videos"},
-		{location: userdirs.Music, name: "♬ " + "Music"},
-		{location: userdirs.Templates, name: "󰏢 " + "Templates"},
-		{location: userdirs.PublicShare, name: " " + "PublicShare"},
+		{location: userdirs.Download, name: "󰏔 Downloads"},
+		{location: userdirs.Documents, name: "󰈙 Documents"},
+		{location: userdirs.Pictures, name: "󰋩 Pictures"},
+		{location: userdirs.Videos, name: "󰎁 Videos"},
+		{location: userdirs.Music, name: "♬ Music"},
+		{location: userdirs.Templates, name: "󰏢 Templates"},
+		{location: userdirs.PublicShare, name: " PublicShare"},
 	}
 
   if runtime.GOOS == "darwin" {
