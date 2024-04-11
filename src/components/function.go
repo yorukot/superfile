@@ -68,42 +68,24 @@ func getPinnedDirectories() []directory {
 	return directories
 }
 
-func getExternalMediaFolders() []directory {
-	var paths []string
-	directories := []directory{}
-
-	currentUser, err := user.Current()
-	if err != nil {
-		OutPutLog("Get user path error", err)
-	}
-	username := currentUser.Username
-
-	folderPath := filepath.Join("/run/media", username)
-	entries, err := os.ReadDir(filepath.Join("/run/media", username))
-	if err != nil {
-		OutPutLog("Get external media error", err)
-	}
-	for _, entry := range entries {
-		if entry.IsDir() {
-			paths = append(paths, filepath.Join(folderPath, entry.Name()))
-		}
-	}
-	return directories
-}
-
-func GetExternalDisk() (disks []disk.PartitionStat, err error) {
+func getExternalMediaFolders() (disks []directory) {
 	parts, err := disk.Partitions(true)
 
 	if err != nil {
-		return []disk.PartitionStat{}, err
+		OutPutLog("Error while getting external media: ", err)
 	}
 	for _, disk := range parts {
 		if IsExternalDiskPath(disk.Mountpoint) {
-		disks = append(disks, disk)
+		disks = append(disks, directory{
+			name: filepath.Base(disk.Mountpoint),
+			location: disk.Mountpoint,
+		})
 		}
 	}
-
-	return disks, err
+	if err != nil {
+		OutPutLog("Error while getting external media: ", err)
+	}
+	return disks
 }
 
 func IsExternalDiskPath(path string) bool {

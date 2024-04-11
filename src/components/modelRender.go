@@ -33,18 +33,9 @@ func SideBarRender(m model) string {
 			cursor = ""
 		}
 		if directory.location == m.fileModel.filePanels[m.filePanelFocusIndex].location {
-			s += cursorStyle.Render(cursor) + " " + sideBarSelected.Render(TruncateText(directory.name, sideBarWidth-2)) + "\n"
+			s += cursorStyle.Render(cursor) + sideBarSelected.Render(" "+TruncateText(directory.name, sideBarWidth-2)) + "\n"
 		} else {
-			s += cursorStyle.Render(cursor) + " " + sideBarItem.Render(TruncateText(directory.name, sideBarWidth-2)) + "\n"
-		}
-		if i == 7 {
-			s += "\n" + sideBarTitle.Render("󰐃 Pinned") + borderStyle.Render(" ───────────") + "\n\n"
-			if noPinnedFolder {
-				s += "\n" + sideBarTitle.Render("󱇰 Disks") + borderStyle.Render(" ────────────") + "\n\n"
-			}
-		}
-		if folder.endPinned {
-			s += "\n" + sideBarTitle.Render("󱇰 Disks") + borderStyle.Render(" ────────────") + "\n\n"
+			s += cursorStyle.Render(cursor) + sideBarItem.Render(" "+TruncateText(directory.name, sideBarWidth-2)) + "\n"
 		}
 	}
 
@@ -93,7 +84,7 @@ func FilePanelRender(m model) string {
 				if filePanel.renaming && h == filePanel.cursor {
 					f[i] += filePanel.rename.View() + "\n"
 				} else {
-					f[i] += cursorStyle.Render(cursor) + " " + PrettierName(filePanel.element[h].name, m.fileModel.width-5, filePanel.element[h].directory, isItemSelected) + "\n"
+					f[i] += cursorStyle.Render(cursor+" ") + PrettierName(filePanel.element[h].name, m.fileModel.width-5, filePanel.element[h].directory, isItemSelected) + "\n"
 				}
 			}
 			cursorPosition := strconv.Itoa(filePanel.cursor + 1)

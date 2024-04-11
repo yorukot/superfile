@@ -15,7 +15,7 @@
   "listUp": ["up", "k"],
   "listDown": ["down", "j"],
 
-  "pinnedFolder": ["ctrl+p", ""],
+  "pinnedDirectory": ["ctrl+p", ""],
 
   "closeFilePanel": ["ctrl+w", ""],
   "createNewFilePanel": ["ctrl+n", ""],

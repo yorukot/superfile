@@ -268,6 +268,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case Config.FilePanelDirectoryCreate[0], Config.FilePanelDirectoryCreate[1]:
 				m = PanelCreateNewFolder(m)
 			case Config.PinnedDirectory[0], Config.PinnedDirectory[1]:
+				OutPutLog("test")
 				m = PinnedFolder(m)
 			case Config.ToggleDotFile[0], Config.ToggleDotFile[1]:
 				m = ToggleDotFile(m)
@@ -345,7 +346,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if ListeningMessage {
 		cmd = tea.Batch(cmd)
 	} else {
-		cmd = tea.Batch(cmd, listenForchannelMessage(channel))
+		cmd = tea.Batch(cmd, listenForChannelMessage(channel))
 	}
 	return m, cmd
 }
