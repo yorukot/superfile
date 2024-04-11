@@ -271,8 +271,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m = PanelCreateNewFolder(m)
 			case Config.PinnedFolder[0], Config.PinnedFolder[1]:
 				m = PinnedFolder(m)
-			case Config.OpenTerminal[0], Config.OpenTerminal[1]:
-				m = OpenTerminal(m)
 			case Config.ToggleDotFile[0], Config.ToggleDotFile[1]:
 				m = ToggleDotFile(m)
 			default:

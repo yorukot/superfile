@@ -15,8 +15,6 @@
   "listUp": ["up", "k"],
   "listDown": ["down", "j"],
 
-  "openTerminal": ["ctrl+t", ""],
-
   "pinnedFolder": ["ctrl+p", ""],
 
   "closeFilePanel": ["ctrl+w", ""],
