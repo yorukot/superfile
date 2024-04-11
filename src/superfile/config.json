@@ -32,6 +32,9 @@
   "filePanelFileCreate": ["c", ""],
   "filePanelItemRename": ["r", ""],
   "pasteItem": ["ctrl+v", ""],
+  "extractFile": ["ctrl+t"],
+  "compressFile": ["ctrl+y"],
+
   "toggleDotFile": ["ctrl+h", ""],
 
   "_COMMIT_special_hotkey": "These hotkeys do not conflict with any other keys (including global hotkey)",
@@ -41,7 +44,7 @@
   "_COMMIT_normal_mode_hotkey": "Here is normal mode hotkey you can conflicts with other mode (cant conflicts with global hotkey)",
   "deleteItem": ["ctrl+d", ""],
   "selectItem": ["enter", "l"],
-  "parentFolder": ["h", "backspace"],
+  "parentDirectory": ["h", "backspace"],
   "copySingleItem": ["ctrl+c", ""],
   "cutSingleItem": ["ctrl+x", ""],
 

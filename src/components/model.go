@@ -40,6 +40,7 @@ var channel = make(chan channelMessage, 1000)
 
 func InitialModel(dir string) model {
 	toggleDotFileBool, firstFilePanelDir := loadConfigFile(dir)
+
 	return model{
 		filePanelFocusIndex: 0,
 		focusPanel:          nonePanelFocus,
@@ -219,10 +220,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case Config.FilePanelDirectoryCreate[0], Config.FilePanelDirectoryCreate[1]:
 				m = panelCreateNewFolder(m)
 			case Config.PinnedDirectory[0], Config.PinnedDirectory[1]:
-				outPutLog("test")
 				m = pinnedFolder(m)
 			case Config.ToggleDotFile[0], Config.ToggleDotFile[1]:
 				m = toggleDotFileController(m)
+			case Config.ExtractFile[0], Config.ExtractFile[1]:
+				go func() {
+					m = extractFile(m)
+				}()
 			default:
 				// check if it's the select mode
 				if m.fileModel.filePanels[m.filePanelFocusIndex].focusType == focus && m.fileModel.filePanels[m.filePanelFocusIndex].panelMode == selectMode {

@@ -1,6 +1,7 @@
 package components
 
 import (
+	"archive/zip"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -15,6 +16,7 @@ import (
 	"time"
 
 	"github.com/barasher/go-exiftool"
+	"github.com/charmbracelet/bubbles/progress"
 	"github.com/lithammer/shortuuid"
 	"github.com/rkoesters/xdg/userdirs"
 	"github.com/shirou/gopsutil/disk"
@@ -520,4 +522,116 @@ func loadConfigFile(dir string) (toggleDotFileBool bool, firstFilePanelDir strin
 		}
 	}
 	return toggleDotFileBool, firstFilePanelDir
+}
+
+func unzip(src, dest string) error {
+	id := shortuuid.New()
+	r, err := zip.OpenReader(src)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err := r.Close(); err != nil {
+			panic(err)
+		}
+	}()
+	totalFile := len(r.File)
+	// progessbar
+	prog := progress.New(progress.WithScaledGradient(theme.ProcessBarGradient[0], theme.ProcessBarGradient[1]))
+	prog.PercentageStyle = textStyle
+	// channel message
+	p := process{
+		name: "test",
+		progress: prog,
+		state:    inOperation,
+		total:    totalFile,
+		done:     0,
+	}
+	if _, err := os.Stat(filepath.Join(dest, filepath.Base(src))); os.IsExist(err) {
+		p.state = failure
+		p.name = "󰛫 Directory already exist"
+		channel <- channelMessage{
+			messageId:       id,
+			processNewState: p,
+		}
+		return nil
+	}
+	os.MkdirAll(dest, 0755)
+
+	// Closure to address file descriptors issue with all the deferred .Close() methods
+	extractAndWriteFile := func(f *zip.File) error {
+		p.name = f.Name
+		if len(channel) < 5 {
+			channel <- channelMessage{
+				messageId:       id,
+				processNewState: p,
+			}
+		}
+		rc, err := f.Open()
+		if err != nil {
+			return err
+		}
+		defer func() {
+			if err := rc.Close(); err != nil {
+				panic(err)
+			}
+		}()
+
+		path := filepath.Join(dest, f.Name)
+
+		// Check for ZipSlip (Directory traversal)
+		if !strings.HasPrefix(path, filepath.Clean(dest)+string(os.PathSeparator)) {
+			return fmt.Errorf("illegal file path: %s", path)
+		}
+
+		if f.FileInfo().IsDir() {
+			os.MkdirAll(path, f.Mode())
+		} else {
+			os.MkdirAll(filepath.Dir(path), f.Mode())
+			f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+			if err != nil {
+				return err
+			}
+			defer func() {
+				if err := f.Close(); err != nil {
+					panic(err)
+				}
+			}()
+
+			_, err = io.Copy(f, rc)
+
+			if err != nil {
+				if len(channel) < 5 {
+					p.state = failure
+					channel <- channelMessage{
+						messageId:       id,
+						processNewState: p,
+					}
+				}
+				return err
+			}
+			p.done++
+			if len(channel) < 5 {
+				channel <- channelMessage{
+					messageId:       id,
+					processNewState: p,
+				}
+			}
+		}
+		return nil
+	}
+
+	for _, f := range r.File {
+		err := extractAndWriteFile(f)
+		if err != nil {
+			return err
+		}
+	}
+	p.state = successful
+	channel <- channelMessage{
+		messageId:       id,
+		processNewState: p,
+	}
+
+	return nil
 }
