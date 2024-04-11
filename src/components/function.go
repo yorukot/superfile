@@ -541,7 +541,7 @@ func unzip(src, dest string) error {
 	prog.PercentageStyle = textStyle
 	// channel message
 	p := process{
-		name: "test",
+		name:     "test",
 		progress: prog,
 		state:    inOperation,
 		total:    totalFile,
@@ -560,13 +560,7 @@ func unzip(src, dest string) error {
 
 	// Closure to address file descriptors issue with all the deferred .Close() methods
 	extractAndWriteFile := func(f *zip.File) error {
-		p.name = f.Name
-		if len(channel) < 5 {
-			channel <- channelMessage{
-				messageId:       id,
-				processNewState: p,
-			}
-		}
+
 		rc, err := f.Open()
 		if err != nil {
 			return err
@@ -601,33 +595,41 @@ func unzip(src, dest string) error {
 			_, err = io.Copy(f, rc)
 
 			if err != nil {
-				if len(channel) < 5 {
-					p.state = failure
-					channel <- channelMessage{
-						messageId:       id,
-						processNewState: p,
-					}
-				}
+
 				return err
-			}
-			p.done++
-			if len(channel) < 5 {
-				channel <- channelMessage{
-					messageId:       id,
-					processNewState: p,
-				}
 			}
 		}
 		return nil
 	}
 
 	for _, f := range r.File {
+		p.name = "󰛫 " + f.Name
+		if len(channel) < 3 {
+			channel <- channelMessage{
+				messageId:       id,
+				processNewState: p,
+			}
+		}
 		err := extractAndWriteFile(f)
 		if err != nil {
+			p.state = failure
+			channel <- channelMessage{
+				messageId:       id,
+				processNewState: p,
+			}
 			return err
 		}
+		p.done++
+		if len(channel) < 3 {
+			channel <- channelMessage{
+				messageId:       id,
+				processNewState: p,
+			}
+		}
 	}
+
 	p.state = successful
+	p.total = totalFile
 	channel <- channelMessage{
 		messageId:       id,
 		processNewState: p,
