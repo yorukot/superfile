@@ -115,15 +115,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if m.typingModal.open {
 			switch msg.String() {
 			case Config.Cancel[0], Config.Cancel[1]:
-				m = CancelTypingModal(m)
+				m = cancelTypingModal(m)
 			case Config.Confirm[0], Config.Confirm[1]:
-				m = CreateItem(m)
+				m = createItem(m)
 			}
 			// if in the renaming mode
 		} else if m.warnModal.open {
 			switch msg.String() {
 			case Config.Cancel[0], Config.Cancel[1]:
-				m = CancelWarnModal(m)
+				m = cancelWarnModal(m)
 			case Config.Confirm[0], Config.Confirm[1]:
 				m.warnModal.open = false
 				if m.fileModel.filePanels[m.filePanelFocusIndex].panelMode == selectMode {
@@ -141,9 +141,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		} else if m.fileModel.renaming {
 			switch msg.String() {
 			case Config.Cancel[0], Config.Cancel[1]:
-				m = CancelReanem(m)
+				m = cancelReanem(m)
 			case Config.Confirm[0], Config.Confirm[1]:
-				m = ConfirmRename(m)
+				m = confirmRename(m)
 			}
 		} else {
 			switch msg.String() {

@@ -5,18 +5,18 @@ import (
 	"path/filepath"
 )
 
-func CancelTypingModal(m model) model {
+func cancelTypingModal(m model) model {
 	m.typingModal.textInput.Blur()
 	m.typingModal.open = false
 	return m
 }
 
-func CancelWarnModal(m model) model {
+func cancelWarnModal(m model) model {
 	m.warnModal.open = false
 	return m
 }
 
-func CreateItem(m model) model {
+func createItem(m model) model {
 	if m.typingModal.itemType == newFile {
 		path := m.typingModal.location + "/" + m.typingModal.textInput.Value()
 		if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
@@ -39,7 +39,7 @@ func CreateItem(m model) model {
 	return m
 }
 
-func CancelReanem(m model) model {
+func cancelReanem(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	panel.rename.Blur()
 	panel.renaming = false
@@ -48,7 +48,7 @@ func CancelReanem(m model) model {
 	return m
 }
 
-func ConfirmRename(m model) model {
+func confirmRename(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	oldPath := panel.element[panel.cursor].location
 	newPath := panel.location + "/" + panel.rename.Value()
