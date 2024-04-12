@@ -20,6 +20,7 @@ All notable changes to this project will be documented in this file. Dates are d
 - Fix interface lag when selecting zip files or large files [`#29`](https://github.com/MHNightCat/superfile/issues/29)
 - Fix external media error [`#46`](https://github.com/MHNightCat/superfile/pull/46)
 - Fix cant find trash can folder [`396674f`](https://github.com/MHNightCat/superfile/commit/396674f33e302369790bcb88d84df0d3830d3543)
+- Fix Crashes when truncating metadata [`#50`](https://github.com/MHNightCat/superfile/issues/50)
 
 # [**v1.0.1**](https://github.com/MHNightCat/superfile/releases/tag/v1.0.1)
 
