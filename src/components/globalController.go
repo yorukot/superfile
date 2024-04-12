@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/charmbracelet/bubbles/progress"
@@ -449,6 +450,16 @@ func toggleDotFileController(m model) model {
 func extractFile(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	unzip(panel.element[panel.cursor].location, filepath.Dir(panel.element[panel.cursor].location))
+	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+	return m
+}
+
+func compressFile(m model) model {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	fileName := filepath.Base(panel.element[panel.cursor].location)
+	
+	zipName := strings.TrimSuffix(fileName, filepath.Ext(fileName)) + ".zip"
+	zipSource(panel.element[panel.cursor].location, filepath.Join(filepath.Dir(panel.element[panel.cursor].location), zipName))
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m
 }

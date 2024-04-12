@@ -10,11 +10,11 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
-  "runtime"
 
 	"github.com/barasher/go-exiftool"
 	"github.com/charmbracelet/bubbles/progress"
@@ -46,14 +46,14 @@ func getWellKnownDirectories() []directory {
 		{location: userdirs.PublicShare, name: " PublicShare"},
 	}
 
-  if runtime.GOOS == "darwin" {
-    wellKnownDirectories[1].location = HomeDir+"/Downloads/"
-    wellKnownDirectories[2].location = HomeDir+"/Documents/"
-    wellKnownDirectories[3].location = HomeDir+"/Pictures/"
-    wellKnownDirectories[4].location = HomeDir+"/Movies/"
-    wellKnownDirectories[5].location = HomeDir+"/Music/"
-    wellKnownDirectories[7].location = HomeDir+"/Public/"
-  }
+	if runtime.GOOS == "darwin" {
+		wellKnownDirectories[1].location = HomeDir + "/Downloads/"
+		wellKnownDirectories[2].location = HomeDir + "/Documents/"
+		wellKnownDirectories[3].location = HomeDir + "/Pictures/"
+		wellKnownDirectories[4].location = HomeDir + "/Movies/"
+		wellKnownDirectories[5].location = HomeDir + "/Music/"
+		wellKnownDirectories[7].location = HomeDir + "/Public/"
+	}
 
 	for _, dir := range wellKnownDirectories {
 		if _, err := os.Stat(dir.location); !os.IsNotExist(err) {
@@ -546,16 +546,16 @@ func unzip(src, dest string) error {
 			panic(err)
 		}
 	}()
-	totalFile := len(r.File)
+	totalFiles := len(r.File)
 	// progessbar
 	prog := progress.New(progress.WithScaledGradient(theme.ProcessBarGradient[0], theme.ProcessBarGradient[1]))
 	prog.PercentageStyle = textStyle
 	// channel message
 	p := process{
-		name:     "test",
+		name:     "unzip file",
 		progress: prog,
 		state:    inOperation,
-		total:    totalFile,
+		total:    totalFiles,
 		done:     0,
 	}
 	if _, err := os.Stat(filepath.Join(dest, filepath.Base(src))); os.IsExist(err) {
@@ -639,8 +639,127 @@ func unzip(src, dest string) error {
 		}
 	}
 
-	p.total = totalFile
+	p.total = totalFiles
 	p.state = successful
+	channel <- channelMessage{
+		messageId:       id,
+		processNewState: p,
+	}
+
+	return nil
+}
+
+func zipSource(source, target string) error {
+	id := shortuuid.New()
+	prog := progress.New(progress.WithScaledGradient(theme.ProcessBarGradient[0], theme.ProcessBarGradient[1]))
+	prog.PercentageStyle = textStyle
+
+	totalFiles, err := countFiles(source)
+
+	if err != nil {
+		outPutLog("Zip file count files error: ", err)
+	}
+
+	p := process{
+		name:     "zip files",
+		progress: prog,
+		state:    inOperation,
+		total:    totalFiles,
+		done:     0,
+	}
+
+	_, err = os.Stat(target)
+	if os.IsExist(err) {
+		p.name = "󰗄 File already exist"
+		channel <- channelMessage{
+			messageId:       id,
+			processNewState: p,
+		}
+		return nil
+	}
+
+	// 1. Create a ZIP file and zip.Writer
+	f, err := os.Create(target)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	writer := zip.NewWriter(f)
+	defer writer.Close()
+
+	// 2. Go through all the files of the source
+	err = filepath.Walk(source, func(path string, info os.FileInfo, err error) error {
+		p.name = filepath.Base(path)
+		if len(channel) < 5 {
+			channel <- channelMessage{
+				messageId:       id,
+				processNewState: p,
+			}
+		}
+
+		if err != nil {
+			return err
+		}
+
+		// 3. Create a local file header
+		header, err := zip.FileInfoHeader(info)
+		if err != nil {
+			return err
+		}
+
+		// set compression
+		header.Method = zip.Deflate
+
+		// 4. Set relative path of a file as the header name
+		header.Name, err = filepath.Rel(filepath.Dir(source), path)
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			header.Name += "/"
+		}
+
+		// 5. Create writer for the file header and save content of the file
+		headerWriter, err := writer.CreateHeader(header)
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() {
+			return nil
+		}
+
+		f, err := os.Open(path)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+
+		_, err = io.Copy(headerWriter, f)
+		if err != nil {
+			return err
+		}
+		p.done++
+		if len(channel) < 5 {
+			channel <- channelMessage{
+				messageId:       id,
+				processNewState: p,
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		outPutLog("Error while zip file:", err)
+		p.state = failure
+		channel <- channelMessage{
+			messageId:       id,
+			processNewState: p,
+		}
+	}
+	p.state = successful
+	p.done = totalFiles
 	channel <- channelMessage{
 		messageId:       id,
 		processNewState: p,

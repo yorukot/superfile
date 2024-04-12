@@ -227,6 +227,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				go func() {
 					m = extractFile(m)
 				}()
+			case Config.CompressFile[0], Config.CompressFile[1]:
+				go func() {
+				 	m = compressFile(m)
+				}()
 			default:
 				// check if it's the select mode
 				if m.fileModel.filePanels[m.filePanelFocusIndex].focusType == focus && m.fileModel.filePanels[m.filePanelFocusIndex].panelMode == selectMode {
