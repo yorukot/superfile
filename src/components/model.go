@@ -292,12 +292,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.fileModel.filePanels[m.filePanelFocusIndex].cursor = 0
 	}
 
-	cmd = tea.Batch(cmd, listenForChannelMessage(channel))
+	cmd = tea.Batch(cmd)
 	m.sideBarModel.directories = getDirectories()
 
-	if ListeningMessage {
-		cmd = tea.Batch(cmd)
-	} else {
+	if !ListeningMessage {
 		cmd = tea.Batch(cmd, listenForChannelMessage(channel))
 	}
 	return m, cmd

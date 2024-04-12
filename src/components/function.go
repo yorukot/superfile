@@ -639,8 +639,8 @@ func unzip(src, dest string) error {
 		}
 	}
 
-	p.state = successful
 	p.total = totalFile
+	p.state = successful
 	channel <- channelMessage{
 		messageId:       id,
 		processNewState: p,
