@@ -1,10 +1,10 @@
 ## General
 
-| Function        | Key        | Variable name |
-| --------------- | ---------- | ------------- |
-| Start SuperFile | `spf`      |               |
-| Reload          | `ctrl+R`   | `reload`      |
-| Quit            | `esc`, `q` | `quit`        |
+| Function        | Key                      | Variable name |
+| --------------- | ------------------------ | ------------- |
+| Start SuperFile | `spf`                    |               |
+| Reload          | press any key can reload |               |
+| Quit            | `esc`, `q`               | `quit`        |
 
 ## Panel navigation
 
@@ -32,18 +32,21 @@
 | Select with your course                             | `shift+up`, `K`(shift+k)   | `filePanelSelectModeItemSelectUp`(only works in selection mode)     |
 | Select with your course                             | `shift+left`, `J`(shift+j) | `filePanelSelectModeItemSelectDown`(only works in selection mode)   |
 | Select the item where the current cursor is located | `enter`, `l`               | `filePanelSelectModeItemSingleSelect`(only works in selection mode) |
+| Toggle dot file display                             | `ctrl+h`                   | `toggleDotFile`                                                     |
 
 ## File operations
 
-| Function                                | Key      | Variable name                                                                 |
-| --------------------------------------- | -------- | ----------------------------------------------------------------------------- |
-| Create a new folder                     | `f`      | `filePanelFolderCreate`                                                       |
-| Create a new file                       | `c`      | `filePanelFileCreate`                                                         |
-| Rename file or folder                   | `r`      | `filePanelItemRename`                                                         |
-| Delete file or folder (or both)         | `ctrl+d` | `deleteItem`(normal mode) <br> `filePanelSelectModeItemDelete`(select mode)   |
-| Copy file or folder (or both)           | `ctrl+c` | `copySingleItem`(normal mode) <br> `filePanelSelectModeItemCopy`(select mode) |
-| Paste all items in your clipboard       | `ctrl+v` | `pasteItem`                                                                   |
-| Open file with your default application | `ctrl+v` | `selectItem`(select mode)                                                     |
+| Function                                | Key          | Variable name                                                                 |
+| --------------------------------------- | ------------ | ----------------------------------------------------------------------------- |
+| Create a new folder                     | `f`          | `filePanelFolderCreate`                                                       |
+| Create a new file                       | `c`          | `filePanelFileCreate`                                                         |
+| Rename file or folder                   | `r`          | `filePanelItemRename`                                                         |
+| Extract zip file                        | `ctrl+e`     | `extractFile`(normal mode)                                                    |
+| Zip file or folder to .zip file         | `ctrl+r`     | `compressFile`(normal mode)                                                   |
+| Delete file or folder (or both)         | `ctrl+d`     | `deleteItem`(normal mode) <br> `filePanelSelectModeItemDelete`(select mode)   |
+| Copy file or folder (or both)           | `ctrl+c`     | `copySingleItem`(normal mode) <br> `filePanelSelectModeItemCopy`(select mode) |
+| Paste all items in your clipboard       | `ctrl+v`     | `pasteItem`                                                                   |
+| Open file with your default application | `enter`, `l` | `selectItem`(select mode)                                                     |
 
 ## Special
 
