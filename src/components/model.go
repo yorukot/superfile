@@ -149,8 +149,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		} else {
 			switch msg.String() {
 			// return superfile
-			case Config.Reload[0], Config.Reload[1]:
-				//just do nothing
 			case Config.Quit[0], Config.Quit[1]:
 				return m, tea.Quit
 			/* LIST CONTROLLER START */

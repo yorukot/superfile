@@ -330,7 +330,6 @@ const configJsonString string =`{
   "_COMMIT_HOTKEY": "",
 
   "_COMMIT_global_hotkey": "Here is global, all global key cant conflicts with other hotkeys",
-  "reload": ["ctrl+r", ""],
   "quit": ["esc", "q"],
 
   "listUp": ["up", "k"],
@@ -353,8 +352,8 @@ const configJsonString string =`{
   "filePanelFileCreate": ["c", ""],
   "filePanelItemRename": ["r", ""],
   "pasteItem": ["ctrl+v", ""],
-  "extractFile": ["ctrl+t"],
-  "compressFile": ["ctrl+y"],
+  "extractFile": ["ctrl+e", ""],
+  "compressFile": ["ctrl+r", ""],
 
   "toggleDotFile": ["ctrl+h", ""],
 
