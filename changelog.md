@@ -13,7 +13,7 @@ All notable changes to this project will be documented in this file. Dates are d
 - Update log file from `$XDG_CONFIG_HOME/superfile/data/superfile.log` to `$XDG_CACH_DATA` [`#27`](https://github.com/MHNightCat/superfile/pull/27)
 - Update theme background [`#42`](https://github.com/MHNightCat/superfile/pull/42)
 - Update unzip function [`#55`](https://github.com/MHNightCat/superfile/pull/55)
-
+- Update zip function [`60c490a`](https://github.com/MHNightCat/superfile/commit/60c490aa06019fb1a5382b1e241c6b0a72ec51a4)
 #### Bug fix
 
 - Fix interface lag when selecting zip files or large files [`#29`](https://github.com/MHNightCat/superfile/issues/29)
