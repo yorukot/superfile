@@ -357,6 +357,8 @@ func pasteItem(m model) model {
 func panelCreateNewFile(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	ti := textinput.New()
+	ti.TextStyle = textStyle
+	ti.Cursor.Blink = true
 	ti.Placeholder = "File name"
 	ti.Focus()
 	ti.CharLimit = 156
@@ -376,6 +378,8 @@ func panelCreateNewFile(m model) model {
 func panelCreateNewFolder(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	ti := textinput.New()
+	ti.TextStyle = textStyle
+	ti.Cursor.Blink = true
 	ti.Placeholder = "Folder name"
 	ti.Focus()
 	ti.CharLimit = 156
@@ -457,7 +461,7 @@ func extractFile(m model) model {
 func compressFile(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	fileName := filepath.Base(panel.element[panel.cursor].location)
-	
+
 	zipName := strings.TrimSuffix(fileName, filepath.Ext(fileName)) + ".zip"
 	zipSource(panel.element[panel.cursor].location, filepath.Join(filepath.Dir(panel.element[panel.cursor].location), zipName))
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel

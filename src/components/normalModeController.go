@@ -257,6 +257,8 @@ func panelItemRename(m model) model {
 		return m
 	}
 	ti := textinput.New()
+	ti.TextStyle = textStyle
+	ti.Cursor.Blink = true
 	ti.Placeholder = "New name"
 	ti.SetValue(panel.element[panel.cursor].name)
 	ti.Focus()

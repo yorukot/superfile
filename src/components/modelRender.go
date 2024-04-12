@@ -214,18 +214,30 @@ func MetaDataRender(m model) string {
 		// Default comparison
 		return m.fileMetaData.metaData[i][0] < m.fileMetaData.metaData[j][0]
 	})
-
 	for _, data := range m.fileMetaData.metaData {
 		if len(data[0]) > maxKeyLength {
 			maxKeyLength = len(data[0])
 		}
 	}
+
+	sprintfLength := maxKeyLength + 1
+	vauleLength := BottomWidth(m.fullWidth) - maxKeyLength - 2
+	if vauleLength < BottomWidth(m.fullWidth)/2 {
+		vauleLength = BottomWidth(m.fullWidth)/2 - 2
+		sprintfLength = vauleLength
+	}
+
 	for i := m.fileMetaData.renderIndex; i < bottomElementHight(bottomBarHeight)+m.fileMetaData.renderIndex && i < len(m.fileMetaData.metaData); i++ {
 		if i != m.fileMetaData.renderIndex {
 			metaDataBar += "\n"
 		}
-		data := TruncateMiddleText(m.fileMetaData.metaData[i][1], (BottomWidth(m.fullWidth))-maxKeyLength-3)
-		metaDataBar += fmt.Sprintf("%-*s %s", maxKeyLength+1, m.fileMetaData.metaData[i][0], data)
+		data := TruncateMiddleText(m.fileMetaData.metaData[i][1], vauleLength)
+		metadataName := m.fileMetaData.metaData[i][0]
+		if BottomWidth(m.fullWidth)-maxKeyLength-3 < BottomWidth(m.fullWidth)/2 {
+			metadataName = TruncateMiddleText(m.fileMetaData.metaData[i][0], vauleLength)
+		}
+		metaDataBar += fmt.Sprintf("%-*s %s", sprintfLength, metadataName, data)
+
 	}
 	bottomBorder := GenerateBottomBorder(fmt.Sprintf("%s/%s", strconv.Itoa(m.fileMetaData.renderIndex+1), strconv.Itoa(len(m.fileMetaData.metaData))), BottomWidth(m.fullWidth)-3)
 	metaDataBar = MetaDataBoarder(bottomElementHight(bottomBarHeight), BottomWidth(m.fullWidth), bottomBorder, m.focusPanel).Render(metaDataBar)
