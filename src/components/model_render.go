@@ -312,15 +312,15 @@ func TerminalSizeWarnRender(m model) string {
 func TypineModalRender(m model) string {
 	if m.typingModal.itemType == newFile {
 		fileLocation := filePanelTopFolderIcon.Render("   ") + filePanelTopPath.Render(TruncateTextBeginning(m.typingModal.location+"/"+m.typingModal.textInput.Value(), modalWidth-4)) + "\n"
-		confirm := modalConfirm.Render(" (" + Config.Confirm[0] + ") New File ")
-		cancel := modalCancel.Render(" (" + Config.Cancel[0] + ") Cancel ")
-		tip := confirm + lipgloss.NewStyle().Background(backgroundWindow).Render("           ") + cancel
+		confirm := modalConfirm.Render(" (" + hotkeys.Confirm[0] + ") New File ")
+		cancel := modalCancel.Render(" (" + hotkeys.Cancel[0] + ") Cancel ")
+		tip := confirm + lipgloss.NewStyle().Background(mainBackgroundColor).Render("           ") + cancel
 		return FullScreenStyle(m.fullHeight, m.fullWidth).Render(FocusedModalStyle(modalHeight, modalWidth).Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip))
 	} else {
 		fileLocation := filePanelTopFolderIcon.Render("   ") + filePanelTopPath.Render(TruncateTextBeginning(m.typingModal.location+"/"+m.typingModal.textInput.Value(), modalWidth-4)) + "\n"
-		confirm := modalConfirm.Render(" (" + Config.Confirm[0] + ") New Folder ")
-		cancel := modalCancel.Render(" (" + Config.Cancel[0] + ") Cancel ")
-		tip := confirm + lipgloss.NewStyle().Background(backgroundWindow).Render("           ") + cancel
+		confirm := modalConfirm.Render(" (" + hotkeys.Confirm[0] + ") New Folder ")
+		cancel := modalCancel.Render(" (" + hotkeys.Cancel[0] + ") Cancel ")
+		tip := confirm + lipgloss.NewStyle().Background(mainBackgroundColor).Render("           ") + cancel
 		return FullScreenStyle(m.fullHeight, m.fullWidth).Render(FocusedModalStyle(modalHeight, modalWidth).Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip))
 	}
 }
@@ -328,8 +328,8 @@ func TypineModalRender(m model) string {
 func WarnModalRender(m model) string {
 	title := m.warnModal.title
 	content := m.warnModal.content
-	confirm := modalCancel.Render(" (" + Config.Confirm[0] + ") Confirm ")
-	cancel := modalCancel.Render(" (" + Config.Cancel[0] + ") Cancel ")
-	tip := confirm + lipgloss.NewStyle().Background(backgroundWindow).Render("           ") + cancel
+	confirm := modalCancel.Render(" (" + hotkeys.Confirm[0] + ") Confirm ")
+	cancel := modalCancel.Render(" (" + hotkeys.Cancel[0] + ") Cancel ")
+	tip := confirm + lipgloss.NewStyle().Background(mainBackgroundColor).Render("           ") + cancel
 	return FullScreenStyle(m.fullHeight, m.fullWidth).Render(FocusedModalStyle(modalHeight, modalWidth).Render(title + "\n\n" + content + "\n\n" + tip))
 }

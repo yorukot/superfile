@@ -6,7 +6,7 @@
 
 border = "#868686"
 cursor = "#8EC07C"
-background_window = "#282828"
+main_background = "#282828"
 
 terminal_too_small_error = "#fb4934"
 terminal_size_currect = "#8ec07c"

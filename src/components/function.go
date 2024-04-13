@@ -498,7 +498,16 @@ func loadConfigFile(dir string) (toggleDotFileBool bool, firstFilePanelDir strin
 	if err != nil {
 		log.Fatalf("Config file doesn't exist: %v", err)
 	}
-	err = json.Unmarshal(data, &Config)
+	err = toml.Unmarshal(data, &Config)
+	if err != nil {
+		log.Fatalf("Error decoding config json( your config file may have misconfigured ): %v", err)
+	}
+
+	data, err = os.ReadFile(SuperFileMainDir + hotkeysFile)
+	if err != nil {
+		log.Fatalf("Config file doesn't exist: %v", err)
+	}
+	err = toml.Unmarshal(data, &hotkeys)
 	if err != nil {
 		log.Fatalf("Error decoding config json( your config file may have misconfigured ): %v", err)
 	}
@@ -691,7 +700,7 @@ func zipSource(source, target string) error {
 
 	// 2. Go through all the files of the source
 	err = filepath.Walk(source, func(path string, info os.FileInfo, err error) error {
-		p.name = filepath.Base(path)
+		p.name = "󰗄 " + filepath.Base(path)
 		if len(channel) < 5 {
 			channel <- channelMessage{
 				messageId:       id,

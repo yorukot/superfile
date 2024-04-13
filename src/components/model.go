@@ -19,7 +19,8 @@ const (
 	pinnedFile       string = "/pinned.json"
 	toggleDotFile    string = "/toggleDotFile"
 	logFile          string = "/superfile.log"
-	configFile       string = "/config.json"
+	configFile       string = "/config.toml"
+	hotkeysFile       string = "/hotkeys.toml"
 	themeZipName     string = "/theme.zip"
 )
 
@@ -30,8 +31,10 @@ var HomeDir = basedir.Home
 var SuperFileMainDir = basedir.ConfigHome + "/superfile"
 var SuperFileCacheDir = basedir.CacheHome + "/superfile"
 var SuperFileDataDir = basedir.DataHome + "/superfile"
+
 var theme ThemeType
 var Config ConfigType
+var hotkeys HotkeysType
 
 var logOutput *os.File
 var et *exiftool.Exiftool
@@ -115,17 +118,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// if in the create item modal
 		if m.typingModal.open {
 			switch msg.String() {
-			case Config.Cancel[0], Config.Cancel[1]:
+			case hotkeys.Cancel[0], hotkeys.Cancel[1]:
 				m = cancelTypingModal(m)
-			case Config.Confirm[0], Config.Confirm[1]:
+			case hotkeys.Confirm[0], hotkeys.Confirm[1]:
 				m = createItem(m)
 			}
 			// if in the renaming mode
 		} else if m.warnModal.open {
 			switch msg.String() {
-			case Config.Cancel[0], Config.Cancel[1]:
+			case hotkeys.Cancel[0], hotkeys.Cancel[1]:
 				m = cancelWarnModal(m)
-			case Config.Confirm[0], Config.Confirm[1]:
+			case hotkeys.Confirm[0], hotkeys.Confirm[1]:
 				m.warnModal.open = false
 				if m.fileModel.filePanels[m.filePanelFocusIndex].panelMode == selectMode {
 					go func() {
@@ -141,19 +144,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// if in the renaming mode
 		} else if m.fileModel.renaming {
 			switch msg.String() {
-			case Config.Cancel[0], Config.Cancel[1]:
+			case hotkeys.Cancel[0], hotkeys.Cancel[1]:
 				m = cancelReanem(m)
-			case Config.Confirm[0], Config.Confirm[1]:
+			case hotkeys.Confirm[0], hotkeys.Confirm[1]:
 				m = confirmRename(m)
 			}
 		} else {
 			switch msg.String() {
 			// return superfile
-			case Config.Quit[0], Config.Quit[1]:
+			case hotkeys.Quit[0], hotkeys.Quit[1]:
 				return m, tea.Quit
 			/* LIST CONTROLLER START */
 			// up list
-			case Config.ListUp[0], Config.ListUp[1]:
+			case hotkeys.ListUp[0], hotkeys.ListUp[1]:
 				if m.focusPanel == sidebarFocus {
 					m = controllerSideBarListUp(m)
 				} else if m.focusPanel == processBarFocus {
@@ -168,7 +171,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					}()
 				}
 			// down list
-			case Config.ListDown[0], Config.ListDown[1]:
+			case hotkeys.ListDown[0], hotkeys.ListDown[1]:
 				if m.focusPanel == sidebarFocus {
 					m = controllerSideBarListDown(m)
 				} else if m.focusPanel == processBarFocus {
@@ -183,49 +186,49 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					}()
 				}
 			/* LIST CONTROLLER END */
-			case Config.ChangePanelMode[0], Config.ChangePanelMode[1]:
+			case hotkeys.ChangePanelMode[0], hotkeys.ChangePanelMode[1]:
 				m = selectedMode(m)
 			/* NAVIGATION CONTROLLER START */
 			// change file panel
-			case Config.NextFilePanel[0], Config.NextFilePanel[1]:
+			case hotkeys.NextFilePanel[0], hotkeys.NextFilePanel[1]:
 				m = nextFilePanel(m)
 			// change file panel
-			case Config.PreviousFilePanel[0], Config.PreviousFilePanel[1]:
+			case hotkeys.PreviousFilePanel[0], hotkeys.PreviousFilePanel[1]:
 				m = previousFilePanel(m)
 			// close file panel
-			case Config.CloseFilePanel[0], Config.CloseFilePanel[1]:
+			case hotkeys.CloseFilePanel[0], hotkeys.CloseFilePanel[1]:
 				m = closeFilePanel(m)
 			// create new file panel
-			case Config.CreateNewFilePanel[0], Config.CreateNewFilePanel[1]:
+			case hotkeys.CreateNewFilePanel[0], hotkeys.CreateNewFilePanel[1]:
 				m = createNewFilePanel(m)
 			// focus to sidebar or file panel
-			case Config.FocusOnSideBar[0], Config.FocusOnSideBar[1]:
+			case hotkeys.FocusOnSideBar[0], hotkeys.FocusOnSideBar[1]:
 				m = focusOnSideBar(m)
 			/* NAVIGATION CONTROLLER END */
-			case Config.FocusOnProcessBar[0], Config.FocusOnProcessBar[1]:
+			case hotkeys.FocusOnProcessBar[0], hotkeys.FocusOnProcessBar[1]:
 				m = focusOnProcessBar(m)
-			case Config.FocusOnMetaData[0], Config.FocusOnMetaData[1]:
+			case hotkeys.FocusOnMetaData[0], hotkeys.FocusOnMetaData[1]:
 				m = focusOnMetaData(m)
 				go func() {
 					m = returnMetaData(m)
 				}()
-			case Config.PasteItem[0], Config.PasteItem[1]:
+			case hotkeys.PasteItem[0], hotkeys.PasteItem[1]:
 				go func() {
 					m = pasteItem(m)
 				}()
-			case Config.FilePanelFileCreate[0], Config.FilePanelFileCreate[1]:
+			case hotkeys.FilePanelFileCreate[0], hotkeys.FilePanelFileCreate[1]:
 				m = panelCreateNewFile(m)
-			case Config.FilePanelDirectoryCreate[0], Config.FilePanelDirectoryCreate[1]:
+			case hotkeys.FilePanelDirectoryCreate[0], hotkeys.FilePanelDirectoryCreate[1]:
 				m = panelCreateNewFolder(m)
-			case Config.PinnedDirectory[0], Config.PinnedDirectory[1]:
+			case hotkeys.PinnedDirectory[0], hotkeys.PinnedDirectory[1]:
 				m = pinnedFolder(m)
-			case Config.ToggleDotFile[0], Config.ToggleDotFile[1]:
+			case hotkeys.ToggleDotFile[0], hotkeys.ToggleDotFile[1]:
 				m = toggleDotFileController(m)
-			case Config.ExtractFile[0], Config.ExtractFile[1]:
+			case hotkeys.ExtractFile[0], hotkeys.ExtractFile[1]:
 				go func() {
 					m = extractFile(m)
 				}()
-			case Config.CompressFile[0], Config.CompressFile[1]:
+			case hotkeys.CompressFile[0], hotkeys.CompressFile[1]:
 				go func() {
 					m = compressFile(m)
 				}()
@@ -233,30 +236,30 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				// check if it's the select mode
 				if m.fileModel.filePanels[m.filePanelFocusIndex].focusType == focus && m.fileModel.filePanels[m.filePanelFocusIndex].panelMode == selectMode {
 					switch msg.String() {
-					case Config.FilePanelSelectModeItemSingleSelect[0], Config.FilePanelSelectModeItemSingleSelect[1]:
+					case hotkeys.FilePanelSelectModeItemSingleSelect[0], hotkeys.FilePanelSelectModeItemSingleSelect[1]:
 						m = singleItemSelect(m)
-					case Config.FilePanelSelectModeItemSelectUp[0], Config.FilePanelSelectModeItemSelectUp[1]:
+					case hotkeys.FilePanelSelectModeItemSelectUp[0], hotkeys.FilePanelSelectModeItemSelectUp[1]:
 						m = itemSelectUp(m)
-					case Config.FilePanelSelectModeItemSelectDown[0], Config.FilePanelSelectModeItemSelectDown[1]:
+					case hotkeys.FilePanelSelectModeItemSelectDown[0], hotkeys.FilePanelSelectModeItemSelectDown[1]:
 						m = itemSelectDown(m)
-					case Config.FilePanelSelectModeItemDelete[0], Config.FilePanelSelectModeItemDelete[1]:
+					case hotkeys.FilePanelSelectModeItemDelete[0], hotkeys.FilePanelSelectModeItemDelete[1]:
 						go func() {
 							m = deleteMultipleItem(m)
 							if !isExternalDiskPath(m.fileModel.filePanels[m.filePanelFocusIndex].location) {
 								m.fileModel.filePanels[m.filePanelFocusIndex].selected = m.fileModel.filePanels[m.filePanelFocusIndex].selected[:0]
 							}
 						}()
-					case Config.FilePanelSelectModeItemCopy[0], Config.FilePanelSelectModeItemCopy[1]:
+					case hotkeys.FilePanelSelectModeItemCopy[0], hotkeys.FilePanelSelectModeItemCopy[1]:
 						m = copyMultipleItem(m)
-					case Config.FilePanelSelectModeItemCut[0], Config.FilePanelSelectModeItemCut[1]:
+					case hotkeys.FilePanelSelectModeItemCut[0], hotkeys.FilePanelSelectModeItemCut[1]:
 						m = cutMultipleItem(m)
-					case Config.FilePanelSelectAllItem[0], Config.FilePanelSelectAllItem[1]:
+					case hotkeys.FilePanelSelectAllItem[0], hotkeys.FilePanelSelectAllItem[1]:
 						m = selectAllItem(m)
 					}
 					// else
 				} else {
 					switch msg.String() {
-					case Config.SelectItem[0], Config.SelectItem[1]:
+					case hotkeys.SelectItem[0], hotkeys.SelectItem[1]:
 						if m.focusPanel == sidebarFocus {
 							m = sidebarSelectFolder(m)
 						} else if m.focusPanel == processBarFocus {
@@ -264,17 +267,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						} else if m.focusPanel == nonePanelFocus {
 							m = enterPanel(m)
 						}
-					case Config.ParentDirectory[0], Config.ParentDirectory[1]:
+					case hotkeys.ParentDirectory[0], hotkeys.ParentDirectory[1]:
 						m = parentFolder(m)
-					case Config.DeleteItem[0], Config.DeleteItem[1]:
+					case hotkeys.DeleteItem[0], hotkeys.DeleteItem[1]:
 						go func() {
 							m = deleteSingleItem(m)
 						}()
-					case Config.CopySingleItem[0], Config.CopySingleItem[1]:
+					case hotkeys.CopySingleItem[0], hotkeys.CopySingleItem[1]:
 						m = copySingleItem(m)
-					case Config.CutSingleItem[0], Config.CutSingleItem[1]:
+					case hotkeys.CutSingleItem[0], hotkeys.CutSingleItem[1]:
 						m = cutSingleItem(m)
-					case Config.FilePanelItemRename[0], Config.FilePanelItemRename[1]:
+					case hotkeys.FilePanelItemRename[0], hotkeys.FilePanelItemRename[1]:
 						m = panelItemRename(m)
 					}
 
