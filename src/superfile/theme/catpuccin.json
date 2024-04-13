@@ -8,10 +8,10 @@
   "terminalTooSmallError": "#c74a4d",
   "terminalSizeCurrect": "#4EB8CA",
   
-  "sideBarTitle": "#74c7ec",
-  "sideBarItem": "#a6adc8",
-  "sideBarSelected": "#cba6f7",
-  "sideBarFocus": "#f38ba8",
+  "sidebarTitle": "#74c7ec",
+  "sidebarItem": "#a6adc8",
+  "sidebarSelected": "#cba6f7",
+  "sidebarFocus": "#f38ba8",
 
   "filePanelFocus": "#b4befe",
   "filePanelTopFolderIcon": "#a6e3a1",
@@ -19,7 +19,7 @@
   "filePanelItem": "#a6adc8",
   "filePanelItemSelected": "#9399b2",
 
-  "bottomBarFocus": "#a6e3a1",
+  "footerFocus": "#a6e3a1",
 
   "processBarSideLine": "#74c7ec",
   "processBarGradient": [ "#89b4fa", "#a6e3a1", "#eba0ac", "#cba6f7" ],

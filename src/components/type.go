@@ -38,7 +38,7 @@ const (
 const (
 	nonePanelFocus focusPanelType = iota
 	processBarFocus
-	sideBarFocus
+	sidebarFocus
 	metaDataFocus
 )
 
@@ -66,7 +66,7 @@ const (
 // Main model
 type model struct {
 	fileModel           fileModel
-	sideBarModel        sideBarModel
+	sidebarModel        sidebarModel
 	processBarModel     processBarModel
 	focusPanel          focusPanelType
 	copyItems           copyItems
@@ -156,7 +156,7 @@ type element struct {
 
 /* SIDE BAR COMPONENTS TYPE START*/
 // Model for sidebar components
-type sideBarModel struct {
+type sidebarModel struct {
 	directories []directory
 	// wellKnownModel []directory
 	// pinnedModel    []directory
@@ -211,40 +211,33 @@ type iconStyle struct {
 
 // Theme configuration
 type ThemeType struct {
-	Border           string
-	Cursor           string
-	BackgroundWindow string
+    Border                   string   `toml:"border"`
+    Cursor                   string   `toml:"cursor"`
+    BackgroundWindow         string   `toml:"background_window"`
 
-	TerminalTooSmallError string
-	TerminalSizeCorrect   string
+    TerminalTooSmallError    string   `toml:"terminal_too_small_error"`
+    TerminalSizeCorrect      string   `toml:"terminal_size_correct"`
 
-	BrowserMode string
-	SelectMode  string
+    SidebarTitle             string   `toml:"sidebar_title"`
+    SidebarItem              string   `toml:"sidebar_item"`
+    SidebarSelected          string   `toml:"sidebar_selected"`
+    SidebarFocus             string   `toml:"sidebar_focus"`
 
-	SideBarTitle    string
-	SideBarItem     string
-	SideBarSelected string
-	SideBarFocus    string
+    FilePanelFocus           string   `toml:"file_panel_focus"`
+    FilePanelTopDirectoryIcon   string   `toml:"file_panel_top_directory_icon"`
+    FilePanelTopPath         string   `toml:"file_panel_top_path"`
+    FilePanelItem            string   `toml:"file_panel_item"`
 
-	FilePanelFocus            string
-	FilePanelTopDirectoryIcon string
-	FilePanelTopPath          string
-	FilePanelItem             string
-	FilePanelItemSelected     string
-
-	BottomBarFocus string
-
-	ProcessBarSideLine string
-	ProcessBarGradient [2]string
-	InOperation        string
-	Done               string
-	Fail               string
-	Cancel             string
-	Warn               string
-
-	ModalForeground string
-	ModalCancel     string
-	ModalConfirm    string
+    FilePanelItemSelected   string   `toml:"file_panel_item_selected"`
+    FooterFocus              string   `toml:"footer_focus"`
+    ProcessBarGradient      [2]string `toml:"process_bar_gradient"`
+    InOperation              string   `toml:"in_operation"`
+    Done                     string   `toml:"done"`
+    Fail                     string   `toml:"fail"`
+    Cancel                   string   `toml:"cancel"`
+    ModalForeground         string   `toml:"modal_foreground"`
+    ModalCancel              string   `toml:"modal_cancel"`
+    ModalConfirm             string   `toml:"modal_confirm"`
 }
 
 // Configuration settings

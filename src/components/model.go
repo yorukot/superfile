@@ -49,7 +49,7 @@ func InitialModel(dir string) model {
 			cursor:  0,
 			render:  0,
 		},
-		sideBarModel: sideBarModel{
+		sidebarModel: sidebarModel{
 			directories: getDirectories(),
 			// wellKnownModel: getWellKnownDirectories(),
 			// pinnedModel:    getPinnedDirectories(),
@@ -105,8 +105,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	// if the message by windows size change
 	case tea.WindowSizeMsg:
-		m.mainPanelHeight = msg.Height - bottomBarHeight + 1
-		m.fileModel.width = (msg.Width - sideBarWidth - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
+		m.mainPanelHeight = msg.Height - footerHeight + 1
+		m.fileModel.width = (msg.Width - sidebarWidth - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
 		m.fullHeight = msg.Height
 		m.fullWidth = msg.Width
 		return m, nil
@@ -154,7 +154,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			/* LIST CONTROLLER START */
 			// up list
 			case Config.ListUp[0], Config.ListUp[1]:
-				if m.focusPanel == sideBarFocus {
+				if m.focusPanel == sidebarFocus {
 					m = controllerSideBarListUp(m)
 				} else if m.focusPanel == processBarFocus {
 					m = contollerProcessBarListUp(m)
@@ -169,7 +169,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			// down list
 			case Config.ListDown[0], Config.ListDown[1]:
-				if m.focusPanel == sideBarFocus {
+				if m.focusPanel == sidebarFocus {
 					m = controllerSideBarListDown(m)
 				} else if m.focusPanel == processBarFocus {
 					m = contollerProcessBarListDown(m)
@@ -227,7 +227,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}()
 			case Config.CompressFile[0], Config.CompressFile[1]:
 				go func() {
-				 	m = compressFile(m)
+					m = compressFile(m)
 				}()
 			default:
 				// check if it's the select mode
@@ -257,8 +257,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				} else {
 					switch msg.String() {
 					case Config.SelectItem[0], Config.SelectItem[1]:
-						if m.focusPanel == sideBarFocus {
-							m = sideBarSelectFolder(m)
+						if m.focusPanel == sidebarFocus {
+							m = sidebarSelectFolder(m)
 						} else if m.focusPanel == processBarFocus {
 
 						} else if m.focusPanel == nonePanelFocus {
@@ -295,7 +295,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	cmd = tea.Batch(cmd)
-	m.sideBarModel.directories = getDirectories()
+	m.sidebarModel.directories = getDirectories()
 
 	if !ListeningMessage {
 		cmd = tea.Batch(cmd, listenForChannelMessage(channel))
@@ -312,11 +312,11 @@ func (m model) View() string {
 	} else if m.warnModal.open {
 		return WarnModalRender(m)
 	} else {
-		sideBar := SideBarRender(m)
+		sidebar := SideBarRender(m)
 
 		filePanel := FilePanelRender(m)
 
-		mainPanel := lipgloss.JoinHorizontal(0, sideBar, filePanel)
+		mainPanel := lipgloss.JoinHorizontal(0, sidebar, filePanel)
 
 		processBar := ProcessBarRender(m)
 
@@ -324,10 +324,10 @@ func (m model) View() string {
 
 		clipboardBar := ClipboardRender(m)
 
-		bottomBar := lipgloss.JoinHorizontal(0, processBar, metaData, clipboardBar)
+		footer := lipgloss.JoinHorizontal(0, processBar, metaData, clipboardBar)
 
 		// final render
-		finalRender := lipgloss.JoinVertical(0, mainPanel, bottomBar)
+		finalRender := lipgloss.JoinVertical(0, mainPanel, footer)
 
 		return lipgloss.JoinVertical(lipgloss.Top, finalRender)
 	}

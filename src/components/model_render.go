@@ -11,7 +11,7 @@ import (
 )
 
 func SideBarRender(m model) string {
-	s := sideBarTitle.Render(" Super Files")
+	s := sidebarTitle.Render(" Super Files")
 	s += "\n\n"
 
 	// Ugly shit workaround from hell code, made by @lescx
@@ -20,33 +20,33 @@ func SideBarRender(m model) string {
 	pinnedRendered := false
 	externalRendered := false
 
-	for i, directory := range m.sideBarModel.directories {
+	for i, directory := range m.sidebarModel.directories {
 		if i == amountWellKnownDirectories && !pinnedRendered {
-			s += "\n" + sideBarTitle.Render("󰐃 Pinned") + borderStyle.Render(" ───────────") + "\n\n"
+			s += "\n" + sidebarTitle.Render("󰐃 Pinned") + borderStyle.Render(" ───────────") + "\n\n"
 			pinnedRendered = true
 		}
 		if i == amountPinnedDirectories+amountWellKnownDirectories && !externalRendered {
-			s += "\n" + sideBarTitle.Render("󱇰 Disks") + borderStyle.Render(" ────────────") + "\n\n"
+			s += "\n" + sidebarTitle.Render("󱇰 Disks") + borderStyle.Render(" ────────────") + "\n\n"
 			externalRendered = true
 		}
 		cursor := " "
-		if m.sideBarModel.cursor == i && m.focusPanel == sideBarFocus {
+		if m.sidebarModel.cursor == i && m.focusPanel == sidebarFocus {
 			cursor = ""
 		}
 		if directory.location == m.fileModel.filePanels[m.filePanelFocusIndex].location {
-			s += cursorStyle.Render(cursor) + sideBarSelected.Render(" "+TruncateText(directory.name, sideBarWidth-2)) + "\n"
+			s += cursorStyle.Render(cursor) + sidebarSelected.Render(" "+TruncateText(directory.name, sidebarWidth-2)) + "\n"
 		} else {
-			s += cursorStyle.Render(cursor) + sideBarItem.Render(" "+TruncateText(directory.name, sideBarWidth-2)) + "\n"
+			s += cursorStyle.Render(cursor) + sidebarItem.Render(" "+TruncateText(directory.name, sidebarWidth-2)) + "\n"
 		}
 	}
 
 	// In case no pinned directories or external drives are pinned,
 	// list menu item at the bottom
 	if !pinnedRendered {
-		s += "\n" + sideBarTitle.Render("󰐃 Pinned") + borderStyle.Render(" ───────────") + "\n\n"
+		s += "\n" + sidebarTitle.Render("󰐃 Pinned") + borderStyle.Render(" ───────────") + "\n\n"
 	}
 	if !externalRendered {
-		s += "\n" + sideBarTitle.Render("󱇰 Disks") + borderStyle.Render(" ────────────") + "\n\n"
+		s += "\n" + sidebarTitle.Render("󱇰 Disks") + borderStyle.Render(" ────────────") + "\n\n"
 	}
 
 	return SideBarBoardStyle(m.mainPanelHeight, m.focusPanel).Render(s)
@@ -63,7 +63,7 @@ func FilePanelRender(m model) string {
 		f[i] += filePanelTopFolderIcon.Render("   ") + filePanelTopPath.Render(TruncateTextBeginning(filePanel.location, m.fileModel.width-4)) + "\n"
 		filePanelWidth := 0
 		bottomBorderWidth := 0
-		if (m.fullWidth-sideBarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels) != 0 && i == len(m.fileModel.filePanels)-1 {
+		if (m.fullWidth-sidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels) != 0 && i == len(m.fileModel.filePanels)-1 {
 			filePanelWidth = (m.fileModel.width + 1)
 			bottomBorderWidth = m.fileModel.width + 7
 		} else {
@@ -152,7 +152,7 @@ func ProcessBarRender(m model) string {
 		if i == m.processBarModel.cursor {
 			cursor = StringColorRender(theme.Cursor).Render("┃ ")
 		} else {
-			cursor = StringColorRender(theme.ProcessBarSideLine).Render("  ")
+			cursor = StringColorRender(theme.Cursor).Render("  ")
 		}
 		switch process.state {
 		case failure:
@@ -184,7 +184,7 @@ func ProcessBarRender(m model) string {
 		courseNumber = m.processBarModel.cursor + 1
 	}
 	bottomBorder := GenerateBottomBorder(fmt.Sprintf("%s/%s", strconv.Itoa(courseNumber), strconv.Itoa(len(m.processBarModel.processList))), BottomWidth(m.fullWidth)-3)
-	processRender = ProcsssBarBoarder(bottomElementHight(bottomBarHeight), BottomWidth(m.fullWidth), bottomBorder, m.focusPanel).Render(processRender)
+	processRender = ProcsssBarBoarder(bottomElementHight(footerHeight), BottomWidth(m.fullWidth), bottomBorder, m.focusPanel).Render(processRender)
 
 	return processRender
 }
@@ -227,7 +227,7 @@ func MetaDataRender(m model) string {
 		sprintfLength = vauleLength
 	}
 
-	for i := m.fileMetaData.renderIndex; i < bottomElementHight(bottomBarHeight)+m.fileMetaData.renderIndex && i < len(m.fileMetaData.metaData); i++ {
+	for i := m.fileMetaData.renderIndex; i < bottomElementHight(footerHeight)+m.fileMetaData.renderIndex && i < len(m.fileMetaData.metaData); i++ {
 		if i != m.fileMetaData.renderIndex {
 			metaDataBar += "\n"
 		}
@@ -240,7 +240,7 @@ func MetaDataRender(m model) string {
 
 	}
 	bottomBorder := GenerateBottomBorder(fmt.Sprintf("%s/%s", strconv.Itoa(m.fileMetaData.renderIndex+1), strconv.Itoa(len(m.fileMetaData.metaData))), BottomWidth(m.fullWidth)-3)
-	metaDataBar = MetaDataBoarder(bottomElementHight(bottomBarHeight), BottomWidth(m.fullWidth), bottomBorder, m.focusPanel).Render(metaDataBar)
+	metaDataBar = MetaDataBoarder(bottomElementHight(footerHeight), BottomWidth(m.fullWidth), bottomBorder, m.focusPanel).Render(metaDataBar)
 
 	return metaDataBar
 }
@@ -252,8 +252,8 @@ func ClipboardRender(m model) string {
 	if len(m.copyItems.items) == 0 {
 		clipboardRender += "\n   No content in clipboard"
 	} else {
-		for i := 0; i < len(m.copyItems.items) && i < bottomElementHight(bottomBarHeight); i++ {
-			if i == bottomElementHight(bottomBarHeight)-1 {
+		for i := 0; i < len(m.copyItems.items) && i < bottomElementHight(footerHeight); i++ {
+			if i == bottomElementHight(footerHeight)-1 {
 				clipboardRender += strconv.Itoa(len(m.copyItems.items)-i+1) + " item left...."
 			} else {
 				fileInfo, err := os.Stat(m.copyItems.items[i])
@@ -276,7 +276,7 @@ func ClipboardRender(m model) string {
 	} else {
 		bottomWidth = BottomWidth(m.fullWidth)
 	}
-	clipboardRender = ClipboardBoarder(bottomElementHight(bottomBarHeight), bottomWidth, "━").Render(clipboardRender)
+	clipboardRender = ClipboardBoarder(bottomElementHight(footerHeight), bottomWidth, "━").Render(clipboardRender)
 
 	return clipboardRender
 }

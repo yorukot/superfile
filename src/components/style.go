@@ -10,7 +10,7 @@ import (
 var (
 	minimumHeight       = 35
 	minimumWidth        = 96
-	bottomBarHeight     = 14
+	footerHeight        = 14
 	modalWidth          = 60
 	modalHeight         = 7
 	terminalTooSmall    lipgloss.Style
@@ -24,10 +24,10 @@ var (
 )
 
 var (
-	sideBarWidth    = 20
-	sideBarTitle    lipgloss.Style
-	sideBarItem     lipgloss.Style
-	sideBarSelected lipgloss.Style
+	sidebarWidth    = 20
+	sidebarTitle    lipgloss.Style
+	sidebarItem     lipgloss.Style
+	sidebarSelected lipgloss.Style
 )
 
 var (
@@ -51,15 +51,15 @@ func LoadThemeConfig() {
 	borderStyle = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.Border)).Background(backgroundWindow)
 	cursorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.Cursor)).Bold(true).Background(backgroundWindow)
 
-	sideBarTitle = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.SideBarTitle)).Bold(true).Background(backgroundWindow)
-	sideBarItem = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.SideBarItem)).Background(backgroundWindow)
+	sidebarTitle = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.SidebarTitle)).Bold(true).Background(backgroundWindow)
+	sidebarItem = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.SidebarItem)).Background(backgroundWindow)
 
 	filePanelTopFolderIcon = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.FilePanelTopDirectoryIcon)).Bold(true)
 	filePanelTopPath = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.FilePanelTopPath)).Bold(true).Background(backgroundWindow)
 	filePanelItem = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.FilePanelItem)).Background(backgroundWindow)
 	filePanelItemSelected = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.FilePanelItemSelected)).Background(backgroundWindow)
 
-	sideBarSelected = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.SideBarSelected)).Background(backgroundWindow)
+	sidebarSelected = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.SidebarSelected)).Background(backgroundWindow)
 
 	modalCancel = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.ModalForeground)).Background(lipgloss.Color(theme.ModalCancel))
 	modalConfirm = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.ModalForeground)).Background(lipgloss.Color(theme.ModalConfirm))
@@ -80,18 +80,18 @@ func FocusedModalStyle(height int, width int) lipgloss.Style {
 }
 
 func SideBarBoardStyle(height int, focus focusPanelType) lipgloss.Style {
-	if focus == sideBarFocus {
+	if focus == sidebarFocus {
 		return lipgloss.NewStyle().
 			BorderStyle(lipgloss.ThickBorder()).
-			BorderForeground(lipgloss.Color(theme.SideBarFocus)).
+			BorderForeground(lipgloss.Color(theme.SidebarFocus)).
 			BorderBackground(backgroundWindow).
-			Width(sideBarWidth).
+			Width(sidebarWidth).
 			Height(height).Bold(true).Background(backgroundWindow)
 	} else {
 		return lipgloss.NewStyle().
 			BorderStyle(lipgloss.HiddenBorder()).
 			BorderBackground(backgroundWindow).
-			Width(sideBarWidth).
+			Width(sidebarWidth).
 			Height(height).Bold(true).Background(backgroundWindow)
 	}
 }
@@ -140,7 +140,7 @@ func ProcsssBarBoarder(height int, width int, borderBottom string, focusType foc
 	if focusType == processBarFocus {
 		return lipgloss.NewStyle().
 			Border(filePanelBottomBoard, true, true, true, true).
-			BorderForeground(lipgloss.Color(theme.BottomBarFocus)).
+			BorderForeground(lipgloss.Color(theme.FooterFocus)).
 			BorderBackground(backgroundWindow).
 			Width(width).
 			Height(height).Bold(true).Background(backgroundWindow)
@@ -168,7 +168,7 @@ func MetaDataBoarder(height int, width int, borderBottom string, focusType focus
 	if focusType == metaDataFocus {
 		return lipgloss.NewStyle().
 			Border(filePanelBottomBoard, true, true, true, true).
-			BorderForeground(lipgloss.Color(theme.BottomBarFocus)).
+			BorderForeground(lipgloss.Color(theme.FooterFocus)).
 			BorderBackground(backgroundWindow).
 			Width(width).
 			Height(height).Bold(true).Background(backgroundWindow)

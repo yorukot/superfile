@@ -21,6 +21,7 @@ import (
 	"github.com/lithammer/shortuuid"
 	"github.com/rkoesters/xdg/userdirs"
 	"github.com/shirou/gopsutil/disk"
+	"github.com/pelletier/go-toml/v2"
 )
 
 func getDirectories() []directory {
@@ -502,12 +503,12 @@ func loadConfigFile(dir string) (toggleDotFileBool bool, firstFilePanelDir strin
 		log.Fatalf("Error decoding config json( your config file may have misconfigured ): %v", err)
 	}
 
-	data, err = os.ReadFile(SuperFileMainDir + themeFolder + "/" + Config.Theme + ".json")
+	data, err = os.ReadFile(SuperFileMainDir + themeFolder + "/" + Config.Theme + ".toml")
 	if err != nil {
 		log.Fatalf("Theme file doesn't exist: %v", err)
 	}
 
-	err = json.Unmarshal(data, &theme)
+	err = toml.Unmarshal(data, &theme)
 	if err != nil {
 		log.Fatalf("Error while decoding theme json( Your theme file may have errors ): %v", err)
 	}

@@ -8,10 +8,10 @@
   "terminalTooSmallError": "#FF5555",
   "terminalSizeCurrect": "#50FA7B",
 
-  "sideBarTitle": "#BD93F9",
-  "sideBarItem": "#F8F8F2",
-  "sideBarSelected": "#FFB86C",
-  "sideBarFocus": "#44475A",
+  "sidebarTitle": "#BD93F9",
+  "sidebarItem": "#F8F8F2",
+  "sidebarSelected": "#FFB86C",
+  "sidebarFocus": "#44475A",
 
   "filePanelFocus": "#44475A",
   "filePanelTopFolderIcon": "#50FA7B",
@@ -19,7 +19,7 @@
   "filePanelItem": "#F8F8F2",
   "filePanelItemSelected": "#FFB86C",
 
-  "bottomBarFocus": "#44475A",
+  "footerFocus": "#44475A",
 
   "processBarSideLine": "#F8F8F2",
   "processBarGradient": ["#50FA7B", "#FF5555"],

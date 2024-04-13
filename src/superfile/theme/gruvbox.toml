@@ -1,0 +1,35 @@
+# Gruvbox
+# Theme create by: https://github.com/MHNightCat
+# Update by(sort by time):
+# 
+# Thanks for all contributor!!
+
+border = "#868686"
+cursor = "#8EC07C"
+background_window = "#282828"
+
+terminal_too_small_error = "#fb4934"
+terminal_size_currect = "#8ec07c"
+
+sidebar_title = "#CC241D"
+sidebar_item = "#EBDBB2"
+sidebar_selected = "#E8751A"
+sidebar_focus = "#D79921"
+
+file_panel_focus = "#FFF1C5"
+file_panel_top_folder_icon = "#8EC07C"
+file_panel_top_path = "#458588"
+file_panel_item = "#EBDBB2"
+file_panel_item_selected = "#D3869B"
+
+footer_focus = "#D79921"
+
+process_bar_gradient = ["#689d6a", "#fb4934"]
+in_operation = "#468588"
+done = "#8ec07c"
+fail = "#FF6969"
+cancel = "#838383"
+
+modal_foreground = "#EBDBB2"
+modal_cancel = "#6D6D6D"
+modal_confirm = "#FF4D00"
