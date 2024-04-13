@@ -11,7 +11,7 @@ import (
 )
 
 func SideBarRender(m model) string {
-	s := sidebarTitle.Render(" Super Files")
+	s := sidebarTitle.Render("     Super File")
 	s += "\n\n"
 
 	// Ugly shit workaround from hell code, made by @lescx
