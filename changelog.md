@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file. Dates are d
 - Update theme background [`#42`](https://github.com/MHNightCat/superfile/pull/42)
 - Update unzip function [`#55`](https://github.com/MHNightCat/superfile/pull/55)
 - Update zip function [`60c490a`](https://github.com/MHNightCat/superfile/commit/60c490aa06019fb1a5382b1e241c6b0a72ec51a4)
+- Update all config file from `json` to `toml` format file [`a018128`](https://github.com/MHNightCat/superfile/commit/a018128ffd431d76a06f379fffbe0aa20d3e78cc)
 
 #### Bug fix
 
