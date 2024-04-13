@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -225,7 +226,8 @@ func CheckForUpdates() {
 		if err := json.Unmarshal(body, &release); err != nil {
 			return
 		}
-		if release.TagName != currentVersion {
+		
+		if versionToNumber(release.TagName) > versionToNumber(currentVersion) {
 			fmt.Printf("A new version %s is available.\n", release.TagName)
 			fmt.Printf("Please update.\n┏\n\n        %s\n\n", latestVersionGithub)
 			fmt.Printf("                                                               ┛\n")
@@ -238,6 +240,14 @@ func CheckForUpdates() {
 			return
 		}
 	}
+}
+
+func versionToNumber(version string) int {
+	version = strings.ReplaceAll(version, "v", "")
+	version = strings.ReplaceAll(version, ".", "")
+
+	num, _ := strconv.Atoi(version)
+	return num
 }
 
 func ReadFromFile(filename string) (time.Time, error) {
