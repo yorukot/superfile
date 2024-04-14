@@ -1,0 +1,35 @@
+# Kaolin
+# Theme create by: https://github.com/AnshumanNeon
+# Update by(sort by time):
+# 
+# Thanks for all contributor!!
+
+border = "#74b09a"
+cursor = "#f5c791"
+main_background = "#17171a"
+
+terminal_too_small_error = "#c74a4d"
+terminal_size_currect = "#4eb8ca"
+
+sidebar_title = "#f5c791"
+sidebar_item = "#efefef"
+sidebar_selected = "#ba667d"
+sidebar_focus = "#57b2c2"
+
+file_panel_focus = "#74b09a"
+file_panel_top_folder_icon = "#f5c791"
+file_panel_top_path = "#d7936d"
+file_panel_item = "#efefef"
+file_panel_item_selected = "#4fa8a3"
+
+footer_focus = "#57b2c2"
+
+process_bar_gradient = ["#74b09a", "#c74a4d"]
+in_operation = "#4fa8a3"
+done = "#74b09a"
+fail = "#c74a4d"
+cancel = "#d7936d"
+
+modal_foreground = "#eedcc1"
+modal_cancel = "#c74a4d"
+modal_confirm = "#3e594a"
