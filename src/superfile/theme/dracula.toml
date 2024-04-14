@@ -1,0 +1,35 @@
+# Dracula
+# Theme create by: https://github.com/BeanieBarrow
+# Update by(sort by time):
+# 
+# Thanks for all contributor!!
+
+border = "#6272a4"
+cursor = "#ff79c6"
+main_background = "#282a36"
+
+terminal_too_small_error = "#ff5555"
+terminal_size_currect = "#50fa7b"
+
+sidebar_title = "#bd93f9"
+sidebar_item = "#f8f8f2"
+sidebar_selected = "#ffb86c"
+sidebar_focus = "#44475a"
+
+file_panel_focus = "#44475a"
+file_panel_top_folder_icon = "#50fa7b"
+file_panel_top_path = "#8be9fd"
+file_panel_item = "#f8f8f2"
+file_panel_item_selected = "#ffb86c"
+
+footer_focus = "#44475a"
+
+process_bar_gradient = ["#50fa7b", "#ff5555"]
+in_operation = "#8be9fd"
+done = "#50fa7b"
+fail = "#ff5555"
+cancel = "#6272a4"
+
+modal_foreground = "#f8f8f2"
+modal_cancel = "#6272a4"
+modal_confirm = "#ffb86c"

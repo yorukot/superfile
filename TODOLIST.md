@@ -2,8 +2,6 @@
 
 - \[ \] File panel search / filter 
 - \[ \] Add help bar down below bottom bar
-- \[ \] Extract files
-- \[ \] Compress files
 - \[ \] Can cancel the progress of the process bar
 - \[ \] Undo function
 - \[ \] Auto clear trash can
@@ -11,7 +9,6 @@
 
 #### Bug fix
 
-- \[ \] Update macos user directories in sidebar [#30](https://github.com/MHNightCat/superfile/issues/30)
 
 #### Will do but no plan for now
 
@@ -29,3 +26,7 @@
 - \[x\] Trash can error: No such file or directory [#24](https://github.com/MHNightCat/superfile/issues/24)
 - \[x\] External media error when moving cursor [#22](https://github.com/MHNightCat/superfile/issues/22)
 - \[x\] Add background color [#34](https://github.com/MHNightCat/superfile/issues/34)
+- \[x\] Extract files
+- \[x\] Compress files
+- \[x\] Update macos user directories in sidebar [#30](https://github.com/MHNightCat/superfile/issues/30)
+

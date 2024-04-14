@@ -1,0 +1,35 @@
+# Nord
+# Theme create by: https://github.com/rames-eltany
+# Update by(sort by time):
+# 
+# Thanks for all contributor!!
+
+border = "#4c566a"
+cursor = "#88c0d0"
+main_background = "#2e3440"
+
+terminal_too_small_error = "#bf616a"
+terminal_size_currect = "#88c0d0"
+
+sidebar_title = "#81a1c1"
+sidebar_item = "#e5e9f0"
+sidebar_selected = "#88c0d0"
+sidebar_focus = "#b48ead"
+
+file_panel_focus = "#d8dee9"
+file_panel_top_folder_icon = "#88c0d0"
+file_panel_top_path = "#88c0d0"
+file_panel_item = "#e5e9f0"
+file_panel_item_selected = "#bf616a"
+
+footer_focus = "#b48ead"
+
+process_bar_gradient = ["#81a1c1", "#bf616a"]
+in_operation = "#8fbcbb"
+done = "#88c0d0"
+fail = "#bf616a"
+cancel = "#d8dee9"
+
+modal_foreground = "#e5e9f0"
+modal_cancel = "#4c566a"
+modal_confirm = "#bf616a"
