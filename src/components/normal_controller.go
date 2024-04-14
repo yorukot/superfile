@@ -257,9 +257,11 @@ func panelItemRename(m model) model {
 		return m
 	}
 	ti := textinput.New()
+	ti.Cursor.Style = cursorStyle
 	ti.TextStyle = textStyle
 	ti.Cursor.Blink = true
 	ti.Placeholder = "New name"
+	ti.PlaceholderStyle = textStyle
 	ti.SetValue(panel.element[panel.cursor].name)
 	ti.Focus()
 	ti.CharLimit = 156
@@ -269,6 +271,20 @@ func panelItemRename(m model) model {
 	panel.renaming = true
 	m.firstTextInput = true
 	panel.rename = ti
+	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+	return m
+}
+
+func searchBarFocus(m model) model {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	if panel.searchBar.Focused() {
+		panel.searchBar.Blur()
+	} else {
+		panel.searchBar.Focus()
+	}
+
+	// config search bar width
+	panel.searchBar.Width = m.fileModel.width - 4
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m
 }

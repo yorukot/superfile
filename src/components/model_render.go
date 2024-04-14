@@ -56,9 +56,21 @@ func FilePanelRender(m model) string {
 	// file panel
 	f := make([]string, 4)
 	for i, filePanel := range m.fileModel.filePanels {
-		fileElenent := returnFolderElement(filePanel.location, m.toggleDotFile)
+		var fileElenent []element
+		if filePanel.searchBar.Value() != "" {
+			fileElenent = returnFolderElementBySearchString(filePanel.location, m.toggleDotFile, filePanel.searchBar.Value())
+		}else {
+			fileElenent = returnFolderElement(filePanel.location, m.toggleDotFile)
+		}
 		filePanel.element = fileElenent
 		m.fileModel.filePanels[i].element = fileElenent
+
+		// check if cursor or render out of range
+		if filePanel.cursor > len(filePanel.element) - 1 {
+			filePanel.cursor = 0
+			filePanel.render = 0
+		}
+		m.fileModel.filePanels[i] = filePanel
 
 		f[i] += filePanelTopFolderIcon.Render("   ") + filePanelTopPath.Render(TruncateTextBeginning(filePanel.location, m.fileModel.width-4)) + "\n"
 		filePanelWidth := 0
@@ -71,21 +83,26 @@ func FilePanelRender(m model) string {
 			bottomBorderWidth = m.fileModel.width + 6
 		}
 		f[i] += FilePanelDividerStyle(filePanel.focusType).Render(strings.Repeat("━", filePanelWidth)) + "\n"
+		f[i] += " " + filePanel.searchBar.View() + "\n"
 		if len(filePanel.element) == 0 {
 			f[i] += "   No such file or directory"
 			bottomBorder := GenerateBottomBorder("0/0", m.fileModel.width+5)
 			f[i] = FilePanelBoardStyle(m.mainPanelHeight, m.fileModel.width, filePanel.focusType, bottomBorder).Render(f[i])
 		} else {
 			for h := filePanel.render; h < filePanel.render+panelElementHeight(m.mainPanelHeight) && h < len(filePanel.element); h++ {
+				endl := "\n"
+				if h == filePanel.render+panelElementHeight(m.mainPanelHeight) - 1 || h == len(filePanel.element) -1 {
+					endl = ""
+				}
 				cursor := " "
 				if h == filePanel.cursor {
 					cursor = ""
 				}
 				isItemSelected := arrayContains(filePanel.selected, filePanel.element[h].location)
 				if filePanel.renaming && h == filePanel.cursor {
-					f[i] += filePanel.rename.View() + "\n"
+					f[i] += filePanel.rename.View() + endl
 				} else {
-					f[i] += cursorStyle.Render(cursor+" ") + PrettierName(filePanel.element[h].name, m.fileModel.width-5, filePanel.element[h].directory, isItemSelected) + "\n"
+					f[i] += cursorStyle.Render(cursor+" ") + PrettierName(filePanel.element[h].name, m.fileModel.width-5, filePanel.element[h].directory, isItemSelected) + endl
 				}
 			}
 			cursorPosition := strconv.Itoa(filePanel.cursor + 1)

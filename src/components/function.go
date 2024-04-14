@@ -18,10 +18,12 @@ import (
 
 	"github.com/barasher/go-exiftool"
 	"github.com/charmbracelet/bubbles/progress"
+	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/lithammer/shortuuid"
+	"github.com/masatana/go-textdistance"
+	"github.com/pelletier/go-toml/v2"
 	"github.com/rkoesters/xdg/userdirs"
 	"github.com/shirou/gopsutil/disk"
-	"github.com/pelletier/go-toml/v2"
 )
 
 func getDirectories() []directory {
@@ -162,6 +164,44 @@ func returnFolderElement(location string, displayDotFile bool) (folderElement []
 
 	// Concatenate folders and files
 	folderElement = append(folders, files...)
+
+	return folderElement
+}
+
+func returnFolderElementBySearchString(location string, displayDotFile bool, searchString string) (folderElement []element) {
+
+	items, err := os.ReadDir(location)
+	if err != nil {
+		outPutLog("Return folder element function error", err)
+	}
+
+	for _, item := range items {
+		fileInfo, _ := item.Info()
+		if !displayDotFile && strings.HasPrefix(fileInfo.Name(), ".") {
+			continue
+		}
+		if fileInfo == nil {
+			continue
+		}
+		newElement := element{
+			name:      item.Name(),
+			directory: item.IsDir(),
+			matchRate: textdistance.JaroWinklerDistance(item.Name(), searchString),
+		}
+		if location == "/" {
+			newElement.location = location + item.Name()
+		} else {
+			newElement.location = location + "/" + item.Name()
+		}
+
+		folderElement = append(folderElement, newElement)
+
+	}
+
+	// Sort folders and files by match rate
+	sort.Slice(folderElement, func(i, j int) bool {
+		return folderElement[i].matchRate > folderElement[j].matchRate
+	})
 
 	return folderElement
 }
@@ -776,4 +816,18 @@ func zipSource(source, target string) error {
 	}
 
 	return nil
+}
+
+func generateSearchBar() textinput.Model {
+	ti := textinput.New()
+	ti.Cursor.Style = cursorStyle
+	ti.TextStyle = textStyle
+	ti.Prompt = filePanelTopFolderIcon.Render(" ")
+	ti.Cursor.Blink = true
+	ti.PlaceholderStyle = textStyle
+	ti.Placeholder = "(" + hotkeys.SearchBar[0] + ") Type something"
+	ti.Blur()
+	ti.CharLimit = 156
+	ti.Cursor.Style = textStyle
+	return ti
 }
