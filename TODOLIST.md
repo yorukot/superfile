@@ -1,6 +1,5 @@
 #### New feature
 
-- \[ \] File panel search / filter 
 - \[ \] Add help bar down below bottom bar
 - \[ \] Can cancel the progress of the process bar
 - \[ \] Undo function
@@ -12,7 +11,7 @@
 
 #### Will do but no plan for now
 
-- \[ \] Changing theme live [[#34](https://github.com/MHNightCat/superfile/issues/34)] 
+- \[x\] Changing theme live [[#34](https://github.com/MHNightCat/superfile/issues/34)] 
 - \[ \] AES encryption and decryption
 
 #### Done
@@ -29,4 +28,4 @@
 - \[x\] Extract files
 - \[x\] Compress files
 - \[x\] Update macos user directories in sidebar [#30](https://github.com/MHNightCat/superfile/issues/30)
-
+- \[x\] File panel search / filter 
