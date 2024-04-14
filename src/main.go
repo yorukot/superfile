@@ -194,8 +194,9 @@ func downloadAndInstallTheme(dir, zipName, zipUrl, zipFolder string) error {
 		err = Unzip(filepath.Join(SuperFileMainDir, zipName), dir)
 		if err != nil {
 			return err
+		} else {
+			os.Remove(filepath.Join(SuperFileMainDir, zipName))
 		}
-		os.Remove(filepath.Join(SuperFileMainDir, zipName))
 	}
 	return nil
 }
