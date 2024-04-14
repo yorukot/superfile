@@ -65,3 +65,18 @@ func confirmRename(m model) model {
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m
 }
+
+func cancelSearch(m model) model {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel.searchBar.Blur()
+	panel.searchBar.SetValue("")
+	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+	return m
+}
+
+func confirmSearch(m model) model {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel.searchBar.Blur()
+	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+	return m
+}

@@ -20,7 +20,7 @@ const (
 	toggleDotFile    string = "/toggleDotFile"
 	logFile          string = "/superfile.log"
 	configFile       string = "/config.toml"
-	hotkeysFile       string = "/hotkeys.toml"
+	hotkeysFile      string = "/hotkeys.toml"
 	themeZipName     string = "/theme.zip"
 )
 
@@ -60,13 +60,14 @@ func InitialModel(dir string) model {
 		},
 		fileModel: fileModel{
 			filePanels: []filePanel{
-				{
+				{	
 					render:          0,
 					cursor:          0,
 					location:        firstFilePanelDir,
 					panelMode:       browserMode,
 					focusType:       focus,
 					directoryRecord: make(map[string]directoryRecord),
+					searchBar: generateSearchBar(),
 				},
 			},
 			width: 10,
@@ -93,6 +94,7 @@ func (m model) Init() tea.Cmd {
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	switch msg := msg.(type) {
 	// check is the message by thread
 	case channelMessage:
@@ -148,6 +150,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m = cancelReanem(m)
 			case hotkeys.Confirm[0], hotkeys.Confirm[1]:
 				m = confirmRename(m)
+			}
+			// if search bar focus
+		} else if panel.searchBar.Focused() {
+			switch msg.String() {
+			case hotkeys.Cancel[0], hotkeys.Cancel[1]:
+				m = cancelSearch(m)
+			case hotkeys.Confirm[0], hotkeys.Confirm[1]:
+				m = confirmSearch(m)
 			}
 		} else {
 			switch msg.String() {
@@ -279,6 +289,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						m = cutSingleItem(m)
 					case hotkeys.FilePanelItemRename[0], hotkeys.FilePanelItemRename[1]:
 						m = panelItemRename(m)
+					case hotkeys.SearchBar[0], hotkeys.SearchBar[1]:
+						m = searchBarFocus(m)
 					}
 
 				}
@@ -289,7 +301,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.firstTextInput = false
 	} else if m.fileModel.renaming {
 		m.fileModel.filePanels[m.filePanelFocusIndex].rename, cmd = m.fileModel.filePanels[m.filePanelFocusIndex].rename.Update(msg)
-	} else {
+	} else if panel.searchBar.Focused(){
+		m.fileModel.filePanels[m.filePanelFocusIndex].searchBar, cmd = m.fileModel.filePanels[m.filePanelFocusIndex].searchBar.Update(msg)
+	} else if m.typingModal.open {
 		m.typingModal.textInput, cmd = m.typingModal.textInput.Update(msg)
 	}
 

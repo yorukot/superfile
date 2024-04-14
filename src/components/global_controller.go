@@ -207,6 +207,9 @@ func closeFilePanel(m model) model {
 		m.fileModel.width = (m.fullWidth - sidebarWidth - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
 		m.fileModel.filePanels[m.filePanelFocusIndex].focusType = returnFocusType(m.focusPanel)
 	}
+	for i := range m.fileModel.filePanels {
+		m.fileModel.filePanels[i].searchBar.Width = m.fileModel.width - 4
+	}
 	return m
 }
 func createNewFilePanel(m model) model {
@@ -216,12 +219,16 @@ func createNewFilePanel(m model) model {
 			panelMode:       browserMode,
 			focusType:       secondFocus,
 			directoryRecord: make(map[string]directoryRecord),
+			searchBar: generateSearchBar(),
 		})
 
 		m.fileModel.filePanels[m.filePanelFocusIndex].focusType = noneFocus
 		m.fileModel.filePanels[m.filePanelFocusIndex+1].focusType = returnFocusType(m.focusPanel)
 		m.fileModel.width = (m.fullWidth - sidebarWidth - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
 		m.filePanelFocusIndex++
+	}
+	for i := range m.fileModel.filePanels {
+		m.fileModel.filePanels[i].searchBar.Width = m.fileModel.width - 4
 	}
 	return m
 }
@@ -357,9 +364,11 @@ func pasteItem(m model) model {
 func panelCreateNewFile(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	ti := textinput.New()
+	ti.Cursor.Style = cursorStyle
 	ti.TextStyle = textStyle
 	ti.Cursor.Blink = true
 	ti.Placeholder = "File name"
+	ti.PlaceholderStyle = textStyle
 	ti.Focus()
 	ti.CharLimit = 156
 	ti.Width = modalWidth - 10
@@ -378,9 +387,11 @@ func panelCreateNewFile(m model) model {
 func panelCreateNewFolder(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	ti := textinput.New()
+	ti.Cursor.Style = cursorStyle
 	ti.TextStyle = textStyle
 	ti.Cursor.Blink = true
 	ti.Placeholder = "Folder name"
+	ti.PlaceholderStyle = textStyle
 	ti.Focus()
 	ti.CharLimit = 156
 	ti.Width = modalWidth - 10
@@ -448,6 +459,7 @@ func toggleDotFileController(m model) model {
 	if err != nil {
 		outPutLog("Pinned folder function updatedData superfile data error", err)
 	}
+
 	return m
 }
 

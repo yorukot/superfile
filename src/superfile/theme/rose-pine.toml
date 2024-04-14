@@ -17,7 +17,7 @@ sidebar_selected = "#f6c177"
 sidebar_focus = "#c4a7e7"
 
 file_panel_focus = "#6e6e86"
-file_panel_top_folder_icon = "#9ccfd8"
+file_panel_top_directory_icon = "#9ccfd8"
 file_panel_top_path = "#ebbcba"
 file_panel_item = "#e0def4"
 file_panel_item_selected = "#c4a7e7"
