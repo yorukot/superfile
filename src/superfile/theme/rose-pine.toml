@@ -1,0 +1,35 @@
+# Rose Pine
+# Theme create by: https://github.com/tanbinislam43
+# Update by(sort by time):
+# 
+# Thanks for all contributor!!
+
+border = "#403d52"
+cursor = "#9ccfd8"
+main_background = "#191724"
+
+terminal_too_small_error = "#eb6f92"
+terminal_size_currect = "#8ec07c"
+
+sidebar_title = "#6e6e86"
+sidebar_item = "#908caa"
+sidebar_selected = "#f6c177"
+sidebar_focus = "#c4a7e7"
+
+file_panel_focus = "#6e6e86"
+file_panel_top_folder_icon = "#9ccfd8"
+file_panel_top_path = "#ebbcba"
+file_panel_item = "#e0def4"
+file_panel_item_selected = "#c4a7e7"
+
+footer_focus = "#f6c177"
+
+process_bar_gradient = ["#31784f", "#eb6f92"]
+in_operation = "#31784f"
+done = "#8ec07c"
+fail = "#ff6969"
+cancel = "#838383"
+
+modal_foreground = "#e0def4"
+modal_cancel = "#524f67"
+modal_confirm = "#eb6f92"
