@@ -20,6 +20,7 @@ import (
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/lithammer/shortuuid"
+	"github.com/masatana/go-textdistance"
 	"github.com/pelletier/go-toml/v2"
 	"github.com/rkoesters/xdg/userdirs"
 	"github.com/shirou/gopsutil/disk"
@@ -185,7 +186,7 @@ func returnFolderElementBySearchString(location string, displayDotFile bool, sea
 		newElement := element{
 			name:      item.Name(),
 			directory: item.IsDir(),
-			matchRate: matchRatio(item.Name(), searchString),
+			matchRate: textdistance.JaroWinklerDistance(item.Name(), searchString),
 		}
 		if location == "/" {
 			newElement.location = location + item.Name()
@@ -196,7 +197,7 @@ func returnFolderElementBySearchString(location string, displayDotFile bool, sea
 		folderElement = append(folderElement, newElement)
 
 	}
-	
+
 	// Sort folders and files by match rate
 	sort.Slice(folderElement, func(i, j int) bool {
 		return folderElement[i].matchRate > folderElement[j].matchRate
@@ -829,15 +830,4 @@ func generateSearchBar() textinput.Model {
 	ti.CharLimit = 156
 	ti.Cursor.Style = textStyle
 	return ti
-}
-
-func matchRatio(filename string, searchString string) float64 {
-	matchCount := 0
-	filename = strings.ToLower(filename)
-	for _, char := range filename {
-		if strings.ContainsRune(searchString, char) {
-			matchCount++
-		}
-	}
-	return float64(matchCount) / float64(len(filename))
 }

@@ -9,11 +9,14 @@ require (
 	github.com/charmbracelet/bubbletea v0.25.0
 	github.com/charmbracelet/lipgloss v0.9.1
 	github.com/lithammer/shortuuid v2.0.3+incompatible
+	github.com/masatana/go-textdistance v0.0.0-20191005053614-738b0edac985
 	github.com/muesli/termenv v0.15.2
 	github.com/rkoesters/xdg v0.0.1
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/urfave/cli/v2 v2.27.1
 )
+
+require github.com/deckarep/golang-set v1.8.0 // indirect
 
 require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect

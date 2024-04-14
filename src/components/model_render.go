@@ -57,7 +57,6 @@ func FilePanelRender(m model) string {
 	f := make([]string, 4)
 	for i, filePanel := range m.fileModel.filePanels {
 		var fileElenent []element
-		outPutLog(filePanel.searchBar.Value())
 		if filePanel.searchBar.Value() != "" {
 			fileElenent = returnFolderElementBySearchString(filePanel.location, m.toggleDotFile, filePanel.searchBar.Value())
 		}else {
