@@ -828,6 +828,5 @@ func generateSearchBar() textinput.Model {
 	ti.Placeholder = "(" + hotkeys.SearchBar[0] + ") Type something"
 	ti.Blur()
 	ti.CharLimit = 156
-	ti.Cursor.Style = textStyle
 	return ti
 }

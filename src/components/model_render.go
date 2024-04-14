@@ -57,11 +57,13 @@ func FilePanelRender(m model) string {
 	f := make([]string, 4)
 	for i, filePanel := range m.fileModel.filePanels {
 		var fileElenent []element
+		// check is user are using search bar
 		if filePanel.searchBar.Value() != "" {
 			fileElenent = returnFolderElementBySearchString(filePanel.location, m.toggleDotFile, filePanel.searchBar.Value())
 		}else {
 			fileElenent = returnFolderElement(filePanel.location, m.toggleDotFile)
 		}
+
 		filePanel.element = fileElenent
 		m.fileModel.filePanels[i].element = fileElenent
 
@@ -95,7 +97,8 @@ func FilePanelRender(m model) string {
 					endl = ""
 				}
 				cursor := " "
-				if h == filePanel.cursor {
+				// Check if the cursor needs to be displayed, if the user is using the search bar, the cursor is not displayed
+				if h == filePanel.cursor && !filePanel.searchBar.Focused() {
 					cursor = ""
 				}
 				isItemSelected := arrayContains(filePanel.selected, filePanel.element[h].location)
