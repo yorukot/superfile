@@ -193,9 +193,9 @@ func returnFolderElementBySearchString(location string, displayDotFile bool, sea
 		} else {
 			newElement.location = location + "/" + item.Name()
 		}
-
-		folderElement = append(folderElement, newElement)
-
+		if newElement.matchRate > 0 {
+			folderElement = append(folderElement, newElement)
+		}
 	}
 
 	// Sort folders and files by match rate
