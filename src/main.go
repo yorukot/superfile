@@ -49,10 +49,6 @@ const (
 	trashDirectoryInfo  string = "/Trash/info"
 )
 
-type GitHubRelease struct {
-	TagName string `json:"tag_name"`
-}
-
 func main() {
 	output := termenv.NewOutput(os.Stdout)
 	terminalBackgroundColor := output.BackgroundColor()
@@ -223,11 +219,15 @@ func CheckForUpdates() {
 			return
 		}
 
+		type GitHubRelease struct {
+			TagName string `json:"tag_name"`
+		}
+
 		var release GitHubRelease
 		if err := json.Unmarshal(body, &release); err != nil {
 			return
 		}
-		
+
 		if versionToNumber(release.TagName) > versionToNumber(currentVersion) {
 			fmt.Printf("A new version %s is available.\n", release.TagName)
 			fmt.Printf("Please update.\n┏\n\n        %s\n\n", latestVersionGithub)
@@ -391,4 +391,10 @@ const configTomlString string = `# change your theme
 theme = "gruvbox"
 
 # useless for now
-bottom_panel_list = ["processes", "metadata", "clipboard"]`
+footer_panel_list = ["processes", "metadata", "clipboard"]
+
+
+# ==========PLUGINS========== #
+
+# Show more detailed metadata, please install exiftool before enabling this plugin!
+metadata = false`

@@ -449,18 +449,27 @@ func returnMetaData(m model) model {
 		return m
 	}
 
-	fileInfos := et.ExtractMetadata(filePath)
-	for _, fileInfo := range fileInfos {
-		if fileInfo.Err != nil {
-			outPutLog("Return meta data function error", fileInfo, fileInfo.Err)
-			continue
-		}
+	if Config.Metadata {
+		fileInfos := et.ExtractMetadata(filePath)
 
-		for k, v := range fileInfo.Fields {
-			temp := [2]string{k, fmt.Sprintf("%v", v)}
-			m.fileMetaData.metaData = append(m.fileMetaData.metaData, temp)
+		for _, fileInfo := range fileInfos {
+			if fileInfo.Err != nil {
+				outPutLog("Return meta data function error", fileInfo, fileInfo.Err)
+				continue
+			}
+
+			for k, v := range fileInfo.Fields {
+				temp := [2]string{k, fmt.Sprintf("%v", v)}
+				m.fileMetaData.metaData = append(m.fileMetaData.metaData, temp)
+			}
 		}
+	} else {
+		fileName := [2]string{"FileName", fileInfo.Name()}
+		fileSize := [2]string{"FileSize", formatFileSize(fileInfo.Size())}
+		fileModifyData := [2]string{"FileModifyDate", fileInfo.ModTime().String()}
+		m.fileMetaData.metaData = append(m.fileMetaData.metaData, fileName, fileSize, fileModifyData)
 	}
+
 	channel <- channelMessage{
 		messageId:    id,
 		loadMetadata: true,

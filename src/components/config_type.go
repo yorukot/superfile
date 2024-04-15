@@ -34,6 +34,8 @@ type ThemeType struct {
 // Configuration settings
 type ConfigType struct {
 	Theme string `toml:"theme"`
+	FooterPanelList []string `toml:"footer_panel_list"`
+	Metadata bool `toml:"metadata"`
 }
 
 type HotkeysType struct {
