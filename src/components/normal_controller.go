@@ -2,17 +2,15 @@ package components
 
 import (
 	"os"
+	"os/exec"
 	"path"
-	"runtime"
 	"time"
 
-	"os/exec"
-
+	"github.com/Bios-Marcel/wastebasket"
 	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/lithammer/shortuuid"
-	"github.com/rkoesters/xdg/trash"
 )
 
 func enterPanel(m model) model {
@@ -127,7 +125,7 @@ func deleteSingleItem(m model) model {
 		return m
 	}
 
-	if isExternalDiskPath(panel.location) || runtime.GOOS == "darwin" {
+	if isExternalDiskPath(panel.location) {
 		channel <- channelMessage{
 			messageId:       id,
 			returnWarnModal: true,
@@ -158,7 +156,7 @@ func deleteSingleItem(m model) model {
 		processNewState: newProcess,
 	}
 
-	err := trash.Trash(panel.element[panel.cursor].location)
+	err := wastebasket.Trash(panel.element[panel.cursor].location)
 	if err != nil {
 		outPutLog("Delete single item function move file to trash can error", err)
 	}

@@ -16,7 +16,10 @@ require (
 	github.com/urfave/cli/v2 v2.27.1
 )
 
-require github.com/deckarep/golang-set v1.8.0 // indirect
+require (
+	github.com/Bios-Marcel/wastebasket v0.0.3 // indirect
+	github.com/deckarep/golang-set v1.8.0 // indirect
+)
 
 require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect

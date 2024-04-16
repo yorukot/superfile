@@ -3,12 +3,11 @@ package components
 import (
 	"os"
 	"path/filepath"
-	"runtime"
 
+	"github.com/Bios-Marcel/wastebasket"
 	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/lithammer/shortuuid"
-	"github.com/rkoesters/xdg/trash"
 )
 
 func singleItemSelect(m model) model {
@@ -144,7 +143,7 @@ func deleteMultipleItem(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	if len(panel.selected) != 0 {
 		id := shortuuid.New()
-		if isExternalDiskPath(panel.location) || runtime.GOOS == "darwin" {
+		if isExternalDiskPath(panel.location) {
 			channel <- channelMessage{
 				messageId:       id,
 				returnWarnModal: true,
@@ -187,7 +186,7 @@ func deleteMultipleItem(m model) model {
 					processNewState: p,
 				}
 			}
-			err := trash.Trash(filePath)
+			err := wastebasket.Trash(filePath)
 			if err != nil {
 				outPutLog("Delete single item function move file to trash can error", err)
 			}

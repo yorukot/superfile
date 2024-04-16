@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -106,15 +107,24 @@ func InitConfigFile() {
 		ThemeFolder:  themeFolder,
 		ThemeZipName: themeZipName,
 	}
+
 	// Create directories
 	if err := createDirectories(
 		config.MainDir, config.DataDir,
 		config.CacheDir,
-		basedir.DataHome+trashDirectory,
-		basedir.DataHome+trashDirectoryFiles,
-		basedir.DataHome+trashDirectoryInfo,
 	); err != nil {
 		log.Fatalln("Error creating directories:", err)
+	}
+
+	// Create trash directories
+	if runtime.GOOS != "darwin" {
+		if err := createDirectories(
+			basedir.DataHome+trashDirectory,
+			basedir.DataHome+trashDirectoryFiles,
+			basedir.DataHome+trashDirectoryInfo,
+		); err != nil {
+			log.Fatalln("Error creating directories:", err)
+		}
 	}
 
 	// Create files

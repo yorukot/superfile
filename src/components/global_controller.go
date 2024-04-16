@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Bios-Marcel/wastebasket"
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/lithammer/shortuuid"
-	"github.com/rkoesters/xdg/trash"
 )
 
 /* CURSOR CONTROLLER START */
@@ -347,7 +347,7 @@ func pasteItem(m model) model {
 	if m.copyItems.cut {
 		for _, item := range m.copyItems.items {
 
-			err := trash.Trash(item)
+			err := wastebasket.Trash(item)
 			if err != nil {
 				outPutLog("Paste item function move file to trash can error", err)
 			}
