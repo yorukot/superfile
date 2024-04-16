@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"runtime"
 	"time"
 
 	"github.com/Bios-Marcel/wastebasket"
@@ -31,10 +32,18 @@ func enterPanel(m model) model {
 			panel.render = 0
 		}
 	} else if len(panel.element) > 0 && !panel.element[panel.cursor].directory {
-		cmd := exec.Command("xdg-open", panel.element[panel.cursor].location)
-		_, err := cmd.Output()
-		if err != nil {
-			outPutLog("err when open file with xdg-open:", err)
+		if runtime.GOOS == "darwin" {
+			cmd := exec.Command("open", panel.element[panel.cursor].location)
+			_, err := cmd.Output()
+			if err != nil {
+				outPutLog("err when open file with open command:", err)
+			}
+		} else {
+			cmd := exec.Command("xdg-open", panel.element[panel.cursor].location)
+			_, err := cmd.Output()
+			if err != nil {
+				outPutLog("err when open file with xdg-open:", err)
+			}
 		}
 	}
 
