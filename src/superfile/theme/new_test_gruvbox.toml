@@ -40,6 +40,9 @@ error = "#FF6969"
 hint = "#468588"
 cancel = "#838383"
 warn = "#FF0000"
+
+# Gradient Color
+
 gradient_color = ["#689d6a", "#fb4934"]
 
 # File Panel Special Items

@@ -1,22 +1,116 @@
 package components
 
+import "github.com/charmbracelet/lipgloss"
+
+var (
+	filePanelBorderColor lipgloss.Color
+	sidebarBorderColor lipgloss.Color
+	footerBorderColor lipgloss.Color
+	modalBorderColor lipgloss.Color
+
+	filePanelBorderActiveColor lipgloss.Color
+	sidebarBorderActiveColor lipgloss.Color
+	footerBorderActiveColor lipgloss.Color
+	modalBorderActiveColor lipgloss.Color
+
+	fullScreenBGColor lipgloss.Color
+	filePanelBGColor lipgloss.Color
+	sidebarBGColor lipgloss.Color
+	footerBGColor lipgloss.Color
+	modalBGColor lipgloss.Color
+
+	fullScreenFGColor lipgloss.Color
+	filePanelFGColor lipgloss.Color
+	sidebarFGColor lipgloss.Color
+	footerFGColor lipgloss.Color
+	modalFGColor lipgloss.Color
+
+	cursorColor lipgloss.Color
+	correctColor lipgloss.Color
+	errorColor lipgloss.Color
+	hintColor lipgloss.Color
+	cancelColor lipgloss.Color
+	warnColor lipgloss.Color
+	
+	filePanelTopDirectoryIconColor lipgloss.Color
+	filePanelTopPathColor lipgloss.Color
+	filePanelItemSelectedFGColor lipgloss.Color
+	filePanelItemSelectedBGColor lipgloss.Color
+
+	sidebarTitleColor lipgloss.Color
+	sidebarItemSelectedFGColor lipgloss.Color
+	sidebarItemSelectedBGColor lipgloss.Color
+	
+	ModalCancelFGColor lipgloss.Color
+	ModalCancelBGColor lipgloss.Color
+	ModalConfirmFGColor lipgloss.Color
+	ModalConfirmBGColor lipgloss.Color
+)
 // Theme configuration
 type ThemeType struct {
+	// Border
+    FilePanelBorder       string `toml:"file_panel_border"`
+    SidebarBorder         string `toml:"sidebar_border"`
+    FooterBorder          string `toml:"footer_border"`
+    ModalBorder           string `toml:"modal_border"`
+
+    // Border Active
+    FilePanelBorderActive string `toml:"file_panel_border_active"`
+    SidebarBorderActive   string `toml:"sidebar_border_active"`
+    FooterBorderActive    string `toml:"footer_border_active"`
+    ModalBorderActive     string `toml:"modal_border_active"`
+
+    // Background (bg)
+    FullScreenBG  string `toml:"full_screen_bg"`
+    FilePanelBG   string `toml:"file_panel_bg"`
+    SidebarBG     string `toml:"sidebar_bg"`
+    FooterBG      string `toml:"footer_bg"`
+    ModalBG       string `toml:"modal_bg"`
+
+    // Foreground (fg)
+    FullScreenFG  string `toml:"full_screen_fg"`
+    FilePanelFG   string `toml:"file_panel_fg"`
+    SidebarFG     string `toml:"sidebar_fg"`
+    FooterFG      string `toml:"footer_fg"`
+    ModalFG       string `toml:"modal_fg"`
+
+    // Special Color
+    Cursor        string `toml:"cursor"`
+    Correct       string `toml:"correct"`
+    Error         string `toml:"error"`
+    Hint          string `toml:"hint"`
+    Cancel        string `toml:"cancel"`
+    Warn          string `toml:"warn"`
+    GradientColor []string `toml:"gradient_color"`
+
+    // File Panel Special Items
+    FilePanelTopDirectoryIcon string `toml:"file_panel_top_directory_icon"`
+    FilePanelTopPath          string `toml:"file_panel_top_path"`
+    FilePanelItemSelectedFG   string `toml:"file_panel_item_selected_fg"`
+    FilePanelItemSelectedBG   string `toml:"file_panel_item_selected_bg"`
+
+    // Sidebar Special Items
+    SidebarTitle             string `toml:"sidebar_title"`
+    SidebarItemSelectedFG    string `toml:"sidebar_item_selected_fg"`
+    SidebarItemSelectedBG    string `toml:"sidebar_item_selected_bg"`
+
+    // Modal Special Items
+    ModalCancelFG            string `toml:"modal_cancel_fg"`
+    ModalCancelBG            string `toml:"modal_cancel_bg"`
+    ModalConfirmFG           string `toml:"modal_confirm_fg"`
+    ModalConfirmBG           string `toml:"modal_confirm_bg"`
+
 	Border         string `toml:"border"`
-	Cursor         string `toml:"cursor"`
 	MainBackground string `toml:"main_background"`
 
 	TerminalTooSmallError string `toml:"terminal_too_small_error"`
 	TerminalSizeCorrect   string `toml:"terminal_size_correct"`
 
-	SidebarTitle    string `toml:"sidebar_title"`
 	SidebarItem     string `toml:"sidebar_item"`
 	SidebarSelected string `toml:"sidebar_selected"`
 	SidebarFocus    string `toml:"sidebar_focus"`
 
 	FilePanelFocus            string `toml:"file_panel_focus"`
-	FilePanelTopDirectoryIcon string `toml:"file_panel_top_directory_icon"`
-	FilePanelTopPath          string `toml:"file_panel_top_path"`
 	FilePanelItem             string `toml:"file_panel_item"`
 
 	FilePanelItemSelected string    `toml:"file_panel_item_selected"`
@@ -25,7 +119,6 @@ type ThemeType struct {
 	InOperation           string    `toml:"in_operation"`
 	Done                  string    `toml:"done"`
 	Fail                  string    `toml:"fail"`
-	Cancel                string    `toml:"cancel"`
 	ModalForeground       string    `toml:"modal_foreground"`
 	ModalCancel           string    `toml:"modal_cancel"`
 	ModalConfirm          string    `toml:"modal_confirm"`

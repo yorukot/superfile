@@ -14,7 +14,7 @@ var (
 	modalWidth          = 60
 	modalHeight         = 7
 	terminalTooSmall    lipgloss.Style
-	terminalMinimumSize lipgloss.Style
+	terminalCorrectSize lipgloss.Style
 
 	borderStyle      lipgloss.Style
 	cursorStyle      lipgloss.Style
@@ -43,10 +43,54 @@ var (
 )
 
 func LoadThemeConfig() {
+	filePanelBorderColor = lipgloss.Color(theme.FilePanelBorder)
+	sidebarBorderColor = lipgloss.Color(theme.SidebarBorder)
+	footerBorderColor = lipgloss.Color(theme.FooterBorder)
+	modalBorderColor = lipgloss.Color(theme.ModalBorder)
+
+	filePanelBorderActiveColor = lipgloss.Color(theme.FilePanelBorderActive)
+	sidebarBorderActiveColor = lipgloss.Color(theme.SidebarBorderActive)
+	footerBorderActiveColor = lipgloss.Color(theme.FooterBorderActive)
+	modalBorderActiveColor = lipgloss.Color(theme.ModalBorderActive)
+
+	fullScreenBGColor = lipgloss.Color(theme.FullScreenBG)
+	filePanelBGColor = lipgloss.Color(theme.FilePanelBG)
+	sidebarBGColor = lipgloss.Color(theme.SidebarBG)
+	footerBGColor = lipgloss.Color(theme.FooterBG)
+	modalBGColor = lipgloss.Color(theme.ModalBG)
+
+	fullScreenFGColor = lipgloss.Color(theme.FullScreenFG)
+	filePanelFGColor = lipgloss.Color(theme.FilePanelFG)
+	sidebarFGColor = lipgloss.Color(theme.SidebarFG)
+	footerFGColor = lipgloss.Color(theme.FooterFG)
+	modalFGColor = lipgloss.Color(theme.ModalFG)
+
+	cursorColor = lipgloss.Color(theme.Cursor)
+	correctColor = lipgloss.Color(theme.Correct)
+	errorColor = lipgloss.Color(theme.Error)
+	hintColor = lipgloss.Color(theme.Hint)
+	cancelColor = lipgloss.Color(theme.Cancel)
+	warnColor = lipgloss.Color(theme.Warn)
+	
+	filePanelTopDirectoryIconColor = lipgloss.Color(theme.FilePanelTopDirectoryIcon)
+	filePanelTopPathColor = lipgloss.Color(theme.FilePanelTopPath)
+	filePanelItemSelectedFGColor = lipgloss.Color(theme.FilePanelItemSelectedFG)
+	filePanelItemSelectedBGColor = lipgloss.Color(theme.FilePanelItemSelectedBG)
+	
+	sidebarTitleColor = lipgloss.Color(theme.SidebarTitle)
+	sidebarItemSelectedFGColor = lipgloss.Color(theme.SidebarItemSelectedFG)
+	sidebarItemSelectedBGColor = lipgloss.Color(theme.SidebarItemSelectedBG)
+	
+	ModalCancelFGColor = lipgloss.Color(theme.ModalCancelFG)
+	ModalCancelBGColor = lipgloss.Color(theme.ModalCancelBG)
+	ModalConfirmFGColor = lipgloss.Color(theme.ModalConfirmFG)
+	ModalConfirmBGColor = lipgloss.Color(theme.ModalConfirmBG)
+
+	
 	mainBackgroundColor = lipgloss.Color(theme.MainBackground)
 
-	terminalTooSmall = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.TerminalTooSmallError)).Background(mainBackgroundColor)
-	terminalMinimumSize = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.TerminalSizeCorrect)).Background(mainBackgroundColor)
+	terminalTooSmall = lipgloss.NewStyle().Foreground(errorColor).Background(fullScreenBGColor)
+	terminalCorrectSize = lipgloss.NewStyle().Foreground(cursorColor).Background(fullScreenBGColor)
 
 	borderStyle = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.Border)).Background(mainBackgroundColor)
 	cursorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.Cursor)).Bold(true).Background(mainBackgroundColor)

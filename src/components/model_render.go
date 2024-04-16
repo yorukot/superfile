@@ -317,16 +317,16 @@ func TerminalSizeWarnRender(m model) string {
 	if m.fullWidth < minimumWidth {
 		fullWidthString = terminalTooSmall.Render(fullWidthString)
 	}
-	fullHeightString = terminalMinimumSize.Render(fullHeightString)
-	fullWidthString = terminalMinimumSize.Render(fullWidthString)
+	fullHeightString = terminalCorrectSize.Render(fullHeightString)
+	fullWidthString = terminalCorrectSize.Render(fullWidthString)
 
 	return focusedModelStyle.Render(`Terminal size too small:` + "\n" +
 		"Width = " + fullWidthString +
 		" Height = " + fullHeightString + "\n\n" +
 
 		"Needed for current config:" + "\n" +
-		"Width = " + terminalMinimumSize.Render(minimumWidthString) +
-		" Height = " + terminalMinimumSize.Render(minimumHeightString))
+		"Width = " + terminalCorrectSize.Render(minimumWidthString) +
+		" Height = " + terminalCorrectSize.Render(minimumHeightString))
 }
 
 func TypineModalRender(m model) string {
