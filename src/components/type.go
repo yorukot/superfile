@@ -39,7 +39,7 @@ const (
 	nonePanelFocus focusPanelType = iota
 	processBarFocus
 	sidebarFocus
-	metaDataFocus
+	metadataFocus
 )
 
 // Constants for file panel with no focus

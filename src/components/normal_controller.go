@@ -73,8 +73,8 @@ func completelyDeleteSingleFile(m model) model {
 		return m
 	}
 
-	prog := progress.New(progress.WithScaledGradient(theme.ProcessBarGradient[0], theme.ProcessBarGradient[1]))
-	prog.PercentageStyle = textStyle
+	prog := progress.New(generateGradientColor())
+	prog.PercentageStyle = footerStyle
 
 	newProcess := process{
 		name:     "󰆴 " + panel.element[panel.cursor].name,
@@ -141,8 +141,8 @@ func deleteSingleItem(m model) model {
 		return m
 	}
 
-	prog := progress.New(progress.WithScaledGradient(theme.ProcessBarGradient[0], theme.ProcessBarGradient[1]))
-	prog.PercentageStyle = textStyle
+	prog := progress.New(generateGradientColor())
+	prog.PercentageStyle = footerStyle
 
 	newProcess := process{
 		name:     "󰆴 " + panel.element[panel.cursor].name,
@@ -257,11 +257,11 @@ func panelItemRename(m model) model {
 		return m
 	}
 	ti := textinput.New()
-	ti.Cursor.Style = cursorStyle
-	ti.TextStyle = textStyle
+	ti.Cursor.Style = filePanelCursorStyle
+	ti.TextStyle = modalStyle
 	ti.Cursor.Blink = true
 	ti.Placeholder = "New name"
-	ti.PlaceholderStyle = textStyle
+	ti.PlaceholderStyle = modalStyle
 	ti.SetValue(panel.element[panel.cursor].name)
 	ti.Focus()
 	ti.CharLimit = 156

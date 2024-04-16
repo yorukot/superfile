@@ -4,131 +4,107 @@ import "github.com/charmbracelet/lipgloss"
 
 var (
 	filePanelBorderColor lipgloss.Color
-	sidebarBorderColor lipgloss.Color
-	footerBorderColor lipgloss.Color
-	modalBorderColor lipgloss.Color
+	sidebarBorderColor   lipgloss.Color
+	footerBorderColor    lipgloss.Color
 
 	filePanelBorderActiveColor lipgloss.Color
-	sidebarBorderActiveColor lipgloss.Color
-	footerBorderActiveColor lipgloss.Color
-	modalBorderActiveColor lipgloss.Color
+	sidebarBorderActiveColor   lipgloss.Color
+	footerBorderActiveColor    lipgloss.Color
+	modalBorderActiveColor     lipgloss.Color
 
 	fullScreenBGColor lipgloss.Color
-	filePanelBGColor lipgloss.Color
-	sidebarBGColor lipgloss.Color
-	footerBGColor lipgloss.Color
-	modalBGColor lipgloss.Color
+	filePanelBGColor  lipgloss.Color
+	sidebarBGColor    lipgloss.Color
+	footerBGColor     lipgloss.Color
+	modalBGColor      lipgloss.Color
 
 	fullScreenFGColor lipgloss.Color
-	filePanelFGColor lipgloss.Color
-	sidebarFGColor lipgloss.Color
-	footerFGColor lipgloss.Color
-	modalFGColor lipgloss.Color
+	filePanelFGColor  lipgloss.Color
+	sidebarFGColor    lipgloss.Color
+	footerFGColor     lipgloss.Color
+	modalFGColor      lipgloss.Color
 
-	cursorColor lipgloss.Color
+	cursorColor  lipgloss.Color
 	correctColor lipgloss.Color
-	errorColor lipgloss.Color
-	hintColor lipgloss.Color
-	cancelColor lipgloss.Color
-	warnColor lipgloss.Color
-	
-	filePanelTopDirectoryIconColor lipgloss.Color
-	filePanelTopPathColor lipgloss.Color
-	filePanelItemSelectedFGColor lipgloss.Color
-	filePanelItemSelectedBGColor lipgloss.Color
+	errorColor   lipgloss.Color
+	hintColor    lipgloss.Color
+	cancelColor  lipgloss.Color
 
-	sidebarTitleColor lipgloss.Color
+	filePanelTopDirectoryIconColor lipgloss.Color
+	filePanelTopPathColor          lipgloss.Color
+	filePanelItemSelectedFGColor   lipgloss.Color
+	filePanelItemSelectedBGColor   lipgloss.Color
+
+	sidebarTitleColor          lipgloss.Color
 	sidebarItemSelectedFGColor lipgloss.Color
 	sidebarItemSelectedBGColor lipgloss.Color
-	
-	ModalCancelFGColor lipgloss.Color
-	ModalCancelBGColor lipgloss.Color
-	ModalConfirmFGColor lipgloss.Color
-	ModalConfirmBGColor lipgloss.Color
+	sidebarDividerColor        lipgloss.Color
+
+	modalCancelFGColor  lipgloss.Color
+	modalCancelBGColor  lipgloss.Color
+	modalConfirmFGColor lipgloss.Color
+	modalConfirmBGColor lipgloss.Color
 )
+
 // Theme configuration
 type ThemeType struct {
 	// Border
-    FilePanelBorder       string `toml:"file_panel_border"`
-    SidebarBorder         string `toml:"sidebar_border"`
-    FooterBorder          string `toml:"footer_border"`
-    ModalBorder           string `toml:"modal_border"`
+	FilePanelBorder string `toml:"file_panel_border"`
+	SidebarBorder   string `toml:"sidebar_border"`
+	FooterBorder    string `toml:"footer_border"`
 
-    // Border Active
-    FilePanelBorderActive string `toml:"file_panel_border_active"`
-    SidebarBorderActive   string `toml:"sidebar_border_active"`
-    FooterBorderActive    string `toml:"footer_border_active"`
-    ModalBorderActive     string `toml:"modal_border_active"`
+	// Border Active
+	FilePanelBorderActive string `toml:"file_panel_border_active"`
+	SidebarBorderActive   string `toml:"sidebar_border_active"`
+	FooterBorderActive    string `toml:"footer_border_active"`
+	ModalBorderActive     string `toml:"modal_border_active"`
 
-    // Background (bg)
-    FullScreenBG  string `toml:"full_screen_bg"`
-    FilePanelBG   string `toml:"file_panel_bg"`
-    SidebarBG     string `toml:"sidebar_bg"`
-    FooterBG      string `toml:"footer_bg"`
-    ModalBG       string `toml:"modal_bg"`
+	// Background (bg)
+	FullScreenBG string `toml:"full_screen_bg"`
+	FilePanelBG  string `toml:"file_panel_bg"`
+	SidebarBG    string `toml:"sidebar_bg"`
+	FooterBG     string `toml:"footer_bg"`
+	ModalBG      string `toml:"modal_bg"`
 
-    // Foreground (fg)
-    FullScreenFG  string `toml:"full_screen_fg"`
-    FilePanelFG   string `toml:"file_panel_fg"`
-    SidebarFG     string `toml:"sidebar_fg"`
-    FooterFG      string `toml:"footer_fg"`
-    ModalFG       string `toml:"modal_fg"`
+	// Foreground (fg)
+	FullScreenFG string `toml:"full_screen_fg"`
+	FilePanelFG  string `toml:"file_panel_fg"`
+	SidebarFG    string `toml:"sidebar_fg"`
+	FooterFG     string `toml:"footer_fg"`
+	ModalFG      string `toml:"modal_fg"`
 
-    // Special Color
-    Cursor        string `toml:"cursor"`
-    Correct       string `toml:"correct"`
-    Error         string `toml:"error"`
-    Hint          string `toml:"hint"`
-    Cancel        string `toml:"cancel"`
-    Warn          string `toml:"warn"`
-    GradientColor []string `toml:"gradient_color"`
+	// Special Color
+	Cursor        string   `toml:"cursor"`
+	Correct       string   `toml:"correct"`
+	Error         string   `toml:"error"`
+	Hint          string   `toml:"hint"`
+	Cancel        string   `toml:"cancel"`
+	GradientColor []string `toml:"gradient_color"`
 
-    // File Panel Special Items
-    FilePanelTopDirectoryIcon string `toml:"file_panel_top_directory_icon"`
-    FilePanelTopPath          string `toml:"file_panel_top_path"`
-    FilePanelItemSelectedFG   string `toml:"file_panel_item_selected_fg"`
-    FilePanelItemSelectedBG   string `toml:"file_panel_item_selected_bg"`
+	// File Panel Special Items
+	FilePanelTopDirectoryIcon string `toml:"file_panel_top_directory_icon"`
+	FilePanelTopPath          string `toml:"file_panel_top_path"`
+	FilePanelItemSelectedFG   string `toml:"file_panel_item_selected_fg"`
+	FilePanelItemSelectedBG   string `toml:"file_panel_item_selected_bg"`
 
-    // Sidebar Special Items
-    SidebarTitle             string `toml:"sidebar_title"`
-    SidebarItemSelectedFG    string `toml:"sidebar_item_selected_fg"`
-    SidebarItemSelectedBG    string `toml:"sidebar_item_selected_bg"`
+	// Sidebar Special Items
+	SidebarTitle          string `toml:"sidebar_title"`
+	SidebarItemSelectedFG string `toml:"sidebar_item_selected_fg"`
+	SidebarItemSelectedBG string `toml:"sidebar_item_selected_bg"`
+	SidebarDivider        string `toml:"sidebar_divider"`
 
-    // Modal Special Items
-    ModalCancelFG            string `toml:"modal_cancel_fg"`
-    ModalCancelBG            string `toml:"modal_cancel_bg"`
-    ModalConfirmFG           string `toml:"modal_confirm_fg"`
-    ModalConfirmBG           string `toml:"modal_confirm_bg"`
-
-	Border         string `toml:"border"`
-	MainBackground string `toml:"main_background"`
-
-	TerminalTooSmallError string `toml:"terminal_too_small_error"`
-	TerminalSizeCorrect   string `toml:"terminal_size_correct"`
-
-	SidebarItem     string `toml:"sidebar_item"`
-	SidebarSelected string `toml:"sidebar_selected"`
-	SidebarFocus    string `toml:"sidebar_focus"`
-
-	FilePanelFocus            string `toml:"file_panel_focus"`
-	FilePanelItem             string `toml:"file_panel_item"`
-
-	FilePanelItemSelected string    `toml:"file_panel_item_selected"`
-	FooterFocus           string    `toml:"footer_focus"`
-	ProcessBarGradient    [2]string `toml:"process_bar_gradient"`
-	InOperation           string    `toml:"in_operation"`
-	Done                  string    `toml:"done"`
-	Fail                  string    `toml:"fail"`
-	ModalForeground       string    `toml:"modal_foreground"`
-	ModalCancel           string    `toml:"modal_cancel"`
-	ModalConfirm          string    `toml:"modal_confirm"`
+	// Modal Special Items
+	ModalCancelFG  string `toml:"modal_cancel_fg"`
+	ModalCancelBG  string `toml:"modal_cancel_bg"`
+	ModalConfirmFG string `toml:"modal_confirm_fg"`
+	ModalConfirmBG string `toml:"modal_confirm_bg"`
 }
 
 // Configuration settings
 type ConfigType struct {
-	Theme string `toml:"theme"`
+	Theme           string   `toml:"theme"`
 	FooterPanelList []string `toml:"footer_panel_list"`
-	Metadata bool `toml:"metadata"`
+	Metadata        bool     `toml:"metadata"`
 }
 
 type HotkeysType struct {
@@ -163,7 +139,7 @@ type HotkeysType struct {
 	ParentDirectory []string `toml:"parent_directory"`
 	CopySingleItem  []string `toml:"copy_single_item"`
 	CutSingleItem   []string `toml:"cut_single_item"`
-	SearchBar		[]string `toml:"search_bar"`
+	SearchBar       []string `toml:"search_bar"`
 
 	FilePanelSelectModeItemSingleSelect []string `toml:"file_panel_select_mode_item_single_select"`
 	FilePanelSelectModeItemSelectDown   []string `toml:"file_panel_select_mode_item_select_down"`

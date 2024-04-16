@@ -8,7 +8,6 @@
 file_panel_border = "#868686"
 sidebar_border = "#868686"
 footer_border = "#868686"
-modal_border = "#868686"
 
 # Border Active
 file_panel_border_active = "#FFF1C5"

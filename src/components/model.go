@@ -171,7 +171,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m = controllerSideBarListUp(m)
 				} else if m.focusPanel == processBarFocus {
 					m = contollerProcessBarListUp(m)
-				} else if m.focusPanel == metaDataFocus {
+				} else if m.focusPanel == metadataFocus {
 					m = controllerMetaDataListUp(m)
 				} else if m.focusPanel == nonePanelFocus {
 					m = controllerFilePanelListUp(m)
@@ -186,7 +186,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m = controllerSideBarListDown(m)
 				} else if m.focusPanel == processBarFocus {
 					m = contollerProcessBarListDown(m)
-				} else if m.focusPanel == metaDataFocus {
+				} else if m.focusPanel == metadataFocus {
 					m = controllerMetaDataListDown(m)
 				} else if m.focusPanel == nonePanelFocus {
 					m = controllerFilePanelListDown(m)
