@@ -818,6 +818,7 @@ func zipSource(source, target string) error {
 func generateSearchBar() textinput.Model {
 	ti := textinput.New()
 	ti.Cursor.Style = footerCursorStyle
+	ti.Cursor.TextStyle = footerStyle
 	ti.TextStyle = filePanelStyle
 	ti.Prompt = filePanelTopDirectoryIconStyle.Render(" ")
 	ti.Cursor.Blink = true

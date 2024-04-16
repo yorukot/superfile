@@ -10,7 +10,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-func SideBarRender(m model) string {
+func sidebarRender(m model) string {
 	s := sidebarTitleStyle.Render("     Super File")
 	s += "\n\n"
 
@@ -55,7 +55,7 @@ func SideBarRender(m model) string {
 	return sideBarBorderStyle(m.mainPanelHeight, m.focusPanel).Render(s)
 }
 
-func FilePanelRender(m model) string {
+func filePanelRender(m model) string {
 	// file panel
 	f := make([]string, 4)
 	for i, filePanel := range m.fileModel.filePanels {
@@ -132,7 +132,7 @@ func FilePanelRender(m model) string {
 	return filePanelRender
 }
 
-func ProcessBarRender(m model) string {
+func processBarRender(m model) string {
 	// save process in the array
 	var processes []process
 	for _, p := range m.processBarModel.process {
@@ -212,7 +212,7 @@ func ProcessBarRender(m model) string {
 	return processRender
 }
 
-func MetaDataRender(m model) string {
+func metadataRender(m model) string {
 	// process bar
 	metaDataBar := ""
 	if len(m.fileMetaData.metaData) == 0 && len(m.fileModel.filePanels[m.filePanelFocusIndex].element) > 0 && !m.fileModel.renaming {
@@ -268,7 +268,7 @@ func MetaDataRender(m model) string {
 	return metaDataBar
 }
 
-func ClipboardRender(m model) string {
+func clipboardRender(m model) string {
 
 	// render
 	clipboardRender := ""
@@ -304,7 +304,7 @@ func ClipboardRender(m model) string {
 	return clipboardRender
 }
 
-func TerminalSizeWarnRender(m model) string {
+func terminalSizeWarnRender(m model) string {
 	fullWidthString := strconv.Itoa(m.fullWidth)
 	fullHeightString := strconv.Itoa(m.fullHeight)
 	minimumWidthString := strconv.Itoa(minimumWidth)
@@ -328,7 +328,7 @@ func TerminalSizeWarnRender(m model) string {
 		heightString + terminalCorrectSize.Render(minimumHeightString))
 }
 
-func TypineModalRender(m model) string {
+func typineModalRender(m model) string {
 	if m.typingModal.itemType == newFile {
 		fileLocation := filePanelTopDirectoryIconStyle.Render("   ") + filePanelTopPathStyle.Render(truncateTextBeginning(m.typingModal.location+"/"+m.typingModal.textInput.Value(), modalWidth-4)) + "\n"
 		confirm := modalConfirm.Render(" (" + hotkeys.Confirm[0] + ") New File ")
@@ -344,7 +344,7 @@ func TypineModalRender(m model) string {
 	}
 }
 
-func WarnModalRender(m model) string {
+func warnModalRender(m model) string {
 	title := m.warnModal.title
 	content := m.warnModal.content
 	confirm := modalCancel.Render(" (" + hotkeys.Confirm[0] + ") Confirm ")

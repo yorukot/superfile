@@ -258,6 +258,7 @@ func panelItemRename(m model) model {
 	}
 	ti := textinput.New()
 	ti.Cursor.Style = filePanelCursorStyle
+	ti.Cursor.TextStyle = filePanelStyle
 	ti.TextStyle = modalStyle
 	ti.Cursor.Blink = true
 	ti.Placeholder = "New name"

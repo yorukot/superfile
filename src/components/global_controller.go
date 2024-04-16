@@ -365,6 +365,7 @@ func panelCreateNewFile(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	ti := textinput.New()
 	ti.Cursor.Style = modalCursorStyle
+	ti.Cursor.TextStyle = modalStyle
 	ti.TextStyle = modalStyle
 	ti.Cursor.Blink = true
 	ti.Placeholder = "File name"
@@ -388,6 +389,7 @@ func panelCreateNewFolder(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	ti := textinput.New()
 	ti.Cursor.Style = modalCursorStyle
+	ti.Cursor.TextStyle = modalStyle
 	ti.TextStyle = modalStyle
 	ti.Cursor.Blink = true
 	ti.Placeholder = "Folder name"
