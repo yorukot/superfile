@@ -4,32 +4,57 @@
 # 
 # Thanks for all contributor!!
 
-border = "#4c566a"
+# If you want to make border display just set it same as sidebar background color
+
+# ========= Border =========
+file_panel_border = "#4c566a"
+sidebar_border = "#2e3440"
+footer_border = "#4c566a"
+
+# ========= Border Active =========
+file_panel_border_active = "#d8dee9"
+sidebar_border_active = "#b48ead"
+footer_border_active = "#b48ead"
+modal_border_active = "#868686"
+
+# ========= Background (bg) =========
+full_screen_bg = "#2e3440"
+file_panel_bg = "#2e3440"
+sidebar_bg = "#2e3440"
+footer_bg = "#2e3440"
+modal_bg = "#2e3440"
+
+# ========= Foreground (fg) =========
+full_screen_fg = "#e5e9f0"
+file_panel_fg = "#e5e9f0"
+sidebar_fg = "#e5e9f0"
+footer_fg = "#e5e9f0"
+modal_fg = "#e5e9f0"
+
+# ========= Special Color =========
 cursor = "#88c0d0"
-main_background = "#2e3440"
+correct = "#88c0d0"
+error = "#bf616a"
+hint = "#8fbcbb"
+cancel = "#d8dee9"
+# Gradient color can only have two color!
+gradient_color = ["#81a1c1", "#bf616a"]
 
-terminal_too_small_error = "#bf616a"
-terminal_size_currect = "#88c0d0"
-
-sidebar_title = "#81a1c1"
-sidebar_item = "#e5e9f0"
-sidebar_selected = "#88c0d0"
-sidebar_focus = "#b48ead"
-
-file_panel_focus = "#d8dee9"
+# ========= File Panel Special Items =========
 file_panel_top_directory_icon = "#88c0d0"
 file_panel_top_path = "#88c0d0"
-file_panel_item = "#e5e9f0"
-file_panel_item_selected = "#bf616a"
+file_panel_item_selected_fg = "#bf616a"
+file_panel_item_selected_bg = "#2e3440"
 
-footer_focus = "#b48ead"
+# ========= Sidebar Special Items =========
+sidebar_title = "#81a1c1"
+sidebar_item_selected_fg = "#88c0d0"
+sidebar_item_selected_bg = "#2e3440"
+sidebar_divider = "#868686"
 
-process_bar_gradient = ["#81a1c1", "#bf616a"]
-in_operation = "#8fbcbb"
-done = "#88c0d0"
-fail = "#bf616a"
-cancel = "#d8dee9"
+# ========= Modal Special Items =========
+modal_cancel_fg = "#e5e9f0"
+modal_cancel_bg = "#4c566a"
 
-modal_foreground = "#e5e9f0"
-modal_cancel = "#4c566a"
-modal_confirm = "#bf616a"
+modal_confirm_fg = "#e5e9f0"
+modal_confirm_bg = "#bf616a"
