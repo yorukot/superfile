@@ -17,6 +17,7 @@ All notable changes to this project will be documented in this file. Dates are d
 - Update all config file from `json` to `toml` format file [`a018128`](https://github.com/MHNightCat/superfile/commit/a018128ffd431d76a06f379fffbe0aa20d3e78cc)
 - Update search bar [`#61`](https://github.com/MHNightCat/superfile/pull/61)
 - Update theme config format [`#66`](https://github.com/MHNightCat/superfile/pull/66)
+- Update metadata to plugins [`c1f942d`](https://github.com/MHNightCat/superfile/commit/c1f942da366919f114b094ce512ff95002b6a08c)
 
 #### Bug fix
 
