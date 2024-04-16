@@ -156,7 +156,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			switch msg.String() {
 			case hotkeys.Cancel[0], hotkeys.Cancel[1]:
 				m = cancelSearch(m)
-			case hotkeys.Confirm[0], hotkeys.Confirm[1]:
+			case hotkeys.Confirm[0], hotkeys.Confirm[1], hotkeys.SearchBar[0], hotkeys.SearchBar[1]:
 				m = confirmSearch(m)
 			}
 		} else {

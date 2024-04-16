@@ -25,6 +25,7 @@
   - [Font](#font)
 - [Build](#build)
 - [Supported Systems](#supported-systems)
+- [Plugins](#plugins)
 - [Themes](#themes)
   - [Use an existing theme](#use-an-existing-theme)
   - [Create your own theme](#create-your-own-theme)
@@ -74,10 +75,6 @@ cd ~/Download
 chmod +x ./spf
 sudo mv ./spf /bin/
 ```
-
-### Exiftool
-
-[`exiftool`](https://github.com/exiftool/exiftool) is a tool used to obtain file metadata. If it is not installed, it will cause errors.
 
 **Installation:**
 
@@ -173,6 +170,11 @@ mv ./bin/spf /usr/local/bin
 - \[x\] MacOS
 - \[ \] Windows
 
+## Plugins
+
+**Metadata**
+request: [`exiftool`](https://github.com/exiftool/exiftool)
+
 ## Themes
 
 ### Use an existing theme
@@ -182,6 +184,7 @@ You can go to [theme list](https://github.com/MHNightCat/superfile/blob/main/THE
 > We only have a few themes at the moment, but we will be making more over time! You can also [submit a pull request](https://github.com/MHNightCat/superfile/pulls) for your own theme!
 
 copy `theme_name` in:
+
 ```
 Theme name: theme_name
 ```
@@ -194,14 +197,14 @@ $EDITOR ~/.config/superfile/config.json
 
 and change:
 
-```json
-"theme": "gruvbox",
+```toml
+theme = "gruvbox"
 ```
 
 to:
 
-```json
-"theme": "theme-name",
+```toml
+theme = "theme-name"
 ```
 
 ### Create your own theme
@@ -210,7 +213,6 @@ If you want to customize your own theme, you can go to `~/.config/superfile/them
 
 Don't forget to change the `theme` variable in `config.json` to your theme name.
 
-
 [If you are satisfied with your theme, you might as well put it into the default theme list!](#contribute)
 
 ## Hotkeys
@@ -218,7 +220,6 @@ Don't forget to change the `theme` variable in `config.json` to your theme name.
 [**Click me to see the hotkey list**](https://github.com/MHNightCat/superfile/blob/main/HOTKEYS.md)
 
 **You can change all hotkeys in** `~/.config/superfile/config.json`
-
 
 > "Normal mode" is the default browsing mode
 
