@@ -3,6 +3,7 @@ module github.com/MHNightCat/superfile
 go 1.21.8
 
 require (
+	github.com/Bios-Marcel/wastebasket v0.0.3
 	github.com/atotto/clipboard v0.1.4
 	github.com/barasher/go-exiftool v1.10.0
 	github.com/charmbracelet/bubbles v0.18.0
@@ -16,10 +17,7 @@ require (
 	github.com/urfave/cli/v2 v2.27.1
 )
 
-require (
-	github.com/Bios-Marcel/wastebasket v0.0.3 // indirect
-	github.com/deckarep/golang-set v1.8.0 // indirect
-)
+require github.com/deckarep/golang-set v1.8.0 // indirect
 
 require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
