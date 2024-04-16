@@ -171,7 +171,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m = controllerSideBarListUp(m)
 				} else if m.focusPanel == processBarFocus {
 					m = contollerProcessBarListUp(m)
-				} else if m.focusPanel == metaDataFocus {
+				} else if m.focusPanel == metadataFocus {
 					m = controllerMetaDataListUp(m)
 				} else if m.focusPanel == nonePanelFocus {
 					m = controllerFilePanelListUp(m)
@@ -186,7 +186,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m = controllerSideBarListDown(m)
 				} else if m.focusPanel == processBarFocus {
 					m = contollerProcessBarListDown(m)
-				} else if m.focusPanel == metaDataFocus {
+				} else if m.focusPanel == metadataFocus {
 					m = controllerMetaDataListDown(m)
 				} else if m.focusPanel == nonePanelFocus {
 					m = controllerFilePanelListDown(m)
@@ -323,23 +323,23 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m model) View() string {
 	// check is the terminal size enough
 	if m.fullHeight < minimumHeight || m.fullWidth < minimumWidth {
-		return TerminalSizeWarnRender(m)
+		return terminalSizeWarnRender(m)
 	} else if m.typingModal.open {
-		return TypineModalRender(m)
+		return typineModalRender(m)
 	} else if m.warnModal.open {
-		return WarnModalRender(m)
+		return warnModalRender(m)
 	} else {
-		sidebar := SideBarRender(m)
+		sidebar := sidebarRender(m)
 
-		filePanel := FilePanelRender(m)
+		filePanel := filePanelRender(m)
 
 		mainPanel := lipgloss.JoinHorizontal(0, sidebar, filePanel)
 
-		processBar := ProcessBarRender(m)
+		processBar := processBarRender(m)
 
-		metaData := MetaDataRender(m)
+		metaData := metadataRender(m)
 
-		clipboardBar := ClipboardRender(m)
+		clipboardBar := clipboardRender(m)
 
 		footer := lipgloss.JoinHorizontal(0, processBar, metaData, clipboardBar)
 

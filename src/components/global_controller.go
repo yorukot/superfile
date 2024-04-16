@@ -219,7 +219,7 @@ func createNewFilePanel(m model) model {
 			panelMode:       browserMode,
 			focusType:       secondFocus,
 			directoryRecord: make(map[string]directoryRecord),
-			searchBar: generateSearchBar(),
+			searchBar:       generateSearchBar(),
 		})
 
 		m.fileModel.filePanels[m.filePanelFocusIndex].focusType = noneFocus
@@ -256,11 +256,11 @@ func focusOnProcessBar(m model) model {
 }
 
 func focusOnMetaData(m model) model {
-	if m.focusPanel == metaDataFocus {
+	if m.focusPanel == metadataFocus {
 		m.focusPanel = nonePanelFocus
 		m.fileModel.filePanels[m.filePanelFocusIndex].focusType = focus
 	} else {
-		m.focusPanel = metaDataFocus
+		m.focusPanel = metadataFocus
 		m.fileModel.filePanels[m.filePanelFocusIndex].focusType = secondFocus
 	}
 	return m
@@ -281,8 +281,8 @@ func pasteItem(m model) model {
 	}
 
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	prog := progress.New(progress.WithScaledGradient(theme.ProcessBarGradient[0], theme.ProcessBarGradient[1]))
-	prog.PercentageStyle = textStyle
+	prog := progress.New(generateGradientColor())
+	prog.PercentageStyle = footerStyle
 
 	newProcess := process{}
 
@@ -364,11 +364,12 @@ func pasteItem(m model) model {
 func panelCreateNewFile(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	ti := textinput.New()
-	ti.Cursor.Style = cursorStyle
-	ti.TextStyle = textStyle
+	ti.Cursor.Style = modalCursorStyle
+	ti.Cursor.TextStyle = modalStyle
+	ti.TextStyle = modalStyle
 	ti.Cursor.Blink = true
 	ti.Placeholder = "File name"
-	ti.PlaceholderStyle = textStyle
+	ti.PlaceholderStyle = modalStyle
 	ti.Focus()
 	ti.CharLimit = 156
 	ti.Width = modalWidth - 10
@@ -387,11 +388,12 @@ func panelCreateNewFile(m model) model {
 func panelCreateNewFolder(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	ti := textinput.New()
-	ti.Cursor.Style = cursorStyle
-	ti.TextStyle = textStyle
+	ti.Cursor.Style = modalCursorStyle
+	ti.Cursor.TextStyle = modalStyle
+	ti.TextStyle = modalStyle
 	ti.Cursor.Blink = true
 	ti.Placeholder = "Folder name"
-	ti.PlaceholderStyle = textStyle
+	ti.PlaceholderStyle = modalStyle
 	ti.Focus()
 	ti.CharLimit = 156
 	ti.Width = modalWidth - 10

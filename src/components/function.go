@@ -403,7 +403,7 @@ func returnMetaData(m model) model {
 	cursor := panel.cursor
 	LastTimeCursorMove = [2]int{int(time.Now().UnixMicro()), cursor}
 	time.Sleep(150 * time.Millisecond)
-	if LastTimeCursorMove[1] != cursor && m.focusPanel != metaDataFocus {
+	if LastTimeCursorMove[1] != cursor && m.focusPanel != metadataFocus {
 		return m
 	}
 	m.fileMetaData.metaData = m.fileMetaData.metaData[:0]
@@ -416,7 +416,7 @@ func returnMetaData(m model) model {
 		}
 		return m
 	}
-	if len(panel.element[panel.cursor].metaData) != 0 && m.focusPanel != metaDataFocus {
+	if len(panel.element[panel.cursor].metaData) != 0 && m.focusPanel != metadataFocus {
 		m.fileMetaData.metaData = panel.element[panel.cursor].metaData
 		channel <- channelMessage{
 			messageId:    id,
@@ -437,7 +437,7 @@ func returnMetaData(m model) model {
 	}
 	if fileInfo.IsDir() {
 		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"FolderName", fileInfo.Name()})
-		if m.focusPanel == metaDataFocus {
+		if m.focusPanel == metadataFocus {
 			m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"FolderSize", formatFileSize(dirSize(filePath))})
 		}
 		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"FolderModifyDate", fileInfo.ModTime().String()})
@@ -595,8 +595,8 @@ func unzip(src, dest string) error {
 	}()
 	totalFiles := len(r.File)
 	// progessbar
-	prog := progress.New(progress.WithScaledGradient(theme.ProcessBarGradient[0], theme.ProcessBarGradient[1]))
-	prog.PercentageStyle = textStyle
+	prog := progress.New(generateGradientColor())
+	prog.PercentageStyle = footerStyle
 	// channel message
 	p := process{
 		name:     "unzip file",
@@ -698,8 +698,8 @@ func unzip(src, dest string) error {
 
 func zipSource(source, target string) error {
 	id := shortuuid.New()
-	prog := progress.New(progress.WithScaledGradient(theme.ProcessBarGradient[0], theme.ProcessBarGradient[1]))
-	prog.PercentageStyle = textStyle
+	prog := progress.New()
+	prog.PercentageStyle = footerStyle
 
 	totalFiles, err := countFiles(source)
 
@@ -817,11 +817,12 @@ func zipSource(source, target string) error {
 
 func generateSearchBar() textinput.Model {
 	ti := textinput.New()
-	ti.Cursor.Style = cursorStyle
-	ti.TextStyle = textStyle
-	ti.Prompt = filePanelTopFolderIcon.Render(" ")
+	ti.Cursor.Style = footerCursorStyle
+	ti.Cursor.TextStyle = footerStyle
+	ti.TextStyle = filePanelStyle
+	ti.Prompt = filePanelTopDirectoryIconStyle.Render(" ")
 	ti.Cursor.Blink = true
-	ti.PlaceholderStyle = textStyle
+	ti.PlaceholderStyle = filePanelStyle
 	ti.Placeholder = "(" + hotkeys.SearchBar[0] + ") Type something"
 	ti.Blur()
 	ti.CharLimit = 156

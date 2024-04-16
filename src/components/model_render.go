@@ -10,8 +10,8 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-func SideBarRender(m model) string {
-	s := sidebarTitle.Render("     Super File")
+func sidebarRender(m model) string {
+	s := sidebarTitleStyle.Render("     Super File")
 	s += "\n\n"
 
 	// Ugly shit workaround from hell code, made by @lescx
@@ -20,13 +20,16 @@ func SideBarRender(m model) string {
 	pinnedRendered := false
 	externalRendered := false
 
+	pinnedDivider := "\n" + sidebarTitleStyle.Render("󰐃 Pinned") + sidebarDividerStyle.Render(" ───────────") + "\n\n"
+	disksDivider := "\n" + sidebarTitleStyle.Render("󱇰 Disks") + sidebarDividerStyle.Render(" ────────────") + "\n\n"
+
 	for i, directory := range m.sidebarModel.directories {
 		if i == amountWellKnownDirectories && !pinnedRendered {
-			s += "\n" + sidebarTitle.Render("󰐃 Pinned") + borderStyle.Render(" ───────────") + "\n\n"
+			s += pinnedDivider
 			pinnedRendered = true
 		}
 		if i == amountPinnedDirectories+amountWellKnownDirectories && !externalRendered {
-			s += "\n" + sidebarTitle.Render("󱇰 Disks") + borderStyle.Render(" ────────────") + "\n\n"
+			s += disksDivider
 			externalRendered = true
 		}
 		cursor := " "
@@ -34,25 +37,25 @@ func SideBarRender(m model) string {
 			cursor = ""
 		}
 		if directory.location == m.fileModel.filePanels[m.filePanelFocusIndex].location {
-			s += cursorStyle.Render(cursor) + sidebarSelected.Render(" "+TruncateText(directory.name, sidebarWidth-2)) + "\n"
+			s += filePanelCursorStyle.Render(cursor) + sidebarSelectedStyle.Render(" "+truncateText(directory.name, sidebarWidth-2)) + "\n"
 		} else {
-			s += cursorStyle.Render(cursor) + sidebarItem.Render(" "+TruncateText(directory.name, sidebarWidth-2)) + "\n"
+			s += filePanelCursorStyle.Render(cursor) + sidebarStyle.Render(" "+truncateText(directory.name, sidebarWidth-2)) + "\n"
 		}
 	}
 
 	// In case no pinned directories or external drives are pinned,
 	// list menu item at the bottom
 	if !pinnedRendered {
-		s += "\n" + sidebarTitle.Render("󰐃 Pinned") + borderStyle.Render(" ───────────") + "\n\n"
+		s += pinnedDivider
 	}
 	if !externalRendered {
-		s += "\n" + sidebarTitle.Render("󱇰 Disks") + borderStyle.Render(" ────────────") + "\n\n"
+		s += disksDivider
 	}
 
-	return SideBarBoardStyle(m.mainPanelHeight, m.focusPanel).Render(s)
+	return sideBarBorderStyle(m.mainPanelHeight, m.focusPanel).Render(s)
 }
 
-func FilePanelRender(m model) string {
+func filePanelRender(m model) string {
 	// file panel
 	f := make([]string, 4)
 	for i, filePanel := range m.fileModel.filePanels {
@@ -60,7 +63,7 @@ func FilePanelRender(m model) string {
 		// check is user are using search bar
 		if filePanel.searchBar.Value() != "" {
 			fileElenent = returnFolderElementBySearchString(filePanel.location, m.toggleDotFile, filePanel.searchBar.Value())
-		}else {
+		} else {
 			fileElenent = returnFolderElement(filePanel.location, m.toggleDotFile)
 		}
 
@@ -68,13 +71,13 @@ func FilePanelRender(m model) string {
 		m.fileModel.filePanels[i].element = fileElenent
 
 		// check if cursor or render out of range
-		if filePanel.cursor > len(filePanel.element) - 1 {
+		if filePanel.cursor > len(filePanel.element)-1 {
 			filePanel.cursor = 0
 			filePanel.render = 0
 		}
 		m.fileModel.filePanels[i] = filePanel
 
-		f[i] += filePanelTopFolderIcon.Render("   ") + filePanelTopPath.Render(TruncateTextBeginning(filePanel.location, m.fileModel.width-4)) + "\n"
+		f[i] += filePanelTopDirectoryIconStyle.Render("   ") + filePanelTopPathStyle.Render(truncateTextBeginning(filePanel.location, m.fileModel.width-4)) + "\n"
 		filePanelWidth := 0
 		bottomBorderWidth := 0
 		if (m.fullWidth-sidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels) != 0 && i == len(m.fileModel.filePanels)-1 {
@@ -84,16 +87,16 @@ func FilePanelRender(m model) string {
 			filePanelWidth = m.fileModel.width
 			bottomBorderWidth = m.fileModel.width + 6
 		}
-		f[i] += FilePanelDividerStyle(filePanel.focusType).Render(strings.Repeat("━", filePanelWidth)) + "\n"
+		f[i] += filePanelDividerStyle(filePanel.focusType).Render(strings.Repeat("━", filePanelWidth)) + "\n"
 		f[i] += " " + filePanel.searchBar.View() + "\n"
 		if len(filePanel.element) == 0 {
-			f[i] += "   No such file or directory"
-			bottomBorder := GenerateBottomBorder("0/0", m.fileModel.width+5)
-			f[i] = FilePanelBoardStyle(m.mainPanelHeight, m.fileModel.width, filePanel.focusType, bottomBorder).Render(f[i])
+			f[i] += filePanelStyle.Render("   No such file or directory")
+			bottomBorder := generateFooterBorder("0/0", m.fileModel.width+5)
+			f[i] = filePanelBorderStyle(m.mainPanelHeight, m.fileModel.width, filePanel.focusType, bottomBorder).Render(f[i])
 		} else {
 			for h := filePanel.render; h < filePanel.render+panelElementHeight(m.mainPanelHeight) && h < len(filePanel.element); h++ {
 				endl := "\n"
-				if h == filePanel.render+panelElementHeight(m.mainPanelHeight) - 1 || h == len(filePanel.element) -1 {
+				if h == filePanel.render+panelElementHeight(m.mainPanelHeight)-1 || h == len(filePanel.element)-1 {
 					endl = ""
 				}
 				cursor := " "
@@ -105,7 +108,7 @@ func FilePanelRender(m model) string {
 				if filePanel.renaming && h == filePanel.cursor {
 					f[i] += filePanel.rename.View() + endl
 				} else {
-					f[i] += cursorStyle.Render(cursor+" ") + PrettierName(filePanel.element[h].name, m.fileModel.width-5, filePanel.element[h].directory, isItemSelected) + endl
+					f[i] += filePanelCursorStyle.Render(cursor+" ") + prettierName(filePanel.element[h].name, m.fileModel.width-5, filePanel.element[h].directory, isItemSelected, filePanelBGColor) + endl
 				}
 			}
 			cursorPosition := strconv.Itoa(filePanel.cursor + 1)
@@ -116,8 +119,8 @@ func FilePanelRender(m model) string {
 			} else if filePanel.panelMode == selectMode {
 				panelModeString = "󰆽 Select"
 			}
-			bottomBorder := GenerateBottomBorder(fmt.Sprintf("%s┣━┫%s/%s", panelModeString, cursorPosition, totalElement), bottomBorderWidth)
-			f[i] = FilePanelBoardStyle(m.mainPanelHeight, filePanelWidth, filePanel.focusType, bottomBorder).Render(f[i])
+			bottomBorder := generateFooterBorder(fmt.Sprintf("%s┣━┫%s/%s", panelModeString, cursorPosition, totalElement), bottomBorderWidth)
+			f[i] = filePanelBorderStyle(m.mainPanelHeight, filePanelWidth, filePanel.focusType, bottomBorder).Render(f[i])
 		}
 	}
 
@@ -129,7 +132,7 @@ func FilePanelRender(m model) string {
 	return filePanelRender
 }
 
-func ProcessBarRender(m model) string {
+func processBarRender(m model) string {
 	// save process in the array
 	var processes []process
 	for _, p := range m.processBarModel.process {
@@ -166,26 +169,26 @@ func ProcessBarRender(m model) string {
 			break
 		}
 		process := processes[i]
-		process.progress.Width = BottomWidth(m.fullWidth) - 3
+		process.progress.Width = footerWidth(m.fullWidth) - 3
 		symbol := ""
 		cursor := ""
 		if i == m.processBarModel.cursor {
-			cursor = StringColorRender(theme.Cursor).Render("┃ ")
+			cursor = footerCursorStyle.Render("┃ ")
 		} else {
-			cursor = StringColorRender(theme.Cursor).Render("  ")
+			cursor = footerCursorStyle.Render("  ")
 		}
 		switch process.state {
 		case failure:
-			symbol = StringColorRender(theme.Fail).Render("")
+			symbol = processErrorStyle.Render("")
 		case successful:
-			symbol = StringColorRender(theme.Done).Render("")
+			symbol = processSuccessfulStyle.Render("")
 		case inOperation:
-			symbol = StringColorRender(theme.InOperation).Render("󰥔")
+			symbol = processInOperationStyle.Render("󰥔")
 		case cancel:
-			symbol = StringColorRender(theme.Cancel).Render("")
+			symbol = processCancelStyle.Render("")
 		}
 
-		processRender += cursor + textStyle.Render(TruncateText(process.name, BottomWidth(m.fullWidth)-7)+" ") + symbol + "\n"
+		processRender += cursor + footerStyle.Render(truncateText(process.name, footerWidth(m.fullWidth)-7)+" ") + symbol + "\n"
 		if renderTimes == 2 {
 			processRender += cursor + process.progress.ViewAs(float64(process.done)/float64(process.total)) + ""
 		} else {
@@ -203,13 +206,13 @@ func ProcessBarRender(m model) string {
 	} else {
 		courseNumber = m.processBarModel.cursor + 1
 	}
-	bottomBorder := GenerateBottomBorder(fmt.Sprintf("%s/%s", strconv.Itoa(courseNumber), strconv.Itoa(len(m.processBarModel.processList))), BottomWidth(m.fullWidth)-3)
-	processRender = ProcsssBarBoarder(bottomElementHight(footerHeight), BottomWidth(m.fullWidth), bottomBorder, m.focusPanel).Render(processRender)
+	bottomBorder := generateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(courseNumber), strconv.Itoa(len(m.processBarModel.processList))), footerWidth(m.fullWidth)-3)
+	processRender = procsssBarBoarder(bottomElementHight(footerHeight), footerWidth(m.fullWidth), bottomBorder, m.focusPanel).Render(processRender)
 
 	return processRender
 }
 
-func MetaDataRender(m model) string {
+func metadataRender(m model) string {
 	// process bar
 	metaDataBar := ""
 	if len(m.fileMetaData.metaData) == 0 && len(m.fileModel.filePanels[m.filePanelFocusIndex].element) > 0 && !m.fileModel.renaming {
@@ -241,9 +244,9 @@ func MetaDataRender(m model) string {
 	}
 
 	sprintfLength := maxKeyLength + 1
-	vauleLength := BottomWidth(m.fullWidth) - maxKeyLength - 2
-	if vauleLength < BottomWidth(m.fullWidth)/2 {
-		vauleLength = BottomWidth(m.fullWidth)/2 - 2
+	vauleLength := footerWidth(m.fullWidth) - maxKeyLength - 2
+	if vauleLength < footerWidth(m.fullWidth)/2 {
+		vauleLength = footerWidth(m.fullWidth)/2 - 2
 		sprintfLength = vauleLength
 	}
 
@@ -251,21 +254,21 @@ func MetaDataRender(m model) string {
 		if i != m.fileMetaData.renderIndex {
 			metaDataBar += "\n"
 		}
-		data := TruncateMiddleText(m.fileMetaData.metaData[i][1], vauleLength)
+		data := truncateMiddleText(m.fileMetaData.metaData[i][1], vauleLength)
 		metadataName := m.fileMetaData.metaData[i][0]
-		if BottomWidth(m.fullWidth)-maxKeyLength-3 < BottomWidth(m.fullWidth)/2 {
-			metadataName = TruncateMiddleText(m.fileMetaData.metaData[i][0], vauleLength)
+		if footerWidth(m.fullWidth)-maxKeyLength-3 < footerWidth(m.fullWidth)/2 {
+			metadataName = truncateMiddleText(m.fileMetaData.metaData[i][0], vauleLength)
 		}
 		metaDataBar += fmt.Sprintf("%-*s %s", sprintfLength, metadataName, data)
 
 	}
-	bottomBorder := GenerateBottomBorder(fmt.Sprintf("%s/%s", strconv.Itoa(m.fileMetaData.renderIndex+1), strconv.Itoa(len(m.fileMetaData.metaData))), BottomWidth(m.fullWidth)-3)
-	metaDataBar = MetaDataBoarder(bottomElementHight(footerHeight), BottomWidth(m.fullWidth), bottomBorder, m.focusPanel).Render(metaDataBar)
+	bottomBorder := generateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(m.fileMetaData.renderIndex+1), strconv.Itoa(len(m.fileMetaData.metaData))), footerWidth(m.fullWidth)-3)
+	metaDataBar = metadataBoarder(bottomElementHight(footerHeight), footerWidth(m.fullWidth), bottomBorder, m.focusPanel).Render(metaDataBar)
 
 	return metaDataBar
 }
 
-func ClipboardRender(m model) string {
+func clipboardRender(m model) string {
 
 	// render
 	clipboardRender := ""
@@ -281,7 +284,7 @@ func ClipboardRender(m model) string {
 					outPutLog("Clipboard render function get item state error", err)
 				}
 				if !os.IsNotExist(err) {
-					clipboardRender += ClipboardPrettierName(m.copyItems.items[i], BottomWidth(m.fullWidth)-3, fileInfo.IsDir(), false) + "\n"
+					clipboardRender += clipboardPrettierName(m.copyItems.items[i], footerWidth(m.fullWidth)-3, fileInfo.IsDir(), false) + "\n"
 				}
 			}
 		}
@@ -292,21 +295,16 @@ func ClipboardRender(m model) string {
 	bottomWidth := 0
 
 	if m.fullWidth%3 != 0 {
-		bottomWidth = BottomWidth(m.fullWidth + m.fullWidth%3 + 2)
+		bottomWidth = footerWidth(m.fullWidth + m.fullWidth%3 + 2)
 	} else {
-		bottomWidth = BottomWidth(m.fullWidth)
+		bottomWidth = footerWidth(m.fullWidth)
 	}
-	clipboardRender = ClipboardBoarder(bottomElementHight(footerHeight), bottomWidth, "━").Render(clipboardRender)
+	clipboardRender = clipboardBoarder(bottomElementHight(footerHeight), bottomWidth, "━").Render(clipboardRender)
 
 	return clipboardRender
 }
 
-func TerminalSizeWarnRender(m model) string {
-	focusedModelStyle := lipgloss.NewStyle().
-		Height(m.fullHeight).
-		Width(m.fullWidth).
-		Align(lipgloss.Center, lipgloss.Center).
-		BorderForeground(lipgloss.Color("69"))
+func terminalSizeWarnRender(m model) string {
 	fullWidthString := strconv.Itoa(m.fullWidth)
 	fullHeightString := strconv.Itoa(m.fullHeight)
 	minimumWidthString := strconv.Itoa(minimumWidth)
@@ -317,39 +315,40 @@ func TerminalSizeWarnRender(m model) string {
 	if m.fullWidth < minimumWidth {
 		fullWidthString = terminalTooSmall.Render(fullWidthString)
 	}
-	fullHeightString = terminalMinimumSize.Render(fullHeightString)
-	fullWidthString = terminalMinimumSize.Render(fullWidthString)
+	fullHeightString = terminalCorrectSize.Render(fullHeightString)
+	fullWidthString = terminalCorrectSize.Render(fullWidthString)
 
-	return focusedModelStyle.Render(`Terminal size too small:` + "\n" +
+	heightString := mainStyle.Render(" Height = ")
+	return fullScreenStyle(m.fullHeight, m.fullWidth).Render(`Terminal size too small:` + "\n" +
 		"Width = " + fullWidthString +
-		" Height = " + fullHeightString + "\n\n" +
+		heightString + fullHeightString + "\n\n" +
 
 		"Needed for current config:" + "\n" +
-		"Width = " + terminalMinimumSize.Render(minimumWidthString) +
-		" Height = " + terminalMinimumSize.Render(minimumHeightString))
+		"Width = " + terminalCorrectSize.Render(minimumWidthString) +
+		heightString + terminalCorrectSize.Render(minimumHeightString))
 }
 
-func TypineModalRender(m model) string {
+func typineModalRender(m model) string {
 	if m.typingModal.itemType == newFile {
-		fileLocation := filePanelTopFolderIcon.Render("   ") + filePanelTopPath.Render(TruncateTextBeginning(m.typingModal.location+"/"+m.typingModal.textInput.Value(), modalWidth-4)) + "\n"
+		fileLocation := filePanelTopDirectoryIconStyle.Render("   ") + filePanelTopPathStyle.Render(truncateTextBeginning(m.typingModal.location+"/"+m.typingModal.textInput.Value(), modalWidth-4)) + "\n"
 		confirm := modalConfirm.Render(" (" + hotkeys.Confirm[0] + ") New File ")
 		cancel := modalCancel.Render(" (" + hotkeys.Cancel[0] + ") Cancel ")
-		tip := confirm + lipgloss.NewStyle().Background(mainBackgroundColor).Render("           ") + cancel
-		return FullScreenStyle(m.fullHeight, m.fullWidth).Render(FocusedModalStyle(modalHeight, modalWidth).Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip))
+		tip := confirm + lipgloss.NewStyle().Background(modalBGColor).Render("           ") + cancel
+		return fullScreenStyle(m.fullHeight, m.fullWidth).Render(modalBorderStyle(modalHeight, modalWidth).Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip))
 	} else {
-		fileLocation := filePanelTopFolderIcon.Render("   ") + filePanelTopPath.Render(TruncateTextBeginning(m.typingModal.location+"/"+m.typingModal.textInput.Value(), modalWidth-4)) + "\n"
+		fileLocation := filePanelTopDirectoryIconStyle.Render("   ") + filePanelTopPathStyle.Render(truncateTextBeginning(m.typingModal.location+"/"+m.typingModal.textInput.Value(), modalWidth-4)) + "\n"
 		confirm := modalConfirm.Render(" (" + hotkeys.Confirm[0] + ") New Folder ")
 		cancel := modalCancel.Render(" (" + hotkeys.Cancel[0] + ") Cancel ")
-		tip := confirm + lipgloss.NewStyle().Background(mainBackgroundColor).Render("           ") + cancel
-		return FullScreenStyle(m.fullHeight, m.fullWidth).Render(FocusedModalStyle(modalHeight, modalWidth).Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip))
+		tip := confirm + lipgloss.NewStyle().Background(modalBGColor).Render("           ") + cancel
+		return fullScreenStyle(m.fullHeight, m.fullWidth).Render(modalBorderStyle(modalHeight, modalWidth).Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip))
 	}
 }
 
-func WarnModalRender(m model) string {
+func warnModalRender(m model) string {
 	title := m.warnModal.title
 	content := m.warnModal.content
 	confirm := modalCancel.Render(" (" + hotkeys.Confirm[0] + ") Confirm ")
 	cancel := modalCancel.Render(" (" + hotkeys.Cancel[0] + ") Cancel ")
-	tip := confirm + lipgloss.NewStyle().Background(mainBackgroundColor).Render("           ") + cancel
-	return FullScreenStyle(m.fullHeight, m.fullWidth).Render(FocusedModalStyle(modalHeight, modalWidth).Render(title + "\n\n" + content + "\n\n" + tip))
+	tip := confirm + lipgloss.NewStyle().Background(modalBGColor).Render("           ") + cancel
+	return fullScreenStyle(m.fullHeight, m.fullWidth).Render(modalBorderStyle(modalHeight, modalWidth).Render(title + "\n\n" + content + "\n\n" + tip))
 }
