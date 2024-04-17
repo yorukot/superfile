@@ -138,6 +138,7 @@ type filePanel struct {
 	rename          textinput.Model
 	renaming        bool
 	searchBar       textinput.Model
+	lastTimeGetElement time.Time
 }
 
 // Record for directory navigation

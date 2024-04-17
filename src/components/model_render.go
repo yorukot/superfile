@@ -62,16 +62,7 @@ func filePanelRender(m model) string {
 	// file panel
 	f := make([]string, 10)
 	for i, filePanel := range m.fileModel.filePanels {
-		var fileElenent []element
-		// check is user are using search bar
-		if filePanel.searchBar.Value() != "" {
-			fileElenent = returnFolderElementBySearchString(filePanel.location, m.toggleDotFile, filePanel.searchBar.Value())
-		} else {
-			fileElenent = returnFolderElement(filePanel.location, m.toggleDotFile)
-		}
 
-		filePanel.element = fileElenent
-		m.fileModel.filePanels[i].element = fileElenent
 
 		// check if cursor or render out of range
 		if filePanel.cursor > len(filePanel.element)-1 {
@@ -83,13 +74,15 @@ func filePanelRender(m model) string {
 		f[i] += filePanelTopDirectoryIconStyle.Render("   ") + filePanelTopPathStyle.Render(truncateTextBeginning(filePanel.location, m.fileModel.width-4)) + "\n"
 		filePanelWidth := 0
 		bottomBorderWidth := 0
+
 		if (m.fullWidth-sidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels) != 0 && i == len(m.fileModel.filePanels)-1 {
-			filePanelWidth = (m.fileModel.width + 1)
+			filePanelWidth = (m.fileModel.width + (m.fullWidth-sidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels))
 			bottomBorderWidth = m.fileModel.width + 7
 		} else {
 			filePanelWidth = m.fileModel.width
 			bottomBorderWidth = m.fileModel.width + 6
 		}
+
 		f[i] += filePanelDividerStyle(filePanel.focusType).Render(strings.Repeat("━", filePanelWidth)) + "\n"
 		f[i] += " " + filePanel.searchBar.View() + "\n"
 		if len(filePanel.element) == 0 {

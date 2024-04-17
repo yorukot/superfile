@@ -57,14 +57,14 @@ func InitialModel(dir string) model {
 		},
 		fileModel: fileModel{
 			filePanels: []filePanel{
-				{	
+				{
 					render:          0,
 					cursor:          0,
 					location:        firstFilePanelDir,
 					panelMode:       browserMode,
 					focusType:       focus,
 					directoryRecord: make(map[string]directoryRecord),
-					searchBar: generateSearchBar(),
+					searchBar:       generateSearchBar(),
 				},
 			},
 			width: 10,
@@ -307,7 +307,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.firstTextInput = false
 	} else if m.fileModel.renaming {
 		m.fileModel.filePanels[m.filePanelFocusIndex].rename, cmd = m.fileModel.filePanels[m.filePanelFocusIndex].rename.Update(msg)
-	} else if panel.searchBar.Focused(){
+	} else if panel.searchBar.Focused() {
 		m.fileModel.filePanels[m.filePanelFocusIndex].searchBar, cmd = m.fileModel.filePanels[m.filePanelFocusIndex].searchBar.Update(msg)
 	} else if m.typingModal.open {
 		m.typingModal.textInput, cmd = m.typingModal.textInput.Update(msg)
@@ -322,6 +322,22 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	if !ListeningMessage {
 		cmd = tea.Batch(cmd, listenForChannelMessage(channel))
+	}
+	for i, filePanel := range m.fileModel.filePanels {
+		var fileElenent []element
+		if filePanel.focusType != noneFocus {
+			nowTime := time.Now()
+			if len(filePanel.element) < 500 || (len(filePanel.element) > 500 && (nowTime.Sub(filePanel.lastTimeGetElement) > 3*time.Second)) {
+				if filePanel.searchBar.Value() != "" {
+					fileElenent = returnFolderElementBySearchString(filePanel.location, m.toggleDotFile, filePanel.searchBar.Value())
+				} else {
+					fileElenent = returnFolderElement(filePanel.location, m.toggleDotFile)
+				}
+				filePanel.element = fileElenent
+				m.fileModel.filePanels[i].element = fileElenent
+				m.fileModel.filePanels[i].lastTimeGetElement = nowTime
+			}
+		}
 	}
 	return m, cmd
 }
