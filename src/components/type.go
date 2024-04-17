@@ -72,7 +72,7 @@ type model struct {
 	copyItems           copyItems
 	typingModal         typingModal
 	warnModal           warnModal
-	fileMetaData        fileMetaData
+	fileMetaData        fileMetadata
 	firstTextInput      bool
 	toggleDotFile       bool
 	filePanelFocusIndex int
@@ -98,7 +98,7 @@ type typingModal struct {
 }
 
 // File metadata
-type fileMetaData struct {
+type fileMetadata struct {
 	metaData    [][2]string
 	renderIndex int
 }
@@ -122,6 +122,7 @@ type fileModel struct {
 	filePanels []filePanel
 	width      int
 	renaming   bool
+	maxFilePanel int
 }
 
 // Panel representing a file

@@ -53,10 +53,7 @@ func InitialModel(dir string) model {
 			render:  0,
 		},
 		sidebarModel: sidebarModel{
-			directories: getDirectories(),
-			// wellKnownModel: getWellKnownDirectories(),
-			// pinnedModel:    getPinnedDirectories(),
-			// disksModel:     getExternalMediaFolders(),
+			directories: getDirectories(40),
 		},
 		fileModel: fileModel{
 			filePanels: []filePanel{
@@ -110,10 +107,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	// if the message by windows size change
 	case tea.WindowSizeMsg:
+		if msg.Height < 30 {
+			footerHeight = 10
+		} else {
+			footerHeight = 14
+		}
 		m.mainPanelHeight = msg.Height - footerHeight + 1
 		m.fileModel.width = (msg.Width - sidebarWidth - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
 		m.fullHeight = msg.Height
 		m.fullWidth = msg.Width
+		m.fileModel.maxFilePanel = (msg.Width - 20) / 24
+		if m.fileModel.maxFilePanel >= 10 {
+			m.fileModel.maxFilePanel = 10
+		}
 		return m, nil
 	// if just user press key
 	case tea.KeyMsg:
@@ -312,7 +318,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	cmd = tea.Batch(cmd)
-	m.sidebarModel.directories = getDirectories()
+	m.sidebarModel.directories = getDirectories(m.fullHeight)
 
 	if !ListeningMessage {
 		cmd = tea.Batch(cmd, listenForChannelMessage(channel))

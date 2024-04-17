@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	minimumHeight = 35
-	minimumWidth  = 96
+	minimumHeight = 24
+	minimumWidth  = 80
 	footerHeight  = 14
 	modalWidth    = 60
 	modalHeight   = 7

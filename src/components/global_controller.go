@@ -108,7 +108,7 @@ func contollerProcessBarListUp(m model) model {
 			m.processBarModel.render--
 		}
 	} else {
-		if len(m.processBarModel.processList) <= 3 {
+		if len(m.processBarModel.processList) <= 3 || (len(m.processBarModel.processList) <= 2 && footerHeight < 14) {
 			m.processBarModel.cursor = len(m.processBarModel.processList) - 1
 		} else {
 			m.processBarModel.render = len(m.processBarModel.processList) - 3
@@ -123,12 +123,12 @@ func contollerProcessBarListDown(m model) model {
 	if len(m.processBarModel.processList) == 0 {
 		return m
 	}
-	if m.processBarModel.cursor < len(m.processBarModel.processList)-1 {
+	if m.processBarModel.cursor < len(m.processBarModel.processList)-1  {
 		m.processBarModel.cursor++
 		if m.processBarModel.cursor > m.processBarModel.render+2 {
 			m.processBarModel.render++
 		}
-	} else {
+	} else { 
 		m.processBarModel.render = 0
 		m.processBarModel.cursor = 0
 	}
@@ -216,7 +216,7 @@ func closeFilePanel(m model) model {
 	return m
 }
 func createNewFilePanel(m model) model {
-	if len(m.fileModel.filePanels) != 4 {
+	if len(m.fileModel.filePanels) != m.fileModel.maxFilePanel {
 		m.fileModel.filePanels = append(m.fileModel.filePanels, filePanel{
 			location:        HomeDir,
 			panelMode:       browserMode,

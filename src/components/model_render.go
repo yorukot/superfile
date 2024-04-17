@@ -28,6 +28,7 @@ func sidebarRender(m model) string {
 			s += pinnedDivider
 			pinnedRendered = true
 		}
+
 		if i == amountPinnedDirectories+amountWellKnownDirectories && !externalRendered {
 			s += disksDivider
 			externalRendered = true
@@ -45,11 +46,13 @@ func sidebarRender(m model) string {
 
 	// In case no pinned directories or external drives are pinned,
 	// list menu item at the bottom
-	if !pinnedRendered {
-		s += pinnedDivider
-	}
-	if !externalRendered {
-		s += disksDivider
+	if m.fullHeight > 30 {
+		if !pinnedRendered {
+			s += pinnedDivider
+		}
+		if !externalRendered {
+			s += disksDivider
+		}
 	}
 
 	return sideBarBorderStyle(m.mainPanelHeight, m.focusPanel).Render(s)
@@ -57,7 +60,7 @@ func sidebarRender(m model) string {
 
 func filePanelRender(m model) string {
 	// file panel
-	f := make([]string, 4)
+	f := make([]string, 10)
 	for i, filePanel := range m.fileModel.filePanels {
 		var fileElenent []element
 		// check is user are using search bar
@@ -165,6 +168,9 @@ func processBarRender(m model) string {
 	renderTimes := 0
 
 	for i := m.processBarModel.render; i < len(processes); i++ {
+		if footerHeight < 14 && renderTimes == 2 {
+			break
+		}
 		if renderTimes == 3 {
 			break
 		}
@@ -191,6 +197,8 @@ func processBarRender(m model) string {
 		processRender += cursor + footerStyle.Render(truncateText(process.name, footerWidth(m.fullWidth)-7)+" ") + symbol + "\n"
 		if renderTimes == 2 {
 			processRender += cursor + process.progress.ViewAs(float64(process.done)/float64(process.total)) + ""
+		} else if footerHeight < 14 && renderTimes == 1 {
+			processRender += cursor + process.progress.ViewAs(float64(process.done)/float64(process.total))
 		} else {
 			processRender += cursor + process.progress.ViewAs(float64(process.done)/float64(process.total)) + "\n\n"
 		}

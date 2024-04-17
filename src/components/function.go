@@ -26,13 +26,14 @@ import (
 	"github.com/shirou/gopsutil/disk"
 )
 
-func getDirectories() []directory {
+func getDirectories(height int) []directory {
 	directories := []directory{}
 
 	directories = append(directories, getWellKnownDirectories()...)
-	directories = append(directories, getPinnedDirectories()...)
-	directories = append(directories, getExternalMediaFolders()...)
-
+	if height > 30 {
+		directories = append(directories, getPinnedDirectories()...)
+		directories = append(directories, getExternalMediaFolders()...)
+	}
 	return directories
 }
 
