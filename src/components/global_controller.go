@@ -2,7 +2,6 @@ package components
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"os/exec"
 	"path"
@@ -350,7 +349,7 @@ func pasteItem(m model) model {
 	if m.copyItems.cut {
 		for _, item := range m.copyItems.items {
 			if runtime.GOOS == "darwin" {
-				cmd := exec.Command("osascript", "-e", fmt.Sprintf("tell application \"Finder\" to delete POSIX file \"%s\"", item))
+				cmd := exec.Command("mv", "-fv", item, "~/.Trash/")
 				err := cmd.Run()
 				if err != nil {
 					outPutLog("Paste item function move file to trash can error", err)

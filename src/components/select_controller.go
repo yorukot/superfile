@@ -1,7 +1,6 @@
 package components
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -191,7 +190,7 @@ func deleteMultipleItem(m model) model {
 			}
 			var err error
 			if runtime.GOOS == "darwin" {
-				cmd := exec.Command("osascript", "-e", fmt.Sprintf("tell application \"Finder\" to delete POSIX file \"%s\"", filePath))
+				cmd := exec.Command("mv", "-fv", filePath, "~/.Trash/")
 				err = cmd.Run()
 				if err != nil {
 					outPutLog("Delete single item function move file to trash can error", err)
