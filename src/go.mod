@@ -3,7 +3,6 @@ module github.com/MHNightCat/superfile
 go 1.21.8
 
 require (
-	github.com/Bios-Marcel/wastebasket v0.0.3
 	github.com/atotto/clipboard v0.1.4
 	github.com/barasher/go-exiftool v1.10.0
 	github.com/charmbracelet/bubbles v0.18.0

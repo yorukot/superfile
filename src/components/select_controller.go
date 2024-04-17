@@ -1,13 +1,16 @@
 package components
 
 import (
+	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
 
-	"github.com/Bios-Marcel/wastebasket"
 	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/lithammer/shortuuid"
+	"github.com/rkoesters/xdg/trash"
 )
 
 func singleItemSelect(m model) model {
@@ -186,9 +189,18 @@ func deleteMultipleItem(m model) model {
 					processNewState: p,
 				}
 			}
-			err := wastebasket.Trash(filePath)
-			if err != nil {
-				outPutLog("Delete single item function move file to trash can error", err)
+			var err error
+			if runtime.GOOS == "darwin" {
+				cmd := exec.Command("osascript", "-e", fmt.Sprintf("tell application \"Finder\" to delete POSIX file \"%s\"", filePath))
+				err = cmd.Run()
+				if err != nil {
+					outPutLog("Delete single item function move file to trash can error", err)
+				}
+			} else {
+				err = trash.Trash(filePath)
+				if err != nil {
+					outPutLog("Delete single item function move file to trash can error", err)
+				}
 			}
 
 			if err != nil {

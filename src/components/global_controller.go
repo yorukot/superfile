@@ -2,16 +2,19 @@ package components
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
-	"github.com/Bios-Marcel/wastebasket"
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/lithammer/shortuuid"
+	"github.com/rkoesters/xdg/trash"
 )
 
 /* CURSOR CONTROLLER START */
@@ -346,11 +349,19 @@ func pasteItem(m model) model {
 	}
 	if m.copyItems.cut {
 		for _, item := range m.copyItems.items {
-
-			err := wastebasket.Trash(item)
-			if err != nil {
-				outPutLog("Paste item function move file to trash can error", err)
+			if runtime.GOOS == "darwin" {
+				cmd := exec.Command("osascript", "-e", fmt.Sprintf("tell application \"Finder\" to delete POSIX file \"%s\"", item))
+				err := cmd.Run()
+				if err != nil {
+					outPutLog("Paste item function move file to trash can error", err)
+				}
+			} else {
+				err := trash.Trash(item)
+				if err != nil {
+					outPutLog("Paste item function move file to trash can error", err)
+				}
 			}
+
 		}
 		if m.fileModel.filePanels[m.copyItems.originalPanel.index].location == m.copyItems.originalPanel.location {
 			m.fileModel.filePanels[m.copyItems.originalPanel.index].selected = panel.selected[:0]

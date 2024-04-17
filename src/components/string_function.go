@@ -40,7 +40,7 @@ func prettierName(name string, width int, isDir bool, isSelected bool, bgColor l
 	if isSelected {
 		return stringColorRender(lipgloss.Color(style.color), bgColor).
 		Background(bgColor).
-		Render(style.icon + "") + 
+		Render(style.icon + " ") + 
 		filePanelItemSelectedStyle.
 		Render(truncateText(name, width))
 	} else {
