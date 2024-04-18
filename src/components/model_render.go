@@ -73,22 +73,28 @@ func filePanelRender(m model) string {
 
 		f[i] += filePanelTopDirectoryIconStyle.Render("   ") + filePanelTopPathStyle.Render(truncateTextBeginning(filePanel.location, m.fileModel.width-4)) + "\n"
 		filePanelWidth := 0
-		bottomBorderWidth := 0
+		footerBorderWidth := 0
 
 		if (m.fullWidth-sidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels) != 0 && i == len(m.fileModel.filePanels)-1 {
 			filePanelWidth = (m.fileModel.width + (m.fullWidth-sidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels))
-			bottomBorderWidth = m.fileModel.width + 7
+			footerBorderWidth = m.fileModel.width + 7
 		} else {
 			filePanelWidth = m.fileModel.width
-			bottomBorderWidth = m.fileModel.width + 6
+			footerBorderWidth = m.fileModel.width + 7
+		}
+		panelModeString := ""
+		if filePanel.panelMode == browserMode {
+			panelModeString = "󰈈 Browser"
+		} else if filePanel.panelMode == selectMode {
+			panelModeString = "󰆽 Select"
 		}
 
 		f[i] += filePanelDividerStyle(filePanel.focusType).Render(strings.Repeat("━", filePanelWidth)) + "\n"
 		f[i] += " " + filePanel.searchBar.View() + "\n"
 		if len(filePanel.element) == 0 {
 			f[i] += filePanelStyle.Render("   No such file or directory")
-			bottomBorder := generateFooterBorder("0/0", m.fileModel.width+5)
-			f[i] = filePanelBorderStyle(m.mainPanelHeight, m.fileModel.width, filePanel.focusType, bottomBorder).Render(f[i])
+			bottomBorder := generateFooterBorder(fmt.Sprintf("%s┣━┫%s", panelModeString, "0/0"), footerBorderWidth)
+			f[i] = filePanelBorderStyle(m.mainPanelHeight, filePanelWidth, filePanel.focusType, bottomBorder).Render(f[i])
 		} else {
 			for h := filePanel.render; h < filePanel.render+panelElementHeight(m.mainPanelHeight) && h < len(filePanel.element); h++ {
 				endl := "\n"
@@ -109,13 +115,8 @@ func filePanelRender(m model) string {
 			}
 			cursorPosition := strconv.Itoa(filePanel.cursor + 1)
 			totalElement := strconv.Itoa(len(filePanel.element))
-			panelModeString := ""
-			if filePanel.panelMode == browserMode {
-				panelModeString = "󰈈 Browser"
-			} else if filePanel.panelMode == selectMode {
-				panelModeString = "󰆽 Select"
-			}
-			bottomBorder := generateFooterBorder(fmt.Sprintf("%s┣━┫%s/%s", panelModeString, cursorPosition, totalElement), bottomBorderWidth)
+
+			bottomBorder := generateFooterBorder(fmt.Sprintf("%s┣━┫%s/%s", panelModeString, cursorPosition, totalElement), footerBorderWidth)
 			f[i] = filePanelBorderStyle(m.mainPanelHeight, filePanelWidth, filePanel.focusType, bottomBorder).Render(f[i])
 		}
 	}
