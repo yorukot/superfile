@@ -31,6 +31,12 @@ schema = 3
   [mod."github.com/davecgh/go-spew"]
     version = "v1.1.2-0.20180830191138-d8f796af33cc"
     hash = "sha256-fV9oI51xjHdOmEx6+dlq7Ku2Ag+m/bmbzPo6A4Y74qc="
+  [mod."github.com/deckarep/golang-set"]
+    version = "v1.8.0"
+    hash = "sha256-ELJKphksU9AOYwV3BtjvwPtUpbZvX9YMmo7eIiauQSc="
+  [mod."github.com/go-ole/go-ole"]
+    version = "v1.2.6"
+    hash = "sha256-+oxitLeJxYF19Z6g+6CgmCHJ1Y5D8raMi2Cb3M6nXCs="
   [mod."github.com/kr/pretty"]
     version = "v0.3.1"
     hash = "sha256-DlER7XM+xiaLjvebcIPiB12oVNjyZHuJHoRGITzzpKU="
@@ -40,6 +46,9 @@ schema = 3
   [mod."github.com/lucasb-eyer/go-colorful"]
     version = "v1.2.0"
     hash = "sha256-Gg9dDJFCTaHrKHRR1SrJgZ8fWieJkybljybkI9x0gyE="
+  [mod."github.com/masatana/go-textdistance"]
+    version = "v0.0.0-20191005053614-738b0edac985"
+    hash = "sha256-oFZqvacgNt5uHrfRCzpR2Z6BRGRepbhKdD+sU9PUCVo="
   [mod."github.com/mattn/go-isatty"]
     version = "v0.0.18"
     hash = "sha256-QpIn0DSggtBn2ocyj0RlXDKLK5F5KZG1/ogzrqBCjF8="
@@ -61,6 +70,9 @@ schema = 3
   [mod."github.com/muesli/termenv"]
     version = "v0.15.2"
     hash = "sha256-Eum/SpyytcNIchANPkG4bYGBgcezLgej7j/+6IhqoMU="
+  [mod."github.com/pelletier/go-toml/v2"]
+    version = "v2.2.1"
+    hash = "sha256-gmQ4CTz/MI97D3pYqU7mpxqo8gBTDccQ1Cp0lAMmJUc="
   [mod."github.com/pmezard/go-difflib"]
     version = "v1.0.1-0.20181226105442-5d4384ee4fb2"
     hash = "sha256-XA4Oj1gdmdV/F/+8kMI+DBxKPthZ768hbKsO3d9Gx90="
@@ -76,15 +88,18 @@ schema = 3
   [mod."github.com/satori/go.uuid"]
     version = "v1.2.0"
     hash = "sha256-y/lSGbnZa7mYJCs30a3LTyjfCFQSaYp8GbVR8dwtmsg="
-  [mod."github.com/stretchr/testify"]
-    version = "v1.8.4"
-    hash = "sha256-MoOmRzbz9QgiJ+OOBo5h5/LbilhJfRUryvzHJmXAWjo="
+  [mod."github.com/shirou/gopsutil"]
+    version = "v3.21.11+incompatible"
+    hash = "sha256-tcH5zN94yZhKtg8wAUfojlqdyguifuPTBLPso3KF7QA="
   [mod."github.com/urfave/cli/v2"]
     version = "v2.27.1"
     hash = "sha256-L+Z9fYABYg7KiB57MK64+XcXEWNjP04WWpjbENOxPWY="
   [mod."github.com/xrash/smetrics"]
     version = "v0.0.0-20201216005158-039620a65673"
     hash = "sha256-WGHtW/OkLowkqOYIvXpDOpn9wqdH2+Dyx3+rYwpmvzI="
+  [mod."github.com/yusufpapurcu/wmi"]
+    version = "v1.2.4"
+    hash = "sha256-N+YDBjOW59YOsZ2lRBVtFsEEi48KhNQRb63/0ZSU3bA="
   [mod."golang.org/x/sync"]
     version = "v0.5.0"
     hash = "sha256-EAKeODSsct5HhXPmpWJfulKSCkuUu6kkDttnjyZMNcI="
