@@ -325,8 +325,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 	for i, filePanel := range m.fileModel.filePanels {
 		var fileElenent []element
-		if filePanel.focusType != noneFocus {
-			nowTime := time.Now()
+		nowTime := time.Now()
+		if filePanel.focusType != noneFocus || nowTime.Sub(filePanel.lastTimeGetElement) > 3*time.Second {
 			if len(filePanel.element) < 500 || (len(filePanel.element) > 500 && (nowTime.Sub(filePanel.lastTimeGetElement) > 3*time.Second)) {
 				if filePanel.searchBar.Value() != "" {
 					fileElenent = returnFolderElementBySearchString(filePanel.location, m.toggleDotFile, filePanel.searchBar.Value())

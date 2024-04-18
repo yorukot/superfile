@@ -131,7 +131,11 @@ func returnFolderElement(location string, displayDotFile bool) (folderElement []
 	}
 
 	for _, item := range items {
-		fileInfo, _ := item.Info()
+		fileInfo, err := item.Info()
+		if err != nil {
+			continue
+		}
+		
 		if !displayDotFile && strings.HasPrefix(fileInfo.Name(), ".") {
 			continue
 		}
