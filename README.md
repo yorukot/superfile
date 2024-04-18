@@ -18,7 +18,6 @@
 
 ## Content
 
-- [Features](#features)
 - [Installation](#install)
   - [Homebrew](#homebrew)
   - [Linux](#linux)
@@ -33,23 +32,6 @@
 - [Contributing](#contributing)
 - [Todo list](#todo-list)
 - [Star History](#star-history)
-
-## Features
-
-- Fancy GUI
-- Fully customizable
-- Vim keybindings
-- Easy to use
-- Trash can
-- Metadata detail
-- Clipboard viewer
-- Copy and paste file
-- Auto rename file or folder when duplicate
-- Rename files in a modern way
-- Open file with default app
-- Open terminal with current path
-- Search bar
-- Extract or compress file
 
 ## Install
 
