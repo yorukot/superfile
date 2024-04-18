@@ -24,6 +24,7 @@
   - [Font](#font)
 - [Build](#build)
 - [Supported Systems](#supported-systems)
+- [Tutorial] (#tutorial)
 - [Plugins](#plugins)
 - [Themes](#themes)
   - [Use an existing theme](#use-an-existing-theme)
@@ -152,6 +153,10 @@ mv ./bin/spf /usr/local/bin
 - \[x\] Linux
 - \[x\] MacOS
 - \[ \] Windows
+
+## Tutorial
+
+After you install superfile, you can go [here](https://github.com/MHNightCat/superfile/wiki/Tutorial) to briefly understand how to use superfile!
 
 ## Plugins
 
