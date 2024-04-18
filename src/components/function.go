@@ -135,7 +135,7 @@ func returnFolderElement(location string, displayDotFile bool) (folderElement []
 		if err != nil {
 			continue
 		}
-		
+
 		if !displayDotFile && strings.HasPrefix(fileInfo.Name(), ".") {
 			continue
 		}
@@ -573,10 +573,14 @@ func loadConfigFile(dir string) (toggleDotFileBool bool, firstFilePanelDir strin
 		toggleDotFileBool = false
 	}
 	LoadThemeConfig()
-	et, err = exiftool.NewExiftool()
-	if err != nil {
-		outPutLog("Initial model function init exiftool error", err)
+	
+	if Config.Metadata {
+		et, err = exiftool.NewExiftool()
+		if err != nil {
+			outPutLog("Initial model function init exiftool error", err)
+		}
 	}
+
 	firstFilePanelDir = HomeDir
 	if dir != "" {
 		firstFilePanelDir, err = filepath.Abs(dir)

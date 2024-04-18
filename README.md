@@ -48,6 +48,8 @@
 - Rename files in a modern way
 - Open file with default app
 - Open terminal with current path
+- Search bar
+- Extract or compress file
 
 ## Install
 
@@ -55,7 +57,6 @@
 
 **Requirements**
 
-- [`Exiftool`](#exiftool)
 - Any [`Nerd Font`](#font)
 
 ### Homebrew
@@ -172,8 +173,7 @@ mv ./bin/spf /usr/local/bin
 
 ## Plugins
 
-**Metadata**
-request: [`exiftool`](https://github.com/exiftool/exiftool)
+[Click me to the plugins wiki](https://github.com/MHNightCat/superfile/wiki/Plugins)
 
 ## Themes
 
@@ -217,15 +217,15 @@ Don't forget to change the `theme` variable in `config.json` to your theme name.
 
 ## Hotkeys
 
-[**Click me to see the hotkey list**](https://github.com/MHNightCat/superfile/blob/main/HOTKEYS.md)
+[**Click me to see the hotkey list**](https://github.com/MHNightCat/superfile/wiki/Hotkey-list)
 
-**You can change all hotkeys in** `~/.config/superfile/config.json`
+**You can change all hotkeys in** `~/.config/superfile/hotkeys.toml`
 
 > "Normal mode" is the default browsing mode
 
 Global hotkeys cannot conflict with other hotkeys (The only exception is the special hotkey).
 
-The hotkey ranges are found in `config.json`
+The hotkey ranges are found in `hotkeys.toml`
 
 ## Contributing
 
