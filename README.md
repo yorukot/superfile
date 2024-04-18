@@ -94,7 +94,8 @@ in {
 
 ### Font
 
-> WARNING: This is a reminder that you must use a [Nerd font](https://www.nerdfonts.com/font-downloads)
+> [!WARNING] 
+> This is a reminder that you must use a [Nerd font](https://www.nerdfonts.com/font-downloads)
 
 Once the font is installed if `superfile` isn't working make sure to update your terminal preferences to use the font.
 
