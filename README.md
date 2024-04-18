@@ -24,7 +24,7 @@
   - [Font](#font)
 - [Build](#build)
 - [Supported Systems](#supported-systems)
-- [Tutorial] (#tutorial)
+- [Tutorial](#tutorial)
 - [Plugins](#plugins)
 - [Themes](#themes)
   - [Use an existing theme](#use-an-existing-theme)
