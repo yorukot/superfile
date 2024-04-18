@@ -60,22 +60,6 @@ chmod +x ./spf
 sudo mv ./spf /bin/
 ```
 
-**Installation:**
-
-```bash
-# Homebrew:
-brew install exiftool
-
-# Fedora:
-sudo dnf install perl-Image-ExifTool
-
-# Ubuntu:
-sudo apt install exiftool
-
-# Archlinux:
-sudo pacman -S perl-image-exiftool
-```
-
 <h4>
      NixOS
 </h4>
