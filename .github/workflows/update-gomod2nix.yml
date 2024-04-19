@@ -1,0 +1,31 @@
+name: Update gomod2nix.toml
+on:
+  pull_request:
+    paths:
+      - 'src/go.mod'
+      - 'src/go.sum'
+
+permissions:
+  contents: write
+
+jobs:
+  dependabot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Nix
+        uses: cachix/install-nix-action@v26
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          nix_path: nixpkgs=channel:nixos-unstable
+      - name: Update checksum
+        run: |
+          cd src
+          nix develop --extra-experimental-features "nix-command flakes" '.#' -c "gomod2nix"
+          # git push if we have a diff
+          if [[ -n $(git diff) ]]; then
+            git config --global user.email "107802416+MHNightCat@users.noreply.github.com"
+            git config --global user.name "MHNightCat"
+            git commit -am "chore: update gomod2nix"
+            git push origin HEAD:${{ github.head_ref }}
+          fi
