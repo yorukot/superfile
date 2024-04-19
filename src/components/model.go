@@ -41,6 +41,8 @@ var et *exiftool.Exiftool
 
 var channel = make(chan channelMessage, 1000)
 
+var foreceReloadElement = false
+
 func InitialModel(dir string) model {
 	toggleDotFileBool, firstFilePanelDir := loadConfigFile(dir)
 
@@ -281,9 +283,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						} else if m.focusPanel == processBarFocus {
 
 						} else if m.focusPanel == nonePanelFocus {
+							foreceReloadElement = true
 							m = enterPanel(m)
 						}
 					case hotkeys.ParentDirectory[0], hotkeys.ParentDirectory[1]:
+						foreceReloadElement = true
 						m = parentFolder(m)
 					case hotkeys.DeleteItem[0], hotkeys.DeleteItem[1]:
 						go func() {
@@ -326,8 +330,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	for i, filePanel := range m.fileModel.filePanels {
 		var fileElenent []element
 		nowTime := time.Now()
-		if filePanel.focusType != noneFocus || nowTime.Sub(filePanel.lastTimeGetElement) > 3*time.Second {
-			if len(filePanel.element) < 500 || (len(filePanel.element) > 500 && (nowTime.Sub(filePanel.lastTimeGetElement) > 3*time.Second)) {
+		if filePanel.focusType != noneFocus || nowTime.Sub(filePanel.lastTimeGetElement) > 3*time.Second || foreceReloadElement {
+			if len(filePanel.element) < 500 || (len(filePanel.element) > 500 && (nowTime.Sub(filePanel.lastTimeGetElement) > 3*time.Second)) || foreceReloadElement {
 				if filePanel.searchBar.Value() != "" {
 					fileElenent = returnFolderElementBySearchString(filePanel.location, m.toggleDotFile, filePanel.searchBar.Value())
 				} else {
@@ -337,6 +341,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.fileModel.filePanels[i].element = fileElenent
 				m.fileModel.filePanels[i].lastTimeGetElement = nowTime
 			}
+			foreceReloadElement = false
 		}
 	}
 	return m, cmd
