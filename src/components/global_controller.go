@@ -3,7 +3,6 @@ package components
 import (
 	"encoding/json"
 	"os"
-	"os/exec"
 	"path"
 	"path/filepath"
 	"runtime"
@@ -349,10 +348,9 @@ func pasteItem(m model) model {
 	if m.copyItems.cut {
 		for _, item := range m.copyItems.items {
 			if runtime.GOOS == "darwin" {
-				cmd := exec.Command("mv", "-fv", item, "~/.Trash/")
-				err := cmd.Run()
+				err := moveElement(panel.element[panel.cursor].location,  HomeDir + "/.Trash/" + filepath.Base(panel.element[panel.cursor].location))
 				if err != nil {
-					outPutLog("Paste item function move file to trash can error", err)
+					outPutLog("Delete single item function move file to trash can error", err)
 				}
 			} else {
 				err := trash.Trash(item)

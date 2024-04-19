@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"runtime"
 	"time"
 
@@ -33,10 +34,9 @@ func enterPanel(m model) model {
 		}
 	} else if len(panel.element) > 0 && !panel.element[panel.cursor].directory {
 		if runtime.GOOS == "darwin" {
-			cmd := exec.Command("open", panel.element[panel.cursor].location)
-			_, err := cmd.Output()
+			err := moveElement(panel.element[panel.cursor].location,  HomeDir + "/.Trash/" + filepath.Base(panel.element[panel.cursor].location))
 			if err != nil {
-				outPutLog("err when open file with open command:", err)
+				outPutLog("Delete single item function move file to trash can error", err)
 			}
 		} else {
 			cmd := exec.Command("xdg-open", panel.element[panel.cursor].location)
@@ -166,8 +166,7 @@ func deleteSingleItem(m model) model {
 	}
 	var err error
 	if runtime.GOOS == "darwin" {
-		cmd := exec.Command("mv", "-fv", panel.element[panel.cursor].location, "~/.Trash/")
-		err = cmd.Run()
+		err := moveElement(panel.element[panel.cursor].location,  HomeDir + "/.Trash/" + filepath.Base(panel.element[panel.cursor].location))
 		if err != nil {
 			outPutLog("Delete single item function move file to trash can error", err)
 		}

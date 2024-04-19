@@ -2,7 +2,6 @@ package components
 
 import (
 	"os"
-	"os/exec"
 	"path/filepath"
 	"runtime"
 
@@ -190,8 +189,7 @@ func deleteMultipleItem(m model) model {
 			}
 			var err error
 			if runtime.GOOS == "darwin" {
-				cmd := exec.Command("mv", "-fv", filePath, "~/.Trash/")
-				err = cmd.Run()
+				err := moveElement(panel.element[panel.cursor].location,  HomeDir + "/.Trash/" + filepath.Base(panel.element[panel.cursor].location))
 				if err != nil {
 					outPutLog("Delete single item function move file to trash can error", err)
 				}

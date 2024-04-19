@@ -837,3 +837,12 @@ func generateSearchBar() textinput.Model {
 	ti.CharLimit = 156
 	return ti
 }
+
+func moveElement(src, dst string) error {
+    // 移动文件
+    err := os.Rename(src, dst)
+    if err != nil {
+        return fmt.Errorf("failed to move file: %v", err)
+    }
+    return nil
+}
