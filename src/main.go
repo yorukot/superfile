@@ -406,5 +406,5 @@ footer_panel_list = ["processes", "metadata", "clipboard"]
 # ==========PLUGINS========== #
 
 # Show more detailed metadata, please install exiftool before enabling this plugin!
-metadata = true
+metadata = false
 `
