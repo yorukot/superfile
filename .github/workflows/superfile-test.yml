@@ -21,5 +21,4 @@ jobs:
 
     - name: Run
       run: |
-        cd src
         ./main
