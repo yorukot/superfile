@@ -1,0 +1,1 @@
+- [ ] check all plugins is disable
