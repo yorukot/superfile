@@ -17,4 +17,5 @@ jobs:
     - name: Build and run
       run: |
         cd src
-        go build ./main.go && ./main
+        go build ./main.go
+        ./main
