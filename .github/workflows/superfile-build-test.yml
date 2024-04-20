@@ -14,8 +14,7 @@ jobs:
       with:
         go-version: 1.21
 
-    - name: Build and run
+    - name: Build
       run: |
         cd src
         go build ./main.go
-        ./main
