@@ -17,8 +17,8 @@ jobs:
     - name: Build and install
       run: |
         cd src
-        go build ./main.go -o ./spf
-        mv ./spf /bin/spf
+        go build ./main.go
+        mv ./main /bin/spf
 
     - name: Run
       run: spf
