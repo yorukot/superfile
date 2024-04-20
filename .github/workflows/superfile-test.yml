@@ -1,0 +1,28 @@
+name: Go
+
+on:
+  push:
+    branches: [ $default-branch ]
+  pull_request:
+    branches: [ $default-branch ]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.19
+
+    - name: Build and install
+      run: |
+        cd src
+        go build ./main.go -o ./spf
+        mv ./spf /bin/spf
+
+    - name: Run
+      run: spf
