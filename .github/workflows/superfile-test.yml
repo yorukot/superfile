@@ -14,11 +14,12 @@ jobs:
       with:
         go-version: 1.21
 
-    - name: Build and install
+    - name: Build
       run: |
         cd src
         go build ./main.go
-        mv ./main /bin/spf
 
     - name: Run
-      run: spf
+      run: |
+        cd src
+        ./main
