@@ -43,12 +43,12 @@ gradient_color = ["#89b4fa", "#cba6f7"]
 # ========= File Panel Special Items =========
 file_panel_top_directory_icon = "#a6e3a1"
 file_panel_top_path = "#89b5fa"
-file_panel_item_selected_fg = "#9399b2"
+file_panel_item_selected_fg = "#98D0FD"
 file_panel_item_selected_bg = "#1e1e2e"
 
 # ========= Sidebar Special Items =========
 sidebar_title = "#74c7ec"
-sidebar_item_selected_fg = "#cba6f7"
+sidebar_item_selected_fg = "#A6DBF7"
 sidebar_item_selected_bg = "#1e1e2e"
 sidebar_divider = "#868686"
 

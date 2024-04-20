@@ -1,11 +1,10 @@
 # change your theme
-theme = "gruvbox"
+theme = "catpuccin"
 
 # useless for now
 footer_panel_list = ["processes", "metadata", "clipboard"]
 
-
 # ==========PLUGINS========== #
 
 # Show more detailed metadata, please install exiftool before enabling this plugin!
-metadata = false
+metadata = true

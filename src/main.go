@@ -27,10 +27,10 @@ var SuperFileCacheDir = basedir.CacheHome + "/superfile"
 var SuperFileDataDir = basedir.DataHome + "/superfile"
 
 const (
-	currentVersion      string = "v1.0.2"
+	currentVersion      string = "v1.1.0"
 	latestVersionURL    string = "https://api.github.com/repos/MHNightCat/superfile/releases/latest"
 	latestVersionGithub string = "github.com/MHNightCat/superfile/releases/latest"
-	themeZip            string = "https://github.com/MHNightCat/superfile/raw/main/themeZip/1.0.2/theme.zip"
+	themeZip            string = "https://github.com/MHNightCat/superfile/raw/main/themeZip/v1.1.0/theme.zip"
 )
 
 const (
@@ -358,8 +358,8 @@ pinned_directory = ["ctrl+p", ""]
 close_file_panel = ["ctrl+w", ""]
 create_new_file_panel = ["ctrl+n", ""]
 
-next_file_panel = ["tab", ""]
-previous_file_panel = ["shift+left", ""]
+next_file_panel = ["tab", "L"]
+previous_file_panel = ["shift+left", "H"]
 focus_on_process_bar = ["p", ""]
 focus_on_side_bar = ["b", ""]
 focus_on_meta_data = ["m", ""]
@@ -398,13 +398,13 @@ file_panel_select_all_item = ["ctrl+a", ""]
 `
 
 const configTomlString string = `# change your theme
-theme = "gruvbox"
+theme = "catpuccin"
 
 # useless for now
 footer_panel_list = ["processes", "metadata", "clipboard"]
 
-
 # ==========PLUGINS========== #
 
 # Show more detailed metadata, please install exiftool before enabling this plugin!
-metadata = false`
+metadata = true
+`
