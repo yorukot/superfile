@@ -20,4 +20,5 @@ jobs:
         go build ./main.go
 
     - name: Run
-      run: ./main
+      run: |
+        /src/main
