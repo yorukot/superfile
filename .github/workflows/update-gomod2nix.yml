@@ -1,5 +1,9 @@
 name: Update gomod2nix.toml
-on: [push]
+on:
+  pull_request:
+    paths:
+      - 'src/go.mod'
+      - 'src/go.sum'
 
 permissions:
  contents: write
@@ -27,3 +31,4 @@ jobs:
             BRANCH_NAME=$(echo ${{ github.ref }} | sed -e 's/refs\/heads\///g')
             git push origin HEAD:$BRANCH_NAME
           fi
+
