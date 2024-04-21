@@ -20,8 +20,8 @@ schema = 3
     version = "v0.2.0"
     hash = "sha256-fi5N0IXhSbbYHdSZFngCfpT4kdiEaKedqj8YpnlvX0o="
   [mod."github.com/charmbracelet/lipgloss"]
-    version = "v0.9.1"
-    hash = "sha256-AHbabOymgDRIXsMBgJHS25/GgBWT54oGbd15EBWKeZc="
+    version = "v0.10.0"
+    hash = "sha256-JZD1iVeizYe0mp3qQcJbUZdYN6HP/DNC67ja79DTe6s="
   [mod."github.com/containerd/console"]
     version = "v1.0.4-0.20230313162750-1ae8d489ac81"
     hash = "sha256-Qus81DgpWHJ6RRqeKOKcUFvzCxvPzygJqBabvBsBuHU="
@@ -37,12 +37,12 @@ schema = 3
   [mod."github.com/go-ole/go-ole"]
     version = "v1.2.6"
     hash = "sha256-+oxitLeJxYF19Z6g+6CgmCHJ1Y5D8raMi2Cb3M6nXCs="
-  [mod."github.com/kr/pretty"]
-    version = "v0.3.1"
-    hash = "sha256-DlER7XM+xiaLjvebcIPiB12oVNjyZHuJHoRGITzzpKU="
+  [mod."github.com/google/uuid"]
+    version = "v1.6.0"
+    hash = "sha256-VWl9sqUzdOuhW0KzQlv0gwwUQClYkmZwSydHG2sALYw="
   [mod."github.com/lithammer/shortuuid"]
-    version = "v2.0.3+incompatible"
-    hash = "sha256-H7G+o5oWiYzSVXGwQ4oL/DBu8OPWBB5t48CXQx+SvRg="
+    version = "v3.0.0+incompatible"
+    hash = "sha256-dD6ArCHGnpo84RBy6SI2kUjMqHS4IZU+K+DgAgmRakY="
   [mod."github.com/lucasb-eyer/go-colorful"]
     version = "v1.2.0"
     hash = "sha256-Gg9dDJFCTaHrKHRR1SrJgZ8fWieJkybljybkI9x0gyE="
@@ -77,17 +77,14 @@ schema = 3
     version = "v1.0.1-0.20181226105442-5d4384ee4fb2"
     hash = "sha256-XA4Oj1gdmdV/F/+8kMI+DBxKPthZ768hbKsO3d9Gx90="
   [mod."github.com/rivo/uniseg"]
-    version = "v0.4.6"
-    hash = "sha256-zGfzO8FWj03POzo47SzrK1B4yLMKJ7iic6ium76ZLzI="
+    version = "v0.4.7"
+    hash = "sha256-rDcdNYH6ZD8KouyyiZCUEy8JrjOQoAkxHBhugrfHjFo="
   [mod."github.com/rkoesters/xdg"]
     version = "v0.0.1"
     hash = "sha256-+ckoKNaiEqQIpRFPr3CNRE3w8+OHmRKZ2cn6MquNIOE="
   [mod."github.com/russross/blackfriday/v2"]
     version = "v2.1.0"
     hash = "sha256-R+84l1si8az5yDqd5CYcFrTyNZ1eSYlpXKq6nFt4OTQ="
-  [mod."github.com/satori/go.uuid"]
-    version = "v1.2.0"
-    hash = "sha256-y/lSGbnZa7mYJCs30a3LTyjfCFQSaYp8GbVR8dwtmsg="
   [mod."github.com/shirou/gopsutil"]
     version = "v3.21.11+incompatible"
     hash = "sha256-tcH5zN94yZhKtg8wAUfojlqdyguifuPTBLPso3KF7QA="
@@ -112,6 +109,3 @@ schema = 3
   [mod."golang.org/x/text"]
     version = "v0.14.0"
     hash = "sha256-yh3B0tom1RfzQBf1RNmfdNWF1PtiqxV41jW1GVS6JAg="
-  [mod."gopkg.in/check.v1"]
-    version = "v1.0.0-20201130134442-10cb98267c6c"
-    hash = "sha256-VlIpM2r/OD+kkyItn6vW35dyc0rtkJufA93rjFyzncs="
