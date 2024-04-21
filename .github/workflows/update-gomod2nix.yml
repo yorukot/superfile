@@ -1,6 +1,6 @@
 name: Update gomod2nix.toml
 on:
-  pull_request:
+  push:
     paths:
       - 'src/go.mod'
       - 'src/go.sum'
