@@ -14,22 +14,16 @@ jobs:
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
           nix_path: nixpkgs=channel:nixos-unstable
+
       - name: Update checksum
         run: |
           cd src
           nix develop --extra-experimental-features "nix-command flakes" '.#' -c "gomod2nix"
-          # Commit changes if there's a diff
+          # git push if we have a diff
           if [[ -n $(git diff) ]]; then
             git config --global user.email "107802416+MHNightCat@users.noreply.github.com"
             git config --global user.name "MHNightCat"
             git commit -am "chore: update gomod2nix"
-            git push origin HEAD:${{ github.head_ref }}
+            BRANCH_NAME=$(echo ${{ github.ref }} | sed -e 's/refs\/heads\///g')
+            git push origin HEAD:$BRANCH_NAME
           fi
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore: update gomod2nix"
-          title: "Update gomod2nix.toml"
-          body: "This PR updates the gomod2nix.toml file."
-          base: main
