@@ -4,12 +4,12 @@ All notable changes to this project will be documented in this file. Dates are d
 
 # [**v1.1.1**]()
 
-> xxxx/xx/xx
+> 2024/04/22
 
 #### Update
 
 #### Bug fix
-
+- key l deletes files in MacOs [#72](https://github.com/MHNightCat/superfile/issues/72)
 
 # [**v1.1.0**](https://github.com/MHNightCat/superfile/releases/tag/v1.1.0)
 
