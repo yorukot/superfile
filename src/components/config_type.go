@@ -102,53 +102,53 @@ type ThemeType struct {
 
 // Configuration settings
 type ConfigType struct {
-	Theme           string   `toml:"theme"`
-	FooterPanelList []string `toml:"footer_panel_list"`
-	Metadata        bool     `toml:"metadata"`
+	Theme           string   `mapstructure:"theme"`
+	FooterPanelList []string `mapstructure:"footer_panel_list"`
+	Metadata        bool     `mapstructure:"metadata"`
 }
 
 type HotkeysType struct {
-	Quit []string `toml:"quit"`
+	Quit []string `mapstructure:"quit"`
 
-	ListUp   []string `toml:"list_up"`
-	ListDown []string `toml:"list_down"`
+	ListUp   []string `mapstructure:"list_up"`
+	ListDown []string `mapstructure:"list_down"`
 
-	PinnedDirectory []string `toml:"pinned_directory"`
+	PinnedDirectory []string `mapstructure:"pinned_directory"`
 
-	CloseFilePanel           []string `toml:"close_file_panel"`
-	CreateNewFilePanel       []string `toml:"create_new_file_panel"`
-	NextFilePanel            []string `toml:"next_file_panel"`
-	PreviousFilePanel        []string `toml:"previous_file_panel"`
-	FocusOnProcessBar        []string `toml:"focus_on_process_bar"`
-	FocusOnSideBar           []string `toml:"focus_on_side_bar"`
-	FocusOnMetaData          []string `toml:"focus_on_meta_data"`
-	ChangePanelMode          []string `toml:"change_panel_mode"`
-	FilePanelDirectoryCreate []string `toml:"file_panel_directory_create"`
-	FilePanelFileCreate      []string `toml:"file_panel_file_create"`
-	FilePanelItemRename      []string `toml:"file_panel_item_rename"`
-	PasteItem                []string `toml:"paste_item"`
-	ExtractFile              []string `toml:"extract_file"`
-	CompressFile             []string `toml:"compress_file"`
-	ToggleDotFile            []string `toml:"toggle_dot_file"`
+	CloseFilePanel           []string `mapstructure:"close_file_panel"`
+	CreateNewFilePanel       []string `mapstructure:"create_new_file_panel"`
+	NextFilePanel            []string `mapstructure:"next_file_panel"`
+	PreviousFilePanel        []string `mapstructure:"previous_file_panel"`
+	FocusOnProcessBar        []string `mapstructure:"focus_on_process_bar"`
+	FocusOnSideBar           []string `mapstructure:"focus_on_side_bar"`
+	FocusOnMetaData          []string `mapstructure:"focus_on_meta_data"`
+	ChangePanelMode          []string `mapstructure:"change_panel_mode"`
+	FilePanelDirectoryCreate []string `mapstructure:"file_panel_directory_create"`
+	FilePanelFileCreate      []string `mapstructure:"file_panel_file_create"`
+	FilePanelItemRename      []string `mapstructure:"file_panel_item_rename"`
+	PasteItem                []string `mapstructure:"paste_item"`
+	ExtractFile              []string `mapstructure:"extract_file"`
+	CompressFile             []string `mapstructure:"compress_file"`
+	ToggleDotFile            []string `mapstructure:"toggle_dot_file"`
 
-	OpenFileWithEditor []string `toml:"oepn_file_with_editor"`
-	OpenCurrentDirectoryWithEditor []string `toml:"open_current_directory_with_editor"`
+	OpenFileWithEditor             []string `mapstructure:"oepn_file_with_editor`
+	OpenCurrentDirectoryWithEditor []string `mapstructure:"open_current_directory_with_editor"`
 
-	Cancel  []string `toml:"cancel"`
-	Confirm []string `toml:"confirm"`
+	Cancel  []string `mapstructure:"cancel"`
+	Confirm []string `mapstructure:"confirm"`
 
-	DeleteItem      []string `toml:"delete_item"`
-	SelectItem      []string `toml:"select_item"`
-	ParentDirectory []string `toml:"parent_directory"`
-	CopySingleItem  []string `toml:"copy_single_item"`
-	CutSingleItem   []string `toml:"cut_single_item"`
-	SearchBar       []string `toml:"search_bar"`
+	DeleteItem      []string `mapstructure:"delete_item"`
+	SelectItem      []string `mapstructure:"select_item"`
+	ParentDirectory []string `mapstructure:"parent_directory"`
+	CopySingleItem  []string `mapstructure:"copy_single_item"`
+	CutSingleItem   []string `mapstructure:"cut_single_item"`
+	SearchBar       []string `mapstructure:"search_bar"`
 
-	FilePanelSelectModeItemSingleSelect []string `toml:"file_panel_select_mode_item_single_select"`
-	FilePanelSelectModeItemSelectDown   []string `toml:"file_panel_select_mode_item_select_down"`
-	FilePanelSelectModeItemSelectUp     []string `toml:"file_panel_select_mode_item_select_up"`
-	FilePanelSelectModeItemDelete       []string `toml:"file_panel_select_mode_item_delete"`
-	FilePanelSelectModeItemCopy         []string `toml:"file_panel_select_mode_item_copy"`
-	FilePanelSelectModeItemCut          []string `toml:"file_panel_select_mode_item_cut"`
-	FilePanelSelectAllItem              []string `toml:"file_panel_select_all_item"`
+	FilePanelSelectModeItemSingleSelect []string `mapstructure:"file_panel_select_mode_item_single_select"`
+	FilePanelSelectModeItemSelectDown   []string `mapstructure:"file_panel_select_mode_item_select_down"`
+	FilePanelSelectModeItemSelectUp     []string `mapstructure:"file_panel_select_mode_item_select_up"`
+	FilePanelSelectModeItemDelete       []string `mapstructure:"file_panel_select_mode_item_delete"`
+	FilePanelSelectModeItemCopy         []string `mapstructure:"file_panel_select_mode_item_copy"`
+	FilePanelSelectModeItemCut          []string `mapstructure:"file_panel_select_mode_item_cut"`
+	FilePanelSelectAllItem              []string `mapstructure:"file_panel_select_all_item"`
 }
