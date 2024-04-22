@@ -131,6 +131,9 @@ type HotkeysType struct {
 	CompressFile             []string `toml:"compress_file"`
 	ToggleDotFile            []string `toml:"toggle_dot_file"`
 
+	OpenFileWithEditor []string `toml:"oepn_file_with_editor"`
+	OpenCurrentDirectoryWithEditor []string `toml:"open_current_directory_with_editor"`
+
 	Cancel  []string `toml:"cancel"`
 	Confirm []string `toml:"confirm"`
 

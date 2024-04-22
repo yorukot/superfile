@@ -24,6 +24,9 @@ paste_item = ["ctrl+v", ""]
 extract_file = ["ctrl+e", ""]
 compress_file = ["ctrl+r", ""]
 
+oepn_file_with_editor = ["e", ""]
+open_current_directory_with_editor = ["E", ""]
+
 toggle_dot_file = ["ctrl+h", ""]
 
 # These hotkeys do not conflict with any other keys (including global hotkey)

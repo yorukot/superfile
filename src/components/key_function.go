@@ -1,6 +1,8 @@
 package components
 
-func mainKey(msg string, m model) model {
+import tea "github.com/charmbracelet/bubbletea"
+
+func mainKey(msg string, m model, cmd tea.Cmd) (model, tea.Cmd) {
 	switch msg {
 	/* LIST CONTROLLER START */
 	// up list
@@ -77,14 +79,15 @@ func mainKey(msg string, m model) model {
 			m = extractFile(m)
 		}()
 	case hotkeys.CompressFile[0], hotkeys.CompressFile[1]:
-
 		go func() {
 			m = compressFile(m)
 		}()
+	case hotkeys.OpenFileWithEditor[0], hotkeys.OpenFileWithEditor[1]:
+		cmd = openFileWithEditor(m)
 	default:
 		m = normalAndBrowserModeKey(msg, m)
 	}
-	return m
+	return m, cmd
 }
 
 func normalAndBrowserModeKey(msg string, m model) model {

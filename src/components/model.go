@@ -96,7 +96,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	switch msg := msg.(type) {
 	case channelMessage:
-		if msg.returnWarnModal {
+		 if msg.returnWarnModal {
 			m.warnModal = msg.warnModal
 		} else if msg.loadMetadata {
 			m.fileMetaData.metaData = msg.metadata
@@ -136,7 +136,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if msg.String() == hotkeys.Quit[0] || msg.String() == hotkeys.Quit[1] {
 				return m, tea.Quit
 			}
-			m = mainKey(msg.String(), m)
+			m, cmd = mainKey(msg.String(), m, cmd)
+			if m.editorMode {
+				m.editorMode = false
+				return m, cmd
+			}
 		}
 	}
 
@@ -169,7 +173,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if len(filePanel.element) > 500 && (len(filePanel.element) > 500 && (nowTime.Sub(filePanel.lastTimeGetElement) > 3*time.Second)) && !forceReloadElement {
 			continue
 		}
-		
+
 		if filePanel.searchBar.Value() != "" {
 			fileElenent = returnFolderElementBySearchString(filePanel.location, m.toggleDotFile, filePanel.searchBar.Value())
 		} else {
@@ -180,7 +184,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.fileModel.filePanels[i].lastTimeGetElement = nowTime
 		forceReloadElement = false
 	}
-	return m, cmd
+
+	return m, tea.Batch(cmd)
 }
 
 func (m model) View() string {
