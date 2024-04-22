@@ -34,9 +34,10 @@ func enterPanel(m model) model {
 		}
 	} else if len(panel.element) > 0 && !panel.element[panel.cursor].directory {
 		if runtime.GOOS == "darwin" {
-			err := moveElement(panel.element[panel.cursor].location,  HomeDir + "/.Trash/" + filepath.Base(panel.element[panel.cursor].location))
+			cmd := exec.Command("open", panel.element[panel.cursor].location)
+			_, err := cmd.Output()
 			if err != nil {
-				outPutLog("Delete single item function move file to trash can error", err)
+				outPutLog("err when open file with xdg-open:", err)
 			}
 		} else {
 			cmd := exec.Command("xdg-open", panel.element[panel.cursor].location)
