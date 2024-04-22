@@ -44,7 +44,7 @@ var et *exiftool.Exiftool
 var channel = make(chan channelMessage, 1000)
 
 func InitialModel(dir string) model {
-	toggleDotFileBool, firstFilePanelDir := loadConfigFile(dir)
+	toggleDotFileBool, firstFilePanelDir := initialConfig(dir)
 
 	return model{
 		filePanelFocusIndex: 0,

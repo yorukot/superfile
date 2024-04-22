@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file. Dates are d
 > 2024/04/22
 
 #### Update
+- Open directory with default application [#33](https://github.com/MHNightCat/superfile/issues/33)
 
 #### Bug fix
 - key `l` deletes files in MacOs [#72](https://github.com/MHNightCat/superfile/issues/72)
