@@ -37,7 +37,7 @@ func enterPanel(m model) model {
 			cmd := exec.Command("open", panel.element[panel.cursor].location)
 			_, err := cmd.Output()
 			if err != nil {
-				outPutLog("err when open file with xdg-open:", err)
+				outPutLog("err when open file with open:", err)
 			}
 		} else {
 			cmd := exec.Command("xdg-open", panel.element[panel.cursor].location)
