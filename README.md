@@ -36,7 +36,7 @@
 
 ## Install
 
-> I am still working on different installation methods like `homebrew` and `snap`
+> I am still working on different installation methods like `snap` or `AUR`
 
 **Requirements**
 
@@ -44,10 +44,10 @@
 
 ### Homebrew
 
-If you want to use homebrew please install `go` first!
+Install homebrew and execute the following commands
 
 ```bash
-brew tap mhnightcat/superfile https://github.com/MHNightCat/homebrew-superfile.git && brew install superfile
+brew install superfile
 ```
 
 ### Linux
