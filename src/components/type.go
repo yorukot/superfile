@@ -75,6 +75,7 @@ type model struct {
 	fileMetaData        fileMetadata
 	firstTextInput      bool
 	toggleDotFile       bool
+	editorMode          bool
 	filePanelFocusIndex int
 	mainPanelHeight     int
 	fullWidth           int
@@ -119,25 +120,25 @@ type originalPanel struct {
 /* FILE WINDOWS TYPE START*/
 // Model for file windows
 type fileModel struct {
-	filePanels []filePanel
-	width      int
-	renaming   bool
+	filePanels   []filePanel
+	width        int
+	renaming     bool
 	maxFilePanel int
 }
 
 // Panel representing a file
 type filePanel struct {
-	cursor          int
-	render          int
-	focusType       filePanelFocusType
-	location        string
-	panelMode       panelMode
-	selected        []string
-	element         []element
-	directoryRecord map[string]directoryRecord
-	rename          textinput.Model
-	renaming        bool
-	searchBar       textinput.Model
+	cursor             int
+	render             int
+	focusType          filePanelFocusType
+	location           string
+	panelMode          panelMode
+	selected           []string
+	element            []element
+	directoryRecord    map[string]directoryRecord
+	rename             textinput.Model
+	renaming           bool
+	searchBar          textinput.Model
 	lastTimeGetElement time.Time
 }
 
@@ -212,3 +213,5 @@ type iconStyle struct {
 	icon  string
 	color string
 }
+
+type editorFinishedMsg struct{ err error }

@@ -3,6 +3,7 @@ package components
 import (
 	"encoding/json"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"runtime"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/textinput"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/lithammer/shortuuid"
 	"github.com/rkoesters/xdg/trash"
 )
@@ -488,4 +490,31 @@ func compressFile(m model) model {
 	zipSource(panel.element[panel.cursor].location, filepath.Join(filepath.Dir(panel.element[panel.cursor].location), zipName))
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m
+}
+
+func openFileWithEditor(m model) tea.Cmd {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+
+	editor := os.Getenv("EDITOR")
+	m.editorMode = true
+	if editor == "" {
+		editor = "nano"
+	}
+	c := exec.Command(editor, panel.element[panel.cursor].location)
+	
+	return tea.ExecProcess(c, func(err error) tea.Msg {
+		return editorFinishedMsg{err}
+	})
+}
+
+func openDirectoryWithEditor(m model) tea.Cmd {
+	editor := os.Getenv("EDITOR")
+	m.editorMode = true
+	if editor == "" {
+		editor = "nano"
+	}
+	c := exec.Command(editor, m.fileModel.filePanels[m.filePanelFocusIndex].location)
+	return tea.ExecProcess(c, func(err error) tea.Msg {
+		return editorFinishedMsg{err}
+	})
 }
