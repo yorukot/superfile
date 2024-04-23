@@ -6,7 +6,8 @@ import (
 	"path/filepath"
 
 	"github.com/barasher/go-exiftool"
-	"github.com/pelletier/go-toml/v2")
+	"github.com/pelletier/go-toml/v2"
+)
 
 func initialConfig(dir string) (toggleDotFileBool bool, firstFilePanelDir string) {
 	var err error
@@ -51,6 +52,9 @@ func initialConfig(dir string) (toggleDotFileBool bool, firstFilePanelDir string
 }
 
 func loadConfigFile() {
+
+	_ = toml.Unmarshal([]byte(ConfigTomlString), &Config)
+
 	data, err := os.ReadFile(SuperFileMainDir + configFile)
 	if err != nil {
 		log.Fatalf("Config file doesn't exist: %v", err)
@@ -62,7 +66,11 @@ func loadConfigFile() {
 }
 
 func loadHotkeysFile() {
+	
+	_ = toml.Unmarshal([]byte(HotkeysTomlString), &hotkeys)
+
 	data, err := os.ReadFile(SuperFileMainDir + hotkeysFile)
+	
 	if err != nil {
 		log.Fatalf("Config file doesn't exist: %v", err)
 	}
