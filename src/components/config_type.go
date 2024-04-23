@@ -102,28 +102,31 @@ type ThemeType struct {
 
 // Configuration settings
 type ConfigType struct {
-	Theme           string   `toml:"theme"`
-	FooterPanelList []string `toml:"footer_panel_list"`
-	Metadata        bool     `toml:"metadata"`
+	Theme           string   `toml:"theme" comment:"change your theme"`
+	FooterPanelList []string `toml:"footer_panel_list" comment:"\nuseless for now"`
+	Metadata bool `toml:"metadata" comment:"\n==========PLUGINS========== #\n\nShow more detailed metadata, please install exiftool before enabling this plugin!"`
 }
 
 type HotkeysType struct {
-	Quit []string `toml:"quit"`
+	Quit []string `toml:"quit" comment:"Here is global, all global key cant conflicts with other hotkeys"`
 
-	ListUp   []string `toml:"list_up"`
+	ListUp   []string `toml:"list_up" comment:"\n"`
 	ListDown []string `toml:"list_down"`
 
-	PinnedDirectory []string `toml:"pinned_directory"`
+	PinnedDirectory []string `toml:"pinned_directory" comment:"\n"`
 
-	CloseFilePanel           []string `toml:"close_file_panel"`
+	CloseFilePanel           []string `toml:"close_file_panel" comment:"\n"`
 	CreateNewFilePanel       []string `toml:"create_new_file_panel"`
-	NextFilePanel            []string `toml:"next_file_panel"`
+
+	NextFilePanel            []string `toml:"next_file_panel" comment:"\n"`
 	PreviousFilePanel        []string `toml:"previous_file_panel"`
 	FocusOnProcessBar        []string `toml:"focus_on_process_bar"`
 	FocusOnSideBar           []string `toml:"focus_on_side_bar"`
 	FocusOnMetaData          []string `toml:"focus_on_meta_data"`
-	ChangePanelMode          []string `toml:"change_panel_mode"`
-	FilePanelDirectoryCreate []string `toml:"file_panel_directory_create"`
+
+	ChangePanelMode          []string `toml:"change_panel_mode" comment:"\n"`
+
+	FilePanelDirectoryCreate []string `toml:"file_panel_directory_create" comment:"\n"`
 	FilePanelFileCreate      []string `toml:"file_panel_file_create"`
 	FilePanelItemRename      []string `toml:"file_panel_item_rename"`
 	PasteItem                []string `toml:"paste_item"`
@@ -131,20 +134,20 @@ type HotkeysType struct {
 	CompressFile             []string `toml:"compress_file"`
 	ToggleDotFile            []string `toml:"toggle_dot_file"`
 
-	OpenFileWithEditor             []string `toml:"oepn_file_with_editor"`
+	OpenFileWithEditor             []string `toml:"oepn_file_with_editor" comment:"\n"`
 	OpenCurrentDirectoryWithEditor []string `toml:"open_current_directory_with_editor"`
 
-	Cancel  []string `toml:"cancel"`
+	Cancel  []string `toml:"cancel" comment:"\nThese hotkeys do not conflict with any other keys (including global hotkey)"`
 	Confirm []string `toml:"confirm"`
 
-	DeleteItem      []string `toml:"delete_item"`
+	DeleteItem      []string `toml:"delete_item" comment:"\nHere is normal mode hotkey you can conflicts with other mode (cant conflicts with global hotkey)"`
 	SelectItem      []string `toml:"select_item"`
 	ParentDirectory []string `toml:"parent_directory"`
 	CopySingleItem  []string `toml:"copy_single_item"`
 	CutSingleItem   []string `toml:"cut_single_item"`
 	SearchBar       []string `toml:"search_bar"`
 
-	FilePanelSelectModeItemSingleSelect []string `toml:"file_panel_select_mode_item_single_select"`
+	FilePanelSelectModeItemSingleSelect []string `toml:"file_panel_select_mode_item_single_select" comment:"\nHere is select mode hotkey you can conflicts with other mode (cant conflicts with global hotkey)"`
 	FilePanelSelectModeItemSelectDown   []string `toml:"file_panel_select_mode_item_select_down"`
 	FilePanelSelectModeItemSelectUp     []string `toml:"file_panel_select_mode_item_select_up"`
 	FilePanelSelectModeItemDelete       []string `toml:"file_panel_select_mode_item_delete"`
