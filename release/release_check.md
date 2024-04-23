@@ -1,1 +1,2 @@
 - [ ] check all plugins is disable
+- [ ] check update version and zip file
