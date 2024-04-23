@@ -6,9 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/barasher/go-exiftool"
-	"github.com/pelletier/go-toml/v2"
-	"github.com/spf13/viper"
-)
+	"github.com/pelletier/go-toml/v2")
 
 func initialConfig(dir string) (toggleDotFileBool bool, firstFilePanelDir string) {
 	var err error
@@ -22,15 +20,8 @@ func initialConfig(dir string) (toggleDotFileBool bool, firstFilePanelDir string
 
 	loadHotkeysFile()
 
-	data, err := os.ReadFile(SuperFileMainDir + themeFolder + "/" + Config.Theme + ".toml")
-	if err != nil {
-		log.Fatalf("Theme file doesn't exist: %v", err)
-	}
+	loadThemeFile()
 
-	err = toml.Unmarshal(data, &theme)
-	if err != nil {
-		log.Fatalf("Error while decoding theme json( Your theme file may have errors ): %v", err)
-	}
 	toggleDotFileData, err := os.ReadFile(SuperFileDataDir + toggleDotFile)
 	if err != nil {
 		outPutLog("Error while reading toggleDotFile data error:", err)
@@ -60,33 +51,35 @@ func initialConfig(dir string) (toggleDotFileBool bool, firstFilePanelDir string
 }
 
 func loadConfigFile() {
-	viperConfig := viper.New()
-	viperConfig.SetConfigName("config")
-	viperConfig.SetConfigType("toml")
-	viperConfig.SetConfigFile(SuperFileMainDir + configFile)
-	err := viperConfig.ReadInConfig()
+	data, err := os.ReadFile(SuperFileMainDir + configFile)
 	if err != nil {
 		log.Fatalf("Config file doesn't exist: %v", err)
 	}
-	err = viperConfig.Unmarshal(&Config)
+	err = toml.Unmarshal(data, &Config)
 	if err != nil {
-		log.Fatalf("Error decoding config file( your config file may have misconfigured ): %v", err)
+		log.Fatalf("Error decoding config file ( your config file may have misconfigured ): %v", err)
 	}
 }
 
 func loadHotkeysFile() {
-	
-	viperHotkeys := viper.New()
-	viperHotkeys.SetConfigName("hotkeys")
-	viperHotkeys.SetConfigType("toml")
-	viperHotkeys.SetConfigFile(SuperFileMainDir + hotkeysFile)
-
-	err := viperHotkeys.ReadInConfig()
+	data, err := os.ReadFile(SuperFileMainDir + hotkeysFile)
 	if err != nil {
 		log.Fatalf("Config file doesn't exist: %v", err)
 	}
-	err = viperHotkeys.Unmarshal(&hotkeys)
+	err = toml.Unmarshal(data, &hotkeys)
 	if err != nil {
-		log.Fatalf("Error decoding hotkeys file( your config file may have misconfigured ): %v", err)
+		log.Fatalf("Error decoding config file ( your config file may have misconfigured ): %v", err)
+	}
+}
+
+func loadThemeFile() {
+	data, err := os.ReadFile(SuperFileMainDir + themeFolder + "/" + Config.Theme + ".toml")
+	if err != nil {
+		log.Fatalf("Theme file doesn't exist: %v", err)
+	}
+
+	err = toml.Unmarshal(data, &theme)
+	if err != nil {
+		log.Fatalf("Error while decoding theme file( Your theme file may have errors ): %v", err)
 	}
 }

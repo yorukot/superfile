@@ -131,7 +131,7 @@ type HotkeysType struct {
 	CompressFile             []string `mapstructure:"compress_file"`
 	ToggleDotFile            []string `mapstructure:"toggle_dot_file"`
 
-	OpenFileWithEditor             []string `mapstructure:"oepn_file_with_editor`
+	OpenFileWithEditor             []string `mapstructure:"oepn_file_with_editor"`
 	OpenCurrentDirectoryWithEditor []string `mapstructure:"open_current_directory_with_editor"`
 
 	Cancel  []string `mapstructure:"cancel"`

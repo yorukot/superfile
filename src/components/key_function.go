@@ -84,7 +84,7 @@ func mainKey(msg string, m model, cmd tea.Cmd) (model, tea.Cmd) {
 		}()
 	case hotkeys.OpenFileWithEditor[0], hotkeys.OpenFileWithEditor[1]:
 		cmd = openFileWithEditor(m)
-	case hotkeys.OpenCurrentDirectoryWithEditor[0], hotkeys.OpenFileWithEditor[1]:
+	case hotkeys.OpenCurrentDirectoryWithEditor[0], hotkeys.OpenCurrentDirectoryWithEditor[1]:
 		cmd = openDirectoryWithEditor(m)
 	default:
 		m = normalAndBrowserModeKey(msg, m)
