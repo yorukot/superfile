@@ -4,13 +4,14 @@ All notable changes to this project will be documented in this file. Dates are d
 
 # [**v1.1.1**]()
 
-> 2024/04/22
+> 2024/04/23
 
 #### Update
-- Open directory with default application [#33](https://github.com/MHNightCat/superfile/issues/33)
+- Open directory with default application [`#33`](https://github.com/MHNightCat/superfile/issues/33)
+- Auto update config file if missing config [`1498c92`](https://github.com/MHNightCat/superfile/commit/1498c92d2166c8c25989be9ce5a15dc6d1ffb073)
 
 #### Bug fix
-- key `l` deletes files in MacOs [#72](https://github.com/MHNightCat/superfile/issues/72)
+- key `l` deletes files in MacOs [`#72`](https://github.com/MHNightCat/superfile/issues/72)
 
 # [**v1.1.0**](https://github.com/MHNightCat/superfile/releases/tag/v1.1.0)
 
