@@ -31,7 +31,6 @@
   - [Create your own theme](#create-your-own-theme)
 - [Hotkeys](#hotkeys)
 - [Contributing](#contributing)
-- [Todo list](#todo-list)
 - [Star History](#star-history)
 
 ## Install
@@ -202,10 +201,6 @@ The hotkey ranges are found in `hotkeys.toml`
 ## Contributing
 
 If you want to contribute please follow the [contribution guide](./CONTRIBUTING.md)
-
-## Todo list
-
-See the todo list in [here](https://github.com/MHNightCat/superfile/blob/main/TODOLIST.md)
 
 ## Star History
 
