@@ -80,3 +80,49 @@ func confirmSearch(m model) model {
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m
 }
+
+func helpMenuListUp(m model) model {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	if len(panel.element) == 0 {
+		return m
+	}
+	if panel.cursor > 0 {
+		panel.cursor--
+		if panel.cursor < panel.render {
+			panel.render--
+		}
+	} else {
+		if len(panel.element) > panelElementHeight(m.mainPanelHeight) {
+			panel.render = len(panel.element) - panelElementHeight(m.mainPanelHeight)
+			panel.cursor = len(panel.element) - 1
+		} else {
+			panel.cursor = len(panel.element) - 1
+		}
+	}
+
+	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+	return m
+}
+
+func helpMenuListDown(m model) model {
+	if len(m.helpMenu.data) == 0 {
+		return m
+	}
+	
+	if m.helpMenu.cursor < len(m.helpMenu.data)-1 {
+		m.helpMenu.cursor++
+		if m.helpMenu.cursor > m.helpMenu.renderIndex+m.helpMenu.height-1 {
+			m.helpMenu.renderIndex++
+		}
+	} else {
+		m.helpMenu.cursor = 0
+		m.helpMenu.renderIndex = 0
+	}
+
+	return m
+}
+
+func quitHelpMenu(m model) model {
+	m.helpMenu.open = false
+	return m
+}

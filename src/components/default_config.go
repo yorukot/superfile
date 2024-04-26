@@ -18,6 +18,7 @@ focus_on_side_bar = ['b', '']
 focus_on_meta_data = ['m', '']
 # 
 change_panel_mode = ['v', '']
+open_help_menu = ['?', '']
 # 
 file_panel_directory_create = ['f', '']
 file_panel_file_create = ['c', '']

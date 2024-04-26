@@ -24,6 +24,14 @@ type itemType int
 
 type warnType int
 
+type hotkeyType int
+
+const (
+	globalType hotkeyType = iota
+	normalType
+	selectType
+)
+
 const (
 	confirmDeleteItem warnType = iota
 )
@@ -72,6 +80,7 @@ type model struct {
 	copyItems           copyItems
 	typingModal         typingModal
 	warnModal           warnModal
+	helpMenu            helpModal
 	fileMetaData        fileMetadata
 	firstTextInput      bool
 	toggleDotFile       bool
@@ -83,6 +92,22 @@ type model struct {
 }
 
 // Modal
+
+type helpModal struct {
+	height      int
+	width       int
+	open        bool
+	renderIndex int
+	cursor      int
+	data        []helpModalData
+}
+
+type helpModalData struct {
+	hotkey         []string
+	description    string
+	hotkeyWorkType hotkeyType
+	previousSubTitle   string
+}
 
 type warnModal struct {
 	open     bool
