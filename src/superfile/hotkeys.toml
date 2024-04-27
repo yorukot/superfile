@@ -16,6 +16,7 @@ focus_on_side_bar = ['b', '']
 focus_on_meta_data = ['m', '']
 # 
 change_panel_mode = ['v', '']
+open_help_menu = ['?', '']
 # 
 file_panel_directory_create = ['f', '']
 file_panel_file_create = ['c', '']
@@ -38,7 +39,7 @@ select_item = ['enter', 'l']
 parent_directory = ['h', 'backspace']
 copy_single_item = ['ctrl+c', '']
 cut_single_item = ['ctrl+x', '']
-search_bar = ['ctrl+f', '']
+search_bar = ['/', 'ctrl+f']
 # 
 # Here is select mode hotkey you can conflicts with other mode (cant conflicts with global hotkey)
 file_panel_select_mode_item_single_select = ['enter', 'l']
