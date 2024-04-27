@@ -335,13 +335,13 @@ func typineModalRender(m model) string {
 		confirm := modalConfirm.Render(" (" + hotkeys.Confirm[0] + ") New File ")
 		cancel := modalCancel.Render(" (" + hotkeys.Cancel[0] + ") Cancel ")
 		tip := confirm + lipgloss.NewStyle().Background(modalBGColor).Render("           ") + cancel
-		return fullScreenStyle(m.fullHeight, m.fullWidth).Render(modalBorderStyle(modalHeight, modalWidth).Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip))
+		return modalBorderStyle(modalHeight, modalWidth).Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip)
 	} else {
 		fileLocation := filePanelTopDirectoryIconStyle.Render("   ") + filePanelTopPathStyle.Render(truncateTextBeginning(m.typingModal.location+"/"+m.typingModal.textInput.Value(), modalWidth-4)) + "\n"
 		confirm := modalConfirm.Render(" (" + hotkeys.Confirm[0] + ") New Folder ")
 		cancel := modalCancel.Render(" (" + hotkeys.Cancel[0] + ") Cancel ")
 		tip := confirm + lipgloss.NewStyle().Background(modalBGColor).Render("           ") + cancel
-		return fullScreenStyle(m.fullHeight, m.fullWidth).Render(modalBorderStyle(modalHeight, modalWidth).Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip))
+		return modalBorderStyle(modalHeight, modalWidth).Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip)
 	}
 }
 
@@ -351,7 +351,7 @@ func warnModalRender(m model) string {
 	confirm := modalCancel.Render(" (" + hotkeys.Confirm[0] + ") Confirm ")
 	cancel := modalCancel.Render(" (" + hotkeys.Cancel[0] + ") Cancel ")
 	tip := confirm + lipgloss.NewStyle().Background(modalBGColor).Render("           ") + cancel
-	return fullScreenStyle(m.fullHeight, m.fullWidth).Render(modalBorderStyle(modalHeight, modalWidth).Render(title + "\n\n" + content + "\n\n" + tip))
+	return modalBorderStyle(modalHeight, modalWidth).Render(title + "\n\n" + content + "\n\n" + tip)
 }
 
 func helpMenuRender(m model) string {
@@ -425,5 +425,5 @@ func helpMenuRender(m model) string {
 
 	bottomBorder := generateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(m.helpMenu.cursor+1 - cursorBeenTitleCount), strconv.Itoa(len(m.helpMenu.data)-totalTitleCount)), m.helpMenu.width-2)
 
-	return fullScreenStyle(m.fullHeight, m.fullWidth).Render(helpMenuModalBorderStyle(m.helpMenu.height, m.helpMenu.width, bottomBorder).Render(helpMenuContent))
+	return helpMenuModalBorderStyle(m.helpMenu.height, m.helpMenu.width, bottomBorder).Render(helpMenuContent)
 }

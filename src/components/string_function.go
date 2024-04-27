@@ -65,3 +65,45 @@ func clipboardPrettierName(name string, width int, isDir bool, isSelected bool) 
 		filePanelStyle.Render(truncateTextBeginning(name, width))
 	}
 }
+
+// func placeOverlay(x, y int,background, placeModal string) string {
+// 	lines := strings.Split(placeModal, "\n")
+// 	lines = lines
+// 	re := regexp.MustCompile(`\x1b\[[0-9;]*[mK]`)
+	
+// 	// 示例字符串
+// 	str := "[38;2;134;134;134;48;2;30;30;46m┏A我[0m"
+	
+// 	// 使用 FindAllStringIndex 找出所有匹配的位置
+// 	indexes := re.FindAllStringIndex(str, -1)
+// 	outPutLog(str)
+// 	// 檢查是否找到匹配
+// 	if indexes != nil {
+// 		for _, loc := range indexes {
+// 			loc = mapCoords(str, loc)
+// 			outPutLog(fmt.Sprintf("匹配的開始位置: %d, 結束位置: %d", loc[0], loc[1]))
+// 		}
+// 	} else {
+// 		outPutLog("沒有找到匹配")
+// 	}
+
+// 	return ""
+// }
+
+// func mapCoords(s string, byteCoords []int) (graphemeCoords []int) {
+//     graphemeCoords = make([]int, 2)
+//     gr := uniseg.NewGraphemes(s)
+//     graphemeIndex := -1
+//     for gr.Next() {
+//         graphemeIndex++
+//         a, b := gr.Positions()
+//         if a == byteCoords[0] {
+//             graphemeCoords[0] = graphemeIndex
+//         }
+//         if b == byteCoords[1] {
+//             graphemeCoords[1] = graphemeIndex + 1
+//             break
+//         }
+//     }
+//     return
+// }
