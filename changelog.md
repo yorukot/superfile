@@ -2,7 +2,17 @@
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC(YYYY/MM/DD).
 
-# [**v1.1.1**]()
+# [**v1.1.2**]()
+
+> xxxx/xx/xx
+
+#### Update
+- Update help menu [`#75`](https://github.com/MHNightCat/superfile/issues/75)
+
+#### Bug fix
+- Fix Cut -> Paste file causes go panic [`#77`](https://github.com/MHNightCat/superfile/issues/77)
+
+# [**v1.1.1**](https://github.com/MHNightCat/superfile/releases/tag/v1.1.1)
 
 > 2024/04/23
 
