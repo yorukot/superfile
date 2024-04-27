@@ -345,6 +345,7 @@ func typineModalRender(m model) string {
 	}
 }
 
+
 func warnModalRender(m model) string {
 	title := m.warnModal.title
 	content := m.warnModal.content

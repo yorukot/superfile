@@ -68,11 +68,16 @@ metadata = false
 func getHelpMenuData() []helpMenuModalData {
 	data := []helpMenuModalData{
 		{
-			subTitle: "測試用途",
+			subTitle: "General",
 		},
 		{
 			hotkey:         hotkeys.Quit,
 			description:    "Quit",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey:         hotkeys.OpenHelpMenu,
+			description:    "Open help menu(hotkeylist)",
 			hotkeyWorkType: globalType,
 		},
 		{
