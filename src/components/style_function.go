@@ -111,6 +111,17 @@ func modalBorderStyle(height int, width int) lipgloss.Style {
 		Foreground(modalFGColor)
 }
 
+func firstUseModal(height int, width int) lipgloss.Style {
+	return lipgloss.NewStyle().Height(height).
+		Width(width).
+		Align(lipgloss.Left, lipgloss.Center).
+		Border(lipgloss.ThickBorder()).
+		BorderForeground(modalBorderActiveColor).
+		BorderBackground(modalBGColor).
+		Background(modalBGColor).
+		Foreground(modalFGColor)
+}
+
 func helpMenuModalBorderStyle(height int, width int, borderBottom string) lipgloss.Style {
 	border := generateBorder()
 	border.Bottom = borderBottom

@@ -28,6 +28,7 @@ var LastTimeCursorMove = [2]int{int(time.Now().UnixMicro()), 0}
 var ListeningMessage = true
 
 var forceReloadElement = false
+var firstUse = false
 
 var HomeDir = basedir.Home
 var SuperFileMainDir = basedir.ConfigHome + "/superfile"
@@ -43,9 +44,9 @@ var et *exiftool.Exiftool
 
 var channel = make(chan channelMessage, 1000)
 
-func InitialModel(dir string) model {
+func InitialModel(dir string, firstUseCheck bool) model {
 	toggleDotFileBool, firstFilePanelDir := initialConfig(dir)
-
+	firstUse = firstUseCheck
 	return model{
 		filePanelFocusIndex: 0,
 		focusPanel:          nonePanelFocus,
@@ -143,6 +144,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		return m, nil
 	case tea.KeyMsg:
+		if firstUse {
+			firstUse = false
+			return m, cmd
+		}
+
 		if m.typingModal.open {
 			m = typingModalOpenKey(msg.String(), m)
 		} else if m.warnModal.open {
@@ -237,24 +243,31 @@ func (m model) View() string {
 
 	if m.helpMenu.open {
 		helpMenu := helpMenuRender(m)
-		overlayX := m.fullWidth / 2 - m.helpMenu.width / 2
-		overlayY := m.fullHeight / 2 - m.helpMenu.height / 2
-
+		overlayX := m.fullWidth/2 - m.helpMenu.width/2
+		overlayY := m.fullHeight/2 - m.helpMenu.height/2
 		return PlaceOverlay(overlayX, overlayY, helpMenu, finalRender)
 	}
 
 	if m.typingModal.open {
 		typingModal := typineModalRender(m)
-		overlayX := m.fullWidth / 2 - modalWidth / 2
-		overlayY := m.fullHeight / 2 - modalHeight / 2
+		overlayX := m.fullWidth/2 - modalWidth/2
+		overlayY := m.fullHeight/2 - modalHeight/2
 		return PlaceOverlay(overlayX, overlayY, typingModal, finalRender)
 	}
 
 	if m.warnModal.open {
 		warnModal := warnModalRender(m)
-		overlayX := m.fullWidth / 2 - modalWidth / 2
-		overlayY := m.fullHeight / 2 - modalHeight / 2
+		overlayX := m.fullWidth/2 - modalWidth/2
+		overlayY := m.fullHeight/2 - modalHeight/2
 		return PlaceOverlay(overlayX, overlayY, warnModal, finalRender)
 	}
+
+	if firstUse {
+		introduceModal := introduceModalRender(m)
+		overlayX := m.fullWidth/2 - m.helpMenu.width/2
+		overlayY := m.fullHeight/2 - m.helpMenu.height/2
+		return PlaceOverlay(overlayX, overlayY, introduceModal, finalRender)
+	}
+
 	return finalRender
 }

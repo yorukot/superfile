@@ -37,6 +37,7 @@ const (
 	themeFolder      string = "/theme"
 	lastCheckVersion string = "/lastCheckVersion"
 	themeFileVersion string = "/themeFileVersion"
+	firstUseCheck 	 string = "/firstUseCheck"
 	pinnedFile       string = "/pinned.json"
 	configFile       string = "/config.toml"
 	hotkeysFile      string = "/hotkeys.toml"
@@ -67,7 +68,9 @@ func main() {
 
 			InitConfigFile()
 
-			p := tea.NewProgram(components.InitialModel(path), tea.WithAltScreen())
+			firstUse := checkFirstUse()
+
+			p := tea.NewProgram(components.InitialModel(path, firstUse), tea.WithAltScreen())
 			if _, err := p.Run(); err != nil {
 				output.SetBackgroundColor(terminalBackgroundColor)
 				log.Fatalf("Alas, there's been an error: %v", err)
@@ -147,7 +150,6 @@ func InitConfigFile() {
 	}
 
 	// Download and install theme
-	
 	if err := downloadAndInstallTheme(config.MainDir, config.ThemeZipName, themeZip, config.ThemeFolder); err != nil {
 		log.Fatalln("Error downloading theme:", err)
 	}
@@ -182,6 +184,17 @@ func createFiles(files ...string) error {
 	return nil
 }
 
+func checkFirstUse() bool {
+	file := SuperFileDataDir+firstUseCheck
+	firstUse := false
+	if _, err := os.Stat(file); os.IsNotExist(err) {
+		firstUse = true
+		if err := os.WriteFile(file, nil, 0644); err != nil {
+			log.Fatalln("failed to create file: %w", err)
+		}
+	}
+	return firstUse
+}
 func writeConfigFile(path, data string) error {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		if err := os.WriteFile(path, []byte(data), 0644); err != nil {
