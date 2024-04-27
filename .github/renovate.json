@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:base", "default:automergeDigest"],
+  "extends": ["config:recommended", ":dependencyDashboard", "default:automergeDigest"],
   "packageRules": [
     {
       "matchDatasources": ["go", "github-releases", "github-tags"],
