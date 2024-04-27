@@ -22,6 +22,9 @@ schema = 3
   [mod."github.com/charmbracelet/lipgloss"]
     version = "v0.10.0"
     hash = "sha256-JZD1iVeizYe0mp3qQcJbUZdYN6HP/DNC67ja79DTe6s="
+  [mod."github.com/charmbracelet/x/exp/term"]
+    version = "v0.0.0-20240425164147-ba2a9512b05f"
+    hash = "sha256-7bnNJJx2DVH6gCO6oGBdctto5z56PgDYZqAxuZP35Q0="
   [mod."github.com/containerd/console"]
     version = "v1.0.4-0.20230313162750-1ae8d489ac81"
     hash = "sha256-Qus81DgpWHJ6RRqeKOKcUFvzCxvPzygJqBabvBsBuHU="
@@ -101,8 +104,8 @@ schema = 3
     version = "v0.5.0"
     hash = "sha256-EAKeODSsct5HhXPmpWJfulKSCkuUu6kkDttnjyZMNcI="
   [mod."golang.org/x/sys"]
-    version = "v0.15.0"
-    hash = "sha256-n7TlABF6179RzGq3gctPDKDPRtDfnwPdjNCMm8ps2KY="
+    version = "v0.19.0"
+    hash = "sha256-cmuL31TYLJmDm/fDnI2Sn0wB88cpdOHV1+urorsJWx4="
   [mod."golang.org/x/term"]
     version = "v0.6.0"
     hash = "sha256-Ao0yXpwY8GyG+/23dVfJUYrfEfNUTES3RF45v1VhUAk="

@@ -76,6 +76,11 @@ func getHelpMenuData() []helpMenuModalData {
 			hotkeyWorkType: globalType,
 		},
 		{
+			hotkey:         hotkeys.OpenHelpMenu,
+			description:    "Open help menu(hotkeylist)",
+			hotkeyWorkType: globalType,
+		},
+		{
 			subTitle: "Panel navigation",
 		},
 		{
