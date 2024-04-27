@@ -73,9 +73,9 @@ func InitialModel(dir string) model {
 		},
 		helpMenu: helpMenuModal{
 			renderIndex: 0,
-			cursor: 1,
-			data: getHelpMenuData(),
-			open: false,
+			cursor:      1,
+			data:        getHelpMenuData(),
+			open:        false,
 		},
 		toggleDotFile: toggleDotFileBool,
 	}
@@ -127,8 +127,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.fullWidth = msg.Width
 		m.fileModel.maxFilePanel = (msg.Width - 20) / 24
 
-		m.helpMenu.height = m.fullHeight -2
-		m.helpMenu.width = m.fullWidth -2
+		m.helpMenu.height = m.fullHeight - 2
+		m.helpMenu.width = m.fullWidth - 2
 
 		if m.fullHeight > 32 {
 			m.helpMenu.height = 30
@@ -160,7 +160,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 			m, cmd = mainKey(msg.String(), m, cmd)
-			
+
 			if m.editorMode {
 				m.editorMode = false
 				return m, cmd
@@ -216,30 +216,45 @@ func (m model) View() string {
 	// check is the terminal size enough
 	if m.fullHeight < minimumHeight || m.fullWidth < minimumWidth {
 		return terminalSizeWarnRender(m)
-	} else if m.typingModal.open {
-		return typineModalRender(m)
-	} else if m.warnModal.open {
-		return warnModalRender(m)
-	} else if m.helpMenu.open {
-		return helpMenuRender(m)
-	} else {
-		sidebar := sidebarRender(m)
 
-		filePanel := filePanelRender(m)
-
-		mainPanel := lipgloss.JoinHorizontal(0, sidebar, filePanel)
-
-		processBar := processBarRender(m)
-
-		metaData := metadataRender(m)
-
-		clipboardBar := clipboardRender(m)
-
-		footer := lipgloss.JoinHorizontal(0, processBar, metaData, clipboardBar)
-
-		// final render
-		finalRender := lipgloss.JoinVertical(0, mainPanel, footer)
-
-		return lipgloss.JoinVertical(lipgloss.Top, finalRender)
 	}
+	sidebar := sidebarRender(m)
+
+	filePanel := filePanelRender(m)
+
+	mainPanel := lipgloss.JoinHorizontal(0, sidebar, filePanel)
+
+	processBar := processBarRender(m)
+
+	metaData := metadataRender(m)
+
+	clipboardBar := clipboardRender(m)
+
+	footer := lipgloss.JoinHorizontal(0, processBar, metaData, clipboardBar)
+
+	// final render
+	finalRender := lipgloss.JoinVertical(0, mainPanel, footer)
+
+	if m.helpMenu.open {
+		helpMenu := helpMenuRender(m)
+		overlayX := m.fullWidth / 2 - m.helpMenu.width / 2
+		overlayY := m.fullHeight / 2 - m.helpMenu.height / 2
+
+		return PlaceOverlay(overlayX, overlayY, helpMenu, finalRender)
+	}
+
+	if m.typingModal.open {
+		typingModal := typineModalRender(m)
+		overlayX := m.fullWidth / 2 - modalWidth / 2
+		overlayY := m.fullHeight / 2 - modalHeight / 2
+		return PlaceOverlay(overlayX, overlayY, typingModal, finalRender)
+	}
+
+	if m.warnModal.open {
+		warnModal := warnModalRender(m)
+		overlayX := m.fullWidth / 2 - modalWidth / 2
+		overlayY := m.fullHeight / 2 - modalHeight / 2
+		return PlaceOverlay(overlayX, overlayY, warnModal, finalRender)
+	}
+	return finalRender
 }
