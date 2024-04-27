@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file. Dates are d
 
 #### Update
 - Update help menu [`#75`](https://github.com/MHNightCat/superfile/issues/75)
+- Update all modal, make other panel still show on background [`#79`](https://github.com/MHNightCat/superfile/pull/79)
 
 #### Bug fix
 - Fix Cut -> Paste file causes go panic [`#77`](https://github.com/MHNightCat/superfile/issues/77)
