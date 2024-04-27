@@ -350,7 +350,7 @@ func pasteItem(m model) model {
 	if m.copyItems.cut {
 		for _, item := range m.copyItems.items {
 			if runtime.GOOS == "darwin" {
-				err := moveElement(panel.element[panel.cursor].location,  HomeDir + "/.Trash/" + filepath.Base(panel.element[panel.cursor].location))
+				err := moveElement(item,  HomeDir + "/.Trash/" + filepath.Base(item))
 				if err != nil {
 					outPutLog("Delete single item function move file to trash can error", err)
 				}
