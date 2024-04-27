@@ -36,6 +36,7 @@ const (
 const (
 	themeFolder      string = "/theme"
 	lastCheckVersion string = "/lastCheckVersion"
+	themeFileVersion string = "/themeFileVersion"
 	pinnedFile       string = "/pinned.json"
 	configFile       string = "/config.toml"
 	hotkeysFile      string = "/hotkeys.toml"
@@ -146,7 +147,7 @@ func InitConfigFile() {
 	}
 
 	// Download and install theme
-
+	
 	if err := downloadAndInstallTheme(config.MainDir, config.ThemeZipName, themeZip, config.ThemeFolder); err != nil {
 		log.Fatalln("Error downloading theme:", err)
 	}
@@ -191,7 +192,12 @@ func writeConfigFile(path, data string) error {
 }
 
 func downloadAndInstallTheme(dir, zipName, zipUrl, zipFolder string) error {
-	if _, err := os.Stat(filepath.Join(dir, zipFolder)); os.IsNotExist(err) {
+	currentThemeVersion, err := readThemeVersionFromFile(SuperFileDataDir + themeFileVersion)
+	if err != nil && !os.IsNotExist(err) {
+		fmt.Println("Error reading from file:", err)
+	}
+
+	if _, err := os.Stat(filepath.Join(dir, zipFolder)); os.IsNotExist(err) || currentThemeVersion != currentVersion {
 
 		err := DownloadFile(filepath.Join(SuperFileMainDir, zipName), zipUrl)
 		if err != nil {
@@ -203,12 +209,13 @@ func downloadAndInstallTheme(dir, zipName, zipUrl, zipFolder string) error {
 		} else {
 			os.Remove(filepath.Join(SuperFileMainDir, zipName))
 		}
+		WriteToFile(SuperFileDataDir+themeFileVersion, currentVersion)
 	}
 	return nil
 }
 
 func CheckForUpdates() {
-	lastTime, err := ReadFromFile(SuperFileDataDir + lastCheckVersion)
+	lastTime, err := readLastTimeCheckVersionFromFile(SuperFileDataDir + lastCheckVersion)
 	if err != nil && !os.IsNotExist(err) {
 		fmt.Println("Error reading from file:", err)
 		return
@@ -261,7 +268,19 @@ func versionToNumber(version string) int {
 	return num
 }
 
-func ReadFromFile(filename string) (time.Time, error) {
+func readThemeVersionFromFile(filename string) (string, error) {
+	content, err := os.ReadFile(filename)
+	if err != nil {
+		return "", err
+	}
+	if len(content) == 0 {
+		return "", nil
+	}
+	
+	return string(content), nil
+}
+
+func readLastTimeCheckVersionFromFile(filename string) (time.Time, error) {
 	content, err := os.ReadFile(filename)
 	if err != nil {
 		return time.Time{}, err
