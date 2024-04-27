@@ -80,7 +80,7 @@ type model struct {
 	copyItems           copyItems
 	typingModal         typingModal
 	warnModal           warnModal
-	helpMenu            helpModal
+	helpMenu            helpMenuModal
 	fileMetaData        fileMetadata
 	firstTextInput      bool
 	toggleDotFile       bool
@@ -93,20 +93,20 @@ type model struct {
 
 // Modal
 
-type helpModal struct {
+type helpMenuModal struct {
 	height      int
 	width       int
 	open        bool
 	renderIndex int
 	cursor      int
-	data        []helpModalData
+	data        []helpMenuModalData
 }
 
-type helpModalData struct {
+type helpMenuModalData struct {
 	hotkey         []string
 	description    string
 	hotkeyWorkType hotkeyType
-	previousSubTitle   string
+	subTitle   string
 }
 
 type warnModal struct {

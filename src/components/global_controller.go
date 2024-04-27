@@ -526,8 +526,5 @@ func openHelpMenu(m model) model {
 	}
 
 	m.helpMenu.open = true
-	m.helpMenu.cursor = 0
-	m.helpMenu.renderIndex = 0
-	m.helpMenu.data = getHelpMenuData()
 	return m
 }

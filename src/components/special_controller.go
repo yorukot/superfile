@@ -82,25 +82,22 @@ func confirmSearch(m model) model {
 }
 
 func helpMenuListUp(m model) model {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	if len(panel.element) == 0 {
-		return m
-	}
-	if panel.cursor > 0 {
-		panel.cursor--
-		if panel.cursor < panel.render {
-			panel.render--
+	if m.helpMenu.cursor > 1 {
+		m.helpMenu.cursor--
+		if m.helpMenu.cursor < m.helpMenu.renderIndex {
+			m.helpMenu.renderIndex--
+			if m.helpMenu.data[m.helpMenu.cursor].subTitle != "" {
+				m.helpMenu.renderIndex--
+			}
+		}
+		if m.helpMenu.data[m.helpMenu.cursor].subTitle != "" {
+			m.helpMenu.cursor--
 		}
 	} else {
-		if len(panel.element) > panelElementHeight(m.mainPanelHeight) {
-			panel.render = len(panel.element) - panelElementHeight(m.mainPanelHeight)
-			panel.cursor = len(panel.element) - 1
-		} else {
-			panel.cursor = len(panel.element) - 1
-		}
+		m.helpMenu.cursor = len(m.helpMenu.data) - 1
+		m.helpMenu.renderIndex = len(m.helpMenu.data) - m.helpMenu.height
 	}
 
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m
 }
 
@@ -108,14 +105,20 @@ func helpMenuListDown(m model) model {
 	if len(m.helpMenu.data) == 0 {
 		return m
 	}
-	
+
 	if m.helpMenu.cursor < len(m.helpMenu.data)-1 {
 		m.helpMenu.cursor++
 		if m.helpMenu.cursor > m.helpMenu.renderIndex+m.helpMenu.height-1 {
 			m.helpMenu.renderIndex++
+			if m.helpMenu.data[m.helpMenu.cursor].subTitle != "" {
+				m.helpMenu.renderIndex++
+			}
+		}
+		if m.helpMenu.data[m.helpMenu.cursor].subTitle != "" {
+			m.helpMenu.cursor++
 		}
 	} else {
-		m.helpMenu.cursor = 0
+		m.helpMenu.cursor = 1
 		m.helpMenu.renderIndex = 0
 	}
 

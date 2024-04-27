@@ -58,3 +58,7 @@ modal_cancel_bg = "#6D6D6D"
 
 modal_confirm_fg = "#EBDBB2"
 modal_confirm_bg = "#FF4D00"
+
+# ========= Help Menu =========
+help_menu_hotkey = "#8EC07C"
+help_menu_title = "#FF4D00"

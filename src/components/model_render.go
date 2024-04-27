@@ -355,12 +355,11 @@ func warnModalRender(m model) string {
 }
 
 func helpMenuRender(m model) string {
-
 	helpMenuContent := ""
 	maxKeyLength := 0
 
 	for _, data := range m.helpMenu.data {
-		if len(data.hotkey[0]+data.hotkey[1])+3 > maxKeyLength {
+		if data.subTitle == "" && len(data.hotkey[0]+data.hotkey[1])+3 > maxKeyLength {
 			maxKeyLength = len(data.hotkey[0]+data.hotkey[1]) + 3
 		}
 	}
@@ -371,9 +370,25 @@ func helpMenuRender(m model) string {
 	}
 
 	renderHotkeyLength := 0
+	totalTitleCount := 0
+	cursorBeenTitleCount := 0
 
-	for i := m.helpMenu.renderIndex; i < bottomElementHight(m.helpMenu.height)+m.helpMenu.renderIndex && i < len(m.helpMenu.data); i++ {
+	for i, data := range m.helpMenu.data {
+		if data.subTitle != ""{
+			if i < m.helpMenu.cursor {
+				cursorBeenTitleCount++
+			}
+			totalTitleCount++
+		}
+	}
+
+	for i := m.helpMenu.renderIndex; i < m.helpMenu.height+m.helpMenu.renderIndex && i < len(m.helpMenu.data); i++ {
 		hotkey := ""
+
+		if m.helpMenu.data[i].subTitle != ""{
+			continue
+		}
+
 		if m.helpMenu.data[i].hotkey[1] == "" {
 			hotkey = m.helpMenu.data[i].hotkey[0]
 		} else {
@@ -383,16 +398,15 @@ func helpMenuRender(m model) string {
 			renderHotkeyLength = len(helpMenuHotkeyStyle.Render(hotkey))
 		}
 	}
+	for i := m.helpMenu.renderIndex; i < m.helpMenu.height+m.helpMenu.renderIndex && i < len(m.helpMenu.data); i++ {
 
-	titleCount := 0
-	for i := m.helpMenu.renderIndex; i < m.helpMenu.height+m.helpMenu.renderIndex && i < len(m.helpMenu.data) - titleCount; i++ {
 		if i != m.helpMenu.renderIndex {
 			helpMenuContent += "\n"
 		}
 
-		if m.helpMenu.data[i].previousSubTitle != "" {
-			helpMenuContent += helpMenuTitleStyle.Render(" " + m.helpMenu.data[i].previousSubTitle) + "\n"
-			titleCount += 1
+		if m.helpMenu.data[i].subTitle != "" {
+			helpMenuContent += helpMenuTitleStyle.Render(" "+m.helpMenu.data[i].subTitle)
+			continue
 		}
 
 		hotkey := ""
@@ -402,14 +416,14 @@ func helpMenuRender(m model) string {
 		} else {
 			hotkey = fmt.Sprintf("%s | %s", m.helpMenu.data[i].hotkey[0], m.helpMenu.data[i].hotkey[1])
 		}
-		cursor := " "
+		cursor := "  "
 		if m.helpMenu.cursor == i {
-			cursor = filePanelCursorStyle.Render("")
+			cursor = filePanelCursorStyle.Render(" ")
 		}
-		helpMenuContent += cursor + fmt.Sprintf("%*s %s", renderHotkeyLength, helpMenuHotkeyStyle.Render(hotkey), modalStyle.Render(description))
+		helpMenuContent += cursor + modalStyle.Render(fmt.Sprintf("%*s%s", renderHotkeyLength, helpMenuHotkeyStyle.Render(hotkey + " "), modalStyle.Render(description)))
 	}
 
-	bottomBorder := generateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(m.helpMenu.cursor+1), strconv.Itoa(len(m.helpMenu.data))), m.helpMenu.width-2)
+	bottomBorder := generateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(m.helpMenu.cursor+1 - cursorBeenTitleCount), strconv.Itoa(len(m.helpMenu.data)-totalTitleCount)), m.helpMenu.width-2)
 
 	return fullScreenStyle(m.fullHeight, m.fullWidth).Render(helpMenuModalBorderStyle(m.helpMenu.height, m.helpMenu.width, bottomBorder).Render(helpMenuContent))
 }

@@ -71,6 +71,12 @@ func InitialModel(dir string) model {
 			},
 			width: 10,
 		},
+		helpMenu: helpMenuModal{
+			renderIndex: 0,
+			cursor: 1,
+			data: getHelpMenuData(),
+			open: false,
+		},
 		toggleDotFile: toggleDotFileBool,
 	}
 }
@@ -121,8 +127,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.fullWidth = msg.Width
 		m.fileModel.maxFilePanel = (msg.Width - 20) / 24
 
-		m.helpMenu.height = m.fullHeight
-		m.helpMenu.width = m.fullWidth
+		m.helpMenu.height = m.fullHeight -2
+		m.helpMenu.width = m.fullWidth -2
 
 		if m.fullHeight > 32 {
 			m.helpMenu.height = 30
@@ -152,7 +158,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if msg.String() == hotkeys.Quit[0] || msg.String() == hotkeys.Quit[1] {
 				return m, tea.Quit
 			}
+
 			m, cmd = mainKey(msg.String(), m, cmd)
+			
 			if m.editorMode {
 				m.editorMode = false
 				return m, cmd

@@ -205,7 +205,7 @@ func focusOnSearchbarKey(msg string, m model) model {
 func helpMenuKey(msg string, m model) model {
 	switch msg {
 	case hotkeys.ListUp[0], hotkeys.ListUp[1]:
-		
+		m = helpMenuListUp(m)
 	case hotkeys.ListDown[0], hotkeys.ListDown[1]:
 		m = helpMenuListDown(m)
 	case hotkeys.Quit[0], hotkeys.Quit[1]:
