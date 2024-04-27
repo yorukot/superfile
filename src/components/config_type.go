@@ -44,6 +44,9 @@ var (
 	modalCancelBGColor  lipgloss.Color
 	modalConfirmFGColor lipgloss.Color
 	modalConfirmBGColor lipgloss.Color
+
+	helpMenuHotkeyColor lipgloss.Color
+	helpMenuTitleColor lipgloss.Color
 )
 
 // Theme configuration
@@ -98,6 +101,9 @@ type ThemeType struct {
 	ModalCancelBG  string `toml:"modal_cancel_bg"`
 	ModalConfirmFG string `toml:"modal_confirm_fg"`
 	ModalConfirmBG string `toml:"modal_confirm_bg"`
+
+	HelpMenuHotkey string `toml:"help_menu_hotkey"`
+	HelpMenuTitle string `toml:"help_menu_title"`
 }
 
 // Configuration settings
@@ -125,6 +131,7 @@ type HotkeysType struct {
 	FocusOnMetaData          []string `toml:"focus_on_meta_data"`
 
 	ChangePanelMode          []string `toml:"change_panel_mode" comment:"\n"`
+	OpenHelpMenu 			 []string `toml:"open_help_menu"`
 
 	FilePanelDirectoryCreate []string `toml:"file_panel_directory_create" comment:"\n"`
 	FilePanelFileCreate      []string `toml:"file_panel_file_create"`

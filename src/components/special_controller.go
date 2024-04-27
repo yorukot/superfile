@@ -80,3 +80,52 @@ func confirmSearch(m model) model {
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m
 }
+
+func helpMenuListUp(m model) model {
+	if m.helpMenu.cursor > 1 {
+		m.helpMenu.cursor--
+		if m.helpMenu.cursor < m.helpMenu.renderIndex {
+			m.helpMenu.renderIndex--
+			if m.helpMenu.data[m.helpMenu.cursor].subTitle != "" {
+				m.helpMenu.renderIndex--
+			}
+		}
+		if m.helpMenu.data[m.helpMenu.cursor].subTitle != "" {
+			m.helpMenu.cursor--
+		}
+	} else {
+		m.helpMenu.cursor = len(m.helpMenu.data) - 1
+		m.helpMenu.renderIndex = len(m.helpMenu.data) - m.helpMenu.height
+	}
+
+	return m
+}
+
+func helpMenuListDown(m model) model {
+	if len(m.helpMenu.data) == 0 {
+		return m
+	}
+
+	if m.helpMenu.cursor < len(m.helpMenu.data)-1 {
+		m.helpMenu.cursor++
+		if m.helpMenu.cursor > m.helpMenu.renderIndex+m.helpMenu.height-1 {
+			m.helpMenu.renderIndex++
+			if m.helpMenu.data[m.helpMenu.cursor].subTitle != "" {
+				m.helpMenu.renderIndex++
+			}
+		}
+		if m.helpMenu.data[m.helpMenu.cursor].subTitle != "" {
+			m.helpMenu.cursor++
+		}
+	} else {
+		m.helpMenu.cursor = 1
+		m.helpMenu.renderIndex = 0
+	}
+
+	return m
+}
+
+func quitHelpMenu(m model) model {
+	m.helpMenu.open = false
+	return m
+}

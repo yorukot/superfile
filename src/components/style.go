@@ -59,6 +59,11 @@ var (
 	modalConfirm lipgloss.Style
 )
 
+var (
+	helpMenuHotkeyStyle lipgloss.Style
+	helpMenuTitleStyle lipgloss.Style
+)
+
 func LoadThemeConfig() {
 	filePanelBorderColor = lipgloss.Color(theme.FilePanelBorder)
 	sidebarBorderColor = lipgloss.Color(theme.SidebarBorder)
@@ -102,6 +107,9 @@ func LoadThemeConfig() {
 	modalConfirmFGColor = lipgloss.Color(theme.ModalConfirmFG)
 	modalConfirmBGColor = lipgloss.Color(theme.ModalConfirmBG)
 
+	helpMenuHotkeyColor = lipgloss.Color(theme.HelpMenuHotkey)
+	helpMenuTitleColor = lipgloss.Color(theme.HelpMenuTitle)
+
 	// All Panel Main Color
 	// (full screen and default color)
 	mainStyle = lipgloss.NewStyle().Foreground(fullScreenFGColor).Background(fullScreenBGColor)
@@ -138,6 +146,10 @@ func LoadThemeConfig() {
 	// Modal Special Style
 	modalCancel = lipgloss.NewStyle().Foreground(modalCancelFGColor).Background(modalCancelBGColor)
 	modalConfirm = lipgloss.NewStyle().Foreground(modalConfirmFGColor).Background(modalConfirmBGColor)
+
+	// Help Menu Style
+	helpMenuHotkeyStyle = lipgloss.NewStyle().Foreground(helpMenuHotkeyColor).Background(modalBGColor)
+	helpMenuTitleStyle = lipgloss.NewStyle().Foreground(helpMenuTitleColor).Background(modalBGColor)
 }
 
 func generateGradientColor() progress.Option {

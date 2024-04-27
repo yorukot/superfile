@@ -82,6 +82,8 @@ func mainKey(msg string, m model, cmd tea.Cmd) (model, tea.Cmd) {
 		go func() {
 			m = compressFile(m)
 		}()
+	case hotkeys.OpenHelpMenu[0], hotkeys.OpenHelpMenu[1]:
+		m = openHelpMenu(m)
 	case hotkeys.OpenFileWithEditor[0], hotkeys.OpenFileWithEditor[1]:
 		cmd = openFileWithEditor(m)
 	case hotkeys.OpenCurrentDirectoryWithEditor[0], hotkeys.OpenCurrentDirectoryWithEditor[1]:
@@ -197,5 +199,18 @@ func focusOnSearchbarKey(msg string, m model) model {
 	case hotkeys.Confirm[0], hotkeys.Confirm[1], hotkeys.SearchBar[0], hotkeys.SearchBar[1]:
 		m = confirmSearch(m)
 	}
+	return m
+}
+
+func helpMenuKey(msg string, m model) model {
+	switch msg {
+	case hotkeys.ListUp[0], hotkeys.ListUp[1]:
+		m = helpMenuListUp(m)
+	case hotkeys.ListDown[0], hotkeys.ListDown[1]:
+		m = helpMenuListDown(m)
+	case hotkeys.Quit[0], hotkeys.Quit[1]:
+		m = quitHelpMenu(m)
+	}
+
 	return m
 }

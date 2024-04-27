@@ -71,6 +71,12 @@ func InitialModel(dir string) model {
 			},
 			width: 10,
 		},
+		helpMenu: helpMenuModal{
+			renderIndex: 0,
+			cursor: 1,
+			data: getHelpMenuData(),
+			open: false,
+		},
 		toggleDotFile: toggleDotFileBool,
 	}
 }
@@ -96,7 +102,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	switch msg := msg.(type) {
 	case channelMessage:
-		 if msg.returnWarnModal {
+		if msg.returnWarnModal {
 			m.warnModal = msg.warnModal
 		} else if msg.loadMetadata {
 			m.fileMetaData.metaData = msg.metadata
@@ -108,16 +114,30 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		forceReloadElement = true
 	case tea.WindowSizeMsg:
+
 		if msg.Height < 30 {
 			footerHeight = 10
 		} else {
 			footerHeight = 14
 		}
+
 		m.mainPanelHeight = msg.Height - footerHeight + 1
 		m.fileModel.width = (msg.Width - sidebarWidth - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
 		m.fullHeight = msg.Height
 		m.fullWidth = msg.Width
 		m.fileModel.maxFilePanel = (msg.Width - 20) / 24
+
+		m.helpMenu.height = m.fullHeight -2
+		m.helpMenu.width = m.fullWidth -2
+
+		if m.fullHeight > 32 {
+			m.helpMenu.height = 30
+		}
+
+		if m.fullWidth > 92 {
+			m.helpMenu.width = 90
+		}
+
 		if m.fileModel.maxFilePanel >= 10 {
 			m.fileModel.maxFilePanel = 10
 		}
@@ -131,12 +151,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m = renamingKey(msg.String(), m)
 		} else if panel.searchBar.Focused() {
 			m = focusOnSearchbarKey(msg.String(), m)
+		} else if m.helpMenu.open {
+			m = helpMenuKey(msg.String(), m)
 		} else {
 			// return superfile
 			if msg.String() == hotkeys.Quit[0] || msg.String() == hotkeys.Quit[1] {
 				return m, tea.Quit
 			}
+
 			m, cmd = mainKey(msg.String(), m, cmd)
+			
 			if m.editorMode {
 				m.editorMode = false
 				return m, cmd
@@ -196,6 +220,8 @@ func (m model) View() string {
 		return typineModalRender(m)
 	} else if m.warnModal.open {
 		return warnModalRender(m)
+	} else if m.helpMenu.open {
+		return helpMenuRender(m)
 	} else {
 		sidebar := sidebarRender(m)
 

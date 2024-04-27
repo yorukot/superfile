@@ -27,10 +27,10 @@ var SuperFileCacheDir = basedir.CacheHome + "/superfile"
 var SuperFileDataDir = basedir.DataHome + "/superfile"
 
 const (
-	currentVersion      string = "v1.1.1"
+	currentVersion      string = "v1.1.2"
 	latestVersionURL    string = "https://api.github.com/repos/MHNightCat/superfile/releases/latest"
 	latestVersionGithub string = "github.com/MHNightCat/superfile/releases/latest"
-	themeZip            string = "https://github.com/MHNightCat/superfile/raw/main/themeZip/v1.1.1/theme.zip"
+	themeZip            string = "https://github.com/MHNightCat/superfile/raw/main/themeZip/v1.1.2/theme.zip"
 )
 
 const (

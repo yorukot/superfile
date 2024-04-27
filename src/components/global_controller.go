@@ -518,3 +518,13 @@ func openDirectoryWithEditor(m model) tea.Cmd {
 		return editorFinishedMsg{err}
 	})
 }
+
+func openHelpMenu(m model) model {
+	if m.helpMenu.open {
+		m.helpMenu.open = false
+		return m
+	}
+
+	m.helpMenu.open = true
+	return m
+}
