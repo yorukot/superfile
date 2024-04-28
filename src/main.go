@@ -212,17 +212,17 @@ func downloadAndInstallTheme(dir, zipName, zipUrl, zipFolder string) error {
 
 	if _, err := os.Stat(filepath.Join(dir, zipFolder)); os.IsNotExist(err) || currentThemeVersion != currentVersion {
 
-		err := DownloadFile(filepath.Join(SuperFileMainDir, zipName), zipUrl)
+		err := downloadFile(filepath.Join(SuperFileMainDir, zipName), zipUrl)
 		if err != nil {
 			return err
 		}
-		err = Unzip(filepath.Join(SuperFileMainDir, zipName), dir)
+		err = unzip(filepath.Join(SuperFileMainDir, zipName), dir)
 		if err != nil {
 			return err
 		} else {
 			os.Remove(filepath.Join(SuperFileMainDir, zipName))
 		}
-		WriteToFile(SuperFileDataDir+themeFileVersion, currentVersion)
+		writeToFile(SuperFileDataDir+themeFileVersion, currentVersion)
 	}
 	return nil
 }
@@ -265,7 +265,7 @@ func CheckForUpdates() {
 		}
 
 		timeStr := currentTime.Format(time.RFC3339)
-		err = WriteToFile(SuperFileDataDir+lastCheckVersion, timeStr)
+		err = writeToFile(SuperFileDataDir+lastCheckVersion, timeStr)
 		if err != nil {
 			log.Println("Error writing to file:", err)
 			return
@@ -309,7 +309,7 @@ func readLastTimeCheckVersionFromFile(filename string) (time.Time, error) {
 	return lastTime, nil
 }
 
-func WriteToFile(filename, content string) error {
+func writeToFile(filename, content string) error {
 	file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
 		return err
@@ -324,7 +324,7 @@ func WriteToFile(filename, content string) error {
 	return nil
 }
 
-func DownloadFile(filepath string, url string) error {
+func downloadFile(filepath string, url string) error {
 	resp, err := http.Get(url)
 	if err != nil {
 		return err
@@ -341,7 +341,7 @@ func DownloadFile(filepath string, url string) error {
 	return err
 }
 
-func Unzip(src, dest string) error {
+func unzip(src, dest string) error {
 	r, err := zip.OpenReader(src)
 	if err != nil {
 		return err
