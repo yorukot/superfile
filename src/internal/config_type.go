@@ -1,4 +1,4 @@
-package components
+package internal
 
 import "github.com/charmbracelet/lipgloss"
 
@@ -46,7 +46,7 @@ var (
 	modalConfirmBGColor lipgloss.Color
 
 	helpMenuHotkeyColor lipgloss.Color
-	helpMenuTitleColor lipgloss.Color
+	helpMenuTitleColor  lipgloss.Color
 )
 
 // Theme configuration
@@ -103,14 +103,14 @@ type ThemeType struct {
 	ModalConfirmBG string `toml:"modal_confirm_bg"`
 
 	HelpMenuHotkey string `toml:"help_menu_hotkey"`
-	HelpMenuTitle string `toml:"help_menu_title"`
+	HelpMenuTitle  string `toml:"help_menu_title"`
 }
 
 // Configuration settings
 type ConfigType struct {
 	Theme           string   `toml:"theme" comment:"change your theme"`
 	FooterPanelList []string `toml:"footer_panel_list" comment:"\nuseless for now"`
-	Metadata bool `toml:"metadata" comment:"\n==========PLUGINS========== #\n\nShow more detailed metadata, please install exiftool before enabling this plugin!"`
+	Metadata        bool     `toml:"metadata" comment:"\n==========PLUGINS========== #\n\nShow more detailed metadata, please install exiftool before enabling this plugin!"`
 }
 
 type HotkeysType struct {
@@ -121,17 +121,17 @@ type HotkeysType struct {
 
 	PinnedDirectory []string `toml:"pinned_directory" comment:"\n"`
 
-	CloseFilePanel           []string `toml:"close_file_panel" comment:"\n"`
-	CreateNewFilePanel       []string `toml:"create_new_file_panel"`
+	CloseFilePanel     []string `toml:"close_file_panel" comment:"\n"`
+	CreateNewFilePanel []string `toml:"create_new_file_panel"`
 
-	NextFilePanel            []string `toml:"next_file_panel" comment:"\n"`
-	PreviousFilePanel        []string `toml:"previous_file_panel"`
-	FocusOnProcessBar        []string `toml:"focus_on_process_bar"`
-	FocusOnSideBar           []string `toml:"focus_on_side_bar"`
-	FocusOnMetaData          []string `toml:"focus_on_meta_data"`
+	NextFilePanel     []string `toml:"next_file_panel" comment:"\n"`
+	PreviousFilePanel []string `toml:"previous_file_panel"`
+	FocusOnProcessBar []string `toml:"focus_on_process_bar"`
+	FocusOnSideBar    []string `toml:"focus_on_side_bar"`
+	FocusOnMetaData   []string `toml:"focus_on_meta_data"`
 
-	ChangePanelMode          []string `toml:"change_panel_mode" comment:"\n"`
-	OpenHelpMenu 			 []string `toml:"open_help_menu"`
+	ChangePanelMode []string `toml:"change_panel_mode" comment:"\n"`
+	OpenHelpMenu    []string `toml:"open_help_menu"`
 
 	FilePanelDirectoryCreate []string `toml:"file_panel_directory_create" comment:"\n"`
 	FilePanelFileCreate      []string `toml:"file_panel_file_create"`

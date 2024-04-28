@@ -1,4 +1,4 @@
-package components
+package internal
 
 import (
 	"strings"
@@ -61,7 +61,7 @@ var (
 
 var (
 	helpMenuHotkeyStyle lipgloss.Style
-	helpMenuTitleStyle lipgloss.Style
+	helpMenuTitleStyle  lipgloss.Style
 )
 
 func LoadThemeConfig() {

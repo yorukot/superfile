@@ -1,9 +1,9 @@
-package components
+package internal
 
 import (
 	"bytes"
 	"strings"
-	
+
 	charmansi "github.com/charmbracelet/x/exp/term/ansi"
 	"github.com/mattn/go-runewidth"
 	ansi "github.com/muesli/reflow/ansi"

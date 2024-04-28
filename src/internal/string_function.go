@@ -1,4 +1,4 @@
-package components
+package internal
 
 import (
 	"strings"
@@ -40,15 +40,15 @@ func prettierName(name string, width int, isDir bool, isSelected bool, bgColor l
 	style := getElementIcon(name, isDir)
 	if isSelected {
 		return stringColorRender(lipgloss.Color(style.color), bgColor).
-		Background(bgColor).
-		Render(style.icon + " ") + 
-		filePanelItemSelectedStyle.
-		Render(truncateText(name, width))
+			Background(bgColor).
+			Render(style.icon+" ") +
+			filePanelItemSelectedStyle.
+				Render(truncateText(name, width))
 	} else {
 		return stringColorRender(lipgloss.Color(style.color), bgColor).
-		Background(bgColor).
-		Render(style.icon + " ") + 
-		filePanelStyle.Render(truncateText(name, width))
+			Background(bgColor).
+			Render(style.icon+" ") +
+			filePanelStyle.Render(truncateText(name, width))
 	}
 }
 
@@ -56,24 +56,24 @@ func clipboardPrettierName(name string, width int, isDir bool, isSelected bool) 
 	style := getElementIcon(name, isDir)
 	if isSelected {
 		return stringColorRender(lipgloss.Color(style.color), footerBGColor).
-		Background(footerBGColor).
-		Render(style.icon + " ") + 
-		filePanelItemSelectedStyle.Render(truncateTextBeginning(name, width))
+			Background(footerBGColor).
+			Render(style.icon+" ") +
+			filePanelItemSelectedStyle.Render(truncateTextBeginning(name, width))
 	} else {
 		return stringColorRender(lipgloss.Color(style.color), footerBGColor).
-		Background(footerBGColor).
-		Render(style.icon + " ") + 
-		filePanelStyle.Render(truncateTextBeginning(name, width))
+			Background(footerBGColor).
+			Render(style.icon+" ") +
+			filePanelStyle.Render(truncateTextBeginning(name, width))
 	}
 }
 
 func fileNameWithoutExtension(fileName string) string {
-    for {
-        pos := strings.LastIndexByte(fileName, '.')
-        if pos == -1 {
-            break
-        }
-        fileName = fileName[:pos]
-    }
-    return fileName
+	for {
+		pos := strings.LastIndexByte(fileName, '.')
+		if pos == -1 {
+			break
+		}
+		fileName = fileName[:pos]
+	}
+	return fileName
 }

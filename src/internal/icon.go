@@ -1,4 +1,4 @@
-package components
+package internal
 
 /*
 THESE CODE BASE ON https://github.com/acarl005/ls-go

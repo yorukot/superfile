@@ -1,4 +1,4 @@
-package components
+package internal
 
 import (
 	"fmt"
@@ -383,7 +383,7 @@ func helpMenuRender(m model) string {
 	cursorBeenTitleCount := 0
 
 	for i, data := range m.helpMenu.data {
-		if data.subTitle != ""{
+		if data.subTitle != "" {
 			if i < m.helpMenu.cursor {
 				cursorBeenTitleCount++
 			}
@@ -394,7 +394,7 @@ func helpMenuRender(m model) string {
 	for i := m.helpMenu.renderIndex; i < m.helpMenu.height+m.helpMenu.renderIndex && i < len(m.helpMenu.data); i++ {
 		hotkey := ""
 
-		if m.helpMenu.data[i].subTitle != ""{
+		if m.helpMenu.data[i].subTitle != "" {
 			continue
 		}
 
@@ -414,7 +414,7 @@ func helpMenuRender(m model) string {
 		}
 
 		if m.helpMenu.data[i].subTitle != "" {
-			helpMenuContent += helpMenuTitleStyle.Render(" "+m.helpMenu.data[i].subTitle)
+			helpMenuContent += helpMenuTitleStyle.Render(" " + m.helpMenu.data[i].subTitle)
 			continue
 		}
 
@@ -429,10 +429,10 @@ func helpMenuRender(m model) string {
 		if m.helpMenu.cursor == i {
 			cursor = filePanelCursorStyle.Render(" ")
 		}
-		helpMenuContent += cursor + modalStyle.Render(fmt.Sprintf("%*s%s", renderHotkeyLength, helpMenuHotkeyStyle.Render(hotkey + " "), modalStyle.Render(description)))
+		helpMenuContent += cursor + modalStyle.Render(fmt.Sprintf("%*s%s", renderHotkeyLength, helpMenuHotkeyStyle.Render(hotkey+" "), modalStyle.Render(description)))
 	}
 
-	bottomBorder := generateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(m.helpMenu.cursor+1 - cursorBeenTitleCount), strconv.Itoa(len(m.helpMenu.data)-totalTitleCount)), m.helpMenu.width-2)
+	bottomBorder := generateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(m.helpMenu.cursor+1-cursorBeenTitleCount), strconv.Itoa(len(m.helpMenu.data)-totalTitleCount)), m.helpMenu.width-2)
 
 	return helpMenuModalBorderStyle(m.helpMenu.height, m.helpMenu.width, bottomBorder).Render(helpMenuContent)
 }

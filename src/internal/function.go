@@ -1,4 +1,4 @@
-package components
+package internal
 
 import (
 	"archive/tar"
@@ -697,7 +697,7 @@ func ungzip(input, output string) error {
 		if err != nil {
 			return err
 		}
-		
+
 	}
 
 	return nil

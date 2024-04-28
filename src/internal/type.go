@@ -1,4 +1,4 @@
-package components
+package internal
 
 import (
 	"time"
@@ -106,7 +106,7 @@ type helpMenuModalData struct {
 	hotkey         []string
 	description    string
 	hotkeyWorkType hotkeyType
-	subTitle   string
+	subTitle       string
 }
 
 type warnModal struct {
@@ -184,8 +184,8 @@ type element struct {
 
 /* FILE WINDOWS TYPE END*/
 
-/* SIDE BAR COMPONENTS TYPE START*/
-// Model for sidebar components
+/* SIDE BAR internal TYPE START*/
+// Model for sidebar internal
 type sidebarModel struct {
 	directories []directory
 	// wellKnownModel []directory
@@ -199,11 +199,11 @@ type directory struct {
 	name     string
 }
 
-/* SIDE BAR COMPONENTS TYPE END*/
+/* SIDE BAR internal TYPE END*/
 
-/*PROCESS BAR COMPONENTS TYPE START*/
+/*PROCESS BAR internal TYPE START*/
 
-// Model for process bar components
+// Model for process bar internal
 type processBarModel struct {
 	render      int
 	cursor      int
@@ -231,7 +231,7 @@ type channelMessage struct {
 	metadata        [][2]string
 }
 
-/*PROCESS BAR COMPONENTS TYPE END*/
+/*PROCESS BAR internal TYPE END*/
 
 // Style for icons
 type iconStyle struct {

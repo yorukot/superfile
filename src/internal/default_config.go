@@ -1,4 +1,4 @@
-package components
+package internal
 
 var HotkeysTomlString string = `# Here is global, all global key cant conflicts with other hotkeys
 quit = ['esc', 'q']

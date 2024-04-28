@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	components "github.com/MHNightCat/superfile/components"
+	internal "github.com/MHNightCat/superfile/internal"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/muesli/termenv"
 	"github.com/rkoesters/xdg/basedir"
@@ -37,7 +37,7 @@ const (
 	themeFolder      string = "/theme"
 	lastCheckVersion string = "/lastCheckVersion"
 	themeFileVersion string = "/themeFileVersion"
-	firstUseCheck 	 string = "/firstUseCheck"
+	firstUseCheck    string = "/firstUseCheck"
 	pinnedFile       string = "/pinned.json"
 	configFile       string = "/config.toml"
 	hotkeysFile      string = "/hotkeys.toml"
@@ -70,7 +70,7 @@ func main() {
 
 			firstUse := checkFirstUse()
 
-			p := tea.NewProgram(components.InitialModel(path, firstUse), tea.WithAltScreen())
+			p := tea.NewProgram(internal.InitialModel(path, firstUse), tea.WithAltScreen())
 			if _, err := p.Run(); err != nil {
 				output.SetBackgroundColor(terminalBackgroundColor)
 				log.Fatalf("Alas, there's been an error: %v", err)
@@ -141,11 +141,11 @@ func InitConfigFile() {
 	}
 
 	// Write config file
-	if err := writeConfigFile(config.MainDir+config.ConfigFile, components.ConfigTomlString); err != nil {
+	if err := writeConfigFile(config.MainDir+config.ConfigFile, internal.ConfigTomlString); err != nil {
 		log.Fatalln("Error writing config file:", err)
 	}
 
-	if err := writeConfigFile(config.MainDir+config.HotkeysFile, components.HotkeysTomlString); err != nil {
+	if err := writeConfigFile(config.MainDir+config.HotkeysFile, internal.HotkeysTomlString); err != nil {
 		log.Fatalln("Error writing config file:", err)
 	}
 
@@ -185,7 +185,7 @@ func createFiles(files ...string) error {
 }
 
 func checkFirstUse() bool {
-	file := SuperFileDataDir+firstUseCheck
+	file := SuperFileDataDir + firstUseCheck
 	firstUse := false
 	if _, err := os.Stat(file); os.IsNotExist(err) {
 		firstUse = true
@@ -289,7 +289,7 @@ func readThemeVersionFromFile(filename string) (string, error) {
 	if len(content) == 0 {
 		return "", nil
 	}
-	
+
 	return string(content), nil
 }
 
