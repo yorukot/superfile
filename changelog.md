@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file. Dates are d
 - Update all modal, make other panel still show on background [`#79`](https://github.com/MHNightCat/superfile/pull/79)
 - Support extract gz tar file [`b9aed84`](https://github.com/MHNightCat/superfile/commit/b9aed847804421e1fc4f03dcaefb0e27f1260ea3)
 - Support transparent background [`4108d40`](https://github.com/MHNightCat/superfile/commit/4108d40bc0b93656eca2da98253a83dbc0cb27a9)
+- Support custom border style [`6ff0576`](https://github.com/MHNightCat/superfile/commit/6ff05765823cbd25e6fdc4d3f7370e435114acbb)
 
 #### Bug fix
 - Fix Cut -> Paste file causes go panic [`#77`](https://github.com/MHNightCat/superfile/issues/77)
