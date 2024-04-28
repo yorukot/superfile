@@ -5,20 +5,24 @@ import (
 	"path/filepath"
 )
 
+// Cancel typing modal e.g. create file or directory
 func cancelTypingModal(m model) model {
 	m.typingModal.textInput.Blur()
 	m.typingModal.open = false
 	return m
 }
 
+// Close warn modal
 func cancelWarnModal(m model) model {
 	m.warnModal.open = false
 	return m
 }
 
+// Confirm to create file or directory
 func createItem(m model) model {
 	if m.typingModal.itemType == newFile {
-		path := m.typingModal.location + "/" + m.typingModal.textInput.Value()
+		path := filepath.Join(m.typingModal.location, m.typingModal.textInput.Value())
+		path, _ = renameIfDuplicate(path)
 		if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
 			outPutLog("Create item function error", err)
 		}
@@ -39,6 +43,7 @@ func createItem(m model) model {
 	return m
 }
 
+// Cancel rename file or directory
 func cancelReanem(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	panel.rename.Blur()
@@ -48,6 +53,7 @@ func cancelReanem(m model) model {
 	return m
 }
 
+// Connfirm rename file or directory
 func confirmRename(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	oldPath := panel.element[panel.cursor].location
@@ -66,6 +72,7 @@ func confirmRename(m model) model {
 	return m
 }
 
+// Cancel search, this will clear all searchbar input
 func cancelSearch(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	panel.searchBar.Blur()
@@ -74,6 +81,7 @@ func cancelSearch(m model) model {
 	return m
 }
 
+// Confirm search
 func confirmSearch(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	panel.searchBar.Blur()
@@ -81,6 +89,7 @@ func confirmSearch(m model) model {
 	return m
 }
 
+// Help menu panel list up
 func helpMenuListUp(m model) model {
 	if m.helpMenu.cursor > 1 {
 		m.helpMenu.cursor--
@@ -101,6 +110,7 @@ func helpMenuListUp(m model) model {
 	return m
 }
 
+// Help menu panel list down
 func helpMenuListDown(m model) model {
 	if len(m.helpMenu.data) == 0 {
 		return m
@@ -125,6 +135,7 @@ func helpMenuListDown(m model) model {
 	return m
 }
 
+// Quit help menu
 func quitHelpMenu(m model) model {
 	m.helpMenu.open = false
 	return m

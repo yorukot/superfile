@@ -15,7 +15,7 @@ next_file_panel = ['tab', 'L']
 previous_file_panel = ['shift+left', 'H']
 focus_on_process_bar = ['p', '']
 focus_on_side_bar = ['b', '']
-focus_on_meta_data = ['m', '']
+focus_on_metadata = ['m', '']
 # 
 change_panel_mode = ['v', '']
 open_help_menu = ['?', '']
@@ -64,6 +64,42 @@ footer_panel_list = ['processes', 'metadata', 'clipboard']
 # Show more detailed metadata, please install exiftool before enabling this plugin!
 metadata = false
 `
+
+func defaultModelConfig(toggleDotFileBool bool, firstFilePanelDir string) model {
+	return model{
+		filePanelFocusIndex: 0,
+		focusPanel:          nonePanelFocus,
+		processBarModel: processBarModel{
+			process: make(map[string]process),
+			cursor:  0,
+			render:  0,
+		},
+		sidebarModel: sidebarModel{
+			directories: getDirectories(40),
+		},
+		fileModel: fileModel{
+			filePanels: []filePanel{
+				{
+					render:          0,
+					cursor:          0,
+					location:        firstFilePanelDir,
+					panelMode:       browserMode,
+					focusType:       focus,
+					directoryRecord: make(map[string]directoryRecord),
+					searchBar:       generateSearchBar(),
+				},
+			},
+			width: 10,
+		},
+		helpMenu: helpMenuModal{
+			renderIndex: 0,
+			cursor:      1,
+			data:        getHelpMenuData(),
+			open:        false,
+		},
+		toggleDotFile: toggleDotFileBool,
+	}
+}
 
 func getHelpMenuData() []helpMenuModalData {
 	data := []helpMenuModalData{

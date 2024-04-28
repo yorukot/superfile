@@ -128,7 +128,7 @@ type HotkeysType struct {
 	PreviousFilePanel []string `toml:"previous_file_panel"`
 	FocusOnProcessBar []string `toml:"focus_on_process_bar"`
 	FocusOnSideBar    []string `toml:"focus_on_side_bar"`
-	FocusOnMetaData   []string `toml:"focus_on_meta_data"`
+	FocusOnMetaData   []string `toml:"focus_on_metadata"`
 
 	ChangePanelMode []string `toml:"change_panel_mode" comment:"\n"`
 	OpenHelpMenu    []string `toml:"open_help_menu"`

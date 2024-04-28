@@ -48,47 +48,7 @@ var channel = make(chan channelMessage, 1000)
 func InitialModel(dir string, firstUseCheck bool) model {
 	toggleDotFileBool, firstFilePanelDir := initialConfig(dir)
 	firstUse = firstUseCheck
-	return model{
-		filePanelFocusIndex: 0,
-		focusPanel:          nonePanelFocus,
-		processBarModel: processBarModel{
-			process: make(map[string]process),
-			cursor:  0,
-			render:  0,
-		},
-		sidebarModel: sidebarModel{
-			directories: getDirectories(40),
-		},
-		fileModel: fileModel{
-			filePanels: []filePanel{
-				{
-					render:          0,
-					cursor:          0,
-					location:        firstFilePanelDir,
-					panelMode:       browserMode,
-					focusType:       focus,
-					directoryRecord: make(map[string]directoryRecord),
-					searchBar:       generateSearchBar(),
-				},
-			},
-			width: 10,
-		},
-		helpMenu: helpMenuModal{
-			renderIndex: 0,
-			cursor:      1,
-			data:        getHelpMenuData(),
-			open:        false,
-		},
-		toggleDotFile: toggleDotFileBool,
-	}
-}
-
-func listenForChannelMessage(msg chan channelMessage) tea.Cmd {
-	return func() tea.Msg {
-		m := <-msg
-		ListeningMessage = false
-		return m
-	}
+	return defaultModelConfig(toggleDotFileBool, firstFilePanelDir)
 }
 
 func (m model) Init() tea.Cmd {
@@ -116,19 +76,23 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		forceReloadElement = true
 	case tea.WindowSizeMsg:
+		m.fullHeight = msg.Height
+		m.fullWidth = msg.Width
 
+		m.mainPanelHeight = msg.Height - footerHeight + 1
+
+		// set each file panel size and max file panel amount 
+		m.fileModel.width = (msg.Width - sidebarWidth - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
+		m.fileModel.maxFilePanel = (msg.Width - 20) / 24
+
+		// set footer size
 		if msg.Height < 30 {
 			footerHeight = 10
 		} else {
 			footerHeight = 14
 		}
 
-		m.mainPanelHeight = msg.Height - footerHeight + 1
-		m.fileModel.width = (msg.Width - sidebarWidth - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
-		m.fullHeight = msg.Height
-		m.fullWidth = msg.Width
-		m.fileModel.maxFilePanel = (msg.Width - 20) / 24
-
+		// set help menu size
 		m.helpMenu.height = m.fullHeight - 2
 		m.helpMenu.width = m.fullWidth - 2
 
@@ -145,6 +109,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		return m, nil
 	case tea.KeyMsg:
+
 		if firstUse {
 			firstUse = false
 			return m, cmd
@@ -192,29 +157,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	cmd = tea.Batch(cmd)
 	m.sidebarModel.directories = getDirectories(m.fullHeight)
 
+	// check if there already have listening message
 	if !ListeningMessage {
 		cmd = tea.Batch(cmd, listenForChannelMessage(channel))
 	}
-	for i, filePanel := range m.fileModel.filePanels {
-		var fileElenent []element
-		nowTime := time.Now()
-		if filePanel.focusType == noneFocus && nowTime.Sub(filePanel.lastTimeGetElement) < 3*time.Second && !forceReloadElement {
-			continue
-		}
-		if len(filePanel.element) > 500 && (len(filePanel.element) > 500 && (nowTime.Sub(filePanel.lastTimeGetElement) > 3*time.Second)) && !forceReloadElement {
-			continue
-		}
 
-		if filePanel.searchBar.Value() != "" {
-			fileElenent = returnFolderElementBySearchString(filePanel.location, m.toggleDotFile, filePanel.searchBar.Value())
-		} else {
-			fileElenent = returnFolderElement(filePanel.location, m.toggleDotFile)
-		}
-		filePanel.element = fileElenent
-		m.fileModel.filePanels[i].element = fileElenent
-		m.fileModel.filePanels[i].lastTimeGetElement = nowTime
-		forceReloadElement = false
-	}
+	m = getFilePanelItems(m)
 
 	return m, tea.Batch(cmd)
 }
@@ -239,9 +187,9 @@ func (m model) View() string {
 
 	footer := lipgloss.JoinHorizontal(0, processBar, metaData, clipboardBar)
 
-	// final render
 	finalRender := lipgloss.JoinVertical(0, mainPanel, footer)
 
+	// check if need pop up modal
 	if m.helpMenu.open {
 		helpMenu := helpMenuRender(m)
 		overlayX := m.fullWidth/2 - m.helpMenu.width/2
@@ -271,4 +219,36 @@ func (m model) View() string {
 	}
 
 	return finalRender
+}
+
+func listenForChannelMessage(msg chan channelMessage) tea.Cmd {
+	return func() tea.Msg {
+		m := <-msg
+		ListeningMessage = false
+		return m
+	}
+}
+
+func getFilePanelItems(m model) model {
+	for i, filePanel := range m.fileModel.filePanels {
+		var fileElenent []element
+		nowTime := time.Now()
+		if filePanel.focusType == noneFocus && nowTime.Sub(filePanel.lastTimeGetElement) < 3*time.Second && !forceReloadElement {
+			continue
+		}
+		if len(filePanel.element) > 500 && (len(filePanel.element) > 500 && (nowTime.Sub(filePanel.lastTimeGetElement) > 3*time.Second)) && !forceReloadElement {
+			continue
+		}
+
+		if filePanel.searchBar.Value() != "" {
+			fileElenent = returnFolderElementBySearchString(filePanel.location, m.toggleDotFile, filePanel.searchBar.Value())
+		} else {
+			fileElenent = returnFolderElement(filePanel.location, m.toggleDotFile)
+		}
+		filePanel.element = fileElenent
+		m.fileModel.filePanels[i].element = fileElenent
+		m.fileModel.filePanels[i].lastTimeGetElement = nowTime
+		forceReloadElement = false
+	}
+	return m
 }

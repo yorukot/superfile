@@ -1,110 +1,23 @@
 package internal
 
 import (
-	"archive/tar"
-	"archive/zip"
-	"compress/gzip"
-	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
 	"regexp"
-	"runtime"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/lithammer/shortuuid"
 	"github.com/masatana/go-textdistance"
-	"github.com/rkoesters/xdg/userdirs"
-	"github.com/shirou/gopsutil/disk"
 )
 
-func getDirectories(height int) []directory {
-	directories := []directory{}
-
-	directories = append(directories, getWellKnownDirectories()...)
-	if height > 30 {
-		directories = append(directories, getPinnedDirectories()...)
-		directories = append(directories, getExternalMediaFolders()...)
-	}
-	return directories
-}
-
-func getWellKnownDirectories() []directory {
-	directories := []directory{}
-	wellKnownDirectories := []directory{
-		{location: HomeDir, name: "󰋜 Home"},
-		{location: userdirs.Download, name: "󰏔 Downloads"},
-		{location: userdirs.Documents, name: "󰈙 Documents"},
-		{location: userdirs.Pictures, name: "󰋩 Pictures"},
-		{location: userdirs.Videos, name: "󰎁 Videos"},
-		{location: userdirs.Music, name: "♬ Music"},
-		{location: userdirs.Templates, name: "󰏢 Templates"},
-		{location: userdirs.PublicShare, name: " PublicShare"},
-	}
-
-	if runtime.GOOS == "darwin" {
-		wellKnownDirectories[1].location = HomeDir + "/Downloads/"
-		wellKnownDirectories[2].location = HomeDir + "/Documents/"
-		wellKnownDirectories[3].location = HomeDir + "/Pictures/"
-		wellKnownDirectories[4].location = HomeDir + "/Movies/"
-		wellKnownDirectories[5].location = HomeDir + "/Music/"
-		wellKnownDirectories[7].location = HomeDir + "/Public/"
-	}
-
-	for _, dir := range wellKnownDirectories {
-		if _, err := os.Stat(dir.location); !os.IsNotExist(err) {
-			// Directory exists
-			directories = append(directories, dir)
-		}
-	}
-	return directories
-}
-
-func getPinnedDirectories() []directory {
-	directories := []directory{}
-	var paths []string
-
-	jsonData, err := os.ReadFile(SuperFileDataDir + pinnedFile)
-	if err != nil {
-		outPutLog("Read superfile data error", err)
-	}
-
-	json.Unmarshal(jsonData, &paths)
-
-	for _, path := range paths {
-		directoryName := filepath.Base(path)
-		directories = append(directories, directory{location: path, name: directoryName})
-	}
-	return directories
-}
-
-func getExternalMediaFolders() (disks []directory) {
-	parts, err := disk.Partitions(true)
-
-	if err != nil {
-		outPutLog("Error while getting external media: ", err)
-	}
-	for _, disk := range parts {
-		if isExternalDiskPath(disk.Mountpoint) {
-			disks = append(disks, directory{
-				name:     filepath.Base(disk.Mountpoint),
-				location: disk.Mountpoint,
-			})
-		}
-	}
-	if err != nil {
-		outPutLog("Error while getting external media: ", err)
-	}
-	return disks
-}
-
+// Check if the directory is external disk path
 func isExternalDiskPath(path string) bool {
 	dir := filepath.Dir(path)
 	return strings.HasPrefix(dir, "/mnt") ||
@@ -330,86 +243,19 @@ func pasteFile(src string, dst string) error {
 	return nil
 }
 
-func pasteDir(src, dst string, id string, m model) (model, error) {
-	// Check if destination directory already exists
-	dst, err := renameIfDuplicate(dst)
-	if err != nil {
-		return m, err
-	}
-
-	err = filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-
-		relPath, err := filepath.Rel(src, path)
-		if err != nil {
-			return err
-		}
-
-		newPath := filepath.Join(dst, relPath)
-
-		if info.IsDir() {
-			newPath, err = renameIfDuplicate(newPath)
-			if err != nil {
-				return err
-			}
-			err = os.MkdirAll(newPath, info.Mode())
-			if err != nil {
-				return err
-			}
-		} else {
-			p := m.processBarModel.process[id]
-			if m.copyItems.cut {
-				p.name = "󰆐 " + filepath.Base(path)
-			} else {
-				p.name = "󰆏 " + filepath.Base(path)
-			}
-
-			if len(channel) < 5 {
-				channel <- channelMessage{
-					messageId:       id,
-					processNewState: p,
-				}
-			}
-
-			err := pasteFile(path, newPath)
-			if err != nil {
-				p.state = failure
-				channel <- channelMessage{
-					messageId:       id,
-					processNewState: p,
-				}
-				return err
-			}
-			p.done++
-			if len(channel) < 5 {
-				channel <- channelMessage{
-					messageId:       id,
-					processNewState: p,
-				}
-			}
-			m.processBarModel.process[id] = p
-		}
-
-		return nil
-	})
-
-	if err != nil {
-		return m, err
-	}
-
-	return m, nil
-}
-
 func returnMetaData(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	cursor := panel.cursor
+
+	// Obtaining metadata will take time. If metadata is obtained for every passing file, it will cause lag.
+	// Therefore, it is necessary to detect whether it is just browsing or stopping on that file or directory.
 	LastTimeCursorMove = [2]int{int(time.Now().UnixMicro()), cursor}
 	time.Sleep(150 * time.Millisecond)
+
 	if LastTimeCursorMove[1] != cursor && m.focusPanel != metadataFocus {
 		return m
 	}
+
 	m.fileMetaData.metaData = m.fileMetaData.metaData[:0]
 	id := shortuuid.New()
 	if len(panel.element) == 0 {
@@ -484,6 +330,7 @@ func returnMetaData(m model) model {
 	return m
 }
 
+// Get directory total size
 func dirSize(path string) int64 {
 	var size int64
 	filepath.Walk(path, func(_ string, info os.FileInfo, err error) error {
@@ -498,6 +345,7 @@ func dirSize(path string) int64 {
 	return size
 }
 
+// Count how many file in the directory
 func countFiles(dirPath string) (int, error) {
 	count := 0
 
@@ -514,296 +362,7 @@ func countFiles(dirPath string) (int, error) {
 	return count, err
 }
 
-func unzip(src, dest string) error {
-	id := shortuuid.New()
-	r, err := zip.OpenReader(src)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		if err := r.Close(); err != nil {
-			panic(err)
-		}
-	}()
-	totalFiles := len(r.File)
-	// progessbar
-	prog := progress.New(generateGradientColor())
-	prog.PercentageStyle = footerStyle
-	// channel message
-	p := process{
-		name:     "unzip file",
-		progress: prog,
-		state:    inOperation,
-		total:    totalFiles,
-		done:     0,
-	}
-
-	// Closure to address file descriptors issue with all the deferred .Close() methods
-	extractAndWriteFile := func(f *zip.File) error {
-
-		rc, err := f.Open()
-		if err != nil {
-			return err
-		}
-		defer func() {
-			if err := rc.Close(); err != nil {
-				panic(err)
-			}
-		}()
-
-		path := filepath.Join(dest, f.Name)
-
-		// Check for ZipSlip (Directory traversal)
-		if !strings.HasPrefix(path, filepath.Clean(dest)+string(os.PathSeparator)) {
-			return fmt.Errorf("illegal file path: %s", path)
-		}
-
-		if f.FileInfo().IsDir() {
-			os.MkdirAll(path, f.Mode())
-		} else {
-			os.MkdirAll(filepath.Dir(path), f.Mode())
-			f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
-			if err != nil {
-				return fmt.Errorf("error open file: %s", err)
-			}
-			defer func() {
-				if err := f.Close(); err != nil {
-					panic(err)
-				}
-			}()
-
-			_, err = io.Copy(f, rc)
-
-			if err != nil {
-				return fmt.Errorf("error copy file: %s", err)
-			}
-		}
-		return nil
-	}
-
-	for _, f := range r.File {
-		p.name = "󰛫 " + f.Name
-		if len(channel) < 3 {
-			channel <- channelMessage{
-				messageId:       id,
-				processNewState: p,
-			}
-		}
-		err := extractAndWriteFile(f)
-		if err != nil {
-			p.state = failure
-			channel <- channelMessage{
-				messageId:       id,
-				processNewState: p,
-			}
-			return err
-		}
-		p.done++
-		if len(channel) < 3 {
-			channel <- channelMessage{
-				messageId:       id,
-				processNewState: p,
-			}
-		}
-	}
-
-	p.total = totalFiles
-	p.state = successful
-	channel <- channelMessage{
-		messageId:       id,
-		processNewState: p,
-	}
-
-	return nil
-}
-
-func ungzip(input, output string) error {
-	var err error
-	input, err = filepath.Abs(input)
-	if err != nil {
-		return err
-	}
-	output, err = filepath.Abs(output)
-	if err != nil {
-		return err
-	}
-
-	inputFile, err := os.Open(input)
-	if err != nil {
-		return err
-	}
-	defer inputFile.Close()
-
-	gzReader, err := gzip.NewReader(inputFile)
-	if err != nil {
-		return err
-	}
-	defer gzReader.Close()
-
-	err = os.MkdirAll(output, 0755)
-	if err != nil {
-		return err
-	}
-
-	tarReader := tar.NewReader(gzReader)
-	for {
-		header, err := tarReader.Next()
-
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return err
-		}
-
-		if !filepath.IsAbs(header.Name) {
-			return fmt.Errorf("unsanitized archive entry with relative path")
-		}
-		targetPath := filepath.Join(output, header.Name)
-
-		fileInfo := header.FileInfo()
-		if fileInfo.IsDir() {
-			err = os.MkdirAll(targetPath, fileInfo.Mode())
-			if err != nil {
-				return err
-			}
-			continue
-		}
-
-		targetFile, err := os.Create(targetPath)
-		if err != nil {
-			return err
-		}
-
-		_, err = io.Copy(targetFile, tarReader)
-		if err != nil {
-			targetFile.Close()
-			return err
-		}
-
-		err = targetFile.Close()
-		if err != nil {
-			return err
-		}
-
-	}
-
-	return nil
-}
-
-func zipSource(source, target string) error {
-	id := shortuuid.New()
-	prog := progress.New()
-	prog.PercentageStyle = footerStyle
-
-	totalFiles, err := countFiles(source)
-
-	if err != nil {
-		outPutLog("Zip file count files error: ", err)
-	}
-
-	p := process{
-		name:     "zip files",
-		progress: prog,
-		state:    inOperation,
-		total:    totalFiles,
-		done:     0,
-	}
-
-	_, err = os.Stat(target)
-	if os.IsExist(err) {
-		p.name = "󰗄 File already exist"
-		channel <- channelMessage{
-			messageId:       id,
-			processNewState: p,
-		}
-		return nil
-	}
-
-	f, err := os.Create(target)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	writer := zip.NewWriter(f)
-	defer writer.Close()
-
-	err = filepath.Walk(source, func(path string, info os.FileInfo, err error) error {
-		p.name = "󰗄 " + filepath.Base(path)
-		if len(channel) < 5 {
-			channel <- channelMessage{
-				messageId:       id,
-				processNewState: p,
-			}
-		}
-
-		if err != nil {
-			return err
-		}
-
-		header, err := zip.FileInfoHeader(info)
-		if err != nil {
-			return err
-		}
-
-		header.Method = zip.Deflate
-
-		header.Name, err = filepath.Rel(filepath.Dir(source), path)
-		if err != nil {
-			return err
-		}
-		if info.IsDir() {
-			header.Name += "/"
-		}
-
-		headerWriter, err := writer.CreateHeader(header)
-		if err != nil {
-			return err
-		}
-
-		if info.IsDir() {
-			return nil
-		}
-
-		f, err := os.Open(path)
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-
-		_, err = io.Copy(headerWriter, f)
-		if err != nil {
-			return err
-		}
-		p.done++
-		if len(channel) < 5 {
-			channel <- channelMessage{
-				messageId:       id,
-				processNewState: p,
-			}
-		}
-		return nil
-	})
-
-	if err != nil {
-		outPutLog("Error while zip file:", err)
-		p.state = failure
-		channel <- channelMessage{
-			messageId:       id,
-			processNewState: p,
-		}
-	}
-	p.state = successful
-	p.done = totalFiles
-	channel <- channelMessage{
-		messageId:       id,
-		processNewState: p,
-	}
-
-	return nil
-}
-
+// Generate search bar for file panel
 func generateSearchBar() textinput.Model {
 	ti := textinput.New()
 	ti.Cursor.Style = footerCursorStyle
@@ -816,12 +375,4 @@ func generateSearchBar() textinput.Model {
 	ti.Blur()
 	ti.CharLimit = 156
 	return ti
-}
-
-func moveElement(src, dst string) error {
-	err := os.Rename(src, dst)
-	if err != nil {
-		return fmt.Errorf("failed to move file: %v", err)
-	}
-	return nil
 }
