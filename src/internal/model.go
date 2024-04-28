@@ -79,7 +79,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.fullHeight = msg.Height
 		m.fullWidth = msg.Width
 
-		m.mainPanelHeight = msg.Height - footerHeight + 1
 
 		// set each file panel size and max file panel amount 
 		m.fileModel.width = (msg.Width - sidebarWidth - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
@@ -91,6 +90,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		} else {
 			footerHeight = 14
 		}
+
+		m.mainPanelHeight = msg.Height - footerHeight + 1
 
 		// set help menu size
 		m.helpMenu.height = m.fullHeight - 2
