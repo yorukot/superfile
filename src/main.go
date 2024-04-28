@@ -58,7 +58,7 @@ func main() {
 	app := &cli.App{
 		Name:        "superfile",
 		Version:     currentVersion,
-		Description: "A Modern file manager with golang",
+		Description: "Pretty fancy and modern terminal file manager ",
 		ArgsUsage:   "[path]",
 		Action: func(c *cli.Context) error {
 			path := ""
