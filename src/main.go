@@ -16,7 +16,6 @@ import (
 
 	internal "github.com/MHNightCat/superfile/internal"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/muesli/termenv"
 	"github.com/rkoesters/xdg/basedir"
 	"github.com/urfave/cli/v2"
 )
@@ -53,8 +52,6 @@ const (
 )
 
 func main() {
-	output := termenv.NewOutput(os.Stdout)
-	terminalBackgroundColor := output.BackgroundColor()
 	app := &cli.App{
 		Name:        "superfile",
 		Version:     currentVersion,
@@ -72,7 +69,6 @@ func main() {
 
 			p := tea.NewProgram(internal.InitialModel(path, firstUse), tea.WithAltScreen())
 			if _, err := p.Run(); err != nil {
-				output.SetBackgroundColor(terminalBackgroundColor)
 				log.Fatalf("Alas, there's been an error: %v", err)
 				os.Exit(1)
 			}

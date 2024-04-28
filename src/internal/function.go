@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"math"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -483,19 +482,6 @@ func returnMetaData(m model) model {
 
 	panel.element[panel.cursor].metaData = m.fileMetaData.metaData
 	return m
-}
-
-func formatFileSize(size int64) string {
-	if size == 0 {
-		return "0B"
-	}
-
-	units := []string{"B", "KB", "MB", "GB", "TB", "PB", "EB"}
-
-	unitIndex := int(math.Floor(math.Log(float64(size)) / math.Log(1024)))
-	adjustedSize := float64(size) / math.Pow(1024, float64(unitIndex))
-
-	return fmt.Sprintf("%.2f %s", adjustedSize, units[unitIndex])
 }
 
 func dirSize(path string) int64 {

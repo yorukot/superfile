@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"fmt"
+	"math"
 	"strings"
 	"unicode/utf8"
 
@@ -76,4 +78,17 @@ func fileNameWithoutExtension(fileName string) string {
 		fileName = fileName[:pos]
 	}
 	return fileName
+}
+
+func formatFileSize(size int64) string {
+	if size == 0 {
+		return "0B"
+	}
+
+	units := []string{"B", "KB", "MB", "GB", "TB", "PB", "EB"}
+
+	unitIndex := int(math.Floor(math.Log(float64(size)) / math.Log(1024)))
+	adjustedSize := float64(size) / math.Pow(1024, float64(unitIndex))
+
+	return fmt.Sprintf("%.2f %s", adjustedSize, units[unitIndex])
 }
