@@ -108,9 +108,24 @@ type ThemeType struct {
 
 // Configuration settings
 type ConfigType struct {
-	Theme           string   `toml:"theme" comment:"change your theme"`
-	FooterPanelList []string `toml:"footer_panel_list" comment:"\nuseless for now"`
-	Metadata        bool     `toml:"metadata" comment:"\n==========PLUGINS========== #\n\nShow more detailed metadata, please install exiftool before enabling this plugin!"`
+	Theme                 string   `toml:"theme" comment:"change your theme"`
+
+	FooterPanelList       []string `toml:"footer_panel_list" comment:"\nuseless for now"`
+
+	TransparentBackground bool     `toml:"transparent_backgroun" comment:"\n================   Style =================\n\nSet transparent background or not (this only work when your terminal background is transparent)"`
+
+	BorderTop             string   `toml:"border_top" comment:"\n\nBorder style"`
+	BorderBottom          string   `toml:"border_bottom"`
+	BorderLeft            string   `toml:"border_left"`
+	BorderRight           string   `toml:"border_right"`
+	BorderTopLeft         string   `toml:"border_top_left"`
+	BorderTopRight        string   `toml:"border_top_right"`
+	BorderBottomLeft      string   `toml:"border_bottom_left"`
+	BorderBottomRight     string   `toml:"border_bottom_right"`
+	BorderSplitLeft       string   `toml:"border_split_left"`
+	BorderSplitRight      string   `toml:"border_split_right"`
+
+	Metadata              bool     `toml:"metadata" comment:"\n==========PLUGINS========== #\n\nShow more detailed metadata, please install exiftool before enabling this plugin!"`
 }
 
 type HotkeysType struct {

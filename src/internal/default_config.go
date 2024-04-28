@@ -58,6 +58,23 @@ theme = 'catpuccin'
 # 
 # useless for now
 footer_panel_list = ['processes', 'metadata', 'clipboard']
+#
+# ================   Style =================
+#
+# Set transparent background or not (this only work when your terminal background is transparent)
+transparent_backgroun = false
+#
+# Border style
+border_top = "━"
+border_bottom = "━"
+border_left = "┃"
+border_right = "┃"
+border_top_left = "┏"
+border_top_right = "┓"
+border_bottom_left = "┗"
+border_bottom_right = "┛"
+border_split_left = "┫"
+border_split_right = "┣"
 # 
 # ==========PLUGINS========== #
 # 

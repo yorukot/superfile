@@ -110,6 +110,10 @@ func LoadThemeConfig() {
 	helpMenuHotkeyColor = lipgloss.Color(theme.HelpMenuHotkey)
 	helpMenuTitleColor = lipgloss.Color(theme.HelpMenuTitle)
 
+	if Config.TransparentBackground {
+		transparentAllBackgrounColor()
+	}
+
 	// All Panel Main Color
 	// (full screen and default color)
 	mainStyle = lipgloss.NewStyle().Foreground(fullScreenFGColor).Background(fullScreenBGColor)
@@ -162,4 +166,13 @@ func generateFooterBorder(countString string, width int) string {
 
 func footerWidth(fullWidth int) int {
 	return fullWidth/3 - 2
+}
+
+var transparentBackgroundColor string
+func transparentAllBackgrounColor() {
+	fullScreenBGColor = lipgloss.Color(transparentBackgroundColor)
+	filePanelBGColor = lipgloss.Color(transparentBackgroundColor)
+	sidebarBGColor = lipgloss.Color(transparentBackgroundColor)
+	footerBGColor = lipgloss.Color(transparentBackgroundColor)
+	modalBGColor = lipgloss.Color(transparentBackgroundColor)
 }

@@ -92,7 +92,7 @@ func metadataBoarder(height int, width int, borderBottom string, focusType focus
 // Generate border style for clipboard and can custom bottom border
 func clipboardBoarder(height int, width int, borderBottom string) lipgloss.Style {
 	border := generateBorder()
-	border.Top = "━┫ Clipboard ┣" + strings.Repeat("━", width)
+	border.Top = "━┫ Clipboard w" + strings.Repeat("━", width)
 	border.Bottom = borderBottom
 
 	return lipgloss.NewStyle().
