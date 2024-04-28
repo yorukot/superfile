@@ -1,7 +1,9 @@
 package components
 
 import (
+	"archive/tar"
 	"archive/zip"
+	"compress/gzip"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -549,16 +551,6 @@ func unzip(src, dest string) error {
 		total:    totalFiles,
 		done:     0,
 	}
-	if _, err := os.Stat(filepath.Join(dest, filepath.Base(src))); os.IsExist(err) {
-		p.state = failure
-		p.name = "󰛫 Directory already exist"
-		channel <- channelMessage{
-			messageId:       id,
-			processNewState: p,
-		}
-		return nil
-	}
-	os.MkdirAll(dest, 0755)
 
 	// Closure to address file descriptors issue with all the deferred .Close() methods
 	extractAndWriteFile := func(f *zip.File) error {
@@ -640,6 +632,77 @@ func unzip(src, dest string) error {
 	return nil
 }
 
+func ungzip(input, output string) error {
+	var err error
+	input, err = filepath.Abs(input)
+	if err != nil {
+		return err
+	}
+	output, err = filepath.Abs(output)
+	if err != nil {
+		return err
+	}
+
+	inputFile, err := os.Open(input)
+	if err != nil {
+		return err
+	}
+	defer inputFile.Close()
+
+	gzReader, err := gzip.NewReader(inputFile)
+	if err != nil {
+		return err
+	}
+	defer gzReader.Close()
+
+	err = os.MkdirAll(output, 0755)
+	if err != nil {
+		return err
+	}
+
+	tarReader := tar.NewReader(gzReader)
+	for {
+		header, err := tarReader.Next()
+
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+
+		targetPath := filepath.Join(output, header.Name)
+
+		fileInfo := header.FileInfo()
+		if fileInfo.IsDir() {
+			err = os.MkdirAll(targetPath, fileInfo.Mode())
+			if err != nil {
+				return err
+			}
+			continue
+		}
+
+		targetFile, err := os.Create(targetPath)
+		if err != nil {
+			return err
+		}
+
+		_, err = io.Copy(targetFile, tarReader)
+		if err != nil {
+			targetFile.Close()
+			return err
+		}
+
+		err = targetFile.Close()
+		if err != nil {
+			return err
+		}
+		
+	}
+
+	return nil
+}
+
 func zipSource(source, target string) error {
 	id := shortuuid.New()
 	prog := progress.New()
@@ -669,7 +732,6 @@ func zipSource(source, target string) error {
 		return nil
 	}
 
-	// 1. Create a ZIP file and zip.Writer
 	f, err := os.Create(target)
 	if err != nil {
 		return err
@@ -679,7 +741,6 @@ func zipSource(source, target string) error {
 	writer := zip.NewWriter(f)
 	defer writer.Close()
 
-	// 2. Go through all the files of the source
 	err = filepath.Walk(source, func(path string, info os.FileInfo, err error) error {
 		p.name = "󰗄 " + filepath.Base(path)
 		if len(channel) < 5 {
@@ -693,16 +754,13 @@ func zipSource(source, target string) error {
 			return err
 		}
 
-		// 3. Create a local file header
 		header, err := zip.FileInfoHeader(info)
 		if err != nil {
 			return err
 		}
 
-		// set compression
 		header.Method = zip.Deflate
 
-		// 4. Set relative path of a file as the header name
 		header.Name, err = filepath.Rel(filepath.Dir(source), path)
 		if err != nil {
 			return err
@@ -711,7 +769,6 @@ func zipSource(source, target string) error {
 			header.Name += "/"
 		}
 
-		// 5. Create writer for the file header and save content of the file
 		headerWriter, err := writer.CreateHeader(header)
 		if err != nil {
 			return err

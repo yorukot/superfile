@@ -31,6 +31,7 @@ var forceReloadElement = false
 var firstUse = false
 
 var HomeDir = basedir.Home
+
 var SuperFileMainDir = basedir.ConfigHome + "/superfile"
 var SuperFileCacheDir = basedir.CacheHome + "/superfile"
 var SuperFileDataDir = basedir.DataHome + "/superfile"

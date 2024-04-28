@@ -123,12 +123,12 @@ func contollerProcessBarListDown(m model) model {
 	if len(m.processBarModel.processList) == 0 {
 		return m
 	}
-	if m.processBarModel.cursor < len(m.processBarModel.processList)-1  {
+	if m.processBarModel.cursor < len(m.processBarModel.processList)-1 {
 		m.processBarModel.cursor++
 		if m.processBarModel.cursor > m.processBarModel.render+2 {
 			m.processBarModel.render++
 		}
-	} else { 
+	} else {
 		m.processBarModel.render = 0
 		m.processBarModel.cursor = 0
 	}
@@ -274,7 +274,9 @@ func pasteItem(m model) model {
 	if len(m.copyItems.items) == 0 {
 		return m
 	}
+
 	totalFiles := 0
+
 	for _, folderPath := range m.copyItems.items {
 		count, err := countFiles(folderPath)
 		if err != nil {
@@ -289,22 +291,17 @@ func pasteItem(m model) model {
 
 	newProcess := process{}
 
+	prefixIcon := "󰆏 "
 	if m.copyItems.cut {
-		newProcess = process{
-			name:     "󰆐 " + filepath.Base(m.copyItems.items[0]),
-			progress: prog,
-			state:    inOperation,
-			total:    totalFiles,
-			done:     0,
-		}
-	} else {
-		newProcess = process{
-			name:     "󰆏 " + filepath.Base(m.copyItems.items[0]),
-			progress: prog,
-			state:    inOperation,
-			total:    totalFiles,
-			done:     0,
-		}
+		prefixIcon = "󰆐 "
+	}
+
+	newProcess = process{
+		name:     prefixIcon + filepath.Base(m.copyItems.items[0]),
+		progress: prog,
+		state:    inOperation,
+		total:    totalFiles,
+		done:     0,
 	}
 
 	m.processBarModel.process[id] = newProcess
@@ -350,7 +347,7 @@ func pasteItem(m model) model {
 	if m.copyItems.cut {
 		for _, item := range m.copyItems.items {
 			if runtime.GOOS == "darwin" {
-				err := moveElement(item,  HomeDir + "/.Trash/" + filepath.Base(item))
+				err := moveElement(item, HomeDir+"/.Trash/"+filepath.Base(item))
 				if err != nil {
 					outPutLog("Delete single item function move file to trash can error", err)
 				}
@@ -476,8 +473,26 @@ func toggleDotFileController(m model) model {
 }
 
 func extractFile(m model) model {
+	var err error
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	unzip(panel.element[panel.cursor].location, filepath.Dir(panel.element[panel.cursor].location))
+	ext := strings.ToLower(filepath.Ext(panel.element[panel.cursor].location))
+	outputDir := fileNameWithoutExtension(panel.element[panel.cursor].location)
+	outputDir, err = renameIfDuplicate(outputDir)
+
+	if err != nil {
+		outPutLog("Error extract file when craete new directory", err)
+	}
+
+	switch ext {
+	case ".zip":
+		os.MkdirAll(outputDir, 0755)
+		unzip(panel.element[panel.cursor].location, outputDir)
+	case ".tar", ".gz":
+		os.MkdirAll(outputDir, 0755)
+		ungzip(panel.element[panel.cursor].location, outputDir)
+	default:
+		return m
+	}
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m
 }
@@ -487,6 +502,12 @@ func compressFile(m model) model {
 	fileName := filepath.Base(panel.element[panel.cursor].location)
 
 	zipName := strings.TrimSuffix(fileName, filepath.Ext(fileName)) + ".zip"
+	zipName, err := renameIfDuplicate(zipName)
+
+	if err != nil {
+		outPutLog("Error compress file when rename dublicate", err)
+	}
+
 	zipSource(panel.element[panel.cursor].location, filepath.Join(filepath.Dir(panel.element[panel.cursor].location), zipName))
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m
@@ -501,7 +522,7 @@ func openFileWithEditor(m model) tea.Cmd {
 		editor = "nano"
 	}
 	c := exec.Command(editor, panel.element[panel.cursor].location)
-	
+
 	return tea.ExecProcess(c, func(err error) tea.Msg {
 		return editorFinishedMsg{err}
 	})
