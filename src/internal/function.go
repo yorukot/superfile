@@ -656,6 +656,9 @@ func ungzip(input, output string) error {
 			return err
 		}
 
+		if !filepath.IsAbs(header.Name) {
+			return fmt.Errorf("unsanitized archive entry with relative path")
+		}
 		targetPath := filepath.Join(output, header.Name)
 
 		fileInfo := header.FileInfo()
