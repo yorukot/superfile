@@ -88,11 +88,11 @@ func filePanelRender(m model) string {
 			panelModeString = "󰆽 Select"
 		}
 
-		f[i] += filePanelDividerStyle(filePanel.focusType).Render(strings.Repeat("━", filePanelWidth)) + "\n"
+		f[i] += filePanelDividerStyle(filePanel.focusType).Render(strings.Repeat(Config.BorderTop, filePanelWidth)) + "\n"
 		f[i] += " " + filePanel.searchBar.View() + "\n"
 		if len(filePanel.element) == 0 {
 			f[i] += filePanelStyle.Render("   No such file or directory")
-			bottomBorder := generateFooterBorder(fmt.Sprintf("%s┣━┫%s", panelModeString, "0/0"), footerBorderWidth)
+			bottomBorder := generateFooterBorder(fmt.Sprintf("%s%s%s", panelModeString, bottomMiddleBorderSplit, "0/0"), footerBorderWidth)
 			f[i] = filePanelBorderStyle(m.mainPanelHeight, filePanelWidth, filePanel.focusType, bottomBorder).Render(f[i])
 		} else {
 			for h := filePanel.render; h < filePanel.render+panelElementHeight(m.mainPanelHeight) && h < len(filePanel.element); h++ {
@@ -115,7 +115,7 @@ func filePanelRender(m model) string {
 			cursorPosition := strconv.Itoa(filePanel.cursor + 1)
 			totalElement := strconv.Itoa(len(filePanel.element))
 
-			bottomBorder := generateFooterBorder(fmt.Sprintf("%s┣━┫%s/%s", panelModeString, cursorPosition, totalElement), footerBorderWidth)
+			bottomBorder := generateFooterBorder(fmt.Sprintf("%s%s%s/%s", panelModeString, bottomMiddleBorderSplit, cursorPosition, totalElement), footerBorderWidth)
 			f[i] = filePanelBorderStyle(m.mainPanelHeight, filePanelWidth, filePanel.focusType, bottomBorder).Render(f[i])
 		}
 	}
@@ -300,7 +300,7 @@ func clipboardRender(m model) string {
 	} else {
 		bottomWidth = footerWidth(m.fullWidth)
 	}
-	clipboardRender = clipboardBoarder(bottomElementHight(footerHeight), bottomWidth, "━").Render(clipboardRender)
+	clipboardRender = clipboardBoarder(bottomElementHight(footerHeight), bottomWidth, Config.BorderBottom).Render(clipboardRender)
 
 	return clipboardRender
 }

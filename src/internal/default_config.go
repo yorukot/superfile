@@ -73,8 +73,8 @@ border_top_left = "┏"
 border_top_right = "┓"
 border_bottom_left = "┗"
 border_bottom_right = "┛"
-border_split_left = "┫"
-border_split_right = "┣"
+border_middle_left = "┣"
+border_middle_right = "┫"
 # 
 # ==========PLUGINS========== #
 # 

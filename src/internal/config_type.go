@@ -122,8 +122,8 @@ type ConfigType struct {
 	BorderTopRight        string   `toml:"border_top_right"`
 	BorderBottomLeft      string   `toml:"border_bottom_left"`
 	BorderBottomRight     string   `toml:"border_bottom_right"`
-	BorderSplitLeft       string   `toml:"border_split_left"`
-	BorderSplitRight      string   `toml:"border_split_right"`
+	BorderMiddleLeft       string   `toml:"border_middle_left"`
+	BorderMiddleRight      string   `toml:"border_middle_right"`
 
 	Metadata              bool     `toml:"metadata" comment:"\n==========PLUGINS========== #\n\nShow more detailed metadata, please install exiftool before enabling this plugin!"`
 }

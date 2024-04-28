@@ -13,11 +13,11 @@ func filePanelBorderStyle(height int, width int, focusType filePanelFocusType, b
 	border.Right = ""
 	for i := 0; i < height; i++ {
 		if i == 1 {
-			border.Left += "┣"
-			border.Right += "┫"
+			border.Left += Config.BorderMiddleLeft
+			border.Right += Config.BorderMiddleRight
 		} else {
-			border.Left += "┃"
-			border.Right += "┃"
+			border.Left += Config.BorderLeft
+			border.Right += Config.BorderRight
 		}
 	}
 	border.Bottom = borderBottom
@@ -50,7 +50,7 @@ func sideBarBorderStyle(height int, focus focusPanelType) lipgloss.Style {
 // Generate border style for process and can custom bottom border
 func procsssBarBoarder(height int, width int, borderBottom string, focusType focusPanelType) lipgloss.Style {
 	border := generateBorder()
-	border.Top = "━┫ Processes ┣" + strings.Repeat("━", width)
+	border.Top = Config.BorderTop + Config.BorderMiddleRight + " Processes " + Config.BorderMiddleLeft + strings.Repeat(Config.BorderTop, width)
 	border.Bottom = borderBottom
 
 	processBorderStateColor := footerBorderColor
@@ -71,7 +71,7 @@ func procsssBarBoarder(height int, width int, borderBottom string, focusType foc
 // Generate border style for metadata and can custom bottom border
 func metadataBoarder(height int, width int, borderBottom string, focusType focusPanelType) lipgloss.Style {
 	border := generateBorder()
-	border.Top = "━┫ Metadata ┣" + strings.Repeat("━", width)
+	border.Top = Config.BorderTop + Config.BorderMiddleRight + " Metadata " + Config.BorderMiddleLeft + strings.Repeat(Config.BorderTop, width)
 	border.Bottom = borderBottom
 
 	metadataBorderStateColor := footerBorderColor
@@ -92,7 +92,7 @@ func metadataBoarder(height int, width int, borderBottom string, focusType focus
 // Generate border style for clipboard and can custom bottom border
 func clipboardBoarder(height int, width int, borderBottom string) lipgloss.Style {
 	border := generateBorder()
-	border.Top = "━┫ Clipboard w" + strings.Repeat("━", width)
+	border.Top = Config.BorderTop + Config.BorderMiddleRight + " Clipboard " + Config.BorderMiddleLeft + strings.Repeat(Config.BorderTop, width)
 	border.Bottom = borderBottom
 
 	return lipgloss.NewStyle().
@@ -107,10 +107,11 @@ func clipboardBoarder(height int, width int, borderBottom string) lipgloss.Style
 
 // Generate modal (pop up widnwos) border style
 func modalBorderStyle(height int, width int) lipgloss.Style {
+	border := generateBorder()
 	return lipgloss.NewStyle().Height(height).
 		Width(width).
 		Align(lipgloss.Center, lipgloss.Center).
-		Border(lipgloss.ThickBorder()).
+		Border(border).
 		BorderForeground(modalBorderActiveColor).
 		BorderBackground(modalBGColor).
 		Background(modalBGColor).
@@ -119,10 +120,11 @@ func modalBorderStyle(height int, width int) lipgloss.Style {
 
 // Generate first use modal style (This modal pop up when user first use superfile)
 func firstUseModal(height int, width int) lipgloss.Style {
+	border := generateBorder()
 	return lipgloss.NewStyle().Height(height).
 		Width(width).
 		Align(lipgloss.Left, lipgloss.Center).
-		Border(lipgloss.ThickBorder()).
+		Border(border).
 		BorderForeground(modalBorderActiveColor).
 		BorderBackground(modalBGColor).
 		Background(modalBGColor).
@@ -180,13 +182,13 @@ func stringColorRender(fgColor lipgloss.Color, bgColor lipgloss.Color) lipgloss.
 // Geerate border style
 func generateBorder() lipgloss.Border {
 	return lipgloss.Border{
-		Top:         "━",
-		Bottom:      "━",
-		Left:        "┃",
-		Right:       "┃",
-		TopLeft:     "┏",
-		TopRight:    "┓",
-		BottomLeft:  "┗",
-		BottomRight: "┛",
+		Top:         Config.BorderTop,
+		Bottom:      Config.BorderBottom,
+		Left:        Config.BorderLeft,
+		Right:       Config.BorderRight,
+		TopLeft:     Config.BorderTopLeft,
+		TopRight:    Config.BorderTopRight,
+		BottomLeft:  Config.BorderBottomLeft,
+		BottomRight: Config.BorderBottomRight,
 	}
 }
