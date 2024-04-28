@@ -564,7 +564,7 @@ func unzip(src, dest string) error {
 			os.MkdirAll(filepath.Dir(path), f.Mode())
 			f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
 			if err != nil {
-				return err
+				return fmt.Errorf("error open file: %s", err)
 			}
 			defer func() {
 				if err := f.Close(); err != nil {
@@ -575,8 +575,7 @@ func unzip(src, dest string) error {
 			_, err = io.Copy(f, rc)
 
 			if err != nil {
-
-				return err
+				return fmt.Errorf("error copy file: %s", err)
 			}
 		}
 		return nil

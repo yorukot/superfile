@@ -486,10 +486,16 @@ func extractFile(m model) model {
 	switch ext {
 	case ".zip":
 		os.MkdirAll(outputDir, 0755)
-		unzip(panel.element[panel.cursor].location, outputDir)
+		err = unzip(panel.element[panel.cursor].location, outputDir)
+		if err != nil {
+			outPutLog(err)
+		}
 	case ".tar", ".gz":
 		os.MkdirAll(outputDir, 0755)
-		ungzip(panel.element[panel.cursor].location, outputDir)
+		err = ungzip(panel.element[panel.cursor].location, outputDir)
+		if err != nil {
+			outPutLog(err)
+		}
 	default:
 		return m
 	}
