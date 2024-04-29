@@ -198,6 +198,13 @@ func (m model) View() string {
 		return PlaceOverlay(overlayX, overlayY, helpMenu, finalRender)
 	}
 
+	if firstUse {
+		introduceModal := introduceModalRender(m)
+		overlayX := m.fullWidth/2 - m.helpMenu.width/2
+		overlayY := m.fullHeight/2 - m.helpMenu.height/2
+		return PlaceOverlay(overlayX, overlayY, introduceModal, finalRender)
+	}
+	
 	if m.typingModal.open {
 		typingModal := typineModalRender(m)
 		overlayX := m.fullWidth/2 - modalWidth/2
@@ -210,13 +217,6 @@ func (m model) View() string {
 		overlayX := m.fullWidth/2 - modalWidth/2
 		overlayY := m.fullHeight/2 - modalHeight/2
 		return PlaceOverlay(overlayX, overlayY, warnModal, finalRender)
-	}
-
-	if firstUse {
-		introduceModal := introduceModalRender(m)
-		overlayX := m.fullWidth/2 - m.helpMenu.width/2
-		overlayY := m.fullHeight/2 - m.helpMenu.height/2
-		return PlaceOverlay(overlayX, overlayY, introduceModal, finalRender)
 	}
 
 	return finalRender

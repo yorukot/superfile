@@ -31,7 +31,9 @@
   - [Create your own theme](#create-your-own-theme)
 - [Hotkeys](#hotkeys)
 - [Contributing](#contributing)
-- [Star History](#star-history)
+- [Thanks](#thanks)
+  - [Contributors](#contributors)
+  - [Star History](#star-history)
 
 ## Install
 
@@ -202,9 +204,20 @@ The hotkey ranges are found in `hotkeys.toml`
 
 If you want to contribute please follow the [contribution guide](./CONTRIBUTING.md)
 
-## Star History
+## Thanks
+
+### Contributors
+
+**Thanks to all the contributors for making this project even greater!**
+
+<a href="https://github.com/MHNightCat/superfile/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=MHNightCat/superfile" />
+</a>
+
+### Star History
 
 **THANKS FOR All OF YOUR STARS!**
+Your stars are my motivation to keep updating!
 
 <a href="https://star-history.com/#MHNightCat/superfile&Timeline">
  <picture>
