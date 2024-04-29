@@ -3,6 +3,7 @@ package internal
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -331,13 +332,25 @@ func terminalSizeWarnRender(m model) string {
 
 func typineModalRender(m model) string {
 	if m.typingModal.itemType == newFile {
-		fileLocation := filePanelTopDirectoryIconStyle.Render("   ") + filePanelTopPathStyle.Render(truncateTextBeginning(m.typingModal.location+"/"+m.typingModal.textInput.Value(), modalWidth-4)) + "\n"
+		previewPath := filepath.Join(m.typingModal.location, m.typingModal.textInput.Value())
+
+		fileLocation := filePanelTopDirectoryIconStyle.Render("   ") +
+			filePanelTopPathStyle.Render(truncateTextBeginning(previewPath, modalWidth-4)) + "\n"
+
 		confirm := modalConfirm.Render(" (" + hotkeys.Confirm[0] + ") New File ")
 		cancel := modalCancel.Render(" (" + hotkeys.Cancel[0] + ") Cancel ")
-		tip := confirm + lipgloss.NewStyle().Background(modalBGColor).Render("           ") + cancel
+
+		tip := confirm +
+			lipgloss.NewStyle().Background(modalBGColor).Render("           ") +
+			cancel
+
 		return modalBorderStyle(modalHeight, modalWidth).Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip)
 	} else {
-		fileLocation := filePanelTopDirectoryIconStyle.Render("   ") + filePanelTopPathStyle.Render(truncateTextBeginning(m.typingModal.location+"/"+m.typingModal.textInput.Value(), modalWidth-4)) + "\n"
+		previewPath := filepath.Join(m.typingModal.location, m.typingModal.textInput.Value())
+
+		fileLocation := filePanelTopDirectoryIconStyle.Render("   ") +
+			filePanelTopPathStyle.Render(truncateTextBeginning(previewPath, modalWidth-4)) + "\n"
+
 		confirm := modalConfirm.Render(" (" + hotkeys.Confirm[0] + ") New Folder ")
 		cancel := modalCancel.Render(" (" + hotkeys.Cancel[0] + ") Cancel ")
 		tip := confirm + lipgloss.NewStyle().Background(modalBGColor).Render("           ") + cancel

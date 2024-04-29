@@ -23,12 +23,26 @@ func truncateText(text string, maxChars int) string {
 }
 
 func truncateTextBeginning(text string, maxChars int) string {
-	if utf8.RuneCountInString(text) <= maxChars {
+	if charmansi.StringWidth(text) <= maxChars {
 		return text
 	}
+
 	runes := []rune(text)
-	charsToKeep := maxChars - 3
-	truncatedRunes := append([]rune("..."), runes[len(runes)-charsToKeep:]...)
+	var truncatedRunes []rune
+
+	truncatedRunes = runes
+
+	truncatedWidth := charmansi.StringWidth(string(truncatedRunes))
+
+	for truncatedWidth > maxChars {
+		truncatedRunes = truncatedRunes[1:]
+		truncatedWidth = charmansi.StringWidth(string(truncatedRunes))
+	}
+
+	if len(truncatedRunes) > 3 {
+		truncatedRunes = append([]rune("..."), truncatedRunes[3:]...)
+	}
+
 	return string(truncatedRunes)
 }
 
@@ -98,8 +112,6 @@ func formatFileSize(size int64) string {
 
 	return fmt.Sprintf("%.2f %s", adjustedSize, units[unitIndex])
 }
-
-
 
 // ======================================= overplace these is from the lipgloss PR =======================================
 // whitespace is a whitespace renderer.
