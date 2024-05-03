@@ -14,8 +14,8 @@ schema = 3
     version = "v0.18.0"
     hash = "sha256-FVKLet2anNB6gupLYXO4kJaKQIXs1dg2dZ2ooaBiEZU="
   [mod."github.com/charmbracelet/bubbletea"]
-    version = "v0.26.0"
-    hash = "sha256-SDhjQhakvBDOlBbVHVAEIB0dMY1a3/ztnN91a+krAWQ="
+    version = "v0.26.1"
+    hash = "sha256-01xs0XEjl9IDqrOfP32VXRJD7AWOU1g1ZHZPwqupqw8="
   [mod."github.com/charmbracelet/harmonica"]
     version = "v0.2.0"
     hash = "sha256-fi5N0IXhSbbYHdSZFngCfpT4kdiEaKedqj8YpnlvX0o="
