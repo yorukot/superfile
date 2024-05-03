@@ -23,8 +23,8 @@ schema = 3
     version = "v0.10.0"
     hash = "sha256-JZD1iVeizYe0mp3qQcJbUZdYN6HP/DNC67ja79DTe6s="
   [mod."github.com/charmbracelet/x/exp/term"]
-    version = "v0.0.0-20240425164147-ba2a9512b05f"
-    hash = "sha256-7bnNJJx2DVH6gCO6oGBdctto5z56PgDYZqAxuZP35Q0="
+    version = "v0.0.0-20240503143715-36ea203beff4"
+    hash = "sha256-BtRL4wAwm6vB9kFbsY8t8Civ3Tx/HHSJfpWUXaorbWs="
   [mod."github.com/containerd/console"]
     version = "v1.0.4-0.20230313162750-1ae8d489ac81"
     hash = "sha256-Qus81DgpWHJ6RRqeKOKcUFvzCxvPzygJqBabvBsBuHU="
