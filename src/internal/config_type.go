@@ -108,24 +108,24 @@ type ThemeType struct {
 
 // Configuration settings
 type ConfigType struct {
-	Theme                 string   `toml:"theme" comment:"change your theme"`
+	Theme string `toml:"theme" comment:"change your theme"`
 
-	FooterPanelList       []string `toml:"footer_panel_list" comment:"\nuseless for now"`
+	FooterPanelList []string `toml:"footer_panel_list" comment:"\nuseless for now"`
 
-	TransparentBackground bool     `toml:"transparent_backgroun" comment:"\n================   Style =================\n\nSet transparent background or not (this only work when your terminal background is transparent)"`
+	TransparentBackground bool `toml:"transparent_backgroun" comment:"\n================   Style =================\n\nSet transparent background or not (this only work when your terminal background is transparent)"`
 
-	BorderTop             string   `toml:"border_top" comment:"\n\nBorder style"`
-	BorderBottom          string   `toml:"border_bottom"`
-	BorderLeft            string   `toml:"border_left"`
-	BorderRight           string   `toml:"border_right"`
-	BorderTopLeft         string   `toml:"border_top_left"`
-	BorderTopRight        string   `toml:"border_top_right"`
-	BorderBottomLeft      string   `toml:"border_bottom_left"`
-	BorderBottomRight     string   `toml:"border_bottom_right"`
-	BorderMiddleLeft       string   `toml:"border_middle_left"`
-	BorderMiddleRight      string   `toml:"border_middle_right"`
+	BorderTop         string `toml:"border_top" comment:"\n\nBorder style"`
+	BorderBottom      string `toml:"border_bottom"`
+	BorderLeft        string `toml:"border_left"`
+	BorderRight       string `toml:"border_right"`
+	BorderTopLeft     string `toml:"border_top_left"`
+	BorderTopRight    string `toml:"border_top_right"`
+	BorderBottomLeft  string `toml:"border_bottom_left"`
+	BorderBottomRight string `toml:"border_bottom_right"`
+	BorderMiddleLeft  string `toml:"border_middle_left"`
+	BorderMiddleRight string `toml:"border_middle_right"`
 
-	Metadata              bool     `toml:"metadata" comment:"\n==========PLUGINS========== #\n\nShow more detailed metadata, please install exiftool before enabling this plugin!"`
+	Metadata bool `toml:"metadata" comment:"\n==========PLUGINS========== #\n\nShow more detailed metadata, please install exiftool before enabling this plugin!"`
 }
 
 type HotkeysType struct {
@@ -168,6 +168,7 @@ type HotkeysType struct {
 	CopySingleItem  []string `toml:"copy_single_item"`
 	CutSingleItem   []string `toml:"cut_single_item"`
 	SearchBar       []string `toml:"search_bar"`
+	CommandLine     []string `toml:"command_line"`
 
 	FilePanelSelectModeItemSingleSelect []string `toml:"file_panel_select_mode_item_single_select" comment:"\nHere is select mode hotkey you can conflicts with other mode (cant conflicts with global hotkey)"`
 	FilePanelSelectModeItemSelectDown   []string `toml:"file_panel_select_mode_item_select_down"`

@@ -42,6 +42,7 @@ parent_directory = ['h', 'backspace']
 copy_single_item = ['ctrl+c', '']
 cut_single_item = ['ctrl+x', '']
 search_bar = ['ctrl+f', '']
+command_line = ['/', '']
 # 
 # Here is select mode hotkey you can conflicts with other mode (cant conflicts with global hotkey)
 file_panel_select_mode_item_single_select = ['enter', 'l']

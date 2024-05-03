@@ -47,6 +47,7 @@ func parentDirectory(m model) model {
 func enterPanel(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 
+	
 	if len(panel.element) > 0 && panel.element[panel.cursor].directory {
 		panel.directoryRecord[panel.location] = directoryRecord{
 			directoryCursor: panel.cursor,
@@ -62,12 +63,25 @@ func enterPanel(m model) model {
 			panel.render = 0
 		}
 	} else if len(panel.element) > 0 && !panel.element[panel.cursor].directory {
+		fileInfo, err := os.Lstat(panel.element[panel.cursor].location)
+		if err != nil {
+			outPutLog("err when getting file info", err)
+			return m
+		}
+
+		if fileInfo.Mode()&os.ModeSymlink != 0 {
+			linkPath, _ := os.Readlink(panel.element[panel.cursor].location)
+			
+			m.fileModel.filePanels[m.filePanelFocusIndex].location = linkPath
+			return m
+		}
+
 		openCommand := "xdg-open"
 		if runtime.GOOS == "darwin" {
 			openCommand = "open"
 		}
 		cmd := exec.Command(openCommand, panel.element[panel.cursor].location)
-		_, err := cmd.Output()
+		_, err = cmd.Output()
 		if err != nil {
 			outPutLog(fmt.Sprintf("err when open file with %s", openCommand), err)
 		}
@@ -78,7 +92,7 @@ func enterPanel(m model) model {
 	return m
 }
 
-// Switch to the directory where the sidebar cursor is located 
+// Switch to the directory where the sidebar cursor is located
 func sidebarSelectDirectory(m model) model {
 	m.focusPanel = nonePanelFocus
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
@@ -155,6 +169,16 @@ func searchBarFocus(m model) model {
 	// config search bar width
 	panel.searchBar.Width = m.fileModel.width - 4
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+	return m
+}
+
+func commandLine(m model) model {
+	if m.commandLine.open {
+		m.commandLine.open = false
+	}
+
+	m.commandLine.open = true
+
 	return m
 }
 

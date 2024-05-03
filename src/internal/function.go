@@ -299,8 +299,16 @@ func returnMetaData(m model) model {
 		return m
 	}
 
-	if Config.Metadata {
+	checkIsSymlinked, err := os.Lstat(filePath)
+	if err != nil {
+		outPutLog("err when getting file info", err)
+		return m
+	}
+
+	if Config.Metadata && checkIsSymlinked.Mode()&os.ModeSymlink == 0 {
+		
 		fileInfos := et.ExtractMetadata(filePath)
+
 
 		for _, fileInfo := range fileInfos {
 			if fileInfo.Err != nil {
