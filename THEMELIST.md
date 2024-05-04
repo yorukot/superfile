@@ -35,6 +35,13 @@
 
 ![](/asset/theme/rose-pine.png)
 
+## Tokyonight
+
+- Theme name: `tokyonight`
+- Author: github.com/pearidar
+
+![](/asset/theme/tokyonight.png)
+
 ## Gruvbox
 
 - Theme name: `gruvbox`
