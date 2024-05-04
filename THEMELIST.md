@@ -31,9 +31,16 @@
 ## Rosé Pine
 
 - Theme name: `rose-pine`
-- Author: github.com/tanbinislam43/
+- Author: github.com/pearcidar/
 
 ![](/asset/theme/rose-pine.png)
+
+## Tokyonight
+
+- Theme name: `tokyonight`
+- Author: github.com/pearidar
+
+![](/asset/theme/tokyonight.png)
 
 ## Gruvbox
 
