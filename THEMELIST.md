@@ -31,7 +31,7 @@
 ## Rosé Pine
 
 - Theme name: `rose-pine`
-- Author: github.com/pearcidar/
+- Author: github.com/tanbinislam43/
 
 ![](/asset/theme/rose-pine.png)
 
