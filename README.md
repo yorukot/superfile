@@ -32,6 +32,7 @@
 - [Hotkeys](#hotkeys)
 - [Contributing](#contributing)
 - [Thanks](#thanks)
+  - [Support](#Support)
   - [Contributors](#contributors)
   - [Star History](#star-history)
 
@@ -207,6 +208,9 @@ If you want to contribute please follow the [contribution guide](./CONTRIBUTING.
 ## Thanks
 
 ### Support
+
+- a Star on my Github repos would be nice 🌟
+- You can buy a coffee for me 💖
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/G2G1JEGGC)
 
