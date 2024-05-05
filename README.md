@@ -206,6 +206,10 @@ If you want to contribute please follow the [contribution guide](./CONTRIBUTING.
 
 ## Thanks
 
+### Support
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/G2G1JEGGC)
+
 ### Contributors
 
 **Thanks to all the contributors for making this project even greater!**
