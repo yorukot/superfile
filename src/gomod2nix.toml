@@ -23,8 +23,8 @@ schema = 3
     version = "v0.10.0"
     hash = "sha256-JZD1iVeizYe0mp3qQcJbUZdYN6HP/DNC67ja79DTe6s="
   [mod."github.com/charmbracelet/x/exp/term"]
-    version = "v0.0.0-20240503143715-36ea203beff4"
-    hash = "sha256-BtRL4wAwm6vB9kFbsY8t8Civ3Tx/HHSJfpWUXaorbWs="
+    version = "v0.0.0-20240506152644-8135bef4e495"
+    hash = "sha256-242kStpIJJY2vGUzy8OckWyAdzeKNlR5PsVc/ObRnJo="
   [mod."github.com/cpuguy83/go-md2man/v2"]
     version = "v2.0.4"
     hash = "sha256-pQ+H8Psh92KWTang8hK0cHFLomH+4X0rMMilIJUQ4Qc="
@@ -104,8 +104,8 @@ schema = 3
     version = "v0.7.0"
     hash = "sha256-2ETllEu2GDWoOd/yMkOkLC2hWBpKzbVZ8LhjLu0d2A8="
   [mod."golang.org/x/sys"]
-    version = "v0.19.0"
-    hash = "sha256-cmuL31TYLJmDm/fDnI2Sn0wB88cpdOHV1+urorsJWx4="
+    version = "v0.20.0"
+    hash = "sha256-mowlaoG2k4n1c1rApWef5EMiXd3I77CsUi8jPh6pTYA="
   [mod."golang.org/x/term"]
     version = "v0.19.0"
     hash = "sha256-wFwEMwhtsr0C4mqjxukjMM7lxJLYPvb7gAPO95xyhyg="
