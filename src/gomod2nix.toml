@@ -23,8 +23,8 @@ schema = 3
     version = "v0.10.0"
     hash = "sha256-JZD1iVeizYe0mp3qQcJbUZdYN6HP/DNC67ja79DTe6s="
   [mod."github.com/charmbracelet/x/exp/term"]
-    version = "v0.0.0-20240506152644-8135bef4e495"
-    hash = "sha256-242kStpIJJY2vGUzy8OckWyAdzeKNlR5PsVc/ObRnJo="
+    version = "v0.0.0-20240507030338-defd02928fc0"
+    hash = "sha256-SeThKwb4xpjQ//MLaYjJMMbZs36wrEL6fXCDrCydBrw="
   [mod."github.com/cpuguy83/go-md2man/v2"]
     version = "v2.0.4"
     hash = "sha256-pQ+H8Psh92KWTang8hK0cHFLomH+4X0rMMilIJUQ4Qc="
