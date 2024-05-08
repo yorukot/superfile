@@ -20,7 +20,6 @@ All notable changes to this project will be documented in this file. Dates are d
 - Fix Cut -> Paste file causes go panic [`#77`](https://github.com/MHNightCat/superfile/issues/77)
 - Fix symlinked folders don't open within superfile [`#88`](https://github.com/MHNightCat/superfile/issues/88)
 
-
 # [**v1.1.1**](https://github.com/MHNightCat/superfile/releases/tag/v1.1.1)
 
 > 2024/04/23
