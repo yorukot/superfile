@@ -1,9 +1,7 @@
 package internal
 
 import (
-	"archive/tar"
 	"archive/zip"
-	"compress/gzip"
 	"fmt"
 	"io"
 	"os"
@@ -12,7 +10,54 @@ import (
 
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/lithammer/shortuuid"
+	"golift.io/xtractr"
 )
+
+func extractCompressFile(src, dest string) error {
+	id := shortuuid.New()
+
+	prog := progress.New(generateGradientColor())
+	prog.PercentageStyle = footerStyle
+
+	p := process{
+		name:     "󰛫 unzip file",
+		progress: prog,
+		state:    inOperation,
+		total:    1,
+		done:     0,
+	}
+	
+	channel <- channelMessage{
+		messageId:       id,
+		processNewState: p,
+	}
+
+	x := &xtractr.XFile{
+		FilePath:  src,
+		OutputDir: dest,
+	}
+
+	_, _, _, err := xtractr.ExtractFile(x)
+
+	if err != nil {
+		p.state = successful
+		channel <- channelMessage{
+			messageId:       id,
+			processNewState: p,
+		}
+		return err
+	}
+
+	p.state = successful
+	p.done = 1
+
+	channel <- channelMessage{
+		messageId:       id,
+		processNewState: p,
+	}
+	
+	return nil
+}
 
 // Extract zip file
 func unzip(src, dest string) error {
@@ -32,7 +77,7 @@ func unzip(src, dest string) error {
 	prog.PercentageStyle = footerStyle
 	// channel message
 	p := process{
-		name:     "unzip file",
+		name:     "󰛫 unzip file",
 		progress: prog,
 		state:    inOperation,
 		total:    totalFiles,
@@ -113,81 +158,6 @@ func unzip(src, dest string) error {
 	channel <- channelMessage{
 		messageId:       id,
 		processNewState: p,
-	}
-
-	return nil
-}
-
-// Extract gzip file
-func ungzip(input, output string) error {
-	var err error
-	input, err = filepath.Abs(input)
-	if err != nil {
-		return err
-	}
-	output, err = filepath.Abs(output)
-	if err != nil {
-		return err
-	}
-
-	inputFile, err := os.Open(input)
-	if err != nil {
-		return err
-	}
-	defer inputFile.Close()
-
-	gzReader, err := gzip.NewReader(inputFile)
-	if err != nil {
-		return err
-	}
-	defer gzReader.Close()
-
-	err = os.MkdirAll(output, 0755)
-	if err != nil {
-		return err
-	}
-
-	tarReader := tar.NewReader(gzReader)
-	for {
-		header, err := tarReader.Next()
-
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return err
-		}
-
-		if !filepath.IsAbs(header.Name) {
-			return fmt.Errorf("unsanitized archive entry with relative path")
-		}
-		targetPath := filepath.Join(output, header.Name)
-
-		fileInfo := header.FileInfo()
-		if fileInfo.IsDir() {
-			err = os.MkdirAll(targetPath, fileInfo.Mode())
-			if err != nil {
-				return err
-			}
-			continue
-		}
-
-		targetFile, err := os.Create(targetPath)
-		if err != nil {
-			return err
-		}
-
-		_, err = io.Copy(targetFile, tarReader)
-		if err != nil {
-			targetFile.Close()
-			return err
-		}
-
-		err = targetFile.Close()
-		if err != nil {
-			return err
-		}
-
 	}
 
 	return nil

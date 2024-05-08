@@ -172,16 +172,6 @@ func searchBarFocus(m model) model {
 	return m
 }
 
-func commandLine(m model) model {
-	if m.commandLine.open {
-		m.commandLine.open = false
-	}
-
-	m.commandLine.open = true
-
-	return m
-}
-
 // ======================================== File panel controller ========================================
 
 // Control file panel list up

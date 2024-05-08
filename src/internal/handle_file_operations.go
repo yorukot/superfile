@@ -496,7 +496,6 @@ func cutMultipleItem(m model) model {
 	return m
 }
 
-
 // Paste all clipboard items
 func pasteItem(m model) model {
 	id := shortuuid.New()
@@ -518,7 +517,6 @@ func pasteItem(m model) model {
 
 	prog := progress.New(generateGradientColor())
 	prog.PercentageStyle = footerStyle
-
 
 	prefixIcon := "󰆏 "
 	if m.copyItems.cut {
@@ -606,16 +604,14 @@ func extractFile(m model) model {
 		os.MkdirAll(outputDir, 0755)
 		err = unzip(panel.element[panel.cursor].location, outputDir)
 		if err != nil {
-			outPutLog(err)
-		}
-	case ".tar", ".gz":
-		os.MkdirAll(outputDir, 0755)
-		err = ungzip(panel.element[panel.cursor].location, outputDir)
-		if err != nil {
-			outPutLog(err)
+			outPutLog("Error extract file,", err)
 		}
 	default:
-		return m
+		os.MkdirAll(outputDir, 0755)
+		err = extractCompressFile(panel.element[panel.cursor].location, outputDir)
+		if err != nil {
+			outPutLog("Error extract file,", err)
+		}
 	}
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m

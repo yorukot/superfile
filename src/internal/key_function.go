@@ -158,9 +158,6 @@ func normalAndBrowserModeKey(msg string, m model) model {
 		m = panelItemRename(m)
 	case hotkeys.SearchBar[0], hotkeys.SearchBar[1]:
 		m = searchBarFocus(m)
-
-	case hotkeys.CommandLine[0], hotkeys.CommandLine[1]:
-		m = commandLine(m)
 	}
 	return m
 }
