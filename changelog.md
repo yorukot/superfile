@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file. Dates are d
 - Support custom border style [`6ff0576`](https://github.com/MHNightCat/superfile/commit/6ff05765823cbd25e6fdc4d3f7370e435114acbb)
 - Enhancement when cutting and pasting, the file should be moved instead of copied and deleted. [`#100`](https://github.com/MHNightCat/superfile/issues/100)
 - Support extract almose compressed file [`e57cb78`](https://github.com/MHNightCat/superfile/commit/e57cb78d602d62b47662e2069b75059d908147db)
+- Update XDG_CACHE to XDG_STATE_HOME [`#90`](https://github.com/MHNightCat/superfile/issues/90)
 
 #### Bug fix
 - Fix Cut -> Paste file causes go panic [`#77`](https://github.com/MHNightCat/superfile/issues/77)
