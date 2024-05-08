@@ -1,6 +1,9 @@
 schema = 3
 
 [mod]
+  [mod."github.com/adrg/xdg"]
+    version = "v0.4.0"
+    hash = "sha256-zGjkdUQmrVqD6rMO9oDY+TeJCpuqnHyvkPCaXDlac/U="
   [mod."github.com/andybalholm/brotli"]
     version = "v1.0.5"
     hash = "sha256-/qS8wU8yZQJ+uTOg66rEl9s7spxq9VIXF5L1BcaEClc="
