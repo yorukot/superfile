@@ -2,7 +2,7 @@
 theme = 'catpuccin'
 # 
 # useless for now
-footer_panel_list = ['processessssssssssss', 'metadata', 'clipboard']
+footer_panel_list = ['processes', 'metadata', 'clipboard']
 # 
 # ==========PLUGINS========== #
 # 

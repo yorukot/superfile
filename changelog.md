@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file. Dates are d
 
 # [**v1.1.2**]()
 
-> xxxx/xx/xx
+> 2024/05/08
 
 #### Update
 - Update help menu [`#75`](https://github.com/MHNightCat/superfile/issues/75)
