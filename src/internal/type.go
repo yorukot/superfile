@@ -131,14 +131,7 @@ type fileMetadata struct {
 // Copied items
 type copyItems struct {
 	items         []string
-	originalPanel originalPanel
 	cut           bool
-}
-
-// Original panel
-type originalPanel struct {
-	index    int
-	location string
 }
 
 /* FILE WINDOWS TYPE START*/

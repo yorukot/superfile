@@ -538,50 +538,53 @@ func pasteItem(m model) model {
 		processNewState: newProcess,
 	}
 
+	p := m.processBarModel.process[id]
 	for _, filePath := range m.copyItems.items {
-		p := m.processBarModel.process[id]
-		if m.copyItems.cut {
+		var err error
+		if m.copyItems.cut && !isExternalDiskPath(filePath) {
 			p.name = "󰆐 " + filepath.Base(filePath)
 		} else {
+			if m.copyItems.cut {
+				p.name = "󰆐 " + filepath.Base(filePath)
+			}
 			p.name = "󰆏 " + filepath.Base(filePath)
 		}
 
-		newModel, err := pasteDir(filePath, filepath.Join(panel.location, path.Base(filePath)), id, m)
-		m = newModel
+		errMessage := "cut item error"
+		if m.copyItems.cut && !isExternalDiskPath(filePath) {
+			err = moveElement(filePath, filepath.Join(panel.location, path.Base(filePath)))
+		} else {
+			newModel, err := pasteDir(filePath, filepath.Join(panel.location, path.Base(filePath)), id, m)
+			if err != nil {
+				errMessage = "paste item error"
+			}
+			m = newModel
+			if m.copyItems.cut {
+				os.RemoveAll(filePath)
+			}
+		}
 		p = m.processBarModel.process[id]
-		// Check if failure pasteItem
 		if err != nil {
 			p.state = failure
 			channel <- channelMessage{
 				messageId:       id,
 				processNewState: p,
 			}
-			outPutLog("Pasted item error", err)
+			outPutLog(errMessage, err)
 			m.processBarModel.process[id] = p
 			break
-		} else {
-			if p.done == p.total {
-				p.state = successful
-				p.done = totalFiles
-				p.doneTime = time.Now()
-				channel <- channelMessage{
-					messageId:       id,
-					processNewState: p,
-				}
-			}
-			m.processBarModel.process[id] = p
 		}
 	}
-
-	// If is cut delete orginal file
-	if m.copyItems.cut {
-		for _, item := range m.copyItems.items {
-			trashMacOrLinux(item)
-		}
-		if m.fileModel.filePanels[m.copyItems.originalPanel.index].location == m.copyItems.originalPanel.location {
-			m.fileModel.filePanels[m.copyItems.originalPanel.index].selected = panel.selected[:0]
-		}
+	
+	p.state = successful
+	p.done = totalFiles
+	p.doneTime = time.Now()
+	channel <- channelMessage{
+		messageId:       id,
+		processNewState: p,
 	}
+	
+	m.processBarModel.process[id] = p
 	m.copyItems.cut = false
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	return m

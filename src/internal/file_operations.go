@@ -53,7 +53,7 @@ func pasteDir(src, dst string, id string, m model) (model, error) {
 		}
 
 		newPath := filepath.Join(dst, relPath)
-
+		
 		if info.IsDir() {
 			newPath, err = renameIfDuplicate(newPath)
 			if err != nil {

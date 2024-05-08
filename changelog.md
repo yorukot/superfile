@@ -12,10 +12,13 @@ All notable changes to this project will be documented in this file. Dates are d
 - Support extract gz tar file [`b9aed84`](https://github.com/MHNightCat/superfile/commit/b9aed847804421e1fc4f03dcaefb0e27f1260ea3)
 - Support transparent background [`4108d40`](https://github.com/MHNightCat/superfile/commit/4108d40bc0b93656eca2da98253a83dbc0cb27a9)
 - Support custom border style [`6ff0576`](https://github.com/MHNightCat/superfile/commit/6ff05765823cbd25e6fdc4d3f7370e435114acbb)
+- Enhancement when cutting and pasting, the file should be moved instead of copied and deleted. [`#100`](https://github.com/MHNightCat/superfile/issues/100)
+- Support extract almose compressed file [`e57cb78`](https://github.com/MHNightCat/superfile/commit/e57cb78d602d62b47662e2069b75059d908147db)
 
 #### Bug fix
 - Fix Cut -> Paste file causes go panic [`#77`](https://github.com/MHNightCat/superfile/issues/77)
 - Fix symlinked folders don't open within superfile [`#88`](https://github.com/MHNightCat/superfile/issues/88)
+
 
 # [**v1.1.1**](https://github.com/MHNightCat/superfile/releases/tag/v1.1.1)
 
