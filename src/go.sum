@@ -20,6 +20,8 @@ github.com/charmbracelet/x/exp/term v0.0.0-20240506152644-8135bef4e495 h1:+0U9qX
 github.com/charmbracelet/x/exp/term v0.0.0-20240506152644-8135bef4e495/go.mod h1:qeR6w1zITbkF7vEhcx0CqX5GfnIiQloJWQghN6HfP+c=
 github.com/charmbracelet/x/exp/term v0.0.0-20240507030338-defd02928fc0 h1:pbIvEOJPtuCD4Em/OU/UBTAWctLRK8I2x0XLrPHQlqg=
 github.com/charmbracelet/x/exp/term v0.0.0-20240507030338-defd02928fc0/go.mod h1:qeR6w1zITbkF7vEhcx0CqX5GfnIiQloJWQghN6HfP+c=
+github.com/charmbracelet/x/exp/term v0.0.0-20240507171223-71e9351b56e7 h1:ATeHxDzJnkCWPCNhTPZUMxyD7AE94ATJDKHN3wZNRUY=
+github.com/charmbracelet/x/exp/term v0.0.0-20240507171223-71e9351b56e7/go.mod h1:qeR6w1zITbkF7vEhcx0CqX5GfnIiQloJWQghN6HfP+c=
 github.com/cpuguy83/go-md2man/v2 v2.0.4 h1:wfIWP927BUkWJb2NmU/kNDYIBTh/ziUX91+lVfRxZq4=
 github.com/cpuguy83/go-md2man/v2 v2.0.4/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
