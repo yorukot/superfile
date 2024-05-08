@@ -13,7 +13,7 @@ import (
 func initialConfig(dir string) (toggleDotFileBool bool, firstFilePanelDir string) {
 	var err error
 
-	logOutput, err = os.OpenFile(SuperFileCacheDir+logFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	logOutput, err = os.OpenFile(SuperFileStateDir+logFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("Error while opening superfile.log file: %v", err)
 	}

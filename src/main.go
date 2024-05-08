@@ -15,15 +15,16 @@ import (
 	"time"
 
 	internal "github.com/MHNightCat/superfile/internal"
+	"github.com/adrg/xdg"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/rkoesters/xdg/basedir"
 	"github.com/urfave/cli/v2"
 )
 
-var HomeDir = basedir.Home
-var SuperFileMainDir = basedir.ConfigHome + "/superfile"
-var SuperFileCacheDir = basedir.CacheHome + "/superfile"
-var SuperFileDataDir = basedir.DataHome + "/superfile"
+var HomeDir = xdg.Home
+var SuperFileMainDir = xdg.ConfigHome + "/superfile"
+var SuperFileCacheDir = xdg.CacheHome + "/superfile"
+var SuperFileDataDir = xdg.DataHome + "/superfile"
+var SuperFileStateDir = xdg.StateHome + "/superfile"
 
 const (
 	currentVersion      string = "v1.1.2"
@@ -87,7 +88,7 @@ func InitConfigFile() {
 	config := struct {
 		MainDir      string
 		DataDir      string
-		CacheDir     string
+		StateDir     string
 		PinnedFile   string
 		ToggleFile   string
 		LogFile      string
@@ -98,7 +99,7 @@ func InitConfigFile() {
 	}{
 		MainDir:      SuperFileMainDir,
 		DataDir:      SuperFileDataDir,
-		CacheDir:     SuperFileCacheDir,
+		StateDir:     SuperFileStateDir,
 		PinnedFile:   pinnedFile,
 		ToggleFile:   toggleDotFile,
 		LogFile:      logFile,
@@ -107,11 +108,12 @@ func InitConfigFile() {
 		ThemeFolder:  themeFolder,
 		ThemeZipName: themeZipName,
 	}
-
+	
 	// Create directories
 	if err := createDirectories(
-		config.MainDir, config.DataDir,
-		config.CacheDir,
+		config.MainDir,
+		config.DataDir,
+		config.StateDir,
 	); err != nil {
 		log.Fatalln("Error creating directories:", err)
 	}
@@ -119,9 +121,9 @@ func InitConfigFile() {
 	// Create trash directories
 	if runtime.GOOS != "darwin" {
 		if err := createDirectories(
-			basedir.DataHome+trashDirectory,
-			basedir.DataHome+trashDirectoryFiles,
-			basedir.DataHome+trashDirectoryInfo,
+			xdg.DataHome+trashDirectory,
+			xdg.DataHome+trashDirectoryFiles,
+			xdg.DataHome+trashDirectoryInfo,
 		); err != nil {
 			log.Fatalln("Error creating directories:", err)
 		}
@@ -131,7 +133,7 @@ func InitConfigFile() {
 	if err := createFiles(
 		config.DataDir+config.PinnedFile,
 		config.DataDir+config.ToggleFile,
-		config.CacheDir+config.LogFile,
+		config.StateDir+config.LogFile,
 	); err != nil {
 		log.Fatalln("Error creating files:", err)
 	}

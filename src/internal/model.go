@@ -4,12 +4,17 @@ import (
 	"os"
 	"time"
 
+	"github.com/adrg/xdg"
 	"github.com/barasher/go-exiftool"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/rkoesters/xdg/basedir"
 )
+
+var HomeDir = xdg.Home
+var SuperFileMainDir = xdg.ConfigHome + "/superfile"
+var SuperFileStateDir = xdg.StateHome + "/superfile"
+var SuperFileDataDir = xdg.DataHome + "/superfile"
 
 const (
 	configFolder     string = "/config"
@@ -29,12 +34,6 @@ var ListeningMessage = true
 
 var forceReloadElement = false
 var firstUse = false
-
-var HomeDir = basedir.Home
-
-var SuperFileMainDir = basedir.ConfigHome + "/superfile"
-var SuperFileCacheDir = basedir.CacheHome + "/superfile"
-var SuperFileDataDir = basedir.DataHome + "/superfile"
 
 var theme ThemeType
 var Config ConfigType
