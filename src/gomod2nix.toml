@@ -38,8 +38,8 @@ schema = 3
     version = "v0.10.0"
     hash = "sha256-JZD1iVeizYe0mp3qQcJbUZdYN6HP/DNC67ja79DTe6s="
   [mod."github.com/charmbracelet/x/exp/term"]
-    version = "v0.0.0-20240507171223-71e9351b56e7"
-    hash = "sha256-SeThKwb4xpjQ//MLaYjJMMbZs36wrEL6fXCDrCydBrw="
+    version = "v0.0.0-20240508200021-63ec5bdef608"
+    hash = "sha256-nFtz7oWQh5L9nIAuY1cW7KOJJ33QsTPSz9HyiNIYRYc="
   [mod."github.com/connesc/cipherio"]
     version = "v0.2.1"
     hash = "sha256-PeuFnTak2WADesP8YTBqHP/XyvBue9bdKHYser2v6LU="
