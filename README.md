@@ -163,10 +163,10 @@ copy `theme_name` in:
 Theme name: theme_name
 ```
 
-Edit `config.json` using your preferred editor:
+Edit `config.toml` using your preferred editor:
 
 ```
-$EDITOR ~/.config/superfile/config.json
+$EDITOR ~/.config/superfile/config.toml
 ```
 
 and change:
@@ -183,9 +183,9 @@ theme = "theme-name"
 
 ### Create your own theme
 
-If you want to customize your own theme, you can go to `~/.config/superfile/theme/YOUR_THEME_NAME.json` and copy the existing theme's json to your own theme file
+If you want to customize your own theme, you can go to `~/.config/superfile/theme/YOUR_THEME_NAME.toml` and copy the existing theme's json to your own theme file
 
-Don't forget to change the `theme` variable in `config.json` to your theme name.
+Don't forget to change the `theme` variable in `config.toml` to your theme name.
 
 [If you are satisfied with your theme, you might as well put it into the default theme list!](#contribute)
 
