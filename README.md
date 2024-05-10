@@ -69,6 +69,20 @@ sudo mv ./spf /bin/
 <details><summary>Click to expand</summary>
 <p>
 
+#### Simple install:
+
+```bash
+nix profile install github:MHNightCat/superfile#superfile
+```
+
+or
+
+```bash
+nix profile install github:MHNightCat/superfile#superfile
+```
+
+#### Complex install:
+
 Add superfile to your flake inputs:
 
 ```nix
