@@ -69,7 +69,7 @@ sudo mv ./spf /bin/
 <details><summary>Click to expand</summary>
 <p>
 
-#### Simple install:
+#### Install with nix command line:
 
 ```bash
 nix profile install github:MHNightCat/superfile#superfile
@@ -81,7 +81,7 @@ or
 nix profile install github:MHNightCat/superfile#superfile
 ```
 
-#### Complex install:
+#### Install with flake:
 
 Add superfile to your flake inputs:
 
