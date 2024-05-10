@@ -20,6 +20,7 @@
 
 - [Installation](#install)
   - [Homebrew](#homebrew)
+  - [One line command](#one-line-command)
   - [Linux](#linux)
   - [Font](#font)
 - [Build](#build)
@@ -51,6 +52,10 @@ Install homebrew and execute the following commands
 ```bash
 brew install superfile
 ```
+
+### One line command
+
+
 
 ### Linux
 
