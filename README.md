@@ -54,7 +54,7 @@ brew install superfile
 
 ### Linux
 
-You can go to the [latest release](https://github.com/MHNightCat/superfile/releases/latest) and download the binary file. Once it is downloaded please excrate the file after that enter the following in your terminal:
+You can go to the [latest release](https://github.com/MHNightCat/superfile/releases/latest) and download the binary file. Once it is downloaded please extract the file after that enter the following in your terminal:
 
 ```bash
 cd ~/Download

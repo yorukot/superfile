@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"runtime"
 )
 
@@ -70,9 +71,16 @@ func enterPanel(m model) model {
 		}
 
 		if fileInfo.Mode()&os.ModeSymlink != 0 {
+			if isBrokenSymlink(panel.element[panel.cursor].location) {return m};
+
 			linkPath, _ := os.Readlink(panel.element[panel.cursor].location)
-			
-			m.fileModel.filePanels[m.filePanelFocusIndex].location = linkPath
+
+			absLinkPath, err := filepath.Abs(linkPath)
+			if err != nil {
+				return m
+			}
+
+			m.fileModel.filePanels[m.filePanelFocusIndex].location = absLinkPath
 			return m
 		}
 

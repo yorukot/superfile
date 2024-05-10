@@ -278,13 +278,28 @@ func returnMetaData(m model) model {
 	filePath := panel.element[panel.cursor].location
 
 	fileInfo, err := os.Stat(filePath)
-	if os.IsNotExist(err) {
-		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"Link file is broken!(you can only delete this file)", ""})
+
+	outPutLog(isBrokenSymlink(filePath))
+
+	if isSymlink(filePath) {
+		if isBrokenSymlink(filePath) {
+			m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"Link file is broken!", ""})
+		} else {
+			m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"This is a link file.", ""})
+		}
+		channel <- channelMessage{
+			messageId:    id,
+			loadMetadata: true,
+			metadata:     m.fileMetaData.metaData,
+		}
 		return m
+
 	}
+
 	if err != nil {
 		outPutLog("Return meta data function get file state error", err)
 	}
+
 	if fileInfo.IsDir() {
 		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"FolderName", fileInfo.Name()})
 		if m.focusPanel == metadataFocus {
@@ -306,9 +321,8 @@ func returnMetaData(m model) model {
 	}
 
 	if Config.Metadata && checkIsSymlinked.Mode()&os.ModeSymlink == 0 {
-		
-		fileInfos := et.ExtractMetadata(filePath)
 
+		fileInfos := et.ExtractMetadata(filePath)
 
 		for _, fileInfo := range fileInfos {
 			if fileInfo.Err != nil {
@@ -383,4 +397,31 @@ func generateSearchBar() textinput.Model {
 	ti.Blur()
 	ti.CharLimit = 156
 	return ti
+}
+
+// Check whether is broken recursive symlinks
+func isBrokenSymlink(filePath string) bool {
+	linkPath, err := os.Readlink(filePath)
+	if err != nil {
+		return true
+	}
+
+	absLinkPath, err := filepath.Abs(linkPath)
+	if err != nil {
+		return true
+	}
+	outPutLog(absLinkPath)
+	_, err = os.Stat(absLinkPath)
+	return err != nil
+}
+
+// Check whether is symlinks
+func isSymlink(filePath string) bool {
+
+	fileInfo, err := os.Lstat(filePath)
+	if err != nil {
+		return true
+	}
+
+	return fileInfo.Mode()&os.ModeSymlink != 0
 }
