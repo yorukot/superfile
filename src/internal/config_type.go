@@ -112,7 +112,7 @@ type ConfigType struct {
 
 	FooterPanelList []string `toml:"footer_panel_list" comment:"\nuseless for now"`
 
-	TransparentBackground bool `toml:"transparent_backgroun" comment:"\n================   Style =================\n\nSet transparent background or not (this only work when your terminal background is transparent)"`
+	TransparentBackground bool `toml:"transparent_background" comment:"\n================   Style =================\n\nSet transparent background or not (this only work when your terminal background is transparent)"`
 
 	BorderTop         string `toml:"border_top" comment:"\n\nBorder style"`
 	BorderBottom      string `toml:"border_bottom"`

@@ -27,10 +27,10 @@ var SuperFileDataDir = xdg.DataHome + "/superfile"
 var SuperFileStateDir = xdg.StateHome + "/superfile"
 
 const (
-	currentVersion      string = "v1.1.2"
+	currentVersion      string = "v1.1.3"
 	latestVersionURL    string = "https://api.github.com/repos/MHNightCat/superfile/releases/latest"
 	latestVersionGithub string = "github.com/MHNightCat/superfile/releases/latest"
-	themeZip            string = "https://github.com/MHNightCat/superfile/raw/main/themeZip/v1.1.2/theme.zip"
+	themeZip            string = "https://github.com/MHNightCat/superfile/raw/main/themeZip/v1.1.3/theme.zip"
 )
 
 const (
