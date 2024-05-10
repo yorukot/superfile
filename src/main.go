@@ -17,6 +17,7 @@ import (
 	internal "github.com/MHNightCat/superfile/internal"
 	"github.com/adrg/xdg"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/urfave/cli/v2"
 )
 
@@ -58,6 +59,21 @@ func main() {
 		Version:     currentVersion,
 		Description: "Pretty fancy and modern terminal file manager ",
 		ArgsUsage:   "[path]",
+		Commands: []*cli.Command{
+			{
+				Name:  "path-list",
+				Aliases: []string{"pl"},
+				Usage: "Print the path to the configuration and directory",
+				Action: func(c *cli.Context) error {
+					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#66b2ff")).Render("[Configuration file path]"), filepath.Join(SuperFileMainDir, configFile))
+					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#ffcc66")).Render("[Hotkeys file path]"), filepath.Join(SuperFileMainDir, hotkeysFile))
+					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#66ff66")).Render("[Log file path]"), filepath.Join(SuperFileStateDir, logFile))
+					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#ff9999")).Render("[Configuration directory path]"), SuperFileMainDir)
+					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#ff66ff")).Render("[Data directory path]"), SuperFileDataDir)
+					return nil
+				},
+			},
+		},
 		Action: func(c *cli.Context) error {
 			path := ""
 			if c.Args().Present() {
@@ -108,7 +124,7 @@ func InitConfigFile() {
 		ThemeFolder:  themeFolder,
 		ThemeZipName: themeZipName,
 	}
-	
+
 	// Create directories
 	if err := createDirectories(
 		config.MainDir,
