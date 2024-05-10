@@ -57,9 +57,11 @@ brew install superfile
 You can go to the [latest release](https://github.com/MHNightCat/superfile/releases/latest) and download the binary file. Once it is downloaded please extract the file after that enter the following in your terminal:
 
 ```bash
-cd ~/Download
+cd ~/Downloads
+tar xvf YOUR_DOWNLOADED.tar.gz
+cd ./dist/YOUR_DOWNLOADED
 chmod +x ./spf
-sudo mv ./spf /bin/
+sudo mv ./spf /usr/bin/
 ```
 
 <h4>
