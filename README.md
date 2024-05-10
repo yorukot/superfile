@@ -20,8 +20,8 @@
 
 - [Installation](#install)
   - [Homebrew](#homebrew)
-  - [One line command](#one-line-command)
-  - [Linux](#linux)
+  - [Install pre-built binaries](#install-pre-built-binaries)
+  - [NixOs](#nixos)
   - [Font](#font)
 - [Build](#build)
 - [Supported Systems](#supported-systems)
@@ -37,9 +37,7 @@
   - [Contributors](#contributors)
   - [Star History](#star-history)
 
-## Install
-
-> I am still working on different installation methods like `snap` or `AUR`
+## Installation
 
 **Requirements**
 
@@ -53,7 +51,7 @@ Install homebrew and execute the following commands
 brew install superfile
 ```
 
-### One-line command
+### Install pre-built binaries
 **Just copy and paste this one-line command:**
 
 ```bash
@@ -66,9 +64,7 @@ Or wget:
 bash -c "$(wget -qO- https://raw.githubusercontent.com/MHNightCat/superfile/main/install.sh)"
 ```
 
-<h4>
-     NixOS
-</h4>
+### NixOS
 
 <details><summary>Click to expand</summary>
 <p>
