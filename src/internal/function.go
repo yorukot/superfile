@@ -279,8 +279,6 @@ func returnMetaData(m model) model {
 
 	fileInfo, err := os.Stat(filePath)
 
-	outPutLog(isBrokenSymlink(filePath))
-
 	if isSymlink(filePath) {
 		if isBrokenSymlink(filePath) {
 			m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"Link file is broken!", ""})
@@ -410,7 +408,7 @@ func isBrokenSymlink(filePath string) bool {
 	if err != nil {
 		return true
 	}
-	outPutLog(absLinkPath)
+	
 	_, err = os.Stat(absLinkPath)
 	return err != nil
 }
