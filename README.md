@@ -53,20 +53,17 @@ Install homebrew and execute the following commands
 brew install superfile
 ```
 
-### One line command
-
-
-
-### Linux
-
-You can go to the [latest release](https://github.com/MHNightCat/superfile/releases/latest) and download the binary file. Once it is downloaded please extract the file after that enter the following in your terminal:
+### One-line command
+**Just copy and paste this one-line command:**
 
 ```bash
-cd ~/Downloads
-tar xvf YOUR_DOWNLOADED.tar.gz
-cd ./dist/YOUR_DOWNLOADED
-chmod +x ./spf
-sudo mv ./spf /usr/bin/
+bash -c "$(curl -sLo- https://raw.githubusercontent.com/MHNightCat/superfile/main/install.sh)"
+```
+
+Or wget:
+
+```bash
+bash -c "$(wget -qO- https://raw.githubusercontent.com/MHNightCat/superfile/main/install.sh)"
 ```
 
 <h4>
