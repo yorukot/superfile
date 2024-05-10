@@ -1,5 +1,5 @@
 {
-  description = "CLI for searching packages on search.nixos.org";
+  description = "A fancy, pretty terminal file manager";
   inputs = {
     nixpkgs.url = github:nixos/nixpkgs/nixos-unstable;
 
