@@ -179,9 +179,13 @@ Theme name: theme_name
 
 Edit `config.toml` using your preferred editor:
 
+> [!TIP]
+> If your os is MacOs the file path should be in the `~/Library/Application Support/superfile/config.toml`
+
 ```
 $EDITOR ~/.config/superfile/config.toml
 ```
+
 
 and change:
 
@@ -206,6 +210,9 @@ Don't forget to change the `theme` variable in `config.toml` to your theme name.
 ## Hotkeys
 
 [**Click me to see the hotkey list**](https://github.com/MHNightCat/superfile/wiki/Hotkey-list)
+
+> [!TIP]
+> If your os is MacOs the file path should be in the `~/Library/Application Support/superfile/hotkeys.toml`
 
 **You can change all hotkeys in** `~/.config/superfile/hotkeys.toml`
 
