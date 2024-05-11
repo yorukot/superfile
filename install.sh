@@ -81,10 +81,11 @@ tar -xzf "${file_name}.tar.gz"
 echo -e "${bright_yellow}Installing ${cyan}${package}...${nc}"
 cd ./dist/${file_name}
 chmod +x ./spf
-sudo mv ./spf /usr/bin/
-
-
-echo -e "🎉 ${bright_green}Installation complete!${nc}"
-echo -e "${bright_cyan}You can type ${white}\"${bright_yellow}spf${white}\" ${bright_cyan}to start!${nc}"
+if sudo mv ./spf /usr/bin/; then
+  echo -e "🎉 ${bright_green}Installation complete!${nc}"
+  echo -e "${bright_cyan}You can type ${white}\"${bright_yellow}spf${white}\" ${bright_cyan}to start!${nc}"
+else
+  echo -e "${red}❌ Fail install superfile: ${yellow}Unable to move binary to /usr/bin. Do you have sudo permissions?${nc}"
+fi
 
 rm -rf "$temp_dir"
