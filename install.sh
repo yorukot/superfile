@@ -50,7 +50,7 @@ if [[ "$arch" == "x86_64" ]]; then
 elif [[ "$arch" == "arm"* ]]; then
     arch="arm64"
 else
-    echo -e "${red}❌ Fail insatll superfile: ${yellow}Unsupported architecture${nc}"
+    echo -e "${red}❌ Fail install superfile: ${yellow}Unsupported architecture${nc}"
     exit 1
 fi
 
@@ -59,7 +59,7 @@ if [[ "$os" == "Linux" ]]; then
 elif [[ "$os" == "Darwin" ]]; then
     os="darwin"
 else
-    echo -e "${red}❌ Fail insatll superfile: ${yellow}Unsupported operating system${nc}"
+    echo -e "${red}❌ Fail install superfile: ${yellow}Unsupported operating system${nc}"
     exit 1
 fi
 
