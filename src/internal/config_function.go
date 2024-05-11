@@ -114,7 +114,7 @@ func loadHotkeysFile() {
 func loadThemeFile() {
 	data, err := os.ReadFile(SuperFileMainDir + themeFolder + "/" + Config.Theme + ".toml")
 	if err != nil {
-		log.Fatalf("Theme file doesn't exist: %v", err)
+		data = []byte(DefaultTheme)
 	}
 
 	err = toml.Unmarshal(data, &theme)

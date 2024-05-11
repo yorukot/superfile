@@ -61,6 +61,19 @@ func main() {
 		ArgsUsage:   "[path]",
 		Commands: []*cli.Command{
 			{
+				Name:  "download-theme",
+				Aliases: []string{"dt"},
+				Usage: "Download or update theme file from github",
+				Action: func(c *cli.Context) error {
+					if err := downloadAndInstallTheme(SuperFileMainDir, themeZipName, themeZip, themeFolder); err != nil {
+						log.Fatalln("Error downloading theme:", err)
+					}
+					fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("#66ff66")).Render("🎉 Successful downloaded themes!"))
+					fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("#66b2ff")).Render("Now you can change your superfile theme!"))
+					return nil
+				},
+			},
+			{
 				Name:  "path-list",
 				Aliases: []string{"pl"},
 				Usage: "Print the path to the configuration and directory",
@@ -110,8 +123,6 @@ func InitConfigFile() {
 		LogFile      string
 		ConfigFile   string
 		HotkeysFile  string
-		ThemeFolder  string
-		ThemeZipName string
 	}{
 		MainDir:      SuperFileMainDir,
 		DataDir:      SuperFileDataDir,
@@ -121,8 +132,6 @@ func InitConfigFile() {
 		LogFile:      logFile,
 		ConfigFile:   configFile,
 		HotkeysFile:  hotkeysFile,
-		ThemeFolder:  themeFolder,
-		ThemeZipName: themeZipName,
 	}
 
 	// Create directories
@@ -162,12 +171,6 @@ func InitConfigFile() {
 	if err := writeConfigFile(config.MainDir+config.HotkeysFile, internal.HotkeysTomlString); err != nil {
 		log.Fatalln("Error writing config file:", err)
 	}
-
-	// Download and install theme
-	if err := downloadAndInstallTheme(config.MainDir, config.ThemeZipName, themeZip, config.ThemeFolder); err != nil {
-		log.Fatalln("Error downloading theme:", err)
-	}
-
 }
 
 // Helper functions
@@ -219,6 +222,9 @@ func writeConfigFile(path, data string) error {
 }
 
 func downloadAndInstallTheme(dir, zipName, zipUrl, zipFolder string) error {
+	if !connected() {
+		log.Fatalln("You don't have an internet connection!")
+	}
 	currentThemeVersion, err := readThemeVersionFromFile(SuperFileDataDir + themeFileVersion)
 	if err != nil && !os.IsNotExist(err) {
 		fmt.Println("Error reading from file:", err)
@@ -391,4 +397,9 @@ func unzip(src, dest string) error {
 		}
 	}
 	return nil
+}
+
+func connected() (ok bool) {
+    _, err := http.Get("http://clients3.google.com/generate_204")
+    return err == nil
 }
