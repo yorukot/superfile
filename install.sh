@@ -33,6 +33,11 @@ echo -e '
 
 
 temp_dir=$(mktemp -d)
+if [ $? -ne 0 ]; then
+    echo -e "${red}❌ Fail install superfile: ${yellow}Unable to create temporary directory${nc}"
+    exit 1
+fi
+
 package=superfile
 version=1.1.2
 arch=$(uname -m)
@@ -45,7 +50,7 @@ if [[ "$arch" == "x86_64" ]]; then
 elif [[ "$arch" == "arm"* ]]; then
     arch="arm64"
 else
-    echo -e "${red}❌ Fail insatll superfile: ${yellow}Unsupported architecture${nc}"
+    echo -e "${red}❌ Fail install superfile: ${yellow}Unsupported architecture${nc}"
     exit 1
 fi
 
@@ -54,7 +59,7 @@ if [[ "$os" == "Linux" ]]; then
 elif [[ "$os" == "Darwin" ]]; then
     os="darwin"
 else
-    echo -e "${red}❌ Fail insatll superfile: ${yellow}Unsupported operating system${nc}"
+    echo -e "${red}❌ Fail install superfile: ${yellow}Unsupported operating system${nc}"
     exit 1
 fi
 
@@ -76,10 +81,11 @@ tar -xzf "${file_name}.tar.gz"
 echo -e "${bright_yellow}Installing ${cyan}${package}...${nc}"
 cd ./dist/${file_name}
 chmod +x ./spf
-sudo mv ./spf /usr/bin/
-
-
-echo -e "🎉 ${bright_green}Installation complete!${nc}"
-echo -e "${bright_cyan}You can type ${white}\"${bright_yellow}spf${white}\" ${bright_cyan}to start!${nc}"
+if sudo mv ./spf /usr/bin/; then
+  echo -e "🎉 ${bright_green}Installation complete!${nc}"
+  echo -e "${bright_cyan}You can type ${white}\"${bright_yellow}spf${white}\" ${bright_cyan}to start!${nc}"
+else
+  echo -e "${red}❌ Fail install superfile: ${yellow}Unable to move binary to /usr/bin. Do you have sudo permissions?${nc}"
+fi
 
 rm -rf "$temp_dir"
