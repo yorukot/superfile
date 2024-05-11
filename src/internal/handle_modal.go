@@ -3,6 +3,7 @@ package internal
 import (
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // Cancel typing modal e.g. create file or directory
@@ -20,7 +21,7 @@ func cancelWarnModal(m model) model {
 
 // Confirm to create file or directory
 func createItem(m model) model {
-	if m.typingModal.itemType == newFile {
+	if !strings.HasSuffix(m.typingModal.textInput.Value(), "/") {
 		path := filepath.Join(m.typingModal.location, m.typingModal.textInput.Value())
 		path, _ = renameIfDuplicate(path)
 		if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {

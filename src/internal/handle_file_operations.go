@@ -23,7 +23,7 @@ func panelCreateNewFile(m model) model {
 	ti.Cursor.TextStyle = modalStyle
 	ti.TextStyle = modalStyle
 	ti.Cursor.Blink = true
-	ti.Placeholder = "Please enter file name"
+	ti.Placeholder = "Add \"/\" represent Transcend folder at the end"
 	ti.PlaceholderStyle = modalStyle
 	ti.Focus()
 	ti.CharLimit = 156
@@ -31,31 +31,6 @@ func panelCreateNewFile(m model) model {
 
 	m.typingModal.location = panel.location
 	m.typingModal.itemType = newFile
-	m.typingModal.open = true
-	m.typingModal.textInput = ti
-	m.firstTextInput = true
-
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
-
-	return m
-}
-
-// Craete new directory in the currently focus file panel
-func panelCreateNewDirectory(m model) model {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	ti := textinput.New()
-	ti.Cursor.Style = modalCursorStyle
-	ti.Cursor.TextStyle = modalStyle
-	ti.TextStyle = modalStyle
-	ti.Cursor.Blink = true
-	ti.Placeholder = "Folder name"
-	ti.PlaceholderStyle = modalStyle
-	ti.Focus()
-	ti.CharLimit = 156
-	ti.Width = modalWidth - 10
-
-	m.typingModal.location = panel.location
-	m.typingModal.itemType = newDirectory
 	m.typingModal.open = true
 	m.typingModal.textInput = ti
 	m.firstTextInput = true
@@ -91,15 +66,12 @@ func panelItemRename(m model) model {
 	return m
 }
 
-// Move file or directory to the trash can
-func deleteSingleItem(m model) model {
-	id := shortuuid.New()
+func deleteItemWarn(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-
-	if len(panel.element) == 0 {
+	if !((panel.panelMode == selectMode && len(panel.selected) != 0) || (panel.panelMode == browserMode)) {
 		return m
 	}
-
+	id := shortuuid.New()
 	if isExternalDiskPath(panel.location) {
 		channel <- channelMessage{
 			messageId:       id,
@@ -111,6 +83,28 @@ func deleteSingleItem(m model) model {
 				warnType: confirmDeleteItem,
 			},
 		}
+		return m
+	} else {
+		channel <- channelMessage{
+			messageId:       id,
+			returnWarnModal: true,
+			warnModal: warnModal{
+				open:     true,
+				title:    "Are you sure you want to move this to trash can",
+				content:  "This operation will move file or directory to trash can.",
+				warnType: confirmDeleteItem,
+			},
+		}
+		return m
+	}
+}
+
+// Move file or directory to the trash can
+func deleteSingleItem(m model) model {
+	id := shortuuid.New()
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+
+	if len(panel.element) == 0 {
 		return m
 	}
 
@@ -157,23 +151,10 @@ func deleteSingleItem(m model) model {
 }
 
 // Move file or directory to the trash can
-func deleteMultipleItem(m model) model {
+func deleteMultipleItems(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	if len(panel.selected) != 0 {
 		id := shortuuid.New()
-		if isExternalDiskPath(panel.location) {
-			channel <- channelMessage{
-				messageId:       id,
-				returnWarnModal: true,
-				warnModal: warnModal{
-					open:     true,
-					title:    "Are you sure you want to completely delete",
-					content:  "This operation cannot be undone and your data will be completely lost.",
-					warnType: confirmDeleteItem,
-				},
-			}
-			return m
-		}
 		prog := progress.New(generateGradientColor())
 		prog.PercentageStyle = footerStyle
 
@@ -240,7 +221,7 @@ func deleteMultipleItem(m model) model {
 }
 
 // Completely delete file or folder (Not move to the trash can)
-func completelyDeleteSingleFile(m model) model {
+func completelyDeleteSingleItem(m model) model {
 	id := shortuuid.New()
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 
@@ -295,7 +276,7 @@ func completelyDeleteSingleFile(m model) model {
 }
 
 // Completely delete all file or folder from clipbaord (Not move to the trash can)
-func completelyDeleteMultipleFile(m model) model {
+func completelyDeleteMultipleItems(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	if len(panel.selected) != 0 {
 		id := shortuuid.New()
@@ -575,7 +556,7 @@ func pasteItem(m model) model {
 			break
 		}
 	}
-	
+
 	p.state = successful
 	p.done = totalFiles
 	p.doneTime = time.Now()
@@ -583,7 +564,7 @@ func pasteItem(m model) model {
 		messageId:       id,
 		processNewState: p,
 	}
-	
+
 	m.processBarModel.process[id] = p
 	m.copyItems.cut = false
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel

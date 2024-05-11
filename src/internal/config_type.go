@@ -129,52 +129,47 @@ type ConfigType struct {
 }
 
 type HotkeysType struct {
-	Quit []string `toml:"quit" comment:"Here is global, all global key cant conflicts with other hotkeys"`
-
-	ListUp   []string `toml:"list_up" comment:"\n"`
+	Confirm []string `toml:"confirm" comment:"=================================================================================================\nHere is global, all global key cant conflicts with other hotkeys"`
+	Quit    []string `toml:"quit"`
+	// movement
+	ListUp   []string `toml:"list_up" comment:"movement"`
 	ListDown []string `toml:"list_down"`
 
-	PinnedDirectory []string `toml:"pinned_directory" comment:"\n"`
-
-	CloseFilePanel     []string `toml:"close_file_panel" comment:"\n"`
+	CloseFilePanel     []string `toml:"close_file_panel" comment:"file panel controll"`
 	CreateNewFilePanel []string `toml:"create_new_file_panel"`
+	NextFilePanel      []string `toml:"next_file_panel"`
+	PreviousFilePanel  []string `toml:"previous_file_panel"`
 
-	NextFilePanel     []string `toml:"next_file_panel" comment:"\n"`
-	PreviousFilePanel []string `toml:"previous_file_panel"`
-	FocusOnProcessBar []string `toml:"focus_on_process_bar"`
-	FocusOnSideBar    []string `toml:"focus_on_side_bar"`
+	FocusOnProcessBar []string `toml:"focus_on_process_bar" comment:"change focus"`
+	FocusOnSidebar    []string `toml:"focus_on_sidebar"`
 	FocusOnMetaData   []string `toml:"focus_on_metadata"`
 
-	ChangePanelMode []string `toml:"change_panel_mode" comment:"\n"`
-	OpenHelpMenu    []string `toml:"open_help_menu"`
+	FilePanelItemCreate []string `toml:"file_panel_item_create" comment:"create file/directory and rename "`
+	FilePanelItemRename []string `toml:"file_panel_item_rename"`
 
-	FilePanelDirectoryCreate []string `toml:"file_panel_directory_create" comment:"\n"`
-	FilePanelFileCreate      []string `toml:"file_panel_file_create"`
-	FilePanelItemRename      []string `toml:"file_panel_item_rename"`
-	PasteItem                []string `toml:"paste_item"`
-	ExtractFile              []string `toml:"extract_file"`
-	CompressFile             []string `toml:"compress_file"`
-	ToggleDotFile            []string `toml:"toggle_dot_file"`
+	CopyItems   []string `toml:"copy_items" comment:"file operate"`
+	PasteItems  []string `toml:"paste_items"`
+	CutItems    []string `toml:"cut_items"`
+	DeleteItems []string `toml:"delete_items"`
 
-	OpenFileWithEditor             []string `toml:"oepn_file_with_editor" comment:"\n"`
+	ExtractFile  []string `toml:"extract_file" comment:"compress and extract"`
+	CompressFile []string `toml:"compress_file"`
+
+	OpenFileWithEditor             []string `toml:"oepn_file_with_editor" comment:"editor"`
 	OpenCurrentDirectoryWithEditor []string `toml:"open_current_directory_with_editor"`
 
-	Cancel  []string `toml:"cancel" comment:"\nThese hotkeys do not conflict with any other keys (including global hotkey)"`
-	Confirm []string `toml:"confirm"`
+	PinnedDirectory []string `toml:"pinned_directory" comment:"else"`
+	ToggleDotFile   []string `toml:"toggle_dot_file"`
+	ChangePanelMode []string `toml:"change_panel_mode"`
+	OpenHelpMenu    []string `toml:"open_help_menu"`
 
-	DeleteItem      []string `toml:"delete_item" comment:"\nHere is normal mode hotkey you can conflicts with other mode (cant conflicts with global hotkey)"`
-	SelectItem      []string `toml:"select_item"`
-	ParentDirectory []string `toml:"parent_directory"`
-	CopySingleItem  []string `toml:"copy_single_item"`
-	CutSingleItem   []string `toml:"cut_single_item"`
+	ConfirmTyping []string `toml:"confirm_typing" comment:"=================================================================================================\nHere is typing hotkey can conflict with all hotkeys"`
+	CancelTyping []string `toml:"cancel_typing"`
+
+	ParentDirectory []string `toml:"parent_directory" comment:"=================================================================================================\nHere is normal mode hotkey you can conflicts with other mode (cant conflicts with global hotkey)"`
 	SearchBar       []string `toml:"search_bar"`
-	CommandLine     []string `toml:"command_line"`
 
-	FilePanelSelectModeItemSingleSelect []string `toml:"file_panel_select_mode_item_single_select" comment:"\nHere is select mode hotkey you can conflicts with other mode (cant conflicts with global hotkey)"`
-	FilePanelSelectModeItemSelectDown   []string `toml:"file_panel_select_mode_item_select_down"`
-	FilePanelSelectModeItemSelectUp     []string `toml:"file_panel_select_mode_item_select_up"`
-	FilePanelSelectModeItemDelete       []string `toml:"file_panel_select_mode_item_delete"`
-	FilePanelSelectModeItemCopy         []string `toml:"file_panel_select_mode_item_copy"`
-	FilePanelSelectModeItemCut          []string `toml:"file_panel_select_mode_item_cut"`
-	FilePanelSelectAllItem              []string `toml:"file_panel_select_all_item"`
+	FilePanelSelectModeItemsSelectDown []string `toml:"file_panel_select_mode_items_select_down" comment:"=================================================================================================\nHere is select mode hotkey you can conflicts with other mode (cant conflicts with global hotkey)"`
+	FilePanelSelectModeItemsSelectUp   []string `toml:"file_panel_select_mode_items_select_up"`
+	FilePanelSelectAllItem            []string `toml:"file_panel_select_all_items"`
 }

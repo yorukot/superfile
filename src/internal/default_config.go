@@ -1,57 +1,53 @@
 package internal
 
-var HotkeysTomlString string = `# Here is global, all global key cant conflicts with other hotkeys
-quit = ['esc', 'q']
-# 
-list_up = ['up', 'k']
-list_down = ['down', 'j']
-# 
-pinned_directory = ['ctrl+p', '']
-# 
-close_file_panel = ['ctrl+w', '']
-create_new_file_panel = ['ctrl+n', '']
-# 
+var HotkeysTomlString string = `# =================================================================================================
+# Here is global, all global key cant conflicts with other hotkeys
+confirm = ['enter', 'l']
+quit = ['q', 'esc'] # (q)uit
+# movement
+list_up = ['up', 'k'] # most user use
+list_down = ['down', 'j'] # most user use
+# file panel controll
+close_file_panel = ['w', '']
+create_new_file_panel = ['n', ''] # (n)ew file panel
 next_file_panel = ['tab', 'L']
 previous_file_panel = ['shift+left', 'H']
-focus_on_process_bar = ['p', '']
-focus_on_side_bar = ['b', '']
-focus_on_metadata = ['m', '']
-# 
-change_panel_mode = ['v', '']
+# change focus
+focus_on_process_bar = ['p', ''] # (p)rocessbar
+focus_on_sidebar = ['s', ''] # (s)idebar
+focus_on_metadata = ['m', ''] # (m)etadata
+# create file/directory and rename 
+file_panel_item_create = ['ctrl+n', ''] # (n)ew file or folder
+file_panel_item_rename = ['ctrl+r', ''] # (r)name
+# file operate
+copy_items = ['ctrl+c', '']  # Most systems are for (c)opy
+paste_items = ['ctrl+v', ''] # Most systems are for pasting
+cut_items = ['ctrl+x', ''] # Most systems are for cut
+delete_items = ['ctrl+d', 'delete'] #(d)elete
+# compress and extract
+extract_file = ['ctrl+e', ''] # (e)xtract
+compress_file = ['ctrl+a', ''] # (a)rchive file
+# editor
+oepn_file_with_editor = ['e', ''] # (e)ditor
+open_current_directory_with_editor = ['E', ''] # (E)ditor
+# else
+pinned_directory = ['P', ''] # (P)inned
+toggle_dot_file = ['.', ''] # (.)dot
+change_panel_mode = ['v', ''] # (v)isual
 open_help_menu = ['?', '']
-# 
-file_panel_directory_create = ['f', '']
-file_panel_file_create = ['c', '']
-file_panel_item_rename = ['r', '']
-paste_item = ['ctrl+v', '']
-extract_file = ['ctrl+e', '']
-compress_file = ['ctrl+r', '']
-toggle_dot_file = ['ctrl+h', '']
-# 
-oepn_file_with_editor = ['e', '']
-open_current_directory_with_editor = ['E', '']
-# 
-# These hotkeys do not conflict with any other keys (including global hotkey)
-cancel = ['ctrl+c', 'esc']
-confirm = ['enter', '']
-# 
+# =================================================================================================
+# Here is typing hotkey can conflict with all hotkeys
+confirm_typing = ['enter', '']
+cancel_typing = ['ctrl+c', 'esc']
+# =================================================================================================
 # Here is normal mode hotkey you can conflicts with other mode (cant conflicts with global hotkey)
-delete_item = ['ctrl+d', '']
-select_item = ['enter', 'l']
-parent_directory = ['h', 'backspace']
-copy_single_item = ['ctrl+c', '']
-cut_single_item = ['ctrl+x', '']
-search_bar = ['ctrl+f', '']
-command_line = ['/', '']
-# 
+parent_directory = ['h', 'backspace'] 
+search_bar = ['/', '']
+# =================================================================================================
 # Here is select mode hotkey you can conflicts with other mode (cant conflicts with global hotkey)
-file_panel_select_mode_item_single_select = ['enter', 'l']
-file_panel_select_mode_item_select_down = ['shift+down', 'J']
-file_panel_select_mode_item_select_up = ['shift+up', 'K']
-file_panel_select_mode_item_delete = ['ctrl+d', 'delete']
-file_panel_select_mode_item_copy = ['ctrl+c', '']
-file_panel_select_mode_item_cut = ['ctrl+x', '']
-file_panel_select_all_item = ['ctrl+a', '']
+file_panel_select_mode_items_select_down = ['shift+down', 'J']
+file_panel_select_mode_items_select_up = ['shift+up', 'K']
+file_panel_select_all_items = ['A', '']
 `
 
 var ConfigTomlString string = `# change your theme
@@ -233,7 +229,7 @@ func getHelpMenuData() []helpMenuModalData {
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         hotkeys.FocusOnSideBar,
+			hotkey:         hotkeys.FocusOnSidebar,
 			description:    "Focus on the sidebar",
 			hotkeyWorkType: globalType,
 		},
@@ -261,11 +257,6 @@ func getHelpMenuData() []helpMenuModalData {
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         hotkeys.SelectItem,
-			description:    "Go to folder",
-			hotkeyWorkType: globalType,
-		},
-		{
 			hotkey:         hotkeys.ParentDirectory,
 			description:    "Return to parent folder",
 			hotkeyWorkType: globalType,
@@ -276,18 +267,8 @@ func getHelpMenuData() []helpMenuModalData {
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         hotkeys.FilePanelSelectModeItemSelectUp,
+			hotkey:         hotkeys.FilePanelSelectModeItemsSelectUp,
 			description:    "Select with your course",
-			hotkeyWorkType: globalType,
-		},
-		{
-			hotkey:         hotkeys.SelectItem,
-			description:    "Select with your course",
-			hotkeyWorkType: selectType,
-		},
-		{
-			hotkey:         hotkeys.FilePanelSelectModeItemSingleSelect,
-			description:    "Select the item where the current cursor is located",
 			hotkeyWorkType: globalType,
 		},
 		{
@@ -302,16 +283,6 @@ func getHelpMenuData() []helpMenuModalData {
 		},
 		{
 			subTitle: "File operations",
-		},
-		{
-			hotkey:         hotkeys.FilePanelDirectoryCreate,
-			description:    "Create a new folder",
-			hotkeyWorkType: globalType,
-		},
-		{
-			hotkey:         hotkeys.FilePanelFileCreate,
-			description:    "Create a new file",
-			hotkeyWorkType: globalType,
 		},
 		{
 			hotkey:         hotkeys.FilePanelItemRename,
@@ -329,31 +300,6 @@ func getHelpMenuData() []helpMenuModalData {
 			hotkeyWorkType: normalType,
 		},
 		{
-			hotkey:         hotkeys.DeleteItem,
-			description:    "Delete file or folder (or both)",
-			hotkeyWorkType: normalType,
-		},
-		{
-			hotkey:         hotkeys.CopySingleItem,
-			description:    "Copy file or folder (or both)",
-			hotkeyWorkType: normalType,
-		},
-		{
-			hotkey:         hotkeys.FilePanelSelectModeItemCut,
-			description:    "Cut file or folder (or both)",
-			hotkeyWorkType: globalType,
-		},
-		{
-			hotkey:         hotkeys.PasteItem,
-			description:    "Paste all items in your clipboard",
-			hotkeyWorkType: globalType,
-		},
-		{
-			hotkey:         hotkeys.SelectItem,
-			description:    "Open file with your default application",
-			hotkeyWorkType: selectType,
-		},
-		{
 			hotkey:         hotkeys.OpenFileWithEditor,
 			description:    "Open file with your default editor",
 			hotkeyWorkType: normalType,
@@ -369,11 +315,6 @@ func getHelpMenuData() []helpMenuModalData {
 		{
 			hotkey:         hotkeys.Confirm,
 			description:    "Confirm rename or create item or exit search bar",
-			hotkeyWorkType: globalType,
-		},
-		{
-			hotkey:         hotkeys.Cancel,
-			description:    "Cancel rename or create item or exit search bar and clear search bar value",
 			hotkeyWorkType: globalType,
 		},
 	}

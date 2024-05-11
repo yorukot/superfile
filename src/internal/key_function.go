@@ -50,7 +50,7 @@ func mainKey(msg string, m model, cmd tea.Cmd) (model, tea.Cmd) {
 	case hotkeys.CreateNewFilePanel[0], hotkeys.CreateNewFilePanel[1]:
 		m = createNewFilePanel(m)
 
-	case hotkeys.FocusOnSideBar[0], hotkeys.FocusOnSideBar[1]:
+	case hotkeys.FocusOnSidebar[0], hotkeys.FocusOnSidebar[1]:
 		m = focusOnSideBar(m)
 
 	case hotkeys.FocusOnProcessBar[0], hotkeys.FocusOnProcessBar[1]:
@@ -62,17 +62,13 @@ func mainKey(msg string, m model, cmd tea.Cmd) (model, tea.Cmd) {
 			m = returnMetaData(m)
 		}()
 
-	case hotkeys.PasteItem[0], hotkeys.PasteItem[1]:
+	case hotkeys.PasteItems[0], hotkeys.PasteItems[1]:
 		go func() {
 			m = pasteItem(m)
 		}()
 
-	case hotkeys.FilePanelFileCreate[0], hotkeys.FilePanelFileCreate[1]:
+	case hotkeys.FilePanelItemCreate[0], hotkeys.FilePanelItemCreate[1]:
 		m = panelCreateNewFile(m)
-
-	case hotkeys.FilePanelDirectoryCreate[0], hotkeys.FilePanelDirectoryCreate[1]:
-		m = panelCreateNewDirectory(m)
-
 	case hotkeys.PinnedDirectory[0], hotkeys.PinnedDirectory[1]:
 		m = pinnedDirectory(m)
 
@@ -108,7 +104,7 @@ func mainKey(msg string, m model, cmd tea.Cmd) (model, tea.Cmd) {
 func normalAndBrowserModeKey(msg string, m model) model {
 	// if not focus on the filepanel return
 	if m.fileModel.filePanels[m.filePanelFocusIndex].focusType != focus {
-		if m.focusPanel == sidebarFocus && (msg == hotkeys.SelectItem[0] || msg == hotkeys.SelectItem[1]) {
+		if m.focusPanel == sidebarFocus && (msg == hotkeys.Confirm[0] || msg == hotkeys.Confirm[1]) {
 			m = sidebarSelectDirectory(m)
 		}
 		return m
@@ -116,22 +112,22 @@ func normalAndBrowserModeKey(msg string, m model) model {
 	// Check if in the select mode and focusOn filepanel
 	if m.fileModel.filePanels[m.filePanelFocusIndex].panelMode == selectMode {
 		switch msg {
-		case hotkeys.FilePanelSelectModeItemSingleSelect[0], hotkeys.FilePanelSelectModeItemSingleSelect[1]:
+		case hotkeys.Confirm[0], hotkeys.Confirm[1]:
 			m = singleItemSelect(m)
-		case hotkeys.FilePanelSelectModeItemSelectUp[0], hotkeys.FilePanelSelectModeItemSelectUp[1]:
+		case hotkeys.FilePanelSelectModeItemsSelectUp[0], hotkeys.FilePanelSelectModeItemsSelectUp[1]:
 			m = itemSelectUp(m)
-		case hotkeys.FilePanelSelectModeItemSelectDown[0], hotkeys.FilePanelSelectModeItemSelectDown[1]:
+		case hotkeys.FilePanelSelectModeItemsSelectDown[0], hotkeys.FilePanelSelectModeItemsSelectDown[1]:
 			m = itemSelectDown(m)
-		case hotkeys.FilePanelSelectModeItemDelete[0], hotkeys.FilePanelSelectModeItemDelete[1]:
+		case hotkeys.DeleteItems[0], hotkeys.DeleteItems[1]:
 			go func() {
-				m = deleteMultipleItem(m)
+				m = deleteItemWarn(m)
 				if !isExternalDiskPath(m.fileModel.filePanels[m.filePanelFocusIndex].location) {
 					m.fileModel.filePanels[m.filePanelFocusIndex].selected = m.fileModel.filePanels[m.filePanelFocusIndex].selected[:0]
 				}
 			}()
-		case hotkeys.FilePanelSelectModeItemCopy[0], hotkeys.FilePanelSelectModeItemCopy[1]:
+		case hotkeys.CopyItems[0], hotkeys.CopyItems[1]:
 			m = copyMultipleItem(m)
-		case hotkeys.FilePanelSelectModeItemCut[0], hotkeys.FilePanelSelectModeItemCut[1]:
+		case hotkeys.CutItems[0], hotkeys.CutItems[1]:
 			m = cutMultipleItem(m)
 		case hotkeys.FilePanelSelectAllItem[0], hotkeys.FilePanelSelectAllItem[1]:
 			m = selectAllItem(m)
@@ -140,19 +136,19 @@ func normalAndBrowserModeKey(msg string, m model) model {
 	}
 
 	switch msg {
-	case hotkeys.SelectItem[0], hotkeys.SelectItem[1]:
+	case hotkeys.Confirm[0], hotkeys.Confirm[1]:
 		forceReloadElement = true
 		m = enterPanel(m)
 	case hotkeys.ParentDirectory[0], hotkeys.ParentDirectory[1]:
 		forceReloadElement = true
 		m = parentDirectory(m)
-	case hotkeys.DeleteItem[0], hotkeys.DeleteItem[1]:
+	case hotkeys.DeleteItems[0], hotkeys.DeleteItems[1]:
 		go func() {
-			m = deleteSingleItem(m)
+			m = deleteItemWarn(m)
 		}()
-	case hotkeys.CopySingleItem[0], hotkeys.CopySingleItem[1]:
+	case hotkeys.CopyItems[0], hotkeys.CopyItems[1]:
 		m = copySingleItem(m)
-	case hotkeys.CutSingleItem[0], hotkeys.CutSingleItem[1]:
+	case hotkeys.CutItems[0], hotkeys.CutItems[1]:
 		m = cutSingleItem(m)
 	case hotkeys.FilePanelItemRename[0], hotkeys.FilePanelItemRename[1]:
 		m = panelItemRename(m)
@@ -164,9 +160,9 @@ func normalAndBrowserModeKey(msg string, m model) model {
 
 func typingModalOpenKey(msg string, m model) model {
 	switch msg {
-	case hotkeys.Cancel[0], hotkeys.Cancel[1]:
+	case hotkeys.CancelTyping[0], hotkeys.CancelTyping[1]:
 		m = cancelTypingModal(m)
-	case hotkeys.Confirm[0], hotkeys.Confirm[1]:
+	case hotkeys.ConfirmTyping[0], hotkeys.ConfirmTyping[1]:
 		m = createItem(m)
 	}
 	return m
@@ -174,19 +170,34 @@ func typingModalOpenKey(msg string, m model) model {
 
 func warnModalOpenKey(msg string, m model) model {
 	switch msg {
-	case hotkeys.Cancel[0], hotkeys.Cancel[1]:
+	case hotkeys.Quit[0], hotkeys.Quit[1], hotkeys.CancelTyping[0], hotkeys.CancelTyping[1]:
 		m = cancelWarnModal(m)
 	case hotkeys.Confirm[0], hotkeys.Confirm[1]:
 		m.warnModal.open = false
+		panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 		if m.fileModel.filePanels[m.filePanelFocusIndex].panelMode == selectMode {
-			go func() {
-				m = completelyDeleteMultipleFile(m)
-				m.fileModel.filePanels[m.filePanelFocusIndex].selected = m.fileModel.filePanels[m.filePanelFocusIndex].selected[:0]
-			}()
+			if isExternalDiskPath(panel.location) {
+				go func() {
+					m = completelyDeleteMultipleItems(m)
+					m.fileModel.filePanels[m.filePanelFocusIndex].selected = m.fileModel.filePanels[m.filePanelFocusIndex].selected[:0]
+				}()
+			} else {
+				go func() {
+					m = deleteMultipleItems(m)
+					m.fileModel.filePanels[m.filePanelFocusIndex].selected = m.fileModel.filePanels[m.filePanelFocusIndex].selected[:0]
+				}()
+			}
 		} else {
-			go func() {
-				m = completelyDeleteSingleFile(m)
-			}()
+			if isExternalDiskPath(panel.location) {
+				go func() {
+					m = completelyDeleteSingleItem(m)
+				}()
+			} else {
+				go func() {
+					m = deleteSingleItem(m)
+				}()
+			}
+
 		}
 	}
 	return m
@@ -194,9 +205,9 @@ func warnModalOpenKey(msg string, m model) model {
 
 func renamingKey(msg string, m model) model {
 	switch msg {
-	case hotkeys.Cancel[0], hotkeys.Cancel[1]:
+	case hotkeys.CancelTyping[0], hotkeys.CancelTyping[1]:
 		m = cancelReanem(m)
-	case hotkeys.Confirm[0], hotkeys.Confirm[1]:
+	case hotkeys.ConfirmTyping[0], hotkeys.ConfirmTyping[1]:
 		m = confirmRename(m)
 	}
 	return m
@@ -204,9 +215,9 @@ func renamingKey(msg string, m model) model {
 
 func focusOnSearchbarKey(msg string, m model) model {
 	switch msg {
-	case hotkeys.Cancel[0], hotkeys.Cancel[1]:
+	case hotkeys.CancelTyping[0], hotkeys.CancelTyping[1]:
 		m = cancelSearch(m)
-	case hotkeys.Confirm[0], hotkeys.Confirm[1], hotkeys.SearchBar[0], hotkeys.SearchBar[1]:
+	case hotkeys.ConfirmTyping[0], hotkeys.ConfirmTyping[1], hotkeys.SearchBar[0], hotkeys.SearchBar[1]:
 		m = confirmSearch(m)
 	}
 	return m

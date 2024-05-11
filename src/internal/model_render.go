@@ -3,7 +3,6 @@ package internal
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -331,31 +330,19 @@ func terminalSizeWarnRender(m model) string {
 }
 
 func typineModalRender(m model) string {
-	if m.typingModal.itemType == newFile {
-		previewPath := filepath.Join(m.typingModal.location, m.typingModal.textInput.Value())
+	previewPath := m.typingModal.location + "/" + m.typingModal.textInput.Value()
 
-		fileLocation := filePanelTopDirectoryIconStyle.Render("   ") +
-			filePanelTopPathStyle.Render(truncateTextBeginning(previewPath, modalWidth-4)) + "\n"
+	fileLocation := filePanelTopDirectoryIconStyle.Render("   ") +
+		filePanelTopPathStyle.Render(truncateTextBeginning(previewPath, modalWidth-4)) + "\n"
 
-		confirm := modalConfirm.Render(" (" + hotkeys.Confirm[0] + ") New File ")
-		cancel := modalCancel.Render(" (" + hotkeys.Cancel[0] + ") Cancel ")
+	confirm := modalConfirm.Render(" (" + hotkeys.ConfirmTyping[0] + ") Create ")
+	cancel := modalCancel.Render(" (" + hotkeys.CancelTyping[0] + ") Cancel ")
 
-		tip := confirm +
-			lipgloss.NewStyle().Background(modalBGColor).Render("           ") +
-			cancel
+	tip := confirm +
+		lipgloss.NewStyle().Background(modalBGColor).Render("           ") +
+		cancel
 
-		return modalBorderStyle(modalHeight, modalWidth).Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip)
-	} else {
-		previewPath := filepath.Join(m.typingModal.location, m.typingModal.textInput.Value())
-
-		fileLocation := filePanelTopDirectoryIconStyle.Render("   ") +
-			filePanelTopPathStyle.Render(truncateTextBeginning(previewPath, modalWidth-4)) + "\n"
-
-		confirm := modalConfirm.Render(" (" + hotkeys.Confirm[0] + ") New Folder ")
-		cancel := modalCancel.Render(" (" + hotkeys.Cancel[0] + ") Cancel ")
-		tip := confirm + lipgloss.NewStyle().Background(modalBGColor).Render("           ") + cancel
-		return modalBorderStyle(modalHeight, modalWidth).Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip)
-	}
+	return modalBorderStyle(modalHeight, modalWidth).Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip)
 }
 
 func introduceModalRender(m model) string {
@@ -370,8 +357,8 @@ func introduceModalRender(m model) string {
 func warnModalRender(m model) string {
 	title := m.warnModal.title
 	content := m.warnModal.content
-	confirm := modalCancel.Render(" (" + hotkeys.Confirm[0] + ") Confirm ")
-	cancel := modalCancel.Render(" (" + hotkeys.Cancel[0] + ") Cancel ")
+	confirm := modalConfirm.Render(" (" + hotkeys.Confirm[0] + ") Confirm ")
+	cancel := modalCancel.Render(" (" + hotkeys.Quit[0] + ") Cancel ")
 	tip := confirm + lipgloss.NewStyle().Background(modalBGColor).Render("           ") + cancel
 	return modalBorderStyle(modalHeight, modalWidth).Render(title + "\n\n" + content + "\n\n" + tip)
 }
