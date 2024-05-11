@@ -30,7 +30,6 @@ func panelCreateNewFile(m model) model {
 	ti.Width = modalWidth - 10
 
 	m.typingModal.location = panel.location
-	m.typingModal.itemType = newFile
 	m.typingModal.open = true
 	m.typingModal.textInput = ti
 	m.firstTextInput = true

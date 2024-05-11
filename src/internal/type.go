@@ -19,9 +19,6 @@ type processState int
 // Type representing the type of focused panel
 type focusPanelType int
 
-// Type representing the type of item
-type itemType int
-
 type warnType int
 
 type hotkeyType int
@@ -34,12 +31,6 @@ const (
 
 const (
 	confirmDeleteItem warnType = iota
-)
-
-// Constants for new file or new directory
-const (
-	newFile itemType = iota
-	newDirectory
 )
 
 // Constants for panel with no focus
@@ -118,7 +109,6 @@ type warnModal struct {
 type typingModal struct {
 	location  string
 	open      bool
-	itemType  itemType
 	textInput textinput.Model
 }
 
