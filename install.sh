@@ -33,6 +33,11 @@ echo -e '
 
 
 temp_dir=$(mktemp -d)
+if [ $? -ne 0 ]; then
+    echo -e "${red}❌ Fail install superfile: ${yellow}Unable to create temporary directory${nc}"
+    exit 1
+fi
+
 package=superfile
 version=1.1.2
 arch=$(uname -m)
