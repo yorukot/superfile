@@ -2,4 +2,4 @@
 cd ./src/
 
 # build the app
-go build -o ../bin/spf
+CGO_ENABLED=0 go build -o ../bin/spf
