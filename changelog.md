@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file. Dates are d
 
 # [**v1.1.3**]()
 
-> xxxx/xx/xx
+> xxxx-xx-xx
 
 #### Update
 - Update print path list [`37c8864`](https://github.com/MHNightCat/superfile/commit/37c8864eb2b0dc73fbf8928dd40b3b7573e9a11dw)
@@ -17,7 +17,7 @@ All notable changes to this project will be documented in this file. Dates are d
 
 # [**v1.1.2**](https://github.com/MHNightCat/superfile/releases/tag/v1.1.2)
 
-> 2024/05/08
+> 2024-05-08
 
 #### Update
 - Update help menu [`#75`](https://github.com/MHNightCat/superfile/issues/75)
@@ -35,18 +35,18 @@ All notable changes to this project will be documented in this file. Dates are d
 
 # [**v1.1.1**](https://github.com/MHNightCat/superfile/releases/tag/v1.1.1)
 
-> 2024/04/23
+> 2024-04-23
 
 #### Update
 - Open directory with default application [`#33`](https://github.com/MHNightCat/superfile/issues/33)
 - Auto update config file if missing config [`1498c92`](https://github.com/MHNightCat/superfile/commit/1498c92d2166c8c25989be9ce5a15dc6d1ffb073)
 
 #### Bug fix
-- key `l` deletes files in macOs [`#72`](https://github.com/MHNightCat/superfile/issues/72)
+- key `l` deletes files in macOS [`#72`](https://github.com/MHNightCat/superfile/issues/72)
 
 # [**v1.1.0**](https://github.com/MHNightCat/superfile/releases/tag/v1.1.0)
 
-> 2024/04/20
+> 2024-04-20
 
 #### Update
 
@@ -70,7 +70,7 @@ All notable changes to this project will be documented in this file. Dates are d
 
 # [**v1.0.1**](https://github.com/MHNightCat/superfile/releases/tag/v1.0.1)
 
-> 2024/04/08
+> 2024-04-08
 
 #### Update
 
@@ -88,7 +88,7 @@ All notable changes to this project will be documented in this file. Dates are d
 
 # [**v1.0.0**](https://github.com/MHNightCat/superfile/releases/tag/v1.0.0)
 
-> 2024/04/06
+> 2024-04-06
 
 ##### Update
 
@@ -103,6 +103,6 @@ All notable changes to this project will be documented in this file. Dates are d
 
 # [**Beta 0.1.0**](https://github.com/MHNightCat/superfile/releases/tag/v0.1.0-beta)
 
-> 2024/04/06
+> 2024-04-06
 
 - FIRST RELEASE COME UP! NO ANY CHANGE
