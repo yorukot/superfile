@@ -310,7 +310,7 @@ func controlMetadataListUp(m model) model {
 	return m
 }
 
-// Control metadta panel down
+// Control metadata panel down
 func controlMetadataListDown(m model) model {
 	if m.fileMetaData.renderIndex < len(m.fileMetaData.metaData)-1 {
 		m.fileMetaData.renderIndex++
@@ -323,7 +323,7 @@ func controlMetadataListDown(m model) model {
 // ======================================== Processbar controller ========================================
 
 // Control processbar panel list up
-func contolProcessbarListUp(m model) model {
+func controlProcessbarListUp(m model) model {
 	if len(m.processBarModel.processList) == 0 {
 		return m
 	}
@@ -345,7 +345,7 @@ func contolProcessbarListUp(m model) model {
 }
 
 // Control processbar panel list down
-func contolProcessbarListDown(m model) model {
+func controlProcessbarListDown(m model) model {
 	if len(m.processBarModel.processList) == 0 {
 		return m
 	}

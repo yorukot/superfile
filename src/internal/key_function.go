@@ -9,7 +9,7 @@ func mainKey(msg string, m model, cmd tea.Cmd) (model, tea.Cmd) {
 		if m.focusPanel == sidebarFocus {
 			m = controlSideBarListUp(m)
 		} else if m.focusPanel == processBarFocus {
-			m = contolProcessbarListUp(m)
+			m = controlProcessbarListUp(m)
 		} else if m.focusPanel == metadataFocus {
 			m = controlMetadataListUp(m)
 		} else if m.focusPanel == nonePanelFocus {
@@ -24,7 +24,7 @@ func mainKey(msg string, m model, cmd tea.Cmd) (model, tea.Cmd) {
 		if m.focusPanel == sidebarFocus {
 			m = controlSideBarListDown(m)
 		} else if m.focusPanel == processBarFocus {
-			m = contolProcessbarListDown(m)
+			m = controlProcessbarListDown(m)
 		} else if m.focusPanel == metadataFocus {
 			m = controlMetadataListDown(m)
 		} else if m.focusPanel == nonePanelFocus {

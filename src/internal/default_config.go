@@ -59,7 +59,7 @@ footer_panel_list = ['processes', 'metadata', 'clipboard']
 # ================   Style =================
 #
 # Set transparent background or not (this only work when your terminal background is transparent)
-transparent_backgroun = false
+transparent_background = false
 #
 # Border style
 border_top = "━"

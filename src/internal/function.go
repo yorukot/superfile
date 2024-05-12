@@ -127,8 +127,8 @@ func panelElementHeight(mainPanelHeight int) int {
 	return mainPanelHeight - 3
 }
 
-func bottomElementHight(bottomElementHight int) int {
-	return bottomElementHight - 5
+func bottomElementHeight(bottomElementHeight int) int {
+	return bottomElementHeight - 5
 }
 
 func arrayContains(s []string, str string) bool {

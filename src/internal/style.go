@@ -116,7 +116,7 @@ func LoadThemeConfig() {
 	helpMenuTitleColor = lipgloss.Color(theme.HelpMenuTitle)
 
 	if Config.TransparentBackground {
-		transparentAllBackgrounColor()
+		transparentAllBackgroundColor()
 	}
 
 	// All Panel Main Color
@@ -174,7 +174,7 @@ func footerWidth(fullWidth int) int {
 }
 
 var transparentBackgroundColor string
-func transparentAllBackgrounColor() {
+func transparentAllBackgroundColor() {
 	fullScreenBGColor = lipgloss.Color(transparentBackgroundColor)
 	filePanelBGColor = lipgloss.Color(transparentBackgroundColor)
 	sidebarBGColor = lipgloss.Color(transparentBackgroundColor)

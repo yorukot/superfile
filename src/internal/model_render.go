@@ -208,7 +208,7 @@ func processBarRender(m model) string {
 		courseNumber = m.processBarModel.cursor + 1
 	}
 	bottomBorder := generateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(courseNumber), strconv.Itoa(len(m.processBarModel.processList))), footerWidth(m.fullWidth)-3)
-	processRender = procsssBarBoarder(bottomElementHight(footerHeight), footerWidth(m.fullWidth), bottomBorder, m.focusPanel).Render(processRender)
+	processRender = procsssBarBoarder(bottomElementHeight(footerHeight), footerWidth(m.fullWidth), bottomBorder, m.focusPanel).Render(processRender)
 
 	return processRender
 }
@@ -251,7 +251,7 @@ func metadataRender(m model) string {
 		sprintfLength = valueLength
 	}
 
-	for i := m.fileMetaData.renderIndex; i < bottomElementHight(footerHeight)+m.fileMetaData.renderIndex && i < len(m.fileMetaData.metaData); i++ {
+	for i := m.fileMetaData.renderIndex; i < bottomElementHeight(footerHeight)+m.fileMetaData.renderIndex && i < len(m.fileMetaData.metaData); i++ {
 		if i != m.fileMetaData.renderIndex {
 			metaDataBar += "\n"
 		}
@@ -264,7 +264,7 @@ func metadataRender(m model) string {
 
 	}
 	bottomBorder := generateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(m.fileMetaData.renderIndex+1), strconv.Itoa(len(m.fileMetaData.metaData))), footerWidth(m.fullWidth)-3)
-	metaDataBar = metadataBoarder(bottomElementHight(footerHeight), footerWidth(m.fullWidth), bottomBorder, m.focusPanel).Render(metaDataBar)
+	metaDataBar = metadataBoarder(bottomElementHeight(footerHeight), footerWidth(m.fullWidth), bottomBorder, m.focusPanel).Render(metaDataBar)
 
 	return metaDataBar
 }
@@ -276,8 +276,8 @@ func clipboardRender(m model) string {
 	if len(m.copyItems.items) == 0 {
 		clipboardRender += "\n   No content in clipboard"
 	} else {
-		for i := 0; i < len(m.copyItems.items) && i < bottomElementHight(footerHeight); i++ {
-			if i == bottomElementHight(footerHeight)-1 {
+		for i := 0; i < len(m.copyItems.items) && i < bottomElementHeight(footerHeight); i++ {
+			if i == bottomElementHeight(footerHeight)-1 {
 				clipboardRender += strconv.Itoa(len(m.copyItems.items)-i+1) + " item left...."
 			} else {
 				fileInfo, err := os.Stat(m.copyItems.items[i])
@@ -300,7 +300,7 @@ func clipboardRender(m model) string {
 	} else {
 		bottomWidth = footerWidth(m.fullWidth)
 	}
-	clipboardRender = clipboardBoarder(bottomElementHight(footerHeight), bottomWidth, Config.BorderBottom).Render(clipboardRender)
+	clipboardRender = clipboardBoarder(bottomElementHeight(footerHeight), bottomWidth, Config.BorderBottom).Render(clipboardRender)
 
 	return clipboardRender
 }
