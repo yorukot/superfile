@@ -21,7 +21,6 @@ jobs:
 
       - name: Update checksum
         run: |
-          cd src
           nix develop --extra-experimental-features "nix-command flakes" '.#' -c "gomod2nix"
           # git push if we have a diff
           if [[ -n $(git diff) ]]; then
