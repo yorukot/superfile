@@ -29,8 +29,8 @@ The developers will merge after making the necessary changes (if arises a need t
 
 Firstly check if the theme you want to add is not already added. If it is, then you work may go waste and be left redundant.
 If no such theme exists, then you may create your own theme. Following steps will guide you for it:
-- As a template, copy an existing theme's JSON file to your theme and then do the customizations. This will reduce errors from your side and make your work easy.
-- To tests your theme, go to `~/.config/superfile/config/config.json` and change `theme = "gruvbox"` to `theme = "YOUR_THEME_NAME"`
+- As a template, copy an existing theme's TOML file to your theme and then do the customizations. This will reduce errors from your side and make your work easy.
+- To tests your theme, go to `~/.config/superfile/config/config.toml` and change description.
 - Make the changes you want and finish the theme.
 - Then you can open a pull request for the same and follow the steps described in the previous section.
 
