@@ -12,7 +12,7 @@ All notable changes to this project will be documented in this file. Dates are d
 - Make downloading theme files optional [`7fa775d`](https://github.com/MHNightCat/superfile/commit/7fa775dd7db175fef694e514bd77ebd75c801fae)
 
 #### Bug fix
-- Recursive symlink crashes superfile [`#109`](https://github.com/MHNightCat/superfile/issues/109) 
+- Recursive symlink crashes superfile [`#109`](https://github.com/MHNightCat/superfile/issues/109)
 
 
 # [**v1.1.2**](https://github.com/MHNightCat/superfile/releases/tag/v1.1.2)
@@ -26,7 +26,7 @@ All notable changes to this project will be documented in this file. Dates are d
 - Support transparent background [`4108d40`](https://github.com/MHNightCat/superfile/commit/4108d40bc0b93656eca2da98253a83dbc0cb27a9)
 - Support custom border style [`6ff0576`](https://github.com/MHNightCat/superfile/commit/6ff05765823cbd25e6fdc4d3f7370e435114acbb)
 - Enhancement when cutting and pasting, the file should be moved instead of copied and deleted. [`#100`](https://github.com/MHNightCat/superfile/issues/100)
-- Support extract almose compressed file [`e57cb78`](https://github.com/MHNightCat/superfile/commit/e57cb78d602d62b47662e2069b75059d908147db)
+- Support extract almost compression formats [`e57cb78`](https://github.com/MHNightCat/superfile/commit/e57cb78d602d62b47662e2069b75059d908147db)
 - Update XDG_CACHE to XDG_STATE_HOME [`#90`](https://github.com/MHNightCat/superfile/issues/90)
 
 #### Bug fix
@@ -42,7 +42,7 @@ All notable changes to this project will be documented in this file. Dates are d
 - Auto update config file if missing config [`1498c92`](https://github.com/MHNightCat/superfile/commit/1498c92d2166c8c25989be9ce5a15dc6d1ffb073)
 
 #### Bug fix
-- key `l` deletes files in MacOs [`#72`](https://github.com/MHNightCat/superfile/issues/72)
+- key `l` deletes files in macOs [`#72`](https://github.com/MHNightCat/superfile/issues/72)
 
 # [**v1.1.0**](https://github.com/MHNightCat/superfile/releases/tag/v1.1.0)
 
@@ -52,7 +52,7 @@ All notable changes to this project will be documented in this file. Dates are d
 
 - Update data folder from `$XDG_CONFIG_HOME/superfile/data` to `$XDG_DATA_HOME/superfile` [`9fff97a`](https://github.com/MHNightCat/superfile/commit/9fff97a362bcd5bec1c19709b7a5aeb59cdeaa34)
 - Toggle dot file display [`9fff97a`](https://github.com/MHNightCat/superfile/commit/9fff97a362bcd5bec1c19709b7a5aeb59cdeaa34/9fff97a362bcd5bec1c19709b7a5aeb59cdeaa34)
-- Update log file from `$XDG_CONFIG_HOME/superfile/data/superfile.log` to `$XDG_CACH_DATA` [`#27`](https://github.com/MHNightCat/superfile/pull/27)
+- Update log file from `$XDG_CONFIG_HOME/superfile/data/superfile.log` to `$XDG_CACHE_DATA` [`#27`](https://github.com/MHNightCat/superfile/pull/27)
 - Update theme background [`#42`](https://github.com/MHNightCat/superfile/pull/42)
 - Update unzip function [`#55`](https://github.com/MHNightCat/superfile/pull/55)
 - Update zip function [`60c490a`](https://github.com/MHNightCat/superfile/commit/60c490aa06019fb1a5382b1e241c6b0a72ec51a4)
@@ -76,7 +76,7 @@ All notable changes to this project will be documented in this file. Dates are d
 
 - Update `$HOME/.superfile` to `$XDG_CONFIG_HOME/superfile` [`886dbfb`](https://github.com/MHNightCat/superfile/commit/886dbfb276407db36e9fb7369ec31053e7aabcf4)
 - Follow [The FreeDesktop.org Trash specification](https://specifications.freedesktop.org/trash-spec/trashspec-1.0.html) to update the trash bin path in local path [`886dbfb`](https://github.com/MHNightCat/superfile/commit/886dbfb276407db36e9fb7369ec31053e7aabcf4)
-- The external hard drive will be deleted directly ,But macOs for now not support trash can[`a4232a8`](https://github.com/MHNightCat/superfile/commit/a4232a88bef4b5c3e99456fd198eabb953dc324c)
+- The external hard drive will be deleted directly ,But macOS for now not support trash can[`a4232a8`](https://github.com/MHNightCat/superfile/commit/a4232a88bef4b5c3e99456fd198eabb953dc324c)
 - The user can enter the path, which will be the path of the first file panel [`14620b3`](https://github.com/MHNightCat/superfile/commit/14620b33b09edfce80a95e1f52f7f66b3686a9d0)
 - Make user can open file with default browser text-editor etc [`f47d291`](https://github.com/MHNightCat/superfile/commit/f47d2915bf637da0cf99a4b15fa0bea8edc8d380)
 - Can open terminal in focused file panel path [`f47d291`](https://github.com/MHNightCat/superfile/commit/f47d2915bf637da0cf99a4b15fa0bea8edc8d380)

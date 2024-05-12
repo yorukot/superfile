@@ -7,7 +7,7 @@ There are many ways to contribute to Superfile:
 - Adding a theme
 - Sharing an idea and working on it
 - Working on a feature with other contributors.
-- And More...
+- And More…
 
 To get started, take a look at the following sections.
 
@@ -21,7 +21,7 @@ Firstly you should check if such an issue was previously opened/closed for your 
 
 If there is an issue you think you can solve, and want to solve, then you should create a new fork of this repository.
 In that repository you should create a new branch for the issue you are working on and commit changes there.
-When the issue is solved and you want it to be integrated into the official repository, you may create a pull request for the same.
+When the issue is solved, and you want it to be integrated into the official repository, you may create a pull request for the same.
 The description of the pull request should clearly describe both the issue and the solution along with other necessary information.
 The developers will merge after making the necessary changes (if arises a need to do so).
 
@@ -29,14 +29,14 @@ The developers will merge after making the necessary changes (if arises a need t
 
 Firstly check if the theme you want to add is not already added. If it is, then you work may go waste and be left redundant.
 If no such theme exists, then you may create your own theme. Following steps will guide you for it:
-- As a template, copy an existing theme's json file to your theme and then do the customizations. This will reduce errors from your side and make your work easy.
+- As a template, copy an existing theme's JSON file to your theme and then do the customizations. This will reduce errors from your side and make your work easy.
 - To tests your theme, go to `~/.config/superfile/config/config.json` and change `theme = "gruvbox"` to `theme = "YOUR_THEME_NAME"`
 - Make the changes you want and finish the theme.
 - Then you can open a pull request for the same and follow the steps described in the previous section.
 
 ### Do you want to share an idea?
 
-Superfile welcomes new ideas. If you have an idea you should firstly check if a similar or identical idea was presented previously or not, or check thoroughly if the idea is already present in superfile.
+Superfile welcomes new ideas. If you have an idea you should first check if a similar or identical idea was presented previously or not, or check thoroughly if the idea is already present in superfile.
 To share your idea you can open a discussion in https://github.com/MHNightCat/superfile/discussions
 There you can share your idea and if you want to work on it, you can follow the same steps as mentioned in previously.
 

@@ -274,7 +274,7 @@ func completelyDeleteSingleItem(m model) model {
 	return m
 }
 
-// Completely delete all file or folder from clipbaord (Not move to the trash can)
+// Completely delete all file or folder from clipboard (Not move to the trash can)
 func completelyDeleteMultipleItems(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	if len(panel.selected) != 0 {
