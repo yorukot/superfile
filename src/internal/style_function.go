@@ -179,7 +179,7 @@ func stringColorRender(fgColor lipgloss.Color, bgColor lipgloss.Color) lipgloss.
 		Background(bgColor)
 }
 
-// Geerate border style
+// Generate border style
 func generateBorder() lipgloss.Border {
 	return lipgloss.Border{
 		Top:         Config.BorderTop,

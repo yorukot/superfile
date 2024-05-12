@@ -69,7 +69,7 @@ bash -c "$(wget -qO- https://raw.githubusercontent.com/MHNightCat/superfile/main
 <details><summary>Click to expand</summary>
 <p>
 
-#### Install with nix command line:
+#### Install with nix command-line:
 
 ```bash
 nix profile install github:MHNightCat/superfile#superfile
@@ -110,7 +110,7 @@ in {
 
 ### Font
 
-> [!WARNING] 
+> [!WARNING]
 > This is a reminder that you must use a [Nerd font](https://www.nerdfonts.com/font-downloads)
 
 Once the font is installed if `superfile` isn't working make sure to update your terminal preferences to use the font.
@@ -125,7 +125,7 @@ You can build the source code yourself by using these steps:
 
 **Build Steps**
 
-Clone this repo using the following command:
+Clone this repository using the following command:
 
 ```
 git clone https://github.com/MHNightCat/superfile.git
@@ -143,7 +143,7 @@ Run the `build.sh` file:
 ./build.sh
 ```
 
-Add the binary file to your $PATH, e.g. in `/usr/local/bin`:
+Add the binary file to your $PATH, e.g., in `/usr/local/bin`:
 
 ```bash
 mv ./bin/spf /usr/local/bin
@@ -169,7 +169,7 @@ After you install superfile, you can go [here](https://github.com/MHNightCat/sup
 
 You can go to [theme list](https://github.com/MHNightCat/superfile/blob/main/THEMELIST.md) to find one you like!
 
-> We only have a few themes at the moment, but we will be making more over time! You can also [submit a pull request](https://github.com/MHNightCat/superfile/pulls) for your own theme!
+> We only have a few themes at the moment, but we will be making more overtime! You can also [submit a pull request](https://github.com/MHNightCat/superfile/pulls) for your own theme!
 
 copy `theme_name` in:
 
@@ -180,7 +180,7 @@ Theme name: theme_name
 Edit `config.toml` using your preferred editor:
 
 > [!TIP]
-> If your os is MacOs the file path should be in the `~/Library/Application Support/superfile/config.toml`
+> If your OS is macOS the file path should be in the `~/Library/Application Support/superfile/config.toml`
 
 ```
 $EDITOR ~/.config/superfile/config.toml
@@ -212,7 +212,7 @@ Don't forget to change the `theme` variable in `config.toml` to your theme name.
 [**Click me to see the hotkey list**](https://github.com/MHNightCat/superfile/wiki/Hotkey-list)
 
 > [!TIP]
-> If your os is MacOs the file path should be in the `~/Library/Application Support/superfile/hotkeys.toml`
+> If your OS is macOS the file path should be in the `~/Library/Application Support/superfile/hotkeys.toml`
 
 **You can change all hotkeys in** `~/.config/superfile/hotkeys.toml`
 
@@ -230,7 +230,7 @@ If you want to contribute please follow the [contribution guide](./CONTRIBUTING.
 
 ### Support
 
-- a Star on my Github repos would be nice 🌟
+- a Star on my GitHub repository would be nice 🌟
 - You can buy a coffee for me 💖
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/G2G1JEGGC)

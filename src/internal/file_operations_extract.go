@@ -72,7 +72,7 @@ func unzip(src, dest string) error {
 		}
 	}()
 	totalFiles := len(r.File)
-	// progessbar
+	// progressbar
 	prog := progress.New(generateGradientColor())
 	prog.PercentageStyle = footerStyle
 	// channel message

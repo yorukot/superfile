@@ -274,7 +274,7 @@ func completelyDeleteSingleItem(m model) model {
 	return m
 }
 
-// Completely delete all file or folder from clipbaord (Not move to the trash can)
+// Completely delete all file or folder from clipboard (Not move to the trash can)
 func completelyDeleteMultipleItems(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	if len(panel.selected) != 0 {
@@ -579,7 +579,7 @@ func extractFile(m model) model {
 	outputDir, err = renameIfDuplicate(outputDir)
 
 	if err != nil {
-		outPutLog("Error extract file when craete new directory", err)
+		outPutLog("Error extract file when create new directory", err)
 	}
 
 	switch ext {
@@ -609,7 +609,7 @@ func compressFile(m model) model {
 	zipName, err := renameIfDuplicate(zipName)
 
 	if err != nil {
-		outPutLog("Error compress file when rename dublicate", err)
+		outPutLog("Error compress file when rename duplicate", err)
 	}
 
 	zipSource(panel.element[panel.cursor].location, filepath.Join(filepath.Dir(panel.element[panel.cursor].location), zipName))
@@ -633,7 +633,7 @@ func openFileWithEditor(m model) tea.Cmd {
 	})
 }
 
-// Open directory with defailt editor
+// Open directory with default editor
 func openDirectoryWithEditor(m model) tea.Cmd {
 	editor := os.Getenv("EDITOR")
 	m.editorMode = true
