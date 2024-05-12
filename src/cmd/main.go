@@ -18,6 +18,7 @@ import (
 	"github.com/adrg/xdg"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/pelletier/go-toml/v2"
 	"github.com/urfave/cli/v2"
 )
 
@@ -61,9 +62,9 @@ func Run() {
 		ArgsUsage:   "[path]",
 		Commands: []*cli.Command{
 			{
-				Name:  "download-theme",
+				Name:    "download-theme",
 				Aliases: []string{"dt"},
-				Usage: "Download or update theme file from github",
+				Usage:   "Download or update theme file from github",
 				Action: func(c *cli.Context) error {
 					if err := downloadAndInstallTheme(SuperFileMainDir, themeZipName, themeZip, themeFolder); err != nil {
 						log.Fatalln("Error downloading theme:", err)
@@ -74,9 +75,9 @@ func Run() {
 				},
 			},
 			{
-				Name:  "path-list",
+				Name:    "path-list",
 				Aliases: []string{"pl"},
-				Usage: "Print the path to the configuration and directory",
+				Usage:   "Print the path to the configuration and directory",
 				Action: func(c *cli.Context) error {
 					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#66b2ff")).Render("[Configuration file path]"), filepath.Join(SuperFileMainDir, configFile))
 					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#ffcc66")).Render("[Hotkeys file path]"), filepath.Join(SuperFileMainDir, hotkeysFile))
@@ -115,23 +116,23 @@ func Run() {
 
 func InitConfigFile() {
 	config := struct {
-		MainDir      string
-		DataDir      string
-		StateDir     string
-		PinnedFile   string
-		ToggleFile   string
-		LogFile      string
-		ConfigFile   string
-		HotkeysFile  string
+		MainDir     string
+		DataDir     string
+		StateDir    string
+		PinnedFile  string
+		ToggleFile  string
+		LogFile     string
+		ConfigFile  string
+		HotkeysFile string
 	}{
-		MainDir:      SuperFileMainDir,
-		DataDir:      SuperFileDataDir,
-		StateDir:     SuperFileStateDir,
-		PinnedFile:   pinnedFile,
-		ToggleFile:   toggleDotFile,
-		LogFile:      logFile,
-		ConfigFile:   configFile,
-		HotkeysFile:  hotkeysFile,
+		MainDir:     SuperFileMainDir,
+		DataDir:     SuperFileDataDir,
+		StateDir:    SuperFileStateDir,
+		PinnedFile:  pinnedFile,
+		ToggleFile:  toggleDotFile,
+		LogFile:     logFile,
+		ConfigFile:  configFile,
+		HotkeysFile: hotkeysFile,
 	}
 
 	// Create directories
@@ -248,6 +249,25 @@ func downloadAndInstallTheme(dir, zipName, zipUrl, zipFolder string) error {
 }
 
 func CheckForUpdates() {
+	type superfileConfig struct {
+		AutoCheckUpdate bool `toml:"auto_check_update"`
+	}
+	var Config superfileConfig
+
+	data, err := os.ReadFile(SuperFileMainDir + configFile)
+	if err != nil {
+		log.Fatalf("Config file doesn't exist: %v", err)
+	}
+
+	err = toml.Unmarshal(data, &Config)
+	if err != nil {
+		log.Fatalf("Error decoding config file ( your config file may have misconfigured ): %v", err)
+	}
+
+	if !Config.AutoCheckUpdate {
+		return
+	}
+	
 	lastTime, err := readLastTimeCheckVersionFromFile(SuperFileDataDir + lastCheckVersion)
 	if err != nil && !os.IsNotExist(err) {
 		fmt.Println("Error reading from file:", err)
@@ -400,6 +420,6 @@ func unzip(src, dest string) error {
 }
 
 func connected() (ok bool) {
-    _, err := http.Get("http://clients3.google.com/generate_204")
-    return err == nil
+	_, err := http.Get("http://clients3.google.com/generate_204")
+	return err == nil
 }

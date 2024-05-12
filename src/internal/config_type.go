@@ -111,7 +111,8 @@ type ConfigType struct {
 	Theme string `toml:"theme" comment:"change your theme"`
 
 	FooterPanelList []string `toml:"footer_panel_list" comment:"\nuseless for now"`
-
+	AutoCheckUpdate bool `toml:"auto_check_update" comment:"\nAuto check for update"`
+	
 	TransparentBackground bool `toml:"transparent_background" comment:"\n================   Style =================\n\nSet transparent background or not (this only work when your terminal background is transparent)"`
 
 	BorderTop         string `toml:"border_top" comment:"\n\nBorder style"`
