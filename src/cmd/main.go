@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"archive/zip"
@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	internal "github.com/MHNightCat/superfile/internal"
+	internal "github.com/MHNightCat/superfile/src/internal"
 	"github.com/adrg/xdg"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -53,7 +53,7 @@ const (
 	trashDirectoryInfo  string = "/Trash/info"
 )
 
-func main() {
+func Run() {
 	app := &cli.App{
 		Name:        "superfile",
 		Version:     currentVersion,
