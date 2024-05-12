@@ -129,13 +129,13 @@ type ConfigType struct {
 }
 
 type HotkeysType struct {
-	Confirm []string `toml:"confirm" comment:"=================================================================================================\nHere is global, all global key cant conflicts with other hotkeys"`
+	Confirm []string `toml:"confirm" comment:"=================================================================================================\nHere is global, all global key can't conflicts with other hotkeys"`
 	Quit    []string `toml:"quit"`
 	// movement
 	ListUp   []string `toml:"list_up" comment:"movement"`
 	ListDown []string `toml:"list_down"`
 
-	CloseFilePanel     []string `toml:"close_file_panel" comment:"file panel controll"`
+	CloseFilePanel     []string `toml:"close_file_panel" comment:"file panel control"`
 	CreateNewFilePanel []string `toml:"create_new_file_panel"`
 	NextFilePanel      []string `toml:"next_file_panel"`
 	PreviousFilePanel  []string `toml:"previous_file_panel"`
@@ -166,10 +166,10 @@ type HotkeysType struct {
 	ConfirmTyping []string `toml:"confirm_typing" comment:"=================================================================================================\nHere is typing hotkey can conflict with all hotkeys"`
 	CancelTyping []string `toml:"cancel_typing"`
 
-	ParentDirectory []string `toml:"parent_directory" comment:"=================================================================================================\nHere is normal mode hotkey you can conflicts with other mode (cant conflicts with global hotkey)"`
+	ParentDirectory []string `toml:"parent_directory" comment:"=================================================================================================\nHere is normal mode hotkey you can conflicts with other mode (can't conflicts with global hotkey)"`
 	SearchBar       []string `toml:"search_bar"`
 
-	FilePanelSelectModeItemsSelectDown []string `toml:"file_panel_select_mode_items_select_down" comment:"=================================================================================================\nHere is select mode hotkey you can conflicts with other mode (cant conflicts with global hotkey)"`
+	FilePanelSelectModeItemsSelectDown []string `toml:"file_panel_select_mode_items_select_down" comment:"=================================================================================================\nHere is select mode hotkey you can conflicts with other mode (can't conflicts with global hotkey)"`
 	FilePanelSelectModeItemsSelectUp   []string `toml:"file_panel_select_mode_items_select_up"`
 	FilePanelSelectAllItem            []string `toml:"file_panel_select_all_items"`
 }

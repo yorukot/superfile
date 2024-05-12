@@ -1,11 +1,11 @@
 # =================================================================================================
-# Here is global, all global key cant conflicts with other hotkeys
+# Here is global, all global key can't conflicts with other hotkeys
 confirm = ['enter', 'l']
 quit = ['q', 'esc'] # (q)uit
 # movement
 list_up = ['up', 'k'] # most user use
 list_down = ['down', 'j'] # most user use
-# file panel controll
+# file panel control
 close_file_panel = ['w', '']
 create_new_file_panel = ['n', ''] # (n)ew file panel
 next_file_panel = ['tab', 'L']
@@ -38,11 +38,11 @@ open_help_menu = ['?', '']
 confirm_typing = ['enter', '']
 cancel_typing = ['ctrl+c', 'esc']
 # =================================================================================================
-# Here is normal mode hotkey you can conflicts with other mode (cant conflicts with global hotkey)
+# Here is normal mode hotkey you can conflicts with other mode (can't conflicts with global hotkey)
 parent_directory = ['h', 'backspace'] 
 search_bar = ['/', '']
 # =================================================================================================
-# Here is select mode hotkey you can conflicts with other mode (cant conflicts with global hotkey)
+# Here is select mode hotkey you can conflicts with other mode (can't conflicts with global hotkey)
 file_panel_select_mode_items_select_down = ['shift+down', 'J']
 file_panel_select_mode_items_select_up = ['shift+up', 'K']
 file_panel_select_all_items = ['A', '']

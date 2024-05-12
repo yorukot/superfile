@@ -120,7 +120,7 @@ func filePanelRender(m model) string {
 		}
 	}
 
-	// file panel render togther
+	// file panel render together
 	filePanelRender := ""
 	for _, f := range f {
 		filePanelRender = lipgloss.JoinHorizontal(lipgloss.Top, filePanelRender, f)

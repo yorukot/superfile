@@ -65,7 +65,7 @@ All notable changes to this project will be documented in this file. Dates are d
 
 - Fix interface lag when selecting zip files or large files [`#29`](https://github.com/MHNightCat/superfile/issues/29)
 - Fix external media error [`#46`](https://github.com/MHNightCat/superfile/pull/46)
-- Fix cant find trash can folder [`396674f`](https://github.com/MHNightCat/superfile/commit/396674f33e302369790bcb88d84df0d3830d3543)
+- Fix can't find trash can folder [`396674f`](https://github.com/MHNightCat/superfile/commit/396674f33e302369790bcb88d84df0d3830d3543)
 - Fix Crashes when truncating metadata [`#50`](https://github.com/MHNightCat/superfile/issues/50)
 
 # [**v1.0.1**](https://github.com/MHNightCat/superfile/releases/tag/v1.0.1)
@@ -94,7 +94,7 @@ All notable changes to this project will be documented in this file. Dates are d
 
 - Auto download folder [`96a3a71`](https://github.com/MHNightCat/superfile/commit/96a3a7108eb7c4327bad3424ed55e472ec78049f)
 - Auto initialize configuration [`96a3a71`](https://github.com/MHNightCat/superfile/commit/96a3a7108eb7c4327bad3424ed55e472ec78049f)
-- Add version subcommand [`ee22df3`](https://github.com/MHNightCat/superfile/commit/ee22df3c7700adddb859ada8623f6c8b038e8087)
+- Add version sub-command [`ee22df3`](https://github.com/MHNightCat/superfile/commit/ee22df3c7700adddb859ada8623f6c8b038e8087)
 
 ##### Bug fix
 
