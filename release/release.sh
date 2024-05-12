@@ -12,7 +12,7 @@ for os in "${osList[@]}"; do
         mkdir "./dist/$projectName-$os-$version-$arch"
         cd ../ || exit
         env GOOS="$os" GOARCH="$arch" CGO_ENABLED=0 go build -o "../release/dist/$projectName-$os-$version-$arch/spf" main.go
-        cd ../release || exit
+        cd ./release || exit
         tar czf "./dist/$projectName-$os-$version-$arch.tar.gz" "./dist/$projectName-$os-$version-$arch"
     done
 done
