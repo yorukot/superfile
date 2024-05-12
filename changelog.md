@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file. Dates are d
 #### Update
 - Update print path list [`37c8864`](https://github.com/MHNightCat/superfile/commit/37c8864eb2b0dc73fbf8928dd40b3b7573e9a11dw)
 - Make downloading theme files optional [`7fa775d`](https://github.com/MHNightCat/superfile/commit/7fa775dd7db175fef694e514bd77ebd75c801fae)
+- Disable update check via config [`#131`](https://github.com/MHNightCat/superfile/issues/131)
 
 #### Bug fix
 - Recursive symlink crashes superfile [`#109`](https://github.com/MHNightCat/superfile/issues/109)
