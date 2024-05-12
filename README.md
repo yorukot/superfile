@@ -64,6 +64,15 @@ Or wget:
 bash -c "$(wget -qO- https://raw.githubusercontent.com/MHNightCat/superfile/main/install.sh)"
 ```
 
+### Windows
+
+It actually supports windows! Sort of.
+
+```powershell
+Set-ExecutionPolicy Bypass -Scope Process -Force; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://github.com/MHNightCat/superfile/blob/main/install.ps1'))
+
+```
+
 ### NixOS
 
 <details><summary>Click to expand</summary>
