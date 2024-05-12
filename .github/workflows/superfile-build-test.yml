@@ -16,5 +16,4 @@ jobs:
 
     - name: Build
       run: |
-        cd src
-        go build ./main.go
+        go build

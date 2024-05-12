@@ -2,8 +2,8 @@ name: Update gomod2nix.toml
 on:
   push:
     paths:
-      - 'src/go.mod'
-      - 'src/go.sum'
+      - 'go.mod'
+      - 'go.sum'
 
 permissions:
  contents: write
