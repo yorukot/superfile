@@ -135,7 +135,7 @@ func focusOnProcessBar(m model) model {
 	return m
 }
 
-// focus on meatadata
+// focus on metadata
 func focusOnMetadata(m model) model {
 	if m.focusPanel == metadataFocus {
 		m.focusPanel = nonePanelFocus
