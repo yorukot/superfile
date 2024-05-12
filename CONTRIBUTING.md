@@ -23,7 +23,7 @@ If there is an issue you think you can solve, and want to solve, then you should
 In that repository you should create a new branch for the issue you are working on and commit changes there.
 When the issue is solved and you want it to be integrated into the official repository, you may create a pull request for the same.
 The description of the pull request should clearly describe both the issue and the solution along with other necessary information.
-The devlopers will merge after making the necessary changes (if arises a need to do so).
+The developers will merge after making the necessary changes (if arises a need to do so).
 
 ### Do you want to add a new theme?
 
