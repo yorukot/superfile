@@ -6,8 +6,8 @@ quit = ['q', 'esc'] # (q)uit
 list_up = ['up', 'k']
 list_down = ['down', 'j']
 # file panel control
-close_file_panel = ['w', '']
 create_new_file_panel = ['n', ''] # (n)ew file panel
+close_file_panel = ['w', '']
 next_file_panel = ['tab', 'L']
 previous_file_panel = ['shift+left', 'H']
 # change focus
@@ -19,8 +19,8 @@ file_panel_item_create = ['ctrl+n', ''] # (n)ew file or folder
 file_panel_item_rename = ['ctrl+r', ''] # (r)name
 # file operations
 copy_items = ['ctrl+c', '']  # (c)opy
-paste_items = ['ctrl+v', ''] # paste
 cut_items = ['ctrl+x', ''] # cut
+paste_items = ['ctrl+v', ''] # paste
 delete_items = ['ctrl+d', 'delete'] #(d)elete
 # compress and extract
 extract_file = ['ctrl+e', ''] # (e)xtract
