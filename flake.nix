@@ -27,7 +27,7 @@
         packages = rec {
           superfile = pkgs.buildGoApplication {
             pname = "superfile";
-            version = "0.1.0";
+            version = "1.1.2";
             src = ./.;
             modules = ./gomod2nix.toml;
           };
