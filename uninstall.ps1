@@ -54,7 +54,7 @@ Write-Host "Removing environment path..."
 try {
     if (FolderIsInPATH "$superfileProgramPath\") {
         $envPath = [Environment]::GetEnvironmentVariable("PATH", "User")
-        $updatedPath =($envPath.Split(';') | Where-Object { $_ -ne "$superfileProgramPath\" }) -join ';' 
+        $updatedPath =($envPath.Split(';') | Where-Object { $_ -ne "$superfileProgramPath" }) -join ';' 
         [Environment]::SetEnvironmentVariable("PATH", $updatedPath, "User")
     }
 }
