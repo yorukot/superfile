@@ -73,8 +73,13 @@ if (-not (Test-Path $superfileProgramPath)) {
     Write-Host "Folder $superfileProgramPath already exists. :/"
     exit
 }
-$url = "https://github.com/MHNightCat/superfile/releases/download/$version/$filename"
-Invoke-WebRequest -OutFile "$superfileProgramPath\$filename" $url
+$url = "https://github.com/MHNightCat/superfile/releases/download/v$version/$filename"
+try {
+    Invoke-WebRequest -OutFile "$superfileProgramPath/$filename" $url
+} catch {
+    Write-Host "An error occurred: $_"
+    exit
+}
 
 Write-Host "Extracting compressed file..."
 
@@ -89,6 +94,7 @@ try {
     Remove-Item -Path $tempDirectory -Recurse -Force
 } catch {
     Write-Host "An error occurred: $_"
+    exit
 }
 if (-not (FolderIsInPATH "$superfileProgramPath\spf.exe")) {
     $envPath = [Environment]::GetEnvironmentVariable("PATH", "User")
