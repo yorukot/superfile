@@ -99,7 +99,7 @@ try {
 if (-not (FolderIsInPATH "$superfileProgramPath\spf.exe")) {
     $envPath = [Environment]::GetEnvironmentVariable("PATH", "User")
     $newPath = "$superfileProgramPath\spf.exe"
-    $updatedPath = $envPath + ";" + $newPath
+    $updatedPath = $envPath.TrimEnd(";") + ";" + $newPath + ";"
     [Environment]::SetEnvironmentVariable("PATH", $updatedPath, "User")
 }
 
