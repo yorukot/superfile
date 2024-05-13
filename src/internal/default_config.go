@@ -59,6 +59,9 @@ footer_panel_list = ['processes', 'metadata', 'clipboard']
 # Auto check for update
 auto_check_update = true
 # 
+# Cd on quit
+cd_on_quit = false
+# 
 # ================   Style =================
 # 
 # Set transparent background or not (this only work when your terminal background is transparent)
