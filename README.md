@@ -70,7 +70,7 @@ It actually supports windows! Sort of.
 For uninstall do the same but uninstall.ps1
 
 ```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://github.com/MHNightCat/superfile/blob/main/install.ps1'))
+Set-ExecutionPolicy Bypass -Scope Process -Force; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/MHNightCat/superfile/main/install.ps1'))
 
 ```
 
