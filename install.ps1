@@ -89,7 +89,6 @@ try {
     Remove-Item -Path $tempDirectory -Recurse -Force
 } catch {
     Write-Host "An error occurred: $_"
-    exit
 }
 if (-not (FolderIsInPATH "$superfileProgramPath\spf.exe")) {
     $envPath = [Environment]::GetEnvironmentVariable("PATH", "User")
