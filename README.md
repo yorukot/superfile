@@ -66,13 +66,15 @@ bash -c "$(wget -qO- https://raw.githubusercontent.com/MHNightCat/superfile/main
 
 ### Windows
 
-It actually supports windows! Sort of.
-For uninstall do the same but uninstall.ps1
+It actually supports windows! Well.. sort of.
+
+Use powershell to run this command:
 
 ```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/MHNightCat/superfile/main/install.ps1'))
+powershell -ExecutionPolicy Bypass -Command "Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/MHNightCat/superfile/main/install.ps1'))"
 
 ```
+For uninstall do the same but uninstall.ps1
 
 ### NixOS
 
