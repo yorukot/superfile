@@ -96,9 +96,9 @@ try {
     Write-Host "An error occurred: $_"
     exit
 }
-if (-not (FolderIsInPATH "$superfileProgramPath\spf.exe")) {
+if (-not (FolderIsInPATH "$superfileProgramPath\")) {
     $envPath = [Environment]::GetEnvironmentVariable("PATH", "User")
-    $newPath = "$superfileProgramPath\spf.exe"
+    $newPath = "$superfileProgramPath\"
     $updatedPath = $envPath.TrimEnd(";") + ";" + $newPath + ";"
     [Environment]::SetEnvironmentVariable("PATH", $updatedPath, "User")
 }
