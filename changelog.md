@@ -16,7 +16,7 @@ All notable changes to this project will be documented in this file. Dates are d
 
 #### Bug fix
 - Recursive symlink crashes superfile [`#109`](https://github.com/MHNightCat/superfile/issues/109)
-
+- Timemachine snapshots listed in Disks section [`#126`](https://github.com/MHNightCat/superfile/issues/126)
 
 # [**v1.1.2**](https://github.com/MHNightCat/superfile/releases/tag/v1.1.2)
 
