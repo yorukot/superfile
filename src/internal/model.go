@@ -128,6 +128,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		} else {
 			// return superfile
 			if msg.String() == hotkeys.Quit[0] || msg.String() == hotkeys.Quit[1] {
+				// cd on quit
+				if Config.CdOnQuit {
+					currentDir := m.fileModel.filePanels[m.filePanelFocusIndex].location
+					if currentDir == HomeDir {
+						return m, tea.Quit
+					}
+					os.WriteFile(SuperFileStateDir+"/lastdir", []byte("cd "+currentDir), 0755)
+				}
 				return m, tea.Quit
 			}
 

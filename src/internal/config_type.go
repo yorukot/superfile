@@ -112,6 +112,7 @@ type ConfigType struct {
 
 	FooterPanelList []string `toml:"footer_panel_list" comment:"\nuseless for now"`
 	AutoCheckUpdate bool `toml:"auto_check_update" comment:"\nAuto check for update"`
+	CdOnQuit        bool `toml:"cd_on_quit" comment:"\nCd on quit"`
 	
 	TransparentBackground bool `toml:"transparent_background" comment:"\n================   Style =================\n\nSet transparent background or not (this only work when your terminal background is transparent)"`
 
