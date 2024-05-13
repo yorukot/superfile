@@ -28,8 +28,8 @@
           superfile = pkgs.buildGoApplication {
             pname = "superfile";
             version = "0.1.0";
-            src = ./src;
-            modules = ./src/gomod2nix.toml;
+            src = ./;
+            modules = ./gomod2nix.toml;
           };
           default = superfile;
         };
