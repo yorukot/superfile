@@ -1,10 +1,10 @@
 # =================================================================================================
-# Here is global, all global key can't conflicts with other hotkeys
+# Global hotkeys (cannot conflict with other hotkeys)
 confirm = ['enter', 'l']
 quit = ['q', 'esc'] # (q)uit
 # movement
-list_up = ['up', 'k'] # most user use
-list_down = ['down', 'j'] # most user use
+list_up = ['up', 'k']
+list_down = ['down', 'j']
 # file panel control
 create_new_file_panel = ['n', ''] # (n)ew file panel
 close_file_panel = ['w', '']
@@ -17,32 +17,32 @@ focus_on_metadata = ['m', ''] # (m)etadata
 # create file/directory and rename 
 file_panel_item_create = ['ctrl+n', ''] # (n)ew file or folder
 file_panel_item_rename = ['ctrl+r', ''] # (r)name
-# file operate
-copy_items = ['ctrl+c', '']  # Most systems are for (c)opy
-cut_items = ['ctrl+x', ''] # Most systems are for cut
-paste_items = ['ctrl+v', ''] # Most systems are for pasting
+# file operations
+copy_items = ['ctrl+c', '']  # (c)opy
+cut_items = ['ctrl+x', ''] # cut
+paste_items = ['ctrl+v', ''] # paste
 delete_items = ['ctrl+d', 'delete'] #(d)elete
 # compress and extract
 extract_file = ['ctrl+e', ''] # (e)xtract
 compress_file = ['ctrl+a', ''] # (a)rchive file
 # editor
-oepn_file_with_editor = ['e', ''] # (e)ditor
+open_file_with_editor = ['e', ''] # (e)ditor
 open_current_directory_with_editor = ['E', ''] # (E)ditor
-    # else
+# other
 pinned_directory = ['P', ''] # (P)inned
 toggle_dot_file = ['.', ''] # (.)dot
 change_panel_mode = ['v', ''] # (v)isual
 open_help_menu = ['?', '']
 # =================================================================================================
-# Here is typing hotkey can conflict with all hotkeys
+# Typing hotkeys (can conflict with all hotkeys)
 confirm_typing = ['enter', '']
 cancel_typing = ['ctrl+c', 'esc']
 # =================================================================================================
-# Here is normal mode hotkey you can conflicts with other mode (can't conflicts with global hotkey)
+# Normal mode hotkeys (can conflict with other modes, cannot conflict with global hotkeys)
 parent_directory = ['h', 'backspace'] 
 search_bar = ['/', '']
 # =================================================================================================
-# Here is select mode hotkey you can conflicts with other mode (can't conflicts with global hotkey)
+# Select mode hotkeys (can conflict with other modes, cananot conflict with global hotkeys)
 file_panel_select_mode_items_select_down = ['shift+down', 'J']
 file_panel_select_mode_items_select_up = ['shift+up', 'K']
 file_panel_select_all_items = ['A', '']
