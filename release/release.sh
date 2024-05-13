@@ -12,7 +12,7 @@ for os in "${osList[@]}"; do
             echo "$projectName-$os-$version-$arch"
             mkdir "./dist/$projectName-$os-$version-$arch"
             cd ../ || exit
-            env GOOS="$os" GOARCH="$arch" CGO_ENABLED=0 go build -o "../release/dist/$projectName-$os-$version-$arch/spf.exe" main.go
+            env GOOS="$os" GOARCH="$arch" CGO_ENABLED=0 go build -o "./release/dist/$projectName-$os-$version-$arch/spf.exe" main.go
             cd ./release || exit
             zip -r "./dist/$projectName-$os-$version-$arch.zip" "./dist/$projectName-$os-$version-$arch"
         done
@@ -21,7 +21,7 @@ for os in "${osList[@]}"; do
             echo "$projectName-$os-$version-$arch"
             mkdir "./dist/$projectName-$os-$version-$arch"
             cd ../ || exit
-            env GOOS="$os" GOARCH="$arch" CGO_ENABLED=0 go build -o "../release/dist/$projectName-$os-$version-$arch/spf" main.go
+            env GOOS="$os" GOARCH="$arch" CGO_ENABLED=0 go build -o "./release/dist/$projectName-$os-$version-$arch/spf" main.go
             cd ./release || exit
             tar czf "./dist/$projectName-$os-$version-$arch.tar.gz" "./dist/$projectName-$os-$version-$arch"
         done
