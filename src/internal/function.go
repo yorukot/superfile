@@ -20,6 +20,12 @@ import (
 // Check if the directory is external disk path
 func isExternalDiskPath(path string) bool {
 	dir := filepath.Dir(path)
+
+	// exclude timemachine
+	if strings.HasPrefix(dir, "/Volumes/.timemachine") {
+		return false
+	}
+
 	return strings.HasPrefix(dir, "/mnt") ||
 		strings.HasPrefix(dir, "/media") ||
 		strings.HasPrefix(dir, "/run/media") ||
@@ -408,7 +414,7 @@ func isBrokenSymlink(filePath string) bool {
 	if err != nil {
 		return true
 	}
-	
+
 	_, err = os.Stat(absLinkPath)
 	return err != nil
 }
