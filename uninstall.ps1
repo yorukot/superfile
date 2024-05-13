@@ -52,9 +52,9 @@ catch {
 Write-Host "Removing environment path..."
 
 try {
-    if (FolderIsInPATH "$superfileProgramPath\spf.bat") {
+    if (FolderIsInPATH "$superfileProgramPath\spf.exe") {
         $envPath = [Environment]::GetEnvironmentVariable("PATH", "User")
-        $updatedPath =($envPath.Split(';') | Where-Object { $_ -ne "$superfileProgramPath\spf.bat" }) -join ';' 
+        $updatedPath =($envPath.Split(';') | Where-Object { $_ -ne "$superfileProgramPath\spf.exe" }) -join ';' 
         [Environment]::SetEnvironmentVariable("PATH", $updatedPath, "User")
     }
 }
