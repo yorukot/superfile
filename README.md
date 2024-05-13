@@ -85,12 +85,6 @@ Set-ExecutionPolicy Bypass -Scope Process -Force; Invoke-Expression ((New-Object
 nix profile install github:MHNightCat/superfile#superfile
 ```
 
-or
-
-```bash
-nix profile install github:MHNightCat/superfile#superfile
-```
-
 #### Install with flake:
 
 Add superfile to your flake inputs:
