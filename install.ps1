@@ -79,8 +79,14 @@ Invoke-WebRequest -OutFile "$superfileProgramPath\$filename" $url
 Write-Host "Extracting compressed file..."
 
 try {
-    Expand-Archive -Path "$superfileProgramPath\$filename" -DestinationPath $superfileProgramPath
+    $tempDirectory = "$superfileProgramPath\temp"
+    New-Item -ItemType Directory -Path $tempDirectory -Force | Out-Null
+    Expand-Archive -Path "$superfileProgramPath\$filename" -DestinationPath $tempDirectory
     Remove-Item -Path "$superfileProgramPath\$filename"
+    $thisisredundant = (Get-ChildItem -Path $tempDirectory -Directory | Sort-Object Name -Descending | Select-Object -First 1).Name
+    $lastFolderName = (Get-ChildItem -Path "$tempDirectory\$thisisredundant" -Directory | Sort-Object Name -Descending | Select-Object -First 1).Name
+    Move-Item -Path "$tempDirectory\$thisisredundant\$lastFolderName\*" -Destination $superfileProgramPath -Force
+    Remove-Item -Path $tempDirectory -Recurse -Force
 } catch {
     Write-Host "An error occurred: $_"
     exit
