@@ -69,12 +69,12 @@ bash -c "$(wget -qO- https://raw.githubusercontent.com/MHNightCat/superfile/main
 It actually supports windows! Well.. sort of.
 
 Use powershell to run this command:
-For uninstall do the same but uninstall.ps1
 
 ```powershell
 powershell -ExecutionPolicy Bypass -Command "Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/MHNightCat/superfile/main/install.ps1'))"
 
 ```
+For uninstall do the same but uninstall.ps1
 
 ### NixOS
 
