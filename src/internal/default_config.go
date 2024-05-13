@@ -190,8 +190,28 @@ func getHelpMenuData() []helpMenuModalData {
 			subTitle: "General",
 		},
 		{
+			hotkey: []string{"spf", ""},
+			description: "Open superfile",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey: hotkeys.Confirm,
+			description: "Confirm your select or typing",
+			hotkeyWorkType: globalType,
+		},
+		{
 			hotkey:         hotkeys.Quit,
-			description:    "Quit",
+			description:    "Quit typing, modal or superfile",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey:         hotkeys.ConfirmTyping,
+			description:    "Confirm typing",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey:         hotkeys.CancelTyping,
+			description:    "Cancel typing",
 			hotkeyWorkType: globalType,
 		},
 		{
@@ -201,11 +221,6 @@ func getHelpMenuData() []helpMenuModalData {
 		},
 		{
 			subTitle: "Panel navigation",
-		},
-		{
-			hotkey:         hotkeys.PinnedDirectory,
-			description:    "Pin or Unpin folder to sidebar (can be auto saved)",
-			hotkeyWorkType: globalType,
 		},
 		{
 			hotkey:         hotkeys.CreateNewFilePanel,
@@ -246,11 +261,6 @@ func getHelpMenuData() []helpMenuModalData {
 			subTitle: "Panel movement",
 		},
 		{
-			hotkey:         hotkeys.ChangePanelMode,
-			description:    "Change between selection mode or normal mode",
-			hotkeyWorkType: globalType,
-		},
-		{
 			hotkey:         hotkeys.ListUp,
 			description:    "Up",
 			hotkeyWorkType: globalType,
@@ -272,7 +282,12 @@ func getHelpMenuData() []helpMenuModalData {
 		},
 		{
 			hotkey:         hotkeys.FilePanelSelectModeItemsSelectUp,
-			description:    "Select with your course",
+			description:    "Select up with your course",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey:         hotkeys.FilePanelSelectModeItemsSelectDown,
+			description:    "Select down with your course",
 			hotkeyWorkType: globalType,
 		},
 		{
@@ -286,7 +301,27 @@ func getHelpMenuData() []helpMenuModalData {
 			hotkeyWorkType: globalType,
 		},
 		{
+			hotkey:         hotkeys.ChangePanelMode,
+			description:    "Change between selection mode or normal mode",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey:         hotkeys.PinnedDirectory,
+			description:    "Pin or Unpin folder to sidebar (can be auto saved)",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey:         hotkeys.ToggleDotFile,
+			description:    "Toggle to show dotfiles or not",
+			hotkeyWorkType: globalType,
+		},
+		{
 			subTitle: "File operations",
+		},
+		{
+			hotkey:         hotkeys.FilePanelItemCreate,
+			description:    "Create file or folder(/ ends with creating a folder)",
+			hotkeyWorkType: globalType,
 		},
 		{
 			hotkey:         hotkeys.FilePanelItemRename,
@@ -294,8 +329,28 @@ func getHelpMenuData() []helpMenuModalData {
 			hotkeyWorkType: globalType,
 		},
 		{
+			hotkey:         hotkeys.CopyItems,
+			description:    "Copy selected items to the clipboard",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey:         hotkeys.PasteItems,
+			description:    "Cut selected items to the clipboard",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey:         hotkeys.PasteItems,
+			description:    "Paste clipboard items into the current file panel",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey:         hotkeys.PasteItems,
+			description:    "Delete selected items",
+			hotkeyWorkType: globalType,
+		},
+		{
 			hotkey:         hotkeys.ExtractFile,
-			description:    "Extract zip file",
+			description:    "Extract compressed file",
 			hotkeyWorkType: normalType,
 		},
 		{
@@ -312,14 +367,6 @@ func getHelpMenuData() []helpMenuModalData {
 			hotkey:         hotkeys.OpenCurrentDirectoryWithEditor,
 			description:    "Open current directory with default editor",
 			hotkeyWorkType: normalType,
-		},
-		{
-			subTitle: "Special",
-		},
-		{
-			hotkey:         hotkeys.Confirm,
-			description:    "Confirm rename or create item or exit search bar",
-			hotkeyWorkType: globalType,
 		},
 	}
 

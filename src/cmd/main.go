@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strconv"
@@ -79,6 +80,26 @@ func Run() {
 				Aliases: []string{"pl"},
 				Usage:   "Print the path to the configuration and directory",
 				Action: func(c *cli.Context) error {
+					newDir := "/home/nightcat/.config"
+					err := os.Chdir(newDir)
+					if err != nil {
+						fmt.Println("Error changing directory:", err)
+					}
+				
+					// Execute a shell command to change the current directory of the terminal
+					cmd := exec.Command("cd", newDir)
+					err = cmd.Run()
+					if err != nil {
+						fmt.Println("Error executing command:", err)
+					}
+				
+					fmt.Println("Current directory changed to:", newDir)
+				
+					fmt.Printf(os.Getwd())
+					if err != nil {
+						panic(err)
+					}
+					
 					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#66b2ff")).Render("[Configuration file path]"), filepath.Join(SuperFileMainDir, configFile))
 					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#ffcc66")).Render("[Hotkeys file path]"), filepath.Join(SuperFileMainDir, hotkeysFile))
 					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#66ff66")).Render("[Log file path]"), filepath.Join(SuperFileStateDir, logFile))
@@ -267,7 +288,7 @@ func CheckForUpdates() {
 	if !Config.AutoCheckUpdate {
 		return
 	}
-	
+
 	lastTime, err := readLastTimeCheckVersionFromFile(SuperFileDataDir + lastCheckVersion)
 	if err != nil && !os.IsNotExist(err) {
 		fmt.Println("Error reading from file:", err)

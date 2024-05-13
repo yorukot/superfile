@@ -2,17 +2,29 @@
 
 projectName="superfile"
 version="v1.1.2"
-osList=("darwin" "linux")
+osList=("darwin" "linux" "windows")
 archList=("amd64" "arm64")
 mkdir dist
 
 for os in "${osList[@]}"; do
-    for arch in "${archList[@]}"; do
-        echo "$projectName-$os-$version-$arch"
-        mkdir "./dist/$projectName-$os-$version-$arch"
-        cd ../ || exit
-        env GOOS="$os" GOARCH="$arch" CGO_ENABLED=0 go build -o "../release/dist/$projectName-$os-$version-$arch/spf" main.go
-        cd ./release || exit
-        tar czf "./dist/$projectName-$os-$version-$arch.tar.gz" "./dist/$projectName-$os-$version-$arch"
-    done
+    if [ "$os" = "windows" ]; then
+        for arch in "${archList[@]}"; do
+            echo "$projectName-$os-$version-$arch"
+            mkdir "./dist/$projectName-$os-$version-$arch"
+            cd ../ || exit
+            env GOOS="$os" GOARCH="$arch" CGO_ENABLED=0 go build -o "../release/dist/$projectName-$os-$version-$arch/spf-executable.exe" main.go
+            cp "../runfromwindows.bat" "../release/dist/$projectName-$os-$version-$arch/spf.bat"
+            cd ./release || exit
+            zip -r "./dist/$projectName-$os-$version-$arch.zip" "./dist/$projectName-$os-$version-$arch"
+        done
+    else
+        for arch in "${archList[@]}"; do
+            echo "$projectName-$os-$version-$arch"
+            mkdir "./dist/$projectName-$os-$version-$arch"
+            cd ../ || exit
+            env GOOS="$os" GOARCH="$arch" CGO_ENABLED=0 go build -o "../release/dist/$projectName-$os-$version-$arch/spf" main.go
+            cd ./release || exit
+            tar czf "./dist/$projectName-$os-$version-$arch.tar.gz" "./dist/$projectName-$os-$version-$arch"
+        done
+    fi
 done

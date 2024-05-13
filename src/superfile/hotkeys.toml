@@ -6,8 +6,8 @@ quit = ['q', 'esc'] # (q)uit
 list_up = ['up', 'k'] # most user use
 list_down = ['down', 'j'] # most user use
 # file panel control
-close_file_panel = ['w', '']
 create_new_file_panel = ['n', ''] # (n)ew file panel
+close_file_panel = ['w', '']
 next_file_panel = ['tab', 'L']
 previous_file_panel = ['shift+left', 'H']
 # change focus
@@ -19,8 +19,8 @@ file_panel_item_create = ['ctrl+n', ''] # (n)ew file or folder
 file_panel_item_rename = ['ctrl+r', ''] # (r)name
 # file operate
 copy_items = ['ctrl+c', '']  # Most systems are for (c)opy
-paste_items = ['ctrl+v', ''] # Most systems are for pasting
 cut_items = ['ctrl+x', ''] # Most systems are for cut
+paste_items = ['ctrl+v', ''] # Most systems are for pasting
 delete_items = ['ctrl+d', 'delete'] #(d)elete
 # compress and extract
 extract_file = ['ctrl+e', ''] # (e)xtract
@@ -28,7 +28,7 @@ compress_file = ['ctrl+a', ''] # (a)rchive file
 # editor
 oepn_file_with_editor = ['e', ''] # (e)ditor
 open_current_directory_with_editor = ['E', ''] # (E)ditor
-# else
+    # else
 pinned_directory = ['P', ''] # (P)inned
 toggle_dot_file = ['.', ''] # (.)dot
 change_panel_mode = ['v', ''] # (v)isual
