@@ -88,12 +88,6 @@ For uninstall do the same but uninstall.ps1
 nix profile install github:MHNightCat/superfile#superfile
 ```
 
-or
-
-```bash
-nix profile install github:MHNightCat/superfile#superfile
-```
-
 #### Install with flake:
 
 Add superfile to your flake inputs:

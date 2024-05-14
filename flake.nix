@@ -1,16 +1,16 @@
 {
   description = "A fancy, pretty terminal file manager";
   inputs = {
-    nixpkgs.url = github:nixos/nixpkgs/nixos-unstable;
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
-    flake-utils.url = github:numtide/flake-utils;
+    flake-utils.url = "github:numtide/flake-utils";
 
-    flake-compat.url = github:edolstra/flake-compat;
+    flake-compat.url = "github:edolstra/flake-compat";
     flake-compat.flake = false;
 
     gomod2nix.url = "github:nix-community/gomod2nix";
     gomod2nix.inputs.nixpkgs.follows = "nixpkgs";
-    # gomod2nix.inputs.utils.follows = "flake-utils";
+    gomod2nix.inputs.flake-utils.follows = "flake-utils";
   };
 
   outputs = inputs @ {...}:
@@ -27,8 +27,8 @@
         packages = rec {
           superfile = pkgs.buildGoApplication {
             pname = "superfile";
-            version = "0.1.0";
-            src = ./;
+            version = "1.1.3";
+            src = ./.;
             modules = ./gomod2nix.toml;
           };
           default = superfile;
@@ -42,7 +42,7 @@
           default = superfile;
         };
 
-        devShells = rec {
+        devShells = {
           default = pkgs.mkShell {
             packages = with pkgs; [
               ## golang
