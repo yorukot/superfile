@@ -33,6 +33,7 @@
   - [Create your own theme](#create-your-own-theme)
 - [Hotkeys](#hotkeys)
 - [Contributing](#contributing)
+- [Troubleshooting](#troubleshooting)
 - [Thanks](#thanks)
   - [Support](#Support)
   - [Contributors](#contributors)
@@ -233,12 +234,7 @@ The hotkey ranges are found in `hotkeys.toml`
 
 ## Troubleshooting
 
-### Help! My superfile's rendering is all messed up!
-
-Try these things below:
-- Set your locale to utf-8
-- chcp 65001 ( If that's an option for your shell )
-- Set environment variable RUNEWIDTH_EASTASIAN to 0
+[**Click me to see common problem fix**](https://github.com/MHNightCat/superfile/wiki/Troubleshooting)
 
 ## Contributing
 
