@@ -70,7 +70,7 @@ func Run() {
 					if err := downloadAndInstallTheme(SuperFileMainDir, themeZipName, themeZip, themeFolder); err != nil {
 						log.Fatalln("Error downloading theme:", err)
 					}
-					fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("#66ff66")).Render("🎉 Successful downloaded themes!"))
+					fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("#66ff66")).Render("🎉 Successfully downloaded themes!"))
 					fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("#66b2ff")).Render("Now you can change your superfile theme!"))
 					return nil
 				},
@@ -282,7 +282,7 @@ func CheckForUpdates() {
 
 	err = toml.Unmarshal(data, &Config)
 	if err != nil {
-		log.Fatalf("Error decoding config file ( your config file may have misconfigured ): %v", err)
+		log.Fatalf("Error decoding config file ( your config file may be misconfigured ): %v", err)
 	}
 
 	if !Config.AutoCheckUpdate {
