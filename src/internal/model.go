@@ -78,14 +78,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.fullHeight = msg.Height
 		m.fullWidth = msg.Width
 
-
-		// set each file panel size and max file panel amount 
+		// set each file panel size and max file panel amount
 		m.fileModel.width = (msg.Width - sidebarWidth - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
 		m.fileModel.maxFilePanel = (msg.Width - 20) / 24
 
 		// set footer size
 		if msg.Height < 30 {
 			footerHeight = 10
+		} else if msg.Height < 35 {
+			footerHeight = 11
+		} else if msg.Height < 40 {
+			footerHeight = 12
+		} else if msg.Height < 45 {
+			footerHeight = 13
 		} else {
 			footerHeight = 14
 		}
@@ -211,7 +216,7 @@ func (m model) View() string {
 		overlayY := m.fullHeight/2 - m.helpMenu.height/2
 		return PlaceOverlay(overlayX, overlayY, introduceModal, finalRender)
 	}
-	
+
 	if m.typingModal.open {
 		typingModal := typineModalRender(m)
 		overlayX := m.fullWidth/2 - modalWidth/2
