@@ -13,10 +13,12 @@ All notable changes to this project will be documented in this file. Dates are d
 - Disable update check via config [`#131`](https://github.com/MHNightCat/superfile/issues/131)
 - Redesing hotkeys [`#116`](https://github.com/MHNightCat/superfile/issues/116)
 - Create file or folder using same hotkey [`#116`](https://github.com/MHNightCat/superfile/issues/116)
+- More dynamic footer height adaptive [`66a3fb4`](https://github.com/MHNightCat/superfile/commit/66a3fb4feba31ead2224938b1a18a431a55ac9cc)
 
 #### Bug fix
 - Recursive symlink crashes superfile [`#109`](https://github.com/MHNightCat/superfile/issues/109)
 - Timemachine snapshots listed in Disks section [`#126`](https://github.com/MHNightCat/superfile/issues/126)
+- There will be a bug in the layout under a specific terminal height [`#105`](https://github.com/MHNightCat/superfile/issues/105)
 
 # [**v1.1.2**](https://github.com/MHNightCat/superfile/releases/tag/v1.1.2)
 
