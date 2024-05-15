@@ -170,9 +170,7 @@ type element struct {
 // Model for sidebar internal
 type sidebarModel struct {
 	directories []directory
-	// wellKnownModel []directory
-	// pinnedModel    []directory
-	// disksModel     []directory
+	renderIndex int
 	cursor int
 }
 

@@ -12,46 +12,46 @@ import (
 
 func sidebarRender(m model) string {
 	s := sidebarTitleStyle.Render("     Super File")
-	s += "\n\n"
+	s += "\n"
 
-	// Ugly shit workaround from hell code, made by @lescx
-	amountWellKnownDirectories := len(getWellKnownDirectories())
-	amountPinnedDirectories := len(getPinnedDirectories())
-	pinnedRendered := false
-	externalRendered := false
+	pinnedDivider := "\n" + sidebarTitleStyle.Render("󰐃 Pinned") + sidebarDividerStyle.Render(" ───────────") + "\n"
+	disksDivider := "\n" + sidebarTitleStyle.Render("󱇰 Disks") + sidebarDividerStyle.Render(" ────────────") + "\n"
 
-	pinnedDivider := "\n" + sidebarTitleStyle.Render("󰐃 Pinned") + sidebarDividerStyle.Render(" ───────────") + "\n\n"
-	disksDivider := "\n" + sidebarTitleStyle.Render("󱇰 Disks") + sidebarDividerStyle.Render(" ────────────") + "\n\n"
+	totalHeight := 2
+	for i := m.sidebarModel.renderIndex; i < len(m.sidebarModel.directories); i++ {
+		if totalHeight >= m.mainPanelHeight {
+			break
+		} else {
+			s += "\n"
+		}
 
-	for i, directory := range m.sidebarModel.directories {
-		if i == amountWellKnownDirectories && !pinnedRendered {
+		directory := m.sidebarModel.directories[i]
+
+		if directory.location == "Pinned+-*/=?" {
 			s += pinnedDivider
-			pinnedRendered = true
+			totalHeight += 3
+			continue
+		}
+		
+		if directory.location == "Disks+-*/=?"{
+			if m.mainPanelHeight - totalHeight <= 2 {
+				break
+			}
+			s += disksDivider
+			totalHeight += 3
+			continue
 		}
 
-		if i == amountPinnedDirectories+amountWellKnownDirectories && !externalRendered {
-			s += disksDivider
-			externalRendered = true
-		}
+		totalHeight++
 		cursor := " "
 		if m.sidebarModel.cursor == i && m.focusPanel == sidebarFocus {
 			cursor = ""
 		}
-		if directory.location == m.fileModel.filePanels[m.filePanelFocusIndex].location {
-			s += filePanelCursorStyle.Render(cursor) + sidebarSelectedStyle.Render(" "+truncateText(directory.name, sidebarWidth-2)) + "\n"
-		} else {
-			s += filePanelCursorStyle.Render(cursor) + sidebarStyle.Render(" "+truncateText(directory.name, sidebarWidth-2)) + "\n"
-		}
-	}
 
-	// In case no pinned directories or external drives are pinned,
-	// list menu item at the bottom
-	if m.fullHeight > 30 {
-		if !pinnedRendered {
-			s += pinnedDivider
-		}
-		if !externalRendered {
-			s += disksDivider
+		if directory.location == m.fileModel.filePanels[m.filePanelFocusIndex].location {
+			s += filePanelCursorStyle.Render(cursor) + sidebarSelectedStyle.Render(" "+truncateText(directory.name, sidebarWidth-2))
+		} else {
+			s += filePanelCursorStyle.Render(cursor) + sidebarStyle.Render(" "+truncateText(directory.name, sidebarWidth-2))
 		}
 	}
 
@@ -407,6 +407,7 @@ func helpMenuRender(m model) string {
 			renderHotkeyLength = len(helpMenuHotkeyStyle.Render(hotkey))
 		}
 	}
+
 	for i := m.helpMenu.renderIndex; i < m.helpMenu.height+m.helpMenu.renderIndex && i < len(m.helpMenu.data); i++ {
 
 		if i != m.helpMenu.renderIndex {

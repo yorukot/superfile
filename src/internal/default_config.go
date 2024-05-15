@@ -161,7 +161,8 @@ func defaultModelConfig(toggleDotFileBool bool, firstFilePanelDir string) model 
 			render:  0,
 		},
 		sidebarModel: sidebarModel{
-			directories: getDirectories(40),
+			renderIndex: 0,
+			directories: getDirectories(),
 		},
 		fileModel: fileModel{
 			filePanels: []filePanel{

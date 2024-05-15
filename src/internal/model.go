@@ -96,11 +96,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.helpMenu.height = m.fullHeight - 2
 		m.helpMenu.width = m.fullWidth - 2
 
-		if m.fullHeight > 32 {
+		if m.fullHeight > 35 {
 			m.helpMenu.height = 30
 		}
 
-		if m.fullWidth > 92 {
+		if m.fullWidth > 95 {
 			m.helpMenu.width = 90
 		}
 
@@ -163,7 +163,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	cmd = tea.Batch(cmd)
-	m.sidebarModel.directories = getDirectories(m.fullHeight)
+	m.sidebarModel.directories = getDirectories()
 
 	// check if there already have listening message
 	if !ListeningMessage {

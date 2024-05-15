@@ -11,14 +11,21 @@ import (
 )
 
 // Return all sidebar directories
-func getDirectories(height int) []directory {
+func getDirectories() []directory {
 	directories := []directory{}
 
 	directories = append(directories, getWellKnownDirectories()...)
-	if height > 30 {
-		directories = append(directories, getPinnedDirectories()...)
-		directories = append(directories, getExternalMediaFolders()...)
-	}
+	directories = append(directories, directory{
+		// Just make sure no one owns the hard drive or directory named this path
+		location: "Pinned+-*/=?",
+	})
+	directories = append(directories, getPinnedDirectories()...)
+	directories = append(directories, directory{
+		// Just make sure no one owns the hard drive or directory named this path
+		location: "Disks+-*/=?",
+	})
+	directories = append(directories, getExternalMediaFolders()...)
+
 	return directories
 }
 
@@ -51,6 +58,7 @@ func getWellKnownDirectories() []directory {
 			directories = append(directories, dir)
 		}
 	}
+
 	return directories
 }
 

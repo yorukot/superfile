@@ -48,7 +48,6 @@ func parentDirectory(m model) model {
 func enterPanel(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 
-	
 	if len(panel.element) > 0 && panel.element[panel.cursor].directory {
 		panel.directoryRecord[panel.location] = directoryRecord{
 			directoryCursor: panel.cursor,
@@ -71,7 +70,9 @@ func enterPanel(m model) model {
 		}
 
 		if fileInfo.Mode()&os.ModeSymlink != 0 {
-			if isBrokenSymlink(panel.element[panel.cursor].location) {return m};
+			if isBrokenSymlink(panel.element[panel.cursor].location) {
+				return m
+			}
 
 			linkPath, _ := os.Readlink(panel.element[panel.cursor].location)
 
@@ -277,13 +278,69 @@ func itemSelectDown(m model) model {
 
 // ======================================== Sidebar controller ========================================
 
+//P.S God bless me, this sidebar controller code is really ugly...
+
 // Control sidebar panel list up
 func controlSideBarListUp(m model) model {
+
 	if m.sidebarModel.cursor > 0 {
 		m.sidebarModel.cursor--
 	} else {
 		m.sidebarModel.cursor = len(m.sidebarModel.directories) - 1
 	}
+	newDirectory := m.sidebarModel.directories[m.sidebarModel.cursor].location
+
+	for newDirectory == "Pinned+-*/=?" || newDirectory == "Disks+-*/=?" {
+		m.sidebarModel.cursor--
+		newDirectory = m.sidebarModel.directories[m.sidebarModel.cursor].location
+	}
+	changeToPlus := false
+	cursorRender := false
+	for !cursorRender {
+		totalHeight := 2
+		for i := m.sidebarModel.renderIndex; i < len(m.sidebarModel.directories); i++ {
+			if totalHeight >= m.mainPanelHeight {
+				break
+			}
+			directory := m.sidebarModel.directories[i]
+
+			if directory.location == "Pinned+-*/=?" {
+				totalHeight += 3
+				continue
+			}
+
+			if directory.location == "Disks+-*/=?" {
+				if m.mainPanelHeight-totalHeight <= 2 {
+					break
+				}
+				totalHeight += 3
+				continue
+			}
+
+			totalHeight++
+			if m.sidebarModel.cursor == i && m.focusPanel == sidebarFocus {
+				cursorRender = true
+			}
+		}
+
+		if changeToPlus {
+			m.sidebarModel.renderIndex++
+			continue
+		}
+
+		if !cursorRender {
+			m.sidebarModel.renderIndex--
+		}
+		if m.sidebarModel.renderIndex < 0 {
+			changeToPlus = true
+			m.sidebarModel.renderIndex++
+		}
+	}
+
+	if changeToPlus {
+		m.sidebarModel.renderIndex--
+	}
+
 	return m
 }
 
@@ -294,6 +351,48 @@ func controlSideBarListDown(m model) model {
 		m.sidebarModel.cursor++
 	} else {
 		m.sidebarModel.cursor = 0
+	}
+
+	newDirectory := m.sidebarModel.directories[m.sidebarModel.cursor].location
+	for newDirectory == "Pinned+-*/=?" || newDirectory == "Disks+-*/=?" {
+		m.sidebarModel.cursor++
+		newDirectory = m.sidebarModel.directories[m.sidebarModel.cursor].location
+	}
+	cursorRender := false
+	for !cursorRender {
+		totalHeight := 2
+		for i := m.sidebarModel.renderIndex; i < len(m.sidebarModel.directories); i++ {
+			if totalHeight >= m.mainPanelHeight {
+				break
+			}
+
+			directory := m.sidebarModel.directories[i]
+
+			if directory.location == "Pinned+-*/=?" {
+				totalHeight += 3
+				continue
+			}
+
+			if directory.location == "Disks+-*/=?" {
+				if m.mainPanelHeight-totalHeight <= 2 {
+					break
+				}
+				totalHeight += 3
+				continue
+			}
+
+			totalHeight++
+			if m.sidebarModel.cursor == i && m.focusPanel == sidebarFocus {
+				cursorRender = true
+			}
+		}
+
+		if !cursorRender {
+			m.sidebarModel.renderIndex++
+		}
+		if m.sidebarModel.renderIndex > m.sidebarModel.cursor {
+			m.sidebarModel.renderIndex = 0
+		}
 	}
 	return m
 }
