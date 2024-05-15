@@ -253,7 +253,7 @@ If you want to contribute please follow the [contribution guide](./CONTRIBUTING.
 
 **Thanks to all the contributors for making this project even greater!**
 
-[![contributors](https://contrib.rocks/image?repo=mhnightcat/superfile)](https://github.com/mhnightcat/superfile/graphs/contributors)
+[![contributors](/asset/contributors.svg)](https://github.com/mhnightcat/superfile/graphs/contributors)
 
 ### Star History
 
