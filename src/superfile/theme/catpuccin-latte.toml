@@ -1,0 +1,64 @@
+# Catpuccin Latte Flavor
+# Theme create by: https://github.com/GV14982
+# Update by(sort by time):
+
+# Thanks for all contributor!!
+
+# If you want to make sidebar border display just set it same as sidebar background color
+
+# ========= Border =========
+file_panel_border = "#9ca0b0" # Overlay0
+sidebar_border = "#eff1f5"    # Base
+footer_border = "#9ca0b0"     # Overlay0
+
+# ========= Border Active =========
+file_panel_border_active = "#7287fd" # Lavender
+sidebar_border_active = "#40a02b"    # Green
+footer_border_active = "#40a02b"     # Green
+modal_border_active = "#7c7f93"      # Overlay2
+
+# ========= Background (bg) =========
+full_screen_bg = "#eff1f5" # Base
+file_panel_bg = "#eff1f5"  # Base
+sidebar_bg = "#eff1f5"     # Base
+footer_bg = "#eff1f5"      # Base
+modal_bg = "#eff1f5"       # Base
+
+# ========= Foreground (fg) =========
+full_screen_fg = "#4c4f69" # Text
+file_panel_fg = "#4c4f69"  # Text
+sidebar_fg = "#4c4f69"     # Text
+footer_fg = "#4c4f69"      # Text
+modal_fg = "#4c4f69"       # Text
+
+# ========= Special Color =========
+cursor = "#dc8a78"  # Rosewater
+correct = "#40a02b" # Green
+error = "#d20f39"   # Red
+hint = "#209fb5"    # Sapphire
+cancel = "#e64553"  # Maroon
+# Gradient color can only have two color!
+gradient_color = ["#1e66f5", "#ca9ee6"] # [Blue, Mauve]
+
+# ========= File Panel Special Items =========
+file_panel_top_directory_icon = "#40a02b" # Green
+file_panel_top_path = "#89b5fa"           # Blue
+file_panel_item_selected_fg = "#04a5e5"   # Sky
+file_panel_item_selected_bg = "#eff1f5"   # Base
+
+# ========= Sidebar Special Items =========
+sidebar_title = "#209fb5"            # Sapphire
+sidebar_item_selected_fg = "#04a5e5" # Sky
+sidebar_item_selected_bg = "#eff1f5" # Base
+sidebar_divider = "#7c7f93"          # Overlay2
+
+# ========= Modal Special Items =========
+modal_cancel_fg = "#eff1f5" # Base
+modal_cancel_bg = "#e64553" # Maroon
+
+modal_confirm_fg = "#eff1f5" # Base
+modal_confirm_bg = "#04a5e5" # Sky
+
+# ========= Help Menu =========
+help_menu_hotkey = "#04a5e5" # Sky
+help_menu_title = "#fe640b"  # Peach
