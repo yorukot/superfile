@@ -65,7 +65,7 @@ fi
 
 file_name=${package}-${os}-v${version}-${arch}
 
-url="https://github.com/MHNightCat/superfile/releases/download/v${version}/${file_name}.tar.gz"
+url="https://github.com/yorukot/superfile/releases/download/v${version}/${file_name}.tar.gz"
 
 if command -v curl &> /dev/null; then
     echo -e "${bright_yellow}Downloading ${cyan}${package} v${version} for ${os} (${arch})...${nc}"

@@ -24,8 +24,8 @@ jobs:
           nix develop --extra-experimental-features "nix-command flakes" '.#' -c "gomod2nix"
           # git push if we have a diff
           if [[ -n $(git diff) ]]; then
-            git config --global user.email "107802416+MHNightCat@users.noreply.github.com"
-            git config --global user.name "MHNightCat"
+            git config --global user.email "107802416+yorukot@users.noreply.github.com"
+            git config --global user.name "yorukot"
             git commit -am "chore: update gomod2nix"
             BRANCH_NAME=$(echo ${{ github.ref }} | sed -e 's/refs\/heads\///g')
             git push origin HEAD:$BRANCH_NAME

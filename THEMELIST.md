@@ -45,6 +45,6 @@
 ## Gruvbox
 
 - Theme name: `gruvbox`
-- Author: github.com/MHNightCat
+- Author: github.com/yorukot
 
 ![](/asset/theme/gruvbox.png)

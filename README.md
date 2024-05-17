@@ -56,7 +56,7 @@ You can build the source code yourself by using these steps:
 Clone this repository using the following command:
 
 ```
-git clone https://github.com/MHNightCat/superfile.git
+git clone https://github.com/yorukot/superfile.git
 ```
 
 Enter the downloaded directory:
@@ -85,19 +85,19 @@ mv ./bin/spf /usr/local/bin
 
 ## Tutorial
 
-After you install superfile, you can go [here](https://github.com/MHNightCat/superfile/wiki/Tutorial) to briefly understand how to use superfile!
+After you install superfile, you can go [here](https://github.com/yorukot/superfile/wiki/Tutorial) to briefly understand how to use superfile!
 
 ## Plugins
 
-[Click me to the plugins wiki](https://github.com/MHNightCat/superfile/wiki/Plugins)
+[Click me to the plugins wiki](https://github.com/yorukot/superfile/wiki/Plugins)
 
 ## Themes
 
 ### Use an existing theme
 
-You can go to [theme list](https://github.com/MHNightCat/superfile/blob/main/THEMELIST.md) to find one you like!
+You can go to [theme list](https://github.com/yorukot/superfile/blob/main/THEMELIST.md) to find one you like!
 
-> We only have a few themes at the moment, but we will be making more overtime! You can also [submit a pull request](https://github.com/MHNightCat/superfile/pulls) for your own theme!
+> We only have a few themes at the moment, but we will be making more overtime! You can also [submit a pull request](https://github.com/yorukot/superfile/pulls) for your own theme!
 
 copy `theme_name` in:
 
@@ -137,7 +137,7 @@ Don't forget to change the `theme` variable in `config.toml` to your theme name.
 
 ## Hotkeys
 
-[**Click me to see the hotkey list**](https://github.com/MHNightCat/superfile/wiki/Hotkey-list)
+[**Click me to see the hotkey list**](https://github.com/yorukot/superfile/wiki/Hotkey-list)
 
 > [!TIP]
 > If your OS is macOS the file path should be in the `~/Library/Application Support/superfile/hotkeys.toml`
@@ -152,7 +152,7 @@ The hotkey ranges are found in `hotkeys.toml`
 
 ## Troubleshooting
 
-[**Click me to see common problem fix**](https://github.com/MHNightCat/superfile/wiki/Troubleshooting)
+[**Click me to see common problem fix**](https://github.com/yorukot/superfile/wiki/Troubleshooting)
 
 ## Contributing
 
@@ -171,17 +171,17 @@ If you want to contribute please follow the [contribution guide](./CONTRIBUTING.
 
 **Thanks to all the contributors for making this project even greater!**
 
-[![contributors](/asset/contributors.svg)](https://github.com/mhnightcat/superfile/graphs/contributors)
+[![contributors](/asset/contributors.svg)](https://github.com/yorukot/superfile/graphs/contributors)
 
 ### Star History
 
 **THANKS FOR All OF YOUR STARS!**
 Your stars are my motivation to keep updating!
 
-<a href="https://star-history.com/#MHNightCat/superfile&Timeline">
+<a href="https://star-history.com/#yorukot/superfile&Timeline">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=MHNightCat/superfile&type=Timeline&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=MHNightCat/superfile&type=Timeline" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=MHNightCat/superfile&type=Timeline" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=yorukot/superfile&type=Timeline&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=yorukot/superfile&type=Timeline" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=yorukot/superfile&type=Timeline" />
  </picture>
 </a>

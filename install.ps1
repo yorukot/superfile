@@ -33,7 +33,7 @@ if ($IsMacOS) {
     Write-Host @"
 $installInstructions
 
-https://github.com/MHNightCat/superfile?tab=readme-ov-file#installation
+https://github.com/yorukot/superfile?tab=readme-ov-file#installation
 "@
     exit
 }
@@ -41,7 +41,7 @@ if ($IsLinux) {
     Write-Host @"
 $installInstructions
 
-https://github.com/MHNightCat/superfile?tab=readme-ov-file#installation
+https://github.com/yorukot/superfile?tab=readme-ov-file#installation
 "@
     exit
 }
@@ -73,7 +73,7 @@ if (-not (Test-Path $superfileProgramPath)) {
     Write-Host "Folder $superfileProgramPath already exists. :/"
     exit
 }
-$url = "https://github.com/MHNightCat/superfile/releases/download/v$version/$filename"
+$url = "https://github.com/yorukot/superfile/releases/download/v$version/$filename"
 try {
     Invoke-WebRequest -OutFile "$superfileProgramPath/$filename" $url
 } catch {
@@ -109,5 +109,5 @@ Done!
 Restart you terminal, and for the love of Get-Command
 Take a look at tutorial :)
 
-https://github.com/MHNightCat/superfile/wiki/Tutorial
+https://github.com/yorukot/superfile/wiki/Tutorial
 '@

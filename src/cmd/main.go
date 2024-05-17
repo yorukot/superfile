@@ -14,12 +14,12 @@ import (
 	"strings"
 	"time"
 
-	internal "github.com/MHNightCat/superfile/src/internal"
 	"github.com/adrg/xdg"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/pelletier/go-toml/v2"
 	"github.com/urfave/cli/v2"
+	internal "github.com/yorukot/superfile/src/internal"
 )
 
 var HomeDir = xdg.Home
@@ -30,9 +30,9 @@ var SuperFileStateDir = xdg.StateHome + "/superfile"
 
 const (
 	currentVersion      string = "v1.1.3"
-	latestVersionURL    string = "https://api.github.com/repos/MHNightCat/superfile/releases/latest"
-	latestVersionGithub string = "github.com/MHNightCat/superfile/releases/latest"
-	themeZip            string = "https://github.com/MHNightCat/superfile/raw/main/themeZip/v1.1.3/theme.zip"
+	latestVersionURL    string = "https://api.github.com/repos/yorukot/superfile/releases/latest"
+	latestVersionGithub string = "github.com/yorukot/superfile/releases/latest"
+	themeZip            string = "https://github.com/yorukot/superfile/raw/main/themeZip/v1.1.3/theme.zip"
 )
 
 const (
@@ -55,7 +55,7 @@ const (
 )
 
 func Run(content embed.FS) {
-	
+
 	internal.LoadAllDefaultConfig(content)
 
 	app := &cli.App{
@@ -130,7 +130,7 @@ func InitConfigFile() {
 		config.MainDir,
 		config.DataDir,
 		config.StateDir,
-		config.MainDir + themeFolder,
+		config.MainDir+themeFolder,
 	); err != nil {
 		log.Fatalln("Error creating directories:", err)
 	}

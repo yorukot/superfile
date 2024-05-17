@@ -90,7 +90,7 @@ import { Icon } from '@astrojs/starlight/components';
     if (starCountElement) {
       starCountElement.classList.add("spinner");
 
-      fetch("https://api.github.com/repos/mhnightcat/superfile")
+      fetch("https://api.github.com/repos/yorukot/superfile")
         .then((response) => response.json())
         .then((data) => {
           starCountElement.classList.remove("spinner");
@@ -108,7 +108,7 @@ import { Icon } from '@astrojs/starlight/components';
 <a
   target="_blank"
   rel="noreferrer noopener"
-  href="https://github.com/mhnightcat/superfile"
+  href="https://github.com/yorukot/superfile"
   class="link">
   <span
     id="star-count"

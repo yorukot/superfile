@@ -22,7 +22,7 @@ export default defineConfig({
         LastUpdated: './src/components/LastUpdated.astro',
       },
       social: {
-        github: 'https://github.com/mhnightcat/superfile',
+        github: 'https://github.com/yorukot/superfile',
       },
       head: [
         {
@@ -68,7 +68,7 @@ export default defineConfig({
         },
       ],
       editLink: {
-				baseUrl: 'https://github.com/mhnightcat/superfile/edit/main/website/',
+				baseUrl: 'https://github.com/yorukot/superfile/edit/main/website/',
 			},
       sidebar: [
         {

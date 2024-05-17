@@ -1,4 +1,4 @@
-module github.com/MHNightCat/superfile
+module github.com/yorukot/superfile
 
 go 1.21.0
 

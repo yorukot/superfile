@@ -31,11 +31,11 @@ brew install superfile
 Just copy and paste this one-line command:
 
 ```bash
-bash -c "$(curl -sLo- https://raw.githubusercontent.com/mhnightcat/superfile/main/install.sh)"
+bash -c "$(curl -sLo- https://raw.githubusercontent.com/yorukot/superfile/main/install.sh)"
 ```
 Or wget:
 ```bash
-bash -c "$(wget -qO- https://raw.githubusercontent.com/mhnightcat/superfile/main/install.sh)"
+bash -c "$(wget -qO- https://raw.githubusercontent.com/yorukot/superfile/main/install.sh)"
 ```
 
 ### Windows
@@ -45,7 +45,7 @@ It actually supports windows! Well.. sort of.
 Use powershell to run this command:
 
 ```bash
-powershell -ExecutionPolicy Bypass -Command "Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/mhnightcat/superfile/main/install.ps1'))"
+powershell -ExecutionPolicy Bypass -Command "Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/yorukot/superfile/main/install.ps1'))"
 ```
 :::note
 For uninstall do the same but uninstall.ps1
@@ -70,7 +70,7 @@ sudo pacman -S superfile-bin
 ###### Install with nix command-line
 
 ```bash
-nix profile install github:mhnightcat/superfile#superfile
+nix profile install github:yorukot/superfile#superfile
 ```
 
 ###### Install with flake
@@ -80,7 +80,7 @@ Add superfile to your flake inputs:
 ```nix
 inputs = {
   superfile = {
-    url = "github:mhnightcat/superfile";
+    url = "github:yorukot/superfile";
   };
   # ...
 };

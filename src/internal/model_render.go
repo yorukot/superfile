@@ -32,9 +32,9 @@ func sidebarRender(m model) string {
 			totalHeight += 3
 			continue
 		}
-		
-		if directory.location == "Disks+-*/=?"{
-			if m.mainPanelHeight - totalHeight <= 2 {
+
+		if directory.location == "Disks+-*/=?" {
+			if m.mainPanelHeight-totalHeight <= 2 {
 				break
 			}
 			s += disksDivider
@@ -347,11 +347,11 @@ func typineModalRender(m model) string {
 
 func introduceModalRender(m model) string {
 	title := sidebarTitleStyle.Render(" Thanks for use superfile!!") + modalStyle.Render("\n You can read the following information before starting to use it!")
-	vimUserWarn :=  modalCancel.Render("** Very importantly ** If you are a Vim/Nvim user, go to:\n to change your hotkey settings!")
-	subOne := sidebarTitleStyle.Render("  (1)") + modalStyle.Render(" If this is your first time, make sure you read:\n      https://github.com/MHNightCat/superfile/wiki/Tutorial")
+	vimUserWarn := modalCancel.Render("** Very importantly ** If you are a Vim/Nvim user, go to:\n to change your hotkey settings!")
+	subOne := sidebarTitleStyle.Render("  (1)") + modalStyle.Render(" If this is your first time, make sure you read:\n      https://github.com/yorukot/superfile/wiki/Tutorial")
 	subTwo := sidebarTitleStyle.Render("  (2)") + modalStyle.Render(" If you forget the relevant keys during use,\n      you can press \"?\" (shift+/) at any time to query the keys!")
-	subThree := sidebarTitleStyle.Render("  (3)") + modalStyle.Render(" For more customization you can refer to:\n      https://github.com/MHNightCat/superfile/wiki")
-	subFour := sidebarTitleStyle.Render("  (4)") + modalStyle.Render(" Thank you again for using superfile.\n      If you have any questions, please feel free to ask at:\n      https://github.com/MHNightCat/superfile\n      Of course, you can always open a new issue to share your idea \n      or report a bug!")
+	subThree := sidebarTitleStyle.Render("  (3)") + modalStyle.Render(" For more customization you can refer to:\n      https://github.com/yorukot/superfile/wiki")
+	subFour := sidebarTitleStyle.Render("  (4)") + modalStyle.Render(" Thank you again for using superfile.\n      If you have any questions, please feel free to ask at:\n      https://github.com/yorukot/superfile\n      Of course, you can always open a new issue to share your idea \n      or report a bug!")
 	return firstUseModal(m.helpMenu.height, m.helpMenu.width).Render(title + "\n\n" + vimUserWarn + subOne + "\n\n" + subTwo + "\n\n" + subThree + "\n\n" + subFour + "\n\n")
 }
 

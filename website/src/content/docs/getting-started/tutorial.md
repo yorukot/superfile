@@ -20,7 +20,7 @@ First, if you want to open `superfile` by opening a terminal and typing `spf`.
 
 Afterwards if you want to exit just press `q` or `esc`.
 
-![demo](https://github.com/mhnightcat/superfile/assets/107802416/ddd9f05c-b39b-4f55-838b-d248c845a589)
+![demo](https://github.com/yorukot/superfile/assets/107802416/ddd9f05c-b39b-4f55-838b-d248c845a589)
 
 ### Navigation
 You can put focus on the sidebar by pressing `b`.
@@ -36,7 +36,7 @@ If you want to get more detailed metadata, you can install the metadata plugin.
 :::
 If you want to return to the file panel, just press again to remove focus.
 
-![demo](https://github.com/mhnightcat/superfile/assets/107802416/ec7062ce-1884-4395-b68b-e0546c8a02de)
+![demo](https://github.com/yorukot/superfile/assets/107802416/ec7062ce-1884-4395-b68b-e0546c8a02de)
 
 ### File panel navigation
 Now you might be thinking that a file panel is not enough. 
@@ -51,7 +51,7 @@ You can press `tab` or `L` (shift+l) to move to the next file panel.
 
 Then press `shift+left` or `H` (shift+h) to move to the previous archive panel.
 
-![demo](https://github.com/mhnightcat/superfile/assets/107802416/2c2a7632-c5c0-43b6-80a7-d6e21fcf63b1)
+![demo](https://github.com/yorukot/superfile/assets/107802416/2c2a7632-c5c0-43b6-80a7-d6e21fcf63b1)
 
 ### File panel movement
 
@@ -72,7 +72,7 @@ If you have a large number of files, you can also use `ctrl+f` to search,After e
 
 If you want to clear the current search, you can press `ctrl+c` or `esc`
 
-![demo](https://github.com/mhnightcat/superfile/assets/107802416/f6fd9e4e-f73f-4848-a113-416732abf126)
+![demo](https://github.com/yorukot/superfile/assets/107802416/f6fd9e4e-f73f-4848-a113-416732abf126)
 
 ### File selection mode movement
 
@@ -102,7 +102,7 @@ Of course, the same is true for `shift+down` or `J` (shift+j)
 
 You can also press `ctrl+a` to select all folders in the current directory
 
-![demo](https://github.com/mhnightcat/superfile/assets/107802416/4306fd31-04e0-456c-b1f2-3923e8d932e1)
+![demo](https://github.com/yorukot/superfile/assets/107802416/4306fd31-04e0-456c-b1f2-3923e8d932e1)
 
 ### File operations
 
@@ -148,5 +148,5 @@ If your editor does not support opening the current directory with an editor, yo
 :::
 
 (Sorry, this video has a little bit of lag)
-[demo video](https://github.com/mhnightcat/superfile/assets/107802416/d0770b3f-025e-40c9-ad3f-8b2adaf1c6c5)
+[demo video](https://github.com/yorukot/superfile/assets/107802416/d0770b3f-025e-40c9-ad3f-8b2adaf1c6c5)
 
