@@ -1,0 +1,64 @@
+# Sugarplum
+# https://github.com/lemonlime0x3C33
+# Update by(sort by time):
+# 
+# Thanks for all contributor!!
+
+# If you want to make border display just set it same as sidebar background color
+
+# ========= Border =========
+file_panel_border = "#a175d4"
+sidebar_border = "a175d4"
+footer_border = "#a175d4"
+
+# ========= Border Active =========
+file_panel_border_active = "#53aaa1"
+sidebar_border_active = "#53aaa1"
+footer_border_active = "#53aaa1"
+modal_border_active = "#53aaa1"
+
+# ========= Background (bg) =========
+full_screen_bg = "#111147"
+file_panel_bg = "#111147"
+sidebar_bg = "#111147"
+footer_bg = "#111147"
+modal_bg = "#111147"
+
+# ========= Foreground (fg) =========
+full_screen_fg = "#db7ddd"
+file_panel_fg = "#db7ddd"
+sidebar_fg = "#d0beee"
+footer_fg = "#5ca8dc"
+modal_fg = "#98c7a3"
+
+# ========= Special Color =========
+cursor = "#53b397"
+correct = "#524094"
+error = "#2082a6"
+hint = "#91d4c2"
+cancel = "#b53dff"
+# Gradient color can only have two color!
+gradient_color = ["#249a84", "#5ca8dc"]
+
+# ========= File Panel Special Items =========
+file_panel_top_directory_icon = "#249a84"
+file_panel_top_path = "#249a84"
+file_panel_item_selected_fg = "#53b397"
+file_panel_item_selected_bg = "#53b397"
+
+# ========= Sidebar Special Items =========
+sidebar_title = "#db7ddd"
+sidebar_item_selected_fg = "#249a84"
+sidebar_item_selected_bg = "#111147"
+sidebar_divider = "#565f89"
+
+# ========= Modal Special Items =========
+modal_cancel_fg = "#7c4094"
+modal_cancel_bg = "#7c4094"
+
+modal_confirm_fg = "#7c4094"
+modal_confirm_bg = "#7c4094"
+
+# ========= Help Menu =========
+help_menu_hotkey = "#7dcfff"
+help_menu_title = "#73daca"
