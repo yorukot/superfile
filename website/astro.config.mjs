@@ -94,6 +94,10 @@ export default defineConfig({
             }
           ],
         },
+        {
+          label: 'Changelog',
+          link: '/changelog',
+        },
       ],
       customCss: ['./src/styles/custom.css'],
       lastUpdated: true,
