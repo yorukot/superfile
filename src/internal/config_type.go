@@ -116,7 +116,7 @@ type ConfigType struct {
 	
 	TransparentBackground bool `toml:"transparent_background" comment:"\n================   Style =================\n\nSet transparent background or not (this only work when your terminal background is transparent)"`
 
-	BorderTop         string `toml:"border_top" comment:"\n\nBorder style"`
+	BorderTop         string `toml:"border_top" comment:"\nBorder style"`
 	BorderBottom      string `toml:"border_bottom"`
 	BorderLeft        string `toml:"border_left"`
 	BorderRight       string `toml:"border_right"`
@@ -157,7 +157,7 @@ type HotkeysType struct {
 	ExtractFile  []string `toml:"extract_file" comment:"compress and extract"`
 	CompressFile []string `toml:"compress_file"`
 
-	OpenFileWithEditor             []string `toml:"oepn_file_with_editor" comment:"editor"`
+	OpenFileWithEditor             []string `toml:"open_file_with_editor" comment:"editor"`
 	OpenCurrentDirectoryWithEditor []string `toml:"open_current_directory_with_editor"`
 
 	PinnedDirectory []string `toml:"pinned_directory" comment:"else"`

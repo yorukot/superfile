@@ -15,7 +15,6 @@ cd_on_quit = false
 # Set transparent background or not (this only work when your terminal background is transparent)
 transparent_background = false
 # 
-# 
 # Border style
 border_top = '─'
 border_bottom = '─'

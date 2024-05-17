@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"embed"
 	"log"
 	"os"
 	"path/filepath"
@@ -114,11 +115,70 @@ func loadHotkeysFile() {
 func loadThemeFile() {
 	data, err := os.ReadFile(SuperFileMainDir + themeFolder + "/" + Config.Theme + ".toml")
 	if err != nil {
-		data = []byte(DefaultTheme)
+		data = []byte(DefaultThemeString)
 	}
 
 	err = toml.Unmarshal(data, &theme)
 	if err != nil {
 		log.Fatalf("Error while decoding theme file( Your theme file may have errors ): %v", err)
 	}
+}
+
+func LoadAllDefaultConfig(content embed.FS) {
+
+	temp, err := content.ReadFile("src/superfileConfig/hotkeys.toml")
+	if err != nil {
+		return
+	}
+	HotkeysTomlString = string(temp)
+
+	temp, err = content.ReadFile("src/superfileConfig/config.toml")
+	if err != nil {
+		return
+	}
+	ConfigTomlString = string(temp)
+
+	temp, err = content.ReadFile("src/superfileConfig/theme/catpuccin.toml")
+	if err != nil {
+		return
+	}
+	DefaultThemeString = string(temp)
+
+	_, err = os.Stat(SuperFileMainDir + themeFolder)
+	if os.IsNotExist(err) {
+		err := os.MkdirAll(SuperFileMainDir+themeFolder, 0755)
+		if err != nil {
+			outPutLog("error create theme direcroty", err)
+			return
+		}
+	} else {
+		return
+	}
+
+	files, err := content.ReadDir("src/superfileConfig/theme")
+	if err != nil {
+		outPutLog("error read theme directory from embed", err)
+		return
+	}
+
+	for _, file := range files {
+		if file.IsDir() {
+			continue
+		}
+		src, err := content.ReadFile(filepath.Join("src/superfileConfig/theme", file.Name()))
+		if err != nil {
+			outPutLog("error read theme file from embed", err)
+			return
+		}
+
+		file, err := os.Create(filepath.Join(SuperFileMainDir+themeFolder, file.Name()))
+		if err != nil {
+			outPutLog("error create theme file from embed", err)
+			return
+		}
+		file.Write(src)
+		defer file.Close()
+	}
+
+	ConfigTomlString = string(temp)
 }

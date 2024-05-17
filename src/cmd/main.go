@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"archive/zip"
+	"embed"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -54,26 +54,16 @@ const (
 	trashDirectoryInfo  string = "/Trash/info"
 )
 
-func Run() {
+func Run(content embed.FS) {
+	
+	internal.LoadAllDefaultConfig(content)
+
 	app := &cli.App{
 		Name:        "superfile",
 		Version:     currentVersion,
 		Description: "Pretty fancy and modern terminal file manager ",
 		ArgsUsage:   "[path]",
 		Commands: []*cli.Command{
-			{
-				Name:    "download-theme",
-				Aliases: []string{"dt"},
-				Usage:   "Download or update theme file from github",
-				Action: func(c *cli.Context) error {
-					if err := downloadAndInstallTheme(SuperFileMainDir, themeZipName, themeZip, themeFolder); err != nil {
-						log.Fatalln("Error downloading theme:", err)
-					}
-					fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("#66ff66")).Render("🎉 Successfully downloaded themes!"))
-					fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("#66b2ff")).Render("Now you can change your superfile theme!"))
-					return nil
-				},
-			},
 			{
 				Name:    "path-list",
 				Aliases: []string{"pl"},
@@ -140,6 +130,7 @@ func InitConfigFile() {
 		config.MainDir,
 		config.DataDir,
 		config.StateDir,
+		config.MainDir + themeFolder,
 	); err != nil {
 		log.Fatalln("Error creating directories:", err)
 	}
@@ -222,32 +213,6 @@ func writeConfigFile(path, data string) error {
 	return nil
 }
 
-func downloadAndInstallTheme(dir, zipName, zipUrl, zipFolder string) error {
-	if !connected() {
-		log.Fatalln("You don't have an internet connection!")
-	}
-	currentThemeVersion, err := readThemeVersionFromFile(SuperFileDataDir + themeFileVersion)
-	if err != nil && !os.IsNotExist(err) {
-		fmt.Println("Error reading from file:", err)
-	}
-
-	if _, err := os.Stat(filepath.Join(dir, zipFolder)); os.IsNotExist(err) || currentThemeVersion != currentVersion {
-
-		err := downloadFile(filepath.Join(SuperFileMainDir, zipName), zipUrl)
-		if err != nil {
-			return err
-		}
-		err = unzip(filepath.Join(SuperFileMainDir, zipName), dir)
-		if err != nil {
-			return err
-		} else {
-			os.Remove(filepath.Join(SuperFileMainDir, zipName))
-		}
-		writeToFile(SuperFileDataDir+themeFileVersion, currentVersion)
-	}
-	return nil
-}
-
 func CheckForUpdates() {
 	type superfileConfig struct {
 		AutoCheckUpdate bool `toml:"auto_check_update"`
@@ -321,18 +286,6 @@ func versionToNumber(version string) int {
 	return num
 }
 
-func readThemeVersionFromFile(filename string) (string, error) {
-	content, err := os.ReadFile(filename)
-	if err != nil {
-		return "", err
-	}
-	if len(content) == 0 {
-		return "", nil
-	}
-
-	return string(content), nil
-}
-
 func readLastTimeCheckVersionFromFile(filename string) (time.Time, error) {
 	content, err := os.ReadFile(filename)
 	if err != nil {
@@ -362,64 +315,4 @@ func writeToFile(filename, content string) error {
 	}
 
 	return nil
-}
-
-func downloadFile(filepath string, url string) error {
-	resp, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	out, err := os.Create(filepath)
-	if err != nil {
-		return err
-	}
-	defer out.Close()
-
-	_, err = io.Copy(out, resp.Body)
-	return err
-}
-
-func unzip(src, dest string) error {
-	r, err := zip.OpenReader(src)
-	if err != nil {
-		return err
-	}
-	defer r.Close()
-
-	for _, f := range r.File {
-		path := filepath.Join(dest, f.Name)
-		if !strings.HasPrefix(path, filepath.Clean(dest)+string(os.PathSeparator)) {
-			return fmt.Errorf("%s: illegal file path", path)
-		}
-
-		if f.FileInfo().IsDir() {
-			os.MkdirAll(path, f.Mode())
-		} else {
-			rc, err := f.Open()
-			if err != nil {
-				return err
-			}
-			defer rc.Close()
-
-			os.MkdirAll(filepath.Dir(path), f.Mode())
-			f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
-			if err != nil {
-				return err
-			}
-			defer f.Close()
-
-			_, err = io.Copy(f, rc)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-
-func connected() (ok bool) {
-	_, err := http.Get("http://clients3.google.com/generate_204")
-	return err == nil
 }
