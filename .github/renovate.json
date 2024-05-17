@@ -6,7 +6,10 @@
       "matchDatasources": ["go", "github-releases", "github-tags"],
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "automerge": true,
-      "paths": ["/src"]
+      "paths": ["/"],
+      "ignorePaths": [
+        "website/"
+      ]
     }
   ]
 }
