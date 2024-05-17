@@ -356,6 +356,9 @@ func controlSideBarListDown(m model) model {
 	newDirectory := m.sidebarModel.directories[m.sidebarModel.cursor].location
 	for newDirectory == "Pinned+-*/=?" || newDirectory == "Disks+-*/=?" {
 		m.sidebarModel.cursor++
+		if m.sidebarModel.cursor + 1 >= len(m.sidebarModel.directories) {
+			m.sidebarModel.cursor = 0
+		}
 		newDirectory = m.sidebarModel.directories[m.sidebarModel.cursor].location
 	}
 	cursorRender := false
