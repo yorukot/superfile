@@ -2,11 +2,10 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import { pluginLineNumbers } from '@expressive-code/plugin-line-numbers';
 
-const site = 'https://starter.obytes.com/';
+const site = 'https://superfile.netlify.app/';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://superfile.github.io',
   integrations: [
     starlight({
       title: 'Superfile',
