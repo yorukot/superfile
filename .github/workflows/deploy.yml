@@ -1,14 +1,10 @@
 name: Deploy to GitHub Pages
 
 on:
-  # 每次推送到 `main` 分支时触发这个“工作流程”
-  # 如果你使用了别的分支名，请按需将 `main` 替换成你的分支名
   push:
     branches: [ main ]
-  # 允许你在 GitHub 上的 Actions 标签中手动触发此“工作流程”
   workflow_dispatch:
 
-# 允许 job 克隆 repo 并创建一个 page deployment
 permissions:
   contents: read
   pages: write
@@ -23,7 +19,7 @@ jobs:
       - name: Install, build, and upload your site
         uses: withastro/action@v2
         with:
-          path: ./website
+          path: ./website/
 
   deploy:
     needs: build
