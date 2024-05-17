@@ -69,7 +69,7 @@ export default defineConfig({
         },
       ],
       editLink: {
-				baseUrl: 'https://github.com/mhnightcat/superfile/edit/main/docs/',
+				baseUrl: 'https://github.com/mhnightcat/superfile/edit/main/website/',
 			},
       sidebar: [
         {
