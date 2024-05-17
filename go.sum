@@ -42,10 +42,6 @@ github.com/charmbracelet/harmonica v0.2.0 h1:8NxJWRWg/bzKqqEaaeFNipOu77YR5t8aSwG
 github.com/charmbracelet/harmonica v0.2.0/go.mod h1:KSri/1RMQOZLbw7AHqgcBycp8pgJnQMYYT8QZRqZ1Ao=
 github.com/charmbracelet/lipgloss v0.10.0 h1:KWeXFSexGcfahHX+54URiZGkBFazf70JNMtwg/AFW3s=
 github.com/charmbracelet/lipgloss v0.10.0/go.mod h1:Wig9DSfvANsxqkRsqj6x87irdy123SR4dOXlKa91ciE=
-github.com/charmbracelet/x/exp/term v0.0.0-20240510181320-e66de7a51531 h1:RPb7LB50mGIt9KAGz0rJ+SBYRi5gg74TwvKquCN7XBM=
-github.com/charmbracelet/x/exp/term v0.0.0-20240510181320-e66de7a51531/go.mod h1:YBotIGhfoWhHDlnUpJMkjebGV2pdGRCn1Y4/Nk/vVcU=
-github.com/charmbracelet/x/exp/term v0.0.0-20240514163027-fb066ab7c504 h1:VE+SqWjHen4wQMzScjQeSKF5wmLK00TPG9RjQx1laJ0=
-github.com/charmbracelet/x/exp/term v0.0.0-20240514163027-fb066ab7c504/go.mod h1:YBotIGhfoWhHDlnUpJMkjebGV2pdGRCn1Y4/Nk/vVcU=
 github.com/charmbracelet/x/exp/term v0.0.0-20240515162549-69ee4f765313 h1:fAAMnqSGV4lwoXfS8ZB7MaLvXayMAAVifUx9sOFRyOo=
 github.com/charmbracelet/x/exp/term v0.0.0-20240515162549-69ee4f765313/go.mod h1:YBotIGhfoWhHDlnUpJMkjebGV2pdGRCn1Y4/Nk/vVcU=
 github.com/chzyer/logex v1.1.10/go.mod h1:+Ywpsq7O8HXn0nuIou7OrIPyXbp3wmkHB+jjWRnGsAI=

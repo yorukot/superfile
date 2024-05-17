@@ -4,9 +4,8 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
-	"runtime"
 
-	"github.com/rkoesters/xdg/userdirs"
+	"github.com/adrg/xdg"
 	"github.com/shirou/gopsutil/disk"
 )
 
@@ -34,22 +33,13 @@ func getWellKnownDirectories() []directory {
 	directories := []directory{}
 	wellKnownDirectories := []directory{
 		{location: HomeDir, name: "󰋜 Home"},
-		{location: userdirs.Download, name: "󰏔 Downloads"},
-		{location: userdirs.Documents, name: "󰈙 Documents"},
-		{location: userdirs.Pictures, name: "󰋩 Pictures"},
-		{location: userdirs.Videos, name: "󰎁 Videos"},
-		{location: userdirs.Music, name: "♬ Music"},
-		{location: userdirs.Templates, name: "󰏢 Templates"},
-		{location: userdirs.PublicShare, name: " PublicShare"},
-	}
-
-	if runtime.GOOS == "darwin" {
-		wellKnownDirectories[1].location = HomeDir + "/Downloads/"
-		wellKnownDirectories[2].location = HomeDir + "/Documents/"
-		wellKnownDirectories[3].location = HomeDir + "/Pictures/"
-		wellKnownDirectories[4].location = HomeDir + "/Movies/"
-		wellKnownDirectories[5].location = HomeDir + "/Music/"
-		wellKnownDirectories[7].location = HomeDir + "/Public/"
+		{location: xdg.UserDirs.Download, name: "󰏔 Downloads"},
+		{location: xdg.UserDirs.Documents, name: "󰈙 Documents"},
+		{location: xdg.UserDirs.Pictures, name: "󰋩 Pictures"},
+		{location: xdg.UserDirs.Videos, name: "󰎁 Videos"},
+		{location: xdg.UserDirs.Music, name: "♬ Music"},
+		{location: xdg.UserDirs.Templates, name: "󰏢 Templates"},
+		{location: xdg.UserDirs.PublicShare, name: " PublicShare"},
 	}
 
 	for _, dir := range wellKnownDirectories {
@@ -81,7 +71,7 @@ func getPinnedDirectories() []directory {
 	return directories
 }
 
-// Get external media directories 
+// Get external media directories
 func getExternalMediaFolders() (disks []directory) {
 	parts, err := disk.Partitions(true)
 
