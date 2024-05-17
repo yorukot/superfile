@@ -15,6 +15,7 @@ All notable changes to this project will be documented in this file. Dates are d
 - Create file or folder using same hotkey [`#116`](https://github.com/MHNightCat/superfile/issues/116)
 - More dynamic footer height adaptive [`66a3fb4`](https://github.com/MHNightCat/superfile/commit/66a3fb4feba31ead2224938b1a18a431a55ac9cc)
 - Confirm delete files [``]()
+- Support windows for get well known directories [`d4db820`](https://github.com/MHNightCat/superfile/commit/d4db820ba839603df209dcce05468902739f301f)
 
 #### Bug fix
 - Recursive symlink crashes superfile [`#109`](https://github.com/MHNightCat/superfile/issues/109)
