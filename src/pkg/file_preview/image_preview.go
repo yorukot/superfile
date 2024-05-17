@@ -1,6 +1,8 @@
 package filepreview
 
 import (
+	"encoding/base64"
+	"fmt"
 	"os"
 	"strings"
 )
@@ -21,6 +23,16 @@ const (
 )
 
 type terminalType int
+
+func imagePreview() string {
+    currentTerminal := detectCurrentTerminal()
+	if currentTerminal == Kitty {
+
+    } else {
+        //...
+    }
+    return ""
+}
 
 func detectCurrentTerminal() terminalType {
     term := os.Getenv("TERM")
@@ -50,4 +62,16 @@ func detectCurrentTerminal() terminalType {
     default:
         return Unknown
     }
+}
+
+func showImageInKitty(imagePath string) string {
+    imageData, err := pathToBase64Encode(imagePath)
+    if err != nil {
+        fmt.Println("Error:", err)
+        return ""
+    }
+
+    encodedData := base64.StdEncoding.EncodeToString([]byte(imageData))
+    fmt.Println("\x1b_G=;base64,%s\a", encodedData)
+    return fmt.Sprintf("\x1b_G=;base64,%s\a", encodedData)
 }
