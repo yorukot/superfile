@@ -98,7 +98,7 @@ in {
 }
 ```
 
-## Star superfile
+## Start superfile
 
 After completing the installation, you can restart the terminal (if necessary)
 
