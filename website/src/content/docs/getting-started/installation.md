@@ -112,6 +112,3 @@ spf
 
 - [Tutorial](/getting-started/tutorial)
 - [Hotkey list](/getting-started/hotkey-list)
-- []()
-- []()
-- []()

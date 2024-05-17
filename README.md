@@ -41,89 +41,7 @@
 
 ## Installation
 
-**Requirements**
-
-- Any [`Nerd Font`](#font)
-
-### Homebrew
-
-Install homebrew and execute the following commands
-
-```bash
-brew install superfile
-```
-
-### Install pre-built binaries
-**Just copy and paste this one-line command:**
-
-```bash
-bash -c "$(curl -sLo- https://raw.githubusercontent.com/MHNightCat/superfile/main/install.sh)"
-```
-
-Or wget:
-
-```bash
-bash -c "$(wget -qO- https://raw.githubusercontent.com/MHNightCat/superfile/main/install.sh)"
-```
-
-### Windows
-
-It actually supports windows! Well.. sort of.
-
-Use powershell to run this command:
-
-```powershell
-powershell -ExecutionPolicy Bypass -Command "Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/MHNightCat/superfile/main/install.ps1'))"
-
-```
-For uninstall do the same but uninstall.ps1
-
-### NixOS
-
-<details><summary>Click to expand</summary>
-<p>
-
-#### Install with nix command-line:
-
-```bash
-nix profile install github:MHNightCat/superfile#superfile
-```
-
-#### Install with flake:
-
-Add superfile to your flake inputs:
-
-```nix
-inputs = {
-  superfile = {
-    url = "github:MHNightCat/superfile";
-  };
-  # ...
-};
-```
-
-Then you can add it to your packages:
-
-```nix
-let
-  system = "x86_64-linux";
-in {
-  environment.systemPackages = with pkgs; [
-    # ...
-    inputs.superfile.packages.${system}.default  ];
-}
-```
-
-</details>
-
-### Font
-
-> [!WARNING]
-> This is a reminder that you must use a [Nerd font](https://www.nerdfonts.com/font-downloads)
-
-Once the font is installed if `superfile` isn't working make sure to update your terminal preferences to use the font.  
-
-After installed, type "spf" to open superfile.
+[You can go here to know how to install](https://superfile.netlify.app/getting-started/installation/)
 
 ## Build
 
@@ -163,7 +81,7 @@ mv ./bin/spf /usr/local/bin
 
 - \[x\] Linux
 - \[x\] MacOS
-- \[ \] Windows
+- \[x\] Windows (Not fully supported yet)
 
 ## Tutorial
 
