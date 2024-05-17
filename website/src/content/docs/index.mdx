@@ -1,36 +1,80 @@
 ---
-title: Welcome to Starlight
-description: Get started building your docs site with Starlight.
+title: Obytes Starter | React Native/Expo starter
+description: "Superfile is a very fancy and modern terminal file manager that can complete the file operations you need!!"
 template: splash
+lastUpdated: false
+editUrl: false
 hero:
-  tagline: Congrats on setting up a new Starlight project!
+  title: Perfect Terminal-based file manager 🚀!
+  tagline: "Superfile is a very fancy and modern terminal file manager that can complete the file operations you need!!"
   image:
-    file: ../../assets/houston.webp
+    file: ../../assets/logo.png
   actions:
-    - text: Example Guide
-      link: /guides/example/
+    - text: Get Started
+      link: /overview
       icon: right-arrow
       variant: primary
-    - text: Read the Starlight docs
-      link: https://starlight.astro.build
+    - text: View on GitHub
+      link: https://github.com/mhnightcat/superfile
       icon: external
 ---
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
+import GithubStar from '../../components/GithubStar.astro';
+import About from '../../components/about.astro';
 
-## Next steps
+<GithubStar />
+
+## Features
 
 <CardGrid stagger>
-	<Card title="Update content" icon="pencil">
-		Edit `src/content/docs/index.mdx` to see this page change.
+	<Card title="This still waiting to updating" icon="star">
 	</Card>
-	<Card title="Add new content" icon="add-document">
-		Add Markdown or MDX files to `src/content/docs` to create new pages.
+  {/* <Card title="Expo Router" icon="add-document">
+		The latest version of Expo Router comes pre-installed and includes examples that demonstrate how to implement comprehensive navigation within your app.
 	</Card>
-	<Card title="Configure your site" icon="setting">
-		Edit your `sidebar` and other config in `astro.config.mjs`.
+  <Card title="10+ GitHub workflows" icon="open-book">
+    From running type checks, tests, lint checks, and code formatting to
+    generating a new app version, and building your app using EAS Build, already
+    configured and ready to go!
+  </Card>
+  <Card title="Minimal UI kit with Tailwind CSS" icon="open-book">
+		We've included a minimal UI with most of the components you'll need to get started with your project. It's built using Tailwind CSS and is very easy to customize.
+  </Card>
+	<Card title="VSCode Setup" icon="laptop">
+		A complete list of recommended extensions, settings, and snippets for Visual Studio Code (VSCode) that enhance the developer experience and boost productivity.
 	</Card>
-	<Card title="Read the docs" icon="open-book">
-		Learn more in [the Starlight Docs](https://starlight.astro.build/).
+	<Card title="TS + Eslint + Prettier + Husky" icon="setting">
+		We use TypeScript, Eslint, Prettier, and Husky to ensure that your code is clean and consistent. No more worrying about code style or pushing bad code!
 	</Card>
+	<Card title="Fully Documented" icon="open-book">
+		We've included a comprehensive set of documentation to help you get started with your project and understand our choices and decisions.
+	</Card>
+	<Card title="Multiple environment builds support" icon="setting">
+		Multiple app environments with a robust solution to manage and validate environment variables with Zod. It enables easy switching between different environments throughout the development and deployment processes.
+	</Card>
+
+<Card title="Form and Keyboard Handling" icon="open-book">
+  We use React Hook Form for form management and Zod for validation, along with
+  a set of inputs for your app. We also include keyboard handling to provide a
+  seamless user experience.
+</Card>
+<Card title="Auth Flow" icon="open-book">
+  We have included a complete authentication flow based on Zustand as a state
+  management library and `react-native-mmkv` as a secure and fast solution for
+  storing tokens and other sensitive data.
+</Card>
+
+  <Card title="React Query + Axios" icon="open-book">
+		We manage data fetching using React Query and Axios. These powerful libraries make it easy to fetch, cache, and update data in your React applications. We also include a set of VSCode snippets to make your life easier when creating queries and mutations.
+	</Card>
+  <Card title="Unit + E2E tests" icon="document">
+		We provide a complete setup for unit and end-to-end tests using Jest and React Testing Library, along with Cypress for end-to-end testing. This will assist you in writing tests for your app and ensuring that it functions as expected.
+	</Card> */}
 </CardGrid>
+
+<About title="Built with ❤️ by Night Cat and all contributor">
+
+
+
+</About>

@@ -1,0 +1,134 @@
+---
+import { Icon } from '@astrojs/starlight/components';
+
+---
+
+<style>
+  @keyframes spinner {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes slide-down {
+    0% {
+      transform: translate(-50%, -140%);
+      opacity: 0;
+    }
+    100% {
+      transform: translate(-50%, 0%);
+      opacity: 1;
+    }
+  }
+  .spinner:before {
+    content: "";
+    box-sizing: border-box;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 12px;
+    height: 12px;
+    margin-top: -6px;
+    margin-left: -7px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    border-top-color: #333;
+    animation: spinner 0.6s linear infinite;
+  }
+  .container{
+    position: absolute;
+    top: 80px;
+    left: 50%;
+    transform: translate(-50%, 0%);
+    background-color: transparent;
+    drop-shadow: drop-shadow(0 20px 13px rgba(0, 0, 0, 0.03)) drop-shadow(0 8px 5px rgba(0, 0, 0, 0.08));
+    border-radius: 20px;
+    border: 1px solid var(--sl-color-accent-high);
+    animation: slide-down 0.5s ease-in-out;
+  }
+  @media screen and (max-width: 768px) {
+    .container{
+      display: none;
+    }
+  }
+  .link {
+    display: flex;
+    padding: 0.5rem;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    gap: 0.5rem;
+    align-items: center;
+    border-radius: 9999px;
+    border-width: 1px;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 100;
+    background-image: background-image: linear-gradient(to right, var(--tw-gradient-stops));
+    transition-duration: 300ms;
+    text-decoration: none;
+  }
+  .link:hover {
+    text-decoration: none;
+    color: var(--sl-color-accent-high);
+  }
+  .star-count{
+    font-weight: 700;
+    min-width: 20px;
+    color: transparent;
+    background-clip: text;
+    background-image: background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
+    background-color: #F59E0B;
+    filter: drop-shadow(0 0 3rem var(--overlay-blurple));
+    drop-shadow: drop-shadow(0 20px 13px rgba(0, 0, 0, 0.03)) drop-shadow(0 8px 5px rgba(0, 0, 0, 0.08));
+  }
+
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const starCountElement = document.getElementById("star-count");
+    if (starCountElement) {
+      starCountElement.classList.add("spinner");
+
+      fetch("https://api.github.com/repos/mhnightcat/superfile")
+        .then((response) => response.json())
+        .then((data) => {
+          starCountElement.classList.remove("spinner");
+          const starCount = data.stargazers_count;
+          starCountElement.textContent = starCount;
+        })
+        .catch((error) => {
+          starCountElement.classList.remove("spinner");
+          console.error("Error:", error);
+        });
+    }
+  });
+</script>
+<div class="container">
+<a
+  target="_blank"
+  rel="noreferrer noopener"
+  href="https://github.com/mhnightcat/superfile"
+  class="link">
+  <span
+    id="star-count"
+    class="star-count"
+  ></span>
+  <Icon name="star" color="goldenrod" size="1rem" />
+  <span class="opacity-50">|</span>
+  <span class="">Give us a star on Github</span>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <path d="m9 18 6-6-6-6"></path>
+  </svg>
+</a>
+</div>

@@ -1,0 +1,41 @@
+---
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<article class="sl-flex not-content" aria-labelledby="about-obytes-heading">
+  <small id="about-obytes-heading">
+    {title}
+    <span class="sr-only">Obytes</span>
+  </small>
+  <a href="https://github.com/obytes/react-native-template-obytes" target="_blank">
+  <small id="about-obytes-heading">
+    This website based on
+    <span class="sr-only">Obytes</span>
+  </small></a>
+  <slot />
+</article>
+
+<style>
+  article {
+    max-width: 50rem;
+    margin-inline: auto;
+    padding-block: 5rem;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.5rem;
+  }
+  article > :global(*) {
+    max-width: 54ch;
+  }
+  small {
+    color: var(--sl-color-gray-3);
+  }
+  svg {
+    width: 15rem;
+  }
+</style>

@@ -1,0 +1,3 @@
+# redirect all /docs requests to the root domain
+
+/docs/\* /:splat 301

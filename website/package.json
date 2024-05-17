@@ -1,19 +1,22 @@
 {
-  "name": "website",
+  "name": "ossified-orbit",
   "type": "module",
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro check && astro build",
+    "build": "astro build",
     "preview": "astro preview",
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/starlight": "^0.22.4",
-    "astro": "^4.3.5",
-    "sharp": "^0.32.5",
-    "@astrojs/check": "^0.7.0",
-    "typescript": "^5.4.5"
+    "@astrojs/starlight": "^0.21.1",
+    "@expressive-code/plugin-collapsible-sections": "^0.33.4",
+    "@expressive-code/plugin-line-numbers": "^0.33.4",
+    "@fontsource/ibm-plex-mono": "^5.0.8",
+    "@fontsource/ibm-plex-serif": "^5.0.8",
+    "astro": "^4.4.9",
+    "hast-util-to-html": "^9.0.0",
+    "sharp": "^0.32.3"
   }
 }
