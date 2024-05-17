@@ -1,0 +1,427 @@
+---
+title: Mengkustomisasi Starlight
+description: Pelajari cara membuat website Starlight menjadi milik Anda sendiri dengan logo, font custom, desain halaman utama, dan lain-lain.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import { FileTree } from '@astrojs/starlight/components';
+
+Starlight menyediakan styling dan fitur bawaan yang disesuaikan, sehingga Anda dapat memulai dengan cepat tanpa ada konfigurasi diperlukan.
+Ketika Anda ingin mulai menyesuaikan tampilan dan nuansa website Starlight Anda, panduan ini akan membantu Anda.
+
+## Tambahkan logo Anda
+
+Menambahkan logo custom ke header website adalah cara cepat untuk menambahkan branding individu Anda ke website Starlight.
+
+1. Tambahkan file gambar logo Anda ke direktori `src/assets/`:
+
+   <FileTree>
+
+   - src/
+     - assets/
+       - **logo-saya.svg**
+     - content/
+   - astro.config.mjs
+
+   </FileTree>
+
+2. Tambahkan path logo Anda sebagai opsi [`logo.src`](/id/reference/configuration/#logo) di `astro.config.mjs`:
+
+   ```js
+   // astro.config.mjs
+   import { defineConfig } from 'astro/config';
+   import starlight from '@astrojs/starlight';
+
+   export default defineConfig({
+   	integrations: [
+   		starlight({
+   			title: 'Website Dokumentasi dengan Logo Saya',
+   			logo: {
+   				src: './src/assets/logo-saya.svg',
+   			},
+   		}),
+   	],
+   });
+   ```
+
+Secara default, logo akan ditampilkan bersama dengan `title` website Anda.
+Jika gambar logo Anda sudah mencakup judul website, Anda dapat menyembunyikan teks judul dengan mengatur opsi `replacesTitle`.
+Teks `title` tetap disertakan untuk pembaca layar agar header tetap dapat diakses.
+
+```js
+starlight({
+  title: 'Website Dokumentasi dengan Logo Saya',
+  logo: {
+    src: './src/assets/my-logo.svg',
+    replacesTitle: true,
+  },
+}),
+```
+
+### Variasi logo terang dan gelap
+
+Anda dapat menampilkan logo Anda dalam versi mode terang dan gelap.
+
+1. Tambahkan file gambar untuk masing-masing varian ke `src/assets/`:
+
+   <FileTree>
+
+   - src/
+     - assets/
+       - **logo-gelap.svg**
+       - **logo-terang.svg**
+     - content/
+   - astro.config.mjs
+
+   </FileTree>
+
+2. Tambahkan path ke varian logo Anda sebagai opsi `light` dan `dark` di `astro.config.mjs` dan bukan di `src`:
+
+   ```js
+   starlight({
+     title: 'Website Dokumentasi dengan Logo Saya',
+     logo: {
+       light: './src/assets/logo-terang.svg',
+       dark: './src/assets/logo-gelap.svg',
+     },
+   }),
+   ```
+
+## Aktifkan sitemap
+
+Starlight memiliki dukungan bawaan untuk menghasilkan sitemap. Aktifkan pembuatan sitemap dengan mengatur URL Anda sebagai `site` di `astro.config.mjs`:
+
+```js
+// astro.config.mjs
+
+export default defineConfig({
+	site: 'https://stargazers.club',
+	integrations: [starlight({ title: 'Website dengan sitemap' })],
+});
+```
+
+## Tata letak halaman
+
+Secara default, halaman Starlight menggunakan tata letak dengan bilah navigasi global dan daftar isi yang menunjukkan judul halaman saat ini.
+
+Anda dapat menerapkan tata letak halaman yang lebih lebar tanpa bilah samping dengan mengatur [`template: splash`](/id/reference/frontmatter/#template) di frontmatter halaman.
+Ini sangat cocok untuk halaman utama dan Anda dapat melihatnya secara langsung di [halaman utama website ini](/id/).
+
+```md
+---
+# src/content/docs/index.md
+
+title: Halaman Utama Saya
+template: splash
+---
+```
+
+## Daftar isi
+
+Starlight menampilkan daftar isi di setiap halaman untuk memudahkan pembaca melompat ke judul yang mereka cari.
+Anda dapat menyesuaikan — atau bahkan menonaktifkan — daftar isi secara global dalam integrasi Starlight atau pada basis halaman dalam frontmatter.
+
+Secara default, heading `<h2>` dan `<h3>` akan dimasukkan ke dalam daftar isi. Ubah tingkat heading yang akan dimasukkan di seluruh website menggunakan opsi `minHeadingLevel` dan `maxHeadingLevel` dalam konfigurasi [global `tableOfContents`](/id/reference/configuration/#tableofcontents). Timpa pengaturan default ini pada masing-masing halaman dengan menambahkan properti [frontmatter `tableOfContents`](/id/reference/frontmatter/#tableofcontents) yang sesuai.
+
+<Tabs>
+  <TabItem label="Frontmatter">
+
+```md
+---
+# src/content/docs/example.md
+title: Halaman dengan hanya H2 di dalam daftar isi
+tableOfContents:
+  minHeadingLevel: 2
+  maxHeadingLevel: 2
+---
+```
+
+  </TabItem>
+  <TabItem label="Konfigurasi global">
+
+```js
+// astro.config.mjs
+
+defineConfig({
+	integrations: [
+		starlight({
+			title: '',
+			tableOfContents: { minHeadingLevel: 2, maxHeadingLevel: 2 },
+		}),
+	],
+});
+```
+
+  </TabItem>
+</Tabs>
+
+Nonaktifkan daftar isi sepenuhnya dengan mengatur opsi `tableOfContents` ke `false`:
+
+<Tabs>
+  <TabItem label="Frontmatter">
+
+```md
+---
+# src/content/docs/example.md
+title: Halaman tanpa daftar isi
+tableOfContents: false
+---
+```
+
+  </TabItem>
+  <TabItem label="Konfigurasi Global">
+
+```js
+// astro.config.mjs
+
+defineConfig({
+	integrations: [
+		starlight({
+			title:
+				'Website dokumentasi dengan daftar isi dinonaktifkan secara global',
+			tableOfContents: false,
+		}),
+	],
+});
+```
+
+  </TabItem>
+</Tabs>
+
+## Social links
+
+Starlight memiliki dukungan bawaan untuk menambahkan tautan ke akun media sosial Anda ke header website melalui opsi [`social`](/id/reference/configuration/#social) dalam integrasi Starlight.
+
+Anda dapat menemukan daftar lengkap ikon tautan yang didukung di [Referensi Konfigurasi](/id/reference/configuration/#social).
+Beritahu kami di GitHub atau Discord jika Anda memerlukan dukungan untuk layanan lain!
+
+```js
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: 'Website Dokumentasi Dengan Tautan Media Sosial',
+			social: {
+				discord: 'https://astro.build/chat',
+				github: 'https://github.com/withastro/starlight',
+			},
+		}),
+	],
+});
+```
+
+## Tautan untuk mengedit
+
+Starlight dapat menampilkan tautan "Edit halaman" di footer setiap halaman.
+Ini memudahkan pembaca menemukan file yang akan diedit untuk meningkatkan website dokumentasi Anda.
+Khususnya untuk proyek open source, ini dapat membantu mendorong kontribusi dari komunitas Anda.
+
+Untuk mengaktifkan tautan edit, atur [`editLink.baseUrl`](/id/reference/configuration/#editlink) ke URL yang digunakan untuk mengedit repositori Anda dalam konfigurasi integrasi Starlight.
+Nilai `editLink.baseUrl` akan ditambahkan ke path halaman saat ini untuk membentuk tautan untuk mengedit secara lengkap.
+
+Pattern yang umum termasuk:
+
+- GitHub: `https://github.com/USER_NAME/REPO_NAME/edit/BRANCH_NAME/`
+- GitLab: `https://gitlab.com/USER_NAME/REPO_NAME/-/edit/BRANCH_NAME/`
+
+Jika proyek Starlight Anda tidak berada di root repositori Anda, sertakan path proyek pada akhir base URL-nya.
+
+Contoh ini menunjukkan tautan untuk mengedit yang dikonfigurasi untuk website dokumentasi Starlight, yang berada dalam subdirektori `docs/` pada branch `main` dari repositori `withastro/starlight` di GitHub:
+
+```js
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: 'Website Dokumentasi dengan Tautan Untuk Mengedit',
+			editLink: {
+				baseUrl: 'https://github.com/withastro/starlight/edit/main/docs/',
+			},
+		}),
+	],
+});
+```
+
+## Halaman 404 custom
+
+Website Starlight menampilkan halaman 404 sederhana secara default.
+Anda dapat menyesuaikannya dengan menambahkan file `404.md` (atau `404.mdx`) ke direktori `src/content/docs/` Anda:
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - **404.md**
+      - index.md
+- astro.config.mjs
+
+</FileTree>
+
+Anda dapat menggunakan semua teknik tata letak dan penyesuaian halaman Starlight dalam halaman 404 Anda. Sebagai contoh, halaman 404 default menggunakan [template `splash`](#tata-letak-halaman) dan komponen [`hero`](/id/reference/frontmatter/#hero) di frontmatter:
+
+```md
+---
+title: '404'
+template: splash
+editUrl: false
+hero:
+  title: '404'
+  tagline: Halaman tidak ditemukan. Cek kembali kolom URL atau gunakan fitur pencarian.
+---
+```
+
+## Font custom
+
+Secara default, Starlight menggunakan font sans-serif yang tersedia di perangkat lokal pengguna untuk semua teks.
+Hal ini memastikan website dokumentasi dimuat dengan cepat dalam font yang sudah familiar bagi setiap pengguna, tanpa memerlukan bandwidth ekstra untuk mengunduh file font yang besar.
+
+Jika Anda perlu menambahkan font kustom ke website Starlight Anda, Anda dapat menyiapkan font untuk digunakan dalam file CSS custom atau dengan teknik [styling Astro lainnya](https://docs.astro.build/en/guides/styling/).
+
+### Menyiapkan font
+
+Jika Anda sudah memiliki file font, ikuti [panduan penyiapan lokal](#menyiapkan-file-font-lokal).
+Untuk menggunakan Google Fonts, ikuti [panduan penyiapan Fontsource](#panduan-penyiapan-fontsource).
+
+#### Menyiapkan file font lokal
+
+1. Tambahkan file font Anda ke direktori `src/fonts/` dan buat file kosong `font-face.css`:
+
+   <FileTree>
+
+   - src/
+     - content/
+     - fonts/
+       - **CustomFont.woff2**
+       - **font-face.css**
+   - astro.config.mjs
+
+   </FileTree>
+
+2. Tambahkan [deklarasi `@font-face`](https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face) untuk setiap font Anda di `src/fonts/font-face.css`.
+   Gunakan path relatif ke file font dalam fungsi `url()`.
+
+   ```css
+   /* src/fonts/font-face.css */
+
+   @font-face {
+   	font-family: 'Custom Font';
+   	/*Gunakan path relatif ke file font dalam fungsi `url()`. */
+   	src: url('./CustomFont.woff2') format('woff2');
+   	font-weight: normal;
+   	font-style: normal;
+   	font-display: swap;
+   }
+   ```
+
+3. Tambahkan path ke file `font-face.css` Anda ke dalam array `customCss` Starlight di `astro.config.mjs`:
+
+   ```js
+   // astro.config.mjs
+   import { defineConfig } from 'astro/config';
+   import starlight from '@astrojs/starlight';
+
+   export default defineConfig({
+   	integrations: [
+   		starlight({
+   			title: 'Website Dokumentasi dengan Tipe Font Kustom',
+   			customCss: [
+   				// Path relatif ke file CSS `@font-face` Anda.
+   				'./src/fonts/font-face.css',
+   			],
+   		}),
+   	],
+   });
+   ```
+
+#### Panduan penyiapan Fontsource
+
+Proyek [Fontsource](https://fontsource.org/) mempermudah penggunaan Google Fonts dan font open-source lainnya.
+Proyek ini menyediakan modul npm yang dapat Anda pasang untuk font yang ingin Anda gunakan dan termasuk file CSS siap pakai untuk ditambahkan ke proyek Anda.
+
+1.  Temukan font yang ingin Anda gunakan di [katalog Fontsource](https://fontsource.org/).
+    Contoh ini akan menggunakan [IBM Plex Serif](https://fontsource.org/fonts/ibm-plex-serif).
+
+2.  Install package untuk font yang Anda pilih.
+    Anda dapat menemukan nama package dengan cara mengklik "Install" pada halaman font Fontsource.
+
+         <Tabs>
+
+    <TabItem label="npm">
+
+    ```sh
+    npm install @fontsource/ibm-plex-serif
+    ```
+
+           </TabItem>
+
+        <TabItem label="pnpm">
+
+    ```sh
+    pnpm add @fontsource/ibm-plex-serif
+    ```
+
+           </TabItem>
+
+        <TabItem label="Yarn">
+
+    ```sh
+    yarn add @fontsource/ibm-plex-serif
+    ```
+
+           </TabItem>
+
+      </Tabs>
+
+3.  Tambahkan file CSS Fontsource ke dalam array `customCss` Starlight di `astro.config.mjs`:
+
+    ```js
+    // astro.config.mjs
+    import { defineConfig } from 'astro/config';
+    import starlight from '@astrojs/starlight';
+
+    export default defineConfig({
+    	integrations: [
+    		starlight({
+    			title: 'Website Dokumentasi dengan Jenis Font Custom',
+    			customCss: [
+    				// File Fontsource untuk font dengan ketebalan reguler dan semi-bold.
+    				'@fontsource/ibm-plex-serif/400.css',
+    				'@fontsource/ibm-plex-serif/600.css',
+    			],
+    		}),
+    	],
+    });
+    ```
+
+    Fontsource menyediakan beberapa file CSS untuk setiap font. Lihat [dokumentasi Fontsource](https://fontsource.org/docs/getting-started/install#4-weights-and-styles) untuk memahami file mana yang harus digunakan.
+
+### Menggunakan font
+
+Untuk menerapkan font yang Anda siapkan untuk website Anda, gunakan nama font pilihan Anda dalam [file CSS custom](/id/guides/css-and-tailwind/#custom-css-styles). Sebagai contoh, untuk mengganti font default Starlight di seluruh website, atur properti custom `--sl-font`:
+
+```css
+/* src/styles/custom.css */
+
+:root {
+	--sl-font: 'IBM Plex Serif', serif;
+}
+```
+
+Anda juga dapat menulis CSS yang lebih terarah jika Anda ingin menerapkan font Anda dengan lebih selektif. Sebagai contoh, untuk hanya mengatur font pada konten utama, bukan di sidebar:
+
+```css
+/* src/styles/custom.css */
+
+main {
+	font-family: 'IBM Plex Serif', serif;
+}
+```
+
+Ikuti [petunjuk CSS custom](/id/guides/css-and-tailwind/#custom-css-styles) untuk menambahkan style Anda ke website Anda.

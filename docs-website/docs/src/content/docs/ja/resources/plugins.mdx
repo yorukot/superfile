@@ -1,0 +1,93 @@
+---
+title: プラグインとインテグレーション
+description: プラグインやインテグレーションをチェックして、Starlightを拡張しましょう！
+sidebar:
+  order: 1
+---
+
+:::tip[自分のものを追加しよう！]
+Starlight向けのプラグインやツールを作成しましたか？このページにリンクを追加するPRを作成しましょう！
+:::
+
+## プラグイン
+
+[プラグイン](/ja/reference/plugins/)により、Starlightの設定やUI、動作をカスタマイズできます。また、プラグインは簡単に共有や再利用ができます。Starlightチームが公式にサポートする公式プラグインと、Starlightユーザーがメンテナンスするコミュニティ製プラグインでサイトを拡張しましょう。
+
+### 公式プラグイン
+
+<CardGrid>
+	<LinkCard
+		href="/guides/site-search/#algolia-docsearch"
+		title="Algolia DocSearch"
+		description="デフォルトの検索プロバイダーであるPagefindを、Algolia DocSearchに置き換えます。"
+	/>
+</CardGrid>
+
+### コミュニティ製プラグイン
+
+<CardGrid>
+	<LinkCard
+		href="https://github.com/HiDeoo/starlight-links-validator"
+		title="starlight-links-validator"
+		description="Starlightページ内のリンクが壊れていないかをチェックします。"
+	/>
+	<LinkCard
+		href="https://github.com/HiDeoo/starlight-typedoc"
+		title="starlight-typedoc"
+		description="TypeDocにより、TypeScriptコードからStarlightページを生成します。"
+	/>
+	<LinkCard
+		href="https://github.com/HiDeoo/starlight-blog"
+		title="starlight-blog"
+		description="ドキュメントサイトにブログを追加します。"
+	/>
+	<LinkCard
+		href="https://github.com/HiDeoo/starlight-openapi"
+		title="starlight-openapi"
+		description="OpenAPI/Swaggerの仕様からドキュメントページを作成します。"
+	/>
+	<LinkCard
+		href="https://github.com/HiDeoo/starlight-obsidian"
+		title="starlight-obsidian"
+		description="Obsidianの保管庫をStarlightサイトに公開します。"
+	/>
+	<LinkCard
+		href="https://astro-ghostcms.xyz/intro/starlight/install/"
+		title="starlight-ghostcms"
+		description="GhostCMSのブログ投稿をStarlightドキュメントに追加します。"
+	/>
+	<LinkCard
+		href="https://github.com/HiDeoo/starlight-image-zoom"
+		title="starlight-image-zoom"
+		description="ドキュメントの画像にズーム機能を追加します。"
+	/>
+</CardGrid>
+
+## コミュニティ製ツールとインテグレーション
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+以下のコミュニティ製ツールやインテグレーションにより、Starlightサイトに機能を追加できます。
+
+<CardGrid>
+	<LinkCard
+		href="https://www.feelback.dev/blog/new-astro-starlight-integration/"
+		title="FeelBack"
+		description="ユーザーフィードバックシステムをドキュメントページに追加します。"
+	/>
+	<LinkCard
+		href="https://github.com/val-town/notion-to-astro"
+		title="notion-to-astro"
+		description="NotionのエクスポートをAstro Starlightドキュメントに変換します。"
+	/>
+	<LinkCard
+		href="https://github.com/mattjennings/astro-live-code"
+		title="astro-live-code"
+		description="MDXコードブロックをインタラクティブなコンポーネントとしてレンダリングします。"
+	/>
+	<LinkCard
+		href="https://github.com/HiDeoo/starlight-i18n"
+		title="starlight-i18n"
+		description="Starlightページの翻訳を支援するVisual Studio Code拡張機能です。"
+	/>
+</CardGrid>

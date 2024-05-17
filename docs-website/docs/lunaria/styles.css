@@ -1,0 +1,47 @@
+:root {
+	--theme-accent: hsl(234, 100%, 87%);
+	--theme-bg: hsl(223, 13%, 10%);
+	--theme-table-header: hsl(222, 13%, 16%);
+	--theme-table-hover: hsl(222, 13%, 16%);
+	--theme-text: hsl(228, 8%, 77%);
+	--theme-text-bright: hsl(0, 0%, 100%);
+	--overlay-blurple: hsla(255, 60%, 60%, 0.2);
+
+	--ln-color-background: linear-gradient(215deg, var(--overlay-blurple), transparent 40%),
+		radial-gradient(var(--overlay-blurple), transparent 40%) no-repeat -60vw -40vh / 105vw 200vh,
+		radial-gradient(var(--overlay-blurple), transparent 65%) no-repeat 50% calc(100% + 20rem) /
+			60rem 30rem,
+		var(--theme-bg);
+	--ln-color-link: var(--theme-accent);
+	--ln-color-black: var(--theme-text);
+	--ln-color-done: var(--ln-color-blue);
+	--ln-color-outdated: #ea580c;
+	--ln-color-missing: var(--theme-text-bright);
+	--ln-color-table-background: var(--theme-table-header);
+	--ln-color-table-border: var(--theme-table-header);
+
+	color-scheme: dark;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	color: var(--theme-text-bright);
+}
+
+p a {
+	text-decoration: underline;
+}
+
+.create-button {
+	background-color: hsl(213deg 89% 64% / 20%);
+	border-radius: 0.5em;
+}
+
+sup {
+	display: flex;
+	justify-content: center;
+}

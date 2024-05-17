@@ -1,0 +1,156 @@
+---
+title: Starlight 🌟 使用 Astro 构建文档站点
+head:
+  - tag: title
+    content: Starlight 🌟 使用 Astro 构建文档站点
+description: Starlight 帮助你使用 Astro 构建漂亮、高性能的文档网站。
+template: splash
+editUrl: false
+lastUpdated: false
+hero:
+  title: Starlight <br/> 使你的文档闪耀夺目
+  tagline: 快速、易用、易于访问 —— 构建卓越文档网站所需的一切。
+  image:
+    file: ~/assets/hero-star.webp
+  actions:
+    - text: 开始使用
+      icon: right-arrow
+      variant: primary
+      link: /zh-cn/getting-started/
+    - text: 在 GitHub 上查看
+      icon: external
+      link: https://github.com/withastro/starlight
+---
+
+import { CardGrid, Card } from '@astrojs/starlight/components';
+import AboutAstro from '~/components/about-astro.astro';
+import TestimonialGrid from '~/components/testimonial-grid.astro';
+import Testimonial from '~/components/testimonial.astro';
+
+<CardGrid stagger>
+	<Card title="令人愉悦的文档" icon="open-book">
+		包括：网站导航、搜索、国际化、SEO、易于阅读的排版、代码高亮、深色模式等等。
+	</Card>
+	<Card title="由 Astro 提供支持" icon="rocket">
+		充分利用 Astro 的全部功能和性能。使用你最喜欢的 Astro 集成和库扩展
+		Starlight。
+	</Card>
+	<Card title="Markdown、Markdoc 和 MDX" icon="document">
+		带上你最喜欢的标记语言。Starlight 为你提供了内置的 frontmatter 验证和
+		TypeScript 类型安全。
+	</Card>
+	<Card title="带上你自己的 UI 组件" icon="puzzle">
+		Starlight 作为一个不依赖于框架的完整文档解决方案。可以使用
+		React、Vue、Svelte、Solid 等进行扩展。
+	</Card>
+</CardGrid>
+
+<TestimonialGrid title="看看人们怎么说">
+  <Testimonial
+    name="Rachel"
+    handle="rachelnabors"
+    cite="https://twitter.com/astrodotbuild/status/1724934718745915558"
+  >
+    Astro 团队通过他们的 Starlight 项目彻底改变了文档处理的方式，现在你可以一站式获取所有功能。
+  </Testimonial>
+  <Testimonial
+    name="Flavio"
+    handle="flaviocopes"
+    cite="https://twitter.com/flaviocopes/status/1738237658717905108"
+  >
+    Astro 官方的入门工具 Starlight 是一款非常令人难以置信的构建文档网站的工具。
+  </Testimonial>
+  <Testimonial
+    name="Tomek"
+    handle="sulco"
+    cite="https://twitter.com/sulco/status/1735610348730802342"
+  >
+    Starlight 是我们极力推荐的出色开发体验（DX）的典范：其速度、便捷性和对细节的关注令人鼓舞。它负责技术和外观，让你可以专注于你的内容。👏
+
+    StackBlitz 团队对它赞不绝口！
+
+  </Testimonial>
+  <Testimonial
+    name="Roberto"
+    handle="RmeetsH"
+    cite="https://twitter.com/RmeetsH/status/1735783992018760090"
+  >
+    Starlight 对我来说是一个改变游戏规则的工具，让我能够专注于内容创作。
+
+    它直观的设计不仅简化了我的工作流程，还缩短了开源开发者的入门时间。
+
+  </Testimonial>
+  <Testimonial
+    name="Joel"
+    handle="jhooks"
+    cite="https://twitter.com/jhooks/status/1727405160547418405"
+  >
+    花了更多时间使用 Starlight 来创建课程构建文档，目前感觉非常不错。有很多巧妙的设计，可以专注于使用  Markdown 进行写作，而不必费心调整网站。
+  </Testimonial>
+  <Testimonial
+    name="Rick"
+    handle="rick_viscomi"
+    cite="https://twitter.com/rick_viscomi/status/1665867447910510593"
+  >
+    开始尝试使用 Starlight。不得不说，我对其开箱即用的性能感到非常印象深刻。
+
+    💯💯💯💯
+
+  </Testimonial>
+  <Testimonial
+    name="Nicolas"
+    handle="beaussan"
+    cite="https://twitter.com/beaussan/status/1735625189583466893"
+  >
+    Starlight 是开始文档编写的最佳方式，结合了 Astro 的强大和速度，以及来自 Starlight 的工具，简直是天作之合。
+
+    我已经使用它一段时间了，一直都很喜欢！
+
+  </Testimonial>
+  <Testimonial
+    name="Sylwia"
+    handle="SylwiaVargas"
+    cite="https://x.com/SylwiaVargas/status/1726556825741578286"
+  >
+    我在上一份工作中使用了 Starlight，非常喜欢它。拥有出色的组件、直观的设计，以及非常响应的社区（每当有人需要帮助时，他们会很快提供支持或告诉你解决方法）。非常愉快的体验。
+  </Testimonial>
+  <Testimonial
+    name="Lou Cyx"
+    handle="loucyx"
+    cite="https://elk.zone/m.webtoo.ls/@loucyx@mastodon.social/111587380021362284"
+  >
+    由于 Starlight 的帮助，我的 monorepo 站点上的文档看起来比以往任何时候都更好。它非常易于使用，同时不失Astro 的所有强大功能。感谢你们的努力工作！
+  </Testimonial>
+  <Testimonial
+    name="BowTiedWebReaper"
+    handle="BowTiedWebReapr"
+    cite="https://twitter.com/BowTiedWebReapr/status/1735633399501697517"
+  >
+    Starlight 是我用于文档编写的首选工具。相比于使用其他需要子域的工具，它使得将文档添加到我现有的 Astro产品网站变得非常容易。
+  </Testimonial>
+  <Testimonial
+    name="Jeff"
+    handle="J_Everhart383"
+    cite="https://twitter.com/J_Everhart383/status/1691900590048292908"
+  >
+    我一直在重建 WPEngine Atlas 平台文档。相信我，Starlight 拥有一切你需要打造 A+ 文档平台的要素。🙌
+  </Testimonial>
+  <Testimonial
+    name="Chloe"
+    handle="solelychloe"
+    cite="https://twitter.com/solelychloe/status/1695115277602628082"
+  >
+    试试 Starlight 吧！
+
+    我在我的几个网站上使用它，效果非常棒。
+
+  </Testimonial>
+</TestimonialGrid>
+
+<AboutAstro title="由以下提供支持">
+Astro 是专为速度而设计的全能 Web 框架。
+从任何地方获取你的内容并在任何地方部署，所有这些都由你喜欢的 UI 组件和库提供支持。
+
+[了解 Astro](https://astro.build/)
+
+</AboutAstro>

@@ -1,0 +1,274 @@
+---
+title: 国际化 (i18n)
+description: 学习如何配置你的 Starlight 网站支持多种语言。
+---
+
+import { FileTree, Steps } from '@astrojs/starlight/components';
+
+Starlight 提供了内置的多语言支持，包括路由、回退内容和完整的从右到左（RTL）语言支持。
+
+## 配置 i18n
+
+<Steps>
+
+1. 通过将 [`locales`](/zh-cn/reference/configuration/#locales) 和 [`defaultLocale`](/zh-cn/reference/configuration/#defaultlocale) 传递给 Starlight 集成，告诉 Starlight 你支持的语言：
+
+   ```js {9-26}
+   // astro.config.mjs
+   import { defineConfig } from 'astro/config';
+   import starlight from '@astrojs/starlight';
+
+   export default defineConfig({
+   	integrations: [
+   		starlight({
+   			title: '我的文档',
+   			// 为此网站设置英语为默认语言。
+   			defaultLocale: 'en',
+   			locales: {
+   				// 英文文档在 `src/content/docs/en/` 中。
+   				en: {
+   					label: 'English',
+   				},
+   				// 简体中文文档在 `src/content/docs/zh-cn/` 中。
+   				'zh-cn': {
+   					label: '简体中文',
+   					lang: 'zh-CN',
+   				},
+   				// 阿拉伯文档在 `src/content/docs/ar/` 中。
+   				ar: {
+   					label: 'العربية',
+   					dir: 'rtl',
+   				},
+   			},
+   		}),
+   	],
+   });
+   ```
+
+   你的 `defaultLocale` 将用于回退内容和 UI 标签，所以选择你最有可能开始编写内容的语言，或者已经有内容的语言。
+
+2. 在 `src/content/docs/` 中为每种语言创建一个目录。
+   例如，对于上面显示的配置，创建以下文件夹：
+
+   <FileTree>
+
+   - src/
+     - content/
+       - docs/
+         - ar/
+         - en/
+         - zh-cn/
+
+   </FileTree>
+
+3. 现在你可以在你的语言目录中添加内容文件。使用相同的文件名来关联跨语言的页面，并利用 Starlight 的完整的 i18n 功能，包括回退内容、翻译通知等。
+
+   举个例子，创建 `ar/index.md` 和 `en/index.md` 来分别表示阿拉伯语和英语的主页。
+
+</Steps>
+
+### 使用 `root` 语言
+
+你可以使用“root”语言来提供没有任何 i18n 前缀的语言。例如，如果英语是你的 root 语言，那么英语页面的路径将是 `/about` 而不是 `/en/about`。
+
+要设置 root 语言，请在你的 `locales` 配置中使用 `root` 键。如果 root 语言也是你的内容的默认语言，请删除 `defaultLocale` 或将其设置为 `'root'`。
+
+```js {9,11-14}
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: '我的文档',
+			defaultLocale: 'root', // 可选
+			locales: {
+				root: {
+					label: 'English',
+					lang: 'en', // lang 是 root 语言必须的
+				},
+				'zh-cn': {
+					label: '简体中文',
+					lang: 'zh-CN',
+				},
+			},
+		}),
+	],
+});
+```
+
+当使用 `root` 语言时，将页面直接放在 `src/content/docs/` 中，而不是在专用的语言文件夹中。例如，当使用上面的配置时，这里是英语和中文的主页文件：
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - **index.md**
+      - zh-cn/
+        - **index.md**
+
+</FileTree>
+
+#### 单语言网站
+
+默认情况下，Starlight 是一个单语言（英语）网站。要在其他语言中创建单语言网站，请将其设置为 `locales` 配置中的 `root`：
+
+```diff lang="js" {10-13}
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: 'My Docs',
+			locales: {
+				root: {
+					label: '简体中文',
+					lang: 'zh-CN',
+				},
+			},
+		}),
+	],
+});
+```
+
+这允许你在不启用其他多语言网站的国际化功能的情况下，覆盖 Starlight 的默认语言，例如语言选择器。
+
+## 回退内容
+
+Starlight 期望你在所有语言中创建等效的页面。例如，如果你有一个 `en/about.md` 文件，请为你支持的每种其他语言创建一个 `about.md`。这允许 Starlight 为尚未翻译的页面提供自动回退内容。
+
+如果某种语言尚未提供翻译，Starlight 将为读者显示该页面的默认语言（通过 `defaultLocale` 设置）的内容。例如，如果你尚未创建关于你的法语版本，并且你的默认语言是英语，那么访问 `/fr/about` 的访问者将看到来自 `/en/about` 的英语内容，并显示该页面尚未翻译的通知。这有助于你在默认语言中添加内容，然后在翻译人员有时间时逐步翻译它。
+
+## 翻译网站标题
+
+默认情况下，Starlight 会为所有语言使用相同的站点标题。
+如果你需要为每种语言自定义标题，你可以在 Starlight 的选项中将一个对象传递给 [`title`](/zh-cn/reference/configuration/#title-必填)：
+
+```diff lang="js"
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+-			title: 'My Docs',
++			title: {
++				en: 'My Docs',
++				'zh-CN': '我的文档',
++			},
+			defaultLocale: 'en',
+			locales: {
+				en: { label: 'English' },
+				'zh-cn': { label: '简体中文', lang: 'zh-CN' },
+			},
+		}),
+	],
+});
+```
+
+## 翻译 Starlight 的 UI
+
+import LanguagesList from '~/components/languages-list.astro';
+import UIStringsList from '~/components/ui-strings-list.astro';
+
+除了托管翻译的内容文件之外，Starlight 还允许你翻译默认的 UI 字符串（例如，目录中的“本页”标题），以便你的读者可以完全使用所选的语言体验你的网站。
+
+默认提供了<LanguagesList/>的翻译 UI 字符串，
+同时我们欢迎[贡献添加更多默认语言](https://github.com/withastro/starlight/blob/main/CONTRIBUTING.md)。
+
+你可以通过 `i18n` 数据集合提供你支持的其他语言的翻译 - 或覆盖我们的默认标签。
+
+<Steps>
+
+1. 如果尚未配置，请在 `src/content/config.ts` 中配置 `i18n` 数据集合：
+
+   ```diff lang="js" ins=/, (i18nSchema)/
+   // src/content/config.ts
+   import { defineCollection } from 'astro:content';
+   import { docsSchema, i18nSchema } from '@astrojs/starlight/schema';
+
+   export const collections = {
+   	docs: defineCollection({ schema: docsSchema() }),
+   +	i18n: defineCollection({ type: 'data', schema: i18nSchema() }),
+   };
+   ```
+
+2. 为你想要提供 UI 翻译字符串的每种其他语言在 `src/content/i18n/` 中创建一个 JSON 文件。
+   例如，这将为阿拉伯语和简体中文添加翻译文件：
+
+   <FileTree>
+
+   - src/
+     - content/
+       - i18n/
+         - ar.json
+         - zh-CN.json
+
+   </FileTree>
+
+3. 在 JSON 文件中添加你想要翻译的键的翻译。只翻译值，将键保留为英语（例如 `"search.label": "搜索"`）。
+
+   这些是 Starlight 附带的现有字符串的英文默认值：
+
+   <UIStringsList />
+
+   Starlight 的代码块使用了 [Expressive Code](https://github.com/expressive-code/expressive-code)。
+   你可以在同一个 JSON 文件中使用 `expressiveCode` 键来设置它的 UI 字符串翻译。
+
+   ```json
+   {
+   	"expressiveCode.copyButtonCopied": "Copied!",
+   	"expressiveCode.copyButtonTooltip": "Copy to clipboard",
+   	"expressiveCode.terminalWindowFallbackTitle": "Terminal window"
+   }
+   ```
+
+   Starlight 的搜索模态框由 [Pagefind](https://pagefind.app/) 库提供支持。
+   你可以在同一个 JSON 文件中使用 `pagefind` 键来设置它的 UI 字符串翻译。
+
+   ```json
+   {
+   	"pagefind.clear_search": "Clear",
+   	"pagefind.load_more": "Load more results",
+   	"pagefind.search_label": "Search this site",
+   	"pagefind.filters_label": "Filters",
+   	"pagefind.zero_results": "No results for [SEARCH_TERM]",
+   	"pagefind.many_results": "[COUNT] results for [SEARCH_TERM]",
+   	"pagefind.one_result": "[COUNT] result for [SEARCH_TERM]",
+   	"pagefind.alt_search": "No results for [SEARCH_TERM]. Showing results for [DIFFERENT_TERM] instead",
+   	"pagefind.search_suggestion": "No results for [SEARCH_TERM]. Try one of the following searches:",
+   	"pagefind.searching": "Searching for [SEARCH_TERM]..."
+   }
+   ```
+
+ </Steps>
+
+### 拓展翻译 schema
+
+通过在 `i18nSchema()` 选项中设置 `extend` 可以向你网站的翻译字典中添加自定义键。
+在下面的示例中添加了一个新的可选的 `custom.label` 键：
+
+```diff lang="js"
+// src/content/config.ts
+import { defineCollection, z } from 'astro:content';
+import { docsSchema, i18nSchema } from '@astrojs/starlight/schema';
+
+export const collections = {
+	docs: defineCollection({ schema: docsSchema() }),
+	i18n: defineCollection({
+		type: 'data',
+		schema: i18nSchema({
++			extend: z.object({
++				'custom.label': z.string().optional(),
++			}),
+		}),
+	}),
+};
+```
+
+在 Astro 文档的[“定义集合模式”](https://docs.astro.build/zh-cn/guides/content-collections/#定义集合模式)中了解有关内容集合 schema 的更多信息。

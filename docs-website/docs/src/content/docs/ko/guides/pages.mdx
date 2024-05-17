@@ -1,0 +1,174 @@
+---
+title: 페이지
+description: Starlight를 사용하여 문서 사이트의 페이지를 만들고 관리하는 방법을 알아보세요.
+sidebar:
+  order: 1
+---
+
+Starlight는 Markdown Frontmatter를 통해 제공되는 유연한 옵션을 사용하여 콘텐츠를 기반으로 사이트의 HTML 페이지를 생성합니다.
+또한 Starlight 프로젝트는 [Astro의 강력한 페이지 생성 도구](https://docs.astro.build/ko/basics/astro-pages/)에 대한 전체 액세스 권한을 갖습니다.
+이 가이드에서는 Starlight에서 페이지 생성이 작동하는 방식을 보여줍니다.
+
+## 콘텐츠 페이지
+
+### 파일 형식
+
+Starlight는 구성이 필요 없는 Markdown 및 MDX 콘텐츠 작성을 지원합니다.
+실험적인 [Astro Markdoc 통합](https://docs.astro.build/ko/guides/integrations-guide/markdoc/)을 설치하여 Markdoc에 대한 지원을 추가할 수 있습니다.
+
+### 페이지 추가
+
+`src/content/docs/`에 `.md` 또는 `.mdx` 파일을 생성하여 사이트에 새 페이지를 추가하세요.
+하위 폴더를 사용하여 파일을 정리하고 여러 경로 세그먼트를 생성하세요.
+
+예를 들어, 다음 파일 구조는 `example.com/hello-world` 및 `example.com/reference/faq`에 페이지를 생성합니다.
+
+import { FileTree } from '@astrojs/starlight/components';
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - hello-world.md
+      - reference/
+        - faq.md
+
+</FileTree>
+
+### 타입 안정성을 갖춘 프론트매터
+
+모든 Starlight 페이지는 페이지 표시 방법을 제어하기 위해 사용자 정의 가능한 [공통 프론트매터 속성 세트](/ko/reference/frontmatter/)를 공유합니다.
+
+```md
+---
+title: 안녕하세요!
+description: 이것은 내 Starlight 기반 사이트의 페이지입니다.
+---
+```
+
+중요한 사항을 잊어버리면 Starlight가 알려드립니다.
+
+## 사용자 정의 페이지
+
+고급 사용 사례의 경우 `src/pages/` 디렉터리를 생성하여 사용자 정의 페이지를 추가할 수 있습니다.
+`src/pages/` 디렉터리는 [Astro의 파일 기반 라우팅](https://docs.astro.build/ko/basics/astro-pages/#파일-기반-라우팅)을 사용하며 다른 페이지 형식에서 `.astro` 파일에 대한 지원을 포함합니다.
+이는 완전히 사용자 정의된 레이아웃으로 페이지를 작성하거나 대체 데이터 소스에서 페이지를 생성해야 하는 경우에 유용합니다.
+
+예를 들어, 이 프로젝트는 `src/content/docs/`의 Markdown 콘텐츠를 `src/pages/`의 Astro 및 HTML 경로와 혼합합니다.
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - hello-world.md
+  - pages/
+    - custom.astro
+    - archived.html
+
+</FileTree>
+
+[Astro 문서의 "페이지" 가이드](https://docs.astro.build/ko/basics/astro-pages/)에서 자세한 내용을 읽어보세요.
+
+### 사용자 정의 페이지에서 Starlight 디자인 사용
+
+사용자 정의 페이지에서 Starlight 레이아웃을 사용하려면 `<StarlightPage />` 컴포넌트로 페이지 콘텐츠를 감싸세요.
+이는 콘텐츠를 동적으로 생성하지만 여전히 Starlight의 디자인을 사용하려는 경우 유용할 수 있습니다.
+
+```astro
+---
+// src/pages/custom-page/example.astro
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import CustomComponent from './CustomComponent.astro';
+---
+
+<StarlightPage frontmatter={{ title: '사용자 정의 페이지' }}>
+	<p>이것은 사용자 정의 컴포넌트가 있는 사용자 정의 페이지입니다.</p>
+	<CustomComponent />
+</StarlightPage>
+```
+
+#### Props
+
+`<StarlightPage />` 컴포넌트는 다음 props를 허용합니다.
+
+##### `frontmatter` (필수)
+
+**타입:** `StarlightPageFrontmatter`
+
+Markdown 페이지의 프론트매터와 유사하게 이 페이지에 대한 [프론트매터 속성](/ko/reference/frontmatter/)을 설정합니다.
+[`title`](/ko/reference/frontmatter/#title-필수) 속성은 필수이며 다른 모든 속성은 선택 사항입니다.
+
+다음 속성은 Markdown 프론트매터와 다릅니다.
+
+- [`slug`](/ko/reference/frontmatter/#slug) 속성은 지원되지 않으며 사용자 정의 페이지의 URL을 기반으로 자동 설정됩니다.
+- [`editUrl`](/ko/reference/frontmatter/#editurl) 옵션에는 편집 링크를 표시하기 위한 URL이 필요합니다.
+- [자동 생성된 링크 그룹](/ko/reference/configuration/#sidebar)에서 페이지가 표시되는 방식을 사용자 정의하기 위한 [`sidebar`](/ko/reference/frontmatter/#sidebar) 프론트매터 속성을 사용할 수 없습니다. `<StarlightPage />` 컴포넌트를 사용하는 페이지는 컬렉션의 일부가 아니며 자동 생성된 사이드바 그룹에 추가될 수 없습니다.
+- [`draft`](/ko/reference/frontmatter/#draft) 옵션은 페이지가 초안이라는 [알림](/ko/reference/overrides/#draftcontentnotice)만 표시할 뿐 프로덕션 빌드에서 자동으로 제외하지는 않습니다.
+
+##### `sidebar`
+
+**타입:** `SidebarEntry[]`
+**기본값:** [전역 `sidebar` 구성](/ko/reference/configuration/#sidebar)을 기반으로 생성된 사이드바
+
+이 페이지에 대한 사용자 정의 사이트 탐색 사이드바를 제공합니다.
+설정하지 않으면 페이지에서 기본 전역 사이드바를 사용합니다.
+
+예를 들어, 다음 페이지는 홈페이지 링크와 다양한 별자리에 대한 링크 그룹으로 기본 사이드바를 재정의합니다.
+사이드바의 현재 페이지는 `isCurrent` 속성을 사용하여 설정되었으며 선택적인 `badge`가 링크 항목에 추가되었습니다.
+
+```astro {3-13}
+<StarlightPage
+	frontmatter={{ title: '오리온' }}
+	sidebar={[
+		{ label: '홈', href: '/' },
+		{
+			label: '별자리',
+			items: [
+				{ label: '안드로메다', href: '/andromeda/' },
+				{ label: '오리온', href: '/orion/', isCurrent: true },
+				{ label: '작은곰자리', href: '/ursa-minor/', badge: 'Stub' },
+			],
+		},
+	]}
+>
+	예시 콘텐츠
+</StarlightPage>
+```
+
+##### `hasSidebar`
+
+**타입:** `boolean`
+**기본값:** [`frontmatter.template`](/ko/reference/frontmatter/#template)의 값이 `'splash'`라면 `false`, 그렇지 않다면 `true`
+
+이 페이지에 사이드바를 표시할지 여부를 제어합니다.
+
+##### `headings`
+
+**타입:** `{ depth: number; slug: string; text: string }[]`
+**기본값:** `[]`
+
+이 페이지의 모든 제목 배열을 제공하세요.
+제공된 경우 Starlight는 이 제목에서 페이지 목차를 생성합니다.
+
+##### `dir`
+
+**타입:** `'ltr' | 'rtl'`
+**기본값:** 현재 로케일의 쓰기 방향
+
+이 페이지 콘텐츠의 쓰기 방향을 설정합니다.
+
+##### `lang`
+
+**타입:** `string`
+**기본값:** 현재 로케일의 언어
+
+이 페이지 콘텐츠에 대해 BCP-47 언어 태그를 설정합니다. 예: `en`, `zh-CN` 또는 `pt-BR`.
+
+##### `isFallback`
+
+**타입:** `boolean`
+**기본값:** `false`
+
+현재 언어에 대한 번역이 존재하지 않아 이 페이지가 [대체 콘텐츠](/ko/guides/i18n/#대체-콘텐츠)를 사용하고 있는지 표시합니다.

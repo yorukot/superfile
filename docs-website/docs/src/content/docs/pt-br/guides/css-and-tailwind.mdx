@@ -1,0 +1,296 @@
+---
+title: CSS e Estilização
+description: Aprenda como estilizar seu site Starlight com CSS customizado ou integrá-lo com Tailwind CSS.
+---
+
+import { Tabs, TabItem, Steps } from '@astrojs/starlight/components';
+
+Você pode estilizar seu site Starlight com arquivos CSS customizados ou utilizar o plugin Starlight Tailwind.
+
+## Estilos CSS customizados
+
+Customize os estilos aplicados ao seu site Starlight ao fornecer arquivos CSS adicionais para modificar ou estender os estilos padrões do Starlight.
+
+<Steps>
+
+1. Adicione um arquivo CSS ao seu diretório `src/`.
+   Por exemplo, você poderia definir uma largura padrão de coluna mais larga e um tamanho de texto maior para títulos da página:
+
+   ```css
+   /* src/styles/customizado.css */
+   :root {
+   	--sl-content-width: 50rem;
+   	--sl-text-5xl: 3.5rem;
+   }
+   ```
+
+2. Adicione o caminho para seu arquivo CSS ao array `customCss` do Starlight em `astro.config.mjs`:
+
+   ```diff lang="js"
+   // astro.config.mjs
+   import { defineConfig } from 'astro/config';
+   import starlight from '@astrojs/starlight';
+
+   export default defineConfig({
+   	integrations: [
+   		starlight({
+   			title: 'Documentação com CSS Customizado',
+   			customCss: [
+   +				// Caminho relativo ao seu arquivo CSS customizado
+   +				'./src/styles/customizado.css',
+   			],
+   		}),
+   	],
+   });
+   ```
+
+</Steps>
+
+Você pode ver todas as propriedades CSS customizadas utilizadas pelo Starlight que você pode definir para customizar o seu site no [arquivo `props.css` no GitHub](https://github.com/withastro/starlight/blob/main/packages/starlight/style/props.css).
+
+## Tailwind CSS
+
+Suporte para Tailwind CSS em projetos Astro é providenciado pela [integração Astro Tailwind](https://docs.astro.build/pt-br/guides/integrations-guide/tailwind/).
+Starlight providencia um plugin Tailwind complementar para ajudar a configurar o Tailwind de forma compatível com os estilos do Starlight.
+
+O plugin Starlight Tailwind plugin aplica a seguinte configuração:
+
+- Configura as variantes `dark:` do Tailwind para funcionarem com o modo escuro do Starlight.
+- Utiliza [cores de tema e fontes](#estilizando-starlight-com-tailwind) do Tailwind na UI do Starlight.
+- Desabilita os estilos de reset [Preflight](https://tailwindcss.com/docs/preflight) do Tailwind enquanto seletivamente restaura partes essenciais do Preflight necessárias para o as classes utilitárias de borda do Tailwind.
+
+### Crie um novo projeto com Tailwind
+
+Comece um novo projeto Starlight com Tailwind CSS pré-configurado utilizando `create astro`:
+
+<Tabs syncKey="pkg">
+<TabItem label="npm">
+
+```sh
+npm create astro@latest -- --template starlight/tailwind
+```
+
+</TabItem>
+<TabItem label="pnpm">
+
+```sh
+pnpm create astro --template starlight/tailwind
+```
+
+</TabItem>
+<TabItem label="Yarn">
+
+```sh
+yarn create astro --template starlight/tailwind
+```
+
+</TabItem>
+</Tabs>
+
+### Adicione Tailwind a um projeto existente
+
+Se você já tem um site Starlight e quer adicionar Tailwind CSS, siga estes passos.
+
+<Steps>
+
+1.  Adicione a integração Astro Tailwind:
+
+    <Tabs syncKey="pkg">
+
+    <TabItem label="npm">
+
+    ```sh
+    npx astro add tailwind
+    ```
+
+    </TabItem>
+
+    <TabItem label="pnpm">
+
+    ```sh
+    pnpm astro add tailwind
+    ```
+
+    </TabItem>
+
+    <TabItem label="Yarn">
+
+    ```sh
+    yarn astro add tailwind
+    ```
+
+    </TabItem>
+
+    </Tabs>
+
+2.  Instale o plugin Starlight Tailwind:
+
+    <Tabs syncKey="pkg">
+
+    <TabItem label="npm">
+
+    ```sh
+    npm install @astrojs/starlight-tailwind
+    ```
+
+    </TabItem>
+
+    <TabItem label="pnpm">
+
+    ```sh
+    pnpm add @astrojs/starlight-tailwind
+    ```
+
+    </TabItem>
+
+    <TabItem label="Yarn">
+
+    ```sh
+    yarn add @astrojs/starlight-tailwind
+    ```
+
+    </TabItem>
+
+    </Tabs>
+
+3.  Crie um arquivo CSS para os estilos base do Tailwind, por exemplo, em `src/tailwind.css`:
+
+    ```css
+    /* src/tailwind.css */
+    @tailwind base;
+    @tailwind components;
+    @tailwind utilities;
+    ```
+
+4.  Atualize seu arquivo de configuração do Astro para utilizar seus estilos base do Tailwind e desabilitar os estilos base padrões:
+
+    ```js {11-12,16-17}
+    // astro.config.mjs
+    import { defineConfig } from 'astro/config';
+    import starlight from '@astrojs/starlight';
+    import tailwind from '@astrojs/tailwind';
+
+    export default defineConfig({
+    	integrations: [
+    		starlight({
+    			title: 'Documentação com Tailwind',
+    			customCss: [
+    				// Caminho para seus estilos base do Tailwind:
+    				'./src/tailwind.css',
+    			],
+    		}),
+    		tailwind({
+    			// Desabilita os estilos base padrões:
+    			applyBaseStyles: false,
+    		}),
+    	],
+    });
+    ```
+
+5.  Adicione o plugin Starlight Tailwind em `tailwind.config.mjs`:
+
+    ```js ins={2,7}
+    // tailwind.config.mjs
+    import starlightPlugin from '@astrojs/starlight-tailwind';
+
+    /** @type {import('tailwindcss').Config} */
+    export default {
+    	content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
+    	plugins: [starlightPlugin()],
+    };
+    ```
+
+</Steps>
+
+### Estilizando Starlight com Tailwind
+
+Starlight irá utilizar os valores da sua [configuração de tema do Tailwind](https://tailwindcss.com/docs/theme) em sua UI.
+
+Se definidas, as seguintes opções irão sobrescrever os estilos padrões do Starlight:
+
+- `colors.accent` — usado para os links e o item atualmente destacado
+- `colors.gray` — usado para as cores de fundo e bordas
+- `fontFamily.sans` — usado para o texto da UI e conteúdo
+- `fontFamily.mono` — usado para códigos de exemplo
+
+```js {12,14,18,20}
+// tailwind.config.mjs
+import starlightPlugin from '@astrojs/starlight-tailwind';
+import colors from 'tailwindcss/colors';
+
+/** @type {import('tailwindcss').Config} */
+export default {
+	content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
+	theme: {
+		extend: {
+			colors: {
+				// Sua cor de destaque preferida. Indigo é o mais próximo do padrão do Starlight.
+				accent: colors.indigo,
+				// Sua escala de cinzas preferida. Zinc é o mais próximo do padrão do Starlight.
+				gray: colors.zinc,
+			},
+			fontFamily: {
+				// Sua fonte de texto preferida. Starlight utiliza um conjunto de fontes do sistema por padrão.
+				sans: ['"Atkinson Hyperlegible"'],
+				// Sua fonte de código preferida. Starlight utiliza fontes monospace do sistema por padrão.
+				mono: ['"IBM Plex Mono"'],
+			},
+		},
+	},
+	plugins: [starlightPlugin()],
+};
+```
+
+## Tema
+
+O tema de cores do Starlight pode ser controlado sobrescrevendo suas propriedades customizadas padrão.
+Essas variáveis são usadas na UI com uma variedade de tons de cinza usados como cores de texto e fundo e uma cor de destaque usada para links e para destacar itens atuais da navegação.
+
+### Editor de tema de cores
+
+Use os controles deslizantes abaixo para modificar as paletas de cor de destaque e cinza do Starlight.
+As áreas de pré-visualização escura e clara irão mostrar as cores resultantes, e a página inteira também será atualizada para visualizar suas mudanças.
+
+Quando você estiver feliz com as mudanças, copie o código CSS ou Tailwind abaixo e use-o no seu projeto.
+
+import ThemeDesigner from '~/components/theme-designer.astro';
+
+<ThemeDesigner
+	labels={{
+		presets: {
+			label: 'Predefinições',
+			ocean: 'Oceano',
+			forest: 'Floresta',
+			oxide: 'Ferrugem',
+			nebula: 'Nebulosa',
+			default: 'Padrão',
+			random: 'Aleatório',
+		},
+		editor: {
+			accentColor: 'Destaque',
+			grayColor: 'Cinza',
+			hue: 'Tonalidade',
+			chroma: 'Croma',
+			pickColor: 'Escolha uma cor',
+		},
+		preview: {
+			darkMode: 'Modo escuro',
+			lightMode: 'Modo claro',
+			bodyText:
+				'Texto de corpo é mostrado em um tom de cinza com alto contraste com o fundo.',
+			linkText: 'Links são coloridos.',
+			dimText: 'Algum texto, como o índice, tem um menor contraste.',
+			inlineCode: 'Código inline tem um fundo distinto.',
+		},
+	}}
+>
+	<Fragment slot="css-docs">
+		Adicione o seguinte CSS ao seu projeto em um [arquivo CSS
+		customizado](#estilos-css-customizados) para aplicar este tema ao seu site.
+	</Fragment>
+	<Fragment slot="tailwind-docs">
+		O [arquivo de configuração do Tailwind](#estilizando-starlight-com-tailwind)
+		de exemplo abaixo inclui paletas de cor `accent` e `gray` para utilizar no
+		objeto da configuração `theme.extend.colors`.
+	</Fragment>
+</ThemeDesigner>

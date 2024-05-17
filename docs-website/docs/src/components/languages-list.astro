@@ -1,0 +1,41 @@
+---
+import { getEntry } from 'astro:content';
+import translations from '../../../packages/starlight/translations';
+import { slugToLocaleData } from '../../../packages/starlight/utils/slugs';
+
+interface Props {
+	startsSentence?: boolean;
+}
+
+// The current page's slug.
+const slug = Astro.url.pathname.replace(/^\//, '').replace(/\/$/, '');
+// The docs entry for the current page, or `undefined` if the page is using fallback content.
+const entry = await getEntry('docs', slug);
+// The BCP-47 tag for the current page or fallback content's language.
+const pageLang = entry ? slugToLocaleData(slug).lang : 'en';
+// The BCP-47 tags for all supported languages in Starlight.
+const supportedLangs = Object.keys(translations);
+// An i18n helper that returns the language name for a given BCP-47 tag configured for the current page's language.
+const langNames = new Intl.DisplayNames([pageLang], { type: 'language' });
+
+// A list of the language names for all supported languages sorted alphabetically.
+const supportedLangNames = supportedLangs
+	.map((supportedLang) => {
+		const langName = langNames.of(supportedLang);
+		if (!langName) throw new Error(`Failed to get the language name for '${supportedLang}'.`);
+		return langName;
+	})
+	.sort((a, b) => a.localeCompare(b, pageLang));
+
+// The list of language names for all supported languages formatted according to the current page's language.
+const langList = new Intl.ListFormat(pageLang, {
+	style: 'long',
+	type: 'conjunction',
+}).format(supportedLangNames);
+---
+
+{
+	Astro.props.startsSentence
+		? langList[0]?.toLocaleUpperCase(pageLang) + langList.slice(1)
+		: langList
+}

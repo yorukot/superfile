@@ -1,0 +1,439 @@
+---
+title: 组件
+description: 使用 Starlight 在 MDX 中使用组件
+---
+
+组件让你可以轻松地重用 UI 或样式。
+例如，链接卡片或 YouTube 嵌入。
+Starlight 支持在 [MDX](https://mdxjs.com/) 文件中使用组件，并提供了一些常用组件供你使用。
+
+[在 Astro 文档中了解更多关于构建组件的内容](https://docs.astro.build/zh-cn/core-concepts/astro-components/)。
+
+## 使用组件
+
+你可以通过在 MDX 文件中导入组件，然后像渲染 JSX 标签一样来使用组件。
+这些看起来像 HTML 标签，但是以大写字母开头，与你的 `import` 语句中的名称匹配：
+
+```mdx
+---
+# src/content/docs/example.mdx
+title: 欢迎来到我的文档
+---
+
+import SomeComponent from '~/components/SomeComponent.astro';
+import AnotherComponent from '~/components/AnotherComponent.astro';
+
+<SomeComponent prop="something" />
+
+<AnotherComponent>组件也可以包含**嵌套内容**。</AnotherComponent>
+```
+
+因为 Starlight 是由 Astro 提供支持的，所以你可以在 MDX 文件中添加对任何 [支持的 UI 框架（React、Preact、Svelte、Vue、Solid、Lit 和 Alpine）](https://docs.astro.build/zh-cn/core-concepts/framework-components/) 构建的组件的支持。
+在 Astro 文档中了解更多关于 [在 MDX 中使用组件](https://docs.astro.build/zh-cn/guides/markdown-content/#在-mdx-中使用组件) 的内容。
+
+### 与 Starlight 样式的兼容
+
+Starlight 为你的 Markdown 内容应用了默认样式，例如在元素之间添加边距。
+
+如果这些样式与你的组件的外观冲突，请在组件上设置 `not-content` 类来禁用它们。
+
+```astro 'class="not-content"'
+---
+// src/components/Example.astro
+---
+
+<div class="not-content">
+	<p>不受 Starlight 默认内容样式的影响。</p>
+</div>
+```
+
+## 内置组件
+
+Starlight 为常见的文档用例提供了一些内置组件。
+这些组件可以从 `@astrojs/starlight/components` 包中获取。
+
+### 选项卡
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+你可以使用 `<Tabs>` 和 `<TabItem>` 组件显示一个选项卡界面。
+每个 `<TabItem>` 必须有一个 `label` 来显示给用户。
+使用可选的`icon`属性在标签旁包含一个[Starlight内置图标](#所有图标)。
+
+```mdx
+# src/content/docs/example.mdx
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+<Tabs>
+	<TabItem label="恒星" icon="star">
+		天狼星、织女星、参宿四
+	</TabItem>
+	<TabItem label="卫星" icon="moon">
+		木卫一、木卫二、木卫三
+	</TabItem>
+</Tabs>
+```
+
+以上代码在页面上生成了以下选项卡：
+
+<Tabs>
+	<TabItem label="恒星" icon="star">
+		天狼星、织女星、参宿四
+	</TabItem>
+	<TabItem label="卫星" icon="moon">
+		木卫一、木卫二、木卫三
+	</TabItem>
+</Tabs>
+
+#### 同步选项卡
+
+通过添加 `syncKey` 属性来保持多个选项卡组同步。
+
+页面上拥有相同的 `syncKey` 值的所有 `<Tabs>` 都将展示相同的活动标签。这使得你的读者只需选择一次（例如他们的操作系统或包管理器），就可以看到他们的选择反映在整个页面中。
+
+若要同步相关的选项卡，请为每个 `<Tabs>` 组件添加相同的 `syncKey` 属性，并确保它们都使用相同的 `<TabItem>` 标签：
+
+```mdx 'syncKey="constellations"'
+# src/content/docs/example.mdx
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+_一些星座:_
+
+<Tabs syncKey="星座">
+	<TabItem label="猎户座">Bellatrix, Rigel, Betelgeuse</TabItem>
+	<TabItem label="双子座">Pollux, Castor A, Castor B</TabItem>
+</Tabs>
+
+_一些系外行星:_
+
+<Tabs syncKey="星座">
+	<TabItem label="猎户座">HD 34445 b, Gliese 179 b, Wasp-82 b</TabItem>
+	<TabItem label="双子座">Pollux b, HAT-P-24b, HD 50554 b</TabItem>
+</Tabs>
+```
+
+以上代码在页面上生成了以下内容：
+
+_一些星座:_
+
+<Tabs syncKey="星座">
+	<TabItem label="猎户座">Bellatrix, Rigel, Betelgeuse</TabItem>
+	<TabItem label="双子座">Pollux, Castor A, Castor B</TabItem>
+</Tabs>
+
+_一些系外行星:_
+
+<Tabs syncKey="星座">
+	<TabItem label="猎户座">HD 34445 b, Gliese 179 b, Wasp-82 b</TabItem>
+	<TabItem label="双子座">Pollux b, HAT-P-24b, HD 50554 b</TabItem>
+</Tabs>
+
+### 卡片
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+你可以使用 `<Card>` 组件在与 Starlight 样式匹配的盒子中显示内容。
+当有足够的空间时，可以使用 `<CardGrid>` 组件将多个卡片封装在一起，以便并排显示卡片。
+
+`<Card>` 需要一个 `title`，并且可以选择包含一个 `icon` 属性，该属性设置为 [Starlight 内置图标](#所有图标) 之一的名称。
+
+```mdx
+# src/content/docs/example.mdx
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<Card title="看看这个">你想要突出显示的有趣内容。</Card>
+
+<CardGrid>
+	<Card title="恒星" icon="star">
+		天狼星、织女星、参宿四
+	</Card>
+	<Card title="卫星" icon="moon">
+		木卫一、木卫二、木卫三
+	</Card>
+</CardGrid>
+```
+
+以上代码在页面上生成了以下内容：
+
+<Card title="看看这个">你想要突出显示的有趣内容。</Card>
+
+<CardGrid>
+	<Card title="恒星" icon="star">
+		天狼星、织女星、参宿四
+	</Card>
+	<Card title="卫星" icon="moon">
+		木卫一、木卫二、木卫三
+	</Card>
+</CardGrid>
+
+:::tip[提示]
+在主页上使用卡片网格来显示项目的关键特性。
+添加 `stagger` 属性来垂直移动第二列的卡片，并增加视觉效果：
+
+```astro
+<CardGrid stagger>
+	<!-- 卡片组件 -->
+</CardGrid>
+```
+
+:::
+
+### 链接卡片
+
+使用 `<LinkCard>` 组件来突出显示链接到不同页面的内容。
+
+`<LinkCard>` 需要一个 `title` 和一个 [`href`](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/a#href) 属性。你可以选择包含一个简短的 `description` 或其他链接属性，例如 `target`。
+
+当有足够的空间时，将多个 `<LinkCard>` 组件组合在 `<CardGrid>` 中，以便并排显示卡片。
+
+```mdx
+# src/content/docs/example.mdx
+
+import { LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+<LinkCard
+	title="自定义 Starlight"
+	description="了解如何使用自定义样式、字体等打造你自己的 Starlight 网站。"
+	href="/zh-cn/guides/customization/"
+/>
+
+<CardGrid>
+	<LinkCard title="创作 Markdown" href="/zh-cn/guides/authoring-content/" />
+	<LinkCard title="组件" href="/zh-cn/guides/components/" />
+</CardGrid>
+```
+
+以上代码在页面上生成了以下内容：
+
+import { LinkCard } from '@astrojs/starlight/components';
+
+<LinkCard
+	title="自定义 Starlight"
+	description="了解如何使用自定义样式、字体等打造你自己的 Starlight 网站。"
+	href="/zh-cn/guides/customization/"
+/>
+
+<CardGrid>
+	<LinkCard title="创作 Markdown" href="/zh-cn/guides/authoring-content/" />
+	<LinkCard title="组件" href="/zh-cn/guides/components/" />
+</CardGrid>
+
+### 旁白
+
+旁白（也称为“警告”或“提醒”）对于在页面的主要内容旁边显示次要信息非常有用。
+
+`<Aside>` 可以有一个可选的 `type` 属性，可以是 `note`（默认值）、`tip`、`caution` 或 `danger`。设置 `title` 属性会覆盖默认的旁白标题。
+
+````mdx
+# src/content/docs/example.mdx
+
+import { Aside } from '@astrojs/starlight/components';
+
+<Aside>没有自定义标题的默认旁白</Aside>
+
+<Aside type="caution" title="当心！">
+	*带有* 自定义标题的警告旁白。
+</Aside>
+
+<Aside type="tip">
+
+旁白中也支持其他内容。
+
+```js
+// 比如代码片段。
+```
+
+</Aside>
+
+<Aside type="danger">不要把你的密码告诉任何人。</Aside>
+````
+
+以上代码在页面上生成了以下内容：
+
+import { Aside } from '@astrojs/starlight/components';
+
+<Aside>没有自定义标题的默认旁白</Aside>
+
+<Aside type="caution" title="当心！">
+	*带有* 自定义标题的警告旁白。
+</Aside>
+
+<Aside type="tip">
+
+旁白中也支持其他内容。
+
+```js
+// 比如代码片段。
+```
+
+</Aside>
+
+<Aside type="danger">不要把你的密码告诉任何人。</Aside>
+
+Starlight 还提供了一种在 Markdown 和 MDX 中渲染旁白的自定义语法，作为 `<Aside>` 组件的替代方案。
+有关自定义语法的详细信息，请参阅 [“在 Markdown 中创作内容”](/zh-cn/guides/authoring-content/#旁白) 指南。
+
+### 代码块
+
+当使用 [Markdown 代码块](/zh-cn/guides/authoring-content/#代码块) 行不通时，可以使用 `<Code>` 组件来渲染语法高亮的代码。例如，渲染来自文件、数据库或 API 等外部来源的数据。
+
+有关 `<Code>` 支持的完整属性的详细信息，请参阅 [Expressive Code 的 “Code Component” 文档](https://expressive-code.com/key-features/code-component/)。
+
+```mdx
+# src/content/docs/example.mdx
+
+import { Code } from '@astrojs/starlight/components';
+
+export const exampleCode = `console.log('这可能来自一个文件或CMS!');`;
+export const fileName = 'example.js';
+export const highlights = ['文件', 'CMS'];
+
+<Code code={exampleCode} lang="js" title={fileName} mark={highlights} />
+```
+
+以上代码在页面上生成了以下内容：
+
+import { Code } from '@astrojs/starlight/components';
+
+export const exampleCode = `console.log('这可能来自一个文件或CMS!');`;
+export const fileName = 'example.js';
+export const highlights = ['文件', 'CMS'];
+
+<Code code={exampleCode} lang="js" title={fileName} mark={highlights} />
+
+#### 导入代码字符串
+
+使用 [Vite 的 `?raw` 导入后缀](https://cn.vitejs.dev/guide/assets#importing-asset-as-string) 来将任何代码文件导入为字符串。
+然后，你可以将此导入的字符串传递给 `<Code>` 组件，以便将其包含在页面上。
+
+```mdx title="src/content/docs/example.mdx" "?raw"
+import { Code } from '@astrojs/starlight/components';
+import importedCode from '/src/env.d.ts?raw';
+
+<Code code={importedCode} lang="ts" title="src/env.d.ts" />
+```
+
+以上代码在页面上生成了以下内容：
+
+import importedCode from '/src/env.d.ts?raw';
+
+<Code code={importedCode} lang="ts" title="src/env.d.ts" />
+
+### 文件树
+
+使用`<FileTree>`组件来显示带有文件图标和可折叠子目录的目录结构。
+
+使用 `<FileTree>` 组件内置的 [Markdown 无序列表语法](https://www.markdownguide.org/basic-syntax/#unordered-lists)指定文件和目录的组织结构。使用嵌套的列表项创建子目录；若希望某个目录不显示具体内容，只需在列表项末尾添加斜杠`/`即可。
+
+以下语法可用于自定义文件树的外观：
+
+- 通过加粗文件名或目录名来突出显示，例如 `**README.md**`
+- 通过在名称后添加更多文本来为文件或目录添加注释
+- 使用 `...` 或 `…` 作为名称来添加占位符文件和目录。
+
+```mdx
+# src/content/docs/example.mdx
+
+import { FileTree } from '@astrojs/starlight/components';
+
+<FileTree>
+
+- astro.config.mjs 一个 **重要** 的文件
+- package.json
+- README.md
+- src
+  - components
+    - **Header.astro**
+  - …
+- pages/
+
+</FileTree>
+```
+
+以上代码在页面上生成了以下内容：
+
+import { FileTree } from '@astrojs/starlight/components';
+
+<FileTree>
+
+- astro.config.mjs 一个 **重要** 的文件
+- package.json
+- README.md
+- src
+  - components
+    - **Header.astro**
+  - …
+- pages/
+
+</FileTree>
+
+### 步骤
+
+使用 `<Steps>` 组件为任务的编号列表设置样式。这对于需要清晰突出地显示每个步骤的分布指南很有用。
+
+将 `<Steps>` 包裹在标准 Markdown 有序列表中。通常所有 Markdown 语法都适用于 `<Steps>` 内部。
+
+````mdx title="src/content/docs/example.mdx"
+import { Steps } from '@astrojs/starlight/components';
+
+<Steps>
+
+1. 在 MDX 文件中导入该组件
+
+   ```js
+   import { Steps } from '@astrojs/starlight/components';
+   ```
+
+2. 将有序列表放入该组件中
+
+</Steps>
+````
+
+以上代码在页面上生成了以下内容：
+
+import { Steps } from '@astrojs/starlight/components';
+
+<Steps>
+
+1. 在 MDX 文件中导入该组件
+
+   ```js
+   import { Steps } from '@astrojs/starlight/components';
+   ```
+
+2. 将有序列表放入该组件中
+
+</Steps>
+
+### 图标
+
+import { Icon } from '@astrojs/starlight/components';
+import IconsList from '~/components/icons-list.astro';
+
+Starlight 提供了一组常用的图标，你可以使用 `<Icon>` 组件在你的内容中显示。
+
+每个 `<Icon>` 都需要一个 [`name`](#所有图标)，并且可以选择性地包含一个 `label` 来为屏幕阅读器提供上下文。
+`size` 和 `color` 属性可以使用 CSS 单位和颜色值来调整图标的外观。
+
+```mdx
+# src/content/docs/example.mdx
+
+import { Icon } from '@astrojs/starlight/components';
+
+<Icon name="star" color="goldenrod" size="2rem" />
+<Icon name="rocket" color="var(--sl-color-text-accent)" />
+```
+
+以上代码在页面上生成了以下内容：
+
+<Icon name="star" color="goldenrod" size="2rem" />
+<Icon name="rocket" color="var(--sl-color-text-accent)" />
+
+#### 所有图标
+
+下面显示了所有可用图标的列表及其关联的名称。点击图标以复制其组件代码。
+
+<IconsList />

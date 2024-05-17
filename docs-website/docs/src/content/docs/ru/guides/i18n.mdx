@@ -1,0 +1,275 @@
+---
+title: Интернационализация (i18n)
+description: Узнайте, как настроить ваш сайт на Starlight для поддержки нескольких языков.
+---
+
+import { FileTree, Steps } from '@astrojs/starlight/components';
+
+Starlight обеспечивает встроенную поддержку многоязычных сайтов, включая маршрутизацию, резервный контент и полную поддержку языков с письмом справа налево (RTL).
+
+## Настройка i18n
+
+<Steps>
+
+1. Сообщите Starlight о поддерживаемых вами языках, передав свойства [`locales`](/ru/reference/configuration/#locales) и [`defaultLocale`](/ru/reference/configuration/#defaultlocale) в интеграцию Starlight:
+
+   ```js {9-26}
+   // astro.config.mjs
+   import { defineConfig } from 'astro/config';
+   import starlight from '@astrojs/starlight';
+
+   export default defineConfig({
+   	integrations: [
+   		starlight({
+   			title: 'Моя документация',
+   			// Устанавливаем «Русский» как язык по умолчанию для этого сайта
+   			defaultLocale: 'ru',
+   			locales: {
+   				// Документация на английском в `src/content/docs/en/`
+   				en: {
+   					label: 'English',
+   				},
+   				// Документация на китайском в `src/content/docs/zh-cn/`
+   				'zh-cn': {
+   					label: '简体中文',
+   					lang: 'zh-CN',
+   				},
+   				// Документация на русском в `src/content/docs/ru/`
+   				ru: {
+   					label: 'Русский',
+   					lang: 'ru',
+   				},
+   			},
+   		}),
+   	],
+   });
+   ```
+
+   `defaultLocale` будет использоваться для резервного контента и текста UI, поэтому выберите язык, на котором вы скорее всего начнете писать контент или для которого у вас уже есть материалы.
+
+2. Создайте каталог для каждого языка в `src/content/docs/`.
+   Например, для показанной выше конфигурации создайте следующие папки:
+
+   <FileTree>
+
+   - src/
+     - content/
+       - docs/
+         - en/
+         - ru/
+         - zh-cn/
+
+   </FileTree>
+
+3. Теперь вы можете добавлять контент в свои языковые каталоги. Используйте одно и то же имя файла для связывания страниц на разных языках и воспользуйтесь полным набором функций i18n Starlight, включая резервный контент, уведомления о переводе и многое другое.
+
+   Например, создайте `ru/index.md` и `en/index.md` для отображения главной страницы на русском и английском языках.
+
+</Steps>
+
+### Использование корневой локали
+
+Вы можете использовать «корневую» локаль для отображения языка без префикса i18n в его пути. Например, если русский является вашей корневой локалью, путь к странице на русском языке будет выглядеть как `/about` вместо `/ru/about`.
+
+Чтобы установить корневую локаль, используйте ключ `root` в вашей конфигурации `locales`. Если корневая локаль также является локалью по умолчанию для вашего контента, удалите `defaultLocale` или установите его значение как `'root'`.
+
+```js {9,11-14}
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: 'Моя документация',
+			defaultLocale: 'root', // опционально
+			locales: {
+				root: {
+					label: 'Русский',
+					lang: 'ru', // параметр lang обязателен для корневых локалей
+				},
+				en: {
+					label: 'English',
+					lang: 'en',
+				},
+			},
+		}),
+	],
+});
+```
+
+При использовании локали `root` храните страницы для этого языка непосредственно в `src/content/docs/`, а не в отдельной языковой папке. Например, вот файлы домашней страницы для английского и русского языков при использовании приведённой выше конфигурации:
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - **index.md**
+      - en/
+        - **index.md**
+
+</FileTree>
+
+#### Одноязычные сайты
+
+По умолчанию, Starlight является одноязычным сайтом, с английским языком. Чтобы создать сайт на другом языке, укажите его как `root` в вашей конфигурации `locales`:
+
+```diff lang="js" {10-13}
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: 'Моя документация',
+			locales: {
+				root: {
+					label: 'Русский',
+					lang: 'ru',
+				},
+			},
+		}),
+	],
+});
+```
+
+Это позволяет вам переопределить язык по умолчанию для Starlight без включения других функций интернационализации для многоязычных сайтов, таких как выбор языка.
+
+## Резервный контент
+
+Starlight предполагает, что вы создадите эквивалентные страницы на всех поддерживаемых языках. Например, если у вас есть файл `en/about.md`, создайте файл `about.md` для каждого другого языка, который вы поддерживаете. Это позволяет Starlight предоставлять автоматически резервный контент для страниц, которые ещё не были переведены.
+
+Если перевод для языка ещё не доступен, Starlight покажет читателям контент этой страницы на языке по умолчанию (установленном через `defaultLocale`). Например, если вы ещё не создали французскую версию вашей страницы «О нас» и вашим языком по умолчанию является английский, посетители `/fr/about` увидят английский контент из `/en/about` с уведомлением о том, что эта страница ещё не была переведена. Это помогает вам добавлять контент на вашем языке по умолчанию и постепенно переводить его, когда у ваших переводчиков есть время.
+
+## Перевод заголовка сайта
+
+По умолчанию Starlight использует одно и то же название сайта для всех языков.
+Если вам нужно настроить заголовок для каждой локали, вы можете передать объект [`title`](/ru/reference/configuration/#title-обязателен) в опциях Starlight:
+
+```diff lang="js"
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+  integrations: [
+    starlight({
+-     title: 'Моя документация',
++     title: {
++       ru: "Моя документация",
++       'zh-CN': '我的文档',
++     },
+      defaultLocale: 'ru',
+      locales: {
+        ru: { label: 'Русский' },
+        'zh-cn': { label: '简体中文', lang: 'zh-CN' },
+      },
+    }),
+  ],
+});
+```
+
+## Перевод интерфейса Starlight
+
+import LanguagesList from '~/components/languages-list.astro';
+import UIStringsList from '~/components/ui-strings-list.astro';
+
+Кроме размещения переведённых файлов с контентом, Starlight позволяет вам переводить текст интерфейсе (например, заголовок «На этой странице» в оглавлении), чтобы ваши читатели могли полностью погрузиться в ваш сайт на выбранном языке.
+
+<LanguagesList startsSentence /> — все переведённые строки пользовательского интерфейса
+на указанных языках предоставляются «из коробки», и мы приветствуем [вклад в добавление
+дополнительных языков по умолчанию](https://github.com/withastro/starlight/blob/main/CONTRIBUTING.md).
+
+Вы можете добавить переводы для дополнительных языков, которые вы поддерживаете — или переопределить наши стандартные тексты — через коллекцию данных `i18n`.
+
+<Steps>
+
+1. Сконфигурируйте коллекцию данных `i18n` в `src/content/config.ts`, если она ещё не настроена:
+
+   ```diff lang="js" ins=/, (i18nSchema)/
+   // src/content/config.ts
+   import { defineCollection } from 'astro:content';
+   import { docsSchema, i18nSchema } from '@astrojs/starlight/schema';
+
+   export const collections = {
+   	docs: defineCollection({ schema: docsSchema() }),
+   +	i18n: defineCollection({ type: 'data', schema: i18nSchema() }),
+   };
+   ```
+
+2. Создайте файл JSON в `src/content/i18n/` для каждой дополнительной локали, для которой вы хотите добавить строки перевода интерфейса.
+   Например, так можно добавить файлы перевода для арабского и русского:
+
+   <FileTree>
+
+   - src/
+     - content/
+       - i18n/
+         - ar.json
+         - ru.json
+
+   </FileTree>
+
+3. Добавьте переводы для ключей, которые вы хотите перевести, в файлы JSON. Переводите только значения, оставляя ключи на английском языке (например, `"search.label": "Поиск"`).
+
+   Это английские значения по умолчанию для существующих строк, с которыми поставляется Starlight:
+
+   <UIStringsList />
+
+   Блоки кода Starlight основаны на библиотеке [Expressive Code](https://github.com/expressive-code/expressive-code).
+   Вы можете установить переводы для строк пользовательского интерфейса в том же файле JSON, используя ключи `expressiveCode`:
+
+   ```json
+   {
+   	"expressiveCode.copyButtonCopied": "Copied!",
+   	"expressiveCode.copyButtonTooltip": "Copy to clipboard",
+   	"expressiveCode.terminalWindowFallbackTitle": "Terminal window"
+   }
+   ```
+
+   Модальное окно поиска в Starlight работает с помощью библиотеки [Pagefind](https://pagefind.app/).
+   Вы можете установить переводы для пользовательского интерфейса Pagefind в том же JSON-файле, используя ключи `pagefind`:
+
+   ```json
+   {
+   	"pagefind.clear_search": "Clear",
+   	"pagefind.load_more": "Load more results",
+   	"pagefind.search_label": "Search this site",
+   	"pagefind.filters_label": "Filters",
+   	"pagefind.zero_results": "No results for [SEARCH_TERM]",
+   	"pagefind.many_results": "[COUNT] results for [SEARCH_TERM]",
+   	"pagefind.one_result": "[COUNT] result for [SEARCH_TERM]",
+   	"pagefind.alt_search": "No results for [SEARCH_TERM]. Showing results for [DIFFERENT_TERM] instead",
+   	"pagefind.search_suggestion": "No results for [SEARCH_TERM]. Try one of the following searches:",
+   	"pagefind.searching": "Searching for [SEARCH_TERM]..."
+   }
+   ```
+
+</Steps>
+
+### Расширение схемы перевода
+
+Добавьте пользовательские ключи в словари переводов вашего сайта, установив `extend` в опциях `i18nSchema()`.
+В следующем примере к ключам по умолчанию добавляется новый необязательный ключ `custom.label`:
+
+```diff lang="js"
+// src/content/config.ts
+import { defineCollection, z } from 'astro:content';
+import { docsSchema, i18nSchema } from '@astrojs/starlight/schema';
+
+export const collections = {
+	docs: defineCollection({ schema: docsSchema() }),
+	i18n: defineCollection({
+		type: 'data',
+		schema: i18nSchema({
++			extend: z.object({
++				'custom.label': z.string().optional(),
++			}),
+		}),
+	}),
+};
+```
+
+Дополнительную информацию о схемах коллекции контента см. в разделе [Определение схемы коллекции](https://docs.astro.build/ru/guides/content-collections/#defining-a-collection-schema) в документации Astro.

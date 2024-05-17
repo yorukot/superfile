@@ -1,0 +1,129 @@
+---
+title: コミュニティコンテンツ
+description: コミュニティ製のガイドや記事、動画をチェックして、Starlightの学習や開発に役立てましょう！
+---
+
+:::tip[自分のものを追加しよう！]
+Starlightに関するコンテンツを作成しましたか？このページにリンクを追加するPRを作成しましょう！
+:::
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+## 記事とレビュー
+
+以下は、Starlightやその開発体験について学ぶための記事のコレクションです。
+
+<CardGrid>
+	<LinkCard
+		href="https://devm.io/open-source/starlight-astro"
+		title="Starlightによる静的サイト生成"
+		description="「コンポーネントの設計において、大きすぎるアイデアも小さすぎるアイデアもありません」- StarlightリードのChris Swithinbankとのインタビュー"
+	/>
+	<LinkCard
+		href="https://frontendatscale.com/blog/hybrid-frontend-architecture/"
+		title="AstroとStarlightによるハイブリッドフロントエンドアーキテクチャ"
+		description="Maxi FerreiraとBen Holmesが、Starlight、TinaCMS、認証付きのインタラクティブAPIプレイグラウンドを使用してドキュメントサイトを作成します。"
+	/>
+	<LinkCard
+		href="https://www.olets.dev/posts/comparing-docs-site-builders-vuepress-vs-starlight/"
+		title="ドキュメントサイトビルダーの比較: VuePressとStarlight"
+		description="両フレームワークはどのように比較されるのでしょうか？"
+	/>
+</CardGrid>
+
+## レシピとガイド
+
+レシピは通常、特定のタスクを読者に具体的に案内する、焦点を絞った短いハウツーガイドです。ステップバイステップの手順に従って、Starlightプロジェクトに新しい機能や動作を追加するための素晴らしい方法といえます！他のガイドでは、画像の使用やMDXの扱い方など、コンテンツの領域に関連する概念も説明しています。
+
+Starlightユーザーによってメンテナンスされている、コミュニティ製のコンテンツをチェックしてみましょう。
+
+<CardGrid>
+	<LinkCard
+		href="https://www.webpro.nl/scraps/versioned-docs-with-starlight-and-vercel"
+		title="StarligtとVercelでバージョン管理されたドキュメントを作成する"
+		description="プロジェクトの各メジャーバージョンごとにドキュメントのバージョンを分けて実装する方法についてのガイド"
+	/>
+	<LinkCard
+		href="https://hideoo.dev/notes/starlight-heading-links"
+		title="Starlightの見出しにリンクを追加する"
+		description="rehypeプラグインを使用して、ドキュメントの特定のセクションへのリンクを共有する方法についてのガイド"
+	/>
+	<LinkCard
+		href="https://blog.otterlord.dev/posts/starlight-sponsors/"
+		title="Starlightサイトにスポンサーを追加する"
+		description="ドキュメントのサイドバーにカスタムスポンサーコンポーネントを実装する方法についてのガイド"
+	/>
+	<LinkCard
+		href="https://hideoo.dev/notes/starlight-og-images"
+		title="Open Graph画像をStarlightに追加する"
+		description="ソーシャル画像とそれに対応するメタタグを生成する方法についてのガイド"
+	/>
+	<LinkCard
+		href="https://hideoo.dev/notes/starlight-third-party-icon-sets"
+		title="サードパーティのアイコンセットをStarlightで使用する"
+		description="unplugin-iconsを使用して、Starlightで利用可能なアイコンの選択肢を拡張する方法についてのガイド"
+	/>
+	<LinkCard
+		href="https://hideoo.dev/notes/starlight-custom-html-head"
+		title="StarligtページのHTMLヘッドを編集する"
+		description="ウェブアナリティクス、フォント、スクリプトなどの共通のヘッドコンテンツを追加する方法について学びます"
+	/>
+	<LinkCard
+		href="https://dev.to/mrrobot/publishing-documentation-with-astro-starlight-691"
+		title="AstroのStarlightでドキュメントを公開する"
+		description="Starligtドキュメントの始め方"
+	/>
+	<LinkCard
+		href="https://events-3bg.pages.dev/jotter/starlight/guide/"
+		title="ビュートランジションを有効にする"
+		description="Bag of Trickのビュートランジションサポートにより、SPAのような使い心地を実現します"
+	/>
+</CardGrid>
+
+## 動画コンテンツ
+
+ライブストリームや教育コンテンツなど、Starlightに関する動画やチャンネルをチェックしてみましょう。
+
+import YouTubeGrid from '~/components/youtube-grid.astro';
+
+### Astroの動画
+
+<YouTubeGrid
+	videos={[
+		{
+			href: 'https://www.youtube.com/watch?v=5u0Ds7wzUeI',
+			title: 'AstroによるStarlight',
+			description: '公式のStarlightローンチ動画をご覧ください。',
+		},
+		{
+			href: 'https://www.youtube.com/shorts/zjOWezSzd18',
+			title: '🌟 1分で起動チャレンジ',
+			description:
+				'Benが1分以内に新しいStarlightサイトを立ち上げる様子を見てみましょう！',
+		},
+	]}
+/>
+
+### コミュニティ製の動画とストリーム
+
+<YouTubeGrid
+	videos={[
+		{
+			href: 'https://www.youtube.com/watch?v=sF6UcV3moZg',
+			title: 'StarlightとAstroでドキュメントを作成する',
+			description:
+				'ChrisとAlexが、Code with CodingCat.devでStarlightについて語ります。',
+		},
+		{
+			href: 'https://www.youtube.com/watch?v=sWkkHbwDeQc',
+			title: 'Astro Starlight',
+			description: '1分でStarligtを紹介します。',
+		},
+		{
+			href: 'https://www.youtube.com/watch?v=-Ki-1E5gNCk',
+			title:
+				'AstroによるStarlightドキュメントテンプレート（アプリのドキュメントを作る！）',
+			description: '5分で新しいStarlightサイトを立ち上げます。',
+		},
+	]}
+/>

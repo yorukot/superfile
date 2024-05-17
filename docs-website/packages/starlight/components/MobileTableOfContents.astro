@@ -1,0 +1,150 @@
+---
+import Icon from '../user-components/Icon.astro';
+import TableOfContentsList from './TableOfContents/TableOfContentsList.astro';
+import type { Props } from '../props';
+
+const { labels, toc } = Astro.props;
+---
+
+{
+	toc && (
+		<mobile-starlight-toc data-min-h={toc.minHeadingLevel} data-max-h={toc.maxHeadingLevel}>
+			<nav aria-labelledby="starlight__on-this-page--mobile">
+				<details id="starlight__mobile-toc">
+					<summary id="starlight__on-this-page--mobile" class="sl-flex">
+						<div class="toggle sl-flex">
+							{labels['tableOfContents.onThisPage']}
+							<Icon name={'right-caret'} class="caret" size="1rem" />
+						</div>
+						<span class="display-current" />
+					</summary>
+					<div class="dropdown">
+						<TableOfContentsList toc={toc.items} isMobile />
+					</div>
+				</details>
+			</nav>
+		</mobile-starlight-toc>
+	)
+}
+
+<style>
+	nav {
+		position: fixed;
+		z-index: var(--sl-z-index-toc);
+		top: calc(var(--sl-nav-height) - 1px);
+		inset-inline: 0;
+		border-top: 1px solid var(--sl-color-gray-5);
+		background-color: var(--sl-color-bg-nav);
+	}
+	@media (min-width: 50rem) {
+		nav {
+			inset-inline-start: var(--sl-content-inline-start, 0);
+		}
+	}
+
+	summary {
+		gap: 0.5rem;
+		align-items: center;
+		height: var(--sl-mobile-toc-height);
+		border-bottom: 1px solid var(--sl-color-hairline-shade);
+		padding: 0.5rem 1rem;
+		font-size: var(--sl-text-xs);
+		outline-offset: var(--sl-outline-offset-inside);
+	}
+	summary::marker,
+	summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.toggle {
+		flex-shrink: 0;
+		gap: 1rem;
+		align-items: center;
+		justify-content: space-between;
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 0.5rem;
+		padding-block: 0.5rem;
+		padding-inline-start: 0.75rem;
+		padding-inline-end: 0.5rem;
+		line-height: 1;
+		background-color: var(--sl-color-black);
+		user-select: none;
+		cursor: pointer;
+	}
+	details[open] .toggle {
+		color: var(--sl-color-white);
+		border-color: var(--sl-color-accent);
+	}
+	details .toggle:hover {
+		color: var(--sl-color-white);
+		border-color: var(--sl-color-gray-2);
+	}
+
+	:global([dir='rtl']) .caret {
+		transform: rotateZ(180deg);
+	}
+	details[open] .caret {
+		transform: rotateZ(90deg);
+	}
+
+	.display-current {
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		overflow: hidden;
+		color: var(--sl-color-white);
+	}
+
+	.dropdown {
+		--border-top: 1px;
+		margin-top: calc(-1 * var(--border-top));
+		border: var(--border-top) solid var(--sl-color-gray-6);
+		border-top-color: var(--sl-color-hairline-shade);
+		max-height: calc(85vh - var(--sl-nav-height) - var(--sl-mobile-toc-height));
+		overflow-y: auto;
+		background-color: var(--sl-color-black);
+		box-shadow: var(--sl-shadow-md);
+		overscroll-behavior: contain;
+	}
+</style>
+
+<script>
+	import { StarlightTOC } from './TableOfContents/starlight-toc';
+
+	class MobileStarlightTOC extends StarlightTOC {
+		override set current(link: HTMLAnchorElement) {
+			super.current = link;
+			const display = this.querySelector('.display-current') as HTMLSpanElement;
+			if (display) display.textContent = link.textContent;
+		}
+
+		constructor() {
+			super();
+			const details = this.querySelector('details');
+			if (!details) return;
+			const closeToC = () => {
+				details.open = false;
+			};
+			// Close the table of contents whenever a link is clicked.
+			details.querySelectorAll('a').forEach((a) => {
+				a.addEventListener('click', closeToC);
+			});
+			// Close the table of contents when a user clicks outside of it.
+			window.addEventListener('click', (e) => {
+				if (!details.contains(e.target as Node)) closeToC();
+			});
+			// Or when they press the escape key.
+			window.addEventListener('keydown', (e) => {
+				if (e.key === 'Escape' && details.open) {
+					const hasFocus = details.contains(document.activeElement);
+					closeToC();
+					if (hasFocus) {
+						const summary = details.querySelector('summary');
+						if (summary) summary.focus();
+					}
+				}
+			});
+		}
+	}
+
+	customElements.define('mobile-starlight-toc', MobileStarlightTOC);
+</script>

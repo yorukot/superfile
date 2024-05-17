@@ -1,0 +1,93 @@
+---
+import { oklchToHex } from './color-lib';
+import { store } from './store';
+import ValueSlider from './value-slider.astro';
+
+export interface Props {
+	key: keyof typeof store;
+	legend: string;
+	labels: Record<'pickColor' | 'hue' | 'chroma', string>;
+}
+const { key, legend, labels } = Astro.props;
+const { hue, chroma } = store[key].get();
+const initialColor = oklchToHex(52, chroma, hue);
+---
+
+<color-editor data-key={key}>
+	<fieldset>
+		<legend>{legend}</legend>
+		<label class="color-picker">
+			<span class="sr-only">{labels.pickColor}</span>
+			<input type="color" value={initialColor} />
+		</label>
+		<div class="sliders">
+			<ValueSlider label={labels.hue} storeKey={key} type="hue" />
+			<ValueSlider label={labels.chroma} storeKey={key} type="chroma" />
+		</div>
+	</fieldset>
+</color-editor>
+
+<script>
+	import { oklch, oklchToHex } from './color-lib';
+	import { store } from './store';
+
+	export class ColorEditor extends HTMLElement {
+		#store = store[this.dataset.key as keyof typeof store];
+		#colorInput = this.querySelector<HTMLInputElement>('input[type="color"]')!;
+
+		constructor() {
+			super();
+			// Update color on user input.
+			this.#store.subscribe(({ chroma, hue }) => {
+				this.#colorInput.value = oklchToHex(52, chroma, hue);
+			});
+			this.#colorInput.addEventListener('input', (e) => {
+				if (!(e.target instanceof HTMLInputElement)) return;
+				const old = this.#store.get();
+				const { c, h } = { ...oklch(e.target.value) };
+				this.#store.set({ hue: h ?? old.hue, chroma: c ?? old.chroma });
+			});
+		}
+	}
+	customElements.define('color-editor', ColorEditor);
+</script>
+
+<style>
+	fieldset {
+		border: 1px solid var(--sl-color-gray-5);
+		background-color: var(--sl-color-gray-7, var(--sl-color-gray-6));
+		padding: 1rem;
+		color: var(--sl-color-white);
+	}
+	legend {
+		float: left;
+		float: inline-start;
+		font-weight: 600;
+	}
+	.color-picker {
+		float: right;
+		float: inline-end;
+	}
+	.sliders {
+		clear: both;
+	}
+	input[type='color'] {
+		border: 0;
+		background: transparent;
+		height: 2em;
+		width: 3rem;
+		cursor: pointer;
+		--swatch-border: var(--sl-color-gray-3);
+	}
+	input[type='color']:hover {
+		--swatch-border: var(--sl-color-gray-1);
+	}
+	input[type='color']::-webkit-color-swatch {
+		border: 1px solid var(--swatch-border);
+		border-radius: 0.5rem;
+	}
+	input[type='color']::-moz-color-swatch {
+		border: 1px solid var(--swatch-border);
+		border-radius: 0.5rem;
+	}
+</style>

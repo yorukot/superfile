@@ -1,0 +1,564 @@
+---
+title: 配置参考
+description: Starlight 支持的所有配置选项的概述。
+---
+
+## 配置 `starlight` 集成
+
+Starlight 是在 [Astro](https://astro.build) web 框架之上构建的集成。你可以在 `astro.config.mjs` 配置文件中配置你的项目：
+
+```js
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: '我的令人愉快的文档网站',
+		}),
+	],
+});
+```
+
+你可以将以下选项传递给`starlight`集成。
+
+### `title` (必填)
+
+**类型：** `string | Record<string, string>`
+
+设置你的网站标题。将用于元数据和浏览器标签标题。
+
+这个值可以是一个字符串，或者对于多语言网站，可以是一个包含每种不同语言值的对象。
+当使用对象形式时，键必须是 BCP-47 标签（例如 `en`，`ar` 或 `zh-CN`）：
+
+```ts
+starlight({
+	title: {
+		en: 'My delightful docs site',
+		de: 'Meine bezaubernde Dokumentationsseite',
+	},
+});
+```
+
+### `description`
+
+**类型：** `string`
+
+设置你的网站描述。如果页面的 frontmatter 中没有设置 `description`，则在 `<meta name="description">` 标签中与搜索引擎共享元数据。
+
+### `logo`
+
+**类型：** [`LogoConfig`](#logoconfig)
+
+在导航栏中设置一个 logo 图片，与网站标题一起显示或替代网站标题。你可以设置单个 `src` 属性，也可以为 `light` 和 `dark` 设置单独的图像源。
+
+```js
+starlight({
+	logo: {
+		src: './src/assets/my-logo.svg',
+	},
+});
+```
+
+#### `LogoConfig`
+
+```ts
+type LogoConfig = { alt?: string; replacesTitle?: boolean } & (
+	| { src: string }
+	| { light: string; dark: string }
+);
+```
+
+### `tableOfContents`
+
+**类型：** `false | { minHeadingLevel?: number; maxHeadingLevel?: number; }`  
+**默认值：** `{ minHeadingLevel: 2; maxHeadingLevel: 3; }`
+
+配置每个页面右侧显示的目录。默认情况下，`<h2>` 和 `<h3>` 标题将包含在此目录中。
+
+### `editLink`
+
+**类型：** `{ baseUrl: string }`
+
+通过设置你要使用的 base URL 来启用 “编辑此页” 链接。最终链接将是`editLink.baseUrl` +当前页面路径。例如，要启用在 GitHub 上编辑`withastro/starlight` 仓库中的页面：
+
+```js
+starlight({
+	editLink: {
+		baseUrl: 'https://github.com/withastro/starlight/edit/main/',
+	},
+});
+```
+
+使用此配置，`/introduction` 页面将具有指向 `https://github.com/withastro/starlight/edit/main/src/content/docs/introduction.md` 的编辑链接。
+
+### `sidebar`
+
+**类型：** [`SidebarItem[]`](#sidebaritem)
+
+配置你的网站的侧边栏导航项目。
+
+侧边栏是包含链接和链接组的数组。每个项目都必须具有 `label` 和以下属性之一：
+
+- `link` — 指向特定 URL 的单个链接，例如 `'/home'` 或 `'https://example.com'`。
+
+- `items` — 包含更多侧边栏链接和子组的数组。
+
+- `autogenerate` — 指定要从中自动生成一组链接的文档目录的对象。
+
+```js
+starlight({
+	sidebar: [
+		// 标记为“Home”的单个链接项。
+		{ label: 'Home', link: '/' },
+		// 一个标记为“Start Here”的组，其中包含两个链接。
+		{
+			label: 'Start Here',
+			items: [
+				{ label: 'Introduction', link: '/intro' },
+				{ label: 'Next Steps', link: '/next-steps' },
+			],
+		},
+		// 一个链接到参考目录中所有页面的组。
+		{
+			label: 'Reference',
+			autogenerate: { directory: 'reference' },
+		},
+	],
+});
+```
+
+#### 排序
+
+自动生成的侧边栏组按文档名字母顺序排序。例如，从 `astro.md` 生成的页面将显示在 `starlight.md`页面上方。
+
+#### 折叠组
+
+默认情况下，链接组是展开的。你可以通过将组的 `collapsed` 属性设置为 `true` 来更改此行为。
+
+自动生成的子组默认情况下会遵守其父组的 `collapsed` 属性。设置 `autogenerate.collapsed` 属性以覆盖此行为。
+
+```js {5,16}
+sidebar: [
+  // 一个折叠的链接组。
+  {
+    label: 'Collapsed Links',
+    collapsed: true,
+    items: [
+      { label: 'Introduction', link: '/intro' },
+      { label: 'Next Steps', link: '/next-steps' },
+    ],
+  },
+  // 一个展开的组，其中包含折叠的自动生成的子组。
+  {
+    label: 'Reference',
+    autogenerate: {
+      directory: 'reference',
+      collapsed: true,
+    },
+  },
+],
+```
+
+#### 翻译标签
+
+如果你的网站是多语言的，每个项目的 `label` 被认为是默认语言。你可以设置一个 `translations` 属性来为你支持的其他语言提供标签：
+
+```js {5,9,14}
+sidebar: [
+  // 一个侧边栏示例，其中的标签被翻译成简体中文。
+  {
+    label: 'Start Here',
+    translations: { 'zh-CN': '从这里开始' },
+    items: [
+      {
+        label: 'Getting Started',
+        translations: { 'zh-CN': '开始使用' },
+        link: '/getting-started',
+      },
+      {
+        label: 'Project Structure',
+        translations: { 'zh-CN': '项目结构' },
+        link: '/structure',
+      },
+    ],
+  },
+],
+```
+
+#### `SidebarItem`
+
+```ts
+type SidebarItem = {
+	label: string;
+	translations?: Record<string, string>;
+	badge?: string | BadgeConfig;
+} & (
+	| {
+			link: string;
+			attrs?: Record<string, string | number | boolean | undefined>;
+	  }
+	| { items: SidebarItem[]; collapsed?: boolean }
+	| {
+			autogenerate: { directory: string; collapsed?: boolean };
+			collapsed?: boolean;
+	  }
+);
+```
+
+#### `BadgeConfig`
+
+```ts
+interface BadgeConfig {
+	text: string;
+	variant: 'note' | 'tip' | 'caution' | 'danger' | 'success' | 'default';
+}
+```
+
+### `locales`
+
+**类型：** <code>\{ \[dir: string\]: [LocaleConfig](#localeconfig) \}</code>
+
+为你的网站设置支持的 `locales` 来[配置国际化（i18n）](/zh-cn/guides/i18n/)。
+
+每个条目都应该使用该语言文件保存的目录作为 key。
+
+```js
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: 'My Site',
+			// 为这个网站设置英语作为默认语言。
+			defaultLocale: 'en',
+			locales: {
+				// 英文文档在 `src/content/docs/en/`
+				en: {
+					label: 'English',
+				},
+				// 简体中文文档在 `src/content/docs/zh-cn/`
+				'zh-cn': {
+					label: '简体中文',
+					lang: 'zh-CN',
+				},
+				// 阿拉伯文档在 `src/content/docs/ar/`
+				ar: {
+					label: 'العربية',
+					dir: 'rtl',
+				},
+			},
+		}),
+	],
+});
+```
+
+#### `LocaleConfig`
+
+```ts
+interface LocaleConfig {
+	label: string;
+	lang?: string;
+	dir?: 'ltr' | 'rtl';
+}
+```
+
+你可以为每个语言设置以下选项：
+
+##### `label` (必填)
+
+**类型：** `string`
+
+要向用户显示的此语言的标签，例如在语言切换器中。大多数情况下，你会希望这是该语言的名称，因为该语言的用户希望阅读它，例如`"English"`，`"العربية"`，或者 `"简体中文"`。
+
+##### `lang`
+
+**类型：** `string`
+
+此语言的 BCP-47 标签，例如`"en"`，`"ar"`，或者 `"zh-CN"`。如果未设置，则默认使用该语言的目录名称。 如果没有找到特定于区域的翻译，带有区域子标签的语言标签（例如`pt-BR`或`en-US`）将使用内置的 UI 翻译作为其基本语言。
+
+##### `dir`
+
+**类型：** `'ltr' | 'rtl'`
+
+这种语言的写作方向; `"ltr"`表示从左到右（默认值）或`"rtl"`表示从右到左。
+
+#### root locale
+
+你可以通过设置 `root` locale 来提供不带 `/lang/` 目录的默认语言：
+
+```js {3-6}
+starlight({
+	locales: {
+		root: {
+			label: 'English',
+			lang: 'en',
+		},
+		fr: {
+			label: 'Français',
+		},
+	},
+});
+```
+
+举例，这允许你将 `/getting-started/` 作为英语路由提供，并将 `/fr/getting-started/` 作为等效的法语页面。
+
+### `defaultLocale`
+
+**类型：** `string`
+
+设置此站点的默认语言。
+该值应该与你的 [`locales`](#locales) 对象的键之一匹配。
+（如果你的默认语言是你的[root locale](#root-locale)，你可以跳过这一步。）
+
+默认语言将用于在缺少翻译时提供回退内容。
+
+### `social`
+
+import SocialLinksType from '~/components/social-links-type.astro';
+
+**类型：** <SocialLinksType />
+
+可选的社交媒体账户详情。添加任何一个都会在网站标题中显示它们作为图标链接。
+
+```js
+starlight({
+	social: {
+		codeberg: 'https://codeberg.org/knut/examples',
+		discord: 'https://astro.build/chat',
+		github: 'https://github.com/withastro/starlight',
+		gitlab: 'https://gitlab.com/delucis',
+		linkedin: 'https://www.linkedin.com/company/astroinc',
+		mastodon: 'https://m.webtoo.ls/@astro',
+		threads: 'https://www.threads.net/@nmoodev',
+		twitch: 'https://www.twitch.tv/bholmesdev',
+		twitter: 'https://twitter.com/astrodotbuild',
+		'x.com': 'https://x.com/astrodotbuild',
+		youtube: 'https://youtube.com/@astrodotbuild',
+	},
+});
+```
+
+### `customCss`
+
+**类型：** `string[]`
+
+提供 CSS 文件来自定义你的 Starlight 网站的外观和风格。
+
+支持相对于项目根目录的本地 CSS 文件，例如 `'./src/custom.css'`，以及你安装为 npm 模块的 CSS，例如 `'@fontsource/roboto'`。
+
+```js
+starlight({
+	customCss: ['./src/custom-styles.css', '@fontsource/roboto'],
+});
+```
+
+### `expressiveCode`
+
+**类型：** `StarlightExpressiveCodeOptions | boolean`  
+**默认值：** `true`
+
+Starlight 使用 [Expressive Code](https://github.com/expressive-code/expressive-code/tree/main/packages/astro-expressive-code) 来渲染代码块，并添加对代码示例的高亮支持，向代码块添加文件名等。
+请参阅 [“代码块”指南](/zh-cn/guides/authoring-content/#代码块) 以了解如何在你的 Markdown 和 MDX 内容中使用 Expressive Code 语法。
+
+你可以通过在 Starlight 的 `expressiveCode` 选项中设置任何标准的 [Expressive Code 配置选项](https://github.com/expressive-code/expressive-code/blob/main/packages/astro-expressive-code/README.md#configuration)以及一些特定于 Starlight 的属性。比如，设置 Expressive Code 的 `styleOverrides` 选项来覆盖默认的 CSS。这样就可以自定义代码块，比如给你的代码块添加圆角：
+
+```js ins={2-4}
+starlight({
+	expressiveCode: {
+		styleOverrides: { borderRadius: '0.5rem' },
+	},
+});
+```
+
+如果你想禁用 Expressive Code，请在 Starlight 配置中设置 `expressiveCode: false`：
+
+```js ins={2}
+starlight({
+	expressiveCode: false,
+});
+```
+
+除了标准的 Expressive Code 选项之外，你还可以在 `expressiveCode` 配置中设置以下 Starlight 特定属性，以进一步自定义代码块的主题行为：
+
+#### `themes`
+
+**类型：** `Array<string | ThemeObject | ExpressiveCodeTheme>`  
+**默认值：** `['starlight-dark', 'starlight-light']`
+
+设置用于代码块样式的主题。有关支持的主题格式的详细信息，请参阅 [Expressive Code `themes` 文档](https://github.com/expressive-code/expressive-code/blob/main/packages/astro-expressive-code/README.md#themes)。
+
+Starlight 默认使用 Sarah Drasner 的 [Night Owl 主题](https://github.com/sdras/night-owl-vscode-theme) 的深色和浅色变体。
+
+如果你提供至少一个深色和一个浅色主题，Starlight 将自动将活动代码块主题与当前网站主题保持同步。
+使用 [`useStarlightDarkModeSwitch`](#usestarlightdarkmodeswitch) 选项配置此行为。
+
+#### `useStarlightDarkModeSwitch`
+
+**类型：** `boolean`  
+**默认值：** `true`
+
+当设置为 `true` 时，代码块会在网站主题更改时自动在浅色和深色主题之间切换。
+当设置为 `false` 时，你必须手动添加 CSS 来处理多个主题之间的切换。
+
+:::note
+当设置 `themes` 时，你必须为 Starlight 暗黑模式切换提供至少一个深色和一个浅色主题。
+:::
+
+#### `useStarlightUiThemeColors`
+
+**类型：** `boolean`  
+**默认值：** 如果未设置 `themes`，则为 `true`，否则为 `false`
+
+当设置为 `true` 时，Starlight 的 CSS 变量用于代码块 UI 元素的颜色（背景、按钮、阴影等），与[网站颜色主题](/zh-cn/guides/css-and-tailwind/#主题)相匹配。
+当设置为 `false` 时，这些元素使用活动语法高亮主题提供的颜色。
+
+:::note
+当使用自定义主题并将其设置为 `true` 时，你必须提供至少一个深色和一个浅色主题，以确保正确的颜色对比度。
+:::
+
+### `pagefind`
+
+**类型：** `boolean`  
+**默认值：** `true`
+
+定义 Starlight 的默认站点搜索 provider [Pagefind](https://pagefind.app/) 是否启用。
+
+将其设置为 `false` 以禁用使用 Pagefind 索引你的网站。这也将隐藏默认的搜索 UI。
+
+### `head`
+
+**类型：** [`HeadConfig[]`](#headconfig)
+
+添加自定义标签到你的 Starlight 网站的 `<head>` 中。
+可以用于添加分析和其他第三方脚本和资源。
+
+```js
+starlight({
+	head: [
+		// 示例：添加 Fathom 分析脚本标签。
+		{
+			tag: 'script',
+			attrs: {
+				src: 'https://cdn.usefathom.com/script.js',
+				'data-site': 'MY-FATHOM-ID',
+				defer: true,
+			},
+		},
+	],
+});
+```
+
+在 `head` 中的条目会直接转换为 HTML 元素，并不会经过 Astro 的 [脚本](https://docs.astro.build/zh-cn/guides/client-side-scripts/#脚本处理) 或 [样式](https://docs.astro.build/zh-cn/guides/styling/#在-astro-进行设计) 处理。如果你需要导入本地资源，如脚本、样式或图片，请[重写 Head 组件](/zh-cn/guides/overriding-components/#复用内置组件)。
+
+#### `HeadConfig`
+
+```ts
+interface HeadConfig {
+	tag: string;
+	attrs?: Record<string, string | boolean | undefined>;
+	content?: string;
+}
+```
+
+### `lastUpdated`
+
+**类型：** `boolean`  
+**默认值：** `false`
+
+控制页脚是否显示页面上次更新的时间。
+
+默认情况下，此功能依赖于你的存储库的 Git 历史记录，并且在某些执行[浅克隆](https://git-scm.com/docs/git-clone#Documentation/git-clone.txt---depthltdepthgt)的部署平台上可能不准确。页面可以使用 [`lastUpdated` frontmatter 字段](/zh-cn/reference/frontmatter/#lastupdated)覆盖此设置或基于 Git 的日期。
+
+### `pagination`
+
+**类型：** `boolean`  
+**默认值：** `true`
+
+定义页脚是否应包含上一页和下一页的链接。
+
+页面可以使用 [`prev`](/zh-cn/reference/frontmatter/#prev) 和 [`next`](/zh-cn/reference/frontmatter/#next) frontmatter 字段覆盖此设置或链接文本和/或 URL。
+
+### `favicon`
+
+**类型：** `string`  
+**默认值：** `'/favicon.svg'`
+
+设置网站的默认 favicon 的路径，它应该位于 `public/` 目录中，并且是一个有效的（`.ico`，`.gif`，`.jpg`，`.png` 或 `.svg`）图标文件。
+
+```js
+starlight({
+  favicon: '/images/favicon.svg',
+}),
+```
+
+如果你需要设置其他变体或回退的 favicon，你可以使用 [`head` 选项](#head)添加标签：
+
+```js
+starlight({
+	favicon: '/images/favicon.svg',
+	head: [
+		// 为 Safari 添加 ICO favicon 回退。
+		{
+			tag: 'link',
+			attrs: {
+				rel: 'icon',
+				href: '/images/favicon.ico',
+				sizes: '32x32',
+			},
+		},
+	],
+});
+```
+
+### `titleDelimiter`
+
+**类型：** `string`  
+**默认值：** `'|'`
+
+设置在页面的 `<title>` 标签里页面标题和网站标题之间的分隔符，它会显示在浏览器标签上。
+
+默认情况下，每个页面的 `<title>` 都是 `页面标题 | 网站标题`。
+举例，本页面的标题是“配置参考”，本站点的标题是“Starlight”，所以本页面的 `<title>` 是“配置参考 | Starlight”。
+
+### `disable404Route`
+
+**类型：** `boolean`  
+**默认值：** `false`
+
+禁用注入 Starlight 的默认 [404 页面](https://docs.astro.build/zh-cn/core-concepts/astro-pages/#自定义-404-错误页面)。要在项目中使用自定义的 `src/pages/404.astro` 路由，请将此选项设置为 `true`。
+
+### `components`
+
+**类型：** `Record<string, string>`
+
+提供组件的路径来覆盖 Starlight 的默认实现。
+
+```js
+starlight({
+	components: {
+		SocialLinks: './src/components/MySocialLinks.astro',
+	},
+});
+```
+
+要查阅所有可覆盖的组件，请参阅[覆盖参考](/zh-cn/reference/overrides/)。
+
+### `plugins`
+
+**类型：** [`StarlightPlugin[]`](/zh-cn/reference/plugins/#快速-api-参照)
+
+使用自定义插件扩展 Starlight。
+插件将更改应用到你的项目中，以修改或添加 Starlight 的功能。
+
+访问 [插件 showcase](/zh-cn/resources/plugins/#插件) 查看可用插件列表。
+
+```js
+starlight({
+	plugins: [starlightPlugin()],
+});
+```
+
+有关创建自己的插件的详细信息，请参阅[插件参考](/zh-cn/reference/plugins/)。

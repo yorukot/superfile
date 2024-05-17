@@ -1,0 +1,94 @@
+---
+title: 插件和集成
+description: 发现扩展 Starlight 的插件和集成等社区工具！
+sidebar:
+  order: 1
+---
+
+:::tip[添加你自己的！]
+你是否构建过 Starlight 插件或 Starlight 工具？
+创建一个 PR 来添加链接到此页面！
+:::
+
+## 插件
+
+[插件](/zh-cn/reference/plugins/) 可以自定义 Starlight 的配置、UI 和行为，同时也易于共享和复用。使用 Starlight 团队支持的官方插件和由 Starlight 用户维护的社区插件扩展你的网站。
+
+### 官方插件
+
+<CardGrid>
+	<LinkCard
+		href="/zh-cn/guides/site-search/#algolia-docsearch"
+		title="Algolia DocSearch"
+		description="将默认搜索 provider Pagefind 替换为 Algolia DocSearch。"
+	/>
+</CardGrid>
+
+### 社区插件
+
+<CardGrid>
+	<LinkCard
+		href="https://github.com/HiDeoo/starlight-links-validator"
+		title="starlight-links-validator"
+		description="在你的 Starlight 页面中检查损坏的链接"
+	/>
+	<LinkCard
+		href="https://github.com/HiDeoo/starlight-typedoc"
+		title="starlight-typedoc"
+		description=" 使用 TypeDoc 从 TypeScript 生成 Starlight 页面。"
+	/>
+	<LinkCard
+		href="https://github.com/HiDeoo/starlight-blog"
+		title="starlight-blog"
+		description="添加一个博客到你的文档网站。"
+	/>
+	<LinkCard
+		href="https://github.com/HiDeoo/starlight-openapi"
+		title="starlight-openapi"
+		description="从 OpenAPI/Swagger 规范创建文档页面。"
+	/>
+	<LinkCard
+		href="https://github.com/HiDeoo/starlight-obsidian"
+		title="starlight-obsidian"
+		description="将 Obsidian vaults 发布到 Starlight 网站。"
+	/>
+	<LinkCard
+		href="https://astro-ghostcms.xyz/intro/starlight/install/"
+		title="starlight-ghostcms"
+		description="添加你的 GhostCMS 博客文章到你的 Starlight 文档。"
+	/>
+	<LinkCard
+		href="https://github.com/HiDeoo/starlight-image-zoom"
+		title="starlight-image-zoom"
+		description="为你的文档图像添加缩放功能。"
+	/>
+</CardGrid>
+
+## 社区工具和集成
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+这些社区工具和集成可用于为你的 Starlight 网站添加新功能。
+
+<CardGrid>
+	<LinkCard
+		href="https://www.feelback.dev/blog/new-astro-starlight-integration/"
+		title="FeelBack"
+		description="在文档页面中添加用户反馈系统。"
+	/>
+	<LinkCard
+		href="https://github.com/val-town/notion-to-astro"
+		title="notion-to-astro"
+		description="将 Notion 输出转换为 Astro Starlight 文档"
+	/>
+	<LinkCard
+		href="https://github.com/mattjennings/astro-live-code"
+		title="astro-live-code"
+		description="将你的 MDX 代码块渲染为交互式组件"
+	/>
+	<LinkCard
+		href="https://github.com/HiDeoo/starlight-i18n"
+		title="starlight-i18n"
+		description="帮助翻译 Starlight 页面的 Visual Studio Code 扩展"
+	/>
+</CardGrid>

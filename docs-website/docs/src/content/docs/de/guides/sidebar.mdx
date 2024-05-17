@@ -1,0 +1,540 @@
+---
+title: Seitenleisten-Navigation
+description: Erfahre, wie du die Navigationslinks in der Seitenleiste deiner Starlight-Website einrichten und anpassen kannst.
+---
+
+import { FileTree } from '@astrojs/starlight/components';
+import SidebarPreview from '~/components/sidebar-preview.astro';
+
+Eine gut organisierte Seitenleiste ist der Schlüssel zu einer guten Dokumentation, da sie eine der Hauptwege ist, auf denen die Benutzer durch deine Website navigieren werden. Starlight bietet eine ganze Reihe von Optionen, um das Layout und den Inhalt der Seitenleiste anzupassen.
+
+## Standard-Seitenleiste
+
+Standardmäßig erzeugt Starlight automatisch eine Seitenleiste, die auf der Dateistruktur deiner Dokumentation basiert und die Eigenschaft `title` jeder Datei als Seitenleisteneintrag verwendet.
+
+Zum Beispiel, wenn du die folgende Dateistruktur hast:
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - guides/
+        - components.md
+        - i18n.md
+      - reference/
+        - configuration.md
+
+</FileTree>
+
+Wird die folgende Seitenleiste automatisch generiert:
+
+<SidebarPreview
+	config={[
+		{
+			label: 'Anleitungen',
+			items: [
+				{ label: 'Komponenten', link: '/guides/components/' },
+				{ label: 'Internationalisierung (i18n)', link: '/guides/i18n/' },
+			],
+		},
+		{
+			label: 'Referenz',
+			items: [
+				{ label: 'Konfigurationsreferenz', link: '/reference/configuration/' },
+			],
+		},
+	]}
+/>
+
+Erfahre mehr über autogenerierte Seitenleisten im Abschnitt [autogenerierte Gruppen](#automatisch-erzeugte-gruppen).
+
+## Links und Linkgruppen hinzufügen
+
+Um deiner Seitenleiste [Links](#links) und [Gruppen von Links](#gruppen) (innerhalb einer einklappbaren Kopfzeile) zu konfigurieren, verwende die Eigenschaft [`starlight.sidebar`](/de/reference/configuration/#sidebar) in `astro.config.mjs`.
+
+Durch die Kombination von Links und Gruppen kannst du eine Vielzahl von Seitenleistenlayouts erstellen.
+
+### Links
+
+Füge einen Link zu einer internen oder externen Seite hinzu, indem du ein Objekt mit den Eigenschaften `label` und `link` verwendest.
+
+```js
+starlight({
+	sidebar: [
+		// Ein Link auf die CSS & Styling Anleitung.
+		{ label: 'CSS & Styling', link: '/guides/css-and-tailwind/' },
+		// Ein externer Link auf die Astro-Website.
+		{ label: 'Astro', link: 'https://astro.build/' },
+	],
+});
+```
+
+Die obige Konfiguration erzeugt die folgende Seitenleiste:
+
+<SidebarPreview
+	config={[
+		{ label: 'CSS & Styling', link: '/guides/css-and-tailwind/' },
+		{ label: 'Astro', link: 'https://astro.build/' },
+	]}
+/>
+
+### Gruppen
+
+Du kannst deine Seitenleiste strukturieren, indem du zusammengehörige Links unter einer zusammenklappbaren Überschrift gruppierst.
+Gruppen können sowohl Links als auch andere Untergruppen enthalten.
+
+Füge eine Gruppe mit einem Objekt mit den Eigenschaften `label` und `items` hinzu.
+Das `label` wird als Überschrift für die Gruppe verwendet.
+Füge Links oder Untergruppen zu dem `items` Array hinzu.
+
+```js
+starlight({
+	sidebar: [
+		// Eine Gruppe von Links mit der Bezeichnung "Guides".
+		{
+			label: 'Anleitungen',
+			items: [
+				{ label: 'Komponenten', link: '/guides/components/' },
+				{ label: 'Internationalisierung (i18n)', link: '/guides/i18n/' },
+				// Eine verschachtelte Gruppe von Links.
+				{
+					label: 'Styling',
+					items: [
+						{ label: 'CSS', link: '/guides/css-and-tailwind/' },
+						{ label: 'Tailwind', link: '/guides/css-and-tailwind/' },
+						{ label: 'Shiki', link: '/guides/css-and-tailwind/' },
+					],
+				},
+			],
+		},
+	],
+});
+```
+
+Die obige Konfiguration erzeugt die folgende Seitenleiste:
+
+<SidebarPreview
+	config={[
+		{
+			label: 'Guides',
+			items: [
+				{ label: 'Komponenten', link: '/guides/components/' },
+				{ label: 'Internationalisierung (i18n)', link: '/guides/i18n/' },
+				{
+					label: 'Styling',
+					items: [
+						{ label: 'CSS', link: '/guides/css-and-tailwind/' },
+						{ label: 'Tailwind', link: '/guides/css-and-tailwind/' },
+						{ label: 'Shiki', link: '/guides/css-and-tailwind/' },
+					],
+				},
+			],
+		},
+	]}
+/>
+
+### Automatisch erzeugte Gruppen
+
+Starlight kann automatisch eine Gruppe in deiner Seitenleiste erzeugen, die auf einem Verzeichnis deiner Dokumente basiert.
+Dies ist hilfreich, wenn du nicht jedes Element der Seitenleiste manuell in eine Gruppe eintragen willst.
+Die Seiten werden standardmäßig alphabetisch nach Dateinamen sortiert.
+
+Füge eine automatisch generierte Gruppe hinzu, indem du ein Objekt mit den Eigenschaften `Label` und `Autogenerate` verwendest. In der Konfiguration von `autogenerate` muss das `Verzeichnis` angegeben werden, das für die Einträge in der Seitenleiste verwendet werden soll. Zum Beispiel, mit der folgenden Konfiguration:
+
+```js
+starlight({
+	sidebar: [
+		{
+			label: 'Guides',
+			// Automatisches Erzeugen einer Gruppe von Links für das Verzeichnis 'guides'.
+			autogenerate: { directory: 'guides' },
+		},
+	],
+});
+```
+
+Und die folgende Dateistruktur:
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - guides/
+        - components.md
+        - i18n.md
+        - advanced/
+          - project-structure.md
+
+</FileTree>
+
+Wird die folgende Seitenleiste erzeugt:
+
+<SidebarPreview
+	config={[
+		{
+			label: 'Anleitungen',
+			items: [
+				{ label: 'Komponenten', link: '/guides/components/' },
+				{ label: 'Internationalisierung (i18n)', link: '/guides/i18n/' },
+				{
+					label: 'advanced',
+					items: [
+						{ label: 'Projektstruktur', link: '/guides/project-structure/' },
+					],
+				},
+			],
+		},
+	]}
+/>
+
+#### Autogenerierte Links im Frontmatter anpassen
+
+Verwende das [`sidebar`-Frontmatter-Feld](/de/reference/frontmatter/#sidebar) in einzelnen Seiten, um automatisch generierte Links anzupassen.
+
+Mit den Frontmatter-Optionen in der Seitenleiste kannst du einem Link eine [eigenen Bezeichnung](/de/reference/frontmatter/#label) oder ein [Abzeichen](/de/reference/frontmatter/#badge) hinzufügen, einen Link aus der Seitenleiste [verstecken](/de/reference/frontmatter/#hidden), oder eine [eigene Reihenfolge](/de/reference/frontmatter/#order) definieren.
+
+```md
+---
+title: Meine Seite
+sidebar:
+  # Setzt eine eigene Beschriftung für den Link
+  label: Benutzerdefinierte Seitenleistenbeschriftung
+  # Legen du eine benutzerdefinierte Reihenfolge für den Link fest (niedrigere Zahlen werden weiter oben angezeigt)
+  order: 2
+  # Fügen du dem Link ein Abzeichen hinzu
+  badge:
+    text: Neu
+    variant: tip
+---
+```
+
+Eine autogenerierte Gruppe, die eine Seite mit dem obigen Frontmatter enthält, erzeugt die folgende Seitenleiste:
+
+<SidebarPreview
+	config={[
+		{
+			label: 'Anleitungen',
+			items: [
+				{ label: 'Eine Seite', link: '#' },
+				{
+					label: 'Benutzerdefinierte Seitenleistenbeschriftung',
+					link: '#',
+					badge: { text: 'Neu', variant: 'tip' },
+				},
+				{ label: 'Andere Seite', link: '#' },
+			],
+		},
+	]}
+/>
+
+:::note[Anmerkung]
+Die `sidebar`-Frontmatter-Konfiguration wird nur für automatisch generierte Links verwendet und wird für manuell definierte Links ignoriert.
+:::
+
+## Abzeichen
+
+Links, Gruppen und automatisch generierte Gruppen können auch eine `badge`-Eigenschaft enthalten, um ein Abzeichen neben dem jeweiligen Text anzuzeigen.
+
+```js
+starlight({
+	sidebar: [
+		{
+			label: 'Anleitungen',
+			items: [
+				// Ein Link mit einem "Neu"-Abzeichen.
+				{
+					label: 'Komponenten',
+					link: '/guides/components/',
+					badge: 'Neu',
+				},
+			],
+		},
+		// Eine automatisch generierte Gruppe mit dem "Veraltet"-Abzeichen.
+		{
+			label: 'Referenz',
+			badge: 'Veraltet',
+			autogenerate: { directory: 'reference' },
+		},
+	],
+});
+```
+
+Die obige Konfiguration erzeugt die folgende Seitenleiste:
+
+<SidebarPreview
+	config={[
+		{
+			label: 'Anleitungen',
+			items: [
+				{
+					label: 'Komponenten',
+					link: '/guides/components/',
+					badge: { text: 'Neu', variant: 'default' },
+				},
+			],
+		},
+		{
+			label: 'Referenz',
+			badge: { text: 'Veraltet', variant: 'default' },
+			items: [
+				{
+					label: 'Konfigurationsreferenz',
+					link: '/reference/configuration/',
+				},
+				{
+					label: 'Frontmatter Referenz',
+					link: '/reference/frontmatter/',
+				},
+				{
+					label: 'Komponenten-Ersetzung Referenz',
+					link: '/reference/overrides/',
+				},
+			],
+		},
+	]}
+/>
+
+### Abzeichenvarianten
+
+Passe das Design des Abzeichens an, indem du ein Objekt mit den Eigenschaften `text` und `variant` verwendest.
+
+Der `text` steht für den anzuzeigenden Inhalt (z.B. "Neu").
+Überschreibe das `default`-Styling, das die Akzentfarbe deiner Website verwendet, indem du die Eigenschaft `variant` auf einen der folgenden Werte setzt: `note`, `tip`, `danger`, `caution` oder `success`.
+
+```js
+starlight({
+	sidebar: [
+		{
+			label: 'Anleitungen',
+			items: [
+				// Ein Link mit einem gelben "Experimentell"-Abzeichen.
+				{
+					label: 'Komponenten',
+					link: '/guides/components/',
+					badge: { text: 'Experimentell', variant: 'caution' },
+				},
+			],
+		},
+	],
+});
+```
+
+Die obige Konfiguration erzeugt die folgende Seitenleiste:
+
+<SidebarPreview
+	config={[
+		{
+			label: 'Anleitungen',
+			items: [
+				{
+					label: 'Komponenten',
+					link: '/guides/components/',
+					badge: { text: 'Experimentell', variant: 'caution' },
+				},
+			],
+		},
+	]}
+/>
+
+## Benutzerdefinierte HTML-Attribute
+
+Links können auch eine Eigenschaft `attrs` enthalten, um dem Link-Element benutzerdefinierte HTML-Attribute hinzuzufügen.
+
+Im folgenden Beispiel wird `attrs` verwendet, um ein `target="_blank"`-Attribut hinzuzufügen, so dass der Link in einem neuen Tab geöffnet wird, und um ein benutzerdefiniertes `style`-Attribut anzuwenden, um die Linkbeschriftung kursiv zu machen:
+
+```js
+starlight({
+	sidebar: [
+		{
+			label: 'Anleitungen',
+			items: [
+				// Ein externer Link zu den Astro-Dokumenten, der in einem neuen Tab geöffnet wird.
+				{
+					label: 'Astro Docs',
+					link: 'https://docs.astro.build/de/',
+					attrs: { target: '_blank', style: 'font-style: italic' },
+				},
+			],
+		},
+	],
+});
+```
+
+Die obige Konfiguration erzeugt die folgende Seitenleiste:
+
+<SidebarPreview
+	config={[
+		{
+			label: 'Anleitungen',
+			items: [
+				{
+					label: 'Astro Docs',
+					link: 'https://docs.astro.build/de/',
+					attrs: {
+						target: '_blank',
+						style: 'font-style: italic',
+					},
+				},
+			],
+		},
+	]}
+/>
+
+## Internationalisierung
+
+Verwende die Eigenschaft `translations` für Link- und Gruppeneinträge, um die Link- oder Gruppenbeschriftung für jede unterstützte Sprache zu übersetzen, indem du ein [BCP-47](https://www.w3.org/International/questions/qa-choosing-language-tags) Sprach-Tag, z.B. `"en"`, `"ar"`, oder `"zh-CN"`, als Schlüssel und die übersetzte Beschriftung als Wert angibst.
+Die Eigenschaft `label` wird für das Standardgebietsschema und für Sprachen ohne Übersetzung verwendet.
+
+```js
+starlight({
+	sidebar: [
+		{
+			label: 'Guides',
+			translations: {
+				'pt-BR': 'Guias',
+			},
+			items: [
+				{
+					label: 'Components',
+					translations: {
+						'pt-BR': 'Componentes',
+					},
+					link: '/guides/components/',
+				},
+				{
+					label: 'Internationalization (i18n)',
+					translations: {
+						'pt-BR': 'Internacionalização (i18n)',
+					},
+					link: '/guides/i18n/',
+				},
+			],
+		},
+	],
+});
+```
+
+Wenn du die Dokumentation in brasilianischem Portugiesisch durchsuchst, wird die folgende Seitenleiste angezeigt:
+
+<SidebarPreview
+	config={[
+		{
+			label: 'Guias',
+			items: [
+				{ label: 'Componentes', link: '/pt-br/guides/components/' },
+				{ label: 'Internacionalização (i18n)', link: '/pt-br/guides/i18n/' },
+			],
+		},
+	]}
+/>
+
+## Zusammenklappen von Gruppen
+
+Gruppen von Links können standardmäßig eingeklappt werden, indem man die Eigenschaft `collapsed` auf `true` setzt.
+
+```js
+starlight({
+	sidebar: [
+		{
+			label: 'Anleitungen',
+			// Die Gruppe wird standardmäßig eingeklappt.
+			collapsed: true,
+			items: [
+				{ label: 'Komponenten', link: '/guides/components/' },
+				{ label: 'Internationalisierung (i18n)', link: '/guides/i18n/' },
+			],
+		},
+	],
+});
+```
+
+Die obige Konfiguration erzeugt die folgende Seitenleiste:
+
+<SidebarPreview
+	config={[
+		{
+			label: 'Anleitungen',
+			collapsed: true,
+			items: [
+				{ label: 'Komponenten', link: '/guides/components/' },
+				{ label: 'Internationalisierung (i18n)', link: '/guides/i18n/' },
+			],
+		},
+	]}
+/>
+
+[Autogenerierte Gruppen](#automatisch-erzeugte-gruppen) respektieren den `collapsed` Wert ihrer Elterngruppe:
+
+```js
+starlight({
+	sidebar: [
+		{
+			label: 'Anleitungen',
+			// Die Gruppe und ihre automatisch erzeugten Untergruppen standardmäßig einklappen.
+			collapsed: true,
+			autogenerate: { directory: 'guides' },
+		},
+	],
+});
+```
+
+Die obige Konfiguration erzeugt die folgende Seitenleiste:
+
+<SidebarPreview
+	config={[
+		{
+			label: 'Anleitungen',
+			collapsed: true,
+			items: [
+				{ label: 'Komponenten', link: '/guides/components/' },
+				{ label: 'Internationalisierung (i18n)', link: '/guides/i18n/' },
+				{
+					label: 'fortgeschritten',
+					collapsed: true,
+					items: [
+						{ label: 'Projektstructur', link: '/guides/project-structure/' },
+					],
+				},
+			],
+		},
+	]}
+/>
+
+Dieses Verhalten kann durch die Definition der Eigenschaft `autogenerate.collapsed` außer Kraft gesetzt werden.
+
+```js
+starlight({
+	sidebar: [
+		{
+			label: 'Anleitungen',
+			// Die Gruppe "Anleitungen" nicht einklappen, aber ihre
+			// automatisch erzeugten Untergruppen.
+			collapsed: false,
+			autogenerate: { directory: 'guides', collapsed: true },
+		},
+	],
+});
+```
+
+Die obige Konfiguration erzeugt die folgende Seitenleiste:
+
+<SidebarPreview
+	config={[
+		{
+			label: 'Anleitungen',
+			items: [
+				{ label: 'Komponenten', link: '/guides/components/' },
+				{ label: 'Internationalisierung (i18n)', link: '/guides/i18n/' },
+				{
+					label: 'fortgeschritten',
+					collapsed: true,
+					items: [
+						{ label: 'Projektstruktur', link: '/guides/project-structure/' },
+					],
+				},
+			],
+		},
+	]}
+/>

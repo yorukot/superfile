@@ -1,0 +1,24 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+
+  "routes": [
+    {
+      "src": "^/_astro/(.*)$",
+      "headers": { "cache-control": "public, max-age=31536000, immutable" },
+      "continue": true
+    },
+
+    { "src": "/(ph$|ph/)(.*)", "dest": "https://astro-houston-ph.pages.dev/ph/$2" },
+
+    { "src": "(.*)/([^./]+)$", "dest": "$1/$2/", "status": 301 },
+    { "src": "(.*)/index.html$", "dest": "$1/", "status": 301 },
+
+    { "handle": "filesystem" },
+
+    { "src": "/zh/(.*)", "dest": "/zh-cn/$1", "status": 301 },
+    { "src": "/showcase/", "dest": "/resources/showcase/", "status": 301 },
+    { "src": "/(?<lang>[^/]*)/showcase/", "dest": "/$lang/resources/showcase/", "status": 301 },
+
+    { "src": "/(?<lang>[^/]*)/(.*)", "dest": "/$lang/404/", "status": 404 }
+  ]
+}

@@ -1,0 +1,48 @@
+---
+title: 프로젝트 구조
+description: Starlight 프로젝트에서 파일을 구성하는 방법을 알아보세요.
+---
+
+이 가이드에서는 Starlight 프로젝트가 구성되는 방법과 프로젝트의 다양한 파일이 수행하는 작업을 보여줍니다.
+
+Starlight 프로젝트는 일반적으로 다른 Astro 프로젝트와 동일한 파일 및 디렉터리 구조를 따릅니다. 자세한 내용은 [Astro의 프로젝트 구조 문서](https://docs.astro.build/ko/core-concepts/project-structure/)를 참조하세요.
+
+## 파일 및 디렉터리
+
+- `astro.config.mjs` — Starlight 통합 및 구성이 포함된 Astro 구성 파일 입니다.
+- `src/content/config.ts` — Starlight의 프론트매터 스키마를 프로젝트에 추가하는 콘텐츠 컬렉션 구성 파일입니다.
+- `src/content/docs/` — 콘텐츠 파일들이 포함된 디렉터리입니다. Starlight는 이 디렉터리에 있는 `.md`, `.mdx` 또는 `.mdoc` 파일을 사이트의 페이지로 변환합니다.
+- `src/content/i18n/` (선택적) — [국제화](/ko/guides/i18n/)를 지원하는 번역 데이터들이 포함된 디렉터리입니다.
+- `src/` — 프로젝트의 기타 소스 코드 및 파일(컴포넌트, 스타일, 이미지 등)이 포함된 디렉터리입니다.
+- `public/` — Astro에서 처리되지 않는 정적 자산(글꼴, 파비콘, PDF 등)이 포함된 디렉터리입니다.
+
+## 예시 프로젝트
+
+Starlight 프로젝트 디렉터리는 다음과 같습니다.
+
+import { FileTree } from '@astrojs/starlight/components';
+
+<FileTree>
+
+- public/
+  - favicon.svg
+- src/
+  - assets/
+    - logo.svg
+    - screenshot.jpg
+  - components/
+    - CustomButton.astro
+    - InteractiveWidget.jsx
+  - content/
+    - docs/
+      - guides/
+        - 01-getting-started.md
+        - 02-advanced.md
+      - index.mdx
+    - config.ts
+  - env.d.ts
+- astro.config.mjs
+- package.json
+- tsconfig.json
+
+</FileTree>

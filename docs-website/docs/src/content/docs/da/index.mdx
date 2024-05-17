@@ -1,0 +1,52 @@
+---
+title: Starlight 🌟 Byg dokumentationssider med Astro
+description: Starlight hjælper dig med at bygge smukke og hurtige dokumentationssider med Astro.
+template: splash
+editUrl: false
+lastUpdated: false
+hero:
+  title: Få din dokumentation til at skinne med Starlight
+  tagline: Alt du har brug for, for at bygge en skindende dokumentationsside. Hurtig, tilgængelig og nem at bruge.
+  image:
+    file: ~/assets/hero-star.webp
+  actions:
+    - text: Kom igang
+      icon: right-arrow
+      variant: primary
+      link: /da/getting-started/
+    - text: Se på GitHub
+      icon: external
+      link: https://github.com/withastro/starlight
+---
+
+import { CardGrid, Card } from '@astrojs/starlight/components';
+import AboutAstro from '~/components/about-astro.astro';
+
+<CardGrid stagger>
+	<Card title="Documentation, der begejstrer" icon="open-book">
+		Inkluderer: Sidenavigation, søg, internationalisering, SEO, nem at læse
+		typografi, kodefremhævning, mørk tilstand og mere.
+	</Card>
+	<Card title="Drevet af Astro" icon="rocket">
+		Udnyt den fulde kraft og udevne af Astro. Udvid Starlight med dine yndlings
+		Astro integrationer og biblioteker
+	</Card>
+	<Card title="Markdown, Markdoc og MDX" icon="document">
+		Anvend dit yndlings markup sprog. Starlight giver dig indbygget
+		Frontmatter-validering med TypeScript type-sikkerhed.
+	</Card>
+	<Card title="Anvend dine egne UI-komponenter" icon="puzzle">
+		Starlight ships as a framework-agnostic, complete docs solution. Extend with
+		React, Vue, Svelte, Solid, and more. Starlight bliver leveret som en fuldent
+		dokumentations-løsning, der er ligeglad, med hvilket framework du bruger.
+		Udvid med React, Vue, Svelte, Solid, og mere.
+	</Card>
+</CardGrid>
+
+<AboutAstro title="Bragt til dig af">
+Astro er et all-in-one web framework, der er bygget til udevne.
+Hiv dit indhold ned fra hvor som helst og indsæt det hvor som helst, alt sammen drevet af dine yndlings UI-komponenter og biblioteker.
+
+[Lær mere om Astro](https://astro.build/)
+
+</AboutAstro>

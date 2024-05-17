@@ -1,0 +1,533 @@
+---
+title: 侧边栏导航
+description: 了解如何设置和自定义 Starlight 站点的侧边栏导航链接。
+---
+
+import { FileTree } from '@astrojs/starlight/components';
+import SidebarPreview from '~/components/sidebar-preview.astro';
+
+一个组织良好的侧边栏是良好文档的关键，因为它是用户浏览你的站点的主要方式之一。Starlight 提供了一整套选项来自定义侧边栏布局和内容。
+
+## 默认侧边栏
+
+默认情况查下，Starlight 会根据你的文档文件系统结构自动生成侧边栏，使用每个文件的 `title` 属性作为侧边栏条目。
+
+例如，给定以下文件结构：
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - constellations/
+        - andromeda.md
+        - orion.md
+      - stars/
+        - betelgeuse.md
+
+</FileTree>
+
+将会自动生成以下侧边栏：
+
+<SidebarPreview
+	config={[
+		{
+			label: 'constellations',
+			items: [
+				{ label: '仙女座', link: '' },
+				{ label: '猎户座', link: '' },
+			],
+		},
+		{
+			label: 'stars',
+			items: [{ label: '参宿四', link: '' }],
+		},
+	]}
+/>
+
+在 [自动生成的分组](#自动生成的分组) 章节了解更多关于自动生成侧边栏的内容。
+
+## 添加链接和链接分组
+
+要配置侧边栏 [链接](#链接) 和 [链接分组](#分组)（在可折叠的标题中），请在 `astro.config.mjs` 中使用 [`starlight.sidebar`](/zh-cn/reference/configuration/#sidebar) 属性。
+
+结合使用链接和链接分组，你可以创建各种侧边栏布局。
+
+### 链接
+
+使用具有 `label` 和 `link` 属性的对象添加一个指向内部或外部页面的链接。
+
+```js "label:" "link:"
+starlight({
+	sidebar: [
+		// 指向木卫三卫星页面的链接。
+		{ label: '木卫三', link: '/moons/ganymede/' },
+		// 指向 NASA 网站的外部链接。
+		{ label: 'NASA', link: 'https://www.nasa.gov/' },
+	],
+});
+```
+
+上面的配置生成以下侧边栏：
+
+<SidebarPreview
+	config={[
+		{ label: '木卫三', link: '' },
+		{ label: 'NASA', link: 'https://www.nasa.gov/' },
+	]}
+/>
+
+### 分组
+
+你可以通过在可折叠的标题下将相关链接组合在一起来为侧边栏添加结构。
+分组可以包含链接和其他子组。
+
+使用具有 `label` 和 `items` 属性的对象添加一个分组。
+`label` 将用作分组的标题。
+将链接或子组添加到 `items` 数组中。
+
+```js /^\s*(label:|items:)/
+starlight({
+	sidebar: [
+		// 一个名为 "星座" 的链接分组
+		{
+			label: '星座',
+			items: [
+				{ label: '船底座', link: '/constellations/carina/' },
+				{ label: '半人马座', link: '/constellations/centaurus/' },
+				// 星座周期的嵌套链接分组。
+				{
+					label: '周期',
+					items: [
+						{ label: '仙女座', link: '/constellations/andromeda/' },
+						{ label: '猎户座', link: '/constellations/orion/' },
+						{ label: '小熊座', link: '/constellations/ursa-minor/' },
+					],
+				},
+			],
+		},
+	],
+});
+```
+
+上面的配置生成以下侧边栏：
+
+<SidebarPreview
+	config={[
+		{
+			label: '星座',
+			items: [
+				{ label: '船底座', link: '' },
+				{ label: '半人马座', link: '' },
+				{
+					label: '周期',
+					items: [
+						{ label: '仙女座', link: '' },
+						{ label: '猎户座', link: '' },
+						{ label: '小熊座', link: '' },
+					],
+				},
+			],
+		},
+	]}
+/>
+
+### 自动生成的分组
+
+Starlight 可以根据文档目录在侧边栏中自动生成一个分组。当你不想手动输入分组中的每个侧边栏项目时，这很有用。
+
+默认情况下，页面按照文件 [`slug`](/zh-cn/reference/overrides/#slug) 的字母顺序排序。
+
+使用具有 `label` 和 `autogenerate` 属性的对象添加自动生成的分组。`autogenerate` 的配置必须指定用于侧边栏条目的 `directory` 。例如，使用以下配置：
+
+```js "label:" "autogenerate:"
+starlight({
+	sidebar: [
+		{
+			label: '星座',
+			// 自动生成一个链接分组，用于 '星座' 目录。
+			autogenerate: { directory: 'constellations' },
+		},
+	],
+});
+```
+
+给定以下文件结构：
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - constellations/
+        - carina.md
+        - centaurus.md
+        - seasonal/
+          - andromeda.md
+
+</FileTree>
+
+将会自动生成以下侧边栏：
+
+<SidebarPreview
+	config={[
+		{
+			label: '星座',
+			items: [
+				{ label: '船底座', link: '' },
+				{ label: '半人马座', link: '' },
+				{
+					label: 'seasonal',
+					items: [{ label: '仙女座', link: '' }],
+				},
+			],
+		},
+	]}
+/>
+
+#### 在 frontmatter 中自定义自动生成的链接
+
+在单个页面中使用 [`sidebar` frontmatter 字段](/zh-cn/reference/frontmatter/#sidebar) 来自定义自动生成的链接。
+
+侧边栏 frontmatter 选项允许你设置 [自定义标签](/zh-cn/reference/frontmatter/#label) 或者为链接添加 [徽章](/zh-cn/reference/frontmatter/#badge)，[隐藏](/zh-cn/reference/frontmatter/#hidden) 侧边栏中的链接，或者定义 [自定义排序权重](/zh-cn/reference/frontmatter/#order)。
+
+```md "sidebar:"
+---
+# src/content/docs/example.md
+title: 我的页面
+sidebar:
+  # 为链接设置自定义标签
+  label: 自定义侧边栏 label
+  # 为链接设置自定义顺序（数字越小显示在上方）
+  order: 2
+  # 为链接添加徽章
+  badge:
+    text: New
+    variant: tip
+---
+```
+
+一个包含上面 frontmatter 的页面的自动生成分组将会生成以下侧边栏：
+
+<SidebarPreview
+	config={[
+		{
+			label: '指南',
+			items: [
+				{ label: '一个页面', link: '' },
+				{
+					label: '自定义侧边栏 label ',
+					link: '',
+					badge: { text: 'New', variant: 'tip' },
+				},
+				{ label: '其他页面', link: '' },
+			],
+		},
+	]}
+/>
+
+:::note
+`sidebar` frontmatter 配置仅用于自动生成的链接，对于手动定义的链接将被忽略。
+:::
+
+## 徽章
+
+链接、分组、自动生成的分组都可以包含一个 `badge` 属性，以在它们的标签旁边显示徽章。
+
+```js {10,17}
+starlight({
+	sidebar: [
+		{
+			label: '星星',
+			items: [
+				// 带有 "Supergiant" 徽章的链接。
+				{
+					label: '英仙座',
+					link: '/stars/persei/',
+					badge: 'Supergiant',
+				},
+			],
+		},
+		// 带有 "Outdated" 徽章的自动生成分组。
+		{
+			label: '卫星',
+			badge: 'Outdated',
+			autogenerate: { directory: 'moons' },
+		},
+	],
+});
+```
+
+以上配置将生成以下侧边栏：
+
+<SidebarPreview
+	config={[
+		{
+			label: '星星',
+			items: [
+				{
+					label: '英仙座',
+					link: '',
+					badge: { text: '超巨星', variant: 'default' },
+				},
+			],
+		},
+		{
+			label: '卫星',
+			badge: { text: 'Outdated', variant: 'default' },
+			items: [
+				{
+					label: '木卫一',
+					link: '',
+				},
+				{
+					label: '木卫二',
+					link: '',
+				},
+				{
+					label: '木卫三',
+					link: '',
+				},
+			],
+		},
+	]}
+/>
+
+### 徽章种类
+
+使用具有 `text` 和 `variant` 属性的对象自定义徽章样式。
+
+`text` 属性表示要显示的内容（例如 "New"）。
+通过将 `variant` 属性设置为以下值之一：`note`、`tip`、`danger`、`caution` 或 `success`，可以覆盖 `default` 样式，默认样式使用你的网站的强调色。
+
+```js {10}
+starlight({
+	sidebar: [
+		{
+			label: '星星',
+			items: [
+				// 一个带有黄色 "Stub" 徽章的链接。
+				{
+					label: '天狼星',
+					link: '/stars/sirius/',
+					badge: { text: 'Stub', variant: 'caution' },
+				},
+			],
+		},
+	],
+});
+```
+
+以上配置将生成以下侧边栏：
+
+<SidebarPreview
+	config={[
+		{
+			label: '星星',
+			items: [
+				{
+					label: '天狼星',
+					link: '',
+					badge: { text: 'Stub', variant: 'caution' },
+				},
+			],
+		},
+	]}
+/>
+
+## 自定义 HTML 属性
+
+可以通过在链接对象里添加 `attrs` 属性来自定义链接元素的 HTML 属性。
+
+在下面的例子中，通过 `attrs` 添加了一个 `target="_blank"` 属性，使得链接在新标签页中打开，并应用了一个自定义的 `style` 属性使链接标签变为斜体：
+
+```js {10}
+starlight({
+	sidebar: [
+		{
+			label: '资源',
+			items: [
+				// 一个指向 NASA 网站的在新标签页打开的外部链接。
+				{
+					label: 'NASA',
+					link: 'https://www.nasa.gov/',
+					attrs: { target: '_blank', style: 'font-style: italic' },
+				},
+			],
+		},
+	],
+});
+```
+
+以上配置将生成以下侧边栏：
+
+<SidebarPreview
+	config={[
+		{
+			label: '资源',
+			items: [
+				{
+					label: 'NASA',
+					link: 'https://www.nasa.gov/',
+					attrs: {
+						target: '_blank',
+						style: 'font-style: italic',
+					},
+				},
+			],
+		},
+	]}
+/>
+
+## 国际化
+
+你可以使用链接和分组条目上的 `translations` 属性，通过指定 [BCP-47](https://www.w3.org/International/questions/qa-choosing-language-tags) 语言标签，为每种支持的语言翻译链接或分组标签，例如用 `"en"`、`"ar"` 或 `"zh-CN"` 作为键，翻译后的标签作为值。
+
+`label` 属性将用于默认语言和没有翻译的语言。
+
+```js {5-7,11-13,18-20}
+starlight({
+	sidebar: [
+		{
+			label: '星座',
+			translations: {
+				'pt-BR': 'Constelações',
+			},
+			items: [
+				{
+					label: '仙女座',
+					translations: {
+						'pt-BR': 'Andrômeda',
+					},
+					link: '/constellations/andromeda/',
+				},
+				{
+					label: '天蝎座',
+					translations: {
+						'pt-BR': 'Escorpião',
+					},
+					link: '/constellations/scorpius/',
+				},
+			],
+		},
+	],
+});
+```
+
+浏览巴西葡萄牙语文档将生成以下侧边栏：
+
+<SidebarPreview
+	config={[
+		{
+			label: 'Constelação',
+			items: [
+				{ label: 'Andrômeda', link: '' },
+				{ label: 'Escorpião', link: '' },
+			],
+		},
+	]}
+/>
+
+## 折叠分组
+
+链接分组可以通过将 `collapsed` 属性设置为 `true` 来默认折叠。
+
+```js {5-6}
+starlight({
+	sidebar: [
+		{
+			label: '星座',
+			// 默认折叠分组
+			collapsed: true,
+			items: [
+				{ label: '仙女座', link: '/constellations/andromeda/' },
+				{ label: '猎户座', link: '/constellations/orion/' },
+			],
+		},
+	],
+});
+```
+
+以上配置将生成以下侧边栏：
+
+<SidebarPreview
+	config={[
+		{
+			label: '星座',
+			collapsed: true,
+			items: [
+				{ label: '仙女座', link: '' },
+				{ label: '猎户座', link: '' },
+			],
+		},
+	]}
+/>
+
+[自动生成的分组](#自动生成的分组) 遵循其父级分组的 `collapsed` 值：
+
+```js {5-6}
+starlight({
+	sidebar: [
+		{
+			label: '星座',
+			// 默认折叠分组及其自动生成的子组。
+			collapsed: true,
+			autogenerate: { directory: 'constellations' },
+		},
+	],
+});
+```
+
+以上配置将生成以下侧边栏：
+
+<SidebarPreview
+	config={[
+		{
+			label: '星座',
+			collapsed: true,
+			items: [
+				{ label: '船底座', link: '' },
+				{ label: '半人马座', link: '' },
+				{
+					label: 'seasonal',
+					collapsed: true,
+					items: [{ label: '仙女座', link: '' }],
+				},
+			],
+		},
+	]}
+/>
+
+这个行为可以通过定义 `autogenerate.collapsed` 属性来覆盖。
+
+```js {5-7} "collapsed: true"
+starlight({
+	sidebar: [
+		{
+			label: '星座',
+			// 不折叠 "星座" 分组，但折叠其自动生成的子组。
+			collapsed: false,
+			autogenerate: { directory: 'Constellations', collapsed: true },
+		},
+	],
+});
+```
+
+以上配置将生成以下侧边栏：
+
+<SidebarPreview
+	config={[
+		{
+			label: '星座',
+			items: [
+				{ label: '船底座', link: '' },
+				{ label: '半人马座', link: '' },
+				{
+					label: 'seasonal',
+					collapsed: true,
+					items: [{ label: '仙女座', link: '' }],
+				},
+			],
+		},
+	]}
+/>

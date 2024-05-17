@@ -1,0 +1,121 @@
+---
+import type { Props } from '../props';
+
+// Built-in CSS styles.
+import '../style/props.css';
+import '../style/reset.css';
+import '../style/shiki.css';
+import '../style/util.css';
+
+// Components — can override built-in CSS, but not user CSS.
+import Banner from 'virtual:starlight/components/Banner';
+import ContentPanel from 'virtual:starlight/components/ContentPanel';
+import FallbackContentNotice from 'virtual:starlight/components/FallbackContentNotice';
+import DraftContentNotice from 'virtual:starlight/components/DraftContentNotice';
+import Footer from 'virtual:starlight/components/Footer';
+import Head from 'virtual:starlight/components/Head';
+import Header from 'virtual:starlight/components/Header';
+import Hero from 'virtual:starlight/components/Hero';
+import MarkdownContent from 'virtual:starlight/components/MarkdownContent';
+import PageFrame from 'virtual:starlight/components/PageFrame';
+import PageSidebar from 'virtual:starlight/components/PageSidebar';
+import PageTitle from 'virtual:starlight/components/PageTitle';
+import Sidebar from 'virtual:starlight/components/Sidebar';
+import SkipLink from 'virtual:starlight/components/SkipLink';
+import ThemeProvider from 'virtual:starlight/components/ThemeProvider';
+import TwoColumnContent from 'virtual:starlight/components/TwoColumnContent';
+
+// Remark component CSS (needs to override `MarkdownContent.astro`)
+import '../style/asides.css';
+
+// Important that this is the last import so it can override built-in styles.
+import 'virtual:starlight/user-css';
+
+const pagefindEnabled =
+	Astro.props.entry.slug !== '404' &&
+	!Astro.props.entry.slug.endsWith('/404') &&
+	Astro.props.entry.data.pagefind !== false;
+---
+
+<html
+	lang={Astro.props.lang}
+	dir={Astro.props.dir}
+	data-has-toc={Boolean(Astro.props.toc)}
+	data-has-sidebar={Astro.props.hasSidebar}
+	data-has-hero={Boolean(Astro.props.entry.data.hero)}
+	data-theme="dark"
+>
+	<head>
+		<Head {...Astro.props} />
+		<style>
+			html:not([data-has-toc]) {
+				--sl-mobile-toc-height: 0rem;
+			}
+			html:not([data-has-sidebar]) {
+				--sl-content-width: 67.5rem;
+			}
+			/* Add scroll padding to ensure anchor headings aren't obscured by nav */
+			html {
+				/* Additional padding is needed to account for the mobile TOC */
+				scroll-padding-top: calc(1.5rem + var(--sl-nav-height) + var(--sl-mobile-toc-height));
+			}
+			main {
+				padding-bottom: 3vh;
+			}
+			@media (min-width: 50em) {
+				[data-has-sidebar] {
+					--sl-content-inline-start: var(--sl-sidebar-width);
+				}
+			}
+			@media (min-width: 72em) {
+				html {
+					scroll-padding-top: calc(1.5rem + var(--sl-nav-height));
+				}
+			}
+		</style>
+		<ThemeProvider {...Astro.props} />
+	</head>
+	<body>
+		<SkipLink {...Astro.props} />
+		<PageFrame {...Astro.props}>
+			<Header slot="header" {...Astro.props} />
+			{Astro.props.hasSidebar && <Sidebar slot="sidebar" {...Astro.props} />}
+			<TwoColumnContent {...Astro.props}>
+				<PageSidebar slot="right-sidebar" {...Astro.props} />
+				<main
+					data-pagefind-body={pagefindEnabled}
+					lang={Astro.props.entryMeta.lang}
+					dir={Astro.props.entryMeta.dir}
+				>
+					{/* TODO: Revisit how this logic flows. */}
+					<Banner {...Astro.props} />
+					{
+						Astro.props.entry.data.hero ? (
+							<ContentPanel {...Astro.props}>
+								<Hero {...Astro.props} />
+								<MarkdownContent {...Astro.props}>
+									<slot />
+								</MarkdownContent>
+								<Footer {...Astro.props} />
+							</ContentPanel>
+						) : (
+							<>
+								<ContentPanel {...Astro.props}>
+									<PageTitle {...Astro.props} />
+									{Astro.props.entry.data.draft && <DraftContentNotice {...Astro.props} />}
+									{Astro.props.isFallback && <FallbackContentNotice {...Astro.props} />}
+								</ContentPanel>
+								<ContentPanel {...Astro.props}>
+									<MarkdownContent {...Astro.props}>
+										<slot />
+									</MarkdownContent>
+									<Footer {...Astro.props} />
+								</ContentPanel>
+							</>
+						)
+					}
+				</main>
+			</TwoColumnContent>
+		</PageFrame>
+	</body>
+</html>

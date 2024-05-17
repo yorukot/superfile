@@ -1,0 +1,178 @@
+---
+title: Pages
+description: Apprenez à créer et à gérer les pages de votre site de documentation avec Starlight.
+sidebar:
+  order: 1
+---
+
+Starlight génère les pages HTML de votre site en fonction de votre contenu, avec des options flexibles fournies par le biais du frontmatter en Markdown.
+En outre, les projets Starlight bénéficient d'un accès complet aux [puissants outils de génération de pages d'Astro](https://docs.astro.build/fr/basics/astro-pages/).
+Ce guide montre comment fonctionne la génération de pages dans Starlight.
+
+## Pages de contenu
+
+### Formats de fichiers
+
+Starlight prend en charge la création de contenu en Markdown et MDX sans aucune configuration requise.
+Vous pouvez ajouter la prise en charge de Markdoc en installant l'intégration expérimentale [Astro Markdoc](https://docs.astro.build/fr/guides/integrations-guide/markdoc/).
+
+### Ajouter des pages
+
+Ajoutez de nouvelles pages à votre site en créant des fichiers `.md` ou `.mdx` dans `src/content/docs/`.
+Utilisez des sous-dossiers pour organiser vos fichiers et pour créer plusieurs segments de chemin.
+
+Par exemple, la structure de fichier suivante générera des pages à `exemple.com/hello-world` et `exemple.com/reference/faq` :
+
+import { FileTree } from '@astrojs/starlight/components';
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - hello-world.md
+      - reference/
+        - faq.md
+
+</FileTree>
+
+### Frontmatter avec sûreté du typage
+
+Toutes les pages Starlight partagent un [ensemble commun de propriétés du frontmatter](/fr/reference/frontmatter/) personnalisable qui permet de contrôler l'apparence de la page :
+
+```md
+---
+title: Bonjour tout le monde !
+description: Voici une page de mon site propulsé par Starlight
+---
+```
+
+Si vous oubliez quelque chose d'important, Starlight vous le fera savoir.
+
+## Pages personnalisées
+
+Pour les cas d'utilisation avancés, vous pouvez ajouter des pages personnalisées en créant un répertoire `src/pages/`.
+Le répertoire `src/pages/` utilise le [routage basé sur les fichiers d'Astro](https://docs.astro.build/fr/basics/astro-pages/#routage-basé-sur-les-fichiers) et inclut le support des fichiers `.astro` parmi d'autres formats de pages.
+Ceci est utile si vous avez besoin de construire des pages avec une mise en page complètement personnalisée ou de générer une page à partir d'une source de données alternative.
+
+Par exemple, ce projet mélange du contenu Markdown dans `src/content/docs/` avec des routes Astro et HTML dans `src/pages/` :
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - hello-world.md
+  - pages/
+    - custom.astro
+    - archived.html
+
+</FileTree>
+
+Pour en savoir plus, consultez le guide [« Pages » dans la documentation d'Astro](https://docs.astro.build/fr/basics/astro-pages/).
+
+### Utiliser le design de Starlight dans des pages personnalisées
+
+Pour utiliser la mise en page Starlight dans des pages personnalisées, englobez le contenu de votre page avec le composant `<StarlightPage />`.
+Cela peut s'avérer utile si vous générez du contenu de manière dynamique, mais que vous souhaitez tout de même utiliser le design de Starlight.
+
+```astro
+---
+// src/pages/page-perso/exemple.astro
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import CustomComponent from './CustomComponent.astro';
+---
+
+<StarlightPage frontmatter={{ title: 'Ma page personnalisée' }}>
+	<p>Il s'agit d'une page personnalisée avec un composant personnalisé :</p>
+	<CustomComponent />
+</StarlightPage>
+```
+
+#### Props
+
+Le composant `<StarlightPage />` accepte les props suivantes.
+
+##### `frontmatter` (obligatoire)
+
+**Type :** `StarlightPageFrontmatter`
+
+Définit les [propriétés du frontmatter](/fr/reference/frontmatter/) pour cette page, similaire au frontmatter dans les pages Markdown.
+La propriété [`title`](/fr/reference/frontmatter/#title-obligatoire) est obligatoire et toutes les autres propriétés sont optionnelles.
+
+Les propriétés suivantes diffèrent du frontmatter en Markdown :
+
+- La propriété [`slug`](/fr/reference/frontmatter/#slug) n'est pas supportée et est automatiquement définie en fonction de l'URL de la page personnalisée.
+- L'option [`editUrl`](/fr/reference/frontmatter/#editurl) nécessite une URL pour afficher un lien d'édition.
+- La propriété [`sidebar`](/fr/reference/frontmatter/#sidebar) du frontmatter permettant de personnaliser l'affichage de la page dans les [groupes de liens autogénérés](/fr/reference/configuration/#sidebar) n'est pas disponible. Les pages utilisant le composant `<StarlightPage />` ne font pas partie d'une collection et ne peuvent pas être ajoutées à un groupe de liens autogénérés.
+- L'option [`draft`](/fr/reference/frontmatter/#draft) affiche uniquement une [note](/fr/reference/overrides/#draftcontentnotice) indiquant que la page est une ébauche, mais ne l'exclut pas automatiquement des déploiements en production.
+
+##### `sidebar`
+
+**Type :** `SidebarEntry[]`  
+**Par défaut :** la barre latérale générée en fonction de la [configuration globale `sidebar`](/fr/reference/configuration/#sidebar)
+
+Fournit une barre latérale de navigation personnalisée pour cette page.
+Si elle n'est pas définie, la page utilisera la barre latérale globale par défaut.
+
+Par exemple, la page suivante remplace la barre latérale par défaut par un lien vers la page d'accueil et un groupe de liens vers différentes constellations.
+La page courante dans la barre latérale est définie à l'aide de la propriété `isCurrent` et un `badge` optionnel a été ajouté à un élément de lien.
+
+```astro {3-13}
+<StarlightPage
+	frontmatter={{ title: 'Orion' }}
+	sidebar={[
+		{ label: 'Accueil', href: '/' },
+		{
+			label: 'Constellations',
+			items: [
+				{ label: 'Andromède', href: '/andromède/' },
+				{ label: 'Orion', href: '/orion/', isCurrent: true },
+				{
+					label: 'La Petite Ourse',
+					href: '/la-petite-ourse/',
+					badge: 'Ébauche',
+				},
+			],
+		},
+	]}
+>
+	Exemple de contenu.
+</StarlightPage>
+```
+
+##### `hasSidebar`
+
+**Type :** `boolean`  
+**Par défaut :** `false` si [`frontmatter.template`](/fr/reference/frontmatter/#template) est `'splash'`, autrement `true`
+
+Contrôle l'affichage ou non de la barre latérale sur cette page.
+
+##### `headings`
+
+**Type :** `{ depth: number; slug: string; text: string }[]`  
+**Par défaut :** `[]`
+
+Fournit un tableau de tous les titres de cette page.
+Starlight générera la table des matières de la page à partir de ces titres s'ils sont fournis.
+
+##### `dir`
+
+**Type :** `'ltr' | 'rtl'`  
+**Par défaut :** le sens d'écriture pour la locale actuelle
+
+Définit le sens d’écriture pour le contenu de la page.
+
+##### `lang`
+
+**Type :** `string`  
+**Par défaut :** la langue de la locale actuelle
+
+Définit l'étiquette d’identification BCP-47 pour le contenu de cette page, par exemple `en`, `zh-CN`, ou `pt-BR`.
+
+##### `isFallback`
+
+**Type :** `boolean`  
+**Par défaut :** `false`
+
+Indique si cette page utilise un [contenu de repli](/fr/guides/i18n/#contenu-de-repli) parce qu'il n'y a pas de traduction pour la langue actuelle.

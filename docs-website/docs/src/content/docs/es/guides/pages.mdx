@@ -1,0 +1,174 @@
+---
+title: Páginas
+description: Aprende cómo crear y gestionar las páginas de tu sitio de documentación con Starlight.
+sidebar:
+  order: 1
+---
+
+Starlight genera las páginas HTML de tu sitio basadas en tu contenido, con opciones flexibles proporcionadas a través del frontmatter de Markdown.
+Además, los proyectos de Starlight tienen acceso completo a las [herramientas de generación de páginas de Astro](https://docs.astro.build/es/basics/astro-pages/).
+Esta guía muestra cómo funciona la generación de páginas en Starlight.
+
+## Páginas de contenido
+
+### Formatos de archivo
+
+Starlight admite la creación de contenido en Markdown y MDX sin necesidad de configuración.
+Puedes agregar soporte para Markdoc instalando la integración experimental de [Astro Markdoc](https://docs.astro.build/es/guides/integrations-guide/markdoc/).
+
+### Agregar páginas
+
+Añade nuevas páginas a tu sitio creando archivos `.md` o `.mdx` en `src/content/docs/`.
+Utiliza subcarpetas para organizar tus archivos y crear múltiples segmentos de ruta.
+
+Por ejemplo, la siguiente estructura de archivos generará páginas en `example.com/hello-world` y `example.com/reference/faq`:
+
+import { FileTree } from '@astrojs/starlight/components';
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - hello-world.md
+      - reference/
+        - faq.md
+
+</FileTree>
+
+### Frontmatter tipado
+
+Todas las páginas de Starlight comparten un [conjunto común de propiedades de frontmatter personalizables](/es/reference/frontmatter/) para controlar cómo aparece la página:
+
+```md
+---
+title: ¡Hola, mundo!
+description: Esta es una página en mi sitio impulsado por Starlight
+---
+```
+
+Si olvidas algo importante, Starlight te lo hará saber.
+
+## Páginas personalizadas
+
+Para casos de uso avanzados, puedes agregar páginas personalizadas creando un directorio `src/pages/`.
+El directorio `src/pages/` utiliza [enrutamiento basado en archivos de Astro](https://docs.astro.build/es/basics/astro-pages/#enrutamiento-basado-en-archivos) e incluye soporte para archivos `.astro` entre otros formatos de página.
+Esto es útil si necesitas construir páginas con un diseño completamente personalizado o generar una página desde una fuente de datos alternativa.
+
+Por ejemplo, este proyecto mezcla contenido Markdown en `src/content/docs/` con rutas de Astro y HTML en `src/pages/`:
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - hello-world.md
+  - pages/
+    - custom.astro
+    - archived.html
+
+</FileTree>
+
+Lee más en la [Guía de Páginas en la documentación de Astro](https://docs.astro.build/es/basics/astro-pages/).
+
+### Usar el diseño de Starlight en páginas personalizadas
+
+Para usar el diseño de Starlight en páginas personalizadas, envuelve el contenido de tu página con el componente `<StarlightPage />`.
+Esto puede ser útil si estás generando contenido dinámicamente pero aún quieres usar el diseño de Starlight.
+
+```astro
+---
+// src/pages/custom-page/example.astro
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import CustomComponent from './CustomComponent.astro';
+---
+
+<StarlightPage frontmatter={{ title: 'Mi página personalizada' }}>
+	<p>Esta es una página personalizada con un componente personalizado:</p>
+	<CustomComponent />
+</StarlightPage>
+```
+
+#### Props
+
+El componente `<StarlightPage />` acepta las siguientes props.
+
+##### `frontmatter` (requerido)
+
+**tipo:** `StarlightPageFrontmatter`
+
+Establece las [propiedades de frontmatter](/es/reference/frontmatter/) para esta página, similar al frontmatter en las páginas de Markdown.
+La propiedad [`title`](/es/reference/frontmatter/#title-requerido) es requerida y todas las demás propiedades son opcionales.
+
+Las siguientes propiedades difieren del frontmatter de Markdown:
+
+- La propiedad [`slug`](/es/reference/frontmatter/#slug) no es compatible y se establece automáticamente en función de la URL de la página personalizada.
+- La opción [`editUrl`](/es/reference/frontmatter/#editurl) requiere una URL para mostrar un enlace de edición.
+- La propiedad frontmatter [`sidebar`](/es/reference/frontmatter/#sidebar) para personalizar cómo aparece la página en [grupos de enlaces autogenerados](/es/reference/configuration/#sidebar) no está disponible. Las páginas que utilizan el componente `<StarlightPage />` no forman parte de una colección y no pueden ser agregadas a un grupo de barra lateral autogenerado.
+- La opción [`draft`](/es/reference/frontmatter/#draft) solo muestra un [aviso](/es/reference/overrides/#draftcontentnotice) de que la página es un borrador, pero no la excluye automáticamente de las compilaciones de producción.
+
+##### `sidebar`
+
+**tipo:** `SidebarEntry[]`  
+**por defecto:** la barra lateral generada basada en la [configuración global de `sidebar`](/es/reference/configuration/#sidebar)
+
+Proporciona una barra lateral de navegación personalizada para esta página.
+Si no se establece, la página usará la barra lateral global predeterminada.
+
+Por ejemplo, la siguiente página sobrescribe la barra lateral predeterminada con un enlace a la página de inicio y un grupo de enlaces a diferentes constelaciones.
+La página actual en la barra lateral se establece utilizando la propiedad `isCurrent` y se ha agregado un `badge` opcional a un elemento de enlace.
+
+```astro {3-13}
+<StarlightPage
+	frontmatter={{ title: 'Orion' }}
+	sidebar={[
+		{ label: 'Home', href: '/' },
+		{
+			label: 'Constelaciones',
+			items: [
+				{ label: 'Andromeda', href: '/andromeda/' },
+				{ label: 'Orion', href: '/orion/', isCurrent: true },
+				{ label: 'Osa Menor', href: '/ursa-minor/', badge: 'Stub' },
+			],
+		},
+	]}
+>
+	Contenido de la página
+</StarlightPage>
+```
+
+##### `hasSidebar`
+
+**tipo:** `boolean`  
+**por defecto:** `false` si [`frontmatter.template`](/es/reference/frontmatter/#template) es `'splash'`, de lo contrario `true`
+
+Controla si la barra lateral debe mostrarse en esta página o no.
+
+##### `headings`
+
+**tipo:** `{ depth: number; slug: string; text: string }[]`  
+**por defecto:** `[]`
+
+Proporciona un array de todos los encabezados en esta página.
+Starlight generará la tabla de contenidos de la página a partir de estos encabezados si se proporcionan.
+
+##### `dir`
+
+**tipo:** `'ltr' | 'rtl'`  
+**por defecto:** la dirección de escritura para la configuración regional actual
+
+Establece la dirección de escritura para el contenido de esta página.
+
+##### `lang`
+
+**tipo:** `string`  
+**por defecto:** el idioma de la configuración regional actual
+
+Establece la etiqueta de idioma BCP-47 para el contenido de esta página, por ejemplo, `en`, `zh-CN` o `pt-BR`.
+
+##### `isFallback`
+
+**tipo:** `boolean`  
+**por defecto:** `false`
+
+Indica si esta página está utilizando [contenido alternativo](/es/guides/i18n/#contenido-de-respaldo) porque no hay traducción para el idioma actual.

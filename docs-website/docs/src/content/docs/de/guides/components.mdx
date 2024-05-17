@@ -1,0 +1,199 @@
+---
+title: Komponenten
+description: Verwendung von Komponenten in MDX mit Starlight.
+---
+
+Mit Komponenten kannst du auf einfache Weise einen Teil der Benutzeroberfläche oder ein Styling konsistent wiederverwenden,
+zum Beispiel eine Linkkarte oder eine YouTube-Einbettung.
+Starlight unterstützt die Verwendung von Komponenten in [MDX](https://mdxjs.com/)-Dateien und stellt dir einige gängige Komponenten zur Verfügung, die du verwenden kannst.
+
+[Erfahre mehr über die Erstellung von Komponenten in den Astro Docs](https://docs.astro.build/de/core-concepts/astro-components/).
+
+## Verwendung einer Komponente
+
+Du kannst eine Komponente verwenden, indem du sie in deine MDX-Datei importierst und sie dann als JSX-Tag renders.
+Diese sehen wie HTML-Tags aus, beginnen aber mit einem Großbuchstaben, der dem Namen in der `import`-Anweisung entspricht:
+
+```mdx
+---
+# src/content/docs/index.mdx
+title: Willkommen bei meiner Dokumentation
+---
+
+import SomeComponent from '~/components/SomeComponent.astro';
+import AnotherComponent from '~/components/AnotherComponent.astro';
+
+<SomeComponent prop="something" />
+
+<AnotherComponent>
+	Komponenten können auch **verschachtelten Inhalt** enthalten.
+</AnotherComponent>
+```
+
+Da Starlight auf Astro basiert, kannst du Komponenten, die mit einem beliebigen [unterstützten UI-Framework (React, Preact, Svelte, Vue, Solid, Lit und Alpine)](https://docs.astro.build/de/core-concepts/framework-components/) erstellt wurden, in deine MDX-Dateien aufnehmen.
+Erfahre mehr über [Verwendung von Komponenten in MDX](https://docs.astro.build/de/guides/markdown-content/#using-components-in-mdx) in den Astro-Dokumenten.
+
+### Kompatibilität mit Starlights Stilen
+
+Starlight wendet Standardstile auf deinen Markdown-Inhalten an, zum Beispiel das Hinzufügen von Abständen zwischen Elementen.
+Wenn diese Stile mit dem Erscheinungsbild deiner Komponente in Konflikt stehen, setze die Klasse `not-content` auf deine Komponente, um sie zu deaktivieren.
+
+```astro
+---
+// src/components/Beispiel.astro
+---
+
+<div class="not-content">
+	<p>Not impacted by Starlight’s default content styling.</p>
+</div>
+```
+
+## Eingebaute Komponenten
+
+Starlight bietet einige standardmäßig eingebaute Komponenten für gängige Dokumentationszwecke.
+Diese Komponenten sind aus dem Paket `@astrojs/starlight/components` verfügbar.
+
+### Registerkarten
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+Mit den Komponenten `<Tabs>` und `<TabItem>` kannst du eine Oberfläche mit Registerkarten anzeigen.
+Jedes `<TabItem>` muss ein `label` haben, welches dem Benutzer angezeigt wird.
+
+```mdx
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+<Tabs>
+	<TabItem label="Sterne">Sirius, Wega, Betelgeuse</TabItem>
+	<TabItem label="Monde">Io, Europa, Ganymed</TabItem>
+</Tabs>
+```
+
+Der obige Code erzeugt die folgenden Registerkarten auf der Seite:
+
+<Tabs>
+	<TabItem label="Sterne">Sirius, Wega, Betelgeuse</TabItem>
+	<TabItem label="Monde">Io, Europa, Ganymed</TabItem>
+</Tabs>
+
+### Karten
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+Mit der Komponente `<Card>` kannst du Inhalte in einer Box darstellen, die den Stilen von Starlight entspricht.
+Packe mehrere Karten in die `<CardGrid>` Komponente ein, um Karten nebeneinander darzustellen, wenn genügend Platz vorhanden ist.
+
+Eine `<Card>` benötigt einen `title` und kann optional ein `icon` Attribut enthalten, welches auf den Namen [eines von Starlights eingebauten Icons](#alle-icons) gesetzt ist.
+
+```mdx
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<Card title="Schau mal hier">
+	Interessanter Inhalt, den du hervorheben möchtest.
+</Card>
+
+<CardGrid>
+	<Card title="Sterne" icon="star">
+		Sirius, Wega, Betelgeuse
+	</Card>
+	<Card title="Monde" icon="moon">
+		Io, Europa, Ganymed
+	</Card>
+</CardGrid>
+```
+
+Der obige Code erzeugt folgendes auf der Seite:
+
+<Card title="Schau mal hier">
+	Interessanter Inhalt, den du hervorheben möchtest.
+</Card>
+
+<CardGrid>
+	<Card title="Sterne" icon="star">
+		Sirius, Wega, Betelgeuse
+	</Card>
+	<Card title="Monde" icon="moon">
+		Io, Europa, Ganymed
+	</Card>
+</CardGrid>
+
+:::tip[Tipp]
+Verwende ein Kartengitter auf deiner Homepage, um die wichtigsten Merkmale deines Projekts darzustellen.
+Füge das Attribut `stagger` hinzu, um die zweite Spalte der Karten vertikal zu verschieben und visuell interessant zu gestalten:
+
+```astro
+<CardGrid stagger>
+	<!-- Karten -->
+</CardGrid>
+```
+
+:::
+
+### Link Cards
+
+Verwende die `<LinkCard>` Komponente, um auffallend auf verschiedene Seiten zu verlinken.
+
+Eine `<LinkCard>` benötigt ein `title` und ein [`href`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#href) Attribut. Du kannst optional eine kurze `description` oder andere Link-Attribute wie `target` einfügen.
+
+Gruppiere mehrere `<LinkCard>`-Komponenten in `<CardGrid>`, um Karten nebeneinander anzuzeigen, wenn genügend Platz vorhanden ist.
+
+```mdx
+import { LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+<LinkCard
+	title="Starlight anpassen"
+	description="Finde heraus, wie du deine Starlight-Site mit eigenen Stilen, Schriftarten und mehr anpassen können."
+	href="/de/guides/customization/"
+/>
+
+<CardGrid>
+	<LinkCard
+		title="Erstellung von Markdown"
+		href="/de/guides/authoring-content/"
+	/>
+	<LinkCard title="Komponenten" href="/de/guides/components/" />
+</CardGrid>
+```
+
+Der obige Code erzeugt folgendes auf der Seite:
+
+import { LinkCard } from '@astrojs/starlight/components';
+
+<LinkCard
+	title="Starlight anpassen"
+	description="Finde heraus, wie du deine Starlight-Site mit eigenen Stilen, Schriftarten und mehr anpassen können."
+	href="/de/guides/customization/"
+/>
+
+<CardGrid>
+	<LinkCard
+		title="Erstellung von Markdown"
+		href="/de/guides/authoring-content/"
+	/>
+	<LinkCard title="Komponenten" href="/de/guides/components/" />
+</CardGrid>
+
+### Icon
+
+import { Icon } from '@astrojs/starlight/components';
+import IconsList from '~/components/icons-list.astro';
+
+Starlight stellt eine Reihe von allgemeinen Icons zur Verfügung, die du mit der Komponente `<Icon>` in deinem Inhalt anzeigen kannst.
+
+Jedes `<Icon>` benötigt einen [`name`](#alle-icons) und kann optional ein `label`, `size` und `color` Attribut enthalten.
+
+```mdx
+import { Icon } from '@astrojs/starlight/components';
+
+<Icon name="star" color="goldenrod" size="2rem" />
+```
+
+Der obige Code erzeugt folgendes auf der Seite:
+
+<Icon name="star" color="goldenrod" size="2rem" />
+
+#### Alle Icons
+
+Nachfolgend findest du eine Liste aller verfügbaren Icons mit den dazugehörigen Namen. Klicke auf ein Symbol, um den Komponentencode dafür zu kopieren.
+
+<IconsList />

@@ -1,0 +1,139 @@
+---
+title: Başlarken
+description: Sıradaki dokümantasyon siteni Astro'nun Starlight'ı ile nasıl oluşturacağını öğren.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+Starlight, [Astro](https://astro.build) çerçevesi üstüne kurulmuş çok özellikli bir dokümantasyon temasıdır.
+Bu rehber, yeni projeye başlamanda yardımcı olacak.
+Mevcut Astro projesine Starlight eklemek için [elle kurulum talimatlarını](/tr/manual-setup/) incele.
+
+## Hızlı Başlangıç
+
+### Yeni Proje Oluşturma
+
+Aşağıdaki komutu terminalinde çalıştırarak yeni bir Astro + Starlight projesi oluştur:
+
+<Tabs syncKey="pkg">
+<TabItem label="npm">
+
+```sh
+npm create astro@latest -- --template starlight
+```
+
+</TabItem>
+<TabItem label="pnpm">
+
+```sh
+pnpm create astro --template starlight
+```
+
+</TabItem>
+<TabItem label="Yarn">
+
+```sh
+yarn create astro --template starlight
+```
+
+</TabItem>
+</Tabs>
+
+Bu, siten için yapılandırmalar ve tüm gerekli dosyalarla birlikte yeni bir [proje dizini](/tr/guides/project-structure/) oluşturacaktır.
+
+:::tip[Çalışan haline göz at]
+Starlight'ı tarayıcında dene:
+[StackBlitz'deki taslağı aç](https://stackblitz.com/github/withastro/starlight/tree/main/examples/basics).
+:::
+
+### Geliştirme sunucusunu başlat
+
+[Astro’nun geliştirme sunucusu](https://docs.astro.build/en/reference/cli-reference/#astro-dev) lokalinizde çalışırken, çalışmanızı önizlemeye ve otomatik olarak tarayıcınızın değişiklik yaptığınızda yenilenmesine olanak tanır.
+
+Geliştirme sunucusunu başlatmak için aşağıdaki komutu proje dizininizde çalıştırın:
+
+<Tabs syncKey="pkg">
+<TabItem label="npm">
+
+```sh
+npm run dev
+```
+
+</TabItem>
+<TabItem label="pnpm">
+
+```sh
+pnpm dev
+```
+
+</TabItem>
+<TabItem label="Yarn">
+
+```sh
+yarn dev
+```
+
+</TabItem>
+</Tabs>
+
+Bu, terminalinizde lokal önizleme bağlantılı bir mesaj gösterecektir.
+Sitenizi tarayıcıda görüntülemek için bu bağlantıyı açın.
+
+### İçerik Ekle
+
+Starlight, yeni bir içerik eklemen ya da var olan dosyalarını getirmen için hazır!
+
+`src/content/docs/` dizini içerisinde yeni Markdown dosyaları oluşturarak yeni sayfalar ekleyin.
+
+Dosya bazlı gezinim ve MDX ile Markdoc dosya desteği hakkında daha fazlası için [“Sayfalar”](/tr/guides/pages/) rehberini okuyun.
+
+### Sonraki Adımlar
+
+- **Yapılandır:** [“Starlight'ı özelleştirmek”](/tr/guides/customization/) rehberinde ortak ayarlar hakkında öğren.
+- **Gezinme:** [“Kenar Çubuğu Gezinimi”](/tr/guides/sidebar/) rehberi ile kenar çubuğunu ayarla.
+- **Bileşenler:** [“Bileşenler”](/tr/guides/components/) rehberinde hazır yapılmış kartlar, tablar ve daha fazlasını keşfet.
+- **Yayına al:** Astro dokümantayonu içerisindeki [“Siteni yayına al”](https://docs.astro.build/en/guides/deploy/) rehberi ile çalışmanı yayınla.
+
+## Starlight'ı Güncelleme
+
+:::tip
+Starlight, beta sürümünde olduğundan dolayı sıklıkla güncelleme ve geliştirmeler yapılacak.
+Starlight'ı güncel tuttuğuna emin ol!
+:::
+
+Starlight bir Astro entegrasyonudur. Bunu ve diğer Astro paketlerini, terminalinde aşağıdaki komutu çalıştırarak güncelleyebilirsin:
+
+<Tabs syncKey="pkg">
+<TabItem label="npm">
+
+```sh
+npx @astrojs/upgrade
+```
+
+</TabItem>
+<TabItem label="pnpm">
+
+```sh
+pnpm dlx @astrojs/upgrade
+```
+
+</TabItem>
+<TabItem label="Yarn">
+
+```sh
+yarn dlx @astrojs/upgrade
+```
+
+</TabItem>
+</Tabs>
+
+[Starlight Değişim Günlüğü](https://github.com/withastro/starlight/blob/main/packages/starlight/CHANGELOG.md)'nde her yayın içindeki değişikliklerin tümünü listeleyebilirsin.
+
+## Starlight'ta Sorun Giderme
+
+Starlight [Proje Yapılandırması](/tr/reference/configuration/) ve [Benzersiz Sayfa Ön-bölüm Yapılandırması](/tr/reference/frontmatter/) bilgileri, bu sitenin referanslar bölümünde mevcuttur. Bu sayfalardan, Starlight siteni doğru yapılandırdığından ve sitenin düzgün çalıştığından emin olmak için kullanabilirsin.
+
+İçerik eklemede ve Starlight siteni özelleştirmene yardımcı olmak için kenar çubuğundaki rehber listesine göz at.
+Aradığın cevap dokümantasyonda yoksa, tüm Astro dokümantasyonu için lütfen [Astro Dokümantasyonu](https://docs.astro.build)'nu ziyaret et. Starlight teması altında Astro'nun genel olarak nasıl çalıştığıyla sorun yanıtlanmış olabilir.
+
+Ayrıca, [GitHub üzerindeki Starlight sorunları](https://github.com/withastro/starlight/issues)'nı kontrol edebilir, aktif ve dost canlısı topluluğumuzdan [Astro Discord](https://astro.build/chat/) üzerinden yardım isteyebilirsin! Sorularını `#support` forumunda "starlight" etiketi ile sorabilir, ya da özel `#starlight` kanalımızı mevcut geliştirmeler ve daha fazlası için ziyaret edebilirsin!

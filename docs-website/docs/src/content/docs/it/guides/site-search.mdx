@@ -1,0 +1,172 @@
+---
+title: Ricerca nel sito
+description: Scopri le funzionalità di ricerca nel sito integrate in Starlight e come personalizzarle.
+---
+
+import { Tabs, TabItem, Steps } from '@astrojs/starlight/components';
+
+Di default, i siti Starlight includono la ricerca a testo intero potenziata da [Pagefind](https://pagefind.app/), che è uno strumento di ricerca veloce e a bassa larghezza di banda per i siti statici.
+
+Non è richiesta alcuna configurazione per abilitare la ricerca. Compila e distribuisci il tuo sito, quindi usa la barra di ricerca nell'intestazione del sito per trovare i contenuti.
+
+## Nascondere contenuti dai risultati di ricerca
+
+### Escludere una pagina
+
+Per escludere una pagina dall'indice di ricerca, aggiungi [`pagefind: false`](/it/reference/frontmatter/#pagefind) nel frontmatter della pagina:
+
+```md title="src/content/docs/not-indexed.md" ins={3}
+---
+title: Contenuto da nascondere dalla ricerca
+pagefind: false
+---
+```
+
+### Escludere parte di una pagina
+
+Pagefind ignorerà il contenuto all'interno di un elemento con l'attributo [`data-pagefind-ignore`](https://pagefind.app/docs/indexing/#removing-individual-elements-from-the-index).
+
+Nell'esempio seguente, il primo paragrafo verrà mostrato nei risultati di ricerca, ma il contenuto del `<div>` no:
+
+```md title="src/content/docs/partially-indexed.md" ins="data-pagefind-ignore"
+---
+title: Pagina indicizzata parzialmente
+---
+
+Questo testo sarà ricercabile.
+
+<div data-pagefind-ignore>
+
+Questo testo sarà nascosto dalla ricerca.
+
+</div>
+```
+
+## Provider di ricerca alternativi
+
+### Algolia DocSearch
+
+Se hai accesso al programma [Algolia's DocSearch](https://docsearch.algolia.com/) e vuoi usarlo al posto di Pagefind, puoi utilizzare il plugin ufficiale Starlight DocSearch.
+
+<Steps>
+
+1. Installa `@astrojs/starlight-docsearch`:
+
+   <Tabs>
+
+   <TabItem label="npm">
+
+   ```sh
+   npm install @astrojs/starlight-docsearch
+   ```
+
+   </TabItem>
+
+   <TabItem label="pnpm">
+
+   ```sh
+   pnpm add @astrojs/starlight-docsearch
+   ```
+
+   </TabItem>
+
+   <TabItem label="Yarn">
+
+   ```sh
+   yarn add @astrojs/starlight-docsearch
+   ```
+
+   </TabItem>
+
+   </Tabs>
+
+2. Aggiungi DocSearch alla configurazione [`plugins`](/it/reference/configuration/#plugins) di Starlight in `astro.config.mjs` e passagli il tuo `appId`, `apiKey` e `indexName` di Algolia:
+
+   ```js ins={4,10-16}
+   // astro.config.mjs
+   import { defineConfig } from 'astro/config';
+   import starlight from '@astrojs/starlight';
+   import starlightDocSearch from '@astrojs/starlight-docsearch';
+
+   export default defineConfig({
+   	integrations: [
+   		starlight({
+   			title: 'Sito con DocSearch',
+   			plugins: [
+   				starlightDocSearch({
+   					appId: 'TUO_APP_ID',
+   					apiKey: 'TUA_API_KEY_DI_RICERCA',
+   					indexName: 'TUO_NOME_INDICE',
+   				}),
+   			],
+   		}),
+   	],
+   });
+   ```
+
+</Steps>
+
+Con questa configurazione aggiornata, la barra di ricerca nel tuo sito aprirà ora una schermata Algolia invece della schermata di ricerca predefinita.
+
+#### Traduzione dell'interfaccia utente di DocSearch
+
+DocSearch fornisce solo stringhe dell'interfaccia utente in inglese di default.
+Aggiungi traduzioni della UI della schermata per la tua lingua utilizzando il [sistema di internazionalizzazione](/it/guides/i18n/#tradurre-linterfaccia-starlight) integrato in Starlight.
+
+<Steps>
+
+1. Estendi la definizione della collezione di contenuti `i18n` di Starlight con lo schema DocSearch in `src/content/config.ts`:
+
+   ```js ins={4} ins=/{ extend: .+ }/
+   // src/content/config.ts
+   import { defineCollection } from 'astro:content';
+   import { docsSchema, i18nSchema } from '@astrojs/starlight/schema';
+   import { docSearchI18nSchema } from '@astrojs/starlight-docsearch/schema';
+
+   export const collections = {
+   	docs: defineCollection({ schema: docsSchema() }),
+   	i18n: defineCollection({
+   		type: 'data',
+   		schema: i18nSchema({ extend: docSearchI18nSchema() }),
+   	}),
+   };
+   ```
+
+2. Aggiungi le traduzioni nei tuoi file JSON in `src/content/i18n/`.
+
+   Questi sono i default in inglese usati da DocSearch:
+
+   ```json title="src/content/i18n/en.json"
+   {
+   	"docsearch.searchBox.resetButtonTitle": "Clear the query",
+   	"docsearch.searchBox.resetButtonAriaLabel": "Clear the query",
+   	"docsearch.searchBox.cancelButtonText": "Cancel",
+   	"docsearch.searchBox.cancelButtonAriaLabel": "Cancel",
+
+   	"docsearch.startScreen.recentSearchesTitle": "Recent",
+   	"docsearch.startScreen.noRecentSearchesText": "No recent searches",
+   	"docsearch.startScreen.saveRecentSearchButtonTitle": "Save this search",
+   	"docsearch.startScreen.removeRecentSearchButtonTitle": "Remove this search from history",
+   	"docsearch.startScreen.favoriteSearchesTitle": "Favorite",
+   	"docsearch.startScreen.removeFavoriteSearchButtonTitle": "Remove this search from favorites",
+
+   	"docsearch.errorScreen.titleText": "Unable to fetch results",
+   	"docsearch.errorScreen.helpText": "You might want to check your network connection.",
+
+   	"docsearch.footer.selectText": "to select",
+   	"docsearch.footer.selectKeyAriaLabel": "Enter key",
+   	"docsearch.footer.navigateText": "to navigate",
+   	"docsearch.footer.navigateUpKeyAriaLabel": "Arrow up",
+   	"docsearch.footer.navigateDownKeyAriaLabel": "Arrow down",
+   	"docsearch.footer.closeText": "to close",
+   	"docsearch.footer.closeKeyAriaLabel": "Escape key",
+   	"docsearch.footer.searchByText": "Search by",
+
+   	"docsearch.noResultsScreen.noResultsText": "No results for",
+   	"docsearch.noResultsScreen.suggestedQueryText": "Try searching for",
+   	"docsearch.noResultsScreen.reportMissingResultsText": "Believe this query should return results?",
+   	"docsearch.noResultsScreen.reportMissingResultsLinkText": "Let us know."
+   }
+   ```
+
+</Steps>

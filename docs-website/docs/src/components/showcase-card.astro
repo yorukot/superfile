@@ -1,0 +1,32 @@
+---
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import MediaCard from './media-card.astro';
+
+interface Props {
+	href: string;
+	title: string;
+	thumbnail: string;
+}
+const { href, title } = Astro.props;
+
+const thumbnails = import.meta.glob<{ default: ImageMetadata }>(
+	'../assets/showcase/*{.png,.jpg,.jpeg,.webp,.avif}'
+);
+const thumbnail = thumbnails[`../assets/showcase/${Astro.props.thumbnail}`];
+if (!thumbnail) {
+	throw new Error(`Could not resolve showcase thumbnail: ${Astro.props.thumbnail}`);
+}
+const src = (await thumbnail()).default;
+---
+
+<MediaCard {href}>
+	<Image slot="media" {src} alt="" width="560" />
+	<p class="title">{title}</p>
+</MediaCard>
+
+<style>
+	.title {
+		padding: 0.75rem 1rem;
+	}
+</style>

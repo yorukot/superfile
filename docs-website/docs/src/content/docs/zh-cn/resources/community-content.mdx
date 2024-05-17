@@ -1,0 +1,139 @@
+---
+title: 社区内容
+description: 发现社区制作的指南、文章和视频，以帮助你学习和构建 Starlight！
+---
+
+:::tip[添加你自己的！]
+你是否制作过关于 Starlight 的内容？
+创建一个 PR 来添加链接到此页面！
+:::
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+## 文章和评论
+
+以下是一系列帖子和文章，以了解有关 Starlight 和其他人的经历的更多信息：
+
+<CardGrid>
+	<LinkCard
+		href="https://devm.io/open-source/starlight-astro"
+		title="使用 Starlight 生成静态站点"
+		description="“在设计组件时，没有太大或太小的想法”——对 Starlight 负责人 Chris Swithinbank 的采访"
+	/>
+	<LinkCard
+		href="https://frontendatscale.com/blog/hybrid-frontend-architecture/"
+		title="使用 Astro 和 Starlight 的混合前端架构"
+		description="Maxi Ferreira 和 Ben Holmes 使用 Starlight、TinaCMS 和具有身份验证功能的交互式 API Playground 构建了一个文档站点。"
+	/>
+	<LinkCard
+		href="https://www.olets.dev/posts/comparing-docs-site-builders-vuepress-vs-starlight/"
+		title="比较文档网站构建工具：VuePress 与 Starlight"
+		description="这两个框架如何衡量？"
+	/>
+</CardGrid>
+
+## 方案和指南
+
+方案通常是短小的、专注的指南，指导读者完成特定任务的工作示例。通过按照逐步说明完成，方案是向 Starlight 项目添加新功能或行为的绝佳方式！其他指南可能会解释与内容领域相关的概念，例如使用图像或使用 MDX。
+
+浏览由 Starlight 用户维护的社区内容：
+
+<CardGrid>
+	<LinkCard
+		href="https://www.webpro.nl/scraps/versioned-docs-with-starlight-and-vercel"
+		title="Starlight & Vercel 的版本化文档"
+		description="为项目的每个主要版本实现单独版本的文档的指南"
+	/>
+	<LinkCard
+		href="https://hideoo.dev/notes/starlight-heading-links"
+		title="添加指向 Starlight 标题的链接"
+		description="使用 rehype 插件共享文档特定部分链接的指南"
+	/>
+	<LinkCard
+		href="https://blog.otterlord.dev/posts/starlight-sponsors/"
+		title="将赞助商添加到你的 Starlight 网站"
+		description="在文档侧边栏中实现自定义赞助商组件的指南"
+	/>
+	<LinkCard
+		href="https://hideoo.dev/notes/starlight-og-images"
+		title="将 Open Graph 图像添加到 Starlight"
+		description="为你的网页生成社交图像和相应 meta 标签的指南"
+	/>
+	<LinkCard
+		href="https://hideoo.dev/notes/starlight-third-party-icon-sets"
+		title="在 Starlight 中使用第三方图标集"
+		description="使用 unplugin-icons 扩展 Starlight 可用图标选择的指南"
+	/>
+	<LinkCard
+		href="https://hideoo.dev/notes/starlight-custom-html-head"
+		title="编辑 Starlight 页面的 HTML head 部分"
+		description="了解如何添加常见的 head 内容，例如 Web 分析、字体和脚本"
+	/>
+	<LinkCard
+		href="https://dev.to/mrrobot/publishing-documentation-with-astro-starlight-691"
+		title="使用 Astro Starlight 发布文档"
+		description="开始使用 Starlight 文档"
+	/>
+	<LinkCard
+		href="https://events-3bg.pages.dev/jotter/starlight/guide/"
+		title="启用视图过渡"
+		description="通过 Bag of Tricks 的视图过渡支持，获得 SPA 一样的观感"
+	/>
+</CardGrid>
+
+## 视频内容
+
+发现 Starlight 内容的视频和频道，包括直播和教育内容。
+
+import YouTubeGrid from '~/components/youtube-grid.astro';
+
+### Astro 视频
+
+<YouTubeGrid
+	videos={[
+		{
+			href: 'https://www.youtube.com/watch?v=5u0Ds7wzUeI',
+			title: '基于 Astro 的 Starlight',
+			description: '观看 Starlight 官方发布视频',
+		},
+		{
+			href: 'https://www.youtube.com/shorts/zjOWezSzd18',
+			title: '🌟 1分钟内启动',
+			description: '观看 Ben 在不到一分钟的时间内推出新的 Starlight 网站！',
+		},
+	]}
+/>
+
+### 社区视频和直播
+
+<YouTubeGrid
+	videos={[
+		{
+			href: 'https://www.youtube.com/watch?v=sF6UcV3moZg',
+			title: '使用 Starlight 和 Astro 构建文档',
+			description:
+				'观看 Chris 和 Alex 通过 CodingCat.dev 深入研究 Starlight 代码。',
+		},
+		{
+			href: 'https://www.youtube.com/watch?v=sWkkHbwDeQc',
+			title: 'Astro Starlight',
+			description: '在不到一分钟的时间内介绍 Starlight。',
+		},
+		{
+			href: 'https://www.youtube.com/watch?v=-Ki-1E5gNCk',
+			title: 'Astro Starlight 文档模板（构建自定义 app 文档！）',
+			description: '在大约 5 分钟内启动并运行新的 Starlight 网站',
+		},
+		{
+			href: 'https://www.youtube.com/watch?v=12o7WxjAxjM',
+			title: '使用代理将 Starlight 文档包含在 Next.js 项目中',
+			description: '将 Starlight 设置为 Next.js 网站内的子目录项目',
+		},
+		{
+			href: 'https://www.youtube.com/watch?v=5pq80drDrNs',
+			title: '我用这个神奇的工具在 30 分钟内重建了 Shadcn 的文档',
+			description:
+				'在这个视频中，我将介绍 Starlight 的酷炫之处以及为什么你可能想在下一个项目中尝试它。',
+		},
+	]}
+/>

@@ -1,0 +1,173 @@
+---
+title: Pagine
+description: Scopri come creare e gestire le pagine del tuo sito di documentazione con Starlight.
+sidebar:
+  order: 1
+---
+
+Starlight genera le pagine HTML del tuo sito in base ai tuoi contenuti, con opzioni flessibili fornite tramite frontmatter Markdown.
+Inoltre, i progetti Starlight hanno pieno accesso agli [potenti strumenti di generazione delle pagine di Astro](https://docs.astro.build/it/basics/astro-pages/).
+Questa guida mostra come funziona la generazione delle pagine in Starlight.
+
+## Pagine generate da contenuti
+
+### Formati dei file
+
+Starlight supporta la creazione di contenuti in Markdown e MDX senza bisogno di configurazione.
+Puoi aggiungere il supporto per Markdoc installando la [integrazione sperimentale Markdoc di Astro](https://docs.astro.build/it/guides/integrations-guide/markdoc/).
+
+### Aggiungi pagine
+
+Aggiungi nuove pagine al tuo sito creando file `.md` o `.mdx` in `src/content/docs/`.
+Usa le sottocartelle per organizzare i tuoi file e per creare più segmenti di percorso.
+
+Per esempio, la seguente struttura di file genererà pagine su `example.com/hello-world` e `example.com/reference/faq`:
+
+import { FileTree } from '@astrojs/starlight/components';
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - hello-world.md
+      - reference/
+        - faq.md
+
+</FileTree>
+
+### Frontmatter type-safe
+
+Tutte le pagine Starlight condividono un [insieme comune di proprietà frontmatter](/it/reference/frontmatter/) personalizzabili per controllare come appare la pagina:
+
+```md
+---
+title: Ciao Mondo!
+description: Questa è una pagina nel mio sito creato con Starlight
+---
+```
+
+Se dimentichi qualcosa di importante, Starlight te lo farà sapere.
+
+## Pagine personalizzate
+
+Per casi d'uso avanzati, puoi aggiungere pagine personalizzate creando una directory `src/pages/`.
+La directory `src/pages/` utilizza il [routing basato su file di Astro](https://docs.astro.build/it/basics/astro-pages/#file-based-routing) e include il supporto per file `.astro` tra gli altri formati di pagina.
+Questo è utile se hai bisogno di costruire pagine con un layout completamente personalizzato o generare una pagina da una fonte di dati alternativa.
+
+Per esempio, questo progetto mischia contenuti Markdown in `src/content/docs/` con route Astro e HTML in `src/pages/`:
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - hello-world.md
+  - pages/
+    - custom.astro
+    - archived.html
+
+</FileTree>
+
+Leggi di più nella guida ["Pagine" nella documentazione di Astro](https://docs.astro.build/it/basics/astro-pages/).
+
+### Utilizzo del design di Starlight nelle pagine personalizzate
+
+Per utilizzare il layout Starlight nelle pagine personalizzate, metti il contenuto della tua pagina dentro al componente `<StarlightPage />`.
+Questo può essere utile se stai generando contenuti dinamicamente ma vuoi comunque utilizzare il design di Starlight.
+
+```astro
+---
+// src/pages/custom-page/example.astro
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import CustomComponent from './CustomComponent.astro';
+---
+
+<StarlightPage frontmatter={{ title: 'La mia pagina personalizzata' }}>
+	<p>Questa è una pagina personalizzata con un componente personalizzato:</p>
+	<CustomComponent />
+</StarlightPage>
+```
+
+#### Props
+
+Il componente `<StarlightPage />` accetta le seguenti props.
+
+##### `frontmatter` (required)
+
+**tipo:** `StarlightPageFrontmatter`
+
+Imposta le [proprietà del frontmatter](/it/reference/frontmatter/) per questa pagina, simili al frontmatter nelle pagine Markdown.
+La proprietà [`title`](/it/reference/frontmatter/#title-obbligatorio) è obbligatoria e tutte le altre proprietà sono opzionali.
+
+Le seguenti proprietà differiscono dal frontmatter di Markdown:
+
+- La proprietà [`slug`](/it/reference/frontmatter/#slug) non è supportata e viene impostata automaticamente in base all'URL della pagina personalizzata.
+- L'opzione [`editUrl`](/it/reference/frontmatter/#editurl) richiede un URL per visualizzare un link di modifica.
+- La proprietà del frontmatter [`sidebar`](/it/reference/frontmatter/#sidebar) per personalizzare come appare la pagina in [gruppi di link autogenerati](/it/reference/configuration/#sidebar) non è disponibile. Le pagine che utilizzano il componente `<StarlightPage />` non fanno parte di una collezione e non possono essere aggiunte a un gruppo di barra laterale autogenerato.
+
+##### `sidebar`
+
+**tipo:** `SidebarEntry[]`  
+**predefinito:** la barra laterale generata in base alla [configurazione globale `sidebar`](/it/reference/configuration/#sidebar)
+
+Fornisce una barra laterale di navigazione personalizzata per questa pagina.
+Se non impostato, la pagina utilizzerà la barra laterale globale predefinita.
+
+Ad esempio, la pagina seguente sovrascrive la barra laterale predefinita con un link alla homepage e un gruppo di link a diverse costellazioni.
+La pagina corrente nella barra laterale è impostata utilizzando la proprietà `isCurrent` e un `badge` opzionale è stato aggiunto a un elemento di link.
+
+```astro {3-13}
+<StarlightPage
+	frontmatter={{ title: 'Orione' }}
+	sidebar={[
+		{ label: 'Home', href: '/' },
+		{
+			label: 'Costellazioni',
+			items: [
+				{ label: 'Andromeda', href: '/andromeda/' },
+				{ label: 'Orione', href: '/orion/', isCurrent: true },
+				{ label: 'Orsa Minore', href: '/ursa-minor/', badge: 'Abbozzo' },
+			],
+		},
+	]}
+>
+	Contenuto di esempio.
+</StarlightPage>
+```
+
+##### `hasSidebar`
+
+**tipo:** `boolean`  
+**predefinito:** `false` se [`frontmatter.template`](/it/reference/frontmatter/#template) è `'splash'`, altrimenti `true`
+
+Controlla se la barra laterale viene essere visualizzata su questa pagina.
+
+##### `headings`
+
+**tipo:** `{ depth: number; slug: string; text: string }[]`
+**predefinito:** `[]`
+
+Fornisce un array di tutti i titoli su questa pagina.
+Starlight genererà la tabella dei contenuti della pagina da questi titoli se forniti.
+
+##### `dir`
+
+**tipo:** `'ltr' | 'rtl'`  
+**predefinito:** la direzione di scrittura per la lingua corrente
+
+Imposta la direzione di scrittura per il contenuto di questa pagina.
+
+##### `lang`
+
+**tipo:** `string`  
+**predefinito:** la lingua della lingua corrente
+
+Imposta il tag di lingua BCP-47 per il contenuto di questa pagina, ad es. `en`, `zh-CN`, o `pt-BR`.
+
+##### `isFallback`
+
+**tipo:** `boolean`  
+**predefinito:** `false`
+
+Indica se questa pagina sta utilizzando [contenuti di riserva](/it/guides/i18n/#contenuti-di-riserva) perché non c'è una traduzione per la lingua corrente.

@@ -1,0 +1,62 @@
+---
+import { store } from './store';
+
+interface Props {
+	label: string;
+	storeKey: keyof typeof store;
+	type: 'hue' | 'chroma';
+}
+const { label, storeKey, type } = Astro.props;
+
+const { max, step } = { hue: { max: 360, step: 1 }, chroma: { max: 0.27, step: 0.001 } }[type];
+const value = store[storeKey].get()[type];
+---
+
+<value-slider data-store={storeKey} data-type={type}>
+	<label>
+		<span>{label}</span>
+		<input type="range" {max} {step} {value} />
+		<span class="value">{value}</span>
+	</label>
+</value-slider>
+
+<script>
+	import { store } from './store';
+
+	class ValueSlider extends HTMLElement {
+		#input = this.querySelector('input')!;
+		#output = this.querySelector<HTMLSpanElement>('.value')!;
+		#store = store[this.dataset.store as keyof typeof store];
+		#type = this.dataset.type as 'hue' | 'chroma';
+		#formatter = new Intl.NumberFormat(document.documentElement.lang || 'en');
+
+		constructor() {
+			super();
+			this.#input.addEventListener('input', () =>
+				this.#store.setKey(this.#type, this.#input.valueAsNumber)
+			);
+			this.#store.subscribe((v) => {
+				const newValue = v[this.#type];
+				this.#input.value = String(newValue);
+				this.#output.innerText = this.#formatter.format(newValue);
+			});
+		}
+	}
+	customElements.define('value-slider', ValueSlider);
+</script>
+
+<style>
+	label {
+		display: grid;
+		grid-template-columns: auto 1fr 2.5rem;
+		align-items: center;
+		gap: 0.75rem;
+	}
+	input {
+		min-width: 5rem;
+	}
+	.value {
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-2);
+	}
+</style>

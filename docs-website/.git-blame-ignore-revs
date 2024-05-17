@@ -1,0 +1,5 @@
+# Apply with:
+# `git config --local blame.ignoreRevsFile .git-blame-ignore-revs`
+
+# [Add Prettier and format files](https://github.com/withastro/starlight/pull/393)
+9b172f5ee09697d80f301e9b70aca1946419ce24

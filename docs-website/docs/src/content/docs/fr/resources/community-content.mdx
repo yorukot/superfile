@@ -1,0 +1,145 @@
+---
+title: Contenu communautaire
+description: Découvrez les guides, articles et vidéos produits par la communauté pour vous aider à apprendre et à créer avec Starlight !
+---
+
+:::tip[Ajoutez le vôtre !]
+Avez-vous produit du contenu sur Starlight ?
+Ouvrez une PR ajoutant un lien à cette page !
+:::
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+## Articles et revues
+
+Voici une collection de publications et d'articles pour en apprendre plus sur Starlight et les expériences d'autres personnes :
+
+<CardGrid>
+	<LinkCard
+		href="https://devm.io/open-source/starlight-astro"
+		title="Génération de sites statiques avec Starlight"
+		description="« Aucune idée n'est trop grande ou trop petite lors de la conception de composants » — une entrevue avec Chris Swithinbank, responsable de Starlight"
+	/>
+	<LinkCard
+		href="https://frontendatscale.com/blog/hybrid-frontend-architecture/"
+		title="Une architecture frontend hybride avec Astro et Starlight"
+		description="Maxi Ferreira et Ben Holmes construisent un site de documentation avec Starlight, TinaCMS et une aire de test interactive avec authentification pour une API."
+	/>
+	<LinkCard
+		href="https://www.olets.dev/posts/comparing-docs-site-builders-vuepress-vs-starlight/"
+		title="Comparaison des générateurs de sites de documentation : VuePress contre Starlight"
+		description="Comment les deux frameworks se comparent-ils ?"
+	/>
+</CardGrid>
+
+## Recettes et guides
+
+Les recettes sont généralement des guides courts et ciblés qui guident un lecteur à travers l'exécution d'un exemple de travail pour une tâche spécifique. Les recettes sont un excellent moyen d'ajouter de nouvelles fonctionnalités ou un nouveau comportement à votre projet Starlight en suivant des instructions étape par étape ! D'autres guides peuvent expliquer des concepts liés à un domaine spécifique, comme l'utilisation d'images ou l'utilisation de MDX.
+
+Explorez le contenu communautaire produit par les utilisateurs de Starlight :
+
+<CardGrid>
+	<LinkCard
+		href="https://www.webpro.nl/scraps/versioned-docs-with-starlight-and-vercel"
+		title="Documentation versionnée avec Starlight et Vercel"
+		description="Un guide pour mettre en place des versions séparées d'une documentation pour chaque version majeure d'un projet"
+	/>
+	<LinkCard
+		href="https://hideoo.dev/notes/starlight-heading-links"
+		title="Ajouter des liens aux titres de Starlight"
+		description="Un guide pour utiliser un module d'extension rehype pour partager des liens vers des sections spécifiques de votre documentation"
+	/>
+	<LinkCard
+		href="https://blog.otterlord.dev/posts/starlight-sponsors/"
+		title="Ajouter des sponsors à votre site Starlight"
+		description="Un guide pour mettre en place un composant de sponsors personnalisé dans la barre latérale de votre documentation"
+	/>
+	<LinkCard
+		href="https://hideoo.dev/notes/starlight-og-images"
+		title="Ajouter des images Open Graph à Starlight"
+		description="Un guide pour générer des images sociales et les balises de métadonnées correspondantes pour vos pages"
+	/>
+	<LinkCard
+		href="https://hideoo.dev/notes/starlight-third-party-icon-sets"
+		title="Utiliser des ensembles d'icônes tiers dans Starlight"
+		description="Un guide pour utiliser unplugin-icons pour étendre la sélection d'icônes disponibles pour Starlight"
+	/>
+	<LinkCard
+		href="https://hideoo.dev/notes/starlight-custom-html-head"
+		title="Éditer l'en-tête HTML des pages Starlight"
+		description="Apprenez à ajouter du contenu d'en-tête commun tel que des analyses d'audience Web, des polices et des scripts"
+	/>
+	<LinkCard
+		href="https://dev.to/mrrobot/publishing-documentation-with-astro-starlight-691"
+		title="Publier une documentation avec Astro Starlight"
+		description="Démarrer une documentation avec Starlight"
+	/>
+	<LinkCard
+		href="https://events-3bg.pages.dev/jotter/starlight/guide/"
+		title="Utiliser les transitions de vue (view transitions)"
+		description="Obtenir l'apparence et ressenti d'une application monopage (SPA) grâce au support des transitions de vue de Bag of Tricks"
+	/>
+</CardGrid>
+
+## Contenu vidéo
+
+Découvrez des vidéos et des chaînes avec du contenu Starlight, y compris des flux en direct et du contenu éducatif.
+
+import YouTubeGrid from '~/components/youtube-grid.astro';
+
+### Vidéos Astro
+
+<YouTubeGrid
+	videos={[
+		{
+			href: 'https://www.youtube.com/watch?v=5u0Ds7wzUeI',
+			title: 'Starlight par Astro',
+			description: 'Regardez la vidéo de lancement officielle de Starlight',
+		},
+		{
+			href: 'https://www.youtube.com/shorts/zjOWezSzd18',
+			title: '🌟 MOINS DE 1 MINUTE',
+			description:
+				"Regardez Ben créer un nouveau site Starlight en moins d'une minute",
+		},
+	]}
+/>
+
+### Vidéos et flux communautaires
+
+<YouTubeGrid
+	videos={[
+		{
+			href: 'https://www.youtube.com/watch?v=sF6UcV3moZg',
+			title: 'Construire une documentation avec Starlight et Astro',
+			description:
+				'Regardez Chris et Alex plonger au cœur de Starlight dans Coder avec CodingCat.dev',
+		},
+		{
+			href: 'https://www.youtube.com/watch?v=sWkkHbwDeQc',
+			title: 'Astro Starlight',
+			description: 'Introduction à Starlight en moins de une minute',
+		},
+		{
+			href: 'https://www.youtube.com/watch?v=-Ki-1E5gNCk',
+			title:
+				"Modèle de documentation Astro Starlight (créer des documentations personnalisées d'application !)",
+			description:
+				"Créez un nouveau site Starlight prêt à l'emploi en environ 5 minutes",
+		},
+		{
+			href: 'https://www.youtube.com/watch?v=12o7WxjAxjM',
+			title:
+				'Inclure une documentation Starlight dans un projet Next.js avec des proxys',
+			description:
+				"Configurer un projet Starlight dans un sous-répertoire au sein d'un site Next.js",
+		},
+		{
+			href: 'https://www.youtube.com/watch?v=5pq80drDrNs',
+			title:
+				"J'ai recréé la documentation de Shadcn en 30 minutes avec cet outil incroyable",
+			description:
+				"Dans cette vidéo, je passe en revue ce qui rend Starlight si cool et pourquoi vous voudriez l'essayer avec votre prochain projet.",
+		},
+	]}
+/>

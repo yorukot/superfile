@@ -1,0 +1,48 @@
+---
+title: Struktur Proyek
+description: Pelajari bagaimana cara menyusun file di dalam proyek Starlight Anda
+---
+
+Panduan ini akan menunjukkan bagaimana susunan proyek Starlight dan apa yang dilakukan oleh file-file tersebut di dalam proyek Anda.
+
+Proyek Starlight umumnya mengikuti struktur file dan direktori yang sama dengan proyek Astro lainnya. Lihat [dokumentasi struktur proyek Astro](https://docs.astro.build/en/core-concepts/project-structure/) untuk lebih detail.
+
+## File dan direktori
+
+- `astro.config.mjs` — File konfigurasi Astro; mencakup integrasi dan konfigurasi Starlight.
+- `src/content/config.ts` — File konfigurasi koleksi konten; menambahkan skema frontmatter Starlight ke proyek Anda.
+- `src/content/docs/` — File konten. Starlight mengubah setiap file `.md`, `.mdx`, atau `.mdoc` dalam direktori ini menjadi halaman di website Anda.
+- `src/content/i18n/` (opsional) — Data terjemahan untuk mendukung [internasionalisasi](/id/guides/i18n/).
+- `src/` — Kode sumber dan file lainnya (komponen, _style_, gambar, dll.) untuk proyek Anda.
+- `public/` — Aset statis (font, favicon, PDF, dll.) yang tidak akan diproses oleh Astro.
+
+## Isi proyek contoh
+
+Sebuah direktori proyek Starlight mungkin terlihat seperti ini:
+
+import { FileTree } from '@astrojs/starlight/components';
+
+<FileTree>
+
+- public/
+  - favicon.svg
+- src/
+  - assets/
+    - logo.svg
+    - screenshot.jpg
+  - components/
+    - CustomButton.astro
+    - InteractiveWidget.jsx
+  - content/
+    - docs/
+      - guides/
+        - 01-getting-started.md
+        - 02-advanced.md
+      - index.mdx
+    - config.ts
+  - env.d.ts
+- astro.config.mjs
+- package.json
+- tsconfig.json
+
+</FileTree>

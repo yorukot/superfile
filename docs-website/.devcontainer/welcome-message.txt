@@ -1,0 +1,11 @@
+🌟 Welcome to Starlight!
+
+🛠️  Your environment is fully setup with all required software installed.
+
+Next steps:
+
+  - Preview the docs site:
+    cd docs && pnpm dev --host
+
+  - Run tests:
+    cd packages/starlight && pnpm test

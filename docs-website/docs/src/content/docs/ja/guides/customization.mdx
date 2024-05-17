@@ -1,0 +1,445 @@
+---
+title: Starlightのカスタマイズ
+description: Starlightサイトをカスタマイズして、ロゴ、カスタムフォント、ランディングページのデザインなどを追加する方法について学びます。
+---
+
+import { Tabs, TabItem, FileTree, Steps } from '@astrojs/starlight/components';
+
+Starlightには標準的なスタイルと機能がデフォルトで用意されているため、設定不要ですぐに使い始めることができますが、Starlightサイトの見た目をカスタマイズしたくなった場合は、このガイドを参照してください。
+
+## ロゴを追加する
+
+カスタムロゴをサイトヘッダーに設定して、Starlightサイトに個別のブランディングを追加することができます。
+
+<Steps>
+
+1. ロゴ画像のファイルを`src/assets/`ディレクトリに追加します。
+
+   <FileTree>
+
+   - src/
+     - assets/
+       - **my-logo.svg**
+     - content/
+   - astro.config.mjs
+
+   </FileTree>
+
+2. `astro.config.mjs`で、Starlightの[`logo.src`](/ja/reference/configuration/#logo)オプションにロゴのパスを指定します。
+
+   ```diff lang="js"
+   // astro.config.mjs
+   import { defineConfig } from 'astro/config';
+   import starlight from '@astrojs/starlight';
+
+   export default defineConfig({
+   	integrations: [
+   		starlight({
+   			title: 'ロゴを設定したドキュメント',
+   			logo: {
+   +				src: './src/assets/my-logo.svg',
+   			},
+   		}),
+   	],
+   });
+   ```
+
+</Steps>
+
+デフォルトでは、ロゴはサイトの`title`と一緒に表示されます。ロゴ画像にサイトタイトルが含まれている場合は、`replacesTitle`オプションを設定して、タイトルテキストを非表示にすることができます。`title`テキストはスクリーンリーダーのために残されるので、ヘッダーはアクセシブルなままです。
+
+```js {5}
+starlight({
+  title: 'ロゴを設定したドキュメント',
+  logo: {
+    src: './src/assets/my-logo.svg',
+    replacesTitle: true,
+  },
+}),
+```
+
+### ライトモードとダークモード
+
+ライトモードとダークモードで異なるバージョンのロゴを表示することができます。
+
+<Steps>
+
+1. `src/assets/`に各バージョンの画像ファイルを追加します。
+
+   <FileTree>
+
+   - src/
+     - assets/
+       - **light-logo.svg**
+       - **dark-logo.svg**
+     - content/
+   - astro.config.mjs
+
+   </FileTree>
+
+2. `astro.config.mjs`で、`src`ではなく`light`と`dark`オプションにロゴのパスを指定します。
+
+   ```diff lang="js"
+   starlight({
+     title: 'ロゴを設定したドキュメント',
+     logo: {
+   +    light: './src/assets/light-logo.svg',
+   +    dark: './src/assets/dark-logo.svg',
+     },
+   }),
+   ```
+
+</Steps>
+
+## サイトマップを有効化する
+
+Starlightにはサイトマップ生成機能が組み込まれています。`astro.config.mjs`の`site`にURLを設定すると、サイトマップの生成が有効になります。
+
+```js {4}
+// astro.config.mjs
+
+export default defineConfig({
+	site: 'https://stargazers.club',
+	integrations: [starlight({ title: 'サイトマップを設定したサイト' })],
+});
+```
+
+## ページレイアウト
+
+Starlightのページはデフォルトで、グローバルなナビゲーションサイドバーと、現在のページの見出しを表示する目次を配置したレイアウトを使用します。
+
+ページのフロントマターで[`template: splash`](/ja/reference/frontmatter/#template)を設定することで、サイドバーのない、より広いページレイアウトを適用できます。これはランディングページに特に適しており、[このサイトのホームページ](/ja/)で確認することができます。
+
+```md {5}
+---
+# src/content/docs/index.md
+
+title: ランディングページ
+template: splash
+---
+```
+
+## 目次
+
+Starlightは、目当ての見出しに読者が簡単にジャンプできるように、各ページに目次を表示します。目次は、Starlightインテグレーションでグローバルにカスタマイズ・無効化できます。また、フロントマターでページごとの設定も可能です。
+
+デフォルトでは、目次には`<h2>`と`<h3>`の見出しが含まれます。目次に含める見出しレベルをサイト全体で変更するには、[グローバルな`tableOfContents`](/ja/reference/configuration/#tableofcontents)の`minHeadingLevel`と`maxHeadingLevel`オプションを使用します。個々のページでこれらのデフォルト値を上書きするには、対応する[フロントマターの`tableOfContents`](/ja/reference/frontmatter/#tableofcontents)プロパティを追加します。
+
+<Tabs>
+  <TabItem label="フロントマター">
+
+```md {4-6}
+---
+# src/content/docs/example.md
+title: 目次にH2のみを表示するページ
+tableOfContents:
+  minHeadingLevel: 2
+  maxHeadingLevel: 2
+---
+```
+
+  </TabItem>
+  <TabItem label="グローバルな設定">
+
+```js {7}
+// astro.config.mjs
+
+defineConfig({
+	integrations: [
+		starlight({
+			title: '目次の設定をカスタマイズしたドキュメント',
+			tableOfContents: { minHeadingLevel: 2, maxHeadingLevel: 2 },
+		}),
+	],
+});
+```
+
+  </TabItem>
+</Tabs>
+
+`tableOfContents`オプションを`false`に設定することで、目次を完全に無効にできます。
+
+<Tabs>
+  <TabItem label="フロントマター">
+
+```md {4}
+---
+# src/content/docs/example.md
+title: 目次のないページ
+tableOfContents: false
+---
+```
+
+  </TabItem>
+  <TabItem label="グローバルな設定">
+
+```js {7}
+// astro.config.mjs
+
+defineConfig({
+	integrations: [
+		starlight({
+			title: '目次をグローバルに無効にしたドキュメント',
+			tableOfContents: false,
+		}),
+	],
+});
+```
+
+  </TabItem>
+</Tabs>
+
+## ソーシャルリンク
+
+Starlightは、Starlightインテグレーションの[`social`](/ja/reference/configuration/#social)オプションを使用して、サイトヘッダーにソーシャルメディアアカウントへのリンクを追加する機能を備えています。
+
+[設定方法のリファレンス](/ja/reference/configuration/#social)で、サポートされているリンクアイコンの完全なリストを確認できます。他のサービスのサポートが必要な場合は、GitHubかDiscordでお知らせください！
+
+```js {9-12}
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: 'ソーシャルリンクを設定したドキュメント',
+			social: {
+				discord: 'https://astro.build/chat',
+				github: 'https://github.com/withastro/starlight',
+			},
+		}),
+	],
+});
+```
+
+## 編集リンク
+
+Starlightは、各ページのフッターに「ページを編集」リンクを表示できます。これにより読者は、ドキュメントを改善するために編集すべきファイルを簡単に見つけられます。特にオープンソースプロジェクトでは、コミュニティからの貢献を促すのに役立ちます。
+
+編集リンクを有効にするには、Starlightインテグレーションの設定で、[`editLink.baseUrl`](/ja/reference/configuration/#editlink)をリポジトリの編集に使用するURLに設定します。`editLink.baseUrl`の値は現在のページへのパスの先頭に追加されて、最終的な編集リンクを形成します。
+
+よくあるパターンは以下の通りです。
+
+- GitHub: `https://github.com/USER_NAME/REPO_NAME/edit/BRANCH_NAME/`
+- GitLab: `https://gitlab.com/USER_NAME/REPO_NAME/-/edit/BRANCH_NAME/`
+
+Starlightプロジェクトがリポジトリのルートにない場合は、ベースURLの末尾にプロジェクトへのパスを含めます。
+
+以下の例では、GitHub上にある`withastro/starlight`リポジトリの`main`ブランチの`docs/`サブディレクトリに置かれている、Starlightドキュメントの編集リンクを設定しています。
+
+```js {9-11}
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: '編集リンクを設定したドキュメント',
+			editLink: {
+				baseUrl: 'https://github.com/withastro/starlight/edit/main/docs/',
+			},
+		}),
+	],
+});
+```
+
+## カスタム404ページ
+
+Starlightサイトは、デフォルトでシンプルな404ページを表示します。これは、`src/content/docs/`ディレクトリに`404.md`（または`404.mdx`）ファイルを追加することでカスタマイズできます。
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - **404.md**
+      - index.md
+- astro.config.mjs
+
+</FileTree>
+
+404ページでは、Starlightのページレイアウトとカスタマイズ機能をすべて使用できます。たとえば、デフォルトの404ページは、フロントマターで[`splash`テンプレート](#ページレイアウト)と[`hero`](/ja/reference/frontmatter/#hero)コンポーネントを使用しています。
+
+```md {4,6-8}
+---
+# src/content/docs/404.md
+title: '404'
+template: splash
+editUrl: false
+hero:
+  title: '404'
+  tagline: ページが見つかりませんでした。URLを確認するか、検索バーを使用してみてください。
+---
+```
+
+### デフォルトの404ページを無効にする
+
+完全にカスタマイズされた404レイアウトがプロジェクトに必要な場合は、`src/pages/404.astro`ルートを作成し、Starlightのデフォルトルートを無効にするために[`disable404Route`](/ja/reference/configuration/#disable404route)オプションを設定します。
+
+```js {9}
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: '404をカスタマイズしたドキュメント',
+			disable404Route: true,
+		}),
+	],
+});
+```
+
+## カスタムフォント
+
+デフォルトでは、Starlightはユーザーのローカルデバイスで利用可能なサンセリフフォントをすべてのテキストに使用します。これにより、大きなフォントファイルをダウンロードするための余分な帯域幅を必要とせず、各ユーザーに馴染みのあるフォントでドキュメントを高速に読み込むことができます。
+
+Starlightサイトにカスタムフォントを追加する必要がある場合は、カスタムCSSファイルまたは他の[Astroのスタイリング手法](https://docs.astro.build/ja/guides/styling/)により使用するフォントを設定できます。
+
+### フォントの設定
+
+フォントファイルがすでに手元にある場合は、[ローカルの設定ガイド](#ローカルフォントファイルの設定)に従ってください。Google Fontsを使用するには、[Fontsourceの設定ガイド](#fontsourceフォントの設定)に従ってください。
+
+#### ローカルフォントファイルの設定
+
+<Steps>
+
+1. `src/fonts/`ディレクトリにフォントファイルを追加し、空の`font-face.css`ファイルを作成します。
+
+   <FileTree>
+
+   - src/
+     - content/
+     - fonts/
+       - **CustomFont.woff2**
+       - **font-face.css**
+   - astro.config.mjs
+
+   </FileTree>
+
+2. `src/fonts/font-face.css`に、各フォントの[`@font-face`宣言](https://developer.mozilla.org/ja/docs/Web/CSS/@font-face)を追加します。`url()`関数にフォントファイルへの相対パスを指定します。
+
+   ```css
+   /* src/fonts/font-face.css */
+
+   @font-face {
+   	font-family: 'カスタムフォント';
+   	/* ローカルフォントファイルへの相対パスを`url()`で指定します。 */
+   	src: url('./CustomFont.woff2') format('woff2');
+   	font-weight: normal;
+   	font-style: normal;
+   	font-display: swap;
+   }
+   ```
+
+3. `astro.config.mjs`で、Starlightの`customCss`配列に`font-face.css`ファイルへのパスを追加します。
+
+   ```diff lang="js"
+   // astro.config.mjs
+   import { defineConfig } from 'astro/config';
+   import starlight from '@astrojs/starlight';
+
+   export default defineConfig({
+   	integrations: [
+   		starlight({
+   			title: 'カスタムフォントを設定したドキュメント',
+   			customCss: [
+   +				// @font-face CSSファイルへの相対パス
+   +				'./src/fonts/font-face.css',
+   			],
+   		}),
+   	],
+   });
+   ```
+
+</Steps>
+
+#### Fontsourceフォントの設定
+
+[Fontsource](https://fontsource.org/)プロジェクトは、Google Fontsやその他のオープンソースフォントの使用を容易にします。使いたいフォントのnpmモジュールをインストールすることができ、プロジェクトに追加するためのCSSファイルも用意されています。
+
+<Steps>
+
+1.  [Fontsourceのカタログ](https://fontsource.org/)で使用したいフォントを見つけます。この例では、[IBM Plex Serif](https://fontsource.org/fonts/ibm-plex-serif)を使用します。
+
+2.  使いたいフォントのパッケージをインストールします。Fontsourceのフォントページで「Install」をクリックすると、パッケージ名が表示されます。
+
+         <Tabs>
+
+    <TabItem label="npm">
+
+    ```sh
+    npm install @fontsource/ibm-plex-serif
+    ```
+
+           </TabItem>
+
+        <TabItem label="pnpm">
+
+    ```sh
+    pnpm add @fontsource/ibm-plex-serif
+    ```
+
+           </TabItem>
+
+        <TabItem label="Yarn">
+
+    ```sh
+    yarn add @fontsource/ibm-plex-serif
+    ```
+
+           </TabItem>
+
+      </Tabs>
+
+3.  `astro.config.mjs`で、FontsourceのCSSファイルをStarlightの`customCss`配列に追加します。
+
+    ```diff lang="js"
+    // astro.config.mjs
+    import { defineConfig } from 'astro/config';
+    import starlight from '@astrojs/starlight';
+
+    export default defineConfig({
+    	integrations: [
+    		starlight({
+    			title: 'カスタムフォントを設定したドキュメント',
+    			customCss: [
+    +				// 標準とセミボールドのフォントウェイト用のFontsourceファイル。
+    +				'@fontsource/ibm-plex-serif/400.css',
+    +				'@fontsource/ibm-plex-serif/600.css',
+    			],
+    		}),
+    	],
+    });
+    ```
+
+    Fontsourceは、各フォント用に複数のCSSファイルを同梱しています。異なるウェイトやスタイルを含める方法については、[Fontsourceのドキュメント](https://fontsource.org/docs/getting-started/install#4-weights-and-styles)を参照してください。
+
+</Steps>
+
+### フォントを使う
+
+設定したフォントをサイトに適用するには、選択したフォントの名前を[カスタムCSSファイル](/ja/guides/css-and-tailwind/#カスタムcssスタイル)で指定します。たとえば、Starlightのデフォルトフォントをすべての場所で上書きするには、`--sl-font`カスタムプロパティを設定します。
+
+```css
+/* src/styles/custom.css */
+
+:root {
+	--sl-font: 'IBM Plex Serif', serif;
+}
+```
+
+フォントをもっと部分的に適用したい場合は、よりターゲットを絞ったCSSを書くこともできます。たとえば、メインコンテンツにのみフォントを設定し、サイドバーには設定しない場合は、次のようにします。
+
+```css
+/* src/styles/custom.css */
+
+main {
+	font-family: 'IBM Plex Serif', serif;
+}
+```
+
+サイトにスタイルを追加するには、[カスタムCSSの導入手順](/ja/guides/css-and-tailwind/#カスタムcssスタイル)に従ってください。

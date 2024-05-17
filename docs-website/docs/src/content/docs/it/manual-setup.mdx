@@ -1,0 +1,130 @@
+---
+title: Configurazione manuale
+description: Scopri come configurare manualmente Starlight per aggiungerlo a un progetto Astro esistente.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+Il modo più rapido per creare un nuovo sito Starlight è utilizzare `create astro` come mostrato nella [guida introduttiva](/it/getting-started/#crea-un-nuovo-progetto).
+Se desideri aggiungere Starlight a un progetto Astro esistente, questa guida spiegherà come.
+
+## Configura Starlight
+
+Per seguire questa guida, avrai bisogno di un progetto Astro esistente.
+
+### Aggiungi l'integrazione Starlight
+
+Starlight è un'[integrazione Astro](https://docs.astro.build/it/guides/integrations-guide/). Aggiungilo al tuo sito eseguendo il comando `astro add` nella directory principale del tuo progetto:
+
+<Tabs>
+    <TabItem label="npm">
+        ```sh
+        npx astro add starlight
+        ```
+
+    </TabItem>
+    <TabItem label="pnpm">
+        ```sh
+        pnpm astro add starlight
+        ```
+    </TabItem>
+    <TabItem label="Yarn">
+        ```sh
+        yarn astro add starlight
+        ```
+    </TabItem>
+
+</Tabs>
+
+Questo installerà le dipendenze richieste e aggiungerà Starlight all'array `integrations` nel tuo file di configurazione Astro.
+
+### Configura l'integrazione
+
+L'integrazione Starlight è configurata nel file `astro.config.mjs`.
+
+Aggiungi un `title` per iniziare:
+
+```js ins={8}
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: 'Il mio meraviglioso sito di documentazione',
+		}),
+	],
+});
+```
+
+Trova tutte le opzioni disponibili nel [riferimento per la configurazione di Starlight](/it/reference/configuration/).
+
+### Configura raccolte di contenuti
+
+Starlight si basa sulle [raccolte di contenuti](https://docs.astro.build/it/guides/content-collections/) di Astro, che sono configurate nel file `src/content/config.ts`.
+
+Crea o aggiorna il file di configurazione del contenuto, aggiungendo una raccolta `docs` che utilizza `docsSchema` di Starlight:
+
+```js ins={3,6}
+// src/content/config.ts
+import { defineCollection } from 'astro:content';
+import { docsSchema } from '@astrojs/starlight/schema';
+
+export const collections = {
+	docs: defineCollection({ schema: docsSchema() }),
+};
+```
+
+### Aggiungi contenuto
+
+Starlight è ora configurato ed è ora di aggiungere alcuni contenuti!
+
+Crea una directory `src/content/docs/` e inizia aggiungendo un file `index.md`.
+Questa sarà la home page del tuo nuovo sito:
+
+```md
+---
+# src/content/docs/index.md
+title: I miei documenti
+description: Scopri di più sul mio progetto in questo sito di documenti creato con Starlight.
+---
+
+Benvenuti nel mio progetto!
+```
+
+Starlight utilizza il routing basato su file, il che significa che ogni file Markdown, MDX o Markdoc in `src/content/docs/` verrà trasformato in una pagina sul tuo sito. I metadati di Frontmatter (i campi `title` e `description` nell'esempio sopra) possono modificare il modo in cui viene visualizzata ciascuna pagina.
+Vedi tutte le opzioni disponibili nel [riferimento frontmatter](/it/reference/frontmatter/).
+
+## Suggerimenti per i siti esistenti
+
+Se hai un progetto Astro esistente, puoi utilizzare Starlight per aggiungere rapidamente una sezione di documentazione al tuo sito.
+
+### Usa Starlight in un sottopercorso
+
+Per aggiungere tutte le pagine Starlight in un sottopercorso, posiziona tutto il contenuto dei tuoi documenti in una sottodirectory di `src/content/docs/`.
+
+Ad esempio, se le pagine Starlight dovessero iniziare tutte con `/guides/`, aggiungi il contenuto nella directory `src/content/docs/guides/`:
+
+import { FileTree } from '@astrojs/starlight/components';
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - **guides/**
+        - guide.md
+        - index.md
+  - pages/
+- astro.config.mjs
+
+</FileTree>
+
+In futuro, prevediamo di supportare meglio questo caso d'uso per evitare la necessità di una directory all'interno di una directory aggiuntiva in `src/content/docs/`.
+
+### Usa Starlight con SSR
+
+Puoi utilizzare Starlight insieme a pagine personalizzate renderizzate su richiesta nel tuo progetto seguendo la guida [“Adattatori di rendering su richiesta”](https://docs.astro.build/it/guides/server-side-rendering/) nella documentazione di Astro.
+
+Attualmente, le pagine di documentazione generate da Starlight sono sempre prerenderizzate indipendentemente dalla modalità di output del tuo progetto. Speriamo di poter supportare presto il rendering su richiesta per le pagine di Starlight.

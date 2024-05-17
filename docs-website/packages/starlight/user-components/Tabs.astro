@@ -1,0 +1,185 @@
+---
+import Icon from './Icon.astro';
+import { processPanels } from './rehype-tabs';
+
+interface Props {
+	syncKey?: string;
+}
+
+const { syncKey } = Astro.props;
+const panelHtml = await Astro.slots.render('default');
+const { html, panels } = processPanels(panelHtml);
+---
+
+<starlight-tabs data-sync-key={syncKey}>
+	{
+		panels && (
+			<div class="tablist-wrapper not-content">
+				<ul role="tablist">
+					{panels.map(({ icon, label, panelId, tabId }, idx) => (
+						<li role="presentation" class="tab">
+							<a
+								role="tab"
+								href={'#' + panelId}
+								id={tabId}
+								aria-selected={idx === 0 ? 'true' : 'false'}
+								tabindex={idx !== 0 ? -1 : 0}
+							>
+								{icon && <Icon name={icon} />}
+								{label}
+							</a>
+						</li>
+					))}
+				</ul>
+			</div>
+		)
+	}
+	<Fragment set:html={html} />
+</starlight-tabs>
+
+<style>
+	starlight-tabs {
+		display: block;
+	}
+
+	.tablist-wrapper {
+		overflow-x: auto;
+	}
+
+	[role='tablist'] {
+		display: flex;
+		list-style: none;
+		border-bottom: 2px solid var(--sl-color-gray-5);
+		padding: 0;
+	}
+
+	.tab {
+		margin-bottom: -2px;
+	}
+	.tab > [role='tab'] {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0 1.25rem;
+		text-decoration: none;
+		border-bottom: 2px solid var(--sl-color-gray-5);
+		color: var(--sl-color-gray-3);
+		outline-offset: var(--sl-outline-offset-inside);
+		overflow-wrap: initial;
+	}
+	.tab [role='tab'][aria-selected='true'] {
+		color: var(--sl-color-white);
+		border-color: var(--sl-color-text-accent);
+		font-weight: 600;
+	}
+
+	.tablist-wrapper ~ :global([role='tabpanel']) {
+		margin-top: 1rem;
+	}
+</style>
+
+<script>
+	class StarlightTabs extends HTMLElement {
+		// A map of sync keys to all tabs that are synced to that key.
+		static #syncedTabs = new Map<string, StarlightTabs[]>();
+
+		tabs: HTMLAnchorElement[];
+		panels: HTMLElement[];
+		#syncKey: string | undefined;
+
+		constructor() {
+			super();
+			const tablist = this.querySelector<HTMLUListElement>('[role="tablist"]')!;
+			this.tabs = [...tablist.querySelectorAll<HTMLAnchorElement>('[role="tab"]')];
+			this.panels = [...this.querySelectorAll<HTMLElement>(':scope > [role="tabpanel"]')];
+			this.#syncKey = this.dataset.syncKey;
+
+			if (this.#syncKey) {
+				const syncedTabs = StarlightTabs.#syncedTabs.get(this.#syncKey) ?? [];
+				syncedTabs.push(this);
+				StarlightTabs.#syncedTabs.set(this.#syncKey, syncedTabs);
+			}
+
+			this.tabs.forEach((tab, i) => {
+				// Handle clicks for mouse users
+				tab.addEventListener('click', (e) => {
+					e.preventDefault();
+					const currentTab = tablist.querySelector('[aria-selected="true"]');
+					if (e.currentTarget !== currentTab) {
+						this.switchTab(e.currentTarget as HTMLAnchorElement, i);
+					}
+				});
+
+				// Handle keyboard input
+				tab.addEventListener('keydown', (e) => {
+					const index = this.tabs.indexOf(e.currentTarget as any);
+					// Work out which key the user is pressing and
+					// Calculate the new tab's index where appropriate
+					const nextIndex =
+						e.key === 'ArrowLeft'
+							? index - 1
+							: e.key === 'ArrowRight'
+							? index + 1
+							: e.key === 'Home'
+							? 0
+							: e.key === 'End'
+							? this.tabs.length - 1
+							: null;
+					if (nextIndex === null) return;
+					if (this.tabs[nextIndex]) {
+						e.preventDefault();
+						this.switchTab(this.tabs[nextIndex], nextIndex);
+					}
+				});
+			});
+		}
+
+		switchTab(newTab: HTMLAnchorElement | null | undefined, index: number, shouldSync = true) {
+			if (!newTab) return;
+
+			// If tabs should be synced, we store the current position so we can restore it after
+			// switching tabs to prevent the page from jumping when the new tab content is of a different
+			// height than the previous tab.
+			const previousTabsOffset = shouldSync ? this.getBoundingClientRect().top : 0;
+
+			// Mark all tabs as unselected and hide all tab panels.
+			this.tabs.forEach((tab) => {
+				tab.setAttribute('aria-selected', 'false');
+				tab.setAttribute('tabindex', '-1');
+			});
+			this.panels.forEach((oldPanel) => {
+				oldPanel.hidden = true;
+			});
+
+			// Show new panel and mark new tab as selected.
+			const newPanel = this.panels[index];
+			if (newPanel) newPanel.hidden = false;
+			// Restore active tab to the default tab order.
+			newTab.removeAttribute('tabindex');
+			newTab.setAttribute('aria-selected', 'true');
+			if (shouldSync) {
+				newTab.focus();
+				StarlightTabs.#syncTabs(this, newTab.innerText);
+				window.scrollTo({
+					top: window.scrollY + (this.getBoundingClientRect().top - previousTabsOffset),
+				});
+			}
+		}
+
+		static #syncTabs(emitter: StarlightTabs, label: string | null) {
+			const syncKey = emitter.#syncKey;
+			if (!syncKey || !label) return;
+			const syncedTabs = StarlightTabs.#syncedTabs.get(syncKey);
+			if (!syncedTabs) return;
+
+			for (const receiver of syncedTabs) {
+				if (receiver === emitter) continue;
+				const labelIndex = receiver.tabs.findIndex((tab) => tab.innerText === label);
+				if (labelIndex === -1) continue;
+				receiver.switchTab(receiver.tabs[labelIndex], labelIndex, false);
+			}
+		}
+	}
+
+	customElements.define('starlight-tabs', StarlightTabs);
+</script>

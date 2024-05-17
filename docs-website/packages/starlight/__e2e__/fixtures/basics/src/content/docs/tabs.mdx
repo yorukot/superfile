@@ -1,0 +1,54 @@
+---
+title: Tabs
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+A set of tabs using the `pkg` sync key.
+
+<Tabs syncKey="pkg">
+	<TabItem label="npm">npm command</TabItem>
+	<TabItem label="pnpm">pnpm command</TabItem>
+	<TabItem label="yarn">yarn command</TabItem>
+</Tabs>
+
+A basic set of tabs.
+
+<Tabs>
+	<TabItem label="one">tab 1</TabItem>
+	<TabItem label="two">tab 2</TabItem>
+	<TabItem label="three">tab 3</TabItem>
+</Tabs>
+
+Another set of tabs using the `pkg` sync key and an extra tab.
+
+<Tabs syncKey="pkg">
+	<TabItem label="npm">another npm command</TabItem>
+	<TabItem label="pnpm">another pnpm command</TabItem>
+	<TabItem label="bun">another bun command</TabItem>
+	<TabItem label="yarn">another yarn command</TabItem>
+</Tabs>
+
+A set of tabs using the `style` sync key.
+
+<Tabs syncKey="style">
+	<TabItem label="css">css code</TabItem>
+	<TabItem label="tailwind">tailwind code</TabItem>
+</Tabs>
+
+Another set of tabs using the `pkg` sync key and using icons.
+
+<Tabs syncKey="pkg">
+	<TabItem label="npm" icon="seti:npm">
+		another npm command
+	</TabItem>
+	<TabItem label="pnpm" icon="pnpm">
+		another pnpm command
+	</TabItem>
+	<TabItem label="bun" icon="bun">
+		another bun command
+	</TabItem>
+	<TabItem label="yarn" icon="seti:yarn">
+		another yarn command
+	</TabItem>
+</Tabs>

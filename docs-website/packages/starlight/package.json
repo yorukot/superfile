@@ -1,0 +1,215 @@
+{
+  "name": "@astrojs/starlight",
+  "version": "0.22.4",
+  "description": "Build beautiful, high-performance documentation websites with Astro",
+  "scripts": {
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright install --with-deps chromium && playwright test"
+  },
+  "keywords": [
+    "docs",
+    "documentation",
+    "astro",
+    "withastro",
+    "astro-integration"
+  ],
+  "author": "Chris Swithinbank <swithinbank@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/withastro/starlight",
+    "directory": "packages/starlight"
+  },
+  "bugs": "https://github.com/withastro/starlight/issues",
+  "homepage": "https://starlight.astro.build",
+  "type": "module",
+  "exports": {
+    ".": "./index.ts",
+    "./components": "./components.ts",
+    "./components/Badge.astro": {
+      "types": "./components/Badge.astro.tsx",
+      "import": "./components/Badge.astro"
+    },
+    "./components/LanguageSelect.astro": {
+      "types": "./components/LanguageSelect.astro.tsx",
+      "import": "./components/LanguageSelect.astro"
+    },
+    "./components/Select.astro": {
+      "types": "./components/Select.astro.tsx",
+      "import": "./components/Select.astro"
+    },
+    "./components/Banner.astro": {
+      "types": "./components/Banner.astro.tsx",
+      "import": "./components/Banner.astro"
+    },
+    "./components/LastUpdated.astro": {
+      "types": "./components/LastUpdated.astro.tsx",
+      "import": "./components/LastUpdated.astro"
+    },
+    "./components/Sidebar.astro": {
+      "types": "./components/Sidebar.astro.tsx",
+      "import": "./components/Sidebar.astro"
+    },
+    "./components/CallToAction.astro": {
+      "types": "./components/CallToAction.astro.tsx",
+      "import": "./components/CallToAction.astro"
+    },
+    "./components/MarkdownContent.astro": {
+      "types": "./components/MarkdownContent.astro.tsx",
+      "import": "./components/MarkdownContent.astro"
+    },
+    "./components/SidebarSublist.astro": {
+      "types": "./components/SidebarSublist.astro.tsx",
+      "import": "./components/SidebarSublist.astro"
+    },
+    "./components/ContentPanel.astro": {
+      "types": "./components/ContentPanel.astro.tsx",
+      "import": "./components/ContentPanel.astro"
+    },
+    "./components/MobileMenuFooter.astro": {
+      "types": "./components/MobileMenuFooter.astro.tsx",
+      "import": "./components/MobileMenuFooter.astro"
+    },
+    "./components/SiteTitle.astro": {
+      "types": "./components/SiteTitle.astro.tsx",
+      "import": "./components/SiteTitle.astro"
+    },
+    "./components/EditLink.astro": {
+      "types": "./components/EditLink.astro.tsx",
+      "import": "./components/EditLink.astro"
+    },
+    "./components/MobileMenuToggle.astro": {
+      "types": "./components/MobileMenuToggle.astro.tsx",
+      "import": "./components/MobileMenuToggle.astro"
+    },
+    "./components/SkipLink.astro": {
+      "types": "./components/SkipLink.astro.tsx",
+      "import": "./components/SkipLink.astro"
+    },
+    "./components/MobileTableOfContents.astro": {
+      "types": "./components/MobileTableOfContents.astro.tsx",
+      "import": "./components/MobileTableOfContents.astro"
+    },
+    "./components/SocialIcons.astro": {
+      "types": "./components/SocialIcons.astro.tsx",
+      "import": "./components/SocialIcons.astro"
+    },
+    "./components/FallbackContentNotice.astro": {
+      "types": "./components/FallbackContentNotice.astro.tsx",
+      "import": "./components/FallbackContentNotice.astro"
+    },
+    "./components/DraftContentNotice.astro": {
+      "types": "./components/DraftContentNotice.astro.tsx",
+      "import": "./components/DraftContentNotice.astro"
+    },
+    "./components/Page.astro": {
+      "types": "./components/Page.astro.tsx",
+      "import": "./components/Page.astro"
+    },
+    "./components/StarlightPage.astro": {
+      "types": "./components/StarlightPage.astro.tsx",
+      "import": "./components/StarlightPage.astro"
+    },
+    "./components/Footer.astro": {
+      "types": "./components/Footer.astro.tsx",
+      "import": "./components/Footer.astro"
+    },
+    "./components/PageFrame.astro": {
+      "types": "./components/PageFrame.astro.tsx",
+      "import": "./components/PageFrame.astro"
+    },
+    "./components/TableOfContents.astro": {
+      "types": "./components/TableOfContents.astro.tsx",
+      "import": "./components/TableOfContents.astro"
+    },
+    "./components/Head.astro": {
+      "types": "./components/Head.astro.tsx",
+      "import": "./components/Head.astro"
+    },
+    "./components/PageSidebar.astro": {
+      "types": "./components/PageSidebar.astro.tsx",
+      "import": "./components/PageSidebar.astro"
+    },
+    "./components/ThemeProvider.astro": {
+      "types": "./components/ThemeProvider.astro.tsx",
+      "import": "./components/ThemeProvider.astro"
+    },
+    "./components/Header.astro": {
+      "types": "./components/Header.astro.tsx",
+      "import": "./components/Header.astro"
+    },
+    "./components/PageTitle.astro": {
+      "types": "./components/PageTitle.astro.tsx",
+      "import": "./components/PageTitle.astro"
+    },
+    "./components/ThemeSelect.astro": {
+      "types": "./components/ThemeSelect.astro.tsx",
+      "import": "./components/ThemeSelect.astro"
+    },
+    "./components/Hero.astro": {
+      "types": "./components/Hero.astro.tsx",
+      "import": "./components/Hero.astro"
+    },
+    "./components/Pagination.astro": {
+      "types": "./components/Pagination.astro.tsx",
+      "import": "./components/Pagination.astro"
+    },
+    "./components/TwoColumnContent.astro": {
+      "types": "./components/TwoColumnContent.astro.tsx",
+      "import": "./components/TwoColumnContent.astro"
+    },
+    "./components/Search.astro": {
+      "types": "./components/Search.astro.tsx",
+      "import": "./components/Search.astro"
+    },
+    "./internal": "./internal.ts",
+    "./props": "./props.ts",
+    "./schema": "./schema.ts",
+    "./types": "./types.ts",
+    "./expressive-code": {
+      "types": "./expressive-code.d.ts",
+      "default": "./expressive-code.mjs"
+    },
+    "./expressive-code/hast": {
+      "types": "./integrations/expressive-code/hast.d.ts",
+      "default": "./integrations/expressive-code/hast.mjs"
+    },
+    "./index.astro": "./index.astro",
+    "./404.astro": "./404.astro",
+    "./style/markdown.css": "./style/markdown.css"
+  },
+  "peerDependencies": {
+    "astro": "^4.2.7"
+  },
+  "devDependencies": {
+    "@astrojs/markdown-remark": "^4.2.1",
+    "@playwright/test": "^1.43.1",
+    "@types/node": "^18.16.19",
+    "@vitest/coverage-v8": "^1.6.0",
+    "astro": "^4.3.5",
+    "vitest": "^1.6.0"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^2.1.1",
+    "@astrojs/sitemap": "^3.0.5",
+    "@pagefind/default-ui": "^1.0.3",
+    "@types/hast": "^3.0.3",
+    "@types/mdast": "^4.0.3",
+    "astro-expressive-code": "^0.35.2",
+    "bcp-47": "^2.1.0",
+    "hast-util-from-html": "^2.0.1",
+    "hast-util-select": "^6.0.2",
+    "hast-util-to-string": "^3.0.0",
+    "hastscript": "^8.0.0",
+    "mdast-util-directive": "^3.0.0",
+    "mdast-util-to-markdown": "^2.1.0",
+    "pagefind": "^1.0.3",
+    "rehype": "^13.0.1",
+    "rehype-format": "^5.0.0",
+    "remark-directive": "^3.0.0",
+    "unified": "^11.0.4",
+    "unist-util-visit": "^5.0.0",
+    "vfile": "^6.0.1"
+  }
+}

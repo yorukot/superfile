@@ -1,0 +1,48 @@
+---
+title: 项目结构
+description: 了解如何组织 Starlight 项目中的文件。
+---
+
+本指南将向你展示 Starlight 项目的组织方式以及项目中的不同文件的作用。
+
+Starlight 项目通常遵循与其他 Astro 项目相同的文件和目录结构。有关更多详细信息，请参阅 [Astro 的项目结构文档](https://docs.astro.build/zh-cn/core-concepts/project-structure/)。
+
+## 文件和目录
+
+- `astro.config.mjs` — Astro 配置文件；包括 Starlight 集成和配置。
+- `src/content/config.ts` — 内容集合配置文件；将 Starlight 的 frontmatter 模式添加到你的项目中。
+- `src/content/docs/` — 内容文件。Starlight 将此目录中的每个 `.md`、`.mdx` 或 `.mdoc` 文件转换为站点上的一个页面。
+- `src/content/i18n/` (可选) — 支持[国际化](/zh-cn/guides/i18n/)的翻译数据。
+- `src/` — 项目的其他源代码和文档（组件、样式、图像等）。
+- `public/` — 静态资源（字体、网站图标、PDF 等）不会被 Astro 处理。
+
+## 示例项目内容
+
+一个 Starlight 项目目录可能如下所示：
+
+import { FileTree } from '@astrojs/starlight/components';
+
+<FileTree>
+
+- public/
+  - favicon.svg
+- src/
+  - assets/
+    - logo.svg
+    - screenshot.jpg
+  - components/
+    - CustomButton.astro
+    - InteractiveWidget.jsx
+  - content/
+    - docs/
+      - guides/
+        - 01-getting-started.md
+        - 02-advanced.md
+      - index.mdx
+    - config.ts
+  - env.d.ts
+- astro.config.mjs
+- package.json
+- tsconfig.json
+
+</FileTree>

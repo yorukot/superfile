@@ -1,0 +1,34 @@
+{
+  "name": "@astrojs/starlight-docsearch",
+  "version": "0.1.0",
+  "description": "Algolia DocSearch plugin for the Starlight documentation theme for Astro",
+  "author": "Chris Swithinbank <swithinbank@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/withastro/starlight",
+    "directory": "packages/docsearch"
+  },
+  "bugs": "https://github.com/withastro/starlight/issues",
+  "homepage": "https://starlight.astro.build",
+  "type": "module",
+  "files": [
+    "index.ts",
+    "DocSearch.astro",
+    "schema.ts",
+    "variables.css",
+    "virtual.d.ts"
+  ],
+  "exports": {
+    ".": "./index.ts",
+    "./DocSearch.astro": "./DocSearch.astro",
+    "./schema": "./schema.ts"
+  },
+  "peerDependencies": {
+    "@astrojs/starlight": ">=0.14.0"
+  },
+  "dependencies": {
+    "@docsearch/css": "^3.5.2",
+    "@docsearch/js": "^3.5.2"
+  }
+}

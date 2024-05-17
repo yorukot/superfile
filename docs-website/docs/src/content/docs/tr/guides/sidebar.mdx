@@ -1,0 +1,519 @@
+---
+title: Kenar Çubuğu Gezintileri
+description: Starlight sitenizin kenar çubuğunu nasıl kuracağınızı ve özelleştireceğinizi öğrenin.
+---
+
+import { FileTree } from '@astrojs/starlight/components';
+import SidebarPreview from '~/components/sidebar-preview.astro';
+
+İyi düzenlenmiş bir kenar çubuğu, kullanıcılarınızın sitenizde gezinti yapabileceği iyi bir dokümantasyonun anahtarıdır. Starlight kenar çubuğunuzun taslağı ve içeriğini özelleştirebileceğiniz ayarlar sunar.
+
+## Varsayılan Kenar Çubuğu
+
+Starlight, varsayılan olarak dokümantasyonunuzda yer alan her dosyanın `title` değerini kenar çubuğu girdisi olacak şekilde kullanan ve dosya hiyerarşisini baz alan bir kenar çubuğunu otomatik olarak oluşturur.
+
+Örneğin, aşağıdaki gibi dosya yapısı:
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - guides/
+        - components.md
+        - i18n.md
+      - reference/
+        - configuration.md
+
+</FileTree>
+
+Aşdağıdaki gibi kenar çubuğu otomatik olarak oluşturulacaktır:
+
+<SidebarPreview
+	config={[
+		{
+			label: 'guides',
+			items: [
+				{ label: 'Bileşenler', link: 'tr/guides/components/' },
+				{ label: 'Uluslararasılaştırma (i18n)', link: 'tr/guides/i18n/' },
+			],
+		},
+		{
+			label: 'reference',
+			items: [
+				{
+					label: 'Yapılandırma Referansı',
+					link: 'tr/reference/configuration/',
+				},
+			],
+		},
+	]}
+/>
+Otomatik oluşturulan kenar çubukları ile ilgili daha fazla bilgiye [otomatik oluşturulan
+gruplar](#otomatik-oluşturulmuş-gruplar) bölümünden ulaşabilirsiniz.
+
+## Bağlantı ve Bağlantı Grupları Ekleme
+
+Kenar çubuğu [bağlantıları](#bağlantılar) ve [link grupları](#gruplar) (toplanabilen başlıkla birlikle) yapılandırmak için `astro.config.mjs` içindeki [`starlight.sidebar`](/tr/reference/configuration/#sidebar) değerini kullanın.
+
+Bağlantıları ve grupları birleştirereki çok çeşitli kenar çubuğu taslakları oluşturabilirsiniz.
+
+### Bağlantılar
+
+Dahili ya da harici sayfaya `label` ve `link` değerlerine sahip bir nesneyi kullanarak bağlantı ekleyin.
+
+```js
+starlight({
+	sidebar: [
+		// CSS ve Stillendirme rehberine bağlantı.
+		{ label: 'CSS ve Stillendirme', link: 'tr/guides/css-and-tailwind/' },
+		// Astro sitesine harici bir bağlantı.
+		{ label: 'Astro', link: 'https://astro.build/' },
+	],
+});
+```
+
+Yukarıdaki yapılandırma aşağıdaki gibi kenar çubuğu oluşturur:
+
+<SidebarPreview
+	config={[
+		{ label: 'CSS ve Stillendirme', link: 'tr/guides/css-and-tailwind/' },
+		{ label: 'Astro', link: 'https://astro.build/' },
+	]}
+/>
+
+### Gruplar
+
+Kenar çubuğunuza ilişkili bağlantıları toplanabilen başlık altında gruplayarak yapı ekleyebilirsiniz.
+Gruplar bağlantı ve diğer alt grupları barındırabilir.
+
+`label` ve `items` değerlerine sahip bir nesneyi kullanarak grup ekleyin.
+`label` grup için başlık olarak kullanılacaktır.
+`items` dizisine bağlantı ya da alt gruplar ekleyin.
+
+```js
+starlight({
+	sidebar: [
+		// "Guides" etiketli bağlantı grupları.
+		{
+			label: 'Rehber',
+			items: [
+				{ label: 'Bileşenler', link: 'tr/guides/components/' },
+				{ label: 'Uluslararasılaştırma (i18n)', link: 'tr/guides/i18n/' },
+				// Yerleşik bir bağlantı grubu.
+				{
+					label: 'Stillendirme',
+					items: [
+						{ label: 'CSS', link: '/guides/css-and-tailwind/' },
+						{ label: 'Tailwind', link: '/guides/css-and-tailwind/' },
+						{ label: 'Shiki', link: '/guides/css-and-tailwind/' },
+					],
+				},
+			],
+		},
+	],
+});
+```
+
+Yukarıdaki yapılandırma aşağıdaki gibi kenar çubuğu oluşturur:
+
+<SidebarPreview
+	config={[
+		{
+			label: 'Rehber',
+			items: [
+				{ label: 'Bileşenler', link: 'tr/guides/components/' },
+				{ label: 'Uluslararasılaştırma (i18n)', link: 'tr/guides/i18n/' },
+				{
+					label: 'Stillendirme',
+					items: [
+						{ label: 'CSS', link: '/guides/css-and-tailwind/' },
+						{ label: 'Tailwind', link: '/guides/css-and-tailwind/' },
+						{ label: 'Shiki', link: '/guides/css-and-tailwind/' },
+					],
+				},
+			],
+		},
+	]}
+/>
+
+### Otomatik Oluşturulmuş Gruplar
+
+Starlight dokümantasyonunuzun dizinini baz alarak kenar çubuğunuzda otomatik olarak grup oluşturabilir.
+Elle her kenar çubuğu elemanını bir grup içerisine eklemek istemediğinizde yardımcı olur.
+Varsayılan olarak dosyalar, dosya isimlerinin alfabetik sıralamasına göre sıralanmış olacaktır.
+
+`label` ve `autogenerate` değerlerini kullanarak otomatik oluşturulmuş bir grup ekleyin. `autogenerate` yapılandırmanız `directory` değerini, kenar çubuğu girdilerini kullanmak için belirtmelidir. Örneğin, aşağıdaki yapılandırmayla:
+
+```js
+starlight({
+	sidebar: [
+		{
+			label: 'Rehber',
+			// 'guides' dizini için bağlantı gruplarını otomatik oluşturur.
+			autogenerate: { directory: 'guides' },
+		},
+	],
+});
+```
+
+Ve aşağıdaki dosya yapısıyla:
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - guides/
+        - components.md
+        - i18n.md
+        - advanced/
+          - project-structure.md
+
+</FileTree>
+
+Aşağıdaki gibi kenar çubuğu oluşturulacaktır:
+
+<SidebarPreview
+	config={[
+		{
+			label: 'Rehber',
+			items: [
+				{ label: 'Bileşenler', link: 'tr/guides/components/' },
+				{ label: 'Uluslararasılaştırma (i18n)', link: 'tr/guides/i18n/' },
+				{
+					label: 'advanced',
+					items: [
+						{ label: 'Proje Yapısı', link: 'tr/guides/project-structure/' },
+					],
+				},
+			],
+		},
+	]}
+/>
+
+#### Önbölümde otomatik oluşturulmuş bağlantıları özelleştirmek
+
+Özel sayfalarınızda [`kenar çubuğu` önbölüm alanı](/tr/reference/frontmatter/#sidebar)'nı otomatik oluşturulan bağlantılarınızı özelleştirmek için kullanın.
+
+Kenar çubuğu önbölüm ayarları bir bağlantıya [özel isim](/tr/reference/frontmatter/#label) ya da [etiket](/tr/reference/frontmatter/#badge) eklemenize, kenar çubuğundan bir bağlantı [gizlemenize](/tr/reference/frontmatter/#hidden) ya da [özel sıralama](/tr/reference/frontmatter/#order) tanımlamanıza olanak sağlar.
+
+```md
+---
+title: Sayfam
+sidebar:
+  # Bağlantı için özel isim ayarlar
+  label: Özel Kenar Çubuğu İsmi
+  # Bağlantı için özel sıralama ayarlar (küçük sayılar üst sıralarda görünür)
+  order: 2
+  # Bağlantıya etiket ekler
+  badge:
+    text: Yeni
+    variant: tip
+---
+```
+
+Yukarıdaki gibi önbölümlü sayfa içeren otomatik oluşturulan grup, aşağıdaki gibi kenar çubuğu oluşturacaktır:
+
+<SidebarPreview
+	config={[
+		{
+			label: 'Sayfam',
+			items: [
+				{ label: 'Bir Sayfa', link: '#' },
+				{
+					label: 'Özel Kenar Çubuğu İsmi',
+					link: '#',
+					badge: { text: 'Yeni', variant: 'tip' },
+				},
+				{ label: 'Diğer Sayfa', link: '#' },
+			],
+		},
+	]}
+/>
+
+:::note
+`kenar çubuğu` önbölüm yapılandırması sadece otomatik oluşturulmuş bağlantılar için kullanılır ve elle tanımlanmış bağlantıları dikkate almaz.
+:::
+
+## Etiketler
+
+Bağlantılar ayrıca `badge` değerini bağlantı isminin yanında etiket göstermek için alabilir.
+
+```js
+starlight({
+	sidebar: [
+		{
+			label: 'Rehber',
+			items: [
+				// "Yeni" etiketli bağlantı.
+				{
+					label: 'Bileşenler',
+					link: '/tr/guides/components',
+					badge: 'Yeni',
+				},
+			],
+		},
+	],
+});
+```
+
+Yukarıdaki yapılandırma aşağıdaki gibi kenar çubuğu oluşturur:
+
+<SidebarPreview
+	config={[
+		{
+			label: 'Rehber',
+			items: [
+				{
+					label: 'Bileşenler',
+					link: '/tr/guides/components',
+					badge: { text: 'Yeni', variant: 'default' },
+				},
+			],
+		},
+	]}
+/>
+
+### Etiket değişkenleri
+
+`text` ve `variant` değerlerine sahip bir nesne kullanarak etiket özelleştirin.
+
+`text` görüntülenecek içeriği temsil eder (örneğin "Yeni").
+
+`variant` özelliğini bu değerlerden (`note`, `tip`, `danger`, `caution` ya da `success`) biri ile değiştirdiğinizde, sitenizin ara rengini kullanan `default` stillendirmenizin üzerine yazar.
+
+```js
+starlight({
+	sidebar: [
+		{
+			label: 'Rehber',
+			items: [
+				// Sarı "Deneysel" etiketli bir bağlantı.
+				{
+					label: 'Bileşenler',
+					link: 'components/',
+					badge: { text: 'Experimental', variant: 'caution' },
+				},
+			],
+		},
+	],
+});
+```
+
+The configuration above generates the following sidebar:
+
+<SidebarPreview
+	config={[
+		{
+			label: 'Rehber',
+			items: [
+				{
+					label: 'Bileşenler',
+					link: '/tr/guides/components/',
+					badge: { text: 'Deneysel', variant: 'caution' },
+				},
+			],
+		},
+	]}
+/>
+
+## Özel HTML nitelikleri
+
+Bağlantılar ayrıca, özel HTML niteliklerini bağlantı elemanına eklemek için `attrs` değerini içerir.
+Aşağıdaki örnekte `attrs`, `target="_blank"` niteliğini eklemek için kullanılmıştır. Böylecek bağlantı yeni bir sekmede açılır. Özel `style` niteliği bağlantı ismini italikleştirir:
+
+```js
+starlight({
+	sidebar: [
+		{
+			label: 'Rehber',
+			items: [
+				//Yeni sekmede açılan Astro Dokümantasyonuna harici bağlantı.
+				{
+					label: 'Astro Docs',
+					link: 'https://docs.astro.build/',
+					attrs: { target: '_blank', style: 'font-style: italic' },
+				},
+			],
+		},
+	],
+});
+```
+
+Yukarıdaki yapılandırma aşağıdaki gibi kenar çubuğu oluşturur:
+
+<SidebarPreview
+	config={[
+		{
+			label: 'Rehber',
+			items: [
+				{
+					label: 'Astro Docs',
+					link: 'https://docs.astro.build/',
+					attrs: {
+						target: '_blank',
+						style: 'font-style: italic',
+					},
+				},
+			],
+		},
+	]}
+/>
+
+## Uluslararasılaştırma
+
+`translations` değerini bağlantının dilini ya da grup etiketini; [BCP-47](https://www.w3.org/International/questions/qa-choosing-language-tags) dil etiketini (örneğin `"en"`,`"ar` ya da `"zh-CN"`) anahtar ve çevirilmiş ismi değer olarak tanımlayarak her bir desteklenen dil için değiştirmekte kullanın.
+`label` değeri varsayılan yer ve çevirisi olmayan diller için kullanılır.
+
+```js
+starlight({
+	sidebar: [
+		{
+			label: 'Rehber',
+			translations: {
+				'pt-BR': 'Guias',
+			},
+			items: [
+				{
+					label: 'Bileşenler',
+					translations: {
+						'pt-BR': 'Componentes',
+					},
+					link: '/guides/components/',
+				},
+				{
+					label: 'Uluslararasılaştırma (i18n)',
+					translations: {
+						'pt-BR': 'Internacionalização (i18n)',
+					},
+					link: '/guides/i18n/',
+				},
+			],
+		},
+	],
+});
+```
+
+Dokümantasyonu Brezilya Portekizcesinde gezinmek aşağıdaki kenar çubuğunu oluşturacaktır:
+
+<SidebarPreview
+	config={[
+		{
+			label: 'Guias',
+			items: [
+				{ label: 'Componentes', link: '/pt-br/guides/components/' },
+				{ label: 'Internacionalização (i18n)', link: '/pt-br/guides/i18n/' },
+			],
+		},
+	]}
+/>
+
+## Toplanabilen Gruplar
+
+Bağlantı grupları varsayılan olarak `collapsed` değerinin `true` olarak ayarlanmasıyla toplanabilir olur.
+
+```js
+starlight({
+	sidebar: [
+		{
+			label: 'Rehber',
+			// Collapse the group by default.
+			collapsed: true,
+			items: [
+				{ label: 'Bileşenler', link: '/tr/guides/components/' },
+				{ label: 'Uluslararasılaştırma (i18n)', link: '/tr/guides/i18n/' },
+			],
+		},
+	],
+});
+```
+
+Yukarıdaki yapılandırma aşağıdaki gibi kenar çubuğu oluşturur:
+
+<SidebarPreview
+	config={[
+		{
+			label: 'Rehber',
+			collapsed: true,
+			items: [
+				{ label: 'Bileşenler', link: '/tr/guides/components/' },
+				{ label: 'Uluslararasılaştırma (i18n)', link: '/tr/guides/i18n/' },
+			],
+		},
+	]}
+/>
+
+[Otomatik oluşturulmuş gruplar](#otomatik-oluşturulmuş-gruplar) `collapsed` değerinin üst grubuna dikkat eder:
+
+```js
+starlight({
+	sidebar: [
+		{
+			label: 'Rehber',
+			// Varsayılan olarak grubu ve otomatik oluşturulmuş alt grupları toplar.
+			collapsed: true,
+			autogenerate: { directory: 'guides' },
+		},
+	],
+});
+```
+
+Yukarıdaki yapılandırma aşağıdaki gibi kenar çubuğu oluşturur:
+
+<SidebarPreview
+	config={[
+		{
+			label: 'Rehber',
+			collapsed: true,
+			items: [
+				{ label: 'Bileşenler', link: '/tr/guides/components/' },
+				{ label: 'Uluslararasılaştırma (i18n)', link: '/tr/guides/i18n/' },
+				{
+					label: 'advanced',
+					collapsed: true,
+					items: [
+						{ label: 'Proje Yapısı', link: '/tr/guides/project-structure/' },
+					],
+				},
+			],
+		},
+	]}
+/>
+
+`autogenerate.collapsed` değerinin tanımlanmasıyla bu davranışın üzerine yazılabilir.
+
+```js
+starlight({
+	sidebar: [
+		{
+			label: 'Rehber',
+			// "Guides" toplanmaz ama
+			//otomatik oluşturulmuş alt grupları toplar.
+			collapsed: false,
+			autogenerate: { directory: 'guides', collapsed: true },
+		},
+	],
+});
+```
+
+Yukarıdaki yapılandırma aşağıdaki gibi kenar çubuğu oluşturur:
+
+<SidebarPreview
+	config={[
+		{
+			label: 'Rehber',
+			items: [
+				{ label: 'Bileşenler', link: '/tr/guides/components/' },
+				{ label: 'Uluslararasılaştırma (i18n)', link: '/tr/guides/i18n/' },
+				{
+					label: 'advanced',
+					collapsed: true,
+					items: [
+						{ label: 'Proje Yapısı', link: '/tr/guides/project-structure/' },
+					],
+				},
+			],
+		},
+	]}
+/>

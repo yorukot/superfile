@@ -1,0 +1,155 @@
+---
+title: Starlight 🌟 Astro 문서 웹 사이트를 만드세요
+head:
+  - tag: title
+    content: Starlight 🌟 Astro 문서 웹 사이트를 만드세요
+description: Starlight로 아름답고 성능이 좋은 Astro 문서 웹 사이트를 만들 수 있습니다.
+template: splash
+editUrl: false
+lastUpdated: false
+hero:
+  title: Starlight로 멋진 문서를 만드세요
+  tagline: 아름다운 문서 웹 사이트를 만드는데 필요한 모든 것. 빠르고, 접근성이 좋으며 사용하기 쉽습니다.
+  image:
+    file: ~/assets/hero-star.webp
+  actions:
+    - text: 시작하기
+      icon: right-arrow
+      variant: primary
+      link: /ko/getting-started/
+    - text: GitHub에서 보기
+      icon: external
+      link: https://github.com/withastro/starlight
+---
+
+import { CardGrid, Card } from '@astrojs/starlight/components';
+import AboutAstro from '~/components/about-astro.astro';
+import TestimonialGrid from '~/components/testimonial-grid.astro';
+import Testimonial from '~/components/testimonial.astro';
+
+<CardGrid stagger>
+	<Card title="아름다운 문서" icon="open-book">
+		사이트 탐색, 검색, 국제화, SEO, 읽기 쉬운 타이포그래피, 구문 강조, 어두운
+		테마 등이 포함되어 있습니다.
+	</Card>
+	<Card title="Astro 기반" icon="rocket">
+		Astro의 힘과 성능을 활용하세요. 선호하는 Astro 통합 및 라이브러리로
+		Starlight를 확장하세요.
+	</Card>
+	<Card title="Markdown, Markdoc, MDX" icon="document">
+		선호하는 마크업 언어를 사용하세요. Starlight는 TypeScript 타입 안정성을 갖춘
+		내장 프론트매터 유효성 검사를 제공합니다.
+	</Card>
+	<Card title="선호하는 UI 컴포넌트 사용" icon="puzzle">
+		Starlight는 프레임워크에 구애받지 않는 완벽한 문서 솔루션으로 제공됩니다.
+		React, Vue, Svelte, Solid 등으로 확장하세요.
+	</Card>
+</CardGrid>
+
+<TestimonialGrid title="사용 후기를 들어보세요">
+  <Testimonial
+    name="Rachel"
+    handle="rachelnabors"
+    cite="https://twitter.com/astrodotbuild/status/1724934718745915558"
+  >
+    Astro 팀은 문서 작성 방법을 발전시켰으며 Starlight 프로젝트를 통해 모든 것을 즉시 사용할 수 있습니다.
+  </Testimonial>
+  <Testimonial
+    name="Flavio"
+    handle="flaviocopes"
+    cite="https://twitter.com/flaviocopes/status/1738237658717905108"
+  >
+    Astro의 공식 시작 키트인 Starlight는 문서 웹 사이트 구축을 위한 정말 놀라운 도구입니다.
+  </Testimonial>
+  <Testimonial
+    name="Tomek"
+    handle="sulco"
+    cite="https://twitter.com/sulco/status/1735610348730802342"
+  >
+    Starlight는 훌륭한 DX의 대표적인 예시입니다. 속도, 편리함, 세부 사항에 대한 관심이 인상적입니다. 기술과 디자인을 모두 관리하므로 콘텐츠에 집중할 수 있습니다 👏
+     
+    StackBlitz 팀은 이 프로젝트를 정말 좋아합니다!
+  </Testimonial>
+  <Testimonial
+    name="Roberto"
+    handle="RmeetsH"
+    cite="https://twitter.com/RmeetsH/status/1735783992018760090"
+  >
+    Starlight는 제가 콘텐츠 제작에 집중할 수 있게 해준 게임 체인저였습니다.
+
+    직관적인 디자인은 작업 흐름을 간소화할 뿐만 아니라 오픈 소스 개발자의 온보딩 시간도 줄여줍니다.
+
+  </Testimonial>
+  <Testimonial
+    name="Joel"
+    handle="jhooks"
+    cite="https://twitter.com/jhooks/status/1727405160547418405"
+  >
+    Course Builder 문서를 구축하기 위해 Starlight를 오래 사용하였으며 지금까지는 훌륭합니다. 많은 부분이 잘 만들어져 있기 때문에 사이트를 만지작거리지 않고 Markdown을 작성하는 데 집중할 수 있습니다.
+  </Testimonial>
+  <Testimonial
+    name="Rick"
+    handle="rick_viscomi"
+    cite="https://twitter.com/rick_viscomi/status/1665867447910510593"
+  >
+    Starlight를 사용하기 시작했습니다. 기본적으로 제공되는 성능에 깊은 인상을 받았습니다.
+
+    💯💯💯💯
+
+  </Testimonial>
+  <Testimonial
+    name="Nicolas"
+    handle="beaussan"
+    cite="https://twitter.com/beaussan/status/1735625189583466893"
+  >
+    Starlight는 문서화를 시작하는 가장 좋은 방법입니다. Astro의 성능과 속도 및 Starlight 도구는 환상의 조합입니다.
+
+    한동안 계속 사용하였고, 계속해서 좋아하고 있어요!
+
+  </Testimonial>
+  <Testimonial
+    name="Sylwia"
+    handle="SylwiaVargas"
+    cite="https://x.com/SylwiaVargas/status/1726556825741578286"
+  >
+    나는 지난 직장에서 Starlight를 사용했고 정말 좋아했습니다. 훌륭한 컴포넌트, 직관적인 디자인, 반응이 빠른 커뮤니티 (누군가 필요한 것이 있을 때마다 즉시 배송하거나 해결 방법을 알려줍니다). 매우 즐거운 경험이었어요.
+  </Testimonial>
+  <Testimonial
+    name="Lou Cyx"
+    handle="loucyx"
+    cite="https://elk.zone/m.webtoo.ls/@loucyx@mastodon.social/111587380021362284"
+  >
+    내 모노레포 사이트의 문서는 Starlight 덕분에 그 어느 때보다 좋아 보입니다. Astro의 모든 기능을 잃지 않고 사용하기가 매우 쉽습니다. 작업해 주셔서 감사합니다!
+  </Testimonial>
+  <Testimonial
+    name="BowTiedWebReaper"
+    handle="BowTiedWebReapr"
+    cite="https://twitter.com/BowTiedWebReapr/status/1735633399501697517"
+  >
+    Starlight는 문서화를 위해 제가 즐겨 사용하는 도구입니다. 다른 도구와 함께 사용하기 위해 하위 도메인이 필요한 것에 비해 기존 Astro 제품 웹사이트에 문서를 추가하는 것이 매우 쉬워졌습니다.
+  </Testimonial>
+  <Testimonial
+    name="Jeff"
+    handle="J_Everhart383"
+    cite="https://twitter.com/J_Everhart383/status/1691900590048292908"
+  >
+    저는 WPEngine Atlas 플랫폼 문서를 다시 작성했습니다. Starlight에 A+ 문서 플랫폼을 만드는 데 필요한 모든 것이 있다고 말할 때 저를 믿으십시오.&nbsp;🙌
+  </Testimonial>
+  <Testimonial
+    name="Chloe"
+    handle="solelychloe"
+    cite="https://twitter.com/solelychloe/status/1695115277602628082"
+  >
+    Starlight를 사용해 보세요!
+
+    나는 내 사이트 중 일부에 이 프로젝트를 사용하고 있으며 훌륭합니다.
+
+  </Testimonial>
+</TestimonialGrid>
+
+<AboutAstro title="제공">
+Astro는 빠른 속도를 위해 설계된 올인원 웹 프레임워크입니다. 선호하는 UI 컴포넌트와 라이브러리를 사용하여 어디서든 콘텐츠를 가져와 배포하세요.
+
+[Astro에 대해 알아보기](https://astro.build/)
+
+</AboutAstro>

@@ -1,0 +1,294 @@
+---
+title: CSS & 样式
+description: 了解如何使用自定义 CSS 设置你的 Starlight 网站的样式或与 Tailwind CSS 集成。
+---
+
+import { Tabs, TabItem, Steps } from '@astrojs/starlight/components';
+
+你可以使用自定义 CSS 设置你的 Starlight 网站的样式或者使用 Starlight Tailwind 插件。
+
+## 自定义 CSS 样式
+
+通过提供额外的 CSS 文件来修改或扩展 Starlight 的默认样式，从而自定义应用于 Starlight 网站的样式。
+
+<Steps>
+
+1. 在 `src/` 目录下添加一个 CSS 文件。
+   例如，你可以设置一个更宽的默认列宽和更大的页面标题文本大小：
+
+   ```css
+   /* src/styles/custom.css */
+   :root {
+   	--sl-content-width: 50rem;
+   	--sl-text-5xl: 3.5rem;
+   }
+   ```
+
+2. 在 `astro.config.mjs` 中的 `customCss` 数组中添加你的 CSS 文件的路径：
+
+   ```diff lang="js"
+   // astro.config.mjs
+   import { defineConfig } from 'astro/config';
+   import starlight from '@astrojs/starlight';
+
+   export default defineConfig({
+   	integrations: [
+   		starlight({
+   			title: 'Docs With Custom CSS',
+   			customCss: [
+   +				// 你的自定义 CSS 文件的相对路径
+   +				'./src/styles/custom.css',
+   			],
+   		}),
+   	],
+   });
+   ```
+
+</Steps>
+
+你可以在[ GitHub 上的 `props.css` 文件](https://github.com/withastro/starlight/blob/main/packages/starlight/style/props.css) 中查看 Starlight 使用的所有 CSS 自定义属性，你可以设置这些属性来自定义你的网站。
+
+## Tailwind CSS
+
+Astro 项目中的 Tailwind CSS 支持由 [Astro Tailwind 集成](https://docs.astro.build/zh-cn/guides/integrations-guide/tailwind/) 提供。
+Starlight 提供了一个补充的 Tailwind 插件，以帮助配置 Tailwind 以与 Starlight 的样式兼容。
+
+Starlight Tailwind 插件应用了以下配置：
+
+- 配置 Tailwind 的 `dark:` 变体以与 Starlight 的暗模式兼容。
+- 在 Starlight 的 UI 中使用 Tailwind [主题颜色和字体](#使用-tailwind-设置-starlight-的样式)。
+- 禁用 Tailwind 的 [Preflight](https://tailwindcss.com/docs/preflight) 重置样式，同时有选择地恢复 Preflight 的必要部分，以便使用 Tailwind 的边框实用程序类。
+
+### 使用 Tailwind 创建新项目
+
+使用 `create astro` 创建一个预配置了 Tailwind CSS 的新 Starlight 项目：
+
+<Tabs syncKey="pkg">
+<TabItem label="npm">
+
+```sh
+npm create astro@latest -- --template starlight/tailwind
+```
+
+</TabItem>
+<TabItem label="pnpm">
+
+```sh
+pnpm create astro --template starlight/tailwind
+```
+
+</TabItem>
+<TabItem label="Yarn">
+
+```sh
+yarn create astro --template starlight/tailwind
+```
+
+</TabItem>
+</Tabs>
+
+### 将 Tailwind 添加到现有项目中
+
+如果你已经有了一个 Starlight 网站，并且想要添加 Tailwind CSS，请按照以下步骤操作。
+
+<Steps>
+
+1. 将 Astro 的 Tailwind 集成添加到项目中：
+
+   <Tabs syncKey="pkg">
+
+   <TabItem label="npm">
+
+   ```sh
+   npx astro add tailwind
+   ```
+
+   </TabItem>
+
+   <TabItem label="pnpm">
+
+   ```sh
+   pnpm astro add tailwind
+   ```
+
+   </TabItem>
+
+   <TabItem label="Yarn">
+
+   ```sh
+   yarn astro add tailwind
+   ```
+
+   </TabItem>
+
+   </Tabs>
+
+2. 安装 Starlight Tailwind 插件：
+
+   <Tabs syncKey="pkg">
+
+   <TabItem label="npm">
+
+   ```sh
+   npm install @astrojs/starlight-tailwind
+   ```
+
+   </TabItem>
+
+   <TabItem label="pnpm">
+
+   ```sh
+   pnpm add @astrojs/starlight-tailwind
+   ```
+
+   </TabItem>
+
+   <TabItem label="Yarn">
+
+   ```sh
+   yarn add @astrojs/starlight-tailwind
+   ```
+
+   </TabItem>
+
+   </Tabs>
+
+3. 创建一个 CSS 文件，用于 Tailwind 的基础样式，例如在 `src/tailwind.css` 中：
+
+   ```css
+   /* src/tailwind.css */
+   @tailwind base;
+   @tailwind components;
+   @tailwind utilities;
+   ```
+
+4. 更新你的 Astro 配置文件，使用你的 Tailwind 基础样式并禁用默认的基础样式：
+
+   ```js {11-12,16-17}
+   // astro.config.mjs
+   import { defineConfig } from 'astro/config';
+   import starlight from '@astrojs/starlight';
+   import tailwind from '@astrojs/tailwind';
+
+   export default defineConfig({
+   	integrations: [
+   		starlight({
+   			title: 'Docs with Tailwind',
+   			customCss: [
+   				// 你的 Tailwind 基础样式的相对路径
+   				'./src/tailwind.css',
+   			],
+   		}),
+   		tailwind({
+   			// 禁用默认的基础样式
+   			applyBaseStyles: false,
+   		}),
+   	],
+   });
+   ```
+
+5. 将 Starlight Tailwind 插件添加到 `tailwind.config.mjs`：
+
+   ```js ins={2,7}
+   // tailwind.config.mjs
+   import starlightPlugin from '@astrojs/starlight-tailwind';
+
+   /** @type {import('tailwindcss').Config} */
+   export default {
+   	content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
+   	plugins: [starlightPlugin()],
+   };
+   ```
+
+</Steps>
+
+### 使用 Tailwind 设置 Starlight 的样式
+
+Starlight 将使用你的 [Tailwind 主题配置](https://tailwindcss.com/docs/theme)中的值来设置其 UI。
+
+如果设置了以下选项，将覆盖 Starlight 的默认样式：
+
+- `colors.accent` — 用于链接和当前项目高亮
+- `colors.gray` — 用于背景颜色和边框
+- `fontFamily.sans` — 用于 UI 和内容文本
+- `fontFamily.mono` — 用于代码示例
+
+```js {12,14,18,20}
+// tailwind.config.mjs
+import starlightPlugin from '@astrojs/starlight-tailwind';
+import colors from 'tailwindcss/colors';
+
+/** @type {import('tailwindcss').Config} */
+export default {
+	content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
+	theme: {
+		extend: {
+			colors: {
+				// 你喜欢的强调色。Indigo 是最接近 Starlight 默认的。
+				accent: colors.indigo,
+				// 你喜欢的灰色。Zinc 是最接近 Starlight 默认的。
+				gray: colors.zinc,
+			},
+			fontFamily: {
+				// 你喜欢的文本字体。Starlight 默认使用系统字体堆栈。
+				sans: ['"Atkinson Hyperlegible"'],
+				// 你喜欢的代码字体。Starlight 默认使用系统等宽字体。
+				mono: ['"IBM Plex Mono"'],
+			},
+		},
+	},
+	plugins: [starlightPlugin()],
+};
+```
+
+## 主题
+
+Starlight 的颜色主题可以通过覆盖其默认的自定义属性来控制。
+这些变量在整个 UI 中使用，使用一系列灰色阴影用于文本和背景颜色，以及用于链接和突出显示导航中当前项目的强调色。
+
+### 颜色主题编辑器
+
+使用下面的滑块来修改 Starlight 的强调色和灰色调色板。暗色和亮色的预览区域将显示结果颜色，整个页面也会更新以预览你的更改。
+
+当你对你的更改满意时，复制下面的 CSS 或 Tailwind 代码并在你的项目中使用。
+
+import ThemeDesigner from '~/components/theme-designer.astro';
+
+<ThemeDesigner
+	labels={{
+		presets: {
+			label: '预设',
+			ocean: '海洋',
+			forest: '森林',
+			oxide: '氧化',
+			nebula: '星云',
+			default: '默认',
+			random: '随机',
+		},
+		editor: {
+			accentColor: 'Accent',
+			grayColor: 'Gray',
+			hue: '颜色',
+			chroma: '色度',
+			pickColor: '选择颜色',
+		},
+		preview: {
+			darkMode: '深色模式',
+			lightMode: '浅色模式',
+			bodyText: '正文以灰色阴影显示，与背景形成高对比度。',
+			linkText: '链接是彩色的。',
+			dimText: '有些文本（如目录）具有较低的对比度。',
+			inlineCode: '内联代码具有独特的背景颜色。',
+		},
+	}}
+>
+	<Fragment slot="css-docs">
+		将以下 CSS 添加到你的项目的[自定义 CSS
+		文件](#自定义-css-样式)中，以将此主题应用到你的网站。
+	</Fragment>
+	<Fragment slot="tailwind-docs">
+		下面的示例 [Tailwind 配置文件](#使用-tailwind-设置-starlight-的样式)
+		包含生成的 `accent` 和 `gray` 调色板，以在 `theme.extend.colors`
+		配置对象中使用。
+	</Fragment>
+</ThemeDesigner>

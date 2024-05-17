@@ -1,0 +1,4 @@
+# Astro generates this during tests, but we want to ignore it.
+src/env.d.ts
+__tests__/**/env.d.ts
+__tests__/**/types.d.ts

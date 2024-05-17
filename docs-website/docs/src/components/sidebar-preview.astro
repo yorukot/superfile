@@ -1,0 +1,52 @@
+---
+import type { AutoSidebarGroup, SidebarItem } from '../../../packages/starlight/schemas/sidebar';
+import SidebarSublist from '../../../packages/starlight/components/SidebarSublist.astro';
+import type { SidebarEntry } from '../../../packages/starlight/utils/navigation';
+
+interface Props {
+	config: SidebarConfig;
+}
+
+type SidebarConfig = Exclude<SidebarItem, AutoSidebarGroup>[];
+
+const { config } = Astro.props;
+
+function makeEntries(items: SidebarConfig): SidebarEntry[] {
+	return items.map((item) => {
+		if ('link' in item) {
+			return {
+				type: 'link',
+				label: item.label,
+				// Empty hrefs are used to represent internal links that do not exist in the Starlight
+				// docs. Using a non-existing anchor link like `#_` will not trigger a page reload or any
+				// scrolling.
+				href: item.link.length > 0 ? item.link : '#_',
+				isCurrent: false,
+				badge: item.badge,
+				attrs: item.attrs ?? {},
+			};
+		}
+
+		return {
+			type: 'group',
+			label: item.label,
+			entries: makeEntries(item.items as SidebarConfig),
+			collapsed: item.collapsed,
+			badge: item.badge,
+		};
+	});
+}
+---
+
+<div class="sidebar-preview not-content">
+	<SidebarSublist sublist={makeEntries(config)} />
+</div>
+
+<style>
+	.sidebar-preview {
+		background-color: var(--sl-color-bg-sidebar);
+		border: 1px solid var(--sl-color-gray-5);
+		padding: 1rem var(--sl-sidebar-pad-x);
+		max-width: var(--sl-sidebar-width);
+	}
+</style>

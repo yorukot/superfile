@@ -1,0 +1,463 @@
+---
+title: Starlight को अनुकूलित करे
+description: जानें कि अपने लोगो, कस्टम फ़ॉन्ट, लैंडिंग पेज डिज़ाइन और बहुत कुछ के साथ अपनी Starlight साइट को कैसे अपना बनाएं।
+---
+
+import { Tabs, TabItem, FileTree, Steps } from '@astrojs/starlight/components';
+
+Starlight समझदार डिफ़ॉल्ट स्टाइलिंग और सुविधाएँ प्रदान करता है, ताकि आप बिना किसी कॉन्फ़िगरेशन की आवश्यकता के जल्दी से शुरुआत कर सकें।
+जब आप अपनी Starlight साइट के रंगरूप को अनुकूलित करना शुरू करना चाहते हैं, तो यह मार्गदर्शिका आपके लिए उपयोगी है।
+
+## अपना लोगो जोड़ें
+
+साइट हेडर पर एक कस्टम लोगो जोड़ना एक तेज़ तरीका है आपकी व्यक्तिगत ब्रांडिंग को Starlight साइट पर जोड़ने के लिए।
+
+<Steps>
+
+1. अपनी लोगो छवि फ़ाइल को `src/assets/` निर्देशिका में जोड़ें:
+
+   <FileTree>
+
+   - src/
+     - assets/
+       - **my-logo.svg**
+     - content/
+   - astro.config.mjs
+
+   </FileTree>
+
+2. `astro.config.mjs` में Starlight के [`logo.src`](/hi/reference/configuration/#logo) विकल्प के रूप में अपने लोगो में पथ जोड़ें:
+
+   ```diff lang="js"
+   // astro.config.mjs
+   import { defineConfig } from 'astro/config';
+   import starlight from '@astrojs/starlight';
+
+   export default defineConfig({
+   	integrations: [
+   		starlight({
+   			title: 'मेरे लोगो के साथ दस्तावेज़',
+   			logo: {
+   +				src: './src/assets/my-logo.svg',
+   			},
+   		}),
+   	],
+   });
+   ```
+
+</Steps>
+
+डिफ़ॉल्ट रूप से, लोगो आपकी साइट के `title` के साथ प्रदर्शित होगा।
+यदि आपकी लोगो छवि में पहले से ही साइट शीर्षक शामिल है, तो आप `replacesTitle` विकल्प सेट करके शीर्षक टेक्स्ट को दृश्य रूप से छिपा सकते हैं।
+`title` टेक्स्ट अभी भी स्क्रीन रीडर के लिए शामिल किया जाएगा ताकि हेडर पहुंच योग्य बना रहे।
+
+```js {5}
+starlight({
+  title: 'मेरे लोगो के साथ दस्तावेज़',
+  logo: {
+    src: './src/assets/my-logo.svg',
+    replacesTitle: true,
+  },
+}),
+```
+
+### हल्के और गहरे रंग के लोगो वेरिएंट
+
+आप अपने लोगो के विभिन्न संस्करणों को रौशनी और अंधेरे मोड में प्रदर्शित कर सकते हैं।
+
+<Steps>
+
+1. प्रत्येक वैरिएंट के लिए `src/assets/` में एक छवि फ़ाइल जोड़ें:
+
+   <FileTree>
+
+   - src/
+     - assets/
+       - **light-logo.svg**
+       - **dark-logo.svg**
+     - content/
+   - astro.config.mjs
+
+   </FileTree>
+
+2. `astro.config.mjs` में `src` के बजाय `light` और `dark` विकल्पों के रूप में अपने लोगो वेरिएंट में पथ जोड़ें:
+
+   ```diff lang="js"
+   starlight({
+     title: 'मेरे लोगो के साथ दस्तावेज़',
+     logo: {
+   +    light: './src/assets/light-logo.svg',
+   +    dark: './src/assets/dark-logo.svg',
+     },
+   }),
+   ```
+
+</Steps>
+
+## साइटमैप सक्षम करें
+
+Starlight में साइटमैप बनाने के लिए अंतर्निहित समर्थन है। `astro.config.mjs` में अपना URL `site` के रूप में सेट करके साइटमैप जनरेशन सक्षम करें:
+
+```js {4}
+// astro.config.mjs
+
+export default defineConfig({
+	site: 'https://stargazers.club',
+	integrations: [starlight({ title: 'साइटमैप के साथ साइट' })],
+});
+```
+
+## पेज लेआउट
+
+डिफ़ॉल्ट रूप से, Starlight पेज वैश्विक नेविगेशन साइडबार और विषय सूची के साथ एक लेआउट का उपयोग करते हैं जो वर्तमान पेज शीर्षक दिखाता है।
+
+आप पेज के फ्रंटमैटर में [`template: splash`](/hi/reference/frontmatter/#template) सेट करके साइडबार के बिना एक व्यापक पेज लेआउट लागू कर सकते हैं।
+यह लैंडिंग पृष्ठों के लिए विशेष रूप से अच्छी तरह से काम करता है और आप इसे [इस साइट के मुखपृष्ठ](/hi/) पर क्रियान्वित होते हुए देख सकते हैं।
+
+```md {5}
+---
+# src/content/docs/index.md
+
+title: मेरा लैंडिंग पेज
+template: splash
+---
+```
+
+## विषय सूची
+
+Starlight प्रत्येक पेज पर एक विषय सूची प्रदर्शित करता है जिससे पाठकों के लिए उस शीर्षक पर जाना आसान हो जाता है जिसे वे ढूंढ रहे हैं।
+आप Starlight एकीकरण में या फ्रंटमैटर में पेज-दर-पेज आधार पर विश्व स्तर पर विषय सूची को अनुकूलित - या अक्षम भी कर सकते हैं।
+
+डिफ़ॉल्ट रूप से, `<h2>` और `<h3>` शीर्षक विषय सूची में शामिल होते हैं। अपने [वैश्विक `tableOfContents`](/hi/reference/configuration/#tableofcontents) में `minHeadingLevel` और `maxHeadingLevel` विकल्पों का उपयोग करके साइट-व्यापी शामिल करने के लिए कौन से शीर्षक स्तर बदलें। संबंधित [frontmatter `tableOfContents`](/hi/reference/frontmatter/#tableofcontents) गुणों को जोड़कर एक व्यक्तिगत पेज पर इन डिफ़ॉल्ट को ओवरराइड करें:
+
+<Tabs>
+  <TabItem label="Frontmatter">
+
+```md {4-6}
+---
+# src/content/docs/example.md
+title: विषय सूची में केवल H2 वाला पेज
+tableOfContents:
+  minHeadingLevel: 2
+  maxHeadingLevel: 2
+---
+```
+
+  </TabItem>
+  <TabItem label="Global config">
+
+```js {7}
+// astro.config.mjs
+
+defineConfig({
+	integrations: [
+		starlight({
+			title: 'कॉन्टेंट कॉन्फ़िगरेशन की कस्टम तालिका वाले दस्तावेज़',
+			tableOfContents: { minHeadingLevel: 2, maxHeadingLevel: 2 },
+		}),
+	],
+});
+```
+
+  </TabItem>
+</Tabs>
+
+`tableOfContents` विकल्प को `false` पर सेट करके विषय सूची को पूरी तरह से अक्षम करें:
+
+<Tabs>
+  <TabItem label="Frontmatter">
+
+```md {4}
+---
+# src/content/docs/example.md
+title: विषय सूची के बिना पेज
+tableOfContents: false
+---
+```
+
+  </TabItem>
+  <TabItem label="Global config">
+
+```js {7}
+// astro.config.mjs
+
+defineConfig({
+	integrations: [
+		starlight({
+			title: 'विश्व स्तर पर अक्षम विषय सूची वाले दस्तावेज़',
+			tableOfContents: false,
+		}),
+	],
+});
+```
+
+  </TabItem>
+</Tabs>
+
+## सामाजिक लिंक्स
+
+Starlight के पास Starlight एकीकरण में [`social`](/hi/reference/configuration/#social) विकल्प के माध्यम से साइट हेडर में आपके सामाजिक मीडिया खातों के लिंक जोड़ने के लिए अंतर्निहित समर्थन है।
+
+आप [कॉन्फ़िगरेशन संदर्भ](/hi/reference/configuration/#social) में समर्थित लिंक आइकन की पूरी सूची पा सकते हैं।
+यदि आपको किसी अन्य सेवा के लिए समर्थन की आवश्यकता है तो हमें GitHub या Discord पर बताएं!
+
+```js {9-12}
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: 'सामाजिक लिंक वाले दस्तावेज़',
+			social: {
+				discord: 'https://astro.build/chat',
+				github: 'https://github.com/withastro/starlight',
+			},
+		}),
+	],
+});
+```
+
+## लिंक संपादित करें
+
+Starlight प्रत्येक पेज के पाद लेख में एक "पृष्ठ संपादित करें" लिंक प्रदर्शित कर सकता है।
+इससे पाठक के लिए आपके दस्तावेज़ों को बेहतर बनाने के लिए संपादित करने हेतु फ़ाइल ढूंढना आसान हो जाता है।
+विशेष रूप से ओपन-स्रोत परियोजनाओं के लिए, यह आपके समुदाय से योगदान को प्रोत्साहित करने में मदद कर सकता है।
+
+लिंक संपादित करने को सक्षम करने के लिए, Starlight एकीकरण कॉन्फ़िगरेशन में अपने रिपॉजिटरी को संपादित करने के लिए उपयोग किए गए URL पर [`editLink.baseUrl`](/hi/reference/configuration/#editlink) सेट करें।
+पूर्ण संपादन लिंक बनाने के लिए `editLink.baseUrl` का मान वर्तमान पेज के पथ से जोड़ा जाएगा।
+
+सामान्य पैटर्न में शामिल हैं:
+
+- GitHub: `https://github.com/USER_NAME/REPO_NAME/edit/BRANCH_NAME/`
+- GitLab: `https://gitlab.com/USER_NAME/REPO_NAME/-/edit/BRANCH_NAME/`
+
+यदि आपका Starlight परियोजना आपके रिपॉजिटरी के मूल में नहीं है, तो बेस URL के अंत में परियोजना का पथ शामिल करें।
+
+यह उदाहरण Starlight दस्तावेज़ के लिए कॉन्फ़िगर किया गया संपादन लिंक दिखाता है, जो GitHub पर `withastro/starlight` रिपॉजिटरी की `main` शाखा पर `docs/` उपनिर्देशिका में रहता है:
+
+```js {9-11}
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: 'संपादन लिंक वाले दस्तावेज़',
+			editLink: {
+				baseUrl: 'https://github.com/withastro/starlight/edit/main/docs/',
+			},
+		}),
+	],
+});
+```
+
+## कस्टम 404 पेज
+
+Starlight साइटें डिफ़ॉल्ट रूप से एक साधारण 404 पेज प्रदर्शित करती हैं।
+आप अपनी `src/content/docs/` निर्देशिका में `404.md` (या `404.mdx`) फ़ाइल जोड़कर इसे अनुकूलित कर सकते हैं:
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - **404.md**
+      - index.md
+- astro.config.mjs
+
+</FileTree>
+
+आप अपने 404 पेज में Starlight के सभी पेज लेआउट और अनुकूलन तकनीकों का उपयोग कर सकते हैं। उदाहरण के लिए, डिफ़ॉल्ट 404 पेज फ्रंटमैटर में [`splash` template](#पेज-लेआउट) और [`hero`](/hi/reference/frontmatter/#hero) घटक का उपयोग करता है:
+
+```md {4,6-8}
+---
+# src/content/docs/404.md
+title: '404'
+template: splash
+editUrl: false
+hero:
+  title: '404'
+  tagline: पेज नहीं मिला। URL जांचें या खोज बार का उपयोग करने का प्रयास करें।
+---
+```
+
+### डिफ़ॉल्ट 404 पेज को अक्षम करना
+
+यदि आपके परियोजना को पूरी तरह से अनुकूलित 404 लेआउट की आवश्यकता है, तो आप `src/pages/404.astro` रूट बना सकते हैं और Starlight के डिफ़ॉल्ट रूट को अक्षम करने के लिए [`disable404Route`](/hi/reference/configuration/#disable404route) कॉन्फिग विकल्प सेट कर सकते हैं:
+
+```js {9}
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: 'कस्टम 404 के साथ दस्तावेज़',
+			disable404Route: true,
+		}),
+	],
+});
+```
+
+## कस्टम फ़ॉन्ट
+
+डिफ़ॉल्ट रूप से, Starlight सभी टेक्स्ट के लिए उपयोगकर्ता के स्थानीय उपकरण पर उपलब्ध sans-serif फ़ॉन्ट का उपयोग करता है।
+यह सुनिश्चित करता है कि बड़े फ़ॉन्ट फ़ाइलों को डाउनलोड करने के लिए अतिरिक्त बैंडविड्थ की आवश्यकता के बिना, दस्तावेज़ प्रत्येक उपयोगकर्ता के परिचित फ़ॉन्ट में तेज़ी से लोड हो।
+
+यदि आपको अपनी Starlight साइट पर एक कस्टम फ़ॉन्ट जोड़ना है, तो आप कस्टम CSS फ़ाइलों में या किसी अन्य [Astro स्टाइलिंग तकनीक](https://docs.astro.build/hi/guides/styling/) के साथ उपयोग करने के लिए फ़ॉन्ट सेट कर सकते हैं। .
+
+### फ़ॉन्ट सेट करें
+
+यदि आपके पास पहले से ही फ़ॉन्ट फ़ाइलें हैं, तो [स्थानीय सेट-अप मार्गदर्शिका](#स्थानीय-फ़ॉन्ट-फ़ाइलें-सेट-करें) का पालन करें।
+Google Fonts का उपयोग करने के लिए, [Fontsource सेट-अप मार्गदर्शिका](#एक-fontsource-फ़ॉन्ट-सेट-करें) का पालन करें।
+
+#### स्थानीय फ़ॉन्ट फ़ाइलें सेट करें
+
+<Steps>
+
+1. अपनी फ़ॉन्ट फ़ाइलें `src/fonts/` निर्देशिका में जोड़ें और एक खाली `font-face.css` फ़ाइल बनाएं:
+
+   <FileTree>
+
+   - src/
+     - content/
+     - fonts/
+       - **CustomFont.woff2**
+       - **font-face.css**
+   - astro.config.mjs
+
+   </FileTree>
+
+2. `src/fonts/font-face.css` में अपने प्रत्येक फ़ॉन्ट के लिए एक [`@font-face` घोषणा](https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face) जोड़ें।
+   `url()` फ़ंक्शन में फ़ॉन्ट फ़ाइल के सापेक्ष पथ का उपयोग करें।
+
+   ```css
+   /* src/fonts/font-face.css */
+
+   @font-face {
+   	font-family: 'Custom Font';
+   	/* `url()` में स्थानीय फ़ॉन्ट फ़ाइल के सापेक्ष पथ का उपयोग करें। */
+   	src: url('./CustomFont.woff2') format('woff2');
+   	font-weight: normal;
+   	font-style: normal;
+   	font-display: swap;
+   }
+   ```
+
+3. अपनी `font-face.css` फ़ाइल का पथ `astro.config.mjs` में Starlight के `customCss` सरणी में जोड़ें:
+
+   ```diff lang="js"
+   // astro.config.mjs
+   import { defineConfig } from 'astro/config';
+   import starlight from '@astrojs/starlight';
+
+   export default defineConfig({
+   	integrations: [
+   		starlight({
+   			title: 'कस्टम टाइपफेस वाले दस्तावेज़',
+   			customCss: [
+   +				// आपकी @font-face CSS फ़ाइल से संबंधित पथ।
+   +				'./src/fonts/font-face.css',
+   			],
+   		}),
+   	],
+   });
+   ```
+
+</Steps>
+
+#### एक Fontsource फ़ॉन्ट सेट करें
+
+[Fontsource](https://fontsource.org/) परियोजना Google फ़ॉन्ट्स और अन्य ओपन-सोर्स फ़ॉन्ट्स का उपयोग करना सरल बनाता है।
+यह npm मॉड्यूल प्रदान करता है जिसे आप उन फ़ॉन्ट्स के लिए इंस्टॉल कर सकते हैं जिन्हें आप उपयोग करना चाहते हैं और इसमें आपके परियोजना में जोड़ने के लिए तैयार CSS फाइलें शामिल हैं।
+
+<Steps>
+
+1.  [Fontsource के सूची](https://fontsource.org/) में वह फ़ॉन्ट ढूंढें जिसे आप उपयोग करना चाहते हैं।
+    यह उदाहरण [IBM Plex Serif](https://fontsource.org/fonts/ibm-plex-serif) का उपयोग करेगा।
+
+2.  अपने चुने हुए फ़ॉन्ट के लिए पैकेज को इंस्टॉल करें।
+    आप Fontsource फ़ॉन्ट पेज पर "Install" पर क्लिक करके पैकेज का नाम पा सकते हैं।
+
+         <Tabs>
+
+    <TabItem label="npm">
+
+    ```sh
+    npm install @fontsource/ibm-plex-serif
+    ```
+
+           </TabItem>
+
+        <TabItem label="pnpm">
+
+    ```sh
+    pnpm add @fontsource/ibm-plex-serif
+    ```
+
+           </TabItem>
+
+        <TabItem label="Yarn">
+
+    ```sh
+    yarn add @fontsource/ibm-plex-serif
+    ```
+
+           </TabItem>
+
+      </Tabs>
+
+3.  `astro.config.mjs` में Starlight के `customCss` ऐरे में Fontsource CSS फ़ाइलें जोड़ें:
+
+    ```diff lang="js"
+    // astro.config.mjs
+    import { defineConfig } from 'astro/config';
+    import starlight from '@astrojs/starlight';
+
+    export default defineConfig({
+    	integrations: [
+    		starlight({
+    			title: 'कस्टम टाइपफेस वाले दस्तावेज़',
+    			customCss: [
+    +				// नियमित और अर्ध-बोल्ड फ़ॉन्ट भार के लिए फ़ॉन्टस्रोत फ़ाइलें।
+    +				'@fontsource/ibm-plex-serif/400.css',
+    +				'@fontsource/ibm-plex-serif/600.css',
+    			],
+    		}),
+    	],
+    });
+    ```
+
+    Fontsource प्रत्येक फ़ॉन्ट के लिए एकाधिक CSS फ़ाइलें भेजता है। यह समझने के लिए कि किसका उपयोग करना है, विभिन्न वज़न और शैलियों को शामिल करने के लिए [Fontsource दस्तावेज़](https://fontsource.org/docs/getting-started/install#4-weights-and-styles) देखें।
+
+</Steps>
+
+### फ़ॉन्ट का प्रयोग करें
+
+आपके द्वारा सेट किए गए फ़ॉन्ट को अपनी साइट पर लागू करने के लिए, अपने चुने हुए फ़ॉन्ट के नाम का उपयोग [कस्टम CSS फ़ाइल](/hi/guides/css-and-tailwind/#कस्टम-css-शैलियाँ) में करें।
+उदाहरण के लिए, हर जगह Starlight के डिफ़ॉल्ट फ़ॉन्ट को ओवरराइड करने के लिए, `--sl-font` कस्टम प्रॉपर्टी सेट करें:
+
+```css
+/* src/styles/custom.css */
+
+:root {
+	--sl-font: 'IBM Plex Serif', serif;
+}
+```
+
+यदि आप अपने फ़ॉन्ट को अधिक चयनात्मक रूप से लागू करना चाहते हैं तो आप अधिक लक्षित CSS भी लिख सकते हैं।
+उदाहरण के लिए, केवल मुख्य सामग्री पर फ़ॉन्ट सेट करें, साइडबार पर नहीं:
+
+```css
+/* src/styles/custom.css */
+
+main {
+	font-family: 'IBM Plex Serif', serif;
+}
+```
+
+अपनी शैलियों को अपनी साइट पर जोड़ने के लिए [कस्टम CSS निर्देशों](/hi/guides/css-and-tailwind/#कस्टम-css-शैलियाँ) का पालन करें।

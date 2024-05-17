@@ -1,0 +1,569 @@
+---
+title: Конфигурация
+description: Обзор всех опций конфигурации, поддерживаемых Starlight.
+---
+
+## Настройка интеграции `starlight`
+
+Starlight — это интеграция, построенная на основе веб-фреймворка [Astro](https://astro.build). Вы можете настроить свой проект в файле конфигурации `astro.config.mjs`:
+
+```js
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: 'Мой восхитительный сайт документации',
+		}),
+	],
+});
+```
+
+Вы можете передать следующие параметры интеграции `starlight`.
+
+### `title` (обязателен)
+
+**тип:** `string | Record<string, string>`
+
+Задайте название для вашего сайта. Будет использоваться в метаданных и в заголовке вкладки браузера.
+
+Значение может быть строкой, а для многоязычных сайтов — объектом со значениями для каждой локали.
+При использовании объектной формы ключи должны быть тегами BCP-47 (например, `en`, `ru` или `zh-CN`):
+
+```ts
+starlight({
+	title: {
+		en: 'My delightful docs site',
+		ru: 'Моя восхитительная документация',
+	},
+});
+```
+
+### `description`
+
+**тип:** `string`
+
+Задайте описание для вашего сайта. Используется в метаданных, передаваемых поисковым системам, в теге `<meta name="description">`, если `description` не задан в метаданных страницы.
+
+### `logo`
+
+**тип:** [`LogoConfig`](#logoconfig)
+
+Установите изображение логотипа, которое будет отображаться в навигационной панели вместе с заголовком сайта или вместо него. Вы можете задать одно свойство `src` или установить отдельные источники изображения для стилей `light` и `dark`.
+
+```js
+starlight({
+	logo: {
+		src: './src/assets/my-logo.svg',
+	},
+});
+```
+
+#### `LogoConfig`
+
+```ts
+type LogoConfig = { alt?: string; replacesTitle?: boolean } & (
+	| { src: string }
+	| { light: string; dark: string }
+);
+```
+
+### `tableOfContents`
+
+**тип:** `false | { minHeadingLevel?: number; maxHeadingLevel?: number; }`  
+**по умолчанию:** `{ minHeadingLevel: 2; maxHeadingLevel: 3; }`
+
+Настройте оглавление, отображаемое справа на каждой странице. По умолчанию в оглавление будут включены заголовки `<h2>` и `<h3>`.
+
+### `editLink`
+
+**тип:** `{ baseUrl: string }`
+
+Включите ссылки "Редактировать эту страницу", задав базовый URL, который они должны использовать. Конечной ссылкой будет `editLink.baseUrl` + путь к текущей странице. Например, чтобы разрешить редактирование страниц в репозитории `withastro/starlight` на GitHub:
+
+```js
+starlight({
+	editLink: {
+		baseUrl: 'https://github.com/withastro/starlight/edit/main/',
+	},
+});
+```
+
+При такой конфигурации страница `/introduction` будет иметь ссылку редактирования, указывающую на `https://github.com/withastro/starlight/edit/main/src/content/docs/introduction.md`.
+
+### `sidebar`
+
+**тип:** [`SidebarItem[]`](#sidebaritem)
+
+Настройте элементы навигации боковой панели вашего сайта.
+
+Боковая панель — это массив ссылок и групп ссылок.
+Каждый элемент должен иметь метку `label` и одно из следующих свойств:
+
+- `link` - одиночная ссылка на определённый URL, например, `'/home'` или `'https://example.com'`.
+
+- `items` - массив, содержащий дополнительные ссылки и подгруппы боковой панели.
+
+- `autogenerate` - объект, указывающий каталог ваших документов для автоматической генерации группы ссылок.
+
+```js
+starlight({
+	sidebar: [
+		// Одиночный элемент ссылки, помеченный как "Главная".
+		{ label: 'Главная', link: '/' },
+		// Группа с надписью "Первые шаги" содержит две ссылки.
+		{
+			label: 'Первые шаги',
+			items: [
+				{ label: 'Введение', link: '/intro' },
+				{ label: 'Следующие шаги', link: '/next-steps' },
+			],
+		},
+		// Группа, связывающая все страницы директории reference.
+		{
+			label: 'Справочник',
+			autogenerate: { directory: 'reference' },
+		},
+	],
+});
+```
+
+#### Сортировка
+
+Автогенерируемые группы боковых панелей сортируются по имени файла в алфавитном порядке.
+Например, страница, созданная на основе `astro.md`, будет отображаться выше страницы для `starlight.md`.
+
+#### Сворачиваемые группы
+
+Группы ссылок раскрываются по умолчанию. Вы можете изменить это поведение, установив для свойства `collapsed` группы значение `true`.
+
+Автогенерируемые подгруппы по умолчанию уважают свойство `collapsed` своей родительской группы. Установите свойство `autogenerate.collapsed`, чтобы переопределить его.
+
+```js {5,16}
+sidebar: [
+  // Группа свёрнутых ссылок.
+  {
+    label: 'Свёрнутые ссылки',
+    collapsed: true,
+    items: [
+      { label: 'Введение', link: '/intro' },
+      { label: 'Следующие шаги', link: '/next-steps' },
+    ],
+  },
+  // Развёрнутая группа, содержащая свёрнутые автогенерируемые подгруппы.
+  {
+    label: 'Справочник',
+    autogenerate: {
+      directory: 'reference',
+      collapsed: true,
+    },
+  },
+],
+```
+
+#### Перевод меток
+
+Если ваш сайт многоязычный, считается, что `label` каждого элемента соответствует локали по умолчанию. Вы можете установить свойство `translations`, чтобы предоставить метки для других поддерживаемых вами языков:
+
+```js {5,9,14}
+sidebar: [
+  // Пример боковой панели с метками, переведёнными на бразильский португальский язык.
+  {
+    label: 'Первые шаги',
+    translations: { 'pt-BR': 'Comece Aqui' },
+    items: [
+      {
+        label: 'Введение',
+        translations: { 'pt-BR': 'Introdução' },
+        link: '/getting-started',
+      },
+      {
+        label: 'Структура проекта',
+        translations: { 'pt-BR': 'Estrutura de Projetos' },
+        link: '/structure',
+      },
+    ],
+  },
+],
+```
+
+#### `SidebarItem`
+
+```ts
+type SidebarItem = {
+	label: string;
+	translations?: Record<string, string>;
+	badge?: string | BadgeConfig;
+} & (
+	| {
+			link: string;
+			attrs?: Record<string, string | number | boolean | undefined>;
+	  }
+	| { items: SidebarItem[]; collapsed?: boolean }
+	| {
+			autogenerate: { directory: string; collapsed?: boolean };
+			collapsed?: boolean;
+	  }
+);
+```
+
+#### `BadgeConfig`
+
+```ts
+interface BadgeConfig {
+	text: string;
+	variant: 'note' | 'tip' | 'caution' | 'danger' | 'success' | 'default';
+}
+```
+
+### `locales`
+
+**тип:** <code>\{ \[dir: string\]: [LocaleConfig](#localeconfig) \}</code>
+
+[Настройте интернационализацию (i18n)](/ru/guides/i18n/) для вашего сайта, установив, какие `locales` поддерживаются.
+
+В каждой записи в качестве ключа должен использоваться каталог, в котором хранятся файлы этого языка.
+
+```js
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: 'Мой сайт',
+			// Устанавливаем русский язык в качестве языка по умолчанию для этого сайта.
+			defaultLocale: 'ru',
+			locales: {
+				// Английская документация в `src/content/docs/en/`
+				en: {
+					label: 'English',
+				},
+				// Китайская документация в `src/content/docs/zh-cn/`
+				'zh-cn': {
+					label: '简体中文',
+					lang: 'zh-CN',
+				},
+				// Русская документация в `src/content/docs/ru/`
+				ru: {
+					label: 'Русский',
+				},
+			},
+		}),
+	],
+});
+```
+
+#### `LocaleConfig`
+
+```ts
+interface LocaleConfig {
+	label: string;
+	lang?: string;
+	dir?: 'ltr' | 'rtl';
+}
+```
+
+Для каждой локали можно задать следующие параметры:
+
+##### `label` (required)
+
+**тип:** `string`
+
+Метка для этого языка, которую нужно показывать пользователям, например, в переключателе языков. Чаще всего вы хотите, чтобы это было название языка в том виде, в котором пользователь этого языка ожидал бы его прочитать, например `"English"`, `"Русский` или `"简体中文"`.
+
+##### `lang`
+
+**тип:** `string`
+
+Метка BCP-47 для этого языка, например, `"en"`, `"ru"`, или `"zh-CN"`. Если не задано, то по умолчанию будет использоваться имя каталога языка. Языковые теги с региональными подтегами (например, `"pt-BR"` или `"en-US"`) будут использовать встроенные переводы пользовательского интерфейса для своего базового языка, если не будут найдены переводы для конкретного региона.
+
+##### `dir`
+
+**тип:** `'ltr' | 'rtl'`
+
+Направление письма на этом языке; `"ltr"` — слева направо (по умолчанию) или `"rtl"` — справа налево.
+
+#### Корневая локаль
+
+Вы можете использовать язык по умолчанию без каталога `/lang/`, установив локаль `root`:
+
+```js {3-6}
+starlight({
+	locales: {
+		root: {
+			label: 'English',
+			lang: 'en',
+		},
+		ru: {
+			label: 'Русский',
+		},
+	},
+});
+```
+
+Например, это позволит вам обслуживать `/getting-started/` как маршрут по умолчанию и использовать `/ru/getting-started/` как эквивалентную русскую страницу.
+
+### `defaultLocale`
+
+**тип:** `string`
+
+Установите язык, который используется по умолчанию для этого сайта.
+Значение должно соответствовать одному из ключей вашего объекта [`locales`](#locales).
+(Если языком по умолчанию является ваша [корневая локаль](#корневая-локаль), это можно пропустить).
+
+Локаль по умолчанию будет использоваться для предоставления резервного содержимого, если перевод отсутствует.
+
+### `social`
+
+import SocialLinksType from '~/components/social-links-type.astro';
+
+**тип:** <SocialLinksType />
+
+Дополнительные сведения об аккаунтах в социальных сетях для этого сайта. При добавлении любого из них они будут отображаться в виде ссылок-иконок в шапке сайта.
+
+```js
+starlight({
+	social: {
+		codeberg: 'https://codeberg.org/knut/examples',
+		discord: 'https://astro.build/chat',
+		github: 'https://github.com/withastro/starlight',
+		gitlab: 'https://gitlab.com/delucis',
+		linkedin: 'https://www.linkedin.com/company/astroinc',
+		mastodon: 'https://m.webtoo.ls/@astro',
+		threads: 'https://www.threads.net/@nmoodev',
+		twitch: 'https://www.twitch.tv/bholmesdev',
+		twitter: 'https://twitter.com/astrodotbuild',
+		'x.com': 'https://x.com/astrodotbuild',
+		youtube: 'https://youtube.com/@astrodotbuild',
+	},
+});
+```
+
+### `customCss`
+
+**тип:** `string[]`
+
+Предоставьте CSS-файлы для настройки внешнего вида вашего сайта Starlight.
+
+Поддерживаются локальные CSS-файлы относительно корня вашего проекта, например: `'./src/custom.css'`, и CSS, которые вы установили как модуль npm, например: `'@fontsource/roboto'`.
+
+```js
+starlight({
+	customCss: ['./src/custom-styles.css', '@fontsource/roboto'],
+});
+```
+
+### `expressiveCode`
+
+**тип:** `StarlightExpressiveCodeOptions | boolean`  
+**по умолчанию:** `true`
+
+Starlight использует [Expressive Code](https://github.com/expressive-code/expressive-code/tree/main/packages/astro-expressive-code) для визуализации блоков кода и добавляет поддержку выделения частей примеров кода, добавления имён файлов к блокам кода и многое другое.
+Смотрите руководство [Блоки кода](/ru/guides/authoring-content/#блоки-кода), чтобы узнать, как использовать синтаксис выразительного кода в Markdown и MDX-содержимом.
+
+Вы также можете использовать любые стандартные [параметры конфигурации Expressive Code](https://github.com/expressive-code/expressive-code/blob/main/packages/astro-expressive-code/README.md#configuration), как некоторые свойства, специфичные для Starlight, установив их в опции `expressiveCode` Starlight.
+Например, установите опцию `styleOverrides` в Expressive Code, чтобы переопределить CSS по умолчанию. Это позволяет настраивать код, например, сделать блокам кода закругленные углы:
+
+```js ins={2-4}
+starlight({
+	expressiveCode: {
+		styleOverrides: { borderRadius: '0.5rem' },
+	},
+});
+```
+
+Если вы хотите отключить Expressive Code, установите `expressiveCode: false` в конфигурации Starlight:
+
+```js ins={2}
+starlight({
+	expressiveCode: false,
+});
+```
+
+В дополнение к стандартным параметрам Expressive Code вы также можете установить следующие свойства, специфичные для Starlight, в вашей конфигурации `expressiveCode` для дальнейшей настройки поведения темы для ваших блоков кода:
+
+#### `themes`
+
+**тип:** `Array<string | ThemeObject | ExpressiveCodeTheme>`  
+**по умолчанию:** `['starlight-dark', 'starlight-light']`
+
+Установите темы, используемые для оформления блоков кода.
+См. [документацию по темам Expressive Code](https://github.com/expressive-code/expressive-code/blob/main/packages/astro-expressive-code/README.md#themes) для получения подробной информации о поддерживаемых форматах тем.
+
+По умолчанию Starlight использует тёмный и светлый варианты [темы Night Owl](https://github.com/sdras/night-owl-vscode-theme) Сары Драснер.
+
+Если вы предоставите хотя бы одну тёмную и одну светлую тему, Starlight автоматически синхронизирует активную тему блока кода с текущей темой сайта.
+Настройте это поведение с помощью параметра [`useStarlightDarkModeSwitch`](#usestarlightdarkmodeswitch).
+
+#### `useStarlightDarkModeSwitch`
+
+**тип:** `boolean`  
+**по умолчанию:** `true`
+
+Если установлено значение true, блоки кода автоматически переключаются между светлой и тёмной темами при изменении темы сайта.
+Если установлено значение false, вам придется вручную добавить CSS для переключения между несколькими темами.
+
+:::note
+При настройке `themes` вы должны указать хотя бы одну тёмную и одну светлую тему, чтобы переключатель темного режима Starlight работал.
+:::
+
+#### `useStarlightUiThemeColors`
+
+**тип:** `boolean`  
+**по умолчанию:** `true` если `themes` не задано, иначе — `false`
+
+Если `true`, то для цветов элементов пользовательского интерфейса кодового блока (фонов, кнопок, теней и т. д.) используются CSS-переменные Starlight, соответствующие [цветовой теме сайта](/ru/guides/css-and-tailwind/#темизация).
+Если `false`, то для этих элементов используются цвета, предоставляемые активной темой подсветки синтаксиса.
+
+:::note
+При использовании пользовательских тем и установке для этого параметра значения `true` необходимо указать хотя бы одну тёмную и одну светлую тему, чтобы обеспечить правильный цветовой контраст.
+:::
+
+### `pagefind`
+
+**тип:** `boolean`  
+**по умолчанию:** `true`
+
+Определите, включен ли в Starlight поставщик поиска по сайту по умолчанию [Pagefind](https://pagefind.app/).
+
+Установите значение `false`, чтобы отключить индексацию вашего сайта с помощью Pagefind.
+Это также скроет стандартный пользовательский интерфейс поиска, если он используется.
+
+### `head`
+
+**тип:** [`HeadConfig[]`](#headconfig)
+
+Добавьте пользовательские теги в `<head>` вашего сайта Starlight.
+Может пригодиться для добавления аналитики и других сторонних скриптов и ресурсов.
+
+```js
+starlight({
+	head: [
+		// Пример: добавляем тег скрипта аналитики Fathom.
+		{
+			tag: 'script',
+			attrs: {
+				src: 'https://cdn.usefathom.com/script.js',
+				'data-site': 'MY-FATHOM-ID',
+				defer: true,
+			},
+		},
+	],
+});
+```
+
+Записи в `head` преобразуются непосредственно в HTML-элементы и не проходят через обработку [скриптов](https://docs.astro.build/ru/guides/client-side-scripts/#обработка-скриптов) или [стилей](https://docs.astro.build/ru/guides/styling/#styling-in-astro) Astro.
+Если вам нужно импортировать локальные ресурсы, такие как скрипты, стили или изображения, [переопределите компонент Head](/ru/guides/overriding-components/#переиспользование-встроенного-компонента).
+
+#### `HeadConfig`
+
+```ts
+interface HeadConfig {
+	tag: string;
+	attrs?: Record<string, string | boolean | undefined>;
+	content?: string;
+}
+```
+
+### `lastUpdated`
+
+**тип:** `boolean`  
+**по умолчанию:** `false`
+
+Укажите, показывать ли в нижнем колонтитуле дату последнего обновления страницы.
+
+По умолчанию эта функция полагается на историю Git вашего репозитория и может быть неточной на некоторых платформах развёртывания, создающих [копии репозитория, включающие только самый последний коммит](https://git-scm.com/docs/git-clone#Documentation/git-clone.txt---depthltdepthgt). Страница может переопределить эту настройку или дату, основанную на Git, с помощью поля [`lastUpdated` frontmatter](/ru/reference/frontmatter/#lastupdated).
+
+### `pagination`
+
+**тип:** `boolean`  
+**по умолчанию:** `true`
+
+Определите, должен ли нижний колонтитул включать ссылки на предыдущую и следующую страницы.
+
+Страница может переопределить эту настройку или текст ссылки и/или URL с помощью полей [`prev`](/ru/reference/frontmatter/#prev) и [`next`](/ru/reference/frontmatter/#next) в метаданных страницы.
+
+### `favicon`
+
+**тип:** `string`  
+**по умолчанию:** `'/favicon.svg'`
+
+Задайте путь к фавиконке по умолчанию для вашего сайта, который должен находиться в директории `public/` и быть валидным (`.ico`, `.gif`, `.jpg`, `.png` или `.svg`) файлом иконок.
+
+```js
+starlight({
+  favicon: '/images/favicon.svg',
+}),
+```
+
+Если вам нужно задать дополнительные варианты или резервные фавиконки, вы можете добавить теги с помощью опции [`head`](#head):
+
+```js
+starlight({
+	favicon: '/images/favicon.svg',
+	head: [
+		// Добавляем резервную фавиконку для Safari
+		{
+			tag: 'link',
+			attrs: {
+				rel: 'icon',
+				href: '/images/favicon.ico',
+				sizes: '32x32',
+			},
+		},
+	],
+});
+```
+
+### `titleDelimiter`
+
+**тип:** `string`  
+**по умолчанию:** `'|'`
+
+Устанавливает разделитель между заголовком страницы и заголовком сайта в теге `<title>`, который отображается на вкладках браузера.
+
+По умолчанию каждая страница имеет `<title>` вида `Заголовок страницы | Заголовок сайта`.
+Например, эта страница называется «Конфигурация», а этот сайт — «Starlight», поэтому `<title>` для этой страницы будет «Конфигурация | Starlight».
+
+### `disable404Route`
+
+**тип:** `boolean`  
+**по умолчанию:** `false`
+
+Отключает внедрение стандартной [страницы 404](https://docs.astro.build/ru/core-concepts/astro-pages/#custom-404-error-page) Starlight. Чтобы использовать в своем проекте собственный маршрут `src/pages/404.astro`, установите для этого параметра значение `true`.
+
+### `components`
+
+**тип:** `Record<string, string>`
+
+Укажите пути к компонентам для переопределения реализаций Starlight по умолчанию.
+
+```js
+starlight({
+	components: {
+		SocialLinks: './src/components/MySocialLinks.astro',
+	},
+});
+```
+
+См. [Справочник по переопределениям](/ru/reference/overrides/) для получения подробной информации обо всех компонентах, которые можно переопределить.
+
+### `plugins`
+
+**тип:** [`StarlightPlugin[]`](/ru/reference/plugins/#краткая-справка-по-api)
+
+Расширьте Starlight с помощью пользовательских плагинов.
+Плагины вносят изменения в ваш проект, чтобы изменить или добавить функции Starlight.
+
+Посетите [витрину плагинов](/ru/resources/plugins/#плагины), чтобы увидеть список доступных плагинов.
+
+```js
+starlight({
+	plugins: [starlightPlugin()],
+});
+```
+
+См. [Справочник по плагинам](/ru/reference/plugins/) для получения подробной информации о создании собственных плагинов.

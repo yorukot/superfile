@@ -1,0 +1,274 @@
+---
+title: 국제화 (i18n)
+description: 여러 언어를 지원하도록 Starlight 사이트를 구성하는 방법을 알아보세요.
+---
+
+import { FileTree, Steps } from '@astrojs/starlight/components';
+
+Starlight는 라우팅, 대체 콘텐츠 및 전체 RTL(오른쪽에서 왼쪽으로) 언어 지원을 포함한 다국어 사이트에 대한 기본 지원을 제공합니다.
+
+## i18n 구성
+
+<Steps>
+
+1. Starlight 통합에 [`locales`](/ko/reference/configuration/#locales) 및 [`defaultLocale`](/ko/reference/configuration/#defaultlocale)을 전달하여 사이트가 지원해야 할 언어에 대해 알려주세요.
+
+   ```js {9-26}
+   // astro.config.mjs
+   import { defineConfig } from 'astro/config';
+   import starlight from '@astrojs/starlight';
+
+   export default defineConfig({
+   	integrations: [
+   		starlight({
+   			title: '나의 문서',
+   			// 사이트의 기본 언어를 영어로 설정합니다.
+   			defaultLocale: 'en',
+   			locales: {
+   				// 영어 문서는 `src/content/docs/en/`에 있습니다.
+   				en: {
+   					label: 'English',
+   				},
+   				// 중국어 간체 문서는 `src/content/docs/zh-cn/`에 있습니다.
+   				'zh-cn': {
+   					label: '简体中文',
+   					lang: 'zh-CN',
+   				},
+   				// 아랍어 문서는 `src/content/docs/ar/`에 있습니다.
+   				ar: {
+   					label: 'العربية',
+   					dir: 'rtl',
+   				},
+   			},
+   		}),
+   	],
+   });
+   ```
+
+   `defaultLocale`은 대체 콘텐츠 및 UI 라벨에 사용되므로 콘텐츠 작성을 시작할 가능성이 가장 높거나 이미 콘텐츠가 있는 언어로 선택하세요.
+
+2. `src/content/docs/`에 각 언어에 대한 디렉터리를 만듭니다. 예를 들어 위에서 사용한 구성의 경우 다음과 같이 디렉터리를 생성할 수 있습니다.
+
+   <FileTree>
+
+   - src/
+     - content/
+       - docs/
+         - ar/
+         - en/
+         - zh-cn/
+
+   </FileTree>
+
+3. 이제 언어 디렉터리에 콘텐츠 파일을 추가할 수 있습니다. 여러 언어로 작성된 페이지를 연결하기 위해 같은 이름의 파일을 사용하면 Starlight의 모든 i18n 기능(대체 콘텐츠, 번역 알림 등)을 활용할 수 있습니다.
+
+   예를 들어, 아랍어와 영어 홈페이지를 각각 나타내려면 `ar/index.md` 및 `en/index.md`를 만듭니다.
+
+</Steps>
+
+### 루트 로케일 사용
+
+경로에 i18n 접두사가 없는 언어를 제공하려면 "루트" 로케일을 사용할 수 있습니다. 예를 들어 영어가 루트 로케일인 경우 영어 페이지 경로는 `/en/about` 대신 `/about`이 됩니다.
+
+루트 로케일을 설정하려면 `locales` 구성에서 `root` 키를 사용하세요. 루트 로케일이 콘텐츠의 기본 로케일이기도 한 경우 `defaultLocale`을 제거하거나 값을 `root`로 설정하세요.
+
+```js {9,11-14}
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: '나의 문서',
+			defaultLocale: 'root', // 선택적
+			locales: {
+				root: {
+					label: 'English',
+					lang: 'en', // 루트 로케일은 lang이 반드시 필요합니다.
+				},
+				'zh-cn': {
+					label: '简体中文',
+					lang: 'zh-CN',
+				},
+			},
+		}),
+	],
+});
+```
+
+루트 로케일을 사용하는 경우 해당 언어로 작성된 페이지를 전용 언어 폴더 대신 `src/content/docs/`에 직접 보관하세요. 예를 들어 위 구성을 사용할 때 영어와 중국어에 대한 홈 페이지 파일은 다음과 같습니다.
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - **index.md**
+      - zh-cn/
+        - **index.md**
+
+</FileTree>
+
+#### 단일 언어를 사용하는 사이트
+
+기본적으로 Starlight는 단일 언어(영어) 사이트입니다.
+다른 언어로 단일 언어 사이트를 만들려면 `locales` 구성에서 `root`를 해당 언어로 설정하세요.
+
+```diff lang="js" {10-13}
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: '나의 문서',
+			locales: {
+				root: {
+					label: '한국어',
+					lang: 'ko',
+				},
+			},
+		}),
+	],
+});
+```
+
+이를 통해 언어 선택기와 같은 다국어 사이트에 대한 다른 국제화 기능을 활성화하지 않고도 Starlight의 기본 언어를 변경할 수 있습니다.
+
+## 대체 콘텐츠
+
+Starlight는 귀하가 모든 언어로 같은 페이지를 생성할 것을 기대합니다. 예를 들어 `en/about.md` 파일이 있는 경우 지원하는 각 언어에 대해 `about.md`를 만듭니다. 이를 통해 Starlight는 아직 번역되지 않은 페이지에 대체 콘텐츠를 제공합니다.
+
+특정 언어에 대한 번역이 아직 제공되지 않는 경우 Starlight는 독자에게 해당 페이지의 콘텐츠를 기본 언어(`defaultLocale`을 통해 설정된 언어)로 표시합니다. 예를 들어, About 페이지의 프랑스어 버전을 아직 만들지 않았고 기본 언어가 영어인 경우 `/fr/about`에 방문한 독자는 이 페이지가 아직 번역되지 않았다는 알림과 함께 `/en/about`에 있는 영어 콘텐츠를 보게 됩니다. 이를 통해 기본 언어로 콘텐츠를 추가한 다음 점진적으로 번역할 수 있습니다.
+
+## 사이트 제목 번역
+
+기본적으로 Starlight는 모든 언어에 대해 동일한 사이트 제목을 사용합니다.
+각 로케일의 제목을 사용자 정의해야 하는 경우 Starlight 옵션의 [`title`](/ko/reference/configuration/#title-필수)에 객체를 전달할 수 있습니다.
+
+```diff lang="js"
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+-			title: '나의 문서',
++			title: {
++				ko: '나의 문서',
++				'zh-CN': '我的文档',
++			},
+			defaultLocale: 'ko',
+			locales: {
+				ko: { label: '한국어' },
+				'zh-cn': { label: '简体中文', lang: 'zh-CN' },
+			},
+		}),
+	],
+});
+```
+
+## Starlight UI 번역
+
+import LanguagesList from '~/components/languages-list.astro';
+import UIStringsList from '~/components/ui-strings-list.astro';
+
+Starlight를 사용하면 번역된 콘텐츠 파일을 호스팅하는 것 외에도 독자가 선택한 언어로 사이트 전체를 경험할 수 있도록 기본 UI 문자열(예를 들어, 목차의 제목인 "목차")을 번역할 수 있습니다.
+
+<LanguagesList startsSentence />로 번역된 UI 문자열이 기본적으로 제공됩니다.
+그리고 우리는 [더 많은 기본 언어를 추가하는 데
+기여](https://github.com/withastro/starlight/blob/main/CONTRIBUTING.md)하는걸
+환영합니다.
+
+`i18n` 데이터 컬렉션을 통해 지원하는 추가 언어에 대한 번역을 제공하거나 기본 라벨을 변경할 수 있습니다.
+
+<Steps>
+
+1. 아직 구성되지 않은 경우 `src/content/config.ts`에서 `i18n` 데이터 컬렉션을 구성합니다.
+
+   ```diff lang="js" ins=/, (i18nSchema)/
+   // src/content/config.ts
+   import { defineCollection } from 'astro:content';
+   import { docsSchema, i18nSchema } from '@astrojs/starlight/schema';
+
+   export const collections = {
+   	docs: defineCollection({ schema: docsSchema() }),
+   +	i18n: defineCollection({ type: 'data', schema: i18nSchema() }),
+   };
+   ```
+
+2. `src/content/i18n/`에 UI 번역 문자열을 제공하려는 각 추가 언어에 대한 JSON 파일을 만듭니다. 예를 들어 다음은 아랍어 및 중국어 간체에 대한 번역 파일을 추가합니다.
+
+   <FileTree>
+
+   - src/
+     - content/
+       - i18n/
+         - ar.json
+         - zh-CN.json
+
+   </FileTree>
+
+3. JSON 파일에서 키에 대한 번역을 추가합니다. 키는 영어로 남겨두고 값을 번역해야합니다. (예: `"search.label": "Buscar"`)
+
+   Starlight와 함께 제공되는 기존 문자열의 영어 기본값은 다음과 같습니다.
+
+   <UIStringsList />
+
+   Starlight의 코드 블록은 [Expressive Code](https://github.com/expressive-code/expressive-code) 라이브러리에 의해 구동됩니다.
+   `expressiveCode` 키를 사용하여 동일한 JSON 파일에서 UI 문자열에 대한 번역을 설정할 수 있습니다.
+
+   ```json
+   {
+   	"expressiveCode.copyButtonCopied": "Copied!",
+   	"expressiveCode.copyButtonTooltip": "Copy to clipboard",
+   	"expressiveCode.terminalWindowFallbackTitle": "Terminal window"
+   }
+   ```
+
+   Starlight의 검색 모달은 [Pagefind](https://pagefind.app/) 라이브러리에 의해 구동됩니다. 동일한 JSON 파일에서 `pagefind` 키를 사용하여 Pagefind의 UI에 대한 번역을 설정할 수 있습니다.
+
+   ```json
+   {
+   	"pagefind.clear_search": "Clear",
+   	"pagefind.load_more": "Load more results",
+   	"pagefind.search_label": "Search this site",
+   	"pagefind.filters_label": "Filters",
+   	"pagefind.zero_results": "No results for [SEARCH_TERM]",
+   	"pagefind.many_results": "[COUNT] results for [SEARCH_TERM]",
+   	"pagefind.one_result": "[COUNT] result for [SEARCH_TERM]",
+   	"pagefind.alt_search": "No results for [SEARCH_TERM]. Showing results for [DIFFERENT_TERM] instead",
+   	"pagefind.search_suggestion": "No results for [SEARCH_TERM]. Try one of the following searches:",
+   	"pagefind.searching": "Searching for [SEARCH_TERM]..."
+   }
+   ```
+
+</Steps>
+
+### 번역 스키마 확장
+
+`i18nSchema()` 옵션에서 `extend`를 설정하여 사이트 번역 사전에 맞춤 키를 추가하세요.
+다음 예시에서는 기본 키에 새로운 선택적 `custom.label` 키가 추가됩니다.
+
+```diff lang="js"
+// src/content/config.ts
+import { defineCollection, z } from 'astro:content';
+import { docsSchema, i18nSchema } from '@astrojs/starlight/schema';
+
+export const collections = {
+	docs: defineCollection({ schema: docsSchema() }),
+	i18n: defineCollection({
+		type: 'data',
+		schema: i18nSchema({
++			extend: z.object({
++				'custom.label': z.string().optional(),
++			}),
+		}),
+	}),
+};
+```
+
+Astro 공식문서의 ["컬렉션 스키마 정의"](https://docs.astro.build/ko/guides/content-collections/#defining-a-collection-schema)에서 콘텐츠 컬렉션 스키마에 대해 자세히 알아보세요.

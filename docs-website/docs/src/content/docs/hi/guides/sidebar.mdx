@@ -1,0 +1,541 @@
+---
+title: साइडबार मार्ग-निर्देशन
+description: जानें कि अपनी Starlight साइट के साइडबार मार्ग-निर्देशन लिंक को कैसे सेट अप और अनुकूलित करें।
+---
+
+import { FileTree } from '@astrojs/starlight/components';
+import SidebarPreview from '~/components/sidebar-preview.astro';
+
+एक सुव्यवस्थित साइडबार एक अच्छे दस्तावेज़ीकरण की कुंजी है क्योंकि यह उन मुख्य तरीकों में से एक है जिनसे उपयोगकर्ता आपकी साइट पर मार्ग-निर्देशन करेंगे। Starlight आपके साइडबार लेआउट और कंटेंट को अनुकूलित करने के लिए विकल्पों का एक पूरा सेट प्रदान करता है।
+
+## डिफ़ॉल्ट साइडबार
+
+डिफ़ॉल्ट रूप से, Starlight स्वचालित रूप से आपके दस्तावेज़ की संचिका प्रणाली संरचना के आधार पर साइडबार प्रविष्टि के रूप में प्रत्येक फ़ाइल की `title` गुण का उपयोग करके एक साइडबार उत्पन्न करेगा।
+
+उदाहरण के लिए, निम्नलिखित फ़ाइल संरचना दी गई है:
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - guides/
+        - components.md
+        - i18n.md
+      - reference/
+        - configuration.md
+
+</FileTree>
+
+निम्नलिखित साइडबार स्वचालित रूप से उत्पन्न हो जाएगा:
+
+<SidebarPreview
+	config={[
+		{
+			label: 'guides',
+			items: [
+				{ label: 'अवयवों', link: '/hi/guides/components/' },
+				{ label: 'अंतर्राष्ट्रीयकरण (i18n)', link: '/hi/guides/i18n/' },
+			],
+		},
+		{
+			label: 'reference',
+			items: [
+				{ label: 'कॉन्फ़िगरेशन संदर्भ', link: '/hi/reference/configuration/' },
+			],
+		},
+	]}
+/>
+
+[स्वतः-निर्मित समूह](#स्वतः-निर्मित-समूह) अनुभाग में स्वतः-निर्मित साइडबार के बारे में और जानें।
+
+## लिंक और लिंक समूह जोड़ें
+
+अपने साइडबार [लिंक](#लिंक) और [लिंक के समूहों](#समूह) (एक सिमटने वाले शीर्ष लेख के भीतर) को कॉन्फ़िगर करने के लिए, `astro.config.mjs` में [`starlight.sidebar`](/hi/reference/configuration/#sidebar) गुण का उपयोग करें।
+
+लिंक और समूहों को मिलाकर, आप विभिन्न प्रकार के साइडबार लेआउट बना सकते हैं।
+
+### लिंक
+
+`label` और `link` गुणों वाले ऑब्जेक्ट का उपयोग करके किसी आंतरिक या बाहरी पृष्ठ पर एक लिंक जोड़ें।
+
+```js "label:" "link:"
+starlight({
+	sidebar: [
+		// CSS और स्टाइलिंग मार्गदर्शिका का लिंक।
+		{ label: 'CSS और स्टाइलिंग', link: '/hi/guides/css-and-tailwind/' },
+		// Astro वेबसाइट का एक बाहरी लिंक।
+		{ label: 'Astro', link: 'https://astro.build/' },
+	],
+});
+```
+
+उपरोक्त कॉन्फ़िगरेशन निम्नलिखित साइडबार उत्पन्न करता है:
+
+<SidebarPreview
+	config={[
+		{ label: 'CSS और स्टाइलिंग', link: '/hi/guides/css-and-tailwind/' },
+		{ label: 'Astro', link: 'https://astro.build/' },
+	]}
+/>
+
+### समूह
+
+आप एक सिमटने वाले शीर्षक के अंतर्गत संबंधित लिंक को एक साथ समूहित करके अपने साइडबार में संरचना जोड़ सकते हैं।
+समूहों में लिंक और अन्य उप-समूह दोनों हो सकते हैं।
+
+`label` और `items` गुणों वाले ऑब्जेक्ट का उपयोग करके एक समूह जोड़ें।
+`label` का उपयोग समूह के शीर्षक के रूप में किया जाएगा।
+`items` सरणी में लिंक या उपसमूह जोड़ें।
+
+```js /^\s*(label:|items:)/
+starlight({
+	sidebar: [
+		// "मार्गदर्शिका" लेबल वाले लिंक का एक समूह।
+		{
+			label: 'मार्गदर्शिका',
+			items: [
+				{ label: 'अवयवों', link: '/hi/guides/components/' },
+				{ label: 'अंतर्राष्ट्रीयकरण (i18n)', link: '/hi/guides/i18n/' },
+				// लिंक का एक नेस्टेड समूह।
+				{
+					label: 'स्टाइलिंग',
+					items: [
+						{ label: 'CSS', link: '/hi/guides/css-and-tailwind/' },
+						{ label: 'Tailwind', link: '/hi/guides/css-and-tailwind/' },
+						{ label: 'Shiki', link: '/hi/guides/css-and-tailwind/' },
+					],
+				},
+			],
+		},
+	],
+});
+```
+
+उपरोक्त कॉन्फ़िगरेशन निम्नलिखित साइडबार उत्पन्न करता है:
+
+<SidebarPreview
+	config={[
+		{
+			label: 'मार्गदर्शिका',
+			items: [
+				{ label: 'अवयवों', link: '/hi/guides/components/' },
+				{ label: 'अंतर्राष्ट्रीयकरण (i18n)', link: '/hi/guides/i18n/' },
+				{
+					label: 'स्टाइलिंग',
+					items: [
+						{ label: 'CSS', link: '/hi/guides/css-and-tailwind/' },
+						{ label: 'Tailwind', link: '/hi/guides/css-and-tailwind/' },
+						{ label: 'Shiki', link: '/hi/guides/css-and-tailwind/' },
+					],
+				},
+			],
+		},
+	]}
+/>
+
+### स्वतः निर्मित समूह
+
+Starlight स्वचालित रूप से आपके दस्तावेज़ों की निर्देशिका के आधार पर आपके साइडबार में एक समूह उत्पन्न कर सकता है।
+यह तब सहायक होता है जब आप किसी समूह में प्रत्येक साइडबार आइटम को मैन्युअल रूप से दर्ज नहीं करना चाहते हैं।
+
+डिफ़ॉल्ट रूप से, पेजों को फ़ाइल [`slug`](/hi/reference/overrides/#slug) के अनुसार वर्णानुक्रम में क्रमबद्ध किया जाता है।
+
+`label` और `autogenerate` गुणों वाले ऑब्जेक्ट का उपयोग करके एक स्वतः निर्मित समूह जोड़ें। साइडबार प्रविष्टियों के लिए उपयोग करने के लिए आपके `autogenerate` कॉन्फ़िगरेशन को `directory` निर्दिष्ट करना होगा। उदाहरण के लिए, निम्नलिखित कॉन्फ़िगरेशन के साथ:
+
+```js "label:" "autogenerate:"
+starlight({
+	sidebar: [
+		{
+			label: 'मार्गदर्शिका',
+			// 'गाइड' निर्देशिका के लिए लिंक का एक समूह स्वतः उत्पन्न करें।
+			autogenerate: { directory: 'guides' },
+		},
+	],
+});
+```
+
+और निम्न फ़ाइल संरचना:
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - guides/
+        - components.md
+        - i18n.md
+        - advanced/
+          - project-structure.md
+
+</FileTree>
+
+निम्नलिखित साइडबार उत्पन्न होगा:
+
+<SidebarPreview
+	config={[
+		{
+			label: 'मार्गदर्शिका',
+			items: [
+				{ label: 'अवयवों', link: '/hi/guides/components/' },
+				{ label: 'अंतर्राष्ट्रीयकरण (i18n)', link: '/hi/guides/i18n/' },
+				{
+					label: 'advanced',
+					items: [
+						{ label: 'परियोजना संरचना', link: '/hi/guides/project-structure/' },
+					],
+				},
+			],
+		},
+	]}
+/>
+
+#### फ्रंटमैटर में स्वतः निर्मित लिंक को अनुकूलित करना
+
+स्वचालित रूप से उत्पन्न किए गए लिंक को अनुकूलित करने के लिए अलग-अलग पृष्ठों में [`sidebar फ्रंटमैटर क्षेत्र`](/hi/reference/frontmatter/#sidebar) का उपयोग करें।
+
+साइडबार फ्रंटमैटर विकल्प आपको एक [कस्टम लेबल](/hi/reference/frontmatter/#label) सेट करने या किसी लिंक में एक [बैज](/hi/reference/frontmatter/#badge) जोड़ने, साइडबार से एक लिंक [छिपाने](/hi/reference/frontmatter/#hidden) या एक [कस्टम सॉर्ट भार](/hi/reference/frontmatter/#order) परिभाषित करने की अनुमति देते हैं।
+
+```md "sidebar:"
+---
+# src/content/docs/example.md
+title: मेरा पेज
+sidebar:
+  # लिंक के लिए एक कस्टम लेबल सेट करें
+  label: कस्टम साइडबार लेबल
+  # लिंक के लिए एक कस्टम क्रम सेट करें (निचले अंक ऊपर प्रदर्शित होते हैं)
+  order: 2
+  # लिंक में एक बैज जोड़ें
+  badge:
+    text: नया
+    variant: tip
+---
+```
+
+उपरोक्त फ्रंटमैटर वाले पृष्ठ सहित एक स्वत: उत्पन्न किया गया समूह निम्नलिखित साइडबार उत्पन्न करेगा:
+
+<SidebarPreview
+	config={[
+		{
+			label: 'मार्गदर्शिका',
+			items: [
+				{ label: 'एक पेज', link: '#' },
+				{
+					label: 'कस्टम साइडबार लेबल',
+					link: '#',
+					badge: { text: 'नया', variant: 'tip' },
+				},
+				{ label: 'एक अन्य पेज', link: '#' },
+			],
+		},
+	]}
+/>
+
+:::note
+`sidebar` फ्रंटमैटर कॉन्फ़िगरेशन का उपयोग केवल स्वतः निर्मित लिंक के लिए किया जाता है और मैन्युअल रूप से परिभाषित लिंक के लिए इसे अनदेखा किया जाएगा।
+:::
+
+## बैजेस
+
+लिंक, समूह और स्वत: उत्पन्न किए गए समूह अपने लेबल के आगे बैज प्रदर्शित करने के लिए `badge` गुण भी शामिल कर सकते हैं।
+
+```js {10,17}
+starlight({
+	sidebar: [
+		{
+			label: 'मार्गदर्शिका',
+			items: [
+				// "नया" बैज वाला एक लिंक.
+				{
+					label: 'अवयवों',
+					link: '/hi/guides/components/',
+					badge: 'नया',
+				},
+			],
+		},
+		// "पदावनत" बैज वाला एक स्वतः निर्मित समूह।
+		{
+			label: 'संदर्भ',
+			badge: 'पदावनत',
+			autogenerate: { directory: 'reference' },
+		},
+	],
+});
+```
+
+उपरोक्त कॉन्फ़िगरेशन निम्नलिखित साइडबार उत्पन्न करता है:
+
+<SidebarPreview
+	config={[
+		{
+			label: 'मार्गदर्शिका',
+			items: [
+				{
+					label: 'अवयवों',
+					link: '/hi/guides/components/',
+					badge: { text: 'नया', variant: 'default' },
+				},
+			],
+		},
+		{
+			label: 'संदर्भ',
+			badge: { text: 'पदावनत', variant: 'default' },
+			items: [
+				{
+					label: 'कॉन्फ़िगरेशन संदर्भ',
+					link: '/hi/reference/configuration/',
+				},
+				{
+					label: 'फ्रंटमैटर संदर्भ',
+					link: '/hi/reference/frontmatter/',
+				},
+				{
+					label: 'ओवरराइड संदर्भ',
+					link: '/hi/reference/overrides/',
+				},
+			],
+		},
+	]}
+/>
+
+### बैज वेरिएंट
+
+`text` और `variant` गुणों वाले ऑब्जेक्ट का उपयोग करके बैज स्टाइल को अनुकूलित करें।
+
+`text` प्रदर्शित की जाने वाली कंटेंट का प्रतिनिधित्व करता है (उदाहरण के लिए "नया")।
+`variant` गुण को निम्नलिखित मानों में से किसी एक पर सेट करके `default` स्टाइल को ओवरराइड करें, जो आपकी साइट के उच्चारण रंग का उपयोग करता है: `note`, `tip`, `danger`, `caution` या `success`।
+
+```js {10}
+starlight({
+	sidebar: [
+		{
+			label: 'मार्गदर्शिका',
+			items: [
+				// पीले "प्रयोगात्मक" बैज वाला एक लिंक।
+				{
+					label: 'अवयवों',
+					link: '/hi/guides/components/',
+					badge: { text: 'प्रयोगात्मक', variant: 'caution' },
+				},
+			],
+		},
+	],
+});
+```
+
+उपरोक्त कॉन्फ़िगरेशन निम्नलिखित साइडबार उत्पन्न करता है:
+
+<SidebarPreview
+	config={[
+		{
+			label: 'मार्गदर्शिका',
+			items: [
+				{
+					label: 'अवयवों',
+					link: '/hi/guides/components/',
+					badge: { text: 'प्रयोगात्मक', variant: 'caution' },
+				},
+			],
+		},
+	]}
+/>
+
+## कस्टम HTML विशेषताएँ
+
+लिंक तत्व में कस्टम HTML विशेषताएँ जोड़ने के लिए लिंक में `attrs` गुण भी शामिल हो सकती है।
+
+निम्नलिखित उदाहरण में, `attrs` का उपयोग `target='_blank'` विशेषता जोड़ने के लिए किया जाता है, ताकि लिंक एक नए टैब में खुले, और लिंक लेबल को इटैलिकाइज़ करने के लिए एक कस्टम `style` विशेषता लागू करने के लिए:
+
+```js {10}
+starlight({
+	sidebar: [
+		{
+			label: 'मार्गदर्शिका',
+			items: [
+				// Astro दस्तावेज़ीकरण का एक बाहरी लिंक एक नए टैब में खुलेगा।
+				{
+					label: 'Astro दस्तावेज़ीकरण',
+					link: 'https://docs.astro.build/',
+					attrs: { target: '_blank', style: 'font-style: italic' },
+				},
+			],
+		},
+	],
+});
+```
+
+उपरोक्त कॉन्फ़िगरेशन निम्नलिखित साइडबार उत्पन्न करता है:
+
+<SidebarPreview
+	config={[
+		{
+			label: 'मार्गदर्शिका',
+			items: [
+				{
+					label: 'Astro दस्तावेज़ीकरण',
+					link: 'https://docs.astro.build/',
+					attrs: {
+						target: '_blank',
+						style: 'font-style: italic',
+					},
+				},
+			],
+		},
+	]}
+/>
+
+## अंतर्राष्ट्रीयकरण
+
+[BCP-47](https://www.w3.org/International/questions/qa-choosing-language-tags) भाषा टैग निर्दिष्ट करके प्रत्येक समर्थित भाषा के लिए लिंक या समूह लेबल का अनुवाद करने के लिए लिंक और समूह प्रविष्टियों पर `translations` संपत्ति का उपयोग करें, उदाहरण के लिए `"en"`, `"ar"`, या `"zh-CN"`, कुंजी के रूप में और अनुवादित लेबल मान के रूप में। `label` गुण का उपयोग डिफ़ॉल्ट लोकेल और बिना अनुवाद वाली भाषाओं के लिए किया जाएगा।
+
+```js {5-7,11-13,18-20}
+starlight({
+	sidebar: [
+		{
+			label: 'मार्गदर्शिका',
+			translations: {
+				'pt-BR': 'Guias',
+			},
+			items: [
+				{
+					label: 'अवयवों',
+					translations: {
+						'pt-BR': 'Componentes',
+					},
+					link: '/hi/guides/components/',
+				},
+				{
+					label: 'अंतर्राष्ट्रीयकरण (i18n)',
+					translations: {
+						'pt-BR': 'Internacionalização (i18n)',
+					},
+					link: '/hi/guides/i18n/',
+				},
+			],
+		},
+	],
+});
+```
+
+ब्राज़ीलियाई पुर्तगाली में दस्तावेज़ ब्राउज़ करने से निम्नलिखित साइडबार उत्पन्न होगा:
+
+<SidebarPreview
+	config={[
+		{
+			label: 'Guias',
+			items: [
+				{ label: 'Componentes', link: '/pt-br/guides/components/' },
+				{ label: 'Internacionalização (i18n)', link: '/pt-br/guides/i18n/' },
+			],
+		},
+	]}
+/>
+
+## सिमटने वाले समूह
+
+`collapsed` गुण को `true` पर सेट करके लिंक के समूहों को डिफ़ॉल्ट रूप से संक्षिप्त किया जा सकता है।
+
+```js {5-6}
+starlight({
+	sidebar: [
+		{
+			label: 'मार्गदर्शिका',
+			// डिफ़ॉल्ट रूप से समूह को संक्षिप्त करें।
+			collapsed: true,
+			items: [
+				{ label: 'अवयवों', link: '/hi/guides/components/' },
+				{ label: 'अंतर्राष्ट्रीयकरण (i18n)', link: '/hi/guides/i18n/' },
+			],
+		},
+	],
+});
+```
+
+उपरोक्त कॉन्फ़िगरेशन निम्नलिखित साइडबार उत्पन्न करता है:
+
+<SidebarPreview
+	config={[
+		{
+			label: 'मार्गदर्शिका',
+			collapsed: true,
+			items: [
+				{ label: 'अवयवों', link: '/hi/guides/components/' },
+				{ label: 'अंतर्राष्ट्रीयकरण (i18n)', link: '/hi/guides/i18n/' },
+			],
+		},
+	]}
+/>
+
+[स्वतः निर्मित समूह](#स्वतः-निर्मित-समूह) respect the `collapsed` value of their parent group:
+
+```js {5-6}
+starlight({
+	sidebar: [
+		{
+			label: 'मार्गदर्शिका',
+			// डिफ़ॉल्ट रूप से समूह और उसके स्वत: उत्पन्न उपसमूहों को सिमटने वाले करें।
+			collapsed: true,
+			autogenerate: { directory: 'guides' },
+		},
+	],
+});
+```
+
+उपरोक्त कॉन्फ़िगरेशन निम्नलिखित साइडबार उत्पन्न करता है:
+
+<SidebarPreview
+	config={[
+		{
+			label: 'मार्गदर्शिका',
+			collapsed: true,
+			items: [
+				{ label: 'अवयवों', link: '/hi/guides/components/' },
+				{ label: 'अंतर्राष्ट्रीयकरण (i18n)', link: '/hi/guides/i18n/' },
+				{
+					label: 'advanced',
+					collapsed: true,
+					items: [
+						{ label: 'परियोजना संरचना', link: '/hi/guides/project-structure/' },
+					],
+				},
+			],
+		},
+	]}
+/>
+
+`autogenerate.collapsed` गुण को परिभाषित करके इस व्यवहार को ओवरराइड किया जा सकता है।
+
+```js {5-7} "collapsed: true"
+starlight({
+	sidebar: [
+		{
+			label: 'मार्गदर्शिका',
+			// "मार्गदर्शक" समूह को सिमटने वाले न करें बल्कि उसके स्वत: उत्पन्न उपसमूहों
+			// को सिमटने वाले करें।
+			collapsed: false,
+			autogenerate: { directory: 'guides', collapsed: true },
+		},
+	],
+});
+```
+
+उपरोक्त कॉन्फ़िगरेशन निम्नलिखित साइडबार उत्पन्न करता है:
+
+<SidebarPreview
+	config={[
+		{
+			label: 'मार्गदर्शिका',
+			items: [
+				{ label: 'अवयवों', link: '/hi/guides/components/' },
+				{ label: 'अंतर्राष्ट्रीयकरण (i18n)', link: '/hi/guides/i18n/' },
+				{
+					label: 'advanced',
+					collapsed: true,
+					items: [
+						{ label: 'परियोजना संरचना', link: '/hi/guides/project-structure/' },
+					],
+				},
+			],
+		},
+	]}
+/>

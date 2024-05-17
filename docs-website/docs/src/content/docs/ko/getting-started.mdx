@@ -1,0 +1,142 @@
+---
+title: 시작하기
+description: Astro가 제공하는 Starlight를 사용해 문서 사이트를 만드는 방법을 알아보세요.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+## 새 프로젝트 생성
+
+Starlight는 [Astro](https://astro.build) 프레임워크 위에 구축되었으며, 완전한 기능을 갖춘 문서 테마입니다.
+이 가이드는 새 프로젝트를 시작하는 데 도움이 될 것입니다.
+기존 Astro 프로젝트에 Starlight를 추가하려면 [수동 설정 지침](/ko/manual-setup/)을 참조하세요.
+
+## 빠른 시작
+
+### 새 프로젝트 생성
+
+터미널에서 다음 명령을 실행하여 새 Astro + Starlight 프로젝트를 생성합니다.
+
+<Tabs syncKey="pkg">
+<TabItem label="npm">
+
+```sh
+npm create astro@latest -- --template starlight
+```
+
+</TabItem>
+<TabItem label="pnpm">
+
+```sh
+pnpm create astro --template starlight
+```
+
+</TabItem>
+<TabItem label="Yarn">
+
+```sh
+yarn create astro --template starlight
+```
+
+</TabItem>
+</Tabs>
+
+이 명령은 필요한 파일과 구성을 모두 갖춘 새 [프로젝트 디렉터리](/ko/guides/project-structure/)를 생성합니다.
+
+:::tip[시도 해보기]
+브라우저에서 Starlight 사용:
+[StackBlitz에서 템플릿 열기](https://stackblitz.com/github/withastro/starlight/tree/main/examples/basics)
+:::
+
+### 개발 서버 시작
+
+로컬에서 작업할 때 [Astro의 개발 서버](https://docs.astro.build/ko/reference/cli-reference/#astro-dev)를 사용하면 작업을 미리 볼 수 있으며 변경 시 자동으로 브라우저를 새로 고칠 수 있습니다.
+
+프로젝트 디렉터리에서 다음 명령을 실행하여 개발 서버를 시작합니다.
+
+<Tabs syncKey="pkg">
+<TabItem label="npm">
+
+```sh
+npm run dev
+```
+
+</TabItem>
+<TabItem label="pnpm">
+
+```sh
+pnpm dev
+```
+
+</TabItem>
+<TabItem label="Yarn">
+
+```sh
+yarn dev
+```
+
+</TabItem>
+</Tabs>
+
+그러면 로컬 미리보기의 URL이 포함된 메시지가 터미널에 기록됩니다.
+사이트 탐색을 시작하려면 이 URL을 여세요.
+
+### 콘텐츠 추가
+
+Starlight는 새로운 콘텐츠를 추가하거나 기존 파일을 가져올 준비가 되어 있습니다!
+
+`src/content/docs/` 디렉터리에 Markdown 파일을 생성하여 사이트에 새 페이지를 추가하세요.
+
+[“페이지”](/ko/guides/pages/) 가이드에서 MDX 및 Markdoc 파일에 대한 파일 기반 라우팅 및 지원에 대해 자세히 알아보세요.
+
+### 다음 단계
+
+- **구성:** [“Starlight 사용자 정의”](/ko/guides/customization/)에서 일반적인 옵션에 대해 알아보세요.
+- **탐색:** ["사이드바 탐색"](/ko/guides/sidebar/) 가이드를 사용하여 사이드바를 설정하세요.
+- **컴포넌트:** ["컴포넌트"](/ko/guides/components/) 가이드에서 내장된 카드 컴포넌트, 탭 컴포넌트 등을 찾아보세요.
+- **배포:** Astro 문서의 [“사이트 배포”](https://docs.astro.build/ko/guides/deploy/) 가이드를 사용하여 작업을 게시하세요.
+
+## Starlight 업데이트
+
+:::tip
+Starlight는 베타 소프트웨어이기 때문에 업데이트와 개선이 자주 이루어질 것입니다.
+정기적으로 Starlight를 업데이트하세요!
+:::
+
+Starlight는 Astro 통합입니다. 터미널에서 다음 명령을 실행하여 이 패키지와 다른 Astro 패키지를 업데이트할 수 있습니다.
+
+<Tabs syncKey="pkg">
+<TabItem label="npm">
+
+```sh
+npx @astrojs/upgrade
+```
+
+</TabItem>
+<TabItem label="pnpm">
+
+```sh
+pnpm dlx @astrojs/upgrade
+```
+
+</TabItem>
+<TabItem label="Yarn">
+
+```sh
+yarn dlx @astrojs/upgrade
+```
+
+</TabItem>
+</Tabs>
+
+각 릴리스의 전체 변경 사항 목록은 [Starlight 변경 로그](https://github.com/withastro/starlight/blob/main/packages/starlight/CHANGELOG.md)를 참조하세요.
+
+## Starlight 문제 해결
+
+[프로젝트 구성](/ko/reference/configuration/) 및 [개별 페이지 프런트매터 구성](/ko/reference/frontmatter/) 참조 페이지를 사용하여 Starlight 사이트가 올바르게 구성되고 작동하는지 확인하세요.
+콘텐츠를 추가하고 Starlight 사이트를 사용자 정의하는 데 도움이 필요하면 사이드바의 가이드를 참조하세요.
+
+이 문서에서 답변을 찾을 수 없다면 완전한 Astro 문서를 확인하기 위해 [Astro 공식 문서](https://docs.astro.build)를 방문하세요.
+이 Starlight 테마에서 Astro가 어떻게 작동하는지 이해하는 것은 질문에 대한 해답이 될 것입니다.
+
+[Github issues](https://github.com/withastro/starlight/issues)에서 Starlight의 알려진 문제를 확인할 수 있으며, 활발하고 친근한 커뮤니티인 [Astro Discord](https://astro.build/chat)에서 도음을 받을수도 있습니다! 현재 진행되고 있는 개발 및 기타 주제에 대해 논의하기 위해 `#support` 채널에서 "starlight" 태그를 사용하여 질문을 게시하거나 `#starlight` 채널을 방문하세요.

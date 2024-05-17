@@ -1,0 +1,48 @@
+---
+title: Proje Yapısı
+description: Starlight projenizde dosyalarınızı nasıl organize edeceğinizi öğrenin.
+---
+
+Bu rehber size bir Starlight projesinin nasıl organize edileceğini ve farklı dosyaların projenizde neler yapacağını gösterir.
+
+Starlight projeleri, diğer Astro projelerinde olduğu gibi aynı dosya ve dizin yapısını takip eder. [Astro'nun proje yapısı dokümantasyonunu](https://docs.astro.build/en/core-concepts/project-structure/) daha fazla bilgi için inceleyin.
+
+## Dosyalar ve dizinler
+
+- `astro.config.mjs` — Astro yapılandırma dosyası. Starlight entegrasyon ve yapılandırmasını içerir.
+- `src/content/config.ts` — İçerik koleksiyonlarını yapılandırma dosyası. Starlight'ın önbölüm şemasını projenize ekler.
+- `src/content/docs/` — İçerik dosyaları. Starlight bu dizin altındaki her bir `.md`, `.mdx` ya da `.mdoc` uzantılı dosyayı websitenizde bir sayfaya dönüştürür.
+- `src/content/i18n/` (opsiyonel) — [Uluslararasılaştırmayı](/tr/guides/i18n/) desteklemek için çeviri verisi.
+- `src/` — Projeniz için diğer kaynak kodu ve dosyaları (bileşenler, stiller, görseller vb.).
+- `public/` — Astro ile işlenmeyen statik mülkler (yazı karakterleri, sekme simgesi, PDF'ler, vb.).
+
+## Örnek proje içerikleri
+
+Bir Starlight projesi dizini bunun gibi görülebilir:
+
+import { FileTree } from '@astrojs/starlight/components';
+
+<FileTree>
+
+- public/
+  - favicon.svg
+- src/
+  - assets/
+    - logo.svg
+    - screenshot.jpg
+  - components/
+    - CustomButton.astro
+    - InteractiveWidget.jsx
+  - content/
+    - docs/
+      - guides/
+        - 01-getting-started.md
+        - 02-advanced.md
+      - index.mdx
+    - config.ts
+  - env.d.ts
+- astro.config.mjs
+- package.json
+- tsconfig.json
+
+</FileTree>

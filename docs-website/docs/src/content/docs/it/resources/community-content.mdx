@@ -1,0 +1,125 @@
+---
+title: Contenuti della community
+description: Scopri guide, articoli e video prodotti dalla community per imparare e costruire con Starlight!
+---
+
+:::tip[Aggiungi il tuo!]
+Hai prodotto dei contenuti su Starlight?
+Apri una PR aggiungendo un link a questa pagina!
+:::
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+## Articoli e recensioni
+
+Qui trovi una raccolta di post e articoli per saperne di più su Starlight e le esperienze di altre persone:
+
+<CardGrid>
+	<LinkCard
+		href="https://devm.io/open-source/starlight-astro"
+		title="Generazione di siti statici con Starlight"
+		description="“Nessuna idea è troppo grande o troppo piccola quando si progettano componenti” — intervista con Chris Swithinbank, leader di Starlight"
+	/>
+	<LinkCard
+		href="https://frontendatscale.com/blog/hybrid-frontend-architecture/"
+		title="Architettura frontend ibrida con Astro e Starlight"
+		description="Maxi Ferreira e Ben Holmes costruiscono un sito di documentazione con Starlight, TinaCMS e un Playground API interattivo con autenticazione."
+	/>
+	<LinkCard
+		href="https://www.olets.dev/posts/comparing-docs-site-builders-vuepress-vs-starlight/"
+		title="Confronto tra generatori di siti di documentazione: VuePress vs Starlight"
+		description="Come si confrontano i due framework?"
+	/>
+</CardGrid>
+
+## Ricette e guide
+
+Le ricette sono tipicamente brevi guide pratiche che guidano il lettore attraverso il completamento di un esempio funzionante per uno specifico compito. Le ricette sono un ottimo modo per aggiungere nuove funzionalità o comportamenti al tuo progetto Starlight seguendo istruzioni passo passo! Altre guide potrebbero spiegare concetti specifici, come l'uso di immagini o come si lavora con MDX.
+
+Esplora i contenuti prodotti dalla community e gestiti dagli utenti di Starlight:
+
+<CardGrid>
+  <LinkCard
+    href="https://www.webpro.nl/scraps/versioned-docs-with-starlight-and-vercel"
+    title="Documentazione versionata con Starlight e Vercel"
+    description="Una guida all'implementazione di versioni separate della documentazione per ogni versione principale di un progetto"
+  />
+  <LinkCard
+    href="https://hideoo.dev/notes/starlight-heading-links"
+    title="Aggiungi link agli heading di Starlight"
+    description="Una guida all'uso di un plugin rehype per condividere link a sezioni specifiche della tua documentazione"
+  />
+  <LinkCard
+    href="https://blog.otterlord.dev/posts/starlight-sponsors/"
+    title="Aggiungi sponsor al tuo sito Starlight"
+    description="Una guida per implementare un componente sponsor personalizzato nella sidebar della tua documentazione"
+  />
+  <LinkCard
+    href="https://hideoo.dev/notes/starlight-og-images"
+    title="Aggiungi immagini Open Graph a Starlight"
+    description="Una guida alla generazione di immagini social e dei tag meta corrispondenti per le tue pagine"
+  />
+  <LinkCard
+    href="https://hideoo.dev/notes/starlight-third-party-icon-sets"
+    title="Usa set di icone di terze parti in Starlight"
+    description="Una guida all'uso di unplugin-icons per espandere la selezione di icone disponibili per Starlight"
+  />
+  <LinkCard
+    href="https://hideoo.dev/notes/starlight-custom-html-head"
+    title="Modifica l'HTML head delle pagine di Starlight"
+    description="Scopri come aggiungere contenuti comuni per l'head come analytics web, font e script"
+  />
+  <LinkCard
+    href="https://dev.to/mrrobot/publishing-documentation-with-astro-starlight-691"
+    title="Pubblicare documentazione con Astro Starlight"
+    description="Come iniziare con la documentazione Starlight"
+  />
+
+</CardGrid>
+
+## Contenuti video
+
+Scopri video e canali con contenuti Starlight, incluse live streaming e contenuti educativi.
+
+import YouTubeGrid from '~/components/youtube-grid.astro';
+
+### Video di Astro
+
+<YouTubeGrid
+	videos={[
+		{
+			href: 'https://www.youtube.com/watch?v=5u0Ds7wzUeI',
+			title: 'Starlight by Astro',
+			description: 'Guarda il video di lancio ufficiale di Starlight',
+		},
+		{
+			href: 'https://www.youtube.com/shorts/zjOWezSzd18',
+			title: '🌟 SUB 1 MINUTE RUN',
+			description:
+				'Guarda Ben lanciare un nuovo sito Starlight in meno di un minuto!',
+		},
+	]}
+/>
+
+### Video e live stream della community
+
+<YouTubeGrid
+	videos={[
+		{
+			href: 'https://www.youtube.com/watch?v=sF6UcV3moZg',
+			title: 'Building docs with Starlight and Astro',
+			description:
+				'Guarda Chris e Alex che si sporcano le mani con Starlight su Code with CodingCat.dev',
+		},
+		{
+			href: 'https://www.youtube.com/watch?v=sWkkHbwDeQc',
+			title: 'Astro Starlight',
+			description: 'Introduzione a Starlight in meno di un minuto.',
+		},
+		{
+			href: 'https://www.youtube.com/watch?v=-Ki-1E5gNCk',
+			title: 'Astro Starlight Documentation Template (build custom app docs!)',
+			description: 'Crea un nuovo sito Starlight in circa 5 minuti',
+		},
+	]}
+/>

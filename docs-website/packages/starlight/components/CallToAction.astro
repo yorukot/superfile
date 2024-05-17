@@ -1,0 +1,51 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+import Icon from '../user-components/Icon.astro';
+import type { Icons } from './Icons';
+
+interface Props {
+	variant: 'primary' | 'secondary' | 'minimal';
+	link: string;
+	icon?: undefined | { type: 'icon'; name: keyof typeof Icons } | { type: 'raw'; html: string };
+	attrs?: Omit<HTMLAttributes<'a'>, 'href'> | undefined;
+}
+
+const { link, variant, icon } = Astro.props;
+const { class: customClass, ...attrs } = Astro.props.attrs || {};
+---
+
+<a class:list={['sl-flex action', variant, customClass]} href={link} {...attrs}>
+	<slot />
+	{icon?.type === 'icon' && <Icon name={icon.name} size="1.5rem" />}
+	{icon?.type === 'raw' && <Fragment set:html={icon.html} />}
+</a>
+
+<style>
+	.action {
+		gap: 0.5em;
+		align-items: center;
+		border-radius: 999rem;
+		padding: 0.5rem 1.125rem;
+		color: var(--sl-color-white);
+		line-height: 1.1875;
+		text-decoration: none;
+		font-size: var(--sl-text-sm);
+	}
+	.action.primary {
+		background: var(--sl-color-text-accent);
+		color: var(--sl-color-black);
+	}
+	.action.secondary {
+		border: 1px solid;
+	}
+	.action.minimal {
+		padding-inline: 0;
+	}
+
+	@media (min-width: 50rem) {
+		.action {
+			font-size: var(--sl-text-base);
+			padding: 1rem 1.25rem;
+		}
+	}
+</style>

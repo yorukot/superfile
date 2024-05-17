@@ -1,0 +1,9 @@
+{
+  "name": "@e2e/basics",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "@astrojs/starlight": "workspace:*",
+    "astro": "^4.3.5"
+  }
+}

@@ -1,0 +1,13 @@
+:root {
+	--astro-code-color-text: var(--sl-color-white);
+	--astro-code-color-background: var(--sl-color-gray-6);
+	--astro-code-token-constant: var(--sl-color-blue-high);
+	--astro-code-token-string: var(--sl-color-green-high);
+	--astro-code-token-comment: var(--sl-color-gray-2);
+	--astro-code-token-keyword: var(--sl-color-purple-high);
+	--astro-code-token-parameter: var(--sl-color-red-high);
+	--astro-code-token-function: var(--sl-color-red-high);
+	--astro-code-token-string-expression: var(--sl-color-green-high);
+	--astro-code-token-punctuation: var(--sl-color-gray-2);
+	--astro-code-token-link: var(--sl-color-blue-high);
+}

@@ -1,0 +1,13 @@
+---
+import type { Props } from '../props';
+
+import MobileMenuFooter from 'virtual:starlight/components/MobileMenuFooter';
+import SidebarSublist from './SidebarSublist.astro';
+
+const { sidebar } = Astro.props;
+---
+
+<SidebarSublist sublist={sidebar} />
+<div class="md:sl-hidden">
+	<MobileMenuFooter {...Astro.props} />
+</div>

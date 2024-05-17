@@ -1,0 +1,141 @@
+---
+title: 开始使用
+description: 了解如何使用 Astro 的 Starlight 开始构建下一个文档站点。
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+Starlight 是一个基于 [Astro](https://astro.build) 框架构建的全功能文档主题。
+这个指南将帮助你开始一个新项目。
+查看[手动配置](/zh-cn/manual-setup/)以将 Starlight 添加到现有的 Astro 项目中。
+
+## 快速入门
+
+### 创建一个新项目
+
+在你的终端中运行以下命令来创建一个新的 Astro + Starlight 项目：
+
+<Tabs syncKey="pkg">
+<TabItem label="npm">
+
+```sh
+npm create astro@latest -- --template starlight
+```
+
+</TabItem>
+<TabItem label="pnpm">
+
+```sh
+pnpm create astro --template starlight
+```
+
+</TabItem>
+<TabItem label="Yarn">
+
+```sh
+yarn create astro --template starlight
+```
+
+</TabItem>
+</Tabs>
+
+这将创建一个新的[项目目录](/zh-cn/guides/project-structure/)，其中包含你网站所需的所有文件和配置。
+
+:::tip[查看实际效果]
+在浏览器中尝试 Starlight：
+[在 StackBlitz 上打开模板](https://stackblitz.com/github/withastro/starlight/tree/main/examples/basics)。
+:::
+
+### 启动开发服务器
+
+在本地工作时，[Astro 的开发服务器](https://docs.astro.build/zh-cn/reference/cli-reference/#astro-dev)使你能预览你的工作，并在你进行更改时自动刷新你的浏览器。
+
+在你的项目目录中，运行以下命令来启动开发服务器：
+
+<Tabs syncKey="pkg">
+<TabItem label="npm">
+
+```sh
+npm run dev
+```
+
+</TabItem>
+<TabItem label="pnpm">
+
+```sh
+pnpm dev
+```
+
+</TabItem>
+<TabItem label="Yarn">
+
+```sh
+yarn dev
+```
+
+</TabItem>
+</Tabs>
+
+这将在你的终端上记录一个包含本地预览网址的消息。
+打开这个网址开始浏览你的网站。
+
+### 添加内容
+
+Starlight 已经准备好让你添加新内容或导入你现有的文件！
+
+通过在 `src/content/docs/` 目录中创建 Markdown 文件来为你的网站添加新页面。
+
+在 [“页面”](/zh-cn/guides/pages/) 指南中了解有关基于文件的路由和对 MDX 和 Markdoc 文件的支持的更多信息。
+
+### 下一步
+
+- **配置：** 在[自定义 Starlight](/zh-cn/guides/customization/)中了解常见选项。
+- **导航：** 使用[侧边栏导航](/zh-cn/guides/sidebar/)指南设置你的侧边栏。
+- **组件：** 在[组件](/zh-cn/guides/components/)指南中发现内置的卡片、标签页等更多内容。
+- **部署：** 使用 Astro 文档中的[部署你的 Astro 站点](https://docs.astro.build/zh-cn/guides/deploy/)指南发布你的站点。
+
+## 更新 Starlight
+
+:::tip[提示]
+由于 Starlight 是 beta 软件，所以会经常更新和改进。
+
+请务必定期更新 Starlight！
+:::
+
+Starlight 是一个 Astro 集成。你可以通过在终端中运行以下命令来更新它和其他 Astro 软件包：
+
+<Tabs syncKey="pkg">
+<TabItem label="npm">
+
+```sh
+npx @astrojs/upgrade
+```
+
+</TabItem>
+<TabItem label="pnpm">
+
+```sh
+pnpm dlx @astrojs/upgrade
+```
+
+</TabItem>
+<TabItem label="Yarn">
+
+```sh
+yarn dlx @astrojs/upgrade
+```
+
+</TabItem>
+</Tabs>
+
+查阅 [Starlight 更新日志](https://github.com/withastro/starlight/blob/main/packages/starlight/CHANGELOG.md)中每个版本的变更列表。
+
+## Starlight 故障排除
+
+本站点的参考部分提供了 Starlight [项目配置](/zh-cn/reference/configuration/)和[单个页面 frontmatter 配置](/zh-cn/reference/frontmatter/)信息。使用这些页面来确保你的 Starlight 网站已正确配置和运行。
+请参阅侧边栏中的指南列表，以获取有关添加内容和自定义 Starlight 网站的帮助。
+
+如果你在这些文档中找不到答案，请访问[完整的 Astro 文档](https://docs.astro.build/zh-cn/) 以获取完整的 Astro 文档。
+你的问题可能是通过了解 Starlight 主题下 Astro 的工作原理来解决的。
+
+你也可以检查任何已知的 [GitHub 上的 Starlight issues](https://github.com/withastro/starlight/issues)，并在 [Astro Discord](https://astro.build/chat/) 上从我们活跃的、友好的社区中获得帮助！在我们的 `#support` 论坛中发布带有 “starlight” 标签的问题，或者访问我们专门的 `#starlight` 频道来讨论当前的开发和更多内容！

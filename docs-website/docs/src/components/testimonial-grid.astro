@@ -1,0 +1,39 @@
+---
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<div class="testimonial-wrapper not-content" data-pagefind-ignore>
+	<h2 class="testimonial-grid-title">{title}</h2>
+	<ul class="testimonial-grid">
+		<slot />
+	</ul>
+</div>
+
+<style>
+	.testimonial-wrapper {
+		margin-block: 7rem 2.5rem !important;
+		font-size: clamp(var(--sl-text-sm), calc(0.5rem + 1vw), var(--sl-text-body));
+	}
+	.testimonial-grid-title {
+		text-align: center;
+		font-size: var(--sl-text-h3);
+		font-weight: 600;
+		color: var(--sl-color-white);
+		line-height: var(--sl-line-height-headings);
+	}
+	.testimonial-grid {
+		margin-top: 2.5rem;
+		display: grid;
+		gap: 5em;
+		padding-inline-start: 0;
+	}
+	@media (min-width: 50rem) {
+		.testimonial-grid {
+			grid-template-columns: 1fr 1fr;
+		}
+	}
+</style>

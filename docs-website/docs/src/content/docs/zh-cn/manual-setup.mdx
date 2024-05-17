@@ -1,0 +1,129 @@
+---
+title: 手动配置
+description: 了解如何手动配置 Starlight 以将其添加到现有的 Astro 项目中。
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+创建新的 Starlight 站点的最快方法是使用 `create astro`，如[入门指南](/zh-cn/getting-started/#创建一个新项目)所示。
+如果你想将 Starlight 添加到现有的 Astro 项目中，本指南将解释如何操作。
+
+## 设置 Starlight
+
+要遵循本指南，你需要一个现有的 Astro 项目。
+
+### 添加 Starlight 集成
+
+Starlight 是一个 [Astro 集成](https://docs.astro.build/zh-cn/guides/integrations-guide/)。通过在项目的根目录中运行 `astro add` 命令将其添加到你的站点中：
+
+<Tabs>
+    <TabItem label="npm">
+        ```sh
+        npx astro add starlight
+        ```
+
+    </TabItem>
+    <TabItem label="pnpm">
+        ```sh
+        pnpm astro add starlight
+        ```
+    </TabItem>
+    <TabItem label="Yarn">
+        ```sh
+        yarn astro add starlight
+        ```
+    </TabItem>
+
+</Tabs>
+
+这将安装所需的依赖项，并将 Starlight 添加到 Astro 配置文件中的 `integrations` 数组中。
+
+### 配置集成
+
+Starlight 集成在 `astro.config.mjs` 文件中配置。
+
+添加一个 `title` 以开始：
+
+```js ins={8}
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: '我的令人愉悦的文档网站',
+		}),
+	],
+});
+```
+
+在 [Starlight 配置参考](/zh-cn/reference/configuration/) 中查找所有可用选项。
+
+### 配置内容集合
+
+Starlight 是建立在 Astro 的[内容集合](https://docs.astro.build/zh-cn/guides/content-collections/)之上的，这些集合在 `src/content/config.ts` 文件中配置。
+
+创建或更新内容配置文件，添加一个使用 Starlight 的 `docsSchema` 的 `docs` 集合：
+
+```js ins={3,6}
+// src/content/config.ts
+import { defineCollection } from 'astro:content';
+import { docsSchema } from '@astrojs/starlight/schema';
+
+export const collections = {
+	docs: defineCollection({ schema: docsSchema() }),
+};
+```
+
+### 添加内容
+
+现在 Starlight 已经配置好了，是时候添加一些内容了！
+
+创建一个 `src/content/docs/` 目录，并从添加一个 `index.md` 文件开始。
+这将是你的新站点的首页：
+
+```md
+---
+# src/content/docs/index.md
+title: 我的文档
+description: 通过 Starlight 构建的文档网站，了解有关我的项目的更多信息。
+---
+
+欢迎来到我的项目！
+```
+
+Starlight 使用基于文件的路由，这意味着 `src/content/docs/` 中的每个 Markdown、MDX 或 Markdoc 文件都将变成你站点上的一个页面。前置元数据（上面示例中的 `title` 和 `description` 字段）可以更改每个页面的显示方式。在 [frontmatter 指南](/zh-cn/reference/frontmatter/) 中查看所有可用选项。
+
+## 现有站点的提示
+
+如果你有一个现有的 Astro 项目，你可以使用 Starlight 快速地为你的站点添加一个文档部分。
+
+### 在子路径中使用 Starlight
+
+要在子路径中添加所有 Starlight 页面，请将所有文档内容放在 `src/content/docs/` 的子目录中。
+
+例如，如果 Starlight 页面都应该以 `/guides/` 开头，请将内容添加到 `src/content/docs/guides/` 目录中：
+
+import { FileTree } from '@astrojs/starlight/components';
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - **guides/**
+        - guide.md
+        - index.md
+  - pages/
+- astro.config.mjs
+
+</FileTree>
+
+在将来，我们计划更好地支持这种用例，以避免在 `src/content/docs/` 中需要额外的嵌套目录。
+
+### 结合 SSR 使用 Starlight
+
+你可以通过按照 Astro 文档中的 [“按需渲染适配器”](https://docs.astro.build/zh-cn/guides/server-side-rendering/) 指南，在你的项目中使用 Starlight 与自定义的按需渲染页面一起工作。
+
+目前，Starlight 生成的文档页面始终是预渲染的，无论你的项目的输出模式如何。我们希望能够尽快支持 Starlight 页面的按需渲染。

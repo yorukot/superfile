@@ -1,0 +1,68 @@
+---
+import { Icon } from '@astrojs/starlight/components';
+import { Icons } from '../../../packages/starlight/components/Icons';
+
+const icons = Object.keys(Icons) as (keyof typeof Icons)[];
+---
+
+<div class="icons-grid">
+	{
+		icons.map((icon) => {
+			return (
+				<button class="icon-preview" aria-label={`Copy ${icon} icon to clipboard`} data-name={icon}>
+					<Icon name={icon} size="1.5rem" />
+					<span aria-live="polite">{icon}</span>
+				</button>
+			);
+		})
+	}
+</div>
+
+<script>
+	const icons = document.querySelectorAll<HTMLButtonElement>('.icon-preview');
+	icons.forEach((icon) => {
+		icon.addEventListener('click', () => {
+			const iconName = icon.dataset.name!;
+			const copiedValue = `<Icon name="${iconName}" />`;
+			navigator.clipboard.writeText(copiedValue);
+
+			const iconLabel = icon.querySelector('[aria-live]');
+			if (iconLabel) {
+				iconLabel.textContent = 'Copied!';
+				setTimeout(() => {
+					iconLabel.textContent = iconName;
+				}, 1000);
+			}
+		});
+	});
+</script>
+
+<style>
+	.icons-grid {
+		display: grid;
+		gap: 1rem;
+		grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+	}
+
+	.icons-grid .icon-preview {
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+		border: 1px solid var(--sl-color-gray-5);
+		display: flex;
+		flex-direction: column;
+		font-size: var(--sl-text-sm);
+		gap: 0.25rem;
+		margin: 0;
+		overflow-wrap: anywhere;
+		padding: 0.75rem;
+		background: none;
+	}
+
+	.icon-preview:hover,
+	.icon-preview:focus {
+		cursor: pointer;
+		border: 1px solid var(--sl-color-gray-3);
+		background: var(--sl-color-gray-7, var(--sl-color-gray-6));
+	}
+</style>

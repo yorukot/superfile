@@ -1,0 +1,48 @@
+---
+title: ディレクトリ構成
+description: Starlightプロジェクトでファイルをどのように配置するかについて学びます。
+---
+
+このガイドでは、Starlightプロジェクトの構成と、プロジェクト内のさまざまなファイルの役割について説明します。
+
+Starlightプロジェクトは、基本的に他のAstroプロジェクトと同じファイル・ディレクトリ構成に従います。詳細については、[Astroのディレクトリ構成のドキュメント](https://docs.astro.build/ja/core-concepts/project-structure/)を参照してください。
+
+## ファイルとディレクトリ
+
+- `astro.config.mjs` — Astroの設定ファイルで、ここにStarlightのインテグレーションや設定を記述します。
+- `src/content/config.ts` — コンテンツコレクションの設定ファイルで、Starlightのフロントマタースキーマをプロジェクトに追加します。
+- `src/content/docs/` — コンテンツのファイルが置かれます。Starlightは、このディレクトリ内の各`.md`、`.mdx`、`.mdoc`ファイルを、サイトのページへと変換します。
+- `src/content/i18n/`（任意） — [国際化](/ja/guides/i18n/)をサポートするための翻訳データが置かれます。
+- `src/` — プロジェクトの他のソースコードやファイル（コンポーネント、スタイル、画像など）が置かれます。
+- `public/` — Astroによって処理されない静的アセット（フォント、ファビコン、PDFなど）が置かれます。
+
+## プロジェクトの中身の例
+
+Starlightプロジェクトのディレクトリは、次のようになります。
+
+import { FileTree } from '@astrojs/starlight/components';
+
+<FileTree>
+
+- public/
+  - favicon.svg
+- src/
+  - assets/
+    - logo.svg
+    - screenshot.jpg
+  - components/
+    - CustomButton.astro
+    - InteractiveWidget.jsx
+  - content/
+    - docs/
+      - guides/
+        - 01-getting-started.md
+        - 02-advanced.md
+      - index.mdx
+    - config.ts
+  - env.d.ts
+- astro.config.mjs
+- package.json
+- tsconfig.json
+
+</FileTree>

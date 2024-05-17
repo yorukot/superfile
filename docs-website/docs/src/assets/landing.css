@@ -1,0 +1,27 @@
+:root {
+	--purple-hsl: 255, 60%, 60%;
+	--overlay-blurple: hsla(var(--purple-hsl), 0.2);
+}
+
+:root[data-theme='light'] {
+	--purple-hsl: 255, 85%, 65%;
+}
+
+[data-has-hero] .page {
+	background:
+		linear-gradient(215deg, var(--overlay-blurple), transparent 40%),
+		radial-gradient(var(--overlay-blurple), transparent 40%) no-repeat -60vw -40vh / 105vw 200vh,
+		radial-gradient(var(--overlay-blurple), transparent 65%) no-repeat 50% calc(100% + 20rem) /
+			60rem 30rem;
+}
+
+[data-has-hero] header {
+	border-bottom: 1px solid transparent;
+	background-color: transparent;
+	-webkit-backdrop-filter: blur(16px);
+	backdrop-filter: blur(16px);
+}
+
+[data-has-hero] .hero > img {
+	filter: drop-shadow(0 0 3rem var(--overlay-blurple));
+}

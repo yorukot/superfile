@@ -1,0 +1,542 @@
+---
+title: 設定方法
+description: Starlightがサポートするすべての設定オプションの概要。
+---
+
+## `starlight`インテグレーションの設定
+
+Starlightは[Astro](https://astro.build)ウェブフレームワークの上に構築されたインテグレーションです。`astro.config.mjs`設定ファイル内でプロジェクトの設定をおこないます。
+
+```js
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: '私の楽しいドキュメントサイト',
+		}),
+	],
+});
+```
+
+以下のオプションを`starlight`インテグレーションに設定できます。
+
+### `title`（必須）
+
+**type:** `string`
+
+ウェブサイトのタイトルを設定します。メタデータとブラウザのタブのタイトルに使用されます。
+
+### `description`
+
+**type:** `string`
+
+ウェブサイトの説明を設定します。`description`がページのフロントマターに設定されていない場合、`<meta name="description">`タグで検索エンジンに共有するメタデータとして使用されます。
+
+### `logo`
+
+**type:** [`LogoConfig`](#logoconfig)
+
+ナビゲーションバーにサイトタイトルと並べて、またはその代わりとして表示するロゴ画像を設定します。単一の`src`プロパティを設定するか、`light`と`dark`用に別々の画像ソースを設定できます。
+
+```js
+starlight({
+	logo: {
+		src: './src/assets/my-logo.svg',
+	},
+});
+```
+
+#### `LogoConfig`
+
+```ts
+type LogoConfig = { alt?: string; replacesTitle?: boolean } & (
+	| { src: string }
+	| { light: string; dark: string }
+);
+```
+
+### `tableOfContents`
+
+**type:** `false | { minHeadingLevel?: number; maxHeadingLevel?: number; }`  
+**default:** `{ minHeadingLevel: 2; maxHeadingLevel: 3; }`
+
+各ページの右側に表示される目次を設定します。デフォルトでは、`<h2>`と`<h3>`の見出しがこの目次に含まれます。
+
+### `editLink`
+
+**type:** `{ baseUrl: string }`
+
+`editLink.baseUrl`を設定すると、「ページを編集」リンクが有効になります。最終的なリンクは、`editLink.baseUrl` + 現在のページのパスになります。たとえば、GitHubの`withastro/starlight`リポジトリのページを編集するには以下のようにします。
+
+```js
+starlight({
+	editLink: {
+		baseUrl: 'https://github.com/withastro/starlight/edit/main/',
+	},
+});
+```
+
+この設定により、`/introduction`ページには`https://github.com/withastro/starlight/edit/main/src/content/docs/introduction.md`を指す編集リンクが表示されます。
+
+### `sidebar`
+
+**type:** [`SidebarItem[]`](#sidebaritem)
+
+サイトのサイドバーのナビゲーション項目を設定します。
+
+サイドバーはリンクとリンクのグループの配列です。各項目は、`label`と以下のプロパティのいずれかが必要です。
+
+- `link` — 特定のURL、たとえば`'/home'`や`'https://example.com'`などへの単一のリンク。
+
+- `items` — サイドバーの複数のリンクとサブグループを含む配列。
+
+- `autogenerate` — リンクのグループを自動的に生成するために、ドキュメントのディレクトリを指定するオブジェクト。
+
+```js
+starlight({
+	sidebar: [
+		// 「ホーム」というラベルのついた単一のリンク。
+		{ label: 'ホーム', link: '/' },
+		// 2つのリンクを含む、「ここから始める」というラベルのついたグループ。
+		{
+			label: 'ここから始める',
+			items: [
+				{ label: 'はじめに', link: '/intro' },
+				{ label: '次のステップ', link: '/next-steps' },
+			],
+		},
+		// referenceディレクトリのすべてのページにリンクするグループ。
+		{
+			label: 'リファレンス',
+			autogenerate: { directory: 'reference' },
+		},
+	],
+});
+```
+
+#### 並び順
+
+自動生成されたサイドバーグループは、ファイル名のアルファベット順に並べ替えられます。たとえば、`astro.md`から生成されたページは、`starlight.md`というページの上に表示されます。
+
+#### グループの折りたたみ
+
+リンクのグループはデフォルトで展開されます。`collapsed`プロパティを`true`に設定して、この動作を変更できます。
+
+自動生成されたサブグループは、デフォルトでは親グループの`collapsed`プロパティに従います。`autogenerate.collapsed`プロパティを設定して、これを上書きできます。
+
+```js {5,16}
+sidebar: [
+  // 折りたたまれたリンクのグループ。
+  {
+    label: '折りたたまれたリンク',
+    collapsed: true,
+    items: [
+      { label: 'はじめに', link: '/intro' },
+      { label: '次のステップ', link: '/next-steps' },
+    ],
+  },
+  // 自動生成される折りたたまれたサブグループを含む展開されたグループ。
+  {
+    label: '参照',
+    autogenerate: {
+      directory: 'reference',
+      collapsed: true,
+    },
+  },
+],
+```
+
+#### ラベルの翻訳
+
+多言語対応が必要なサイトの場合、各項目の`label`はデフォルトのロケールのものとみなされます。サポート対象の言語のラベルを提供するには、`translations`プロパティを設定します。
+
+```js {5,9,14}
+sidebar: [
+  // ブラジルポルトガル語に翻訳されたラベルをもつサイドバーの例。
+  {
+    label: 'ここから始める',
+    translations: { 'pt-BR': 'Comece Aqui' },
+    items: [
+      {
+        label: '開始する',
+        translations: { 'pt-BR': 'Introdução' },
+        link: '/getting-started',
+      },
+      {
+        label: 'プロジェクトの構造',
+        translations: { 'pt-BR': 'Estrutura de Projetos' },
+        link: '/structure',
+      },
+    ],
+  },
+],
+```
+
+#### `SidebarItem`
+
+```ts
+type SidebarItem = {
+	label: string;
+	translations?: Record<string, string>;
+	badge?: string | BadgeConfig;
+} & (
+	| {
+			link: string;
+			attrs?: Record<string, string | number | boolean | undefined>;
+	  }
+	| { items: SidebarItem[]; collapsed?: boolean }
+	| {
+			autogenerate: { directory: string; collapsed?: boolean };
+			collapsed?: boolean;
+	  }
+);
+```
+
+#### `BadgeConfig`
+
+```ts
+interface BadgeConfig {
+	text: string;
+	variant: 'note' | 'tip' | 'caution' | 'danger' | 'success' | 'default';
+}
+```
+
+### `locales`
+
+**type:** <code>\{ \[dir: string\]: [LocaleConfig](#localeconfig) \}</code>
+
+[サイトの国際化（i18n）をおこなうには](/ja/guides/i18n/)、サポート対象の`locales`を設定します。
+
+各エントリは、その言語のファイルが保存されているディレクトリ名をキーとして使用する必要があります。
+
+```js
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: 'My Site',
+			// このサイトのデフォルト言語を英語に設定します。
+			defaultLocale: 'en',
+			locales: {
+				// 英語のドキュメントは`src/content/docs/en/`にあります。
+				en: {
+					label: 'English',
+				},
+				// 簡体字中国語のドキュメントは`src/content/docs/zh-cn/`にあります。
+				'zh-cn': {
+					label: '简体中文',
+					lang: 'zh-CN',
+				},
+				// アラビア語のドキュメントは`src/content/docs/ar/`にあります。
+				ar: {
+					label: 'العربية',
+					dir: 'rtl',
+				},
+			},
+		}),
+	],
+});
+```
+
+#### `LocaleConfig`
+
+```ts
+interface LocaleConfig {
+	label: string;
+	lang?: string;
+	dir?: 'ltr' | 'rtl';
+}
+```
+
+各ロケールに対し以下のオプションを設定できます。
+
+##### `label`（必須）
+
+**type:** `string`
+
+たとえば言語の切替機能などでユーザーに表示する、この言語を表わすラベルです。ほとんどの場合、このラベルは、その言語を使用するユーザーが読みたいと思う言語の名前にすることが望ましいでしょう。たとえば、`"English"`、`"العربية"`、`"简体中文"`などです。
+
+##### `lang`
+
+**type:** `string`
+
+この言語のBCP-47タグです。たとえば`"en"`、`"ar"`、`"zh-CN"`などです。設定されていない場合、デフォルトでは言語のディレクトリ名が使用されます。`"pt-BR"`や`"en-US"`のように地域タグが含まれる言語タグは、その地域専用の翻訳が見つからない場合、ベース言語の組み込みUI翻訳が使用されます。
+
+##### `dir`
+
+**type:** `'ltr' | 'rtl'`
+
+この言語を記述する方向です。左から右へ（デフォルト）は`"ltr"`を、右から左へは`"rtl"`を設定します。
+
+#### ルートロケール
+
+`root`ロケールを設定することで、`/lang/`ディレクトリなしでデフォルト言語を提供できます。
+
+```js {3-6}
+starlight({
+	locales: {
+		root: {
+			label: 'English',
+			lang: 'en',
+		},
+		fr: {
+			label: 'Français',
+		},
+	},
+});
+```
+
+この設定により、たとえば`/getting-started/`を英語のルートとし、対応するフランス語のページを`/fr/getting-started/`として提供することができます。
+
+### `defaultLocale`
+
+**type:** `string`
+
+このサイトのデフォルト言語を設定します。この値は、[`locales`](#locales)オブジェクトのキーのいずれかと一致する必要があります。（デフォルト言語が[ルートロケール](#ルートロケール)の場合は、この設定をスキップできます。）
+
+翻訳がない場合には、デフォルトロケールがフォールバックコンテンツとして使用されます。
+
+### `social`
+
+import SocialLinksType from '~/components/social-links-type.astro';
+
+**type:** <SocialLinksType />
+
+このサイトのソーシャルメディアアカウントに関する任意の項目です。これらのいずれかを追加すると、サイトヘッダーにアイコンリンクとして表示されます。
+
+```js
+starlight({
+	social: {
+		codeberg: 'https://codeberg.org/knut/examples',
+		discord: 'https://astro.build/chat',
+		github: 'https://github.com/withastro/starlight',
+		gitlab: 'https://gitlab.com/delucis',
+		linkedin: 'https://www.linkedin.com/company/astroinc',
+		mastodon: 'https://m.webtoo.ls/@astro',
+		threads: 'https://www.threads.net/@nmoodev',
+		twitch: 'https://www.twitch.tv/bholmesdev',
+		twitter: 'https://twitter.com/astrodotbuild',
+		'x.com': 'https://x.com/astrodotbuild',
+		youtube: 'https://youtube.com/@astrodotbuild',
+	},
+});
+```
+
+### `customCss`
+
+**type:** `string[]`
+
+Starlightサイトの見た目をカスタマイズするためのCSSファイルを設定します。
+
+プロジェクトのルートからの相対パスで指定したローカルのCSSファイル（`'./src/custom.css'`など）と、npmモジュールとしてインストールしたCSS（`'@fontsource/roboto'`など）に対応しています。
+
+```js
+starlight({
+	customCss: ['./src/custom-styles.css', '@fontsource/roboto'],
+});
+```
+
+### `expressiveCode`
+
+**type:** `StarlightExpressiveCodeOptions | boolean`  
+**default:** `true`
+
+Starlightは、[Expressive Code](https://github.com/expressive-code/expressive-code/tree/main/packages/astro-expressive-code)を使用して、コードブロックのレンダリングやコード例の一部のハイライト、コードブロックへのファイル名の追加などをおこなっています。MarkdownやMDXのコンテンツでExpressive Code構文を使用する方法については、[「コードブロック」ガイド](/ja/guides/authoring-content/#コード)を参照してください。
+
+[Expressive Code標準の設定オプション](https://github.com/expressive-code/expressive-code/blob/main/packages/astro-expressive-code/README.md#configuration)はすべて使用できます。また、Starlightの`expressiveCode`オプションを設定することで、Starlight固有のプロパティも使用できます。たとえば、Expressive Codeの`styleOverrides`オプションを設定して、デフォルトのCSSを上書きできます。これにより、コードブロックに角丸を付けるなどのカスタマイズが可能になります。
+
+```js ins={2-4}
+starlight({
+	expressiveCode: {
+		styleOverrides: { borderRadius: '0.5rem' },
+	},
+});
+```
+
+Expressive Codeを無効にするには、Starlightの設定で`expressiveCode: false`を設定します。
+
+```js ins={2}
+starlight({
+	expressiveCode: false,
+});
+```
+
+標準のExpressive Codeオプションに加えて、`expressiveCode`の設定に以下のStarlight固有のプロパティを追加することで、コードブロックのテーマの動作をさらにカスタマイズできます。
+
+#### `themes`
+
+**type:** `Array<string | ThemeObject | ExpressiveCodeTheme>`  
+**default:** `['starlight-dark', 'starlight-light']`
+
+コードブロックのスタイルに使用するテーマを設定します。サポートされているテーマのフォーマットの詳細については、[Expressive Codeの`themes`ドキュメント](https://github.com/expressive-code/expressive-code/blob/main/packages/astro-expressive-code/README.md#themes)を参照してください。
+
+Starlightは、デフォルトでSarah Drasnerの[Night Owlテーマ](https://github.com/sdras/night-owl-vscode-theme)のダークとライトのバリアントを使用します。
+
+ダークテーマとライトテーマを少なくとも1つずつ提供すると、Starlightは自動的にアクティブなコードブロックのテーマを現在のサイトテーマと同期します。この動作は[`useStarlightDarkModeSwitch`](#usestarlightdarkmodeswitch)オプションから設定できます。
+
+#### `useStarlightDarkModeSwitch`
+
+**type:** `boolean`  
+**default:** `true`
+
+`true`の場合、サイトテーマが変更されると、コードブロックは自動的にライトテーマとダークテーマを切り替えます。`false`の場合、複数のテーマの切り替えをおこなうために、手動でCSSを追加する必要があります。
+
+:::note
+`themes`を設定する場合、Starlightのダークモードスイッチが機能するように、ダークテーマとライトテーマを少なくとも1つずつ設定する必要があります。
+:::
+
+#### `useStarlightUiThemeColors`
+
+**type:** `boolean`  
+**default:** `themes`が設定されていない場合は`true`、それ以外の場合は`false`
+
+`true`の場合、コードブロックのUI要素（背景、ボタン、シャドウなど）の色にStarlightのCSS変数が使用され、[サイトのカラーテーマ](/ja/guides/css-and-tailwind/#テーマの設定)と一致させます。`false`の場合、これらの要素には、アクティブなシンタックスハイライトのテーマから提供される色が使用されます。
+
+:::note
+カスタムテーマを使用し、かつこの値を`true`に設定する場合、適切な色のコントラストを確保するために、ダークテーマとライトテーマを少なくとも1つずつ提供する必要があります。
+:::
+
+### `pagefind`
+
+**type:** `boolean`  
+**default:** `true`
+
+Starlightのデフォルトのサイト検索プロバイダである[Pagefind](https://pagefind.app/)を有効にするかどうかを定義します。
+
+`false`に設定すると、Pagefindによるサイトのインデックス作成はおこなわれません。また、デフォルトの検索UIを使用している場合は、これも非表示になります。
+
+### `head`
+
+**type:** [`HeadConfig[]`](#headconfig)
+
+Starlightサイトの`<head>`にカスタムタグを追加します。アナリティクスやその他のサードパーティのスクリプトやリソースを追加するのに便利です。
+
+```js
+starlight({
+	head: [
+		// Fathomのアナリティクススクリプトタグを追加する例。
+		{
+			tag: 'script',
+			attrs: {
+				src: 'https://cdn.usefathom.com/script.js',
+				'data-site': 'MY-FATHOM-ID',
+				defer: true,
+			},
+		},
+	],
+});
+```
+
+`head`のエントリーは直接HTML要素に変換され、Astroの[スクリプト](https://docs.astro.build/ja/guides/client-side-scripts/#スクリプトの処理)や[スタイル](https://docs.astro.build/ja/guides/styling/#astroでのスタイリング)の処理を通過しません。スクリプト、スタイル、または画像などのローカルアセットをインポートする必要がある場合は、[Headコンポーネントをオーバーライド](/ja/guides/overriding-components/#組み込みコンポーネントを再利用する)してください。
+
+#### `HeadConfig`
+
+```ts
+interface HeadConfig {
+	tag: string;
+	attrs?: Record<string, string | boolean | undefined>;
+	content?: string;
+}
+```
+
+### `lastUpdated`
+
+**type:** `boolean`  
+**default:** `false`
+
+フッターにページの最終更新日を表示するかどうかを制御します。
+
+デフォルトでは、この機能はリポジトリのGit履歴に依存しており、[浅いクローン](https://git-scm.com/docs/git-clone/ja#git-clone---depthltdepthgt)を実行する一部のデプロイプラットフォームでは正確にならない場合があります。[フロントマターの`lastUpdated`フィールド](/ja/reference/frontmatter/#lastupdated)を使用して、各ページでこの設定またはGitを基準とした日付を上書きできます。
+
+### `pagination`
+
+**type:** `boolean`  
+**default:** `true`
+
+フッターに前のページと次のページへのリンクを含めるかどうかを定義します。
+
+[`prev`](/ja/reference/frontmatter/#prev)と[`next`](/ja/reference/frontmatter/#next)フロントマターフィールドを使用して、この設定、またはリンクテキストとURLをページごとに上書きできます。
+
+### `favicon`
+
+**type:** `string`  
+**default:** `'/favicon.svg'`
+
+サイトのデフォルトファビコンのパスを設定します。ファビコンは`public/`ディレクトリに配置され、また有効なアイコンファイル（`.ico`、`.gif`、`.jpg`、`.png`、または`.svg`）である必要があります。
+
+```js
+starlight({
+  favicon: '/images/favicon.svg',
+}),
+```
+
+追加のバリアントやフォールバック用のファビコンを設定する必要がある場合は、[`head`オプション](#head)を使用してタグを追加できます。
+
+```js
+starlight({
+	favicon: '/images/favicon.svg',
+	head: [
+		// Safari用にICOファビコンのフォールバックを追加します。
+		{
+			tag: 'link',
+			attrs: {
+				rel: 'icon',
+				href: '/images/favicon.ico',
+				sizes: '32x32',
+			},
+		},
+	],
+});
+```
+
+### `titleDelimiter`
+
+**type:** `string`  
+**default:** `'|'`
+
+ブラウザのタブに表示される、ページの`<title>`タグ内のページタイトルとサイトタイトルの間の区切り文字を設定します。
+
+デフォルトでは、すべてのページの`<title>`は`ページタイトル | サイトタイトル`となります。たとえば、このページのタイトルは「設定方法」であり、このサイトのタイトルは「Starlight」なので、このページの`<title>`は「設定方法 | Starlight」となります。
+
+### `disable404Route`
+
+**type:** `boolean`  
+**default:** `false`
+
+Starlightのデフォルトの[404ページ](https://docs.astro.build/ja/core-concepts/astro-pages/#カスタム404エラーページ)を無効にします。プロジェクトでカスタムの`src/pages/404.astro`ルートを使用するには、このオプションを`true`に設定します。
+
+### `components`
+
+**type:** `Record<string, string>`
+
+コンポーネントへのパスを指定して、Starlightのデフォルトの実装をオーバーライドします。
+
+```js
+starlight({
+	components: {
+		SocialLinks: './src/components/MySocialLinks.astro',
+	},
+});
+```
+
+オーバーライド可能なすべてのコンポーネントの詳細については、[オーバーライドリファレンス](/ja/reference/overrides/)を参照してください。
+
+### `plugins`
+
+**type:** [`StarlightPlugin[]`](/ja/reference/plugins/#api早見表)
+
+Starlightをカスタムプラグインにより拡張します。プラグインは、Starlightの機能を変更または追加するために、プロジェクトに変更を適用します。
+
+利用可能なプラグインの一覧については、[プラグインショーケース](/ja/resources/plugins/)を参照してください。
+
+```js
+starlight({
+	plugins: [starlightPlugin()],
+});
+```
+
+独自のプラグインを作成する方法の詳細については、[プラグインリファレンス](/ja/reference/plugins/)を参照してください。

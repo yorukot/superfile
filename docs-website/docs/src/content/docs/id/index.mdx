@@ -1,0 +1,49 @@
+---
+title: Starlight 🌟 Membangun website dokumentasi dengan Astro
+description: Starlight membantu membangun website dokumentasi yang menawan dan berperforma tinggi dengan Astro.
+template: splash
+hero:
+  title: Buat dokumentasi yang bersinar dengan Starlight
+  tagline: Semua yang Anda butuhkan untuk membangun website dokumentasi yang luar biasa. Cepat, ramah pengguna, dan sangat mudah digunakan.
+  image:
+    file: ~/assets/hero-star.webp
+  actions:
+    - text: Memulai
+      icon: right-arrow
+      variant: primary
+      link: /id/getting-started/
+    - text: Lihat di GitHub
+      icon: external
+      link: https://github.com/withastro/starlight
+---
+
+import { CardGrid, Card } from '@astrojs/starlight/components';
+import AboutAstro from '~/components/about-astro.astro';
+
+<CardGrid stagger>
+	<Card title="Dokumentasi yang menawan" icon="open-book">
+		Sudah termasuk: Navigasi website, pencarian, terjemahan, SEO, tipografi yang
+		mudah dibaca, _code highlighting_, mode gelap, dan masih banyak lagi.
+	</Card>
+	<Card title="Berbasis Astro" icon="rocket">
+		Manfaatkan kekuatan penuh dan performa Astro. Kembangkan Starlight dengan
+		_library_ dan integrasi Astro favorit Anda.
+	</Card>
+	<Card title="Markdown, Markdoc, and MDX" icon="document">
+		Gunakan bahasa markup favorit Anda. Starlight menyediakan validasi
+		_frontmatter_ bawaan dengan TypeScript _type-safety_.
+	</Card>
+	<Card title="Gunakan komponen UI pilihan Anda" icon="puzzle">
+		Starlight adalah solusi dokumentasi yang lengkap dan _framework-agnostic_.
+		Kembangkan lebih jauh dengan React, Vue, Svelte, Solid, dan lain-lain.
+	</Card>
+</CardGrid>
+
+<AboutAstro title="Dipersembahkan oleh">
+Astro adalah _web framework_ serbaguna yang didesain untuk kecepatan.
+Gunakan konten Anda dari sumber mana saja dan _deploy_ di mana saja, 
+semuanya didukung oleh _library_ dan komponen UI favorit Anda.
+
+[Pelajari tentang Astro](https://astro.build/)
+
+</AboutAstro>

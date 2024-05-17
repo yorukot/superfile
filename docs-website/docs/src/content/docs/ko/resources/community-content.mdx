@@ -1,0 +1,142 @@
+---
+title: 커뮤니티 콘텐츠
+description: Starlight를 배우고 구축하는 데 도움이 되는 커뮤니티 제작 가이드, 기사 및 비디오를 찾아보세요!
+---
+
+:::tip[직접 추가하세요!]
+Starlight에 대한 콘텐츠를 제작한 적이 있나요?
+이 페이지에 링크를 추가하여 PR을 열어보세요!
+:::
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+## 기사 및 리뷰
+
+다음은 Starlight와 다른 사람들의 경험에 대해 자세히 알아볼 수 있는 게시물과 기사 모음입니다.
+
+<CardGrid>
+	<LinkCard
+		href="https://devm.io/open-source/starlight-astro"
+		title="Starlight를 사용한 정적 사이트 생성"
+		description="“컴포넌트를 설계할 때 아이디어가 너무 크거나 너무 작으면 안 됩니다.” — Starlight 리드 개발자인 Chris Swithinbank와의 인터뷰"
+	/>
+	<LinkCard
+		href="https://frontendatscale.com/blog/hybrid-frontend-architecture/"
+		title="Astro와 Starlight를 사용한 하이브리드 프런트엔드 아키텍처"
+		description="Maxi Ferreira와 Ben Holmes는 Starlight, TinaCMS 및 인증 기능이 있는 대화형 API 플레이그라운드를 사용하여 문서 사이트를 구축합니다."
+	/>
+	<LinkCard
+		href="https://www.olets.dev/posts/comparing-docs-site-builders-vuepress-vs-starlight/"
+		title="문서 사이트 빌더 비교: VuePress vs Starlight"
+		description="이 두 프레임워크는 어떻게 비교되나요?"
+	/>
+</CardGrid>
+
+## 레시피 및 안내서
+
+레시피는 일반적으로 특정 작업의 실제 예시를 완료하는 과정을 독자에게 안내하는 짧고 집중적인 방법 안내서입니다. 레시피는 단계별 지침에 따라 Starlight 프로젝트에 새로운 기능이나 동작을 추가할 수 있는 좋은 방법입니다! 다른 안내서에서는 이미지 사용이나 MDX 작업 등 콘텐츠 영역과 관련된 개념을 설명할 수도 있습니다.
+
+Starlight 사용자들이 관리하는 커뮤니티 제작 콘텐츠를 살펴보세요.
+
+<CardGrid>
+	<LinkCard
+		href="https://www.webpro.nl/scraps/versioned-docs-with-starlight-and-vercel"
+		title="Starlight & Vercel을 사용한 버전별 문서"
+		description="프로젝트의 각 주요 버전에 대해 별도의 문서 버전을 구현하는 방법에 대한 안내서"
+	/>
+	<LinkCard
+		href="https://hideoo.dev/notes/starlight-heading-links"
+		title="Starlight 제목에 링크 추가"
+		description="문서의 특정 섹션에 대한 링크를 공유하기 위한 rehype 플러그인 사용 안내서"
+	/>
+	<LinkCard
+		href="https://blog.otterlord.dev/posts/starlight-sponsors/"
+		title="Starlight 사이트에 스폰서 추가"
+		description="문서 사이드바에 맞춤 스폰서 컴포넌트를 구현하기 위한 안내서"
+	/>
+	<LinkCard
+		href="https://hideoo.dev/notes/starlight-og-images"
+		title="Starlight에 Open Graph 이미지 추가"
+		description="페이지에 대한 소셜 이미지 및 해당 메타 태그 생성에 대한 안내서"
+	/>
+	<LinkCard
+		href="https://hideoo.dev/notes/starlight-third-party-icon-sets"
+		title="Starlight에서 타사 아이콘 세트 사용"
+		description="unplugin-icons를 사용하여 Starlight에 사용 가능한 아이콘 선택 범위를 확장하는 방법에 대한 안내서"
+	/>
+	<LinkCard
+		href="https://hideoo.dev/notes/starlight-custom-html-head"
+		title="Starlight 페이지의 HTML 헤드 편집"
+		description="웹 분석, 글꼴, 스크립트 등 일반적인 헤드 콘텐츠를 추가하는 방법을 알아보세요."
+	/>
+	<LinkCard
+		href="https://dev.to/mrrobot/publishing-documentation-with-astro-starlight-691"
+		title="Astro Starlight로 문서 게시"
+		description="Starlight 문서 시작하기"
+	/>
+	<LinkCard
+		href="https://events-3bg.pages.dev/jotter/starlight/guide/"
+		title="View Transitions 활성화"
+		description="Bag of Tricks의 view transitions 지원으로 SPA와 같은 모양과 느낌을 얻으세요"
+	/>
+</CardGrid>
+
+## 영상 콘텐츠
+
+라이브 스트림, 교육 콘텐츠 등 Starlight 콘텐츠가 포함된 비디오와 채널을 찾아보세요.
+
+import YouTubeGrid from '~/components/youtube-grid.astro';
+
+### Astro 동영상
+
+<YouTubeGrid
+	videos={[
+		{
+			href: 'https://www.youtube.com/watch?v=5u0Ds7wzUeI',
+			title: 'Astro Starlight',
+			description: '공식 Starlight 출시 동영상',
+		},
+		{
+			href: 'https://www.youtube.com/shorts/zjOWezSzd18',
+			title: '🌟 1분 안에 시작하기',
+			description:
+				'Ben이 1분 안에 새로운 Starlight 사이트를 시작하는 모습을 지켜보세요!',
+		},
+	]}
+/>
+
+### 커뮤니티 동영상 및 스트림
+
+<YouTubeGrid
+	videos={[
+		{
+			href: 'https://www.youtube.com/watch?v=sF6UcV3moZg',
+			title: 'Starlight 및 Astro를 사용하여 문서 작성',
+			description:
+				'CodingCat.dev를 통해 Chris와 Alex가 Code에서 Starlight에 대해 알아보는 모습을 시청하세요.',
+		},
+		{
+			href: 'https://www.youtube.com/watch?v=sWkkHbwDeQc',
+			title: 'Astro Starlight',
+			description: '1분 안에 Starlight 소개',
+		},
+		{
+			href: 'https://www.youtube.com/watch?v=-Ki-1E5gNCk',
+			title: 'Astro Starlight 문서 템플릿 (맞춤형 앱 문서 구축!)',
+			description: '약 5분 안에 새로운 Starlight 사이트를 시작하고 실행하세요.',
+		},
+		{
+			href: 'https://www.youtube.com/watch?v=12o7WxjAxjM',
+			title: '프록시를 사용하여 Next.js 프로젝트에 Starlight 문서 포함',
+			description:
+				'Next.js 웹사이트 내 하위 디렉터리 프로젝트로 Starlight 설정',
+		},
+		{
+			href: 'https://www.youtube.com/watch?v=5pq80drDrNs',
+			title:
+				'이 놀라운 도구를 사용하여 Shadcn의 문서를 30분 만에 다시 만들었습니다.',
+			description:
+				'이 비디오에서는 Starlight가 왜 그렇게 멋진지, 그리고 왜 다음 프로젝트에서 Starlight를 사용해 보고 싶은지 설명합니다.',
+		},
+	]}
+/>

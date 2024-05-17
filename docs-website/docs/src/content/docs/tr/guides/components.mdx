@@ -1,0 +1,189 @@
+---
+title: Bileşenler
+description: Starlight ile MDX'te bileşenlerin kullanımı.
+---
+
+Bileşenler bir arayüz parçasını kolaylıkla tekrar tekrar kullanmanıza ve tutarlı bir şekilde stillendirmenize olanak sağlar.
+Bağlantı kartı ya da bir Youtube yerleştirmesi örnek olarak verilebilir.
+Starlight [MDX](https://mdxjs.com/) dosyaları içerisindeki bileşenlerin kullanılmasını destekler ve bazı ortak bileşenleri kullanımınıza sunar.
+
+[Astro dokümantasyonunda bileşen oluşturma hakkında daha fazla bilgi edinin](https://docs.astro.build/en/core-concepts/astro-components/).
+
+## Bileşen Kullanımı
+
+Bir bileşeni MDX dosyanıza dahil ederek kullanabilir ve sonrasında JSX etiketi olarak oluşturabilirsiniz.
+HTML etiketleri gibi görünür ancak ilk harfi büyük olarak ismi uyan `import` ifadesidir:
+
+```mdx
+---
+# src/content/docs/index.mdx
+title: Dokümantasyonuma hoşgeldiniz.
+---
+
+import SomeComponent from '../../components/SomeComponent.astro';
+import AnotherComponent from '../../components/AnotherComponent.astro';
+
+<SomeComponent prop="birşey" />
+
+<AnotherComponent>
+	Bileşenler ayrıca **içe yerleştirilmiş içerik** barındırabilir.
+</AnotherComponent>
+```
+
+Starlight'ın Astro'dan aldığı güç sayesinde, MDX dosyalarınız içerisinde [desteklenen herhangi bir arayüz çerçevesi ile (React, Preact, Svelte, Vue, Solid, Lit, ve Alpine)](https://docs.astro.build/en/core-concepts/framework-components/) oluşturulmış bileşenlerinizi destekleyebilirsiniz.
+Astro dokümantasyonunda [MDX içerisinde bileşen kullanmak](https://docs.astro.build/en/guides/markdown-content/#using-components-in-mdx) hakkında daha fazlasını öğrenin.
+
+### Starlight stilleri ile uyumluluk
+
+Starlight Markdown içeriklerinize varsayılan stillendirmeyi uygular, örneğin elemanlar arasına marjin ekler.
+Bu stiller bileşeninizin görünümü ile çakışıyorsa, bileşeninizde stili etkisiz kılmak için `not-content` sınıfını bileşeninize ekleyin.
+
+```astro
+---
+// src/components/Example.astro
+---
+
+<div class="not-content">
+	<p>Starlight'ın varsayılan içerik stillendirmesinden etkilenmez.</p>
+</div>
+```
+
+## Yerleşik Bileşenler
+
+Starlight bazı yerleşik bileşenleri ortak dokümantasyon ihtiyaçları için sunar.
+Bu bileşenler `@astrojs/starlight/components` paketinde mevcuttur.
+
+### Sekmeler
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+`<Tabs>` ve `<TabItem>` bileşenlerini kullanarak sekmeli arayüz gösterebilirsiniz.
+You can display a tabbed interface using the `<Tabs>` and `<TabItem>` components.
+Her `<TabItem>` bileşenini kullanıcılara göstermek için `label` sahibi olması zorunludur.
+
+```mdx
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+<Tabs>
+	<TabItem label="Yıldızlar">Sirius, Vega, Betelgeuse</TabItem>
+	<TabItem label="Uydular">Io, Europa, Ganymede</TabItem>
+</Tabs>
+```
+
+Yukarıdaki kod, sayfa üzerinde aşağıdaki gibi sekmeler oluşturur:
+
+<Tabs>
+	<TabItem label="Yıldızlar">Sirius, Vega, Betelgeuse</TabItem>
+	<TabItem label="Uydular">Io, Europa, Ganymede</TabItem>
+</Tabs>
+
+### Kartlar
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+`<Card>` bileşenini kullanarak Starlight'ın stiline uyan kutu içerisinde yer alan içeriği gösterebilirsiniz.
+Birden fazla kartı `<CardGrid>` bileşeni içinde, yeteri kadar boşluk olduğu zaman kartları yan yana sıralı olarak göstermek için sarmalayın.
+
+`<Card>` bileşeni `title` değerine ihtiyaç duyar ve opsiyonel olarak [Starlight'ın kurulu ikonlarından birinin](#tüm-i̇konlar) ismini taşıyan `icon` özelliğini içerebilir.
+
+```mdx
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<Card title="Buna bir bakın.">Vurgulamak istediğin ilgi çekici içerik</Card>
+
+<CardGrid>
+	<Card title="Yıldızlar" icon="star">
+		Sirius, Vega, Betelgeuse
+	</Card>
+	<Card title="Uydular" icon="moon">
+		Io, Europa, Ganymede
+	</Card>
+</CardGrid>
+```
+
+Yukarıdaki kod, sayfa üzerinde aşağıdaki gibi çıktı oluşturur:
+
+<Card title="Buna bir bakın.">Vurgulamak istediğin ilgi çekici içerik</Card>
+
+<CardGrid>
+	<Card title="Yıldızlar" icon="star">
+		Sirius, Vega, Betelgeuse
+	</Card>
+	<Card title="Uydular" icon="moon">
+		Io, Europa, Ganymede
+	</Card>
+</CardGrid>
+
+:::tip
+Projenizin kilit özelliklerini göstermek için anasayfanızda kart kılavuzunu kullanın.
+`stagger` niteliğini ikinci sütunun kartlarını düşey eksenli olarak sıralamak ve görsel açıdan ilgi çekmek için ekleyin:
+
+```astro
+<CardGrid stagger>
+	<!-- kartlar -->
+</CardGrid>
+```
+
+:::
+
+### Bağlantı kartları
+
+Belirgin olarak farklı sayfalara bağlantı eklemek için `<LinkCard>` bileşenini kullanın.
+
+`<LinkCard>` `title` değerine ve [`href`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#href) özelliğine ihtiyaç duyar. İsteğe bağlı olarak `description` ya da `target` gibi bağlantı özelliklerini ekleyebilirsiniz.
+
+Birden fazla `<LinkCard>` bileşeninizi, yeterince boşluk olduğunda yan yana olacak şekilde göstermek için `<CardGrid>` içerisinde gruplayın.
+
+```mdx
+import { LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+<LinkCard
+	title="Starlight'ı Özelleştirmek"
+	description="Starlight sitenizi kendi özel stiliniz, yazı karakteriniz ve daha fazlası ile nasıl oluşturacağınızı öğrenin."
+	href="/tr/guides/customization/"
+/>
+
+<CardGrid>
+	<LinkCard title="Markdown Oluşturmak" href="/tr/guides/authoring-content/" />
+	<LinkCard title="Bileşenler" href="/tr/guides/components/" />
+</CardGrid>
+```
+
+Yukarıdaki kod, sayfa üzerinde aşağıdaki gibi çıktı oluşturur.
+
+import { LinkCard } from '@astrojs/starlight/components';
+
+<LinkCard
+	title="Starlight'ı Özelleştirmek"
+	description="Starlight sitenizi kendi özel stiliniz, yazı karakteriniz ve daha fazlası ile nasıl oluşturacağınızı öğrenin."
+	href="/tr/guides/customization/"
+/>
+
+<CardGrid>
+	<LinkCard title="Markdown Oluşturmak" href="/tr/guides/authoring-content/" />
+	<LinkCard title="Bileşenler" href="/tr/guides/components/" />
+</CardGrid>
+
+### İkon
+
+import { Icon } from '@astrojs/starlight/components';
+import IconsList from '~/components/icons-list.astro';
+
+Starlight, içeriğinizde görünmesi için `<Icon>` bileşenini kullanarak bir grup ortak ikonları kullanımınıza sunar.
+Her `<Icon>` [`name`](#tüm-i̇konlar) değerine ihtiyaç duyar ve isteğe bağlı olarak `label`, `size`, ve `color` özellikleri eklenebilir.
+
+```mdx
+import { Icon } from '@astrojs/starlight/components';
+
+<Icon name="star" color="goldenrod" size="2rem" />
+```
+
+Yukarıdaki kod, aşağıdaki gibi çıktı oluşturur:
+
+<Icon name="star" color="goldenrod" size="2rem" />
+
+#### Tüm İkonlar
+
+Mevcut tüm ikonların listesi aşağıdaki gibi ilişkili isimleriyle gösterilmiştir. Bileşen kodunu kopyalamak için bir ikona tıklayın.
+
+<IconsList />

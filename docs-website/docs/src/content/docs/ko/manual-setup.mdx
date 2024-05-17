@@ -1,0 +1,128 @@
+---
+title: 수동으로 설정하기
+description: Starlight를 기존 Astro 프로젝트에 추가하기 위해 수동으로 구성하는 방법을 알아보세요.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+새로운 Starlight 사이트를 시작하는 가장 빠른 방법은 [시작하기](/ko/getting-started/#새-프로젝트-생성)에 나와있는 것처럼 `create astro`를 사용하는 것입니다. 이 가이드에서는 기존 Astro 프로젝트에 Starlight를 추가하는 방법을 설명합니다.
+
+## Starlight 설정
+
+이 가이드를 따르기 위해서는 기존 Astro 프로젝트가 필요합니다.
+
+### Starlight 통합 추가
+
+Starlight는 [Astro 통합](https://docs.astro.build/ko/guides/integrations-guide/)입니다. 사이트에 이를 추가하기 위해 프로젝트의 루트 디렉터리에서 `astro add` 명령을 실행하세요.
+
+<Tabs>
+    <TabItem label="npm">
+        ```sh
+        npx astro add starlight
+        ```
+
+    </TabItem>
+    <TabItem label="pnpm">
+        ```sh
+        pnpm astro add starlight
+        ```
+    </TabItem>
+    <TabItem label="Yarn">
+        ```sh
+        yarn astro add starlight
+        ```
+    </TabItem>
+
+</Tabs>
+
+그러면 필요한 종속성이 설치되고 Astro 구성 파일의 `integrations` 배열에 Starlight가 추가됩니다.
+
+### 통합 구성
+
+Starlight 통합은 `astro.config.mjs` 파일에서 구성됩니다.
+
+시작하려면 `title`을 추가하세요.
+
+```js ins={8}
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: '나만의 멋진 문서 사이트',
+		}),
+	],
+});
+```
+
+[Starlight 구성 참조](/ko/reference/configuration/)에서 사용 가능한 모든 옵션을 찾아보세요.
+
+### 콘텐츠 컬렉션 구성
+
+Starlight는 `src/content/config.ts` 파일에 구성된 Astro의 [콘텐츠 컬렉션](https://docs.astro.build/ko/guides/content-collections/) 위에 구축되었습니다.
+
+Starlight의 `docsSchema`를 사용하는 `docs` 컬렉션을 추가하여 콘텐츠 구성 파일을 생성하거나 업데이트하세요.
+
+```js ins={3,6}
+// src/content/config.ts
+import { defineCollection } from 'astro:content';
+import { docsSchema } from '@astrojs/starlight/schema';
+
+export const collections = {
+	docs: defineCollection({ schema: docsSchema() }),
+};
+```
+
+### 콘텐츠 추가
+
+이제 Starlight가 구성되었으며 콘텐츠를 추가할 시간입니다!
+
+`src/content/docs/` 디렉터리를 생성한 후 `index.md` 파일을 추가하여 시작하세요.
+이것은 웹 사이트의 홈페이지가 됩니다.
+
+```md
+---
+# src/content/docs/index.md
+title: 나의 문서
+description: Starlight로 구축된 이 문서 사이트에서 내 프로젝트에 대해 자세히 알아보세요.
+---
+
+내 프로젝트에 오신 것을 환영합니다!
+```
+
+Starlight는 파일 기반 라우팅을 사용합니다. 즉, `src/content/docs/`에 있는 모든 Markdown, MDX 또는 Markdoc 파일이 사이트의 페이지로 전환됩니다. Frontmatter 메타데이터(위 예시에서 `title` 및 `description` 필드)는 각 페이지가 표시되는 방식을 변경할 수 있습니다. [Frontmatter 참조](/ko/reference/frontmatter/)에서 사용 가능한 모든 옵션을 확인하세요.
+
+## 기존 웹 사이트에 대한 팁
+
+기존 Astro 프로젝트가 존재하는 경우 Starlight를 사용하여 사이트에 문서 섹션을 빠르게 추가할 수 있습니다.
+
+### 하위 경로에서 Starlight 사용
+
+모든 Starlight 페이지를 하위 경로에 추가하려면 모든 문서 콘텐츠를 `src/content/docs/`의 하위 디렉터리에 배치하세요.
+
+예를 들어, Starlight의 모든 페이지가 `/guides/`에서 시작해야 하는 경우 `src/content/docs/guides/` 디렉터리에 콘텐츠를 추가하세요.
+
+import { FileTree } from '@astrojs/starlight/components';
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - **guides/**
+        - guide.md
+        - index.md
+  - pages/
+- astro.config.mjs
+
+</FileTree>
+
+앞으로 우리는 `src/content/docs/`에 추가로 중첩된 디렉터리가 필요하지 않도록 이 사용 사례에 대한 지원을 더 늘릴 예정입니다.
+
+### SSR과 함께 Starlight 사용
+
+Astro 문서의 [“주문형 렌더링 어댑터”](https://docs.astro.build/ko/guides/server-side-rendering/) 안내서에 따라 프로젝트에서 사용자 정의 주문형 렌더링 페이지와 함께 Starlight를 사용할 수 있습니다.
+
+현재 Starlight에서 생성된 문서 페이지는 프로젝트의 출력 모드에 관계없이 항상 사전 렌더링됩니다. 곧 Starlight 페이지에 대한 주문형 렌더링을 지원할 수 있기를 바랍니다.

@@ -1,0 +1,103 @@
+{
+  "$schema": "./node_modules/@lunariajs/core/config.schema.json",
+  "repository": {
+    "name": "withastro/starlight",
+    "rootDir": "docs"
+  },
+  "defaultLocale": {
+    "label": "English",
+    "lang": "en"
+  },
+  "locales": [
+    {
+      "label": "Dansk",
+      "lang": "da"
+    },
+    {
+      "label": "Deutsch",
+      "lang": "de"
+    },
+    {
+      "label": "Español",
+      "lang": "es"
+    },
+    {
+      "label": "Français",
+      "lang": "fr"
+    },
+    {
+      "label": "हिंदी",
+      "lang": "hi"
+    },
+    {
+      "label": "Bahasa Indonesia",
+      "lang": "id"
+    },
+    {
+      "label": "Italiano",
+      "lang": "it"
+    },
+    {
+      "label": "日本語",
+      "lang": "ja"
+    },
+    {
+      "label": "한국어",
+      "lang": "ko"
+    },
+    {
+      "label": "Português do Brasil",
+      "lang": "pt-br"
+    },
+    {
+      "label": "Português",
+      "lang": "pt-pt"
+    },
+    {
+      "label": "Русский",
+      "lang": "ru"
+    },
+    {
+      "label": "Türkçe",
+      "lang": "tr"
+    },
+    {
+      "label": "Українська",
+      "lang": "uk"
+    },
+    {
+      "label": "简体中文",
+      "lang": "zh-cn"
+    }
+  ],
+  "files": [
+    {
+      "location": "src/content/docs/**/*.{md,mdx}",
+      "pattern": "src/content/docs/@lang/@path",
+      "type": "universal"
+    }
+  ],
+  "dashboard": {
+    "title": "Starlight Docs Translation Status",
+    "description": "Translation progress tracker for the Starlight Docs site. See how much has been translated in your language and get involved!",
+    "favicon": {
+      "external": [
+        {
+          "link": "https://starlight.astro.build/favicon.svg",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    "customCss": ["./lunaria/styles.css"],
+    "basesToHide": ["src/content/docs/"],
+    "ui": {
+      "statusByLocale.heading": "Translation progress by locale",
+      "statusByLocale.incompleteLocalizationLink": "incomplete translation",
+      "statusByLocale.outdatedLocalizationLink": "outdated translation",
+      "statusByLocale.completeLocalization": "This translation is complete, amazing job! 🎉",
+      "statusByFile.heading": "Translation status by file"
+    }
+  },
+  "ignoreKeywords": ["lunaria-ignore", "typo", "en-only", "broken link", "i18nReady", "i18nIgnore"],
+  "renderer": "./lunaria/renderer.config.ts"
+}

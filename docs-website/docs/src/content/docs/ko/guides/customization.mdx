@@ -1,0 +1,447 @@
+---
+title: Starlight 사용자 정의
+description: 로고, 사용자 정의 글꼴, 랜딩 페이지 디자인 등을 사용하여 나만의 Starlight 사이트를 만드는 방법을 알아보세요.
+---
+
+import { Tabs, TabItem, FileTree, Steps } from '@astrojs/starlight/components';
+
+Starlight는 합리적인 기본 스타일과 기능을 제공하므로 구성 없이 빠르게 시작할 수 있습니다. Starlight 사이트의 모양과 느낌을 바꾸고 싶다면 이 가이드를 참조하세요.
+
+## 로고 추가
+
+사이트 헤더에 로고를 추가하는 것은 Starlight 사이트에 브랜드를 추가하는 빠른 방법입니다.
+
+<Steps>
+
+1. `src/assets/` 디렉터리에 로고 이미지 파일을 추가합니다.
+
+   <FileTree>
+
+   - src/
+     - assets/
+       - **my-logo.svg**
+     - content/
+   - astro.config.mjs
+
+   </FileTree>
+
+2. `astro.config.mjs` 파일에 있는 [logo.src](/ko/reference/configuration/#logo) 옵션의 값으로 로고 파일의 경로를 추가하세요.
+
+   ```diff lang="js"
+   // astro.config.mjs
+   import { defineConfig } from 'astro/config';
+   import starlight from '@astrojs/starlight';
+
+   export default defineConfig({
+   	integrations: [
+   		starlight({
+   			title: '로고를 사용하는 문서',
+   			logo: {
+   +				src: './src/assets/my-logo.svg',
+   			},
+   		}),
+   	],
+   });
+   ```
+
+</Steps>
+
+기본적으로 로고는 사이트의 `title`과 함께 표시됩니다. 이미 로고 이미지에 사이트 제목이 포함되어 있는 경우, `replacementTitle` 옵션을 설정하여 제목 텍스트를 시각적으로 숨길 수 있습니다. `title` 텍스트는 스크린 리더를 위해 남아 있기 때문에 헤더의 접근성은 유지됩니다.
+
+```js {5}
+starlight({
+  title: '로고를 사용하는 문서',
+  logo: {
+    src: './src/assets/my-logo.svg',
+    replacesTitle: true,
+  },
+}),
+```
+
+### 라이트 모드와 다크 모드에서의 로고 변형
+
+라이트 모드와 다크 모드에서 다른 버전의 로고를 표시할 수 있습니다.
+
+<Steps>
+
+1. `src/assets/` 디렉터리에 각 변형에 대한 이미지 파일을 추가합니다.
+
+   <FileTree>
+
+   - src/
+     - assets/
+       - **light-logo.svg**
+       - **dark-logo.svg**
+     - content/
+   - astro.config.mjs
+
+   </FileTree>
+
+2. `astro.config.mjs` 파일에서 `src` 대신 `light` 및 `dark` 옵션을 전달하여 로고 변형에 대한 경로를 추가합니다.
+
+   ```diff lang="js"
+   starlight({
+     title: '로고를 사용하는 문서',
+     logo: {
+   +    light: './src/assets/light-logo.svg',
+   +    dark: './src/assets/dark-logo.svg',
+     },
+   }),
+   ```
+
+</Steps>
+
+## 사이트맵 활성화
+
+Starlight에는 사이트맵 생성 기능이 내장되어 있습니다. `astro.config.mjs` 파일에 있는 `site` 속성의 값을 URL로 설정하여 사이트맵 생성을 활성화할 수 있습니다.
+
+```js {4}
+// astro.config.mjs
+
+export default defineConfig({
+	site: 'https://stargazers.club',
+	integrations: [starlight({ title: '사이트맵을 사용하는 웹 사이트' })],
+});
+```
+
+## 페이지 레이아웃
+
+기본적으로 Starlight 페이지는 전역 탐색 사이드바와 현재 페이지 제목의 목차가 포함된 레이아웃을 사용합니다.
+
+프론트매터에 [`template: splash`](/ko/reference/frontmatter/#template)를 설정하여 사이드바 없이 더 넓은 페이지 레이아웃을 적용할 수 있습니다. 주로 랜딩 페이지에서 사용되며, [이 사이트의 홈페이지](/ko/)에서 실제로 작동하는 것을 확인할 수 있습니다.
+
+```md {5}
+---
+# src/content/docs/index.md
+
+title: 랜딩 페이지
+template: splash
+---
+```
+
+## 목차
+
+Starlight는 독자가 원하는 제목으로 쉽게 이동할 수 있도록 각 페이지에 목차를 표시합니다. Starlight 통합을 통해 모든 페이지의 목차를 변경하거나 비활성화할 수 있습니다. 또한, 프론트매터를 수정하여 각 페이지의 목차를 변경할 수도 있습니다.
+
+기본적으로 `<h2>` 및 `<h3>` 제목이 목차에 포함됩니다. [`tableOfContents`](/ko/reference/configuration/#tableofcontents) 의 `minHeadingLevel` 및 `maxHeadingLevel` 옵션을 사용하여 모든 페이지의 목차를 변경할 수 있습니다. 개별 페이지의 기본 목차를 변경하기 위해서는 [프론트매터에 `tableOfContents`](/ko/reference/frontmatter/#tableofcontents) 속성을 추가하세요.
+
+<Tabs syncKey="config-type">
+  <TabItem label="개별 페이지 설정">
+
+```md {4-6}
+---
+# src/content/docs/example.md
+title: 목차에 H2만 있는 페이지
+tableOfContents:
+  minHeadingLevel: 2
+  maxHeadingLevel: 2
+---
+```
+
+  </TabItem>
+  <TabItem label="전역 설정">
+
+```js {7}
+// astro.config.mjs
+
+defineConfig({
+	integrations: [
+		starlight({
+			title: '맞춤 목차 구성이 포함된 문서',
+			tableOfContents: { minHeadingLevel: 2, maxHeadingLevel: 2 },
+		}),
+	],
+});
+```
+
+  </TabItem>
+</Tabs>
+
+`tableOfContents` 옵션의 값을 `false`로 설정하여 모든 페이지의 목차를 비활성화 할 수 있습니다.
+
+<Tabs syncKey="config-type">
+  <TabItem label="개별 페이지 설정">
+
+```md {4}
+---
+# src/content/docs/example.md
+title: 목차가 없는 페이지
+tableOfContents: false
+---
+```
+
+  </TabItem>
+  <TabItem label="전역 설정">
+
+```js {7}
+// astro.config.mjs
+
+defineConfig({
+	integrations: [
+		starlight({
+			title: '모든 목차가 비활성화된 문서',
+			tableOfContents: false,
+		}),
+	],
+});
+```
+
+  </TabItem>
+</Tabs>
+
+## 소셜 링크
+
+Starlight에는 [`social`](/ko/reference/configuration/#social) 옵션을 사용하여 사이트 헤더에 소셜 미디어 계정을 링크하는 기능이 내장되어 있습니다.
+
+[구성 참조](/ko/reference/configuration/#social)에서 지원되는 링크 아이콘의 전체 목록을 확인할 수 있습니다.
+다른 서비스에 대한 지원이 필요하면 GitHub나 Discord를 통해 알려주세요!
+
+```js {9-12}
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: '소셜 링크를 사용하는 문서',
+			social: {
+				discord: 'https://astro.build/chat',
+				github: 'https://github.com/withastro/starlight',
+			},
+		}),
+	],
+});
+```
+
+## 링크 편집
+
+Starlight는 각 페이지의 아래에 "페이지 편집" 링크를 표시할 수 있습니다. 이렇게 하면 독자가 문서 개선을 위해 편집할 파일을 쉽게 찾을 수 있습니다. 특히 오픈 소스 프로젝트에서는 커뮤니티의 기여를 장려하는 데 도움이 될 수 있습니다.
+
+편집 링크를 활성화하기 위해 [`editLink.baseUrl`](/ko/reference/configuration/#editlink)의 값을 저장소를 편집하는 데 사용되는 URL로 설정하세요. `editLink.baseUrl`의 값은 전체 편집 링크를 형성하기 위해 현재 페이지의 경로 앞에 추가됩니다.
+
+일반적인 패턴은 다음과 같습니다.
+
+- GitHub: `https://github.com/USER_NAME/REPO_NAME/edit/BRANCH_NAME/`
+- GitLab: `https://gitlab.com/USER_NAME/REPO_NAME/-/edit/BRANCH_NAME/`
+
+Starlight 프로젝트가 저장소의 루트에 없는 경우 기본 URL 끝에 프로젝트 경로를 포함합니다.
+
+아래 예시는 GitHub `withastro/starlight` 저장소의 `main` 브랜치에 있는 `docs/` 디렉터리에 있는 Starlight 문서에 대해 구성된 편집 링크를 보여줍니다.
+
+```js {9-11}
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: '편집 링크가 있는 문서',
+			editLink: {
+				baseUrl: 'https://github.com/withastro/starlight/edit/main/docs/',
+			},
+		}),
+	],
+});
+```
+
+## 사용자 정의 404 페이지
+
+Starlight 사이트는 기본적으로 간단한 404 페이지를 표시합니다. `src/content/docs/` 디렉터리에 `404.md`(또는 `404.mdx`) 파일을 추가하여 이를 변경할 수 있습니다:
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - **404.md**
+      - index.md
+- astro.config.mjs
+
+</FileTree>
+
+404 페이지에서 Starlight의 모든 페이지 레이아웃과 사용자 정의 기술을 사용할 수 있습니다. 예를 들어 기본 404 페이지는 프론트매터에서 [`splash` 템플릿](#페이지-레이아웃)과 [`hero`](/ko/reference/frontmatter/#hero) 컴포넌트를 사용합니다.
+
+```md {4,6-8}
+---
+# src/content/docs/404.md
+title: '404'
+template: splash
+editUrl: false
+hero:
+  title: '404'
+  tagline: 페이지를 찾을 수 없습니다. URL을 확인하거나 검색창을 사용해 보세요.
+---
+```
+
+### 기본 404 페이지 비활성화
+
+프로젝트에 완전히 사용자 정의된 404 레이아웃이 필요한 경우 `src/pages/404.astro` 경로를 생성하고 [`disable404Route`](/ko/reference/configuration/#disable404route) 구성 옵션을 설정하여 Starlight의 기본 경로를 비활성화할 수 있습니다.
+
+```js {9}
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: '사용자 정의 404가 포함된 문서',
+			disable404Route: true,
+		}),
+	],
+});
+```
+
+## 사용자 정의 글꼴
+
+기본적으로 Starlight는 모든 텍스트에 대해 사용자의 로컬 장치에서 사용할 수 있는 sans-serif 글꼴을 사용합니다. 이를 통해 대용량 글꼴 파일을 다운로드하기 위한 추가 대역폭 없이 각 사용자에게 친숙한 글꼴로 문서를 빠르게 로드할 수 있습니다.
+
+Starlight 사이트에 사용자 정의 글꼴을 추가해야 하는 경우, 사용자 정의 CSS 파일이나 다른 [Astro 스타일링 기술](https://docs.astro.build/ko/guides/styling/)을 사용하세요.
+
+### 글꼴 설정
+
+이미 글꼴 파일이 존재한다면 [로컬 설정 가이드](#로컬-글꼴-파일-설정)를 따르세요. Google Fonts를 사용하려면 [Fontsource 설정 가이드](#fontsource-글꼴-설정)를 따르세요.
+
+#### 로컬 글꼴 파일 설정
+
+<Steps>
+
+1. `src/fonts/` 디렉터리에 글꼴 파일을 추가하고 빈 `font-face.css` 파일을 만드세요.
+
+   <FileTree>
+
+   - src/
+     - content/
+     - fonts/
+       - **CustomFont.woff2**
+       - **font-face.css**
+   - astro.config.mjs
+
+   </FileTree>
+
+2. `src/fonts/font-face.css` 파일에 각 글꼴에 대한 [`@font-face` 선언](https://developer.mozilla.org/ko/docs/Web/CSS/@font-face)을 추가하세요. `url()` 함수에서 글꼴 파일의 상대 경로를 사용하세요.
+
+   ```css
+   /* src/fonts/font-face.css */
+
+   @font-face {
+   	font-family: 'Custom Font';
+   	/* `url()`에서 로컬 글꼴 파일의 상대 경로를 사용하세요. */
+   	src: url('./CustomFont.woff2') format('woff2');
+   	font-weight: normal;
+   	font-style: normal;
+   	font-display: swap;
+   }
+   ```
+
+3. `astro.config.mjs` 파일에 있는 Starlight의 `customCss` 배열에 `font-face.css` 파일의 경로를 추가하세요.
+
+   ```diff lang="js"
+   // astro.config.mjs
+   import { defineConfig } from 'astro/config';
+   import starlight from '@astrojs/starlight';
+
+   export default defineConfig({
+   	integrations: [
+   		starlight({
+   			title: '사용자 정의 글꼴을 사용하는 문서',
+   			customCss: [
+   +				// @font-face CSS 파일의 상대 경로입니다.
+   +				'./src/fonts/font-face.css',
+   			],
+   		}),
+   	],
+   });
+   ```
+
+</Steps>
+
+#### Fontsource 글꼴 설정
+
+[Fontsource](https://fontsource.org/) 프로젝트는 Google Fonts 및 기타 오픈 소스 글꼴 사용을 단순화합니다. 글꼴을 설치할 수 있는 npm 모듈과 프로젝트에 추가할 CSS 파일을 제공합니다.
+
+<Steps>
+
+1.  [Fontsource 카탈로그](https://fontsource.org/)에서 사용하려는 글꼴을 찾으세요. 예시에서는 [IBM Plex Serif](https://fontsource.org/fonts/ibm-plex-serif)를 사용합니다.
+
+2.  선택한 글꼴에 대한 패키지를 설치합니다. Fontsource 글꼴 페이지에서 “Install”을 클릭하면 패키지 이름을 찾을 수 있습니다.
+
+         <Tabs>
+
+    <TabItem label="npm">
+
+    ```sh
+    npm install @fontsource/ibm-plex-serif
+    ```
+
+           </TabItem>
+
+        <TabItem label="pnpm">
+
+    ```sh
+    pnpm add @fontsource/ibm-plex-serif
+    ```
+
+           </TabItem>
+
+        <TabItem label="Yarn">
+
+    ```sh
+    yarn add @fontsource/ibm-plex-serif
+    ```
+
+           </TabItem>
+
+      </Tabs>
+
+3.  `astro.config.mjs`에 있는 Starlight의 `customCss` 배열에 Fontsource CSS 파일을 추가합니다.
+
+    ```diff lang="js"
+    // astro.config.mjs
+    import { defineConfig } from 'astro/config';
+    import starlight from '@astrojs/starlight';
+
+    export default defineConfig({
+    	integrations: [
+    		starlight({
+    			title: '사용자 정의 글꼴을 사용하는 문서',
+    			customCss: [
+    + 				// 보통 및 약간 굵은 글꼴 두께에 대한 Fontsource 파일입니다.
+    + 				'@fontsource/ibm-plex-serif/400.css',
+    + 				'@fontsource/ibm-plex-serif/600.css',
+    			],
+    		}),
+    	],
+    });
+    ```
+
+    Fontsource는 각 글꼴에 대해 여러 CSS 파일을 제공합니다. 다른 굵기 및 스타일을 포함하는 방법이 궁금하다면 [Fontsource 문서](https://fontsource.org/docs/getting-started/install#4-weights-and-styles)를 참조하세요.
+
+</Steps>
+
+### 글꼴 사용
+
+설정한 글꼴을 웹 사이트에 적용하려면 [사용자 정의 CSS 파일](/ko/guides/css-and-tailwind/#사용자-정의-css-스타일)에서 선택한 글꼴 이름을 사용하세요. 예를 들어 Starlight의 기본 글꼴을 변경하려면 사용자 정의 속성인 `--sl-font`를 설정하세요.
+
+```css
+/* src/styles/custom.css */
+
+:root {
+	--sl-font: 'IBM Plex Serif', serif;
+}
+```
+
+글꼴을 더 선택적으로 적용하기 위해 더 많은 CSS를 작성할 수도 있습니다.
+예를 들어 다음과 같은 방법으로 메인 콘텐츠에만 글꼴을 설정하고 사이드바에는 글꼴을 설정하지 않을 수 있습니다.
+
+```css
+/* src/styles/custom.css */
+
+main {
+	font-family: 'IBM Plex Serif', serif;
+}
+```
+
+[사용자 정의 CSS 사용법](/ko/guides/css-and-tailwind/#사용자-정의-css-스타일)에 따라 웹 사이트에 스타일을 추가하세요.

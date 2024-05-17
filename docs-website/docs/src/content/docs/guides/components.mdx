@@ -1,0 +1,443 @@
+---
+title: Components
+description: Using components in MDX with Starlight.
+---
+
+Components let you easily reuse a piece of UI or styling consistently.
+Examples might include a link card or a YouTube embed.
+Starlight supports the use of components in [MDX](https://mdxjs.com/) files and provides some common components for you to use.
+
+[Learn more about building components in the Astro Docs](https://docs.astro.build/en/core-concepts/astro-components/).
+
+## Using a component
+
+You can use a component by importing it into your MDX file and then rendering it as a JSX tag.
+These look like HTML tags but start with an uppercase letter matching the name in your `import` statement:
+
+```mdx
+---
+# src/content/docs/example.mdx
+title: Welcome to my docs
+---
+
+import SomeComponent from '../../components/SomeComponent.astro';
+import AnotherComponent from '../../components/AnotherComponent.astro';
+
+<SomeComponent prop="something" />
+
+<AnotherComponent>
+	Components can also contain **nested content**.
+</AnotherComponent>
+```
+
+Because Starlight is powered by Astro, you can add support for components built with any [supported UI framework (React, Preact, Svelte, Vue, Solid, Lit, and Alpine)](https://docs.astro.build/en/core-concepts/framework-components/) in your MDX files.
+Learn more about [using components in MDX](https://docs.astro.build/en/guides/markdown-content/#using-components-in-mdx) in the Astro docs.
+
+### Compatibility with Starlight’s styles
+
+Starlight applies default styling to your Markdown content, for example adding margin between elements.
+If these styles conflict with your component’s appearance, set the `not-content` class on your component to disable them.
+
+```astro 'class="not-content"'
+---
+// src/components/Example.astro
+---
+
+<div class="not-content">
+	<p>Not impacted by Starlight’s default content styling.</p>
+</div>
+```
+
+## Built-in components
+
+Starlight provides some built-in components for common documentation use cases.
+These components are available from the `@astrojs/starlight/components` package.
+
+### Tabs
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+You can display a tabbed interface using the `<Tabs>` and `<TabItem>` components.
+Each `<TabItem>` must have a `label` to display to users.
+Use the optional `icon` attribute to include one of [Starlight’s built-in icons](#all-icons) next to the label.
+
+```mdx
+# src/content/docs/example.mdx
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+<Tabs>
+	<TabItem label="Stars" icon="star">
+		Sirius, Vega, Betelgeuse
+	</TabItem>
+	<TabItem label="Moons" icon="moon">
+		Io, Europa, Ganymede
+	</TabItem>
+</Tabs>
+```
+
+The code above generates the following tabs on the page:
+
+<Tabs>
+	<TabItem label="Stars" icon="star">
+		Sirius, Vega, Betelgeuse
+	</TabItem>
+	<TabItem label="Moons" icon="moon">
+		Io, Europa, Ganymede
+	</TabItem>
+</Tabs>
+
+#### Synced tabs
+
+Keep multiple tab groups synchronized by adding the `syncKey` attribute.
+
+All `<Tabs>` on a page with the same `syncKey` value will display the same active label. This allows your reader to choose once (e.g. their operating system or package manager), and see their choice reflected throughout the page.
+
+To synchronize related tabs, add an identical `syncKey` property to each `<Tabs>` component and ensure that they all use the same `<TabItem>` labels:
+
+```mdx 'syncKey="constellations"'
+# src/content/docs/example.mdx
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+_Some stars:_
+
+<Tabs syncKey="constellations">
+	<TabItem label="Orion">Bellatrix, Rigel, Betelgeuse</TabItem>
+	<TabItem label="Gemini">Pollux, Castor A, Castor B</TabItem>
+</Tabs>
+
+_Some exoplanets:_
+
+<Tabs syncKey="constellations">
+	<TabItem label="Orion">HD 34445 b, Gliese 179 b, Wasp-82 b</TabItem>
+	<TabItem label="Gemini">Pollux b, HAT-P-24b, HD 50554 b</TabItem>
+</Tabs>
+```
+
+The code above generates the following on the page:
+
+_Some stars:_
+
+<Tabs syncKey="constellations">
+	<TabItem label="Orion">Bellatrix, Rigel, Betelgeuse</TabItem>
+	<TabItem label="Gemini">Pollux, Castor A, Castor B</TabItem>
+</Tabs>
+
+_Some exoplanets:_
+
+<Tabs syncKey="constellations">
+	<TabItem label="Orion">HD 34445 b, Gliese 179 b, Wasp-82 b</TabItem>
+	<TabItem label="Gemini">Pollux b, HAT-P-24b, HD 50554 b</TabItem>
+</Tabs>
+
+### Cards
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+You can display content in a box matching Starlight’s styles using the `<Card>` component.
+Wrap multiple cards in the `<CardGrid>` component to display cards side-by-side when there’s enough space.
+
+A `<Card>` requires a `title` and can optionally include an `icon` attribute set to the name of [one of Starlight’s built-in icons](#all-icons).
+
+```mdx
+# src/content/docs/example.mdx
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<Card title="Check this out">Interesting content you want to highlight.</Card>
+
+<CardGrid>
+	<Card title="Stars" icon="star">
+		Sirius, Vega, Betelgeuse
+	</Card>
+	<Card title="Moons" icon="moon">
+		Io, Europa, Ganymede
+	</Card>
+</CardGrid>
+```
+
+The code above generates the following on the page:
+
+<Card title="Check this out">Interesting content you want to highlight.</Card>
+
+<CardGrid>
+	<Card title="Stars" icon="star">
+		Sirius, Vega, Betelgeuse
+	</Card>
+	<Card title="Moons" icon="moon">
+		Io, Europa, Ganymede
+	</Card>
+</CardGrid>
+
+:::tip
+Use a card grid on your home page to display your project’s key features.
+Add the `stagger` attribute to shift the second column of cards vertically and add visual interest:
+
+```astro
+<CardGrid stagger>
+	<!-- cards -->
+</CardGrid>
+```
+
+:::
+
+### Link Cards
+
+Use the `<LinkCard>` component to link prominently to different pages.
+
+A `<LinkCard>` requires a `title` and an [`href`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#href) attribute. You can optionally include a short `description` or other link attributes such as `target`.
+
+Group multiple `<LinkCard>` components in `<CardGrid>` to display cards side-by-side when there’s enough space.
+
+```mdx
+# src/content/docs/example.mdx
+
+import { LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+<LinkCard
+	title="Customizing Starlight"
+	description="Learn how to make your Starlight site your own with custom styles, fonts, and more."
+	href="/guides/customization/"
+/>
+
+<CardGrid>
+	<LinkCard title="Authoring Markdown" href="/guides/authoring-content/" />
+	<LinkCard title="Components" href="/guides/components/" />
+</CardGrid>
+```
+
+The above code generates the following on the page:
+
+import { LinkCard } from '@astrojs/starlight/components';
+
+<LinkCard
+	title="Customizing Starlight"
+	description="Learn how to make your Starlight site your own with custom styles, fonts, and more."
+	href="/guides/customization/"
+/>
+
+<CardGrid>
+	<LinkCard title="Authoring Markdown" href="/guides/authoring-content/" />
+	<LinkCard title="Components" href="/guides/components/" />
+</CardGrid>
+
+### Asides
+
+Asides (also known as “admonitions” or “callouts”) are useful for displaying secondary information alongside a page’s main content.
+
+An `<Aside>` can have an optional `type` of `note` (the default), `tip`, `caution` or `danger`. Setting a `title` attribute overrides the default aside title.
+
+````mdx
+# src/content/docs/example.mdx
+
+import { Aside } from '@astrojs/starlight/components';
+
+<Aside>A default aside without a custom title.</Aside>
+
+<Aside type="caution" title="Watch out!">
+	A warning aside *with* a custom title.
+</Aside>
+
+<Aside type="tip">
+
+Other content is also supported in asides.
+
+```js
+// A code snippet, for example.
+```
+
+</Aside>
+
+<Aside type="danger">Do not give your password to anyone.</Aside>
+````
+
+The above code generates the following on the page:
+
+import { Aside } from '@astrojs/starlight/components';
+
+<Aside>A default aside without a custom title.</Aside>
+
+<Aside type="caution" title="Watch out!">
+	A warning aside *with* a custom title.
+</Aside>
+
+<Aside type="tip">
+
+Other content is also supported in asides.
+
+```js
+// A code snippet, for example.
+```
+
+</Aside>
+
+<Aside type="danger">Do not give your password to anyone.</Aside>
+
+Starlight also provides a custom syntax for rendering asides in Markdown and MDX as an alternative to the `<Aside>` component.
+See the [“Authoring Content in Markdown”](/guides/authoring-content/#asides) guide for details of the custom syntax.
+
+### Code
+
+Use the `<Code>` component to render syntax highlighted code when using a [Markdown code block](/guides/authoring-content/#code-blocks) is not possible, for example, to render data coming from external sources like files, databases, or APIs.
+
+See the [Expressive Code “Code Component” docs](https://expressive-code.com/key-features/code-component/) for full details of the props `<Code>` supports.
+
+```mdx
+# src/content/docs/example.mdx
+
+import { Code } from '@astrojs/starlight/components';
+
+export const exampleCode = `console.log('This could come from a file or CMS!');`;
+export const fileName = 'example.js';
+export const highlights = ['file', 'CMS'];
+
+<Code code={exampleCode} lang="js" title={fileName} mark={highlights} />
+```
+
+The code above generates the following on the page:
+
+import { Code } from '@astrojs/starlight/components';
+
+export const exampleCode = `console.log('This could come from a file or CMS!');`;
+export const fileName = 'example.js';
+export const highlights = ['file', 'CMS'];
+
+<Code code={exampleCode} lang="js" title={fileName} mark={highlights} />
+
+#### Imported Code
+
+Use [Vite’s `?raw` import suffix](https://vitejs.dev/guide/assets#importing-asset-as-string) to import any code file as a string.
+You can then pass this imported string to the `<Code>` component to include it on your page.
+
+```mdx title="src/content/docs/example.mdx" "?raw"
+import { Code } from '@astrojs/starlight/components';
+import importedCode from '/src/env.d.ts?raw';
+
+<Code code={importedCode} lang="ts" title="src/env.d.ts" />
+```
+
+The code above generates the following on the page:
+
+import importedCode from '/src/env.d.ts?raw';
+
+<Code code={importedCode} lang="ts" title="src/env.d.ts" />
+
+### File Tree
+
+Use the `<FileTree>` component to display the structure of a directory with file icons and collapsible sub-directories.
+
+Specify the structure of your files and directories with an [unordered Markdown list](https://www.markdownguide.org/basic-syntax/#unordered-lists) inside `<FileTree>`.
+Create a sub-directory using a nested list or add a `/` to the end of a list item to render it as a directory without specific content.
+
+The following syntax can be used to customize the appearance of the file tree:
+
+- Highlight a file or directory by making its name bold, e.g. `**README.md**`.
+- Add a comment to a file or directory by adding more text after the name.
+- Add placeholder files and directories by using either `...` or `…` as the name.
+
+```mdx
+# src/content/docs/example.mdx
+
+import { FileTree } from '@astrojs/starlight/components';
+
+<FileTree>
+
+- astro.config.mjs an **important** file
+- package.json
+- README.md
+- src
+  - components
+    - **Header.astro**
+  - …
+- pages/
+
+</FileTree>
+```
+
+The above code generates the following on the page:
+
+import { FileTree } from '@astrojs/starlight/components';
+
+<FileTree>
+
+- astro.config.mjs an **important** file
+- package.json
+- README.md
+- src
+  - components
+    - **Header.astro**
+  - …
+- pages/
+
+</FileTree>
+
+### Steps
+
+Use the `<Steps>` component to style numbered lists of tasks.
+This is useful for more complex step-by-step guides where each step needs to be clearly highlighted.
+
+Wrap `<Steps>` around a standard Markdown ordered list.
+All the usual Markdown syntax is applicable inside `<Steps>`.
+
+````mdx title="src/content/docs/example.mdx"
+import { Steps } from '@astrojs/starlight/components';
+
+<Steps>
+
+1. Import the component into your MDX file:
+
+   ```js
+   import { Steps } from '@astrojs/starlight/components';
+   ```
+
+2. Wrap `<Steps>` around your ordered list items.
+
+</Steps>
+````
+
+The code above generates the following on the page:
+
+import { Steps } from '@astrojs/starlight/components';
+
+<Steps>
+
+1. Import the component into your MDX file:
+
+   ```js
+   import { Steps } from '@astrojs/starlight/components';
+   ```
+
+2. Wrap `<Steps>` around your ordered list items.
+
+</Steps>
+
+### Icon
+
+import { Icon } from '@astrojs/starlight/components';
+import IconsList from '~/components/icons-list.astro';
+
+Starlight provides a set of common icons that you can display in your content using the `<Icon>` component.
+
+Each `<Icon>` requires a [`name`](#all-icons) and can optionally include a `label` to provide context for screen readers.
+The `size` and `color` attributes can be used to adjust the icon’s appearance using CSS units and color values.
+
+```mdx
+# src/content/docs/example.mdx
+
+import { Icon } from '@astrojs/starlight/components';
+
+<Icon name="star" color="goldenrod" size="2rem" />
+<Icon name="rocket" color="var(--sl-color-text-accent)" />
+```
+
+The code above generates the following on the page:
+
+<Icon name="star" color="goldenrod" size="2rem" />
+<Icon name="rocket" color="var(--sl-color-text-accent)" />
+
+#### All icons
+
+A list of all available icons is shown below with their associated names. Click an icon to copy the component code for it.
+
+<IconsList />

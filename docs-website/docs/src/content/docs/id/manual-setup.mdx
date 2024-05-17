@@ -1,0 +1,128 @@
+---
+title: Instalasi Manual
+description: Pelajari cara mengkonfigurasi Starlight secara manual untuk menambahkan ke proyek Astro yang sudah ada.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+Cara tercepat untuk membuat website Starlight adalah dengan menjalankan perintah `create astro` sebagaimana dijelaskan di [panduan memulai](/id/getting-started/#membuat-proyek-baru).
+Jika Anda ingin menambahkan Starlight ke proyek Astro yang sudah ada, berikut ini adalah cara melakukannya.
+
+## Memasang Starlight
+
+Untuk mengikuti panduan ini, Anda membutuhkan proyek Astro yang sudah berjalan.
+
+### Menambahkan integrasi Starlight
+
+Starlight adalah sebuah [integrasi Astro](https://docs.astro.build/en/guides/integrations-guide/). Tambahkan ke website Anda dengan cara menjalankan perintah `astro add` di _root directory_ proyek Anda:
+
+<Tabs>
+    <TabItem label="npm">
+        ```sh
+        npx astro add starlight
+        ```
+
+    </TabItem>
+    <TabItem label="pnpm">
+        ```sh
+        pnpm astro add starlight
+        ```
+    </TabItem>
+    <TabItem label="Yarn">
+        ```sh
+        yarn astro add starlight
+        ```
+    </TabItem>
+
+</Tabs>
+
+Perintah tersebut akan menginstal semua dependensi yang dibutuhkan dan menambahkan Starlight ke dalam _array_ `integrations` di dalam file konfigurasi Astro Anda.
+
+### Mengkonfigurasi integrasi
+
+Integrasi Starlight dikonfigurasi di dalam file `astro.config.mjs`.
+
+Tambahkan `title` untuk memulai:
+
+```js {7-9}
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: 'Situs dokumentasi yang oke banget!',
+		}),
+	],
+});
+```
+
+Untuk opsi lengkapnya tersedia di [referensi pengaturan Starlight](/id/reference/configuration/).
+
+### Mengatur koleksi konten
+
+Starlight dibangun berdasarkan fitur [koleksi konten](https://docs.astro.build/en/guides/content-collections/) oleh Astro, yang dapat dikonfigurasi di file `src/content/config.ts`.
+
+Buat baru atau perbarui file konfigurasi koleksi konten Anda, menambahkan koleksi bernama `docs` yang menggunakan skema `docsSchema` dari Starlight:
+
+```js ins={3,6}
+// src/content/config.ts
+import { defineCollection } from 'astro:content';
+import { docsSchema } from '@astrojs/starlight/schema';
+
+export const collections = {
+	docs: defineCollection({ schema: docsSchema() }),
+};
+```
+
+### Menambahkan konten
+
+Starlight sekarang sudah terkonfigurasi. Sekarang adalah waktunya menambahkan konten Anda!
+
+Buatlah folder `src/content/docs/` dan tambahkan file `index.md`.
+Halaman ini adalah beranda dari website baru Anda:
+
+```md
+---
+# src/content/docs/index.md
+title: Dokumentasi proyek saya
+description: Pelajari tentang proyek saya di website dokumentasi ini yang dibuat dengan Starlight!
+---
+
+Selamat datang di proyek saya!
+```
+
+Starlight menggunakan _file-based routing_, yang artinya setiap file Markdown, MDX, atau Markdoc dalam folder `src/content/docs/` akan dirubah menjadi sebuah halaman di website Anda. _Metadata frontmatter_ (kolom `title` dan `description` pada contoh di atas) dapat mempengaruhi tampilan halaman tersebut.
+Untuk melihat semua opsi yang tersedia bisa dilihat di [referensi _frontmatter_](/id/reference/frontmatter/).
+
+## Tips untuk website yang sudah ada
+
+Jika Anda memiliki sebuah proyek Astro yang sudah berjalan, Anda dapat menggunakan Starlight untuk menambahkan bagian dokumentasi secara cepat.
+
+### Menggunakan Starlight di dalam _subpath_
+
+Untuk menambahkan halaman Starlight di dalam _subpath_, letakkan konten dokumentasi Anda di dalam subfolder `src/content/docs/`.
+
+Contohnya, jika halaman Starlight berada pada rute `/panduan/`, letakkan konten dokumentasi Anda di folder `src/content/docs/panduan/`:
+
+import { FileTree } from '@astrojs/starlight/components';
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - **panduan/**
+        - cara-instalasi.md
+        - index.md
+  - pages/
+- astro.config.mjs
+
+</FileTree>
+
+Di masa yang akan datang, kami berencana mendukung skenario penggunaan semacam ini dengan lebih baik, sehingga Anda tidak perlu lagi menambahkan folder bertingkat di `src/content/docs/`.
+
+### Menggunakan Starlight dengan SSR
+
+Saat ini, Starlight tidak mendukung _deployment_ [SSR](https://docs.astro.build/en/guides/server-side-rendering/) menggunakan adapter server Astro. Kami berharap untuk dapat men-_support_ fitur ini segera.

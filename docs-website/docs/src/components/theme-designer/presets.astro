@@ -1,0 +1,94 @@
+---
+import { Icon } from '@astrojs/starlight/components';
+import { getPalettes } from './color-lib';
+import { presets } from './store';
+
+export interface Props {
+	labels: Record<keyof typeof presets, string> & {
+		label: string;
+		random: string;
+	};
+}
+const { labels } = Astro.props;
+
+const resolvedPresets = Object.entries(presets).map(([key, preset]) => {
+	const palette = getPalettes(preset);
+	const label = labels[key as keyof typeof presets];
+	return [key, { ...palette, label }] as const;
+});
+---
+
+<preset-picker class="sl-flex not-content">
+	<span class="label">{labels.label}</span>
+	{
+		resolvedPresets.map(([key, { label, dark, light }]) => (
+			<button
+				data-preset={key}
+				style={{
+					'--dark-bg': dark['accent-high'],
+					'--light-bg': light.accent,
+					'--dark-text': dark['accent-low'],
+					'--light-text': light.black,
+				}}
+			>
+				{label}
+			</button>
+		))
+	}
+	<button data-random>{labels.random}<Icon name="random" size="1rem" /></button>
+</preset-picker>
+
+<style>
+	preset-picker {
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.75rem;
+	}
+
+	.label {
+		color: var(--sl-color-white);
+	}
+
+	[data-preset],
+	[data-random] {
+		border: 0;
+		border-radius: 99rem;
+		min-width: 4.5rem;
+		display: flex;
+		gap: 0.25rem;
+		align-items: center;
+		justify-content: center;
+		padding: 0.25rem 0.75rem;
+		background-color: var(--dark-bg, var(--sl-color-white));
+		color: var(--dark-text, var(--sl-color-black));
+		font-size: var(--sl-text-xs);
+		cursor: pointer;
+	}
+	:global([data-theme='light']) [data-preset] {
+		background-color: var(--light-bg);
+		color: var(--light-text);
+	}
+	button > :global(*) {
+		/* We want all clicks to go to the button, not child elements. */
+		pointer-events: none;
+	}
+</style>
+
+<script>
+	import { usePreset, useRandom } from './store';
+
+	class PresetPicker extends HTMLElement {
+		constructor() {
+			super();
+			this.addEventListener('click', (e) => {
+				if (e.target instanceof HTMLButtonElement) {
+					const name = e.target.dataset.preset;
+					if (name) usePreset(name);
+					if ('random' in e.target.dataset) useRandom();
+				}
+			});
+		}
+	}
+
+	customElements.define('preset-picker', PresetPicker);
+</script>

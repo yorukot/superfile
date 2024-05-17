@@ -1,0 +1,189 @@
+---
+title: Komponen
+description: Menggunakan komponen dalam MDX dengan Starlight.
+---
+
+Komponen memungkinkan Anda dengan mudah menggunakan kembali bagian UI atau _style_ secara konsisten.
+Contohnya mungkin kartu tautan atau _YouTube embed_.
+Starlight mendukung penggunaan komponen dalam file [MDX](https://mdxjs.com/) dan menyediakan beberapa komponen umum yang dapat Anda gunakan.
+
+[Pelajari lebih lanjut tentang membuat komponen di Astro Docs](https://docs.astro.build/en/core-concepts/astro-components/).
+
+## Menggunakan Komponen
+
+Anda dapat menggunakan komponen dengan mengimpornya ke dalam file MDX Anda dan kemudian merendernya sebagai tag JSX.
+Tag-tag ini mirip dengan tag HTML tetapi dimulai dengan huruf kapital yang sesuai dengan nama dalam pernyataan `import` Anda:
+
+```mdx
+---
+# src/content/docs/index.mdx
+title: Selamat datang di website dokumentasi saya
+---
+
+import SomeComponent from '../../components/SomeComponent.astro';
+import AnotherComponent from '../../components/AnotherComponent.astro';
+
+<SomeComponent prop="sesuatu" />
+
+<AnotherComponent>
+	Komponen juga dapat berisi **konten bertingkat**.
+</AnotherComponent>
+```
+
+Karena Starlight dibuat dengan Astro, Anda dapat menambahkan dukungan untuk komponen yang dibangun dengan berbagai [_UI framework_ yang didukung (React, Preact, Svelte, Vue, Solid, Lit, dan Alpine)](https://docs.astro.build/en/core-concepts/framework-components/) dalam file MDX Anda.
+Pelajari lebih lanjut tentang menggunakan [komponen dalam MDX](https://docs.astro.build/en/guides/markdown-content/#using-components-in-mdx) di website dokumentasi Astro.
+
+### Kompatibilitas dengan style Starlight
+
+Starlight menerapkan _style_ default pada konten Markdown Anda, misalnya menambahkan margin antara elemen-elemen.
+Jika _style_ ini tidak sesuai dengan tampilan komponen Anda, atur kelas `not-content` pada komponen untuk menonaktifkannya.
+
+```astro
+---
+// src/components/Example.astro
+---
+
+<div class="not-content">
+	<p>Tidak terpengaruh oleh style konten default Starlight.</p>
+</div>
+```
+
+## Komponen Bawaan
+
+Starlight menyediakan beberapa komponen bawaan yang umum digunakan untuk keperluan dokumentasi.
+Komponen ini tersedia di _package_ `@astrojs/starlight/components`.
+
+### Tabs
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+Anda dapat menampilkan _interface_ berbasis tab menggunakan komponen `<Tabs>` dan `<TabItem>`.
+Setiap `<TabItem>` harus memiliki `label` untuk ditampilkan kepada pengguna.
+
+```mdx
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+<Tabs>
+	<TabItem label="Bintang">Sirius, Vega, Betelgeuse</TabItem>
+	<TabItem label="Bulan">Io, Europa, Ganymede</TabItem>
+</Tabs>
+```
+
+Kode di atas akan menampilkan tab seperti berikut pada halaman:
+
+<Tabs>
+	<TabItem label="Bintang">Sirius, Vega, Betelgeuse</TabItem>
+	<TabItem label="Bulan">Io, Europa, Ganymede</TabItem>
+</Tabs>
+
+### Cards
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+Anda dapat menampilkan konten di dalam kotak yang sesuai dengan _style_ Starlight menggunakan komponen `<Card>`.
+Bungkus beberapa _card_ dalam komponen `<CardGrid>` untuk menampilkan _card-card_ secara berdampingan ketika ada cukup ruang.
+
+`<Card>` memerlukan `title` dan secara opsional dapat ditambahkan atribut `icon` yang di-set dengan [nama salah satu icon bawaan Starlight](#semua-icon).
+
+```mdx
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<Card title="Cek sekarang">Konten menarik yang ingin Anda highlight.</Card>
+
+<CardGrid>
+	<Card title="Bintang" icon="star">
+		Sirius, Vega, Betelgeuse
+	</Card>
+	<Card title="Bulan" icon="moon">
+		Io, Europa, Ganymede
+	</Card>
+</CardGrid>
+```
+
+Kode di atas akan menampilkan hasil sebagai berikut:
+
+<Card title="Cek sekarang">Konten menarik yang ingin Anda highlight.</Card>
+
+<CardGrid>
+	<Card title="Bintang" icon="star">
+		Sirius, Vega, Betelgeuse
+	</Card>
+	<Card title="Bulan" icon="moon">
+		Io, Europa, Ganymede
+	</Card>
+</CardGrid>
+
+:::tip
+Gunakan _card_ grid di halaman utama untuk menampilkan fitur-fitur utama proyek Anda.
+Tambahkan atribut `stagger` untuk menggeser kolom kedua _card_ secara vertikal dan menambah daya tarik visual:
+
+```astro
+<CardGrid stagger>
+	<!-- cards -->
+</CardGrid>
+```
+
+:::
+
+### Link Cards
+
+Gunakan komponen `<LinkCard>` untuk menautkan ke berbagai halaman secara menonjol.
+
+`<LinkCard>` memerlukan atribut `title` dan [`href`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#href). Anda juga dapat secara opsional menyertakan `description` singkat atau atribut tautan lain seperti `target`.
+
+Gabungkan beberapa komponen `<LinkCard>` dalam `<CardGrid>` untuk menampilkan kartu secara berdampingan ketika terdapat cukup ruang.
+
+```mdx
+import { LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+<LinkCard
+	title="Mengkustomisasi Starlight"
+	description="Pelajari cara membuat situs Starlight Anda sendiri dengan style, font, dan lainnya."
+	href="/id/guides/customization/"
+/>
+
+<CardGrid>
+	<LinkCard title="Menulis Markdown" href="/id/guides/authoring-content/" />
+	<LinkCard title="Komponen" href="/id/guides/components/" />
+</CardGrid>
+```
+
+Kode di atas akan menampilkan hasil sebagai berikut:
+
+import { LinkCard } from '@astrojs/starlight/components';
+
+<LinkCard
+	title="Mengkustomisasi Starlight"
+	description="Pelajari cara membuat situs Starlight Anda sendiri dengan style, font, dan lainnya."
+	href="/id/guides/customization/"
+/>
+
+<CardGrid>
+	<LinkCard title="Menulis Markdown" href="/id/guides/authoring-content/" />
+	<LinkCard title="Komponen" href="/id/guides/components/" />
+</CardGrid>
+
+### Icon
+
+import { Icon } from '@astrojs/starlight/components';
+import IconsList from '~/components/icons-list.astro';
+
+Starlight menyediakan sejumlah icon umum yang dapat Anda tampilkan dalam konten Anda menggunakan komponen `<Icon>`.
+
+Setiap `<Icon>` membutuhkan atribut [`name`](#semua-icon) dan dapat secara opsional menyertakan atribut `label`, `size`, dan `color`.
+
+```mdx
+import { Icon } from '@astrojs/starlight/components';
+
+<Icon name="star" color="goldenrod" size="2rem" />
+```
+
+Kode di atas menghasilkan tampilan berikut di halaman:
+
+<Icon name="star" color="goldenrod" size="2rem" />
+
+#### Semua Icon
+
+List dari semua icon-icon yang tersedia dapat dilihat di bawah sesuai dengan nama-nya masing-masing. Klik icon untuk menyalin kode komponen tersebut.
+
+<IconsList />

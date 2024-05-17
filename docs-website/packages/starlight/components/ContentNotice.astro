@@ -1,0 +1,31 @@
+---
+import { Icons } from '../components/Icons';
+import Icon from '../user-components/Icon.astro';
+
+interface Props {
+	icon: keyof typeof Icons;
+	label: string;
+}
+
+const { icon, label } = Astro.props;
+---
+
+<p class="sl-flex">
+	<Icon name={icon} size="1.5em" color="var(--sl-color-orange-high)" />
+	<span>{label}</span>
+</p>
+
+<style>
+	p {
+		border: 1px solid var(--sl-color-orange);
+		padding: 0.75em 1em;
+		background-color: var(--sl-color-orange-low);
+		color: var(--sl-color-orange-high);
+		width: max-content;
+		max-width: 100%;
+		align-items: center;
+		gap: 0.75em;
+		font-size: var(--sl-text-body-sm);
+		line-height: var(--sl-line-height-headings);
+	}
+</style>

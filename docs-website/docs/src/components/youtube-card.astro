@@ -1,0 +1,34 @@
+---
+import { YouTube } from '@astro-community/astro-embed-youtube';
+import MediaCard from './media-card.astro';
+
+export interface Props {
+	href: string;
+	title: string;
+	description?: string;
+}
+const { href, title, description } = Astro.props;
+---
+
+<MediaCard>
+	<YouTube slot="media" id={href} />
+	<div class="meta sl-flex">
+		<p class="title">{title}</p>
+		{description && <p class="description" set:html={description} />}
+	</div>
+</MediaCard>
+
+<style>
+	.meta {
+		padding: 1rem;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+	.title {
+		font-size: var(--sl-text-lg);
+	}
+	.description {
+		color: var(--sl-color-gray-3);
+		line-height: 1.5;
+	}
+</style>

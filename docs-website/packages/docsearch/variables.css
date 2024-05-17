@@ -1,0 +1,47 @@
+/* Variables */
+:root {
+	--docsearch-primary-color: var(--sl-color-text-accent);
+	--docsearch-text-color: var(--sl-color-text);
+	--docsearch-spacing: 12px;
+	--docsearch-icon-stroke-width: 1.4;
+	--docsearch-highlight-color: var(--docsearch-primary-color);
+	--docsearch-muted-color: var(--sl-color-gray-3);
+	--docsearch-container-background: var(--sl-color-backdrop-overlay);
+
+	/* modal */
+	--docsearch-modal-width: 560px;
+	--docsearch-modal-height: 600px;
+	--docsearch-modal-background: var(--sl-color-gray-6);
+	--docsearch-modal-shadow: var(--sl-shadow-lg);
+
+	/* searchbox */
+	--docsearch-searchbox-height: 56px;
+	--docsearch-searchbox-background: var(--sl-color-gray-7, var(--sl-color-gray-6));
+	--docsearch-searchbox-focus-background: var(--sl-color-black);
+	--docsearch-searchbox-shadow: inset 0 0 0 1px var(--docsearch-primary-color);
+
+	/* hit */
+	--docsearch-hit-height: 56px;
+	--docsearch-hit-color: var(--sl-color-white);
+	--docsearch-hit-active-color: var(--sl-color-black);
+	--docsearch-hit-background: var(--sl-color-black);
+
+	/* key */
+	--docsearch-key-gradient: linear-gradient(
+		var(--sl-color-bg-inline-code) 0%,
+		var(--sl-color-bg-inline-code) 100%
+	);
+
+	/* footer */
+	--docsearch-footer-height: 44px;
+	--docsearch-footer-background: var(--sl-color-black);
+	--docsearch-footer-shadow: 0 -1px 0 0 var(--sl-color-hairline-light);
+}
+
+/* Custom style overrides */
+.DocSearch-Modal {
+	border: 1px solid var(--sl-color-hairline-light);
+}
+.DocSearch-Logo svg * {
+	fill: var(--docsearch-muted-color);
+}

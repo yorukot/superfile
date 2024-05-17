@@ -1,0 +1,463 @@
+---
+title: Personnaliser Starlight
+description: Apprenez à vous approprier votre site Starlight avec votre logo, polices personnalisées et bien plus encore.
+---
+
+import { Tabs, TabItem, FileTree, Steps } from '@astrojs/starlight/components';
+
+Starlight propose par défaut un style et des fonctionnalités pragmatiques, vous pouvez donc démarrer rapidement sans configuration nécessaire.
+Lorsque vous souhaitez commencer à personnaliser l’apparence de votre site Starlight, ce guide vous accompagne.
+
+## Ajouter votre logo
+
+L’ajout d’un logo personnalisé à l’en-tête du site est un moyen rapide d’ajouter votre image de marque personnelle à un site Starlight.
+
+<Steps>
+
+1. Ajoutez votre fichier logo au répertoire `src/assets/` :
+
+   <FileTree>
+
+   - src/
+     - assets/
+       - **mon-logo.svg**
+     - content/
+   - astro.config.mjs
+
+   </FileTree>
+
+2. Ajoutez le chemin vers votre logo à votre option de configuration Starlight [`logo.src`](/fr/reference/configuration/#logo) dans `astro.config.mjs`:
+
+   ```diff lang="js"
+   // astro.config.mjs
+   import { defineConfig } from 'astro/config';
+   import starlight from '@astrojs/starlight';
+
+   export default defineConfig({
+   	integrations: [
+   		starlight({
+   			title: 'Docs Avec Mon Logo',
+   			logo: {
+   +				src: './src/assets/mon-logo.svg',
+   			},
+   		}),
+   	],
+   });
+   ```
+
+</Steps>
+
+Par défaut, le logo sera affiché à côté du nom de votre site (option `title` dans la configuration).
+Si l’image de votre logo inclut déjà le titre du site, vous pouvez masquer visuellement le texte du titre en définissant l’option `replacesTitle` à `true`.
+Le texte du titre (`title`) le texte sera toujours inclus pour les lecteurs d’écran afin que l’en-tête reste accessible.
+
+```js {5}
+starlight({
+  title: 'Docs Avec Mon Logo',
+  logo: {
+    src: './src/assets/mon-logo.svg',
+    replacesTitle: true,
+  },
+}),
+```
+
+### Variantes claires et sombres de votre logo
+
+Vous pouvez afficher différentes versions de votre logo en modes clair et sombre.
+
+<Steps>
+
+1. Ajouter un fichier image pour chaque variante dans `src/assets/`:
+
+   <FileTree>
+
+   - src/
+     - assets/
+       - **logo-clair.svg**
+       - **logo-sombre.svg**
+     - content/
+   - astro.config.mjs
+
+   </FileTree>
+
+2. Ajouter les chemins vers vos variantes de logo dans les options `light` (clair) et `dark` (sombre) en remplacement de l’option `src` dans `astro.config.mjs`:
+
+   ```diff lang="js"
+   starlight({
+     title: 'Docs Avec Mon Logo',
+     logo: {
+   +    light: './src/assets/logo-clair.svg',
+   +    dark: './src/assets/logo-sombre.svg',
+     },
+   }),
+   ```
+
+</Steps>
+
+## Activer un plan de site
+
+Starlight possède une prise en charge intégrée pour la génération d’un plan de site. Activez la génération du plan de site en définissant votre URL comme `site` dans `astro.config.mjs`:
+
+```js {4}
+// astro.config.mjs
+
+export default defineConfig({
+	site: 'https://stargazers.club',
+	integrations: [starlight({ title: 'Site avec un plan de site' })],
+});
+```
+
+## Mise en Page
+
+Par défaut, les pages Starlight utilisent une mise en page avec une barre latérale de navigation globale et une table des matières qui affiche les titres de la page courante.
+
+Vous pouvez appliquer une mise en page plus large sans barres latérales en définissant [`template: splash`](/fr/reference/frontmatter/#template) dans le frontmatter de votre page.
+Cela fonctionne particulièrement bien pour les pages d’atterissage et vous pouvez le voir en action sur la [page d’accueil de ce site](/fr/).
+
+```md {5}
+---
+# src/content/docs/index.md
+
+title: Ma page d’atterissage
+template: splash
+---
+```
+
+## Table des matières
+
+Starlight affiche une table des matières sur chaque page pour permettre aux lecteurs d’accéder plus facilement à la section qu’ils recherchent.
+Vous pouvez personnaliser - ou même désactiver - la table des matières globalement dans l’intégration Starlight ou page par page dans votre frontmatter.
+
+Par défaut, les titres `<h2>` et `<h3>` sont inclus dans la table des matières. Modifiez les niveaux de titres à inclure à l’échelle du site à l’aide des options `minHeadingLevel` et `maxHeadingLevel` dans votre option de configuration [globale `tableOfContents`](/fr/reference/configuration/#tableofcontents). Remplacez ces valeurs par défaut sur une page individuelle en ajoutant les propriétés [frontmatter `tableOfContents`](/fr/reference/frontmatter/#tableofcontents) correspondantes :
+
+<Tabs syncKey="config-type">
+  <TabItem label="Frontmatter">
+
+```md {4-6}
+---
+# src/content/docs/exemple.md
+title: Page avec seulement les H2s dans la table des matières
+tableOfContents:
+  minHeadingLevel: 2
+  maxHeadingLevel: 2
+---
+```
+
+  </TabItem>
+  <TabItem label="Configuration globale">
+
+```js {7}
+// astro.config.mjs
+
+defineConfig({
+	integrations: [
+		starlight({
+			title: 'Site avec une configuration de table des matières personnalisée',
+			tableOfContents: { minHeadingLevel: 2, maxHeadingLevel: 2 },
+		}),
+	],
+});
+```
+
+  </TabItem>
+</Tabs>
+
+Désactivez la table des matières complètement en définissant l’option `tableOfContents` à `false`:
+
+<Tabs syncKey="config-type">
+  <TabItem label="Frontmatter">
+
+```md {4}
+---
+# src/content/docs/exemple.md
+title: Page sans table des matières
+tableOfContents: false
+---
+```
+
+  </TabItem>
+  <TabItem label="Configuration globale">
+
+```js {7}
+// astro.config.mjs
+
+defineConfig({
+	integrations: [
+		starlight({
+			title: 'Site avec la table des matières désactivée globalement',
+			tableOfContents: false,
+		}),
+	],
+});
+```
+
+  </TabItem>
+</Tabs>
+
+## Liens sociaux
+
+Starlight supporte par défaut l’ajout de liens vers vos comptes de médias sociaux dans l’en-tête du site via l’option [`social`](/fr/reference/configuration/#social) dans l’intégration Starlight.
+
+Vous pouvez retrouver une liste complète des icônes de liens prises en charge dans la [référence de configuration](/fr/reference/configuration/#social).
+Faites-nous savoir sur GitHub ou Discord si vous avez besoin de la prise en charge d’un autre service !
+
+```js {9-12}
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: 'Site avec des liens sociaux',
+			social: {
+				discord: 'https://astro.build/chat',
+				github: 'https://github.com/withastro/starlight',
+			},
+		}),
+	],
+});
+```
+
+## Liens d’édition de page
+
+Starlight peut afficher un lien "Modifier cette page" dans le pied de page de chaque page.
+Cela permet au lecteur de trouver facilement le fichier à modifier pour améliorer vos documents.
+Pour les projets open source en particulier, cela peut aider à encourager les contributions de votre communauté.
+
+Pour activer les liens de modification, définissez l’option de configuration [`editLink.baseUrl`](/fr/reference/configuration/#editlink) en lui assignant l’URL utilisée pour modifier votre référentiel dans la configuration de l’intégration Starlight.
+La valeur de `editLink.baseUrl` sera automatiquement ajoutée au chemin d’accès vers la page actuelle pour former le lien d’édition complet.
+
+Les formes d’URL les plus courantes incluent :
+
+- GitHub: `https://github.com/NOM_UTILISATEUR/NOM_DU_DEPOT/edit/NOM_DE_LA_BRANCHE/`
+- GitLab: `https://gitlab.com/NOM_UTILISATEUR/NOM_DU_DEPOT/-/edit/NOM_DE_LA_BRANCHE/`
+
+Si votre projet Starlight ne se trouve pas à la racine de votre dépôt, incluez le chemin d’accès au projet à la fin de l’URL de base.
+
+Cet exemple montre le lien d’édition configuré pour les documents Starlight, qui se trouvent dans le sous-répertoire `docs/` sur la branche `main` du dépôt `withastro/starlight` sur GitHub :
+
+```js {9-11}
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: 'Sites avec liens d’édition de page',
+			editLink: {
+				baseUrl: 'https://github.com/withastro/starlight/edit/main/docs/',
+			},
+		}),
+	],
+});
+```
+
+## Page 404 personnalisée
+
+Les sites Starlight affichent par défaut une simple page 404.
+Vous pouvez personnaliser cela en ajoutant un fichier `404.md` (ou `404.mdx`) à votre répertoire `src/content/docs/` :
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - **404.md**
+      - index.md
+- astro.config.mjs
+
+</FileTree>
+
+Vous pouvez utiliser toutes les techniques de mise en page et de personnalisation de Starlight dans votre page 404. Par exemple, la page 404 par défaut utilise la [mise en page `splash`](#mise-en-page) et le composant [`hero`](/fr/reference/frontmatter/#hero) dans son frontmatter :
+
+```md {4,6-8}
+---
+# src/content/docs/404.md
+title: '404'
+template: splash
+editUrl: false
+hero:
+  title: '404'
+  tagline: Page introuvable. Vérifiez l’URL ou essayez la barre de recherche.
+---
+```
+
+### Désactiver la page 404 par défaut
+
+Si votre projet nécessite une mise en page entièrement personnalisée pour votre page 404, vous pouvez créer une route `src/pages/404.astro` et définir l'option de configuration [`disable404Route`](/fr/reference/configuration/#disable404route) pour désactiver la route par défaut de Starlight :
+
+```js {9}
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: 'Documentation avec 404 personnalisée',
+			disable404Route: true,
+		}),
+	],
+});
+```
+
+## Polices personnalisées
+
+Par défaut, Starlight utilise des polices sans empattement disponibles en local sur la machine du visiteur pour tout les textes.
+Cela garantit que la documentation se charge rapidement dans une police familière à chaque utilisateur, sans nécessiter de bande passante supplémentaire pour télécharger des fichiers de police volumineux.
+
+Si vous souhaitez ajouter une police personnalisée à votre site Starlight, vous pouvez configurer les polices à utiliser dans des fichiers CSS personnalisés ou avec toute autre [technique de style Astro](https://docs.astro.build/en/guides/styling/).
+
+### Configurer les polices
+
+Si vous avez déjà des fichiers de polices, suivez le [guide de configuration local](#configurer-les-polices-localement).
+Pour utiliser Google Fonts, suivez le [Guide de configuration de Fontsource](#configurer-les-polices-avec-fontsource).
+
+#### Configurer les polices localement
+
+<Steps>
+
+1. Ajoutez vos fichiers de polices dans un répertoire `src/fonts/` et créez un fichier `font-face.css` vide :
+
+   <FileTree>
+
+   - src/
+     - content/
+     - fonts/
+       - **PolicePersonnalisee.woff2**
+       - **font-face.css**
+   - astro.config.mjs
+
+   </FileTree>
+
+2. Ajoutez une [déclaration `@font-face`](https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face) pour chacune de vos polices dans `src/fonts/font-face.css`.
+   Utilisez le chemin relatif vers le fichier de police dans la fonction `url()`.
+
+   ```css
+   /* src/fonts/font-face.css */
+
+   @font-face {
+   	font-family: 'Police Personnalisee';
+   	/* Utilisez le chemin relatif vers le fichier de police dans la fonction `url()`. */
+   	src: url('./PolicePersonnalisee.woff2') format('woff2');
+   	font-weight: normal;
+   	font-style: normal;
+   	font-display: swap;
+   }
+   ```
+
+3. Ajoutez le chemin de votre fichier `font-face.css` au tableau `customCss` de Starlight dans `astro.config.mjs` :
+
+   ```diff lang="js"
+   // astro.config.mjs
+   import { defineConfig } from 'astro/config';
+   import starlight from '@astrojs/starlight';
+
+   export default defineConfig({
+   	integrations: [
+   		starlight({
+   			title: 'Site avec polices personnalisées',
+   			customCss: [
+   +				// Chemin relatif vers votre fichier CSS @font-face.
+   +				'/src/fonts/font-face.css',
+   			],
+   		}),
+   	],
+   });
+   ```
+
+</Steps>
+
+#### Configurer les polices avec Fontsource
+
+Le projet [Fontsource](https://fontsource.org/) simplifie l’utilisation des polices Google et d’autres polices open source.
+Il fournit des modules npm que vous pouvez installer pour les polices que vous souhaitez utiliser et inclut des fichiers CSS prêts à l’emploi à ajouter à votre projet.
+
+<Steps>
+
+1.  Trouvez la police que vous souhaitez utiliser dans le [catalogue de Fontsource](https://fontsource.org/).
+    Cet exemple utilisera [IBM Plex Serif](https://fontsource.org/fonts/ibm-plex-serif).
+
+2.  Installez le package pour la police choisie.
+    Vous pouvez trouver le nom du package en cliquant sur "Installer" sur la page de police Fontsource.
+
+        <Tabs>
+
+    <TabItem label="npm">
+
+        ```sh
+        npm install @fontsource/ibm-plex-serif
+        ```
+
+          </TabItem>
+
+          <TabItem label="pnpm">
+
+        ```sh
+        pnpm add @fontsource/ibm-plex-serif
+        ```
+
+          </TabItem>
+
+          <TabItem label="Yarn">
+
+        ```sh
+        yarn add @fontsource/ibm-plex-serif
+        ```
+
+        </TabItem>
+
+      </Tabs>
+
+3.  Ajoutez les fichiers CSS Fontsource au tableau `customCss` de Starlight dans `astro.config.mjs` :
+
+        ```diff lang="js"
+        // astro.config.mjs
+        import { defineConfig } from "astro/config";
+        import starlight from "@astrojs/starlight";
+
+        export default defineConfig({
+          integrations: [
+            starlight({
+              title: "Site avec polices personnalisées Fontsource",
+              customCss: [
+        +        // Fichiers Fontsource pour les graisses regular et semi-bold.
+        +        "@fontsource/ibm-plex-serif/400.css",
+        +        "@fontsource/ibm-plex-serif/600.css",
+              ],
+            }),
+          ],
+        });
+        ```
+
+    Fontsource fournit plusieurs fichiers CSS pour chaque police. Consultez la [documentation Fontsource](https://fontsource.org/docs/getting-started/install#4-weights-and-styles) sur l’inclusion de différentes graisses et styles pour comprendre lesquels utiliser.
+
+</Steps>
+
+### Utiliser vos polices personnalisées
+
+Une fois configurée, pour appliquer votre police personnalisée à votre site, utilisez le nom de la police que vous avez choisie dans un [fichier CSS personnalisé](/fr/guides/css-and-tailwind/#styles-css-personnalisés).
+Par exemple, pour remplacer la police par défaut de Starlight partout, définissez la propriété personnalisée `--sl-font` :
+
+```css
+/* src/styles/custom.css */
+
+:root {
+	--sl-font: 'IBM Plex Serif', serif;
+}
+```
+
+Vous pouvez également écrire du CSS plus ciblé si vous souhaitez appliquer votre police de manière plus sélective.
+Par exemple, pour définir uniquement une police sur le contenu principal, mais pas sur les barres latérales :
+
+```css
+/* src/styles/custom.css */
+
+main {
+	font-family: 'IBM Plex Serif', serif;
+}
+```
+
+Suivez les [instructions de CSS personnalisé](/fr/guides/css-and-tailwind/#styles-css-personnalisés) pour ajouter vos styles à votre site.

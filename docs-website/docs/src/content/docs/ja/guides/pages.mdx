@@ -1,0 +1,162 @@
+---
+title: ページ
+description: Starligtでドキュメントサイトのページを作成し管理する方法を学びます。
+sidebar:
+  order: 1
+---
+
+Starlightは、Markdownのフロントマターにより提供される柔軟なオプションを使用して、コンテンツに基づいてサイトのHTMLページを生成します。さらにStarlightプロジェクトは、[Astroの強力なページ生成ツール](https://docs.astro.build/ja/basics/astro-pages/)に完全にアクセスできます。このガイドでは、Starlightのページ生成の仕組みについて説明します。
+
+## コンテンツページ
+
+### ファイルフォーマット
+
+Starlightは、設定なしでMarkdownとMDXによってコンテンツを作成できます。Markdocのサポートを追加するには、実験的な[AstroのMarkdocインテグレーション](https://docs.astro.build/ja/guides/integrations-guide/markdoc/)をインストールします。
+
+### ページの追加
+
+`.md`または`.mdx`ファイルを`src/content/docs/`に作成することで、サイトに新しいページを追加できます。サブフォルダを使用してファイルを整理し、複数のパスセグメントを作成できます。
+
+たとえば次のファイル構造は、`example.com/hello-world`と`example.com/reference/faq`にページを生成します。
+
+import { FileTree } from '@astrojs/starlight/components';
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - hello-world.md
+      - reference/
+        - faq.md
+
+</FileTree>
+
+### 型安全なフロントマター
+
+すべてのStarlightページは、ページの表示方法を制御するためのカスタマイズ可能な[共通のフロントマタープロパティ](/ja/reference/frontmatter/)を共有しています。
+
+```md
+---
+title: こんにちは、世界！
+description: これは私のStarlight製サイトのページです
+---
+```
+
+何か重要なことを忘れてしまっていても、Starlightがあなたに教えてくれるでしょう。
+
+## カスタムページ
+
+発展的なユースケースとしては、`src/pages/`ディレクトリを作成しておこなうカスタムページの追加があります。`src/pages/`ディレクトリは[Astroのファイルベースルーティング](https://docs.astro.build/ja/basics/astro-pages/#ファイルベースルーティング)を使用しており、他のページフォーマットに加えて`.astro`ファイルをサポートしています。これは、完全にカスタムのレイアウトでページを作成したり、異なるデータソースからページを生成する必要がある場合に役立ちます。
+
+たとえば以下のプロジェクトは、`src/content/docs/`のMarkdownコンテンツと、`src/pages/`のAstroとHTMLルートを混在させています。
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - hello-world.md
+  - pages/
+    - custom.astro
+    - archived.html
+
+</FileTree>
+
+詳しくは[Astroドキュメントの「ページ」ガイド](https://docs.astro.build/ja/basics/astro-pages/)を参照してください。
+
+### カスタムページでStarlightのデザインを使用する
+
+カスタムページでStarlightのデザインを使用するには、ページコンテンツを`<StarlightPage />`コンポーネントでラップします。これは、コンテンツを動的に生成したいものの、Starlightのデザインも使用したいような場合に役立ちます。
+
+```astro
+---
+// src/pages/custom-page/example.astro
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import CustomComponent from './CustomComponent.astro';
+---
+
+<StarlightPage frontmatter={{ title: '私のカスタムページ' }}>
+	<p>これはカスタムコンポーネントを用いたカスタムページです:</p>
+	<CustomComponent />
+</StarlightPage>
+```
+
+#### Props
+
+`<StarlightPage />`コンポーネントは以下のpropsを受け付けます。
+
+##### `frontmatter`（必須）
+
+**type:** `StarlightPageFrontmatter`
+
+ページの[フロントマタープロパティ](/ja/reference/frontmatter/)を設定します。これは、Markdownページのフロントマターと同様です。[`title`](/ja/reference/frontmatter/#title必須)プロパティは必須ですが、その他のプロパティは任意です。
+
+以下のプロパティはMarkdownのフロントマターと異なります。
+
+- [`slug`](/ja/reference/frontmatter/#slug)プロパティはサポートされておらず、カスタムページのURLに基づいて自動的に設定されます。
+- [`editUrl`](/ja/reference/frontmatter/#editurl)オプションは、編集リンクを表示するためのURLが必要です。
+- [自動生成されるリンクグループ](/ja/reference/configuration/#sidebar)にページを表示する方法をカスタマイズするための[`sidebar`](/ja/reference/frontmatter/#sidebar)フロントマタープロパティは利用できません。`<StarlightPage />`コンポーネントを使用するページはコレクションの一部ではなく、自動生成されるサイドバーグループには追加できません。
+
+##### `sidebar`
+
+**type:** `SidebarEntry[]`  
+**default:** [グローバルな`sidebar`設定値](/ja/reference/configuration/#sidebar)に基づき生成されるサイドバー
+
+ページにカスタムのサイトナビゲーションサイドバーを設定します。未設定の場合、ページはデフォルトのグローバルサイドバーを使用します。
+
+たとえば以下のページは、ホームページへのリンクと星座へのリンクグループによりデフォルトのサイドバーをオーバーライドします。サイドバーの現在のページは`isCurrent`プロパティを使用して設定され、またリンクアイテムにオプションの`badge`が追加されています。
+
+```astro {3-13}
+<StarlightPage
+	frontmatter={{ title: 'オリオン座' }}
+	sidebar={[
+		{ label: 'ホーム', href: '/' },
+		{
+			label: '星座',
+			items: [
+				{ label: 'アンドロメダ座', href: '/andromeda/' },
+				{ label: 'オリオン座', href: '/orion/', isCurrent: true },
+				{ label: 'こぐま座', href: '/ursa-minor/', badge: 'スタブ' },
+			],
+		},
+	]}
+>
+	何らかのコンテンツ。
+</StarlightPage>
+```
+
+##### `hasSidebar`
+
+**type:** `boolean`  
+**default:** [`frontmatter.template`](/ja/reference/frontmatter/#template)が`'splash'`の場合は`false`、それ以外の場合は`true`
+
+ページにサイドバーを表示するかどうかを制御します。
+
+##### `headings`
+
+**type:** `{ depth: number; slug: string; text: string }[]`  
+**default:** `[]`
+
+ページのすべての見出しの配列を指定します。指定された場合、Starlightはこれらの見出しからページの目次を生成します。
+
+##### `dir`
+
+**type:** `'ltr' | 'rtl'`  
+**default:** 現在のロケールの記述方向
+
+ページのコンテンツを記述する方向を設定します。
+
+##### `lang`
+
+**type:** `string`  
+**default:** 現在のロケールの言語
+
+`en`や`zh-CN`、`pt-BR`など、ページのBCP-47言語タグを設定します。
+
+##### `isFallback`
+
+**type:** `boolean`  
+**default:** `false`
+
+現在の言語に対する翻訳がない結果、ページが[フォールバックコンテンツ](/ja/guides/i18n/#フォールバックコンテンツ)を使用しているかどうかを示します。

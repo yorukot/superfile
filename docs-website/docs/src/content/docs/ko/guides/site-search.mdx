@@ -1,0 +1,172 @@
+---
+title: 사이트 검색
+description: Starlight에 내장된 사이트 검색 기능과 이를 사용자 정의하는 방법에 대해 알아보세요.
+---
+
+import { Tabs, TabItem, Steps } from '@astrojs/starlight/components';
+
+기본적으로 Starlight 사이트에는 정적 사이트를 위한 빠르고 낮은 대역폭을 갖춘 검색 도구인 [Pagefind](https://pagefind.app/)에서 제공하는 전체 텍스트 검색이 포함되어 있습니다.
+
+검색을 활성화하는 데 구성이 필요하지 않습니다. 사이트를 구축하고 배포한 다음, 사이트 헤더의 검색창을 사용하여 콘텐츠를 찾을 수 있습니다.
+
+## 검색결과에서 콘텐츠 숨기기
+
+### 페이지 제외
+
+검색 색인에서 페이지를 제외하려면 페이지 프런트매터에 [`pagefind: false`](/ko/reference/frontmatter/#pagefind)를 추가하세요.
+
+```md title="src/content/docs/not-indexed.md" ins={3}
+---
+title: 검색에서 숨길 콘텐츠
+pagefind: false
+---
+```
+
+### 페이지 일부 제외
+
+Pagefind는 [`data-pagefind-ignore`](https://pagefind.app/docs/indexing/#removing-individual-elements-from-the-index) 속성이 있는 요소 내부의 콘텐츠를 무시합니다.
+
+다음 예시에서 첫 번째 단락은 검색 결과에 표시되지만 `<div>`의 내용은 표시되지 않습니다.
+
+```md title="src/content/docs/partially-indexed.md" ins="data-pagefind-ignore"
+---
+title: 부분적으로 색인이 생성된 페이지
+---
+
+이 텍스트는 검색을 통해 찾을 수 있습니다.
+
+<div data-pagefind-ignore>
+
+이 텍스트는 검색에서 숨겨집니다.
+
+</div>
+```
+
+## 대체 검색 공급자
+
+### Algolia DocSearch
+
+[Algolia의 DocSearch 프로그램](https://docsearch.algolia.com/)에 대한 액세스 권한이 있고, 이를 Pagefind 대신 사용하려는 경우, 공식 Starlight DocSearch 플러그인을 사용할 수 있습니다.
+
+<Steps>
+
+1. `@astrojs/starlight-docsearch`를 설치합니다.
+
+   <Tabs>
+
+   <TabItem label="npm">
+
+   ```sh
+   npm install @astrojs/starlight-docsearch
+   ```
+
+   </TabItem>
+
+   <TabItem label="pnpm">
+
+   ```sh
+   pnpm add @astrojs/starlight-docsearch
+   ```
+
+   </TabItem>
+
+   <TabItem label="Yarn">
+
+   ```sh
+   yarn add @astrojs/starlight-docsearch
+   ```
+
+   </TabItem>
+
+   </Tabs>
+
+2. `astro.config.mjs` 파일의 Starlight [`plugins`](/ko/reference/configuration/#plugins) 구성에 DocSearch를 추가하고 Algolia `appId`, `apiKey`, `indexName`를 전달합니다.
+
+   ```js ins={4,10-16}
+   // astro.config.mjs
+   import { defineConfig } from 'astro/config';
+   import starlight from '@astrojs/starlight';
+   import starlightDocSearch from '@astrojs/starlight-docsearch';
+
+   export default defineConfig({
+   	integrations: [
+   		starlight({
+   			title: 'DocSearch를 사용하는 사이트',
+   			plugins: [
+   				starlightDocSearch({
+   					appId: 'YOUR_APP_ID',
+   					apiKey: 'YOUR_SEARCH_API_KEY',
+   					indexName: 'YOUR_INDEX_NAME',
+   				}),
+   			],
+   		}),
+   	],
+   });
+   ```
+
+</Steps>
+
+이 업데이트된 구성을 사용하면 사이트의 검색 창에서 기본 검색 모달 대신 Algolia 모달이 열립니다.
+
+#### DocSearch UI 번역
+
+DocSearch는 기본적으로 영어 UI 문자열만 제공합니다.
+Starlight에 내장된 [국제화 시스템](/ko/guides/i18n/#starlight-ui-번역)을 사용하여 모달 UI 번역을 추가하세요.
+
+<Steps>
+
+1. `src/content/config.ts` 파일의 DocSearch 스키마를 사용하여 Starlight의 `i18n` 콘텐츠 컬렉션 정의를 확장합니다.
+
+   ```js ins={4} ins=/{ extend: .+ }/
+   // src/content/config.ts
+   import { defineCollection } from 'astro:content';
+   import { docsSchema, i18nSchema } from '@astrojs/starlight/schema';
+   import { docSearchI18nSchema } from '@astrojs/starlight-docsearch/schema';
+
+   export const collections = {
+   	docs: defineCollection({ schema: docsSchema() }),
+   	i18n: defineCollection({
+   		type: 'data',
+   		schema: i18nSchema({ extend: docSearchI18nSchema() }),
+   	}),
+   };
+   ```
+
+2. `src/content/i18n/` 디렉터리에 있는 JSON 파일에 번역을 추가하세요.
+
+   DocSearch에서 사용되는 영어 기본값은 다음과 같습니다.
+
+   ```json title="src/content/i18n/en.json"
+   {
+   	"docsearch.searchBox.resetButtonTitle": "Clear the query",
+   	"docsearch.searchBox.resetButtonAriaLabel": "Clear the query",
+   	"docsearch.searchBox.cancelButtonText": "Cancel",
+   	"docsearch.searchBox.cancelButtonAriaLabel": "Cancel",
+
+   	"docsearch.startScreen.recentSearchesTitle": "Recent",
+   	"docsearch.startScreen.noRecentSearchesText": "No recent searches",
+   	"docsearch.startScreen.saveRecentSearchButtonTitle": "Save this search",
+   	"docsearch.startScreen.removeRecentSearchButtonTitle": "Remove this search from history",
+   	"docsearch.startScreen.favoriteSearchesTitle": "Favorite",
+   	"docsearch.startScreen.removeFavoriteSearchButtonTitle": "Remove this search from favorites",
+
+   	"docsearch.errorScreen.titleText": "Unable to fetch results",
+   	"docsearch.errorScreen.helpText": "You might want to check your network connection.",
+
+   	"docsearch.footer.selectText": "to select",
+   	"docsearch.footer.selectKeyAriaLabel": "Enter key",
+   	"docsearch.footer.navigateText": "to navigate",
+   	"docsearch.footer.navigateUpKeyAriaLabel": "Arrow up",
+   	"docsearch.footer.navigateDownKeyAriaLabel": "Arrow down",
+   	"docsearch.footer.closeText": "to close",
+   	"docsearch.footer.closeKeyAriaLabel": "Escape key",
+   	"docsearch.footer.searchByText": "Search by",
+
+   	"docsearch.noResultsScreen.noResultsText": "No results for",
+   	"docsearch.noResultsScreen.suggestedQueryText": "Try searching for",
+   	"docsearch.noResultsScreen.reportMissingResultsText": "Believe this query should return results?",
+   	"docsearch.noResultsScreen.reportMissingResultsLinkText": "Let us know."
+   }
+   ```
+
+</Steps>

@@ -1,0 +1,48 @@
+---
+title: Estructura del proyecto
+description: Aprende cómo organizar archivos en tu proyecto Starlight
+---
+
+Esta guía te mostrará cómo se organiza un proyecto de Starlight y qué hacen los diferentes archivos en tu proyecto.
+
+Los proyectos de Starlight generalmente siguen la misma estructura de archivos y directorios que otros proyectos de Astro. Para obtener más detalles, consulta la documentación sobre [la estructura del proyecto de Astro](https://docs.astro.build/es/core-concepts/project-structure/).
+
+## Archivos y directorios
+
+- `astro.config.mjs` — El archivo de configuración de Astro; incluye la integración y configuración de Starlight.
+- `src/content/config.ts` — El archivo de configuración de las colecciones de contenido; añade los esquemas del frontmatter de Starlight a tu proyecto.
+- `src/content/docs/` — Archivos de contenido. Starlight convierte cada archivo `.md`, `.mdx` o `.mdoc` en este directorio en una página de tu sitio.
+- `src/content/i18n/` (opcional) — Datos de traducción para soportar la [internacionalización](/es/guides/i18n/).
+- `src/` — Otros códigos fuente y archivos (componentes, estilos, imágenes, etc.) para tu proyecto.
+- `public/` — Recursos estáticos (fuentes, favicon, PDF, etc.) que no serán procesados por Astro.
+
+## Ejemplo de contenido de un proyecto
+
+Un directorio de proyecto de Starlight podría lucir así:
+
+import { FileTree } from '@astrojs/starlight/components';
+
+<FileTree>
+
+- public/
+  - favicon.svg
+- src/
+  - assets/
+    - logo.svg
+    - screenshot.jpg
+  - components/
+    - CustomButton.astro
+    - InteractiveWidget.jsx
+  - content/
+    - docs/
+      - guides/
+        - 01-getting-started.md
+        - 02-advanced.md
+      - index.mdx
+    - config.ts
+  - env.d.ts
+- astro.config.mjs
+- package.json
+- tsconfig.json
+
+</FileTree>

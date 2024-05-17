@@ -1,0 +1,573 @@
+---
+title: 구성 참조
+description: Starlight가 지원하는 모든 구성 옵션에 대한 개요입니다.
+---
+
+## `starlight` 통합 구성
+
+Starlight는 [Astro](https://astro.build) 웹 프레임워크 위에 구축된 통합입니다. `astro.config.mjs` 구성 파일에서 프로젝트를 구성할 수 있습니다.
+
+```js
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: '즐거운 문서 사이트',
+		}),
+	],
+});
+```
+
+`starlight` 통합에 다음 옵션을 전달할 수 있습니다.
+
+### `title` (필수)
+
+**타입:** `string | Record<string, string>`
+
+웹사이트의 제목을 설정합니다. 메타데이터 및 브라우저 탭 제목에 사용됩니다.
+
+값은 문자열일 수도 있고, 다국어 사이트의 경우 각기 다른 로케일에 대한 값이 포함된 객체일 수도 있습니다.
+객체 형식을 사용할 때 키는 BCP-47 태그(예: `en`, `ar` 또는 `zh-CN`)여야 합니다.
+
+```ts
+starlight({
+	title: {
+		en: 'My delightful docs site',
+		de: 'Meine bezaubernde Dokumentationsseite',
+	},
+});
+```
+
+### `description`
+
+**타입:** `string`
+
+웹사이트에 대한 설명을 설정합니다. 페이지의 프론트매터에 `description`이 설정되지 않은 경우, `<meta name="description">` 태그에서 검색 엔진과 공유되는 메타데이터로 사용됩니다.
+
+### `logo`
+
+**타입:** [`LogoConfig`](#logoconfig)
+
+사이트 제목을 대체하거나 사이트 제목과 함께 네비게이션 바에 표시되는 로고 이미지를 설정합니다. 단일 `src` 속성을 설정하거나 `light` 및 `dark` 속성에 다른 이미지 소스를 전달할 수 있습니다.
+
+```js
+starlight({
+	logo: {
+		src: './src/assets/my-logo.svg',
+	},
+});
+```
+
+#### `LogoConfig`
+
+```ts
+type LogoConfig = { alt?: string; replacesTitle?: boolean } & (
+	| { src: string }
+	| { light: string; dark: string }
+);
+```
+
+### `tableOfContents`
+
+**타입:** `false | { minHeadingLevel?: number; maxHeadingLevel?: number; }`  
+**기본값:** `{ minHeadingLevel: 2; maxHeadingLevel: 3; }`
+
+각 페이지 오른쪽에 표시되는 목차를 구성합니다. 기본적으로 `<h2>` 및 `<h3>` 제목이 이 목차에 포함됩니다.
+
+### `editLink`
+
+**타입:** `{ baseUrl: string }`
+
+기본 URL을 설정하여 "페이지 편집" 링크를 활성화합니다. 최종 링크는 `editLink.baseUrl` + 현재 페이지 경로가 됩니다. 예를 들어, 다음 코드를 통해 GitHub의 `withastro/starlight` 저장소의 페이지 편집 기능을 활성화할 수 있습니다.
+
+```js
+starlight({
+	editLink: {
+		baseUrl: 'https://github.com/withastro/starlight/edit/main/',
+	},
+});
+```
+
+이 구성을 통해 `/introduction` 페이지에 있는 편집 링크는 `https://github.com/withastro/starlight/edit/main/src/content/docs/introduction.md`를 가리킵니다.
+
+### `sidebar`
+
+**타입:** [`SidebarItem[]`](#sidebaritem)
+
+사이트의 사이드바 탐색 항목을 구성합니다.
+
+사이드바는 링크의 배열과 링크 그룹입니다. 각 항목은 `label`과 함께 다음 속성 중 하나를 반드시 포함해야합니다.
+
+- `link` — 특정 URL에 대한 단일 링크(예: `'/home'` 또는 `'https://example.com'`).
+
+- `items` — 더 많은 사이드바 링크와 하위 그룹을 포함하는 배열
+
+- `autogenerate` — 링크 그룹을 자동으로 생성하기 위해 문서의 디렉터리를 지정하는 객체
+
+```js
+starlight({
+	sidebar: [
+		// '홈'이라는 라벨이 붙은 단일 링크 항목
+		{ label: '홈', link: '/' },
+		// 두 개의 링크가 포함된 '여기서부터' 라는 라벨이 붙은 그룹
+		{
+			label: '여기서부터',
+			items: [
+				{ label: '소개', link: '/intro' },
+				{ label: '다음 단계', link: '/next-steps' },
+			],
+		},
+		// 'reference' 디렉터리의 모든 페이지에 연결되는 그룹
+		{
+			label: '참조',
+			autogenerate: { directory: 'reference' },
+		},
+	],
+});
+```
+
+#### 정렬
+
+자동 생성된 사이드바 그룹은 파일 이름을 기준으로 알파벳순으로 정렬됩니다. 예를 들어 `astro.md`에서 생성된 페이지는 `starlight.md` 페이지 위에 표시됩니다.
+
+#### 그룹 최소화
+
+링크 그룹은 기본적으로 펼쳐져 있습니다. 그룹의 `collapsed` 속성을 `true`로 설정하여 이 동작을 변경할 수 있습니다.
+
+자동 생성된 하위 그룹은 기본적으로 상위 그룹의 `collapsed` 속성을 따릅니다. 이를 변경하려면 `autogenerate.collapsed` 속성을 설정하세요.
+
+```js {5,16}
+sidebar: [
+  // 최소화된 링크 그룹
+  {
+    label: '최소화된 링크 모음',
+    collapsed: true,
+    items: [
+      { label: '소개', link: '/intro' },
+      { label: '다음 단계', link: '/next-steps' },
+    ],
+  },
+  // 최소화된 자동 생성 하위 그룹을 포함하는 펼쳐진 그룹
+  {
+    label: '참조',
+    autogenerate: {
+      directory: 'reference',
+      collapsed: true,
+    },
+  },
+],
+```
+
+#### 라벨 번역
+
+다국어 사이트의 경우, 각 항목의 `label`은 기본 언어로 설정됩니다. `translations` 속성을 설정하여 지원하는 다른 언어로 된 라벨을 제공할 수 있습니다.
+
+```js {5,9,14}
+sidebar: [
+  // 브라질 포르투갈어로 번역된 라벨이 있는 예시 사이드바입니다.
+  {
+    label: '여기서부터',
+    translations: { 'pt-BR': 'Comece Aqui' },
+    items: [
+      {
+        label: '시작하기',
+        translations: { 'pt-BR': 'Introdução' },
+        link: '/getting-started',
+      },
+      {
+        label: '프로젝트 구조',
+        translations: { 'pt-BR': 'Estrutura de Projetos' },
+        link: '/structure',
+      },
+    ],
+  },
+],
+```
+
+#### `SidebarItem`
+
+```ts
+type SidebarItem = {
+	label: string;
+	translations?: Record<string, string>;
+	badge?: string | BadgeConfig;
+} & (
+	| {
+			link: string;
+			attrs?: Record<string, string | number | boolean | undefined>;
+	  }
+	| { items: SidebarItem[]; collapsed?: boolean }
+	| {
+			autogenerate: { directory: string; collapsed?: boolean };
+			collapsed?: boolean;
+	  }
+);
+```
+
+#### `BadgeConfig`
+
+```ts
+interface BadgeConfig {
+	text: string;
+	variant: 'note' | 'tip' | 'caution' | 'danger' | 'success' | 'default';
+}
+```
+
+### `locales`
+
+**타입:** <code>\{ \[dir: string\]: [LocaleConfig](#localeconfig) }</code>
+
+지원되는 `locales`를 설정하여 사이트의 [국제화(i18n)를 구성](/ko/guides/i18n/)하세요.
+
+각 항목은 언어 파일이 저장된 디렉터리를 키로 사용해야 합니다.
+
+```js
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: '나의 사이트',
+			// 이 사이트의 기본 언어를 한국어로 설정합니다.
+			defaultLocale: 'ko',
+			locales: {
+				// 한국어 문서는 `src/content/docs/ko/`에 있습니다.
+				ko: {
+					label: '한국어',
+				},
+				// 영어 문서는 `src/content/docs/en/`에 있습니다.
+				en: {
+					label: 'English',
+					lang: 'en',
+				},
+				// 중국어 간체 문서는 `src/content/docs/zh-cn/`에 있습니다.
+				'zh-cn': {
+					label: '简体中文',
+					lang: 'zh-CN',
+				},
+				// 아랍어 문서는 `src/content/docs/ar/`에 있습니다.
+				ar: {
+					label: 'العربية',
+					dir: 'rtl',
+				},
+			},
+		}),
+	],
+});
+```
+
+#### `LocaleConfig`
+
+```ts
+interface LocaleConfig {
+	label: string;
+	lang?: string;
+	dir?: 'ltr' | 'rtl';
+}
+```
+
+각 언어에 대해 다음 옵션을 설정할 수 있습니다.
+
+##### `label` (필수)
+
+**타입:** `string`
+
+언어의 라벨은 언어 변경 기능에서 사용자에게 보여지는 문자입니다. 대부분의 경우, `"English"`, `"العربية"`, 또는 `"简体中文"`와 같이 해당 언어를 사용하는 사용자가 읽을 것으로 예상되는 언어의 이름을 작성하는 것이 좋습니다.
+
+##### `lang`
+
+**타입:** `string`
+
+`"en"`, `"ar"` 또는 `"zh-CN"`와 같은 언어의 BCP-47 태그입니다. 설정하지 않으면 기본적으로 해당 언어의 디렉터리 이름이 사용됩니다. 지역 하위 태그가 있는 언어 태그(예: `"pt-BR"` 또는 `"en-US"`)는 지역별 번역이 없는 경우에 내장된 기본 언어 UI 번역을 사용합니다.
+
+##### `dir`
+
+**타입:** `'ltr' | 'rtl'`
+
+언어의 쓰기 방향입니다. `"ltr"`은 왼쪽에서 오른쪽으로 진행함을 나타내며 기본값입니다. `"rtl"`은 오른쪽에서 왼쪽으로 진행함을 나타냅니다.
+
+#### 루트 로케일
+
+`root` 로케일을 설정하면 `/lang/` 디렉터리 없이 기본 언어를 제공할 수 있습니다.
+
+```js {3-6}
+starlight({
+	locales: {
+		root: {
+			label: '한국어',
+			lang: 'ko',
+		},
+		fr: {
+			label: 'Français',
+		},
+	},
+});
+```
+
+예를 들어, `/getting-started/`를 한국어 경로로 제공하고, `/fr/getting-started/`를 동일한 페이지의 프랑스어 버전으로 제공할 수 있습니다.
+
+### `defaultLocale`
+
+**타입:** `string`
+
+사이트의 기본 언어를 설정합니다.
+값은 [`locales`](#locales) 객체의 키 중 하나와 일치해야 합니다.
+(기본 언어가 [루트 로케일](#루트-로케일)인 경우 이 단계를 건너뛸 수 있습니다.)
+
+이 값은 번역이 누락된 대체 콘텐츠를 제공하는 데 사용됩니다.
+
+### `social`
+
+import SocialLinksType from '~/components/social-links-type.astro';
+
+**타입:** <SocialLinksType />
+
+이 사이트의 소셜 미디어 계정에 대한 선택적 세부 정보입니다. 이 중 하나를 추가하면 사이트 헤더에 아이콘 링크로 표시됩니다.
+
+```js
+starlight({
+	social: {
+		codeberg: 'https://codeberg.org/knut/examples',
+		discord: 'https://astro.build/chat',
+		github: 'https://github.com/withastro/starlight',
+		gitlab: 'https://gitlab.com/delucis',
+		linkedin: 'https://www.linkedin.com/company/astroinc',
+		mastodon: 'https://m.webtoo.ls/@astro',
+		threads: 'https://www.threads.net/@nmoodev',
+		twitch: 'https://www.twitch.tv/bholmesdev',
+		twitter: 'https://twitter.com/astrodotbuild',
+		'x.com': 'https://x.com/astrodotbuild',
+		youtube: 'https://youtube.com/@astrodotbuild',
+	},
+});
+```
+
+### `customCss`
+
+**타입:** `string[]`
+
+Starlight 사이트의 모양과 느낌을 변경하려면 CSS 파일을 제공하세요.
+
+`'./src/custom.css'`와 같은 프로젝트 루트에서 상대 경로로 지정한 로컬 CSS 파일 및 `'@fontsource/roboto'`와 같은 npm 모듈로 설치한 CSS를 지원합니다.
+
+```js
+starlight({
+	customCss: ['./src/custom-styles.css', '@fontsource/roboto'],
+});
+```
+
+### `expressiveCode`
+
+**타입:** `StarlightExpressiveCodeOptions | boolean`  
+**기본값:** `true`
+
+Starlight는 [Expressive Code](https://github.com/expressive-code/expressive-code/tree/main/packages/astro-expressive-code)를 사용하여 코드 블록을 렌더링하고 코드 예시의 부분 강조 표시, 코드 블록에 파일 이름 추가 등 다양한 기능을 지원합니다.
+Markdown 및 MDX 콘텐츠에서 Expressive Code 구문을 사용하는 방법을 알아보려면 [“코드 블록” 가이드](/ko/guides/authoring-content/#코드-블록)를 참조하세요.
+
+Starlight의 `expressiveCode` 옵션을 설정하여 표준 [Expressive Code 구성 옵션](https://github.com/expressive-code/expressive-code/blob/main/packages/astro-expressive-code/README.md#configuration)과 일부 Starlight 관련 속성을 사용할 수 있습니다.
+예를 들어, Expressive Code의 `styleOverrides` 옵션을 설정하여 기본 CSS를 재정의할 수 있습니다. 이를 통해 코드 블록에 둥근 모서리를 제공하는 등의 사용자 정의가 가능해집니다.
+
+```js ins={2-4}
+starlight({
+	expressiveCode: {
+		styleOverrides: { borderRadius: '0.5rem' },
+	},
+});
+```
+
+Expressive Code를 비활성화하려면 Starlight 구성에서 `expressiveCode: false`를 설정하세요.
+
+```js ins={2}
+starlight({
+	expressiveCode: false,
+});
+```
+
+표준 Expressive Code 옵션 외에도 `expressiveCode` 구성에서 다음과 같은 Starlight 관련 속성을 설정하여 코드 블록에 대한 테마를 추가로 변경할 수도 있습니다.
+
+#### `themes`
+
+**타입:** `Array<string | ThemeObject | ExpressiveCodeTheme>`  
+**기본값:** `['starlight-dark', 'starlight-light']`
+
+코드 블록 스타일을 지정하는 데 사용되는 테마를 설정합니다.
+지원되는 테마 형식에 대한 자세한 내용은 [Expressive Code `themes` 문서](https://github.com/expressive-code/expressive-code/blob/main/packages/astro-expressive-code/README.md#themes)를 참조하세요.
+
+Starlight는 기본적으로 Sarah Drasner가 제작한 [Night Owl theme](https://github.com/sdras/night-owl-vscode-theme)의 어둡고 밝은 변형을 사용합니다.
+
+어두운 테마와 밝은 테마를 최소 하나씩 제공하는 경우 Starlight는 자동으로 활성 코드 블록 테마를 현재 사이트 테마와 동기화된 상태로 유지합니다.
+[`useStarlightDarkModeSwitch`](#usestarlightdarkmodeswitch) 옵션을 사용하여 이 동작을 구성하세요.
+
+#### `useStarlightDarkModeSwitch`
+
+**타입:** `boolean`  
+**기본값:** `true`
+
+값이 `true`인 경우, 사이트 테마가 변경되면 코드 블록이 밝은 테마와 어두운 테마를 자동으로 전환합니다.
+값이 `false`인 경우, 여러 테마 간 전환을 처리하기 위해 CSS를 수동으로 추가해야 합니다.
+
+:::note
+`themes`를 설정할 때, 최소 하나의 어두운 테마와 밝은 테마를 제공해야 Starlight 어두운 모드 스위치가 작동합니다.
+:::
+
+#### `useStarlightUiThemeColors`
+
+**타입:** `boolean`  
+**기본값:** `themes`가 설정되어 있지 않으면 `true`이고, 그렇지 않으면 `false`입니다.
+
+값이 `true`인 경우, Starlight의 CSS 변수는 코드 블록의 UI 요소(배경, 버튼, 그림자 등)에 사용되며, [사이트 색상 테마](/ko/guides/css-and-tailwind/#테마)와 일치합니다.
+값이 `false`인 경우, 활성 구문 강조 테마에서 제공하는 색상이 이러한 요소에 사용됩니다.
+
+:::note
+사용자 정의 테마를 사용하고 이를 `true`로 설정하는 경우, 적절한 색상 대비를 보장하기 위해 최소한 하나의 어두운 테마와 하나의 밝은 테마를 제공해야 합니다.
+:::
+
+### `pagefind`
+
+**타입:** `boolean`  
+**기본값:** `true`
+
+Starlight의 기본 사이트 검색 공급자인 [Pagefind](https://pagefind.app/)가 활성화되어 있는지 정의합니다.
+
+Pagefind로 사이트 색인을 생성하지 않으려면 `false`로 설정하세요.
+또한, 이는 기본 검색 UI도 숨깁니다.
+
+### `head`
+
+**타입:** [`HeadConfig[]`](#headconfig)
+
+Starlight 사이트의 `<head>`에 사용자 정의 태그를 추가합니다. 분석 및 기타 서드파티 스크립트와 리소스를 추가하는 데 유용할 수 있습니다.
+
+```js
+starlight({
+	head: [
+		// Fathom 분석 스크립트 태그를 추가하는 예시
+		{
+			tag: 'script',
+			attrs: {
+				src: 'https://cdn.usefathom.com/script.js',
+				'data-site': 'MY-FATHOM-ID',
+				defer: true,
+			},
+		},
+	],
+});
+```
+
+`head`의 항목은 HTML 요소로 직접 변환되며 Astro의 [스크립트](https://docs.astro.build/ko/guides/client-side-scripts/#스크립트-처리)나 [스타일](https://docs.astro.build/ko/guides/styling/#astro에서-스타일링하기) 처리를 거치지 않습니다.
+스크립트, 스타일 또는 이미지와 같은 로컬 자산을 가져와야 하는 경우 [Head 컴포넌트를 재정의하세요](/ko/guides/overriding-components/#내장-컴포넌트-재사용).
+
+#### `HeadConfig`
+
+```ts
+interface HeadConfig {
+	tag: string;
+	attrs?: Record<string, string | boolean | undefined>;
+	content?: string;
+}
+```
+
+### `lastUpdated`
+
+**타입:** `boolean`  
+**기본값:** `false`
+
+페이지 하단에 최종 업데이트 날짜를 표시할지 여부를 제어합니다.
+
+기본적으로 이 기능은 저장소의 Git 기록에 의존하며 [얕은 복제](https://git-scm.com/docs/git-clone#Documentation/git-clone.txt---depthltdepthgt)를 수행하는 일부 배포 플랫폼에서는 정확하지 않을 수 있습니다. 페이지는 [`lastUpdated` 프론트매터 필드](/ko/reference/frontmatter/#lastupdated)를 사용하여 이 설정이나 Git 기반 날짜를 변경할 수 있습니다.
+
+### `pagination`
+
+**타입:** `boolean`  
+**기본값:** `true`
+
+페이지 하단에 이전 페이지 링크와 다음 페이지 링크가 포함되어야 하는지 정의합니다.
+
+페이지는 [`prev`](/ko/reference/frontmatter/#prev)와 [`next`](/ko/reference/frontmatter/#next) 프론트매터 필드를 통해 이 설정이나 링크 텍스트, URL을 변경할 수 있습니다.
+
+### `favicon`
+
+**타입:** `string`  
+**기본값:** `'/favicon.svg'`
+
+`public/` 디렉터리에 포함되어 있으며 유효한 아이콘 파일인 (`.ico`, `.gif`, `.jpg`, `.png`, 또는 `.svg`) 웹 사이트의 기본 파비콘 경로를 설정합니다.
+
+```js
+starlight({
+  favicon: '/images/favicon.svg',
+}),
+```
+
+추가 변형이나 대체 파비콘을 설정해야 하는 경우 [`head` 옵션](#head)을 사용하여 태그를 추가할 수 있습니다.
+
+```js
+starlight({
+	favicon: '/images/favicon.svg',
+	head: [
+		// Safari용 대체 ICO 파비콘을 추가합니다.
+		{
+			tag: 'link',
+			attrs: {
+				rel: 'icon',
+				href: '/images/favicon.ico',
+				sizes: '32x32',
+			},
+		},
+	],
+});
+```
+
+### `titleDelimiter`
+
+**타입:** `string`  
+**기본값:** `'|'`
+
+브라우저 탭에 표시되는 페이지의 `<title>` 태그에서 페이지 제목과 사이트 제목 사이의 구분 기호를 설정합니다.
+
+기본적으로 모든 페이지에 설정된 `<title>` 태그의 내용은 `페이지 제목 | 사이트 제목`입니다.
+예를 들어, 이 페이지의 제목이 "구성 참조"이고, 이 사이트의 제목이 "Starlight"라면, 이 페이지의 `<title>`의 내용은 `구성 참조 | Starlight`가 됩니다.
+
+### `disable404Route`
+
+**타입:** `boolean`  
+**기본값:** `false`
+
+Starlight의 기본 [404 페이지](https://docs.astro.build/ko/core-concepts/astro-pages/#사용자-정의-404-오류-페이지) 삽입을 비활성화합니다. 프로젝트에서 사용자 정의 `src/pages/404.astro` 경로를 사용하려면 이 옵션을 `true`로 설정하세요.
+
+### `components`
+
+**타입:** `Record<string, string>`
+
+Starlight의 기본 구현을 재정의하기 위해 컴포넌트에 대한 경로를 제공합니다.
+
+```js
+starlight({
+	components: {
+		SocialLinks: './src/components/MySocialLinks.astro',
+	},
+});
+```
+
+재정의할 수 있는 모든 컴포넌트에 대한 자세한 내용은 [재정의 참조](/ko/reference/overrides/)를 확인하세요.
+
+### `plugins`
+
+**타입:** [`StarlightPlugin[]`](/ko/reference/plugins/#빠른-api-참조)
+
+맞춤형 플러그인으로 Starlight를 확장하세요.
+플러그인은 프로젝트에 변경 사항을 적용하여 Starlight의 기능을 수정하거나 추가합니다.
+
+사용 가능한 플러그인 목록을 보려면 [플러그인 쇼케이스](/ko/resources/plugins/)를 방문하세요.
+
+```js
+starlight({
+	plugins: [starlightPlugin()],
+});
+```
+
+나만의 플러그인을 만드는 방법에 대한 자세한 내용은 [플러그인 참조](/ko/reference/plugins/)를 확인하세요.

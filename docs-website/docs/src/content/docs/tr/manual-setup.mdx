@@ -1,0 +1,128 @@
+---
+title: Elle Kurulum
+description: Var olan Astro projesine Starlight'ı eklemek için nasıl yapılandırıldığını öğrenin.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+Yeni bir Starlight sitesi yapmanın en hızlı yolu, [Başlangıç Rehberi](/tr/getting-started/#yeni-proje-oluşturma)'nde gösterildiği gibi `create astro` komutunu kullanmak.
+Mevcut Astro projesine Starlight eklemek istersen, bu rehber nasıl yapılacağını açıklar.
+
+## Starlight Kurulumu
+
+Bu rehberi takip edebilmen için mevcut Astro projesine ihtiyacın olacak.
+
+### Starlight Entegrasyonunun Eklenmesi
+
+Starlight bir [Astro entegrasyonu](https://docs.astro.build/en/guides/integrations-guide/)'dur. Projenin kök dizininde `astro add` komutunu çalıştırarak sitene ekle:
+
+<Tabs>
+    <TabItem label="npm">
+        ```sh
+        npx astro add starlight
+        ```
+
+    </TabItem>
+    <TabItem label="pnpm">
+        ```sh
+        pnpm astro add starlight
+        ```
+    </TabItem>
+    <TabItem label="Yarn">
+        ```sh
+        yarn astro add starlight
+        ```
+    </TabItem>
+
+</Tabs>
+
+Bu adım, gerekli bağımlılıkları yükleyecek ve Astro yapılandırma dosyasındaki `integrations` dizisine Starlight’ı ekleyecek.
+
+### Entegrasyon Yapılandırması
+
+Starlight entegrasyonu `astro.config.mjs` dosyanda yapılandırılmıştır.
+
+Başlangıç için bir `başlık (title)` ekle:
+
+```js {7-9}
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: 'Benim harika dokümantasyon sitem',
+		}),
+	],
+});
+```
+
+Geçerli olan tüm ayarları [Starlight Yapılandırma Referansı](/tr/reference/configuration/)'nda bulabilirsin.
+
+### İçerik Koleksiyonlarının Yapılandırılması
+
+Starlight, Astro'nun `src/content/config.ts` dosyasında yapılandırılan [içerik koleksiyonları](https://docs.astro.build/en/guides/content-collections/) üzerine kurulmuştur.
+
+Starlight'ın `docsSchema` isimli şemasını kullanan `docs` isimli koleksiyon ekleyerek içerik yapılandırma dosyasını oluştur ya da güncelle:
+
+```js ins={3,6}
+// src/content/config.ts
+import { defineCollection } from 'astro:content';
+import { docsSchema } from '@astrojs/starlight/schema';
+
+export const collections = {
+	docs: defineCollection({ schema: docsSchema() }),
+};
+```
+
+### İçerik Ekleme
+
+Starlight'ın yapılandırması artık tamamladı. Şimdi sıra içerik eklemekte!
+
+`src/content/docs/` dizinini oluştur ve `index.md` dosyasını ekle.
+Bu, sitenin ana sayfası olacak.
+
+```md
+---
+# src/content/docs/index.md
+title: Dokümanlarım
+description: Starlight ile yapılmış bu dokümantasyon sitesinde projem ile ilgili daha fazlasını öğren.
+---
+
+Projeme hoşgeldin!
+```
+
+Starlight dosya bazlı yönlendirme kullanır, bu da `src/content/docs/` dizini altındaki her Markdown, MDX ya da Markdoc dosyasını sitende bir sayfaya dönüştüreceği anlamına gelir. Frontmatter metadata (yukarıdaki örnekte yer alan `title` ve `description` alanları) görüntülenen her sayfada değişebilir.
+Geçerli olan tüm ayarları [frontmatter referansı](/tr/reference/frontmatter/)'nda görebilirsin.
+
+## Var olan siteler için ipuçları
+
+Hazır Astro projen varsa, Starlight'ı sitende dokümantasyon bölümü oluşturmak için kullanabilirsin.
+
+### Starlight'ın Alt Kırılımda Kullanımı
+
+Tüm Starlight sayfalarını alt kırılımda eklemek için `src/content/docs/` içinde alt dizin olarak tüm dokümanlarını ekle.
+
+Örneğin, Starlight sayfaların `/guides/` kırılımıyla başlaması gerekiyorsa, içeriklerini `src/content/docs/guides/` dizininde ekle:
+
+import { FileTree } from '@astrojs/starlight/components';
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - **guides/**
+        - guide.md
+        - index.md
+  - pages/
+- astro.config.mjs
+
+</FileTree>
+
+Bu kullanımı, `src/content/docs/` dizini içinde ekstra alt dizin ihtiyacını kaldırmak için gelecekte daha iyi desteklemeyi planlıyoruz.
+
+### Starliht'ın SSR ile Kullanımı
+
+Mevcut olarak Starlight Astro'nun sunucu adaptörlerini kullanarak [SSR dağıtımı](https://docs.astro.build/en/guides/server-side-rendering/)'nı desteklememektedir. Yakın zamanda desteklemeyi planlıyoruz.

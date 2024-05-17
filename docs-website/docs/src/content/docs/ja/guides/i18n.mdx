@@ -1,0 +1,241 @@
+---
+title: 国際化（i18n）
+description: 複数言語をサポートするためにStarlightサイトを設定する方法について学びます。
+---
+
+import { FileTree, Steps } from '@astrojs/starlight/components';
+
+Starlightは、ルーティング、フォールバックコンテンツ、右横書き（right-to-left、RTL）言語へのフルサポートなど、複数言語サイトを構築するための機能を組み込みで提供します。
+
+## i18nの設定
+
+<Steps>
+
+1. [`locales`](/ja/reference/configuration/#locales)と[`defaultLocale`](/ja/reference/configuration/#defaultlocale)をStarlightインテグレーションに渡すことで、サポートする言語についてStarlightに伝えます。
+
+   ```js {9-26}
+   // astro.config.mjs
+   import { defineConfig } from 'astro/config';
+   import starlight from '@astrojs/starlight';
+
+   export default defineConfig({
+   	integrations: [
+   		starlight({
+   			title: 'My Docs',
+   			// このサイトのデフォルト言語として英語を設定します。
+   			defaultLocale: 'en',
+   			locales: {
+   				// 英語のドキュメントは`src/content/docs/en/`に置きます。
+   				en: {
+   					label: 'English',
+   				},
+   				// 簡体字中国語のドキュメントは`src/content/docs/zh-cn/`に置きます。
+   				'zh-cn': {
+   					label: '简体中文',
+   					lang: 'zh-CN',
+   				},
+   				// アラビア語のドキュメントは`src/content/docs/ar/`に置きます。
+   				ar: {
+   					label: 'العربية',
+   					dir: 'rtl',
+   				},
+   			},
+   		}),
+   	],
+   });
+   ```
+
+   `defaultLocale`はフォールバックコンテンツとUIラベルに使用されるため、コンテンツを最初に書く可能性が最も高い言語、またはすでにコンテンツがある言語を選択してください。
+
+2. `src/content/docs/`に各言語のディレクトリを作成します。たとえば上で示した構成に対しては、以下のフォルダを作成します。
+
+   <FileTree>
+
+   - src/
+     - content/
+       - docs/
+         - ar/
+         - en/
+         - zh-cn/
+
+   </FileTree>
+
+3. これで各言語のディレクトリにコンテンツ用のファイルを追加できるようになりました。言語間でページを関連付けるために、同じページには同じファイル名を使用してください。フォールバックコンテンツや翻訳に関する通知など、Starlightのi18n機能をフル活用しましょう。
+
+   たとえば、`ar/index.md`と`en/index.md`は、アラビア語版と英語版のホームページをそれぞれ表わします。
+
+</Steps>
+
+### ルートロケールを使用する
+
+「ルート」ロケールを使用すると、パスにi18nプレフィックスを付けずにある言語を提供できます。たとえば英語をルートロケールとすると、英語のページパスは`/en/about`ではなく`/about`のようになります。
+
+ルートロケールを設定するには、`locales`の`root`キーを使用します。ルートロケールがコンテンツのデフォルトロケールでもある場合は、`defaultLocale`を削除するか、`'root'`に設定します。
+
+```js {9,11-14}
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: 'My Docs',
+			defaultLocale: 'root', // 任意
+			locales: {
+				root: {
+					label: 'English',
+					lang: 'en', // langはルートロケールに必要です
+				},
+				'zh-cn': {
+					label: '简体中文',
+					lang: 'zh-CN',
+				},
+			},
+		}),
+	],
+});
+```
+
+`root`ロケールを使用する場合は、言語専用のフォルダではなく、`src/content/docs/`にその言語のページを直接保存します。たとえば上記の設定を使用した場合、英語と中国語のホームページ用ファイルは次のようになります。
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - **index.md**
+      - zh-cn/
+        - **index.md**
+
+</FileTree>
+
+#### 単一言語のサイト
+
+デフォルトでは、Starlightは単一言語（英語）のサイトです。他の言語で単一言語のサイトを作成するには、その言語を`locales`において`root`に設定します。
+
+```diff lang="js" {10-13}
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: '私のドキュメント',
+			locales: {
+				root: {
+					label: '简体中文',
+					lang: 'zh-CN',
+				},
+			},
+		}),
+	],
+});
+```
+
+これにより、言語選択機能などの他の国際化機能は有効化せずに、Starlightのデフォルト言語を上書きできます。
+
+## フォールバックコンテンツ
+
+Starlightは、すべての言語で同等のページが作成されることを想定しています。たとえば`en/about.md`ファイルがある場合、サポートする他の言語でもそれぞれ`about.md`を作成してください。これにより、まだ翻訳されていないページに対して、Starlightが自動的にフォールバックコンテンツを提供できるようになります。
+
+ある言語の翻訳がまだである場合、Starlightはそのページのコンテンツを（`defaultLocale`で設定する）デフォルト言語で表示します。たとえば、概要（about）ページのフランス語版をまだ作成していない場合、デフォルト言語が英語であれば、`/fr/about`を訪れた人には未翻訳であるという通知とともに英語のコンテンツが表示されます。これにより、まずデフォルト言語にコンテンツを追加し、そして翻訳者が時間を掛けて徐々に翻訳していくことが可能となります。
+
+## StarlightのUIを翻訳する
+
+import LanguagesList from '~/components/languages-list.astro';
+import UIStringsList from '~/components/ui-strings-list.astro';
+
+Starlightでは、読者が選択した言語でサイト全体を体験できるように、翻訳されたコンテンツファイルをホストするだけでなく、デフォルトUIの文字列（たとえば目次に表示されている「目次」という見出し）も翻訳できるようになっています。
+
+{/* prettier-ignore */}
+<LanguagesList startsSentence />の翻訳済みUI文字列がすでに用意されていますが、[デフォルト言語をさらに追加するための貢献](https://github.com/withastro/starlight/blob/main/CONTRIBUTING.md)も歓迎します。
+
+`18n`データコレクションを使用すると、サポートしたい言語の翻訳を追加したり、デフォルトのラベルを上書きしたりできます。
+
+<Steps>
+
+1. 設定がまだであれば、`src/content/config.ts`で`i18n`データコレクションを設定します。
+
+   ```diff lang="js" ins=/, (i18nSchema)/
+   // src/content/config.ts
+   import { defineCollection } from 'astro:content';
+   import { docsSchema, i18nSchema } from '@astrojs/starlight/schema';
+
+   export const collections = {
+   	docs: defineCollection({ schema: docsSchema() }),
+   +	i18n: defineCollection({ type: 'data', schema: i18nSchema() }),
+   };
+   ```
+
+2. UI文字列を追加で翻訳したいロケールごとに、`src/content/i18n/`にJSONファイルを作成します。たとえば、以下ではアラビア語と簡体字中国語の翻訳ファイルを追加しています。
+
+   <FileTree>
+
+   - src/
+     - content/
+       - i18n/
+         - ar.json
+         - zh-CN.json
+
+   </FileTree>
+
+3. 翻訳したいキーに対応する翻訳を、JSONファイルに追加します。キーは英語のままとし、値のみを翻訳します（例: `"search.label": "Buscar"`）。
+
+   以下は、Starlightが英語版のデフォルトとして使用している文字列です。
+
+   <UIStringsList />
+
+   Starlightのコードブロックは、[Expressive Code](https://github.com/expressive-code/expressive-code)ライブラリによって動作しています。`expressiveCode`キーを使用して、同じJSONファイルでUI文字列の翻訳について設定できます。
+
+   ```json
+   {
+   	"expressiveCode.copyButtonCopied": "Copied!",
+   	"expressiveCode.copyButtonTooltip": "Copy to clipboard",
+   	"expressiveCode.terminalWindowFallbackTitle": "Terminal window"
+   }
+   ```
+
+   Starlightの検索モーダルは、[Pagefind](https://pagefind.app/)ライブラリによって動作しています。PagefindのUIの翻訳は、`pagefind`キーを使用して同じJSONファイルに設定できます。
+
+   ```json
+   {
+   	"pagefind.clear_search": "Clear",
+   	"pagefind.load_more": "Load more results",
+   	"pagefind.search_label": "Search this site",
+   	"pagefind.filters_label": "Filters",
+   	"pagefind.zero_results": "No results for [SEARCH_TERM]",
+   	"pagefind.many_results": "[COUNT] results for [SEARCH_TERM]",
+   	"pagefind.one_result": "[COUNT] result for [SEARCH_TERM]",
+   	"pagefind.alt_search": "No results for [SEARCH_TERM]. Showing results for [DIFFERENT_TERM] instead",
+   	"pagefind.search_suggestion": "No results for [SEARCH_TERM]. Try one of the following searches:",
+   	"pagefind.searching": "Searching for [SEARCH_TERM]..."
+   }
+   ```
+
+</Steps>
+
+### 翻訳スキーマを拡張する
+
+`i18nSchema()`オプションの`extend`を設定することで、サイトの翻訳辞書にカスタムキーを追加できます。以下の例では、オプションの`custom.label`キーが新たにデフォルトのキーに追加されています。
+
+```diff lang="js"
+// src/content/config.ts
+import { defineCollection, z } from 'astro:content';
+import { docsSchema, i18nSchema } from '@astrojs/starlight/schema';
+
+export const collections = {
+	docs: defineCollection({ schema: docsSchema() }),
+	i18n: defineCollection({
+		type: 'data',
+		schema: i18nSchema({
++			extend: z.object({
++				'custom.label': z.string().optional(),
++			}),
+		}),
+	}),
+};
+```
+
+コンテンツコレクションのスキーマについて詳しくは、Astroドキュメントの[「コレクションスキーマの定義」](https://docs.astro.build/ja/guides/content-collections/#コレクションスキーマの定義)を参照してください。

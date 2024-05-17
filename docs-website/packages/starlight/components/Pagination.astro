@@ -1,0 +1,78 @@
+---
+import Icon from '../user-components/Icon.astro';
+import type { Props } from '../props';
+
+const { dir, labels, pagination } = Astro.props;
+const { prev, next } = pagination;
+const isRtl = dir === 'rtl';
+---
+
+<div class="pagination-links" dir={dir}>
+	{
+		prev && (
+			<a href={prev.href} rel="prev">
+				<Icon name={isRtl ? 'right-arrow' : 'left-arrow'} size="1.5rem" />
+				<span>
+					{labels['page.previousLink']}
+					<br />
+					<span class="link-title">{prev.label}</span>
+				</span>
+			</a>
+		)
+	}
+	{
+		next && (
+			<a href={next.href} rel="next">
+				<Icon name={isRtl ? 'left-arrow' : 'right-arrow'} size="1.5rem" />
+				<span>
+					{labels['page.nextLink']}
+					<br />
+					<span class="link-title">{next.label}</span>
+				</span>
+			</a>
+		)
+	}
+</div>
+
+<style>
+	.pagination-links {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
+		gap: 1rem;
+	}
+
+	a {
+		display: flex;
+		align-items: center;
+		justify-content: flex-start;
+		gap: 0.5rem;
+		width: 100%;
+		flex-basis: calc(50% - 0.5rem);
+		flex-grow: 1;
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 0.5rem;
+		padding: 1rem;
+		text-decoration: none;
+		color: var(--sl-color-gray-2);
+		box-shadow: var(--sl-shadow-md);
+		overflow-wrap: anywhere;
+	}
+	[rel='next'] {
+		justify-content: end;
+		text-align: end;
+		flex-direction: row-reverse;
+	}
+	a:hover {
+		border-color: var(--sl-color-gray-2);
+	}
+
+	.link-title {
+		color: var(--sl-color-white);
+		font-size: var(--sl-text-2xl);
+		line-height: var(--sl-line-height-headings);
+	}
+
+	svg {
+		flex-shrink: 0;
+	}
+</style>

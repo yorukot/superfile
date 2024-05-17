@@ -1,0 +1,274 @@
+---
+title: Internationalization (i18n)
+description: Learn how to configure your Starlight site to support multiple languages.
+---
+
+import { FileTree, Steps } from '@astrojs/starlight/components';
+
+Starlight provides built-in support for multilingual sites, including routing, fallback content, and full right-to-left (RTL) language support.
+
+## Configure i18n
+
+<Steps>
+
+1. Tell Starlight about the languages you support by passing [`locales`](/reference/configuration/#locales) and [`defaultLocale`](/reference/configuration/#defaultlocale) to the Starlight integration:
+
+   ```js {9-26}
+   // astro.config.mjs
+   import { defineConfig } from 'astro/config';
+   import starlight from '@astrojs/starlight';
+
+   export default defineConfig({
+   	integrations: [
+   		starlight({
+   			title: 'My Docs',
+   			// Set English as the default language for this site.
+   			defaultLocale: 'en',
+   			locales: {
+   				// English docs in `src/content/docs/en/`
+   				en: {
+   					label: 'English',
+   				},
+   				// Simplified Chinese docs in `src/content/docs/zh-cn/`
+   				'zh-cn': {
+   					label: '简体中文',
+   					lang: 'zh-CN',
+   				},
+   				// Arabic docs in `src/content/docs/ar/`
+   				ar: {
+   					label: 'العربية',
+   					dir: 'rtl',
+   				},
+   			},
+   		}),
+   	],
+   });
+   ```
+
+   Your `defaultLocale` will be used for fallback content and UI labels, so choose the language you are most likely to start writing content in, or already have content for.
+
+2. Create a directory for each language in `src/content/docs/`.
+   For example, for the configuration shown above, create the following folders:
+
+   <FileTree>
+
+   - src/
+     - content/
+       - docs/
+         - ar/
+         - en/
+         - zh-cn/
+
+   </FileTree>
+
+3. You can now add content files in your language directories. Use the same file name to associate pages across languages and take advantage of Starlight’s full set of i18n features, including fallback content, translation notices, and more.
+
+   For example, create `ar/index.md` and `en/index.md` to represent the homepage for Arabic and English respectively.
+
+</Steps>
+
+### Use a root locale
+
+You can use a “root” locale to serve a language without any i18n prefix in its path. For example, if English is your root locale, an English page path would look like `/about` instead of `/en/about`.
+
+To set a root locale, use the `root` key in your `locales` config. If the root locale is also the default locale for your content, remove `defaultLocale` or set it to `'root'`.
+
+```js {9,11-14}
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: 'My Docs',
+			defaultLocale: 'root', // optional
+			locales: {
+				root: {
+					label: 'English',
+					lang: 'en', // lang is required for root locales
+				},
+				'zh-cn': {
+					label: '简体中文',
+					lang: 'zh-CN',
+				},
+			},
+		}),
+	],
+});
+```
+
+When using a `root` locale, keep pages for that language directly in `src/content/docs/` instead of in a dedicated language folder. For example, here are the home page files for English and Chinese when using the config above:
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - **index.md**
+      - zh-cn/
+        - **index.md**
+
+</FileTree>
+
+#### Monolingual sites
+
+By default, Starlight is a monolingual (English) site. To create a single language site in another language, set it as the `root` in your `locales` config:
+
+```diff lang="js" {10-13}
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: 'My Docs',
+			locales: {
+				root: {
+					label: '简体中文',
+					lang: 'zh-CN',
+				},
+			},
+		}),
+	],
+});
+```
+
+This allows you to override Starlight’s default language without enabling other internationalization features for multi-language sites, such as the language picker.
+
+## Fallback content
+
+Starlight expects you to create equivalent pages in all your languages. For example, if you have an `en/about.md` file, create an `about.md` for each other language you support. This allows Starlight to provide automatic fallback content for pages that have not yet been translated.
+
+If a translation is not yet available for a language, Starlight will show readers the content for that page in the default language (set via `defaultLocale`). For example, if you have not yet created a French version of your About page and your default language is English, visitors to `/fr/about` will see the English content from `/en/about` with a notice that this page has not yet been translated. This helps you add content in your default language and then progressively translate it when your translators have time.
+
+## Translate the site title
+
+By default, Starlight will use the same site title for all languages.
+If you need to customize the title for each locale, you can pass an object to [`title`](/reference/configuration/#title-required) in Starlight’s options:
+
+```diff lang="js"
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+-			title: 'My Docs',
++			title: {
++				en: 'My Docs',
++				'zh-CN': '我的文档',
++			},
+			defaultLocale: 'en',
+			locales: {
+				en: { label: 'English' },
+				'zh-cn': { label: '简体中文', lang: 'zh-CN' },
+			},
+		}),
+	],
+});
+```
+
+## Translate Starlight's UI
+
+import LanguagesList from '~/components/languages-list.astro';
+import UIStringsList from '~/components/ui-strings-list.astro';
+
+In addition to hosting translated content files, Starlight allows you to translate the default UI strings (e.g. the "On this page" heading in the table of contents) so that your readers can experience your site entirely in the selected language.
+
+<LanguagesList startsSentence /> translated UI strings are provided out of the box,
+and we welcome [contributions to add more default languages](https://github.com/withastro/starlight/blob/main/CONTRIBUTING.md).
+
+You can provide translations for additional languages you support — or override our default labels — via the `i18n` data collection.
+
+<Steps>
+
+1. Configure the `i18n` data collection in `src/content/config.ts` if it isn’t configured already:
+
+   ```diff lang="js" ins=/, (i18nSchema)/
+   // src/content/config.ts
+   import { defineCollection } from 'astro:content';
+   import { docsSchema, i18nSchema } from '@astrojs/starlight/schema';
+
+   export const collections = {
+   	docs: defineCollection({ schema: docsSchema() }),
+   +	i18n: defineCollection({ type: 'data', schema: i18nSchema() }),
+   };
+   ```
+
+2. Create a JSON file in `src/content/i18n/` for each additional locale you want to provide UI translation strings for.
+   For example, this would add translation files for Arabic and Simplified Chinese:
+
+   <FileTree>
+
+   - src/
+     - content/
+       - i18n/
+         - ar.json
+         - zh-CN.json
+
+   </FileTree>
+
+3. Add translations for the keys you want to translate to the JSON files. Translate only the values, leaving the keys in English (e.g. `"search.label": "Buscar"`).
+
+   These are the English defaults of the existing strings Starlight ships with:
+
+   <UIStringsList />
+
+   Starlight’s code blocks are powered by the [Expressive Code](https://github.com/expressive-code/expressive-code) library.
+   You can set translations for its UI strings in the same JSON file using `expressiveCode` keys:
+
+   ```json
+   {
+   	"expressiveCode.copyButtonCopied": "Copied!",
+   	"expressiveCode.copyButtonTooltip": "Copy to clipboard",
+   	"expressiveCode.terminalWindowFallbackTitle": "Terminal window"
+   }
+   ```
+
+   Starlight’s search modal is powered by the [Pagefind](https://pagefind.app/) library.
+   You can set translations for Pagefind’s UI in the same JSON file using `pagefind` keys:
+
+   ```json
+   {
+   	"pagefind.clear_search": "Clear",
+   	"pagefind.load_more": "Load more results",
+   	"pagefind.search_label": "Search this site",
+   	"pagefind.filters_label": "Filters",
+   	"pagefind.zero_results": "No results for [SEARCH_TERM]",
+   	"pagefind.many_results": "[COUNT] results for [SEARCH_TERM]",
+   	"pagefind.one_result": "[COUNT] result for [SEARCH_TERM]",
+   	"pagefind.alt_search": "No results for [SEARCH_TERM]. Showing results for [DIFFERENT_TERM] instead",
+   	"pagefind.search_suggestion": "No results for [SEARCH_TERM]. Try one of the following searches:",
+   	"pagefind.searching": "Searching for [SEARCH_TERM]..."
+   }
+   ```
+
+ </Steps>
+
+### Extend translation schema
+
+Add custom keys to your site’s translation dictionaries by setting `extend` in the `i18nSchema()` options.
+In the following example, a new, optional `custom.label` key is added to the default keys:
+
+```diff lang="js"
+// src/content/config.ts
+import { defineCollection, z } from 'astro:content';
+import { docsSchema, i18nSchema } from '@astrojs/starlight/schema';
+
+export const collections = {
+	docs: defineCollection({ schema: docsSchema() }),
+	i18n: defineCollection({
+		type: 'data',
+		schema: i18nSchema({
++			extend: z.object({
++				'custom.label': z.string().optional(),
++			}),
+		}),
+	}),
+};
+```
+
+Learn more about content collection schemas in [“Defining a collection schema”](https://docs.astro.build/en/guides/content-collections/#defining-a-collection-schema) in the Astro docs.

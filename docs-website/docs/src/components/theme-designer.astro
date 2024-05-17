@@ -1,0 +1,151 @@
+---
+import { TabItem, Tabs } from '@astrojs/starlight/components';
+import ColorEditor, { type Props as EditorProps } from './theme-designer/color-editor.astro';
+import Presets, { type Props as PresetsProps } from './theme-designer/presets.astro';
+import Preview from './theme-designer/preview.astro';
+
+interface Props {
+	labels: {
+		presets: PresetsProps['labels'];
+		editor: EditorProps['labels'] & { accentColor: string; grayColor: string };
+		preview: Record<
+			'darkMode' | 'lightMode' | 'bodyText' | 'linkText' | 'dimText' | 'inlineCode',
+			string
+		>;
+	};
+}
+const {
+	labels: { presets, editor, preview },
+} = Astro.props;
+---
+
+<Presets labels={presets} />
+
+<div>
+	<theme-designer>
+		<div class="sl-flex controls not-content">
+			<ColorEditor key="accent" legend={editor.accentColor} labels={editor} />
+			<ColorEditor key="gray" legend={editor.grayColor} labels={editor} />
+		</div>
+
+		<div class="preview" data-accent-preview>
+			<Preview labels={preview} data-dark />
+			<Preview labels={preview} data-light />
+		</div>
+
+		<Tabs>
+			<TabItem label="CSS">
+				<slot name="css-docs" />
+				<pre
+					class="generated-code"
+					tabindex="0"><code style="background-color: var(--astro-code-color-background);color: var(--sl-color-text)" data-theme-css /></pre>
+			</TabItem>
+			<TabItem label="Tailwind">
+				<slot name="tailwind-docs" />
+				<pre
+					class="generated-code"
+					tabindex="0"><code style="background-color: var(--astro-code-color-background);color: var(--sl-color-text)" data-theme-tailwind /></pre>
+			</TabItem>
+		</Tabs>
+	</theme-designer>
+</div>
+
+<script>
+	import { getPalettes } from './theme-designer/color-lib';
+	import { store } from './theme-designer/store';
+
+	class ThemeDesigner extends HTMLElement {
+		#stylesheet = new CSSStyleSheet();
+
+		constructor() {
+			super();
+			// Add our stylesheet to the document.
+			document.adoptedStyleSheets = [...document.adoptedStyleSheets, this.#stylesheet];
+			// Update theme palettes on user input.
+			const onInput = () => this.#update();
+			store.accent.subscribe(onInput);
+			store.gray.subscribe(onInput);
+		}
+
+		#update() {
+			const palettes = getPalettes({ accent: store.accent.get(), gray: store.gray.get() });
+			this.#updatePreview(palettes);
+			this.#updateStylesheet(palettes);
+			this.#updateTailwindConfig(palettes);
+		}
+
+		/** Apply the generated palettes to the style attributes of the in-content preview panes. */
+		#updatePreview({ dark, light }: ReturnType<typeof getPalettes>) {
+			const previews = this.querySelectorAll<HTMLDivElement>('[data-accent-preview] > *');
+			previews.forEach((preview) => {
+				const theme = 'dark' in preview.dataset ? dark : light;
+				Object.entries(theme).forEach(([key, color]) => {
+					preview.style.setProperty(`--sl-color-${key}`, color);
+				});
+			});
+		}
+
+		/** Convert a color palette into a string of CSS rules. */
+		#paletteToRules(palette: ReturnType<typeof getPalettes>['dark' | 'light']) {
+			return Object.entries(palette)
+				.map(([key, color]) => `--sl-color-${key}: ${color};`)
+				.join('\n\t');
+		}
+
+		/** Update the CSS stylesheet applied to the current page and offered to users to copy. */
+		#updateStylesheet({ dark, light }: ReturnType<typeof getPalettes>) {
+			const styles = `/* Dark mode colors. */
+:root {\n\t${this.#paletteToRules(dark)}\n}
+/* Light mode colors. */
+:root[data-theme='light'] {\n\t${this.#paletteToRules(light)}\n}`;
+			this.#stylesheet.replaceSync(styles);
+			const codePreview = this.querySelector('[data-theme-css]');
+			if (codePreview) codePreview.innerHTML = styles;
+		}
+
+		#updateTailwindConfig({ dark, light }: ReturnType<typeof getPalettes>) {
+			const config = `import starlightPlugin from '@astrojs/starlight-tailwind';
+
+// Generated color palettes
+const accent = { 200: '${dark['accent-high']}', 600: '${light.accent}', 900: '${light['accent-high']}', 950: '${dark['accent-low']}' };
+const gray = { 100: '${light['gray-7']}', 200: '${light['gray-6']}', 300: '${light['gray-5']}', 400: '${light['gray-4']}', 500: '${light['gray-3']}', 700: '${light['gray-2']}', 800: '${light['gray-1']}', 900: '${light.white}' };
+
+/** @type {import('tailwindcss').Config} */
+export default {
+	content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
+	theme: {
+		extend: {
+			colors: { accent, gray },
+		},
+	},
+	plugins: [starlightPlugin()],
+};`;
+			const codePreview = this.querySelector('[data-theme-tailwind]');
+			if (codePreview) codePreview.innerHTML = config;
+		}
+	}
+
+	customElements.define('theme-designer', ThemeDesigner);
+</script>
+
+<style>
+	.controls {
+		flex-wrap: wrap;
+		gap: 1.5rem;
+	}
+	.controls > :global(*) {
+		flex: 1 1;
+	}
+	.preview {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 1.5rem;
+	}
+
+	.generated-code {
+		height: 16rem;
+		background-color: var(--astro-code-color-background);
+		overflow: auto scroll;
+		user-select: all;
+	}
+</style>

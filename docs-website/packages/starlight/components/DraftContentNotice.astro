@@ -1,0 +1,8 @@
+---
+import ContentNotice from './ContentNotice.astro';
+import type { Props } from '../props';
+
+const { labels } = Astro.props;
+---
+
+<ContentNotice icon="warning" label={labels['page.draft']} />

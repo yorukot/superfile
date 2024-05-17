@@ -1,0 +1,140 @@
+---
+title: Getting Started
+description: Learn how to start building your next documentation site with Starlight by Astro.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+Starlight is a full-featured documentation theme built on top of the [Astro](https://astro.build) framework.
+This guide will help you get started with a new project.
+See the [manual setup instructions](/manual-setup/) to add Starlight to an existing Astro project.
+
+## Quick Start
+
+### Create a new project
+
+Create a new Astro + Starlight project by running the following command in your terminal:
+
+<Tabs syncKey="pkg">
+<TabItem label="npm">
+
+```sh
+npm create astro@latest -- --template starlight
+```
+
+</TabItem>
+<TabItem label="pnpm">
+
+```sh
+pnpm create astro --template starlight
+```
+
+</TabItem>
+<TabItem label="Yarn">
+
+```sh
+yarn create astro --template starlight
+```
+
+</TabItem>
+</Tabs>
+
+This will create a new [project directory](/guides/project-structure/) with all the necessary files and configurations for your site.
+
+:::tip[See it in action]
+Try Starlight in your browser:
+[open the template on StackBlitz](https://stackblitz.com/github/withastro/starlight/tree/main/examples/basics).
+:::
+
+### Start the development server
+
+When working locally, [Astro’s development server](https://docs.astro.build/en/reference/cli-reference/#astro-dev) lets you preview your work and automatically refreshes your browser when you make changes.
+
+Inside your project directory, run the following command to start the development server:
+
+<Tabs syncKey="pkg">
+<TabItem label="npm">
+
+```sh
+npm run dev
+```
+
+</TabItem>
+<TabItem label="pnpm">
+
+```sh
+pnpm dev
+```
+
+</TabItem>
+<TabItem label="Yarn">
+
+```sh
+yarn dev
+```
+
+</TabItem>
+</Tabs>
+
+This will log a message to your terminal with the URL of your local preview.
+Open this URL to start browsing your site.
+
+### Add content
+
+Starlight is ready for you to add new content, or bring your existing files!
+
+Add new pages to your site by creating Markdown files in the `src/content/docs/` directory.
+
+Read more about file-based routing and support for MDX and Markdoc files in the [“Pages”](/guides/pages/) guide.
+
+### Next steps
+
+- **Configure:** Learn about common options in [“Customizing Starlight”](/guides/customization/).
+- **Navigate:** Set up your sidebar with the [“Sidebar Navigation”](/guides/sidebar/) guide.
+- **Components:** Discover built-in cards, tabs, and more in the [“Components”](/guides/components/) guide.
+- **Deploy:** Publish your work with the [“Deploy your site”](https://docs.astro.build/en/guides/deploy/) guide in the Astro docs.
+
+## Updating Starlight
+
+:::tip
+Because Starlight is beta software, there will be frequent updates and improvements.
+Be sure to update Starlight regularly!
+:::
+
+Starlight is an Astro integration. You can update it and other Astro packages by running the following command in your terminal:
+
+<Tabs syncKey="pkg">
+<TabItem label="npm">
+
+```sh
+npx @astrojs/upgrade
+```
+
+</TabItem>
+<TabItem label="pnpm">
+
+```sh
+pnpm dlx @astrojs/upgrade
+```
+
+</TabItem>
+<TabItem label="Yarn">
+
+```sh
+yarn dlx @astrojs/upgrade
+```
+
+</TabItem>
+</Tabs>
+
+See the [Starlight changelog](https://github.com/withastro/starlight/blob/main/packages/starlight/CHANGELOG.md) for a full list of the changes made in each release.
+
+## Troubleshooting Starlight
+
+Use the [project configuration](/reference/configuration/) and [individual page frontmatter configuration](/reference/frontmatter/) reference pages to ensure that your Starlight site is configured and functioning properly.
+See the guides in the sidebar for help adding content and customizing your Starlight site.
+
+If your answer cannot be found in these docs, please visit the [full Astro Docs](https://docs.astro.build) for complete Astro documentation.
+Your question may be answered by understanding how Astro works in general, underneath this Starlight theme.
+
+You can also check for any known [Starlight issues on GitHub](https://github.com/withastro/starlight/issues), and get help in the [Astro Discord](https://astro.build/chat/) from our active, friendly community! Post questions in our `#support` forum with the "starlight" tag, or visit our dedicated `#starlight` channel to discuss current development and more!

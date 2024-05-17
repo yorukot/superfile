@@ -1,0 +1,130 @@
+---
+title: मैनुअल सेटअप
+description: मौजूदा Astro परियोजना में Starlight जोड़ने के लिए मैन्युअल रूप से कॉन्फ़िगर करने का तरीका जानें।
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+नई Starlight साइट बनाने का सबसे तेज़ तरीका `create astro` का उपयोग है जैसा कि [पहले कदम मार्गदर्शक](/hi/getting-started/#एक-नयी-परियोजना-बनाएं) में दिखाया गया है।
+यदि आप किसी मौजूदा Astro परियोजना में Starlight जोड़ना चाहते हैं, तो यह मार्गदर्शिका बताएगी कि कैसे किया जाता हैं ।
+
+## Starlight स्थापित करें
+
+इस मार्गदर्शिका का पालन करने के लिए, आपको एक मौजूदा Astro परियोजना की आवश्यकता होगी।
+
+### Starlight एकीकरण जोड़ें
+
+Starlight एक [Astro एकीकरण](https://docs.astro.build/hi/guides/integrations-guide/) है। अपने परियोजना की मूल निर्देशिका में `astro add` आदेश चलाकर इसे अपनी साइट में जोड़ें:
+
+<Tabs>
+    <TabItem label="npm">
+        ```sh
+        npx astro add starlight
+        ```
+
+    </TabItem>
+    <TabItem label="pnpm">
+        ```sh
+        pnpm astro add starlight
+        ```
+    </TabItem>
+    <TabItem label="Yarn">
+        ```sh
+        yarn astro add starlight
+        ```
+    </TabItem>
+
+</Tabs>
+
+यह आवश्यक निर्भरताएँ इंस्टॉल करेगा और आपकी Astro कॉन्फ़िगरेशन फ़ाइल में `एकीकरण` सरणी में Starlight जोड़ देगा।
+
+### एकीकरण कॉन्फ़िगर करें
+
+Starlight एकीकरण आपकी `astro.config.mjs` फ़ाइल में कॉन्फ़िगर किया गया है।
+
+आरंभ करने के लिए एक `title` जोड़ें:
+
+```js {8}
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: 'मेरी आनंददायक दस्तावेज़ीकरण साइट',
+		}),
+	],
+});
+```
+
+[Starlight कॉन्फ़िगरेशन संदर्भ](/hi/reference/configuration/) में सभी उपलब्ध विकल्प ढूंढें।
+
+### सामग्री संग्रह कॉन्फ़िगर करें
+
+Starlight Astro के [सामग्री संग्रह](https://docs.astro.build/hi/guides/content-collections/) के शीर्ष पर बनाया गया है, जो `src/content/config.ts` फ़ाइल में कॉन्फ़िगर किया गया है।
+
+Starlight के `docsSchema` का उपयोग करने वाले `docs` संग्रह को जोड़कर सामग्री कॉन्फ़िगरेशन फ़ाइल बनाएं या उसका अद्यतन करें:
+
+```js ins={3,6}
+// src/content/config.ts
+import { defineCollection } from 'astro:content';
+import { docsSchema } from '@astrojs/starlight/schema';
+
+export const collections = {
+	docs: defineCollection({ schema: docsSchema() }),
+};
+```
+
+### कंटेंट जोड़ें
+
+Starlight अब कॉन्फ़िगर हो गया है और अब कुछ सामग्री जोड़ने का समय आ गया है!
+
+एक `src/content/docs/` निर्देशिका बनाएं और इसमें एक `index.md` फ़ाइल जोड़कर प्रारंभ करें।
+यह आपकी नई साइट का मुखपृष्ठ होगा:
+
+```md
+---
+# src/content/docs/index.md
+title: मेरे दस्तावेज़
+description: Starlight के साथ निर्मित इस दस्तावेज़ साइट में मेरे परियोजना के बारे में और जानें।
+---
+
+मेरे परियोजना में आपका स्वागत है!
+```
+
+Starlight फ़ाइल-आधारित रूटिंग का उपयोग करता है, जिसका अर्थ है कि `src/content/docs/` में प्रत्येक Markdown, MDX, या Markdoc फ़ाइल आपकी साइट पर एक पेज में बदल जाएगी। फ्रंटमैटर मेटाडेटा (उपरोक्त उदाहरण में `title` और `description` फ़ील्ड) प्रत्येक पृष्ठ को प्रदर्शित करने के तरीके को बदल सकता है।
+[फ्रंटमैटर संदर्भ](/hi/reference/frontmatter/) में सभी उपलब्ध विकल्प देखें।
+
+## मौजूदा साइटों के लिए युक्तियाँ
+
+यदि आपके पास कोई मौजूदा Astro परियोजना है, तो आप अपनी साइट पर शीघ्रता से दस्तावेज़ीकरण अनुभाग जोड़ने के लिए Starlight का उपयोग कर सकते हैं।
+
+### उपपथ पर Starlight
+
+सभी Starlight पृष्ठों को एक उपपथ पर जोड़ने के लिए, अपने सभी दस्तावेज़ सामग्री को `src/content/docs/` की उपनिर्देशिका के अंदर रखें।
+
+उदाहरण के लिए, यदि Starlight पेज सभी `/guides/` से शुरू होने चाहिए, तो अपनी सामग्री को `src/content/docs/guides/` निर्देशिका में जोड़ें:
+
+import { FileTree } from '@astrojs/starlight/components';
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - **guides/**
+        - guide.md
+        - index.md
+  - pages/
+- astro.config.mjs
+
+</FileTree>
+
+भविष्य में, हम `src/content/docs/` में अतिरिक्त नेस्टेड निर्देशिका की आवश्यकता से बचने के लिए इस उपयोग के मामले का बेहतर समर्थन करने की योजना बना रहे हैं।
+
+### SSR के साथ Starlight का प्रयोग करें
+
+आप Astro दस्तावेज़ में [“ऑन-डिमांड रेंडरिंग एडेप्टर”](https://docs.astro.build/hi/guides/server-side-rendering/) मार्गदर्शिका का पालन करके अपने परियोजना में कस्टम ऑन-डिमांड रेंडर पेजों के साथ Starlight का उपयोग कर सकते हैं।
+
+वर्तमान में, आपके परियोजना के आउटपुट मोड की परवाह किए बिना, Starlight द्वारा उत्पन्न दस्तावेज़ीकरण पेज हमेशा पहले से प्रस्तुत किए जाते हैं। हमें उम्मीद है कि हम जल्द ही Starlight पेजों के लिए ऑन-डिमांड रेंडरिंग का समर्थन करने में सक्षम होंगे।

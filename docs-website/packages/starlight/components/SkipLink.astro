@@ -1,0 +1,27 @@
+---
+import { PAGE_TITLE_ID } from '../constants';
+import type { Props } from '../props';
+
+const { labels } = Astro.props;
+---
+
+<a href={`#${PAGE_TITLE_ID}`}>{labels['skipLink.label']}</a>
+
+<style>
+	a {
+		clip: rect(0, 0, 0, 0);
+		position: fixed;
+		top: 0.75rem;
+		inset-inline-start: 0.75rem;
+	}
+	a:focus {
+		clip: unset;
+		z-index: var(--sl-z-index-skiplink);
+		display: block;
+		padding: 0.5rem 1rem;
+		text-decoration: none;
+		color: var(--sl-color-text-invert);
+		background-color: var(--sl-color-text-accent);
+		box-shadow: var(--sl-shadow-lg);
+	}
+</style>

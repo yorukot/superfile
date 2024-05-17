@@ -1,0 +1,532 @@
+---
+title: 사이드바 탐색
+description: Starlight 사이트의 사이드바 탐색 링크를 설정하고 사용자 정의하는 방법을 알아보세요.
+---
+
+import { FileTree } from '@astrojs/starlight/components';
+import SidebarPreview from '~/components/sidebar-preview.astro';
+
+잘 구성된 사이드바는 사용자가 사이트를 탐색하는 주요 방법 중 하나이므로 좋은 문서의 핵심입니다. Starlight는 사이드바 레이아웃과 콘텐츠를 변경할 수 있는 완전한 옵션 세트를 제공합니다.
+
+## 기본 사이드바
+
+기본적으로 Starlight는 각 파일의 `title` 속성을 사이드바 항목으로 사용하여 자동으로 문서의 파일 시스템 구조 기반의 사이드바를 생성합니다.
+
+예를 들어, 다음과 같은 파일 구조가 있다고 가정합니다.
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - constellations/
+        - andromeda.md
+        - orion.md
+      - stars/
+        - betelgeuse.md
+
+</FileTree>
+
+다음 사이드바가 자동으로 생성됩니다.
+
+<SidebarPreview
+	config={[
+		{
+			label: 'constellations',
+			items: [
+				{ label: '안드로메다', link: '' },
+				{ label: '오리온', link: '' },
+			],
+		},
+		{
+			label: 'stars',
+			items: [{ label: '베텔게우스', link: '' }],
+		},
+	]}
+/>
+
+[자동 생성 그룹](#자동-생성-그룹) 섹션에서 자동으로 생성된 사이드바에 대해 자세히 알아보세요.
+
+## 링크 및 링크 그룹 추가
+
+`astro.config.mjs` 파일의 [`starlight.sidebar`](/ko/reference/configuration/#sidebar) 속성을 사용하여 사이드바 [링크](#링크) 및 [링크 그룹](#그룹) (접이식 헤더 및 하위 항목들)을 구성할 수 있습니다.
+
+링크와 그룹을 결합하여 다양한 사이드바 레이아웃을 만들 수 있습니다.
+
+### 링크
+
+`label` 및 `link` 속성이 있는 객체를 사용하여 내부 또는 외부 페이지에 대한 링크를 추가할 수 있습니다.
+
+```js "label:" "link:"
+starlight({
+	sidebar: [
+		// 가니메데 위성 페이지로 이동하는 링크
+		{ label: '가니메데', link: '/moons/ganymede/' },
+		// NASA 웹사이트로 이동하는 외부 링크
+		{ label: 'NASA', link: 'https://www.nasa.gov/' },
+	],
+});
+```
+
+위 구성은 다음 사이드바를 생성합니다.
+
+<SidebarPreview
+	config={[
+		{ label: '가니메데', link: '' },
+		{ label: 'NASA', link: 'https://www.nasa.gov/' },
+	]}
+/>
+
+### 그룹
+
+접을 수 있는 제목 아래 관련 링크를 그룹화하여 사이드바에 구조를 추가할 수 있습니다. 그룹에는 링크와 기타 하위 그룹이 모두 포함될 수 있습니다.
+
+`label` 및 `items` 속성이 있는 객체를 사용하여 그룹을 추가합니다. `label`은 그룹의 제목으로 사용됩니다. `items` 배열에 링크나 하위 그룹을 추가할 수 있습니다.
+
+```js /^\s*(label:|items:)/
+starlight({
+	sidebar: [
+		// '별자리' 라벨이 붙은 링크 그룹
+		{
+			label: '별자리',
+			items: [
+				{ label: '용골자리', link: '/constellations/carina/' },
+				{ label: '켄타우루스', link: '/constellations/centaurus/' },
+				// 계절별 별자리에 대한 중첩된 링크 그룹
+				{
+					label: '계절별',
+					items: [
+						{ label: '안드로메다', link: '/constellations/andromeda/' },
+						{ label: '오리온', link: '/constellations/orion/' },
+						{ label: '작은곰자리', link: '/constellations/ursa-minor/' },
+					],
+				},
+			],
+		},
+	],
+});
+```
+
+위 구성은 다음 사이드바를 생성합니다.
+
+<SidebarPreview
+	config={[
+		{
+			label: '별자리',
+			items: [
+				{ label: '용골자리', link: '' },
+				{ label: '켄타우루스', link: '' },
+				{
+					label: '계절별',
+					items: [
+						{ label: '안드로메다', link: '' },
+						{ label: '오리온', link: '' },
+						{ label: '작은곰자리', link: '' },
+					],
+				},
+			],
+		},
+	]}
+/>
+
+### 자동 생성 그룹
+
+Starlight는 문서 디렉터리를 기반해서 자동으로 사이드바에 그룹을 생성할 수 있습니다. 이는 그룹의 각 사이드바 항목을 수동으로 입력하고 싶지 않을 때 유용합니다.
+
+기본적으로 페이지는 파일 [`slug`](/ko/reference/overrides/#slug)에 따라 알파벳순으로 정렬됩니다.
+
+`label` 및 `autogenerate` 속성이 있는 객체를 사용하여 자동 생성 그룹을 추가합니다. `autogenerate` 구성은 사이드바 항목에 사용할 디렉터리를 지정해야 합니다. 예를 들어, 다음 구성을 사용할 수 있습니다.
+
+```js "label:" "autogenerate:"
+starlight({
+	sidebar: [
+		{
+			label: '별자리',
+			// '별자리' 디렉토리에 대한 링크 그룹을 자동 생성
+			autogenerate: { directory: 'constellations' },
+		},
+	],
+});
+```
+
+파일 구조는 다음과 같습니다.
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - constellations/
+        - carina.md
+        - centaurus.md
+        - seasonal/
+          - andromeda.md
+
+</FileTree>
+
+다음 사이드바가 생성됩니다:
+
+<SidebarPreview
+	config={[
+		{
+			label: '별자리',
+			items: [
+				{ label: '용골자리', link: '' },
+				{ label: '켄타우루스', link: '' },
+				{
+					label: 'seasonal',
+					items: [{ label: '안드로메다', link: '' }],
+				},
+			],
+		},
+	]}
+/>
+
+#### 프론트매터에서 자동으로 생성된 링크 변경하기
+
+자동으로 생성된 링크를 변경하려면 개별 페이지의 [`sidebar` 프론트매터 필드](/ko/reference/frontmatter/#sidebar)를 사용하세요.
+
+프론트매터에서 sidebar 옵션을 사용하면 [사용자 정의 라벨](/ko/reference/frontmatter/#label)을 설정하거나 링크에 [배지](/ko/reference/frontmatter/#badge)를 추가하거나 사이드바에서 링크를 [숨기거나](/ko/reference/frontmatter/#hidden) [사용자 정의 정렬 기준](/ko/reference/frontmatter/#order)을 설정할 수 있습니다.
+
+```md "sidebar:"
+---
+# src/content/docs/example.md
+title: 나의 페이지
+sidebar:
+  # 링크에 대한 사용자 정의 라벨 설정
+  label: 사용자 정의 사이드바 라벨
+  # 링크에 대한 사용자 정의 순서 설정 (숫자가 낮을수록 더 위에 표시됩니다.)
+  order: 2
+  # 링크에 배지 추가
+  badge:
+    text: New
+    variant: tip
+---
+```
+
+위 프론트매터가 있는 페이지를 포함하는 자동 생성 그룹은 다음 사이드바를 생성합니다.
+
+<SidebarPreview
+	config={[
+		{
+			label: '안내서',
+			items: [
+				{ label: '페이지', link: '' },
+				{
+					label: '사용자 정의 사이드바 라벨',
+					link: '',
+					badge: { text: 'New', variant: 'tip' },
+				},
+				{ label: '기타 페이지', link: '' },
+			],
+		},
+	]}
+/>
+
+:::note
+
+`sidebar` 프론트매터 구성은 자동으로 생성된 링크에만 사용되며 수동으로 정의된 링크에서는 무시됩니다.
+
+:::
+
+## 배지
+
+링크, 그룹, 자동 생성된 그룹은 라벨 옆에 배지를 표시하기 위해 `badge` 속성을 포함할 수도 있습니다.
+
+```js {10,17}
+starlight({
+	sidebar: [
+		{
+			label: '별',
+			items: [
+				// "초거성" 배지가 있는 링크
+				{
+					label: '페르세우스',
+					link: '/stars/persei/',
+					badge: '초거성',
+				},
+			],
+		},
+		// "Outdated" 배지가 있는 자동 생성된 그룹
+		{
+			label: '위성',
+			badge: 'Outdated',
+			autogenerate: { directory: 'moons' },
+		},
+	],
+});
+```
+
+위 구성은 다음 사이드바를 생성합니다.
+
+<SidebarPreview
+	config={[
+		{
+			label: '별',
+			items: [
+				{
+					label: '페르세우스',
+					link: '',
+					badge: { text: '초거성', variant: 'default' },
+				},
+			],
+		},
+		{
+			label: '위성',
+			badge: { text: 'Outdated', variant: 'default' },
+			items: [
+				{
+					label: '이오',
+					link: '',
+				},
+				{
+					label: '유로파',
+					link: '',
+				},
+				{
+					label: '가니메데',
+					link: '',
+				},
+			],
+		},
+	]}
+/>
+
+### 배지 변형
+
+`text` 및 `variant` 속성이 있는 객체를 사용하여 배지 스타일을 변경할 수 있습니다.
+
+`text`는 표시할 콘텐츠를 나타냅니다 (예: "New"). `variant` 속성의 값을 `note`, `tip`, `danger`, `caution`, `success` 중 하나로 설정하여 사이트의 강조 색상을 사용하는 `default` 스타일을 변경하세요.
+
+```js {10}
+starlight({
+	sidebar: [
+		{
+			label: '별',
+			items: [
+				// 노란색 "Stub" 배지가 있는 링크
+				{
+					label: '시리우스',
+					link: '/stars/sirius/',
+					badge: { text: 'Stub', variant: 'caution' },
+				},
+			],
+		},
+	],
+});
+```
+
+위 구성은 다음 사이드바를 생성합니다.
+
+<SidebarPreview
+	config={[
+		{
+			label: '별',
+			items: [
+				{
+					label: '시리우스',
+					link: '',
+					badge: { text: 'Stub', variant: 'caution' },
+				},
+			],
+		},
+	]}
+/>
+
+## 사용자 정의 HTML 속성
+
+링크에는 사용자 정의 HTML 속성을 추가하기 위한 `attrs` 속성이 포함될 수도 있습니다.
+
+다음 예에서는 `attrs`를 사용하여 링크가 새 탭에서 열리도록 `target="_blank"` 속성을 추가하고 사용자 정의 스타일 속성을 적용하여 링크 레이블을 기울임꼴로 표시합니다.
+
+다음 예에서는 링크가 새 탭에서 열리도록 `target="_blank` 속성을 추가하고, 사용자 정의 `style` 속성을 적용하여 링크 레이블을 기울임꼴로 표시하기 위해 `attrs`를 사용합니다.
+
+```js {10}
+starlight({
+	sidebar: [
+		{
+			label: '리소스',
+			items: [
+				// 새 탭에서 열리는 NASA 웹사이트로 이동하는 외부 링크
+				{
+					label: 'NASA',
+					link: 'https://www.nasa.gov/',
+					attrs: { target: '_blank', style: 'font-style: italic' },
+				},
+			],
+		},
+	],
+});
+```
+
+위 구성은 다음 사이드바를 생성합니다.
+
+<SidebarPreview
+	config={[
+		{
+			label: '리소스',
+			items: [
+				{
+					label: 'NASA',
+					link: 'https://www.nasa.gov/',
+					attrs: {
+						target: '_blank',
+						style: 'font-style: italic',
+					},
+				},
+			],
+		},
+	]}
+/>
+
+## 국제화
+
+[BCP-47](https://www.w3.org/International/questions/qa-choosing-language-tags) 언어 태그를 지정하여 지원되는 각 언어에 대한 링크 또는 그룹 라벨을 번역하려면 링크 및 그룹 항목의 `translations` 속성을 사용하세요. `"en"`, `"ar"` 또는 `"zh-CN"`을 키로, 번역된 라벨을 값으로 사용합니다.
+`label` 속성은 기본 언어 및 번역이 제공되지 않는 언어를 위해 사용될 것입니다.
+
+```js {5-7,11-13,18-20}
+starlight({
+	sidebar: [
+		{
+			label: '별자리',
+			translations: {
+				'pt-BR': 'Constelações',
+			},
+			items: [
+				{
+					label: '안드로메다',
+					translations: {
+						'pt-BR': 'Andrômeda',
+					},
+					link: '/constellations/andromeda/',
+				},
+				{
+					label: '전갈자리',
+					translations: {
+						'pt-BR': 'Escorpião',
+					},
+					link: '/constellations/scorpius/',
+				},
+			],
+		},
+	],
+});
+```
+
+브라질 포르투갈어로 문서를 검색하면 다음 사이드바가 생성됩니다.
+
+<SidebarPreview
+	config={[
+		{
+			label: 'Constelação',
+			items: [
+				{ label: 'Andrômeda', link: '' },
+				{ label: 'Escorpião', link: '' },
+			],
+		},
+	]}
+/>
+
+## 그룹 축소
+
+`collapsed` 속성을 `true`로 설정하면 링크 그룹의 기본 상태를 접힌 상태로 만들 수 있습니다.
+
+```js {5-6}
+starlight({
+	sidebar: [
+		{
+			label: '별자리',
+			// 기본적으로 그룹을 축소
+			collapsed: true,
+			items: [
+				{ label: '안드로메다', link: '/constellations/andromeda/' },
+				{ label: '오리온', link: '/constellations/orion/' },
+			],
+		},
+	],
+});
+```
+
+위 구성은 다음 사이드바를 생성합니다.
+
+<SidebarPreview
+	config={[
+		{
+			label: '별자리',
+			collapsed: true,
+			items: [
+				{ label: '안드로메다', link: '' },
+				{ label: '오리온', link: '' },
+			],
+		},
+	]}
+/>
+
+[자동 생성 그룹](#자동-생성-그룹)은 상위 그룹의 `collapsed` 값을 따릅니다.
+
+```js {5-6}
+starlight({
+	sidebar: [
+		{
+			label: '별자리',
+			// 그룹 및 자동으로 생성된 하위 그룹의 기본 상태가 접힌 상태가 됩니다.
+			collapsed: true,
+			autogenerate: { directory: 'constellations' },
+		},
+	],
+});
+```
+
+위 구성은 다음 사이드바를 생성합니다.
+
+<SidebarPreview
+	config={[
+		{
+			label: '별자리',
+			collapsed: true,
+			items: [
+				{ label: '용골자리', link: '' },
+				{ label: '켄타우루스', link: '' },
+				{
+					label: 'seasonal',
+					collapsed: true,
+					items: [{ label: '안드로메다', link: '' }],
+				},
+			],
+		},
+	]}
+/>
+
+`autogenerate.collapsed` 속성을 정의하여 이 동작을 변경할 수 있습니다.
+
+```js {5-7} "collapsed: true"
+starlight({
+	sidebar: [
+		{
+			label: '별자리',
+			// "별자리" 그룹을 축소하지 말고 자동 생성된 하위 그룹을 축소합니다.
+			collapsed: false,
+			autogenerate: { directory: 'constellations', collapsed: true },
+		},
+	],
+});
+```
+
+위 구성은 다음 사이드바를 생성합니다.
+
+<SidebarPreview
+	config={[
+		{
+			label: '별자리',
+			items: [
+				{ label: '용골자리', link: '' },
+				{ label: '켄타우루스', link: '' },
+				{
+					label: 'seasonal',
+					collapsed: true,
+					items: [{ label: '안드로메다', link: '' }],
+				},
+			],
+		},
+	]}
+/>

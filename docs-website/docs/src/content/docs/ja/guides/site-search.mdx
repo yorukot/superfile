@@ -1,0 +1,171 @@
+---
+title: サイト内検索
+description: Starlight組み込みのサイト内検索機能と、そのカスタマイズ方法について学びます。
+---
+
+import { Tabs, TabItem, Steps } from '@astrojs/starlight/components';
+
+Starlightサイトには、デフォルトで[Pagefind](https://pagefind.app/)による全文検索機能が組み込まれています。Pagefindは、静的サイト向けの高速で通信量が少ない検索ツールです。
+
+検索機能を有効にするための設定は必要ありません。サイトをビルドしてデプロイすれば、サイトヘッダーの検索バーを使ってコンテンツを検索できます。
+
+## 検索結果からコンテンツを隠す
+
+### ページを除外する
+
+検索インデックスからページを除外するには、ページのフロントマターに[`pagefind: false`](/ja/reference/frontmatter/#pagefind)を追加します。
+
+```md title="src/content/docs/not-indexed.md" ins={3}
+---
+title: 検索結果から隠したいコンテンツ
+pagefind: false
+---
+```
+
+### ページの一部を除外する
+
+Pagefindは、[`data-pagefind-ignore`](https://pagefind.app/docs/indexing/#removing-individual-elements-from-the-index)属性をもつ要素内のコンテンツを無視します。
+
+以下の例では、最初の段落は検索結果に表示されますが、`<div>`の中身は表示されません。
+
+```md title="src/content/docs/partially-indexed.md" ins="data-pagefind-ignore"
+---
+title: 部分的にインデックスされるページ
+---
+
+このテキストは検索で見つかります。
+
+<div data-pagefind-ignore>
+
+このテキストは検索結果から隠されます。
+
+</div>
+```
+
+## その他の検索プロバイダ
+
+### Algolia DocSearch
+
+[AlgoliaのDocSearchプログラム](https://docsearch.algolia.com/)にアクセスでき、Pagefindの代わりにそれを使いたい場合は、公式のStarlight DocSearchプラグインを使うことができます。
+
+<Steps>
+
+1. `@astrojs/starlight-docsearch`をインストールします。
+
+   <Tabs>
+
+   <TabItem label="npm">
+
+   ```sh
+   npm install @astrojs/starlight-docsearch
+   ```
+
+   </TabItem>
+
+   <TabItem label="pnpm">
+
+   ```sh
+   pnpm add @astrojs/starlight-docsearch
+   ```
+
+   </TabItem>
+
+   <TabItem label="Yarn">
+
+   ```sh
+   yarn add @astrojs/starlight-docsearch
+   ```
+
+   </TabItem>
+
+   </Tabs>
+
+2. `astro.config.mjs`でStarlightの[`plugins`](/ja/reference/configuration/#plugins)設定にDocSearchを追加し、Algoliaの`appId`、`apiKey`、`indexName`を渡します。
+
+   ```js ins={4,10-16}
+   // astro.config.mjs
+   import { defineConfig } from 'astro/config';
+   import starlight from '@astrojs/starlight';
+   import starlightDocSearch from '@astrojs/starlight-docsearch';
+
+   export default defineConfig({
+   	integrations: [
+   		starlight({
+   			title: 'DocSearchを使ったサイト',
+   			plugins: [
+   				starlightDocSearch({
+   					appId: 'YOUR_APP_ID',
+   					apiKey: 'YOUR_SEARCH_API_KEY',
+   					indexName: 'YOUR_INDEX_NAME',
+   				}),
+   			],
+   		}),
+   	],
+   });
+   ```
+
+</Steps>
+
+このように設定を更新すると、サイトの検索バーはデフォルトの検索モーダルではなく、Algoliaのモーダルを開きます。
+
+#### DocSearch UIを翻訳する
+
+DocSearchはデフォルトで英語のUI文字列のみを提供しています。Starlightの組み込みの[国際化の仕組み](/ja/guides/i18n/#starlightのuiを翻訳する)を使って、モーダルのUIを翻訳できます。
+
+<Steps>
+
+1. `src/content/config.ts`で、Starlightの`i18n`コンテンツコレクション定義をDocSearchスキーマにより拡張します。
+
+   ```js ins={4} ins=/{ extend: .+ }/
+   // src/content/config.ts
+   import { defineCollection } from 'astro:content';
+   import { docsSchema, i18nSchema } from '@astrojs/starlight/schema';
+   import { docSearchI18nSchema } from '@astrojs/starlight-docsearch/schema';
+
+   export const collections = {
+   	docs: defineCollection({ schema: docsSchema() }),
+   	i18n: defineCollection({
+   		type: 'data',
+   		schema: i18nSchema({ extend: docSearchI18nSchema() }),
+   	}),
+   };
+   ```
+
+2. `src/content/i18n/`のJSONファイルに翻訳を追加します。
+
+   以下はDocSearchで使われる英語のデフォルトです。
+
+   ```json title="src/content/i18n/en.json"
+   {
+   	"docsearch.searchBox.resetButtonTitle": "Clear the query",
+   	"docsearch.searchBox.resetButtonAriaLabel": "Clear the query",
+   	"docsearch.searchBox.cancelButtonText": "Cancel",
+   	"docsearch.searchBox.cancelButtonAriaLabel": "Cancel",
+
+   	"docsearch.startScreen.recentSearchesTitle": "Recent",
+   	"docsearch.startScreen.noRecentSearchesText": "No recent searches",
+   	"docsearch.startScreen.saveRecentSearchButtonTitle": "Save this search",
+   	"docsearch.startScreen.removeRecentSearchButtonTitle": "Remove this search from history",
+   	"docsearch.startScreen.favoriteSearchesTitle": "Favorite",
+   	"docsearch.startScreen.removeFavoriteSearchButtonTitle": "Remove this search from favorites",
+
+   	"docsearch.errorScreen.titleText": "Unable to fetch results",
+   	"docsearch.errorScreen.helpText": "You might want to check your network connection.",
+
+   	"docsearch.footer.selectText": "to select",
+   	"docsearch.footer.selectKeyAriaLabel": "Enter key",
+   	"docsearch.footer.navigateText": "to navigate",
+   	"docsearch.footer.navigateUpKeyAriaLabel": "Arrow up",
+   	"docsearch.footer.navigateDownKeyAriaLabel": "Arrow down",
+   	"docsearch.footer.closeText": "to close",
+   	"docsearch.footer.closeKeyAriaLabel": "Escape key",
+   	"docsearch.footer.searchByText": "Search by",
+
+   	"docsearch.noResultsScreen.noResultsText": "No results for",
+   	"docsearch.noResultsScreen.suggestedQueryText": "Try searching for",
+   	"docsearch.noResultsScreen.reportMissingResultsText": "Believe this query should return results?",
+   	"docsearch.noResultsScreen.reportMissingResultsLinkText": "Let us know."
+   }
+   ```
+
+</Steps>

@@ -1,0 +1,48 @@
+---
+interface Props {
+	href?: string | undefined;
+}
+const { href } = Astro.props;
+const El = href ? 'a' : 'span';
+---
+
+<li class="not-content sl-flex">
+	<El class="media-card sl-flex" {href}>
+		<div class="media"><slot name="media" /></div>
+		<slot />
+	</El>
+</li>
+
+<style>
+	.media-card {
+		flex-direction: column;
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 0.5rem;
+		overflow: hidden;
+		text-decoration: none;
+		box-shadow: var(--sl-shadow-sm);
+		width: 100%;
+	}
+	a:hover {
+		border-color: var(--sl-color-gray-2);
+		background-color: var(--sl-color-gray-7, var(--sl-color-gray-6));
+	}
+
+	.media {
+		border-bottom: 1px solid var(--sl-color-gray-5);
+	}
+
+	.media :global(img) {
+		display: block;
+		max-width: 100%;
+		height: auto;
+		aspect-ratio: 16 / 9;
+		object-fit: cover;
+	}
+
+	.media-card :global(.title) {
+		color: var(--sl-color-white);
+		font-weight: 600;
+		line-height: var(--sl-line-height-headings);
+	}
+</style>

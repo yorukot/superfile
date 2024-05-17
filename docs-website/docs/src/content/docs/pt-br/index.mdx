@@ -1,0 +1,53 @@
+---
+title: Starlight 🌟 Construa sites de documentação com Astro
+head:
+  - tag: title
+    content: Starlight 🌟 Construa sites de documentação com Astro
+description: Starlight te ajuda a construir belos e performáticos websites de documentação com Astro.
+template: splash
+editUrl: false
+lastUpdated: false
+hero:
+  title: Faça sua documentação brilhar com Starlight
+  tagline: Tudo o que você precisa para construir um site de documentação brilhante. Rápido, acessível e fácil de usar.
+  image:
+    file: ~/assets/hero-star.webp
+  actions:
+    - text: Começar
+      icon: right-arrow
+      variant: primary
+      link: /pt-br/getting-started/
+    - text: Veja no GitHub
+      icon: external
+      link: https://github.com/withastro/starlight
+---
+
+import { CardGrid, Card } from '@astrojs/starlight/components';
+import AboutAstro from '~/components/about-astro.astro';
+
+<CardGrid stagger>
+	<Card title="Documentação de iluminar os olhos" icon="open-book">
+		Inclui: Navegação do site, pesquisa, internacionalização, SEO, tipografia
+		fácil de ler, highlighting de código, modo escuro e mais.
+	</Card>
+	<Card title="Possibilitado por Astro" icon="rocket">
+		Aproveite todo o poder e performance do Astro. Estenda Starlight com suas
+		integrações e bibliotecas favoritas do Astro.
+	</Card>
+	<Card title="Markdown, Markdoc e MDX" icon="document">
+		Traga a sua linguagem de marcação favorita. Starlight te dá validação de
+		frontmatter com segurança de tipos do TypeScript integrada.
+	</Card>
+	<Card title="Traga seus componentes de UI" icon="puzzle">
+		Starlight é uma solução completa de documentação agnóstica a frameworks.
+		Estenda-o com React, Vue, Svelte, Solid e mais.
+	</Card>
+</CardGrid>
+
+<AboutAstro title="Trazido a você por">
+Astro é o framework web tudo-em-um projetado para velocidade.
+Traga seu conteúdo de qualquer lugar e faça deploy em todo lugar, tudo fornecido pelos seus componentes de UI e bibliotecas favoritas.
+
+[Aprenda sobre Astro](https://astro.build/)
+
+</AboutAstro>

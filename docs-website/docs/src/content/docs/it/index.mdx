@@ -1,0 +1,162 @@
+---
+title: Starlight 🌟 Costruire siti per documentazione con Astro
+head:
+  - tag: title
+    content: Starlight 🌟 Costruire siti per documentazione con Astro
+description: Starlight ti aiuta a creare siti belli e performanti con Astro.
+template: splash
+editUrl: false
+lastUpdated: false
+hero:
+  title: Fai brillare la tua documentazione con Starlight
+  tagline: Tutto quello di cui hai bisogno per creare documentazione stellare. Veloce, accessibile e facile da usare.
+  image:
+    file: ~/assets/hero-star.webp
+  actions:
+    - text: Inizia
+      icon: right-arrow
+      variant: primary
+      link: /it/getting-started/
+    - text: Vedi su GitHub
+      icon: external
+      link: https://github.com/withastro/starlight
+---
+
+import { CardGrid, Card } from '@astrojs/starlight/components';
+import AboutAstro from '~/components/about-astro.astro';
+import TestimonialGrid from '~/components/testimonial-grid.astro';
+import Testimonial from '~/components/testimonial.astro';
+
+<CardGrid stagger>
+	<Card title="Documentazione che delizia" icon="open-book">
+		Include: Navigazione, ricerca, internazionalizzazione, SEO, caratteri facili
+		da leggere, evidenziazione del codice, tema scuro e altro.
+	</Card>
+	<Card title="Basato su Astro" icon="rocket">
+		Sfrutta la potenza di Astro. Estendi Starlight con le tue integrazioni e
+		librerie preferite.
+	</Card>
+	<Card title="Markdown, Markdoc e MDX" icon="document">
+		Utilizza il tuo linguaggio markup preferito. Starlight fornisce validazione
+		frontmatter con TypeScript.
+	</Card>
+	<Card title="Utilizza i tuoi componenti UI" icon="puzzle">
+		Starlight è una soluzione indipendente da framework. Estendi come vuoi con
+		React, Vue, Svelte, Solid e altro.
+	</Card>
+</CardGrid>
+
+<TestimonialGrid title="Cosa dicono le persone">
+  <Testimonial
+    name="Rachel"
+    handle="rachelnabors"
+    cite="https://twitter.com/astrodotbuild/status/1724934718745915558"
+  >
+    Il team di Astro ha FATTO EVOLVERE il modo in cui la documentazione può essere realizzata e puoi ottenerla tutta out-of-the-box con il loro progetto Starlight.
+  </Testimonial>
+  <Testimonial
+    name="Flavio"
+    handle="flaviocopes"
+    cite="https://twitter.com/flaviocopes/status/1738237658717905108"
+  >
+    Lo starter kit ufficiale di Astro Starlight è uno strumento davvero incredibile per costruire un sito web di documentazione
+  </Testimonial>
+  <Testimonial
+    name="Tomek"
+    handle="sulco"
+    cite="https://twitter.com/sulco/status/1735610348730802342"
+  >
+    Starlight è il nostro esempio di riferimento di una grande esperienza utente: la velocità, la comodità e
+    l'attenzione ai dettagli è fonte di ispirazione. Si occupa della parte tecnica e dell'aspetto,
+    in modo che tu possa concentrarti sui tuoi contenuti 👏
+     
+    Il team di StackBlitz lo adora assolutamente!
+  </Testimonial>
+  <Testimonial
+    name="Roberto"
+    handle="RmeetsH"
+    cite="https://twitter.com/RmeetsH/status/1735783992018760090"
+  >
+		Starlight è stato un game changer per me, permettendomi di concentrarmi sulla creazione di contenuti.
+
+    	Il suo design intuitivo non solo ottimizza il mio flusso di lavoro ma riduce anche il tempo di onboarding per gli sviluppatori open source.
+
+  </Testimonial>
+  <Testimonial
+    name="Joel"
+    handle="jhooks"
+    cite="https://twitter.com/jhooks/status/1727405160547418405"
+  >
+		Ho trascorso un po' più di tempo con Starlight per la documentazione di Course Builder ed è stato ottimo finora. Molte funzionalità utili e in più posso concentrarmi sulla scrittura in Markdown e non smanettare con il sito.
+  </Testimonial>
+  <Testimonial
+    name="Rick"
+    handle="rick_viscomi"
+    cite="https://twitter.com/rick_viscomi/status/1665867447910510593"
+  >
+		Ho iniziato a giocare con Starlight. Devo dire che sono molto colpito dalle prestazioni out-of-the-box.
+
+    	💯💯💯💯
+
+  </Testimonial>
+  <Testimonial
+    name="Nicolas"
+    handle="beaussan"
+    cite="https://twitter.com/beaussan/status/1735625189583466893"
+  >
+		Starlight è il modo migliore per iniziare con la documentazione, tra
+		la potenza e la velocità di Astro, e gli strumenti di Starlight, è un match in
+		paradiso.
+
+    	È stato il mio riferimento per un po' di tempo, e continuo ad amarlo!
+
+  </Testimonial>
+  <Testimonial
+    name="Sylwia"
+    handle="SylwiaVargas"
+    cite="https://x.com/SylwiaVargas/status/1726556825741578286"
+  >
+		Ho usato Starlight nel mio ultimo lavoro e mi è piaciuto molto. Ottimi componenti, design
+		intuitivo e community super-reattiva (ogni volta che qualcuno aveva bisogno di qualcosa,
+		loro lo avrebbero implementato quasi subito oppure ti avrebbero detto una soluzione alternativa). Esperienza molto piacevole.
+  </Testimonial>
+  <Testimonial
+    name="Lou Cyx"
+    handle="loucyx"
+    cite="https://elk.zone/m.webtoo.ls/@loucyx@mastodon.social/111587380021362284"
+  >
+		La documentazione sul mio sito monorepo sembra migliore che mai grazie a Starlight. È estremamente facile da usare senza perdere tutta la potenza di Astro. Grazie per averci lavorato!
+  </Testimonial>
+  <Testimonial
+    name="BowTiedWebReaper"
+    handle="BowTiedWebReapr"
+    cite="https://twitter.com/BowTiedWebReapr/status/1735633399501697517"
+  >
+		Starlight è il mio strumento di riferimento per la documentazione. Ha reso super facile aggiungere la documentazione al mio sito web di prodotto fatto con Astro, rispetto alla necessità di usare un sottodominio con un altro strumento.
+  </Testimonial>
+  <Testimonial
+    name="Jeff"
+    handle="J_Everhart383"
+    cite="https://twitter.com/J_Everhart383/status/1691900590048292908"
+  >
+		Sto ricostruendo la documentazione della piattaforma WPEngine Atlas. Credimi quando dico che Starlight ha tutto ciò di cui hai bisogno per creare una piattaforma di documentazione di classe A 🙌
+  </Testimonial>
+  <Testimonial
+    name="Chloe"
+    handle="solelychloe"
+    cite="https://twitter.com/solelychloe/status/1695115277602628082"
+  >
+		Prova Starlight!
+
+    	Lo uso per alcuni dei miei siti ed è fantastico.
+
+  </Testimonial>
+</TestimonialGrid>
+
+<AboutAstro title="Sviluppato da">
+Astro è un framework completo progettato per essere veloce.
+Prendi i tuoi contenuti da dove preferisci e pubblica dove vuoi, il tutto con i tuoi componenti UI e librerie preferite.
+
+[Impara di più su Astro](https://astro.build/)
+
+</AboutAstro>

@@ -1,0 +1,449 @@
+---
+title: 컴포넌트
+description: Starlight를 이용해 MDX에서 컴포넌트 사용하기.
+---
+
+컴포넌트를 사용하면 쉽고 일관되게 UI 조각이나 스타일을 재사용할 수 있습니다.
+링크 카드나 YouTube 삽입 등을 예로 들 수 있습니다.
+Starlight는 [MDX](https://mdxjs.com/) 파일에서 컴포넌트 사용을 지원하며 사용할 수 있는 몇 가지 공통 컴포넌트를 제공합니다.
+
+[Astro 문서에서 컴포넌트 구축에 대해 자세히 알아보세요](https://docs.astro.build/ko/core-concepts/astro-components/).
+
+## 컴포넌트 사용
+
+MDX 파일에서 컴포넌트를 가져온 다음 JSX 태그로 렌더링하여 사용할 수 있습니다.
+이는 HTML 태그처럼 보이지만 `import` 문에 있는 이름과 일치하는 대문자로 시작합니다.
+
+```mdx
+---
+# src/content/docs/example.mdx
+title: 내 문서에 오신 것을 환영합니다
+---
+
+import SomeComponent from '~/components/SomeComponent.astro';
+import AnotherComponent from '~/components/AnotherComponent.astro';
+
+<SomeComponent prop="어떤 값" />
+
+<AnotherComponent>
+	컴포넌트에는 **중첩된 콘텐츠**가 포함될 수도 있습니다.
+</AnotherComponent>
+```
+
+Starlight는 Astro로 구동되므로 [지원되는 UI 프레임워크(React, Preact, Svelte, Vue, Solid, Lit 및 Alpine)](https://docs.astro.build/ko/core-concepts/framework-components/)로 빌드된 컴포넌트를 MDX 파일에 추가할 수 있습니다.
+Astro 문서에서 [MDX에서 컴포넌트 사용](https://docs.astro.build/ko/guides/markdown-content/#using-comComponents-in-mdx)에 대해 자세히 알아보세요.
+
+### Starlight 스타일과의 호환성
+
+Starlight는 요소 사이에 여백을 추가하는 등 Markdown 콘텐츠에 기본 스타일을 적용합니다.
+이러한 스타일이 컴포넌트의 모양과 충돌하는 경우 컴포넌트에 `not-content` 클래스를 추가하여 비활성화하세요.
+
+```astro 'class="not-content"'
+---
+// src/components/Example.astro
+---
+
+<div class="not-content">
+	<p>Starlight의 기본 콘텐츠 스타일에 영향을 받지 않습니다.</p>
+</div>
+```
+
+## 내장된 컴포넌트
+
+Starlight는 일반적인 문서 사용 사례를 위한 몇 가지 내장 컴포넌트를 제공합니다.
+이러한 컴포넌트는 `@astrojs/starlight/components` 패키지를 통해 사용할 수 있습니다.
+
+### 탭
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+`<Tabs>` 및 `<TabItem>` 컴포넌트를 사용하여 탭 인터페이스를 표시할 수 있습니다.
+각 `<TabItem>`은 사용자에게 보여줄 `label`을 반드시 포함해야합니다.
+label 옆에 [Starlight 내장 아이콘](#모든-아이콘) 중 하나를 포함하려면 선택적 `icon` 속성을 사용하세요.
+
+```mdx
+# src/content/docs/example.mdx
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+<Tabs>
+	<TabItem label="별" icon="star">
+		시리우스, 베가, 베텔게우스
+	</TabItem>
+	<TabItem label="달" icon="moon">
+		이오, 유로파, 가니메데
+	</TabItem>
+</Tabs>
+```
+
+위 코드는 페이지에 아래와 같은 탭을 생성합니다.
+
+<Tabs>
+	<TabItem label="별" icon="star">
+		시리우스, 베가, 베텔게우스
+	</TabItem>
+	<TabItem label="달" icon="moon">
+		이오, 유로파, 가니메데
+	</TabItem>
+</Tabs>
+
+#### 동기화된 탭
+
+`syncKey` 속성을 추가하여 여러 탭 그룹을 동기화된 상태로 유지합니다.
+
+동일한 `syncKey` 값을 가진 페이지의 모든 `<Tabs>`에는 동일한 활성 라벨이 표시됩니다. 이를 통해 독자는 한 번 (예: 운영 체제 또는 패키지 관리자) 선택하고 선택 사항이 페이지 전체에 반영되는 것을 볼 수 있습니다.
+
+관련 탭을 동기화하려면 각 `<Tabs>` 컴포넌트에 동일한 `syncKey` 속성을 추가하고 모두 동일한 `<TabItem>` 라벨을 사용하는지 확인하세요.
+
+```mdx 'syncKey="별자리"'
+# src/content/docs/example.mdx
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+_별:_
+
+<Tabs syncKey="별자리">
+	<TabItem label="오리온자리">벨라트릭스, 리겔, 베텔게우스</TabItem>
+	<TabItem label="쌍둥이자리">폴룩스, 캐스터 A, 캐스터 B</TabItem>
+</Tabs>
+
+_외계 행성:_
+
+<Tabs syncKey="별자리">
+	<TabItem label="오리온자리">HD 34445 b, 글리제 179 b, Wasp-82 b</TabItem>
+	<TabItem label="쌍둥이자리">폴룩스 b, HAT-P-24b, HD 50554 b</TabItem>
+</Tabs>
+```
+
+위 코드는 페이지에 다음을 생성합니다.
+
+_별:_
+
+<Tabs syncKey="별자리">
+	<TabItem label="오리온자리">벨라트릭스, 리겔, 베텔게우스</TabItem>
+	<TabItem label="쌍둥이자리">폴룩스, 캐스터 A, 캐스터 B</TabItem>
+</Tabs>
+
+_외계 행성:_
+
+<Tabs syncKey="별자리">
+	<TabItem label="오리온자리">HD 34445 b, 글리제 179 b, Wasp-82 b</TabItem>
+	<TabItem label="쌍둥이자리">폴룩스 b, HAT-P-24b, HD 50554 b</TabItem>
+</Tabs>
+
+### 카드
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+`<Card>` 컴포넌트를 사용하면 Starlight 스타일의 상자에 콘텐츠를 표시할 수 있습니다.
+공간이 충분할 때 카드를 나란히 표시하려면 `<CardGrid>` 컴포넌트로 여러 카드를 감싸세요.
+
+`<Card>` 컴포넌트에는 `title` 속성이 반드시 필요하며 선택적으로 [Starlight 내장 아이콘 중 하나](#모든-아이콘)의 이름으로 설정된 `icon` 속성을 포함할 수 있습니다.
+
+```mdx
+# src/content/docs/example.mdx
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<Card title="확인">강조하고 싶은 흥미로운 콘텐츠.</Card>
+
+<CardGrid>
+	<Card title="별" icon="star">
+		시리우스, 베가, 베텔게우스
+	</Card>
+	<Card title="달" icon="moon">
+		이오, 유로파, 가니메데
+	</Card>
+</CardGrid>
+```
+
+위 코드는 페이지에 아래와 같은 요소들을 생성합니다.
+
+<Card title="확인">강조하고 싶은 흥미로운 콘텐츠.</Card>
+
+<CardGrid>
+	<Card title="별" icon="star">
+		시리우스, 베가, 베텔게우스
+	</Card>
+	<Card title="달" icon="moon">
+		이오, 유로파, 가니메데
+	</Card>
+</CardGrid>
+
+:::tip
+
+홈 페이지에서 프로젝트의 주요 기능을 보여주기 위해 카드 그리드를 사용하세요.
+카드의 두 번째 열을 수직으로 이동시켜 시각적 흥미를 더하려면 `stagger` 속성을 추가하세요.
+
+```astro
+<CardGrid stagger>
+	<!-- 카드 -->
+</CardGrid>
+```
+
+:::
+
+### 링크 카드
+
+다른 페이지로 이동하는 눈에 띄는 링크를 만들기 위해 `<LinkCard>` 컴포넌트를 사용하세요.
+
+`<LinkCard>` 컴포넌트에는 `title`과 [`href`](https://developer.mozilla.org/ko/docs/Web/HTML/Element/a#attr-href) 속성이 필요합니다. 짧은 `description`이나 `target`과 같은 기타 링크 속성을 선택적으로 포함할 수 있습니다.
+
+공간이 충분할 때, 카드를 나란히 표시하기 위해 여러 `<LinkCard>` 컴포넌트를 `<CardGrid>`에 그룹화하세요.
+
+```mdx
+# src/content/docs/example.mdx
+
+import { LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+<LinkCard
+	title="Starlight 사용자 정의"
+	description="사용자 정의 스타일, 글꼴 등을 사용하여 나만의 Starlight 사이트를 만드는 방법을 알아보세요."
+	href="/ko/guides/customization/"
+/>
+
+<CardGrid>
+	<LinkCard
+		title="마크다운으로 콘텐츠 작성"
+		href="/ko/guides/authoring-content/"
+	/>
+	<LinkCard title="컴포넌트" href="/ko/guides/components/" />
+</CardGrid>
+```
+
+위 코드는 페이지에 아래와 같은 요소들을 생성합니다.
+
+import { LinkCard } from '@astrojs/starlight/components';
+
+<LinkCard
+	title="Starlight 사용자 정의"
+	description="사용자 정의 스타일, 글꼴 등을 사용하여 나만의 Starlight 사이트를 만드는 방법을 알아보세요."
+	href="/ko/guides/customization/"
+/>
+
+<CardGrid>
+	<LinkCard
+		title="마크다운으로 콘텐츠 작성"
+		href="/ko/guides/authoring-content/"
+	/>
+	<LinkCard title="컴포넌트" href="/ko/guides/components/" />
+</CardGrid>
+
+### 주석
+
+“권고” 또는 “콜아웃”이라고도 하는 '주석'은 페이지의 기본 콘텐츠 옆에 보조 정보를 표시하는 데 유용합니다.
+
+`<Aside>`에는 `note` (기본값), `tip`, `caution` 또는 `danger` 등 선택적인 `type`이 있을 수 있습니다. `title` 속성을 설정하면 주석의 기본 제목을 재정의합니다.
+
+````mdx
+# src/content/docs/example.mdx
+
+import { Aside } from '@astrojs/starlight/components';
+
+<Aside>제목을 설정하지 않은 기본 주석입니다.</Aside>
+
+<Aside type="caution" title="주의!">
+	제목이 설정된 경고 주석입니다.
+</Aside>
+
+<Aside type="tip">
+
+주석에서는 다른 콘텐츠도 지원됩니다.
+
+```js
+// 코드 조각의 예시입니다.
+```
+
+</Aside>
+
+<Aside type="danger">여러분의 비밀번호를 누구에게도 알려주지 마세요.</Aside>
+````
+
+위 코드는 페이지에 다음을 생성합니다.
+
+import { Aside } from '@astrojs/starlight/components';
+
+<Aside>제목을 설정하지 않은 기본 주석입니다.</Aside>
+
+<Aside type="caution" title="주의!">
+	제목이 설정된 경고 주석입니다.
+</Aside>
+
+<Aside type="tip">
+
+주석에서는 다른 콘텐츠도 지원됩니다.
+
+```js
+// 코드 조각의 예시입니다.
+```
+
+</Aside>
+
+<Aside type="danger">여러분의 비밀번호를 누구에게도 알려주지 마세요.</Aside>
+
+Starlight는 `<Aside>` 컴포넌트 대신 Markdown 및 MDX에서 Aside를 렌더링하기 위한 사용자 정의 구문도 제공합니다.
+사용자 정의 구문에 대한 자세한 내용은 [“마크다운으로 콘텐츠 작성”](/ko/guides/authoring-content/#주석) 가이드를 참조하세요.
+
+### 코드
+
+예를 들어 파일, 데이터베이스 또는 API와 같은 외부 소스에서 오는 데이터를 렌더링하기 위해 [Markdown 코드 블록](/ko/guides/authoring-content/#코드-블록)을 사용할 수 없는 경우 `<Code>` 컴포넌트를 사용하여 구문 강조 코드를 렌더링합니다.
+
+`<Code>`가 지원하는 props에 대한 자세한 내용은 [Expressive Code “Code Component” 문서](https://expressive-code.com/key-features/code-component/)를 참조하세요.
+
+```mdx
+# src/content/docs/example.mdx
+
+import { Code } from '@astrojs/starlight/components';
+
+export const exampleCode = `console.log('This could come from a file or CMS!');`;
+export const fileName = 'example.js';
+export const highlights = ['file', 'CMS'];
+
+<Code code={exampleCode} lang="js" title={fileName} mark={highlights} />
+```
+
+위 코드는 페이지에 다음을 생성합니다.
+
+import { Code } from '@astrojs/starlight/components';
+
+export const exampleCode = `console.log('This could come from a file or CMS!');`;
+export const fileName = 'example.js';
+export const highlights = ['file', 'CMS'];
+
+<Code code={exampleCode} lang="js" title={fileName} mark={highlights} />
+
+#### 가져온 코드
+
+[Vite의 `?raw` 가져오기 접미사](https://vitejs.dev/guide/assets#importing-asset-as-string)를 사용하여 코드 파일을 문자열로 가져옵니다. 그런 다음 가져온 문자열을 `<Code>` 컴포넌트에 전달하여 페이지에 포함할 수 있습니다.
+
+```mdx title="src/content/docs/example.mdx" "?raw"
+import { Code } from '@astrojs/starlight/components';
+import importedCode from '/src/env.d.ts?raw';
+
+<Code code={importedCode} lang="ts" title="src/env.d.ts" />
+```
+
+위 코드는 페이지에 다음을 생성합니다.
+
+import importedCode from '/src/env.d.ts?raw';
+
+<Code code={importedCode} lang="ts" title="src/env.d.ts" />
+
+### 파일 트리
+
+`<FileTree>` 컴포넌트를 사용하면 파일 아이콘과 축소 가능한 하위 디렉터리가 있는 디렉터리 구조를 표시할 수 있습니다.
+
+`<FileTree>`에서 [순서가 지정되지 않은 Markdown 목록](https://www.markdownguide.org/basic-syntax/#unordered-lists)을 사용하여 파일 및 디렉터리의 구조를 지정하세요.
+중첩된 목록을 사용하여 하위 디렉터리를 생성하거나 목록 항목 끝에 `/`를 추가하여 특정 내용이 없는 디렉터리로 렌더링합니다.
+
+다음 구문을 사용하여 파일 트리의 모양을 사용자 정의할 수 있습니다.
+
+- 이름을 굵게 표시하여 파일이나 디렉터리를 강조 표시합니다. 예: `**README.md**`.
+- 이름 뒤에 더 많은 텍스트를 추가하여 파일이나 디렉터리에 설명을 추가합니다.
+- `...` 또는 `…`을 이름으로 사용하여 자리 표시자 파일과 디렉터리를 추가합니다.
+
+```mdx
+# src/content/docs/example.mdx
+
+import { FileTree } from '@astrojs/starlight/components';
+
+<FileTree>
+
+- astro.config.mjs **중요** 파일
+- package.json
+- README.md
+- src
+  - components
+    - **Header.astro**
+  - …
+- pages/
+
+</FileTree>
+```
+
+위 코드는 페이지에 다음을 생성합니다.
+
+import { FileTree } from '@astrojs/starlight/components';
+
+<FileTree>
+
+- astro.config.mjs **중요** 파일
+- package.json
+- README.md
+- src
+  - components
+    - **Header.astro**
+  - …
+- pages/
+
+</FileTree>
+
+### 단계
+
+`<Steps>` 컴포넌트를 사용하여 번호가 매겨진 작업 목록의 스타일을 지정합니다.
+이는 각 단계를 명확하게 강조해야 하는 보다 복잡한 단계별 가이드에 유용합니다.
+
+표준 Markdown 정렬 목록을 `<Steps>`로 묶습니다.
+모든 일반적인 Markdown 구문은 `<Steps>` 내에서 적용 가능합니다.
+
+````mdx title="src/content/docs/example.mdx"
+import { Steps } from '@astrojs/starlight/components';
+
+<Steps>
+
+1. 컴포넌트를 MDX 파일로 가져옵니다.
+
+   ```js
+   import { Steps } from '@astrojs/starlight/components';
+   ```
+
+2. 순서가 매겨진 목록 항목을 `<Steps>`로 묶습니다.
+
+</Steps>
+````
+
+위 코드는 페이지에 다음을 생성합니다.
+
+import { Steps } from '@astrojs/starlight/components';
+
+<Steps>
+
+1. 컴포넌트를 MDX 파일로 가져옵니다.
+
+   ```js
+   import { Steps } from '@astrojs/starlight/components';
+   ```
+
+2. 순서가 매겨진 목록 항목을 `<Steps>`로 묶습니다.
+
+</Steps>
+
+### 아이콘
+
+import { Icon } from '@astrojs/starlight/components';
+import IconsList from '~/components/icons-list.astro';
+
+Starlight는 `<Icon>` 컴포넌트를 사용하여 콘텐츠에 표시할 수 있는 공통 아이콘 세트를 제공합니다.
+
+각 `<Icon>`에는 [`name`](#모든-아이콘)이 필요하며 스크린 리더에 컨텍스트를 제공하기 위해 선택적으로 `label`을 포함할 수 있습니다.
+CSS 단위와 색상 값을 사용하여 아이콘의 모양을 조정하는 데 `size` 및 `color` 속성을 사용할 수 있습니다.
+
+```mdx
+# src/content/docs/example.mdx
+
+import { Icon } from '@astrojs/starlight/components';
+
+<Icon name="star" color="goldenrod" size="2rem" />
+<Icon name="rocket" color="var(--sl-color-text-accent)" />
+```
+
+위 코드는 페이지에 다음을 생성합니다.
+
+<Icon name="star" color="goldenrod" size="2rem" />
+<Icon name="rocket" color="var(--sl-color-text-accent)" />
+
+#### 모든 아이콘
+
+사용 가능한 모든 아이콘 목록이 관련 이름과 함께 아래에 표시됩니다. 아이콘을 클릭하면 해당 컴포넌트의 코드를 복사할 수 있습니다.
+
+<IconsList />

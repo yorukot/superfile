@@ -1,0 +1,225 @@
+---
+title: Internationalisierung (i18n)
+description: Lerne, wie du deine Starlight-Website so konfigurierst, dass sie mehrere Sprachen unterstützt.
+---
+
+import { FileTree } from '@astrojs/starlight/components';
+
+Starlight bietet eingebaute Unterstützung für mehrsprachige Seiten, einschließlich Routing, Fallback-Inhalte und vollständige Unterstützung von rechts-nach-links (RTL) Sprachen.
+
+## Konfiguriere i18n
+
+1. Teile Starlight mit, welche Sprachen du unterstützt, indem du [`locales`](/de/reference/configuration/#locales) und [`defaultLocale`](/de/reference/configuration/#defaultlocale) an die Starlight Integration übergibst:
+
+   ```js
+   // astro.config.mjs
+   import { defineConfig } from 'astro/config';
+   import starlight from '@astrojs/starlight';
+
+   export default defineConfig({
+   	integrations: [
+   		starlight({
+   			title: 'Meine Dokumentation',
+   			// Lege Englisch als Standardsprache für diese Website fest.
+   			defaultLocale: 'en',
+   			locales: {
+   				// Englische Dokumente in `src/content/docs/en/`
+   				en: {
+   					label: 'English',
+   				},
+   				// Vereinfachte chinesische Dokumente in `src/content/docs/zh/`
+   				zh: {
+   					label: '简体中文',
+   					lang: 'zh-CN',
+   				},
+   				// Arabische Dokumente in `src/content/docs/ar/`
+   				ar: {
+   					label: 'العربية',
+   					dir: 'rtl',
+   				},
+   			},
+   		}),
+   	],
+   });
+   ```
+
+   Dein `defaultLocale` wird für Fallback-Inhalte und UI-Labels verwendet, wähle also die Sprache, in der du am ehesten mit dem Schreiben von Inhalten beginnen wirst oder für die du bereits Inhalte hast.
+
+2. Erstelle ein Verzeichnis für jede Sprache in `src/content/docs/`.
+   Für die oben gezeigte Konfiguration erstellst du zum Beispiel die folgenden Verzeichnisse:
+
+   <FileTree>
+
+   - src/
+     - content/
+       - docs/
+         - ar/
+         - en/
+         - zh/
+
+   </FileTree>
+
+3. Du kannst nun Inhaltsdateien in deinen Sprachverzeichnissen hinzufügen. Verwende den gleichen Dateinamen, um Seiten in verschiedenen Sprachen zuzuordnen und nutze Starlights volle i18n-Funktionen, einschließlich Fallback-Inhalte, Übersetzungshinweise und mehr.
+
+   Erstelle zum Beispiel `ar/index.md` und `en/index.md`, um die Homepage für Arabisch bzw. Englisch darzustellen.
+
+### Verwende ein Root-Verzeichnis
+
+Du kannst ein Root-Verzeichnis verwenden, um eine Sprache ohne i18n-Präfix in ihrem Pfad anzubieten. Wenn zum Beispiel Englisch dein Stammverzeichnis ist, würde ein englischer Seitenpfad unter `/about` anstelle von `/en/about` zu finden sein.
+
+Um ein Stammverzeichnis festzulegen, verwende den Key `root` in deiner `locales`-Konfiguration. Wenn das Root-Verzeichnis auch das Standard-Verzeichnis für deinen Inhalt ist, entferne `defaultLocale` oder setze es auf `'root'`.
+
+```js
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: 'Meine Dokumentation',
+			defaultLocale: 'root', // optional
+			locales: {
+				root: {
+					label: 'English',
+					lang: 'en', // lang ist für Stammverzeichnis erforderlich
+				},
+				zh: {
+					label: '简体中文',
+					lang: 'zh-CN',
+				},
+			},
+		}),
+	],
+});
+```
+
+Wenn du ein `root`-Verzeichnis verwendest, speichere die Seiten für diese Sprache direkt in `src/content/docs/`, anstatt in einem speziellen Sprachordner. Zum Beispiel sind hier die Homepage-Dateien für Englisch und Chinesisch, wenn man die obige Konfiguration verwendet:
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - **index.md**
+      - zh/
+        - **index.md**
+
+</FileTree>
+
+#### Einsprachige Seiten
+
+Standardmäßig ist Starlight eine einsprachige (englische) Website. Um eine einsprachige Website in einer anderen Sprache zu erstellen, setze diese als `root` in Ihrer `locales` Konfiguration:
+
+```js
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: 'Meine Dokumentation',
+			locales: {
+				root: {
+					label: '简体中文',
+					lang: 'zh-CN',
+				},
+			},
+		}),
+	],
+});
+```
+
+Dies ermöglicht es dir, die Standardsprache von Starlight zu überschreiben, ohne andere Internationalisierungsfunktionen für mehrsprachige Seiten zu aktivieren, wie z.B. die Sprachauswahl.
+
+## Fallback-Inhalt
+
+Starlight erwartet, dass du äquivalente Seiten in allen deinen Sprachen erstellst. Wenn du zum Beispiel eine `de/about.md` Datei hast, erstelle eine `about.md` für jede andere Sprache, die du unterstützt. Dies ermöglicht Starlight, automatisch Ersatzinhalte für Websiten zu liefern, die noch nicht übersetzt wurden.
+
+Wenn für eine Sprache noch keine Übersetzung verfügbar ist, zeigt Starlight den Lesern den Inhalt dieser Seite in der Standardsprache (eingestellt über `defaultLocale`). Wenn du z.B. noch keine französische Version Ihrer "About"-Website erstellt hast und deine Standardsprache Englisch ist, werden Besucher von `/fr/about` den englischen Inhalt von `/en/about` sehen, mit einem Hinweis, dass diese Seite noch nicht übersetzt wurde. Auf diese Weise kannst du Inhalte in deiner Standardsprache hinzufügen und sie dann nach und nach übersetzen, wenn du Lust dazu hast.
+
+## Starlights UI übersetzen
+
+Starlight bietet nicht nur übersetzte Inhaltsdateien, sondern auch die Möglichkeit, die Standard-Benutzeroberfläche zu übersetzen (z.B. die Überschrift "Auf dieser Seite" im Inhaltsverzeichnis), so dass deine Leser deine Website vollständig in der ausgewählten Sprache erleben können.
+
+Englisch, Tschechisch, Französisch, Deutsch, Italienisch, Japanisch, Portugiesisch, Niederländisch, Dänisch, Spanisch, Türkisch, Arabisch, Norwegisch, Farsi, Hebräisch, Chinesisch (vereinfacht), Koreanisch, Indonesisch, Russisch, Schwedisch, Ukrainisch, Vietnamesisch und Galizisch werden standardmäßig übersetzt, und wir freuen uns über [Beiträge zur Aufnahme weiterer Standardsprachen](https://github.com/withastro/starlight/blob/main/CONTRIBUTING.md).
+
+Du kannst Übersetzungen für zusätzliche Sprachen, die du unterstützt, über die `i18n` Datensammlung zur Verfügung stellen - oder unsere Standardbezeichnungen überschreiben.
+
+1. Konfiguriere die `i18n` Datensammlung in `src/content/config.ts`, wenn sie nicht bereits konfiguriert ist:
+
+   ```js
+   // src/content/config.ts
+   import { defineCollection } from 'astro:content';
+   import { docsSchema, i18nSchema } from '@astrojs/starlight/schema';
+
+   export const collections = {
+   	docs: defineCollection({ schema: docsSchema() }),
+   	i18n: defineCollection({ type: 'data', schema: i18nSchema() }),
+   };
+   ```
+
+2. Erstelle eine JSON-Datei in `src/content/i18n/` für jedes zusätzliche Gebietsschema, für das du UI-Übersetzungsstrings bereitstellen möchtest.
+   Dies würde zum Beispiel Übersetzungsdateien für Arabisch und vereinfachtes Chinesisch hinzufügen:
+
+   <FileTree>
+
+   - src/
+     - content/
+       - i18n/
+         - ar.json
+         - zh-CN.json
+
+   </FileTree>
+
+3. Füge Übersetzungen für die Schlüssel hinzu, die in den JSON-Dateien übersetzt werden sollen. Übersetze nur die Werte und belasse die Schlüssel auf Englisch (z.B. `"search.label": "Buscar"`).
+
+   Dies sind die englischen Standardwerte der vorhandenen Strings, mit denen Starlight ausgeliefert wird:
+
+   ```json
+   {
+   	"skipLink.label": "Skip to content",
+   	"search.label": "Search",
+   	"search.shortcutLabel": "(Press / to Search)",
+   	"search.cancelLabel": "Cancel",
+   	"search.devWarning": "Search is only available in production builds. \nTry building and previewing the site to test it out locally.",
+   	"themeSelect.accessibleLabel": "Select theme",
+   	"themeSelect.dark": "Dark",
+   	"themeSelect.light": "Light",
+   	"themeSelect.auto": "Auto",
+   	"languageSelect.accessibleLabel": "Select language",
+   	"menuButton.accessibleLabel": "Menu",
+   	"sidebarNav.accessibleLabel": "Main",
+   	"tableOfContents.onThisPage": "On this page",
+   	"tableOfContents.overview": "Overview",
+   	"i18n.untranslatedContent": "This content is not available in your language yet.",
+   	"page.editLink": "Edit page",
+   	"page.lastUpdated": "Last updated:",
+   	"page.previousLink": "Previous",
+   	"page.nextLink": "Next",
+   	"404.text": "Page not found. Check the URL or try using the search bar.",
+   	"aside.note": "Note",
+   	"aside.tip": "Tip",
+   	"aside.caution": "Caution",
+   	"aside.danger": "Danger"
+   }
+   ```
+
+   Die Suchfunktion von Starlight wird von der [Pagefind-Bibliothek](https://pagefind.app/) unterstützt.
+   Du kannst die Übersetzungen für Pagefinds UI in der gleichen JSON Datei mit `pagefind`-Schlüsseln setzen:
+
+   ```json
+   {
+   	"pagefind.clear_search": "Clear",
+   	"pagefind.load_more": "Load more results",
+   	"pagefind.search_label": "Search this site",
+   	"pagefind.filters_label": "Filters",
+   	"pagefind.zero_results": "No results for [SEARCH_TERM]",
+   	"pagefind.many_results": "[COUNT] results for [SEARCH_TERM]",
+   	"pagefind.one_result": "[COUNT] result for [SEARCH_TERM]",
+   	"pagefind.alt_search": "No results for [SEARCH_TERM]. Showing results for [DIFFERENT_TERM] instead",
+   	"pagefind.search_suggestion": "No results for [SEARCH_TERM]. Try one of the following searches:",
+   	"pagefind.searching": "Searching for [SEARCH_TERM]..."
+   }
+   ```

@@ -1,0 +1,10 @@
+{
+  "defaults": {
+    "runners": [
+      "axe"
+    ],
+    "ignore": [
+      "color-contrast"
+    ]
+  }
+}

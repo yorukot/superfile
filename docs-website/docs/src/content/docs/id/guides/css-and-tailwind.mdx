@@ -1,0 +1,289 @@
+---
+title: CSS dan Styling
+description: Pelajari bagaimana cara styling website Starlight Anda dengan custom css dan mengintegrasikannya dengan Tailwind CSS.
+---
+
+Anda dapat menggunakan custom CSS atau menggunakan plugin Tailwind Starlight untuk styling website Starlight Anda.
+
+## Custom CSS styles
+
+Sesuaikan style yang diterapkan pada website Starlight Anda dengan memberikan file CSS tambahan untuk memodifikasi atau menambahkan style ke style default dari Starlight.
+
+1. Tambakan sebuah file CSS ke direktori `src/` Anda.
+   Sebagai contoh, Anda dapat mengatur lebar kolom default yang lebih lebar dan ukuran teks yang lebih besar untuk judul halaman:
+
+   ```css
+   /* src/styles/custom.css */
+   :root {
+   	--sl-content-width: 50rem;
+   	--sl-text-5xl: 3.5rem;
+   }
+   ```
+
+2. Tambahkan path file CSS Anda ke dalam array `customCss` pada config Starlight di `astro.config.mjs`.
+
+   ```js
+   // astro.config.mjs
+   import { defineConfig } from 'astro/config';
+   import starlight from '@astrojs/starlight';
+
+   export default defineConfig({
+   	integrations: [
+   		starlight({
+   			title: 'Website Dokumentasi Dengan Custom CSS',
+   			customCss: [
+   				// Path relative ke custom CSS file Anda
+   				'./src/styles/custom.css',
+   			],
+   		}),
+   	],
+   });
+   ```
+
+Anda dapat melihat semua properti custom CSS yang dapat Anda atur yang digunakan oleh Starlight untuk menyesuaikan website dokumentasi Anda di dalam file [`props.css` di GitHub](https://github.com/withastro/starlight/blob/main/packages/starlight/style/props.css).
+
+## Tailwind CSS
+
+Dukungan Tailwind CSS dalam proyek-proyek Astro disediakan oleh [integrasi Astro Tailwind](https://docs.astro.build/en/guides/integrations-guide/tailwind/).
+Starlight menyediakan plugin Tailwind tambahan untuk membantu mengonfigurasi Tailwind agar kompatibel dengan styles dari Starlight.
+
+Plugin Tailwind Starlight menerapkan konfigurasi berikut:
+
+- Mengonfigurasi varian `dark:` Tailwind agar cocok dengan mode gelap Starlight.
+- Menggunakan [tema warna dan font Tailwind](#styling-starlight-dengan-tailwind) pada UI dari Starlight.
+- Menonaktifkan reset [Preflight](https://tailwindcss.com/docs/preflight) Tailwind namun secara selektif mengembalikan bagian-bagian penting dari Preflight yang diperlukan untuk _border utility classes_ Tailwind.
+
+### Membuat proyek baru dengan Tailwind
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+Mulai proyek Starlight baru dengan konfigurasi awal Tailwind CSS menggunakan `create astro`:
+
+<Tabs>
+<TabItem label="npm">
+
+```sh
+npm create astro@latest -- --template starlight/tailwind
+```
+
+</TabItem>
+<TabItem label="pnpm">
+
+```sh
+pnpm create astro --template starlight/tailwind
+```
+
+</TabItem>
+<TabItem label="Yarn">
+
+```sh
+yarn create astro --template starlight/tailwind
+```
+
+</TabItem>
+</Tabs>
+
+### Menambahkan Tailwind ke dalam proyek yang sudah ada
+
+Jika Anda sudah memiliki website Starlight dan ingin menambahkan Tailwind CSS, ikuti langkah-langkah berikut.
+
+1.  Tambahkan Integrasi Tailwind Astro
+
+    <Tabs>
+
+    <TabItem label="npm">
+
+    ```sh
+    npx astro add tailwind
+    ```
+
+    </TabItem>
+
+    <TabItem label="pnpm">
+
+    ```sh
+    pnpm astro add tailwind
+    ```
+
+    </TabItem>
+
+    <TabItem label="Yarn">
+
+    ```sh
+    yarn astro add tailwind
+    ```
+
+    </TabItem>
+
+    </Tabs>
+
+2.  Instal plugin Tailwind Starlight
+
+    <Tabs>
+
+    <TabItem label="npm">
+
+    ```sh
+    npm install @astrojs/starlight-tailwind
+    ```
+
+    </TabItem>
+
+    <TabItem label="pnpm">
+
+    ```sh
+    pnpm add @astrojs/starlight-tailwind
+    ```
+
+    </TabItem>
+
+    <TabItem label="Yarn">
+
+    ```sh
+    yarn add @astrojs/starlight-tailwind
+    ```
+
+    </TabItem>
+
+    </Tabs>
+
+3.  Buat file CSS untuk _base styles_ Tailwind, misalnya di `src/tailwind.css`:
+
+    ```css
+    /* src/tailwind.css */
+    @tailwind base;
+    @tailwind components;
+    @tailwind utilities;
+    ```
+
+4.  Perbarui file konfigurasi Astro Anda untuk menggunakan _base styles_ Tailwind dan nonaktifkan _base styles_ bawaan:
+
+    ```js {11-12,16-17}
+    // astro.config.mjs
+    import { defineConfig } from 'astro/config';
+    import starlight from '@astrojs/starlight';
+    import tailwind from '@astrojs/tailwind';
+
+    export default defineConfig({
+    	integrations: [
+    		starlight({
+    			title: 'Website Dokumentasi dengan Tailwind',
+    			customCss: [
+    				// Path ke Tailwind base styles Anda:
+    				'./src/tailwind.css',
+    			],
+    		}),
+    		tailwind({
+    			// Nonaktifkan base styles bawaan
+    			applyBaseStyles: false,
+    		}),
+    	],
+    });
+    ```
+
+5.  Tambahkan plugin Tailwind Starlight ke `tailwind.config.mjs`:
+
+    ```js ins={2,7}
+    // tailwind.config.mjs
+    import starlightPlugin from '@astrojs/starlight-tailwind';
+
+    /** @type {import('tailwindcss').Config} */
+    export default {
+    	content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
+    	plugins: [starlightPlugin()],
+    };
+    ```
+
+### Styling Starlight dengan Tailwind
+
+Starlight akan menggunakan nilai-nilai dari konfigurasi tema [Tailwind Anda](https://tailwindcss.com/docs/theme) di dalam UI-nya.
+
+Jika diatur, opsi berikut akan menggantikan style bawaan Starlight:
+
+- `colors.accent` — digunakan untuk tautan dan menandakan item yang sedang aktif
+- `colors.gray` — digunakan untuk warna latar belakang dan border
+- `fontFamily.sans` — digunakan untuk UI dan konten teks
+- `fontFamily.mono` — digunakan untuk contoh kode
+
+```js {12,14,18,20}
+// tailwind.config.mjs
+import starlightPlugin from '@astrojs/starlight-tailwind';
+import colors from 'tailwindcss/colors';
+
+/** @type {import('tailwindcss').Config} */
+export default {
+	content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
+	theme: {
+		extend: {
+			colors: {
+				// Warna aksen pilihan Anda. Indigo paling mendekati bawaan Starlight.
+				accent: colors.indigo,
+				// Skala abu-abu pilihan Anda. Zinc paling mendekati bawaan Starlight.
+				gray: colors.zinc,
+			},
+			fontFamily: {
+				// Font teks pilihan Anda. Starlight menggunakan kumpulan font sistem secara default.
+				sans: ['"Atkinson Hyperlegible"'],
+				// Font kode pilihan Anda. Starlight menggunakan font monospace sistem secara default.
+				mono: ['"IBM Plex Mono"'],
+			},
+		},
+	},
+	plugins: [starlightPlugin()],
+};
+```
+
+## Tema
+
+Tema warna Starlight dapat dikontrol dengan mengganti custom properti bawaannya.
+Variabel-variabel ini digunakan di seluruh UI dengan berbagai nuansa abu-abu yang digunakan untuk warna teks dan latar belakang, dan satu warna aksen yang digunakan untuk tautan serta menyoroti item-item yand sedang aktif di bagian navigasi.
+
+### Editor Tema Warna
+
+Gunakan slider di bawah ini untuk mengubah palet warna aksen dan abu-abu Starlight.
+Preview gelap dan terang akan menampilkan warna-warna hasilnya, dan seluruh halaman juga akan diperbarui untuk menyesuaikan dengan perubahan yang Anda lakukan.
+
+Saat Anda puas dengan perubahan Anda, salin CSS atau kode Tailwind di bawah ini dan gunakan di proyek Anda.
+
+import ThemeDesigner from '~/components/theme-designer.astro';
+
+<ThemeDesigner
+	labels={{
+		presets: {
+			label: 'Preset',
+			ocean: 'Lautan',
+			forest: 'Hutan',
+			oxide: 'Oksida',
+			nebula: 'Nebula',
+			default: 'Default',
+			random: 'Acak',
+		},
+		editor: {
+			accentColor: 'Aksen',
+			grayColor: 'Abu-abu',
+			hue: 'Hue',
+			chroma: 'Chroma',
+			pickColor: 'Pilih warna',
+		},
+		preview: {
+			darkMode: 'Mode Gelap',
+			lightMode: 'Mode terang',
+			bodyText:
+				'Teks body ditampilkan dalam nuansa abu-abu yang berkontras tinggi dengan latar belakang.',
+			linkText: 'Tautan berwarna.',
+			dimText:
+				'Beberapa teks, seperti daftar isi, memiliki kontras yang lebih rendah.',
+			inlineCode: 'Kode inline memiliki latar belakang yang berbeda.',
+		},
+	}}
+>
+	<Fragment slot="css-docs">
+		Tambahkan CSS berikut ke proyek Anda dalam [file CSS
+		custom](#custom-css-styles) untuk menerapkan tema ini ke website Anda.
+	</Fragment>
+	<Fragment slot="tailwind-docs">
+		Contoh [file konfigurasi Tailwind ](#styling-starlight-dengan-tailwind) di
+		bawah ini menyertakan palet warna `accent` dan `gray` yang dihasilkan untuk
+		digunakan di objek konfigurasi `theme.extend.colors`.
+	</Fragment>
+</ThemeDesigner>

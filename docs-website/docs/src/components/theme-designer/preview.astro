@@ -1,0 +1,53 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+import Palette from './palette.astro';
+
+interface Props extends HTMLAttributes<'div'> {
+	labels: {
+		lightMode: string;
+		darkMode: string;
+		bodyText: string;
+		linkText: string;
+		dimText: string;
+		inlineCode: string;
+	};
+}
+const { labels, ...attrs } = Astro.props;
+const light = 'data-light' in attrs;
+const linkColor = light ? '--sl-color-accent' : '--sl-color-accent-high';
+const codeBg = light ? '--sl-color-gray-6' : '--sl-color-gray-5';
+---
+
+<div class="preview-card" {...attrs}>
+	<h4>{light ? labels.lightMode : labels.darkMode}</h4>
+	<p>
+		{labels.bodyText}{' '}
+		<span class="link" style={`color:var(${linkColor})`}>{labels.linkText}</span>{' '}
+		<span class="dim">{labels.dimText}</span>{' '}
+		<code style={`--sl-color-bg-inline-code:var(${codeBg})`}>{labels.inlineCode}</code>
+	</p>
+	<Palette {light} />
+</div>
+
+<style>
+	.preview-card {
+		margin: 0 !important;
+		border: 1px solid var(--sl-color-gray-5);
+		padding: 1rem;
+		background-color: var(--sl-color-black);
+	}
+
+	p {
+		margin-top: 0.5em !important;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-2);
+	}
+
+	.link {
+		text-decoration: underline;
+	}
+
+	.dim {
+		color: var(--sl-color-gray-3);
+	}
+</style>

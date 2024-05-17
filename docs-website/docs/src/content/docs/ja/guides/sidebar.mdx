@@ -1,0 +1,535 @@
+---
+title: サイドバーのナビゲーション
+description: Starlightサイトのサイドバーのナビゲーションリンクを設定・カスタマイズする方法を学びます。
+---
+
+import { FileTree } from '@astrojs/starlight/components';
+import SidebarPreview from '~/components/sidebar-preview.astro';
+
+サイドバーはユーザーがサイト内を移動するための主要な方法の1つであるため、サイドバーを整理することは良いドキュメントの鍵となります。Starlightでは、サイドバーのレイアウトとコンテンツをカスタマイズするためのオプション一式を提供しています。
+
+## デフォルトのサイドバー
+
+Starlightはデフォルトで、ドキュメントのファイルシステム構造に基づいてサイドバーを自動的に生成します。その際、各ファイルの`title`プロパティをサイドバーのエントリとして使用します。
+
+たとえば以下のファイル構造があるとします。
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - guides/
+        - components.md
+        - i18n.md
+      - reference/
+        - configuration.md
+
+</FileTree>
+
+すると以下のサイドバーが自動的に生成されます。
+
+<SidebarPreview
+	config={[
+		{
+			label: 'guides',
+			items: [
+				{ label: 'Components', link: '/guides/components/' },
+				{ label: 'Internationalization (i18n)', link: '/guides/i18n/' },
+			],
+		},
+		{
+			label: 'reference',
+			items: [
+				{ label: 'Configuration Reference', link: '/reference/configuration/' },
+			],
+		},
+	]}
+/>
+
+自動生成されるサイドバーについては、[自動生成されるグループ](#自動生成されるグループ)のセクションで詳しく説明します。
+
+## リンクとリンクグループを追加する
+
+サイドバーの[リンク](#リンク)と（折りたたみ可能なヘッダー内の）[リンクグループ](#グループ)を設定するには、`astro.config.mjs`で[`starlight.sidebar`](/ja/reference/configuration/#sidebar)プロパティを使用します。
+
+リンクとグループを組み合わせることで、さまざまなサイドバーレイアウトを作成できます。
+
+### リンク
+
+`label`と`link`プロパティをもつオブジェクトを使用して、内部または外部ページへのリンクを追加します。
+
+```js "label:" "link:"
+starlight({
+	sidebar: [
+		// CSSとスタイリングガイドへのリンク。
+		{ label: 'CSSとスタイリング', link: '/guides/css-and-tailwind/' },
+		// Astroウェブサイトへの外部リンク。
+		{ label: 'Astro', link: 'https://astro.build/' },
+	],
+});
+```
+
+上の設定により、以下のサイドバーが生成されます。
+
+<SidebarPreview
+	config={[
+		{ label: 'CSSとスタイリング', link: '/ja/guides/css-and-tailwind/' },
+		{ label: 'Astro', link: 'https://astro.build/' },
+	]}
+/>
+
+### グループ
+
+折りたたみ可能な見出しの下に関連するリンクをグループ化することで、サイドバーに構造を追加できます。グループには、リンクと他のサブグループを含められます。
+
+`label`と`items`プロパティをもつオブジェクトを使用して、グループを追加します。`label`はグループの見出しとして使用されます。`items`配列にリンクまたはサブグループを追加します。
+
+```js /^\s*(label:|items:)/
+starlight({
+	sidebar: [
+		// 「ガイド」というラベルのリンクグループ。
+		{
+			label: 'ガイド',
+			items: [
+				{ label: 'コンポーネント', link: '/guides/components/' },
+				{ label: '国際化（i18n）', link: '/guides/i18n/' },
+				// 入れ子のリンクグープ。
+				{
+					label: 'スタイリング',
+					items: [
+						{ label: 'CSS', link: '/ja/guides/css-and-tailwind/' },
+						{ label: 'Tailwind', link: '/ja/guides/css-and-tailwind/' },
+						{ label: 'Shiki', link: '/ja/guides/css-and-tailwind/' },
+					],
+				},
+			],
+		},
+	],
+});
+```
+
+上の設定により、以下のサイドバーが生成されます。
+
+<SidebarPreview
+	config={[
+		{
+			label: 'ガイド',
+			items: [
+				{ label: 'コンポーネント', link: '/ja/guides/components/' },
+				{ label: '国際化（i18n）', link: '/ja/guides/i18n/' },
+				{
+					label: 'スタイリング',
+					items: [
+						{ label: 'CSS', link: '/ja/guides/css-and-tailwind/' },
+						{ label: 'Tailwind', link: '/ja/guides/css-and-tailwind/' },
+						{ label: 'Shiki', link: '/ja/guides/css-and-tailwind/' },
+					],
+				},
+			],
+		},
+	]}
+/>
+
+### 自動生成されるグループ
+
+Starlightはドキュメントのディレクトリに基づいて、サイドバーのグループを自動的に生成できます。これはグループ内のサイドバー項目を手動で入力したくない場合に便利です。
+
+デフォルトでは、ページはファイルの[`slug`](/ja/reference/overrides/#slug)に従ってアルファベット順に並べ替えられます。
+
+`label`と`autogenerate`プロパティをもつオブジェクトを使用して、自動生成されるグループを追加します。`autogenerate`の設定には、サイドバーのエントリに使用する`directory`を指定する必要があります。たとえば、以下のように設定したとします。
+
+```js "label:" "autogenerate:"
+starlight({
+	sidebar: [
+		{
+			label: 'Guides',
+			// guidesディレクトリのリンクグループを自動生成します。
+			autogenerate: { directory: 'guides' },
+		},
+	],
+});
+```
+
+そして以下のファイル構造があるとします。
+
+<FileTree>
+
+- src/
+  - content/
+    - docs/
+      - guides/
+        - components.md
+        - i18n.md
+        - advanced/
+          - project-structure.md
+
+</FileTree>
+
+すると以下のサイドバーが生成されます。
+
+<SidebarPreview
+	config={[
+		{
+			label: 'Guides',
+			items: [
+				{ label: 'Components', link: '/guides/components/' },
+				{ label: 'Internationalization (i18n)', link: '/guides/i18n/' },
+				{
+					label: 'advanced',
+					items: [
+						{ label: 'Project Structure', link: '/guides/project-structure/' },
+					],
+				},
+			],
+		},
+	]}
+/>
+
+#### 自動生成されるリンクをフロントマターでカスタマイズする
+
+個々のページで[`sidebar`フロントマターフィールド](/ja/reference/frontmatter/#sidebar)を使用して、自動生成されるリンクをカスタマイズします。
+
+フロントマターのサイドバーオプションにより、[カスタムラベル](/ja/reference/frontmatter/#label)を設定したり、リンクに[バッジ](/ja/reference/frontmatter/#badge)を追加したり、サイドバーからリンクを[非表示](/ja/reference/frontmatter/#hidden)にしたり、[カスタムのソート順](/ja/reference/frontmatter/#order)を定義したりできます。
+
+```md "sidebar:"
+---
+title: 私のページ
+sidebar:
+  # このリンクのカスタムラベルを設定します
+  label: カスタムサイドバーラベル
+  # このリンクの順番をカスタマイズします（数字が小さいほど上に表示されます）
+  order: 2
+  # このリンクにバッジを追加します
+  badge:
+    text: 新規
+    variant: tip
+---
+```
+
+上記のフロントマターを設定したページと一緒に自動生成されるグループは、以下のサイドバーを生成します。
+
+<SidebarPreview
+	config={[
+		{
+			label: 'ガイド',
+			items: [
+				{ label: 'ページ', link: '#' },
+				{
+					label: 'カスタムサイドバーラベル',
+					link: '#',
+					badge: { text: '新規', variant: 'tip' },
+				},
+				{ label: '別のページ', link: '#' },
+			],
+		},
+	]}
+/>
+
+:::note
+フロントマターの`sidebar`設定は、自動生成されるリンクにのみ使用され、手動で定義されたリンクに対しては無視されます。
+:::
+
+## バッジ
+
+リンク、グループ、自動生成されるグループには、ラベルの横にバッジを表示するための`badge`プロパティも含められます。
+
+```js {10,17}
+starlight({
+	sidebar: [
+		{
+			label: 'ガイド',
+			items: [
+				// 「新規」バッジ付きのリンク。
+				{
+					label: 'コンポーネント',
+					link: '/guides/components/',
+					badge: '新規',
+				},
+			],
+		},
+		// 「非推奨」バッジ付きの自動生成されるグループ。
+		{
+			label: 'リファレンス',
+			badge: '非推奨',
+			autogenerate: { directory: 'reference' },
+		},
+	],
+});
+```
+
+上の設定により、以下のサイドバーが生成されます。
+
+<SidebarPreview
+	config={[
+		{
+			label: 'ガイド',
+			items: [
+				{
+					label: 'コンポーネント',
+					link: '/ja/guides/components/',
+					badge: { text: '新規', variant: 'default' },
+				},
+			],
+		},
+		{
+			label: 'リファレンス',
+			badge: { text: '非推奨', variant: 'default' },
+			items: [
+				{
+					label: '設定方法',
+					link: '/ja/reference/configuration/',
+				},
+				{
+					label: 'フロントマター',
+					link: '/ja/reference/frontmatter/',
+				},
+				{
+					label: 'オーバーライド',
+					link: '/ja/reference/overrides/',
+				},
+			],
+		},
+	]}
+/>
+
+### バッジのバリアント
+
+`text`と`variant`プロパティをもつオブジェクトを使用して、バッジのスタイルをカスタマイズできます。
+
+`text`は表示するコンテンツ、たとえば「新規」などを表わします。`variant`プロパティを`note`、`tip`、`danger`、`caution`、`success`のいずれかに設定することで、サイトのアクセントカラーを使用する`default`スタイルを上書きできます。
+
+```js {10}
+starlight({
+	sidebar: [
+		{
+			label: 'ガイド',
+			items: [
+				// 「実験的」バッジ付きのリンク。
+				{
+					label: 'コンポーネント',
+					link: '/guides/components/',
+					badge: { text: '実験的', variant: 'caution' },
+				},
+			],
+		},
+	],
+});
+```
+
+上の設定により、以下のサイドバーが生成されます。
+
+<SidebarPreview
+	config={[
+		{
+			label: 'ガイド',
+			items: [
+				{
+					label: 'コンポーネント',
+					link: '/ja/guides/components/',
+					badge: { text: '実験的', variant: 'caution' },
+				},
+			],
+		},
+	]}
+/>
+
+## カスタムHTML属性
+
+リンク要素にカスタムのHTML属性を追加するには、`attrs`プロパティを使用します。
+
+以下の例では、リンクが新しいタブで開かれるよう、`attrs`を使用して`target="_blank"`属性を追加しています。また、リンクのラベルにカスタムの`style`属性を適用して斜体にします。
+
+```js {10}
+starlight({
+	sidebar: [
+		{
+			label: 'ガイド',
+			items: [
+				// 新しいタブで開かれる、Astroドキュメントへの外部リンク。
+				{
+					label: 'Astro Docs',
+					link: 'https://docs.astro.build/',
+					attrs: { target: '_blank', style: 'font-style: italic' },
+				},
+			],
+		},
+	],
+});
+```
+
+上の設定により、以下のサイドバーが生成されます。
+
+<SidebarPreview
+	config={[
+		{
+			label: 'ガイド',
+			items: [
+				{
+					label: 'Astro Docs',
+					link: 'https://docs.astro.build/',
+					attrs: {
+						target: '_blank',
+						style: 'font-style: italic',
+					},
+				},
+			],
+		},
+	]}
+/>
+
+## 国際化
+
+リンクやグループのラベルをサポート対象の言語向けに翻訳するには、リンクやグループのエントリに`translations`プロパティを使用します。[BCP-47](https://www.w3.org/International/questions/qa-choosing-language-tags)の言語タグ、たとえば`"en"`、`"ar"`、`"zh-CN"`をキーとして、翻訳されたラベルを値として指定します。`label`プロパティは、デフォルトのロケールと、翻訳がない言語に対して使用されます。
+
+```js {5-7,11-13,18-20}
+starlight({
+	sidebar: [
+		{
+			label: 'Guides',
+			translations: {
+				'pt-BR': 'Guias',
+			},
+			items: [
+				{
+					label: 'Components',
+					translations: {
+						'pt-BR': 'Componentes',
+					},
+					link: '/guides/components/',
+				},
+				{
+					label: 'Internationalization (i18n)',
+					translations: {
+						'pt-BR': 'Internacionalização (i18n)',
+					},
+					link: '/guides/i18n/',
+				},
+			],
+		},
+	],
+});
+```
+
+ブラジルポルトガル語でドキュメントを閲覧すると、以下のサイドバーが生成されます。
+
+<SidebarPreview
+	config={[
+		{
+			label: 'Guias',
+			items: [
+				{ label: 'Componentes', link: '/pt-br/guides/components/' },
+				{ label: 'Internacionalização (i18n)', link: '/pt-br/guides/i18n/' },
+			],
+		},
+	]}
+/>
+
+## グループを折りたたむ
+
+`collapsed`プロパティを`true`に設定することで、リンクのグループをデフォルトで折りたためます。
+
+```js {5-6}
+starlight({
+	sidebar: [
+		{
+			label: 'Guides',
+			// デフォルトでグループを折りたたみます。
+			collapsed: true,
+			items: [
+				{ label: 'Components', link: '/guides/components/' },
+				{ label: 'Internationalization (i18n)', link: '/guides/i18n/' },
+			],
+		},
+	],
+});
+```
+
+上の設定により、以下のサイドバーが生成されます。
+
+<SidebarPreview
+	config={[
+		{
+			label: 'Guides',
+			collapsed: true,
+			items: [
+				{ label: 'Components', link: '/guides/components/' },
+				{ label: 'Internationalization (i18n)', link: '/guides/i18n/' },
+			],
+		},
+	]}
+/>
+
+[自動生成されるグループ](#自動生成されるグループ)は、親グループの`collapsed`値に従います。
+
+```js {5-6}
+starlight({
+	sidebar: [
+		{
+			label: 'Guides',
+			// デフォルトでグループと自動生成されるサブグループを折りたたみます。
+			collapsed: true,
+			autogenerate: { directory: 'guides' },
+		},
+	],
+});
+```
+
+上の設定により、以下のサイドバーが生成されます。
+
+<SidebarPreview
+	config={[
+		{
+			label: 'Guides',
+			collapsed: true,
+			items: [
+				{ label: 'Components', link: '/guides/components/' },
+				{ label: 'Internationalization (i18n)', link: '/guides/i18n/' },
+				{
+					label: 'advanced',
+					collapsed: true,
+					items: [
+						{ label: 'Project Structure', link: '/guides/project-structure/' },
+					],
+				},
+			],
+		},
+	]}
+/>
+
+この動作は、`autogenerate.collapsed`プロパティを定義することで上書きできます。
+
+```js {5-7} "collapsed: true"
+starlight({
+	sidebar: [
+		{
+			label: 'Guides',
+			// 「Guides」グループは折りたたみませんが、
+			// 自動生成されるサブグループは折りたたみます。
+			collapsed: false,
+			autogenerate: { directory: 'guides', collapsed: true },
+		},
+	],
+});
+```
+
+上の設定により、以下のサイドバーが生成されます。
+
+<SidebarPreview
+	config={[
+		{
+			label: 'Guides',
+			items: [
+				{ label: 'Components', link: '/guides/components/' },
+				{ label: 'Internationalization (i18n)', link: '/guides/i18n/' },
+				{
+					label: 'advanced',
+					collapsed: true,
+					items: [
+						{ label: 'Project Structure', link: '/guides/project-structure/' },
+					],
+				},
+			],
+		},
+	]}
+/>

@@ -1,0 +1,102 @@
+---
+import type { z } from 'astro/zod';
+import config from 'virtual:starlight/user-config';
+import { version } from '../package.json';
+import type { HeadConfigSchema } from '../schemas/head';
+import { fileWithBase } from '../utils/base';
+import { createHead } from '../utils/head';
+import { localizedUrl } from '../utils/localizedUrl';
+import type { Props } from '../props';
+
+const { entry, lang, siteTitle } = Astro.props;
+const { data } = entry;
+
+const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site) : undefined;
+const description = data.description || config.description;
+
+const headDefaults: z.input<ReturnType<typeof HeadConfigSchema>> = [
+	{ tag: 'meta', attrs: { charset: 'utf-8' } },
+	{
+		tag: 'meta',
+		attrs: { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+	},
+	{ tag: 'title', content: `${data.title} ${config.titleDelimiter} ${siteTitle}` },
+	{ tag: 'link', attrs: { rel: 'canonical', href: canonical?.href } },
+	{ tag: 'meta', attrs: { name: 'generator', content: Astro.generator } },
+	{
+		tag: 'meta',
+		attrs: { name: 'generator', content: `Starlight v${version}` },
+	},
+	// Favicon
+	{
+		tag: 'link',
+		attrs: {
+			rel: 'shortcut icon',
+			href: fileWithBase(config.favicon.href),
+			type: config.favicon.type,
+		},
+	},
+	// OpenGraph Tags
+	{ tag: 'meta', attrs: { property: 'og:title', content: data.title } },
+	{ tag: 'meta', attrs: { property: 'og:type', content: 'article' } },
+	{ tag: 'meta', attrs: { property: 'og:url', content: canonical?.href } },
+	{ tag: 'meta', attrs: { property: 'og:locale', content: lang } },
+	{ tag: 'meta', attrs: { property: 'og:description', content: description } },
+	{ tag: 'meta', attrs: { property: 'og:site_name', content: siteTitle } },
+	// Twitter Tags
+	{
+		tag: 'meta',
+		attrs: { name: 'twitter:card', content: 'summary_large_image' },
+	},
+	{ tag: 'meta', attrs: { name: 'twitter:title', content: data.title } },
+	{ tag: 'meta', attrs: { name: 'twitter:description', content: description } },
+];
+
+if (description)
+	headDefaults.push({
+		tag: 'meta',
+		attrs: { name: 'description', content: description },
+	});
+
+// Link to language alternates.
+if (canonical && config.isMultilingual) {
+	for (const locale in config.locales) {
+		const localeOpts = config.locales[locale];
+		if (!localeOpts) continue;
+		headDefaults.push({
+			tag: 'link',
+			attrs: {
+				rel: 'alternate',
+				hreflang: localeOpts.lang,
+				href: localizedUrl(canonical, locale).href,
+			},
+		});
+	}
+}
+
+// Link to sitemap, but only when `site` is set.
+if (Astro.site) {
+	headDefaults.push({
+		tag: 'link',
+		attrs: {
+			rel: 'sitemap',
+			href: fileWithBase('/sitemap-index.xml'),
+		},
+	});
+}
+
+// Link to Twitter account if set in Starlight config.
+if (config.social?.twitter) {
+	headDefaults.push({
+		tag: 'meta',
+		attrs: {
+			name: 'twitter:site',
+			content: new URL(config.social.twitter.url).pathname,
+		},
+	});
+}
+
+const head = createHead(headDefaults, config.head, data.head);
+---
+
+{head.map(({ tag: Tag, attrs, content }) => <Tag {...attrs} set:html={content} />)}

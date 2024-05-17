@@ -1,0 +1,29 @@
+---
+import type { Props } from '../props';
+
+import EditLink from 'virtual:starlight/components/EditLink';
+import LastUpdated from 'virtual:starlight/components/LastUpdated';
+import Pagination from 'virtual:starlight/components/Pagination';
+---
+
+<footer>
+	<div class="meta sl-flex">
+		<EditLink {...Astro.props} />
+		<LastUpdated {...Astro.props} />
+	</div>
+	<Pagination {...Astro.props} />
+</footer>
+
+<style>
+	.meta {
+		gap: 0.75rem 3rem;
+		justify-content: space-between;
+		flex-wrap: wrap;
+		margin-block: 3rem 1.5rem;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-3);
+	}
+	.meta > :global(p:only-child) {
+		margin-inline-start: auto;
+	}
+</style>

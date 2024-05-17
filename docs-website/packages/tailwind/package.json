@@ -1,0 +1,35 @@
+{
+  "name": "@astrojs/starlight-tailwind",
+  "version": "2.0.2",
+  "description": "Tailwind CSS plugin for the Starlight documentation theme for Astro",
+  "author": "Chris Swithinbank <swithinbank@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/withastro/starlight",
+    "directory": "packages/tailwind"
+  },
+  "bugs": "https://github.com/withastro/starlight/issues",
+  "homepage": "https://starlight.astro.build",
+  "type": "module",
+  "files": [
+    "index.ts"
+  ],
+  "exports": {
+    ".": "./index.ts"
+  },
+  "scripts": {
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^1.6.0",
+    "postcss": "^8.4.33",
+    "vitest": "^1.6.0"
+  },
+  "peerDependencies": {
+    "@astrojs/starlight": ">=0.9.0",
+    "@astrojs/tailwind": "^5.0.0",
+    "tailwindcss": "^3.3.3"
+  }
+}

@@ -1,0 +1,48 @@
+---
+title: Projekt Struktur
+description: Lær hvordan man organiserer filerne i dit Starlight projekt.
+---
+
+Denne guide viser dig hvordan et Starlight projekt skal opbygges og hvordan de forskellige filer i projektet virker.
+
+Starlight projekter følger for det meste den samme fil- og mappestruktur som andre Astro projekter. Se [Astros projektstrukturs dokumentation](https://docs.astro.build/en/core-concepts/project-structure/) for flere detaljer.
+
+## Filer og mapper
+
+- `astro.config.mjs` — Astro konfigurationsfilen; inkluderer Starlight integrationen og konfigurationen.
+- `src/content/config.ts` — Indholdskollektions-konfigurationsfilen; tilføjer Starlights frontmatter-skemaer til dit projekt.
+- `src/content/docs/` — Indholdsfiler. Starlight laver alle `.md`, `.mdx` eller `.mdoc` filer i denne mappe til en side på din hjemmeside.
+- `src/content/i18n/` (valgfri) — Oversættelses data til at støtte [internationaliseringen](/da/guides/i18n/).
+- `src/` — Andre koder og filer (komponenter, styling, billeder mm.) til dit projekt.
+- `public/` — Statiske filer (fonter, favicon, PDF'er mm.) som ikke vil blive ændret af Astro.
+
+## Eksempel projektindhold
+
+En Starlight projektstruktur kunne se sådan ud:
+
+import { FileTree } from '@astrojs/starlight/components';
+
+<FileTree>
+
+- public/
+  - favicon.svg
+- src/
+  - assets/
+    - logo.svg
+    - screenshot.jpg
+  - components/
+    - CustomButton.astro
+    - InteractiveWidget.jsx
+  - content/
+    - docs/
+      - guides/
+        - 01-getting-started.md
+        - 02-advanced.md
+      - index.mdx
+    - config.ts
+  - env.d.ts
+- astro.config.mjs
+- package.json
+- tsconfig.json
+
+</FileTree>

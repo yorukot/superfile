@@ -1,0 +1,90 @@
+---
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+
+interface Props {
+	handle: string;
+	name: string;
+	cite: string;
+}
+
+const { name, handle, cite } = Astro.props;
+
+const avatars = import.meta.glob<{ default: ImageMetadata }>('../assets/testimonials/*.jpg');
+const avatar = avatars[`../assets/testimonials/${handle}.jpg`];
+if (!avatar) {
+	throw new Error(`Could not resolve testimonial avatar for @${handle}`);
+}
+const src = (await avatar()).default;
+---
+
+<li class="testimonial">
+	<blockquote class="quote" cite={cite}>
+		<slot />
+	</blockquote>
+	<div class="footer">
+		<Image class="avatar" height="96" width="96" {src} alt="" />
+		<div>
+			<p class="name">{name}</p>
+			<a href={cite} class="handle">@{handle}</a>
+		</div>
+	</div>
+</li>
+
+<style>
+	.testimonial {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5em;
+	}
+	@media (min-width: 50rem) {
+		.testimonial {
+			gap: 2em;
+		}
+	}
+	.quote {
+		position: relative;
+		padding-inline-start: 1.5em;
+	}
+	.quote::before {
+		position: absolute;
+		content: '';
+		inset-block: 0.5em;
+		inset-inline-start: 0;
+		border-inline-start: 1px solid var(--sl-color-text-accent);
+	}
+	.quote > :global(* + *) {
+		margin-top: 0.75em;
+	}
+
+	.footer {
+		display: flex;
+		gap: 1rem;
+		align-items: center;
+	}
+	.avatar {
+		--outline-color: rgba(255, 255, 255, 0.33);
+		outline: 1px solid var(--outline-color);
+		outline-offset: -1px;
+		border-radius: 99rem;
+		width: 4em;
+		height: 4em;
+	}
+	:global([data-theme='light']) .avatar {
+		--outline-color: rgba(23, 25, 30, 0.33);
+	}
+
+	.name {
+		font-weight: 600;
+		font-size: var(--sl-text-h4);
+		color: var(--sl-color-white);
+		line-height: var(--sl-line-height-headings);
+	}
+	.handle {
+		text-underline-offset: 4px;
+		color: var(--sl-color-text-accent);
+	}
+	.handle:hover {
+		color: var(--sl-color-white);
+	}
+</style>
