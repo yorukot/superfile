@@ -77,6 +77,14 @@ func Run(content embed.FS) {
 					return nil
 				},
 			},
+			{
+				Name:    "edit-hotkeys",
+				Aliases: []string{"eh"},
+				Usage:   "Print the path to the configuration and directory",
+				Action: func(c *cli.Context) error {
+					return nil
+				},
+			},
 		},
 		Action: func(c *cli.Context) error {
 			path := ""

@@ -7,7 +7,7 @@ head:
 ---
 
 :::tip
-These are the default hotkeys and you can [change](/) them all!
+These are the default hotkeys and you can [change](/configure/custom-hotkeys) them all!
 :::
 
 ## General

@@ -1,0 +1,29 @@
+---
+title: Custom theme
+description: Custom your own superfile theme
+head:
+  - tag: title
+    content: Custom theme | superfile
+---
+
+import CodeBlock from '../../../components/code.astro';
+
+You can enter the following command to set it up;
+
+```bash
+$EDITOR config_path
+```
+You can first go to the [theme list](/list/theme-list) to find a theme you like (or if you don'wqt have one you like, you can make one yourself!)
+
+Once you find one you like, copy it and paste it into the theme in the config_path file.
+
+```diff
+- theme = 'catpuccin'
++ theme = 'theme_name_you_like'
+```
+
+###
+
+### Default theme
+
+<CodeBlock file="src/superfileConfig/theme/catpuccin.toml" />

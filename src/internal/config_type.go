@@ -110,7 +110,6 @@ type ThemeType struct {
 type ConfigType struct {
 	Theme string `toml:"theme" comment:"change your theme"`
 
-	FooterPanelList []string `toml:"footer_panel_list" comment:"\nuseless for now"`
 	AutoCheckUpdate bool `toml:"auto_check_update" comment:"\nAuto check for update"`
 	CdOnQuit        bool `toml:"cd_on_quit" comment:"\nCd on quit"`
 	

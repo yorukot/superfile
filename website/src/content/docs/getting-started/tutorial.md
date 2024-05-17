@@ -13,7 +13,7 @@ If you didn't install superfile yet please [click here](/getting-started/install
 :::
 
 :::tip
-If you just want to know about Hotkey without so much supplementary content, please go to [here]()
+If you just want to know about Hotkey without so much supplementary content, please go to [here](/list/hotkey-list)
 :::
 ## Hotkeys tutorial
 First, if you want to open `superfile` by opening a terminal and typing `spf`.

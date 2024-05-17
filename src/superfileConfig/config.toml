@@ -1,9 +1,6 @@
 # change your theme
 theme = 'catpuccin'
 # 
-# useless for now
-footer_panel_list = ['processes', 'metadata', 'clipboard']
-# 
 # Auto check for update
 auto_check_update = true
 # 

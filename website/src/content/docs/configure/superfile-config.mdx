@@ -1,0 +1,70 @@
+---
+title: Superfile config
+description: Configure your superfile
+head:
+  - tag: title
+    content: Superfile config | superfile
+---
+
+import CodeBlock from '../../../components/code.astro';
+
+You can enter the following command to set it up;
+
+```bash
+$EDITOR config_path
+```
+
+:::tip
+If you want to get the set path you can try `spf pl` which will print out the file locations of all superfile.
+:::
+
+- ###### theme
+You can go to [here](/configure/custom-theme) to know how to config it
+
+- ###### auto_check_update
+`true`  => Turning on will check whether updates are needed every time superfile is closed (only checked once a day)
+
+`false` => If closed, no checks will be performed
+
+- ###### transparent_background
+`true` => If enabled, the background color will not be rendered (transparent). This is useful if your terminal background is transparent.
+
+`true` => If turned off, the background will be rendered (with color) to maintain theme consistency.
+
+- ###### Border style
+Here are a few suggested styles, of course you can change them to your own:
+
+```toml
+# ...
+border_top = "━"
+border_bottom = "━"
+border_left = "┃"
+border_right = "┃"
+border_top_left = "┏"
+border_top_right = "┓"
+border_bottom_left = "┗"
+border_bottom_right = "┛"
+border_middle_left = "┣"
+border_middle_right = "┫"
+#...
+```
+
+```toml
+# ...
+border_top = "─"
+border_bottom = "─"
+border_left = "│"
+border_right = "│"
+border_top_left = "╭"
+border_top_right = "╮"
+border_bottom_left = "╰"
+border_bottom_right = "╯"
+border_middle_left = "├"
+border_middle_right = "┤"
+#...
+```
+
+### Default superfile config
+
+<CodeBlock file="src/superfileConfig/config.toml" />
+

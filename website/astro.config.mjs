@@ -78,7 +78,6 @@ export default defineConfig({
         {
           label: 'Start Here',
           items: [
-            // Each item here is one entry in the navigation menu.
             {
               label: 'Installation',
               link: '/getting-started/installation/',
@@ -87,10 +86,36 @@ export default defineConfig({
               label: 'Tutorial',
               link: '/getting-started/tutorial/',
             },
+          ],
+        },
+        {
+          label: 'Configure',
+          items: [
+            {
+              label: 'Superfile config',
+              link: '/configure/superfile-config/',
+            },
+            {
+              label: 'Custom hotkeys',
+              link: '/configure/custom-hotkeys/',
+            },
+            {
+              label: 'Custom theme',
+              link: '/configure/custom-theme'
+            }
+          ],
+        },
+        {
+          label: 'List',
+          items: [
             {
               label: 'Hotkey list',
-              link: '/getting-started/hotkey-list/',
-            }
+              link: '/list/hotkey-list/',
+            },
+            {
+              label: 'Theme list',
+              link: '/list/theme-list/',
+            },
           ],
         },
         {
