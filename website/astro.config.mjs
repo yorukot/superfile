@@ -62,7 +62,7 @@ export default defineConfig({
         {
           tag: 'script',
           content: ` window.minimalAnalytics = {
-            trackingId: 'G-GQ45JJD1JC',
+            trackingId: 'G-WFLBCRZ7MC',
             autoTrack: true,
           };`,
         },
