@@ -18,19 +18,12 @@
 
 ## Content
 
-- [Installation](#install)
-  - [Homebrew](#homebrew)
-  - [Install pre-built binaries](#install-pre-built-binaries)
-  - [Windows](#Windows)
-  - [NixOs](#nixos)
-  - [Font](#font)
+- [Installation](#installation)
 - [Build](#build)
 - [Supported Systems](#supported-systems)
 - [Tutorial](#tutorial)
 - [Plugins](#plugins)
 - [Themes](#themes)
-  - [Use an existing theme](#use-an-existing-theme)
-  - [Create your own theme](#create-your-own-theme)
 - [Hotkeys](#hotkeys)
 - [Contributing](#contributing)
 - [Troubleshooting](#troubleshooting)
@@ -93,17 +86,7 @@ After you install superfile, you can go [here](https://superfile.netlify.app/get
 
 ## Themes
 
-### Use an existing theme
-
 [Click me to the theme wiki](https://superfile.netlify.app/configure/custom-theme/)
-
-### Create your own theme
-
-If you want to customize your own theme, you can go to `~/.config/superfile/theme/YOUR_THEME_NAME.toml` and copy the existing theme's json to your own theme file
-
-Don't forget to change the `theme` variable in `config.toml` to your theme name.
-
-[If you are satisfied with your theme, you might as well put it into the default theme list!](#contribute)
 
 ## Hotkeys
 
