@@ -1,0 +1,64 @@
+# Catpuccin Frappe Flavor
+# Theme create by: https://github.com/GV14982
+# Update by(sort by time):
+
+# Thanks for all contributor!!
+
+# If you want to make sidebar border display just set it same as sidebar background color
+
+# ========= Border =========
+file_panel_border = "#737994" # Overlay0
+sidebar_border = "#303446"    # Base
+footer_border = "#737994"     # Overlay0
+
+# ========= Border Active =========
+file_panel_border_active = "#babbf1" # Lavendar
+sidebar_border_active = "#e78284"    # Red
+footer_border_active = "#a6d189"     # Green
+modal_border_active = "#949cbb"      # Overlay2
+
+# ========= Background (bg) =========
+full_screen_bg = "#303446" # Base
+file_panel_bg = "#303446"  # Base
+sidebar_bg = "#303446"     # Base
+footer_bg = "#303446"      # Base
+modal_bg = "#303446"       # Base
+
+# ========= Foreground (fg) =========
+full_screen_fg = "#a5adce" # Subtext0
+file_panel_fg = "#a5adce"  # Subtext0
+sidebar_fg = "#a5adce"     # Subtext0
+footer_fg = "#a5adce"      # Subtext0
+modal_fg = "#a5adce"       # Subtext0
+
+# ========= Special Color =========
+cursor = "#f2d5cf"  # Rosewater
+correct = "#a6d189" # Green
+error = "#e78284"   # Red
+hint = "#85c1dc"    # Sapphire
+cancel = "#ea999c"  # Maroon
+# Gradient color can only have two color!
+gradient_color = ["#8caaee", "#ca9ee6"] # [Blue, Mauve]
+
+# ========= File Panel Special Items =========
+file_panel_top_directory_icon = "#a6d189" # Green
+file_panel_top_path = "#89b5fa"           # Blue
+file_panel_item_selected_fg = "#99d1db"   # Sky
+file_panel_item_selected_bg = "#303446"   # Base
+
+# ========= Sidebar Special Items =========
+sidebar_title = "#85c1dc"            # Sapphire
+sidebar_item_selected_fg = "#99d1db" # Sky
+sidebar_item_selected_bg = "#303446" # Base
+sidebar_divider = "#949cbb"          # Overlay2
+
+# ========= Modal Special Items =========
+modal_cancel_fg = "#414559" # Surface0
+modal_cancel_bg = "#ea999c" # Maroon
+
+modal_confirm_fg = "#414559" # Surface0
+modal_confirm_bg = "#99d1db" # Sky
+
+# ========= Help Menu =========
+help_menu_hotkey = "#99d1db" # Sky
+help_menu_title = "#ea999c"  # Maroon
