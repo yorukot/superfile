@@ -8,12 +8,17 @@ head:
 
 import CodeBlock from '../../../components/code.astro';
 
+### Use an existing theme
+
 You can enter the following command to set it up;
 
+[Click me to know where is CONFIG_PATH](/configure/config-file-path#config)
+
 ```bash
-$EDITOR config_path
+$EDITOR CONFIG_PATH
 ```
-You can first go to the [theme list](/list/theme-list) to find a theme you like (or if you don'wqt have one you like, you can make one yourself!)
+
+You can first go to the [theme list](/list/theme-list) to find a theme you like (or if you don't have one you like, you can make one yourself!)
 
 Once you find one you like, copy it and paste it into the theme in the config_path file.
 
@@ -22,7 +27,15 @@ Once you find one you like, copy it and paste it into the theme in the config_pa
 + theme = 'theme_name_you_like'
 ```
 
-###
+### Create your own theme
+
+[Click me to know where is THEME_DIRECTORY](/configure/config-file-path#config)
+
+If you want to customize your own theme, you can go to `THEME_DIRECTORY/YOUR_THEME_NAME.toml` and copy the existing theme's json to your own theme file
+
+Don't forget to change the `theme` variable in `config.toml` to your theme name.
+
+[If you are satisfied with your theme, you might as well put it into the default theme list!](/how-to-contribute)
 
 ### Default theme
 

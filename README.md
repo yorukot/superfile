@@ -85,7 +85,7 @@ mv ./bin/spf /usr/local/bin
 
 ## Tutorial
 
-After you install superfile, you can go [here](https://github.com/yorukot/superfile/wiki/Tutorial) to briefly understand how to use superfile!
+After you install superfile, you can go [here](https://superfile.netlify.app/getting-started/tutorial/) to briefly understand how to use superfile!
 
 ## Plugins
 
@@ -95,37 +95,7 @@ After you install superfile, you can go [here](https://github.com/yorukot/superf
 
 ### Use an existing theme
 
-You can go to [theme list](https://github.com/yorukot/superfile/blob/main/THEMELIST.md) to find one you like!
-
-> We only have a few themes at the moment, but we will be making more overtime! You can also [submit a pull request](https://github.com/yorukot/superfile/pulls) for your own theme!
-
-copy `theme_name` in:
-
-```
-Theme name: theme_name
-```
-
-Edit `config.toml` using your preferred editor:
-
-> [!TIP]
-> If your OS is macOS the file path should be in the `~/Library/Application Support/superfile/config.toml`
-
-```
-$EDITOR ~/.config/superfile/config.toml
-```
-
-
-and change:
-
-```toml
-theme = "gruvbox"
-```
-
-to:
-
-```toml
-theme = "theme-name"
-```
+[Click me to the theme wiki](https://superfile.netlify.app/configure/custom-theme/)
 
 ### Create your own theme
 
@@ -137,18 +107,10 @@ Don't forget to change the `theme` variable in `config.toml` to your theme name.
 
 ## Hotkeys
 
-[**Click me to see the hotkey list**](https://github.com/yorukot/superfile/wiki/Hotkey-list)
+> [!WARNING]
+> If you are vim/nvim user please change your default hotkeys config to vim version!
 
-> [!TIP]
-> If your OS is macOS the file path should be in the `~/Library/Application Support/superfile/hotkeys.toml`
-
-**You can change all hotkeys in** `~/.config/superfile/hotkeys.toml`
-
-> "Normal mode" is the default browsing mode
-
-Global hotkeys cannot conflict with other hotkeys (The only exception is the special hotkey).
-
-The hotkey ranges are found in `hotkeys.toml`
+[**Click me to see the hotkey wiki**](https://superfile.netlify.app/configure/custom-hotkeys/)
 
 ## Troubleshooting
 

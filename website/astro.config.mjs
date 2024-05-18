@@ -92,6 +92,10 @@ export default defineConfig({
           label: 'Configure',
           items: [
             {
+              label: 'All config file path',
+              link: '/configure/config-file-path',
+            },
+            {
               label: 'Superfile config',
               link: '/configure/superfile-config/',
             },
@@ -117,6 +121,10 @@ export default defineConfig({
               link: '/list/theme-list/',
             },
           ],
+        },
+        {
+          label: 'How to contribute',
+          link: '/how-to-contribute'
         },
         {
           label: 'Changelog',

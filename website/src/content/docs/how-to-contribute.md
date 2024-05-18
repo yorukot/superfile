@@ -3,14 +3,55 @@ title: How to Contribute
 description: How to contribute to the project, including ways to show your support, report bugs, and more.
 head:
   - tag: title
-    content: How to Contribute | React Native / Expo Starter
+    content: How to Contribute | superfile
 ---
 
-Thank you for your interest in contributing to our project. Your involvement is greatly appreciated and we welcome your contributions. Here are some ways you can help us improve this project:
+# Contributing to Superfile
 
-1. Show your support for the project by giving it a 🌟 on [Github](https://github.com/obytes/react-native-template-obytes). This helps us increase visibility and attract more contributors.
-2. Share your thoughts and ideas with us by [opening an issue](https://github.com/obytes/react-native-template-obytes/issues). If you have any suggestions or feedback about any aspect of the project, we are always eager to hear from you and have a [discussion](https://github.com/obytes/react-native-template-obytes/discussions).
-3. If you have any questions about the project, please don't hesitate to ask. Simply open a new [QA discussion](https://github.com/obytes/react-native-template-obytes/discussions/categories/q-a) and our team will do our best to provide a helpful and informative response.
-4. If you encounter a bug or typo while using the starter kit or reading the documentation, we would be grateful if you could bring it to our attention. You can open an issue to report the issue, or even better, submit a pull request with a fix.
+Welcome to Superfile! This document shall serve as a guide for you to follow in your journey to contributing to this project.
+There are many ways to contribute to Superfile:
+- Reporting Bugs
+- Resolving issues
+- Adding a theme
+- Sharing an idea and working on it
+- Working on a feature with other contributors.
+- And More…
 
-We value the input and contributions of our community and look forward to working with you to improve this project.
+To get started, take a look at the following sections.
+
+## Issues
+
+### Did you spot a problem in superfile?
+
+Firstly you should check if such an issue was previously opened/closed for your problem on the repository. If it doesn't then you should create a new issue.
+
+### Do you want to solve an issue?
+
+If there is an issue you think you can solve, and want to solve, then you should create a new fork of this repository.
+In that repository you should create a new branch for the issue you are working on and commit changes there.
+When the issue is solved, and you want it to be integrated into the official repository, you may create a pull request for the same.
+The description of the pull request should clearly describe both the issue and the solution along with other necessary information.
+The developers will merge after making the necessary changes (if arises a need to do so).
+
+### Do you want to add a new theme?
+
+Firstly check if the theme you want to add is not already added. If it is, then you work may go waste and be left redundant.
+If no such theme exists, then you may create your own theme. Following steps will guide you for it:
+- As a template, copy an existing theme's TOML file to your theme and then do the customizations. This will reduce errors from your side and make your work easy.
+- To tests your theme, go to [`CONFIG_PATH`](configure/config-file-path#config) and change description.
+- Make the changes you want and finish the theme.
+- Then you can open a pull request for the same and follow the steps described in the previous section.
+
+### Do you want to share an idea?
+
+Superfile welcomes new ideas. If you have an idea you should first check if a similar or identical idea was presented previously or not, or check thoroughly if the idea is already present in superfile.
+To share your idea you can open a discussion in https://github.com/MHNightCat/superfile/discussions
+There you can share your idea and if you want to work on it, you can follow the same steps as mentioned in previously.
+
+### Do you want to contribute but don't know how?
+
+Your first resource in this should be https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-a-project
+This file serves as your guide specifically for this project to help you get your contributions into the project.
+If you still have some questions or need help, feel free to open a discussion on the same.
+
+# Thank You 🙏

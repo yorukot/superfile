@@ -15,6 +15,27 @@ head:
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/catpuccin.png?raw=true)
 
+## Catpuccin Frappe
+
+- Theme name: `catpuccin-frappe`
+- Author: github.com/GV14982
+
+![](https://github.com/yorukot/superfile/blob/main/asset/theme/catpuccin-frappe.png?raw=true)
+
+## Catpuccin Latte
+
+- Theme name: `catpuccin-latte`
+- Author: github.com/GV14982
+
+![](https://github.com/yorukot/superfile/blob/main/asset/theme/catpuccin-latte.png?raw=true)
+
+## Catpuccin Macchiato
+
+- Theme name: `catpuccin-macchiato`
+- Author: github.com/GV14982
+
+![](https://github.com/yorukot/superfile/blob/main/asset/theme/catpuccin-macchiato.png?raw=true)
+
 ## Dracula
 
 - Theme name: `dracula`

@@ -111,4 +111,4 @@ spf
 ## Next-step
 
 - [Tutorial](/getting-started/tutorial)
-- [Hotkey list](/getting-started/hotkey-list)
+- [Hotkey list](/list/hotkey-list)
