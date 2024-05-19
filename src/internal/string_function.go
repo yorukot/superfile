@@ -1,18 +1,16 @@
 package internal
 
 import (
-	"bytes"
+	"bufio"
 	"fmt"
 	"math"
+	"os"
 	"strings"
+	"unicode"
 	"unicode/utf8"
 
 	"github.com/charmbracelet/lipgloss"
 	charmansi "github.com/charmbracelet/x/exp/term/ansi"
-	"github.com/mattn/go-runewidth"
-	ansi "github.com/muesli/reflow/ansi"
-	"github.com/muesli/reflow/truncate"
-	"github.com/muesli/termenv"
 )
 
 func truncateText(text string, maxChars int) string {
@@ -113,159 +111,44 @@ func formatFileSize(size int64) string {
 	return fmt.Sprintf("%.2f %s", adjustedSize, units[unitIndex])
 }
 
-// ======================================= overplace these is from the lipgloss PR =======================================
-// whitespace is a whitespace renderer.
-type whitespace struct {
-	style termenv.Style
-	chars string
+// Truncate line lengths and keep ANSI
+func checkAndTruncateLineLengths(text string, maxLength int) string {
+	lines := strings.Split(text, "\n")
+	var result strings.Builder
+
+	for _, line := range lines {
+		truncatedLine := charmansi.Truncate(line, maxLength, "")
+		result.WriteString(truncatedLine + "\n")
+	}
+
+	finalResult := strings.TrimRight(result.String(), "\n")
+
+	return finalResult
 }
 
-type WhitespaceOption func(*whitespace)
+// Check file is text file or not
+func isTextFile(filename string) (bool, error) {
+    file, err := os.Open(filename)
+    if err != nil {
+        return false, err
+    }
+    defer file.Close()
 
-// Render whitespaces.
-func (w whitespace) render(width int) string {
-	if w.chars == "" {
-		w.chars = " "
-	}
+    reader := bufio.NewReader(file)
+    buffer := make([]byte, 1024)
+    _, err = reader.Read(buffer)
+    if err != nil {
+        return false, err
+    }
 
-	r := []rune(w.chars)
-	j := 0
-	b := strings.Builder{}
+    for _, b := range buffer {
+        if b == 0 {
+            return false, nil
+        }
+        if !unicode.IsPrint(rune(b)) && !unicode.IsSpace(rune(b)) {
+            return false, nil
+        }
+    }
 
-	// Cycle through runes and print them into the whitespace.
-	for i := 0; i < width; {
-		b.WriteRune(r[j])
-		j++
-		if j >= len(r) {
-			j = 0
-		}
-		i += charmansi.StringWidth(string(r[j]))
-	}
-
-	// Fill any extra gaps white spaces. This might be necessary if any runes
-	// are more than one cell wide, which could leave a one-rune gap.
-	short := width - charmansi.StringWidth(b.String())
-	if short > 0 {
-		b.WriteString(strings.Repeat(" ", short))
-	}
-
-	return w.style.Styled(b.String())
-}
-
-// PlaceOverlay places fg on top of bg.
-func PlaceOverlay(x, y int, fg, bg string, opts ...WhitespaceOption) string {
-	fgLines, fgWidth := getLines(fg)
-	bgLines, bgWidth := getLines(bg)
-	bgHeight := len(bgLines)
-	fgHeight := len(fgLines)
-
-	if fgWidth >= bgWidth && fgHeight >= bgHeight {
-		// FIXME: return fg or bg?
-		return fg
-	}
-	// TODO: allow placement outside of the bg box?
-	x = clamp(x, 0, bgWidth-fgWidth)
-	y = clamp(y, 0, bgHeight-fgHeight)
-
-	ws := &whitespace{}
-	for _, opt := range opts {
-		opt(ws)
-	}
-
-	var b strings.Builder
-	for i, bgLine := range bgLines {
-		if i > 0 {
-			b.WriteByte('\n')
-		}
-		if i < y || i >= y+fgHeight {
-			b.WriteString(bgLine)
-			continue
-		}
-
-		pos := 0
-		if x > 0 {
-			left := truncate.String(bgLine, uint(x))
-			pos = ansi.PrintableRuneWidth(left)
-			b.WriteString(left)
-			if pos < x {
-				b.WriteString(ws.render(x - pos))
-				pos = x
-			}
-		}
-
-		fgLine := fgLines[i-y]
-		b.WriteString(fgLine)
-		pos += ansi.PrintableRuneWidth(fgLine)
-
-		right := cutLeft(bgLine, pos)
-		bgWidth := ansi.PrintableRuneWidth(bgLine)
-		rightWidth := ansi.PrintableRuneWidth(right)
-		if rightWidth <= bgWidth-pos {
-			b.WriteString(ws.render(bgWidth - rightWidth - pos))
-		}
-
-		b.WriteString(right)
-	}
-
-	return b.String()
-}
-
-// cutLeft cuts printable characters from the left.
-// This function is heavily based on muesli's ansi and truncate packages.
-func cutLeft(s string, cutWidth int) string {
-	var (
-		pos    int
-		isAnsi bool
-		ab     bytes.Buffer
-		b      bytes.Buffer
-	)
-	for _, c := range s {
-		var w int
-		if c == ansi.Marker || isAnsi {
-			isAnsi = true
-			ab.WriteRune(c)
-			if ansi.IsTerminator(c) {
-				isAnsi = false
-				if bytes.HasSuffix(ab.Bytes(), []byte("[0m")) {
-					ab.Reset()
-				}
-			}
-		} else {
-			w = runewidth.RuneWidth(c)
-		}
-
-		if pos >= cutWidth {
-			if b.Len() == 0 {
-				if ab.Len() > 0 {
-					b.Write(ab.Bytes())
-				}
-				if pos-cutWidth > 1 {
-					b.WriteByte(' ')
-					continue
-				}
-			}
-			b.WriteRune(c)
-		}
-		pos += w
-	}
-	return b.String()
-}
-
-func clamp(v, lower, upper int) int {
-	return min(max(v, lower), upper)
-}
-
-// Split a string into lines, additionally returning the size of the widest
-// line.
-func getLines(s string) (lines []string, widest int) {
-	lines = strings.Split(s, "\n")
-
-	for _, l := range lines {
-		w := charmansi.StringWidth(l)
-		if widest < w {
-			widest = w
-		}
-	}
-
-	return lines, widest
+    return true, nil
 }

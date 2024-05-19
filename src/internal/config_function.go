@@ -9,12 +9,13 @@ import (
 
 	"github.com/barasher/go-exiftool"
 	"github.com/pelletier/go-toml/v2"
+	varibale "github.com/yorukot/superfile/src/config"
 )
 
 func initialConfig(dir string) (toggleDotFileBool bool, firstFilePanelDir string) {
 	var err error
 
-	logOutput, err = os.OpenFile(SuperFileStateDir+logFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	logOutput, err = os.OpenFile(varibale.LogFilea, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("Error while opening superfile.log file: %v", err)
 	}
@@ -25,7 +26,7 @@ func initialConfig(dir string) (toggleDotFileBool bool, firstFilePanelDir string
 
 	loadThemeFile()
 
-	toggleDotFileData, err := os.ReadFile(SuperFileDataDir + toggleDotFile)
+	toggleDotFileData, err := os.ReadFile(varibale.ToggleDotFilea)
 	if err != nil {
 		outPutLog("Error while reading toggleDotFile data error:", err)
 	}
@@ -43,11 +44,11 @@ func initialConfig(dir string) (toggleDotFileBool bool, firstFilePanelDir string
 		}
 	}
 
-	firstFilePanelDir = HomeDir
+	firstFilePanelDir = varibale.HomeDir
 	if dir != "" {
 		firstFilePanelDir, err = filepath.Abs(dir)
 		if err != nil {
-			firstFilePanelDir = HomeDir
+			firstFilePanelDir = varibale.HomeDir
 		}
 	}
 	return toggleDotFileBool, firstFilePanelDir
@@ -58,7 +59,7 @@ func loadConfigFile() {
 	_ = toml.Unmarshal([]byte(ConfigTomlString), &Config)
 	tempForCheckMissingConfig := ConfigType{}
 
-	data, err := os.ReadFile(SuperFileMainDir + configFile)
+	data, err := os.ReadFile(varibale.ConfigFilea)
 	if err != nil {
 		log.Fatalf("Config file doesn't exist: %v", err)
 	}
@@ -75,10 +76,13 @@ func loadConfigFile() {
 			log.Fatalf("Error encoding config: %v", err)
 		}
 
-		err = os.WriteFile(SuperFileMainDir+configFile, tomlData, 0644)
+		err = os.WriteFile(varibale.ConfigFilea, tomlData, 0644)
 		if err != nil {
 			log.Fatalf("Error writing config file: %v", err)
 		}
+	}
+	if Config.FilePreviewWidth > 10 || Config.FilePreviewWidth == 1 {
+		log.Fatalf("Config file file_preview_width invalidation")
 	}
 }
 
@@ -86,7 +90,7 @@ func loadHotkeysFile() {
 
 	_ = toml.Unmarshal([]byte(HotkeysTomlString), &hotkeys)
 	tempForCheckMissingConfig := HotkeysType{}
-	data, err := os.ReadFile(SuperFileMainDir + hotkeysFile)
+	data, err := os.ReadFile(varibale.HotkeysFilea)
 
 	if err != nil {
 		log.Fatalf("Config file doesn't exist: %v", err)
@@ -104,7 +108,7 @@ func loadHotkeysFile() {
 			log.Fatalf("Error encoding hotkeys: %v", err)
 		}
 
-		err = os.WriteFile(SuperFileMainDir+hotkeysFile, tomlData, 0644)
+		err = os.WriteFile(varibale.HotkeysFilea, tomlData, 0644)
 		if err != nil {
 			log.Fatalf("Error writing hotkeys file: %v", err)
 		}
@@ -113,7 +117,7 @@ func loadHotkeysFile() {
 }
 
 func loadThemeFile() {
-	data, err := os.ReadFile(SuperFileMainDir + themeFolder + "/" + Config.Theme + ".toml")
+	data, err := os.ReadFile(varibale.ThemeFoldera + "/" + Config.Theme + ".toml")
 	if err != nil {
 		data = []byte(DefaultThemeString)
 	}
@@ -144,14 +148,22 @@ func LoadAllDefaultConfig(content embed.FS) {
 	}
 	DefaultThemeString = string(temp)
 
-	_, err = os.Stat(SuperFileMainDir + themeFolder)
+	currentThemeVersion, err := os.ReadFile(varibale.ThemeFileVersiona)
+
+	if err != nil && !os.IsNotExist(err) {
+		outPutLog("Error reading from file:", err)
+		return
+	}
+
+	_, err = os.Stat(varibale.ThemeFoldera)
+
 	if os.IsNotExist(err) {
-		err := os.MkdirAll(SuperFileMainDir+themeFolder, 0755)
+		err := os.MkdirAll(varibale.ThemeFoldera, 0755)
 		if err != nil {
 			outPutLog("error create theme direcroty", err)
 			return
 		}
-	} else {
+	} else if string(currentThemeVersion) == varibale.CurrentVersion {
 		return
 	}
 
@@ -171,7 +183,7 @@ func LoadAllDefaultConfig(content embed.FS) {
 			return
 		}
 
-		file, err := os.Create(filepath.Join(SuperFileMainDir+themeFolder, file.Name()))
+		file, err := os.Create(filepath.Join(varibale.ThemeFoldera, file.Name()))
 		if err != nil {
 			outPutLog("error create theme file from embed", err)
 			return
@@ -180,5 +192,5 @@ func LoadAllDefaultConfig(content embed.FS) {
 		defer file.Close()
 	}
 
-	ConfigTomlString = string(temp)
+	os.WriteFile(varibale.ThemeFileVersiona, []byte(varibale.CurrentVersion), 0644)
 }

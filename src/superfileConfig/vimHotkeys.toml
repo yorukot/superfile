@@ -1,3 +1,4 @@
+# This is maintain by github.com/nonepork
 # =================================================================================================
 # Global hotkeys (cannot conflict with other hotkeys)
 # I know this is not really that "vim", but the control flow is different.
@@ -11,6 +12,7 @@ create_new_file_panel = ['n', '']
 close_file_panel = ['q', '']
 next_file_panel = ['tab', '']
 previous_file_panel = ['shift+tab', '']
+toggle_file_preview_panel = ['f', '']
 # change focus
 focus_on_process_bar = ['ctrl+p', '']
 focus_on_sidebar = ['ctrl+s', '']

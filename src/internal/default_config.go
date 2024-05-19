@@ -1,8 +1,8 @@
 package internal
 
 var (
-	HotkeysTomlString string
-	ConfigTomlString  string
+	HotkeysTomlString  string
+	ConfigTomlString   string
 	DefaultThemeString string
 )
 
@@ -30,6 +30,9 @@ func defaultModelConfig(toggleDotFileBool bool, firstFilePanelDir string) model 
 					directoryRecord: make(map[string]directoryRecord),
 					searchBar:       generateSearchBar(),
 				},
+			},
+			filePreview: filePreviewPanel{
+				open: true,
 			},
 			width: 10,
 		},

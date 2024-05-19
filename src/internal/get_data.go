@@ -7,6 +7,7 @@ import (
 
 	"github.com/adrg/xdg"
 	"github.com/shirou/gopsutil/disk"
+	varibale "github.com/yorukot/superfile/src/config"
 )
 
 // Return all sidebar directories
@@ -32,7 +33,7 @@ func getDirectories() []directory {
 func getWellKnownDirectories() []directory {
 	directories := []directory{}
 	wellKnownDirectories := []directory{
-		{location: HomeDir, name: "󰋜 Home"},
+		{location: xdg.Home, name: "󰋜 Home"},
 		{location: xdg.UserDirs.Download, name: "󰏔 Downloads"},
 		{location: xdg.UserDirs.Documents, name: "󰈙 Documents"},
 		{location: xdg.UserDirs.Pictures, name: "󰋩 Pictures"},
@@ -57,7 +58,7 @@ func getPinnedDirectories() []directory {
 	directories := []directory{}
 	var paths []string
 
-	jsonData, err := os.ReadFile(SuperFileDataDir + pinnedFile)
+	jsonData, err := os.ReadFile(varibale.PinnedFilea)
 	if err != nil {
 		outPutLog("Read superfile data error", err)
 	}

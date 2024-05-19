@@ -50,6 +50,9 @@ func mainKey(msg string, m model, cmd tea.Cmd) (model, tea.Cmd) {
 	case hotkeys.CreateNewFilePanel[0], hotkeys.CreateNewFilePanel[1]:
 		m = createNewFilePanel(m)
 
+	case hotkeys.ToggleFilePreviewPanel[0], hotkeys.ToggleFilePreviewPanel[1]:
+		m = toggleFilePreviewPanel(m)
+	
 	case hotkeys.FocusOnSidebar[0], hotkeys.FocusOnSidebar[1]:
 		m = focusOnSideBar(m)
 

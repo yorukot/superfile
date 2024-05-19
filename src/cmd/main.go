@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
 	"runtime"
 	"strconv"
 	"strings"
@@ -19,39 +18,8 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/pelletier/go-toml/v2"
 	"github.com/urfave/cli/v2"
+	varibale "github.com/yorukot/superfile/src/config"
 	internal "github.com/yorukot/superfile/src/internal"
-)
-
-var HomeDir = xdg.Home
-var SuperFileMainDir = xdg.ConfigHome + "/superfile"
-var SuperFileCacheDir = xdg.CacheHome + "/superfile"
-var SuperFileDataDir = xdg.DataHome + "/superfile"
-var SuperFileStateDir = xdg.StateHome + "/superfile"
-
-const (
-	currentVersion      string = "v1.1.3"
-	latestVersionURL    string = "https://api.github.com/repos/yorukot/superfile/releases/latest"
-	latestVersionGithub string = "github.com/yorukot/superfile/releases/latest"
-	themeZip            string = "https://github.com/yorukot/superfile/raw/main/themeZip/v1.1.3/theme.zip"
-)
-
-const (
-	themeFolder      string = "/theme"
-	lastCheckVersion string = "/lastCheckVersion"
-	themeFileVersion string = "/themeFileVersion"
-	firstUseCheck    string = "/firstUseCheck"
-	pinnedFile       string = "/pinned.json"
-	configFile       string = "/config.toml"
-	hotkeysFile      string = "/hotkeys.toml"
-	toggleDotFile    string = "/toggleDotFile"
-	themeZipName     string = "/theme.zip"
-	logFile          string = "/superfile.log"
-)
-
-const (
-	trashDirectory      string = "/Trash"
-	trashDirectoryFiles string = "/Trash/files"
-	trashDirectoryInfo  string = "/Trash/info"
 )
 
 func Run(content embed.FS) {
@@ -60,7 +28,7 @@ func Run(content embed.FS) {
 
 	app := &cli.App{
 		Name:        "superfile",
-		Version:     currentVersion,
+		Version:     varibale.CurrentVersion,
 		Description: "Pretty fancy and modern terminal file manager ",
 		ArgsUsage:   "[path]",
 		Commands: []*cli.Command{
@@ -69,11 +37,11 @@ func Run(content embed.FS) {
 				Aliases: []string{"pl"},
 				Usage:   "Print the path to the configuration and directory",
 				Action: func(c *cli.Context) error {
-					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#66b2ff")).Render("[Configuration file path]"), filepath.Join(SuperFileMainDir, configFile))
-					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#ffcc66")).Render("[Hotkeys file path]"), filepath.Join(SuperFileMainDir, hotkeysFile))
-					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#66ff66")).Render("[Log file path]"), filepath.Join(SuperFileStateDir, logFile))
-					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#ff9999")).Render("[Configuration directory path]"), SuperFileMainDir)
-					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#ff66ff")).Render("[Data directory path]"), SuperFileDataDir)
+					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#66b2ff")).Render("[Configuration file path]"), varibale.ConfigFilea)
+					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#ffcc66")).Render("[Hotkeys file path]"), varibale.HotkeysFilea)
+					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#66ff66")).Render("[Log file path]"), varibale.LogFilea)
+					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#ff9999")).Render("[Configuration directory path]"), varibale.SuperFileMainDir)
+					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#ff66ff")).Render("[Data directory path]"), varibale.SuperFileDataDir)
 					return nil
 				},
 			},
@@ -113,32 +81,12 @@ func Run(content embed.FS) {
 }
 
 func InitConfigFile() {
-	config := struct {
-		MainDir     string
-		DataDir     string
-		StateDir    string
-		PinnedFile  string
-		ToggleFile  string
-		LogFile     string
-		ConfigFile  string
-		HotkeysFile string
-	}{
-		MainDir:     SuperFileMainDir,
-		DataDir:     SuperFileDataDir,
-		StateDir:    SuperFileStateDir,
-		PinnedFile:  pinnedFile,
-		ToggleFile:  toggleDotFile,
-		LogFile:     logFile,
-		ConfigFile:  configFile,
-		HotkeysFile: hotkeysFile,
-	}
-
 	// Create directories
 	if err := createDirectories(
-		config.MainDir,
-		config.DataDir,
-		config.StateDir,
-		config.MainDir+themeFolder,
+		varibale.SuperFileMainDir,
+		varibale.SuperFileDataDir,
+		varibale.SuperFileStateDir,
+		varibale.ThemeFoldera,
 	); err != nil {
 		log.Fatalln("Error creating directories:", err)
 	}
@@ -146,9 +94,9 @@ func InitConfigFile() {
 	// Create trash directories
 	if runtime.GOOS != "darwin" {
 		if err := createDirectories(
-			xdg.DataHome+trashDirectory,
-			xdg.DataHome+trashDirectoryFiles,
-			xdg.DataHome+trashDirectoryInfo,
+			xdg.DataHome+varibale.TrashDirectory,
+			xdg.DataHome+varibale.TrashDirectoryFiles,
+			xdg.DataHome+varibale.TrashDirectoryInfo,
 		); err != nil {
 			log.Fatalln("Error creating directories:", err)
 		}
@@ -156,19 +104,20 @@ func InitConfigFile() {
 
 	// Create files
 	if err := createFiles(
-		config.DataDir+config.PinnedFile,
-		config.DataDir+config.ToggleFile,
-		config.StateDir+config.LogFile,
+		varibale.PinnedFilea,
+		varibale.ToggleDotFilea,
+		varibale.LogFilea,
+		varibale.ThemeFileVersiona,
 	); err != nil {
 		log.Fatalln("Error creating files:", err)
 	}
 
 	// Write config file
-	if err := writeConfigFile(config.MainDir+config.ConfigFile, internal.ConfigTomlString); err != nil {
+	if err := writeConfigFile(varibale.ConfigFilea, internal.ConfigTomlString); err != nil {
 		log.Fatalln("Error writing config file:", err)
 	}
 
-	if err := writeConfigFile(config.MainDir+config.HotkeysFile, internal.HotkeysTomlString); err != nil {
+	if err := writeConfigFile(varibale.HotkeysFilea, internal.HotkeysTomlString); err != nil {
 		log.Fatalln("Error writing config file:", err)
 	}
 }
@@ -202,7 +151,7 @@ func createFiles(files ...string) error {
 }
 
 func checkFirstUse() bool {
-	file := SuperFileDataDir + firstUseCheck
+	file := varibale.FirstUseChecka
 	firstUse := false
 	if _, err := os.Stat(file); os.IsNotExist(err) {
 		firstUse = true
@@ -227,7 +176,7 @@ func CheckForUpdates() {
 	}
 	var Config superfileConfig
 
-	data, err := os.ReadFile(SuperFileMainDir + configFile)
+	data, err := os.ReadFile(varibale.ConfigFilea)
 	if err != nil {
 		log.Fatalf("Config file doesn't exist: %v", err)
 	}
@@ -241,7 +190,7 @@ func CheckForUpdates() {
 		return
 	}
 
-	lastTime, err := readLastTimeCheckVersionFromFile(SuperFileDataDir + lastCheckVersion)
+	lastTime, err := readLastTimeCheckVersionFromFile(varibale.LastCheckVersiona)
 	if err != nil && !os.IsNotExist(err) {
 		fmt.Println("Error reading from file:", err)
 		return
@@ -250,7 +199,7 @@ func CheckForUpdates() {
 	currentTime := time.Now()
 
 	if lastTime.IsZero() || currentTime.Sub(lastTime) >= 24*time.Hour {
-		resp, err := http.Get(latestVersionURL)
+		resp, err := http.Get(varibale.LatestVersionURL)
 		if err != nil {
 			fmt.Println("Error checking for updates:", err)
 			return
@@ -271,14 +220,14 @@ func CheckForUpdates() {
 			return
 		}
 
-		if versionToNumber(release.TagName) > versionToNumber(currentVersion) {
+		if versionToNumber(release.TagName) > versionToNumber(varibale.CurrentVersion) {
 			fmt.Printf("A new version %s is available.\n", release.TagName)
-			fmt.Printf("Please update.\n┏\n\n        %s\n\n", latestVersionGithub)
+			fmt.Printf("Please update.\n┏\n\n        %s\n\n", varibale.LatestVersionGithub)
 			fmt.Printf("                                                               ┛\n")
 		}
 
 		timeStr := currentTime.Format(time.RFC3339)
-		err = writeToFile(SuperFileDataDir+lastCheckVersion, timeStr)
+		err = writeToFile(varibale.LastCheckVersiona, timeStr)
 		if err != nil {
 			log.Println("Error writing to file:", err)
 			return

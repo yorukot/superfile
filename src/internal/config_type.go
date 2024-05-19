@@ -51,6 +51,9 @@ var (
 
 // Theme configuration
 type ThemeType struct {
+	// Code syntax highlight theme
+	CodeSyntaxHighlightTheme string `toml:"code_syntax_highlight"`
+
 	// Border
 	FilePanelBorder string `toml:"file_panel_border"`
 	SidebarBorder   string `toml:"sidebar_border"`
@@ -112,8 +115,10 @@ type ConfigType struct {
 
 	AutoCheckUpdate bool `toml:"auto_check_update" comment:"\nAuto check for update"`
 	CdOnQuit        bool `toml:"cd_on_quit" comment:"\nCd on quit"`
-	
+	DefaultOpenFilePreview bool `toml:"default_open_file_preview" comment:"\nWhether to open file preview automatically every time superfile is opened."`
+
 	TransparentBackground bool `toml:"transparent_background" comment:"\n================   Style =================\n\nSet transparent background or not (this only work when your terminal background is transparent)"`
+	FilePreviewWidth int `toml:"file_preview_width" comment:"\nFile preview width allow '0' (this mean same as file panel),'x' x must be less than 10 and greater than 1 (This means that the width of the file preview will be one xth of the total width.)"`
 
 	BorderTop         string `toml:"border_top" comment:"\nBorder style"`
 	BorderBottom      string `toml:"border_bottom"`
@@ -140,6 +145,7 @@ type HotkeysType struct {
 	CreateNewFilePanel []string `toml:"create_new_file_panel"`
 	NextFilePanel      []string `toml:"next_file_panel"`
 	PreviousFilePanel  []string `toml:"previous_file_panel"`
+	ToggleFilePreviewPanel []string `toml:"toggle_file_preview_panel"`
 
 	FocusOnProcessBar []string `toml:"focus_on_process_bar" comment:"change focus"`
 	FocusOnSidebar    []string `toml:"focus_on_sidebar"`

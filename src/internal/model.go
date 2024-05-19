@@ -1,32 +1,16 @@
 package internal
 
 import (
+	"log"
 	"os"
 	"time"
 
-	"github.com/adrg/xdg"
 	"github.com/barasher/go-exiftool"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-)
-
-var HomeDir = xdg.Home
-var SuperFileMainDir = xdg.ConfigHome + "/superfile"
-var SuperFileStateDir = xdg.StateHome + "/superfile"
-var SuperFileDataDir = xdg.DataHome + "/superfile"
-
-const (
-	configFolder     string = "/config"
-	themeFolder      string = "/theme"
-	dataFolder       string = "/data"
-	lastCheckVersion string = "/lastCheckVersion"
-	pinnedFile       string = "/pinned.json"
-	toggleDotFile    string = "/toggleDotFile"
-	logFile          string = "/superfile.log"
-	configFile       string = "/config.toml"
-	hotkeysFile      string = "/hotkeys.toml"
-	themeZipName     string = "/theme.zip"
+	varibale "github.com/yorukot/superfile/src/config"
+	stringfunction "github.com/yorukot/superfile/src/pkg/stringFunction"
 )
 
 var LastTimeCursorMove = [2]int{int(time.Now().UnixMicro()), 0}
@@ -78,9 +62,24 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.fullHeight = msg.Height
 		m.fullWidth = msg.Width
 
+		if m.fileModel.filePreview.open {
+			// File preview panel width same as file panel
+			if Config.FilePreviewWidth == 0 {
+				m.fileModel.filePreview.width = (msg.Width - sidebarWidth - (4 + (len(m.fileModel.filePanels))*2)) / (len(m.fileModel.filePanels) + 1)
+			} else {
+				if Config.FilePreviewWidth > 10 || Config.FilePreviewWidth == 1 {
+					log.Fatalln("Config file file_preview_width invalidation")
+				}
+				m.fileModel.filePreview.width = (msg.Width - sidebarWidth) / Config.FilePreviewWidth
+			}
+		}
+
 		// set each file panel size and max file panel amount
-		m.fileModel.width = (msg.Width - sidebarWidth - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
-		m.fileModel.maxFilePanel = (msg.Width - 20) / 24
+		m.fileModel.width = (msg.Width - sidebarWidth - m.fileModel.filePreview.width - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
+		m.fileModel.maxFilePanel = (msg.Width - sidebarWidth - m.fileModel.filePreview.width) / 20
+		for i := range m.fileModel.filePanels {
+			m.fileModel.filePanels[i].searchBar.Width = m.fileModel.width - 4
+		}
 
 		// set footer size
 		if msg.Height < 30 {
@@ -136,10 +135,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				// cd on quit
 				if Config.CdOnQuit {
 					currentDir := m.fileModel.filePanels[m.filePanelFocusIndex].location
-					if currentDir == HomeDir {
+					if currentDir == varibale.HomeDir {
 						return m, tea.Quit
 					}
-					os.WriteFile(SuperFileStateDir+"/lastdir", []byte("cd "+currentDir), 0755)
+					os.WriteFile(varibale.SuperFileStateDir+"/lastdir", []byte("cd "+currentDir), 0755)
 				}
 				return m, tea.Quit
 			}
@@ -184,14 +183,19 @@ func (m model) View() string {
 	// check is the terminal size enough
 	if m.fullHeight < minimumHeight || m.fullWidth < minimumWidth {
 		return terminalSizeWarnRender(m)
-
+	}
+	if m.fileModel.width < 18 {
+		return terminalSizeWarnAfterFirstRender(m)
 	}
 	sidebar := sidebarRender(m)
 
 	filePanel := filePanelRender(m)
 
-	mainPanel := lipgloss.JoinHorizontal(0, sidebar, filePanel)
+	filePreview := filePreviewPanelRender(m)
 
+	mainPanel := lipgloss.JoinHorizontal(0, sidebar, filePanel, filePreview)
+
+	
 	processBar := processBarRender(m)
 
 	metaData := metadataRender(m)
@@ -207,28 +211,28 @@ func (m model) View() string {
 		helpMenu := helpMenuRender(m)
 		overlayX := m.fullWidth/2 - m.helpMenu.width/2
 		overlayY := m.fullHeight/2 - m.helpMenu.height/2
-		return PlaceOverlay(overlayX, overlayY, helpMenu, finalRender)
+		return stringfunction.PlaceOverlay(overlayX, overlayY, helpMenu, finalRender)
 	}
 
 	if firstUse {
 		introduceModal := introduceModalRender(m)
 		overlayX := m.fullWidth/2 - m.helpMenu.width/2
 		overlayY := m.fullHeight/2 - m.helpMenu.height/2
-		return PlaceOverlay(overlayX, overlayY, introduceModal, finalRender)
+		return stringfunction.PlaceOverlay(overlayX, overlayY, introduceModal, finalRender)
 	}
 
 	if m.typingModal.open {
 		typingModal := typineModalRender(m)
 		overlayX := m.fullWidth/2 - modalWidth/2
 		overlayY := m.fullHeight/2 - modalHeight/2
-		return PlaceOverlay(overlayX, overlayY, typingModal, finalRender)
+		return stringfunction.PlaceOverlay(overlayX, overlayY, typingModal, finalRender)
 	}
 
 	if m.warnModal.open {
 		warnModal := warnModalRender(m)
 		overlayX := m.fullWidth/2 - modalWidth/2
 		overlayY := m.fullHeight/2 - modalHeight/2
-		return PlaceOverlay(overlayX, overlayY, warnModal, finalRender)
+		return stringfunction.PlaceOverlay(overlayX, overlayY, warnModal, finalRender)
 	}
 
 	return finalRender

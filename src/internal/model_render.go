@@ -1,13 +1,17 @@
 package internal
 
 import (
+	"bufio"
 	"fmt"
 	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
 
+	"github.com/alecthomas/chroma/lexers"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/yorukot/ansichroma"
 )
 
 func sidebarRender(m model) string {
@@ -75,7 +79,12 @@ func filePanelRender(m model) string {
 		footerBorderWidth := 0
 
 		if (m.fullWidth-sidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels) != 0 && i == len(m.fileModel.filePanels)-1 {
-			filePanelWidth = (m.fileModel.width + (m.fullWidth-sidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels))
+			if m.fileModel.filePreview.open {
+				filePanelWidth = m.fileModel.width
+				m.fileModel.filePreview.width = (m.fileModel.width + (m.fullWidth-sidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels))
+			} else {
+				filePanelWidth = (m.fileModel.width + (m.fullWidth-sidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels))
+			}
 			footerBorderWidth = m.fileModel.width + 7
 		} else {
 			filePanelWidth = m.fileModel.width
@@ -329,6 +338,32 @@ func terminalSizeWarnRender(m model) string {
 		heightString + terminalCorrectSize.Render(minimumHeightString))
 }
 
+func terminalSizeWarnAfterFirstRender(m model) string {
+	minimumWidthInt := sidebarWidth + 20*len(m.fileModel.filePanels) + 20 - 1
+	minimumWidthString := strconv.Itoa(minimumWidthInt)
+	fullWidthString := strconv.Itoa(m.fullWidth)
+	fullHeightString := strconv.Itoa(m.fullHeight)
+	minimumHeightString := strconv.Itoa(minimumHeight)
+
+	if m.fullHeight < minimumHeight {
+		fullHeightString = terminalTooSmall.Render(fullHeightString)
+	}
+	if m.fullWidth < minimumWidthInt {
+		fullWidthString = terminalTooSmall.Render(fullWidthString)
+	}
+	fullHeightString = terminalCorrectSize.Render(fullHeightString)
+	fullWidthString = terminalCorrectSize.Render(fullWidthString)
+
+	heightString := mainStyle.Render(" Height = ")
+	return fullScreenStyle(m.fullHeight, m.fullWidth).Render(`You change your terminal size too small:` + "\n" +
+		"Width = " + fullWidthString +
+		heightString + fullHeightString + "\n\n" +
+
+		"Needed for current config:" + "\n" +
+		"Width = " + terminalCorrectSize.Render(minimumWidthString) +
+		heightString + terminalCorrectSize.Render(minimumHeightString))
+}
+
 func typineModalRender(m model) string {
 	previewPath := m.typingModal.location + "/" + m.typingModal.textInput.Value()
 
@@ -437,4 +472,73 @@ func helpMenuRender(m model) string {
 	bottomBorder := generateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(m.helpMenu.cursor+1-cursorBeenTitleCount), strconv.Itoa(len(m.helpMenu.data)-totalTitleCount)), m.helpMenu.width-2)
 
 	return helpMenuModalBorderStyle(m.helpMenu.height, m.helpMenu.width, bottomBorder).Render(helpMenuContent)
+}
+
+func filePreviewPanelRender(m model) string {
+	previewLine := m.mainPanelHeight + 2
+
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	
+	if len(panel.element) == 0 {
+		return "\n ---  No content to preview ---"
+	}
+
+	fileInfo, err := os.Stat(panel.element[panel.cursor].location)
+	if err != nil {
+		outPutLog("error get file info", err)
+		return "\n ---  Error get file info ---"
+	}
+
+	if fileInfo.IsDir() {
+		return "\n ---  Unsupported formats ---"
+	}
+
+	format := lexers.Match(filepath.Base(panel.element[panel.cursor].location))
+	if format != nil {
+		codeHighlight, err := ansichroma.HighlightFromFile(panel.element[panel.cursor].location, previewLine, theme.CodeSyntaxHighlightTheme, theme.FilePanelBG)
+		
+		if err != nil {
+			outPutLog("Error render code highlight", err)
+			return"\n ---  Error render code highlight ---"
+		}
+
+		codeHighlight = checkAndTruncateLineLengths(codeHighlight, m.fileModel.filePreview.width)
+		return codeHighlight
+	} else {
+		textFile, err := isTextFile(panel.element[panel.cursor].location)
+		if err != nil {
+			outPutLog("Error check text file", err)
+		}
+		if textFile {
+			var fileContent string 
+			file, err := os.Open(panel.element[panel.cursor].location)
+			if err != nil {
+				outPutLog(err)
+				return"\n ---  Error open file ---"
+			}
+			defer file.Close()
+	
+			scanner := bufio.NewScanner(file)
+			lineCount := 0
+	
+			for scanner.Scan() {
+				fileContent += scanner.Text() + "\n"
+				lineCount++
+				if previewLine > 0 && lineCount >= previewLine {
+					break
+				}
+			}
+	
+			if err := scanner.Err(); err != nil {
+				outPutLog(err)
+				return "\n ---  Error open file ---"
+			}
+
+			textContent  := checkAndTruncateLineLengths(string(fileContent), m.fileModel.filePreview.width) 
+			
+			return filePreviewBox(previewLine, m.fileModel.filePreview.width).Render(textContent)
+		}
+	}
+
+	return "\n ---  Unsupported formats ---"
 }

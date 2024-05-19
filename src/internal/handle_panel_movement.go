@@ -7,6 +7,8 @@ import (
 	"path"
 	"path/filepath"
 	"runtime"
+
+	varibale "github.com/yorukot/superfile/src/config"
 )
 
 // Change file panel mode (select mode or browser mode)
@@ -158,7 +160,7 @@ func toggleDotFileController(m model) model {
 		newToggleDotFile = "true"
 		m.toggleDotFile = true
 	}
-	err := os.WriteFile(SuperFileDataDir+toggleDotFile, []byte(newToggleDotFile), 0644)
+	err := os.WriteFile(varibale.ToggleDotFilea, []byte(newToggleDotFile), 0644)
 	if err != nil {
 		outPutLog("Pinned folder function updatedData superfile data error", err)
 	}

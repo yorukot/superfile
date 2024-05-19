@@ -1,9 +1,10 @@
 module github.com/yorukot/superfile
 
-go 1.21.0
+go 1.22.2
 
 require (
 	github.com/adrg/xdg v0.4.0
+	github.com/alecthomas/chroma v0.10.0
 	github.com/atotto/clipboard v0.1.4
 	github.com/barasher/go-exiftool v1.10.0
 	github.com/charmbracelet/bubbles v0.18.0
@@ -15,16 +16,19 @@ require (
 	github.com/rkoesters/xdg v0.0.1
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/urfave/cli/v2 v2.27.2
+	github.com/yorukot/ansichroma v0.0.0-20240519081657-d7791bcab076
 	golift.io/xtractr v0.2.2
 )
 
 require (
+	github.com/alecthomas/chroma/v2 v2.13.0 // indirect
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/bodgit/plumbing v1.3.0 // indirect
 	github.com/bodgit/sevenzip v1.4.0 // indirect
 	github.com/bodgit/windows v1.0.1 // indirect
 	github.com/connesc/cipherio v0.2.1 // indirect
 	github.com/deckarep/golang-set v1.8.0 // indirect
+	github.com/dlclark/regexp2 v1.11.0 // indirect
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
