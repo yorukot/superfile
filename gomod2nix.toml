@@ -4,6 +4,12 @@ schema = 3
   [mod."github.com/adrg/xdg"]
     version = "v0.4.0"
     hash = "sha256-zGjkdUQmrVqD6rMO9oDY+TeJCpuqnHyvkPCaXDlac/U="
+  [mod."github.com/alecthomas/chroma"]
+    version = "v0.10.0"
+    hash = "sha256-p721vddVTv4iv1O0/dqpdk5xF6x9iLIHcrfh8JEVnqQ="
+  [mod."github.com/alecthomas/chroma/v2"]
+    version = "v2.13.0"
+    hash = "sha256-fYwAHQFWGWzcMO8XPNzR7iAUarVGMKJjfX1DB74AmrA="
   [mod."github.com/andybalholm/brotli"]
     version = "v1.0.5"
     hash = "sha256-/qS8wU8yZQJ+uTOg66rEl9s7spxq9VIXF5L1BcaEClc="
@@ -38,7 +44,7 @@ schema = 3
     version = "v0.10.0"
     hash = "sha256-JZD1iVeizYe0mp3qQcJbUZdYN6HP/DNC67ja79DTe6s="
   [mod."github.com/charmbracelet/x/exp/term"]
-    version = "v0.0.0-20240515162549-69ee4f765313"
+    version = "v0.0.0-20240517183709-47cd60ea8d59"
     hash = "sha256-nFtz7oWQh5L9nIAuY1cW7KOJJ33QsTPSz9HyiNIYRYc="
   [mod."github.com/connesc/cipherio"]
     version = "v0.2.1"
@@ -52,6 +58,9 @@ schema = 3
   [mod."github.com/deckarep/golang-set"]
     version = "v1.8.0"
     hash = "sha256-ELJKphksU9AOYwV3BtjvwPtUpbZvX9YMmo7eIiauQSc="
+  [mod."github.com/dlclark/regexp2"]
+    version = "v1.11.0"
+    hash = "sha256-iXBBgykYu9Dcd+7LMJyRYc3Ry47jmuLGZFW13zU6toU="
   [mod."github.com/erikgeiser/coninput"]
     version = "v0.0.0-20211004153227-1c3628e74d0f"
     hash = "sha256-OWSqN1+IoL73rWXWdbbcahZu8n2al90Y3eT5Z0vgHvU="
@@ -136,6 +145,9 @@ schema = 3
   [mod."github.com/xrash/smetrics"]
     version = "v0.0.0-20240312152122-5f08fbb34913"
     hash = "sha256-ySUTdeoOUi3QcLEJBYvCDIhVrsrD2Ks6/4V9n4hCvBk="
+  [mod."github.com/yorukot/ansichroma"]
+    version = "v0.0.0-20240519081657-d7791bcab076"
+    hash = "sha256-ymtIEZaMpdeBKN5bsA95DCJtqU0nko/vK8qNc+vdZb8="
   [mod."github.com/yusufpapurcu/wmi"]
     version = "v1.2.4"
     hash = "sha256-N+YDBjOW59YOsZ2lRBVtFsEEi48KhNQRb63/0ZSU3bA="
