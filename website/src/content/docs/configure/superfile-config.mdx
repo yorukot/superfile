@@ -26,6 +26,21 @@ You can go to [here](/configure/custom-theme) to know how to config it
 
 `false` => If closed, no checks will be performed
 
+- ###### cd_on_quit
+`true` => Every time you exit superfile, it will navigate the path of the terminal to the path of the last file panel you used.
+
+`false` => Nothing happen
+
+If you want to open this feature you need copy code blow to the `~/.bashrc`
+
+<CodeBlock file="cd_on_quit.sh" />
+
+and relaod ~/.bashrc
+
+```bash
+source ~/.bashrc
+```
+
 - ###### transparent_background
 `true` => If enabled, the background color will not be rendered (transparent). This is useful if your terminal background is transparent.
 
