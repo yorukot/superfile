@@ -81,7 +81,6 @@ func filePanelRender(m model) string {
 		if (m.fullWidth-sidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels) != 0 && i == len(m.fileModel.filePanels)-1 {
 			if m.fileModel.filePreview.open {
 				filePanelWidth = m.fileModel.width
-				m.fileModel.filePreview.width = (m.fileModel.width + (m.fullWidth-sidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels))
 			} else {
 				filePanelWidth = (m.fileModel.width + (m.fullWidth-sidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels))
 			}
@@ -476,11 +475,12 @@ func helpMenuRender(m model) string {
 
 func filePreviewPanelRender(m model) string {
 	previewLine := m.mainPanelHeight + 2
+	m.fileModel.filePreview.width += m.fullWidth - sidebarWidth - m.fileModel.filePreview.width - ((m.fileModel.width + 2) * len(m.fileModel.filePanels)) - 2
 
 	box := filePreviewBox(previewLine, m.fileModel.filePreview.width)
 
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	
+
 	if len(panel.element) == 0 {
 		return box.Render("\n ---  No content to preview ---")
 	}
@@ -498,7 +498,7 @@ func filePreviewPanelRender(m model) string {
 	format := lexers.Match(filepath.Base(panel.element[panel.cursor].location))
 	if format != nil {
 		codeHighlight, err := ansichroma.HighlightFromFile(panel.element[panel.cursor].location, previewLine, theme.CodeSyntaxHighlightTheme, theme.FilePanelBG)
-		
+
 		if err != nil {
 			outPutLog("Error render code highlight", err)
 			return box.Render("\n ---  Error render code highlight ---")
@@ -514,17 +514,17 @@ func filePreviewPanelRender(m model) string {
 			outPutLog("Error check text file", err)
 		}
 		if textFile {
-			var fileContent string 
+			var fileContent string
 			file, err := os.Open(panel.element[panel.cursor].location)
 			if err != nil {
 				outPutLog(err)
 				return box.Render("\n ---  Error open file ---")
 			}
 			defer file.Close()
-	
+
 			scanner := bufio.NewScanner(file)
 			lineCount := 0
-	
+
 			for scanner.Scan() {
 				fileContent += scanner.Text() + "\n"
 				lineCount++
@@ -532,14 +532,14 @@ func filePreviewPanelRender(m model) string {
 					break
 				}
 			}
-	
+
 			if err := scanner.Err(); err != nil {
 				outPutLog(err)
 				return box.Render("\n ---  Error open file ---")
 			}
 
-			textContent  := checkAndTruncateLineLengths(string(fileContent), m.fileModel.filePreview.width) 
-			
+			textContent := checkAndTruncateLineLengths(string(fileContent), m.fileModel.filePreview.width)
+
 			return box.Render(textContent)
 		}
 	}
