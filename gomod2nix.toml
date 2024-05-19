@@ -44,7 +44,7 @@ schema = 3
     version = "v0.10.0"
     hash = "sha256-JZD1iVeizYe0mp3qQcJbUZdYN6HP/DNC67ja79DTe6s="
   [mod."github.com/charmbracelet/x/exp/term"]
-    version = "v0.0.0-20240515162549-69ee4f765313"
+    version = "v0.0.0-20240517183709-47cd60ea8d59"
     hash = "sha256-nFtz7oWQh5L9nIAuY1cW7KOJJ33QsTPSz9HyiNIYRYc="
   [mod."github.com/connesc/cipherio"]
     version = "v0.2.1"
