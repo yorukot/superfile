@@ -6,8 +6,8 @@
 
 # If you want to make sidebar border display just set it same as sidebar background color
 
-# Code syntax highlight theme (you can go to https://github.com/alecthomas/chroma/blob/master/styles/catppuccin-macchiato.xml to find one you like)
-code_syntax_highlight = "catppuccin-macchiato"
+# Code syntax highlight theme (you can go to https://github.com/alecthomas/chroma/blob/master/styles to find one you like)
+code_syntax_highlight = "catppuccin-mocha"
 
 # ========= Border =========
 file_panel_border = "#6c7086"

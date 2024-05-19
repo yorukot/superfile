@@ -477,20 +477,22 @@ func helpMenuRender(m model) string {
 func filePreviewPanelRender(m model) string {
 	previewLine := m.mainPanelHeight + 2
 
+	box := filePreviewBox(previewLine, m.fileModel.filePreview.width)
+
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	
 	if len(panel.element) == 0 {
-		return "\n ---  No content to preview ---"
+		return box.Render("\n ---  No content to preview ---")
 	}
 
 	fileInfo, err := os.Stat(panel.element[panel.cursor].location)
 	if err != nil {
 		outPutLog("error get file info", err)
-		return "\n ---  Error get file info ---"
+		return box.Render("\n ---  Error get file info ---")
 	}
 
 	if fileInfo.IsDir() {
-		return "\n ---  Unsupported formats ---"
+		return box.Render("\n ---  Unsupported formats ---")
 	}
 
 	format := lexers.Match(filepath.Base(panel.element[panel.cursor].location))
@@ -499,11 +501,13 @@ func filePreviewPanelRender(m model) string {
 		
 		if err != nil {
 			outPutLog("Error render code highlight", err)
-			return"\n ---  Error render code highlight ---"
+			return box.Render("\n ---  Error render code highlight ---")
 		}
-
+		if codeHighlight == "" {
+			return box.Render("\n --- empty ---")
+		}
 		codeHighlight = checkAndTruncateLineLengths(codeHighlight, m.fileModel.filePreview.width)
-		return codeHighlight
+		return box.Render(codeHighlight)
 	} else {
 		textFile, err := isTextFile(panel.element[panel.cursor].location)
 		if err != nil {
@@ -514,7 +518,7 @@ func filePreviewPanelRender(m model) string {
 			file, err := os.Open(panel.element[panel.cursor].location)
 			if err != nil {
 				outPutLog(err)
-				return"\n ---  Error open file ---"
+				return box.Render("\n ---  Error open file ---")
 			}
 			defer file.Close()
 	
@@ -531,14 +535,14 @@ func filePreviewPanelRender(m model) string {
 	
 			if err := scanner.Err(); err != nil {
 				outPutLog(err)
-				return "\n ---  Error open file ---"
+				return box.Render("\n ---  Error open file ---")
 			}
 
 			textContent  := checkAndTruncateLineLengths(string(fileContent), m.fileModel.filePreview.width) 
 			
-			return filePreviewBox(previewLine, m.fileModel.filePreview.width).Render(textContent)
+			return box.Render(textContent)
 		}
 	}
 
-	return "\n ---  Unsupported formats ---"
+	return box.Render("\n ---  Unsupported formats ---")
 }
