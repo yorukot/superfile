@@ -16,7 +16,6 @@ require (
 	github.com/rkoesters/xdg v0.0.1
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/urfave/cli/v2 v2.27.2
-	github.com/yorukot/ansichroma v0.0.0-20240519081657-d7791bcab076
 	golift.io/xtractr v0.2.2
 )
 
@@ -38,6 +37,7 @@ require (
 	github.com/nwaples/rardecode v1.1.3 // indirect
 	github.com/pierrec/lz4/v4 v4.1.17 // indirect
 	github.com/ulikunitz/xz v0.5.11 // indirect
+	github.com/yorukot/ansichroma v0.1.0
 	go4.org v0.0.0-20230225012048-214862532bf5 // indirect
 )
 
