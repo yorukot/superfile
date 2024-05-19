@@ -8,33 +8,33 @@ head:
 
 > Sort by A-Z
 
-## Catpuccin
+## Catppuccin
 
-- Theme name: `catpuccin`
+- Theme name: `catppuccin`
 - Author: github.com/AnshumanNeon
 
-![](https://github.com/yorukot/superfile/blob/main/asset/theme/catpuccin.png?raw=true)
+![](https://github.com/yorukot/superfile/blob/main/asset/theme/catppuccin.png?raw=true)
 
-## Catpuccin Frappe
+## Catppuccin Frappe
 
-- Theme name: `catpuccin-frappe`
+- Theme name: `catppuccin-frappe`
 - Author: github.com/GV14982
 
-![](https://github.com/yorukot/superfile/blob/main/asset/theme/catpuccin-frappe.png?raw=true)
+![](https://github.com/yorukot/superfile/blob/main/asset/theme/catppuccin-frappe.png?raw=true)
 
-## Catpuccin Latte
+## Catppuccin Latte
 
-- Theme name: `catpuccin-latte`
+- Theme name: `catppuccin-latte`
 - Author: github.com/GV14982
 
-![](https://github.com/yorukot/superfile/blob/main/asset/theme/catpuccin-latte.png?raw=true)
+![](https://github.com/yorukot/superfile/blob/main/asset/theme/catppuccin-latte.png?raw=true)
 
-## Catpuccin Macchiato
+## Catppuccin Macchiato
 
-- Theme name: `catpuccin-macchiato`
+- Theme name: `catppuccin-macchiato`
 - Author: github.com/GV14982
 
-![](https://github.com/yorukot/superfile/blob/main/asset/theme/catpuccin-macchiato.png?raw=true)
+![](https://github.com/yorukot/superfile/blob/main/asset/theme/catppuccin-macchiato.png?raw=true)
 
 ## Dracula
 

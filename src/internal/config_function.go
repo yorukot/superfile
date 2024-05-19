@@ -142,7 +142,7 @@ func LoadAllDefaultConfig(content embed.FS) {
 	}
 	ConfigTomlString = string(temp)
 
-	temp, err = content.ReadFile("src/superfileConfig/theme/catpuccin.toml")
+	temp, err = content.ReadFile("src/superfileConfig/theme/catppuccin.toml")
 	if err != nil {
 		return
 	}
