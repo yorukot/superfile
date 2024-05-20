@@ -34,7 +34,7 @@
 
 ## Installation
 
-[You can go here to know how to install](https://superfile.netlify.app/getting-started/installation/)
+[Click me to check on how to install](https://superfile.netlify.app/getting-started/installation/)
 
 ## Build
 
