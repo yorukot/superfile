@@ -130,19 +130,19 @@ func loadThemeFile() {
 
 func LoadAllDefaultConfig(content embed.FS) {
 
-	temp, err := content.ReadFile("src/superfileConfig/hotkeys.toml")
+	temp, err := content.ReadFile("src/superfile_config/hotkeys.toml")
 	if err != nil {
 		return
 	}
 	HotkeysTomlString = string(temp)
 
-	temp, err = content.ReadFile("src/superfileConfig/config.toml")
+	temp, err = content.ReadFile("src/superfile_config/config.toml")
 	if err != nil {
 		return
 	}
 	ConfigTomlString = string(temp)
 
-	temp, err = content.ReadFile("src/superfileConfig/theme/catppuccin.toml")
+	temp, err = content.ReadFile("src/superfile_config/theme/catppuccin.toml")
 	if err != nil {
 		return
 	}
@@ -167,7 +167,7 @@ func LoadAllDefaultConfig(content embed.FS) {
 		return
 	}
 
-	files, err := content.ReadDir("src/superfileConfig/theme")
+	files, err := content.ReadDir("src/superfile_config/theme")
 	if err != nil {
 		outPutLog("error read theme directory from embed", err)
 		return
@@ -177,7 +177,7 @@ func LoadAllDefaultConfig(content embed.FS) {
 		if file.IsDir() {
 			continue
 		}
-		src, err := content.ReadFile(filepath.Join("src/superfileConfig/theme", file.Name()))
+		src, err := content.ReadFile(filepath.Join("src/superfile_config/theme", file.Name()))
 		if err != nil {
 			outPutLog("error read theme file from embed", err)
 			return

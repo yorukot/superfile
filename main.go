@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	//go:embed src/superfileConfig/*
+	//go:embed src/superfile_config/*
 	content embed.FS
 )
 

@@ -171,10 +171,7 @@ func writeConfigFile(path, data string) error {
 }
 
 func CheckForUpdates() {
-	type superfileConfig struct {
-		AutoCheckUpdate bool `toml:"auto_check_update"`
-	}
-	var Config superfileConfig
+	var Config internal.ConfigType
 
 	data, err := os.ReadFile(varibale.ConfigFilea)
 	if err != nil {
