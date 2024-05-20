@@ -64,7 +64,7 @@ func Run(content embed.FS) {
 
 			firstUse := checkFirstUse()
 
-			p := tea.NewProgram(internal.InitialModel(path, firstUse), tea.WithAltScreen())
+			p := tea.NewProgram(internal.InitialModel(path, firstUse), tea.WithAltScreen(), tea.WithMouseCellMotion())
 			if _, err := p.Run(); err != nil {
 				log.Fatalf("Alas, there's been an error: %v", err)
 				os.Exit(1)

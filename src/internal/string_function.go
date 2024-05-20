@@ -72,6 +72,14 @@ func prettierName(name string, width int, isDir bool, isSelected bool, bgColor l
 	}
 }
 
+func prettierDirectoryPreviewName(name string, isDir bool, bgColor lipgloss.Color) string {
+	style := getElementIcon(name, isDir)
+	return stringColorRender(lipgloss.Color(style.color), bgColor).
+		Background(bgColor).
+		Render(style.icon+" ") +
+		filePanelStyle.Render(name)
+}
+
 func clipboardPrettierName(name string, width int, isDir bool, isSelected bool) string {
 	style := getElementIcon(name, isDir)
 	if isSelected {
@@ -128,27 +136,27 @@ func checkAndTruncateLineLengths(text string, maxLength int) string {
 
 // Check file is text file or not
 func isTextFile(filename string) (bool, error) {
-    file, err := os.Open(filename)
-    if err != nil {
-        return false, err
-    }
-    defer file.Close()
+	file, err := os.Open(filename)
+	if err != nil {
+		return false, err
+	}
+	defer file.Close()
 
-    reader := bufio.NewReader(file)
-    buffer := make([]byte, 1024)
-    _, err = reader.Read(buffer)
-    if err != nil {
-        return false, err
-    }
+	reader := bufio.NewReader(file)
+	buffer := make([]byte, 1024)
+	_, err = reader.Read(buffer)
+	if err != nil {
+		return false, err
+	}
 
-    for _, b := range buffer {
-        if b == 0 {
-            return false, nil
-        }
-        if !unicode.IsPrint(rune(b)) && !unicode.IsSpace(rune(b)) {
-            return false, nil
-        }
-    }
+	for _, b := range buffer {
+		if b == 0 {
+			return false, nil
+		}
+		if !unicode.IsPrint(rune(b)) && !unicode.IsSpace(rune(b)) {
+			return false, nil
+		}
+	}
 
-    return true, nil
+	return true, nil
 }

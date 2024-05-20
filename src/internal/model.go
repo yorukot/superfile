@@ -10,7 +10,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	varibale "github.com/yorukot/superfile/src/config"
-	stringfunction "github.com/yorukot/superfile/src/pkg/stringFunction"
+	stringfunction "github.com/yorukot/superfile/src/pkg/string_function"
 )
 
 var LastTimeCursorMove = [2]int{int(time.Now().UnixMicro()), 0}
@@ -112,8 +112,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.fileModel.maxFilePanel = 10
 		}
 		return m, nil
+	case tea.MouseMsg:
+		m, cmd = wheelMainAction(msg.String(), m, cmd)
 	case tea.KeyMsg:
-
 		if firstUse {
 			firstUse = false
 			return m, cmd

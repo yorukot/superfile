@@ -186,95 +186,122 @@ func searchBarFocus(m model) model {
 // ======================================== File panel controller ========================================
 
 // Control file panel list up
-func controlFilePanelListUp(m model) model {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	if len(panel.element) == 0 {
-		return m
+func controlFilePanelListUp(m model, wheel bool) model {
+	runTime := 1
+	if wheel {
+		runTime = wheelRunTime
 	}
-	if panel.cursor > 0 {
-		panel.cursor--
-		if panel.cursor < panel.render {
-			panel.render--
+
+	for i := 0; i < runTime; i++ {
+		panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+		if len(panel.element) == 0 {
+			return m
 		}
-	} else {
-		if len(panel.element) > panelElementHeight(m.mainPanelHeight) {
-			panel.render = len(panel.element) - panelElementHeight(m.mainPanelHeight)
-			panel.cursor = len(panel.element) - 1
+		if panel.cursor > 0 {
+			panel.cursor--
+			if panel.cursor < panel.render {
+				panel.render--
+			}
 		} else {
-			panel.cursor = len(panel.element) - 1
+			if len(panel.element) > panelElementHeight(m.mainPanelHeight) {
+				panel.render = len(panel.element) - panelElementHeight(m.mainPanelHeight)
+				panel.cursor = len(panel.element) - 1
+			} else {
+				panel.cursor = len(panel.element) - 1
+			}
 		}
+
+		m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	}
-
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
-
 	return m
 }
 
 // Control file panel list down
-func controlFilePanelListDown(m model) model {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	if len(panel.element) == 0 {
-		return m
+func controlFilePanelListDown(m model, wheel bool) model {
+	runTime := 1
+	if wheel {
+		runTime = wheelRunTime
 	}
-	if panel.cursor < len(panel.element)-1 {
-		panel.cursor++
-		if panel.cursor > panel.render+panelElementHeight(m.mainPanelHeight)-1 {
-			panel.render++
+
+	for i := 0; i < runTime; i++ {
+		panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+		if len(panel.element) == 0 {
+			return m
 		}
-	} else {
-		panel.render = 0
-		panel.cursor = 0
+		if panel.cursor < len(panel.element)-1 {
+			panel.cursor++
+			if panel.cursor > panel.render+panelElementHeight(m.mainPanelHeight)-1 {
+				panel.render++
+			}
+		} else {
+			panel.render = 0
+			panel.cursor = 0
+		}
+		m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	}
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 
 	return m
 }
 
 // Handles the action of selecting an item in the file panel upwards. (only work on select mode)
-func itemSelectUp(m model) model {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	if panel.cursor > 0 {
-		panel.cursor--
-		if panel.cursor < panel.render {
-			panel.render--
-		}
-	} else {
-		if len(panel.element) > panelElementHeight(m.mainPanelHeight) {
-			panel.render = len(panel.element) - panelElementHeight(m.mainPanelHeight)
-			panel.cursor = len(panel.element) - 1
-		} else {
-			panel.cursor = len(panel.element) - 1
-		}
-	}
-	if arrayContains(panel.selected, panel.element[panel.cursor].location) {
-		panel.selected = removeElementByValue(panel.selected, panel.element[panel.cursor].location)
-	} else {
-		panel.selected = append(panel.selected, panel.element[panel.cursor].location)
+func itemSelectUp(m model, wheel bool) model {
+	runTime := 1
+	if wheel {
+		runTime = wheelRunTime
 	}
 
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+	for i := 0; i < runTime; i++ {
+		panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+		if panel.cursor > 0 {
+			panel.cursor--
+			if panel.cursor < panel.render {
+				panel.render--
+			}
+		} else {
+			if len(panel.element) > panelElementHeight(m.mainPanelHeight) {
+				panel.render = len(panel.element) - panelElementHeight(m.mainPanelHeight)
+				panel.cursor = len(panel.element) - 1
+			} else {
+				panel.cursor = len(panel.element) - 1
+			}
+		}
+		if arrayContains(panel.selected, panel.element[panel.cursor].location) {
+			panel.selected = removeElementByValue(panel.selected, panel.element[panel.cursor].location)
+		} else {
+			panel.selected = append(panel.selected, panel.element[panel.cursor].location)
+		}
+
+		m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+	}
 	return m
 }
 
 // Handles the action of selecting an item in the file panel downwards. (only work on select mode)
-func itemSelectDown(m model) model {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	if panel.cursor < len(panel.element)-1 {
-		panel.cursor++
-		if panel.cursor > panel.render+panelElementHeight(m.mainPanelHeight)-1 {
-			panel.render++
-		}
-	} else {
-		panel.render = 0
-		panel.cursor = 0
-	}
-	if arrayContains(panel.selected, panel.element[panel.cursor].location) {
-		panel.selected = removeElementByValue(panel.selected, panel.element[panel.cursor].location)
-	} else {
-		panel.selected = append(panel.selected, panel.element[panel.cursor].location)
+func itemSelectDown(m model, wheel bool) model {
+	runTime := 1
+	if wheel {
+		runTime = wheelRunTime
 	}
 
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+	for i := 0; i < runTime; i++ {
+		panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+		if panel.cursor < len(panel.element)-1 {
+			panel.cursor++
+			if panel.cursor > panel.render+panelElementHeight(m.mainPanelHeight)-1 {
+				panel.render++
+			}
+		} else {
+			panel.render = 0
+			panel.cursor = 0
+		}
+		if arrayContains(panel.selected, panel.element[panel.cursor].location) {
+			panel.selected = removeElementByValue(panel.selected, panel.element[panel.cursor].location)
+		} else {
+			panel.selected = append(panel.selected, panel.element[panel.cursor].location)
+		}
+
+		m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+	}
 	return m
 }
 
@@ -283,120 +310,132 @@ func itemSelectDown(m model) model {
 //P.S God bless me, this sidebar controller code is really ugly...
 
 // Control sidebar panel list up
-func controlSideBarListUp(m model) model {
-
-	if m.sidebarModel.cursor > 0 {
-		m.sidebarModel.cursor--
-	} else {
-		m.sidebarModel.cursor = len(m.sidebarModel.directories) - 1
+func controlSideBarListUp(m model, wheel bool) model {
+	runTime := 1
+	if wheel {
+		runTime = wheelRunTime
 	}
-	newDirectory := m.sidebarModel.directories[m.sidebarModel.cursor].location
 
-	for newDirectory == "Pinned+-*/=?" || newDirectory == "Disks+-*/=?" {
-		m.sidebarModel.cursor--
-		newDirectory = m.sidebarModel.directories[m.sidebarModel.cursor].location
-	}
-	changeToPlus := false
-	cursorRender := false
-	for !cursorRender {
-		totalHeight := 2
-		for i := m.sidebarModel.renderIndex; i < len(m.sidebarModel.directories); i++ {
-			if totalHeight >= m.mainPanelHeight {
-				break
-			}
-			directory := m.sidebarModel.directories[i]
+	for i := 0; i < runTime; i++ {
+		if m.sidebarModel.cursor > 0 {
+			m.sidebarModel.cursor--
+		} else {
+			m.sidebarModel.cursor = len(m.sidebarModel.directories) - 1
+		}
+		newDirectory := m.sidebarModel.directories[m.sidebarModel.cursor].location
 
-			if directory.location == "Pinned+-*/=?" {
-				totalHeight += 3
-				continue
-			}
-
-			if directory.location == "Disks+-*/=?" {
-				if m.mainPanelHeight-totalHeight <= 2 {
+		for newDirectory == "Pinned+-*/=?" || newDirectory == "Disks+-*/=?" {
+			m.sidebarModel.cursor--
+			newDirectory = m.sidebarModel.directories[m.sidebarModel.cursor].location
+		}
+		changeToPlus := false
+		cursorRender := false
+		for !cursorRender {
+			totalHeight := 2
+			for i := m.sidebarModel.renderIndex; i < len(m.sidebarModel.directories); i++ {
+				if totalHeight >= m.mainPanelHeight {
 					break
 				}
-				totalHeight += 3
+				directory := m.sidebarModel.directories[i]
+
+				if directory.location == "Pinned+-*/=?" {
+					totalHeight += 3
+					continue
+				}
+
+				if directory.location == "Disks+-*/=?" {
+					if m.mainPanelHeight-totalHeight <= 2 {
+						break
+					}
+					totalHeight += 3
+					continue
+				}
+
+				totalHeight++
+				if m.sidebarModel.cursor == i && m.focusPanel == sidebarFocus {
+					cursorRender = true
+				}
+			}
+
+			if changeToPlus {
+				m.sidebarModel.renderIndex++
 				continue
 			}
 
-			totalHeight++
-			if m.sidebarModel.cursor == i && m.focusPanel == sidebarFocus {
-				cursorRender = true
+			if !cursorRender {
+				m.sidebarModel.renderIndex--
+			}
+			if m.sidebarModel.renderIndex < 0 {
+				changeToPlus = true
+				m.sidebarModel.renderIndex++
 			}
 		}
 
 		if changeToPlus {
-			m.sidebarModel.renderIndex++
-			continue
-		}
-
-		if !cursorRender {
 			m.sidebarModel.renderIndex--
 		}
-		if m.sidebarModel.renderIndex < 0 {
-			changeToPlus = true
-			m.sidebarModel.renderIndex++
-		}
 	}
-
-	if changeToPlus {
-		m.sidebarModel.renderIndex--
-	}
-
 	return m
 }
 
 // Control sidebar panel list down
-func controlSideBarListDown(m model) model {
-	lenDirs := len(m.sidebarModel.directories)
-	if m.sidebarModel.cursor < lenDirs-1 {
-		m.sidebarModel.cursor++
-	} else {
-		m.sidebarModel.cursor = 0
+func controlSideBarListDown(m model, wheel bool) model {
+	runTime := 1
+	if wheel {
+		runTime = wheelRunTime
 	}
 
-	newDirectory := m.sidebarModel.directories[m.sidebarModel.cursor].location
-	for newDirectory == "Pinned+-*/=?" || newDirectory == "Disks+-*/=?" {
-		m.sidebarModel.cursor++
-		if m.sidebarModel.cursor + 1 >= len(m.sidebarModel.directories) {
+	for i := 0; i < runTime; i++ {
+		lenDirs := len(m.sidebarModel.directories)
+		if m.sidebarModel.cursor < lenDirs-1 {
+			m.sidebarModel.cursor++
+		} else {
 			m.sidebarModel.cursor = 0
 		}
-		newDirectory = m.sidebarModel.directories[m.sidebarModel.cursor].location
-	}
-	cursorRender := false
-	for !cursorRender {
-		totalHeight := 2
-		for i := m.sidebarModel.renderIndex; i < len(m.sidebarModel.directories); i++ {
-			if totalHeight >= m.mainPanelHeight {
-				break
+
+		newDirectory := m.sidebarModel.directories[m.sidebarModel.cursor].location
+		for newDirectory == "Pinned+-*/=?" || newDirectory == "Disks+-*/=?" {
+			m.sidebarModel.cursor++
+			if m.sidebarModel.cursor+1 >= len(m.sidebarModel.directories) {
+				m.sidebarModel.cursor = 0
 			}
-
-			directory := m.sidebarModel.directories[i]
-
-			if directory.location == "Pinned+-*/=?" {
-				totalHeight += 3
-				continue
-			}
-
-			if directory.location == "Disks+-*/=?" {
-				if m.mainPanelHeight-totalHeight <= 2 {
+			newDirectory = m.sidebarModel.directories[m.sidebarModel.cursor].location
+		}
+		cursorRender := false
+		for !cursorRender {
+			totalHeight := 2
+			for i := m.sidebarModel.renderIndex; i < len(m.sidebarModel.directories); i++ {
+				if totalHeight >= m.mainPanelHeight {
 					break
 				}
-				totalHeight += 3
-				continue
+
+				directory := m.sidebarModel.directories[i]
+
+				if directory.location == "Pinned+-*/=?" {
+					totalHeight += 3
+					continue
+				}
+
+				if directory.location == "Disks+-*/=?" {
+					if m.mainPanelHeight-totalHeight <= 2 {
+						break
+					}
+					totalHeight += 3
+					continue
+				}
+
+				totalHeight++
+				if m.sidebarModel.cursor == i && m.focusPanel == sidebarFocus {
+					cursorRender = true
+				}
 			}
 
-			totalHeight++
-			if m.sidebarModel.cursor == i && m.focusPanel == sidebarFocus {
-				cursorRender = true
+			if !cursorRender {
+				m.sidebarModel.renderIndex++
 			}
-		}
-
-		if !cursorRender {
-			m.sidebarModel.renderIndex++
-		}
-		if m.sidebarModel.renderIndex > m.sidebarModel.cursor {
-			m.sidebarModel.renderIndex = 0
+			if m.sidebarModel.renderIndex > m.sidebarModel.cursor {
+				m.sidebarModel.renderIndex = 0
+			}
 		}
 	}
 	return m
@@ -405,21 +444,35 @@ func controlSideBarListDown(m model) model {
 // ======================================== Metadata controller ========================================
 
 // Control metadata panel up
-func controlMetadataListUp(m model) model {
-	if m.fileMetaData.renderIndex > 0 {
-		m.fileMetaData.renderIndex--
-	} else {
-		m.fileMetaData.renderIndex = len(m.fileMetaData.metaData) - 1
+func controlMetadataListUp(m model, wheel bool) model {
+	runTime := 1
+	if wheel {
+		runTime = wheelRunTime
+	}
+
+	for i := 0; i < runTime; i++ {
+		if m.fileMetaData.renderIndex > 0 {
+			m.fileMetaData.renderIndex--
+		} else {
+			m.fileMetaData.renderIndex = len(m.fileMetaData.metaData) - 1
+		}
 	}
 	return m
 }
 
 // Control metadata panel down
-func controlMetadataListDown(m model) model {
-	if m.fileMetaData.renderIndex < len(m.fileMetaData.metaData)-1 {
-		m.fileMetaData.renderIndex++
-	} else {
-		m.fileMetaData.renderIndex = 0
+func controlMetadataListDown(m model, wheel bool) model {
+	runTime := 1
+	if wheel {
+		runTime = wheelRunTime
+	}
+
+	for i := 0; i < runTime; i++ {
+		if m.fileMetaData.renderIndex < len(m.fileMetaData.metaData)-1 {
+			m.fileMetaData.renderIndex++
+		} else {
+			m.fileMetaData.renderIndex = 0
+		}
 	}
 	return m
 }
@@ -427,40 +480,54 @@ func controlMetadataListDown(m model) model {
 // ======================================== Processbar controller ========================================
 
 // Control processbar panel list up
-func controlProcessbarListUp(m model) model {
+func controlProcessbarListUp(m model, wheel bool) model {
 	if len(m.processBarModel.processList) == 0 {
 		return m
 	}
-	if m.processBarModel.cursor > 0 {
-		m.processBarModel.cursor--
-		if m.processBarModel.cursor < m.processBarModel.render {
-			m.processBarModel.render--
-		}
-	} else {
-		if len(m.processBarModel.processList) <= 3 || (len(m.processBarModel.processList) <= 2 && footerHeight < 14) {
-			m.processBarModel.cursor = len(m.processBarModel.processList) - 1
-		} else {
-			m.processBarModel.render = len(m.processBarModel.processList) - 3
-			m.processBarModel.cursor = len(m.processBarModel.processList) - 1
-		}
+	runTime := 1
+	if wheel {
+		runTime = wheelRunTime
 	}
 
+	for i := 0; i < runTime; i++ {
+		if m.processBarModel.cursor > 0 {
+			m.processBarModel.cursor--
+			if m.processBarModel.cursor < m.processBarModel.render {
+				m.processBarModel.render--
+			}
+		} else {
+			if len(m.processBarModel.processList) <= 3 || (len(m.processBarModel.processList) <= 2 && footerHeight < 14) {
+				m.processBarModel.cursor = len(m.processBarModel.processList) - 1
+			} else {
+				m.processBarModel.render = len(m.processBarModel.processList) - 3
+				m.processBarModel.cursor = len(m.processBarModel.processList) - 1
+			}
+		}
+	}
 	return m
 }
 
 // Control processbar panel list down
-func controlProcessbarListDown(m model) model {
+func controlProcessbarListDown(m model, wheel bool) model {
 	if len(m.processBarModel.processList) == 0 {
 		return m
 	}
-	if m.processBarModel.cursor < len(m.processBarModel.processList)-1 {
-		m.processBarModel.cursor++
-		if m.processBarModel.cursor > m.processBarModel.render+2 {
-			m.processBarModel.render++
+
+	runTime := 1
+	if wheel {
+		runTime = wheelRunTime
+	}
+
+	for i := 0; i < runTime; i++ {
+		if m.processBarModel.cursor < len(m.processBarModel.processList)-1 {
+			m.processBarModel.cursor++
+			if m.processBarModel.cursor > m.processBarModel.render+2 {
+				m.processBarModel.render++
+			}
+		} else {
+			m.processBarModel.render = 0
+			m.processBarModel.cursor = 0
 		}
-	} else {
-		m.processBarModel.render = 0
-		m.processBarModel.cursor = 0
 	}
 	return m
 }

@@ -7,13 +7,13 @@ func mainKey(msg string, m model, cmd tea.Cmd) (model, tea.Cmd) {
 
 	case hotkeys.ListUp[0], hotkeys.ListUp[1]:
 		if m.focusPanel == sidebarFocus {
-			m = controlSideBarListUp(m)
+			m = controlSideBarListUp(m, false)
 		} else if m.focusPanel == processBarFocus {
-			m = controlProcessbarListUp(m)
+			m = controlProcessbarListUp(m, false)
 		} else if m.focusPanel == metadataFocus {
-			m = controlMetadataListUp(m)
+			m = controlMetadataListUp(m, false)
 		} else if m.focusPanel == nonePanelFocus {
-			m = controlFilePanelListUp(m)
+			m = controlFilePanelListUp(m, false)
 			m.fileMetaData.renderIndex = 0
 			go func() {
 				m = returnMetaData(m)
@@ -22,13 +22,13 @@ func mainKey(msg string, m model, cmd tea.Cmd) (model, tea.Cmd) {
 
 	case hotkeys.ListDown[0], hotkeys.ListDown[1]:
 		if m.focusPanel == sidebarFocus {
-			m = controlSideBarListDown(m)
+			m = controlSideBarListDown(m, false)
 		} else if m.focusPanel == processBarFocus {
-			m = controlProcessbarListDown(m)
+			m = controlProcessbarListDown(m, false)
 		} else if m.focusPanel == metadataFocus {
-			m = controlMetadataListDown(m)
+			m = controlMetadataListDown(m, false)
 		} else if m.focusPanel == nonePanelFocus {
-			m = controlFilePanelListDown(m)
+			m = controlFilePanelListDown(m, false)
 			m.fileMetaData.renderIndex = 0
 			go func() {
 				m = returnMetaData(m)
@@ -118,9 +118,9 @@ func normalAndBrowserModeKey(msg string, m model) model {
 		case hotkeys.Confirm[0], hotkeys.Confirm[1]:
 			m = singleItemSelect(m)
 		case hotkeys.FilePanelSelectModeItemsSelectUp[0], hotkeys.FilePanelSelectModeItemsSelectUp[1]:
-			m = itemSelectUp(m)
+			m = itemSelectUp(m, false)
 		case hotkeys.FilePanelSelectModeItemsSelectDown[0], hotkeys.FilePanelSelectModeItemsSelectDown[1]:
-			m = itemSelectDown(m)
+			m = itemSelectDown(m, false)
 		case hotkeys.DeleteItems[0], hotkeys.DeleteItems[1]:
 			go func() {
 				m = deleteItemWarn(m)

@@ -490,9 +490,39 @@ func filePreviewPanelRender(m model) string {
 		outPutLog("error get file info", err)
 		return box.Render("\n ---  Error get file info ---")
 	}
-
 	if fileInfo.IsDir() {
-		return box.Render("\n ---  Unsupported formats ---")
+		directoryContent := ""
+		dirPath := panel.element[panel.cursor].location
+
+		files, err := os.ReadDir(dirPath)
+		if err != nil {
+			outPutLog("Error render directory preview", err)
+			return box.Render("\n ---  Error render directory preview ---")
+		}
+
+		if len(files) == 0 {
+			return box.Render("\n --- empty ---")
+		}
+
+		sort.Slice(files, func(i, j int) bool {
+			if files[i].IsDir() && !files[j].IsDir() {
+				return true
+			}
+			if !files[i].IsDir() && files[j].IsDir() {
+				return false
+			}
+			return files[i].Name() < files[j].Name()
+		})
+
+		for i := 0; i < previewLine && i < len(files); i++ {
+			file := files[i]
+			directoryContent += prettierDirectoryPreviewName(file.Name(), file.IsDir(), lipgloss.Color(theme.FilePanelBG))
+			if i != previewLine - 1 && i != len(files) -1 {
+				directoryContent += "\n"
+			}
+		}
+		directoryContent = checkAndTruncateLineLengths(directoryContent, m.fileModel.filePreview.width)
+		return box.Render(directoryContent)
 	}
 
 	format := lexers.Match(filepath.Base(panel.element[panel.cursor].location))

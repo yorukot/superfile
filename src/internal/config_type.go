@@ -3,6 +3,10 @@ package internal
 import "github.com/charmbracelet/lipgloss"
 
 var (
+	wheelRunTime = 5
+)
+
+var (
 	filePanelBorderColor lipgloss.Color
 	sidebarBorderColor   lipgloss.Color
 	footerBorderColor    lipgloss.Color

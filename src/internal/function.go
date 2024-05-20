@@ -39,16 +39,28 @@ func returnFocusType(focusPanel focusPanelType) filePanelFocusType {
 	return secondFocus
 }
 
-func returnFolderElement(location string, displayDotFile bool) (folderElement []element) {
-	var files []element
-	var folders []element
+func returnFolderElement(location string, displayDotFile bool) (directoryElement []element) {
 
-	items, err := os.ReadDir(location)
+	files, err := os.ReadDir(location)
+	if len(files) == 0 {
+		return directoryElement
+	}
+	
 	if err != nil {
 		outPutLog("Return folder element function error", err)
 	}
+	
+	sort.Slice(files, func(i, j int) bool {
+		if files[i].IsDir() && !files[j].IsDir() {
+			return true
+		}
+		if !files[i].IsDir() && files[j].IsDir() {
+			return false
+		}
+		return files[i].Name() < files[j].Name()
+	})
 
-	for _, item := range items {
+	for _, item := range files {
 		fileInfo, err := item.Info()
 		if err != nil {
 			continue
@@ -67,28 +79,12 @@ func returnFolderElement(location string, displayDotFile bool) (folderElement []
 		if location == "/" {
 			newElement.location = location + item.Name()
 		} else {
-			newElement.location = location + "/" + item.Name()
+			newElement.location = filepath.Join(location, item.Name())
 		}
-
-		if item.IsDir() {
-			folders = append(folders, newElement)
-		} else {
-			files = append(files, newElement)
-		}
+		directoryElement = append(directoryElement, newElement)
 	}
 
-	// Sort folders and files alphabetically
-	sort.Slice(folders, func(i, j int) bool {
-		return folders[i].name < folders[j].name
-	})
-	sort.Slice(files, func(i, j int) bool {
-		return files[i].name < files[j].name
-	})
-
-	// Concatenate folders and files
-	folderElement = append(folders, files...)
-
-	return folderElement
+	return directoryElement
 }
 
 func returnFolderElementBySearchString(location string, displayDotFile bool, searchString string) (folderElement []element) {
