@@ -146,8 +146,8 @@ schema = 3
     version = "v0.0.0-20240312152122-5f08fbb34913"
     hash = "sha256-ySUTdeoOUi3QcLEJBYvCDIhVrsrD2Ks6/4V9n4hCvBk="
   [mod."github.com/yorukot/ansichroma"]
-    version = "v0.0.0-20240519081657-d7791bcab076"
-    hash = "sha256-ymtIEZaMpdeBKN5bsA95DCJtqU0nko/vK8qNc+vdZb8="
+    version = "v0.1.0"
+    hash = "sha256-aIQZ16auuGfGLltKt2lm2T83f4sALrmRpOujxQepkS4="
   [mod."github.com/yusufpapurcu/wmi"]
     version = "v1.2.4"
     hash = "sha256-N+YDBjOW59YOsZ2lRBVtFsEEi48KhNQRb63/0ZSU3bA="
