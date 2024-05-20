@@ -45,7 +45,7 @@ If no such theme exists, then you may create your own theme. Following steps wil
 ### Do you want to share an idea?
 
 Superfile welcomes new ideas. If you have an idea you should first check if a similar or identical idea was presented previously or not, or check thoroughly if the idea is already present in superfile.
-To share your idea you can open a discussion in https://github.com/MHNightCat/superfile/discussions
+To share your idea you can open a discussion in https://github.com/yorukot/superfile/discussions
 There you can share your idea and if you want to work on it, you can follow the same steps as mentioned in previously.
 
 ### Do you want to contribute but don't know how?
