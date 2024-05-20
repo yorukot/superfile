@@ -218,8 +218,12 @@ func CheckForUpdates() {
 		}
 
 		if versionToNumber(release.TagName) > versionToNumber(varibale.CurrentVersion) {
-			fmt.Printf("A new version %s is available.\n", release.TagName)
-			fmt.Printf("Please update.\n┏\n\n        %s\n\n", varibale.LatestVersionGithub)
+			fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("#FF69E1")).Render("┃ ") +
+			lipgloss.NewStyle().Foreground(lipgloss.Color("#FFBA52")).Bold(true).Render("A new version ") + 
+			lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFF2")).Bold(true).Italic(true).Render(release.TagName) + 
+			lipgloss.NewStyle().Foreground(lipgloss.Color("#FFBA52")).Bold(true).Render(" is available."))
+			
+			fmt.Printf(lipgloss.NewStyle().Foreground(lipgloss.Color("#FF69E1")).Render("┃ ") + "Please update.\n┏\n\n      => %s\n\n", varibale.LatestVersionGithub)
 			fmt.Printf("                                                               ┛\n")
 		}
 
