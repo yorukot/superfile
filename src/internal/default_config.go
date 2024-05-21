@@ -95,6 +95,11 @@ func getHelpMenuData() []helpMenuModalData {
 			hotkeyWorkType: globalType,
 		},
 		{
+			hotkey:         hotkeys.ToggleFilePreviewPanel,
+			description:    "Toggle file preview panel",
+			hotkeyWorkType: globalType,
+		},
+		{
 			hotkey:         hotkeys.NextFilePanel,
 			description:    "Focus on the next file panel",
 			hotkeyWorkType: globalType,
