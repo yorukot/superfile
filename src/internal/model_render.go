@@ -3,6 +3,7 @@ package internal
 import (
 	"bufio"
 	"fmt"
+	"image"
 	"os"
 	"path/filepath"
 	"sort"
@@ -12,6 +13,7 @@ import (
 	"github.com/alecthomas/chroma/lexers"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/yorukot/ansichroma"
+	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
 )
 
 func sidebarRender(m model) string {
@@ -477,22 +479,23 @@ func filePreviewPanelRender(m model) string {
 	previewLine := m.mainPanelHeight + 2
 	m.fileModel.filePreview.width += m.fullWidth - sidebarWidth - m.fileModel.filePreview.width - ((m.fileModel.width + 2) * len(m.fileModel.filePanels)) - 2
 
-	box := filePreviewBox(previewLine, m.fileModel.filePreview.width)
-
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	box := filePreviewBox(previewLine, m.fileModel.filePreview.width)
 
 	if len(panel.element) == 0 {
 		return box.Render("\n ---  No content to preview ---")
 	}
 
-	fileInfo, err := os.Stat(panel.element[panel.cursor].location)
+	itemPath := panel.element[panel.cursor].location
+
+	fileInfo, err := os.Stat(itemPath)
 	if err != nil {
 		outPutLog("error get file info", err)
 		return box.Render("\n ---  Error get file info ---")
 	}
 	if fileInfo.IsDir() {
 		directoryContent := ""
-		dirPath := panel.element[panel.cursor].location
+		dirPath := itemPath
 
 		files, err := os.ReadDir(dirPath)
 		if err != nil {
@@ -517,7 +520,7 @@ func filePreviewPanelRender(m model) string {
 		for i := 0; i < previewLine && i < len(files); i++ {
 			file := files[i]
 			directoryContent += prettierDirectoryPreviewName(file.Name(), file.IsDir(), lipgloss.Color(theme.FilePanelBG))
-			if i != previewLine - 1 && i != len(files) -1 {
+			if i != previewLine-1 && i != len(files)-1 {
 				directoryContent += "\n"
 			}
 		}
@@ -525,9 +528,23 @@ func filePreviewPanelRender(m model) string {
 		return box.Render(directoryContent)
 	}
 
-	format := lexers.Match(filepath.Base(panel.element[panel.cursor].location))
+	if isImageFile(itemPath) {
+		ansiRender, err := filepreview.ImagePreview(itemPath, m.fileModel.filePreview.width, previewLine, theme.FilePanelBG)
+		if err == image.ErrFormat {
+			return box.Render("\n ---  Unsupported image formats ---")
+		}
+
+		if err != nil {
+			outPutLog("Error covernt image to ansi", err)
+			return box.Render("\n ---  Error covernt image to ansi ---")
+		}
+
+		return box.AlignVertical(lipgloss.Center).AlignHorizontal(lipgloss.Center).Render(ansiRender)
+	}
+
+	format := lexers.Match(filepath.Base(itemPath))
 	if format != nil {
-		codeHighlight, err := ansichroma.HighlightFromFile(panel.element[panel.cursor].location, previewLine, theme.CodeSyntaxHighlightTheme, theme.FilePanelBG)
+		codeHighlight, err := ansichroma.HighlightFromFile(itemPath, previewLine, theme.CodeSyntaxHighlightTheme, theme.FilePanelBG)
 
 		if err != nil {
 			outPutLog("Error render code highlight", err)
@@ -539,13 +556,13 @@ func filePreviewPanelRender(m model) string {
 		codeHighlight = checkAndTruncateLineLengths(codeHighlight, m.fileModel.filePreview.width)
 		return box.Render(codeHighlight)
 	} else {
-		textFile, err := isTextFile(panel.element[panel.cursor].location)
+		textFile, err := isTextFile(itemPath)
 		if err != nil {
 			outPutLog("Error check text file", err)
 		}
 		if textFile {
 			var fileContent string
-			file, err := os.Open(panel.element[panel.cursor].location)
+			file, err := os.Open(itemPath)
 			if err != nil {
 				outPutLog(err)
 				return box.Render("\n ---  Error open file ---")

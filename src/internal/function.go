@@ -425,3 +425,20 @@ func isSymlink(filePath string) bool {
 
 	return fileInfo.Mode()&os.ModeSymlink != 0
 }
+
+func isImageFile(filename string) bool {
+	imageExtensions := map[string]bool{
+		".jpg":  true,
+		".jpeg": true,
+		".png":  true,
+		".gif":  true,
+		".bmp":  true,
+		".tiff": true,
+		".svg":  true,
+		".webp": true,
+		".ico":  true,
+	}
+
+	ext := strings.ToLower(filepath.Ext(filename))
+	return imageExtensions[ext]
+}
