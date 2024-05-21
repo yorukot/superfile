@@ -19,6 +19,7 @@ All notable changes to this project will be documented in this file. Dates are d
 - Support text file preview [`#26`](https://github.com/yorukot/superfile/issues/26)
 - Support directory preview [`#26`](https://github.com/yorukot/superfile/issues/26)
 - Improve mouse scrolling delay [`f734292`](https://github.com/yorukot/superfile/commit/f7342921d49d87f1bc633c9f8e19fe6845fbbf26)
+- Support image preview with ansi [`#26`](https://github.com/yorukot/superfile/issues/26)
 
 #### Bug fix
 - Recursive symlink crashes superfile [`#109`](https://github.com/yorukot/superfile/issues/109)
