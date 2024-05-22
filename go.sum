@@ -54,6 +54,8 @@ github.com/charmbracelet/x/exp/term v0.0.0-20240517183709-47cd60ea8d59 h1:3evjM2
 github.com/charmbracelet/x/exp/term v0.0.0-20240517183709-47cd60ea8d59/go.mod h1:YBotIGhfoWhHDlnUpJMkjebGV2pdGRCn1Y4/Nk/vVcU=
 github.com/charmbracelet/x/exp/term v0.0.0-20240521140335-394a367403ba h1:OIiPXTWfMtq1ln3yFj+HzXBdkTR8HGoX+OYt1dZ6qNE=
 github.com/charmbracelet/x/exp/term v0.0.0-20240521140335-394a367403ba/go.mod h1:YBotIGhfoWhHDlnUpJMkjebGV2pdGRCn1Y4/Nk/vVcU=
+github.com/charmbracelet/x/exp/term v0.0.0-20240521184646-23081fb03b28 h1:nj+p3t676vvOHbeydL+ZrBLzsTTuuPwyq8PDZiYKhDU=
+github.com/charmbracelet/x/exp/term v0.0.0-20240521184646-23081fb03b28/go.mod h1:YBotIGhfoWhHDlnUpJMkjebGV2pdGRCn1Y4/Nk/vVcU=
 github.com/chzyer/logex v1.1.10/go.mod h1:+Ywpsq7O8HXn0nuIou7OrIPyXbp3wmkHB+jjWRnGsAI=
 github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e/go.mod h1:nSuG5e5PlCu98SY8svDHJxuZscDgtXS6KTTbou5AhLI=
 github.com/chzyer/test v0.0.0-20180213035817-a1ea475d72b1/go.mod h1:Q3SI9o4m/ZMnBNeIyt5eFwwo7qiLfzFZmjNmxjkiQlU=
