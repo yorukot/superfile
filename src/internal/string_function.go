@@ -14,10 +14,13 @@ import (
 )
 
 func truncateText(text string, maxChars int) string {
-	if utf8.RuneCountInString(text) <= maxChars {
-		return text
+
+	truncatedText := charmansi.Truncate(text, maxChars - 3, "")
+	if text != truncatedText {
+		return truncatedText + "..."
 	}
-	return text[:maxChars-3] + "..."
+	
+	return text
 }
 
 func truncateTextBeginning(text string, maxChars int) string {
