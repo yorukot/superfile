@@ -20,11 +20,13 @@ All notable changes to this project will be documented in this file. Dates are d
 - Support directory preview [`#26`](https://github.com/yorukot/superfile/issues/26)
 - Improve mouse scrolling delay [`f734292`](https://github.com/yorukot/superfile/commit/f7342921d49d87f1bc633c9f8e19fe6845fbbf26)
 - Support image preview with ansi [`#26`](https://github.com/yorukot/superfile/issues/26)
+- Clear search after opening directory  [`#146`](https://github.com/yorukot/superfile/issues/146)
 
 #### Bug fix
 - Recursive symlink crashes superfile [`#109`](https://github.com/yorukot/superfile/issues/109)
 - Timemachine snapshots listed in Disks section [`#126`](https://github.com/yorukot/superfile/issues/126)
 - There will be a bug in the layout under a specific terminal height [`#105`](https://github.com/yorukot/superfile/issues/105)
+- Fix lag when there are a lot of files [`#124`](https://github.com/yorukot/superfile/issues/124)
 
 # [**v1.1.2**](https://github.com/yorukot/superfile/releases/tag/v1.1.2)
 
