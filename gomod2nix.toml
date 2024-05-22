@@ -8,8 +8,8 @@ schema = 3
     version = "v0.10.0"
     hash = "sha256-p721vddVTv4iv1O0/dqpdk5xF6x9iLIHcrfh8JEVnqQ="
   [mod."github.com/alecthomas/chroma/v2"]
-    version = "v2.13.0"
-    hash = "sha256-fYwAHQFWGWzcMO8XPNzR7iAUarVGMKJjfX1DB74AmrA="
+    version = "v2.14.0"
+    hash = "sha256-d+zcIobMS5Y0/Ym9Uxubf20uyw0aBCr0f1oEOAGHlEA="
   [mod."github.com/andybalholm/brotli"]
     version = "v1.0.5"
     hash = "sha256-/qS8wU8yZQJ+uTOg66rEl9s7spxq9VIXF5L1BcaEClc="
