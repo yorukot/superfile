@@ -98,7 +98,7 @@ func clipboardPrettierName(name string, width int, isDir bool, isSelected bool) 
 func fileNameWithoutExtension(fileName string) string {
 	for {
 		pos := strings.LastIndexByte(fileName, '.')
-		if pos == -1 {
+		if pos <= 0 {
 			break
 		}
 		fileName = fileName[:pos]
