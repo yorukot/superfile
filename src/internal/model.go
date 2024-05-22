@@ -3,6 +3,7 @@ package internal
 import (
 	"log"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/barasher/go-exiftool"
@@ -248,13 +249,27 @@ func listenForChannelMessage(msg chan channelMessage) tea.Cmd {
 }
 
 func getFilePanelItems(m model) model {
+	focusPanel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	for i, filePanel := range m.fileModel.filePanels {
 		var fileElenent []element
 		nowTime := time.Now()
 		if filePanel.focusType == noneFocus && nowTime.Sub(filePanel.lastTimeGetElement) < 3*time.Second && !forceReloadElement {
 			continue
 		}
-		if len(filePanel.element) > 500 && (len(filePanel.element) > 500 && (nowTime.Sub(filePanel.lastTimeGetElement) > 3*time.Second)) && !forceReloadElement {
+
+		focusPanelReRender := false
+
+		if len(focusPanel.element) > 0 {
+			if filepath.Dir(focusPanel.element[0].location) != focusPanel.location {
+				focusPanelReRender = true
+			}
+		} else {
+			focusPanelReRender = true
+		}
+		
+		reRenderTime := int(float64(len(filePanel.element)) / 100)
+
+		if filePanel.focusType == focus && nowTime.Sub(filePanel.lastTimeGetElement) < time.Duration(reRenderTime)*time.Second && !forceReloadElement && !focusPanelReRender {
 			continue
 		}
 
