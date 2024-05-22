@@ -78,11 +78,6 @@ func ImagePreview(path string, maxWidth, maxHeight int, defaultBGColor string) (
 }
 
 func hexToColor(hex string) color.RGBA {
-	hex = hex[1:]
-
-	r, _ := strconv.ParseInt(hex[0:2], 16, 64)
-	g, _ := strconv.ParseInt(hex[2:4], 16, 64)
-	b, _ := strconv.ParseInt(hex[4:6], 16, 64)
-
-	return color.RGBA{uint8(r), uint8(g), uint8(b), 0xff}
+	values, _ := strconv.ParseUint(string(hex[1:]), 16, 32)
+	return color.RGBA{R: uint8(values >> 16), G: uint8((values >> 8) & 0xFF), B: uint8(values & 0xFF), A: 255}
 }
