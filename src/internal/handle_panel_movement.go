@@ -50,7 +50,11 @@ func parentDirectory(m model) model {
 func enterPanel(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 
-	if len(panel.element) > 0 && panel.element[panel.cursor].directory {
+	if len(panel.element) == 0 {
+		return m
+	}
+
+	if panel.element[panel.cursor].directory {
 		panel.directoryRecord[panel.location] = directoryRecord{
 			directoryCursor: panel.cursor,
 			directoryRender: panel.render,
@@ -64,7 +68,8 @@ func enterPanel(m model) model {
 			panel.cursor = 0
 			panel.render = 0
 		}
-	} else if len(panel.element) > 0 && !panel.element[panel.cursor].directory {
+		panel.searchBar.SetValue("")
+	} else if !panel.element[panel.cursor].directory {
 		fileInfo, err := os.Lstat(panel.element[panel.cursor].location)
 		if err != nil {
 			outPutLog("err when getting file info", err)
