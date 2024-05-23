@@ -6,7 +6,7 @@ head:
     content: superfile ChangeLog | superfile
 ---
 
-All notable changes to this project will be documented in this file. Dates are displayed in UTC(YYYY/MM/DD).
+All notable changes to this project will be documented in this file. Dates are displayed in UTC(YYYY-MM-DD).
 
 
 # [**v1.1.3**]()
@@ -15,18 +15,24 @@ All notable changes to this project will be documented in this file. Dates are d
 
 #### Update
 - Update print path list [`37c8864`](https://github.com/yorukot/superfile/commit/37c8864eb2b0dc73fbf8928dd40b3b7573e9a11dw)
-- Make downloading theme files optional [`7fa775d`](https://github.com/yorukot/superfile/commit/7fa775dd7db175fef694e514bd77ebd75c801fae)
+- Make theme files embed [`0f53a12`](https://github.com/yorukot/superfile/commit/7fa775dd7db175fef694e514bd77ebd75c801fae)
 - Disable update check via config [`#131`](https://github.com/yorukot/superfile/issues/131)
 - Redesing hotkeys [`#116`](https://github.com/yorukot/superfile/issues/116)
 - Create file or folder using same hotkey [`#116`](https://github.com/yorukot/superfile/issues/116)
 - More dynamic footer height adaptive [`66a3fb4`](https://github.com/yorukot/superfile/commit/66a3fb4feba31ead2224938b1a18a431a55ac9cc)
 - Confirm delete files [``]()
 - Support windows for get well known directories [`d4db820`](https://github.com/yorukot/superfile/commit/d4db820ba839603df209dcce05468902739f301f)
+- Support text file preview [`#26`](https://github.com/yorukot/superfile/issues/26)
+- Support directory preview [`#26`](https://github.com/yorukot/superfile/issues/26)
+- Improve mouse scrolling delay [`f734292`](https://github.com/yorukot/superfile/commit/f7342921d49d87f1bc633c9f8e19fe6845fbbf26)
+- Support image preview with ansi [`#26`](https://github.com/yorukot/superfile/issues/26)
+- Clear search after opening directory  [`#146`](https://github.com/yorukot/superfile/issues/146)
 
 #### Bug fix
 - Recursive symlink crashes superfile [`#109`](https://github.com/yorukot/superfile/issues/109)
 - Timemachine snapshots listed in Disks section [`#126`](https://github.com/yorukot/superfile/issues/126)
 - There will be a bug in the layout under a specific terminal height [`#105`](https://github.com/yorukot/superfile/issues/105)
+- Fix lag when there are a lot of files [`#124`](https://github.com/yorukot/superfile/issues/124)
 
 # [**v1.1.2**](https://github.com/yorukot/superfile/releases/tag/v1.1.2)
 

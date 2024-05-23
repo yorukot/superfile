@@ -106,6 +106,11 @@ export default defineConfig({
             {
               label: 'Custom theme',
               link: '/configure/custom-theme'
+            },
+            {
+              label: 'Enable plugin',
+              link: '/configure/enable-plugin'
+
             }
           ],
         },
@@ -119,6 +124,10 @@ export default defineConfig({
             {
               label: 'Theme list',
               link: '/list/theme-list/',
+            },
+            {
+              label: 'Plugin list',
+              link: '/list/plugin-list/',
             },
           ],
         },
