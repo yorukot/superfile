@@ -67,7 +67,7 @@ Run the `build.sh` file:
 Add the binary file to your $PATH, e.g., in `/usr/local/bin`:
 
 ```bash
-mv ./bin/spf /usr/local/bin
+sudo mv ./bin/spf /usr/local/bin
 ```
 
 ## Supported Systems
