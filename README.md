@@ -49,7 +49,7 @@ You can build the source code yourself by using these steps:
 Clone this repository using the following command:
 
 ```
-git clone https://github.com/yorukot/superfile.git
+git clone https://github.com/yorukot/superfile.git --depth=1
 ```
 
 Enter the downloaded directory:
