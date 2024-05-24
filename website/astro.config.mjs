@@ -132,6 +132,10 @@ export default defineConfig({
           ],
         },
         {
+          label: 'Troubleshooting',
+          link: '/troubleshooting'
+        },
+        {
           label: 'How to contribute',
           link: '/how-to-contribute'
         },

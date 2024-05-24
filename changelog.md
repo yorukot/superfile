@@ -2,7 +2,6 @@
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC(YYYY-MM-DD).
 
-
 # [**v1.1.3**]()
 
 > xxxx-xx-xx
@@ -27,6 +26,7 @@ All notable changes to this project will be documented in this file. Dates are d
 - Timemachine snapshots listed in Disks section [`#126`](https://github.com/yorukot/superfile/issues/126)
 - There will be a bug in the layout under a specific terminal height [`#105`](https://github.com/yorukot/superfile/issues/105)
 - Fix lag when there are a lot of files [`#124`](https://github.com/yorukot/superfile/issues/124)
+- Rendering will be blocked while executing a task that uses a progress bar [`#104`](https://github.com/yorukot/superfile/issues/104)
 
 # [**v1.1.2**](https://github.com/yorukot/superfile/releases/tag/v1.1.2)
 
