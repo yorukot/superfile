@@ -35,17 +35,29 @@ schema = 3
     version = "v0.18.0"
     hash = "sha256-FVKLet2anNB6gupLYXO4kJaKQIXs1dg2dZ2ooaBiEZU="
   [mod."github.com/charmbracelet/bubbletea"]
-    version = "v0.26.2"
-    hash = "sha256-s91dQE2wL7VDfQo0UDK0RRySSpUeGgrCHbSKhYEodvM="
+    version = "v0.26.3"
+    hash = "sha256-tP9yi8cNjtFf6A0nXI0dLHyzh4nmpzFom4GzUQCrVzQ="
   [mod."github.com/charmbracelet/harmonica"]
     version = "v0.2.0"
     hash = "sha256-fi5N0IXhSbbYHdSZFngCfpT4kdiEaKedqj8YpnlvX0o="
   [mod."github.com/charmbracelet/lipgloss"]
     version = "v0.10.0"
     hash = "sha256-JZD1iVeizYe0mp3qQcJbUZdYN6HP/DNC67ja79DTe6s="
+  [mod."github.com/charmbracelet/x/ansi"]
+    version = "v0.1.1"
+    hash = "sha256-Ouq2iNo/aKQYxJSIQ7Pj1H2wpmx1G664nunJy7LvPkc="
   [mod."github.com/charmbracelet/x/exp/term"]
     version = "v0.0.0-20240522154747-75cd6ffa5c81"
     hash = "sha256-nFtz7oWQh5L9nIAuY1cW7KOJJ33QsTPSz9HyiNIYRYc="
+  [mod."github.com/charmbracelet/x/input"]
+    version = "v0.1.0"
+    hash = "sha256-oPt488pHiPGn9SiWZBjDGEYq2f8npDA8UIVX1MJ9pSk="
+  [mod."github.com/charmbracelet/x/term"]
+    version = "v0.1.1"
+    hash = "sha256-BBsMkabliwOYrGZAwFzWKA6lXDSOIkvE3FMJFjBGSSM="
+  [mod."github.com/charmbracelet/x/windows"]
+    version = "v0.1.0"
+    hash = "sha256-TLwaSrLgruvRinn986Jt/B7kb63IOq9pHUIWiyyNzos="
   [mod."github.com/connesc/cipherio"]
     version = "v0.2.1"
     hash = "sha256-PeuFnTak2WADesP8YTBqHP/XyvBue9bdKHYser2v6LU="
@@ -145,6 +157,9 @@ schema = 3
   [mod."github.com/urfave/cli/v2"]
     version = "v2.27.2"
     hash = "sha256-P0yLmx2a2hIQjQ/RXKLG8ehI5eVivnettuMFr8MznFY="
+  [mod."github.com/xo/terminfo"]
+    version = "v0.0.0-20220910002029-abceb7e1c41e"
+    hash = "sha256-GyCDxxMQhXA3Pi/TsWXpA8cX5akEoZV7CFx4RO3rARU="
   [mod."github.com/xrash/smetrics"]
     version = "v0.0.0-20240312152122-5f08fbb34913"
     hash = "sha256-ySUTdeoOUi3QcLEJBYvCDIhVrsrD2Ks6/4V9n4hCvBk="
