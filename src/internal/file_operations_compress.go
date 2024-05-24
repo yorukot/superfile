@@ -29,13 +29,17 @@ func zipSource(source, target string) error {
 		done:     0,
 	}
 
+	message := channelMessage{
+		messageId:       id,
+		messageType:     sendProcess,
+		processNewState: p,
+	}
+
 	_, err = os.Stat(target)
 	if os.IsExist(err) {
 		p.name = "󰗄 File already exist"
-		channel <- channelMessage{
-			messageId:       id,
-			processNewState: p,
-		}
+		message.processNewState = p
+		channel <- message
 		return nil
 	}
 
@@ -51,10 +55,8 @@ func zipSource(source, target string) error {
 	err = filepath.Walk(source, func(path string, info os.FileInfo, err error) error {
 		p.name = "󰗄 " + filepath.Base(path)
 		if len(channel) < 5 {
-			channel <- channelMessage{
-				messageId:       id,
-				processNewState: p,
-			}
+			message.processNewState = p
+			channel <- message
 		}
 
 		if err != nil {
@@ -97,10 +99,9 @@ func zipSource(source, target string) error {
 		}
 		p.done++
 		if len(channel) < 5 {
-			channel <- channelMessage{
-				messageId:       id,
-				processNewState: p,
-			}
+
+			message.processNewState = p
+			channel <- message
 		}
 		return nil
 	})
@@ -108,17 +109,14 @@ func zipSource(source, target string) error {
 	if err != nil {
 		outPutLog("Error while zip file:", err)
 		p.state = failure
-		channel <- channelMessage{
-			messageId:       id,
-			processNewState: p,
-		}
+		message.processNewState = p
+		channel <- message
 	}
 	p.state = successful
 	p.done = totalFiles
-	channel <- channelMessage{
-		messageId:       id,
-		processNewState: p,
-	}
+
+	message.processNewState = p
+	channel <- message
 
 	return nil
 }

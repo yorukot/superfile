@@ -67,7 +67,7 @@ func mainKey(msg string, m model, cmd tea.Cmd) (model, tea.Cmd) {
 
 	case hotkeys.PasteItems[0], hotkeys.PasteItems[1]:
 		go func() {
-			m = pasteItem(m)
+			pasteItem(m)
 		}()
 
 	case hotkeys.FilePanelItemCreate[0], hotkeys.FilePanelItemCreate[1]:
@@ -80,12 +80,12 @@ func mainKey(msg string, m model, cmd tea.Cmd) (model, tea.Cmd) {
 
 	case hotkeys.ExtractFile[0], hotkeys.ExtractFile[1]:
 		go func() {
-			m = extractFile(m)
+			extractFile(m)
 		}()
 
 	case hotkeys.CompressFile[0], hotkeys.CompressFile[1]:
 		go func() {
-			m = compressFile(m)
+			compressFile(m)
 		}()
 
 	case hotkeys.OpenHelpMenu[0], hotkeys.OpenHelpMenu[1]:
@@ -124,9 +124,6 @@ func normalAndBrowserModeKey(msg string, m model) model {
 		case hotkeys.DeleteItems[0], hotkeys.DeleteItems[1]:
 			go func() {
 				m = deleteItemWarn(m)
-				if !isExternalDiskPath(m.fileModel.filePanels[m.filePanelFocusIndex].location) {
-					m.fileModel.filePanels[m.filePanelFocusIndex].selected = m.fileModel.filePanels[m.filePanelFocusIndex].selected[:0]
-				}
 			}()
 		case hotkeys.CopyItems[0], hotkeys.CopyItems[1]:
 			m = copyMultipleItem(m)
@@ -140,14 +137,12 @@ func normalAndBrowserModeKey(msg string, m model) model {
 
 	switch msg {
 	case hotkeys.Confirm[0], hotkeys.Confirm[1]:
-		forceReloadElement = true
 		m = enterPanel(m)
 	case hotkeys.ParentDirectory[0], hotkeys.ParentDirectory[1]:
-		forceReloadElement = true
 		m = parentDirectory(m)
 	case hotkeys.DeleteItems[0], hotkeys.DeleteItems[1]:
 		go func() {
-			m = deleteItemWarn(m)
+			deleteItemWarn(m)
 		}()
 	case hotkeys.CopyItems[0], hotkeys.CopyItems[1]:
 		m = copySingleItem(m)
@@ -181,12 +176,12 @@ func warnModalOpenKey(msg string, m model) model {
 		if m.fileModel.filePanels[m.filePanelFocusIndex].panelMode == selectMode {
 			if isExternalDiskPath(panel.location) {
 				go func() {
-					m = completelyDeleteMultipleItems(m)
+					completelyDeleteMultipleItems(m)
 					m.fileModel.filePanels[m.filePanelFocusIndex].selected = m.fileModel.filePanels[m.filePanelFocusIndex].selected[:0]
 				}()
 			} else {
 				go func() {
-					m = deleteMultipleItems(m)
+					deleteMultipleItems(m)
 					m.fileModel.filePanels[m.filePanelFocusIndex].selected = m.fileModel.filePanels[m.filePanelFocusIndex].selected[:0]
 				}()
 			}

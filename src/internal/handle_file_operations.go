@@ -71,29 +71,28 @@ func deleteItemWarn(m model) model {
 		return m
 	}
 	id := shortuuid.New()
+	message := channelMessage{
+		messageId:       id,
+		messageType:  snedWarnModal,
+	}
+
 	if isExternalDiskPath(panel.location) {
-		channel <- channelMessage{
-			messageId:       id,
-			returnWarnModal: true,
-			warnModal: warnModal{
-				open:     true,
-				title:    "Are you sure you want to completely delete",
-				content:  "This operation cannot be undone and your data will be completely lost.",
-				warnType: confirmDeleteItem,
-			},
+		message.warnModal = warnModal{
+			open:     true,
+			title:    "Are you sure you want to completely delete",
+			content:  "This operation cannot be undone and your data will be completely lost.",
+			warnType: confirmDeleteItem,
 		}
+		channel <- message
 		return m
 	} else {
-		channel <- channelMessage{
-			messageId:       id,
-			returnWarnModal: true,
-			warnModal: warnModal{
-				open:     true,
-				title:    "Are you sure you want to move this to trash can",
-				content:  "This operation will move file or directory to trash can.",
-				warnType: confirmDeleteItem,
-			},
+		message.warnModal = warnModal{
+			open:     true,
+			title:    "Are you sure you want to move this to trash can",
+			content:  "This operation will move file or directory to trash can.",
+			warnType: confirmDeleteItem,
 		}
+		channel <- message
 		return m
 	}
 }
@@ -119,28 +118,27 @@ func deleteSingleItem(m model) model {
 	}
 	m.processBarModel.process[id] = newProcess
 
-	channel <- channelMessage{
-		messageId:       id,
+	message := channelMessage{
+		messageId: id,
+		messageType: sendProcess,
 		processNewState: newProcess,
 	}
+
+	channel <- message
 	err := trashMacOrLinux(panel.element[panel.cursor].location)
 
 	if err != nil {
 		p := m.processBarModel.process[id]
 		p.state = failure
-		channel <- channelMessage{
-			messageId:       id,
-			processNewState: p,
-		}
+		message.processNewState = p
+		channel <- message
 	} else {
 		p := m.processBarModel.process[id]
 		p.done = 1
 		p.state = successful
 		p.doneTime = time.Now()
-		channel <- channelMessage{
-			messageId:       id,
-			processNewState: p,
-		}
+		message.processNewState = p
+		channel <- message
 	}
 	if panel.cursor == len(panel.element)-1 {
 		panel.cursor--
@@ -150,7 +148,7 @@ func deleteSingleItem(m model) model {
 }
 
 // Move file or directory to the trash can
-func deleteMultipleItems(m model) model {
+func deleteMultipleItems(m model) {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	if len(panel.selected) != 0 {
 		id := shortuuid.New()
@@ -167,10 +165,13 @@ func deleteMultipleItems(m model) model {
 
 		m.processBarModel.process[id] = newProcess
 
-		channel <- channelMessage{
-			messageId:       id,
+		message := channelMessage{
+			messageId: id,
+			messageType: sendProcess,
 			processNewState: newProcess,
 		}
+
+		channel <- message
 
 		for _, filePath := range panel.selected {
 
@@ -179,29 +180,23 @@ func deleteMultipleItems(m model) model {
 			p.done++
 			p.state = inOperation
 			if len(channel) < 5 {
-				channel <- channelMessage{
-					messageId:       id,
-					processNewState: p,
-				}
+				message.processNewState = p
+				channel <- message
 			}
 			err := trashMacOrLinux(filePath)
 
 			if err != nil {
 				p.state = failure
-				channel <- channelMessage{
-					messageId:       id,
-					processNewState: p,
-				}
+				message.processNewState = p
+				channel <- message
 				outPutLog("Delete multiple item function error", err)
 				m.processBarModel.process[id] = p
 				break
 			} else {
 				if p.done == p.total {
 					p.state = successful
-					channel <- channelMessage{
-						messageId:       id,
-						processNewState: p,
-					}
+					message.processNewState = p
+					channel <- message
 				}
 				m.processBarModel.process[id] = p
 			}
@@ -215,8 +210,6 @@ func deleteMultipleItems(m model) model {
 		}
 	}
 	panel.selected = panel.selected[:0]
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
-	return m
 }
 
 // Completely delete file or folder (Not move to the trash can)
@@ -240,10 +233,13 @@ func completelyDeleteSingleItem(m model) model {
 	}
 	m.processBarModel.process[id] = newProcess
 
-	channel <- channelMessage{
-		messageId:       id,
+	message := channelMessage{
+		messageId: id,
+		messageType: sendProcess,
 		processNewState: newProcess,
 	}
+	
+	channel <- message
 
 	err := os.RemoveAll(panel.element[panel.cursor].location)
 	if err != nil {
@@ -253,19 +249,15 @@ func completelyDeleteSingleItem(m model) model {
 	if err != nil {
 		p := m.processBarModel.process[id]
 		p.state = failure
-		channel <- channelMessage{
-			messageId:       id,
-			processNewState: p,
-		}
+		message.processNewState = p
+		channel <- message
 	} else {
 		p := m.processBarModel.process[id]
 		p.done = 1
 		p.state = successful
 		p.doneTime = time.Now()
-		channel <- channelMessage{
-			messageId:       id,
-			processNewState: p,
-		}
+		message.processNewState = p
+		channel <- message
 	}
 	if panel.cursor == len(panel.element)-1 {
 		panel.cursor--
@@ -275,7 +267,7 @@ func completelyDeleteSingleItem(m model) model {
 }
 
 // Completely delete all file or folder from clipboard (Not move to the trash can)
-func completelyDeleteMultipleItems(m model) model {
+func completelyDeleteMultipleItems(m model) {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	if len(panel.selected) != 0 {
 		id := shortuuid.New()
@@ -292,10 +284,13 @@ func completelyDeleteMultipleItems(m model) model {
 
 		m.processBarModel.process[id] = newProcess
 
-		channel <- channelMessage{
-			messageId:       id,
+		message := channelMessage{
+			messageId:  id,
+			messageType: sendProcess,
 			processNewState: newProcess,
 		}
+
+		channel <- message
 		for _, filePath := range panel.selected {
 
 			p := m.processBarModel.process[id]
@@ -303,10 +298,8 @@ func completelyDeleteMultipleItems(m model) model {
 			p.done++
 			p.state = inOperation
 			if len(channel) < 5 {
-				channel <- channelMessage{
-					messageId:       id,
-					processNewState: p,
-				}
+				message.processNewState = p
+				channel <- message
 			}
 			err := os.RemoveAll(filePath)
 			if err != nil {
@@ -315,20 +308,16 @@ func completelyDeleteMultipleItems(m model) model {
 
 			if err != nil {
 				p.state = failure
-				channel <- channelMessage{
-					messageId:       id,
-					processNewState: p,
-				}
+				message.processNewState = p
+				channel <- message
 				outPutLog("Completely delete multiple item function error", err)
 				m.processBarModel.process[id] = p
 				break
 			} else {
 				if p.done == p.total {
 					p.state = successful
-					channel <- channelMessage{
-						messageId:       id,
-						processNewState: p,
-					}
+					message.processNewState = p
+					channel <- message
 				}
 				m.processBarModel.process[id] = p
 			}
@@ -342,8 +331,6 @@ func completelyDeleteMultipleItems(m model) model {
 		}
 	}
 	panel.selected = panel.selected[:0]
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
-	return m
 }
 
 // Copy directory or file
@@ -477,12 +464,12 @@ func cutMultipleItem(m model) model {
 }
 
 // Paste all clipboard items
-func pasteItem(m model) model {
+func pasteItem(m model) {
 	id := shortuuid.New()
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 
 	if len(m.copyItems.items) == 0 {
-		return m
+		return 
 	}
 
 	totalFiles := 0
@@ -513,10 +500,13 @@ func pasteItem(m model) model {
 
 	m.processBarModel.process[id] = newProcess
 
-	channel <- channelMessage{
-		messageId:       id,
+	message := channelMessage{
+		messageId: id,
+		messageType: sendProcess,
 		processNewState: newProcess,
 	}
+
+	channel <- message
 
 	p := m.processBarModel.process[id]
 	for _, filePath := range m.copyItems.items {
@@ -546,10 +536,8 @@ func pasteItem(m model) model {
 		p = m.processBarModel.process[id]
 		if err != nil {
 			p.state = failure
-			channel <- channelMessage{
-				messageId:       id,
-				processNewState: p,
-			}
+			message.processNewState = p
+			channel <- message
 			outPutLog(errMessage, err)
 			m.processBarModel.process[id] = p
 			break
@@ -559,19 +547,15 @@ func pasteItem(m model) model {
 	p.state = successful
 	p.done = totalFiles
 	p.doneTime = time.Now()
-	channel <- channelMessage{
-		messageId:       id,
-		processNewState: p,
-	}
+	message.processNewState = p
+	channel <- message
 
 	m.processBarModel.process[id] = p
 	m.copyItems.cut = false
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
-	return m
 }
 
 // Extrach compress file
-func extractFile(m model) model {
+func extractFile(m model) {
 	var err error
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	ext := strings.ToLower(filepath.Ext(panel.element[panel.cursor].location))
@@ -596,12 +580,10 @@ func extractFile(m model) model {
 			outPutLog("Error extract file,", err)
 		}
 	}
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
-	return m
 }
 
 // Compress file or directory
-func compressFile(m model) model {
+func compressFile(m model) {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	fileName := filepath.Base(panel.element[panel.cursor].location)
 
@@ -613,8 +595,6 @@ func compressFile(m model) model {
 	}
 
 	zipSource(panel.element[panel.cursor].location, filepath.Join(filepath.Dir(panel.element[panel.cursor].location), zipName))
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
-	return m
 }
 
 // Open file with default editor

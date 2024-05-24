@@ -66,6 +66,13 @@ func pasteDir(src, dst string, id string, m model) (model, error) {
 			}
 		} else {
 			p := m.processBarModel.process[id]
+
+			message := channelMessage{
+				messageId: id,
+				messageType: sendProcess,
+				processNewState: p,
+			}
+
 			if m.copyItems.cut {
 				p.name = "󰆐 " + filepath.Base(path)
 			} else {
@@ -73,27 +80,21 @@ func pasteDir(src, dst string, id string, m model) (model, error) {
 			}
 
 			if len(channel) < 5 {
-				channel <- channelMessage{
-					messageId:       id,
-					processNewState: p,
-				}
+				message.processNewState = p
+				channel <- message
 			}
 
 			err := pasteFile(path, newPath)
 			if err != nil {
 				p.state = failure
-				channel <- channelMessage{
-					messageId:       id,
-					processNewState: p,
-				}
+				message.processNewState = p
+				channel <- message
 				return err
 			}
 			p.done++
 			if len(channel) < 5 {
-				channel <- channelMessage{
-					messageId:       id,
-					processNewState: p,
-				}
+				message.processNewState = p
+				channel <- message
 			}
 			m.processBarModel.process[id] = p
 		}

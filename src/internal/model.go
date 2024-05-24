@@ -17,7 +17,6 @@ import (
 var LastTimeCursorMove = [2]int{int(time.Now().UnixMicro()), 0}
 var ListeningMessage = true
 
-var forceReloadElement = false
 var firstUse = false
 
 var theme ThemeType
@@ -28,6 +27,7 @@ var logOutput *os.File
 var et *exiftool.Exiftool
 
 var channel = make(chan channelMessage, 1000)
+var progressBarLastRenderTime time.Time = time.Now()
 
 func InitialModel(dir string, firstUseCheck bool) model {
 	toggleDotFileBool, firstFilePanelDir := initialConfig(dir)
@@ -48,9 +48,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	switch msg := msg.(type) {
 	case channelMessage:
-		if msg.returnWarnModal {
+		if msg.messageType == snedWarnModal {
 			m.warnModal = msg.warnModal
-		} else if msg.loadMetadata {
+		} else if msg.messageType == sendMetadata {
 			m.fileMetaData.metaData = msg.metadata
 		} else {
 			if !arrayContains(m.processBarModel.processList, msg.messageId) {
@@ -58,7 +58,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			m.processBarModel.process[msg.messageId] = msg.processNewState
 		}
-		forceReloadElement = true
 	case tea.WindowSizeMsg:
 		m.fullHeight = msg.Height
 		m.fullWidth = msg.Width
@@ -197,7 +196,6 @@ func (m model) View() string {
 
 	mainPanel := lipgloss.JoinHorizontal(0, sidebar, filePanel, filePreview)
 
-	
 	processBar := processBarRender(m)
 
 	metaData := metadataRender(m)
@@ -244,7 +242,14 @@ func listenForChannelMessage(msg chan channelMessage) tea.Cmd {
 	return func() tea.Msg {
 		m := <-msg
 		ListeningMessage = false
-		return m
+		if time.Since(progressBarLastRenderTime).Seconds() < 5 && m.messageType == sendProcess && m.processNewState.state != successful{
+			return nil
+		} else if m.messageType == sendProcess {
+			progressBarLastRenderTime = time.Now()
+			return m
+		} else {
+			return m
+		}
 	}
 }
 
@@ -253,7 +258,7 @@ func getFilePanelItems(m model) model {
 	for i, filePanel := range m.fileModel.filePanels {
 		var fileElenent []element
 		nowTime := time.Now()
-		if filePanel.focusType == noneFocus && nowTime.Sub(filePanel.lastTimeGetElement) < 3*time.Second && !forceReloadElement {
+		if filePanel.focusType == noneFocus && nowTime.Sub(filePanel.lastTimeGetElement) < 3*time.Second {
 			continue
 		}
 
@@ -266,10 +271,10 @@ func getFilePanelItems(m model) model {
 		} else {
 			focusPanelReRender = true
 		}
-		
+
 		reRenderTime := int(float64(len(filePanel.element)) / 100)
 
-		if filePanel.focusType == focus && nowTime.Sub(filePanel.lastTimeGetElement) < time.Duration(reRenderTime)*time.Second && !forceReloadElement && !focusPanelReRender {
+		if filePanel.focusType != noneFocus && nowTime.Sub(filePanel.lastTimeGetElement) < time.Duration(reRenderTime)*time.Second && !focusPanelReRender {
 			continue
 		}
 
@@ -281,7 +286,6 @@ func getFilePanelItems(m model) model {
 		filePanel.element = fileElenent
 		m.fileModel.filePanels[i].element = fileElenent
 		m.fileModel.filePanels[i].lastTimeGetElement = nowTime
-		forceReloadElement = false
 	}
 	return m
 }

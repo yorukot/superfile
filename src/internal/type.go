@@ -23,6 +23,8 @@ type warnType int
 
 type hotkeyType int
 
+type channelMessageType int
+
 const (
 	globalType hotkeyType = iota
 	normalType
@@ -60,6 +62,12 @@ const (
 	successful
 	cancel
 	failure
+)
+
+const (
+	snedWarnModal channelMessageType = iota 
+	sendMetadata
+	sendProcess
 )
 
 // Main model
@@ -210,10 +218,9 @@ type process struct {
 // Message for process bar
 type channelMessage struct {
 	messageId       string
+	messageType 	channelMessageType
 	processNewState process
-	returnWarnModal bool
 	warnModal       warnModal
-	loadMetadata    bool
 	metadata        [][2]string
 }
 

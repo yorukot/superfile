@@ -26,11 +26,13 @@ func extractCompressFile(src, dest string) error {
 		total:    1,
 		done:     0,
 	}
-	
-	channel <- channelMessage{
+	message := 	channelMessage{
 		messageId:       id,
+		messageType: sendProcess,
 		processNewState: p,
 	}
+
+	channel <- message
 
 	x := &xtractr.XFile{
 		FilePath:  src,
@@ -41,20 +43,16 @@ func extractCompressFile(src, dest string) error {
 
 	if err != nil {
 		p.state = successful
-		channel <- channelMessage{
-			messageId:       id,
-			processNewState: p,
-		}
+		message.processNewState = p
+		channel <- message
 		return err
 	}
 
 	p.state = successful
 	p.done = 1
 
-	channel <- channelMessage{
-		messageId:       id,
-		processNewState: p,
-	}
+	message.processNewState = p
+	channel <- message
 	
 	return nil
 }
@@ -82,6 +80,12 @@ func unzip(src, dest string) error {
 		state:    inOperation,
 		total:    totalFiles,
 		done:     0,
+	}
+
+	message := channelMessage{
+		messageId: id,
+		messageType: sendProcess,
+		processNewState: p,
 	}
 
 	// Closure to address file descriptors issue with all the deferred .Close() methods
@@ -130,35 +134,27 @@ func unzip(src, dest string) error {
 	for _, f := range r.File {
 		p.name = "󰛫 " + f.Name
 		if len(channel) < 3 {
-			channel <- channelMessage{
-				messageId:       id,
-				processNewState: p,
-			}
+			message.processNewState = p
+			channel <- message
 		}
 		err := extractAndWriteFile(f)
 		if err != nil {
 			p.state = failure
-			channel <- channelMessage{
-				messageId:       id,
-				processNewState: p,
-			}
+			message.processNewState = p
+			channel <- message
 			return err
 		}
 		p.done++
 		if len(channel) < 3 {
-			channel <- channelMessage{
-				messageId:       id,
-				processNewState: p,
-			}
+			message.processNewState = p
+			channel <- message
 		}
 	}
 
 	p.total = totalFiles
 	p.state = successful
-	channel <- channelMessage{
-		messageId:       id,
-		processNewState: p,
-	}
+	message.processNewState = p
+	channel <- message
 
 	return nil
 }

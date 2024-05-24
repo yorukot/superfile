@@ -248,6 +248,13 @@ func pasteFile(src string, dst string) error {
 func returnMetaData(m model) model {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	cursor := panel.cursor
+	id := shortuuid.New()
+
+	message := channelMessage{
+		messageId:    id,
+		messageType:  sendMetadata,
+		metadata:     m.fileMetaData.metaData,
+	}
 
 	// Obtaining metadata will take time. If metadata is obtained for every passing file, it will cause lag.
 	// Therefore, it is necessary to detect whether it is just browsing or stopping on that file or directory.
@@ -259,22 +266,15 @@ func returnMetaData(m model) model {
 	}
 
 	m.fileMetaData.metaData = m.fileMetaData.metaData[:0]
-	id := shortuuid.New()
 	if len(panel.element) == 0 {
-		channel <- channelMessage{
-			messageId:    id,
-			loadMetadata: true,
-			metadata:     m.fileMetaData.metaData,
-		}
+		message.metadata = m.fileMetaData.metaData 
+		channel <- message
 		return m
 	}
 	if len(panel.element[panel.cursor].metaData) != 0 && m.focusPanel != metadataFocus {
 		m.fileMetaData.metaData = panel.element[panel.cursor].metaData
-		channel <- channelMessage{
-			messageId:    id,
-			loadMetadata: true,
-			metadata:     m.fileMetaData.metaData,
-		}
+		message.metadata = m.fileMetaData.metaData 
+		channel <- message
 		return m
 	}
 	filePath := panel.element[panel.cursor].location
@@ -287,11 +287,8 @@ func returnMetaData(m model) model {
 		} else {
 			m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"This is a link file.", ""})
 		}
-		channel <- channelMessage{
-			messageId:    id,
-			loadMetadata: true,
-			metadata:     m.fileMetaData.metaData,
-		}
+		message.metadata = m.fileMetaData.metaData 
+		channel <- message
 		return m
 
 	}
@@ -306,11 +303,8 @@ func returnMetaData(m model) model {
 			m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"FolderSize", formatFileSize(dirSize(filePath))})
 		}
 		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"FolderModifyDate", fileInfo.ModTime().String()})
-		channel <- channelMessage{
-			messageId:    id,
-			loadMetadata: true,
-			metadata:     m.fileMetaData.metaData,
-		}
+		message.metadata = m.fileMetaData.metaData 
+		channel <- message
 		return m
 	}
 
@@ -342,11 +336,8 @@ func returnMetaData(m model) model {
 		m.fileMetaData.metaData = append(m.fileMetaData.metaData, fileName, fileSize, fileModifyData)
 	}
 
-	channel <- channelMessage{
-		messageId:    id,
-		loadMetadata: true,
-		metadata:     m.fileMetaData.metaData,
-	}
+	message.metadata = m.fileMetaData.metaData 
+	channel <- message
 
 	panel.element[panel.cursor].metaData = m.fileMetaData.metaData
 	return m
