@@ -174,7 +174,17 @@ func footerWidth(fullWidth int) int {
 }
 
 var transparentBackgroundColor string
+
 func transparentAllBackgroundColor() {
+
+	if sidebarBGColor == sidebarItemSelectedBGColor {
+		sidebarItemSelectedBGColor = lipgloss.Color(transparentBackgroundColor)
+	}
+
+	if filePanelBGColor == filePanelItemSelectedBGColor {
+		filePanelItemSelectedBGColor = lipgloss.Color(transparentBackgroundColor)
+	}
+
 	fullScreenBGColor = lipgloss.Color(transparentBackgroundColor)
 	filePanelBGColor = lipgloss.Color(transparentBackgroundColor)
 	sidebarBGColor = lipgloss.Color(transparentBackgroundColor)
