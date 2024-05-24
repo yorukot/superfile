@@ -240,15 +240,17 @@ func (m model) View() string {
 
 func listenForChannelMessage(msg chan channelMessage) tea.Cmd {
 	return func() tea.Msg {
-		m := <-msg
-		ListeningMessage = false
-		if time.Since(progressBarLastRenderTime).Seconds() < 5 && m.messageType == sendProcess && m.processNewState.state != successful{
-			return nil
-		} else if m.messageType == sendProcess {
-			progressBarLastRenderTime = time.Now()
-			return m
-		} else {
-			return m
+		for {
+			m := <-msg
+			if m.messageType != sendProcess {
+				ListeningMessage = false
+				return m
+			}
+			if time.Since(progressBarLastRenderTime).Seconds() > 2 || m.processNewState.state == successful || m.processNewState.done < 2 {
+				ListeningMessage = false
+				progressBarLastRenderTime = time.Now()
+				return m
+			}
 		}
 	}
 }
