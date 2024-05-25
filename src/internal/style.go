@@ -13,7 +13,6 @@ var (
 	footerHeight  = 14
 	modalWidth    = 60
 	modalHeight   = 7
-	sidebarWidth  = 20
 )
 
 var (

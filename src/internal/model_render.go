@@ -12,16 +12,25 @@ import (
 
 	"github.com/alecthomas/chroma/lexers"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/x/exp/term/ansi"
 	"github.com/yorukot/ansichroma"
 	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
 )
 
 func sidebarRender(m model) string {
-	s := sidebarTitleStyle.Render("     Super File")
+	if Config.SidebarWidth == 0 {
+		return ""
+	}
+	superfileTitle :=  sidebarTitleStyle.Render("     Super File")
+	superfileTitle = ansi.Truncate(superfileTitle, Config.SidebarWidth, "")
+	s := superfileTitle
 	s += "\n"
 
 	pinnedDivider := "\n" + sidebarTitleStyle.Render("󰐃 Pinned") + sidebarDividerStyle.Render(" ───────────") + "\n"
 	disksDivider := "\n" + sidebarTitleStyle.Render("󱇰 Disks") + sidebarDividerStyle.Render(" ────────────") + "\n"
+	disksDivider =  ansi.Truncate(disksDivider, Config.SidebarWidth, "")
+	pinnedDivider =  ansi.Truncate(pinnedDivider, Config.SidebarWidth, "")
+
 
 	totalHeight := 2
 	for i := m.sidebarModel.renderIndex; i < len(m.sidebarModel.directories); i++ {
@@ -55,9 +64,9 @@ func sidebarRender(m model) string {
 		}
 
 		if directory.location == m.fileModel.filePanels[m.filePanelFocusIndex].location {
-			s += filePanelCursorStyle.Render(cursor) + sidebarSelectedStyle.Render(" "+truncateText(directory.name, sidebarWidth-2))
+			s += filePanelCursorStyle.Render(cursor) + sidebarSelectedStyle.Render(" "+truncateText(directory.name, Config.SidebarWidth-2))
 		} else {
-			s += filePanelCursorStyle.Render(cursor) + sidebarStyle.Render(" "+truncateText(directory.name, sidebarWidth-2))
+			s += filePanelCursorStyle.Render(cursor) + sidebarStyle.Render(" "+truncateText(directory.name, Config.SidebarWidth-2))
 		}
 	}
 
@@ -80,11 +89,11 @@ func filePanelRender(m model) string {
 		filePanelWidth := 0
 		footerBorderWidth := 0
 
-		if (m.fullWidth-sidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels) != 0 && i == len(m.fileModel.filePanels)-1 {
+		if (m.fullWidth-Config.SidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels) != 0 && i == len(m.fileModel.filePanels)-1 {
 			if m.fileModel.filePreview.open {
 				filePanelWidth = m.fileModel.width
 			} else {
-				filePanelWidth = (m.fileModel.width + (m.fullWidth-sidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels))
+				filePanelWidth = (m.fileModel.width + (m.fullWidth-Config.SidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels))
 			}
 			footerBorderWidth = m.fileModel.width + 7
 		} else {
@@ -340,7 +349,7 @@ func terminalSizeWarnRender(m model) string {
 }
 
 func terminalSizeWarnAfterFirstRender(m model) string {
-	minimumWidthInt := sidebarWidth + 20*len(m.fileModel.filePanels) + 20 - 1
+	minimumWidthInt := Config.SidebarWidth + 20*len(m.fileModel.filePanels) + 20 - 1
 	minimumWidthString := strconv.Itoa(minimumWidthInt)
 	fullWidthString := strconv.Itoa(m.fullWidth)
 	fullHeightString := strconv.Itoa(m.fullHeight)
@@ -477,7 +486,7 @@ func helpMenuRender(m model) string {
 
 func filePreviewPanelRender(m model) string {
 	previewLine := m.mainPanelHeight + 2
-	m.fileModel.filePreview.width += m.fullWidth - sidebarWidth - m.fileModel.filePreview.width - ((m.fileModel.width + 2) * len(m.fileModel.filePanels)) - 2
+	m.fileModel.filePreview.width += m.fullWidth - Config.SidebarWidth - m.fileModel.filePreview.width - ((m.fileModel.width + 2) * len(m.fileModel.filePanels)) - 2
 
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	box := filePreviewBox(previewLine, m.fileModel.filePreview.width)

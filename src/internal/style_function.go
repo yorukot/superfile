@@ -48,7 +48,7 @@ func sideBarBorderStyle(height int, focus focusPanelType) lipgloss.Style {
 		BorderStyle(border).
 		BorderForeground(sidebarBorderStateColor).
 		BorderBackground(sidebarBGColor).
-		Width(sidebarWidth).
+		Width(Config.SidebarWidth).
 		Height(height).
 		Background(sidebarBGColor).
 		Foreground(sidebarFGColor)
@@ -198,4 +198,9 @@ func generateBorder() lipgloss.Border {
 		BottomLeft:  Config.BorderBottomLeft,
 		BottomRight: Config.BorderBottomRight,
 	}
+}
+
+// Generate config error style
+func loadConfigError(value string) string {
+	return lipgloss.NewStyle().Foreground(lipgloss.Color("#FF5555")).Render("■ ERROR: ") + "Config file \"" + lipgloss.NewStyle().Foreground(lipgloss.Color("#00D9FF")).Render(value) + "\" invalidation"
 }

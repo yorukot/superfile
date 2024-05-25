@@ -2,6 +2,7 @@ package internal
 
 import (
 	"embed"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -82,7 +83,13 @@ func loadConfigFile() {
 		}
 	}
 	if Config.FilePreviewWidth > 10 || Config.FilePreviewWidth == 1 {
-		log.Fatalf("Config file file_preview_width invalidation")
+		fmt.Println(loadConfigError("file_preview_width"))
+		os.Exit(0)
+	}
+
+	if Config.SidebarWidth != 0 && (Config.SidebarWidth < 3 || Config.SidebarWidth > 20) {
+		fmt.Println(loadConfigError("sidebar_width"))
+		os.Exit(0)
 	}
 }
 

@@ -65,18 +65,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if m.fileModel.filePreview.open {
 			// File preview panel width same as file panel
 			if Config.FilePreviewWidth == 0 {
-				m.fileModel.filePreview.width = (msg.Width - sidebarWidth - (4 + (len(m.fileModel.filePanels))*2)) / (len(m.fileModel.filePanels) + 1)
+				m.fileModel.filePreview.width = (msg.Width - Config.SidebarWidth - (4 + (len(m.fileModel.filePanels))*2)) / (len(m.fileModel.filePanels) + 1)
 			} else {
 				if Config.FilePreviewWidth > 10 || Config.FilePreviewWidth == 1 {
 					log.Fatalln("Config file file_preview_width invalidation")
 				}
-				m.fileModel.filePreview.width = (msg.Width - sidebarWidth) / Config.FilePreviewWidth
+				m.fileModel.filePreview.width = (msg.Width - Config.SidebarWidth) / Config.FilePreviewWidth
 			}
 		}
 
 		// set each file panel size and max file panel amount
-		m.fileModel.width = (msg.Width - sidebarWidth - m.fileModel.filePreview.width - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
-		m.fileModel.maxFilePanel = (msg.Width - sidebarWidth - m.fileModel.filePreview.width) / 20
+		m.fileModel.width = (msg.Width - Config.SidebarWidth - m.fileModel.filePreview.width - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
+		m.fileModel.maxFilePanel = (msg.Width - Config.SidebarWidth - m.fileModel.filePreview.width) / 20
 		for i := range m.fileModel.filePanels {
 			m.fileModel.filePanels[i].searchBar.Width = m.fileModel.width - 4
 		}
