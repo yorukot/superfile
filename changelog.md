@@ -20,6 +20,7 @@ All notable changes to this project will be documented in this file. Dates are d
 - Improve mouse scrolling delay [`f734292`](https://github.com/yorukot/superfile/commit/f7342921d49d87f1bc633c9f8e19fe6845fbbf26)
 - Support image preview with ansi [`#26`](https://github.com/yorukot/superfile/issues/26)
 - Clear search after opening directory  [`#146`](https://github.com/yorukot/superfile/issues/146)
+- Support for changing sidebar width [`05f3ab0`](https://github.com/yorukot/superfile/commit/05f3ab0a3df8a814c3e8907b07ebc5dd1fb828d6)
 
 #### Bug fix
 - Recursive symlink crashes superfile [`#109`](https://github.com/yorukot/superfile/issues/109)
