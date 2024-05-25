@@ -165,7 +165,11 @@ func generateGradientColor() progress.Option {
 }
 
 func generateFooterBorder(countString string, width int) string {
-	return strings.Repeat(Config.BorderBottom, width-len(countString)) + Config.BorderMiddleRight + countString + Config.BorderMiddleLeft
+	repeatCount := width - len(countString)
+	if repeatCount < 0 {
+		repeatCount = 0
+	}
+	return strings.Repeat(Config.BorderBottom, repeatCount)+Config.BorderMiddleRight+countString+Config.BorderMiddleLeft
 }
 
 func footerWidth(fullWidth int) int {

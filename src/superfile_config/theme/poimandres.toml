@@ -1,5 +1,10 @@
-#Poimandres
-# Theme
+# Poimandres
+# Theme create by: https://github.com/Myles-J
+# Update by(sort by time):
+# 
+# Thanks for all contributor!!
+
+# If you want to make border display just set it same as sidebar background color
 
 # ========= Border =========
 file_panel_border = "#6c7086"

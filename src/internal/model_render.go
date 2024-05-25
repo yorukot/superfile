@@ -21,16 +21,15 @@ func sidebarRender(m model) string {
 	if Config.SidebarWidth == 0 {
 		return ""
 	}
-	superfileTitle :=  sidebarTitleStyle.Render("     Super File")
+	superfileTitle := sidebarTitleStyle.Render("     Super File")
 	superfileTitle = ansi.Truncate(superfileTitle, Config.SidebarWidth, "")
 	s := superfileTitle
 	s += "\n"
 
 	pinnedDivider := "\n" + sidebarTitleStyle.Render("󰐃 Pinned") + sidebarDividerStyle.Render(" ───────────") + "\n"
 	disksDivider := "\n" + sidebarTitleStyle.Render("󱇰 Disks") + sidebarDividerStyle.Render(" ────────────") + "\n"
-	disksDivider =  ansi.Truncate(disksDivider, Config.SidebarWidth, "")
-	pinnedDivider =  ansi.Truncate(pinnedDivider, Config.SidebarWidth, "")
-
+	disksDivider = ansi.Truncate(disksDivider, Config.SidebarWidth, "")
+	pinnedDivider = ansi.Truncate(pinnedDivider, Config.SidebarWidth, "")
 
 	totalHeight := 2
 	for i := m.sidebarModel.renderIndex; i < len(m.sidebarModel.directories); i++ {
@@ -64,9 +63,9 @@ func sidebarRender(m model) string {
 		}
 
 		if directory.location == m.fileModel.filePanels[m.filePanelFocusIndex].location {
-			s += filePanelCursorStyle.Render(cursor) + sidebarSelectedStyle.Render(" "+truncateText(directory.name, Config.SidebarWidth-2))
+			s += filePanelCursorStyle.Render(cursor+" ") + sidebarSelectedStyle.Render(truncateText(directory.name, Config.SidebarWidth-2, "..."))
 		} else {
-			s += filePanelCursorStyle.Render(cursor) + sidebarStyle.Render(" "+truncateText(directory.name, Config.SidebarWidth-2))
+			s += filePanelCursorStyle.Render(cursor+" ") + sidebarStyle.Render(truncateText(directory.name, Config.SidebarWidth-2, "..."))
 		}
 	}
 
@@ -85,7 +84,7 @@ func filePanelRender(m model) string {
 		}
 		m.fileModel.filePanels[i] = filePanel
 
-		f[i] += filePanelTopDirectoryIconStyle.Render("   ") + filePanelTopPathStyle.Render(truncateTextBeginning(filePanel.location, m.fileModel.width-4)) + "\n"
+		f[i] += filePanelTopDirectoryIconStyle.Render("   ") + filePanelTopPathStyle.Render(truncateTextBeginning(filePanel.location, m.fileModel.width-4, "...")) + "\n"
 		filePanelWidth := 0
 		footerBorderWidth := 0
 
@@ -206,7 +205,7 @@ func processBarRender(m model) string {
 			symbol = processCancelStyle.Render("")
 		}
 
-		processRender += cursor + footerStyle.Render(truncateText(process.name, footerWidth(m.fullWidth)-7)+" ") + symbol + "\n"
+		processRender += cursor + footerStyle.Render(truncateText(process.name, footerWidth(m.fullWidth)-7, "...")+" ") + symbol + "\n"
 		if renderTimes == 2 {
 			processRender += cursor + process.progress.ViewAs(float64(process.done)/float64(process.total)) + ""
 		} else if footerHeight < 14 && renderTimes == 1 {
@@ -274,10 +273,10 @@ func metadataRender(m model) string {
 		if i != m.fileMetaData.renderIndex {
 			metaDataBar += "\n"
 		}
-		data := truncateMiddleText(m.fileMetaData.metaData[i][1], valueLength)
+		data := truncateMiddleText(m.fileMetaData.metaData[i][1], valueLength, "...")
 		metadataName := m.fileMetaData.metaData[i][0]
 		if footerWidth(m.fullWidth)-maxKeyLength-3 < footerWidth(m.fullWidth)/2 {
-			metadataName = truncateMiddleText(m.fileMetaData.metaData[i][0], valueLength)
+			metadataName = truncateMiddleText(m.fileMetaData.metaData[i][0], valueLength, "...")
 		}
 		metaDataBar += fmt.Sprintf("%-*s %s", sprintfLength, metadataName, data)
 
@@ -378,7 +377,7 @@ func typineModalRender(m model) string {
 	previewPath := m.typingModal.location + "/" + m.typingModal.textInput.Value()
 
 	fileLocation := filePanelTopDirectoryIconStyle.Render("   ") +
-		filePanelTopPathStyle.Render(truncateTextBeginning(previewPath, modalWidth-4)) + "\n"
+		filePanelTopPathStyle.Render(truncateTextBeginning(previewPath, modalWidth-4, "...")) + "\n"
 
 	confirm := modalConfirm.Render(" (" + hotkeys.ConfirmTyping[0] + ") Create ")
 	cancel := modalCancel.Render(" (" + hotkeys.CancelTyping[0] + ") Cancel ")
@@ -466,7 +465,7 @@ func helpMenuRender(m model) string {
 		}
 
 		hotkey := ""
-		description := truncateText(m.helpMenu.data[i].description, valueLength)
+		description := truncateText(m.helpMenu.data[i].description, valueLength, "...")
 		if m.helpMenu.data[i].hotkey[1] == "" {
 			hotkey = m.helpMenu.data[i].hotkey[0]
 		} else {

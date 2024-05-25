@@ -7,26 +7,27 @@ import (
 
 func TestStringTruncate(t *testing.T) {
 	var inputs = []struct {
-		function func(string, int) string
+		function func(string, int, string) string
 		funcName string
 		input    string
 		maxSize  int
+		talis    string
 		expected string
 	}{
-		{truncateText, "truncateText", "Hello world", 4, "H..."},
-		{truncateText, "truncateText", "Hello world", 6, "Hel..."},
-		{truncateText, "truncateText", "Hello", 100, "Hello"},
-		{truncateTextBeginning, "truncateTextBeginning", "Hello world", 4, "...d"},
-		{truncateTextBeginning, "truncateTextBeginning", "Hello world", 6, "...rld"},
-		{truncateTextBeginning, "truncateTextBeginning", "Hello", 100, "Hello"},
-		{truncateMiddleText, "truncateMiddleText", "Hello world", 5, "H...d"},
-		{truncateMiddleText, "truncateMiddleText", "Hello world", 7, "He...ld"},
-		{truncateMiddleText, "truncateMiddleText", "Hello", 100, "Hello"},
+		{truncateText, "truncateText", "Hello world", 4, "...", "H..."},
+		{truncateText, "truncateText", "Hello world", 6, "...", "Hel..."},
+		{truncateText, "truncateText", "Hello", 100, "...", "Hello"},
+		{truncateTextBeginning, "truncateTextBeginning", "Hello world", 4, "...", "...d"},
+		{truncateTextBeginning, "truncateTextBeginning", "Hello world", 6, "...", "...rld"},
+		{truncateTextBeginning, "truncateTextBeginning", "Hello", 100, "...", "Hello"},
+		{truncateMiddleText, "truncateMiddleText", "Hello world", 5, "...", "H...d"},
+		{truncateMiddleText, "truncateMiddleText", "Hello world", 7, "...", "He...ld"},
+		{truncateMiddleText, "truncateMiddleText", "Hello", 100, "...", "Hello"},
 	}
 
 	for _, tt := range inputs {
 		t.Run(fmt.Sprintf("Run %s on string %s to %d chars", tt.funcName, tt.input, tt.maxSize), func(t *testing.T) {
-			result := tt.function(tt.input, tt.maxSize)
+			result := tt.function(tt.input, tt.maxSize, tt.talis)
 			expected := tt.expected
 			if result != expected {
 				t.Errorf("got \"%s\", expected \"%s\"", result, expected)

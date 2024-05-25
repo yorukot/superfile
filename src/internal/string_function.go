@@ -10,51 +10,48 @@ import (
 	"unicode/utf8"
 
 	"github.com/charmbracelet/lipgloss"
-	charmansi "github.com/charmbracelet/x/exp/term/ansi"
+	"github.com/charmbracelet/x/exp/term/ansi"
 )
 
-func truncateText(text string, maxChars int) string {
+func truncateText(text string, maxChars int, talis string) string {
 
-	truncatedText := charmansi.Truncate(text, maxChars - 3, "")
+	truncatedText := ansi.Truncate(text, maxChars-len(talis), "")
 	if text != truncatedText {
-		return truncatedText + "..."
+		return truncatedText + talis
 	}
-	
+
 	return text
 }
 
-func truncateTextBeginning(text string, maxChars int) string {
-	if charmansi.StringWidth(text) <= maxChars {
+func truncateTextBeginning(text string, maxChars int, talis string) string {
+	if ansi.StringWidth(text) <= maxChars {
 		return text
 	}
 
-	runes := []rune(text)
-	var truncatedRunes []rune
+	truncatedRunes := []rune(text)
 
-	truncatedRunes = runes
-
-	truncatedWidth := charmansi.StringWidth(string(truncatedRunes))
+	truncatedWidth := ansi.StringWidth(string(truncatedRunes))
 
 	for truncatedWidth > maxChars {
 		truncatedRunes = truncatedRunes[1:]
-		truncatedWidth = charmansi.StringWidth(string(truncatedRunes))
+		truncatedWidth = ansi.StringWidth(string(truncatedRunes))
 	}
 
-	if len(truncatedRunes) > 3 {
-		truncatedRunes = append([]rune("..."), truncatedRunes[3:]...)
+	if len(truncatedRunes) > len(talis) {
+		truncatedRunes = append([]rune(talis), truncatedRunes[len(talis):]...)
 	}
 
 	return string(truncatedRunes)
 }
 
-func truncateMiddleText(text string, maxChars int) string {
+func truncateMiddleText(text string, maxChars int, talis string) string {
 	if utf8.RuneCountInString(text) <= maxChars {
 		return text
 	}
 
 	halfEllipsisLength := (maxChars - 3) / 2
 
-	truncatedText := text[:halfEllipsisLength] + "..." + text[utf8.RuneCountInString(text)-halfEllipsisLength:]
+	truncatedText := text[:halfEllipsisLength] + talis + text[utf8.RuneCountInString(text)-halfEllipsisLength:]
 
 	return truncatedText
 }
@@ -66,12 +63,12 @@ func prettierName(name string, width int, isDir bool, isSelected bool, bgColor l
 			Background(bgColor).
 			Render(style.icon+" ") +
 			filePanelItemSelectedStyle.
-				Render(truncateText(name, width))
+				Render(truncateText(name, width, "..."))
 	} else {
 		return stringColorRender(lipgloss.Color(style.color), bgColor).
 			Background(bgColor).
 			Render(style.icon+" ") +
-			filePanelStyle.Render(truncateText(name, width))
+			filePanelStyle.Render(truncateText(name, width, "..."))
 	}
 }
 
@@ -89,12 +86,12 @@ func clipboardPrettierName(name string, width int, isDir bool, isSelected bool) 
 		return stringColorRender(lipgloss.Color(style.color), footerBGColor).
 			Background(footerBGColor).
 			Render(style.icon+" ") +
-			filePanelItemSelectedStyle.Render(truncateTextBeginning(name, width))
+			filePanelItemSelectedStyle.Render(truncateTextBeginning(name, width, "..."))
 	} else {
 		return stringColorRender(lipgloss.Color(style.color), footerBGColor).
 			Background(footerBGColor).
 			Render(style.icon+" ") +
-			filePanelStyle.Render(truncateTextBeginning(name, width))
+			filePanelStyle.Render(truncateTextBeginning(name, width, "..."))
 	}
 }
 
@@ -128,7 +125,7 @@ func checkAndTruncateLineLengths(text string, maxLength int) string {
 	var result strings.Builder
 
 	for _, line := range lines {
-		truncatedLine := charmansi.Truncate(line, maxLength, "")
+		truncatedLine := ansi.Truncate(line, maxLength, "")
 		result.WriteString(truncatedLine + "\n")
 	}
 
