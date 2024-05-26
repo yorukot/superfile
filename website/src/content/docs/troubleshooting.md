@@ -2,7 +2,7 @@
 title: Troubleshooting
 description: Have you encountered any problems? Come here and take a look.
 head:
-  - tag: Troubleshooting
+  - tag: title
     content: Troubleshooting | superfile
 ---
 
