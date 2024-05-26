@@ -89,7 +89,7 @@ After you install superfile, you can go [here](https://superfile.netlify.app/get
 
 ## Plugins
 
-[Click me to the plugins wiki](https://github.com/yorukot/superfile/wiki/Plugins)
+[Click me to the plugins wiki](https://superfile.netlify.app/list/plugin-list/)
 
 ## Themes
 
@@ -104,7 +104,7 @@ After you install superfile, you can go [here](https://superfile.netlify.app/get
 
 ## Troubleshooting
 
-[**Click me to see common problem fix**](https://github.com/yorukot/superfile/wiki/Troubleshooting)
+[**Click me to see common problem fix**](https://superfile.netlify.app/troubleshooting/)
 
 ## Contributing
 
