@@ -82,7 +82,7 @@ func loadConfigFile() {
 			log.Fatalf("Error writing config file: %v", err)
 		}
 	}
-	if Config.FilePreviewWidth > 10 || Config.FilePreviewWidth == 1 {
+	if (Config.FilePreviewWidth > 10 || Config.FilePreviewWidth < 2) &&  Config.FilePreviewWidth != 0{
 		fmt.Println(loadConfigError("file_preview_width"))
 		os.Exit(0)
 	}

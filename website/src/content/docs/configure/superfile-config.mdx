@@ -18,6 +18,8 @@ $EDITOR config_path
 If you want to get the set path you can try `spf pl` which will print out the file locations of all superfile.
 :::
 
+### Setting
+
 - ###### theme
 You can go to [here](/configure/custom-theme) to know how to config it
 
@@ -45,10 +47,39 @@ and reload ~/.bashrc
 source ~/.bashrc
 ```
 
+- ###### default_open_file_preview
+`true` =>  The file preview panel opens automatically every time you open superfile.
+
+`false` => The file preview panel will not open automatically when you open a superfile.
+
+### Style
+
 - ###### transparent_background
 `true` => If enabled, the background color will not be rendered (transparent). This is useful if your terminal background is transparent.
 
-`true` => If turned off, the background will be rendered (with color) to maintain theme consistency.
+`false` => If turned off, the background will be rendered (with color) to maintain theme consistency.
+
+- ###### file_preview_width
+This setting is an integer.
+
+`0` => When it is 0, it means that the width of the File preview panel will be the same as that of the File panel.
+
+`X` => When it is any other number, it means that the width of the File preview panel will be the width of the entire panel (total width of the terminal - width of the sidebar) divided by X.
+
+:::caution
+The number of entries must be from 2 to 10
+:::
+
+- ###### sidebar_width
+This setting is an integer.
+
+`0` => If the number is 0 then the sidebar will not display.
+
+`X` => This number will be the width of the sidebar width.
+
+:::caution
+Figures must be 3-20
+:::
 
 - ###### Border style
 Here are a few suggested styles, of course you can change them to your own:

@@ -1,10 +1,13 @@
 # Poimandres
 # Theme create by: https://github.com/Myles-J
 # Update by(sort by time):
-# 
+# - Update code_syntax_highlight(I couldn't find a matching theme so I'm using this one for now.) - github.com/yorukot
 # Thanks for all contributor!!
 
 # If you want to make border display just set it same as sidebar background color
+
+# Code syntax highlight theme (you can go to https://github.com/alecthomas/chroma/blob/master/styles to find one you like)
+code_syntax_highlight = "catppuccin-mocha"
 
 # ========= Border =========
 file_panel_border = "#6c7086"

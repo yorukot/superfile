@@ -64,6 +64,13 @@ head:
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/nord.png?raw=true)
 
+## Poimandres
+
+- Theme name: `poimandres`
+- Author: github.com/Myles-J
+
+![](https://github.com/yorukot/superfile/blob/main/asset/theme/poimandres.png?raw=true)
+
 ## Rosé Pine
 
 - Theme name: `rose-pine`

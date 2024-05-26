@@ -32,7 +32,7 @@ func defaultModelConfig(toggleDotFileBool bool, firstFilePanelDir string) model 
 				},
 			},
 			filePreview: filePreviewPanel{
-				open: true,
+				open: Config.DefaultOpenFilePreview,
 			},
 			width: 10,
 		},
