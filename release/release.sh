@@ -1,7 +1,7 @@
 #!/usr/bin/env -S bash -euo pipefail
 
 projectName="superfile"
-version="v1.1.2"
+version="v1.1.3"
 osList=("darwin" "linux" "windows")
 archList=("amd64" "arm64")
 mkdir dist

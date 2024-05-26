@@ -8,9 +8,9 @@ head:
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC(YYYY-MM-DD).
 
-# [**v1.1.3**]()
+# [**v1.1.3**](https://github.com/yorukot/superfile/releases/tag/v1.1.3)
 
-> xxxx-xx-xx
+> 2024-05-26
 
 #### Update
 - Update print path list [`37c8864`](https://github.com/yorukot/superfile/commit/37c8864eb2b0dc73fbf8928dd40b3b7573e9a11dw)
