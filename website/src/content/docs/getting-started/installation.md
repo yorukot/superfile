@@ -18,14 +18,6 @@ If you don't install `Nerd font` superfile it will still work, but the UI may be
 
 ## Installation
 
-### Homebrew
-
-Install homebrew and execute the following commands
-
-```bash
-brew install superfile
-```
-
 ### Install pre-built binaries
 
 Just copy and paste this one-line command:
@@ -36,6 +28,14 @@ bash -c "$(curl -sLo- https://raw.githubusercontent.com/yorukot/superfile/main/i
 Or wget:
 ```bash
 bash -c "$(wget -qO- https://raw.githubusercontent.com/yorukot/superfile/main/install.sh)"
+```
+
+### Homebrew
+
+Install homebrew and execute the following commands
+
+```bash
+brew install superfile
 ```
 
 ### Windows
