@@ -118,7 +118,7 @@ type ConfigType struct {
 	Theme string `toml:"theme" comment:"change your theme"`
 
 	AutoCheckUpdate bool `toml:"auto_check_update" comment:"\nAuto check for update"`
-	CdOnQuit        bool `toml:"cd_on_quit" comment:"\nCd on quit"`
+	CdOnQuit        bool `toml:"cd_on_quit" comment:"\nCd on quit (For more details, please check out https://superfile.netlify.app/configure/superfile-config/#cd_on_quit)"`
 	DefaultOpenFilePreview bool `toml:"default_open_file_preview" comment:"\nWhether to open file preview automatically every time superfile is opened."`
 
 	TransparentBackground bool `toml:"transparent_background" comment:"\n================   Style =================\n\nSet transparent background or not (this only work when your terminal background is transparent)"`

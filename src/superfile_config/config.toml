@@ -4,7 +4,7 @@ theme = 'catppuccin'
 # Auto check for update
 auto_check_update = true
 # 
-# Cd on quit
+# Cd on quit (For more details, please check out https://superfile.netlify.app/configure/superfile-config/#cd_on_quit)
 cd_on_quit = false
 #
 # Whether to open file preview automatically every time superfile is opened.
