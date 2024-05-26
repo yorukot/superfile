@@ -201,7 +201,7 @@ func getHelpMenuData() []helpMenuModalData {
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         hotkeys.PasteItems,
+			hotkey:         hotkeys.CutItems,
 			description:    "Cut selected items to the clipboard",
 			hotkeyWorkType: globalType,
 		},
@@ -211,7 +211,7 @@ func getHelpMenuData() []helpMenuModalData {
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         hotkeys.PasteItems,
+			hotkey:         hotkeys.DeleteItems,
 			description:    "Delete selected items",
 			hotkeyWorkType: globalType,
 		},
