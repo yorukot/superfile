@@ -34,6 +34,13 @@
 
 ## Installation
 
+Quick install (Support macOs and linux)
+
+```bash
+bash -c "$(wget -qO- https://raw.githubusercontent.com/yorukot/superfile/main/install.sh)"
+```
+
+### More installation methods
 [Click me to check on how to install](https://superfile.netlify.app/getting-started/installation/)
 
 ## Build
