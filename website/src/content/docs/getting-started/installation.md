@@ -16,10 +16,9 @@ First make sure you have the following tools installed on your machine:
 If you don't install `Nerd font` superfile it will still work, but the UI may be a bit ugly.
 :::
 
-## Installation
+## Installation Script
 
-### Install pre-built binaries
-
+### Linux / MacOs
 Just copy and paste this one-line command:
 
 ```bash
@@ -30,15 +29,7 @@ Or wget:
 bash -c "$(wget -qO- https://raw.githubusercontent.com/yorukot/superfile/main/install.sh)"
 ```
 
-### Homebrew
-
-Install homebrew and execute the following commands
-
-```bash
-brew install superfile
-```
-
-### Windows
+## Windows
 
 It actually supports windows! Well.. sort of.
 
@@ -50,6 +41,13 @@ powershell -ExecutionPolicy Bypass -Command "Invoke-Expression ((New-Object Syst
 :::note
 For uninstall do the same but uninstall.ps1
 :::
+
+
+## Community maintained packages
+
+[![Packaging status](https://repology.org/badge/vertical-allrepos/superfile.svg)](https://repology.org/project/superfile/versions)
+
+> Sort by letter
 
 ### Arch
 
@@ -63,6 +61,14 @@ sudo pacman -S superfile
 
 ```bash
 sudo pacman -S superfile-bin
+```
+
+### Homebrew
+
+Install homebrew and execute the following commands
+
+```bash
+brew install superfile
 ```
 
 ### NixOS

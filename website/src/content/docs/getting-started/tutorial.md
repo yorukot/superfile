@@ -15,6 +15,7 @@ If you didn't install superfile yet please [click here](/getting-started/install
 :::tip
 If you just want to know about Hotkey without so much supplementary content, please go to [here](/list/hotkey-list)
 :::
+
 ## Hotkeys tutorial
 First, if you want to open `superfile` by opening a terminal and typing `spf`.
 
@@ -23,7 +24,7 @@ Afterwards if you want to exit just press `q` or `esc`.
 ![demo](https://github.com/yorukot/superfile/assets/107802416/ddd9f05c-b39b-4f55-838b-d248c845a589)
 
 ### Navigation
-You can put focus on the sidebar by pressing `b`.
+You can put focus on the sidebar by pressing `s`.
 
 Press `p` to focus the processbar.
 
@@ -41,7 +42,7 @@ If you want to return to the file panel, just press again to remove focus.
 ### File panel navigation
 Now you might be thinking that a file panel is not enough. 
 
-Therefore, you can press `ctrl+n` to create a new file panel and `ctrl+w` to close the file panel.
+Therefore, you can press `n` to create a new file panel and `w` to close the file panel.
 
 Now you know how to create and close file panels.
 
@@ -57,9 +58,9 @@ Then press `shift+left` or `H` (shift+h) to move to the previous archive panel.
 
 Now let us introduce how to operate the File panel
 
-First of all, if you don’t want to see dotfiles, you can press `ctrl+h` which will hide all dotfiles
+First of all, if you don’t want to see dotfiles, you can press `.` which will hide all dotfiles
 
-Then if you think you will use this folder frequently, you can also put it on the sidebar, just press `ctrl+p` to pin or unpin
+Then if you think you will use this folder frequently, you can also put it on the sidebar, just press `P` to pin or unpin
 
 When you focus on the file panel you can press `up` or `k` to up
 press `down` or `j` to down
@@ -68,7 +69,7 @@ After navigation to the file or folder you want, you can press `enter` or `l` to
 
 Press `h` or `backspace` will return to the parent directory.
 
-If you have a large number of files, you can also use `ctrl+f` to search,After entering the Key you want, you can press `ctrl+f` again or `enter` 
+If you have a large number of files, you can also use `/` to search,After entering the Key you want, you can press `/` again or `enter` 
 
 If you want to clear the current search, you can press `ctrl+c` or `esc`
 
@@ -100,7 +101,7 @@ You can press `shift+up` or `K` (shift+k) to select all files or folders passed 
 
 Of course, the same is true for `shift+down` or `J` (shift+j)
 
-You can also press `ctrl+a` to select all folders in the current directory
+You can also press `A` to select all folders in the current directory
 
 ![demo](https://github.com/yorukot/superfile/assets/107802416/4306fd31-04e0-456c-b1f2-3923e8d932e1)
 
@@ -114,7 +115,7 @@ You have learned how to use superfile to browse files and select files. Let's le
 
 First, let me teach you how to create a file. You can press `c` to create a file and press `f` to create a folder.
 
-Then if you want to rename it, press `r` and it will name the location of your cursor.
+Then if you want to rename it, press `ctrl+r` and it will name the location of your cursor.
 
 If you want to copy, you can press `ctrl+c` and the copied file list will be displayed in the clipboard (lower right corner).
 
@@ -128,7 +129,7 @@ Your copy process will be displayed in the processbar (lower left corner).
 
 You can press `ctrl+d` to delete file (The deletion here is not direct deletion but will be placed in the trash can.). But when you use an external hard drive, it will be deleted directly.
 
-If you want to decompress or compress you can press `ctrl+r` to compress and `ctrl+e` to decompress.
+If you want to decompress or compress you can press `ctrl+a` to compress and `ctrl+e` to decompress.
 
 To open a file with an editor, press `e`.
 
