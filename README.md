@@ -34,7 +34,7 @@
 
 ## Installation
 
-Quick install (Support macOs and linux)
+Quick install (Support MacOs and linux)
 
 ```bash
 bash -c "$(wget -qO- https://raw.githubusercontent.com/yorukot/superfile/main/install.sh)"
