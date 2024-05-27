@@ -10,6 +10,9 @@ cd_on_quit = false
 # Whether to open file preview automatically every time superfile is opened.
 default_open_file_preview = true
 # 
+# The path of the first file panel when superfile is opened. (DON'T USE '~')
+default_directory = "."
+#
 # ================   Style =================
 # 
 # Set transparent background or not (this only work when your terminal background is transparent)

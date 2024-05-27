@@ -117,13 +117,14 @@ type ThemeType struct {
 type ConfigType struct {
 	Theme string `toml:"theme" comment:"change your theme"`
 
-	AutoCheckUpdate bool `toml:"auto_check_update" comment:"\nAuto check for update"`
-	CdOnQuit        bool `toml:"cd_on_quit" comment:"\nCd on quit (For more details, please check out https://superfile.netlify.app/configure/superfile-config/#cd_on_quit)"`
+	AutoCheckUpdate        bool `toml:"auto_check_update" comment:"\nAuto check for update"`
+	CdOnQuit               bool `toml:"cd_on_quit" comment:"\nCd on quit (For more details, please check out https://superfile.netlify.app/configure/superfile-config/#cd_on_quit)"`
 	DefaultOpenFilePreview bool `toml:"default_open_file_preview" comment:"\nWhether to open file preview automatically every time superfile is opened."`
+	DefaultDirectory       string `toml:"default_directory" comment:"\nThe path of the first file panel when superfile is opened.  (DON'T USE '~')"`
 
 	TransparentBackground bool `toml:"transparent_background" comment:"\n================   Style =================\n\nSet transparent background or not (this only work when your terminal background is transparent)"`
-	FilePreviewWidth int `toml:"file_preview_width" comment:"\nFile preview width allow '0' (this mean same as file panel),'x' x must be less than 10 and greater than 1 (This means that the width of the file preview will be one xth of the total width.)"`
-	SidebarWidth int `toml:"sidebar_width" comment:"\nThe length of the sidebar. If you don't want to display the sidebar, you can input 0 directly. If you want to display the value, please place it in the range of 3-20."`
+	FilePreviewWidth      int  `toml:"file_preview_width" comment:"\nFile preview width allow '0' (this mean same as file panel),'x' x must be less than 10 and greater than 1 (This means that the width of the file preview will be one xth of the total width.)"`
+	SidebarWidth          int  `toml:"sidebar_width" comment:"\nThe length of the sidebar. If you don't want to display the sidebar, you can input 0 directly. If you want to display the value, please place it in the range of 3-20."`
 
 	BorderTop         string `toml:"border_top" comment:"\nBorder style"`
 	BorderBottom      string `toml:"border_bottom"`
@@ -146,10 +147,10 @@ type HotkeysType struct {
 	ListUp   []string `toml:"list_up" comment:"movement"`
 	ListDown []string `toml:"list_down"`
 
-	CloseFilePanel     []string `toml:"close_file_panel" comment:"file panel control"`
-	CreateNewFilePanel []string `toml:"create_new_file_panel"`
-	NextFilePanel      []string `toml:"next_file_panel"`
-	PreviousFilePanel  []string `toml:"previous_file_panel"`
+	CloseFilePanel         []string `toml:"close_file_panel" comment:"file panel control"`
+	CreateNewFilePanel     []string `toml:"create_new_file_panel"`
+	NextFilePanel          []string `toml:"next_file_panel"`
+	PreviousFilePanel      []string `toml:"previous_file_panel"`
 	ToggleFilePreviewPanel []string `toml:"toggle_file_preview_panel"`
 
 	FocusOnProcessBar []string `toml:"focus_on_process_bar" comment:"change focus"`
@@ -176,12 +177,12 @@ type HotkeysType struct {
 	OpenHelpMenu    []string `toml:"open_help_menu"`
 
 	ConfirmTyping []string `toml:"confirm_typing" comment:"=================================================================================================\nHere is typing hotkey can conflict with all hotkeys"`
-	CancelTyping []string `toml:"cancel_typing"`
+	CancelTyping  []string `toml:"cancel_typing"`
 
 	ParentDirectory []string `toml:"parent_directory" comment:"=================================================================================================\nHere is normal mode hotkey you can conflicts with other mode (can't conflicts with global hotkey)"`
 	SearchBar       []string `toml:"search_bar"`
 
 	FilePanelSelectModeItemsSelectDown []string `toml:"file_panel_select_mode_items_select_down" comment:"=================================================================================================\nHere is select mode hotkey you can conflicts with other mode (can't conflicts with global hotkey)"`
 	FilePanelSelectModeItemsSelectUp   []string `toml:"file_panel_select_mode_items_select_up"`
-	FilePanelSelectAllItem            []string `toml:"file_panel_select_all_items"`
+	FilePanelSelectAllItem             []string `toml:"file_panel_select_all_items"`
 }

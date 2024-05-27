@@ -45,13 +45,16 @@ func initialConfig(dir string) (toggleDotFileBool bool, firstFilePanelDir string
 		}
 	}
 
-	firstFilePanelDir = varibale.HomeDir
 	if dir != "" {
 		firstFilePanelDir, err = filepath.Abs(dir)
-		if err != nil {
-			firstFilePanelDir = varibale.HomeDir
-		}
+	} else {
+		firstFilePanelDir, err = filepath.Abs(Config.DefaultDirectory)
 	}
+
+	if err != nil {
+		firstFilePanelDir = varibale.HomeDir
+	}
+
 	return toggleDotFileBool, firstFilePanelDir
 }
 
