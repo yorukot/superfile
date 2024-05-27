@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC(YYYY-MM-DD).
 
+# [**v1.1.4**] ()
+
+> xxxx-xx-xx
+
+#### Update
+- Add option to change default directory [`#211`](https://github.com/yorukot/superfile/issues/211)
+
+#### Bug fix
+
+
 # [**v1.1.3**](https://github.com/yorukot/superfile/releases/tag/v1.1.3)
 
 > 2024-05-26
