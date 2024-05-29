@@ -226,10 +226,4 @@ type channelMessage struct {
 
 /*PROCESS BAR internal TYPE END*/
 
-// Style for icons
-type iconStyle struct {
-	icon  string
-	color string
-}
-
 type editorFinishedMsg struct{ err error }

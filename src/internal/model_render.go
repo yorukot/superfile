@@ -14,6 +14,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/x/exp/term/ansi"
 	"github.com/yorukot/ansichroma"
+	"github.com/yorukot/superfile/src/config/icon"
 	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
 )
 
@@ -21,7 +22,7 @@ func sidebarRender(m model) string {
 	if Config.SidebarWidth == 0 {
 		return ""
 	}
-	superfileTitle := sidebarTitleStyle.Render("     Super File")
+	superfileTitle := sidebarTitleStyle.Render("    " + icon.SuperfileIcon + " Super File")
 	superfileTitle = ansi.Truncate(superfileTitle, Config.SidebarWidth, "")
 	s := superfileTitle
 	s += "\n"
@@ -59,7 +60,7 @@ func sidebarRender(m model) string {
 		totalHeight++
 		cursor := " "
 		if m.sidebarModel.cursor == i && m.focusPanel == sidebarFocus {
-			cursor = ""
+			cursor = icon.Cursor
 		}
 
 		if directory.location == m.fileModel.filePanels[m.filePanelFocusIndex].location {
@@ -84,7 +85,7 @@ func filePanelRender(m model) string {
 		}
 		m.fileModel.filePanels[i] = filePanel
 
-		f[i] += filePanelTopDirectoryIconStyle.Render("   ") + filePanelTopPathStyle.Render(truncateTextBeginning(filePanel.location, m.fileModel.width-4, "...")) + "\n"
+		f[i] += filePanelTopDirectoryIconStyle.Render(" " + icon.Directory + icon.Space) + filePanelTopPathStyle.Render(truncateTextBeginning(filePanel.location, m.fileModel.width-4, "...")) + "\n"
 		filePanelWidth := 0
 		footerBorderWidth := 0
 
@@ -101,15 +102,15 @@ func filePanelRender(m model) string {
 		}
 		panelModeString := ""
 		if filePanel.panelMode == browserMode {
-			panelModeString = "󰈈 Browser"
+			panelModeString = icon.Browser + icon.Space + "Browser"
 		} else if filePanel.panelMode == selectMode {
-			panelModeString = "󰆽 Select"
+			panelModeString = icon.Select + icon.Space + "󰆽 Select"
 		}
 
 		f[i] += filePanelDividerStyle(filePanel.focusType).Render(strings.Repeat(Config.BorderTop, filePanelWidth)) + "\n"
 		f[i] += " " + filePanel.searchBar.View() + "\n"
 		if len(filePanel.element) == 0 {
-			f[i] += filePanelStyle.Render("   No such file or directory")
+			f[i] += filePanelStyle.Render(" " + icon.Error + "  No such file or directory")
 			bottomBorder := generateFooterBorder(fmt.Sprintf("%s%s%s", panelModeString, bottomMiddleBorderSplit, "0/0"), footerBorderWidth)
 			f[i] = filePanelBorderStyle(m.mainPanelHeight, filePanelWidth, filePanel.focusType, bottomBorder).Render(f[i])
 		} else {
@@ -121,7 +122,7 @@ func filePanelRender(m model) string {
 				cursor := " "
 				// Check if the cursor needs to be displayed, if the user is using the search bar, the cursor is not displayed
 				if h == filePanel.cursor && !filePanel.searchBar.Focused() {
-					cursor = ""
+					cursor = icon.Cursor
 				}
 				isItemSelected := arrayContains(filePanel.selected, filePanel.element[h].location)
 				if filePanel.renaming && h == filePanel.cursor {
@@ -196,13 +197,13 @@ func processBarRender(m model) string {
 		}
 		switch process.state {
 		case failure:
-			symbol = processErrorStyle.Render("")
+			symbol = processErrorStyle.Render(icon.Warn)
 		case successful:
-			symbol = processSuccessfulStyle.Render("")
+			symbol = processSuccessfulStyle.Render(icon.Done)
 		case inOperation:
-			symbol = processInOperationStyle.Render("󰥔")
+			symbol = processInOperationStyle.Render(icon.InOperation)
 		case cancel:
-			symbol = processCancelStyle.Render("")
+			symbol = processCancelStyle.Render(icon.Error)
 		}
 
 		processRender += cursor + footerStyle.Render(truncateText(process.name, footerWidth(m.fullWidth)-7, "...")+" ") + symbol + "\n"
@@ -217,7 +218,7 @@ func processBarRender(m model) string {
 	}
 
 	if len(processes) == 0 {
-		processRender += "\n   No processes running"
+		processRender += "\n " + icon.Error + "  No processes running"
 	}
 	courseNumber := 0
 	if len(m.processBarModel.processList) == 0 {
@@ -236,7 +237,7 @@ func metadataRender(m model) string {
 	metaDataBar := ""
 	if len(m.fileMetaData.metaData) == 0 && len(m.fileModel.filePanels[m.filePanelFocusIndex].element) > 0 && !m.fileModel.renaming {
 		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"", ""})
-		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{" 󰥔  Loading metadata...", ""})
+		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{" " + icon.InOperation + "  Loading metadata...", ""})
 		go func() {
 			m = returnMetaData(m)
 		}()
@@ -292,7 +293,7 @@ func clipboardRender(m model) string {
 	// render
 	clipboardRender := ""
 	if len(m.copyItems.items) == 0 {
-		clipboardRender += "\n   No content in clipboard"
+		clipboardRender += "\n " + icon.Error + "  No content in clipboard"
 	} else {
 		for i := 0; i < len(m.copyItems.items) && i < bottomElementHeight(footerHeight); i++ {
 			if i == bottomElementHeight(footerHeight)-1 {
@@ -376,7 +377,7 @@ func terminalSizeWarnAfterFirstRender(m model) string {
 func typineModalRender(m model) string {
 	previewPath := m.typingModal.location + "/" + m.typingModal.textInput.Value()
 
-	fileLocation := filePanelTopDirectoryIconStyle.Render("   ") +
+	fileLocation := filePanelTopDirectoryIconStyle.Render(" "+icon.Directory+icon.Space) +
 		filePanelTopPathStyle.Render(truncateTextBeginning(previewPath, modalWidth-4, "...")) + "\n"
 
 	confirm := modalConfirm.Render(" (" + hotkeys.ConfirmTyping[0] + ") Create ")
@@ -473,7 +474,7 @@ func helpMenuRender(m model) string {
 		}
 		cursor := "  "
 		if m.helpMenu.cursor == i {
-			cursor = filePanelCursorStyle.Render(" ")
+			cursor = filePanelCursorStyle.Render(icon.Cursor + " ")
 		}
 		helpMenuContent += cursor + modalStyle.Render(fmt.Sprintf("%*s%s", renderHotkeyLength, helpMenuHotkeyStyle.Render(hotkey+" "), modalStyle.Render(description)))
 	}
@@ -491,7 +492,7 @@ func filePreviewPanelRender(m model) string {
 	box := filePreviewBox(previewLine, m.fileModel.filePreview.width)
 
 	if len(panel.element) == 0 {
-		return box.Render("\n ---  No content to preview ---")
+		return box.Render("\n --- " + icon.Error + " No content to preview ---")
 	}
 
 	itemPath := panel.element[panel.cursor].location
@@ -499,7 +500,7 @@ func filePreviewPanelRender(m model) string {
 	fileInfo, err := os.Stat(itemPath)
 	if err != nil {
 		outPutLog("error get file info", err)
-		return box.Render("\n ---  Error get file info ---")
+		return box.Render("\n --- " + icon.Error + " Error get file info ---")
 	}
 	if fileInfo.IsDir() {
 		directoryContent := ""
@@ -508,7 +509,7 @@ func filePreviewPanelRender(m model) string {
 		files, err := os.ReadDir(dirPath)
 		if err != nil {
 			outPutLog("Error render directory preview", err)
-			return box.Render("\n ---  Error render directory preview ---")
+			return box.Render("\n --- " + icon.Error + " Error render directory preview ---")
 		}
 
 		if len(files) == 0 {
@@ -539,12 +540,12 @@ func filePreviewPanelRender(m model) string {
 	if isImageFile(itemPath) {
 		ansiRender, err := filepreview.ImagePreview(itemPath, m.fileModel.filePreview.width, previewLine, theme.FilePanelBG)
 		if err == image.ErrFormat {
-			return box.Render("\n ---  Unsupported image formats ---")
+			return box.Render("\n --- " + icon.Error + " Unsupported image formats ---")
 		}
 
 		if err != nil {
 			outPutLog("Error covernt image to ansi", err)
-			return box.Render("\n ---  Error covernt image to ansi ---")
+			return box.Render("\n --- " + icon.Error + " Error covernt image to ansi ---")
 		}
 
 		return box.AlignVertical(lipgloss.Center).AlignHorizontal(lipgloss.Center).Render(ansiRender)
@@ -556,7 +557,7 @@ func filePreviewPanelRender(m model) string {
 
 		if err != nil {
 			outPutLog("Error render code highlight", err)
-			return box.Render("\n ---  Error render code highlight ---")
+			return box.Render("\n --- " + icon.Error + " Error render code highlight ---")
 		}
 		if codeHighlight == "" {
 			return box.Render("\n --- empty ---")
@@ -573,7 +574,7 @@ func filePreviewPanelRender(m model) string {
 			file, err := os.Open(itemPath)
 			if err != nil {
 				outPutLog(err)
-				return box.Render("\n ---  Error open file ---")
+				return box.Render("\n --- " + icon.Error + " Error open file ---")
 			}
 			defer file.Close()
 
@@ -590,7 +591,7 @@ func filePreviewPanelRender(m model) string {
 
 			if err := scanner.Err(); err != nil {
 				outPutLog(err)
-				return box.Render("\n ---  Error open file ---")
+				return box.Render("\n --- " + icon.Error + " Error open file ---")
 			}
 
 			textContent := checkAndTruncateLineLengths(string(fileContent), m.fileModel.filePreview.width)
@@ -599,5 +600,5 @@ func filePreviewPanelRender(m model) string {
 		}
 	}
 
-	return box.Render("\n ---  Unsupported formats ---")
+	return box.Render("\n --- "+ icon.Error +" Unsupported formats ---")
 }

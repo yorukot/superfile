@@ -13,6 +13,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/lithammer/shortuuid"
+	"github.com/yorukot/superfile/src/config/icon"
 )
 
 // Create a file in the currently focus file panel
@@ -110,7 +111,7 @@ func deleteSingleItem(m model) model {
 	prog.PercentageStyle = footerStyle
 
 	newProcess := process{
-		name:     "󰆴 " + panel.element[panel.cursor].name,
+		name:     icon.Delete + icon.Space + panel.element[panel.cursor].name,
 		progress: prog,
 		state:    inOperation,
 		total:    1,
@@ -156,7 +157,7 @@ func deleteMultipleItems(m model) {
 		prog.PercentageStyle = footerStyle
 
 		newProcess := process{
-			name:     "󰆴 " + filepath.Base(panel.selected[0]),
+			name:     icon.Delete + icon.Space + filepath.Base(panel.selected[0]),
 			progress: prog,
 			state:    inOperation,
 			total:    len(panel.selected),
@@ -176,7 +177,7 @@ func deleteMultipleItems(m model) {
 		for _, filePath := range panel.selected {
 
 			p := m.processBarModel.process[id]
-			p.name = "󰆴 " + filepath.Base(filePath)
+			p.name = icon.Delete + icon.Space + filepath.Base(filePath)
 			p.done++
 			p.state = inOperation
 			if len(channel) < 5 {
@@ -275,7 +276,7 @@ func completelyDeleteMultipleItems(m model) {
 		prog.PercentageStyle = footerStyle
 
 		newProcess := process{
-			name:     "󰆴 " + filepath.Base(panel.selected[0]),
+			name:     icon.Delete + icon.Space + filepath.Base(panel.selected[0]),
 			progress: prog,
 			state:    inOperation,
 			total:    len(panel.selected),
@@ -294,7 +295,7 @@ func completelyDeleteMultipleItems(m model) {
 		for _, filePath := range panel.selected {
 
 			p := m.processBarModel.process[id]
-			p.name = "󰆴 " + filepath.Base(filePath)
+			p.name = icon.Delete + icon.Space + filepath.Base(filePath)
 			p.done++
 			p.state = inOperation
 			if len(channel) < 5 {
@@ -485,9 +486,9 @@ func pasteItem(m model) {
 	prog := progress.New(generateGradientColor())
 	prog.PercentageStyle = footerStyle
 
-	prefixIcon := "󰆏 "
+	prefixIcon := icon.Copy + icon.Space
 	if m.copyItems.cut {
-		prefixIcon = "󰆐 "
+		prefixIcon = icon.Cut + icon.Space
 	}
 
 	newProcess := process{
@@ -512,12 +513,12 @@ func pasteItem(m model) {
 	for _, filePath := range m.copyItems.items {
 		var err error
 		if m.copyItems.cut && !isExternalDiskPath(filePath) {
-			p.name = "󰆐 " + filepath.Base(filePath)
+			p.name = icon.Cut + icon.Space + filepath.Base(filePath)
 		} else {
 			if m.copyItems.cut {
-				p.name = "󰆐 " + filepath.Base(filePath)
+				p.name = icon.Cut + icon.Space + filepath.Base(filePath)
 			}
-			p.name = "󰆏 " + filepath.Base(filePath)
+			p.name = icon.Copy + icon.Space + filepath.Base(filePath)
 		}
 
 		errMessage := "cut item error"

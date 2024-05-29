@@ -59,38 +59,38 @@ func truncateMiddleText(text string, maxChars int, talis string) string {
 func prettierName(name string, width int, isDir bool, isSelected bool, bgColor lipgloss.Color) string {
 	style := getElementIcon(name, isDir)
 	if isSelected {
-		return stringColorRender(lipgloss.Color(style.color), bgColor).
+		return stringColorRender(lipgloss.Color(style.Color), bgColor).
 			Background(bgColor).
-			Render(style.icon+" ") +
+			Render(style.Icon+" ") +
 			filePanelItemSelectedStyle.
 				Render(truncateText(name, width, "..."))
 	} else {
-		return stringColorRender(lipgloss.Color(style.color), bgColor).
+		return stringColorRender(lipgloss.Color(style.Color), bgColor).
 			Background(bgColor).
-			Render(style.icon+" ") +
+			Render(style.Icon+" ") +
 			filePanelStyle.Render(truncateText(name, width, "..."))
 	}
 }
 
 func prettierDirectoryPreviewName(name string, isDir bool, bgColor lipgloss.Color) string {
 	style := getElementIcon(name, isDir)
-	return stringColorRender(lipgloss.Color(style.color), bgColor).
+	return stringColorRender(lipgloss.Color(style.Color), bgColor).
 		Background(bgColor).
-		Render(style.icon+" ") +
+		Render(style.Icon+" ") +
 		filePanelStyle.Render(name)
 }
 
 func clipboardPrettierName(name string, width int, isDir bool, isSelected bool) string {
 	style := getElementIcon(name, isDir)
 	if isSelected {
-		return stringColorRender(lipgloss.Color(style.color), footerBGColor).
+		return stringColorRender(lipgloss.Color(style.Color), footerBGColor).
 			Background(footerBGColor).
-			Render(style.icon+" ") +
+			Render(style.Icon+" ") +
 			filePanelItemSelectedStyle.Render(truncateTextBeginning(name, width, "..."))
 	} else {
-		return stringColorRender(lipgloss.Color(style.color), footerBGColor).
+		return stringColorRender(lipgloss.Color(style.Color), footerBGColor).
 			Background(footerBGColor).
-			Render(style.icon+" ") +
+			Render(style.Icon+" ") +
 			filePanelStyle.Render(truncateTextBeginning(name, width, "..."))
 	}
 }

@@ -8,6 +8,7 @@ import (
 
 	"github.com/rkoesters/xdg/trash"
 	varibale "github.com/yorukot/superfile/src/config"
+	"github.com/yorukot/superfile/src/config/icon"
 )
 
 // Move file or directory
@@ -74,9 +75,9 @@ func pasteDir(src, dst string, id string, m model) (model, error) {
 			}
 
 			if m.copyItems.cut {
-				p.name = "󰆐 " + filepath.Base(path)
+				p.name = icon.Cut + icon.Space + filepath.Base(path)
 			} else {
-				p.name = "󰆏 " + filepath.Base(path)
+				p.name = icon.Copy + icon.Space + filepath.Base(path)
 			}
 
 			if len(channel) < 5 {

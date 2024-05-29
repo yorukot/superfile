@@ -11,6 +11,7 @@ import (
 	"github.com/barasher/go-exiftool"
 	"github.com/pelletier/go-toml/v2"
 	varibale "github.com/yorukot/superfile/src/config"
+	"github.com/yorukot/superfile/src/config/icon"
 )
 
 func initialConfig(dir string) (toggleDotFileBool bool, firstFilePanelDir string) {
@@ -26,6 +27,8 @@ func initialConfig(dir string) (toggleDotFileBool bool, firstFilePanelDir string
 	loadHotkeysFile()
 
 	loadThemeFile()
+
+	icon.InitIcon(Config.Nerdfont)
 
 	toggleDotFileData, err := os.ReadFile(varibale.ToggleDotFilea)
 	if err != nil {

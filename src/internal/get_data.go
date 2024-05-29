@@ -8,6 +8,7 @@ import (
 	"github.com/adrg/xdg"
 	"github.com/shirou/gopsutil/disk"
 	varibale "github.com/yorukot/superfile/src/config"
+	"github.com/yorukot/superfile/src/config/icon"
 )
 
 // Return all sidebar directories
@@ -33,14 +34,14 @@ func getDirectories() []directory {
 func getWellKnownDirectories() []directory {
 	directories := []directory{}
 	wellKnownDirectories := []directory{
-		{location: xdg.Home, name: "󰋜 Home"},
-		{location: xdg.UserDirs.Download, name: "󰏔 Downloads"},
-		{location: xdg.UserDirs.Documents, name: "󰈙 Documents"},
-		{location: xdg.UserDirs.Pictures, name: "󰋩 Pictures"},
-		{location: xdg.UserDirs.Videos, name: "󰎁 Videos"},
-		{location: xdg.UserDirs.Music, name: "♬ Music"},
-		{location: xdg.UserDirs.Templates, name: "󰏢 Templates"},
-		{location: xdg.UserDirs.PublicShare, name: " PublicShare"},
+		{location: xdg.Home, name: icon.Home + icon.Space + "Home"},
+		{location: xdg.UserDirs.Download, name: icon.Download + icon.Space + "Downloads"},
+		{location: xdg.UserDirs.Documents, name: icon.Documents + icon.Space + "Documents"},
+		{location: xdg.UserDirs.Pictures, name: icon.Pictures + icon.Space +  "Pictures"},
+		{location: xdg.UserDirs.Videos, name: icon.Videos + icon.Space + "Videos"},
+		{location: xdg.UserDirs.Music, name: icon.Music + icon.Space + "Music"},
+		{location: xdg.UserDirs.Templates, name: icon.Templates + icon.Space + "Templates"},
+		{location: xdg.UserDirs.PublicShare, name: icon.PublicShare + icon.Space + "PublicShare"},
 	}
 
 	for _, dir := range wellKnownDirectories {
