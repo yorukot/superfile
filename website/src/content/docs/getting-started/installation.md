@@ -22,11 +22,11 @@ If you don't install `Nerd font` superfile it will still work, but the UI may be
 Just copy and paste this one-line command:
 
 ```bash
-bash -c "$(curl -sLo- https://raw.githubusercontent.com/yorukot/superfile/main/install.sh)"
+bash -c "$(curl -sLo- https://superfile.netlify.app/install.sh)"
 ```
 Or wget:
 ```bash
-bash -c "$(wget -qO- https://raw.githubusercontent.com/yorukot/superfile/main/install.sh)"
+bash -c "$(wget -qO- https://superfile.netlify.app/install.sh)"
 ```
 
 ## Windows
@@ -36,7 +36,7 @@ It actually supports windows! Well.. sort of.
 Use powershell to run this command:
 
 ```bash
-powershell -ExecutionPolicy Bypass -Command "Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/yorukot/superfile/main/install.ps1'))"
+powershell -ExecutionPolicy Bypass -Command "Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://superfile.netlify.app/install.ps1'))"
 ```
 :::note
 For uninstall do the same but uninstall.ps1

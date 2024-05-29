@@ -37,7 +37,7 @@
 Quick install (Support MacOs and linux)
 
 ```bash
-bash -c "$(wget -qO- https://raw.githubusercontent.com/yorukot/superfile/main/install.sh)"
+bash -c "$(wget -qO- https://superfile.netlify.app/install.sh)"
 ```
 
 ### More installation methods
