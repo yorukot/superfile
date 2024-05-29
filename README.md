@@ -137,3 +137,10 @@ Your stars are my motivation to keep updating!
    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=yorukot/superfile&type=Timeline" />
  </picture>
 </a>
+
+
+<div align="center">
+
+## ༼ つ ◕_◕ ༽つ  Please share.
+
+</div>
