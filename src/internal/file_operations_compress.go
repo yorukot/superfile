@@ -8,6 +8,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/lithammer/shortuuid"
+	"github.com/yorukot/superfile/src/config/icon"
 )
 
 func zipSource(source, target string) error {
@@ -37,7 +38,7 @@ func zipSource(source, target string) error {
 
 	_, err = os.Stat(target)
 	if os.IsExist(err) {
-		p.name = "󰗄 File already exist"
+		p.name = icon.CompressFile + icon.Space + "File already exist"
 		message.processNewState = p
 		channel <- message
 		return nil
@@ -53,7 +54,7 @@ func zipSource(source, target string) error {
 	defer writer.Close()
 
 	err = filepath.Walk(source, func(path string, info os.FileInfo, err error) error {
-		p.name = "󰗄 " + filepath.Base(path)
+		p.name = icon.CompressFile+ icon.Space + filepath.Base(path)
 		if len(channel) < 5 {
 			message.processNewState = p
 			channel <- message

@@ -1,3 +1,5 @@
+# More details are at https://superfile.netlify.app/configure/superfile-config/
+#
 # change your theme
 theme = 'catppuccin'
 # 
@@ -15,6 +17,9 @@ default_directory = "."
 #
 # ================   Style =================
 # 
+# If you don't have or don't want Nerdfont installed you can turn this off
+nerdfont = true
+#
 # Set transparent background or not (this only work when your terminal background is transparent)
 transparent_background = false
 # 

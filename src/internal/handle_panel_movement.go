@@ -312,7 +312,7 @@ func itemSelectDown(m model, wheel bool) model {
 
 // ======================================== Sidebar controller ========================================
 
-//P.S God bless me, this sidebar controller code is really ugly...
+// Yorukot: P.S God bless me, this sidebar controller code is really ugly...
 
 // Control sidebar panel list up
 func controlSideBarListUp(m model, wheel bool) model {

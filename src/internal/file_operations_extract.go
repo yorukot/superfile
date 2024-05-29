@@ -10,6 +10,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/lithammer/shortuuid"
+	"github.com/yorukot/superfile/src/config/icon"
 	"golift.io/xtractr"
 )
 
@@ -20,7 +21,7 @@ func extractCompressFile(src, dest string) error {
 	prog.PercentageStyle = footerStyle
 
 	p := process{
-		name:     "󰛫 unzip file",
+		name:     icon.ExtractFile + icon.Space + "unzip file",
 		progress: prog,
 		state:    inOperation,
 		total:    1,
@@ -75,7 +76,7 @@ func unzip(src, dest string) error {
 	prog.PercentageStyle = footerStyle
 	// channel message
 	p := process{
-		name:     "󰛫 unzip file",
+		name:     icon.ExtractFile + icon.Space + "unzip file",
 		progress: prog,
 		state:    inOperation,
 		total:    totalFiles,
@@ -132,7 +133,7 @@ func unzip(src, dest string) error {
 	}
 
 	for _, f := range r.File {
-		p.name = "󰛫 " + f.Name
+		p.name = icon.ExtractFile + icon.Space + f.Name
 		if len(channel) < 3 {
 			message.processNewState = p
 			channel <- message
