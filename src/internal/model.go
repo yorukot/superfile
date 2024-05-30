@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/barasher/go-exiftool"
@@ -139,7 +140,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					if currentDir == varibale.HomeDir {
 						return m, tea.Quit
 					}
-					os.WriteFile(varibale.SuperFileStateDir+"/lastdir", []byte("cd "+currentDir), 0755)
+					// escape single quote
+					currentDir = strings.ReplaceAll(currentDir, "'", "'\\''")
+					os.WriteFile(varibale.SuperFileStateDir+"/lastdir", []byte("cd '"+currentDir+"'"), 0755)
 				}
 				return m, tea.Quit
 			}
