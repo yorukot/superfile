@@ -1,6 +1,6 @@
 # =================================================================================================
 # Global hotkeys (cannot conflict with other hotkeys)
-confirm = ['enter', 'l']
+confirm = ['right', 'l']
 quit = ['q', 'esc']
 # movement
 list_up = ['up', 'k']
@@ -40,7 +40,7 @@ confirm_typing = ['enter', '']
 cancel_typing = ['ctrl+c', 'esc']
 # =================================================================================================
 # Normal mode hotkeys (can conflict with other modes, cannot conflict with global hotkeys)
-parent_directory = ['h', 'backspace'] 
+parent_directory = ['h', 'left'] 
 search_bar = ['/', '']
 # =================================================================================================
 # Select mode hotkeys (can conflict with other modes, cananot conflict with global hotkeys)
