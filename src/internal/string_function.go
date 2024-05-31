@@ -111,12 +111,18 @@ func formatFileSize(size int64) string {
 		return "0B"
 	}
 
-	units := []string{"B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB"}
+	unitsDec := []string{"B", "kB", "MB", "GB", "TB", "PB", "EB"}
+	unitsBin := []string{"B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB"}
 
-	unitIndex := int(math.Floor(math.Log(float64(size)) / math.Log(1024)))
-	adjustedSize := float64(size) / math.Pow(1024, float64(unitIndex))
-
-	return fmt.Sprintf("%.2f %s", adjustedSize, units[unitIndex])
+	if (Config.FileSizeUseSI) {
+		unitIndex := int(math.Floor(math.Log(float64(size)) / math.Log(1000)))
+		adjustedSize := float64(size) / math.Pow(1000, float64(unitIndex))
+		return fmt.Sprintf("%.2f %s", adjustedSize, unitsDec[unitIndex])
+	} else {
+		unitIndex := int(math.Floor(math.Log(float64(size)) / math.Log(1024)))
+		adjustedSize := float64(size) / math.Pow(1024, float64(unitIndex))
+		return fmt.Sprintf("%.2f %s", adjustedSize, unitsBin[unitIndex])
+	}
 }
 
 // Truncate line lengths and keep ANSI

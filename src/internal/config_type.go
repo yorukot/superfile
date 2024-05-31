@@ -121,6 +121,7 @@ type ConfigType struct {
 	CdOnQuit               bool   `toml:"cd_on_quit" comment:"\nCd on quit (For more details, please check out https://superfile.netlify.app/configure/superfile-config/#cd_on_quit)"`
 	DefaultOpenFilePreview bool   `toml:"default_open_file_preview" comment:"\nWhether to open file preview automatically every time superfile is opened."`
 	DefaultDirectory       string `toml:"default_directory" comment:"\nThe path of the first file panel when superfile is opened.  (DON'T USE '~')"`
+	FileSizeUseSI          bool   `toml:"file_size_use_si" comment:"\nDisplay file sizes using powers of 1000 (kB, MB, GB) instead of powers of 1024 (KiB, MiB, GiB)."`
 	
 	Nerdfont               bool   `toml:"nerdfont" comment:"\n================   Style =================\n\n If you don't have or don't want Nerdfont installed you can turn this off"`
 	TransparentBackground  bool   `toml:"transparent_background" comment:"\nSet transparent background or not (this only work when your terminal background is transparent)"`
