@@ -15,6 +15,9 @@ default_open_file_preview = true
 # The path of the first file panel when superfile is opened. (DON'T USE '~')
 default_directory = "."
 #
+# Display file sizes using powers of 1000 (kB, MB, GB) instead of powers of 1024 (KiB, MiB, GiB).
+file_size_use_si = false
+#
 # ================   Style =================
 # 
 # If you don't have or don't want Nerdfont installed you can turn this off
