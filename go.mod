@@ -8,7 +8,7 @@ require (
 	github.com/atotto/clipboard v0.1.4
 	github.com/barasher/go-exiftool v1.10.0
 	github.com/charmbracelet/bubbles v0.18.0
-	github.com/charmbracelet/bubbletea v0.26.3
+	github.com/charmbracelet/bubbletea v0.26.4
 	github.com/charmbracelet/lipgloss v0.10.0
 	github.com/lithammer/shortuuid v3.0.0+incompatible
 	github.com/masatana/go-textdistance v0.0.0-20191005053614-738b0edac985
@@ -21,7 +21,7 @@ require (
 
 require (
 	github.com/alecthomas/chroma/v2 v2.14.0 // indirect
-	github.com/charmbracelet/x/ansi v0.1.1 // indirect
+	github.com/charmbracelet/x/ansi v0.1.2 // indirect
 	github.com/charmbracelet/x/input v0.1.0 // indirect
 	github.com/charmbracelet/x/term v0.1.1 // indirect
 	github.com/charmbracelet/x/windows v0.1.0 // indirect

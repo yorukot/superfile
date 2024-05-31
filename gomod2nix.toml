@@ -35,8 +35,8 @@ schema = 3
     version = "v0.18.0"
     hash = "sha256-FVKLet2anNB6gupLYXO4kJaKQIXs1dg2dZ2ooaBiEZU="
   [mod."github.com/charmbracelet/bubbletea"]
-    version = "v0.26.3"
-    hash = "sha256-tP9yi8cNjtFf6A0nXI0dLHyzh4nmpzFom4GzUQCrVzQ="
+    version = "v0.26.4"
+    hash = "sha256-JTv5+zhesfzxgQc98YSWV+GF9w36ExP27k22cq9YfpM="
   [mod."github.com/charmbracelet/harmonica"]
     version = "v0.2.0"
     hash = "sha256-fi5N0IXhSbbYHdSZFngCfpT4kdiEaKedqj8YpnlvX0o="
@@ -44,8 +44,8 @@ schema = 3
     version = "v0.10.0"
     hash = "sha256-JZD1iVeizYe0mp3qQcJbUZdYN6HP/DNC67ja79DTe6s="
   [mod."github.com/charmbracelet/x/ansi"]
-    version = "v0.1.1"
-    hash = "sha256-Ouq2iNo/aKQYxJSIQ7Pj1H2wpmx1G664nunJy7LvPkc="
+    version = "v0.1.2"
+    hash = "sha256-Gq4kkBH1pNjR0kHk1LSueZskGM4jbyIbHymqUnmFhBs="
   [mod."github.com/charmbracelet/x/exp/term"]
     version = "v0.0.0-20240529170602-5872190e21dd"
     hash = "sha256-nFtz7oWQh5L9nIAuY1cW7KOJJ33QsTPSz9HyiNIYRYc="
