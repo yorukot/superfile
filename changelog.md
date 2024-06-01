@@ -9,9 +9,11 @@ All notable changes to this project will be documented in this file. Dates are d
 #### Update
 - Added option to change default directory [`#211`](https://github.com/yorukot/superfile/issues/211)
 - Added quotes arround dir in lastdir to support special characters [`#218`](https://github.com/yorukot/superfile/pull/218)
+- Make Hotkey settings unlimited [`423a96a`](https://github.com/yorukot/superfile/commit/423a96a0aeca4ea2c30447d8b4010868045bb7e8)
 
 #### Bug fix
 - An option to display the filesize in decimal or binary sizes [`#220`](https://github.com/yorukot/superfile/issues/220)
+- Fix Transparent Background issue [`#76`](https://github.com/yorukot/superfile/issues/76)
 
 # [**v1.1.3**](https://github.com/yorukot/superfile/releases/tag/v1.1.3)
 
