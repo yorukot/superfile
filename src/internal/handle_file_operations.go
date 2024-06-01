@@ -17,7 +17,7 @@ import (
 )
 
 // Create a file in the currently focus file panel
-func panelCreateNewFile(m model) model {
+func (m *model) panelCreateNewFile() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	ti := textinput.New()
 	ti.Cursor.Style = modalCursorStyle
@@ -37,14 +37,13 @@ func panelCreateNewFile(m model) model {
 
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 
-	return m
 }
 
 // Rename file where the cusror is located
-func panelItemRename(m model) model {
+func (m *model) panelItemRename() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	if len(panel.element) == 0 {
-		return m
+		return
 	}
 	ti := textinput.New()
 	ti.Cursor.Style = filePanelCursorStyle
@@ -64,18 +63,17 @@ func panelItemRename(m model) model {
 	m.firstTextInput = true
 	panel.rename = ti
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
-	return m
 }
 
-func deleteItemWarn(m model) model {
+func (m *model) deleteItemWarn() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	if !((panel.panelMode == selectMode && len(panel.selected) != 0) || (panel.panelMode == browserMode)) {
-		return m
+		return
 	}
 	id := shortuuid.New()
 	message := channelMessage{
-		messageId:       id,
-		messageType:  snedWarnModal,
+		messageId:   id,
+		messageType: snedWarnModal,
 	}
 
 	if isExternalDiskPath(panel.location) {
@@ -86,7 +84,7 @@ func deleteItemWarn(m model) model {
 			warnType: confirmDeleteItem,
 		}
 		channel <- message
-		return m
+		return
 	} else {
 		message.warnModal = warnModal{
 			open:     true,
@@ -95,17 +93,17 @@ func deleteItemWarn(m model) model {
 			warnType: confirmDeleteItem,
 		}
 		channel <- message
-		return m
+		return
 	}
 }
 
 // Move file or directory to the trash can
-func deleteSingleItem(m model) model {
+func (m *model) deleteSingleItem() {
 	id := shortuuid.New()
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 
 	if len(panel.element) == 0 {
-		return m
+		return
 	}
 
 	prog := progress.New(generateGradientColor())
@@ -121,8 +119,8 @@ func deleteSingleItem(m model) model {
 	m.processBarModel.process[id] = newProcess
 
 	message := channelMessage{
-		messageId: id,
-		messageType: sendProcess,
+		messageId:       id,
+		messageType:     sendProcess,
 		processNewState: newProcess,
 	}
 
@@ -146,11 +144,10 @@ func deleteSingleItem(m model) model {
 		panel.cursor--
 	}
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
-	return m
 }
 
 // Move file or directory to the trash can
-func deleteMultipleItems(m model) {
+func (m model) deleteMultipleItems() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	if len(panel.selected) != 0 {
 		id := shortuuid.New()
@@ -168,8 +165,8 @@ func deleteMultipleItems(m model) {
 		m.processBarModel.process[id] = newProcess
 
 		message := channelMessage{
-			messageId: id,
-			messageType: sendProcess,
+			messageId:       id,
+			messageType:     sendProcess,
 			processNewState: newProcess,
 		}
 
@@ -215,12 +212,12 @@ func deleteMultipleItems(m model) {
 }
 
 // Completely delete file or folder (Not move to the trash can)
-func completelyDeleteSingleItem(m model) model {
+func (m *model) completelyDeleteSingleItem() {
 	id := shortuuid.New()
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 
 	if len(panel.element) == 0 {
-		return m
+		return
 	}
 
 	prog := progress.New(generateGradientColor())
@@ -236,11 +233,11 @@ func completelyDeleteSingleItem(m model) model {
 	m.processBarModel.process[id] = newProcess
 
 	message := channelMessage{
-		messageId: id,
-		messageType: sendProcess,
+		messageId:       id,
+		messageType:     sendProcess,
 		processNewState: newProcess,
 	}
-	
+
 	channel <- message
 
 	err := os.RemoveAll(panel.element[panel.cursor].location)
@@ -265,11 +262,10 @@ func completelyDeleteSingleItem(m model) model {
 		panel.cursor--
 	}
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
-	return m
 }
 
 // Completely delete all file or folder from clipboard (Not move to the trash can)
-func completelyDeleteMultipleItems(m model) {
+func (m model) completelyDeleteMultipleItems() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	if len(panel.selected) != 0 {
 		id := shortuuid.New()
@@ -287,8 +283,8 @@ func completelyDeleteMultipleItems(m model) {
 		m.processBarModel.process[id] = newProcess
 
 		message := channelMessage{
-			messageId:  id,
-			messageType: sendProcess,
+			messageId:       id,
+			messageType:     sendProcess,
 			processNewState: newProcess,
 		}
 
@@ -336,18 +332,18 @@ func completelyDeleteMultipleItems(m model) {
 }
 
 // Copy directory or file
-func copySingleItem(m model) model {
+func (m *model) copySingleItem() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	m.copyItems.cut = false
 	m.copyItems.items = m.copyItems.items[:0]
 	if len(panel.element) == 0 {
-		return m
+		return
 	}
 	m.copyItems.items = append(m.copyItems.items, panel.element[panel.cursor].location)
 	fileInfo, err := os.Stat(panel.element[panel.cursor].location)
 	if os.IsNotExist(err) {
 		m.copyItems.items = m.copyItems.items[:0]
-		return m
+		return
 	}
 	if err != nil {
 		outPutLog("Copy single item get file state error", panel.element[panel.cursor].location, err)
@@ -365,21 +361,20 @@ func copySingleItem(m model) model {
 		}
 	}
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
-	return m
 }
 
 // Copy all selected file or directory to the clipboard
-func copyMultipleItem(m model) model {
+func (m *model) copyMultipleItem() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	m.copyItems.cut = false
 	m.copyItems.items = m.copyItems.items[:0]
 	if len(panel.selected) == 0 {
-		return m
+		return
 	}
 	m.copyItems.items = panel.selected
 	fileInfo, err := os.Stat(panel.selected[0])
 	if os.IsNotExist(err) {
-		return m
+		return
 	}
 	if err != nil {
 		outPutLog("Copy multiple item function get file state error", panel.selected[0], err)
@@ -397,22 +392,21 @@ func copyMultipleItem(m model) model {
 		}
 	}
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
-	return m
 }
 
 // Cut directory or file
-func cutSingleItem(m model) model {
+func (m *model) cutSingleItem() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	m.copyItems.cut = true
 	m.copyItems.items = m.copyItems.items[:0]
 	if len(panel.element) == 0 {
-		return m
+		return
 	}
 	m.copyItems.items = append(m.copyItems.items, panel.element[panel.cursor].location)
 	fileInfo, err := os.Stat(panel.element[panel.cursor].location)
 	if os.IsNotExist(err) {
 		m.copyItems.items = m.copyItems.items[:0]
-		return m
+		return
 	}
 	if err != nil {
 		outPutLog("Cut single item get file state error", panel.element[panel.cursor].location, err)
@@ -430,21 +424,20 @@ func cutSingleItem(m model) model {
 		}
 	}
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
-	return m
 }
 
 // Cut all selected file or directory to the clipboard
-func cutMultipleItem(m model) model {
+func (m *model) cutMultipleItem() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	m.copyItems.cut = true
 	m.copyItems.items = m.copyItems.items[:0]
 	if len(panel.selected) == 0 {
-		return m
+		return
 	}
 	m.copyItems.items = panel.selected
 	fileInfo, err := os.Stat(panel.selected[0])
 	if os.IsNotExist(err) {
-		return m
+		return
 	}
 	if err != nil {
 		outPutLog("Copy multiple item function get file state error", panel.selected[0], err)
@@ -462,16 +455,15 @@ func cutMultipleItem(m model) model {
 		}
 	}
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
-	return m
 }
 
 // Paste all clipboard items
-func pasteItem(m model) {
+func (m model) pasteItem() {
 	id := shortuuid.New()
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 
 	if len(m.copyItems.items) == 0 {
-		return 
+		return
 	}
 
 	totalFiles := 0
@@ -503,8 +495,8 @@ func pasteItem(m model) {
 	m.processBarModel.process[id] = newProcess
 
 	message := channelMessage{
-		messageId: id,
-		messageType: sendProcess,
+		messageId:       id,
+		messageType:     sendProcess,
 		processNewState: newProcess,
 	}
 
@@ -557,7 +549,7 @@ func pasteItem(m model) {
 }
 
 // Extrach compress file
-func extractFile(m model) {
+func (m model) extractFile() {
 	var err error
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	ext := strings.ToLower(filepath.Ext(panel.element[panel.cursor].location))
@@ -585,7 +577,7 @@ func extractFile(m model) {
 }
 
 // Compress file or directory
-func compressFile(m model) {
+func (m model) compressFile() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	fileName := filepath.Base(panel.element[panel.cursor].location)
 
@@ -600,11 +592,10 @@ func compressFile(m model) {
 }
 
 // Open file with default editor
-func openFileWithEditor(m model) tea.Cmd {
+func (m model) openFileWithEditor() tea.Cmd {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 
 	editor := os.Getenv("EDITOR")
-	m.editorMode = true
 	if editor == "" {
 		editor = "nano"
 	}
@@ -616,9 +607,8 @@ func openFileWithEditor(m model) tea.Cmd {
 }
 
 // Open directory with default editor
-func openDirectoryWithEditor(m model) tea.Cmd {
+func (m model) openDirectoryWithEditor() tea.Cmd {
 	editor := os.Getenv("EDITOR")
-	m.editorMode = true
 	if editor == "" {
 		editor = "nano"
 	}

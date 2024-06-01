@@ -246,7 +246,7 @@ func pasteFile(src string, dst string) error {
 	return nil
 }
 
-func returnMetaData(m model) model {
+func (m *model) returnMetaData() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	cursor := panel.cursor
 	id := shortuuid.New()
@@ -263,20 +263,20 @@ func returnMetaData(m model) model {
 	time.Sleep(150 * time.Millisecond)
 
 	if LastTimeCursorMove[1] != cursor && m.focusPanel != metadataFocus {
-		return m
+		return
 	}
 
 	m.fileMetaData.metaData = m.fileMetaData.metaData[:0]
 	if len(panel.element) == 0 {
 		message.metadata = m.fileMetaData.metaData 
 		channel <- message
-		return m
+		return
 	}
 	if len(panel.element[panel.cursor].metaData) != 0 && m.focusPanel != metadataFocus {
 		m.fileMetaData.metaData = panel.element[panel.cursor].metaData
 		message.metadata = m.fileMetaData.metaData 
 		channel <- message
-		return m
+		return
 	}
 	filePath := panel.element[panel.cursor].location
 
@@ -290,7 +290,7 @@ func returnMetaData(m model) model {
 		}
 		message.metadata = m.fileMetaData.metaData 
 		channel <- message
-		return m
+		return
 
 	}
 
@@ -306,13 +306,13 @@ func returnMetaData(m model) model {
 		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"FolderModifyDate", fileInfo.ModTime().String()})
 		message.metadata = m.fileMetaData.metaData 
 		channel <- message
-		return m
+		return
 	}
 
 	checkIsSymlinked, err := os.Lstat(filePath)
 	if err != nil {
 		outPutLog("err when getting file info", err)
-		return m
+		return
 	}
 
 	if Config.Metadata && checkIsSymlinked.Mode()&os.ModeSymlink == 0 {
@@ -341,7 +341,6 @@ func returnMetaData(m model) model {
 	channel <- message
 
 	panel.element[panel.cursor].metaData = m.fileMetaData.metaData
-	return m
 }
 
 // Get directory total size

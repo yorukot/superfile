@@ -18,7 +18,7 @@ import (
 	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
 )
 
-func sidebarRender(m model) string {
+func (m model) sidebarRender() string {
 	if Config.SidebarWidth == 0 {
 		return ""
 	}
@@ -73,7 +73,7 @@ func sidebarRender(m model) string {
 	return sideBarBorderStyle(m.mainPanelHeight, m.focusPanel).Render(s)
 }
 
-func filePanelRender(m model) string {
+func (m model) filePanelRender() string {
 	// file panel
 	f := make([]string, 10)
 	for i, filePanel := range m.fileModel.filePanels {
@@ -85,7 +85,7 @@ func filePanelRender(m model) string {
 		}
 		m.fileModel.filePanels[i] = filePanel
 
-		f[i] += filePanelTopDirectoryIconStyle.Render(" " + icon.Directory + icon.Space) + filePanelTopPathStyle.Render(truncateTextBeginning(filePanel.location, m.fileModel.width-4, "...")) + "\n"
+		f[i] += filePanelTopDirectoryIconStyle.Render(" "+icon.Directory+icon.Space) + filePanelTopPathStyle.Render(truncateTextBeginning(filePanel.location, m.fileModel.width-4, "...")) + "\n"
 		filePanelWidth := 0
 		footerBorderWidth := 0
 
@@ -104,7 +104,7 @@ func filePanelRender(m model) string {
 		if filePanel.panelMode == browserMode {
 			panelModeString = icon.Browser + icon.Space + "Browser"
 		} else if filePanel.panelMode == selectMode {
-			panelModeString = icon.Select + icon.Space + "󰆽 Select"
+			panelModeString = icon.Select + icon.Space + "Select"
 		}
 
 		f[i] += filePanelDividerStyle(filePanel.focusType).Render(strings.Repeat(Config.BorderTop, filePanelWidth)) + "\n"
@@ -147,7 +147,7 @@ func filePanelRender(m model) string {
 	return filePanelRender
 }
 
-func processBarRender(m model) string {
+func (m model) processBarRender() string {
 	// save process in the array
 	var processes []process
 	for _, p := range m.processBarModel.process {
@@ -232,14 +232,14 @@ func processBarRender(m model) string {
 	return processRender
 }
 
-func metadataRender(m model) string {
+func (m model) metadataRender() string {
 	// process bar
 	metaDataBar := ""
 	if len(m.fileMetaData.metaData) == 0 && len(m.fileModel.filePanels[m.filePanelFocusIndex].element) > 0 && !m.fileModel.renaming {
 		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"", ""})
 		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{" " + icon.InOperation + "  Loading metadata...", ""})
 		go func() {
-			m = returnMetaData(m)
+			m.returnMetaData()
 		}()
 	}
 	maxKeyLength := 0
@@ -288,7 +288,7 @@ func metadataRender(m model) string {
 	return metaDataBar
 }
 
-func clipboardRender(m model) string {
+func (m model) clipboardRender() string {
 
 	// render
 	clipboardRender := ""
@@ -324,7 +324,7 @@ func clipboardRender(m model) string {
 	return clipboardRender
 }
 
-func terminalSizeWarnRender(m model) string {
+func (m model) terminalSizeWarnRender() string {
 	fullWidthString := strconv.Itoa(m.fullWidth)
 	fullHeightString := strconv.Itoa(m.fullHeight)
 	minimumWidthString := strconv.Itoa(minimumWidth)
@@ -348,7 +348,7 @@ func terminalSizeWarnRender(m model) string {
 		heightString + terminalCorrectSize.Render(minimumHeightString))
 }
 
-func terminalSizeWarnAfterFirstRender(m model) string {
+func (m model) terminalSizeWarnAfterFirstRender() string {
 	minimumWidthInt := Config.SidebarWidth + 20*len(m.fileModel.filePanels) + 20 - 1
 	minimumWidthString := strconv.Itoa(minimumWidthInt)
 	fullWidthString := strconv.Itoa(m.fullWidth)
@@ -374,7 +374,7 @@ func terminalSizeWarnAfterFirstRender(m model) string {
 		heightString + terminalCorrectSize.Render(minimumHeightString))
 }
 
-func typineModalRender(m model) string {
+func (m model) typineModalRender() string {
 	previewPath := m.typingModal.location + "/" + m.typingModal.textInput.Value()
 
 	fileLocation := filePanelTopDirectoryIconStyle.Render(" "+icon.Directory+icon.Space) +
@@ -390,7 +390,7 @@ func typineModalRender(m model) string {
 	return modalBorderStyle(modalHeight, modalWidth).Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip)
 }
 
-func introduceModalRender(m model) string {
+func (m model) introduceModalRender() string {
 	title := sidebarTitleStyle.Render(" Thanks for use superfile!!") + modalStyle.Render("\n You can read the following information before starting to use it!")
 	vimUserWarn := processErrorStyle.Render("  ** Very importantly ** If you are a Vim/Nvim user, go to:\n  https://superfile.netlify.app/configure/custom-hotkeys/ to change your hotkey settings!")
 	subOne := sidebarTitleStyle.Render("  (1)") + modalStyle.Render(" If this is your first time, make sure you read:\n      https://superfile.netlify.app/getting-started/tutorial/")
@@ -400,7 +400,7 @@ func introduceModalRender(m model) string {
 	return firstUseModal(m.helpMenu.height, m.helpMenu.width).Render(title + "\n\n" + vimUserWarn + "\n\n" + subOne + "\n\n" + subTwo + "\n\n" + subThree + "\n\n" + subFour + "\n\n")
 }
 
-func warnModalRender(m model) string {
+func (m model) warnModalRender() string {
 	title := m.warnModal.title
 	content := m.warnModal.content
 	confirm := modalConfirm.Render(" (" + hotkeys.Confirm[0] + ") Confirm ")
@@ -409,13 +409,18 @@ func warnModalRender(m model) string {
 	return modalBorderStyle(modalHeight, modalWidth).Render(title + "\n\n" + content + "\n\n" + tip)
 }
 
-func helpMenuRender(m model) string {
+func (m model) helpMenuRender() string {
 	helpMenuContent := ""
 	maxKeyLength := 0
 
 	for _, data := range m.helpMenu.data {
-		if data.subTitle == "" && len(data.hotkey[0]+data.hotkey[1])+3 > maxKeyLength {
-			maxKeyLength = len(data.hotkey[0]+data.hotkey[1]) + 3
+		totalKeyLen := 0
+		for _, key := range data.hotkey {
+			totalKeyLen += len(key)
+		}
+		saprateLen := len(data.hotkey) - 1*3
+		if data.subTitle == "" && totalKeyLen+saprateLen > maxKeyLength {
+			maxKeyLength = totalKeyLen + saprateLen
 		}
 	}
 
@@ -444,11 +449,13 @@ func helpMenuRender(m model) string {
 			continue
 		}
 
-		if m.helpMenu.data[i].hotkey[1] == "" {
-			hotkey = m.helpMenu.data[i].hotkey[0]
-		} else {
-			hotkey = fmt.Sprintf("%s | %s", m.helpMenu.data[i].hotkey[0], m.helpMenu.data[i].hotkey[1])
+		for i, key := range m.helpMenu.data[i].hotkey {
+			if i != 0 {
+				hotkey += " | " 
+			}
+			hotkey += key
 		}
+		
 		if len(helpMenuHotkeyStyle.Render(hotkey)) > renderHotkeyLength {
 			renderHotkeyLength = len(helpMenuHotkeyStyle.Render(hotkey))
 		}
@@ -467,11 +474,14 @@ func helpMenuRender(m model) string {
 
 		hotkey := ""
 		description := truncateText(m.helpMenu.data[i].description, valueLength, "...")
-		if m.helpMenu.data[i].hotkey[1] == "" {
-			hotkey = m.helpMenu.data[i].hotkey[0]
-		} else {
-			hotkey = fmt.Sprintf("%s | %s", m.helpMenu.data[i].hotkey[0], m.helpMenu.data[i].hotkey[1])
+		
+		for i, key := range m.helpMenu.data[i].hotkey {
+			if i != 0 {
+				hotkey += " | " 
+			}
+			hotkey += key
 		}
+
 		cursor := "  "
 		if m.helpMenu.cursor == i {
 			cursor = filePanelCursorStyle.Render(icon.Cursor + " ")
@@ -484,7 +494,7 @@ func helpMenuRender(m model) string {
 	return helpMenuModalBorderStyle(m.helpMenu.height, m.helpMenu.width, bottomBorder).Render(helpMenuContent)
 }
 
-func filePreviewPanelRender(m model) string {
+func (m model) filePreviewPanelRender() string {
 	previewLine := m.mainPanelHeight + 2
 	m.fileModel.filePreview.width += m.fullWidth - Config.SidebarWidth - m.fileModel.filePreview.width - ((m.fileModel.width + 2) * len(m.fileModel.filePanels)) - 2
 
@@ -605,5 +615,5 @@ func filePreviewPanelRender(m model) string {
 		}
 	}
 
-	return box.Render("\n --- "+ icon.Error +" Unsupported formats ---")
+	return box.Render("\n --- " + icon.Error + " Unsupported formats ---")
 }

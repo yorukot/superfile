@@ -7,31 +7,31 @@ func wheelMainAction(msg string, m model, cmd tea.Cmd) (model, tea.Cmd) {
 
 	case "wheel up":
 		if m.focusPanel == sidebarFocus {
-			m = controlSideBarListUp(m, true)
+			m.controlSideBarListUp(true)
 		} else if m.focusPanel == processBarFocus {
-			m = controlProcessbarListUp(m, true)
+			m.controlProcessbarListUp(true)
 		} else if m.focusPanel == metadataFocus {
-			m = controlMetadataListUp(m, true)
+			m.controlMetadataListUp(true)
 		} else if m.focusPanel == nonePanelFocus {
-			m = controlFilePanelListUp(m, true)
+			m.controlFilePanelListUp(true)
 			m.fileMetaData.renderIndex = 0
 			go func() {
-				m = returnMetaData(m)
+				m.returnMetaData()
 			}()
 		}
 
 	case "wheel down":
 		if m.focusPanel == sidebarFocus {
-			m = controlSideBarListDown(m, true)
+			m.controlSideBarListDown(true)
 		} else if m.focusPanel == processBarFocus {
-			m = controlProcessbarListDown(m, true)
+			m.controlProcessbarListDown(true)
 		} else if m.focusPanel == metadataFocus {
-			m = controlMetadataListDown(m, true)
+			m.controlMetadataListDown(true)
 		} else if m.focusPanel == nonePanelFocus {
-			m = controlFilePanelListDown(m, true)
+			m.controlFilePanelListDown(true)
 			m.fileMetaData.renderIndex = 0
 			go func() {
-				m = returnMetaData(m)
+				m.returnMetaData()
 			}()
 		}
 	}

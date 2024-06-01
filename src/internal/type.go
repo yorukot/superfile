@@ -83,7 +83,6 @@ type model struct {
 	fileMetaData        fileMetadata
 	firstTextInput      bool
 	toggleDotFile       bool
-	editorMode          bool
 	filePanelFocusIndex int
 	mainPanelHeight     int
 	fullWidth           int
