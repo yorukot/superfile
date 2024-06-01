@@ -263,7 +263,11 @@ func (m *model) itemSelectUp(wheel bool) {
 		if arrayContains(panel.selected, panel.element[panel.cursor].location) {
 			panel.selected = removeElementByValue(panel.selected, panel.element[panel.cursor].location)
 		} else {
-			panel.selected = append(panel.selected, panel.element[panel.cursor].location)
+			selectItemIndex := panel.cursor + 1
+			if selectItemIndex > len(panel.element) - 1 {
+				selectItemIndex = 0
+			}
+			panel.selected = append(panel.selected, panel.element[selectItemIndex].location)
 		}
 
 		m.fileModel.filePanels[m.filePanelFocusIndex] = panel
@@ -291,7 +295,11 @@ func (m *model) itemSelectDown(wheel bool) {
 		if arrayContains(panel.selected, panel.element[panel.cursor].location) {
 			panel.selected = removeElementByValue(panel.selected, panel.element[panel.cursor].location)
 		} else {
-			panel.selected = append(panel.selected, panel.element[panel.cursor].location)
+			selectItemIndex := panel.cursor - 1
+			if selectItemIndex < 0 {
+				selectItemIndex = len(panel.element) - 1
+			}
+			panel.selected = append(panel.selected, panel.element[selectItemIndex].location)
 		}
 
 		m.fileModel.filePanels[m.filePanelFocusIndex] = panel
