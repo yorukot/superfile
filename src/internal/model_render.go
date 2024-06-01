@@ -553,8 +553,13 @@ func filePreviewPanelRender(m model) string {
 
 	format := lexers.Match(filepath.Base(itemPath))
 	if format != nil {
-		codeHighlight, err := ansichroma.HighlightFromFile(itemPath, previewLine, theme.CodeSyntaxHighlightTheme, theme.FilePanelBG)
-
+		var codeHighlight string
+		var err error
+		if Config.TransparentBackground {
+			codeHighlight, err = ansichroma.HighlightFromFile(itemPath, previewLine, theme.CodeSyntaxHighlightTheme, "")
+		} else {
+			codeHighlight, err = ansichroma.HighlightFromFile(itemPath, previewLine, theme.CodeSyntaxHighlightTheme, theme.FilePanelBG)
+		}
 		if err != nil {
 			outPutLog("Error render code highlight", err)
 			return box.Render("\n --- " + icon.Error + " Error render code highlight ---")
