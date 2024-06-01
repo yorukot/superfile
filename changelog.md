@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file. Dates are d
 - Added quotes arround dir in lastdir to support special characters [`#218`](https://github.com/yorukot/superfile/pull/218)
 - Make Hotkey settings unlimited [`423a96a`](https://github.com/yorukot/superfile/commit/423a96a0aeca4ea2c30447d8b4010868045bb7e8)
 - Selection should start on currently positioned/pointed item [`#226`](https://github.com/yorukot/superfile/issues/226)
+- Make Nerdfont optional [`#6`](https://github.com/yorukot/superfile/issues/6)
 
 #### Bug fix
 - An option to display the filesize in decimal or binary sizes [`#220`](https://github.com/yorukot/superfile/issues/220)
