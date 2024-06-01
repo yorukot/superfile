@@ -528,7 +528,7 @@ func filePreviewPanelRender(m model) string {
 
 		for i := 0; i < previewLine && i < len(files); i++ {
 			file := files[i]
-			directoryContent += prettierDirectoryPreviewName(file.Name(), file.IsDir(), lipgloss.Color(theme.FilePanelBG))
+			directoryContent += prettierDirectoryPreviewName(file.Name(), file.IsDir(), filePanelBGColor)
 			if i != previewLine-1 && i != len(files)-1 {
 				directoryContent += "\n"
 			}
