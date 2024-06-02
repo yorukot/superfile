@@ -2,50 +2,50 @@
 # I know this is not really that "vim", but the control flow is different.
 # =================================================================================================
 # Global hotkeys (cannot conflict with other hotkeys)
-confirm = ['enter']
-quit = ['ctrl+c'] # also know as, theprimeagen troller
+confirm = ['enter', '']
+quit = ['ctrl+c', ''] # also know as, theprimeagen troller
 # movement
-list_up = ['k']
-list_down = ['j']
+list_up = ['k', '']
+list_down = ['j', '']
 # file panel control
-create_new_file_panel = ['n']
-close_file_panel = ['q']
-next_file_panel = ['tab']
-previous_file_panel = ['shift+tab']
-toggle_file_preview_panel = ['f']
+create_new_file_panel = ['n', '']
+close_file_panel = ['q', '']
+next_file_panel = ['tab', '']
+previous_file_panel = ['shift+tab', '']
+toggle_file_preview_panel = ['f', '']
 # change focus
-focus_on_process_bar = ['ctrl+p']
-focus_on_sidebar = ['ctrl+s']
-focus_on_metadata = ['ctrl+m']
+focus_on_process_bar = ['ctrl+p', '']
+focus_on_sidebar = ['ctrl+s', '']
+focus_on_metadata = ['ctrl+m', '']
 # create file/directory and rename
-file_panel_item_create = ['a']
-file_panel_item_rename = ['r']
+file_panel_item_create = ['a', '']
+file_panel_item_rename = ['r', '']
 # file operations
-copy_items = ['y']
-cut_items = ['x']
-paste_items = ['p']
-delete_items = ['d']
+copy_items = ['y', '']
+cut_items = ['x', '']
+paste_items = ['p', '']
+delete_items = ['d', '']
 # compress and extract
-extract_file = ['ctrl+e']
-compress_file = ['ctrl+a']
+extract_file = ['ctrl+e', '']
+compress_file = ['ctrl+a', '']
 # editor
-open_file_with_editor = ['e']
-open_current_directory_with_editor = ['E']
+open_file_with_editor = ['e', '']
+open_current_directory_with_editor = ['E', '']
 # other
-pinned_directory = ['P']
-toggle_dot_file = ['.']
-change_panel_mode = ['m']
-open_help_menu = ['?']
+pinned_directory = ['P', '']
+toggle_dot_file = ['.', '']
+change_panel_mode = ['m', '']
+open_help_menu = ['?', '']
 # =================================================================================================
 # Typing hotkeys (can conflict with all hotkeys)
-confirm_typing = ['enter']
-cancel_typing = ['esc']
+confirm_typing = ['enter', '']
+cancel_typing = ['esc', '']
 # =================================================================================================
 # Normal mode hotkeys (can conflict with other modes, cannot conflict with global hotkeys)
-parent_directory = ['-']
-search_bar = ['/']
+parent_directory = ['-', '']
+search_bar = ['/', '']
 # =================================================================================================
 # Select mode hotkeys (can conflict with other modes, cananot conflict with global hotkeys)
-file_panel_select_mode_items_select_down = ['J']
-file_panel_select_mode_items_select_up = ['K']
-file_panel_select_all_items = ['A']
+file_panel_select_mode_items_select_down = ['J', '']
+file_panel_select_mode_items_select_up = ['K', '']
+file_panel_select_all_items = ['A', '']
