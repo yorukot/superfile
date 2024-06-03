@@ -337,13 +337,15 @@ func returnMetaData(m model) model {
 		fileSize := [2]string{"FileSize", formatFileSize(fileInfo.Size())}
 		fileModifyData := [2]string{"FileModifyDate", fileInfo.ModTime().String()}
 
-		// Calculate MD5 checksum
-		checksum, err := calculateMD5Checksum(filePath)
-		if err != nil {
-			outPutLog("Error calculating MD5 checksum", err)
-		} else {
-			md5Data := [2]string{"MD5Checksum", checksum}
-			m.fileMetaData.metaData = append(m.fileMetaData.metaData, md5Data)
+		if Config.EnableMD5Checksum {
+			// Calculate MD5 checksum
+			checksum, err := calculateMD5Checksum(filePath)
+			if err != nil {
+				outPutLog("Error calculating MD5 checksum", err)
+			} else {
+				md5Data := [2]string{"MD5Checksum", checksum}
+				m.fileMetaData.metaData = append(m.fileMetaData.metaData, md5Data)
+			}
 		}
 
 		m.fileMetaData.metaData = append(m.fileMetaData.metaData, fileName, fileSize, fileModifyData)
