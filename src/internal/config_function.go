@@ -129,6 +129,25 @@ func loadHotkeysFile() {
 		}
 	}
 
+	val := reflect.ValueOf(hotkeys)
+
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Type().Field(i)
+		value := val.Field(i)
+
+		if value.Kind() != reflect.Slice || value.Type().Elem().Kind() != reflect.String {
+			fmt.Println(lodaHotkeysError(field.Name))
+			os.Exit(0)
+		}
+
+		hotkeysList := value.Interface().([]string)
+
+		if len(hotkeysList) == 0  || hotkeysList[0] == "" {
+			fmt.Println(lodaHotkeysError(field.Name))
+			os.Exit(0)
+		}
+	}
+   
 }
 
 func loadThemeFile() {
