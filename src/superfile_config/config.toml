@@ -50,4 +50,4 @@ border_middle_right = '┤'
 metadata = false
 #
 # Enable MD5 checksum generation for files
-enable_md5_checksum = true
+enable_md5_checksum = false
