@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"log"
@@ -46,11 +48,11 @@ func returnFolderElement(location string, displayDotFile bool) (directoryElement
 	if len(files) == 0 {
 		return directoryElement
 	}
-	
+
 	if err != nil {
 		outPutLog("Return folder element function error", err)
 	}
-	
+
 	sort.Slice(files, func(i, j int) bool {
 		if files[i].IsDir() && !files[j].IsDir() {
 			return true
@@ -252,9 +254,9 @@ func (m *model) returnMetaData() {
 	id := shortuuid.New()
 
 	message := channelMessage{
-		messageId:    id,
-		messageType:  sendMetadata,
-		metadata:     m.fileMetaData.metaData,
+		messageId:   id,
+		messageType: sendMetadata,
+		metadata:    m.fileMetaData.metaData,
 	}
 
 	// Obtaining metadata will take time. If metadata is obtained for every passing file, it will cause lag.
@@ -268,13 +270,13 @@ func (m *model) returnMetaData() {
 
 	m.fileMetaData.metaData = m.fileMetaData.metaData[:0]
 	if len(panel.element) == 0 {
-		message.metadata = m.fileMetaData.metaData 
+		message.metadata = m.fileMetaData.metaData
 		channel <- message
 		return
 	}
 	if len(panel.element[panel.cursor].metaData) != 0 && m.focusPanel != metadataFocus {
 		m.fileMetaData.metaData = panel.element[panel.cursor].metaData
-		message.metadata = m.fileMetaData.metaData 
+		message.metadata = m.fileMetaData.metaData
 		channel <- message
 		return
 	}
@@ -288,7 +290,7 @@ func (m *model) returnMetaData() {
 		} else {
 			m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"This is a link file.", ""})
 		}
-		message.metadata = m.fileMetaData.metaData 
+		message.metadata = m.fileMetaData.metaData
 		channel <- message
 		return
 
@@ -304,7 +306,7 @@ func (m *model) returnMetaData() {
 			m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"FolderSize", formatFileSize(dirSize(filePath))})
 		}
 		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"FolderModifyDate", fileInfo.ModTime().String()})
-		message.metadata = m.fileMetaData.metaData 
+		message.metadata = m.fileMetaData.metaData
 		channel <- message
 		return
 	}
@@ -334,13 +336,41 @@ func (m *model) returnMetaData() {
 		fileName := [2]string{"FileName", fileInfo.Name()}
 		fileSize := [2]string{"FileSize", formatFileSize(fileInfo.Size())}
 		fileModifyData := [2]string{"FileModifyDate", fileInfo.ModTime().String()}
+
+		if Config.EnableMD5Checksum {
+			// Calculate MD5 checksum
+			checksum, err := calculateMD5Checksum(filePath)
+			if err != nil {
+				outPutLog("Error calculating MD5 checksum", err)
+			} else {
+				md5Data := [2]string{"MD5Checksum", checksum}
+				m.fileMetaData.metaData = append(m.fileMetaData.metaData, md5Data)
+			}
+		}
+
 		m.fileMetaData.metaData = append(m.fileMetaData.metaData, fileName, fileSize, fileModifyData)
 	}
 
-	message.metadata = m.fileMetaData.metaData 
+	message.metadata = m.fileMetaData.metaData
 	channel <- message
 
 	panel.element[panel.cursor].metaData = m.fileMetaData.metaData
+}
+
+func calculateMD5Checksum(filePath string) (string, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return "", fmt.Errorf("failed to open file: %v", err)
+	}
+	defer file.Close()
+
+	hash := md5.New()
+	if _, err := io.Copy(hash, file); err != nil {
+		return "", fmt.Errorf("failed to calculate MD5 checksum: %v", err)
+	}
+
+	checksum := hex.EncodeToString(hash.Sum(nil))
+	return checksum, nil
 }
 
 // Get directory total size
@@ -440,7 +470,7 @@ func getElementIcon(file string, IsDir bool) icon.IconStyle {
 
 	if !Config.Nerdfont {
 		return icon.IconStyle{
-			Icon: "",
+			Icon:  "",
 			Color: theme.FilePanelFG,
 		}
 	}

@@ -122,11 +122,11 @@ type ConfigType struct {
 	DefaultOpenFilePreview bool   `toml:"default_open_file_preview" comment:"\nWhether to open file preview automatically every time superfile is opened."`
 	DefaultDirectory       string `toml:"default_directory" comment:"\nThe path of the first file panel when superfile is opened."`
 	FileSizeUseSI          bool   `toml:"file_size_use_si" comment:"\nDisplay file sizes using powers of 1000 (kB, MB, GB) instead of powers of 1024 (KiB, MiB, GiB)."`
-	
-	Nerdfont               bool   `toml:"nerdfont" comment:"\n================   Style =================\n\n If you don't have or don't want Nerdfont installed you can turn this off"`
-	TransparentBackground  bool   `toml:"transparent_background" comment:"\nSet transparent background or not (this only work when your terminal background is transparent)"`
-	FilePreviewWidth       int    `toml:"file_preview_width" comment:"\nFile preview width allow '0' (this mean same as file panel),'x' x must be less than 10 and greater than 1 (This means that the width of the file preview will be one xth of the total width.)"`
-	SidebarWidth           int    `toml:"sidebar_width" comment:"\nThe length of the sidebar. If you don't want to display the sidebar, you can input 0 directly. If you want to display the value, please place it in the range of 3-20."`
+
+	Nerdfont              bool `toml:"nerdfont" comment:"\n================   Style =================\n\n If you don't have or don't want Nerdfont installed you can turn this off"`
+	TransparentBackground bool `toml:"transparent_background" comment:"\nSet transparent background or not (this only work when your terminal background is transparent)"`
+	FilePreviewWidth      int  `toml:"file_preview_width" comment:"\nFile preview width allow '0' (this mean same as file panel),'x' x must be less than 10 and greater than 1 (This means that the width of the file preview will be one xth of the total width.)"`
+	SidebarWidth          int  `toml:"sidebar_width" comment:"\nThe length of the sidebar. If you don't want to display the sidebar, you can input 0 directly. If you want to display the value, please place it in the range of 3-20."`
 
 	BorderTop         string `toml:"border_top" comment:"\nBorder style"`
 	BorderBottom      string `toml:"border_bottom"`
@@ -139,7 +139,8 @@ type ConfigType struct {
 	BorderMiddleLeft  string `toml:"border_middle_left"`
 	BorderMiddleRight string `toml:"border_middle_right"`
 
-	Metadata bool `toml:"metadata" comment:"\n==========PLUGINS========== #\n\nShow more detailed metadata, please install exiftool before enabling this plugin!"`
+	Metadata          bool `toml:"metadata" comment:"\n==========PLUGINS========== #\n\nShow more detailed metadata, please install exiftool before enabling this plugin!"`
+	EnableMD5Checksum bool `toml:"enable_md5_checksum" comment:"Enable MD5 checksum generation for files"`
 }
 
 type HotkeysType struct {
