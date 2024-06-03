@@ -12,7 +12,7 @@ import (
 )
 
 // Change file panel mode (select mode or browser mode)
-func changeFilePanelMode(m model) model {
+func (m *model) changeFilePanelMode() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	if panel.panelMode == selectMode {
 		panel.selected = panel.selected[:0]
@@ -21,11 +21,10 @@ func changeFilePanelMode(m model) model {
 		panel.panelMode = selectMode
 	}
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
-	return m
 }
 
 // Back to parent directory
-func parentDirectory(m model) model {
+func (m *model) parentDirectory() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	panel.directoryRecord[panel.location] = directoryRecord{
 		directoryCursor: panel.cursor,
@@ -43,15 +42,14 @@ func parentDirectory(m model) model {
 		panel.render = 0
 	}
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
-	return m
 }
 
 // Enter director or open file with default application
-func enterPanel(m model) model {
+func (m *model) enterPanel() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 
 	if len(panel.element) == 0 {
-		return m
+		return
 	}
 
 	if panel.element[panel.cursor].directory {
@@ -73,23 +71,23 @@ func enterPanel(m model) model {
 		fileInfo, err := os.Lstat(panel.element[panel.cursor].location)
 		if err != nil {
 			outPutLog("err when getting file info", err)
-			return m
+			return
 		}
 
 		if fileInfo.Mode()&os.ModeSymlink != 0 {
 			if isBrokenSymlink(panel.element[panel.cursor].location) {
-				return m
+				return
 			}
 
 			linkPath, _ := os.Readlink(panel.element[panel.cursor].location)
 
 			absLinkPath, err := filepath.Abs(linkPath)
 			if err != nil {
-				return m
+				return
 			}
 
 			m.fileModel.filePanels[m.filePanelFocusIndex].location = absLinkPath
-			return m
+			return
 		}
 
 		openCommand := "xdg-open"
@@ -105,11 +103,10 @@ func enterPanel(m model) model {
 	}
 
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
-	return m
 }
 
 // Switch to the directory where the sidebar cursor is located
-func sidebarSelectDirectory(m model) model {
+func (m *model) sidebarSelectDirectory() {
 	m.focusPanel = nonePanelFocus
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 
@@ -129,21 +126,19 @@ func sidebarSelectDirectory(m model) model {
 	}
 	panel.focusType = focus
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
-	return m
 }
 
 // Select all item in the file panel (only work on select mode)
-func selectAllItem(m model) model {
+func (m *model) selectAllItem() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	for _, item := range panel.element {
 		panel.selected = append(panel.selected, item.location)
 	}
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
-	return m
 }
 
 // Select the item where cursor located (only work on select mode)
-func singleItemSelect(m model) model {
+func (m *model) singleItemSelect() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	if arrayContains(panel.selected, panel.element[panel.cursor].location) {
 		panel.selected = removeElementByValue(panel.selected, panel.element[panel.cursor].location)
@@ -152,11 +147,10 @@ func singleItemSelect(m model) model {
 	}
 
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
-	return m
 }
 
 // Toggle dotfile display or not
-func toggleDotFileController(m model) model {
+func (m *model) toggleDotFileController() {
 	newToggleDotFile := ""
 	if m.toggleDotFile {
 		newToggleDotFile = "false"
@@ -170,11 +164,10 @@ func toggleDotFileController(m model) model {
 		outPutLog("Pinned folder function updatedData superfile data error", err)
 	}
 
-	return m
 }
 
 // Focus on search bar
-func searchBarFocus(m model) model {
+func (m *model) searchBarFocus() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	if panel.searchBar.Focused() {
 		panel.searchBar.Blur()
@@ -185,13 +178,12 @@ func searchBarFocus(m model) model {
 	// config search bar width
 	panel.searchBar.Width = m.fileModel.width - 4
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
-	return m
 }
 
 // ======================================== File panel controller ========================================
 
 // Control file panel list up
-func controlFilePanelListUp(m model, wheel bool) model {
+func (m *model) controlFilePanelListUp(wheel bool) {
 	runTime := 1
 	if wheel {
 		runTime = wheelRunTime
@@ -200,7 +192,7 @@ func controlFilePanelListUp(m model, wheel bool) model {
 	for i := 0; i < runTime; i++ {
 		panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 		if len(panel.element) == 0 {
-			return m
+			return
 		}
 		if panel.cursor > 0 {
 			panel.cursor--
@@ -218,11 +210,10 @@ func controlFilePanelListUp(m model, wheel bool) model {
 
 		m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	}
-	return m
 }
 
 // Control file panel list down
-func controlFilePanelListDown(m model, wheel bool) model {
+func (m *model) controlFilePanelListDown(wheel bool) {
 	runTime := 1
 	if wheel {
 		runTime = wheelRunTime
@@ -231,7 +222,7 @@ func controlFilePanelListDown(m model, wheel bool) model {
 	for i := 0; i < runTime; i++ {
 		panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 		if len(panel.element) == 0 {
-			return m
+			return
 		}
 		if panel.cursor < len(panel.element)-1 {
 			panel.cursor++
@@ -245,11 +236,10 @@ func controlFilePanelListDown(m model, wheel bool) model {
 		m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	}
 
-	return m
 }
 
 // Handles the action of selecting an item in the file panel upwards. (only work on select mode)
-func itemSelectUp(m model, wheel bool) model {
+func (m *model) itemSelectUp(wheel bool) {
 	runTime := 1
 	if wheel {
 		runTime = wheelRunTime
@@ -273,16 +263,19 @@ func itemSelectUp(m model, wheel bool) model {
 		if arrayContains(panel.selected, panel.element[panel.cursor].location) {
 			panel.selected = removeElementByValue(panel.selected, panel.element[panel.cursor].location)
 		} else {
-			panel.selected = append(panel.selected, panel.element[panel.cursor].location)
+			selectItemIndex := panel.cursor + 1
+			if selectItemIndex > len(panel.element) - 1 {
+				selectItemIndex = 0
+			}
+			panel.selected = append(panel.selected, panel.element[selectItemIndex].location)
 		}
 
 		m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	}
-	return m
 }
 
 // Handles the action of selecting an item in the file panel downwards. (only work on select mode)
-func itemSelectDown(m model, wheel bool) model {
+func (m *model) itemSelectDown(wheel bool) {
 	runTime := 1
 	if wheel {
 		runTime = wheelRunTime
@@ -302,12 +295,15 @@ func itemSelectDown(m model, wheel bool) model {
 		if arrayContains(panel.selected, panel.element[panel.cursor].location) {
 			panel.selected = removeElementByValue(panel.selected, panel.element[panel.cursor].location)
 		} else {
-			panel.selected = append(panel.selected, panel.element[panel.cursor].location)
+			selectItemIndex := panel.cursor - 1
+			if selectItemIndex < 0 {
+				selectItemIndex = len(panel.element) - 1
+			}
+			panel.selected = append(panel.selected, panel.element[selectItemIndex].location)
 		}
 
 		m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	}
-	return m
 }
 
 // ======================================== Sidebar controller ========================================
@@ -315,7 +311,7 @@ func itemSelectDown(m model, wheel bool) model {
 // Yorukot: P.S God bless me, this sidebar controller code is really ugly...
 
 // Control sidebar panel list up
-func controlSideBarListUp(m model, wheel bool) model {
+func (m *model) controlSideBarListUp(wheel bool) {
 	runTime := 1
 	if wheel {
 		runTime = wheelRunTime
@@ -380,11 +376,10 @@ func controlSideBarListUp(m model, wheel bool) model {
 			m.sidebarModel.renderIndex--
 		}
 	}
-	return m
 }
 
 // Control sidebar panel list down
-func controlSideBarListDown(m model, wheel bool) model {
+func (m *model) controlSideBarListDown(wheel bool) {
 	runTime := 1
 	if wheel {
 		runTime = wheelRunTime
@@ -443,13 +438,12 @@ func controlSideBarListDown(m model, wheel bool) model {
 			}
 		}
 	}
-	return m
 }
 
 // ======================================== Metadata controller ========================================
 
 // Control metadata panel up
-func controlMetadataListUp(m model, wheel bool) model {
+func (m *model) controlMetadataListUp(wheel bool) {
 	runTime := 1
 	if wheel {
 		runTime = wheelRunTime
@@ -462,11 +456,10 @@ func controlMetadataListUp(m model, wheel bool) model {
 			m.fileMetaData.renderIndex = len(m.fileMetaData.metaData) - 1
 		}
 	}
-	return m
 }
 
 // Control metadata panel down
-func controlMetadataListDown(m model, wheel bool) model {
+func (m *model) controlMetadataListDown(wheel bool) {
 	runTime := 1
 	if wheel {
 		runTime = wheelRunTime
@@ -479,15 +472,14 @@ func controlMetadataListDown(m model, wheel bool) model {
 			m.fileMetaData.renderIndex = 0
 		}
 	}
-	return m
 }
 
 // ======================================== Processbar controller ========================================
 
 // Control processbar panel list up
-func controlProcessbarListUp(m model, wheel bool) model {
+func (m *model) controlProcessbarListUp(wheel bool) {
 	if len(m.processBarModel.processList) == 0 {
-		return m
+		return
 	}
 	runTime := 1
 	if wheel {
@@ -509,13 +501,12 @@ func controlProcessbarListUp(m model, wheel bool) model {
 			}
 		}
 	}
-	return m
 }
 
 // Control processbar panel list down
-func controlProcessbarListDown(m model, wheel bool) model {
+func (m *model) controlProcessbarListDown(wheel bool) {
 	if len(m.processBarModel.processList) == 0 {
-		return m
+		return
 	}
 
 	runTime := 1
@@ -534,5 +525,4 @@ func controlProcessbarListDown(m model, wheel bool) model {
 			m.processBarModel.cursor = 0
 		}
 	}
-	return m
 }

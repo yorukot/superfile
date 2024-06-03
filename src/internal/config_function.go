@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 
 	"github.com/barasher/go-exiftool"
 	"github.com/pelletier/go-toml/v2"
@@ -51,6 +52,7 @@ func initialConfig(dir string) (toggleDotFileBool bool, firstFilePanelDir string
 	if dir != "" {
 		firstFilePanelDir, err = filepath.Abs(dir)
 	} else {
+		Config.DefaultDirectory = strings.Replace(Config.DefaultDirectory, "~", varibale.HomeDir, -1) 
 		firstFilePanelDir, err = filepath.Abs(Config.DefaultDirectory)
 	}
 

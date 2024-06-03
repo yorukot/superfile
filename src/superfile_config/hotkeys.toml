@@ -1,6 +1,6 @@
 # =================================================================================================
 # Global hotkeys (cannot conflict with other hotkeys)
-confirm = ['enter', 'l']
+confirm = ['enter', 'right', 'l']
 quit = ['q', 'esc']
 # movement
 list_up = ['up', 'k']
@@ -22,7 +22,7 @@ file_panel_item_rename = ['ctrl+r', '']
 copy_items = ['ctrl+c', '']
 cut_items = ['ctrl+x', '']
 paste_items = ['ctrl+v', '']
-delete_items = ['ctrl+d', 'delete']
+delete_items = ['ctrl+d', 'delete', '']
 # compress and extract
 extract_file = ['ctrl+e', '']
 compress_file = ['ctrl+a', '']
@@ -40,7 +40,7 @@ confirm_typing = ['enter', '']
 cancel_typing = ['ctrl+c', 'esc']
 # =================================================================================================
 # Normal mode hotkeys (can conflict with other modes, cannot conflict with global hotkeys)
-parent_directory = ['h', 'backspace'] 
+parent_directory = ['h', 'left', "backspace"] 
 search_bar = ['/', '']
 # =================================================================================================
 # Select mode hotkeys (can conflict with other modes, cananot conflict with global hotkeys)

@@ -1,12 +1,11 @@
 package internal
 
 // Toggle help menu
-func openHelpMenu(m model) model {
+func (m *model) openHelpMenu() {
 	if m.helpMenu.open {
 		m.helpMenu.open = false
-		return m
+		return
 	}
 
 	m.helpMenu.open = true
-	return m
 }

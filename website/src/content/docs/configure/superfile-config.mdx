@@ -52,12 +52,20 @@ source ~/.bashrc
 
 `false` => The file preview panel will not open automatically when you open a superfile.
 
+- ###### file_size_use_si
+`true` => The file/directory sizes will be displayed using powers of 1000 (kB, MB, GB).
+
+`false` => The file/directory sizes will be displayed using powers of 1024 (KiB, MiB, GiB).
+
 ### Style
 
 - ###### transparent_background
 `true` => If enabled, the background color will not be rendered (transparent). This is useful if your terminal background is transparent.
 
 `false` => If turned off, the background will be rendered (with color) to maintain theme consistency.
+
+- ###### default_directory
+The default location every time superfile is opened, supports `~` and `.`
 
 - ###### file_preview_width
 This setting is an integer.

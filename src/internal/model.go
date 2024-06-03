@@ -122,15 +122,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		if m.typingModal.open {
-			m = typingModalOpenKey(msg.String(), m)
+			m.typingModalOpenKey(msg.String())
 		} else if m.warnModal.open {
-			m = warnModalOpenKey(msg.String(), m)
+			m.warnModalOpenKey(msg.String())
 		} else if m.fileModel.renaming {
-			m = renamingKey(msg.String(), m)
+			m.renamingKey(msg.String())
 		} else if panel.searchBar.Focused() {
-			m = focusOnSearchbarKey(msg.String(), m)
+			m.focusOnSearchbarKey(msg.String())
 		} else if m.helpMenu.open {
-			m = helpMenuKey(msg.String(), m)
+			m.helpMenuKey(msg.String())
 		} else {
 			// return superfile
 			if msg.String() == hotkeys.Quit[0] || msg.String() == hotkeys.Quit[1] {
@@ -147,12 +147,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, tea.Quit
 			}
 
-			m, cmd = mainKey(msg.String(), m, cmd)
-
-			if m.editorMode {
-				m.editorMode = false
-				return m, cmd
-			}
+			cmd = m.mainKey(msg.String(), cmd)
 		}
 	}
 
@@ -178,7 +173,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmd = tea.Batch(cmd, listenForChannelMessage(channel))
 	}
 
-	m = getFilePanelItems(m)
+	m.getFilePanelItems()
 
 	return m, tea.Batch(cmd)
 }
@@ -186,24 +181,24 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m model) View() string {
 	// check is the terminal size enough
 	if m.fullHeight < minimumHeight || m.fullWidth < minimumWidth {
-		return terminalSizeWarnRender(m)
+		return m.terminalSizeWarnRender()
 	}
 	if m.fileModel.width < 18 {
-		return terminalSizeWarnAfterFirstRender(m)
+		return m.terminalSizeWarnAfterFirstRender()
 	}
-	sidebar := sidebarRender(m)
+	sidebar := m.sidebarRender()
 
-	filePanel := filePanelRender(m)
+	filePanel := m.filePanelRender()
 
-	filePreview := filePreviewPanelRender(m)
+	filePreview := m.filePreviewPanelRender()
 
 	mainPanel := lipgloss.JoinHorizontal(0, sidebar, filePanel, filePreview)
 
-	processBar := processBarRender(m)
+	processBar := m.processBarRender()
 
-	metaData := metadataRender(m)
+	metaData := m.metadataRender()
 
-	clipboardBar := clipboardRender(m)
+	clipboardBar := m.clipboardRender()
 
 	footer := lipgloss.JoinHorizontal(0, processBar, metaData, clipboardBar)
 
@@ -211,28 +206,28 @@ func (m model) View() string {
 
 	// check if need pop up modal
 	if m.helpMenu.open {
-		helpMenu := helpMenuRender(m)
+		helpMenu := m.helpMenuRender()
 		overlayX := m.fullWidth/2 - m.helpMenu.width/2
 		overlayY := m.fullHeight/2 - m.helpMenu.height/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, helpMenu, finalRender)
 	}
 
 	if firstUse {
-		introduceModal := introduceModalRender(m)
+		introduceModal := m.introduceModalRender()
 		overlayX := m.fullWidth/2 - m.helpMenu.width/2
 		overlayY := m.fullHeight/2 - m.helpMenu.height/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, introduceModal, finalRender)
 	}
 
 	if m.typingModal.open {
-		typingModal := typineModalRender(m)
+		typingModal := m.typineModalRender()
 		overlayX := m.fullWidth/2 - modalWidth/2
 		overlayY := m.fullHeight/2 - modalHeight/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, typingModal, finalRender)
 	}
 
 	if m.warnModal.open {
-		warnModal := warnModalRender(m)
+		warnModal := m.warnModalRender()
 		overlayX := m.fullWidth/2 - modalWidth/2
 		overlayY := m.fullHeight/2 - modalHeight/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, warnModal, finalRender)
@@ -258,7 +253,7 @@ func listenForChannelMessage(msg chan channelMessage) tea.Cmd {
 	}
 }
 
-func getFilePanelItems(m model) model {
+func (m *model) getFilePanelItems() {
 	focusPanel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	for i, filePanel := range m.fileModel.filePanels {
 		var fileElenent []element
@@ -292,5 +287,4 @@ func getFilePanelItems(m model) model {
 		m.fileModel.filePanels[i].element = fileElenent
 		m.fileModel.filePanels[i].lastTimeGetElement = nowTime
 	}
-	return m
 }
