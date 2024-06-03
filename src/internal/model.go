@@ -133,7 +133,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.helpMenuKey(msg.String())
 		} else {
 			// return superfile
-			if msg.String() == hotkeys.Quit[0] || msg.String() == hotkeys.Quit[1] {
+			if msg.String() == containsKey(msg.String(), hotkeys.Quit) {
 				// cd on quit
 				if Config.CdOnQuit {
 					currentDir := m.fileModel.filePanels[m.filePanelFocusIndex].location

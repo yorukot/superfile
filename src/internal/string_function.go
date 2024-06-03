@@ -131,7 +131,9 @@ func checkAndTruncateLineLengths(text string, maxLength int) string {
 	var result strings.Builder
 
 	for _, line := range lines {
-		truncatedLine := ansi.Truncate(line, maxLength, "")
+		// Replace tabs with spaces
+		expandedLine := strings.ReplaceAll(line, "\t", strings.Repeat(" ", 4))
+		truncatedLine := ansi.Truncate(expandedLine, maxLength, "")
 		result.WriteString(truncatedLine + "\n")
 	}
 

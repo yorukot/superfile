@@ -609,7 +609,7 @@ func (m model) filePreviewPanelRender() string {
 				return box.Render("\n --- " + icon.Error + " Error open file ---")
 			}
 
-			textContent := checkAndTruncateLineLengths(string(fileContent), m.fileModel.filePreview.width)
+			textContent := checkAndTruncateLineLengths(fileContent, m.fileModel.filePreview.width)
 
 			return box.Render(textContent)
 		}
