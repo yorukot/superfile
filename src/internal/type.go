@@ -65,7 +65,7 @@ const (
 )
 
 const (
-	snedWarnModal channelMessageType = iota 
+	snedWarnModal channelMessageType = iota
 	sendMetadata
 	sendProcess
 )
@@ -81,6 +81,7 @@ type model struct {
 	warnModal           warnModal
 	helpMenu            helpMenuModal
 	fileMetaData        fileMetadata
+	commandLine         commandLineModal
 	firstTextInput      bool
 	toggleDotFile       bool
 	filePanelFocusIndex int
@@ -90,6 +91,12 @@ type model struct {
 }
 
 // Modal
+type commandLineModal struct {
+	input         []string
+	open          bool
+	displayOutput bool
+}
+
 type helpMenuModal struct {
 	height      int
 	width       int
@@ -127,8 +134,8 @@ type fileMetadata struct {
 
 // Copied items
 type copyItems struct {
-	items         []string
-	cut           bool
+	items []string
+	cut   bool
 }
 
 /* FILE WINDOWS TYPE START*/
@@ -138,11 +145,11 @@ type fileModel struct {
 	width        int
 	renaming     bool
 	maxFilePanel int
-	filePreview filePreviewPanel
+	filePreview  filePreviewPanel
 }
 
 type filePreviewPanel struct {
-	open bool
+	open  bool
 	width int
 }
 
@@ -184,7 +191,7 @@ type element struct {
 type sidebarModel struct {
 	directories []directory
 	renderIndex int
-	cursor int
+	cursor      int
 }
 
 type directory struct {
@@ -217,7 +224,7 @@ type process struct {
 // Message for process bar
 type channelMessage struct {
 	messageId       string
-	messageType 	channelMessageType
+	messageType     channelMessageType
 	processNewState process
 	warnModal       warnModal
 	metadata        [][2]string

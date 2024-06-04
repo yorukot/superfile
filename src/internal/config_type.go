@@ -178,6 +178,7 @@ type HotkeysType struct {
 	ToggleDotFile   []string `toml:"toggle_dot_file"`
 	ChangePanelMode []string `toml:"change_panel_mode"`
 	OpenHelpMenu    []string `toml:"open_help_menu"`
+	OpenCommandLine []string `toml:"open_command_line"`
 
 	ConfirmTyping []string `toml:"confirm_typing" comment:"=================================================================================================\nHere is typing hotkey can conflict with all hotkeys"`
 	CancelTyping  []string `toml:"cancel_typing"`

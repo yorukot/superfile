@@ -34,6 +34,7 @@ pinned_directory = ['P', '']
 toggle_dot_file = ['.', '']
 change_panel_mode = ['v', '']
 open_help_menu = ['?', '']
+open_command_line = [':', '']
 # =================================================================================================
 # Typing hotkeys (can conflict with all hotkeys)
 confirm_typing = ['enter', '']

@@ -84,7 +84,7 @@ func getHelpMenuData() []helpMenuModalData {
 		{
 			subTitle: "Panel navigation",
 		},
-		{
+	{
 			hotkey:         hotkeys.CreateNewFilePanel,
 			description:    "Create new file panel",
 			hotkeyWorkType: globalType,

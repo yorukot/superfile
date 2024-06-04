@@ -127,7 +127,21 @@ func (m *model) helpMenuListDown() {
 
 }
 
+// Toggle help menu
+func (m *model) openHelpMenu() {
+	if m.helpMenu.open {
+		m.helpMenu.open = false
+		return
+	}
+
+	m.helpMenu.open = true
+}
+
 // Quit help menu
 func (m *model) quitHelpMenu() {
 	m.helpMenu.open = false
+}
+
+func (m *model) openCommandLine() {
+	m.commandLine.open = true
 }
