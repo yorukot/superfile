@@ -260,13 +260,13 @@ func (m *model) itemSelectUp(wheel bool) {
 				panel.cursor = len(panel.element) - 1
 			}
 		}
-		if arrayContains(panel.selected, panel.element[panel.cursor].location) {
-			panel.selected = removeElementByValue(panel.selected, panel.element[panel.cursor].location)
+		selectItemIndex := panel.cursor + 1
+		if selectItemIndex > len(panel.element) - 1 {
+			selectItemIndex = 0
+		}
+		if arrayContains(panel.selected, panel.element[selectItemIndex].location) {
+			panel.selected = removeElementByValue(panel.selected, panel.element[selectItemIndex].location)
 		} else {
-			selectItemIndex := panel.cursor + 1
-			if selectItemIndex > len(panel.element) - 1 {
-				selectItemIndex = 0
-			}
 			panel.selected = append(panel.selected, panel.element[selectItemIndex].location)
 		}
 
@@ -292,13 +292,13 @@ func (m *model) itemSelectDown(wheel bool) {
 			panel.render = 0
 			panel.cursor = 0
 		}
-		if arrayContains(panel.selected, panel.element[panel.cursor].location) {
-			panel.selected = removeElementByValue(panel.selected, panel.element[panel.cursor].location)
+		selectItemIndex := panel.cursor - 1
+		if selectItemIndex < 0 {
+			selectItemIndex = len(panel.element) - 1
+		}
+		if arrayContains(panel.selected, panel.element[selectItemIndex].location) {
+			panel.selected = removeElementByValue(panel.selected, panel.element[selectItemIndex].location)
 		} else {
-			selectItemIndex := panel.cursor - 1
-			if selectItemIndex < 0 {
-				selectItemIndex = len(panel.element) - 1
-			}
 			panel.selected = append(panel.selected, panel.element[selectItemIndex].location)
 		}
 

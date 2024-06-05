@@ -92,7 +92,7 @@ type model struct {
 
 // Modal
 type commandLineModal struct {
-	input         []string
+	input         string
 	open          bool
 	displayOutput bool
 }
