@@ -123,7 +123,9 @@ If you want to contribute please follow the [contribution guide](./CONTRIBUTING.
 
 **Thanks to all the contributors for making this project even greater!**
 
-[![contributors](/asset/contributors.svg)](https://github.com/yorukot/superfile/graphs/contributors)
+<a href="https://github.com/yorukot/superfile/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=yorukot/superfile" />
+</a>
 
 ### Star History
 
