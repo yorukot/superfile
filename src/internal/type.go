@@ -82,6 +82,7 @@ type model struct {
 	helpMenu            helpMenuModal
 	fileMetaData        fileMetadata
 	commandLine         commandLineModal
+	confirmToQuit 		bool
 	firstTextInput      bool
 	toggleDotFile       bool
 	filePanelFocusIndex int

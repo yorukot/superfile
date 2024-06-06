@@ -131,19 +131,25 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.focusOnSearchbarKey(msg.String())
 		} else if m.helpMenu.open {
 			m.helpMenuKey(msg.String())
+		} else if m.confirmToQuit {
+			quit := m.confirmToQuitSuperfile(msg.String())
+			if quit {
+				m.quitSuperfile()
+				return m, tea.Quit
+			}
 		} else {
 			// return superfile
 			if msg.String() == containsKey(msg.String(), hotkeys.Quit) {
-				// cd on quit
-				if Config.CdOnQuit {
-					currentDir := m.fileModel.filePanels[m.filePanelFocusIndex].location
-					if currentDir == varibale.HomeDir {
-						return m, tea.Quit
+				for _, data := range m.processBarModel.process {
+					if data.state == inOperation && data.done != data.total {
+						m.confirmToQuit = true
+						m.warnModal.title = "Confirm to quit superfile"
+						m.warnModal.content = "You still have files being processed. Are you sure you want to exit?"
+						return m, cmd
 					}
-					// escape single quote
-					currentDir = strings.ReplaceAll(currentDir, "'", "'\\''")
-					os.WriteFile(varibale.SuperFileStateDir+"/lastdir", []byte("cd '"+currentDir+"'"), 0755)
 				}
+
+				m.quitSuperfile()
 				return m, tea.Quit
 			}
 
@@ -233,6 +239,13 @@ func (m model) View() string {
 		return stringfunction.PlaceOverlay(overlayX, overlayY, warnModal, finalRender)
 	}
 
+	if m.confirmToQuit {
+		warnModal := m.warnModalRender()
+		overlayX := m.fullWidth/2 - modalWidth/2
+		overlayY := m.fullHeight/2 - modalHeight/2
+		return stringfunction.PlaceOverlay(overlayX, overlayY, warnModal, finalRender)
+	}
+
 	return finalRender
 }
 
@@ -287,4 +300,18 @@ func (m *model) getFilePanelItems() {
 		m.fileModel.filePanels[i].element = fileElenent
 		m.fileModel.filePanels[i].lastTimeGetElement = nowTime
 	}
+}
+
+func (m model) quitSuperfile() {
+	// cd on quit
+	if Config.CdOnQuit {
+		currentDir := m.fileModel.filePanels[m.filePanelFocusIndex].location
+		if currentDir == varibale.HomeDir {
+			return
+		}
+		// escape single quote
+		currentDir = strings.ReplaceAll(currentDir, "'", "'\\''")
+		os.WriteFile(varibale.SuperFileStateDir+"/lastdir", []byte("cd '"+currentDir+"'"), 0755)
+	}
+	return
 }

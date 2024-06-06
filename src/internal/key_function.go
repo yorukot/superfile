@@ -211,6 +211,19 @@ func (m *model) warnModalOpenKey(msg string) {
 	}
 }
 
+func (m *model) confirmToQuitSuperfile(msg string) bool {
+	switch msg {
+	case containsKey(msg, hotkeys.Quit), containsKey(msg, hotkeys.CancelTyping):
+		m.cancelWarnModal()
+		m.confirmToQuit = false
+		return false
+	case containsKey(msg, hotkeys.Confirm):
+		return true
+	default:
+		return false
+	}
+}
+
 func (m *model) renamingKey(msg string) {
 	switch msg {
 	case containsKey(msg, hotkeys.CancelTyping):
