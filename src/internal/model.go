@@ -313,5 +313,4 @@ func (m model) quitSuperfile() {
 		currentDir = strings.ReplaceAll(currentDir, "'", "'\\''")
 		os.WriteFile(varibale.SuperFileStateDir+"/lastdir", []byte("cd '"+currentDir+"'"), 0755)
 	}
-	return
 }

@@ -16,7 +16,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/lithammer/shortuuid"
-	"github.com/masatana/go-textdistance"
+	"github.com/reinhrst/fzf-lib"
 	"github.com/yorukot/superfile/src/config/icon"
 )
 
@@ -97,27 +97,45 @@ func returnFolderElementBySearchString(location string, displayDotFile bool, sea
 		outPutLog("Return folder element function error", err)
 	}
 
+	folderElementMap := map[string]element{}
+	fileAndDirectories := []string{}
+
 	for _, item := range items {
 		fileInfo, _ := item.Info()
 		if !displayDotFile && strings.HasPrefix(fileInfo.Name(), ".") {
 			continue
 		}
+
 		if fileInfo == nil {
 			continue
 		}
-		newElement := element{
+
+		folderElementLocation := location + "/" + item.Name()
+		if location == "/" {
+			folderElementLocation = location + item.Name()
+		}
+
+		fileAndDirectories = append(fileAndDirectories, item.Name())
+		folderElementMap[item.Name()] = element{
 			name:      item.Name(),
 			directory: item.IsDir(),
-			matchRate: textdistance.JaroWinklerDistance(item.Name(), searchString),
+			location:  folderElementLocation,
 		}
-		if location == "/" {
-			newElement.location = location + item.Name()
-		} else {
-			newElement.location = location + "/" + item.Name()
-		}
-		if newElement.matchRate > 0 {
-			folderElement = append(folderElement, newElement)
-		}
+
+	}
+
+	var options = fzf.DefaultOptions()
+	var hayStack = fileAndDirectories
+	var myFzf = fzf.New(hayStack, options)
+	var result fzf.SearchResult
+	myFzf.Search(searchString)
+	result = <-myFzf.GetResultChannel()
+	myFzf.End()
+
+	for _, item := range result.Matches {
+		resultItem := folderElementMap[item.Key]
+		resultItem.matchRate = float64(item.Score)
+		folderElement = append(folderElement, resultItem)
 	}
 
 	// Sort folders and files by match rate

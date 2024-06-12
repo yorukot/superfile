@@ -11,8 +11,8 @@ require (
 	github.com/charmbracelet/bubbletea v0.26.4
 	github.com/charmbracelet/lipgloss v0.10.0
 	github.com/lithammer/shortuuid v3.0.0+incompatible
-	github.com/masatana/go-textdistance v0.0.0-20191005053614-738b0edac985
 	github.com/muesli/termenv v0.15.2
+	github.com/reinhrst/fzf-lib v0.9.0
 	github.com/rkoesters/xdg v0.0.1
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/urfave/cli/v2 v2.27.2
@@ -34,7 +34,6 @@ require (
 	github.com/bodgit/sevenzip v1.4.0 // indirect
 	github.com/bodgit/windows v1.0.1 // indirect
 	github.com/connesc/cipherio v0.2.1 // indirect
-	github.com/deckarep/golang-set v1.8.0 // indirect
 	github.com/dlclark/regexp2 v1.11.0 // indirect
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
 	github.com/google/uuid v1.6.0 // indirect
@@ -57,7 +56,7 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
-	github.com/mattn/go-isatty v0.0.18 // indirect
+	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-localereader v0.0.1 // indirect
 	github.com/mattn/go-runewidth v0.0.15
 	github.com/muesli/ansi v0.0.0-20230316100256-276c6243b2f6 // indirect
