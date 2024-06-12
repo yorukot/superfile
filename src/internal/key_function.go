@@ -80,7 +80,7 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) ( tea.Cmd) {
 			m.pasteItem()
 		}()
 
-	case containsKey(msg, hotkeys.CreateNewFilePanel):
+	case containsKey(msg, hotkeys.FilePanelItemCreate):
 		m.panelCreateNewFile()
 	case containsKey(msg, hotkeys.PinnedDirectory):
 		m.pinnedDirectory()
