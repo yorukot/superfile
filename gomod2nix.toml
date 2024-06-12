@@ -67,9 +67,6 @@ schema = 3
   [mod."github.com/davecgh/go-spew"]
     version = "v1.1.2-0.20180830191138-d8f796af33cc"
     hash = "sha256-fV9oI51xjHdOmEx6+dlq7Ku2Ag+m/bmbzPo6A4Y74qc="
-  [mod."github.com/deckarep/golang-set"]
-    version = "v1.8.0"
-    hash = "sha256-ELJKphksU9AOYwV3BtjvwPtUpbZvX9YMmo7eIiauQSc="
   [mod."github.com/dlclark/regexp2"]
     version = "v1.11.0"
     hash = "sha256-iXBBgykYu9Dcd+7LMJyRYc3Ry47jmuLGZFW13zU6toU="
@@ -100,12 +97,9 @@ schema = 3
   [mod."github.com/lucasb-eyer/go-colorful"]
     version = "v1.2.0"
     hash = "sha256-Gg9dDJFCTaHrKHRR1SrJgZ8fWieJkybljybkI9x0gyE="
-  [mod."github.com/masatana/go-textdistance"]
-    version = "v0.0.0-20191005053614-738b0edac985"
-    hash = "sha256-oFZqvacgNt5uHrfRCzpR2Z6BRGRepbhKdD+sU9PUCVo="
   [mod."github.com/mattn/go-isatty"]
-    version = "v0.0.18"
-    hash = "sha256-QpIn0DSggtBn2ocyj0RlXDKLK5F5KZG1/ogzrqBCjF8="
+    version = "v0.0.20"
+    hash = "sha256-qhw9hWtU5wnyFyuMbKx+7RB8ckQaFQ8D+8GKPkN3HHQ="
   [mod."github.com/mattn/go-localereader"]
     version = "v0.0.1"
     hash = "sha256-JlWckeGaWG+bXK8l8WEdZqmSiTwCA8b1qbmBKa/Fj3E="
@@ -139,6 +133,9 @@ schema = 3
   [mod."github.com/pmezard/go-difflib"]
     version = "v1.0.1-0.20181226105442-5d4384ee4fb2"
     hash = "sha256-XA4Oj1gdmdV/F/+8kMI+DBxKPthZ768hbKsO3d9Gx90="
+  [mod."github.com/reinhrst/fzf-lib"]
+    version = "v0.9.0"
+    hash = "sha256-UUe5g+oXopDj+JjvzAguqJ70/a4pqZhn7pdJiFE97yI="
   [mod."github.com/rivo/uniseg"]
     version = "v0.4.7"
     hash = "sha256-rDcdNYH6ZD8KouyyiZCUEy8JrjOQoAkxHBhugrfHjFo="
