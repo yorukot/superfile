@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@astrojs/starlight':
-        specifier: ^0.24.0
-        version: 0.24.1(astro@4.10.2)
+        specifier: ^0.24.2
+        version: 0.24.2(astro@4.10.2)
       '@expressive-code/plugin-collapsible-sections':
         specifier: ^0.35.0
         version: 0.35.3
@@ -24,7 +24,7 @@ importers:
         specifier: ^5.0.8
         version: 5.0.8
       astro:
-        specifier: ^4.10.2
+        specifier: ^4.4.9
         version: 4.10.2
       hast-util-to-html:
         specifier: ^9.0.0
@@ -61,8 +61,8 @@ packages:
   '@astrojs/sitemap@3.1.5':
     resolution: {integrity: sha512-GLdzJ01387Uzb8RKYpsYLlg/GzoPnGbmDeQNkarSE11i2+l9Qp8Nj/WoTEy9nkTS25fxxy0kxDfJmreeVleCqg==}
 
-  '@astrojs/starlight@0.24.1':
-    resolution: {integrity: sha512-5wuIdF8PfDpzEEjfNcmffDDLbi2GWT0XCJH9pk+Pw5+yftwC9QdGzYrY9Ui9kIaXcODlwvL62L04kHB50j4lhw==}
+  '@astrojs/starlight@0.24.2':
+    resolution: {integrity: sha512-hXFVBHcr2a4UwX5GDCNQEZsRXdgVlNzZ7txpI2jlMvtzbgfoLEGOHjaHpB5QTW/OCrRAMjcx9Zx0HxRliohaxQ==}
     peerDependencies:
       astro: ^4.8.6
 
@@ -2283,7 +2283,7 @@ snapshots:
       stream-replace-string: 2.0.0
       zod: 3.23.8
 
-  '@astrojs/starlight@0.24.1(astro@4.10.2)':
+  '@astrojs/starlight@0.24.2(astro@4.10.2)':
     dependencies:
       '@astrojs/mdx': 3.1.0(astro@4.10.2)
       '@astrojs/sitemap': 3.1.5
@@ -2296,7 +2296,7 @@ snapshots:
       hast-util-from-html: 2.0.1
       hast-util-select: 6.0.2
       hast-util-to-string: 3.0.0
-      hastscript: 8.0.0
+      hastscript: 9.0.0
       mdast-util-directive: 3.0.0
       mdast-util-to-markdown: 2.1.0
       pagefind: 1.1.0
