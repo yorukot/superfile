@@ -1,0 +1,63 @@
+# Blood
+# Theme create by: https://github.com/charlesrocket
+# Update by(sort by time):
+
+# Thank you!
+
+code_syntax_highlight = "onedark"
+
+# border
+file_panel_border = "#9a0000"
+sidebar_border = "#790000"
+footer_border = "#790000"
+
+# border active
+file_panel_border_active = "#ff0000"
+sidebar_border_active = "#ff0000"
+footer_border_active = "#ff0000"
+modal_border_active = "#ff0000"
+
+# background (bg)
+full_screen_bg = "#000000"
+file_panel_bg = "#000000"
+sidebar_bg = "#000000"
+footer_bg = "#000000"
+modal_bg = "#000000"
+
+# foreground (fg)
+full_screen_fg = "#f8f8f2"
+file_panel_fg = "#f8f8f2"
+sidebar_fg = "#f8f8f2"
+footer_fg = "#f8f8f2"
+modal_fg = "#f8f8f2"
+
+# special color
+cursor = "#ff0000"
+correct = "#47ef7d"
+error = "#d70000"
+hint = "#5bd9f3"
+cancel = "#6575ab"
+gradient_color = ["#720000", "#ff0000"]
+
+# file panel special items
+file_panel_top_directory_icon = "#ff522e"
+file_panel_top_path = "#ff9999"
+file_panel_item_selected_fg = "#ff8d34"
+file_panel_item_selected_bg = "#524549"
+
+# sidebar special items
+sidebar_title = "#dd0000"
+sidebar_item_selected_fg = "#000000"
+sidebar_item_selected_bg = "#ff8d34"
+sidebar_divider = "#615250"
+
+# modal special items
+modal_cancel_fg = "#f9f9fe"
+modal_cancel_bg = "#000042"
+
+modal_confirm_fg = "#f9f9fe"
+modal_confirm_bg = "#ffb86c"
+
+# help menu
+help_menu_hotkey = "#ff8d34"
+help_menu_title = "#ff6666"
