@@ -22,7 +22,7 @@ func InitIcon(nerdfont bool) {
 		Delete = ""
 
 		// other
-		Cursor = "⮀"
+		Cursor = ">"
 		Browser = ""
 		Select = ""
 		Error = ""
@@ -30,6 +30,6 @@ func InitIcon(nerdfont bool) {
 		Done = ""
 		InOperation = ""
 		Directory = ""
-
+		Search = ""
 	}
 }

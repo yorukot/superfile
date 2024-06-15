@@ -253,3 +253,12 @@ func (m *model) helpMenuKey(msg string) {
 	}
 
 }
+
+func (m *model) commandLineKey(msg string) {
+	switch msg {
+	case containsKey(msg, hotkeys.CancelTyping):
+		m.closeCommandLine()
+	case containsKey(msg, hotkeys.ConfirmTyping):
+		m.enterCommandLine()
+	}
+}

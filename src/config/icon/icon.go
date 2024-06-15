@@ -36,6 +36,7 @@ var (
 	Done        string = ""
 	InOperation string = "󰥔"
 	Directory   string = ""
+	Search      string = ""
 )
 
 /*

@@ -95,6 +95,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			footerHeight = 14
 		}
 
+		if m.commandLine.input.Focused() {
+			footerHeight--
+		}
+
 		m.mainPanelHeight = msg.Height - footerHeight + 1
 
 		// set help menu size
@@ -131,6 +135,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.focusOnSearchbarKey(msg.String())
 		} else if m.helpMenu.open {
 			m.helpMenuKey(msg.String())
+		} else if m.commandLine.input.Focused() {
+			m.commandLineKey(msg.String())
 		} else if m.confirmToQuit {
 			quit := m.confirmToQuitSuperfile(msg.String())
 			if quit {
@@ -163,6 +169,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.fileModel.filePanels[m.filePanelFocusIndex].rename, cmd = m.fileModel.filePanels[m.filePanelFocusIndex].rename.Update(msg)
 	} else if panel.searchBar.Focused() {
 		m.fileModel.filePanels[m.filePanelFocusIndex].searchBar, cmd = m.fileModel.filePanels[m.filePanelFocusIndex].searchBar.Update(msg)
+	} else if m.commandLine.input.Focused() {
+		m.commandLine.input, cmd =  m.commandLine.input.Update(msg)
 	} else if m.typingModal.open {
 		m.typingModal.textInput, cmd = m.typingModal.textInput.Update(msg)
 	}
@@ -206,7 +214,13 @@ func (m model) View() string {
 
 	clipboardBar := m.clipboardRender()
 
+
 	footer := lipgloss.JoinHorizontal(0, processBar, metaData, clipboardBar)
+
+	if m.commandLine.input.Focused() {
+		commandLine := m.commandLineInputBoxRender()
+		footer = lipgloss.JoinVertical(0, footer, commandLine)
+	}
 
 	finalRender := lipgloss.JoinVertical(0, mainPanel, footer)
 

@@ -93,9 +93,7 @@ type model struct {
 
 // Modal
 type commandLineModal struct {
-	input         string
-	open          bool
-	displayOutput bool
+	input         textinput.Model
 }
 
 type helpMenuModal struct {

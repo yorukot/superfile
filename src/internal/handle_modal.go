@@ -2,6 +2,7 @@ package internal
 
 import (
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 )
@@ -142,6 +143,28 @@ func (m *model) quitHelpMenu() {
 	m.helpMenu.open = false
 }
 
+// Command line
 func (m *model) openCommandLine() {
-	m.commandLine.open = true
+	m.firstTextInput = true
+	footerHeight--
+	m.commandLine.input = generateCommandLineInputBox()
+	m.commandLine.input.Width = m.fullWidth - 3
+	m.commandLine.input.Focus()
+}
+
+func (m *model) closeCommandLine() {
+	footerHeight++
+	m.commandLine.input.SetValue("")
+	m.commandLine.input.Blur()
+}
+
+func (m *model) enterCommandLine() {
+	cmd := exec.Command("/bin/sh", "-c", m.commandLine.input.Value())
+	// 执行命令并获取输出
+	_, err := cmd.CombinedOutput()
+	if err != nil {
+		outPutLog("Error run command line command", err)
+		return
+	}
+	m.commandLine.input.SetValue("")
 }

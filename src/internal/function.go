@@ -14,7 +14,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/lithammer/shortuuid"
 	"github.com/reinhrst/fzf-lib"
 	"github.com/yorukot/superfile/src/config/icon"
@@ -421,21 +420,6 @@ func countFiles(dirPath string) (int, error) {
 	})
 
 	return count, err
-}
-
-// Generate search bar for file panel
-func generateSearchBar() textinput.Model {
-	ti := textinput.New()
-	ti.Cursor.Style = footerCursorStyle
-	ti.Cursor.TextStyle = footerStyle
-	ti.TextStyle = filePanelStyle
-	ti.Prompt = filePanelTopDirectoryIconStyle.Render(" ")
-	ti.Cursor.Blink = true
-	ti.PlaceholderStyle = filePanelStyle
-	ti.Placeholder = "(" + hotkeys.SearchBar[0] + ") Type something"
-	ti.Blur()
-	ti.CharLimit = 156
-	return ti
 }
 
 // Check whether is broken recursive symlinks

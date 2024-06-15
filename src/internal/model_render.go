@@ -617,3 +617,7 @@ func (m model) filePreviewPanelRender() string {
 
 	return box.Render("\n --- " + icon.Error + " Unsupported formats ---")
 }
+
+func (m model) commandLineInputBoxRender() string {
+	return m.commandLine.input.View()
+}

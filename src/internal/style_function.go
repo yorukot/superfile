@@ -3,7 +3,9 @@ package internal
 import (
 	"strings"
 
+	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/yorukot/superfile/src/config/icon"
 )
 
 // Generate border style for file panel
@@ -208,4 +210,32 @@ func loadConfigError(value string) string {
 // Generate config error style
 func lodaHotkeysError(value string) string {
 	return lipgloss.NewStyle().Foreground(lipgloss.Color("#FF5555")).Render("■ ERROR: ") + "Hotkeys file \"" + lipgloss.NewStyle().Foreground(lipgloss.Color("#00D9FF")).Render(value) + "\" invalidation"
+}
+
+// Generate search bar for file panel
+func generateSearchBar() textinput.Model {
+	ti := textinput.New()
+	ti.Cursor.Style = footerCursorStyle
+	ti.Cursor.TextStyle = footerStyle
+	ti.TextStyle = filePanelStyle
+	ti.Prompt = filePanelTopDirectoryIconStyle.Render(icon.Search + icon.Space)
+	ti.Cursor.Blink = true
+	ti.PlaceholderStyle = filePanelStyle
+	ti.Placeholder = "(" + hotkeys.SearchBar[0] + ") Type something"
+	ti.Blur()
+	ti.CharLimit = 156
+	return ti
+}
+
+// Generate command line in the bottom
+func generateCommandLineInputBox() textinput.Model {
+	ti := textinput.New()
+	ti.Cursor.Style = footerCursorStyle
+	ti.Cursor.TextStyle = footerStyle
+	ti.TextStyle = filePanelStyle
+	ti.Prompt = filePanelTopDirectoryIconStyle.Render(icon.Cursor + icon.Space)
+	ti.Cursor.Blink = true
+	ti.PlaceholderStyle = filePanelStyle
+	ti.Blur()
+	return ti
 }
