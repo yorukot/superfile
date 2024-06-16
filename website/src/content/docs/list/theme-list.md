@@ -8,6 +8,13 @@ head:
 
 > Sort by A-Z
 
+## Blood
+
+- Theme name: `blood`
+- Author: github.com/charlesrocket
+
+![](https://github.com/yorukot/superfile/blob/main/asset/theme/blood.png?raw=true)
+
 ## Catppuccin
 
 - Theme name: `catppuccin`
@@ -49,6 +56,13 @@ head:
 - Author: github.com/yorukot
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/gruvbox.png?raw=true)
+
+## Hacks
+
+- Theme name: `hacks`
+- Author: github.com/charlesrocket
+
+![](https://github.com/yorukot/superfile/blob/main/asset/theme/hacks.png?raw=true)
 
 ## Kaolin
 
