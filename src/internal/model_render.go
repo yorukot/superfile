@@ -565,10 +565,34 @@ func (m model) filePreviewPanelRender() string {
 	if format != nil {
 		var codeHighlight string
 		var err error
+		var fileContent string
+		file, err := os.Open(itemPath)
+		if err != nil {
+			outPutLog(err)
+			return box.Render("\n --- " + icon.Error + " Error open file ---")
+		}
+		defer file.Close()
+
+		scanner := bufio.NewScanner(file)
+		lineCount := 0
+
+		maxLineLength := m.fileModel.width + 20
+		for scanner.Scan() {
+			line := scanner.Text()
+			if len(line) > maxLineLength {
+				line = line[:maxLineLength] // 截取超出部分
+			}
+			fileContent += line + "\n"
+			lineCount++
+			if previewLine > 0 && lineCount >= previewLine {
+				break
+			}
+		}
+
 		if Config.TransparentBackground {
-			codeHighlight, err = ansichroma.HighlightFromFile(itemPath, previewLine, theme.CodeSyntaxHighlightTheme, "")
+			codeHighlight, err = ansichroma.HightlightString(fileContent, format.Config().Name, theme.CodeSyntaxHighlightTheme, "")
 		} else {
-			codeHighlight, err = ansichroma.HighlightFromFile(itemPath, previewLine, theme.CodeSyntaxHighlightTheme, theme.FilePanelBG)
+			codeHighlight, err = ansichroma.HightlightString(fileContent, format.Config().Name, theme.CodeSyntaxHighlightTheme, theme.FilePanelBG)
 		}
 		if err != nil {
 			outPutLog("Error render code highlight", err)
@@ -577,7 +601,9 @@ func (m model) filePreviewPanelRender() string {
 		if codeHighlight == "" {
 			return box.Render("\n --- empty ---")
 		}
+		
 		codeHighlight = checkAndTruncateLineLengths(codeHighlight, m.fileModel.filePreview.width)
+
 		return box.Render(codeHighlight)
 	} else {
 		textFile, err := isTextFile(itemPath)
