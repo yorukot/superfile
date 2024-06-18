@@ -11,96 +11,96 @@ head:
 ## Blood
 
 - Theme name: `blood`
-- Author: github.com/charlesrocket
+- Ported by: github.com/charlesrocket
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/blood.png?raw=true)
 
 ## Catppuccin
 
 - Theme name: `catppuccin`
-- Author: github.com/AnshumanNeon
+- Ported by: github.com/AnshumanNeon
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/catppuccin.png?raw=true)
 
 ## Catppuccin Frappe
 
 - Theme name: `catppuccin-frappe`
-- Author: github.com/GV14982
+- Ported by: github.com/GV14982
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/catppuccin-frappe.png?raw=true)
 
 ## Catppuccin Latte
 
 - Theme name: `catppuccin-latte`
-- Author: github.com/GV14982
+- Ported by: github.com/GV14982
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/catppuccin-latte.png?raw=true)
 
 ## Catppuccin Macchiato
 
 - Theme name: `catppuccin-macchiato`
-- Author: github.com/GV14982
+- Ported by: github.com/GV14982
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/catppuccin-macchiato.png?raw=true)
 
 ## Dracula
 
 - Theme name: `dracula`
-- Author: github.com/BeanieBarrow
+- Ported by: github.com/BeanieBarrow
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/dracula.png?raw=true)
 
 ## Gruvbox
 
 - Theme name: `gruvbox`
-- Author: github.com/yorukot
+- Ported by: github.com/yorukot
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/gruvbox.png?raw=true)
 
 ## Hacks
 
 - Theme name: `hacks`
-- Author: github.com/charlesrocket
+- Ported by: github.com/charlesrocket
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/hacks.png?raw=true)
 
 ## Kaolin
 
 - Theme name: `kaolin`
-- Author: github.com/AnshumqanNeon
+- Ported by: github.com/AnshumqanNeon
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/kaolin.png?raw=true)
 
 ## Nord
 
 - Theme name: `nord`
-- Author: github.com/ramses-eltany
+- Ported by: github.com/ramses-eltany
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/nord.png?raw=true)
 
 ## Poimandres
 
 - Theme name: `poimandres`
-- Author: github.com/Myles-J
+- Ported by: github.com/Myles-J
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/poimandres.png?raw=true)
 
 ## Rosé Pine
 
 - Theme name: `rose-pine`
-- Author: github.com/pearcidar
+- Ported by: github.com/pearcidar
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/rose-pine.png?raw=true)
 
 ## Sugarplum
 - Theme name: `sugarplum`
-- Author: github.com/lemonlime0x3C33
+- Ported by: github.com/lemonlime0x3C33
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/sugarplum.png?raw=true)
 
 ## Tokyonight
 
 - Theme name: `tokyonight`
-- Author: github.com/pearcidar
+- Ported By: github.com/pearcidar
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/tokyonight.png?raw=true)
