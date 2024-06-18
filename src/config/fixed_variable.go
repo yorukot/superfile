@@ -9,7 +9,7 @@ var SuperFileDataDir = xdg.DataHome + "/superfile"
 var SuperFileStateDir = xdg.StateHome + "/superfile"
 
 const (
-	CurrentVersion      string = "v1.1.3"
+	CurrentVersion      string = "v1.1.4"
 	LatestVersionURL    string = "https://api.github.com/repos/yorukot/superfile/releases/latest"
 	LatestVersionGithub string = "github.com/yorukot/superfile/releases/latest"
 )
