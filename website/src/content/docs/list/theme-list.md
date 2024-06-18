@@ -107,6 +107,7 @@ head:
 ## Sugarplum
 - Theme name: `sugarplum`
 - Ported by: github.com/lemonlime0x3C33
+- Original Author: https://github.com/lemonlime0x3C33
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/sugarplum.png?raw=true)
 
