@@ -451,11 +451,11 @@ func (m model) helpMenuRender() string {
 
 		for i, key := range m.helpMenu.data[i].hotkey {
 			if i != 0 {
-				hotkey += " | " 
+				hotkey += " | "
 			}
 			hotkey += key
 		}
-		
+
 		if len(helpMenuHotkeyStyle.Render(hotkey)) > renderHotkeyLength {
 			renderHotkeyLength = len(helpMenuHotkeyStyle.Render(hotkey))
 		}
@@ -474,10 +474,10 @@ func (m model) helpMenuRender() string {
 
 		hotkey := ""
 		description := truncateText(m.helpMenu.data[i].description, valueLength, "...")
-		
+
 		for i, key := range m.helpMenu.data[i].hotkey {
 			if i != 0 {
-				hotkey += " | " 
+				hotkey += " | "
 			}
 			hotkey += key
 		}
@@ -580,7 +580,7 @@ func (m model) filePreviewPanelRender() string {
 		for scanner.Scan() {
 			line := scanner.Text()
 			if len(line) > maxLineLength {
-				line = line[:maxLineLength] // 截取超出部分
+				line = line[:maxLineLength]
 			}
 			fileContent += line + "\n"
 			lineCount++
@@ -601,7 +601,7 @@ func (m model) filePreviewPanelRender() string {
 		if codeHighlight == "" {
 			return box.Render("\n --- empty ---")
 		}
-		
+
 		codeHighlight = checkAndTruncateLineLengths(codeHighlight, m.fileModel.filePreview.width)
 
 		return box.Render(codeHighlight)
