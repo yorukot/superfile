@@ -81,11 +81,23 @@ tar -xzf "${file_name}.tar.gz"
 echo -e "${bright_yellow}Installing ${cyan}${package}...${nc}"
 cd ./dist/${file_name}
 chmod +x ./spf
-if sudo mv ./spf /usr/local/bin/; then
+echo -e "${yellow}Press ctrl+C to not install as sudo and try locally.${nc}"
+if ! sudo mv ./spf /usr/local/bin/; then
+  echo -e "${yellow}Unable to move binary to /usr/local/bin. Do you have sudo permissions?${nc}"
+  mkdir -p ~/.local/bin
+  if ! mv ./spf ~/.local/bin/; then
+    echo -e "${red}❌ Failed to install superfile: Unable to move to ~/.local/bin as well.${nc}"
+  else
+    if ! [[ ":$PATH:" == *":$HOME/.local/bin:"* ]]; then
+      export PATH="${PATH}:${HOME}/.local/bin"
+      echo 'export PATH="${PATH}:${HOME}/.local/bin"' >> ~/.bashrc
+    fi
+    echo -e "🎉 ${bright_cyan}Local ${bright_green}Installation complete!${nc}"
+    echo -e "${bright_cyan}You can type ${white}\"${bright_yellow}spf${white}\" ${bright_cyan}to start!${nc}"
+  fi
+else
   echo -e "🎉 ${bright_green}Installation complete!${nc}"
   echo -e "${bright_cyan}You can type ${white}\"${bright_yellow}spf${white}\" ${bright_cyan}to start!${nc}"
-else
-  echo -e "${red}❌ Fail install superfile: ${yellow}Unable to move binary to /usr/local/bin. Do you have sudo permissions?${nc}"
 fi
 
 rm -rf "$temp_dir"
