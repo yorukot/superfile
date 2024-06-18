@@ -12,6 +12,7 @@ head:
 
 - Theme name: `blood`
 - Ported by: github.com/charlesrocket
+- Original Author: 
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/blood.png?raw=true)
 
@@ -19,6 +20,7 @@ head:
 
 - Theme name: `catppuccin`
 - Ported by: github.com/AnshumanNeon
+- Original Author: https://github.com/catppuccin
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/catppuccin.png?raw=true)
 
@@ -26,6 +28,7 @@ head:
 
 - Theme name: `catppuccin-frappe`
 - Ported by: github.com/GV14982
+- Original Author: https://github.com/catppuccin
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/catppuccin-frappe.png?raw=true)
 
@@ -33,6 +36,7 @@ head:
 
 - Theme name: `catppuccin-latte`
 - Ported by: github.com/GV14982
+- Original Author: https://github.com/catppuccin
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/catppuccin-latte.png?raw=true)
 
@@ -40,6 +44,7 @@ head:
 
 - Theme name: `catppuccin-macchiato`
 - Ported by: github.com/GV14982
+- Original Author: https://github.com/catppuccin
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/catppuccin-macchiato.png?raw=true)
 
@@ -47,6 +52,7 @@ head:
 
 - Theme name: `dracula`
 - Ported by: github.com/BeanieBarrow
+- Original Author: https://github.com/zenorocha
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/dracula.png?raw=true)
 
@@ -54,6 +60,7 @@ head:
 
 - Theme name: `gruvbox`
 - Ported by: github.com/yorukot
+- Original Author: https://github.com/morhetz/
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/gruvbox.png?raw=true)
 
@@ -68,6 +75,7 @@ head:
 
 - Theme name: `kaolin`
 - Ported by: github.com/AnshumqanNeon
+- Original Author: https://github.com/ogdenwebb/
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/kaolin.png?raw=true)
 
@@ -75,6 +83,7 @@ head:
 
 - Theme name: `nord`
 - Ported by: github.com/ramses-eltany
+- Original Author: https://github.com/nordtheme
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/nord.png?raw=true)
 
@@ -82,6 +91,7 @@ head:
 
 - Theme name: `poimandres`
 - Ported by: github.com/Myles-J
+- Original Author: https://github.com/drcmda/
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/poimandres.png?raw=true)
 
@@ -89,6 +99,7 @@ head:
 
 - Theme name: `rose-pine`
 - Ported by: github.com/pearcidar
+- Original Author: https://github.com/rose-pine
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/rose-pine.png?raw=true)
 
@@ -101,6 +112,7 @@ head:
 ## Tokyonight
 
 - Theme name: `tokyonight`
-- Ported By: github.com/pearcidar
+- Ported by: github.com/pearcidar
+- Original Author: https://github.com/enkia/
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/tokyonight.png?raw=true)
