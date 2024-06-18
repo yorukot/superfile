@@ -12,7 +12,7 @@ head:
 
 - Theme name: `blood`
 - Ported by: github.com/charlesrocket
-- Original Author: 
+- Original Author: https://github.com/charlesrocket
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/blood.png?raw=true)
 
@@ -67,7 +67,8 @@ head:
 ## Hacks
 
 - Theme name: `hacks`
-- Ported by: github.com/charlesrocket
+- Ported by: https://github.com/charlesrocket
+- Original Author: https://github.com/charlesrocket
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/hacks.png?raw=true)
 
