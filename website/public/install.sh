@@ -81,11 +81,54 @@ tar -xzf "${file_name}.tar.gz"
 echo -e "${bright_yellow}Installing ${cyan}${package}...${nc}"
 cd ./dist/${file_name}
 chmod +x ./spf
-if sudo mv ./spf /usr/local/bin/; then
+echo -e "${yellow}Press ctrl+C to not install as sudo and try locally.${nc}"
+if ! sudo mv ./spf /usr/local/bin/; then
+  echo -e "${yellow}Unable to move binary to /usr/local/bin. Do you have sudo permissions?${nc}"
+  mkdir -p ~/.local/bin
+  if ! mv ./spf ~/.local/bin/; then
+    echo -e "${red}❌ Failed to install superfile: Unable to move to ~/.local/bin as well.${nc}"
+  else
+    if ! [[ ":$PATH:" == *":$HOME/.local/bin:"* ]]; then
+      shell_found_and_not_bash=1
+      case $SHELL in
+        */bash)
+          echo 'export PATH="${HOME}/.local/bin":${PATH}' >> ~/.bashrc
+          shell_found_and_not_bash=0
+          ;;
+        */zsh)
+          echo 'export PATH="${HOME}/.local/bin":${PATH}' >> ~/.zshrc
+          ;;
+        */fish)
+          echo 'fish_add_path "${HOME}/.local/bin"' >> ~/.config/fish/config.fish 
+          ;;
+        */ksh)
+          echo 'export PATH="${HOME}/.local/bin":${PATH}' >> ~/.kshrc
+          ;;
+        */xonsh)
+          echo '$PATH.prepend("${HOME}/.local/bin")' >> ~/.xonshrc
+          ;;
+        */csh)
+          echo 'setenv PATH "${HOME}/.local/bin":${PATH}' >> ~/.cshrc
+          ;;
+        */tcsh)
+          echo 'setenv PATH "${HOME}/.local/bin":${PATH}' >> ~/.tshrc
+          ;;
+        *)
+          echo -e "${red}Unsupported shell: ${SHELL}. Please add ${white}\"${bright_cyan}\${HOME}/.local/bin${white}\" ${red}to PATH in your shell's config file.${red}"
+          shell_found_and_not_bash=0
+          ;;
+      esac
+      if [ $shell_found_and_not_bash == 1 ]; then
+        echo -e "${white}\"${bright_purple}${HOME}/.local/bin${white}\"${yellow} has been added to your PATH.${nc}"
+        echo -e "${yellow}Please source your config file/relogin.${nc}"
+      fi
+    fi
+    echo -e "🎉 ${bright_cyan}Local ${bright_green}Installation complete!${nc}"
+    echo -e "${bright_cyan}You can type ${white}\"${bright_yellow}spf${white}\" ${bright_cyan}to start!${nc}"
+  fi
+else
   echo -e "🎉 ${bright_green}Installation complete!${nc}"
   echo -e "${bright_cyan}You can type ${white}\"${bright_yellow}spf${white}\" ${bright_cyan}to start!${nc}"
-else
-  echo -e "${red}❌ Fail install superfile: ${yellow}Unable to move binary to /usr/local/bin. Do you have sudo permissions?${nc}"
 fi
 
 rm -rf "$temp_dir"
