@@ -178,11 +178,6 @@ func getHelpMenuData() []helpMenuModalData {
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         hotkeys.ToggleDotFile,
-			description:    "Toggle to show dotfiles or not",
-			hotkeyWorkType: globalType,
-		},
-		{
 			subTitle: "File operations",
 		},
 		{
