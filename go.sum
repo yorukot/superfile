@@ -48,6 +48,8 @@ github.com/charmbracelet/bubbletea v0.26.4 h1:2gDkkzLZaTjMl/dQBpNVtnvcCxsh/FCkim
 github.com/charmbracelet/bubbletea v0.26.4/go.mod h1:P+r+RRA5qtI1DOHNFn0otoNwB4rn+zNAzSj/EXz6xU0=
 github.com/charmbracelet/bubbletea v0.26.5 h1:90pqTPElAReb/qQUgSMUresTkfwVr0Wx+zczeHHOgxk=
 github.com/charmbracelet/bubbletea v0.26.5/go.mod h1:dz8CWPlfCCGLFbBlTY4N7bjLiyOGDJEnd2Muu7pOWhk=
+github.com/charmbracelet/bubbletea v0.26.6 h1:zTCWSuST+3yZYZnVSvbXwKOPRSNZceVeqpzOLN2zq1s=
+github.com/charmbracelet/bubbletea v0.26.6/go.mod h1:dz8CWPlfCCGLFbBlTY4N7bjLiyOGDJEnd2Muu7pOWhk=
 github.com/charmbracelet/harmonica v0.2.0 h1:8NxJWRWg/bzKqqEaaeFNipOu77YR5t8aSwG4pgaUBiQ=
 github.com/charmbracelet/harmonica v0.2.0/go.mod h1:KSri/1RMQOZLbw7AHqgcBycp8pgJnQMYYT8QZRqZ1Ao=
 github.com/charmbracelet/lipgloss v0.10.0 h1:KWeXFSexGcfahHX+54URiZGkBFazf70JNMtwg/AFW3s=
