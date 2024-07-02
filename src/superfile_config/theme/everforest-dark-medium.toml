@@ -1,0 +1,67 @@
+# Everforest Dark Medium
+# Theme create by: https://github.com/dotintegral
+# Update by(sort by time):
+# 
+# Thanks for all contributor!!
+
+# If you want to make border display just set it same as sidebar background color
+
+# Code syntax highlight theme (you can go to https://github.com/alecthomas/chroma/blob/master/styles to find one you like)
+code_syntax_highlight = "catppuccin-macchiato"
+
+# ========= Border =========
+file_panel_border = "#859289" 
+sidebar_border = "#2D353B" 
+footer_border = "#859289" 
+
+# ========= Border Active =========
+file_panel_border_active = "#FFF1C5"
+sidebar_border_active = "#DBBC7F" 
+footer_border_active = "#DBBC7F" 
+modal_border_active = "#859289" 
+
+# ========= Background (bg) =========
+full_screen_bg = "#2D353B" 
+file_panel_bg = "#2D353B"
+sidebar_bg = "#2D353B"
+footer_bg = "#2D353B"
+modal_bg = "#2D353B"
+
+# ========= Foreground (fg) =========
+full_screen_fg = "#D3C6AA" 
+file_panel_fg = "#D3C6AA"
+sidebar_fg = "#D3C6AA"
+footer_fg = "#D3C6AA"
+modal_fg = "#D3C6AA"
+
+# ========= Special Color =========
+cursor = "#A7C080" 
+correct = "#A7C080" 
+error = "#E67E80" 
+hint = "#7FBBB3"  
+cancel = "#859289" 
+# Gradient color can only have two color!
+gradient_color = ["#A7C080", "#E67E80"] 
+
+# ========= File Panel Special Items =========
+file_panel_top_directory_icon = "#A7C080" 
+file_panel_top_path = "#7FBBB3" 
+file_panel_item_selected_fg = "#D699B6" 
+file_panel_item_selected_bg = "#232A2E" 
+
+# ========= Sidebar Special Items =========
+sidebar_title = "#D699B6" 
+sidebar_item_selected_fg = "#E69875" 
+sidebar_item_selected_bg = "#2D353B" 
+sidebar_divider = "#859289" 
+
+# ========= Modal Special Items =========
+modal_cancel_fg = "#D3C6AA" 
+modal_cancel_bg = "#232A2E" 
+
+modal_confirm_fg = "#D3C6AA" 
+modal_confirm_bg = "#E69875" 
+
+# ========= Help Menu =========
+help_menu_hotkey = "#A7C080" 
+help_menu_title = "#E69875" 
