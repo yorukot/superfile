@@ -3,7 +3,7 @@ module github.com/yorukot/superfile
 go 1.22.2
 
 require (
-	github.com/adrg/xdg v0.4.0
+	github.com/adrg/xdg v0.5.0
 	github.com/alecthomas/chroma v0.10.0
 	github.com/atotto/clipboard v0.1.4
 	github.com/barasher/go-exiftool v1.10.0
