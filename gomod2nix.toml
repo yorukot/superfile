@@ -152,14 +152,14 @@ schema = 3
     version = "v0.5.11"
     hash = "sha256-SUyrjc2wyN3cTGKe5JdBEXjtZC1rJySRxJHVUZ59row="
   [mod."github.com/urfave/cli/v2"]
-    version = "v2.27.2"
-    hash = "sha256-P0yLmx2a2hIQjQ/RXKLG8ehI5eVivnettuMFr8MznFY="
+    version = "v2.27.3"
+    hash = "sha256-9xfMFv4e3YKJK6lPRBH7KHmNf3MdRxmksjjxsvfSeEI="
   [mod."github.com/xo/terminfo"]
     version = "v0.0.0-20220910002029-abceb7e1c41e"
     hash = "sha256-GyCDxxMQhXA3Pi/TsWXpA8cX5akEoZV7CFx4RO3rARU="
   [mod."github.com/xrash/smetrics"]
-    version = "v0.0.0-20240312152122-5f08fbb34913"
-    hash = "sha256-ySUTdeoOUi3QcLEJBYvCDIhVrsrD2Ks6/4V9n4hCvBk="
+    version = "v0.0.0-20240521201337-686a1a2994c1"
+    hash = "sha256-CsyN59w6sKERDI5kkdpq0YKmqdixyCHuN4FYE/56/BQ="
   [mod."github.com/yorukot/ansichroma"]
     version = "v0.1.0"
     hash = "sha256-aIQZ16auuGfGLltKt2lm2T83f4sALrmRpOujxQepkS4="
