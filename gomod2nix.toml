@@ -47,7 +47,7 @@ schema = 3
     version = "v0.1.2"
     hash = "sha256-Gq4kkBH1pNjR0kHk1LSueZskGM4jbyIbHymqUnmFhBs="
   [mod."github.com/charmbracelet/x/exp/term"]
-    version = "v0.0.0-20240722160745-212f7b056ed0"
+    version = "v0.0.0-20240725160154-f9f6568126ec"
     hash = "sha256-kbLB1lNbLwLeMLLUcVfOGcE1CJTZYHs9CY1b/fnOmZ4="
   [mod."github.com/charmbracelet/x/input"]
     version = "v0.1.0"
