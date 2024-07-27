@@ -78,6 +78,8 @@ github.com/charmbracelet/x/exp/term v0.0.0-20240709134850-9d428570ae29 h1:HBEyS4
 github.com/charmbracelet/x/exp/term v0.0.0-20240709134850-9d428570ae29/go.mod h1:fWgEZxV4wKHVWeYwyVLoZTlG+V326QA6xT0tLlgQ3aM=
 github.com/charmbracelet/x/exp/term v0.0.0-20240710172756-1a5969e3146f h1:oZ6+BoHPgZK7nlxCwBeJoQDC1ATL4klqJce1GiKXUbQ=
 github.com/charmbracelet/x/exp/term v0.0.0-20240710172756-1a5969e3146f/go.mod h1:fWgEZxV4wKHVWeYwyVLoZTlG+V326QA6xT0tLlgQ3aM=
+github.com/charmbracelet/x/exp/term v0.0.0-20240722160745-212f7b056ed0 h1:QpckqHHCNP4JM+bSzR3Bn+dRWQ6bNM8TFH3OM4h+Xn8=
+github.com/charmbracelet/x/exp/term v0.0.0-20240722160745-212f7b056ed0/go.mod h1:YG0dzr31td4jqC86wFlB8fJGgPwqPgTSa8VC0Hf7u+k=
 github.com/charmbracelet/x/input v0.1.0 h1:TEsGSfZYQyOtp+STIjyBq6tpRaorH0qpwZUj8DavAhQ=
 github.com/charmbracelet/x/input v0.1.0/go.mod h1:ZZwaBxPF7IG8gWWzPUVqHEtWhc1+HXJPNuerJGRGZ28=
 github.com/charmbracelet/x/term v0.1.1 h1:3cosVAiPOig+EV4X9U+3LDgtwwAoEzJjNdwbXDjF6yI=
