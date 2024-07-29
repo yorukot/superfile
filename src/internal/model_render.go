@@ -508,10 +508,19 @@ func (m model) filePreviewPanelRender() string {
 	itemPath := panel.element[panel.cursor].location
 
 	fileInfo, err := os.Stat(itemPath)
+
 	if err != nil {
 		outPutLog("error get file info", err)
 		return box.Render("\n --- " + icon.Error + " Error get file info ---")
 	}
+	
+	ext := filepath.Ext(itemPath)
+
+	// check if the file is pdf file, cuz pdf will cause error
+	if ext == "pdf" {
+		return box.Render("\n --- " + icon.Error + " Unsupported  formats ---")
+	}	
+
 	if fileInfo.IsDir() {
 		directoryContent := ""
 		dirPath := itemPath
