@@ -323,6 +323,7 @@ func (m *model) returnMetaData() {
 			m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"FolderSize", formatFileSize(dirSize(filePath))})
 		}
 		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"FolderModifyDate", fileInfo.ModTime().String()})
+		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"FolderPermissions", fileInfo.Mode().String()})
 		message.metadata = m.fileMetaData.metaData
 		channel <- message
 		return
@@ -353,6 +354,7 @@ func (m *model) returnMetaData() {
 		fileName := [2]string{"FileName", fileInfo.Name()}
 		fileSize := [2]string{"FileSize", formatFileSize(fileInfo.Size())}
 		fileModifyData := [2]string{"FileModifyDate", fileInfo.ModTime().String()}
+		filePermissions := [2]string{"FilePermissions", fileInfo.Mode().String()}
 
 		if Config.EnableMD5Checksum {
 			// Calculate MD5 checksum
@@ -365,7 +367,7 @@ func (m *model) returnMetaData() {
 			}
 		}
 
-		m.fileMetaData.metaData = append(m.fileMetaData.metaData, fileName, fileSize, fileModifyData)
+		m.fileMetaData.metaData = append(m.fileMetaData.metaData, fileName, fileSize, fileModifyData, filePermissions)
 	}
 
 	message.metadata = m.fileMetaData.metaData

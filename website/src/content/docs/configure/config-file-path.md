@@ -14,25 +14,25 @@ If you want to get the set path you can try `spf pl` which will print out the fi
 
 #### Config directory
 
-|         Linux         |              MacOs              |          Windows           |
+|         Linux         |              macOS              |          Windows           |
 | :-------------------: | :-----------------------------: | :------------------------: |
-| `~/.config/superfile` | `~/Library/Application Support` | `%LOCALAPPDATA%/superfile` |
+| `~/.config/superfile` | `~/Library/Application Support/superfile` | `%LOCALAPPDATA%/superfile` |
 
 #### Theme directory
 
-|            Linux            |                      MacOs                      |             Windows              |
+|            Linux            |                      macOS                      |             Windows              |
 | :-------------------------: | :---------------------------------------------: | :------------------------------: |
 | `~/.config/superfile/theme` | `~/Library/Application Support/superfile/theme` | `%LOCALAPPDATA%/superfile/theme` |
 
 #### Data directory
 
-|           Linux            |                   MacOs                    |          Windows           |
+|           Linux            |                   macOS                    |          Windows           |
 | :------------------------: | :----------------------------------------: | :------------------------: |
 | `~/.local/share/superfile` | `~/Library/Application Support/superfile/` | `%LOCALAPPDATA%/superfile` |
 
 #### Log directory
 
-|           Linux            |                   MacOs                   |          Windows           |
+|           Linux            |                   macOS                   |          Windows           |
 | :------------------------: | :---------------------------------------: | :------------------------: |
 | `~/.local/state/superfile` | `~/Library/Application Support/superfile` | `%LOCALAPPDATA%/superfile` |
 
@@ -42,18 +42,18 @@ If you want to get the set path you can try `spf pl` which will print out the fi
 
 #### Config
 
-|               Linux               |                    MacOs                    |                Windows                 |
+|               Linux               |                    macOS                    |                Windows                 |
 | :-------------------------------: | :-----------------------------------------: | :------------------------------------: |
-| `~/.config/superfile/config.toml` | `~/Library/Application Support/config.toml` | `%LOCALAPPDATA%/superfile/config.toml` |
+| `~/.config/superfile/config.toml` | `~/Library/Application Support/superfile/config.toml` | `%LOCALAPPDATA%/superfile/config.toml` |
 
 #### Hotkeys
 
-|               Linux                |                    MacOs                     |                 Windows                 |
+|               Linux                |                    macOS                     |                 Windows                 |
 | :--------------------------------: | :------------------------------------------: | :-------------------------------------: |
-| `~/.config/superfile/hotkeys.toml` | `~/Library/Application Support/hotkeys.toml` | `%LOCALAPPDATA%/superfile/hotkeys.toml` |
+| `~/.config/superfile/hotkeys.toml` | `~/Library/Application Support/superfile/hotkeys.toml` | `%LOCALAPPDATA%/superfile/hotkeys.toml` |
 
 #### Log file
 
-|                  Linux                   |                          MacOs                          |                 Windows                  |
+|                  Linux                   |                          macOS                          |                 Windows                  |
 | :--------------------------------------: | :-----------------------------------------------------: | :--------------------------------------: |
 | `~/.local/state/superfile/superfile.log` | `~/Library/Application Support/superfile/superfile.log` | `%LOCALAPPDATA%/superfile/superfile.log` |

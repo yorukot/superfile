@@ -2,8 +2,8 @@ schema = 3
 
 [mod]
   [mod."github.com/adrg/xdg"]
-    version = "v0.4.0"
-    hash = "sha256-zGjkdUQmrVqD6rMO9oDY+TeJCpuqnHyvkPCaXDlac/U="
+    version = "v0.5.0"
+    hash = "sha256-hYxtRzeFzT+4zbslWSZWmUJf+OBDmCiwL0D/0Ry8Z2I="
   [mod."github.com/alecthomas/chroma"]
     version = "v0.10.0"
     hash = "sha256-p721vddVTv4iv1O0/dqpdk5xF6x9iLIHcrfh8JEVnqQ="
@@ -35,8 +35,8 @@ schema = 3
     version = "v0.18.0"
     hash = "sha256-FVKLet2anNB6gupLYXO4kJaKQIXs1dg2dZ2ooaBiEZU="
   [mod."github.com/charmbracelet/bubbletea"]
-    version = "v0.26.5"
-    hash = "sha256-xR/27FqXmQRcT9YhqlIjYwL125UMu0SAxPGG03FbGsc="
+    version = "v0.26.6"
+    hash = "sha256-D34zyOdsT/FJOquYzfSLO9hVujpAUCvS/LtmL/vcG6E="
   [mod."github.com/charmbracelet/harmonica"]
     version = "v0.2.0"
     hash = "sha256-fi5N0IXhSbbYHdSZFngCfpT4kdiEaKedqj8YpnlvX0o="
@@ -47,8 +47,8 @@ schema = 3
     version = "v0.1.2"
     hash = "sha256-Gq4kkBH1pNjR0kHk1LSueZskGM4jbyIbHymqUnmFhBs="
   [mod."github.com/charmbracelet/x/exp/term"]
-    version = "v0.0.0-20240621151055-6ef6757dbe52"
-    hash = "sha256-pF7nNyy3hN7mo6oThDBWcsy5npUB1hdD7KQRwJfmdNk="
+    version = "v0.0.0-20240725160154-f9f6568126ec"
+    hash = "sha256-kbLB1lNbLwLeMLLUcVfOGcE1CJTZYHs9CY1b/fnOmZ4="
   [mod."github.com/charmbracelet/x/input"]
     version = "v0.1.0"
     hash = "sha256-oPt488pHiPGn9SiWZBjDGEYq2f8npDA8UIVX1MJ9pSk="
@@ -104,8 +104,8 @@ schema = 3
     version = "v0.0.1"
     hash = "sha256-JlWckeGaWG+bXK8l8WEdZqmSiTwCA8b1qbmBKa/Fj3E="
   [mod."github.com/mattn/go-runewidth"]
-    version = "v0.0.15"
-    hash = "sha256-WP39EU2UrQbByYfnwrkBDoKN7xzXsBssDq3pNryBGm0="
+    version = "v0.0.16"
+    hash = "sha256-NC+ntvwIpqDNmXb7aixcg09il80ygq6JAnW0Gb5b/DQ="
   [mod."github.com/muesli/ansi"]
     version = "v0.0.0-20230316100256-276c6243b2f6"
     hash = "sha256-qRKn0Bh2yvP0QxeEMeZe11Vz0BPFIkVcleKsPeybKMs="
@@ -152,14 +152,14 @@ schema = 3
     version = "v0.5.11"
     hash = "sha256-SUyrjc2wyN3cTGKe5JdBEXjtZC1rJySRxJHVUZ59row="
   [mod."github.com/urfave/cli/v2"]
-    version = "v2.27.2"
-    hash = "sha256-P0yLmx2a2hIQjQ/RXKLG8ehI5eVivnettuMFr8MznFY="
+    version = "v2.27.3"
+    hash = "sha256-9xfMFv4e3YKJK6lPRBH7KHmNf3MdRxmksjjxsvfSeEI="
   [mod."github.com/xo/terminfo"]
     version = "v0.0.0-20220910002029-abceb7e1c41e"
     hash = "sha256-GyCDxxMQhXA3Pi/TsWXpA8cX5akEoZV7CFx4RO3rARU="
   [mod."github.com/xrash/smetrics"]
-    version = "v0.0.0-20240312152122-5f08fbb34913"
-    hash = "sha256-ySUTdeoOUi3QcLEJBYvCDIhVrsrD2Ks6/4V9n4hCvBk="
+    version = "v0.0.0-20240521201337-686a1a2994c1"
+    hash = "sha256-CsyN59w6sKERDI5kkdpq0YKmqdixyCHuN4FYE/56/BQ="
   [mod."github.com/yorukot/ansichroma"]
     version = "v0.1.0"
     hash = "sha256-aIQZ16auuGfGLltKt2lm2T83f4sALrmRpOujxQepkS4="
@@ -173,8 +173,8 @@ schema = 3
     version = "v0.7.0"
     hash = "sha256-2ETllEu2GDWoOd/yMkOkLC2hWBpKzbVZ8LhjLu0d2A8="
   [mod."golang.org/x/sys"]
-    version = "v0.21.0"
-    hash = "sha256-gapzPWuEqY36V6W2YhIDYR49sEvjJRd7bSuf9K1f4JY="
+    version = "v0.22.0"
+    hash = "sha256-RbG0XaXGGlErCsl2agvUxMnrkRwdbJLmriYT1H24FwA="
   [mod."golang.org/x/text"]
     version = "v0.14.0"
     hash = "sha256-yh3B0tom1RfzQBf1RNmfdNWF1PtiqxV41jW1GVS6JAg="
