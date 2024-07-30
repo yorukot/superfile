@@ -34,10 +34,18 @@
 
 ## Installation
 
-Quick install (Support MacOs and linux)
+### Quick install 
+
+Using bash (Support MacOS and linux)
 
 ```bash
-bash -c "$(wget -qO- https://superfile.netlify.app/install.sh)"
+bash -c "$(curl -sLo- https://superfile.netlify.app/install.sh)"
+```
+
+Using powershell (Support Windows)
+
+```powershell
+powershell -ExecutionPolicy Bypass -Command "Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://superfile.netlify.app/install.ps1'))"
 ```
 
 ### More installation methods
