@@ -34,10 +34,18 @@
 
 ## Installation
 
-Quick install (Support MacOs and linux)
+### Quick install 
+
+Using bash (Support MacOS and linux)
 
 ```bash
-bash -c "$(wget -qO- https://superfile.netlify.app/install.sh)"
+bash -c "$(curl -sLo- https://superfile.netlify.app/install.sh)"
+```
+
+Using powershell (Support Windows)
+
+```powershell
+powershell -ExecutionPolicy Bypass -Command "Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://superfile.netlify.app/install.ps1'))"
 ```
 
 ### More installation methods
@@ -105,6 +113,33 @@ After you install superfile, you can go [here](https://superfile.netlify.app/get
 ## Troubleshooting
 
 [**Click me to see common problem fix**](https://superfile.netlify.app/troubleshooting/)
+
+## Uninstalling
+
+### MacOS and Linux
+
+On MacOS and Linux, you can uninstall superfile by simply removing the binary. If you installed superfile with sudo, run
+
+```bash
+sudo rm /usr/local/bin/spf
+```
+
+If you installed superfile without sudo, run
+
+```bash
+rm ~/.local/bin/spf
+```
+
+If you don't rember, just try removing both.
+
+
+### Window
+
+To uninstall superfile on Windows, use this powershell script.
+
+```powershell
+powershell -ExecutionPolicy Bypass -Command "Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://superfile.netlify.app/uninstall.ps1'))"
+```
 
 ## Contributing
 
