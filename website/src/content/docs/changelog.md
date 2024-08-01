@@ -12,17 +12,25 @@ All notable changes to this project will be documented in this file. Dates are d
 
 # [**v1.1.4**] ()
 
-> xxxx-xx-xx
+> 2024-08-01
 
 #### Update
 - Added option to change default directory [`#211`](https://github.com/yorukot/superfile/issues/211)
 - Added quotes arround dir in lastdir to support special characters [`#218`](https://github.com/yorukot/superfile/pull/218)
 - Make Hotkey settings unlimited [`423a96a`](https://github.com/yorukot/superfile/commit/423a96a0aeca4ea2c30447d8b4010868045bb7e8)
 - Selection should start on currently positioned/pointed item [`#226`](https://github.com/yorukot/superfile/issues/226)
+- Make Nerdfont optional [`#6`](https://github.com/yorukot/superfile/issues/6)
+- Confirm before quit [`#155`](https://github.com/yorukot/superfile/issues/155)
+- Added file permissions to metadata [`#279`](https://github.com/yorukot/superfile/pull/279)
+- Better fuzzy file search [`#115`](https://github.com/yorukot/superfile/issues/115)
+- MD5 checksum in Metadata [`#255`](https://github.com/yorukot/superfile/pull/225)
+- An option to display the filesize in decimal or binary sizes [`#220`](https://github.com/yorukot/superfile/issues/220)
 
 #### Bug fix
 - An option to display the filesize in decimal or binary sizes [`#220`](https://github.com/yorukot/superfile/issues/220)
 - Fix Transparent Background issue [`#76`](https://github.com/yorukot/superfile/issues/76)
+- Big text file makes the program freeze for a while [`#255`](https://github.com/yorukot/superfile/issues/255)
+- Text in file preview has a background color behind it when using transparency [`#76`](https://github.com/yorukot/superfile/issues/76)
 
 # [**v1.1.3**](https://github.com/yorukot/superfile/releases/tag/v1.1.3)
 

@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file. Dates are d
 
 # [**v1.1.4**] ()
 
-> xxxx-xx-xx
+> 2024-08-01
 
 #### Update
 - Added option to change default directory [`#211`](https://github.com/yorukot/superfile/issues/211)
