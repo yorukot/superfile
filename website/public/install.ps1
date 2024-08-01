@@ -22,7 +22,7 @@ Write-Host -ForegroundColor Red         "                    `$`$/              
 Write-Host ""
 
 $package = "superfile"
-$version = "1.1.3"
+$version = "1.1.4"
 
 $installInstructions = @'
 This installer is only available for Windows.
@@ -109,5 +109,5 @@ Done!
 Restart you terminal, and for the love of Get-Command
 Take a look at tutorial :)
 
-https://github.com/yorukot/superfile/wiki/Tutorial
+https://superfile.netlify.app/getting-started/tutorial/
 '@
