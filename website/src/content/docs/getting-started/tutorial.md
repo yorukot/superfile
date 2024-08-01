@@ -113,7 +113,7 @@ Only copy, cut and delete can be used in selection mode
 
 You have learned how to use superfile to browse files and select files. Let's learn how to perform file operations!
 
-First, let me teach you how to create a file. You can press `c` to create a file and press `f` to create a folder.
+First, let me teach you how to create a file. You can press `ctrl+n` to create a file or folder, if you want to create folder you need add `/` in the end.
 
 Then if you want to rename it, press `ctrl+r` and it will name the location of your cursor.
 
