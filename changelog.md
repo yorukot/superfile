@@ -13,10 +13,16 @@ All notable changes to this project will be documented in this file. Dates are d
 - Selection should start on currently positioned/pointed item [`#226`](https://github.com/yorukot/superfile/issues/226)
 - Make Nerdfont optional [`#6`](https://github.com/yorukot/superfile/issues/6)
 - Confirm before quit [`#155`](https://github.com/yorukot/superfile/issues/155)
+- Added file permissions to metadata [`#279`](https://github.com/yorukot/superfile/pull/279)
+- Better fuzzy file search [`#115`](https://github.com/yorukot/superfile/issues/115)
+- MD5 checksum in Metadata [`#255`](https://github.com/yorukot/superfile/pull/225)
+- An option to display the filesize in decimal or binary sizes [`#220`](https://github.com/yorukot/superfile/issues/220)
 
 #### Bug fix
 - An option to display the filesize in decimal or binary sizes [`#220`](https://github.com/yorukot/superfile/issues/220)
 - Fix Transparent Background issue [`#76`](https://github.com/yorukot/superfile/issues/76)
+- Big text file makes the program freeze for a while [`#255`](https://github.com/yorukot/superfile/issues/255)
+- Text in file preview has a background color behind it when using transparency [`#76`](https://github.com/yorukot/superfile/issues/76)
 
 # [**v1.1.3**](https://github.com/yorukot/superfile/releases/tag/v1.1.3)
 
