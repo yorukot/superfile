@@ -12,10 +12,10 @@ importers:
         specifier: ^0.25.0
         version: 0.25.3(astro@4.13.1)
       '@expressive-code/plugin-collapsible-sections':
-        specifier: ^0.35.0
-        version: 0.35.4
-      '@expressive-code/plugin-line-numbers':
         specifier: ^0.35.6
+        version: 0.35.6
+      '@expressive-code/plugin-line-numbers':
+        specifier: ^0.35.0
         version: 0.35.6
       '@fontsource/ibm-plex-mono':
         specifier: ^5.0.8
@@ -306,14 +306,11 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@expressive-code/core@0.35.4':
-    resolution: {integrity: sha512-Vq8KeVKjCvBbgapQgwHZiHG3XmgN6itt3fCcIexz2RnoYpkv765AlpTlBGwEooXCEN++Pf0OFDer0l7G6vYO2Q==}
-
   '@expressive-code/core@0.35.6':
     resolution: {integrity: sha512-xGqCkmfkgT7lr/rvmfnYdDSeTdCSp1otAHgoFS6wNEeO7wGDPpxdosVqYiIcQ8CfWUABh/pGqWG90q+MV3824A==}
 
-  '@expressive-code/plugin-collapsible-sections@0.35.4':
-    resolution: {integrity: sha512-nIimsSImMWH0v9mU02t216UvcRcfoikla6xL5Bc2LuQ7zSQm4o24bZIsPj+kCFs1iUxckfMCOM1/dsSFWYbcOA==}
+  '@expressive-code/plugin-collapsible-sections@0.35.6':
+    resolution: {integrity: sha512-PciZoBynxp3DCrK3dvcc/rxkj2HVbFxX992yqez1pircmPj0g1STySslkOBVMHh9COy6whJ4Mbq2k9DPV1A5/Q==}
 
   '@expressive-code/plugin-frames@0.35.3':
     resolution: {integrity: sha512-QYytMq6IsaHgTofQ5b6d+CnbxkqLdikSF2hC+IL/ZZwPYHYZoUlmjIwmJZhY4/hHqJGELrtZsyVdlt06RntgmA==}
@@ -2262,18 +2259,6 @@ snapshots:
   '@esbuild/win32-x64@0.21.5':
     optional: true
 
-  '@expressive-code/core@0.35.4':
-    dependencies:
-      '@ctrl/tinycolor': 4.1.0
-      hast-util-select: 6.0.2
-      hast-util-to-html: 9.0.1
-      hast-util-to-text: 4.0.2
-      hastscript: 9.0.0
-      postcss: 8.4.40
-      postcss-nested: 6.2.0(postcss@8.4.40)
-      unist-util-visit: 5.0.0
-      unist-util-visit-parents: 6.0.1
-
   '@expressive-code/core@0.35.6':
     dependencies:
       '@ctrl/tinycolor': 4.1.0
@@ -2286,9 +2271,9 @@ snapshots:
       unist-util-visit: 5.0.0
       unist-util-visit-parents: 6.0.1
 
-  '@expressive-code/plugin-collapsible-sections@0.35.4':
+  '@expressive-code/plugin-collapsible-sections@0.35.6':
     dependencies:
-      '@expressive-code/core': 0.35.4
+      '@expressive-code/core': 0.35.6
 
   '@expressive-code/plugin-frames@0.35.3':
     dependencies:
@@ -3938,11 +3923,6 @@ snapshots:
   pkg-dir@4.2.0:
     dependencies:
       find-up: 4.1.0
-
-  postcss-nested@6.2.0(postcss@8.4.40):
-    dependencies:
-      postcss: 8.4.40
-      postcss-selector-parser: 6.1.1
 
   postcss-nested@6.2.0(postcss@8.4.41):
     dependencies:
