@@ -118,19 +118,18 @@ func loadHotkeysFile() {
 
 	hasMissingHotkeysInConfig := reflect.DeepEqual(hotkeys, hotkeysFromConfig) == false
 
-	hotKeysConfig := reflect.ValueOf(hotkeysFromConfig)
-	for i := 0; i < hotKeysConfig.NumField(); i++ {
-		field := hotKeysConfig.Type().Field(i)
-		value := hotKeysConfig.Field(i)
-		name := field.Name
-		isMissing := value.Len() == 0
+	if hasMissingHotkeysInConfig && varibale.FixHotkeys == false {
+		hotKeysConfig := reflect.ValueOf(hotkeysFromConfig)
+		for i := 0; i < hotKeysConfig.NumField(); i++ {
+			field := hotKeysConfig.Type().Field(i)
+			value := hotKeysConfig.Field(i)
+			name := field.Name
+			isMissing := value.Len() == 0
 
-		if isMissing {
-			fmt.Printf("Field \"%s\" is missing in hotkeys configuration\n", name)
+			if isMissing {
+				fmt.Printf("Field \"%s\" is missing in hotkeys configuration\n", name)
+			}
 		}
-	}
-
-	if hasMissingHotkeysInConfig {
 		fmt.Println("To add missing fields to hotkeys directory automaticially run Superfile with the --fix-hotkeys flag")
 	}
 
