@@ -144,7 +144,7 @@ type ConfigType struct {
 }
 
 type HotkeysType struct {
-	Confirm []string `toml:"confirm" comment:"=================================================================================================\nHere is global, all global key can't conflicts with other hotkeys"`
+	Confirm []string `toml:"confirm" comment:"=================================================================================================\nGlobal hotkeys (cannot conflict with other hotkeys)"`
 	Quit    []string `toml:"quit"`
 	// movement
 	ListUp   []string `toml:"list_up" comment:"movement"`
@@ -174,19 +174,19 @@ type HotkeysType struct {
 	OpenFileWithEditor             []string `toml:"open_file_with_editor" comment:"editor"`
 	OpenCurrentDirectoryWithEditor []string `toml:"open_current_directory_with_editor"`
 
-	PinnedDirectory []string `toml:"pinned_directory" comment:"else"`
+	PinnedDirectory []string `toml:"pinned_directory" comment:"other"`
 	ToggleDotFile   []string `toml:"toggle_dot_file"`
 	ChangePanelMode []string `toml:"change_panel_mode"`
 	OpenHelpMenu    []string `toml:"open_help_menu"`
 	OpenCommandLine []string `toml:"open_command_line"`
 
-	ConfirmTyping []string `toml:"confirm_typing" comment:"=================================================================================================\nHere is typing hotkey can conflict with all hotkeys"`
+	ConfirmTyping []string `toml:"confirm_typing" comment:"=================================================================================================\nTyping hotkeys (can conflict with all hotkeys)"`
 	CancelTyping  []string `toml:"cancel_typing"`
 
-	ParentDirectory []string `toml:"parent_directory" comment:"=================================================================================================\nHere is normal mode hotkey you can conflicts with other mode (can't conflicts with global hotkey)"`
+	ParentDirectory []string `toml:"parent_directory" comment:"=================================================================================================\nNormal mode hotkeys (can conflict with other modes, cannot conflict with global hotkeys)"`
 	SearchBar       []string `toml:"search_bar"`
 
-	FilePanelSelectModeItemsSelectDown []string `toml:"file_panel_select_mode_items_select_down" comment:"=================================================================================================\nHere is select mode hotkey you can conflicts with other mode (can't conflicts with global hotkey)"`
+	FilePanelSelectModeItemsSelectDown []string `toml:"file_panel_select_mode_items_select_down" comment:"=================================================================================================\nSelect mode hotkeys (can conflict with other modes, cananot conflict with global hotkeys)"`
 	FilePanelSelectModeItemsSelectUp   []string `toml:"file_panel_select_mode_items_select_up"`
 	FilePanelSelectAllItem             []string `toml:"file_panel_select_all_items"`
 }

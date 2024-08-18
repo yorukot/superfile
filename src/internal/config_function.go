@@ -116,9 +116,9 @@ func loadHotkeysFile() {
 		log.Fatalf("Error decoding hotkeys file ( your config file may have misconfigured ): %v", err)
 	}
 
-	hasMissingHotkeysInConfig := reflect.DeepEqual(hotkeys, hotkeysFromConfig) == false
+	hasMissingHotkeysInConfig := !reflect.DeepEqual(hotkeys, hotkeysFromConfig)
 
-	if hasMissingHotkeysInConfig && varibale.FixHotkeys == false {
+	if hasMissingHotkeysInConfig && !varibale.FixHotkeys {
 		hotKeysConfig := reflect.ValueOf(hotkeysFromConfig)
 		for i := 0; i < hotKeysConfig.NumField(); i++ {
 			field := hotKeysConfig.Type().Field(i)
