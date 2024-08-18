@@ -52,7 +52,7 @@ func initialConfig(dir string) (toggleDotFileBool bool, firstFilePanelDir string
 	if dir != "" {
 		firstFilePanelDir, err = filepath.Abs(dir)
 	} else {
-		Config.DefaultDirectory = strings.Replace(Config.DefaultDirectory, "~", varibale.HomeDir, -1) 
+		Config.DefaultDirectory = strings.Replace(Config.DefaultDirectory, "~", varibale.HomeDir, -1)
 		firstFilePanelDir, err = filepath.Abs(Config.DefaultDirectory)
 	}
 
@@ -90,7 +90,7 @@ func loadConfigFile() {
 			log.Fatalf("Error writing config file: %v", err)
 		}
 	}
-	if (Config.FilePreviewWidth > 10 || Config.FilePreviewWidth < 2) &&  Config.FilePreviewWidth != 0{
+	if (Config.FilePreviewWidth > 10 || Config.FilePreviewWidth < 2) && Config.FilePreviewWidth != 0 {
 		fmt.Println(loadConfigError("file_preview_width"))
 		os.Exit(0)
 	}
@@ -104,29 +104,37 @@ func loadConfigFile() {
 func loadHotkeysFile() {
 
 	_ = toml.Unmarshal([]byte(HotkeysTomlString), &hotkeys)
-	tempForCheckMissingConfig := HotkeysType{}
+	hotkeysFromConfig := HotkeysType{}
 	data, err := os.ReadFile(varibale.HotkeysFilea)
 
 	if err != nil {
 		log.Fatalf("Config file doesn't exist: %v", err)
 	}
-
-	_ = toml.Unmarshal(data, &tempForCheckMissingConfig)
+	_ = toml.Unmarshal(data, &hotkeysFromConfig)
 	err = toml.Unmarshal(data, &hotkeys)
 	if err != nil {
 		log.Fatalf("Error decoding hotkeys file ( your config file may have misconfigured ): %v", err)
 	}
 
-	if !reflect.DeepEqual(hotkeys, tempForCheckMissingConfig) {
-		tomlData, err := toml.Marshal(hotkeys)
-		if err != nil {
-			log.Fatalf("Error encoding hotkeys: %v", err)
-		}
+	hasMissingHotkeysInConfig := reflect.DeepEqual(hotkeys, hotkeysFromConfig) == false
 
-		err = os.WriteFile(varibale.HotkeysFilea, tomlData, 0644)
-		if err != nil {
-			log.Fatalf("Error writing hotkeys file: %v", err)
+	if hasMissingHotkeysInConfig && varibale.FixHotkeys == false {
+		hotKeysConfig := reflect.ValueOf(hotkeysFromConfig)
+		for i := 0; i < hotKeysConfig.NumField(); i++ {
+			field := hotKeysConfig.Type().Field(i)
+			value := hotKeysConfig.Field(i)
+			name := field.Name
+			isMissing := value.Len() == 0
+
+			if isMissing {
+				fmt.Printf("Field \"%s\" is missing in hotkeys configuration\n", name)
+			}
 		}
+		fmt.Println("To add missing fields to hotkeys directory automaticially run Superfile with the --fix-hotkeys flag")
+	}
+
+	if hasMissingHotkeysInConfig && varibale.FixHotkeys {
+		writeHotkeysFile(hotkeys)
 	}
 
 	val := reflect.ValueOf(hotkeys)
@@ -142,12 +150,24 @@ func loadHotkeysFile() {
 
 		hotkeysList := value.Interface().([]string)
 
-		if len(hotkeysList) == 0  || hotkeysList[0] == "" {
+		if len(hotkeysList) == 0 || hotkeysList[0] == "" {
 			fmt.Println(lodaHotkeysError(field.Name))
 			os.Exit(0)
 		}
 	}
-   
+
+}
+
+func writeHotkeysFile(hotkeys HotkeysType) {
+	tomlData, err := toml.Marshal(hotkeys)
+	if err != nil {
+		log.Fatalf("Error encoding hotkeys: %v", err)
+	}
+
+	err = os.WriteFile(varibale.HotkeysFilea, tomlData, 0644)
+	if err != nil {
+		log.Fatalf("Error writing hotkeys file: %v", err)
+	}
 }
 
 func loadThemeFile() {

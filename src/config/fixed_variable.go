@@ -24,6 +24,7 @@ var (
 	HotkeysFilea      string = SuperFileMainDir + "/hotkeys.toml"
 	ToggleDotFilea    string = SuperFileDataDir + "/toggleDotFile"
 	LogFilea          string = SuperFileStateDir + "/superfile.log"
+	FixHotkeys        bool   = false
 )
 
 const (

@@ -54,6 +54,14 @@ func Run(content embed.FS) {
 				},
 			},
 		},
+		Flags: []cli.Flag{
+			&cli.BoolFlag{
+				Name:    "fix-hotkeys",
+				Aliases: []string{"fh"},
+				Usage:   "Adds any missing hotkeys to the hotkey config file",
+				Value:   false,
+			},
+		},
 		Action: func(c *cli.Context) error {
 			path := ""
 			if c.Args().Present() {
@@ -62,6 +70,8 @@ func Run(content embed.FS) {
 
 			InitConfigFile()
 
+			varibale.FixHotkeys = c.Bool("fix-hotkeys")
+
 			firstUse := checkFirstUse()
 
 			p := tea.NewProgram(internal.InitialModel(path, firstUse), tea.WithAltScreen(), tea.WithMouseCellMotion())
@@ -69,6 +79,7 @@ func Run(content embed.FS) {
 				log.Fatalf("Alas, there's been an error: %v", err)
 				os.Exit(1)
 			}
+
 			CheckForUpdates()
 			return nil
 		},
