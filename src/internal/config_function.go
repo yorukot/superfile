@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/barasher/go-exiftool"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/pelletier/go-toml/v2"
 	varibale "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/config/icon"
@@ -127,7 +128,9 @@ func loadHotkeysFile() {
 			isMissing := value.Len() == 0
 
 			if isMissing {
-				fmt.Printf("Field \"%s\" is missing in hotkeys configuration\n", name)
+				fmt.Print(lipgloss.NewStyle().Foreground(lipgloss.Color("#F93939")).Render("Error") +
+				lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFEE")).Render(" ┃ ") + 
+				fmt.Sprintf("Field \"%s\" is missing in hotkeys configuration\n", name))
 			}
 		}
 		fmt.Println("To add missing fields to hotkeys directory automaticially run Superfile with the --fix-hotkeys flag")
