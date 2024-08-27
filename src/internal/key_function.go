@@ -45,6 +45,9 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) ( tea.Cmd) {
 			}()
 		}
 
+	case containsKey(msg, hotkeys.CreateNewPluginPanel):
+		m.createNewPluginPanel()
+
 	case containsKey(msg, hotkeys.ChangePanelMode):
 		m.changeFilePanelMode()
 

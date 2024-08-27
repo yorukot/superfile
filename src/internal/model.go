@@ -214,7 +214,6 @@ func (m model) View() string {
 
 	clipboardBar := m.clipboardRender()
 
-
 	footer := lipgloss.JoinHorizontal(0, processBar, metaData, clipboardBar)
 
 	if m.commandLine.input.Focused() {

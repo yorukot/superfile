@@ -166,6 +166,9 @@ type filePanel struct {
 	renaming           bool
 	searchBar          textinput.Model
 	lastTimeGetElement time.Time
+	plugin             int
+	pluginName         string
+
 }
 
 // Record for directory navigation

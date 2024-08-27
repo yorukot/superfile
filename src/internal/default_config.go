@@ -57,6 +57,11 @@ func getHelpMenuData() []helpMenuModalData {
 			hotkeyWorkType: globalType,
 		},
 		{
+			hotkey:         hotkeys.CreateNewPluginPanel,
+			description:    "something something",
+			hotkeyWorkType: globalType,
+		},
+		{
 			hotkey:         hotkeys.Confirm,
 			description:    "Confirm your select or typing",
 			hotkeyWorkType: globalType,

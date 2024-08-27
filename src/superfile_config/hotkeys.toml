@@ -11,6 +11,8 @@ close_file_panel = ['w', '']
 next_file_panel = ['tab', 'L']
 previous_file_panel = ['shift+left', 'H']
 toggle_file_preview_panel = ['f', '']
+create_new_plugin_panel = ['o', '']
+
 # change focus
 focus_on_process_bar = ['p', '']
 focus_on_sidebar = ['s', '']

@@ -82,6 +82,38 @@ func (m *model) createNewFilePanel() {
 	}
 }
 
+func (m *model) createNewPluginPanel() {
+	if len(m.fileModel.filePanels) == m.fileModel.maxFilePanel {
+		return
+	}
+
+	m.fileModel.filePanels = append(m.fileModel.filePanels, filePanel{
+		plugin:      1,
+		pluginName:  "something",
+	})
+
+	if m.fileModel.filePreview.open {
+		// File preview panel width same as file panel
+		if Config.FilePreviewWidth == 0 {
+			m.fileModel.filePreview.width = (m.fullWidth - Config.SidebarWidth - (4 + (len(m.fileModel.filePanels))*2)) / (len(m.fileModel.filePanels) + 1)
+		} else {
+			m.fileModel.filePreview.width = (m.fullWidth - Config.SidebarWidth) / Config.FilePreviewWidth
+		}
+	}
+
+	m.fileModel.filePanels[m.filePanelFocusIndex].focusType = noneFocus
+	m.fileModel.filePanels[m.filePanelFocusIndex+1].focusType = returnFocusType(m.focusPanel)
+	m.fileModel.width = (m.fullWidth - Config.SidebarWidth - m.fileModel.filePreview.width - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
+	m.filePanelFocusIndex++
+
+	m.fileModel.maxFilePanel = (m.fullWidth - Config.SidebarWidth - m.fileModel.filePreview.width) / 20
+
+	for i := range m.fileModel.filePanels {
+		m.fileModel.filePanels[i].searchBar.Width = m.fileModel.width - 4
+	}
+}
+
+
 // Close current focus file panel
 func (m *model) closeFilePanel() {
 	if len(m.fileModel.filePanels) == 1 {

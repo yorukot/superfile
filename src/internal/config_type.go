@@ -150,6 +150,8 @@ type HotkeysType struct {
 	ListUp   []string `toml:"list_up" comment:"movement"`
 	ListDown []string `toml:"list_down"`
 
+	CreateNewPluginPanel   []string `toml:"create_new_plugin_panel" comment:"something somethimg please work uwu"`
+
 	CloseFilePanel         []string `toml:"close_file_panel" comment:"file panel control"`
 	CreateNewFilePanel     []string `toml:"create_new_file_panel"`
 	NextFilePanel          []string `toml:"next_file_panel"`

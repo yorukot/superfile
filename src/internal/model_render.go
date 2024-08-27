@@ -85,57 +85,83 @@ func (m model) filePanelRender() string {
 		}
 		m.fileModel.filePanels[i] = filePanel
 
-		f[i] += filePanelTopDirectoryIconStyle.Render(" "+icon.Directory+icon.Space) + filePanelTopPathStyle.Render(truncateTextBeginning(filePanel.location, m.fileModel.width-4, "...")) + "\n"
-		filePanelWidth := 0
-		footerBorderWidth := 0
+		// check if trying to render a plugin
+		if filePanel.plugin == 1 {
+			filePanelWidth := 0
+			footerBorderWidth := 0
 
-		if (m.fullWidth-Config.SidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels) != 0 && i == len(m.fileModel.filePanels)-1 {
-			if m.fileModel.filePreview.open {
-				filePanelWidth = m.fileModel.width
-			} else {
-				filePanelWidth = (m.fileModel.width + (m.fullWidth-Config.SidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels))
-			}
-			footerBorderWidth = m.fileModel.width + 7
-		} else {
-			filePanelWidth = m.fileModel.width
-			footerBorderWidth = m.fileModel.width + 7
-		}
-		panelModeString := ""
-		if filePanel.panelMode == browserMode {
-			panelModeString = icon.Browser + icon.Space + "Browser"
-		} else if filePanel.panelMode == selectMode {
-			panelModeString = icon.Select + icon.Space + "Select"
-		}
 
-		f[i] += filePanelDividerStyle(filePanel.focusType).Render(strings.Repeat(Config.BorderTop, filePanelWidth)) + "\n"
-		f[i] += " " + filePanel.searchBar.View() + "\n"
-		if len(filePanel.element) == 0 {
-			f[i] += filePanelStyle.Render(" " + icon.Error + "  No such file or directory")
-			bottomBorder := generateFooterBorder(fmt.Sprintf("%s%s%s", panelModeString, bottomMiddleBorderSplit, "0/0"), footerBorderWidth)
-			f[i] = filePanelBorderStyle(m.mainPanelHeight, filePanelWidth, filePanel.focusType, bottomBorder).Render(f[i])
-		} else {
-			for h := filePanel.render; h < filePanel.render+panelElementHeight(m.mainPanelHeight) && h < len(filePanel.element); h++ {
-				endl := "\n"
-				if h == filePanel.render+panelElementHeight(m.mainPanelHeight)-1 || h == len(filePanel.element)-1 {
-					endl = ""
-				}
-				cursor := " "
-				// Check if the cursor needs to be displayed, if the user is using the search bar, the cursor is not displayed
-				if h == filePanel.cursor && !filePanel.searchBar.Focused() {
-					cursor = icon.Cursor
-				}
-				isItemSelected := arrayContains(filePanel.selected, filePanel.element[h].location)
-				if filePanel.renaming && h == filePanel.cursor {
-					f[i] += filePanel.rename.View() + endl
+			if (m.fullWidth-Config.SidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels) != 0 && i == len(m.fileModel.filePanels)-1 {
+				if m.fileModel.filePreview.open {
+					filePanelWidth = m.fileModel.width
 				} else {
-					f[i] += filePanelCursorStyle.Render(cursor+" ") + prettierName(filePanel.element[h].name, m.fileModel.width-5, filePanel.element[h].directory, isItemSelected, filePanelBGColor) + endl
+					filePanelWidth = (m.fileModel.width + (m.fullWidth-Config.SidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels))
 				}
+				footerBorderWidth = m.fileModel.width + 7
+			} else {
+				filePanelWidth = m.fileModel.width
+				footerBorderWidth = m.fileModel.width + 7
 			}
-			cursorPosition := strconv.Itoa(filePanel.cursor + 1)
-			totalElement := strconv.Itoa(len(filePanel.element))
+			panelModeString := filePanel.pluginName
 
-			bottomBorder := generateFooterBorder(fmt.Sprintf("%s%s%s/%s", panelModeString, bottomMiddleBorderSplit, cursorPosition, totalElement), footerBorderWidth)
+			f[i] += filePanelDividerStyle(filePanel.focusType).Render(strings.Repeat(Config.BorderTop, filePanelWidth)) + "\n"
+			bottomBorder := generateFooterBorder(fmt.Sprintf("%s%s%s/%s", panelModeString, bottomMiddleBorderSplit), footerBorderWidth)
 			f[i] = filePanelBorderStyle(m.mainPanelHeight, filePanelWidth, filePanel.focusType, bottomBorder).Render(f[i])
+
+
+		} else {
+			f[i] += filePanelTopDirectoryIconStyle.Render(" "+icon.Directory+icon.Space) + filePanelTopPathStyle.Render(truncateTextBeginning(filePanel.location, m.fileModel.width-4, "...")) + "\n"
+			filePanelWidth := 0
+			footerBorderWidth := 0
+
+			if (m.fullWidth-Config.SidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels) != 0 && i == len(m.fileModel.filePanels)-1 {
+				if m.fileModel.filePreview.open {
+					filePanelWidth = m.fileModel.width
+				} else {
+					filePanelWidth = (m.fileModel.width + (m.fullWidth-Config.SidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels))
+				}
+				footerBorderWidth = m.fileModel.width + 7
+			} else {
+				filePanelWidth = m.fileModel.width
+				footerBorderWidth = m.fileModel.width + 7
+			}
+			panelModeString := ""
+			if filePanel.panelMode == browserMode {
+				panelModeString = icon.Browser + icon.Space + "Browser"
+			} else if filePanel.panelMode == selectMode {
+				panelModeString = icon.Select + icon.Space + "Select"
+			}
+
+			f[i] += filePanelDividerStyle(filePanel.focusType).Render(strings.Repeat(Config.BorderTop, filePanelWidth)) + "\n"
+			f[i] += " " + filePanel.searchBar.View() + "\n"
+			if len(filePanel.element) == 0 {
+				f[i] += filePanelStyle.Render(" " + icon.Error + "  No such file or directory")
+				bottomBorder := generateFooterBorder(fmt.Sprintf("%s%s%s", panelModeString, bottomMiddleBorderSplit, "0/0"), footerBorderWidth)
+				f[i] = filePanelBorderStyle(m.mainPanelHeight, filePanelWidth, filePanel.focusType, bottomBorder).Render(f[i])
+			} else {
+				for h := filePanel.render; h < filePanel.render+panelElementHeight(m.mainPanelHeight) && h < len(filePanel.element); h++ {
+					endl := "\n"
+					if h == filePanel.render+panelElementHeight(m.mainPanelHeight)-1 || h == len(filePanel.element)-1 {
+						endl = ""
+					}
+					cursor := " "
+					// Check if the cursor needs to be displayed, if the user is using the search bar, the cursor is not displayed
+					if h == filePanel.cursor && !filePanel.searchBar.Focused() {
+						cursor = icon.Cursor
+					}
+					isItemSelected := arrayContains(filePanel.selected, filePanel.element[h].location)
+					if filePanel.renaming && h == filePanel.cursor {
+						f[i] += filePanel.rename.View() + endl
+					} else {
+						f[i] += filePanelCursorStyle.Render(cursor+" ") + prettierName(filePanel.element[h].name, m.fileModel.width-5, filePanel.element[h].directory, isItemSelected, filePanelBGColor) + endl
+					}
+				}
+				cursorPosition := strconv.Itoa(filePanel.cursor + 1)
+				totalElement := strconv.Itoa(len(filePanel.element))
+
+				bottomBorder := generateFooterBorder(fmt.Sprintf("%s%s%s/%s", panelModeString, bottomMiddleBorderSplit, cursorPosition, totalElement), footerBorderWidth)
+				f[i] = filePanelBorderStyle(m.mainPanelHeight, filePanelWidth, filePanel.focusType, bottomBorder).Render(f[i])
+			}
 		}
 	}
 
