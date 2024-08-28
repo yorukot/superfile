@@ -15,14 +15,14 @@ importers:
         specifier: ^0.35.0
         version: 0.35.4
       '@expressive-code/plugin-line-numbers':
-        specifier: ^0.35.6
+        specifier: ^0.35.0
         version: 0.35.6
       '@fontsource/ibm-plex-mono':
-        specifier: ^5.0.8
-        version: 5.0.8
+        specifier: ^5.0.14
+        version: 5.0.14
       '@fontsource/ibm-plex-serif':
-        specifier: ^5.0.8
-        version: 5.0.8
+        specifier: ^5.0.14
+        version: 5.0.14
       astro:
         specifier: ^4.4.9
         version: 4.13.1
@@ -327,11 +327,11 @@ packages:
   '@expressive-code/plugin-text-markers@0.35.3':
     resolution: {integrity: sha512-gDdnQrfDRXw5Y+PKHJDkpAUdf2pthYOthGcgy3JB8GOTQ3EL1h+755Ct/bGc4MR6jn+dgnQP47uHMWQaccvN6Q==}
 
-  '@fontsource/ibm-plex-mono@5.0.8':
-    resolution: {integrity: sha512-AoR7K2YtlGKy3LApyLYjqjyz0o8XtkRvbB/juMsGSGNayBBAly140ykZls+VxcXjZSLQpp2RyxKo6lYOuHPmUw==}
+  '@fontsource/ibm-plex-mono@5.0.14':
+    resolution: {integrity: sha512-727fOjiog6PbVkfLTRaiba5vus9z00RrGuoxif85FIKljXkoLxrSEKmACz0ldzLJy6KuEwnj5JBq2h4SUC0N8w==}
 
-  '@fontsource/ibm-plex-serif@5.0.8':
-    resolution: {integrity: sha512-KUp1E9Wzf2Umhr2SbpcF9HwgFJmuxvKAARmpl7GDDkIG30R1PMFJWxfSfQ7oX/oVBtomGq5RUTaMMUeE0ngEgw==}
+  '@fontsource/ibm-plex-serif@5.0.14':
+    resolution: {integrity: sha512-gJi2QhrIoQ9EZL0zirJfoKARgEr37B3t+oRDTlZU540HH4NGuY3cr5rqGkx20RleHevxY2rKt6GsDjXqo5Y0Sw==}
 
   '@img/sharp-darwin-arm64@0.33.4':
     resolution: {integrity: sha512-p0suNqXufJs9t3RqLBO6vvrgr5OhgbWp76s5gTRvdmxmuv9E1rcaqGUsl3l4mKVmXPkTkTErXediAui4x+8PSA==}
@@ -2307,9 +2307,9 @@ snapshots:
     dependencies:
       '@expressive-code/core': 0.35.6
 
-  '@fontsource/ibm-plex-mono@5.0.8': {}
+  '@fontsource/ibm-plex-mono@5.0.14': {}
 
-  '@fontsource/ibm-plex-serif@5.0.8': {}
+  '@fontsource/ibm-plex-serif@5.0.14': {}
 
   '@img/sharp-darwin-arm64@0.33.4':
     optionalDependencies:
