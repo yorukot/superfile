@@ -152,8 +152,8 @@ schema = 3
     version = "v0.5.11"
     hash = "sha256-SUyrjc2wyN3cTGKe5JdBEXjtZC1rJySRxJHVUZ59row="
   [mod."github.com/urfave/cli/v2"]
-    version = "v2.27.3"
-    hash = "sha256-9xfMFv4e3YKJK6lPRBH7KHmNf3MdRxmksjjxsvfSeEI="
+    version = "v2.27.4"
+    hash = "sha256-8gkLizRt7U9BfTok/hTysMt78HBP8syiEJ0eYhFrAvo="
   [mod."github.com/xo/terminfo"]
     version = "v0.0.0-20220910002029-abceb7e1c41e"
     hash = "sha256-GyCDxxMQhXA3Pi/TsWXpA8cX5akEoZV7CFx4RO3rARU="
