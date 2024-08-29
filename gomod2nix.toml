@@ -47,8 +47,8 @@ schema = 3
     version = "v0.1.2"
     hash = "sha256-Gq4kkBH1pNjR0kHk1LSueZskGM4jbyIbHymqUnmFhBs="
   [mod."github.com/charmbracelet/x/exp/term"]
-    version = "v0.0.0-20240805145438-99a7cad109d8"
-    hash = "sha256-kbLB1lNbLwLeMLLUcVfOGcE1CJTZYHs9CY1b/fnOmZ4="
+    version = "v0.0.0-20240814160751-e2dc8b53b604"
+    hash = "sha256-8M7BzhJasT6X5/oo8dpJ4LEuSl60FQf13by5M8t+GwE="
   [mod."github.com/charmbracelet/x/input"]
     version = "v0.1.0"
     hash = "sha256-oPt488pHiPGn9SiWZBjDGEYq2f8npDA8UIVX1MJ9pSk="
@@ -173,8 +173,8 @@ schema = 3
     version = "v0.7.0"
     hash = "sha256-2ETllEu2GDWoOd/yMkOkLC2hWBpKzbVZ8LhjLu0d2A8="
   [mod."golang.org/x/sys"]
-    version = "v0.22.0"
-    hash = "sha256-RbG0XaXGGlErCsl2agvUxMnrkRwdbJLmriYT1H24FwA="
+    version = "v0.24.0"
+    hash = "sha256-P0fsA+qy9taYHWPTtCs5XmrJ1i8tWfvkno+PNuc2elw="
   [mod."golang.org/x/text"]
     version = "v0.14.0"
     hash = "sha256-yh3B0tom1RfzQBf1RNmfdNWF1PtiqxV41jW1GVS6JAg="
