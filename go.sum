@@ -84,6 +84,8 @@ github.com/charmbracelet/x/exp/term v0.0.0-20240725160154-f9f6568126ec h1:tg3MAn
 github.com/charmbracelet/x/exp/term v0.0.0-20240725160154-f9f6568126ec/go.mod h1:YG0dzr31td4jqC86wFlB8fJGgPwqPgTSa8VC0Hf7u+k=
 github.com/charmbracelet/x/exp/term v0.0.0-20240805145438-99a7cad109d8 h1:xR3kAq3xxAVscXXsWftrB864QAFEo9wy4er13s4DUYY=
 github.com/charmbracelet/x/exp/term v0.0.0-20240805145438-99a7cad109d8/go.mod h1:YG0dzr31td4jqC86wFlB8fJGgPwqPgTSa8VC0Hf7u+k=
+github.com/charmbracelet/x/exp/term v0.0.0-20240814160751-e2dc8b53b604 h1:Dd3IMfj+uWPNYXGOiqP698ssKfJcKZGjAW1T5H7Btqc=
+github.com/charmbracelet/x/exp/term v0.0.0-20240814160751-e2dc8b53b604/go.mod h1:3yyfTUvntvRMtnNv2YRxn5q0HzBiShrse/DjoGHtM18=
 github.com/charmbracelet/x/input v0.1.0 h1:TEsGSfZYQyOtp+STIjyBq6tpRaorH0qpwZUj8DavAhQ=
 github.com/charmbracelet/x/input v0.1.0/go.mod h1:ZZwaBxPF7IG8gWWzPUVqHEtWhc1+HXJPNuerJGRGZ28=
 github.com/charmbracelet/x/term v0.1.1 h1:3cosVAiPOig+EV4X9U+3LDgtwwAoEzJjNdwbXDjF6yI=
@@ -333,6 +335,8 @@ golang.org/x/sys v0.21.0 h1:rF+pYz3DAGSQAxAu1CbC7catZg4ebC4UIeIhKxBZvws=
 golang.org/x/sys v0.21.0/go.mod h1:/VUhepiaJMQUp4+oa/7Zr1D23ma6VTLIYjOOTFZPUcA=
 golang.org/x/sys v0.22.0 h1:RI27ohtqKCnwULzJLqkv897zojh5/DwS/ENaMzUOaWI=
 golang.org/x/sys v0.22.0/go.mod h1:/VUhepiaJMQUp4+oa/7Zr1D23ma6VTLIYjOOTFZPUcA=
+golang.org/x/sys v0.24.0 h1:Twjiwq9dn6R1fQcyiK+wQyHWfaz/BJB+YIpzU/Cv3Xg=
+golang.org/x/sys v0.24.0/go.mod h1:/VUhepiaJMQUp4+oa/7Zr1D23ma6VTLIYjOOTFZPUcA=
 golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1/go.mod h1:bj7SfCRtBDWHUb9snDiAeCFNEtKQo2Wmx5Cou7ajbmo=
 golang.org/x/term v0.0.0-20210927222741-03fcf44c2211/go.mod h1:jbD1KX2456YbFQfuXm/mYQcufACuNUgVhRMnK/tPxf8=
 golang.org/x/term v0.5.0/go.mod h1:jMB1sMXY+tzblOD4FWmEbocvup2/aLOaQEp7JmGp78k=
