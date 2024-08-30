@@ -32,20 +32,20 @@ schema = 3
     version = "v1.0.1"
     hash = "sha256-GSpAGboli54A5wDMpDEdZDYh55o1Zs8dZzFIf7hYdMY="
   [mod."github.com/charmbracelet/bubbles"]
-    version = "v0.18.0"
-    hash = "sha256-FVKLet2anNB6gupLYXO4kJaKQIXs1dg2dZ2ooaBiEZU="
+    version = "v0.19.0"
+    hash = "sha256-eN8QmTZjHMzUgJ877IFPsGjS5WEgvMPAgPHytTwtitU="
   [mod."github.com/charmbracelet/bubbletea"]
-    version = "v0.26.6"
-    hash = "sha256-D34zyOdsT/FJOquYzfSLO9hVujpAUCvS/LtmL/vcG6E="
+    version = "v0.27.0"
+    hash = "sha256-+d+8sF4vGyesAL9SBqdkWIAmAjfhCUdNnKVVXyUYEUY="
   [mod."github.com/charmbracelet/harmonica"]
     version = "v0.2.0"
     hash = "sha256-fi5N0IXhSbbYHdSZFngCfpT4kdiEaKedqj8YpnlvX0o="
   [mod."github.com/charmbracelet/lipgloss"]
-    version = "v0.10.0"
-    hash = "sha256-JZD1iVeizYe0mp3qQcJbUZdYN6HP/DNC67ja79DTe6s="
+    version = "v0.12.1"
+    hash = "sha256-Uqv5hbHAxe7u94iBbAhR/de4VwWbIAw+t89We4ufiss="
   [mod."github.com/charmbracelet/x/ansi"]
-    version = "v0.1.2"
-    hash = "sha256-Gq4kkBH1pNjR0kHk1LSueZskGM4jbyIbHymqUnmFhBs="
+    version = "v0.1.4"
+    hash = "sha256-hfyC3QY43qeXJGngTKdCDMoawfIJHeAC3BW4Wj461KQ="
   [mod."github.com/charmbracelet/x/exp/term"]
     version = "v0.0.0-20240814160751-e2dc8b53b604"
     hash = "sha256-8M7BzhJasT6X5/oo8dpJ4LEuSl60FQf13by5M8t+GwE="
@@ -170,8 +170,8 @@ schema = 3
     version = "v0.0.0-20230225012048-214862532bf5"
     hash = "sha256-8y7krSESdxZfxTzo16EDqmF8USRzGmLPYr3iKuVYzzE="
   [mod."golang.org/x/sync"]
-    version = "v0.7.0"
-    hash = "sha256-2ETllEu2GDWoOd/yMkOkLC2hWBpKzbVZ8LhjLu0d2A8="
+    version = "v0.8.0"
+    hash = "sha256-usvF0z7gq1vsX58p4orX+8WHlv52pdXgaueXlwj2Wss="
   [mod."golang.org/x/sys"]
     version = "v0.24.0"
     hash = "sha256-P0fsA+qy9taYHWPTtCs5XmrJ1i8tWfvkno+PNuc2elw="
