@@ -159,12 +159,19 @@ func (m *model) closeCommandLine() {
 }
 
 func (m *model) enterCommandLine() {
-	cmd := exec.Command("/bin/sh", "-c", m.commandLine.input.Value())
-	// 执行命令并获取输出
+	focusPanelDir := ""
+	for _, panel := range m.fileModel.filePanels {
+		if panel.focusType == focus {
+			focusPanelDir = panel.location
+		}
+	}
+	cd := "cd "+focusPanelDir+" && "
+	cmd := exec.Command("/bin/sh", "-c", cd + m.commandLine.input.Value())
 	_, err := cmd.CombinedOutput()
+	m.commandLine.input.SetValue("")
 	if err != nil {
-		outPutLog("Error run command line command", err)
 		return
 	}
-	m.commandLine.input.SetValue("")
+	m.commandLine.input.Blur()
+	footerHeight++
 }
