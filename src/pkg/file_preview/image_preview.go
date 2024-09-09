@@ -47,10 +47,9 @@ func ConvertImageToANSI(img image.Image, defaultBGColor color.Color) string {
 // colorToTermenv converts a color.Color to a termenv.RGBColor
 func colorToTermenv(c color.Color, fallbackColor string) termenv.RGBColor {
 	r, g, b, a := c.RGBA()
-	if a == 0  && fallbackColor != "" {
-		return termenv.RGBColor(fallbackColor)
-	}
-
+	if a == 0 {
+        	return termenv.RGBColor("")
+    	}
 	return termenv.RGBColor(fmt.Sprintf("#%02x%02x%02x", uint8(r>>8), uint8(g>>8), uint8(b>>8)))
 }
 
