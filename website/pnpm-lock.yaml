@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@astrojs/starlight':
-        specifier: ^0.26.0
-        version: 0.26.1(astro@4.15.4(rollup@4.21.2)(typescript@5.5.4))
+        specifier: ^0.27.0
+        version: 0.27.0(astro@4.15.4(rollup@4.21.2)(typescript@5.5.4))
       '@expressive-code/plugin-collapsible-sections':
         specifier: ^0.36.1
         version: 0.36.1
@@ -61,8 +61,8 @@ packages:
   '@astrojs/sitemap@3.1.6':
     resolution: {integrity: sha512-1Qp2NvAzVImqA6y+LubKi1DVhve/hXXgFvB0szxiipzh7BvtuKe4oJJ9dXSqaubaTkt4nMa6dv6RCCAYeB6xaQ==}
 
-  '@astrojs/starlight@0.26.1':
-    resolution: {integrity: sha512-0qNYWZJ+ZOdSfM7du6fGuwUhyTHtAeRIl0zYe+dF0TxDvcakplO1SYLbGGX6lEVYE3PdBne7dcJww85bXZJIIQ==}
+  '@astrojs/starlight@0.27.0':
+    resolution: {integrity: sha512-W06VHc4VVohKE6g1CytSF64WQ97nv/hlHHf2+vKGh/+I9nDdom/M7RXqkyLx7FBlLCbgsSvLYZUkh8cQ/mMOzQ==}
     peerDependencies:
       astro: ^4.8.6
 
@@ -1025,9 +1025,6 @@ packages:
   hast-util-embedded@3.0.0:
     resolution: {integrity: sha512-naH8sld4Pe2ep03qqULEtvYr7EjrLK2QHY8KJR6RJkTUjPGObe1vnx585uzem2hGra+s1q08DZZpfgDVYRbaXA==}
 
-  hast-util-from-html@2.0.1:
-    resolution: {integrity: sha512-RXQBLMl9kjKVNkJTIO6bZyb2n+cUH8LFaSSzo82jiLT6Tfc+Pt7VQCS+/h3YwG4jaNE2TA2sdJisGWR+aJrp0g==}
-
   hast-util-from-html@2.0.2:
     resolution: {integrity: sha512-HwOHwxdt2zC5KQ/CNoybBntRook2zJvfZE/u5/Ap7aLPe22bDqen7KwGkOqOyzL5zIqKwiYX/OTtE0FWgr6XXA==}
 
@@ -1804,9 +1801,6 @@ packages:
   vfile-message@4.0.2:
     resolution: {integrity: sha512-jRDZ1IMLttGj41KcZvlrYAaI3CfqpLpfpf+Mfig13viT6NKvRzWZ+lXz0Y5D60w6uJIBAOGq9mSHf0gktF0duw==}
 
-  vfile@6.0.2:
-    resolution: {integrity: sha512-zND7NlS8rJYb/sPqkb13ZvbbUoExdbi4w3SfRrMq6R3FvnLQmmfpajJNITuuYm6AZ5uao9vy4BAos3EXBPf2rg==}
-
   vfile@6.0.3:
     resolution: {integrity: sha512-KzIbH/9tXat2u30jf+smMwFCsno4wHVdNmzFyL+T/L3UGqqk6JKfVqOFOZEpZSHADH1k40ab6NUIXZq422ov3Q==}
 
@@ -1950,7 +1944,7 @@ snapshots:
       remark-smartypants: 3.0.2
       source-map: 0.7.4
       unist-util-visit: 5.0.0
-      vfile: 6.0.2
+      vfile: 6.0.3
     transitivePeerDependencies:
       - supports-color
 
@@ -1964,7 +1958,7 @@ snapshots:
       stream-replace-string: 2.0.0
       zod: 3.23.8
 
-  '@astrojs/starlight@0.26.1(astro@4.15.4(rollup@4.21.2)(typescript@5.5.4))':
+  '@astrojs/starlight@0.27.0(astro@4.15.4(rollup@4.21.2)(typescript@5.5.4))':
     dependencies:
       '@astrojs/mdx': 3.1.3(astro@4.15.4(rollup@4.21.2)(typescript@5.5.4))
       '@astrojs/sitemap': 3.1.6
@@ -1974,7 +1968,7 @@ snapshots:
       astro: 4.15.4(rollup@4.21.2)(typescript@5.5.4)
       astro-expressive-code: 0.35.6(astro@4.15.4(rollup@4.21.2)(typescript@5.5.4))
       bcp-47: 2.1.0
-      hast-util-from-html: 2.0.1
+      hast-util-from-html: 2.0.2
       hast-util-select: 6.0.2
       hast-util-to-string: 3.0.0
       hastscript: 9.0.0
@@ -1987,7 +1981,7 @@ snapshots:
       remark-directive: 3.0.0
       unified: 11.0.5
       unist-util-visit: 5.0.0
-      vfile: 6.0.2
+      vfile: 6.0.3
     transitivePeerDependencies:
       - supports-color
 
@@ -2378,7 +2372,7 @@ snapshots:
       unist-util-position-from-estree: 2.0.0
       unist-util-stringify-position: 4.0.0
       unist-util-visit: 5.0.0
-      vfile: 6.0.2
+      vfile: 6.0.3
     transitivePeerDependencies:
       - supports-color
 
@@ -2957,15 +2951,6 @@ snapshots:
       '@types/hast': 3.0.4
       hast-util-is-element: 3.0.0
 
-  hast-util-from-html@2.0.1:
-    dependencies:
-      '@types/hast': 3.0.4
-      devlop: 1.1.0
-      hast-util-from-parse5: 8.0.1
-      parse5: 7.1.2
-      vfile: 6.0.2
-      vfile-message: 4.0.2
-
   hast-util-from-html@2.0.2:
     dependencies:
       '@types/hast': 3.0.4
@@ -2982,7 +2967,7 @@ snapshots:
       devlop: 1.1.0
       hastscript: 8.0.0
       property-information: 6.5.0
-      vfile: 6.0.2
+      vfile: 6.0.3
       vfile-location: 5.0.3
       web-namespaces: 2.0.1
 
@@ -4190,7 +4175,7 @@ snapshots:
       extend: 3.0.2
       is-plain-obj: 4.1.0
       trough: 2.2.0
-      vfile: 6.0.2
+      vfile: 6.0.3
 
   unist-util-find-after@5.0.0:
     dependencies:
@@ -4249,18 +4234,12 @@ snapshots:
   vfile-location@5.0.3:
     dependencies:
       '@types/unist': 3.0.3
-      vfile: 6.0.2
+      vfile: 6.0.3
 
   vfile-message@4.0.2:
     dependencies:
       '@types/unist': 3.0.3
       unist-util-stringify-position: 4.0.0
-
-  vfile@6.0.2:
-    dependencies:
-      '@types/unist': 3.0.3
-      unist-util-stringify-position: 4.0.0
-      vfile-message: 4.0.2
 
   vfile@6.0.3:
     dependencies:
