@@ -12,7 +12,7 @@
   "dependencies": {
     "@astrojs/starlight": "^0.26.0",
     "@expressive-code/plugin-collapsible-sections": "^0.36.0",
-    "@expressive-code/plugin-line-numbers": "^0.35.0",
+    "@expressive-code/plugin-line-numbers": "^0.36.0",
     "@fontsource/ibm-plex-mono": "^5.0.8",
     "@fontsource/ibm-plex-serif": "^5.0.8",
     "astro": "^4.4.9",
