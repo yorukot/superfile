@@ -104,6 +104,13 @@ in {
 }
 ```
 
+### X-CMD
+
+[x-cmd](https://www.x-cmd.com/) is a **toolbox for Posix Shell**, offering a lightweight package manager built using shell and awk.
+```sh
+x env use superfile
+```
+
 ## Start superfile
 
 After completing the installation, you can restart the terminal (if necessary)
