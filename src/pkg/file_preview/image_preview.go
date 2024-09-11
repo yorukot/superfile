@@ -19,19 +19,14 @@ func ConvertImageToANSI(img image.Image, defaultBGColor color.Color) string {
 	width := img.Bounds().Dx()
 	height := img.Bounds().Dy()
 	output := ""
-	BGColor :=colorToTermenv(defaultBGColor. "")
-
-	// r, g, b, _ := defaultBGColor.RGBA()
-
-	// BGColor := fmt.Sprintf("#%02x%02x%02x", uint8(r>>8), uint8(g>>8), uint8(b>>8))
 
 	for y := 0; y < height; y += 2 {
 		for x := 0; x < width; x++ {
-			upperColor := colorToTermenv(img.At(x, y), "")
-			lowerColor := BGColor
+			upperColor := colorToTermenv(img.At(x, y), colorToHex(defaultBGColor))
+			lowerColor := colorToTermenv(defaultBGColor, "")
 
 			if y + 1 < height {
-				lowerColor = colorToTermenv(img.At(x, y + 1), "")
+				lowerColor = colorToTermenv(img.At(x, y + 1), colorToHex(defaultBGColor))
 			}
 
 			// Using the "▄" character which fills the lower half
@@ -48,7 +43,7 @@ func ConvertImageToANSI(img image.Image, defaultBGColor color.Color) string {
 func colorToTermenv(c color.Color, fallbackColor string) termenv.RGBColor {
 	r, g, b, a := c.RGBA()
 	if a == 0 {
-        	return termenv.RGBColor("")
+        	return termenv.RGBColor(fallbackColor)
     	}
 	return termenv.RGBColor(fmt.Sprintf("#%02x%02x%02x", uint8(r>>8), uint8(g>>8), uint8(b>>8)))
 }
@@ -90,4 +85,12 @@ func hexToColor(hex string) (color.RGBA, error) {
 		return color.RGBA{}, err
 	}
 	return color.RGBA{R: uint8(values >> 16), G: uint8((values >> 8) & 0xFF), B: uint8(values & 0xFF), A: 255},nil
+}
+
+func colorToHex(color color.Color) (fullbackHex string) {
+	r, g, b, _ := color.RGBA()
+
+	fullbackHex = fmt.Sprintf("#%02x%02x%02x", uint8(r>>8), uint8(g>>8), uint8(b>>8))
+	return fullbackHex
+
 }
