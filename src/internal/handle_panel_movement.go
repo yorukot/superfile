@@ -44,7 +44,7 @@ func (m *model) parentDirectory() {
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
-// Enter director or open file with default application
+// Enter directory or open file with default application
 func (m *model) enterPanel() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 
@@ -139,14 +139,21 @@ func (m *model) selectAllItem() {
 
 // Select the item where cursor located (only work on select mode)
 func (m *model) singleItemSelect() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	if arrayContains(panel.selected, panel.element[panel.cursor].location) {
-		panel.selected = removeElementByValue(panel.selected, panel.element[panel.cursor].location)
-	} else {
-		panel.selected = append(panel.selected, panel.element[panel.cursor].location)
-	}
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]  // Access the current panel
+
+	if len(panel.element) > 0 && panel.cursor >= 0 && panel.cursor < len(panel.element) {
+        elementLocation := panel.element[panel.cursor].location
+
+		if arrayContains(panel.selected, elementLocation) {
+			panel.selected = removeElementByValue(panel.selected, elementLocation)
+		} else {
+			panel.selected = append(panel.selected, elementLocation)
+		}
 
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+	} else {
+        outPutLog("No elements to select or cursor out of bounds.")
+    }
 }
 
 // Toggle dotfile display or not
