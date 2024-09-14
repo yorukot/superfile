@@ -18,11 +18,11 @@ importers:
         specifier: ^0.36.0
         version: 0.36.1
       '@fontsource/ibm-plex-mono':
-        specifier: ^5.0.8
-        version: 5.0.15
+        specifier: ^5.1.0
+        version: 5.1.0
       '@fontsource/ibm-plex-serif':
-        specifier: ^5.0.8
-        version: 5.0.15
+        specifier: ^5.1.0
+        version: 5.1.0
       astro:
         specifier: ^4.15.6
         version: 4.15.6(rollup@4.21.3)(typescript@5.5.4)
@@ -327,11 +327,11 @@ packages:
   '@expressive-code/plugin-text-markers@0.35.6':
     resolution: {integrity: sha512-/k9eWVZSCs+uEKHR++22Uu6eIbHWEciVHbIuD8frT8DlqTtHYaaiwHPncO6KFWnGDz5i/gL7oyl6XmOi/E6GVg==}
 
-  '@fontsource/ibm-plex-mono@5.0.15':
-    resolution: {integrity: sha512-etA4nIhgrywWWV8RQ8lXQtxujJmiX7MT5JZq9T8vIdEhBH42ErsjD1ewLwhGlgfafA3veoqVGsEAF9CmgpRGwA==}
+  '@fontsource/ibm-plex-mono@5.1.0':
+    resolution: {integrity: sha512-XKsZNyRCj6tz8zlatHmniSoLVephMD5GQG2sXgcaEb8DkUO+O61r28uTlIMEZuoZXtP4c4STvL+KUlJM5jZOEg==}
 
-  '@fontsource/ibm-plex-serif@5.0.15':
-    resolution: {integrity: sha512-dsZLJpBVt8JmqTCMo4i/05yXrDEWF9wSTMaPr/WT/zhQW4xlj2i7I4XiEweG1SGBxndoQ6Tn7LWqW6ZDLqtDFA==}
+  '@fontsource/ibm-plex-serif@5.1.0':
+    resolution: {integrity: sha512-x8/rprq/hc94eYugICIUJCyUVMC1rPpgmL8km5FhhXIl6l2soaYadLcx4bmVP/rvLr/cRtj4GCaV6ZnGg3jaPA==}
 
   '@img/sharp-darwin-arm64@0.33.5':
     resolution: {integrity: sha512-UT4p+iz/2H4twwAoLCqfA9UH5pI6DggwKEGuaPy7nCVQ8ZsiY5PIcrRvD1DzuY3qYL07NtIQcWnBSY/heikIFQ==}
@@ -2264,9 +2264,9 @@ snapshots:
     dependencies:
       '@expressive-code/core': 0.35.6
 
-  '@fontsource/ibm-plex-mono@5.0.15': {}
+  '@fontsource/ibm-plex-mono@5.1.0': {}
 
-  '@fontsource/ibm-plex-serif@5.0.15': {}
+  '@fontsource/ibm-plex-serif@5.1.0': {}
 
   '@img/sharp-darwin-arm64@0.33.5':
     optionalDependencies:
