@@ -49,15 +49,9 @@ schema = 3
   [mod."github.com/charmbracelet/x/exp/term"]
     version = "v0.0.0-20240814160751-e2dc8b53b604"
     hash = "sha256-8M7BzhJasT6X5/oo8dpJ4LEuSl60FQf13by5M8t+GwE="
-  [mod."github.com/charmbracelet/x/input"]
-    version = "v0.1.0"
-    hash = "sha256-oPt488pHiPGn9SiWZBjDGEYq2f8npDA8UIVX1MJ9pSk="
   [mod."github.com/charmbracelet/x/term"]
     version = "v0.2.0"
     hash = "sha256-eIsmNg/ktYEFWG9j/z2FuD+iizkV+HGLrUvor7Xkqlo="
-  [mod."github.com/charmbracelet/x/windows"]
-    version = "v0.1.0"
-    hash = "sha256-TLwaSrLgruvRinn986Jt/B7kb63IOq9pHUIWiyyNzos="
   [mod."github.com/connesc/cipherio"]
     version = "v0.2.1"
     hash = "sha256-PeuFnTak2WADesP8YTBqHP/XyvBue9bdKHYser2v6LU="
@@ -154,9 +148,6 @@ schema = 3
   [mod."github.com/urfave/cli/v2"]
     version = "v2.27.4"
     hash = "sha256-8gkLizRt7U9BfTok/hTysMt78HBP8syiEJ0eYhFrAvo="
-  [mod."github.com/xo/terminfo"]
-    version = "v0.0.0-20220910002029-abceb7e1c41e"
-    hash = "sha256-GyCDxxMQhXA3Pi/TsWXpA8cX5akEoZV7CFx4RO3rARU="
   [mod."github.com/xrash/smetrics"]
     version = "v0.0.0-20240521201337-686a1a2994c1"
     hash = "sha256-CsyN59w6sKERDI5kkdpq0YKmqdixyCHuN4FYE/56/BQ="
