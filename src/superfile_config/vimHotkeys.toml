@@ -37,6 +37,7 @@ toggle_dot_file = ['.', '']
 change_panel_mode = ['m', '']
 open_help_menu = ['?', '']
 open_command_line = [':', '']
+copy_path = ['Y', '']
 # =================================================================================================
 # Typing hotkeys (can conflict with all hotkeys)
 confirm_typing = ['enter', '']
