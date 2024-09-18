@@ -19,7 +19,7 @@ import (
 func initialConfig(dir string) (toggleDotFileBool bool, firstFilePanelDir string) {
 	var err error
 
-	logOutput, err = os.OpenFile(varibale.LogFilea, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	logOutput, err = os.OpenFile(varibale.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("Error while opening superfile.log file: %v", err)
 	}
@@ -32,7 +32,7 @@ func initialConfig(dir string) (toggleDotFileBool bool, firstFilePanelDir string
 
 	icon.InitIcon(Config.Nerdfont)
 
-	toggleDotFileData, err := os.ReadFile(varibale.ToggleDotFilea)
+	toggleDotFileData, err := os.ReadFile(varibale.ToggleDotFile)
 	if err != nil {
 		outPutLog("Error while reading toggleDotFile data error:", err)
 	}
@@ -69,7 +69,7 @@ func loadConfigFile() {
 	_ = toml.Unmarshal([]byte(ConfigTomlString), &Config)
 	tempForCheckMissingConfig := ConfigType{}
 
-	data, err := os.ReadFile(varibale.ConfigFilea)
+	data, err := os.ReadFile(varibale.ConfigFile)
 	if err != nil {
 		log.Fatalf("Config file doesn't exist: %v", err)
 	}
@@ -86,7 +86,7 @@ func loadConfigFile() {
 			log.Fatalf("Error encoding config: %v", err)
 		}
 
-		err = os.WriteFile(varibale.ConfigFilea, tomlData, 0644)
+		err = os.WriteFile(varibale.ConfigFile, tomlData, 0644)
 		if err != nil {
 			log.Fatalf("Error writing config file: %v", err)
 		}
@@ -106,7 +106,7 @@ func loadHotkeysFile() {
 
 	_ = toml.Unmarshal([]byte(HotkeysTomlString), &hotkeys)
 	hotkeysFromConfig := HotkeysType{}
-	data, err := os.ReadFile(varibale.HotkeysFilea)
+	data, err := os.ReadFile(varibale.HotkeysFile)
 
 	if err != nil {
 		log.Fatalf("Config file doesn't exist: %v", err)
@@ -129,8 +129,8 @@ func loadHotkeysFile() {
 
 			if isMissing {
 				fmt.Print(lipgloss.NewStyle().Foreground(lipgloss.Color("#F93939")).Render("Error") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFEE")).Render(" ┃ ") + 
-				fmt.Sprintf("Field \"%s\" is missing in hotkeys configuration\n", name))
+					lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFEE")).Render(" ┃ ") +
+					fmt.Sprintf("Field \"%s\" is missing in hotkeys configuration\n", name))
 			}
 		}
 		fmt.Println("To add missing fields to hotkeys directory automaticially run Superfile with the --fix-hotkeys flag")
@@ -167,14 +167,14 @@ func writeHotkeysFile(hotkeys HotkeysType) {
 		log.Fatalf("Error encoding hotkeys: %v", err)
 	}
 
-	err = os.WriteFile(varibale.HotkeysFilea, tomlData, 0644)
+	err = os.WriteFile(varibale.HotkeysFile, tomlData, 0644)
 	if err != nil {
 		log.Fatalf("Error writing hotkeys file: %v", err)
 	}
 }
 
 func loadThemeFile() {
-	data, err := os.ReadFile(varibale.ThemeFoldera + "/" + Config.Theme + ".toml")
+	data, err := os.ReadFile(varibale.ThemeFolder + "/" + Config.Theme + ".toml")
 	if err != nil {
 		data = []byte(DefaultThemeString)
 	}
@@ -205,17 +205,17 @@ func LoadAllDefaultConfig(content embed.FS) {
 	}
 	DefaultThemeString = string(temp)
 
-	currentThemeVersion, err := os.ReadFile(varibale.ThemeFileVersiona)
+	currentThemeVersion, err := os.ReadFile(varibale.ThemeFileVersion)
 
 	if err != nil && !os.IsNotExist(err) {
 		outPutLog("Error reading from file:", err)
 		return
 	}
 
-	_, err = os.Stat(varibale.ThemeFoldera)
+	_, err = os.Stat(varibale.ThemeFolder)
 
 	if os.IsNotExist(err) {
-		err := os.MkdirAll(varibale.ThemeFoldera, 0755)
+		err := os.MkdirAll(varibale.ThemeFolder, 0755)
 		if err != nil {
 			outPutLog("error create theme direcroty", err)
 			return
@@ -240,7 +240,7 @@ func LoadAllDefaultConfig(content embed.FS) {
 			return
 		}
 
-		file, err := os.Create(filepath.Join(varibale.ThemeFoldera, file.Name()))
+		file, err := os.Create(filepath.Join(varibale.ThemeFolder, file.Name()))
 		if err != nil {
 			outPutLog("error create theme file from embed", err)
 			return
@@ -249,5 +249,5 @@ func LoadAllDefaultConfig(content embed.FS) {
 		defer file.Close()
 	}
 
-	os.WriteFile(varibale.ThemeFileVersiona, []byte(varibale.CurrentVersion), 0644)
+	os.WriteFile(varibale.ThemeFileVersion, []byte(varibale.CurrentVersion), 0644)
 }

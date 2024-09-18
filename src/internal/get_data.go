@@ -37,7 +37,7 @@ func getWellKnownDirectories() []directory {
 		{location: xdg.Home, name: icon.Home + icon.Space + "Home"},
 		{location: xdg.UserDirs.Download, name: icon.Download + icon.Space + "Downloads"},
 		{location: xdg.UserDirs.Documents, name: icon.Documents + icon.Space + "Documents"},
-		{location: xdg.UserDirs.Pictures, name: icon.Pictures + icon.Space +  "Pictures"},
+		{location: xdg.UserDirs.Pictures, name: icon.Pictures + icon.Space + "Pictures"},
 		{location: xdg.UserDirs.Videos, name: icon.Videos + icon.Space + "Videos"},
 		{location: xdg.UserDirs.Music, name: icon.Music + icon.Space + "Music"},
 		{location: xdg.UserDirs.Templates, name: icon.Templates + icon.Space + "Templates"},
@@ -59,7 +59,7 @@ func getPinnedDirectories() []directory {
 	directories := []directory{}
 	var paths []string
 
-	jsonData, err := os.ReadFile(varibale.PinnedFilea)
+	jsonData, err := os.ReadFile(varibale.PinnedFile)
 	if err != nil {
 		outPutLog("Read superfile data error", err)
 	}

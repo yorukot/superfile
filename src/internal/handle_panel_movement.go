@@ -139,10 +139,10 @@ func (m *model) selectAllItem() {
 
 // Select the item where cursor located (only work on select mode)
 func (m *model) singleItemSelect() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]  // Access the current panel
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex] // Access the current panel
 
 	if len(panel.element) > 0 && panel.cursor >= 0 && panel.cursor < len(panel.element) {
-        elementLocation := panel.element[panel.cursor].location
+		elementLocation := panel.element[panel.cursor].location
 
 		if arrayContains(panel.selected, elementLocation) {
 			panel.selected = removeElementByValue(panel.selected, elementLocation)
@@ -150,10 +150,10 @@ func (m *model) singleItemSelect() {
 			panel.selected = append(panel.selected, elementLocation)
 		}
 
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+		m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	} else {
-        outPutLog("No elements to select or cursor out of bounds.")
-    }
+		outPutLog("No elements to select or cursor out of bounds.")
+	}
 }
 
 // Toggle dotfile display or not
@@ -166,7 +166,7 @@ func (m *model) toggleDotFileController() {
 		newToggleDotFile = "true"
 		m.toggleDotFile = true
 	}
-	err := os.WriteFile(varibale.ToggleDotFilea, []byte(newToggleDotFile), 0644)
+	err := os.WriteFile(varibale.ToggleDotFile, []byte(newToggleDotFile), 0644)
 	if err != nil {
 		outPutLog("Pinned folder function updatedData superfile data error", err)
 	}
@@ -268,7 +268,7 @@ func (m *model) itemSelectUp(wheel bool) {
 			}
 		}
 		selectItemIndex := panel.cursor + 1
-		if selectItemIndex > len(panel.element) - 1 {
+		if selectItemIndex > len(panel.element)-1 {
 			selectItemIndex = 0
 		}
 		if arrayContains(panel.selected, panel.element[selectItemIndex].location) {

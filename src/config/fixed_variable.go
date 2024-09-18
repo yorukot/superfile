@@ -15,16 +15,16 @@ const (
 )
 
 var (
-	ThemeFoldera      string = SuperFileMainDir + "/theme"
-	LastCheckVersiona string = SuperFileDataDir + "/lastCheckVersion"
-	ThemeFileVersiona string = SuperFileDataDir + "/themeFileVersion"
-	FirstUseChecka    string = SuperFileDataDir + "/firstUseCheck"
-	PinnedFilea       string = SuperFileDataDir + "/pinned.json"
-	ConfigFilea       string = SuperFileMainDir + "/config.toml"
-	HotkeysFilea      string = SuperFileMainDir + "/hotkeys.toml"
-	ToggleDotFilea    string = SuperFileDataDir + "/toggleDotFile"
-	LogFilea          string = SuperFileStateDir + "/superfile.log"
-	FixHotkeys        bool   = false
+	ThemeFolder      string = SuperFileMainDir + "/theme"
+	LastCheckVersion string = SuperFileDataDir + "/lastCheckVersion"
+	ThemeFileVersion string = SuperFileDataDir + "/themeFileVersion"
+	FirstUseCheck    string = SuperFileDataDir + "/firstUseCheck"
+	PinnedFile       string = SuperFileDataDir + "/pinned.json"
+	ConfigFile       string = SuperFileMainDir + "/config.toml"
+	HotkeysFile      string = SuperFileMainDir + "/hotkeys.toml"
+	ToggleDotFile    string = SuperFileDataDir + "/toggleDotFile"
+	LogFile          string = SuperFileStateDir + "/superfile.log"
+	FixHotkeys       bool   = false
 )
 
 const (

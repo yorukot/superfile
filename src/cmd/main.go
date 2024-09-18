@@ -37,9 +37,9 @@ func Run(content embed.FS) {
 				Aliases: []string{"pl"},
 				Usage:   "Print the path to the configuration and directory",
 				Action: func(c *cli.Context) error {
-					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#66b2ff")).Render("[Configuration file path]"), variable.ConfigFilea)
-					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#ffcc66")).Render("[Hotkeys file path]"), variable.HotkeysFilea)
-					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#66ff66")).Render("[Log file path]"), variable.LogFilea)
+					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#66b2ff")).Render("[Configuration file path]"), variable.ConfigFile)
+					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#ffcc66")).Render("[Hotkeys file path]"), variable.HotkeysFile)
+					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#66ff66")).Render("[Log file path]"), variable.LogFile)
 					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#ff9999")).Render("[Configuration directory path]"), variable.SuperFileMainDir)
 					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#ff66ff")).Render("[Data directory path]"), variable.SuperFileDataDir)
 					return nil
@@ -88,7 +88,7 @@ func InitConfigFile() {
 		variable.SuperFileMainDir,
 		variable.SuperFileDataDir,
 		variable.SuperFileStateDir,
-		variable.ThemeFoldera,
+		variable.ThemeFolder,
 	); err != nil {
 		log.Fatalln("Error creating directories:", err)
 	}
@@ -106,20 +106,20 @@ func InitConfigFile() {
 
 	// Create files
 	if err := createFiles(
-		variable.PinnedFilea,
-		variable.ToggleDotFilea,
-		variable.LogFilea,
-		variable.ThemeFileVersiona,
+		variable.PinnedFile,
+		variable.ToggleDotFile,
+		variable.LogFile,
+		variable.ThemeFileVersion,
 	); err != nil {
 		log.Fatalln("Error creating files:", err)
 	}
 
 	// Write config file
-	if err := writeConfigFile(variable.ConfigFilea, internal.ConfigTomlString); err != nil {
+	if err := writeConfigFile(variable.ConfigFile, internal.ConfigTomlString); err != nil {
 		log.Fatalln("Error writing config file:", err)
 	}
 
-	if err := writeConfigFile(variable.HotkeysFilea, internal.HotkeysTomlString); err != nil {
+	if err := writeConfigFile(variable.HotkeysFile, internal.HotkeysTomlString); err != nil {
 		log.Fatalln("Error writing config file:", err)
 	}
 }
@@ -153,7 +153,7 @@ func createFiles(files ...string) error {
 }
 
 func checkFirstUse() bool {
-	file := variable.FirstUseChecka
+	file := variable.FirstUseCheck
 	firstUse := false
 	if _, err := os.Stat(file); os.IsNotExist(err) {
 		firstUse = true
@@ -175,7 +175,7 @@ func writeConfigFile(path, data string) error {
 func CheckForUpdates() {
 	var Config internal.ConfigType
 
-	data, err := os.ReadFile(variable.ConfigFilea)
+	data, err := os.ReadFile(variable.ConfigFile)
 	if err != nil {
 		log.Fatalf("Config file doesn't exist: %v", err)
 	}
@@ -189,7 +189,7 @@ func CheckForUpdates() {
 		return
 	}
 
-	lastTime, err := readLastTimeCheckVersionFromFile(variable.LastCheckVersiona)
+	lastTime, err := readLastTimeCheckVersionFromFile(variable.LastCheckVersion)
 	if err != nil && !os.IsNotExist(err) {
 		fmt.Println("Error reading from file:", err)
 		return
@@ -221,16 +221,16 @@ func CheckForUpdates() {
 
 		if versionToNumber(release.TagName) > versionToNumber(variable.CurrentVersion) {
 			fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("#FF69E1")).Render("┃ ") +
-			lipgloss.NewStyle().Foreground(lipgloss.Color("#FFBA52")).Bold(true).Render("A new version ") + 
-			lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFF2")).Bold(true).Italic(true).Render(release.TagName) + 
-			lipgloss.NewStyle().Foreground(lipgloss.Color("#FFBA52")).Bold(true).Render(" is available."))
-			
-			fmt.Printf(lipgloss.NewStyle().Foreground(lipgloss.Color("#FF69E1")).Render("┃ ") + "Please update.\n┏\n\n      => %s\n\n", variable.LatestVersionGithub)
+				lipgloss.NewStyle().Foreground(lipgloss.Color("#FFBA52")).Bold(true).Render("A new version ") +
+				lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFF2")).Bold(true).Italic(true).Render(release.TagName) +
+				lipgloss.NewStyle().Foreground(lipgloss.Color("#FFBA52")).Bold(true).Render(" is available."))
+
+			fmt.Printf(lipgloss.NewStyle().Foreground(lipgloss.Color("#FF69E1")).Render("┃ ")+"Please update.\n┏\n\n      => %s\n\n", variable.LatestVersionGithub)
 			fmt.Printf("                                                               ┛\n")
 		}
 
 		timeStr := currentTime.Format(time.RFC3339)
-		err = writeToFile(variable.LastCheckVersiona, timeStr)
+		err = writeToFile(variable.LastCheckVersion, timeStr)
 		if err != nil {
 			log.Println("Error writing to file:", err)
 			return
