@@ -211,6 +211,11 @@ func getHelpMenuData() []helpMenuModalData {
 			hotkeyWorkType: globalType,
 		},
 		{
+			hotkey:         hotkeys.CopyPath,
+			description:    "Copy current file or directory path",
+			hotkeyWorkType: globalType,
+		},
+		{
 			hotkey:         hotkeys.ExtractFile,
 			description:    "Extract compressed file",
 			hotkeyWorkType: normalType,

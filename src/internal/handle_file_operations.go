@@ -617,3 +617,11 @@ func (m model) openDirectoryWithEditor() tea.Cmd {
 		return editorFinishedMsg{err}
 	})
 }
+
+// Copy file path
+func (m model) copyPath() {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	if err := clipboard.WriteAll(panel.element[panel.cursor].location); err != nil {
+		outPutLog("Copy path error", panel.element[panel.cursor].location, err)
+	}
+}

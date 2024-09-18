@@ -32,9 +32,10 @@ open_current_directory_with_editor = ['E', '']
 # other
 pinned_directory = ['P', '']
 toggle_dot_file = ['.', '']
-change_panel_mode = ['v', '']
+change_panel_mode = ['ctrl+L', '']
 open_help_menu = ['?', '']
 open_command_line = [':', '']
+copy_path = ['ctrl+p', '']
 # =================================================================================================
 # Typing hotkeys (can conflict with all hotkeys)
 confirm_typing = ['enter', '']
