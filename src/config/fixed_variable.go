@@ -1,4 +1,4 @@
-package varibale
+package variable
 
 import "github.com/adrg/xdg"
 
