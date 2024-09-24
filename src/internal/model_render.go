@@ -517,7 +517,7 @@ func (m model) filePreviewPanelRender() string {
 	ext := filepath.Ext(itemPath)
 	// check if the file is pdf file, cuz pdf will cause error
 	if ext == ".pdf" {
-		return box.Render("\n --- " + icon.Error + " Unsupported  formats ---")
+		return box.Render("\n --- " + icon.Error + " Unsupported formats ---")
 	}	
 
 	if fileInfo.IsDir() {
