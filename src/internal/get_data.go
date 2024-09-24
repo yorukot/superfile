@@ -7,7 +7,7 @@ import (
 
 	"github.com/adrg/xdg"
 	"github.com/shirou/gopsutil/disk"
-	varibale "github.com/yorukot/superfile/src/config"
+	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/config/icon"
 )
 
@@ -59,7 +59,7 @@ func getPinnedDirectories() []directory {
 	directories := []directory{}
 	var paths []string
 
-	jsonData, err := os.ReadFile(varibale.PinnedFile)
+	jsonData, err := os.ReadFile(variable.PinnedFile)
 	if err != nil {
 		outPutLog("Read superfile data error", err)
 	}

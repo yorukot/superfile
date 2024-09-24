@@ -11,7 +11,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	varibale "github.com/yorukot/superfile/src/config"
+	variable "github.com/yorukot/superfile/src/config"
 	stringfunction "github.com/yorukot/superfile/src/pkg/string_function"
 )
 
@@ -320,11 +320,11 @@ func (m model) quitSuperfile() {
 	// cd on quit
 	if Config.CdOnQuit {
 		currentDir := m.fileModel.filePanels[m.filePanelFocusIndex].location
-		if currentDir == varibale.HomeDir {
+		if currentDir == variable.HomeDir {
 			return
 		}
 		// escape single quote
 		currentDir = strings.ReplaceAll(currentDir, "'", "'\\''")
-		os.WriteFile(varibale.SuperFileStateDir+"/lastdir", []byte("cd '"+currentDir+"'"), 0755)
+		os.WriteFile(variable.SuperFileStateDir+"/lastdir", []byte("cd '"+currentDir+"'"), 0755)
 	}
 }
