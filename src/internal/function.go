@@ -338,6 +338,7 @@ func (m *model) returnMetaData() {
 	if Config.Metadata && checkIsSymlinked.Mode()&os.ModeSymlink == 0 {
 
 		fileInfos := et.ExtractMetadata(filePath)
+		et.Close()
 
 		for _, fileInfo := range fileInfos {
 			if fileInfo.Err != nil {
