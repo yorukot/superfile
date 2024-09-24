@@ -595,7 +595,10 @@ func (m model) compressFile() {
 func (m model) openFileWithEditor() tea.Cmd {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 
-	editor := os.Getenv("EDITOR")
+	editor := Config.Editor
+	if editor == "" {
+		editor = os.Getenv("EDITOR")
+	}
 	if editor == "" {
 		editor = "nano"
 	}
@@ -608,7 +611,10 @@ func (m model) openFileWithEditor() tea.Cmd {
 
 // Open directory with default editor
 func (m model) openDirectoryWithEditor() tea.Cmd {
-	editor := os.Getenv("EDITOR")
+	editor := Config.Editor
+	if editor == "" {
+		editor = os.Getenv("EDITOR")
+	}
 	if editor == "" {
 		editor = "nano"
 	}
