@@ -317,14 +317,18 @@ func (m *model) getFilePanelItems() {
 }
 
 func (m model) quitSuperfile() {
-	// cd on quit
-	if Config.CdOnQuit {
-		currentDir := m.fileModel.filePanels[m.filePanelFocusIndex].location
-		if currentDir == variable.HomeDir {
-			return
-		}
-		// escape single quote
-		currentDir = strings.ReplaceAll(currentDir, "'", "'\\''")
-		os.WriteFile(variable.SuperFileStateDir+"/lastdir", []byte("cd '"+currentDir+"'"), 0755)
-	}
+    // close exiftool session
+    if Config.Metadata {
+        et.Close();
+    }
+    // cd on quit
+    if Config.CdOnQuit {
+        currentDir := m.fileModel.filePanels[m.filePanelFocusIndex].location
+        if currentDir == variable.HomeDir {
+            return
+        }
+        // escape single quote
+        currentDir = strings.ReplaceAll(currentDir, "'", "'\\''")
+        os.WriteFile(variable.SuperFileStateDir+"/lastdir", []byte("cd '"+currentDir+"'"), 0755)
+    }
 }
