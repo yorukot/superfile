@@ -513,12 +513,17 @@ func (m model) filePreviewPanelRender() string {
 		outPutLog("error get file info", err)
 		return box.Render("\n --- " + icon.Error + " Error get file info ---")
 	}
-	
+
 	ext := filepath.Ext(itemPath)
 	// check if the file is pdf file, cuz pdf will cause error
 	if ext == ".pdf" {
 		return box.Render("\n --- " + icon.Error + " Unsupported formats ---")
-	}	
+	}
+
+	// check if the file is torrent file, cuz torrent will cause error
+	if ext == ".torrent" {
+		return box.Render("\n --- " + icon.Error + " Unsupported formats ---")
+	}
 
 	if fileInfo.IsDir() {
 		directoryContent := ""
