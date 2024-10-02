@@ -45,9 +45,9 @@ os=$(uname -s)
 
 cd "${temp_dir}"
 
-if [[ "$arch" == "x86_64" ]]; then
+if [[ "$arch" == "x86_64" || "$arch" == "amd64" ]]; then
     arch="amd64"
-elif [[ "$arch" == "arm"* ]]; then
+elif [[ "$arch" == "arm"* || "$arch" == "aarch64" || "$arch" == "arm64" ]]; then
     arch="arm64"
 else
     echo -e "${red}❌ Fail install superfile: ${yellow}Unsupported architecture${nc}"
