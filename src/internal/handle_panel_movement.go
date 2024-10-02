@@ -403,7 +403,7 @@ func (m *model) controlSideBarListDown(wheel bool) {
 		newDirectory := m.sidebarModel.directories[m.sidebarModel.cursor].location
 		for newDirectory == "Pinned+-*/=?" || newDirectory == "Disks+-*/=?" {
 			m.sidebarModel.cursor++
-			if m.sidebarModel.cursor+1 >= len(m.sidebarModel.directories) {
+			if m.sidebarModel.cursor+1 > len(m.sidebarModel.directories) {
 				m.sidebarModel.cursor = 0
 			}
 			newDirectory = m.sidebarModel.directories[m.sidebarModel.cursor].location
