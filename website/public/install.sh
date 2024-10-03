@@ -39,7 +39,7 @@ if [ $? -ne 0 ]; then
 fi
 
 package=superfile
-version=1.1.4
+version=1.1.5
 arch=$(uname -m)
 os=$(uname -s)
 
