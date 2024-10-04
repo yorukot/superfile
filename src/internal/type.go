@@ -80,6 +80,7 @@ type model struct {
 	typingModal         typingModal
 	warnModal           warnModal
 	helpMenu            helpMenuModal
+	sftpPanel 			sftpPanelModal
 	fileMetaData        fileMetadata
 	commandLine         commandLineModal
 	confirmToQuit 		bool
@@ -232,3 +233,24 @@ type channelMessage struct {
 /*PROCESS BAR internal TYPE END*/
 
 type editorFinishedMsg struct{ err error }
+
+// Sftp modal data
+
+type sftpPanelModal struct {
+	height int
+	width int
+	open bool
+	renderIndex int
+	cursor int
+	sftpData SftpData
+	editing bool 
+	editData SftpData
+}
+
+type SftpData struct {
+	name string
+	host string
+	user string
+	password string
+	indentityFile string
+}

@@ -655,3 +655,7 @@ func (m model) filePreviewPanelRender() string {
 func (m model) commandLineInputBoxRender() string {
 	return m.commandLine.input.View()
 }
+
+func (m model) sftpPanelRender() string {
+	return ""
+}

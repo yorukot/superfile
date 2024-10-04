@@ -175,3 +175,12 @@ func (m *model) enterCommandLine() {
 	m.commandLine.input.Blur()
 	footerHeight++
 }
+
+func (m *model) openSftpMenu() {
+	if m.sftpPanel.open {
+		m.sftpPanel.open = false
+		return
+	}
+
+	m.sftpPanel.open = true
+}

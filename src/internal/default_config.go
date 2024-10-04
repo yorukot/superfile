@@ -82,9 +82,14 @@ func getHelpMenuData() []helpMenuModalData {
 			hotkeyWorkType: globalType,
 		},
 		{
+			hotkey:         hotkeys.OpenSftpPanel,
+			description:    "Open sftp panel",
+			hotkeyWorkType: globalType,
+		},
+		{
 			subTitle: "Panel navigation",
 		},
-	{
+		{
 			hotkey:         hotkeys.CreateNewFilePanel,
 			description:    "Create new file panel",
 			hotkeyWorkType: globalType,
@@ -233,6 +238,39 @@ func getHelpMenuData() []helpMenuModalData {
 		{
 			hotkey:         hotkeys.OpenCurrentDirectoryWithEditor,
 			description:    "Open current directory with default editor",
+			hotkeyWorkType: normalType,
+		},
+		{
+			subTitle: "Sftp panel",
+		},
+		{
+			hotkey:         hotkeys.Confirm,
+			description:    "Connet and open current sftp as a new file panel",
+			hotkeyWorkType: normalType,
+		},
+		{
+			hotkey:         hotkeys.SftpPanelNew,
+			description:    "Craete new sftp configuration file",
+			hotkeyWorkType: normalType,
+		},
+		{
+			hotkey:         hotkeys.SftpPanelSave,
+			description:    "Save new sftp configuration file",
+			hotkeyWorkType: normalType,
+		},
+		{
+			hotkey:         hotkeys.SftpPanelEdit,
+			description:    "Edit current sftp configuration file",
+			hotkeyWorkType: normalType,
+		},
+		{
+			hotkey:         hotkeys.SftpPanelClone,
+			description:    "Clone current sftp configuration file",
+			hotkeyWorkType: normalType,
+		},
+		{
+			hotkey:         hotkeys.SftpPanelClone,
+			description:    "Delete current sftp configuration file",
 			hotkeyWorkType: normalType,
 		},
 	}

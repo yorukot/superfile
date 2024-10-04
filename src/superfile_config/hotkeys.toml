@@ -36,6 +36,7 @@ change_panel_mode = ['ctrl+L', '']
 open_help_menu = ['?', '']
 open_command_line = [':', '']
 copy_path = ['ctrl+p', '']
+open_sftp_panel = ['ctrl+f', '']
 # =================================================================================================
 # Typing hotkeys (can conflict with all hotkeys)
 confirm_typing = ['enter', '']
@@ -49,3 +50,10 @@ search_bar = ['/', '']
 file_panel_select_mode_items_select_down = ['shift+down', 'J']
 file_panel_select_mode_items_select_up = ['shift+up', 'K']
 file_panel_select_all_items = ['A', '']
+# =================================================================================================
+# sftp panel hotkeys (can confict with all hotkeys, only cant conflict quit, confirm, movement,  hotkeys)
+sftp_panel_new = ['ctrl+n', '']
+sftp_panel_save = ['ctrl+s', '']
+sftp_panel_edit = ['ctrl+e', '']
+sftp_panel_clone = ['ctrl+c', '']
+sftp_panel_delete = ['ctrl+d', '']

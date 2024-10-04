@@ -182,6 +182,7 @@ type HotkeysType struct {
 	OpenCommandLine []string `toml:"open_command_line"`
 
 	CopyPath []string `toml:"copy_path"`
+	OpenSftpPanel []string `toml:"open_sftp_panel"`
 
 	ConfirmTyping []string `toml:"confirm_typing" comment:"=================================================================================================\nTyping hotkeys (can conflict with all hotkeys)"`
 	CancelTyping  []string `toml:"cancel_typing"`
@@ -192,4 +193,10 @@ type HotkeysType struct {
 	FilePanelSelectModeItemsSelectDown []string `toml:"file_panel_select_mode_items_select_down" comment:"=================================================================================================\nSelect mode hotkeys (can conflict with other modes, cananot conflict with global hotkeys)"`
 	FilePanelSelectModeItemsSelectUp   []string `toml:"file_panel_select_mode_items_select_up"`
 	FilePanelSelectAllItem             []string `toml:"file_panel_select_all_items"`
+
+	SftpPanelNew []string `toml:"sftp_panel_new" comment:"# =================================================================================================\nsftp panel hotkeys (can confict with all hotkeys, only cant conflict quit, confirm, movement,  hotkeys)"`
+	SftpPanelSave []string `toml:"sftp_panel_save"`
+	SftpPanelEdit []string `toml:"sftp_panel_edit"`
+	SftpPanelClone []string `toml:"sftp_panel_clone"`
+	SftpPanelDelete []string `toml:"sftp_panel_delete"` 
 }

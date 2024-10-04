@@ -101,6 +101,9 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) ( tea.Cmd) {
 	case containsKey(msg, hotkeys.OpenHelpMenu):
 		m.openHelpMenu()
 
+	case containsKey(msg, hotkeys.OpenSftpPanel):
+		m.openSftpMenu()
+
 	case containsKey(msg, hotkeys.OpenCommandLine):
 		m.openCommandLine()
 
