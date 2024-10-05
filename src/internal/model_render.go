@@ -491,7 +491,7 @@ func (m model) helpMenuRender() string {
 
 	bottomBorder := generateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(m.helpMenu.cursor+1-cursorBeenTitleCount), strconv.Itoa(len(m.helpMenu.data)-totalTitleCount)), m.helpMenu.width-2)
 
-	return helpMenuModalBorderStyle(m.helpMenu.height, m.helpMenu.width, bottomBorder).Render(helpMenuContent)
+	return popUpModalBorderStyle(m.helpMenu.height, m.helpMenu.width, bottomBorder).Render(helpMenuContent)
 }
 
 func (m model) filePreviewPanelRender() string {
@@ -652,10 +652,14 @@ func (m model) filePreviewPanelRender() string {
 	return box.Render("\n --- " + icon.Error + " Unsupported formats ---")
 }
 
-func (m model) commandLineInputBoxRender() string {
-	return m.commandLine.input.View()
-}
 
 func (m model) sftpPanelRender() string {
-	return ""
+
+	bottomBorder := generateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(m.sftpPanelModal.cursor), strconv.Itoa(len(m.sftpPanelModal.sftpData))), m.sftpPanelModal.width-2)
+
+	return popUpModalBorderStyle(m.sftpPanelModal.height, m.sftpPanelModal.width, bottomBorder).Render()
+}
+
+func (m model) commandLineInputBoxRender() string {
+	return m.commandLine.input.View()
 }

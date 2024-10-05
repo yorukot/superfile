@@ -44,6 +44,8 @@ func (m model) Init() tea.Cmd {
 	)
 }
 
+// ==============================================================================================
+// bubbletea update function
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
@@ -97,6 +99,7 @@ func (m *model) handleWindowResize(msg tea.WindowSizeMsg){
 	m.setFilePanelsSize(msg.Width)
 	m.setFooterSize(msg.Height)
 	m.setHelpMenuSize()
+	m.sftpPanelSize()
 
 	if m.fileModel.maxFilePanel >= 10 {
 		m.fileModel.maxFilePanel = 10
@@ -157,6 +160,22 @@ func (m *model) setHelpMenuSize(){
 	}
 }
 
+func (m *model) sftpPanelSize(){
+	// set sftp menu size
+	m.sftpPanelModal.height = m.fullHeight - 2
+	m.sftpPanelModal.width = m.fullWidth - 2
+
+	if m.fullHeight > 35 {
+		m.sftpPanelModal.height = 30
+	}
+
+	if m.fullWidth > 95 {
+		m.sftpPanelModal.width = 90
+	}
+}
+
+// ==============================================================================================
+// hotkey handler
 func (m model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) (model, tea.Cmd){
 	if firstUse {
 		firstUse = false
@@ -235,6 +254,8 @@ func (m *model) warnModalForQuit() {
 	m.warnModal.content = "You still have files being processed. Are you sure you want to exit?"
 }
 
+// ==============================================================================================
+// Superfile main render function
 func (m model) View() string {
 	// check is the terminal size enough
 	if m.fullHeight < minimumHeight || m.fullWidth < minimumWidth {
@@ -272,37 +293,44 @@ func (m model) View() string {
 		helpMenu := m.helpMenuRender()
 		overlayX := m.fullWidth/2 - m.helpMenu.width/2
 		overlayY := m.fullHeight/2 - m.helpMenu.height/2
-		return stringfunction.PlaceOverlay(overlayX, overlayY, helpMenu, finalRender)
+		finalRender = stringfunction.PlaceOverlay(overlayX, overlayY, helpMenu, finalRender)
+	}
+
+	if m.sftpPanelModal.open {
+		sftpModal := m.sftpPanelRender()
+		overlayX := m.fullWidth/2 - m.sftpPanelModal.width/2
+		overlayY := m.fullHeight/2 - m.sftpPanelModal.height/2
+		finalRender = stringfunction.PlaceOverlay(overlayX, overlayY, sftpModal, finalRender)
 	}
 
 	if firstUse {
 		introduceModal := m.introduceModalRender()
 		overlayX := m.fullWidth/2 - m.helpMenu.width/2
 		overlayY := m.fullHeight/2 - m.helpMenu.height/2
-		return stringfunction.PlaceOverlay(overlayX, overlayY, introduceModal, finalRender)
+		finalRender = stringfunction.PlaceOverlay(overlayX, overlayY, introduceModal, finalRender)
 	}
 
 	if m.typingModal.open {
 		typingModal := m.typineModalRender()
 		overlayX := m.fullWidth/2 - modalWidth/2
 		overlayY := m.fullHeight/2 - modalHeight/2
-		return stringfunction.PlaceOverlay(overlayX, overlayY, typingModal, finalRender)
+		finalRender = stringfunction.PlaceOverlay(overlayX, overlayY, typingModal, finalRender)
 	}
 
 	if m.warnModal.open {
 		warnModal := m.warnModalRender()
 		overlayX := m.fullWidth/2 - modalWidth/2
 		overlayY := m.fullHeight/2 - modalHeight/2
-		return stringfunction.PlaceOverlay(overlayX, overlayY, warnModal, finalRender)
+		finalRender = stringfunction.PlaceOverlay(overlayX, overlayY, warnModal, finalRender)
 	}
 
 	if m.confirmToQuit {
 		warnModal := m.warnModalRender()
 		overlayX := m.fullWidth/2 - modalWidth/2
 		overlayY := m.fullHeight/2 - modalHeight/2
-		return stringfunction.PlaceOverlay(overlayX, overlayY, warnModal, finalRender)
+		finalRender = stringfunction.PlaceOverlay(overlayX, overlayY, warnModal, finalRender)
 	}
-
+	
 	return finalRender
 }
 

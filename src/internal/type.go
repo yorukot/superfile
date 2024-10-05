@@ -80,10 +80,10 @@ type model struct {
 	typingModal         typingModal
 	warnModal           warnModal
 	helpMenu            helpMenuModal
-	sftpPanel 			sftpPanelModal
+	sftpPanelModal      sftpPanelModal
 	fileMetaData        fileMetadata
 	commandLine         commandLineModal
-	confirmToQuit 		bool
+	confirmToQuit       bool
 	firstTextInput      bool
 	toggleDotFile       bool
 	filePanelFocusIndex int
@@ -94,7 +94,7 @@ type model struct {
 
 // Modal
 type commandLineModal struct {
-	input         textinput.Model
+	input textinput.Model
 }
 
 type helpMenuModal struct {
@@ -237,20 +237,20 @@ type editorFinishedMsg struct{ err error }
 // Sftp modal data
 
 type sftpPanelModal struct {
-	height int
-	width int
-	open bool
+	height      int
+	width       int
+	open        bool
 	renderIndex int
-	cursor int
-	sftpData SftpData
-	editing bool 
-	editData SftpData
+	cursor      int
+	sftpData    []sftpData
+	editing     bool
+	editData    sftpData
 }
 
-type SftpData struct {
-	name string
-	host string
-	user string
-	password string
+type sftpData struct {
+	name          string
+	host          string
+	user          string
+	password      string
 	indentityFile string
 }

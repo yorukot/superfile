@@ -140,8 +140,8 @@ func firstUseModal(height int, width int) lipgloss.Style {
 		Foreground(modalFGColor)
 }
 
-// Generate help menu modal border style
-func helpMenuModalBorderStyle(height int, width int, borderBottom string) lipgloss.Style {
+// Generate popup modal border style
+func popUpModalBorderStyle(height int, width int, borderBottom string) lipgloss.Style {
 	border := generateBorder()
 	border.Bottom = borderBottom
 

@@ -177,10 +177,10 @@ func (m *model) enterCommandLine() {
 }
 
 func (m *model) openSftpMenu() {
-	if m.sftpPanel.open {
-		m.sftpPanel.open = false
+	if m.sftpPanelModal.open {
+		m.sftpPanelModal.open = false
 		return
 	}
 
-	m.sftpPanel.open = true
+	m.sftpPanelModal.open = true
 }
