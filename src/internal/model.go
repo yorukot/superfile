@@ -57,7 +57,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		m, cmd = m.handleKeyInput(msg, cmd)
 	}		
-	
+
 	m.updateFilePanelsState(msg, &cmd)
 	m.sidebarModel.directories = getDirectories()
 
@@ -196,20 +196,27 @@ func (m model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) (model, tea.Cmd){
 }
 
 func (m *model) updateFilePanelsState(msg tea.Msg, cmd *tea.Cmd) {
+	focusPanel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	if m.firstTextInput {
 		m.firstTextInput = false
 	} else if m.fileModel.renaming {
-		m.fileModel.filePanels[m.filePanelFocusIndex].rename, *cmd = m.fileModel.filePanels[m.filePanelFocusIndex].rename.Update(msg)
-	} else if m.fileModel.filePanels[m.filePanelFocusIndex].searchBar.Focused() {
-		m.fileModel.filePanels[m.filePanelFocusIndex].searchBar, *cmd = m.fileModel.filePanels[m.filePanelFocusIndex].searchBar.Update(msg)
+		focusPanel.rename, *cmd = focusPanel.rename.Update(msg)
+	} else if focusPanel.searchBar.Focused() {
+		focusPanel.searchBar, *cmd = focusPanel.searchBar.Update(msg)
+		for _, hotkey := range hotkeys.SearchBar {
+			if hotkey == focusPanel.searchBar.Value() {
+				focusPanel.searchBar.SetValue("")
+				break
+			}
+		}
 	} else if m.commandLine.input.Focused() {
 		m.commandLine.input, *cmd =  m.commandLine.input.Update(msg)
 	} else if m.typingModal.open {
 		m.typingModal.textInput, *cmd = m.typingModal.textInput.Update(msg)
 	}
 
-	if m.fileModel.filePanels[m.filePanelFocusIndex].cursor < 0 {
-		m.fileModel.filePanels[m.filePanelFocusIndex].cursor = 0
+	if focusPanel.cursor < 0 {
+		focusPanel.cursor = 0
 	}
 }
 
@@ -261,38 +268,31 @@ func (m model) View() string {
 	finalRender := lipgloss.JoinVertical(0, mainPanel, footer)
 
 	// check if need pop up modal
+	overlayX := m.fullWidth/2 - modalWidth/2
+	overlayY := m.fullHeight/2 - m.helpMenu.height/2
+
 	if m.helpMenu.open {
 		helpMenu := m.helpMenuRender()
-		overlayX := m.fullWidth/2 - m.helpMenu.width/2
-		overlayY := m.fullHeight/2 - m.helpMenu.height/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, helpMenu, finalRender)
 	}
 
 	if firstUse {
 		introduceModal := m.introduceModalRender()
-		overlayX := m.fullWidth/2 - m.helpMenu.width/2
-		overlayY := m.fullHeight/2 - m.helpMenu.height/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, introduceModal, finalRender)
 	}
 
 	if m.typingModal.open {
 		typingModal := m.typineModalRender()
-		overlayX := m.fullWidth/2 - modalWidth/2
-		overlayY := m.fullHeight/2 - modalHeight/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, typingModal, finalRender)
 	}
 
 	if m.warnModal.open {
 		warnModal := m.warnModalRender()
-		overlayX := m.fullWidth/2 - modalWidth/2
-		overlayY := m.fullHeight/2 - modalHeight/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, warnModal, finalRender)
 	}
 
 	if m.confirmToQuit {
 		warnModal := m.warnModalRender()
-		overlayX := m.fullWidth/2 - modalWidth/2
-		overlayY := m.fullHeight/2 - modalHeight/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, warnModal, finalRender)
 	}
 
