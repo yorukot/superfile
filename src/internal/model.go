@@ -268,31 +268,38 @@ func (m model) View() string {
 	finalRender := lipgloss.JoinVertical(0, mainPanel, footer)
 
 	// check if need pop up modal
-	overlayX := m.fullWidth/2 - modalWidth/2
-	overlayY := m.fullHeight/2 - m.helpMenu.height/2
-
 	if m.helpMenu.open {
 		helpMenu := m.helpMenuRender()
+		overlayX := m.fullWidth/2 - m.helpMenu.width/2
+		overlayY := m.fullHeight/2 - m.helpMenu.height/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, helpMenu, finalRender)
 	}
 
 	if firstUse {
 		introduceModal := m.introduceModalRender()
+		overlayX := m.fullWidth/2 - m.helpMenu.width/2
+		overlayY := m.fullHeight/2 - m.helpMenu.height/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, introduceModal, finalRender)
 	}
 
 	if m.typingModal.open {
 		typingModal := m.typineModalRender()
+		overlayX := m.fullWidth/2 - modalWidth/2
+		overlayY := m.fullHeight/2 - modalHeight/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, typingModal, finalRender)
 	}
 
 	if m.warnModal.open {
 		warnModal := m.warnModalRender()
+		overlayX := m.fullWidth/2 - modalWidth/2
+		overlayY := m.fullHeight/2 - modalHeight/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, warnModal, finalRender)
 	}
 
 	if m.confirmToQuit {
 		warnModal := m.warnModalRender()
+		overlayX := m.fullWidth/2 - modalWidth/2
+		overlayY := m.fullHeight/2 - modalHeight/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, warnModal, finalRender)
 	}
 
