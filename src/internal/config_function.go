@@ -12,14 +12,14 @@ import (
 	"github.com/barasher/go-exiftool"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/pelletier/go-toml/v2"
-	varibale "github.com/yorukot/superfile/src/config"
+	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/config/icon"
 )
 
 func initialConfig(dir string) (toggleDotFileBool bool, firstFilePanelDir string) {
 	var err error
 
-	logOutput, err = os.OpenFile(varibale.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	logOutput, err = os.OpenFile(variable.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("Error while opening superfile.log file: %v", err)
 	}
@@ -32,7 +32,7 @@ func initialConfig(dir string) (toggleDotFileBool bool, firstFilePanelDir string
 
 	icon.InitIcon(Config.Nerdfont)
 
-	toggleDotFileData, err := os.ReadFile(varibale.ToggleDotFile)
+	toggleDotFileData, err := os.ReadFile(variable.ToggleDotFile)
 	if err != nil {
 		outPutLog("Error while reading toggleDotFile data error:", err)
 	}
@@ -53,12 +53,12 @@ func initialConfig(dir string) (toggleDotFileBool bool, firstFilePanelDir string
 	if dir != "" {
 		firstFilePanelDir, err = filepath.Abs(dir)
 	} else {
-		Config.DefaultDirectory = strings.Replace(Config.DefaultDirectory, "~", varibale.HomeDir, -1)
+		Config.DefaultDirectory = strings.Replace(Config.DefaultDirectory, "~", variable.HomeDir, -1)
 		firstFilePanelDir, err = filepath.Abs(Config.DefaultDirectory)
 	}
 
 	if err != nil {
-		firstFilePanelDir = varibale.HomeDir
+		firstFilePanelDir = variable.HomeDir
 	}
 
 	return toggleDotFileBool, firstFilePanelDir
@@ -69,7 +69,7 @@ func loadConfigFile() {
 	_ = toml.Unmarshal([]byte(ConfigTomlString), &Config)
 	tempForCheckMissingConfig := ConfigType{}
 
-	data, err := os.ReadFile(varibale.ConfigFile)
+	data, err := os.ReadFile(variable.ConfigFile)
 	if err != nil {
 		log.Fatalf("Config file doesn't exist: %v", err)
 	}
@@ -86,7 +86,7 @@ func loadConfigFile() {
 			log.Fatalf("Error encoding config: %v", err)
 		}
 
-		err = os.WriteFile(varibale.ConfigFile, tomlData, 0644)
+		err = os.WriteFile(variable.ConfigFile, tomlData, 0644)
 		if err != nil {
 			log.Fatalf("Error writing config file: %v", err)
 		}
@@ -106,7 +106,7 @@ func loadHotkeysFile() {
 
 	_ = toml.Unmarshal([]byte(HotkeysTomlString), &hotkeys)
 	hotkeysFromConfig := HotkeysType{}
-	data, err := os.ReadFile(varibale.HotkeysFile)
+	data, err := os.ReadFile(variable.HotkeysFile)
 
 	if err != nil {
 		log.Fatalf("Config file doesn't exist: %v", err)
@@ -119,7 +119,7 @@ func loadHotkeysFile() {
 
 	hasMissingHotkeysInConfig := !reflect.DeepEqual(hotkeys, hotkeysFromConfig)
 
-	if hasMissingHotkeysInConfig && !varibale.FixHotkeys {
+	if hasMissingHotkeysInConfig && !variable.FixHotkeys {
 		hotKeysConfig := reflect.ValueOf(hotkeysFromConfig)
 		for i := 0; i < hotKeysConfig.NumField(); i++ {
 			field := hotKeysConfig.Type().Field(i)
@@ -136,7 +136,7 @@ func loadHotkeysFile() {
 		fmt.Println("To add missing fields to hotkeys directory automaticially run Superfile with the --fix-hotkeys flag")
 	}
 
-	if hasMissingHotkeysInConfig && varibale.FixHotkeys {
+	if hasMissingHotkeysInConfig && variable.FixHotkeys {
 		writeHotkeysFile(hotkeys)
 	}
 
@@ -167,14 +167,14 @@ func writeHotkeysFile(hotkeys HotkeysType) {
 		log.Fatalf("Error encoding hotkeys: %v", err)
 	}
 
-	err = os.WriteFile(varibale.HotkeysFile, tomlData, 0644)
+	err = os.WriteFile(variable.HotkeysFile, tomlData, 0644)
 	if err != nil {
 		log.Fatalf("Error writing hotkeys file: %v", err)
 	}
 }
 
 func loadThemeFile() {
-	data, err := os.ReadFile(varibale.ThemeFolder + "/" + Config.Theme + ".toml")
+	data, err := os.ReadFile(variable.ThemeFolder + "/" + Config.Theme + ".toml")
 	if err != nil {
 		data = []byte(DefaultThemeString)
 	}
@@ -205,22 +205,22 @@ func LoadAllDefaultConfig(content embed.FS) {
 	}
 	DefaultThemeString = string(temp)
 
-	currentThemeVersion, err := os.ReadFile(varibale.ThemeFileVersion)
+	currentThemeVersion, err := os.ReadFile(variable.ThemeFileVersion)
 
 	if err != nil && !os.IsNotExist(err) {
 		outPutLog("Error reading from file:", err)
 		return
 	}
 
-	_, err = os.Stat(varibale.ThemeFolder)
+	_, err = os.Stat(variable.ThemeFolder)
 
 	if os.IsNotExist(err) {
-		err := os.MkdirAll(varibale.ThemeFolder, 0755)
+		err := os.MkdirAll(variable.ThemeFolder, 0755)
 		if err != nil {
 			outPutLog("error create theme direcroty", err)
 			return
 		}
-	} else if string(currentThemeVersion) == varibale.CurrentVersion {
+	} else if string(currentThemeVersion) == variable.CurrentVersion {
 		return
 	}
 
@@ -240,7 +240,7 @@ func LoadAllDefaultConfig(content embed.FS) {
 			return
 		}
 
-		file, err := os.Create(filepath.Join(varibale.ThemeFolder, file.Name()))
+		file, err := os.Create(filepath.Join(variable.ThemeFolder, file.Name()))
 		if err != nil {
 			outPutLog("error create theme file from embed", err)
 			return
@@ -249,5 +249,5 @@ func LoadAllDefaultConfig(content embed.FS) {
 		defer file.Close()
 	}
 
-	os.WriteFile(varibale.ThemeFileVersion, []byte(varibale.CurrentVersion), 0644)
+	os.WriteFile(variable.ThemeFileVersion, []byte(variable.CurrentVersion), 0644)
 }

@@ -8,7 +8,7 @@ require (
 	github.com/atotto/clipboard v0.1.4
 	github.com/barasher/go-exiftool v1.10.0
 	github.com/charmbracelet/bubbles v0.20.0
-	github.com/charmbracelet/bubbletea v1.1.0
+	github.com/charmbracelet/bubbletea v1.1.1
 	github.com/charmbracelet/lipgloss v0.13.0
 	github.com/lithammer/shortuuid v3.0.0+incompatible
 	github.com/muesli/termenv v0.15.2

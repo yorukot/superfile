@@ -2,7 +2,40 @@
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC(YYYY-MM-DD).
 
-# [**v1.1.4**] ()
+# [**v1.2.0**]()
+
+> xxxx-xx-xx
+
+#### Update
+
+
+#### Bug fix
+- Fix the searchbar to automatically put the open key into the searchbar [`ec9e256`](https://github.com/yorukot/superfile/commit/b20bc70fe9d4e0ee96931092a6522e8604cc017b)
+
+# [**v1.1.5**](https://github.com/yorukot/superfile/releases/tag/v1.1.5)
+
+> 2024-10-03
+
+#### Update
+- Stop automatically updating config file. Add fix-hotkeys flag, feedback for missing hotkeys [`#333`](https://github.com/yorukot/superfile/issues/333)
+- Update installation.md: Add x-cmd method to install superfile [`#371`](https://github.com/yorukot/superfile/issues/333)
+- Added option to change default editor [`#396`](https://github.com/yorukot/superfile/pull/396)
+- Support Shell access but cant read history [`#127`](https://github.com/yorukot/superfile/issues/127)
+- shortcut to copy path to currently selected file [`#196`](https://github.com/yorukot/superfile/issues/196)
+
+#### Bug fix
+- fixed typo in hotkeys.toml [`#341`](https://github.com/yorukot/superfile/issues/341)
+- Fixes issue #360 + Typo fixes by [`#379`](https://github.com/yorukot/superfile/pull/379)
+- fixed spelling mistake : varibale to variable [`#394`](https://github.com/yorukot/superfile/pull/394)
+- fixed exiftool session left open after use [`#400`](https://github.com/yorukot/superfile/pull/400)
+- Show unsupported format in preview panel over a torrent file [`#408`](https://github.com/yorukot/superfile/pull/408)
+- Vim bindings in docs cause error on nixos [`#325`](https://github.com/yorukot/superfile/issues/325)
+- fix spf help flag error [`#368`](https://github.com/yorukot/superfile/issues/368)
+- You cannot access the disks section in the side panel when only have one disk [`#409`](https://github.com/yorukot/superfile/issues/409)
+- "Unsupported formats" message has an extra space for .pdf files [`#392`](https://github.com/yorukot/superfile/issues/392)
+
+
+# [**v1.1.4**](https://github.com/yorukot/superfile/releases/tag/v1.1.4)
 
 > 2024-08-01
 

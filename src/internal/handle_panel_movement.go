@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"runtime"
 
-	varibale "github.com/yorukot/superfile/src/config"
+	variable "github.com/yorukot/superfile/src/config"
 )
 
 // Change file panel mode (select mode or browser mode)
@@ -166,7 +166,7 @@ func (m *model) toggleDotFileController() {
 		newToggleDotFile = "true"
 		m.toggleDotFile = true
 	}
-	err := os.WriteFile(varibale.ToggleDotFile, []byte(newToggleDotFile), 0644)
+	err := os.WriteFile(variable.ToggleDotFile, []byte(newToggleDotFile), 0644)
 	if err != nil {
 		outPutLog("Pinned folder function updatedData superfile data error", err)
 	}
@@ -403,7 +403,7 @@ func (m *model) controlSideBarListDown(wheel bool) {
 		newDirectory := m.sidebarModel.directories[m.sidebarModel.cursor].location
 		for newDirectory == "Pinned+-*/=?" || newDirectory == "Disks+-*/=?" {
 			m.sidebarModel.cursor++
-			if m.sidebarModel.cursor+1 >= len(m.sidebarModel.directories) {
+			if m.sidebarModel.cursor+1 > len(m.sidebarModel.directories) {
 				m.sidebarModel.cursor = 0
 			}
 			newDirectory = m.sidebarModel.directories[m.sidebarModel.cursor].location

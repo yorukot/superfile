@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"os"
 
-	varibale "github.com/yorukot/superfile/src/config"
+	variable "github.com/yorukot/superfile/src/config"
 )
 
 // Pinned directory
@@ -13,7 +13,7 @@ func (m *model) pinnedDirectory() {
 
 	unPinned := false
 
-	jsonData, err := os.ReadFile(varibale.PinnedFile)
+	jsonData, err := os.ReadFile(variable.PinnedFile)
 	if err != nil {
 		outPutLog("Pinned folder function read superfile data error", err)
 	}
@@ -39,7 +39,7 @@ func (m *model) pinnedDirectory() {
 		outPutLog("Pinned folder function updatedData superfile data error", err)
 	}
 
-	err = os.WriteFile(varibale.PinnedFile, updatedData, 0644)
+	err = os.WriteFile(variable.PinnedFile, updatedData, 0644)
 	if err != nil {
 		outPutLog("Pinned folder function updatedData superfile data error", err)
 	}
@@ -54,7 +54,7 @@ func (m *model) createNewFilePanel() {
 	}
 
 	m.fileModel.filePanels = append(m.fileModel.filePanels, filePanel{
-		location:        varibale.HomeDir,
+		location:        variable.HomeDir,
 		sortOptions:     m.fileModel.filePanels[m.filePanelFocusIndex].sortOptions,
 		panelMode:       browserMode,
 		focusType:       secondFocus,

@@ -7,7 +7,7 @@ import (
 	"runtime"
 
 	"github.com/rkoesters/xdg/trash"
-	varibale "github.com/yorukot/superfile/src/config"
+	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/config/icon"
 )
 
@@ -23,7 +23,7 @@ func moveElement(src, dst string) error {
 // Move file to trash can and can auto switch macos trash can or linux trash can
 func trashMacOrLinux(src string) error {
 	if runtime.GOOS == "darwin" {
-		err := moveElement(src, varibale.HomeDir+"/.Trash/"+filepath.Base(src))
+		err := moveElement(src, variable.HomeDir+"/.Trash/"+filepath.Base(src))
 		if err != nil {
 			outPutLog("Delete single item function move file to trash can error", err)
 		}
