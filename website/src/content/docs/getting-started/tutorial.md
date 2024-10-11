@@ -71,7 +71,9 @@ Press `h` or `backspace` will return to the parent directory.
 
 Pressing `o` will bring up a menu to choose how you would like the panel to sort the files. You can choose between `Name`, `Size`, or `Date Modified`. `enter` to select, and `esc`, `o`, or `ctrl+c` to cancel.
 
-If you have a large number of files, you can also use `/` to search,After entering the Key you want, you can press `/` again or `enter` 
+To reverse the order of the sort, press `R` (`shift+r`)
+
+If you have a large number of files, you can also use `/` to search,After entering the Key you want, you can press `/` again or `enter`
 
 If you want to clear the current search, you can press `ctrl+c` or `esc`
 

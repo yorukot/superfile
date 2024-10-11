@@ -95,11 +95,20 @@ func (m model) filePanelRender() string {
 			} else {
 				filePanelWidth = (m.fileModel.width + (m.fullWidth-Config.SidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels))
 			}
-			footerBorderWidth = m.fileModel.width + 7
+			footerBorderWidth = m.fileModel.width + 15
 		} else {
 			filePanelWidth = m.fileModel.width
-			footerBorderWidth = m.fileModel.width + 7
+			footerBorderWidth = m.fileModel.width + 15
 		}
+
+		sortDirectionString := ""
+		if filePanel.sortOptions.data.reversed {
+			sortDirectionString = icon.SortDesc
+		} else {
+			sortDirectionString = icon.SortAsc
+		}
+		sortTypeString := sortDirectionString + filePanel.sortOptions.data.options[filePanel.sortOptions.data.selected]
+
 		panelModeString := ""
 		if filePanel.panelMode == browserMode {
 			panelModeString = icon.Browser + icon.Space + "Browser"
@@ -111,7 +120,7 @@ func (m model) filePanelRender() string {
 		f[i] += " " + filePanel.searchBar.View() + "\n"
 		if len(filePanel.element) == 0 {
 			f[i] += filePanelStyle.Render(" " + icon.Error + "  No such file or directory")
-			bottomBorder := generateFooterBorder(fmt.Sprintf("%s%s%s", panelModeString, bottomMiddleBorderSplit, "0/0"), footerBorderWidth)
+			bottomBorder := generateFooterBorder(fmt.Sprintf("%s%s%s%s%s", sortTypeString, bottomMiddleBorderSplit, panelModeString, bottomMiddleBorderSplit, "0/0"), footerBorderWidth)
 			f[i] = filePanelBorderStyle(m.mainPanelHeight, filePanelWidth, filePanel.focusType, bottomBorder).Render(f[i])
 		} else {
 			for h := filePanel.render; h < filePanel.render+panelElementHeight(m.mainPanelHeight) && h < len(filePanel.element); h++ {
@@ -134,7 +143,7 @@ func (m model) filePanelRender() string {
 			cursorPosition := strconv.Itoa(filePanel.cursor + 1)
 			totalElement := strconv.Itoa(len(filePanel.element))
 
-			bottomBorder := generateFooterBorder(fmt.Sprintf("%s%s%s/%s", panelModeString, bottomMiddleBorderSplit, cursorPosition, totalElement), footerBorderWidth)
+			bottomBorder := generateFooterBorder(fmt.Sprintf("%s%s%s%s%s/%s", sortTypeString, bottomMiddleBorderSplit, panelModeString, bottomMiddleBorderSplit, cursorPosition, totalElement), footerBorderWidth)
 			f[i] = filePanelBorderStyle(m.mainPanelHeight, filePanelWidth, filePanel.focusType, bottomBorder).Render(f[i])
 		}
 	}

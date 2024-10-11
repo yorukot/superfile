@@ -104,6 +104,9 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) ( tea.Cmd) {
 	case containsKey(msg, hotkeys.OpenSortOptionsMenu):
 		m.openSortOptionsMenu()
 
+	case containsKey(msg, hotkeys.ToggleReverseSort):
+		m.toggleReverseSort()
+
 	case containsKey(msg, hotkeys.OpenCommandLine):
 		m.openCommandLine()
 

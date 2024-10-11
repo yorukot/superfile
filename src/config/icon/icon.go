@@ -37,6 +37,8 @@ var (
 	InOperation string = "󰥔"
 	Directory   string = ""
 	Search      string = ""
+	SortAsc     string = ""
+	SortDesc    string = ""
 )
 
 /*

@@ -33,6 +33,7 @@ func defaultModelConfig(toggleDotFileBool bool, firstFilePanelDir string) model 
 						data:   sortOptionsModelData{
 							options:  []string{"Name", "Size", "Date Modified"},
 							selected: 0,
+							reversed: false,
 						},
 					},
 					panelMode:       browserMode,

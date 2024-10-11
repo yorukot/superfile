@@ -109,6 +109,12 @@ func (m *model) sortOptionsListDown() {
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
+func (m *model) toggleReverseSort() {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel.sortOptions.data.reversed = !panel.sortOptions.data.reversed
+	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+}
+
 // Cancel search, this will clear all searchbar input
 func (m *model) cancelSearch() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]

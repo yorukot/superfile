@@ -54,6 +54,7 @@ func returnFolderElement(location string, displayDotFile bool, sortOptions sortO
 
 	// Sort files
 	var order func(i, j int) bool
+	reversed := sortOptions.reversed
 
 	switch sortOptions.options[sortOptions.selected] {
 	case "Name":
@@ -64,7 +65,7 @@ func returnFolderElement(location string, displayDotFile bool, sortOptions sortO
 			if !files[i].IsDir() && files[j].IsDir() {
 				return false
 			}
-			return files[i].Name() < files[j].Name()
+			return files[i].Name() < files[j].Name() != reversed
 		}
 	case "Size":
 		order = func(i, j int) bool {
@@ -85,15 +86,15 @@ func returnFolderElement(location string, displayDotFile bool, sortOptions sortO
 				if err != nil {
 					outPutLog("Error when reading directory", err)
 				}
-				return len(filesI) > len(filesJ)
+				return len(filesI) < len(filesJ) != reversed
 			}
-			return fileInfoI.Size() > fileInfoJ.Size()
+			return fileInfoI.Size() < fileInfoJ.Size() != reversed
 		}
 	case "Date Modified":
 		order = func(i, j int) bool {
 			fileInfoI, _ := files[i].Info()
 			fileInfoJ, _ := files[j].Info()
-			return fileInfoI.ModTime().After(fileInfoJ.ModTime())
+			return fileInfoI.ModTime().After(fileInfoJ.ModTime()) != reversed
 		}
 	}
 

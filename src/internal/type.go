@@ -181,6 +181,7 @@ type sortOptionsModel struct {
 type sortOptionsModelData struct {
 	options  []string
 	selected int
+	reversed bool
 }
 
 // Record for directory navigation
