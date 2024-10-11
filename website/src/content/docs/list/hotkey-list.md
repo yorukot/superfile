@@ -35,18 +35,19 @@ These are the default hotkeys and you can [change](/configure/custom-hotkeys) th
 
 ## Panel movement
 
-| Function                                           | Key                        | Variable name                                                   |
-| -------------------------------------------------- | -------------------------- | --------------------------------------------------------------- |
-| Up                                                 | `up`, `k`                  | `list_up`                                                       |
-| Down                                               | `down`, `j`                | `list_down`                                                     |
-| Return to parent folder                            | `h`, `left`, `backspace`   | `parent_folder`                                                 |
-| Select all items in focused file panel             | `A`(shift+a)               | `file_panel_select_all_item` (selection mode only)              |
-| Select up with your course                         | `shift+up`, `K`(shift+k)   | `file_panel_select_mode_item_select_up` (selection mode only)   |
-| Select down with your course                       | `shift+down`, `J`(shift+j) | `file_panel_select_mode_item_select_down` (selection mode only) |
-| Toggle dot file display                            | `.`                        | `toggle_dot_file`                                               |
-| Toggle active search bar                           | `/`                        | `search_bar`                                                    |
-| Change between selection mode or normal mode       | `v`                        | `change_panel_mode`                                             |
-| Pin or Unpin folder to sidebar (can be auto saved) | `P`(shift+p)               | `pinned_folder`                                                 |
+| Function                                           | Key                         | Variable name                                                   |
+| -------------------------------------------------- | --------------------------- | --------------------------------------------------------------- |
+| Up                                                 | `up`, `k`                   | `list_up`                                                       |
+| Down                                               | `down`, `j`                 | `list_down`                                                     |
+| Return to parent folder                            | `h`, `left`, `backspace`    | `parent_folder`                                                 |
+| Toggle sort options menu                           | `o`                         | `open_sort_options_menu`                                        |
+| Select all items in focused file panel             | `A` (shift+a)               | `file_panel_select_all_item` (selection mode only)              |
+| Select up with your course                         | `shift+up`, `K` (shift+k)   | `file_panel_select_mode_item_select_up` (selection mode only)   |
+| Select down with your course                       | `shift+down`, `J` (shift+j) | `file_panel_select_mode_item_select_down` (selection mode only) |
+| Toggle dot file display                            | `.`                         | `toggle_dot_file`                                               |
+| Toggle active search bar                           | `/`                         | `search_bar`                                                    |
+| Change between selection mode or normal mode       | `v`                         | `change_panel_mode`                                             |
+| Pin or Unpin folder to sidebar (can be auto saved) | `P` (shift+p)               | `pinned_folder`                                                 |
 
 ## File operations
 
@@ -61,4 +62,4 @@ These are the default hotkeys and you can [change](/configure/custom-hotkeys) th
 | Extract zip file                                     | `ctrl+e`           | `extract_file` (normal mode)                                                           |
 | Zip file or folder to .zip file                      | `ctrl+a`           | `compress_file` (normal mode)                                                          |
 | Open file with your default editor                   | `e`                | `oepn_file_with_editor` (normal node)                                                  |
-| Open current directory with default editor           | `E`(shift+e)       | `current_directory_with_editor` (normal node)                                          |
+| Open current directory with default editor           | `E` (shift+e)      | `current_directory_with_editor` (normal node)                                          |

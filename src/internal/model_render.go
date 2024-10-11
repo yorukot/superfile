@@ -494,6 +494,21 @@ func (m model) helpMenuRender() string {
 	return helpMenuModalBorderStyle(m.helpMenu.height, m.helpMenu.width, bottomBorder).Render(helpMenuContent)
 }
 
+func (m model) sortOptionsRender() string {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	sortOptionsContent := " Sort Options\n\n"
+	for i, option := range panel.sortOptions.data.options {
+		cursor := " "
+		if i == panel.sortOptions.cursor {
+			cursor = icon.Cursor
+		}
+		sortOptionsContent += cursor + modalStyle.Render(option) + "\n"
+	}
+	bottomBorder := generateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(panel.sortOptions.cursor+1), strconv.Itoa(len(panel.sortOptions.data.options))), panel.sortOptions.width-2)
+
+	return sortOptionsModalBorderStyle(panel.sortOptions.height, panel.sortOptions.width, bottomBorder).Render(sortOptionsContent)
+}
+
 func (m model) filePreviewPanelRender() string {
 	previewLine := m.mainPanelHeight + 2
 	m.fileModel.filePreview.width += m.fullWidth - Config.SidebarWidth - m.fileModel.filePreview.width - ((m.fileModel.width + 2) * len(m.fileModel.filePanels)) - 2

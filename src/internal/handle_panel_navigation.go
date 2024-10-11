@@ -55,6 +55,7 @@ func (m *model) createNewFilePanel() {
 
 	m.fileModel.filePanels = append(m.fileModel.filePanels, filePanel{
 		location:        varibale.HomeDir,
+		sortOptions:     m.fileModel.filePanels[m.filePanelFocusIndex].sortOptions,
 		panelMode:       browserMode,
 		focusType:       secondFocus,
 		directoryRecord: make(map[string]directoryRecord),

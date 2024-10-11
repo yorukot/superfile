@@ -156,6 +156,7 @@ type HotkeysType struct {
 	NextFilePanel          []string `toml:"next_file_panel"`
 	PreviousFilePanel      []string `toml:"previous_file_panel"`
 	ToggleFilePreviewPanel []string `toml:"toggle_file_preview_panel"`
+	OpenSortOptionsMenu    []string `toml:"open_sort_options_menu"`
 
 	FocusOnProcessBar []string `toml:"focus_on_process_bar" comment:"change focus"`
 	FocusOnSidebar    []string `toml:"focus_on_sidebar"`

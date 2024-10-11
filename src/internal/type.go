@@ -82,7 +82,7 @@ type model struct {
 	helpMenu            helpMenuModal
 	fileMetaData        fileMetadata
 	commandLine         commandLineModal
-	confirmToQuit 		bool
+	confirmToQuit       bool
 	firstTextInput      bool
 	toggleDotFile       bool
 	filePanelFocusIndex int
@@ -158,6 +158,7 @@ type filePanel struct {
 	render             int
 	focusType          filePanelFocusType
 	location           string
+	sortOptions        sortOptionsModel
 	panelMode          panelMode
 	selected           []string
 	element            []element
@@ -166,6 +167,20 @@ type filePanel struct {
 	renaming           bool
 	searchBar          textinput.Model
 	lastTimeGetElement time.Time
+}
+
+// Sort options
+type sortOptionsModel struct {
+	width  int
+	height int
+	open   bool
+	cursor int
+	data   sortOptionsModelData
+}
+
+type sortOptionsModelData struct {
+	options  []string
+	selected int
 }
 
 // Record for directory navigation
