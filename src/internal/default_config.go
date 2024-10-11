@@ -116,6 +116,11 @@ func getHelpMenuData() []helpMenuModalData {
 			hotkeyWorkType: globalType,
 		},
 		{
+			hotkey:         hotkeys.ToggleReverseSort,
+			description:    "Toggle reverse sort",
+			hotkeyWorkType: globalType,
+		},
+		{
 			hotkey:         hotkeys.NextFilePanel,
 			description:    "Focus on the next file panel",
 			hotkeyWorkType: globalType,
