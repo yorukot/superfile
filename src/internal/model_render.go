@@ -107,7 +107,7 @@ func (m model) filePanelRender() string {
 		} else {
 			sortDirectionString = icon.SortAsc
 		}
-		sortTypeString := sortDirectionString + filePanel.sortOptions.data.options[filePanel.sortOptions.data.selected]
+		sortTypeString := sortDirectionString + " " + filePanel.sortOptions.data.options[filePanel.sortOptions.data.selected]
 
 		panelModeString := ""
 		if filePanel.panelMode == browserMode {
@@ -505,13 +505,13 @@ func (m model) helpMenuRender() string {
 
 func (m model) sortOptionsRender() string {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	sortOptionsContent := " Sort Options\n\n"
+	sortOptionsContent := modalTitleStyle.Render(" Sort Options") + "\n\n"
 	for i, option := range panel.sortOptions.data.options {
 		cursor := " "
 		if i == panel.sortOptions.cursor {
-			cursor = icon.Cursor
+			cursor = filePanelCursorStyle.Render(icon.Cursor)
 		}
-		sortOptionsContent += cursor + modalStyle.Render(option) + "\n"
+		sortOptionsContent += cursor + modalStyle.Render(" " + option) + "\n"
 	}
 	bottomBorder := generateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(panel.sortOptions.cursor+1), strconv.Itoa(len(panel.sortOptions.data.options))), panel.sortOptions.width-2)
 

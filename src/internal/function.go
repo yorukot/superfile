@@ -82,6 +82,9 @@ func returnFolderElement(location string, displayDotFile bool, sortOptions sortO
 			}
 			if files[i].IsDir() && files[j].IsDir() {
 				filesI, err := os.ReadDir(filepath.Join(location, files[i].Name()))
+				if err != nil {
+					outPutLog("Error when reading directory", err)
+				}
 				filesJ, err := os.ReadDir(filepath.Join(location, files[j].Name()))
 				if err != nil {
 					outPutLog("Error when reading directory", err)
