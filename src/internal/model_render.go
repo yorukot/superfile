@@ -103,17 +103,50 @@ func (m model) filePanelRender() string {
 
 		sortDirectionString := ""
 		if filePanel.sortOptions.data.reversed {
-			sortDirectionString = icon.SortDesc
+			if Config.Nerdfont {
+				sortDirectionString = icon.SortDesc
+			} else {
+				sortDirectionString = "D"
+			}
 		} else {
-			sortDirectionString = icon.SortAsc
+			if Config.Nerdfont {
+				sortDirectionString = icon.SortAsc
+			} else {
+				sortDirectionString = "A"
+			}
 		}
-		sortTypeString := sortDirectionString + " " + filePanel.sortOptions.data.options[filePanel.sortOptions.data.selected]
+		sortTypeString := ""
+		if filePanelWidth < 23 {
+			sortTypeString = sortDirectionString
+		} else {
+			if filePanel.sortOptions.data.options[filePanel.sortOptions.data.selected] == "Date Modified" {
+				sortTypeString = sortDirectionString + icon.Space + "Date"
+			} else {
+				sortTypeString = sortDirectionString + icon.Space + filePanel.sortOptions.data.options[filePanel.sortOptions.data.selected]
+			}
+		}
 
 		panelModeString := ""
-		if filePanel.panelMode == browserMode {
-			panelModeString = icon.Browser + icon.Space + "Browser"
-		} else if filePanel.panelMode == selectMode {
-			panelModeString = icon.Select + icon.Space + "Select"
+		if filePanelWidth < 23 {
+			if filePanel.panelMode == browserMode {
+				if Config.Nerdfont {
+					panelModeString = icon.Browser
+				} else {
+					panelModeString = "B"
+				}
+			} else if filePanel.panelMode == selectMode {
+				if Config.Nerdfont {
+					panelModeString = icon.Select
+				} else {
+					panelModeString = "S"
+				}
+			}
+		} else {
+			if filePanel.panelMode == browserMode {
+				panelModeString = icon.Browser + icon.Space + "Browser"
+			} else if filePanel.panelMode == selectMode {
+				panelModeString = icon.Select + icon.Space + "Select"
+			}
 		}
 
 		f[i] += filePanelDividerStyle(filePanel.focusType).Render(strings.Repeat(Config.BorderTop, filePanelWidth)) + "\n"
@@ -511,7 +544,7 @@ func (m model) sortOptionsRender() string {
 		if i == panel.sortOptions.cursor {
 			cursor = filePanelCursorStyle.Render(icon.Cursor)
 		}
-		sortOptionsContent += cursor + modalStyle.Render(" " + option) + "\n"
+		sortOptionsContent += cursor + modalStyle.Render(" "+option) + "\n"
 	}
 	bottomBorder := generateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(panel.sortOptions.cursor+1), strconv.Itoa(len(panel.sortOptions.data.options))), panel.sortOptions.width-2)
 
