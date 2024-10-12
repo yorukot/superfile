@@ -76,8 +76,11 @@ func loadConfigFile() {
 
 	_ = toml.Unmarshal(data, &tempForCheckMissingConfig)
 	err = toml.Unmarshal(data, &Config)
-	if err != nil {
-		log.Fatalf("Error decoding config file ( your config file may have misconfigured ): %v", err)
+	if err != nil && !variable.FixConfigFile {
+		fmt.Print(lipgloss.NewStyle().Foreground(lipgloss.Color("#F93939")).Render("Error") +
+			lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFEE")).Render(" ┃ ") +
+			"Error decoding configuration file\n")
+		fmt.Println("To add missing fields to hotkeys directory automaticially run Superfile with the --fix-config-file flag `spf --fix-config-file`")
 	}
 
 	if !reflect.DeepEqual(Config, tempForCheckMissingConfig) {
@@ -86,9 +89,11 @@ func loadConfigFile() {
 			log.Fatalf("Error encoding config: %v", err)
 		}
 
-		err = os.WriteFile(variable.ConfigFile, tomlData, 0644)
-		if err != nil {
-			log.Fatalf("Error writing config file: %v", err)
+		if variable.FixConfigFile {
+			err = os.WriteFile(variable.ConfigFile, tomlData, 0644)
+			if err != nil {
+				log.Fatalf("Error writing config file: %v", err)
+			}
 		}
 	}
 	if (Config.FilePreviewWidth > 10 || Config.FilePreviewWidth < 2) && Config.FilePreviewWidth != 0 {
@@ -133,7 +138,7 @@ func loadHotkeysFile() {
 					fmt.Sprintf("Field \"%s\" is missing in hotkeys configuration\n", name))
 			}
 		}
-		fmt.Println("To add missing fields to hotkeys directory automaticially run Superfile with the --fix-hotkeys flag")
+		fmt.Println("To add missing fields to hotkeys directory automaticially run Superfile with the --fix-hotkeys flag `spf --fix-hotkeys`")
 	}
 
 	if hasMissingHotkeysInConfig && variable.FixHotkeys {

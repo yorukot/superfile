@@ -25,6 +25,7 @@ var (
 	ToggleDotFile    string = SuperFileDataDir + "/toggleDotFile"
 	LogFile          string = SuperFileStateDir + "/superfile.log"
 	FixHotkeys       bool   = false
+	FixConfigFile    bool   = false
 )
 
 const (

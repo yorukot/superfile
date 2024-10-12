@@ -53,6 +53,12 @@ func Run(content embed.FS) {
 				Usage:   "Adds any missing hotkeys to the hotkey config file",
 				Value:   false,
 			},
+			&cli.BoolFlag{
+				Name:    "fix-config-file",
+				Aliases: []string{"fch"},
+				Usage:   "Adds any missing hotkeys to the hotkey config file",
+				Value:   false,
+			},
 		},
 		Action: func(c *cli.Context) error {
 			path := ""
@@ -63,6 +69,7 @@ func Run(content embed.FS) {
 			InitConfigFile()
 
 			variable.FixHotkeys = c.Bool("fix-hotkeys")
+			variable.FixConfigFile = c.Bool("fix-config-file")
 
 			firstUse := checkFirstUse()
 
@@ -74,6 +81,7 @@ func Run(content embed.FS) {
 			CheckForUpdates()
 			return nil
 		},
+		
 	}
 
 	err := app.Run(os.Args)
