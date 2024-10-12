@@ -31,5 +31,7 @@ func InitIcon(nerdfont bool) {
 		InOperation = ""
 		Directory = ""
 		Search = ""
+		SortAsc = ""
+		SortDesc = ""
 	}
 }

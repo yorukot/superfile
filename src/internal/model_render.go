@@ -95,11 +95,20 @@ func (m model) filePanelRender() string {
 			} else {
 				filePanelWidth = (m.fileModel.width + (m.fullWidth-Config.SidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels))
 			}
-			footerBorderWidth = m.fileModel.width + 7
+			footerBorderWidth = m.fileModel.width + 15
 		} else {
 			filePanelWidth = m.fileModel.width
-			footerBorderWidth = m.fileModel.width + 7
+			footerBorderWidth = m.fileModel.width + 15
 		}
+
+		sortDirectionString := ""
+		if filePanel.sortOptions.data.reversed {
+			sortDirectionString = icon.SortDesc
+		} else {
+			sortDirectionString = icon.SortAsc
+		}
+		sortTypeString := sortDirectionString + " " + filePanel.sortOptions.data.options[filePanel.sortOptions.data.selected]
+
 		panelModeString := ""
 		if filePanel.panelMode == browserMode {
 			panelModeString = icon.Browser + icon.Space + "Browser"
@@ -111,7 +120,7 @@ func (m model) filePanelRender() string {
 		f[i] += " " + filePanel.searchBar.View() + "\n"
 		if len(filePanel.element) == 0 {
 			f[i] += filePanelStyle.Render(" " + icon.Error + "  No such file or directory")
-			bottomBorder := generateFooterBorder(fmt.Sprintf("%s%s%s", panelModeString, bottomMiddleBorderSplit, "0/0"), footerBorderWidth)
+			bottomBorder := generateFooterBorder(fmt.Sprintf("%s%s%s%s%s", sortTypeString, bottomMiddleBorderSplit, panelModeString, bottomMiddleBorderSplit, "0/0"), footerBorderWidth)
 			f[i] = filePanelBorderStyle(m.mainPanelHeight, filePanelWidth, filePanel.focusType, bottomBorder).Render(f[i])
 		} else {
 			for h := filePanel.render; h < filePanel.render+panelElementHeight(m.mainPanelHeight) && h < len(filePanel.element); h++ {
@@ -134,7 +143,7 @@ func (m model) filePanelRender() string {
 			cursorPosition := strconv.Itoa(filePanel.cursor + 1)
 			totalElement := strconv.Itoa(len(filePanel.element))
 
-			bottomBorder := generateFooterBorder(fmt.Sprintf("%s%s%s/%s", panelModeString, bottomMiddleBorderSplit, cursorPosition, totalElement), footerBorderWidth)
+			bottomBorder := generateFooterBorder(fmt.Sprintf("%s%s%s%s%s/%s", sortTypeString, bottomMiddleBorderSplit, panelModeString, bottomMiddleBorderSplit, cursorPosition, totalElement), footerBorderWidth)
 			f[i] = filePanelBorderStyle(m.mainPanelHeight, filePanelWidth, filePanel.focusType, bottomBorder).Render(f[i])
 		}
 	}
@@ -492,6 +501,21 @@ func (m model) helpMenuRender() string {
 	bottomBorder := generateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(m.helpMenu.cursor+1-cursorBeenTitleCount), strconv.Itoa(len(m.helpMenu.data)-totalTitleCount)), m.helpMenu.width-2)
 
 	return helpMenuModalBorderStyle(m.helpMenu.height, m.helpMenu.width, bottomBorder).Render(helpMenuContent)
+}
+
+func (m model) sortOptionsRender() string {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	sortOptionsContent := modalTitleStyle.Render(" Sort Options") + "\n\n"
+	for i, option := range panel.sortOptions.data.options {
+		cursor := " "
+		if i == panel.sortOptions.cursor {
+			cursor = filePanelCursorStyle.Render(icon.Cursor)
+		}
+		sortOptionsContent += cursor + modalStyle.Render(" " + option) + "\n"
+	}
+	bottomBorder := generateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(panel.sortOptions.cursor+1), strconv.Itoa(len(panel.sortOptions.data.options))), panel.sortOptions.width-2)
+
+	return sortOptionsModalBorderStyle(panel.sortOptions.height, panel.sortOptions.width, bottomBorder).Render(sortOptionsContent)
 }
 
 func (m model) filePreviewPanelRender() string {

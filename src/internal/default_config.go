@@ -22,9 +22,20 @@ func defaultModelConfig(toggleDotFileBool bool, firstFilePanelDir string) model 
 		fileModel: fileModel{
 			filePanels: []filePanel{
 				{
-					render:          0,
-					cursor:          0,
-					location:        firstFilePanelDir,
+					render:      0,
+					cursor:      0,
+					location:    firstFilePanelDir,
+					sortOptions: sortOptionsModel{
+						width:  20,
+						height: 4,
+						open:   false,
+						cursor: Config.DefaultSortType,
+						data:   sortOptionsModelData{
+							options:  []string{"Name", "Size", "Date Modified"},
+							selected: Config.DefaultSortType,
+							reversed: Config.SortOrderReversed,
+						},
+					},
 					panelMode:       browserMode,
 					focusType:       focus,
 					directoryRecord: make(map[string]directoryRecord),
@@ -78,13 +89,13 @@ func getHelpMenuData() []helpMenuModalData {
 		},
 		{
 			hotkey:         hotkeys.OpenHelpMenu,
-			description:    "Open help menu(hotkeylist)",
+			description:    "Open help menu (hotkeylist)",
 			hotkeyWorkType: globalType,
 		},
 		{
 			subTitle: "Panel navigation",
 		},
-	{
+		{
 			hotkey:         hotkeys.CreateNewFilePanel,
 			description:    "Create new file panel",
 			hotkeyWorkType: globalType,
@@ -97,6 +108,16 @@ func getHelpMenuData() []helpMenuModalData {
 		{
 			hotkey:         hotkeys.ToggleFilePreviewPanel,
 			description:    "Toggle file preview panel",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey:         hotkeys.OpenSortOptionsMenu,
+			description:    "Open sort options menu",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey:         hotkeys.ToggleReverseSort,
+			description:    "Toggle reverse sort",
 			hotkeyWorkType: globalType,
 		},
 		{

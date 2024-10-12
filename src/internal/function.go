@@ -41,7 +41,7 @@ func returnFocusType(focusPanel focusPanelType) filePanelFocusType {
 	return secondFocus
 }
 
-func returnFolderElement(location string, displayDotFile bool) (directoryElement []element) {
+func returnFolderElement(location string, displayDotFile bool, sortOptions sortOptionsModelData) (directoryElement []element) {
 
 	files, err := os.ReadDir(location)
 	if len(files) == 0 {
@@ -52,15 +52,56 @@ func returnFolderElement(location string, displayDotFile bool) (directoryElement
 		outPutLog("Return folder element function error", err)
 	}
 
-	sort.Slice(files, func(i, j int) bool {
-		if files[i].IsDir() && !files[j].IsDir() {
-			return true
+	// Sort files
+	var order func(i, j int) bool
+	reversed := sortOptions.reversed
+
+	switch sortOptions.options[sortOptions.selected] {
+	case "Name":
+		order = func(i, j int) bool {
+			if files[i].IsDir() && !files[j].IsDir() {
+				return true
+			}
+			if !files[i].IsDir() && files[j].IsDir() {
+				return false
+			}
+			return files[i].Name() < files[j].Name() != reversed
 		}
-		if !files[i].IsDir() && files[j].IsDir() {
-			return false
+	case "Size":
+		order = func(i, j int) bool {
+			// Directories at the top sorted by direct child count (not recursive)
+			// Files sorted by size
+			fileInfoI, _ := files[i].Info()
+			fileInfoJ, _ := files[j].Info()
+
+			if files[i].IsDir() && !files[j].IsDir() {
+				return true
+			}
+			if !files[i].IsDir() && files[j].IsDir() {
+				return false
+			}
+			if files[i].IsDir() && files[j].IsDir() {
+				filesI, err := os.ReadDir(filepath.Join(location, files[i].Name()))
+				if err != nil {
+					outPutLog("Error when reading directory", err)
+				}
+				filesJ, err := os.ReadDir(filepath.Join(location, files[j].Name()))
+				if err != nil {
+					outPutLog("Error when reading directory", err)
+				}
+				return len(filesI) < len(filesJ) != reversed
+			}
+			return fileInfoI.Size() < fileInfoJ.Size() != reversed
 		}
-		return files[i].Name() < files[j].Name()
-	})
+	case "Date Modified":
+		order = func(i, j int) bool {
+			fileInfoI, _ := files[i].Info()
+			fileInfoJ, _ := files[j].Info()
+			return fileInfoI.ModTime().After(fileInfoJ.ModTime()) != reversed
+		}
+	}
+
+	sort.Slice(files, order)
 
 	for _, item := range files {
 		fileInfo, err := item.Info()

@@ -21,6 +21,12 @@ default_directory = "."
 # Display file sizes using powers of 1000 (kB, MB, GB) instead of powers of 1024 (KiB, MiB, GiB).
 file_size_use_si = false
 #
+# Default sort type (0: Name, 1: Size, 2: Date Modified).
+default_sort_type = 0
+#
+# Default sort order (false: Ascending, true: Descending).
+sort_order_reversed = false
+#
 # ================   Style =================
 # 
 # If you don't have or don't want Nerdfont installed you can turn this off
