@@ -46,11 +46,11 @@ Therefore, you can press `n` to create a new file panel and `w` to close the fil
 
 Now you know how to create and close file panels.
 
-But how to switch to the next or previous archive panel?
+But how to switch to the next or previous file panel?
 
 You can press `tab` or `L` (shift+l) to move to the next file panel.
 
-Then press `shift+left` or `H` (shift+h) to move to the previous archive panel.
+Then press `shift+left` or `H` (shift+h) to move to the previous file panel.
 
 ![demo](https://github.com/yorukot/superfile/assets/107802416/2c2a7632-c5c0-43b6-80a7-d6e21fcf63b1)
 
