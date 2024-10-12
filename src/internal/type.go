@@ -159,6 +159,7 @@ type filePanel struct {
 	render             int
 	focusType          filePanelFocusType
 	location           string
+	sortOptions        sortOptionsModel
 	panelMode          panelMode
 	selected           []string
 	element            []element
@@ -167,6 +168,21 @@ type filePanel struct {
 	renaming           bool
 	searchBar          textinput.Model
 	lastTimeGetElement time.Time
+}
+
+// Sort options
+type sortOptionsModel struct {
+	width  int
+	height int
+	open   bool
+	cursor int
+	data   sortOptionsModelData
+}
+
+type sortOptionsModelData struct {
+	options  []string
+	selected int
+	reversed bool
 }
 
 // Record for directory navigation

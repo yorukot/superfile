@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file. Dates are d
 > xxxx-xx-xx
 
 #### Update
-
+- Add Sort options [`#420`](https://github.com/yorukot/superfile/pull/420)
 
 #### Bug fix
 - Fix the searchbar to automatically put the open key into the searchbar [`ec9e256`](https://github.com/yorukot/superfile/commit/b20bc70fe9d4e0ee96931092a6522e8604cc017b)

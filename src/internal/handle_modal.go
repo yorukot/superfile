@@ -69,6 +69,52 @@ func (m *model) confirmRename() {
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
+func (m *model) openSortOptionsMenu() {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel.sortOptions.open = true
+	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+}
+
+func (m *model) cancelSortOptions() {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel.sortOptions.cursor = panel.sortOptions.data.selected
+	panel.sortOptions.open = false
+	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+}
+
+func (m *model) confirmSortOptions() {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel.sortOptions.data.selected = panel.sortOptions.cursor
+	panel.sortOptions.open = false
+	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+}
+
+func (m *model) sortOptionsListUp() {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	if panel.sortOptions.cursor > 0 {
+		panel.sortOptions.cursor--
+	} else {
+		panel.sortOptions.cursor = len(panel.sortOptions.data.options) - 1
+	}
+	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+}
+
+func (m *model) sortOptionsListDown() {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	if panel.sortOptions.cursor < len(panel.sortOptions.data.options) - 1 {
+		panel.sortOptions.cursor++
+	} else {
+		panel.sortOptions.cursor = 0
+	}
+	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+}
+
+func (m *model) toggleReverseSort() {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel.sortOptions.data.reversed = !panel.sortOptions.data.reversed
+	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+}
+
 // Cancel search, this will clear all searchbar input
 func (m *model) cancelSearch() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
@@ -101,7 +147,6 @@ func (m *model) helpMenuListUp() {
 		m.helpMenu.cursor = len(m.helpMenu.data) - 1
 		m.helpMenu.renderIndex = len(m.helpMenu.data) - m.helpMenu.height
 	}
-
 }
 
 // Help menu panel list down
@@ -125,7 +170,6 @@ func (m *model) helpMenuListDown() {
 		m.helpMenu.cursor = 1
 		m.helpMenu.renderIndex = 0
 	}
-
 }
 
 // Toggle help menu

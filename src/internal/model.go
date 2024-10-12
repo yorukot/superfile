@@ -190,6 +190,8 @@ func (m model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) (model, tea.Cmd){
 		m.renamingKey(msg.String())
 	} else if m.fileModel.filePanels[m.filePanelFocusIndex].searchBar.Focused() {
 		m.focusOnSearchbarKey(msg.String())
+	} else if m.fileModel.filePanels[m.filePanelFocusIndex].sortOptions.open {
+		m.sortOptionsKey(msg.String())
 	} else if m.helpMenu.open {
 		m.helpMenuKey(msg.String())
 	} else if m.commandLine.input.Focused() {
@@ -257,6 +259,7 @@ func (m *model) warnModalForQuit() {
 // ==============================================================================================
 // Superfile main render function
 func (m model) View() string {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	// check is the terminal size enough
 	if m.fullHeight < minimumHeight || m.fullWidth < minimumWidth {
 		return m.terminalSizeWarnRender()
@@ -301,6 +304,13 @@ func (m model) View() string {
 		overlayX := m.fullWidth/2 - m.sftpPanelModal.width/2
 		overlayY := m.fullHeight/2 - m.sftpPanelModal.height/2
 		finalRender = stringfunction.PlaceOverlay(overlayX, overlayY, sftpModal, finalRender)
+	}
+
+	if panel.sortOptions.open {
+		sortOptions := m.sortOptionsRender()
+		overlayX := m.fullWidth/2 - panel.sortOptions.width/2
+		overlayY := m.fullHeight/2 - panel.sortOptions.height/2
+		return stringfunction.PlaceOverlay(overlayX, overlayY, sortOptions, finalRender)
 	}
 
 	if firstUse {
@@ -379,7 +389,7 @@ func (m *model) getFilePanelItems() {
 		if filePanel.searchBar.Value() != "" {
 			fileElenent = returnFolderElementBySearchString(filePanel.location, m.toggleDotFile, filePanel.searchBar.Value())
 		} else {
-			fileElenent = returnFolderElement(filePanel.location, m.toggleDotFile)
+			fileElenent = returnFolderElement(filePanel.location, m.toggleDotFile, filePanel.sortOptions.data)
 		}
 		filePanel.element = fileElenent
 		m.fileModel.filePanels[i].element = fileElenent

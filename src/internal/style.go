@@ -59,6 +59,7 @@ var (
 var (
 	modalCancel  lipgloss.Style
 	modalConfirm lipgloss.Style
+	modalTitleStyle lipgloss.Style
 )
 
 var (
@@ -154,6 +155,7 @@ func LoadThemeConfig() {
 	// Modal Special Style
 	modalCancel = lipgloss.NewStyle().Foreground(modalCancelFGColor).Background(modalCancelBGColor)
 	modalConfirm = lipgloss.NewStyle().Foreground(modalConfirmFGColor).Background(modalConfirmBGColor)
+	modalTitleStyle = lipgloss.NewStyle().Foreground(hintColor).Background(modalBGColor)
 
 	// Help Menu Style
 	helpMenuHotkeyStyle = lipgloss.NewStyle().Foreground(helpMenuHotkeyColor).Background(modalBGColor)

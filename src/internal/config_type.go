@@ -123,6 +123,8 @@ type ConfigType struct {
 	DefaultOpenFilePreview bool   `toml:"default_open_file_preview" comment:"\nWhether to open file preview automatically every time superfile is opened."`
 	DefaultDirectory       string `toml:"default_directory" comment:"\nThe path of the first file panel when superfile is opened."`
 	FileSizeUseSI          bool   `toml:"file_size_use_si" comment:"\nDisplay file sizes using powers of 1000 (kB, MB, GB) instead of powers of 1024 (KiB, MiB, GiB)."`
+	DefaultSortType        int    `toml:"default_sort_type" comment:"\nDefault sort type (0: Name, 1: Size, 2: Date Modified)."`
+	SortOrderReversed      bool   `toml:"sort_order_reversed" comment:"\nDefault sort order (false: Ascending, true: Descending)."`
 
 	Nerdfont              bool `toml:"nerdfont" comment:"\n================   Style =================\n\n If you don't have or don't want Nerdfont installed you can turn this off"`
 	TransparentBackground bool `toml:"transparent_background" comment:"\nSet transparent background or not (this only work when your terminal background is transparent)"`
@@ -156,6 +158,8 @@ type HotkeysType struct {
 	NextFilePanel          []string `toml:"next_file_panel"`
 	PreviousFilePanel      []string `toml:"previous_file_panel"`
 	ToggleFilePreviewPanel []string `toml:"toggle_file_preview_panel"`
+	OpenSortOptionsMenu    []string `toml:"open_sort_options_menu"`
+	ToggleReverseSort    []string `toml:"toggle_reverse_sort"`
 
 	FocusOnProcessBar []string `toml:"focus_on_process_bar" comment:"change focus"`
 	FocusOnSidebar    []string `toml:"focus_on_sidebar"`

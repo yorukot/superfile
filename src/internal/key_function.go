@@ -3,12 +3,12 @@ package internal
 import tea "github.com/charmbracelet/bubbletea"
 
 func containsKey(v string, a []string) string {
-    for _, i := range a {
-        if i == v {
-            return v
-        }
-    }
-    return ""
+	for _, i := range a {
+		if i == v {
+			return v
+		}
+	}
+	return ""
 }
 
 
@@ -62,7 +62,7 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) ( tea.Cmd) {
 
 	case containsKey(msg, hotkeys.ToggleFilePreviewPanel):
 		m.toggleFilePreviewPanel()
-	
+
 	case containsKey(msg, hotkeys.FocusOnSidebar):
 		m.focusOnSideBar()
 
@@ -100,9 +100,14 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) ( tea.Cmd) {
 
 	case containsKey(msg, hotkeys.OpenHelpMenu):
 		m.openHelpMenu()
-
 	case containsKey(msg, hotkeys.OpenSftpPanel):
 		m.openSftpMenu()
+	
+	case containsKey(msg, hotkeys.OpenSortOptionsMenu):
+		m.openSortOptionsMenu()
+
+	case containsKey(msg, hotkeys.ToggleReverseSort):
+		m.toggleReverseSort()
 
 	case containsKey(msg, hotkeys.OpenCommandLine):
 		m.openCommandLine()
@@ -173,7 +178,7 @@ func (m *model) normalAndBrowserModeKey(msg string) {
 	}
 }
 
-func (m *model)  typingModalOpenKey(msg string) {
+func (m *model) typingModalOpenKey(msg string) {
 	switch msg {
 	case containsKey(msg, hotkeys.CancelTyping):
 		m.cancelTypingModal()
@@ -229,6 +234,23 @@ func (m *model) confirmToQuitSuperfile(msg string) bool {
 	}
 }
 
+func (m *model) sortOptionsKey(msg string) {
+	switch msg {
+	case containsKey(msg, hotkeys.OpenSortOptionsMenu):
+		m.cancelSortOptions()
+	case containsKey(msg, hotkeys.CancelTyping):
+		m.cancelSortOptions()
+	case containsKey(msg, hotkeys.ConfirmTyping):
+		m.confirmSortOptions()
+	case containsKey(msg, hotkeys.ListUp):
+		m.sortOptionsListUp()
+	case containsKey(msg, hotkeys.ListDown):
+		m.sortOptionsListDown()
+	case containsKey(msg, hotkeys.Quit):
+		m.cancelSortOptions()
+	}
+}
+
 func (m *model) renamingKey(msg string) {
 	switch msg {
 	case containsKey(msg, hotkeys.CancelTyping):
@@ -238,7 +260,7 @@ func (m *model) renamingKey(msg string) {
 	}
 }
 
-func (m *model)  focusOnSearchbarKey(msg string) {
+func (m *model) focusOnSearchbarKey(msg string) {
 	switch msg {
 	case containsKey(msg, hotkeys.CancelTyping):
 		m.cancelSearch()
@@ -256,7 +278,6 @@ func (m *model) helpMenuKey(msg string) {
 	case containsKey(msg, hotkeys.Quit):
 		m.quitHelpMenu()
 	}
-
 }
 
 func (m *model) commandLineKey(msg string) {
