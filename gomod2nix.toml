@@ -56,8 +56,8 @@ schema = 3
     version = "v0.2.1"
     hash = "sha256-PeuFnTak2WADesP8YTBqHP/XyvBue9bdKHYser2v6LU="
   [mod."github.com/cpuguy83/go-md2man/v2"]
-    version = "v2.0.4"
-    hash = "sha256-pQ+H8Psh92KWTang8hK0cHFLomH+4X0rMMilIJUQ4Qc="
+    version = "v2.0.5"
+    hash = "sha256-UX9FajFqZApVFED3MYcq167iPwztnIck25ehfcOeFD8="
   [mod."github.com/davecgh/go-spew"]
     version = "v1.1.2-0.20180830191138-d8f796af33cc"
     hash = "sha256-fV9oI51xjHdOmEx6+dlq7Ku2Ag+m/bmbzPo6A4Y74qc="
@@ -146,8 +146,8 @@ schema = 3
     version = "v0.5.11"
     hash = "sha256-SUyrjc2wyN3cTGKe5JdBEXjtZC1rJySRxJHVUZ59row="
   [mod."github.com/urfave/cli/v2"]
-    version = "v2.27.4"
-    hash = "sha256-8gkLizRt7U9BfTok/hTysMt78HBP8syiEJ0eYhFrAvo="
+    version = "v2.27.5"
+    hash = "sha256-b/mERhhQ7CHxVEyf2QXfVnZut9pgMMVgL4zs2Wh9s4A="
   [mod."github.com/xrash/smetrics"]
     version = "v0.0.0-20240521201337-686a1a2994c1"
     hash = "sha256-CsyN59w6sKERDI5kkdpq0YKmqdixyCHuN4FYE/56/BQ="
