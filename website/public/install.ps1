@@ -64,6 +64,8 @@ The installer for system arch ($arch) is not available.
 }
 $filename = "$package-windows-v$version-$arch.zip"
 
+$ProgressPreference = 'SilentlyContinue' #speeds up Download massively, but doesnt show Bits written
+
 Write-Host "Downloading superfile..."
 
 $superfileProgramPath = [Environment]::GetFolderPath("LocalApplicationData") + "\Programs\superfile"
