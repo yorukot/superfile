@@ -15,8 +15,8 @@ importers:
         specifier: ^0.37.0
         version: 0.37.0
       '@expressive-code/plugin-line-numbers':
-        specifier: ^0.37.0
-        version: 0.37.0
+        specifier: ^0.37.1
+        version: 0.37.1
       '@fontsource/ibm-plex-mono':
         specifier: ^5.0.8
         version: 5.1.0
@@ -24,7 +24,7 @@ importers:
         specifier: ^5.0.8
         version: 5.1.0
       astro:
-        specifier: ^4.16.6
+        specifier: ^4.4.9
         version: 4.16.6(rollup@4.24.0)(typescript@5.5.4)
       hast-util-to-html:
         specifier: ^9.0.0
@@ -316,14 +316,17 @@ packages:
   '@expressive-code/core@0.37.0':
     resolution: {integrity: sha512-uCPAaQ//5RZeeKAN9cMyGH8YIm+h1Rldy34IWMbsCECrFVo86w+eR67jVWoQ2HNe0dSZ4XTdgJKYEScuVcy2Cw==}
 
+  '@expressive-code/core@0.37.1':
+    resolution: {integrity: sha512-nYgsK3uxK4W46v0IolHdB5+T6MQfy5weTpyB3kbzr11ur2UKUy2oHGhbWa+hRThfYEF1PM+TFxMtWU7amcjF8A==}
+
   '@expressive-code/plugin-collapsible-sections@0.37.0':
     resolution: {integrity: sha512-gnsBdoJnaKuioznATceLTp0xjWuBZdsY02WWkmvEbLP6DOyufMvAY7K3SATOCIlovaVVtA800boZ5m3X/ah1OQ==}
 
   '@expressive-code/plugin-frames@0.35.6':
     resolution: {integrity: sha512-CqjSWjDJ3wabMJZfL9ZAzH5UAGKg7KWsf1TBzr4xvUbZvWoBtLA/TboBML0U1Ls8h/4TRCIvR4VEb8dv5+QG3w==}
 
-  '@expressive-code/plugin-line-numbers@0.37.0':
-    resolution: {integrity: sha512-np3Z51zYycO9zYaiqH51LPsn7PFGIcENhD5l0iAy+RrJNK4b213VvydVWgqLq87efZtCXg+lMuY/U8P4lCAPMw==}
+  '@expressive-code/plugin-line-numbers@0.37.1':
+    resolution: {integrity: sha512-Tg8ZpJUwB1T4v3BKRjo5iqDslbOtXy7vI59NNq5K5JvvFs7j3FLHtxNQjDwown3sEDRTOFc1Yw6VulZ9afJ+yA==}
 
   '@expressive-code/plugin-shiki@0.35.6':
     resolution: {integrity: sha512-xm+hzi9BsmhkDUGuyAWIydOAWer7Cs9cj8FM0t4HXaQ+qCubprT6wJZSKUxuvFJIUsIOqk1xXFaJzGJGnWtKMg==}
@@ -2249,6 +2252,18 @@ snapshots:
       unist-util-visit: 5.0.0
       unist-util-visit-parents: 6.0.1
 
+  '@expressive-code/core@0.37.1':
+    dependencies:
+      '@ctrl/tinycolor': 4.1.0
+      hast-util-select: 6.0.3
+      hast-util-to-html: 9.0.3
+      hast-util-to-text: 4.0.2
+      hastscript: 9.0.0
+      postcss: 8.4.47
+      postcss-nested: 6.2.0(postcss@8.4.47)
+      unist-util-visit: 5.0.0
+      unist-util-visit-parents: 6.0.1
+
   '@expressive-code/plugin-collapsible-sections@0.37.0':
     dependencies:
       '@expressive-code/core': 0.37.0
@@ -2257,9 +2272,9 @@ snapshots:
     dependencies:
       '@expressive-code/core': 0.35.6
 
-  '@expressive-code/plugin-line-numbers@0.37.0':
+  '@expressive-code/plugin-line-numbers@0.37.1':
     dependencies:
-      '@expressive-code/core': 0.37.0
+      '@expressive-code/core': 0.37.1
 
   '@expressive-code/plugin-shiki@0.35.6':
     dependencies:
