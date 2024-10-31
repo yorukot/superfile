@@ -41,11 +41,11 @@ schema = 3
     version = "v0.2.0"
     hash = "sha256-fi5N0IXhSbbYHdSZFngCfpT4kdiEaKedqj8YpnlvX0o="
   [mod."github.com/charmbracelet/lipgloss"]
-    version = "v0.13.0"
-    hash = "sha256-80A5GLx5cG3pd9LMN6edv27x6R2GQWDFdWTbcLFtcbo="
+    version = "v1.0.0"
+    hash = "sha256-6ilMmaNrkVUt+RtuDu2lMAGFWe6Dx6921swURY+M1HE="
   [mod."github.com/charmbracelet/x/ansi"]
-    version = "v0.2.3"
-    hash = "sha256-JYjiEPdFsI/RtlUyMoOtGUlXo1/fmf5Oh8NMGBRaIdg="
+    version = "v0.4.2"
+    hash = "sha256-8MXyqHnzwGjl7z8ll8Tb5RQyj3ZhyK98ottgxRiBWjg="
   [mod."github.com/charmbracelet/x/exp/term"]
     version = "v0.0.0-20240814160751-e2dc8b53b604"
     hash = "sha256-8M7BzhJasT6X5/oo8dpJ4LEuSl60FQf13by5M8t+GwE="
