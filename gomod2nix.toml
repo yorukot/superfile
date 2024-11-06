@@ -35,17 +35,17 @@ schema = 3
     version = "v0.20.0"
     hash = "sha256-p5jmxDfH9vEWsafg1lB7HBTUSysXrTGymTThFYClrOE="
   [mod."github.com/charmbracelet/bubbletea"]
-    version = "v1.1.2"
-    hash = "sha256-8sIpObB/3sJzwA9k478ZSu7y8hIdR/VAGskn+dmUFlo="
+    version = "v1.2.0"
+    hash = "sha256-s/4Yr7SaEMiVFpb1IkhFiacSih16xgWWk2pb7bxJdCw="
   [mod."github.com/charmbracelet/harmonica"]
     version = "v0.2.0"
     hash = "sha256-fi5N0IXhSbbYHdSZFngCfpT4kdiEaKedqj8YpnlvX0o="
   [mod."github.com/charmbracelet/lipgloss"]
-    version = "v0.13.0"
-    hash = "sha256-80A5GLx5cG3pd9LMN6edv27x6R2GQWDFdWTbcLFtcbo="
+    version = "v1.0.0"
+    hash = "sha256-6ilMmaNrkVUt+RtuDu2lMAGFWe6Dx6921swURY+M1HE="
   [mod."github.com/charmbracelet/x/ansi"]
-    version = "v0.4.0"
-    hash = "sha256-ciiWPgTBK94jb4JajZLcxgJmBKhZI19E1/edF28O6MA="
+    version = "v0.4.5"
+    hash = "sha256-Lq+d2VYKVLIgF6pBac8phexaecdl7Q3Ga4B2tv+VvXY="
   [mod."github.com/charmbracelet/x/exp/term"]
     version = "v0.0.0-20240814160751-e2dc8b53b604"
     hash = "sha256-8M7BzhJasT6X5/oo8dpJ4LEuSl60FQf13by5M8t+GwE="
