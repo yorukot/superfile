@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@astrojs/starlight':
-        specifier: ^0.28.0
-        version: 0.28.3(astro@4.16.8(rollup@4.24.3)(typescript@5.5.4))
+        specifier: ^0.29.0
+        version: 0.29.0(astro@4.16.8(rollup@4.24.3)(typescript@5.5.4))
       '@expressive-code/plugin-collapsible-sections':
         specifier: ^0.37.0
         version: 0.37.0
@@ -24,7 +24,7 @@ importers:
         specifier: ^5.0.8
         version: 5.1.0
       astro:
-        specifier: ^4.16.8
+        specifier: ^4.4.9
         version: 4.16.8(rollup@4.24.3)(typescript@5.5.4)
       hast-util-to-html:
         specifier: ^9.0.0
@@ -61,8 +61,8 @@ packages:
   '@astrojs/sitemap@3.2.0':
     resolution: {integrity: sha512-SkrOCL3Z6HxdiXreZ1+aPBWgnBMJ31EgPdcscgQeLqI2Gqk/4EKLuw9q0SqKU9MmHpcPXXtcd0odfCk4barPoA==}
 
-  '@astrojs/starlight@0.28.3':
-    resolution: {integrity: sha512-GXXIPKSu5d50mLVtgI4jf6pb3FPQm8n4MI6ZXuQQqqnA0xg7PJQ76WFSVyrICeqM5fKABSqcBksp/glyEJes/A==}
+  '@astrojs/starlight@0.29.0':
+    resolution: {integrity: sha512-0HRr7LiI0XJUA5n0Mj5LPSLZtw80ttkL6eh824y6t/DCcvJzC6e+HRQZ0hIolU8jsEMc7Qs07mMQIvPTpX9KMg==}
     peerDependencies:
       astro: ^4.14.0
 
@@ -302,26 +302,26 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@expressive-code/core@0.35.6':
-    resolution: {integrity: sha512-xGqCkmfkgT7lr/rvmfnYdDSeTdCSp1otAHgoFS6wNEeO7wGDPpxdosVqYiIcQ8CfWUABh/pGqWG90q+MV3824A==}
-
   '@expressive-code/core@0.37.0':
     resolution: {integrity: sha512-uCPAaQ//5RZeeKAN9cMyGH8YIm+h1Rldy34IWMbsCECrFVo86w+eR67jVWoQ2HNe0dSZ4XTdgJKYEScuVcy2Cw==}
+
+  '@expressive-code/core@0.38.3':
+    resolution: {integrity: sha512-s0/OtdRpBONwcn23O8nVwDNQqpBGKscysejkeBkwlIeHRLZWgiTVrusT5Idrdz1d8cW5wRk9iGsAIQmwDPXgJg==}
 
   '@expressive-code/plugin-collapsible-sections@0.37.0':
     resolution: {integrity: sha512-gnsBdoJnaKuioznATceLTp0xjWuBZdsY02WWkmvEbLP6DOyufMvAY7K3SATOCIlovaVVtA800boZ5m3X/ah1OQ==}
 
-  '@expressive-code/plugin-frames@0.35.6':
-    resolution: {integrity: sha512-CqjSWjDJ3wabMJZfL9ZAzH5UAGKg7KWsf1TBzr4xvUbZvWoBtLA/TboBML0U1Ls8h/4TRCIvR4VEb8dv5+QG3w==}
+  '@expressive-code/plugin-frames@0.38.3':
+    resolution: {integrity: sha512-qL2oC6FplmHNQfZ8ZkTR64/wKo9x0c8uP2WDftR/ydwN/yhe1ed7ZWYb8r3dezxsls+tDokCnN4zYR594jbpvg==}
 
   '@expressive-code/plugin-line-numbers@0.37.0':
     resolution: {integrity: sha512-np3Z51zYycO9zYaiqH51LPsn7PFGIcENhD5l0iAy+RrJNK4b213VvydVWgqLq87efZtCXg+lMuY/U8P4lCAPMw==}
 
-  '@expressive-code/plugin-shiki@0.35.6':
-    resolution: {integrity: sha512-xm+hzi9BsmhkDUGuyAWIydOAWer7Cs9cj8FM0t4HXaQ+qCubprT6wJZSKUxuvFJIUsIOqk1xXFaJzGJGnWtKMg==}
+  '@expressive-code/plugin-shiki@0.38.3':
+    resolution: {integrity: sha512-kqHnglZeesqG3UKrb6e9Fq5W36AZ05Y9tCREmSN2lw8LVTqENIeCIkLDdWtQ5VoHlKqwUEQFTVlRehdwoY7Gmw==}
 
-  '@expressive-code/plugin-text-markers@0.35.6':
-    resolution: {integrity: sha512-/k9eWVZSCs+uEKHR++22Uu6eIbHWEciVHbIuD8frT8DlqTtHYaaiwHPncO6KFWnGDz5i/gL7oyl6XmOi/E6GVg==}
+  '@expressive-code/plugin-text-markers@0.38.3':
+    resolution: {integrity: sha512-dPK3+BVGTbTmGQGU3Fkj3jZ3OltWUAlxetMHI6limUGCWBCucZiwoZeFM/WmqQa71GyKRzhBT+iEov6kkz2xVA==}
 
   '@fontsource/ibm-plex-mono@5.1.0':
     resolution: {integrity: sha512-XKsZNyRCj6tz8zlatHmniSoLVephMD5GQG2sXgcaEb8DkUO+O61r28uTlIMEZuoZXtP4c4STvL+KUlJM5jZOEg==}
@@ -714,10 +714,10 @@ packages:
     resolution: {integrity: sha512-LElXdjswlqjWrPpJFg1Fx4wpkOCxj1TDHlSV4PlaRxHGWko024xICaa97ZkMfs6DRKlCguiAI+rbXv5GWwXIkg==}
     hasBin: true
 
-  astro-expressive-code@0.35.6:
-    resolution: {integrity: sha512-1U4KrvFuodaCV3z4I1bIR16SdhQlPkolGsYTtiANxPZUVv/KitGSCTjzksrkPonn1XuwVqvnwmUUVzTLWngnBA==}
+  astro-expressive-code@0.38.3:
+    resolution: {integrity: sha512-Tvdc7RV0G92BbtyEOsfJtXU35w41CkM94fOAzxbQP67Wj5jArfserJ321FO4XA7WG9QMV0GIBmQq77NBIRDzpQ==}
     peerDependencies:
-      astro: ^4.0.0-beta || ^3.3.0
+      astro: ^4.0.0-beta || ^5.0.0-beta || ^3.3.0
 
   astro@4.16.8:
     resolution: {integrity: sha512-BRWFP0UQ8gkOr90KQW7oooedtgCk/j91pyv1WQUmgZwMUZk/v0HJRiddAZgvGCECOnmZFc9ZqRZnBsAMUgApNQ==}
@@ -943,8 +943,8 @@ packages:
   eventemitter3@5.0.1:
     resolution: {integrity: sha512-GWkBvjiSZK87ELrYOSESUYeVIc9mvLLf/nXalMOS5dYrgZq9o5OVkbZAVM06CVxYsCwH9BDZFPlQTlPA1j4ahA==}
 
-  expressive-code@0.35.6:
-    resolution: {integrity: sha512-+mx+TPTbMqgo0mL92Xh9QgjW0kSQIsEivMgEcOnaqKqL7qCw8Vkqc5Rg/di7ZYw4aMUSr74VTc+w8GQWu05j1g==}
+  expressive-code@0.38.3:
+    resolution: {integrity: sha512-COM04AiUotHCKJgWdn7NtW2lqu8OW8owAidMpkXt1qxrZ9Q2iC7+tok/1qIn2ocGnczvr9paIySgGnEwFeEQ8Q==}
 
   extend-shallow@2.0.1:
     resolution: {integrity: sha512-zCnTtlxNoAiDc3gqY2aYAWFx7XWWiasuF2K8Me5WbN8otHKTUKBwjPtNpRs/rbUZm7KxWAaNj7P1a/p52GbVug==}
@@ -1238,9 +1238,6 @@ packages:
   mdast-util-find-and-replace@3.0.1:
     resolution: {integrity: sha512-SG21kZHGC3XRTSUhtofZkBzZTJNM5ecCi0SK2IMKmSXR8vO3peL+kb1O0z7Zl83jKtutG4k5Wv/W7V3/YHvzPA==}
 
-  mdast-util-from-markdown@2.0.1:
-    resolution: {integrity: sha512-aJEUyzZ6TzlsX2s5B4Of7lN7EQtAxvtradMMglCQDyaTFgse6CmtmdJ15ElnVRlCg1vpNyVtbem0PWzlNieZsA==}
-
   mdast-util-from-markdown@2.0.2:
     resolution: {integrity: sha512-uZhTV/8NBuw0WHkPTrCqDOl0zVe1BIng5ZtHoDk49ME1qqcjYmmLmOf0gELgcRMxN4w2iuIeVso5/6QymSrgmA==}
 
@@ -1279,9 +1276,6 @@ packages:
 
   mdast-util-to-hast@13.2.0:
     resolution: {integrity: sha512-QGYKEuUsYT9ykKBCMOEDLsU5JRObWQusAolFMeko/tYPufNkRffBAQjIE+99jbA87xv6FgmjLtwjh9wBWajwAA==}
-
-  mdast-util-to-markdown@2.1.0:
-    resolution: {integrity: sha512-SR2VnIEdVNCJbP6y7kVTJgPLifdr8WEU440fQec7qHoHOUz/oJ2jmNRqdDQ3rbiStOXb2mCDGTuwsK5OPUgYlQ==}
 
   mdast-util-to-markdown@2.1.1:
     resolution: {integrity: sha512-OrkcCoqAkEg9b1ykXBrA0ehRc8H4fGU/03cACmW2xXzau1+dIdS+qJugh1Cqex3hMumSBgSE/5pc7uqP12nLAw==}
@@ -1479,9 +1473,6 @@ packages:
   parse-latin@7.0.0:
     resolution: {integrity: sha512-mhHgobPPua5kZ98EF4HWiH167JWBfl4pvAIXXdbaVohtK7a6YBOy56kvhCqduqyo/f3yrHFWmqmiMg/BkBkYYQ==}
 
-  parse5@7.2.0:
-    resolution: {integrity: sha512-ZkDsAOcxsUMZ4Lz5fVciOehNcJ+Gb8gTzcA4yl3wnc273BAybYWrQ+Ks/OjCjSEpjvQkDSeZbybK9qj2VHHdGA==}
-
   parse5@7.2.1:
     resolution: {integrity: sha512-BuBYQYlv1ckiPdQi/ohiivi9Sagc9JG+Ozs0r7b/0iK3sKmrb0b9FdWdBbOdx6hBCM/F9Ir82ofnBhtZOjCRPQ==}
 
@@ -1549,8 +1540,8 @@ packages:
   regex@4.3.3:
     resolution: {integrity: sha512-r/AadFO7owAq1QJVeZ/nq9jNS1vyZt+6t1p/E59B56Rn2GCya+gr1KSyOzNL/er+r+B7phv5jG2xU2Nz1YkmJg==}
 
-  rehype-expressive-code@0.35.6:
-    resolution: {integrity: sha512-pPdE+pRcRw01kxMOwHQjuRxgwlblZt5+wAc3w2aPGgmcnn57wYjn07iKO7zaznDxYVxMYVvYlnL+R3vWFQS4Gw==}
+  rehype-expressive-code@0.38.3:
+    resolution: {integrity: sha512-RYSSDkMBikoTbycZPkcWp6ELneANT4eTpND1DSRJ6nI2eVFUwTBDCvE2vO6jOOTaavwnPiydi4i/87NRyjpdOA==}
 
   rehype-format@5.0.1:
     resolution: {integrity: sha512-zvmVru9uB0josBVpr946OR8ui7nJEdzZobwLOOqHb/OOD88W0Vk2SqLwoVOj0fM6IPCCO6TaV9CvQvJMWwukFQ==}
@@ -1948,7 +1939,7 @@ snapshots:
       stream-replace-string: 2.0.0
       zod: 3.23.8
 
-  '@astrojs/starlight@0.28.3(astro@4.16.8(rollup@4.24.3)(typescript@5.5.4))':
+  '@astrojs/starlight@0.29.0(astro@4.16.8(rollup@4.24.3)(typescript@5.5.4))':
     dependencies:
       '@astrojs/mdx': 3.1.8(astro@4.16.8(rollup@4.24.3)(typescript@5.5.4))
       '@astrojs/sitemap': 3.2.0
@@ -1956,15 +1947,16 @@ snapshots:
       '@types/hast': 3.0.4
       '@types/mdast': 4.0.4
       astro: 4.16.8(rollup@4.24.3)(typescript@5.5.4)
-      astro-expressive-code: 0.35.6(astro@4.16.8(rollup@4.24.3)(typescript@5.5.4))
+      astro-expressive-code: 0.38.3(astro@4.16.8(rollup@4.24.3)(typescript@5.5.4))
       bcp-47: 2.1.0
       hast-util-from-html: 2.0.3
       hast-util-select: 6.0.3
       hast-util-to-string: 3.0.1
       hastscript: 9.0.0
       i18next: 23.15.2
+      js-yaml: 4.1.0
       mdast-util-directive: 3.0.0
-      mdast-util-to-markdown: 2.1.0
+      mdast-util-to-markdown: 2.1.1
       mdast-util-to-string: 4.0.0
       pagefind: 1.1.1
       rehype: 13.0.2
@@ -2188,7 +2180,7 @@ snapshots:
   '@esbuild/win32-x64@0.21.5':
     optional: true
 
-  '@expressive-code/core@0.35.6':
+  '@expressive-code/core@0.37.0':
     dependencies:
       '@ctrl/tinycolor': 4.1.0
       hast-util-select: 6.0.3
@@ -2200,7 +2192,7 @@ snapshots:
       unist-util-visit: 5.0.0
       unist-util-visit-parents: 6.0.1
 
-  '@expressive-code/core@0.37.0':
+  '@expressive-code/core@0.38.3':
     dependencies:
       '@ctrl/tinycolor': 4.1.0
       hast-util-select: 6.0.3
@@ -2216,22 +2208,22 @@ snapshots:
     dependencies:
       '@expressive-code/core': 0.37.0
 
-  '@expressive-code/plugin-frames@0.35.6':
+  '@expressive-code/plugin-frames@0.38.3':
     dependencies:
-      '@expressive-code/core': 0.35.6
+      '@expressive-code/core': 0.38.3
 
   '@expressive-code/plugin-line-numbers@0.37.0':
     dependencies:
       '@expressive-code/core': 0.37.0
 
-  '@expressive-code/plugin-shiki@0.35.6':
+  '@expressive-code/plugin-shiki@0.38.3':
     dependencies:
-      '@expressive-code/core': 0.35.6
+      '@expressive-code/core': 0.38.3
       shiki: 1.22.2
 
-  '@expressive-code/plugin-text-markers@0.35.6':
+  '@expressive-code/plugin-text-markers@0.38.3':
     dependencies:
-      '@expressive-code/core': 0.35.6
+      '@expressive-code/core': 0.38.3
 
   '@fontsource/ibm-plex-mono@5.1.0': {}
 
@@ -2572,10 +2564,10 @@ snapshots:
 
   astring@1.9.0: {}
 
-  astro-expressive-code@0.35.6(astro@4.16.8(rollup@4.24.3)(typescript@5.5.4)):
+  astro-expressive-code@0.38.3(astro@4.16.8(rollup@4.24.3)(typescript@5.5.4)):
     dependencies:
       astro: 4.16.8(rollup@4.24.3)(typescript@5.5.4)
-      rehype-expressive-code: 0.35.6
+      rehype-expressive-code: 0.38.3
 
   astro@4.16.8(rollup@4.24.3)(typescript@5.5.4):
     dependencies:
@@ -2856,12 +2848,12 @@ snapshots:
 
   eventemitter3@5.0.1: {}
 
-  expressive-code@0.35.6:
+  expressive-code@0.38.3:
     dependencies:
-      '@expressive-code/core': 0.35.6
-      '@expressive-code/plugin-frames': 0.35.6
-      '@expressive-code/plugin-shiki': 0.35.6
-      '@expressive-code/plugin-text-markers': 0.35.6
+      '@expressive-code/core': 0.38.3
+      '@expressive-code/plugin-frames': 0.38.3
+      '@expressive-code/plugin-shiki': 0.38.3
+      '@expressive-code/plugin-text-markers': 0.38.3
 
   extend-shallow@2.0.1:
     dependencies:
@@ -2943,7 +2935,7 @@ snapshots:
       '@types/hast': 3.0.4
       devlop: 1.1.0
       hast-util-from-parse5: 8.0.1
-      parse5: 7.2.0
+      parse5: 7.2.1
       vfile: 6.0.3
       vfile-message: 4.0.2
 
@@ -3253,8 +3245,8 @@ snapshots:
       '@types/mdast': 4.0.4
       '@types/unist': 3.0.3
       devlop: 1.1.0
-      mdast-util-from-markdown: 2.0.1
-      mdast-util-to-markdown: 2.1.0
+      mdast-util-from-markdown: 2.0.2
+      mdast-util-to-markdown: 2.1.1
       parse-entities: 4.0.1
       stringify-entities: 4.0.4
       unist-util-visit-parents: 6.0.1
@@ -3267,23 +3259,6 @@ snapshots:
       escape-string-regexp: 5.0.0
       unist-util-is: 6.0.0
       unist-util-visit-parents: 6.0.1
-
-  mdast-util-from-markdown@2.0.1:
-    dependencies:
-      '@types/mdast': 4.0.4
-      '@types/unist': 3.0.3
-      decode-named-character-reference: 1.0.2
-      devlop: 1.1.0
-      mdast-util-to-string: 4.0.0
-      micromark: 4.0.0
-      micromark-util-decode-numeric-character-reference: 2.0.1
-      micromark-util-decode-string: 2.0.0
-      micromark-util-normalize-identifier: 2.0.0
-      micromark-util-symbol: 2.0.0
-      micromark-util-types: 2.0.0
-      unist-util-stringify-position: 4.0.0
-    transitivePeerDependencies:
-      - supports-color
 
   mdast-util-from-markdown@2.0.2:
     dependencies:
@@ -3366,7 +3341,7 @@ snapshots:
       '@types/mdast': 4.0.4
       devlop: 1.1.0
       mdast-util-from-markdown: 2.0.2
-      mdast-util-to-markdown: 2.1.0
+      mdast-util-to-markdown: 2.1.1
     transitivePeerDependencies:
       - supports-color
 
@@ -3379,7 +3354,7 @@ snapshots:
       ccount: 2.0.1
       devlop: 1.1.0
       mdast-util-from-markdown: 2.0.2
-      mdast-util-to-markdown: 2.1.0
+      mdast-util-to-markdown: 2.1.1
       parse-entities: 4.0.1
       stringify-entities: 4.0.4
       unist-util-stringify-position: 4.0.0
@@ -3393,7 +3368,7 @@ snapshots:
       mdast-util-mdx-expression: 2.0.1
       mdast-util-mdx-jsx: 3.1.3
       mdast-util-mdxjs-esm: 2.0.1
-      mdast-util-to-markdown: 2.1.0
+      mdast-util-to-markdown: 2.1.1
     transitivePeerDependencies:
       - supports-color
 
@@ -3404,7 +3379,7 @@ snapshots:
       '@types/mdast': 4.0.4
       devlop: 1.1.0
       mdast-util-from-markdown: 2.0.2
-      mdast-util-to-markdown: 2.1.0
+      mdast-util-to-markdown: 2.1.1
     transitivePeerDependencies:
       - supports-color
 
@@ -3424,17 +3399,6 @@ snapshots:
       unist-util-position: 5.0.0
       unist-util-visit: 5.0.0
       vfile: 6.0.3
-
-  mdast-util-to-markdown@2.1.0:
-    dependencies:
-      '@types/mdast': 4.0.4
-      '@types/unist': 3.0.3
-      longest-streak: 3.1.0
-      mdast-util-phrasing: 4.1.0
-      mdast-util-to-string: 4.0.0
-      micromark-util-decode-string: 2.0.0
-      unist-util-visit: 5.0.0
-      zwitch: 2.0.4
 
   mdast-util-to-markdown@2.1.1:
     dependencies:
@@ -3824,10 +3788,6 @@ snapshots:
       unist-util-visit-children: 3.0.0
       vfile: 6.0.3
 
-  parse5@7.2.0:
-    dependencies:
-      entities: 4.5.0
-
   parse5@7.2.1:
     dependencies:
       entities: 4.5.0
@@ -3889,9 +3849,9 @@ snapshots:
 
   regex@4.3.3: {}
 
-  rehype-expressive-code@0.35.6:
+  rehype-expressive-code@0.38.3:
     dependencies:
-      expressive-code: 0.35.6
+      expressive-code: 0.38.3
 
   rehype-format@5.0.1:
     dependencies:
