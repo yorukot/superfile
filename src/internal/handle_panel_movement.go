@@ -95,7 +95,7 @@ func (m *model) enterPanel() {
 			openCommand = "open"
 		}
 		cmd := exec.Command(openCommand, panel.element[panel.cursor].location)
-		_, err = cmd.Output()
+		err = cmd.Start()
 		if err != nil {
 			outPutLog(fmt.Sprintf("err when open file with %s", openCommand), err)
 		}
