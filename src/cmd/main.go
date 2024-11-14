@@ -61,9 +61,10 @@ func Run(content embed.FS) {
 			},
 		},
 		Action: func(c *cli.Context) error {
+            // If no args are called along with "spf" use current dir
 			path := ""
 			if c.Args().Present() {
-				path = c.Args().First()
+				path = c.Args().First() 
 			}
 
 			InitConfigFile()
@@ -171,6 +172,7 @@ func checkFirstUse() bool {
 	}
 	return firstUse
 }
+
 func writeConfigFile(path, data string) error {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		if err := os.WriteFile(path, []byte(data), 0644); err != nil {
@@ -227,6 +229,7 @@ func CheckForUpdates() {
 			return
 		}
 
+        //Check if the local version is outdated
 		if versionToNumber(release.TagName) > versionToNumber(variable.CurrentVersion) {
 			fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("#FF69E1")).Render("┃ ") +
 				lipgloss.NewStyle().Foreground(lipgloss.Color("#FFBA52")).Bold(true).Render("A new version ") +
