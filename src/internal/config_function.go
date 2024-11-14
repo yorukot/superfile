@@ -67,7 +67,9 @@ func initialConfig(dir string) (toggleDotFileBool bool, firstFilePanelDir string
 	return toggleDotFileBool, firstFilePanelDir
 }
 
-// Load and fix config toml file
+// Load configurations from the configuration file. Compares the content
+// with the default values and modify the config file to include default configs
+// if the FixConfigFile flag is on
 func loadConfigFile() {
 
 	//Initialize default configs
@@ -116,7 +118,9 @@ func loadConfigFile() {
 	}
 }
 
-// Load and handle keybinds settings in hotkeys toml file
+// Load keybinds from the hotkeys file. Compares the content
+// with the default values and modify the hotkeys  if the FixHotkeys flag is on.
+// If is off check if all hotkeys are properly setted
 func loadHotkeysFile() {
 
     // load default Hotkeys configs
@@ -194,7 +198,8 @@ func writeHotkeysFile(hotkeys HotkeysType) {
 	}
 }
 
-// Load coonfigurations from theme file
+// Load configurations from theme file into &theme and return default values 
+// if file theme folder is empty
 func loadThemeFile() {
 	data, err := os.ReadFile(variable.ThemeFolder + "/" + Config.Theme + ".toml")
 	if err != nil {
@@ -207,7 +212,8 @@ func loadThemeFile() {
 	}
 }
 
-// Load all default configurations from superfile_config folder
+// Load all default configurations from superfile_config folder into global 
+// configurations variables
 func LoadAllDefaultConfig(content embed.FS) {
 
 	temp, err := content.ReadFile("src/superfile_config/hotkeys.toml")

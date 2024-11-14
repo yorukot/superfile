@@ -7,7 +7,7 @@ var (
 	DefaultThemeString string
 )
 
-// Generate model containing default configurations 
+// Generate and return model containing default configurations 
 func defaultModelConfig(toggleDotFileBool bool, firstFilePanelDir string) model {
 	return model{
 		filePanelFocusIndex: 0,
