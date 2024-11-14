@@ -16,9 +16,12 @@ import (
 	"github.com/yorukot/superfile/src/config/icon"
 )
 
+// initialConfig load and handle all configuration files (spf config,hotkeys
+// themes) setted up. Returns absolute path of dir pointing to the file Panel
 func initialConfig(dir string) (toggleDotFileBool bool, firstFilePanelDir string) {
 	var err error
 
+    // Open log stream
 	logOutput, err = os.OpenFile(variable.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("Error while opening superfile.log file: %v", err)
@@ -64,9 +67,14 @@ func initialConfig(dir string) (toggleDotFileBool bool, firstFilePanelDir string
 	return toggleDotFileBool, firstFilePanelDir
 }
 
+// Load configurations from the configuration file. Compares the content
+// with the default values and modify the config file to include default configs
+// if the FixConfigFile flag is on
 func loadConfigFile() {
 
+	//Initialize default configs
 	_ = toml.Unmarshal([]byte(ConfigTomlString), &Config)
+	//Initialize empty configs
 	tempForCheckMissingConfig := ConfigType{}
 
 	data, err := os.ReadFile(variable.ConfigFile)
@@ -74,7 +82,9 @@ func loadConfigFile() {
 		log.Fatalf("Config file doesn't exist: %v", err)
 	}
 
+	// Insert data present in the config file inside temp variable
 	_ = toml.Unmarshal(data, &tempForCheckMissingConfig)
+	// Replace default values for values specifieds in config file
 	err = toml.Unmarshal(data, &Config)
 	if err != nil && !variable.FixConfigFile {
 		fmt.Print(lipgloss.NewStyle().Foreground(lipgloss.Color("#F93939")).Render("Error") +
@@ -83,19 +93,20 @@ func loadConfigFile() {
 		fmt.Println("To add missing fields to hotkeys directory automaticially run Superfile with the --fix-config-file flag `spf --fix-config-file`")
 	}
 
-	if !reflect.DeepEqual(Config, tempForCheckMissingConfig) {
+	// If data is different and FixConfigFile option is on, then fullfill then
+	// fullfill the config file with the default values
+	if !reflect.DeepEqual(Config, tempForCheckMissingConfig) && variable.FixConfigFile {
 		tomlData, err := toml.Marshal(Config)
 		if err != nil {
 			log.Fatalf("Error encoding config: %v", err)
 		}
 
-		if variable.FixConfigFile {
-			err = os.WriteFile(variable.ConfigFile, tomlData, 0644)
-			if err != nil {
-				log.Fatalf("Error writing config file: %v", err)
-			}
+		err = os.WriteFile(variable.ConfigFile, tomlData, 0644)
+		if err != nil {
+			log.Fatalf("Error writing config file: %v", err)
 		}
 	}
+
 	if (Config.FilePreviewWidth > 10 || Config.FilePreviewWidth < 2) && Config.FilePreviewWidth != 0 {
 		fmt.Println(loadConfigError("file_preview_width"))
 		os.Exit(0)
@@ -107,8 +118,12 @@ func loadConfigFile() {
 	}
 }
 
+// Load keybinds from the hotkeys file. Compares the content
+// with the default values and modify the hotkeys  if the FixHotkeys flag is on.
+// If is off check if all hotkeys are properly setted
 func loadHotkeysFile() {
 
+    // load default Hotkeys configs
 	_ = toml.Unmarshal([]byte(HotkeysTomlString), &hotkeys)
 	hotkeysFromConfig := HotkeysType{}
 	data, err := os.ReadFile(variable.HotkeysFile)
@@ -116,7 +131,9 @@ func loadHotkeysFile() {
 	if err != nil {
 		log.Fatalf("Config file doesn't exist: %v", err)
 	}
+    // Load data from hotkeys file
 	_ = toml.Unmarshal(data, &hotkeysFromConfig)
+    // Override default hotkeys with the ones from the file
 	err = toml.Unmarshal(data, &hotkeys)
 	if err != nil {
 		log.Fatalf("Error decoding hotkeys file ( your config file may have misconfigured ): %v", err)
@@ -124,6 +141,7 @@ func loadHotkeysFile() {
 
 	hasMissingHotkeysInConfig := !reflect.DeepEqual(hotkeys, hotkeysFromConfig)
 
+    // If FixHotKeys is not on then check if every needed hotkey is properly setted
 	if hasMissingHotkeysInConfig && !variable.FixHotkeys {
 		hotKeysConfig := reflect.ValueOf(hotkeysFromConfig)
 		for i := 0; i < hotKeysConfig.NumField(); i++ {
@@ -141,6 +159,7 @@ func loadHotkeysFile() {
 		fmt.Println("To add missing fields to hotkeys directory automaticially run Superfile with the --fix-hotkeys flag `spf --fix-hotkeys`")
 	}
 
+    // Override hotkey files with default configs if the Fix flag is on
 	if hasMissingHotkeysInConfig && variable.FixHotkeys {
 		writeHotkeysFile(hotkeys)
 	}
@@ -166,6 +185,7 @@ func loadHotkeysFile() {
 
 }
 
+// Write hotkeys inside the hotkeys toml file
 func writeHotkeysFile(hotkeys HotkeysType) {
 	tomlData, err := toml.Marshal(hotkeys)
 	if err != nil {
@@ -178,6 +198,8 @@ func writeHotkeysFile(hotkeys HotkeysType) {
 	}
 }
 
+// Load configurations from theme file into &theme and return default values 
+// if file theme folder is empty
 func loadThemeFile() {
 	data, err := os.ReadFile(variable.ThemeFolder + "/" + Config.Theme + ".toml")
 	if err != nil {
@@ -190,6 +212,8 @@ func loadThemeFile() {
 	}
 }
 
+// Load all default configurations from superfile_config folder into global 
+// configurations variables
 func LoadAllDefaultConfig(content embed.FS) {
 
 	temp, err := content.ReadFile("src/superfile_config/hotkeys.toml")

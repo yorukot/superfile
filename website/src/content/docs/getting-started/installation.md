@@ -13,35 +13,38 @@ First make sure you have the following tools installed on your machine:
 - [Any Nerd-font ](https://www.nerdfonts.com/font-downloads)
 
 :::tip
-If you don't install `Nerd font` superfile it will still work, but the UI may be a bit ugly.
+If you don't install `Nerd font`, superfile will still work, but the UI may be a bit ugly.
 :::
 
-## Installation Script
+## Installation Scripts
+
+Copy and paste the following one-line command into your machine's terminal.
 
 ### Linux / MacOs
-Just copy and paste this one-line command:
+
+With `curl`:
 
 ```bash
 bash -c "$(curl -sLo- https://superfile.netlify.app/install.sh)"
 ```
-Or wget:
+
+Or with `wget`:
 ```bash
 bash -c "$(wget -qO- https://superfile.netlify.app/install.sh)"
 ```
 
-## Windows
+### Windows
 
-It actually supports windows! Well.. sort of.
-
-Use powershell to run this command:
+With `powershell`:
 
 ```bash
 powershell -ExecutionPolicy Bypass -Command "Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://superfile.netlify.app/install.ps1'))"
 ```
 :::note
-For uninstall do the same but uninstall.ps1
-:::
+To uninstall, run the above `powershell` command with the modified URL:
 
+`https://superfile.netlify.app/uninstall.ps1`
+:::
 
 ## Community maintained packages
 
@@ -57,7 +60,7 @@ For uninstall do the same but uninstall.ps1
 sudo pacman -S superfile
 ```
 
-###### Fetches prebuilt binaries from github
+###### Fetches prebuilt binaries from GitHub
 
 ```bash
 sudo pacman -S superfile-bin
@@ -65,7 +68,7 @@ sudo pacman -S superfile-bin
 
 ### Homebrew
 
-Install homebrew and execute the following commands
+Install [Homebrew](https://brew.sh/) and then run the following command:
 
 ```bash
 brew install superfile
@@ -113,15 +116,15 @@ x env use superfile
 
 ## Start superfile
 
-After completing the installation, you can restart the terminal (if necessary)
+After completing the installation, you can restart the terminal (if necessary).
 
-You can use `spf` to start superfile
+Run `spf` to start superfile
 
 ```bash
 spf
 ```
 
-## Next-step
+## Next steps
 
 - [Tutorial](/getting-started/tutorial)
 - [Hotkey list](/list/hotkey-list)

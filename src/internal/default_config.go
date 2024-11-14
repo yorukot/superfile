@@ -1,11 +1,13 @@
 package internal
 
+// Variables for holding default configurations of each settings
 var (
 	HotkeysTomlString  string
 	ConfigTomlString   string
 	DefaultThemeString string
 )
 
+// Generate and return model containing default configurations 
 func defaultModelConfig(toggleDotFileBool bool, firstFilePanelDir string) model {
 	return model{
 		filePanelFocusIndex: 0,
@@ -57,6 +59,7 @@ func defaultModelConfig(toggleDotFileBool bool, firstFilePanelDir string) model 
 	}
 }
 
+// Return help menu for hotkeys
 func getHelpMenuData() []helpMenuModalData {
 	data := []helpMenuModalData{
 		{
