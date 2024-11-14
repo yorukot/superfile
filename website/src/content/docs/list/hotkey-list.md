@@ -1,6 +1,6 @@
 ---
 title: Hotkey list
-description: Superfile hotkey list
+description: superfile hotkey list
 head:
   - tag: title
     content: Hotkey list | superfile

@@ -26,4 +26,4 @@ If applicable, add screenshots to help explain your problem.
 **System information (please complete the following information):**
  - OS: [e.g. iOS]
  - Version [e.g. 22]
- - Superfile Version [e.g. 1.1.1]
+ - superfile Version [e.g. 1.1.1]

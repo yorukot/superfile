@@ -22,7 +22,7 @@ func (m model) sidebarRender() string {
 	if Config.SidebarWidth == 0 {
 		return ""
 	}
-	superfileTitle := sidebarTitleStyle.Render("    " + icon.SuperfileIcon + " Super File")
+	superfileTitle := sidebarTitleStyle.Render("    " + icon.SuperfileIcon + " superfile")
 	superfileTitle = ansi.Truncate(superfileTitle, Config.SidebarWidth, "")
 	s := superfileTitle
 	s += "\n"

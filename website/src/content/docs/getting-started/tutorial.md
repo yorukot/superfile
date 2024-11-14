@@ -1,6 +1,6 @@
 ---
 title: Learn how to use tutorial
-description: Quickly get started with Superfile
+description: Quickly get started with superfile
 head:
   - tag: title
     content: Tutorial | superfile

@@ -6,10 +6,10 @@ head:
     content: How to Contribute | superfile
 ---
 
-# Contributing to Superfile
+# Contributing to superfile
 
-Welcome to Superfile! This document shall serve as a guide for you to follow in your journey to contributing to this project.
-There are many ways to contribute to Superfile:
+Welcome to superfile! This document shall serve as a guide for you to follow in your journey to contributing to this project.
+There are many ways to contribute to superfile:
 - Reporting Bugs
 - Resolving issues
 - Adding a theme
@@ -44,7 +44,7 @@ If no such theme exists, then you may create your own theme. Following steps wil
 
 ### Do you want to share an idea?
 
-Superfile welcomes new ideas. If you have an idea you should first check if a similar or identical idea was presented previously or not, or check thoroughly if the idea is already present in superfile.
+superfile welcomes new ideas. If you have an idea you should first check if a similar or identical idea was presented previously or not, or check thoroughly if the idea is already present in superfile.
 To share your idea you can open a discussion in https://github.com/yorukot/superfile/discussions
 There you can share your idea and if you want to work on it, you can follow the same steps as mentioned in previously.
 

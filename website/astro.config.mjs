@@ -8,8 +8,8 @@ const site = 'https://superfile.netlify.app/';
 export default defineConfig({
   integrations: [
     starlight({
-      title: 'Superfile',
-      description: `Superfile is a very fancy and modern terminal file manager that can complete the file operations you need!`,
+      title: 'superfile',
+      description: `superfile is a very fancy and modern terminal file manager that can complete the file operations you need!`,
       expressiveCode: {
         themes: ['dracula', 'solarized-light'],
       },
@@ -96,7 +96,7 @@ export default defineConfig({
               link: '/configure/config-file-path',
             },
             {
-              label: 'Superfile config',
+              label: 'superfile config',
               link: '/configure/superfile-config/',
             },
             {

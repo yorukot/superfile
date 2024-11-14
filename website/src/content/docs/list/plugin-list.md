@@ -1,6 +1,6 @@
 ---
 title: Plugin list
-description: Superfile plugin list
+description: superfile plugin list
 head:
   - tag: title
     content: Plugin list | superfile
