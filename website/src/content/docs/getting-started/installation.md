@@ -6,14 +6,14 @@ head:
     content: Install superfile | superfile
 ---
 
-## Requirements
+## Before install
 
 First make sure you have the following tools installed on your machine:
 
 - [Any Nerd-font ](https://www.nerdfonts.com/font-downloads)
 
 :::tip
-If you don't install `Nerd font`, superfile will still work, but the UI may be a bit ugly.
+If you don't install `Nerd font`, superfile will still work, but the UI may look a bit off. It's recommended to disable the Nerd font option to avoid this issue.
 :::
 
 ## Installation Scripts
