@@ -196,9 +196,6 @@ func writeConfigFile(path, data string) error {
 func CheckForUpdates() {
 	var Config internal.ConfigType
 
-	if !Config.AutoCheckUpdate {
-		return
-	}
 
 	data, err := os.ReadFile(variable.ConfigFile)
 	if err != nil {
@@ -208,6 +205,10 @@ func CheckForUpdates() {
 	err = toml.Unmarshal(data, &Config)
 	if err != nil {
 		log.Fatalf("Error decoding config file ( your config file may be misconfigured ): %v", err)
+	}
+
+	if !Config.AutoCheckUpdate {
+		return
 	}
 
 	lastTime, err := readLastTimeCheckVersionFromFile(variable.LastCheckVersion)
