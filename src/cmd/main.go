@@ -197,6 +197,7 @@ func CheckForUpdates() {
 	var Config internal.ConfigType
 
 
+    // Get AutoCheck flag from configuration files
 	data, err := os.ReadFile(variable.ConfigFile)
 	if err != nil {
 		log.Fatalf("Config file doesn't exist: %v", err)
@@ -211,6 +212,7 @@ func CheckForUpdates() {
 		return
 	}
 
+    // Check last time the version was checked
 	lastTime, err := readLastTimeCheckVersionFromFile(variable.LastCheckVersion)
 	if err != nil && !os.IsNotExist(err) {
 		fmt.Println("Error reading from file:", err)
