@@ -65,7 +65,7 @@ const (
 )
 
 const (
-	snedWarnModal channelMessageType = iota
+	sendWarnModal channelMessageType = iota
 	sendMetadata
 	sendProcess
 )

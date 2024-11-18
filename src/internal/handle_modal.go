@@ -43,7 +43,7 @@ func (m *model) createItem() {
 }
 
 // Cancel rename file or directory
-func (m *model) cancelReanem() {
+func (m *model) cancelRename() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	panel.rename.Blur()
 	panel.renaming = false
@@ -89,6 +89,7 @@ func (m *model) confirmSortOptions() {
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
+// Move the cursor up in the sort options menu
 func (m *model) sortOptionsListUp() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	if panel.sortOptions.cursor > 0 {
@@ -99,6 +100,7 @@ func (m *model) sortOptionsListUp() {
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
+// Move the cursor down in the sort options menu
 func (m *model) sortOptionsListDown() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	if panel.sortOptions.cursor < len(panel.sortOptions.data.options) - 1 {
@@ -123,7 +125,7 @@ func (m *model) cancelSearch() {
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
-// Confirm search
+// Confirm search. This will exit the search bar and filter the files
 func (m *model) confirmSearch() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	panel.searchBar.Blur()
@@ -202,6 +204,8 @@ func (m *model) closeCommandLine() {
 	m.commandLine.input.Blur()
 }
 
+// Exec a command line input inside the pointing file dir. Like opening the 
+// focused file in the text editor
 func (m *model) enterCommandLine() {
 	focusPanelDir := ""
 	for _, panel := range m.fileModel.filePanels {

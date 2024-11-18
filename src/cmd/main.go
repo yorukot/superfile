@@ -22,6 +22,7 @@ import (
 	internal "github.com/yorukot/superfile/src/internal"
 )
 
+// Run superfile app
 func Run(content embed.FS) {
 
 	internal.LoadAllDefaultConfig(content)
@@ -91,6 +92,8 @@ func Run(content embed.FS) {
 	}
 }
 
+// Create proper directories for storing configuration and write default 
+// configurations to Config and Hotkeys toml
 func InitConfigFile() {
 	// Create directories
 	if err := createDirectories(
@@ -134,6 +137,7 @@ func InitConfigFile() {
 }
 
 // Helper functions
+// Create all dirs that does not already exists
 func createDirectories(dirs ...string) error {
 	for _, dir := range dirs {
 		if _, err := os.Stat(dir); os.IsNotExist(err) {
@@ -150,6 +154,7 @@ func createDirectories(dirs ...string) error {
 	return nil
 }
 
+// Create all files if they do not exists yet
 func createFiles(files ...string) error {
 	for _, file := range files {
 		if _, err := os.Stat(file); os.IsNotExist(err) {
@@ -161,6 +166,8 @@ func createFiles(files ...string) error {
 	return nil
 }
 
+// Check if is the first time initializing the app, if it is create 
+// use check file
 func checkFirstUse() bool {
 	file := variable.FirstUseCheck
 	firstUse := false
@@ -173,6 +180,7 @@ func checkFirstUse() bool {
 	return firstUse
 }
 
+// Write data to the path file if it exists
 func writeConfigFile(path, data string) error {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		if err := os.WriteFile(path, []byte(data), 0644); err != nil {
@@ -182,9 +190,14 @@ func writeConfigFile(path, data string) error {
 	return nil
 }
 
+// Check for the need of updates if AutoCheckUpdate is on, if its the first time
+//that version is checked or if has more than 24h since the last version check,
+//look into the repo if  there's any more recent version
 func CheckForUpdates() {
 	var Config internal.ConfigType
 
+
+    // Get AutoCheck flag from configuration files
 	data, err := os.ReadFile(variable.ConfigFile)
 	if err != nil {
 		log.Fatalf("Config file doesn't exist: %v", err)
@@ -199,6 +212,7 @@ func CheckForUpdates() {
 		return
 	}
 
+    // Check last time the version was checked
 	lastTime, err := readLastTimeCheckVersionFromFile(variable.LastCheckVersion)
 	if err != nil && !os.IsNotExist(err) {
 		fmt.Println("Error reading from file:", err)
@@ -249,6 +263,7 @@ func CheckForUpdates() {
 	}
 }
 
+// Convert version string to number
 func versionToNumber(version string) int {
 	version = strings.ReplaceAll(version, "v", "")
 	version = strings.ReplaceAll(version, ".", "")
@@ -257,6 +272,7 @@ func versionToNumber(version string) int {
 	return num
 }
 
+// Check the last time the version file was checked
 func readLastTimeCheckVersionFromFile(filename string) (time.Time, error) {
 	content, err := os.ReadFile(filename)
 	if err != nil {
@@ -273,6 +289,7 @@ func readLastTimeCheckVersionFromFile(filename string) (time.Time, error) {
 	return lastTime, nil
 }
 
+// Write content to filename
 func writeToFile(filename, content string) error {
 	file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {

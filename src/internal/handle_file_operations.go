@@ -73,7 +73,7 @@ func (m *model) deleteItemWarn() {
 	id := shortuuid.New()
 	message := channelMessage{
 		messageId:   id,
-		messageType: snedWarnModal,
+		messageType: sendWarnModal,
 	}
 
 	if isExternalDiskPath(panel.location) {

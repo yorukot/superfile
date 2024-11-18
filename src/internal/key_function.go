@@ -11,10 +11,13 @@ func containsKey(v string, a []string) string {
 	return ""
 }
 
-
+// mainKey handles most of key commands in the regular state of the application. For 
+// keys that performs actions in multiple panels, like going up or down,
+// check the state of model m and handle properly.
 func (m *model) mainKey(msg string, cmd tea.Cmd) ( tea.Cmd) {
 	switch msg {
 
+    // If move up Key is pressed, check the current state and executes
 	case containsKey(msg, hotkeys.ListUp):
 		if m.focusPanel == sidebarFocus {
 			m.controlSideBarListUp(false)
@@ -30,6 +33,7 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) ( tea.Cmd) {
 			}()
 		}
 
+    // If move down Key is pressed, check the current state and executes
 	case containsKey(msg, hotkeys.ListDown):
 		if m.focusPanel == sidebarFocus {
 			m.controlSideBarListDown(false)
@@ -176,6 +180,7 @@ func (m *model) normalAndBrowserModeKey(msg string) {
 	}
 }
 
+// Check the hotkey to cancel operation or create file 
 func (m *model) typingModalOpenKey(msg string) {
 	switch msg {
 	case containsKey(msg, hotkeys.CancelTyping):
@@ -219,6 +224,7 @@ func (m *model) warnModalOpenKey(msg string) {
 	}
 }
 
+// Handle key input to confirm or cancel and close quiting warn in SPF
 func (m *model) confirmToQuitSuperfile(msg string) bool {
 	switch msg {
 	case containsKey(msg, hotkeys.Quit), containsKey(msg, hotkeys.CancelTyping):
@@ -232,6 +238,7 @@ func (m *model) confirmToQuitSuperfile(msg string) bool {
 	}
 }
 
+// Handles key inputs inside sort options menu
 func (m *model) sortOptionsKey(msg string) {
 	switch msg {
 	case containsKey(msg, hotkeys.OpenSortOptionsMenu):
@@ -252,12 +259,13 @@ func (m *model) sortOptionsKey(msg string) {
 func (m *model) renamingKey(msg string) {
 	switch msg {
 	case containsKey(msg, hotkeys.CancelTyping):
-		m.cancelReanem()
+		m.cancelRename()
 	case containsKey(msg, hotkeys.ConfirmTyping):
 		m.confirmRename()
 	}
 }
 
+// Check the key input and cancel or confirms the search
 func (m *model) focusOnSearchbarKey(msg string) {
 	switch msg {
 	case containsKey(msg, hotkeys.CancelTyping):
@@ -267,6 +275,8 @@ func (m *model) focusOnSearchbarKey(msg string) {
 	}
 }
 
+// Check hotkey input in help menu. Possible actions are moving up, down
+// and quiting the menu
 func (m *model) helpMenuKey(msg string) {
 	switch msg {
 	case containsKey(msg, hotkeys.ListUp):
@@ -278,6 +288,7 @@ func (m *model) helpMenuKey(msg string) {
 	}
 }
 
+// Handle command line keys closing or entering command line
 func (m *model) commandLineKey(msg string) {
 	switch msg {
 	case containsKey(msg, hotkeys.CancelTyping):

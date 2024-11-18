@@ -1,5 +1,4 @@
 package internal
-
 import (
 	"log"
 	"os"
@@ -30,12 +29,15 @@ var et *exiftool.Exiftool
 var channel = make(chan channelMessage, 1000)
 var progressBarLastRenderTime time.Time = time.Now()
 
+// Initialize and return model with default configs
 func InitialModel(dir string, firstUseCheck bool) model {
 	toggleDotFileBool, firstFilePanelDir := initialConfig(dir)
 	firstUse = firstUseCheck
 	return defaultModelConfig(toggleDotFileBool, firstFilePanelDir)
 }
 
+// Init function to be called by Bubble tea framework, sets windows title,
+// cursos blinking and starts message streamming channel
 func (m model) Init() tea.Cmd {
 	return tea.Batch(
 		tea.SetWindowTitle("SuperFile"),
@@ -44,6 +46,8 @@ func (m model) Init() tea.Cmd {
 	)
 }
 
+// Update function for bubble tea to provide internal communication to the 
+// application
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
@@ -71,9 +75,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, tea.Batch(cmd)
 }
 
+// Handle message exchanging whithin the application
 func (m *model) handleChannelMessage(msg channelMessage){
 	switch msg.messageType{ 
-	case snedWarnModal:
+	case sendWarnModal:
 		m.warnModal = msg.warnModal
 	case sendMetadata:
 		m.fileMetaData.metaData = msg.metadata
@@ -85,6 +90,7 @@ func (m *model) handleChannelMessage(msg channelMessage){
 	}
 }
 
+// Adjust window size based on msg information
 func (m *model) handleWindowResize(msg tea.WindowSizeMsg){
 	m.fullHeight = msg.Height
 	m.fullWidth = msg.Width
@@ -103,6 +109,7 @@ func (m *model) handleWindowResize(msg tea.WindowSizeMsg){
 	}
 }
 
+// Set file preview panel Widht to width. Assure that 
 func (m *model) setFilePreviewWidth(width int){
 	if Config.FilePreviewWidth == 0 {
 		m.fileModel.filePreview.width = (width - Config.SidebarWidth - (4 + (len(m.fileModel.filePanels))*2)) / (len(m.fileModel.filePanels) + 1)
@@ -113,6 +120,7 @@ func (m *model) setFilePreviewWidth(width int){
 	}
 }
 
+// Proper set panels size. Assure that panels do not overlap
 func (m *model) setFilePanelsSize(width int){
 		// set each file panel size and max file panel amount
 		m.fileModel.width = (width - Config.SidebarWidth - m.fileModel.filePreview.width - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
@@ -122,8 +130,8 @@ func (m *model) setFilePanelsSize(width int){
 		}
 }
 
+// Set footer size using height 
 func (m *model) setFooterSize(height int){
-	// set footer size
 	if height < 30 {
 		footerHeight = 10
 	} else if height < 35 {
@@ -143,8 +151,8 @@ func (m *model) setFooterSize(height int){
 	m.mainPanelHeight = height - footerHeight + 1
 }
 
+// Set help menu size
 func (m *model) setHelpMenuSize(){
-	// set help menu size
 	m.helpMenu.height = m.fullHeight - 2
 	m.helpMenu.width = m.fullWidth - 2
 
@@ -157,6 +165,8 @@ func (m *model) setHelpMenuSize(){
 	}
 }
 
+// Identify the current state of the application m and properly handle the 
+// msg keybind pressed
 func (m model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) (model, tea.Cmd){
 	if firstUse {
 		firstUse = false
@@ -167,22 +177,30 @@ func (m model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) (model, tea.Cmd){
 		m.typingModalOpenKey(msg.String())
 	} else if m.warnModal.open {
 		m.warnModalOpenKey(msg.String())
+    // If renaming a object
 	} else if m.fileModel.renaming {
 		m.renamingKey(msg.String())
+    // If search bar is open
 	} else if m.fileModel.filePanels[m.filePanelFocusIndex].searchBar.Focused() {
 		m.focusOnSearchbarKey(msg.String())
+    // If sort options menu is open 
 	} else if m.fileModel.filePanels[m.filePanelFocusIndex].sortOptions.open {
 		m.sortOptionsKey(msg.String())
+    // If help menu is open
 	} else if m.helpMenu.open {
 		m.helpMenuKey(msg.String())
+    // If command line input is send
 	} else if m.commandLine.input.Focused() {
 		m.commandLineKey(msg.String())
+    // If asking to confirm quiting
 	} else if m.confirmToQuit {
 		quit := m.confirmToQuitSuperfile(msg.String())
 		if quit {
 			m.quitSuperfile()
 			return m, tea.Quit
 		}
+    // If quiting input pressed, check if has any runing process and displays a
+    // warn. Otherwise just quits application
 	} else if msg.String() == containsKey(msg.String(), hotkeys.Quit) {
 		if m.hasRunningProcesses(){
 				m.warnModalForQuit()
@@ -192,11 +210,14 @@ func (m model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) (model, tea.Cmd){
 		m.quitSuperfile()
 		return m, tea.Quit
 	} else {
+        // Handles general kinds of inputs in the regular state of the application
 		cmd = m.mainKey(msg.String(), cmd)
 	}
 	return m, cmd	
 }
 
+// Update the file panel state. Change name of renamed files, filter out files
+// in search, update typingb bar, etc 
 func (m *model) updateFilePanelsState(msg tea.Msg, cmd *tea.Cmd) {
 	focusPanel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	if m.firstTextInput {
@@ -222,6 +243,7 @@ func (m *model) updateFilePanelsState(msg tea.Msg, cmd *tea.Cmd) {
 	}
 }
 
+// Check if there's any processes running in background
 func (m *model) hasRunningProcesses() bool{
 	for _, data := range m.processBarModel.process {
 		if data.state == inOperation && data.done != data.total {
@@ -231,12 +253,14 @@ func (m *model) hasRunningProcesses() bool{
 	return false
 }
 
+// Triggers a warn for confirm quiting
 func (m *model) warnModalForQuit() {
 	m.confirmToQuit = true
 	m.warnModal.title = "Confirm to quit superfile"
 	m.warnModal.content = "You still have files being processed. Are you sure you want to exit?"
 }
 
+// Implement View function for bubble tea model to handle visualization.
 func (m model) View() string {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	// check is the terminal size enough
@@ -316,6 +340,7 @@ func (m model) View() string {
 	return finalRender
 }
 
+// Returns a tea.cmd responsible for listening messages from msg channel
 func listenForChannelMessage(msg chan channelMessage) tea.Cmd {
 	return func() tea.Msg {
 		for {
@@ -333,11 +358,15 @@ func listenForChannelMessage(msg chan channelMessage) tea.Cmd {
 	}
 }
 
+
+// Render and update file panel items. Check for changes and updates in files and
+// folders in the current directory.
 func (m *model) getFilePanelItems() {
 	focusPanel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	for i, filePanel := range m.fileModel.filePanels {
-		var fileElenent []element
+		var fileElement []element
 		nowTime := time.Now()
+        // Check last time each element was updated, if less then 3 seconds ignore
 		if filePanel.focusType == noneFocus && nowTime.Sub(filePanel.lastTimeGetElement) < 3*time.Second {
 			continue
 		}
@@ -358,17 +387,21 @@ func (m *model) getFilePanelItems() {
 			continue
 		}
 
+        // Get file names based on search bar filter
 		if filePanel.searchBar.Value() != "" {
-			fileElenent = returnFolderElementBySearchString(filePanel.location, m.toggleDotFile, filePanel.searchBar.Value())
+			fileElement = returnFolderElementBySearchString(filePanel.location, m.toggleDotFile, filePanel.searchBar.Value())
 		} else {
-			fileElenent = returnFolderElement(filePanel.location, m.toggleDotFile, filePanel.sortOptions.data)
+			fileElement = returnFolderElement(filePanel.location, m.toggleDotFile, filePanel.sortOptions.data)
 		}
-		filePanel.element = fileElenent
-		m.fileModel.filePanels[i].element = fileElenent
+        // Update file panel list
+		filePanel.element = fileElement
+		m.fileModel.filePanels[i].element = fileElement
 		m.fileModel.filePanels[i].lastTimeGetElement = nowTime
 	}
 }
 
+// Close superfile application. Cd into the curent dir if CdOnQuit on and save
+// the path in state direcotory
 func (m model) quitSuperfile() {
     // close exiftool session
     if Config.Metadata {
