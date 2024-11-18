@@ -65,7 +65,11 @@ func returnFolderElement(location string, displayDotFile bool, sortOptions sortO
 			if !files[i].IsDir() && files[j].IsDir() {
 				return false
 			}
-			return files[i].Name() < files[j].Name() != reversed
+			if Config.CaseSensitiveSort {
+				return files[i].Name() < files[j].Name() != reversed
+			} else {
+				return strings.ToLower(files[i].Name()) < strings.ToLower(files[j].Name()) != reversed
+			}
 		}
 	case "Size":
 		order = func(i, j int) bool {
