@@ -27,6 +27,9 @@ default_sort_type = 0
 # Default sort order (false: Ascending, true: Descending).
 sort_order_reversed = false
 #
+# Case sensitive sort by name (upper "B" comes before lower "a" if true).
+case_sensitive_sort = false
+#
 # ================   Style =================
 # 
 # If you don't have or don't want Nerdfont installed you can turn this off
