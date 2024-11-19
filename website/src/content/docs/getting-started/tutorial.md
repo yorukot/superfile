@@ -9,11 +9,11 @@ head:
 This tutorial will help you learn to use superfile step by step.
 
 :::caution
-If you didn't install superfile yet please [click here](/getting-started/installation) to install.
+If you haven't installed superfile yet, please [click here](/getting-started/installation) to install.
 :::
 
 :::tip
-If you just want to know about Hotkey without so much supplementary content, please go to [here](/list/hotkey-list)
+If you just want to know about hotkeys without so much supplementary content, please go [here](/list/hotkey-list)
 :::
 
 ## Hotkeys tutorial
