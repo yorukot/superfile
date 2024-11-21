@@ -10,6 +10,19 @@ head:
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC(YYYY-MM-DD).
 
+# [**v1.1.6**](https://github.com/yorukot/superfile/releases/tag/v1.1.6)
+
+> 2024-11-21
+
+#### Update
+- Add sort case toggle [`#469`](https://github.com/yorukot/superfile/issues/469)
+- Add Sort options [`#420`](https://github.com/yorukot/superfile/pull/420)
+- Fix flashing when switching between panels [`#122`](https://github.com/yorukot/superfile/issues/122)
+
+#### Bug fix
+- Fix some hotkey broken
+- Fix the searchbar to automatically put the open key into the searchbar [`ec9e256`](https://github.com/yorukot/superfile/commit/b20bc70fe9d4e0ee96931092a6522e8604cc017b)
+
 # [**v1.1.5**](https://github.com/yorukot/superfile/releases/tag/v1.1.5)
 
 > 2024-10-03
