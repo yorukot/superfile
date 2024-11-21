@@ -9,11 +9,11 @@ head:
 This tutorial will teach you how to use superfile step by step.
 
 :::caution
-If you haven't installed superfile yet, please [click here](./installation.md).
+If you haven't installed superfile yet, please [click here](/getting-started/installation).
 :::
 
 :::tip
-A full list of hotkeys are available [here](../list/hotkey-list.md)
+A full list of hotkeys are available [here](/list/hotkey-list)
 :::
 
 ## Hotkeys tutorial
@@ -51,7 +51,7 @@ You can also press `f` to show or hide the preview window.
 :::tip
 The size of the folder will only be shown when you focus on the metadata.
 
-For more detailed metadata, [click here](../configure/enable-plugin.md) to install the metadata plugin.
+For more detailed metadata, [click here](/configure/enable-plugin) to install the metadata plugin.
 :::
 
 To create more file panels, press `n`. Press `w` to close the focused file panel.
