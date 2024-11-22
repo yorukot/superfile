@@ -66,15 +66,53 @@ $filename = "$package-windows-v$version-$arch.zip"
 
 $ProgressPreference = 'SilentlyContinue' #speeds up Download massively, but doesnt show Bits written
 
-Write-Host "Downloading superfile..."
+Write-Host "Checking for superfile installation..."
 
 $superfileProgramPath = [Environment]::GetFolderPath("LocalApplicationData") + "\Programs\superfile"
+$superfileExePath = $superfileProgramPath + "\spf.exe"
+
 if (-not (Test-Path $superfileProgramPath)) {
     New-Item -Path $superfileProgramPath -ItemType Directory -Verbose:$false | Out-Null
 } else {
-    Write-Host "Folder $superfileProgramPath already exists. :/"
-    exit
+    if (Test-Path $superfileExePath) {
+        $versionOutput = & $superfileExePath --version
+        $versionOutput = $versionOutput.Replace('superfile version v', '')
+
+        $currentVersionParts = $version -split '\.' | ForEach-Object { [int]$_ }
+        $installedVersionParts = $versionOutput -split '\.' | ForEach-Object { [int]$_ }
+
+        # Compare versions part by part
+        $isUpToDate = $true
+        for ($i = 0; $i -lt $currentVersionParts.Count; $i++) {
+            if ($currentVersionParts[$i] -gt $installedVersionParts[$i]) {
+                $isUpToDate = $false
+                break
+            } elseif ($currentVersionParts[$i] -lt $installedVersionParts[$i]) {
+                continue
+            }
+        }
+        if ($isUpToDate) {
+            Write-Host "superfile already installed, quitting..."
+        } else {
+            Write-Host "Old version (superfile v$versionOutput) found, removing..."
+            try {
+                if (Test-Path $superfileExePath) {
+                    Remove-Item -Path $superfileExePath -Force
+                }
+            }
+            catch {
+                Write-Host "An error occurred: $_"
+                exit
+            }
+        }
+    } else {
+        Write-Host "superfile folder found but not executable :/, please check your %localappdata%\Programs\superfile for conflict."
+        exit
+    }
 }
+
+Write-Host "Downloading superfile..."
+
 $url = "https://github.com/yorukot/superfile/releases/download/v$version/$filename"
 try {
     Invoke-WebRequest -OutFile "$superfileProgramPath/$filename" $url
