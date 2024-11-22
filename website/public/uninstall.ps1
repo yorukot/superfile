@@ -41,7 +41,7 @@ Write-Host "Removing folder..."
 $superfileProgramPath = [Environment]::GetFolderPath("LocalApplicationData") + "\Programs\superfile"
 try {
     if (Test-Path $superfileProgramPath) {
-      Remove-Item -Path $superfileProgramPath -Recurse -Force
+        Remove-Item -Path $superfileProgramPath -Recurse -Force
     }
 }
 catch {
