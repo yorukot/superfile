@@ -59,10 +59,12 @@ func returnFolderElement(location string, displayDotFile bool, sortOptions sortO
 	switch sortOptions.options[sortOptions.selected] {
 	case "Name":
 		order = func(i, j int) bool {
-			if files[i].IsDir() && !files[j].IsDir() {
+			_, errI := os.ReadDir(location+"/"+files[i].Name());
+			_, errJ := os.ReadDir(location+"/"+files[j].Name());
+			if (files[i].IsDir()||errI==nil) && (!files[j].IsDir()&&errJ!=nil) {
 				return true
 			}
-			if !files[i].IsDir() && files[j].IsDir() {
+			if (!files[i].IsDir()&&errI!=nil) && (files[j].IsDir()||errJ==nil) {
 				return false
 			}
 			if Config.CaseSensitiveSort {
@@ -77,11 +79,13 @@ func returnFolderElement(location string, displayDotFile bool, sortOptions sortO
 			// Files sorted by size
 			fileInfoI, _ := files[i].Info()
 			fileInfoJ, _ := files[j].Info()
+			_, errI := os.ReadDir(location+"/"+files[i].Name());
+			_, errJ := os.ReadDir(location+"/"+files[j].Name());
 
-			if files[i].IsDir() && !files[j].IsDir() {
+			if (files[i].IsDir()||errI==nil) && (!files[j].IsDir()&&errJ!=nil) {
 				return true
 			}
-			if !files[i].IsDir() && files[j].IsDir() {
+			if (!files[i].IsDir()&&errI!=nil) && (files[j].IsDir()||errJ==nil) {
 				return false
 			}
 			if files[i].IsDir() && files[j].IsDir() {
