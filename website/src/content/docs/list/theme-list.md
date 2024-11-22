@@ -88,6 +88,14 @@ head:
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/nord.png?raw=true)
 
+## OneDark
+
+- Theme name: `onedark`
+- Ported by: https://github.com/CommandJoo
+- Original Author: https://github.com/one-dark
+
+![](https://github.com/yorukot/superfile/blob/main/asset/theme/onedark.png?raw=true)
+
 ## Poimandres
 
 - Theme name: `poimandres`
