@@ -492,7 +492,6 @@ func isSymlink(filePath string) bool {
 	if err != nil {
 		return true
 	}
-
 	return fileInfo.Mode()&os.ModeSymlink != 0
 }
 
