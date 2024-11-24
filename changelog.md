@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC(YYYY-MM-DD).
 
+# [**v1.1.7**]()
+
+> xxxx-xx-xx
+
+#### Update
+
+#### Bug fix
+- Fix Render Directory Symlinks as Directories not as Files [`#481`](https://github.com/yorukot/superfile/pull/481)
+
 # [**v1.1.6**](https://github.com/yorukot/superfile/releases/tag/v1.1.6)
 
 > 2024-11-21
