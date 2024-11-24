@@ -170,7 +170,8 @@ func (m model) filePanelRender() string {
 				if filePanel.renaming && h == filePanel.cursor {
 					f[i] += filePanel.rename.View() + endl
 				} else {
-					f[i] += filePanelCursorStyle.Render(cursor+" ") + prettierName(filePanel.element[h].name, m.fileModel.width-5, filePanel.element[h].directory, isItemSelected, filePanelBGColor) + endl
+					_, err := os.ReadDir(filePanel.element[h].location);
+					f[i] += filePanelCursorStyle.Render(cursor+" ") + prettierName(filePanel.element[h].name, m.fileModel.width-5, filePanel.element[h].directory||(err == nil), isItemSelected, filePanelBGColor) + endl
 				}
 			}
 			cursorPosition := strconv.Itoa(filePanel.cursor + 1)
@@ -188,7 +189,6 @@ func (m model) filePanelRender() string {
 	}
 	return filePanelRender
 }
-
 func (m model) processBarRender() string {
 	// save process in the array
 	var processes []process
