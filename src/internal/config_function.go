@@ -18,7 +18,7 @@ import (
 
 // initialConfig load and handle all configuration files (spf config,hotkeys
 // themes) setted up. Returns absolute path of dir pointing to the file Panel
-func initialConfig(dir string) (toggleDotFileBool bool, firstFilePanelDir string) {
+func initialConfig(dir string) (toggleDotFileBool bool, toggleFooter bool, firstFilePanelDir string) {
 	var err error
 
     // Open log stream
@@ -43,7 +43,22 @@ func initialConfig(dir string) (toggleDotFileBool bool, firstFilePanelDir string
 		toggleDotFileBool = true
 	} else if string(toggleDotFileData) == "false" {
 		toggleDotFileBool = false
+	} else {
+		toggleDotFileBool = false
 	}
+
+	toggleFooterData, err := os.ReadFile(variable.ToggleFooter)
+	if err != nil {
+		outPutLog("Error while reading toggleFooter data error:", err)
+	}
+	if string(toggleFooterData) == "true" {
+		toggleFooter = true
+	} else if string(toggleFooterData) == "false" {
+		toggleFooter = false
+	} else {
+		toggleFooter = true
+	}
+
 	LoadThemeConfig()
 
 	if Config.Metadata {
@@ -64,7 +79,7 @@ func initialConfig(dir string) (toggleDotFileBool bool, firstFilePanelDir string
 		firstFilePanelDir = variable.HomeDir
 	}
 
-	return toggleDotFileBool, firstFilePanelDir
+	return toggleDotFileBool, toggleFooter, firstFilePanelDir
 }
 
 // Load configurations from the configuration file. Compares the content

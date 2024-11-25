@@ -173,6 +173,24 @@ func (m *model) toggleDotFileController() {
 
 }
 
+// Toggle dotfile display or not
+func (m *model) toggleFooterController() {
+	newToggleFooterFile := ""
+	if m.toggleFooter {
+		newToggleFooterFile = "false"
+		m.toggleFooter = false
+	} else {
+		newToggleFooterFile = "true"
+		m.toggleFooter = true
+	}
+	err := os.WriteFile(variable.ToggleFooter, []byte(newToggleFooterFile), 0644)
+	if err != nil {
+		outPutLog("Toggle footer function updatedData superfile data error", err)
+	}
+	m.setFooterSize(m.fullHeight)
+
+}
+
 // Focus on search bar
 func (m *model) searchBarFocus() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]

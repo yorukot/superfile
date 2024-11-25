@@ -122,6 +122,7 @@ func InitConfigFile() {
 		variable.ToggleDotFile,
 		variable.LogFile,
 		variable.ThemeFileVersion,
+		variable.ToggleFooter,
 	); err != nil {
 		log.Fatalln("Error creating files:", err)
 	}

@@ -85,6 +85,7 @@ type model struct {
 	confirmToQuit       bool
 	firstTextInput      bool
 	toggleDotFile       bool
+	toggleFooter        bool
 	filePanelFocusIndex int
 	mainPanelHeight     int
 	fullWidth           int
@@ -93,7 +94,7 @@ type model struct {
 
 // Modal
 type commandLineModal struct {
-	input         textinput.Model
+	input textinput.Model
 }
 
 type helpMenuModal struct {

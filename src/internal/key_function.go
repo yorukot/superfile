@@ -92,6 +92,9 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) ( tea.Cmd) {
 	case containsKey(msg, hotkeys.ToggleDotFile):
 		m.toggleDotFileController()
 
+	case containsKey(msg, hotkeys.ToggleFooter):
+		m.toggleFooterController()
+
 	case containsKey(msg, hotkeys.ExtractFile):
 		go func() {
 			m.extractFile()

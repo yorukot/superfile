@@ -38,6 +38,7 @@ change_panel_mode = ['v', '']
 open_help_menu = ['?', '']
 open_command_line = [':', '']
 copy_path = ['ctrl+p', '']
+toggle_footer = ['F', '']
 # =================================================================================================
 # Typing hotkeys (can conflict with all hotkeys)
 confirm_typing = ['enter', '']
