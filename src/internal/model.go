@@ -1,4 +1,5 @@
 package internal
+
 import (
 	"log"
 	"os"
@@ -408,8 +409,10 @@ func (m model) quitSuperfile() {
         et.Close();
     }
     // cd on quit
+    currentDir := m.fileModel.filePanels[m.filePanelFocusIndex].location
+    variable.LastDir = currentDir
+
     if Config.CdOnQuit {
-        currentDir := m.fileModel.filePanels[m.filePanelFocusIndex].location
         if currentDir == variable.HomeDir {
             return
         }

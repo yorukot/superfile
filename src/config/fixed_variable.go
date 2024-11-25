@@ -26,6 +26,8 @@ var (
 	LogFile          string = SuperFileStateDir + "/superfile.log"
 	FixHotkeys       bool   = false
 	FixConfigFile    bool   = false
+	LastDir          string = ""
+	PrintLastDir     bool   = false
 )
 
 const (

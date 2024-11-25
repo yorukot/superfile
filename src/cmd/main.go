@@ -60,18 +60,25 @@ func Run(content embed.FS) {
 				Usage:   "Adds any missing hotkeys to the hotkey config file",
 				Value:   false,
 			},
+			&cli.BoolFlag{
+				Name:    "print-last-dir",
+				Aliases: []string{"pld"},
+				Usage:   "Print the last dir to stdout on exit (to use for cd)",
+				Value:   false,
+			},
 		},
 		Action: func(c *cli.Context) error {
-            // If no args are called along with "spf" use current dir
+			// If no args are called along with "spf" use current dir
 			path := ""
 			if c.Args().Present() {
-				path = c.Args().First() 
+				path = c.Args().First()
 			}
 
 			InitConfigFile()
 
 			variable.FixHotkeys = c.Bool("fix-hotkeys")
 			variable.FixConfigFile = c.Bool("fix-config-file")
+			variable.PrintLastDir = c.Bool("print-last-dir")
 
 			firstUse := checkFirstUse()
 
@@ -80,10 +87,13 @@ func Run(content embed.FS) {
 				log.Fatalf("Alas, there's been an error: %v", err)
 			}
 
+			if variable.PrintLastDir {
+				fmt.Println(variable.LastDir)
+			}
+
 			CheckForUpdates()
 			return nil
 		},
-		
 	}
 
 	err := app.Run(os.Args)
@@ -92,7 +102,7 @@ func Run(content embed.FS) {
 	}
 }
 
-// Create proper directories for storing configuration and write default 
+// Create proper directories for storing configuration and write default
 // configurations to Config and Hotkeys toml
 func InitConfigFile() {
 	// Create directories
@@ -166,7 +176,7 @@ func createFiles(files ...string) error {
 	return nil
 }
 
-// Check if is the first time initializing the app, if it is create 
+// Check if is the first time initializing the app, if it is create
 // use check file
 func checkFirstUse() bool {
 	file := variable.FirstUseCheck
@@ -191,13 +201,12 @@ func writeConfigFile(path, data string) error {
 }
 
 // Check for the need of updates if AutoCheckUpdate is on, if its the first time
-//that version is checked or if has more than 24h since the last version check,
-//look into the repo if  there's any more recent version
+// that version is checked or if has more than 24h since the last version check,
+// look into the repo if  there's any more recent version
 func CheckForUpdates() {
 	var Config internal.ConfigType
 
-
-    // Get AutoCheck flag from configuration files
+	// Get AutoCheck flag from configuration files
 	data, err := os.ReadFile(variable.ConfigFile)
 	if err != nil {
 		log.Fatalf("Config file doesn't exist: %v", err)
@@ -212,7 +221,7 @@ func CheckForUpdates() {
 		return
 	}
 
-    // Check last time the version was checked
+	// Check last time the version was checked
 	lastTime, err := readLastTimeCheckVersionFromFile(variable.LastCheckVersion)
 	if err != nil && !os.IsNotExist(err) {
 		fmt.Println("Error reading from file:", err)
@@ -243,7 +252,7 @@ func CheckForUpdates() {
 			return
 		}
 
-        //Check if the local version is outdated
+		//Check if the local version is outdated
 		if versionToNumber(release.TagName) > versionToNumber(variable.CurrentVersion) {
 			fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("#FF69E1")).Render("┃ ") +
 				lipgloss.NewStyle().Foreground(lipgloss.Color("#FFBA52")).Bold(true).Render("A new version ") +
