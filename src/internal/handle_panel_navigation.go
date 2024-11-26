@@ -177,6 +177,10 @@ func (m *model) focusOnSideBar() {
 
 // Focus on processbar
 func (m *model) focusOnProcessBar() {
+	if !m.toggleFooter {
+		return
+	}
+
 	if m.focusPanel == processBarFocus {
 		m.focusPanel = nonePanelFocus
 		m.fileModel.filePanels[m.filePanelFocusIndex].focusType = focus
@@ -188,6 +192,10 @@ func (m *model) focusOnProcessBar() {
 
 // focus on metadata
 func (m *model) focusOnMetadata() {
+	if !m.toggleFooter {
+		return
+	}
+
 	if m.focusPanel == metadataFocus {
 		m.focusPanel = nonePanelFocus
 		m.fileModel.filePanels[m.filePanelFocusIndex].focusType = focus

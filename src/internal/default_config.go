@@ -8,7 +8,7 @@ var (
 )
 
 // Generate and return model containing default configurations for interface
-func defaultModelConfig(toggleDotFileBool bool, firstFilePanelDir string) model {
+func defaultModelConfig(toggleDotFileBool bool, toggleFooter bool, firstFilePanelDir string) model {
 	return model{
 		filePanelFocusIndex: 0,
 		focusPanel:          nonePanelFocus,
@@ -24,15 +24,15 @@ func defaultModelConfig(toggleDotFileBool bool, firstFilePanelDir string) model 
 		fileModel: fileModel{
 			filePanels: []filePanel{
 				{
-					render:      0,
-					cursor:      0,
-					location:    firstFilePanelDir,
+					render:   0,
+					cursor:   0,
+					location: firstFilePanelDir,
 					sortOptions: sortOptionsModel{
 						width:  20,
 						height: 4,
 						open:   false,
 						cursor: Config.DefaultSortType,
-						data:   sortOptionsModelData{
+						data: sortOptionsModelData{
 							options:  []string{"Name", "Size", "Date Modified"},
 							selected: Config.DefaultSortType,
 							reversed: Config.SortOrderReversed,
@@ -56,6 +56,7 @@ func defaultModelConfig(toggleDotFileBool bool, firstFilePanelDir string) model 
 			open:        false,
 		},
 		toggleDotFile: toggleDotFileBool,
+		toggleFooter:  toggleFooter,
 	}
 }
 
@@ -121,6 +122,11 @@ func getHelpMenuData() []helpMenuModalData {
 		{
 			hotkey:         hotkeys.ToggleReverseSort,
 			description:    "Toggle reverse sort",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey:         hotkeys.ToggleFooter,
+			description:    "Toggle footer",
 			hotkeyWorkType: globalType,
 		},
 		{

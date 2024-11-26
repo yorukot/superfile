@@ -23,6 +23,7 @@ var (
 	ConfigFile       string = SuperFileMainDir + "/config.toml"
 	HotkeysFile      string = SuperFileMainDir + "/hotkeys.toml"
 	ToggleDotFile    string = SuperFileDataDir + "/toggleDotFile"
+	ToggleFooter    string = SuperFileDataDir + "/toggleFooter"
 	LogFile          string = SuperFileStateDir + "/superfile.log"
 	FixHotkeys       bool   = false
 	FixConfigFile    bool   = false

@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file. Dates are d
 > xxxx-xx-xx
 
 #### Update
+- Enabling or disabling Process, Metadata and Clipboard panels [`#472`](https://github.com/yorukot/superfile/discussions/472)
 
 #### Bug fix
 - Fix Render Directory Symlinks as Directories not as Files [`#481`](https://github.com/yorukot/superfile/pull/481)

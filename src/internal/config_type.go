@@ -188,6 +188,8 @@ type HotkeysType struct {
 
 	CopyPath []string `toml:"copy_path"`
 
+	ToggleFooter []string `toml:"toggle_footer"`
+
 	ConfirmTyping []string `toml:"confirm_typing" comment:"=================================================================================================\nTyping hotkeys (can conflict with all hotkeys)"`
 	CancelTyping  []string `toml:"cancel_typing"`
 

@@ -32,9 +32,9 @@ var progressBarLastRenderTime time.Time = time.Now()
 
 // Initialize and return model with default configs
 func InitialModel(dir string, firstUseCheck bool) model {
-	toggleDotFileBool, firstFilePanelDir := initialConfig(dir)
+	toggleDotFileBool, toggleFooter, firstFilePanelDir := initialConfig(dir)
 	firstUse = firstUseCheck
-	return defaultModelConfig(toggleDotFileBool, firstFilePanelDir)
+	return defaultModelConfig(toggleDotFileBool, toggleFooter, firstFilePanelDir)
 }
 
 // Init function to be called by Bubble tea framework, sets windows title,
@@ -47,7 +47,7 @@ func (m model) Init() tea.Cmd {
 	)
 }
 
-// Update function for bubble tea to provide internal communication to the 
+// Update function for bubble tea to provide internal communication to the
 // application
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
@@ -61,7 +61,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m, cmd = wheelMainAction(msg.String(), m, cmd)
 	case tea.KeyMsg:
 		m, cmd = m.handleKeyInput(msg, cmd)
-	}		
+	}
 
 	m.updateFilePanelsState(msg, &cmd)
 	m.sidebarModel.directories = getDirectories()
@@ -77,8 +77,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 // Handle message exchanging whithin the application
-func (m *model) handleChannelMessage(msg channelMessage){
-	switch msg.messageType{ 
+func (m *model) handleChannelMessage(msg channelMessage) {
+	switch msg.messageType {
 	case sendWarnModal:
 		m.warnModal = msg.warnModal
 	case sendMetadata:
@@ -92,7 +92,7 @@ func (m *model) handleChannelMessage(msg channelMessage){
 }
 
 // Adjust window size based on msg information
-func (m *model) handleWindowResize(msg tea.WindowSizeMsg){
+func (m *model) handleWindowResize(msg tea.WindowSizeMsg) {
 	m.fullHeight = msg.Height
 	m.fullWidth = msg.Width
 
@@ -100,7 +100,7 @@ func (m *model) handleWindowResize(msg tea.WindowSizeMsg){
 		// File preview panel width same as file panel
 		m.setFilePreviewWidth(msg.Width)
 	}
-	
+
 	m.setFilePanelsSize(msg.Width)
 	m.setFooterSize(msg.Height)
 	m.setHelpMenuSize()
@@ -110,50 +110,56 @@ func (m *model) handleWindowResize(msg tea.WindowSizeMsg){
 	}
 }
 
-// Set file preview panel Widht to width. Assure that 
-func (m *model) setFilePreviewWidth(width int){
+// Set file preview panel Widht to width. Assure that
+func (m *model) setFilePreviewWidth(width int) {
 	if Config.FilePreviewWidth == 0 {
 		m.fileModel.filePreview.width = (width - Config.SidebarWidth - (4 + (len(m.fileModel.filePanels))*2)) / (len(m.fileModel.filePanels) + 1)
 	} else if Config.FilePreviewWidth > 10 || Config.FilePreviewWidth == 1 {
-			log.Fatalln("Config file file_preview_width invalidation")
-	}else{
+		log.Fatalln("Config file file_preview_width invalidation")
+	} else {
 		m.fileModel.filePreview.width = (width - Config.SidebarWidth) / Config.FilePreviewWidth
 	}
 }
 
 // Proper set panels size. Assure that panels do not overlap
-func (m *model) setFilePanelsSize(width int){
-		// set each file panel size and max file panel amount
-		m.fileModel.width = (width - Config.SidebarWidth - m.fileModel.filePreview.width - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
-		m.fileModel.maxFilePanel = (width- Config.SidebarWidth - m.fileModel.filePreview.width) / 20
-		for i := range m.fileModel.filePanels {
-			m.fileModel.filePanels[i].searchBar.Width = m.fileModel.width - 4
-		}
+func (m *model) setFilePanelsSize(width int) {
+	// set each file panel size and max file panel amount
+	m.fileModel.width = (width - Config.SidebarWidth - m.fileModel.filePreview.width - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
+	m.fileModel.maxFilePanel = (width - Config.SidebarWidth - m.fileModel.filePreview.width) / 20
+	for i := range m.fileModel.filePanels {
+		m.fileModel.filePanels[i].searchBar.Width = m.fileModel.width - 4
+	}
 }
 
-// Set footer size using height 
-func (m *model) setFooterSize(height int){
-	if height < 30 {
+// Set footer size using height
+func (m *model) setFooterSize(height int) {
+	if !m.toggleFooter {
+		footerHeight = 0
+	} else if height < 30 {
 		footerHeight = 10
 	} else if height < 35 {
 		footerHeight = 11
-	} else if height< 40 {
+	} else if height < 40 {
 		footerHeight = 12
-	} else if height< 45 {
+	} else if height < 45 {
 		footerHeight = 13
 	} else {
 		footerHeight = 14
 	}
 
-	if m.commandLine.input.Focused() {
+	if m.commandLine.input.Focused() && m.toggleFooter {
 		footerHeight--
 	}
 
-	m.mainPanelHeight = height - footerHeight + 1
+	if m.toggleFooter {
+		m.mainPanelHeight = height - footerHeight + 1
+	} else {
+		m.mainPanelHeight = height - 2
+	}
 }
 
 // Set help menu size
-func (m *model) setHelpMenuSize(){
+func (m *model) setHelpMenuSize() {
 	m.helpMenu.height = m.fullHeight - 2
 	m.helpMenu.width = m.fullWidth - 2
 
@@ -166,9 +172,9 @@ func (m *model) setHelpMenuSize(){
 	}
 }
 
-// Identify the current state of the application m and properly handle the 
+// Identify the current state of the application m and properly handle the
 // msg keybind pressed
-func (m model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) (model, tea.Cmd){
+func (m model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) (model, tea.Cmd) {
 	if firstUse {
 		firstUse = false
 		return m, cmd
@@ -178,47 +184,47 @@ func (m model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) (model, tea.Cmd){
 		m.typingModalOpenKey(msg.String())
 	} else if m.warnModal.open {
 		m.warnModalOpenKey(msg.String())
-    // If renaming a object
+		// If renaming a object
 	} else if m.fileModel.renaming {
 		m.renamingKey(msg.String())
-    // If search bar is open
+		// If search bar is open
 	} else if m.fileModel.filePanels[m.filePanelFocusIndex].searchBar.Focused() {
 		m.focusOnSearchbarKey(msg.String())
-    // If sort options menu is open 
+		// If sort options menu is open
 	} else if m.fileModel.filePanels[m.filePanelFocusIndex].sortOptions.open {
 		m.sortOptionsKey(msg.String())
-    // If help menu is open
+		// If help menu is open
 	} else if m.helpMenu.open {
 		m.helpMenuKey(msg.String())
-    // If command line input is send
+		// If command line input is send
 	} else if m.commandLine.input.Focused() {
 		m.commandLineKey(msg.String())
-    // If asking to confirm quiting
+		// If asking to confirm quiting
 	} else if m.confirmToQuit {
 		quit := m.confirmToQuitSuperfile(msg.String())
 		if quit {
 			m.quitSuperfile()
 			return m, tea.Quit
 		}
-    // If quiting input pressed, check if has any runing process and displays a
-    // warn. Otherwise just quits application
+		// If quiting input pressed, check if has any runing process and displays a
+		// warn. Otherwise just quits application
 	} else if msg.String() == containsKey(msg.String(), hotkeys.Quit) {
-		if m.hasRunningProcesses(){
-				m.warnModalForQuit()
-				return m, cmd
+		if m.hasRunningProcesses() {
+			m.warnModalForQuit()
+			return m, cmd
 		}
 
 		m.quitSuperfile()
 		return m, tea.Quit
 	} else {
-        // Handles general kinds of inputs in the regular state of the application
+		// Handles general kinds of inputs in the regular state of the application
 		cmd = m.mainKey(msg.String(), cmd)
 	}
-	return m, cmd	
+	return m, cmd
 }
 
 // Update the file panel state. Change name of renamed files, filter out files
-// in search, update typingb bar, etc 
+// in search, update typingb bar, etc
 func (m *model) updateFilePanelsState(msg tea.Msg, cmd *tea.Cmd) {
 	focusPanel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	if m.firstTextInput {
@@ -234,7 +240,7 @@ func (m *model) updateFilePanelsState(msg tea.Msg, cmd *tea.Cmd) {
 			}
 		}
 	} else if m.commandLine.input.Focused() {
-		m.commandLine.input, *cmd =  m.commandLine.input.Update(msg)
+		m.commandLine.input, *cmd = m.commandLine.input.Update(msg)
 	} else if m.typingModal.open {
 		m.typingModal.textInput, *cmd = m.typingModal.textInput.Update(msg)
 	}
@@ -245,7 +251,7 @@ func (m *model) updateFilePanelsState(msg tea.Msg, cmd *tea.Cmd) {
 }
 
 // Check if there's any processes running in background
-func (m *model) hasRunningProcesses() bool{
+func (m *model) hasRunningProcesses() bool {
 	for _, data := range m.processBarModel.process {
 		if data.state == inOperation && data.done != data.total {
 			return true
@@ -279,22 +285,31 @@ func (m model) View() string {
 
 	mainPanel := lipgloss.JoinHorizontal(0, sidebar, filePanel, filePreview)
 
-	processBar := m.processBarRender()
+	var footer string
 
-	metaData := m.metadataRender()
+	if m.toggleFooter {
+		processBar := m.processBarRender()
 
-	clipboardBar := m.clipboardRender()
+		metaData := m.metadataRender()
 
+		clipboardBar := m.clipboardRender()
 
-	footer := lipgloss.JoinHorizontal(0, processBar, metaData, clipboardBar)
+		footer = lipgloss.JoinHorizontal(0, processBar, metaData, clipboardBar)
+	}
 
 	if m.commandLine.input.Focused() {
 		commandLine := m.commandLineInputBoxRender()
 		footer = lipgloss.JoinVertical(0, footer, commandLine)
+
 	}
 
-	finalRender := lipgloss.JoinVertical(0, mainPanel, footer)
+	var finalRender string
 
+	if m.toggleFooter {
+		finalRender = lipgloss.JoinVertical(0, mainPanel, footer)
+	} else {
+		finalRender = mainPanel
+	}
 	// check if need pop up modal
 	if m.helpMenu.open {
 		helpMenu := m.helpMenuRender()
@@ -359,7 +374,6 @@ func listenForChannelMessage(msg chan channelMessage) tea.Cmd {
 	}
 }
 
-
 // Render and update file panel items. Check for changes and updates in files and
 // folders in the current directory.
 func (m *model) getFilePanelItems() {
@@ -367,7 +381,7 @@ func (m *model) getFilePanelItems() {
 	for i, filePanel := range m.fileModel.filePanels {
 		var fileElement []element
 		nowTime := time.Now()
-        // Check last time each element was updated, if less then 3 seconds ignore
+		// Check last time each element was updated, if less then 3 seconds ignore
 		if filePanel.focusType == noneFocus && nowTime.Sub(filePanel.lastTimeGetElement) < 3*time.Second {
 			continue
 		}
@@ -388,13 +402,13 @@ func (m *model) getFilePanelItems() {
 			continue
 		}
 
-        // Get file names based on search bar filter
+		// Get file names based on search bar filter
 		if filePanel.searchBar.Value() != "" {
 			fileElement = returnFolderElementBySearchString(filePanel.location, m.toggleDotFile, filePanel.searchBar.Value())
 		} else {
 			fileElement = returnFolderElement(filePanel.location, m.toggleDotFile, filePanel.sortOptions.data)
 		}
-        // Update file panel list
+		// Update file panel list
 		filePanel.element = fileElement
 		m.fileModel.filePanels[i].element = fileElement
 		m.fileModel.filePanels[i].lastTimeGetElement = nowTime
