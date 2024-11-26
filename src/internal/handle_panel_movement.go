@@ -75,13 +75,7 @@ func (m *model) enterPanel() {
 		}
 
 		if fileInfo.Mode()&os.ModeSymlink != 0 {
-			if isBrokenSymlink(panel.element[panel.cursor].location) {
-				return
-			}
-
-			linkPath, _ := os.Readlink(panel.element[panel.cursor].location)
-
-			absLinkPath, err := filepath.Abs(linkPath)
+			absLinkPath, err := filepath.EvalSymlinks(panel.element[panel.cursor].location)
 			if err != nil {
 				return
 			}
