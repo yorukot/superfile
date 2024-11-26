@@ -75,12 +75,21 @@ func (m *model) enterPanel() {
 		}
 
 		if fileInfo.Mode()&os.ModeSymlink != 0 {
-			absLinkPath, err := filepath.EvalSymlinks(panel.element[panel.cursor].location)
+			targetPath, err := filepath.EvalSymlinks(panel.element[panel.cursor].location)
 			if err != nil {
 				return
 			}
 
-			m.fileModel.filePanels[m.filePanelFocusIndex].location = absLinkPath
+			targetInfo, err := os.Lstat(targetPath)
+
+			if err != nil {
+				return
+			}
+
+			if targetInfo.IsDir() {
+				m.fileModel.filePanels[m.filePanelFocusIndex].location = absLinkPath
+			}
+
 			return
 		}
 
