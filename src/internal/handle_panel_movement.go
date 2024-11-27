@@ -87,7 +87,7 @@ func (m *model) enterPanel() {
 			}
 
 			if targetInfo.IsDir() {
-				m.fileModel.filePanels[m.filePanelFocusIndex].location = absLinkPath
+				m.fileModel.filePanels[m.filePanelFocusIndex].location = targetPath
 			}
 
 			return
