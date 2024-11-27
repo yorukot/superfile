@@ -418,18 +418,20 @@ func (m *model) getFilePanelItems() {
 // Close superfile application. Cd into the curent dir if CdOnQuit on and save
 // the path in state direcotory
 func (m model) quitSuperfile() {
-	// close exiftool session
-	if Config.Metadata {
-		et.Close()
-	}
-	// cd on quit
-	if Config.CdOnQuit {
-		currentDir := m.fileModel.filePanels[m.filePanelFocusIndex].location
-		if currentDir == variable.HomeDir {
-			return
-		}
-		// escape single quote
-		currentDir = strings.ReplaceAll(currentDir, "'", "'\\''")
-		os.WriteFile(variable.SuperFileStateDir+"/lastdir", []byte("cd '"+currentDir+"'"), 0755)
-	}
+    // close exiftool session
+    if Config.Metadata {
+        et.Close();
+    }
+    // cd on quit
+    currentDir := m.fileModel.filePanels[m.filePanelFocusIndex].location
+    variable.LastDir = currentDir
+
+    if Config.CdOnQuit {
+        if currentDir == variable.HomeDir {
+            return
+        }
+        // escape single quote
+        currentDir = strings.ReplaceAll(currentDir, "'", "'\\''")
+        os.WriteFile(variable.SuperFileStateDir+"/lastdir", []byte("cd '"+currentDir+"'"), 0755)
+    }
 }
