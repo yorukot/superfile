@@ -59,12 +59,12 @@ func returnFolderElement(location string, displayDotFile bool, sortOptions sortO
 	switch sortOptions.options[sortOptions.selected] {
 	case "Name":
 		order = func(i, j int) bool {
-			_, errI := os.ReadDir(location+"/"+files[i].Name());
-			_, errJ := os.ReadDir(location+"/"+files[j].Name());
-			if (files[i].IsDir()||errI==nil) && (!files[j].IsDir()&&errJ!=nil) {
+			_, errI := os.ReadDir(location + "/" + files[i].Name())
+			_, errJ := os.ReadDir(location + "/" + files[j].Name())
+			if (files[i].IsDir() || errI == nil) && (!files[j].IsDir() && errJ != nil) {
 				return true
 			}
-			if (!files[i].IsDir()&&errI!=nil) && (files[j].IsDir()||errJ==nil) {
+			if (!files[i].IsDir() && errI != nil) && (files[j].IsDir() || errJ == nil) {
 				return false
 			}
 			if Config.CaseSensitiveSort {
@@ -79,13 +79,13 @@ func returnFolderElement(location string, displayDotFile bool, sortOptions sortO
 			// Files sorted by size
 			fileInfoI, _ := files[i].Info()
 			fileInfoJ, _ := files[j].Info()
-			_, errI := os.ReadDir(location+"/"+files[i].Name());
-			_, errJ := os.ReadDir(location+"/"+files[j].Name());
+			_, errI := os.ReadDir(location + "/" + files[i].Name())
+			_, errJ := os.ReadDir(location + "/" + files[j].Name())
 
-			if (files[i].IsDir()||errI==nil) && (!files[j].IsDir()&&errJ!=nil) {
+			if (files[i].IsDir() || errI == nil) && (!files[j].IsDir() && errJ != nil) {
 				return true
 			}
-			if (!files[i].IsDir()&&errI!=nil) && (files[j].IsDir()||errJ==nil) {
+			if (!files[i].IsDir() && errI != nil) && (files[j].IsDir() || errJ == nil) {
 				return false
 			}
 			if files[i].IsDir() && files[j].IsDir() {
@@ -351,7 +351,8 @@ func (m *model) returnMetaData() {
 	fileInfo, err := os.Stat(filePath)
 
 	if isSymlink(filePath) {
-		if isBrokenSymlink(filePath) {
+		_, err := filepath.EvalSymlinks(filePath)
+		if err != nil {
 			m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"Link file is broken!", ""})
 		} else {
 			m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"This is a link file.", ""})
@@ -471,22 +472,6 @@ func countFiles(dirPath string) (int, error) {
 	})
 
 	return count, err
-}
-
-// Check whether is broken recursive symlinks
-func isBrokenSymlink(filePath string) bool {
-	linkPath, err := os.Readlink(filePath)
-	if err != nil {
-		return true
-	}
-
-	absLinkPath, err := filepath.Abs(linkPath)
-	if err != nil {
-		return true
-	}
-
-	_, err = os.Stat(absLinkPath)
-	return err != nil
 }
 
 // Check whether is symlinks
