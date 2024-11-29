@@ -96,7 +96,20 @@ func (m *model) enterPanel() {
 		openCommand := "xdg-open"
 		if runtime.GOOS == "darwin" {
 			openCommand = "open"
+		} else if runtime.GOOS == "windows" {
+
+			dllpath := filepath.Join(os.Getenv("SYSTEMROOT"), "System32", "rundll32.exe")
+			dllfile := "url.dll,FileProtocolHandler"
+
+			cmd := exec.Command(dllpath, dllfile, panel.element[panel.cursor].location)
+			err = cmd.Start()
+			if err != nil {
+				outPutLog(fmt.Sprintf("err when open file with %s", openCommand), err)
+			}
+
+			return
 		}
+
 		cmd := exec.Command(openCommand, panel.element[panel.cursor].location)
 		err = cmd.Start()
 		if err != nil {
