@@ -33,6 +33,7 @@ Once superfile is running, it displays five panels:
 - processes
 - metadata
 - clipboard
+- command execution bar
 
 The file panel is the focused view by default. You can change focus onto three other panels.
 
@@ -42,9 +43,15 @@ Press `p` to focus on the processes.
 
 Press `m` to focus on the metadata.
 
+Press `:` to open command execution bar.
+
 To return focus back onto the file panel, press the same hotkey again.
 
+> For command execution bar you need press `esc` or `ctrl+c`
+
 You can also press `f` to show or hide the preview window.
+
+Also press `F` to hide or show all footer panel.
 
 ![demo](https://github.com/yorukot/superfile/assets/107802416/ec7062ce-1884-4395-b68b-e0546c8a02de)
 
@@ -64,7 +71,7 @@ To move through multiple file panels, press `tab` or `L` (shift+l). To move to t
 
 superfile provides multiple hotkeys to move through directories. The angle bracket cursor `>` tells you where you are.
 
-While focused on the file panel, move the cursor up with `up` or `k` and down with `down` or `j`. 
+While focused on the file panel, move the cursor up with `up` or `k` and down with `down` or `j`.
 
 After navigating to the your file/folder, press `enter` or `l` to confirm your selection. Files are opened with your default application (if none set, there will be no response) and folders are opened for viewing. Press `h` or `backspace` to return to the parent directory.
 
@@ -73,13 +80,14 @@ After navigating to the your file/folder, press `enter` or `l` to confirm your s
 Folders can be pinned to the sidebar panel. Navigate to and open your folder. Press `P` (shift+p) to pin or unpin it.
 
 Press `o` to bring up the sort options menu. You can sort by:
+
 - `Name`
 - `Size`
 - `Date Modified`
 
 Press `enter` to confirm your sort option. Press `esc`, `o`, or `ctrl`+`c` to cancel. To reverse the order of the sort, press `R` (shift+r).
 
-Press `/` to bring up the search bar. Type the name (you may need to first delete the `/` if it auto-populates). superfile searches in the current directory and dynamically displays the results. To exit the search bar, press `ctrl`+`c` or `esc`. 
+Press `/` to bring up the search bar. Type the name (you may need to first delete the `/` if it auto-populates). superfile searches in the current directory and dynamically displays the results. To exit the search bar, press `ctrl`+`c` or `esc`.
 
 Press `.` to show or hide dotfiles.
 
@@ -87,7 +95,7 @@ Press `.` to show or hide dotfiles.
 
 Use selection mode for bulk operations. If you are familiar with Vim, selection mode is similar to Vim's [visual mode](https://vimhelp.org/visual.txt.html#Visual).
 
-Press `v` to toggle between selection mode and normal (browser) mode. 
+Press `v` to toggle between selection mode and normal (browser) mode.
 
 Once in selection mode, you can perform [file operations](#file-operations) on all selected files/folders. [Panel movement](#panel-movement) hotkeys also work in selection mode.
 
@@ -95,7 +103,7 @@ Once in selection mode, you can perform [file operations](#file-operations) on a
 The following operations can only be performed while in selection mode. Your current mode is displayed in the lower-right corner of the file panel (Select or Browser).
 :::
 
-To make selections, navigate to your file/folder and press `enter` or `L` (shift+l). Press the same key again to deselect. 
+To make selections, navigate to your file/folder and press `enter` or `L` (shift+l). Press the same key again to deselect.
 
 This may become tedious when you have a large number of items. Instead, you can press `shift`+`up` or `K` (shift+k) to select everything above the cursor. Press `shift`+`down` or `J` (shift+j) to select everything below the cursor.
 
@@ -121,13 +129,13 @@ You can create a directory, subdirectory and file in one string. For example:
 
 To rename, point your cursor at a file/folder and press `ctrl`+`r`.
 
-To copy, you can press `ctrl`+`c`. 
+To copy, you can press `ctrl`+`c`.
 
-To cut, you can press `ctrl`+`x`. 
+To cut, you can press `ctrl`+`x`.
 
 Both cut and copied items are shown in the clipboard panel (lower-right corner). The progress of your operations is displayed in the processes panel (lower-left corner).
 
-To delete, you can press `ctrl`+`d` 
+To delete, you can press `ctrl`+`d`
 
 :::note
 The deletion here is not direct deletion, but will be placed in the trash can. However, when you use an external hard drive, it will be deleted directly.
@@ -153,4 +161,3 @@ If your editor does not support opening the current directory with an editor, yo
 
 (Sorry, this video has a little bit of lag)
 [demo video](https://github.com/yorukot/superfile/assets/107802416/d0770b3f-025e-40c9-ad3f-8b2adaf1c6c5)
-
