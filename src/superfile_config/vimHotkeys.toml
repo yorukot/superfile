@@ -7,6 +7,8 @@ quit = ['ctrl+c', ''] # also know as, theprimeagen troller
 # movement
 list_up = ['k', '']
 list_down = ['j', '']
+page_up = ['pgup','']
+page_down = ['pgdown','']
 # file panel control
 create_new_file_panel = ['n', '']
 close_file_panel = ['q', '']
