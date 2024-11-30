@@ -49,6 +49,12 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) ( tea.Cmd) {
 			}()
 		}
 
+  case tea.KeyPgUp.String():
+    m.controlFilePanelPgUp()
+
+  case tea.KeyPgDown.String():
+    m.controlFilePanelPgDown()
+
 	case containsKey(msg, hotkeys.ChangePanelMode):
 		m.changeFilePanelMode()
 
