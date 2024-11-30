@@ -383,7 +383,9 @@ func (m *model) getFilePanelItems() {
 		nowTime := time.Now()
 		// Check last time each element was updated, if less then 3 seconds ignore
 		if filePanel.focusType == noneFocus && nowTime.Sub(filePanel.lastTimeGetElement) < 3*time.Second {
-			continue
+      if !m.updatedToggleDotFile {
+        continue
+      }
 		}
 
 		focusPanelReRender := false
@@ -413,6 +415,8 @@ func (m *model) getFilePanelItems() {
 		m.fileModel.filePanels[i].element = fileElement
 		m.fileModel.filePanels[i].lastTimeGetElement = nowTime
 	}
+
+  m.updatedToggleDotFile = false
 }
 
 // Close superfile application. Cd into the curent dir if CdOnQuit on and save

@@ -182,6 +182,7 @@ func (m *model) toggleDotFileController() {
 		newToggleDotFile = "true"
 		m.toggleDotFile = true
 	}
+  m.updatedToggleDotFile = true
 	err := os.WriteFile(variable.ToggleDotFile, []byte(newToggleDotFile), 0644)
 	if err != nil {
 		outPutLog("Pinned folder function updatedData superfile data error", err)
