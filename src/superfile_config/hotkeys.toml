@@ -5,6 +5,8 @@ quit = ['q', 'esc']
 # movement
 list_up = ['up', 'k']
 list_down = ['down', 'j']
+page_up = ['pgup','']
+page_down = ['pgdown','']
 # file panel control
 create_new_file_panel = ['n', '']
 close_file_panel = ['w', '']
