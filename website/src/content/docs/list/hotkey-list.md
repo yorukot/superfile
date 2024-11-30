@@ -19,6 +19,7 @@ These are the default hotkeys and you can [change](/configure/custom-hotkeys) th
 | Quit typing, modal or superfile | `esc`, `q`       | `quit`           |
 | Cancel typing                   | `ctrl+c`, `esc`  | `cancel_typing`  |
 | Open help menu(hotkeylist)      | `?`              | `open_help_menu` |
+| Toggle footer                   | `F`              | `toggle_footer`  |
 
 ## Panel navigation
 
@@ -32,6 +33,7 @@ These are the default hotkeys and you can [change](/configure/custom-hotkeys) th
 | Focus on the processbar panel    | `p`                        | `focus_on_process_bar`      |
 | Focus on the sidebar             | `s`                        | `focus_on_side_bar`         |
 | Focus on the metadata panel      | `m`                        | `focus_on_metadata`         |
+| Open command execution bar       | `:`                        | `open_command_line`         |
 
 ## Panel movement
 
