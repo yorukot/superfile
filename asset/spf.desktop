@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=spf
+GenericName=superfile
+Comment=fancy and modern terminal file manager
+Type=Application
+MimeType=inode/directory
+Icon=utilities-terminal
+Terminal=true
+TryExec=spf
+Exec=spf %u
+Categories=Utility;System;FileTools;FileManager;Filesystem;ConsoleOnly
+Keywords=File;Manager;Explorer
