@@ -72,24 +72,25 @@ const (
 
 // Main model
 type model struct {
-	fileModel           fileModel
-	sidebarModel        sidebarModel
-	processBarModel     processBarModel
-	focusPanel          focusPanelType
-	copyItems           copyItems
-	typingModal         typingModal
-	warnModal           warnModal
-	helpMenu            helpMenuModal
-	fileMetaData        fileMetadata
-	commandLine         commandLineModal
-	confirmToQuit       bool
-	firstTextInput      bool
-	toggleDotFile       bool
-	toggleFooter        bool
-	filePanelFocusIndex int
-	mainPanelHeight     int
-	fullWidth           int
-	fullHeight          int
+	fileModel            fileModel
+	sidebarModel         sidebarModel
+	processBarModel      processBarModel
+	focusPanel           focusPanelType
+	copyItems            copyItems
+	typingModal          typingModal
+	warnModal            warnModal
+	helpMenu             helpMenuModal
+	fileMetaData         fileMetadata
+	commandLine          commandLineModal
+	confirmToQuit        bool
+	firstTextInput       bool
+	toggleDotFile        bool
+	updatedToggleDotFile bool
+	toggleFooter         bool
+	filePanelFocusIndex  int
+	mainPanelHeight      int
+	fullWidth            int
+	fullHeight           int
 }
 
 // Modal
