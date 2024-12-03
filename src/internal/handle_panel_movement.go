@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"runtime"
 
@@ -31,7 +30,7 @@ func (m *model) parentDirectory() {
 		directoryRender: panel.render,
 	}
 	fullPath := panel.location
-	parentDir := path.Dir(fullPath)
+	parentDir := filepath.Dir(fullPath)
 	panel.location = parentDir
 	directoryRecord, hasRecord := panel.directoryRecord[panel.location]
 	if hasRecord {
