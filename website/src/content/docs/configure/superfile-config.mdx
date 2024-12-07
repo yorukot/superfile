@@ -37,12 +37,12 @@ The editor your files/directories will be opened with (if blank, it will default
 - ###### cd_on_quit
 
 :::note
-This doesn't work on Windows at the moment.
+Doesn't work on Windows at the moment.
 :::
 
-`true` => When you exit superfile, navigates the path of the terminal to the path of the last file panel you used.
+`true` => When you exit superfile, changes the terminal path to the last file panel you used.
 
-`false` => The path of the terminal remains the same as before you ran superfile.
+`false` => When you exit superfile, the terminal path remains the same prior to superfile.
 
 After setting to `true`, you need to update your `.bashrc` file.
 
@@ -63,17 +63,24 @@ source ~/.bashrc
 ```
 
 - ###### default_open_file_preview
-`true` =>  The file preview panel opens automatically every time you open superfile.
 
-`false` => The file preview panel will not open automatically when you open a superfile.
+`true` => Shows the file preview window when you run superfile.
+
+`false` => Hides the file preview window when you run a superfile.
 
 - ###### file_size_use_si
-`true` => The file/directory sizes will be displayed using powers of 1000 (kB, MB, GB).
 
-`false` => The file/directory sizes will be displayed using powers of 1024 (KiB, MiB, GiB).
+`true` => Displays the file/directory sizes using powers of 1000 (kB, MB, GB).
+
+`false` => Displays the file/directory sizes using powers of 1024 (KiB, MiB, GiB).
+
+- ###### default_directory
+
+The default location every time superfile is opened. Supports `~` and `.`
 
 - ###### default_sort_type
-Sorting types of the file panel. Directories will always be displayed at the top.
+
+File panel sorting type. Directories will always be displayed at the top.
 
 `0` => Name
 
@@ -82,14 +89,16 @@ Sorting types of the file panel. Directories will always be displayed at the top
 `2` => Date Modified
 
 - ###### sort_order_reversed
-Sorting order of the file panel.
+
+File panel sorting order.
 
 `false` => Ascending (a-z)
 
 `true` => Descending (z-a)
 
 - ###### case_sensitive_sort
-Case sensitive sort by name (upper "B" comes before lower "a" if true).
+
+File panel sorting case sensitivity (if `true`, uppercase letters come before lowercase letters).
 
 `true` => Case sensitive ("B" comes before "a")
 
@@ -98,36 +107,37 @@ Case sensitive sort by name (upper "B" comes before lower "a" if true).
 ### Style
 
 - ###### transparent_background
-`true` => If enabled, the background color will not be rendered (transparent). This is useful if your terminal background is transparent.
 
-`false` => If turned off, the background will be rendered (with color) to maintain theme consistency.
+`true` => The background color is not rendered (transparent). This is useful if your terminal background is transparent.
 
-- ###### default_directory
-The default location every time superfile is opened, supports `~` and `.`
+`false` => The background is rendered (with color) to maintain theme consistency.
 
 - ###### file_preview_width
+
 This setting is an integer.
 
-`0` => When it is 0, it means that the width of the File preview panel will be the same as that of the File panel.
+`0` => The width of the file preview window is the same as the file panel.
 
-`X` => When it is any other number, it means that the width of the File preview panel will be the width of the entire panel (total width of the terminal - width of the sidebar) divided by X.
+`X` => The width of the file preview window is 1/`X` of the terminal width (minus the sidebar width). It is calculated as: (terminal width - sidebar width) / `X`
 
 :::caution
-The number of entries must be from 2 to 10
+`X` must be from 2 to 10.
 :::
 
 - ###### sidebar_width
+
 This setting is an integer.
 
-`0` => If the number is 0 then the sidebar will not display.
+`0` => The sidebar will not display.
 
-`X` => This number will be the width of the sidebar width.
+`X` => The width of the sidebar.
 
 :::caution
-Figures must be 3-20
+`X` must be from 3 to 20.
 :::
 
 - ###### Border style
+
 Here are a few suggested styles, of course you can change them to your own:
 
 ```toml
