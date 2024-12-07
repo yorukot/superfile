@@ -8,43 +8,55 @@ head:
 
 import CodeBlock from '../../../components/code.astro';
 
-You can enter the following command to set it up;
+You can edit your superfile config file with the following command:
 
 ```bash
 $EDITOR config_path
 ```
 
 :::tip
-If you want to get the set path you can try `spf pl` which will print out the file locations of all superfile.
+To see the path locations of your superfile files, use the command `spf pl`.
 :::
 
 ### Setting
 
 - ###### theme
-You can go to [here](/configure/custom-theme) to know how to config it
+
+[Click here](/configure/custom-theme) for instructions to edit the theme.
 
 - ###### editor
-The editor files/directories will be opened with. (leave blank to use the EDITOR environment variable).
+
+The editor your files/directories will be opened with (if blank, it will default to the EDITOR environment variable).
 
 - ###### auto_check_update
-`true`  => Turning on will check whether updates are needed every time superfile is closed (only checked once a day)
 
-`false` => If closed, no checks will be performed
+`true`  => Checks whether updates are needed when you exit superfile (only checks once a day).
+
+`false` => No checks performed.
 
 - ###### cd_on_quit
-`true` => Every time you exit superfile, it will navigate the path of the terminal to the path of the last file panel you used.
-
-`false` => Nothing happen
-
-If you want to open this feature you need to copy the code into `~/.bashrc`
 
 :::note
-This doesn't work on windows at the moment.
+This doesn't work on Windows at the moment.
 :::
+
+`true` => When you exit superfile, navigates the path of the terminal to the path of the last file panel you used.
+
+`false` => The path of the terminal remains the same as before you ran superfile.
+
+After setting to `true`, you need to update your `.bashrc` file.
+
+Open the file:
+
+```bash
+$EDITOR ~/.bashrc
+```
+
+Copy the following code into the file:
 
 <CodeBlock file="cd_on_quit/cd_on_quit.sh" />
 
-and reload ~/.bashrc
+Save, exit, and reload your `.bashrc` file:
 
 ```bash
 source ~/.bashrc
