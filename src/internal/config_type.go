@@ -189,6 +189,7 @@ type HotkeysType struct {
 	OpenCommandLine []string `toml:"open_command_line"`
 
 	CopyPath []string `toml:"copy_path"`
+	CopyPWD  []string `toml:"copy_present_working_directory"`
 
 	ToggleFooter []string `toml:"toggle_footer"`
 

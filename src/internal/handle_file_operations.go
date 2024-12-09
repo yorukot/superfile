@@ -631,3 +631,10 @@ func (m model) copyPath() {
 		outPutLog("Copy path error", panel.element[panel.cursor].location, err)
 	}
 }
+
+func (m model) copyPWD() {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	if err := clipboard.WriteAll(panel.location); err != nil {
+		outPutLog("Copy present working directory error", panel.location, err)
+	}
+}

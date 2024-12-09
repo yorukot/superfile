@@ -186,6 +186,8 @@ func (m *model) normalAndBrowserModeKey(msg string) {
 		m.searchBarFocus()
 	case containsKey(msg, hotkeys.CopyPath):
 		m.copyPath()
+  case containsKey(msg, hotkeys.CopyPWD):
+    m.copyPWD()
 	}
 }
 
