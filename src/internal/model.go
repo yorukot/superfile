@@ -431,9 +431,6 @@ func (m model) quitSuperfile() {
     variable.LastDir = currentDir
 
     if Config.CdOnQuit {
-        if currentDir == variable.HomeDir {
-            return
-        }
         // escape single quote
         currentDir = strings.ReplaceAll(currentDir, "'", "'\\''")
         os.WriteFile(variable.SuperFileStateDir+"/lastdir", []byte("cd '"+currentDir+"'"), 0755)
