@@ -284,36 +284,6 @@ func renameIfDuplicate(destination string) (string, error) {
 	}
 }
 
-func pasteFile(src string, dst string) error {
-	srcFile, err := os.Open(src)
-	if err != nil {
-		outPutLog("Paste file function open file error", err)
-	}
-	defer srcFile.Close()
-
-	dst, err = renameIfDuplicate(dst)
-	if err != nil {
-		outPutLog("Paste file function rename error", err)
-	}
-	dstFile, err := os.Create(dst)
-	if err != nil {
-		outPutLog("Paste file function create file error", err)
-	}
-	if err != nil {
-		return err
-	}
-	defer dstFile.Close()
-
-	_, err = io.Copy(dstFile, srcFile)
-	if err != nil {
-		outPutLog("Paste file function copy file error", err)
-	}
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func (m *model) returnMetaData() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	cursor := panel.cursor
