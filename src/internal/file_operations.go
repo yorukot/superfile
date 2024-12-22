@@ -2,20 +2,129 @@ package internal
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"runtime"
+	"syscall"
 
 	"github.com/rkoesters/xdg/trash"
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/config/icon"
 )
 
-// Move file or directory
-func moveElement(src, dst string) error {
-	err := os.Rename(src, dst)
+// isSamePartition checks if two paths are on the same filesystem partition
+func isSamePartition(path1, path2 string) (bool, error) {
+	var stat1, stat2 syscall.Stat_t
+
+	err := syscall.Stat(path1, &stat1)
 	if err != nil {
-		return fmt.Errorf("failed to move file: %v", err)
+		return false, fmt.Errorf("failed to stat first path: %v", err)
+	}
+
+	// For the destination, we need to check its parent directory if it doesn't exist yet
+	path2Parent := filepath.Dir(path2)
+	err = syscall.Stat(path2Parent, &stat2)
+	if err != nil {
+		return false, fmt.Errorf("failed to stat second path: %v", err)
+	}
+
+	return stat1.Dev == stat2.Dev, nil
+}
+
+// moveElement moves a file or directory efficiently
+func moveElement(src, dst string) error {
+	// Check if source and destination are on the same partition
+	sameDev, err := isSamePartition(src, dst)
+	if err != nil {
+		return fmt.Errorf("failed to check partitions: %v", err)
+	}
+
+	// If on the same partition, attempt to rename (which will use the same inode)
+	if sameDev {
+		err := os.Rename(src, dst)
+		if err == nil {
+			return nil
+		}
+		// If rename fails, fall back to copy+delete
+	}
+
+	// If on different partitions or rename failed, fall back to copy+delete
+	err = copyElement(src, dst)
+	if err != nil {
+		return fmt.Errorf("failed to copy: %v", err)
+	}
+
+	err = os.RemoveAll(src)
+	if err != nil {
+		return fmt.Errorf("failed to remove source after copy: %v", err)
+	}
+
+	return nil
+}
+
+// copyElement handles copying of both files and directories
+func copyElement(src, dst string) error {
+	srcInfo, err := os.Stat(src)
+	if err != nil {
+		return fmt.Errorf("failed to stat source: %v", err)
+	}
+
+	if srcInfo.IsDir() {
+		return copyDir(src, dst, srcInfo)
+	}
+	return copyFile(src, dst, srcInfo)
+}
+
+// copyDir recursively copies a directory
+func copyDir(src, dst string, srcInfo os.FileInfo) error {
+	err := os.MkdirAll(dst, srcInfo.Mode())
+	if err != nil {
+		return fmt.Errorf("failed to create destination directory: %v", err)
+	}
+
+	entries, err := os.ReadDir(src)
+	if err != nil {
+		return fmt.Errorf("failed to read source directory: %v", err)
+	}
+
+	for _, entry := range entries {
+		srcPath := filepath.Join(src, entry.Name())
+		dstPath := filepath.Join(dst, entry.Name())
+
+		entryInfo, err := entry.Info()
+		if err != nil {
+			return fmt.Errorf("failed to get entry info: %v", err)
+		}
+
+		if entryInfo.IsDir() {
+			err = copyDir(srcPath, dstPath, entryInfo)
+		} else {
+			err = copyFile(srcPath, dstPath, entryInfo)
+		}
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// copyFile copies a single file
+func copyFile(src, dst string, srcInfo os.FileInfo) error {
+	srcFile, err := os.Open(src)
+	if err != nil {
+		return fmt.Errorf("failed to open source file: %v", err)
+	}
+	defer srcFile.Close()
+
+	dstFile, err := os.OpenFile(dst, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, srcInfo.Mode())
+	if err != nil {
+		return fmt.Errorf("failed to create destination file: %v", err)
+	}
+	defer dstFile.Close()
+
+	if _, err := io.Copy(dstFile, srcFile); err != nil {
+		return fmt.Errorf("failed to copy file contents: %v", err)
 	}
 	return nil
 }
@@ -23,7 +132,7 @@ func moveElement(src, dst string) error {
 // Move file to trash can and can auto switch macos trash can or linux trash can
 func trashMacOrLinux(src string) error {
 	if runtime.GOOS == "darwin" {
-		err := moveElement(src, variable.HomeDir+"/.Trash/"+filepath.Base(src))
+		err := moveElement(src, filepath.Join(variable.HomeDir, ".Trash", filepath.Base(src)))
 		if err != nil {
 			outPutLog("Delete single item function move file to trash can error", err)
 		}
@@ -36,12 +145,22 @@ func trashMacOrLinux(src string) error {
 	return nil
 }
 
-// Paste all item in directory
+// pasteDir handles directory copying with progress tracking
 func pasteDir(src, dst string, id string, m model) (model, error) {
-	// Check if destination directory already exists
 	dst, err := renameIfDuplicate(dst)
 	if err != nil {
 		return m, err
+	}
+
+	// Check if we can do a fast move within the same partition
+	sameDev, err := isSamePartition(src, dst)
+	if err == nil && sameDev && m.copyItems.cut {
+		// For cut operations on same partition, try fast rename first
+		err = os.Rename(src, dst)
+		if err == nil {
+			return m, nil
+		}
+		// If rename fails, fall back to manual copy
 	}
 
 	err = filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
@@ -53,9 +172,8 @@ func pasteDir(src, dst string, id string, m model) (model, error) {
 		if err != nil {
 			return err
 		}
-
 		newPath := filepath.Join(dst, relPath)
-		
+
 		if info.IsDir() {
 			newPath, err = renameIfDuplicate(newPath)
 			if err != nil {
@@ -67,10 +185,9 @@ func pasteDir(src, dst string, id string, m model) (model, error) {
 			}
 		} else {
 			p := m.processBarModel.process[id]
-
 			message := channelMessage{
-				messageId: id,
-				messageType: sendProcess,
+				messageId:       id,
+				messageType:     sendProcess,
 				processNewState: p,
 			}
 
@@ -85,13 +202,20 @@ func pasteDir(src, dst string, id string, m model) (model, error) {
 				channel <- message
 			}
 
-			err := pasteFile(path, newPath)
+			var err error
+			if m.copyItems.cut && sameDev {
+				err = os.Rename(path, newPath)
+			} else {
+				err = copyFile(path, newPath, info)
+			}
+
 			if err != nil {
 				p.state = failure
 				message.processNewState = p
 				channel <- message
 				return err
 			}
+
 			p.done++
 			if len(channel) < 5 {
 				message.processNewState = p
@@ -99,12 +223,19 @@ func pasteDir(src, dst string, id string, m model) (model, error) {
 			}
 			m.processBarModel.process[id] = p
 		}
-
 		return nil
 	})
 
 	if err != nil {
 		return m, err
+	}
+
+	// If this was a cut operation and we had to do a manual copy, remove the source
+	if m.copyItems.cut && !sameDev {
+		err = os.RemoveAll(src)
+		if err != nil {
+			return m, fmt.Errorf("failed to remove source after move: %v", err)
+		}
 	}
 
 	return m, nil
