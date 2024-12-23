@@ -35,7 +35,9 @@ func extractCompressFile(src, dest string) error {
 		processNewState: p,
 	}
 
+	if len(channel) < 5 {
 	channel <- message
+	}
 
 	x := &xtractr.XFile{
 		FilePath:  src,
@@ -48,7 +50,10 @@ func extractCompressFile(src, dest string) error {
 		p.state = failure
 		p.doneTime = time.Now()
 		message.processNewState = p
+		if len(channel) < 5 {
 		channel <- message
+		}
+		outPutLog(fmt.Sprintf("Error extracting %s: %v", src, err))
 		return err
 	}
 
@@ -56,8 +61,10 @@ func extractCompressFile(src, dest string) error {
 	p.done = 1
 	p.doneTime = time.Now()
 	message.processNewState = p
+	if len(channel) < 5 {
 	channel <- message
-	
+	}
+
 	return nil
 }
 
@@ -66,13 +73,14 @@ func unzip(src, dest string) error {
 	id := shortuuid.New()
 	r, err := zip.OpenReader(src)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to open zip: %w", err)
 	}
 	defer func() {
 		if err := r.Close(); err != nil {
-			panic(err)
+			outPutLog(fmt.Sprintf("Error closing zip reader: %v", err))
 		}
 	}()
+
 	totalFiles := len(r.File)
 	// progressbar
 	prog := progress.New(generateGradientColor())
@@ -98,11 +106,11 @@ func unzip(src, dest string) error {
 
 		rc, err := f.Open()
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to open file in zip: %w", err)
 		}
 		defer func() {
 			if err := rc.Close(); err != nil {
-				panic(err)
+				outPutLog(fmt.Sprintf("Error closing file reader: %v", err))
 			}
 		}()
 
@@ -119,7 +127,7 @@ func unzip(src, dest string) error {
 			os.MkdirAll(filepath.Dir(path), f.Mode())
 			f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
 			if err != nil {
-				return fmt.Errorf("error open file: %s", err)
+				return fmt.Errorf("failed to create directory: %w", err)
 			}
 			defer func() {
 				if err := f.Close(); err != nil {
@@ -130,7 +138,7 @@ func unzip(src, dest string) error {
 			_, err = io.Copy(f, rc)
 
 			if err != nil {
-				return fmt.Errorf("error copy file: %s", err)
+				return fmt.Errorf("failed to create file: %w", err)
 			}
 		}
 		return nil
@@ -138,7 +146,7 @@ func unzip(src, dest string) error {
 
 	for _, f := range r.File {
 		p.name = icon.ExtractFile + icon.Space + f.Name
-		if len(channel) < 3 {
+		if len(channel) < 5 {
 			message.processNewState = p
 			channel <- message
 		}
@@ -147,12 +155,14 @@ func unzip(src, dest string) error {
 			p.state = failure
 			message.processNewState = p
 			channel <- message
-			return err
+			outPutLog(fmt.Sprintf("Error extracting %s: %v", f.Name, err))
+			p.done++
+			continue
 		}
 		p.done++
-		if len(channel) < 3 {
+		if len(channel) < 5 {
 			message.processNewState = p
-			channel <- message
+		        channel <- message
 		}
 	}
 
@@ -164,7 +174,9 @@ func unzip(src, dest string) error {
 		p.state = failure
 	}
 	message.processNewState = p
+	if len(channel) < 5 {
 	channel <- message
+	}
 
 	return nil
 }
