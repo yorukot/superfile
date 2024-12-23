@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/lithammer/shortuuid"
@@ -26,6 +27,7 @@ func extractCompressFile(src, dest string) error {
 		state:    inOperation,
 		total:    1,
 		done:     0,
+		doneTime: time.Time{},
 	}
 	message := 	channelMessage{
 		messageId:       id,
@@ -43,7 +45,8 @@ func extractCompressFile(src, dest string) error {
 	_, _, _, err := xtractr.ExtractFile(x)
 
 	if err != nil {
-		p.state = successful
+		p.state = failure
+		p.doneTime = time.Now()
 		message.processNewState = p
 		channel <- message
 		return err
@@ -51,7 +54,7 @@ func extractCompressFile(src, dest string) error {
 
 	p.state = successful
 	p.done = 1
-
+	p.doneTime = time.Now()
 	message.processNewState = p
 	channel <- message
 	
@@ -81,6 +84,7 @@ func unzip(src, dest string) error {
 		state:    inOperation,
 		total:    totalFiles,
 		done:     0,
+		doneTime: time.Time{},
 	}
 
 	message := channelMessage{
@@ -153,7 +157,12 @@ func unzip(src, dest string) error {
 	}
 
 	p.total = totalFiles
-	p.state = successful
+	p.doneTime = time.Now()
+	if p.done == totalFiles {
+		p.state = successful
+	} else {
+		p.state = failure
+	}
 	message.processNewState = p
 	channel <- message
 
