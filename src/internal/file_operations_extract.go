@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -14,6 +15,20 @@ import (
 	"github.com/yorukot/superfile/src/config/icon"
 	"golift.io/xtractr"
 )
+
+func getDefaultFileMode() os.FileMode {
+	if runtime.GOOS == "windows" {
+		return 0666
+	}
+	return 0644
+}
+
+func shouldSkipFile(name string) bool {
+	// Skip system files across platforms
+	return strings.HasPrefix(name, "__MACOSX/") ||
+		strings.EqualFold(name, "Thumbs.db") ||
+		strings.EqualFold(name, "desktop.ini")
+}
 
 func extractCompressFile(src, dest string) error {
 	id := shortuuid.New()
@@ -116,31 +131,44 @@ func unzip(src, dest string) error {
 
 		path := filepath.Join(dest, f.Name)
 
-		// Check for ZipSlip (Directory traversal)
-		if !strings.HasPrefix(path, filepath.Clean(dest)+string(os.PathSeparator)) {
+		// Cross-platform path security check
+		if !strings.HasPrefix(filepath.Clean(path), filepath.Clean(dest)+string(os.PathSeparator)) {
 			return fmt.Errorf("illegal file path: %s", path)
 		}
 
+		fileMode := f.Mode()
 		if f.FileInfo().IsDir() {
-			os.MkdirAll(path, f.Mode())
-		} else {
-			os.MkdirAll(filepath.Dir(path), f.Mode())
-			f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+			err := os.MkdirAll(path, fileMode)
 			if err != nil {
 				return fmt.Errorf("failed to create directory: %w", err)
 			}
-			defer func() {
-				if err := f.Close(); err != nil {
-					panic(err)
-				}
-			}()
+			return nil
+		}
 
-			_, err = io.Copy(f, rc)
+		// Create directory structure
+		if err := os.MkdirAll(filepath.Dir(path), fileMode); err != nil {
+			return fmt.Errorf("failed to create parent directory: %w", err)
+		}
 
+		// Try default permissions first
+		outFile, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, getDefaultFileMode())
+		if err != nil {
+			// Fall back to original file permissions
+			outFile, err = os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, fileMode)
 			if err != nil {
 				return fmt.Errorf("failed to create file: %w", err)
 			}
 		}
+		defer func() {
+			if err := outFile.Close(); err != nil {
+				outPutLog(fmt.Sprintf("Error closing output file %s: %v", path, err))
+			}
+		}()
+
+		if _, err := io.Copy(outFile, rc); err != nil {
+			return fmt.Errorf("failed to write file content: %w", err)
+		}
+
 		return nil
 	}
 
@@ -150,6 +178,12 @@ func unzip(src, dest string) error {
 			message.processNewState = p
 			channel <- message
 		}
+
+		if shouldSkipFile(f.Name) {
+			p.done++
+			continue
+		}
+
 		err := extractAndWriteFile(f)
 		if err != nil {
 			p.state = failure
