@@ -39,6 +39,39 @@ func (m *model) panelCreateNewFile() {
 
 }
 
+func (m *model) IsRenamingConflicting() bool {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	oldPath := panel.element[panel.cursor].location
+	newPath := panel.location + "/" + panel.rename.Value()
+
+	if oldPath == newPath {
+		return false
+	}
+
+	_, err := os.Stat(newPath)
+	if err == nil {
+		return true
+	}
+
+	return false
+}
+
+func (m *model) warnModalForRenaming() {
+	id := shortuuid.New()
+	message := channelMessage{
+		messageId:   id,
+		messageType: sendWarnModal,
+	}
+
+	message.warnModal = warnModal{
+		open:     true,
+		title:    "There is already a file or directory with that name",
+		content:  "This operation will override the existing file",
+		warnType: confirmRenameItem,
+	}
+	channel <- message
+}
+
 // Rename file where the cusror is located
 func (m *model) panelItemRename() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
