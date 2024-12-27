@@ -76,13 +76,19 @@ func Run(content embed.FS) {
 
 			InitConfigFile()
 
+			err := InitTrash()
+			hasTrash := true
+			if err != nil {
+				hasTrash = false
+			}
+
 			variable.FixHotkeys = c.Bool("fix-hotkeys")
 			variable.FixConfigFile = c.Bool("fix-config-file")
 			variable.PrintLastDir = c.Bool("print-last-dir")
 
 			firstUse := checkFirstUse()
 
-			p := tea.NewProgram(internal.InitialModel(path, firstUse), tea.WithAltScreen(), tea.WithMouseCellMotion())
+			p := tea.NewProgram(internal.InitialModel(path, firstUse, hasTrash), tea.WithAltScreen(), tea.WithMouseCellMotion())
 			if _, err := p.Run(); err != nil {
 				log.Fatalf("Alas, there's been an error: %v", err)
 			}
@@ -115,17 +121,6 @@ func InitConfigFile() {
 		log.Fatalln("Error creating directories:", err)
 	}
 
-	// Create trash directories
-	if runtime.GOOS != "darwin" {
-		if err := createDirectories(
-			xdg.DataHome+variable.TrashDirectory,
-			xdg.DataHome+variable.TrashDirectoryFiles,
-			xdg.DataHome+variable.TrashDirectoryInfo,
-		); err != nil {
-			log.Fatalln("Error creating directories:", err)
-		}
-	}
-
 	// Create files
 	if err := createFiles(
 		variable.PinnedFile,
@@ -145,6 +140,19 @@ func InitConfigFile() {
 	if err := writeConfigFile(variable.HotkeysFile, internal.HotkeysTomlString); err != nil {
 		log.Fatalln("Error writing config file:", err)
 	}
+}
+
+func InitTrash() error {
+	// Create trash directories
+	if runtime.GOOS != "darwin" {
+		err := createDirectories(
+			xdg.DataHome+variable.TrashDirectory,
+			xdg.DataHome+variable.TrashDirectoryFiles,
+			xdg.DataHome+variable.TrashDirectoryInfo,
+		)
+		return err
+	}
+	return nil
 }
 
 // Helper functions
