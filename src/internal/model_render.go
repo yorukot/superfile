@@ -613,6 +613,9 @@ func (m model) filePreviewPanelRender() string {
 	}
 
 	if isImageFile(itemPath) {
+		if !m.fileModel.filePreview.open {
+            return box.Render("\n --- Preview panel is closed ---")
+        }
 		ansiRender, err := filepreview.ImagePreview(itemPath, m.fileModel.filePreview.width, previewLine, theme.FilePanelBG)
 		if err == image.ErrFormat {
 			return box.Render("\n --- " + icon.Error + " Unsupported image formats ---")

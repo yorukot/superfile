@@ -14,19 +14,46 @@ import (
 	"github.com/nfnt/resize"
 )
 
+type colorCache struct {
+	rgbaToTermenv map[color.RGBA]termenv.RGBColor
+}
+
+func newColorCache() *colorCache {
+	return &colorCache{
+		rgbaToTermenv: make(map[color.RGBA]termenv.RGBColor),
+	}
+}
+
+func (c *colorCache) getTermenvColor(col color.Color, fallbackColor string) termenv.RGBColor {
+	rgba := color.RGBAModel.Convert(col).(color.RGBA)
+	if rgba.A == 0 {
+		return termenv.RGBColor(fallbackColor)
+	}
+
+	if termenvColor, exists := c.rgbaToTermenv[rgba]; exists {
+		return termenvColor
+	}
+
+	termenvColor := termenv.RGBColor(fmt.Sprintf("#%02x%02x%02x", rgba.R, rgba.G, rgba.B))
+	c.rgbaToTermenv[rgba] = termenvColor
+	return termenvColor
+}
+
 // ConvertImageToANSI converts an image to ANSI escape codes with proper aspect ratio
 func ConvertImageToANSI(img image.Image, defaultBGColor color.Color) string {
 	width := img.Bounds().Dx()
 	height := img.Bounds().Dy()
 	output := ""
+	cache := newColorCache()
+	defaultBGHex := colorToHex(defaultBGColor)
 
 	for y := 0; y < height; y += 2 {
 		for x := 0; x < width; x++ {
-			upperColor := colorToTermenv(img.At(x, y), colorToHex(defaultBGColor))
-			lowerColor := colorToTermenv(defaultBGColor, "")
+			upperColor := cache.getTermenvColor(img.At(x, y), defaultBGHex)
+			lowerColor := cache.getTermenvColor(defaultBGColor, "")
 
 			if y + 1 < height {
-				lowerColor = colorToTermenv(img.At(x, y + 1), colorToHex(defaultBGColor))
+				lowerColor = cache.getTermenvColor(img.At(x, y+1), defaultBGHex)
 			}
 
 			// Using the "▄" character which fills the lower half
@@ -37,15 +64,6 @@ func ConvertImageToANSI(img image.Image, defaultBGColor color.Color) string {
 	}
 
 	return output
-}
-
-// colorToTermenv converts a color.Color to a termenv.RGBColor
-func colorToTermenv(c color.Color, fallbackColor string) termenv.RGBColor {
-	r, g, b, a := c.RGBA()
-	if a == 0 {
-        	return termenv.RGBColor(fallbackColor)
-    	}
-	return termenv.RGBColor(fmt.Sprintf("#%02x%02x%02x", uint8(r>>8), uint8(g>>8), uint8(b>>8)))
 }
 
 // Return image preview ansi string
