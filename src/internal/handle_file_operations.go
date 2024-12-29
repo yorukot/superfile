@@ -140,8 +140,12 @@ func (m *model) deleteSingleItem() {
 		message.processNewState = p
 		channel <- message
 	}
-	if panel.cursor == len(panel.element)-1 {
-		panel.cursor--
+	if len(panel.element) == 0 {
+        panel.cursor = 0
+    } else {
+			if panel.cursor >= len(panel.element) {
+                panel.cursor = len(panel.element) - 1
+			}
 	}
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
@@ -258,8 +262,12 @@ func (m *model) completelyDeleteSingleItem() {
 		message.processNewState = p
 		channel <- message
 	}
-	if panel.cursor == len(panel.element)-1 {
-		panel.cursor--
+	if len(panel.element) == 0 {
+        panel.cursor = 0
+    } else {
+			if panel.cursor >= len(panel.element) {
+                panel.cursor = len(panel.element) - 1
+			}
 	}
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
