@@ -205,32 +205,40 @@ func (m *model) warnModalOpenKey(msg string) {
 	switch msg {
 	case containsKey(msg, hotkeys.Quit), containsKey(msg, hotkeys.CancelTyping):
 		m.cancelWarnModal()
+		if m.warnModal.warnType == confirmRenameItem {
+			m.cancelRename()
+		}
 	case containsKey(msg, hotkeys.Confirm):
 		m.warnModal.open = false
-		panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-		if m.fileModel.filePanels[m.filePanelFocusIndex].panelMode == selectMode {
-			if isExternalDiskPath(panel.location) {
-				go func() {
-					m.completelyDeleteMultipleItems()
-					m.fileModel.filePanels[m.filePanelFocusIndex].selected = m.fileModel.filePanels[m.filePanelFocusIndex].selected[:0]
-				}()
+		switch m.warnModal.warnType {
+		case confirmDeleteItem:
+			panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+			if m.fileModel.filePanels[m.filePanelFocusIndex].panelMode == selectMode {
+				if isExternalDiskPath(panel.location) {
+					go func() {
+						m.completelyDeleteMultipleItems()
+						m.fileModel.filePanels[m.filePanelFocusIndex].selected = m.fileModel.filePanels[m.filePanelFocusIndex].selected[:0]
+					}()
+				} else {
+					go func() {
+						m.deleteMultipleItems()
+						m.fileModel.filePanels[m.filePanelFocusIndex].selected = m.fileModel.filePanels[m.filePanelFocusIndex].selected[:0]
+					}()
+				}
 			} else {
-				go func() {
-					m.deleteMultipleItems()
-					m.fileModel.filePanels[m.filePanelFocusIndex].selected = m.fileModel.filePanels[m.filePanelFocusIndex].selected[:0]
-				}()
-			}
-		} else {
-			if isExternalDiskPath(panel.location) {
-				go func() {
-					m.completelyDeleteSingleItem()
-				}()
-			} else {
-				go func() {
-					m.deleteSingleItem()
-				}()
-			}
+				if isExternalDiskPath(panel.location) {
+					go func() {
+						m.completelyDeleteSingleItem()
+					}()
+				} else {
+					go func() {
+						m.deleteSingleItem()
+					}()
+				}
 
+			}
+		case confirmRenameItem:
+            m.confirmRename()
 		}
 	}
 }
@@ -272,7 +280,11 @@ func (m *model) renamingKey(msg string) {
 	case containsKey(msg, hotkeys.CancelTyping):
 		m.cancelRename()
 	case containsKey(msg, hotkeys.ConfirmTyping):
-		m.confirmRename()
+		if m.IsRenamingConflicting() {
+			m.warnModalForRenaming()
+		} else {
+			m.confirmRename()
+		}
 	}
 }
 
