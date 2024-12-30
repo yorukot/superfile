@@ -415,12 +415,15 @@ func calculateMD5Checksum(filePath string) (string, error) {
 // Get directory total size
 func dirSize(path string) int64 {
 	var size int64
-	filepath.Walk(path, func(_ string, info os.FileInfo, err error) error {
+	filepath.WalkDir(path, func(_ string, entry os.DirEntry, err error) error {
 		if err != nil {
 			outPutLog("Dir size function error", err)
 		}
-		if !info.IsDir() {
-			size += info.Size()
+		if !entry.IsDir() {
+			info, err := entry.Info()
+			if err == nil {
+				size += info.Size()
+			}
 		}
 		return err
 	})
