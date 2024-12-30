@@ -214,7 +214,7 @@ func (m *model) warnModalOpenKey(msg string) {
 		case confirmDeleteItem:
 			panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 			if m.fileModel.filePanels[m.filePanelFocusIndex].panelMode == selectMode {
-				if isExternalDiskPath(panel.location) {
+				if !hasTrash || isExternalDiskPath(panel.location) {
 					go func() {
 						m.completelyDeleteMultipleItems()
 						m.fileModel.filePanels[m.filePanelFocusIndex].selected = m.fileModel.filePanels[m.filePanelFocusIndex].selected[:0]
@@ -226,7 +226,7 @@ func (m *model) warnModalOpenKey(msg string) {
 					}()
 				}
 			} else {
-				if isExternalDiskPath(panel.location) {
+				if !hasTrash || isExternalDiskPath(panel.location) {
 					go func() {
 						m.completelyDeleteSingleItem()
 					}()

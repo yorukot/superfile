@@ -109,7 +109,7 @@ func (m *model) deleteItemWarn() {
 		messageType: sendWarnModal,
 	}
 
-	if isExternalDiskPath(panel.location) {
+	if !hasTrash || isExternalDiskPath(panel.location) {
 		message.warnModal = warnModal{
 			open:     true,
 			title:    "Are you sure you want to completely delete",
