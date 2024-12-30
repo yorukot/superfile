@@ -544,6 +544,10 @@ func (m *model) controlMetadataListUp(wheel bool) {
 		runTime = wheelRunTime
 	}
 
+	if len(m.fileMetaData.metaData) == 0 {
+		return
+	}
+
 	for i := 0; i < runTime; i++ {
 		if m.fileMetaData.renderIndex > 0 {
 			m.fileMetaData.renderIndex--
