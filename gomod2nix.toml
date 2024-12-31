@@ -4,9 +4,6 @@ schema = 3
   [mod."github.com/adrg/xdg"]
     version = "v0.5.3"
     hash = "sha256-bo6tBgHS+3sl6f4oWpmdFrZjfV6eA/3xAlysSW0bIEs="
-  [mod."github.com/alecthomas/chroma"]
-    version = "v0.10.0"
-    hash = "sha256-p721vddVTv4iv1O0/dqpdk5xF6x9iLIHcrfh8JEVnqQ="
   [mod."github.com/alecthomas/chroma/v2"]
     version = "v2.14.0"
     hash = "sha256-d+zcIobMS5Y0/Ym9Uxubf20uyw0aBCr0f1oEOAGHlEA="
