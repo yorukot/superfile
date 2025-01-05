@@ -10,6 +10,36 @@ head:
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC(YYYY-MM-DD).
 
+# [**v1.1.7**](https://github.com/yorukot/superfile/releases/tag/v1.1.7)
+
+> 2024-01-05
+
+#### Update
+
+- OneDark Theme added [`#477`](https://github.com/yorukot/superfile/pull/477)
+- Add keys PageUp and PageDown for better navigation [`#498`](https://github.com/yorukot/superfile/pull/498)
+- Add hotkey for copying PWD to clipboard [`#510`](https://github.com/yorukot/superfile/pull/510)
+- Add desktop entry [`#501`](https://github.com/yorukot/superfile/pull/501)
+- Enable cd_on_quit when current directory is home directory [`#518`](https://github.com/yorukot/superfile/pull/518)
+- Edit superfile config [`#509`](https://github.com/yorukot/superfile/pull/509)
+
+#### Bug fix
+- Fix rendering directory symlinks as directories, not files [`#481`](https://github.com/yorukot/superfile/pull/481)
+- Fix opening files on Windows [`#496`](https://github.com/yorukot/superfile/pull/496)
+- Fix lag in dotfile toggle with multiple panels [`#499`](https://github.com/yorukot/superfile/pull/499)
+- Fix parent directory navigation on Windows [`#502`](https://github.com/yorukot/superfile/pull/502)
+- Fix panic when deleting last file in directory [`#529`](https://github.com/yorukot/superfile/pull/529)
+- Fix panic when scrolling through an empty metadata list [`#531`](https://github.com/yorukot/superfile/pull/531)
+- Fix panic when trying to get folder size without needed permissions [`#532`](https://github.com/yorukot/superfile/pull/532)
+- Fix lag when navigating directories with large image files [`#525`](https://github.com/yorukot/superfile/pull/525)
+- Fix typo in welcome message [`#494`](https://github.com/yorukot/superfile/pull/494)
+
+#### Optimization
+- Optimize file move operation [`#522`](https://github.com/yorukot/superfile/pull/522)
+- Optimize file extraction [`#524`](https://github.com/yorukot/superfile/pull/524)
+- Warn overwrite when renaming files [`#526`](https://github.com/yorukot/superfile/pull/526)
+- Work without trash [`#527`](https://github.com/yorukot/superfile/pull/527)
+
 # [**v1.1.6**](https://github.com/yorukot/superfile/releases/tag/v1.1.6)
 
 > 2024-11-21
