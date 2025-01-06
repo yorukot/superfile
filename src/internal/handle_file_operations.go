@@ -49,11 +49,7 @@ func (m *model) IsRenamingConflicting() bool {
 	}
 
 	_, err := os.Stat(newPath)
-	if err == nil {
-		return true
-	}
-
-	return false
+	return err == nil
 }
 
 func (m *model) warnModalForRenaming() {

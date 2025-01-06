@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"syscall"
+	"strings"
 
 	"github.com/rkoesters/xdg/trash"
 	variable "github.com/yorukot/superfile/src/config"
@@ -15,21 +15,33 @@ import (
 
 // isSamePartition checks if two paths are on the same filesystem partition
 func isSamePartition(path1, path2 string) (bool, error) {
-	var stat1, stat2 syscall.Stat_t
-
-	err := syscall.Stat(path1, &stat1)
+	// Get the absolute path to handle relative paths
+	absPath1, err := filepath.Abs(path1)
 	if err != nil {
-		return false, fmt.Errorf("failed to stat first path: %v", err)
+		return false, fmt.Errorf("failed to get absolute path of the first path: %v", err)
 	}
 
-	// For the destination, we need to check its parent directory if it doesn't exist yet
-	path2Parent := filepath.Dir(path2)
-	err = syscall.Stat(path2Parent, &stat2)
+	absPath2, err := filepath.Abs(path2)
 	if err != nil {
-		return false, fmt.Errorf("failed to stat second path: %v", err)
+		return false, fmt.Errorf("failed to get absolute path of the second path: %v", err)
 	}
 
-	return stat1.Dev == stat2.Dev, nil
+	if runtime.GOOS == "windows" {
+		// On Windows, we can check if both paths are on the same drive (same letter)
+		drive1 := getDriveLetter(absPath1)
+		drive2 := getDriveLetter(absPath2)
+		return drive1 == drive2, nil
+	}
+
+	// For Unix-like systems, we use the same path to check the root partition
+	return filepath.VolumeName(absPath1) == filepath.VolumeName(absPath2), nil
+}
+
+// getDriveLetter extracts the drive letter from a Windows path
+func getDriveLetter(path string) string {
+	// Windows paths are usually like "C:\path\to\file"
+	// So we need to extract the drive letter (e.g., "C")
+	return strings.ToUpper(string(path[0]))
 }
 
 // moveElement moves a file or directory efficiently
