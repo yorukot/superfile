@@ -10,6 +10,15 @@ head:
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC(YYYY-MM-DD).
 
+# [**v1.1.7.1**](https://github.com/yorukot/superfile/releases/tag/v1.1.7)
+
+> 2024-01-06
+
+NOTE: This release is a hotfix to resolve an unusual issue on Windows.
+
+#### Bug fix
+- Fix can't run on windows [`#534`](https://github.com/yorukot/superfile/issues/534)
+
 # [**v1.1.7**](https://github.com/yorukot/superfile/releases/tag/v1.1.7)
 
 > 2024-01-05
