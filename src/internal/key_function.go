@@ -262,16 +262,14 @@ func (m *model) sortOptionsKey(msg string) {
 	switch msg {
 	case containsKey(msg, hotkeys.OpenSortOptionsMenu):
 		m.cancelSortOptions()
-	case containsKey(msg, hotkeys.CancelTyping):
+	case containsKey(msg, hotkeys.Quit):
 		m.cancelSortOptions()
-	case containsKey(msg, hotkeys.ConfirmTyping):
+	case containsKey(msg, hotkeys.Confirm):
 		m.confirmSortOptions()
 	case containsKey(msg, hotkeys.ListUp):
 		m.sortOptionsListUp()
 	case containsKey(msg, hotkeys.ListDown):
 		m.sortOptionsListDown()
-	case containsKey(msg, hotkeys.Quit):
-		m.cancelSortOptions()
 	}
 }
 
