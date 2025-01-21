@@ -84,7 +84,7 @@ Add the binary file to your $PATH, e.g., in `/usr/local/bin`:
 ```bash
 sudo mv ./bin/spf /usr/local/bin
 ```
-## Run the app
+## Start Superfile
 
 ```bash
 spf
