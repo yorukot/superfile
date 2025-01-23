@@ -193,7 +193,7 @@ func checkFirstUse() bool {
 	if _, err := os.Stat(file); os.IsNotExist(err) {
 		firstUse = true
 		if err := os.WriteFile(file, nil, 0644); err != nil {
-			log.Fatalln("failed to create file: %w", err)
+			log.Fatalf("Failed to create file: %v", err)
 		}
 	}
 	return firstUse
