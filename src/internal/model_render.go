@@ -551,6 +551,32 @@ func (m model) sortOptionsRender() string {
 	return sortOptionsModalBorderStyle(panel.sortOptions.height, panel.sortOptions.width, bottomBorder).Render(sortOptionsContent)
 }
 
+func readFileContent(filepath string, maxLineLength int, previewLine int) (string, error) {
+	fileContent := ""
+	file, err := os.Open(filepath)
+	if err != nil {
+		return fileContent, err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	lineCount := 0
+	for scanner.Scan() {
+		line := scanner.Text()
+		if len(line) > maxLineLength {
+			line = line[:maxLineLength]
+		}
+		fileContent += line + "\n"
+		lineCount++
+		if previewLine > 0 && lineCount >= previewLine {
+			break
+		}
+	}
+	// returns the first non-EOF error that was encountered by the [Scanner]
+	// Handled by the caller
+	return fileContent, scanner.Err()
+}
+
 func (m model) filePreviewPanelRender() string {
 	previewLine := m.mainPanelHeight + 2
 	m.fileModel.filePreview.width += m.fullWidth - Config.SidebarWidth - m.fileModel.filePreview.width - ((m.fileModel.width + 2) * len(m.fileModel.filePanels)) - 2
@@ -630,86 +656,42 @@ func (m model) filePreviewPanelRender() string {
 	}
 
 	format := lexers.Match(filepath.Base(itemPath))
-	if format != nil {
-		var codeHighlight string
-		var err error
-		var fileContent string
-		file, err := os.Open(itemPath)
+
+	if format == nil {
+		isText, err := isTextFile(itemPath)
 		if err != nil {
-			outPutLog(err)
-			return box.Render("\n --- " + icon.Error + " Error open file ---")
+			outPutLog("Error while checking text file", err)
+			return box.Render("\n --- " + icon.Error + " Error get file info ---")
+		} else if !isText {
+			return box.Render("\n --- " + icon.Error + " Unsupported formats ---")
 		}
-		defer file.Close()
+	}
 
-		scanner := bufio.NewScanner(file)
-		lineCount := 0
+	// At this point either format is not nil, or we can read the file
+	fileContent , err := readFileContent(itemPath, m.fileModel.width+20, previewLine)
+	if err != nil {
+		outPutLog(err)
+		return box.Render("\n --- " + icon.Error + " Error open file ---")
+	}
 
-		maxLineLength := m.fileModel.width + 20
-		for scanner.Scan() {
-			line := scanner.Text()
-			if len(line) > maxLineLength {
-				line = line[:maxLineLength]
-			}
-			fileContent += line + "\n"
-			lineCount++
-			if previewLine > 0 && lineCount >= previewLine {
-				break
-			}
+	// We know the format of file, and we can apply syntax highlighting
+	if format != nil {
+		background := ""
+		if ! Config.TransparentBackground {
+			background = theme.FilePanelBG
 		}
-
-		if Config.TransparentBackground {
-			codeHighlight, err = ansichroma.HightlightString(fileContent, format.Config().Name, theme.CodeSyntaxHighlightTheme, "")
-		} else {
-			codeHighlight, err = ansichroma.HightlightString(fileContent, format.Config().Name, theme.CodeSyntaxHighlightTheme, theme.FilePanelBG)
-		}
+		fileContent, err = ansichroma.HightlightString(fileContent, format.Config().Name, theme.CodeSyntaxHighlightTheme, background)
 		if err != nil {
 			outPutLog("Error render code highlight", err)
 			return box.Render("\n --- " + icon.Error + " Error render code highlight ---")
 		}
-		if codeHighlight == "" {
-			return box.Render("\n --- empty ---")
-		}
-
-		codeHighlight = checkAndTruncateLineLengths(codeHighlight, m.fileModel.filePreview.width)
-
-		return box.Render(codeHighlight)
-	} else {
-		textFile, err := isTextFile(itemPath)
-		if err != nil {
-			outPutLog("Error check text file", err)
-		}
-		if textFile {
-			var fileContent string
-			file, err := os.Open(itemPath)
-			if err != nil {
-				outPutLog(err)
-				return box.Render("\n --- " + icon.Error + " Error open file ---")
-			}
-			defer file.Close()
-
-			scanner := bufio.NewScanner(file)
-			lineCount := 0
-
-			for scanner.Scan() {
-				fileContent += scanner.Text() + "\n"
-				lineCount++
-				if previewLine > 0 && lineCount >= previewLine {
-					break
-				}
-			}
-
-			if err := scanner.Err(); err != nil {
-				outPutLog(err)
-				return box.Render("\n --- " + icon.Error + " Error open file ---")
-			}
-
-			textContent := checkAndTruncateLineLengths(fileContent, m.fileModel.filePreview.width)
-
-			return box.Render(textContent)
-		}
 	}
 
-	return box.Render("\n --- " + icon.Error + " Unsupported formats ---")
+	if fileContent == "" {
+		return box.Render("\n --- empty ---")
+	}
+	fileContent = checkAndTruncateLineLengths(fileContent, m.fileModel.filePreview.width)
+	return box.Render(fileContent)
 }
 
 func (m model) commandLineInputBoxRender() string {
