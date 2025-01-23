@@ -552,10 +552,12 @@ func (m model) sortOptionsRender() string {
 }
 
 func readFileContent(filepath string, maxLineLength int, previewLine int) (string, error) {
-	fileContent := ""
+	// String builder is Much better for efficiency 
+	// See - https://stackoverflow.com/questions/1760757/how-to-efficiently-concatenate-strings-in-go/47798475#47798475
+	var resultBuilder strings.Builder 
 	file, err := os.Open(filepath)
 	if err != nil {
-		return fileContent, err
+		return resultBuilder.String(), err
 	}
 	defer file.Close()
 
@@ -566,15 +568,14 @@ func readFileContent(filepath string, maxLineLength int, previewLine int) (strin
 		if len(line) > maxLineLength {
 			line = line[:maxLineLength]
 		}
-		fileContent += line + "\n"
+		resultBuilder.WriteString(line+"\n")
 		lineCount++
 		if previewLine > 0 && lineCount >= previewLine {
 			break
 		}
 	}
 	// returns the first non-EOF error that was encountered by the [Scanner]
-	// Handled by the caller
-	return fileContent, scanner.Err()
+	return resultBuilder.String(), scanner.Err()
 }
 
 func (m model) filePreviewPanelRender() string {
