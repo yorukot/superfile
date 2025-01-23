@@ -568,6 +568,8 @@ func readFileContent(filepath string, maxLineLength int, previewLine int) (strin
 		if len(line) > maxLineLength {
 			line = line[:maxLineLength]
 		}
+		// This is critical to avoid layout break, removes non Printable ASCII control characters. 
+		line = makePrintable(line)
 		resultBuilder.WriteString(line+"\n")
 		lineCount++
 		if previewLine > 0 && lineCount >= previewLine {

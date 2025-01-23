@@ -67,6 +67,9 @@ func TestIsBufferPrintable(t *testing.T) {
 		{"hello", true},
 		{"abcdABCD0123~!@#$%^&*()_+-={}|:\"<>?,./;'[]", true},
 		{"Horizontal Tab and NewLine\t\t\n\n", true},
+		{"\xa0(NBSP)", true},
+		{"\x0b(Vertical Tab)", true},
+		{"\x0d(CR)", true},
 		{"ASCII control characters : \x00(NULL)", false},
 		{"\x05(ENQ)", false},
 		{"\x0f(SI)", false},
@@ -82,5 +85,35 @@ func TestIsBufferPrintable(t *testing.T) {
 			}
 		})
 	}
-
 }
+
+func TestMakePrintable(t *testing.T) {
+	var inputs = []struct {
+		input    string
+		expected string
+	} {
+		{"hello", "hello"},
+		{"abcdABCD0123~!@#$%^&*()_+-={}|:\"<>?,./;'[]", "abcdABCD0123~!@#$%^&*()_+-={}|:\"<>?,./;'[]"},
+		{"Horizontal Tab and NewLine\t\t\n\n", "Horizontal Tab and NewLine\t\t\n\n"},
+		{"(NBSP)\xa0\xa0\xa0\xa0;", "(NBSP)\xa0\xa0\xa0\xa0;"},
+		{"\x0b(Vertical Tab)", "(Vertical Tab)"},
+		{"\x0d(CR)", "(CR)"},
+		{"ASCII control characters : \x00(NULL)", "ASCII control characters : (NULL)"},
+		{"\x05(ENQ)", "(ENQ)"},
+		{"\x0f(SI)", "(SI)"},
+		{"\x1b(ESC)", "(ESC)"},
+		{"\x7f(DEL)", "(DEL)"},
+	}
+	for _, tt := range inputs {
+
+		t.Run(fmt.Sprintf("Make %q printable", tt.input), func(t* testing.T){
+			result := makePrintable(tt.input)
+			if result != tt.expected {
+				//t.Logf("length - %v, %v; bytes - %v, %v", 
+				//	len(tt.expected), len(result), []byte(tt.expected), []byte(result))
+				t.Errorf("Expected %v, got %v", tt.expected, result)
+			}
+		})
+	}
+}
+
