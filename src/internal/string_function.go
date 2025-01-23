@@ -3,6 +3,7 @@ package internal
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"math"
 	"os"
 	"strings"
@@ -164,7 +165,7 @@ func isTextFile(filename string) (bool, error) {
 	reader := bufio.NewReader(file)
 	buffer := make([]byte, 1024)
 	cnt, err := reader.Read(buffer)
-	if err != nil {
+	if err != nil && err != io.EOF {
 		return false, err
 	}
 	return isBufferPrintable(buffer[:cnt]), nil

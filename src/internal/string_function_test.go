@@ -64,6 +64,7 @@ func TestIsBufferPrintable(t *testing.T) {
 		input    string
 		expected bool
 	} {
+		{"", true},
 		{"hello", true},
 		{"abcdABCD0123~!@#$%^&*()_+-={}|:\"<>?,./;'[]", true},
 		{"Horizontal Tab and NewLine\t\t\n\n", true},
@@ -92,6 +93,7 @@ func TestMakePrintable(t *testing.T) {
 		input    string
 		expected string
 	} {
+		{"", ""},
 		{"hello", "hello"},
 		{"abcdABCD0123~!@#$%^&*()_+-={}|:\"<>?,./;'[]", "abcdABCD0123~!@#$%^&*()_+-={}|:\"<>?,./;'[]"},
 		{"Horizontal Tab and NewLine\t\t\n\n", "Horizontal Tab and NewLine\t\t\n\n"},
