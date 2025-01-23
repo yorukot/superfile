@@ -152,12 +152,12 @@ func isTextFile(filename string) (bool, error) {
 
 	reader := bufio.NewReader(file)
 	buffer := make([]byte, 1024)
-	_, err = reader.Read(buffer)
+	cnt, err := reader.Read(buffer)
 	if err != nil {
 		return false, err
 	}
 
-	for _, b := range buffer {
+	for _, b := range buffer[:cnt] {
 		if b == 0 {
 			return false, nil
 		}
