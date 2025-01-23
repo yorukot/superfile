@@ -57,3 +57,30 @@ func TestFilenameWithouText(t *testing.T) {
 		})
 	}
 }
+
+
+func TestIsBufferPrintable(t *testing.T) {
+	var inputs = []struct {
+		input    string
+		expected bool
+	} {
+		{"hello", true},
+		{"abcdABCD0123~!@#$%^&*()_+-={}|:\"<>?,./;'[]", true},
+		{"Horizontal Tab and NewLine\t\t\n\n", true},
+		{"ASCII control characters : \x00(NULL)", false},
+		{"\x05(ENQ)", false},
+		{"\x0f(SI)", false},
+		{"\x1b(ESC)", false},
+		{"\x7f(DEL)", false},
+	}
+	for _, tt := range inputs {
+
+		t.Run(fmt.Sprintf("Testing if buffer %q is printable", tt.input), func(t* testing.T){
+			result := isBufferPrintable([]byte(tt.input))
+			if result != tt.expected {
+				t.Errorf("Expected %v, got %v", tt.expected, result)
+			}
+		})
+	}
+
+}

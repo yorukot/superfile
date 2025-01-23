@@ -142,6 +142,17 @@ func checkAndTruncateLineLengths(text string, maxLength int) string {
 	return finalResult
 }
 
+// Separated this out out for easy testing
+func isBufferPrintable(buffer []byte) bool {
+	for _, b := range buffer {
+		// This will also handle b==0
+		if !unicode.IsPrint(rune(b)) && !unicode.IsSpace(rune(b)) {
+			return false
+		}
+	}
+	return true
+}
+
 // Check file is text file or not
 func isTextFile(filename string) (bool, error) {
 	file, err := os.Open(filename)
@@ -156,15 +167,5 @@ func isTextFile(filename string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-
-	for _, b := range buffer[:cnt] {
-		if b == 0 {
-			return false, nil
-		}
-		if !unicode.IsPrint(rune(b)) && !unicode.IsSpace(rune(b)) {
-			return false, nil
-		}
-	}
-
-	return true, nil
+	return isBufferPrintable(buffer[:cnt]), nil
 }
