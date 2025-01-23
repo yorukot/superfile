@@ -147,11 +147,13 @@ func trashMacOrLinux(src string) error {
 		err := moveElement(src, filepath.Join(variable.HomeDir, ".Trash", filepath.Base(src)))
 		if err != nil {
 			outPutLog("Delete single item function move file to trash can error", err)
+			return err
 		}
 	} else {
 		err := trash.Trash(src)
 		if err != nil {
 			outPutLog("Paste item function move file to trash can error", err)
+			return err
 		}
 	}
 	return nil
