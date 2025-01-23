@@ -172,7 +172,7 @@ func isTextFile(filename string) (bool, error) {
 }
 
 
-// Although some characters like `\x0b`(vertical tab are printable) 
+// Although some characters like `\x0b`(vertical tab) are printable, 
 // previewing them breaks the layout. 
 // So, among the "non-graphic" printable characters, we only need \n and \t 
 // Space and NBSP are already considered graphic by unicode.

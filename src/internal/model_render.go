@@ -552,7 +552,7 @@ func (m model) sortOptionsRender() string {
 }
 
 func readFileContent(filepath string, maxLineLength int, previewLine int) (string, error) {
-	// String builder is Much better for efficiency 
+	// String builder is much better for efficiency 
 	// See - https://stackoverflow.com/questions/1760757/how-to-efficiently-concatenate-strings-in-go/47798475#47798475
 	var resultBuilder strings.Builder 
 	file, err := os.Open(filepath)

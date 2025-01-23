@@ -111,8 +111,6 @@ func TestMakePrintable(t *testing.T) {
 		t.Run(fmt.Sprintf("Make %q printable", tt.input), func(t* testing.T){
 			result := makePrintable(tt.input)
 			if result != tt.expected {
-				//t.Logf("length - %v, %v; bytes - %v, %v", 
-				//	len(tt.expected), len(result), []byte(tt.expected), []byte(result))
 				t.Errorf("Expected %v, got %v", tt.expected, result)
 			}
 		})
