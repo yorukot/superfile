@@ -76,8 +76,9 @@ func (m *model) panelItemRename() {
 	}
 
 	cursorPos := strings.LastIndex(panel.element[panel.cursor].name, ".")
-	if cursorPos == -1 || panel.element[panel.cursor].directory {
-		cursorPos = len(panel.element[panel.cursor].name)
+	nameLen := len(panel.element[panel.cursor].name)
+	if cursorPos == -1 || cursorPos == 0 && nameLen > 0 || panel.element[panel.cursor].directory {
+		cursorPos = nameLen
 	}
 
 	ti := textinput.New()
