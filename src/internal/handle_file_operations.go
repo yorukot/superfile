@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"log/slog"
 	"strings"
 	"time"
 
@@ -376,6 +377,10 @@ func (m *model) copySingleItem() {
 	if len(panel.element) == 0 {
 		return
 	}
+
+	slog.Debug("handle_file_operations.copySingleItem", "panel location", 
+		panel.element[panel.cursor].location)
+
 	m.copyItems.items = append(m.copyItems.items, panel.element[panel.cursor].location)
 	fileInfo, err := os.Stat(panel.element[panel.cursor].location)
 	if os.IsNotExist(err) {
@@ -408,6 +413,8 @@ func (m *model) copyMultipleItem() {
 	if len(panel.selected) == 0 {
 		return
 	}
+	slog.Debug("handle_file_operations.copyMultipleItem", "panel selected files", 
+		panel.selected)
 	m.copyItems.items = panel.selected
 	fileInfo, err := os.Stat(panel.selected[0])
 	if os.IsNotExist(err) {
@@ -439,6 +446,7 @@ func (m *model) cutSingleItem() {
 	if len(panel.element) == 0 {
 		return
 	}
+	
 	m.copyItems.items = append(m.copyItems.items, panel.element[panel.cursor].location)
 	fileInfo, err := os.Stat(panel.element[panel.cursor].location)
 	if os.IsNotExist(err) {
@@ -512,6 +520,9 @@ func (m model) pasteItem() {
 		}
 		totalFiles += count
 	}
+
+	slog.Debug("model.pasteItem",  "items", m.copyItems.items, 
+		"totalFiles", totalFiles, "panel location", panel.location) 
 
 	prog := progress.New(generateGradientColor())
 	prog.PercentageStyle = footerStyle

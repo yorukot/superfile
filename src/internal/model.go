@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -175,6 +176,11 @@ func (m *model) setHelpMenuSize() {
 // Identify the current state of the application m and properly handle the
 // msg keybind pressed
 func (m model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) (model, tea.Cmd) {
+	
+	slog.Debug("model.handleKeyInput", "msg", msg, "typestr", msg.Type.String(),
+		"runes", msg.Runes, "type", int(msg.Type), "paste", msg.Paste, 
+		"alt", msg.Alt, "focusPanel", m.focusPanel)
+
 	if firstUse {
 		firstUse = false
 		return m, cmd
