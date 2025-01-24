@@ -372,8 +372,7 @@ func (m model) completelyDeleteMultipleItems() {
 // Copy directory or file
 func (m *model) copySingleItem() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	m.copyItems.cut = false
-	m.copyItems.items = m.copyItems.items[:0]
+	m.copyItems.reset(false)
 	if len(panel.element) == 0 {
 		return
 	}
@@ -384,7 +383,7 @@ func (m *model) copySingleItem() {
 	m.copyItems.items = append(m.copyItems.items, panel.element[panel.cursor].location)
 	fileInfo, err := os.Stat(panel.element[panel.cursor].location)
 	if os.IsNotExist(err) {
-		m.copyItems.items = m.copyItems.items[:0]
+		m.copyItems.reset(false)
 		return
 	}
 	if err != nil {
@@ -408,8 +407,7 @@ func (m *model) copySingleItem() {
 // Copy all selected file or directory to the clipboard
 func (m *model) copyMultipleItem() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	m.copyItems.cut = false
-	m.copyItems.items = m.copyItems.items[:0]
+	m.copyItems.reset(false)
 	if len(panel.selected) == 0 {
 		return
 	}
@@ -441,8 +439,7 @@ func (m *model) copyMultipleItem() {
 // Cut directory or file
 func (m *model) cutSingleItem() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	m.copyItems.cut = true
-	m.copyItems.items = m.copyItems.items[:0]
+	m.copyItems.reset(true)
 	if len(panel.element) == 0 {
 		return
 	}
@@ -450,7 +447,7 @@ func (m *model) cutSingleItem() {
 	m.copyItems.items = append(m.copyItems.items, panel.element[panel.cursor].location)
 	fileInfo, err := os.Stat(panel.element[panel.cursor].location)
 	if os.IsNotExist(err) {
-		m.copyItems.items = m.copyItems.items[:0]
+		m.copyItems.reset(true)
 		return
 	}
 	if err != nil {
@@ -474,8 +471,7 @@ func (m *model) cutSingleItem() {
 // Cut all selected file or directory to the clipboard
 func (m *model) cutMultipleItem() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	m.copyItems.cut = true
-	m.copyItems.items = m.copyItems.items[:0]
+	m.copyItems.reset(true)
 	if len(panel.selected) == 0 {
 		return
 	}
