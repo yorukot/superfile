@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -25,7 +24,6 @@ var theme ThemeType
 var Config ConfigType
 var hotkeys HotkeysType
 
-var logOutput *os.File
 var et *exiftool.Exiftool
 
 var channel = make(chan channelMessage, 1000)
@@ -117,7 +115,7 @@ func (m *model) setFilePreviewWidth(width int) {
 	if Config.FilePreviewWidth == 0 {
 		m.fileModel.filePreview.width = (width - Config.SidebarWidth - (4 + (len(m.fileModel.filePanels))*2)) / (len(m.fileModel.filePanels) + 1)
 	} else if Config.FilePreviewWidth > 10 || Config.FilePreviewWidth == 1 {
-		log.Fatalln("Config file file_preview_width invalidation")
+		LogAndExit("Config file file_preview_width invalidation")
 	} else {
 		m.fileModel.filePreview.width = (width - Config.SidebarWidth) / Config.FilePreviewWidth
 	}

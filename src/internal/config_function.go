@@ -3,7 +3,7 @@ package internal
 import (
 	"embed"
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -19,15 +19,32 @@ import (
 // initialConfig load and handle all configuration files (spf config,hotkeys
 // themes) setted up. Returns absolute path of dir pointing to the file Panel
 func initialConfig(dir string) (toggleDotFileBool bool, toggleFooter bool, firstFilePanelDir string) {
-	var err error
-
     // Open log stream
-	logOutput, err = os.OpenFile(variable.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	file, err := os.OpenFile(variable.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	
+	// This could be improved if we want to make superfile more resilient to errors
+	// For example if the log file directories have access issues.
+	// we could pass a dummy object to log.SetOutput() and the app would still function.
 	if err != nil {
-		log.Fatalf("Error while opening superfile.log file: %v", err)
+		// At this point, it will go to stdout since log file is not initilized
+		// Other option is using LogAndExit(fmt.Sprintf()), which is inefficient and verbose
+		LogAndExit("Error while opening superfile.log file", "error", err)
 	}
 
 	loadConfigFile()
+
+	// slog is a good inbuilt logging framework. So we dont need to use third party library
+	// It will help us to add Debug logs, but only in case of debug = true in config file
+	// to keep the performance same in case of debug = false
+	// See - https://signoz.io/guides/golang-slog/, https://go.dev/blog/slog
+	// slog uses the alternating key-and-value syntax
+	logLevel := slog.LevelInfo
+	if Config.Debug {
+		logLevel = slog.LevelDebug
+	}
+
+	slog.SetDefault(slog.New(slog.NewTextHandler(
+		file, &slog.HandlerOptions{Level: logLevel})))
 
 	loadHotkeysFile()
 
@@ -94,7 +111,7 @@ func loadConfigFile() {
 
 	data, err := os.ReadFile(variable.ConfigFile)
 	if err != nil {
-		log.Fatalf("Config file doesn't exist: %v", err)
+		LogAndExit("Config file doesn't exist", "error", err)
 	}
 
 	// Insert data present in the config file inside temp variable
@@ -113,23 +130,22 @@ func loadConfigFile() {
 	if !reflect.DeepEqual(Config, tempForCheckMissingConfig) && variable.FixConfigFile {
 		tomlData, err := toml.Marshal(Config)
 		if err != nil {
-			log.Fatalf("Error encoding config: %v", err)
+			LogAndExit("Error encoding config", "error", err)
 		}
 
 		err = os.WriteFile(variable.ConfigFile, tomlData, 0644)
 		if err != nil {
-			log.Fatalf("Error writing config file: %v", err)
+			LogAndExit("Error writing config file", "error", err)
 		}
 	}
 
+	// This changes the error code from 0 to 1, which is correct as there were failures
 	if (Config.FilePreviewWidth > 10 || Config.FilePreviewWidth < 2) && Config.FilePreviewWidth != 0 {
-		fmt.Println(loadConfigError("file_preview_width"))
-		os.Exit(0)
+		LogAndExit(loadConfigError("file_preview_width"))
 	}
 
 	if Config.SidebarWidth != 0 && (Config.SidebarWidth < 3 || Config.SidebarWidth > 20) {
-		fmt.Println(loadConfigError("sidebar_width"))
-		os.Exit(0)
+		LogAndExit(loadConfigError("sidebar_width"))
 	}
 }
 
@@ -144,14 +160,14 @@ func loadHotkeysFile() {
 	data, err := os.ReadFile(variable.HotkeysFile)
 
 	if err != nil {
-		log.Fatalf("Config file doesn't exist: %v", err)
+		LogAndExit("Config file doesn't exist", "error", err)
 	}
     // Load data from hotkeys file
 	_ = toml.Unmarshal(data, &hotkeysFromConfig)
     // Override default hotkeys with the ones from the file
 	err = toml.Unmarshal(data, &hotkeys)
 	if err != nil {
-		log.Fatalf("Error decoding hotkeys file ( your config file may have misconfigured ): %v", err)
+		LogAndExit("Error decoding hotkeys file ( your config file may have misconfigured", "error", err)
 	}
 
 	hasMissingHotkeysInConfig := !reflect.DeepEqual(hotkeys, hotkeysFromConfig)
@@ -186,15 +202,13 @@ func loadHotkeysFile() {
 		value := val.Field(i)
 
 		if value.Kind() != reflect.Slice || value.Type().Elem().Kind() != reflect.String {
-			fmt.Println(lodaHotkeysError(field.Name))
-			os.Exit(0)
+			LogAndExit(lodaHotkeysError(field.Name))
 		}
 
 		hotkeysList := value.Interface().([]string)
 
 		if len(hotkeysList) == 0 || hotkeysList[0] == "" {
-			fmt.Println(lodaHotkeysError(field.Name))
-			os.Exit(0)
+			LogAndExit(lodaHotkeysError(field.Name))
 		}
 	}
 
@@ -204,12 +218,12 @@ func loadHotkeysFile() {
 func writeHotkeysFile(hotkeys HotkeysType) {
 	tomlData, err := toml.Marshal(hotkeys)
 	if err != nil {
-		log.Fatalf("Error encoding hotkeys: %v", err)
+		LogAndExit("Error encoding hotkeys", "error", err)
 	}
 
 	err = os.WriteFile(variable.HotkeysFile, tomlData, 0644)
 	if err != nil {
-		log.Fatalf("Error writing hotkeys file: %v", err)
+		LogAndExit("Error writing hotkeys file", "error", err)
 	}
 }
 
@@ -223,7 +237,7 @@ func loadThemeFile() {
 
 	err = toml.Unmarshal(data, &theme)
 	if err != nil {
-		log.Fatalf("Error while decoding theme file( Your theme file may have errors ): %v", err)
+		LogAndExit("Error while decoding theme file( Your theme file may have errors", "error", err)
 	}
 }
 
