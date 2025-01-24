@@ -369,7 +369,7 @@ func (m model) completelyDeleteMultipleItems() {
 	panel.selected = panel.selected[:0]
 }
 
-// Copy directory or file
+// Copy directory or file's path to clipboard
 func (m *model) copySingleItem() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	m.copyItems.reset(false)
@@ -381,30 +381,12 @@ func (m *model) copySingleItem() {
 		panel.element[panel.cursor].location)
 
 	m.copyItems.items = append(m.copyItems.items, panel.element[panel.cursor].location)
-	fileInfo, err := os.Stat(panel.element[panel.cursor].location)
-	if os.IsNotExist(err) {
-		m.copyItems.reset(false)
-		return
-	}
-	if err != nil {
-		outPutLog("Copy single item get file state error", panel.element[panel.cursor].location, err)
-	}
-
-	if !fileInfo.IsDir() && float64(fileInfo.Size())/(1024*1024) < 250 {
-		fileContent, err := os.ReadFile(panel.element[panel.cursor].location)
-
-		if err != nil {
-			outPutLog("Copy single item read file error", panel.element[panel.cursor].location, err)
-		}
-
-		if err := clipboard.WriteAll(string(fileContent)); err != nil {
-			outPutLog("Copy single item write file error", panel.element[panel.cursor].location, err)
-		}
-	}
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+	// We dont need to copy file's content to clipboard.
+	// It causes issues in windows, could be a security concern
+	// and its inefficient.
 }
 
-// Copy all selected file or directory to the clipboard
+// Copy all selected file or directory's paths to the clipboard
 func (m *model) copyMultipleItem() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	m.copyItems.reset(false)
@@ -414,29 +396,9 @@ func (m *model) copyMultipleItem() {
 	slog.Debug("handle_file_operations.copyMultipleItem", "panel selected files", 
 		panel.selected)
 	m.copyItems.items = panel.selected
-	fileInfo, err := os.Stat(panel.selected[0])
-	if os.IsNotExist(err) {
-		return
-	}
-	if err != nil {
-		outPutLog("Copy multiple item function get file state error", panel.selected[0], err)
-	}
-
-	if !fileInfo.IsDir() && float64(fileInfo.Size())/(1024*1024) < 250 {
-		fileContent, err := os.ReadFile(panel.selected[0])
-
-		if err != nil {
-			outPutLog("Copy multiple item function read file error", err)
-		}
-
-		if err := clipboard.WriteAll(string(fileContent)); err != nil {
-			outPutLog("Copy multiple item function write file to clipboard error", err)
-		}
-	}
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
-// Cut directory or file
+// Cut directory or file - put path in clipboard
 func (m *model) cutSingleItem() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	m.copyItems.reset(true)
@@ -445,27 +407,6 @@ func (m *model) cutSingleItem() {
 	}
 	
 	m.copyItems.items = append(m.copyItems.items, panel.element[panel.cursor].location)
-	fileInfo, err := os.Stat(panel.element[panel.cursor].location)
-	if os.IsNotExist(err) {
-		m.copyItems.reset(true)
-		return
-	}
-	if err != nil {
-		outPutLog("Cut single item get file state error", panel.element[panel.cursor].location, err)
-	}
-
-	if !fileInfo.IsDir() && float64(fileInfo.Size())/(1024*1024) < 250 {
-		fileContent, err := os.ReadFile(panel.element[panel.cursor].location)
-
-		if err != nil {
-			outPutLog("Cut single item read file error", panel.element[panel.cursor].location, err)
-		}
-
-		if err := clipboard.WriteAll(string(fileContent)); err != nil {
-			outPutLog("Cut single item write file error", panel.element[panel.cursor].location, err)
-		}
-	}
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 // Cut all selected file or directory to the clipboard
@@ -476,39 +417,19 @@ func (m *model) cutMultipleItem() {
 		return
 	}
 	m.copyItems.items = panel.selected
-	fileInfo, err := os.Stat(panel.selected[0])
-	if os.IsNotExist(err) {
-		return
-	}
-	if err != nil {
-		outPutLog("Copy multiple item function get file state error", panel.selected[0], err)
-	}
-
-	if !fileInfo.IsDir() && float64(fileInfo.Size())/(1024*1024) < 250 {
-		fileContent, err := os.ReadFile(panel.selected[0])
-
-		if err != nil {
-			outPutLog("Copy multiple item function read file error", err)
-		}
-
-		if err := clipboard.WriteAll(string(fileContent)); err != nil {
-			outPutLog("Copy multiple item function write file to clipboard error", err)
-		}
-	}
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 // Paste all clipboard items
 func (m model) pasteItem() {
-	id := shortuuid.New()
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-
 	if len(m.copyItems.items) == 0 {
 		return
 	}
 
+	id := shortuuid.New()
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	totalFiles := 0
 
+	// Todo check
 	for _, folderPath := range m.copyItems.items {
 		count, err := countFiles(folderPath)
 		if err != nil {
@@ -582,14 +503,20 @@ func (m model) pasteItem() {
 		}
 	}
 
-	p.state = successful
-	p.done = totalFiles
-	p.doneTime = time.Now()
+	if p.state != failure {
+		p.state = successful
+		p.done = totalFiles
+		p.doneTime = time.Now()
+	
+	}
 	message.processNewState = p
 	channel <- message
 
 	m.processBarModel.process[id] = p
+	
+	//dont reset item slice
 	m.copyItems.cut = false
+	
 }
 
 // Extrach compress file
