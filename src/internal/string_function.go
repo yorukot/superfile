@@ -3,6 +3,7 @@ package internal
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"math"
 	"os"
 	"strings"
@@ -142,6 +143,17 @@ func checkAndTruncateLineLengths(text string, maxLength int) string {
 	return finalResult
 }
 
+// Separated this out out for easy testing
+func isBufferPrintable(buffer []byte) bool {
+	for _, b := range buffer {
+		// This will also handle b==0
+		if !unicode.IsPrint(rune(b)) && !unicode.IsSpace(rune(b)) {
+			return false
+		}
+	}
+	return true
+}
+
 // Check file is text file or not
 func isTextFile(filename string) (bool, error) {
 	file, err := os.Open(filename)
@@ -152,19 +164,28 @@ func isTextFile(filename string) (bool, error) {
 
 	reader := bufio.NewReader(file)
 	buffer := make([]byte, 1024)
-	_, err = reader.Read(buffer)
-	if err != nil {
+	cnt, err := reader.Read(buffer)
+	if err != nil && err != io.EOF {
 		return false, err
 	}
+	return isBufferPrintable(buffer[:cnt]), nil
+}
 
-	for _, b := range buffer {
-		if b == 0 {
-			return false, nil
-		}
-		if !unicode.IsPrint(rune(b)) && !unicode.IsSpace(rune(b)) {
-			return false, nil
+
+// Although some characters like `\x0b`(vertical tab) are printable, 
+// previewing them breaks the layout. 
+// So, among the "non-graphic" printable characters, we only need \n and \t 
+// Space and NBSP are already considered graphic by unicode.
+func makePrintable(line string)(string) {
+	var sb strings.Builder
+	// This has to be looped byte-wise, looping it rune-wise 
+	// or by using strings.Map would cause issues with strings like
+	// "(NBSP)\xa0"
+	for i:=0; i<len(line); i++ {
+		r := rune(line[i])
+		if unicode.IsGraphic(r) || r == rune('\t') || r == rune('\n') {
+			sb.WriteByte(line[i])
 		}
 	}
-
-	return true, nil
+	return sb.String()
 }
