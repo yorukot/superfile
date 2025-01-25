@@ -422,18 +422,34 @@ func (m *model) cutMultipleItem() {
 // pointer was not passed here, it was also causing buggy behaviour
 // for example, unable to set cut to false
 func (m *model) pasteItem() {
+	// Return before needless initialising id or panel, if we have to.
 	if len(m.copyItems.items) == 0 {
 		return
 	}
 
 	id := shortuuid.New()
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	// Avoid copying of panel struct that is 10K bytes.
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	totalFiles := 0
 
 	// Todo check
 	for _, folderPath := range m.copyItems.items {
+		// Cur : check this 
+		// This is inefficient
+		// In case of a cut operations for a directory with a lot of files
+		// we are unnecessarily walking the whole directory recursively
+		// while os will just perform a rename 
+		// So instead of few operations this will cause the cut paste 
+		// to read the whole directory recursively
+		// we should avoid doing this.
+		// Although this allows us a more detailed progress tracking
+		// this make the copy/cut more inefficient
+		// instead, we could just track progress based on total items in
+		// m.copyItems.items 
+		// efficiency should be prioritized over more detailed feedback.
 		count, err := countFiles(folderPath)
 		if err != nil {
+			slog.Error("mode.pasteItem - Error in countFiles", "error", err)
 			continue
 		}
 		totalFiles += count
@@ -484,16 +500,20 @@ func (m *model) pasteItem() {
 		if m.copyItems.cut && !isExternalDiskPath(filePath) {
 			err = moveElement(filePath, filepath.Join(panel.location, filepath.Base(filePath)))
 		} else {
-			// This is a big struct(10768 bytes as of now). 
+			// model is a big struct(10768 bytes as of now). 
 			// Instead of passing it around as a value, better to send it as pointer only
 			// We need to reduce passing of model by value as much as possible
-			newModel, err := pasteDir(filePath, filepath.Join(panel.location, filepath.Base(filePath)), id, *m)
+			err = pasteDir(filePath, filepath.Join(panel.location, filepath.Base(filePath)), id, m)
 			if err != nil {
 				errMessage = "paste item error"
-			}
-			*m = newModel
-			if m.copyItems.cut {
-				os.RemoveAll(filePath)
+			} else {
+				// moving this in else block fixes the wrong behaviour, when we would 
+				// remove files, even when paste failed.
+				// These error cases are hard to test. We have to somehow make the paste operations fail, 
+				// which is time cosuming and manual. We should test these with automated testcases
+				if m.copyItems.cut {
+					os.RemoveAll(filePath)
+				}
 			}
 		}
 		p = m.processBarModel.process[id]
@@ -507,20 +527,19 @@ func (m *model) pasteItem() {
 		}
 	}
 
+	// This fixes current issue, when failed processes were also marked as success.
 	if p.state != failure {
 		p.state = successful
 		p.done = totalFiles
 		p.doneTime = time.Now()
-	
 	}
 	message.processNewState = p
 	channel <- message
 
 	m.processBarModel.process[id] = p
-	
-	//dont reset item slice
-	m.copyItems.cut = false
-	
+	// reset after paste is done. set cut to false
+	// remove times. As the current items in clipboard are anyways delete
+	m.copyItems.reset(false)
 }
 
 // Extrach compress file

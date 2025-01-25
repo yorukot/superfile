@@ -2,7 +2,6 @@ package internal
 
 import (
 	"fmt"
-	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -211,14 +210,11 @@ func (m *model) toggleFooterController() {
 // Focus on search bar
 func (m *model) searchBarFocus() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	slog.Debug("model.searchBarFocus", "focused", panel.searchBar.Focused())
 	if panel.searchBar.Focused() {
 		panel.searchBar.Blur()
 	} else {
 		panel.searchBar.Focus()
 	}
-
-	m.firstTextInput = true
 
 	// config search bar width
 	panel.searchBar.Width = m.fileModel.width - 4

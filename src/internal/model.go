@@ -180,7 +180,6 @@ func (m model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) (model, tea.Cmd) {
 	slog.Debug("model.handleKeyInput", "msg", msg, "typestr", msg.Type.String(),
 		"runes", msg.Runes, "type", int(msg.Type), "paste", msg.Paste, 
 		"alt", msg.Alt)
-	
 	slog.Debug("model.handleKeyInput. model info. ",
 		"filePanelFocusIndex", m.filePanelFocusIndex, 
 		"filePanel.focusType", m.fileModel.filePanels[m.filePanelFocusIndex].focusType,
@@ -193,8 +192,6 @@ func (m model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) (model, tea.Cmd) {
 		"firstTextInput", m.firstTextInput,
 		"focusPanel", m.focusPanel,
 	)
-	// focus type 
-	// panel mode
 
 	if firstUse {
 		firstUse = false
@@ -241,36 +238,25 @@ func (m model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) (model, tea.Cmd) {
 		// Handles general kinds of inputs in the regular state of the application
 		cmd = m.mainKey(msg.String(), cmd)
 	}
-
-	slog.Debug("[temp] model.handleKeyInput returning")
 	return m, cmd
 }
 
 // Update the file panel state. Change name of renamed files, filter out files
 // in search, update typingb bar, etc
 func (m *model) updateFilePanelsState(msg tea.Msg, cmd *tea.Cmd) {
-
 	focusPanel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-
-
-	//slog.Debug("[temp] model.udpateFilePanelsState", 
-	//	"firstText", m.firstTextInput,
-	//	"searcBar value", focusPanel.searchBar.Value(),
-	//	"tea.Msg", msg,
-	//)
-
 	if m.firstTextInput {
 		m.firstTextInput = false
 	} else if m.fileModel.renaming {
 		focusPanel.rename, *cmd = focusPanel.rename.Update(msg)
 	} else if focusPanel.searchBar.Focused() {
 		focusPanel.searchBar, *cmd = focusPanel.searchBar.Update(msg)
-		//for _, hotkey := range hotkeys.SearchBar {
-		//	if hotkey == focusPanel.searchBar.Value() {
-		//		focusPanel.searchBar.SetValue("")
-		//		break
-		//	}
-		//}
+		for _, hotkey := range hotkeys.SearchBar {
+			if hotkey == focusPanel.searchBar.Value() {
+				focusPanel.searchBar.SetValue("")
+				break
+			}
+		}
 	} else if m.commandLine.input.Focused() {
 		m.commandLine.input, *cmd = m.commandLine.input.Update(msg)
 	} else if m.typingModal.open {

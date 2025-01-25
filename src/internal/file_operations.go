@@ -160,10 +160,11 @@ func trashMacOrLinux(src string) error {
 }
 
 // pasteDir handles directory copying with progress tracking
-func pasteDir(src, dst string, id string, m model) (model, error) {
+// The new model returned would only have changes in m.processBarModel.process[id] 
+func pasteDir(src, dst string, id string, m *model) (error) {
 	dst, err := renameIfDuplicate(dst)
 	if err != nil {
-		return m, err
+		return err
 	}
 
 	// Check if we can do a fast move within the same partition
@@ -172,7 +173,7 @@ func pasteDir(src, dst string, id string, m model) (model, error) {
 		// For cut operations on same partition, try fast rename first
 		err = os.Rename(src, dst)
 		if err == nil {
-			return m, nil
+			return nil
 		}
 		// If rename fails, fall back to manual copy
 	}
@@ -241,16 +242,16 @@ func pasteDir(src, dst string, id string, m model) (model, error) {
 	})
 
 	if err != nil {
-		return m, err
+		return err
 	}
 
 	// If this was a cut operation and we had to do a manual copy, remove the source
 	if m.copyItems.cut && !sameDev {
 		err = os.RemoveAll(src)
 		if err != nil {
-			return m, fmt.Errorf("failed to remove source after move: %v", err)
+			return fmt.Errorf("failed to remove source after move: %v", err)
 		}
 	}
 
-	return m, nil
+	return nil
 }

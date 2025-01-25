@@ -1,10 +1,6 @@
 package internal
 
-import (
-	"log/slog"
-
-	tea "github.com/charmbracelet/bubbletea"
-)
+import tea "github.com/charmbracelet/bubbletea"
 
 func containsKey(v string, a []string) string {
 	for _, i := range a {
@@ -292,7 +288,6 @@ func (m *model) renamingKey(msg string) {
 
 // Check the key input and cancel or confirms the search
 func (m *model) focusOnSearchbarKey(msg string) {
-	slog.Debug("[Temp] model.focusOnSearchbarKey", "msg", msg)
 	switch msg {
 	case containsKey(msg, hotkeys.CancelTyping):
 		m.cancelSearch()
