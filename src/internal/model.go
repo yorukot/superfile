@@ -59,9 +59,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.handleWindowResize(msg)
 	case tea.MouseMsg:
-		m, cmd = wheelMainAction(msg.String(), m, cmd)
+		cmd = wheelMainAction(msg.String(), &m, cmd)
 	case tea.KeyMsg:
-		m, cmd = m.handleKeyInput(msg, cmd)
+		cmd = m.handleKeyInput(msg, cmd)
 	}
 
 	m.updateFilePanelsState(msg, &cmd)
@@ -175,7 +175,7 @@ func (m *model) setHelpMenuSize() {
 
 // Identify the current state of the application m and properly handle the
 // msg keybind pressed
-func (m model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) (model, tea.Cmd) {
+func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 	
 	slog.Debug("model.handleKeyInput", "msg", msg, "typestr", msg.Type.String(),
 		"runes", msg.Runes, "type", int(msg.Type), "paste", msg.Paste, 
@@ -195,7 +195,7 @@ func (m model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) (model, tea.Cmd) {
 
 	if firstUse {
 		firstUse = false
-		return m, cmd
+		return cmd
 	}
 
 	if m.typingModal.open {
@@ -222,23 +222,23 @@ func (m model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) (model, tea.Cmd) {
 		quit := m.confirmToQuitSuperfile(msg.String())
 		if quit {
 			m.quitSuperfile()
-			return m, tea.Quit
+			return tea.Quit
 		}
 		// If quiting input pressed, check if has any runing process and displays a
 		// warn. Otherwise just quits application
 	} else if msg.String() == containsKey(msg.String(), hotkeys.Quit) {
 		if m.hasRunningProcesses() {
 			m.warnModalForQuit()
-			return m, cmd
+			return cmd
 		}
 
 		m.quitSuperfile()
-		return m, tea.Quit
+		return tea.Quit
 	} else {
 		// Handles general kinds of inputs in the regular state of the application
 		cmd = m.mainKey(msg.String(), cmd)
 	}
-	return m, cmd
+	return cmd
 }
 
 // Update the file panel state. Change name of renamed files, filter out files
@@ -439,7 +439,7 @@ func (m *model) getFilePanelItems() {
 
 // Close superfile application. Cd into the curent dir if CdOnQuit on and save
 // the path in state direcotory
-func (m model) quitSuperfile() {
+func (m *model) quitSuperfile() {
     // close exiftool session
     if Config.Metadata {
         et.Close();

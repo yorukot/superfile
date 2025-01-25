@@ -496,6 +496,8 @@ func (m *model) pasteItem() {
 		}
 		p = m.processBarModel.process[id]
 		if err != nil {
+			slog.Debug("model.pasteItem - paste failure", "error", err,
+				"current item", filePath, "errMessage", errMessage)
 			p.state = failure
 			message.processNewState = p
 			channel <- message
@@ -514,9 +516,11 @@ func (m *model) pasteItem() {
 	channel <- message
 
 	m.processBarModel.process[id] = p
-	// reset after paste is done. set cut to false clear items slice. 
-	// The current items in clipboard are anyways deleted now
-	m.copyItems.reset(false)
+	// Reset after paste is done. Only in case of cut  
+	// because current items in clipboard are deleted now
+	if m.copyItems.cut {
+		m.copyItems.reset(false)
+	}
 }
 
 // Extrach compress file
