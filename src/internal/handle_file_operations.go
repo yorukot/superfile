@@ -3,7 +3,6 @@ package internal
 import (
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"log/slog"
 	"strings"
@@ -384,6 +383,7 @@ func (m *model) copySingleItem() {
 	// We dont need to copy file's content to clipboard.
 	// It causes issues in windows, could be a security concern
 	// and its inefficient.
+	// Also no need to copy back panel variable, we didn't modify it.
 }
 
 // Copy all selected file or directory's paths to the clipboard
@@ -405,7 +405,6 @@ func (m *model) cutSingleItem() {
 	if len(panel.element) == 0 {
 		return
 	}
-	
 	m.copyItems.items = append(m.copyItems.items, panel.element[panel.cursor].location)
 }
 
@@ -420,7 +419,9 @@ func (m *model) cutMultipleItem() {
 }
 
 // Paste all clipboard items
-func (m model) pasteItem() {
+// pointer was not passed here, it was also causing buggy behaviour
+// for example, unable to set cut to false
+func (m *model) pasteItem() {
 	if len(m.copyItems.items) == 0 {
 		return
 	}
@@ -438,8 +439,8 @@ func (m model) pasteItem() {
 		totalFiles += count
 	}
 
-	slog.Debug("model.pasteItem",  "items", m.copyItems.items, 
-		"totalFiles", totalFiles, "panel location", panel.location) 
+	slog.Debug("model.pasteItem",  "items", m.copyItems.items, "cut", m.copyItems.cut,
+		"totalFiles", totalFiles, "panel location", panel.location)
 
 	prog := progress.New(generateGradientColor())
 	prog.PercentageStyle = footerStyle
@@ -481,13 +482,16 @@ func (m model) pasteItem() {
 
 		errMessage := "cut item error"
 		if m.copyItems.cut && !isExternalDiskPath(filePath) {
-			err = moveElement(filePath, filepath.Join(panel.location, path.Base(filePath)))
+			err = moveElement(filePath, filepath.Join(panel.location, filepath.Base(filePath)))
 		} else {
-			newModel, err := pasteDir(filePath, filepath.Join(panel.location, path.Base(filePath)), id, m)
+			// This is a big struct(10768 bytes as of now). 
+			// Instead of passing it around as a value, better to send it as pointer only
+			// We need to reduce passing of model by value as much as possible
+			newModel, err := pasteDir(filePath, filepath.Join(panel.location, filepath.Base(filePath)), id, *m)
 			if err != nil {
 				errMessage = "paste item error"
 			}
-			m = newModel
+			*m = newModel
 			if m.copyItems.cut {
 				os.RemoveAll(filePath)
 			}

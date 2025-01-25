@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"strings"
 
 	"github.com/barasher/go-exiftool"
@@ -45,6 +46,11 @@ func initialConfig(dir string) (toggleDotFileBool bool, toggleFooter bool, first
 
 	slog.SetDefault(slog.New(slog.NewTextHandler(
 		file, &slog.HandlerOptions{Level: logLevel})))
+	
+	// model struct is 10768 bytes as of now. 
+	// "model struct size(bytes)", reflect.ValueOf(model{}).Type().Size()
+	// filePanel is 10576 bytes
+	slog.Debug("Runtime information", "runtime.GOOS", runtime.GOOS)
 
 	loadHotkeysFile()
 
