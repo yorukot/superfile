@@ -1,6 +1,6 @@
 ---
 title: Custom hotkeys
-description: Custom your own hotkeys
+description: Customize your own hotkeys
 head:
   - tag: title
     content: Custom hotkeys | superfile
@@ -15,6 +15,12 @@ You can enter the following command to set it up;
 ```bash
 $EDITOR HOTKEYS_PATH
 ```
+
+:::caution
+Please do not use hotkeys with ascii codes conflicting with keys used to control superfile : 
+- `Ctrl+M` - conflicts with `Enter` Key
+- `Ctrl+?`, `Ctrl+[` - conflicts with `Delete` and `Backspace` Key
+:::
 
 ### Default superfile hotkeys
 
