@@ -214,7 +214,6 @@ func (m *model) searchBarFocus() {
 		panel.searchBar.Blur()
 	} else {
 		panel.searchBar.Focus()
-		m.firstTextInput = true
 	}
 
 	// config search bar width

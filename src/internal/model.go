@@ -235,6 +235,12 @@ func (m *model) updateFilePanelsState(msg tea.Msg, cmd *tea.Cmd) {
 		focusPanel.rename, *cmd = focusPanel.rename.Update(msg)
 	} else if focusPanel.searchBar.Focused() {
 		focusPanel.searchBar, *cmd = focusPanel.searchBar.Update(msg)
+		for _, hotkey := range hotkeys.SearchBar {
+			if hotkey == focusPanel.searchBar.Value() {
+				focusPanel.searchBar.SetValue("")
+				break
+			}
+		}
 	} else if m.commandLine.input.Focused() {
 		m.commandLine.input, *cmd = m.commandLine.input.Update(msg)
 	} else if m.typingModal.open {
