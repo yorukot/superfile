@@ -47,11 +47,7 @@ func initialConfig(dir string) (toggleDotFileBool bool, toggleFooter bool, first
 	slog.SetDefault(slog.New(slog.NewTextHandler(
 		file, &slog.HandlerOptions{Level: logLevel})))
 	
-	// model struct is 10768 bytes as of now. 
-	// "model struct size(bytes)", reflect.ValueOf(model{}).Type().Size()
-	// filePanel is 10576 bytes
-	slog.Debug("Runtime information", "runtime.GOOS", runtime.GOOS,
-		"process struct size(bytes)", reflect.ValueOf(process{}).Type().Size())
+	slog.Debug("Runtime information", "runtime.GOOS", runtime.GOOS)
 
 	loadHotkeysFile()
 
@@ -146,7 +142,7 @@ func loadConfigFile() {
 		}
 	}
 
-	// This changes the error code from 0 to 1, which is correct as there were failures
+	// This also changes the error code from 0 to 1, which is correct as there were failures
 	if (Config.FilePreviewWidth > 10 || Config.FilePreviewWidth < 2) && Config.FilePreviewWidth != 0 {
 		LogAndExit(loadConfigError("file_preview_width"))
 	}

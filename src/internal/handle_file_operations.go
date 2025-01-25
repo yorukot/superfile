@@ -422,7 +422,7 @@ func (m *model) cutMultipleItem() {
 // pointer was not passed here, it was also causing buggy behaviour
 // for example, unable to set cut to false
 func (m *model) pasteItem() {
-	// Return before needless initialising id or panel, if we have to.
+	// Return before needlessly initialising id or panel, if we have to.
 	if len(m.copyItems.items) == 0 {
 		return
 	}
@@ -432,9 +432,7 @@ func (m *model) pasteItem() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	totalFiles := 0
 
-	// Todo check
 	for _, folderPath := range m.copyItems.items {
-		// Cur : check this 
 		// This is inefficient
 		// In case of a cut operations for a directory with a lot of files
 		// we are unnecessarily walking the whole directory recursively
@@ -527,7 +525,6 @@ func (m *model) pasteItem() {
 		}
 	}
 
-	// This fixes current issue, when failed processes were also marked as success.
 	if p.state != failure {
 		p.state = successful
 		p.done = totalFiles
@@ -537,8 +534,8 @@ func (m *model) pasteItem() {
 	channel <- message
 
 	m.processBarModel.process[id] = p
-	// reset after paste is done. set cut to false
-	// remove times. As the current items in clipboard are anyways delete
+	// reset after paste is done. set cut to false clear items slice. 
+	// The current items in clipboard are anyways deleted now
 	m.copyItems.reset(false)
 }
 

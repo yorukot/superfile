@@ -160,7 +160,7 @@ func trashMacOrLinux(src string) error {
 }
 
 // pasteDir handles directory copying with progress tracking
-// The new model returned would only have changes in m.processBarModel.process[id] 
+// model would only have changes in m.processBarModel.process[id] 
 func pasteDir(src, dst string, id string, m *model) (error) {
 	dst, err := renameIfDuplicate(dst)
 	if err != nil {
