@@ -74,6 +74,13 @@ func (m *model) panelItemRename() {
 	if len(panel.element) == 0 {
 		return
 	}
+
+	cursorPos := strings.LastIndex(panel.element[panel.cursor].name, ".")
+	nameLen := len(panel.element[panel.cursor].name)
+	if cursorPos == -1 || cursorPos == 0 && nameLen > 0 || panel.element[panel.cursor].directory {
+		cursorPos = nameLen
+	}
+
 	ti := textinput.New()
 	ti.Cursor.Style = filePanelCursorStyle
 	ti.Cursor.TextStyle = filePanelStyle
@@ -83,6 +90,7 @@ func (m *model) panelItemRename() {
 	ti.Placeholder = "New name"
 	ti.PlaceholderStyle = modalStyle
 	ti.SetValue(panel.element[panel.cursor].name)
+	ti.SetCursor(cursorPos)
 	ti.Focus()
 	ti.CharLimit = 156
 	ti.Width = m.fileModel.width - 4
