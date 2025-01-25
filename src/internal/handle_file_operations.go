@@ -368,53 +368,33 @@ func (m model) completelyDeleteMultipleItems() {
 	panel.selected = panel.selected[:0]
 }
 
-// Copy directory or file's path to clipboard
-func (m *model) copySingleItem() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	m.copyItems.reset(false)
+
+// We dont need to copy file's content to system clipboard.
+// It causes issues in windows, could be a security concern
+// and its inefficient.
+// Also no need to copy back panel variable, we didn't modify it.
+// Copy directory or file's path to sueprfile clipboard
+// set cut to true/false accordingly
+func (m *model) copySingleItem(cut bool) {
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+	m.copyItems.reset(cut)
 	if len(panel.element) == 0 {
 		return
 	}
-
-	slog.Debug("handle_file_operations.copySingleItem", "panel location", 
-		panel.element[panel.cursor].location)
-
+	slog.Debug("handle_file_operations.copySingleItem", "cut", cut,
+		"panel location", panel.element[panel.cursor].location)
 	m.copyItems.items = append(m.copyItems.items, panel.element[panel.cursor].location)
-	// We dont need to copy file's content to clipboard.
-	// It causes issues in windows, could be a security concern
-	// and its inefficient.
-	// Also no need to copy back panel variable, we didn't modify it.
 }
 
 // Copy all selected file or directory's paths to the clipboard
-func (m *model) copyMultipleItem() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	m.copyItems.reset(false)
+func (m *model) copyMultipleItem(cut bool) {
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+	m.copyItems.reset(cut)
 	if len(panel.selected) == 0 {
 		return
 	}
-	slog.Debug("handle_file_operations.copyMultipleItem", "panel selected files", 
-		panel.selected)
-	m.copyItems.items = panel.selected
-}
-
-// Cut directory or file - put path in clipboard
-func (m *model) cutSingleItem() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	m.copyItems.reset(true)
-	if len(panel.element) == 0 {
-		return
-	}
-	m.copyItems.items = append(m.copyItems.items, panel.element[panel.cursor].location)
-}
-
-// Cut all selected file or directory to the clipboard
-func (m *model) cutMultipleItem() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	m.copyItems.reset(true)
-	if len(panel.selected) == 0 {
-		return
-	}
+	slog.Debug("handle_file_operations.copyMultipleItem", "cut", cut, 
+		"panel selected files", panel.selected)
 	m.copyItems.items = panel.selected
 }
 
