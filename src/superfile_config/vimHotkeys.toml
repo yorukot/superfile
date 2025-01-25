@@ -20,7 +20,7 @@ toggle_reverse_sort = ['R', '']
 # change focus
 focus_on_process_bar = ['ctrl+p', '']
 focus_on_sidebar = ['ctrl+s', '']
-focus_on_metadata = ['ctrl+m', '']
+focus_on_metadata = ['ctrl+d', '']
 # create file/directory and rename
 file_panel_item_create = ['a', '']
 file_panel_item_rename = ['r', '']

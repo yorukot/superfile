@@ -23,22 +23,16 @@ func initialConfig(dir string) (toggleDotFileBool bool, toggleFooter bool, first
     // Open log stream
 	file, err := os.OpenFile(variable.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	
-	// This could be improved if we want to make superfile more resilient to errors
+	// Todo : This could be improved if we want to make superfile more resilient to errors
 	// For example if the log file directories have access issues.
 	// we could pass a dummy object to log.SetOutput() and the app would still function.
 	if err != nil {
 		// At this point, it will go to stdout since log file is not initilized
-		// Other option is using LogAndExit(fmt.Sprintf()), which is inefficient and verbose
 		LogAndExit("Error while opening superfile.log file", "error", err)
 	}
 
 	loadConfigFile()
 
-	// slog is a good inbuilt logging framework. So we dont need to use third party library
-	// It will help us to add Debug logs, but only in case of debug = true in config file
-	// to keep the performance same in case of debug = false
-	// See - https://signoz.io/guides/golang-slog/, https://go.dev/blog/slog
-	// slog uses the alternating key-and-value syntax
 	logLevel := slog.LevelInfo
 	if Config.Debug {
 		logLevel = slog.LevelDebug
@@ -142,7 +136,6 @@ func loadConfigFile() {
 		}
 	}
 
-	// This also changes the error code from 0 to 1, which is correct as there were failures
 	if (Config.FilePreviewWidth > 10 || Config.FilePreviewWidth < 2) && Config.FilePreviewWidth != 0 {
 		LogAndExit(loadConfigError("file_preview_width"))
 	}
@@ -205,13 +198,13 @@ func loadHotkeysFile() {
 		value := val.Field(i)
 
 		if value.Kind() != reflect.Slice || value.Type().Elem().Kind() != reflect.String {
-			LogAndExit(lodaHotkeysError(field.Name))
+			LogAndExit(loadHotkeysError(field.Name))
 		}
 
 		hotkeysList := value.Interface().([]string)
 
 		if len(hotkeysList) == 0 || hotkeysList[0] == "" {
-			LogAndExit(lodaHotkeysError(field.Name))
+			LogAndExit(loadHotkeysError(field.Name))
 		}
 	}
 

@@ -376,12 +376,7 @@ func (m model) completelyDeleteMultipleItems() {
 	panel.selected = panel.selected[:0]
 }
 
-
-// We dont need to copy file's content to system clipboard.
-// It causes issues in windows, could be a security concern
-// and its inefficient.
-// Also no need to copy back panel variable, we didn't modify it.
-// Copy directory or file's path to sueprfile clipboard
+// Copy directory or file's path to superfile's clipboard
 // set cut to true/false accordingly
 func (m *model) copySingleItem(cut bool) {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
@@ -407,21 +402,17 @@ func (m *model) copyMultipleItem(cut bool) {
 }
 
 // Paste all clipboard items
-// pointer was not passed here, it was also causing buggy behaviour
-// for example, unable to set cut to false
 func (m *model) pasteItem() {
-	// Return before needlessly initialising id or panel, if we have to.
 	if len(m.copyItems.items) == 0 {
 		return
 	}
 
 	id := shortuuid.New()
-	// Avoid copying of panel struct that is 10K bytes.
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	totalFiles := 0
 
 	for _, folderPath := range m.copyItems.items {
-		// This is inefficient
+		// Todo : Fix this. This is inefficient
 		// In case of a cut operations for a directory with a lot of files
 		// we are unnecessarily walking the whole directory recursively
 		// while os will just perform a rename 
@@ -486,17 +477,12 @@ func (m *model) pasteItem() {
 		if m.copyItems.cut && !isExternalDiskPath(filePath) {
 			err = moveElement(filePath, filepath.Join(panel.location, filepath.Base(filePath)))
 		} else {
-			// model is a big struct(10768 bytes as of now). 
-			// Instead of passing it around as a value, better to send it as pointer only
-			// We need to reduce passing of model by value as much as possible
 			err = pasteDir(filePath, filepath.Join(panel.location, filepath.Base(filePath)), id, m)
 			if err != nil {
 				errMessage = "paste item error"
 			} else {
-				// moving this in else block fixes the wrong behaviour, when we would 
-				// remove files, even when paste failed.
-				// These error cases are hard to test. We have to somehow make the paste operations fail, 
-				// which is time cosuming and manual. We should test these with automated testcases
+				// Todo : These error cases are hard to test. We have to somehow make the paste operations fail, 
+				// which is time consuming and manual. We should test these with automated testcases
 				if m.copyItems.cut {
 					os.RemoveAll(filePath)
 				}

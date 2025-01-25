@@ -211,15 +211,12 @@ func arrayContains(s []string, str string) bool {
 	return false
 }
 
-// Eventually we will replace all calls to direct slog calls
+// Todo : Eventually we will replace all calls to direct slog calls
 func outPutLog(values ...interface{}) {
 	slog.Info(fmt.Sprintln(values...))
 }
 
-// Eventually we want to remove all such usage that can result in app exiting abruptly
-// Its better than log.Fatalf as it allows structure logging with key, value pairs 
-// without having to use expensive string formatting
-// Also using both `log` and `slog` together is not useful
+// Todo : Eventually we want to remove all such usage that can result in app exiting abruptly
 func LogAndExit(msg string, values ...any) {
 	slog.Error(msg, values...)
 	os.Exit(1)
