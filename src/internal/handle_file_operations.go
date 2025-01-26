@@ -3,8 +3,8 @@ package internal
 import (
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
+	"log/slog"
 	"strings"
 	"time"
 
@@ -376,150 +376,64 @@ func (m model) completelyDeleteMultipleItems() {
 	panel.selected = panel.selected[:0]
 }
 
-// Copy directory or file
-func (m *model) copySingleItem() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	m.copyItems.cut = false
-	m.copyItems.items = m.copyItems.items[:0]
+// Copy directory or file's path to superfile's clipboard
+// set cut to true/false accordingly
+func (m *model) copySingleItem(cut bool) {
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+	m.copyItems.reset(cut)
 	if len(panel.element) == 0 {
 		return
 	}
+	slog.Debug("handle_file_operations.copySingleItem", "cut", cut,
+		"panel location", panel.element[panel.cursor].location)
 	m.copyItems.items = append(m.copyItems.items, panel.element[panel.cursor].location)
-	fileInfo, err := os.Stat(panel.element[panel.cursor].location)
-	if os.IsNotExist(err) {
-		m.copyItems.items = m.copyItems.items[:0]
-		return
-	}
-	if err != nil {
-		outPutLog("Copy single item get file state error", panel.element[panel.cursor].location, err)
-	}
-
-	if !fileInfo.IsDir() && float64(fileInfo.Size())/(1024*1024) < 250 {
-		fileContent, err := os.ReadFile(panel.element[panel.cursor].location)
-
-		if err != nil {
-			outPutLog("Copy single item read file error", panel.element[panel.cursor].location, err)
-		}
-
-		if err := clipboard.WriteAll(string(fileContent)); err != nil {
-			outPutLog("Copy single item write file error", panel.element[panel.cursor].location, err)
-		}
-	}
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
-// Copy all selected file or directory to the clipboard
-func (m *model) copyMultipleItem() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	m.copyItems.cut = false
-	m.copyItems.items = m.copyItems.items[:0]
+// Copy all selected file or directory's paths to the clipboard
+func (m *model) copyMultipleItem(cut bool) {
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+	m.copyItems.reset(cut)
 	if len(panel.selected) == 0 {
 		return
 	}
+	slog.Debug("handle_file_operations.copyMultipleItem", "cut", cut, 
+		"panel selected files", panel.selected)
 	m.copyItems.items = panel.selected
-	fileInfo, err := os.Stat(panel.selected[0])
-	if os.IsNotExist(err) {
-		return
-	}
-	if err != nil {
-		outPutLog("Copy multiple item function get file state error", panel.selected[0], err)
-	}
-
-	if !fileInfo.IsDir() && float64(fileInfo.Size())/(1024*1024) < 250 {
-		fileContent, err := os.ReadFile(panel.selected[0])
-
-		if err != nil {
-			outPutLog("Copy multiple item function read file error", err)
-		}
-
-		if err := clipboard.WriteAll(string(fileContent)); err != nil {
-			outPutLog("Copy multiple item function write file to clipboard error", err)
-		}
-	}
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
-}
-
-// Cut directory or file
-func (m *model) cutSingleItem() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	m.copyItems.cut = true
-	m.copyItems.items = m.copyItems.items[:0]
-	if len(panel.element) == 0 {
-		return
-	}
-	m.copyItems.items = append(m.copyItems.items, panel.element[panel.cursor].location)
-	fileInfo, err := os.Stat(panel.element[panel.cursor].location)
-	if os.IsNotExist(err) {
-		m.copyItems.items = m.copyItems.items[:0]
-		return
-	}
-	if err != nil {
-		outPutLog("Cut single item get file state error", panel.element[panel.cursor].location, err)
-	}
-
-	if !fileInfo.IsDir() && float64(fileInfo.Size())/(1024*1024) < 250 {
-		fileContent, err := os.ReadFile(panel.element[panel.cursor].location)
-
-		if err != nil {
-			outPutLog("Cut single item read file error", panel.element[panel.cursor].location, err)
-		}
-
-		if err := clipboard.WriteAll(string(fileContent)); err != nil {
-			outPutLog("Cut single item write file error", panel.element[panel.cursor].location, err)
-		}
-	}
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
-}
-
-// Cut all selected file or directory to the clipboard
-func (m *model) cutMultipleItem() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	m.copyItems.cut = true
-	m.copyItems.items = m.copyItems.items[:0]
-	if len(panel.selected) == 0 {
-		return
-	}
-	m.copyItems.items = panel.selected
-	fileInfo, err := os.Stat(panel.selected[0])
-	if os.IsNotExist(err) {
-		return
-	}
-	if err != nil {
-		outPutLog("Copy multiple item function get file state error", panel.selected[0], err)
-	}
-
-	if !fileInfo.IsDir() && float64(fileInfo.Size())/(1024*1024) < 250 {
-		fileContent, err := os.ReadFile(panel.selected[0])
-
-		if err != nil {
-			outPutLog("Copy multiple item function read file error", err)
-		}
-
-		if err := clipboard.WriteAll(string(fileContent)); err != nil {
-			outPutLog("Copy multiple item function write file to clipboard error", err)
-		}
-	}
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 // Paste all clipboard items
-func (m model) pasteItem() {
-	id := shortuuid.New()
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-
+func (m *model) pasteItem() {
 	if len(m.copyItems.items) == 0 {
 		return
 	}
 
+	id := shortuuid.New()
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	totalFiles := 0
 
 	for _, folderPath := range m.copyItems.items {
+		// Todo : Fix this. This is inefficient
+		// In case of a cut operations for a directory with a lot of files
+		// we are unnecessarily walking the whole directory recursively
+		// while os will just perform a rename 
+		// So instead of few operations this will cause the cut paste 
+		// to read the whole directory recursively
+		// we should avoid doing this.
+		// Although this allows us a more detailed progress tracking
+		// this make the copy/cut more inefficient
+		// instead, we could just track progress based on total items in
+		// m.copyItems.items 
+		// efficiency should be prioritized over more detailed feedback.
 		count, err := countFiles(folderPath)
 		if err != nil {
+			slog.Error("mode.pasteItem - Error in countFiles", "error", err)
 			continue
 		}
 		totalFiles += count
 	}
+
+	slog.Debug("model.pasteItem",  "items", m.copyItems.items, "cut", m.copyItems.cut,
+		"totalFiles", totalFiles, "panel location", panel.location)
 
 	prog := progress.New(generateGradientColor())
 	prog.PercentageStyle = footerStyle
@@ -561,19 +475,23 @@ func (m model) pasteItem() {
 
 		errMessage := "cut item error"
 		if m.copyItems.cut && !isExternalDiskPath(filePath) {
-			err = moveElement(filePath, filepath.Join(panel.location, path.Base(filePath)))
+			err = moveElement(filePath, filepath.Join(panel.location, filepath.Base(filePath)))
 		} else {
-			newModel, err := pasteDir(filePath, filepath.Join(panel.location, path.Base(filePath)), id, m)
+			err = pasteDir(filePath, filepath.Join(panel.location, filepath.Base(filePath)), id, m)
 			if err != nil {
 				errMessage = "paste item error"
-			}
-			m = newModel
-			if m.copyItems.cut {
-				os.RemoveAll(filePath)
+			} else {
+				// Todo : These error cases are hard to test. We have to somehow make the paste operations fail, 
+				// which is time consuming and manual. We should test these with automated testcases
+				if m.copyItems.cut {
+					os.RemoveAll(filePath)
+				}
 			}
 		}
 		p = m.processBarModel.process[id]
 		if err != nil {
+			slog.Debug("model.pasteItem - paste failure", "error", err,
+				"current item", filePath, "errMessage", errMessage)
 			p.state = failure
 			message.processNewState = p
 			channel <- message
@@ -583,14 +501,20 @@ func (m model) pasteItem() {
 		}
 	}
 
-	p.state = successful
-	p.done = totalFiles
-	p.doneTime = time.Now()
+	if p.state != failure {
+		p.state = successful
+		p.done = totalFiles
+		p.doneTime = time.Now()
+	}
 	message.processNewState = p
 	channel <- message
 
 	m.processBarModel.process[id] = p
-	m.copyItems.cut = false
+	// Reset after paste is done. Only in case of cut  
+	// because current items in clipboard are deleted now
+	if m.copyItems.cut {
+		m.copyItems.reset(false)
+	}
 }
 
 // Extrach compress file

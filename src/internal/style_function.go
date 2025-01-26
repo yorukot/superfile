@@ -223,7 +223,7 @@ func loadConfigError(value string) string {
 }
 
 // Generate config error style
-func lodaHotkeysError(value string) string {
+func loadHotkeysError(value string) string {
 	return lipgloss.NewStyle().Foreground(lipgloss.Color("#FF5555")).Render("■ ERROR: ") + "Hotkeys file \"" + lipgloss.NewStyle().Foreground(lipgloss.Color("#00D9FF")).Render(value) + "\" invalidation"
 }
 

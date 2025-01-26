@@ -30,6 +30,9 @@ sort_order_reversed = false
 # Case sensitive sort by name (upper "B" comes before lower "a" if true).
 case_sensitive_sort = false
 #
+# Whether to enable debug mode.
+debug = false
+#
 # ================   Style =================
 # 
 # If you don't have or don't want Nerdfont installed you can turn this off

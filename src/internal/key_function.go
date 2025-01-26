@@ -158,9 +158,9 @@ func (m *model) normalAndBrowserModeKey(msg string) {
 				m.deleteItemWarn()
 			}()
 		case containsKey(msg, hotkeys.CopyItems):
-			m.copyMultipleItem()
+			m.copyMultipleItem(false)
 		case containsKey(msg, hotkeys.CutItems):
-			m.cutMultipleItem()
+			m.copyMultipleItem(true)
 		case containsKey(msg, hotkeys.FilePanelSelectAllItem):
 			m.selectAllItem()
 		}
@@ -177,9 +177,9 @@ func (m *model) normalAndBrowserModeKey(msg string) {
 			m.deleteItemWarn()
 		}()
 	case containsKey(msg, hotkeys.CopyItems):
-		m.copySingleItem()
+		m.copySingleItem(false)
 	case containsKey(msg, hotkeys.CutItems):
-		m.cutSingleItem()
+		m.copySingleItem(true)
 	case containsKey(msg, hotkeys.FilePanelItemRename):
 		m.panelItemRename()
 	case containsKey(msg, hotkeys.SearchBar):
