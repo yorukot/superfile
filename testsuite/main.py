@@ -2,7 +2,6 @@ import os
 import subprocess
 import time
 import pyautogui
-import shutil
 import tempfile
 
 def spf_input():
@@ -33,7 +32,7 @@ def main():
             with open(spf_out_filepath, 'w') as fout, open(spf_err_filepath, 'w') as ferr:
                 # Start Superfile in a subprocess
                 process = subprocess.Popen(
-                    ['/Users/kuknitin/Workspace/kuknitin/superfile/bin/spf', dir1],
+                    ['../bin/spf', dir1],
                     stdout=fout, 
                     stderr=ferr,
                     )
@@ -54,7 +53,8 @@ def main():
     except Exception as e:
         print("Exception during test : ", e)
     finally:
-        process.terminate()
+        if process is not None:
+            process.terminate()
 
 main()
 
