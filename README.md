@@ -11,7 +11,7 @@
 <a href="https://www.warp.dev/?utm_source=github&utm_medium=referral&utm_campaign=superfile">
 <div>
   <picture>
-    <img alt="Warp" width="300" src="https://github-production-user-asset-6210df.s3.amazonaws.com/3764335/386862788-2bda420d-4211-4900-a37e-e3c7056d799c.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20250127%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250127T083056Z&X-Amz-Expires=300&X-Amz-Signature=4adff9372fbef44c6ac8ccaba79c26d1e84e1f4856fff8131e7af2b33e108766&X-Amz-SignedHeaders=host">
+    <img alt="Warp" width="300" src="/asset/warp.png">
   </picture>
 </div>
   <b>Warp, the intelligent terminal</b>
