@@ -1,5 +1,31 @@
 <div align="center">
 
+<p>
+  <sup>
+    <a href="https://ko-fi.com/yorukot">superfile is supported by the community.</a>
+  </sup>
+</p>
+<sup>Special thanks to our sponsor:</sup>
+<br>
+<br>
+<a href="https://www.warp.dev/?utm_source=github&utm_medium=referral&utm_campaign=superfile">
+<div>
+  <picture>
+    <img alt="Warp" width="300" src="https://github-production-user-asset-6210df.s3.amazonaws.com/3764335/386862788-2bda420d-4211-4900-a37e-e3c7056d799c.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20250127%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250127T083056Z&X-Amz-Expires=300&X-Amz-Signature=4adff9372fbef44c6ac8ccaba79c26d1e84e1f4856fff8131e7af2b33e108766&X-Amz-SignedHeaders=host">
+  </picture>
+</div>
+  <b>Warp, the intelligent terminal</b>
+  <div>
+    <sup>superfile's Terminal of Choice<br>
+Visit warp.dev to learn more
+    </sup>
+  </div>
+</a>
+<hr>
+</div>
+
+<div align="center">
+
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="/asset/superfilelogowhite.png" />
   <source media="(prefers-color-scheme: light)" srcset="/asset/superfilelogoblack.png" />
@@ -118,7 +144,7 @@ After you install superfile, you can go [here](https://superfile.netlify.app/get
 
 ### MacOS and Linux
 
-On MacOS and Linux, you can uninstall superfile by simply removing the binary. If you installed superfile with sudo, run
+On MacOS and Linux, you can uninstall superfile by simply removing the binary. If you installed superfile with sudo, runw
 
 ```bash
 sudo rm /usr/local/bin/spf
