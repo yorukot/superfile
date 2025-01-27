@@ -18,7 +18,7 @@ import (
 	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
 )
 
-func (m model) sidebarRender() string {
+func (m *model) sidebarRender() string {
 	if Config.SidebarWidth == 0 {
 		return ""
 	}
@@ -73,7 +73,8 @@ func (m model) sidebarRender() string {
 	return sideBarBorderStyle(m.mainPanelHeight, m.focusPanel).Render(s)
 }
 
-func (m model) filePanelRender() string {
+// This also modifies the m.fileModel.filePanels
+func (m *model) filePanelRender() string {
 	// file panel
 	f := make([]string, 10)
 	for i, filePanel := range m.fileModel.filePanels {
@@ -189,7 +190,7 @@ func (m model) filePanelRender() string {
 	}
 	return filePanelRender
 }
-func (m model) processBarRender() string {
+func (m *model) processBarRender() string {
 	// save process in the array
 	var processes []process
 	for _, p := range m.processBarModel.process {
@@ -274,7 +275,8 @@ func (m model) processBarRender() string {
 	return processRender
 }
 
-func (m model) metadataRender() string {
+// This updates m.fileMetaData 
+func (m *model) metadataRender() string {
 	// process bar
 	metaDataBar := ""
 	if len(m.fileMetaData.metaData) == 0 && len(m.fileModel.filePanels[m.filePanelFocusIndex].element) > 0 && !m.fileModel.renaming {
@@ -330,7 +332,7 @@ func (m model) metadataRender() string {
 	return metaDataBar
 }
 
-func (m model) clipboardRender() string {
+func (m *model) clipboardRender() string {
 
 	// render
 	clipboardRender := ""
@@ -366,7 +368,7 @@ func (m model) clipboardRender() string {
 	return clipboardRender
 }
 
-func (m model) terminalSizeWarnRender() string {
+func (m *model) terminalSizeWarnRender() string {
 	fullWidthString := strconv.Itoa(m.fullWidth)
 	fullHeightString := strconv.Itoa(m.fullHeight)
 	minimumWidthString := strconv.Itoa(minimumWidth)
@@ -390,7 +392,7 @@ func (m model) terminalSizeWarnRender() string {
 		heightString + terminalCorrectSize.Render(minimumHeightString))
 }
 
-func (m model) terminalSizeWarnAfterFirstRender() string {
+func (m *model) terminalSizeWarnAfterFirstRender() string {
 	minimumWidthInt := Config.SidebarWidth + 20*len(m.fileModel.filePanels) + 20 - 1
 	minimumWidthString := strconv.Itoa(minimumWidthInt)
 	fullWidthString := strconv.Itoa(m.fullWidth)
@@ -416,7 +418,7 @@ func (m model) terminalSizeWarnAfterFirstRender() string {
 		heightString + terminalCorrectSize.Render(minimumHeightString))
 }
 
-func (m model) typineModalRender() string {
+func (m *model) typineModalRender() string {
 	previewPath := m.typingModal.location + "/" + m.typingModal.textInput.Value()
 
 	fileLocation := filePanelTopDirectoryIconStyle.Render(" "+icon.Directory+icon.Space) +
@@ -432,7 +434,7 @@ func (m model) typineModalRender() string {
 	return modalBorderStyle(modalHeight, modalWidth).Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip)
 }
 
-func (m model) introduceModalRender() string {
+func (m *model) introduceModalRender() string {
 	title := sidebarTitleStyle.Render(" Thanks for using superfile!!") + modalStyle.Render("\n You can read the following information before starting to use it!")
 	vimUserWarn := processErrorStyle.Render("  ** Very importantly ** If you are a Vim/Nvim user, go to:\n  https://superfile.netlify.app/configure/custom-hotkeys/ to change your hotkey settings!")
 	subOne := sidebarTitleStyle.Render("  (1)") + modalStyle.Render(" If this is your first time, make sure you read:\n      https://superfile.netlify.app/getting-started/tutorial/")
@@ -442,7 +444,7 @@ func (m model) introduceModalRender() string {
 	return firstUseModal(m.helpMenu.height, m.helpMenu.width).Render(title + "\n\n" + vimUserWarn + "\n\n" + subOne + "\n\n" + subTwo + "\n\n" + subThree + "\n\n" + subFour + "\n\n")
 }
 
-func (m model) warnModalRender() string {
+func (m *model) warnModalRender() string {
 	title := m.warnModal.title
 	content := m.warnModal.content
 	confirm := modalConfirm.Render(" (" + hotkeys.Confirm[0] + ") Confirm ")
@@ -451,7 +453,7 @@ func (m model) warnModalRender() string {
 	return modalBorderStyle(modalHeight, modalWidth).Render(title + "\n\n" + content + "\n\n" + tip)
 }
 
-func (m model) helpMenuRender() string {
+func (m *model) helpMenuRender() string {
 	helpMenuContent := ""
 	maxKeyLength := 0
 
@@ -536,7 +538,7 @@ func (m model) helpMenuRender() string {
 	return helpMenuModalBorderStyle(m.helpMenu.height, m.helpMenu.width, bottomBorder).Render(helpMenuContent)
 }
 
-func (m model) sortOptionsRender() string {
+func (m *model) sortOptionsRender() string {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	sortOptionsContent := modalTitleStyle.Render(" Sort Options") + "\n\n"
 	for i, option := range panel.sortOptions.data.options {
@@ -551,7 +553,36 @@ func (m model) sortOptionsRender() string {
 	return sortOptionsModalBorderStyle(panel.sortOptions.height, panel.sortOptions.width, bottomBorder).Render(sortOptionsContent)
 }
 
-func (m model) filePreviewPanelRender() string {
+func readFileContent(filepath string, maxLineLength int, previewLine int) (string, error) {
+	// String builder is much better for efficiency 
+	// See - https://stackoverflow.com/questions/1760757/how-to-efficiently-concatenate-strings-in-go/47798475#47798475
+	var resultBuilder strings.Builder 
+	file, err := os.Open(filepath)
+	if err != nil {
+		return resultBuilder.String(), err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	lineCount := 0
+	for scanner.Scan() {
+		line := scanner.Text()
+		if len(line) > maxLineLength {
+			line = line[:maxLineLength]
+		}
+		// This is critical to avoid layout break, removes non Printable ASCII control characters. 
+		line = makePrintable(line)
+		resultBuilder.WriteString(line+"\n")
+		lineCount++
+		if previewLine > 0 && lineCount >= previewLine {
+			break
+		}
+	}
+	// returns the first non-EOF error that was encountered by the [Scanner]
+	return resultBuilder.String(), scanner.Err()
+}
+
+func (m *model) filePreviewPanelRender() string {
 	previewLine := m.mainPanelHeight + 2
 	m.fileModel.filePreview.width += m.fullWidth - Config.SidebarWidth - m.fileModel.filePreview.width - ((m.fileModel.width + 2) * len(m.fileModel.filePanels)) - 2
 
@@ -630,88 +661,44 @@ func (m model) filePreviewPanelRender() string {
 	}
 
 	format := lexers.Match(filepath.Base(itemPath))
-	if format != nil {
-		var codeHighlight string
-		var err error
-		var fileContent string
-		file, err := os.Open(itemPath)
+
+	if format == nil {
+		isText, err := isTextFile(itemPath)
 		if err != nil {
-			outPutLog(err)
-			return box.Render("\n --- " + icon.Error + " Error open file ---")
+			outPutLog("Error while checking text file", err)
+			return box.Render("\n --- " + icon.Error + " Error get file info ---")
+		} else if !isText {
+			return box.Render("\n --- " + icon.Error + " Unsupported formats ---")
 		}
-		defer file.Close()
+	}
 
-		scanner := bufio.NewScanner(file)
-		lineCount := 0
+	// At this point either format is not nil, or we can read the file
+	fileContent , err := readFileContent(itemPath, m.fileModel.width+20, previewLine)
+	if err != nil {
+		outPutLog(err)
+		return box.Render("\n --- " + icon.Error + " Error open file ---")
+	}
 
-		maxLineLength := m.fileModel.width + 20
-		for scanner.Scan() {
-			line := scanner.Text()
-			if len(line) > maxLineLength {
-				line = line[:maxLineLength]
-			}
-			fileContent += line + "\n"
-			lineCount++
-			if previewLine > 0 && lineCount >= previewLine {
-				break
-			}
+	// We know the format of file, and we can apply syntax highlighting
+	if format != nil {
+		background := ""
+		if ! Config.TransparentBackground {
+			background = theme.FilePanelBG
 		}
-
-		if Config.TransparentBackground {
-			codeHighlight, err = ansichroma.HightlightString(fileContent, format.Config().Name, theme.CodeSyntaxHighlightTheme, "")
-		} else {
-			codeHighlight, err = ansichroma.HightlightString(fileContent, format.Config().Name, theme.CodeSyntaxHighlightTheme, theme.FilePanelBG)
-		}
+		fileContent, err = ansichroma.HightlightString(fileContent, format.Config().Name, theme.CodeSyntaxHighlightTheme, background)
 		if err != nil {
 			outPutLog("Error render code highlight", err)
 			return box.Render("\n --- " + icon.Error + " Error render code highlight ---")
 		}
-		if codeHighlight == "" {
-			return box.Render("\n --- empty ---")
-		}
-
-		codeHighlight = checkAndTruncateLineLengths(codeHighlight, m.fileModel.filePreview.width)
-
-		return box.Render(codeHighlight)
-	} else {
-		textFile, err := isTextFile(itemPath)
-		if err != nil {
-			outPutLog("Error check text file", err)
-		}
-		if textFile {
-			var fileContent string
-			file, err := os.Open(itemPath)
-			if err != nil {
-				outPutLog(err)
-				return box.Render("\n --- " + icon.Error + " Error open file ---")
-			}
-			defer file.Close()
-
-			scanner := bufio.NewScanner(file)
-			lineCount := 0
-
-			for scanner.Scan() {
-				fileContent += scanner.Text() + "\n"
-				lineCount++
-				if previewLine > 0 && lineCount >= previewLine {
-					break
-				}
-			}
-
-			if err := scanner.Err(); err != nil {
-				outPutLog(err)
-				return box.Render("\n --- " + icon.Error + " Error open file ---")
-			}
-
-			textContent := checkAndTruncateLineLengths(fileContent, m.fileModel.filePreview.width)
-
-			return box.Render(textContent)
-		}
 	}
 
-	return box.Render("\n --- " + icon.Error + " Unsupported formats ---")
+	if fileContent == "" {
+		return box.Render("\n --- empty ---")
+	}
+	fileContent = checkAndTruncateLineLengths(fileContent, m.fileModel.filePreview.width)
+	return box.Render(fileContent)
 }
 
-func (m model) commandLineInputBoxRender() string {
+func (m *model) commandLineInputBoxRender() string {
 	return m.commandLine.input.View()
 }

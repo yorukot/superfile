@@ -1,7 +1,7 @@
 package internal
 
 import (
-	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -25,7 +25,6 @@ var theme ThemeType
 var Config ConfigType
 var hotkeys HotkeysType
 
-var logOutput *os.File
 var et *exiftool.Exiftool
 
 var channel = make(chan channelMessage, 1000)
@@ -60,9 +59,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.handleWindowResize(msg)
 	case tea.MouseMsg:
-		m, cmd = wheelMainAction(msg.String(), m, cmd)
+		cmd = wheelMainAction(msg.String(), &m, cmd)
 	case tea.KeyMsg:
-		m, cmd = m.handleKeyInput(msg, cmd)
+		cmd = m.handleKeyInput(msg, cmd)
 	}
 
 	m.updateFilePanelsState(msg, &cmd)
@@ -117,7 +116,7 @@ func (m *model) setFilePreviewWidth(width int) {
 	if Config.FilePreviewWidth == 0 {
 		m.fileModel.filePreview.width = (width - Config.SidebarWidth - (4 + (len(m.fileModel.filePanels))*2)) / (len(m.fileModel.filePanels) + 1)
 	} else if Config.FilePreviewWidth > 10 || Config.FilePreviewWidth == 1 {
-		log.Fatalln("Config file file_preview_width invalidation")
+		LogAndExit("Config file file_preview_width invalidation")
 	} else {
 		m.fileModel.filePreview.width = (width - Config.SidebarWidth) / Config.FilePreviewWidth
 	}
@@ -176,10 +175,27 @@ func (m *model) setHelpMenuSize() {
 
 // Identify the current state of the application m and properly handle the
 // msg keybind pressed
-func (m model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) (model, tea.Cmd) {
+func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
+	
+	slog.Debug("model.handleKeyInput", "msg", msg, "typestr", msg.Type.String(),
+		"runes", msg.Runes, "type", int(msg.Type), "paste", msg.Paste, 
+		"alt", msg.Alt)
+	slog.Debug("model.handleKeyInput. model info. ",
+		"filePanelFocusIndex", m.filePanelFocusIndex, 
+		"filePanel.focusType", m.fileModel.filePanels[m.filePanelFocusIndex].focusType,
+		"filePanel.panelMode", m.fileModel.filePanels[m.filePanelFocusIndex].panelMode,
+		"typingModal.open", m.typingModal.open,
+		"warnModal.open", m.warnModal.open,
+		"fileModel.renaming", m.fileModel.renaming,
+		"searchBar.focussed", m.fileModel.filePanels[m.filePanelFocusIndex].searchBar.Focused(),
+		"helpMenu.open", m.helpMenu.open,
+		"firstTextInput", m.firstTextInput,
+		"focusPanel", m.focusPanel,
+	)
+
 	if firstUse {
 		firstUse = false
-		return m, cmd
+		return cmd
 	}
 
 	if m.typingModal.open {
@@ -206,23 +222,23 @@ func (m model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) (model, tea.Cmd) {
 		quit := m.confirmToQuitSuperfile(msg.String())
 		if quit {
 			m.quitSuperfile()
-			return m, tea.Quit
+			return tea.Quit
 		}
 		// If quiting input pressed, check if has any runing process and displays a
 		// warn. Otherwise just quits application
 	} else if msg.String() == containsKey(msg.String(), hotkeys.Quit) {
 		if m.hasRunningProcesses() {
 			m.warnModalForQuit()
-			return m, cmd
+			return cmd
 		}
 
 		m.quitSuperfile()
-		return m, tea.Quit
+		return tea.Quit
 	} else {
 		// Handles general kinds of inputs in the regular state of the application
 		cmd = m.mainKey(msg.String(), cmd)
 	}
-	return m, cmd
+	return cmd
 }
 
 // Update the file panel state. Change name of renamed files, filter out files
@@ -235,12 +251,6 @@ func (m *model) updateFilePanelsState(msg tea.Msg, cmd *tea.Cmd) {
 		focusPanel.rename, *cmd = focusPanel.rename.Update(msg)
 	} else if focusPanel.searchBar.Focused() {
 		focusPanel.searchBar, *cmd = focusPanel.searchBar.Update(msg)
-		for _, hotkey := range hotkeys.SearchBar {
-			if hotkey == focusPanel.searchBar.Value() {
-				focusPanel.searchBar.SetValue("")
-				break
-			}
-		}
 	} else if m.commandLine.input.Focused() {
 		m.commandLine.input, *cmd = m.commandLine.input.Update(msg)
 	} else if m.typingModal.open {
@@ -423,7 +433,7 @@ func (m *model) getFilePanelItems() {
 
 // Close superfile application. Cd into the curent dir if CdOnQuit on and save
 // the path in state direcotory
-func (m model) quitSuperfile() {
+func (m *model) quitSuperfile() {
     // close exiftool session
     if Config.Metadata {
         et.Close();

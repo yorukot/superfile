@@ -126,6 +126,7 @@ type ConfigType struct {
 	DefaultSortType        int    `toml:"default_sort_type" comment:"\nDefault sort type (0: Name, 1: Size, 2: Date Modified)."`
 	SortOrderReversed      bool   `toml:"sort_order_reversed" comment:"\nDefault sort order (false: Ascending, true: Descending)."`
 	CaseSensitiveSort      bool   `toml:"case_sensitive_sort" comment:"\nCase sensitive sort by name (captal \"B\" comes before \"a\" if true)."`
+	Debug                  bool   `toml:"debug" comment:"\nWhether to enable debug mode."`
 
 	Nerdfont              bool `toml:"nerdfont" comment:"\n================   Style =================\n\n If you don't have or don't want Nerdfont installed you can turn this off"`
 	TransparentBackground bool `toml:"transparent_background" comment:"\nSet transparent background or not (this only work when your terminal background is transparent)"`

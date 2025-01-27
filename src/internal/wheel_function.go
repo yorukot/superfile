@@ -2,7 +2,7 @@ package internal
 
 import tea "github.com/charmbracelet/bubbletea"
 
-func wheelMainAction(msg string, m model, cmd tea.Cmd) (model, tea.Cmd) {
+func wheelMainAction(msg string, m *model, cmd tea.Cmd) tea.Cmd {
 	switch msg {
 
 	case "wheel up":
@@ -35,5 +35,5 @@ func wheelMainAction(msg string, m model, cmd tea.Cmd) (model, tea.Cmd) {
 			}()
 		}
 	}
-	return m, cmd
+	return cmd
 }
