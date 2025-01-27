@@ -15,8 +15,8 @@ importers:
         specifier: ^0.40.0
         version: 0.40.0
       '@expressive-code/plugin-line-numbers':
-        specifier: ^0.37.0
-        version: 0.37.1
+        specifier: ^0.40.0
+        version: 0.40.1
       '@fontsource/ibm-plex-mono':
         specifier: ^5.0.8
         version: 5.1.1
@@ -305,11 +305,11 @@ packages:
   '@expressive-code/core@0.35.6':
     resolution: {integrity: sha512-xGqCkmfkgT7lr/rvmfnYdDSeTdCSp1otAHgoFS6wNEeO7wGDPpxdosVqYiIcQ8CfWUABh/pGqWG90q+MV3824A==}
 
-  '@expressive-code/core@0.37.1':
-    resolution: {integrity: sha512-nYgsK3uxK4W46v0IolHdB5+T6MQfy5weTpyB3kbzr11ur2UKUy2oHGhbWa+hRThfYEF1PM+TFxMtWU7amcjF8A==}
-
   '@expressive-code/core@0.40.0':
     resolution: {integrity: sha512-vKRxKaDVhSozGPETcPOB7NF8sn1ICZoO/UfUWs/4o+XmDIOSX7cBQX8BVukenvSksdv5Aaf/teuGzjxX0a7Ibw==}
+
+  '@expressive-code/core@0.40.1':
+    resolution: {integrity: sha512-j71gxBepyzBgOtZomxzl8M90AjILf6hZarWFePDis7sTjqCwxWrtZEtTCafto8IOURG/ECZN0g7Ys4zExkNU7Q==}
 
   '@expressive-code/plugin-collapsible-sections@0.40.0':
     resolution: {integrity: sha512-OktWRqYOC4g92wCK1dClYX1UGvO4WAkAv0gUd+kAuZH/lAaesl+TC0NWoLRY+fEqMx3co4YfKmboCmjXWmBwBw==}
@@ -317,8 +317,8 @@ packages:
   '@expressive-code/plugin-frames@0.35.6':
     resolution: {integrity: sha512-CqjSWjDJ3wabMJZfL9ZAzH5UAGKg7KWsf1TBzr4xvUbZvWoBtLA/TboBML0U1Ls8h/4TRCIvR4VEb8dv5+QG3w==}
 
-  '@expressive-code/plugin-line-numbers@0.37.1':
-    resolution: {integrity: sha512-Tg8ZpJUwB1T4v3BKRjo5iqDslbOtXy7vI59NNq5K5JvvFs7j3FLHtxNQjDwown3sEDRTOFc1Yw6VulZ9afJ+yA==}
+  '@expressive-code/plugin-line-numbers@0.40.1':
+    resolution: {integrity: sha512-9SgO73lamP46SuRlPkFAFGYKPy+MCzXAyT+VUeNA95g+CUVrNx0ySevEWAATQ9JmVUp4vNETbssJdMJb7Xcqiw==}
 
   '@expressive-code/plugin-shiki@0.35.6':
     resolution: {integrity: sha512-xm+hzi9BsmhkDUGuyAWIydOAWer7Cs9cj8FM0t4HXaQ+qCubprT6wJZSKUxuvFJIUsIOqk1xXFaJzGJGnWtKMg==}
@@ -2224,7 +2224,7 @@ snapshots:
       unist-util-visit: 5.0.0
       unist-util-visit-parents: 6.0.1
 
-  '@expressive-code/core@0.37.1':
+  '@expressive-code/core@0.40.0':
     dependencies:
       '@ctrl/tinycolor': 4.1.0
       hast-util-select: 6.0.3
@@ -2236,7 +2236,7 @@ snapshots:
       unist-util-visit: 5.0.0
       unist-util-visit-parents: 6.0.1
 
-  '@expressive-code/core@0.40.0':
+  '@expressive-code/core@0.40.1':
     dependencies:
       '@ctrl/tinycolor': 4.1.0
       hast-util-select: 6.0.3
@@ -2256,9 +2256,9 @@ snapshots:
     dependencies:
       '@expressive-code/core': 0.35.6
 
-  '@expressive-code/plugin-line-numbers@0.37.1':
+  '@expressive-code/plugin-line-numbers@0.40.1':
     dependencies:
-      '@expressive-code/core': 0.37.1
+      '@expressive-code/core': 0.40.1
 
   '@expressive-code/plugin-shiki@0.35.6':
     dependencies:
