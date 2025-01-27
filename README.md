@@ -1,9 +1,9 @@
 <div align="center">
 
 <p>
-  <sup>
+  <H4>
     <a href="https://ko-fi.com/yorukot">superfile is supported by the community.</a>
-  </sup>
+  </H3>
 </p>
 <sup>Special thanks to our sponsor:</sup>
 <br>
@@ -11,10 +11,10 @@
 <a href="https://www.warp.dev/?utm_source=github&utm_medium=referral&utm_campaign=superfile">
 <div>
   <picture>
-    <img alt="Warp" width="300" src="/asset/warp.png">
+    <img alt="Warp" width="500" src="/asset/warp.png">
   </picture>
 </div>
-  <b>Warp, the intelligent terminal</b>
+  <h4>Warp, the intelligent terminal</h4>
   <div>
     <sup>superfile's Terminal of Choice<br>
 Visit warp.dev to learn more
