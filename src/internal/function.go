@@ -143,18 +143,18 @@ func returnFolderElementBySearchString(location string, displayDotFile bool, sea
 	items, err := os.ReadDir(location)
 	if err != nil {
 		outPutLog("Return folder element function error", err)
+		return []element{}
 	}
 
 	folderElementMap := map[string]element{}
 	fileAndDirectories := []string{}
 
 	for _, item := range items {
-		fileInfo, _ := item.Info()
-		if !displayDotFile && strings.HasPrefix(fileInfo.Name(), ".") {
+		fileInfo, err := item.Info()
+		if err != nil {
 			continue
 		}
-
-		if fileInfo == nil {
+		if !displayDotFile && strings.HasPrefix(fileInfo.Name(), ".") {
 			continue
 		}
 
@@ -169,7 +169,6 @@ func returnFolderElementBySearchString(location string, displayDotFile bool, sea
 			directory: item.IsDir(),
 			location:  folderElementLocation,
 		}
-
 	}
 
 	var options = fzf.DefaultOptions()
