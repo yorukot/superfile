@@ -9,12 +9,12 @@
 <br>
 <br>
 <a href="https://www.warp.dev/?utm_source=github&utm_medium=referral&utm_campaign=superfile">
-<div>
-  <picture>
-    <img alt="Warp" width="500" src="/asset/warp.png">
-  </picture>
-</div>
-  <h4>Warp, the intelligent terminal</h4>
+  <div>
+    <picture>
+      <img alt="Warp" width="500" src="/asset/warp.png">
+    </picture>
+  </div>
+  <b>Warp, the intelligent terminal</b>
   <div>
     <sup>superfile's Terminal of Choice<br>
 Visit warp.dev to learn more
