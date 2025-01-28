@@ -14,6 +14,8 @@
     <img alt="Warp" width="500" src="/asset/warp.png">
   </picture>
 </div>
+</a>
+<a href="https://www.warp.dev/?utm_source=github&utm_medium=referral&utm_campaign=superfile">
   <h4>Warp, the intelligent terminal</h4>
   <div>
     <sup>superfile's Terminal of Choice<br>
@@ -60,7 +62,7 @@ Visit warp.dev to learn more
 
 ## Installation
 
-### Quick install 
+### Quick install
 
 Using bash (Support MacOS and linux)
 
@@ -75,6 +77,7 @@ powershell -ExecutionPolicy Bypass -Command "Invoke-Expression ((New-Object Syst
 ```
 
 ### More installation methods
+
 [Click me to check on how to install](https://superfile.netlify.app/getting-started/installation/)
 
 ## Build
@@ -110,6 +113,7 @@ Add the binary file to your $PATH, e.g., in `/usr/local/bin`:
 ```bash
 sudo mv ./bin/spf /usr/local/bin
 ```
+
 ## Start Superfile
 
 ```bash
@@ -163,7 +167,6 @@ rm ~/.local/bin/spf
 
 If you don't rember, just try removing both.
 
-
 ### Window
 
 To uninstall superfile on Windows, use this powershell script.
@@ -206,9 +209,8 @@ Your stars are my motivation to keep updating!
  </picture>
 </a>
 
-
 <div align="center">
 
-## ༼ つ ◕_◕ ༽つ  Please share.
+## ༼ つ ◕_◕ ༽つ Please share.
 
 </div>
