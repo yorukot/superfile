@@ -169,7 +169,6 @@ func returnFolderElementBySearchString(location string, displayDotFile bool, sea
 			directory: item.IsDir(),
 			location:  folderElementLocation,
 		}
-
 	}
 
 	var options = fzf.DefaultOptions()
