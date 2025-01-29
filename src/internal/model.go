@@ -65,6 +65,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	m.updateFilePanelsState(msg, &cmd)
+    m.updateSidebarState(msg, &cmd)
 	m.sidebarModel.directories = getDirectories()
 
 	// check if there already have listening message
@@ -205,6 +206,8 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 		// If renaming a object
 	} else if m.fileModel.renaming {
 		m.renamingKey(msg.String())
+	} else if m.sidebarModel.renaming {
+		m.sidebarRenamingKey(msg.String())
 		// If search bar is open
 	} else if m.fileModel.filePanels[m.filePanelFocusIndex].searchBar.Focused() {
 		m.focusOnSearchbarKey(msg.String())
@@ -259,6 +262,18 @@ func (m *model) updateFilePanelsState(msg tea.Msg, cmd *tea.Cmd) {
 
 	if focusPanel.cursor < 0 {
 		focusPanel.cursor = 0
+	}
+}
+
+// Update the sidebar state. Change name of the renaming pinned directory.
+func (m *model) updateSidebarState(msg tea.Msg, cmd *tea.Cmd) {
+	sidebar := &m.sidebarModel
+	if sidebar.renaming {
+		sidebar.rename, *cmd = sidebar.rename.Update(msg)
+	}
+
+	if sidebar.cursor < 0 {
+		sidebar.cursor = 0
 	}
 }
 

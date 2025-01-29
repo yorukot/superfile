@@ -142,6 +142,9 @@ func (m *model) normalAndBrowserModeKey(msg string) {
 		if m.focusPanel == sidebarFocus && (msg == containsKey(msg, hotkeys.Confirm)) {
 			m.sidebarSelectDirectory()
 		}
+		if m.focusPanel == sidebarFocus && (msg == containsKey(msg, hotkeys.FilePanelItemRename)) {
+            m.pinnedItemRename()
+		}
 		return
 	}
 	// Check if in the select mode and focusOn filepanel
@@ -283,6 +286,15 @@ func (m *model) renamingKey(msg string) {
 		} else {
 			m.confirmRename()
 		}
+	}
+}
+
+func (m *model) sidebarRenamingKey(msg string) {
+	switch msg {
+	case containsKey(msg, hotkeys.CancelTyping):
+		m.cancelSidebarRename()
+	case containsKey(msg, hotkeys.ConfirmTyping):
+        m.confirmSidebarRename()
 	}
 }
 

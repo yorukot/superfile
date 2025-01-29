@@ -63,7 +63,9 @@ func (m *model) sidebarRender() string {
 			cursor = icon.Cursor
 		}
 
-		if directory.location == m.fileModel.filePanels[m.filePanelFocusIndex].location {
+		if m.sidebarModel.renaming && i == m.sidebarModel.cursor {
+			s += m.sidebarModel.rename.View()
+		} else if directory.location == m.fileModel.filePanels[m.filePanelFocusIndex].location {
 			s += filePanelCursorStyle.Render(cursor+" ") + sidebarSelectedStyle.Render(truncateText(directory.name, Config.SidebarWidth-2, "..."))
 		} else {
 			s += filePanelCursorStyle.Render(cursor+" ") + sidebarStyle.Render(truncateText(directory.name, Config.SidebarWidth-2, "..."))
