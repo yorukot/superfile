@@ -17,7 +17,8 @@ cd <superfile_root>
 ./build.sh
 ```
 
-### 
+### Running testsuite
+- Note : You must keep your focus on the terminal for the entire duration of test run. `pyautogui` sends keypress to process on focus.
 ```
 .venv/bin/python3 main.py
 ```
