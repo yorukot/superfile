@@ -1,5 +1,5 @@
 # Overview
-This is to document the behviour of tmux, and how could use it in testsuite
+This is to document the behviour of tmux, and how could we use it in testsuite
 
 # Tmux concepts and working info
 - Tmux creates a main server process, and one new process for each session.
