@@ -65,6 +65,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	m.updateFilePanelsState(msg, &cmd)
+	m.updateSidebarState(msg, &cmd)
 	m.sidebarModel.directories = getDirectories()
 
 	// check if there already have listening message
@@ -176,12 +177,12 @@ func (m *model) setHelpMenuSize() {
 // Identify the current state of the application m and properly handle the
 // msg keybind pressed
 func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
-	
+
 	slog.Debug("model.handleKeyInput", "msg", msg, "typestr", msg.Type.String(),
-		"runes", msg.Runes, "type", int(msg.Type), "paste", msg.Paste, 
+		"runes", msg.Runes, "type", int(msg.Type), "paste", msg.Paste,
 		"alt", msg.Alt)
 	slog.Debug("model.handleKeyInput. model info. ",
-		"filePanelFocusIndex", m.filePanelFocusIndex, 
+		"filePanelFocusIndex", m.filePanelFocusIndex,
 		"filePanel.focusType", m.fileModel.filePanels[m.filePanelFocusIndex].focusType,
 		"filePanel.panelMode", m.fileModel.filePanels[m.filePanelFocusIndex].panelMode,
 		"typingModal.open", m.typingModal.open,
@@ -205,6 +206,8 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 		// If renaming a object
 	} else if m.fileModel.renaming {
 		m.renamingKey(msg.String())
+	} else if m.sidebarModel.renaming {
+		m.sidebarRenamingKey(msg.String())
 		// If search bar is open
 	} else if m.fileModel.filePanels[m.filePanelFocusIndex].searchBar.Focused() {
 		m.focusOnSearchbarKey(msg.String())
@@ -259,6 +262,18 @@ func (m *model) updateFilePanelsState(msg tea.Msg, cmd *tea.Cmd) {
 
 	if focusPanel.cursor < 0 {
 		focusPanel.cursor = 0
+	}
+}
+
+// Update the sidebar state. Change name of the renaming pinned directory.
+func (m *model) updateSidebarState(msg tea.Msg, cmd *tea.Cmd) {
+	sidebar := &m.sidebarModel
+	if sidebar.renaming {
+		sidebar.rename, *cmd = sidebar.rename.Update(msg)
+	}
+
+	if sidebar.cursor < 0 {
+		sidebar.cursor = 0
 	}
 }
 
@@ -395,9 +410,9 @@ func (m *model) getFilePanelItems() {
 		nowTime := time.Now()
 		// Check last time each element was updated, if less then 3 seconds ignore
 		if filePanel.focusType == noneFocus && nowTime.Sub(filePanel.lastTimeGetElement) < 3*time.Second {
-      if !m.updatedToggleDotFile {
-        continue
-      }
+			if !m.updatedToggleDotFile {
+				continue
+			}
 		}
 
 		focusPanelReRender := false
@@ -428,23 +443,23 @@ func (m *model) getFilePanelItems() {
 		m.fileModel.filePanels[i].lastTimeGetElement = nowTime
 	}
 
-  m.updatedToggleDotFile = false
+	m.updatedToggleDotFile = false
 }
 
 // Close superfile application. Cd into the curent dir if CdOnQuit on and save
 // the path in state direcotory
 func (m *model) quitSuperfile() {
-    // close exiftool session
-    if Config.Metadata {
-        et.Close();
-    }
-    // cd on quit
-    currentDir := m.fileModel.filePanels[m.filePanelFocusIndex].location
-    variable.LastDir = currentDir
+	// close exiftool session
+	if Config.Metadata {
+		et.Close()
+	}
+	// cd on quit
+	currentDir := m.fileModel.filePanels[m.filePanelFocusIndex].location
+	variable.LastDir = currentDir
 
-    if Config.CdOnQuit {
-        // escape single quote
-        currentDir = strings.ReplaceAll(currentDir, "'", "'\\''")
-        os.WriteFile(variable.SuperFileStateDir+"/lastdir", []byte("cd '"+currentDir+"'"), 0755)
-    }
+	if Config.CdOnQuit {
+		// escape single quote
+		currentDir = strings.ReplaceAll(currentDir, "'", "'\\''")
+		os.WriteFile(variable.SuperFileStateDir+"/lastdir", []byte("cd '"+currentDir+"'"), 0755)
+	}
 }

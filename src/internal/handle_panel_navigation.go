@@ -3,6 +3,7 @@ package internal
 import (
 	"encoding/json"
 	"os"
+	"path/filepath"
 
 	variable "github.com/yorukot/superfile/src/config"
 )
@@ -13,28 +14,31 @@ func (m *model) pinnedDirectory() {
 
 	unPinned := false
 
-	jsonData, err := os.ReadFile(variable.PinnedFile)
-	if err != nil {
-		outPutLog("Pinned folder function read superfile data error", err)
-	}
-
-	var pinnedFolder []string
-	err = json.Unmarshal(jsonData, &pinnedFolder)
-	if err != nil {
-		outPutLog("Pinned folder function unmarshal superfile data error", err)
-	}
-	for i, other := range pinnedFolder {
-		if other == panel.location {
-			pinnedFolder = append(pinnedFolder[:i], pinnedFolder[i+1:]...)
+	dirs := getPinnedDirectories()
+	for i, other := range dirs {
+		if other.location == panel.location {
+			dirs = append(dirs[:i], dirs[i+1:]...)
 			unPinned = true
 		}
 	}
 
-	if !arrayContains(pinnedFolder, panel.location) && !unPinned {
-		pinnedFolder = append(pinnedFolder, panel.location)
+	if !unPinned {
+		dirs = append(dirs, directory{
+			location: panel.location,
+			name:     filepath.Base(panel.location),
+		})
 	}
 
-	updatedData, err := json.Marshal(pinnedFolder)
+	type pinnedDir struct {
+		Location string `json:"location"`
+		Name     string `json:"name"`
+	}
+	var pinnedDirs []pinnedDir
+	for _, dir := range dirs {
+		pinnedDirs = append(pinnedDirs, pinnedDir{Location: dir.location, Name: dir.name})
+	}
+
+	updatedData, err := json.Marshal(pinnedDirs)
 	if err != nil {
 		outPutLog("Pinned folder function updatedData superfile data error", err)
 	}

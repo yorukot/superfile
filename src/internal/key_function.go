@@ -11,13 +11,13 @@ func containsKey(v string, a []string) string {
 	return ""
 }
 
-// mainKey handles most of key commands in the regular state of the application. For 
+// mainKey handles most of key commands in the regular state of the application. For
 // keys that performs actions in multiple panels, like going up or down,
 // check the state of model m and handle properly.
-func (m *model) mainKey(msg string, cmd tea.Cmd) ( tea.Cmd) {
+func (m *model) mainKey(msg string, cmd tea.Cmd) tea.Cmd {
 	switch msg {
 
-    // If move up Key is pressed, check the current state and executes
+	// If move up Key is pressed, check the current state and executes
 	case containsKey(msg, hotkeys.ListUp):
 		if m.focusPanel == sidebarFocus {
 			m.controlSideBarListUp(false)
@@ -33,7 +33,7 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) ( tea.Cmd) {
 			}()
 		}
 
-    // If move down Key is pressed, check the current state and executes
+		// If move down Key is pressed, check the current state and executes
 	case containsKey(msg, hotkeys.ListDown):
 		if m.focusPanel == sidebarFocus {
 			m.controlSideBarListDown(false)
@@ -49,11 +49,11 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) ( tea.Cmd) {
 			}()
 		}
 
-  case containsKey(msg, hotkeys.PageUp):
-    m.controlFilePanelPgUp()
+	case containsKey(msg, hotkeys.PageUp):
+		m.controlFilePanelPgUp()
 
-  case containsKey(msg, hotkeys.PageDown):
-    m.controlFilePanelPgDown()
+	case containsKey(msg, hotkeys.PageDown):
+		m.controlFilePanelPgDown()
 
 	case containsKey(msg, hotkeys.ChangePanelMode):
 		m.changeFilePanelMode()
@@ -142,6 +142,9 @@ func (m *model) normalAndBrowserModeKey(msg string) {
 		if m.focusPanel == sidebarFocus && (msg == containsKey(msg, hotkeys.Confirm)) {
 			m.sidebarSelectDirectory()
 		}
+		if m.focusPanel == sidebarFocus && (msg == containsKey(msg, hotkeys.FilePanelItemRename)) {
+			m.pinnedItemRename()
+		}
 		return
 	}
 	// Check if in the select mode and focusOn filepanel
@@ -186,12 +189,12 @@ func (m *model) normalAndBrowserModeKey(msg string) {
 		m.searchBarFocus()
 	case containsKey(msg, hotkeys.CopyPath):
 		m.copyPath()
-  case containsKey(msg, hotkeys.CopyPWD):
-    m.copyPWD()
+	case containsKey(msg, hotkeys.CopyPWD):
+		m.copyPWD()
 	}
 }
 
-// Check the hotkey to cancel operation or create file 
+// Check the hotkey to cancel operation or create file
 func (m *model) typingModalOpenKey(msg string) {
 	switch msg {
 	case containsKey(msg, hotkeys.CancelTyping):
@@ -238,7 +241,7 @@ func (m *model) warnModalOpenKey(msg string) {
 
 			}
 		case confirmRenameItem:
-            m.confirmRename()
+			m.confirmRename()
 		}
 	}
 }
@@ -283,6 +286,15 @@ func (m *model) renamingKey(msg string) {
 		} else {
 			m.confirmRename()
 		}
+	}
+}
+
+func (m *model) sidebarRenamingKey(msg string) {
+	switch msg {
+	case containsKey(msg, hotkeys.CancelTyping):
+		m.cancelSidebarRename()
+	case containsKey(msg, hotkeys.ConfirmTyping):
+		m.confirmSidebarRename()
 	}
 }
 

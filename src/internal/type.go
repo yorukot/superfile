@@ -210,6 +210,8 @@ type sidebarModel struct {
 	directories []directory
 	renderIndex int
 	cursor      int
+	rename      textinput.Model
+	renaming    bool
 }
 
 type directory struct {
