@@ -18,10 +18,10 @@ importers:
         specifier: ^0.40.0
         version: 0.40.1
       '@fontsource/ibm-plex-mono':
-        specifier: ^5.0.8
+        specifier: ^5.1.1
         version: 5.1.1
       '@fontsource/ibm-plex-serif':
-        specifier: ^5.0.8
+        specifier: ^5.1.1
         version: 5.1.1
       astro:
         specifier: ^4.4.9
