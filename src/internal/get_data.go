@@ -59,7 +59,7 @@ func getPinnedDirectories() []directory {
 	directories := []directory{}
 	var paths []string
 	var pinnedDirs []struct {
-        Location string `json:"location"`
+		Location string `json:"location"`
 		Name     string `json:"name"`
 	}
 
@@ -68,18 +68,18 @@ func getPinnedDirectories() []directory {
 		outPutLog("Read superfile data error", err)
 	}
 
-    // Check if the data is in the old format
+	// Check if the data is in the old format
 	if err := json.Unmarshal(jsonData, &paths); err == nil {
 		for _, path := range paths {
 			directoryName := filepath.Base(path)
 			directories = append(directories, directory{location: path, name: directoryName})
 		}
-    // Check if the data is in the new format
+		// Check if the data is in the new format
 	} else if err := json.Unmarshal(jsonData, &pinnedDirs); err == nil {
 		for _, pinnedDir := range pinnedDirs {
 			directories = append(directories, directory{location: pinnedDir.Location, name: pinnedDir.Name})
 		}
-    // If the data is in neither format, log the error
+		// If the data is in neither format, log the error
 	} else {
 		outPutLog("Error parsing pinned data", err)
 	}
