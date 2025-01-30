@@ -1,3 +1,13 @@
+## Coding style rules
+- Prefer using strong typing 
+- Prefer using type hinting for the first time the variable is declared, and for functions paremeters and return types
+- Use `-> None` to explicitly indicate no return value
+
+### Ideas
+- Recommended to integrate your IDE with PEP8 to highlight PEP8 violations in real-time
+- Enforcing PEP8 via `pylint flake8 pycodestyle` and via pre commit hooks
+
+
 ## Setup for MacOS / Linux
 
 
