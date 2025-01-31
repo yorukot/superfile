@@ -57,13 +57,13 @@ To uninstall, run the above `powershell` command with the modified URL:
 ###### Builds package from sources
 
 ```bash
-sudo pacman -S superfile
+yay -S superfile
 ```
 
 ###### Fetches prebuilt binaries from GitHub
 
 ```bash
-sudo pacman -S superfile-bin
+yay -S superfile-bin
 ```
 
 ### Homebrew
