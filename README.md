@@ -99,6 +99,7 @@ Enter the downloaded directory:
 cd superfile
 ```
 
+### For MacOS/Linux
 Run the `build.sh` file:
 
 ```bash
@@ -110,6 +111,15 @@ Add the binary file to your $PATH, e.g., in `/usr/local/bin`:
 ```bash
 sudo mv ./bin/spf /usr/local/bin
 ```
+
+### For Windows
+
+```bash
+go build -o bin/spf.exe
+```
+
+Edit System Environment Variables and add superfile repo's `bin` directory to your PATH  
+
 ## Start Superfile
 
 ```bash
