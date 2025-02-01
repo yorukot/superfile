@@ -583,22 +583,17 @@ func (m *model) openFileWithEditor() tea.Cmd {
 
 // Open directory with default editor
 func (m *model) openDirectoryWithEditor() tea.Cmd {
-	editor := Config.Editor
-	if editor == "" {
-		editor = os.Getenv("EDITOR")
-	}
-	// Make sure there is an editor
 	// Todo : Move hardcoded strings to constants : "windows", and editors
-	if editor == "" {
-		if runtime.GOOS == "windows" {
-			editor = "explorer"
-		} else if runtime.GOOS == "darwin" {
-			// open is command for MacOS Finder
-			editor = "open"
-		} else {
-			editor = "nano"
-		}
+	editor := ""
+	if runtime.GOOS == "windows" {
+		editor = "explorer"
+	} else if runtime.GOOS == "darwin" {
+		// open is command for MacOS Finder
+		editor = "open"
+	} else {
+		editor = "vi"
 	}
+
 	c := exec.Command(editor, m.fileModel.filePanels[m.filePanelFocusIndex].location)
 	return tea.ExecProcess(c, func(err error) tea.Msg {
 		return editorFinishedMsg{err}
