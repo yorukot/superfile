@@ -592,6 +592,9 @@ func (m *model) openDirectoryWithEditor() tea.Cmd {
 	if editor == "" {
 		if runtime.GOOS == "windows" {
 			editor = "explorer"
+		} else if runtime.GOOS == "darwin" {
+			// open is command for MacOS Finder
+			editor = "open"
 		} else {
 			editor = "nano"
 		}
