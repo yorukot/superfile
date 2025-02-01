@@ -5,8 +5,10 @@ import libtmux
 import pathlib
 
 def spf_input(p : libtmux.Pane) -> None:
-    p.send_keys('C-c', enter=False)
-    p.send_keys('C-v', enter=False)
+    p.send_keys(chr(3), enter=False)
+    #p.send_keys("C-c", enter=False)
+    p.send_keys(chr(22), enter=False)
+    #p.send_keys("C-v", enter=False)
     
     # Maybe this is bad for efficiency, hence async is great.
     time.sleep(0.1)

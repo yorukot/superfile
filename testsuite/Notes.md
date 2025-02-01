@@ -53,6 +53,12 @@ POC with pyautogui as a lot of issues, stated above.
 - Programmatic setup is better.
 - We could keep test directory setup as a config file - json/yaml/toml 
 - or as a hardcoded python dict
+- Turns out, a in-memory fs is better. We have utilities like copy to actual fs and print tree
+  - Although it has a limitation of not being able to work with large files, as that would consume a lot of RAM
+  - For large files, we could do actually make them only on the actual filesystem, and not use in-memory fs
+  - https://docs.pyfilesystem.org/en/latest/reference/memoryfs.html
+  - https://docs.pyfilesystem.org/en/latest/guide.html 
+
 
 ## Tests and Validation
 - Each tests starts independently, so there is no strict order

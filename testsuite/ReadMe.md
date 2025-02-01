@@ -7,6 +7,8 @@
 - Recommended to integrate your IDE with PEP8 to highlight PEP8 violations in real-time
 - Enforcing PEP8 via `pylint flake8 pycodestyle` and via pre commit hooks
 
+## Setup 
+Requires python 3.9 or later.
 
 ## Setup for MacOS / Linux
 
