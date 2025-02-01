@@ -41,14 +41,16 @@ class GenericTestImpl(BaseTest):
         test_dirs : list[Path],
         test_files : list[tuple[Path, str]],
         key_inputs : list[Union[keys.Keys,str]],
-        validation_files : list[Path]):
+        validate_exists : list[Path] = [],
+        validate_not_exists : list[Path] = []):
         super().__init__(test_env)
         self.test_root = test_root
         self.start_dir = start_dir
         self.test_dirs = test_dirs
         self.test_files = test_files
         self.key_inputs = key_inputs
-        self.validation_files = validation_files
+        self.validate_exists = validate_exists
+        self.validate_not_exists = validate_not_exists
     
     def setup(self) -> None:
         for dir_path in self.test_dirs:
@@ -66,7 +68,7 @@ class GenericTestImpl(BaseTest):
         # Start in DIR1
         self.env.spf_mgr.start_spf(self.env.fs_mgr.abspath(self.start_dir))
 
-        assert self.env.spf_mgr.is_spf_running(), "Supperfile is not running"
+        assert self.env.spf_mgr.is_spf_running(), "Superfile is not running"
 
         for cur_input in self.key_inputs:
             if isinstance(cur_input, keys.Keys):
@@ -90,8 +92,11 @@ class GenericTestImpl(BaseTest):
             self.env.spf_mgr.runtime_info(), self.env.fs_mgr.tree(self.test_root))
         try:
             assert not self.env.spf_mgr.is_spf_running(), "Supperfile is still running"
-            for file_path in self.validation_files:
-                assert self.env.fs_mgr.check_exists(file_path), f"File {file_path} does not exist"
+            for file_path in self.validate_exists:
+                assert self.env.fs_mgr.check_exists(file_path), f"File {file_path} does not exists"
+            
+            for file_path in self.validate_not_exists:
+                assert not self.env.fs_mgr.check_exists(file_path), f"File {file_path} exists" 
         except AssertionError as ae:
             self.logger.debug("Test assertion failed : %s", ae, exc_info=True)
             return False

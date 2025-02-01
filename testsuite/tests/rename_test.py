@@ -25,5 +25,6 @@ class RenameTest(GenericTestImpl):
             test_dirs=[DIR1],
             test_files=[(FILE1, tconst.FILE_TEXT1)],
             key_inputs=[keys.KEY_CTRL_R, keys.KEY_BACKSPACE, '2', keys.KEY_ENTER],
-            validation_files=[FILE1_RENAMED]
+            validate_exists=[FILE1_RENAMED],
+            validate_not_exists=[FILE1]
         )

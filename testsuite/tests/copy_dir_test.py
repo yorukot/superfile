@@ -28,5 +28,5 @@ class CopyDirTest(GenericTestImpl):
             test_dirs=[DIR1, DIR2, NESTED_DIR1, NESTED_DIR2],
             test_files=[(FILE1, tconst.FILE_TEXT1)],
             key_inputs=[keys.KEY_CTRL_C, keys.KEY_DOWN, keys.KEY_ENTER, keys.KEY_CTRL_V],
-            validation_files=[DIR1_COPIED, FILE1_COPIED]
+            validate_exists=[DIR1_COPIED, FILE1_COPIED, DIR1, FILE1]
         )
