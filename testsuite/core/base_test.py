@@ -3,7 +3,7 @@ import time
 from abc import ABC, abstractmethod
 from core.environment import Environment
 from pathlib import Path
-from typing import Union
+from typing import Union, List, Tuple
 import core.keys as keys
 import core.test_constants as tconst
 
@@ -38,11 +38,11 @@ class GenericTestImpl(BaseTest):
     def __init__(self, test_env : Environment,
         test_root : Path,
         start_dir : Path,
-        test_dirs : list[Path],
-        test_files : list[tuple[Path, str]],
-        key_inputs : list[Union[keys.Keys,str]],
-        validate_exists : list[Path] = [],
-        validate_not_exists : list[Path] = []):
+        test_dirs : List[Path],
+        test_files : List[Tuple[Path, str]],
+        key_inputs : List[Union[keys.Keys,str]],
+        validate_exists : List[Path] = [],
+        validate_not_exists : List[Path] = []):
         super().__init__(test_env)
         self.test_root = test_root
         self.start_dir = start_dir

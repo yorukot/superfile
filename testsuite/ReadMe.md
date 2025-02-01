@@ -17,6 +17,8 @@ Requires python 3.9 or later.
 
 ## Setup for MacOS / Linux
 
+### Install tmux
+- You need to have tmux installed. See https://github.com/tmux/tmux/wiki
 
 ### Python virtual env setup
 ```
@@ -72,3 +74,5 @@ Notes
 - If you see flakiness in test runs due to superfile being still open, consider using `--close-wait-time` options to increase wait time for superfile to close
 - Use `-t` or `--tests` to only run specific tests
   - Example `python main.py -d -t RenameTest CopyTest`
+
+- If you see `libtmux` errors like `libtmux.exc.LibTmuxException: ['no server running on /private/tmp/tmux-501/superfile']` Make sure your python version is up to date

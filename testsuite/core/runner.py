@@ -7,6 +7,8 @@ import logging
 import platform
 import importlib
 from pathlib import Path
+from typing import List
+
 
 # Preferred importing at the top level
 if platform.system() == "Windows" :
@@ -18,8 +20,8 @@ else:
 
 logger = logging.getLogger()
 
-def get_testcases(test_env : Environment, only_run_tests : list[str] = None) -> list[BaseTest]:
-    res : list[BaseTest] = []
+def get_testcases(test_env : Environment, only_run_tests : List[str] = None) -> List[BaseTest]:
+    res : List[BaseTest] = []
     test_dir = Path(__file__).parent.parent / "tests"
     for test_file in test_dir.glob("*_test.py"):
         # Import dynamically
@@ -36,7 +38,7 @@ def get_testcases(test_env : Environment, only_run_tests : list[str] = None) -> 
     return res
 
 
-def run_tests(spf_path : Path, stop_on_fail : bool = True, only_run_tests : list[str] = None) -> None:
+def run_tests(spf_path : Path, stop_on_fail : bool = True, only_run_tests : List[str] = None) -> None:
     # is this str conversion needed ?
 
     spf_manager : BaseSPFManager = None 
@@ -52,7 +54,7 @@ def run_tests(spf_path : Path, stop_on_fail : bool = True, only_run_tests : list
     try:
         cnt_passed : int = 0
         cnt_executed : int = 0
-        testcases : list[BaseTest] = get_testcases(test_env, only_run_tests=only_run_tests)
+        testcases : List[BaseTest] = get_testcases(test_env, only_run_tests=only_run_tests)
         logger.info("Testcases : %s", testcases)
         for t in testcases:
             logger.info("Running test %s", t)
