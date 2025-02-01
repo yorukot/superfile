@@ -45,18 +45,22 @@ def run_tests(spf_path : Path, stop_on_fail : bool = True) -> None:
         cnt_passed : int = 0
         cnt_executed : int = 0
         testcases : list[BaseTest] = get_testcases(test_env)
-        logger.debug("Testcases : %s", testcases)
+        logger.info("Testcases : %s", testcases)
         for t in testcases:
+            logger.info("Running test %s", t)
             t.setup()
             t.test_execute()
             cnt_executed += 1
 
             if t.validate():
+                logger.info("Passed test %s", t)
                 cnt_passed += 1
-            elif stop_on_fail:
-                break
+            else:
+                logger.error("Failed test %s", t)
+                if stop_on_fail:
+                    break
         
-        logger.info("Finised running %s test. %s passed", cnt_executed, cnt_passed)
+        logger.info("Finished running %s test. %s passed", cnt_executed, cnt_passed)
     finally:
         # Make sure of cleanup
         # This is still not full proof, as if what happens when TestFSManager __init__ fails ?

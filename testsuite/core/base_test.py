@@ -66,19 +66,19 @@ class GenericTestImpl(BaseTest):
         # Start in DIR1
         self.env.spf_mgr.start_spf(self.env.fs_mgr.abspath(self.start_dir))
 
-        assert self.env.spf_mgr.is_spf_running()
+        assert self.env.spf_mgr.is_spf_running(), "Supperfile is not running"
 
         for cur_input in self.key_inputs:
             if isinstance(cur_input, keys.Keys):
                 self.env.spf_mgr.send_special_input(cur_input)
             else:
-                assert isinstance(cur_input, str)
+                assert isinstance(cur_input, str), "Invalid input type"
                 self.env.spf_mgr.send_text_input(cur_input)
             time.sleep(tconst.KEY_DELAY)
 
         time.sleep(tconst.OPERATION_DELAY)
         self.env.spf_mgr.send_special_input(keys.KEY_ESC)    
-        time.sleep(tconst.CLOSE_DELAY)
+        time.sleep(tconst.CLOSE_WAIT_TIME)
         self.logger.debug("Finished Execution")
 
     def validate(self) -> bool:
@@ -89,11 +89,11 @@ class GenericTestImpl(BaseTest):
         self.logger.debug("spf_manager info : %s, Current file structure : \n%s",
             self.env.spf_mgr.runtime_info(), self.env.fs_mgr.tree(self.test_root))
         try:
-            assert not self.env.spf_mgr.is_spf_running()
+            assert not self.env.spf_mgr.is_spf_running(), "Supperfile is still running"
             for file_path in self.validation_files:
-                assert self.env.fs_mgr.check_exists(file_path)
+                assert self.env.fs_mgr.check_exists(file_path), f"File {file_path} does not exist"
         except AssertionError as ae:
-            self.logger.debug("Test assertion failed : %s", ae)
+            self.logger.debug("Test assertion failed : %s", ae, exc_info=True)
             return False
                 
         return True
