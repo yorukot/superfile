@@ -1,61 +1,50 @@
-import fs
-import fs.copy
-import fs.memoryfs
 import logging
-import io 
+from  tempfile import TemporaryDirectory
+from pathlib import Path
+import os
+from io import StringIO
 
-# Relevant constants
-FILE_TEXT1 : str = "This is a sample Text\n"
-
-
-# Abstract the usage of in memory fs
 class TestFSManager:
-
-    # Class variables for efficiency
-    TEST_1_COPY_ROOT_DIR = "op1/copy_op"
-
+    """Manage the temporary files for test and the cleanup
+    """    
     def __init__(self):
-        # Gotta close it too
-        # usage of memoryfs to quickly replicate the whole test filesystem anywhere
-        self.memfs = fs.memoryfs.MemoryFS()
         self.logger = logging.getLogger()
-
-        self.setup_memfs()
-        self.logger.debug("Initialized TestDirManager") 
-        tree_out = io.StringIO()
-        self.memfs.tree(file=tree_out)
-        
-        # Using lazy logging -  W1201
-        self.logger.debug("Directory structure : \n%s", tree_out.getvalue())
+        self.logger.debug("Initialized %s", self.__class__.__name__) 
+        self.temp_dir_obj = TemporaryDirectory()
+        self.temp_dir = Path(self.temp_dir_obj.name)
     
-    def copy_to_dir(self, dst_dir : str) -> None:
-        fs.copy.copy_fs(self.memfs, dst_dir)
+    def makedirs(self, relative_path : Path):
+        # Overloaded '/' operator
+        os.makedirs(self.temp_dir / relative_path, exist_ok=True)
     
-    def writef_memfs(self, filepath : str, content : str = "") -> None:
-        with self.memfs.open(filepath, 'w') as f:
-            f.write(content)
+    def create_file(self, relative_path : Path, data : str = ""):
+        """Create files
+        Make sure directories exist
+        Args:
+            relative_path (Path): Relative path from test root
+        """
+        with open(self.temp_dir / relative_path, 'w', encoding="utf-8") as f:
+            f.write(data)
 
-    def setup_memfs(self) -> None:
-        
-        # At root level
-
-        # First group of operations
-        self.memfs.makedirs("op1")
-
-        # Copy operation. makedir creates intermediate directories
-        self.memfs.makedirs("op1/copy_op/dir1")
-        self.memfs.makedirs("op1/copy_op/dir2")
-        self.writef_memfs("op1/copy_op/dir1/file1.txt", FILE_TEXT1)
-
-        # Cut operation
-        self.memfs.makedirs("op1/cut_op/dir1")
-        self.memfs.makedirs("op1/cut_op/dir2")
-        self.writef_memfs("op1/cut_op/dir1/file1.txt", FILE_TEXT1)
-        
-        # Rename operation
-        self.memfs.makedirs("op1/rename_op/dir1")
-        self.writef_memfs("op1/rename_op/dir1/file1.txt", FILE_TEXT1)
+    def tree(self, relative_root : Path = None) -> str:
+        if relative_root is None:
+            root = self.temp_dir
+        else:
+            root = self.temp_dir / relative_root
+        res = StringIO()
+        for item in root.rglob('*'):
+            path_str = str(item.relative_to(root))
+            if item.is_dir():
+                res.write(f"D-{path_str}\n")
+            else:
+                res.write(f"F-{path_str}\n")
+        return res.getvalue()
 
     def cleanup(self) -> None:
-        self.memfs.close()
+        """Cleaup the temporary directory
+        Its okay to forget it though, it will be cleaned on program exit then.
+        """
+        self.temp_dir_obj.cleanup()
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(temp_dir = {self.temp_dir})"

@@ -1,10 +1,8 @@
 import argparse
 import logging
 import sys
-import tempfile
-import time
 
-from ./core/fs_manager import TestFSManager
+from core.fs_manager import TestFSManager
 
 logger = logging.getLogger()
 
@@ -28,20 +26,19 @@ def configure_logging(debug : bool = False) -> None:
         logger.setLevel(logging.INFO)
 
 def test_main():
-    tdm = TestFSManager()
     try:
-        run_tests()
-        with tempfile.TemporaryDirectory() as temp_dir:
-            logger.info(f'Temporary directory created at: {temp_dir}')
-            tdm.copy_to_dir(temp_dir)
+        t = TestFSManager()
+        logger.info(t)
 
-            time.sleep(10)
-
-            
+        t.makedirs('1/2/3')
+        t.create_file("1/2/3/1.txt")
+        logger.info(t.tree('1'))
+        input("Press enter to exit ...")
+        t.cleanup() 
     except Exception as e:
-        logger.error(f"Exception while running tests : {e}")
+        logger.error("Exception while running tests : {%s}", e)
     finally:
-        tdm.cleanup()
+        pass
 
 def main():
     # Setup argument parser
