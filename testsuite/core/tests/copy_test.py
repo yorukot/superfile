@@ -1,5 +1,19 @@
+from core.base_test import BaseTest
 
-class CopyTest(BaseExecutor):
+class CopyTest(BaseTest):
+
+    def setup(self):
+        """Set up the required things for test
+        """
 
     def test_execute(self):
-        self.spf_manager.start_spf()
+        """Execute the test
+        """
+
+    def validate(self) -> bool:
+        """Validate that test passed. Log exception if failed.
+        Returns:
+            bool: True if validation passed
+        """
+    def __repr__(self):
+        return f"{self.__class__.__name__}"

@@ -2,7 +2,7 @@ import libtmux
 import time 
 from abc import ABC, abstractmethod
 
-from keys import Keys
+from core.keys import Keys
 
 
 class BaseSPFManager(ABC):
@@ -83,14 +83,14 @@ class TmuxSPFManager(BaseSPFManager):
 
     def get_rendered_output(self) -> str:
         return "[Not supported yet]"
-    
+
     def is_spf_running(self) -> bool:
         self._is_spf_running = (
             (self.spf_session != None) 
             and (self.server.sessions.count(self.spf_session) == 1))
-        
+
         return self._is_spf_running
-    
+
     def close_spf(self) -> None:
         if self.is_spf_running():
             self.server.kill_session(self.spf_session.name)
@@ -98,3 +98,36 @@ class TmuxSPFManager(BaseSPFManager):
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(server : {self.server}, " + \
             f"session : {self.spf_session}, running : {self._is_spf_running})"
+
+
+class PyAutoGuiSPFManager(BaseSPFManager):
+    
+    def __init__(self, spf_path : str):
+        super().__init__(spf_path)
+        self.spf_process = None
+
+
+    def start_spf(self, start_dir : str = None) -> None:
+        pass 
+    
+    def send_text_input(self, text : str, all_at_once : bool = False) -> None:
+        pass 
+
+    def send_special_input(self, key : Keys) -> None:
+        pass 
+
+    def get_rendered_output(self) -> str:
+        pass
+    
+    
+    def is_spf_running(self) -> bool:
+        """
+        We allow using _is_spf_running variable for efficiency
+        But this method should give the true state, although this might have some calculations
+        """
+        return self._is_spf_running
+    
+    def close_spf(self) -> None:
+        """
+        Close spf if its running and cleanup any other resources
+        """

@@ -1,11 +1,9 @@
 import argparse
 import logging
 import sys
+from pathlib import Path
 
-from core.fs_manager import TestFSManager
-
-logger = logging.getLogger()
-
+from core.runner import run_tests
 
 
 def configure_logging(debug : bool = False) -> None:
@@ -17,7 +15,9 @@ def configure_logging(debug : bool = False) -> None:
         '[%(asctime)s - %(levelname)7s] %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S'
     ))
-    
+
+
+    logger = logging.getLogger()
     logger.addHandler(handler)
 
     if debug:
@@ -25,34 +25,30 @@ def configure_logging(debug : bool = False) -> None:
     else:
         logger.setLevel(logging.INFO)
 
-def test_main():
-    try:
-        t = TestFSManager()
-        logger.info(t)
-
-        t.makedirs('1/2/3')
-        t.create_file("1/2/3/1.txt")
-        logger.info(t.tree('1'))
-        input("Press enter to exit ...")
-        t.cleanup() 
-    except Exception as e:
-        logger.error("Exception while running tests : {%s}", e)
-    finally:
-        pass
-
 def main():
     # Setup argument parser
     parser = argparse.ArgumentParser(description='superfile testsuite')
-    parser.add_argument('-d', '--debug', 
-                        action='store_true', 
+    parser.add_argument('-d', '--debug',
+                        action='store_true',
                         help='Enable debug logging')
+    parser.add_argument('--spf-path', type=str,
+                        help='Override the default spf executable path(../bin/spf) under test')
     
     # Parse arguments
     args = parser.parse_args()
 
     configure_logging(args.debug)
 
-    test_main()
-    
+    # Default path
+    # We maybe should run this only in main.py file.
+    spf_path = Path(__file__).parent.parent / "bin" / "spf"
+
+    if args.spf_path is not None:
+        spf_path = Path(args.spf_path)
+    # Resolve any symlinks, and make it absolute
+    spf_path = spf_path.resolve()
+
+    run_tests(spf_path)
+
 
 main()
