@@ -1,9 +1,9 @@
 import libtmux
 import time 
+import logging
 from abc import ABC, abstractmethod
 
-from core.keys import Keys
-
+import core.keys as keys
 
 class BaseSPFManager(ABC):
 
@@ -21,7 +21,7 @@ class BaseSPFManager(ABC):
         pass 
 
     @abstractmethod
-    def send_special_input(self, key : Keys) -> None:
+    def send_special_input(self, key : keys.Keys) -> None:
         pass 
 
     @abstractmethod
@@ -47,6 +47,8 @@ class BaseSPFManager(ABC):
 class TmuxSPFManager(BaseSPFManager):
     """
     Tmux based Manager
+    After running spf, you can connect to the session via
+    tmux -L superfile attach -t spf_session
     """
     # Class variables
     SPF_START_DELAY = 0.1 # seconds
@@ -55,6 +57,7 @@ class TmuxSPFManager(BaseSPFManager):
     # Init should not allocate any resources
     def __init__(self, spf_path : str):
         super().__init__(spf_path)
+        self.logger = logging.getLogger()
         self.server = libtmux.Server(socket_name=TmuxSPFManager.SPF_SOCKET_NAME)
         self.spf_session : libtmux.Session = None
         self.spf_pane : libtmux.Pane = None
@@ -78,9 +81,14 @@ class TmuxSPFManager(BaseSPFManager):
             for c in text:
                 self._send_key(c)
 
-    def send_special_input(self, key : Keys) -> str:
-        self._send_key(chr(key.ascii_code))
-
+    def send_special_input(self, key : keys.Keys) -> str:
+        if key.ascii_code != keys.NO_ASCII:
+            self._send_key(chr(key.ascii_code))
+        elif isinstance(key, keys.SpecialKeys):
+            self._send_key(key.key_name)
+        else:
+            raise Exception(f"Unknown key : {key}") 
+            
     def get_rendered_output(self) -> str:
         return "[Not supported yet]"
 
@@ -113,7 +121,7 @@ class PyAutoGuiSPFManager(BaseSPFManager):
     def send_text_input(self, text : str, all_at_once : bool = False) -> None:
         pass 
 
-    def send_special_input(self, key : Keys) -> None:
+    def send_special_input(self, key : keys.Keys) -> None:
         pass 
 
     def get_rendered_output(self) -> str:

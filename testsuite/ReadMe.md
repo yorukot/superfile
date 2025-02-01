@@ -7,6 +7,11 @@
 - Recommended to integrate your IDE with PEP8 to highlight PEP8 violations in real-time
 - Enforcing PEP8 via `pylint flake8 pycodestyle` and via pre commit hooks
 
+## Writing New testcases
+- Just create a file ending with `_test.py` in `tests` directory
+  - Any subclass of BaseTest with name ending with `Test` will be executed 
+  - see `run_tests` and `get_testcases` in `core/runner.py` for more info
+
 ## Setup 
 Requires python 3.9 or later.
 

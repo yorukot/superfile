@@ -13,11 +13,17 @@ class TestFSManager:
         self.temp_dir_obj = TemporaryDirectory()
         self.temp_dir = Path(self.temp_dir_obj.name)
     
-    def makedirs(self, relative_path : Path):
+    def abspath(self, relative_path : Path) -> Path:
+        return self.temp_dir / relative_path
+    
+    def check_exists(self, relative_path : Path) -> bool:
+        return self.abspath(relative_path).exists()
+
+    def makedirs(self, relative_path : Path) -> None:
         # Overloaded '/' operator
         os.makedirs(self.temp_dir / relative_path, exist_ok=True)
     
-    def create_file(self, relative_path : Path, data : str = ""):
+    def create_file(self, relative_path : Path, data : str = "") -> None:
         """Create files
         Make sure directories exist
         Args:

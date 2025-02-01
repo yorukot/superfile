@@ -25,6 +25,8 @@ def configure_logging(debug : bool = False) -> None:
     else:
         logger.setLevel(logging.INFO)
 
+    logging.getLogger("libtmux").setLevel(logging.WARNING)
+
 def main():
     # Setup argument parser
     parser = argparse.ArgumentParser(description='superfile testsuite')

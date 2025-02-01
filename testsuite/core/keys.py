@@ -31,9 +31,19 @@ KEY_CTRL_C : Keys = CtrlKeys('c')
 KEY_CTRL_M : Keys = CtrlKeys('m')
 KEY_CTRL_R : Keys = CtrlKeys('r')
 KEY_CTRL_V : Keys = CtrlKeys('v')
+KEY_CTRL_X : Keys = CtrlKeys('x')
 
 # See https://vimdoc.sourceforge.net/htmldoc/digraph.html#digraph-table for key codes
 KEY_BACKSPACE   : Keys = SpecialKeys(8 , "Backspace")
 KEY_ENTER       : Keys = SpecialKeys(13, "Enter")
 KEY_ESC         : Keys = SpecialKeys(27, "Esc")
 
+
+NO_ASCII = -1
+
+# Some keys dont have ascii codes, they have to be handled separately
+# Make sure key name is the same string as key code for Tmux
+KEY_DOWN        : Keys = SpecialKeys(NO_ASCII, "Down")
+KEY_UP          : Keys = SpecialKeys(NO_ASCII, "Up")
+KEY_LEFT        : Keys = SpecialKeys(NO_ASCII, "Left")
+KEY_RIGHT       : Keys = SpecialKeys(NO_ASCII, "Right")
