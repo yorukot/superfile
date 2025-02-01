@@ -38,6 +38,7 @@ KEY_CTRL_X : Keys = CtrlKeys('x')
 KEY_BACKSPACE   : Keys = SpecialKeys(8 , "Backspace")
 KEY_ENTER       : Keys = SpecialKeys(13, "Enter")
 KEY_ESC         : Keys = SpecialKeys(27, "Esc")
+KEY_DELETE      : Keys = SpecialKeys(127 , "Delete")
 
 
 NO_ASCII = -1

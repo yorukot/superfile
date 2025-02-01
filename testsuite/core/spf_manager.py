@@ -98,9 +98,8 @@ class TmuxSPFManager(BaseSPFManager):
         return "[Not supported yet]"
 
     def is_spf_running(self) -> bool:
-        self._is_spf_running = (
-            (self.spf_session is not None)
-            and (self.server.sessions.count(self.spf_session) == 1))
+        self._is_spf_running = (self.spf_session is not None) \
+            and (self.spf_session in self.server.sessions)
 
         return self._is_spf_running
 

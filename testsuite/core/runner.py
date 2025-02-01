@@ -12,7 +12,7 @@ from pathlib import Path
 
 logger = logging.getLogger()
 
-def get_testcases(test_env : Environment) -> list[BaseTest]:
+def get_testcases(test_env : Environment, only_run_tests : list[str] = None) -> list[BaseTest]:
     res : list[BaseTest] = []
     test_dir = Path(__file__).parent.parent / "tests"
     for test_file in test_dir.glob("*_test.py"):
@@ -20,6 +20,8 @@ def get_testcases(test_env : Environment) -> list[BaseTest]:
         module_name = test_file.stem 
         module = importlib.import_module(f"tests.{module_name}")
         for attr_name in dir(module):
+            if only_run_tests is not None and attr_name not in only_run_tests:
+                continue
             attr = getattr(module, attr_name)
             if isinstance(attr, type) and attr is not BaseTest and issubclass(attr, BaseTest) \
                 and  attr_name.endswith("Test"):
@@ -28,7 +30,7 @@ def get_testcases(test_env : Environment) -> list[BaseTest]:
     return res
 
 
-def run_tests(spf_path : Path, stop_on_fail : bool = True) -> None:
+def run_tests(spf_path : Path, stop_on_fail : bool = True, only_run_tests : list[str] = None) -> None:
     # is this str conversion needed ?
 
     spf_manager : BaseSPFManager = None 
@@ -44,7 +46,7 @@ def run_tests(spf_path : Path, stop_on_fail : bool = True) -> None:
     try:
         cnt_passed : int = 0
         cnt_executed : int = 0
-        testcases : list[BaseTest] = get_testcases(test_env)
+        testcases : list[BaseTest] = get_testcases(test_env, only_run_tests=only_run_tests)
         logger.info("Testcases : %s", testcases)
         for t in testcases:
             logger.info("Running test %s", t)

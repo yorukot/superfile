@@ -37,7 +37,8 @@ def main():
                         help='Override default wait time after closing spf')
     parser.add_argument('--spf-path', type=str,
                         help='Override the default spf executable path(../bin/spf) under test')
-    
+    parser.add_argument('-t', '--tests', nargs='+',
+                        help='Specify one or more than one space separated testcases to be run')
     # Parse arguments
     args = parser.parse_args()
     if args.close_wait_time is not None:
@@ -54,7 +55,7 @@ def main():
     # Resolve any symlinks, and make it absolute
     spf_path = spf_path.resolve()
 
-    run_tests(spf_path)
+    run_tests(spf_path, only_run_tests=args.tests)
 
 
 main()

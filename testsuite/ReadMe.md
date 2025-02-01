@@ -67,6 +67,8 @@ Notes
 .venv\Scripts\python main.py
 ```
 
-## Troubleshooting failing tests
+## Tips while running tests
 - Use `-d` or `--debug` to enable debug logs during test run.
 - If you see flakiness in test runs due to superfile being still open, consider using `--close-wait-time` options to increase wait time for superfile to close
+- Use `-t` or `--tests` to only run specific tests
+  - Example `python main.py -d -t RenameTest CopyTest`
