@@ -1,5 +1,4 @@
-
-from core.spf_manager import BaseSPFManager, TmuxSPFManager, PyAutoGuiSPFManager
+from core.spf_manager import BaseSPFManager
 from core.fs_manager import TestFSManager
 from core.environment import Environment
 from core.base_test import BaseTest
@@ -9,6 +8,13 @@ import platform
 import importlib
 from pathlib import Path
 
+# Preferred importing at the top level
+if platform.system() == "Windows" :
+    # Conditional import is needed to make it work on linux
+    # importing pyautogui on linux can cause errors.
+    from core.pyautogui_manager import PyAutoGuiSPFManager
+else:
+    from core.tmux_manager import TmuxSPFManager
 
 logger = logging.getLogger()
 
