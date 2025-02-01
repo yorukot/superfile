@@ -35,9 +35,38 @@ cd <superfile_root>
 ```
 
 ### Running testsuite
-- Note : You must keep your focus on the terminal for the entire duration of test run. `pyautogui` sends keypress to process on focus.
 ```
 .venv/bin/python3 main.py
 ```
 ## Setup for Windows
 Coming soon.
+
+
+
+### Python virtual env setup
+```
+# cd to this directory
+cd <path/to/here>
+python3 -m venv .venv
+.venv\Scripts\python -m pip install --upgrade pip
+.venv\Scripts\pip -r requirements.txt
+```
+
+### Make sure you build spf
+```
+# cd to the superfile repo root (parent of this)
+cd <superfile_root>
+go build -o bin/spf.exe
+```
+
+### Running testsuite
+Notes 
+- You must keep your focus on the terminal for the entire duration of test run. `pyautogui` sends keypress to process on focus.
+
+```
+.venv\Scripts\python main.py
+```
+
+## Troubleshooting failing tests
+- Use `-d` or `--debug` to enable debug logs during test run.
+- If you see flakiness in test runs due to superfile being still open, consider using `--close-wait-time` options to increase wait time for superfile to close

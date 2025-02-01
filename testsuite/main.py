@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 
 from core.runner import run_tests
+import core.test_constants as tconst
 
 
 def configure_logging(debug : bool = False) -> None:
@@ -30,17 +31,20 @@ def configure_logging(debug : bool = False) -> None:
 def main():
     # Setup argument parser
     parser = argparse.ArgumentParser(description='superfile testsuite')
-    parser.add_argument('-d', '--debug',
-                        action='store_true',
+    parser.add_argument('-d', '--debug',action='store_true',
                         help='Enable debug logging')
+    parser.add_argument('--close-wait-time', type=float,
+                        help='Override default wait time after closing spf')
     parser.add_argument('--spf-path', type=str,
                         help='Override the default spf executable path(../bin/spf) under test')
     
     # Parse arguments
     args = parser.parse_args()
-
+    if args.close_wait_time is not None:
+        tconst.CLOSE_WAIT_TIME = args.close_wait_time
+    
     configure_logging(args.debug)
-
+        
     # Default path
     # We maybe should run this only in main.py file.
     spf_path = Path(__file__).parent.parent / "bin" / "spf"

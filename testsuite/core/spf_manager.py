@@ -53,6 +53,7 @@ class TmuxSPFManager(BaseSPFManager):
     Tmux based Manager
     After running spf, you can connect to the session via
     tmux -L superfile attach -t spf_session
+    Wont work in windows
     """
     # Class variables
     SPF_START_DELAY : float = 0.1 # seconds
@@ -156,9 +157,19 @@ class PyAutoGuiSPFManager(BaseSPFManager):
     
     
     def is_spf_running(self) -> bool:
-        self._is_spf_running = self.spf_process is not None and self.spf_process.poll() is None
+        self._is_spf_running = (self.spf_process is not None) and (self.spf_process.poll() is None)
         return self._is_spf_running
     
     def close_spf(self) -> None:
         if self.spf_process is not None:
             self.spf_process.terminate()
+    
+    # Override
+    def runtime_info(self) -> str:
+        if self.spf_process is None:
+            return "[No process]"
+        else:
+            return f"[PID : {self.spf_process.pid}, poll : {self.spf_process.poll()}]"  
+
+
+
