@@ -447,4 +447,5 @@ func (m *model) quitSuperfile() {
         currentDir = strings.ReplaceAll(currentDir, "'", "'\\''")
         os.WriteFile(variable.SuperFileStateDir+"/lastdir", []byte("cd '"+currentDir+"'"), 0755)
     }
+	slog.Debug("Quitting superfile", "current dir", currentDir)
 }
