@@ -1,10 +1,11 @@
 package internal
 
 import (
+	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"log/slog"
+	"runtime"
 	"strings"
 	"time"
 
@@ -18,7 +19,7 @@ import (
 
 // Create a file in the currently focus file panel
 func (m *model) panelCreateNewFile() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	ti := textinput.New()
 	ti.Cursor.Style = modalCursorStyle
 	ti.Cursor.TextStyle = modalStyle
@@ -35,12 +36,10 @@ func (m *model) panelCreateNewFile() {
 	m.typingModal.textInput = ti
 	m.firstTextInput = true
 
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
-
 }
 
 func (m *model) IsRenamingConflicting() bool {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	oldPath := panel.element[panel.cursor].location
 	newPath := panel.location + "/" + panel.rename.Value()
 
@@ -70,7 +69,7 @@ func (m *model) warnModalForRenaming() {
 
 // Rename file where the cusror is located
 func (m *model) panelItemRename() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	if len(panel.element) == 0 {
 		return
 	}
@@ -99,11 +98,10 @@ func (m *model) panelItemRename() {
 	panel.renaming = true
 	m.firstTextInput = true
 	panel.rename = ti
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 func (m *model) deleteItemWarn() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	if !((panel.panelMode == selectMode && len(panel.selected) != 0) || (panel.panelMode == browserMode)) {
 		return
 	}
@@ -137,7 +135,7 @@ func (m *model) deleteItemWarn() {
 // Move file or directory to the trash can
 func (m *model) deleteSingleItem() {
 	id := shortuuid.New()
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 
 	if len(panel.element) == 0 {
 		return
@@ -184,12 +182,11 @@ func (m *model) deleteSingleItem() {
 			panel.cursor = len(panel.element) - 1
 		}
 	}
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 // Move file or directory to the trash can
-func (m model) deleteMultipleItems() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+func (m *model) deleteMultipleItems() {
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	if len(panel.selected) != 0 {
 		id := shortuuid.New()
 		prog := progress.New(generateGradientColor())
@@ -255,7 +252,7 @@ func (m model) deleteMultipleItems() {
 // Completely delete file or folder (Not move to the trash can)
 func (m *model) completelyDeleteSingleItem() {
 	id := shortuuid.New()
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 
 	if len(panel.element) == 0 {
 		return
@@ -306,12 +303,11 @@ func (m *model) completelyDeleteSingleItem() {
 			panel.cursor = len(panel.element) - 1
 		}
 	}
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 // Completely delete all file or folder from clipboard (Not move to the trash can)
-func (m model) completelyDeleteMultipleItems() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+func (m *model) completelyDeleteMultipleItems() {
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	if len(panel.selected) != 0 {
 		id := shortuuid.New()
 		prog := progress.New(generateGradientColor())
@@ -396,7 +392,7 @@ func (m *model) copyMultipleItem(cut bool) {
 	if len(panel.selected) == 0 {
 		return
 	}
-	slog.Debug("handle_file_operations.copyMultipleItem", "cut", cut, 
+	slog.Debug("handle_file_operations.copyMultipleItem", "cut", cut,
 		"panel selected files", panel.selected)
 	m.copyItems.items = panel.selected
 }
@@ -415,14 +411,14 @@ func (m *model) pasteItem() {
 		// Todo : Fix this. This is inefficient
 		// In case of a cut operations for a directory with a lot of files
 		// we are unnecessarily walking the whole directory recursively
-		// while os will just perform a rename 
-		// So instead of few operations this will cause the cut paste 
+		// while os will just perform a rename
+		// So instead of few operations this will cause the cut paste
 		// to read the whole directory recursively
 		// we should avoid doing this.
 		// Although this allows us a more detailed progress tracking
 		// this make the copy/cut more inefficient
 		// instead, we could just track progress based on total items in
-		// m.copyItems.items 
+		// m.copyItems.items
 		// efficiency should be prioritized over more detailed feedback.
 		count, err := countFiles(folderPath)
 		if err != nil {
@@ -432,7 +428,7 @@ func (m *model) pasteItem() {
 		totalFiles += count
 	}
 
-	slog.Debug("model.pasteItem",  "items", m.copyItems.items, "cut", m.copyItems.cut,
+	slog.Debug("model.pasteItem", "items", m.copyItems.items, "cut", m.copyItems.cut,
 		"totalFiles", totalFiles, "panel location", panel.location)
 
 	prog := progress.New(generateGradientColor())
@@ -481,7 +477,7 @@ func (m *model) pasteItem() {
 			if err != nil {
 				errMessage = "paste item error"
 			} else {
-				// Todo : These error cases are hard to test. We have to somehow make the paste operations fail, 
+				// Todo : These error cases are hard to test. We have to somehow make the paste operations fail,
 				// which is time consuming and manual. We should test these with automated testcases
 				if m.copyItems.cut {
 					os.RemoveAll(filePath)
@@ -510,7 +506,7 @@ func (m *model) pasteItem() {
 	channel <- message
 
 	m.processBarModel.process[id] = p
-	// Reset after paste is done. Only in case of cut  
+	// Reset after paste is done. Only in case of cut
 	// because current items in clipboard are deleted now
 	if m.copyItems.cut {
 		m.copyItems.reset(false)
@@ -518,9 +514,9 @@ func (m *model) pasteItem() {
 }
 
 // Extrach compress file
-func (m model) extractFile() {
+func (m *model) extractFile() {
 	var err error
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	ext := strings.ToLower(filepath.Ext(panel.element[panel.cursor].location))
 	outputDir := fileNameWithoutExtension(panel.element[panel.cursor].location)
 	outputDir, err = renameIfDuplicate(outputDir)
@@ -546,8 +542,8 @@ func (m model) extractFile() {
 }
 
 // Compress file or directory
-func (m model) compressFile() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+func (m *model) compressFile() {
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	fileName := filepath.Base(panel.element[panel.cursor].location)
 
 	zipName := strings.TrimSuffix(fileName, filepath.Ext(fileName)) + ".zip"
@@ -561,15 +557,22 @@ func (m model) compressFile() {
 }
 
 // Open file with default editor
-func (m model) openFileWithEditor() tea.Cmd {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+func (m *model) openFileWithEditor() tea.Cmd {
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 
 	editor := Config.Editor
 	if editor == "" {
 		editor = os.Getenv("EDITOR")
 	}
+
+	// Make sure there is an editor
+	// Todo : Move hardcoded strings to constants : "windows", and editors
 	if editor == "" {
-		editor = "nano"
+		if runtime.GOOS == "windows" {
+			editor = "notepad"
+		} else {
+			editor = "nano"
+		}
 	}
 	c := exec.Command(editor, panel.element[panel.cursor].location)
 
@@ -579,13 +582,19 @@ func (m model) openFileWithEditor() tea.Cmd {
 }
 
 // Open directory with default editor
-func (m model) openDirectoryWithEditor() tea.Cmd {
+func (m *model) openDirectoryWithEditor() tea.Cmd {
 	editor := Config.Editor
 	if editor == "" {
 		editor = os.Getenv("EDITOR")
 	}
+	// Make sure there is an editor
+	// Todo : Move hardcoded strings to constants : "windows", and editors
 	if editor == "" {
-		editor = "nano"
+		if runtime.GOOS == "windows" {
+			editor = "explorer"
+		} else {
+			editor = "nano"
+		}
 	}
 	c := exec.Command(editor, m.fileModel.filePanels[m.filePanelFocusIndex].location)
 	return tea.ExecProcess(c, func(err error) tea.Msg {
@@ -594,15 +603,15 @@ func (m model) openDirectoryWithEditor() tea.Cmd {
 }
 
 // Copy file path
-func (m model) copyPath() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+func (m *model) copyPath() {
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	if err := clipboard.WriteAll(panel.element[panel.cursor].location); err != nil {
 		outPutLog("Copy path error", panel.element[panel.cursor].location, err)
 	}
 }
 
-func (m model) copyPWD() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+func (m *model) copyPWD() {
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	if err := clipboard.WriteAll(panel.location); err != nil {
 		outPutLog("Copy present working directory error", panel.location, err)
 	}
