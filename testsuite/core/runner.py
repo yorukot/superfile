@@ -44,7 +44,7 @@ def run_tests(spf_path : Path, stop_on_fail : bool = True) -> None:
     try:
         cnt_passed : int = 0
         cnt_executed : int = 0
-        testcases = get_testcases(test_env)
+        testcases : list[BaseTest] = get_testcases(test_env)
         logger.debug("Testcases : %s", testcases)
         for t in testcases:
             t.setup()

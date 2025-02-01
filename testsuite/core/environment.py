@@ -9,6 +9,6 @@ class Environment:
         self.spf_mgr = spf_manager
         self.fs_mgr = fs_manager
 
-    def cleanup(self):
+    def cleanup(self) -> None:
         self.spf_mgr.close_spf()
         self.fs_mgr.cleanup()

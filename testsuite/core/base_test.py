@@ -18,12 +18,12 @@ class BaseTest(ABC):
         self.logger = logging.getLogger()
 
     @abstractmethod
-    def setup(self):
+    def setup(self) -> None:
         """Set up the required things for test
         """
 
     @abstractmethod
-    def test_execute(self):
+    def test_execute(self) -> None:
         """Execute the test
         """
 
@@ -50,7 +50,7 @@ class GenericTestImpl(BaseTest):
         self.key_inputs = key_inputs
         self.validation_files = validation_files
     
-    def setup(self):
+    def setup(self) -> None:
         for dir_path in self.test_dirs:
             self.env.fs_mgr.makedirs(dir_path)
         for file_path, data in self.test_files:
@@ -60,7 +60,7 @@ class GenericTestImpl(BaseTest):
             self.env.fs_mgr.tree(self.test_root))
 
 
-    def test_execute(self):
+    def test_execute(self) -> None:
         """Execute the test
         """
         # Start in DIR1
@@ -86,8 +86,8 @@ class GenericTestImpl(BaseTest):
         Returns:
             bool: True if validation passed
         """
-        self.logger.debug("tmux sessions : %s, Current file structure : \n%s",
-            self.env.spf_mgr.server.sessions, self.env.fs_mgr.tree(self.test_root))
+        self.logger.debug("spf_manager info : %s, Current file structure : \n%s",
+            self.env.spf_mgr.runtime_info(), self.env.fs_mgr.tree(self.test_root))
         try:
             assert not self.env.spf_mgr.is_spf_running()
             for file_path in self.validation_files:
@@ -98,6 +98,6 @@ class GenericTestImpl(BaseTest):
                 
         return True
     
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.__class__.__name__}"
 

@@ -33,8 +33,8 @@ def main():
                 # Start Superfile in a subprocess
                 process = subprocess.Popen(
                     ['../bin/spf', dir1],
-                    stdout=fout, 
-                    stderr=ferr,
+                    #stdout=fout, 
+                    #stderr=ferr,
                     )
                 # Wait for it to load.
                 time.sleep(1)

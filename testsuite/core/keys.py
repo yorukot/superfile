@@ -4,7 +4,7 @@ class Keys(ABC):
     def __init__(self, ascii_code : int):
         self.ascii_code = ascii_code
     
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Key(code={self.ascii_code})"
 
 # Will isinstance of Keys work for object of CtrlKeys ?
@@ -34,6 +34,7 @@ KEY_CTRL_V : Keys = CtrlKeys('v')
 KEY_CTRL_X : Keys = CtrlKeys('x')
 
 # See https://vimdoc.sourceforge.net/htmldoc/digraph.html#digraph-table for key codes
+# If keyname is not the same string as key code in pyautogui, need to handle seperately
 KEY_BACKSPACE   : Keys = SpecialKeys(8 , "Backspace")
 KEY_ENTER       : Keys = SpecialKeys(13, "Enter")
 KEY_ESC         : Keys = SpecialKeys(27, "Esc")
