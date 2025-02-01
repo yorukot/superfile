@@ -63,7 +63,9 @@ func (m *model) sidebarRender() string {
 			cursor = icon.Cursor
 		}
 
-		if directory.location == m.fileModel.filePanels[m.filePanelFocusIndex].location {
+		if m.sidebarModel.renaming && i == m.sidebarModel.cursor {
+			s += m.sidebarModel.rename.View()
+		} else if directory.location == m.fileModel.filePanels[m.filePanelFocusIndex].location {
 			s += filePanelCursorStyle.Render(cursor+" ") + sidebarSelectedStyle.Render(truncateText(directory.name, Config.SidebarWidth-2, "..."))
 		} else {
 			s += filePanelCursorStyle.Render(cursor+" ") + sidebarStyle.Render(truncateText(directory.name, Config.SidebarWidth-2, "..."))
@@ -171,8 +173,8 @@ func (m *model) filePanelRender() string {
 				if filePanel.renaming && h == filePanel.cursor {
 					f[i] += filePanel.rename.View() + endl
 				} else {
-					_, err := os.ReadDir(filePanel.element[h].location);
-					f[i] += filePanelCursorStyle.Render(cursor+" ") + prettierName(filePanel.element[h].name, m.fileModel.width-5, filePanel.element[h].directory||(err == nil), isItemSelected, filePanelBGColor) + endl
+					_, err := os.ReadDir(filePanel.element[h].location)
+					f[i] += filePanelCursorStyle.Render(cursor+" ") + prettierName(filePanel.element[h].name, m.fileModel.width-5, filePanel.element[h].directory || (err == nil), isItemSelected, filePanelBGColor) + endl
 				}
 			}
 			cursorPosition := strconv.Itoa(filePanel.cursor + 1)
@@ -275,7 +277,7 @@ func (m *model) processBarRender() string {
 	return processRender
 }
 
-// This updates m.fileMetaData 
+// This updates m.fileMetaData
 func (m *model) metadataRender() string {
 	// process bar
 	metaDataBar := ""
@@ -554,9 +556,9 @@ func (m *model) sortOptionsRender() string {
 }
 
 func readFileContent(filepath string, maxLineLength int, previewLine int) (string, error) {
-	// String builder is much better for efficiency 
+	// String builder is much better for efficiency
 	// See - https://stackoverflow.com/questions/1760757/how-to-efficiently-concatenate-strings-in-go/47798475#47798475
-	var resultBuilder strings.Builder 
+	var resultBuilder strings.Builder
 	file, err := os.Open(filepath)
 	if err != nil {
 		return resultBuilder.String(), err
@@ -570,9 +572,9 @@ func readFileContent(filepath string, maxLineLength int, previewLine int) (strin
 		if len(line) > maxLineLength {
 			line = line[:maxLineLength]
 		}
-		// This is critical to avoid layout break, removes non Printable ASCII control characters. 
+		// This is critical to avoid layout break, removes non Printable ASCII control characters.
 		line = makePrintable(line)
-		resultBuilder.WriteString(line+"\n")
+		resultBuilder.WriteString(line + "\n")
 		lineCount++
 		if previewLine > 0 && lineCount >= previewLine {
 			break
@@ -645,8 +647,8 @@ func (m *model) filePreviewPanelRender() string {
 
 	if isImageFile(itemPath) {
 		if !m.fileModel.filePreview.open {
-            return box.Render("\n --- Preview panel is closed ---")
-        }
+			return box.Render("\n --- Preview panel is closed ---")
+		}
 		ansiRender, err := filepreview.ImagePreview(itemPath, m.fileModel.filePreview.width, previewLine, theme.FilePanelBG)
 		if err == image.ErrFormat {
 			return box.Render("\n --- " + icon.Error + " Unsupported image formats ---")
@@ -673,7 +675,7 @@ func (m *model) filePreviewPanelRender() string {
 	}
 
 	// At this point either format is not nil, or we can read the file
-	fileContent , err := readFileContent(itemPath, m.fileModel.width+20, previewLine)
+	fileContent, err := readFileContent(itemPath, m.fileModel.width+20, previewLine)
 	if err != nil {
 		outPutLog(err)
 		return box.Render("\n --- " + icon.Error + " Error open file ---")
@@ -682,7 +684,7 @@ func (m *model) filePreviewPanelRender() string {
 	// We know the format of file, and we can apply syntax highlighting
 	if format != nil {
 		background := ""
-		if ! Config.TransparentBackground {
+		if !Config.TransparentBackground {
 			background = theme.FilePanelBG
 		}
 		fileContent, err = ansichroma.HightlightString(fileContent, format.Config().Name, theme.CodeSyntaxHighlightTheme, background)

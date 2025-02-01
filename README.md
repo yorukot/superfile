@@ -1,5 +1,31 @@
 <div align="center">
 
+<p>
+  <H4>
+    <a href="https://ko-fi.com/yorukot">superfile is supported by the community.</a>
+  </H3>
+</p>
+<sup>Special thanks to our sponsor:</sup>
+<br>
+<br>
+<a href="https://www.warp.dev/?utm_source=github&utm_medium=referral&utm_campaign=superfile">
+  <div>
+    <picture>
+      <img alt="Warp" width="500" src="/asset/warp.png">
+    </picture>
+  </div>
+  <b>Warp, the intelligent terminal</b>
+  <div>
+    <sup>superfile's Terminal of Choice<br>
+Visit warp.dev to learn more
+    </sup>
+  </div>
+</a>
+<hr>
+</div>
+
+<div align="center">
+
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="/asset/superfilelogowhite.png" />
   <source media="(prefers-color-scheme: light)" srcset="/asset/superfilelogoblack.png" />
@@ -123,7 +149,7 @@ After you install superfile, you can go [here](https://superfile.netlify.app/get
 
 ### MacOS and Linux
 
-On MacOS and Linux, you can uninstall superfile by simply removing the binary. If you installed superfile with sudo, run
+On MacOS and Linux, you can uninstall superfile by simply removing the binary. If you installed superfile with sudo, runw
 
 ```bash
 sudo rm /usr/local/bin/spf
