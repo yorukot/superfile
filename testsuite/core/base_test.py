@@ -91,7 +91,7 @@ class GenericTestImpl(BaseTest):
         self.logger.debug("spf_manager info : %s, Current file structure : \n%s",
             self.env.spf_mgr.runtime_info(), self.env.fs_mgr.tree(self.test_root))
         try:
-            assert not self.env.spf_mgr.is_spf_running(), "Supperfile is still running"
+            assert not self.env.spf_mgr.is_spf_running(), "Superfile is still running"
             for file_path in self.validate_exists:
                 assert self.env.fs_mgr.check_exists(file_path), f"File {file_path} does not exists"
             

@@ -457,10 +457,10 @@ func (m *model) quitSuperfile() {
 	currentDir := m.fileModel.filePanels[m.filePanelFocusIndex].location
 	variable.LastDir = currentDir
 
-    if Config.CdOnQuit {
-        // escape single quote
-        currentDir = strings.ReplaceAll(currentDir, "'", "'\\''")
-        os.WriteFile(variable.SuperFileStateDir+"/lastdir", []byte("cd '"+currentDir+"'"), 0755)
-    }
+	if Config.CdOnQuit {
+		// escape single quote
+		currentDir = strings.ReplaceAll(currentDir, "'", "'\\''")
+		os.WriteFile(variable.SuperFileStateDir+"/lastdir", []byte("cd '"+currentDir+"'"), 0755)
+	}
 	slog.Debug("Quitting superfile", "current dir", currentDir)
 }
