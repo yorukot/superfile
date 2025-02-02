@@ -41,8 +41,7 @@ func initialConfig(dir string) (toggleDotFileBool bool, toggleFooter bool, first
 	slog.SetDefault(slog.New(slog.NewTextHandler(
 		file, &slog.HandlerOptions{Level: logLevel})))
 	
-	slog.Debug("Runtime information", "runtime.GOOS", runtime.GOOS)
-
+	
 	loadHotkeysFile()
 
 	loadThemeFile()
@@ -92,6 +91,9 @@ func initialConfig(dir string) (toggleDotFileBool bool, toggleFooter bool, first
 	if err != nil {
 		firstFilePanelDir = variable.HomeDir
 	}
+
+	slog.Debug("Runtime information", "runtime.GOOS", runtime.GOOS,
+		"start directory", firstFilePanelDir)
 
 	return toggleDotFileBool, toggleFooter, firstFilePanelDir
 }
