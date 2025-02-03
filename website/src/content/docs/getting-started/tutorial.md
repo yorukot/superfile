@@ -135,6 +135,12 @@ To cut, you can press `ctrl`+`x`.
 
 Both cut and copied items are shown in the clipboard panel (lower-right corner). The progress of your operations is displayed in the processes panel (lower-left corner).
 
+To paste, you can press `ctrl`+`v` or `ctrl`+`w`.
+
+:::note
+In some terminals, for example Windows Powershell, `ctrl`+`v` pastes input from clipboard to terminal. So, `ctrl`+`v` might not work for paste. Either you can use `ctrl`+`w` key, or override default behaviour of `ctrl`+`v` on your terminal.
+:::
+
 To delete, you can press `ctrl`+`d`
 
 :::note
@@ -161,6 +167,8 @@ This will set Neovim as your default file editor. After setting this, Neovim wil
 file_editor = nano
 dir_editor = vi
 ```
+
+These are changes in config file. See [superfile-config](/configure/superfile-config) for more info.
 This will set `nano` as your default file editor, and `vi` as your default directory editor. After setting this, `nano` will be used when opening files with the `e` key bindings, and `vi` will be used to open current directory with `E` key bindings.
 
 :::caution
