@@ -560,7 +560,7 @@ func (m *model) compressFile() {
 func (m *model) openFileWithEditor() tea.Cmd {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 
-	editor := Config.Editor
+	editor := Config.FileEditor
 	if editor == "" {
 		editor = os.Getenv("EDITOR")
 	}
@@ -584,14 +584,17 @@ func (m *model) openFileWithEditor() tea.Cmd {
 // Open directory with default editor
 func (m *model) openDirectoryWithEditor() tea.Cmd {
 	// Todo : Move hardcoded strings to constants : "windows", and editors
-	editor := ""
-	if runtime.GOOS == "windows" {
-		editor = "explorer"
-	} else if runtime.GOOS == "darwin" {
-		// open is command for MacOS Finder
-		editor = "open"
-	} else {
-		editor = "vi"
+	editor := Config.DirEditor
+
+	if editor == "" {
+		if runtime.GOOS == "windows" {
+			editor = "explorer"
+		} else if runtime.GOOS == "darwin" {
+			// open is command for MacOS Finder
+			editor = "open"
+		} else {
+			editor = "vi"
+		}
 	}
 
 	c := exec.Command(editor, m.fileModel.filePanels[m.filePanelFocusIndex].location)
