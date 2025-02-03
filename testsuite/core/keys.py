@@ -32,6 +32,7 @@ KEY_CTRL_D : Keys = CtrlKeys('d')
 KEY_CTRL_M : Keys = CtrlKeys('m')
 KEY_CTRL_R : Keys = CtrlKeys('r')
 KEY_CTRL_V : Keys = CtrlKeys('v')
+KEY_CTRL_W : Keys = CtrlKeys('w')
 KEY_CTRL_X : Keys = CtrlKeys('x')
 
 # See https://vimdoc.sourceforge.net/htmldoc/digraph.html#digraph-table for key codes
