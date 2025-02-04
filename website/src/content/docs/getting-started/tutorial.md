@@ -164,8 +164,8 @@ EDITOR=nvim
 This will set Neovim as your default file editor. After setting this, Neovim will be used when opening files with the `e` key bindings.
 
 ```
-file_editor = nano
-dir_editor = vi
+file_editor = "nano"
+dir_editor = "vi"
 ```
 
 These are changes in config file. See [superfile-config](/configure/superfile-config) for more info.
