@@ -51,8 +51,6 @@ func (m model) Init() tea.Cmd {
 // Update function for bubble tea to provide internal communication to the
 // application
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	slog.Debug("model.Update() called.", "current width", m.fullWidth,
-		"current height", m.fullHeight)
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
@@ -72,14 +70,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	// check if there already have listening message
 	if !ListeningMessage {
-		slog.Debug("ListeningMessage is false in model Update()")
 		cmd = tea.Batch(cmd, listenForChannelMessage(channel))
 	}
 
 	m.getFilePanelItems()
-
-	slog.Debug("model.Update() returning.", "current width", m.fullWidth,
-		"current height", m.fullHeight)
 
 	return m, tea.Batch(cmd)
 }
@@ -101,7 +95,6 @@ func (m *model) handleChannelMessage(msg channelMessage) {
 
 // Adjust window size based on msg information
 func (m *model) handleWindowResize(msg tea.WindowSizeMsg) {
-	slog.Debug("model.Update() called with handleWindowResize msg.", "msg.Width", msg.Width, "msg.Height", msg.Height)
 	m.fullHeight = msg.Height
 	m.fullWidth = msg.Width
 
@@ -254,7 +247,6 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 // Update the file panel state. Change name of renamed files, filter out files
 // in search, update typingb bar, etc
 func (m *model) updateFilePanelsState(msg tea.Msg, cmd *tea.Cmd) {
-	slog.Debug("updateFilePanelsState() called")
 	focusPanel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	if m.firstTextInput {
 		m.firstTextInput = false
@@ -275,7 +267,6 @@ func (m *model) updateFilePanelsState(msg tea.Msg, cmd *tea.Cmd) {
 
 // Update the sidebar state. Change name of the renaming pinned directory.
 func (m *model) updateSidebarState(msg tea.Msg, cmd *tea.Cmd) {
-	slog.Debug("updateSidebarState() is called")
 	sidebar := &m.sidebarModel
 	if sidebar.renaming {
 		sidebar.rename, *cmd = sidebar.rename.Update(msg)
@@ -305,7 +296,6 @@ func (m *model) warnModalForQuit() {
 
 // Implement View function for bubble tea model to handle visualization.
 func (m model) View() string {
-	slog.Debug("model.View() called.", "h", m.fullHeight, "w", m.fullWidth)
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	// check is the terminal size enough
 	if m.fullHeight < minimumHeight || m.fullWidth < minimumWidth {
@@ -443,9 +433,9 @@ func (m *model) getFilePanelItems() {
 
 		// Get file names based on search bar filter
 		if filePanel.searchBar.Value() != "" {
-			fileElement = returnFolderElementBySearchString(filePanel.location, m.toggleDotFile, filePanel.searchBar.Value())
+			fileElement = returnDirElementBySearchString(filePanel.location, m.toggleDotFile, filePanel.searchBar.Value())
 		} else {
-			fileElement = returnDirectoryElement(filePanel.location, m.toggleDotFile, filePanel.sortOptions.data)
+			fileElement = returnDirElement(filePanel.location, m.toggleDotFile, filePanel.sortOptions.data)
 		}
 		// Update file panel list
 		filePanel.element = fileElement

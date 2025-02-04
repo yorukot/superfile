@@ -2,7 +2,6 @@ package internal
 
 import (
 	"encoding/json"
-	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -14,7 +13,6 @@ import (
 
 // Return all sidebar directories
 func getDirectories() []directory {
-	slog.Debug("getDirectories() called")
 	directories := []directory{}
 
 	directories = append(directories, getWellKnownDirectories()...)
@@ -28,7 +26,6 @@ func getDirectories() []directory {
 		location: "Disks+-*/=?",
 	})
 	directories = append(directories, getExternalMediaFolders()...)
-	slog.Debug("getDirectories() returning", "directories", directories)
 	return directories
 }
 
@@ -68,7 +65,6 @@ func getPinnedDirectories() []directory {
 	jsonData, err := os.ReadFile(variable.PinnedFile)
 	if err != nil {
 		outPutLog("Read superfile data error", err)
-		// Should exit here
 		return directories
 	}
 

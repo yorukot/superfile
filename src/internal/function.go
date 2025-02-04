@@ -42,9 +42,7 @@ func returnFocusType(focusPanel focusPanelType) filePanelFocusType {
 	return secondFocus
 }
 
-// Need to rename folder to directory.
-func returnDirectoryElement(location string, displayDotFile bool, sortOptions sortOptionsModelData) (directoryElement []element) {
-	slog.Debug("returnFolderElement() called.")
+func returnDirElement(location string, displayDotFile bool, sortOptions sortOptionsModelData) (directoryElement []element) {
 	dirEntries, err := os.ReadDir(location)
 	if err != nil {
 		outPutLog("Return folder element function error", err)
@@ -52,7 +50,7 @@ func returnDirectoryElement(location string, displayDotFile bool, sortOptions so
 	}
 
 	dirEntries = slices.DeleteFunc(dirEntries, func(e os.DirEntry) bool {
-		// Should be deleted
+		// Entries not needed to be considered
 		_, err := e.Info()
 		return err != nil || (strings.HasPrefix(e.Name(), ".") && !displayDotFile)
 	})
@@ -66,16 +64,17 @@ func returnDirectoryElement(location string, displayDotFile bool, sortOptions so
 	var order func(i, j int) bool
 	reversed := sortOptions.reversed
 
+	// Todo : These strings should not be hardcoded here, but defined as constants
 	switch sortOptions.options[sortOptions.selected] {
 	case "Name":
 		order = func(i, j int) bool {
 			slog.Debug("sort func", "i", i, "j", j)
-			
+
 			// One of them is a directory, and other is not
 			if dirEntries[i].IsDir() != dirEntries[j].IsDir() {
 				return dirEntries[i].IsDir()
 			}
-			
+
 			if Config.CaseSensitiveSort {
 				return dirEntries[i].Name() < dirEntries[j].Name() != reversed
 			} else {
@@ -86,12 +85,12 @@ func returnDirectoryElement(location string, displayDotFile bool, sortOptions so
 		order = func(i, j int) bool {
 			// Directories at the top sorted by direct child count (not recursive)
 			// Files sorted by size
-			
+
 			// One of them is a directory, and other is not
 			if dirEntries[i].IsDir() != dirEntries[j].IsDir() {
 				return dirEntries[i].IsDir()
 			}
-			
+
 			// This needs to be improved, and we should sort by actual size only
 			// Repeated recursive read would be slow, so we could cache
 			if dirEntries[i].IsDir() && dirEntries[j].IsDir() {
@@ -112,7 +111,7 @@ func returnDirectoryElement(location string, displayDotFile bool, sortOptions so
 				fileInfoJ, _ := dirEntries[j].Info()
 				return fileInfoI.Size() < fileInfoJ.Size() != reversed
 			}
-			
+
 		}
 	case "Date Modified":
 		order = func(i, j int) bool {
@@ -124,7 +123,6 @@ func returnDirectoryElement(location string, displayDotFile bool, sortOptions so
 	}
 
 	sort.Slice(dirEntries, order)
-
 	for _, item := range dirEntries {
 		directoryElement = append(directoryElement, element{
 			name:      item.Name(),
@@ -132,13 +130,10 @@ func returnDirectoryElement(location string, displayDotFile bool, sortOptions so
 			location:  filepath.Join(location, item.Name()),
 		})
 	}
-
-	slog.Debug("returnFolderElement() returning.", "directoryElement", directoryElement)
-
 	return directoryElement
 }
 
-func returnFolderElementBySearchString(location string, displayDotFile bool, searchString string) (folderElement []element) {
+func returnDirElementBySearchString(location string, displayDotFile bool, searchString string) (dirElement []element) {
 
 	items, err := os.ReadDir(location)
 	if err != nil {
@@ -182,15 +177,15 @@ func returnFolderElementBySearchString(location string, displayDotFile bool, sea
 	for _, item := range result.Matches {
 		resultItem := folderElementMap[item.Key]
 		resultItem.matchRate = float64(item.Score)
-		folderElement = append(folderElement, resultItem)
+		dirElement = append(dirElement, resultItem)
 	}
 
 	// Sort folders and files by match rate
-	sort.Slice(folderElement, func(i, j int) bool {
-		return folderElement[i].matchRate > folderElement[j].matchRate
+	sort.Slice(dirElement, func(i, j int) bool {
+		return dirElement[i].matchRate > dirElement[j].matchRate
 	})
 
-	return folderElement
+	return dirElement
 }
 
 func panelElementHeight(mainPanelHeight int) int {
