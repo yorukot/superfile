@@ -450,7 +450,7 @@ func (m *model) getFilePanelItems() {
 // the path in state direcotory
 func (m *model) quitSuperfile() {
 	// close exiftool session
-	if Config.Metadata {
+	if Config.Metadata && et != nil {
 		et.Close()
 	}
 	// cd on quit
