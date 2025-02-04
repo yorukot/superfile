@@ -25,7 +25,7 @@ file_panel_item_rename = ['ctrl+r', '']
 # file operations
 copy_items = ['ctrl+c', '']
 cut_items = ['ctrl+x', '']
-paste_items = ['ctrl+v', '']
+paste_items = ['ctrl+v', 'ctrl+w', '']
 delete_items = ['ctrl+d', 'delete', '']
 # compress and extract
 extract_file = ['ctrl+e', '']

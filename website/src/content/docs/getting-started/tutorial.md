@@ -135,6 +135,12 @@ To cut, you can press `ctrl`+`x`.
 
 Both cut and copied items are shown in the clipboard panel (lower-right corner). The progress of your operations is displayed in the processes panel (lower-left corner).
 
+To paste, you can press `ctrl`+`v` or `ctrl`+`w`.
+
+:::note
+In some terminals, for example Windows Powershell, `ctrl`+`v` pastes input from clipboard to terminal. So, `ctrl`+`v` might not work for paste. Either you can use `ctrl`+`w` key, or override default behaviour of `ctrl`+`v` on your terminal.
+:::
+
 To delete, you can press `ctrl`+`d`
 
 :::note
@@ -147,16 +153,26 @@ To open a file with an editor, press `e`.
 
 To open the current directory with an editor, press `E` (shift+e).
 
-To change the default editor, you can set the `EDITOR` environment variable in your terminal. For example:
+To change the default file editor, you can set the `EDITOR` environment variable in your terminal or you can use the `file_editor` config option (take priority over `EDITOR` environment variable). 
+To change the default directory editor, you can use the `dir_editor` config option.
+For example:
 
 ```bash
 EDITOR=nvim
 ```
 
-This will set Neovim as your default editor. After setting this, the specified editor will be used when opening files with the `e` or `E` key bindings.
+This will set Neovim as your default file editor. After setting this, Neovim will be used when opening files with the `e` key bindings.
+
+```
+file_editor = "nano"
+dir_editor = "vi"
+```
+
+These are changes in config file. See [superfile-config](/configure/superfile-config) for more info.
+This will set `nano` as your default file editor, and `vi` as your default directory editor. After setting this, `nano` will be used when opening files with the `e` key bindings, and `vi` will be used to open current directory with `E` key bindings.
 
 :::caution
-If your editor does not support opening the current directory with an editor, you may encounter an error when pressing `E`.
+If your directory editor does not support opening the current directory with an editor, you may encounter an error when pressing `E`.
 :::
 
 (Sorry, this video has a little bit of lag)

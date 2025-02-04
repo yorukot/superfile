@@ -3,8 +3,11 @@
 # change your theme
 theme = 'catppuccin'
 # 
-# The editor files/directories will be opened with. (leave blank to use the EDITOR environment variable).
-editor = ""
+# The editor files will be opened with. (Leave blank to use the EDITOR environment variable).
+file_editor = ""
+# 
+# The editor directories will be opened with. (Leave blank to use the default editors).
+dir_editor = ""
 #
 # Auto check for update
 auto_check_update = true
