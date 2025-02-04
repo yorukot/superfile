@@ -42,14 +42,14 @@ func returnFocusType(focusPanel focusPanelType) filePanelFocusType {
 }
 
 func returnFolderElement(location string, displayDotFile bool, sortOptions sortOptionsModelData) (directoryElement []element) {
-
+	slog.Debug("returnFolderElement() called.")
 	files, err := os.ReadDir(location)
-	if len(files) == 0 {
-		return directoryElement
-	}
-
 	if err != nil {
 		outPutLog("Return folder element function error", err)
+		return directoryElement
+	}
+	if len(files) == 0 {
+		return directoryElement
 	}
 
 	// Sort files
@@ -59,6 +59,9 @@ func returnFolderElement(location string, displayDotFile bool, sortOptions sortO
 	switch sortOptions.options[sortOptions.selected] {
 	case "Name":
 		order = func(i, j int) bool {
+			slog.Debug("sort func", "i", i, "j", j)
+			// This is inefficient, no need to read directories recurdsively here
+			// We just need their name to sort.
 			_, errI := os.ReadDir(location + "/" + files[i].Name())
 			_, errJ := os.ReadDir(location + "/" + files[j].Name())
 			if (files[i].IsDir() || errI == nil) && (!files[j].IsDir() && errJ != nil) {
@@ -79,6 +82,8 @@ func returnFolderElement(location string, displayDotFile bool, sortOptions sortO
 			// Files sorted by size
 			fileInfoI, _ := files[i].Info()
 			fileInfoJ, _ := files[j].Info()
+
+			// Hard coded "/" - Should only use filepath.join
 			_, errI := os.ReadDir(location + "/" + files[i].Name())
 			_, errJ := os.ReadDir(location + "/" + files[j].Name())
 
@@ -88,6 +93,9 @@ func returnFolderElement(location string, displayDotFile bool, sortOptions sortO
 			if (!files[i].IsDir() && errI != nil) && (files[j].IsDir() || errJ == nil) {
 				return false
 			}
+			
+			// This needs to be improved, and we should sort by actual size only
+			// Repeated recursive read would be slow, so we could cache  
 			if files[i].IsDir() && files[j].IsDir() {
 				filesI, err := os.ReadDir(filepath.Join(location, files[i].Name()))
 				if err != nil {
@@ -103,6 +111,7 @@ func returnFolderElement(location string, displayDotFile bool, sortOptions sortO
 		}
 	case "Date Modified":
 		order = func(i, j int) bool {
+			// You should make sure that files with info nil are filtered beforehand 
 			fileInfoI, _ := files[i].Info()
 			fileInfoJ, _ := files[j].Info()
 			return fileInfoI.ModTime().After(fileInfoJ.ModTime()) != reversed
@@ -113,13 +122,16 @@ func returnFolderElement(location string, displayDotFile bool, sortOptions sortO
 
 	for _, item := range files {
 		fileInfo, err := item.Info()
+		// should have skipped these files way before
 		if err != nil {
 			continue
 		}
-
+		
+		// If the dot files were not even needed, why consider them for sorting ?
 		if !displayDotFile && strings.HasPrefix(fileInfo.Name(), ".") {
 			continue
 		}
+		// should have skipped before .
 		if fileInfo == nil {
 			continue
 		}
@@ -127,6 +139,7 @@ func returnFolderElement(location string, displayDotFile bool, sortOptions sortO
 			name:      item.Name(),
 			directory: item.IsDir(),
 		}
+		// Redundant.
 		if location == "/" {
 			newElement.location = location + item.Name()
 		} else {
@@ -134,6 +147,8 @@ func returnFolderElement(location string, displayDotFile bool, sortOptions sortO
 		}
 		directoryElement = append(directoryElement, newElement)
 	}
+
+	slog.Debug("returnFolderElement() returning.", "directoryElement", directoryElement)
 
 	return directoryElement
 }
