@@ -51,7 +51,7 @@ func (m model) Init() tea.Cmd {
 // Update function for bubble tea to provide internal communication to the
 // application
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	slog.Debug("model.Update() called.", "current width", m.fullWidth, 
+	slog.Debug("model.Update() called.", "current width", m.fullWidth,
 		"current height", m.fullHeight)
 	var cmd tea.Cmd
 
@@ -70,7 +70,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.updateSidebarState(msg, &cmd)
 	m.sidebarModel.directories = getDirectories()
 
-
 	// check if there already have listening message
 	if !ListeningMessage {
 		slog.Debug("ListeningMessage is false in model Update()")
@@ -79,7 +78,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	m.getFilePanelItems()
 
-	slog.Debug("model.Update() returning.", "current width", m.fullWidth, 
+	slog.Debug("model.Update() returning.", "current width", m.fullWidth,
 		"current height", m.fullHeight)
 
 	return m, tea.Batch(cmd)
@@ -415,7 +414,6 @@ func listenForChannelMessage(msg chan channelMessage) tea.Cmd {
 // Render and update file panel items. Check for changes and updates in files and
 // folders in the current directory.
 func (m *model) getFilePanelItems() {
-	slog.Debug("getFilePanelItems() called")
 	focusPanel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	for i, filePanel := range m.fileModel.filePanels {
 		var fileElement []element
@@ -447,7 +445,7 @@ func (m *model) getFilePanelItems() {
 		if filePanel.searchBar.Value() != "" {
 			fileElement = returnFolderElementBySearchString(filePanel.location, m.toggleDotFile, filePanel.searchBar.Value())
 		} else {
-			fileElement = returnFolderElement(filePanel.location, m.toggleDotFile, filePanel.sortOptions.data)
+			fileElement = returnDirectoryElement(filePanel.location, m.toggleDotFile, filePanel.sortOptions.data)
 		}
 		// Update file panel list
 		filePanel.element = fileElement

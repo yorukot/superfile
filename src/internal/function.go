@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -41,14 +42,23 @@ func returnFocusType(focusPanel focusPanelType) filePanelFocusType {
 	return secondFocus
 }
 
-func returnFolderElement(location string, displayDotFile bool, sortOptions sortOptionsModelData) (directoryElement []element) {
+// Need to rename folder to directory.
+func returnDirectoryElement(location string, displayDotFile bool, sortOptions sortOptionsModelData) (directoryElement []element) {
 	slog.Debug("returnFolderElement() called.")
-	files, err := os.ReadDir(location)
+	dirEntries, err := os.ReadDir(location)
 	if err != nil {
 		outPutLog("Return folder element function error", err)
 		return directoryElement
 	}
-	if len(files) == 0 {
+
+	dirEntries = slices.DeleteFunc(dirEntries, func(e os.DirEntry) bool {
+		// Should be deleted
+		_, err := e.Info()
+		return err != nil || (strings.HasPrefix(e.Name(), ".") && !displayDotFile)
+	})
+
+	// No files/directoes to process
+	if len(dirEntries) == 0 {
 		return directoryElement
 	}
 
@@ -60,92 +70,67 @@ func returnFolderElement(location string, displayDotFile bool, sortOptions sortO
 	case "Name":
 		order = func(i, j int) bool {
 			slog.Debug("sort func", "i", i, "j", j)
-			// This is inefficient, no need to read directories recurdsively here
-			// We just need their name to sort.
-			_, errI := os.ReadDir(location + "/" + files[i].Name())
-			_, errJ := os.ReadDir(location + "/" + files[j].Name())
-			if (files[i].IsDir() || errI == nil) && (!files[j].IsDir() && errJ != nil) {
-				return true
+			
+			// One of them is a directory, and other is not
+			if dirEntries[i].IsDir() != dirEntries[j].IsDir() {
+				return dirEntries[i].IsDir()
 			}
-			if (!files[i].IsDir() && errI != nil) && (files[j].IsDir() || errJ == nil) {
-				return false
-			}
+			
 			if Config.CaseSensitiveSort {
-				return files[i].Name() < files[j].Name() != reversed
+				return dirEntries[i].Name() < dirEntries[j].Name() != reversed
 			} else {
-				return strings.ToLower(files[i].Name()) < strings.ToLower(files[j].Name()) != reversed
+				return strings.ToLower(dirEntries[i].Name()) < strings.ToLower(dirEntries[j].Name()) != reversed
 			}
 		}
 	case "Size":
 		order = func(i, j int) bool {
 			// Directories at the top sorted by direct child count (not recursive)
 			// Files sorted by size
-			fileInfoI, _ := files[i].Info()
-			fileInfoJ, _ := files[j].Info()
-
-			// Hard coded "/" - Should only use filepath.join
-			_, errI := os.ReadDir(location + "/" + files[i].Name())
-			_, errJ := os.ReadDir(location + "/" + files[j].Name())
-
-			if (files[i].IsDir() || errI == nil) && (!files[j].IsDir() && errJ != nil) {
-				return true
-			}
-			if (!files[i].IsDir() && errI != nil) && (files[j].IsDir() || errJ == nil) {
-				return false
+			
+			// One of them is a directory, and other is not
+			if dirEntries[i].IsDir() != dirEntries[j].IsDir() {
+				return dirEntries[i].IsDir()
 			}
 			
 			// This needs to be improved, and we should sort by actual size only
-			// Repeated recursive read would be slow, so we could cache  
-			if files[i].IsDir() && files[j].IsDir() {
-				filesI, err := os.ReadDir(filepath.Join(location, files[i].Name()))
+			// Repeated recursive read would be slow, so we could cache
+			if dirEntries[i].IsDir() && dirEntries[j].IsDir() {
+				filesI, err := os.ReadDir(filepath.Join(location, dirEntries[i].Name()))
+				// No need of early return, we only call len() on filesI, so nil would
+				// just result in 0
 				if err != nil {
-					outPutLog("Error when reading directory", err)
+					outPutLog("Error when reading directory during sort", err)
 				}
-				filesJ, err := os.ReadDir(filepath.Join(location, files[j].Name()))
+				filesJ, err := os.ReadDir(filepath.Join(location, dirEntries[j].Name()))
 				if err != nil {
-					outPutLog("Error when reading directory", err)
+					outPutLog("Error when reading directory during sort", err)
 				}
 				return len(filesI) < len(filesJ) != reversed
+			} else {
+				// No need for err check, we already filtered out dirEntries with err != nil in Info() call
+				fileInfoI, _ := dirEntries[i].Info()
+				fileInfoJ, _ := dirEntries[j].Info()
+				return fileInfoI.Size() < fileInfoJ.Size() != reversed
 			}
-			return fileInfoI.Size() < fileInfoJ.Size() != reversed
+			
 		}
 	case "Date Modified":
 		order = func(i, j int) bool {
-			// You should make sure that files with info nil are filtered beforehand 
-			fileInfoI, _ := files[i].Info()
-			fileInfoJ, _ := files[j].Info()
+			// No need for err check, we already filtered out dirEntries with err != nil in Info() call
+			fileInfoI, _ := dirEntries[i].Info()
+			fileInfoJ, _ := dirEntries[j].Info()
 			return fileInfoI.ModTime().After(fileInfoJ.ModTime()) != reversed
 		}
 	}
 
-	sort.Slice(files, order)
+	sort.Slice(dirEntries, order)
 
-	for _, item := range files {
-		fileInfo, err := item.Info()
-		// should have skipped these files way before
-		if err != nil {
-			continue
-		}
-		
-		// If the dot files were not even needed, why consider them for sorting ?
-		if !displayDotFile && strings.HasPrefix(fileInfo.Name(), ".") {
-			continue
-		}
-		// should have skipped before .
-		if fileInfo == nil {
-			continue
-		}
-		newElement := element{
+	for _, item := range dirEntries {
+		directoryElement = append(directoryElement, element{
 			name:      item.Name(),
 			directory: item.IsDir(),
-		}
-		// Redundant.
-		if location == "/" {
-			newElement.location = location + item.Name()
-		} else {
-			newElement.location = filepath.Join(location, item.Name())
-		}
-		directoryElement = append(directoryElement, newElement)
+			location:  filepath.Join(location, item.Name()),
+		})
 	}
 
 	slog.Debug("returnFolderElement() returning.", "directoryElement", directoryElement)
