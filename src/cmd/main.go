@@ -66,12 +66,26 @@ func Run(content embed.FS) {
 				Usage:   "Print the last dir to stdout on exit (to use for cd)",
 				Value:   false,
 			},
+			&cli.StringFlag{
+				Name:    "config-file",
+				Aliases: []string{"c"},
+				Usage:   "Specify the path to a different config file",
+				Value:   variable.ConfigFile, // Default to the existing config file path
+			},
 		},
 		Action: func(c *cli.Context) error {
 			// If no args are called along with "spf" use current dir
 			path := ""
 			if c.Args().Present() {
 				path = c.Args().First()
+			}
+
+			// Setting the config file path
+			variable.ConfigFile = c.String("config-file")
+
+			// Validate the config file exists
+			if _, err := os.Stat(variable.ConfigFile); os.IsNotExist(err) {
+				log.Fatalf("Error: Configuration file '%s' does not exist", variable.ConfigFile)
 			}
 
 			InitConfigFile()
