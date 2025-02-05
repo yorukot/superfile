@@ -1,12 +1,16 @@
 package variable
 
-import "github.com/adrg/xdg"
+import (
+	"path/filepath"
+
+	"github.com/adrg/xdg"
+)
 
 var HomeDir = xdg.Home
-var SuperFileMainDir = xdg.ConfigHome + "/superfile"
-var SuperFileCacheDir = xdg.CacheHome + "/superfile"
-var SuperFileDataDir = xdg.DataHome + "/superfile"
-var SuperFileStateDir = xdg.StateHome + "/superfile"
+var SuperFileMainDir = filepath.Join(xdg.ConfigHome, "superfile")
+var SuperFileCacheDir = filepath.Join(xdg.CacheHome, "superfile")
+var SuperFileDataDir = filepath.Join(xdg.DataHome, "superfile")
+var SuperFileStateDir = filepath.Join(xdg.StateHome, "superfile")
 
 const (
 	CurrentVersion      string = "v1.1.7.1"
@@ -15,24 +19,21 @@ const (
 )
 
 var (
-	ThemeFolder      string = SuperFileMainDir + "/theme"
-	LastCheckVersion string = SuperFileDataDir + "/lastCheckVersion"
-	ThemeFileVersion string = SuperFileDataDir + "/themeFileVersion"
-	FirstUseCheck    string = SuperFileDataDir + "/firstUseCheck"
-	PinnedFile       string = SuperFileDataDir + "/pinned.json"
-	ConfigFile       string = SuperFileMainDir + "/config.toml"
-	HotkeysFile      string = SuperFileMainDir + "/hotkeys.toml"
-	ToggleDotFile    string = SuperFileDataDir + "/toggleDotFile"
-	ToggleFooter    string = SuperFileDataDir + "/toggleFooter"
-	LogFile          string = SuperFileStateDir + "/superfile.log"
-	FixHotkeys       bool   = false
-	FixConfigFile    bool   = false
-	LastDir          string = ""
-	PrintLastDir     bool   = false
-)
-
-const (
-	TrashDirectory      string = "/Trash"
-	TrashDirectoryFiles string = "/Trash/files"
-	TrashDirectoryInfo  string = "/Trash/info"
+	ThemeFolder         string = filepath.Join(SuperFileMainDir, "theme")
+	LastCheckVersion    string = filepath.Join(SuperFileDataDir, "lastCheckVersion")
+	ThemeFileVersion    string = filepath.Join(SuperFileDataDir, "themeFileVersion")
+	FirstUseCheck       string = filepath.Join(SuperFileDataDir, "firstUseCheck")
+	PinnedFile          string = filepath.Join(SuperFileDataDir, "pinned.json")
+	ConfigFile          string = filepath.Join(SuperFileMainDir, "config.toml")
+	HotkeysFile         string = filepath.Join(SuperFileMainDir, "hotkeys.toml")
+	ToggleDotFile       string = filepath.Join(SuperFileDataDir, "toggleDotFile")
+	ToggleFooter        string = filepath.Join(SuperFileDataDir, "toggleFooter")
+	LogFile             string = filepath.Join(SuperFileStateDir, "superfile.log")
+	FixHotkeys          bool   = false
+	FixConfigFile       bool   = false
+	LastDir             string = ""
+	PrintLastDir        bool   = false
+	TrashDirectory      string = filepath.Join("/", "Trash")
+	TrashDirectoryFiles string = filepath.Join("/", "Trash", "files")
+	TrashDirectoryInfo  string = filepath.Join("/", "Trash", "info")
 )
