@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/rkoesters/xdg/trash"
+	trash_win "github.com/hymkor/trash-go"
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/config/icon"
 )
@@ -145,6 +146,12 @@ func copyFile(src, dst string, srcInfo os.FileInfo) error {
 func trashMacOrLinux(src string) error {
 	if runtime.GOOS == "darwin" {
 		err := moveElement(src, filepath.Join(variable.HomeDir, ".Trash", filepath.Base(src)))
+		if err != nil {
+			outPutLog("Delete single item function move file to trash can error", err)
+			return err
+		}
+	} else if runtime.GOOS == "windows" {
+		err := trash_win.Throw(src)
 		if err != nil {
 			outPutLog("Delete single item function move file to trash can error", err)
 			return err
