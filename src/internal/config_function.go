@@ -228,12 +228,15 @@ func writeHotkeysFile(hotkeys HotkeysType) {
 // Load configurations from theme file into &theme and return default values 
 // if file theme folder is empty
 func loadThemeFile() {
-	data, err := os.ReadFile(variable.ThemeFolder + "/" + Config.Theme + ".toml")
+	themeFile := filepath.Join(variable.ThemeFolder, Config.Theme + ".toml")
+	data, err := os.ReadFile(themeFile)
 	if err != nil {
+		slog.Info("Could not read theme file", "path", themeFile, "error", err)
 		data = []byte(DefaultThemeString)
 	}
 
 	err = toml.Unmarshal(data, &theme)
+	// Todo : Even if user's theme file have errors, lets not exit, but use a default theme file
 	if err != nil {
 		LogAndExit("Error while decoding theme file( Your theme file may have errors", "error", err)
 	}
@@ -243,26 +246,29 @@ func loadThemeFile() {
 // configurations variables
 func LoadAllDefaultConfig(content embed.FS) {
 
-	temp, err := content.ReadFile("src/superfile_config/hotkeys.toml")
+	temp, err := content.ReadFile(variable.EmbedHotkeysFile)
 	if err != nil {
+		outPutLog("Error reading from embed file:", err)
 		return
 	}
 	HotkeysTomlString = string(temp)
 
-	temp, err = content.ReadFile("src/superfile_config/config.toml")
+	temp, err = content.ReadFile(variable.EmbedConfigFile)
 	if err != nil {
+		outPutLog("Error reading from embed file:", err)
 		return
 	}
 	ConfigTomlString = string(temp)
 
-	temp, err = content.ReadFile("src/superfile_config/theme/catppuccin.toml")
+	temp, err = content.ReadFile(variable.EmbedThemeCatppuccinFile)
 	if err != nil {
+		outPutLog("Error reading from embed file:", err)
 		return
 	}
 	DefaultThemeString = string(temp)
 
+	// Todo : We should not return here, and have a default value for this
 	currentThemeVersion, err := os.ReadFile(variable.ThemeFileVersion)
-
 	if err != nil && !os.IsNotExist(err) {
 		outPutLog("Error reading from file:", err)
 		return
@@ -273,14 +279,14 @@ func LoadAllDefaultConfig(content embed.FS) {
 	if os.IsNotExist(err) {
 		err := os.MkdirAll(variable.ThemeFolder, 0755)
 		if err != nil {
-			outPutLog("error create theme direcroty", err)
+			outPutLog("error create theme directory", err)
 			return
 		}
 	} else if string(currentThemeVersion) == variable.CurrentVersion {
 		return
 	}
 
-	files, err := content.ReadDir("src/superfile_config/theme")
+	files, err := content.ReadDir(variable.EmbedThemeDir)
 	if err != nil {
 		outPutLog("error read theme directory from embed", err)
 		return
@@ -290,7 +296,8 @@ func LoadAllDefaultConfig(content embed.FS) {
 		if file.IsDir() {
 			continue
 		}
-		src, err := content.ReadFile(filepath.Join("src/superfile_config/theme", file.Name()))
+		// This will not break in windows. This is a relative path for Embed FS. It uses "/" only 
+		src, err := content.ReadFile(variable.EmbedThemeDir + "/" + file.Name())
 		if err != nil {
 			outPutLog("error read theme file from embed", err)
 			return
