@@ -13,7 +13,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/adrg/xdg"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/pelletier/go-toml/v2"
@@ -156,13 +155,14 @@ func InitConfigFile() {
 	}
 }
 
+// We are initializing these, but not sure if we are ever using them
 func InitTrash() error {
 	// Create trash directories
 	if runtime.GOOS != "darwin" {
 		err := createDirectories(
-			xdg.DataHome+variable.TrashDirectory,
-			xdg.DataHome+variable.TrashDirectoryFiles,
-			xdg.DataHome+variable.TrashDirectoryInfo,
+			variable.CustomTrashDirectory,
+			variable.CustomTrashDirectoryFiles,
+			variable.CustomTrashDirectoryInfo,
 		)
 		return err
 	}

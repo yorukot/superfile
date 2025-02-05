@@ -145,7 +145,7 @@ func copyFile(src, dst string, srcInfo os.FileInfo) error {
 // Move file to trash can and can auto switch macos trash can or linux trash can
 func trashMacOrLinux(src string) error {
 	if runtime.GOOS == "darwin" {
-		err := moveElement(src, filepath.Join(variable.HomeDir, ".Trash", filepath.Base(src)))
+		err := moveElement(src, filepath.Join(variable.DarwinTrashDirectory, filepath.Base(src)))
 		if err != nil {
 			outPutLog("Delete single item function move file to trash can error", err)
 			return err
