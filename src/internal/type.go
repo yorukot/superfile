@@ -88,6 +88,7 @@ type model struct {
 	toggleDotFile        bool
 	updatedToggleDotFile bool
 	toggleFooter         bool
+	firstLoadingComplete bool
 	filePanelFocusIndex  int
 	mainPanelHeight      int
 	fullWidth            int
