@@ -46,6 +46,12 @@ To uninstall, run the above `powershell` command with the modified URL:
 `https://superfile.netlify.app/uninstall.ps1`
 :::
 
+With [Scoop](https://scoop.sh/):
+
+```bash
+scoop install superfile
+```
+
 ## Community maintained packages
 
 [![Packaging status](https://repology.org/badge/vertical-allrepos/superfile.svg)](https://repology.org/project/superfile/versions)
