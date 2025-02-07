@@ -433,9 +433,9 @@ func (m *model) getFilePanelItems() {
 
 		// Get file names based on search bar filter
 		if filePanel.searchBar.Value() != "" {
-			fileElement = returnFolderElementBySearchString(filePanel.location, m.toggleDotFile, filePanel.searchBar.Value())
+			fileElement = returnDirElementBySearchString(filePanel.location, m.toggleDotFile, filePanel.searchBar.Value())
 		} else {
-			fileElement = returnFolderElement(filePanel.location, m.toggleDotFile, filePanel.sortOptions.data)
+			fileElement = returnDirElement(filePanel.location, m.toggleDotFile, filePanel.sortOptions.data)
 		}
 		// Update file panel list
 		filePanel.element = fileElement
