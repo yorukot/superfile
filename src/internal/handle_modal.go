@@ -220,13 +220,13 @@ func (m *model) enterCommandLine() {
 	switch runtime.GOOS {
 	case "windows":
 		// On Windows, we use PowerShell with -Command flag for single command execution
-		cmdStr := "cd " + focusPanelDir + "; " + m.commandLine.input.Value()
-		cmd = exec.Command("powershell.exe", "-Command", cmdStr)
+		cmd = exec.Command("powershell.exe", "-Command", m.commandLine.input.Value())
 	default:
 		// On Unix-like systems, use bash/sh
-		cdCmd := "cd " + focusPanelDir + " && "
-		cmd = exec.Command("/bin/sh", "-c", cdCmd+m.commandLine.input.Value())
+		cmd = exec.Command("/bin/sh", "-c", m.commandLine.input.Value())
 	}
+
+	cmd.Dir = focusPanelDir // switch to the focused panel directory
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
