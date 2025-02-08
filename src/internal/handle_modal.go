@@ -2,7 +2,7 @@ package internal
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -106,7 +106,7 @@ func (m *model) sortOptionsListUp() {
 // Move the cursor down in the sort options menu
 func (m *model) sortOptionsListDown() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	if panel.sortOptions.cursor < len(panel.sortOptions.data.options) - 1 {
+	if panel.sortOptions.cursor < len(panel.sortOptions.data.options)-1 {
 		panel.sortOptions.cursor++
 	} else {
 		panel.sortOptions.cursor = 0
@@ -207,7 +207,7 @@ func (m *model) closeCommandLine() {
 	m.commandLine.input.Blur()
 }
 
-// Exec a command line input inside the pointing file dir. Like opening the 
+// Exec a command line input inside the pointing file dir. Like opening the
 // focused file in the text editor
 func (m *model) enterCommandLine() {
 	focusPanelDir := ""
@@ -231,7 +231,7 @@ func (m *model) enterCommandLine() {
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Printf("Command execution failed: %v\nOutput: %s", err, output)
+		slog.Error("Command execution failed", "error", err, "output", string(output))
 		return
 	}
 
