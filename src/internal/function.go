@@ -153,10 +153,7 @@ func returnDirElementBySearchString(location string, displayDotFile bool, search
 			continue
 		}
 
-		folderElementLocation := location + "/" + item.Name()
-		if location == "/" {
-			folderElementLocation = location + item.Name()
-		}
+		folderElementLocation := filepath.Join(location, item.Name())
 
 		fileAndDirectories = append(fileAndDirectories, item.Name())
 		folderElementMap[item.Name()] = element{
