@@ -50,92 +50,82 @@ func (m *model) createItem() {
 
 // Cancel rename file or directory
 func (m *model) cancelRename() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	panel.rename.Blur()
 	panel.renaming = false
 	m.fileModel.renaming = false
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 // Connfirm rename file or directory
 func (m *model) confirmRename() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	oldPath := panel.element[panel.cursor].location
-	newPath := panel.location + "/" + panel.rename.Value()
+	newPath := filepath.Join(panel.location, panel.rename.Value())
 
 	// Rename the file
 	err := os.Rename(oldPath, newPath)
 	if err != nil {
-		outPutLog("Confirm func (m *model)tion rename error", err)
+		outPutLog("confirmRename error during rename : ", err)
+		// Dont return. We have to also reset the panel and model information
 	}
-
 	m.fileModel.renaming = false
 	panel.rename.Blur()
 	panel.renaming = false
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 func (m *model) openSortOptionsMenu() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	panel.sortOptions.open = true
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 func (m *model) cancelSortOptions() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	panel.sortOptions.cursor = panel.sortOptions.data.selected
 	panel.sortOptions.open = false
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 func (m *model) confirmSortOptions() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	panel.sortOptions.data.selected = panel.sortOptions.cursor
 	panel.sortOptions.open = false
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 // Move the cursor up in the sort options menu
 func (m *model) sortOptionsListUp() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	if panel.sortOptions.cursor > 0 {
 		panel.sortOptions.cursor--
 	} else {
 		panel.sortOptions.cursor = len(panel.sortOptions.data.options) - 1
 	}
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 // Move the cursor down in the sort options menu
 func (m *model) sortOptionsListDown() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	if panel.sortOptions.cursor < len(panel.sortOptions.data.options) - 1 {
 		panel.sortOptions.cursor++
 	} else {
 		panel.sortOptions.cursor = 0
 	}
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 func (m *model) toggleReverseSort() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	panel.sortOptions.data.reversed = !panel.sortOptions.data.reversed
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 // Cancel search, this will clear all searchbar input
 func (m *model) cancelSearch() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	panel.searchBar.Blur()
 	panel.searchBar.SetValue("")
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 // Confirm search. This will exit the search bar and filter the files
 func (m *model) confirmSearch() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	panel.searchBar.Blur()
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 // Help menu panel list up
@@ -219,6 +209,8 @@ func (m *model) enterCommandLine() {
 			focusPanelDir = panel.location
 		}
 	}
+
+	// Todo : Fix this for windows.
 	cd := "cd "+focusPanelDir+" && "
 	cmd := exec.Command("/bin/sh", "-c", cd + m.commandLine.input.Value())
 	_, err := cmd.CombinedOutput()

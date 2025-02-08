@@ -41,6 +41,7 @@ var (
 	
 	// StateDir files
 	LogFile                   string = filepath.Join(SuperFileStateDir, "superfile.log")
+	LastDirFile               string = filepath.Join(SuperFileStateDir, "lastdir")
 	
 	// Trash Directories
 	DarwinTrashDirectory      string = filepath.Join(HomeDir, ".Trash")
