@@ -32,9 +32,15 @@ Visit warp.dev to learn more
   <img alt="superfile LOGO" src="/asset/superfilelogowhite.png" />
 </picture>
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/yorukot/superfile)](https://goreportcard.com/report/github.com/yorukot/superfile)
+[![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/yorukot/superfile/refs/heads/main/LICENSE)
+[![Go Doc](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat-square)](https://pkg.go.dev/github.com/yorukot/superfile)
+[![Release](https://img.shields.io/github/v/release/yorukot/superfile.svg?style=flat-square)](https://github.com/yorukot/superfile/releases/latest)
+
 ![](/asset/demo.png)
 
 </div>
+
 
 ## Demo
 
