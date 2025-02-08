@@ -1,9 +1,12 @@
 package internal
 
 import (
+	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -213,13 +216,26 @@ func (m *model) enterCommandLine() {
 			focusPanelDir = panel.location
 		}
 	}
-	cd := "cd "+focusPanelDir+" && "
-	cmd := exec.Command("/bin/sh", "-c", cd + m.commandLine.input.Value())
-	_, err := cmd.CombinedOutput()
-	m.commandLine.input.SetValue("")
+
+	var cmd *exec.Cmd
+	switch runtime.GOOS {
+	case "windows":
+		// On Windows, we use cmd.exe with /C flag for single command execution
+		cmdStr := fmt.Sprintf("cd /d %s && %s", focusPanelDir, m.commandLine.input.Value())
+		cmd = exec.Command("cmd.exe", "/C", cmdStr)
+	default:
+		// On Unix-like systems, use bash/sh
+		cdCmd := fmt.Sprintf("cd %s && ", focusPanelDir)
+		cmd = exec.Command("/bin/sh", "-c", cdCmd+m.commandLine.input.Value())
+	}
+
+	output, err := cmd.CombinedOutput()
 	if err != nil {
+		log.Printf("Command execution failed: %v\nOutput: %s", err, output)
 		return
 	}
+
+	m.commandLine.input.SetValue("")
 	m.commandLine.input.Blur()
 	footerHeight++
 }
