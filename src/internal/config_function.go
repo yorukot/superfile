@@ -307,9 +307,16 @@ func LoadAllDefaultConfig(content embed.FS) {
 			outPutLog("error create theme file from embed", err)
 			return
 		}
-		file.Write(src)
 		defer file.Close()
+		_, err = file.Write(src)
+		if err != nil {
+			slog.Error("error writing theme file from embed", "error", err)
+			return	
+		}
 	}
 
-	os.WriteFile(variable.ThemeFileVersion, []byte(variable.CurrentVersion), 0644)
+	err = os.WriteFile(variable.ThemeFileVersion, []byte(variable.CurrentVersion), 0644)
+	if err != nil {
+		slog.Error("error writing theme file version", "error", err)
+	}
 }
