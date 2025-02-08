@@ -20,7 +20,7 @@ This is to document the behviour of tmux, and how could we use it in testsuite
 - `Ctrl+B`+`:` - Enter commands
 - `Ctrl+B`+`D` - Detach from session
 - `:source ~/.tmux.conf` - Change the config of running server
-- We have already a wrapper libary for termux in python !!!!!
+- We have already a wrapper library for termux in python !!!!!
 - How to send key press/tmux commands to the process ?
 
 

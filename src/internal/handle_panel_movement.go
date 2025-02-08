@@ -181,7 +181,7 @@ func (m *model) toggleDotFileController() {
 		newToggleDotFile = "true"
 		m.toggleDotFile = true
 	}
-  m.updatedToggleDotFile = true
+	m.updatedToggleDotFile = true
 	err := os.WriteFile(variable.ToggleDotFile, []byte(newToggleDotFile), 0644)
 	if err != nil {
 		outPutLog("Pinned folder function updatedData superfile data error", err)
@@ -280,56 +280,56 @@ func (m *model) controlFilePanelListDown(wheel bool) {
 
 }
 
-func (m *model) controlFilePanelPgUp(){
-  panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-  panlen := len(panel.element)
-  panHeight := panelElementHeight(m.mainPanelHeight)
-  panCenter := panHeight / 2     // For making sure the cursor is at the center of the panel
+func (m *model) controlFilePanelPgUp() {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panlen := len(panel.element)
+	panHeight := panelElementHeight(m.mainPanelHeight)
+	panCenter := panHeight / 2 // For making sure the cursor is at the center of the panel
 
-  if panlen == 0 {
-    return
-  }
+	if panlen == 0 {
+		return
+	}
 
-  if panHeight >= panlen {
-    panel.cursor = 0
-  } else {
-    if panel.cursor - panHeight <= 0 {
-      panel.cursor = 0
-      panel.render = 0
-    } else {
-      panel.cursor -= panHeight
-      panel.render = panel.cursor - panCenter
-      
-      if panel.render < 0 {
-        panel.render = 0
-      }
-    }
-  }
+	if panHeight >= panlen {
+		panel.cursor = 0
+	} else {
+		if panel.cursor-panHeight <= 0 {
+			panel.cursor = 0
+			panel.render = 0
+		} else {
+			panel.cursor -= panHeight
+			panel.render = panel.cursor - panCenter
+
+			if panel.render < 0 {
+				panel.render = 0
+			}
+		}
+	}
 
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
-func (m *model) controlFilePanelPgDown(){
-  panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-  panlen := len(panel.element)
-  panHeight := panelElementHeight(m.mainPanelHeight)
-  panCenter := panHeight / 2     // For making sure the cursor is at the center of the panel
+func (m *model) controlFilePanelPgDown() {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panlen := len(panel.element)
+	panHeight := panelElementHeight(m.mainPanelHeight)
+	panCenter := panHeight / 2 // For making sure the cursor is at the center of the panel
 
-  if panlen == 0 {
-    return
-  }
+	if panlen == 0 {
+		return
+	}
 
-  if panHeight >= panlen {
-    panel.cursor = panlen - 1
-  } else {
-    if panel.cursor + panHeight >= panlen {
-      panel.cursor = panlen - 1
-      panel.render = panel.cursor - panCenter
-    } else {
-      panel.cursor += panHeight
-      panel.render = panel.cursor - panCenter
-    }
-  }
+	if panHeight >= panlen {
+		panel.cursor = panlen - 1
+	} else {
+		if panel.cursor+panHeight >= panlen {
+			panel.cursor = panlen - 1
+			panel.render = panel.cursor - panCenter
+		} else {
+			panel.cursor += panHeight
+			panel.render = panel.cursor - panCenter
+		}
+	}
 
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }

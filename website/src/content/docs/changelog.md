@@ -90,7 +90,7 @@ NOTE: This release is a hotfix to resolve an unusual issue on Windows.
 
 #### Update
 - Added option to change default directory [`#211`](https://github.com/yorukot/superfile/issues/211)
-- Added quotes arround dir in lastdir to support special characters [`#218`](https://github.com/yorukot/superfile/pull/218)
+- Added quotes around dir in lastdir to support special characters [`#218`](https://github.com/yorukot/superfile/pull/218)
 - Make Hotkey settings unlimited [`423a96a`](https://github.com/yorukot/superfile/commit/423a96a0aeca4ea2c30447d8b4010868045bb7e8)
 - Selection should start on currently positioned/pointed item [`#226`](https://github.com/yorukot/superfile/issues/226)
 - Make Nerdfont optional [`#6`](https://github.com/yorukot/superfile/issues/6)
@@ -114,7 +114,7 @@ NOTE: This release is a hotfix to resolve an unusual issue on Windows.
 - Update print path list [`37c8864`](https://github.com/yorukot/superfile/commit/37c8864eb2b0dc73fbf8928dd40b3b7573e9a11dw)
 - Make theme files embed [`0f53a12`](https://github.com/yorukot/superfile/commit/7fa775dd7db175fef694e514bd77ebd75c801fae)
 - Disable update check via config [`#131`](https://github.com/yorukot/superfile/issues/131)
-- Redesing hotkeys [`#116`](https://github.com/yorukot/superfile/issues/116)
+- Redesign hotkeys [`#116`](https://github.com/yorukot/superfile/issues/116)
 - Create file or folder using same hotkey [`#116`](https://github.com/yorukot/superfile/issues/116)
 - More dynamic footer height adaptive [`66a3fb4`](https://github.com/yorukot/superfile/commit/66a3fb4feba31ead2224938b1a18a431a55ac9cc)
 - Confirm delete files [``]()
