@@ -20,26 +20,32 @@ func (m *model) cancelWarnModal() {
 
 // Confirm to create file or directory
 func (m *model) createItem() {
-	if !strings.HasSuffix(m.typingModal.textInput.Value(), "/") {
-		path := filepath.Join(m.typingModal.location, m.typingModal.textInput.Value())
+	// Reset the typingModal in all cases
+	defer func(){
+		m.typingModal.open = false
+		m.typingModal.textInput.Blur()
+	}()
+	path := filepath.Join(m.typingModal.location, m.typingModal.textInput.Value())
+	if !strings.HasSuffix(m.typingModal.textInput.Value(), string(filepath.Separator)) {
 		path, _ = renameIfDuplicate(path)
 		if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
-			outPutLog("Create item func (m *model)tion error", err)
+			outPutLog("createItem error during directory creation : ", err)
+			return
 		}
 		f, err := os.Create(path)
 		if err != nil {
-			outPutLog("Create item func (m *model)tion create file error", err)
+			outPutLog("createItem error during file creation : ", err)
+			return
 		}
-		defer f.Close()
+		defer f.Close()		
 	} else {
-		path := m.typingModal.location + "/" + m.typingModal.textInput.Value()
+		// Directory creation
 		err := os.MkdirAll(path, 0755)
 		if err != nil {
-			outPutLog("Create item func (m *model)tion create folder error", err)
+			outPutLog("createItem error during directory creation : ", err)
+			return
 		}
 	}
-	m.typingModal.open = false
-	m.typingModal.textInput.Blur()
 }
 
 // Cancel rename file or directory
