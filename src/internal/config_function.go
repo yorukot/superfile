@@ -311,7 +311,7 @@ func LoadAllDefaultConfig(content embed.FS) {
 		_, err = file.Write(src)
 		if err != nil {
 			slog.Error("error writing theme file from embed", "error", err)
-			return	
+			return
 		}
 	}
 

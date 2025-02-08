@@ -41,7 +41,6 @@ Visit warp.dev to learn more
 
 </div>
 
-
 ## Demo
 
 | Perform common operations |
