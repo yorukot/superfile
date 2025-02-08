@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"fmt"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -220,12 +219,12 @@ func (m *model) enterCommandLine() {
 	var cmd *exec.Cmd
 	switch runtime.GOOS {
 	case "windows":
-		// On Windows, we use cmd.exe with /C flag for single command execution
-		cmdStr := fmt.Sprintf("cd /d %s && %s", focusPanelDir, m.commandLine.input.Value())
-		cmd = exec.Command("cmd.exe", "/C", cmdStr)
+		// On Windows, we use PowerShell with -Command flag for single command execution
+		cmdStr := "cd " + focusPanelDir + "; " + m.commandLine.input.Value()
+		cmd = exec.Command("powershell.exe", "-Command", cmdStr)
 	default:
 		// On Unix-like systems, use bash/sh
-		cdCmd := fmt.Sprintf("cd %s && ", focusPanelDir)
+		cdCmd := "cd " + focusPanelDir + " && "
 		cmd = exec.Command("/bin/sh", "-c", cdCmd+m.commandLine.input.Value())
 	}
 
