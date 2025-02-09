@@ -23,3 +23,8 @@ jobs:
     
     - name: Test `go fmt` creates no diffs
       run: go fmt && git diff --exit-code
+    
+    - name: golangci-lint
+      uses: golangci/golangci-lint-action@v6
+      with:
+          version: v1.58
