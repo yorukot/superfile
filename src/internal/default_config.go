@@ -216,7 +216,7 @@ func getHelpMenuData() []helpMenuModalData {
 		},
 		{
 			hotkey:         hotkeys.FilePanelItemCreate,
-			description:    "Create file or folder(end with " + string(filepath.Separator) + "to create a folder)",
+			description:    "Create file or folder(end with " + string(filepath.Separator) + " to create a folder)",
 			hotkeyWorkType: globalType,
 		},
 		{

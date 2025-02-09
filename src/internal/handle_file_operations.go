@@ -25,7 +25,7 @@ func (m *model) panelCreateNewFile() {
 	ti.Cursor.TextStyle = modalStyle
 	ti.TextStyle = modalStyle
 	ti.Cursor.Blink = true
-	ti.Placeholder = "Add \"" + string(filepath.Separator) + "\" represent Transcend folder at the end"
+	ti.Placeholder = "Add \"" + string(filepath.Separator) + "\" transcend folders"
 	ti.PlaceholderStyle = modalStyle
 	ti.Focus()
 	ti.CharLimit = 156
