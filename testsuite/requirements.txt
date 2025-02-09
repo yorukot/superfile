@@ -1,2 +1,2 @@
-pyautogui
-libtmux
+pyautogui; sys_platform == "windows"
+libtmux; sys_platform == "linux" or sys_platform == "darwin"

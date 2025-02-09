@@ -5,6 +5,7 @@ from core.base_test import BaseTest
 
 import logging
 import platform
+import sys
 import importlib
 from pathlib import Path
 from typing import List
@@ -37,8 +38,17 @@ def get_testcases(test_env : Environment, only_run_tests : List[str] = None) -> 
                 res.append(attr(test_env))
     return res
 
+def run_tests(spf_path : Path, stop_on_fail : bool = True, only_run_tests : List[str] = None) -> bool:
+    """Runs tests
 
-def run_tests(spf_path : Path, stop_on_fail : bool = True, only_run_tests : List[str] = None) -> None:
+    Args:
+        spf_path (Path): Path of spf binary under test
+        stop_on_fail (bool, optional): Whether to stop on failures. Defaults to True.
+        only_run_tests (List[str], optional): Only specific test to run. Defaults to None.
+
+    Returns:
+        bool: Whether run was successful
+    """    
     # is this str conversion needed ?
 
     spf_manager : BaseSPFManager = None 
@@ -50,10 +60,9 @@ def run_tests(spf_path : Path, stop_on_fail : bool = True, only_run_tests : List
     fs_manager = TestFSManager()
 
     test_env = Environment(spf_manager, fs_manager)
-
-    try:
-        cnt_passed : int = 0
-        cnt_executed : int = 0
+    cnt_passed : int = 0
+    cnt_executed : int = 0
+    try:    
         testcases : List[BaseTest] = get_testcases(test_env, only_run_tests=only_run_tests)
         logger.info("Testcases : %s", testcases)
         for t in testcases:
@@ -75,5 +84,8 @@ def run_tests(spf_path : Path, stop_on_fail : bool = True, only_run_tests : List
         # Make sure of cleanup
         # This is still not full proof, as if what happens when TestFSManager __init__ fails ?
         test_env.cleanup()
+
+    return cnt_passed == cnt_executed
+        
 
 
