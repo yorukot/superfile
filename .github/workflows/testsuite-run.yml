@@ -13,16 +13,58 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install tmux
+        run: sudo apt-get update && sudo apt-get install -y tmux
+
+      - name: Check tmux basic usage
+        run: tmux -V; tmux new-session -d vi; tmux ls
+
+      - name: Check tmux basic usage again
+        run: tmux ls
+        
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.22.2
+      - name: Build superfile
+        run: ./build.sh
+
+      - name: Check installation
+        run: tmux -V; ls; pwd; ls bin/; bin/spf path-list; bin/spf &
+
+      - name: delay 1 second
+        run: sleep 1
+      - name: set debug
+        run: sed -i 's/debug = false/debug = true/g' /home/runner/.config/superfile/config.toml
+
+      - name: Check tmux superfile usage
+        run:  tmux -L superfile new-session -d -s spf_test_session "$(pwd)/bin/spf"; tmux -L superfile ls; tmux -L superfile list-windows -t spf_test_session 
+
+      - name: Pre run check again
+        run: ls /tmp/tmux-1001/; tmux -L superfile ls; tmux -L superfile list-windows -t spf_test_session
+
+      - name: delay 2 second
+        run: sleep 2
+
+      - name: Pre run check once again
+        run: ls /tmp/tmux-1001/; tmux -L superfile ls; tmux -L superfile list-windows -t spf_test_session
+
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.9'
-
+    
       - name: Install Dependencies
         run: pip install -r testsuite/requirements.txt
 
-      - name: Install tmux
-        run: sudo apt-get update && sudo apt-get install -y tmux
+      - name: Pre run check
+        run: ls /tmp/tmux-1001/; tmux -L superfile ls; tmux -L superfile list-windows -t spf_test_session
 
       - name: Run Tests
-        run: python testsuite/main.py
+        run: python testsuite/main.py -d
+      
+      - name: Print logs
+        if: always()
+        run: cat ~/.local/state/superfile/superfile.log
