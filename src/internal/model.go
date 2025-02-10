@@ -460,7 +460,10 @@ func (m *model) quitSuperfile() {
 	if Config.CdOnQuit {
 		// escape single quote
 		currentDir = strings.ReplaceAll(currentDir, "'", "'\\''")
-		os.WriteFile(variable.SuperFileStateDir+"/lastdir", []byte("cd '"+currentDir+"'"), 0755)
+		err := os.WriteFile(variable.LastDirFile, []byte("cd '"+currentDir+"'"), 0755)
+		if err != nil {
+			slog.Error("Error during writing lastdir file", "error", err)
+		}
 	}
 	slog.Debug("Quitting superfile", "current dir", currentDir)
 }

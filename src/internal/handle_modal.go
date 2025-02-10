@@ -20,116 +20,112 @@ func (m *model) cancelWarnModal() {
 
 // Confirm to create file or directory
 func (m *model) createItem() {
-	if !strings.HasSuffix(m.typingModal.textInput.Value(), "/") {
-		path := filepath.Join(m.typingModal.location, m.typingModal.textInput.Value())
+	// Reset the typingModal in all cases
+	defer func(){
+		m.typingModal.open = false
+		m.typingModal.textInput.Blur()
+	}()
+	path := filepath.Join(m.typingModal.location, m.typingModal.textInput.Value())
+	if !strings.HasSuffix(m.typingModal.textInput.Value(), string(filepath.Separator)) {
 		path, _ = renameIfDuplicate(path)
 		if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
-			outPutLog("Create item func (m *model)tion error", err)
+			outPutLog("createItem error during directory creation : ", err)
+			return
 		}
 		f, err := os.Create(path)
 		if err != nil {
-			outPutLog("Create item func (m *model)tion create file error", err)
+			outPutLog("createItem error during file creation : ", err)
+			return
 		}
-		defer f.Close()
+		defer f.Close()		
 	} else {
-		path := m.typingModal.location + "/" + m.typingModal.textInput.Value()
+		// Directory creation
 		err := os.MkdirAll(path, 0755)
 		if err != nil {
-			outPutLog("Create item func (m *model)tion create folder error", err)
+			outPutLog("createItem error during directory creation : ", err)
+			return
 		}
 	}
-	m.typingModal.open = false
-	m.typingModal.textInput.Blur()
 }
 
 // Cancel rename file or directory
 func (m *model) cancelRename() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	panel.rename.Blur()
 	panel.renaming = false
 	m.fileModel.renaming = false
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 // Connfirm rename file or directory
 func (m *model) confirmRename() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	oldPath := panel.element[panel.cursor].location
-	newPath := panel.location + "/" + panel.rename.Value()
+	newPath := filepath.Join(panel.location, panel.rename.Value())
 
 	// Rename the file
 	err := os.Rename(oldPath, newPath)
 	if err != nil {
-		outPutLog("Confirm func (m *model)tion rename error", err)
+		outPutLog("confirmRename error during rename : ", err)
+		// Dont return. We have to also reset the panel and model information
 	}
-
 	m.fileModel.renaming = false
 	panel.rename.Blur()
 	panel.renaming = false
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 func (m *model) openSortOptionsMenu() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	panel.sortOptions.open = true
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 func (m *model) cancelSortOptions() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	panel.sortOptions.cursor = panel.sortOptions.data.selected
 	panel.sortOptions.open = false
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 func (m *model) confirmSortOptions() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	panel.sortOptions.data.selected = panel.sortOptions.cursor
 	panel.sortOptions.open = false
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 // Move the cursor up in the sort options menu
 func (m *model) sortOptionsListUp() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	if panel.sortOptions.cursor > 0 {
 		panel.sortOptions.cursor--
 	} else {
 		panel.sortOptions.cursor = len(panel.sortOptions.data.options) - 1
 	}
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 // Move the cursor down in the sort options menu
 func (m *model) sortOptionsListDown() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	if panel.sortOptions.cursor < len(panel.sortOptions.data.options) - 1 {
 		panel.sortOptions.cursor++
 	} else {
 		panel.sortOptions.cursor = 0
 	}
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 func (m *model) toggleReverseSort() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	panel.sortOptions.data.reversed = !panel.sortOptions.data.reversed
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 // Cancel search, this will clear all searchbar input
 func (m *model) cancelSearch() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	panel.searchBar.Blur()
 	panel.searchBar.SetValue("")
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 // Confirm search. This will exit the search bar and filter the files
 func (m *model) confirmSearch() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	panel.searchBar.Blur()
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 // Help menu panel list up
@@ -213,6 +209,8 @@ func (m *model) enterCommandLine() {
 			focusPanelDir = panel.location
 		}
 	}
+
+	// Todo : Fix this for windows.
 	cd := "cd "+focusPanelDir+" && "
 	cmd := exec.Command("/bin/sh", "-c", cd + m.commandLine.input.Value())
 	_, err := cmd.CombinedOutput()

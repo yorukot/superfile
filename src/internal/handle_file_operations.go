@@ -25,7 +25,7 @@ func (m *model) panelCreateNewFile() {
 	ti.Cursor.TextStyle = modalStyle
 	ti.TextStyle = modalStyle
 	ti.Cursor.Blink = true
-	ti.Placeholder = "Add \"/\" represent Transcend folder at the end"
+	ti.Placeholder = "Add \"" + string(filepath.Separator) + "\" represent Transcend folder at the end"
 	ti.PlaceholderStyle = modalStyle
 	ti.Focus()
 	ti.CharLimit = 156
@@ -41,7 +41,7 @@ func (m *model) panelCreateNewFile() {
 func (m *model) IsRenamingConflicting() bool {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	oldPath := panel.element[panel.cursor].location
-	newPath := panel.location + "/" + panel.rename.Value()
+	newPath := filepath.Join(panel.location, panel.rename.Value())
 
 	if oldPath == newPath {
 		return false
