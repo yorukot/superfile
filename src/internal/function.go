@@ -68,13 +68,10 @@ func returnDirElement(location string, displayDotFile bool, sortOptions sortOpti
 	switch sortOptions.options[sortOptions.selected] {
 	case "Name":
 		order = func(i, j int) bool {
-			slog.Debug("sort func", "i", i, "j", j)
-
 			// One of them is a directory, and other is not
 			if dirEntries[i].IsDir() != dirEntries[j].IsDir() {
 				return dirEntries[i].IsDir()
 			}
-
 			if Config.CaseSensitiveSort {
 				return dirEntries[i].Name() < dirEntries[j].Name() != reversed
 			} else {
