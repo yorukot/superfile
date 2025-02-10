@@ -61,6 +61,9 @@ schema = 3
   [mod."github.com/davecgh/go-spew"]
     version = "v1.1.2-0.20180830191138-d8f796af33cc"
     hash = "sha256-fV9oI51xjHdOmEx6+dlq7Ku2Ag+m/bmbzPo6A4Y74qc="
+  [mod."github.com/disintegration/imaging"]
+    version = "v1.6.2"
+    hash = "sha256-pSeMTPvSkxlthh65LjNYYhPLvCZDkBgVgAGYWW0Aguo="
   [mod."github.com/dlclark/regexp2"]
     version = "v1.11.0"
     hash = "sha256-iXBBgykYu9Dcd+7LMJyRYc3Ry47jmuLGZFW13zU6toU="
@@ -142,6 +145,9 @@ schema = 3
   [mod."github.com/russross/blackfriday/v2"]
     version = "v2.1.0"
     hash = "sha256-R+84l1si8az5yDqd5CYcFrTyNZ1eSYlpXKq6nFt4OTQ="
+  [mod."github.com/rwcarlsen/goexif"]
+    version = "v0.0.0-20190401172101-9e8deecbddbd"
+    hash = "sha256-AiY2T9hXj6jnfldYDoe4WNr3FldpVTxc3lScR++HOLc="
   [mod."github.com/shirou/gopsutil"]
     version = "v3.21.11+incompatible"
     hash = "sha256-tcH5zN94yZhKtg8wAUfojlqdyguifuPTBLPso3KF7QA="
@@ -163,6 +169,9 @@ schema = 3
   [mod."go4.org"]
     version = "v0.0.0-20230225012048-214862532bf5"
     hash = "sha256-8y7krSESdxZfxTzo16EDqmF8USRzGmLPYr3iKuVYzzE="
+  [mod."golang.org/x/image"]
+    version = "v0.0.0-20191009234506-e7c1f5e7dbb8"
+    hash = "sha256-rnqWpj/Tj8hw1KfiNjHMQCz+v2AQyOVfCxyzqE5C9zM="
   [mod."golang.org/x/sync"]
     version = "v0.9.0"
     hash = "sha256-sGvzGqaaXE5dxohKkpbJMnu+bMmismsSqr8YMtrK+Rc="
