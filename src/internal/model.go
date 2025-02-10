@@ -74,7 +74,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	m.getFilePanelItems()
-
+	if !m.firstLoadingComplete { 
+		m.firstLoadingComplete = true
+	}
 	return m, tea.Batch(cmd)
 }
 
@@ -296,6 +298,9 @@ func (m *model) warnModalForQuit() {
 
 // Implement View function for bubble tea model to handle visualization.
 func (m model) View() string {
+	if !m.firstLoadingComplete {
+		return "Loading..."
+	}
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	// check is the terminal size enough
 	if m.fullHeight < minimumHeight || m.fullWidth < minimumWidth {
