@@ -7,6 +7,7 @@ import (
 	_ "image/gif"  // Import to enable GIF support
 	_ "image/jpeg" // Import to enable JPEG support
 	_ "image/png"  // Import to enable PNG support
+	"log/slog"
 	"os"
 	"strconv"
 
@@ -88,16 +89,10 @@ func ImagePreview(path string, maxWidth, maxHeight int, defaultBGColor string) (
 		return "", err
 	}
 
-	// Read EXIF data
-	exifData, err := exif.Decode(file)
-	if err == nil {
-		orientation, err := exifData.Get(exif.Orientation)
-		if err == nil {
-			orientationValue, err := orientation.Int(0)
-			if err == nil {
-				img = adjustOrientation(img, orientationValue)
-			}
-		}
+	// Adjust image orientation based on EXIF data
+	img, err = adjustImageOrientation(file, img)
+	if err != nil {
+		return "", err
 	}
 
 	// Resize image to fit terminal
@@ -113,8 +108,32 @@ func ImagePreview(path string, maxWidth, maxHeight int, defaultBGColor string) (
 	return ansiImage, nil
 }
 
+func adjustImageOrientation(file *os.File, img image.Image) (image.Image, error) {
+	exifData, err := exif.Decode(file)
+	if err != nil {
+		slog.Error("exif error", "error", err)
+		return img, nil // Return the original image if EXIF data cannot be read
+	}
+
+	orientation, err := exifData.Get(exif.Orientation)
+	if err != nil {
+		slog.Error("exif orientation error", "error", err)
+		return img, nil // Return the original image if orientation cannot be read
+	}
+
+	orientationValue, err := orientation.Int(0)
+	if err != nil {
+		slog.Error("exif orientation value error", "error", err)
+		return img, nil // Return the original image if orientation value cannot be read
+	}
+
+	return adjustOrientation(img, orientationValue), nil
+}
+
 func adjustOrientation(img image.Image, orientation int) image.Image {
 	switch orientation {
+	case 1:
+		return img
 	case 2:
 		return imaging.FlipH(img)
 	case 3:
@@ -130,7 +149,8 @@ func adjustOrientation(img image.Image, orientation int) image.Image {
 	case 8:
 		return imaging.Rotate90(img)
 	default:
-		return img
+		slog.Error("invalid orientation value", "orientation", orientation)
+		return img // Return the original image for invalid orientation values
 	}
 }
 
