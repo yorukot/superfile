@@ -10,8 +10,10 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/disintegration/imaging"
 	"github.com/muesli/termenv"
 	"github.com/nfnt/resize"
+	"github.com/rwcarlsen/goexif/exif"
 )
 
 type colorCache struct {
@@ -81,6 +83,23 @@ func ImagePreview(path string, maxWidth, maxHeight int, defaultBGColor string) (
 		return "", err
 	}
 
+	// Seek back to the beginning of the file before reading EXIF data
+	if _, err := file.Seek(0, 0); err != nil {
+		return "", err
+	}
+
+	// Read EXIF data
+	exifData, err := exif.Decode(file)
+	if err == nil {
+		orientation, err := exifData.Get(exif.Orientation)
+		if err == nil {
+			orientationValue, err := orientation.Int(0)
+			if err == nil {
+				img = adjustOrientation(img, orientationValue)
+			}
+		}
+	}
+
 	// Resize image to fit terminal
 	resizedImg := resize.Thumbnail(uint(maxWidth), uint(maxHeight), img, resize.Lanczos3)
 
@@ -92,6 +111,27 @@ func ImagePreview(path string, maxWidth, maxHeight int, defaultBGColor string) (
 	ansiImage := ConvertImageToANSI(resizedImg, bgColor)
 
 	return ansiImage, nil
+}
+
+func adjustOrientation(img image.Image, orientation int) image.Image {
+	switch orientation {
+	case 2:
+		return imaging.FlipH(img)
+	case 3:
+		return imaging.Rotate180(img)
+	case 4:
+		return imaging.FlipV(img)
+	case 5:
+		return imaging.Transpose(img)
+	case 6:
+		return imaging.Rotate270(img)
+	case 7:
+		return imaging.Transverse(img)
+	case 8:
+		return imaging.Rotate90(img)
+	default:
+		return img
+	}
 }
 
 func hexToColor(hex string) (color.RGBA, error) {
