@@ -104,8 +104,10 @@ func (m *model) sortOptionsListUp() {
 
 // Move the cursor down in the sort options menu
 func (m *model) sortOptionsListDown() {
+
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	if panel.sortOptions.cursor < len(panel.sortOptions.data.options)-1 {
+
 		panel.sortOptions.cursor++
 	} else {
 		panel.sortOptions.cursor = 0
@@ -225,6 +227,7 @@ func (m *model) enterCommandLine() {
 	cmd.Dir = focusPanelDir // switch to the focused panel directory
 
 	output, err := cmd.CombinedOutput()
+
 	if err != nil {
 		slog.Error("Command execution failed", "error", err, "output", string(output))
 		return

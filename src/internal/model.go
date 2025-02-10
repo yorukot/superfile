@@ -74,7 +74,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	m.getFilePanelItems()
-
+	if !m.firstLoadingComplete { 
+		m.firstLoadingComplete = true
+	}
 	return m, tea.Batch(cmd)
 }
 
@@ -296,6 +298,9 @@ func (m *model) warnModalForQuit() {
 
 // Implement View function for bubble tea model to handle visualization.
 func (m model) View() string {
+	if !m.firstLoadingComplete {
+		return "Loading..."
+	}
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	// check is the terminal size enough
 	if m.fullHeight < minimumHeight || m.fullWidth < minimumWidth {
@@ -460,7 +465,10 @@ func (m *model) quitSuperfile() {
 	if Config.CdOnQuit {
 		// escape single quote
 		currentDir = strings.ReplaceAll(currentDir, "'", "'\\''")
-		os.WriteFile(variable.SuperFileStateDir+"/lastdir", []byte("cd '"+currentDir+"'"), 0755)
+		err := os.WriteFile(variable.LastDirFile, []byte("cd '"+currentDir+"'"), 0755)
+		if err != nil {
+			slog.Error("Error during writing lastdir file", "error", err)
+		}
 	}
 	slog.Debug("Quitting superfile", "current dir", currentDir)
 }
