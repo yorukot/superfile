@@ -136,8 +136,12 @@ export default defineConfig({
           items: [
             {
               label: 'How to contribute',
-              link: '/how-to-contribute'
+              link: '/contribute/how-to-contribute'
             },
+            {
+              label: 'File structure',
+              link: '/contribute/file-struct'
+            }
           ],
         },
         {
