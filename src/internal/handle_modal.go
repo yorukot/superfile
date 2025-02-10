@@ -23,7 +23,7 @@ func (m *model) cancelWarnModal() {
 // Confirm to create file or directory
 func (m *model) createItem() {
 	// Reset the typingModal in all cases
-	defer func(){
+	defer func() {
 		m.typingModal.open = false
 		m.typingModal.textInput.Blur()
 	}()
@@ -39,7 +39,7 @@ func (m *model) createItem() {
 			outPutLog("createItem error during file creation : ", err)
 			return
 		}
-		defer f.Close()		
+		defer f.Close()
 	} else {
 		// Directory creation
 		err := os.MkdirAll(path, 0755)
@@ -104,8 +104,7 @@ func (m *model) sortOptionsListUp() {
 
 // Move the cursor down in the sort options menu
 func (m *model) sortOptionsListDown() {
-
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	if panel.sortOptions.cursor < len(panel.sortOptions.data.options)-1 {
 
 		panel.sortOptions.cursor++
