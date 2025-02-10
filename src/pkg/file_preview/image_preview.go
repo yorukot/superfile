@@ -89,11 +89,8 @@ func ImagePreview(path string, maxWidth, maxHeight int, defaultBGColor string) (
 		return "", err
 	}
 
-	// Adjust image orientation based on EXIF data
-	img, err = adjustImageOrientation(file, img)
-	if err != nil {
-		return "", err
-	}
+	// Try to adjust image orientation based on EXIF data
+	img = adjustImageOrientation(file, img)
 
 	// Resize image to fit terminal
 	resizedImg := resize.Thumbnail(uint(maxWidth), uint(maxHeight), img, resize.Lanczos3)
@@ -108,26 +105,26 @@ func ImagePreview(path string, maxWidth, maxHeight int, defaultBGColor string) (
 	return ansiImage, nil
 }
 
-func adjustImageOrientation(file *os.File, img image.Image) (image.Image, error) {
+func adjustImageOrientation(file *os.File, img image.Image) (image.Image) {
 	exifData, err := exif.Decode(file)
 	if err != nil {
 		slog.Error("exif error", "error", err)
-		return img, nil // Return the original image if EXIF data cannot be read
+		return img
 	}
 
 	orientation, err := exifData.Get(exif.Orientation)
 	if err != nil {
 		slog.Error("exif orientation error", "error", err)
-		return img, nil // Return the original image if orientation cannot be read
+		return img
 	}
 
 	orientationValue, err := orientation.Int(0)
 	if err != nil {
 		slog.Error("exif orientation value error", "error", err)
-		return img, nil // Return the original image if orientation value cannot be read
+		return img
 	}
 
-	return adjustOrientation(img, orientationValue), nil
+	return adjustOrientation(img, orientationValue)
 }
 
 func adjustOrientation(img image.Image, orientation int) image.Image {
