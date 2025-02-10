@@ -1,3 +1,2 @@
-https://img.shields.io/homebrew/installs/:interval/:formula
-
-![Brew downloads](https://img.shields.io/homebrew/installs/dy/superfile)
+![HomeBrew downloads](https://img.shields.io/homebrew/installs/dy/superfile?label=homebrew)
+![Github downloads](https://img.shields.io/github/downloads/yorukot/superfile/total?label=github%20downloads%20assets%2Freleases)
