@@ -130,17 +130,25 @@ func (m *model) sidebarSelectDirectory() {
 		directoryRender: panel.render,
 	}
 
-	panel.location = m.sidebarModel.directories[m.sidebarModel.cursor].location
-	directoryRecord, hasRecord := panel.directoryRecord[panel.location]
-	if hasRecord {
-		panel.cursor = directoryRecord.directoryCursor
-		panel.render = directoryRecord.directoryRender
-	} else {
-		panel.cursor = 0
-		panel.render = 0
-	}
-	panel.focusType = focus
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+    // Use the filtered directories if the search bar has a value
+    var directories []directory
+    if m.sidebarModel.searchBar.Value() != "" {
+        directories = m.filterSidebarDirectories(m.sidebarModel.searchBar.Value())
+    } else {
+        directories = m.sidebarModel.directories
+    }
+
+    panel.location = directories[m.sidebarModel.cursor].location
+    directoryRecord, hasRecord := panel.directoryRecord[panel.location]
+    if hasRecord {
+        panel.cursor = directoryRecord.directoryCursor
+        panel.render = directoryRecord.directoryRender
+    } else {
+        panel.cursor = 0
+        panel.render = 0
+    }
+    panel.focusType = focus
+    m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 // Select all item in the file panel (only work on select mode)
@@ -408,132 +416,132 @@ func (m *model) itemSelectDown(wheel bool) {
 
 // Control sidebar panel list up
 func (m *model) controlSideBarListUp(wheel bool) {
-	runTime := 1
-	if wheel {
-		runTime = wheelRunTime
-	}
+    runTime := 1
+    if wheel {
+        runTime = wheelRunTime
+    }
 
-	for i := 0; i < runTime; i++ {
-		if m.sidebarModel.cursor > 0 {
-			m.sidebarModel.cursor--
-		} else {
-			m.sidebarModel.cursor = len(m.sidebarModel.directories) - 1
-		}
-		newDirectory := m.sidebarModel.directories[m.sidebarModel.cursor].location
+    for i := 0; i < runTime; i++ {
+        if m.sidebarModel.cursor > 0 {
+            m.sidebarModel.cursor--
+        } else {
+            m.sidebarModel.cursor = len(m.sidebarModel.directories) - 1
+        }
+        newDirectory := m.sidebarModel.directories[m.sidebarModel.cursor].location
 
-		for newDirectory == "Pinned+-*/=?" || newDirectory == "Disks+-*/=?" {
-			m.sidebarModel.cursor--
-			newDirectory = m.sidebarModel.directories[m.sidebarModel.cursor].location
-		}
-		changeToPlus := false
-		cursorRender := false
-		for !cursorRender {
-			totalHeight := 2
-			for i := m.sidebarModel.renderIndex; i < len(m.sidebarModel.directories); i++ {
-				if totalHeight >= m.mainPanelHeight {
-					break
-				}
-				directory := m.sidebarModel.directories[i]
+        for newDirectory == "Pinned+-*/=?" || newDirectory == "Disks+-*/=?" {
+            m.sidebarModel.cursor--
+            newDirectory = m.sidebarModel.directories[m.sidebarModel.cursor].location
+        }
+        changeToPlus := false
+        cursorRender := false
+        for !cursorRender {
+            totalHeight := 2
+            for i := m.sidebarModel.renderIndex; i < len(m.sidebarModel.directories); i++ {
+                if totalHeight >= m.mainPanelHeight {
+                    break
+                }
+                directory := m.sidebarModel.directories[i]
 
-				if directory.location == "Pinned+-*/=?" {
-					totalHeight += 3
-					continue
-				}
+                if directory.location == "Pinned+-*/=?" {
+                    totalHeight += 3
+                    continue
+                }
 
-				if directory.location == "Disks+-*/=?" {
-					if m.mainPanelHeight-totalHeight <= 2 {
-						break
-					}
-					totalHeight += 3
-					continue
-				}
+                if directory.location == "Disks+-*/=?" {
+                    if m.mainPanelHeight-totalHeight <= 2 {
+                        break
+                    }
+                    totalHeight += 3
+                    continue
+                }
 
-				totalHeight++
-				if m.sidebarModel.cursor == i && m.focusPanel == sidebarFocus {
-					cursorRender = true
-				}
-			}
+                totalHeight++
+                if m.sidebarModel.cursor == i && m.focusPanel == sidebarFocus {
+                    cursorRender = true
+                }
+            }
 
-			if changeToPlus {
-				m.sidebarModel.renderIndex++
-				continue
-			}
+            if changeToPlus {
+                m.sidebarModel.renderIndex++
+                continue
+            }
 
-			if !cursorRender {
-				m.sidebarModel.renderIndex--
-			}
-			if m.sidebarModel.renderIndex < 0 {
-				changeToPlus = true
-				m.sidebarModel.renderIndex++
-			}
-		}
+            if !cursorRender {
+                m.sidebarModel.renderIndex--
+            }
+            if m.sidebarModel.renderIndex < 0 {
+                changeToPlus = true
+                m.sidebarModel.renderIndex++
+            }
+        }
 
-		if changeToPlus {
-			m.sidebarModel.renderIndex--
-		}
-	}
+        if changeToPlus {
+            m.sidebarModel.renderIndex--
+        }
+    }
 }
 
 // Control sidebar panel list down
 func (m *model) controlSideBarListDown(wheel bool) {
-	runTime := 1
-	if wheel {
-		runTime = wheelRunTime
-	}
+    runTime := 1
+    if wheel {
+        runTime = wheelRunTime
+    }
 
-	for i := 0; i < runTime; i++ {
-		lenDirs := len(m.sidebarModel.directories)
-		if m.sidebarModel.cursor < lenDirs-1 {
-			m.sidebarModel.cursor++
-		} else {
-			m.sidebarModel.cursor = 0
-		}
+    for i := 0; i < runTime; i++ {
+        lenDirs := len(m.sidebarModel.directories)
+        if m.sidebarModel.cursor < lenDirs-1 {
+            m.sidebarModel.cursor++
+        } else {
+            m.sidebarModel.cursor = 0
+        }
 
-		newDirectory := m.sidebarModel.directories[m.sidebarModel.cursor].location
-		for newDirectory == "Pinned+-*/=?" || newDirectory == "Disks+-*/=?" {
-			m.sidebarModel.cursor++
-			if m.sidebarModel.cursor+1 > len(m.sidebarModel.directories) {
-				m.sidebarModel.cursor = 0
-			}
-			newDirectory = m.sidebarModel.directories[m.sidebarModel.cursor].location
-		}
-		cursorRender := false
-		for !cursorRender {
-			totalHeight := 2
-			for i := m.sidebarModel.renderIndex; i < len(m.sidebarModel.directories); i++ {
-				if totalHeight >= m.mainPanelHeight {
-					break
-				}
+        newDirectory := m.sidebarModel.directories[m.sidebarModel.cursor].location
+        for newDirectory == "Pinned+-*/=?" || newDirectory == "Disks+-*/=?" {
+            m.sidebarModel.cursor++
+            if m.sidebarModel.cursor+1 > len(m.sidebarModel.directories) {
+                m.sidebarModel.cursor = 0
+            }
+            newDirectory = m.sidebarModel.directories[m.sidebarModel.cursor].location
+        }
+        cursorRender := false
+        for !cursorRender {
+            totalHeight := 2
+            for i := m.sidebarModel.renderIndex; i < len(m.sidebarModel.directories); i++ {
+                if totalHeight >= m.mainPanelHeight {
+                    break
+                }
 
-				directory := m.sidebarModel.directories[i]
+                directory := m.sidebarModel.directories[i]
 
-				if directory.location == "Pinned+-*/=?" {
-					totalHeight += 3
-					continue
-				}
+                if directory.location == "Pinned+-*/=?" {
+                    totalHeight += 3
+                    continue
+                }
 
-				if directory.location == "Disks+-*/=?" {
-					if m.mainPanelHeight-totalHeight <= 2 {
-						break
-					}
-					totalHeight += 3
-					continue
-				}
+                if directory.location == "Disks+-*/=?" {
+                    if m.mainPanelHeight-totalHeight <= 2 {
+                        break
+                    }
+                    totalHeight += 3
+                    continue
+                }
 
-				totalHeight++
-				if m.sidebarModel.cursor == i && m.focusPanel == sidebarFocus {
-					cursorRender = true
-				}
-			}
+                totalHeight++
+                if m.sidebarModel.cursor == i && m.focusPanel == sidebarFocus {
+                    cursorRender = true
+                }
+            }
 
-			if !cursorRender {
-				m.sidebarModel.renderIndex++
-			}
-			if m.sidebarModel.renderIndex > m.sidebarModel.cursor {
-				m.sidebarModel.renderIndex = 0
-			}
-		}
-	}
+            if !cursorRender {
+                m.sidebarModel.renderIndex++
+            }
+            if m.sidebarModel.renderIndex > m.sidebarModel.cursor {
+                m.sidebarModel.renderIndex = 0
+            }
+        }
+    }
 }
 
 // ======================================== Metadata controller ========================================

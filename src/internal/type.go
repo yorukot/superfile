@@ -212,6 +212,7 @@ type sidebarModel struct {
 	cursor      int
 	rename      textinput.Model
 	renaming    bool
+	searchBar   textinput.Model
 }
 
 type directory struct {
