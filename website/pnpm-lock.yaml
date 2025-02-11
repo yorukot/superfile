@@ -16,7 +16,7 @@ importers:
         version: 0.40.1
       '@expressive-code/plugin-line-numbers':
         specifier: ^0.40.0
-        version: 0.40.1
+        version: 0.40.2
       '@fontsource/ibm-plex-mono':
         specifier: ^5.0.8
         version: 5.1.1
@@ -312,14 +312,17 @@ packages:
   '@expressive-code/core@0.40.1':
     resolution: {integrity: sha512-j71gxBepyzBgOtZomxzl8M90AjILf6hZarWFePDis7sTjqCwxWrtZEtTCafto8IOURG/ECZN0g7Ys4zExkNU7Q==}
 
+  '@expressive-code/core@0.40.2':
+    resolution: {integrity: sha512-gXY3v7jbgz6nWKvRpoDxK4AHUPkZRuJsM79vHX/5uhV9/qX6Qnctp/U/dMHog/LCVXcuOps+5nRmf1uxQVPb3w==}
+
   '@expressive-code/plugin-collapsible-sections@0.40.1':
     resolution: {integrity: sha512-lXVH1f+NPmckMoV8b4dSOfHA90ckgys0bDKdXIgcjqxTsbcdb+wrNYqdepnWCuX1HGDSlac7haJd0qtj0OrvaA==}
 
   '@expressive-code/plugin-frames@0.40.1':
     resolution: {integrity: sha512-qV7BIdTQ9nJ/eLHaJlzMvUq5aqAoZKO3PLFzBVop/q0d0m5rWpwWncIQ8qkufQDabmq2m38PRRWxKgx5FkJ2Rg==}
 
-  '@expressive-code/plugin-line-numbers@0.40.1':
-    resolution: {integrity: sha512-9SgO73lamP46SuRlPkFAFGYKPy+MCzXAyT+VUeNA95g+CUVrNx0ySevEWAATQ9JmVUp4vNETbssJdMJb7Xcqiw==}
+  '@expressive-code/plugin-line-numbers@0.40.2':
+    resolution: {integrity: sha512-YMLkn68n9a9DI/4fQW/f6QJ33uQUzHmGdV3pDl+f6fVTxv7rvhRja+UtPksm0ZJpft6vrrACV8wS2TaH77SBzw==}
 
   '@expressive-code/plugin-shiki@0.40.1':
     resolution: {integrity: sha512-N5oXhLv5DwLGXmLwJtwMzrfnZPWJl4pHRR5mfDoqK1+NxptdVaaQ0nEjgw13Y5ID/O5Bbze5YcOyph2K52BBrQ==}
@@ -1555,6 +1558,10 @@ packages:
     resolution: {integrity: sha512-OCVPnIObs4N29kxTjzLfUryOkvZEq+pf8jTF0lg8E7uETuWHA+v7j3c/xJmiqpX450191LlmZfUKkXxkTry7nA==}
     engines: {node: ^10 || ^12 || >=14}
 
+  postcss@8.5.2:
+    resolution: {integrity: sha512-MjOadfU3Ys9KYoX0AdkBlFEF1Vx37uCCeN4ZHnmwm9FfpbsGWMZeBLMmmpY+6Ocqod7mkdZ0DT31OlbsFrLlkA==}
+    engines: {node: ^10 || ^12 || >=14}
+
   preferred-pm@4.0.0:
     resolution: {integrity: sha512-gYBeFTZLu055D8Vv3cSPox/0iTPtkzxpLroSYYA7WXgRi31WCJ51Uyl8ZiPeUUjyvs2MBzK+S8v9JVUgHU/Sqw==}
     engines: {node: '>=18.12'}
@@ -2285,26 +2292,38 @@ snapshots:
       unist-util-visit: 5.0.0
       unist-util-visit-parents: 6.0.1
 
+  '@expressive-code/core@0.40.2':
+    dependencies:
+      '@ctrl/tinycolor': 4.1.0
+      hast-util-select: 6.0.3
+      hast-util-to-html: 9.0.4
+      hast-util-to-text: 4.0.2
+      hastscript: 9.0.0
+      postcss: 8.5.2
+      postcss-nested: 6.2.0(postcss@8.5.2)
+      unist-util-visit: 5.0.0
+      unist-util-visit-parents: 6.0.1
+
   '@expressive-code/plugin-collapsible-sections@0.40.1':
     dependencies:
       '@expressive-code/core': 0.40.1
 
   '@expressive-code/plugin-frames@0.40.1':
     dependencies:
-      '@expressive-code/core': 0.40.1
+      '@expressive-code/core': 0.40.2
 
-  '@expressive-code/plugin-line-numbers@0.40.1':
+  '@expressive-code/plugin-line-numbers@0.40.2':
     dependencies:
-      '@expressive-code/core': 0.40.1
+      '@expressive-code/core': 0.40.2
 
   '@expressive-code/plugin-shiki@0.40.1':
     dependencies:
-      '@expressive-code/core': 0.40.1
+      '@expressive-code/core': 0.40.2
       shiki: 1.29.2
 
   '@expressive-code/plugin-text-markers@0.40.1':
     dependencies:
-      '@expressive-code/core': 0.40.1
+      '@expressive-code/core': 0.40.2
 
   '@fontsource/ibm-plex-mono@5.1.1': {}
 
@@ -3000,7 +3019,7 @@ snapshots:
 
   expressive-code@0.40.1:
     dependencies:
-      '@expressive-code/core': 0.40.1
+      '@expressive-code/core': 0.40.2
       '@expressive-code/plugin-frames': 0.40.1
       '@expressive-code/plugin-shiki': 0.40.1
       '@expressive-code/plugin-text-markers': 0.40.1
@@ -3955,12 +3974,23 @@ snapshots:
       postcss: 8.4.49
       postcss-selector-parser: 6.1.2
 
+  postcss-nested@6.2.0(postcss@8.5.2):
+    dependencies:
+      postcss: 8.5.2
+      postcss-selector-parser: 6.1.2
+
   postcss-selector-parser@6.1.2:
     dependencies:
       cssesc: 3.0.0
       util-deprecate: 1.0.2
 
   postcss@8.4.49:
+    dependencies:
+      nanoid: 3.3.8
+      picocolors: 1.1.1
+      source-map-js: 1.2.1
+
+  postcss@8.5.2:
     dependencies:
       nanoid: 3.3.8
       picocolors: 1.1.1
