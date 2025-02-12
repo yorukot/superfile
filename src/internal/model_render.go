@@ -431,7 +431,7 @@ func (m *model) terminalSizeWarnAfterFirstRender() string {
 }
 
 func (m *model) typineModalRender() string {
-	previewPath := m.typingModal.location + "/" + m.typingModal.textInput.Value()
+	previewPath := filepath.Join(m.typingModal.location, m.typingModal.textInput.Value())
 
 	fileLocation := filePanelTopDirectoryIconStyle.Render(" "+icon.Directory+icon.Space) +
 		filePanelTopPathStyle.Render(truncateTextBeginning(previewPath, modalWidth-4, "...")) + "\n"

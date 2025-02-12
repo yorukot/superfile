@@ -60,18 +60,22 @@ Visit warp.dev to learn more
 
 ## Installation
 
-### Quick install 
-
-Using bash (Support MacOS and linux)
+### MacOS and Linux
 
 ```bash
 bash -c "$(curl -sLo- https://superfile.netlify.app/install.sh)"
 ```
 
-Using powershell (Support Windows)
+### Windows
 
+#### Powershell
 ```powershell
 powershell -ExecutionPolicy Bypass -Command "Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://superfile.netlify.app/install.ps1'))"
+```
+
+#### [Scoop](https://scoop.sh/)
+```
+scoop install superfile
 ```
 
 ### More installation methods

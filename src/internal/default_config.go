@@ -1,5 +1,9 @@
 package internal
 
+import (
+	"path/filepath"
+)
+
 // Variables for holding default configurations of each settings
 var (
 	HotkeysTomlString  string
@@ -213,7 +217,7 @@ func getHelpMenuData() []helpMenuModalData {
 		},
 		{
 			hotkey:         hotkeys.FilePanelItemCreate,
-			description:    "Create file or folder(/ ends with creating a folder)",
+			description:    "Create file or folder(end with " + string(filepath.Separator) + "to create a folder)",
 			hotkeyWorkType: globalType,
 		},
 		{

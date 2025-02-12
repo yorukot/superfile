@@ -26,7 +26,6 @@ func getDirectories() []directory {
 		location: "Disks+-*/=?",
 	})
 	directories = append(directories, getExternalMediaFolders()...)
-
 	return directories
 }
 
@@ -66,6 +65,7 @@ func getPinnedDirectories() []directory {
 	jsonData, err := os.ReadFile(variable.PinnedFile)
 	if err != nil {
 		outPutLog("Read superfile data error", err)
+		return directories
 	}
 
 	// Check if the data is in the old format
