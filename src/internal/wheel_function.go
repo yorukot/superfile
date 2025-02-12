@@ -7,7 +7,11 @@ func wheelMainAction(msg string, m *model, cmd tea.Cmd) tea.Cmd {
 
 	case "wheel up":
 		if m.focusPanel == sidebarFocus {
-			m.controlSideBarListUp(true)
+			if m.sidebarModel.searchBar.Value() != ""{
+				m.controlFilteredSideBarListUp(true)
+			}else{
+				m.controlSideBarListUp(true)
+			}
 		} else if m.focusPanel == processBarFocus {
 			m.controlProcessbarListUp(true)
 		} else if m.focusPanel == metadataFocus {
@@ -22,7 +26,11 @@ func wheelMainAction(msg string, m *model, cmd tea.Cmd) tea.Cmd {
 
 	case "wheel down":
 		if m.focusPanel == sidebarFocus {
-			m.controlSideBarListDown(true)
+			if m.sidebarModel.searchBar.Value() != ""{	
+				m.controlFilteredSideBarListDown(true)
+			}else{
+				m.controlSideBarListDown(true)
+			}
 		} else if m.focusPanel == processBarFocus {
 			m.controlProcessbarListDown(true)
 		} else if m.focusPanel == metadataFocus {

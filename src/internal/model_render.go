@@ -32,11 +32,17 @@ func (m *model) sidebarRender() string {
 	disksDivider = ansi.Truncate(disksDivider, Config.SidebarWidth, "")
 	pinnedDivider = ansi.Truncate(pinnedDivider, Config.SidebarWidth, "")
 
-	totalHeight := 2
 	m.sidebarModel.searchBar.Placeholder = "Search"
-	s += ansi.Truncate(m.sidebarModel.searchBar.View(), Config.SidebarWidth, "...") + "\n"
+	s += "\n" + ansi.Truncate(m.sidebarModel.searchBar.View(), Config.SidebarWidth, "...") + "\n"
 	m.filterSidebarDirectories(m.sidebarModel.searchBar.Value())
 	
+    if len(m.sidebarModel.directories) == 0 {
+        s += sidebarStyle.Render(" " + icon.Error + " None")
+        return sideBarBorderStyle(m.mainPanelHeight, m.focusPanel).Render(s)
+    }
+
+	totalHeight := 3
+
 	for i := m.sidebarModel.renderIndex; i < len(m.sidebarModel.directories); i++ {
 		if totalHeight >= m.mainPanelHeight {
 			break

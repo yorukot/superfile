@@ -540,6 +540,43 @@ func (m *model) controlSideBarListDown(wheel bool) {
     }
 }
 
+// Control filtered sidebar panel list up
+func (m *model) controlFilteredSideBarListUp(wheel bool) {
+    runTime := 1
+    if wheel {
+        runTime = wheelRunTime
+    }
+
+	m.filterSidebarDirectories(m.sidebarModel.searchBar.Value())
+	
+    for i := 0; i < runTime; i++ {
+        if m.sidebarModel.cursor > 0 {
+            m.sidebarModel.cursor--
+        } else {
+            m.sidebarModel.cursor = len(m.sidebarModel.directories) - 1
+        }
+    }
+}
+
+// Control filtered sidebar panel list down
+func (m *model) controlFilteredSideBarListDown(wheel bool) {
+    runTime := 1
+    if wheel {
+        runTime = wheelRunTime
+    }
+
+	m.filterSidebarDirectories(m.sidebarModel.searchBar.Value())
+
+    for i := 0; i < runTime; i++ {
+        lenDirs := len(m.sidebarModel.directories)
+        if m.sidebarModel.cursor < lenDirs-1 {
+            m.sidebarModel.cursor++
+        } else {
+            m.sidebarModel.cursor = 0
+        }
+    }
+}
+
 // Focus on sidebar search bar
 func (m *model) sidebarSearchBarFocus() {
 	if m.sidebarModel.searchBar.Focused() {
