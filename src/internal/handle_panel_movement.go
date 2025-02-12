@@ -130,7 +130,7 @@ func (m *model) sidebarSelectDirectory() {
         directoryRender: panel.render,
     }
 
-	m.filterSidebarDirectories(m.sidebarModel.searchBar.Value())
+	m.filterSidebarDirectories()
     panel.location = m.sidebarModel.directories[m.sidebarModel.cursor].location
     directoryRecord, hasRecord := panel.directoryRecord[panel.location]
     if hasRecord {
@@ -547,7 +547,7 @@ func (m *model) controlFilteredSideBarListUp(wheel bool) {
         runTime = wheelRunTime
     }
 
-	m.filterSidebarDirectories(m.sidebarModel.searchBar.Value())
+	m.filterSidebarDirectories()
 	
     for i := 0; i < runTime; i++ {
         if m.sidebarModel.cursor > 0 {
@@ -565,7 +565,7 @@ func (m *model) controlFilteredSideBarListDown(wheel bool) {
         runTime = wheelRunTime
     }
 
-	m.filterSidebarDirectories(m.sidebarModel.searchBar.Value())
+	m.filterSidebarDirectories()
 
     for i := 0; i < runTime; i++ {
         lenDirs := len(m.sidebarModel.directories)

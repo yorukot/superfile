@@ -186,8 +186,8 @@ func returnDirElementBySearchString(location string, displayDotFile bool, search
 }
 
 // Filter directories based on the search query
-func (m *model) filterSidebarDirectories(query string) {
-    query = strings.ToLower(query)
+func (m *model) filterSidebarDirectories() {
+	query := strings.ToLower(m.sidebarModel.searchBar.Value())
     if query == "" {
         m.sidebarModel.directories = getDirectories()
         return
