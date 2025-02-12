@@ -35,23 +35,16 @@ func (m *model) sidebarRender() string {
 	totalHeight := 2
 	m.sidebarModel.searchBar.Placeholder = "Search"
 	s += ansi.Truncate(m.sidebarModel.searchBar.View(), Config.SidebarWidth, "...") + "\n"
-
-	// Filter directories based on search bar value
-	var directories []directory
-	if m.sidebarModel.searchBar.Value() != "" {
-		directories = m.filterSidebarDirectories(m.sidebarModel.searchBar.Value())
-	} else {
-		directories = m.sidebarModel.directories
-	}
-
-	for i := m.sidebarModel.renderIndex; i < len(directories); i++ {
+	m.filterSidebarDirectories(m.sidebarModel.searchBar.Value())
+	
+	for i := m.sidebarModel.renderIndex; i < len(m.sidebarModel.directories); i++ {
 		if totalHeight >= m.mainPanelHeight {
 			break
 		} else {
 			s += "\n"
 		}
 
-		directory := directories[i]
+		directory := m.sidebarModel.directories[i]
 
 		if directory.location == "Pinned+-*/=?" {
 			s += pinnedDivider

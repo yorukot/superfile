@@ -318,7 +318,6 @@ func (m *model) sidebarSearchBarKey(msg string) {
     default:
         // Update the search bar with the key input
         m.sidebarModel.searchBar, _ = m.sidebarModel.searchBar.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune(msg)})
-        m.sidebarModel.directories = m.filterSidebarDirectories(m.sidebarModel.searchBar.Value())
     }
 }
 

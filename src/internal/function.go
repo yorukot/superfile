@@ -194,10 +194,11 @@ func returnFolderElementBySearchString(location string, displayDotFile bool, sea
 }
 
 // Filter directories based on the search query
-func (m *model) filterSidebarDirectories(query string) []directory {
+func (m *model) filterSidebarDirectories(query string) {
     query = strings.ToLower(query)
     if query == "" {
-        return m.sidebarModel.directories
+        m.sidebarModel.directories = getDirectories()
+        return
     }
 
     var filteredDirectories []directory
@@ -206,7 +207,7 @@ func (m *model) filterSidebarDirectories(query string) []directory {
             filteredDirectories = append(filteredDirectories, dir)
         }
     }
-    return filteredDirectories
+    m.sidebarModel.directories = filteredDirectories
 }
 
 func panelElementHeight(mainPanelHeight int) int {

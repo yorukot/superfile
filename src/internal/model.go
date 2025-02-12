@@ -244,19 +244,6 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 	return cmd
 }
 
-// Focus on sidebar search bar
-func (m *model) sidebarSearchBarFocus() {
-	if m.sidebarModel.searchBar.Focused() {
-		m.sidebarModel.searchBar.Blur()
-	} else {
-		m.sidebarModel.searchBar.Focus()
-		m.firstTextInput = true
-	}
-
-	// config search bar width
-	m.sidebarModel.searchBar.Width = Config.SidebarWidth - 4
-}
-
 // Update the file panel state. Change name of renamed files, filter out files
 // in search, update typingb bar, etc
 func (m *model) updateFilePanelsState(msg tea.Msg, cmd *tea.Cmd) {

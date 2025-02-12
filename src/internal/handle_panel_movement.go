@@ -122,23 +122,16 @@ func (m *model) enterPanel() {
 
 // Switch to the directory where the sidebar cursor is located
 func (m *model) sidebarSelectDirectory() {
-	m.focusPanel = nonePanelFocus
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+    m.focusPanel = nonePanelFocus
+    panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 
-	panel.directoryRecord[panel.location] = directoryRecord{
-		directoryCursor: panel.cursor,
-		directoryRender: panel.render,
-	}
-
-    // Use the filtered directories if the search bar has a value
-    var directories []directory
-    if m.sidebarModel.searchBar.Value() != "" {
-        directories = m.filterSidebarDirectories(m.sidebarModel.searchBar.Value())
-    } else {
-        directories = m.sidebarModel.directories
+    panel.directoryRecord[panel.location] = directoryRecord{
+        directoryCursor: panel.cursor,
+        directoryRender: panel.render,
     }
 
-    panel.location = directories[m.sidebarModel.cursor].location
+	m.filterSidebarDirectories(m.sidebarModel.searchBar.Value())
+    panel.location = m.sidebarModel.directories[m.sidebarModel.cursor].location
     directoryRecord, hasRecord := panel.directoryRecord[panel.location]
     if hasRecord {
         panel.cursor = directoryRecord.directoryCursor
@@ -431,6 +424,9 @@ func (m *model) controlSideBarListUp(wheel bool) {
 
         for newDirectory == "Pinned+-*/=?" || newDirectory == "Disks+-*/=?" {
             m.sidebarModel.cursor--
+            if m.sidebarModel.cursor < 0 {
+                m.sidebarModel.cursor = len(m.sidebarModel.directories) - 1
+            }
             newDirectory = m.sidebarModel.directories[m.sidebarModel.cursor].location
         }
         changeToPlus := false
@@ -543,6 +539,20 @@ func (m *model) controlSideBarListDown(wheel bool) {
         }
     }
 }
+
+// Focus on sidebar search bar
+func (m *model) sidebarSearchBarFocus() {
+	if m.sidebarModel.searchBar.Focused() {
+		m.sidebarModel.searchBar.Blur()
+	} else {
+		m.sidebarModel.searchBar.Focus()
+		m.firstTextInput = true
+	}
+
+	// config search bar width
+	m.sidebarModel.searchBar.Width = Config.SidebarWidth - 4
+}
+
 
 // ======================================== Metadata controller ========================================
 
