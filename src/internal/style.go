@@ -57,8 +57,8 @@ var (
 )
 
 var (
-	modalCancel  lipgloss.Style
-	modalConfirm lipgloss.Style
+	modalCancel     lipgloss.Style
+	modalConfirm    lipgloss.Style
 	modalTitleStyle lipgloss.Style
 )
 
@@ -171,7 +171,7 @@ func generateFooterBorder(countString string, width int) string {
 	if repeatCount < 0 {
 		repeatCount = 0
 	}
-	return strings.Repeat(Config.BorderBottom, repeatCount)+Config.BorderMiddleRight+countString+Config.BorderMiddleLeft
+	return strings.Repeat(Config.BorderBottom, repeatCount) + Config.BorderMiddleRight + countString + Config.BorderMiddleLeft
 }
 
 func footerWidth(fullWidth int) int {

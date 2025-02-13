@@ -106,7 +106,6 @@ func (m *model) sortOptionsListUp() {
 func (m *model) sortOptionsListDown() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	if panel.sortOptions.cursor < len(panel.sortOptions.data.options)-1 {
-
 		panel.sortOptions.cursor++
 	} else {
 		panel.sortOptions.cursor = 0

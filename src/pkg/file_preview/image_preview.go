@@ -55,7 +55,7 @@ func ConvertImageToANSI(img image.Image, defaultBGColor color.Color) string {
 			upperColor := cache.getTermenvColor(img.At(x, y), defaultBGHex)
 			lowerColor := cache.getTermenvColor(defaultBGColor, "")
 
-			if y + 1 < height {
+			if y+1 < height {
 				lowerColor = cache.getTermenvColor(img.At(x, y+1), defaultBGHex)
 			}
 
@@ -159,7 +159,7 @@ func hexToColor(hex string) (color.RGBA, error) {
 	if err != nil {
 		return color.RGBA{}, err
 	}
-	return color.RGBA{R: uint8(values >> 16), G: uint8((values >> 8) & 0xFF), B: uint8(values & 0xFF), A: 255},nil
+	return color.RGBA{R: uint8(values >> 16), G: uint8((values >> 8) & 0xFF), B: uint8(values & 0xFF), A: 255}, nil
 }
 
 func colorToHex(color color.Color) (fullbackHex string) {

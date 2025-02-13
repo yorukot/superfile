@@ -68,13 +68,10 @@ func returnDirElement(location string, displayDotFile bool, sortOptions sortOpti
 	switch sortOptions.options[sortOptions.selected] {
 	case "Name":
 		order = func(i, j int) bool {
-			slog.Debug("sort func", "i", i, "j", j)
-
 			// One of them is a directory, and other is not
 			if dirEntries[i].IsDir() != dirEntries[j].IsDir() {
 				return dirEntries[i].IsDir()
 			}
-
 			if Config.CaseSensitiveSort {
 				return dirEntries[i].Name() < dirEntries[j].Name() != reversed
 			} else {
@@ -410,7 +407,7 @@ func calculateMD5Checksum(filePath string) (string, error) {
 // Get directory total size
 func dirSize(path string) int64 {
 	var size int64
-	filepath.WalkDir(path, func(_ string, entry os.DirEntry, err error) error {
+	err := filepath.WalkDir(path, func(_ string, entry os.DirEntry, err error) error {
 		if err != nil {
 			outPutLog("Dir size function error", err)
 		}
@@ -422,6 +419,9 @@ func dirSize(path string) int64 {
 		}
 		return err
 	})
+	if err != nil {
+		slog.Error("errors during WalkDir", "error", err)
+	}
 	return size
 }
 

@@ -58,12 +58,11 @@ func TestFilenameWithouText(t *testing.T) {
 	}
 }
 
-
 func TestIsBufferPrintable(t *testing.T) {
 	var inputs = []struct {
 		input    string
 		expected bool
-	} {
+	}{
 		{"", true},
 		{"hello", true},
 		{"abcdABCD0123~!@#$%^&*()_+-={}|:\"<>?,./;'[]", true},
@@ -79,7 +78,7 @@ func TestIsBufferPrintable(t *testing.T) {
 	}
 	for _, tt := range inputs {
 
-		t.Run(fmt.Sprintf("Testing if buffer %q is printable", tt.input), func(t* testing.T){
+		t.Run(fmt.Sprintf("Testing if buffer %q is printable", tt.input), func(t *testing.T) {
 			result := isBufferPrintable([]byte(tt.input))
 			if result != tt.expected {
 				t.Errorf("Expected %v, got %v", tt.expected, result)
@@ -92,7 +91,7 @@ func TestMakePrintable(t *testing.T) {
 	var inputs = []struct {
 		input    string
 		expected string
-	} {
+	}{
 		{"", ""},
 		{"hello", "hello"},
 		{"abcdABCD0123~!@#$%^&*()_+-={}|:\"<>?,./;'[]", "abcdABCD0123~!@#$%^&*()_+-={}|:\"<>?,./;'[]"},
@@ -108,7 +107,7 @@ func TestMakePrintable(t *testing.T) {
 	}
 	for _, tt := range inputs {
 
-		t.Run(fmt.Sprintf("Make %q printable", tt.input), func(t* testing.T){
+		t.Run(fmt.Sprintf("Make %q printable", tt.input), func(t *testing.T) {
 			result := makePrintable(tt.input)
 			if result != tt.expected {
 				t.Errorf("Expected %v, got %v", tt.expected, result)
@@ -116,4 +115,3 @@ func TestMakePrintable(t *testing.T) {
 		})
 	}
 }
-

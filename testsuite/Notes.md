@@ -1,7 +1,7 @@
 # Implementation notes
 
 - The `pyautogui` sends input to the process in focus, which is the `spf` subprocess.
-- If `spf` is not exited correcly via `q`, it causes wierd vertical tabs in print statements from python
+- If `spf` is not exited correcly via `q`, it causes weird vertical tabs in print statements from python
 - There is some flakiness in sending of input. Many times, `Ctrl+C` is received as `C` in `spf`
   - If first key is `Ctrl+C`, its always received as `C`
 - Note : You must keep your focus on the terminal for the entire duration of test run. `pyautogui` sends keypress to process on focus.

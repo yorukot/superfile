@@ -213,7 +213,7 @@ func checkFirstUse() bool {
 	return firstUse
 }
 
-// Write data to the path file if it exists
+// Write data to the path file if it does not exists
 func writeConfigFile(path, data string) error {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		if err := os.WriteFile(path, []byte(data), 0644); err != nil {

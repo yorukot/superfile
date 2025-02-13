@@ -44,14 +44,14 @@ func extractCompressFile(src, dest string) error {
 		done:     0,
 		doneTime: time.Time{},
 	}
-	message := 	channelMessage{
+	message := channelMessage{
 		messageId:       id,
-		messageType: sendProcess,
+		messageType:     sendProcess,
 		processNewState: p,
 	}
 
 	if len(channel) < 5 {
-	channel <- message
+		channel <- message
 	}
 
 	x := &xtractr.XFile{
@@ -66,7 +66,7 @@ func extractCompressFile(src, dest string) error {
 		p.doneTime = time.Now()
 		message.processNewState = p
 		if len(channel) < 5 {
-		channel <- message
+			channel <- message
 		}
 		outPutLog(fmt.Sprintf("Error extracting %s: %v", src, err))
 		return err
@@ -77,7 +77,7 @@ func extractCompressFile(src, dest string) error {
 	p.doneTime = time.Now()
 	message.processNewState = p
 	if len(channel) < 5 {
-	channel <- message
+		channel <- message
 	}
 
 	return nil
@@ -111,8 +111,8 @@ func unzip(src, dest string) error {
 	}
 
 	message := channelMessage{
-		messageId: id,
-		messageType: sendProcess,
+		messageId:       id,
+		messageType:     sendProcess,
 		processNewState: p,
 	}
 
@@ -196,7 +196,7 @@ func unzip(src, dest string) error {
 		p.done++
 		if len(channel) < 5 {
 			message.processNewState = p
-		        channel <- message
+			channel <- message
 		}
 	}
 
@@ -209,7 +209,7 @@ func unzip(src, dest string) error {
 	}
 	message.processNewState = p
 	if len(channel) < 5 {
-	channel <- message
+		channel <- message
 	}
 
 	return nil
