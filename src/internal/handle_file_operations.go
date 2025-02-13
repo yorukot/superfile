@@ -25,7 +25,7 @@ func (m *model) panelCreateNewFile() {
 	ti.Cursor.TextStyle = modalStyle
 	ti.TextStyle = modalStyle
 	ti.Cursor.Blink = true
-	ti.Placeholder = "Add \"" + string(filepath.Separator) + "\" represent Transcend folder at the end"
+	ti.Placeholder = "Add \"" + string(filepath.Separator) + "\" transcend folders"
 	ti.PlaceholderStyle = modalStyle
 	ti.Focus()
 	ti.CharLimit = 156
@@ -513,30 +513,36 @@ func (m *model) pasteItem() {
 	}
 }
 
-// Extrach compress file
+// Extract compressed file
+// Todo : err should be returned and properly handled by the caller
 func (m *model) extractFile() {
 	var err error
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	ext := strings.ToLower(filepath.Ext(panel.element[panel.cursor].location))
 	outputDir := fileNameWithoutExtension(panel.element[panel.cursor].location)
 	outputDir, err = renameIfDuplicate(outputDir)
-
 	if err != nil {
-		outPutLog("Error extract file when create new directory", err)
+		slog.Error("Error extract file when create new directory", "error", err)
+		return
 	}
 
+	err = os.MkdirAll(outputDir, 0755)
+	if err != nil {
+		slog.Error("Error while making directory for extracting files", "error", err)
+		return
+	}
 	switch ext {
 	case ".zip":
-		os.MkdirAll(outputDir, 0755)
 		err = unzip(panel.element[panel.cursor].location, outputDir)
 		if err != nil {
-			outPutLog("Error extract file,", err)
+			slog.Error("Error extract file", "error", err)
+			return
 		}
 	default:
-		os.MkdirAll(outputDir, 0755)
 		err = extractCompressFile(panel.element[panel.cursor].location, outputDir)
 		if err != nil {
-			outPutLog("Error extract file,", err)
+			outPutLog("Error extract file", "error", err)
+			return
 		}
 	}
 }
@@ -550,10 +556,17 @@ func (m *model) compressFile() {
 	zipName, err := renameIfDuplicate(zipName)
 
 	if err != nil {
-		outPutLog("Error compress file when rename duplicate", err)
+		slog.Error("Error in compressing files during rename duplicate", "error", err)
+		return
 	}
 
-	zipSource(panel.element[panel.cursor].location, filepath.Join(filepath.Dir(panel.element[panel.cursor].location), zipName))
+	err = zipSource(panel.element[panel.cursor].location, filepath.Join(filepath.Dir(panel.element[panel.cursor].location), zipName))
+	if err != nil {
+		slog.Error("Error in zipping files", "error", err)
+		// Although return is not needed here at the moment. This clarifies the intent of
+		// not continuing after the error even if any further code is added in this function later
+		return
+	}
 }
 
 // Open file with default editor
