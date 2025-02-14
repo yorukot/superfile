@@ -8,8 +8,8 @@ schema = 3
     version = "v0.10.0"
     hash = "sha256-p721vddVTv4iv1O0/dqpdk5xF6x9iLIHcrfh8JEVnqQ="
   [mod."github.com/alecthomas/chroma/v2"]
-    version = "v2.14.0"
-    hash = "sha256-d+zcIobMS5Y0/Ym9Uxubf20uyw0aBCr0f1oEOAGHlEA="
+    version = "v2.15.0"
+    hash = "sha256-vpYgavp9sAjP541UrPDDP10gBetbPKV6+owJ5Z01YXk="
   [mod."github.com/andybalholm/brotli"]
     version = "v1.0.5"
     hash = "sha256-/qS8wU8yZQJ+uTOg66rEl9s7spxq9VIXF5L1BcaEClc="
@@ -65,8 +65,8 @@ schema = 3
     version = "v1.6.2"
     hash = "sha256-pSeMTPvSkxlthh65LjNYYhPLvCZDkBgVgAGYWW0Aguo="
   [mod."github.com/dlclark/regexp2"]
-    version = "v1.11.0"
-    hash = "sha256-iXBBgykYu9Dcd+7LMJyRYc3Ry47jmuLGZFW13zU6toU="
+    version = "v1.11.4"
+    hash = "sha256-1uCoCYCKyP8QZddlYfJCTWmcrKlEFNCsxWwMde9MspE="
   [mod."github.com/erikgeiser/coninput"]
     version = "v0.0.0-20211004153227-1c3628e74d0f"
     hash = "sha256-OWSqN1+IoL73rWXWdbbcahZu8n2al90Y3eT5Z0vgHvU="
