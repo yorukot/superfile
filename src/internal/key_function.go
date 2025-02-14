@@ -21,11 +21,7 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) tea.Cmd {
 	// If move up Key is pressed, check the current state and executes
 	case containsKey(msg, hotkeys.ListUp):
 		if m.focusPanel == sidebarFocus {
-			if m.sidebarModel.searchBar.Value() != ""{
-				m.controlFilteredSideBarListUp(false)
-			}else{
-				m.controlSideBarListUp(false)
-			}
+			m.controlSideBarListUp(false)
 		} else if m.focusPanel == processBarFocus {
 			m.controlProcessbarListUp(false)
 		} else if m.focusPanel == metadataFocus {
@@ -41,11 +37,7 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) tea.Cmd {
 		// If move down Key is pressed, check the current state and executes
 	case containsKey(msg, hotkeys.ListDown):
 		if m.focusPanel == sidebarFocus {
-			if m.sidebarModel.searchBar.Value() != ""{
-				m.controlFilteredSideBarListDown(false)
-			}else{
-				m.controlSideBarListDown(false)
-			}
+			m.controlSideBarListDown(false)
 		} else if m.focusPanel == processBarFocus {
 			m.controlProcessbarListDown(false)
 		} else if m.focusPanel == metadataFocus {
