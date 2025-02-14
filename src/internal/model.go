@@ -52,9 +52,9 @@ func (m model) Init() tea.Cmd {
 // application
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
-	
+
 	m.updateSidebarState(msg, &cmd)
-	
+
 	switch msg := msg.(type) {
 	case channelMessage:
 		m.handleChannelMessage(msg)
@@ -68,19 +68,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	m.updateFilePanelsState(msg, &cmd)
 
-	if(m.sidebarModel.searchBar.Value() != ""){
+	if m.sidebarModel.searchBar.Value() != "" {
 		m.sidebarModel.directories = getFilteredDirectories(m.sidebarModel.searchBar.Value())
-	}else{
-	m.sidebarModel.directories = getDirectories()
+	} else {
+		m.sidebarModel.directories = getDirectories()
 	}
-	
+
 	// check if there already have listening message
 	if !ListeningMessage {
 		cmd = tea.Batch(cmd, listenForChannelMessage(channel))
 	}
 
 	m.getFilePanelItems()
-	if !m.firstLoadingComplete { 
+	if !m.firstLoadingComplete {
 		m.firstLoadingComplete = true
 	}
 	return m, tea.Batch(cmd)
@@ -221,9 +221,9 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 		m.focusOnSearchbarKey(msg.String())
 		// If sort options menu is open
 	} else if m.sidebarModel.searchBar.Focused() {
-        m.sidebarSearchBarKey(msg.String())
-        // If sort options menu is open
-    } else if m.fileModel.filePanels[m.filePanelFocusIndex].sortOptions.open {
+		m.sidebarSearchBarKey(msg.String())
+		// If sort options menu is open
+	} else if m.fileModel.filePanels[m.filePanelFocusIndex].sortOptions.open {
 		m.sortOptionsKey(msg.String())
 		// If help menu is open
 	} else if m.helpMenu.open {
@@ -278,16 +278,16 @@ func (m *model) updateFilePanelsState(msg tea.Msg, cmd *tea.Cmd) {
 
 // Update the sidebar state. Change name of the renaming pinned directory.
 func (m *model) updateSidebarState(msg tea.Msg, cmd *tea.Cmd) {
-    sidebar := &m.sidebarModel
-    if sidebar.renaming {
-        sidebar.rename, *cmd = sidebar.rename.Update(msg)
-    } else if sidebar.searchBar.Focused() {
-        sidebar.searchBar, *cmd = sidebar.searchBar.Update(msg)
-    }
+	sidebar := &m.sidebarModel
+	if sidebar.renaming {
+		sidebar.rename, *cmd = sidebar.rename.Update(msg)
+	} else if sidebar.searchBar.Focused() {
+		sidebar.searchBar, *cmd = sidebar.searchBar.Update(msg)
+	}
 
-    if sidebar.cursor < 0 {
-        sidebar.cursor = 0
-    }
+	if sidebar.cursor < 0 {
+		sidebar.cursor = 0
+	}
 }
 
 // Check if there's any processes running in background

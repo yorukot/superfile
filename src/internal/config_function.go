@@ -20,9 +20,9 @@ import (
 // initialConfig load and handle all configuration files (spf config,hotkeys
 // themes) setted up. Returns absolute path of dir pointing to the file Panel
 func initialConfig(dir string) (toggleDotFileBool bool, toggleFooter bool, firstFilePanelDir string) {
-    // Open log stream
+	// Open log stream
 	file, err := os.OpenFile(variable.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	
+
 	// Todo : This could be improved if we want to make superfile more resilient to errors
 	// For example if the log file directories have access issues.
 	// we could pass a dummy object to log.SetOutput() and the app would still function.
@@ -40,8 +40,7 @@ func initialConfig(dir string) (toggleDotFileBool bool, toggleFooter bool, first
 
 	slog.SetDefault(slog.New(slog.NewTextHandler(
 		file, &slog.HandlerOptions{Level: logLevel})))
-	
-	
+
 	loadHotkeysFile()
 
 	loadThemeFile()
@@ -152,7 +151,7 @@ func loadConfigFile() {
 // If is off check if all hotkeys are properly setted
 func loadHotkeysFile() {
 
-    // load default Hotkeys configs
+	// load default Hotkeys configs
 	_ = toml.Unmarshal([]byte(HotkeysTomlString), &hotkeys)
 	hotkeysFromConfig := HotkeysType{}
 	data, err := os.ReadFile(variable.HotkeysFile)
@@ -160,9 +159,9 @@ func loadHotkeysFile() {
 	if err != nil {
 		LogAndExit("Config file doesn't exist", "error", err)
 	}
-    // Load data from hotkeys file
+	// Load data from hotkeys file
 	_ = toml.Unmarshal(data, &hotkeysFromConfig)
-    // Override default hotkeys with the ones from the file
+	// Override default hotkeys with the ones from the file
 	err = toml.Unmarshal(data, &hotkeys)
 	if err != nil {
 		LogAndExit("Error decoding hotkeys file ( your config file may have misconfigured", "error", err)
@@ -170,7 +169,7 @@ func loadHotkeysFile() {
 
 	hasMissingHotkeysInConfig := !reflect.DeepEqual(hotkeys, hotkeysFromConfig)
 
-    // If FixHotKeys is not on then check if every needed hotkey is properly setted
+	// If FixHotKeys is not on then check if every needed hotkey is properly setted
 	if hasMissingHotkeysInConfig && !variable.FixHotkeys {
 		hotKeysConfig := reflect.ValueOf(hotkeysFromConfig)
 		for i := 0; i < hotKeysConfig.NumField(); i++ {
@@ -188,7 +187,7 @@ func loadHotkeysFile() {
 		fmt.Println("To add missing fields to hotkeys directory automaticially run Superfile with the --fix-hotkeys flag `spf --fix-hotkeys`")
 	}
 
-    // Override hotkey files with default configs if the Fix flag is on
+	// Override hotkey files with default configs if the Fix flag is on
 	if hasMissingHotkeysInConfig && variable.FixHotkeys {
 		writeHotkeysFile(hotkeys)
 	}
@@ -225,10 +224,10 @@ func writeHotkeysFile(hotkeys HotkeysType) {
 	}
 }
 
-// Load configurations from theme file into &theme and return default values 
+// Load configurations from theme file into &theme and return default values
 // if file theme folder is empty
 func loadThemeFile() {
-	themeFile := filepath.Join(variable.ThemeFolder, Config.Theme + ".toml")
+	themeFile := filepath.Join(variable.ThemeFolder, Config.Theme+".toml")
 	data, err := os.ReadFile(themeFile)
 	if err != nil {
 		slog.Info("Could not read theme file", "path", themeFile, "error", err)
@@ -242,7 +241,7 @@ func loadThemeFile() {
 	}
 }
 
-// Load all default configurations from superfile_config folder into global 
+// Load all default configurations from superfile_config folder into global
 // configurations variables
 func LoadAllDefaultConfig(content embed.FS) {
 
@@ -296,7 +295,7 @@ func LoadAllDefaultConfig(content embed.FS) {
 		if file.IsDir() {
 			continue
 		}
-		// This will not break in windows. This is a relative path for Embed FS. It uses "/" only 
+		// This will not break in windows. This is a relative path for Embed FS. It uses "/" only
 		src, err := content.ReadFile(variable.EmbedThemeDir + "/" + file.Name())
 		if err != nil {
 			outPutLog("error read theme file from embed", err)

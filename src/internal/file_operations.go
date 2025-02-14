@@ -8,8 +8,8 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/rkoesters/xdg/trash"
 	trash_win "github.com/hymkor/trash-go"
+	"github.com/rkoesters/xdg/trash"
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/config/icon"
 )
@@ -167,8 +167,8 @@ func trashMacOrLinux(src string) error {
 }
 
 // pasteDir handles directory copying with progress tracking
-// model would only have changes in m.processBarModel.process[id] 
-func pasteDir(src, dst string, id string, m *model) (error) {
+// model would only have changes in m.processBarModel.process[id]
+func pasteDir(src, dst string, id string, m *model) error {
 	dst, err := renameIfDuplicate(dst)
 	if err != nil {
 		return err

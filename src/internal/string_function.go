@@ -115,7 +115,7 @@ func formatFileSize(size int64) string {
 	unitsDec := []string{"B", "kB", "MB", "GB", "TB", "PB", "EB"}
 	unitsBin := []string{"B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB"}
 
-	if (Config.FileSizeUseSI) {
+	if Config.FileSizeUseSI {
 		unitIndex := int(math.Floor(math.Log(float64(size)) / math.Log(1000)))
 		adjustedSize := float64(size) / math.Pow(1000, float64(unitIndex))
 		return fmt.Sprintf("%.2f %s", adjustedSize, unitsDec[unitIndex])
@@ -171,17 +171,16 @@ func isTextFile(filename string) (bool, error) {
 	return isBufferPrintable(buffer[:cnt]), nil
 }
 
-
-// Although some characters like `\x0b`(vertical tab) are printable, 
-// previewing them breaks the layout. 
-// So, among the "non-graphic" printable characters, we only need \n and \t 
+// Although some characters like `\x0b`(vertical tab) are printable,
+// previewing them breaks the layout.
+// So, among the "non-graphic" printable characters, we only need \n and \t
 // Space and NBSP are already considered graphic by unicode.
-func makePrintable(line string)(string) {
+func makePrintable(line string) string {
 	var sb strings.Builder
-	// This has to be looped byte-wise, looping it rune-wise 
+	// This has to be looped byte-wise, looping it rune-wise
 	// or by using strings.Map would cause issues with strings like
 	// "(NBSP)\xa0"
-	for i:=0; i<len(line); i++ {
+	for i := 0; i < len(line); i++ {
 		r := rune(line[i])
 		if unicode.IsGraphic(r) || r == rune('\t') || r == rune('\n') {
 			sb.WriteByte(line[i])

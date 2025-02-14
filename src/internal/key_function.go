@@ -303,13 +303,13 @@ func (m *model) sidebarRenamingKey(msg string) {
 }
 
 func (m *model) sidebarSearchBarKey(msg string) {
-    switch msg {
-    case containsKey(msg, hotkeys.CancelTyping):
-        m.sidebarModel.searchBar.Blur()
-        m.sidebarModel.searchBar.SetValue("")
-    case containsKey(msg, hotkeys.ConfirmTyping):
-        m.sidebarModel.searchBar.Blur()
-    }
+	switch msg {
+	case containsKey(msg, hotkeys.CancelTyping):
+		m.sidebarModel.searchBar.Blur()
+		m.sidebarModel.searchBar.SetValue("")
+	case containsKey(msg, hotkeys.ConfirmTyping):
+		m.sidebarModel.searchBar.Blur()
+	}
 }
 
 // Check the key input and cancel or confirms the search

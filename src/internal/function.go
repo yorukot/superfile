@@ -185,7 +185,6 @@ func returnDirElementBySearchString(location string, displayDotFile bool, search
 	return dirElement
 }
 
-
 func panelElementHeight(mainPanelHeight int) int {
 	return mainPanelHeight - 3
 }

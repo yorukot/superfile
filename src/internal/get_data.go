@@ -110,73 +110,73 @@ func getExternalMediaFolders() (disks []directory) {
 
 // Fuzzy search function for a list of directories.
 func fuzzySearch(query string, dirs []directory) []directory {
-    var filteredDirs []directory
-    if len(dirs) > 0 {
-        haystack := make([]string, len(dirs))
-        dirMap := make(map[string]directory, len(dirs))
+	var filteredDirs []directory
+	if len(dirs) > 0 {
+		haystack := make([]string, len(dirs))
+		dirMap := make(map[string]directory, len(dirs))
 
-        for i, dir := range dirs {
-            haystack[i] = dir.name
-            dirMap[dir.name] = dir
-        }
+		for i, dir := range dirs {
+			haystack[i] = dir.name
+			dirMap[dir.name] = dir
+		}
 
-        options := fzf.DefaultOptions()
-        fzfNone := fzf.New(haystack, options)
-        fzfNone.Search(query)
-        result := <-fzfNone.GetResultChannel()
-        fzfNone.End()
+		options := fzf.DefaultOptions()
+		fzfNone := fzf.New(haystack, options)
+		fzfNone.Search(query)
+		result := <-fzfNone.GetResultChannel()
+		fzfNone.End()
 
-        for _, match := range result.Matches {
-            if d, ok := dirMap[match.Key]; ok {
-                filteredDirs = append(filteredDirs, d)
-            }
-        }
-    }
-    return filteredDirs
+		for _, match := range result.Matches {
+			if d, ok := dirMap[match.Key]; ok {
+				filteredDirs = append(filteredDirs, d)
+			}
+		}
+	}
+	return filteredDirs
 }
 
 // Get filtered directories using fuzzy search logic with three haystacks.
 func getFilteredDirectories(query string) []directory {
-    // Get all directories.
-    allDirs := getDirectories()
+	// Get all directories.
+	allDirs := getDirectories()
 
-    var noneDirs []directory
-    var pinnedDirs []directory
-    var diskDirs []directory
+	var noneDirs []directory
+	var pinnedDirs []directory
+	var diskDirs []directory
 
-    // Partition directories into three groups.
-    var currentGroup *[]directory
-    for _, dir := range allDirs {
-        switch dir.location {
-        case "Pinned+-*/=?":
-            currentGroup = &pinnedDirs
-        case "Disks+-*/=?":
-            currentGroup = &diskDirs
-        default:
-            if currentGroup != nil {
-                *currentGroup = append(*currentGroup, dir)
-            } else {
-                noneDirs = append(noneDirs, dir)
-            }
-        }
-    }
+	// Partition directories into three groups.
+	var currentGroup *[]directory
+	for _, dir := range allDirs {
+		switch dir.location {
+		case "Pinned+-*/=?":
+			currentGroup = &pinnedDirs
+		case "Disks+-*/=?":
+			currentGroup = &diskDirs
+		default:
+			if currentGroup != nil {
+				*currentGroup = append(*currentGroup, dir)
+			} else {
+				noneDirs = append(noneDirs, dir)
+			}
+		}
+	}
 
-    // Run fuzzy search on each group.
-    filteredNone := fuzzySearch(query, noneDirs)
-    filteredPinned := fuzzySearch(query, pinnedDirs)
-    filteredDisks := fuzzySearch(query, diskDirs)
+	// Run fuzzy search on each group.
+	filteredNone := fuzzySearch(query, noneDirs)
+	filteredPinned := fuzzySearch(query, pinnedDirs)
+	filteredDisks := fuzzySearch(query, diskDirs)
 
-    // Combine fuzzy-matched directories.
-    var filteredDirs []directory
-    filteredDirs = append(filteredDirs, filteredNone...)
+	// Combine fuzzy-matched directories.
+	var filteredDirs []directory
+	filteredDirs = append(filteredDirs, filteredNone...)
 	filteredDirs = append(filteredDirs, directory{
 		location: "Pinned+-*/=?",
 	})
-    filteredDirs = append(filteredDirs, filteredPinned...)
-		filteredDirs = append(filteredDirs, directory{
+	filteredDirs = append(filteredDirs, filteredPinned...)
+	filteredDirs = append(filteredDirs, directory{
 		location: "Disks+-*/=?",
 	})
-    filteredDirs = append(filteredDirs, filteredDisks...)
+	filteredDirs = append(filteredDirs, filteredDisks...)
 
-    return filteredDirs
+	return filteredDirs
 }
