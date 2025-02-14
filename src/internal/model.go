@@ -74,7 +74,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	m.getFilePanelItems()
-	if !m.firstLoadingComplete { 
+	if !m.firstLoadingComplete {
 		m.firstLoadingComplete = true
 	}
 	return m, tea.Batch(cmd)

@@ -105,7 +105,7 @@ func ImagePreview(path string, maxWidth, maxHeight int, defaultBGColor string) (
 	return ansiImage, nil
 }
 
-func adjustImageOrientation(file *os.File, img image.Image) (image.Image) {
+func adjustImageOrientation(file *os.File, img image.Image) image.Image {
 	exifData, err := exif.Decode(file)
 	if err != nil {
 		slog.Error("exif error", "error", err)
