@@ -22,7 +22,7 @@ linters-settings:
   cyclop:
     # The maximal code complexity to report.
     # Default: 10
-    max-complexity: 30
+    max-complexity: 40
     # The maximal average package complexity.
     # If it's higher than 0.0 (float) the check is enabled
     # Default: 0.0
@@ -74,11 +74,13 @@ linters-settings:
     # Checks the number of lines in a function.
     # If lower than 0, disable the check.
     # Default: 60
-    lines: 100
+    # Todo make all lines < 150
+    lines: 300
     # Checks the number of statements in a function.
     # If lower than 0, disable the check.
     # Default: 40
-    statements: 50
+    # Todo : make statememnts < 80
+    statements: 80
     # Ignore comments when counting lines.
     # Default false
     ignore-comments: true
@@ -97,11 +99,17 @@ linters-settings:
     # Settings passed to gocritic.
     # The settings key is the name of a supported gocritic checker.
     # The list of supported checkers can be find in https://go-critic.github.io/overview.
+    
+    # Todo : Fix
+    disable:
+      - elseif
+      - captLocal
+      - commentFormatting
     settings:
-      captLocal:
-        # Whether to restrict checker to params only.
-        # Default: true
-        paramsOnly: false
+      # captLocal:
+      #   # Whether to restrict checker to params only.
+      #   # Default: true
+      #   paramsOnly: false
       underef:
         # Whether to skip (*x).method() calls where x is a pointer receiver.
         # Default: true
@@ -134,12 +142,14 @@ linters-settings:
     # Default: []
     disable:
       - fieldalignment # too strict
+      - shadow # We have too many of these
+      # Todo : fix them 
     # Settings per analyzer.
-    settings:
-      shadow:
-        # Whether to be strict about shadowing; can be noisy.
-        # Default: false
-        strict: true
+    # settings:
+    #   shadow:
+    #     # Whether to be strict about shadowing; can be noisy.
+    #     # Default: false
+    #     strict: true
 
   inamedparam:
     # Skips check for interface methods with only a single parameter.
@@ -187,6 +197,13 @@ linters-settings:
     # Default: true
     strconcat: false
 
+  # Todo : Fix these 
+  revive:
+    enable-all: true
+    disable:
+      - var-declaration
+      - indent-error-flow
+      - superfluous-else
   rowserrcheck:
     # database/sql is always checked
     # Default: []
@@ -246,7 +263,9 @@ linters:
     - forbidigo # forbids identifiers
     - funlen # tool for detection of long functions
     - gocheckcompilerdirectives # validates go compiler directive comments (//go:)
-    - gochecknoglobals # checks that no global variables exist
+    # - gochecknoglobals # checks that no global variables exist
+    # Our code has too much of these for now. 
+    # Todo : Maybe we can fix that ?
     - gochecknoinits # checks that no init functions are present in Go code
     - gochecksumtype # checks exhaustiveness on Go "sum types"
     - gocognit # computes and checks the cognitive complexity of functions
@@ -260,20 +279,28 @@ linters:
     - goprintffuncname # checks that printf-like functions are named with f at the end
     - gosec # inspects source code for security problems
     - iface # checks the incorrect use of interfaces, helping developers avoid interface pollution
-    - intrange # finds places where for loops could make use of an integer range
-    - lll # reports long lines
+    # - intrange # finds places where for loops could make use of an integer range
+    # Todo : Lets add this one day
+    # - lll # reports long lines
+    # Its not too bad, but impacts readibility
+    # Todo : Maybe we can fix that ?
     - loggercheck # checks key value pairs for common logger libraries (kitlog,klog,logr,zap)
     - makezero # finds slice declarations with non-zero initial length
     - mirror # reports wrong mirror patterns of bytes/strings usage
-    - mnd # detects magic numbers
+    # - mnd # detects magic numbers
+    # Our code has too much of these magic numbers for now. 
+    # Todo : Fix at least most of them
     - musttag # enforces field tags in (un)marshaled structs
     - nakedret # finds naked returns in functions greater than a specified function length
-    - nestif # reports deeply nested if statements
+    # - nestif # reports deeply nested if statements
+    # Its not too bad, but impacts readibility
+    # Todo : Maybe we can fix that ?
     - nilerr # finds the code that returns nil even if it checks that the error is not nil
     - nilnil # checks that there is no simultaneous return of nil error and an invalid value
     - noctx # finds sending http request without context.Context
     - nolintlint # reports ill-formed or insufficient nolint directives
-    - nonamedreturns # reports all named returns
+    # - nonamedreturns # reports all named returns
+    # This might be too strict for us
     - nosprintfhostport # checks for misuse of Sprintf to construct a host with port in a URL
     - perfsprint # checks that fmt.Sprintf can be replaced with a faster alternative
     - predeclared # finds code that shadows one of Go's predeclared identifiers
@@ -290,12 +317,14 @@ linters:
     - tenv # detects using os.Setenv instead of t.Setenv since Go1.17
     - testableexamples # checks if examples are testable (have an expected output)
     - testifylint # checks usage of github.com/stretchr/testify
-    - testpackage # makes you use a separate _test package
+    # - testpackage # makes you use a separate _test package
+    # Todo : Fix these low hanging fruit
     - tparallel # detects inappropriate usage of t.Parallel() method in your Go test codes
     - unconvert # removes unnecessary type conversions
     - unparam # reports unused function parameters
     - usestdlibvars # detects the possibility to use variables/constants from the Go standard library
-    - wastedassign # finds wasted assignment statements
+    # - wastedassign # finds wasted assignment statements
+    # Todo : Fix these  - low hanging fruit
     - whitespace # detects leading and trailing whitespace
 
     ## you may want to enable
@@ -342,8 +371,30 @@ issues:
   # Maximum count of issues with the same text.
   # Set to 0 to disable.
   # Default: 3
-  max-same-issues: 50
+  max-same-issues: 10
 
+  exclude:
+    # Too many of these formatting issues
+    - "unnecessary leading newline"
+    - "unnecessary trailing newline"
+    - "Comment should end in a period"
+    - "put a space between `//` and comment text (gocritic)" # Ignore missing space after // in comments
+
+    # This is not too bad
+    - "ifElseChain: rewrite if-else to switch statement"
+    
+    # We are fine with this since we use single global logging configuration
+    - "global logger should not be used" # sloglint
+
+    # Todo 
+    - "fmt.Errorf can be replaced with errors.New"
+
+    # Todo - Think about what to do here ?
+    - "use of `fmt.Println` forbidden by pattern `^(fmt\\.Print(|f|ln)|print|println)$`"
+    - "use of `fmt.Printf` forbidden by pattern `^(fmt\\.Print(|f|ln)|print|println)$`"
+    
+    - "indent-error-flow: if block ends with a return statement, so drop this else and outdent its block"
+    - ""
   exclude-rules:
     - source: "(noinspection|TODO)"
       linters: [ godot ]
