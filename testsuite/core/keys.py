@@ -36,7 +36,7 @@ KEY_CTRL_W : Keys = CtrlKeys('w')
 KEY_CTRL_X : Keys = CtrlKeys('x')
 
 # See https://vimdoc.sourceforge.net/htmldoc/digraph.html#digraph-table for key codes
-# If keyname is not the same string as key code in pyautogui, need to handle seperately
+# If keyname is not the same string as key code in pyautogui, need to handle separately
 KEY_BACKSPACE   : Keys = SpecialKeys(8 , "Backspace")
 KEY_ENTER       : Keys = SpecialKeys(13, "Enter")
 KEY_ESC         : Keys = SpecialKeys(27, "Esc")

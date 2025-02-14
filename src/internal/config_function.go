@@ -123,8 +123,8 @@ func loadConfigFile() {
 		fmt.Println("To add missing fields to hotkeys directory automaticially run Superfile with the --fix-config-file flag `spf --fix-config-file`")
 	}
 
-	// If data is different and FixConfigFile option is on, then fullfill then
-	// fullfill the config file with the default values
+	// If data is different and FixConfigFile option is on, then
+	// fill the config file with the default values
 	if !reflect.DeepEqual(Config, tempForCheckMissingConfig) && variable.FixConfigFile {
 		tomlData, err := toml.Marshal(Config)
 		if err != nil {
@@ -307,9 +307,16 @@ func LoadAllDefaultConfig(content embed.FS) {
 			outPutLog("error create theme file from embed", err)
 			return
 		}
-		file.Write(src)
 		defer file.Close()
+		_, err = file.Write(src)
+		if err != nil {
+			slog.Error("error writing theme file from embed", "error", err)
+			return
+		}
 	}
 
-	os.WriteFile(variable.ThemeFileVersion, []byte(variable.CurrentVersion), 0644)
+	err = os.WriteFile(variable.ThemeFileVersion, []byte(variable.CurrentVersion), 0644)
+	if err != nil {
+		slog.Error("error writing theme file version", "error", err)
+	}
 }

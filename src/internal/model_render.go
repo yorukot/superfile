@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/alecthomas/chroma/lexers"
+	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/x/exp/term/ansi"
 	"github.com/yorukot/ansichroma"
@@ -614,7 +614,7 @@ func (m *model) filePreviewPanelRender() string {
 	}
 
 	ext := filepath.Ext(itemPath)
-	// check if the file is unsipported file, cuz pdf will cause error
+	// check if the file is unsupported file, cuz pdf will cause error
 	if ext == ".pdf" || ext == ".torrent" {
 		return box.Render("\n --- " + icon.Error + " Unsupported formats ---")
 	}

@@ -1,9 +1,11 @@
 package internal
 
 import (
+	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -210,14 +212,26 @@ func (m *model) enterCommandLine() {
 		}
 	}
 
-	// Todo : Fix this for windows.
-	cd := "cd " + focusPanelDir + " && "
-	cmd := exec.Command("/bin/sh", "-c", cd+m.commandLine.input.Value())
-	_, err := cmd.CombinedOutput()
-	m.commandLine.input.SetValue("")
+	var cmd *exec.Cmd
+	switch runtime.GOOS {
+	case "windows":
+		// On Windows, we use PowerShell with -Command flag for single command execution
+		cmd = exec.Command("powershell.exe", "-Command", m.commandLine.input.Value())
+	default:
+		// On Unix-like systems, use bash/sh
+		cmd = exec.Command("/bin/sh", "-c", m.commandLine.input.Value())
+	}
+
+	cmd.Dir = focusPanelDir // switch to the focused panel directory
+
+	output, err := cmd.CombinedOutput()
+
 	if err != nil {
+		slog.Error("Command execution failed", "error", err, "output", string(output))
 		return
 	}
+
+	m.commandLine.input.SetValue("")
 	m.commandLine.input.Blur()
 	footerHeight++
 }

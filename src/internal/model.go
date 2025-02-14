@@ -86,7 +86,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, tea.Batch(cmd)
 }
 
-// Handle message exchanging whithin the application
+// Handle message exchanging within the application
 func (m *model) handleChannelMessage(msg channelMessage) {
 	switch msg.messageType {
 	case sendWarnModal:
@@ -238,7 +238,7 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 			m.quitSuperfile()
 			return tea.Quit
 		}
-		// If quiting input pressed, check if has any runing process and displays a
+		// If quiting input pressed, check if has any running process and displays a
 		// warn. Otherwise just quits application
 	} else if msg.String() == containsKey(msg.String(), hotkeys.Quit) {
 		if m.hasRunningProcesses() {

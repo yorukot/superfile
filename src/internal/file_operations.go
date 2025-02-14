@@ -144,26 +144,18 @@ func copyFile(src, dst string, srcInfo os.FileInfo) error {
 
 // Move file to trash can and can auto switch macos trash can or linux trash can
 func trashMacOrLinux(src string) error {
+	var err error
 	if runtime.GOOS == "darwin" {
-		err := moveElement(src, filepath.Join(variable.DarwinTrashDirectory, filepath.Base(src)))
-		if err != nil {
-			outPutLog("Delete single item function move file to trash can error", err)
-			return err
-		}
+		err = moveElement(src, filepath.Join(variable.DarwinTrashDirectory, filepath.Base(src)))
 	} else if runtime.GOOS == "windows" {
-		err := trash_win.Throw(src)
-		if err != nil {
-			outPutLog("Delete single item function move file to trash can error", err)
-			return err
-		}
+		err = trash_win.Throw(src)
 	} else {
-		err := trash.Trash(src)
-		if err != nil {
-			outPutLog("Paste item function move file to trash can error", err)
-			return err
-		}
+		err = trash.Trash(src)
 	}
-	return nil
+	if err != nil {
+		outPutLog("Delete single item function move file to trash can error", err)
+	}
+	return err
 }
 
 // pasteDir handles directory copying with progress tracking

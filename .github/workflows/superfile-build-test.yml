@@ -1,6 +1,10 @@
 name: Go
 
-on: [push]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
 
@@ -12,7 +16,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v5
       with:
-        go-version: 1.21
+        go-version: 1.22.2
 
     - name: Build
       run: |
@@ -20,3 +24,11 @@ jobs:
 
     - name: Test
       run: go test ./...
+    
+    - name: Test `go fmt` creates no diffs
+      run: go fmt ./... && git diff --exit-code
+    
+    - name: golangci-lint
+      uses: golangci/golangci-lint-action@v6
+      with:
+          version: v1.58
