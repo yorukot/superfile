@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/alecthomas/chroma/lexers"
+	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/x/exp/term/ansi"
 	"github.com/yorukot/ansichroma"
