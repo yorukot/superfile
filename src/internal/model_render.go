@@ -34,7 +34,6 @@ func (m *model) sidebarRender() string {
 
 	m.sidebarModel.searchBar.Placeholder = "(" + hotkeys.SearchBar[0] + ")" +" Search"
 	s += "\n" + ansi.Truncate(m.sidebarModel.searchBar.View(), Config.SidebarWidth-2, "...") + "\n"
-	m.filterSidebarDirectories()
 	
     if len(m.sidebarModel.directories) == 0 {
         s += sidebarStyle.Render(" " + icon.Error + " None")

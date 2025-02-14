@@ -130,7 +130,6 @@ func (m *model) sidebarSelectDirectory() {
         directoryRender: panel.render,
     }
 
-	m.filterSidebarDirectories()
     panel.location = m.sidebarModel.directories[m.sidebarModel.cursor].location
     directoryRecord, hasRecord := panel.directoryRecord[panel.location]
     if hasRecord {
@@ -540,6 +539,15 @@ func (m *model) controlSideBarListDown(wheel bool) {
     }
 }
 
+func (m *model) sidebarSearchBarFocus() {
+	if m.sidebarModel.searchBar.Focused() {
+		m.sidebarModel.searchBar.Blur()
+	} else {
+		m.sidebarModel.searchBar.Focus()
+		m.firstTextInput = true
+	}
+}
+
 // Control filtered sidebar panel list up
 func (m *model) controlFilteredSideBarListUp(wheel bool) {
     runTime := 1
@@ -547,8 +555,6 @@ func (m *model) controlFilteredSideBarListUp(wheel bool) {
         runTime = wheelRunTime
     }
 
-	m.filterSidebarDirectories()
-	
     for i := 0; i < runTime; i++ {
         if m.sidebarModel.cursor > 0 {
             m.sidebarModel.cursor--
@@ -565,8 +571,6 @@ func (m *model) controlFilteredSideBarListDown(wheel bool) {
         runTime = wheelRunTime
     }
 
-	m.filterSidebarDirectories()
-
     for i := 0; i < runTime; i++ {
         lenDirs := len(m.sidebarModel.directories)
         if m.sidebarModel.cursor < lenDirs-1 {
@@ -576,20 +580,6 @@ func (m *model) controlFilteredSideBarListDown(wheel bool) {
         }
     }
 }
-
-// Focus on sidebar search bar
-func (m *model) sidebarSearchBarFocus() {
-	if m.sidebarModel.searchBar.Focused() {
-		m.sidebarModel.searchBar.Blur()
-	} else {
-		m.sidebarModel.searchBar.Focus()
-		m.firstTextInput = true
-	}
-
-	// config search bar width
-	m.sidebarModel.searchBar.Width = Config.SidebarWidth - 4
-}
-
 
 // ======================================== Metadata controller ========================================
 

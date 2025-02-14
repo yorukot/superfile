@@ -15,11 +15,6 @@ func containsKey(v string, a []string) string {
 // keys that performs actions in multiple panels, like going up or down,
 // check the state of model m and handle properly.
 func (m *model) mainKey(msg string, cmd tea.Cmd) tea.Cmd {
-	// Check if the search bar is focused
-	if m.sidebarModel.searchBar.Focused() {
-		m.sidebarSearchBarKey(msg)
-		return cmd
-	}
 
 	switch msg {
 
@@ -323,9 +318,6 @@ func (m *model) sidebarSearchBarKey(msg string) {
         m.sidebarModel.directories = getDirectories()
     case containsKey(msg, hotkeys.ConfirmTyping):
         m.sidebarModel.searchBar.Blur()
-    default:
-        // Update the search bar with the key input
-        m.sidebarModel.searchBar, _ = m.sidebarModel.searchBar.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune(msg)})
     }
 }
 

@@ -66,8 +66,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	m.updateFilePanelsState(msg, &cmd)
 	m.updateSidebarState(msg, &cmd)
-	m.sidebarModel.directories = getDirectories()
 
+	if(m.sidebarModel.searchBar.Value() != ""){
+		m.sidebarModel.directories = getFilteredDirectories(m.sidebarModel.searchBar.Value())
+	}else{
+	m.sidebarModel.directories = getDirectories()
+	}
+	
 	// check if there already have listening message
 	if !ListeningMessage {
 		cmd = tea.Batch(cmd, listenForChannelMessage(channel))
@@ -214,7 +219,10 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 	} else if m.fileModel.filePanels[m.filePanelFocusIndex].searchBar.Focused() {
 		m.focusOnSearchbarKey(msg.String())
 		// If sort options menu is open
-	} else if m.fileModel.filePanels[m.filePanelFocusIndex].sortOptions.open {
+	} else if m.sidebarModel.searchBar.Focused() {
+        m.sidebarSearchBarKey(msg.String())
+        // If sort options menu is open
+    } else if m.fileModel.filePanels[m.filePanelFocusIndex].sortOptions.open {
 		m.sortOptionsKey(msg.String())
 		// If help menu is open
 	} else if m.helpMenu.open {
@@ -269,14 +277,16 @@ func (m *model) updateFilePanelsState(msg tea.Msg, cmd *tea.Cmd) {
 
 // Update the sidebar state. Change name of the renaming pinned directory.
 func (m *model) updateSidebarState(msg tea.Msg, cmd *tea.Cmd) {
-	sidebar := &m.sidebarModel
-	if sidebar.renaming {
-		sidebar.rename, *cmd = sidebar.rename.Update(msg)
-	}
+    sidebar := &m.sidebarModel
+    if sidebar.renaming {
+        sidebar.rename, *cmd = sidebar.rename.Update(msg)
+    } else if sidebar.searchBar.Focused() {
+        sidebar.searchBar, *cmd = sidebar.searchBar.Update(msg)
+    }
 
-	if sidebar.cursor < 0 {
-		sidebar.cursor = 0
-	}
+    if sidebar.cursor < 0 {
+        sidebar.cursor = 0
+    }
 }
 
 // Check if there's any processes running in background

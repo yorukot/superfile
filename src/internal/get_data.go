@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/adrg/xdg"
 	"github.com/shirou/gopsutil/disk"
@@ -105,4 +106,19 @@ func getExternalMediaFolders() (disks []directory) {
 		outPutLog("Error while getting external media: ", err)
 	}
 	return disks
+}
+
+func getFilteredDirectories(query string) []directory {
+	query = strings.ToLower(query)
+    if query == "" {
+		return getDirectories()
+    }
+
+    var filteredDirectories []directory
+    for _, dir := range getDirectories() {
+        if strings.Contains(strings.ToLower(dir.name), query) {
+            filteredDirectories = append(filteredDirectories, dir)
+        }
+    }
+    return filteredDirectories
 }
