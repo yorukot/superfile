@@ -122,25 +122,25 @@ func (m *model) enterPanel() {
 
 // Switch to the directory where the sidebar cursor is located
 func (m *model) sidebarSelectDirectory() {
-    m.focusPanel = nonePanelFocus
-    panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	m.focusPanel = nonePanelFocus
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 
-    panel.directoryRecord[panel.location] = directoryRecord{
-        directoryCursor: panel.cursor,
-        directoryRender: panel.render,
-    }
+	panel.directoryRecord[panel.location] = directoryRecord{
+		directoryCursor: panel.cursor,
+		directoryRender: panel.render,
+	}
 
-    panel.location = m.sidebarModel.directories[m.sidebarModel.cursor].location
-    directoryRecord, hasRecord := panel.directoryRecord[panel.location]
-    if hasRecord {
-        panel.cursor = directoryRecord.directoryCursor
-        panel.render = directoryRecord.directoryRender
-    } else {
-        panel.cursor = 0
-        panel.render = 0
-    }
-    panel.focusType = focus
-    m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+	panel.location = m.sidebarModel.directories[m.sidebarModel.cursor].location
+	directoryRecord, hasRecord := panel.directoryRecord[panel.location]
+	if hasRecord {
+		panel.cursor = directoryRecord.directoryCursor
+		panel.render = directoryRecord.directoryRender
+	} else {
+		panel.cursor = 0
+		panel.render = 0
+	}
+	panel.focusType = focus
+	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 // Select all item in the file panel (only work on select mode)
@@ -181,7 +181,7 @@ func (m *model) toggleDotFileController() {
 		newToggleDotFile = "true"
 		m.toggleDotFile = true
 	}
-  m.updatedToggleDotFile = true
+	m.updatedToggleDotFile = true
 	err := os.WriteFile(variable.ToggleDotFile, []byte(newToggleDotFile), 0644)
 	if err != nil {
 		outPutLog("Pinned folder function updatedData superfile data error", err)
@@ -280,56 +280,56 @@ func (m *model) controlFilePanelListDown(wheel bool) {
 
 }
 
-func (m *model) controlFilePanelPgUp(){
-  panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-  panlen := len(panel.element)
-  panHeight := panelElementHeight(m.mainPanelHeight)
-  panCenter := panHeight / 2     // For making sure the cursor is at the center of the panel
+func (m *model) controlFilePanelPgUp() {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panlen := len(panel.element)
+	panHeight := panelElementHeight(m.mainPanelHeight)
+	panCenter := panHeight / 2 // For making sure the cursor is at the center of the panel
 
-  if panlen == 0 {
-    return
-  }
+	if panlen == 0 {
+		return
+	}
 
-  if panHeight >= panlen {
-    panel.cursor = 0
-  } else {
-    if panel.cursor - panHeight <= 0 {
-      panel.cursor = 0
-      panel.render = 0
-    } else {
-      panel.cursor -= panHeight
-      panel.render = panel.cursor - panCenter
-      
-      if panel.render < 0 {
-        panel.render = 0
-      }
-    }
-  }
+	if panHeight >= panlen {
+		panel.cursor = 0
+	} else {
+		if panel.cursor-panHeight <= 0 {
+			panel.cursor = 0
+			panel.render = 0
+		} else {
+			panel.cursor -= panHeight
+			panel.render = panel.cursor - panCenter
+
+			if panel.render < 0 {
+				panel.render = 0
+			}
+		}
+	}
 
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
-func (m *model) controlFilePanelPgDown(){
-  panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-  panlen := len(panel.element)
-  panHeight := panelElementHeight(m.mainPanelHeight)
-  panCenter := panHeight / 2     // For making sure the cursor is at the center of the panel
+func (m *model) controlFilePanelPgDown() {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panlen := len(panel.element)
+	panHeight := panelElementHeight(m.mainPanelHeight)
+	panCenter := panHeight / 2 // For making sure the cursor is at the center of the panel
 
-  if panlen == 0 {
-    return
-  }
+	if panlen == 0 {
+		return
+	}
 
-  if panHeight >= panlen {
-    panel.cursor = panlen - 1
-  } else {
-    if panel.cursor + panHeight >= panlen {
-      panel.cursor = panlen - 1
-      panel.render = panel.cursor - panCenter
-    } else {
-      panel.cursor += panHeight
-      panel.render = panel.cursor - panCenter
-    }
-  }
+	if panHeight >= panlen {
+		panel.cursor = panlen - 1
+	} else {
+		if panel.cursor+panHeight >= panlen {
+			panel.cursor = panlen - 1
+			panel.render = panel.cursor - panCenter
+		} else {
+			panel.cursor += panHeight
+			panel.render = panel.cursor - panCenter
+		}
+	}
 
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
@@ -408,135 +408,132 @@ func (m *model) itemSelectDown(wheel bool) {
 
 // Control sidebar panel list up
 func (m *model) controlSideBarListUp(wheel bool) {
-    runTime := 1
-    if wheel {
-        runTime = wheelRunTime
-    }
+	runTime := 1
+	if wheel {
+		runTime = wheelRunTime
+	}
 
-    for i := 0; i < runTime; i++ {
-        if m.sidebarModel.cursor > 0 {
-            m.sidebarModel.cursor--
-        } else {
-            m.sidebarModel.cursor = len(m.sidebarModel.directories) - 1
-        }
-        newDirectory := m.sidebarModel.directories[m.sidebarModel.cursor].location
+	for i := 0; i < runTime; i++ {
+		if m.sidebarModel.cursor > 0 {
+			m.sidebarModel.cursor--
+		} else {
+			m.sidebarModel.cursor = len(m.sidebarModel.directories) - 1
+		}
+		newDirectory := m.sidebarModel.directories[m.sidebarModel.cursor].location
 
-        for newDirectory == "Pinned+-*/=?" || newDirectory == "Disks+-*/=?" {
-            m.sidebarModel.cursor--
-            if m.sidebarModel.cursor < 0 {
-                m.sidebarModel.cursor = len(m.sidebarModel.directories) - 1
-            }
-            newDirectory = m.sidebarModel.directories[m.sidebarModel.cursor].location
-        }
-        changeToPlus := false
-        cursorRender := false
-        for !cursorRender {
-            totalHeight := 2
-            for i := m.sidebarModel.renderIndex; i < len(m.sidebarModel.directories); i++ {
-                if totalHeight >= m.mainPanelHeight {
-                    break
-                }
-                directory := m.sidebarModel.directories[i]
+		for newDirectory == "Pinned+-*/=?" || newDirectory == "Disks+-*/=?" {
+			m.sidebarModel.cursor--
+			newDirectory = m.sidebarModel.directories[m.sidebarModel.cursor].location
+		}
+		changeToPlus := false
+		cursorRender := false
+		for !cursorRender {
+			totalHeight := 2
+			for i := m.sidebarModel.renderIndex; i < len(m.sidebarModel.directories); i++ {
+				if totalHeight >= m.mainPanelHeight {
+					break
+				}
+				directory := m.sidebarModel.directories[i]
 
-                if directory.location == "Pinned+-*/=?" {
-                    totalHeight += 3
-                    continue
-                }
+				if directory.location == "Pinned+-*/=?" {
+					totalHeight += 3
+					continue
+				}
 
-                if directory.location == "Disks+-*/=?" {
-                    if m.mainPanelHeight-totalHeight <= 2 {
-                        break
-                    }
-                    totalHeight += 3
-                    continue
-                }
+				if directory.location == "Disks+-*/=?" {
+					if m.mainPanelHeight-totalHeight <= 2 {
+						break
+					}
+					totalHeight += 3
+					continue
+				}
 
-                totalHeight++
-                if m.sidebarModel.cursor == i && m.focusPanel == sidebarFocus {
-                    cursorRender = true
-                }
-            }
+				totalHeight++
+				if m.sidebarModel.cursor == i && m.focusPanel == sidebarFocus {
+					cursorRender = true
+				}
+			}
 
-            if changeToPlus {
-                m.sidebarModel.renderIndex++
-                continue
-            }
+			if changeToPlus {
+				m.sidebarModel.renderIndex++
+				continue
+			}
 
-            if !cursorRender {
-                m.sidebarModel.renderIndex--
-            }
-            if m.sidebarModel.renderIndex < 0 {
-                changeToPlus = true
-                m.sidebarModel.renderIndex++
-            }
-        }
+			if !cursorRender {
+				m.sidebarModel.renderIndex--
+			}
+			if m.sidebarModel.renderIndex < 0 {
+				changeToPlus = true
+				m.sidebarModel.renderIndex++
+			}
+		}
 
-        if changeToPlus {
-            m.sidebarModel.renderIndex--
-        }
-    }
+		if changeToPlus {
+			m.sidebarModel.renderIndex--
+		}
+	}
 }
 
 // Control sidebar panel list down
 func (m *model) controlSideBarListDown(wheel bool) {
-    runTime := 1
-    if wheel {
-        runTime = wheelRunTime
-    }
+	runTime := 1
+	if wheel {
+		runTime = wheelRunTime
+	}
 
-    for i := 0; i < runTime; i++ {
-        lenDirs := len(m.sidebarModel.directories)
-        if m.sidebarModel.cursor < lenDirs-1 {
-            m.sidebarModel.cursor++
-        } else {
-            m.sidebarModel.cursor = 0
-        }
+	for i := 0; i < runTime; i++ {
+		lenDirs := len(m.sidebarModel.directories)
+		if m.sidebarModel.cursor < lenDirs-1 {
+			m.sidebarModel.cursor++
+		} else {
+			m.sidebarModel.cursor = 0
+		}
 
-        newDirectory := m.sidebarModel.directories[m.sidebarModel.cursor].location
-        for newDirectory == "Pinned+-*/=?" || newDirectory == "Disks+-*/=?" {
-            m.sidebarModel.cursor++
-            if m.sidebarModel.cursor+1 > len(m.sidebarModel.directories) {
-                m.sidebarModel.cursor = 0
-            }
-            newDirectory = m.sidebarModel.directories[m.sidebarModel.cursor].location
-        }
-        cursorRender := false
-        for !cursorRender {
-            totalHeight := 2
-            for i := m.sidebarModel.renderIndex; i < len(m.sidebarModel.directories); i++ {
-                if totalHeight >= m.mainPanelHeight {
-                    break
-                }
+		newDirectory := m.sidebarModel.directories[m.sidebarModel.cursor].location
+		for newDirectory == "Pinned+-*/=?" || newDirectory == "Disks+-*/=?" {
+			m.sidebarModel.cursor++
+			if m.sidebarModel.cursor+1 > len(m.sidebarModel.directories) {
+				m.sidebarModel.cursor = 0
+			}
+			newDirectory = m.sidebarModel.directories[m.sidebarModel.cursor].location
+		}
+		cursorRender := false
+		for !cursorRender {
+			totalHeight := 2
+			for i := m.sidebarModel.renderIndex; i < len(m.sidebarModel.directories); i++ {
+				if totalHeight >= m.mainPanelHeight {
+					break
+				}
 
-                directory := m.sidebarModel.directories[i]
+				directory := m.sidebarModel.directories[i]
 
-                if directory.location == "Pinned+-*/=?" {
-                    totalHeight += 3
-                    continue
-                }
+				if directory.location == "Pinned+-*/=?" {
+					totalHeight += 3
+					continue
+				}
 
-                if directory.location == "Disks+-*/=?" {
-                    if m.mainPanelHeight-totalHeight <= 2 {
-                        break
-                    }
-                    totalHeight += 3
-                    continue
-                }
+				if directory.location == "Disks+-*/=?" {
+					if m.mainPanelHeight-totalHeight <= 2 {
+						break
+					}
+					totalHeight += 3
+					continue
+				}
 
-                totalHeight++
-                if m.sidebarModel.cursor == i && m.focusPanel == sidebarFocus {
-                    cursorRender = true
-                }
-            }
+				totalHeight++
+				if m.sidebarModel.cursor == i && m.focusPanel == sidebarFocus {
+					cursorRender = true
+				}
+			}
 
-            if !cursorRender {
-                m.sidebarModel.renderIndex++
-            }
-            if m.sidebarModel.renderIndex > m.sidebarModel.cursor {
-                m.sidebarModel.renderIndex = 0
-            }
-        }
-    }
+			if !cursorRender {
+				m.sidebarModel.renderIndex++
+			}
+			if m.sidebarModel.renderIndex > m.sidebarModel.cursor {
+				m.sidebarModel.renderIndex = 0
+			}
+		}
+	}
 }
 
 func (m *model) sidebarSearchBarFocus() {
