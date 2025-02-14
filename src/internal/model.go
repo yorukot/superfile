@@ -52,7 +52,9 @@ func (m model) Init() tea.Cmd {
 // application
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
-
+	
+	m.updateSidebarState(msg, &cmd)
+	
 	switch msg := msg.(type) {
 	case channelMessage:
 		m.handleChannelMessage(msg)
@@ -65,7 +67,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	m.updateFilePanelsState(msg, &cmd)
-	m.updateSidebarState(msg, &cmd)
 
 	if(m.sidebarModel.searchBar.Value() != ""){
 		m.sidebarModel.directories = getFilteredDirectories(m.sidebarModel.searchBar.Value())

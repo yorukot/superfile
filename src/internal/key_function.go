@@ -315,7 +315,6 @@ func (m *model) sidebarSearchBarKey(msg string) {
     case containsKey(msg, hotkeys.CancelTyping):
         m.sidebarModel.searchBar.Blur()
         m.sidebarModel.searchBar.SetValue("")
-        m.sidebarModel.directories = getDirectories()
     case containsKey(msg, hotkeys.ConfirmTyping):
         m.sidebarModel.searchBar.Blur()
     }
