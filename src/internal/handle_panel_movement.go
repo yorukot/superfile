@@ -405,48 +405,8 @@ func (m *model) itemSelectDown(wheel bool) {
 
 // ======================================== Sidebar controller ========================================
 
-// Yorukot: P.S God bless me, this sidebar controller code is really ugly...
-
-// Return till what indexes we will render, if we start from startIndex
-// if returned value is `startIndex - 1`, that means nothing can be rendered 
-// This could be made constant time by keeping Indexes ot special directories saved, 
-// but that too much.
-func (s *sidebarModel) lastRenderedIndex(mainPanelHeight int, startIndex int) int {
-	
-	curHeight := 2 // Due to superfile logo
-	endIndex := startIndex - 1
-	for i := startIndex; i<len(s.directories); i++ {
-		curHeight += s.directories[i].requiredHeight()
-		if curHeight > mainPanelHeight {
-			break
-		}
-		endIndex = i
-	}
-	return endIndex
-}
-
-// Return what will be the startIndex, if we end at endIndex
-// if returned value is `endIndex + 1`, that means nothing can be rendered 
-func (s *sidebarModel) firstRenderedIndex(mainPanelHeight int, endIndex int) int {
-	// This should ideally never happen. Maybe we should panic ?
-	if endIndex >= len(s.directories) {
-		return endIndex + 1
-	}
-	
-	curHeight := 2 // Due to superfile logo
-	startIndex := endIndex + 1
-	for i := endIndex; i>=0; i-- {
-		curHeight += s.directories[i].requiredHeight()
-		if curHeight > mainPanelHeight {
-			break
-		}
-		startIndex = i
-	}
-	return startIndex
-}
-
 func (s *sidebarModel) controlListUp(wheel bool, mainPanelHeight int) {
-	slog.Error("controlListUp called")
+	
 	// Todo : This snippet is duplicated everywhere. It can be better refractored outside 
 	runTime := 1
 	if wheel {
@@ -458,6 +418,11 @@ func (s *sidebarModel) controlListUp(wheel bool, mainPanelHeight int) {
 }
 
 func (s *sidebarModel) listUp(mainPanelHeight int) {
+	slog.Debug("controlListUp called", "cursor", s.cursor, 
+		"renderIndex", s.renderIndex, "directory count", len(s.directories))
+	if s.noActualDir() {
+		return
+	}
 	if s.cursor > 0 {
 		// Not at the top, can safely decrease
 		s.cursor --
@@ -466,166 +431,47 @@ func (s *sidebarModel) listUp(mainPanelHeight int) {
 		s.cursor = len(s.directories) - 1
 	}
 
-	// Move above special divider directories
 	if s.directories[s.cursor].isDivider() {
-		s.cursor --
+		// cause another listUp trigger to move up.
+		s.listUp(mainPanelHeight)
+	} else {
+		s.updateRenderIndex(mainPanelHeight)
 	}
 
-	// Case I : New cursor moved above current renderIndex
-	if s.cursor == s.renderIndex - 1 {
-		// We will start rendering from there
-		s.renderIndex -- 
+}
+
+func (s *sidebarModel) controlListDown(wheel bool, mainPanelHeight int) {
+	
+	// Todo : This snippet is duplicated everywhere. It can be better refractored outside 
+	runTime := 1
+	if wheel {
+		runTime = wheelRunTime
+	}
+	for i := 0; i < runTime; i++ {
+		s.listDown(mainPanelHeight)
+	}
+}
+
+func (s *sidebarModel) listDown(mainPanelHeight int) {
+	slog.Debug("controlListDown called", "cursor", s.cursor, 
+		"renderIndex", s.renderIndex, "directory count", len(s.directories))
+	if s.noActualDir() {
 		return
 	}
-
-	curEndIndex := s.lastRenderedIndex(mainPanelHeight, s.renderIndex)
-
-	// Case II : new cursor also comes in range of rendered directores
-	// Taking this case later avoid extra lastRenderedIndex() call
-	if s.renderIndex <= s.cursor && s.cursor <= curEndIndex {
-		// no need to update s.renderIndex
-		return 
+	if s.cursor < len(s.directories) - 1 {
+		// Not at the bottom, can safely increase
+		s.cursor ++
+	} else {
+		// We are at the bottom. Move to the top
+		s.cursor = 0
 	}
 
-	// Case III : New cursor is too below
-	if curEndIndex < s.cursor {
-		s.renderIndex = s.firstRenderedIndex(mainPanelHeight, s.cursor)
-		return 
-	} 
-
-	// Code should never reach here
-	slog.Error("Unexpected situation in sideBarUp", "cursor", s.cursor, 
-		"renderIndex", s.renderIndex, "directory count", len(s.directories) )
-	
-}
-
-// Control sidebar panel list up
-func (m *model) controlSideBarListUp(wheel bool) {
-	runTime := 1
-	if wheel {
-		runTime = wheelRunTime
-	}
-
-	for i := 0; i < runTime; i++ {
-		if m.sidebarModel.cursor > 0 {
-			m.sidebarModel.cursor--
-		} else {
-			m.sidebarModel.cursor = len(m.sidebarModel.directories) - 1
-		}
-		newDirectory := m.sidebarModel.directories[m.sidebarModel.cursor].location
-
-		for newDirectory == "Pinned+-*/=?" || newDirectory == "Disks+-*/=?" {
-			m.sidebarModel.cursor--
-			newDirectory = m.sidebarModel.directories[m.sidebarModel.cursor].location
-		}
-		changeToPlus := false
-		cursorRender := false
-		for !cursorRender {
-			totalHeight := 2
-			for i := m.sidebarModel.renderIndex; i < len(m.sidebarModel.directories); i++ {
-				if totalHeight >= m.mainPanelHeight {
-					break
-				}
-				directory := m.sidebarModel.directories[i]
-
-				if directory.location == "Pinned+-*/=?" {
-					totalHeight += 3
-					continue
-				}
-
-				if directory.location == "Disks+-*/=?" {
-					if m.mainPanelHeight-totalHeight <= 2 {
-						break
-					}
-					totalHeight += 3
-					continue
-				}
-
-				totalHeight++
-				if m.sidebarModel.cursor == i && m.focusPanel == sidebarFocus {
-					cursorRender = true
-				}
-			}
-
-			if changeToPlus {
-				m.sidebarModel.renderIndex++
-				continue
-			}
-
-			if !cursorRender {
-				m.sidebarModel.renderIndex--
-			}
-			if m.sidebarModel.renderIndex < 0 {
-				changeToPlus = true
-				m.sidebarModel.renderIndex++
-			}
-		}
-
-		if changeToPlus {
-			m.sidebarModel.renderIndex--
-		}
-	}
-}
-
-// Control sidebar panel list down
-func (m *model) controlSideBarListDown(wheel bool) {
-	runTime := 1
-	if wheel {
-		runTime = wheelRunTime
-	}
-
-	for i := 0; i < runTime; i++ {
-		lenDirs := len(m.sidebarModel.directories)
-		if m.sidebarModel.cursor < lenDirs-1 {
-			m.sidebarModel.cursor++
-		} else {
-			m.sidebarModel.cursor = 0
-		}
-
-		newDirectory := m.sidebarModel.directories[m.sidebarModel.cursor].location
-		for newDirectory == "Pinned+-*/=?" || newDirectory == "Disks+-*/=?" {
-			m.sidebarModel.cursor++
-			if m.sidebarModel.cursor+1 > len(m.sidebarModel.directories) {
-				m.sidebarModel.cursor = 0
-			}
-			newDirectory = m.sidebarModel.directories[m.sidebarModel.cursor].location
-		}
-		cursorRender := false
-		for !cursorRender {
-			totalHeight := 2
-			for i := m.sidebarModel.renderIndex; i < len(m.sidebarModel.directories); i++ {
-				if totalHeight >= m.mainPanelHeight {
-					break
-				}
-
-				directory := m.sidebarModel.directories[i]
-
-				if directory.location == "Pinned+-*/=?" {
-					totalHeight += 3
-					continue
-				}
-
-				if directory.location == "Disks+-*/=?" {
-					if m.mainPanelHeight-totalHeight <= 2 {
-						break
-					}
-					totalHeight += 3
-					continue
-				}
-
-				totalHeight++
-				if m.sidebarModel.cursor == i && m.focusPanel == sidebarFocus {
-					cursorRender = true
-				}
-			}
-
-			if !cursorRender {
-				m.sidebarModel.renderIndex++
-			}
-			if m.sidebarModel.renderIndex > m.sidebarModel.cursor {
-				m.sidebarModel.renderIndex = 0
-			}
-		}
+	// Move below special divider directories
+	if s.directories[s.cursor].isDivider() {
+		// cause another listDown trigger to move down.
+		s.listDown(mainPanelHeight)
+	} else {
+		s.updateRenderIndex(mainPanelHeight)
 	}
 }
 

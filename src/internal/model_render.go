@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"image"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"sort"
@@ -22,6 +23,10 @@ func (m *model) sidebarRender() string {
 	if Config.SidebarWidth == 0 {
 		return ""
 	}
+	slog.Debug("Rendering sidebar.", "cursor", m.sidebarModel.cursor,
+		"renderIndex", m.sidebarModel.renderIndex, "dirs count", len(m.sidebarModel.directories), 
+		"sidebar focused", m.focusPanel == sidebarFocus, 
+		"selected dir", m.sidebarModel.directories[m.sidebarModel.cursor])
 	superfileTitle := sidebarTitleStyle.Render("    " + icon.SuperfileIcon + " superfile")
 	superfileTitle = ansi.Truncate(superfileTitle, Config.SidebarWidth, "")
 	s := superfileTitle
@@ -40,7 +45,7 @@ func (m *model) sidebarRender() string {
 		return sideBarBorderStyle(m.mainPanelHeight, m.focusPanel).Render(s)
 	}
 
-	totalHeight := 3
+	totalHeight := sideBarInitialHeight
 
 	for i := m.sidebarModel.renderIndex; i < len(m.sidebarModel.directories); i++ {
 		if totalHeight >= m.mainPanelHeight {

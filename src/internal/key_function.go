@@ -37,7 +37,7 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) tea.Cmd {
 		// If move down Key is pressed, check the current state and executes
 	case containsKey(msg, hotkeys.ListDown):
 		if m.focusPanel == sidebarFocus {
-			m.controlSideBarListDown(false)
+			m.sidebarModel.controlListDown(false, m.mainPanelHeight)
 		} else if m.focusPanel == processBarFocus {
 			m.controlProcessbarListDown(false)
 		} else if m.focusPanel == metadataFocus {
