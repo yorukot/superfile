@@ -6,7 +6,21 @@ func (c *copyItems) reset(cut bool) {
 	c.items = c.items[:0]
 }
 
-// String method for easy logging
+// ================ Sidebar directory =====================
+// Hopefully compiler inlines it
+func (d directory) isDivider() bool {
+	return d == pinnedDivider || d == diskDivider
+}
+func (d directory) requiredHeight() int {
+	if d.isDivider() {
+		return 3
+	}
+	return 1
+}
+
+
+// ================ String method for easy logging =====================
+
 func (f focusPanelType) String() string {
 	switch f {
 	case nonePanelFocus:

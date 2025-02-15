@@ -21,7 +21,7 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) tea.Cmd {
 	// If move up Key is pressed, check the current state and executes
 	case containsKey(msg, hotkeys.ListUp):
 		if m.focusPanel == sidebarFocus {
-			m.controlSideBarListUp(false)
+			m.sidebarModel.controlListUp(false, m.mainPanelHeight)
 		} else if m.focusPanel == processBarFocus {
 			m.controlProcessbarListUp(false)
 		} else if m.focusPanel == metadataFocus {

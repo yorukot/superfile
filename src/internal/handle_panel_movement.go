@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -405,6 +406,98 @@ func (m *model) itemSelectDown(wheel bool) {
 // ======================================== Sidebar controller ========================================
 
 // Yorukot: P.S God bless me, this sidebar controller code is really ugly...
+
+// Return till what indexes we will render, if we start from startIndex
+// if returned value is `startIndex - 1`, that means nothing can be rendered 
+// This could be made constant time by keeping Indexes ot special directories saved, 
+// but that too much.
+func (s *sidebarModel) lastRenderedIndex(mainPanelHeight int, startIndex int) int {
+	
+	curHeight := 2 // Due to superfile logo
+	endIndex := startIndex - 1
+	for i := startIndex; i<len(s.directories); i++ {
+		curHeight += s.directories[i].requiredHeight()
+		if curHeight > mainPanelHeight {
+			break
+		}
+		endIndex = i
+	}
+	return endIndex
+}
+
+// Return what will be the startIndex, if we end at endIndex
+// if returned value is `endIndex + 1`, that means nothing can be rendered 
+func (s *sidebarModel) firstRenderedIndex(mainPanelHeight int, endIndex int) int {
+	// This should ideally never happen. Maybe we should panic ?
+	if endIndex >= len(s.directories) {
+		return endIndex + 1
+	}
+	
+	curHeight := 2 // Due to superfile logo
+	startIndex := endIndex + 1
+	for i := endIndex; i>=0; i-- {
+		curHeight += s.directories[i].requiredHeight()
+		if curHeight > mainPanelHeight {
+			break
+		}
+		startIndex = i
+	}
+	return startIndex
+}
+
+func (s *sidebarModel) controlListUp(wheel bool, mainPanelHeight int) {
+	slog.Error("controlListUp called")
+	// Todo : This snippet is duplicated everywhere. It can be better refractored outside 
+	runTime := 1
+	if wheel {
+		runTime = wheelRunTime
+	}
+	for i := 0; i < runTime; i++ {
+		s.listUp(mainPanelHeight)
+	}
+}
+
+func (s *sidebarModel) listUp(mainPanelHeight int) {
+	if s.cursor > 0 {
+		// Not at the top, can safely decrease
+		s.cursor --
+	} else {
+		// We are at the top. Move to the bottom
+		s.cursor = len(s.directories) - 1
+	}
+
+	// Move above special divider directories
+	if s.directories[s.cursor].isDivider() {
+		s.cursor --
+	}
+
+	// Case I : New cursor moved above current renderIndex
+	if s.cursor == s.renderIndex - 1 {
+		// We will start rendering from there
+		s.renderIndex -- 
+		return
+	}
+
+	curEndIndex := s.lastRenderedIndex(mainPanelHeight, s.renderIndex)
+
+	// Case II : new cursor also comes in range of rendered directores
+	// Taking this case later avoid extra lastRenderedIndex() call
+	if s.renderIndex <= s.cursor && s.cursor <= curEndIndex {
+		// no need to update s.renderIndex
+		return 
+	}
+
+	// Case III : New cursor is too below
+	if curEndIndex < s.cursor {
+		s.renderIndex = s.firstRenderedIndex(mainPanelHeight, s.cursor)
+		return 
+	} 
+
+	// Code should never reach here
+	slog.Error("Unexpected situation in sideBarUp", "cursor", s.cursor, 
+		"renderIndex", s.renderIndex, "directory count", len(s.directories) )
+	
+}
 
 // Control sidebar panel list up
 func (m *model) controlSideBarListUp(wheel bool) {
