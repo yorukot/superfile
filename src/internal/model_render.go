@@ -33,7 +33,7 @@ func (m *model) sidebarRender() string {
 	pinnedDivider = ansi.Truncate(pinnedDivider, Config.SidebarWidth, "")
 
 	m.sidebarModel.searchBar.Placeholder = "(" + hotkeys.SearchBar[0] + ")" + " Search"
-	s += "\n" + ansi.Truncate(m.sidebarModel.searchBar.View(), Config.SidebarWidth-2, "...") + "\n"
+	s += "\n" + ansi.Truncate(m.sidebarModel.searchBar.View(), Config.SidebarWidth-2, "...")
 
 	if len(m.sidebarModel.directories) == 0 {
 		s += sidebarStyle.Render(" " + icon.Error + " None")
