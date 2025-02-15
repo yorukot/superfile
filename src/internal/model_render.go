@@ -37,7 +37,7 @@ func (m *model) sidebarRender() string {
 		return sideBarBorderStyle(m.mainPanelHeight, m.focusPanel).Render(s)
 	}
 
-	s += m.sidebarModel.directoriesRender(m.mainPanelHeight, 
+	s += m.sidebarModel.directoriesRender(m.mainPanelHeight,
 		m.fileModel.filePanels[m.filePanelFocusIndex].location, m.focusPanel == sidebarFocus)
 
 	return sideBarBorderStyle(m.mainPanelHeight, m.focusPanel).Render(s)
@@ -47,7 +47,7 @@ func (s *sidebarModel) directoriesRender(mainPanelHeight int, curFilePanelFileLo
 	res := ""
 	totalHeight := sideBarInitialHeight
 	for i := s.renderIndex; i < len(s.directories); i++ {
-		if totalHeight + s.directories[i].requiredHeight() > mainPanelHeight {
+		if totalHeight+s.directories[i].requiredHeight() > mainPanelHeight {
 			break
 		}
 		res += "\n"
@@ -70,7 +70,7 @@ func (s *sidebarModel) directoriesRender(mainPanelHeight int, curFilePanelFileLo
 				if s.directories[i].location == curFilePanelFileLocation {
 					renderStyle = sidebarSelectedStyle
 				}
-				res += filePanelCursorStyle.Render(cursor+" ") + 
+				res += filePanelCursorStyle.Render(cursor+" ") +
 					renderStyle.Render(truncateText(s.directories[i].name, Config.SidebarWidth-2, "..."))
 			}
 		}

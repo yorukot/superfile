@@ -406,8 +406,8 @@ func (m *model) itemSelectDown(wheel bool) {
 // ======================================== Sidebar controller ========================================
 
 func (s *sidebarModel) controlListUp(wheel bool, mainPanelHeight int) {
-	
-	// Todo : This snippet is duplicated everywhere. It can be better refractored outside 
+
+	// Todo : This snippet is duplicated everywhere. It can be better refractored outside
 	runTime := 1
 	if wheel {
 		runTime = wheelRunTime
@@ -418,14 +418,14 @@ func (s *sidebarModel) controlListUp(wheel bool, mainPanelHeight int) {
 }
 
 func (s *sidebarModel) listUp(mainPanelHeight int) {
-	slog.Debug("controlListUp called", "cursor", s.cursor, 
+	slog.Debug("controlListUp called", "cursor", s.cursor,
 		"renderIndex", s.renderIndex, "directory count", len(s.directories))
 	if s.noActualDir() {
 		return
 	}
 	if s.cursor > 0 {
 		// Not at the top, can safely decrease
-		s.cursor --
+		s.cursor--
 	} else {
 		// We are at the top. Move to the bottom
 		s.cursor = len(s.directories) - 1
@@ -441,8 +441,8 @@ func (s *sidebarModel) listUp(mainPanelHeight int) {
 }
 
 func (s *sidebarModel) controlListDown(wheel bool, mainPanelHeight int) {
-	
-	// Todo : This snippet is duplicated everywhere. It can be better refractored outside 
+
+	// Todo : This snippet is duplicated everywhere. It can be better refractored outside
 	runTime := 1
 	if wheel {
 		runTime = wheelRunTime
@@ -453,14 +453,14 @@ func (s *sidebarModel) controlListDown(wheel bool, mainPanelHeight int) {
 }
 
 func (s *sidebarModel) listDown(mainPanelHeight int) {
-	slog.Debug("controlListDown called", "cursor", s.cursor, 
+	slog.Debug("controlListDown called", "cursor", s.cursor,
 		"renderIndex", s.renderIndex, "directory count", len(s.directories))
 	if s.noActualDir() {
 		return
 	}
-	if s.cursor < len(s.directories) - 1 {
+	if s.cursor < len(s.directories)-1 {
 		// Not at the bottom, can safely increase
-		s.cursor ++
+		s.cursor++
 	} else {
 		// We are at the bottom. Move to the top
 		s.cursor = 0

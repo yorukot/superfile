@@ -25,6 +25,6 @@ func LoadPrerenderedVariables() {
 
 	sideBarDisksDivider = sidebarTitleStyle.Render("󱇰 Disks") + sidebarDividerStyle.Render(" ────────────") + "\n"
 	sideBarDisksDivider = ansi.Truncate(sideBarDisksDivider, Config.SidebarWidth, "")
-	
+
 	sideBarNoneText = sidebarStyle.Render(" " + icon.Error + " None")
 }
