@@ -199,7 +199,6 @@ type element struct {
 	name      string
 	location  string
 	directory bool
-	matchRate float64
 	metaData  [][2]string
 }
 

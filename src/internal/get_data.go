@@ -7,7 +7,6 @@ import (
 	"slices"
 
 	"github.com/adrg/xdg"
-	"github.com/reinhrst/fzf-lib"
 	"github.com/shirou/gopsutil/disk"
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/config/icon"
@@ -101,28 +100,27 @@ func getExternalMediaFolders() (disks []directory) {
 
 // Fuzzy search function for a list of directories.
 func fuzzySearch(query string, dirs []directory) []directory {
+	if len(dirs) == 0 {
+		return []directory{}
+	}
+
 	var filteredDirs []directory
-	if len(dirs) > 0 {
-		haystack := make([]string, len(dirs))
-		dirMap := make(map[string]directory, len(dirs))
 
-		for i, dir := range dirs {
-			haystack[i] = dir.name
-			dirMap[dir.name] = dir
-		}
+	// Optimization - This haystack can be kept precomputed based on directories
+	// instead of re computing it in each call
+	haystack := make([]string, len(dirs))
+	dirMap := make(map[string]directory, len(dirs))
+	for i, dir := range dirs {
+		haystack[i] = dir.name
+		dirMap[dir.name] = dir
+	}
 
-		options := fzf.DefaultOptions()
-		fzfNone := fzf.New(haystack, options)
-		fzfNone.Search(query)
-		result := <-fzfNone.GetResultChannel()
-		fzfNone.End()
-
-		for _, match := range result.Matches {
-			if d, ok := dirMap[match.Key]; ok {
-				filteredDirs = append(filteredDirs, d)
-			}
+	for _, match := range fzfSearch(query, haystack) {
+		if d, ok := dirMap[match.Key]; ok {
+			filteredDirs = append(filteredDirs, d)
 		}
 	}
+
 	return filteredDirs
 }
 

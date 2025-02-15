@@ -159,27 +159,23 @@ func returnDirElementBySearchString(location string, displayDotFile bool, search
 			location:  folderElementLocation,
 		}
 	}
-
-	var options = fzf.DefaultOptions()
-	var hayStack = fileAndDirectories
-	var myFzf = fzf.New(hayStack, options)
-	var result fzf.SearchResult
-	myFzf.Search(searchString)
-	result = <-myFzf.GetResultChannel()
-	myFzf.End()
-
-	for _, item := range result.Matches {
+	// https://github.com/reinhrst/fzf-lib/blob/main/core.go#L43
+	// No sorting needed. fzf.DefaultOptions() already return values ordered on Score
+	for _, item := range fzfSearch(searchString, fileAndDirectories) {
 		resultItem := folderElementMap[item.Key]
-		resultItem.matchRate = float64(item.Score)
 		dirElement = append(dirElement, resultItem)
 	}
 
-	// Sort folders and files by match rate
-	sort.Slice(dirElement, func(i, j int) bool {
-		return dirElement[i].matchRate > dirElement[j].matchRate
-	})
-
 	return dirElement
+}
+
+// Returning a string slice causes inefficiency in current usage
+func fzfSearch(query string, source []string) []fzf.MatchResult {
+	fzfSearcher := fzf.New(source, fzf.DefaultOptions())
+	fzfSearcher.Search(query)
+	fzfResults := <-fzfSearcher.GetResultChannel()
+	fzfSearcher.End()
+	return fzfResults.Matches
 }
 
 func panelElementHeight(mainPanelHeight int) int {
@@ -190,6 +186,7 @@ func bottomElementHeight(bottomElementHeight int) int {
 	return bottomElementHeight - 5
 }
 
+// Todo : replace usage of this with slices.contains
 func arrayContains(s []string, str string) bool {
 	for _, v := range s {
 		if v == str {
@@ -276,6 +273,7 @@ func renameIfDuplicate(destination string) (string, error) {
 	}
 }
 
+// Todo : Move this model related function to the right file. Should not be in functions file.
 func (m *model) returnMetaData() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	cursor := panel.cursor
