@@ -25,8 +25,7 @@ func (m *model) sidebarRender() string {
 	}
 	slog.Debug("Rendering sidebar.", "cursor", m.sidebarModel.cursor,
 		"renderIndex", m.sidebarModel.renderIndex, "dirs count", len(m.sidebarModel.directories), 
-		"sidebar focused", m.focusPanel == sidebarFocus, 
-		"selected dir", m.sidebarModel.directories[m.sidebarModel.cursor])
+		"sidebar focused", m.focusPanel == sidebarFocus)
 	superfileTitle := sidebarTitleStyle.Render("    " + icon.SuperfileIcon + " superfile")
 	superfileTitle = ansi.Truncate(superfileTitle, Config.SidebarWidth, "")
 	s := superfileTitle

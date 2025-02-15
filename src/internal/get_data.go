@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"slices"
 
 	"github.com/adrg/xdg"
 	"github.com/reinhrst/fzf-lib"
@@ -14,25 +15,19 @@ import (
 
 // Return all sidebar directories
 func getDirectories() []directory {
-	directories := []directory{}
+	return formDirctorySlice(getWellKnownDirectories(), getPinnedDirectories(), getExternalMediaFolders())
+}
 
-	directories = append(directories, getWellKnownDirectories()...)
-	directories = append(directories, directory{
-		// Just make sure no one owns the hard drive or directory named this path
-		location: "Pinned+-*/=?",
-	})
-	directories = append(directories, getPinnedDirectories()...)
-	directories = append(directories, directory{
-		// Just make sure no one owns the hard drive or directory named this path
-		location: "Disks+-*/=?",
-	})
-	directories = append(directories, getExternalMediaFolders()...)
+func formDirctorySlice(homeDirectories []directory, pinnedDirectories []directory, diskDirectories []directory) []directory {
+	directories := append(homeDirectories, pinnedDivider)
+	directories = append(directories, pinnedDirectories...)
+	directories = append(directories, diskDivider)
+	directories = append(directories, diskDirectories...)
 	return directories
 }
 
 // Return system default directory e.g. Home, Downloads, etc
 func getWellKnownDirectories() []directory {
-	directories := []directory{}
 	wellKnownDirectories := []directory{
 		{location: xdg.Home, name: icon.Home + icon.Space + "Home"},
 		{location: xdg.UserDirs.Download, name: icon.Download + icon.Space + "Downloads"},
@@ -44,14 +39,10 @@ func getWellKnownDirectories() []directory {
 		{location: xdg.UserDirs.PublicShare, name: icon.PublicShare + icon.Space + "PublicShare"},
 	}
 
-	for _, dir := range wellKnownDirectories {
-		if _, err := os.Stat(dir.location); !os.IsNotExist(err) {
-			// Directory exists
-			directories = append(directories, dir)
-		}
-	}
-
-	return directories
+	return slices.DeleteFunc(wellKnownDirectories, func(d directory) bool {
+		_, err := os.Stat(d.location)
+		return err != nil
+	})
 }
 
 // Get user pinned directories
@@ -77,6 +68,8 @@ func getPinnedDirectories() []directory {
 		}
 		// Check if the data is in the new format
 	} else if err := json.Unmarshal(jsonData, &pinnedDirs); err == nil {
+		// Todo : we can optimize this. pinnedDirs and directories have exact same struct format
+		// we are just copying data needlessly. We should directly unmarshal to 'directories' 
 		for _, pinnedDir := range pinnedDirs {
 			directories = append(directories, directory{location: pinnedDir.Location, name: pinnedDir.Name})
 		}
@@ -93,6 +86,7 @@ func getExternalMediaFolders() (disks []directory) {
 
 	if err != nil {
 		outPutLog("Error while getting external media: ", err)
+		return disks
 	}
 	for _, disk := range parts {
 		if isExternalDiskPath(disk.Mountpoint) {
@@ -101,9 +95,6 @@ func getExternalMediaFolders() (disks []directory) {
 				location: disk.Mountpoint,
 			})
 		}
-	}
-	if err != nil {
-		outPutLog("Error while getting external media: ", err)
 	}
 	return disks
 }
@@ -137,46 +128,9 @@ func fuzzySearch(query string, dirs []directory) []directory {
 
 // Get filtered directories using fuzzy search logic with three haystacks.
 func getFilteredDirectories(query string) []directory {
-	// Get all directories.
-	allDirs := getDirectories()
-
-	var noneDirs []directory
-	var pinnedDirs []directory
-	var diskDirs []directory
-
-	// Partition directories into three groups.
-	var currentGroup *[]directory
-	for _, dir := range allDirs {
-		switch dir.location {
-		case "Pinned+-*/=?":
-			currentGroup = &pinnedDirs
-		case "Disks+-*/=?":
-			currentGroup = &diskDirs
-		default:
-			if currentGroup != nil {
-				*currentGroup = append(*currentGroup, dir)
-			} else {
-				noneDirs = append(noneDirs, dir)
-			}
-		}
-	}
-
-	// Run fuzzy search on each group.
-	filteredNone := fuzzySearch(query, noneDirs)
-	filteredPinned := fuzzySearch(query, pinnedDirs)
-	filteredDisks := fuzzySearch(query, diskDirs)
-
-	// Combine fuzzy-matched directories.
-	var filteredDirs []directory
-	filteredDirs = append(filteredDirs, filteredNone...)
-	filteredDirs = append(filteredDirs, directory{
-		location: "Pinned+-*/=?",
-	})
-	filteredDirs = append(filteredDirs, filteredPinned...)
-	filteredDirs = append(filteredDirs, directory{
-		location: "Disks+-*/=?",
-	})
-	filteredDirs = append(filteredDirs, filteredDisks...)
-
-	return filteredDirs
+	return formDirctorySlice(
+		fuzzySearch(query, getWellKnownDirectories()),
+		fuzzySearch(query, getPinnedDirectories()),
+		fuzzySearch(query, getExternalMediaFolders()),
+	)
 }
