@@ -19,9 +19,9 @@ func getDirectories() []directory {
 }
 
 func formDirctorySlice(homeDirectories []directory, pinnedDirectories []directory, diskDirectories []directory) []directory {
-	directories := append(homeDirectories, pinnedDivider)
+	directories := append(homeDirectories, pinnedDividerDir)
 	directories = append(directories, pinnedDirectories...)
-	directories = append(directories, diskDivider)
+	directories = append(directories, diskDividerDir)
 	directories = append(directories, diskDirectories...)
 	return directories
 }
@@ -69,7 +69,7 @@ func getPinnedDirectories() []directory {
 		// Check if the data is in the new format
 	} else if err := json.Unmarshal(jsonData, &pinnedDirs); err == nil {
 		// Todo : we can optimize this. pinnedDirs and directories have exact same struct format
-		// we are just copying data needlessly. We should directly unmarshal to 'directories' 
+		// we are just copying data needlessly. We should directly unmarshal to 'directories'
 		for _, pinnedDir := range pinnedDirs {
 			directories = append(directories, directory{location: pinnedDir.Location, name: pinnedDir.Name})
 		}

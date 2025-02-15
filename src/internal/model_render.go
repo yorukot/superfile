@@ -26,6 +26,8 @@ func (m *model) sidebarRender() string {
 	slog.Debug("Rendering sidebar.", "cursor", m.sidebarModel.cursor,
 		"renderIndex", m.sidebarModel.renderIndex, "dirs count", len(m.sidebarModel.directories), 
 		"sidebar focused", m.focusPanel == sidebarFocus)
+	
+	// Todo : Move these pretruncated rendered string values to one time initialized constsants.
 	superfileTitle := sidebarTitleStyle.Render("    " + icon.SuperfileIcon + " superfile")
 	superfileTitle = ansi.Truncate(superfileTitle, Config.SidebarWidth, "")
 	s := superfileTitle
