@@ -24,70 +24,58 @@ func (m *model) sidebarRender() string {
 		return ""
 	}
 	slog.Debug("Rendering sidebar.", "cursor", m.sidebarModel.cursor,
-		"renderIndex", m.sidebarModel.renderIndex, "dirs count", len(m.sidebarModel.directories), 
+		"renderIndex", m.sidebarModel.renderIndex, "dirs count", len(m.sidebarModel.directories),
 		"sidebar focused", m.focusPanel == sidebarFocus)
-	
-	// Todo : Move these pretruncated rendered string values to one time initialized constsants.
-	superfileTitle := sidebarTitleStyle.Render("    " + icon.SuperfileIcon + " superfile")
-	superfileTitle = ansi.Truncate(superfileTitle, Config.SidebarWidth, "")
-	s := superfileTitle
-	s += "\n"
 
-	pinnedDivider := "\n" + sidebarTitleStyle.Render("󰐃 Pinned") + sidebarDividerStyle.Render(" ───────────") + "\n"
-	disksDivider := "\n" + sidebarTitleStyle.Render("󱇰 Disks") + sidebarDividerStyle.Render(" ────────────") + "\n"
-	disksDivider = ansi.Truncate(disksDivider, Config.SidebarWidth, "")
-	pinnedDivider = ansi.Truncate(pinnedDivider, Config.SidebarWidth, "")
+	s := sideBarSuperfileTitle + "\n"
 
 	m.sidebarModel.searchBar.Placeholder = "(" + hotkeys.SearchBar[0] + ")" + " Search"
 	s += "\n" + ansi.Truncate(m.sidebarModel.searchBar.View(), Config.SidebarWidth-2, "...")
 
 	if len(m.sidebarModel.directories) == 0 {
-		s += sidebarStyle.Render(" " + icon.Error + " None")
+		s += sideBarNoneText
 		return sideBarBorderStyle(m.mainPanelHeight, m.focusPanel).Render(s)
 	}
 
-	totalHeight := sideBarInitialHeight
-
-	for i := m.sidebarModel.renderIndex; i < len(m.sidebarModel.directories); i++ {
-		if totalHeight >= m.mainPanelHeight {
-			break
-		} else {
-			s += "\n"
-		}
-
-		directory := m.sidebarModel.directories[i]
-
-		if directory.location == "Pinned+-*/=?" {
-			s += pinnedDivider
-			totalHeight += 3
-			continue
-		}
-
-		if directory.location == "Disks+-*/=?" {
-			if m.mainPanelHeight-totalHeight <= 2 {
-				break
-			}
-			s += disksDivider
-			totalHeight += 3
-			continue
-		}
-
-		totalHeight++
-		cursor := " "
-		if m.sidebarModel.cursor == i && m.focusPanel == sidebarFocus {
-			cursor = icon.Cursor
-		}
-
-		if m.sidebarModel.renaming && i == m.sidebarModel.cursor {
-			s += m.sidebarModel.rename.View()
-		} else if directory.location == m.fileModel.filePanels[m.filePanelFocusIndex].location {
-			s += filePanelCursorStyle.Render(cursor+" ") + sidebarSelectedStyle.Render(truncateText(directory.name, Config.SidebarWidth-2, "..."))
-		} else {
-			s += filePanelCursorStyle.Render(cursor+" ") + sidebarStyle.Render(truncateText(directory.name, Config.SidebarWidth-2, "..."))
-		}
-	}
+	s += m.sidebarModel.directoriesRender(m.mainPanelHeight, 
+		m.fileModel.filePanels[m.filePanelFocusIndex].location, m.focusPanel == sidebarFocus)
 
 	return sideBarBorderStyle(m.mainPanelHeight, m.focusPanel).Render(s)
+}
+
+func (s *sidebarModel) directoriesRender(mainPanelHeight int, curFilePanelFileLocation string, sideBarFocussed bool) string {
+	res := ""
+	totalHeight := sideBarInitialHeight
+	for i := s.renderIndex; i < len(s.directories); i++ {
+		if totalHeight + s.directories[i].requiredHeight() > mainPanelHeight {
+			break
+		}
+		res += "\n"
+
+		totalHeight += s.directories[i].requiredHeight()
+
+		if s.directories[i] == pinnedDividerDir {
+			res += "\n" + sideBarPinnedDivider
+		} else if s.directories[i] == diskDividerDir {
+			res += "\n" + sideBarDisksDivider
+		} else {
+			cursor := " "
+			if s.cursor == i && sideBarFocussed {
+				cursor = icon.Cursor
+			}
+			if s.renaming && s.cursor == i {
+				res += s.rename.View()
+			} else {
+				renderStyle := sidebarStyle
+				if s.directories[i].location == curFilePanelFileLocation {
+					renderStyle = sidebarSelectedStyle
+				}
+				res += filePanelCursorStyle.Render(cursor+" ") + 
+					renderStyle.Render(truncateText(s.directories[i].name, Config.SidebarWidth-2, "..."))
+			}
+		}
+	}
+	return res
 }
 
 // This also modifies the m.fileModel.filePanels

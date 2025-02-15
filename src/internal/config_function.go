@@ -72,6 +72,7 @@ func initialConfig(dir string) (toggleDotFileBool bool, toggleFooter bool, first
 	}
 
 	LoadThemeConfig()
+	LoadPrerenderedVariables()
 
 	if Config.Metadata {
 		et, err = exiftool.NewExiftool()
