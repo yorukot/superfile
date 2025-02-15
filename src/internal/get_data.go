@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/adrg/xdg"
-	"github.com/reinhrst/fzf-lib" // <-- added for fuzzy search
+	"github.com/reinhrst/fzf-lib"
 	"github.com/shirou/gopsutil/disk"
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/config/icon"
