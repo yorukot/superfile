@@ -51,6 +51,7 @@ func (m model) Init() tea.Cmd {
 // Update function for bubble tea to provide internal communication to the
 // application
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	slog.Debug("model.Update() called")
 	var cmd tea.Cmd
 
 	m.updateSidebarState(msg, &cmd)
@@ -69,9 +70,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.updateFilePanelsState(msg, &cmd)
 
 	if m.sidebarModel.searchBar.Value() != "" {
+		// Todo : All updates of sideBar must be moved to seperate struct functions
+		// we have to keep the state of sidebar consistent, and keep values of
+		// cursor, directories, renderIndex sane for each update, and it has to
+		// take care at one single place, not everywhere we use sideBar
 		m.sidebarModel.directories = getFilteredDirectories(m.sidebarModel.searchBar.Value())
+		if m.sidebarModel.isCursorInvalid() {
+			m.sidebarModel.resetCursor()
+		}
 	} else {
 		m.sidebarModel.directories = getDirectories()
+		if m.sidebarModel.isCursorInvalid() {
+			m.sidebarModel.resetCursor()
+		}
 	}
 
 	// check if there already have listening message
@@ -309,6 +320,7 @@ func (m *model) warnModalForQuit() {
 
 // Implement View function for bubble tea model to handle visualization.
 func (m model) View() string {
+	slog.Debug("model.View() called")
 	if !m.firstLoadingComplete {
 		return "Loading..."
 	}

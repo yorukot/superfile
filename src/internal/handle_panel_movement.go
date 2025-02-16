@@ -481,7 +481,12 @@ func (s *sidebarModel) listDown(mainPanelHeight int) {
 }
 
 func (m *model) sidebarSearchBarFocus() {
+
 	if m.sidebarModel.searchBar.Focused() {
+		// Ideally Code should never reach here. Once sidebar is focussed, we should
+		// not cause sidebarSearchBarFocus() event by pressing search key
+		// Should we use Runtime panic asserts ?
+		slog.Error("sidebarSearchBarFocus() called on Focussed sidebar")
 		m.sidebarModel.searchBar.Blur()
 	} else {
 		m.sidebarModel.searchBar.Focus()

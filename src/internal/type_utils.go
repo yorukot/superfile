@@ -33,6 +33,10 @@ func (s *sidebarModel) noActualDir() bool {
 	return true
 }
 
+func (s *sidebarModel) isCursorInvalid() bool {
+	return s.cursor < 0 || s.cursor >= len(s.directories) || s.directories[s.cursor].isDivider()
+}
+
 func (s *sidebarModel) resetCursor() {
 	s.cursor = 0
 	// Move to first non Divider dir

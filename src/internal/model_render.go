@@ -46,10 +46,11 @@ func (m *model) sidebarRender() string {
 func (s *sidebarModel) directoriesRender(mainPanelHeight int, curFilePanelFileLocation string, sideBarFocussed bool) string {
 
 	// Cursor should always point to a valid directory at this point
-	if s.directories[s.cursor].isDivider() {
+	if s.isCursorInvalid() {
 		slog.Error("Unexpected situation in sideBar Model. "+
 			"Cursor is at invalid postion, while there are valide directories", "cursor", s.cursor,
 			"directory count", len(s.directories))
+		return ""
 	}
 
 	res := ""
