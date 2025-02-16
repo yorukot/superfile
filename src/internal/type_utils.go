@@ -33,12 +33,11 @@ func (s *sidebarModel) noActualDir() bool {
 	return true
 }
 
-
-func (s* sidebarModel) resetCursor() {
+func (s *sidebarModel) resetCursor() {
 	s.cursor = 0
 	// Move to first non Divider dir
-	for i,d := range s.directories {
-		if !d.isDivider(){
+	for i, d := range s.directories {
+		if !d.isDivider() {
 			s.cursor = i
 			return
 		}

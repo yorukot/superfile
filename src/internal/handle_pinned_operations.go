@@ -80,7 +80,7 @@ func (m *model) confirmSidebarRename() {
 
 func pinnedIndexRange() (int, int) {
 	// pinned directories start after well-known directories and the divider
-	// Can't use getPinnedDirectories() here, as if we are in search mode, we would be showing 
+	// Can't use getPinnedDirectories() here, as if we are in search mode, we would be showing
 	// and having less directories in sideBar.directories slice
 	pinnedIndex := len(getWellKnownDirectories()) + 1
 	pinnedLen := len(getPinnedDirectories())
