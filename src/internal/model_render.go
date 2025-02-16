@@ -32,10 +32,11 @@ func (m *model) sidebarRender() string {
 	m.sidebarModel.searchBar.Placeholder = "(" + hotkeys.SearchBar[0] + ")" + " Search"
 	s += "\n" + ansi.Truncate(m.sidebarModel.searchBar.View(), Config.SidebarWidth-2, "...")
 
-	if len(m.sidebarModel.directories) == 0 {
-		s += sideBarNoneText
+	if m.sidebarModel.noActualDir() {
+		s += "\n" + sideBarNoneText
 		return sideBarBorderStyle(m.mainPanelHeight, m.focusPanel).Render(s)
 	}
+
 
 	s += m.sidebarModel.directoriesRender(m.mainPanelHeight,
 		m.fileModel.filePanels[m.filePanelFocusIndex].location, m.focusPanel == sidebarFocus)
@@ -44,6 +45,14 @@ func (m *model) sidebarRender() string {
 }
 
 func (s *sidebarModel) directoriesRender(mainPanelHeight int, curFilePanelFileLocation string, sideBarFocussed bool) string {
+	
+	// Cursor should always point to a valid directory at this point
+	if s.directories[s.cursor].isDivider() {
+		slog.Error("Unexpected situation in sideBar Model. " + 
+			"Cursor is at invalid postion, while there are valide directories", "cursor", s.cursor,
+			"directory count", len(s.directories))
+	}
+
 	res := ""
 	totalHeight := sideBarInitialHeight
 	for i := s.renderIndex; i < len(s.directories); i++ {
@@ -60,7 +69,7 @@ func (s *sidebarModel) directoriesRender(mainPanelHeight int, curFilePanelFileLo
 			res += "\n" + sideBarDisksDivider
 		} else {
 			cursor := " "
-			if s.cursor == i && sideBarFocussed {
+			if s.cursor == i && sideBarFocussed && !s.searchBar.Focused() {
 				cursor = icon.Cursor
 			}
 			if s.renaming && s.cursor == i {

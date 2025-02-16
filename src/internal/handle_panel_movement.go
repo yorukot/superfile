@@ -123,6 +123,11 @@ func (m *model) enterPanel() {
 
 // Switch to the directory where the sidebar cursor is located
 func (m *model) sidebarSelectDirectory() {
+	// We can't do this when we have only divider directories
+	// m.sidebarModel.directories[m.sidebarModel.cursor].location would point to a divider dir.
+	if m.sidebarModel.noActualDir() {
+		return
+	}
 	m.focusPanel = nonePanelFocus
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 

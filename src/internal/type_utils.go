@@ -33,6 +33,20 @@ func (s *sidebarModel) noActualDir() bool {
 	return true
 }
 
+
+func (s* sidebarModel) resetCursor() {
+	s.cursor = 0
+	// Move to first non Divider dir
+	for i,d := range s.directories {
+		if !d.isDivider(){
+			s.cursor = i
+			return
+		}
+	}
+	// If all directories are divider, code will reach here. and s.cursor will stay 0
+	// Or s.directories is empty
+}
+
 // Return till what indexes we will render, if we start from startIndex
 // if returned value is `startIndex - 1`, that means nothing can be rendered
 // This could be made constant time by keeping Indexes ot special directories saved,

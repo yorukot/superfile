@@ -309,6 +309,7 @@ func (m *model) sidebarSearchBarKey(msg string) {
 		m.sidebarModel.searchBar.SetValue("")
 	case containsKey(msg, hotkeys.ConfirmTyping):
 		m.sidebarModel.searchBar.Blur()
+		m.sidebarModel.resetCursor()
 	}
 }
 
