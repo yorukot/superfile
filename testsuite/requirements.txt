@@ -1,3 +1,2 @@
 pyautogui; sys_platform == "windows"
-# Newer version is broken. See - https://github.com/tmux-python/libtmux/issues/571
-libtmux==0.40.1; sys_platform == "linux" or sys_platform == "darwin"
+libtmux; sys_platform == "linux" or sys_platform == "darwin"
