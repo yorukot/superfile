@@ -435,12 +435,13 @@ func (s *sidebarModel) listUp(mainPanelHeight int) {
 		// We are at the top. Move to the bottom
 		s.cursor = len(s.directories) - 1
 	}
-
+	// We should update even if cursor is at divider for now
+	// Otherwise dividers are sometimes skipped in render in case of
+	// large pinned directories
+	s.updateRenderIndex(mainPanelHeight)
 	if s.directories[s.cursor].isDivider() {
 		// cause another listUp trigger to move up.
 		s.listUp(mainPanelHeight)
-	} else {
-		s.updateRenderIndex(mainPanelHeight)
 	}
 
 }
@@ -471,12 +472,15 @@ func (s *sidebarModel) listDown(mainPanelHeight int) {
 		s.cursor = 0
 	}
 
+	// We should update even if cursor is at divider for now
+	// Otherwise dividers are sometimes skipped in render in case of
+	// large pinned directories
+	s.updateRenderIndex(mainPanelHeight)
+
 	// Move below special divider directories
 	if s.directories[s.cursor].isDivider() {
 		// cause another listDown trigger to move down.
 		s.listDown(mainPanelHeight)
-	} else {
-		s.updateRenderIndex(mainPanelHeight)
 	}
 }
 
