@@ -51,7 +51,10 @@ func (m model) Init() tea.Cmd {
 // Update function for bubble tea to provide internal communication to the
 // application
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	slog.Debug("model.Update() called")
 	var cmd tea.Cmd
+
+	m.updateSidebarState(msg, &cmd)
 
 	switch msg := msg.(type) {
 	case channelMessage:
@@ -65,8 +68,22 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	m.updateFilePanelsState(msg, &cmd)
-	m.updateSidebarState(msg, &cmd)
-	m.sidebarModel.directories = getDirectories()
+
+	if m.sidebarModel.searchBar.Value() != "" {
+		// Todo : All updates of sideBar must be moved to seperate struct functions
+		// we have to keep the state of sidebar consistent, and keep values of
+		// cursor, directories, renderIndex sane for each update, and it has to
+		// take care at one single place, not everywhere we use sideBar
+		m.sidebarModel.directories = getFilteredDirectories(m.sidebarModel.searchBar.Value())
+		if m.sidebarModel.isCursorInvalid() {
+			m.sidebarModel.resetCursor()
+		}
+	} else {
+		m.sidebarModel.directories = getDirectories()
+		if m.sidebarModel.isCursorInvalid() {
+			m.sidebarModel.resetCursor()
+		}
+	}
 
 	// check if there already have listening message
 	if !ListeningMessage {
@@ -214,6 +231,9 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 	} else if m.fileModel.filePanels[m.filePanelFocusIndex].searchBar.Focused() {
 		m.focusOnSearchbarKey(msg.String())
 		// If sort options menu is open
+	} else if m.sidebarModel.searchBar.Focused() {
+		m.sidebarSearchBarKey(msg.String())
+		// If sort options menu is open
 	} else if m.fileModel.filePanels[m.filePanelFocusIndex].sortOptions.open {
 		m.sortOptionsKey(msg.String())
 		// If help menu is open
@@ -272,6 +292,8 @@ func (m *model) updateSidebarState(msg tea.Msg, cmd *tea.Cmd) {
 	sidebar := &m.sidebarModel
 	if sidebar.renaming {
 		sidebar.rename, *cmd = sidebar.rename.Update(msg)
+	} else if sidebar.searchBar.Focused() {
+		sidebar.searchBar, *cmd = sidebar.searchBar.Update(msg)
 	}
 
 	if sidebar.cursor < 0 {
@@ -298,6 +320,7 @@ func (m *model) warnModalForQuit() {
 
 // Implement View function for bubble tea model to handle visualization.
 func (m model) View() string {
+	slog.Debug("model.View() called")
 	if !m.firstLoadingComplete {
 		return "Loading..."
 	}

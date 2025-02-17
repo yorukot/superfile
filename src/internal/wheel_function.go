@@ -7,7 +7,7 @@ func wheelMainAction(msg string, m *model, cmd tea.Cmd) tea.Cmd {
 
 	case "wheel up":
 		if m.focusPanel == sidebarFocus {
-			m.controlSideBarListUp(true)
+			m.sidebarModel.controlListUp(true, m.mainPanelHeight)
 		} else if m.focusPanel == processBarFocus {
 			m.controlProcessbarListUp(true)
 		} else if m.focusPanel == metadataFocus {
@@ -22,7 +22,7 @@ func wheelMainAction(msg string, m *model, cmd tea.Cmd) tea.Cmd {
 
 	case "wheel down":
 		if m.focusPanel == sidebarFocus {
-			m.controlSideBarListDown(true)
+			m.sidebarModel.controlListDown(true, m.mainPanelHeight)
 		} else if m.focusPanel == processBarFocus {
 			m.controlProcessbarListDown(true)
 		} else if m.focusPanel == metadataFocus {

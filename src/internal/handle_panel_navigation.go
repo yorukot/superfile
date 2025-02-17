@@ -29,6 +29,7 @@ func (m *model) pinnedDirectory() {
 		})
 	}
 
+	// Todo : This anonymous struct is defined at 3 places. Too much duplication. Need to fix.
 	type pinnedDir struct {
 		Location string `json:"location"`
 		Name     string `json:"name"`
