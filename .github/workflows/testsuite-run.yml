@@ -16,13 +16,6 @@ jobs:
       - name: Install tmux
         run: sudo apt-get update && sudo apt-get install -y tmux
 
-      - name: Check tmux basic usage
-        run: tmux -V; tmux new-session -d vi; tmux ls
-
-      - name: Check tmux basic usage again
-        run: tmux ls
-        
-
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
@@ -30,26 +23,12 @@ jobs:
       - name: Build superfile
         run: ./build.sh
 
+      # timeout command just launches and kills spf, to create the config directories
       - name: Check installation
-        run: tmux -V; ls; pwd; ls bin/; bin/spf path-list; bin/spf &
-
-      - name: delay 1 second
-        run: sleep 1
+        run: tmux -V; ls; pwd; ls bin/; bin/spf path-list; timeout 1s bin/spf
+        continue-on-error: true
       - name: set debug
         run: sed -i 's/debug = false/debug = true/g' /home/runner/.config/superfile/config.toml
-
-      - name: Check tmux superfile usage
-        run:  tmux -L superfile new-session -d -s spf_test_session "$(pwd)/bin/spf"; tmux -L superfile ls; tmux -L superfile list-windows -t spf_test_session 
-
-      - name: Pre run check again
-        run: ls /tmp/tmux-1001/; tmux -L superfile ls; tmux -L superfile list-windows -t spf_test_session
-
-      - name: delay 2 second
-        run: sleep 2
-
-      - name: Pre run check once again
-        run: ls /tmp/tmux-1001/; tmux -L superfile ls; tmux -L superfile list-windows -t spf_test_session
-
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -59,11 +38,8 @@ jobs:
       - name: Install Dependencies
         run: pip install -r testsuite/requirements.txt
 
-      - name: Pre run check
-        run: ls /tmp/tmux-1001/; tmux -L superfile ls; tmux -L superfile list-windows -t spf_test_session
-
       - name: Run Tests
-        run: python testsuite/main.py -d
+        run: python testsuite/main.py -d --close-wait-time 1
       
       - name: Print logs
         if: always()
