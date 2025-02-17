@@ -69,7 +69,7 @@ func Run(content embed.FS) {
 				Name:    "config-file",
 				Aliases: []string{"c"},
 				Usage:   "Specify the path to a different config file",
-				Value:   "", // Default to the existing config file path
+				Value:   "", // Default to the blank string indicating non-usage of flag
 			},
 		},
 		Action: func(c *cli.Context) error {
@@ -84,7 +84,7 @@ func Run(content embed.FS) {
 
 			// Validate the config file exists
 			if configFileArg != "" {
-				if _, err := os.Stat(variable.ConfigFile); os.IsNotExist(err) || err != nil {
+				if _, err := os.Stat(variable.ConfigFile); err != nil {
 					log.Fatalf("Error: While reading config file '%s' from arguement : %v", configFileArg, err)
 				} else {
 					variable.ConfigFile = configFileArg
@@ -113,6 +113,7 @@ func Run(content embed.FS) {
 			if variable.PrintLastDir {
 				fmt.Println(variable.LastDir)
 			}
+
 			CheckForUpdates()
 			return nil
 		},
