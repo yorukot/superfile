@@ -39,7 +39,7 @@ jobs:
         run: pip install -r testsuite/requirements.txt
 
       - name: Run Tests
-        run: python testsuite/main.py -d --close-wait-time 1
+        run: python testsuite/main.py -d
       
       - name: Print logs
         if: always()
