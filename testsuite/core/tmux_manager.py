@@ -20,6 +20,7 @@ class TmuxSPFManager(BaseSPFManager):
         super().__init__(spf_path)
         self.logger = logging.getLogger()
         self.server = libtmux.Server(socket_name=TmuxSPFManager.SPF_SOCKET_NAME)
+        self.logger.debug("server object : %s", self.server)
         self.spf_session : libtmux.Session = None
         self.spf_pane : libtmux.Pane = None
 
@@ -28,6 +29,7 @@ class TmuxSPFManager(BaseSPFManager):
                 window_command=self.spf_path, 
                 start_directory=start_dir)
         time.sleep(TmuxSPFManager.SPF_START_DELAY)
+        self.logger.debug("spf_session initialised : %s", self.spf_session)
 
         self.spf_pane = self.spf_session.active_pane
         self._is_spf_running = True

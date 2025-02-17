@@ -55,7 +55,10 @@ def main():
     # Resolve any symlinks, and make it absolute
     spf_path = spf_path.resolve()
 
-    run_tests(spf_path, only_run_tests=args.tests)
-
+    success = run_tests(spf_path, only_run_tests=args.tests)
+    if success:
+        sys.exit(0)
+    else:
+        sys.exit(1)
 
 main()

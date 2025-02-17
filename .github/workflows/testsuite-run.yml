@@ -1,0 +1,46 @@
+name: Python Testsuite Run
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install tmux
+        run: sudo apt-get update && sudo apt-get install -y tmux
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.22.2
+      - name: Build superfile
+        run: ./build.sh
+
+      # timeout command just launches and kills spf, to create the config directories
+      - name: Check installation
+        run: tmux -V; ls; pwd; ls bin/; bin/spf path-list; timeout 1s bin/spf
+        continue-on-error: true
+      - name: set debug
+        run: sed -i 's/debug = false/debug = true/g' /home/runner/.config/superfile/config.toml
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+    
+      - name: Install Dependencies
+        run: pip install -r testsuite/requirements.txt
+
+      - name: Run Tests
+        run: python testsuite/main.py -d
+      
+      - name: Print logs
+        if: always()
+        run: cat ~/.local/state/superfile/superfile.log
