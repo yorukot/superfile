@@ -33,6 +33,11 @@ class BaseTest(ABC):
         Returns:
             bool: True if validation passed
         """
+    @abstractmethod
+    def cleanup(self) -> None:
+        """Any required cleanup after test is done
+        """
+
 
 class GenericTestImpl(BaseTest):
     def __init__(self, test_env : Environment,
@@ -41,8 +46,10 @@ class GenericTestImpl(BaseTest):
         test_dirs : List[Path],
         test_files : List[Tuple[Path, str]],
         key_inputs : List[Union[keys.Keys,str]],
-        validate_exists : List[Path] = [],
-        validate_not_exists : List[Path] = []):
+        validate_exists : List[Path] = None,
+        validate_not_exists : List[Path] = None,
+        validate_spf_closed: bool = False,
+        close_wait_time : float = tconst.CLOSE_WAIT_TIME ):
         super().__init__(test_env)
         self.test_root = test_root
         self.start_dir = start_dir
@@ -51,6 +58,8 @@ class GenericTestImpl(BaseTest):
         self.key_inputs = key_inputs
         self.validate_exists = validate_exists
         self.validate_not_exists = validate_not_exists
+        self.validate_spf_closed = validate_spf_closed
+        self.close_wait_time = close_wait_time
     
     def setup(self) -> None:
         for dir_path in self.test_dirs:
@@ -80,7 +89,7 @@ class GenericTestImpl(BaseTest):
 
         time.sleep(tconst.OPERATION_DELAY)
         self.env.spf_mgr.send_special_input(keys.KEY_ESC)    
-        time.sleep(tconst.CLOSE_WAIT_TIME)
+        time.sleep(self.close_wait_time)
         self.logger.debug("Finished Execution")
 
     def validate(self) -> bool:
@@ -91,17 +100,26 @@ class GenericTestImpl(BaseTest):
         self.logger.debug("spf_manager info : %s, Current file structure : \n%s",
             self.env.spf_mgr.runtime_info(), self.env.fs_mgr.tree(self.test_root))
         try:
-            assert not self.env.spf_mgr.is_spf_running(), "Superfile is still running"
-            for file_path in self.validate_exists:
-                assert self.env.fs_mgr.check_exists(file_path), f"File {file_path} does not exists"
-            
-            for file_path in self.validate_not_exists:
-                assert not self.env.fs_mgr.check_exists(file_path), f"File {file_path} exists" 
+            if self.validate_spf_closed :
+                assert not self.env.spf_mgr.is_spf_running(), "Superfile is still running"
+
+            if self.validate_exists is not None:
+                for file_path in self.validate_exists:
+                    assert self.env.fs_mgr.check_exists(file_path), f"File {file_path} does not exists"
+
+            if self.validate_not_exists is not None:
+                for file_path in self.validate_not_exists:
+                    assert not self.env.fs_mgr.check_exists(file_path), f"File {file_path} exists" 
         except AssertionError as ae:
             self.logger.debug("Test assertion failed : %s", ae, exc_info=True)
             return False
                 
         return True
+
+    def cleanup(self) -> None:
+        # Cleanup after test is done
+        if self.env.spf_mgr.is_spf_running():
+            self.env.spf_mgr.close_spf()
     
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}"

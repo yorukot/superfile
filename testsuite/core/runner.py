@@ -5,7 +5,6 @@ from core.base_test import BaseTest
 
 import logging
 import platform
-import sys
 import importlib
 from pathlib import Path
 from typing import List
@@ -70,8 +69,10 @@ def run_tests(spf_path : Path, stop_on_fail : bool = True, only_run_tests : List
             t.setup()
             t.test_execute()
             cnt_executed += 1
+            passed : bool = t.validate()
+            t.cleanup()
 
-            if t.validate():
+            if passed:
                 logger.info("Passed test %s", t)
                 cnt_passed += 1
             else:
