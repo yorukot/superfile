@@ -10,9 +10,6 @@ FILE1 = TESTROOT / "file1"
 
 class CommandTest(GenericTestImpl):
     """Test compression and extraction
-
-    Args:
-        GenericTestImpl (_type_): _description_
     """
     def __init__(self, test_env : Environment):
         super().__init__(

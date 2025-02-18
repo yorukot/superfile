@@ -1,2 +1,4 @@
 pyautogui; sys_platform == "windows"
 libtmux; sys_platform == "linux" or sys_platform == "darwin"
+pyperclip
+assertpy

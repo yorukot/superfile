@@ -44,7 +44,7 @@ class GenericTestImpl(BaseTest):
         test_root : Path,
         start_dir : Path,
         test_dirs : List[Path],
-        key_inputs : List[Union[keys.Keys,str]],
+        key_inputs : List[Union[keys.Keys,str]] = None,
         test_files : List[Tuple[Path, str]] = None,
         validate_exists : List[Path] = None,
         validate_not_exists : List[Path] = None,
@@ -71,28 +71,33 @@ class GenericTestImpl(BaseTest):
         
         self.logger.debug("Current file structure : \n%s",
             self.env.fs_mgr.tree(self.test_root))
+        
+    
+    def start_spf(self) -> None:
+        self.env.spf_mgr.start_spf(self.env.fs_mgr.abspath(self.start_dir))
+        assert self.env.spf_mgr.is_spf_running(), "Superfile is not running"
 
+    def end_execution(self) -> None:
+        self.env.spf_mgr.send_special_input(keys.KEY_ESC)    
+        time.sleep(self.close_wait_time)
+        self.logger.debug("Finished Execution")
 
     def test_execute(self) -> None:
         """Execute the test
         """
-        # Start in DIR1
-        self.env.spf_mgr.start_spf(self.env.fs_mgr.abspath(self.start_dir))
-
-        assert self.env.spf_mgr.is_spf_running(), "Superfile is not running"
-
-        for cur_input in self.key_inputs:
-            if isinstance(cur_input, keys.Keys):
-                self.env.spf_mgr.send_special_input(cur_input)
-            else:
-                assert isinstance(cur_input, str), "Invalid input type"
-                self.env.spf_mgr.send_text_input(cur_input)
-            time.sleep(tconst.KEY_DELAY)
+        self.start_spf()
+        if self.key_inputs is not None:
+            for cur_input in self.key_inputs:
+                if isinstance(cur_input, keys.Keys):
+                    self.env.spf_mgr.send_special_input(cur_input)
+                else:
+                    assert isinstance(cur_input, str), "Invalid input type"
+                    self.env.spf_mgr.send_text_input(cur_input)
+                time.sleep(tconst.KEY_DELAY)
 
         time.sleep(tconst.OPERATION_DELAY)
-        self.env.spf_mgr.send_special_input(keys.KEY_ESC)    
-        time.sleep(self.close_wait_time)
-        self.logger.debug("Finished Execution")
+        self.end_execution()
+        
 
     def validate(self) -> bool:
         """Validate that test passed. Log exception if failed.
