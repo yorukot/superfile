@@ -44,8 +44,8 @@ class GenericTestImpl(BaseTest):
         test_root : Path,
         start_dir : Path,
         test_dirs : List[Path],
-        test_files : List[Tuple[Path, str]],
         key_inputs : List[Union[keys.Keys,str]],
+        test_files : List[Tuple[Path, str]] = None,
         validate_exists : List[Path] = None,
         validate_not_exists : List[Path] = None,
         validate_spf_closed: bool = False,
@@ -64,8 +64,10 @@ class GenericTestImpl(BaseTest):
     def setup(self) -> None:
         for dir_path in self.test_dirs:
             self.env.fs_mgr.makedirs(dir_path)
-        for file_path, data in self.test_files:
-            self.env.fs_mgr.create_file(file_path, data)
+        
+        if self.test_files is not None:
+            for file_path, data in self.test_files:
+                self.env.fs_mgr.create_file(file_path, data)
         
         self.logger.debug("Current file structure : \n%s",
             self.env.fs_mgr.tree(self.test_root))
