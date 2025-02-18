@@ -10,7 +10,8 @@ FILE1 = TESTROOT / "file1.txt"
 FILE1_COPY1 = TESTROOT / "file1(1).txt"
 
 class CopyWTest(GenericTestImpl):
-
+    """Testcase to validate copying with Ctrl+W shortcut 
+    """
     def __init__(self, test_env : Environment):
         super().__init__(
             test_env=test_env,

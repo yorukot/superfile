@@ -28,6 +28,7 @@ class SpecialKeys(Keys):
 
 KEY_CTRL_A : Keys = CtrlKeys('a')
 KEY_CTRL_C : Keys = CtrlKeys('c')
+KEY_CTRL_E : Keys = CtrlKeys('e')
 KEY_CTRL_D : Keys = CtrlKeys('d')
 KEY_CTRL_M : Keys = CtrlKeys('m')
 KEY_CTRL_R : Keys = CtrlKeys('r')
