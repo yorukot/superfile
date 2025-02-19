@@ -28,8 +28,10 @@ class SpecialKeys(Keys):
 
 KEY_CTRL_A : Keys = CtrlKeys('a')
 KEY_CTRL_C : Keys = CtrlKeys('c')
+KEY_CTRL_E : Keys = CtrlKeys('e')
 KEY_CTRL_D : Keys = CtrlKeys('d')
 KEY_CTRL_M : Keys = CtrlKeys('m')
+KEY_CTRL_P : Keys = CtrlKeys('p')
 KEY_CTRL_R : Keys = CtrlKeys('r')
 KEY_CTRL_V : Keys = CtrlKeys('v')
 KEY_CTRL_W : Keys = CtrlKeys('w')

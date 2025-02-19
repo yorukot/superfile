@@ -315,6 +315,12 @@ func LoadAllDefaultConfig(content embed.FS) {
 		}
 	}
 
+	// Prevent failure for first time app run by making sure parent directories exists
+	if err = os.MkdirAll(filepath.Dir(variable.ThemeFileVersion), 0755); err != nil {
+		slog.Error("error creating theme file parent directory", "error", err)
+		return
+	}
+
 	err = os.WriteFile(variable.ThemeFileVersion, []byte(variable.CurrentVersion), 0644)
 	if err != nil {
 		slog.Error("error writing theme file version", "error", err)
