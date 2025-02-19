@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"fmt"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -70,7 +69,7 @@ func (m *model) enterPanel() {
 	} else if !panel.element[panel.cursor].directory {
 		fileInfo, err := os.Lstat(panel.element[panel.cursor].location)
 		if err != nil {
-			outPutLog("err when getting file info", err)
+			slog.Error("Error while getting file info", "error", err)
 			return
 		}
 
@@ -104,7 +103,7 @@ func (m *model) enterPanel() {
 			cmd := exec.Command(dllpath, dllfile, panel.element[panel.cursor].location)
 			err = cmd.Start()
 			if err != nil {
-				outPutLog(fmt.Sprintf("err when open file with %s", openCommand), err)
+				slog.Error("Error while open file with", "error", err)
 			}
 
 			return
@@ -113,7 +112,7 @@ func (m *model) enterPanel() {
 		cmd := exec.Command(openCommand, panel.element[panel.cursor].location)
 		err = cmd.Start()
 		if err != nil {
-			outPutLog(fmt.Sprintf("err when open file with %s", openCommand), err)
+			slog.Error("Error while open file with", "error", err)
 		}
 
 	}
@@ -172,8 +171,6 @@ func (m *model) singleItemSelect() {
 		}
 
 		m.fileModel.filePanels[m.filePanelFocusIndex] = panel
-	} else {
-		outPutLog("No elements to select or cursor out of bounds.")
 	}
 }
 
@@ -190,7 +187,7 @@ func (m *model) toggleDotFileController() {
 	m.updatedToggleDotFile = true
 	err := os.WriteFile(variable.ToggleDotFile, []byte(newToggleDotFile), 0644)
 	if err != nil {
-		outPutLog("Pinned folder function updatedData superfile data error", err)
+		slog.Error("Error while pinned folder function updatedData superfile data", "error", err)
 	}
 
 }
@@ -207,7 +204,7 @@ func (m *model) toggleFooterController() {
 	}
 	err := os.WriteFile(variable.ToggleFooter, []byte(newToggleFooterFile), 0644)
 	if err != nil {
-		outPutLog("Toggle footer function updatedData superfile data error", err)
+		slog.Error("Error while Toggle footer function updatedData superfile data", "error", err)
 	}
 	m.setFooterSize(m.fullHeight)
 

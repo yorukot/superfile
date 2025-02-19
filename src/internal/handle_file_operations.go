@@ -226,7 +226,7 @@ func (m *model) deleteMultipleItems() {
 				p.state = failure
 				message.processNewState = p
 				channel <- message
-				outPutLog("Delete multiple item function error", err)
+				slog.Error("Error while delete multiple item function", "error", err)
 				m.processBarModel.process[id] = p
 				break
 			} else {
@@ -280,7 +280,7 @@ func (m *model) completelyDeleteSingleItem() {
 
 	err := os.RemoveAll(panel.element[panel.cursor].location)
 	if err != nil {
-		outPutLog("Completely delete single item function remove file error", err)
+		slog.Error("Error while completely delete single item function remove file", "error", err)
 	}
 
 	if err != nil {
@@ -342,14 +342,14 @@ func (m *model) completelyDeleteMultipleItems() {
 			}
 			err := os.RemoveAll(filePath)
 			if err != nil {
-				outPutLog("Completely delete multiple item function remove file error", err)
+				slog.Error("Error while completely delete multiple item function remove file", "error", err)
 			}
 
 			if err != nil {
 				p.state = failure
 				message.processNewState = p
 				channel <- message
-				outPutLog("Completely delete multiple item function error", err)
+				slog.Error("Error while completely delete multiple item function", "error", err)
 				m.processBarModel.process[id] = p
 				break
 			} else {
@@ -491,7 +491,7 @@ func (m *model) pasteItem() {
 			p.state = failure
 			message.processNewState = p
 			channel <- message
-			outPutLog(errMessage, err)
+			slog.Error(errMessage, err)
 			m.processBarModel.process[id] = p
 			break
 		}
@@ -541,7 +541,7 @@ func (m *model) extractFile() {
 	default:
 		err = extractCompressFile(panel.element[panel.cursor].location, outputDir)
 		if err != nil {
-			outPutLog("Error extract file", "error", err)
+			slog.Error("Error extract file", "error", err)
 			return
 		}
 	}
@@ -620,13 +620,13 @@ func (m *model) openDirectoryWithEditor() tea.Cmd {
 func (m *model) copyPath() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	if err := clipboard.WriteAll(panel.element[panel.cursor].location); err != nil {
-		outPutLog("Copy path error", panel.element[panel.cursor].location, err)
+		slog.Error("Error while copy path", "error", err)
 	}
 }
 
 func (m *model) copyPWD() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	if err := clipboard.WriteAll(panel.location); err != nil {
-		outPutLog("Copy present working directory error", panel.location, err)
+		slog.Error("Error while copy present working directory", "error", err)
 	}
 }
