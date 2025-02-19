@@ -29,8 +29,10 @@ func (m *model) sidebarRender() string {
 
 	s := sideBarSuperfileTitle + "\n"
 
-	m.sidebarModel.searchBar.Placeholder = "(" + hotkeys.SearchBar[0] + ")" + " Search"
-	s += "\n" + ansi.Truncate(m.sidebarModel.searchBar.View(), Config.SidebarWidth-2, "...")
+	if m.sidebarModel.searchBar.Focused() {
+		m.sidebarModel.searchBar.Placeholder = "(" + hotkeys.SearchBar[0] + ")" + " Search"
+		s += "\n" + ansi.Truncate(m.sidebarModel.searchBar.View(), Config.SidebarWidth-2, "...")
+	}
 
 	if m.sidebarModel.noActualDir() {
 		s += "\n" + sideBarNoneText
