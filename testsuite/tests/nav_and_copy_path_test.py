@@ -13,8 +13,7 @@ DIR1 = TESTROOT / "dir1"
 FILE1 = TESTROOT / "file1"
 FILE2 = TESTROOT / "file2"
 
-# Temporarily disabled, till we fix xclip does not works in github actions 
-class NavCopyPathTest_Disabled(GenericTestImpl):
+class NavCopyPathTest(GenericTestImpl):
     """Test navigation, and Copying of path
     """
     def __init__(self, test_env : Environment):
