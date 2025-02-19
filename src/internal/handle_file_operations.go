@@ -491,7 +491,7 @@ func (m *model) pasteItem() {
 			p.state = failure
 			message.processNewState = p
 			channel <- message
-			slog.Error(errMessage, err)
+			slog.Error(errMessage, "error", err)
 			m.processBarModel.process[id] = p
 			break
 		}

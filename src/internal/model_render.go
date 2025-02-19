@@ -17,7 +17,6 @@ import (
 	"github.com/yorukot/ansichroma"
 	"github.com/yorukot/superfile/src/config/icon"
 	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
-	"log/slog"
 )
 
 func (m *model) sidebarRender() string {
@@ -362,7 +361,7 @@ func (m *model) clipboardRender() string {
 			} else {
 				fileInfo, err := os.Stat(m.copyItems.items[i])
 				if err != nil {
-					slog.Error("Clipboard render function get item state error", err)
+					slog.Error("Clipboard render function get item state ", "error", err)
 				}
 				if !os.IsNotExist(err) {
 					clipboardRender += clipboardPrettierName(m.copyItems.items[i], footerWidth(m.fullWidth)-3, fileInfo.IsDir(), false) + "\n"

@@ -86,7 +86,7 @@ func getExternalMediaFolders() (disks []directory) {
 
 	if err != nil {
 		slog.Error("Error while getting external media: ", "error", err)
-		return disks		
+		return disks
 	}
 	for _, disk := range parts {
 		if isExternalDiskPath(disk.Mountpoint) {
