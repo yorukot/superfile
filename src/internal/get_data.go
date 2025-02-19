@@ -2,6 +2,7 @@ package internal
 
 import (
 	"encoding/json"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"slices"
@@ -55,7 +56,7 @@ func getPinnedDirectories() []directory {
 
 	jsonData, err := os.ReadFile(variable.PinnedFile)
 	if err != nil {
-		outPutLog("Read superfile data error", err)
+		slog.Error("Error while reading pinned data", "error", err)
 		return directories
 	}
 
@@ -74,7 +75,7 @@ func getPinnedDirectories() []directory {
 		}
 		// If the data is in neither format, log the error
 	} else {
-		outPutLog("Error parsing pinned data", err)
+		slog.Error("Error parsing pinned data", "error", err)
 	}
 	return directories
 }
@@ -84,7 +85,7 @@ func getExternalMediaFolders() (disks []directory) {
 	parts, err := disk.Partitions(true)
 
 	if err != nil {
-		outPutLog("Error while getting external media: ", err)
+		slog.Error("Error while getting external media", "error", err)
 		return disks
 	}
 	for _, disk := range parts {

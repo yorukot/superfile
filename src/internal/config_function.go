@@ -49,7 +49,7 @@ func initialConfig(dir string) (toggleDotFileBool bool, toggleFooter bool, first
 
 	toggleDotFileData, err := os.ReadFile(variable.ToggleDotFile)
 	if err != nil {
-		outPutLog("Error while reading toggleDotFile data error:", err)
+		slog.Error("Error while reading toggleDotFile data", "error", err)
 	}
 	if string(toggleDotFileData) == "true" {
 		toggleDotFileBool = true
@@ -61,7 +61,7 @@ func initialConfig(dir string) (toggleDotFileBool bool, toggleFooter bool, first
 
 	toggleFooterData, err := os.ReadFile(variable.ToggleFooter)
 	if err != nil {
-		outPutLog("Error while reading toggleFooter data error:", err)
+		slog.Error("Error while reading toggleFooter data", "error", err)
 	}
 	if string(toggleFooterData) == "true" {
 		toggleFooter = true
@@ -77,7 +77,7 @@ func initialConfig(dir string) (toggleDotFileBool bool, toggleFooter bool, first
 	if Config.Metadata {
 		et, err = exiftool.NewExiftool()
 		if err != nil {
-			outPutLog("Initial model function init exiftool error", err)
+			slog.Error("Error while initializing exiftool", "error", err)
 		}
 	}
 
@@ -231,7 +231,7 @@ func loadThemeFile() {
 	themeFile := filepath.Join(variable.ThemeFolder, Config.Theme+".toml")
 	data, err := os.ReadFile(themeFile)
 	if err != nil {
-		slog.Info("Could not read theme file", "path", themeFile, "error", err)
+		slog.Error("Error while reading theme file", "path", themeFile, "error", err)
 		data = []byte(DefaultThemeString)
 	}
 
@@ -248,21 +248,21 @@ func LoadAllDefaultConfig(content embed.FS) {
 
 	temp, err := content.ReadFile(variable.EmbedHotkeysFile)
 	if err != nil {
-		outPutLog("Error reading from embed file:", err)
+		slog.Error("Error reading from embed file", "path", variable.EmbedHotkeysFile, "error", err)
 		return
 	}
 	HotkeysTomlString = string(temp)
 
 	temp, err = content.ReadFile(variable.EmbedConfigFile)
 	if err != nil {
-		outPutLog("Error reading from embed file:", err)
+		slog.Error("Error reading from embed file", "path", variable.EmbedConfigFile, "error", err)
 		return
 	}
 	ConfigTomlString = string(temp)
 
 	temp, err = content.ReadFile(variable.EmbedThemeCatppuccinFile)
 	if err != nil {
-		outPutLog("Error reading from embed file:", err)
+		slog.Error("Error reading from embed file", "path", variable.EmbedThemeCatppuccinFile, "error", err)
 		return
 	}
 	DefaultThemeString = string(temp)
@@ -270,7 +270,7 @@ func LoadAllDefaultConfig(content embed.FS) {
 	// Todo : We should not return here, and have a default value for this
 	currentThemeVersion, err := os.ReadFile(variable.ThemeFileVersion)
 	if err != nil && !os.IsNotExist(err) {
-		outPutLog("Error reading from file:", err)
+		slog.Error("Error reading from file", "path", variable.ThemeFileVersion, "error", err)
 		return
 	}
 
@@ -279,7 +279,7 @@ func LoadAllDefaultConfig(content embed.FS) {
 	if os.IsNotExist(err) {
 		err := os.MkdirAll(variable.ThemeFolder, 0755)
 		if err != nil {
-			outPutLog("error create theme directory", err)
+			slog.Error("Error create theme directory", "error", err)
 			return
 		}
 	} else if string(currentThemeVersion) == variable.CurrentVersion {
@@ -288,7 +288,7 @@ func LoadAllDefaultConfig(content embed.FS) {
 
 	files, err := content.ReadDir(variable.EmbedThemeDir)
 	if err != nil {
-		outPutLog("error read theme directory from embed", err)
+		slog.Error("Error read theme directory from embed", "error", err)
 		return
 	}
 
@@ -299,25 +299,25 @@ func LoadAllDefaultConfig(content embed.FS) {
 		// This will not break in windows. This is a relative path for Embed FS. It uses "/" only
 		src, err := content.ReadFile(variable.EmbedThemeDir + "/" + file.Name())
 		if err != nil {
-			outPutLog("error read theme file from embed", err)
+			slog.Error("Error read theme file from embed", "error", err)
 			return
 		}
 
 		file, err := os.Create(filepath.Join(variable.ThemeFolder, file.Name()))
 		if err != nil {
-			outPutLog("error create theme file from embed", err)
+			slog.Error("Error create theme file from embed", "error", err)
 			return
 		}
 		defer file.Close()
 		_, err = file.Write(src)
 		if err != nil {
-			slog.Error("error writing theme file from embed", "error", err)
+			slog.Error("Error writing theme file from embed", "error", err)
 			return
 		}
 	}
 
 	err = os.WriteFile(variable.ThemeFileVersion, []byte(variable.CurrentVersion), 0644)
 	if err != nil {
-		slog.Error("error writing theme file version", "error", err)
+		slog.Error("Error writing theme file version", "error", err)
 	}
 }

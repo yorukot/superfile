@@ -31,12 +31,12 @@ func (m *model) createItem() {
 	if !strings.HasSuffix(m.typingModal.textInput.Value(), string(filepath.Separator)) {
 		path, _ = renameIfDuplicate(path)
 		if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
-			outPutLog("createItem error during directory creation : ", err)
+			slog.Error("Error while creating directory", "error", err)
 			return
 		}
 		f, err := os.Create(path)
 		if err != nil {
-			outPutLog("createItem error during file creation : ", err)
+			slog.Error("Error while creating file", "error", err)
 			return
 		}
 		defer f.Close()
@@ -44,7 +44,7 @@ func (m *model) createItem() {
 		// Directory creation
 		err := os.MkdirAll(path, 0755)
 		if err != nil {
-			outPutLog("createItem error during directory creation : ", err)
+			slog.Error("Error while creating directory", "error", err)
 			return
 		}
 	}
@@ -67,7 +67,7 @@ func (m *model) confirmRename() {
 	// Rename the file
 	err := os.Rename(oldPath, newPath)
 	if err != nil {
-		outPutLog("confirmRename error during rename : ", err)
+		slog.Error("Error while renaming file", "error", err)
 		// Dont return. We have to also reset the panel and model information
 	}
 	m.fileModel.renaming = false
@@ -227,7 +227,7 @@ func (m *model) enterCommandLine() {
 	output, err := cmd.CombinedOutput()
 
 	if err != nil {
-		slog.Error("Command execution failed", "error", err, "output", string(output))
+		slog.Error("Error while executing command", "error", err, "output", string(output))
 		return
 	}
 
