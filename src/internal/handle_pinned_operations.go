@@ -2,7 +2,6 @@ package internal
 
 import (
 	"encoding/json"
-	"log/slog"
 	"os"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -79,12 +78,12 @@ func (m *model) confirmSidebarRename() {
 
 	jsonData, err := json.Marshal(pinnedDirs)
 	if err != nil {
-		slog.Error("Error marshaling pinned directories data", "error", err)
+		outPutLog("Error marshaling pinned directories data")
 	}
 
 	err = os.WriteFile(variable.PinnedFile, jsonData, 0644)
 	if err != nil {
-		slog.Error("Error updating pinned directories data", "error", err)
+		outPutLog("Error updating pinned directories data", err)
 	}
 }
 

@@ -4,7 +4,6 @@ import (
 	"archive/zip"
 	"fmt"
 	"io"
-	"log/slog"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -69,7 +68,7 @@ func extractCompressFile(src, dest string) error {
 		if len(channel) < 5 {
 			channel <- message
 		}
-		slog.Error("Error extracting", "path", src, "error", err)
+		outPutLog(fmt.Sprintf("Error extracting %s: %v", src, err))
 		return err
 	}
 
@@ -93,7 +92,7 @@ func unzip(src, dest string) error {
 	}
 	defer func() {
 		if err := r.Close(); err != nil {
-			slog.Error("Error closing zip reader", "error", err)
+			outPutLog(fmt.Sprintf("Error closing zip reader: %v", err))
 		}
 	}()
 
@@ -126,7 +125,7 @@ func unzip(src, dest string) error {
 		}
 		defer func() {
 			if err := rc.Close(); err != nil {
-				slog.Error("Error closing file reader", "error", err)
+				outPutLog(fmt.Sprintf("Error closing file reader: %v", err))
 			}
 		}()
 
@@ -162,7 +161,7 @@ func unzip(src, dest string) error {
 		}
 		defer func() {
 			if err := outFile.Close(); err != nil {
-				slog.Error("Error closing output file", "path", path, "error", err)
+				outPutLog(fmt.Sprintf("Error closing output file %s: %v", path, err))
 			}
 		}()
 
@@ -190,7 +189,7 @@ func unzip(src, dest string) error {
 			p.state = failure
 			message.processNewState = p
 			channel <- message
-			slog.Error("Error extracting", "path", f.Name, "error", err)
+			outPutLog(fmt.Sprintf("Error extracting %s: %v", f.Name, err))
 			p.done++
 			continue
 		}

@@ -45,7 +45,7 @@ func returnFocusType(focusPanel focusPanelType) filePanelFocusType {
 func returnDirElement(location string, displayDotFile bool, sortOptions sortOptionsModelData) (directoryElement []element) {
 	dirEntries, err := os.ReadDir(location)
 	if err != nil {
-		slog.Error("Return folder element function error", "error", err)
+		outPutLog("Return folder element function error", err)
 		return directoryElement
 	}
 
@@ -95,11 +95,11 @@ func returnDirElement(location string, displayDotFile bool, sortOptions sortOpti
 				// No need of early return, we only call len() on filesI, so nil would
 				// just result in 0
 				if err != nil {
-					slog.Error("Error when reading directory during sort", "error", err)
+					outPutLog("Error when reading directory during sort", err)
 				}
 				filesJ, err := os.ReadDir(filepath.Join(location, dirEntries[j].Name()))
 				if err != nil {
-					slog.Error("Error when reading directory during sort", "error", err)
+					outPutLog("Error when reading directory during sort", err)
 				}
 				return len(filesI) < len(filesJ) != reversed
 			} else {
@@ -134,7 +134,7 @@ func returnDirElementBySearchString(location string, displayDotFile bool, search
 
 	items, err := os.ReadDir(location)
 	if err != nil {
-		slog.Error("Return folder element function error", "error", err)
+		outPutLog("Return folder element function error", err)
 		return []element{}
 	}
 
@@ -194,6 +194,11 @@ func arrayContains(s []string, str string) bool {
 		}
 	}
 	return false
+}
+
+// Todo : Eventually we will replace all calls to direct slog calls
+func outPutLog(values ...interface{}) {
+	slog.Info(fmt.Sprintln(values...))
 }
 
 // Todo : Eventually we want to remove all such usage that can result in app exiting abruptly
@@ -319,7 +324,7 @@ func (m *model) returnMetaData() {
 	}
 
 	if err != nil {
-		slog.Error("Error while getting file state", "error", err)
+		outPutLog("Return meta data function get file state error", err)
 	}
 
 	if fileInfo.IsDir() {
@@ -336,7 +341,7 @@ func (m *model) returnMetaData() {
 
 	checkIsSymlinked, err := os.Lstat(filePath)
 	if err != nil {
-		slog.Error("Error while getting file info", "error", err)
+		outPutLog("err when getting file info", err)
 		return
 	}
 
@@ -346,7 +351,7 @@ func (m *model) returnMetaData() {
 
 		for _, fileInfo := range fileInfos {
 			if fileInfo.Err != nil {
-				slog.Error("Return meta data function error", "error", fileInfo.Err)
+				outPutLog("Return meta data function error", fileInfo, fileInfo.Err)
 				continue
 			}
 
@@ -365,7 +370,7 @@ func (m *model) returnMetaData() {
 			// Calculate MD5 checksum
 			checksum, err := calculateMD5Checksum(filePath)
 			if err != nil {
-				slog.Error("Error calculating MD5 checksum", "error", err)
+				outPutLog("Error calculating MD5 checksum", err)
 			} else {
 				md5Data := [2]string{"MD5Checksum", checksum}
 				m.fileMetaData.metaData = append(m.fileMetaData.metaData, md5Data)
@@ -402,7 +407,7 @@ func dirSize(path string) int64 {
 	var size int64
 	err := filepath.WalkDir(path, func(_ string, entry os.DirEntry, err error) error {
 		if err != nil {
-			slog.Error("Error while getting directory size", "error", err)
+			outPutLog("Dir size function error", err)
 		}
 		if !entry.IsDir() {
 			info, err := entry.Info()
@@ -413,7 +418,7 @@ func dirSize(path string) int64 {
 		return err
 	})
 	if err != nil {
-		slog.Error("Errors during WalkDir", "error", err)
+		slog.Error("errors during WalkDir", "error", err)
 	}
 	return size
 }

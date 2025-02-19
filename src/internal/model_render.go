@@ -361,7 +361,7 @@ func (m *model) clipboardRender() string {
 			} else {
 				fileInfo, err := os.Stat(m.copyItems.items[i])
 				if err != nil {
-					slog.Error("Error while getting item state", "error", err)
+					outPutLog("Clipboard render function get item state error", err)
 				}
 				if !os.IsNotExist(err) {
 					clipboardRender += clipboardPrettierName(m.copyItems.items[i], footerWidth(m.fullWidth)-3, fileInfo.IsDir(), false) + "\n"
@@ -614,7 +614,7 @@ func (m *model) filePreviewPanelRender() string {
 	fileInfo, err := os.Stat(itemPath)
 
 	if err != nil {
-		slog.Error("Error while getting file info", "error", err)
+		outPutLog("error get file info", err)
 		return box.Render("\n --- " + icon.Error + " Error get file info ---")
 	}
 
@@ -630,7 +630,7 @@ func (m *model) filePreviewPanelRender() string {
 
 		files, err := os.ReadDir(dirPath)
 		if err != nil {
-			slog.Error("Error render directory preview", "error", err)
+			outPutLog("Error render directory preview", err)
 			return box.Render("\n --- " + icon.Error + " Error render directory preview ---")
 		}
 
@@ -669,7 +669,7 @@ func (m *model) filePreviewPanelRender() string {
 		}
 
 		if err != nil {
-			slog.Error("Error covernt image to ansi", "error", err)
+			outPutLog("Error covernt image to ansi", err)
 			return box.Render("\n --- " + icon.Error + " Error covernt image to ansi ---")
 		}
 
@@ -681,7 +681,7 @@ func (m *model) filePreviewPanelRender() string {
 	if format == nil {
 		isText, err := isTextFile(itemPath)
 		if err != nil {
-			slog.Error("Error while checking text file", "error", err)
+			outPutLog("Error while checking text file", err)
 			return box.Render("\n --- " + icon.Error + " Error get file info ---")
 		} else if !isText {
 			return box.Render("\n --- " + icon.Error + " Unsupported formats ---")
@@ -691,7 +691,7 @@ func (m *model) filePreviewPanelRender() string {
 	// At this point either format is not nil, or we can read the file
 	fileContent, err := readFileContent(itemPath, m.fileModel.width+20, previewLine)
 	if err != nil {
-		slog.Error("Error while open file", "error", err)
+		outPutLog(err)
 		return box.Render("\n --- " + icon.Error + " Error open file ---")
 	}
 
@@ -703,7 +703,7 @@ func (m *model) filePreviewPanelRender() string {
 		}
 		fileContent, err = ansichroma.HightlightString(fileContent, format.Config().Name, theme.CodeSyntaxHighlightTheme, background)
 		if err != nil {
-			slog.Error("Error render code highlight", "error", err)
+			outPutLog("Error render code highlight", err)
 			return box.Render("\n --- " + icon.Error + " Error render code highlight ---")
 		}
 	}
