@@ -255,7 +255,7 @@ func CheckForUpdates() {
 		return
 	}
 
-	currentTime := time.Now()
+	currentTime := time.Now().UTC()
 
 	if lastTime.IsZero() || currentTime.Sub(lastTime) >= 24*time.Hour {
 		resp, err := http.Get(variable.LatestVersionURL)
@@ -322,7 +322,8 @@ func readLastTimeCheckVersionFromFile(filename string) (time.Time, error) {
 		return time.Time{}, err
 	}
 
-	return lastTime, nil
+	// Ensure the time is in UTC
+	return lastTime.UTC(), nil
 }
 
 // Write content to filename
