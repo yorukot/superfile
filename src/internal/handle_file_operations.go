@@ -519,6 +519,12 @@ func (m *model) extractFile() {
 	var err error
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	ext := strings.ToLower(filepath.Ext(panel.element[panel.cursor].location))
+	err = isValidFileExtension(ext)
+	if err != nil {
+		slog.Error("Error extract file", "error", err)
+		return
+	}
+
 	outputDir := fileNameWithoutExtension(panel.element[panel.cursor].location)
 	outputDir, err = renameIfDuplicate(outputDir)
 	if err != nil {

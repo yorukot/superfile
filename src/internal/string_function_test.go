@@ -87,6 +87,34 @@ func TestIsBufferPrintable(t *testing.T) {
 	}
 }
 
+func TestIsValidFileExtension(t *testing.T) {
+	var inputs = []struct {
+		input         string
+		expectedError bool
+	}{
+		{".zip", true},
+		{".zip ", false},
+		{".zip_", false},
+		{"", false},
+		{".", false},
+		{".jpg", true},
+		{".123", true},       // Numeric extension is valid
+		{".a", true},         // Single-letter extensions are valid
+		{"zip", false},       // Missing dot
+		{".zip-file", false}, // Invalid character
+	}
+	for _, tt := range inputs {
+		err := isValidFileExtension(tt.input)
+		if (err != nil) != tt.expectedError {
+			fmt.Printf("Test failed for input %q: unexpected result\n", tt.input)
+		} else if err != nil {
+			fmt.Printf("validateFileExtension(%q) failed: %v\n", tt.input, err)
+		} else {
+			fmt.Printf("validateFileExtension(%q) passed\n", tt.input)
+		}
+	}
+}
+
 func TestMakePrintable(t *testing.T) {
 	var inputs = []struct {
 		input    string
