@@ -258,7 +258,10 @@ func CheckForUpdates() {
 	currentTime := time.Now()
 
 	if lastTime.IsZero() || currentTime.Sub(lastTime) >= 24*time.Hour {
-		resp, err := http.Get(variable.LatestVersionURL)
+		client := &http.Client{
+			Timeout: 10 * time.Second,
+		}
+		resp, err := client.Get(variable.LatestVersionURL)
 		if err != nil {
 			fmt.Println("Error checking for updates:", err)
 			return
