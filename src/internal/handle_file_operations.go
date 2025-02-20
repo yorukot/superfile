@@ -585,7 +585,13 @@ func (m *model) openFileWithEditor() tea.Cmd {
 			editor = "nano"
 		}
 	}
-	c := exec.Command(editor, panel.element[panel.cursor].location)
+
+	// Split the editor command into command and arguments
+	parts := strings.Fields(editor)
+	cmd := parts[0]
+	args := append(parts[1:], panel.element[panel.cursor].location)
+
+	c := exec.Command(cmd, args...)
 
 	return tea.ExecProcess(c, func(err error) tea.Msg {
 		return editorFinishedMsg{err}
