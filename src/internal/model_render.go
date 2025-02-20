@@ -29,7 +29,7 @@ func (m *model) sidebarRender() string {
 
 	s := sideBarSuperfileTitle + "\n"
 
-	if m.sidebarModel.searchBar.Focused() {
+	if m.sidebarModel.searchBar.Focused() || m.sidebarModel.searchBar.Value() != "" || m.focusPanel == sidebarFocus {
 		m.sidebarModel.searchBar.Placeholder = "(" + hotkeys.SearchBar[0] + ")" + " Search"
 		s += "\n" + ansi.Truncate(m.sidebarModel.searchBar.View(), Config.SidebarWidth-2, "...")
 	}
