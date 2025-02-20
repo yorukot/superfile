@@ -15,12 +15,13 @@ func containsKey(v string, a []string) string {
 // keys that performs actions in multiple panels, like going up or down,
 // check the state of model m and handle properly.
 func (m *model) mainKey(msg string, cmd tea.Cmd) tea.Cmd {
+
 	switch msg {
 
 	// If move up Key is pressed, check the current state and executes
 	case containsKey(msg, hotkeys.ListUp):
 		if m.focusPanel == sidebarFocus {
-			m.controlSideBarListUp(false)
+			m.sidebarModel.controlListUp(false, m.mainPanelHeight)
 		} else if m.focusPanel == processBarFocus {
 			m.controlProcessbarListUp(false)
 		} else if m.focusPanel == metadataFocus {
@@ -36,7 +37,7 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) tea.Cmd {
 		// If move down Key is pressed, check the current state and executes
 	case containsKey(msg, hotkeys.ListDown):
 		if m.focusPanel == sidebarFocus {
-			m.controlSideBarListDown(false)
+			m.sidebarModel.controlListDown(false, m.mainPanelHeight)
 		} else if m.focusPanel == processBarFocus {
 			m.controlProcessbarListDown(false)
 		} else if m.focusPanel == metadataFocus {
@@ -144,6 +145,9 @@ func (m *model) normalAndBrowserModeKey(msg string) {
 		}
 		if m.focusPanel == sidebarFocus && (msg == containsKey(msg, hotkeys.FilePanelItemRename)) {
 			m.pinnedItemRename()
+		}
+		if m.focusPanel == sidebarFocus && (msg == containsKey(msg, hotkeys.SearchBar)) {
+			m.sidebarSearchBarFocus()
 		}
 		return
 	}
@@ -295,6 +299,17 @@ func (m *model) sidebarRenamingKey(msg string) {
 		m.cancelSidebarRename()
 	case containsKey(msg, hotkeys.ConfirmTyping):
 		m.confirmSidebarRename()
+	}
+}
+
+func (m *model) sidebarSearchBarKey(msg string) {
+	switch msg {
+	case containsKey(msg, hotkeys.CancelTyping):
+		m.sidebarModel.searchBar.Blur()
+		m.sidebarModel.searchBar.SetValue("")
+	case containsKey(msg, hotkeys.ConfirmTyping):
+		m.sidebarModel.searchBar.Blur()
+		m.sidebarModel.resetCursor()
 	}
 }
 

@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -122,6 +123,11 @@ func (m *model) enterPanel() {
 
 // Switch to the directory where the sidebar cursor is located
 func (m *model) sidebarSelectDirectory() {
+	// We can't do this when we have only divider directories
+	// m.sidebarModel.directories[m.sidebarModel.cursor].location would point to a divider dir.
+	if m.sidebarModel.noActualDir() {
+		return
+	}
 	m.focusPanel = nonePanelFocus
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 
@@ -404,135 +410,91 @@ func (m *model) itemSelectDown(wheel bool) {
 
 // ======================================== Sidebar controller ========================================
 
-// Yorukot: P.S God bless me, this sidebar controller code is really ugly...
+func (s *sidebarModel) controlListUp(wheel bool, mainPanelHeight int) {
 
-// Control sidebar panel list up
-func (m *model) controlSideBarListUp(wheel bool) {
+	// Todo : This snippet is duplicated everywhere. It can be better refractored outside
 	runTime := 1
 	if wheel {
 		runTime = wheelRunTime
 	}
-
 	for i := 0; i < runTime; i++ {
-		if m.sidebarModel.cursor > 0 {
-			m.sidebarModel.cursor--
-		} else {
-			m.sidebarModel.cursor = len(m.sidebarModel.directories) - 1
-		}
-		newDirectory := m.sidebarModel.directories[m.sidebarModel.cursor].location
-
-		for newDirectory == "Pinned+-*/=?" || newDirectory == "Disks+-*/=?" {
-			m.sidebarModel.cursor--
-			newDirectory = m.sidebarModel.directories[m.sidebarModel.cursor].location
-		}
-		changeToPlus := false
-		cursorRender := false
-		for !cursorRender {
-			totalHeight := 2
-			for i := m.sidebarModel.renderIndex; i < len(m.sidebarModel.directories); i++ {
-				if totalHeight >= m.mainPanelHeight {
-					break
-				}
-				directory := m.sidebarModel.directories[i]
-
-				if directory.location == "Pinned+-*/=?" {
-					totalHeight += 3
-					continue
-				}
-
-				if directory.location == "Disks+-*/=?" {
-					if m.mainPanelHeight-totalHeight <= 2 {
-						break
-					}
-					totalHeight += 3
-					continue
-				}
-
-				totalHeight++
-				if m.sidebarModel.cursor == i && m.focusPanel == sidebarFocus {
-					cursorRender = true
-				}
-			}
-
-			if changeToPlus {
-				m.sidebarModel.renderIndex++
-				continue
-			}
-
-			if !cursorRender {
-				m.sidebarModel.renderIndex--
-			}
-			if m.sidebarModel.renderIndex < 0 {
-				changeToPlus = true
-				m.sidebarModel.renderIndex++
-			}
-		}
-
-		if changeToPlus {
-			m.sidebarModel.renderIndex--
-		}
+		s.listUp(mainPanelHeight)
 	}
 }
 
-// Control sidebar panel list down
-func (m *model) controlSideBarListDown(wheel bool) {
+func (s *sidebarModel) listUp(mainPanelHeight int) {
+	slog.Debug("controlListUp called", "cursor", s.cursor,
+		"renderIndex", s.renderIndex, "directory count", len(s.directories))
+	if s.noActualDir() {
+		return
+	}
+	if s.cursor > 0 {
+		// Not at the top, can safely decrease
+		s.cursor--
+	} else {
+		// We are at the top. Move to the bottom
+		s.cursor = len(s.directories) - 1
+	}
+	// We should update even if cursor is at divider for now
+	// Otherwise dividers are sometimes skipped in render in case of
+	// large pinned directories
+	s.updateRenderIndex(mainPanelHeight)
+	if s.directories[s.cursor].isDivider() {
+		// cause another listUp trigger to move up.
+		s.listUp(mainPanelHeight)
+	}
+
+}
+
+func (s *sidebarModel) controlListDown(wheel bool, mainPanelHeight int) {
+
+	// Todo : This snippet is duplicated everywhere. It can be better refractored outside
 	runTime := 1
 	if wheel {
 		runTime = wheelRunTime
 	}
-
 	for i := 0; i < runTime; i++ {
-		lenDirs := len(m.sidebarModel.directories)
-		if m.sidebarModel.cursor < lenDirs-1 {
-			m.sidebarModel.cursor++
-		} else {
-			m.sidebarModel.cursor = 0
-		}
+		s.listDown(mainPanelHeight)
+	}
+}
 
-		newDirectory := m.sidebarModel.directories[m.sidebarModel.cursor].location
-		for newDirectory == "Pinned+-*/=?" || newDirectory == "Disks+-*/=?" {
-			m.sidebarModel.cursor++
-			if m.sidebarModel.cursor+1 > len(m.sidebarModel.directories) {
-				m.sidebarModel.cursor = 0
-			}
-			newDirectory = m.sidebarModel.directories[m.sidebarModel.cursor].location
-		}
-		cursorRender := false
-		for !cursorRender {
-			totalHeight := 2
-			for i := m.sidebarModel.renderIndex; i < len(m.sidebarModel.directories); i++ {
-				if totalHeight >= m.mainPanelHeight {
-					break
-				}
+func (s *sidebarModel) listDown(mainPanelHeight int) {
+	slog.Debug("controlListDown called", "cursor", s.cursor,
+		"renderIndex", s.renderIndex, "directory count", len(s.directories))
+	if s.noActualDir() {
+		return
+	}
+	if s.cursor < len(s.directories)-1 {
+		// Not at the bottom, can safely increase
+		s.cursor++
+	} else {
+		// We are at the bottom. Move to the top
+		s.cursor = 0
+	}
 
-				directory := m.sidebarModel.directories[i]
+	// We should update even if cursor is at divider for now
+	// Otherwise dividers are sometimes skipped in render in case of
+	// large pinned directories
+	s.updateRenderIndex(mainPanelHeight)
 
-				if directory.location == "Pinned+-*/=?" {
-					totalHeight += 3
-					continue
-				}
+	// Move below special divider directories
+	if s.directories[s.cursor].isDivider() {
+		// cause another listDown trigger to move down.
+		s.listDown(mainPanelHeight)
+	}
+}
 
-				if directory.location == "Disks+-*/=?" {
-					if m.mainPanelHeight-totalHeight <= 2 {
-						break
-					}
-					totalHeight += 3
-					continue
-				}
+func (m *model) sidebarSearchBarFocus() {
 
-				totalHeight++
-				if m.sidebarModel.cursor == i && m.focusPanel == sidebarFocus {
-					cursorRender = true
-				}
-			}
-
-			if !cursorRender {
-				m.sidebarModel.renderIndex++
-			}
-			if m.sidebarModel.renderIndex > m.sidebarModel.cursor {
-				m.sidebarModel.renderIndex = 0
-			}
-		}
+	if m.sidebarModel.searchBar.Focused() {
+		// Ideally Code should never reach here. Once sidebar is focussed, we should
+		// not cause sidebarSearchBarFocus() event by pressing search key
+		// Should we use Runtime panic asserts ?
+		slog.Error("sidebarSearchBarFocus() called on Focussed sidebar")
+		m.sidebarModel.searchBar.Blur()
+	} else {
+		m.sidebarModel.searchBar.Focus()
+		m.firstTextInput = true
 	}
 }
 

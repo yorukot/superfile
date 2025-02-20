@@ -24,6 +24,7 @@ func defaultModelConfig(toggleDotFileBool bool, toggleFooter bool, firstFilePane
 		sidebarModel: sidebarModel{
 			renderIndex: 0,
 			directories: getDirectories(),
+			searchBar:   generateSearchBar(),
 		},
 		fileModel: fileModel{
 			filePanels: []filePanel{

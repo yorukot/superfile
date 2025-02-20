@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"slices"
 
 	"github.com/adrg/xdg"
 	"github.com/shirou/gopsutil/disk"
@@ -13,25 +14,19 @@ import (
 
 // Return all sidebar directories
 func getDirectories() []directory {
-	directories := []directory{}
+	return formDirctorySlice(getWellKnownDirectories(), getPinnedDirectories(), getExternalMediaFolders())
+}
 
-	directories = append(directories, getWellKnownDirectories()...)
-	directories = append(directories, directory{
-		// Just make sure no one owns the hard drive or directory named this path
-		location: "Pinned+-*/=?",
-	})
-	directories = append(directories, getPinnedDirectories()...)
-	directories = append(directories, directory{
-		// Just make sure no one owns the hard drive or directory named this path
-		location: "Disks+-*/=?",
-	})
-	directories = append(directories, getExternalMediaFolders()...)
+func formDirctorySlice(homeDirectories []directory, pinnedDirectories []directory, diskDirectories []directory) []directory {
+	directories := append(homeDirectories, pinnedDividerDir)
+	directories = append(directories, pinnedDirectories...)
+	directories = append(directories, diskDividerDir)
+	directories = append(directories, diskDirectories...)
 	return directories
 }
 
 // Return system default directory e.g. Home, Downloads, etc
 func getWellKnownDirectories() []directory {
-	directories := []directory{}
 	wellKnownDirectories := []directory{
 		{location: xdg.Home, name: icon.Home + icon.Space + "Home"},
 		{location: xdg.UserDirs.Download, name: icon.Download + icon.Space + "Downloads"},
@@ -43,14 +38,10 @@ func getWellKnownDirectories() []directory {
 		{location: xdg.UserDirs.PublicShare, name: icon.PublicShare + icon.Space + "PublicShare"},
 	}
 
-	for _, dir := range wellKnownDirectories {
-		if _, err := os.Stat(dir.location); !os.IsNotExist(err) {
-			// Directory exists
-			directories = append(directories, dir)
-		}
-	}
-
-	return directories
+	return slices.DeleteFunc(wellKnownDirectories, func(d directory) bool {
+		_, err := os.Stat(d.location)
+		return err != nil
+	})
 }
 
 // Get user pinned directories
@@ -76,6 +67,8 @@ func getPinnedDirectories() []directory {
 		}
 		// Check if the data is in the new format
 	} else if err := json.Unmarshal(jsonData, &pinnedDirs); err == nil {
+		// Todo : we can optimize this. pinnedDirs and directories have exact same struct format
+		// we are just copying data needlessly. We should directly unmarshal to 'directories'
 		for _, pinnedDir := range pinnedDirs {
 			directories = append(directories, directory{location: pinnedDir.Location, name: pinnedDir.Name})
 		}
@@ -92,6 +85,7 @@ func getExternalMediaFolders() (disks []directory) {
 
 	if err != nil {
 		outPutLog("Error while getting external media: ", err)
+		return disks
 	}
 	for _, disk := range parts {
 		if isExternalDiskPath(disk.Mountpoint) {
@@ -101,8 +95,40 @@ func getExternalMediaFolders() (disks []directory) {
 			})
 		}
 	}
-	if err != nil {
-		outPutLog("Error while getting external media: ", err)
-	}
 	return disks
+}
+
+// Fuzzy search function for a list of directories.
+func fuzzySearch(query string, dirs []directory) []directory {
+	if len(dirs) == 0 {
+		return []directory{}
+	}
+
+	var filteredDirs []directory
+
+	// Optimization - This haystack can be kept precomputed based on directories
+	// instead of re computing it in each call
+	haystack := make([]string, len(dirs))
+	dirMap := make(map[string]directory, len(dirs))
+	for i, dir := range dirs {
+		haystack[i] = dir.name
+		dirMap[dir.name] = dir
+	}
+
+	for _, match := range fzfSearch(query, haystack) {
+		if d, ok := dirMap[match.Key]; ok {
+			filteredDirs = append(filteredDirs, d)
+		}
+	}
+
+	return filteredDirs
+}
+
+// Get filtered directories using fuzzy search logic with three haystacks.
+func getFilteredDirectories(query string) []directory {
+	return formDirctorySlice(
+		fuzzySearch(query, getWellKnownDirectories()),
+		fuzzySearch(query, getPinnedDirectories()),
+		fuzzySearch(query, getExternalMediaFolders()),
+	)
 }
