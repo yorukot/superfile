@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"runtime"
@@ -263,7 +264,7 @@ func CheckForUpdates() {
 		}
 		resp, err := client.Get(variable.LatestVersionURL)
 		if err != nil {
-			fmt.Println("Error checking for updates:", err)
+			slog.Error("Error checking for updates:", "error", err)
 			return
 		}
 		defer resp.Body.Close()
