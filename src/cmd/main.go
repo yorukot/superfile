@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"runtime"
@@ -258,9 +259,12 @@ func CheckForUpdates() {
 	currentTime := time.Now().UTC()
 
 	if lastTime.IsZero() || currentTime.Sub(lastTime) >= 24*time.Hour {
-		resp, err := http.Get(variable.LatestVersionURL)
+		client := &http.Client{
+			Timeout: 5 * time.Second,
+		}
+		resp, err := client.Get(variable.LatestVersionURL)
 		if err != nil {
-			fmt.Println("Error checking for updates:", err)
+			slog.Error("Error checking for updates:", "error", err)
 			return
 		}
 		defer resp.Body.Close()
