@@ -2,10 +2,12 @@ package internal
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"math"
 	"os"
+	"regexp"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -152,6 +154,22 @@ func isBufferPrintable(buffer []byte) bool {
 		}
 	}
 	return true
+}
+
+// isValidFileExtension checks if a string is a valid file extension.
+// Returns nil if valid, otherwise returns an error with a descriptive message.
+func isValidFileExtension(ext string) error {
+	// Regular expression: starts with a dot, followed by 1+ alphanumeric characters
+	re := regexp.MustCompile(`^\.[a-zA-Z0-9]+$`)
+
+	if ext == "" {
+		return errors.New("file extension cannot be empty")
+	}
+	if !re.MatchString(ext) {
+		return fmt.Errorf("%q is not a valid file extension", ext)
+	}
+
+	return nil
 }
 
 // Check file is text file or not
