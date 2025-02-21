@@ -2,12 +2,10 @@ package internal
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"io"
 	"math"
 	"os"
-	"regexp"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -156,20 +154,22 @@ func isBufferPrintable(buffer []byte) bool {
 	return true
 }
 
-// isValidFileExtension checks if a string is a valid file extension.
-// Returns nil if valid, otherwise returns an error with a descriptive message.
-func isValidFileExtension(ext string) error {
-	// Regular expression: starts with a dot, followed by 1+ alphanumeric characters
-	re := regexp.MustCompile(`^\.[a-zA-Z0-9]+$`)
-
-	if ext == "" {
-		return errors.New("file extension cannot be empty")
+// isExensionExtractable checks if a string is a valid compressed archive file extension.
+func isExensionExtractable(ext string) bool {
+	// Extensions based on the types that package: `xtractr` `ExtractFile` function handles.
+	validExtensions := map[string]struct{}{
+		".zip":     {},
+		".bz":      {},
+		".gz":      {},
+		".iso":     {},
+		".rar":     {},
+		".7z":      {},
+		".tar":     {},
+		".tar.gz":  {},
+		".tar.bz2": {},
 	}
-	if !re.MatchString(ext) {
-		return fmt.Errorf("%q is not a valid file extension", ext)
-	}
-
-	return nil
+	_, exists := validExtensions[strings.ToLower(ext)]
+	return exists
 }
 
 // Check file is text file or not
