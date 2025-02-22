@@ -113,8 +113,8 @@ schema = 3
     version = "v0.3.0"
     hash = "sha256-Pou2ybE9SFSZG6YfZLVV1Eyfm+X4FuVpDPLxhpn47Cc="
   [mod."github.com/muesli/termenv"]
-    version = "v0.15.2"
-    hash = "sha256-Eum/SpyytcNIchANPkG4bYGBgcezLgej7j/+6IhqoMU="
+    version = "v0.16.0"
+    hash = "sha256-hGo275DJlyLtcifSLpWnk8jardOksdeX9lH4lBeE3gI="
   [mod."github.com/nfnt/resize"]
     version = "v0.0.0-20180221191011-83c6a9932646"
     hash = "sha256-yvPV+HlDOyJsiwAcVHQkmtw8DHSXyw+cXHkigXm8rAA="
