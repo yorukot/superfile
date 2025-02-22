@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -470,10 +471,14 @@ func (m *model) pasteItem() {
 		}
 
 		errMessage := "cut item error"
-		if m.copyItems.cut && !isExternalDiskPath(filePath) {
-			err = moveElement(filePath, filepath.Join(panel.location, filepath.Base(filePath)))
+
+		dstPath := filepath.Join(panel.location, filepath.Base(filePath))
+		if strings.HasPrefix(dstPath, filePath) {
+			err = fmt.Errorf("failed to paste: cannot paste item '%s' into itself: %s", filePath, dstPath)
+		} else if m.copyItems.cut && !isExternalDiskPath(filePath) {
+			err = moveElement(filePath, dstPath)
 		} else {
-			err = pasteDir(filePath, filepath.Join(panel.location, filepath.Base(filePath)), id, m)
+			err = pasteDir(filePath, dstPath, id, m)
 			if err != nil {
 				errMessage = "paste item error"
 			} else {

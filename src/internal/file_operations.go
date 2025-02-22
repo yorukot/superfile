@@ -48,9 +48,6 @@ func getDriveLetter(path string) string {
 
 // moveElement moves a file or directory efficiently
 func moveElement(src, dst string) error {
-	if strings.HasPrefix(dst, src) {
-		return fmt.Errorf("failed to move: cannot move folder '%s' inside itself: '%s'", src, dst)
-	}
 	// Check if source and destination are on the same partition
 	sameDev, err := isSamePartition(src, dst)
 	if err != nil {
