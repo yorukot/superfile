@@ -62,7 +62,7 @@ func isSubDir(src string, dst string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	if strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+	if rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
 		return false, nil
 	}
 
