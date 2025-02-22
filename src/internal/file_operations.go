@@ -46,6 +46,30 @@ func getDriveLetter(path string) string {
 	return strings.ToUpper(string(path[0]))
 }
 
+// isSubDir check if a path is inside another path to prevent unwanted recursive operations
+func isSubDir(src string, dst string) (bool, error) {
+	absSrc, err := filepath.Abs(src)
+	if err != nil {
+		return false, err
+	}
+
+	absDst, err := filepath.Abs(filepath.Dir(dst))
+	if err != nil {
+		return false, err
+	}
+
+	rel, err := filepath.Rel(absSrc, absDst)
+	if err != nil {
+		return false, err
+	}
+	if strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+		return false, nil
+	}
+
+	return true, nil
+
+}
+
 // moveElement moves a file or directory efficiently
 func moveElement(src, dst string) error {
 	// Check if source and destination are on the same partition

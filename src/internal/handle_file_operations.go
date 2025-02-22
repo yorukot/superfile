@@ -473,8 +473,12 @@ func (m *model) pasteItem() {
 		errMessage := "cut item error"
 
 		dstPath := filepath.Join(panel.location, filepath.Base(filePath))
-		if strings.HasPrefix(dstPath, filePath) {
-			err = fmt.Errorf("failed to paste: cannot paste item '%s' into itself: %s", filePath, dstPath)
+		subDir, err := isSubDir(filePath, dstPath)
+
+		if err != nil {
+			// cannot compare source and destination paths, so just fail with the given error
+		} else if subDir {
+			err = fmt.Errorf("failed to paste: cannot paste item, '%s', into itself, %s", filePath, dstPath)
 		} else if m.copyItems.cut && !isExternalDiskPath(filePath) {
 			err = moveElement(filePath, dstPath)
 		} else {
