@@ -1,5 +1,45 @@
 # ChangeLog
 
+# [**v1.2.0**](https://github.com/yorukot/superfile/releases/tag/v1.2.0)
+
+> 2025-02-24
+
+#### Update
+
+- Add support for macOS M1/M2/M3 architectures [`#540`](https://github.com/yorukot/superfile/pull/540)
+- Update README.md and added a Run the app title by @siddhant-nair in [#550](https://github.com/yorukot/superfile/pull/550)
+- Added direnv support for nix flake dev shell by @fangjunzhou in [#568](https://github.com/yorukot/superfile/pull/568)
+- Renaming feature for pinned directories by @thezbm in [#579](https://github.com/yorukot/superfile/pull/579)
+- Add python testsuite by @lazysegtree in [#581](https://github.com/yorukot/superfile/pull/581)
+- Add build instructions for windows by @lazysegtree in [#583](https://github.com/yorukot/superfile/pull/583)
+- feat: `--config-file` flag support by @BhagatHarsh in [#592](https://github.com/yorukot/superfile/pull/592)
+- Document Windows scoop installation option by @goostleek in [#595](https://github.com/yorukot/superfile/pull/595)
+- Improving file panel rendering by @lazysegtree in [#589](https://github.com/yorukot/superfile/pull/589)
+- feat: Change all outPutLog to slog.Error or slog.Info by @yorukot in [#628](https://github.com/yorukot/superfile/pull/628)
+- Add install.sh files link for more trust by @lazysegtree in [#645](https://github.com/yorukot/superfile/pull/645)
+
+#### Bug fix
+
+- Fix sort options hotkey by @booth-w in [#548](https://github.com/yorukot/superfile/pull/548)
+- Fix wrong log line, Fatalln was used with formatting verbs by @lazysegtree in [#555](https://github.com/yorukot/superfile/pull/555)
+- Fix incorrect failure reporting in delete operation by @lazysegtree in [#558](https://github.com/yorukot/superfile/pull/558)
+- Fix previews for text file with control characters - Avoid layout breaking, improved code, added tests for string functions by @lazysegtree in [#557](https://github.com/yorukot/superfile/pull/557)
+- Fix search field key blocking by @fangjunzhou in [#569](https://github.com/yorukot/superfile/pull/569)
+- Move rename cursor to start before the extension by @booth-w in [#565](https://github.com/yorukot/superfile/pull/565)
+- Fix windows operations and other improvements by @lazysegtree in [#564](https://github.com/yorukot/superfile/pull/564)
+- Fix crash when searching on WSL mounted drives by @PratyushBalaji in [#576](https://github.com/yorukot/superfile/pull/576)
+- Fix arch install instructions by @booth-w in [#580](https://github.com/yorukot/superfile/pull/580)
+- Fix windows delete, open file and other improvements by @lazysegtree in [#584](https://github.com/yorukot/superfile/pull/584)
+- Fix: rotate img using EXIF metadata by @BhagatHarsh in [#607](https://github.com/yorukot/superfile/pull/607)
+- resolved "Used wrong path separator in windows" by @lazysegtree in [#597](https://github.com/yorukot/superfile/pull/597)
+- fix: Fix UI issue of spf stuck with terminal size too small, when its actually stuck in loading files by @lazysegtree in [#594](https://github.com/yorukot/superfile/pull/594)
+- (Hotfix) Revert changes in website that were not yet released in latest release by @lazysegtree in [#611](https://github.com/yorukot/superfile/pull/611)
+- Improve formatting, error handling. Fixed typos by @lazysegtree in [#600](https://github.com/yorukot/superfile/pull/600)
+- fix: Command line not working for windows by @BhagatHarsh in [#601](https://github.com/yorukot/superfile/pull/601)
+- Go formatting fixes by @lazysegtree in [#618](https://github.com/yorukot/superfile/pull/618)
+- Fix: Error while reading last check version file in new time zone #434 by @yorukot in [#634](https://github.com/yorukot/superfile/pull/634)
+- fix: discrete timeout for http get version by @jachewz in [#632](https://github.com/yorukot/superfile/pull/632)
+
 All notable changes to this project will be documented in this file. Dates are displayed in UTC(YYYY-MM-DD).
 
 # [**v1.1.7**](https://github.com/yorukot/superfile/releases/tag/v1.1.7)
