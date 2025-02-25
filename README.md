@@ -70,6 +70,7 @@ Visit warp.dev to learn more
 ```bash
 bash -c "$(curl -sLo- https://superfile.netlify.app/install.sh)"
 ```
+If you want to inspect the script, see : [install.sh](./website/public/install.sh)
 
 ### Windows
 
@@ -77,6 +78,7 @@ bash -c "$(curl -sLo- https://superfile.netlify.app/install.sh)"
 ```powershell
 powershell -ExecutionPolicy Bypass -Command "Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://superfile.netlify.app/install.ps1'))"
 ```
+If you want to inspect the script, see : [install.ps1](./website/public/install.ps1)
 
 #### [Scoop](https://scoop.sh/)
 ```
