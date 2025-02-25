@@ -3,6 +3,7 @@ package internal
 import (
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -153,7 +154,7 @@ func trashMacOrLinux(src string) error {
 		err = trash.Trash(src)
 	}
 	if err != nil {
-		outPutLog("Delete single item function move file to trash can error", err)
+		slog.Error("Error while delete single item function move file to trash can", "error", err)
 	}
 	return err
 }

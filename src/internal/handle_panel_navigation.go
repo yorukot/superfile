@@ -2,6 +2,7 @@ package internal
 
 import (
 	"encoding/json"
+	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -41,12 +42,12 @@ func (m *model) pinnedDirectory() {
 
 	updatedData, err := json.Marshal(pinnedDirs)
 	if err != nil {
-		outPutLog("Pinned folder function updatedData superfile data error", err)
+		slog.Error("Error while pinned folder function updatedData superfile data", "error", err)
 	}
 
 	err = os.WriteFile(variable.PinnedFile, updatedData, 0644)
 	if err != nil {
-		outPutLog("Pinned folder function updatedData superfile data error", err)
+		slog.Error("Error while pinned folder function updatedData superfile data", "error", err)
 	}
 
 	m.fileModel.filePanels[m.filePanelFocusIndex] = panel

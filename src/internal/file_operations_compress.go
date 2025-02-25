@@ -3,6 +3,7 @@ package internal
 import (
 	"archive/zip"
 	"io"
+	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -19,7 +20,7 @@ func zipSource(source, target string) error {
 	totalFiles, err := countFiles(source)
 
 	if err != nil {
-		outPutLog("Zip file count files error: ", err)
+		slog.Error("Error while zip file count files ", "error", err)
 	}
 
 	p := process{
@@ -108,7 +109,7 @@ func zipSource(source, target string) error {
 	})
 
 	if err != nil {
-		outPutLog("Error while zip file:", err)
+		slog.Error("Error while zip file", "error", err)
 		p.state = failure
 		message.processNewState = p
 		channel <- message

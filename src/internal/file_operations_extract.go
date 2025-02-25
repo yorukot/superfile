@@ -1,7 +1,7 @@
 package internal
 
 import (
-	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/charmbracelet/bubbles/progress"
@@ -48,7 +48,7 @@ func extractCompressFile(src, dest string) error {
 		if len(channel) < 5 {
 			channel <- message
 		}
-		outPutLog(fmt.Sprintf("Error extracting %s: %v", src, err))
+		slog.Error("Error extracting", "path", src, "error", err)
 		return err
 	}
 
