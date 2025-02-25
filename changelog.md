@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file. Dates are d
 
 # [**v1.2.0**](https://github.com/yorukot/superfile/releases/tag/v1.2.0)
 
-> 2025-02-24
+> 2025-02-2x
 
 #### Update
 
@@ -41,6 +41,15 @@ All notable changes to this project will be documented in this file. Dates are d
 - Go formatting fixes by @lazysegtree in [#618](https://github.com/yorukot/superfile/pull/618)
 - Fix: Error while reading last check version file in new time zone #434 by @yorukot in [#634](https://github.com/yorukot/superfile/pull/634)
 - fix: discrete timeout for http get version by @jachewz in [#632](https://github.com/yorukot/superfile/pull/632)
+
+# [**v1.1.7.1**](https://github.com/yorukot/superfile/releases/tag/v1.1.7)
+
+> 2024-01-06
+
+NOTE: This release is a hotfix to resolve an unusual issue on Windows.
+
+#### Bug fix
+- Fix can't run on windows [`#534`](https://github.com/yorukot/superfile/issues/534)
 
 # [**v1.1.7**](https://github.com/yorukot/superfile/releases/tag/v1.1.7)
 
