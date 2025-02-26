@@ -141,7 +141,6 @@ func InitConfigFile() {
 
 	// Create files
 	if err := createFiles(
-		variable.PinnedFile,
 		variable.ToggleDotFile,
 		variable.LogFile,
 		variable.ThemeFileVersion,
@@ -157,6 +156,10 @@ func InitConfigFile() {
 
 	if err := writeConfigFile(variable.HotkeysFile, internal.HotkeysTomlString); err != nil {
 		log.Fatalln("Error writing config file:", err)
+	}
+
+	if err := initJsonFile(variable.PinnedFile); err != nil {
+		log.Fatalln("Error initializing json file:", err)
 	}
 }
 
@@ -223,6 +226,15 @@ func writeConfigFile(path, data string) error {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		if err := os.WriteFile(path, []byte(data), 0644); err != nil {
 			return fmt.Errorf("failed to write config file %s: %w", path, err)
+		}
+	}
+	return nil
+}
+
+func initJsonFile(path string) error {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		if err := os.WriteFile(path, []byte("null"), 0644); err != nil {
+			return fmt.Errorf("failed to initialize json file %s: %w", path, err)
 		}
 	}
 	return nil
