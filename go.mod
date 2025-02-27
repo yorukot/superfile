@@ -23,7 +23,9 @@ require (
 require (
 	github.com/charmbracelet/x/ansi v0.8.0 // indirect
 	github.com/charmbracelet/x/term v0.2.1 // indirect
+	github.com/stretchr/testify v1.10.0 // indirect
 	golang.org/x/image v0.18.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 require (
