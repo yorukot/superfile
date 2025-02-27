@@ -37,6 +37,8 @@ func extractCompressFile(src, dest string) error {
 	x := &xtractr.XFile{
 		FilePath:  src,
 		OutputDir: dest,
+		FileMode:  0644,
+		DirMode:   0755,
 	}
 
 	_, _, _, err := xtractr.ExtractFile(x)
