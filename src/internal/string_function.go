@@ -154,6 +154,24 @@ func isBufferPrintable(buffer []byte) bool {
 	return true
 }
 
+// isExensionExtractable checks if a string is a valid compressed archive file extension.
+func isExensionExtractable(ext string) bool {
+	// Extensions based on the types that package: `xtractr` `ExtractFile` function handles.
+	validExtensions := map[string]struct{}{
+		".zip":     {},
+		".bz":      {},
+		".gz":      {},
+		".iso":     {},
+		".rar":     {},
+		".7z":      {},
+		".tar":     {},
+		".tar.gz":  {},
+		".tar.bz2": {},
+	}
+	_, exists := validExtensions[strings.ToLower(ext)]
+	return exists
+}
+
 // Check file is text file or not
 func isTextFile(filename string) (bool, error) {
 	file, err := os.Open(filename)
