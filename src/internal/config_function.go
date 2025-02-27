@@ -110,11 +110,11 @@ func loadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 
 	// Create a map to track which fields are present
 	var rawData map[string]interface{}
-	toml.Unmarshal(data, &rawData)
+	rawError := toml.Unmarshal(data, &rawData)
 
 	// Replace default values with file values
 	err = toml.Unmarshal(data, target)
-	if err != nil && !fixFlag {
+	if (err != nil && !fixFlag) || rawError != nil {
 		if decodeErr, ok := err.(*toml.DecodeError); ok {
 			row, col := decodeErr.Position()
 			fmt.Print(lipgloss.NewStyle().Foreground(lipgloss.Color("#F93939")).Render("Error") +
