@@ -117,7 +117,7 @@ type ThemeType struct {
 type ConfigType struct {
 	Theme string `toml:"theme" comment:"More details are at https://superfile.netlify.app/configure/superfile-config/\nchange your theme"`
 
-	FileEditor             string `toml:"file_editor" comment:"\nThe editor files will be opened with. (Leave blank to use the EDITOR environment variable)."`
+	Editor                 string `toml:"editor" comment:"\nThe editor files will be opened with. (Leave blank to use the EDITOR environment variable)."`
 	DirEditor              string `toml:"dir_editor" comment:"\nThe editor directories will be opened with. (Leave blank to use the default editors)."`
 	AutoCheckUpdate        bool   `toml:"auto_check_update" comment:"\nAuto check for update"`
 	CdOnQuit               bool   `toml:"cd_on_quit" comment:"\nCd on quit (For more details, please check out https://superfile.netlify.app/configure/superfile-config/#cd_on_quit)"`
