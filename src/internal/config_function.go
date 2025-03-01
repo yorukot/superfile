@@ -109,6 +109,9 @@ func loadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 	}
 
 	// Create a map to track which fields are present
+	// Have to do this manually as toml.Unmarshal does not return an error when it encounters a TOML key
+	// that does not match any field in the struct.
+	// Instead, it simply ignores that key and continues parsing.
 	var rawData map[string]interface{}
 	rawError := toml.Unmarshal(data, &rawData)
 
@@ -130,34 +133,41 @@ func loadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 
 	// Check for missing fields if no decoding errors
 	targetType := reflect.TypeOf(target).Elem()
-	if len(rawData) < targetType.NumField() {
-		if !fixFlag {
-			// Print warning for each missing field
-			for i := 0; i < targetType.NumField(); i++ {
-				field := targetType.Field(i)
-				if _, exists := rawData[field.Tag.Get("toml")]; !exists {
-					fmt.Print(lipgloss.NewStyle().Foreground(lipgloss.Color("#F93939")).Render("Error") +
-						lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFEE")).Render(" ┃ ") +
-						fmt.Sprintf("Field \"%s\" is missing\n", field.Tag.Get("toml")))
-				}
-			}
-			return true
-		} else {
-			// In case we are fixing the file, we would not return hasError=true even if there was error
-			// Fix the file by writing all fields
-			tomlData, err := toml.Marshal(target)
-			if err != nil {
-				LogAndExit("Error encoding data", "error", err)
-			}
+	missingFields := false
 
-			err = os.WriteFile(filePath, tomlData, 0644)
-			if err != nil {
-				LogAndExit("Error writing file", "error", err)
+	for i := 0; i < targetType.NumField(); i++ {
+		field := targetType.Field(i)
+		if _, exists := rawData[field.Tag.Get("toml")]; !exists {
+			missingFields = true
+			// A field doesn't exist in the toml config file
+			if !fixFlag {
+				// Just Print warning for each missing field. We are not allowed to fix the file.
+				// Todo : Move this string composition to a utility function
+				fmt.Print(lipgloss.NewStyle().Foreground(lipgloss.Color("#F93939")).Render("Error") +
+					lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFEE")).Render(" ┃ ") +
+					fmt.Sprintf("Field \"%s\" is missing\n", field.Tag.Get("toml")))
 			}
 		}
-
+	}
+	// File is okay
+	if !missingFields {
+		return false
 	}
 
+	// File is bad, but we arent' allowed to fix
+	if !fixFlag {
+		return true
+	}
+	// Now we are fixing the file, we would not return hasError=true even if there was error
+	// Fix the file by writing all fields
+	tomlData, err := toml.Marshal(target)
+	if err != nil {
+		LogAndExit("Error encoding data", "error", err)
+	}
+	err = os.WriteFile(filePath, tomlData, 0644)
+	if err != nil {
+		LogAndExit("Error writing file", "error", err)
+	}
 	return false
 }
 
