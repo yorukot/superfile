@@ -614,7 +614,12 @@ func (m *model) openDirectoryWithEditor() tea.Cmd {
 		}
 	}
 
-	c := exec.Command(editor, m.fileModel.filePanels[m.filePanelFocusIndex].location)
+	// Split the editor command into command and arguments
+	parts := strings.Fields(editor)
+	cmd := parts[0]
+	args := append(parts[1:], m.fileModel.filePanels[m.filePanelFocusIndex].location)
+
+	c := exec.Command(cmd, args...)
 	return tea.ExecProcess(c, func(err error) tea.Msg {
 		return editorFinishedMsg{err}
 	})
