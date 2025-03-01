@@ -125,12 +125,6 @@ func loadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 				lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFEE")).Render(" ┃ ") +
 				"Error decoding file: " + err.Error() + "\n")
 		}
-		// Show appropriate fix message based on the file type
-		if filePath == variable.ConfigFile {
-			fmt.Println("To add missing fields to configuration file automatically run superfile with the --fix-config-file flag `spf --fix-config-file`")
-		} else if filePath == variable.HotkeysFile {
-			fmt.Println("To add missing fields to hotkeys file automatically run superfile with the --fix-hotkeys flag `spf --fix-hotkeys`")
-		}
 		return true
 	}
 
@@ -147,13 +141,9 @@ func loadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 						fmt.Sprintf("Field \"%s\" is missing\n", field.Tag.Get("toml")))
 				}
 			}
-			// Show appropriate fix message based on the file type
-			if filePath == variable.ConfigFile {
-				fmt.Println("To add missing fields to configuration file automatically run superfile with the --fix-config-file flag `spf --fix-config-file`")
-			} else if filePath == variable.HotkeysFile {
-				fmt.Println("To add missing fields to hotkeys file automatically run superfile with the --fix-hotkeys flag `spf --fix-hotkeys`")
-			}
+			return true
 		} else {
+			// In case we are fixing the file, we would not return hasError=true even if there was error
 			// Fix the file by writing all fields
 			tomlData, err := toml.Marshal(target)
 			if err != nil {
@@ -165,6 +155,7 @@ func loadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 				LogAndExit("Error writing file", "error", err)
 			}
 		}
+
 	}
 
 	return false
@@ -175,36 +166,43 @@ func loadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 // if the FixConfigFile flag is on
 func loadConfigFile() {
 	hasError := loadTomlFile(variable.ConfigFile, ConfigTomlString, &Config, variable.FixConfigFile)
-	if !hasError {
-		if (Config.FilePreviewWidth > 10 || Config.FilePreviewWidth < 2) && Config.FilePreviewWidth != 0 {
-			LogAndExit(loadConfigError("file_preview_width"))
-		}
-
-		if Config.SidebarWidth != 0 && (Config.SidebarWidth < 3 || Config.SidebarWidth > 20) {
-			LogAndExit(loadConfigError("sidebar_width"))
-		}
+	if hasError {
+		fmt.Println("To add missing fields to configuration file automatically run superfile with the --fix-config-file flag `spf --fix-config-file`")
+		return
 	}
+
+	if (Config.FilePreviewWidth > 10 || Config.FilePreviewWidth < 2) && Config.FilePreviewWidth != 0 {
+		LogAndExit(loadConfigError("file_preview_width"))
+	}
+
+	if Config.SidebarWidth != 0 && (Config.SidebarWidth < 3 || Config.SidebarWidth > 20) {
+		LogAndExit(loadConfigError("sidebar_width"))
+	}
+
 }
 
 // Load keybinds from the hotkeys file. Compares the content
 // with the default values and modify the hotkeys if the FixHotkeys flag is on.
 func loadHotkeysFile() {
 	hasError := loadTomlFile(variable.HotkeysFile, HotkeysTomlString, &hotkeys, variable.FixHotkeys)
-	if !hasError {
-		// Validate hotkey values
-		val := reflect.ValueOf(hotkeys)
-		for i := 0; i < val.NumField(); i++ {
-			field := val.Type().Field(i)
-			value := val.Field(i)
+	if hasError {
+		fmt.Println("To add missing fields to hotkeys file automatically run superfile with the --fix-hotkeys flag `spf --fix-hotkeys`")
+		return
+	}
 
-			if value.Kind() != reflect.Slice || value.Type().Elem().Kind() != reflect.String {
-				LogAndExit(loadHotkeysError(field.Name))
-			}
+	// Validate hotkey values
+	val := reflect.ValueOf(hotkeys)
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Type().Field(i)
+		value := val.Field(i)
 
-			hotkeysList := value.Interface().([]string)
-			if len(hotkeysList) == 0 || hotkeysList[0] == "" {
-				LogAndExit(loadHotkeysError(field.Name))
-			}
+		if value.Kind() != reflect.Slice || value.Type().Elem().Kind() != reflect.String {
+			LogAndExit(loadHotkeysError(field.Name))
+		}
+
+		hotkeysList := value.Interface().([]string)
+		if len(hotkeysList) == 0 || hotkeysList[0] == "" {
+			LogAndExit(loadHotkeysError(field.Name))
 		}
 	}
 }
