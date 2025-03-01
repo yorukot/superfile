@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/barasher/go-exiftool"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/pelletier/go-toml/v2"
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/config/icon"
@@ -98,6 +97,19 @@ func initialConfig(dir string) (toggleDotFileBool bool, toggleFooter bool, first
 	return toggleDotFileBool, toggleFooter, firstFilePanelDir
 }
 
+func writeTomlData(filePath string, data interface{}) error {
+	tomlData, err := toml.Marshal(data)
+	if err != nil {
+		// return a wrapped error
+		return fmt.Errorf("Error encoding data : %w", err)
+	}
+	err = os.WriteFile(filePath, tomlData, 0644)
+	if err != nil {
+		return fmt.Errorf("Error writing file : %w", err)
+	}
+	return nil
+}
+
 // Helper function to load and validate TOML files with field checking
 func loadTomlFile(filePath string, defaultData string, target interface{}, fixFlag bool) (hasError bool) {
 	// Initialize with default config
@@ -107,6 +119,7 @@ func loadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 	if err != nil {
 		LogAndExit("Config file doesn't exist", "error", err)
 	}
+	errMsg := ""
 
 	// Create a map to track which fields are present
 	// Have to do this manually as toml.Unmarshal does not return an error when it encounters a TOML key
@@ -114,59 +127,55 @@ func loadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 	// Instead, it simply ignores that key and continues parsing.
 	var rawData map[string]interface{}
 	rawError := toml.Unmarshal(data, &rawData)
-
-	// Replace default values with file values
-	err = toml.Unmarshal(data, target)
-	if (err != nil && !fixFlag) || rawError != nil {
-		if decodeErr, ok := err.(*toml.DecodeError); ok {
-			row, col := decodeErr.Position()
-			fmt.Print(lipgloss.NewStyle().Foreground(lipgloss.Color("#F93939")).Render("Error") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFEE")).Render(" ┃ ") +
-				fmt.Sprintf("Error in field at line %d column %d: %s\n", row, col, decodeErr.Error()))
-		} else {
-			fmt.Print(lipgloss.NewStyle().Foreground(lipgloss.Color("#F93939")).Render("Error") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFEE")).Render(" ┃ ") +
-				"Error decoding file: " + err.Error() + "\n")
-		}
-		return true
+	if rawError != nil {
+		hasError = true
+		errMsg = lipglossError + "Error decoding file: " + rawError.Error() + "\n"
 	}
 
-	// Check for missing fields if no decoding errors
-	targetType := reflect.TypeOf(target).Elem()
-	missingFields := false
+	// Replace default values with file values
+	if !hasError {
+		if err = toml.Unmarshal(data, target); err != nil {
+			hasError = true
+			if decodeErr, ok := err.(*toml.DecodeError); ok {
+				row, col := decodeErr.Position()
+				errMsg = lipglossError + fmt.Sprintf("Error in field at line %d column %d: %s\n",
+					row, col, decodeErr.Error())
+			} else {
+				errMsg = lipglossError + "Error unmarshalling data: " + err.Error() + "\n"
+			}
+		}
+	}
 
-	for i := 0; i < targetType.NumField(); i++ {
-		field := targetType.Field(i)
-		if _, exists := rawData[field.Tag.Get("toml")]; !exists {
-			missingFields = true
-			// A field doesn't exist in the toml config file
-			if !fixFlag {
-				// Just Print warning for each missing field. We are not allowed to fix the file.
-				// Todo : Move this string composition to a utility function
-				fmt.Print(lipgloss.NewStyle().Foreground(lipgloss.Color("#F93939")).Render("Error") +
-					lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFEE")).Render(" ┃ ") +
-					fmt.Sprintf("Field \"%s\" is missing\n", field.Tag.Get("toml")))
+	if !hasError {
+		// Check for missing fields if no errors yet
+		targetType := reflect.TypeOf(target).Elem()
+
+		for i := 0; i < targetType.NumField(); i++ {
+			field := targetType.Field(i)
+			if _, exists := rawData[field.Tag.Get("toml")]; !exists {
+				hasError = true
+				// A field doesn't exist in the toml config file
+				errMsg += lipglossError + fmt.Sprintf("Field \"%s\" is missing\n", field.Tag.Get("toml"))
 			}
 		}
 	}
 	// File is okay
-	if !missingFields {
+	if !hasError {
 		return false
 	}
 
 	// File is bad, but we arent' allowed to fix
+	// We just print error message to stdout
+	// Todo : Ideally this should behave as an intenal function with no side effects
+	// and the caller should do the printing to stdout
 	if !fixFlag {
+		fmt.Print(errMsg)
 		return true
 	}
 	// Now we are fixing the file, we would not return hasError=true even if there was error
 	// Fix the file by writing all fields
-	tomlData, err := toml.Marshal(target)
-	if err != nil {
-		LogAndExit("Error encoding data", "error", err)
-	}
-	err = os.WriteFile(filePath, tomlData, 0644)
-	if err != nil {
-		LogAndExit("Error writing file", "error", err)
+	if err := writeTomlData(filePath, target); err != nil {
+		LogAndExit("Error while writing config file", "error", err)
 	}
 	return false
 }

@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/x/exp/term/ansi"
 	"github.com/yorukot/superfile/src/config/icon"
 )
@@ -10,7 +11,14 @@ var (
 	sideBarPinnedDivider  string
 	sideBarDisksDivider   string
 	sideBarNoneText       string
+	lipglossError         string
 )
+
+// No dependencies
+func LoadInitial_PrerenderedVariables() {
+	lipglossError = lipgloss.NewStyle().Foreground(lipgloss.Color("#F93939")).Render("Error") +
+		lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFEE")).Render(" ┃ ")
+}
 
 // Dependecies
 // LoadThemeConfig() in style.go should be finished
