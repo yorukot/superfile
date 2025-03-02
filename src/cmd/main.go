@@ -106,6 +106,8 @@ func Run(content embed.FS) {
 
 			firstUse := checkFirstUse()
 
+			go CheckForUpdates()
+
 			p := tea.NewProgram(internal.InitialModel(path, firstUse, hasTrash), tea.WithAltScreen(), tea.WithMouseCellMotion())
 			if _, err := p.Run(); err != nil {
 				log.Fatalf("Alas, there's been an error: %v", err)
@@ -115,7 +117,6 @@ func Run(content embed.FS) {
 				fmt.Println(variable.LastDir)
 			}
 
-			CheckForUpdates()
 			return nil
 		},
 	}
@@ -240,18 +241,29 @@ func initJsonFile(path string) error {
 	return nil
 }
 
+func writeLastCheckTime(t time.Time) {
+	err := os.WriteFile(variable.LastCheckVersion, []byte(t.Format(time.RFC3339)), 0644)
+	if err != nil {
+		slog.Error("Error writing LastCheckVersion file", "error", err)
+	}
+}
+
 // Check for the need of updates if AutoCheckUpdate is on, if its the first time
 // that version is checked or if has more than 24h since the last version check,
 // look into the repo if  there's any more recent version
+// Todo : This is too big of a function. Refactor it to displayUpdateNotification, fetchLatestVersion,
+// shouldCheckForUpdates, chucks
 func CheckForUpdates() {
 	var Config internal.ConfigType
 
 	// Get AutoCheck flag from configuration files
+
+	// Todo : We are reading the config file here, and also in the loadConfigFile functions
+	// This needs to be fixed.
 	data, err := os.ReadFile(variable.ConfigFile)
 	if err != nil {
 		log.Fatalf("Config file doesn't exist: %v", err)
 	}
-
 	err = toml.Unmarshal(data, &Config)
 	if err != nil {
 		log.Fatalf("Error decoding config file ( your config file may be misconfigured ): %v", err)
@@ -261,16 +273,30 @@ func CheckForUpdates() {
 		return
 	}
 
-	// Check last time the version was checked
-	lastTime, err := readLastTimeCheckVersionFromFile(variable.LastCheckVersion)
-	if err != nil && !os.IsNotExist(err) {
-		fmt.Println("Error reading from file:", err)
-		return
-	}
-
+	// Get current time in UTC
 	currentTime := time.Now().UTC()
 
+	// Check last time the version was checked
+	content, err := os.ReadFile(variable.LastCheckVersion)
+
+	// Default to zero time if file doesn't exist, is empty, or has errors
+	lastTime := time.Time{}
+
+	if err == nil && len(content) > 0 {
+		parsedTime, parseErr := time.Parse(time.RFC3339, string(content))
+		if parseErr == nil {
+			lastTime = parsedTime.UTC()
+		} else {
+			// Let the time stay as zero initialized value
+			slog.Error("Error parsing time from LastCheckVersion file. Setting last time to zero", "error", parseErr)
+		}
+	}
+
 	if lastTime.IsZero() || currentTime.Sub(lastTime) >= 24*time.Hour {
+		// We would make sure to update the file in all return paths
+		defer func() {
+			writeLastCheckTime(currentTime)
+		}()
 		client := &http.Client{
 			Timeout: 5 * time.Second,
 		}
@@ -283,6 +309,7 @@ func CheckForUpdates() {
 
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
+			slog.Error("Error reading response body", "error", err)
 			return
 		}
 
@@ -292,6 +319,8 @@ func CheckForUpdates() {
 
 		var release GitHubRelease
 		if err := json.Unmarshal(body, &release); err != nil {
+			// Update the timestamp file even if JSON parsing fails
+			slog.Error("Error parsing JSON from Github", "error", err)
 			return
 		}
 
@@ -305,13 +334,6 @@ func CheckForUpdates() {
 			fmt.Printf(lipgloss.NewStyle().Foreground(lipgloss.Color("#FF69E1")).Render("┃ ")+"Please update.\n┏\n\n      => %s\n\n", variable.LatestVersionGithub)
 			fmt.Printf("                                                               ┛\n")
 		}
-
-		timeStr := currentTime.Format(time.RFC3339)
-		err = writeToFile(variable.LastCheckVersion, timeStr)
-		if err != nil {
-			log.Println("Error writing to file:", err)
-			return
-		}
 	}
 }
 
@@ -322,38 +344,4 @@ func versionToNumber(version string) int {
 
 	num, _ := strconv.Atoi(version)
 	return num
-}
-
-// Check the last time the version file was checked
-func readLastTimeCheckVersionFromFile(filename string) (time.Time, error) {
-	content, err := os.ReadFile(filename)
-	if err != nil {
-		return time.Time{}, err
-	}
-	if len(content) == 0 {
-		return time.Time{}, nil
-	}
-	lastTime, err := time.Parse(time.RFC3339, string(content))
-	if err != nil {
-		return time.Time{}, err
-	}
-
-	// Ensure the time is in UTC
-	return lastTime.UTC(), nil
-}
-
-// Write content to filename
-func writeToFile(filename, content string) error {
-	file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE, 0644)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	_, err = file.WriteString(content)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
