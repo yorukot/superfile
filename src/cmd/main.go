@@ -241,6 +241,13 @@ func initJsonFile(path string) error {
 	return nil
 }
 
+func writeLastCheckTime(t time.Time) {
+	err := os.WriteFile(variable.LastCheckVersion, []byte(t.Format(time.RFC3339)), 0644)
+	if err != nil {
+		slog.Error("Error writing LastCheckVersion file", "error", err)
+	}
+}
+
 // Check for the need of updates if AutoCheckUpdate is on, if its the first time
 // that version is checked or if has more than 24h since the last version check,
 // look into the repo if  there's any more recent version
@@ -248,11 +255,13 @@ func CheckForUpdates() {
 	var Config internal.ConfigType
 
 	// Get AutoCheck flag from configuration files
+
+	// Todo : We are reading the config file here, and also in the loadConfigFile functions
+	// This needs to be fixed.
 	data, err := os.ReadFile(variable.ConfigFile)
 	if err != nil {
 		log.Fatalf("Config file doesn't exist: %v", err)
 	}
-
 	err = toml.Unmarshal(data, &Config)
 	if err != nil {
 		log.Fatalf("Error decoding config file ( your config file may be misconfigured ): %v", err)
@@ -276,32 +285,29 @@ func CheckForUpdates() {
 		if parseErr == nil {
 			lastTime = parsedTime.UTC()
 		} else {
-			// If we can't parse the time, overwrite with current time
-			timeStr := currentTime.Format(time.RFC3339)
-			os.WriteFile(variable.LastCheckVersion, []byte(timeStr), 0644)
+			// Let the time stay as zero initialized value
+			slog.Error("Error parsing time from LastCheckVersion file. Setting last time to zero", "error", parseErr)
 		}
 	}
 
 	if lastTime.IsZero() || currentTime.Sub(lastTime) >= 24*time.Hour {
+		// We would make sure to update the file in all return paths
+		defer func() {
+			writeLastCheckTime(currentTime)
+		}()
 		client := &http.Client{
 			Timeout: 5 * time.Second,
 		}
 		resp, err := client.Get(variable.LatestVersionURL)
 		if err != nil {
-
-      		slog.Error("Error checking for updates:", "error", err)
-			// Update the timestamp file even if the update check fails
-			timeStr := currentTime.Format(time.RFC3339)
-			os.WriteFile(variable.LastCheckVersion, []byte(timeStr), 0644)
+			slog.Error("Error checking for updates:", "error", err)
 			return
 		}
 		defer resp.Body.Close()
 
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
-			// Update the timestamp file even if reading the response fails
-			timeStr := currentTime.Format(time.RFC3339)
-			os.WriteFile(variable.LastCheckVersion, []byte(timeStr), 0644)
+			slog.Error("Error reading response body", "error", err)
 			return
 		}
 
@@ -312,8 +318,7 @@ func CheckForUpdates() {
 		var release GitHubRelease
 		if err := json.Unmarshal(body, &release); err != nil {
 			// Update the timestamp file even if JSON parsing fails
-			timeStr := currentTime.Format(time.RFC3339)
-			os.WriteFile(variable.LastCheckVersion, []byte(timeStr), 0644)
+			slog.Error("Error parsing JSON from Github", "error", err)
 			return
 		}
 
@@ -327,10 +332,6 @@ func CheckForUpdates() {
 			fmt.Printf(lipgloss.NewStyle().Foreground(lipgloss.Color("#FF69E1")).Render("┃ ")+"Please update.\n┏\n\n      => %s\n\n", variable.LatestVersionGithub)
 			fmt.Printf("                                                               ┛\n")
 		}
-
-		// Always update the timestamp file after checking
-		timeStr := currentTime.Format(time.RFC3339)
-		os.WriteFile(variable.LastCheckVersion, []byte(timeStr), 0644)
 	}
 }
 
