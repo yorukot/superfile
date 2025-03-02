@@ -251,6 +251,8 @@ func writeLastCheckTime(t time.Time) {
 // Check for the need of updates if AutoCheckUpdate is on, if its the first time
 // that version is checked or if has more than 24h since the last version check,
 // look into the repo if  there's any more recent version
+// Todo : This is too big of a function. Refactor it to displayUpdateNotification, fetchLatestVersion,
+// shouldCheckForUpdates, chucks
 func CheckForUpdates() {
 	var Config internal.ConfigType
 
