@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/barasher/go-exiftool"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/pelletier/go-toml/v2"
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/config/icon"
@@ -98,44 +97,97 @@ func initialConfig(dir string) (toggleDotFileBool bool, toggleFooter bool, first
 	return toggleDotFileBool, toggleFooter, firstFilePanelDir
 }
 
+func writeTomlData(filePath string, data interface{}) error {
+	tomlData, err := toml.Marshal(data)
+	if err != nil {
+		// return a wrapped error
+		return fmt.Errorf("Error encoding data : %w", err)
+	}
+	err = os.WriteFile(filePath, tomlData, 0644)
+	if err != nil {
+		return fmt.Errorf("Error writing file : %w", err)
+	}
+	return nil
+}
+
+// Helper function to load and validate TOML files with field checking
+func loadTomlFile(filePath string, defaultData string, target interface{}, fixFlag bool) (hasError bool) {
+	// Initialize with default config
+	_ = toml.Unmarshal([]byte(defaultData), target)
+
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		LogAndExit("Config file doesn't exist", "error", err)
+	}
+	errMsg := ""
+
+	// Create a map to track which fields are present
+	// Have to do this manually as toml.Unmarshal does not return an error when it encounters a TOML key
+	// that does not match any field in the struct.
+	// Instead, it simply ignores that key and continues parsing.
+	var rawData map[string]interface{}
+	rawError := toml.Unmarshal(data, &rawData)
+	if rawError != nil {
+		hasError = true
+		errMsg = lipglossError + "Error decoding file: " + rawError.Error() + "\n"
+	}
+
+	// Replace default values with file values
+	if !hasError {
+		if err = toml.Unmarshal(data, target); err != nil {
+			hasError = true
+			if decodeErr, ok := err.(*toml.DecodeError); ok {
+				row, col := decodeErr.Position()
+				errMsg = lipglossError + fmt.Sprintf("Error in field at line %d column %d: %s\n",
+					row, col, decodeErr.Error())
+			} else {
+				errMsg = lipglossError + "Error unmarshalling data: " + err.Error() + "\n"
+			}
+		}
+	}
+
+	if !hasError {
+		// Check for missing fields if no errors yet
+		targetType := reflect.TypeOf(target).Elem()
+
+		for i := 0; i < targetType.NumField(); i++ {
+			field := targetType.Field(i)
+			if _, exists := rawData[field.Tag.Get("toml")]; !exists {
+				hasError = true
+				// A field doesn't exist in the toml config file
+				errMsg += lipglossError + fmt.Sprintf("Field \"%s\" is missing\n", field.Tag.Get("toml"))
+			}
+		}
+	}
+	// File is okay
+	if !hasError {
+		return false
+	}
+
+	// File is bad, but we arent' allowed to fix
+	// We just print error message to stdout
+	// Todo : Ideally this should behave as an intenal function with no side effects
+	// and the caller should do the printing to stdout
+	if !fixFlag {
+		fmt.Print(errMsg)
+		return true
+	}
+	// Now we are fixing the file, we would not return hasError=true even if there was error
+	// Fix the file by writing all fields
+	if err := writeTomlData(filePath, target); err != nil {
+		LogAndExit("Error while writing config file", "error", err)
+	}
+	return false
+}
+
 // Load configurations from the configuration file. Compares the content
 // with the default values and modify the config file to include default configs
 // if the FixConfigFile flag is on
 func loadConfigFile() {
-
-	//Initialize default configs
-	_ = toml.Unmarshal([]byte(ConfigTomlString), &Config)
-	//Initialize empty configs
-	tempForCheckMissingConfig := ConfigType{}
-
-	data, err := os.ReadFile(variable.ConfigFile)
-	if err != nil {
-		LogAndExit("Config file doesn't exist", "error", err)
-	}
-
-	// Insert data present in the config file inside temp variable
-	_ = toml.Unmarshal(data, &tempForCheckMissingConfig)
-	// Replace default values for values specifieds in config file
-	err = toml.Unmarshal(data, &Config)
-	if err != nil && !variable.FixConfigFile {
-		fmt.Print(lipgloss.NewStyle().Foreground(lipgloss.Color("#F93939")).Render("Error") +
-			lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFEE")).Render(" ┃ ") +
-			"Error decoding configuration file\n")
-		fmt.Println("To add missing fields to hotkeys directory automaticially run Superfile with the --fix-config-file flag `spf --fix-config-file`")
-	}
-
-	// If data is different and FixConfigFile option is on, then
-	// fill the config file with the default values
-	if !reflect.DeepEqual(Config, tempForCheckMissingConfig) && variable.FixConfigFile {
-		tomlData, err := toml.Marshal(Config)
-		if err != nil {
-			LogAndExit("Error encoding config", "error", err)
-		}
-
-		err = os.WriteFile(variable.ConfigFile, tomlData, 0644)
-		if err != nil {
-			LogAndExit("Error writing config file", "error", err)
-		}
+	hasError := loadTomlFile(variable.ConfigFile, ConfigTomlString, &Config, variable.FixConfigFile)
+	if hasError {
+		fmt.Println("To add missing fields to configuration file automatically run superfile with the --fix-config-file flag `spf --fix-config-file`")
+		return
 	}
 
 	if (Config.FilePreviewWidth > 10 || Config.FilePreviewWidth < 2) && Config.FilePreviewWidth != 0 {
@@ -145,56 +197,20 @@ func loadConfigFile() {
 	if Config.SidebarWidth != 0 && (Config.SidebarWidth < 3 || Config.SidebarWidth > 20) {
 		LogAndExit(loadConfigError("sidebar_width"))
 	}
+
 }
 
 // Load keybinds from the hotkeys file. Compares the content
-// with the default values and modify the hotkeys  if the FixHotkeys flag is on.
-// If is off check if all hotkeys are properly setted
+// with the default values and modify the hotkeys if the FixHotkeys flag is on.
 func loadHotkeysFile() {
-
-	// load default Hotkeys configs
-	_ = toml.Unmarshal([]byte(HotkeysTomlString), &hotkeys)
-	hotkeysFromConfig := HotkeysType{}
-	data, err := os.ReadFile(variable.HotkeysFile)
-
-	if err != nil {
-		LogAndExit("Config file doesn't exist", "error", err)
-	}
-	// Load data from hotkeys file
-	_ = toml.Unmarshal(data, &hotkeysFromConfig)
-	// Override default hotkeys with the ones from the file
-	err = toml.Unmarshal(data, &hotkeys)
-	if err != nil {
-		LogAndExit("Error decoding hotkeys file ( your config file may have misconfigured", "error", err)
+	hasError := loadTomlFile(variable.HotkeysFile, HotkeysTomlString, &hotkeys, variable.FixHotkeys)
+	if hasError {
+		fmt.Println("To add missing fields to hotkeys file automatically run superfile with the --fix-hotkeys flag `spf --fix-hotkeys`")
+		return
 	}
 
-	hasMissingHotkeysInConfig := !reflect.DeepEqual(hotkeys, hotkeysFromConfig)
-
-	// If FixHotKeys is not on then check if every needed hotkey is properly setted
-	if hasMissingHotkeysInConfig && !variable.FixHotkeys {
-		hotKeysConfig := reflect.ValueOf(hotkeysFromConfig)
-		for i := 0; i < hotKeysConfig.NumField(); i++ {
-			field := hotKeysConfig.Type().Field(i)
-			value := hotKeysConfig.Field(i)
-			name := field.Name
-			isMissing := value.Len() == 0
-
-			if isMissing {
-				fmt.Print(lipgloss.NewStyle().Foreground(lipgloss.Color("#F93939")).Render("Error") +
-					lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFEE")).Render(" ┃ ") +
-					fmt.Sprintf("Field \"%s\" is missing in hotkeys configuration\n", name))
-			}
-		}
-		fmt.Println("To add missing fields to hotkeys directory automaticially run Superfile with the --fix-hotkeys flag `spf --fix-hotkeys`")
-	}
-
-	// Override hotkey files with default configs if the Fix flag is on
-	if hasMissingHotkeysInConfig && variable.FixHotkeys {
-		writeHotkeysFile(hotkeys)
-	}
-
+	// Validate hotkey values
 	val := reflect.ValueOf(hotkeys)
-
 	for i := 0; i < val.NumField(); i++ {
 		field := val.Type().Field(i)
 		value := val.Field(i)
@@ -204,24 +220,9 @@ func loadHotkeysFile() {
 		}
 
 		hotkeysList := value.Interface().([]string)
-
 		if len(hotkeysList) == 0 || hotkeysList[0] == "" {
 			LogAndExit(loadHotkeysError(field.Name))
 		}
-	}
-
-}
-
-// Write hotkeys inside the hotkeys toml file
-func writeHotkeysFile(hotkeys HotkeysType) {
-	tomlData, err := toml.Marshal(hotkeys)
-	if err != nil {
-		LogAndExit("Error encoding hotkeys", "error", err)
-	}
-
-	err = os.WriteFile(variable.HotkeysFile, tomlData, 0644)
-	if err != nil {
-		LogAndExit("Error writing hotkeys file", "error", err)
 	}
 }
 

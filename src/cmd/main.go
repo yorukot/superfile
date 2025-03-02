@@ -24,7 +24,7 @@ import (
 
 // Run superfile app
 func Run(content embed.FS) {
-
+	internal.LoadInitial_PrerenderedVariables()
 	internal.LoadAllDefaultConfig(content)
 
 	app := &cli.App{
