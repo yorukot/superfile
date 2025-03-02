@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"errors"
+	"fmt"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -519,6 +521,11 @@ func (m *model) extractFile() {
 	var err error
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	ext := strings.ToLower(filepath.Ext(panel.element[panel.cursor].location))
+	if !isExensionExtractable(ext) {
+		slog.Error(fmt.Sprintf("Error unexpected file extension type: %s", ext), "error", errors.ErrUnsupported)
+		return
+	}
+
 	outputDir := fileNameWithoutExtension(panel.element[panel.cursor].location)
 	outputDir, err = renameIfDuplicate(outputDir)
 	if err != nil {
@@ -531,19 +538,10 @@ func (m *model) extractFile() {
 		slog.Error("Error while making directory for extracting files", "error", err)
 		return
 	}
-	switch ext {
-	case ".zip":
-		err = unzip(panel.element[panel.cursor].location, outputDir)
-		if err != nil {
-			slog.Error("Error extract file", "error", err)
-			return
-		}
-	default:
-		err = extractCompressFile(panel.element[panel.cursor].location, outputDir)
-		if err != nil {
-			slog.Error("Error extract file", "error", err)
-			return
-		}
+	err = extractCompressFile(panel.element[panel.cursor].location, outputDir)
+	if err != nil {
+		slog.Error("Error extract file", "error", err)
+		return
 	}
 }
 

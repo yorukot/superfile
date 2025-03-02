@@ -87,6 +87,37 @@ func TestIsBufferPrintable(t *testing.T) {
 	}
 }
 
+func TestIsExtensionExtractable(t *testing.T) {
+	inputs := []struct {
+		ext      string
+		expected bool
+	}{
+		{".zip", true},
+		{".rar", true},
+		{".7z", true},
+		{".tar.gz", true},
+		{".tar.bz2", true},
+		{".exe", false},
+		{".txt", false},
+		{".tar", true},
+		{"", false},    // Empty string case
+		{".ZIP", true}, // Case sensitivity check
+		{".Zip", true}, // Case sensitivity check
+		{".bz", true},
+		{".gz", true},
+		{".iso", true},
+	}
+
+	for _, tt := range inputs {
+		t.Run(tt.ext, func(t *testing.T) {
+			result := isExensionExtractable(tt.ext)
+			if result != tt.expected {
+				t.Errorf("isExensionExtractable (%q) = %v; want %v", tt.ext, result, tt.expected)
+			}
+		})
+	}
+}
+
 func TestMakePrintable(t *testing.T) {
 	var inputs = []struct {
 		input    string
