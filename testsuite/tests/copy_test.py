@@ -23,7 +23,7 @@ class CopyTest(GenericTestImpl):
             start_dir=DIR1,
             test_dirs=[DIR1, DIR2],
             test_files=[(FILE1, tconst.FILE_TEXT1)],
-            key_inputs=[keys.KEY_CTRL_C, keys.KEY_CTRL_V],
+            key_inputs=[keys.KEY_CTRL_C, keys.KEY_PASTE],
             validate_exists=[FILE1, FILE1_COPY1],
             # If you want to validate spf being close, wait time needs to be high
             # Otherwise tests are flaky
