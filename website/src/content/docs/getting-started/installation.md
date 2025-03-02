@@ -10,7 +10,7 @@ head:
 
 First make sure you have the following tools installed on your machine:
 
-- [Any Nerd-font ](https://www.nerdfonts.com/font-downloads)
+- [Any Nerd-font ](https://www.nerdfonts.com/font-downloads), and set the font for your terminal application to use the installed Nerd-font
 
 :::tip
 If you don't install `Nerd font`, superfile will still work, but the UI may look a bit off. It's recommended to disable the Nerd font option to avoid this issue.

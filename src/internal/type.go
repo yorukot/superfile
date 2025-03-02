@@ -199,7 +199,6 @@ type element struct {
 	name      string
 	location  string
 	directory bool
-	matchRate float64
 	metaData  [][2]string
 }
 
@@ -213,6 +212,7 @@ type sidebarModel struct {
 	cursor      int
 	rename      textinput.Model
 	renaming    bool
+	searchBar   textinput.Model
 }
 
 type directory struct {

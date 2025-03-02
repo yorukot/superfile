@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"image"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"sort"
@@ -22,57 +23,70 @@ func (m *model) sidebarRender() string {
 	if Config.SidebarWidth == 0 {
 		return ""
 	}
-	superfileTitle := sidebarTitleStyle.Render("    " + icon.SuperfileIcon + " superfile")
-	superfileTitle = ansi.Truncate(superfileTitle, Config.SidebarWidth, "")
-	s := superfileTitle
-	s += "\n"
+	slog.Debug("Rendering sidebar.", "cursor", m.sidebarModel.cursor,
+		"renderIndex", m.sidebarModel.renderIndex, "dirs count", len(m.sidebarModel.directories),
+		"sidebar focused", m.focusPanel == sidebarFocus)
 
-	pinnedDivider := "\n" + sidebarTitleStyle.Render("󰐃 Pinned") + sidebarDividerStyle.Render(" ───────────") + "\n"
-	disksDivider := "\n" + sidebarTitleStyle.Render("󱇰 Disks") + sidebarDividerStyle.Render(" ────────────") + "\n"
-	disksDivider = ansi.Truncate(disksDivider, Config.SidebarWidth, "")
-	pinnedDivider = ansi.Truncate(pinnedDivider, Config.SidebarWidth, "")
+	s := sideBarSuperfileTitle + "\n"
 
-	totalHeight := 2
-	for i := m.sidebarModel.renderIndex; i < len(m.sidebarModel.directories); i++ {
-		if totalHeight >= m.mainPanelHeight {
-			break
-		} else {
-			s += "\n"
-		}
-
-		directory := m.sidebarModel.directories[i]
-
-		if directory.location == "Pinned+-*/=?" {
-			s += pinnedDivider
-			totalHeight += 3
-			continue
-		}
-
-		if directory.location == "Disks+-*/=?" {
-			if m.mainPanelHeight-totalHeight <= 2 {
-				break
-			}
-			s += disksDivider
-			totalHeight += 3
-			continue
-		}
-
-		totalHeight++
-		cursor := " "
-		if m.sidebarModel.cursor == i && m.focusPanel == sidebarFocus {
-			cursor = icon.Cursor
-		}
-
-		if m.sidebarModel.renaming && i == m.sidebarModel.cursor {
-			s += m.sidebarModel.rename.View()
-		} else if directory.location == m.fileModel.filePanels[m.filePanelFocusIndex].location {
-			s += filePanelCursorStyle.Render(cursor+" ") + sidebarSelectedStyle.Render(truncateText(directory.name, Config.SidebarWidth-2, "..."))
-		} else {
-			s += filePanelCursorStyle.Render(cursor+" ") + sidebarStyle.Render(truncateText(directory.name, Config.SidebarWidth-2, "..."))
-		}
+	if m.sidebarModel.searchBar.Focused() || m.sidebarModel.searchBar.Value() != "" || m.focusPanel == sidebarFocus {
+		m.sidebarModel.searchBar.Placeholder = "(" + hotkeys.SearchBar[0] + ")" + " Search"
+		s += "\n" + ansi.Truncate(m.sidebarModel.searchBar.View(), Config.SidebarWidth-2, "...")
 	}
 
+	if m.sidebarModel.noActualDir() {
+		s += "\n" + sideBarNoneText
+		return sideBarBorderStyle(m.mainPanelHeight, m.focusPanel).Render(s)
+	}
+
+	s += m.sidebarModel.directoriesRender(m.mainPanelHeight,
+		m.fileModel.filePanels[m.filePanelFocusIndex].location, m.focusPanel == sidebarFocus)
+
 	return sideBarBorderStyle(m.mainPanelHeight, m.focusPanel).Render(s)
+}
+
+func (s *sidebarModel) directoriesRender(mainPanelHeight int, curFilePanelFileLocation string, sideBarFocussed bool) string {
+
+	// Cursor should always point to a valid directory at this point
+	if s.isCursorInvalid() {
+		slog.Error("Unexpected situation in sideBar Model. "+
+			"Cursor is at invalid postion, while there are valide directories", "cursor", s.cursor,
+			"directory count", len(s.directories))
+		return ""
+	}
+
+	res := ""
+	totalHeight := sideBarInitialHeight
+	for i := s.renderIndex; i < len(s.directories); i++ {
+		if totalHeight+s.directories[i].requiredHeight() > mainPanelHeight {
+			break
+		}
+		res += "\n"
+
+		totalHeight += s.directories[i].requiredHeight()
+
+		if s.directories[i] == pinnedDividerDir {
+			res += "\n" + sideBarPinnedDivider
+		} else if s.directories[i] == diskDividerDir {
+			res += "\n" + sideBarDisksDivider
+		} else {
+			cursor := " "
+			if s.cursor == i && sideBarFocussed && !s.searchBar.Focused() {
+				cursor = icon.Cursor
+			}
+			if s.renaming && s.cursor == i {
+				res += s.rename.View()
+			} else {
+				renderStyle := sidebarStyle
+				if s.directories[i].location == curFilePanelFileLocation {
+					renderStyle = sidebarSelectedStyle
+				}
+				res += filePanelCursorStyle.Render(cursor+" ") +
+					renderStyle.Render(truncateText(s.directories[i].name, Config.SidebarWidth-2, "..."))
+			}
+		}
+	}
+	return res
 }
 
 // This also modifies the m.fileModel.filePanels
@@ -347,7 +361,7 @@ func (m *model) clipboardRender() string {
 			} else {
 				fileInfo, err := os.Stat(m.copyItems.items[i])
 				if err != nil {
-					outPutLog("Clipboard render function get item state error", err)
+					slog.Error("Clipboard render function get item state ", "error", err)
 				}
 				if !os.IsNotExist(err) {
 					clipboardRender += clipboardPrettierName(m.copyItems.items[i], footerWidth(m.fullWidth)-3, fileInfo.IsDir(), false) + "\n"
@@ -600,7 +614,7 @@ func (m *model) filePreviewPanelRender() string {
 	fileInfo, err := os.Stat(itemPath)
 
 	if err != nil {
-		outPutLog("error get file info", err)
+		slog.Error("Error get file info", "error", err)
 		return box.Render("\n --- " + icon.Error + " Error get file info ---")
 	}
 
@@ -616,7 +630,7 @@ func (m *model) filePreviewPanelRender() string {
 
 		files, err := os.ReadDir(dirPath)
 		if err != nil {
-			outPutLog("Error render directory preview", err)
+			slog.Error("Error render directory preview", "error", err)
 			return box.Render("\n --- " + icon.Error + " Error render directory preview ---")
 		}
 
@@ -655,7 +669,7 @@ func (m *model) filePreviewPanelRender() string {
 		}
 
 		if err != nil {
-			outPutLog("Error covernt image to ansi", err)
+			slog.Error("Error covernt image to ansi", "error", err)
 			return box.Render("\n --- " + icon.Error + " Error covernt image to ansi ---")
 		}
 
@@ -667,7 +681,7 @@ func (m *model) filePreviewPanelRender() string {
 	if format == nil {
 		isText, err := isTextFile(itemPath)
 		if err != nil {
-			outPutLog("Error while checking text file", err)
+			slog.Error("Error while checking text file", "error", err)
 			return box.Render("\n --- " + icon.Error + " Error get file info ---")
 		} else if !isText {
 			return box.Render("\n --- " + icon.Error + " Unsupported formats ---")
@@ -677,7 +691,7 @@ func (m *model) filePreviewPanelRender() string {
 	// At this point either format is not nil, or we can read the file
 	fileContent, err := readFileContent(itemPath, m.fileModel.width+20, previewLine)
 	if err != nil {
-		outPutLog(err)
+		slog.Error("Error open file", "error", err)
 		return box.Render("\n --- " + icon.Error + " Error open file ---")
 	}
 
@@ -689,7 +703,7 @@ func (m *model) filePreviewPanelRender() string {
 		}
 		fileContent, err = ansichroma.HightlightString(fileContent, format.Config().Name, theme.CodeSyntaxHighlightTheme, background)
 		if err != nil {
-			outPutLog("Error render code highlight", err)
+			slog.Error("Error render code highlight", "error", err)
 			return box.Render("\n --- " + icon.Error + " Error render code highlight ---")
 		}
 	}

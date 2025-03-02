@@ -45,7 +45,7 @@ func returnFocusType(focusPanel focusPanelType) filePanelFocusType {
 func returnDirElement(location string, displayDotFile bool, sortOptions sortOptionsModelData) (directoryElement []element) {
 	dirEntries, err := os.ReadDir(location)
 	if err != nil {
-		outPutLog("Return folder element function error", err)
+		slog.Error("Error while return folder element function", "error", err)
 		return directoryElement
 	}
 
@@ -95,11 +95,11 @@ func returnDirElement(location string, displayDotFile bool, sortOptions sortOpti
 				// No need of early return, we only call len() on filesI, so nil would
 				// just result in 0
 				if err != nil {
-					outPutLog("Error when reading directory during sort", err)
+					slog.Error("Error when reading directory during sort", "error", err)
 				}
 				filesJ, err := os.ReadDir(filepath.Join(location, dirEntries[j].Name()))
 				if err != nil {
-					outPutLog("Error when reading directory during sort", err)
+					slog.Error("Error when reading directory during sort", "error", err)
 				}
 				return len(filesI) < len(filesJ) != reversed
 			} else {
@@ -134,7 +134,7 @@ func returnDirElementBySearchString(location string, displayDotFile bool, search
 
 	items, err := os.ReadDir(location)
 	if err != nil {
-		outPutLog("Return folder element function error", err)
+		slog.Error("Error while return folder element function", "error", err)
 		return []element{}
 	}
 
@@ -159,27 +159,23 @@ func returnDirElementBySearchString(location string, displayDotFile bool, search
 			location:  folderElementLocation,
 		}
 	}
-
-	var options = fzf.DefaultOptions()
-	var hayStack = fileAndDirectories
-	var myFzf = fzf.New(hayStack, options)
-	var result fzf.SearchResult
-	myFzf.Search(searchString)
-	result = <-myFzf.GetResultChannel()
-	myFzf.End()
-
-	for _, item := range result.Matches {
+	// https://github.com/reinhrst/fzf-lib/blob/main/core.go#L43
+	// No sorting needed. fzf.DefaultOptions() already return values ordered on Score
+	for _, item := range fzfSearch(searchString, fileAndDirectories) {
 		resultItem := folderElementMap[item.Key]
-		resultItem.matchRate = float64(item.Score)
 		dirElement = append(dirElement, resultItem)
 	}
 
-	// Sort folders and files by match rate
-	sort.Slice(dirElement, func(i, j int) bool {
-		return dirElement[i].matchRate > dirElement[j].matchRate
-	})
-
 	return dirElement
+}
+
+// Returning a string slice causes inefficiency in current usage
+func fzfSearch(query string, source []string) []fzf.MatchResult {
+	fzfSearcher := fzf.New(source, fzf.DefaultOptions())
+	fzfSearcher.Search(query)
+	fzfResults := <-fzfSearcher.GetResultChannel()
+	fzfSearcher.End()
+	return fzfResults.Matches
 }
 
 func panelElementHeight(mainPanelHeight int) int {
@@ -190,6 +186,7 @@ func bottomElementHeight(bottomElementHeight int) int {
 	return bottomElementHeight - 5
 }
 
+// Todo : replace usage of this with slices.contains
 func arrayContains(s []string, str string) bool {
 	for _, v := range s {
 		if v == str {
@@ -197,11 +194,6 @@ func arrayContains(s []string, str string) bool {
 		}
 	}
 	return false
-}
-
-// Todo : Eventually we will replace all calls to direct slog calls
-func outPutLog(values ...interface{}) {
-	slog.Info(fmt.Sprintln(values...))
 }
 
 // Todo : Eventually we want to remove all such usage that can result in app exiting abruptly
@@ -276,6 +268,7 @@ func renameIfDuplicate(destination string) (string, error) {
 	}
 }
 
+// Todo : Move this model related function to the right file. Should not be in functions file.
 func (m *model) returnMetaData() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	cursor := panel.cursor
@@ -326,7 +319,7 @@ func (m *model) returnMetaData() {
 	}
 
 	if err != nil {
-		outPutLog("Return meta data function get file state error", err)
+		slog.Error("Error while return meta data function get file state", "error", err)
 	}
 
 	if fileInfo.IsDir() {
@@ -343,7 +336,7 @@ func (m *model) returnMetaData() {
 
 	checkIsSymlinked, err := os.Lstat(filePath)
 	if err != nil {
-		outPutLog("err when getting file info", err)
+		slog.Error("Error when getting file info", "error", err)
 		return
 	}
 
@@ -353,7 +346,7 @@ func (m *model) returnMetaData() {
 
 		for _, fileInfo := range fileInfos {
 			if fileInfo.Err != nil {
-				outPutLog("Return meta data function error", fileInfo, fileInfo.Err)
+				slog.Error("Error while return metadata function", "fileInfo", fileInfo, "error", fileInfo.Err)
 				continue
 			}
 
@@ -372,7 +365,7 @@ func (m *model) returnMetaData() {
 			// Calculate MD5 checksum
 			checksum, err := calculateMD5Checksum(filePath)
 			if err != nil {
-				outPutLog("Error calculating MD5 checksum", err)
+				slog.Error("Error calculating MD5 checksum", "error", err)
 			} else {
 				md5Data := [2]string{"MD5Checksum", checksum}
 				m.fileMetaData.metaData = append(m.fileMetaData.metaData, md5Data)
@@ -409,7 +402,7 @@ func dirSize(path string) int64 {
 	var size int64
 	err := filepath.WalkDir(path, func(_ string, entry os.DirEntry, err error) error {
 		if err != nil {
-			outPutLog("Dir size function error", err)
+			slog.Error("Dir size function error", "error", err)
 		}
 		if !entry.IsDir() {
 			info, err := entry.Info()

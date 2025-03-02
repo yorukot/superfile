@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"runtime"
@@ -23,7 +24,7 @@ import (
 
 // Run superfile app
 func Run(content embed.FS) {
-
+	internal.LoadInitial_PrerenderedVariables()
 	internal.LoadAllDefaultConfig(content)
 
 	app := &cli.App{
@@ -141,7 +142,6 @@ func InitConfigFile() {
 
 	// Create files
 	if err := createFiles(
-		variable.PinnedFile,
 		variable.ToggleDotFile,
 		variable.LogFile,
 		variable.ThemeFileVersion,
@@ -157,6 +157,10 @@ func InitConfigFile() {
 
 	if err := writeConfigFile(variable.HotkeysFile, internal.HotkeysTomlString); err != nil {
 		log.Fatalln("Error writing config file:", err)
+	}
+
+	if err := initJsonFile(variable.PinnedFile); err != nil {
+		log.Fatalln("Error initializing json file:", err)
 	}
 }
 
@@ -228,6 +232,15 @@ func writeConfigFile(path, data string) error {
 	return nil
 }
 
+func initJsonFile(path string) error {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		if err := os.WriteFile(path, []byte("null"), 0644); err != nil {
+			return fmt.Errorf("failed to initialize json file %s: %w", path, err)
+		}
+	}
+	return nil
+}
+
 // Check for the need of updates if AutoCheckUpdate is on, if its the first time
 // that version is checked or if has more than 24h since the last version check,
 // look into the repo if  there's any more recent version
@@ -270,9 +283,13 @@ func CheckForUpdates() {
 	}
 
 	if lastTime.IsZero() || currentTime.Sub(lastTime) >= 24*time.Hour {
-		resp, err := http.Get(variable.LatestVersionURL)
+		client := &http.Client{
+			Timeout: 5 * time.Second,
+		}
+		resp, err := client.Get(variable.LatestVersionURL)
 		if err != nil {
-			fmt.Println("Error checking for updates:", err)
+
+      slog.Error("Error checking for updates:", "error", err)
 			// Update the timestamp file even if the update check fails
 			timeStr := currentTime.Format(time.RFC3339)
 			os.WriteFile(variable.LastCheckVersion, []byte(timeStr), 0644)
