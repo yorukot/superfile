@@ -289,7 +289,7 @@ func CheckForUpdates() {
 		resp, err := client.Get(variable.LatestVersionURL)
 		if err != nil {
 
-      slog.Error("Error checking for updates:", "error", err)
+      		slog.Error("Error checking for updates:", "error", err)
 			// Update the timestamp file even if the update check fails
 			timeStr := currentTime.Format(time.RFC3339)
 			os.WriteFile(variable.LastCheckVersion, []byte(timeStr), 0644)
