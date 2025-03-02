@@ -67,6 +67,11 @@ func generate_dir_list(count int) []directory {
 	return res
 }
 
+// Todo : Use t.Run(tt.name
+// Todo : Get rid of global vars, use testdata in each test, even if there is a bit of
+// duplication.
+// Todo : Add tt.names
+
 func Test_noActualDir(t *testing.T) {
 	assert.True(t, sidebar1_empty_invalid.noActualDir(), "Empty sidebar should have no actual directories")
 	assert.True(t, sidebar2_empty.noActualDir(), "Empty sidebar should have no actual directories")
