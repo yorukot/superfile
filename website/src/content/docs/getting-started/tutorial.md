@@ -135,10 +135,10 @@ To cut, you can press `ctrl`+`x`.
 
 Both cut and copied items are shown in the clipboard panel (lower-right corner). The progress of your operations is displayed in the processes panel (lower-left corner).
 
-To paste, you can press `ctrl`+`v` or `ctrl`+`w`.
+To paste, you can press `ctrl`+`v`.
 
 :::note
-In some terminals, for example Windows Powershell, `ctrl`+`v` pastes input from clipboard to terminal. So, `ctrl`+`v` might not work for paste. Either you can use `ctrl`+`w` key, or override default behaviour of `ctrl`+`v` on your terminal.
+In some terminals, for example Windows Powershell, `ctrl`+`v` pastes input from clipboard to terminal. So, `ctrl`+`v` might not work for paste. Either you can add `ctrl`+`w` hotkey for paste, or override default behaviour of `ctrl`+`v` on your terminal.
 :::
 
 To delete, you can press `ctrl`+`d`
