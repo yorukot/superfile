@@ -17,6 +17,7 @@ require (
 	github.com/rkoesters/xdg v0.0.1
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/urfave/cli/v2 v2.27.5
+	golang.org/x/mod v0.23.0
 	golift.io/xtractr v0.2.2
 )
 

@@ -10,8 +10,6 @@ import (
 	"net/http"
 	"os"
 	"runtime"
-	"strconv"
-	"strings"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -20,6 +18,7 @@ import (
 	"github.com/urfave/cli/v2"
 	variable "github.com/yorukot/superfile/src/config"
 	internal "github.com/yorukot/superfile/src/internal"
+	"golang.org/x/mod/semver"
 )
 
 // Run superfile app
@@ -325,9 +324,7 @@ func CheckForUpdates() {
 		}
 
 		// Check if the local version is outdated
-		// We do lexicographical string comparison
-		// "v1.2.0" > "v1.1.7.1" > "v.1.1.7" > "v.1.1.6"
-		if release.TagName > variable.CurrentVersion {
+		if semver.Compare(release.TagName, variable.CurrentVersion) > 0 {
 			fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("#FF69E1")).Render("┃ ") +
 				lipgloss.NewStyle().Foreground(lipgloss.Color("#FFBA52")).Bold(true).Render("A new version ") +
 				lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFF2")).Bold(true).Italic(true).Render(release.TagName) +
