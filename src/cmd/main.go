@@ -337,11 +337,21 @@ func CheckForUpdates() {
 	}
 }
 
-// Convert version string to number
+// Convert version string to number for proper comparison
 func versionToNumber(version string) int {
-	version = strings.ReplaceAll(version, "v", "")
-	version = strings.ReplaceAll(version, ".", "")
+	version = strings.TrimPrefix(version, "v")
+	parts := strings.Split(version, ".")
 
-	num, _ := strconv.Atoi(version)
-	return num
+	result := 0
+	scale := 1000000
+
+	for i := 0; i < len(parts) && i < 4; i++ {
+		num, err := strconv.Atoi(parts[i])
+		if err == nil {
+			result += num * scale
+		}
+		scale /= 1000
+	}
+
+	return result
 }
