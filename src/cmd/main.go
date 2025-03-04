@@ -335,36 +335,3 @@ func CheckForUpdates() {
 		}
 	}
 }
-
-// Check the last time the version file was checked
-func readLastTimeCheckVersionFromFile(filename string) (time.Time, error) {
-	content, err := os.ReadFile(filename)
-	if err != nil {
-		return time.Time{}, err
-	}
-	if len(content) == 0 {
-		return time.Time{}, nil
-	}
-	lastTime, err := time.Parse(time.RFC3339, string(content))
-	if err != nil {
-		return time.Time{}, err
-	}
-
-	return lastTime, nil
-}
-
-// Write content to filename
-func writeToFile(filename, content string) error {
-	file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE, 0644)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	_, err = file.WriteString(content)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
