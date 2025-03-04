@@ -324,8 +324,10 @@ func CheckForUpdates() {
 			return
 		}
 
-		//Check if the local version is outdated
-		if versionToNumber(release.TagName) > versionToNumber(variable.CurrentVersion) {
+		// Check if the local version is outdated
+		// We do lexicographical string comparison
+		// "v1.2.0" > "v1.1.7.1" > "v.1.1.7" > "v.1.1.6"
+		if release.TagName > variable.CurrentVersion {
 			fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("#FF69E1")).Render("┃ ") +
 				lipgloss.NewStyle().Foreground(lipgloss.Color("#FFBA52")).Bold(true).Render("A new version ") +
 				lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFF2")).Bold(true).Italic(true).Render(release.TagName) +
@@ -337,21 +339,35 @@ func CheckForUpdates() {
 	}
 }
 
-// Convert version string to number for proper comparison
-func versionToNumber(version string) int {
-	version = strings.TrimPrefix(version, "v")
-	parts := strings.Split(version, ".")
-
-	result := 0
-	scale := 1000000
-
-	for i := 0; i < len(parts) && i < 4; i++ {
-		num, err := strconv.Atoi(parts[i])
-		if err == nil {
-			result += num * scale
-		}
-		scale /= 1000
+// Check the last time the version file was checked
+func readLastTimeCheckVersionFromFile(filename string) (time.Time, error) {
+	content, err := os.ReadFile(filename)
+	if err != nil {
+		return time.Time{}, err
+	}
+	if len(content) == 0 {
+		return time.Time{}, nil
+	}
+	lastTime, err := time.Parse(time.RFC3339, string(content))
+	if err != nil {
+		return time.Time{}, err
 	}
 
-	return result
+	return lastTime, nil
+}
+
+// Write content to filename
+func writeToFile(filename, content string) error {
+	file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE, 0644)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	_, err = file.WriteString(content)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
