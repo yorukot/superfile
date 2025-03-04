@@ -10,9 +10,9 @@ head:
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC(YYYY-MM-DD).
 
-# [**v1.2.0**](https://github.com/yorukot/superfile/releases/tag/v1.2.0)
+# [**v1.1.7.2**](https://github.com/yorukot/superfile/releases/tag/v1.1.7.2)
 
-> 2025-03-04
+> 2025-03-05
 
 #### Update
 - Added direnv support for nix flake dev shell [`#568`](https://github.com/yorukot/superfile/pull/568)
