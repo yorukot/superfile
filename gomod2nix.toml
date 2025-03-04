@@ -169,6 +169,9 @@ schema = 3
   [mod."golang.org/x/image"]
     version = "v0.18.0"
     hash = "sha256-g9N/y4asXG1lctPJ1KEf8XIjeJi/mQ43EXUa8HTj/zQ="
+  [mod."golang.org/x/mod"]
+    version = "v0.23.0"
+    hash = "sha256-8mlTcEyJy1ETxCO4g7RjZ4Z5nJvXRNwKLwAOoe2GChI="
   [mod."golang.org/x/sync"]
     version = "v0.11.0"
     hash = "sha256-5ZBfDJvNaUBM4Vhk0fgYblCGL3eBxiJL85nIE8LiKl0="
