@@ -18,7 +18,6 @@ import (
 	"github.com/urfave/cli/v2"
 	variable "github.com/yorukot/superfile/src/config"
 	internal "github.com/yorukot/superfile/src/internal"
-	"golang.org/x/mod/semver"
 )
 
 // Run superfile app
@@ -324,7 +323,12 @@ func CheckForUpdates() {
 		}
 
 		// Check if the local version is outdated
-		if semver.Compare(release.TagName, variable.CurrentVersion) > 0 {
+		res, err := versionCompare(release.TagName, variable.CurrentVersion)
+		if err != nil {
+			slog.Error("Error while trying to compare versions", "error", err)
+			return
+		}
+		if res > 0 {
 			fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("#FF69E1")).Render("┃ ") +
 				lipgloss.NewStyle().Foreground(lipgloss.Color("#FFBA52")).Bold(true).Render("A new version ") +
 				lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFF2")).Bold(true).Italic(true).Render(release.TagName) +
