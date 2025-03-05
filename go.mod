@@ -1,6 +1,8 @@
 module github.com/yorukot/superfile
 
-go 1.22.2
+go 1.23.0
+
+toolchain go1.24.1
 
 require (
 	github.com/adrg/xdg v0.5.3
@@ -18,7 +20,7 @@ require (
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/stretchr/testify v1.9.0
 	github.com/urfave/cli/v2 v2.27.5
-	golang.org/x/mod v0.23.0
+	golang.org/x/mod v0.24.0
 	golift.io/xtractr v0.2.2
 )
 
