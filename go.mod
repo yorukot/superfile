@@ -16,7 +16,9 @@ require (
 	github.com/reinhrst/fzf-lib v0.9.0
 	github.com/rkoesters/xdg v0.0.1
 	github.com/shirou/gopsutil v3.21.11+incompatible
+	github.com/stretchr/testify v1.9.0
 	github.com/urfave/cli/v2 v2.27.5
+	golang.org/x/mod v0.23.0
 	golift.io/xtractr v0.2.2
 )
 
@@ -24,6 +26,7 @@ require (
 	github.com/charmbracelet/x/ansi v0.8.0 // indirect
 	github.com/charmbracelet/x/term v0.2.1 // indirect
 	golang.org/x/image v0.18.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 require (

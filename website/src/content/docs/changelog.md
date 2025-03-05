@@ -10,6 +10,58 @@ head:
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC(YYYY-MM-DD).
 
+# [**v1.2.0.0**](https://github.com/yorukot/superfile/releases/tag/v1.2.0.0)
+
+> 2025-03-05
+
+#### Update
+- Added direnv support for nix flake dev shell [`#568`](https://github.com/yorukot/superfile/pull/568)
+- Move rename cursor to start before the extension [`#565`](https://github.com/yorukot/superfile/pull/565)
+- Renaming feature for pinned directories [`#579`](https://github.com/yorukot/superfile/pull/579)
+- Add python testsuite [`#581`](https://github.com/yorukot/superfile/pull/581)
+- Add build instructions for windows [`#583`](https://github.com/yorukot/superfile/pull/583)
+- Add `--config-file` flag support [`#592`](https://github.com/yorukot/superfile/pull/592)
+- Document Windows scoop installation option [`#595`](https://github.com/yorukot/superfile/pull/595)
+- Rotate image using EXIF metadata [`#607`](https://github.com/yorukot/superfile/pull/607)
+- Upgrade sidebar search [`#614`](https://github.com/yorukot/superfile/pull/614)
+- Change all outPutLog to slog.Error or slog.Info [`#628`](https://github.com/yorukot/superfile/pull/628)
+- Add install.sh files link for more trust [`#645`](https://github.com/yorukot/superfile/pull/645)
+- Update README.md and added a Run the app title [`#550`](https://github.com/yorukot/superfile/pull/550)
+
+#### Bug fix
+- Fix sort options hotkey [`#548`](https://github.com/yorukot/superfile/pull/548)
+- Fix wrong log line, Fatalln was used with formatting verbs [`#555`](https://github.com/yorukot/superfile/pull/555)
+- Fix incorrect failure reporting in delete operation [`#558`](https://github.com/yorukot/superfile/pull/558)
+- Fix previews for text file with control characters [`#557`](https://github.com/yorukot/superfile/pull/557)
+- Fix search field key blocking [`#569`](https://github.com/yorukot/superfile/pull/569)
+- Fix windows operations and other improvements [`#564`](https://github.com/yorukot/superfile/pull/564)
+- Fix crash when searching on WSL mounted drives [`#576`](https://github.com/yorukot/superfile/pull/576)
+- Fix arch install instructions [`#580`](https://github.com/yorukot/superfile/pull/580)
+- Fix windows delete, open file and other improvements [`#584`](https://github.com/yorukot/superfile/pull/584)
+- Fix UI issue of spf stuck with terminal size too small [`#594`](https://github.com/yorukot/superfile/pull/594)
+- Fix wrong path separator in windows [`#597`](https://github.com/yorukot/superfile/pull/597)
+- Fix command line not working for windows [`#601`](https://github.com/yorukot/superfile/pull/601)
+- Fix error while reading last check version file in new time zone [`#634`](https://github.com/yorukot/superfile/pull/634)
+- Fix discrete timeout for HTTP get version [`#632`](https://github.com/yorukot/superfile/pull/632)
+- Fix initial pinned.json having invalid JSON [`#652`](https://github.com/yorukot/superfile/pull/652)
+- Fix loadConfigFile and loadHotkeysFile functions [`#650`](https://github.com/yorukot/superfile/pull/650)
+- Fix issue when trying to extract a file with .zip_ extension [`#636`](https://github.com/yorukot/superfile/pull/636)
+- Fix openFileWithEditor bug [`#635`](https://github.com/yorukot/superfile/pull/635)
+- Fix partial overwrite issue by ensuring full file rewrite [`#665`](https://github.com/yorukot/superfile/pull/665)
+
+#### Optimization
+- Improving file panel rendering [`#589`](https://github.com/yorukot/superfile/pull/589)
+- Improve formatting, error handling, and fix typos [`#600`](https://github.com/yorukot/superfile/pull/600)
+- Go formatting fixes [`#618`](https://github.com/yorukot/superfile/pull/618)
+- Testsuite in GitHub Actions [`#602`](https://github.com/yorukot/superfile/pull/602)
+
+#### Documentation
+- Revert changes in website that were not yet released [`#611`](https://github.com/yorukot/superfile/pull/611)
+- Docs contribute [`#610`](https://github.com/yorukot/superfile/pull/610)
+- Remove godocs badge [`#627`](https://github.com/yorukot/superfile/pull/627)
+- Update installation.md to note setting nerd-font in terminal application [`#658`](https://github.com/yorukot/superfile/pull/658)
+- Fix README typos [`#653`](https://github.com/yorukot/superfile/pull/653)
+
 # [**v1.1.7.1**](https://github.com/yorukot/superfile/releases/tag/v1.1.7)
 
 > 2024-01-06
