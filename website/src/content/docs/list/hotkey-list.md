@@ -59,7 +59,7 @@ These are the default hotkeys and you can [change](/configure/custom-hotkeys) th
 | Rename file or folder                                | `ctrl+r`           | `file_panel_item_rename`                                                               |
 | Copy file or folder (or both)                        | `ctrl+c`           | `copy_single_item` (normal mode) <br> `file_panel_select_mode_item_copy` (select mode) |
 | Cut file or folder (or both)                         | `ctrl+x`           | `file_panel_select_mode_item_cut`                                                      |
-| Paste all items in your clipboard                    | `ctrl+v`           | `paste_item`                                                                           |
+| Paste all items in your clipboard                    | `ctrl+v`, `ctrl+w` | `paste_item`                                                                           |
 | Delete file or folder (or both)                      | `ctrl+d`, `delete` | `delete_item` (normal mode) <br> `file_panel_select_mode_item_delete` (select mode)    |
 | Copy current file or directory path                  | `ctrl+p`           | `copy_path`                                                                            |
 | Extract zip file                                     | `ctrl+e`           | `extract_file` (normal mode)                                                           |

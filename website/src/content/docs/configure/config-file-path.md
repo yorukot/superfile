@@ -30,6 +30,14 @@ If you want to get the set path you can try `spf pl` which will print out the fi
 | :------------------------: | :----------------------------------------: | :------------------------: |
 | `~/.local/share/superfile` | `~/Library/Application Support/superfile/` | `%LOCALAPPDATA%/superfile` |
 
+### Changing Config File Path
+
+You can use the `-c` flag to specify a different path for the `config.toml` file:
+
+```bash
+spf -c /path/to/your/config.toml
+```
+
 #### Log directory
 
 |           Linux            |                   macOS                   |          Windows           |

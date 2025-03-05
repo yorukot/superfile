@@ -26,7 +26,11 @@ To see the path locations of your superfile files, use the command `spf pl`.
 
 - ###### editor
 
-The editor your files/directories will be opened with (if blank, it will default to the EDITOR environment variable).
+The editor your files will be opened with (Leave blank to use the EDITOR environment variable. If EDITOR environment variable is not set, it will default to `nano` for MacOS/Linux, and `notepad` for Windows.
+
+- ###### dir_editor
+
+The editor your directories will be opened with (Leave blank to use defaults : `vi` - Linux, `open` - MacOS, `explorer` - Windows).
 
 - ###### auto_check_update
 
@@ -36,15 +40,13 @@ The editor your files/directories will be opened with (if blank, it will default
 
 - ###### cd_on_quit
 
-:::note
-Doesn't work on Windows at the moment.
-:::
-
 `true` => When you exit superfile, changes the terminal path to the last file panel you used.
 
 `false` => When you exit superfile, the terminal path remains the same prior to superfile.
 
-After setting to `true`, you need to update your `.bashrc` file.
+After setting to `true`, you need to update your shell config file. Sample changes :
+
+##### MacOS/Linux (bash)
 
 Open the file:
 
@@ -61,6 +63,31 @@ Save, exit, and reload your `.bashrc` file:
 ```bash
 source ~/.bashrc
 ```
+
+##### Windows (Powershell)
+
+Open the file:
+
+```powershell
+notepad $PROFILE
+```
+
+Copy the following code into the file:
+
+<CodeBlock file="cd_on_quit/cd_on_quit.ps1" />
+
+Save, exit, and reload your profile.
+
+```powershell
+. $PROFILE
+```
+
+:::note
+You need to make sure powershell is allowed to execute script. If you get error like `running
+scripts is disabled on this system`. You need to allow it.
+
+Example command to enable - `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned` 
+:::
 
 - ###### default_open_file_preview
 
