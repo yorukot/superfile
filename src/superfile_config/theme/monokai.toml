@@ -1,0 +1,67 @@
+# OneDark
+# Theme create by: https://github.com/CommandJoo
+# Update by(sort by time):
+#
+# Thanks for all contributor!!
+
+# If you want to make sidebar border display just set it same as sidebar background color
+
+# Code syntax highlight theme (you can go to https://github.com/alecthomas/chroma/blob/master/styles to find one you like)
+code_syntax_highlight = "monokai"
+
+# ========= Border =========
+file_panel_border =			"#75715E" # Overlay0
+sidebar_border =			"#75715E"    # Base
+footer_border =				"#75715E"     # Overlay0
+
+# ========= Border Active =========
+file_panel_border_active =	"#66D9EF" # Lavendar
+sidebar_border_active =		"#F92672"    # Red
+footer_border_active =		"#A9DC76"     # Green
+modal_border_active =		"#66D9EF"      # Overlay2
+
+# ========= Background (bg) =========
+full_screen_bg = "#272822" # Base
+file_panel_bg =  "#272822"  # Base
+sidebar_bg =     "#272822"     # Base
+footer_bg =      "#272822"      # Base
+modal_bg =       "#272822"       # Base
+
+# ========= Foreground (fg) =========
+full_screen_fg =			"#F8F8F2" # Subtext0
+file_panel_fg =				"#F8F8F2"  # Subtext0
+sidebar_fg =				"#F8F8F2"     # Subtext0
+footer_fg =					"#F8F8F2"      # Subtext0
+modal_fg =					"#F8F8F2"       # Subtext0
+
+# ========= Special Color =========
+cursor =					"#66D9EF"  # Rosewater
+correct =					"#A6E22E" # Green
+error =						"#F92672"   # Red
+hint =						"#66D9EF"    # Sapphire
+cancel =					"#E6DB74"  # Maroon
+# Gradient color can only have two color!
+gradient_color =			["#66D9EF", "#AE81FF"] # [Blue, Mauve]
+
+# ========= File Panel Special Items =========
+file_panel_top_directory_icon = "#E6DB74" # Green
+file_panel_top_path =			"#E6DB74"           # Blue
+file_panel_item_selected_fg =	"#66D9EF"   # Sky
+file_panel_item_selected_bg =	"#2E2E2E"   # Base
+
+# ========= Sidebar Special Items =========
+sidebar_title =					"#66D9EF"            # Sapphire
+sidebar_item_selected_fg =		"#66D9EF" # Sky
+sidebar_item_selected_bg =		"#272822" # Base
+sidebar_divider =				"#75715E"          # Overlay2
+
+# ========= Modal Special Items =========
+modal_cancel_fg =				"#75715E" # Surface0
+modal_cancel_bg =				"#F92672" # Maroon
+
+modal_confirm_fg =				"#75715E" # Surface0
+modal_confirm_bg =				"#66D9EF" # Sky
+
+# ========= Help Menu =========
+help_menu_hotkey =				"#66D9EF" # Sky
+help_menu_title =				"#AE81FF"  # Maroon
