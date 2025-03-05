@@ -10,8 +10,6 @@ import (
 	"net/http"
 	"os"
 	"runtime"
-	"strconv"
-	"strings"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -324,8 +322,13 @@ func CheckForUpdates() {
 			return
 		}
 
-		//Check if the local version is outdated
-		if versionToNumber(release.TagName) > versionToNumber(variable.CurrentVersion) {
+		// Check if the local version is outdated
+		res, err := versionCompare(release.TagName, variable.CurrentVersion)
+		if err != nil {
+			slog.Error("Error while trying to compare versions", "error", err)
+			return
+		}
+		if res > 0 {
 			fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("#FF69E1")).Render("┃ ") +
 				lipgloss.NewStyle().Foreground(lipgloss.Color("#FFBA52")).Bold(true).Render("A new version ") +
 				lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFF2")).Bold(true).Italic(true).Render(release.TagName) +
@@ -335,13 +338,4 @@ func CheckForUpdates() {
 			fmt.Printf("                                                               ┛\n")
 		}
 	}
-}
-
-// Convert version string to number
-func versionToNumber(version string) int {
-	version = strings.ReplaceAll(version, "v", "")
-	version = strings.ReplaceAll(version, ".", "")
-
-	num, _ := strconv.Atoi(version)
-	return num
 }
