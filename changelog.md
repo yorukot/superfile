@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC(YYYY-MM-DD).
 
-# [**v1.1.7.2**](https://github.com/yorukot/superfile/releases/tag/v1.1.7.2)
+# [**v1.2.0.0**](https://github.com/yorukot/superfile/releases/tag/v1.2.0.0)
 
 > 2025-03-05
 

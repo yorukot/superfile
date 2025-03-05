@@ -22,7 +22,7 @@ Write-Host -ForegroundColor Red         "                    `$`$/              
 Write-Host ""
 
 $package = "superfile"
-$version = "1.1.7.2"
+$version = "1.2.0.0"
 
 $installInstructions = @'
 This uninstaller is only available for Windows.
