@@ -2,14 +2,17 @@ package internal
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"image"
 	"log/slog"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/charmbracelet/lipgloss"
@@ -369,9 +372,6 @@ func (m *model) clipboardRender() string {
 			}
 		}
 	}
-	for i := 0; i < len(m.copyItems.items); i++ {
-
-	}
 	bottomWidth := 0
 
 	if m.fullWidth%3 != 0 {
@@ -695,26 +695,69 @@ func (m *model) filePreviewPanelRender() string {
 		return box.Render("\n --- " + icon.Error + " Error open file ---")
 	}
 
+	if fileContent == "" {
+		return box.Render("\n --- empty ---")
+	}
+
 	// We know the format of file, and we can apply syntax highlighting
 	if format != nil {
 		background := ""
 		if !Config.TransparentBackground {
 			background = theme.FilePanelBG
 		}
-		fileContent, err = ansichroma.HightlightString(fileContent, format.Config().Name, theme.CodeSyntaxHighlightTheme, background)
+		if Config.CodePreviewer == "bat" {
+			if batCmd == "" {
+				return box.Render("\n --- " + icon.Error + " 'bat' is not installed or not found. ---\n --- Cannot render file preview. ---")
+			}
+			fileContent, err = getBatSyntaxHighlightedContent(itemPath, previewLine, background)
+		} else {
+			fileContent, err = ansichroma.HightlightString(fileContent, format.Config().Name, theme.CodeSyntaxHighlightTheme, background)
+		}
 		if err != nil {
 			slog.Error("Error render code highlight", "error", err)
 			return box.Render("\n --- " + icon.Error + " Error render code highlight ---")
 		}
 	}
 
-	if fileContent == "" {
-		return box.Render("\n --- empty ---")
-	}
 	fileContent = checkAndTruncateLineLengths(fileContent, m.fileModel.filePreview.width)
 	return box.Render(fileContent)
 }
 
 func (m *model) commandLineInputBoxRender() string {
 	return m.commandLine.input.View()
+}
+
+func getBatSyntaxHighlightedContent(itemPath string, previewLine int, background string) (string, error) {
+	fileContent := ""
+	// --plain: use the plain style without line numbers and decorations
+	// --force-colorization: force colorization for non-interactive shell output
+	// --line-range <:m>: only read from line 1 to line "m"
+	batArgs := []string{itemPath, "--plain", "--force-colorization", "--line-range", fmt.Sprintf(":%d", previewLine-1)}
+
+	// set timeout for the external command execution to 500ms max
+	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+	defer cancel()
+
+	cmd := exec.CommandContext(ctx, batCmd, batArgs...)
+
+	fileContentBytes, err := cmd.Output()
+	if err != nil {
+		slog.Error("Error render code highlight", "error", err)
+		return "", err
+	}
+
+	fileContent = string(fileContentBytes)
+	if !Config.TransparentBackground {
+		fileContent = setBatBackground(fileContent, background)
+	}
+	return fileContent, nil
+}
+
+func setBatBackground(input string, background string) string {
+	tokens := strings.Split(input, "\x1b[0m")
+	backgroundStyle := lipgloss.NewStyle().Background(lipgloss.Color(background))
+	for idx, token := range tokens {
+		tokens[idx] = backgroundStyle.Render(token)
+	}
+	return strings.Join(tokens, "\x1b[0m")
 }

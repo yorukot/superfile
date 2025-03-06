@@ -3,6 +3,7 @@ package internal
 import (
 	"log/slog"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
@@ -20,6 +21,7 @@ var ListeningMessage = true
 
 var firstUse = false
 var hasTrash = true
+var batCmd = ""
 
 var theme ThemeType
 var Config ConfigType
@@ -31,10 +33,11 @@ var channel = make(chan channelMessage, 1000)
 var progressBarLastRenderTime time.Time = time.Now()
 
 // Initialize and return model with default configs
-func InitialModel(dir string, firstUseCheck bool, hasTrashCheck bool) model {
+func InitialModel(dir string, firstUseCheck, hasTrashCheck bool) model {
 	toggleDotFileBool, toggleFooter, firstFilePanelDir := initialConfig(dir)
 	firstUse = firstUseCheck
 	hasTrash = hasTrashCheck
+	batCmd = checkBatCmd()
 	return defaultModelConfig(toggleDotFileBool, toggleFooter, firstFilePanelDir)
 }
 
@@ -494,4 +497,16 @@ func (m *model) quitSuperfile() {
 		}
 	}
 	slog.Debug("Quitting superfile", "current dir", currentDir)
+}
+
+// Check if bat is an executable in PATH and whether to use bat or batcat as command
+func checkBatCmd() string {
+	if _, err := exec.LookPath("bat"); err == nil {
+		return "bat"
+	}
+	// on ubuntu bat executable is called batcat
+	if _, err := exec.LookPath("batcat"); err == nil {
+		return "batcat"
+	}
+	return ""
 }
