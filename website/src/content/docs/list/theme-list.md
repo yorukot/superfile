@@ -80,6 +80,14 @@ head:
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/kaolin.png?raw=true)
 
+## Monokai
+
+- Theme name: `monokai`
+- Ported by: https://github.com/CommandJoo
+- Original Author: https://github.com/monokai
+
+![](https://github.com/yorukot/superfile/blob/main/asset/theme/monokai.png?raw=true)
+
 ## Nord
 
 - Theme name: `nord`
