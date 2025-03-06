@@ -20,6 +20,7 @@ var ListeningMessage = true
 
 var firstUse = false
 var hasTrash = true
+var hasBat = false
 
 var theme ThemeType
 var Config ConfigType
@@ -31,10 +32,11 @@ var channel = make(chan channelMessage, 1000)
 var progressBarLastRenderTime time.Time = time.Now()
 
 // Initialize and return model with default configs
-func InitialModel(dir string, firstUseCheck bool, hasTrashCheck bool) model {
+func InitialModel(dir string, firstUseCheck, hasTrashCheck, hasBatCheck bool) model {
 	toggleDotFileBool, toggleFooter, firstFilePanelDir := initialConfig(dir)
 	firstUse = firstUseCheck
 	hasTrash = hasTrashCheck
+	hasBat = hasBatCheck
 	return defaultModelConfig(toggleDotFileBool, toggleFooter, firstFilePanelDir)
 }
 
