@@ -8,6 +8,14 @@ head:
 
 > Sort by A-Z
 
+## Ayu Dark
+
+- Theme name: `ayu-dark`
+- Ported by: https://github.com/rustnomicon
+- Original Author: https://github.com/ayu-theme/
+
+![](https://github.com/yorukot/superfile/blob/main/asset/theme/ayu-dark.png?raw=true)
+
 ## Blood
 
 - Theme name: `blood`
@@ -55,6 +63,14 @@ head:
 - Original Author: https://github.com/zenorocha
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/dracula.png?raw=true)
+
+## Everforest Dark Medium
+
+- Theme name: `everforest-dark-medium`
+- Ported by: https://github.com/dotintegral
+- Original Author: https://github.com/sainnhe/
+
+![](https://github.com/yorukot/superfile/blob/main/asset/theme/everforest-dark-medium.png?raw=true)
 
 ## Gruvbox
 
