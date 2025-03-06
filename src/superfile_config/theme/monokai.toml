@@ -1,0 +1,67 @@
+# OneDark
+# Theme create by: https://github.com/CommandJoo
+# Update by(sort by time):
+#
+# Thanks for all contributor!!
+
+# If you want to make sidebar border display just set it same as sidebar background color
+
+# Code syntax highlight theme (you can go to https://github.com/alecthomas/chroma/blob/master/styles to find one you like)
+code_syntax_highlight = "monokai"
+
+# ========= Border =========
+file_panel_border = "#75715E" # Overlay0
+footer_border = "#75715E" # Overlay0
+sidebar_border = "#75715E" # Base
+
+# ========= Border Active =========
+file_panel_border_active = "#66D9EF" # Lavendar
+footer_border_active = "#A9DC76" # Green
+modal_border_active = "#66D9EF" # Overlay2
+sidebar_border_active = "#F92672" # Red
+
+# ========= Background (bg) =========
+file_panel_bg = "#272822" # Base
+footer_bg = "#272822" # Base
+full_screen_bg = "#272822" # Base
+modal_bg = "#272822" # Base
+sidebar_bg = "#272822" # Base
+
+# ========= Foreground (fg) =========
+file_panel_fg = "#F8F8F2" # Subtext0
+footer_fg = "#F8F8F2" # Subtext0
+full_screen_fg = "#F8F8F2" # Subtext0
+modal_fg = "#F8F8F2" # Subtext0
+sidebar_fg = "#F8F8F2" # Subtext0
+
+# ========= Special Color =========
+cancel = "#E6DB74" # Maroon
+correct = "#A6E22E" # Green
+cursor = "#66D9EF" # Rosewater
+error = "#F92672" # Red
+hint = "#66D9EF" # Sapphire
+# Gradient color can only have two color!
+gradient_color = ["#66D9EF", "#AE81FF"] # [Blue, Mauve]
+
+# ========= File Panel Special Items =========
+file_panel_item_selected_bg = "#2E2E2E" # Base
+file_panel_item_selected_fg = "#66D9EF" # Sky
+file_panel_top_directory_icon = "#E6DB74" # Green
+file_panel_top_path = "#E6DB74" # Blue
+
+# ========= Sidebar Special Items =========
+sidebar_divider = "#75715E" # Overlay2
+sidebar_item_selected_bg = "#272822" # Base
+sidebar_item_selected_fg = "#66D9EF" # Sky
+sidebar_title = "#66D9EF" # Sapphire
+
+# ========= Modal Special Items =========
+modal_cancel_bg = "#F92672" # Maroon
+modal_cancel_fg = "#75715E" # Surface0
+
+modal_confirm_bg = "#66D9EF" # Sky
+modal_confirm_fg = "#75715E" # Surface0
+
+# ========= Help Menu =========
+help_menu_hotkey = "#66D9EF" # Sky
+help_menu_title = "#AE81FF" # Maroon

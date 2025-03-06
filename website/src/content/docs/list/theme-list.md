@@ -8,6 +8,14 @@ head:
 
 > Sort by A-Z
 
+## Ayu Dark
+
+- Theme name: `ayu-dark`
+- Ported by: https://github.com/rustnomicon
+- Original Author: https://github.com/ayu-theme/
+
+![](https://github.com/yorukot/superfile/blob/main/asset/theme/ayu-dark.png?raw=true)
+
 ## Blood
 
 - Theme name: `blood`
@@ -56,6 +64,14 @@ head:
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/dracula.png?raw=true)
 
+## Everforest Dark Medium
+
+- Theme name: `everforest-dark-medium`
+- Ported by: https://github.com/dotintegral
+- Original Author: https://github.com/sainnhe/
+
+![](https://github.com/yorukot/superfile/blob/main/asset/theme/everforest-dark-medium.png?raw=true)
+
 ## Gruvbox
 
 - Theme name: `gruvbox`
@@ -79,6 +95,14 @@ head:
 - Original Author: https://github.com/ogdenwebb/
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/kaolin.png?raw=true)
+
+## Monokai
+
+- Theme name: `monokai`
+- Ported by: https://github.com/CommandJoo
+- Original Author: https://github.com/monokai
+
+![](https://github.com/yorukot/superfile/blob/main/asset/theme/monokai.png?raw=true)
 
 ## Nord
 
