@@ -149,8 +149,8 @@ schema = 3
     version = "v3.21.11+incompatible"
     hash = "sha256-tcH5zN94yZhKtg8wAUfojlqdyguifuPTBLPso3KF7QA="
   [mod."github.com/stretchr/testify"]
-    version = "v1.9.0"
-    hash = "sha256-uUp/On+1nK+lARkTVtb5RxlW15zxtw2kaAFuIASA+J0="
+    version = "v1.10.0"
+    hash = "sha256-fJ4gnPr0vnrOhjQYQwJ3ARDKPsOtA7d4olQmQWR+wpI="
   [mod."github.com/ulikunitz/xz"]
     version = "v0.5.11"
     hash = "sha256-SUyrjc2wyN3cTGKe5JdBEXjtZC1rJySRxJHVUZ59row="

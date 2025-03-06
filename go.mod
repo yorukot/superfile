@@ -16,7 +16,7 @@ require (
 	github.com/reinhrst/fzf-lib v0.9.0
 	github.com/rkoesters/xdg v0.0.1
 	github.com/shirou/gopsutil v3.21.11+incompatible
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v2 v2.27.5
 	golang.org/x/mod v0.23.0
 	golift.io/xtractr v0.2.2
