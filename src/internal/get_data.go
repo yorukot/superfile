@@ -8,7 +8,7 @@ import (
 	"slices"
 
 	"github.com/adrg/xdg"
-	"github.com/shirou/gopsutil/disk"
+	"github.com/shirou/gopsutil/v4/disk"
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/config/icon"
 )
