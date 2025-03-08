@@ -3,6 +3,7 @@ package internal
 import (
 	"log/slog"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
@@ -20,7 +21,7 @@ var ListeningMessage = true
 
 var firstUse = false
 var hasTrash = true
-var hasBat = false
+var batCmd []string = nil
 
 var theme ThemeType
 var Config ConfigType
@@ -32,11 +33,11 @@ var channel = make(chan channelMessage, 1000)
 var progressBarLastRenderTime time.Time = time.Now()
 
 // Initialize and return model with default configs
-func InitialModel(dir string, firstUseCheck, hasTrashCheck, hasBatCheck bool) model {
+func InitialModel(dir string, firstUseCheck, hasTrashCheck bool) model {
 	toggleDotFileBool, toggleFooter, firstFilePanelDir := initialConfig(dir)
 	firstUse = firstUseCheck
 	hasTrash = hasTrashCheck
-	hasBat = hasBatCheck
+	batCmd = checkHasBat()
 	return defaultModelConfig(toggleDotFileBool, toggleFooter, firstFilePanelDir)
 }
 
@@ -496,4 +497,20 @@ func (m *model) quitSuperfile() {
 		}
 	}
 	slog.Debug("Quitting superfile", "current dir", currentDir)
+}
+
+// Check if bat is an executable in PATH and whether to use bat or batcat as command
+func checkHasBat() []string {
+	if _, err := exec.LookPath("bat"); err == nil {
+		// --plain: use the plain style without line numbers and decorations
+		// --force-colorization: force colorization for non-interactive shell output
+		return []string{"bat", "--plain", "--force-colorization"}
+	}
+	// on ubuntu bat executable is called batcat
+	if _, err := exec.LookPath("batcat"); err == nil {
+		// --plain: use the plain style without line numbers and decorations
+		// --force-colorization: force colorization for non-interactive shell output
+		return []string{"batcat", "--plain", "--force-colorization"}
+	}
+	return nil
 }

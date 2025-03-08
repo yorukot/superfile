@@ -9,7 +9,6 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
-	"os/exec"
 	"runtime"
 	"time"
 
@@ -104,11 +103,10 @@ func Run(content embed.FS) {
 			variable.PrintLastDir = c.Bool("print-last-dir")
 
 			firstUse := checkFirstUse()
-			hasBat := checkHasBat()
 
 			go CheckForUpdates()
 
-			p := tea.NewProgram(internal.InitialModel(path, firstUse, hasTrash, hasBat), tea.WithAltScreen(), tea.WithMouseCellMotion())
+			p := tea.NewProgram(internal.InitialModel(path, firstUse, hasTrash), tea.WithAltScreen(), tea.WithMouseCellMotion())
 			if _, err := p.Run(); err != nil {
 				log.Fatalf("Alas, there's been an error: %v", err)
 			}
@@ -220,18 +218,6 @@ func checkFirstUse() bool {
 		}
 	}
 	return firstUse
-}
-
-// Check if bat is an executable in PATH
-func checkHasBat() bool {
-	if _, err := exec.LookPath("bat"); err == nil {
-		return true
-	}
-	// on ubuntu bat executable is called batcat
-	if _, err := exec.LookPath("batcat"); err == nil {
-		return true
-	}
-	return false
 }
 
 // Write data to the path file if it does not exists

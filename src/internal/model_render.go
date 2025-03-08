@@ -373,9 +373,6 @@ func (m *model) clipboardRender() string {
 			}
 		}
 	}
-	for i := 0; i < len(m.copyItems.items); i++ {
-
-	}
 	bottomWidth := 0
 
 	if m.fullWidth%3 != 0 {
@@ -710,7 +707,7 @@ func (m *model) filePreviewPanelRender() string {
 			background = theme.FilePanelBG
 		}
 		if Config.CodePreviewer == "bat" {
-			if !hasBat {
+			if batCmd == nil {
 				return box.Render("\n --- " + icon.Error + " 'bat' is not installed or not found. ---\n --- Cannot render file preview. ---")
 			}
 			fileContent, err = getBatSyntaxHighlightedContent(itemPath, previewLine, background)
@@ -734,15 +731,11 @@ func (m *model) commandLineInputBoxRender() string {
 func getBatSyntaxHighlightedContent(itemPath string, previewLine int, background string) (string, error) {
 	fileContent := ""
 
-	// --plain: use the plain style without line numbers and decorations
-	// --force-colorization: force colorization for non-interactive shell output
-	batCmd := []string{"bat", itemPath, "--plain", "--force-colorization"}
-
 	// set timeout for the external command execution to 500ms max
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, batCmd[0], batCmd[1:]...)
+	cmd := exec.CommandContext(ctx, batCmd[0], append([]string{itemPath}, batCmd[1:]...)...)
 
 	fileContentBytes, err := cmd.Output()
 	if err != nil {
