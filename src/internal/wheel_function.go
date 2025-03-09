@@ -21,11 +21,11 @@ func wheelMainAction(msg string, m *model, cmd tea.Cmd) tea.Cmd {
 		if m.focusPanel == sidebarFocus {
 			action = func() { m.sidebarModel.listDown(m.mainPanelHeight) }
 		} else if m.focusPanel == processBarFocus {
-			action = func() { m.controlProcessbarListDown(true) }
+			action = func() { m.processBarModel.listDown() }
 		} else if m.focusPanel == metadataFocus {
-			action = func() { m.controlMetadataListDown(true) }
+			action = func() { m.fileMetaData.listDown() }
 		} else if m.focusPanel == nonePanelFocus {
-			action = func() { m.controlFilePanelListDown(true) }
+			action = func() { m.fileModel.filePanels[m.filePanelFocusIndex].listDown(m.mainPanelHeight) }
 		}
 	}
 
