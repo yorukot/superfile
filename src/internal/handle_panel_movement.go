@@ -228,59 +228,39 @@ func (m *model) searchBarFocus() {
 // ======================================== File panel controller ========================================
 
 // Control file panel list up
-func (m *model) controlFilePanelListUp(wheel bool) {
-	runTime := 1
-	if wheel {
-		runTime = wheelRunTime
+func (panel *filePanel) listUp(mainPanelHeight int) {
+	if len(panel.element) == 0 {
+		return
 	}
-
-	for i := 0; i < runTime; i++ {
-		panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-		if len(panel.element) == 0 {
-			return
+	if panel.cursor > 0 {
+		panel.cursor--
+		if panel.cursor < panel.render {
+			panel.render--
 		}
-		if panel.cursor > 0 {
-			panel.cursor--
-			if panel.cursor < panel.render {
-				panel.render--
-			}
+	} else {
+		if len(panel.element) > panelElementHeight(mainPanelHeight) {
+			panel.render = len(panel.element) - panelElementHeight(mainPanelHeight)
+			panel.cursor = len(panel.element) - 1
 		} else {
-			if len(panel.element) > panelElementHeight(m.mainPanelHeight) {
-				panel.render = len(panel.element) - panelElementHeight(m.mainPanelHeight)
-				panel.cursor = len(panel.element) - 1
-			} else {
-				panel.cursor = len(panel.element) - 1
-			}
+			panel.cursor = len(panel.element) - 1
 		}
-
-		m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	}
 }
 
 // Control file panel list down
-func (m *model) controlFilePanelListDown(wheel bool) {
-	runTime := 1
-	if wheel {
-		runTime = wheelRunTime
+func (panel *filePanel) listDown(mainPanelHeight int) {
+	if len(panel.element) == 0 {
+		return
 	}
-
-	for i := 0; i < runTime; i++ {
-		panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-		if len(panel.element) == 0 {
-			return
+	if panel.cursor < len(panel.element)-1 {
+		panel.cursor++
+		if panel.cursor > panel.render+panelElementHeight(mainPanelHeight)-1 {
+			panel.render++
 		}
-		if panel.cursor < len(panel.element)-1 {
-			panel.cursor++
-			if panel.cursor > panel.render+panelElementHeight(m.mainPanelHeight)-1 {
-				panel.render++
-			}
-		} else {
-			panel.render = 0
-			panel.cursor = 0
-		}
-		m.fileModel.filePanels[m.filePanelFocusIndex] = panel
+	} else {
+		panel.render = 0
+		panel.cursor = 0
 	}
-
 }
 
 func (m *model) controlFilePanelPgUp() {
@@ -407,18 +387,6 @@ func (m *model) itemSelectDown(wheel bool) {
 
 // ======================================== Sidebar controller ========================================
 
-func (s *sidebarModel) controlListUp(wheel bool, mainPanelHeight int) {
-
-	// Todo : This snippet is duplicated everywhere. It can be better refractored outside
-	runTime := 1
-	if wheel {
-		runTime = wheelRunTime
-	}
-	for i := 0; i < runTime; i++ {
-		s.listUp(mainPanelHeight)
-	}
-}
-
 func (s *sidebarModel) listUp(mainPanelHeight int) {
 	slog.Debug("controlListUp called", "cursor", s.cursor,
 		"renderIndex", s.renderIndex, "directory count", len(s.directories))
@@ -441,18 +409,6 @@ func (s *sidebarModel) listUp(mainPanelHeight int) {
 		s.listUp(mainPanelHeight)
 	}
 
-}
-
-func (s *sidebarModel) controlListDown(wheel bool, mainPanelHeight int) {
-
-	// Todo : This snippet is duplicated everywhere. It can be better refractored outside
-	runTime := 1
-	if wheel {
-		runTime = wheelRunTime
-	}
-	for i := 0; i < runTime; i++ {
-		s.listDown(mainPanelHeight)
-	}
 }
 
 func (s *sidebarModel) listDown(mainPanelHeight int) {
@@ -498,90 +454,60 @@ func (m *model) sidebarSearchBarFocus() {
 // ======================================== Metadata controller ========================================
 
 // Control metadata panel up
-func (m *model) controlMetadataListUp(wheel bool) {
-	runTime := 1
-	if wheel {
-		runTime = wheelRunTime
-	}
-
-	if len(m.fileMetaData.metaData) == 0 {
+func (fm *fileMetadata) listUp() {
+	if len(fm.metaData) == 0 {
 		return
 	}
-
-	for i := 0; i < runTime; i++ {
-		if m.fileMetaData.renderIndex > 0 {
-			m.fileMetaData.renderIndex--
-		} else {
-			m.fileMetaData.renderIndex = len(m.fileMetaData.metaData) - 1
-		}
+	if fm.renderIndex > 0 {
+		fm.renderIndex--
+	} else {
+		fm.renderIndex = len(fm.metaData) - 1
 	}
 }
 
 // Control metadata panel down
-func (m *model) controlMetadataListDown(wheel bool) {
-	runTime := 1
-	if wheel {
-		runTime = wheelRunTime
-	}
-
-	for i := 0; i < runTime; i++ {
-		if m.fileMetaData.renderIndex < len(m.fileMetaData.metaData)-1 {
-			m.fileMetaData.renderIndex++
-		} else {
-			m.fileMetaData.renderIndex = 0
-		}
+func (fm *fileMetadata) listDown() {
+	if fm.renderIndex < len(fm.metaData)-1 {
+		fm.renderIndex++
+	} else {
+		fm.renderIndex = 0
 	}
 }
 
 // ======================================== Processbar controller ========================================
 
 // Control processbar panel list up
-func (m *model) controlProcessbarListUp(wheel bool) {
-	if len(m.processBarModel.processList) == 0 {
+func (p *processBarModel) listUp() {
+	if len(p.processList) == 0 {
 		return
 	}
-	runTime := 1
-	if wheel {
-		runTime = wheelRunTime
-	}
-
-	for i := 0; i < runTime; i++ {
-		if m.processBarModel.cursor > 0 {
-			m.processBarModel.cursor--
-			if m.processBarModel.cursor < m.processBarModel.render {
-				m.processBarModel.render--
-			}
+	if p.cursor > 0 {
+		p.cursor--
+		if p.cursor < p.render {
+			p.render--
+		}
+	} else {
+		if len(p.processList) <= 3 || (len(p.processList) <= 2 && footerHeight < 14) {
+			p.cursor = len(p.processList) - 1
 		} else {
-			if len(m.processBarModel.processList) <= 3 || (len(m.processBarModel.processList) <= 2 && footerHeight < 14) {
-				m.processBarModel.cursor = len(m.processBarModel.processList) - 1
-			} else {
-				m.processBarModel.render = len(m.processBarModel.processList) - 3
-				m.processBarModel.cursor = len(m.processBarModel.processList) - 1
-			}
+			p.render = len(p.processList) - 3
+			p.cursor = len(p.processList) - 1
 		}
 	}
 }
 
 // Control processbar panel list down
-func (m *model) controlProcessbarListDown(wheel bool) {
-	if len(m.processBarModel.processList) == 0 {
+func (p *processBarModel) listDown() {
+	if len(p.processList) == 0 {
 		return
 	}
-
-	runTime := 1
-	if wheel {
-		runTime = wheelRunTime
-	}
-
-	for i := 0; i < runTime; i++ {
-		if m.processBarModel.cursor < len(m.processBarModel.processList)-1 {
-			m.processBarModel.cursor++
-			if m.processBarModel.cursor > m.processBarModel.render+2 {
-				m.processBarModel.render++
-			}
-		} else {
-			m.processBarModel.render = 0
-			m.processBarModel.cursor = 0
+	if p.cursor < len(p.processList)-1 {
+		p.cursor++
+		if p.cursor > p.render+2 {
+			p.render++
 		}
+	} else {
+		p.render = 0
+		p.cursor = 0
 	}
 }

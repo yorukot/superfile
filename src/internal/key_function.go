@@ -21,13 +21,13 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) tea.Cmd {
 	// If move up Key is pressed, check the current state and executes
 	case containsKey(msg, hotkeys.ListUp):
 		if m.focusPanel == sidebarFocus {
-			m.sidebarModel.controlListUp(false, m.mainPanelHeight)
+			m.sidebarModel.listUp(m.mainPanelHeight)
 		} else if m.focusPanel == processBarFocus {
-			m.controlProcessbarListUp(false)
+			m.processBarModel.listUp()
 		} else if m.focusPanel == metadataFocus {
-			m.controlMetadataListUp(false)
+			m.fileMetaData.listUp()
 		} else if m.focusPanel == nonePanelFocus {
-			m.controlFilePanelListUp(false)
+			m.fileModel.filePanels[m.filePanelFocusIndex].listUp(m.mainPanelHeight)
 			m.fileMetaData.renderIndex = 0
 			go func() {
 				m.returnMetaData()
@@ -37,13 +37,13 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) tea.Cmd {
 		// If move down Key is pressed, check the current state and executes
 	case containsKey(msg, hotkeys.ListDown):
 		if m.focusPanel == sidebarFocus {
-			m.sidebarModel.controlListDown(false, m.mainPanelHeight)
+			m.sidebarModel.listDown(m.mainPanelHeight)
 		} else if m.focusPanel == processBarFocus {
-			m.controlProcessbarListDown(false)
+			m.processBarModel.listDown()
 		} else if m.focusPanel == metadataFocus {
-			m.controlMetadataListDown(false)
+			m.fileMetaData.listDown()
 		} else if m.focusPanel == nonePanelFocus {
-			m.controlFilePanelListDown(false)
+			m.fileModel.filePanels[m.filePanelFocusIndex].listDown(m.mainPanelHeight)
 			m.fileMetaData.renderIndex = 0
 			go func() {
 				m.returnMetaData()
