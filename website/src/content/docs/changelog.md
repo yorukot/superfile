@@ -10,6 +10,16 @@ head:
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC(YYYY-MM-DD).
 
+# [**v1.2.1**](https://github.com/yorukot/superfile/releases/tag/v1.2.1)
+
+> 2025-03-10
+
+#### Update
+#### Bug Fix
+#### Optimization
+#### Documentation
+
+
 # [**v1.2.0.0**](https://github.com/yorukot/superfile/releases/tag/v1.2.0.0)
 
 > 2025-03-05
