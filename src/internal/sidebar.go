@@ -2,7 +2,7 @@ package internal
 
 import "log/slog"
 
-// True of only divicers are in directories slice,
+// True ff only dividers are in directories slice,
 // but no actual directories
 // This will be pretty quick. But we can replace it with
 // len(s.directories) <= 2 - More hacky and hardcoded-like, but faster
