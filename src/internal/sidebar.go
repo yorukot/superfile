@@ -100,18 +100,6 @@ func (s *sidebarModel) updateRenderIndex(mainPanelHeight int) {
 
 // ======================================== Sidebar controller ========================================
 
-func (s *sidebarModel) controlListUp(wheel bool, mainPanelHeight int) {
-
-	// Todo : This snippet is duplicated everywhere. It can be better refractored outside
-	runTime := 1
-	if wheel {
-		runTime = wheelRunTime
-	}
-	for i := 0; i < runTime; i++ {
-		s.listUp(mainPanelHeight)
-	}
-}
-
 func (s *sidebarModel) listUp(mainPanelHeight int) {
 	slog.Debug("controlListUp called", "cursor", s.cursor,
 		"renderIndex", s.renderIndex, "directory count", len(s.directories))
@@ -134,18 +122,6 @@ func (s *sidebarModel) listUp(mainPanelHeight int) {
 		s.listUp(mainPanelHeight)
 	}
 
-}
-
-func (s *sidebarModel) controlListDown(wheel bool, mainPanelHeight int) {
-
-	// Todo : This snippet is duplicated everywhere. It can be better refractored outside
-	runTime := 1
-	if wheel {
-		runTime = wheelRunTime
-	}
-	for i := 0; i < runTime; i++ {
-		s.listDown(mainPanelHeight)
-	}
 }
 
 func (s *sidebarModel) listDown(mainPanelHeight int) {
