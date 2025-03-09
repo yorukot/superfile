@@ -6,65 +6,16 @@ import (
 	"testing"
 )
 
-var home_dir_list_1 = []directory{
-	{name: "Home1", location: "/a/b"},
-	{name: "Home2", location: "/a/b"},
-}
-
-var pinned_dir_list_1 = []directory{
-	{name: "Pinned1", location: "/a/b"},
-	{name: "Pinned2", location: "/a/b"},
-}
-
-var disk_dir_list_1 = []directory{
-	{name: "Disk1", location: "/a/b"},
-	{name: "Disk2", location: "/a/b"},
-}
-
-var directory_list_1 = formDirctorySlice(home_dir_list_1, pinned_dir_list_1, disk_dir_list_1)
-
-// Its still invalid
-var sidebar1_empty_invalid = sidebarModel{}
-
-var sidebar2_empty = sidebarModel{
-	directories: []directory{pinnedDividerDir, diskDividerDir},
-	renderIndex: 0,
-	cursor:      0,
-}
-
-var sidebar3_only_pinned = sidebarModel{
-	directories: formDirctorySlice(nil, pinned_dir_list_1, nil),
-}
-
-var sidebar4_all = sidebarModel{
-	directories: directory_list_1,
-	renderIndex: 0,
-	cursor:      0,
-}
-
-var sidebar5_invalid = sidebarModel{
-	directories: directory_list_1,
-	renderIndex: 0,
-	cursor:      len(directory_list_1) + 1,
-}
-
-var sidebar6_invalid = sidebarModel{
-	directories: formDirctorySlice(home_dir_list_1, nil, nil),
-	renderIndex: 0,
-	// Cursor now points to pinned divider, which is invalid
-	cursor: len(home_dir_list_1),
-}
-
-var sidebar7_only_disks = sidebarModel{
-	directories: formDirctorySlice(nil, nil, disk_dir_list_1),
-}
-
-func generate_dir_list(count int) []directory {
+func dirSlice(count int) []directory {
 	res := make([]directory, count)
 	for i := 0; i < count; i++ {
 		res[i] = directory{name: "Dir" + strconv.Itoa(i), location: "/a/" + strconv.Itoa(i)}
 	}
 	return res
+}
+
+func fullDirSlice(count int) []directory {
+	return formDirctorySlice(dirSlice(count), dirSlice(count), dirSlice(count))
 }
 
 // Todo : Use t.Run(tt.name
@@ -73,107 +24,264 @@ func generate_dir_list(count int) []directory {
 // Todo : Add tt.names
 
 func Test_noActualDir(t *testing.T) {
-	assert.True(t, sidebar1_empty_invalid.noActualDir(), "Empty sidebar should have no actual directories")
-	assert.True(t, sidebar2_empty.noActualDir(), "Empty sidebar should have no actual directories")
-	assert.False(t, sidebar3_only_pinned.noActualDir(), "Non-Empty Sidebar should have actual directories")
-	assert.False(t, sidebar4_all.noActualDir(), "Non-Empty Sidebar should have actual directories")
+	testcases := []struct {
+		name     string
+		sidebar  sidebarModel
+		expected bool
+	}{
+		{
+			"Empty invalid sidebar should have no actual directories",
+			sidebarModel{},
+			true,
+		},
+		{
+			"Empty sidebar should have no actual directories",
+			sidebarModel{
+				directories: fullDirSlice(0),
+				renderIndex: 0,
+				cursor:      0,
+			},
+			true,
+		},
+		{
+			"Non-Empty Sidebar with only pinned directories",
+			sidebarModel{
+				directories: formDirctorySlice(nil, dirSlice(10), nil),
+			},
+			false,
+		},
+		{
+			"Non-Empty Sidebar with all directories",
+			sidebarModel{
+				directories: fullDirSlice(10),
+			},
+			false,
+		},
+	}
+	for _, tt := range testcases {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, tt.sidebar.noActualDir())
+		})
+	}
 }
 
 func Test_isCursorInvalid(t *testing.T) {
-	assert.True(t, sidebar1_empty_invalid.isCursorInvalid(), "Expected cursor to be invalid")
-	assert.True(t, sidebar5_invalid.isCursorInvalid(), "Expected cursor to be invalid")
-	assert.True(t, sidebar6_invalid.isCursorInvalid(), "Expected cursor to be invalid")
-	assert.False(t, sidebar4_all.isCursorInvalid(), "Expected cursor to be valid")
+
+	testcases := []struct {
+		name     string
+		sidebar  sidebarModel
+		expected bool
+	}{
+		{
+			"Empty invalid sidebar",
+			sidebarModel{},
+			true,
+		},
+		{
+			"Cursor after all directories",
+			sidebarModel{
+				directories: fullDirSlice(10),
+				renderIndex: 0,
+				cursor:      32,
+			},
+			true,
+		},
+		{
+			"Curson points to pinned divider",
+			sidebarModel{
+				directories: fullDirSlice(10),
+				cursor:      10,
+			},
+			true,
+		},
+		{
+			"Non-Empty Sidebar with all directories",
+			sidebarModel{
+				directories: fullDirSlice(10),
+				cursor:      5,
+			},
+			false,
+		},
+	}
+
+	for _, tt := range testcases {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, tt.sidebar.isCursorInvalid())
+		})
+	}
 }
 
 func Test_resetCursor(t *testing.T) {
 	data := []struct {
+		name              string
 		curSideBar        sidebarModel
 		expectedCursorPos int
 	}{
 		{
-			curSideBar:        sidebar3_only_pinned,
+			name: "Only Pinned directories",
+			curSideBar: sidebarModel{
+				directories: formDirctorySlice(nil, dirSlice(10), nil),
+			},
 			expectedCursorPos: 1, // After pinned divider
 		},
 		{
-			curSideBar:        sidebar4_all,
+			name: "All kind of directories",
+			curSideBar: sidebarModel{
+				directories: fullDirSlice(10),
+			},
 			expectedCursorPos: 0, // First home
 		},
 		{
-			curSideBar:        sidebar7_only_disks,
+			name: "Only Disk",
+			curSideBar: sidebarModel{
+				directories: formDirctorySlice(nil, nil, dirSlice(10)),
+			},
 			expectedCursorPos: 2, // After pinned and dist divider
 		},
 		{
-			curSideBar:        sidebar2_empty,
+			name: "Empty Sidebar",
+			curSideBar: sidebarModel{
+				directories: fullDirSlice(0),
+			},
 			expectedCursorPos: 0, // Empty sidebar, cursor should reset to 0
 		},
 	}
 
 	for _, tt := range data {
-		tt.curSideBar.resetCursor()
-		assert.Equal(t, tt.expectedCursorPos, tt.curSideBar.cursor)
+		t.Run(tt.name, func(t *testing.T) {
+			tt.curSideBar.resetCursor()
+			assert.Equal(t, tt.expectedCursorPos, tt.curSideBar.cursor)
+		})
 	}
 }
 
-// Todo : we can add more tests
-func Test_renderIndex(t *testing.T) {
-
+func Test_lastRenderIndex(t *testing.T) {
+	// Setup test data
 	sidebar_a := sidebarModel{
 		directories: formDirctorySlice(
-			generate_dir_list(10), generate_dir_list(10), generate_dir_list(10),
+			dirSlice(10), dirSlice(10), dirSlice(10),
 		),
 	}
 	sidebar_b := sidebarModel{
 		directories: formDirctorySlice(
-			generate_dir_list(1), nil, generate_dir_list(5),
+			dirSlice(1), nil, dirSlice(5),
 		),
 	}
 
-	lastRenderedIndex_data := []struct {
-		curSideBar        sidebarModel
+	testCases := []struct {
+		name              string
+		sidebar           sidebarModel
 		mainPanelHeight   int
 		startIndex        int
 		expectedLastIndex int
+		explanation       string
 	}{
-		// 3(initialHeight) , 7 (0-6 home dirs)
-		{sidebar_a, 10, 0, 6},
-
-		// 3(initialHeight) , 10 (0-9 home dirs), 3 (10-pinned divider)
-		// 4(11-14 pinned dirs)
-		{sidebar_a, 20, 0, 14},
-
-		// 3(initialHeight) , 10 (11-20 pinned dirs), 3 (21-disk divider)
-		// 4(22-25 disk dirs)
-		{sidebar_a, 20, 11, 25},
-
-		// Last dir - 31
-		{sidebar_a, 100, 11, 31},
-
-		// startIndex is more then len(directories), and startIndex-1 is returned
-		{sidebar_a, 100, 32, 31},
-
-		// 3(initialHeight), 1 (0-homedir), 6(1-pinned divider, 2-diskdivider),
-		// 2(3-4 diskdirs)
-		{sidebar_b, 12, 0, 4},
+		{
+			name:              "Small viewport with home directories",
+			sidebar:           sidebar_a,
+			mainPanelHeight:   10,
+			startIndex:        0,
+			expectedLastIndex: 6,
+			explanation:       "3(initialHeight) + 7 (0-6 home dirs)",
+		},
+		{
+			name:              "Medium viewport showing home and some pinned",
+			sidebar:           sidebar_a,
+			mainPanelHeight:   20,
+			startIndex:        0,
+			expectedLastIndex: 14,
+			explanation:       "3(initialHeight) + 10 (0-9 home dirs) + 1 (10-pinned divider) + 4 (11-14 pinned dirs)",
+		},
+		{
+			name:              "Medium viewport starting from pinned dirs",
+			sidebar:           sidebar_a,
+			mainPanelHeight:   20,
+			startIndex:        11,
+			expectedLastIndex: 25,
+			explanation:       "3(initialHeight) + 10 (11-20 pinned dirs) + 1 (21-disk divider) + 4 (22-25 disk dirs)",
+		},
+		{
+			name:              "Large viewport showing all directories",
+			sidebar:           sidebar_a,
+			mainPanelHeight:   100,
+			startIndex:        11,
+			expectedLastIndex: 31,
+			explanation:       "Last dir index is 31",
+		},
+		{
+			name:              "Start index beyond directory count",
+			sidebar:           sidebar_a,
+			mainPanelHeight:   100,
+			startIndex:        32,
+			expectedLastIndex: 31,
+			explanation:       "When startIndex > len(directories), return last valid index",
+		},
+		{
+			name:              "Asymmetric directory distribution",
+			sidebar:           sidebar_b,
+			mainPanelHeight:   12,
+			startIndex:        0,
+			expectedLastIndex: 4,
+			explanation:       "3(initialHeight) + 1 (0-homedir) + 1 (1-pinned divider) + 1 (2-diskdivider) + 2 (3-4 diskdirs)",
+		},
 	}
 
-	for _, tt := range lastRenderedIndex_data {
-		assert.Equal(t, tt.curSideBar.lastRenderedIndex(tt.mainPanelHeight, tt.startIndex),
-			tt.expectedLastIndex)
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.sidebar.lastRenderedIndex(tt.mainPanelHeight, tt.startIndex)
+			assert.Equal(t, tt.expectedLastIndex, result,
+				"lastRenderedIndex failed: %s", tt.explanation)
+		})
 	}
 
-	firstRenderedIndex_data := []struct {
-		curSideBar         sidebarModel
+}
+
+func Test_firstRenderIndex(t *testing.T) {
+	sidebar_a := sidebarModel{
+		directories: formDirctorySlice(
+			dirSlice(10), dirSlice(10), dirSlice(10),
+		),
+	}
+
+	testCases := []struct {
+		name               string
+		sidebar            sidebarModel
 		mainPanelHeight    int
 		endIndex           int
 		expectedFirstIndex int
+		explanation        string
 	}{
-		// 3(InitialHeight), 4(6-9 homedirs), 3(10-pinned divider)
-		{sidebar_a, 10, 10, 6},
+		{
+			name:               "Basic calculation from end index",
+			sidebar:            sidebar_a,
+			mainPanelHeight:    10,
+			endIndex:           10,
+			expectedFirstIndex: 6,
+			explanation:        "3(InitialHeight) + 4 (6-9 homedirs) + 1 (10-pinned divider)",
+		},
+		{
+			name:               "Small panel height",
+			sidebar:            sidebar_a,
+			mainPanelHeight:    5,
+			endIndex:           15,
+			expectedFirstIndex: 14,
+			explanation:        "3(InitialHeight) + 2(14-15 pinned dirs)",
+		},
+		{
+			name:               "End index near beginning",
+			sidebar:            sidebar_a,
+			mainPanelHeight:    20,
+			endIndex:           3,
+			expectedFirstIndex: 0,
+			explanation:        "When end index is near beginning, first index should be 0",
+		},
 	}
 
-	for _, tt := range firstRenderedIndex_data {
-		assert.Equal(t, tt.curSideBar.firstRenderedIndex(tt.mainPanelHeight, tt.endIndex),
-			tt.expectedFirstIndex)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			result := tc.sidebar.firstRenderedIndex(tc.mainPanelHeight, tc.endIndex)
+			assert.Equal(t, tc.expectedFirstIndex, result,
+				"firstRenderedIndex failed: %s", tc.explanation)
+		})
 	}
 }
