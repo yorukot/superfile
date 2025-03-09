@@ -15,16 +15,17 @@ require (
 	github.com/muesli/termenv v0.15.2
 	github.com/reinhrst/fzf-lib v0.9.0
 	github.com/rkoesters/xdg v0.0.1
-	github.com/shirou/gopsutil v3.21.11+incompatible
+	github.com/shirou/gopsutil/v4 v4.25.2
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v2 v2.27.5
-	golang.org/x/mod v0.23.0
 	golift.io/xtractr v0.2.2
 )
 
 require (
 	github.com/charmbracelet/x/ansi v0.8.0 // indirect
 	github.com/charmbracelet/x/term v0.2.1 // indirect
+	github.com/ebitengine/purego v0.8.2 // indirect
+	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
 	golang.org/x/image v0.18.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
