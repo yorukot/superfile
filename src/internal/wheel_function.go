@@ -3,37 +3,42 @@ package internal
 import tea "github.com/charmbracelet/bubbletea"
 
 func wheelMainAction(msg string, m *model, cmd tea.Cmd) tea.Cmd {
+	var action func()
 	switch msg {
 
 	case "wheel up":
 		if m.focusPanel == sidebarFocus {
-			m.sidebarModel.controlListUp(true, m.mainPanelHeight)
+			action = func() { m.sidebarModel.listUp(m.mainPanelHeight) }
 		} else if m.focusPanel == processBarFocus {
-			m.controlProcessbarListUp(true)
+			action = func() { m.processBarModel.listUp() }
 		} else if m.focusPanel == metadataFocus {
-			m.controlMetadataListUp(true)
+			action = func() { m.fileMetaData.listUp() }
 		} else if m.focusPanel == nonePanelFocus {
-			m.controlFilePanelListUp(true)
-			m.fileMetaData.renderIndex = 0
-			go func() {
-				m.returnMetaData()
-			}()
+			action = func() { m.fileModel.filePanels[m.filePanelFocusIndex].listUp(m.mainPanelHeight) }
 		}
 
 	case "wheel down":
 		if m.focusPanel == sidebarFocus {
-			m.sidebarModel.controlListDown(true, m.mainPanelHeight)
+			action = func() { m.sidebarModel.listDown(m.mainPanelHeight) }
 		} else if m.focusPanel == processBarFocus {
-			m.controlProcessbarListDown(true)
+			action = func() { m.controlProcessbarListDown(true) }
 		} else if m.focusPanel == metadataFocus {
-			m.controlMetadataListDown(true)
+			action = func() { m.controlMetadataListDown(true) }
 		} else if m.focusPanel == nonePanelFocus {
-			m.controlFilePanelListDown(true)
-			m.fileMetaData.renderIndex = 0
-			go func() {
-				m.returnMetaData()
-			}()
+			action = func() { m.controlFilePanelListDown(true) }
 		}
 	}
+
+	for i := 0; i < wheelRunTime; i++ {
+		action()
+	}
+
+	if m.focusPanel == nonePanelFocus {
+		m.fileMetaData.renderIndex = 0
+		go func() {
+			m.returnMetaData()
+		}()
+	}
+
 	return cmd
 }

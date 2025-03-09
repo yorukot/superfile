@@ -23,11 +23,11 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) tea.Cmd {
 		if m.focusPanel == sidebarFocus {
 			m.sidebarModel.controlListUp(false, m.mainPanelHeight)
 		} else if m.focusPanel == processBarFocus {
-			m.controlProcessbarListUp(false)
+			m.processBarModel.listUp()
 		} else if m.focusPanel == metadataFocus {
-			m.controlMetadataListUp(false)
+			m.fileMetaData.listUp()
 		} else if m.focusPanel == nonePanelFocus {
-			m.controlFilePanelListUp(false)
+			m.fileModel.filePanels[m.filePanelFocusIndex].listUp(m.mainPanelHeight)
 			m.fileMetaData.renderIndex = 0
 			go func() {
 				m.returnMetaData()
