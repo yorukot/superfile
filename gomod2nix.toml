@@ -64,6 +64,9 @@ schema = 3
   [mod."github.com/dlclark/regexp2"]
     version = "v1.11.4"
     hash = "sha256-1uCoCYCKyP8QZddlYfJCTWmcrKlEFNCsxWwMde9MspE="
+  [mod."github.com/ebitengine/purego"]
+    version = "v0.8.2"
+    hash = "sha256-f3Q8KVX+RkHa1EsGF+U8E9MHHOCZ9j2jtMJOTPCZw08="
   [mod."github.com/erikgeiser/coninput"]
     version = "v0.0.0-20211004153227-1c3628e74d0f"
     hash = "sha256-OWSqN1+IoL73rWXWdbbcahZu8n2al90Y3eT5Z0vgHvU="
@@ -130,6 +133,9 @@ schema = 3
   [mod."github.com/pmezard/go-difflib"]
     version = "v1.0.1-0.20181226105442-5d4384ee4fb2"
     hash = "sha256-XA4Oj1gdmdV/F/+8kMI+DBxKPthZ768hbKsO3d9Gx90="
+  [mod."github.com/power-devops/perfstat"]
+    version = "v0.0.0-20210106213030-5aafc221ea8c"
+    hash = "sha256-ywykDYuqcMt0TvZOz1l9Z6Z2JMTYQw8cP2fT8AtpmX4="
   [mod."github.com/reinhrst/fzf-lib"]
     version = "v0.9.0"
     hash = "sha256-UUe5g+oXopDj+JjvzAguqJ70/a4pqZhn7pdJiFE97yI="
@@ -145,9 +151,9 @@ schema = 3
   [mod."github.com/rwcarlsen/goexif"]
     version = "v0.0.0-20190401172101-9e8deecbddbd"
     hash = "sha256-AiY2T9hXj6jnfldYDoe4WNr3FldpVTxc3lScR++HOLc="
-  [mod."github.com/shirou/gopsutil"]
-    version = "v3.21.11+incompatible"
-    hash = "sha256-tcH5zN94yZhKtg8wAUfojlqdyguifuPTBLPso3KF7QA="
+  [mod."github.com/shirou/gopsutil/v4"]
+    version = "v4.25.2"
+    hash = "sha256-dxYnTF6OhihHq89AxEj2PPDdqHftLz1F/hfGjygoFj0="
   [mod."github.com/stretchr/testify"]
     version = "v1.10.0"
     hash = "sha256-fJ4gnPr0vnrOhjQYQwJ3ARDKPsOtA7d4olQmQWR+wpI="
@@ -172,9 +178,6 @@ schema = 3
   [mod."golang.org/x/image"]
     version = "v0.18.0"
     hash = "sha256-g9N/y4asXG1lctPJ1KEf8XIjeJi/mQ43EXUa8HTj/zQ="
-  [mod."golang.org/x/mod"]
-    version = "v0.23.0"
-    hash = "sha256-8mlTcEyJy1ETxCO4g7RjZ4Z5nJvXRNwKLwAOoe2GChI="
   [mod."golang.org/x/sync"]
     version = "v0.11.0"
     hash = "sha256-5ZBfDJvNaUBM4Vhk0fgYblCGL3eBxiJL85nIE8LiKl0="
