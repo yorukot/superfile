@@ -27,6 +27,7 @@ require (
 	github.com/ebitengine/purego v0.8.2 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
 	golang.org/x/image v0.18.0 // indirect
+	golang.org/x/mod v0.23.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
