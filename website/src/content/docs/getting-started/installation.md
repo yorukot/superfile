@@ -113,6 +113,14 @@ in {
 }
 ```
 
+### Pixi
+
+Install [Pixi](https://pixi.sh/latest/) and then run the following command:
+
+```bash
+pixi global install superfile
+```
+
 ### X-CMD
 
 [x-cmd](https://www.x-cmd.com/) is a **toolbox for Posix Shell**, offering a lightweight package manager built using shell and awk.
