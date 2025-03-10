@@ -1,4 +1,5 @@
 from abc import ABC
+import platform
 
 class Keys(ABC):
     def __init__(self, ascii_code : int):
@@ -36,6 +37,11 @@ KEY_CTRL_R : Keys = CtrlKeys('r')
 KEY_CTRL_V : Keys = CtrlKeys('v')
 KEY_CTRL_W : Keys = CtrlKeys('w')
 KEY_CTRL_X : Keys = CtrlKeys('x')
+
+# Platform specific keys
+KEY_PASTE : Keys = KEY_CTRL_V
+if platform.system() == "Windows" :
+    KEY_PASTE = KEY_CTRL_W
 
 # See https://vimdoc.sourceforge.net/htmldoc/digraph.html#digraph-table for key codes
 # If keyname is not the same string as key code in pyautogui, need to handle separately
