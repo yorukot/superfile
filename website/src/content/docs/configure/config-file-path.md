@@ -32,10 +32,16 @@ If you want to get the set path you can try `spf pl` which will print out the fi
 
 ### Changing Config File Path
 
-You can use the `-c` flag to specify a different path for the `config.toml` file:
+You can use the `-c` or `--config-file` flag to specify a different path for the `config.toml` file:
 
 ```bash
 spf -c /path/to/your/config.toml
+```
+
+You can use the `--hotkey-file` flag to specify a different path for the `hotkey.toml` file:
+
+```bash
+spf --hotkey-file /path/to/your/hotkey.toml
 ```
 
 #### Log directory
