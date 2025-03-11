@@ -71,6 +71,11 @@ func Run(content embed.FS) {
 				Usage:   "Specify the path to a different config file",
 				Value:   "", // Default to the blank string indicating non-usage of flag
 			},
+			&cli.StringFlag{
+				Name:  "hotkey-file",
+				Usage: "Specify the path to a different hotkey file",
+				Value: "", // Default to the blank string indicating non-usage of flag
+			},
 		},
 		Action: func(c *cli.Context) error {
 			// If no args are called along with "spf" use current dir
@@ -84,10 +89,20 @@ func Run(content embed.FS) {
 
 			// Validate the config file exists
 			if configFileArg != "" {
-				if _, err := os.Stat(variable.ConfigFile); err != nil {
+				if _, err := os.Stat(configFileArg); err != nil {
 					log.Fatalf("Error: While reading config file '%s' from arguement : %v", configFileArg, err)
 				} else {
 					variable.ConfigFile = configFileArg
+				}
+			}
+
+			hotkeyFileArg := c.String("hotkey-file")
+
+			if hotkeyFileArg != "" {
+				if _, err := os.Stat(hotkeyFileArg); err != nil {
+					log.Fatalf("Error: While reading hotkey file '%s' from arguement : %v", hotkeyFileArg, err)
+				} else {
+					variable.HotkeysFile = hotkeyFileArg
 				}
 			}
 
