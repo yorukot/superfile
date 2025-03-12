@@ -51,10 +51,10 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) tea.Cmd {
 		}
 
 	case containsKey(msg, hotkeys.PageUp):
-		m.controlFilePanelPgUp()
+		m.fileModel.filePanels[m.filePanelFocusIndex].pgUp(m.mainPanelHeight)
 
 	case containsKey(msg, hotkeys.PageDown):
-		m.controlFilePanelPgDown()
+		m.fileModel.filePanels[m.filePanelFocusIndex].pgDown(m.mainPanelHeight)
 
 	case containsKey(msg, hotkeys.ChangePanelMode):
 		m.changeFilePanelMode()

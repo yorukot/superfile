@@ -255,15 +255,14 @@ func (panel *filePanel) listDown(mainPanelHeight int) {
 	}
 }
 
-func (m *model) controlFilePanelPgUp() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+func (panel *filePanel) pgUp(mainPanelHeight int) {
 	panlen := len(panel.element)
-	panHeight := panelElementHeight(m.mainPanelHeight)
-	panCenter := panHeight / 2 // For making sure the cursor is at the center of the panel
-
 	if panlen == 0 {
 		return
 	}
+
+	panHeight := panelElementHeight(mainPanelHeight)
+	panCenter := panHeight / 2 // For making sure the cursor is at the center of the panel
 
 	if panHeight >= panlen {
 		panel.cursor = 0
@@ -280,19 +279,16 @@ func (m *model) controlFilePanelPgUp() {
 			}
 		}
 	}
-
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
-func (m *model) controlFilePanelPgDown() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+func (panel *filePanel) pgDown(mainPanelHeight int) {
 	panlen := len(panel.element)
-	panHeight := panelElementHeight(m.mainPanelHeight)
-	panCenter := panHeight / 2 // For making sure the cursor is at the center of the panel
-
 	if panlen == 0 {
 		return
 	}
+
+	panHeight := panelElementHeight(mainPanelHeight)
+	panCenter := panHeight / 2 // For making sure the cursor is at the center of the panel
 
 	if panHeight >= panlen {
 		panel.cursor = panlen - 1
@@ -305,8 +301,6 @@ func (m *model) controlFilePanelPgDown() {
 			panel.render = panel.cursor - panCenter
 		}
 	}
-
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 // Handles the action of selecting an item in the file panel upwards. (only work on select mode)
