@@ -22,17 +22,15 @@ import (
 
 // Check if the directory is external disk path
 func isExternalDiskPath(path string) bool {
-	dir := filepath.Dir(path)
-
 	// exclude timemachine
-	if strings.HasPrefix(dir, "/Volumes/.timemachine") {
+	if strings.HasPrefix(path, "/Volumes/.timemachine") {
 		return false
 	}
 
-	return strings.HasPrefix(dir, "/mnt") ||
-		strings.HasPrefix(dir, "/media") ||
-		strings.HasPrefix(dir, "/run/media") ||
-		strings.HasPrefix(dir, "/Volumes")
+	return strings.HasPrefix(path, "/mnt") ||
+		strings.HasPrefix(path, "/media") ||
+		strings.HasPrefix(path, "/run/media") ||
+		strings.HasPrefix(path, "/Volumes")
 }
 
 func returnFocusType(focusPanel focusPanelType) filePanelFocusType {
