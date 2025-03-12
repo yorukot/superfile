@@ -157,9 +157,9 @@ func (m *model) normalAndBrowserModeKey(msg string) {
 		case containsKey(msg, hotkeys.Confirm):
 			m.singleItemSelect()
 		case containsKey(msg, hotkeys.FilePanelSelectModeItemsSelectUp):
-			m.itemSelectUp(false)
+			m.fileModel.filePanels[m.filePanelFocusIndex].itemSelectUp(m.mainPanelHeight)
 		case containsKey(msg, hotkeys.FilePanelSelectModeItemsSelectDown):
-			m.itemSelectDown(false)
+			m.fileModel.filePanels[m.filePanelFocusIndex].itemSelectDown(m.mainPanelHeight)
 		case containsKey(msg, hotkeys.DeleteItems):
 			go func() {
 				m.deleteItemWarn()
