@@ -12,19 +12,18 @@ import (
 
 // Change file panel mode (select mode or browser mode)
 func (m *model) changeFilePanelMode() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	if panel.panelMode == selectMode {
 		panel.selected = panel.selected[:0]
 		panel.panelMode = browserMode
 	} else if panel.panelMode == browserMode {
 		panel.panelMode = selectMode
 	}
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 // Back to parent directory
 func (m *model) parentDirectory() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	panel.directoryRecord[panel.location] = directoryRecord{
 		directoryCursor: panel.cursor,
 		directoryRender: panel.render,
@@ -40,12 +39,11 @@ func (m *model) parentDirectory() {
 		panel.cursor = 0
 		panel.render = 0
 	}
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 // Enter directory or open file with default application
 func (m *model) enterPanel() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 
 	if len(panel.element) == 0 {
 		return
@@ -117,7 +115,6 @@ func (m *model) enterPanel() {
 
 	}
 
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 // Switch to the directory where the sidebar cursor is located
@@ -128,7 +125,7 @@ func (m *model) sidebarSelectDirectory() {
 		return
 	}
 	m.focusPanel = nonePanelFocus
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 
 	panel.directoryRecord[panel.location] = directoryRecord{
 		directoryCursor: panel.cursor,
@@ -145,21 +142,19 @@ func (m *model) sidebarSelectDirectory() {
 		panel.render = 0
 	}
 	panel.focusType = focus
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 // Select all item in the file panel (only work on select mode)
 func (m *model) selectAllItem() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	for _, item := range panel.element {
 		panel.selected = append(panel.selected, item.location)
 	}
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 // Select the item where cursor located (only work on select mode)
 func (m *model) singleItemSelect() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex] // Access the current panel
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex] // Access the current panel
 
 	if len(panel.element) > 0 && panel.cursor >= 0 && panel.cursor < len(panel.element) {
 		elementLocation := panel.element[panel.cursor].location
@@ -169,8 +164,6 @@ func (m *model) singleItemSelect() {
 		} else {
 			panel.selected = append(panel.selected, elementLocation)
 		}
-
-		m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 	}
 }
 
@@ -212,7 +205,7 @@ func (m *model) toggleFooterController() {
 
 // Focus on search bar
 func (m *model) searchBarFocus() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	if panel.searchBar.Focused() {
 		panel.searchBar.Blur()
 	} else {
@@ -222,7 +215,6 @@ func (m *model) searchBarFocus() {
 
 	// config search bar width
 	panel.searchBar.Width = m.fileModel.width - 4
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 // ======================================== File panel controller ========================================
