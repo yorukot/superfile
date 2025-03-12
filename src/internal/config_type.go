@@ -84,12 +84,13 @@ type ThemeType struct {
 	ModalFG      string `toml:"modal_fg"`
 
 	// Special Color
-	Cursor        string   `toml:"cursor"`
-	Correct       string   `toml:"correct"`
-	Error         string   `toml:"error"`
-	Hint          string   `toml:"hint"`
-	Cancel        string   `toml:"cancel"`
-	GradientColor []string `toml:"gradient_color"`
+	Cursor             string   `toml:"cursor"`
+	Correct            string   `toml:"correct"`
+	Error              string   `toml:"error"`
+	Hint               string   `toml:"hint"`
+	Cancel             string   `toml:"cancel"`
+	GradientColor      []string `toml:"gradient_color"`
+	DirectoryIconColor string   `toml:"directory_icon_color"`
 
 	// File Panel Special Items
 	FilePanelTopDirectoryIcon string `toml:"file_panel_top_directory_icon"`

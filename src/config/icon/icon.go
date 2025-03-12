@@ -408,9 +408,9 @@ var Folders = map[string]IconStyle{
 	".vscode":               {Icon: "\ue70c", Color: "#007acc"}, // VSCode folder - Blue
 	".vim":                  {Icon: "\ue62b", Color: "#019833"}, // Vim folder - Green
 	"config":                {Icon: "\ue5fc", Color: "#ffb86c"}, // Config folder - Light orange
-	"folder":                {Icon: "", Color: "NONE"},         // Generic folder - Dark yellowish
-	"hidden":                {Icon: "\uf023", Color: "#75715e"}, // Hidden folder - Dark yellowish
-	"node_modules":          {Icon: "\ue5fa", Color: "#cb3837"}, // Node modules folder - Red
+	// Item for Generic folder, with key "folder" is initialized in InitIcon()
+	"hidden":       {Icon: "\uf023", Color: "#75715e"}, // Hidden folder - Dark yellowish
+	"node_modules": {Icon: "\ue5fa", Color: "#cb3837"}, // Node modules folder - Red
 
 	"superfile": {Icon: "󰚝", Color: "#FF6F00"},
 }
