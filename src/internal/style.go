@@ -13,6 +13,7 @@ var (
 
 	// Todo : These are model object properties, not global properties
 	// We are modifying them in the code many time. They need to be part of model struct.
+	minFooterHeight = 8
 	footerHeight = 14
 	modalWidth   = 60
 	modalHeight  = 7

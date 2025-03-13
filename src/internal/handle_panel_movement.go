@@ -199,7 +199,7 @@ func (m *model) toggleFooterController() {
 	if err != nil {
 		slog.Error("Error while Toggle footer function updatedData superfile data", "error", err)
 	}
-	m.setFooterSize(m.fullHeight)
+	m.setHeightValues(m.fullHeight)
 
 }
 
