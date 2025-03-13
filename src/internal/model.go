@@ -164,24 +164,24 @@ func (m *model) setFilePanelsSize(width int) {
 // This is not just footer size, but size of mainPanel as well.
 func (m *model) setHeightValues(height int) {
 	if !m.toggleFooter {
-		footerHeight = 0
+		m.footerHeight = 0
 	} else if height < 30 {
-		footerHeight = 6
+		m.footerHeight = 6
 	} else if height < 35 {
-		footerHeight = 7
+		m.footerHeight = 7
 	} else if height < 40 {
-		footerHeight = 8
+		m.footerHeight = 8
 	} else if height < 45 {
-		footerHeight = 9
+		m.footerHeight = 9
 	} else {
-		footerHeight = 10
+		m.footerHeight = 10
 	}
 	// Todo : Make it grow even more for bigger screen sizes.
 	// Todo : Calculate the value , instead of manually hard coding it.
 
 	// Total Height = mainPanelHeight + 2 (border) + footerHeight (including borders and command line)
 	m.mainPanelHeight = height -
-		actualfooterHeight(footerHeight, m.commandLine.input.Focused()) - 2
+		actualfooterHeight(m.footerHeight, m.commandLine.input.Focused()) - 2
 }
 
 // Set help menu size
@@ -326,7 +326,7 @@ func (m *model) warnModalForQuit() {
 // Implement View function for bubble tea model to handle visualization.
 func (m model) View() string {
 	slog.Debug("model.View() called", "mainPanelHeight", m.mainPanelHeight,
-		"footerHeight", footerHeight, "fullHeight", m.fullHeight,
+		"footerHeight", m.footerHeight, "fullHeight", m.fullHeight,
 		"fullWidth", m.fullWidth)
 
 	if !m.firstLoadingComplete {

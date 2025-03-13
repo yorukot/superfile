@@ -14,7 +14,7 @@ func wheelMainAction(msg string, m *model) {
 		if m.focusPanel == sidebarFocus {
 			action = func() { m.sidebarModel.listUp(m.mainPanelHeight) }
 		} else if m.focusPanel == processBarFocus {
-			action = func() { m.processBarModel.listUp(footerHeight) }
+			action = func() { m.processBarModel.listUp(m.footerHeight) }
 		} else if m.focusPanel == metadataFocus {
 			action = func() { m.fileMetaData.listUp() }
 		} else if m.focusPanel == nonePanelFocus {
@@ -25,7 +25,7 @@ func wheelMainAction(msg string, m *model) {
 		if m.focusPanel == sidebarFocus {
 			action = func() { m.sidebarModel.listDown(m.mainPanelHeight) }
 		} else if m.focusPanel == processBarFocus {
-			action = func() { m.processBarModel.listDown(footerHeight) }
+			action = func() { m.processBarModel.listDown(m.footerHeight) }
 		} else if m.focusPanel == metadataFocus {
 			action = func() { m.fileMetaData.listDown() }
 		} else if m.focusPanel == nonePanelFocus {

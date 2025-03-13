@@ -91,6 +91,7 @@ type model struct {
 	firstLoadingComplete bool
 	filePanelFocusIndex  int
 	mainPanelHeight      int
+	footerHeight         int
 	fullWidth            int
 	fullHeight           int
 }

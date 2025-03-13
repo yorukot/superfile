@@ -207,9 +207,9 @@ func (m *model) filePanelRender() string {
 	return filePanelRender
 }
 func (m *model) processBarRender() string {
-	if !m.processBarModel.isValid(footerHeight) {
+	if !m.processBarModel.isValid(m.footerHeight) {
 		slog.Error("processBar in invalid state", "render", m.processBarModel.render,
-			"cursor", m.processBarModel.cursor, "footerHeight", footerHeight)
+			"cursor", m.processBarModel.cursor, "footerHeight", m.footerHeight)
 	}
 
 	// Change : Moved this up. Early return
@@ -259,14 +259,14 @@ func (m *model) processBarRender() string {
 
 		// We allow rendering of a process if we have at least 2 lines left
 		// Then we dont add a separator newline
-		if footerHeight < renderedHeight+2 {
+		if m.footerHeight < renderedHeight+2 {
 			break
 		}
 		renderedHeight += 3
 		endSeparator := "\n\n"
 
 		// Cant add newline after last process
-		if footerHeight < renderedHeight {
+		if m.footerHeight < renderedHeight {
 			endSeparator = "\n"
 			renderedHeight--
 		}
@@ -307,7 +307,7 @@ func (m *model) wrapProcessBardBorder(processRender string) string {
 		courseNumber = m.processBarModel.cursor + 1
 	}
 	bottomBorder := generateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(courseNumber), strconv.Itoa(len(m.processBarModel.processList))), footerWidth(m.fullWidth)-3)
-	processRender = procsssBarBorder(footerHeight, footerWidth(m.fullWidth), bottomBorder, m.focusPanel).Render(processRender)
+	processRender = procsssBarBorder(m.footerHeight, footerWidth(m.fullWidth), bottomBorder, m.focusPanel).Render(processRender)
 
 	return processRender
 }
@@ -358,7 +358,7 @@ func (m *model) metadataRender() string {
 		sprintfLength = valueLength
 	}
 
-	imax := min(footerHeight+m.fileMetaData.renderIndex, len(m.fileMetaData.metaData))
+	imax := min(m.footerHeight+m.fileMetaData.renderIndex, len(m.fileMetaData.metaData))
 	for i := m.fileMetaData.renderIndex; i < imax; i++ {
 		// Newline separator before all entries except first
 		if i != m.fileMetaData.renderIndex {
@@ -373,7 +373,7 @@ func (m *model) metadataRender() string {
 
 	}
 	bottomBorder := generateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(m.fileMetaData.renderIndex+1), strconv.Itoa(len(m.fileMetaData.metaData))), footerWidth(m.fullWidth)-3)
-	metaDataBar = metadataBorder(footerHeight, footerWidth(m.fullWidth), bottomBorder, m.focusPanel).Render(metaDataBar)
+	metaDataBar = metadataBorder(m.footerHeight, footerWidth(m.fullWidth), bottomBorder, m.focusPanel).Render(metaDataBar)
 
 	return metaDataBar
 }
@@ -385,12 +385,12 @@ func (m *model) clipboardRender() string {
 	if len(m.copyItems.items) == 0 {
 		clipboardRender += "\n " + icon.Error + "  No content in clipboard"
 	} else {
-		for i := 0; i < len(m.copyItems.items) && i < footerHeight; i++ {
+		for i := 0; i < len(m.copyItems.items) && i < m.footerHeight; i++ {
 			// Newline separator before all entries except first
 			if i != 0 {
 				clipboardRender += "\n"
 			}
-			if i == footerHeight-1 && i != len(m.copyItems.items)-1 {
+			if i == m.footerHeight-1 && i != len(m.copyItems.items)-1 {
 				// Last Entry we can render, but there are more that one left
 				clipboardRender += strconv.Itoa(len(m.copyItems.items)-i) + " item left...."
 			} else {
@@ -411,7 +411,7 @@ func (m *model) clipboardRender() string {
 	} else {
 		bottomWidth = footerWidth(m.fullWidth)
 	}
-	clipboardRender = clipboardBorder(footerHeight, bottomWidth, Config.BorderBottom).Render(clipboardRender)
+	clipboardRender = clipboardBorder(m.footerHeight, bottomWidth, Config.BorderBottom).Render(clipboardRender)
 
 	return clipboardRender
 }

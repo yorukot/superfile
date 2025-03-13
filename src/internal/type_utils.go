@@ -12,13 +12,13 @@ func (c *copyItems) reset(cut bool) {
 
 // Non fatal Validations. This indicates bug / programming errors, not user configuration mistake
 func (m *model) validateLayout() error {
-	if 0 < footerHeight && footerHeight < minFooterHeight {
-		return fmt.Errorf("footerHeight %v is too small", footerHeight)
+	if 0 < m.footerHeight && m.footerHeight < minFooterHeight {
+		return fmt.Errorf("footerHeight %v is too small", m.footerHeight)
 	}
 	// PanelHeight + 2 lines (main border) + actual footer height
-	if m.fullHeight != (m.mainPanelHeight+2)+actualfooterHeight(footerHeight, m.commandLine.input.Focused()) {
+	if m.fullHeight != (m.mainPanelHeight+2)+actualfooterHeight(m.footerHeight, m.commandLine.input.Focused()) {
 		return fmt.Errorf("Invalid model layout, fullHeight : %v, mainPanelHeight : %v, footerHeight : %v\n",
-			m.fullHeight, m.mainPanelHeight, footerHeight)
+			m.fullHeight, m.mainPanelHeight, m.footerHeight)
 	}
 	// Todo : Add check for width as well
 	return nil
