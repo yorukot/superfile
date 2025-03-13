@@ -93,6 +93,46 @@ func Test_processBarModel(t *testing.T) {
 			expectedRender: 0,
 			footerHeight:   10,
 		},
+		{
+			name:           "Up at top wraps to last and adjusts render",
+			pModel:         genProcessBarModel(10, 0, 0),
+			listDown:       false,
+			expectedCursor: 9,
+			expectedRender: 6, // 10 processes , 4 renderable
+			footerHeight:   11,
+		},
+		{
+			name:           "Up causes render index decrement",
+			pModel:         genProcessBarModel(10, 3, 3),
+			listDown:       false,
+			expectedCursor: 2,
+			expectedRender: 2, // Cursor moved above render start
+			footerHeight:   8, // Renders 3 processes
+		},
+		{
+			name:           "Up on short list wraps correctly",
+			pModel:         genProcessBarModel(3, 0, 0),
+			listDown:       false,
+			expectedCursor: 2,
+			expectedRender: 0, // 3 processes, 3 renderable
+			footerHeight:   11,
+		},
+		{
+			name:           "Up within render window maintains position",
+			pModel:         genProcessBarModel(8, 5, 3),
+			listDown:       false,
+			expectedCursor: 4,
+			expectedRender: 3, // Remain in render window
+			footerHeight:   11,
+		},
+		{
+			name:           "Up with minimal footer height",
+			pModel:         genProcessBarModel(5, 0, 0),
+			listDown:       false,
+			expectedCursor: 4,
+			expectedRender: 3,
+			footerHeight:   5,
+		},
 	}
 
 	for _, tt := range testdata {
