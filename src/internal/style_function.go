@@ -78,8 +78,9 @@ func procsssBarBorder(height int, width int, borderBottom string, focusType focu
 		Foreground(footerFGColor)
 }
 
+// Change : Fix typo
 // Generate border style for metadata and can custom bottom border
-func metadataBoarder(height int, width int, borderBottom string, focusType focusPanelType) lipgloss.Style {
+func metadataBorder(height int, width int, borderBottom string, focusType focusPanelType) lipgloss.Style {
 	border := generateBorder()
 	border.Top = Config.BorderTop + Config.BorderMiddleRight + " Metadata " + Config.BorderMiddleLeft + strings.Repeat(Config.BorderTop, width)
 	border.Bottom = borderBottom
@@ -99,8 +100,9 @@ func metadataBoarder(height int, width int, borderBottom string, focusType focus
 		Foreground(footerFGColor)
 }
 
+// Change : Fix typo
 // Generate border style for clipboard and can custom bottom border
-func clipboardBoarder(height int, width int, borderBottom string) lipgloss.Style {
+func clipboardBorder(height int, width int, borderBottom string) lipgloss.Style {
 	border := generateBorder()
 	border.Top = Config.BorderTop + Config.BorderMiddleRight + " Clipboard " + Config.BorderMiddleLeft + strings.Repeat(Config.BorderTop, width)
 	border.Bottom = borderBottom

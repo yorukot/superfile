@@ -324,7 +324,11 @@ func (m *model) metadataRender() string {
 		}()
 	}
 	maxKeyLength := 0
+	// Todo : The whole intention of this is to get the comparisonFields come before
+	// other fields. Sorting like this is a bad way of achieving that. This can be improved
 	sort.Slice(m.fileMetaData.metaData, func(i, j int) bool {
+		// Initialising a new slice in each check by sort functions is too ineffinceint.
+		// Todo : Fix it
 		comparisonFields := []string{"FileName", "FileSize", "FolderName", "FolderSize", "FileModifyDate", "FileAccessDate"}
 
 		for _, field := range comparisonFields {
@@ -344,6 +348,9 @@ func (m *model) metadataRender() string {
 		}
 	}
 
+	// Todo : Too much calculations that are not in a fuctions, are not
+	// unit tested, and have no proper explanation. This makes it
+	// very hard to maintain and add any changes
 	sprintfLength := maxKeyLength + 1
 	valueLength := footerWidth(m.fullWidth) - maxKeyLength - 2
 	if valueLength < footerWidth(m.fullWidth)/2 {
@@ -351,7 +358,9 @@ func (m *model) metadataRender() string {
 		sprintfLength = valueLength
 	}
 
-	for i := m.fileMetaData.renderIndex; i < bottomElementHeight(footerHeight)+m.fileMetaData.renderIndex && i < len(m.fileMetaData.metaData); i++ {
+	imax := min(footerHeight+m.fileMetaData.renderIndex, len(m.fileMetaData.metaData))
+	for i := m.fileMetaData.renderIndex; i < imax; i++ {
+		// Newline separator before all entries except first
 		if i != m.fileMetaData.renderIndex {
 			metaDataBar += "\n"
 		}
@@ -364,7 +373,7 @@ func (m *model) metadataRender() string {
 
 	}
 	bottomBorder := generateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(m.fileMetaData.renderIndex+1), strconv.Itoa(len(m.fileMetaData.metaData))), footerWidth(m.fullWidth)-3)
-	metaDataBar = metadataBoarder(footerHeight, footerWidth(m.fullWidth), bottomBorder, m.focusPanel).Render(metaDataBar)
+	metaDataBar = metadataBorder(footerHeight, footerWidth(m.fullWidth), bottomBorder, m.focusPanel).Render(metaDataBar)
 
 	return metaDataBar
 }
@@ -377,10 +386,9 @@ func (m *model) clipboardRender() string {
 		clipboardRender += "\n " + icon.Error + "  No content in clipboard"
 	} else {
 		for i := 0; i < len(m.copyItems.items) && i < footerHeight; i++ {
-			separator := "\n"
-			if i == footerHeight-1 || i == len(m.copyItems.items)-1 {
-				// Last item we will render, no separator needed
-				separator = ""
+			// Newline separator before all entries except first
+			if i != 0 {
+				clipboardRender += "\n"
 			}
 			if i == footerHeight-1 && i != len(m.copyItems.items)-1 {
 				// Last Entry we can render, but there are more that one left
@@ -394,7 +402,6 @@ func (m *model) clipboardRender() string {
 					clipboardRender += clipboardPrettierName(m.copyItems.items[i], footerWidth(m.fullWidth)-3, fileInfo.IsDir(), false)
 				}
 			}
-			clipboardRender += separator
 		}
 	}
 	bottomWidth := 0
@@ -404,7 +411,7 @@ func (m *model) clipboardRender() string {
 	} else {
 		bottomWidth = footerWidth(m.fullWidth)
 	}
-	clipboardRender = clipboardBoarder(footerHeight, bottomWidth, Config.BorderBottom).Render(clipboardRender)
+	clipboardRender = clipboardBorder(footerHeight, bottomWidth, Config.BorderBottom).Render(clipboardRender)
 
 	return clipboardRender
 }
