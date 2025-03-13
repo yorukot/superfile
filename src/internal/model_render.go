@@ -207,6 +207,11 @@ func (m *model) filePanelRender() string {
 	return filePanelRender
 }
 func (m *model) processBarRender() string {
+	if !m.processBarModel.isValid(footerHeight) {
+		slog.Error("processBar in invalid state", "render", m.processBarModel.render,
+			"cursor", m.processBarModel.cursor, "footerHeight", footerHeight)
+		return ""
+	}
 	// save process in the array
 	var processes []process
 	for _, p := range m.processBarModel.process {

@@ -49,7 +49,7 @@ func Test_processBarModel(t *testing.T) {
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.listDown {
-				tt.pModel.listDown()
+				tt.pModel.listDown(footerHeight)
 			} else {
 				tt.pModel.listUp(footerHeight)
 			}

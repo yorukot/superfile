@@ -1,5 +1,7 @@
 package internal
 
+import "log/slog"
+
 // ======================================== File panel controller ========================================
 
 // Control file panel list up
@@ -165,6 +167,7 @@ func (fm *fileMetadata) listDown() {
 // There is a shadowing happening here, but it will be removed
 // Once we make footerHeight part of model struct
 func (p *processBarModel) listUp(footerHeight int) {
+	slog.Debug("processBarModel.listUp()", "footerHeight", footerHeight)
 	if len(p.processList) == 0 {
 		return
 	}
@@ -174,27 +177,42 @@ func (p *processBarModel) listUp(footerHeight int) {
 			p.render--
 		}
 	} else {
-		if len(p.processList) <= 3 || (len(p.processList) <= 2 && footerHeight < 14) {
-			p.cursor = len(p.processList) - 1
-		} else {
-			p.render = len(p.processList) - 3
-			p.cursor = len(p.processList) - 1
-		}
+		p.cursor = len(p.processList) - 1
+		// Change : Fixed and simplified the calculation here.
+		// Either start from beginning or
+		// from a process so that we could render last one
+		p.render = max(0, len(p.processList)-cntRenderableProcess(footerHeight))
 	}
 }
 
 // Control processbar panel list down
-func (p *processBarModel) listDown() {
+func (p *processBarModel) listDown(footerHeight int) {
+	slog.Debug("processBarModel.listDown()", "footerHeight", footerHeight)
 	if len(p.processList) == 0 {
 		return
 	}
 	if p.cursor < len(p.processList)-1 {
 		p.cursor++
-		if p.cursor > p.render+2 {
+		// Change : It was hardcoded that we would only be able to render 3 processes
+		// Fixed that
+		if p.cursor > p.render+cntRenderableProcess(footerHeight)-1 {
 			p.render++
 		}
 	} else {
 		p.render = 0
 		p.cursor = 0
 	}
+}
+
+// Todo : use this function while rendering and report if there is any issue.
+func (p *processBarModel) isValid(footerHeight int) bool {
+	return p.render <= p.cursor &&
+		p.cursor <= p.render+cntRenderableProcess(footerHeight)-1
+}
+
+// Separate out this calculation for better documentation
+func cntRenderableProcess(footerHeight int) int {
+	// We can render one process in three lines
+	// footerHeight-2 for top and bottom border
+	return (footerHeight - 2) / 3
 }

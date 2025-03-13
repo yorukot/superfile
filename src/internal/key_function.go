@@ -39,7 +39,7 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) tea.Cmd {
 		if m.focusPanel == sidebarFocus {
 			m.sidebarModel.listDown(m.mainPanelHeight)
 		} else if m.focusPanel == processBarFocus {
-			m.processBarModel.listDown()
+			m.processBarModel.listDown(footerHeight)
 		} else if m.focusPanel == metadataFocus {
 			m.fileMetaData.listDown()
 		} else if m.focusPanel == nonePanelFocus {
