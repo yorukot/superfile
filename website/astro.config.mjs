@@ -150,7 +150,7 @@ export default defineConfig({
         },
         {
           label: 'How to contribute',
-          link: '/how-to-contribute'
+          link: '/contribute/how-to-contribute'
         },
         {
           label: 'Changelog',
