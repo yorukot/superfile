@@ -24,6 +24,17 @@ func genProcessBarModel(count int, cursor int, render int) processBarModel {
 	}
 }
 
+func Test_cntRenderableProcess(t *testing.T) {
+	assert.Equal(t, cntRenderableProcess(4), 1)
+	assert.Equal(t, cntRenderableProcess(5), 2)
+	assert.Equal(t, cntRenderableProcess(6), 2)
+	assert.Equal(t, cntRenderableProcess(7), 2)
+	assert.Equal(t, cntRenderableProcess(8), 3)
+	assert.Equal(t, cntRenderableProcess(9), 3)
+	assert.Equal(t, cntRenderableProcess(10), 3)
+	assert.Equal(t, cntRenderableProcess(11), 4)
+}
+
 // Control processbar panel list down
 func Test_processBarModel(t *testing.T) {
 	testdata := []struct {
@@ -33,7 +44,6 @@ func Test_processBarModel(t *testing.T) {
 		expectedCursor int
 		expectedRender int
 		footerHeight   int
-		explanation    string
 	}{
 		{
 			name:           "Basic down movement 1",
@@ -42,16 +52,48 @@ func Test_processBarModel(t *testing.T) {
 			expectedCursor: 1,
 			expectedRender: 0,
 			footerHeight:   10,
-			explanation:    "Basic movements",
+		},
+		{
+			name:           "Down at the last process",
+			pModel:         genProcessBarModel(3, 2, 0),
+			listDown:       true,
+			expectedCursor: 0,
+			expectedRender: 0,
+			footerHeight:   10,
+		},
+		{
+			name:           "Down at the last process - Footer height just enough",
+			pModel:         genProcessBarModel(3, 2, 0),
+			listDown:       true,
+			expectedCursor: 0,
+			expectedRender: 0,
+			footerHeight:   8,
+		},
+		{
+			name:           "Down at the process causing render index to move",
+			pModel:         genProcessBarModel(10, 3, 0),
+			listDown:       true,
+			expectedCursor: 4,
+			expectedRender: 1,
+			footerHeight:   11, // Can hold 4 processes
+		},
+		{
+			name:           "Basic up movement 1",
+			pModel:         genProcessBarModel(10, 1, 0),
+			listDown:       false,
+			expectedCursor: 0,
+			expectedRender: 0,
+			footerHeight:   10,
 		},
 	}
 
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
+			assert.True(t, tt.pModel.isValid(tt.footerHeight))
 			if tt.listDown {
-				tt.pModel.listDown(footerHeight)
+				tt.pModel.listDown(tt.footerHeight)
 			} else {
-				tt.pModel.listUp(footerHeight)
+				tt.pModel.listUp(tt.footerHeight)
 			}
 
 			assert.Equal(t, tt.expectedCursor, tt.pModel.cursor)

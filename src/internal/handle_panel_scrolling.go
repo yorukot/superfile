@@ -1,6 +1,8 @@
 package internal
 
-import "log/slog"
+import (
+	"log/slog"
+)
 
 // ======================================== File panel controller ========================================
 
@@ -214,9 +216,5 @@ func (p *processBarModel) isValid(footerHeight int) bool {
 func cntRenderableProcess(footerHeight int) int {
 	// We can render one process in three lines
 	// And last process in two or three lines ( with/without a line separtor)
-	// footerHeight 5 -> Render 2
-	// footerHeight 6 -> Render 2
-	// footerHeight 7 -> Render 2
-	// footerHeight 8 -> Render 3
 	return (footerHeight + 1) / 3
 }
