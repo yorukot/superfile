@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"slices"
 	"sort"
 	"strconv"
@@ -22,11 +23,17 @@ import (
 
 // Check if the directory is external disk path
 func isExternalDiskPath(path string) bool {
-	// exclude timemachine
+	// exclude timemachine on MacOS
 	if strings.HasPrefix(path, "/Volumes/.timemachine") {
 		return false
 	}
 
+  if runtime.GOOS == "windows" {
+    // we need to get C:, D: drive etc in the list
+    return true
+  }
+
+  // to filter out mounted partitions like /, /boot etc
 	return strings.HasPrefix(path, "/mnt") ||
 		strings.HasPrefix(path, "/media") ||
 		strings.HasPrefix(path, "/run/media") ||

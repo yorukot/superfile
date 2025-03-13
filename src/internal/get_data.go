@@ -82,12 +82,14 @@ func getPinnedDirectories() []directory {
 
 // Get external media directories
 func getExternalMediaFolders() (disks []directory) {
-	parts, err := disk.Partitions(true)
+  // only get physical drives
+	parts, err := disk.Partitions(false)
 
 	if err != nil {
 		slog.Error("Error while getting external media: ", "error", err)
 		return disks
 	}
+
 	for _, disk := range parts {
 		if isExternalDiskPath(disk.Mountpoint) {
 			disks = append(disks, directory{
