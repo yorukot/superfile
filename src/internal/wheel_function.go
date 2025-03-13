@@ -4,7 +4,6 @@ import (
 	"log/slog"
 )
 
-// Change : tea.Cmd is not used at all
 func wheelMainAction(msg string, m *model) {
 	slog.Debug("wheelMainAction called", "msg", msg, "focusPanel", m.focusPanel)
 	var action func()

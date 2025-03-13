@@ -90,10 +90,16 @@ type model struct {
 	toggleFooter         bool
 	firstLoadingComplete bool
 	filePanelFocusIndex  int
-	mainPanelHeight      int
-	footerHeight         int
-	fullWidth            int
-	fullHeight           int
+
+	// Height in number of lines of actual viewport of
+	// main panel and sidebar excluding border
+	mainPanelHeight int
+
+	// Height in number of lines of actual viewport of
+	// footer panels - process/metadata/clipboard - excluding border
+	footerHeight int
+	fullWidth    int
+	fullHeight   int
 }
 
 // Modal

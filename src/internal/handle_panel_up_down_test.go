@@ -8,16 +8,16 @@ import (
 )
 
 func genProcessBarModel(count int, cursor int, render int) processBarModel {
-	pSlice := make([]string, count)
+	pList := make([]string, count)
 	pMap := map[string]process{}
 	for i := 0; i < count; i++ {
-		pSlice[i] = strconv.Itoa(i)
-		pMap[pSlice[i]] = process{
-			name: pSlice[i],
+		pList[i] = strconv.Itoa(i)
+		pMap[pList[i]] = process{
+			name: pList[i],
 		}
 	}
 	return processBarModel{
-		processList: pSlice,
+		processList: pList,
 		process:     pMap,
 		cursor:      cursor,
 		render:      render,

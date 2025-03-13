@@ -212,7 +212,6 @@ func (m *model) processBarRender() string {
 			"cursor", m.processBarModel.cursor, "footerHeight", m.footerHeight)
 	}
 
-	// Change : Moved this up. Early return
 	if len(m.processBarModel.processList) == 0 {
 		processRender := "\n " + icon.Error + "  No processes running"
 		return m.wrapProcessBardBorder(processRender)
@@ -265,9 +264,15 @@ func (m *model) processBarRender() string {
 		renderedHeight += 3
 		endSeparator := "\n\n"
 
-		// Cant add newline after last process
-		if m.footerHeight < renderedHeight {
+		// Last process, but can render full in three lines
+		// Although there is no next process, so dont add extra newline
+		if m.footerHeight == renderedHeight {
 			endSeparator = "\n"
+		}
+
+		// Cant add newline after last process. Only have two lines
+		if m.footerHeight < renderedHeight {
+			endSeparator = ""
 			renderedHeight--
 		}
 

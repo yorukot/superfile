@@ -160,8 +160,6 @@ func (m *model) setFilePanelsSize(width int) {
 	}
 }
 
-// Change : this functions is named incorrectly.
-// This is not just footer size, but size of mainPanel as well.
 func (m *model) setHeightValues(height int) {
 	if !m.toggleFooter {
 		m.footerHeight = 0

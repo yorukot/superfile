@@ -180,7 +180,6 @@ func (p *processBarModel) listUp(footerHeight int) {
 		}
 	} else {
 		p.cursor = len(p.processList) - 1
-		// Change : Fixed and simplified the calculation here.
 		// Either start from beginning or
 		// from a process so that we could render last one
 		p.render = max(0, len(p.processList)-cntRenderableProcess(footerHeight))
@@ -195,8 +194,6 @@ func (p *processBarModel) listDown(footerHeight int) {
 	}
 	if p.cursor < len(p.processList)-1 {
 		p.cursor++
-		// Change : It was hardcoded that we would only be able to render 3 processes
-		// Fixed that
 		if p.cursor > p.render+cntRenderableProcess(footerHeight)-1 {
 			p.render++
 		}
@@ -206,7 +203,6 @@ func (p *processBarModel) listDown(footerHeight int) {
 	}
 }
 
-// Todo : use this function while rendering and report if there is any issue.
 func (p *processBarModel) isValid(footerHeight int) bool {
 	return p.render <= p.cursor &&
 		p.cursor <= p.render+cntRenderableProcess(footerHeight)-1
