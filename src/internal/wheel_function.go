@@ -1,8 +1,12 @@
 package internal
 
-import tea "github.com/charmbracelet/bubbletea"
+import (
+	"log/slog"
+)
 
-func wheelMainAction(msg string, m *model, cmd tea.Cmd) tea.Cmd {
+// Change : tea.Cmd is not used at all
+func wheelMainAction(msg string, m *model) {
+	slog.Debug("wheelMainAction called", "msg", msg, "focusPanel", m.focusPanel)
 	var action func()
 	switch msg {
 
@@ -39,6 +43,4 @@ func wheelMainAction(msg string, m *model, cmd tea.Cmd) tea.Cmd {
 			m.returnMetaData()
 		}()
 	}
-
-	return cmd
 }

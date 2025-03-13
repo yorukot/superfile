@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"time"
 
@@ -62,9 +63,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.handleWindowResize(msg)
 	case tea.MouseMsg:
-		cmd = wheelMainAction(msg.String(), &m, cmd)
+		msgStr := msg.String()
+		if msgStr == "wheel up" || msgStr == "wheel down" {
+			wheelMainAction(msgStr, &m)
+		} else {
+			slog.Debug("Mouse event of type that is not handled", "msg", msgStr)
+		}
 	case tea.KeyMsg:
 		cmd = m.handleKeyInput(msg, cmd)
+	default:
+		slog.Debug("Message of type that is not handled", "type", reflect.TypeOf(msg))
 	}
 
 	m.updateFilePanelsState(msg, &cmd)
