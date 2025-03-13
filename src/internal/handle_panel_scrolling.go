@@ -162,7 +162,9 @@ func (fm *fileMetadata) listDown() {
 // ======================================== Processbar controller ========================================
 
 // Control processbar panel list up
-func (p *processBarModel) listUp() {
+// There is a shadowing happening here, but it will be removed
+// Once we make footerHeight part of model struct
+func (p *processBarModel) listUp(footerHeight int) {
 	if len(p.processList) == 0 {
 		return
 	}

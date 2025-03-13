@@ -10,7 +10,7 @@ func wheelMainAction(msg string, m *model, cmd tea.Cmd) tea.Cmd {
 		if m.focusPanel == sidebarFocus {
 			action = func() { m.sidebarModel.listUp(m.mainPanelHeight) }
 		} else if m.focusPanel == processBarFocus {
-			action = func() { m.processBarModel.listUp() }
+			action = func() { m.processBarModel.listUp(footerHeight) }
 		} else if m.focusPanel == metadataFocus {
 			action = func() { m.fileMetaData.listUp() }
 		} else if m.focusPanel == nonePanelFocus {
