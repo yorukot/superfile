@@ -378,11 +378,11 @@ func (m *model) clipboardRender() string {
 	} else {
 		for i := 0; i < len(m.copyItems.items) && i < footerHeight; i++ {
 			separator := "\n"
-			if i == footerHeight - 1 || i == len(m.copyItems.items) - 1{
+			if i == footerHeight-1 || i == len(m.copyItems.items)-1 {
 				// Last item we will render, no separator needed
 				separator = ""
 			}
-			if i == footerHeight - 1 && i != len(m.copyItems.items) - 1{
+			if i == footerHeight-1 && i != len(m.copyItems.items)-1 {
 				// Last Entry we can render, but there are more that one left
 				clipboardRender += strconv.Itoa(len(m.copyItems.items)-i) + " item left...."
 			} else {

@@ -218,5 +218,5 @@ func cntRenderableProcess(footerHeight int) int {
 	// footerHeight 6 -> Render 2
 	// footerHeight 7 -> Render 2
 	// footerHeight 8 -> Render 3
-	return (footerHeight+1) / 3
+	return (footerHeight + 1) / 3
 }
