@@ -54,7 +54,7 @@ func Test_processBarModel(t *testing.T) {
 			footerHeight:   10,
 		},
 		{
-			name:           "Down at the last process",
+			name:           "Down at the last process - Footer height is plenty",
 			pModel:         genProcessBarModel(3, 2, 0),
 			listDown:       true,
 			expectedCursor: 0,
@@ -64,6 +64,14 @@ func Test_processBarModel(t *testing.T) {
 		{
 			name:           "Down at the last process - Footer height just enough",
 			pModel:         genProcessBarModel(3, 2, 0),
+			listDown:       true,
+			expectedCursor: 0,
+			expectedRender: 0,
+			footerHeight:   8,
+		},
+		{
+			name:           "Down at the last process - Footer height is small",
+			pModel:         genProcessBarModel(10, 9, 7),
 			listDown:       true,
 			expectedCursor: 0,
 			expectedRender: 0,
