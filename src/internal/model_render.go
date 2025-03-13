@@ -307,7 +307,7 @@ func (m *model) wrapProcessBardBorder(processRender string) string {
 		courseNumber = m.processBarModel.cursor + 1
 	}
 	bottomBorder := generateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(courseNumber), strconv.Itoa(len(m.processBarModel.processList))), footerWidth(m.fullWidth)-3)
-	processRender = procsssBarBorder(bottomElementHeight(footerHeight), footerWidth(m.fullWidth), bottomBorder, m.focusPanel).Render(processRender)
+	processRender = procsssBarBorder(footerHeight, footerWidth(m.fullWidth), bottomBorder, m.focusPanel).Render(processRender)
 
 	return processRender
 }
@@ -364,7 +364,7 @@ func (m *model) metadataRender() string {
 
 	}
 	bottomBorder := generateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(m.fileMetaData.renderIndex+1), strconv.Itoa(len(m.fileMetaData.metaData))), footerWidth(m.fullWidth)-3)
-	metaDataBar = metadataBoarder(bottomElementHeight(footerHeight), footerWidth(m.fullWidth), bottomBorder, m.focusPanel).Render(metaDataBar)
+	metaDataBar = metadataBoarder(footerHeight, footerWidth(m.fullWidth), bottomBorder, m.focusPanel).Render(metaDataBar)
 
 	return metaDataBar
 }
@@ -376,22 +376,26 @@ func (m *model) clipboardRender() string {
 	if len(m.copyItems.items) == 0 {
 		clipboardRender += "\n " + icon.Error + "  No content in clipboard"
 	} else {
-		for i := 0; i < len(m.copyItems.items) && i < bottomElementHeight(footerHeight); i++ {
-			if i == bottomElementHeight(footerHeight)-1 {
-				clipboardRender += strconv.Itoa(len(m.copyItems.items)-i+1) + " item left...."
+		for i := 0; i < len(m.copyItems.items) && i < footerHeight; i++ {
+			separator := "\n"
+			if i == footerHeight - 1 || i == len(m.copyItems.items) - 1{
+				// Last item we will render, no separator needed
+				separator = ""
+			}
+			if i == footerHeight - 1 && i != len(m.copyItems.items) - 1{
+				// Last Entry we can render, but there are more that one left
+				clipboardRender += strconv.Itoa(len(m.copyItems.items)-i) + " item left...."
 			} else {
 				fileInfo, err := os.Stat(m.copyItems.items[i])
 				if err != nil {
 					slog.Error("Clipboard render function get item state ", "error", err)
 				}
 				if !os.IsNotExist(err) {
-					clipboardRender += clipboardPrettierName(m.copyItems.items[i], footerWidth(m.fullWidth)-3, fileInfo.IsDir(), false) + "\n"
+					clipboardRender += clipboardPrettierName(m.copyItems.items[i], footerWidth(m.fullWidth)-3, fileInfo.IsDir(), false)
 				}
 			}
+			clipboardRender += separator
 		}
-	}
-	for i := 0; i < len(m.copyItems.items); i++ {
-
 	}
 	bottomWidth := 0
 
@@ -400,7 +404,7 @@ func (m *model) clipboardRender() string {
 	} else {
 		bottomWidth = footerWidth(m.fullWidth)
 	}
-	clipboardRender = clipboardBoarder(bottomElementHeight(footerHeight), bottomWidth, Config.BorderBottom).Render(clipboardRender)
+	clipboardRender = clipboardBoarder(footerHeight, bottomWidth, Config.BorderBottom).Render(clipboardRender)
 
 	return clipboardRender
 }

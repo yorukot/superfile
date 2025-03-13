@@ -166,15 +166,15 @@ func (m *model) setHeightValues(height int) {
 	if !m.toggleFooter {
 		footerHeight = 0
 	} else if height < 30 {
-		footerHeight = 8
+		footerHeight = 6
 	} else if height < 35 {
-		footerHeight = 9
+		footerHeight = 7
 	} else if height < 40 {
-		footerHeight = 10
+		footerHeight = 8
 	} else if height < 45 {
-		footerHeight = 11
+		footerHeight = 9
 	} else {
-		footerHeight = 12
+		footerHeight = 10
 	}
 	// Todo : Make it grow even more for bigger screen sizes.
 	// Todo : Calculate the value , instead of manually hard coding it.
