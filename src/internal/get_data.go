@@ -82,7 +82,7 @@ func getPinnedDirectories() []directory {
 
 // Get external media directories
 func getExternalMediaFolders() (disks []directory) {
-  // only get physical drives
+	// only get physical drives
 	parts, err := disk.Partitions(false)
 
 	if err != nil {
