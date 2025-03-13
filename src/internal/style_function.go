@@ -57,7 +57,8 @@ func sideBarBorderStyle(height int, focus focusPanelType) lipgloss.Style {
 }
 
 // Generate border style for process and can custom bottom border
-func procsssBarBoarder(height int, width int, borderBottom string, focusType focusPanelType) lipgloss.Style {
+// Change : Fix typo
+func procsssBarBorder(height int, width int, borderBottom string, focusType focusPanelType) lipgloss.Style {
 	border := generateBorder()
 	border.Top = Config.BorderTop + Config.BorderMiddleRight + " Processes " + Config.BorderMiddleLeft + strings.Repeat(Config.BorderTop, width)
 	border.Bottom = borderBottom

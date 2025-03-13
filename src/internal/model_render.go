@@ -210,14 +210,25 @@ func (m *model) processBarRender() string {
 	if !m.processBarModel.isValid(footerHeight) {
 		slog.Error("processBar in invalid state", "render", m.processBarModel.render,
 			"cursor", m.processBarModel.cursor, "footerHeight", footerHeight)
-		return ""
 	}
-	// save process in the array
+
+	// Change : Moved this up. Early return
+	if len(m.processBarModel.processList) == 0 {
+		processRender := "\n " + icon.Error + "  No processes running"
+		return m.wrapProcessBardBorder(processRender)
+	}
+
+	// save process in the array and sort the process by finished or not,
+	// completion percetage, or finish time
+	// Todo : This is very inefficient and can be improved.
+	// The whole design needs to be changed so that we dont need to recreate the slice
+	// and sort on each render. Idea : Maintain two slices - completed, ongoing
+	// Processes should be added / removed to the slice on correct time, and we dont
+	// need to redo slice formation and sorting on each render.
 	var processes []process
 	for _, p := range m.processBarModel.process {
 		processes = append(processes, p)
 	}
-
 	// sort by the process
 	sort.Slice(processes, func(i, j int) bool {
 		doneI := (processes[i].state == successful)
@@ -241,15 +252,25 @@ func (m *model) processBarRender() string {
 
 	// render
 	processRender := ""
-	renderTimes := 0
+	renderedHeight := 0
 
 	for i := m.processBarModel.render; i < len(processes); i++ {
-		if footerHeight < 14 && renderTimes == 2 {
+		// Cant render any more processes
+
+		// We allow rendering of a process if we have at least 2 lines left
+		// Then we dont add a separator newline
+		if footerHeight < renderedHeight+2 {
 			break
 		}
-		if renderTimes == 3 {
-			break
+		renderedHeight += 3
+		endSeparator := "\n\n"
+
+		// Cant add newline after last process
+		if footerHeight < renderedHeight {
+			endSeparator = "\n"
+			renderedHeight--
 		}
+
 		process := processes[i]
 		process.progress.Width = footerWidth(m.fullWidth) - 3
 		symbol := ""
@@ -271,19 +292,14 @@ func (m *model) processBarRender() string {
 		}
 
 		processRender += cursor + footerStyle.Render(truncateText(process.name, footerWidth(m.fullWidth)-7, "...")+" ") + symbol + "\n"
-		if renderTimes == 2 {
-			processRender += cursor + process.progress.ViewAs(float64(process.done)/float64(process.total)) + ""
-		} else if footerHeight < 14 && renderTimes == 1 {
-			processRender += cursor + process.progress.ViewAs(float64(process.done)/float64(process.total))
-		} else {
-			processRender += cursor + process.progress.ViewAs(float64(process.done)/float64(process.total)) + "\n\n"
-		}
-		renderTimes++
+
+		processRender += cursor + process.progress.ViewAs(float64(process.done)/float64(process.total)) + endSeparator
 	}
 
-	if len(processes) == 0 {
-		processRender += "\n " + icon.Error + "  No processes running"
-	}
+	return m.wrapProcessBardBorder(processRender)
+}
+
+func (m *model) wrapProcessBardBorder(processRender string) string {
 	courseNumber := 0
 	if len(m.processBarModel.processList) == 0 {
 		courseNumber = 0
@@ -291,7 +307,7 @@ func (m *model) processBarRender() string {
 		courseNumber = m.processBarModel.cursor + 1
 	}
 	bottomBorder := generateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(courseNumber), strconv.Itoa(len(m.processBarModel.processList))), footerWidth(m.fullWidth)-3)
-	processRender = procsssBarBoarder(bottomElementHeight(footerHeight), footerWidth(m.fullWidth), bottomBorder, m.focusPanel).Render(processRender)
+	processRender = procsssBarBorder(bottomElementHeight(footerHeight), footerWidth(m.fullWidth), bottomBorder, m.focusPanel).Render(processRender)
 
 	return processRender
 }

@@ -176,11 +176,11 @@ func (m *model) setHeightValues(height int) {
 	} else {
 		footerHeight = 12
 	}
-	// Todo : Make it grow even more for bigger screen sizes. 
+	// Todo : Make it grow even more for bigger screen sizes.
 	// Todo : Calculate the value , instead of manually hard coding it.
 
-	// Total Height = mainPanelHeight + 2 (border) + footerHeight (including borders and command line) 
-	m.mainPanelHeight = height - 
+	// Total Height = mainPanelHeight + 2 (border) + footerHeight (including borders and command line)
+	m.mainPanelHeight = height -
 		actualfooterHeight(footerHeight, m.commandLine.input.Focused()) - 2
 }
 

@@ -213,6 +213,10 @@ func (p *processBarModel) isValid(footerHeight int) bool {
 // Separate out this calculation for better documentation
 func cntRenderableProcess(footerHeight int) int {
 	// We can render one process in three lines
-	// footerHeight-2 for top and bottom border
-	return (footerHeight - 2) / 3
+	// And last process in two or three lines ( with/without a line separtor)
+	// footerHeight 5 -> Render 2
+	// footerHeight 6 -> Render 2
+	// footerHeight 7 -> Render 2
+	// footerHeight 8 -> Render 3
+	return (footerHeight+1) / 3
 }
