@@ -3,6 +3,7 @@ from pathlib import Path
 from core.base_test import GenericTestImpl
 from core.environment import Environment
 import core.keys as keys
+import core.test_constants as tconst
 
 TESTROOT = Path("cmd_ops")
 DIR1 = TESTROOT / "dir1"
@@ -17,6 +18,6 @@ class CommandTest(GenericTestImpl):
             test_root=TESTROOT,
             start_dir=TESTROOT,
             test_dirs=[TESTROOT],
-            key_inputs=[':', 'mkdir dir1', keys.KEY_ENTER, ':', 'touch file1', keys.KEY_ENTER],
+            key_inputs=[':', 'mkdir dir1', keys.KEY_ENTER, ':', tconst.FILE_CREATE_COMMAND + ' file1', keys.KEY_ENTER],
             validate_exists=[DIR1, FILE1]
         )
