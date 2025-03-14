@@ -44,7 +44,7 @@ func initialConfig(dir string) (toggleDotFileBool bool, toggleFooter bool, first
 
 	loadThemeFile()
 
-	icon.InitIcon(Config.Nerdfont)
+	icon.InitIcon(Config.Nerdfont, theme.DirectoryIconColor)
 
 	toggleDotFileData, err := os.ReadFile(variable.ToggleDotFile)
 	if err != nil {
