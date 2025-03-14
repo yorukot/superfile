@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"slices"
 	"sort"
 	"strconv"
@@ -22,17 +23,21 @@ import (
 
 // Check if the directory is external disk path
 func isExternalDiskPath(path string) bool {
-	dir := filepath.Dir(path)
-
-	// exclude timemachine
-	if strings.HasPrefix(dir, "/Volumes/.timemachine") {
+	// exclude timemachine on MacOS
+	if strings.HasPrefix(path, "/Volumes/.timemachine") {
 		return false
 	}
 
-	return strings.HasPrefix(dir, "/mnt") ||
-		strings.HasPrefix(dir, "/media") ||
-		strings.HasPrefix(dir, "/run/media") ||
-		strings.HasPrefix(dir, "/Volumes")
+	if runtime.GOOS == "windows" {
+		// we need to get C:, D: drive etc in the list
+		return true
+	}
+
+	// to filter out mounted partitions like /, /boot etc
+	return strings.HasPrefix(path, "/mnt") ||
+		strings.HasPrefix(path, "/media") ||
+		strings.HasPrefix(path, "/run/media") ||
+		strings.HasPrefix(path, "/Volumes")
 }
 
 func returnFocusType(focusPanel focusPanelType) filePanelFocusType {
