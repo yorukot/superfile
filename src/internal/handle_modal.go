@@ -190,14 +190,14 @@ func (m *model) quitHelpMenu() {
 // Command line
 func (m *model) openCommandLine() {
 	m.firstTextInput = true
-	footerHeight--
+	m.footerHeight--
 	m.commandLine.input = generateCommandLineInputBox()
 	m.commandLine.input.Width = m.fullWidth - 3
 	m.commandLine.input.Focus()
 }
 
 func (m *model) closeCommandLine() {
-	footerHeight++
+	m.footerHeight++
 	m.commandLine.input.SetValue("")
 	m.commandLine.input.Blur()
 }
@@ -233,5 +233,5 @@ func (m *model) enterCommandLine() {
 
 	m.commandLine.input.SetValue("")
 	m.commandLine.input.Blur()
-	footerHeight++
+	m.footerHeight++
 }

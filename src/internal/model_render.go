@@ -210,12 +210,27 @@ func (m *model) filePanelRender() string {
 	return filePanelRender
 }
 func (m *model) processBarRender() string {
-	// save process in the array
+	if !m.processBarModel.isValid(m.footerHeight) {
+		slog.Error("processBar in invalid state", "render", m.processBarModel.render,
+			"cursor", m.processBarModel.cursor, "footerHeight", m.footerHeight)
+	}
+
+	if len(m.processBarModel.processList) == 0 {
+		processRender := "\n " + icon.Error + "  No processes running"
+		return m.wrapProcessBardBorder(processRender)
+	}
+
+	// save process in the array and sort the process by finished or not,
+	// completion percetage, or finish time
+	// Todo : This is very inefficient and can be improved.
+	// The whole design needs to be changed so that we dont need to recreate the slice
+	// and sort on each render. Idea : Maintain two slices - completed, ongoing
+	// Processes should be added / removed to the slice on correct time, and we dont
+	// need to redo slice formation and sorting on each render.
 	var processes []process
 	for _, p := range m.processBarModel.process {
 		processes = append(processes, p)
 	}
-
 	// sort by the process
 	sort.Slice(processes, func(i, j int) bool {
 		doneI := (processes[i].state == successful)
@@ -239,15 +254,31 @@ func (m *model) processBarRender() string {
 
 	// render
 	processRender := ""
-	renderTimes := 0
+	renderedHeight := 0
 
 	for i := m.processBarModel.render; i < len(processes); i++ {
-		if footerHeight < 14 && renderTimes == 2 {
+		// Cant render any more processes
+
+		// We allow rendering of a process if we have at least 2 lines left
+		// Then we dont add a separator newline
+		if m.footerHeight < renderedHeight+2 {
 			break
 		}
-		if renderTimes == 3 {
-			break
+		renderedHeight += 3
+		endSeparator := "\n\n"
+
+		// Last process, but can render full in three lines
+		// Although there is no next process, so dont add extra newline
+		if m.footerHeight == renderedHeight {
+			endSeparator = "\n"
 		}
+
+		// Cant add newline after last process. Only have two lines
+		if m.footerHeight < renderedHeight {
+			endSeparator = ""
+			renderedHeight--
+		}
+
 		process := processes[i]
 		process.progress.Width = footerWidth(m.fullWidth) - 3
 		symbol := ""
@@ -269,19 +300,14 @@ func (m *model) processBarRender() string {
 		}
 
 		processRender += cursor + footerStyle.Render(truncateText(process.name, footerWidth(m.fullWidth)-7, "...")+" ") + symbol + "\n"
-		if renderTimes == 2 {
-			processRender += cursor + process.progress.ViewAs(float64(process.done)/float64(process.total)) + ""
-		} else if footerHeight < 14 && renderTimes == 1 {
-			processRender += cursor + process.progress.ViewAs(float64(process.done)/float64(process.total))
-		} else {
-			processRender += cursor + process.progress.ViewAs(float64(process.done)/float64(process.total)) + "\n\n"
-		}
-		renderTimes++
+
+		processRender += cursor + process.progress.ViewAs(float64(process.done)/float64(process.total)) + endSeparator
 	}
 
-	if len(processes) == 0 {
-		processRender += "\n " + icon.Error + "  No processes running"
-	}
+	return m.wrapProcessBardBorder(processRender)
+}
+
+func (m *model) wrapProcessBardBorder(processRender string) string {
 	courseNumber := 0
 	if len(m.processBarModel.processList) == 0 {
 		courseNumber = 0
@@ -289,7 +315,7 @@ func (m *model) processBarRender() string {
 		courseNumber = m.processBarModel.cursor + 1
 	}
 	bottomBorder := generateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(courseNumber), strconv.Itoa(len(m.processBarModel.processList))), footerWidth(m.fullWidth)-3)
-	processRender = procsssBarBoarder(bottomElementHeight(footerHeight), footerWidth(m.fullWidth), bottomBorder, m.focusPanel).Render(processRender)
+	processRender = procsssBarBorder(m.footerHeight, footerWidth(m.fullWidth), bottomBorder, m.focusPanel).Render(processRender)
 
 	return processRender
 }
@@ -306,7 +332,11 @@ func (m *model) metadataRender() string {
 		}()
 	}
 	maxKeyLength := 0
+	// Todo : The whole intention of this is to get the comparisonFields come before
+	// other fields. Sorting like this is a bad way of achieving that. This can be improved
 	sort.Slice(m.fileMetaData.metaData, func(i, j int) bool {
+		// Initialising a new slice in each check by sort functions is too ineffinceint.
+		// Todo : Fix it
 		comparisonFields := []string{"FileName", "FileSize", "FolderName", "FolderSize", "FileModifyDate", "FileAccessDate"}
 
 		for _, field := range comparisonFields {
@@ -326,6 +356,9 @@ func (m *model) metadataRender() string {
 		}
 	}
 
+	// Todo : Too much calculations that are not in a fuctions, are not
+	// unit tested, and have no proper explanation. This makes it
+	// very hard to maintain and add any changes
 	sprintfLength := maxKeyLength + 1
 	valueLength := footerWidth(m.fullWidth) - maxKeyLength - 2
 	if valueLength < footerWidth(m.fullWidth)/2 {
@@ -333,7 +366,9 @@ func (m *model) metadataRender() string {
 		sprintfLength = valueLength
 	}
 
-	for i := m.fileMetaData.renderIndex; i < bottomElementHeight(footerHeight)+m.fileMetaData.renderIndex && i < len(m.fileMetaData.metaData); i++ {
+	imax := min(m.footerHeight+m.fileMetaData.renderIndex, len(m.fileMetaData.metaData))
+	for i := m.fileMetaData.renderIndex; i < imax; i++ {
+		// Newline separator before all entries except first
 		if i != m.fileMetaData.renderIndex {
 			metaDataBar += "\n"
 		}
@@ -346,7 +381,7 @@ func (m *model) metadataRender() string {
 
 	}
 	bottomBorder := generateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(m.fileMetaData.renderIndex+1), strconv.Itoa(len(m.fileMetaData.metaData))), footerWidth(m.fullWidth)-3)
-	metaDataBar = metadataBoarder(bottomElementHeight(footerHeight), footerWidth(m.fullWidth), bottomBorder, m.focusPanel).Render(metaDataBar)
+	metaDataBar = metadataBorder(m.footerHeight, footerWidth(m.fullWidth), bottomBorder, m.focusPanel).Render(metaDataBar)
 
 	return metaDataBar
 }
@@ -358,16 +393,21 @@ func (m *model) clipboardRender() string {
 	if len(m.copyItems.items) == 0 {
 		clipboardRender += "\n " + icon.Error + "  No content in clipboard"
 	} else {
-		for i := 0; i < len(m.copyItems.items) && i < bottomElementHeight(footerHeight); i++ {
-			if i == bottomElementHeight(footerHeight)-1 {
-				clipboardRender += strconv.Itoa(len(m.copyItems.items)-i+1) + " item left...."
+		for i := 0; i < len(m.copyItems.items) && i < m.footerHeight; i++ {
+			// Newline separator before all entries except first
+			if i != 0 {
+				clipboardRender += "\n"
+			}
+			if i == m.footerHeight-1 && i != len(m.copyItems.items)-1 {
+				// Last Entry we can render, but there are more that one left
+				clipboardRender += strconv.Itoa(len(m.copyItems.items)-i) + " item left...."
 			} else {
 				fileInfo, err := os.Stat(m.copyItems.items[i])
 				if err != nil {
 					slog.Error("Clipboard render function get item state ", "error", err)
 				}
 				if !os.IsNotExist(err) {
-					clipboardRender += clipboardPrettierName(m.copyItems.items[i], footerWidth(m.fullWidth)-3, fileInfo.IsDir(), false) + "\n"
+					clipboardRender += clipboardPrettierName(m.copyItems.items[i], footerWidth(m.fullWidth)-3, fileInfo.IsDir(), false)
 				}
 			}
 		}
@@ -379,7 +419,7 @@ func (m *model) clipboardRender() string {
 	} else {
 		bottomWidth = footerWidth(m.fullWidth)
 	}
-	clipboardRender = clipboardBoarder(bottomElementHeight(footerHeight), bottomWidth, Config.BorderBottom).Render(clipboardRender)
+	clipboardRender = clipboardBorder(m.footerHeight, bottomWidth, Config.BorderBottom).Render(clipboardRender)
 
 	return clipboardRender
 }

@@ -57,7 +57,7 @@ func sideBarBorderStyle(height int, focus focusPanelType) lipgloss.Style {
 }
 
 // Generate border style for process and can custom bottom border
-func procsssBarBoarder(height int, width int, borderBottom string, focusType focusPanelType) lipgloss.Style {
+func procsssBarBorder(height int, width int, borderBottom string, focusType focusPanelType) lipgloss.Style {
 	border := generateBorder()
 	border.Top = Config.BorderTop + Config.BorderMiddleRight + " Processes " + Config.BorderMiddleLeft + strings.Repeat(Config.BorderTop, width)
 	border.Bottom = borderBottom
@@ -78,7 +78,7 @@ func procsssBarBoarder(height int, width int, borderBottom string, focusType foc
 }
 
 // Generate border style for metadata and can custom bottom border
-func metadataBoarder(height int, width int, borderBottom string, focusType focusPanelType) lipgloss.Style {
+func metadataBorder(height int, width int, borderBottom string, focusType focusPanelType) lipgloss.Style {
 	border := generateBorder()
 	border.Top = Config.BorderTop + Config.BorderMiddleRight + " Metadata " + Config.BorderMiddleLeft + strings.Repeat(Config.BorderTop, width)
 	border.Bottom = borderBottom
@@ -99,7 +99,7 @@ func metadataBoarder(height int, width int, borderBottom string, focusType focus
 }
 
 // Generate border style for clipboard and can custom bottom border
-func clipboardBoarder(height int, width int, borderBottom string) lipgloss.Style {
+func clipboardBorder(height int, width int, borderBottom string) lipgloss.Style {
 	border := generateBorder()
 	border.Top = Config.BorderTop + Config.BorderMiddleRight + " Clipboard " + Config.BorderMiddleLeft + strings.Repeat(Config.BorderTop, width)
 	border.Bottom = borderBottom

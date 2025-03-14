@@ -182,10 +182,6 @@ func panelElementHeight(mainPanelHeight int) int {
 	return mainPanelHeight - 3
 }
 
-func bottomElementHeight(bottomElementHeight int) int {
-	return bottomElementHeight - 5
-}
-
 // Todo : replace usage of this with slices.contains
 func arrayContains(s []string, str string) bool {
 	for _, v := range s {

@@ -1,5 +1,6 @@
 package internal
 
+// Todo , merge this and predefined variables file
 // These are effectively consts
 var pinnedDividerDir = directory{
 	name:     "",
