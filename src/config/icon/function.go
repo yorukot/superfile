@@ -39,7 +39,7 @@ func InitIcon(nerdfont bool, directoryIconColor string) {
 		directoryIconColor = "NONE" // Dark yellowish
 	}
 	Folders["folder"] = IconStyle{
-		Icon:  "",
+		Icon:  "\uf07b", // Printable Rune : ""
 		Color: directoryIconColor,
 	}
 }
