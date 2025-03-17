@@ -17,7 +17,7 @@ require (
 	github.com/rkoesters/xdg v0.0.1
 	github.com/shirou/gopsutil/v4 v4.25.2
 	github.com/stretchr/testify v1.10.0
-	github.com/urfave/cli/v2 v2.27.5
+	github.com/urfave/cli/v2 v2.27.6
 	golang.org/x/mod v0.23.0
 	golift.io/xtractr v0.2.2
 )
