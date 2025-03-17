@@ -93,7 +93,7 @@ func getExternalMediaFolders() (disks []directory) {
 	for _, disk := range parts {
 		if isExternalDiskPath(disk.Mountpoint) {
 			disks = append(disks, directory{
-				name:     filepath.Base(disk.Mountpoint),
+				name:     disk.Device,
 				location: disk.Mountpoint,
 			})
 		}
