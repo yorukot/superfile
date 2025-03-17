@@ -141,6 +141,10 @@ export default defineConfig({
             {
               label: 'File structure',
               link: '/contribute/file-struct'
+            },
+            {
+              label: 'Implementation Info',
+              link: '/contribute/implementation-info'
             }
           ],
         },

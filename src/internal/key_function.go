@@ -23,7 +23,7 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) tea.Cmd {
 		if m.focusPanel == sidebarFocus {
 			m.sidebarModel.listUp(m.mainPanelHeight)
 		} else if m.focusPanel == processBarFocus {
-			m.processBarModel.listUp()
+			m.processBarModel.listUp(m.footerHeight)
 		} else if m.focusPanel == metadataFocus {
 			m.fileMetaData.listUp()
 		} else if m.focusPanel == nonePanelFocus {
@@ -39,7 +39,7 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) tea.Cmd {
 		if m.focusPanel == sidebarFocus {
 			m.sidebarModel.listDown(m.mainPanelHeight)
 		} else if m.focusPanel == processBarFocus {
-			m.processBarModel.listDown()
+			m.processBarModel.listDown(m.footerHeight)
 		} else if m.focusPanel == metadataFocus {
 			m.fileMetaData.listDown()
 		} else if m.focusPanel == nonePanelFocus {
@@ -51,10 +51,10 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) tea.Cmd {
 		}
 
 	case containsKey(msg, hotkeys.PageUp):
-		m.controlFilePanelPgUp()
+		m.fileModel.filePanels[m.filePanelFocusIndex].pgUp(m.mainPanelHeight)
 
 	case containsKey(msg, hotkeys.PageDown):
-		m.controlFilePanelPgDown()
+		m.fileModel.filePanels[m.filePanelFocusIndex].pgDown(m.mainPanelHeight)
 
 	case containsKey(msg, hotkeys.ChangePanelMode):
 		m.changeFilePanelMode()
@@ -157,9 +157,9 @@ func (m *model) normalAndBrowserModeKey(msg string) {
 		case containsKey(msg, hotkeys.Confirm):
 			m.singleItemSelect()
 		case containsKey(msg, hotkeys.FilePanelSelectModeItemsSelectUp):
-			m.itemSelectUp(false)
+			m.fileModel.filePanels[m.filePanelFocusIndex].itemSelectUp(m.mainPanelHeight)
 		case containsKey(msg, hotkeys.FilePanelSelectModeItemsSelectDown):
-			m.itemSelectDown(false)
+			m.fileModel.filePanels[m.filePanelFocusIndex].itemSelectDown(m.mainPanelHeight)
 		case containsKey(msg, hotkeys.DeleteItems):
 			go func() {
 				m.deleteItemWarn()

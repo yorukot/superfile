@@ -1,8 +1,11 @@
 package internal
 
-import tea "github.com/charmbracelet/bubbletea"
+import (
+	"log/slog"
+)
 
-func wheelMainAction(msg string, m *model, cmd tea.Cmd) tea.Cmd {
+func wheelMainAction(msg string, m *model) {
+	slog.Debug("wheelMainAction called", "msg", msg, "focusPanel", m.focusPanel)
 	var action func()
 	switch msg {
 
@@ -10,7 +13,7 @@ func wheelMainAction(msg string, m *model, cmd tea.Cmd) tea.Cmd {
 		if m.focusPanel == sidebarFocus {
 			action = func() { m.sidebarModel.listUp(m.mainPanelHeight) }
 		} else if m.focusPanel == processBarFocus {
-			action = func() { m.processBarModel.listUp() }
+			action = func() { m.processBarModel.listUp(m.footerHeight) }
 		} else if m.focusPanel == metadataFocus {
 			action = func() { m.fileMetaData.listUp() }
 		} else if m.focusPanel == nonePanelFocus {
@@ -21,7 +24,7 @@ func wheelMainAction(msg string, m *model, cmd tea.Cmd) tea.Cmd {
 		if m.focusPanel == sidebarFocus {
 			action = func() { m.sidebarModel.listDown(m.mainPanelHeight) }
 		} else if m.focusPanel == processBarFocus {
-			action = func() { m.processBarModel.listDown() }
+			action = func() { m.processBarModel.listDown(m.footerHeight) }
 		} else if m.focusPanel == metadataFocus {
 			action = func() { m.fileMetaData.listDown() }
 		} else if m.focusPanel == nonePanelFocus {
@@ -39,6 +42,4 @@ func wheelMainAction(msg string, m *model, cmd tea.Cmd) tea.Cmd {
 			m.returnMetaData()
 		}()
 	}
-
-	return cmd
 }
