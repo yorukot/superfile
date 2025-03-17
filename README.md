@@ -56,6 +56,7 @@ Visit warp.dev to learn more
 - [Plugins](#plugins)
 - [Themes](#themes)
 - [Hotkeys](#hotkeys)
+- [Notes](#notes)
 - [Contributing](#contributing)
 - [Troubleshooting](#troubleshooting)
 - [Thanks](#thanks)
@@ -202,6 +203,8 @@ powershell -ExecutionPolicy Bypass -Command "Invoke-Expression ((New-Object Syst
 ## Contributing
 
 If you want to contribute please follow the [contribution guide](./CONTRIBUTING.md)
+
+[**Click me to see changelog**](https://superfile.netlify.app/changelog)
 
 ## Thanks
 
