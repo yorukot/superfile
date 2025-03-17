@@ -22,7 +22,7 @@ Write-Host -ForegroundColor Red         "                    `$`$/              
 Write-Host ""
 
 $package = "superfile"
-$version = "1.2.0.0"
+$version = "1.2.1"
 
 $installInstructions = @'
 This installer is only available for Windows.
