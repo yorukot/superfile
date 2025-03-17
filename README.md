@@ -56,6 +56,7 @@ Visit warp.dev to learn more
 - [Plugins](#plugins)
 - [Themes](#themes)
 - [Hotkeys](#hotkeys)
+- [Notes](#notes)
 - [Contributing](#contributing)
 - [Troubleshooting](#troubleshooting)
 - [Thanks](#thanks)
@@ -162,6 +163,12 @@ After you install superfile, you can go [here](https://superfile.netlify.app/get
 
 [**Click me to see the hotkey wiki**](https://superfile.netlify.app/configure/custom-hotkeys/)
 
+## Notes
+
+We have an auto update functionality, that fetches superfile's latest released version from github (if last timestamp of last version check was less than 24 hours) and prints a prompt to user, if there is a newer version available.
+
+You can turn this off, by setting `auto_check_update` to false in superfile config. [**Click me to see the config wiki**](https://superfile.netlify.app/configure/superfile-config/) 
+
 ## Troubleshooting
 
 [**Click me to see common problem fix**](https://superfile.netlify.app/troubleshooting/)
@@ -196,6 +203,8 @@ powershell -ExecutionPolicy Bypass -Command "Invoke-Expression ((New-Object Syst
 ## Contributing
 
 If you want to contribute please follow the [contribution guide](./CONTRIBUTING.md)
+
+[**Click me to see changelog**](https://superfile.netlify.app/changelog)
 
 ## Thanks
 
