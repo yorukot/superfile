@@ -1,8 +1,6 @@
 module github.com/yorukot/superfile
 
-go 1.23.0
-
-toolchain go1.23.7
+go 1.24.1
 
 require (
 	github.com/adrg/xdg v0.5.3
