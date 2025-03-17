@@ -219,6 +219,10 @@ func generateBorder() lipgloss.Border {
 
 // Generate config error style
 func loadConfigError(value string) string {
+	// Style rendering each time is so fucking dumb
+	// Do you see the size of lipgloss.Style() struct ? 
+	// 552 bytes each fucking time, in each calling as parameter using a return, the fuck.
+	// Do you see the size of render() call ?
 	return lipgloss.NewStyle().Foreground(lipgloss.Color("#FF5555")).Render("■ ERROR: ") + "Config file \"" + lipgloss.NewStyle().Foreground(lipgloss.Color("#00D9FF")).Render(value) + "\" invalidation"
 }
 
