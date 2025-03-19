@@ -85,16 +85,23 @@ func getExternalMediaFolders() (disks []directory) {
 	// only get physical drives
 	parts, err := disk.Partitions(false)
 
+	slog.Debug("disk.Partitions() called", "number of parts", len(parts))
+
 	if err != nil {
 		slog.Error("Error while getting external media: ", "error", err)
 		return disks
 	}
 
 	for _, disk := range parts {
-		if isExternalDiskPath(disk.Mountpoint) {
+		// Not removing this for now, as it is helpful if we need to debug
+		// any user issues related disk listing in sidebar.
+		slog.Debug("Returned disk by disk.Partition()", "device", disk.Device,
+			"mountpoint", disk.Mountpoint, "fstype", disk.Fstype)
+		if shouldListDisk(disk.Mountpoint) {
+
 			disks = append(disks, directory{
-				name:     disk.Device,
-				location: disk.Mountpoint,
+				name:     filepath.Base(disk.Mountpoint),
+				location: diskLocation(disk.Mountpoint),
 			})
 		}
 	}
