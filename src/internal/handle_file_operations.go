@@ -571,6 +571,11 @@ func (m *model) compressFile() {
 func (m *model) openFileWithEditor() tea.Cmd {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 
+	// Check if panel is empty
+	if len(panel.element) == 0 {
+		return nil
+	}
+
 	editor := Config.Editor
 	if editor == "" {
 		editor = os.Getenv("EDITOR")
