@@ -705,7 +705,7 @@ func (m *model) filePreviewPanelRender() string {
 			return box.Render("\n --- Preview panel is closed ---")
 		}
 
-		if ! Config.ShowImagePreview {
+		if !Config.ShowImagePreview {
 			return box.Render("\n --- Image preview is disabled ---")
 		}
 
