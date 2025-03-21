@@ -701,8 +701,14 @@ func (m *model) filePreviewPanelRender() string {
 
 	if isImageFile(itemPath) {
 		if !m.fileModel.filePreview.open {
+			// Todo : These variables can be pre rendered for efficiency and less duplicacy
 			return box.Render("\n --- Preview panel is closed ---")
 		}
+
+		if ! Config.ShowImagePreview {
+			return box.Render("\n --- Image preview is disabled ---")
+		}
+
 		ansiRender, err := filepreview.ImagePreview(itemPath, m.fileModel.filePreview.width, previewLine, theme.FilePanelBG)
 		if err == image.ErrFormat {
 			return box.Render("\n --- " + icon.Error + " Unsupported image formats ---")
