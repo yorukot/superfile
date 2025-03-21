@@ -1,12 +1,14 @@
 package internal
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 )
 
 // Cancel typing modal e.g. create file or directory
@@ -212,14 +214,22 @@ func (m *model) enterCommandLine() {
 		}
 	}
 
+	var cmdLine string = m.commandLine.input.Value()
+	var spfCommand, cutSpf = strings.CutPrefix(cmdLine, "spf ")
+
+	if cutSpf {
+		// let the terminal handle translating `~`, `.` and so on
+		cmdLine = "echo " + spfCommand
+	}
+
 	var cmd *exec.Cmd
 	switch runtime.GOOS {
 	case "windows":
 		// On Windows, we use PowerShell with -Command flag for single command execution
-		cmd = exec.Command("powershell.exe", "-Command", m.commandLine.input.Value())
+		cmd = exec.Command("powershell.exe", "-Command", cmdLine)
 	default:
 		// On Unix-like systems, use bash/sh
-		cmd = exec.Command("/bin/sh", "-c", m.commandLine.input.Value())
+		cmd = exec.Command("/bin/sh", "-c", cmdLine)
 	}
 
 	cmd.Dir = focusPanelDir // switch to the focused panel directory
@@ -228,10 +238,43 @@ func (m *model) enterCommandLine() {
 
 	if err != nil {
 		slog.Error("Command execution failed", "error", err, "output", string(output))
+		fmt.Print("command failed ", output)
+		time.Sleep(1 * time.Second)
 		return
 	}
 
-	m.commandLine.input.SetValue("")
-	m.commandLine.input.Blur()
-	m.footerHeight++
+	if cutSpf {
+
+		outputPath, err := filepath.Abs(strings.TrimSpace(string(output)))
+		if err != nil {
+			slog.Error("FilePath failed (can't find absolute)", "error", err, "output", outputPath)
+			fmt.Print("failed to determin directory")
+			time.Sleep(1 * time.Second)
+			return
+		}
+
+		stat, err := os.Stat(outputPath + "/")
+		if os.IsNotExist(err) {
+			fmt.Print("This path does not exist")
+			time.Sleep(1 * time.Second)
+			return
+
+		} else if err != nil {
+			slog.Error("FilePath failed (can't determin stats)", "error", err, "output", outputPath)
+			fmt.Print("failed to determin directory")
+			time.Sleep(1 * time.Second)
+			return
+
+		}
+
+		if !stat.IsDir() {
+			outputPath = filepath.Dir(outputPath)
+		}
+
+		newFilePanelDir = outputPath
+		m.createNewFilePanel()
+
+	}
+
+	m.closeCommandLine()
 }
