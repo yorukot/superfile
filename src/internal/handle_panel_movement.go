@@ -135,6 +135,8 @@ func (m *model) sidebarSelectDirectory() {
 	}
 
 	panel.location = m.sidebarModel.directories[m.sidebarModel.cursor].location
+	newFilePanelDir = panel.location
+
 	directoryRecord, hasRecord := panel.directoryRecord[panel.location]
 	if hasRecord {
 		panel.cursor = directoryRecord.directoryCursor
