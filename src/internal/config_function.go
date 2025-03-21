@@ -89,6 +89,7 @@ func initialConfig(dir string) (toggleDotFileBool bool, toggleFooter bool, first
 
 	if err != nil {
 		firstFilePanelDir = variable.HomeDir
+		newFilePanelDir = firstFilePanelDir
 	}
 
 	slog.Debug("Runtime information", "runtime.GOOS", runtime.GOOS,

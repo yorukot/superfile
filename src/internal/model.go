@@ -33,9 +33,14 @@ var et *exiftool.Exiftool
 var channel = make(chan channelMessage, 1000)
 var progressBarLastRenderTime time.Time = time.Now()
 
+var newFilePanelDir string = variable.HomeDir
+
 // Initialize and return model with default configs
 func InitialModel(dir string, firstUseCheck, hasTrashCheck bool) model {
+
 	toggleDotFileBool, toggleFooter, firstFilePanelDir := initialConfig(dir)
+	newFilePanelDir = firstFilePanelDir
+
 	firstUse = firstUseCheck
 	hasTrash = hasTrashCheck
 	batCmd = checkBatCmd()

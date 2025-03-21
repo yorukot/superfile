@@ -31,6 +31,7 @@ func (m *model) parentDirectory() {
 	fullPath := panel.location
 	parentDir := filepath.Dir(fullPath)
 	panel.location = parentDir
+	newFilePanelDir = panel.location
 	directoryRecord, hasRecord := panel.directoryRecord[panel.location]
 	if hasRecord {
 		panel.cursor = directoryRecord.directoryCursor
@@ -55,6 +56,7 @@ func (m *model) enterPanel() {
 			directoryRender: panel.render,
 		}
 		panel.location = panel.element[panel.cursor].location
+		newFilePanelDir = panel.location
 		directoryRecord, hasRecord := panel.directoryRecord[panel.location]
 		if hasRecord {
 			panel.cursor = directoryRecord.directoryCursor
