@@ -60,7 +60,7 @@ func (m *model) createNewFilePanel() {
 	}
 
 	m.fileModel.filePanels = append(m.fileModel.filePanels, filePanel{
-		location:        variable.HomeDir,
+		location:        newFilePanelDir,
 		sortOptions:     m.fileModel.filePanels[m.filePanelFocusIndex].sortOptions,
 		panelMode:       browserMode,
 		focusType:       secondFocus,
@@ -153,6 +153,8 @@ func (m *model) nextFilePanel() {
 	}
 
 	m.fileModel.filePanels[m.filePanelFocusIndex].focusType = returnFocusType(m.focusPanel)
+	newFilePanelDir = m.fileModel.filePanels[m.filePanelFocusIndex].location
+
 }
 
 // Focus on previous file panel
@@ -165,6 +167,7 @@ func (m *model) previousFilePanel() {
 	}
 
 	m.fileModel.filePanels[m.filePanelFocusIndex].focusType = returnFocusType(m.focusPanel)
+	newFilePanelDir = m.fileModel.filePanels[m.filePanelFocusIndex].location
 }
 
 // Focus on sidebar
