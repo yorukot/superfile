@@ -337,7 +337,7 @@ func (m *model) metadataRender() string {
 	sort.Slice(m.fileMetaData.metaData, func(i, j int) bool {
 		// Initialising a new slice in each check by sort functions is too ineffinceint.
 		// Todo : Fix it
-		comparisonFields := []string{"FileName", "FileSize", "FolderName", "FolderSize", "FileModifyDate", "FileAccessDate"}
+		comparisonFields := []string{"Name", "Size", "Date Modified", "Date Accessed"}
 
 		for _, field := range comparisonFields {
 			if m.fileMetaData.metaData[i][0] == field {
