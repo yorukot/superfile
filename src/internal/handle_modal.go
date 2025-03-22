@@ -238,7 +238,7 @@ func (m *model) enterCommandLine() {
 
 	if err != nil {
 		slog.Error("Command execution failed", "error", err, "output", string(output))
-		fmt.Print("command failed ", output)
+		fmt.Print("command failed (see superfile.log)")
 		time.Sleep(1 * time.Second)
 		return
 	}
