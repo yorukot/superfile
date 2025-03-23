@@ -59,11 +59,23 @@ func shouldListDisk(mountPoint string) bool {
 		return true
 	}
 
+	// Todo : make a configurable field in config.yaml
+	// excluded_disk_mounts = ["/Volumes/.timemachine"]
+	// Mountpoints that are in subdirectory of disk_mounts
+	// but still are to be excluded in disk section of sidebar
+	if strings.HasPrefix(mountPoint, "/Volumes/.timemachine") {
+		return false
+	}
+
 	// We avoid listing all mounted partitions (Otherwise listed disk could get huge)
 	// but only a few partitions that usually corresponds to external physical devices
 	// For example : mounts like /boot, /var/ will get skipped
 	// This can be inaccurate based on your system setup if you mount any external devices
 	// on other directories, or if you have some extra mounts on these directories
+	// Todo : make a configurable field in config.yaml
+	// disk_mounts = ["/mnt", "/media", "/run/media", "/Volumes"]
+	// Only block devicies that are mounted on these or any subdirectory of these Mountpoints
+	// Will be shown in disk sidebar
 	return strings.HasPrefix(mountPoint, "/mnt") ||
 		strings.HasPrefix(mountPoint, "/media") ||
 		strings.HasPrefix(mountPoint, "/run/media") ||
@@ -71,7 +83,7 @@ func shouldListDisk(mountPoint string) bool {
 }
 
 func diskLocation(mountPoint string) string {
-	// In windows if you are in "C:", "cd C:" will not cd to root of C: drive
+	// In windows if you are in "C:\some\path", "cd C:" will not cd to root of C: drive
 	// but "cd C:\" will
 	if runtime.GOOS == "windows" {
 		return filepath.Join(mountPoint, "\\")

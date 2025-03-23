@@ -95,6 +95,10 @@ func getExternalMediaFolders() (disks []directory) {
 	for _, disk := range parts {
 		// Not removing this for now, as it is helpful if we need to debug
 		// any user issues related disk listing in sidebar.
+		// Todo : We need to evaluate if more debug logs are a performance problem
+		// even when user had set debug=false in config. We dont write those to log file
+		// But we do make a functions call, and pass around some strings. So it might/might not be
+		// a problem. It could be a problem in a hot path though.
 		slog.Debug("Returned disk by disk.Partition()", "device", disk.Device,
 			"mountpoint", disk.Mountpoint, "fstype", disk.Fstype)
 		if shouldListDisk(disk.Mountpoint) {
