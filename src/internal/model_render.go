@@ -511,6 +511,12 @@ func (m *model) warnModalRender() string {
 	return modalBorderStyle(modalHeight, modalWidth).Render(title + "\n\n" + content + "\n\n" + tip)
 }
 
+func (m *model) promptModalRender() string {
+
+	return m.promptModal.Render(m)
+
+}
+
 func (m *model) helpMenuRender() string {
 	helpMenuContent := ""
 	maxKeyLength := 0

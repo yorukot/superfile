@@ -2,6 +2,8 @@
 # Global hotkeys (cannot conflict with other hotkeys)
 confirm = ['enter', 'right', 'l']
 quit = ['q', 'esc']
+prompt = ['>', '']
+
 # movement
 list_up = ['up', 'k']
 list_down = ['down', 'j']

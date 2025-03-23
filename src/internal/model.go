@@ -226,6 +226,10 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 
 	if m.typingModal.open {
 		m.typingModalOpenKey(msg.String())
+
+	} else if m.promptModal.open {
+		m.promptModalOpenKey(msg.String())
+
 	} else if m.warnModal.open {
 		m.warnModalOpenKey(msg.String())
 		// If renaming a object
@@ -286,6 +290,8 @@ func (m *model) updateFilePanelsState(msg tea.Msg, cmd *tea.Cmd) {
 		m.commandLine.input, *cmd = m.commandLine.input.Update(msg)
 	} else if m.typingModal.open {
 		m.typingModal.textInput, *cmd = m.typingModal.textInput.Update(msg)
+	} else if m.promptModal.open {
+		m.promptModal.textInput, *cmd = m.promptModal.textInput.Update(msg)
 	}
 
 	if focusPanel.cursor < 0 {
@@ -382,6 +388,13 @@ func (m model) View() string {
 	// check if need pop up modal
 	if m.helpMenu.open {
 		helpMenu := m.helpMenuRender()
+		overlayX := m.fullWidth/2 - m.helpMenu.width/2
+		overlayY := m.fullHeight/2 - m.helpMenu.height/2
+		return stringfunction.PlaceOverlay(overlayX, overlayY, helpMenu, finalRender)
+	}
+
+	if m.promptModal.open {
+		helpMenu := m.promptModalRender()
 		overlayX := m.fullWidth/2 - m.helpMenu.width/2
 		overlayY := m.fullHeight/2 - m.helpMenu.height/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, helpMenu, finalRender)

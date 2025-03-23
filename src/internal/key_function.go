@@ -1,6 +1,8 @@
 package internal
 
-import tea "github.com/charmbracelet/bubbletea"
+import (
+	tea "github.com/charmbracelet/bubbletea"
+)
 
 func containsKey(v string, a []string) string {
 	for _, i := range a {
@@ -112,6 +114,9 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) tea.Cmd {
 			m.compressFile()
 		}()
 
+	case containsKey(msg, hotkeys.OpenPrompt):
+		m.openPrompt()
+
 	case containsKey(msg, hotkeys.OpenHelpMenu):
 		m.openHelpMenu()
 
@@ -206,6 +211,24 @@ func (m *model) typingModalOpenKey(msg string) {
 	case containsKey(msg, hotkeys.ConfirmTyping):
 		m.createItem()
 	}
+
+}
+
+func (m *model) promptModalOpenKey(msg string) {
+	switch msg {
+	case containsKey(msg, hotkeys.ConfirmTyping):
+		if m.promptModal.Confirm(m) {
+			m.promptModal.Close(m)
+		}
+
+	case containsKey(msg, hotkeys.CancelTyping):
+		m.promptModal.Close(m)
+
+	default:
+		m.promptModal.textInput.Focus()
+
+	}
+
 }
 
 func (m *model) warnModalOpenKey(msg string) {

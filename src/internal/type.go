@@ -81,6 +81,7 @@ type model struct {
 	typingModal          typingModal
 	warnModal            warnModal
 	helpMenu             helpMenuModal
+	promptModal          promptModal
 	fileMetaData         fileMetadata
 	commandLine          commandLineModal
 	confirmToQuit        bool
@@ -114,6 +115,14 @@ type helpMenuModal struct {
 	renderIndex int
 	cursor      int
 	data        []helpMenuModalData
+}
+
+type promptModal struct {
+	headline  string
+	open      bool
+	cmd       PromptCommand
+	textInput textinput.Model
+	errormsg  string
 }
 
 type helpMenuModalData struct {

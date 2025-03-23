@@ -60,6 +60,10 @@ func defaultModelConfig(toggleDotFileBool bool, toggleFooter bool, firstFilePane
 			data:        getHelpMenuData(),
 			open:        false,
 		},
+		promptModal: promptModal{
+			headline: "SuperFile - Prompt",
+			open:     false,
+		},
 		toggleDotFile: toggleDotFileBool,
 		toggleFooter:  toggleFooter,
 	}

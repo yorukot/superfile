@@ -181,6 +181,11 @@ func (m *model) helpMenuListDown() {
 	}
 }
 
+// Toggle Prompt
+func (m *model) openPrompt() {
+	m.promptModal.Open(m, PROMPT_COMMAND_COMMAND)
+}
+
 // Toggle help menu
 func (m *model) openHelpMenu() {
 	if m.helpMenu.open {
@@ -240,7 +245,5 @@ func (m *model) enterCommandLine() {
 		return
 	}
 
-	m.commandLine.input.SetValue("")
-	m.commandLine.input.Blur()
-	m.footerHeight++
+	m.closeCommandLine()
 }
