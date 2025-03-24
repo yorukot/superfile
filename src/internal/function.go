@@ -82,6 +82,20 @@ func shouldListDisk(mountPoint string) bool {
 		strings.HasPrefix(mountPoint, "/Volumes")
 }
 
+func diskName(mountPoint string) string {
+	// In windows we dont want to use filepath.Base as it returns "\" for when
+	// mountPoint is any drive root "C:", "D:", etc. Hence causing same name
+	// for each drive
+	if runtime.GOOS == "windows" {
+		return mountPoint
+	}
+
+	// This might cause duplicate names in case you mount two devices in
+	// /mnt/usb and /mnt/dir2/usb . Full mountpoint is a more accurate way
+	// but that results in messy UI, hence we do this.
+	return filepath.Base(mountPoint)
+}
+
 func diskLocation(mountPoint string) string {
 	// In windows if you are in "C:\some\path", "cd C:" will not cd to root of C: drive
 	// but "cd C:\" will

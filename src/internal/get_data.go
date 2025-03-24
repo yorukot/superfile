@@ -101,10 +101,13 @@ func getExternalMediaFolders() (disks []directory) {
 		// a problem. It could be a problem in a hot path though.
 		slog.Debug("Returned disk by disk.Partition()", "device", disk.Device,
 			"mountpoint", disk.Mountpoint, "fstype", disk.Fstype)
+
+		// shouldListDisk, diskName, and diskLocation, each has runtime.GOOS checks
+		// We can ideally reduce it to one check only.
 		if shouldListDisk(disk.Mountpoint) {
 
 			disks = append(disks, directory{
-				name:     filepath.Base(disk.Mountpoint),
+				name:     diskName(disk.Mountpoint),
 				location: diskLocation(disk.Mountpoint),
 			})
 		}
