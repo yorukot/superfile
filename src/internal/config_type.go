@@ -151,9 +151,8 @@ type ConfigType struct {
 }
 
 type HotkeysType struct {
-	Confirm    []string `toml:"confirm" comment:"=================================================================================================\nGlobal hotkeys (cannot conflict with other hotkeys)"`
-	Quit       []string `toml:"quit"`
-	OpenPrompt []string `toml:"prompt"`
+	Confirm []string `toml:"confirm" comment:"=================================================================================================\nGlobal hotkeys (cannot conflict with other hotkeys)"`
+	Quit    []string `toml:"quit"`
 
 	// movement
 	ListUp   []string `toml:"list_up" comment:"movement"`
@@ -192,6 +191,7 @@ type HotkeysType struct {
 	ChangePanelMode []string `toml:"change_panel_mode"`
 	OpenHelpMenu    []string `toml:"open_help_menu"`
 	OpenCommandLine []string `toml:"open_command_line"`
+	OpenPrompt      []string `toml:"prompt"`
 
 	CopyPath []string `toml:"copy_path"`
 	CopyPWD  []string `toml:"copy_present_working_directory"`
