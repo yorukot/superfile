@@ -115,7 +115,7 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) tea.Cmd {
 			m.compressFile()
 		}()
 
-	case containsKey(msg, hotkeys.OpenPrompt):
+	case containsKey(msg, hotkeys.OpenSPFPrompt):
 		m.promptModal.Open(m, PROMPT_COMMAND_COMMAND)
 
 	case containsKey(msg, hotkeys.OpenHelpMenu):

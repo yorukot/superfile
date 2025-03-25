@@ -2,7 +2,6 @@
 # Global hotkeys (cannot conflict with other hotkeys)
 confirm = ['enter', 'right', 'l']
 quit = ['q', 'esc']
-prompt = ['>', '']
 
 # movement
 list_up = ['up', 'k']
@@ -41,6 +40,7 @@ toggle_dot_file = ['.', '']
 change_panel_mode = ['v', '']
 open_help_menu = ['?', '']
 open_command_line = [':', '']
+open_spf_prompt = ['>', '']
 copy_path = ['ctrl+p', '']
 copy_present_working_directory = ['c', '']
 toggle_footer = ['F', '']

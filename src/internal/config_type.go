@@ -191,7 +191,7 @@ type HotkeysType struct {
 	ChangePanelMode []string `toml:"change_panel_mode"`
 	OpenHelpMenu    []string `toml:"open_help_menu"`
 	OpenCommandLine []string `toml:"open_command_line"`
-	OpenPrompt      []string `toml:"prompt"`
+	OpenSPFPrompt   []string `toml:"open_spf_prompt"`
 
 	CopyPath []string `toml:"copy_path"`
 	CopyPWD  []string `toml:"copy_present_working_directory"`
