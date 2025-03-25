@@ -219,11 +219,11 @@ func (m *model) promptModalOpenKey(msg string) {
 	switch msg {
 	case containsKey(msg, hotkeys.ConfirmTyping):
 		if m.promptModal.Confirm(m) {
-			m.promptModal.Close(m)
+			m.promptModal.Close()
 		}
 
 	case containsKey(msg, hotkeys.CancelTyping):
-		m.promptModal.Close(m)
+		m.promptModal.Close()
 
 	default:
 		m.promptModal.textInput.Focus()

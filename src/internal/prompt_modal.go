@@ -174,7 +174,7 @@ func (p *promptModal) Open(m *model, cmdPrefix PromptCommandPrefix) {
 	p.open = true
 }
 
-func (p *promptModal) Close(m *model) {
+func (p *promptModal) Close() {
 	p.open = false
 	p.errormsg = ""
 	p.textInput.SetValue("")
