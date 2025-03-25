@@ -394,10 +394,10 @@ func (m model) View() string {
 	}
 
 	if m.promptModal.open {
-		helpMenu := m.promptModalRender()
+		promptModal := m.promptModalRender()
 		overlayX := m.fullWidth/2 - m.helpMenu.width/2
 		overlayY := m.fullHeight/2 - m.helpMenu.height/2
-		return stringfunction.PlaceOverlay(overlayX, overlayY, helpMenu, finalRender)
+		return stringfunction.PlaceOverlay(overlayX, overlayY, promptModal, finalRender)
 	}
 
 	if panel.sortOptions.open {
