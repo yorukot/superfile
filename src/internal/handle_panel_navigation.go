@@ -54,11 +54,7 @@ func (m *model) pinnedDirectory() {
 }
 
 // Create new file panel
-
-func (m *model) createNewFilePanel() {
-	m.createNewFilePanelForLocation(variable.HomeDir)
-}
-func (m *model) createNewFilePanelForLocation(location string) {
+func (m *model) createNewFilePanel(location string) {
 	if len(m.fileModel.filePanels) == m.fileModel.maxFilePanel {
 		return
 	}

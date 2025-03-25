@@ -106,7 +106,7 @@ func init() {
 
 			if dir, err := os.Stat(path); err == nil {
 				if dir.IsDir() {
-					m.createNewFilePanelForLocation(path)
+					m.createNewFilePanel(path)
 					return true
 
 				} else {
@@ -128,7 +128,7 @@ func init() {
 		handleCommand: func(_ string, _ *promptModal, m *model) bool {
 
 			location := m.fileModel.filePanels[m.filePanelFocusIndex].location
-			m.createNewFilePanelForLocation(location)
+			m.createNewFilePanel(location)
 
 			return true
 		},

@@ -2,6 +2,7 @@ package internal
 
 import (
 	tea "github.com/charmbracelet/bubbletea"
+	variable "github.com/yorukot/superfile/src/config"
 )
 
 func containsKey(v string, a []string) string {
@@ -71,7 +72,7 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) tea.Cmd {
 		m.closeFilePanel()
 
 	case containsKey(msg, hotkeys.CreateNewFilePanel):
-		m.createNewFilePanel()
+		m.createNewFilePanel(variable.HomeDir)
 
 	case containsKey(msg, hotkeys.ToggleFilePreviewPanel):
 		m.toggleFilePreviewPanel()
