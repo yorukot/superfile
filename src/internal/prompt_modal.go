@@ -184,10 +184,9 @@ func (p *promptModal) Confirm(m *model) bool {
 	return p.cmd.handleCommand(p.textInput.Value(), p, m)
 }
 
-func (p *promptModal) Render(m *model) string {
+func (p *promptModal) Render(width int) string {
 
 	var content, promptLine string
-	width := m.helpMenu.width
 	text := p.textInput.Value()
 	suggestions := p.textInput.CurrentSuggestion()
 
