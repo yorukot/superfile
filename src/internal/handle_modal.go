@@ -181,11 +181,6 @@ func (m *model) helpMenuListDown() {
 	}
 }
 
-// Toggle Prompt
-func (m *model) openPrompt() {
-	m.promptModal.Open(m, PROMPT_COMMAND_COMMAND)
-}
-
 // Toggle help menu
 func (m *model) openHelpMenu() {
 	if m.helpMenu.open {
