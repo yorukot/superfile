@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"slices"
 	"sort"
 	"strconv"
@@ -21,18 +22,87 @@ import (
 )
 
 // Check if the directory is external disk path
+// Todo : This function should be give two directories, and it should return
+// if the two share a different disk partition.
+// Ideally we shouldn't even try to figure that out in our file operations, and let OS handles it.
+// But at least right now its not okay. This returns if `path` is an External disk
+// from perspective of `/`, but it should tell from perspective of currently open directory
+// The usage of this function in cut/paste is not as expected.
 func isExternalDiskPath(path string) bool {
-	dir := filepath.Dir(path)
-
-	// exclude timemachine
-	if strings.HasPrefix(dir, "/Volumes/.timemachine") {
+	// This is very vague. You cannot tell if a path is belonging to an external partition
+	// if you dont define the source path to compare with
+	// But making this true will cause slow file operations based on current implementation
+	if runtime.GOOS == "windows" {
 		return false
 	}
 
-	return strings.HasPrefix(dir, "/mnt") ||
-		strings.HasPrefix(dir, "/media") ||
-		strings.HasPrefix(dir, "/run/media") ||
-		strings.HasPrefix(dir, "/Volumes")
+	// exclude timemachine on MacOS
+	if strings.HasPrefix(path, "/Volumes/.timemachine") {
+		return false
+	}
+
+	// to filter out mounted partitions like /, /boot etc
+	return strings.HasPrefix(path, "/mnt") ||
+		strings.HasPrefix(path, "/media") ||
+		strings.HasPrefix(path, "/run/media") ||
+		strings.HasPrefix(path, "/Volumes")
+}
+
+func shouldListDisk(mountPoint string) bool {
+	if runtime.GOOS == "windows" {
+		// We need to get C:, D: drive etc in the list
+		return true
+	}
+
+	// Should always list the main disk
+	if mountPoint == "/" {
+		return true
+	}
+
+	// Todo : make a configurable field in config.yaml
+	// excluded_disk_mounts = ["/Volumes/.timemachine"]
+	// Mountpoints that are in subdirectory of disk_mounts
+	// but still are to be excluded in disk section of sidebar
+	if strings.HasPrefix(mountPoint, "/Volumes/.timemachine") {
+		return false
+	}
+
+	// We avoid listing all mounted partitions (Otherwise listed disk could get huge)
+	// but only a few partitions that usually corresponds to external physical devices
+	// For example : mounts like /boot, /var/ will get skipped
+	// This can be inaccurate based on your system setup if you mount any external devices
+	// on other directories, or if you have some extra mounts on these directories
+	// Todo : make a configurable field in config.yaml
+	// disk_mounts = ["/mnt", "/media", "/run/media", "/Volumes"]
+	// Only block devicies that are mounted on these or any subdirectory of these Mountpoints
+	// Will be shown in disk sidebar
+	return strings.HasPrefix(mountPoint, "/mnt") ||
+		strings.HasPrefix(mountPoint, "/media") ||
+		strings.HasPrefix(mountPoint, "/run/media") ||
+		strings.HasPrefix(mountPoint, "/Volumes")
+}
+
+func diskName(mountPoint string) string {
+	// In windows we dont want to use filepath.Base as it returns "\" for when
+	// mountPoint is any drive root "C:", "D:", etc. Hence causing same name
+	// for each drive
+	if runtime.GOOS == "windows" {
+		return mountPoint
+	}
+
+	// This might cause duplicate names in case you mount two devices in
+	// /mnt/usb and /mnt/dir2/usb . Full mountpoint is a more accurate way
+	// but that results in messy UI, hence we do this.
+	return filepath.Base(mountPoint)
+}
+
+func diskLocation(mountPoint string) string {
+	// In windows if you are in "C:\some\path", "cd C:" will not cd to root of C: drive
+	// but "cd C:\" will
+	if runtime.GOOS == "windows" {
+		return filepath.Join(mountPoint, "\\")
+	}
+	return mountPoint
 }
 
 func returnFocusType(focusPanel focusPanelType) filePanelFocusType {
