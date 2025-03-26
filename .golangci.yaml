@@ -253,10 +253,9 @@ linters:
   enable:
     ## enabled by default
     - errcheck # checking for unchecked errors, these unchecked errors can be critical bugs in some cases
+    - gosimple # specializes in simplifying a code
     # Todo enable
-    #- gosimple # specializes in simplifying a code
-    # Todo enable
-    #- govet # reports suspicious constructs, such as Printf calls whose arguments do not align with the format string
+    - govet # reports suspicious constructs, such as Printf calls whose arguments do not align with the format string
     # Todo enable
     #- ineffassign # detects when assignments to existing variables are not used
     # Todo enable
