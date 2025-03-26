@@ -12,11 +12,17 @@ import (
 	"github.com/yorukot/superfile/src/config/icon"
 )
 
+// This look like a very slow implementatin of zipping
+// Todo : Improve the implementation
 func zipSource(source, target string) error {
 	id := shortuuid.New()
 	prog := progress.New()
 	prog.PercentageStyle = footerStyle
 
+	// This is inefficient
+	// This should not be the reason of doing a recursive directory walk.
+	// For the sake of measuring progress, we should not significantly
+	// slow down the progress. 
 	totalFiles, err := countFiles(source)
 
 	if err != nil {

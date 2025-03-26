@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/barasher/go-exiftool"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/pelletier/go-toml/v2"
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/config/icon"
@@ -27,6 +28,9 @@ func initialConfig(dir string) (toggleDotFileBool bool, toggleFooter bool, first
 	// we could pass a dummy object to log.SetOutput() and the app would still function.
 	if err != nil {
 		// At this point, it will go to stdout since log file is not initilized
+		// This should not be enough to make us exit !! If we cant open log file, we log
+		// on Error logs to stderr, or we dont log at all.
+		// Or we may display a warning modal that logs will be disabled.
 		LogAndExit("Error while opening superfile.log file", "error", err)
 	}
 
@@ -58,6 +62,7 @@ func initialConfig(dir string) (toggleDotFileBool bool, toggleFooter bool, first
 		toggleDotFileBool = false
 	}
 
+	// Duplication. Todo : Use a binary file reader/writer function with a default value.
 	toggleFooterData, err := os.ReadFile(variable.ToggleFooter)
 	if err != nil {
 		slog.Error("Error while reading toggleFooter data error:", "error", err)
@@ -76,13 +81,16 @@ func initialConfig(dir string) (toggleDotFileBool bool, toggleFooter bool, first
 	if Config.Metadata {
 		et, err = exiftool.NewExiftool()
 		if err != nil {
+			// Should set config.Metatdata to false now ?
 			slog.Error("Error while initial model function init exiftool error", "error", err)
 		}
 	}
 
+	// This should just be dir := Config.DefaultDirectory
 	if dir != "" {
 		firstFilePanelDir, err = filepath.Abs(dir)
 	} else {
+		// Shouldn't we just do filepath.Abs when we read DefaultDirectory ?
 		Config.DefaultDirectory = strings.Replace(Config.DefaultDirectory, "~", variable.HomeDir, -1)
 		firstFilePanelDir, err = filepath.Abs(Config.DefaultDirectory)
 	}
@@ -92,7 +100,9 @@ func initialConfig(dir string) (toggleDotFileBool bool, toggleFooter bool, first
 	}
 
 	slog.Debug("Runtime information", "runtime.GOOS", runtime.GOOS,
-		"start directory", firstFilePanelDir)
+		"start directory", firstFilePanelDir, 
+		"Struct sizes, internal.Model(bytes)" , reflect.TypeOf(model{}).Size(),
+		"lipgloss.Style(bytes)", reflect.TypeOf(lipgloss.Style{}).Size())
 
 	return toggleDotFileBool, toggleFooter, firstFilePanelDir
 }
@@ -190,6 +200,7 @@ func loadConfigFile() {
 		return
 	}
 
+	// Todo : This is validation, should be a separate function.
 	if (Config.FilePreviewWidth > 10 || Config.FilePreviewWidth < 2) && Config.FilePreviewWidth != 0 {
 		LogAndExit(loadConfigError("file_preview_width"))
 	}

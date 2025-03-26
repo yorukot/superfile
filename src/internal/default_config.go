@@ -13,6 +13,7 @@ var (
 
 // Generate and return model containing default configurations for interface
 func defaultModelConfig(toggleDotFileBool bool, toggleFooter bool, firstFilePanelDir string) model {
+	
 	return model{
 		filePanelFocusIndex: 0,
 		focusPanel:          nonePanelFocus,
@@ -33,10 +34,12 @@ func defaultModelConfig(toggleDotFileBool bool, toggleFooter bool, firstFilePane
 					cursor:   0,
 					location: firstFilePanelDir,
 					sortOptions: sortOptionsModel{
+						// Todo : Move these magic numbers
 						width:  20,
 						height: 4,
 						open:   false,
 						cursor: Config.DefaultSortType,
+						// ? This should be separated out in funcs. That would be reusable ?
 						data: sortOptionsModelData{
 							options:  []string{"Name", "Size", "Date Modified"},
 							selected: Config.DefaultSortType,
@@ -67,10 +70,17 @@ func defaultModelConfig(toggleDotFileBool bool, toggleFooter bool, firstFilePane
 
 // Return help menu for hotkeys
 func getHelpMenuData() []helpMenuModalData {
+	// The render for this would be so similiar to sidebar render. So much duplication
 	data := []helpMenuModalData{
 		{
 			subTitle: "General",
 		},
+
+		// Is the "" at the end of slice to print that "|"
+		// And is this supposed to be this inconsistent
+		// Both cant be yes for sure.
+		// Having a blank just as a roundabout way of printing | at the end
+		// This should be fixed
 		{
 			hotkey:         []string{"spf", ""},
 			description:    "Open superfile",
