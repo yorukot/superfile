@@ -108,9 +108,8 @@ func Run(content embed.FS) {
 
 			InitConfigFile()
 
-			err := InitTrash()
 			hasTrash := true
-			if err != nil {
+			if err := InitTrash(); err != nil {
 				hasTrash = false
 			}
 
@@ -198,7 +197,7 @@ func createDirectories(dirs ...string) error {
 	for _, dir := range dirs {
 		if _, err := os.Stat(dir); os.IsNotExist(err) {
 			// Directory doesn't exist, create it
-			if err := os.MkdirAll(dir, 0755); err != nil {
+			if err = os.MkdirAll(dir, 0755); err != nil {
 				return fmt.Errorf("failed to create directory %s: %w", dir, err)
 			}
 		} else if err != nil {
@@ -214,7 +213,7 @@ func createDirectories(dirs ...string) error {
 func createFiles(files ...string) error {
 	for _, file := range files {
 		if _, err := os.Stat(file); os.IsNotExist(err) {
-			if err := os.WriteFile(file, nil, 0644); err != nil {
+			if err = os.WriteFile(file, nil, 0644); err != nil {
 				return fmt.Errorf("failed to create file %s: %w", file, err)
 			}
 		}
@@ -229,7 +228,7 @@ func checkFirstUse() bool {
 	firstUse := false
 	if _, err := os.Stat(file); os.IsNotExist(err) {
 		firstUse = true
-		if err := os.WriteFile(file, nil, 0644); err != nil {
+		if err = os.WriteFile(file, nil, 0644); err != nil {
 			log.Fatalf("Failed to create file: %v", err)
 		}
 	}
@@ -239,7 +238,7 @@ func checkFirstUse() bool {
 // Write data to the path file if it does not exists
 func writeConfigFile(path, data string) error {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		if err := os.WriteFile(path, []byte(data), 0644); err != nil {
+		if err = os.WriteFile(path, []byte(data), 0644); err != nil {
 			return fmt.Errorf("failed to write config file %s: %w", path, err)
 		}
 	}
@@ -248,7 +247,7 @@ func writeConfigFile(path, data string) error {
 
 func initJsonFile(path string) error {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		if err := os.WriteFile(path, []byte("null"), 0644); err != nil {
+		if err = os.WriteFile(path, []byte("null"), 0644); err != nil {
 			return fmt.Errorf("failed to initialize json file %s: %w", path, err)
 		}
 	}

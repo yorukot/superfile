@@ -85,7 +85,7 @@ func ImagePreview(path string, maxWidth, maxHeight int, defaultBGColor string) (
 	}
 
 	// Seek back to the beginning of the file before reading EXIF data
-	if _, err := file.Seek(0, 0); err != nil {
+	if _, err = file.Seek(0, 0); err != nil {
 		return "", err
 	}
 

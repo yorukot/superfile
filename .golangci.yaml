@@ -10,6 +10,10 @@
 
 # Based on https://gist.github.com/maratori/47a4d00457a92aa426dbd48a18776322
 
+# Custom changes
+# (1) govet shadow analyzer is set to "strict : false" settings.
+# strict : true causes too much noise
+
 run:
   # Timeout for analysis, e.g. 30s, 5m.
   # Default: 1m
@@ -163,7 +167,7 @@ linters-settings:
       shadow:
         # Whether to be strict about shadowing; can be noisy.
         # Default: false
-        strict: true
+        strict: false
 
   inamedparam:
     # Skips check for interface methods with only a single parameter.

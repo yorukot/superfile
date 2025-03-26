@@ -278,8 +278,7 @@ func LoadAllDefaultConfig(content embed.FS) {
 	_, err = os.Stat(variable.ThemeFolder)
 
 	if os.IsNotExist(err) {
-		err := os.MkdirAll(variable.ThemeFolder, 0755)
-		if err != nil {
+		if err = os.MkdirAll(variable.ThemeFolder, 0755); err != nil {
 			slog.Error("Error creating theme directory", "error", err)
 			return
 		}
@@ -298,6 +297,7 @@ func LoadAllDefaultConfig(content embed.FS) {
 			continue
 		}
 		// This will not break in windows. This is a relative path for Embed FS. It uses "/" only
+		// nolint:govet // Suppress err shadowing
 		src, err := content.ReadFile(variable.EmbedThemeDir + "/" + file.Name())
 		if err != nil {
 			slog.Error("Error reading theme file from embed", "error", err)

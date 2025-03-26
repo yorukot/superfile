@@ -56,8 +56,7 @@ func moveElement(src, dst string) error {
 
 	// If on the same partition, attempt to rename (which will use the same inode)
 	if sameDev {
-		err := os.Rename(src, dst)
-		if err == nil {
+		if err = os.Rename(src, dst); err == nil {
 			return nil
 		}
 		// If rename fails, fall back to copy+delete

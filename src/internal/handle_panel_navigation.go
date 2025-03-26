@@ -60,12 +60,12 @@ func (m *model) createNewFilePanel() {
 	}
 
 	m.fileModel.filePanels = append(m.fileModel.filePanels, filePanel{
-		location:        variable.HomeDir,
-		sortOptions:     m.fileModel.filePanels[m.filePanelFocusIndex].sortOptions,
-		panelMode:       browserMode,
-		focusType:       secondFocus,
-		directoryRecord: make(map[string]directoryRecord),
-		searchBar:       generateSearchBar(),
+		location:         variable.HomeDir,
+		sortOptions:      m.fileModel.filePanels[m.filePanelFocusIndex].sortOptions,
+		panelMode:        browserMode,
+		focusType:        secondFocus,
+		directoryRecords: make(map[string]directoryRecord),
+		searchBar:        generateSearchBar(),
 	})
 
 	if m.fileModel.filePreview.open {

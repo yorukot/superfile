@@ -279,8 +279,9 @@ func (m *model) processBarRender() string {
 			renderedHeight--
 		}
 
-		process := processes[i]
-		process.progress.Width = footerWidth(m.fullWidth) - 3
+		// Change 'process' is a struct type. Should not use it as variable name
+		curProcess := processes[i]
+		curProcess.progress.Width = footerWidth(m.fullWidth) - 3
 		symbol := ""
 		cursor := ""
 		if i == m.processBarModel.cursor {
@@ -288,7 +289,7 @@ func (m *model) processBarRender() string {
 		} else {
 			cursor = footerCursorStyle.Render("  ")
 		}
-		switch process.state {
+		switch curProcess.state {
 		case failure:
 			symbol = processErrorStyle.Render(icon.Warn)
 		case successful:
@@ -299,9 +300,9 @@ func (m *model) processBarRender() string {
 			symbol = processCancelStyle.Render(icon.Error)
 		}
 
-		processRender += cursor + footerStyle.Render(truncateText(process.name, footerWidth(m.fullWidth)-7, "...")+" ") + symbol + "\n"
+		processRender += cursor + footerStyle.Render(truncateText(curProcess.name, footerWidth(m.fullWidth)-7, "...")+" ") + symbol + "\n"
 
-		processRender += cursor + process.progress.ViewAs(float64(process.done)/float64(process.total)) + endSeparator
+		processRender += cursor + curProcess.progress.ViewAs(float64(curProcess.done)/float64(curProcess.total)) + endSeparator
 	}
 
 	return m.wrapProcessBardBorder(processRender)
@@ -651,10 +652,11 @@ func (m *model) filePreviewPanelRender() string {
 
 	itemPath := panel.element[panel.cursor].location
 
-	fileInfo, err := os.Stat(itemPath)
+	// Renamed it to info_err to prevent shadowing with err below
+	fileInfo, info_err := os.Stat(itemPath)
 
-	if err != nil {
-		slog.Error("Error get file info", "error", err)
+	if info_err != nil {
+		slog.Error("Error get file info", "error", info_err)
 		return box.Render("\n --- " + icon.Error + " Error get file info ---")
 	}
 
