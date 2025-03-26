@@ -23,6 +23,7 @@ All notable changes to this project will be documented in this file. Dates are d
 
 #### Bug fix
 - Fix broken link in website causing 404 [`#714`](https://github.com/yorukot/superfile/pull/714)
+- Fix sidebar disk listing [`#708`](https://github.com/yorukot/superfile/pull/708)
 - Switch to semver for newer 1.2.1 release [`#687`](https://github.com/yorukot/superfile/pull/687)
 
 #### Optimization
