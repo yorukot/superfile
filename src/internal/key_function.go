@@ -1,15 +1,15 @@
 package internal
 
 import (
+	"slices"
+
 	tea "github.com/charmbracelet/bubbletea"
 	variable "github.com/yorukot/superfile/src/config"
 )
 
 func containsKey(v string, a []string) string {
-	for _, i := range a {
-		if i == v {
-			return v
-		}
+	if slices.Contains(a, v) {
+		return v
 	}
 	return ""
 }
