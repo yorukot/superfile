@@ -258,39 +258,24 @@ linters:
     ## enabled by default
     - errcheck # checking for unchecked errors, these unchecked errors can be critical bugs in some cases
     - gosimple # specializes in simplifying a code
-    # Todo enable
     - govet # reports suspicious constructs, such as Printf calls whose arguments do not align with the format string
-    # Todo enable
-    #- ineffassign # detects when assignments to existing variables are not used
-    # Todo enable
-    #- staticcheck # is a go vet on steroids, applying a ton of static analysis checks
-    # Todo enable
-    #- typecheck # like the front-end of a Go compiler, parses and type-checks Go code
-    # Todo enable
-    #- unused # checks for unused constants, variables, functions and types
+    - ineffassign # detects when assignments to existing variables are not used
+    - staticcheck # is a go vet on steroids, applying a ton of static analysis checks
+    - typecheck # like the front-end of a Go compiler, parses and type-checks Go code
+    - unused # checks for unused constants, variables, functions and types
     ## disabled by default
-    # Todo enable
-    #- asasalint # checks for pass []any as any in variadic func(...any)
-    # Todo enable
-    #- asciicheck # checks that your code does not contain non-ASCII identifiers
-    # Todo enable
-    #- bidichk # checks for dangerous unicode character sequences
-    # Todo enable
-    #- bodyclose # checks whether HTTP response body is closed successfully
-    # Todo enable
-    #- canonicalheader # checks whether net/http.Header uses canonical header
-    # Todo enable
-    #- copyloopvar # detects places where loop variables are copied (Go 1.22+)
-    # Todo enable
+    - asasalint # checks for pass []any as any in variadic func(...any)
+    - asciicheck # checks that your code does not contain non-ASCII identifiers
+    - bidichk # checks for dangerous unicode character sequences
+    - bodyclose # checks whether HTTP response body is closed successfully
+    - canonicalheader # checks whether net/http.Header uses canonical header
+    - copyloopvar # detects places where loop variables are copied (Go 1.22+)
+    # Todo enable this - This needs a fix in few of our functions
     #- cyclop # checks function and package cyclomatic complexity
-    # Todo enable
-    #- depguard # checks if package imports are in a list of acceptable packages
-    # Todo enable
-    #- dupl # tool for code clone detection
-    # Todo enable
-    #- durationcheck # checks for two durations multiplied together
-    # Todo enable
-    #- errname # checks that sentinel errors are prefixed with the Err and error types are suffixed with the Error
+    - depguard # checks if package imports are in a list of acceptable packages
+    - dupl # tool for code clone detection
+    - durationcheck # checks for two durations multiplied together
+    - errname # checks that sentinel errors are prefixed with the Err and error types are suffixed with the Error
     # Todo enable
     #- errorlint # finds code that will cause problems with the error wrapping scheme introduced in Go 1.13
     # Todo enable
