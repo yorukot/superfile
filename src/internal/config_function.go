@@ -219,8 +219,8 @@ func loadHotkeysFile() {
 			LogAndExit(loadHotkeysError(field.Name))
 		}
 
-		hotkeysList := value.Interface().([]string)
-		if len(hotkeysList) == 0 || hotkeysList[0] == "" {
+		hotkeysList, ok := value.Interface().([]string)
+		if !ok || len(hotkeysList) == 0 || hotkeysList[0] == "" {
 			LogAndExit(loadHotkeysError(field.Name))
 		}
 	}

@@ -28,8 +28,8 @@ func newColorCache() *colorCache {
 }
 
 func (c *colorCache) getTermenvColor(col color.Color, fallbackColor string) termenv.RGBColor {
-	rgba := color.RGBAModel.Convert(col).(color.RGBA)
-	if rgba.A == 0 {
+	rgba, ok := color.RGBAModel.Convert(col).(color.RGBA)
+	if !ok || rgba.A == 0 {
 		return termenv.RGBColor(fallbackColor)
 	}
 
