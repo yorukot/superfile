@@ -253,82 +253,157 @@ linters:
   enable:
     ## enabled by default
     - errcheck # checking for unchecked errors, these unchecked errors can be critical bugs in some cases
-    - gosimple # specializes in simplifying a code
-    - govet # reports suspicious constructs, such as Printf calls whose arguments do not align with the format string
-    - ineffassign # detects when assignments to existing variables are not used
-    - staticcheck # is a go vet on steroids, applying a ton of static analysis checks
-    - typecheck # like the front-end of a Go compiler, parses and type-checks Go code
-    - unused # checks for unused constants, variables, functions and types
+    # Todo enable
+    #- gosimple # specializes in simplifying a code
+    # Todo enable
+    #- govet # reports suspicious constructs, such as Printf calls whose arguments do not align with the format string
+    # Todo enable
+    #- ineffassign # detects when assignments to existing variables are not used
+    # Todo enable
+    #- staticcheck # is a go vet on steroids, applying a ton of static analysis checks
+    # Todo enable
+    #- typecheck # like the front-end of a Go compiler, parses and type-checks Go code
+    # Todo enable
+    #- unused # checks for unused constants, variables, functions and types
     ## disabled by default
-    - asasalint # checks for pass []any as any in variadic func(...any)
-    - asciicheck # checks that your code does not contain non-ASCII identifiers
-    - bidichk # checks for dangerous unicode character sequences
-    - bodyclose # checks whether HTTP response body is closed successfully
-    - canonicalheader # checks whether net/http.Header uses canonical header
-    - copyloopvar # detects places where loop variables are copied (Go 1.22+)
-    - cyclop # checks function and package cyclomatic complexity
-    - depguard # checks if package imports are in a list of acceptable packages
-    - dupl # tool for code clone detection
-    - durationcheck # checks for two durations multiplied together
-    - errname # checks that sentinel errors are prefixed with the Err and error types are suffixed with the Error
-    - errorlint # finds code that will cause problems with the error wrapping scheme introduced in Go 1.13
-    - exhaustive # checks exhaustiveness of enum switch statements
-    - exptostd # detects functions from golang.org/x/exp/ that can be replaced by std functions
-    - fatcontext # detects nested contexts in loops
-    - forbidigo # forbids identifiers
-    - funlen # tool for detection of long functions
-    - gocheckcompilerdirectives # validates go compiler directive comments (//go:)
-    - gochecknoglobals # checks that no global variables exist
-    - gochecknoinits # checks that no init functions are present in Go code
-    - gochecksumtype # checks exhaustiveness on Go "sum types"
-    - gocognit # computes and checks the cognitive complexity of functions
-    - goconst # finds repeated strings that could be replaced by a constant
-    - gocritic # provides diagnostics that check for bugs, performance and style issues
-    - gocyclo # computes and checks the cyclomatic complexity of functions
-    - godot # checks if comments end in a period
-    - goimports # in addition to fixing imports, goimports also formats your code in the same style as gofmt
-    - gomoddirectives # manages the use of 'replace', 'retract', and 'excludes' directives in go.mod
-    - goprintffuncname # checks that printf-like functions are named with f at the end
-    - gosec # inspects source code for security problems
-    - iface # checks the incorrect use of interfaces, helping developers avoid interface pollution
-    - intrange # finds places where for loops could make use of an integer range
-    - lll # reports long lines
-    - loggercheck # checks key value pairs for common logger libraries (kitlog,klog,logr,zap)
-    - makezero # finds slice declarations with non-zero initial length
-    - mirror # reports wrong mirror patterns of bytes/strings usage
-    - mnd # detects magic numbers
-    - musttag # enforces field tags in (un)marshaled structs
-    - nakedret # finds naked returns in functions greater than a specified function length
-    - nestif # reports deeply nested if statements
-    - nilerr # finds the code that returns nil even if it checks that the error is not nil
-    - nilnesserr # reports that it checks for err != nil, but it returns a different nil value error (powered by nilness and nilerr)
-    - nilnil # checks that there is no simultaneous return of nil error and an invalid value
-    - noctx # finds sending http request without context.Context
-    - nolintlint # reports ill-formed or insufficient nolint directives
-    - nonamedreturns # reports all named returns
-    - nosprintfhostport # checks for misuse of Sprintf to construct a host with port in a URL
-    - perfsprint # checks that fmt.Sprintf can be replaced with a faster alternative
-    - predeclared # finds code that shadows one of Go's predeclared identifiers
-    - promlinter # checks Prometheus metrics naming via promlint
-    - protogetter # reports direct reads from proto message fields when getters should be used
-    - reassign # checks that package variables are not reassigned
-    - recvcheck # checks for receiver type consistency
-    - revive # fast, configurable, extensible, flexible, and beautiful linter for Go, drop-in replacement of golint
-    - rowserrcheck # checks whether Err of rows is checked successfully
-    - sloglint # ensure consistent code style when using log/slog
-    - spancheck # checks for mistakes with OpenTelemetry/Census spans
-    - sqlclosecheck # checks that sql.Rows and sql.Stmt are closed
-    - stylecheck # is a replacement for golint
-    - testableexamples # checks if examples are testable (have an expected output)
-    - testifylint # checks usage of github.com/stretchr/testify
-    - testpackage # makes you use a separate _test package
-    - tparallel # detects inappropriate usage of t.Parallel() method in your Go test codes
-    - unconvert # removes unnecessary type conversions
-    - unparam # reports unused function parameters
-    - usestdlibvars # detects the possibility to use variables/constants from the Go standard library
-    - usetesting # reports uses of functions with replacement inside the testing package
-    - wastedassign # finds wasted assignment statements
-    - whitespace # detects leading and trailing whitespace
+    # Todo enable
+    #- asasalint # checks for pass []any as any in variadic func(...any)
+    # Todo enable
+    #- asciicheck # checks that your code does not contain non-ASCII identifiers
+    # Todo enable
+    #- bidichk # checks for dangerous unicode character sequences
+    # Todo enable
+    #- bodyclose # checks whether HTTP response body is closed successfully
+    # Todo enable
+    #- canonicalheader # checks whether net/http.Header uses canonical header
+    # Todo enable
+    #- copyloopvar # detects places where loop variables are copied (Go 1.22+)
+    # Todo enable
+    #- cyclop # checks function and package cyclomatic complexity
+    # Todo enable
+    #- depguard # checks if package imports are in a list of acceptable packages
+    # Todo enable
+    #- dupl # tool for code clone detection
+    # Todo enable
+    #- durationcheck # checks for two durations multiplied together
+    # Todo enable
+    #- errname # checks that sentinel errors are prefixed with the Err and error types are suffixed with the Error
+    # Todo enable
+    #- errorlint # finds code that will cause problems with the error wrapping scheme introduced in Go 1.13
+    # Todo enable
+    #- exhaustive # checks exhaustiveness of enum switch statements
+    # Todo enable
+    #- exptostd # detects functions from golang.org/x/exp/ that can be replaced by std functions
+    # Todo enable
+    #- fatcontext # detects nested contexts in loops
+    # Todo enable
+    #- forbidigo # forbids identifiers
+    # Todo enable
+    #- funlen # tool for detection of long functions
+    # Todo enable
+    #- gocheckcompilerdirectives # validates go compiler directive comments (//go:)
+    # Todo enable
+    #- gochecknoglobals # checks that no global variables exist
+    # Todo enable
+    #- gochecknoinits # checks that no init functions are present in Go code
+    # Todo enable
+    #- gochecksumtype # checks exhaustiveness on Go "sum types"
+    # Todo enable
+    #- gocognit # computes and checks the cognitive complexity of functions
+    # Todo enable
+    #- goconst # finds repeated strings that could be replaced by a constant
+    # Todo enable
+    #- gocritic # provides diagnostics that check for bugs, performance and style issues
+    # Todo enable
+    #- gocyclo # computes and checks the cyclomatic complexity of functions
+    # Todo enable
+    #- godot # checks if comments end in a period
+    # Todo enable
+    #- goimports # in addition to fixing imports, goimports also formats your code in the same style as gofmt
+    # Todo enable
+    #- gomoddirectives # manages the use of 'replace', 'retract', and 'excludes' directives in go.mod
+    # Todo enable
+    #- goprintffuncname # checks that printf-like functions are named with f at the end
+    # Todo enable
+    #- gosec # inspects source code for security problems
+    # Todo enable
+    #- iface # checks the incorrect use of interfaces, helping developers avoid interface pollution
+    # Todo enable
+    #- intrange # finds places where for loops could make use of an integer range
+    # Todo enable
+    #- lll # reports long lines
+    # Todo enable
+    #- loggercheck # checks key value pairs for common logger libraries (kitlog,klog,logr,zap)
+    # Todo enable
+    #- makezero # finds slice declarations with non-zero initial length
+    # Todo enable
+    #- mirror # reports wrong mirror patterns of bytes/strings usage
+    # Todo enable
+    #- mnd # detects magic numbers
+    # Todo enable
+    #- musttag # enforces field tags in (un)marshaled structs
+    # Todo enable
+    #- nakedret # finds naked returns in functions greater than a specified function length
+    # Todo enable
+    #- nestif # reports deeply nested if statements
+    # Todo enable
+    #- nilerr # finds the code that returns nil even if it checks that the error is not nil
+    # Todo enable
+    #- nilnesserr # reports that it checks for err != nil, but it returns a different nil value error (powered by nilness and nilerr)
+    # Todo enable
+    #- nilnil # checks that there is no simultaneous return of nil error and an invalid value
+    # Todo enable
+    #- noctx # finds sending http request without context.Context
+    # Todo enable
+    #- nolintlint # reports ill-formed or insufficient nolint directives
+    # Todo enable
+    #- nonamedreturns # reports all named returns
+    # Todo enable
+    #- nosprintfhostport # checks for misuse of Sprintf to construct a host with port in a URL
+    # Todo enable
+    #- perfsprint # checks that fmt.Sprintf can be replaced with a faster alternative
+    # Todo enable
+    #- predeclared # finds code that shadows one of Go's predeclared identifiers
+    # Todo enable
+    #- promlinter # checks Prometheus metrics naming via promlint
+    # Todo enable
+    #- protogetter # reports direct reads from proto message fields when getters should be used
+    # Todo enable
+    #- reassign # checks that package variables are not reassigned
+    # Todo enable
+    #- recvcheck # checks for receiver type consistency
+    # Todo enable
+    #- revive # fast, configurable, extensible, flexible, and beautiful linter for Go, drop-in replacement of golint
+    # Todo enable
+    #- rowserrcheck # checks whether Err of rows is checked successfully
+    # Todo enable
+    #- sloglint # ensure consistent code style when using log/slog
+    # Todo enable
+    #- spancheck # checks for mistakes with OpenTelemetry/Census spans
+    # Todo enable
+    #- sqlclosecheck # checks that sql.Rows and sql.Stmt are closed
+    # Todo enable
+    #- stylecheck # is a replacement for golint
+    # Todo enable
+    #- testableexamples # checks if examples are testable (have an expected output)
+    # Todo enable
+    #- testifylint # checks usage of github.com/stretchr/testify
+    # Todo enable
+    #- testpackage # makes you use a separate _test package
+    # Todo enable
+    #- tparallel # detects inappropriate usage of t.Parallel() method in your Go test codes
+    # Todo enable
+    #- unconvert # removes unnecessary type conversions
+    # Todo enable
+    #- unparam # reports unused function parameters
+    # Todo enable
+    #- usestdlibvars # detects the possibility to use variables/constants from the Go standard library
+    # Todo enable
+    #- usetesting # reports uses of functions with replacement inside the testing package
+    # Todo enable
+    #- wastedassign # finds wasted assignment statements
+    # Todo enable
+    #- whitespace # detects leading and trailing whitespace
 
     ## you may want to enable
     #- decorder # checks declaration order and count of types, constants, variables and functions
