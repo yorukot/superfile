@@ -278,120 +278,121 @@ linters:
     - errname # checks that sentinel errors are prefixed with the Err and error types are suffixed with the Error
     # Todo enable
     #- errorlint # finds code that will cause problems with the error wrapping scheme introduced in Go 1.13
-    # Todo enable
+    # Todo enable - Need on small fix
     #- exhaustive # checks exhaustiveness of enum switch statements
     # Todo enable
-    #- exptostd # detects functions from golang.org/x/exp/ that can be replaced by std functions
+    - exptostd # detects functions from golang.org/x/exp/ that can be replaced by std functions
     # Todo enable
-    #- fatcontext # detects nested contexts in loops
-    # Todo enable
-    #- forbidigo # forbids identifiers
-    # Todo enable
+    - fatcontext # detects nested contexts in loops
+    # Todo enable - no . this blocks only fmt.Print family and is not useful right now
+    # - forbidigo # forbids identifiers
+    # Todo enable - need to make functions shorter
     #- funlen # tool for detection of long functions
     # Todo enable
-    #- gocheckcompilerdirectives # validates go compiler directive comments (//go:)
+    - gocheckcompilerdirectives # validates go compiler directive comments (//go:)
+    # Todo enable - This is too much for us right now
+    # - gochecknoglobals # checks that no global variables exist
     # Todo enable
-    #- gochecknoglobals # checks that no global variables exist
+    - gochecknoinits # checks that no init functions are present in Go code
     # Todo enable
-    #- gochecknoinits # checks that no init functions are present in Go code
-    # Todo enable
-    #- gochecksumtype # checks exhaustiveness on Go "sum types"
-    # Todo enable
-    #- gocognit # computes and checks the cognitive complexity of functions
-    # Todo enable
-    #- goconst # finds repeated strings that could be replaced by a constant
-    # Todo enable
-    #- gocritic # provides diagnostics that check for bugs, performance and style issues
+    - gochecksumtype # checks exhaustiveness on Go "sum types"
+    # Todo enable - Need to refactor many functions
+    # - gocognit # computes and checks the cognitive complexity of functions
+    # Todo enable - Need a few changes - easy
+    # - goconst # finds repeated strings that could be replaced by a constant
+    # Todo enable - Some few changes. There are good suggestions
+    # - gocritic # provides diagnostics that check for bugs, performance and style issues
     # Todo enable
     #- gocyclo # computes and checks the cyclomatic complexity of functions
-    # Todo enable
+    # Todo enable - too much for us
     #- godot # checks if comments end in a period
-    # Todo enable
+    # Todo enable - one small fix
     #- goimports # in addition to fixing imports, goimports also formats your code in the same style as gofmt
     # Todo enable
-    #- gomoddirectives # manages the use of 'replace', 'retract', and 'excludes' directives in go.mod
+    - gomoddirectives # manages the use of 'replace', 'retract', and 'excludes' directives in go.mod
     # Todo enable
-    #- goprintffuncname # checks that printf-like functions are named with f at the end
+    - goprintffuncname # checks that printf-like functions are named with f at the end
+    # Todo enable - ignore for a few int overflow, and fix file permissions
+    # weak md5 cryptography, Subprocess launched with a potential tainted input
+    # - gosec # inspects source code for security problems
     # Todo enable
-    #- gosec # inspects source code for security problems
+    - iface # checks the incorrect use of interfaces, helping developers avoid interface pollution
+    # Todo enable : Need fixes
+    # - intrange # finds places where for loops could make use of an integer range
+    # Todo enable : Need many fixes
+    # - lll # reports long lines
     # Todo enable
-    #- iface # checks the incorrect use of interfaces, helping developers avoid interface pollution
+    - loggercheck # checks key value pairs for common logger libraries (kitlog,klog,logr,zap)
     # Todo enable
-    #- intrange # finds places where for loops could make use of an integer range
+    - makezero # finds slice declarations with non-zero initial length
     # Todo enable
-    #- lll # reports long lines
+    - mirror # reports wrong mirror patterns of bytes/strings usage
+    # Todo enable - Many many magic numbers, and this should be fixed.
+    # - mnd # detects magic numbers
     # Todo enable
-    #- loggercheck # checks key value pairs for common logger libraries (kitlog,klog,logr,zap)
+    - musttag # enforces field tags in (un)marshaled structs
     # Todo enable
-    #- makezero # finds slice declarations with non-zero initial length
+    - nakedret # finds naked returns in functions greater than a specified function length
+    # Todo enable : Many reports. A bit hard to understand the nesting value.
+    # - nestif # reports deeply nested if statements
     # Todo enable
-    #- mirror # reports wrong mirror patterns of bytes/strings usage
+    - nilerr # finds the code that returns nil even if it checks that the error is not nil
     # Todo enable
-    #- mnd # detects magic numbers
+    - nilnesserr # reports that it checks for err != nil, but it returns a different nil value error (powered by nilness and nilerr)
     # Todo enable
-    #- musttag # enforces field tags in (un)marshaled structs
+    - nilnil # checks that there is no simultaneous return of nil error and an invalid value
+    # Todo enable : Need to fix one client.Get usage
+    # - noctx # finds sending http request without context.Context
+    # Todo enable : Needs some fixes
+    # - nolintlint # reports ill-formed or insufficient nolint directives
+    # Todo enable - maybe too strict for us
+    # - nonamedreturns # reports all named returns
     # Todo enable
-    #- nakedret # finds naked returns in functions greater than a specified function length
+    - nosprintfhostport # checks for misuse of Sprintf to construct a host with port in a URL
+    # Todo enable : One small fix
+    # - perfsprint # checks that fmt.Sprintf can be replaced with a faster alternative
     # Todo enable
-    #- nestif # reports deeply nested if statements
+    - predeclared # finds code that shadows one of Go's predeclared identifiers
     # Todo enable
-    #- nilerr # finds the code that returns nil even if it checks that the error is not nil
+    - promlinter # checks Prometheus metrics naming via promlint
     # Todo enable
-    #- nilnesserr # reports that it checks for err != nil, but it returns a different nil value error (powered by nilness and nilerr)
+    - protogetter # reports direct reads from proto message fields when getters should be used
+    # Todo enable - Some hard to fix things
+    # - reassign # checks that package variables are not reassigned
+    # Todo enable - Issue due to model struct
+    # - recvcheck # checks for receiver type consistency
+    # Todo enable : Many changes
+    # - revive # fast, configurable, extensible, flexible, and beautiful linter for Go, drop-in replacement of golint
     # Todo enable
-    #- nilnil # checks that there is no simultaneous return of nil error and an invalid value
+    - rowserrcheck # checks whether Err of rows is checked successfully
+    # Todo enable - Need to use non-root logger
+    # - sloglint # ensure consistent code style when using log/slog
     # Todo enable
-    #- noctx # finds sending http request without context.Context
+    - spancheck # checks for mistakes with OpenTelemetry/Census spans
     # Todo enable
-    #- nolintlint # reports ill-formed or insufficient nolint directives
+    - sqlclosecheck # checks that sql.Rows and sql.Stmt are closed
+    # Todo enable : Many changes, but good changes.
+    # - stylecheck # is a replacement for golint
     # Todo enable
-    #- nonamedreturns # reports all named returns
+    - testableexamples # checks if examples are testable (have an expected output)
+    # Todo enable - some test bugs. To be fixed
+    # - testifylint # checks usage of github.com/stretchr/testify
+    # Todo enable - Might be too strict for us
+    # - testpackage # makes you use a separate _test package
     # Todo enable
-    #- nosprintfhostport # checks for misuse of Sprintf to construct a host with port in a URL
+    - tparallel # detects inappropriate usage of t.Parallel() method in your Go test codes
+    # Todo enable - One small change. Good find.
+    # - unconvert # removes unnecessary type conversions
     # Todo enable
-    #- perfsprint # checks that fmt.Sprintf can be replaced with a faster alternative
+    - unparam # reports unused function parameters
     # Todo enable
-    #- predeclared # finds code that shadows one of Go's predeclared identifiers
+    - usestdlibvars # detects the possibility to use variables/constants from the Go standard library
     # Todo enable
-    #- promlinter # checks Prometheus metrics naming via promlint
-    # Todo enable
-    #- protogetter # reports direct reads from proto message fields when getters should be used
-    # Todo enable
-    #- reassign # checks that package variables are not reassigned
-    # Todo enable
-    #- recvcheck # checks for receiver type consistency
-    # Todo enable
-    #- revive # fast, configurable, extensible, flexible, and beautiful linter for Go, drop-in replacement of golint
-    # Todo enable
-    #- rowserrcheck # checks whether Err of rows is checked successfully
-    # Todo enable
-    #- sloglint # ensure consistent code style when using log/slog
-    # Todo enable
-    #- spancheck # checks for mistakes with OpenTelemetry/Census spans
-    # Todo enable
-    #- sqlclosecheck # checks that sql.Rows and sql.Stmt are closed
-    # Todo enable
-    #- stylecheck # is a replacement for golint
-    # Todo enable
-    #- testableexamples # checks if examples are testable (have an expected output)
-    # Todo enable
-    #- testifylint # checks usage of github.com/stretchr/testify
-    # Todo enable
-    #- testpackage # makes you use a separate _test package
-    # Todo enable
-    #- tparallel # detects inappropriate usage of t.Parallel() method in your Go test codes
-    # Todo enable
-    #- unconvert # removes unnecessary type conversions
-    # Todo enable
-    #- unparam # reports unused function parameters
-    # Todo enable
-    #- usestdlibvars # detects the possibility to use variables/constants from the Go standard library
-    # Todo enable
-    #- usetesting # reports uses of functions with replacement inside the testing package
-    # Todo enable
-    #- wastedassign # finds wasted assignment statements
-    # Todo enable
-    #- whitespace # detects leading and trailing whitespace
+    - usetesting # reports uses of functions with replacement inside the testing package
+    # Todo enable - many required fixes
+    # - wastedassign # finds wasted assignment statements
+    # Todo enable - many fixes
+    # - whitespace # detects leading and trailing whitespace
 
     ## you may want to enable
     #- decorder # checks declaration order and count of types, constants, variables and functions
