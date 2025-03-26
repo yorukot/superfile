@@ -104,9 +104,11 @@ func (m *model) panelItemRename() {
 
 func (m *model) deleteItemWarn() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-	if !((panel.panelMode == selectMode && len(panel.selected) != 0) || (panel.panelMode == browserMode)) {
+
+	if panel.panelMode == browserMode && len(panel.element) == 0 || panel.panelMode == selectMode && len(panel.selected) == 0 {
 		return
 	}
+
 	id := shortuuid.New()
 	message := channelMessage{
 		messageId:   id,
