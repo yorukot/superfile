@@ -280,21 +280,16 @@ linters:
     #- errorlint # finds code that will cause problems with the error wrapping scheme introduced in Go 1.13
     # Todo enable - Need on small fix
     #- exhaustive # checks exhaustiveness of enum switch statements
-    # Todo enable
     - exptostd # detects functions from golang.org/x/exp/ that can be replaced by std functions
-    # Todo enable
     - fatcontext # detects nested contexts in loops
     # Todo enable - no . this blocks only fmt.Print family and is not useful right now
     # - forbidigo # forbids identifiers
     # Todo enable - need to make functions shorter
     #- funlen # tool for detection of long functions
-    # Todo enable
     - gocheckcompilerdirectives # validates go compiler directive comments (//go:)
     # Todo enable - This is too much for us right now
     # - gochecknoglobals # checks that no global variables exist
-    # Todo enable
     - gochecknoinits # checks that no init functions are present in Go code
-    # Todo enable
     - gochecksumtype # checks exhaustiveness on Go "sum types"
     # Todo enable - Need to refactor many functions
     # - gocognit # computes and checks the cognitive complexity of functions
@@ -308,38 +303,27 @@ linters:
     #- godot # checks if comments end in a period
     # Todo enable - one small fix
     #- goimports # in addition to fixing imports, goimports also formats your code in the same style as gofmt
-    # Todo enable
     - gomoddirectives # manages the use of 'replace', 'retract', and 'excludes' directives in go.mod
-    # Todo enable
     - goprintffuncname # checks that printf-like functions are named with f at the end
     # Todo enable - ignore for a few int overflow, and fix file permissions
     # weak md5 cryptography, Subprocess launched with a potential tainted input
     # - gosec # inspects source code for security problems
-    # Todo enable
     - iface # checks the incorrect use of interfaces, helping developers avoid interface pollution
     # Todo enable : Need fixes
     # - intrange # finds places where for loops could make use of an integer range
     # Todo enable : Need many fixes
     # - lll # reports long lines
-    # Todo enable
     - loggercheck # checks key value pairs for common logger libraries (kitlog,klog,logr,zap)
-    # Todo enable
     - makezero # finds slice declarations with non-zero initial length
-    # Todo enable
     - mirror # reports wrong mirror patterns of bytes/strings usage
     # Todo enable - Many many magic numbers, and this should be fixed.
     # - mnd # detects magic numbers
-    # Todo enable
     - musttag # enforces field tags in (un)marshaled structs
-    # Todo enable
     - nakedret # finds naked returns in functions greater than a specified function length
     # Todo enable : Many reports. A bit hard to understand the nesting value.
     # - nestif # reports deeply nested if statements
-    # Todo enable
     - nilerr # finds the code that returns nil even if it checks that the error is not nil
-    # Todo enable
     - nilnesserr # reports that it checks for err != nil, but it returns a different nil value error (powered by nilness and nilerr)
-    # Todo enable
     - nilnil # checks that there is no simultaneous return of nil error and an invalid value
     # Todo enable : Need to fix one client.Get usage
     # - noctx # finds sending http request without context.Context
@@ -347,15 +331,11 @@ linters:
     # - nolintlint # reports ill-formed or insufficient nolint directives
     # Todo enable - maybe too strict for us
     # - nonamedreturns # reports all named returns
-    # Todo enable
     - nosprintfhostport # checks for misuse of Sprintf to construct a host with port in a URL
     # Todo enable : One small fix
     # - perfsprint # checks that fmt.Sprintf can be replaced with a faster alternative
-    # Todo enable
     - predeclared # finds code that shadows one of Go's predeclared identifiers
-    # Todo enable
     - promlinter # checks Prometheus metrics naming via promlint
-    # Todo enable
     - protogetter # reports direct reads from proto message fields when getters should be used
     # Todo enable - Some hard to fix things
     # - reassign # checks that package variables are not reassigned
@@ -363,75 +343,85 @@ linters:
     # - recvcheck # checks for receiver type consistency
     # Todo enable : Many changes
     # - revive # fast, configurable, extensible, flexible, and beautiful linter for Go, drop-in replacement of golint
-    # Todo enable
     - rowserrcheck # checks whether Err of rows is checked successfully
     # Todo enable - Need to use non-root logger
     # - sloglint # ensure consistent code style when using log/slog
-    # Todo enable
     - spancheck # checks for mistakes with OpenTelemetry/Census spans
-    # Todo enable
     - sqlclosecheck # checks that sql.Rows and sql.Stmt are closed
     # Todo enable : Many changes, but good changes.
     # - stylecheck # is a replacement for golint
-    # Todo enable
     - testableexamples # checks if examples are testable (have an expected output)
     # Todo enable - some test bugs. To be fixed
     # - testifylint # checks usage of github.com/stretchr/testify
     # Todo enable - Might be too strict for us
     # - testpackage # makes you use a separate _test package
-    # Todo enable
     - tparallel # detects inappropriate usage of t.Parallel() method in your Go test codes
     # Todo enable - One small change. Good find.
     # - unconvert # removes unnecessary type conversions
-    # Todo enable
     - unparam # reports unused function parameters
-    # Todo enable
     - usestdlibvars # detects the possibility to use variables/constants from the Go standard library
-    # Todo enable
     - usetesting # reports uses of functions with replacement inside the testing package
     # Todo enable - many required fixes
     # - wastedassign # finds wasted assignment statements
     # Todo enable - many fixes
     # - whitespace # detects leading and trailing whitespace
 
+    ## Todo : Enable some of them
     ## you may want to enable
-    #- decorder # checks declaration order and count of types, constants, variables and functions
+    - decorder # checks declaration order and count of types, constants, variables and functions
+    # We have so many false positives
     #- exhaustruct # [highly recommend to enable] checks if all structure fields are initialized
+    # Not needed
     #- gci # controls golang package import order and makes it always deterministic
     #- ginkgolinter # [if you use ginkgo/gomega] enforces standards of using ginkgo and gomega
+    # We have too many already
     #- godox # detects usage of FIXME, TODO and other keywords inside comments
-    #- goheader # checks is file header matches to pattern
+    - goheader # checks is file header matches to pattern
     #- inamedparam # [great idea, but too strict, need to ignore a lot of cases by default] reports interfaces with unnamed method parameters
-    #- interfacebloat # checks the number of methods inside an interface
+    - interfacebloat # checks the number of methods inside an interface
+    # Function Update() is caught
     #- ireturn # accept interfaces, return concrete types
+    # Too premature
     #- prealloc # [premature optimization, but can be used in some cases] finds slice declarations that could potentially be preallocated
+    # Gotta see if this points to any issue
     #- tagalign # checks that struct tags are well aligned
+    # Useless
     #- varnamelen # [great idea, but too many false positives] checks that the length of a variable's name matches its scope
+    # Too much for us
     #- wrapcheck # checks that errors returned from external packages are wrapped
+    # We dont use zerolog
     #- zerologlint # detects the wrong usage of zerolog that a user forgets to dispatch zerolog.Event
 
     ## disabled
     #- containedctx # detects struct contained context.Context field
     #- contextcheck # [too many false positives] checks the function whether use a non-inherited context
-    #- dogsled # checks assignments with too many blank identifiers (e.g. x, _, _, _, := f())
-    #- dupword # [useless without config] checks for duplicate words in the source code
-    #- err113 # [too strict] checks the errors handling expressions
-    #- errchkjson # [don't see profit + I'm against of omitting errors like in the first example https://github.com/breml/errchkjson] checks types passed to the json encoding functions. Reports unsupported types and optionally reports occasions, where the check for the returned error can be omitted
-    #- forcetypeassert # [replaced by errcheck] finds forced type assertions
-    #- gofmt # [replaced by goimports] checks whether code was gofmt-ed
+    # False positives
+    # - dogsled # checks assignments with too many blank identifiers (e.g. x, _, _, _, := f())
+    # False positives
+    # - dupword # [useless without config] checks for duplicate words in the source code
+    # Todo : It gave some useful errors. Should fix
+    # - err113 # [too strict] checks the errors handling expressions
+    # - errchkjson # [don't see profit + I'm against of omitting errors like in the first example https://github.com/breml/errchkjson] checks types passed to the json encoding functions. Reports unsupported types and optionally reports occasions, where the check for the returned error can be omitted
+    # - forcetypeassert # [replaced by errcheck] finds forced type assertions
+    # Todo : rely on this, and skip seperate go fmt check in cicd
+    # - gofmt # [replaced by goimports] checks whether code was gofmt-ed
+    # Todo : Check this
     #- gofumpt # [replaced by goimports, gofumports is not available yet] checks whether code was gofumpt-ed
     #- gomodguard # [use more powerful depguard] allow and block lists linter for direct Go module dependencies
-    #- gosmopolitan # reports certain i18n/l10n anti-patterns in your Go codebase
-    #- grouper # analyzes expression groups
-    #- importas # enforces consistent import aliases
-    #- maintidx # measures the maintainability index of each function
-    #- misspell # [useless] finds commonly misspelled English words in comments
-    #- nlreturn # [too strict and mostly code is not more readable] checks for a new line before return and branch statements to increase code clarity
+    - gosmopolitan # reports certain i18n/l10n anti-patterns in your Go codebase
+    - grouper # analyzes expression groups
+    - importas # enforces consistent import aliases
+    - maintidx # measures the maintainability index of each function
+    # Todo - might enable this. This is not so bad
+    # - misspell # [useless] finds commonly misspelled English words in comments
+    # - nlreturn # [too strict and mostly code is not more readable] checks for a new line before return and branch statements to increase code clarity
+    # Todo : might make tests parallel
     #- paralleltest # [too many false positives] detects missing usage of t.Parallel() method in your Go test
-    #- tagliatelle # checks the struct tags
-    #- tenv # [deprecated, replaced by usetesting] detects using os.Setenv instead of t.Setenv since Go1.17
+    # Todo : Check this. There are some issues to be fixed
+    # - tagliatelle # checks the struct tags
+    # - tenv # [deprecated, replaced by usetesting] detects using os.Setenv instead of t.Setenv since Go1.17
     #- thelper # detects golang test helpers without t.Helper() call and checks the consistency of test helpers
-    #- wsl # [too strict and mostly code is not more readable] whitespace linter forces you to use empty lines
+    # - wsl # [too strict and mostly code is not more readable] whitespace linter forces you to use empty lines
 
 
 issues:
