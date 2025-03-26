@@ -520,6 +520,11 @@ func (m *model) pasteItem() {
 func (m *model) extractFile() {
 	var err error
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+
+	if len(panel.element) == 0 {
+		return
+	}
+
 	ext := strings.ToLower(filepath.Ext(panel.element[panel.cursor].location))
 	if !isExensionExtractable(ext) {
 		slog.Error(fmt.Sprintf("Error unexpected file extension type: %s", ext), "error", errors.ErrUnsupported)
@@ -548,6 +553,11 @@ func (m *model) extractFile() {
 // Compress file or directory
 func (m *model) compressFile() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+
+	if len(panel.element) == 0 {
+		return
+	}
+
 	fileName := filepath.Base(panel.element[panel.cursor].location)
 
 	zipName := strings.TrimSuffix(fileName, filepath.Ext(fileName)) + ".zip"
@@ -633,6 +643,11 @@ func (m *model) openDirectoryWithEditor() tea.Cmd {
 // Copy file path
 func (m *model) copyPath() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+
+	if len(panel.element) == 0 {
+		return
+	}
+
 	if err := clipboard.WriteAll(panel.element[panel.cursor].location); err != nil {
 		slog.Error("Error while copy path", "error", err)
 	}

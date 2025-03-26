@@ -208,6 +208,10 @@ func returnDirElementBySearchString(location string, displayDotFile bool, search
 		return []element{}
 	}
 
+	if len(items) == 0 {
+		return []element{}
+	}
+
 	folderElementMap := map[string]element{}
 	fileAndDirectories := []string{}
 
