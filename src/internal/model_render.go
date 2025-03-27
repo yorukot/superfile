@@ -279,7 +279,6 @@ func (m *model) processBarRender() string {
 			renderedHeight--
 		}
 
-		// Change 'process' is a struct type. Should not use it as variable name
 		curProcess := processes[i]
 		curProcess.progress.Width = footerWidth(m.fullWidth) - 3
 		symbol := ""
