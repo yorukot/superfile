@@ -786,10 +786,6 @@ func (m *model) filePreviewPanelRender() string {
 	return box.Render(fileContent)
 }
 
-func (m *model) commandLineInputBoxRender() string {
-	return m.commandLine.input.View()
-}
-
 func getBatSyntaxHighlightedContent(itemPath string, previewLine int, background string) (string, error) {
 	fileContent := ""
 	// --plain: use the plain style without line numbers and decorations

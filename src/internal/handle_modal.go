@@ -3,9 +3,7 @@ package internal
 import (
 	"log/slog"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"runtime"
 	"strings"
 )
 
@@ -194,51 +192,4 @@ func (m *model) openHelpMenu() {
 // Quit help menu
 func (m *model) quitHelpMenu() {
 	m.helpMenu.open = false
-}
-
-// Command line
-func (m *model) openCommandLine() {
-	m.firstTextInput = true
-	m.footerHeight--
-	m.commandLine.input = generateCommandLineInputBox()
-	m.commandLine.input.Width = m.fullWidth - 3
-	m.commandLine.input.Focus()
-}
-
-func (m *model) closeCommandLine() {
-	m.footerHeight++
-	m.commandLine.input.SetValue("")
-	m.commandLine.input.Blur()
-}
-
-// Exec a command line input inside the pointing file dir. Like opening the
-// focused file in the text editor
-func (m *model) enterCommandLine() {
-	focusPanelDir := ""
-	for _, panel := range m.fileModel.filePanels {
-		if panel.focusType == focus {
-			focusPanelDir = panel.location
-		}
-	}
-
-	var cmd *exec.Cmd
-	switch runtime.GOOS {
-	case "windows":
-		// On Windows, we use PowerShell with -Command flag for single command execution
-		cmd = exec.Command("powershell.exe", "-Command", m.commandLine.input.Value())
-	default:
-		// On Unix-like systems, use bash/sh
-		cmd = exec.Command("/bin/sh", "-c", m.commandLine.input.Value())
-	}
-
-	cmd.Dir = focusPanelDir // switch to the focused panel directory
-
-	output, err := cmd.CombinedOutput()
-
-	if err != nil {
-		slog.Error("Command execution failed", "error", err, "output", string(output))
-		return
-	}
-
-	m.closeCommandLine()
 }

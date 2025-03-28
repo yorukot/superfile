@@ -127,9 +127,6 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) tea.Cmd {
 	case containsKey(msg, hotkeys.ToggleReverseSort):
 		m.toggleReverseSort()
 
-	case containsKey(msg, hotkeys.OpenCommandLine):
-		m.openCommandLine()
-
 	case containsKey(msg, hotkeys.OpenFileWithEditor):
 		cmd = m.openFileWithEditor()
 
@@ -359,15 +356,5 @@ func (m *model) helpMenuKey(msg string) {
 		m.helpMenuListDown()
 	case containsKey(msg, hotkeys.Quit):
 		m.quitHelpMenu()
-	}
-}
-
-// Handle command line keys closing or entering command line
-func (m *model) commandLineKey(msg string) {
-	switch msg {
-	case containsKey(msg, hotkeys.CancelTyping):
-		m.closeCommandLine()
-	case containsKey(msg, hotkeys.ConfirmTyping):
-		m.enterCommandLine()
 	}
 }

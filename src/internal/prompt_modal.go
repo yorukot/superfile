@@ -3,8 +3,11 @@ package internal
 import (
 	"fmt"
 	"log"
+	"log/slog"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -55,9 +58,26 @@ func init() {
 		renderHint:   "Bash/Powershell - Command",
 		handleCommand: func(input string, _ *promptModal, m *model) bool {
 
-			m.openCommandLine()
-			m.commandLine.input.SetValue(input)
-			m.enterCommandLine()
+			// Make base work inside the prompt modal
+
+			basePath := m.fileModel.filePanels[m.filePanelFocusIndex].location
+			var cmd *exec.Cmd
+			switch runtime.GOOS {
+			case "windows":
+				// On Windows, we use PowerShell with -Command flag for single command execution
+				cmd = exec.Command("powershell.exe", "-Command", input)
+			default:
+				// On Unix-like systems, use bash/sh
+				cmd = exec.Command("/bin/sh", "-c", input)
+			}
+			cmd.Dir = basePath // switch to the focused panel directory
+
+			output, err := cmd.CombinedOutput()
+
+			if err != nil {
+				slog.Error("Command execution failed", "error", err, "output", string(output))
+				return true
+			}
 
 			return true
 

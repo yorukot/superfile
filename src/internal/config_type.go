@@ -190,7 +190,6 @@ type HotkeysType struct {
 	ToggleDotFile   []string `toml:"toggle_dot_file"`
 	ChangePanelMode []string `toml:"change_panel_mode"`
 	OpenHelpMenu    []string `toml:"open_help_menu"`
-	OpenCommandLine []string `toml:"open_command_line"`
 	OpenSPFPrompt   []string `toml:"open_spf_prompt"`
 
 	CopyPath []string `toml:"copy_path"`

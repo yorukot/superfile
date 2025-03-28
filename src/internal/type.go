@@ -83,7 +83,6 @@ type model struct {
 	helpMenu             helpMenuModal
 	promptModal          promptModal
 	fileMetaData         fileMetadata
-	commandLine          commandLineModal
 	confirmToQuit        bool
 	firstTextInput       bool
 	toggleDotFile        bool
@@ -104,10 +103,6 @@ type model struct {
 }
 
 // Modal
-type commandLineModal struct {
-	input textinput.Model
-}
-
 type helpMenuModal struct {
 	height      int
 	width       int

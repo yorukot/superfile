@@ -46,7 +46,7 @@ func InitialModel(dir string, firstUseCheck, hasTrashCheck bool) model {
 // cursos blinking and starts message streamming channel
 func (m model) Init() tea.Cmd {
 	return tea.Batch(
-		tea.SetWindowTitle("SuperFile"),
+		tea.SetWindowTitle("superfile"),
 		textinput.Blink, // Assuming textinput.Blink is a valid command
 		listenForChannelMessage(channel),
 	)
@@ -181,8 +181,7 @@ func (m *model) setHeightValues(height int) {
 	// Todo : Calculate the value , instead of manually hard coding it.
 
 	// Total Height = mainPanelHeight + 2 (border) + footerHeight (including borders and command line)
-	m.mainPanelHeight = height -
-		actualfooterHeight(m.footerHeight, m.commandLine.input.Focused()) - 2
+	m.mainPanelHeight = height - m.footerHeight - 2
 }
 
 // Set help menu size
@@ -249,9 +248,6 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 		// If help menu is open
 	} else if m.helpMenu.open {
 		m.helpMenuKey(msg.String())
-		// If command line input is send
-	} else if m.commandLine.input.Focused() {
-		m.commandLineKey(msg.String())
 		// If asking to confirm quiting
 	} else if m.confirmToQuit {
 		quit := m.confirmToQuitSuperfile(msg.String())
@@ -286,8 +282,6 @@ func (m *model) updateFilePanelsState(msg tea.Msg, cmd *tea.Cmd) {
 		focusPanel.rename, *cmd = focusPanel.rename.Update(msg)
 	} else if focusPanel.searchBar.Focused() {
 		focusPanel.searchBar, *cmd = focusPanel.searchBar.Update(msg)
-	} else if m.commandLine.input.Focused() {
-		m.commandLine.input, *cmd = m.commandLine.input.Update(msg)
 	} else if m.typingModal.open {
 		m.typingModal.textInput, *cmd = m.typingModal.textInput.Update(msg)
 	} else if m.promptModal.open {
@@ -370,12 +364,6 @@ func (m model) View() string {
 		clipboardBar := m.clipboardRender()
 
 		footer = lipgloss.JoinHorizontal(0, processBar, metaData, clipboardBar)
-	}
-
-	if m.commandLine.input.Focused() {
-		commandLine := m.commandLineInputBoxRender()
-		footer = lipgloss.JoinVertical(0, footer, commandLine)
-
 	}
 
 	var finalRender string
