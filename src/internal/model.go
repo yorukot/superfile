@@ -180,8 +180,8 @@ func (m *model) setHeightValues(height int) {
 	// Todo : Make it grow even more for bigger screen sizes.
 	// Todo : Calculate the value , instead of manually hard coding it.
 
-	// Total Height = mainPanelHeight + 2 (border) + footerHeight (including borders and command line)
-	m.mainPanelHeight = height - m.footerHeight - 2
+	// Main panel height = Total terminal height - footer height - 2(footer border) - 2(file panel border)
+	m.mainPanelHeight = height - m.footerHeight - 2 - 2
 }
 
 // Set help menu size
