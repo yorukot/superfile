@@ -2,6 +2,8 @@ package internal
 
 import (
 	"path/filepath"
+
+	"github.com/yorukot/superfile/src/config/icon"
 )
 
 // Variables for holding default configurations of each settings
@@ -61,7 +63,7 @@ func defaultModelConfig(toggleDotFileBool bool, toggleFooter bool, firstFilePane
 			open:        false,
 		},
 		promptModal: promptModal{
-			headline: "superfile - Prompt",
+			headline: icon.Terminal + " superfile - Prompt",
 			open:     false,
 		},
 		toggleDotFile: toggleDotFileBool,
