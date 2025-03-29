@@ -62,7 +62,7 @@ func defaultModelConfig(toggleDotFileBool bool, toggleFooter bool, firstFilePane
 			data:        getHelpMenuData(),
 			open:        false,
 		},
-		promptModal: promptModal{
+		promptModal: promptModalType{
 			headline: icon.Terminal + " superfile - Prompt",
 			open:     false,
 		},

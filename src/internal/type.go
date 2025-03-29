@@ -81,7 +81,7 @@ type model struct {
 	typingModal          typingModal
 	warnModal            warnModal
 	helpMenu             helpMenuModal
-	promptModal          promptModal
+	promptModal          promptModalType
 	fileMetaData         fileMetadata
 	confirmToQuit        bool
 	firstTextInput       bool
@@ -112,7 +112,7 @@ type helpMenuModal struct {
 	data        []helpMenuModalData
 }
 
-type promptModal struct {
+type promptModalType struct {
 	headline  string
 	open      bool
 	cmd       PromptCommand

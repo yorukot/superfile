@@ -16,7 +16,7 @@ import (
 type PromptCommand struct {
 	renderPrefix  string
 	renderHint    string
-	handleCommand func(input string, p *promptModal, m *model) bool
+	handleCommand func(input string, p *promptModalType, m *model) bool
 }
 type PromptCommandPrefix = string
 
@@ -36,7 +36,7 @@ func init() {
 
 	promptCommands[PROMPT_COMMAND_COMMAND] = PromptCommand{
 		renderPrefix: "> ",
-		handleCommand: func(input string, p *promptModal, m *model) bool {
+		handleCommand: func(input string, p *promptModalType, m *model) bool {
 
 			fields := strings.Fields(input)
 			inputCmd := fields[0]
@@ -56,7 +56,7 @@ func init() {
 	promptCommands[PROMPT_COMMAND_SHELL] = PromptCommand{
 		renderPrefix: "$ ",
 		renderHint:   "Bash/Powershell - Command",
-		handleCommand: func(input string, _ *promptModal, m *model) bool {
+		handleCommand: func(input string, _ *promptModalType, m *model) bool {
 
 			// Make base work inside the prompt modal
 
@@ -87,7 +87,7 @@ func init() {
 	promptCommands[PROMPT_COMMAND_CD] = PromptCommand{
 		renderPrefix: "CD > ",
 		renderHint:   "CD current FilePanel",
-		handleCommand: func(input string, p *promptModal, m *model) bool {
+		handleCommand: func(input string, p *promptModalType, m *model) bool {
 			basePath := m.fileModel.filePanels[m.filePanelFocusIndex].location
 			path := strings.TrimSpace(input)
 			if !filepath.IsAbs(path) {
@@ -116,7 +116,7 @@ func init() {
 	promptCommands[PROMPT_COMMAND_NEWFILEPANEL] = PromptCommand{
 		renderPrefix: "OPEN > ",
 		renderHint:   "new Filepanel at given path",
-		handleCommand: func(input string, p *promptModal, m *model) bool {
+		handleCommand: func(input string, p *promptModalType, m *model) bool {
 
 			basePath := m.fileModel.filePanels[m.filePanelFocusIndex].location
 			path := strings.TrimSpace(input)
@@ -145,7 +145,7 @@ func init() {
 
 	promptCommands[PROMPT_COMMAND_SPLIT] = PromptCommand{
 		renderHint: "new Filepanel at current location",
-		handleCommand: func(_ string, _ *promptModal, m *model) bool {
+		handleCommand: func(_ string, _ *promptModalType, m *model) bool {
 
 			location := m.fileModel.filePanels[m.filePanelFocusIndex].location
 			m.createNewFilePanel(location)
@@ -156,7 +156,7 @@ func init() {
 
 }
 
-func (p *promptModal) Open(m *model, cmdPrefix PromptCommandPrefix) {
+func (p *promptModalType) Open(m *model, cmdPrefix PromptCommandPrefix) {
 
 	prompt, ok := promptCommands[cmdPrefix]
 	if !ok {
@@ -194,17 +194,17 @@ func (p *promptModal) Open(m *model, cmdPrefix PromptCommandPrefix) {
 	p.open = true
 }
 
-func (p *promptModal) Close() {
+func (p *promptModalType) Close() {
 	p.open = false
 	p.errormsg = ""
 	p.textInput.SetValue("")
 }
 
-func (p *promptModal) Confirm(m *model) bool {
+func (p *promptModalType) Confirm(m *model) bool {
 	return p.cmd.handleCommand(p.textInput.Value(), p, m)
 }
 
-func (p *promptModal) Render(width int) string {
+func (p *promptModalType) Render(width int) string {
 
 	var content, promptLine string
 	text := p.textInput.Value()
