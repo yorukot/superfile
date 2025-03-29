@@ -389,12 +389,12 @@ func (m *model) returnMetaData() {
 	}
 
 	if fileInfo.IsDir() {
-		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"FolderName", fileInfo.Name()})
+		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"Name", fileInfo.Name()})
 		if m.focusPanel == metadataFocus {
-			m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"FolderSize", formatFileSize(dirSize(filePath))})
+			m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"Size", formatFileSize(dirSize(filePath))})
 		}
-		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"FolderModifyDate", fileInfo.ModTime().String()})
-		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"FolderPermissions", fileInfo.Mode().String()})
+		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"Date Modified", fileInfo.ModTime().String()})
+		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"Permissions", fileInfo.Mode().String()})
 		message.metadata = m.fileMetaData.metaData
 		channel <- message
 		return
@@ -422,10 +422,10 @@ func (m *model) returnMetaData() {
 			}
 		}
 	} else {
-		fileName := [2]string{"FileName", fileInfo.Name()}
-		fileSize := [2]string{"FileSize", formatFileSize(fileInfo.Size())}
-		fileModifyData := [2]string{"FileModifyDate", fileInfo.ModTime().String()}
-		filePermissions := [2]string{"FilePermissions", fileInfo.Mode().String()}
+		fileName := [2]string{"Name", fileInfo.Name()}
+		fileSize := [2]string{"Size", formatFileSize(fileInfo.Size())}
+		fileModifyData := [2]string{"Date Modified", fileInfo.ModTime().String()}
+		filePermissions := [2]string{"Permissions", fileInfo.Mode().String()}
 
 		if Config.EnableMD5Checksum {
 			// Calculate MD5 checksum
