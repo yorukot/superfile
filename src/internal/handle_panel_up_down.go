@@ -91,53 +91,18 @@ func (panel *filePanel) pgDown(mainPanelHeight int) {
 }
 
 // Handles the action of selecting an item in the file panel upwards. (only work on select mode)
+// This basically just toggles the "selected" status of element that is pointed by the cursor
+// and then moves the cursor up
+// Todo : Add unit tests for itemSelectUp and singleItemSelect
 func (panel *filePanel) itemSelectUp(mainPanelHeight int) {
-	if panel.cursor > 0 {
-		panel.cursor--
-		if panel.cursor < panel.render {
-			panel.render--
-		}
-	} else {
-		if len(panel.element) > panelElementHeight(mainPanelHeight) {
-			panel.render = len(panel.element) - panelElementHeight(mainPanelHeight)
-			panel.cursor = len(panel.element) - 1
-		} else {
-			panel.cursor = len(panel.element) - 1
-		}
-	}
-	selectItemIndex := panel.cursor + 1
-	if selectItemIndex > len(panel.element)-1 {
-		selectItemIndex = 0
-	}
-	if arrayContains(panel.selected, panel.element[selectItemIndex].location) {
-		panel.selected = removeElementByValue(panel.selected, panel.element[selectItemIndex].location)
-	} else {
-		panel.selected = append(panel.selected, panel.element[selectItemIndex].location)
-	}
+	panel.singleItemSelect()
+	panel.listUp(mainPanelHeight)
 }
 
 // Handles the action of selecting an item in the file panel downwards. (only work on select mode)
 func (panel *filePanel) itemSelectDown(mainPanelHeight int) {
-
-	if panel.cursor < len(panel.element)-1 {
-		panel.cursor++
-		if panel.cursor > panel.render+panelElementHeight(mainPanelHeight)-1 {
-			panel.render++
-		}
-	} else {
-		panel.render = 0
-		panel.cursor = 0
-	}
-	selectItemIndex := panel.cursor - 1
-	if selectItemIndex < 0 {
-		selectItemIndex = len(panel.element) - 1
-	}
-	if arrayContains(panel.selected, panel.element[selectItemIndex].location) {
-		panel.selected = removeElementByValue(panel.selected, panel.element[selectItemIndex].location)
-	} else {
-		panel.selected = append(panel.selected, panel.element[selectItemIndex].location)
-	}
-
+	panel.singleItemSelect()
+	panel.listDown(mainPanelHeight)
 }
 
 // ======================================== Metadata controller ========================================

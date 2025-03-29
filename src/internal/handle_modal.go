@@ -60,7 +60,16 @@ func (m *model) cancelRename() {
 
 // Connfirm rename file or directory
 func (m *model) confirmRename() {
+
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+
+	// Although we dont expect this to happen based on our current flow
+	// Just adding it here to be safe
+	if len(panel.element) == 0 {
+		slog.Error("confirmRename called on empty panel")
+		return
+	}
+
 	oldPath := panel.element[panel.cursor].location
 	newPath := filepath.Join(panel.location, panel.rename.Value())
 

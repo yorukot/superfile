@@ -153,13 +153,16 @@ func (m *model) selectAllItem() {
 }
 
 // Select the item where cursor located (only work on select mode)
-func (m *model) singleItemSelect() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex] // Access the current panel
+func (panel *filePanel) singleItemSelect() {
 
 	if len(panel.element) > 0 && panel.cursor >= 0 && panel.cursor < len(panel.element) {
 		elementLocation := panel.element[panel.cursor].location
 
 		if arrayContains(panel.selected, elementLocation) {
+			// This is inefficient. Once you select 1000 items,
+			// each select / deselect operation can take 1000 operations
+			// It can be easily made constant time.
+			// Todo : (performance)convert panel.selected to a set (map[string]struct{})
 			panel.selected = removeElementByValue(panel.selected, elementLocation)
 		} else {
 			panel.selected = append(panel.selected, elementLocation)

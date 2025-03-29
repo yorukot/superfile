@@ -49,6 +49,7 @@ class GenericTestImpl(BaseTest):
         validate_exists : List[Path] = None,
         validate_not_exists : List[Path] = None,
         validate_spf_closed: bool = False,
+        validate_spf_running: bool = False,
         close_wait_time : float = tconst.CLOSE_WAIT_TIME ):
         super().__init__(test_env)
         self.test_root = test_root
@@ -59,6 +60,7 @@ class GenericTestImpl(BaseTest):
         self.validate_exists = validate_exists
         self.validate_not_exists = validate_not_exists
         self.validate_spf_closed = validate_spf_closed
+        self.validate_spf_running = validate_spf_running
         self.close_wait_time = close_wait_time
     
     def setup(self) -> None:
@@ -82,10 +84,7 @@ class GenericTestImpl(BaseTest):
         time.sleep(self.close_wait_time)
         self.logger.debug("Finished Execution")
 
-    def test_execute(self) -> None:
-        """Execute the test
-        """
-        self.start_spf()
+    def send_input(self) -> None:
         if self.key_inputs is not None:
             for cur_input in self.key_inputs:
                 if isinstance(cur_input, keys.Keys):
@@ -95,6 +94,11 @@ class GenericTestImpl(BaseTest):
                     self.env.spf_mgr.send_text_input(cur_input)
                 time.sleep(tconst.KEY_DELAY)
 
+    def test_execute(self) -> None:
+        """Execute the test
+        """
+        self.start_spf()
+        self.send_input()    
         time.sleep(tconst.OPERATION_DELAY)
         self.end_execution()
         
@@ -109,6 +113,8 @@ class GenericTestImpl(BaseTest):
         try:
             if self.validate_spf_closed :
                 assert not self.env.spf_mgr.is_spf_running(), "Superfile is still running"
+            if self.validate_spf_running :
+                assert self.env.spf_mgr.is_spf_running(), "Superfile is not running"
 
             if self.validate_exists is not None:
                 for file_path in self.validate_exists:
