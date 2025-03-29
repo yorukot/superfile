@@ -10,6 +10,32 @@ head:
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC(YYYY-MM-DD).
 
+# [**v1.2.1**](https://github.com/yorukot/superfile/releases/tag/v1.2.1)
+
+> 2025-03-26
+
+#### Update
+- Add show_image_preview flag [`#728`](https://github.com/yorukot/superfile/pull/728)
+- Allow specifying directory icon color in theme files [`#709`](https://github.com/yorukot/superfile/pull/709)
+- --hotkey-file flag and fix in configFileFlag [`#700`](https://github.com/yorukot/superfile/pull/700)
+- File preview: Add bat as plugin [`#686`](https://github.com/yorukot/superfile/pull/686)
+- Monokai Theme [`#673`](https://github.com/yorukot/superfile/pull/673)
+
+#### Bug fix
+- Fix broken link in website causing 404 [`#714`](https://github.com/yorukot/superfile/pull/714)
+- Fix sidebar disk listing [`#708`](https://github.com/yorukot/superfile/pull/708)
+- Switch to semver for newer 1.2.1 release [`#687`](https://github.com/yorukot/superfile/pull/687)
+
+#### Optimization
+- Fix: icon consts [`#719`](https://github.com/yorukot/superfile/pull/719)
+- Refactor and unit tests for scrolling [`#710`](https://github.com/yorukot/superfile/pull/710)
+- Refactor of wheel functions [`#695`](https://github.com/yorukot/superfile/pull/695)
+
+#### Documentation
+- Add info about auto update [`#721`](https://github.com/yorukot/superfile/pull/721)
+- add cd_on_quit for fish shell [`#696`](https://github.com/yorukot/superfile/pull/696)
+- Add Pixi installation instructions [`#690`](https://github.com/yorukot/superfile/pull/690)
+
 # [**v1.2.0.0**](https://github.com/yorukot/superfile/releases/tag/v1.2.0.0)
 
 > 2025-03-05

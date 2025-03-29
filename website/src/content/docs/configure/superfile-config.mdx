@@ -95,6 +95,12 @@ Example command to enable - `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned`
 
 `false` => Hides the file preview window when you run a superfile.
 
+- ###### show_image_preview
+
+`true` => Shows the image preview in file preview panel when an image file is selected.
+
+`false` => Does not shows the image preview.
+
 - ###### file_size_use_si
 
 `true` => Displays the file/directory sizes using powers of 1000 (kB, MB, GB).
@@ -140,6 +146,17 @@ Whether to enable debug mode. (if `true`, more verbose logs are written in log f
 `false` => INFO, WARN, ERROR logs are written to log file
 
 ### Style
+
+- ###### code_previewer
+
+`''` => Use the builtin syntax highlighting for code files with *chroma*.
+`'bat'` => Use syntax highlighting provided by the [`bat`](https://github.com/sharkdp/bat) command line tool.
+
+- ###### nerdfont
+
+`true` => Use nerdfont for directories and file icons.
+
+`false` => Dont use nerdfont. If you don't have or don't want Nerdfont installed you can turn this off
 
 - ###### transparent_background
 
