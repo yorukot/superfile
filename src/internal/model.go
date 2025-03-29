@@ -26,7 +26,7 @@ var batCmd = ""
 
 var theme ThemeType
 var Config ConfigType
-var hotkeys HotkeysType
+var Hotkeys HotkeysType
 
 var et *exiftool.Exiftool
 
@@ -257,7 +257,7 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 		}
 		// If quiting input pressed, check if has any running process and displays a
 		// warn. Otherwise just quits application
-	} else if msg.String() == containsKey(msg.String(), hotkeys.Quit) {
+	} else if msg.String() == containsKey(msg.String(), Hotkeys.Quit) {
 		if m.hasRunningProcesses() {
 			m.warnModalForQuit()
 			return cmd

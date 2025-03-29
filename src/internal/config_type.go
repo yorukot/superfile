@@ -153,7 +153,6 @@ type ConfigType struct {
 type HotkeysType struct {
 	Confirm []string `toml:"confirm" comment:"=================================================================================================\nGlobal hotkeys (cannot conflict with other hotkeys)"`
 	Quit    []string `toml:"quit"`
-
 	// movement
 	ListUp   []string `toml:"list_up" comment:"movement"`
 	ListDown []string `toml:"list_down"`

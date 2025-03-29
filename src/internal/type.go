@@ -5,6 +5,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/textinput"
+	"github.com/yorukot/superfile/src/internal/ui/prompt"
 )
 
 // Type representing the mode of the panel
@@ -81,7 +82,7 @@ type model struct {
 	typingModal          typingModal
 	warnModal            warnModal
 	helpMenu             helpMenuModal
-	promptModal          promptModalType
+	promptModal          prompt.PromptModal
 	fileMetaData         fileMetadata
 	confirmToQuit        bool
 	firstTextInput       bool
@@ -110,16 +111,6 @@ type helpMenuModal struct {
 	renderIndex int
 	cursor      int
 	data        []helpMenuModalData
-}
-
-type promptModalType struct {
-	headline  string
-	open      bool
-	cmd       PromptCommand
-	textInput textinput.Model
-	errormsg  string
-
-	commandList map[PromptCommandPrefix]PromptCommand
 }
 
 type helpMenuModalData struct {

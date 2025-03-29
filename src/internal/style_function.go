@@ -236,7 +236,7 @@ func generateSearchBar() textinput.Model {
 	ti.Prompt = filePanelTopDirectoryIconStyle.Render(icon.Search + icon.Space)
 	ti.Cursor.Blink = true
 	ti.PlaceholderStyle = filePanelStyle
-	ti.Placeholder = "(" + hotkeys.SearchBar[0] + ") Type something"
+	ti.Placeholder = "(" + Hotkeys.SearchBar[0] + ") Type something"
 	ti.Blur()
 	ti.CharLimit = 156
 	return ti

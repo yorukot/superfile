@@ -33,7 +33,7 @@ func (m *model) sidebarRender() string {
 	s := sideBarSuperfileTitle + "\n"
 
 	if m.sidebarModel.searchBar.Focused() || m.sidebarModel.searchBar.Value() != "" || m.focusPanel == sidebarFocus {
-		m.sidebarModel.searchBar.Placeholder = "(" + hotkeys.SearchBar[0] + ")" + " Search"
+		m.sidebarModel.searchBar.Placeholder = "(" + Hotkeys.SearchBar[0] + ")" + " Search"
 		s += "\n" + ansi.Truncate(m.sidebarModel.searchBar.View(), Config.SidebarWidth-2, "...")
 	}
 
@@ -482,8 +482,8 @@ func (m *model) typineModalRender() string {
 	fileLocation := filePanelTopDirectoryIconStyle.Render(" "+icon.Directory+icon.Space) +
 		filePanelTopPathStyle.Render(truncateTextBeginning(previewPath, modalWidth-4, "...")) + "\n"
 
-	confirm := modalConfirm.Render(" (" + hotkeys.ConfirmTyping[0] + ") Create ")
-	cancel := modalCancel.Render(" (" + hotkeys.CancelTyping[0] + ") Cancel ")
+	confirm := modalConfirm.Render(" (" + Hotkeys.ConfirmTyping[0] + ") Create ")
+	cancel := modalCancel.Render(" (" + Hotkeys.CancelTyping[0] + ") Cancel ")
 
 	tip := confirm +
 		lipgloss.NewStyle().Background(modalBGColor).Render("           ") +
@@ -505,8 +505,8 @@ func (m *model) introduceModalRender() string {
 func (m *model) warnModalRender() string {
 	title := m.warnModal.title
 	content := m.warnModal.content
-	confirm := modalConfirm.Render(" (" + hotkeys.Confirm[0] + ") Confirm ")
-	cancel := modalCancel.Render(" (" + hotkeys.Quit[0] + ") Cancel ")
+	confirm := modalConfirm.Render(" (" + Hotkeys.Confirm[0] + ") Confirm ")
+	cancel := modalCancel.Render(" (" + Hotkeys.Quit[0] + ") Cancel ")
 	tip := confirm + lipgloss.NewStyle().Background(modalBGColor).Render("           ") + cancel
 	return modalBorderStyle(modalHeight, modalWidth).Render(title + "\n\n" + content + "\n\n" + tip)
 }
