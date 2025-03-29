@@ -40,8 +40,16 @@ func (m *model) panelCreateNewFile() {
 
 }
 
+// Todo : This function does not needs the entire model. Only pass the panel object
 func (m *model) IsRenamingConflicting() bool {
+	// Todo : Replace this with m.getCurrentFilePanel() everywhere
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+
+	if len(panel.element) == 0 {
+		slog.Error("IsRenamingConflicting() being called on empty panel")
+		return false
+	}
+
 	oldPath := panel.element[panel.cursor].location
 	newPath := filepath.Join(panel.location, panel.rename.Value())
 
@@ -82,6 +90,7 @@ func (m *model) panelItemRename() {
 		cursorPos = nameLen
 	}
 
+	// Todo : Separate this out to a function like initDefaultTextInput()
 	ti := textinput.New()
 	ti.Cursor.Style = filePanelCursorStyle
 	ti.Cursor.TextStyle = filePanelStyle
@@ -244,6 +253,9 @@ func (m *model) deleteMultipleItems() {
 		}
 	}
 
+	// This feels a bit fuzzy and unclean. Todo : Review and simplifiy this.
+	// We should never get to this condition of panel.cursor getting negative
+	// and if we do, we should error log that.
 	if panel.cursor >= len(panel.element)-len(panel.selected)-1 {
 		panel.cursor = len(panel.element) - len(panel.selected) - 1
 		if panel.cursor < 0 {

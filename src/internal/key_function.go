@@ -155,7 +155,7 @@ func (m *model) normalAndBrowserModeKey(msg string) {
 	if m.fileModel.filePanels[m.filePanelFocusIndex].panelMode == selectMode {
 		switch msg {
 		case containsKey(msg, hotkeys.Confirm):
-			m.singleItemSelect()
+			m.fileModel.filePanels[m.filePanelFocusIndex].singleItemSelect()
 		case containsKey(msg, hotkeys.FilePanelSelectModeItemsSelectUp):
 			m.fileModel.filePanels[m.filePanelFocusIndex].itemSelectUp(m.mainPanelHeight)
 		case containsKey(msg, hotkeys.FilePanelSelectModeItemsSelectDown):

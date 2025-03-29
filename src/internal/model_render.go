@@ -652,6 +652,13 @@ func (m *model) filePreviewPanelRender() string {
 	}
 	// This could create errors if panel.cursor ever becomes negative, or goes out of bounds
 	// We should have a panel validation function in our View() function
+	// Panel is a full fledged object with own state, its accessed and modified so many times.
+	// Ideally we dont should never access data from it via directly accessing its variables
+	// Todo : Instead we should have helper functions for panel object and access data that way
+	// like panel.GetCurrentSelectedElem() . This abstration of implemetation of panel is needed.
+	// Now this lack of abstraction has caused issues ( See PR#730 ) . And now
+	// someone needs to scan through the entire codebase to figure out which access of panel
+	// data is causing crash.
 	itemPath := panel.element[panel.cursor].location
 
 	// Renamed it to info_err to prevent shadowing with err below
