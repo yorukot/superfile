@@ -236,21 +236,8 @@ func generateSearchBar() textinput.Model {
 	ti.Prompt = filePanelTopDirectoryIconStyle.Render(icon.Search + icon.Space)
 	ti.Cursor.Blink = true
 	ti.PlaceholderStyle = filePanelStyle
-	ti.Placeholder = "(" + hotkeys.SearchBar[0] + ") Type something"
+	ti.Placeholder = "(" + Hotkeys.SearchBar[0] + ") Type something"
 	ti.Blur()
 	ti.CharLimit = 156
-	return ti
-}
-
-// Generate command line in the bottom
-func generateCommandLineInputBox() textinput.Model {
-	ti := textinput.New()
-	ti.Cursor.Style = footerCursorStyle
-	ti.Cursor.TextStyle = footerStyle
-	ti.TextStyle = filePanelStyle
-	ti.Prompt = filePanelTopDirectoryIconStyle.Render(icon.Cursor + icon.Space)
-	ti.Cursor.Blink = true
-	ti.PlaceholderStyle = filePanelStyle
-	ti.Blur()
 	return ti
 }

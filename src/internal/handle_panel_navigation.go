@@ -54,13 +54,18 @@ func (m *model) pinnedDirectory() {
 }
 
 // Create new file panel
-func (m *model) createNewFilePanel() {
+func (m *model) createNewFilePanel(location string) {
 	if len(m.fileModel.filePanels) == m.fileModel.maxFilePanel {
 		return
 	}
 
+	if location == "" {
+		location = variable.HomeDir
+	}
+
 	m.fileModel.filePanels = append(m.fileModel.filePanels, filePanel{
-		location:         variable.HomeDir,
+
+		location:         location,
 		sortOptions:      m.fileModel.filePanels[m.filePanelFocusIndex].sortOptions,
 		panelMode:        browserMode,
 		focusType:        secondFocus,
