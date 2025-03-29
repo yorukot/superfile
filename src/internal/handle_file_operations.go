@@ -574,6 +574,20 @@ func (m *model) compressFile() {
 
 	fileName := filepath.Base(panel.element[panel.cursor].location)
 
+	// Create a slice to hold the paths of all selected files
+	var selectedFiles []string
+	for _, element := range panel.element {
+		// Assuming `element.selected` indicates if the file is selected
+		if element.name != "" {
+			selectedFiles = append(selectedFiles, element.location)
+		}
+	}
+
+	// Check if any files were selected
+	if len(selectedFiles) == 0 {
+		slog.Error("No files selected for compression")
+		return
+	}
 	zipName := strings.TrimSuffix(fileName, filepath.Ext(fileName)) + ".zip"
 	zipName, err := renameIfDuplicate(zipName)
 
@@ -582,7 +596,7 @@ func (m *model) compressFile() {
 		return
 	}
 
-	err = zipSource(panel.element[panel.cursor].location, filepath.Join(filepath.Dir(panel.element[panel.cursor].location), zipName))
+	err = zipSource(selectedFiles, filepath.Join(filepath.Dir(panel.element[panel.cursor].location), zipName))
 	if err != nil {
 		slog.Error("Error in zipping files", "error", err)
 		// Although return is not needed here at the moment. This clarifies the intent of
