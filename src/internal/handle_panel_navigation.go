@@ -59,7 +59,12 @@ func (m *model) createNewFilePanel(location string) {
 		return
 	}
 
+	if location == "" {
+		location = variable.HomeDir
+	}
+
 	m.fileModel.filePanels = append(m.fileModel.filePanels, filePanel{
+
 		location:         location,
 		sortOptions:      m.fileModel.filePanels[m.filePanelFocusIndex].sortOptions,
 		panelMode:        browserMode,
