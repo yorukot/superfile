@@ -372,8 +372,8 @@ func (m *model) returnMetaData() {
 	fileInfo, err := os.Stat(filePath)
 
 	if isSymlink(filePath) {
-		_, err := filepath.EvalSymlinks(filePath)
-		if err != nil {
+		_, symlink_err := filepath.EvalSymlinks(filePath)
+		if symlink_err != nil {
 			m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"Link file is broken!", ""})
 		} else {
 			m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"This is a link file.", ""})
@@ -466,20 +466,21 @@ func calculateMD5Checksum(filePath string) (string, error) {
 // Get directory total size
 func dirSize(path string) int64 {
 	var size int64
-	err := filepath.WalkDir(path, func(_ string, entry os.DirEntry, err error) error {
+	// Its named walk_err to prevent shadowing
+	walk_err := filepath.WalkDir(path, func(_ string, entry os.DirEntry, err error) error {
 		if err != nil {
 			slog.Error("Dir size function error", "error", err)
 		}
 		if !entry.IsDir() {
-			info, err := entry.Info()
-			if err == nil {
+			info, info_err := entry.Info()
+			if info_err == nil {
 				size += info.Size()
 			}
 		}
 		return err
 	})
-	if err != nil {
-		slog.Error("errors during WalkDir", "error", err)
+	if walk_err != nil {
+		slog.Error("errors during WalkDir", "error", walk_err)
 	}
 	return size
 }

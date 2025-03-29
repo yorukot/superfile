@@ -101,7 +101,7 @@ func PlaceOverlay(x, y int, fg, bg string, opts ...WhitespaceOption) string {
 		pos += ansi.PrintableRuneWidth(fgLine)
 
 		right := cutLeft(bgLine, pos)
-		bgWidth := ansi.PrintableRuneWidth(bgLine)
+		bgWidth = ansi.PrintableRuneWidth(bgLine)
 		rightWidth := ansi.PrintableRuneWidth(right)
 		if rightWidth <= bgWidth-pos {
 			b.WriteString(ws.render(bgWidth - rightWidth - pos))

@@ -173,7 +173,7 @@ type filePanel struct {
 	panelMode          panelMode
 	selected           []string
 	element            []element
-	directoryRecord    map[string]directoryRecord
+	directoryRecords   map[string]directoryRecord
 	rename             textinput.Model
 	renaming           bool
 	searchBar          textinput.Model
