@@ -181,18 +181,20 @@ If your directory editor does not support opening the current directory with an 
 ### The Command-Prompt
 
 superfile also has a list of commands, that are not triggerable via Keyboard shortcuts.
-To open them just hit the `>` key (`shift`+`.` on QWERTY or `shift`+`<` on QWERTZ).
+To open the list just hit the `>` key (`shift`+`.` on QWERTY).
 
-> [!todo] add screenshot via GitHub-Uplaod
+![image](https://github.com/user-attachments/assets/a13cf09b-c4fb-4bf6-8433-7a05d2f20608)
 
-currently the Prompt comes with 4 different commands you can enter.
+currently the Prompt comes with 4 different commands.
+
 #### `split`
 Will open a new filepanel that points to the same location as the currently active filepanel.
 
 #### `cd [your path here]`
 Changes the currently active Filepanels location to the path you enter.
 
-> [!note] currently, you don't have access to shell specific values like `~` or `$HOME`
+> [!NOTE] 
+> currently, you don't have access to shell specific values like `~` or `$HOME`
 > allthough, that may change in the future.
 
 ##### example:
@@ -202,7 +204,8 @@ cd /home/user/.config
 #### `open [your path here]`
 Opens a new Filepanel that points to the given path.
 
-> [!note] currently, you don't have access to shell specific values like `~` or `$HOME`
+> [!NOTE] 
+> currently, you don't have access to shell specific values like `~` or `$HOME`
 > allthough, that may change in the future.
 
 ##### example:
@@ -214,9 +217,10 @@ open /home/user/.config
 With the `$ ` command, any following inputs will be send to the shell.
 (`sh` or `PowerShell`, depending on your System).
 
-> [!warning] please note, that you won't receive any shell outputs.
-> for now, this is meant for executing more complex file manipulation via the shell,
-> Ranther than handling interactive outsputs.
+> [!IMPORTANT] 
+> Please note, that you won't receive any stdout outputs.
+> for now, this is meant for executing more complex file manipulations via the shell,
+> rather than handling interactive outputs.
 >
 > You can however check for errors, by checking the `superfile.log`
 
