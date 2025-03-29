@@ -118,6 +118,8 @@ type promptModalType struct {
 	cmd       PromptCommand
 	textInput textinput.Model
 	errormsg  string
+
+	commandList map[PromptCommandPrefix]PromptCommand
 }
 
 type helpMenuModalData struct {
