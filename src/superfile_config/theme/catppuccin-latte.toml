@@ -42,6 +42,7 @@ hint = "#209fb5"    # Sapphire
 cancel = "#e64553"  # Maroon
 # Gradient color can only have two color!
 gradient_color = ["#1e66f5", "#ca9ee6"] # [Blue, Mauve]
+directory_icon_color = "#444444" # Darker shade of grey
 
 # ========= File Panel Special Items =========
 file_panel_top_directory_icon = "#40a02b" # Green

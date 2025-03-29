@@ -1,39 +1,45 @@
 package internal
 
-import tea "github.com/charmbracelet/bubbletea"
+import (
+	"log/slog"
+)
 
-func wheelMainAction(msg string, m *model, cmd tea.Cmd) tea.Cmd {
+func wheelMainAction(msg string, m *model) {
+	slog.Debug("wheelMainAction called", "msg", msg, "focusPanel", m.focusPanel)
+	var action func()
 	switch msg {
 
 	case "wheel up":
 		if m.focusPanel == sidebarFocus {
-			m.sidebarModel.controlListUp(true, m.mainPanelHeight)
+			action = func() { m.sidebarModel.listUp(m.mainPanelHeight) }
 		} else if m.focusPanel == processBarFocus {
-			m.controlProcessbarListUp(true)
+			action = func() { m.processBarModel.listUp(m.footerHeight) }
 		} else if m.focusPanel == metadataFocus {
-			m.controlMetadataListUp(true)
+			action = func() { m.fileMetaData.listUp() }
 		} else if m.focusPanel == nonePanelFocus {
-			m.controlFilePanelListUp(true)
-			m.fileMetaData.renderIndex = 0
-			go func() {
-				m.returnMetaData()
-			}()
+			action = func() { m.fileModel.filePanels[m.filePanelFocusIndex].listUp(m.mainPanelHeight) }
 		}
 
 	case "wheel down":
 		if m.focusPanel == sidebarFocus {
-			m.sidebarModel.controlListDown(true, m.mainPanelHeight)
+			action = func() { m.sidebarModel.listDown(m.mainPanelHeight) }
 		} else if m.focusPanel == processBarFocus {
-			m.controlProcessbarListDown(true)
+			action = func() { m.processBarModel.listDown(m.footerHeight) }
 		} else if m.focusPanel == metadataFocus {
-			m.controlMetadataListDown(true)
+			action = func() { m.fileMetaData.listDown() }
 		} else if m.focusPanel == nonePanelFocus {
-			m.controlFilePanelListDown(true)
-			m.fileMetaData.renderIndex = 0
-			go func() {
-				m.returnMetaData()
-			}()
+			action = func() { m.fileModel.filePanels[m.filePanelFocusIndex].listDown(m.mainPanelHeight) }
 		}
 	}
-	return cmd
+
+	for i := 0; i < wheelRunTime; i++ {
+		action()
+	}
+
+	if m.focusPanel == nonePanelFocus {
+		m.fileMetaData.renderIndex = 0
+		go func() {
+			m.returnMetaData()
+		}()
+	}
 }

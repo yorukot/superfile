@@ -8,7 +8,7 @@ import (
 	"slices"
 
 	"github.com/adrg/xdg"
-	"github.com/shirou/gopsutil/disk"
+	"github.com/shirou/gopsutil/v4/disk"
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/config/icon"
 )
@@ -82,17 +82,33 @@ func getPinnedDirectories() []directory {
 
 // Get external media directories
 func getExternalMediaFolders() (disks []directory) {
-	parts, err := disk.Partitions(true)
+	// only get physical drives
+	parts, err := disk.Partitions(false)
+
+	slog.Debug("disk.Partitions() called", "number of parts", len(parts))
 
 	if err != nil {
 		slog.Error("Error while getting external media: ", "error", err)
 		return disks
 	}
+
 	for _, disk := range parts {
-		if isExternalDiskPath(disk.Mountpoint) {
+		// Not removing this for now, as it is helpful if we need to debug
+		// any user issues related disk listing in sidebar.
+		// Todo : We need to evaluate if more debug logs are a performance problem
+		// even when user had set debug=false in config. We dont write those to log file
+		// But we do make a functions call, and pass around some strings. So it might/might not be
+		// a problem. It could be a problem in a hot path though.
+		slog.Debug("Returned disk by disk.Partition()", "device", disk.Device,
+			"mountpoint", disk.Mountpoint, "fstype", disk.Fstype)
+
+		// shouldListDisk, diskName, and diskLocation, each has runtime.GOOS checks
+		// We can ideally reduce it to one check only.
+		if shouldListDisk(disk.Mountpoint) {
+
 			disks = append(disks, directory{
-				name:     filepath.Base(disk.Mountpoint),
-				location: disk.Mountpoint,
+				name:     diskName(disk.Mountpoint),
+				location: diskLocation(disk.Mountpoint),
 			})
 		}
 	}

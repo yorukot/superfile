@@ -141,6 +141,10 @@ export default defineConfig({
             {
               label: 'File structure',
               link: '/contribute/file-struct'
+            },
+            {
+              label: 'Implementation Info',
+              link: '/contribute/implementation-info'
             }
           ],
         },
@@ -150,7 +154,7 @@ export default defineConfig({
         },
         {
           label: 'How to contribute',
-          link: '/how-to-contribute'
+          link: '/contribute/how-to-contribute'
         },
         {
           label: 'Changelog',

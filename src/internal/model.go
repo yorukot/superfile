@@ -3,7 +3,9 @@ package internal
 import (
 	"log/slog"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"time"
 
@@ -20,6 +22,7 @@ var ListeningMessage = true
 
 var firstUse = false
 var hasTrash = true
+var batCmd = ""
 
 var theme ThemeType
 var Config ConfigType
@@ -31,10 +34,11 @@ var channel = make(chan channelMessage, 1000)
 var progressBarLastRenderTime time.Time = time.Now()
 
 // Initialize and return model with default configs
-func InitialModel(dir string, firstUseCheck bool, hasTrashCheck bool) model {
+func InitialModel(dir string, firstUseCheck, hasTrashCheck bool) model {
 	toggleDotFileBool, toggleFooter, firstFilePanelDir := initialConfig(dir)
 	firstUse = firstUseCheck
 	hasTrash = hasTrashCheck
+	batCmd = checkBatCmd()
 	return defaultModelConfig(toggleDotFileBool, toggleFooter, firstFilePanelDir)
 }
 
@@ -62,9 +66,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.handleWindowResize(msg)
 	case tea.MouseMsg:
-		cmd = wheelMainAction(msg.String(), &m, cmd)
+		msgStr := msg.String()
+		if msgStr == "wheel up" || msgStr == "wheel down" {
+			wheelMainAction(msgStr, &m)
+		} else {
+			slog.Debug("Mouse event of type that is not handled", "msg", msgStr)
+		}
 	case tea.KeyMsg:
 		cmd = m.handleKeyInput(msg, cmd)
+	default:
+		slog.Debug("Message of type that is not handled", "type", reflect.TypeOf(msg))
 	}
 
 	m.updateFilePanelsState(msg, &cmd)
@@ -123,7 +134,7 @@ func (m *model) handleWindowResize(msg tea.WindowSizeMsg) {
 	}
 
 	m.setFilePanelsSize(msg.Width)
-	m.setFooterSize(msg.Height)
+	m.setHeightValues(msg.Height)
 	m.setHelpMenuSize()
 
 	if m.fileModel.maxFilePanel >= 10 {
@@ -152,31 +163,26 @@ func (m *model) setFilePanelsSize(width int) {
 	}
 }
 
-// Set footer size using height
-func (m *model) setFooterSize(height int) {
+func (m *model) setHeightValues(height int) {
 	if !m.toggleFooter {
-		footerHeight = 0
+		m.footerHeight = 0
 	} else if height < 30 {
-		footerHeight = 10
+		m.footerHeight = 6
 	} else if height < 35 {
-		footerHeight = 11
+		m.footerHeight = 7
 	} else if height < 40 {
-		footerHeight = 12
+		m.footerHeight = 8
 	} else if height < 45 {
-		footerHeight = 13
+		m.footerHeight = 9
 	} else {
-		footerHeight = 14
+		m.footerHeight = 10
 	}
+	// Todo : Make it grow even more for bigger screen sizes.
+	// Todo : Calculate the value , instead of manually hard coding it.
 
-	if m.commandLine.input.Focused() && m.toggleFooter {
-		footerHeight--
-	}
-
-	if m.toggleFooter {
-		m.mainPanelHeight = height - footerHeight + 1
-	} else {
-		m.mainPanelHeight = height - 2
-	}
+	// Total Height = mainPanelHeight + 2 (border) + footerHeight (including borders and command line)
+	m.mainPanelHeight = height -
+		actualfooterHeight(m.footerHeight, m.commandLine.input.Focused()) - 2
 }
 
 // Set help menu size
@@ -320,7 +326,10 @@ func (m *model) warnModalForQuit() {
 
 // Implement View function for bubble tea model to handle visualization.
 func (m model) View() string {
-	slog.Debug("model.View() called")
+	slog.Debug("model.View() called", "mainPanelHeight", m.mainPanelHeight,
+		"footerHeight", m.footerHeight, "fullHeight", m.fullHeight,
+		"fullWidth", m.fullWidth)
+
 	if !m.firstLoadingComplete {
 		return "Loading..."
 	}
@@ -332,6 +341,11 @@ func (m model) View() string {
 	if m.fileModel.width < 18 {
 		return m.terminalSizeWarnAfterFirstRender()
 	}
+
+	if err := m.validateLayout(); err != nil {
+		slog.Error("Invalid layout", "error", err)
+	}
+
 	sidebar := m.sidebarRender()
 
 	filePanel := m.filePanelRender()
@@ -494,4 +508,16 @@ func (m *model) quitSuperfile() {
 		}
 	}
 	slog.Debug("Quitting superfile", "current dir", currentDir)
+}
+
+// Check if bat is an executable in PATH and whether to use bat or batcat as command
+func checkBatCmd() string {
+	if _, err := exec.LookPath("bat"); err == nil {
+		return "bat"
+	}
+	// on ubuntu bat executable is called batcat
+	if _, err := exec.LookPath("batcat"); err == nil {
+		return "batcat"
+	}
+	return ""
 }

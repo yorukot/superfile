@@ -1,6 +1,6 @@
 package icon
 
-func InitIcon(nerdfont bool) {
+func InitIcon(nerdfont bool, directoryIconColor string) {
 	if !nerdfont {
 		Space = ""
 		SuperfileIcon = ""
@@ -33,5 +33,13 @@ func InitIcon(nerdfont bool) {
 		Search = ""
 		SortAsc = ""
 		SortDesc = ""
+	}
+
+	if directoryIconColor == "" {
+		directoryIconColor = "NONE" // Dark yellowish
+	}
+	Folders["folder"] = IconStyle{
+		Icon:  "\uf07b", // Printable Rune : ""
+		Color: directoryIconColor,
 	}
 }

@@ -1,6 +1,6 @@
 package internal
 
-import "log/slog"
+import "fmt"
 
 // reset the items slice and set the cut value
 func (c *copyItems) reset(cut bool) {
@@ -8,7 +8,37 @@ func (c *copyItems) reset(cut bool) {
 	c.items = c.items[:0]
 }
 
-// ================ Sidebar related =====================
+// ================ Model related utils =======================
+
+// Non fatal Validations. This indicates bug / programming errors, not user configuration mistake
+func (m *model) validateLayout() error {
+	if 0 < m.footerHeight && m.footerHeight < minFooterHeight {
+		return fmt.Errorf("footerHeight %v is too small", m.footerHeight)
+	}
+	// PanelHeight + 2 lines (main border) + actual footer height
+	if m.fullHeight != (m.mainPanelHeight+2)+actualfooterHeight(m.footerHeight, m.commandLine.input.Focused()) {
+		return fmt.Errorf("Invalid model layout, fullHeight : %v, mainPanelHeight : %v, footerHeight : %v\n",
+			m.fullHeight, m.mainPanelHeight, m.footerHeight)
+	}
+	// Todo : Add check for width as well
+	return nil
+}
+
+func actualfooterHeight(footerHeight int, commandLineFocussed bool) int {
+	// footerHeight + 2 or 0 lines (footer border)
+	// + 1 lines ( commmand line only if footersize is >0)
+	footerBorder := 2
+	if footerHeight == 0 {
+		footerBorder = 0
+	}
+	commandLineHeight := 0
+	if commandLineFocussed && footerHeight != 0 {
+		commandLineHeight = 1
+	}
+	return footerHeight + footerBorder + commandLineHeight
+}
+
+// ================ Sidebar related utils =====================
 // Hopefully compiler inlines it
 func (d directory) isDivider() bool {
 	return d == pinnedDividerDir || d == diskDividerDir
@@ -18,102 +48,6 @@ func (d directory) requiredHeight() int {
 		return 3
 	}
 	return 1
-}
-
-// True of only divicers are in directories slice,
-// but no actual directories
-// This will be pretty quick. But we can replace it with
-// len(s.directories) <= 2 - More hacky and hardcoded-like, but faster
-func (s *sidebarModel) noActualDir() bool {
-	for _, d := range s.directories {
-		if !d.isDivider() {
-			return false
-		}
-	}
-	return true
-}
-
-func (s *sidebarModel) isCursorInvalid() bool {
-	return s.cursor < 0 || s.cursor >= len(s.directories) || s.directories[s.cursor].isDivider()
-}
-
-func (s *sidebarModel) resetCursor() {
-	s.cursor = 0
-	// Move to first non Divider dir
-	for i, d := range s.directories {
-		if !d.isDivider() {
-			s.cursor = i
-			return
-		}
-	}
-	// If all directories are divider, code will reach here. and s.cursor will stay 0
-	// Or s.directories is empty
-}
-
-// Return till what indexes we will render, if we start from startIndex
-// if returned value is `startIndex - 1`, that means nothing can be rendered
-// This could be made constant time by keeping Indexes ot special directories saved,
-// but that too much.
-func (s *sidebarModel) lastRenderedIndex(mainPanelHeight int, startIndex int) int {
-
-	curHeight := sideBarInitialHeight
-	endIndex := startIndex - 1
-	for i := startIndex; i < len(s.directories); i++ {
-		curHeight += s.directories[i].requiredHeight()
-		if curHeight > mainPanelHeight {
-			break
-		}
-		endIndex = i
-	}
-	return endIndex
-}
-
-// Return what will be the startIndex, if we end at endIndex
-// if returned value is `endIndex + 1`, that means nothing can be rendered
-func (s *sidebarModel) firstRenderedIndex(mainPanelHeight int, endIndex int) int {
-	// This should ideally never happen. Maybe we should panic ?
-	if endIndex >= len(s.directories) {
-		return endIndex + 1
-	}
-
-	curHeight := sideBarInitialHeight
-	startIndex := endIndex + 1
-	for i := endIndex; i >= 0; i-- {
-		curHeight += s.directories[i].requiredHeight()
-		if curHeight > mainPanelHeight {
-			break
-		}
-		startIndex = i
-	}
-	return startIndex
-}
-
-func (s *sidebarModel) updateRenderIndex(mainPanelHeight int) {
-	// Case I : New cursor moved above current renderable range
-	if s.cursor < s.renderIndex {
-		// We will start rendering from there
-		s.renderIndex = s.cursor
-		return
-	}
-
-	curEndIndex := s.lastRenderedIndex(mainPanelHeight, s.renderIndex)
-
-	// Case II : new cursor also comes in range of rendered directores
-	// Taking this case later avoid extra lastRenderedIndex() call
-	if s.renderIndex <= s.cursor && s.cursor <= curEndIndex {
-		// no need to update s.renderIndex
-		return
-	}
-
-	// Case III : New cursor is too below
-	if curEndIndex < s.cursor {
-		s.renderIndex = s.firstRenderedIndex(mainPanelHeight, s.cursor)
-		return
-	}
-
-	// Code should never reach here
-	slog.Error("Unexpected situation in updateRenderIndex", "cursor", s.cursor,
-		"renderIndex", s.renderIndex, "directory count", len(s.directories))
 }
 
 // ================ String method for easy logging =====================

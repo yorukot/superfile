@@ -8,37 +8,37 @@ type IconStyle struct {
 
 var (
 	Space         string = " "
-	SuperfileIcon string = ""
+	SuperfileIcon string = "\ue6ad" // Printable Rune : ""
 
 	// Well Known Directories
-	Home        string = "󰋜"
-	Download    string = "󰏔"
-	Documents   string = "󰈙"
-	Pictures    string = "󰋩"
-	Videos      string = "󰎁"
-	Music       string = "♬"
-	Templates   string = "󰏢"
-	PublicShare string = ""
+	Home        string = "\U000f02dc" // Printable Rune : "󰋜"
+	Download    string = "\U000f03d4" // Printable Rune : "󰏔"
+	Documents   string = "\U000f0219" // Printable Rune : "󰈙"
+	Pictures    string = "\U000f02e9" // Printable Rune : "󰋩"
+	Videos      string = "\U000f0381" // Printable Rune : "󰎁"
+	Music       string = "♬"          // Printable Rune : "♬"
+	Templates   string = "\U000f03e2" // Printable Rune : "󰏢"
+	PublicShare string = "\uf0ac"     // Printable Rune : ""
 
 	// file operations
-	CompressFile string = "󰗄"
-	ExtractFile  string = "󰛫"
-	Copy         string = "󰆏"
-	Cut          string = "󰆐"
-	Delete       string = "󰆴"
+	CompressFile string = "\U000f05c4" // Printable Rune : "󰗄"
+	ExtractFile  string = "\U000f06eb" // Printable Rune : "󰛫"
+	Copy         string = "\U000f018f" // Printable Rune : "󰆏"
+	Cut          string = "\U000f0190" // Printable Rune : "󰆐"
+	Delete       string = "\U000f01b4" // Printable Rune : "󰆴"
 
 	// other
-	Cursor      string = ""
-	Browser     string = "󰈈"
-	Select      string = "󰆽"
-	Error       string = ""
-	Warn        string = ""
-	Done        string = ""
-	InOperation string = "󰥔"
-	Directory   string = ""
-	Search      string = ""
-	SortAsc     string = ""
-	SortDesc    string = ""
+	Cursor      string = "\uf054"     // Printable Rune : ""
+	Browser     string = "\U000f0208" // Printable Rune : "󰈈"
+	Select      string = "\U000f01bd" // Printable Rune : "󰆽"
+	Error       string = "\uf530"     // Printable Rune : ""
+	Warn        string = "\uf071"     // Printable Rune : ""
+	Done        string = "\uf4a4"     // Printable Rune : ""
+	InOperation string = "\U000f0954" // Printable Rune : "󰥔"
+	Directory   string = "\uf07b"     // Printable Rune : ""
+	Search      string = "\ue68f"     // Printable Rune : ""
+	SortAsc     string = "\uf0de"     // Printable Rune : ""
+	SortDesc    string = "\uf0dd"     // Printable Rune : ""
 )
 
 /*
@@ -48,119 +48,119 @@ thanks for the great work!!
 
 var Icons = map[string]IconStyle{
 	"ai": {
-		Icon:  "",
+		Icon:  "\ue669", // Printable Rune : ""
 		Color: "#ce6f14",
 	},
-	"android":      {Icon: "", Color: "#a7c83f"},
-	"apple":        {Icon: "", Color: "#78909c"},
-	"asm":          {Icon: "󰘚", Color: "#ff7844"},
-	"audio":        {Icon: "", Color: "#ee524f"},
-	"binary":       {Icon: "", Color: "#ff7844"},
-	"c":            {Icon: "", Color: "#0188d2"},
-	"cfg":          {Icon: "", Color: "#8B8B8B"},
-	"clj":          {Icon: "", Color: "#68b338"},
-	"conf":         {Icon: "", Color: "#8B8B8B"},
-	"cpp":          {Icon: "", Color: "#0188d2"},
-	"css":          {Icon: "", Color: "#2d53e5"},
-	"dart":         {Icon: "", Color: "#03589b"},
-	"db":           {Icon: "", Color: "#FF8400"},
-	"deb":          {Icon: "", Color: "#ab0836"},
-	"doc":          {Icon: "", Color: "#295394"},
-	"dockerfile":   {Icon: "󰡨", Color: "#099cec"},
-	"ebook":        {Icon: "", Color: "#67b500"},
-	"env":          {Icon: "", Color: "#eed645"},
-	"f":            {Icon: "󱈚", Color: "#8e44ad"},
-	"file":         {Icon: "\uf15b", Color: "NONE"},
-	"font":         {Icon: "\uf031", Color: "#3498db"},
-	"fs":           {Icon: "\ue7a7", Color: "#2ecc71"},
-	"gb":           {Icon: "\ue272", Color: "#f1c40f"},
-	"gform":        {Icon: "\uf298", Color: "#9b59b6"},
-	"git":          {Icon: "\ue702", Color: "#e67e22"},
-	"go":           {Icon: "", Color: "#6ed8e5"},
-	"graphql":      {Icon: "\ue662", Color: "#e74c3c"},
-	"glp":          {Icon: "󰆧", Color: "#3498db"},
-	"groovy":       {Icon: "\ue775", Color: "#2ecc71"},
-	"gruntfile.js": {Icon: "\ue74c", Color: "#3498db"},
-	"gulpfile.js":  {Icon: "\ue610", Color: "#e67e22"},
-	"gv":           {Icon: "\ue225", Color: "#9b59b6"},
-	"h":            {Icon: "\uf0fd", Color: "#3498db"},
-	"haml":         {Icon: "\ue664", Color: "#9b59b6"},
-	"hs":           {Icon: "\ue777", Color: "#2980b9"},
-	"html":         {Icon: "\uf13b", Color: "#e67e22"},
-	"hx":           {Icon: "\ue666", Color: "#e74c3c"},
-	"ics":          {Icon: "\uf073", Color: "#f1c40f"},
-	"image":        {Icon: "\uf1c5", Color: "#e74c3c"},
-	"iml":          {Icon: "\ue7b5", Color: "#3498db"},
-	"ini":          {Icon: "󰅪", Color: "#f1c40f"},
-	"ino":          {Icon: "\ue255", Color: "#2ecc71"},
-	"iso":          {Icon: "󰋊", Color: "#f1c40f"},
-	"jade":         {Icon: "\ue66c", Color: "#9b59b6"},
-	"java":         {Icon: "\ue738", Color: "#e67e22"},
-	"jenkinsfile":  {Icon: "\ue767", Color: "#e74c3c"},
-	"jl":           {Icon: "\ue624", Color: "#2ecc71"},
-	"js":           {Icon: "\ue781", Color: "#f39c12"},
-	"json":         {Icon: "\ue60b", Color: "#f1c40f"},
-	"jsx":          {Icon: "\ue7ba", Color: "#e67e22"},
-	"key":          {Icon: "\uf43d", Color: "#f1c40f"},
-	"ko":           {Icon: "\uebc6", Color: "#9b59b6"},
-	"kt":           {Icon: "\ue634", Color: "#2980b9"},
-	"less":         {Icon: "\ue758", Color: "#3498db"},
-	"lock":         {Icon: "\uf023", Color: "#f1c40f"},
-	"log":          {Icon: "\uf18d", Color: "#7f8c8d"},
-	"lua":          {Icon: "\ue620", Color: "#e74c3c"},
-	"maintainers":  {Icon: "\uf0c0", Color: "#7f8c8d"},
-	"makefile":     {Icon: "\ue20f", Color: "#3498db"},
-	"md":           {Icon: "\uf48a", Color: "#7f8c8d"},
-	"mjs":          {Icon: "\ue718", Color: "#f39c12"},
-	"ml":           {Icon: "󰘧", Color: "#2ecc71"},
-	"mustache":     {Icon: "\ue60f", Color: "#e67e22"},
-	"nc":           {Icon: "󰋁", Color: "#f1c40"},
-	"nim":          {Icon: "\ue677", Color: "#3498db"},
-	"nix":          {Icon: "\uf313", Color: "#f39c12"},
-	"npmignore":    {Icon: "\ue71e", Color: "#e74c3c"},
-	"package":      {Icon: "󰏗", Color: "#9b59b6"},
-	"passwd":       {Icon: "\uf023", Color: "#f1c40f"},
-	"patch":        {Icon: "\uf440", Color: "#e67e22"},
-	"pdf":          {Icon: "\uf1c1", Color: "#d35400"},
-	"php":          {Icon: "\ue608", Color: "#9b59b6"},
-	"pl":           {Icon: "\ue7a1", Color: "#3498db"},
-	"prisma":       {Icon: "\ue684", Color: "#9b59b6"},
-	"ppt":          {Icon: "\uf1c4", Color: "#c0392b"},
-	"psd":          {Icon: "\ue7b8", Color: "#3498db"},
-	"py":           {Icon: "\ue606", Color: "#3498db"},
-	"r":            {Icon: "\ue68a", Color: "#9b59b6"},
-	"rb":           {Icon: "\ue21e", Color: "#9b59b6"},
-	"rdb":          {Icon: "\ue76d", Color: "#9b59b6"},
-	"rpm":          {Icon: "\uf17c", Color: "#d35400"},
-	"rs":           {Icon: "\ue7a8", Color: "#f39c12"},
-	"rss":          {Icon: "\uf09e", Color: "#c0392b"},
-	"rst":          {Icon: "󰅫", Color: "#2ecc71"},
-	"rubydoc":      {Icon: "\ue73b", Color: "#e67e22"},
-	"sass":         {Icon: "\ue603", Color: "#e74c3c"},
-	"scala":        {Icon: "\ue737", Color: "#e67e22"},
-	"shell":        {Icon: "\uf489", Color: "#2ecc71"},
-	"shp":          {Icon: "󰙞", Color: "#f1c40f"},
-	"sol":          {Icon: "󰡪", Color: "#3498db"},
-	"sqlite":       {Icon: "\ue7c4", Color: "#27ae60"},
-	"styl":         {Icon: "\ue600", Color: "#e74c3c"},
-	"svelte":       {Icon: "\ue697", Color: "#ff3e00"},
-	"swift":        {Icon: "\ue755", Color: "#ff6f61"},
-	"tex":          {Icon: "\u222b", Color: "#9b59b6"},
-	"tf":           {Icon: "\ue69a", Color: "#2ecc71"},
-	"toml":         {Icon: "󰅪", Color: "#f39c12"},
-	"ts":           {Icon: "󰛦", Color: "#2980b9"},
-	"twig":         {Icon: "\ue61c", Color: "#9b59b6"},
-	"txt":          {Icon: "\uf15c", Color: "#7f8c8d"},
-	"vagrantfile":  {Icon: "\ue21e", Color: "#3498db"},
-	"video":        {Icon: "\uf03d", Color: "#c0392b"},
-	"vim":          {Icon: "\ue62b", Color: "#019833"},
-	"vue":          {Icon: "\ue6a0", Color: "#41b883"},
-	"windows":      {Icon: "\uf17a", Color: "#4a90e2"},
-	"xls":          {Icon: "\uf1c3", Color: "#27ae60"},
-	"xml":          {Icon: "\ue796", Color: "#3498db"},
-	"yml":          {Icon: "\ue601", Color: "#f39c12"},
-	"zig":          {Icon: "\ue6a9", Color: "#9b59b6"},
-	"zip":          {Icon: "\uf410", Color: "#e74c3c"},
+	"android":      {Icon: "\uf17b", Color: "#a7c83f"},     // Printable Rune : ""
+	"apple":        {Icon: "\ue711", Color: "#78909c"},     // Printable Rune : ""
+	"asm":          {Icon: "\U000f061a", Color: "#ff7844"}, // Printable Rune : "󰘚"
+	"audio":        {Icon: "\uf001", Color: "#ee524f"},     // Printable Rune : ""
+	"binary":       {Icon: "\uf471", Color: "#ff7844"},     // Printable Rune : ""
+	"c":            {Icon: "\ue649", Color: "#0188d2"},     // Printable Rune : ""
+	"cfg":          {Icon: "\ue615", Color: "#8B8B8B"},     // Printable Rune : ""
+	"clj":          {Icon: "\ue76a", Color: "#68b338"},     // Printable Rune : ""
+	"conf":         {Icon: "\ue615", Color: "#8B8B8B"},     // Printable Rune : ""
+	"cpp":          {Icon: "\ue646", Color: "#0188d2"},     // Printable Rune : ""
+	"css":          {Icon: "\uf13c", Color: "#2d53e5"},     // Printable Rune : ""
+	"dart":         {Icon: "\ue64c", Color: "#03589b"},     // Printable Rune : ""
+	"db":           {Icon: "\uf1c0", Color: "#FF8400"},     // Printable Rune : ""
+	"deb":          {Icon: "\ue77d", Color: "#ab0836"},     // Printable Rune : ""
+	"doc":          {Icon: "\ue6a5", Color: "#295394"},     // Printable Rune : ""
+	"dockerfile":   {Icon: "\U000f0868", Color: "#099cec"}, // Printable Rune : "󰡨"
+	"ebook":        {Icon: "\uf02d", Color: "#67b500"},     // Printable Rune : ""
+	"env":          {Icon: "\uf462", Color: "#eed645"},     // Printable Rune : ""
+	"f":            {Icon: "\U000f121a", Color: "#8e44ad"}, // Printable Rune : "󱈚"
+	"file":         {Icon: "\uf15b", Color: "NONE"},        // Printable Rune : ""
+	"font":         {Icon: "\uf031", Color: "#3498db"},     // Printable Rune : ""
+	"fs":           {Icon: "\ue7a7", Color: "#2ecc71"},     // Printable Rune : ""
+	"gb":           {Icon: "\ue272", Color: "#f1c40f"},     // Printable Rune : ""
+	"gform":        {Icon: "\uf298", Color: "#9b59b6"},     // Printable Rune : ""
+	"git":          {Icon: "\ue702", Color: "#e67e22"},     // Printable Rune : ""
+	"go":           {Icon: "\ue627", Color: "#6ed8e5"},     // Printable Rune : ""
+	"graphql":      {Icon: "\ue662", Color: "#e74c3c"},     // Printable Rune : ""
+	"glp":          {Icon: "\U000f01a7", Color: "#3498db"}, // Printable Rune : "󰆧"
+	"groovy":       {Icon: "\ue775", Color: "#2ecc71"},     // Printable Rune : ""
+	"gruntfile.js": {Icon: "\ue74c", Color: "#3498db"},     // Printable Rune : ""
+	"gulpfile.js":  {Icon: "\ue610", Color: "#e67e22"},     // Printable Rune : ""
+	"gv":           {Icon: "\ue225", Color: "#9b59b6"},     // Printable Rune : ""
+	"h":            {Icon: "\uf0fd", Color: "#3498db"},     // Printable Rune : ""
+	"haml":         {Icon: "\ue664", Color: "#9b59b6"},     // Printable Rune : ""
+	"hs":           {Icon: "\ue777", Color: "#2980b9"},     // Printable Rune : ""
+	"html":         {Icon: "\uf13b", Color: "#e67e22"},     // Printable Rune : ""
+	"hx":           {Icon: "\ue666", Color: "#e74c3c"},     // Printable Rune : ""
+	"ics":          {Icon: "\uf073", Color: "#f1c40f"},     // Printable Rune : ""
+	"image":        {Icon: "\uf1c5", Color: "#e74c3c"},     // Printable Rune : ""
+	"iml":          {Icon: "\ue7b5", Color: "#3498db"},     // Printable Rune : ""
+	"ini":          {Icon: "\U000f016a", Color: "#f1c40f"}, // Printable Rune : "󰅪"
+	"ino":          {Icon: "\ue255", Color: "#2ecc71"},     // Printable Rune : ""
+	"iso":          {Icon: "\U000f02ca", Color: "#f1c40f"}, // Printable Rune : "󰋊"
+	"jade":         {Icon: "\ue66c", Color: "#9b59b6"},     // Printable Rune : ""
+	"java":         {Icon: "\ue738", Color: "#e67e22"},     // Printable Rune : ""
+	"jenkinsfile":  {Icon: "\ue767", Color: "#e74c3c"},     // Printable Rune : ""
+	"jl":           {Icon: "\ue624", Color: "#2ecc71"},     // Printable Rune : ""
+	"js":           {Icon: "\ue781", Color: "#f39c12"},     // Printable Rune : ""
+	"json":         {Icon: "\ue60b", Color: "#f1c40f"},     // Printable Rune : ""
+	"jsx":          {Icon: "\ue7ba", Color: "#e67e22"},     // Printable Rune : ""
+	"key":          {Icon: "\uf43d", Color: "#f1c40f"},     // Printable Rune : ""
+	"ko":           {Icon: "\uebc6", Color: "#9b59b6"},     // Printable Rune : ""
+	"kt":           {Icon: "\ue634", Color: "#2980b9"},     // Printable Rune : ""
+	"less":         {Icon: "\ue758", Color: "#3498db"},     // Printable Rune : ""
+	"lock":         {Icon: "\uf023", Color: "#f1c40f"},     // Printable Rune : ""
+	"log":          {Icon: "\uf18d", Color: "#7f8c8d"},     // Printable Rune : ""
+	"lua":          {Icon: "\ue620", Color: "#e74c3c"},     // Printable Rune : ""
+	"maintainers":  {Icon: "\uf0c0", Color: "#7f8c8d"},     // Printable Rune : ""
+	"makefile":     {Icon: "\ue20f", Color: "#3498db"},     // Printable Rune : ""
+	"md":           {Icon: "\uf48a", Color: "#7f8c8d"},     // Printable Rune : ""
+	"mjs":          {Icon: "\ue718", Color: "#f39c12"},     // Printable Rune : ""
+	"ml":           {Icon: "\U000f0627", Color: "#2ecc71"}, // Printable Rune : "󰘧"
+	"mustache":     {Icon: "\ue60f", Color: "#e67e22"},     // Printable Rune : ""
+	"nc":           {Icon: "\U000f02c1", Color: "#f1c40"},  // Printable Rune : "󰋁"
+	"nim":          {Icon: "\ue677", Color: "#3498db"},     // Printable Rune : ""
+	"nix":          {Icon: "\uf313", Color: "#f39c12"},     // Printable Rune : ""
+	"npmignore":    {Icon: "\ue71e", Color: "#e74c3c"},     // Printable Rune : ""
+	"package":      {Icon: "\U000f03d7", Color: "#9b59b6"}, // Printable Rune : "󰏗"
+	"passwd":       {Icon: "\uf023", Color: "#f1c40f"},     // Printable Rune : ""
+	"patch":        {Icon: "\uf440", Color: "#e67e22"},     // Printable Rune : ""
+	"pdf":          {Icon: "\uf1c1", Color: "#d35400"},     // Printable Rune : ""
+	"php":          {Icon: "\ue608", Color: "#9b59b6"},     // Printable Rune : ""
+	"pl":           {Icon: "\ue7a1", Color: "#3498db"},     // Printable Rune : ""
+	"prisma":       {Icon: "\ue684", Color: "#9b59b6"},     // Printable Rune : ""
+	"ppt":          {Icon: "\uf1c4", Color: "#c0392b"},     // Printable Rune : ""
+	"psd":          {Icon: "\ue7b8", Color: "#3498db"},     // Printable Rune : ""
+	"py":           {Icon: "\ue606", Color: "#3498db"},     // Printable Rune : ""
+	"r":            {Icon: "\ue68a", Color: "#9b59b6"},     // Printable Rune : ""
+	"rb":           {Icon: "\ue21e", Color: "#9b59b6"},     // Printable Rune : ""
+	"rdb":          {Icon: "\ue76d", Color: "#9b59b6"},     // Printable Rune : ""
+	"rpm":          {Icon: "\uf17c", Color: "#d35400"},     // Printable Rune : ""
+	"rs":           {Icon: "\ue7a8", Color: "#f39c12"},     // Printable Rune : ""
+	"rss":          {Icon: "\uf09e", Color: "#c0392b"},     // Printable Rune : ""
+	"rst":          {Icon: "\U000f016b", Color: "#2ecc71"}, // Printable Rune : "󰅫"
+	"rubydoc":      {Icon: "\ue73b", Color: "#e67e22"},     // Printable Rune : ""
+	"sass":         {Icon: "\ue603", Color: "#e74c3c"},     // Printable Rune : ""
+	"scala":        {Icon: "\ue737", Color: "#e67e22"},     // Printable Rune : ""
+	"shell":        {Icon: "\uf489", Color: "#2ecc71"},     // Printable Rune : ""
+	"shp":          {Icon: "\U000f065e", Color: "#f1c40f"}, // Printable Rune : "󰙞"
+	"sol":          {Icon: "\U000f086a", Color: "#3498db"}, // Printable Rune : "󰡪"
+	"sqlite":       {Icon: "\ue7c4", Color: "#27ae60"},     // Printable Rune : ""
+	"styl":         {Icon: "\ue600", Color: "#e74c3c"},     // Printable Rune : ""
+	"svelte":       {Icon: "\ue697", Color: "#ff3e00"},     // Printable Rune : ""
+	"swift":        {Icon: "\ue755", Color: "#ff6f61"},     // Printable Rune : ""
+	"tex":          {Icon: "\u222b", Color: "#9b59b6"},     // Printable Rune : "∫"
+	"tf":           {Icon: "\ue69a", Color: "#2ecc71"},     // Printable Rune : ""
+	"toml":         {Icon: "\U000f016a", Color: "#f39c12"}, // Printable Rune : "󰅪"
+	"ts":           {Icon: "\U000f06e6", Color: "#2980b9"}, // Printable Rune : "󰛦"
+	"twig":         {Icon: "\ue61c", Color: "#9b59b6"},     // Printable Rune : ""
+	"txt":          {Icon: "\uf15c", Color: "#7f8c8d"},     // Printable Rune : ""
+	"vagrantfile":  {Icon: "\ue21e", Color: "#3498db"},     // Printable Rune : ""
+	"video":        {Icon: "\uf03d", Color: "#c0392b"},     // Printable Rune : ""
+	"vim":          {Icon: "\ue62b", Color: "#019833"},     // Printable Rune : ""
+	"vue":          {Icon: "\ue6a0", Color: "#41b883"},     // Printable Rune : ""
+	"windows":      {Icon: "\uf17a", Color: "#4a90e2"},     // Printable Rune : ""
+	"xls":          {Icon: "\uf1c3", Color: "#27ae60"},     // Printable Rune : ""
+	"xml":          {Icon: "\ue796", Color: "#3498db"},     // Printable Rune : ""
+	"yml":          {Icon: "\ue601", Color: "#f39c12"},     // Printable Rune : ""
+	"zig":          {Icon: "\ue6a9", Color: "#9b59b6"},     // Printable Rune : ""
+	"zip":          {Icon: "\uf410", Color: "#e74c3c"},     // Printable Rune : ""
 }
 
 var Aliases = map[string]string{
@@ -394,23 +394,23 @@ var Aliases = map[string]string{
 }
 
 var Folders = map[string]IconStyle{
-	".atom":                 {Icon: "\ue764", Color: "#66595c"}, // Atom folder - Dark gray
-	".aws":                  {Icon: "\ue7ad", Color: "#ff9900"}, // AWS folder - Orange
-	".docker":               {Icon: "\ue7b0", Color: "#0db7ed"}, // Docker folder - Blue
-	".gem":                  {Icon: "\ue21e", Color: "#e9573f"}, // Gem folder - Red
-	".git":                  {Icon: "\ue5fb", Color: "#f14e32"}, // Git folder - Red
-	".git-credential-cache": {Icon: "\ue5fb", Color: "#f14e32"}, // Git credential cache folder - Red
-	".github":               {Icon: "\ue5fd", Color: "#000000"}, // GitHub folder - Black
-	".npm":                  {Icon: "\ue5fa", Color: "#cb3837"}, // npm folder - Red
-	".nvm":                  {Icon: "\ue718", Color: "#cb3837"}, // nvm folder - Red
-	".rvm":                  {Icon: "\ue21e", Color: "#e9573f"}, // rvm folder - Red
-	".Trash":                {Icon: "\uf1f8", Color: "#7f8c8d"}, // Trash folder - Light gray
-	".vscode":               {Icon: "\ue70c", Color: "#007acc"}, // VSCode folder - Blue
-	".vim":                  {Icon: "\ue62b", Color: "#019833"}, // Vim folder - Green
-	"config":                {Icon: "\ue5fc", Color: "#ffb86c"}, // Config folder - Light orange
-	"folder":                {Icon: "", Color: "NONE"},         // Generic folder - Dark yellowish
-	"hidden":                {Icon: "\uf023", Color: "#75715e"}, // Hidden folder - Dark yellowish
-	"node_modules":          {Icon: "\ue5fa", Color: "#cb3837"}, // Node modules folder - Red
+	".atom":                 {Icon: "\ue764", Color: "#66595c"}, // Atom folder - Dark gray // Printable Rune : ""
+	".aws":                  {Icon: "\ue7ad", Color: "#ff9900"}, // AWS folder - Orange // Printable Rune : ""
+	".docker":               {Icon: "\ue7b0", Color: "#0db7ed"}, // Docker folder - Blue // Printable Rune : ""
+	".gem":                  {Icon: "\ue21e", Color: "#e9573f"}, // Gem folder - Red // Printable Rune : ""
+	".git":                  {Icon: "\ue5fb", Color: "#f14e32"}, // Git folder - Red // Printable Rune : ""
+	".git-credential-cache": {Icon: "\ue5fb", Color: "#f14e32"}, // Git credential cache folder - Red // Printable Rune : ""
+	".github":               {Icon: "\ue5fd", Color: "#000000"}, // GitHub folder - Black // Printable Rune : ""
+	".npm":                  {Icon: "\ue5fa", Color: "#cb3837"}, // npm folder - Red // Printable Rune : ""
+	".nvm":                  {Icon: "\ue718", Color: "#cb3837"}, // nvm folder - Red // Printable Rune : ""
+	".rvm":                  {Icon: "\ue21e", Color: "#e9573f"}, // rvm folder - Red // Printable Rune : ""
+	".Trash":                {Icon: "\uf1f8", Color: "#7f8c8d"}, // Trash folder - Light gray // Printable Rune : ""
+	".vscode":               {Icon: "\ue70c", Color: "#007acc"}, // VSCode folder - Blue // Printable Rune : ""
+	".vim":                  {Icon: "\ue62b", Color: "#019833"}, // Vim folder - Green // Printable Rune : ""
+	"config":                {Icon: "\ue5fc", Color: "#ffb86c"}, // Config folder - Light orange // Printable Rune : ""
+	// Item for Generic folder, with key "folder" is initialized in InitIcon()
+	"hidden":       {Icon: "\uf023", Color: "#75715e"}, // Hidden folder - Dark yellowish // Printable Rune : ""
+	"node_modules": {Icon: "\ue5fa", Color: "#cb3837"}, // Node modules folder - Red // Printable Rune : ""
 
-	"superfile": {Icon: "󰚝", Color: "#FF6F00"},
+	"superfile": {Icon: "\U000f069d", Color: "#FF6F00"}, // Printable Rune : "󰚝"
 }
