@@ -49,7 +49,9 @@ class EmptyPanelTest(GenericTestImpl):
         self.start_spf()
         self.send_input()    
         time.sleep(tconst.OPERATION_DELAY)
-        # To not close spf
+        # Intentionally not closing spf to ensure it remains running,
+        # which is verified by the validate_spf_running flag which is set 
+        # to true for this testcase
     
     
         
