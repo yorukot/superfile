@@ -92,7 +92,9 @@ func (s *sidebarModel) directoriesRender(mainPanelHeight int, curFilePanelFileLo
 	return res
 }
 
-// This also modifies the m.fileModel.filePanels
+// This also modifies the m.fileModel.filePanels, which it should not
+// what modifications we do on this model object are of no consequence.
+// Since bubblea passed this 'model' by value in View() function.
 func (m *model) filePanelRender() string {
 	// file panel
 	f := make([]string, 10)
@@ -648,7 +650,8 @@ func (m *model) filePreviewPanelRender() string {
 	if len(panel.element) == 0 {
 		return box.Render("\n --- " + icon.Error + " No content to preview ---")
 	}
-
+	// This could create errors if panel.cursor ever becomes negative, or goes out of bounds
+	// We should have a panel validation function in our View() function
 	itemPath := panel.element[panel.cursor].location
 
 	// Renamed it to info_err to prevent shadowing with err below
