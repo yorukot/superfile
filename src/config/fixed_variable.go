@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	CurrentVersion      string = "v1.2.0.0"
+	CurrentVersion      string = "v1.2.1"
 	LatestVersionURL    string = "https://api.github.com/repos/yorukot/superfile/releases/latest"
 	LatestVersionGithub string = "github.com/yorukot/superfile/releases/latest"
 
