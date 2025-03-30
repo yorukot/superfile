@@ -2,33 +2,24 @@ package prompt
 
 import (
 	"github.com/charmbracelet/bubbles/textinput"
-	"github.com/yorukot/superfile/src/internal/common"
 )
-
-type PromptCommandPrefix = string
-
-type PromptCommand struct {
-	renderPrefix  string
-	renderHint    string
-	handleCommand func(input string) (common.ModelUpdateAction, error)
-}
 
 type PromptModal struct {
 	headline string
 	open     bool
-	// whether its shellMode of spf Mode
+	// whether its shellMode or spfMode
 	shellMode bool
 	textInput textinput.Model
-	errormsg  string
-
-	// Defined here for decoupling between internal and prompt package
-	// We will later take hotkeys to the common pacakge
-	confirmHotkeys []string
-	cancelHotkeys  []string
-
-	commandList map[PromptCommandPrefix]PromptCommand
 }
 
 func (p *PromptModal) IsOpen() bool {
 	return p.open
+}
+
+func (p *PromptModal) Validate() bool {
+	// Prompt was closed, but textInput was not cleared
+	if !p.open && p.textInput.Value() != "" {
+		return false
+	}
+	return true
 }

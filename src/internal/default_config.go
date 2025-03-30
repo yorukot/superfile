@@ -56,7 +56,7 @@ func defaultModelConfig(toggleDotFileBool bool, toggleFooter bool, firstFilePane
 			data:        getHelpMenuData(),
 			open:        false,
 		},
-		promptModal:   prompt.DefaultPrompt(hotkeys.ConfirmTyping, hotkeys.CancelTyping),
+		promptModal:   prompt.DefaultPrompt(),
 		toggleDotFile: toggleDotFileBool,
 		toggleFooter:  toggleFooter,
 	}

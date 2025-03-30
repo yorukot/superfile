@@ -19,7 +19,7 @@ func (m *model) validateLayout() error {
 		return fmt.Errorf("footerHeight %v is too small", m.footerHeight)
 	}
 	// PanelHeight + 2 lines (main border) + actual footer height
-	if m.fullHeight != (m.mainPanelHeight+2)+m.footerHeight {
+	if m.fullHeight != (m.mainPanelHeight+2)+(m.footerHeight+2) {
 		return fmt.Errorf("Invalid model layout, fullHeight : %v, mainPanelHeight : %v, footerHeight : %v\n",
 			m.fullHeight, m.mainPanelHeight, m.footerHeight)
 	}
