@@ -18,18 +18,18 @@ import (
 // with the default values and modify the config file to include default configs
 // if the FixConfigFile flag is on
 func LoadConfigFile() {
-	hasError := utils.LoadTomlFile(variable.ConfigFile, ConfigTomlString, &Config, variable.FixConfigFile, lipglossError)
+	hasError := utils.LoadTomlFile(variable.ConfigFile, ConfigTomlString, &Config, variable.FixConfigFile, LipglossError)
 	if hasError {
 		fmt.Println("To add missing fields to configuration file automatically run superfile with the --fix-config-file flag `spf --fix-config-file`")
 		return
 	}
 
 	if (Config.FilePreviewWidth > 10 || Config.FilePreviewWidth < 2) && Config.FilePreviewWidth != 0 {
-		utils.LogAndExit(loadConfigError("file_preview_width"))
+		utils.LogAndExit(LoadConfigError("file_preview_width"))
 	}
 
 	if Config.SidebarWidth != 0 && (Config.SidebarWidth < 3 || Config.SidebarWidth > 20) {
-		utils.LogAndExit(loadConfigError("sidebar_width"))
+		utils.LogAndExit(LoadConfigError("sidebar_width"))
 	}
 
 }
@@ -37,7 +37,7 @@ func LoadConfigFile() {
 // Load keybinds from the hotkeys file. Compares the content
 // with the default values and modify the hotkeys if the FixHotkeys flag is on.
 func LoadHotkeysFile() {
-	hasError := utils.LoadTomlFile(variable.HotkeysFile, HotkeysTomlString, &Hotkeys, variable.FixHotkeys, lipglossError)
+	hasError := utils.LoadTomlFile(variable.HotkeysFile, HotkeysTomlString, &Hotkeys, variable.FixHotkeys, LipglossError)
 	if hasError {
 		fmt.Println("To add missing fields to hotkeys file automatically run superfile with the --fix-hotkeys flag `spf --fix-hotkeys`")
 		return
@@ -50,12 +50,12 @@ func LoadHotkeysFile() {
 		value := val.Field(i)
 
 		if value.Kind() != reflect.Slice || value.Type().Elem().Kind() != reflect.String {
-			utils.LogAndExit(loadHotkeysError(field.Name))
+			utils.LogAndExit(LoadHotkeysError(field.Name))
 		}
 
 		hotkeysList, ok := value.Interface().([]string)
 		if !ok || len(hotkeysList) == 0 || hotkeysList[0] == "" {
-			utils.LogAndExit(loadHotkeysError(field.Name))
+			utils.LogAndExit(LoadHotkeysError(field.Name))
 		}
 	}
 }

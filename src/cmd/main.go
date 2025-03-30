@@ -4,6 +4,7 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"github.com/yorukot/superfile/src/internal/common"
 	"io"
 	"log"
 	"log/slog"
@@ -23,8 +24,8 @@ import (
 
 // Run superfile app
 func Run(content embed.FS) {
-	internal.LoadInitial_PrerenderedVariables()
-	internal.LoadAllDefaultConfig(content)
+	common.LoadInitial_PrerenderedVariables()
+	common.LoadAllDefaultConfig(content)
 
 	app := &cli.App{
 		Name:        "superfile",
@@ -164,11 +165,11 @@ func InitConfigFile() {
 	}
 
 	// Write config file
-	if err := writeConfigFile(variable.ConfigFile, internal.ConfigTomlString); err != nil {
+	if err := writeConfigFile(variable.ConfigFile, common.ConfigTomlString); err != nil {
 		log.Fatalln("Error writing config file:", err)
 	}
 
-	if err := writeConfigFile(variable.HotkeysFile, internal.HotkeysTomlString); err != nil {
+	if err := writeConfigFile(variable.HotkeysFile, common.HotkeysTomlString); err != nil {
 		log.Fatalln("Error writing config file:", err)
 	}
 
@@ -267,7 +268,7 @@ func writeLastCheckTime(t time.Time) {
 // Todo : This is too big of a function. Refactor it to displayUpdateNotification, fetchLatestVersion,
 // shouldCheckForUpdates, chucks
 func CheckForUpdates() {
-	var Config internal.ConfigType
+	var Config common.ConfigType
 
 	// Get AutoCheck flag from configuration files
 

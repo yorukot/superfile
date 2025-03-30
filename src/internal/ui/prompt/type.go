@@ -14,8 +14,10 @@ type PromptCommand struct {
 }
 
 type PromptModal struct {
-	headline  string
-	open      bool
+	headline string
+	open     bool
+	// whether its shellMode of spf Mode
+	shellMode bool
 	textInput textinput.Model
 	errormsg  string
 

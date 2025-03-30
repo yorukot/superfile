@@ -11,8 +11,8 @@ import (
 )
 
 // Generate border style for file panel
-func filePanelBorderStyle(height int, width int, filePanelFocussed bool, borderBottom string) lipgloss.Style {
-	border := generateBorder()
+func FilePanelBorderStyle(height int, width int, filePanelFocussed bool, borderBottom string) lipgloss.Style {
+	border := GenerateBorder()
 	border.Left = ""
 	border.Right = ""
 	for i := 0; i < height; i++ {
@@ -27,46 +27,46 @@ func filePanelBorderStyle(height int, width int, filePanelFocussed bool, borderB
 	border.Bottom = borderBottom
 	return lipgloss.NewStyle().
 		Border(border).
-		BorderForeground(filePanelFocusColor(filePanelFocussed)).
-		BorderBackground(filePanelBGColor).
+		BorderForeground(FilePanelFocusColor(filePanelFocussed)).
+		BorderBackground(FilePanelBGColor).
 		Width(width).
-		Height(height).Background(filePanelBGColor)
+		Height(height).Background(FilePanelBGColor)
 }
 
 // Generate filePreview Box
-func filePreviewBox(height int, width int) lipgloss.Style {
+func FilePreviewBox(height int, width int) lipgloss.Style {
 	return lipgloss.NewStyle().
 		Width(width).
-		Height(height).Background(filePanelBGColor)
+		Height(height).Background(FilePanelBGColor)
 }
 
 // Generate border style for sidebar
-func sideBarBorderStyle(height int, sidebarFocussed bool) lipgloss.Style {
-	border := generateBorder()
-	sidebarBorderStateColor := sidebarBorderColor
+func SideBarBorderStyle(height int, sidebarFocussed bool) lipgloss.Style {
+	border := GenerateBorder()
+	sidebarBorderStateColor := SidebarBorderColor
 	if sidebarFocussed {
-		sidebarBorderStateColor = sidebarBorderActiveColor
+		sidebarBorderStateColor = SidebarBorderActiveColor
 	}
 
 	return lipgloss.NewStyle().
 		BorderStyle(border).
 		BorderForeground(sidebarBorderStateColor).
-		BorderBackground(sidebarBGColor).
+		BorderBackground(SidebarBGColor).
 		Width(Config.SidebarWidth).
 		Height(height).
-		Background(sidebarBGColor).
-		Foreground(sidebarFGColor)
+		Background(SidebarBGColor).
+		Foreground(SidebarFGColor)
 }
 
 // Generate border style for process and can custom bottom border
-func procsssBarBorder(height int, width int, borderBottom string, processBarFocussed bool) lipgloss.Style {
-	border := generateBorder()
+func ProcsssBarBorder(height int, width int, borderBottom string, processBarFocussed bool) lipgloss.Style {
+	border := GenerateBorder()
 	border.Top = Config.BorderTop + Config.BorderMiddleRight + " Processes " + Config.BorderMiddleLeft + strings.Repeat(Config.BorderTop, width)
 	border.Bottom = borderBottom
 
-	processBorderStateColor := footerBorderColor
+	processBorderStateColor := FooterBorderColor
 	if processBarFocussed {
-		processBorderStateColor = footerBorderActiveColor
+		processBorderStateColor = FooterBorderActiveColor
 	}
 
 	return lipgloss.NewStyle().
@@ -76,18 +76,18 @@ func procsssBarBorder(height int, width int, borderBottom string, processBarFocu
 		Width(width).
 		Height(height).
 		Background(FooterBGColor).
-		Foreground(footerFGColor)
+		Foreground(FooterFGColor)
 }
 
 // Generate border style for metadata and can custom bottom border
-func metadataBorder(height int, width int, borderBottom string, metadataFocussed bool) lipgloss.Style {
-	border := generateBorder()
+func MetadataBorder(height int, width int, borderBottom string, metadataFocussed bool) lipgloss.Style {
+	border := GenerateBorder()
 	border.Top = Config.BorderTop + Config.BorderMiddleRight + " Metadata " + Config.BorderMiddleLeft + strings.Repeat(Config.BorderTop, width)
 	border.Bottom = borderBottom
 
-	metadataBorderStateColor := footerBorderColor
+	metadataBorderStateColor := FooterBorderColor
 	if metadataFocussed {
-		metadataBorderStateColor = footerBorderActiveColor
+		metadataBorderStateColor = FooterBorderActiveColor
 	}
 
 	return lipgloss.NewStyle().
@@ -97,104 +97,104 @@ func metadataBorder(height int, width int, borderBottom string, metadataFocussed
 		Width(width).
 		Height(height).
 		Background(FooterBGColor).
-		Foreground(footerFGColor)
+		Foreground(FooterFGColor)
 }
 
 // Generate border style for clipboard and can custom bottom border
-func clipboardBorder(height int, width int, borderBottom string) lipgloss.Style {
-	border := generateBorder()
+func ClipboardBorder(height int, width int, borderBottom string) lipgloss.Style {
+	border := GenerateBorder()
 	border.Top = Config.BorderTop + Config.BorderMiddleRight + " Clipboard " + Config.BorderMiddleLeft + strings.Repeat(Config.BorderTop, width)
 	border.Bottom = borderBottom
 
 	return lipgloss.NewStyle().
 		Border(border).
-		BorderForeground(footerBorderColor).
+		BorderForeground(FooterBorderColor).
 		BorderBackground(FooterBGColor).
 		Width(width).
 		Height(height).
 		Background(FooterBGColor).
-		Foreground(footerFGColor)
+		Foreground(FooterFGColor)
 }
 
 // Generate modal (pop up widnwos) border style
-func modalBorderStyle(height int, width int) lipgloss.Style {
-	border := generateBorder()
+func ModalBorderStyle(height int, width int) lipgloss.Style {
+	border := GenerateBorder()
 	return lipgloss.NewStyle().Height(height).
 		Width(width).
 		Align(lipgloss.Center, lipgloss.Center).
 		Border(border).
-		BorderForeground(modalBorderActiveColor).
-		BorderBackground(modalBGColor).
-		Background(modalBGColor).
-		Foreground(modalFGColor)
+		BorderForeground(ModalBorderActiveColor).
+		BorderBackground(ModalBGColor).
+		Background(ModalBGColor).
+		Foreground(ModalFGColor)
 }
 
 // Generate first use modal style (This modal pop up when user first use superfile)
-func firstUseModal(height int, width int) lipgloss.Style {
-	border := generateBorder()
+func FirstUseModal(height int, width int) lipgloss.Style {
+	border := GenerateBorder()
 	return lipgloss.NewStyle().Height(height).
 		Width(width).
 		Align(lipgloss.Left, lipgloss.Center).
 		Border(border).
-		BorderForeground(modalBorderActiveColor).
-		BorderBackground(modalBGColor).
-		Background(modalBGColor).
-		Foreground(modalFGColor)
+		BorderForeground(ModalBorderActiveColor).
+		BorderBackground(ModalBGColor).
+		Background(ModalBGColor).
+		Foreground(ModalFGColor)
 }
 
 // Generate help menu modal border style
-func helpMenuModalBorderStyle(height int, width int, borderBottom string) lipgloss.Style {
-	border := generateBorder()
+func HelpMenuModalBorderStyle(height int, width int, borderBottom string) lipgloss.Style {
+	border := GenerateBorder()
 	border.Bottom = borderBottom
 
 	return lipgloss.NewStyle().
 		Border(border).
-		BorderForeground(modalBorderActiveColor).
-		BorderBackground(modalBGColor).
+		BorderForeground(ModalBorderActiveColor).
+		BorderBackground(ModalBGColor).
 		Width(width).
 		Height(height).
-		Background(modalBGColor).
-		Foreground(modalFGColor)
+		Background(ModalBGColor).
+		Foreground(ModalFGColor)
 }
 
 // Generate sort options modal border style
-func sortOptionsModalBorderStyle(height int, width int, borderBottom string) lipgloss.Style {
-	border := generateBorder()
+func SortOptionsModalBorderStyle(height int, width int, borderBottom string) lipgloss.Style {
+	border := GenerateBorder()
 	border.Bottom = borderBottom
 
 	return lipgloss.NewStyle().
 		Border(border).
-		BorderForeground(modalBorderActiveColor).
-		BorderBackground(modalBGColor).
+		BorderForeground(ModalBorderActiveColor).
+		BorderBackground(ModalBGColor).
 		Width(width).
 		Height(height).
-		Background(modalBGColor).
-		Foreground(modalFGColor)
+		Background(ModalBGColor).
+		Foreground(ModalFGColor)
 }
 
 // Generate full screen style for terminal size too small etc
-func fullScreenStyle(height int, width int) lipgloss.Style {
+func FullScreenStyle(height int, width int) lipgloss.Style {
 	return lipgloss.NewStyle().
 		Height(height).
 		Width(width).
 		Align(lipgloss.Center, lipgloss.Center).
-		Background(fullScreenBGColor).
-		Foreground(fullScreenFGColor)
+		Background(FullScreenBGColor).
+		Foreground(FullScreenFGColor)
 }
 
 // Generate file panel divider style
-func filePanelDividerStyle(filePanelFocussed bool) lipgloss.Style {
+func FilePanelDividerStyle(filePanelFocussed bool) lipgloss.Style {
 	return lipgloss.NewStyle().
-		Foreground(filePanelFocusColor(filePanelFocussed)).
-		Background(filePanelBGColor)
+		Foreground(FilePanelFocusColor(filePanelFocussed)).
+		Background(FilePanelBGColor)
 }
 
 // Return border color based on file panel status
-func filePanelFocusColor(filePanelFocussed bool) lipgloss.Color {
+func FilePanelFocusColor(filePanelFocussed bool) lipgloss.Color {
 	if filePanelFocussed {
-		return filePanelBorderActiveColor
+		return FilePanelBorderActiveColor
 	}
-	return filePanelBorderColor
+	return FilePanelBorderColor
 }
 
 // Return only fg and bg color style
@@ -205,7 +205,7 @@ func StringColorRender(fgColor lipgloss.Color, bgColor lipgloss.Color) lipgloss.
 }
 
 // Generate border style
-func generateBorder() lipgloss.Border {
+func GenerateBorder() lipgloss.Border {
 	return lipgloss.Border{
 		Top:         Config.BorderTop,
 		Bottom:      Config.BorderBottom,
@@ -219,12 +219,12 @@ func generateBorder() lipgloss.Border {
 }
 
 // Generate config error style
-func loadConfigError(value string) string {
+func LoadConfigError(value string) string {
 	return lipgloss.NewStyle().Foreground(lipgloss.Color("#FF5555")).Render("■ ERROR: ") + "Config file \"" + lipgloss.NewStyle().Foreground(lipgloss.Color("#00D9FF")).Render(value) + "\" invalidation"
 }
 
 // Generate config error style
-func loadHotkeysError(value string) string {
+func LoadHotkeysError(value string) string {
 	return lipgloss.NewStyle().Foreground(lipgloss.Color("#FF5555")).Render("■ ERROR: ") + "Hotkeys file \"" + lipgloss.NewStyle().Foreground(lipgloss.Color("#00D9FF")).Render(value) + "\" invalidation"
 }
 
@@ -234,7 +234,7 @@ func GenerateSearchBar() textinput.Model {
 	ti.Cursor.Style = FooterCursorStyle
 	ti.Cursor.TextStyle = FooterStyle
 	ti.TextStyle = FilePanelStyle
-	ti.Prompt = filePanelTopDirectoryIconStyle.Render(icon.Search + icon.Space)
+	ti.Prompt = FilePanelTopDirectoryIconStyle.Render(icon.Search + icon.Space)
 	ti.Cursor.Blink = true
 	ti.PlaceholderStyle = FilePanelStyle
 	ti.Placeholder = "(" + Hotkeys.SearchBar[0] + ") Type something"
@@ -309,4 +309,16 @@ func GenerateDefaultProgress() progress.Model {
 	prog := progress.New(GenerateGradientColor())
 	prog.PercentageStyle = FooterStyle
 	return prog
+}
+
+func GenerateGradientColor() progress.Option {
+	return progress.WithScaledGradient(Theme.GradientColor[0], Theme.GradientColor[1])
+}
+
+func GenerateFooterBorder(countString string, width int) string {
+	repeatCount := width - len(countString)
+	if repeatCount < 0 {
+		repeatCount = 0
+	}
+	return strings.Repeat(Config.BorderBottom, repeatCount) + Config.BorderMiddleRight + countString + Config.BorderMiddleLeft
 }

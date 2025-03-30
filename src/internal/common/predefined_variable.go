@@ -20,16 +20,16 @@ var (
 )
 
 var (
-	sideBarSuperfileTitle string
-	sideBarPinnedDivider  string
-	sideBarDisksDivider   string
-	sideBarNoneText       string
-	lipglossError         string
+	SideBarSuperfileTitle string
+	SideBarPinnedDivider  string
+	SideBarDisksDivider   string
+	SideBarNoneText       string
+	LipglossError         string
 )
 
 // No dependencies
 func LoadInitial_PrerenderedVariables() {
-	lipglossError = lipgloss.NewStyle().Foreground(lipgloss.Color("#F93939")).Render("Error") +
+	LipglossError = lipgloss.NewStyle().Foreground(lipgloss.Color("#F93939")).Render("Error") +
 		lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFEE")).Render(" ┃ ")
 }
 
@@ -38,14 +38,14 @@ func LoadInitial_PrerenderedVariables() {
 // loadConfigFile() in config_types.go should be finished
 // InitIcon() in config package in function.go should be finished
 func LoadPrerenderedVariables() {
-	sideBarSuperfileTitle = SidebarTitleStyle.Render("    " + icon.SuperfileIcon + " superfile")
-	sideBarSuperfileTitle = ansi.Truncate(sideBarSuperfileTitle, Config.SidebarWidth, "")
+	SideBarSuperfileTitle = SidebarTitleStyle.Render("    " + icon.SuperfileIcon + " superfile")
+	SideBarSuperfileTitle = ansi.Truncate(SideBarSuperfileTitle, Config.SidebarWidth, "")
 
-	sideBarPinnedDivider = SidebarTitleStyle.Render("󰐃 Pinned") + SidebarDividerStyle.Render(" ───────────") + "\n"
-	sideBarPinnedDivider = ansi.Truncate(sideBarPinnedDivider, Config.SidebarWidth, "")
+	SideBarPinnedDivider = SidebarTitleStyle.Render("󰐃 Pinned") + SidebarDividerStyle.Render(" ───────────") + "\n"
+	SideBarPinnedDivider = ansi.Truncate(SideBarPinnedDivider, Config.SidebarWidth, "")
 
-	sideBarDisksDivider = SidebarTitleStyle.Render("󱇰 Disks") + SidebarDividerStyle.Render(" ────────────") + "\n"
-	sideBarDisksDivider = ansi.Truncate(sideBarDisksDivider, Config.SidebarWidth, "")
+	SideBarDisksDivider = SidebarTitleStyle.Render("󱇰 Disks") + SidebarDividerStyle.Render(" ────────────") + "\n"
+	SideBarDisksDivider = ansi.Truncate(SideBarDisksDivider, Config.SidebarWidth, "")
 
-	sideBarNoneText = SidebarStyle.Render(" " + icon.Error + " None")
+	SideBarNoneText = SidebarStyle.Render(" " + icon.Error + " None")
 }
