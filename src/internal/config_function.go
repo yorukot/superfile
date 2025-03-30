@@ -203,14 +203,14 @@ func loadConfigFile() {
 // Load keybinds from the hotkeys file. Compares the content
 // with the default values and modify the hotkeys if the FixHotkeys flag is on.
 func loadHotkeysFile() {
-	hasError := loadTomlFile(variable.HotkeysFile, HotkeysTomlString, &Hotkeys, variable.FixHotkeys)
+	hasError := loadTomlFile(variable.HotkeysFile, HotkeysTomlString, &hotkeys, variable.FixHotkeys)
 	if hasError {
 		fmt.Println("To add missing fields to hotkeys file automatically run superfile with the --fix-hotkeys flag `spf --fix-hotkeys`")
 		return
 	}
 
 	// Validate hotkey values
-	val := reflect.ValueOf(Hotkeys)
+	val := reflect.ValueOf(hotkeys)
 	for i := 0; i < val.NumField(); i++ {
 		field := val.Type().Field(i)
 		value := val.Field(i)

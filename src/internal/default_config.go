@@ -6,12 +6,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/prompt"
 )
 
-// Variables for holding default configurations of each settings
-var (
-	HotkeysTomlString  string
-	ConfigTomlString   string
-	DefaultThemeString string
-)
+
 
 // Generate and return model containing default configurations for interface
 func defaultModelConfig(toggleDotFileBool bool, toggleFooter bool, firstFilePanelDir string) model {
@@ -62,7 +57,7 @@ func defaultModelConfig(toggleDotFileBool bool, toggleFooter bool, firstFilePane
 			data:        getHelpMenuData(),
 			open:        false,
 		},
-		promptModal:   prompt.DefaultPrompt(),
+		promptModal:   prompt.DefaultPrompt(hotkeys.ConfirmTyping, hotkeys.CancelTyping),
 		toggleDotFile: toggleDotFileBool,
 		toggleFooter:  toggleFooter,
 	}
@@ -80,27 +75,27 @@ func getHelpMenuData() []helpMenuModalData {
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         Hotkeys.Confirm,
+			hotkey:         hotkeys.Confirm,
 			description:    "Confirm your select or typing",
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         Hotkeys.Quit,
+			hotkey:         hotkeys.Quit,
 			description:    "Quit typing, modal or superfile",
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         Hotkeys.ConfirmTyping,
+			hotkey:         hotkeys.ConfirmTyping,
 			description:    "Confirm typing",
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         Hotkeys.CancelTyping,
+			hotkey:         hotkeys.CancelTyping,
 			description:    "Cancel typing",
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         Hotkeys.OpenHelpMenu,
+			hotkey:         hotkeys.OpenHelpMenu,
 			description:    "Open help menu (hotkeylist)",
 			hotkeyWorkType: globalType,
 		},
@@ -108,57 +103,57 @@ func getHelpMenuData() []helpMenuModalData {
 			subTitle: "Panel navigation",
 		},
 		{
-			hotkey:         Hotkeys.CreateNewFilePanel,
+			hotkey:         hotkeys.CreateNewFilePanel,
 			description:    "Create new file panel",
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         Hotkeys.CloseFilePanel,
+			hotkey:         hotkeys.CloseFilePanel,
 			description:    "Close the focused file panel",
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         Hotkeys.ToggleFilePreviewPanel,
+			hotkey:         hotkeys.ToggleFilePreviewPanel,
 			description:    "Toggle file preview panel",
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         Hotkeys.OpenSortOptionsMenu,
+			hotkey:         hotkeys.OpenSortOptionsMenu,
 			description:    "Open sort options menu",
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         Hotkeys.ToggleReverseSort,
+			hotkey:         hotkeys.ToggleReverseSort,
 			description:    "Toggle reverse sort",
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         Hotkeys.ToggleFooter,
+			hotkey:         hotkeys.ToggleFooter,
 			description:    "Toggle footer",
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         Hotkeys.NextFilePanel,
+			hotkey:         hotkeys.NextFilePanel,
 			description:    "Focus on the next file panel",
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         Hotkeys.PreviousFilePanel,
+			hotkey:         hotkeys.PreviousFilePanel,
 			description:    "Focus on the previous file panel",
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         Hotkeys.FocusOnProcessBar,
+			hotkey:         hotkeys.FocusOnProcessBar,
 			description:    "Focus on the processbar panel",
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         Hotkeys.FocusOnSidebar,
+			hotkey:         hotkeys.FocusOnSidebar,
 			description:    "Focus on the sidebar",
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         Hotkeys.FocusOnMetaData,
+			hotkey:         hotkeys.FocusOnMetaData,
 			description:    "Focus on the metadata panel",
 			hotkeyWorkType: globalType,
 		},
@@ -166,52 +161,52 @@ func getHelpMenuData() []helpMenuModalData {
 			subTitle: "Panel movement",
 		},
 		{
-			hotkey:         Hotkeys.ListUp,
+			hotkey:         hotkeys.ListUp,
 			description:    "Up",
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         Hotkeys.ListDown,
+			hotkey:         hotkeys.ListDown,
 			description:    "Down",
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         Hotkeys.ParentDirectory,
+			hotkey:         hotkeys.ParentDirectory,
 			description:    "Return to parent folder",
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         Hotkeys.FilePanelSelectAllItem,
+			hotkey:         hotkeys.FilePanelSelectAllItem,
 			description:    "Select all items in focused file panel",
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         Hotkeys.FilePanelSelectModeItemsSelectUp,
+			hotkey:         hotkeys.FilePanelSelectModeItemsSelectUp,
 			description:    "Select up with your course",
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         Hotkeys.FilePanelSelectModeItemsSelectDown,
+			hotkey:         hotkeys.FilePanelSelectModeItemsSelectDown,
 			description:    "Select down with your course",
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         Hotkeys.ToggleDotFile,
+			hotkey:         hotkeys.ToggleDotFile,
 			description:    "Toggle dot file display",
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         Hotkeys.SearchBar,
+			hotkey:         hotkeys.SearchBar,
 			description:    "Toggle active search bar",
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         Hotkeys.ChangePanelMode,
+			hotkey:         hotkeys.ChangePanelMode,
 			description:    "Change between selection mode or normal mode",
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         Hotkeys.PinnedDirectory,
+			hotkey:         hotkeys.PinnedDirectory,
 			description:    "Pin or Unpin folder to sidebar (can be auto saved)",
 			hotkeyWorkType: globalType,
 		},
@@ -219,57 +214,57 @@ func getHelpMenuData() []helpMenuModalData {
 			subTitle: "File operations",
 		},
 		{
-			hotkey:         Hotkeys.FilePanelItemCreate,
+			hotkey:         hotkeys.FilePanelItemCreate,
 			description:    "Create file or folder(end with " + string(filepath.Separator) + " to create a folder)",
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         Hotkeys.FilePanelItemRename,
+			hotkey:         hotkeys.FilePanelItemRename,
 			description:    "Rename file or folder",
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         Hotkeys.CopyItems,
+			hotkey:         hotkeys.CopyItems,
 			description:    "Copy selected items to the clipboard",
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         Hotkeys.CutItems,
+			hotkey:         hotkeys.CutItems,
 			description:    "Cut selected items to the clipboard",
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         Hotkeys.PasteItems,
+			hotkey:         hotkeys.PasteItems,
 			description:    "Paste clipboard items into the current file panel",
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         Hotkeys.DeleteItems,
+			hotkey:         hotkeys.DeleteItems,
 			description:    "Delete selected items",
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         Hotkeys.CopyPath,
+			hotkey:         hotkeys.CopyPath,
 			description:    "Copy current file or directory path",
 			hotkeyWorkType: globalType,
 		},
 		{
-			hotkey:         Hotkeys.ExtractFile,
+			hotkey:         hotkeys.ExtractFile,
 			description:    "Extract compressed file",
 			hotkeyWorkType: normalType,
 		},
 		{
-			hotkey:         Hotkeys.CompressFile,
+			hotkey:         hotkeys.CompressFile,
 			description:    "Zip file or folder to .zip file",
 			hotkeyWorkType: normalType,
 		},
 		{
-			hotkey:         Hotkeys.OpenFileWithEditor,
+			hotkey:         hotkeys.OpenFileWithEditor,
 			description:    "Open file with your default editor",
 			hotkeyWorkType: normalType,
 		},
 		{
-			hotkey:         Hotkeys.OpenCurrentDirectoryWithEditor,
+			hotkey:         hotkeys.OpenCurrentDirectoryWithEditor,
 			description:    "Open current directory with default editor",
 			hotkeyWorkType: normalType,
 		},

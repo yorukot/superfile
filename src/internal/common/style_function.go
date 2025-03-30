@@ -1,4 +1,4 @@
-package internal
+package common
 
 import (
 	"strings"
@@ -9,7 +9,7 @@ import (
 )
 
 // Generate border style for file panel
-func filePanelBorderStyle(height int, width int, focusType filePanelFocusType, borderBottom string) lipgloss.Style {
+func filePanelBorderStyle(height int, width int, filePanelFocussed bool, borderBottom string) lipgloss.Style {
 	border := generateBorder()
 	border.Left = ""
 	border.Right = ""
@@ -25,7 +25,7 @@ func filePanelBorderStyle(height int, width int, focusType filePanelFocusType, b
 	border.Bottom = borderBottom
 	return lipgloss.NewStyle().
 		Border(border).
-		BorderForeground(filePanelFocusColor(focusType)).
+		BorderForeground(filePanelFocusColor(filePanelFocussed)).
 		BorderBackground(filePanelBGColor).
 		Width(width).
 		Height(height).Background(filePanelBGColor)
@@ -39,10 +39,10 @@ func filePreviewBox(height int, width int) lipgloss.Style {
 }
 
 // Generate border style for sidebar
-func sideBarBorderStyle(height int, focus focusPanelType) lipgloss.Style {
+func sideBarBorderStyle(height int, sidebarFocussed bool) lipgloss.Style {
 	border := generateBorder()
 	sidebarBorderStateColor := sidebarBorderColor
-	if focus == sidebarFocus {
+	if sidebarFocussed {
 		sidebarBorderStateColor = sidebarBorderActiveColor
 	}
 
@@ -57,13 +57,13 @@ func sideBarBorderStyle(height int, focus focusPanelType) lipgloss.Style {
 }
 
 // Generate border style for process and can custom bottom border
-func procsssBarBorder(height int, width int, borderBottom string, focusType focusPanelType) lipgloss.Style {
+func procsssBarBorder(height int, width int, borderBottom string, processBarFocussed bool) lipgloss.Style {
 	border := generateBorder()
 	border.Top = Config.BorderTop + Config.BorderMiddleRight + " Processes " + Config.BorderMiddleLeft + strings.Repeat(Config.BorderTop, width)
 	border.Bottom = borderBottom
 
 	processBorderStateColor := footerBorderColor
-	if focusType == processBarFocus {
+	if processBarFocussed {
 		processBorderStateColor = footerBorderActiveColor
 	}
 
@@ -78,13 +78,13 @@ func procsssBarBorder(height int, width int, borderBottom string, focusType focu
 }
 
 // Generate border style for metadata and can custom bottom border
-func metadataBorder(height int, width int, borderBottom string, focusType focusPanelType) lipgloss.Style {
+func metadataBorder(height int, width int, borderBottom string, metadataFocussed bool) lipgloss.Style {
 	border := generateBorder()
 	border.Top = Config.BorderTop + Config.BorderMiddleRight + " Metadata " + Config.BorderMiddleLeft + strings.Repeat(Config.BorderTop, width)
 	border.Bottom = borderBottom
 
 	metadataBorderStateColor := footerBorderColor
-	if focusType == metadataFocus {
+	if metadataFocussed {
 		metadataBorderStateColor = footerBorderActiveColor
 	}
 
@@ -181,19 +181,18 @@ func fullScreenStyle(height int, width int) lipgloss.Style {
 }
 
 // Generate file panel divider style
-func filePanelDividerStyle(focusType filePanelFocusType) lipgloss.Style {
+func filePanelDividerStyle(filePanelFocussed bool) lipgloss.Style {
 	return lipgloss.NewStyle().
-		Foreground(filePanelFocusColor(focusType)).
+		Foreground(filePanelFocusColor(filePanelFocussed)).
 		Background(filePanelBGColor)
 }
 
 // Return border color based on file panel status
-func filePanelFocusColor(focusType filePanelFocusType) lipgloss.Color {
-	if focusType == noneFocus {
-		return filePanelBorderColor
-	} else {
+func filePanelFocusColor(filePanelFocussed bool) lipgloss.Color {
+	if filePanelFocussed {
 		return filePanelBorderActiveColor
 	}
+	return filePanelBorderColor
 }
 
 // Return only fg and bg color style
@@ -236,7 +235,7 @@ func generateSearchBar() textinput.Model {
 	ti.Prompt = filePanelTopDirectoryIconStyle.Render(icon.Search + icon.Space)
 	ti.Cursor.Blink = true
 	ti.PlaceholderStyle = filePanelStyle
-	ti.Placeholder = "(" + Hotkeys.SearchBar[0] + ") Type something"
+	ti.Placeholder = "(" + hotkeys.SearchBar[0] + ") Type something"
 	ti.Blur()
 	ti.CharLimit = 156
 	return ti

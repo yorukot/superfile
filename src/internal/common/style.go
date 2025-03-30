@@ -1,10 +1,11 @@
-package internal
+package common
 
 import (
 	"strings"
 
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/lipgloss"
+
 )
 
 var (
@@ -68,6 +69,53 @@ var (
 var (
 	helpMenuHotkeyStyle lipgloss.Style
 	helpMenuTitleStyle  lipgloss.Style
+)
+
+var (
+	filePanelBorderColor lipgloss.Color
+	sidebarBorderColor   lipgloss.Color
+	footerBorderColor    lipgloss.Color
+
+	filePanelBorderActiveColor lipgloss.Color
+	sidebarBorderActiveColor   lipgloss.Color
+	footerBorderActiveColor    lipgloss.Color
+	modalBorderActiveColor     lipgloss.Color
+
+	fullScreenBGColor lipgloss.Color
+	filePanelBGColor  lipgloss.Color
+	sidebarBGColor    lipgloss.Color
+	footerBGColor     lipgloss.Color
+	modalBGColor      lipgloss.Color
+
+	fullScreenFGColor lipgloss.Color
+	filePanelFGColor  lipgloss.Color
+	sidebarFGColor    lipgloss.Color
+	footerFGColor     lipgloss.Color
+	modalFGColor      lipgloss.Color
+
+	cursorColor  lipgloss.Color
+	correctColor lipgloss.Color
+	errorColor   lipgloss.Color
+	hintColor    lipgloss.Color
+	cancelColor  lipgloss.Color
+
+	filePanelTopDirectoryIconColor lipgloss.Color
+	filePanelTopPathColor          lipgloss.Color
+	filePanelItemSelectedFGColor   lipgloss.Color
+	filePanelItemSelectedBGColor   lipgloss.Color
+
+	sidebarTitleColor          lipgloss.Color
+	sidebarItemSelectedFGColor lipgloss.Color
+	sidebarItemSelectedBGColor lipgloss.Color
+	sidebarDividerColor        lipgloss.Color
+
+	modalCancelFGColor  lipgloss.Color
+	modalCancelBGColor  lipgloss.Color
+	modalConfirmFGColor lipgloss.Color
+	modalConfirmBGColor lipgloss.Color
+
+	helpMenuHotkeyColor lipgloss.Color
+	helpMenuTitleColor  lipgloss.Color
 )
 
 func LoadThemeConfig() {

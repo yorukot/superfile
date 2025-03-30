@@ -1,25 +1,26 @@
 package prompt
 
 import (
+	"log/slog"
 	"slices"
 
 	"github.com/yorukot/superfile/src/config/icon"
-	"github.com/yorukot/superfile/src/internal"
 )
 
-func DefaultPrompt() (PromptModal) {
+func DefaultPrompt(confirmHotkeys []string, cancelHotkeys []string) (PromptModal) {
 	return PromptModal{
 		headline: icon.Terminal + " superfile - Prompt",
 		open:     false,
+		confirmHotkeys: confirmHotkeys,
+		cancelHotkeys: cancelHotkeys,
 	}
 }
 
 func (p *PromptModal) HandleMessage(msg string) {
-	if slices.Contains(internal.Hotkeys.ConfirmTyping, msg) {
-		if p.Confirm(m) {
-			p.Close()
-		}
-	} else if slices.Contains(internal.Hotkeys.CancelTyping, msg) {
+	slog.Debug("promptModal HandleMessage()", "msg", msg)
+	if slices.Contains(p.confirmHotkeys, msg) {
+
+	} else if slices.Contains(p.cancelHotkeys, msg) {
 		p.Close()
 	} else {
 		p.textInput.Focus()
@@ -170,15 +171,7 @@ func (p *PromptModal) Open(m *model, cmdPrefix PromptCommandPrefix) {
 
 	p.cmd = prompt
 
-	p.textInput = textinput.New()
-	p.textInput.Prompt = ""
-	p.textInput.CharLimit = 156
-	p.textInput.SetValue("")
-
-	p.textInput.Cursor.Style = modalCursorStyle
-	p.textInput.Cursor.TextStyle = modalStyle
-	p.textInput.TextStyle = modalStyle
-	p.textInput.PlaceholderStyle = modalStyle
+	
 
 	suggestions := make([]string, 0, len(p.commandList)-1)
 	for cmd := range p.commandList {

@@ -24,7 +24,7 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) tea.Cmd {
 	switch msg {
 
 	// If move up Key is pressed, check the current state and executes
-	case containsKey(msg, Hotkeys.ListUp):
+	case containsKey(msg, hotkeys.ListUp):
 		if m.focusPanel == sidebarFocus {
 			m.sidebarModel.listUp(m.mainPanelHeight)
 		} else if m.focusPanel == processBarFocus {
@@ -40,7 +40,7 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) tea.Cmd {
 		}
 
 		// If move down Key is pressed, check the current state and executes
-	case containsKey(msg, Hotkeys.ListDown):
+	case containsKey(msg, hotkeys.ListDown):
 		if m.focusPanel == sidebarFocus {
 			m.sidebarModel.listDown(m.mainPanelHeight)
 		} else if m.focusPanel == processBarFocus {
@@ -55,84 +55,84 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) tea.Cmd {
 			}()
 		}
 
-	case containsKey(msg, Hotkeys.PageUp):
+	case containsKey(msg, hotkeys.PageUp):
 		m.fileModel.filePanels[m.filePanelFocusIndex].pgUp(m.mainPanelHeight)
 
-	case containsKey(msg, Hotkeys.PageDown):
+	case containsKey(msg, hotkeys.PageDown):
 		m.fileModel.filePanels[m.filePanelFocusIndex].pgDown(m.mainPanelHeight)
 
-	case containsKey(msg, Hotkeys.ChangePanelMode):
+	case containsKey(msg, hotkeys.ChangePanelMode):
 		m.changeFilePanelMode()
 
-	case containsKey(msg, Hotkeys.NextFilePanel):
+	case containsKey(msg, hotkeys.NextFilePanel):
 		m.nextFilePanel()
 
-	case containsKey(msg, Hotkeys.PreviousFilePanel):
+	case containsKey(msg, hotkeys.PreviousFilePanel):
 		m.previousFilePanel()
 
-	case containsKey(msg, Hotkeys.CloseFilePanel):
+	case containsKey(msg, hotkeys.CloseFilePanel):
 		m.closeFilePanel()
 
-	case containsKey(msg, Hotkeys.CreateNewFilePanel):
+	case containsKey(msg, hotkeys.CreateNewFilePanel):
 		m.createNewFilePanel(variable.HomeDir)
 
-	case containsKey(msg, Hotkeys.ToggleFilePreviewPanel):
+	case containsKey(msg, hotkeys.ToggleFilePreviewPanel):
 		m.toggleFilePreviewPanel()
 
-	case containsKey(msg, Hotkeys.FocusOnSidebar):
+	case containsKey(msg, hotkeys.FocusOnSidebar):
 		m.focusOnSideBar()
 
-	case containsKey(msg, Hotkeys.FocusOnProcessBar):
+	case containsKey(msg, hotkeys.FocusOnProcessBar):
 		m.focusOnProcessBar()
 
-	case containsKey(msg, Hotkeys.FocusOnMetaData):
+	case containsKey(msg, hotkeys.FocusOnMetaData):
 		m.focusOnMetadata()
 		go func() {
 			m.returnMetaData()
 		}()
 
-	case containsKey(msg, Hotkeys.PasteItems):
+	case containsKey(msg, hotkeys.PasteItems):
 		go func() {
 			m.pasteItem()
 		}()
 
-	case containsKey(msg, Hotkeys.FilePanelItemCreate):
+	case containsKey(msg, hotkeys.FilePanelItemCreate):
 		m.panelCreateNewFile()
-	case containsKey(msg, Hotkeys.PinnedDirectory):
+	case containsKey(msg, hotkeys.PinnedDirectory):
 		m.pinnedDirectory()
 
-	case containsKey(msg, Hotkeys.ToggleDotFile):
+	case containsKey(msg, hotkeys.ToggleDotFile):
 		m.toggleDotFileController()
 
-	case containsKey(msg, Hotkeys.ToggleFooter):
+	case containsKey(msg, hotkeys.ToggleFooter):
 		m.toggleFooterController()
 
-	case containsKey(msg, Hotkeys.ExtractFile):
+	case containsKey(msg, hotkeys.ExtractFile):
 		go func() {
 			m.extractFile()
 		}()
 
-	case containsKey(msg, Hotkeys.CompressFile):
+	case containsKey(msg, hotkeys.CompressFile):
 		go func() {
 			m.compressFile()
 		}()
 
-	case containsKey(msg, Hotkeys.OpenSPFPrompt):
+	case containsKey(msg, hotkeys.OpenSPFPrompt):
 		m.promptModal.Open(m, PROMPT_COMMAND_COMMAND)
 
-	case containsKey(msg, Hotkeys.OpenHelpMenu):
+	case containsKey(msg, hotkeys.OpenHelpMenu):
 		m.openHelpMenu()
 
-	case containsKey(msg, Hotkeys.OpenSortOptionsMenu):
+	case containsKey(msg, hotkeys.OpenSortOptionsMenu):
 		m.openSortOptionsMenu()
 
-	case containsKey(msg, Hotkeys.ToggleReverseSort):
+	case containsKey(msg, hotkeys.ToggleReverseSort):
 		m.toggleReverseSort()
 
-	case containsKey(msg, Hotkeys.OpenFileWithEditor):
+	case containsKey(msg, hotkeys.OpenFileWithEditor):
 		cmd = m.openFileWithEditor()
 
-	case containsKey(msg, Hotkeys.OpenCurrentDirectoryWithEditor):
+	case containsKey(msg, hotkeys.OpenCurrentDirectoryWithEditor):
 		cmd = m.openDirectoryWithEditor()
 
 	default:
@@ -145,13 +145,13 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) tea.Cmd {
 func (m *model) normalAndBrowserModeKey(msg string) {
 	// if not focus on the filepanel return
 	if m.fileModel.filePanels[m.filePanelFocusIndex].focusType != focus {
-		if m.focusPanel == sidebarFocus && (msg == containsKey(msg, Hotkeys.Confirm)) {
+		if m.focusPanel == sidebarFocus && (msg == containsKey(msg, hotkeys.Confirm)) {
 			m.sidebarSelectDirectory()
 		}
-		if m.focusPanel == sidebarFocus && (msg == containsKey(msg, Hotkeys.FilePanelItemRename)) {
+		if m.focusPanel == sidebarFocus && (msg == containsKey(msg, hotkeys.FilePanelItemRename)) {
 			m.pinnedItemRename()
 		}
-		if m.focusPanel == sidebarFocus && (msg == containsKey(msg, Hotkeys.SearchBar)) {
+		if m.focusPanel == sidebarFocus && (msg == containsKey(msg, hotkeys.SearchBar)) {
 			m.sidebarSearchBarFocus()
 		}
 		return
@@ -159,46 +159,46 @@ func (m *model) normalAndBrowserModeKey(msg string) {
 	// Check if in the select mode and focusOn filepanel
 	if m.fileModel.filePanels[m.filePanelFocusIndex].panelMode == selectMode {
 		switch msg {
-		case containsKey(msg, Hotkeys.Confirm):
+		case containsKey(msg, hotkeys.Confirm):
 			m.fileModel.filePanels[m.filePanelFocusIndex].singleItemSelect()
-		case containsKey(msg, Hotkeys.FilePanelSelectModeItemsSelectUp):
+		case containsKey(msg, hotkeys.FilePanelSelectModeItemsSelectUp):
 			m.fileModel.filePanels[m.filePanelFocusIndex].itemSelectUp(m.mainPanelHeight)
-		case containsKey(msg, Hotkeys.FilePanelSelectModeItemsSelectDown):
+		case containsKey(msg, hotkeys.FilePanelSelectModeItemsSelectDown):
 			m.fileModel.filePanels[m.filePanelFocusIndex].itemSelectDown(m.mainPanelHeight)
-		case containsKey(msg, Hotkeys.DeleteItems):
+		case containsKey(msg, hotkeys.DeleteItems):
 			go func() {
 				m.deleteItemWarn()
 			}()
-		case containsKey(msg, Hotkeys.CopyItems):
+		case containsKey(msg, hotkeys.CopyItems):
 			m.copyMultipleItem(false)
-		case containsKey(msg, Hotkeys.CutItems):
+		case containsKey(msg, hotkeys.CutItems):
 			m.copyMultipleItem(true)
-		case containsKey(msg, Hotkeys.FilePanelSelectAllItem):
+		case containsKey(msg, hotkeys.FilePanelSelectAllItem):
 			m.selectAllItem()
 		}
 		return
 	}
 
 	switch msg {
-	case containsKey(msg, Hotkeys.Confirm):
+	case containsKey(msg, hotkeys.Confirm):
 		m.enterPanel()
-	case containsKey(msg, Hotkeys.ParentDirectory):
+	case containsKey(msg, hotkeys.ParentDirectory):
 		m.parentDirectory()
-	case containsKey(msg, Hotkeys.DeleteItems):
+	case containsKey(msg, hotkeys.DeleteItems):
 		go func() {
 			m.deleteItemWarn()
 		}()
-	case containsKey(msg, Hotkeys.CopyItems):
+	case containsKey(msg, hotkeys.CopyItems):
 		m.copySingleItem(false)
-	case containsKey(msg, Hotkeys.CutItems):
+	case containsKey(msg, hotkeys.CutItems):
 		m.copySingleItem(true)
-	case containsKey(msg, Hotkeys.FilePanelItemRename):
+	case containsKey(msg, hotkeys.FilePanelItemRename):
 		m.panelItemRename()
-	case containsKey(msg, Hotkeys.SearchBar):
+	case containsKey(msg, hotkeys.SearchBar):
 		m.searchBarFocus()
-	case containsKey(msg, Hotkeys.CopyPath):
+	case containsKey(msg, hotkeys.CopyPath):
 		m.copyPath()
-	case containsKey(msg, Hotkeys.CopyPWD):
+	case containsKey(msg, hotkeys.CopyPWD):
 		m.copyPWD()
 	}
 }
@@ -206,9 +206,9 @@ func (m *model) normalAndBrowserModeKey(msg string) {
 // Check the hotkey to cancel operation or create file
 func (m *model) typingModalOpenKey(msg string) {
 	switch msg {
-	case containsKey(msg, Hotkeys.CancelTyping):
+	case containsKey(msg, hotkeys.CancelTyping):
 		m.cancelTypingModal()
-	case containsKey(msg, Hotkeys.ConfirmTyping):
+	case containsKey(msg, hotkeys.ConfirmTyping):
 		m.createItem()
 	}
 
@@ -222,12 +222,12 @@ func (m *model) promptModalOpenKey(msg string) {
 
 func (m *model) warnModalOpenKey(msg string) {
 	switch msg {
-	case containsKey(msg, Hotkeys.Quit), containsKey(msg, Hotkeys.CancelTyping):
+	case containsKey(msg, hotkeys.Quit), containsKey(msg, hotkeys.CancelTyping):
 		m.cancelWarnModal()
 		if m.warnModal.warnType == confirmRenameItem {
 			m.cancelRename()
 		}
-	case containsKey(msg, Hotkeys.Confirm):
+	case containsKey(msg, hotkeys.Confirm):
 		m.warnModal.open = false
 		switch m.warnModal.warnType {
 		case confirmDeleteItem:
@@ -265,11 +265,11 @@ func (m *model) warnModalOpenKey(msg string) {
 // Handle key input to confirm or cancel and close quiting warn in SPF
 func (m *model) confirmToQuitSuperfile(msg string) bool {
 	switch msg {
-	case containsKey(msg, Hotkeys.Quit), containsKey(msg, Hotkeys.CancelTyping):
+	case containsKey(msg, hotkeys.Quit), containsKey(msg, hotkeys.CancelTyping):
 		m.cancelWarnModal()
 		m.confirmToQuit = false
 		return false
-	case containsKey(msg, Hotkeys.Confirm):
+	case containsKey(msg, hotkeys.Confirm):
 		return true
 	default:
 		return false
@@ -279,24 +279,24 @@ func (m *model) confirmToQuitSuperfile(msg string) bool {
 // Handles key inputs inside sort options menu
 func (m *model) sortOptionsKey(msg string) {
 	switch msg {
-	case containsKey(msg, Hotkeys.OpenSortOptionsMenu):
+	case containsKey(msg, hotkeys.OpenSortOptionsMenu):
 		m.cancelSortOptions()
-	case containsKey(msg, Hotkeys.Quit):
+	case containsKey(msg, hotkeys.Quit):
 		m.cancelSortOptions()
-	case containsKey(msg, Hotkeys.Confirm):
+	case containsKey(msg, hotkeys.Confirm):
 		m.confirmSortOptions()
-	case containsKey(msg, Hotkeys.ListUp):
+	case containsKey(msg, hotkeys.ListUp):
 		m.sortOptionsListUp()
-	case containsKey(msg, Hotkeys.ListDown):
+	case containsKey(msg, hotkeys.ListDown):
 		m.sortOptionsListDown()
 	}
 }
 
 func (m *model) renamingKey(msg string) {
 	switch msg {
-	case containsKey(msg, Hotkeys.CancelTyping):
+	case containsKey(msg, hotkeys.CancelTyping):
 		m.cancelRename()
-	case containsKey(msg, Hotkeys.ConfirmTyping):
+	case containsKey(msg, hotkeys.ConfirmTyping):
 		if m.IsRenamingConflicting() {
 			m.warnModalForRenaming()
 		} else {
@@ -307,19 +307,19 @@ func (m *model) renamingKey(msg string) {
 
 func (m *model) sidebarRenamingKey(msg string) {
 	switch msg {
-	case containsKey(msg, Hotkeys.CancelTyping):
+	case containsKey(msg, hotkeys.CancelTyping):
 		m.cancelSidebarRename()
-	case containsKey(msg, Hotkeys.ConfirmTyping):
+	case containsKey(msg, hotkeys.ConfirmTyping):
 		m.confirmSidebarRename()
 	}
 }
 
 func (m *model) sidebarSearchBarKey(msg string) {
 	switch msg {
-	case containsKey(msg, Hotkeys.CancelTyping):
+	case containsKey(msg, hotkeys.CancelTyping):
 		m.sidebarModel.searchBar.Blur()
 		m.sidebarModel.searchBar.SetValue("")
-	case containsKey(msg, Hotkeys.ConfirmTyping):
+	case containsKey(msg, hotkeys.ConfirmTyping):
 		m.sidebarModel.searchBar.Blur()
 		m.sidebarModel.resetCursor()
 	}
@@ -328,9 +328,9 @@ func (m *model) sidebarSearchBarKey(msg string) {
 // Check the key input and cancel or confirms the search
 func (m *model) focusOnSearchbarKey(msg string) {
 	switch msg {
-	case containsKey(msg, Hotkeys.CancelTyping):
+	case containsKey(msg, hotkeys.CancelTyping):
 		m.cancelSearch()
-	case containsKey(msg, Hotkeys.ConfirmTyping):
+	case containsKey(msg, hotkeys.ConfirmTyping):
 		m.confirmSearch()
 	}
 }
@@ -339,11 +339,11 @@ func (m *model) focusOnSearchbarKey(msg string) {
 // and quiting the menu
 func (m *model) helpMenuKey(msg string) {
 	switch msg {
-	case containsKey(msg, Hotkeys.ListUp):
+	case containsKey(msg, hotkeys.ListUp):
 		m.helpMenuListUp()
-	case containsKey(msg, Hotkeys.ListDown):
+	case containsKey(msg, hotkeys.ListDown):
 		m.helpMenuListDown()
-	case containsKey(msg, Hotkeys.Quit):
+	case containsKey(msg, hotkeys.Quit):
 		m.quitHelpMenu()
 	}
 }
