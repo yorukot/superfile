@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"github.com/yorukot/superfile/src/internal/common/utils"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -17,13 +18,24 @@ import (
 // themes) setted up. Returns absolute path of dir pointing to the file Panel
 func initialConfig(dir string) (toggleDotFileBool bool, toggleFooter bool, firstFilePanelDir string) {
 	// Open log stream
+	file, err := os.OpenFile(variable.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 
-	slog.Debug("hi")
-	slog.Info("hi")
-
+	// Todo : This could be improved if we want to make superfile more resilient to errors
+	// For example if the log file directories have access issues.
+	// we could pass a dummy object to log.SetOutput() and the app would still function.
+	if err != nil {
+		// At this point, it will go to stdout since log file is not initilized
+		utils.LogAndExit("Error while opening superfile.log file", "error", err)
+	}
 	common.LoadConfigFile()
 
-	slog.Debug("Config is", "config", common.Config)
+	logLevel := slog.LevelInfo
+	if common.Config.Debug {
+		logLevel = slog.LevelDebug
+	}
+
+	slog.SetDefault(slog.New(slog.NewTextHandler(
+		file, &slog.HandlerOptions{Level: logLevel})))
 
 	common.LoadHotkeysFile()
 
