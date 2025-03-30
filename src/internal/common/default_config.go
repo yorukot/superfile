@@ -9,6 +9,6 @@ var (
 	DefaultThemeString string
 )
 
-var theme ThemeType
+var Theme ThemeType
 var Config ConfigType
 var hotkeys HotkeysType

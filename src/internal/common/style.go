@@ -5,7 +5,6 @@ import (
 
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/lipgloss"
-
 )
 
 var (
@@ -121,50 +120,50 @@ var (
 func LoadThemeConfig() {
 	bottomMiddleBorderSplit = Config.BorderMiddleLeft + Config.BorderBottom + Config.BorderMiddleRight
 
-	filePanelBorderColor = lipgloss.Color(theme.FilePanelBorder)
-	sidebarBorderColor = lipgloss.Color(theme.SidebarBorder)
-	footerBorderColor = lipgloss.Color(theme.FooterBorder)
+	filePanelBorderColor = lipgloss.Color(Theme.FilePanelBorder)
+	sidebarBorderColor = lipgloss.Color(Theme.SidebarBorder)
+	footerBorderColor = lipgloss.Color(Theme.FooterBorder)
 
-	filePanelBorderActiveColor = lipgloss.Color(theme.FilePanelBorderActive)
-	sidebarBorderActiveColor = lipgloss.Color(theme.SidebarBorderActive)
-	footerBorderActiveColor = lipgloss.Color(theme.FooterBorderActive)
-	modalBorderActiveColor = lipgloss.Color(theme.ModalBorderActive)
+	filePanelBorderActiveColor = lipgloss.Color(Theme.FilePanelBorderActive)
+	sidebarBorderActiveColor = lipgloss.Color(Theme.SidebarBorderActive)
+	footerBorderActiveColor = lipgloss.Color(Theme.FooterBorderActive)
+	modalBorderActiveColor = lipgloss.Color(Theme.ModalBorderActive)
 
-	fullScreenBGColor = lipgloss.Color(theme.FullScreenBG)
-	filePanelBGColor = lipgloss.Color(theme.FilePanelBG)
-	sidebarBGColor = lipgloss.Color(theme.SidebarBG)
-	footerBGColor = lipgloss.Color(theme.FooterBG)
-	modalBGColor = lipgloss.Color(theme.ModalBG)
+	fullScreenBGColor = lipgloss.Color(Theme.FullScreenBG)
+	filePanelBGColor = lipgloss.Color(Theme.FilePanelBG)
+	sidebarBGColor = lipgloss.Color(Theme.SidebarBG)
+	footerBGColor = lipgloss.Color(Theme.FooterBG)
+	modalBGColor = lipgloss.Color(Theme.ModalBG)
 
-	fullScreenFGColor = lipgloss.Color(theme.FullScreenFG)
-	filePanelFGColor = lipgloss.Color(theme.FilePanelFG)
-	sidebarFGColor = lipgloss.Color(theme.SidebarFG)
-	footerFGColor = lipgloss.Color(theme.FooterFG)
-	modalFGColor = lipgloss.Color(theme.ModalFG)
+	fullScreenFGColor = lipgloss.Color(Theme.FullScreenFG)
+	filePanelFGColor = lipgloss.Color(Theme.FilePanelFG)
+	sidebarFGColor = lipgloss.Color(Theme.SidebarFG)
+	footerFGColor = lipgloss.Color(Theme.FooterFG)
+	modalFGColor = lipgloss.Color(Theme.ModalFG)
 
-	cursorColor = lipgloss.Color(theme.Cursor)
-	correctColor = lipgloss.Color(theme.Correct)
-	errorColor = lipgloss.Color(theme.Error)
-	hintColor = lipgloss.Color(theme.Hint)
-	cancelColor = lipgloss.Color(theme.Cancel)
+	cursorColor = lipgloss.Color(Theme.Cursor)
+	correctColor = lipgloss.Color(Theme.Correct)
+	errorColor = lipgloss.Color(Theme.Error)
+	hintColor = lipgloss.Color(Theme.Hint)
+	cancelColor = lipgloss.Color(Theme.Cancel)
 
-	filePanelTopDirectoryIconColor = lipgloss.Color(theme.FilePanelTopDirectoryIcon)
-	filePanelTopPathColor = lipgloss.Color(theme.FilePanelTopPath)
-	filePanelItemSelectedFGColor = lipgloss.Color(theme.FilePanelItemSelectedFG)
-	filePanelItemSelectedBGColor = lipgloss.Color(theme.FilePanelItemSelectedBG)
+	filePanelTopDirectoryIconColor = lipgloss.Color(Theme.FilePanelTopDirectoryIcon)
+	filePanelTopPathColor = lipgloss.Color(Theme.FilePanelTopPath)
+	filePanelItemSelectedFGColor = lipgloss.Color(Theme.FilePanelItemSelectedFG)
+	filePanelItemSelectedBGColor = lipgloss.Color(Theme.FilePanelItemSelectedBG)
 
-	sidebarTitleColor = lipgloss.Color(theme.SidebarTitle)
-	sidebarItemSelectedFGColor = lipgloss.Color(theme.SidebarItemSelectedFG)
-	sidebarItemSelectedBGColor = lipgloss.Color(theme.SidebarItemSelectedBG)
-	sidebarDividerColor = lipgloss.Color(theme.SidebarDivider)
+	sidebarTitleColor = lipgloss.Color(Theme.SidebarTitle)
+	sidebarItemSelectedFGColor = lipgloss.Color(Theme.SidebarItemSelectedFG)
+	sidebarItemSelectedBGColor = lipgloss.Color(Theme.SidebarItemSelectedBG)
+	sidebarDividerColor = lipgloss.Color(Theme.SidebarDivider)
 
-	modalCancelFGColor = lipgloss.Color(theme.ModalCancelFG)
-	modalCancelBGColor = lipgloss.Color(theme.ModalCancelBG)
-	modalConfirmFGColor = lipgloss.Color(theme.ModalConfirmFG)
-	modalConfirmBGColor = lipgloss.Color(theme.ModalConfirmBG)
+	modalCancelFGColor = lipgloss.Color(Theme.ModalCancelFG)
+	modalCancelBGColor = lipgloss.Color(Theme.ModalCancelBG)
+	modalConfirmFGColor = lipgloss.Color(Theme.ModalConfirmFG)
+	modalConfirmBGColor = lipgloss.Color(Theme.ModalConfirmBG)
 
-	helpMenuHotkeyColor = lipgloss.Color(theme.HelpMenuHotkey)
-	helpMenuTitleColor = lipgloss.Color(theme.HelpMenuTitle)
+	helpMenuHotkeyColor = lipgloss.Color(Theme.HelpMenuHotkey)
+	helpMenuTitleColor = lipgloss.Color(Theme.HelpMenuTitle)
 
 	if Config.TransparentBackground {
 		transparentAllBackgroundColor()
@@ -214,7 +213,7 @@ func LoadThemeConfig() {
 }
 
 func generateGradientColor() progress.Option {
-	return progress.WithScaledGradient(theme.GradientColor[0], theme.GradientColor[1])
+	return progress.WithScaledGradient(Theme.GradientColor[0], Theme.GradientColor[1])
 }
 
 func generateFooterBorder(countString string, width int) string {

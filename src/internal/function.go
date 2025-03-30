@@ -267,11 +267,7 @@ func arrayContains(s []string, str string) bool {
 	return false
 }
 
-// Todo : Eventually we want to remove all such usage that can result in app exiting abruptly
-func LogAndExit(msg string, values ...any) {
-	slog.Error(msg, values...)
-	os.Exit(1)
-}
+
 
 func removeElementByValue(slice []string, value string) []string {
 	newSlice := []string{}
