@@ -1,6 +1,9 @@
 package internal
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/yorukot/superfile/src/internal/common"
+)
 
 // reset the items slice and set the cut value
 func (c *copyItems) reset(cut bool) {
@@ -12,7 +15,7 @@ func (c *copyItems) reset(cut bool) {
 
 // Non fatal Validations. This indicates bug / programming errors, not user configuration mistake
 func (m *model) validateLayout() error {
-	if 0 < m.footerHeight && m.footerHeight < minFooterHeight {
+	if 0 < m.footerHeight && m.footerHeight < common.MinFooterHeight {
 		return fmt.Errorf("footerHeight %v is too small", m.footerHeight)
 	}
 	// PanelHeight + 2 lines (main border) + actual footer height

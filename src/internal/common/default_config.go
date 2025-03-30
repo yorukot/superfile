@@ -1,7 +1,5 @@
 package common
 
-var wheelRunTime = 5
-
 // Variables for holding default configurations of each settings
 var (
 	HotkeysTomlString  string

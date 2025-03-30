@@ -6,6 +6,19 @@ import (
 	"github.com/yorukot/superfile/src/config/icon"
 )
 
+const WheelRunTime = 5
+
+var (
+	MinimumHeight = 24
+	MinimumWidth  = 60
+
+	// Todo : These are model object properties, not global properties
+	// We are modifying them in the code many time. They need to be part of model struct.
+	MinFooterHeight = 6
+	ModalWidth      = 60
+	ModalHeight     = 7
+)
+
 var (
 	sideBarSuperfileTitle string
 	sideBarPinnedDivider  string
@@ -25,14 +38,14 @@ func LoadInitial_PrerenderedVariables() {
 // loadConfigFile() in config_types.go should be finished
 // InitIcon() in config package in function.go should be finished
 func LoadPrerenderedVariables() {
-	sideBarSuperfileTitle = sidebarTitleStyle.Render("    " + icon.SuperfileIcon + " superfile")
+	sideBarSuperfileTitle = SidebarTitleStyle.Render("    " + icon.SuperfileIcon + " superfile")
 	sideBarSuperfileTitle = ansi.Truncate(sideBarSuperfileTitle, Config.SidebarWidth, "")
 
-	sideBarPinnedDivider = sidebarTitleStyle.Render("󰐃 Pinned") + sidebarDividerStyle.Render(" ───────────") + "\n"
+	sideBarPinnedDivider = SidebarTitleStyle.Render("󰐃 Pinned") + SidebarDividerStyle.Render(" ───────────") + "\n"
 	sideBarPinnedDivider = ansi.Truncate(sideBarPinnedDivider, Config.SidebarWidth, "")
 
-	sideBarDisksDivider = sidebarTitleStyle.Render("󱇰 Disks") + sidebarDividerStyle.Render(" ────────────") + "\n"
+	sideBarDisksDivider = SidebarTitleStyle.Render("󱇰 Disks") + SidebarDividerStyle.Render(" ────────────") + "\n"
 	sideBarDisksDivider = ansi.Truncate(sideBarDisksDivider, Config.SidebarWidth, "")
 
-	sideBarNoneText = sidebarStyle.Render(" " + icon.Error + " None")
+	sideBarNoneText = SidebarStyle.Render(" " + icon.Error + " None")
 }

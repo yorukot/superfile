@@ -8,66 +8,55 @@ import (
 )
 
 var (
-	minimumHeight = 24
-	minimumWidth  = 60
-
-	// Todo : These are model object properties, not global properties
-	// We are modifying them in the code many time. They need to be part of model struct.
-	minFooterHeight = 6
-	modalWidth      = 60
-	modalHeight     = 7
-)
-
-var (
-	bottomMiddleBorderSplit string
+	BottomMiddleBorderSplit string
 )
 var (
-	terminalTooSmall    lipgloss.Style
-	terminalCorrectSize lipgloss.Style
+	TerminalTooSmall    lipgloss.Style
+	TerminalCorrectSize lipgloss.Style
 )
 
 var (
 	mainStyle      lipgloss.Style
-	filePanelStyle lipgloss.Style
-	sidebarStyle   lipgloss.Style
+	FilePanelStyle lipgloss.Style
+	SidebarStyle   lipgloss.Style
 	FooterStyle    lipgloss.Style
-	modalStyle     lipgloss.Style
+	ModalStyle     lipgloss.Style
 )
 
 var (
-	sidebarDividerStyle  lipgloss.Style
-	sidebarTitleStyle    lipgloss.Style
-	sidebarSelectedStyle lipgloss.Style
+	SidebarDividerStyle  lipgloss.Style
+	SidebarTitleStyle    lipgloss.Style
+	SidebarSelectedStyle lipgloss.Style
 )
 
 var (
-	filePanelCursorStyle lipgloss.Style
-	footerCursorStyle    lipgloss.Style
-	modalCursorStyle     lipgloss.Style
+	FilePanelCursorStyle lipgloss.Style
+	FooterCursorStyle    lipgloss.Style
+	ModalCursorStyle     lipgloss.Style
 )
 
 var (
-	filePanelTopDirectoryIconStyle lipgloss.Style
-	filePanelTopPathStyle          lipgloss.Style
-	filePanelItemSelectedStyle     lipgloss.Style
+	FilePanelTopDirectoryIconStyle lipgloss.Style
+	FilePanelTopPathStyle          lipgloss.Style
+	FilePanelItemSelectedStyle     lipgloss.Style
 )
 
 var (
-	processErrorStyle       lipgloss.Style
-	processInOperationStyle lipgloss.Style
-	processCancelStyle      lipgloss.Style
-	processSuccessfulStyle  lipgloss.Style
+	ProcessErrorStyle       lipgloss.Style
+	ProcessInOperationStyle lipgloss.Style
+	ProcessCancelStyle      lipgloss.Style
+	ProcessSuccessfulStyle  lipgloss.Style
 )
 
 var (
-	modalCancel     lipgloss.Style
-	modalConfirm    lipgloss.Style
-	modalTitleStyle lipgloss.Style
+	ModalCancel     lipgloss.Style
+	ModalConfirm    lipgloss.Style
+	ModalTitleStyle lipgloss.Style
 )
 
 var (
-	helpMenuHotkeyStyle lipgloss.Style
-	helpMenuTitleStyle  lipgloss.Style
+	HelpMenuHotkeyStyle lipgloss.Style
+	HelpMenuTitleStyle  lipgloss.Style
 )
 
 var (
@@ -83,7 +72,7 @@ var (
 	fullScreenBGColor lipgloss.Color
 	filePanelBGColor  lipgloss.Color
 	sidebarBGColor    lipgloss.Color
-	footerBGColor     lipgloss.Color
+	FooterBGColor     lipgloss.Color
 	modalBGColor      lipgloss.Color
 
 	fullScreenFGColor lipgloss.Color
@@ -118,7 +107,7 @@ var (
 )
 
 func LoadThemeConfig() {
-	bottomMiddleBorderSplit = Config.BorderMiddleLeft + Config.BorderBottom + Config.BorderMiddleRight
+	BottomMiddleBorderSplit = Config.BorderMiddleLeft + Config.BorderBottom + Config.BorderMiddleRight
 
 	filePanelBorderColor = lipgloss.Color(Theme.FilePanelBorder)
 	sidebarBorderColor = lipgloss.Color(Theme.SidebarBorder)
@@ -132,7 +121,7 @@ func LoadThemeConfig() {
 	fullScreenBGColor = lipgloss.Color(Theme.FullScreenBG)
 	filePanelBGColor = lipgloss.Color(Theme.FilePanelBG)
 	sidebarBGColor = lipgloss.Color(Theme.SidebarBG)
-	footerBGColor = lipgloss.Color(Theme.FooterBG)
+	FooterBGColor = lipgloss.Color(Theme.FooterBG)
 	modalBGColor = lipgloss.Color(Theme.ModalBG)
 
 	fullScreenFGColor = lipgloss.Color(Theme.FullScreenFG)
@@ -172,44 +161,44 @@ func LoadThemeConfig() {
 	// All Panel Main Color
 	// (full screen and default color)
 	mainStyle = lipgloss.NewStyle().Foreground(fullScreenFGColor).Background(fullScreenBGColor)
-	filePanelStyle = lipgloss.NewStyle().Foreground(filePanelFGColor).Background(filePanelBGColor)
-	sidebarStyle = lipgloss.NewStyle().Foreground(sidebarFGColor).Background(sidebarBGColor)
-	FooterStyle = lipgloss.NewStyle().Foreground(footerFGColor).Background(footerBGColor)
-	modalStyle = lipgloss.NewStyle().Foreground(modalFGColor).Background(modalBGColor)
+	FilePanelStyle = lipgloss.NewStyle().Foreground(filePanelFGColor).Background(filePanelBGColor)
+	SidebarStyle = lipgloss.NewStyle().Foreground(sidebarFGColor).Background(sidebarBGColor)
+	FooterStyle = lipgloss.NewStyle().Foreground(footerFGColor).Background(FooterBGColor)
+	ModalStyle = lipgloss.NewStyle().Foreground(modalFGColor).Background(modalBGColor)
 
 	// Terminal Size Error
-	terminalTooSmall = lipgloss.NewStyle().Foreground(errorColor).Background(fullScreenBGColor)
-	terminalCorrectSize = lipgloss.NewStyle().Foreground(cursorColor).Background(fullScreenBGColor)
+	TerminalTooSmall = lipgloss.NewStyle().Foreground(errorColor).Background(fullScreenBGColor)
+	TerminalCorrectSize = lipgloss.NewStyle().Foreground(cursorColor).Background(fullScreenBGColor)
 
 	// Cursor
-	filePanelCursorStyle = lipgloss.NewStyle().Foreground(cursorColor).Background(filePanelBGColor)
-	footerCursorStyle = lipgloss.NewStyle().Foreground(cursorColor).Background(footerBGColor)
-	modalCursorStyle = lipgloss.NewStyle().Foreground(cursorColor).Background(modalBGColor)
+	FilePanelCursorStyle = lipgloss.NewStyle().Foreground(cursorColor).Background(filePanelBGColor)
+	FooterCursorStyle = lipgloss.NewStyle().Foreground(cursorColor).Background(FooterBGColor)
+	ModalCursorStyle = lipgloss.NewStyle().Foreground(cursorColor).Background(modalBGColor)
 
 	// File Panel Special Style
-	filePanelTopDirectoryIconStyle = lipgloss.NewStyle().Foreground(filePanelTopDirectoryIconColor).Background(filePanelBGColor)
-	filePanelTopPathStyle = lipgloss.NewStyle().Foreground(filePanelTopPathColor).Background(filePanelBGColor)
-	filePanelItemSelectedStyle = lipgloss.NewStyle().Foreground(filePanelItemSelectedFGColor).Background(filePanelItemSelectedBGColor)
+	FilePanelTopDirectoryIconStyle = lipgloss.NewStyle().Foreground(filePanelTopDirectoryIconColor).Background(filePanelBGColor)
+	FilePanelTopPathStyle = lipgloss.NewStyle().Foreground(filePanelTopPathColor).Background(filePanelBGColor)
+	FilePanelItemSelectedStyle = lipgloss.NewStyle().Foreground(filePanelItemSelectedFGColor).Background(filePanelItemSelectedBGColor)
 
 	// Sidebar Special Style
-	sidebarDividerStyle = lipgloss.NewStyle().Foreground(sidebarDividerColor).Background(sidebarBGColor)
-	sidebarTitleStyle = lipgloss.NewStyle().Foreground(sidebarTitleColor).Background(sidebarBGColor)
-	sidebarSelectedStyle = lipgloss.NewStyle().Foreground(sidebarItemSelectedFGColor).Background(sidebarItemSelectedBGColor)
+	SidebarDividerStyle = lipgloss.NewStyle().Foreground(sidebarDividerColor).Background(sidebarBGColor)
+	SidebarTitleStyle = lipgloss.NewStyle().Foreground(sidebarTitleColor).Background(sidebarBGColor)
+	SidebarSelectedStyle = lipgloss.NewStyle().Foreground(sidebarItemSelectedFGColor).Background(sidebarItemSelectedBGColor)
 
 	// Footer Special Style
-	processErrorStyle = lipgloss.NewStyle().Foreground(errorColor).Background(footerBGColor)
-	processInOperationStyle = lipgloss.NewStyle().Foreground(hintColor).Background(footerBGColor)
-	processCancelStyle = lipgloss.NewStyle().Foreground(cancelColor).Background(footerBGColor)
-	processSuccessfulStyle = lipgloss.NewStyle().Foreground(correctColor).Background(footerBGColor)
+	ProcessErrorStyle = lipgloss.NewStyle().Foreground(errorColor).Background(FooterBGColor)
+	ProcessInOperationStyle = lipgloss.NewStyle().Foreground(hintColor).Background(FooterBGColor)
+	ProcessCancelStyle = lipgloss.NewStyle().Foreground(cancelColor).Background(FooterBGColor)
+	ProcessSuccessfulStyle = lipgloss.NewStyle().Foreground(correctColor).Background(FooterBGColor)
 
 	// Modal Special Style
-	modalCancel = lipgloss.NewStyle().Foreground(modalCancelFGColor).Background(modalCancelBGColor)
-	modalConfirm = lipgloss.NewStyle().Foreground(modalConfirmFGColor).Background(modalConfirmBGColor)
-	modalTitleStyle = lipgloss.NewStyle().Foreground(hintColor).Background(modalBGColor)
+	ModalCancel = lipgloss.NewStyle().Foreground(modalCancelFGColor).Background(modalCancelBGColor)
+	ModalConfirm = lipgloss.NewStyle().Foreground(modalConfirmFGColor).Background(modalConfirmBGColor)
+	ModalTitleStyle = lipgloss.NewStyle().Foreground(hintColor).Background(modalBGColor)
 
 	// Help Menu Style
-	helpMenuHotkeyStyle = lipgloss.NewStyle().Foreground(helpMenuHotkeyColor).Background(modalBGColor)
-	helpMenuTitleStyle = lipgloss.NewStyle().Foreground(helpMenuTitleColor).Background(modalBGColor)
+	HelpMenuHotkeyStyle = lipgloss.NewStyle().Foreground(helpMenuHotkeyColor).Background(modalBGColor)
+	HelpMenuTitleStyle = lipgloss.NewStyle().Foreground(helpMenuTitleColor).Background(modalBGColor)
 }
 
 func GenerateGradientColor() progress.Option {
@@ -243,6 +232,6 @@ func transparentAllBackgroundColor() {
 	fullScreenBGColor = lipgloss.Color(transparentBackgroundColor)
 	filePanelBGColor = lipgloss.Color(transparentBackgroundColor)
 	sidebarBGColor = lipgloss.Color(transparentBackgroundColor)
-	footerBGColor = lipgloss.Color(transparentBackgroundColor)
+	FooterBGColor = lipgloss.Color(transparentBackgroundColor)
 	modalBGColor = lipgloss.Color(transparentBackgroundColor)
 }

@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"github.com/yorukot/superfile/src/internal/common"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -222,7 +223,7 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 	if m.typingModal.open {
 		m.typingModalOpenKey(msg.String())
 
-	} else if m.promptModal.open {
+	} else if m.promptModal.IsOpen() {
 		m.promptModalOpenKey(msg.String())
 
 	} else if m.warnModal.open {
@@ -280,8 +281,8 @@ func (m *model) updateFilePanelsState(msg tea.Msg, cmd *tea.Cmd) {
 		focusPanel.searchBar, *cmd = focusPanel.searchBar.Update(msg)
 	} else if m.typingModal.open {
 		m.typingModal.textInput, *cmd = m.typingModal.textInput.Update(msg)
-	} else if m.promptModal.open {
-		m.promptModal.textInput, *cmd = m.promptModal.textInput.Update(msg)
+	} else if m.promptModal.IsOpen() {
+		//m.promptModal.textInput, *cmd = m.promptModal.textInput.Update(msg)
 	}
 
 	if focusPanel.cursor < 0 {
@@ -331,7 +332,7 @@ func (m model) View() string {
 	}
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	// check is the terminal size enough
-	if m.fullHeight < minimumHeight || m.fullWidth < minimumWidth {
+	if m.fullHeight < common.MinimumHeight || m.fullWidth < common.MinimumWidth {
 		return m.terminalSizeWarnRender()
 	}
 	if m.fileModel.width < 18 {
@@ -377,7 +378,7 @@ func (m model) View() string {
 		return stringfunction.PlaceOverlay(overlayX, overlayY, helpMenu, finalRender)
 	}
 
-	if m.promptModal.open {
+	if m.promptModal.IsOpen() {
 		promptModal := m.promptModalRender()
 		overlayX := m.fullWidth/2 - m.helpMenu.width/2
 		overlayY := m.fullHeight/2 - m.helpMenu.height/2
@@ -400,22 +401,22 @@ func (m model) View() string {
 
 	if m.typingModal.open {
 		typingModal := m.typineModalRender()
-		overlayX := m.fullWidth/2 - modalWidth/2
-		overlayY := m.fullHeight/2 - modalHeight/2
+		overlayX := m.fullWidth/2 - common.ModalWidth/2
+		overlayY := m.fullHeight/2 - common.ModalHeight/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, typingModal, finalRender)
 	}
 
 	if m.warnModal.open {
 		warnModal := m.warnModalRender()
-		overlayX := m.fullWidth/2 - modalWidth/2
-		overlayY := m.fullHeight/2 - modalHeight/2
+		overlayX := m.fullWidth/2 - common.ModalWidth/2
+		overlayY := m.fullHeight/2 - common.ModalHeight/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, warnModal, finalRender)
 	}
 
 	if m.confirmToQuit {
 		warnModal := m.warnModalRender()
-		overlayX := m.fullWidth/2 - modalWidth/2
-		overlayY := m.fullHeight/2 - modalHeight/2
+		overlayX := m.fullWidth/2 - common.ModalWidth/2
+		overlayY := m.fullHeight/2 - common.ModalHeight/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, warnModal, finalRender)
 	}
 

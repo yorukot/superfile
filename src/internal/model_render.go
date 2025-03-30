@@ -444,7 +444,6 @@ func (m *model) terminalSizeWarnRender() string {
 	return fullScreenStyle(m.fullHeight, m.fullWidth).Render(`Terminal size too small:` + "\n" +
 		"Width = " + fullWidthString +
 		heightString + fullHeightString + "\n\n" +
-
 		"Needed for current config:" + "\n" +
 		"Width = " + terminalCorrectSize.Render(minimumWidthString) +
 		heightString + terminalCorrectSize.Render(minimumHeightString))
@@ -470,7 +469,6 @@ func (m *model) terminalSizeWarnAfterFirstRender() string {
 	return fullScreenStyle(m.fullHeight, m.fullWidth).Render(`You change your terminal size too small:` + "\n" +
 		"Width = " + fullWidthString +
 		heightString + fullHeightString + "\n\n" +
-
 		"Needed for current config:" + "\n" +
 		"Width = " + terminalCorrectSize.Render(minimumWidthString) +
 		heightString + terminalCorrectSize.Render(minimumHeightString))

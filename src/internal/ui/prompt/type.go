@@ -26,3 +26,7 @@ type PromptModal struct {
 
 	commandList map[PromptCommandPrefix]PromptCommand
 }
+
+func (p *PromptModal) IsOpen() bool {
+	return p.open
+}

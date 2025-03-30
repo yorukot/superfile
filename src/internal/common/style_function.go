@@ -1,12 +1,13 @@
 package common
 
 import (
+	"path/filepath"
+	"strings"
+
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/yorukot/superfile/src/config/icon"
-	"path/filepath"
-	"strings"
 )
 
 // Generate border style for file panel
@@ -71,10 +72,10 @@ func procsssBarBorder(height int, width int, borderBottom string, processBarFocu
 	return lipgloss.NewStyle().
 		Border(border).
 		BorderForeground(processBorderStateColor).
-		BorderBackground(footerBGColor).
+		BorderBackground(FooterBGColor).
 		Width(width).
 		Height(height).
-		Background(footerBGColor).
+		Background(FooterBGColor).
 		Foreground(footerFGColor)
 }
 
@@ -92,10 +93,10 @@ func metadataBorder(height int, width int, borderBottom string, metadataFocussed
 	return lipgloss.NewStyle().
 		Border(border).
 		BorderForeground(metadataBorderStateColor).
-		BorderBackground(footerBGColor).
+		BorderBackground(FooterBGColor).
 		Width(width).
 		Height(height).
-		Background(footerBGColor).
+		Background(FooterBGColor).
 		Foreground(footerFGColor)
 }
 
@@ -108,10 +109,10 @@ func clipboardBorder(height int, width int, borderBottom string) lipgloss.Style 
 	return lipgloss.NewStyle().
 		Border(border).
 		BorderForeground(footerBorderColor).
-		BorderBackground(footerBGColor).
+		BorderBackground(FooterBGColor).
 		Width(width).
 		Height(height).
-		Background(footerBGColor).
+		Background(FooterBGColor).
 		Foreground(footerFGColor)
 }
 
@@ -197,7 +198,7 @@ func filePanelFocusColor(filePanelFocussed bool) lipgloss.Color {
 }
 
 // Return only fg and bg color style
-func stringColorRender(fgColor lipgloss.Color, bgColor lipgloss.Color) lipgloss.Style {
+func StringColorRender(fgColor lipgloss.Color, bgColor lipgloss.Color) lipgloss.Style {
 	return lipgloss.NewStyle().
 		Foreground(fgColor).
 		Background(bgColor)
@@ -230,12 +231,12 @@ func loadHotkeysError(value string) string {
 // Generate search bar for file panel
 func GenerateSearchBar() textinput.Model {
 	ti := textinput.New()
-	ti.Cursor.Style = footerCursorStyle
+	ti.Cursor.Style = FooterCursorStyle
 	ti.Cursor.TextStyle = FooterStyle
-	ti.TextStyle = filePanelStyle
+	ti.TextStyle = FilePanelStyle
 	ti.Prompt = filePanelTopDirectoryIconStyle.Render(icon.Search + icon.Space)
 	ti.Cursor.Blink = true
-	ti.PlaceholderStyle = filePanelStyle
+	ti.PlaceholderStyle = FilePanelStyle
 	ti.Placeholder = "(" + Hotkeys.SearchBar[0] + ") Type something"
 	ti.Blur()
 	ti.CharLimit = 156
@@ -247,37 +248,37 @@ func GeneratePromptTextInput() textinput.Model {
 	t.Prompt = ""
 	t.CharLimit = 156
 	t.SetValue("")
-	t.Cursor.Style = modalCursorStyle
-	t.Cursor.TextStyle = modalStyle
-	t.TextStyle = modalStyle
-	t.PlaceholderStyle = modalStyle
+	t.Cursor.Style = ModalCursorStyle
+	t.Cursor.TextStyle = ModalStyle
+	t.TextStyle = ModalStyle
+	t.PlaceholderStyle = ModalStyle
 
 	return t
 }
 
 func GenerateNewFileTextInput() textinput.Model {
 	t := textinput.New()
-	t.Cursor.Style = modalCursorStyle
-	t.Cursor.TextStyle = modalStyle
-	t.TextStyle = modalStyle
+	t.Cursor.Style = ModalCursorStyle
+	t.Cursor.TextStyle = ModalStyle
+	t.TextStyle = ModalStyle
 	t.Cursor.Blink = true
 	t.Placeholder = "Add \"" + string(filepath.Separator) + "\" transcend folders"
-	t.PlaceholderStyle = modalStyle
+	t.PlaceholderStyle = ModalStyle
 	t.Focus()
 	t.CharLimit = 156
-	t.Width = modalWidth - 10
+	t.Width = ModalWidth - 10
 	return t
 }
 
 func GenerateRenameTextInput(width int, cursorPos int, defaultValue string) textinput.Model {
 	ti := textinput.New()
-	ti.Cursor.Style = filePanelCursorStyle
-	ti.Cursor.TextStyle = filePanelStyle
-	ti.Prompt = filePanelCursorStyle.Render(icon.Cursor + " ")
-	ti.TextStyle = modalStyle
+	ti.Cursor.Style = FilePanelCursorStyle
+	ti.Cursor.TextStyle = FilePanelStyle
+	ti.Prompt = FilePanelCursorStyle.Render(icon.Cursor + " ")
+	ti.TextStyle = ModalStyle
 	ti.Cursor.Blink = true
 	ti.Placeholder = "New name"
-	ti.PlaceholderStyle = modalStyle
+	ti.PlaceholderStyle = ModalStyle
 	ti.SetValue(defaultValue)
 	ti.SetCursor(cursorPos)
 	ti.Focus()
@@ -289,13 +290,13 @@ func GenerateRenameTextInput(width int, cursorPos int, defaultValue string) text
 
 func GeneratePinnedRenameTextInput(cursorPos int, defaultValue string) textinput.Model {
 	ti := textinput.New()
-	ti.Cursor.Style = filePanelCursorStyle
-	ti.Cursor.TextStyle = filePanelStyle
-	ti.Prompt = filePanelCursorStyle.Render(icon.Cursor + " ")
-	ti.TextStyle = modalStyle
+	ti.Cursor.Style = FilePanelCursorStyle
+	ti.Cursor.TextStyle = FilePanelStyle
+	ti.Prompt = FilePanelCursorStyle.Render(icon.Cursor + " ")
+	ti.TextStyle = ModalStyle
 	ti.Cursor.Blink = true
 	ti.Placeholder = "New name"
-	ti.PlaceholderStyle = modalStyle
+	ti.PlaceholderStyle = ModalStyle
 	ti.SetValue(defaultValue)
 	ti.SetCursor(cursorPos)
 	ti.Focus()
