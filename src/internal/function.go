@@ -16,7 +16,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/lithammer/shortuuid"
 	"github.com/reinhrst/fzf-lib"
 	"github.com/yorukot/superfile/src/config/icon"
@@ -582,17 +581,4 @@ func getElementIcon(file string, IsDir bool) icon.IconStyle {
 		}
 		return resultIcon
 	}
-}
-
-func DefaultPromptTextInput() textinput.Model {
-	t := textinput.New()
-	t.Prompt = ""
-	t.CharLimit = 156
-	t.SetValue("")
-	t.Cursor.Style = modalCursorStyle
-	t.Cursor.TextStyle = modalStyle
-	t.TextStyle = modalStyle
-	t.PlaceholderStyle = modalStyle
-
-	return t
 }

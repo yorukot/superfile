@@ -1,11 +1,12 @@
 package common
 
 import (
-	"strings"
-
+	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/yorukot/superfile/src/config/icon"
+	"path/filepath"
+	"strings"
 )
 
 // Generate border style for file panel
@@ -239,4 +240,55 @@ func GenerateSearchBar() textinput.Model {
 	ti.Blur()
 	ti.CharLimit = 156
 	return ti
+}
+
+func GeneratePromptTextInput() textinput.Model {
+	t := textinput.New()
+	t.Prompt = ""
+	t.CharLimit = 156
+	t.SetValue("")
+	t.Cursor.Style = modalCursorStyle
+	t.Cursor.TextStyle = modalStyle
+	t.TextStyle = modalStyle
+	t.PlaceholderStyle = modalStyle
+
+	return t
+}
+
+func GenerateNewFileTextInput() textinput.Model {
+	t := textinput.New()
+	t.Cursor.Style = modalCursorStyle
+	t.Cursor.TextStyle = modalStyle
+	t.TextStyle = modalStyle
+	t.Cursor.Blink = true
+	t.Placeholder = "Add \"" + string(filepath.Separator) + "\" transcend folders"
+	t.PlaceholderStyle = modalStyle
+	t.Focus()
+	t.CharLimit = 156
+	t.Width = modalWidth - 10
+	return t
+}
+
+func GenerateRenameTextInput(width int, cursorPos int, defaultValue string) textinput.Model {
+	ti := textinput.New()
+	ti.Cursor.Style = filePanelCursorStyle
+	ti.Cursor.TextStyle = filePanelStyle
+	ti.Prompt = filePanelCursorStyle.Render(icon.Cursor + " ")
+	ti.TextStyle = modalStyle
+	ti.Cursor.Blink = true
+	ti.Placeholder = "New name"
+	ti.PlaceholderStyle = modalStyle
+	ti.SetValue(defaultValue)
+	ti.SetCursor(cursorPos)
+	ti.Focus()
+	ti.CharLimit = 156
+	ti.Width = width
+
+	return ti
+}
+
+func GenerateDefaultProgress() progress.Model {
+	prog := progress.New(GenerateGradientColor())
+	prog.PercentageStyle = FooterStyle
+	return prog
 }
