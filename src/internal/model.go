@@ -2,6 +2,7 @@ package internal
 
 import (
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/common/utils"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -141,20 +142,20 @@ func (m *model) handleWindowResize(msg tea.WindowSizeMsg) {
 
 // Set file preview panel Widht to width. Assure that
 func (m *model) setFilePreviewWidth(width int) {
-	if Config.FilePreviewWidth == 0 {
-		m.fileModel.filePreview.width = (width - Config.SidebarWidth - (4 + (len(m.fileModel.filePanels))*2)) / (len(m.fileModel.filePanels) + 1)
-	} else if Config.FilePreviewWidth > 10 || Config.FilePreviewWidth == 1 {
-		LogAndExit("Config file file_preview_width invalidation")
+	if common.Config.FilePreviewWidth == 0 {
+		m.fileModel.filePreview.width = (width - common.Config.SidebarWidth - (4 + (len(m.fileModel.filePanels))*2)) / (len(m.fileModel.filePanels) + 1)
+	} else if common.Config.FilePreviewWidth > 10 || common.Config.FilePreviewWidth == 1 {
+		utils.LogAndExit("Config file file_preview_width invalidation")
 	} else {
-		m.fileModel.filePreview.width = (width - Config.SidebarWidth) / Config.FilePreviewWidth
+		m.fileModel.filePreview.width = (width - common.Config.SidebarWidth) / common.Config.FilePreviewWidth
 	}
 }
 
 // Proper set panels size. Assure that panels do not overlap
 func (m *model) setFilePanelsSize(width int) {
 	// set each file panel size and max file panel amount
-	m.fileModel.width = (width - Config.SidebarWidth - m.fileModel.filePreview.width - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
-	m.fileModel.maxFilePanel = (width - Config.SidebarWidth - m.fileModel.filePreview.width) / 20
+	m.fileModel.width = (width - common.Config.SidebarWidth - m.fileModel.filePreview.width - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
+	m.fileModel.maxFilePanel = (width - common.Config.SidebarWidth - m.fileModel.filePreview.width) / 20
 	for i := range m.fileModel.filePanels {
 		m.fileModel.filePanels[i].searchBar.Width = m.fileModel.width - 4
 	}
@@ -254,7 +255,7 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 		}
 		// If quiting input pressed, check if has any running process and displays a
 		// warn. Otherwise just quits application
-	} else if msg.String() == containsKey(msg.String(), hotkeys.Quit) {
+	} else if msg.String() == containsKey(msg.String(), common.Hotkeys.Quit) {
 		if m.hasRunningProcesses() {
 			m.warnModalForQuit()
 			return cmd
@@ -490,14 +491,14 @@ func (m *model) getFilePanelItems() {
 // the path in state direcotory
 func (m *model) quitSuperfile() {
 	// close exiftool session
-	if Config.Metadata && et != nil {
+	if common.Config.Metadata && et != nil {
 		et.Close()
 	}
 	// cd on quit
 	currentDir := m.fileModel.filePanels[m.filePanelFocusIndex].location
 	variable.LastDir = currentDir
 
-	if Config.CdOnQuit {
+	if common.Config.CdOnQuit {
 		// escape single quote
 		currentDir = strings.ReplaceAll(currentDir, "'", "'\\''")
 		err := os.WriteFile(variable.LastDirFile, []byte("cd '"+currentDir+"'"), 0755)

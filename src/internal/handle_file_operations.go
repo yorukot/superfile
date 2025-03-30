@@ -570,7 +570,7 @@ func (m *model) openFileWithEditor() tea.Cmd {
 		return nil
 	}
 
-	editor := Config.Editor
+	editor := common.Config.Editor
 	if editor == "" {
 		editor = os.Getenv("EDITOR")
 	}
@@ -600,7 +600,7 @@ func (m *model) openFileWithEditor() tea.Cmd {
 // Open directory with default editor
 func (m *model) openDirectoryWithEditor() tea.Cmd {
 	// Todo : Move hardcoded strings to constants : "windows", and editors
-	editor := Config.DirEditor
+	editor := common.Config.DirEditor
 
 	if editor == "" {
 		if runtime.GOOS == "windows" {

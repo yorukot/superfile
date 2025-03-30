@@ -24,6 +24,23 @@ import (
 
 // Run superfile app
 func Run(content embed.FS) {
+
+	file, err1 := os.OpenFile(variable.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+
+	// Todo : This could be improved if we want to make superfile more resilient to errors
+	// For example if the log file directories have access issues.
+	// we could pass a dummy object to log.SetOutput() and the app would still function.
+	if err1 != nil {
+		// At this point, it will go to stdout since log file is not initilized
+		slog.Error("Error while opening superfile.log file", "error", err1)
+		os.Exit(1)
+	}
+
+	slog.SetDefault(slog.New(slog.NewTextHandler(
+		file, &slog.HandlerOptions{Level: slog.LevelDebug})))
+
+	slog.Debug("hi")
+
 	common.LoadInitial_PrerenderedVariables()
 	common.LoadAllDefaultConfig(content)
 

@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"github.com/yorukot/superfile/src/internal/common"
 	"io"
 	"log/slog"
 	"os"
@@ -142,7 +143,7 @@ func returnDirElement(location string, displayDotFile bool, sortOptions sortOpti
 			if dirEntries[i].IsDir() != dirEntries[j].IsDir() {
 				return dirEntries[i].IsDir()
 			}
-			if Config.CaseSensitiveSort {
+			if common.Config.CaseSensitiveSort {
 				return dirEntries[i].Name() < dirEntries[j].Name() != reversed
 			} else {
 				return strings.ToLower(dirEntries[i].Name()) < strings.ToLower(dirEntries[j].Name()) != reversed
@@ -404,7 +405,7 @@ func (m *model) returnMetaData() {
 		return
 	}
 
-	if Config.Metadata && checkIsSymlinked.Mode()&os.ModeSymlink == 0 && et != nil {
+	if common.Config.Metadata && checkIsSymlinked.Mode()&os.ModeSymlink == 0 && et != nil {
 
 		fileInfos := et.ExtractMetadata(filePath)
 
@@ -425,7 +426,7 @@ func (m *model) returnMetaData() {
 		fileModifyData := [2]string{"Date Modified", fileInfo.ModTime().String()}
 		filePermissions := [2]string{"Permissions", fileInfo.Mode().String()}
 
-		if Config.EnableMD5Checksum {
+		if common.Config.EnableMD5Checksum {
 			// Calculate MD5 checksum
 			checksum, err := calculateMD5Checksum(filePath)
 			if err != nil {
@@ -531,10 +532,10 @@ func getElementIcon(file string, IsDir bool) icon.IconStyle {
 	ext := strings.TrimPrefix(filepath.Ext(file), ".")
 	name := file
 
-	if !Config.Nerdfont {
+	if !common.Config.Nerdfont {
 		return icon.IconStyle{
 			Icon:  "",
-			Color: theme.FilePanelFG,
+			Color: common.Theme.FilePanelFG,
 		}
 	}
 
@@ -576,7 +577,7 @@ func getElementIcon(file string, IsDir bool) icon.IconStyle {
 		if resultIcon.Color == "NONE" {
 			return icon.IconStyle{
 				Icon:  resultIcon.Icon,
-				Color: theme.FilePanelFG,
+				Color: common.Theme.FilePanelFG,
 			}
 		}
 		return resultIcon

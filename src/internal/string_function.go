@@ -116,7 +116,7 @@ func formatFileSize(size int64) string {
 	unitsDec := []string{"B", "kB", "MB", "GB", "TB", "PB", "EB"}
 	unitsBin := []string{"B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB"}
 
-	if Config.FileSizeUseSI {
+	if common.Config.FileSizeUseSI {
 		unitIndex := int(math.Floor(math.Log(float64(size)) / math.Log(1000)))
 		adjustedSize := float64(size) / math.Pow(1000, float64(unitIndex))
 		return fmt.Sprintf("%.2f %s", adjustedSize, unitsDec[unitIndex])

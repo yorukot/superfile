@@ -85,7 +85,7 @@ func getExternalMediaFolders() (disks []directory) {
 	// only get physical drives
 	parts, err := disk.Partitions(false)
 
-	slog.Debug("disk.Partitions() called", "number of parts", len(parts))
+	//slog.Debug("disk.Partitions() called", "number of parts", len(parts))
 
 	if err != nil {
 		slog.Error("Error while getting external media: ", "error", err)
@@ -99,8 +99,8 @@ func getExternalMediaFolders() (disks []directory) {
 		// even when user had set debug=false in config. We dont write those to log file
 		// But we do make a functions call, and pass around some strings. So it might/might not be
 		// a problem. It could be a problem in a hot path though.
-		slog.Debug("Returned disk by disk.Partition()", "device", disk.Device,
-			"mountpoint", disk.Mountpoint, "fstype", disk.Fstype)
+		//slog.Debug("Returned disk by disk.Partition()", "device", disk.Device,
+		//	"mountpoint", disk.Mountpoint, "fstype", disk.Fstype)
 
 		// shouldListDisk, diskName, and diskLocation, each has runtime.GOOS checks
 		// We can ideally reduce it to one check only.
