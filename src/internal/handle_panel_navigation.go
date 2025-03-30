@@ -2,6 +2,7 @@ package internal
 
 import (
 	"encoding/json"
+	"github.com/yorukot/superfile/src/internal/common"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -70,7 +71,7 @@ func (m *model) createNewFilePanel(location string) {
 		panelMode:        browserMode,
 		focusType:        secondFocus,
 		directoryRecords: make(map[string]directoryRecord),
-		searchBar:        generateSearchBar(),
+		searchBar:        common.GenerateSearchBar(),
 	})
 
 	if m.fileModel.filePreview.open {

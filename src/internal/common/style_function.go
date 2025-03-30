@@ -287,6 +287,23 @@ func GenerateRenameTextInput(width int, cursorPos int, defaultValue string) text
 	return ti
 }
 
+func GeneratePinnedRenameTextInput(cursorPos int, defaultValue string) textinput.Model {
+	ti := textinput.New()
+	ti.Cursor.Style = filePanelCursorStyle
+	ti.Cursor.TextStyle = filePanelStyle
+	ti.Prompt = filePanelCursorStyle.Render(icon.Cursor + " ")
+	ti.TextStyle = modalStyle
+	ti.Cursor.Blink = true
+	ti.Placeholder = "New name"
+	ti.PlaceholderStyle = modalStyle
+	ti.SetValue(defaultValue)
+	ti.SetCursor(cursorPos)
+	ti.Focus()
+	ti.CharLimit = 156
+	ti.Width = Config.SidebarWidth - 4
+	return ti
+}
+
 func GenerateDefaultProgress() progress.Model {
 	prog := progress.New(GenerateGradientColor())
 	prog.PercentageStyle = FooterStyle
