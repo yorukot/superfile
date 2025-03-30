@@ -1,4 +1,4 @@
-package utils 
+package utils
 
 import "log/slog"
 import "os"

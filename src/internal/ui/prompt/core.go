@@ -7,12 +7,12 @@ import (
 	"github.com/yorukot/superfile/src/config/icon"
 )
 
-func DefaultPrompt(confirmHotkeys []string, cancelHotkeys []string) (PromptModal) {
+func DefaultPrompt(confirmHotkeys []string, cancelHotkeys []string) PromptModal {
 	return PromptModal{
-		headline: icon.Terminal + " superfile - Prompt",
-		open:     false,
+		headline:       icon.Terminal + " superfile - Prompt",
+		open:           false,
 		confirmHotkeys: confirmHotkeys,
-		cancelHotkeys: cancelHotkeys,
+		cancelHotkeys:  cancelHotkeys,
 	}
 }
 
@@ -26,7 +26,6 @@ func (p *PromptModal) HandleMessage(msg string) {
 		p.textInput.Focus()
 	}
 }
-
 
 func (p *PromptModal) Init() {
 
@@ -170,8 +169,6 @@ func (p *PromptModal) Open(m *model, cmdPrefix PromptCommandPrefix) {
 	}
 
 	p.cmd = prompt
-
-	
 
 	suggestions := make([]string, 0, len(p.commandList)-1)
 	for cmd := range p.commandList {

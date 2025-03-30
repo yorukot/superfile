@@ -1,8 +1,5 @@
 package common
 
-
-
-
 // Theme configuration
 type ThemeType struct {
 	// Code syntax highlight theme

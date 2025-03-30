@@ -24,7 +24,6 @@ var firstUse = false
 var hasTrash = true
 var batCmd = ""
 
-
 var et *exiftool.Exiftool
 
 var channel = make(chan channelMessage, 1000)

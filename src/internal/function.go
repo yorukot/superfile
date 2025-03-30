@@ -267,8 +267,6 @@ func arrayContains(s []string, str string) bool {
 	return false
 }
 
-
-
 func removeElementByValue(slice []string, value string) []string {
 	newSlice := []string{}
 	for _, v := range slice {
@@ -585,7 +583,6 @@ func getElementIcon(file string, IsDir bool) icon.IconStyle {
 		return resultIcon
 	}
 }
-
 
 func DefaultPromptTextInput() textinput.Model {
 	t := textinput.New()

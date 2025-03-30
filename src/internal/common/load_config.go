@@ -1,20 +1,23 @@
 package common
 
-import "log/slog"
-import "fmt"
-import "reflect"
-import "path/filepath"
-import "os"
-import "embed"
-import "github.com/pelletier/go-toml/v2"
+import (
+	"embed"
+	"fmt"
+	"log/slog"
+	"os"
+	"path/filepath"
+	"reflect"
 
-import "github.com/yorukot/superfile/src/internal/common/utils"
-import  variable "github.com/yorukot/superfile/src/config"
+	"github.com/pelletier/go-toml/v2"
+	"github.com/yorukot/superfile/src/internal/common/utils"
+
+	variable "github.com/yorukot/superfile/src/config"
+)
 
 // Load configurations from the configuration file. Compares the content
 // with the default values and modify the config file to include default configs
 // if the FixConfigFile flag is on
-func loadConfigFile() {
+func LoadConfigFile() {
 	hasError := utils.LoadTomlFile(variable.ConfigFile, ConfigTomlString, &Config, variable.FixConfigFile, lipglossError)
 	if hasError {
 		fmt.Println("To add missing fields to configuration file automatically run superfile with the --fix-config-file flag `spf --fix-config-file`")
@@ -33,7 +36,7 @@ func loadConfigFile() {
 
 // Load keybinds from the hotkeys file. Compares the content
 // with the default values and modify the hotkeys if the FixHotkeys flag is on.
-func loadHotkeysFile() {
+func LoadHotkeysFile() {
 	hasError := utils.LoadTomlFile(variable.HotkeysFile, HotkeysTomlString, &hotkeys, variable.FixHotkeys, lipglossError)
 	if hasError {
 		fmt.Println("To add missing fields to hotkeys file automatically run superfile with the --fix-hotkeys flag `spf --fix-hotkeys`")
@@ -59,7 +62,7 @@ func loadHotkeysFile() {
 
 // Load configurations from theme file into &theme and return default values
 // if file theme folder is empty
-func loadThemeFile() {
+func LoadThemeFile() {
 	themeFile := filepath.Join(variable.ThemeFolder, Config.Theme+".toml")
 	data, err := os.ReadFile(themeFile)
 	if err != nil {

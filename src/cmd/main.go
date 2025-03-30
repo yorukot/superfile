@@ -37,7 +37,7 @@ func Run(content embed.FS) {
 				Aliases: []string{"pl"},
 				Usage:   "Print the path to the configuration and directory",
 				Action: func(c *cli.Context) error {
-					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#66b2ff")).Render("[Configuration file path]"), variable.ConfigFilePath)
+					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#66b2ff")).Render("[Configuration file path]"), variable.ConfigFile)
 					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#ffcc66")).Render("[Hotkeys file path]"), variable.HotkeysFile)
 					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#66ff66")).Render("[Log file path]"), variable.LogFile)
 					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#ff9999")).Render("[Configuration directory path]"), variable.SuperFileMainDir)
@@ -92,7 +92,7 @@ func Run(content embed.FS) {
 				if _, err := os.Stat(configFileArg); err != nil {
 					log.Fatalf("Error: While reading config file '%s' from arguement : %v", configFileArg, err)
 				} else {
-					variable.ConfigFilePath = configFileArg
+					variable.ConfigFile = configFileArg
 				}
 			}
 
@@ -164,7 +164,7 @@ func InitConfigFile() {
 	}
 
 	// Write config file
-	if err := writeConfigFile(variable.ConfigFilePath, internal.ConfigTomlString); err != nil {
+	if err := writeConfigFile(variable.ConfigFile, internal.ConfigTomlString); err != nil {
 		log.Fatalln("Error writing config file:", err)
 	}
 
@@ -273,7 +273,7 @@ func CheckForUpdates() {
 
 	// Todo : We are reading the config file here, and also in the loadConfigFile functions
 	// This needs to be fixed.
-	data, err := os.ReadFile(variable.ConfigFilePath)
+	data, err := os.ReadFile(variable.ConfigFile)
 	if err != nil {
 		log.Fatalf("Config file doesn't exist: %v", err)
 	}

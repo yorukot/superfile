@@ -7,7 +7,6 @@ import "reflect"
 
 // Utility functions related to file operations
 
-
 func WriteTomlData(filePath string, data interface{}) error {
 	tomlData, err := toml.Marshal(data)
 	if err != nil {

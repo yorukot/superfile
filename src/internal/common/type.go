@@ -11,5 +11,5 @@ const (
 
 type ModelUpdateAction struct {
 	action ActionType
-	args   []string   
+	args   []string
 }

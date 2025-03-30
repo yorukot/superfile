@@ -1,19 +1,16 @@
 package internal
 
 import (
-	"embed"
-	"fmt"
 	"log/slog"
 	"os"
 	"path/filepath"
-	"reflect"
 	"runtime"
 	"strings"
 
 	"github.com/barasher/go-exiftool"
-	"github.com/pelletier/go-toml/v2"
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/config/icon"
+	"github.com/yorukot/superfile/src/internal/common"
 )
 
 // initialConfig load and handle all configuration files (spf config,hotkeys
@@ -30,7 +27,7 @@ func initialConfig(dir string) (toggleDotFileBool bool, toggleFooter bool, first
 		LogAndExit("Error while opening superfile.log file", "error", err)
 	}
 
-	loadConfigFile()
+	common.LoadConfigFile()
 
 	logLevel := slog.LevelInfo
 	if Config.Debug {
@@ -40,9 +37,9 @@ func initialConfig(dir string) (toggleDotFileBool bool, toggleFooter bool, first
 	slog.SetDefault(slog.New(slog.NewTextHandler(
 		file, &slog.HandlerOptions{Level: logLevel})))
 
-	loadHotkeysFile()
+	common.LoadHotkeysFile()
 
-	loadThemeFile()
+	common.LoadThemeFile()
 
 	icon.InitIcon(Config.Nerdfont, theme.DirectoryIconColor)
 
@@ -70,8 +67,8 @@ func initialConfig(dir string) (toggleDotFileBool bool, toggleFooter bool, first
 		toggleFooter = true
 	}
 
-	LoadThemeConfig()
-	LoadPrerenderedVariables()
+	common.LoadThemeConfig()
+	common.LoadPrerenderedVariables()
 
 	if Config.Metadata {
 		et, err = exiftool.NewExiftool()
@@ -96,5 +93,3 @@ func initialConfig(dir string) (toggleDotFileBool bool, toggleFooter bool, first
 
 	return toggleDotFileBool, toggleFooter, firstFilePanelDir
 }
-
-

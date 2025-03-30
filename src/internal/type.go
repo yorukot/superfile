@@ -258,4 +258,3 @@ type channelMessage struct {
 /*PROCESS BAR internal TYPE END*/
 
 type editorFinishedMsg struct{ err error }
-

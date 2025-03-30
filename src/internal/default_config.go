@@ -6,8 +6,6 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/prompt"
 )
 
-
-
 // Generate and return model containing default configurations for interface
 func defaultModelConfig(toggleDotFileBool bool, toggleFooter bool, firstFilePanelDir string) model {
 	return model{
