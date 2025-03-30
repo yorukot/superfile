@@ -1,6 +1,7 @@
 *.log
 bin/
 dist/
+.idea/
 
 # generated types
 .astro/
