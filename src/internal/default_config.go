@@ -3,6 +3,7 @@ package internal
 import (
 	"path/filepath"
 
+	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/prompt"
 )
 
@@ -19,7 +20,7 @@ func defaultModelConfig(toggleDotFileBool bool, toggleFooter bool, firstFilePane
 		sidebarModel: sidebarModel{
 			renderIndex: 0,
 			directories: getDirectories(),
-			searchBar:   generateSearchBar(),
+			searchBar:   common.GenerateSearchBar(),
 		},
 		fileModel: fileModel{
 			filePanels: []filePanel{
@@ -41,7 +42,7 @@ func defaultModelConfig(toggleDotFileBool bool, toggleFooter bool, firstFilePane
 					panelMode:        browserMode,
 					focusType:        focus,
 					directoryRecords: make(map[string]directoryRecord),
-					searchBar:        generateSearchBar(),
+					searchBar:        common.GenerateSearchBar(),
 				},
 			},
 			filePreview: filePreviewPanel{

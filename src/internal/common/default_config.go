@@ -11,4 +11,4 @@ var (
 
 var Theme ThemeType
 var Config ConfigType
-var hotkeys HotkeysType
+var Hotkeys HotkeysType

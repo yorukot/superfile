@@ -30,7 +30,7 @@ var (
 	mainStyle      lipgloss.Style
 	filePanelStyle lipgloss.Style
 	sidebarStyle   lipgloss.Style
-	footerStyle    lipgloss.Style
+	FooterStyle    lipgloss.Style
 	modalStyle     lipgloss.Style
 )
 
@@ -174,7 +174,7 @@ func LoadThemeConfig() {
 	mainStyle = lipgloss.NewStyle().Foreground(fullScreenFGColor).Background(fullScreenBGColor)
 	filePanelStyle = lipgloss.NewStyle().Foreground(filePanelFGColor).Background(filePanelBGColor)
 	sidebarStyle = lipgloss.NewStyle().Foreground(sidebarFGColor).Background(sidebarBGColor)
-	footerStyle = lipgloss.NewStyle().Foreground(footerFGColor).Background(footerBGColor)
+	FooterStyle = lipgloss.NewStyle().Foreground(footerFGColor).Background(footerBGColor)
 	modalStyle = lipgloss.NewStyle().Foreground(modalFGColor).Background(modalBGColor)
 
 	// Terminal Size Error
@@ -212,7 +212,7 @@ func LoadThemeConfig() {
 	helpMenuTitleStyle = lipgloss.NewStyle().Foreground(helpMenuTitleColor).Background(modalBGColor)
 }
 
-func generateGradientColor() progress.Option {
+func GenerateGradientColor() progress.Option {
 	return progress.WithScaledGradient(Theme.GradientColor[0], Theme.GradientColor[1])
 }
 

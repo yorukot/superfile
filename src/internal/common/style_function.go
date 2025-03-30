@@ -227,15 +227,15 @@ func loadHotkeysError(value string) string {
 }
 
 // Generate search bar for file panel
-func generateSearchBar() textinput.Model {
+func GenerateSearchBar() textinput.Model {
 	ti := textinput.New()
 	ti.Cursor.Style = footerCursorStyle
-	ti.Cursor.TextStyle = footerStyle
+	ti.Cursor.TextStyle = FooterStyle
 	ti.TextStyle = filePanelStyle
 	ti.Prompt = filePanelTopDirectoryIconStyle.Render(icon.Search + icon.Space)
 	ti.Cursor.Blink = true
 	ti.PlaceholderStyle = filePanelStyle
-	ti.Placeholder = "(" + hotkeys.SearchBar[0] + ") Type something"
+	ti.Placeholder = "(" + Hotkeys.SearchBar[0] + ") Type something"
 	ti.Blur()
 	ti.CharLimit = 156
 	return ti
