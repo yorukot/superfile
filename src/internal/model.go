@@ -209,6 +209,7 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 		"filePanel.panelMode", m.fileModel.filePanels[m.filePanelFocusIndex].panelMode,
 		"typingModal.open", m.typingModal.open,
 		"warnModal.open", m.warnModal.open,
+		"promptModal.open", m.promptModal.IsOpen(),
 		"fileModel.renaming", m.fileModel.renaming,
 		"searchBar.focussed", m.fileModel.filePanels[m.filePanelFocusIndex].searchBar.Focused(),
 		"helpMenu.open", m.helpMenu.open,
@@ -283,7 +284,7 @@ func (m *model) updateFilePanelsState(msg tea.Msg, cmd *tea.Cmd) {
 	} else if m.typingModal.open {
 		m.typingModal.textInput, *cmd = m.typingModal.textInput.Update(msg)
 	} else if m.promptModal.IsOpen() {
-		//m.promptModal.textInput, *cmd = m.promptModal.textInput.Update(msg)
+		*cmd = m.promptModal.HandleUpdate(msg)
 	}
 
 	if focusPanel.cursor < 0 {

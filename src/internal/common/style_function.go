@@ -116,12 +116,20 @@ func ClipboardBorder(height int, width int, borderBottom string) lipgloss.Style 
 		Foreground(FooterFGColor)
 }
 
-// Generate modal (pop up widnwos) border style
 func ModalBorderStyle(height int, width int) lipgloss.Style {
+	return modalBorderStyleWithAlign(height, width, lipgloss.Center)
+}
+
+func ModalBorderStyleLeft(height int, width int) lipgloss.Style {
+	return modalBorderStyleWithAlign(height, width, lipgloss.Left)
+}
+
+// Generate modal (pop up widnwos) border style
+func modalBorderStyleWithAlign(height int, width int, horizontalAlignment lipgloss.Position) lipgloss.Style {
 	border := GenerateBorder()
 	return lipgloss.NewStyle().Height(height).
 		Width(width).
-		Align(lipgloss.Center, lipgloss.Center).
+		Align(horizontalAlignment, lipgloss.Center).
 		Border(border).
 		BorderForeground(ModalBorderActiveColor).
 		BorderBackground(ModalBGColor).
