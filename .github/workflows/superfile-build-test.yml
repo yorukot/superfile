@@ -29,6 +29,6 @@ jobs:
       run: go fmt ./... && git diff --exit-code
     
     - name: golangci-lint
-      uses: golangci/golangci-lint-action@v6
+      uses: golangci/golangci-lint-action@v7
       with:
           version: v1.64
