@@ -163,6 +163,9 @@ schema = 3
   [mod."github.com/urfave/cli/v2"]
     version = "v2.27.6"
     hash = "sha256-u4yUgMwphs/7iwkhWrLgsHZru1InycgvY2ZmuxHQeLI="
+  [mod."github.com/urfave/cli/v3"]
+    version = "v3.1.0"
+    hash = "sha256-sFWobSoncomkvnT7s11a/aKR5lqwAahFNl788uk9888="
   [mod."github.com/xrash/smetrics"]
     version = "v0.0.0-20240521201337-686a1a2994c1"
     hash = "sha256-CsyN59w6sKERDI5kkdpq0YKmqdixyCHuN4FYE/56/BQ="
