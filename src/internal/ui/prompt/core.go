@@ -21,10 +21,11 @@ func DefaultPrompt() PromptModal {
 	}
 }
 
-func (p *PromptModal) HandleMessage(msg tea.Msg) (common.PromptAction, tea.Cmd) {
+func (p *PromptModal) HandleMessage(msg tea.Msg) (common.ModelAction, tea.Cmd) {
 	slog.Debug("promptModal HandleMessage()", "msg", msg,
 		"textInput", p.textInput.Value())
-	action := common.NoPromptAction()
+	var action common.ModelAction
+	action = common.NoAction{}
 	var cmd tea.Cmd
 	if !p.IsOpen() {
 		slog.Error("HandleMessage called on closed prompt")
@@ -87,15 +88,14 @@ func (p *PromptModal) Render(width int) string {
 	return common.ModalBorderStyleLeft(1, width+2).Render(content)
 }
 
-func getPromptAction(shellMode bool, value string) (common.PromptAction, error) {
-	noAction := common.NoPromptAction()
+func getPromptAction(shellMode bool, value string) (common.ModelAction, error) {
+	noAction := common.NoAction{}
 	if value == "" {
 		return noAction, nil
 	}
 	if shellMode {
-		return common.PromptAction{
-			Action: common.ShellCommandAction,
-			Args:   []string{value},
+		return common.ShellCommandAction{
+			Command: value,
 		}, nil
 	}
 
@@ -104,9 +104,7 @@ func getPromptAction(shellMode bool, value string) (common.PromptAction, error) 
 
 	switch promptArgs[0] {
 	case "split":
-		return common.PromptAction{
-			Action: common.SplitPanelAction,
-		}, nil
+		return common.SplitPanelAction{}, nil
 	case "cd":
 		if len(promptArgs) != 2 {
 			return noAction, fmt.Errorf("cd prompts needs exactly one arguement, received %d",
@@ -120,9 +118,8 @@ func getPromptAction(shellMode bool, value string) (common.PromptAction, error) 
 		}
 
 		// Todo : Instead, we can have a function that creates this object
-		return common.PromptAction{
-			Action: common.CDCurrentPanelAction,
-			Args:   []string{cdPath},
+		return common.CDCurrentPanelAction{
+			Location: cdPath,
 		}, nil
 	case "open":
 		// Todo : Duplication. Fix this
@@ -137,9 +134,8 @@ func getPromptAction(shellMode bool, value string) (common.PromptAction, error) 
 			return noAction, fmt.Errorf("invalid open path : %s", path)
 		}
 		// Todo : Instead, we can have a function that creates this object
-		return common.PromptAction{
-			Action: common.OpenPanelAction,
-			Args:   []string{newPanelPath},
+		return common.OpenPanelAction{
+			Location: newPanelPath,
 		}, nil
 
 	default:

@@ -288,7 +288,7 @@ func (m *model) updateFilePanelsState(msg tea.Msg, cmd *tea.Cmd) {
 		m.typingModal.textInput, *cmd = m.typingModal.textInput.Update(msg)
 	} else if m.promptModal.IsOpen() {
 		// *cmd is a non-name, and cannot be used on left of :=
-		var action common.PromptAction
+		var action common.ModelAction
 		// Taking returned cmd is necessary for blinking
 		action, *cmd = m.promptModal.HandleMessage(msg)
 		m.applyPromptModalAction(action)
@@ -301,42 +301,19 @@ func (m *model) updateFilePanelsState(msg tea.Msg, cmd *tea.Cmd) {
 	}
 }
 
-func (m *model) applyPromptModalAction(action common.PromptAction) {
-	switch action.Action {
+func (m *model) applyPromptModalAction(action common.ModelAction) {
+	slog.Debug("applyPromptModalAction", "action", action)
+	switch action := action.(type) {
 	case common.NoAction:
 		return
 	case common.ShellCommandAction:
-		if len(action.Args) != 1 {
-			slog.Error("Invalid ShellCommandAction without exactly one arg",
-				"args", action.Args)
-			return
-		}
-		m.applyShellCommandAction(action.Args[0])
+		m.applyShellCommandAction(action.Command)
 	case common.SplitPanelAction:
-		if len(action.Args) != 0 {
-			slog.Warn("Invalid SplitPanelAction with extra args. Ignoring.",
-				"args", action.Args)
-		}
-		// Todo : make string conversion functions for ActionType and use that.
-		slog.Debug("SplitPanelAction")
 		m.splitPanel()
 	case common.CDCurrentPanelAction:
-		if len(action.Args) != 1 {
-			slog.Warn("Invalid CDCurrentPanelAction without exactly one arg. Ignoring.",
-				"args", action.Args)
-			return
-		}
-		_ = m.updateCurrentFilePanelDir(action.Args[0])
-
+		_ = m.updateCurrentFilePanelDir(action.Location)
 	case common.OpenPanelAction:
-		if len(action.Args) != 1 {
-			slog.Warn("Invalid OpenPanelAction without exactly one arg. Ignoring.",
-				"args", action.Args)
-			return
-		}
-		// Todo : This is bad, It should have been an OpenPanelAction Type
-		// and .getPath() or something. This needs to be fixed
-		m.createNewFilePanel(action.Args[0])
+		m.createNewFilePanel(action.Location)
 	}
 }
 

@@ -10,6 +10,7 @@ Handles user input updates, spf model updates, and returns a PromptAction to mod
 - Testsuite test
 - Allow both : and > keys
 - Take config for exit_after_success
+- Make $() and ${} work !!!!
 - Remove hardcoded constants
 - Run linter on this with hard settings
 - Printing return code from shell command
