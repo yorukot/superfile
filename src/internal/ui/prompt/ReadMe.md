@@ -4,11 +4,11 @@ This is for the Prompt modal of superfile
 Handles user input updates, spf model updates, and returns a PromptAction to model. 
 
 # Todos
-- Hints rendering via prefix match
+x Hints rendering via prefix match
 - Handling updates from spf model
 - Unit tests
 - Testsuite test
-- Allow both : and > keys
+x Allow both : and > keys
 - Take config for exit_after_success
 - Make $() and ${} work !!!!
 - Remove hardcoded constants

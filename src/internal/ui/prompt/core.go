@@ -23,14 +23,14 @@ func DefaultPrompt() PromptModal {
 	}
 }
 
-func (p *PromptModal) HandleMessage(msg tea.Msg) (common.ModelAction, tea.Cmd) {
-	slog.Debug("promptModal HandleMessage()", "msg", msg,
+func (p *PromptModal) HandleUpdate(msg tea.Msg) (common.ModelAction, tea.Cmd) {
+	slog.Debug("promptModal HandleUpdate()", "msg", msg,
 		"textInput", p.textInput.Value())
 	var action common.ModelAction
 	action = common.NoAction{}
 	var cmd tea.Cmd
 	if !p.IsOpen() {
-		slog.Error("HandleMessage called on closed prompt")
+		slog.Error("HandleUpdate called on closed prompt")
 		return action, cmd
 	}
 
@@ -39,11 +39,16 @@ func (p *PromptModal) HandleMessage(msg tea.Msg) (common.ModelAction, tea.Cmd) {
 		if slices.Contains(common.Hotkeys.ConfirmTyping, msg.String()) {
 			var err error
 			action, err = getPromptAction(p.shellMode, p.textInput.Value())
-			if err != nil {
-				// Todo create and error that wraps user facing message
-				p.errorMsg = err.Error()
+			if err == nil {
+				p.resultMsg = ""
+				p.actionSuccess = true
+			} else if cmdErr, ok := err.(InvalidCmdError); ok {
+				// We dont expect a wrapped error here, so using type assertion
+				p.resultMsg = "Error : " + cmdErr.UIMessage()
+				p.actionSuccess = false
 			} else {
-				p.errorMsg = ""
+				p.resultMsg = err.Error()
+				p.actionSuccess = false
 			}
 			p.textInput.SetValue("")
 		} else if slices.Contains(common.Hotkeys.CancelTyping, msg.String()) {
@@ -56,6 +61,8 @@ func (p *PromptModal) HandleMessage(msg tea.Msg) (common.ModelAction, tea.Cmd) {
 			} else {
 				p.textInput, cmd = p.textInput.Update(msg)
 			}
+			p.resultMsg = ""
+			p.actionSuccess = true
 		}
 	default:
 		p.textInput, cmd = p.textInput.Update(msg)
@@ -63,6 +70,26 @@ func (p *PromptModal) HandleMessage(msg tea.Msg) (common.ModelAction, tea.Cmd) {
 
 	return action, cmd
 
+}
+
+// After action is performed, model will update the PromptModal with results
+func (p *PromptModal) HandleShellCommandResults(retCode int, _ string) {
+	p.actionSuccess = retCode == 0
+	// Not allowing user to see output yet. This needs to be sanitized and
+	// need to be made sure that it doesn't breaks layout
+	// Hence we are ignoring output for now
+	p.resultMsg = fmt.Sprintf("Command exited withs status %d", retCode)
+}
+
+// After action is performed, model will update the PromptModal with results
+// In case of NoAction, this method should not be called.
+func (p *PromptModal) HandleSPFActionResults(success bool, msg string) {
+	p.actionSuccess = success
+	if !p.actionSuccess {
+		p.resultMsg = "Error : " + msg
+	} else {
+		p.resultMsg = "Success : " + msg
+	}
 }
 
 func getPromptAction(shellMode bool, value string) (common.ModelAction, error) {
@@ -81,27 +108,37 @@ func getPromptAction(shellMode bool, value string) (common.ModelAction, error) {
 
 	switch promptArgs[0] {
 	case "split":
+		if len(promptArgs) != 1 {
+			return noAction, InvalidCmdError{
+				uiMsg: "split command should not be given arguments",
+			}
+		}
 		return common.SplitPanelAction{}, nil
 	case "cd":
 		if len(promptArgs) != 2 {
-			return noAction, fmt.Errorf("cd prompts needs exactly one arguement, received %d",
-				len(promptArgs)-1)
+			return noAction, InvalidCmdError{
+				uiMsg: fmt.Sprintf("cd command needs exactly one argument, received %d",
+					len(promptArgs)-1),
+			}
 		}
 		return common.CDCurrentPanelAction{
 			Location: promptArgs[1],
 		}, nil
 	case "open":
-		// Todo : Duplication. Fix this
 		if len(promptArgs) != 2 {
-			return noAction, fmt.Errorf("open prompts needs exactly one arguement, received %d",
-				len(promptArgs)-1)
+			return noAction, InvalidCmdError{
+				uiMsg: fmt.Sprintf("open command needs exactly one argument, received %d",
+					len(promptArgs)-1),
+			}
 		}
 		return common.OpenPanelAction{
 			Location: promptArgs[1],
 		}, nil
 
 	default:
-		return noAction, fmt.Errorf("invalid spf prompt command")
+		return noAction, InvalidCmdError{
+			uiMsg: "Invalid spf prompt command : " + promptArgs[0],
+		}
 	}
 
 }
@@ -139,7 +176,7 @@ func (p *PromptModal) Render(width int) string {
 		}
 	} else {
 		if p.textInput.Value() == "" {
-			suggestionText += " '" + p.spfPromptHotkey + "' - Get into SPF Prompt mode"
+			suggestionText += "\n '" + p.spfPromptHotkey + "' - Get into SPF Prompt mode"
 		}
 	}
 
@@ -148,9 +185,14 @@ func (p *PromptModal) Render(width int) string {
 		content += suggestionText
 	}
 	// Rendering error Message is a but fuzzy right now. Todo Fix this.
-	if p.errorMsg != "" {
+	// Todo : Handle error being multiline or being too long
+	if p.resultMsg != "" {
+		resultStyle := common.PromptSuccessStyle
+		if !p.actionSuccess {
+			resultStyle = common.PromptFailureStyle
+		}
 		content += "\n" + divider
-		content += "\n " + p.errorMsg
+		content += "\n " + resultStyle.Render(p.resultMsg)
 	}
 	return common.ModalBorderStyleLeft(1, width+2).Render(content)
 }

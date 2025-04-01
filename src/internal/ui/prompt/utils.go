@@ -1,6 +1,29 @@
 package prompt
 
-import "strings"
+import (
+	"strings"
+)
+
+// This is to generate error objects that can pe nicely printed to UI
+type InvalidCmdError struct {
+	uiMsg        string
+	wrappedError error
+}
+
+func (e InvalidCmdError) Error() string {
+	if e.wrappedError == nil {
+		return e.uiMsg
+	}
+	return e.wrappedError.Error()
+}
+
+func (e InvalidCmdError) Unwrap() error {
+	return e.wrappedError
+}
+
+func (e InvalidCmdError) UIMessage() string {
+	return e.uiMsg
+}
 
 func (p *PromptModal) IsOpen() bool {
 	return p.open

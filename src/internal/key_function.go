@@ -2,6 +2,7 @@ package internal
 
 import (
 	"github.com/yorukot/superfile/src/internal/common"
+	"log/slog"
 	"slices"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -75,8 +76,10 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) tea.Cmd {
 		m.closeFilePanel()
 
 	case containsKey(msg, common.Hotkeys.CreateNewFilePanel):
-		m.createNewFilePanel(variable.HomeDir)
-
+		err := m.createNewFilePanel(variable.HomeDir)
+		if err != nil {
+			slog.Error("error while creating new panel", "error", err)
+		}
 	case containsKey(msg, common.Hotkeys.ToggleFilePreviewPanel):
 		m.toggleFilePreviewPanel()
 

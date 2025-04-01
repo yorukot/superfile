@@ -1,19 +1,21 @@
 package prompt
 
-import (
-	"github.com/charmbracelet/bubbles/textinput"
-)
+import "github.com/charmbracelet/bubbles/textinput"
 
 type PromptModal struct {
-	headline string
-	open     bool
-	// whether its shellMode or spfMode
-	shellMode         bool
-	textInput         textinput.Model
-	errorMsg          string
+	headline          string
 	commands          []promptCommand
 	spfPromptHotkey   string
 	shellPromptHotkey string
+
+	open bool
+	// whether its shellMode or spfMode
+	shellMode bool
+	textInput textinput.Model
+	resultMsg string
+
+	// Whether the user intended action was successful
+	actionSuccess bool
 }
 
 // This is only used to render suggestions

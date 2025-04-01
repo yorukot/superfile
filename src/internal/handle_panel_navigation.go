@@ -2,6 +2,7 @@ package internal
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/yorukot/superfile/src/internal/common"
 	"log/slog"
 	"os"
@@ -55,13 +56,17 @@ func (m *model) pinnedDirectory() {
 }
 
 // Create new file panel
-func (m *model) createNewFilePanel(location string) {
+func (m *model) createNewFilePanel(location string) error {
 	if len(m.fileModel.filePanels) == m.fileModel.maxFilePanel {
-		return
+		return fmt.Errorf("maximum panel count reached")
 	}
 
 	if location == "" {
 		location = variable.HomeDir
+	}
+
+	if _, err := os.Stat(location); err != nil {
+		return fmt.Errorf("cannot access location : %s", location)
 	}
 
 	m.fileModel.filePanels = append(m.fileModel.filePanels, filePanel{
@@ -93,6 +98,7 @@ func (m *model) createNewFilePanel(location string) {
 	for i := range m.fileModel.filePanels {
 		m.fileModel.filePanels[i].searchBar.Width = m.fileModel.width - 4
 	}
+	return nil
 }
 
 // Close current focus file panel

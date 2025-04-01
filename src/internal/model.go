@@ -290,7 +290,7 @@ func (m *model) updateFilePanelsState(msg tea.Msg, cmd *tea.Cmd) {
 		// *cmd is a non-name, and cannot be used on left of :=
 		var action common.ModelAction
 		// Taking returned cmd is necessary for blinking
-		action, *cmd = m.promptModal.HandleMessage(msg)
+		action, *cmd = m.promptModal.HandleUpdate(msg)
 		m.applyPromptModalAction(action)
 	}
 
@@ -301,19 +301,37 @@ func (m *model) updateFilePanelsState(msg tea.Msg, cmd *tea.Cmd) {
 	}
 }
 
+// Apply the Action and notify the promptModal
 func (m *model) applyPromptModalAction(action common.ModelAction) {
-	slog.Debug("applyPromptModalAction", "action", action)
+	if action, ok := action.(common.NoAction); !ok {
+		slog.Debug("applyPromptModalAction", "action", action)
+	}
+	var actionErr error
+	var successMsg string
 	switch action := action.(type) {
 	case common.NoAction:
 		return
 	case common.ShellCommandAction:
+		// Update to promptModal is handled here
 		m.applyShellCommandAction(action.Command)
+		return
 	case common.SplitPanelAction:
-		m.splitPanel()
+		actionErr = m.splitPanel()
+		successMsg = "Panel successfully split"
 	case common.CDCurrentPanelAction:
-		_ = m.updateCurrentFilePanelDir(action.Location)
+		actionErr = m.updateCurrentFilePanelDir(action.Location)
+		successMsg = "Panel directory changed"
 	case common.OpenPanelAction:
-		m.createNewFilePanel(action.Location)
+		actionErr = m.createNewFilePanel(action.Location)
+		successMsg = "New panel opened"
+	default:
+		actionErr = fmt.Errorf("unhandled action type")
+	}
+
+	if actionErr != nil {
+		m.promptModal.HandleSPFActionResults(false, actionErr.Error())
+	} else {
+		m.promptModal.HandleSPFActionResults(true, successMsg)
 	}
 }
 
@@ -338,6 +356,8 @@ func (m *model) applyShellCommandAction(shellCommand string) {
 	retCode, output, err := utils.ExecuteShellCommand(common.DefaultCommandTimeoutMsec, focusPanelDir,
 		baseCmd, args...)
 
+	m.promptModal.HandleShellCommandResults(retCode, output)
+
 	if err != nil {
 		slog.Error("Command execution failed", "retCode", retCode,
 			"error", err, "output", string(output))
@@ -345,8 +365,8 @@ func (m *model) applyShellCommandAction(shellCommand string) {
 	}
 }
 
-func (m *model) splitPanel() {
-	m.createNewFilePanel(m.fileModel.filePanels[m.filePanelFocusIndex].location)
+func (m *model) splitPanel() error {
+	return m.createNewFilePanel(m.fileModel.filePanels[m.filePanelFocusIndex].location)
 }
 
 func (m *model) updateCurrentFilePanelDir(dir string) error {
