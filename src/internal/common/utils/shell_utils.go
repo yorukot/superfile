@@ -6,10 +6,25 @@ import (
 	"fmt"
 	"log/slog"
 	"os/exec"
+	"runtime"
 	"time"
 )
 
-func ExecuteShellCommand(timeLimitMsec int, cmdDir string, baseCmd string, args ...string) (int, string, error) {
+// Choose correct shell as per OS
+func ExecuteCommandInShell(timeLimitMsec int, cmdDir string, shellCommand string) (int, string, error) {
+	// Linux and Darwin
+	baseCmd := "/bin/sh"
+	args := []string{"-c", shellCommand}
+
+	if runtime.GOOS == "windows" {
+		baseCmd = "powershell.exe"
+		args[0] = "-Command"
+	}
+
+	return ExecuteCommand(timeLimitMsec, cmdDir, baseCmd, args...)
+}
+
+func ExecuteCommand(timeLimitMsec int, cmdDir string, baseCmd string, args ...string) (int, string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeLimitMsec)*time.Millisecond)
 	defer cancel()
 

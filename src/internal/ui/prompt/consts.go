@@ -5,9 +5,11 @@ package prompt
 const (
 	promptHeadlineText = "Superfile Prompt"
 
-	openCommand     = "open"
-	splitCommand    = "split"
-	cdCommand       = "cd"
+	openCommand  = "open"
+	splitCommand = "split"
+	cdCommand    = "cd"
+
+	// We could later make this configurable. But, not needed now.
 	spfPromptChar   = ">"
 	shellPromptChar = ":"
 
@@ -16,4 +18,6 @@ const (
 
 	shellModeString = "(Shell Mode)"
 	spfModeString   = "(Prompt Mode)"
+
+	shellSubTimeoutMsec = 1000
 )

@@ -9,7 +9,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"reflect"
-	"runtime"
 	"strings"
 	"time"
 
@@ -290,7 +289,9 @@ func (m *model) updateFilePanelsState(msg tea.Msg, cmd *tea.Cmd) {
 		// *cmd is a non-name, and cannot be used on left of :=
 		var action common.ModelAction
 		// Taking returned cmd is necessary for blinking
-		action, *cmd = m.promptModal.HandleUpdate(msg)
+		// Todo : Separate this to a utility
+		cwdLocation := m.fileModel.filePanels[m.filePanelFocusIndex].location
+		action, *cmd = m.promptModal.HandleUpdate(msg, cwdLocation)
 		m.applyPromptModalAction(action)
 	}
 
@@ -337,24 +338,9 @@ func (m *model) applyPromptModalAction(action common.ModelAction) {
 
 // Todo : Move them around to appropriate places
 func (m *model) applyShellCommandAction(shellCommand string) {
-	focusPanelDir := ""
-	for _, panel := range m.fileModel.filePanels {
-		if panel.focusType == focus {
-			focusPanelDir = panel.location
-		}
-	}
+	focusPanelDir := m.fileModel.filePanels[m.filePanelFocusIndex].location
 
-	// Linux and Darwin
-	baseCmd := "/bin/sh"
-	args := []string{"-c", shellCommand}
-
-	if runtime.GOOS == "windows" {
-		baseCmd = "powershell.exe"
-		args[0] = "-Command"
-	}
-
-	retCode, output, err := utils.ExecuteShellCommand(common.DefaultCommandTimeoutMsec, focusPanelDir,
-		baseCmd, args...)
+	retCode, output, err := utils.ExecuteCommandInShell(common.DefaultCommandTimeoutMsec, focusPanelDir, shellCommand)
 
 	m.promptModal.HandleShellCommandResults(retCode, output)
 

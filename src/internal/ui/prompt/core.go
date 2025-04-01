@@ -24,7 +24,7 @@ func DefaultPrompt() Model {
 	}
 }
 
-func (p *Model) HandleUpdate(msg tea.Msg) (common.ModelAction, tea.Cmd) {
+func (p *Model) HandleUpdate(msg tea.Msg, cwdLocation string) (common.ModelAction, tea.Cmd) {
 	slog.Debug("promptModal HandleUpdate()", "msg", msg,
 		"textInput", p.textInput.Value())
 	var action common.ModelAction
@@ -46,7 +46,7 @@ func (p *Model) HandleUpdate(msg tea.Msg) (common.ModelAction, tea.Cmd) {
 
 			// Create Action based on input
 			var err error
-			action, err = getPromptAction(p.shellMode, p.textInput.Value())
+			action, err = getPromptAction(p.shellMode, p.textInput.Value(), cwdLocation)
 			if err == nil {
 				p.resultMsg = ""
 				p.actionSuccess = true
@@ -96,7 +96,7 @@ func (p *Model) HandleSPFActionResults(success bool, msg string) {
 	p.CloseOnSuccessIfNeeded(common.Config.ShellExitOnSucsess)
 }
 
-func getPromptAction(shellMode bool, value string) (common.ModelAction, error) {
+func getPromptAction(shellMode bool, value string, cwdLocation string) (common.ModelAction, error) {
 	noAction := common.NoAction{}
 	if value == "" {
 		return noAction, nil
@@ -108,7 +108,12 @@ func getPromptAction(shellMode bool, value string) (common.ModelAction, error) {
 	}
 
 	// Todo - Add tokenization for $() and ${} args
-	promptArgs := strings.Fields(value)
+	promptArgs, err := tokenizePromptCommand(value, cwdLocation)
+	if err != nil {
+		return noAction, invalidCmdError{
+			uiMsg: fmt.Sprintf("error during shell substitution : %w", err),
+		}
+	}
 
 	switch promptArgs[0] {
 	case "split":

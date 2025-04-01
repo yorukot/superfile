@@ -14,7 +14,7 @@ x Run linter on this with hard settings
 x Printing return code from shell command
 x Check github PR todos
 - Make $() and ${} work !!!!
-- Superfile file prompt should appear in the middle of the whole terminal (veritically)
+- Superfile file prompt should appear in the middle of the whole terminal (vertically)
 - Unit tests
 
 - Make UI looks pretty
