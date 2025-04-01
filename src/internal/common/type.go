@@ -4,10 +4,13 @@ package common
 type ActionType = int
 
 // Constants for actions
+// Todo : Shouldn't we be using inheritance here ?
 const (
 	NoAction ActionType = iota
 	ShellCommandAction
 	SplitPanelAction
+	CDCurrentPanelAction
+	OpenPanelAction
 )
 
 type PromptAction struct {

@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/common/utils"
 	"log/slog"
@@ -316,8 +317,26 @@ func (m *model) applyPromptModalAction(action common.PromptAction) {
 			slog.Warn("Invalid SplitPanelAction with extra args. Ignoring.",
 				"args", action.Args)
 		}
+		// Todo : make string conversion functions for ActionType and use that.
 		slog.Debug("SplitPanelAction")
 		m.splitPanel()
+	case common.CDCurrentPanelAction:
+		if len(action.Args) != 1 {
+			slog.Warn("Invalid CDCurrentPanelAction without exactly one arg. Ignoring.",
+				"args", action.Args)
+			return
+		}
+		_ = m.updateCurrentFilePanelDir(action.Args[0])
+
+	case common.OpenPanelAction:
+		if len(action.Args) != 1 {
+			slog.Warn("Invalid OpenPanelAction without exactly one arg. Ignoring.",
+				"args", action.Args)
+			return
+		}
+		// Todo : This is bad, It should have been an OpenPanelAction Type
+		// and .getPath() or something. This needs to be fixed
+		m.createNewFilePanel(action.Args[0])
 	}
 }
 
@@ -351,6 +370,24 @@ func (m *model) applyShellCommandAction(shellCommand string) {
 
 func (m *model) splitPanel() {
 	m.createNewFilePanel(m.fileModel.filePanels[m.filePanelFocusIndex].location)
+}
+
+func (m *model) updateCurrentFilePanelDir(dir string) error {
+	currentPath := m.fileModel.filePanels[m.filePanelFocusIndex].location
+	newPath := dir
+	if !filepath.IsAbs(dir) {
+		// Assume relative path from current
+		newPath = filepath.Join(currentPath, dir)
+	}
+
+	if info, err := os.Stat(newPath); err != nil {
+		return fmt.Errorf("%s : no such file or directory, stats err : %w", newPath, err)
+	} else if !info.IsDir() {
+		return fmt.Errorf("%s is not a directory", newPath)
+	}
+
+	m.fileModel.filePanels[m.filePanelFocusIndex].location = newPath
+	return nil
 }
 
 // Update the sidebar state. Change name of the renaming pinned directory.

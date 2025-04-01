@@ -5,6 +5,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/yorukot/superfile/src/internal/common"
 	"log/slog"
+	"path/filepath"
 	"slices"
 	"strings"
 
@@ -38,6 +39,8 @@ func (p *PromptModal) HandleMessage(msg tea.Msg) (common.PromptAction, tea.Cmd) 
 			if err != nil {
 				// Todo create and error that wraps user facing message
 				p.errorMsg = err.Error()
+			} else {
+				p.errorMsg = ""
 			}
 			p.textInput.SetValue("")
 		} else if slices.Contains(common.Hotkeys.CancelTyping, msg.String()) {
@@ -75,12 +78,19 @@ func (p *PromptModal) Render(width int) string {
 	content := " " + p.headline + modeString(p.shellMode)
 	content += "\n" + strings.Repeat(common.Config.BorderTop, width)
 	content += "\n" + " " + shellPrompt(p.shellMode) + " " + p.textInput.View()
+
+	// Rendering error Message is a but fuzzy right now. Todo Fix this.
+	if p.errorMsg != "" {
+		content += "\n" + strings.Repeat(common.Config.BorderTop, width)
+		content += "\n" + " " + p.errorMsg
+	}
 	return common.ModalBorderStyleLeft(1, width+2).Render(content)
 }
 
 func getPromptAction(shellMode bool, value string) (common.PromptAction, error) {
+	noAction := common.NoPromptAction()
 	if value == "" {
-		return common.NoPromptAction(), nil
+		return noAction, nil
 	}
 	if shellMode {
 		return common.PromptAction{
@@ -89,6 +99,7 @@ func getPromptAction(shellMode bool, value string) (common.PromptAction, error) 
 		}, nil
 	}
 
+	// Todo - Add tokenization for $() and ${} args
 	promptArgs := strings.Fields(value)
 
 	switch promptArgs[0] {
@@ -96,8 +107,43 @@ func getPromptAction(shellMode bool, value string) (common.PromptAction, error) 
 		return common.PromptAction{
 			Action: common.SplitPanelAction,
 		}, nil
+	case "cd":
+		if len(promptArgs) != 2 {
+			return noAction, fmt.Errorf("cd prompts needs exactly one arguement, received %d",
+				len(promptArgs)-1)
+		}
+		cdPath := ""
+		if path, err := filepath.Abs(promptArgs[1]); err == nil {
+			cdPath = path
+		} else {
+			return noAction, fmt.Errorf("invalid cd path : %s", path)
+		}
+
+		// Todo : Instead, we can have a function that creates this object
+		return common.PromptAction{
+			Action: common.CDCurrentPanelAction,
+			Args:   []string{cdPath},
+		}, nil
+	case "open":
+		// Todo : Duplication. Fix this
+		if len(promptArgs) != 2 {
+			return noAction, fmt.Errorf("open prompts needs exactly one arguement, received %d",
+				len(promptArgs)-1)
+		}
+		newPanelPath := ""
+		if path, err := filepath.Abs(promptArgs[1]); err == nil {
+			newPanelPath = path
+		} else {
+			return noAction, fmt.Errorf("invalid open path : %s", path)
+		}
+		// Todo : Instead, we can have a function that creates this object
+		return common.PromptAction{
+			Action: common.OpenPanelAction,
+			Args:   []string{newPanelPath},
+		}, nil
+
 	default:
-		return common.NoPromptAction(), fmt.Errorf("invalid spf prompt command")
+		return noAction, fmt.Errorf("invalid spf prompt command")
 	}
 
 }
