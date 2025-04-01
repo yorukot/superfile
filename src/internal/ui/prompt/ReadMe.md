@@ -25,3 +25,7 @@ Handles user input updates, spf model updates, and returns a PromptAction to mod
 - Bigger unit testcase for model's prompt feature.
 - Review go module design docs/videos and see if current design is okay
 
+- Coderabbit review and fix comments
+- Test on windows
+- Self Code Review
+- More self sanity testing
