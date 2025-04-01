@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"strings"
 	"time"
 
@@ -226,7 +227,8 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 		m.typingModalOpenKey(msg.String())
 
 	} else if m.promptModal.IsOpen() {
-		m.promptModalOpenKey(msg.String())
+		// Ignore keypress. It will be handled in Update call via
+		// updateFilePanelState
 
 	} else if m.warnModal.open {
 		m.warnModalOpenKey(msg.String())
@@ -284,11 +286,60 @@ func (m *model) updateFilePanelsState(msg tea.Msg, cmd *tea.Cmd) {
 	} else if m.typingModal.open {
 		m.typingModal.textInput, *cmd = m.typingModal.textInput.Update(msg)
 	} else if m.promptModal.IsOpen() {
-		*cmd = m.promptModal.HandleUpdate(msg)
+		// *cmd is a non-name, and cannot be used on left of :=
+		var action common.PromptAction
+		// Taking returned cmd is necessary for blinking
+		action, *cmd = m.promptModal.HandleMessage(msg)
+		m.applyPromptModalAction(action)
 	}
 
+	// Todo : This is like duct taping a bigger problem
+	// The code should never reach this state.
 	if focusPanel.cursor < 0 {
 		focusPanel.cursor = 0
+	}
+}
+
+func (m *model) applyPromptModalAction(action common.PromptAction) {
+	switch action.Action {
+	case common.NoAction:
+		return
+	case common.ShellCommandAction:
+		if len(action.Args) != 1 {
+			slog.Error("Invalid ShellCommandAction without exactly one arg",
+				"args", action.Args)
+			return
+		}
+		m.applyShellCommandAction(action.Args[0])
+	case common.SplitPanelAction:
+
+	}
+}
+
+func (m *model) applyShellCommandAction(shellCommand string) {
+	focusPanelDir := ""
+	for _, panel := range m.fileModel.filePanels {
+		if panel.focusType == focus {
+			focusPanelDir = panel.location
+		}
+	}
+
+	// Linux and Darwin
+	baseCmd := "/bin/sh"
+	args := []string{"-c", shellCommand}
+
+	if runtime.GOOS == "windows" {
+		baseCmd = "powershell.exe"
+		args[0] = "-Command"
+	}
+
+	retCode, output, err := utils.ExecuteShellCommand(common.DefaultCommandTimeoutMsec, focusPanelDir,
+		baseCmd, args...)
+
+	if err != nil {
+		slog.Error("Command execution failed", "retCode", retCode,
+			"error", err, "output", string(output))
+		return
 	}
 }
 

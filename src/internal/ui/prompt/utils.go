@@ -1,5 +1,7 @@
 package prompt
 
+import "github.com/yorukot/superfile/src/internal/common"
+
 func (p *PromptModal) IsOpen() bool {
 	return p.open
 }
@@ -24,4 +26,14 @@ func shellPrompt(shellMode bool) string {
 		return ":"
 	}
 	return ">"
+}
+
+func getPromptAction(shellMode bool, value string) common.PromptAction {
+	if shellMode {
+		return common.PromptAction{
+			Action: common.ShellCommandAction,
+			Args:   []string{value},
+		}
+	}
+	return common.NoPromptAction()
 }

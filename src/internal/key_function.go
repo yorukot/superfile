@@ -217,10 +217,6 @@ func (m *model) typingModalOpenKey(msg string) {
 
 // Todo : There is a lot of duplication for these models, each one of them has to handle
 // ConfirmTyping and CancleTyping in a similar way. There is a scope of some good refactoring here.
-func (m *model) promptModalOpenKey(msg string) {
-	m.promptModal.HandleMessage(msg)
-}
-
 func (m *model) warnModalOpenKey(msg string) {
 	switch msg {
 	case containsKey(msg, common.Hotkeys.Quit), containsKey(msg, common.Hotkeys.CancelTyping):

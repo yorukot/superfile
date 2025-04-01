@@ -7,6 +7,7 @@ import (
 )
 
 const WheelRunTime = 5
+const DefaultCommandTimeoutMsec = 5000
 
 var (
 	MinimumHeight = 24

@@ -19,39 +19,39 @@ func DefaultPrompt() PromptModal {
 	}
 }
 
-func (p *PromptModal) HandleMessage(msg string) {
+func (p *PromptModal) HandleMessage(msg tea.Msg) (common.PromptAction, tea.Cmd) {
 	slog.Debug("promptModal HandleMessage()", "msg", msg,
-		"textInput", p.textInput.Value(),
-		"inputView", p.textInput.View())
-	if slices.Contains(common.Hotkeys.ConfirmTyping, msg) {
-		p.textInput.SetValue("")
-	} else if slices.Contains(common.Hotkeys.CancelTyping, msg) {
-		p.Close()
-	}
-}
-
-func (p *PromptModal) HandleUpdate(msg tea.Msg) tea.Cmd {
-	slog.Debug("promptModal HandleUpdate()", "msg", msg,
-		"textInput", p.textInput.Value(),
-		"inputView", p.textInput.View())
+		"textInput", p.textInput.Value())
+	action := common.NoPromptAction()
 	var cmd tea.Cmd
-	ignoreInput := false
+	if !p.IsOpen() {
+		slog.Error("HandleMessage called on closed prompt")
+		return action, cmd
+	}
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		if msg.String() == ">" && p.textInput.Value() == "" {
-			p.shellMode = false
-			ignoreInput = true
+		if slices.Contains(common.Hotkeys.ConfirmTyping, msg.String()) {
+			action = getPromptAction(p.shellMode, p.textInput.Value())
+			p.textInput.SetValue("")
+		} else if slices.Contains(common.Hotkeys.CancelTyping, msg.String()) {
+			p.Close()
+		} else {
+			if msg.String() == ">" && p.textInput.Value() == "" {
+				p.shellMode = false
+			} else if msg.String() == ":" && p.textInput.Value() == "" {
+				p.shellMode = true
+			} else {
+				// Purposefully ignoring tea.Cmd here.
+				p.textInput, cmd = p.textInput.Update(msg)
+			}
 		}
-		if msg.String() == ":" && p.textInput.Value() == "" {
-			p.shellMode = true
-			ignoreInput = true
-		}
-	}
-
-	if !ignoreInput {
+	default:
 		p.textInput, cmd = p.textInput.Update(msg)
 	}
-	return cmd
+
+	return action, cmd
+
 }
 
 func (p *PromptModal) Open() {

@@ -1,15 +1,16 @@
 package common
 
-/* To work with PromptModal */
+// ActionType : To work with PromptModal
 type ActionType = int
 
 // Constants for actions
 const (
-	SplitPanel ActionType = iota
-	RunShellCommand
+	NoAction ActionType = iota
+	ShellCommandAction
+	SplitPanelAction
 )
 
-type ModelUpdateAction struct {
-	action ActionType
-	args   []string
+type PromptAction struct {
+	Action ActionType
+	Args   []string
 }
