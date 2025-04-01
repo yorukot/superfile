@@ -8,7 +8,7 @@ x Hints rendering via prefix match
 x Handling updates from spf model
 x Allow both : and > keys
 - Finish todos of prompt
-- Take config for exit_after_success
+x Take config for exit_after_success
 x Remove hardcoded constants
 x Run linter on this with hard settings
 x Printing return code from shell command

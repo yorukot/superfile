@@ -20,6 +20,7 @@ func DefaultPrompt() Model {
 		commands:          defaultCommandSlice(),
 		spfPromptHotkey:   common.Hotkeys.OpenSPFPrompt[0],
 		shellPromptHotkey: common.Hotkeys.OpenCommandLine[0],
+		actionSuccess:     true,
 	}
 }
 
@@ -38,14 +39,20 @@ func (p *Model) HandleUpdate(msg tea.Msg) (common.ModelAction, tea.Cmd) {
 	case tea.KeyMsg:
 		switch {
 		case slices.Contains(common.Hotkeys.ConfirmTyping, msg.String()):
+			// Pressing confirm on empty prompt will trigger close
+			if p.textInput.Value() == "" {
+				p.CloseOnSuccessIfNeeded(common.Config.ShellExitOnSucsess)
+			}
+
+			// Create Action based on input
 			var err error
 			action, err = getPromptAction(p.shellMode, p.textInput.Value())
 			if err == nil {
 				p.resultMsg = ""
 				p.actionSuccess = true
-			} else if cmdErr, ok := err.(InvalidCmdError); ok {
+			} else if cmdErr, ok := err.(invalidCmdError); ok {
 				// We dont expect a wrapped error here, so using type assertion
-				p.resultMsg = cmdErr.UIMessage()
+				p.resultMsg = cmdErr.uiMessage()
 				p.actionSuccess = false
 			} else {
 				p.resultMsg = err.Error()
@@ -78,6 +85,7 @@ func (p *Model) HandleShellCommandResults(retCode int, _ string) {
 	// need to be made sure that it doesn't breaks layout
 	// Hence we are ignoring output for now
 	p.resultMsg = fmt.Sprintf("Command exited withs status %d", retCode)
+	p.CloseOnSuccessIfNeeded(common.Config.ShellExitOnSucsess)
 }
 
 // After action is performed, model will update the Model with results
@@ -85,6 +93,7 @@ func (p *Model) HandleShellCommandResults(retCode int, _ string) {
 func (p *Model) HandleSPFActionResults(success bool, msg string) {
 	p.actionSuccess = success
 	p.resultMsg = msg
+	p.CloseOnSuccessIfNeeded(common.Config.ShellExitOnSucsess)
 }
 
 func getPromptAction(shellMode bool, value string) (common.ModelAction, error) {
@@ -104,14 +113,14 @@ func getPromptAction(shellMode bool, value string) (common.ModelAction, error) {
 	switch promptArgs[0] {
 	case "split":
 		if len(promptArgs) != 1 {
-			return noAction, InvalidCmdError{
+			return noAction, invalidCmdError{
 				uiMsg: "split command should not be given arguments",
 			}
 		}
 		return common.SplitPanelAction{}, nil
 	case "cd":
 		if len(promptArgs) != 2 {
-			return noAction, InvalidCmdError{
+			return noAction, invalidCmdError{
 				uiMsg: fmt.Sprintf("cd command needs exactly one argument, received %d",
 					len(promptArgs)-1),
 			}
@@ -121,7 +130,7 @@ func getPromptAction(shellMode bool, value string) (common.ModelAction, error) {
 		}, nil
 	case "open":
 		if len(promptArgs) != 2 {
-			return noAction, InvalidCmdError{
+			return noAction, invalidCmdError{
 				uiMsg: fmt.Sprintf("open command needs exactly one argument, received %d",
 					len(promptArgs)-1),
 			}
@@ -131,7 +140,7 @@ func getPromptAction(shellMode bool, value string) (common.ModelAction, error) {
 		}, nil
 
 	default:
-		return noAction, InvalidCmdError{
+		return noAction, invalidCmdError{
 			uiMsg: "Invalid spf prompt command : " + promptArgs[0],
 		}
 	}
@@ -152,7 +161,6 @@ func (p *Model) Close() {
 
 func (p *Model) Render(width int) string {
 
-	// Todo fix divider being a bit smaller
 	divider := strings.Repeat(common.Config.BorderTop, width)
 	content := " " + p.headline + modeString(p.shellMode)
 	content += "\n" + divider
@@ -189,5 +197,5 @@ func (p *Model) Render(width int) string {
 		content += "\n" + divider
 		content += "\n " + resultStyle.Render(msgPrefix+" : "+p.resultMsg)
 	}
-	return common.ModalBorderStyleLeft(1, width+2).Render(content)
+	return common.ModalBorderStyleLeft(1, width+1).Render(content)
 }

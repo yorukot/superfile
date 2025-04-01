@@ -5,23 +5,23 @@ import (
 )
 
 // This is to generate error objects that can pe nicely printed to UI
-type InvalidCmdError struct {
+type invalidCmdError struct {
 	uiMsg        string
 	wrappedError error
 }
 
-func (e InvalidCmdError) Error() string {
+func (e invalidCmdError) Error() string {
 	if e.wrappedError == nil {
 		return e.uiMsg
 	}
 	return e.wrappedError.Error()
 }
 
-func (e InvalidCmdError) Unwrap() error {
+func (e invalidCmdError) Unwrap() error {
 	return e.wrappedError
 }
 
-func (e InvalidCmdError) UIMessage() string {
+func (e invalidCmdError) uiMessage() string {
 	return e.uiMsg
 }
 
@@ -29,12 +29,18 @@ func (p *Model) IsOpen() bool {
 	return p.open
 }
 
-func (p *Model) Validate() bool {
+func (p *Model) validate() bool {
 	// Prompt was closed, but textInput was not cleared
 	if !p.open && p.textInput.Value() != "" {
 		return false
 	}
 	return true
+}
+
+func (p *Model) CloseOnSuccessIfNeeded(needed bool) {
+	if needed && p.actionSuccess {
+		p.Close()
+	}
 }
 
 func modeString(shellMode bool) string {
