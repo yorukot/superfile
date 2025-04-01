@@ -5,25 +5,30 @@ Handles user input updates, spf model updates, and returns a PromptAction to mod
 
 # Todos
 x Hints rendering via prefix match
-- Handling updates from spf model
-- Unit tests
-- Testsuite test
+x Handling updates from spf model
 x Allow both : and > keys
+- Finish todos of prompt
 - Take config for exit_after_success
+x Remove hardcoded constants
+x Run linter on this with hard settings
+x Printing return code from shell command
+x Check github PR todos
 - Make $() and ${} work !!!!
-- Remove hardcoded constants
-- Run linter on this with hard settings
-- Printing return code from shell command
+- Superfile file prompt should appear in the middle of the whole terminal (veritically)
+- Unit tests
+
 - Make UI looks pretty
 - Ask on discord for suggestions
-- Check github PR todos
-- Finish todos
+
 
 # PR Todos
 - Remove all new todos
-- More refactoring ? of stuff to common/utils ?
-- Bigger unit testcase for model's prompt feature.
+x No More refactoring ? of stuff to common/utils ?
+- ? Bigger unit testcase for model's prompt feature.
 - Review go module design docs/videos and see if current design is okay
+- Testsuite test
+- Remove hardcoded constants
+
 
 - Coderabbit review and fix comments
 - Test on windows

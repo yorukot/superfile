@@ -107,6 +107,9 @@ var (
 
 	helpMenuHotkeyColor lipgloss.Color
 	helpMenuTitleColor  lipgloss.Color
+
+	promptSuccessColor lipgloss.Color
+	promptFailureColor lipgloss.Color
 )
 
 func LoadThemeConfig() {
@@ -157,6 +160,9 @@ func LoadThemeConfig() {
 	helpMenuHotkeyColor = lipgloss.Color(Theme.HelpMenuHotkey)
 	helpMenuTitleColor = lipgloss.Color(Theme.HelpMenuTitle)
 
+	promptSuccessColor = lipgloss.Color(Theme.Correct)
+	promptFailureColor = lipgloss.Color(Theme.Error)
+
 	if Config.TransparentBackground {
 		TransparentAllBackgroundColor()
 	}
@@ -204,9 +210,8 @@ func LoadThemeConfig() {
 	HelpMenuTitleStyle = lipgloss.NewStyle().Foreground(helpMenuTitleColor).Background(ModalBGColor)
 
 	// Prompt Style
-	// Todo : Use its own style ( Greenish for success, and Reddish for failure )
-	PromptSuccessStyle = lipgloss.NewStyle().Foreground(helpMenuHotkeyColor).Background(ModalBGColor)
-	PromptFailureStyle = lipgloss.NewStyle().Foreground(helpMenuTitleColor).Background(ModalBGColor)
+	PromptSuccessStyle = lipgloss.NewStyle().Foreground(promptSuccessColor).Background(ModalBGColor)
+	PromptFailureStyle = lipgloss.NewStyle().Foreground(promptFailureColor).Background(ModalBGColor)
 }
 
 func TransparentAllBackgroundColor() {

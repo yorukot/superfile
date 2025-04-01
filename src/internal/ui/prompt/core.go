@@ -11,9 +11,9 @@ import (
 	"github.com/yorukot/superfile/src/config/icon"
 )
 
-func DefaultPrompt() PromptModal {
-	return PromptModal{
-		headline:          icon.Terminal + " superfile - Prompt",
+func DefaultPrompt() Model {
+	return Model{
+		headline:          icon.Terminal + " " + promptHeadlineText,
 		open:              false,
 		shellMode:         true,
 		textInput:         common.GeneratePromptTextInput(),
@@ -23,7 +23,7 @@ func DefaultPrompt() PromptModal {
 	}
 }
 
-func (p *PromptModal) HandleUpdate(msg tea.Msg) (common.ModelAction, tea.Cmd) {
+func (p *Model) HandleUpdate(msg tea.Msg) (common.ModelAction, tea.Cmd) {
 	slog.Debug("promptModal HandleUpdate()", "msg", msg,
 		"textInput", p.textInput.Value())
 	var action common.ModelAction
@@ -36,7 +36,8 @@ func (p *PromptModal) HandleUpdate(msg tea.Msg) (common.ModelAction, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		if slices.Contains(common.Hotkeys.ConfirmTyping, msg.String()) {
+		switch {
+		case slices.Contains(common.Hotkeys.ConfirmTyping, msg.String()):
 			var err error
 			action, err = getPromptAction(p.shellMode, p.textInput.Value())
 			if err == nil {
@@ -44,16 +45,16 @@ func (p *PromptModal) HandleUpdate(msg tea.Msg) (common.ModelAction, tea.Cmd) {
 				p.actionSuccess = true
 			} else if cmdErr, ok := err.(InvalidCmdError); ok {
 				// We dont expect a wrapped error here, so using type assertion
-				p.resultMsg = "Error : " + cmdErr.UIMessage()
+				p.resultMsg = cmdErr.UIMessage()
 				p.actionSuccess = false
 			} else {
 				p.resultMsg = err.Error()
 				p.actionSuccess = false
 			}
 			p.textInput.SetValue("")
-		} else if slices.Contains(common.Hotkeys.CancelTyping, msg.String()) {
+		case slices.Contains(common.Hotkeys.CancelTyping, msg.String()):
 			p.Close()
-		} else {
+		default:
 			if p.textInput.Value() == "" && msg.String() == p.spfPromptHotkey {
 				p.shellMode = false
 			} else if p.textInput.Value() == "" && msg.String() == p.shellPromptHotkey {
@@ -67,13 +68,11 @@ func (p *PromptModal) HandleUpdate(msg tea.Msg) (common.ModelAction, tea.Cmd) {
 	default:
 		p.textInput, cmd = p.textInput.Update(msg)
 	}
-
 	return action, cmd
-
 }
 
-// After action is performed, model will update the PromptModal with results
-func (p *PromptModal) HandleShellCommandResults(retCode int, _ string) {
+// After action is performed, model will update the Model with results
+func (p *Model) HandleShellCommandResults(retCode int, _ string) {
 	p.actionSuccess = retCode == 0
 	// Not allowing user to see output yet. This needs to be sanitized and
 	// need to be made sure that it doesn't breaks layout
@@ -81,15 +80,11 @@ func (p *PromptModal) HandleShellCommandResults(retCode int, _ string) {
 	p.resultMsg = fmt.Sprintf("Command exited withs status %d", retCode)
 }
 
-// After action is performed, model will update the PromptModal with results
+// After action is performed, model will update the Model with results
 // In case of NoAction, this method should not be called.
-func (p *PromptModal) HandleSPFActionResults(success bool, msg string) {
+func (p *Model) HandleSPFActionResults(success bool, msg string) {
 	p.actionSuccess = success
-	if !p.actionSuccess {
-		p.resultMsg = "Error : " + msg
-	} else {
-		p.resultMsg = "Success : " + msg
-	}
+	p.resultMsg = msg
 }
 
 func getPromptAction(shellMode bool, value string) (common.ModelAction, error) {
@@ -143,19 +138,19 @@ func getPromptAction(shellMode bool, value string) (common.ModelAction, error) {
 
 }
 
-func (p *PromptModal) Open(shellMode bool) {
+func (p *Model) Open(shellMode bool) {
 	p.open = true
 	p.shellMode = shellMode
 	_ = p.textInput.Focus()
 }
 
-func (p *PromptModal) Close() {
+func (p *Model) Close() {
 	p.open = false
 	p.shellMode = true
 	p.textInput.SetValue("")
 }
 
-func (p *PromptModal) Render(width int) string {
+func (p *Model) Render(width int) string {
 
 	// Todo fix divider being a bit smaller
 	divider := strings.Repeat(common.Config.BorderTop, width)
@@ -169,15 +164,13 @@ func (p *PromptModal) Render(width int) string {
 			suggestionText += "\n '" + p.shellPromptHotkey + "' - Get into Shell mode"
 		}
 		command := getFirstToken(p.textInput.Value())
-		for i := 0; i < len(p.commands); i++ {
-			if strings.HasPrefix(p.commands[i].command, command) {
-				suggestionText += "\n '" + p.commands[i].usage + "' - " + p.commands[i].description
+		for _, cmd := range p.commands {
+			if strings.HasPrefix(cmd.command, command) {
+				suggestionText += "\n '" + cmd.usage + "' - " + cmd.description
 			}
 		}
-	} else {
-		if p.textInput.Value() == "" {
-			suggestionText += "\n '" + p.spfPromptHotkey + "' - Get into SPF Prompt mode"
-		}
+	} else if p.textInput.Value() == "" {
+		suggestionText += "\n '" + p.spfPromptHotkey + "' - Get into SPF Prompt mode"
 	}
 
 	if suggestionText != "" {
@@ -187,12 +180,14 @@ func (p *PromptModal) Render(width int) string {
 	// Rendering error Message is a but fuzzy right now. Todo Fix this.
 	// Todo : Handle error being multiline or being too long
 	if p.resultMsg != "" {
+		msgPrefix := successMessagePrefix
 		resultStyle := common.PromptSuccessStyle
 		if !p.actionSuccess {
 			resultStyle = common.PromptFailureStyle
+			msgPrefix = failureMessagePrefix
 		}
 		content += "\n" + divider
-		content += "\n " + resultStyle.Render(p.resultMsg)
+		content += "\n " + resultStyle.Render(msgPrefix+" : "+p.resultMsg)
 	}
 	return common.ModalBorderStyleLeft(1, width+2).Render(content)
 }

@@ -82,7 +82,7 @@ type model struct {
 	typingModal          typingModal
 	warnModal            warnModal
 	helpMenu             helpMenuModal
-	promptModal          prompt.PromptModal
+	promptModal          prompt.Model
 	fileMetaData         fileMetadata
 	confirmToQuit        bool
 	firstTextInput       bool

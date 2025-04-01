@@ -25,11 +25,11 @@ func (e InvalidCmdError) UIMessage() string {
 	return e.uiMsg
 }
 
-func (p *PromptModal) IsOpen() bool {
+func (p *Model) IsOpen() bool {
 	return p.open
 }
 
-func (p *PromptModal) Validate() bool {
+func (p *Model) Validate() bool {
 	// Prompt was closed, but textInput was not cleared
 	if !p.open && p.textInput.Value() != "" {
 		return false
@@ -39,9 +39,9 @@ func (p *PromptModal) Validate() bool {
 
 func modeString(shellMode bool) string {
 	if shellMode {
-		return "(Shell Mode)"
+		return shellModeString
 	}
-	return "(Prompt Mode)"
+	return spfModeString
 }
 
 func shellPrompt(shellMode bool) string {

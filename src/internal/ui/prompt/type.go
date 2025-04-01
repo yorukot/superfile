@@ -2,7 +2,7 @@ package prompt
 
 import "github.com/charmbracelet/bubbles/textinput"
 
-type PromptModal struct {
+type Model struct {
 	headline          string
 	commands          []promptCommand
 	spfPromptHotkey   string
