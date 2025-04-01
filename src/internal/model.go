@@ -312,10 +312,16 @@ func (m *model) applyPromptModalAction(action common.PromptAction) {
 		}
 		m.applyShellCommandAction(action.Args[0])
 	case common.SplitPanelAction:
-
+		if len(action.Args) != 0 {
+			slog.Warn("Invalid SplitPanelAction with extra args. Ignoring.",
+				"args", action.Args)
+		}
+		slog.Debug("SplitPanelAction")
+		m.splitPanel()
 	}
 }
 
+// Todo : Move them around to appropriate places
 func (m *model) applyShellCommandAction(shellCommand string) {
 	focusPanelDir := ""
 	for _, panel := range m.fileModel.filePanels {
@@ -341,6 +347,10 @@ func (m *model) applyShellCommandAction(shellCommand string) {
 			"error", err, "output", string(output))
 		return
 	}
+}
+
+func (m *model) splitPanel() {
+	m.createNewFilePanel(m.fileModel.filePanels[m.filePanelFocusIndex].location)
 }
 
 // Update the sidebar state. Change name of the renaming pinned directory.

@@ -10,4 +10,5 @@ type PromptModal struct {
 	// whether its shellMode or spfMode
 	shellMode bool
 	textInput textinput.Model
+	errorMsg  string
 }
