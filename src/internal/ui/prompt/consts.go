@@ -19,5 +19,44 @@ const (
 	shellModeString = "(Shell Mode)"
 	spfModeString   = "(Prompt Mode)"
 
+	// Error message string
+	tokenizationError    = "Failed during tokenization"
+	splitCommandArgError = "split command should not be given arguments"
+
+	// Timeout for command executed for shell substitution
 	shellSubTimeoutMsec = 1000
 )
+
+func modeString(shellMode bool) string {
+	if shellMode {
+		return shellModeString
+	}
+	return spfModeString
+}
+
+func shellPrompt(shellMode bool) string {
+	if shellMode {
+		return shellPromptChar
+	}
+	return spfPromptChar
+}
+
+func defaultCommandSlice() []promptCommand {
+	return []promptCommand{
+		{
+			command:     openCommand,
+			usage:       openCommand + " <PATH>",
+			description: "Open a new panel at a specified path",
+		},
+		{
+			command:     splitCommand,
+			usage:       splitCommand,
+			description: "Open a new panel at a current file panel's path",
+		},
+		{
+			command:     cdCommand,
+			usage:       cdCommand + " <PATH>",
+			description: "Change directory of current panel",
+		},
+	}
+}

@@ -1,72 +1,65 @@
 package prompt
 
 import (
+	"fmt"
+	"github.com/yorukot/superfile/src/internal/common"
 	"strings"
 )
 
-// This is to generate error objects that can pe nicely printed to UI
-type invalidCmdError struct {
-	uiMsg        string
-	wrappedError error
-}
-
-func (e invalidCmdError) Error() string {
-	if e.wrappedError == nil {
-		return e.uiMsg
+func getPromptAction(shellMode bool, value string, cwdLocation string) (common.ModelAction, error) {
+	noAction := common.NoAction{}
+	if value == "" {
+		return noAction, nil
 	}
-	return e.wrappedError.Error()
-}
-
-func (e invalidCmdError) Unwrap() error {
-	return e.wrappedError
-}
-
-func (e invalidCmdError) uiMessage() string {
-	return e.uiMsg
-}
-
-func (m *Model) Open(shellMode bool) {
-	m.open = true
-	m.shellMode = shellMode
-	_ = m.textInput.Focus()
-}
-
-func (m *Model) Close() {
-	m.open = false
-	m.shellMode = true
-	m.textInput.SetValue("")
-}
-
-func (m *Model) IsOpen() bool {
-	return m.open
-}
-
-func (m *Model) validate() bool {
-	// Prompt was closed, but textInput was not cleared
-	if !m.open && m.textInput.Value() != "" {
-		return false
-	}
-	return true
-}
-
-func (m *Model) CloseOnSuccessIfNeeded() {
-	if m.closeOnSuccess && m.actionSuccess {
-		m.Close()
-	}
-}
-
-func modeString(shellMode bool) string {
 	if shellMode {
-		return shellModeString
+		return common.ShellCommandAction{
+			Command: value,
+		}, nil
 	}
-	return spfModeString
-}
 
-func shellPrompt(shellMode bool) string {
-	if shellMode {
-		return shellPromptChar
+	promptArgs, err := tokenizePromptCommand(value, cwdLocation)
+	if err != nil {
+		return noAction, invalidCmdError{
+			uiMsg:        tokenizationError,
+			wrappedError: fmt.Errorf("error during tokenization : %w", err),
+		}
 	}
-	return spfPromptChar
+
+	switch promptArgs[0] {
+	case "split":
+		if len(promptArgs) != 1 {
+			return noAction, invalidCmdError{
+				uiMsg: splitCommandArgError,
+			}
+		}
+		return common.SplitPanelAction{}, nil
+	case "cd":
+		if len(promptArgs) != 2 {
+			return noAction, invalidCmdError{
+				uiMsg: fmt.Sprintf("cd command needs exactly one argument, received %d",
+					len(promptArgs)-1),
+			}
+		}
+		return common.CDCurrentPanelAction{
+			Location: promptArgs[1],
+		}, nil
+	case "open":
+		if len(promptArgs) != 2 {
+			return noAction, invalidCmdError{
+				uiMsg: fmt.Sprintf("open command needs exactly one argument, received %d",
+					len(promptArgs)-1),
+			}
+		}
+		return common.OpenPanelAction{
+			Location: promptArgs[1],
+		}, nil
+
+	default:
+		return noAction, invalidCmdError{
+			uiMsg: "Invalid spf prompt command : " + promptArgs[0],
+		}
+	}
+
 }
 
 // Only allocates memory proportional to first token's size
@@ -76,24 +69,4 @@ func getFirstToken(command string) string {
 		return command
 	}
 	return command[:spaceIndex]
-}
-
-func defaultCommandSlice() []promptCommand {
-	return []promptCommand{
-		{
-			command:     openCommand,
-			usage:       openCommand + " <PATH>",
-			description: "Open a new panel at a specified path",
-		},
-		{
-			command:     splitCommand,
-			usage:       splitCommand,
-			description: "Open a new panel at a current file panel's path",
-		},
-		{
-			command:     cdCommand,
-			usage:       cdCommand + " <PATH>",
-			description: "Change directory of current panel",
-		},
-	}
 }

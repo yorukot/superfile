@@ -32,7 +32,8 @@ func GenerateModel(spfPromptHotkey string, shellPromptHotkey string, closeOnSucc
 
 func (m *Model) HandleUpdate(msg tea.Msg, cwdLocation string) (common.ModelAction, tea.Cmd) {
 	slog.Debug("prompt.Model HandleUpdate()", "msg", msg,
-		"textInput", m.textInput.Value())
+		"textInput", m.textInput.Value(),
+		"cursorBlink state - ", m.textInput.Cursor.Blink)
 	var action common.ModelAction
 	action = common.NoAction{}
 	var cmd tea.Cmd
@@ -91,7 +92,7 @@ func (m *Model) HandleShellCommandResults(retCode int, _ string) {
 	// Not allowing user to see output yet. This needs to be sanitized and
 	// need to be made sure that it doesn't breaks layout
 	// Hence we are ignoring output for now
-	m.resultMsg = fmt.Sprintf("Command exited withs status %d", retCode)
+	m.resultMsg = fmt.Sprintf("Command exited with status %d", retCode)
 	m.CloseOnSuccessIfNeeded()
 }
 
@@ -103,62 +104,7 @@ func (m *Model) HandleSPFActionResults(success bool, msg string) {
 	m.CloseOnSuccessIfNeeded()
 }
 
-func getPromptAction(shellMode bool, value string, cwdLocation string) (common.ModelAction, error) {
-	noAction := common.NoAction{}
-	if value == "" {
-		return noAction, nil
-	}
-	if shellMode {
-		return common.ShellCommandAction{
-			Command: value,
-		}, nil
-	}
-
-	promptArgs, err := tokenizePromptCommand(value, cwdLocation)
-	if err != nil {
-		return noAction, invalidCmdError{
-			uiMsg:        "Failed during tokenization",
-			wrappedError: fmt.Errorf("error during tokenization : %w", err),
-		}
-	}
-
-	switch promptArgs[0] {
-	case "split":
-		if len(promptArgs) != 1 {
-			return noAction, invalidCmdError{
-				uiMsg: "split command should not be given arguments",
-			}
-		}
-		return common.SplitPanelAction{}, nil
-	case "cd":
-		if len(promptArgs) != 2 {
-			return noAction, invalidCmdError{
-				uiMsg: fmt.Sprintf("cd command needs exactly one argument, received %d",
-					len(promptArgs)-1),
-			}
-		}
-		return common.CDCurrentPanelAction{
-			Location: promptArgs[1],
-		}, nil
-	case "open":
-		if len(promptArgs) != 2 {
-			return noAction, invalidCmdError{
-				uiMsg: fmt.Sprintf("open command needs exactly one argument, received %d",
-					len(promptArgs)-1),
-			}
-		}
-		return common.OpenPanelAction{
-			Location: promptArgs[1],
-		}, nil
-
-	default:
-		return noAction, invalidCmdError{
-			uiMsg: "Invalid spf prompt command : " + promptArgs[0],
-		}
-	}
-
-}
-
+// Todo : Unit test this
 func (m *Model) Render(width int) string {
 
 	divider := strings.Repeat(common.Config.BorderTop, width)
@@ -198,4 +144,34 @@ func (m *Model) Render(width int) string {
 		content += "\n " + resultStyle.Render(msgPrefix+" : "+m.resultMsg)
 	}
 	return common.ModalBorderStyleLeft(1, width+1).Render(content)
+}
+
+func (m *Model) Open(shellMode bool) {
+	m.open = true
+	m.shellMode = shellMode
+	_ = m.textInput.Focus()
+}
+
+func (m *Model) Close() {
+	m.open = false
+	m.shellMode = true
+	m.textInput.SetValue("")
+}
+
+func (m *Model) IsOpen() bool {
+	return m.open
+}
+
+func (m *Model) validate() bool {
+	// Prompt was closed, but textInput was not cleared
+	if !m.open && m.textInput.Value() != "" {
+		return false
+	}
+	return true
+}
+
+func (m *Model) CloseOnSuccessIfNeeded() {
+	if m.closeOnSuccess && m.actionSuccess {
+		m.Close()
+	}
 }

@@ -33,6 +33,7 @@ x No More refactoring ? of stuff to common/utils ?
 
 
 - Coderabbit review and fix comments
+- Ask coderabbit for typos, or hardcoding, etc.
 - Test on windows
 - Self Code Review
 - More self sanity testing
