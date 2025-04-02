@@ -25,21 +25,33 @@ func (e invalidCmdError) uiMessage() string {
 	return e.uiMsg
 }
 
-func (p *Model) IsOpen() bool {
-	return p.open
+func (m *Model) Open(shellMode bool) {
+	m.open = true
+	m.shellMode = shellMode
+	_ = m.textInput.Focus()
 }
 
-func (p *Model) validate() bool {
+func (m *Model) Close() {
+	m.open = false
+	m.shellMode = true
+	m.textInput.SetValue("")
+}
+
+func (m *Model) IsOpen() bool {
+	return m.open
+}
+
+func (m *Model) validate() bool {
 	// Prompt was closed, but textInput was not cleared
-	if !p.open && p.textInput.Value() != "" {
+	if !m.open && m.textInput.Value() != "" {
 		return false
 	}
 	return true
 }
 
-func (p *Model) CloseOnSuccessIfNeeded(needed bool) {
-	if needed && p.actionSuccess {
-		p.Close()
+func (m *Model) CloseOnSuccessIfNeeded() {
+	if m.closeOnSuccess && m.actionSuccess {
+		m.Close()
 	}
 }
 

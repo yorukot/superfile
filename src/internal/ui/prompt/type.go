@@ -4,11 +4,15 @@ import "github.com/charmbracelet/bubbles/textinput"
 
 // No need to name it as PromptModel. It will me imported as prompt.Model
 type Model struct {
+
+	// Configuration
 	headline          string
 	commands          []promptCommand
 	spfPromptHotkey   string
 	shellPromptHotkey string
+	closeOnSuccess    bool
 
+	// State
 	open bool
 	// whether its shellMode or spfMode
 	shellMode bool

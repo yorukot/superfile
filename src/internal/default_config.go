@@ -56,7 +56,7 @@ func defaultModelConfig(toggleDotFileBool bool, toggleFooter bool, firstFilePane
 			data:        getHelpMenuData(),
 			open:        false,
 		},
-		promptModal:   prompt.DefaultPrompt(),
+		promptModal:   prompt.DefaultModel(),
 		toggleDotFile: toggleDotFileBool,
 		toggleFooter:  toggleFooter,
 	}
