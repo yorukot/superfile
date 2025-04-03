@@ -14,4 +14,4 @@ Should not import any "ui" package
 Can import common and its subpackages
 
 # Implementation specifications
-Implement everything via interfaces, so that we can easily write unit tests
+Try to implement everything via interfaces, so that we can easily write unit tests

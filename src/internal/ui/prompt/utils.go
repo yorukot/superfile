@@ -66,6 +66,7 @@ func getPromptAction(shellMode bool, value string, cwdLocation string) (common.M
 // Only works for space right now. Does not splits command based on
 // \n or \t , etc
 func getFirstToken(command string) string {
+	command = strings.TrimSpace(command)
 	spaceIndex := strings.IndexByte(command, ' ')
 	if spaceIndex == -1 {
 		return command

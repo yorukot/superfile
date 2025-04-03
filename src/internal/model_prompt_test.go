@@ -2,11 +2,13 @@ package internal
 
 import (
 	"flag"
+	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/stretchr/testify/assert"
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/common/utils"
 	"github.com/yorukot/superfile/src/internal/ui/prompt"
+	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
@@ -17,10 +19,15 @@ func TestMain(m *testing.M) {
 	spfConfigDir := filepath.Join(filepath.Dir(filepath.Dir(filename)),
 		"superfile_config")
 
-	_ = common.PopulateGlobalConfigs(
+	err := common.PopulateGlobalConfigs(
 		filepath.Join(spfConfigDir, "config.toml"),
 		filepath.Join(spfConfigDir, "hotkeys.toml"),
 		filepath.Join(spfConfigDir, "theme", "monokai.toml"))
+
+	if err != nil {
+		fmt.Printf("error while populating config, err : %v", err)
+		os.Exit(1)
+	}
 
 	flag.Parse()
 	if testing.Verbose() {

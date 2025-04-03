@@ -7,7 +7,6 @@ import (
 )
 
 func TestModel_getPromptAction(t *testing.T) {
-	t.Parallel()
 	// Notes of Things we tested
 	// About Tokenization failure. Don't test all failures,
 	// it will be in tokenize_test.go
@@ -128,6 +127,7 @@ func Test_getFirstToken(t *testing.T) {
 		assert.Equal(t, "abc", getFirstToken("abc"))
 		assert.Equal(t, "abc", getFirstToken("abc a b c"))
 		assert.Equal(t, "abc", getFirstToken("abc "))
+		assert.Equal(t, "abc", getFirstToken("  abc "))
 		assert.Equal(t, "abc\n\ta", getFirstToken("abc\n\ta"))
 	})
 }

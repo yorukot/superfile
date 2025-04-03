@@ -13,7 +13,7 @@ import (
 
 func DefaultModel() Model {
 	return GenerateModel(common.Hotkeys.OpenSPFPrompt[0],
-		common.Hotkeys.OpenCommandLine[0], common.Config.ShellCloseOnSucsess)
+		common.Hotkeys.OpenCommandLine[0], common.Config.ShellCloseOnSuccess)
 }
 
 func GenerateModel(spfPromptHotkey string, shellPromptHotkey string, closeOnSuccess bool) Model {

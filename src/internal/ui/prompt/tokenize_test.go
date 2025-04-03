@@ -21,7 +21,6 @@ var testEnvValues = map[string]string{
 }
 
 func Test_tokenizePromptCommand(t *testing.T) {
-	t.Parallel()
 	// Just test that we can split as expected
 	// Don't try to test shell substitution in this. This is just
 	// to test that tokenize function can handle the results of shell
@@ -81,7 +80,6 @@ func Test_tokenizePromptCommand(t *testing.T) {
 }
 
 func Test_resolveShellSubstitution(t *testing.T) {
-	t.Parallel()
 	testdata := []struct {
 		name            string
 		command         string
@@ -187,7 +185,6 @@ func Test_resolveShellSubstitution(t *testing.T) {
 }
 
 func Test_findEndingParenthesis(t *testing.T) {
-	t.Parallel()
 
 	testdata := []struct {
 		name        string

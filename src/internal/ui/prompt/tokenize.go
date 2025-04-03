@@ -93,17 +93,17 @@ func resolveShellSubstitution(subCmdTimeout time.Duration, command string, cwdLo
 	return resCommand.String(), nil
 }
 
-func findEndingParenthesis(r []rune, openIdx int, open rune, close rune) int {
-	if openIdx < 0 || openIdx >= len(r) || r[openIdx] != open {
+func findEndingParenthesis(r []rune, openIdx int, openParan rune, closeParan rune) int {
+	if openIdx < 0 || openIdx >= len(r) || r[openIdx] != openParan {
 		return -1
 	}
 
 	openCount := 1
 	i := openIdx + 1
 	for i < len(r) && openCount != 0 {
-		if r[i] == open {
+		if r[i] == openParan {
 			openCount++
-		} else if r[i] == close {
+		} else if r[i] == closeParan {
 			openCount--
 		}
 		if openCount != 0 {

@@ -41,7 +41,6 @@ func TestMain(m *testing.M) {
 }
 
 func TestModel_HandleUpdate(t *testing.T) {
-	t.Parallel()
 	// We don't test getPromptAction here. It is a separate test
 	t.Run("Handle update called on closed Model", func(t *testing.T) {
 		m := GenerateModel(spfPromptChar, shellPromptChar, true)
@@ -82,7 +81,7 @@ func TestModel_HandleUpdate(t *testing.T) {
 		action, _ = m.HandleUpdate(tea.KeyMsg{Type: tea.KeyEnter}, defaultTestCwd)
 		assert.Equal(t, common.SplitPanelAction{}, action)
 
-		action, _ = m.HandleUpdate(utils.TeaRuneKeyMsg("bad_command"), defaultTestCwd)
+		_, _ = m.HandleUpdate(utils.TeaRuneKeyMsg("bad_command"), defaultTestCwd)
 		action, _ = m.HandleUpdate(tea.KeyMsg{Type: tea.KeyEnter}, defaultTestCwd)
 		assert.Equal(t, common.NoAction{}, action)
 		assert.False(t, m.actionSuccess)
@@ -90,7 +89,7 @@ func TestModel_HandleUpdate(t *testing.T) {
 
 		m.shellMode = true
 		command := "abc def /xyz"
-		action, _ = m.HandleUpdate(utils.TeaRuneKeyMsg(command), defaultTestCwd)
+		_, _ = m.HandleUpdate(utils.TeaRuneKeyMsg(command), defaultTestCwd)
 		action, _ = m.HandleUpdate(tea.KeyMsg{Type: tea.KeyEnter}, defaultTestCwd)
 		assert.Equal(t, common.ShellCommandAction{Command: command}, action)
 	})
@@ -100,8 +99,8 @@ func TestModel_HandleUpdate(t *testing.T) {
 
 		actualTest := func(closeKey tea.KeyMsg, shouldBeOpen bool) {
 			m.Open(true)
-			action, _ := m.HandleUpdate(utils.TeaRuneKeyMsg("xyz"), defaultTestCwd)
-			action, _ = m.HandleUpdate(closeKey, defaultTestCwd)
+			_, _ = m.HandleUpdate(utils.TeaRuneKeyMsg("xyz"), defaultTestCwd)
+			action, _ := m.HandleUpdate(closeKey, defaultTestCwd)
 			assert.Equal(t, common.NoAction{}, action)
 			assert.Equal(t, shouldBeOpen, m.IsOpen())
 		}
@@ -166,7 +165,6 @@ func TestModel_HandleUpdate(t *testing.T) {
 }
 
 func TestMode_HandleResults(t *testing.T) {
-	t.Parallel()
 	t.Run("Verify Shell results update", func(t *testing.T) {
 		m := GenerateModel(spfPromptChar, shellPromptChar, true)
 		m.Open(true)

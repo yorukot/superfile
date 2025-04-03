@@ -32,6 +32,10 @@ func LoadConfigFile() {
 		utils.LogAndExit(LoadConfigError("sidebar_width"))
 	}
 
+	if Config.DefaultSortType < 0 || Config.DefaultSortType > 2 {
+		utils.LogAndExit(LoadConfigError("default_sort_type"))
+	}
+
 }
 
 // Load keybinds from the hotkeys file. Compares the content
