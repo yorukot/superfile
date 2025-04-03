@@ -585,17 +585,16 @@ func getElementIcon(file string, IsDir bool) icon.IconStyle {
 	}
 }
 
-// Utility to send update to model
-// Majorly used in tests
+// TeaUpdate : Utility to send update to model , majorly used in tests
 // Not using pointer reciever as this is more like a utility, than
 // a member function of model
 func TeaUpdate(m *model, msg tea.Msg) (tea.Cmd, error) {
 	resModel, cmd := m.Update(msg)
 
-	// Todo : Revisit this ?
 	mObj, ok := resModel.(model)
 	if !ok {
-		return cmd, fmt.Errorf("model not returned")
+
+		return cmd, fmt.Errorf("unexpected model type: %T", resModel)
 	}
 	*m = mObj
 	return cmd, nil

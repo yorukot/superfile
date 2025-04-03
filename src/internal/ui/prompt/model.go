@@ -105,7 +105,11 @@ func (m *Model) HandleSPFActionResults(success bool, msg string) {
 	m.CloseOnSuccessIfNeeded()
 }
 
-// Todo : Unit test this
+// Todo : We would make a separate Render object, that is initialized by
+// a give width and height, and then we can provide string as lines to it
+// it would handle everything from wrapping lines count, lines width, in
+// a generic way. We would have all our components use that.
+// And we could unit test this Render() easility.
 func (m *Model) Render(width int) string {
 
 	divider := strings.Repeat(common.Config.BorderTop, width)
@@ -132,8 +136,7 @@ func (m *Model) Render(width int) string {
 		content += "\n" + divider
 		content += suggestionText
 	}
-	// Rendering error Message is a but fuzzy right now. Todo Fix this.
-	// Todo : Handle error being multiline or being too long
+
 	if m.resultMsg != "" {
 		msgPrefix := successMessagePrefix
 		resultStyle := common.PromptSuccessStyle

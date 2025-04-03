@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"flag"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/stretchr/testify/assert"
 	"github.com/yorukot/superfile/src/internal/common"
@@ -8,32 +9,31 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/prompt"
 	"path/filepath"
 	"runtime"
-	"sync"
 	"testing"
 )
 
-var once sync.Once
+func TestMain(m *testing.M) {
+	_, filename, _, _ := runtime.Caller(0)
+	spfConfigDir := filepath.Join(filepath.Dir(filepath.Dir(filename)),
+		"superfile_config")
 
-func initialize() {
-	once.Do(func() {
-		_, filename, _, _ := runtime.Caller(0)
-		spfConfigDir := filepath.Join(filepath.Dir(filepath.Dir(filename)),
-			"superfile_config")
+	_ = common.PopulateGlobalConfigs(
+		filepath.Join(spfConfigDir, "config.toml"),
+		filepath.Join(spfConfigDir, "hotkeys.toml"),
+		filepath.Join(spfConfigDir, "theme", "monokai.toml"))
 
-		_ = common.PopulateGlobalConfigs(
-			filepath.Join(spfConfigDir, "config.toml"),
-			filepath.Join(spfConfigDir, "hotkeys.toml"),
-			filepath.Join(spfConfigDir, "theme", "monokai.toml"))
-
+	flag.Parse()
+	if testing.Verbose() {
 		utils.SetRootLoggerToStdout(true)
-	})
+	} else {
+		utils.SetRootLoggerToDiscarded()
+	}
+	m.Run()
 }
 
 // Model is huge. Just one test file ain't enough
 
 func TestModel_Update_Prompt(t *testing.T) {
-	// Todo : Think of any better way to do test setup ?
-	initialize()
 
 	// We want to test these. Todo : complete important tests
 	// 1. Being able to open prompt
@@ -49,7 +49,7 @@ func TestModel_Update_Prompt(t *testing.T) {
 	// Use a mock os command executor to have timeouts, and
 	// custom command behaviour
 
-	// Todo : Unit tests For later
+	// Other tests cases
 	// -- UI
 	// 1. Entire model's rendering with promptModel open/closed
 	// 2. Rendering not breaking when user pastes/enter special character or too much text

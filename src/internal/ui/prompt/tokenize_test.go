@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/stretchr/testify/assert"
-	"github.com/yorukot/superfile/src/internal/common/utils"
-	"os"
 	"testing"
 )
 
@@ -22,27 +20,13 @@ var testEnvValues = map[string]string{
 	spfTestEnvVar3: "",
 }
 
-func TestMain(m *testing.M) {
-	for env, val := range testEnvValues {
-		err := os.Setenv(env, val)
-		if err != nil {
-			fmt.Printf("Could not set env variables, error : %v", err)
-			os.Exit(1)
-		}
-	}
-	os.Exit(m.Run())
-}
-
 func Test_tokenizePromptCommand(t *testing.T) {
+	t.Parallel()
 	// Just test that we can split as expected
-	// Empty string, trailing and leading whitespace
-	// single, and multiple tokens
-	// special characters
-	// Dont try to test shell substitution in this. This is just
+	// Don't try to test shell substitution in this. This is just
 	// to test that tokenize function can handle the results of shell
 	// substitution as expected
 
-	defaultCwd := "/"
 	testdata := []struct {
 		name            string
 		command         string
@@ -89,7 +73,7 @@ func Test_tokenizePromptCommand(t *testing.T) {
 
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
-			res, err := tokenizePromptCommand(tt.command, defaultCwd)
+			res, err := tokenizePromptCommand(tt.command, defaultTestCwd)
 			assert.Equal(t, tt.expectedRes, res)
 			assert.Equal(t, tt.isErrorExpected, err != nil)
 		})
@@ -97,20 +81,7 @@ func Test_tokenizePromptCommand(t *testing.T) {
 }
 
 func Test_resolveShellSubstitution(t *testing.T) {
-	// We want to test
-	// x Empty string
-	// x Strings without $ - Normal, trailing and leading whitespace, special char
-	// x also with $ but no ${} or $() - $HOME , _$$_xyz
-	// x Ill formatted substitutions - missing '$', missing ')' or '}' or '{'
-	// x Multiple correct ${} and $()
-	// x Empty ${} and $()
-	// x ${ $() } -> Should not work , $(echo ${} $(echo $())) -> Should work
-	// x cd $(echo $(echo hi))
-	// x no output shell commands $(true), newline output $(echo -e "\n")
-	// x env var - not found
-	// x substitution command times out
-	defaultCwd := "/"
-	utils.SetRootLoggerToStdout(true)
+	t.Parallel()
 	testdata := []struct {
 		name            string
 		command         string
@@ -196,7 +167,7 @@ func Test_resolveShellSubstitution(t *testing.T) {
 
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := resolveShellSubstitution(shellSubTimeoutInTests, tt.command, defaultCwd)
+			result, err := resolveShellSubstitution(shellSubTimeoutInTests, tt.command, defaultTestCwd)
 			assert.Equal(t, tt.expectedResult, result)
 			if err != nil {
 				assert.True(t, tt.isErrorExpected)
@@ -208,7 +179,7 @@ func Test_resolveShellSubstitution(t *testing.T) {
 	}
 
 	t.Run("Testing shell substitution timeout", func(t *testing.T) {
-		result, err := resolveShellSubstitution(shellSubTimeoutInTests, "$(sleep 0.1)", defaultCwd)
+		result, err := resolveShellSubstitution(shellSubTimeoutInTests, "$(sleep 0.1)", defaultTestCwd)
 		assert.Empty(t, result)
 		assert.NotNil(t, err)
 		assert.ErrorAs(t, err, &context.DeadlineExceeded)
@@ -216,6 +187,8 @@ func Test_resolveShellSubstitution(t *testing.T) {
 }
 
 func Test_findEndingParenthesis(t *testing.T) {
+	t.Parallel()
+
 	testdata := []struct {
 		name        string
 		value       string

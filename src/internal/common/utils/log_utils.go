@@ -18,3 +18,8 @@ func SetRootLoggerToStdout(debug bool) {
 	slog.SetDefault(slog.New(slog.NewTextHandler(
 		os.Stdout, &slog.HandlerOptions{Level: level})))
 }
+
+// Used in unit test
+func SetRootLoggerToDiscarded() {
+	slog.SetDefault(slog.New(slog.DiscardHandler))
+}

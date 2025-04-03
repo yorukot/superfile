@@ -1,51 +1,51 @@
 package prompt
 
 import (
+	"flag"
+	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/stretchr/testify/assert"
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/common/utils"
+	"os"
 	"testing"
 )
 
-var setupDone = false
-
 // Initialize the globals we need for testing
-func initGlobals(initLogging bool) {
-	// Maybe we could use doOnce go constructs
-	if setupDone {
-		return
-	}
-	if initLogging {
-		utils.SetRootLoggerToStdout(true)
-	}
-
+func initGlobals() {
 	// Updating globals for test is not a good idea and can lead to all sorts of issue
 	// When multiple tests depend on same global variable and want different values
 	// Since this is config that would likely stay same, maybe this is okay.
 	common.Hotkeys.ConfirmTyping = []string{"enter"}
 	common.Hotkeys.CancelTyping = []string{"ctrl+c", "esc"}
-	setupDone = true
+
+}
+
+func TestMain(m *testing.M) {
+	for env, val := range testEnvValues {
+		err := os.Setenv(env, val)
+		if err != nil {
+			fmt.Printf("Could not set env variables, error : %v", err)
+			os.Exit(1)
+		}
+	}
+	flag.Parse()
+	if testing.Verbose() {
+		utils.SetRootLoggerToStdout(true)
+	} else {
+		utils.SetRootLoggerToDiscarded()
+	}
+
+	initGlobals()
+	m.Run()
 }
 
 func TestModel_HandleUpdate(t *testing.T) {
-	const defaultCwd = "/"
-	// Could take this as a test argument
-	initGlobals(true)
-	// We want to test
-	// 1. Handle update called on closed Model
-	// 2. Pressing confirm on empty input
-	// 3. Three conditions of getPromptAction
-	// 4. Cancel typing
-	// 5. Switching between shell and SPF mode
-	// 6. Updating text input with text - Tested in above.
-	// 7. keyMsg like cursor.BlinkMsg, cursor.blinkCanceled
-	// Validate blink m.textInput.Cursor.Blink
-	// Dont test getPromptAction here. It will be a separate test
-
+	t.Parallel()
+	// We don't test getPromptAction here. It is a separate test
 	t.Run("Handle update called on closed Model", func(t *testing.T) {
 		m := GenerateModel(spfPromptChar, shellPromptChar, true)
-		action, _ := m.HandleUpdate(utils.TeaRuneKeyMsg("x"), defaultCwd)
+		action, _ := m.HandleUpdate(utils.TeaRuneKeyMsg("x"), defaultTestCwd)
 		assert.Empty(t, m.textInput.Value())
 		assert.True(t, m.validate())
 		assert.False(t, m.IsOpen())
@@ -59,7 +59,7 @@ func TestModel_HandleUpdate(t *testing.T) {
 			m.Open(true)
 			assert.True(t, m.IsOpen())
 
-			action, _ := m.HandleUpdate(tea.KeyMsg{Type: tea.KeyEnter}, defaultCwd)
+			action, _ := m.HandleUpdate(tea.KeyMsg{Type: tea.KeyEnter}, defaultTestCwd)
 			assert.Equal(t, openAfterEnter, m.IsOpen())
 			assert.Equal(t, common.NoAction{}, action)
 			assert.Equal(t, "", m.resultMsg)
@@ -76,22 +76,22 @@ func TestModel_HandleUpdate(t *testing.T) {
 		m := GenerateModel(spfPromptChar, shellPromptChar, true)
 		m.Open(false)
 
-		action, _ := m.HandleUpdate(utils.TeaRuneKeyMsg(SplitCommand), defaultCwd)
+		action, _ := m.HandleUpdate(utils.TeaRuneKeyMsg(SplitCommand), defaultTestCwd)
 		assert.Equal(t, common.NoAction{}, action)
 
-		action, _ = m.HandleUpdate(tea.KeyMsg{Type: tea.KeyEnter}, defaultCwd)
+		action, _ = m.HandleUpdate(tea.KeyMsg{Type: tea.KeyEnter}, defaultTestCwd)
 		assert.Equal(t, common.SplitPanelAction{}, action)
 
-		action, _ = m.HandleUpdate(utils.TeaRuneKeyMsg("bad_command"), defaultCwd)
-		action, _ = m.HandleUpdate(tea.KeyMsg{Type: tea.KeyEnter}, defaultCwd)
+		action, _ = m.HandleUpdate(utils.TeaRuneKeyMsg("bad_command"), defaultTestCwd)
+		action, _ = m.HandleUpdate(tea.KeyMsg{Type: tea.KeyEnter}, defaultTestCwd)
 		assert.Equal(t, common.NoAction{}, action)
 		assert.False(t, m.actionSuccess)
 		assert.NotEmpty(t, m.resultMsg)
 
 		m.shellMode = true
 		command := "abc def /xyz"
-		action, _ = m.HandleUpdate(utils.TeaRuneKeyMsg(command), defaultCwd)
-		action, _ = m.HandleUpdate(tea.KeyMsg{Type: tea.KeyEnter}, defaultCwd)
+		action, _ = m.HandleUpdate(utils.TeaRuneKeyMsg(command), defaultTestCwd)
+		action, _ = m.HandleUpdate(tea.KeyMsg{Type: tea.KeyEnter}, defaultTestCwd)
 		assert.Equal(t, common.ShellCommandAction{Command: command}, action)
 	})
 
@@ -100,8 +100,8 @@ func TestModel_HandleUpdate(t *testing.T) {
 
 		actualTest := func(closeKey tea.KeyMsg, shouldBeOpen bool) {
 			m.Open(true)
-			action, _ := m.HandleUpdate(utils.TeaRuneKeyMsg("xyz"), defaultCwd)
-			action, _ = m.HandleUpdate(closeKey, defaultCwd)
+			action, _ := m.HandleUpdate(utils.TeaRuneKeyMsg("xyz"), defaultTestCwd)
+			action, _ = m.HandleUpdate(closeKey, defaultTestCwd)
 			assert.Equal(t, common.NoAction{}, action)
 			assert.Equal(t, shouldBeOpen, m.IsOpen())
 		}
@@ -120,19 +120,19 @@ func TestModel_HandleUpdate(t *testing.T) {
 			assert.True(t, m.shellMode)
 
 			// Shell to prompt
-			action, _ := m.HandleUpdate(utils.TeaRuneKeyMsg(promptChar), defaultCwd)
+			action, _ := m.HandleUpdate(utils.TeaRuneKeyMsg(promptChar), defaultTestCwd)
 			assert.False(t, m.shellMode)
 			assert.True(t, m.actionSuccess)
 			assert.Equal(t, common.NoAction{}, action)
 
 			// Prompt to shell
-			action, _ = m.HandleUpdate(utils.TeaRuneKeyMsg(shellChar), defaultCwd)
+			action, _ = m.HandleUpdate(utils.TeaRuneKeyMsg(shellChar), defaultTestCwd)
 			assert.True(t, m.shellMode)
 			assert.True(t, m.actionSuccess)
 			assert.Equal(t, common.NoAction{}, action)
 
 			// Pressing shellChar when you are already on shell shouldn't to anything
-			action, _ = m.HandleUpdate(utils.TeaRuneKeyMsg(shellChar), defaultCwd)
+			action, _ = m.HandleUpdate(utils.TeaRuneKeyMsg(shellChar), defaultTestCwd)
 			assert.True(t, m.shellMode)
 			assert.True(t, m.actionSuccess)
 			assert.Equal(t, common.NoAction{}, action)
@@ -147,17 +147,17 @@ func TestModel_HandleUpdate(t *testing.T) {
 		assert.False(t, m.textInput.Cursor.Blink)
 
 		blinkMsg := m.textInput.Cursor.BlinkCmd()()
-		action, _ := m.HandleUpdate(blinkMsg, defaultCwd)
+		action, _ := m.HandleUpdate(blinkMsg, defaultTestCwd)
 		assert.Equal(t, common.NoAction{}, action)
 		assert.True(t, m.textInput.Cursor.Blink)
 
 		blinkMsg = m.textInput.Cursor.BlinkCmd()()
-		action, _ = m.HandleUpdate(blinkMsg, defaultCwd)
+		action, _ = m.HandleUpdate(blinkMsg, defaultTestCwd)
 		assert.Equal(t, common.NoAction{}, action)
 		assert.False(t, m.textInput.Cursor.Blink)
 
 		blinkMsg = m.textInput.Cursor.BlinkCmd()()
-		action, _ = m.HandleUpdate(blinkMsg, defaultCwd)
+		action, _ = m.HandleUpdate(blinkMsg, defaultTestCwd)
 		assert.Equal(t, common.NoAction{}, action)
 		assert.True(t, m.textInput.Cursor.Blink)
 
@@ -166,6 +166,7 @@ func TestModel_HandleUpdate(t *testing.T) {
 }
 
 func TestMode_HandleResults(t *testing.T) {
+	t.Parallel()
 	t.Run("Verify Shell results update", func(t *testing.T) {
 		m := GenerateModel(spfPromptChar, shellPromptChar, true)
 		m.Open(true)

@@ -7,13 +7,10 @@ import (
 )
 
 func TestModel_getPromptAction(t *testing.T) {
-	// Things we want to test
-	// 1. No Action
-	// 2. Shell command
-	// 3. Tokenization failure (Don't test all failures, it will be in tokenize_test.go)
-	// 4. Command with incorrect no. of args
-	// 5. Invalid command
-	// 6. Correct parsing of split, open and cd commands
+	t.Parallel()
+	// Notes of Things we tested
+	// About Tokenization failure. Don't test all failures,
+	// it will be in tokenize_test.go
 
 	testdata := []struct {
 		name           string
