@@ -47,6 +47,7 @@ func TestModel_HandleUpdate(t *testing.T) {
 		m := GenerateModel(spfPromptChar, shellPromptChar, true)
 		action, _ := m.HandleUpdate(utils.TeaRuneKeyMsg("x"), defaultCwd)
 		assert.Empty(t, m.textInput.Value())
+		assert.True(t, m.validate())
 		assert.False(t, m.IsOpen())
 		assert.Equal(t, common.NoAction{}, action)
 	})
@@ -63,6 +64,7 @@ func TestModel_HandleUpdate(t *testing.T) {
 			assert.Equal(t, common.NoAction{}, action)
 			assert.Equal(t, "", m.resultMsg)
 			assert.Equal(t, true, m.actionSuccess)
+			assert.True(t, m.validate())
 		}
 
 		actualTest(true, false)
@@ -91,10 +93,6 @@ func TestModel_HandleUpdate(t *testing.T) {
 		action, _ = m.HandleUpdate(utils.TeaRuneKeyMsg(command), defaultCwd)
 		action, _ = m.HandleUpdate(tea.KeyMsg{Type: tea.KeyEnter}, defaultCwd)
 		assert.Equal(t, common.ShellCommandAction{Command: command}, action)
-
-		// Todo : test third error condition
-		// Right now, I dont know what could cause that unexpected error
-
 	})
 
 	t.Run("Validate Cancel typing", func(t *testing.T) {

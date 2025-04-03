@@ -2,10 +2,36 @@ package prompt
 
 import (
 	"context"
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/yorukot/superfile/src/internal/common/utils"
+	"os"
 	"testing"
 )
+
+const (
+	spfTestEnvVar1 = "SPF_TEST_ENV_VAR1"
+	spfTestEnvVar2 = "SPF_TEST_ENV_VAR2"
+	spfTestEnvVar3 = "SPF_TEST_ENV_VAR3"
+	spfTestEnvVar4 = "SPF_TEST_ENV_VAR4"
+)
+
+var testEnvValues = map[string]string{
+	spfTestEnvVar1: "1",
+	spfTestEnvVar2: "hello",
+	spfTestEnvVar3: "",
+}
+
+func TestMain(m *testing.M) {
+	for env, val := range testEnvValues {
+		err := os.Setenv(env, val)
+		if err != nil {
+			fmt.Printf("Could not set env variables, error : %v", err)
+			os.Exit(1)
+		}
+	}
+	os.Exit(m.Run())
+}
 
 func Test_tokenizePromptCommand(t *testing.T) {
 	// Just test that we can split as expected
@@ -72,17 +98,17 @@ func Test_tokenizePromptCommand(t *testing.T) {
 
 func Test_resolveShellSubstitution(t *testing.T) {
 	// We want to test
-	// Empty string
-	// Strings without $ - Normal, trailing and leading whitespace, special char
-	// also with $ but no ${} or $() - $HOME , _$$_xyz
-	// Ill formatted substitutions - missing '$', missing ')' or '}' or '{'
-	// Multiple correct ${} and $()
-	// Empty ${} and $()
-	// ${ $() } -> Should not work , $(echo ${} $(echo $())) -> Should work
-	// cd $(echo $(echo hi))
-	// no output shell commands $(true), newline output $(echo -e "\n")
-	// env var - not found
-	// substitution command times out
+	// x Empty string
+	// x Strings without $ - Normal, trailing and leading whitespace, special char
+	// x also with $ but no ${} or $() - $HOME , _$$_xyz
+	// x Ill formatted substitutions - missing '$', missing ')' or '}' or '{'
+	// x Multiple correct ${} and $()
+	// x Empty ${} and $()
+	// x ${ $() } -> Should not work , $(echo ${} $(echo $())) -> Should work
+	// x cd $(echo $(echo hi))
+	// x no output shell commands $(true), newline output $(echo -e "\n")
+	// x env var - not found
+	// x substitution command times out
 	defaultCwd := "/"
 	utils.SetRootLoggerToStdout(true)
 	testdata := []struct {
@@ -138,6 +164,34 @@ func Test_resolveShellSubstitution(t *testing.T) {
 			isErrorExpected: false,
 			errorToMatch:    nil,
 		},
+		{
+			name:            "Multiple substitution",
+			command:         fmt.Sprintf("$(echo $(echo $%s)) ${%s}", spfTestEnvVar1, spfTestEnvVar2),
+			expectedResult:  fmt.Sprintf("%s\n %s", testEnvValues[spfTestEnvVar1], testEnvValues[spfTestEnvVar2]),
+			isErrorExpected: false,
+			errorToMatch:    nil,
+		},
+		{
+			name:            "Non Existing env var",
+			command:         fmt.Sprintf("${%s}", spfTestEnvVar4),
+			expectedResult:  "",
+			isErrorExpected: true,
+			errorToMatch:    envVarNotFoundError{varName: spfTestEnvVar4},
+		},
+		{
+			name:            "Shell substitution inside env var substitution",
+			command:         "${$(pwd)}",
+			expectedResult:  "",
+			isErrorExpected: true,
+			errorToMatch:    envVarNotFoundError{varName: "$(pwd)"},
+		},
+		{
+			name:            "Empty output",
+			command:         "cd abc $(true)",
+			expectedResult:  "cd abc ",
+			isErrorExpected: false,
+			errorToMatch:    nil,
+		},
 	}
 
 	for _, tt := range testdata {
@@ -146,6 +200,9 @@ func Test_resolveShellSubstitution(t *testing.T) {
 			assert.Equal(t, tt.expectedResult, result)
 			if err != nil {
 				assert.True(t, tt.isErrorExpected)
+				if tt.errorToMatch != nil {
+					assert.ErrorAs(t, err, &tt.errorToMatch)
+				}
 			}
 		})
 	}

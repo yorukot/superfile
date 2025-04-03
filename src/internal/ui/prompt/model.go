@@ -62,6 +62,7 @@ func (m *Model) HandleUpdate(msg tea.Msg, cwdLocation string) (common.ModelActio
 				m.resultMsg = cmdErr.uiMessage()
 				m.actionSuccess = false
 			} else {
+				slog.Error("Unexpected error from getPromptAction", "error", err)
 				m.resultMsg = err.Error()
 				m.actionSuccess = false
 			}

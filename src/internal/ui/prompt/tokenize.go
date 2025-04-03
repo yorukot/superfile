@@ -40,11 +40,13 @@ func resolveShellSubstitution(subCmdTimeout time.Duration, command string, cwdLo
 
 				envVarName := string(cmdRunes[i+2 : end])
 
-				// Todo : add a layer of abstraction for unit testing
+				// We can add a layer of abstraction for better unit testing
 				if value, ok := os.LookupEnv(envVarName); !ok {
 					return "", envVarNotFoundError{varName: envVarName}
 				} else {
-					// Todo : Handle value being too big ? or having newlines ?
+					// Might Handle values being too big, or having multiple lines
+					// But this is based on user input, so it is probably okay for now
+					// Same comment for command substitution
 					resCommand.WriteString(value)
 				}
 
@@ -73,7 +75,6 @@ func resolveShellSubstitution(subCmdTimeout time.Duration, command string, cwdLo
 						slog.Debug("substitution command exited with non zero status", "retCode", retCode,
 							"command", subCmd)
 					}
-					// Todo : Handle value being too big ? or having newlines ?
 					resCommand.WriteString(output)
 				}
 
