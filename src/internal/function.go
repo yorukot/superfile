@@ -4,6 +4,8 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/yorukot/superfile/src/internal/common"
 	"io"
 	"log/slog"
 	"os"
@@ -142,7 +144,7 @@ func returnDirElement(location string, displayDotFile bool, sortOptions sortOpti
 			if dirEntries[i].IsDir() != dirEntries[j].IsDir() {
 				return dirEntries[i].IsDir()
 			}
-			if Config.CaseSensitiveSort {
+			if common.Config.CaseSensitiveSort {
 				return dirEntries[i].Name() < dirEntries[j].Name() != reversed
 			} else {
 				return strings.ToLower(dirEntries[i].Name()) < strings.ToLower(dirEntries[j].Name()) != reversed
@@ -264,12 +266,6 @@ func arrayContains(s []string, str string) bool {
 		}
 	}
 	return false
-}
-
-// Todo : Eventually we want to remove all such usage that can result in app exiting abruptly
-func LogAndExit(msg string, values ...any) {
-	slog.Error(msg, values...)
-	os.Exit(1)
 }
 
 func removeElementByValue(slice []string, value string) []string {
@@ -410,7 +406,7 @@ func (m *model) returnMetaData() {
 		return
 	}
 
-	if Config.Metadata && checkIsSymlinked.Mode()&os.ModeSymlink == 0 && et != nil {
+	if common.Config.Metadata && checkIsSymlinked.Mode()&os.ModeSymlink == 0 && et != nil {
 
 		fileInfos := et.ExtractMetadata(filePath)
 
@@ -431,7 +427,7 @@ func (m *model) returnMetaData() {
 		fileModifyData := [2]string{"Date Modified", fileInfo.ModTime().String()}
 		filePermissions := [2]string{"Permissions", fileInfo.Mode().String()}
 
-		if Config.EnableMD5Checksum {
+		if common.Config.EnableMD5Checksum {
 			// Calculate MD5 checksum
 			checksum, err := calculateMD5Checksum(filePath)
 			if err != nil {
@@ -537,10 +533,10 @@ func getElementIcon(file string, IsDir bool) icon.IconStyle {
 	ext := strings.TrimPrefix(filepath.Ext(file), ".")
 	name := file
 
-	if !Config.Nerdfont {
+	if !common.Config.Nerdfont {
 		return icon.IconStyle{
 			Icon:  "",
-			Color: theme.FilePanelFG,
+			Color: common.Theme.FilePanelFG,
 		}
 	}
 
@@ -582,9 +578,24 @@ func getElementIcon(file string, IsDir bool) icon.IconStyle {
 		if resultIcon.Color == "NONE" {
 			return icon.IconStyle{
 				Icon:  resultIcon.Icon,
-				Color: theme.FilePanelFG,
+				Color: common.Theme.FilePanelFG,
 			}
 		}
 		return resultIcon
 	}
+}
+
+// TeaUpdate : Utility to send update to model , majorly used in tests
+// Not using pointer reciever as this is more like a utility, than
+// a member function of model
+func TeaUpdate(m *model, msg tea.Msg) (tea.Cmd, error) {
+	resModel, cmd := m.Update(msg)
+
+	mObj, ok := resModel.(model)
+	if !ok {
+
+		return cmd, fmt.Errorf("unexpected model type: %T", resModel)
+	}
+	*m = mObj
+	return cmd, nil
 }
