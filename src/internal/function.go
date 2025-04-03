@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/yorukot/superfile/src/internal/common"
 	"io"
 	"log/slog"
@@ -582,4 +583,20 @@ func getElementIcon(file string, IsDir bool) icon.IconStyle {
 		}
 		return resultIcon
 	}
+}
+
+// Utility to send update to model
+// Majorly used in tests
+// Not using pointer reciever as this is more like a utility, than
+// a member function of model
+func TeaUpdate(m *model, msg tea.Msg) (tea.Cmd, error) {
+	resModel, cmd := m.Update(msg)
+
+	// Todo : Revisit this ?
+	mObj, ok := resModel.(model)
+	if !ok {
+		return cmd, fmt.Errorf("model not returned")
+	}
+	*m = mObj
+	return cmd, nil
 }

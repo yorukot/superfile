@@ -5,8 +5,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/common/utils"
-	"log/slog"
-	"os"
 	"testing"
 )
 
@@ -19,9 +17,12 @@ func initGlobals(initLogging bool) {
 		return
 	}
 	if initLogging {
-		slog.SetDefault(slog.New(slog.NewTextHandler(
-			os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug})))
+		utils.SetRootLoggerToStdout(true)
 	}
+
+	// Updating globals for test is not a good idea and can lead to all sorts of issue
+	// When multiple tests depend on same global variable and want different values
+	// Since this is config that would likely stay same, maybe this is okay.
 	common.Hotkeys.ConfirmTyping = []string{"enter"}
 	common.Hotkeys.CancelTyping = []string{"ctrl+c", "esc"}
 	setupDone = true
@@ -73,7 +74,7 @@ func TestModel_HandleUpdate(t *testing.T) {
 		m := GenerateModel(spfPromptChar, shellPromptChar, true)
 		m.Open(false)
 
-		action, _ := m.HandleUpdate(utils.TeaRuneKeyMsg(splitCommand), defaultCwd)
+		action, _ := m.HandleUpdate(utils.TeaRuneKeyMsg(SplitCommand), defaultCwd)
 		assert.Equal(t, common.NoAction{}, action)
 
 		action, _ = m.HandleUpdate(tea.KeyMsg{Type: tea.KeyEnter}, defaultCwd)

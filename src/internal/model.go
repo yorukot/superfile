@@ -304,7 +304,7 @@ func (m *model) updateFilePanelsState(msg tea.Msg, cmd *tea.Cmd) {
 
 // Apply the Action and notify the promptModal
 func (m *model) applyPromptModalAction(action common.ModelAction) {
-	if action, ok := action.(common.NoAction); !ok {
+	if _, ok := action.(common.NoAction); !ok {
 		slog.Debug("applyPromptModalAction", "action", action)
 	}
 	var actionErr error
@@ -340,7 +340,7 @@ func (m *model) applyPromptModalAction(action common.ModelAction) {
 func (m *model) applyShellCommandAction(shellCommand string) {
 	focusPanelDir := m.fileModel.filePanels[m.filePanelFocusIndex].location
 
-	retCode, output, err := utils.ExecuteCommandInShell(common.DefaultCommandTimeoutMsec, focusPanelDir, shellCommand)
+	retCode, output, err := utils.ExecuteCommandInShell(common.DefaultCommandTimeout, focusPanelDir, shellCommand)
 
 	m.promptModal.HandleShellCommandResults(retCode, output)
 

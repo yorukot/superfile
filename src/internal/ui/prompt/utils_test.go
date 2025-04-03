@@ -51,7 +51,7 @@ func TestModel_getPromptAction(t *testing.T) {
 		},
 		{
 			name:           "Split with extra arguments",
-			text:           splitCommand + " xyz",
+			text:           SplitCommand + " xyz",
 			shellMode:      false,
 			expectecAction: common.NoAction{},
 			expectedErr:    true,
@@ -59,7 +59,7 @@ func TestModel_getPromptAction(t *testing.T) {
 		},
 		{
 			name:           "cd with 0 arguments",
-			text:           cdCommand,
+			text:           CdCommand,
 			shellMode:      false,
 			expectecAction: common.NoAction{},
 			expectedErr:    true,
@@ -75,7 +75,7 @@ func TestModel_getPromptAction(t *testing.T) {
 		},
 		{
 			name:           "Correct split command",
-			text:           splitCommand,
+			text:           SplitCommand,
 			shellMode:      false,
 			expectecAction: common.SplitPanelAction{},
 			expectedErr:    false,
@@ -83,7 +83,7 @@ func TestModel_getPromptAction(t *testing.T) {
 		},
 		{
 			name:           "Correct cd command",
-			text:           cdCommand + " /abc",
+			text:           CdCommand + " /abc",
 			shellMode:      false,
 			expectecAction: common.CDCurrentPanelAction{Location: "/abc"},
 			expectedErr:    false,
@@ -91,7 +91,7 @@ func TestModel_getPromptAction(t *testing.T) {
 		},
 		{
 			name:           "Correct open command",
-			text:           openCommand + " /abc",
+			text:           OpenCommand + " /abc",
 			shellMode:      false,
 			expectecAction: common.OpenPanelAction{Location: "/abc"},
 			expectedErr:    false,
@@ -116,4 +116,13 @@ func TestModel_getPromptAction(t *testing.T) {
 		})
 	}
 
+}
+
+func Test_getFirstToken(t *testing.T) {
+	t.Run("Basic test", func(t *testing.T) {
+		assert.Equal(t, "abc", getFirstToken("abc"))
+		assert.Equal(t, "abc", getFirstToken("abc a b c"))
+		assert.Equal(t, "abc", getFirstToken("abc "))
+		assert.Equal(t, "abc\n\ta", getFirstToken("abc\n\ta"))
+	})
 }

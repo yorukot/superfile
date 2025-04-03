@@ -162,3 +162,59 @@ func LoadAllDefaultConfig(content embed.FS) {
 		slog.Error("Error writing theme file version", "error", err)
 	}
 }
+
+// Used only in unit tests
+// Populate config variables based on given file
+func PopulateGlobalConfigs(configFilePath string, hotkeyFilePath string, themeFilePath string) error {
+	err := PopulateConfigFromFile(configFilePath)
+	if err != nil {
+		return err
+	}
+	err = PopulateHotkeyFromFile(hotkeyFilePath)
+	if err != nil {
+		return err
+	}
+	err = PopulateThemeFromFile(themeFilePath)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// No validation required
+func PopulateConfigFromFile(configFilePath string) error {
+	data, err := os.ReadFile(configFilePath)
+	if err != nil {
+		return err
+	}
+	err = toml.Unmarshal(data, &Config)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// No validation required
+func PopulateHotkeyFromFile(hotkeyFilePath string) error {
+	data, err := os.ReadFile(hotkeyFilePath)
+	if err != nil {
+		return err
+	}
+	err = toml.Unmarshal(data, &Hotkeys)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func PopulateThemeFromFile(themeFilePath string) error {
+	data, err := os.ReadFile(themeFilePath)
+	if err != nil {
+		return err
+	}
+	err = toml.Unmarshal(data, &Theme)
+	if err != nil {
+		return err
+	}
+	return nil
+}

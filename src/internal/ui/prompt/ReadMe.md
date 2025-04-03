@@ -13,11 +13,18 @@ x Remove hardcoded constants
 x Run linter on this with hard settings
 x Printing return code from shell command
 x Check github PR todos
-- Make $() and ${} work !!!!
+x Make $() and ${} work !!!!
 - Do we need textInput.showsuggestions ?
 - Superfile file prompt should appear in the middle of the whole terminal (vertically)
+- Prompt gets resized to smaller value based on total width. and should not break.
+- Implement ... wrapping ?
 - Unit tests
+- Check html of unit test coverage
 
+- Benchmark test
+- Fuzzing test
+- Testmain
+- -debug arg
 
 - Make UI looks pretty
 - Ask on discord for suggestions
@@ -26,11 +33,11 @@ x Check github PR todos
 # PR Todos
 - Remove all new todos
 x No More refactoring ? of stuff to common/utils ?
-- ? Bigger unit testcase for model's prompt feature.
+x Bigger unit testcase for model's prompt feature.
 - Review go module design docs/videos and see if current design is okay
 - Testsuite test
-- Remove hardcoded constants
-
+x Remove hardcoded constants
+- Unit tests for other utils that you added
 
 - Coderabbit review and fix comments
 - Ask coderabbit for typos, or hardcoding, etc.

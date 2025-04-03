@@ -4,10 +4,11 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/x/exp/term/ansi"
 	"github.com/yorukot/superfile/src/config/icon"
+	"time"
 )
 
 const WheelRunTime = 5
-const DefaultCommandTimeoutMsec = 5000
+const DefaultCommandTimeout = 5000 * time.Millisecond
 
 var (
 	MinimumHeight = 24

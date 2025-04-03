@@ -11,7 +11,7 @@ import (
 )
 
 // Choose correct shell as per OS
-func ExecuteCommandInShell(timeLimitMsec int, cmdDir string, shellCommand string) (int, string, error) {
+func ExecuteCommandInShell(timeLimit time.Duration, cmdDir string, shellCommand string) (int, string, error) {
 	// Linux and Darwin
 	baseCmd := "/bin/sh"
 	args := []string{"-c", shellCommand}
@@ -21,11 +21,11 @@ func ExecuteCommandInShell(timeLimitMsec int, cmdDir string, shellCommand string
 		args[0] = "-Command"
 	}
 
-	return ExecuteCommand(timeLimitMsec, cmdDir, baseCmd, args...)
+	return ExecuteCommand(timeLimit, cmdDir, baseCmd, args...)
 }
 
-func ExecuteCommand(timeLimitMsec int, cmdDir string, baseCmd string, args ...string) (int, string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeLimitMsec)*time.Millisecond)
+func ExecuteCommand(timeLimit time.Duration, cmdDir string, baseCmd string, args ...string) (int, string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), timeLimit)
 	defer cancel()
 
 	cmd := exec.CommandContext(ctx, baseCmd, args...)

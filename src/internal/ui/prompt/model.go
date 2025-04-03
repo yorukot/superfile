@@ -33,7 +33,7 @@ func GenerateModel(spfPromptHotkey string, shellPromptHotkey string, closeOnSucc
 func (m *Model) HandleUpdate(msg tea.Msg, cwdLocation string) (common.ModelAction, tea.Cmd) {
 	slog.Debug("prompt.Model HandleUpdate()", "msg", msg,
 		"textInput", m.textInput.Value(),
-		"cursorBlink state - ", m.textInput.Cursor.Blink)
+		"cursorBlink", m.textInput.Cursor.Blink)
 	var action common.ModelAction
 	action = common.NoAction{}
 	var cmd tea.Cmd

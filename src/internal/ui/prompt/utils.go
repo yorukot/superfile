@@ -63,6 +63,8 @@ func getPromptAction(shellMode bool, value string, cwdLocation string) (common.M
 }
 
 // Only allocates memory proportional to first token's size
+// Only works for space right now. Does not splits command based on
+// \n or \t , etc
 func getFirstToken(command string) string {
 	spaceIndex := strings.IndexByte(command, ' ')
 	if spaceIndex == -1 {

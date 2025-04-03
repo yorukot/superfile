@@ -1,13 +1,15 @@
 package prompt
 
+import "time"
+
 // These could as well be property of prompt Model vs being global consts
 // But its fine
 const (
 	promptHeadlineText = "Superfile Prompt"
 
-	openCommand  = "open"
-	splitCommand = "split"
-	cdCommand    = "cd"
+	OpenCommand  = "open"
+	SplitCommand = "split"
+	CdCommand    = "cd"
 
 	// We could later make this configurable. But, not needed now.
 	spfPromptChar   = ">"
@@ -24,7 +26,7 @@ const (
 	splitCommandArgError = "split command should not be given arguments"
 
 	// Timeout for command executed for shell substitution
-	shellSubTimeoutMsec = 1000
+	shellSubTimeout = 1000 * time.Millisecond
 )
 
 func modeString(shellMode bool) string {
@@ -44,18 +46,18 @@ func shellPrompt(shellMode bool) string {
 func defaultCommandSlice() []promptCommand {
 	return []promptCommand{
 		{
-			command:     openCommand,
-			usage:       openCommand + " <PATH>",
+			command:     OpenCommand,
+			usage:       OpenCommand + " <PATH>",
 			description: "Open a new panel at a specified path",
 		},
 		{
-			command:     splitCommand,
-			usage:       splitCommand,
+			command:     SplitCommand,
+			usage:       SplitCommand,
 			description: "Open a new panel at a current file panel's path",
 		},
 		{
-			command:     cdCommand,
-			usage:       cdCommand + " <PATH>",
+			command:     CdCommand,
+			usage:       CdCommand + " <PATH>",
 			description: "Change directory of current panel",
 		},
 	}
