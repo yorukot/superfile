@@ -26,7 +26,8 @@ const (
 	splitCommandArgError = "split command should not be given arguments"
 
 	// Timeout for command executed for shell substitution
-	shellSubTimeout = 1000 * time.Millisecond
+	shellSubTimeout        = 1000 * time.Millisecond
+	shellSubTimeoutInTests = 50 * time.Millisecond
 )
 
 func modeString(shellMode bool) string {

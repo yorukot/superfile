@@ -97,6 +97,14 @@ func TestModel_getPromptAction(t *testing.T) {
 			expectedErr:    false,
 			expectedErrMsg: "",
 		},
+		{
+			name:           "open with three arguments",
+			text:           OpenCommand + " /abc /xyz",
+			shellMode:      false,
+			expectecAction: common.NoAction{},
+			expectedErr:    true,
+			expectedErrMsg: "open command needs exactly one argument, received 2",
+		},
 	}
 
 	for _, tt := range testdata {

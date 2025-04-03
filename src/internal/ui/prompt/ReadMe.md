@@ -42,5 +42,16 @@ x Remove hardcoded constants
 - Coderabbit review and fix comments
 - Ask coderabbit for typos, or hardcoding, etc.
 - Test on windows
+- Execute unit test and testsuite on windows
 - Self Code Review
 - More self sanity testing
+
+# Coverage
+```bash
+cd /path/to/ui/prompt
+# Basic coverage
+go test -cover
+
+# HTML report
+go test -coverprofile=coverage.out && go tool cover -html=coverage.out -o coverage.html
+```

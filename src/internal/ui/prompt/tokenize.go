@@ -3,6 +3,7 @@ package prompt
 import (
 	"fmt"
 	"github.com/yorukot/superfile/src/internal/common/utils"
+	"log/slog"
 	"os"
 	"strings"
 	"time"
@@ -20,17 +21,6 @@ func tokenizePromptCommand(command string, cwdLocation string) ([]string, error)
 
 // Replace ${} and $() with values
 func resolveShellSubstitution(subCmdTimeout time.Duration, command string, cwdLocation string) (string, error) {
-	// We want to test
-	// Empty string
-	// Strings without $ - Normal, trailing and leading whitespace, special char
-	// Strings with $ but no ${} or $() - $HOME , _$$_xyz
-	// Ill formatted substitutions - missing '$', missing ')' or '}' or '{'
-	// Multiple correct ${} and $()
-	// Empty ${} and $()
-	// ${ $() } -> Should not work , $(echo ${} $(echo $())) -> Should work
-	// cd $(echo $(echo hi))
-	// env var - not found
-	// substitution command times out
 	resCommand := strings.Builder{}
 	cmdRunes := []rune(command)
 	i := 0
@@ -45,14 +35,14 @@ func resolveShellSubstitution(subCmdTimeout time.Duration, command string, cwdLo
 					return "", fmt.Errorf("unexpected error in tokenization")
 				}
 				if end == len(cmdRunes) {
-					return "", fmt.Errorf("could not find matching for '}' for '${'")
+					return "", curlyBracketParMatchError()
 				}
 
 				envVarName := string(cmdRunes[i+2 : end])
 
 				// Todo : add a layer of abstraction for unit testing
 				if value, ok := os.LookupEnv(envVarName); !ok {
-					return "", fmt.Errorf("env %s not found", envVarName)
+					return "", envVarNotFoundError{varName: envVarName}
 				} else {
 					// Todo : Handle value being too big ? or having newlines ?
 					resCommand.WriteString(value)
@@ -68,7 +58,7 @@ func resolveShellSubstitution(subCmdTimeout time.Duration, command string, cwdLo
 				}
 
 				if end == len(cmdRunes) {
-					return "", fmt.Errorf("could not find matching for ')' for '$('")
+					return "", bracketParMatchError()
 				}
 
 				subCmd := string(cmdRunes[i+2 : end])
@@ -77,6 +67,12 @@ func resolveShellSubstitution(subCmdTimeout time.Duration, command string, cwdLo
 				if retCode == -1 {
 					return "", fmt.Errorf("could not execute shell substitution command : %s : %w", subCmd, err)
 				} else {
+					// We are allowing commands that exit with non zero status code
+					// We still use its output
+					if retCode != 0 {
+						slog.Debug("substitution command exited with non zero status", "retCode", retCode,
+							"command", subCmd)
+					}
 					// Todo : Handle value being too big ? or having newlines ?
 					resCommand.WriteString(output)
 				}
@@ -102,7 +98,7 @@ func findEndingParenthesis(r []rune, openIdx int, open rune, close rune) int {
 	}
 
 	openCount := 1
-	i := openIdx
+	i := openIdx + 1
 	for i < len(r) && openCount != 0 {
 		if r[i] == open {
 			openCount++

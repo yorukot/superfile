@@ -31,12 +31,14 @@ func ExecuteCommand(timeLimit time.Duration, cmdDir string, baseCmd string, args
 	cmd := exec.CommandContext(ctx, baseCmd, args...)
 	cmd.Dir = cmdDir
 	outputBytes, err := cmd.CombinedOutput()
+	retCode := -1
 
 	if errors.Is(ctx.Err(), context.DeadlineExceeded) {
-		slog.Error("User's command timed out")
+		slog.Error("User's command timed out", "outputBytes", outputBytes,
+			"cmd error", err, "ctx error", ctx.Err())
+		return retCode, string(outputBytes), ctx.Err()
 	}
 
-	retCode := -1
 	if err == nil {
 		retCode = 0
 	} else if exitErr, ok := err.(*exec.ExitError); ok {
