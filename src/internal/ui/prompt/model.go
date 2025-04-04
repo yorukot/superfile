@@ -46,7 +46,7 @@ func (m *Model) HandleUpdate(msg tea.Msg, cwdLocation string) (common.ModelActio
 	case tea.KeyMsg:
 		switch {
 		case slices.Contains(common.Hotkeys.ConfirmTyping, msg.String()):
-			action = m.handleCofirm(cwdLocation)
+			action = m.handleConfirm(cwdLocation)
 		case slices.Contains(common.Hotkeys.CancelTyping, msg.String()):
 			m.Close()
 		default:
@@ -60,7 +60,7 @@ func (m *Model) HandleUpdate(msg tea.Msg, cwdLocation string) (common.ModelActio
 	return action, cmd
 }
 
-func (m *Model) handleCofirm(cwdLocation string) common.ModelAction {
+func (m *Model) handleConfirm(cwdLocation string) common.ModelAction {
 	// Pressing confirm on empty prompt will trigger close
 	if m.textInput.Value() == "" {
 		m.CloseOnSuccessIfNeeded()

@@ -20,7 +20,7 @@ func getPromptAction(shellMode bool, value string, cwdLocation string) (common.M
 	promptArgs, err := tokenizePromptCommand(value, cwdLocation)
 	if err != nil {
 		return noAction, invalidCmdError{
-			uiMsg:        tokenizationError,
+			uiMsg:        tokenizationError + " : " + err.Error(),
 			wrappedError: fmt.Errorf("error during tokenization : %w", err),
 		}
 	}

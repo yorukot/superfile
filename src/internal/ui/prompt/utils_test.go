@@ -43,7 +43,7 @@ func TestModel_getPromptAction(t *testing.T) {
 			shellMode:      false,
 			expectecAction: common.NoAction{},
 			expectedErr:    true,
-			expectedErrMsg: tokenizationError,
+			expectedErrMsg: tokenizationError + " : " + curlyBracketMatchError().Error(),
 		},
 		{
 			name:           "Split with extra arguments",

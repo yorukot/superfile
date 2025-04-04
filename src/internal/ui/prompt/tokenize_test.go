@@ -107,14 +107,14 @@ func Test_resolveShellSubstitution(t *testing.T) {
 			command:         "abc $(abc",
 			expectedResult:  "",
 			isErrorExpected: true,
-			errorToMatch:    roundBracketParMatchError(),
+			errorToMatch:    roundBracketMatchError(),
 		},
 		{
 			name:            "Ill formed command 2",
 			command:         "abc $(abc) syt ${ sdfc ( {)}",
 			expectedResult:  "",
 			isErrorExpected: true,
-			errorToMatch:    curlyBracketParMatchError(),
+			errorToMatch:    curlyBracketMatchError(),
 		},
 
 		// Test with substitution being performed
@@ -276,7 +276,7 @@ func Test_findEndingParenthesis(t *testing.T) {
 
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
-			res := findEndingParenthesis([]rune(tt.value), tt.openIdx, tt.openPar, tt.closePar)
+			res := findEndingBracket([]rune(tt.value), tt.openIdx, tt.openPar, tt.closePar)
 			assert.Equal(t, tt.expectedRes, res)
 		})
 	}

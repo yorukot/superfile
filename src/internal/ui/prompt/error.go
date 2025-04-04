@@ -31,19 +31,19 @@ func (e envVarNotFoundError) Error() string {
 	return fmt.Sprintf("env var %s not found", e.varName)
 }
 
-type parenthesisMatchError struct {
+type bracketMatchError struct {
 	openChar  rune
 	closeChar rune
 }
 
-func (p parenthesisMatchError) Error() string {
-	return fmt.Sprintf("could not find matching %v for %v", p.closeChar, p.openChar)
+func (p bracketMatchError) Error() string {
+	return fmt.Sprintf("could not find matching %c for %c", p.closeChar, p.openChar)
 }
 
-func roundBracketParMatchError() parenthesisMatchError {
-	return parenthesisMatchError{openChar: '(', closeChar: ')'}
+func roundBracketMatchError() bracketMatchError {
+	return bracketMatchError{openChar: '(', closeChar: ')'}
 }
 
-func curlyBracketParMatchError() parenthesisMatchError {
-	return parenthesisMatchError{openChar: '{', closeChar: '}'}
+func curlyBracketMatchError() bracketMatchError {
+	return bracketMatchError{openChar: '{', closeChar: '}'}
 }

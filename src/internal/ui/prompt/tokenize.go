@@ -30,12 +30,12 @@ func resolveShellSubstitution(subCmdTimeout time.Duration, command string, cwdLo
 			// ${ spotted
 			if cmdRunes[i+1] == '{' {
 				// Look for Ending '}'
-				end := findEndingParenthesis(cmdRunes, i+1, '{', '}')
+				end := findEndingBracket(cmdRunes, i+1, '{', '}')
 				if end == -1 {
 					return "", fmt.Errorf("unexpected error in tokenization")
 				}
 				if end == len(cmdRunes) {
-					return "", curlyBracketParMatchError()
+					return "", curlyBracketMatchError()
 				}
 
 				envVarName := string(cmdRunes[i+2 : end])
@@ -54,13 +54,13 @@ func resolveShellSubstitution(subCmdTimeout time.Duration, command string, cwdLo
 
 			} else if cmdRunes[i+1] == '(' {
 				// Look for ending ')'
-				end := findEndingParenthesis(cmdRunes, i+1, '(', ')')
+				end := findEndingBracket(cmdRunes, i+1, '(', ')')
 				if end == -1 {
 					return "", fmt.Errorf("unexpected error in tokenization")
 				}
 
 				if end == len(cmdRunes) {
-					return "", roundBracketParMatchError()
+					return "", roundBracketMatchError()
 				}
 
 				subCmd := string(cmdRunes[i+2 : end])
@@ -93,7 +93,7 @@ func resolveShellSubstitution(subCmdTimeout time.Duration, command string, cwdLo
 	return resCommand.String(), nil
 }
 
-func findEndingParenthesis(r []rune, openIdx int, openParan rune, closeParan rune) int {
+func findEndingBracket(r []rune, openIdx int, openParan rune, closeParan rune) int {
 	if openIdx < 0 || openIdx >= len(r) || r[openIdx] != openParan {
 		return -1
 	}

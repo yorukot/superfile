@@ -1,6 +1,6 @@
 # Backend Package
 Handles operations on the User's OS.
-For example - Executing shell commands, performing file operations on user's files.
+For example, executing shell commands, performing file operations on user's files...
 Reading OS-specific configurations like disk partitions.
 
 The name 'backend' isn't the most appropriate, open to suggestions.
