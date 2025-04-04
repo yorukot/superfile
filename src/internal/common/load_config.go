@@ -64,20 +64,25 @@ func LoadHotkeysFile() {
 	}
 }
 
-// Load configurations from theme file into &theme and return default values
-// if file theme folder is empty
+// LoadThemeFile : Load configurations from theme file into &theme
+// set default values if we cant read user's theme file
 func LoadThemeFile() {
 	themeFile := filepath.Join(variable.ThemeFolder, Config.Theme+".toml")
 	data, err := os.ReadFile(themeFile)
-	if err != nil {
-		slog.Info("Could not read theme file", "path", themeFile, "error", err)
-		data = []byte(DefaultThemeString)
+	if err == nil {
+		if unmarshalErr := toml.Unmarshal(data, &Theme); unmarshalErr == nil {
+			return
+		} else {
+			slog.Error("Could not unmarshal theme file. Falling back to default theme",
+				"unmarshalErr", unmarshalErr)
+		}
+	} else {
+		slog.Error("Could not read user's theme file. Falling back to default theme", "path", themeFile, "error", err)
 	}
 
-	err = toml.Unmarshal(data, &Theme)
-	// Todo : Even if user's theme file have errors, lets not exit, but use a default theme file
+	err = toml.Unmarshal([]byte(DefaultThemeString), &Theme)
 	if err != nil {
-		utils.LogAndExit("Error while decoding theme file( Your theme file may have errors", "error", err)
+		utils.LogAndExit("Unexpected error while reading default theme file. Exiting...", "error", err)
 	}
 }
 
