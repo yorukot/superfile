@@ -2,7 +2,7 @@ package prompt
 
 import "fmt"
 
-// This is to generate error objects that can pe nicely printed to UI
+// This is to generate error objects that can be nicely printed to UI
 type invalidCmdError struct {
 	uiMsg        string
 	wrappedError error
@@ -31,19 +31,19 @@ func (e envVarNotFoundError) Error() string {
 	return fmt.Sprintf("env var %s not found", e.varName)
 }
 
-type paranthesisMatchError struct {
+type parenthesisMatchError struct {
 	openChar  rune
 	closeChar rune
 }
 
-func (p paranthesisMatchError) Error() string {
+func (p parenthesisMatchError) Error() string {
 	return fmt.Sprintf("could not find matching %v for %v", p.closeChar, p.openChar)
 }
 
-func bracketParMatchError() paranthesisMatchError {
-	return paranthesisMatchError{openChar: '(', closeChar: ')'}
+func roundBracketParMatchError() parenthesisMatchError {
+	return parenthesisMatchError{openChar: '(', closeChar: ')'}
 }
 
-func curlyBracketParMatchError() paranthesisMatchError {
-	return paranthesisMatchError{openChar: '{', closeChar: '}'}
+func curlyBracketParMatchError() parenthesisMatchError {
+	return parenthesisMatchError{openChar: '{', closeChar: '}'}
 }

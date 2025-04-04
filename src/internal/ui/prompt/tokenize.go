@@ -60,7 +60,7 @@ func resolveShellSubstitution(subCmdTimeout time.Duration, command string, cwdLo
 				}
 
 				if end == len(cmdRunes) {
-					return "", bracketParMatchError()
+					return "", roundBracketParMatchError()
 				}
 
 				subCmd := string(cmdRunes[i+2 : end])

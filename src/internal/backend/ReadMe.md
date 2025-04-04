@@ -1,10 +1,9 @@
-# backend package
-Handles operations on User's OS .
-For example - Executing shell commands, doing files operations on user's files.
-Reading OS specific configurations like disk partitions.
+# Backend Package
+Handles operations on the User's OS.
+For example - Executing shell commands, performing file operations on user's files.
+Reading OS-specific configurations like disk partitions.
 
-Name 'backend' isn't the most appropriate, open to suggestions.
-
+The name 'backend' isn't the most appropriate, open to suggestions.
 This would modularize the code, and would enable us to write unit tests 
 where we would 'mock' the backend functionality with dummy interface 
 implementations

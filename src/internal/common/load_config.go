@@ -81,78 +81,32 @@ func LoadThemeFile() {
 	}
 }
 
-// Load all default configurations from superfile_config folder into global
-// configurations variables
+// LoadAllDefaultConfig : Load all default configurations from embedded superfile_config folder into global
+// configurations variables and write theme files if its needed.
 func LoadAllDefaultConfig(content embed.FS) {
 
-	temp, err := content.ReadFile(variable.EmbedHotkeysFile)
+	err := LoadConfigStringGlobals(content)
 	if err != nil {
-		slog.Error("Error reading from embed file:", "error", err)
+		slog.Error("Could not load default config from embed FS", "error", err)
 		return
 	}
-	HotkeysTomlString = string(temp)
 
-	temp, err = content.ReadFile(variable.EmbedConfigFile)
-	if err != nil {
-		slog.Error("Error reading from embed file:", "error", err)
-		return
-	}
-	ConfigTomlString = string(temp)
-
-	temp, err = content.ReadFile(variable.EmbedThemeCatppuccinFile)
-	if err != nil {
-		slog.Error("Error reading from embed file:", "error", err)
-		return
-	}
-	DefaultThemeString = string(temp)
-
-	// Todo : We should not return here, and have a default value for this
 	currentThemeVersion, err := os.ReadFile(variable.ThemeFileVersion)
 	if err != nil && !os.IsNotExist(err) {
-		slog.Error("Error reading from file:", "error", err)
+		slog.Error("Unexpected error reading from file:", "error", err)
 		return
 	}
 
-	_, err = os.Stat(variable.ThemeFolder)
-
-	if os.IsNotExist(err) {
-		if err = os.MkdirAll(variable.ThemeFolder, 0755); err != nil {
-			slog.Error("Error creating theme directory", "error", err)
-			return
-		}
-	} else if string(currentThemeVersion) == variable.CurrentVersion {
+	if string(currentThemeVersion) == variable.CurrentVersion {
+		// We don't need to update themes as its already up to date
 		return
 	}
 
-	files, err := content.ReadDir(variable.EmbedThemeDir)
+	// Write theme files to theme directory
+	err = WriteThemeFiles(content)
 	if err != nil {
-		slog.Error("Error reading theme directory from embed", "error", err)
+		slog.Error("Error while writing default theme directories", "error", err)
 		return
-	}
-
-	for _, file := range files {
-		if file.IsDir() {
-			continue
-		}
-		// This will not break in windows. This is a relative path for Embed FS. It uses "/" only
-		// nolint:govet // Suppress err shadowing
-		src, err := content.ReadFile(variable.EmbedThemeDir + "/" + file.Name())
-		if err != nil {
-			slog.Error("Error reading theme file from embed", "error", err)
-			return
-		}
-
-		file, err := os.Create(filepath.Join(variable.ThemeFolder, file.Name()))
-		if err != nil {
-			slog.Error("Error creating theme file from embed", "error", err)
-			return
-		}
-		defer file.Close()
-		_, err = file.Write(src)
-		if err != nil {
-			slog.Error("Error writing theme file from embed", "error", err)
-			return
-		}
 	}
 
 	// Prevent failure for first time app run by making sure parent directories exists
@@ -165,6 +119,70 @@ func LoadAllDefaultConfig(content embed.FS) {
 	if err != nil {
 		slog.Error("Error writing theme file version", "error", err)
 	}
+}
+
+func LoadConfigStringGlobals(content embed.FS) error {
+	hotkeyData, err := content.ReadFile(variable.EmbedHotkeysFile)
+	if err != nil {
+		return err
+	}
+	HotkeysTomlString = string(hotkeyData)
+
+	configData, err := content.ReadFile(variable.EmbedConfigFile)
+	if err != nil {
+		return err
+	}
+	ConfigTomlString = string(configData)
+
+	themeData, err := content.ReadFile(variable.EmbedThemeCatppuccinFile)
+	if err != nil {
+		return err
+	}
+	DefaultThemeString = string(themeData)
+	return nil
+}
+
+func WriteThemeFiles(content embed.FS) error {
+	_, err := os.Stat(variable.ThemeFolder)
+
+	if os.IsNotExist(err) {
+		if err = os.MkdirAll(variable.ThemeFolder, 0755); err != nil {
+			slog.Error("Error creating theme directory", "error", err)
+			return err
+		}
+	}
+
+	files, err := content.ReadDir(variable.EmbedThemeDir)
+	if err != nil {
+		slog.Error("Error reading theme directory from embed", "error", err)
+		return err
+	}
+
+	for _, file := range files {
+		if file.IsDir() {
+			continue
+		}
+		// This will not break in windows. This is a relative path for Embed FS. It uses "/" only
+		// nolint:govet // Suppress err shadowing
+		src, err := content.ReadFile(variable.EmbedThemeDir + "/" + file.Name())
+		if err != nil {
+			slog.Error("Error reading theme file from embed", "error", err)
+			return err
+		}
+
+		curThemeFile, err := os.Create(filepath.Join(variable.ThemeFolder, file.Name()))
+		if err != nil {
+			slog.Error("Error creating theme file from embed", "error", err)
+			return err
+		}
+		defer curThemeFile.Close()
+		_, err = curThemeFile.Write(src)
+		if err != nil {
+			slog.Error("Error writing theme file from embed", "error", err)
+			return err
+		}
+	}
+	return nil
 }
 
 // Used only in unit tests

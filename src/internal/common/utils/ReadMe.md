@@ -1,2 +1,2 @@
 # utils package
-Independent utilities with zero dependency with other packages
+Independent utilities with zero dependencies with other packages

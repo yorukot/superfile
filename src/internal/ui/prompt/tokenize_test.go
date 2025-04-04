@@ -107,7 +107,7 @@ func Test_resolveShellSubstitution(t *testing.T) {
 			command:         "abc $(abc",
 			expectedResult:  "",
 			isErrorExpected: true,
-			errorToMatch:    bracketParMatchError(),
+			errorToMatch:    roundBracketParMatchError(),
 		},
 		{
 			name:            "Ill formed command 2",

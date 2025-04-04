@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/common/utils"
 	"io"
 	"log"
 	"log/slog"
@@ -24,6 +25,10 @@ import (
 
 // Run superfile app
 func Run(content embed.FS) {
+
+	// Before we open log file, set all "non debug" logs to stdout
+	utils.SetRootLoggerToStdout(false)
+
 	common.LoadInitial_PrerenderedVariables()
 	common.LoadAllDefaultConfig(content)
 

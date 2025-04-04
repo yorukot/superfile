@@ -1,6 +1,4 @@
 # ui package
 
-
-
-# Todos
+# To-dos
 - Put model, filePanel, sidebarModel, etc. in separate packages like this
