@@ -72,7 +72,7 @@ func TestModel_Update_Prompt(t *testing.T) {
 		m := defaultModelConfig(false, false, "/")
 		firstUse = false
 		_, err := TeaUpdate(&m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenCommandLine[0]))
-		assert.Nil(t, err)
+		assert.Nil(t, err, "Opening the prompt should not produce an error")
 		assert.True(t, m.promptModal.IsOpen())
 	})
 
@@ -83,7 +83,7 @@ func TestModel_Update_Prompt(t *testing.T) {
 		_, _ = TeaUpdate(&m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenSPFPrompt[0]))
 		_, _ = TeaUpdate(&m, utils.TeaRuneKeyMsg(prompt.SplitCommand))
 		_, err := TeaUpdate(&m, tea.KeyMsg{Type: tea.KeyEnter})
-		assert.Nil(t, err)
+		assert.Nil(t, err, "Opening the prompt should not produce an error")
 		assert.Equal(t, 2, len(m.fileModel.filePanels))
 	})
 }

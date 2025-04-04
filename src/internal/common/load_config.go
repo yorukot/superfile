@@ -2,6 +2,7 @@ package common
 
 import (
 	"embed"
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -21,21 +22,29 @@ func LoadConfigFile() {
 	hasError := utils.LoadTomlFile(variable.ConfigFile, ConfigTomlString, &Config, variable.FixConfigFile, LipglossError)
 	if hasError {
 		fmt.Println("To add missing fields to configuration file automatically run superfile with the --fix-config-file flag `spf --fix-config-file`")
-		return
+	}
+	// Even if there is a missing field, we want to validate fields that are present
+
+	if err := ValidateConfig(&Config); err != nil {
+		// If config is incorrect we cannot continue. We need to exit
+		utils.LogAndExit(err.Error())
 	}
 
-	if (Config.FilePreviewWidth > 10 || Config.FilePreviewWidth < 2) && Config.FilePreviewWidth != 0 {
-		utils.LogAndExit(LoadConfigError("file_preview_width"))
+}
+
+func ValidateConfig(c *ConfigType) error {
+	if (c.FilePreviewWidth > 10 || c.FilePreviewWidth < 2) && c.FilePreviewWidth != 0 {
+		return errors.New(LoadConfigError("file_preview_width"))
 	}
 
-	if Config.SidebarWidth != 0 && (Config.SidebarWidth < 3 || Config.SidebarWidth > 20) {
-		utils.LogAndExit(LoadConfigError("sidebar_width"))
+	if c.SidebarWidth != 0 && (c.SidebarWidth < 3 || c.SidebarWidth > 20) {
+		return errors.New(LoadConfigError("sidebar_width"))
 	}
 
-	if Config.DefaultSortType < 0 || Config.DefaultSortType > 2 {
-		utils.LogAndExit(LoadConfigError("default_sort_type"))
+	if c.DefaultSortType < 0 || c.DefaultSortType > 2 {
+		return errors.New(LoadConfigError("default_sort_type"))
 	}
-
+	return nil
 }
 
 // Load keybinds from the hotkeys file. Compares the content
@@ -53,6 +62,9 @@ func LoadHotkeysFile() {
 		field := val.Type().Field(i)
 		value := val.Field(i)
 
+		// Although this is redundant as Hotkey is always a slice
+		// This adds a layer against accidental struct modifications
+		// Makes sure its always be a string slice. It's somewhat like a unit test
 		if value.Kind() != reflect.Slice || value.Type().Elem().Kind() != reflect.String {
 			utils.LogAndExit(LoadHotkeysError(field.Name))
 		}
@@ -209,39 +221,26 @@ func PopulateGlobalConfigs(configFilePath string, hotkeyFilePath string, themeFi
 }
 
 // No validation required
-func PopulateConfigFromFile(configFilePath string) error {
-	data, err := os.ReadFile(configFilePath)
+func populateFromFile(filePath string, target interface{}) error {
+	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return err
 	}
-	err = toml.Unmarshal(data, &Config)
+	err = toml.Unmarshal(data, target)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-// No validation required
+func PopulateConfigFromFile(configFilePath string) error {
+	return populateFromFile(configFilePath, &Config)
+}
+
 func PopulateHotkeyFromFile(hotkeyFilePath string) error {
-	data, err := os.ReadFile(hotkeyFilePath)
-	if err != nil {
-		return err
-	}
-	err = toml.Unmarshal(data, &Hotkeys)
-	if err != nil {
-		return err
-	}
-	return nil
+	return populateFromFile(hotkeyFilePath, &Hotkeys)
 }
 
 func PopulateThemeFromFile(themeFilePath string) error {
-	data, err := os.ReadFile(themeFilePath)
-	if err != nil {
-		return err
-	}
-	err = toml.Unmarshal(data, &Theme)
-	if err != nil {
-		return err
-	}
-	return nil
+	return populateFromFile(themeFilePath, &Theme)
 }

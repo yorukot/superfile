@@ -46,45 +46,57 @@ func (m *Model) HandleUpdate(msg tea.Msg, cwdLocation string) (common.ModelActio
 	case tea.KeyMsg:
 		switch {
 		case slices.Contains(common.Hotkeys.ConfirmTyping, msg.String()):
-			// Pressing confirm on empty prompt will trigger close
-			if m.textInput.Value() == "" {
-				m.CloseOnSuccessIfNeeded()
-			}
-
-			// Create Action based on input
-			var err error
-			action, err = getPromptAction(m.shellMode, m.textInput.Value(), cwdLocation)
-			if err == nil {
-				m.resultMsg = ""
-				m.actionSuccess = true
-			} else if cmdErr, ok := err.(invalidCmdError); ok {
-				// We dont expect a wrapped error here, so using type assertion
-				m.resultMsg = cmdErr.uiMessage()
-				m.actionSuccess = false
-			} else {
-				slog.Error("Unexpected error from getPromptAction", "error", err)
-				m.resultMsg = err.Error()
-				m.actionSuccess = false
-			}
-			m.textInput.SetValue("")
+			action = m.handleCofirm(cwdLocation)
 		case slices.Contains(common.Hotkeys.CancelTyping, msg.String()):
 			m.Close()
 		default:
-			if m.textInput.Value() == "" && msg.String() == m.spfPromptHotkey {
-				m.shellMode = false
-			} else if m.textInput.Value() == "" && msg.String() == m.shellPromptHotkey {
-				m.shellMode = true
-			} else {
-				m.textInput, cmd = m.textInput.Update(msg)
-			}
-			m.resultMsg = ""
-			m.actionSuccess = true
+			cmd = m.handleNormalKeyInput(msg)
 		}
 	default:
+		// Non keypress updates like Cursor Blink
 		m.textInput, cmd = m.textInput.Update(msg)
 
 	}
 	return action, cmd
+}
+
+func (m *Model) handleCofirm(cwdLocation string) common.ModelAction {
+	// Pressing confirm on empty prompt will trigger close
+	if m.textInput.Value() == "" {
+		m.CloseOnSuccessIfNeeded()
+	}
+
+	// Create Action based on input
+	var err error
+	action, err := getPromptAction(m.shellMode, m.textInput.Value(), cwdLocation)
+	if err == nil {
+		m.resultMsg = ""
+		m.actionSuccess = true
+	} else if cmdErr, ok := err.(invalidCmdError); ok {
+		// We don't expect a wrapped error here, so using type assertion
+		m.resultMsg = cmdErr.uiMessage()
+		m.actionSuccess = false
+	} else {
+		slog.Error("Unexpected error from getPromptAction", "error", err)
+		m.resultMsg = err.Error()
+		m.actionSuccess = false
+	}
+	m.textInput.SetValue("")
+	return action
+}
+
+func (m *Model) handleNormalKeyInput(msg tea.KeyMsg) tea.Cmd {
+	var cmd tea.Cmd
+	if m.textInput.Value() == "" && msg.String() == m.spfPromptHotkey {
+		m.shellMode = false
+	} else if m.textInput.Value() == "" && msg.String() == m.shellPromptHotkey {
+		m.shellMode = true
+	} else {
+		m.textInput, cmd = m.textInput.Update(msg)
+	}
+	m.resultMsg = ""
+	m.actionSuccess = true
+	return cmd
 }
 
 // After action is performed, model will update the Model with results
