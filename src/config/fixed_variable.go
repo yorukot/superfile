@@ -17,6 +17,9 @@ const (
 	EmbedHotkeysFile         string = EmbedConfigDir + "/hotkeys.toml"
 	EmbedThemeDir            string = EmbedConfigDir + "/theme"
 	EmbedThemeCatppuccinFile string = EmbedThemeDir + "/catppuccin.toml"
+
+	OS_WINDOWS = "windows"
+	OS_DARWIN  = "darwin"
 )
 
 var (

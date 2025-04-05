@@ -187,7 +187,7 @@ func InitConfigFile() {
 // We are initializing these, but not sure if we are ever using them
 func InitTrash() error {
 	// Create trash directories
-	if runtime.GOOS != "darwin" {
+	if runtime.GOOS != variable.OS_DARWIN {
 		err := createDirectories(
 			variable.CustomTrashDirectory,
 			variable.CustomTrashDirectoryFiles,

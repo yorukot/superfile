@@ -16,7 +16,7 @@ import (
 
 // initialConfig load and handle all configuration files (spf config,Hotkeys
 // themes) setted up. Returns absolute path of dir pointing to the file Panel
-func initialConfig(dir string) (toggleDotFileBool bool, toggleFooter bool, firstFilePanelDir string) {
+func initialConfig(dir string) (toggleDotFile bool, toggleFooter bool, firstFilePanelDir string) {
 	// Open log stream
 	file, err := os.OpenFile(variable.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 
@@ -43,29 +43,9 @@ func initialConfig(dir string) (toggleDotFileBool bool, toggleFooter bool, first
 
 	icon.InitIcon(common.Config.Nerdfont, common.Theme.DirectoryIconColor)
 
-	toggleDotFileData, err := os.ReadFile(variable.ToggleDotFile)
-	if err != nil {
-		slog.Error("Error while reading toggleDotFile data error:", "error", err)
-	}
-	if string(toggleDotFileData) == "true" {
-		toggleDotFileBool = true
-	} else if string(toggleDotFileData) == "false" {
-		toggleDotFileBool = false
-	} else {
-		toggleDotFileBool = false
-	}
+	toggleDotFile = utils.ReadBoolFile(variable.ToggleDotFile, false)
 
-	toggleFooterData, err := os.ReadFile(variable.ToggleFooter)
-	if err != nil {
-		slog.Error("Error while reading toggleFooter data error:", "error", err)
-	}
-	if string(toggleFooterData) == "true" {
-		toggleFooter = true
-	} else if string(toggleFooterData) == "false" {
-		toggleFooter = false
-	} else {
-		toggleFooter = true
-	}
+	toggleFooter = utils.ReadBoolFile(variable.ToggleFooter, true)
 
 	common.LoadThemeConfig()
 	common.LoadPrerenderedVariables()
@@ -91,5 +71,5 @@ func initialConfig(dir string) (toggleDotFileBool bool, toggleFooter bool, first
 	slog.Debug("Runtime information", "runtime.GOOS", runtime.GOOS,
 		"start directory", firstFilePanelDir)
 
-	return toggleDotFileBool, toggleFooter, firstFilePanelDir
+	return toggleDotFile, toggleFooter, firstFilePanelDir
 }

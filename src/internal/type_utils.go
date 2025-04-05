@@ -3,6 +3,7 @@ package internal
 import (
 	"fmt"
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/common/utils"
 )
 
 // reset the items slice and set the cut value
@@ -18,8 +19,11 @@ func (m *model) validateLayout() error {
 	if 0 < m.footerHeight && m.footerHeight < common.MinFooterHeight {
 		return fmt.Errorf("footerHeight %v is too small", m.footerHeight)
 	}
+	if !m.toggleFooter && m.footerHeight != 0 {
+		return fmt.Errorf("footer closed and footerHeight %v is non zero", m.footerHeight)
+	}
 	// PanelHeight + 2 lines (main border) + actual footer height
-	if m.fullHeight != (m.mainPanelHeight+2)+(m.footerHeight+2) {
+	if m.fullHeight != (m.mainPanelHeight+2)+utils.FullFooterHeight(m.footerHeight, m.toggleFooter) {
 		return fmt.Errorf("Invalid model layout, fullHeight : %v, mainPanelHeight : %v, footerHeight : %v\n",
 			m.fullHeight, m.mainPanelHeight, m.footerHeight)
 	}
@@ -52,7 +56,7 @@ func (f focusPanelType) String() string {
 	case metadataFocus:
 		return "metadataFocus"
 	default:
-		return "Invalid"
+		return invalidTypeString
 	}
 }
 
@@ -65,8 +69,9 @@ func (f filePanelFocusType) String() string {
 	case focus:
 		return "focus"
 	default:
-		return "Invalid"
+		return invalidTypeString
 	}
+
 }
 
 func (p panelMode) String() string {
@@ -76,6 +81,6 @@ func (p panelMode) String() string {
 	case browserMode:
 		return "browserMode"
 	default:
-		return "Invalid"
+		return invalidTypeString
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	variable "github.com/yorukot/superfile/src/config"
 	"log/slog"
 	"os/exec"
 	"runtime"
@@ -16,7 +17,7 @@ func ExecuteCommandInShell(timeLimit time.Duration, cmdDir string, shellCommand 
 	baseCmd := "/bin/sh"
 	args := []string{"-c", shellCommand}
 
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS == variable.OS_WINDOWS {
 		baseCmd = "powershell.exe"
 		args[0] = "-Command"
 	}

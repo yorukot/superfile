@@ -28,7 +28,7 @@ func isSamePartition(path1, path2 string) (bool, error) {
 		return false, fmt.Errorf("failed to get absolute path of the second path: %v", err)
 	}
 
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS == variable.OS_WINDOWS {
 		// On Windows, we can check if both paths are on the same drive (same letter)
 		drive1 := getDriveLetter(absPath1)
 		drive2 := getDriveLetter(absPath2)
@@ -145,9 +145,9 @@ func copyFile(src, dst string, srcInfo os.FileInfo) error {
 // Move file to trash can and can auto switch macos trash can or linux trash can
 func trashMacOrLinux(src string) error {
 	var err error
-	if runtime.GOOS == "darwin" {
+	if runtime.GOOS == variable.OS_DARWIN {
 		err = moveElement(src, filepath.Join(variable.DarwinTrashDirectory, filepath.Base(src)))
-	} else if runtime.GOOS == "windows" {
+	} else if runtime.GOOS == variable.OS_WINDOWS {
 		err = trash_win.Throw(src)
 	} else {
 		err = trash.Trash(src)

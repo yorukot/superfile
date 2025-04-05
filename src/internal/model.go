@@ -34,11 +34,11 @@ var progressBarLastRenderTime time.Time = time.Now()
 
 // Initialize and return model with default configs
 func InitialModel(dir string, firstUseCheck, hasTrashCheck bool) model {
-	toggleDotFileBool, toggleFooter, firstFilePanelDir := initialConfig(dir)
+	toggleDotFile, toggleFooter, firstFilePanelDir := initialConfig(dir)
 	firstUse = firstUseCheck
 	hasTrash = hasTrashCheck
 	batCmd = checkBatCmd()
-	return defaultModelConfig(toggleDotFileBool, toggleFooter, firstFilePanelDir)
+	return defaultModelConfig(toggleDotFile, toggleFooter, firstFilePanelDir)
 }
 
 // Init function to be called by Bubble tea framework, sets windows title,
@@ -182,8 +182,8 @@ func (m *model) setHeightValues(height int) {
 	// Todo : Make it grow even more for bigger screen sizes.
 	// Todo : Calculate the value , instead of manually hard coding it.
 
-	// Main panel height = Total terminal height - footer height - 2(footer border) - 2(file panel border)
-	m.mainPanelHeight = height - m.footerHeight - 2 - 2
+	// Main panel height = Total terminal height- 2(file panel border) - footer height
+	m.mainPanelHeight = height - 2 - utils.FullFooterHeight(m.footerHeight, m.toggleFooter)
 }
 
 // Set help menu size
@@ -536,6 +536,8 @@ func (m *model) getFilePanelItems() {
 		nowTime := time.Now()
 		// Check last time each element was updated, if less then 3 seconds ignore
 		if filePanel.focusType == noneFocus && nowTime.Sub(filePanel.lastTimeGetElement) < 3*time.Second {
+			// Todo : revisit this. This feels like a duct tape solution of an actual
+			// deep rooted problem. This feels very hacky.
 			if !m.updatedToggleDotFile {
 				continue
 			}

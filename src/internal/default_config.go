@@ -8,7 +8,7 @@ import (
 )
 
 // Generate and return model containing default configurations for interface
-func defaultModelConfig(toggleDotFileBool bool, toggleFooter bool, firstFilePanelDir string) model {
+func defaultModelConfig(toggleDotFile bool, toggleFooter bool, firstFilePanelDir string) model {
 	return model{
 		filePanelFocusIndex: 0,
 		focusPanel:          nonePanelFocus,
@@ -57,7 +57,7 @@ func defaultModelConfig(toggleDotFileBool bool, toggleFooter bool, firstFilePane
 			open:        false,
 		},
 		promptModal:   prompt.DefaultModel(),
-		toggleDotFile: toggleDotFileBool,
+		toggleDotFile: toggleDotFile,
 		toggleFooter:  toggleFooter,
 	}
 }

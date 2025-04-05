@@ -292,8 +292,7 @@ linters:
     - gochecksumtype # checks exhaustiveness on Go "sum types"
     # Todo enable - Need to refactor many functions
     # - gocognit # computes and checks the cognitive complexity of functions
-    # Todo enable - Need a few changes - easy
-    # - goconst # finds repeated strings that could be replaced by a constant
+    - goconst # finds repeated strings that could be replaced by a constant
     # Todo enable - Some few changes. There are good suggestions
     # - gocritic # provides diagnostics that check for bugs, performance and style issues
     # Todo enable

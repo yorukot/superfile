@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"github.com/yorukot/superfile/src/internal/common/utils"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -91,9 +92,9 @@ func (m *model) enterPanel() {
 		}
 
 		openCommand := "xdg-open"
-		if runtime.GOOS == "darwin" {
+		if runtime.GOOS == variable.OS_DARWIN {
 			openCommand = "open"
-		} else if runtime.GOOS == "windows" {
+		} else if runtime.GOOS == variable.OS_WINDOWS {
 
 			dllpath := filepath.Join(os.Getenv("SYSTEMROOT"), "System32", "rundll32.exe")
 			dllfile := "url.dll,FileProtocolHandler"
@@ -172,38 +173,24 @@ func (panel *filePanel) singleItemSelect() {
 
 // Toggle dotfile display or not
 func (m *model) toggleDotFileController() {
-	newToggleDotFile := ""
-	if m.toggleDotFile {
-		newToggleDotFile = "false"
-		m.toggleDotFile = false
-	} else {
-		newToggleDotFile = "true"
-		m.toggleDotFile = true
-	}
+	m.toggleDotFile = !m.toggleDotFile
 	m.updatedToggleDotFile = true
-	err := os.WriteFile(variable.ToggleDotFile, []byte(newToggleDotFile), 0644)
+	err := utils.WriteBoolFile(variable.ToggleDotFile, m.toggleDotFile)
 	if err != nil {
-		slog.Error("Error while pinned folder function updatedData superfile data", "error", err)
+		slog.Error("Error while updating toggleDotFile data", "error", err)
 	}
 
 }
 
 // Toggle dotfile display or not
 func (m *model) toggleFooterController() {
-	newToggleFooterFile := ""
-	if m.toggleFooter {
-		newToggleFooterFile = "false"
-		m.toggleFooter = false
-	} else {
-		newToggleFooterFile = "true"
-		m.toggleFooter = true
-	}
-	err := os.WriteFile(variable.ToggleFooter, []byte(newToggleFooterFile), 0644)
+	m.toggleFooter = !m.toggleFooter
+	err := utils.WriteBoolFile(variable.ToggleFooter, m.toggleFooter)
 	if err != nil {
-		slog.Error("Error while Toggle footer function updatedData superfile data", "error", err)
+		slog.Error("Error while updating toggleFooter data", "error", err)
 	}
+	// Todo : Revisit this. Is this really need here, is this correct ?
 	m.setHeightValues(m.fullHeight)
-
 }
 
 // Focus on search bar

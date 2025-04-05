@@ -6,3 +6,11 @@ package utils
 func FooterWidth(fullWidth int) int {
 	return fullWidth/3 - 2
 }
+
+// Including borders
+func FullFooterHeight(footerHeight int, toogleFooter bool) int {
+	if toogleFooter {
+		return footerHeight + 2
+	}
+	return 0
+}
