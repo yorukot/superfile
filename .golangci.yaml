@@ -330,8 +330,7 @@ linters:
     # Todo enable - maybe too strict for us
     # - nonamedreturns # reports all named returns
     - nosprintfhostport # checks for misuse of Sprintf to construct a host with port in a URL
-    # Todo enable : One small fix
-    # - perfsprint # checks that fmt.Sprintf can be replaced with a faster alternative
+    - perfsprint # checks that fmt.Sprintf can be replaced with a faster alternative
     - predeclared # finds code that shadows one of Go's predeclared identifiers
     - promlinter # checks Prometheus metrics naming via promlint
     - protogetter # reports direct reads from proto message fields when getters should be used
@@ -354,8 +353,7 @@ linters:
     # Todo enable - Might be too strict for us
     # - testpackage # makes you use a separate _test package
     - tparallel # detects inappropriate usage of t.Parallel() method in your Go test codes
-    # Todo enable - One small change. Good find.
-    # - unconvert # removes unnecessary type conversions
+    - unconvert # removes unnecessary type conversions
     - unparam # reports unused function parameters
     - usestdlibvars # detects the possibility to use variables/constants from the Go standard library
     - usetesting # reports uses of functions with replacement inside the testing package

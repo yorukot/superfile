@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"errors"
 	"fmt"
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/common/utils"
@@ -329,7 +330,7 @@ func (m *model) applyPromptModalAction(action common.ModelAction) {
 		actionErr = m.createNewFilePanel(action.Location)
 		successMsg = "New panel opened"
 	default:
-		actionErr = fmt.Errorf("unhandled action type")
+		actionErr = errors.New("unhandled action type")
 	}
 
 	if actionErr != nil {
@@ -349,7 +350,7 @@ func (m *model) applyShellCommandAction(shellCommand string) {
 
 	if err != nil {
 		slog.Error("Command execution failed", "retCode", retCode,
-			"error", err, "output", string(output))
+			"error", err, "output", output)
 		return
 	}
 }
