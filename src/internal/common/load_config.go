@@ -180,7 +180,6 @@ func WriteThemeFiles(content embed.FS) error {
 			continue
 		}
 		// This will not break in windows. This is a relative path for Embed FS. It uses "/" only
-		// nolint:govet // Suppress err shadowing
 		src, err := content.ReadFile(variable.EmbedThemeDir + "/" + file.Name())
 		if err != nil {
 			slog.Error("Error reading theme file from embed", "error", err)

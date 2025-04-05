@@ -324,7 +324,7 @@ linters:
     - nilnil # checks that there is no simultaneous return of nil error and an invalid value
     - noctx # finds sending http request without context.Context
     # Todo enable : Needs some fixes
-    # - nolintlint # reports ill-formed or insufficient nolint directives
+    - nolintlint # reports ill-formed or insufficient nolint directives
     # Todo enable - maybe too strict for us
     # - nonamedreturns # reports all named returns
     - nosprintfhostport # checks for misuse of Sprintf to construct a host with port in a URL
