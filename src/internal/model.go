@@ -114,11 +114,14 @@ func (m *model) handleChannelMessage(msg channelMessage) {
 		m.warnModal = msg.warnModal
 	case sendMetadata:
 		m.fileMetaData.metaData = msg.metadata
-	default:
+	case sendProcess:
 		if !arrayContains(m.processBarModel.processList, msg.messageId) {
 			m.processBarModel.processList = append(m.processBarModel.processList, msg.messageId)
 		}
 		m.processBarModel.process[msg.messageId] = msg.processNewState
+	default:
+		slog.Error("Unhandled channelMessageType in handleChannelMessage()",
+			"messageType", msg.messageType)
 	}
 }
 

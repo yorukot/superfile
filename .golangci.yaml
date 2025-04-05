@@ -278,11 +278,10 @@ linters:
     - errname # checks that sentinel errors are prefixed with the Err and error types are suffixed with the Error
     # Todo enable
     #- errorlint # finds code that will cause problems with the error wrapping scheme introduced in Go 1.13
-    # Todo enable - Need on small fix
-    #- exhaustive # checks exhaustiveness of enum switch statements
+    - exhaustive # checks exhaustiveness of enum switch statements
     - exptostd # detects functions from golang.org/x/exp/ that can be replaced by std functions
     - fatcontext # detects nested contexts in loops
-    # Todo enable - no . this blocks only fmt.Print family and is not useful right now
+    # Not needed. this blocks only fmt.Print family and is not useful right now
     # - forbidigo # forbids identifiers
     # Todo enable - need to make functions shorter
     #- funlen # tool for detection of long functions
