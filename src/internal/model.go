@@ -1,6 +1,9 @@
 package internal
 
 import (
+	"fmt"
+	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/common/utils"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -24,10 +27,6 @@ var firstUse = false
 var hasTrash = true
 var batCmd = ""
 
-var theme ThemeType
-var Config ConfigType
-var hotkeys HotkeysType
-
 var et *exiftool.Exiftool
 
 var channel = make(chan channelMessage, 1000)
@@ -46,7 +45,7 @@ func InitialModel(dir string, firstUseCheck, hasTrashCheck bool) model {
 // cursos blinking and starts message streamming channel
 func (m model) Init() tea.Cmd {
 	return tea.Batch(
-		tea.SetWindowTitle("SuperFile"),
+		tea.SetWindowTitle("superfile"),
 		textinput.Blink, // Assuming textinput.Blink is a valid command
 		listenForChannelMessage(channel),
 	)
@@ -144,20 +143,20 @@ func (m *model) handleWindowResize(msg tea.WindowSizeMsg) {
 
 // Set file preview panel Widht to width. Assure that
 func (m *model) setFilePreviewWidth(width int) {
-	if Config.FilePreviewWidth == 0 {
-		m.fileModel.filePreview.width = (width - Config.SidebarWidth - (4 + (len(m.fileModel.filePanels))*2)) / (len(m.fileModel.filePanels) + 1)
-	} else if Config.FilePreviewWidth > 10 || Config.FilePreviewWidth == 1 {
-		LogAndExit("Config file file_preview_width invalidation")
+	if common.Config.FilePreviewWidth == 0 {
+		m.fileModel.filePreview.width = (width - common.Config.SidebarWidth - (4 + (len(m.fileModel.filePanels))*2)) / (len(m.fileModel.filePanels) + 1)
+	} else if common.Config.FilePreviewWidth > 10 || common.Config.FilePreviewWidth == 1 {
+		utils.LogAndExit("Config file file_preview_width invalidation")
 	} else {
-		m.fileModel.filePreview.width = (width - Config.SidebarWidth) / Config.FilePreviewWidth
+		m.fileModel.filePreview.width = (width - common.Config.SidebarWidth) / common.Config.FilePreviewWidth
 	}
 }
 
 // Proper set panels size. Assure that panels do not overlap
 func (m *model) setFilePanelsSize(width int) {
 	// set each file panel size and max file panel amount
-	m.fileModel.width = (width - Config.SidebarWidth - m.fileModel.filePreview.width - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
-	m.fileModel.maxFilePanel = (width - Config.SidebarWidth - m.fileModel.filePreview.width) / 20
+	m.fileModel.width = (width - common.Config.SidebarWidth - m.fileModel.filePreview.width - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
+	m.fileModel.maxFilePanel = (width - common.Config.SidebarWidth - m.fileModel.filePreview.width) / 20
 	for i := range m.fileModel.filePanels {
 		m.fileModel.filePanels[i].searchBar.Width = m.fileModel.width - 4
 	}
@@ -180,9 +179,8 @@ func (m *model) setHeightValues(height int) {
 	// Todo : Make it grow even more for bigger screen sizes.
 	// Todo : Calculate the value , instead of manually hard coding it.
 
-	// Total Height = mainPanelHeight + 2 (border) + footerHeight (including borders and command line)
-	m.mainPanelHeight = height -
-		actualfooterHeight(m.footerHeight, m.commandLine.input.Focused()) - 2
+	// Main panel height = Total terminal height - footer height - 2(footer border) - 2(file panel border)
+	m.mainPanelHeight = height - m.footerHeight - 2 - 2
 }
 
 // Set help menu size
@@ -212,6 +210,7 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 		"filePanel.panelMode", m.fileModel.filePanels[m.filePanelFocusIndex].panelMode,
 		"typingModal.open", m.typingModal.open,
 		"warnModal.open", m.warnModal.open,
+		"promptModal.open", m.promptModal.IsOpen(),
 		"fileModel.renaming", m.fileModel.renaming,
 		"searchBar.focussed", m.fileModel.filePanels[m.filePanelFocusIndex].searchBar.Focused(),
 		"helpMenu.open", m.helpMenu.open,
@@ -226,6 +225,11 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 
 	if m.typingModal.open {
 		m.typingModalOpenKey(msg.String())
+
+	} else if m.promptModal.IsOpen() {
+		// Ignore keypress. It will be handled in Update call via
+		// updateFilePanelState
+
 	} else if m.warnModal.open {
 		m.warnModalOpenKey(msg.String())
 		// If renaming a object
@@ -245,9 +249,6 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 		// If help menu is open
 	} else if m.helpMenu.open {
 		m.helpMenuKey(msg.String())
-		// If command line input is send
-	} else if m.commandLine.input.Focused() {
-		m.commandLineKey(msg.String())
 		// If asking to confirm quiting
 	} else if m.confirmToQuit {
 		quit := m.confirmToQuitSuperfile(msg.String())
@@ -257,7 +258,7 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 		}
 		// If quiting input pressed, check if has any running process and displays a
 		// warn. Otherwise just quits application
-	} else if msg.String() == containsKey(msg.String(), hotkeys.Quit) {
+	} else if msg.String() == containsKey(msg.String(), common.Hotkeys.Quit) {
 		if m.hasRunningProcesses() {
 			m.warnModalForQuit()
 			return cmd
@@ -282,15 +283,94 @@ func (m *model) updateFilePanelsState(msg tea.Msg, cmd *tea.Cmd) {
 		focusPanel.rename, *cmd = focusPanel.rename.Update(msg)
 	} else if focusPanel.searchBar.Focused() {
 		focusPanel.searchBar, *cmd = focusPanel.searchBar.Update(msg)
-	} else if m.commandLine.input.Focused() {
-		m.commandLine.input, *cmd = m.commandLine.input.Update(msg)
 	} else if m.typingModal.open {
 		m.typingModal.textInput, *cmd = m.typingModal.textInput.Update(msg)
+	} else if m.promptModal.IsOpen() {
+		// *cmd is a non-name, and cannot be used on left of :=
+		var action common.ModelAction
+		// Taking returned cmd is necessary for blinking
+		// Todo : Separate this to a utility
+		cwdLocation := m.fileModel.filePanels[m.filePanelFocusIndex].location
+		action, *cmd = m.promptModal.HandleUpdate(msg, cwdLocation)
+		m.applyPromptModalAction(action)
 	}
 
+	// Todo : This is like duct taping a bigger problem
+	// The code should never reach this state.
 	if focusPanel.cursor < 0 {
 		focusPanel.cursor = 0
 	}
+}
+
+// Apply the Action and notify the promptModal
+func (m *model) applyPromptModalAction(action common.ModelAction) {
+	if _, ok := action.(common.NoAction); !ok {
+		slog.Debug("applyPromptModalAction", "action", action)
+	}
+	var actionErr error
+	var successMsg string
+	switch action := action.(type) {
+	case common.NoAction:
+		return
+	case common.ShellCommandAction:
+		// Update to promptModal is handled here
+		m.applyShellCommandAction(action.Command)
+		return
+	case common.SplitPanelAction:
+		actionErr = m.splitPanel()
+		successMsg = "Panel successfully split"
+	case common.CDCurrentPanelAction:
+		actionErr = m.updateCurrentFilePanelDir(action.Location)
+		successMsg = "Panel directory changed"
+	case common.OpenPanelAction:
+		actionErr = m.createNewFilePanel(action.Location)
+		successMsg = "New panel opened"
+	default:
+		actionErr = fmt.Errorf("unhandled action type")
+	}
+
+	if actionErr != nil {
+		m.promptModal.HandleSPFActionResults(false, actionErr.Error())
+	} else {
+		m.promptModal.HandleSPFActionResults(true, successMsg)
+	}
+}
+
+// Todo : Move them around to appropriate places
+func (m *model) applyShellCommandAction(shellCommand string) {
+	focusPanelDir := m.fileModel.filePanels[m.filePanelFocusIndex].location
+
+	retCode, output, err := utils.ExecuteCommandInShell(common.DefaultCommandTimeout, focusPanelDir, shellCommand)
+
+	m.promptModal.HandleShellCommandResults(retCode, output)
+
+	if err != nil {
+		slog.Error("Command execution failed", "retCode", retCode,
+			"error", err, "output", string(output))
+		return
+	}
+}
+
+func (m *model) splitPanel() error {
+	return m.createNewFilePanel(m.fileModel.filePanels[m.filePanelFocusIndex].location)
+}
+
+func (m *model) updateCurrentFilePanelDir(dir string) error {
+	currentPath := m.fileModel.filePanels[m.filePanelFocusIndex].location
+	newPath := dir
+	if !filepath.IsAbs(dir) {
+		// Assume relative path from current
+		newPath = filepath.Join(currentPath, dir)
+	}
+
+	if info, err := os.Stat(newPath); err != nil {
+		return fmt.Errorf("%s : no such file or directory, stats err : %w", newPath, err)
+	} else if !info.IsDir() {
+		return fmt.Errorf("%s is not a directory", newPath)
+	}
+
+	m.fileModel.filePanels[m.filePanelFocusIndex].location = newPath
+	return nil
 }
 
 // Update the sidebar state. Change name of the renaming pinned directory.
@@ -335,7 +415,7 @@ func (m model) View() string {
 	}
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	// check is the terminal size enough
-	if m.fullHeight < minimumHeight || m.fullWidth < minimumWidth {
+	if m.fullHeight < common.MinimumHeight || m.fullWidth < common.MinimumWidth {
 		return m.terminalSizeWarnRender()
 	}
 	if m.fileModel.width < 18 {
@@ -366,12 +446,6 @@ func (m model) View() string {
 		footer = lipgloss.JoinHorizontal(0, processBar, metaData, clipboardBar)
 	}
 
-	if m.commandLine.input.Focused() {
-		commandLine := m.commandLineInputBoxRender()
-		footer = lipgloss.JoinVertical(0, footer, commandLine)
-
-	}
-
 	var finalRender string
 
 	if m.toggleFooter {
@@ -385,6 +459,13 @@ func (m model) View() string {
 		overlayX := m.fullWidth/2 - m.helpMenu.width/2
 		overlayY := m.fullHeight/2 - m.helpMenu.height/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, helpMenu, finalRender)
+	}
+
+	if m.promptModal.IsOpen() {
+		promptModal := m.promptModalRender()
+		overlayX := m.fullWidth/2 - m.helpMenu.width/2
+		overlayY := m.fullHeight/2 - m.helpMenu.height/2
+		return stringfunction.PlaceOverlay(overlayX, overlayY, promptModal, finalRender)
 	}
 
 	if panel.sortOptions.open {
@@ -403,22 +484,22 @@ func (m model) View() string {
 
 	if m.typingModal.open {
 		typingModal := m.typineModalRender()
-		overlayX := m.fullWidth/2 - modalWidth/2
-		overlayY := m.fullHeight/2 - modalHeight/2
+		overlayX := m.fullWidth/2 - common.ModalWidth/2
+		overlayY := m.fullHeight/2 - common.ModalHeight/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, typingModal, finalRender)
 	}
 
 	if m.warnModal.open {
 		warnModal := m.warnModalRender()
-		overlayX := m.fullWidth/2 - modalWidth/2
-		overlayY := m.fullHeight/2 - modalHeight/2
+		overlayX := m.fullWidth/2 - common.ModalWidth/2
+		overlayY := m.fullHeight/2 - common.ModalHeight/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, warnModal, finalRender)
 	}
 
 	if m.confirmToQuit {
 		warnModal := m.warnModalRender()
-		overlayX := m.fullWidth/2 - modalWidth/2
-		overlayY := m.fullHeight/2 - modalHeight/2
+		overlayX := m.fullWidth/2 - common.ModalWidth/2
+		overlayY := m.fullHeight/2 - common.ModalHeight/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, warnModal, finalRender)
 	}
 
@@ -492,14 +573,14 @@ func (m *model) getFilePanelItems() {
 // the path in state direcotory
 func (m *model) quitSuperfile() {
 	// close exiftool session
-	if Config.Metadata && et != nil {
+	if common.Config.Metadata && et != nil {
 		et.Close()
 	}
 	// cd on quit
 	currentDir := m.fileModel.filePanels[m.filePanelFocusIndex].location
 	variable.LastDir = currentDir
 
-	if Config.CdOnQuit {
+	if common.Config.CdOnQuit {
 		// escape single quote
 		currentDir = strings.ReplaceAll(currentDir, "'", "'\\''")
 		err := os.WriteFile(variable.LastDirFile, []byte("cd '"+currentDir+"'"), 0755)

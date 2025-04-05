@@ -3,6 +3,7 @@ package internal
 import (
 	"errors"
 	"fmt"
+	"github.com/yorukot/superfile/src/internal/common"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -13,7 +14,6 @@ import (
 
 	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/progress"
-	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/lithammer/shortuuid"
 	"github.com/yorukot/superfile/src/config/icon"
@@ -22,22 +22,11 @@ import (
 // Create a file in the currently focus file panel
 func (m *model) panelCreateNewFile() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-	ti := textinput.New()
-	ti.Cursor.Style = modalCursorStyle
-	ti.Cursor.TextStyle = modalStyle
-	ti.TextStyle = modalStyle
-	ti.Cursor.Blink = true
-	ti.Placeholder = "Add \"" + string(filepath.Separator) + "\" transcend folders"
-	ti.PlaceholderStyle = modalStyle
-	ti.Focus()
-	ti.CharLimit = 156
-	ti.Width = modalWidth - 10
 
 	m.typingModal.location = panel.location
 	m.typingModal.open = true
-	m.typingModal.textInput = ti
+	m.typingModal.textInput = common.GenerateNewFileTextInput()
 	m.firstTextInput = true
-
 }
 
 // Todo : This function does not needs the entire model. Only pass the panel object
@@ -90,25 +79,10 @@ func (m *model) panelItemRename() {
 		cursorPos = nameLen
 	}
 
-	// Todo : Separate this out to a function like initDefaultTextInput()
-	ti := textinput.New()
-	ti.Cursor.Style = filePanelCursorStyle
-	ti.Cursor.TextStyle = filePanelStyle
-	ti.Prompt = filePanelCursorStyle.Render(icon.Cursor + " ")
-	ti.TextStyle = modalStyle
-	ti.Cursor.Blink = true
-	ti.Placeholder = "New name"
-	ti.PlaceholderStyle = modalStyle
-	ti.SetValue(panel.element[panel.cursor].name)
-	ti.SetCursor(cursorPos)
-	ti.Focus()
-	ti.CharLimit = 156
-	ti.Width = m.fileModel.width - 4
-
 	m.fileModel.renaming = true
 	panel.renaming = true
 	m.firstTextInput = true
-	panel.rename = ti
+	panel.rename = common.GenerateRenameTextInput(m.fileModel.width-4, cursorPos, panel.element[panel.cursor].name)
 }
 
 func (m *model) deleteItemWarn() {
@@ -154,8 +128,7 @@ func (m *model) deleteSingleItem() {
 		return
 	}
 
-	prog := progress.New(generateGradientColor())
-	prog.PercentageStyle = footerStyle
+	prog := common.GenerateDefaultProgress()
 
 	newProcess := process{
 		name:     icon.Delete + icon.Space + panel.element[panel.cursor].name,
@@ -202,8 +175,8 @@ func (m *model) deleteMultipleItems() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	if len(panel.selected) != 0 {
 		id := shortuuid.New()
-		prog := progress.New(generateGradientColor())
-		prog.PercentageStyle = footerStyle
+		prog := progress.New(common.GenerateGradientColor())
+		prog.PercentageStyle = common.FooterStyle
 
 		newProcess := process{
 			name:     icon.Delete + icon.Space + filepath.Base(panel.selected[0]),
@@ -274,8 +247,7 @@ func (m *model) completelyDeleteSingleItem() {
 		return
 	}
 
-	prog := progress.New(generateGradientColor())
-	prog.PercentageStyle = footerStyle
+	prog := common.GenerateDefaultProgress()
 
 	newProcess := process{
 		name:     "󰆴 " + panel.element[panel.cursor].name,
@@ -326,8 +298,7 @@ func (m *model) completelyDeleteMultipleItems() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	if len(panel.selected) != 0 {
 		id := shortuuid.New()
-		prog := progress.New(generateGradientColor())
-		prog.PercentageStyle = footerStyle
+		prog := common.GenerateDefaultProgress()
 
 		newProcess := process{
 			name:     icon.Delete + icon.Space + filepath.Base(panel.selected[0]),
@@ -447,8 +418,7 @@ func (m *model) pasteItem() {
 	slog.Debug("model.pasteItem", "items", m.copyItems.items, "cut", m.copyItems.cut,
 		"totalFiles", totalFiles, "panel location", panel.location)
 
-	prog := progress.New(generateGradientColor())
-	prog.PercentageStyle = footerStyle
+	prog := common.GenerateDefaultProgress()
 
 	prefixIcon := icon.Copy + icon.Space
 	if m.copyItems.cut {
@@ -600,7 +570,7 @@ func (m *model) openFileWithEditor() tea.Cmd {
 		return nil
 	}
 
-	editor := Config.Editor
+	editor := common.Config.Editor
 	if editor == "" {
 		editor = os.Getenv("EDITOR")
 	}
@@ -630,7 +600,7 @@ func (m *model) openFileWithEditor() tea.Cmd {
 // Open directory with default editor
 func (m *model) openDirectoryWithEditor() tea.Cmd {
 	// Todo : Move hardcoded strings to constants : "windows", and editors
-	editor := Config.DirEditor
+	editor := common.Config.DirEditor
 
 	if editor == "" {
 		if runtime.GOOS == "windows" {

@@ -4,6 +4,8 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/common/utils"
 	"io"
 	"log"
 	"log/slog"
@@ -14,7 +16,6 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/pelletier/go-toml/v2"
 	"github.com/urfave/cli/v2"
 	variable "github.com/yorukot/superfile/src/config"
 	internal "github.com/yorukot/superfile/src/internal"
@@ -23,8 +24,12 @@ import (
 
 // Run superfile app
 func Run(content embed.FS) {
-	internal.LoadInitial_PrerenderedVariables()
-	internal.LoadAllDefaultConfig(content)
+
+	// Before we open log file, set all "non debug" logs to stdout
+	utils.SetRootLoggerToStdout(false)
+
+	common.LoadInitial_PrerenderedVariables()
+	common.LoadAllDefaultConfig(content)
 
 	app := &cli.App{
 		Name:        "superfile",
@@ -119,12 +124,14 @@ func Run(content embed.FS) {
 
 			firstUse := checkFirstUse()
 
-			go CheckForUpdates()
-
 			p := tea.NewProgram(internal.InitialModel(path, firstUse, hasTrash), tea.WithAltScreen(), tea.WithMouseCellMotion())
 			if _, err := p.Run(); err != nil {
 				log.Fatalf("Alas, there's been an error: %v", err)
 			}
+
+			// This must be after calling internal.InitialModel()
+			// so that we know `common.Config` is loaded
+			go CheckForUpdates()
 
 			if variable.PrintLastDir {
 				fmt.Println(variable.LastDir)
@@ -164,11 +171,11 @@ func InitConfigFile() {
 	}
 
 	// Write config file
-	if err := writeConfigFile(variable.ConfigFile, internal.ConfigTomlString); err != nil {
+	if err := writeConfigFile(variable.ConfigFile, common.ConfigTomlString); err != nil {
 		log.Fatalln("Error writing config file:", err)
 	}
 
-	if err := writeConfigFile(variable.HotkeysFile, internal.HotkeysTomlString); err != nil {
+	if err := writeConfigFile(variable.HotkeysFile, common.HotkeysTomlString); err != nil {
 		log.Fatalln("Error writing config file:", err)
 	}
 
@@ -267,22 +274,7 @@ func writeLastCheckTime(t time.Time) {
 // Todo : This is too big of a function. Refactor it to displayUpdateNotification, fetchLatestVersion,
 // shouldCheckForUpdates, chucks
 func CheckForUpdates() {
-	var Config internal.ConfigType
-
-	// Get AutoCheck flag from configuration files
-
-	// Todo : We are reading the config file here, and also in the loadConfigFile functions
-	// This needs to be fixed.
-	data, err := os.ReadFile(variable.ConfigFile)
-	if err != nil {
-		log.Fatalf("Config file doesn't exist: %v", err)
-	}
-	err = toml.Unmarshal(data, &Config)
-	if err != nil {
-		log.Fatalf("Error decoding config file ( your config file may be misconfigured ): %v", err)
-	}
-
-	if !Config.AutoCheckUpdate {
+	if !common.Config.AutoCheckUpdate {
 		return
 	}
 

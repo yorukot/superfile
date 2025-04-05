@@ -1,6 +1,7 @@
 *.log
 bin/
 dist/
+.idea/
 
 # generated types
 .astro/
@@ -14,6 +15,9 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# Go test coverage reports
+coverage.out
+coverage.html
 
 # environment variables
 .env

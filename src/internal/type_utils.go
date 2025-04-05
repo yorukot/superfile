@@ -1,6 +1,9 @@
 package internal
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/yorukot/superfile/src/internal/common"
+)
 
 // reset the items slice and set the cut value
 func (c *copyItems) reset(cut bool) {
@@ -12,30 +15,16 @@ func (c *copyItems) reset(cut bool) {
 
 // Non fatal Validations. This indicates bug / programming errors, not user configuration mistake
 func (m *model) validateLayout() error {
-	if 0 < m.footerHeight && m.footerHeight < minFooterHeight {
+	if 0 < m.footerHeight && m.footerHeight < common.MinFooterHeight {
 		return fmt.Errorf("footerHeight %v is too small", m.footerHeight)
 	}
 	// PanelHeight + 2 lines (main border) + actual footer height
-	if m.fullHeight != (m.mainPanelHeight+2)+actualfooterHeight(m.footerHeight, m.commandLine.input.Focused()) {
+	if m.fullHeight != (m.mainPanelHeight+2)+(m.footerHeight+2) {
 		return fmt.Errorf("Invalid model layout, fullHeight : %v, mainPanelHeight : %v, footerHeight : %v\n",
 			m.fullHeight, m.mainPanelHeight, m.footerHeight)
 	}
 	// Todo : Add check for width as well
 	return nil
-}
-
-func actualfooterHeight(footerHeight int, commandLineFocussed bool) int {
-	// footerHeight + 2 or 0 lines (footer border)
-	// + 1 lines ( commmand line only if footersize is >0)
-	footerBorder := 2
-	if footerHeight == 0 {
-		footerBorder = 0
-	}
-	commandLineHeight := 0
-	if commandLineFocussed && footerHeight != 0 {
-		commandLineHeight = 1
-	}
-	return footerHeight + footerBorder + commandLineHeight
 }
 
 // ================ Sidebar related utils =====================

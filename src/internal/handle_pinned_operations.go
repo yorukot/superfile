@@ -2,11 +2,9 @@ package internal
 
 import (
 	"encoding/json"
+	"github.com/yorukot/superfile/src/internal/common"
 	"log/slog"
 	"os"
-
-	"github.com/charmbracelet/bubbles/textinput"
-	"github.com/yorukot/superfile/src/config/icon"
 
 	variable "github.com/yorukot/superfile/src/config"
 )
@@ -24,22 +22,8 @@ func (m *model) pinnedItemRename() {
 	nameLen := len(sidebar.directories[sidebar.cursor].name)
 	cursorPos := nameLen
 
-	ti := textinput.New()
-	ti.Cursor.Style = filePanelCursorStyle
-	ti.Cursor.TextStyle = filePanelStyle
-	ti.Prompt = filePanelCursorStyle.Render(icon.Cursor + " ")
-	ti.TextStyle = modalStyle
-	ti.Cursor.Blink = true
-	ti.Placeholder = "New name"
-	ti.PlaceholderStyle = modalStyle
-	ti.SetValue(sidebar.directories[sidebar.cursor].name)
-	ti.SetCursor(cursorPos)
-	ti.Focus()
-	ti.CharLimit = 156
-	ti.Width = Config.SidebarWidth - 4
-
 	m.sidebarModel.renaming = true
-	m.sidebarModel.rename = ti
+	m.sidebarModel.rename = common.GeneratePinnedRenameTextInput(cursorPos, sidebar.directories[sidebar.cursor].name)
 }
 
 // Cancel rename pinned directory

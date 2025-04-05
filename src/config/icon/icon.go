@@ -39,6 +39,7 @@ var (
 	Search      string = "\ue68f"     // Printable Rune : ""
 	SortAsc     string = "\uf0de"     // Printable Rune : ""
 	SortDesc    string = "\uf0dd"     // Printable Rune : ""
+	Terminal    string = "\ue795"     // Printable Rune : ""
 )
 
 /*

@@ -3,6 +3,7 @@ package internal
 import (
 	"bufio"
 	"fmt"
+	"github.com/yorukot/superfile/src/internal/common"
 	"io"
 	"math"
 	"os"
@@ -60,39 +61,39 @@ func truncateMiddleText(text string, maxChars int, talis string) string {
 func prettierName(name string, width int, isDir bool, isSelected bool, bgColor lipgloss.Color) string {
 	style := getElementIcon(name, isDir)
 	if isSelected {
-		return stringColorRender(lipgloss.Color(style.Color), bgColor).
+		return common.StringColorRender(lipgloss.Color(style.Color), bgColor).
 			Background(bgColor).
 			Render(style.Icon+" ") +
-			filePanelItemSelectedStyle.
+			common.FilePanelItemSelectedStyle.
 				Render(truncateText(name, width, "..."))
 	} else {
-		return stringColorRender(lipgloss.Color(style.Color), bgColor).
+		return common.StringColorRender(lipgloss.Color(style.Color), bgColor).
 			Background(bgColor).
 			Render(style.Icon+" ") +
-			filePanelStyle.Render(truncateText(name, width, "..."))
+			common.FilePanelStyle.Render(truncateText(name, width, "..."))
 	}
 }
 
 func prettierDirectoryPreviewName(name string, isDir bool, bgColor lipgloss.Color) string {
 	style := getElementIcon(name, isDir)
-	return stringColorRender(lipgloss.Color(style.Color), bgColor).
+	return common.StringColorRender(lipgloss.Color(style.Color), bgColor).
 		Background(bgColor).
 		Render(style.Icon+" ") +
-		filePanelStyle.Render(name)
+		common.FilePanelStyle.Render(name)
 }
 
 func clipboardPrettierName(name string, width int, isDir bool, isSelected bool) string {
 	style := getElementIcon(name, isDir)
 	if isSelected {
-		return stringColorRender(lipgloss.Color(style.Color), footerBGColor).
-			Background(footerBGColor).
+		return common.StringColorRender(lipgloss.Color(style.Color), common.FooterBGColor).
+			Background(common.FooterBGColor).
 			Render(style.Icon+" ") +
-			filePanelItemSelectedStyle.Render(truncateTextBeginning(name, width, "..."))
+			common.FilePanelItemSelectedStyle.Render(truncateTextBeginning(name, width, "..."))
 	} else {
-		return stringColorRender(lipgloss.Color(style.Color), footerBGColor).
-			Background(footerBGColor).
+		return common.StringColorRender(lipgloss.Color(style.Color), common.FooterBGColor).
+			Background(common.FooterBGColor).
 			Render(style.Icon+" ") +
-			filePanelStyle.Render(truncateTextBeginning(name, width, "..."))
+			common.FilePanelStyle.Render(truncateTextBeginning(name, width, "..."))
 	}
 }
 
@@ -115,7 +116,7 @@ func formatFileSize(size int64) string {
 	unitsDec := []string{"B", "kB", "MB", "GB", "TB", "PB", "EB"}
 	unitsBin := []string{"B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB"}
 
-	if Config.FileSizeUseSI {
+	if common.Config.FileSizeUseSI {
 		unitIndex := int(math.Floor(math.Log(float64(size)) / math.Log(1000)))
 		adjustedSize := float64(size) / math.Pow(1000, float64(unitIndex))
 		return fmt.Sprintf("%.2f %s", adjustedSize, unitsDec[unitIndex])

@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"github.com/yorukot/superfile/src/internal/common"
 	"log/slog"
 )
 
@@ -32,7 +33,7 @@ func wheelMainAction(msg string, m *model) {
 		}
 	}
 
-	for i := 0; i < wheelRunTime; i++ {
+	for i := 0; i < common.WheelRunTime; i++ {
 		action()
 	}
 

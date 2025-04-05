@@ -10,12 +10,13 @@ import (
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/lithammer/shortuuid"
 	"github.com/yorukot/superfile/src/config/icon"
+	"github.com/yorukot/superfile/src/internal/common"
 )
 
 func zipSource(source, target string) error {
 	id := shortuuid.New()
 	prog := progress.New()
-	prog.PercentageStyle = footerStyle
+	prog.PercentageStyle = common.FooterStyle
 
 	totalFiles, err := countFiles(source)
 
