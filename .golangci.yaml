@@ -299,7 +299,6 @@ linters:
     #- gocyclo # computes and checks the cyclomatic complexity of functions
     # Todo enable - too much for us
     #- godot # checks if comments end in a period
-    # Todo enable - one small fix
     - goimports # in addition to fixing imports, goimports also formats your code in the same style as gofmt
     - gomoddirectives # manages the use of 'replace', 'retract', and 'excludes' directives in go.mod
     - goprintffuncname # checks that printf-like functions are named with f at the end
@@ -323,8 +322,7 @@ linters:
     - nilerr # finds the code that returns nil even if it checks that the error is not nil
     - nilnesserr # reports that it checks for err != nil, but it returns a different nil value error (powered by nilness and nilerr)
     - nilnil # checks that there is no simultaneous return of nil error and an invalid value
-    # Todo enable : Need to fix one client.Get usage
-    # - noctx # finds sending http request without context.Context
+    - noctx # finds sending http request without context.Context
     # Todo enable : Needs some fixes
     # - nolintlint # reports ill-formed or insufficient nolint directives
     # Todo enable - maybe too strict for us
