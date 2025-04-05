@@ -3,15 +3,16 @@ package internal
 import (
 	"flag"
 	"fmt"
+	"os"
+	"path/filepath"
+	"runtime"
+	"testing"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/stretchr/testify/assert"
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/common/utils"
 	"github.com/yorukot/superfile/src/internal/ui/prompt"
-	"os"
-	"path/filepath"
-	"runtime"
-	"testing"
 )
 
 func TestMain(m *testing.M) {

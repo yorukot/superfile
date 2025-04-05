@@ -1,8 +1,9 @@
 package internal
 
 import (
-	"github.com/yorukot/superfile/src/internal/common"
 	"log/slog"
+
+	"github.com/yorukot/superfile/src/internal/common"
 )
 
 func wheelMainAction(msg string, m *model) {

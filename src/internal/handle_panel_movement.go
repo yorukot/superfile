@@ -1,12 +1,13 @@
 package internal
 
 import (
-	"github.com/yorukot/superfile/src/internal/common/utils"
 	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
+
+	"github.com/yorukot/superfile/src/internal/common/utils"
 
 	variable "github.com/yorukot/superfile/src/config"
 )

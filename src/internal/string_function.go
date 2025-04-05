@@ -3,13 +3,14 @@ package internal
 import (
 	"bufio"
 	"fmt"
-	"github.com/yorukot/superfile/src/internal/common"
 	"io"
 	"math"
 	"os"
 	"strings"
 	"unicode"
 	"unicode/utf8"
+
+	"github.com/yorukot/superfile/src/internal/common"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/x/exp/term/ansi"

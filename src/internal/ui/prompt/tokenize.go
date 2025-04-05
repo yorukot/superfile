@@ -3,11 +3,12 @@ package prompt
 import (
 	"errors"
 	"fmt"
-	"github.com/yorukot/superfile/src/internal/common/utils"
 	"log/slog"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/yorukot/superfile/src/internal/common/utils"
 )
 
 // split into tokens

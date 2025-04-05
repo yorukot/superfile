@@ -300,7 +300,7 @@ linters:
     # Todo enable - too much for us
     #- godot # checks if comments end in a period
     # Todo enable - one small fix
-    #- goimports # in addition to fixing imports, goimports also formats your code in the same style as gofmt
+    - goimports # in addition to fixing imports, goimports also formats your code in the same style as gofmt
     - gomoddirectives # manages the use of 'replace', 'retract', and 'excludes' directives in go.mod
     - goprintffuncname # checks that printf-like functions are named with f at the end
     # Todo enable - ignore for a few int overflow, and fix file permissions

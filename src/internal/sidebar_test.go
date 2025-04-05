@@ -1,9 +1,10 @@
 package internal
 
 import (
-	"github.com/stretchr/testify/assert"
 	"strconv"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func dirSlice(count int) []directory {

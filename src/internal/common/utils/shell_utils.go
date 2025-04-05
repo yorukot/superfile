@@ -4,11 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	variable "github.com/yorukot/superfile/src/config"
 	"log/slog"
 	"os/exec"
 	"runtime"
 	"time"
+
+	variable "github.com/yorukot/superfile/src/config"
 )
 
 // Choose correct shell as per OS

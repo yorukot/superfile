@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/yorukot/superfile/src/internal/common"
 	"log/slog"
 	"os"
 	"path/filepath"
+
+	"github.com/yorukot/superfile/src/internal/common"
 
 	variable "github.com/yorukot/superfile/src/config"
 )

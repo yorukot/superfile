@@ -1,12 +1,13 @@
 package internal
 
 import (
-	"github.com/yorukot/superfile/src/internal/common/utils"
 	"log/slog"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/yorukot/superfile/src/internal/common/utils"
 
 	"github.com/barasher/go-exiftool"
 	variable "github.com/yorukot/superfile/src/config"

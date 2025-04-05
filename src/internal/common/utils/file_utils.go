@@ -1,9 +1,12 @@
 package utils
 
-import "os"
-import "fmt"
-import "github.com/pelletier/go-toml/v2"
-import "reflect"
+import (
+	"fmt"
+	"os"
+	"reflect"
+
+	"github.com/pelletier/go-toml/v2"
+)
 
 // Utility functions related to file operations
 

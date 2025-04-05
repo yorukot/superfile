@@ -3,8 +3,6 @@ package internal
 import (
 	"errors"
 	"fmt"
-	"github.com/yorukot/superfile/src/internal/common"
-	"github.com/yorukot/superfile/src/internal/common/utils"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -12,6 +10,9 @@ import (
 	"reflect"
 	"strings"
 	"time"
+
+	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/common/utils"
 
 	"github.com/barasher/go-exiftool"
 	"github.com/charmbracelet/bubbles/textinput"

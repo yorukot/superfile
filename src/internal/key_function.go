@@ -1,9 +1,10 @@
 package internal
 
 import (
-	"github.com/yorukot/superfile/src/internal/common"
 	"log/slog"
 	"slices"
+
+	"github.com/yorukot/superfile/src/internal/common"
 
 	tea "github.com/charmbracelet/bubbletea"
 	variable "github.com/yorukot/superfile/src/config"
