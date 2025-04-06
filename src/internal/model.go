@@ -22,17 +22,15 @@ import (
 	stringfunction "github.com/yorukot/superfile/src/pkg/string_function"
 )
 
-var LastTimeCursorMove = [2]int{int(time.Now().UnixMicro()), 0}
-var ListeningMessage = true
-
-var firstUse = false
-var hasTrash = true
-var batCmd = ""
-
-var et *exiftool.Exiftool
-
-var channel = make(chan channelMessage, 1000)
-var progressBarLastRenderTime time.Time = time.Now()
+// These represent model's state information, its not a global preperty
+var LastTimeCursorMove = [2]int{int(time.Now().UnixMicro()), 0} //nolint: gochecknoglobals // Todo : Move to model struct
+var ListeningMessage = true                                     //nolint: gochecknoglobals // Todo : Move to model struct
+var firstUse = false                                            //nolint: gochecknoglobals // Todo : Move to model struct
+var hasTrash = true                                             //nolint: gochecknoglobals // Todo : Move to model struct
+var batCmd = ""                                                 //nolint: gochecknoglobals // Todo : Move to model struct
+var et *exiftool.Exiftool                                       //nolint: gochecknoglobals // Todo : Move to model struct
+var channel = make(chan channelMessage, 1000)                   //nolint: gochecknoglobals // Todo : Move to model struct
+var progressBarLastRenderTime time.Time = time.Now()            //nolint: gochecknoglobals // Todo : Move to model struct
 
 // Initialize and return model with default configs
 // It returns only tea.Model because when it used in main, the return value

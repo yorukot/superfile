@@ -128,7 +128,6 @@ linters-settings:
     # Ignore comments when counting lines.
     # Default false
     ignore-comments: true
-
   gochecksumtype:
     # Presence of `default` case in switch statements satisfies exhaustiveness, if all members are not listed.
     # Default: true
@@ -285,7 +284,7 @@ linters:
     #- funlen # tool for detection of long functions
     - gocheckcompilerdirectives # validates go compiler directive comments (//go:)
     # Todo enable - This is too much for us right now
-    # - gochecknoglobals # checks that no global variables exist
+    - gochecknoglobals # checks that no global variables exist
     - gochecknoinits # checks that no init functions are present in Go code
     - gochecksumtype # checks exhaustiveness on Go "sum types"
     # Todo enable - Need to refactor many functions
@@ -398,7 +397,29 @@ linters:
     # - tenv # [deprecated, replaced by usetesting] detects using os.Setenv instead of t.Setenv since Go1.17
     #- thelper # detects golang test helpers without t.Helper() call and checks the consistency of test helpers
     # - wsl # [too strict and mostly code is not more readable] whitespace linter forces you to use empty lines
-
+  exclusions:
+    rules:
+      # Stores globally accessible icon strings
+      - path: 'src/config/icon/icon.go'
+        linters:
+          - gochecknoglobals
+      # Stores prerendered styles
+      - path: 'src/internal/common/style.go'
+        linters:
+          - gochecknoglobals
+      # Some fixed variables like default config paths, version, etc.
+      - path: 'src/config/fixed_variable.go'
+        linters:
+          - gochecknoglobals
+      # Stores predefined variables, like re-used non-const strings
+      - path: 'src/internal/common/predefined_variable.go'
+        linters:
+          - gochecknoglobals
+      # Global variables storing config
+      - path: 'src/internal/common/default_config.go'
+        linters:
+          - gochecknoglobals    
+          
 
 issues:
   # Maximum count of issues with the same text.
