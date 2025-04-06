@@ -291,7 +291,6 @@ linters:
     # Todo enable - Need to refactor many functions
     # - gocognit # computes and checks the cognitive complexity of functions
     - goconst # finds repeated strings that could be replaced by a constant
-    # Todo enable - Some few changes. There are good suggestions
     - gocritic # provides diagnostics that check for bugs, performance and style issues
     # Todo enable
     #- gocyclo # computes and checks the cyclomatic complexity of functions
@@ -320,8 +319,7 @@ linters:
     - nilnil # checks that there is no simultaneous return of nil error and an invalid value
     - noctx # finds sending http request without context.Context
     - nolintlint # reports ill-formed or insufficient nolint directives
-    # Todo enable - maybe too strict for us
-    # - nonamedreturns # reports all named returns
+    - nonamedreturns # reports all named returns
     - nosprintfhostport # checks for misuse of Sprintf to construct a host with port in a URL
     - perfsprint # checks that fmt.Sprintf can be replaced with a faster alternative
     - predeclared # finds code that shadows one of Go's predeclared identifiers

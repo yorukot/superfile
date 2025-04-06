@@ -25,7 +25,7 @@ func WriteTomlData(filePath string, data interface{}) error {
 
 // Helper function to load and validate TOML files with field checking
 // errorPrefix is appended before every error message
-func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFlag bool, errorPrefix string) (hasError bool) {
+func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFlag bool, errorPrefix string) bool {
 	// Initialize with default config
 	_ = toml.Unmarshal([]byte(defaultData), target)
 
@@ -34,6 +34,7 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 		LogAndExit("Config file doesn't exist", "error", err)
 	}
 	errMsg := ""
+	hasError := false
 
 	// Create a map to track which fields are present
 	// Have to do this manually as toml.Unmarshal does not return an error when it encounters a TOML key

@@ -86,21 +86,16 @@ func getPinnedDirectories() []directory {
 }
 
 // Get external media directories
-func getExternalMediaFolders() (disks []directory) {
+func getExternalMediaFolders() []directory {
 	// only get physical drives
 	parts, err := disk.Partitions(false)
 
 	if err != nil {
 		slog.Error("Error while getting external media: ", "error", err)
-		return disks
+		return nil
 	}
-
+	var disks []directory
 	for _, disk := range parts {
-		// Todo : We need to evaluate if more debug logs are a performance problem
-		// even when user had set debug=false in config. We dont write those to log file
-		// But we do make a functions call, and pass around some strings. So it might/might not be
-		// a problem. It could be a problem in a hot path though.
-
 		// shouldListDisk, diskName, and diskLocation, each has runtime.GOOS checks
 		// We can ideally reduce it to one check only.
 		if shouldListDisk(disk.Mountpoint) {

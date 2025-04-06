@@ -116,11 +116,11 @@ func returnFocusType(focusPanel focusPanelType) filePanelFocusType {
 	return secondFocus
 }
 
-func returnDirElement(location string, displayDotFile bool, sortOptions sortOptionsModelData) (directoryElement []element) {
+func returnDirElement(location string, displayDotFile bool, sortOptions sortOptionsModelData) []element {
 	dirEntries, err := os.ReadDir(location)
 	if err != nil {
 		slog.Error("Error while return folder element function", "error", err)
-		return directoryElement
+		return nil
 	}
 
 	dirEntries = slices.DeleteFunc(dirEntries, func(e os.DirEntry) bool {
@@ -131,7 +131,7 @@ func returnDirElement(location string, displayDotFile bool, sortOptions sortOpti
 
 	// No files/directoes to process
 	if len(dirEntries) == 0 {
-		return directoryElement
+		return nil
 	}
 
 	// Sort files
@@ -193,6 +193,8 @@ func returnDirElement(location string, displayDotFile bool, sortOptions sortOpti
 	}
 
 	sort.Slice(dirEntries, order)
+	// Preallocate for efficiency
+	directoryElement := make([]element, 0, len(dirEntries))
 	for _, item := range dirEntries {
 		directoryElement = append(directoryElement, element{
 			name:      item.Name(),
@@ -203,7 +205,7 @@ func returnDirElement(location string, displayDotFile bool, sortOptions sortOpti
 	return directoryElement
 }
 
-func returnDirElementBySearchString(location string, displayDotFile bool, searchString string) (dirElement []element) {
+func returnDirElementBySearchString(location string, displayDotFile bool, searchString string) []element {
 	items, err := os.ReadDir(location)
 	if err != nil {
 		slog.Error("Error while return folder element function", "error", err)
@@ -237,7 +239,9 @@ func returnDirElementBySearchString(location string, displayDotFile bool, search
 	}
 	// https://github.com/reinhrst/fzf-lib/blob/main/core.go#L43
 	// No sorting needed. fzf.DefaultOptions() already return values ordered on Score
-	for _, item := range fzfSearch(searchString, fileAndDirectories) {
+	fzfResults := fzfSearch(searchString, fileAndDirectories)
+	dirElement := make([]element, 0, len(fzfResults))
+	for _, item := range fzfResults {
 		resultItem := folderElementMap[item.Key]
 		dirElement = append(dirElement, resultItem)
 	}
