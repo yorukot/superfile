@@ -43,9 +43,7 @@ func ExecuteCommand(timeLimit time.Duration, cmdDir string, baseCmd string, args
 
 	if err == nil {
 		retCode = 0
-	} else if exitErr, ok := err.(*exec.ExitError); ok {
-		// We dont expect error to be Wrapped here, so we are using type
-		// assertion not errors.As
+	} else if exitErr, ok := err.(*exec.ExitError); ok { //nolint: errorlint // We dont expect error to be Wrapped here, so we are using type assertion not errors.As
 		retCode = exitErr.ExitCode()
 	} else {
 		err = fmt.Errorf("unexpected Error in command execution : %w", err)

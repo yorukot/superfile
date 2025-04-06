@@ -99,7 +99,7 @@ func ImagePreview(path string, maxWidth, maxHeight int, defaultBGColor string) (
 	// Convert image to ANSI
 	bgColor, err := hexToColor(defaultBGColor)
 	if err != nil {
-		return "", fmt.Errorf("invalid background color: %v", err)
+		return "", fmt.Errorf("invalid background color: %w", err)
 	}
 	ansiImage := ConvertImageToANSI(resizedImg, bgColor)
 

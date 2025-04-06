@@ -276,8 +276,7 @@ linters:
     - dupl # tool for code clone detection
     - durationcheck # checks for two durations multiplied together
     - errname # checks that sentinel errors are prefixed with the Err and error types are suffixed with the Error
-    # Todo enable
-    #- errorlint # finds code that will cause problems with the error wrapping scheme introduced in Go 1.13
+    - errorlint # finds code that will cause problems with the error wrapping scheme introduced in Go 1.13
     - exhaustive # checks exhaustiveness of enum switch statements
     - exptostd # detects functions from golang.org/x/exp/ that can be replaced by std functions
     - fatcontext # detects nested contexts in loops
@@ -344,8 +343,7 @@ linters:
     # - stylecheck # is a replacement for golint
     - testableexamples # checks if examples are testable (have an expected output)
     - testifylint # checks usage of github.com/stretchr/testify
-    # Todo enable - Might be too strict for us
-    # - testpackage # makes you use a separate _test package
+    # - testpackage # makes you use a separate _test package # Not needed - Makes it harder to test unexported package functions.
     - tparallel # detects inappropriate usage of t.Parallel() method in your Go test codes
     - unconvert # removes unnecessary type conversions
     - unparam # reports unused function parameters

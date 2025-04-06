@@ -20,12 +20,12 @@ func isSamePartition(path1, path2 string) (bool, error) {
 	// Get the absolute path to handle relative paths
 	absPath1, err := filepath.Abs(path1)
 	if err != nil {
-		return false, fmt.Errorf("failed to get absolute path of the first path: %v", err)
+		return false, fmt.Errorf("failed to get absolute path of the first path: %w", err)
 	}
 
 	absPath2, err := filepath.Abs(path2)
 	if err != nil {
-		return false, fmt.Errorf("failed to get absolute path of the second path: %v", err)
+		return false, fmt.Errorf("failed to get absolute path of the second path: %w", err)
 	}
 
 	if runtime.GOOS == variable.OS_WINDOWS {
@@ -51,7 +51,7 @@ func moveElement(src, dst string) error {
 	// Check if source and destination are on the same partition
 	sameDev, err := isSamePartition(src, dst)
 	if err != nil {
-		return fmt.Errorf("failed to check partitions: %v", err)
+		return fmt.Errorf("failed to check partitions: %w", err)
 	}
 
 	// If on the same partition, attempt to rename (which will use the same inode)
@@ -65,12 +65,12 @@ func moveElement(src, dst string) error {
 	// If on different partitions or rename failed, fall back to copy+delete
 	err = copyElement(src, dst)
 	if err != nil {
-		return fmt.Errorf("failed to copy: %v", err)
+		return fmt.Errorf("failed to copy: %w", err)
 	}
 
 	err = os.RemoveAll(src)
 	if err != nil {
-		return fmt.Errorf("failed to remove source after copy: %v", err)
+		return fmt.Errorf("failed to remove source after copy: %w", err)
 	}
 
 	return nil
@@ -80,7 +80,7 @@ func moveElement(src, dst string) error {
 func copyElement(src, dst string) error {
 	srcInfo, err := os.Stat(src)
 	if err != nil {
-		return fmt.Errorf("failed to stat source: %v", err)
+		return fmt.Errorf("failed to stat source: %w", err)
 	}
 
 	if srcInfo.IsDir() {
@@ -93,12 +93,12 @@ func copyElement(src, dst string) error {
 func copyDir(src, dst string, srcInfo os.FileInfo) error {
 	err := os.MkdirAll(dst, srcInfo.Mode())
 	if err != nil {
-		return fmt.Errorf("failed to create destination directory: %v", err)
+		return fmt.Errorf("failed to create destination directory: %w", err)
 	}
 
 	entries, err := os.ReadDir(src)
 	if err != nil {
-		return fmt.Errorf("failed to read source directory: %v", err)
+		return fmt.Errorf("failed to read source directory: %w", err)
 	}
 
 	for _, entry := range entries {
@@ -107,7 +107,7 @@ func copyDir(src, dst string, srcInfo os.FileInfo) error {
 
 		entryInfo, err := entry.Info()
 		if err != nil {
-			return fmt.Errorf("failed to get entry info: %v", err)
+			return fmt.Errorf("failed to get entry info: %w", err)
 		}
 
 		if entryInfo.IsDir() {
@@ -126,18 +126,18 @@ func copyDir(src, dst string, srcInfo os.FileInfo) error {
 func copyFile(src, dst string, srcInfo os.FileInfo) error {
 	srcFile, err := os.Open(src)
 	if err != nil {
-		return fmt.Errorf("failed to open source file: %v", err)
+		return fmt.Errorf("failed to open source file: %w", err)
 	}
 	defer srcFile.Close()
 
 	dstFile, err := os.OpenFile(dst, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, srcInfo.Mode())
 	if err != nil {
-		return fmt.Errorf("failed to create destination file: %v", err)
+		return fmt.Errorf("failed to create destination file: %w", err)
 	}
 	defer dstFile.Close()
 
 	if _, err := io.Copy(dstFile, srcFile); err != nil {
-		return fmt.Errorf("failed to copy file contents: %v", err)
+		return fmt.Errorf("failed to copy file contents: %w", err)
 	}
 	return nil
 }
@@ -248,7 +248,7 @@ func pasteDir(src, dst string, id string, m *model) error {
 	if m.copyItems.cut && !sameDev {
 		err = os.RemoveAll(src)
 		if err != nil {
-			return fmt.Errorf("failed to remove source after move: %v", err)
+			return fmt.Errorf("failed to remove source after move: %w", err)
 		}
 	}
 

@@ -72,8 +72,7 @@ func (m *Model) handleConfirm(cwdLocation string) common.ModelAction {
 	if err == nil {
 		m.resultMsg = ""
 		m.actionSuccess = true
-	} else if cmdErr, ok := err.(invalidCmdError); ok {
-		// We don't expect a wrapped error here, so using type assertion
+	} else if cmdErr, ok := err.(invalidCmdError); ok { //nolint: errorlint // We don't expect a wrapped error here, so using type assertion
 		m.resultMsg = cmdErr.uiMessage()
 		m.actionSuccess = false
 	} else {

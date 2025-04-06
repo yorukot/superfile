@@ -448,13 +448,13 @@ func (m *model) returnMetaData() {
 func calculateMD5Checksum(filePath string) (string, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
-		return "", fmt.Errorf("failed to open file: %v", err)
+		return "", fmt.Errorf("failed to open file: %w", err)
 	}
 	defer file.Close()
 
 	hash := md5.New()
 	if _, err := io.Copy(hash, file); err != nil {
-		return "", fmt.Errorf("failed to calculate MD5 checksum: %v", err)
+		return "", fmt.Errorf("failed to calculate MD5 checksum: %w", err)
 	}
 
 	checksum := hex.EncodeToString(hash.Sum(nil))

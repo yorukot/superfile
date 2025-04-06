@@ -50,6 +50,7 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 	if !hasError {
 		if err = toml.Unmarshal(data, target); err != nil {
 			hasError = true
+			//nolint: errorlint // Type assertion is better here, and we need to read data from error
 			if decodeErr, ok := err.(*toml.DecodeError); ok {
 				row, col := decodeErr.Position()
 				errMsg = errorPrefix + fmt.Sprintf("Error in field at line %d column %d: %s\n",
