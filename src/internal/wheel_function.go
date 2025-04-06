@@ -33,6 +33,9 @@ func wheelMainAction(msg string, m *model) {
 		case nonePanelFocus:
 			action = func() { m.fileModel.filePanels[m.filePanelFocusIndex].listDown(m.mainPanelHeight) }
 		}
+	default:
+		slog.Error("Unexpected type of mouse action in wheelMainAction", "msg", msg)
+		return
 	}
 
 	for range common.WheelRunTime {
