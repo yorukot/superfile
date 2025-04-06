@@ -67,7 +67,6 @@ func Test_noActualDir(t *testing.T) {
 }
 
 func Test_isCursorInvalid(t *testing.T) {
-
 	testcases := []struct {
 		name     string
 		sidebar  sidebarModel
@@ -234,7 +233,6 @@ func Test_lastRenderIndex(t *testing.T) {
 				"lastRenderedIndex failed: %s", tt.explanation)
 		})
 	}
-
 }
 
 func Test_firstRenderIndex(t *testing.T) {

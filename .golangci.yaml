@@ -353,8 +353,7 @@ linters:
     - usestdlibvars # detects the possibility to use variables/constants from the Go standard library
     - usetesting # reports uses of functions with replacement inside the testing package
     - wastedassign # finds wasted assignment statements
-    # Todo enable - many fixes
-    # - whitespace # detects leading and trailing whitespace
+    - whitespace # detects leading and trailing whitespace
 
     ## Todo : Enable some of them
     ## you may want to enable
@@ -393,7 +392,6 @@ linters:
     # - err113 # [too strict] checks the errors handling expressions
     # - errchkjson # [don't see profit + I'm against of omitting errors like in the first example https://github.com/breml/errchkjson] checks types passed to the json encoding functions. Reports unsupported types and optionally reports occasions, where the check for the returned error can be omitted
     # - forcetypeassert # [replaced by errcheck] finds forced type assertions
-    # Todo : rely on this, and skip separate go fmt check in cicd
     # - gofmt # [replaced by goimports] checks whether code was gofmt-ed
     # Todo : Check this
     #- gofumpt # [replaced by goimports, gofumports is not available yet] checks whether code was gofumpt-ed

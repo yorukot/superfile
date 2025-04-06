@@ -168,5 +168,4 @@ func colorToHex(color color.Color) (fullbackHex string) {
 
 	fullbackHex = fmt.Sprintf("#%02x%02x%02x", uint8(r>>8), uint8(g>>8), uint8(b>>8))
 	return fullbackHex
-
 }

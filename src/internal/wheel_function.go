@@ -10,7 +10,6 @@ func wheelMainAction(msg string, m *model) {
 	slog.Debug("wheelMainAction called", "msg", msg, "focusPanel", m.focusPanel)
 	var action func()
 	switch msg {
-
 	case "wheel up":
 		if m.focusPanel == sidebarFocus {
 			action = func() { m.sidebarModel.listUp(m.mainPanelHeight) }

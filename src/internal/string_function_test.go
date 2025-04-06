@@ -77,7 +77,6 @@ func TestIsBufferPrintable(t *testing.T) {
 		{"\x7f(DEL)", false},
 	}
 	for _, tt := range inputs {
-
 		t.Run(fmt.Sprintf("Testing if buffer %q is printable", tt.input), func(t *testing.T) {
 			result := isBufferPrintable([]byte(tt.input))
 			if result != tt.expected {
@@ -137,7 +136,6 @@ func TestMakePrintable(t *testing.T) {
 		{"\x7f(DEL)", "(DEL)"},
 	}
 	for _, tt := range inputs {
-
 		t.Run(fmt.Sprintf("Make %q printable", tt.input), func(t *testing.T) {
 			result := makePrintable(tt.input)
 			if result != tt.expected {

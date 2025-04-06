@@ -72,7 +72,6 @@ func (f filePanelFocusType) String() string {
 	default:
 		return invalidTypeString
 	}
-
 }
 
 func (p panelMode) String() string {

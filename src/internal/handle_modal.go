@@ -58,7 +58,6 @@ func (m *model) cancelRename() {
 
 // Connfirm rename file or directory
 func (m *model) confirmRename() {
-
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 
 	// Although we dont expect this to happen based on our current flow

@@ -50,7 +50,6 @@ func (m *model) sidebarRender() string {
 }
 
 func (s *sidebarModel) directoriesRender(mainPanelHeight int, curFilePanelFileLocation string, sideBarFocussed bool) string {
-
 	// Cursor should always point to a valid directory at this point
 	if s.isCursorInvalid() {
 		slog.Error("Unexpected situation in sideBar Model. "+
@@ -100,7 +99,6 @@ func (m *model) filePanelRender() string {
 	// file panel
 	f := make([]string, 10)
 	for i, filePanel := range m.fileModel.filePanels {
-
 		// check if cursor or render out of range
 		if filePanel.cursor > len(filePanel.element)-1 {
 			filePanel.cursor = 0
@@ -379,7 +377,6 @@ func (m *model) metadataRender() string {
 			metadataName = truncateMiddleText(m.fileMetaData.metaData[i][0], valueLength, "...")
 		}
 		metaDataBar += fmt.Sprintf("%-*s %s", sprintfLength, metadataName, data)
-
 	}
 	bottomBorder := common.GenerateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(m.fileMetaData.renderIndex+1), strconv.Itoa(len(m.fileMetaData.metaData))), utils.FooterWidth(m.fullWidth)-3)
 	metaDataBar = common.MetadataBorder(m.footerHeight, utils.FooterWidth(m.fullWidth), bottomBorder, m.focusPanel == metadataFocus).Render(metaDataBar)
@@ -388,7 +385,6 @@ func (m *model) metadataRender() string {
 }
 
 func (m *model) clipboardRender() string {
-
 	// render
 	clipboardRender := ""
 	if len(m.copyItems.items) == 0 {
@@ -509,9 +505,7 @@ func (m *model) warnModalRender() string {
 }
 
 func (m *model) promptModalRender() string {
-
 	return m.promptModal.Render(m.helpMenu.width)
-
 }
 
 func (m *model) helpMenuRender() string {
@@ -567,7 +561,6 @@ func (m *model) helpMenuRender() string {
 	}
 
 	for i := m.helpMenu.renderIndex; i < m.helpMenu.height+m.helpMenu.renderIndex && i < len(m.helpMenu.data); i++ {
-
 		if i != m.helpMenu.renderIndex {
 			helpMenuContent += "\n"
 		}

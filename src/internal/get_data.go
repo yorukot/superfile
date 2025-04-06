@@ -99,7 +99,6 @@ func getExternalMediaFolders() (disks []directory) {
 		// shouldListDisk, diskName, and diskLocation, each has runtime.GOOS checks
 		// We can ideally reduce it to one check only.
 		if shouldListDisk(disk.Mountpoint) {
-
 			disks = append(disks, directory{
 				name:     diskName(disk.Mountpoint),
 				location: diskLocation(disk.Mountpoint),

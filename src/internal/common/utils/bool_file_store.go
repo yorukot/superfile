@@ -32,5 +32,4 @@ func ReadBoolFile(path string, defaultValue bool) bool {
 
 func WriteBoolFile(path string, value bool) error {
 	return os.WriteFile(path, []byte(strconv.FormatBool(value)), 0644)
-
 }

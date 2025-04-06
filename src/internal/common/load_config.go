@@ -29,7 +29,6 @@ func LoadConfigFile() {
 		// If config is incorrect we cannot continue. We need to exit
 		utils.LogAndExit(err.Error())
 	}
-
 }
 
 func ValidateConfig(c *ConfigType) error {
@@ -101,7 +100,6 @@ func LoadThemeFile() {
 // LoadAllDefaultConfig : Load all default configurations from embedded superfile_config folder into global
 // configurations variables and write theme files if its needed.
 func LoadAllDefaultConfig(content embed.FS) {
-
 	err := LoadConfigStringGlobals(content)
 	if err != nil {
 		slog.Error("Could not load default config from embed FS", "error", err)

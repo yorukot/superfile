@@ -23,9 +23,7 @@ func containsKey(v string, a []string) string {
 // keys that performs actions in multiple panels, like going up or down,
 // check the state of model m and handle properly.
 func (m *model) mainKey(msg string, cmd tea.Cmd) tea.Cmd {
-
 	switch msg {
-
 	// If move up Key is pressed, check the current state and executes
 	case containsKey(msg, common.Hotkeys.ListUp):
 		if m.focusPanel == sidebarFocus {
@@ -218,7 +216,6 @@ func (m *model) typingModalOpenKey(msg string) {
 	case containsKey(msg, common.Hotkeys.ConfirmTyping):
 		m.createItem()
 	}
-
 }
 
 // Todo : There is a lot of duplication for these models, each one of them has to handle
@@ -257,7 +254,6 @@ func (m *model) warnModalOpenKey(msg string) {
 						m.deleteSingleItem()
 					}()
 				}
-
 			}
 		case confirmRenameItem:
 			m.confirmRename()

@@ -26,7 +26,6 @@ import (
 
 // Run superfile app
 func Run(content embed.FS) {
-
 	// Before we open log file, set all "non debug" logs to stdout
 	utils.SetRootLoggerToStdout(false)
 

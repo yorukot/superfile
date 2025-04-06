@@ -187,7 +187,6 @@ func Test_resolveShellSubstitution(t *testing.T) {
 }
 
 func Test_findEndingParenthesis(t *testing.T) {
-
 	testdata := []struct {
 		name        string
 		value       string

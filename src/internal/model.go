@@ -205,7 +205,6 @@ func (m *model) setHelpMenuSize() {
 // Identify the current state of the application m and properly handle the
 // msg keybind pressed
 func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
-
 	slog.Debug("model.handleKeyInput", "msg", msg, "typestr", msg.Type.String(),
 		"runes", msg.Runes, "type", int(msg.Type), "paste", msg.Paste,
 		"alt", msg.Alt)
@@ -230,7 +229,6 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 
 	if m.typingModal.open {
 		m.typingModalOpenKey(msg.String())
-
 	} else if m.promptModal.IsOpen() {
 		// Ignore keypress. It will be handled in Update call via
 		// updateFilePanelState

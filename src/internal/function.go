@@ -182,7 +182,6 @@ func returnDirElement(location string, displayDotFile bool, sortOptions sortOpti
 				fileInfoJ, _ := dirEntries[j].Info()
 				return fileInfoI.Size() < fileInfoJ.Size() != reversed
 			}
-
 		}
 	case "Date Modified":
 		order = func(i, j int) bool {
@@ -205,7 +204,6 @@ func returnDirElement(location string, displayDotFile bool, sortOptions sortOpti
 }
 
 func returnDirElementBySearchString(location string, displayDotFile bool, searchString string) (dirElement []element) {
-
 	items, err := os.ReadDir(location)
 	if err != nil {
 		slog.Error("Error while return folder element function", "error", err)
@@ -383,7 +381,6 @@ func (m *model) returnMetaData() {
 		message.metadata = m.fileMetaData.metaData
 		channel <- message
 		return
-
 	}
 
 	if err != nil {
@@ -409,7 +406,6 @@ func (m *model) returnMetaData() {
 	}
 
 	if common.Config.Metadata && checkIsSymlinked.Mode()&os.ModeSymlink == 0 && et != nil {
-
 		fileInfos := et.ExtractMetadata(filePath)
 
 		for _, fileInfo := range fileInfos {
@@ -506,7 +502,6 @@ func countFiles(dirPath string) (int, error) {
 
 // Check whether is symlinks
 func isSymlink(filePath string) bool {
-
 	fileInfo, err := os.Lstat(filePath)
 	if err != nil {
 		return true
@@ -595,7 +590,6 @@ func TeaUpdate(m *model, msg tea.Msg) (tea.Cmd, error) {
 
 	mObj, ok := resModel.(model)
 	if !ok {
-
 		return cmd, fmt.Errorf("unexpected model type: %T", resModel)
 	}
 	*m = mObj

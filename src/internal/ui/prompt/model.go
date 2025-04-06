@@ -56,7 +56,6 @@ func (m *Model) HandleUpdate(msg tea.Msg, cwdLocation string) (common.ModelActio
 	default:
 		// Non keypress updates like Cursor Blink
 		m.textInput, cmd = m.textInput.Update(msg)
-
 	}
 	return action, cmd
 }
@@ -124,7 +123,6 @@ func (m *Model) HandleSPFActionResults(success bool, msg string) {
 // a generic way. We would have all our components use that.
 // And we could unit test this Render() easility.
 func (m *Model) Render(width int) string {
-
 	divider := strings.Repeat(common.Config.BorderTop, width)
 	content := " " + m.headline + modeString(m.shellMode)
 	content += "\n" + divider

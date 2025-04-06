@@ -17,7 +17,6 @@ import (
 )
 
 func truncateText(text string, maxChars int, talis string) string {
-
 	truncatedText := ansi.Truncate(text, maxChars-len(talis), "")
 	if text != truncatedText {
 		return truncatedText + talis

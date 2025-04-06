@@ -102,7 +102,6 @@ func zipSource(source, target string) error {
 		}
 		p.done++
 		if len(channel) < 5 {
-
 			message.processNewState = p
 			channel <- message
 		}

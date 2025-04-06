@@ -60,7 +60,6 @@ func getPromptAction(shellMode bool, value string, cwdLocation string) (common.M
 			uiMsg: "Invalid spf prompt command : " + promptArgs[0],
 		}
 	}
-
 }
 
 // Only allocates memory proportional to first token's size

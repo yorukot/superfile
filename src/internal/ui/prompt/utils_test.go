@@ -117,10 +117,8 @@ func TestModel_getPromptAction(t *testing.T) {
 			}
 
 			assert.Equal(t, tt.expectecAction, action)
-
 		})
 	}
-
 }
 
 func Test_getFirstToken(t *testing.T) {

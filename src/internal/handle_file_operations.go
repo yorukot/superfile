@@ -199,7 +199,6 @@ func (m *model) deleteMultipleItems() {
 		channel <- message
 
 		for _, filePath := range panel.selected {
-
 			p := m.processBarModel.process[id]
 			p.name = icon.Delete + icon.Space + filepath.Base(filePath)
 			p.done++
@@ -320,7 +319,6 @@ func (m *model) completelyDeleteMultipleItems() {
 
 		channel <- message
 		for _, filePath := range panel.selected {
-
 			p := m.processBarModel.process[id]
 			p.name = icon.Delete + icon.Space + filepath.Base(filePath)
 			p.done++

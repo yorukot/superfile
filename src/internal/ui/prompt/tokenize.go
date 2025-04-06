@@ -13,7 +13,6 @@ import (
 
 // split into tokens
 func tokenizePromptCommand(command string, cwdLocation string) ([]string, error) {
-
 	command, err := resolveShellSubstitution(shellSubTimeout, command, cwdLocation)
 	if err != nil {
 		return nil, err
@@ -27,7 +26,6 @@ func resolveShellSubstitution(subCmdTimeout time.Duration, command string, cwdLo
 	cmdRunes := []rune(command)
 	i := 0
 	for i < len(cmdRunes) {
-
 		if i+1 < len(cmdRunes) && cmdRunes[i] == '$' {
 			// ${ spotted
 			if cmdRunes[i+1] == '{' {
@@ -53,7 +51,6 @@ func resolveShellSubstitution(subCmdTimeout time.Duration, command string, cwdLo
 				}
 
 				i = end + 1
-
 			} else if cmdRunes[i+1] == '(' {
 				// Look for ending ')'
 				end := findEndingBracket(cmdRunes, i+1, '(', ')')
@@ -89,7 +86,6 @@ func resolveShellSubstitution(subCmdTimeout time.Duration, command string, cwdLo
 			resCommand.WriteRune(cmdRunes[i])
 			i++
 		}
-
 	}
 
 	return resCommand.String(), nil
