@@ -6,7 +6,7 @@
   - If first key is `Ctrl+C`, its always received as `C`
 - Note : You must keep your focus on the terminal for the entire duration of test run. `pyautogui` sends keypress to process on focus.
 
-# Todos
+# To-dos
 - Write testsuite to validate new files getting created on first launch
   - We recently had a bug slip into main, where lastVersionFile would not get written
 

@@ -8,8 +8,8 @@ func FooterWidth(fullWidth int) int {
 }
 
 // Including borders
-func FullFooterHeight(footerHeight int, toogleFooter bool) int {
-	if toogleFooter {
+func FullFooterHeight(footerHeight int, toggleFooter bool) int {
+	if toggleFooter {
 		return footerHeight + 2
 	}
 	return 0

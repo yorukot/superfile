@@ -17,6 +17,9 @@ func ReadBoolFile(path string, defaultValue bool) bool {
 	}
 
 	// Not using strconv.ParseBool() as it allows other values like : "TRUE"
+	// Using exact string comparison with predefined constants ensures
+	// consistent behavior and prevents issues with case-insensitivity or
+	// unexpected values like "yes", "on", etc. that ParseBool would accept
 	switch string(data) {
 	case TRUE_STRING:
 		return true
