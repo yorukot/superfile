@@ -526,7 +526,7 @@ func isImageFile(filename string) bool {
 	return imageExtensions[ext]
 }
 
-func getElementIcon(file string, IsDir bool) icon.IconStyle {
+func getElementIcon(file string, isDir bool) icon.IconStyle {
 	ext := strings.TrimPrefix(filepath.Ext(file), ".")
 	name := file
 
@@ -537,7 +537,7 @@ func getElementIcon(file string, IsDir bool) icon.IconStyle {
 		}
 	}
 
-	if IsDir {
+	if isDir {
 		resultIcon := icon.Folders["folder"]
 		betterIcon, hasBetterIcon := icon.Folders[name]
 		if hasBetterIcon {

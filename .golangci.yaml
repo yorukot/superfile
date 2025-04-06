@@ -292,11 +292,10 @@ linters:
     # - gocognit # computes and checks the cognitive complexity of functions
     - goconst # finds repeated strings that could be replaced by a constant
     # Todo enable - Some few changes. There are good suggestions
-    # - gocritic # provides diagnostics that check for bugs, performance and style issues
+    - gocritic # provides diagnostics that check for bugs, performance and style issues
     # Todo enable
     #- gocyclo # computes and checks the cyclomatic complexity of functions
-    # Todo enable - too much for us
-    #- godot # checks if comments end in a period
+    #- godot # checks if comments end in a period # Too much for us right now
     - goimports # in addition to fixing imports, goimports also formats your code in the same style as gofmt
     - gomoddirectives # manages the use of 'replace', 'retract', and 'excludes' directives in go.mod
     - goprintffuncname # checks that printf-like functions are named with f at the end

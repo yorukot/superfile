@@ -27,8 +27,9 @@ func resolveShellSubstitution(subCmdTimeout time.Duration, command string, cwdLo
 	i := 0
 	for i < len(cmdRunes) {
 		if i+1 < len(cmdRunes) && cmdRunes[i] == '$' {
+			switch cmdRunes[i+1] {
 			// ${ spotted
-			if cmdRunes[i+1] == '{' {
+			case '{':
 				// Look for Ending '}'
 				end := findEndingBracket(cmdRunes, i+1, '{', '}')
 				if end == -1 {
@@ -51,7 +52,7 @@ func resolveShellSubstitution(subCmdTimeout time.Duration, command string, cwdLo
 				}
 
 				i = end + 1
-			} else if cmdRunes[i+1] == '(' {
+			case '(':
 				// Look for ending ')'
 				end := findEndingBracket(cmdRunes, i+1, '(', ')')
 				if end == -1 {
@@ -78,7 +79,7 @@ func resolveShellSubstitution(subCmdTimeout time.Duration, command string, cwdLo
 				}
 
 				i = end + 1
-			} else {
+			default:
 				resCommand.WriteRune(cmdRunes[i])
 				i++
 			}

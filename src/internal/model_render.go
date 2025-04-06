@@ -69,11 +69,12 @@ func (s *sidebarModel) directoriesRender(mainPanelHeight int, curFilePanelFileLo
 
 		totalHeight += s.directories[i].requiredHeight()
 
-		if s.directories[i] == pinnedDividerDir {
+		switch s.directories[i] {
+		case pinnedDividerDir:
 			res += "\n" + common.SideBarPinnedDivider
-		} else if s.directories[i] == diskDividerDir {
+		case diskDividerDir:
 			res += "\n" + common.SideBarDisksDivider
-		} else {
+		default:
 			cursor := " "
 			if s.cursor == i && sideBarFocussed && !s.searchBar.Focused() {
 				cursor = icon.Cursor

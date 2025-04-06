@@ -165,10 +165,8 @@ func (m *model) deleteSingleItem() {
 	}
 	if len(panel.element) == 0 {
 		panel.cursor = 0
-	} else {
-		if panel.cursor >= len(panel.element) {
-			panel.cursor = len(panel.element) - 1
-		}
+	} else if panel.cursor >= len(panel.element) {
+		panel.cursor = len(panel.element) - 1
 	}
 }
 
@@ -285,12 +283,11 @@ func (m *model) completelyDeleteSingleItem() {
 		message.processNewState = p
 		channel <- message
 	}
+	// Todo : This is duplicated code fragment. Remove this duplication
 	if len(panel.element) == 0 {
 		panel.cursor = 0
-	} else {
-		if panel.cursor >= len(panel.element) {
-			panel.cursor = len(panel.element) - 1
-		}
+	} else if panel.cursor >= len(panel.element) {
+		panel.cursor = len(panel.element) - 1
 	}
 }
 
@@ -459,15 +456,13 @@ func (m *model) pasteItem() {
 		if m.copyItems.cut && !isExternalDiskPath(filePath) {
 			err = moveElement(filePath, filepath.Join(panel.location, filepath.Base(filePath)))
 		} else {
+			// Todo : These error cases are hard to test. We have to somehow make the paste operations fail,
+			// which is time consuming and manual. We should test these with automated testcases
 			err = pasteDir(filePath, filepath.Join(panel.location, filepath.Base(filePath)), id, m)
 			if err != nil {
 				errMessage = "paste item error"
-			} else {
-				// Todo : These error cases are hard to test. We have to somehow make the paste operations fail,
-				// which is time consuming and manual. We should test these with automated testcases
-				if m.copyItems.cut {
-					os.RemoveAll(filePath)
-				}
+			} else if m.copyItems.cut {
+				os.RemoveAll(filePath)
 			}
 		}
 		p = m.processBarModel.process[id]
@@ -587,6 +582,8 @@ func (m *model) openFileWithEditor() tea.Cmd {
 	// Split the editor command into command and arguments
 	parts := strings.Fields(editor)
 	cmd := parts[0]
+
+	//nolint:gocritic // appendAssign: intentionally creating a new slice
 	args := append(parts[1:], panel.element[panel.cursor].location)
 
 	c := exec.Command(cmd, args...)
@@ -601,12 +598,12 @@ func (m *model) openDirectoryWithEditor() tea.Cmd {
 	editor := common.Config.DirEditor
 
 	if editor == "" {
-		if runtime.GOOS == variable.OS_WINDOWS {
+		switch runtime.GOOS {
+		case variable.OS_WINDOWS:
 			editor = "explorer"
-		} else if runtime.GOOS == variable.OS_DARWIN {
-			// open is command for MacOS Finder
+		case variable.OS_DARWIN:
 			editor = "open"
-		} else {
+		default:
 			editor = "vi"
 		}
 	}
@@ -614,6 +611,7 @@ func (m *model) openDirectoryWithEditor() tea.Cmd {
 	// Split the editor command into command and arguments
 	parts := strings.Fields(editor)
 	cmd := parts[0]
+	//nolint:gocritic // appendAssign: intentionally creating a new slice
 	args := append(parts[1:], m.fileModel.filePanels[m.filePanelFocusIndex].location)
 
 	c := exec.Command(cmd, args...)

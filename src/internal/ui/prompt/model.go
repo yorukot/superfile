@@ -86,11 +86,12 @@ func (m *Model) handleConfirm(cwdLocation string) common.ModelAction {
 
 func (m *Model) handleNormalKeyInput(msg tea.KeyMsg) tea.Cmd {
 	var cmd tea.Cmd
-	if m.textInput.Value() == "" && msg.String() == m.spfPromptHotkey {
+	switch {
+	case m.textInput.Value() == "" && msg.String() == m.spfPromptHotkey:
 		m.shellMode = false
-	} else if m.textInput.Value() == "" && msg.String() == m.shellPromptHotkey {
+	case m.textInput.Value() == "" && msg.String() == m.shellPromptHotkey:
 		m.shellMode = true
-	} else {
+	default:
 		m.textInput, cmd = m.textInput.Update(msg)
 	}
 	m.resultMsg = ""

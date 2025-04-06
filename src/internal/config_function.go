@@ -58,14 +58,21 @@ func initialConfig(dir string) (toggleDotFile bool, toggleFooter bool, firstFile
 		}
 	}
 
-	if dir != "" {
-		firstFilePanelDir, err = filepath.Abs(dir)
-	} else {
-		common.Config.DefaultDirectory = strings.Replace(common.Config.DefaultDirectory, "~", variable.HomeDir, -1)
-		firstFilePanelDir, err = filepath.Abs(common.Config.DefaultDirectory)
+	// spf was not called with an argument
+	firstFilePanelDir = dir
+	if firstFilePanelDir == "" {
+		firstFilePanelDir = common.Config.DefaultDirectory
 	}
 
+	if strings.HasPrefix(firstFilePanelDir, "~") {
+		// We only need to replace the first ~ , not all of them
+		// And only if its a prefix
+		firstFilePanelDir = strings.Replace(firstFilePanelDir, "~", variable.HomeDir, 1)
+	}
+	firstFilePanelDir, err = filepath.Abs(firstFilePanelDir)
+	// In case of unexpected path error, fallback to home dir
 	if err != nil {
+		slog.Error("Unexpected error while calculating firstFilePanelDir", "error", err)
 		firstFilePanelDir = variable.HomeDir
 	}
 

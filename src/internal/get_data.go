@@ -19,7 +19,12 @@ func getDirectories() []directory {
 }
 
 func formDirctorySlice(homeDirectories []directory, pinnedDirectories []directory, diskDirectories []directory) []directory {
-	directories := append(homeDirectories, pinnedDividerDir)
+	// Preallocation for efficiency
+	totalCapacity := len(homeDirectories) + len(pinnedDirectories) + len(diskDirectories) + 2
+	directories := make([]directory, 0, totalCapacity)
+
+	directories = append(directories, homeDirectories...)
+	directories = append(directories, pinnedDividerDir)
 	directories = append(directories, pinnedDirectories...)
 	directories = append(directories, diskDividerDir)
 	directories = append(directories, diskDirectories...)
