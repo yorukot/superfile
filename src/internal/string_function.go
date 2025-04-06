@@ -199,7 +199,7 @@ func makePrintable(line string) string {
 	// This has to be looped byte-wise, looping it rune-wise
 	// or by using strings.Map would cause issues with strings like
 	// "(NBSP)\xa0"
-	for i := 0; i < len(line); i++ {
+	for _, i := range line {
 		r := rune(line[i])
 		if unicode.IsGraphic(r) || r == rune('\t') || r == rune('\n') {
 			sb.WriteByte(line[i])

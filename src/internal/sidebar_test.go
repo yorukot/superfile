@@ -9,7 +9,7 @@ import (
 
 func dirSlice(count int) []directory {
 	res := make([]directory, count)
-	for i := 0; i < count; i++ {
+	for i := range count {
 		res[i] = directory{name: "Dir" + strconv.Itoa(i), location: "/a/" + strconv.Itoa(i)}
 	}
 	return res

@@ -57,7 +57,7 @@ func LoadHotkeysFile() {
 
 	// Validate hotkey values
 	val := reflect.ValueOf(Hotkeys)
-	for i := 0; i < val.NumField(); i++ {
+	for i := range val.NumField() {
 		field := val.Type().Field(i)
 		value := val.Field(i)
 

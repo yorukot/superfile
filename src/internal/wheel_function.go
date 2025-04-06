@@ -33,7 +33,7 @@ func wheelMainAction(msg string, m *model) {
 		}
 	}
 
-	for i := 0; i < common.WheelRunTime; i++ {
+	for range common.WheelRunTime {
 		action()
 	}
 

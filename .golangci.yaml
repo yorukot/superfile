@@ -305,8 +305,7 @@ linters:
     # weak md5 cryptography, Subprocess launched with a potential tainted input
     # - gosec # inspects source code for security problems
     - iface # checks the incorrect use of interfaces, helping developers avoid interface pollution
-    # Todo enable : Need fixes
-    # - intrange # finds places where for loops could make use of an integer range
+    - intrange # finds places where for loops could make use of an integer range
     # Todo enable : Need many fixes
     # - lll # reports long lines
     - loggercheck # checks key value pairs for common logger libraries (kitlog,klog,logr,zap)

@@ -64,7 +64,7 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 		// Check for missing fields if no errors yet
 		targetType := reflect.TypeOf(target).Elem()
 
-		for i := 0; i < targetType.NumField(); i++ {
+		for i := range targetType.NumField() {
 			field := targetType.Field(i)
 			if _, exists := rawData[field.Tag.Get("toml")]; !exists {
 				hasError = true

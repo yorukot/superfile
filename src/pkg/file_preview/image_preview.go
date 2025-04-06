@@ -52,7 +52,7 @@ func ConvertImageToANSI(img image.Image, defaultBGColor color.Color) string {
 	defaultBGHex := colorToHex(defaultBGColor)
 
 	for y := 0; y < height; y += 2 {
-		for x := 0; x < width; x++ {
+		for x := range width {
 			upperColor := cache.getTermenvColor(img.At(x, y), defaultBGHex)
 			lowerColor := cache.getTermenvColor(defaultBGColor, "")
 
