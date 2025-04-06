@@ -35,7 +35,11 @@ var channel = make(chan channelMessage, 1000)
 var progressBarLastRenderTime time.Time = time.Now()
 
 // Initialize and return model with default configs
-func InitialModel(dir string, firstUseCheck, hasTrashCheck bool) model {
+// It returns only tea.Model because when it used in main, the return value
+// is passed to tea.NewProgram() which accepts tea.Model
+// Either way type 'model' is not exported, so there is not way main package can
+// be aware of it, and use it directly
+func InitialModel(dir string, firstUseCheck, hasTrashCheck bool) tea.Model {
 	toggleDotFile, toggleFooter, firstFilePanelDir := initialConfig(dir)
 	firstUse = firstUseCheck
 	hasTrash = hasTrashCheck
@@ -117,10 +121,10 @@ func (m *model) handleChannelMessage(msg channelMessage) {
 	case sendMetadata:
 		m.fileMetaData.metaData = msg.metadata
 	case sendProcess:
-		if !arrayContains(m.processBarModel.processList, msg.messageId) {
-			m.processBarModel.processList = append(m.processBarModel.processList, msg.messageId)
+		if !arrayContains(m.processBarModel.processList, msg.messageID) {
+			m.processBarModel.processList = append(m.processBarModel.processList, msg.messageID)
 		}
-		m.processBarModel.process[msg.messageId] = msg.processNewState
+		m.processBarModel.process[msg.messageID] = msg.processNewState
 	default:
 		slog.Error("Unhandled channelMessageType in handleChannelMessage()",
 			"messageType", msg.messageType)

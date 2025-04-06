@@ -25,7 +25,7 @@ func (m *model) validateLayout() error {
 	}
 	// PanelHeight + 2 lines (main border) + actual footer height
 	if m.fullHeight != (m.mainPanelHeight+2)+utils.FullFooterHeight(m.footerHeight, m.toggleFooter) {
-		return fmt.Errorf("Invalid model layout, fullHeight : %v, mainPanelHeight : %v, footerHeight : %v\n",
+		return fmt.Errorf("invalid model layout, fullHeight : %v, mainPanelHeight : %v, footerHeight : %v",
 			m.fullHeight, m.mainPanelHeight, m.footerHeight)
 	}
 	// Todo : Add check for width as well

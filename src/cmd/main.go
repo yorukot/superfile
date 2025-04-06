@@ -29,7 +29,7 @@ func Run(content embed.FS) {
 	// Before we open log file, set all "non debug" logs to stdout
 	utils.SetRootLoggerToStdout(false)
 
-	common.LoadInitial_PrerenderedVariables()
+	common.LoadinitialPrerenderedvariables()
 	common.LoadAllDefaultConfig(content)
 
 	app := &cli.App{
@@ -42,7 +42,7 @@ func Run(content embed.FS) {
 				Name:    "path-list",
 				Aliases: []string{"pl"},
 				Usage:   "Print the path to the configuration and directory",
-				Action: func(c *cli.Context) error {
+				Action: func(_ *cli.Context) error {
 					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#66b2ff")).Render("[Configuration file path]"), variable.ConfigFile)
 					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#ffcc66")).Render("[Hotkeys file path]"), variable.HotkeysFile)
 					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#66ff66")).Render("[Log file path]"), variable.LogFile)
@@ -158,7 +158,7 @@ func InitConfigFile() {
 		log.Fatalln("Error writing config file:", err)
 	}
 
-	if err := initJsonFile(variable.PinnedFile); err != nil {
+	if err := initJSONFile(variable.PinnedFile); err != nil {
 		log.Fatalln("Error initializing json file:", err)
 	}
 }
@@ -166,7 +166,7 @@ func InitConfigFile() {
 // We are initializing these, but not sure if we are ever using them
 func InitTrash() error {
 	// Create trash directories
-	if runtime.GOOS != variable.OS_DARWIN {
+	if runtime.GOOS != variable.OsDarwin {
 		err := createDirectories(
 			variable.CustomTrashDirectory,
 			variable.CustomTrashDirectoryFiles,
@@ -231,7 +231,7 @@ func writeConfigFile(path, data string) error {
 	return nil
 }
 
-func initJsonFile(path string) error {
+func initJSONFile(path string) error {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		if err = os.WriteFile(path, []byte("null"), 0644); err != nil {
 			return fmt.Errorf("failed to initialize json file %s: %w", path, err)

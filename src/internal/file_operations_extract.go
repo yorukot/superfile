@@ -26,7 +26,7 @@ func extractCompressFile(src, dest string) error {
 		doneTime: time.Time{},
 	}
 	message := channelMessage{
-		messageId:       id,
+		messageID:       id,
 		messageType:     sendProcess,
 		processNewState: p,
 	}

@@ -74,14 +74,14 @@ func (m *model) enterPanel() {
 		}
 
 		if fileInfo.Mode()&os.ModeSymlink != 0 {
-			targetPath, symlink_err := filepath.EvalSymlinks(panel.element[panel.cursor].location)
-			if symlink_err != nil {
+			targetPath, symlinkErr := filepath.EvalSymlinks(panel.element[panel.cursor].location)
+			if symlinkErr != nil {
 				return
 			}
 
-			targetInfo, lstat_err := os.Lstat(targetPath)
+			targetInfo, lstatErr := os.Lstat(targetPath)
 
-			if lstat_err != nil {
+			if lstatErr != nil {
 				return
 			}
 
@@ -93,9 +93,9 @@ func (m *model) enterPanel() {
 		}
 
 		openCommand := "xdg-open"
-		if runtime.GOOS == variable.OS_DARWIN {
+		if runtime.GOOS == variable.OsDarwin {
 			openCommand = "open"
-		} else if runtime.GOOS == variable.OS_WINDOWS {
+		} else if runtime.GOOS == variable.OsWindows {
 			dllpath := filepath.Join(os.Getenv("SYSTEMROOT"), "System32", "rundll32.exe")
 			dllfile := "url.dll,FileProtocolHandler"
 

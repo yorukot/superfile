@@ -14,11 +14,11 @@ func WriteTomlData(filePath string, data interface{}) error {
 	tomlData, err := toml.Marshal(data)
 	if err != nil {
 		// return a wrapped error
-		return fmt.Errorf("Error encoding data : %w", err)
+		return fmt.Errorf("error encoding data : %w", err)
 	}
 	err = os.WriteFile(filePath, tomlData, 0644)
 	if err != nil {
-		return fmt.Errorf("Error writing file : %w", err)
+		return fmt.Errorf("error writing file : %w", err)
 	}
 	return nil
 }

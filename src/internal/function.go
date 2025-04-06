@@ -36,7 +36,7 @@ func isExternalDiskPath(path string) bool {
 	// This is very vague. You cannot tell if a path is belonging to an external partition
 	// if you dont define the source path to compare with
 	// But making this true will cause slow file operations based on current implementation
-	if runtime.GOOS == variable.OS_WINDOWS {
+	if runtime.GOOS == variable.OsWindows {
 		return false
 	}
 
@@ -53,7 +53,7 @@ func isExternalDiskPath(path string) bool {
 }
 
 func shouldListDisk(mountPoint string) bool {
-	if runtime.GOOS == variable.OS_WINDOWS {
+	if runtime.GOOS == variable.OsWindows {
 		// We need to get C:, D: drive etc in the list
 		return true
 	}
@@ -90,7 +90,7 @@ func diskName(mountPoint string) string {
 	// In windows we dont want to use filepath.Base as it returns "\" for when
 	// mountPoint is any drive root "C:", "D:", etc. Hence causing same name
 	// for each drive
-	if runtime.GOOS == variable.OS_WINDOWS {
+	if runtime.GOOS == variable.OsWindows {
 		return mountPoint
 	}
 
@@ -103,7 +103,7 @@ func diskName(mountPoint string) string {
 func diskLocation(mountPoint string) string {
 	// In windows if you are in "C:\some\path", "cd C:" will not cd to root of C: drive
 	// but "cd C:\" will
-	if runtime.GOOS == variable.OS_WINDOWS {
+	if runtime.GOOS == variable.OsWindows {
 		return filepath.Join(mountPoint, "\\")
 	}
 	return mountPoint
@@ -148,9 +148,8 @@ func returnDirElement(location string, displayDotFile bool, sortOptions sortOpti
 			}
 			if common.Config.CaseSensitiveSort {
 				return dirEntries[i].Name() < dirEntries[j].Name() != reversed
-			} else {
-				return strings.ToLower(dirEntries[i].Name()) < strings.ToLower(dirEntries[j].Name()) != reversed
 			}
+			return strings.ToLower(dirEntries[i].Name()) < strings.ToLower(dirEntries[j].Name()) != reversed
 		}
 	case "Size":
 		order = func(i, j int) bool {
@@ -176,12 +175,11 @@ func returnDirElement(location string, displayDotFile bool, sortOptions sortOpti
 					slog.Error("Error when reading directory during sort", "error", err)
 				}
 				return len(filesI) < len(filesJ) != reversed
-			} else {
-				// No need for err check, we already filtered out dirEntries with err != nil in Info() call
-				fileInfoI, _ := dirEntries[i].Info()
-				fileInfoJ, _ := dirEntries[j].Info()
-				return fileInfoI.Size() < fileInfoJ.Size() != reversed
 			}
+			// No need for err check, we already filtered out dirEntries with err != nil in Info() call
+			fileInfoI, _ := dirEntries[i].Info()
+			fileInfoJ, _ := dirEntries[j].Info()
+			return fileInfoI.Size() < fileInfoJ.Size() != reversed
 		}
 	case "Date Modified":
 		order = func(i, j int) bool {
@@ -345,7 +343,7 @@ func (m *model) returnMetaData() {
 	id := shortuuid.New()
 
 	message := channelMessage{
-		messageId:   id,
+		messageID:   id,
 		messageType: sendMetadata,
 		metadata:    m.fileMetaData.metaData,
 	}
@@ -376,8 +374,8 @@ func (m *model) returnMetaData() {
 	fileInfo, err := os.Stat(filePath)
 
 	if isSymlink(filePath) {
-		_, symlink_err := filepath.EvalSymlinks(filePath)
-		if symlink_err != nil {
+		_, symlinkErr := filepath.EvalSymlinks(filePath)
+		if symlinkErr != nil {
 			m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"Link file is broken!", ""})
 		} else {
 			m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"This is a link file.", ""})
@@ -468,21 +466,21 @@ func calculateMD5Checksum(filePath string) (string, error) {
 // Get directory total size
 func dirSize(path string) int64 {
 	var size int64
-	// Its named walk_err to prevent shadowing
-	walk_err := filepath.WalkDir(path, func(_ string, entry os.DirEntry, err error) error {
+	// Its named walkErr to prevent shadowing
+	walkErr := filepath.WalkDir(path, func(_ string, entry os.DirEntry, err error) error {
 		if err != nil {
 			slog.Error("Dir size function error", "error", err)
 		}
 		if !entry.IsDir() {
-			info, info_err := entry.Info()
-			if info_err == nil {
+			info, infoErr := entry.Info()
+			if infoErr == nil {
 				size += info.Size()
 			}
 		}
 		return err
 	})
-	if walk_err != nil {
-		slog.Error("errors during WalkDir", "error", walk_err)
+	if walkErr != nil {
+		slog.Error("errors during WalkDir", "error", walkErr)
 	}
 	return size
 }
@@ -491,7 +489,7 @@ func dirSize(path string) int64 {
 func countFiles(dirPath string) (int, error) {
 	count := 0
 
-	err := filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk(dirPath, func(_ string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -530,12 +528,12 @@ func isImageFile(filename string) bool {
 	return imageExtensions[ext]
 }
 
-func getElementIcon(file string, isDir bool) icon.IconStyle {
+func getElementIcon(file string, isDir bool) icon.Style {
 	ext := strings.TrimPrefix(filepath.Ext(file), ".")
 	name := file
 
 	if !common.Config.Nerdfont {
-		return icon.IconStyle{
+		return icon.Style{
 			Icon:  "",
 			Color: common.Theme.FilePanelFG,
 		}
@@ -548,42 +546,41 @@ func getElementIcon(file string, isDir bool) icon.IconStyle {
 			resultIcon = betterIcon
 		}
 		return resultIcon
-	} else {
-		// default icon for all files. try to find a better one though...
-		resultIcon := icon.Icons["file"]
-		// resolve aliased extensions
-		extKey := strings.ToLower(ext)
-		alias, hasAlias := icon.Aliases[extKey]
-		if hasAlias {
-			extKey = alias
-		}
-
-		// see if we can find a better icon based on extension alone
-		betterIcon, hasBetterIcon := icon.Icons[extKey]
-		if hasBetterIcon {
-			resultIcon = betterIcon
-		}
-
-		// now look for icons based on full names
-		fullName := name
-
-		fullName = strings.ToLower(fullName)
-		fullAlias, hasFullAlias := icon.Aliases[fullName]
-		if hasFullAlias {
-			fullName = fullAlias
-		}
-		bestIcon, hasBestIcon := icon.Icons[fullName]
-		if hasBestIcon {
-			resultIcon = bestIcon
-		}
-		if resultIcon.Color == "NONE" {
-			return icon.IconStyle{
-				Icon:  resultIcon.Icon,
-				Color: common.Theme.FilePanelFG,
-			}
-		}
-		return resultIcon
 	}
+	// default icon for all files. try to find a better one though...
+	resultIcon := icon.Icons["file"]
+	// resolve aliased extensions
+	extKey := strings.ToLower(ext)
+	alias, hasAlias := icon.Aliases[extKey]
+	if hasAlias {
+		extKey = alias
+	}
+
+	// see if we can find a better icon based on extension alone
+	betterIcon, hasBetterIcon := icon.Icons[extKey]
+	if hasBetterIcon {
+		resultIcon = betterIcon
+	}
+
+	// now look for icons based on full names
+	fullName := name
+
+	fullName = strings.ToLower(fullName)
+	fullAlias, hasFullAlias := icon.Aliases[fullName]
+	if hasFullAlias {
+		fullName = fullAlias
+	}
+	bestIcon, hasBestIcon := icon.Icons[fullName]
+	if hasBestIcon {
+		resultIcon = bestIcon
+	}
+	if resultIcon.Color == "NONE" {
+		return icon.Style{
+			Icon:  resultIcon.Icon,
+			Color: common.Theme.FilePanelFG,
+		}
+	}
+	return resultIcon
 }
 
 // TeaUpdate : Utility to send update to model , majorly used in tests

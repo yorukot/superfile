@@ -1,45 +1,45 @@
 package icon
 
 // Style for icons
-type IconStyle struct {
+type Style struct {
 	Icon  string
 	Color string
 }
 
 var (
-	Space         string = " "
-	SuperfileIcon string = "\ue6ad" // Printable Rune : ""
+	Space         = " "
+	SuperfileIcon = "\ue6ad" // Printable Rune : ""
 
 	// Well Known Directories
-	Home        string = "\U000f02dc" // Printable Rune : "󰋜"
-	Download    string = "\U000f03d4" // Printable Rune : "󰏔"
-	Documents   string = "\U000f0219" // Printable Rune : "󰈙"
-	Pictures    string = "\U000f02e9" // Printable Rune : "󰋩"
-	Videos      string = "\U000f0381" // Printable Rune : "󰎁"
-	Music       string = "♬"          // Printable Rune : "♬"
-	Templates   string = "\U000f03e2" // Printable Rune : "󰏢"
-	PublicShare string = "\uf0ac"     // Printable Rune : ""
+	Home        = "\U000f02dc" // Printable Rune : "󰋜"
+	Download    = "\U000f03d4" // Printable Rune : "󰏔"
+	Documents   = "\U000f0219" // Printable Rune : "󰈙"
+	Pictures    = "\U000f02e9" // Printable Rune : "󰋩"
+	Videos      = "\U000f0381" // Printable Rune : "󰎁"
+	Music       = "♬"          // Printable Rune : "♬"
+	Templates   = "\U000f03e2" // Printable Rune : "󰏢"
+	PublicShare = "\uf0ac"     // Printable Rune : ""
 
 	// file operations
-	CompressFile string = "\U000f05c4" // Printable Rune : "󰗄"
-	ExtractFile  string = "\U000f06eb" // Printable Rune : "󰛫"
-	Copy         string = "\U000f018f" // Printable Rune : "󰆏"
-	Cut          string = "\U000f0190" // Printable Rune : "󰆐"
-	Delete       string = "\U000f01b4" // Printable Rune : "󰆴"
+	CompressFile = "\U000f05c4" // Printable Rune : "󰗄"
+	ExtractFile  = "\U000f06eb" // Printable Rune : "󰛫"
+	Copy         = "\U000f018f" // Printable Rune : "󰆏"
+	Cut          = "\U000f0190" // Printable Rune : "󰆐"
+	Delete       = "\U000f01b4" // Printable Rune : "󰆴"
 
 	// other
-	Cursor      string = "\uf054"     // Printable Rune : ""
-	Browser     string = "\U000f0208" // Printable Rune : "󰈈"
-	Select      string = "\U000f01bd" // Printable Rune : "󰆽"
-	Error       string = "\uf530"     // Printable Rune : ""
-	Warn        string = "\uf071"     // Printable Rune : ""
-	Done        string = "\uf4a4"     // Printable Rune : ""
-	InOperation string = "\U000f0954" // Printable Rune : "󰥔"
-	Directory   string = "\uf07b"     // Printable Rune : ""
-	Search      string = "\ue68f"     // Printable Rune : ""
-	SortAsc     string = "\uf0de"     // Printable Rune : ""
-	SortDesc    string = "\uf0dd"     // Printable Rune : ""
-	Terminal    string = "\ue795"     // Printable Rune : ""
+	Cursor      = "\uf054"     // Printable Rune : ""
+	Browser     = "\U000f0208" // Printable Rune : "󰈈"
+	Select      = "\U000f01bd" // Printable Rune : "󰆽"
+	Error       = "\uf530"     // Printable Rune : ""
+	Warn        = "\uf071"     // Printable Rune : ""
+	Done        = "\uf4a4"     // Printable Rune : ""
+	InOperation = "\U000f0954" // Printable Rune : "󰥔"
+	Directory   = "\uf07b"     // Printable Rune : ""
+	Search      = "\ue68f"     // Printable Rune : ""
+	SortAsc     = "\uf0de"     // Printable Rune : ""
+	SortDesc    = "\uf0dd"     // Printable Rune : ""
+	Terminal    = "\ue795"     // Printable Rune : ""
 )
 
 /*
@@ -47,7 +47,7 @@ THESE CODE BASE ON https://github.com/acarl005/ls-go
 thanks for the great work!!
 */
 
-var Icons = map[string]IconStyle{
+var Icons = map[string]Style{
 	"ai": {
 		Icon:  "\ue669", // Printable Rune : ""
 		Color: "#ce6f14",
@@ -394,7 +394,7 @@ var Aliases = map[string]string{
 	"z":                "zip",
 }
 
-var Folders = map[string]IconStyle{
+var Folders = map[string]Style{
 	".atom":                 {Icon: "\ue764", Color: "#66595c"}, // Atom folder - Dark gray // Printable Rune : ""
 	".aws":                  {Icon: "\ue7ad", Color: "#ff9900"}, // AWS folder - Orange // Printable Rune : ""
 	".docker":               {Icon: "\ue7b0", Color: "#0db7ed"}, // Docker folder - Blue // Printable Rune : ""

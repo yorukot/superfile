@@ -55,7 +55,7 @@ func (m *model) IsRenamingConflicting() bool {
 func (m *model) warnModalForRenaming() {
 	id := shortuuid.New()
 	message := channelMessage{
-		messageId:   id,
+		messageID:   id,
 		messageType: sendWarnModal,
 	}
 
@@ -96,7 +96,7 @@ func (m *model) deleteItemWarn() {
 
 	id := shortuuid.New()
 	message := channelMessage{
-		messageId:   id,
+		messageID:   id,
 		messageType: sendWarnModal,
 	}
 
@@ -109,16 +109,14 @@ func (m *model) deleteItemWarn() {
 		}
 		channel <- message
 		return
-	} else {
-		message.warnModal = warnModal{
-			open:     true,
-			title:    "Are you sure you want to move this to trash can",
-			content:  "This operation will move file or directory to trash can.",
-			warnType: confirmDeleteItem,
-		}
-		channel <- message
-		return
 	}
+	message.warnModal = warnModal{
+		open:     true,
+		title:    "Are you sure you want to move this to trash can",
+		content:  "This operation will move file or directory to trash can.",
+		warnType: confirmDeleteItem,
+	}
+	channel <- message
 }
 
 // Move file or directory to the trash can
@@ -142,7 +140,7 @@ func (m *model) deleteSingleItem() {
 	m.processBarModel.process[id] = newProcess
 
 	message := channelMessage{
-		messageId:       id,
+		messageID:       id,
 		messageType:     sendProcess,
 		processNewState: newProcess,
 	}
@@ -189,7 +187,7 @@ func (m *model) deleteMultipleItems() {
 		m.processBarModel.process[id] = newProcess
 
 		message := channelMessage{
-			messageId:       id,
+			messageID:       id,
 			messageType:     sendProcess,
 			processNewState: newProcess,
 		}
@@ -214,14 +212,13 @@ func (m *model) deleteMultipleItems() {
 				slog.Error("Error while delete multiple item function", "error", err)
 				m.processBarModel.process[id] = p
 				break
-			} else {
-				if p.done == p.total {
-					p.state = successful
-					message.processNewState = p
-					channel <- message
-				}
-				m.processBarModel.process[id] = p
 			}
+			if p.done == p.total {
+				p.state = successful
+				message.processNewState = p
+				channel <- message
+			}
+			m.processBarModel.process[id] = p
 		}
 	}
 
@@ -258,7 +255,7 @@ func (m *model) completelyDeleteSingleItem() {
 	m.processBarModel.process[id] = newProcess
 
 	message := channelMessage{
-		messageId:       id,
+		messageID:       id,
 		messageType:     sendProcess,
 		processNewState: newProcess,
 	}
@@ -309,7 +306,7 @@ func (m *model) completelyDeleteMultipleItems() {
 		m.processBarModel.process[id] = newProcess
 
 		message := channelMessage{
-			messageId:       id,
+			messageID:       id,
 			messageType:     sendProcess,
 			processNewState: newProcess,
 		}
@@ -336,14 +333,13 @@ func (m *model) completelyDeleteMultipleItems() {
 				slog.Error("Error while completely delete multiple item function", "error", err)
 				m.processBarModel.process[id] = p
 				break
-			} else {
-				if p.done == p.total {
-					p.state = successful
-					message.processNewState = p
-					channel <- message
-				}
-				m.processBarModel.process[id] = p
 			}
+			if p.done == p.total {
+				p.state = successful
+				message.processNewState = p
+				channel <- message
+			}
+			m.processBarModel.process[id] = p
 		}
 	}
 
@@ -433,7 +429,7 @@ func (m *model) pasteItem() {
 	m.processBarModel.process[id] = newProcess
 
 	message := channelMessage{
-		messageId:       id,
+		messageID:       id,
 		messageType:     sendProcess,
 		processNewState: newProcess,
 	}
@@ -572,7 +568,7 @@ func (m *model) openFileWithEditor() tea.Cmd {
 
 	// Make sure there is an editor
 	if editor == "" {
-		if runtime.GOOS == variable.OS_WINDOWS {
+		if runtime.GOOS == variable.OsWindows {
 			editor = "notepad"
 		} else {
 			editor = "nano"
@@ -599,9 +595,9 @@ func (m *model) openDirectoryWithEditor() tea.Cmd {
 
 	if editor == "" {
 		switch runtime.GOOS {
-		case variable.OS_WINDOWS:
+		case variable.OsWindows:
 			editor = "explorer"
-		case variable.OS_DARWIN:
+		case variable.OsDarwin:
 			editor = "open"
 		default:
 			editor = "vi"

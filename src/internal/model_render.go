@@ -660,10 +660,10 @@ func (m *model) filePreviewPanelRender() string {
 	itemPath := panel.element[panel.cursor].location
 
 	// Renamed it to info_err to prevent shadowing with err below
-	fileInfo, info_err := os.Stat(itemPath)
+	fileInfo, infoErr := os.Stat(itemPath)
 
-	if info_err != nil {
-		slog.Error("Error get file info", "error", info_err)
+	if infoErr != nil {
+		slog.Error("Error get file info", "error", infoErr)
 		return box.Render("\n --- " + icon.Error + " Error get file info ---")
 	}
 

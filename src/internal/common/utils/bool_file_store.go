@@ -21,9 +21,9 @@ func ReadBoolFile(path string, defaultValue bool) bool {
 	// consistent behavior and prevents issues with case-insensitivity or
 	// unexpected values like "yes", "on", etc. that ParseBool would accept
 	switch string(data) {
-	case TRUE_STRING:
+	case TrueString:
 		return true
-	case FALSE_STRING:
+	case FalseString:
 		return false
 	default:
 		return defaultValue

@@ -24,14 +24,14 @@ func TestReadBoolFile(t *testing.T) {
 	}{
 		{
 			name:         "file contains true",
-			fileContent:  TRUE_STRING,
+			fileContent:  TrueString,
 			defaultValue: false,
 			createFile:   true,
 			expected:     true,
 		},
 		{
 			name:         "file contains false",
-			fileContent:  FALSE_STRING,
+			fileContent:  FalseString,
 			defaultValue: true,
 			createFile:   true,
 			expected:     false,
@@ -130,15 +130,15 @@ func TestWriteBoolFile(t *testing.T) {
 			content, err := os.ReadFile(filePath)
 			require.NoError(t, err)
 
-			expected := FALSE_STRING
+			expected := FalseString
 			if tt.value {
-				expected = TRUE_STRING
+				expected = TrueString
 			}
 
 			assert.Equal(t, expected, string(content))
 
 			// Verify permissions (Unix only)
-			if runtime.GOOS != variable.OS_WINDOWS {
+			if runtime.GOOS != variable.OsWindows {
 				info, err := os.Stat(filePath)
 				require.NoError(t, err)
 				assert.Equal(t, os.FileMode(0644), info.Mode().Perm())
@@ -157,7 +157,7 @@ func TestWriteBoolFileError(t *testing.T) {
 
 func TestReadBoolFilePermissionDenied(t *testing.T) {
 	// Skip on Windows as permission handling differs
-	if runtime.GOOS == variable.OS_WINDOWS {
+	if runtime.GOOS == variable.OsWindows {
 		t.Skip("Skipping permission test on Windows")
 	}
 
@@ -165,7 +165,7 @@ func TestReadBoolFilePermissionDenied(t *testing.T) {
 
 	// Create a file
 	filePath := filepath.Join(tempDir, "no_read_perm.txt")
-	err := os.WriteFile(filePath, []byte(TRUE_STRING), 0644)
+	err := os.WriteFile(filePath, []byte(TrueString), 0644)
 	require.NoError(t, err)
 
 	// Remove read permissions
@@ -183,7 +183,7 @@ func TestReadBoolFilePermissionDenied(t *testing.T) {
 
 func TestWriteBoolFilePermissionDenied(t *testing.T) {
 	// Skip on Windows as permission handling differs
-	if runtime.GOOS == variable.OS_WINDOWS {
+	if runtime.GOOS == variable.OsWindows {
 		t.Skip("Skipping permission test on Windows")
 	}
 

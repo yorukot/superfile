@@ -67,12 +67,11 @@ func prettierName(name string, width int, isDir bool, isSelected bool, bgColor l
 			Render(style.Icon+" ") +
 			common.FilePanelItemSelectedStyle.
 				Render(truncateText(name, width, "..."))
-	} else {
-		return common.StringColorRender(lipgloss.Color(style.Color), bgColor).
-			Background(bgColor).
-			Render(style.Icon+" ") +
-			common.FilePanelStyle.Render(truncateText(name, width, "..."))
 	}
+	return common.StringColorRender(lipgloss.Color(style.Color), bgColor).
+		Background(bgColor).
+		Render(style.Icon+" ") +
+		common.FilePanelStyle.Render(truncateText(name, width, "..."))
 }
 
 func prettierDirectoryPreviewName(name string, isDir bool, bgColor lipgloss.Color) string {
@@ -90,12 +89,11 @@ func clipboardPrettierName(name string, width int, isDir bool, isSelected bool) 
 			Background(common.FooterBGColor).
 			Render(style.Icon+" ") +
 			common.FilePanelItemSelectedStyle.Render(truncateTextBeginning(name, width, "..."))
-	} else {
-		return common.StringColorRender(lipgloss.Color(style.Color), common.FooterBGColor).
-			Background(common.FooterBGColor).
-			Render(style.Icon+" ") +
-			common.FilePanelStyle.Render(truncateTextBeginning(name, width, "..."))
 	}
+	return common.StringColorRender(lipgloss.Color(style.Color), common.FooterBGColor).
+		Background(common.FooterBGColor).
+		Render(style.Icon+" ") +
+		common.FilePanelStyle.Render(truncateTextBeginning(name, width, "..."))
 }
 
 func fileNameWithoutExtension(fileName string) string {
@@ -117,15 +115,15 @@ func formatFileSize(size int64) string {
 	unitsDec := []string{"B", "kB", "MB", "GB", "TB", "PB", "EB"}
 	unitsBin := []string{"B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB"}
 
+	// Todo : Remove duplication here
 	if common.Config.FileSizeUseSI {
 		unitIndex := int(math.Floor(math.Log(float64(size)) / math.Log(1000)))
 		adjustedSize := float64(size) / math.Pow(1000, float64(unitIndex))
 		return fmt.Sprintf("%.2f %s", adjustedSize, unitsDec[unitIndex])
-	} else {
-		unitIndex := int(math.Floor(math.Log(float64(size)) / math.Log(1024)))
-		adjustedSize := float64(size) / math.Pow(1024, float64(unitIndex))
-		return fmt.Sprintf("%.2f %s", adjustedSize, unitsBin[unitIndex])
 	}
+	unitIndex := int(math.Floor(math.Log(float64(size)) / math.Log(1024)))
+	adjustedSize := float64(size) / math.Pow(1024, float64(unitIndex))
+	return fmt.Sprintf("%.2f %s", adjustedSize, unitsBin[unitIndex])
 }
 
 // Truncate line lengths and keep ANSI

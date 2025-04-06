@@ -248,7 +248,7 @@ type process struct {
 
 // Message for process bar
 type channelMessage struct {
-	messageId       string
+	messageID       string
 	messageType     channelMessageType
 	processNewState process
 	warnModal       warnModal

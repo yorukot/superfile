@@ -31,7 +31,7 @@ var (
 )
 
 // No dependencies
-func LoadInitial_PrerenderedVariables() {
+func LoadinitialPrerenderedvariables() {
 	LipglossError = lipgloss.NewStyle().Foreground(lipgloss.Color("#F93939")).Render("Error") +
 		lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFEE")).Render(" ┃ ")
 }

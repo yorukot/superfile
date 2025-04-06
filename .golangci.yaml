@@ -328,15 +328,13 @@ linters:
     - reassign # checks that package variables are not reassigned
     # Todo enable - Issue due to model struct
     # - recvcheck # checks for receiver type consistency
-    # Todo enable : Many changes
-    # - revive # fast, configurable, extensible, flexible, and beautiful linter for Go, drop-in replacement of golint
+    - revive # fast, configurable, extensible, flexible, and beautiful linter for Go, drop-in replacement of golint
     - rowserrcheck # checks whether Err of rows is checked successfully
     # Todo enable - Need to use non-root logger
     # - sloglint # ensure consistent code style when using log/slog
     - spancheck # checks for mistakes with OpenTelemetry/Census spans
     - sqlclosecheck # checks that sql.Rows and sql.Stmt are closed
-    # Todo enable : Many changes, but good changes.
-    # - stylecheck # is a replacement for golint
+    - stylecheck # is a replacement for golint
     - testableexamples # checks if examples are testable (have an expected output)
     - testifylint # checks usage of github.com/stretchr/testify
     # - testpackage # makes you use a separate _test package # Not needed - Makes it harder to test unexported package functions.

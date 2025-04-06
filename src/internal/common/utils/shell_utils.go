@@ -18,7 +18,7 @@ func ExecuteCommandInShell(timeLimit time.Duration, cmdDir string, shellCommand 
 	baseCmd := "/bin/sh"
 	args := []string{"-c", shellCommand}
 
-	if runtime.GOOS == variable.OS_WINDOWS {
+	if runtime.GOOS == variable.OsWindows {
 		baseCmd = "powershell.exe"
 		args[0] = "-Command"
 	}

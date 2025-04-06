@@ -81,12 +81,12 @@ func LoadThemeFile() {
 	themeFile := filepath.Join(variable.ThemeFolder, Config.Theme+".toml")
 	data, err := os.ReadFile(themeFile)
 	if err == nil {
-		if unmarshalErr := toml.Unmarshal(data, &Theme); unmarshalErr == nil {
+		unmarshalErr := toml.Unmarshal(data, &Theme)
+		if unmarshalErr == nil {
 			return
-		} else {
-			slog.Error("Could not unmarshal theme file. Falling back to default theme",
-				"unmarshalErr", unmarshalErr)
 		}
+		slog.Error("Could not unmarshal theme file. Falling back to default theme",
+			"unmarshalErr", unmarshalErr)
 	} else {
 		slog.Error("Could not read user's theme file. Falling back to default theme", "path", themeFile, "error", err)
 	}

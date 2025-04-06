@@ -33,7 +33,7 @@ func zipSource(source, target string) error {
 	}
 
 	message := channelMessage{
-		messageId:       id,
+		messageID:       id,
 		messageType:     sendProcess,
 		processNewState: p,
 	}

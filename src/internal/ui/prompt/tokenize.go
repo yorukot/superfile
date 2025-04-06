@@ -42,14 +42,14 @@ func resolveShellSubstitution(subCmdTimeout time.Duration, command string, cwdLo
 				envVarName := string(cmdRunes[i+2 : end])
 
 				// We can add a layer of abstraction for better unit testing
-				if value, ok := os.LookupEnv(envVarName); !ok {
+				value, ok := os.LookupEnv(envVarName)
+				if !ok {
 					return "", envVarNotFoundError{varName: envVarName}
-				} else {
-					// Might Handle values being too big, or having multiple lines
-					// But this is based on user input, so it is probably okay for now
-					// Same comment for command substitution
-					resCommand.WriteString(value)
 				}
+				// Might Handle values being too big, or having multiple lines
+				// But this is based on user input, so it is probably okay for now
+				// Same comment for command substitution
+				resCommand.WriteString(value)
 
 				i = end + 1
 			case '(':
@@ -68,15 +68,14 @@ func resolveShellSubstitution(subCmdTimeout time.Duration, command string, cwdLo
 
 				if retCode == -1 {
 					return "", fmt.Errorf("could not execute shell substitution command : %s : %w", subCmd, err)
-				} else {
-					// We are allowing commands that exit with non zero status code
-					// We still use its output
-					if retCode != 0 {
-						slog.Debug("substitution command exited with non zero status", "retCode", retCode,
-							"command", subCmd)
-					}
-					resCommand.WriteString(output)
 				}
+				// We are allowing commands that exit with non zero status code
+				// We still use its output
+				if retCode != 0 {
+					slog.Debug("substitution command exited with non zero status", "retCode", retCode,
+						"command", subCmd)
+				}
+				resCommand.WriteString(output)
 
 				i = end + 1
 			default:
