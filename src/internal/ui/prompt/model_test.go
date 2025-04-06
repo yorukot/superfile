@@ -63,7 +63,7 @@ func TestModel_HandleUpdate(t *testing.T) {
 			assert.Equal(t, openAfterEnter, m.IsOpen())
 			assert.Equal(t, common.NoAction{}, action)
 			assert.Equal(t, "", m.resultMsg)
-			assert.Equal(t, true, m.actionSuccess)
+			assert.True(t, m.actionSuccess)
 			assert.True(t, m.validate())
 		}
 
@@ -173,20 +173,20 @@ func TestMode_HandleResults(t *testing.T) {
 
 		// Validate close happens when closeOnSuccess is true
 		assert.True(t, m.actionSuccess)
-		assert.Equal(t, m.resultMsg, "Command exited with status 0")
+		assert.Equal(t, "Command exited with status 0", m.resultMsg)
 		assert.False(t, m.IsOpen())
 
 		m.Open(true)
 		m.HandleShellCommandResults(1, "")
 		assert.False(t, m.actionSuccess)
-		assert.Equal(t, m.resultMsg, "Command exited with status 1")
+		assert.Equal(t, "Command exited with status 1", m.resultMsg)
 		assert.True(t, m.IsOpen())
 
 		m.closeOnSuccess = false
 		m.HandleShellCommandResults(0, "")
 		// Validate that close does not happen when closeOnSuccess is true
 		assert.True(t, m.actionSuccess)
-		assert.Equal(t, m.resultMsg, "Command exited with status 0")
+		assert.Equal(t, "Command exited with status 0", m.resultMsg)
 		assert.True(t, m.IsOpen())
 
 	})

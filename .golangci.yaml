@@ -323,7 +323,6 @@ linters:
     - nilnesserr # reports that it checks for err != nil, but it returns a different nil value error (powered by nilness and nilerr)
     - nilnil # checks that there is no simultaneous return of nil error and an invalid value
     - noctx # finds sending http request without context.Context
-    # Todo enable : Needs some fixes
     - nolintlint # reports ill-formed or insufficient nolint directives
     # Todo enable - maybe too strict for us
     # - nonamedreturns # reports all named returns
@@ -346,8 +345,7 @@ linters:
     # Todo enable : Many changes, but good changes.
     # - stylecheck # is a replacement for golint
     - testableexamples # checks if examples are testable (have an expected output)
-    # Todo enable - some test bugs. To be fixed
-    # - testifylint # checks usage of github.com/stretchr/testify
+    - testifylint # checks usage of github.com/stretchr/testify
     # Todo enable - Might be too strict for us
     # - testpackage # makes you use a separate _test package
     - tparallel # detects inappropriate usage of t.Parallel() method in your Go test codes

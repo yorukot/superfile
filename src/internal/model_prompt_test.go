@@ -10,6 +10,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/common/utils"
 	"github.com/yorukot/superfile/src/internal/ui/prompt"
@@ -73,18 +74,18 @@ func TestModel_Update_Prompt(t *testing.T) {
 		m := defaultModelConfig(false, false, "/")
 		firstUse = false
 		_, err := TeaUpdate(&m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenCommandLine[0]))
-		assert.Nil(t, err, "Opening the prompt should not produce an error")
+		require.NoError(t, err, "Opening the prompt should not produce an error")
 		assert.True(t, m.promptModal.IsOpen())
 	})
 
 	t.Run("Split Panel", func(t *testing.T) {
 		m := defaultModelConfig(false, false, "/")
 		firstUse = false
-		assert.Equal(t, 1, len(m.fileModel.filePanels))
+		assert.Len(t, m.fileModel.filePanels, 1)
 		_, _ = TeaUpdate(&m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenSPFPrompt[0]))
 		_, _ = TeaUpdate(&m, utils.TeaRuneKeyMsg(prompt.SplitCommand))
 		_, err := TeaUpdate(&m, tea.KeyMsg{Type: tea.KeyEnter})
-		assert.Nil(t, err, "Opening the prompt should not produce an error")
-		assert.Equal(t, 2, len(m.fileModel.filePanels))
+		require.NoError(t, err, "Opening the prompt should not produce an error")
+		assert.Len(t, m.fileModel.filePanels, 2)
 	})
 }

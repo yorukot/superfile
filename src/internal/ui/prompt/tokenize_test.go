@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -171,7 +172,7 @@ func Test_resolveShellSubstitution(t *testing.T) {
 			if err != nil {
 				assert.True(t, tt.isErrorExpected)
 				if tt.errorToMatch != nil {
-					assert.ErrorAs(t, err, &tt.errorToMatch)
+					assert.ErrorIs(t, err, tt.errorToMatch)
 				}
 			}
 		})
@@ -180,8 +181,8 @@ func Test_resolveShellSubstitution(t *testing.T) {
 	t.Run("Testing shell substitution timeout", func(t *testing.T) {
 		result, err := resolveShellSubstitution(shellSubTimeoutInTests, "$(sleep 0.1)", defaultTestCwd)
 		assert.Empty(t, result)
-		assert.NotNil(t, err)
-		assert.ErrorAs(t, err, &context.DeadlineExceeded)
+		require.Error(t, err)
+		require.ErrorIs(t, err, context.DeadlineExceeded)
 	})
 }
 
