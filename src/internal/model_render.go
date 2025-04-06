@@ -109,22 +109,22 @@ func (m *model) filePanelRender() string {
 		m.fileModel.filePanels[i] = filePanel
 
 		f[i] += common.FilePanelTopDirectoryIconStyle.Render(" "+icon.Directory+icon.Space) + common.FilePanelTopPathStyle.Render(truncateTextBeginning(filePanel.location, m.fileModel.width-4, "...")) + "\n"
-		filePanelWidth := 0
-		footerBorderWidth := 0
+		var filePanelWidth int
+		footerBorderWidth := m.fileModel.width + 15
 
+		// Todo : Move this to a utility function and clarify the calculation via comments
+		// Maybe even write unit tests
 		if (m.fullWidth-common.Config.SidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels) != 0 && i == len(m.fileModel.filePanels)-1 {
 			if m.fileModel.filePreview.open {
 				filePanelWidth = m.fileModel.width
 			} else {
 				filePanelWidth = (m.fileModel.width + (m.fullWidth-common.Config.SidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels))
 			}
-			footerBorderWidth = m.fileModel.width + 15
 		} else {
 			filePanelWidth = m.fileModel.width
-			footerBorderWidth = m.fileModel.width + 15
 		}
 
-		sortDirectionString := ""
+		var sortDirectionString string
 		if filePanel.sortOptions.data.reversed {
 			if common.Config.Nerdfont {
 				sortDirectionString = icon.SortDesc
@@ -138,7 +138,7 @@ func (m *model) filePanelRender() string {
 				sortDirectionString = "A"
 			}
 		}
-		sortTypeString := ""
+		var sortTypeString string
 		if filePanelWidth < 23 {
 			sortTypeString = sortDirectionString
 		} else {
@@ -284,8 +284,8 @@ func (m *model) processBarRender() string {
 
 		curProcess := processes[i]
 		curProcess.progress.Width = utils.FooterWidth(m.fullWidth) - 3
-		symbol := ""
-		cursor := ""
+		var symbol string
+		var cursor string
 		if i == m.processBarModel.cursor {
 			cursor = common.FooterCursorStyle.Render("┃ ")
 		} else {
@@ -312,9 +312,7 @@ func (m *model) processBarRender() string {
 
 func (m *model) wrapProcessBardBorder(processRender string) string {
 	courseNumber := 0
-	if len(m.processBarModel.processList) == 0 {
-		courseNumber = 0
-	} else {
+	if len(m.processBarModel.processList) != 0 {
 		courseNumber = m.processBarModel.cursor + 1
 	}
 	bottomBorder := common.GenerateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(courseNumber), strconv.Itoa(len(m.processBarModel.processList))), utils.FooterWidth(m.fullWidth)-3)
@@ -415,8 +413,8 @@ func (m *model) clipboardRender() string {
 			}
 		}
 	}
-	bottomWidth := 0
 
+	var bottomWidth int
 	if m.fullWidth%3 != 0 {
 		bottomWidth = utils.FooterWidth(m.fullWidth + m.fullWidth%3 + 2)
 	} else {
@@ -786,7 +784,6 @@ func (m *model) filePreviewPanelRender() string {
 }
 
 func getBatSyntaxHighlightedContent(itemPath string, previewLine int, background string) (string, error) {
-	fileContent := ""
 	// --plain: use the plain style without line numbers and decorations
 	// --force-colorization: force colorization for non-interactive shell output
 	// --line-range <:m>: only read from line 1 to line "m"
@@ -804,7 +801,7 @@ func getBatSyntaxHighlightedContent(itemPath string, previewLine int, background
 		return "", err
 	}
 
-	fileContent = string(fileContentBytes)
+	fileContent := string(fileContentBytes)
 	if !common.Config.TransparentBackground {
 		fileContent = setBatBackground(fileContent, background)
 	}

@@ -352,8 +352,7 @@ linters:
     - unparam # reports unused function parameters
     - usestdlibvars # detects the possibility to use variables/constants from the Go standard library
     - usetesting # reports uses of functions with replacement inside the testing package
-    # Todo enable - many required fixes
-    # - wastedassign # finds wasted assignment statements
+    - wastedassign # finds wasted assignment statements
     # Todo enable - many fixes
     # - whitespace # detects leading and trailing whitespace
 
