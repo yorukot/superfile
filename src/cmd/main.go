@@ -90,27 +90,7 @@ func Run(content embed.FS) {
 				path = c.Args().First()
 			}
 
-			// Setting the config file path
-			configFileArg := c.String("config-file")
-
-			// Validate the config file exists
-			if configFileArg != "" {
-				if _, err := os.Stat(configFileArg); err != nil {
-					log.Fatalf("Error: While reading config file '%s' from argument : %v", configFileArg, err)
-				} else {
-					variable.ConfigFile = configFileArg
-				}
-			}
-
-			hotkeyFileArg := c.String("hotkey-file")
-
-			if hotkeyFileArg != "" {
-				if _, err := os.Stat(hotkeyFileArg); err != nil {
-					log.Fatalf("Error: While reading hotkey file '%s' from argument : %v", hotkeyFileArg, err)
-				} else {
-					variable.HotkeysFile = hotkeyFileArg
-				}
-			}
+			variable.UpdateVarFromCliArgs(c)
 
 			InitConfigFile()
 
@@ -118,10 +98,6 @@ func Run(content embed.FS) {
 			if err := InitTrash(); err != nil {
 				hasTrash = false
 			}
-
-			variable.FixHotkeys = c.Bool("fix-hotkeys")
-			variable.FixConfigFile = c.Bool("fix-config-file")
-			variable.PrintLastDir = c.Bool("print-last-dir")
 
 			firstUse := checkFirstUse()
 

@@ -325,8 +325,7 @@ linters:
     - predeclared # finds code that shadows one of Go's predeclared identifiers
     - promlinter # checks Prometheus metrics naming via promlint
     - protogetter # reports direct reads from proto message fields when getters should be used
-    # Todo enable - Some hard to fix things
-    # - reassign # checks that package variables are not reassigned
+    - reassign # checks that package variables are not reassigned
     # Todo enable - Issue due to model struct
     # - recvcheck # checks for receiver type consistency
     # Todo enable : Many changes
@@ -382,12 +381,12 @@ linters:
     # - dogsled # checks assignments with too many blank identifiers (e.g. x, _, _, _, := f())
     # False positives
     # - dupword # [useless without config] checks for duplicate words in the source code
-    # Todo : It gave some useful errors. Should fix
-    # - err113 # [too strict] checks the errors handling expressions
+
+    # It gave some useful errors optimization. Should fix eventually. But this is low priority
+    # - err113 # [too strict] checks the errors handling expressions #
     # - errchkjson # [don't see profit + I'm against of omitting errors like in the first example https://github.com/breml/errchkjson] checks types passed to the json encoding functions. Reports unsupported types and optionally reports occasions, where the check for the returned error can be omitted
     # - forcetypeassert # [replaced by errcheck] finds forced type assertions
     # - gofmt # [replaced by goimports] checks whether code was gofmt-ed
-    # Todo : Check this
     #- gofumpt # [replaced by goimports, gofumports is not available yet] checks whether code was gofumpt-ed
     #- gomodguard # [use more powerful depguard] allow and block lists linter for direct Go module dependencies
     - gosmopolitan # reports certain i18n/l10n anti-patterns in your Go codebase
@@ -396,9 +395,7 @@ linters:
     - maintidx # measures the maintainability index of each function
     - misspell # [useless] finds commonly misspelled English words in comments
     # - nlreturn # [too strict and mostly code is not more readable] checks for a new line before return and branch statements to increase code clarity
-    # Todo : might make tests parallel
     #- paralleltest # [too many false positives] detects missing usage of t.Parallel() method in your Go test
-    # Todo : Check this. There are some issues to be fixed
     # - tagliatelle # checks the struct tags
     # - tenv # [deprecated, replaced by usetesting] detects using os.Setenv instead of t.Setenv since Go1.17
     #- thelper # detects golang test helpers without t.Helper() call and checks the consistency of test helpers

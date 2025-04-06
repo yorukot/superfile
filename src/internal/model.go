@@ -583,7 +583,7 @@ func (m *model) quitSuperfile() {
 	}
 	// cd on quit
 	currentDir := m.fileModel.filePanels[m.filePanelFocusIndex].location
-	variable.LastDir = currentDir
+	variable.SetLastDir(currentDir)
 
 	if common.Config.CdOnQuit {
 		// escape single quote

@@ -1,7 +1,11 @@
 package variable
 
 import (
+	"log"
+	"os"
 	"path/filepath"
+
+	"github.com/urfave/cli/v2"
 
 	"github.com/adrg/xdg"
 )
@@ -34,8 +38,6 @@ var (
 
 	// MainDir files
 	ThemeFolder string = filepath.Join(SuperFileMainDir, "theme")
-	ConfigFile  string = filepath.Join(SuperFileMainDir, "config.toml")
-	HotkeysFile string = filepath.Join(SuperFileMainDir, "hotkeys.toml")
 
 	// DataDir files
 	LastCheckVersion string = filepath.Join(SuperFileDataDir, "lastCheckVersion")
@@ -54,6 +56,12 @@ var (
 	CustomTrashDirectory      string = filepath.Join(xdg.DataHome, "Trash")
 	CustomTrashDirectoryFiles string = filepath.Join(xdg.DataHome, "Trash", "files")
 	CustomTrashDirectoryInfo  string = filepath.Join(xdg.DataHome, "Trash", "info")
+)
+
+// These variables are actually not fixed, they are sometimes updated dynamically
+var (
+	ConfigFile  string = filepath.Join(SuperFileMainDir, "config.toml")
+	HotkeysFile string = filepath.Join(SuperFileMainDir, "hotkeys.toml")
 
 	// Other state variables
 	FixHotkeys    bool   = false
@@ -61,3 +69,37 @@ var (
 	LastDir       string = ""
 	PrintLastDir  bool   = false
 )
+
+// Still we are preventing other packages to directly modify them via reassign linter
+
+func SetLastDir(path string) {
+	LastDir = path
+}
+
+func UpdateVarFromCliArgs(c *cli.Context) {
+	// Setting the config file path
+	configFileArg := c.String("config-file")
+
+	// Validate the config file exists
+	if configFileArg != "" {
+		if _, err := os.Stat(configFileArg); err != nil {
+			log.Fatalf("Error: While reading config file '%s' from argument : %v", configFileArg, err)
+		} else {
+			ConfigFile = configFileArg
+		}
+	}
+
+	hotkeyFileArg := c.String("hotkey-file")
+
+	if hotkeyFileArg != "" {
+		if _, err := os.Stat(hotkeyFileArg); err != nil {
+			log.Fatalf("Error: While reading hotkey file '%s' from argument : %v", hotkeyFileArg, err)
+		} else {
+			HotkeysFile = hotkeyFileArg
+		}
+	}
+
+	FixHotkeys = c.Bool("fix-hotkeys")
+	FixConfigFile = c.Bool("fix-config-file")
+	PrintLastDir = c.Bool("print-last-dir")
+}
