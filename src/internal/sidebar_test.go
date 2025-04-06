@@ -311,7 +311,7 @@ func Test_firstRenderIndex(t *testing.T) {
 			explanation:        "Large panel should show all directories from start",
 		},
 		{
-			name:               "Assymetric sidebar with few directories",
+			name:               "Asymetric sidebar with few directories",
 			sidebar:            sidebar_b,
 			mainPanelHeight:    12,
 			endIndex:           4, // Last disk dir in sidebar_b

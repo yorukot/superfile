@@ -82,7 +82,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.updateFilePanelsState(msg, &cmd)
 
 	if m.sidebarModel.searchBar.Value() != "" {
-		// Todo : All updates of sideBar must be moved to seperate struct functions
+		// Todo : All updates of sideBar must be moved to separate struct functions
 		// we have to keep the state of sidebar consistent, and keep values of
 		// cursor, directories, renderIndex sane for each update, and it has to
 		// take care at one single place, not everywhere we use sideBar
@@ -576,7 +576,7 @@ func (m *model) getFilePanelItems() {
 	m.updatedToggleDotFile = false
 }
 
-// Close superfile application. Cd into the curent dir if CdOnQuit on and save
+// Close superfile application. Cd into the current dir if CdOnQuit on and save
 // the path in state direcotory
 func (m *model) quitSuperfile() {
 	// close exiftool session

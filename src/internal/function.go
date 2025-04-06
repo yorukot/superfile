@@ -588,7 +588,7 @@ func getElementIcon(file string, IsDir bool) icon.IconStyle {
 }
 
 // TeaUpdate : Utility to send update to model , majorly used in tests
-// Not using pointer reciever as this is more like a utility, than
+// Not using pointer receiver as this is more like a utility, than
 // a member function of model
 func TeaUpdate(m *model, msg tea.Msg) (tea.Cmd, error) {
 	resModel, cmd := m.Update(msg)

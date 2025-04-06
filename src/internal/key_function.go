@@ -11,7 +11,7 @@ import (
 )
 
 // Todo : Replace usage of this with direct slices.Contains call
-// This fucntion is not required
+// This function is not required
 func containsKey(v string, a []string) string {
 	if slices.Contains(a, v) {
 		return v

@@ -97,7 +97,7 @@ func Run(content embed.FS) {
 			// Validate the config file exists
 			if configFileArg != "" {
 				if _, err := os.Stat(configFileArg); err != nil {
-					log.Fatalf("Error: While reading config file '%s' from arguement : %v", configFileArg, err)
+					log.Fatalf("Error: While reading config file '%s' from argument : %v", configFileArg, err)
 				} else {
 					variable.ConfigFile = configFileArg
 				}
@@ -107,7 +107,7 @@ func Run(content embed.FS) {
 
 			if hotkeyFileArg != "" {
 				if _, err := os.Stat(hotkeyFileArg); err != nil {
-					log.Fatalf("Error: While reading hotkey file '%s' from arguement : %v", hotkeyFileArg, err)
+					log.Fatalf("Error: While reading hotkey file '%s' from argument : %v", hotkeyFileArg, err)
 				} else {
 					variable.HotkeysFile = hotkeyFileArg
 				}

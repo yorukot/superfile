@@ -228,7 +228,7 @@ func (m *model) deleteMultipleItems() {
 		}
 	}
 
-	// This feels a bit fuzzy and unclean. Todo : Review and simplifiy this.
+	// This feels a bit fuzzy and unclean. Todo : Review and simplify this.
 	// We should never get to this condition of panel.cursor getting negative
 	// and if we do, we should error log that.
 	if panel.cursor >= len(panel.element)-len(panel.selected)-1 {
