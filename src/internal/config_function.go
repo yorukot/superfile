@@ -25,8 +25,7 @@ func initialConfig(dir string) (bool, bool, string) {
 	// For example if the log file directories have access issues.
 	// we could pass a dummy object to log.SetOutput() and the app would still function.
 	if err != nil {
-		// At this point, it will go to stdout since log file is not initilized
-		utils.LogAndExit("Error while opening superfile.log file", "error", err)
+		utils.PrintfAndExit("Error while opening superfile.log file : %v", err)
 	}
 	common.LoadConfigFile()
 

@@ -11,7 +11,8 @@ import (
 	"strings"
 	"time"
 
-	variable "github.com/yorukot/superfile/src/config"
+	"github.com/yorukot/superfile/src/internal/common/utils"
+
 	"github.com/yorukot/superfile/src/internal/common"
 
 	"github.com/atotto/clipboard"
@@ -568,7 +569,7 @@ func (m *model) openFileWithEditor() tea.Cmd {
 
 	// Make sure there is an editor
 	if editor == "" {
-		if runtime.GOOS == variable.OsWindows {
+		if runtime.GOOS == utils.OsWindows {
 			editor = "notepad"
 		} else {
 			editor = "nano"
@@ -595,9 +596,9 @@ func (m *model) openDirectoryWithEditor() tea.Cmd {
 
 	if editor == "" {
 		switch runtime.GOOS {
-		case variable.OsWindows:
+		case utils.OsWindows:
 			editor = "explorer"
-		case variable.OsDarwin:
+		case utils.OsDarwin:
 			editor = "open"
 		default:
 			editor = "vi"

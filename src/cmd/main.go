@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"log/slog"
 	"net/http"
 	"os"
@@ -103,7 +102,7 @@ func Run(content embed.FS) {
 
 			p := tea.NewProgram(internal.InitialModel(path, firstUse, hasTrash), tea.WithAltScreen(), tea.WithMouseCellMotion())
 			if _, err := p.Run(); err != nil {
-				log.Fatalf("Alas, there's been an error: %v", err)
+				utils.PrintfAndExit("Alas, there's been an error: %v", err)
 			}
 
 			// This must be after calling internal.InitialModel()
@@ -122,7 +121,7 @@ func Run(content embed.FS) {
 
 	err := app.Run(os.Args)
 	if err != nil {
-		log.Fatalln(err)
+		utils.PrintlnAndExit(err)
 	}
 }
 
@@ -136,7 +135,7 @@ func InitConfigFile() {
 		variable.SuperFileStateDir,
 		variable.ThemeFolder,
 	); err != nil {
-		log.Fatalln("Error creating directories:", err)
+		utils.PrintlnAndExit("Error creating directories:", err)
 	}
 
 	// Create files
@@ -146,27 +145,27 @@ func InitConfigFile() {
 		variable.ThemeFileVersion,
 		variable.ToggleFooter,
 	); err != nil {
-		log.Fatalln("Error creating files:", err)
+		utils.PrintlnAndExit("Error creating files:", err)
 	}
 
 	// Write config file
 	if err := writeConfigFile(variable.ConfigFile, common.ConfigTomlString); err != nil {
-		log.Fatalln("Error writing config file:", err)
+		utils.PrintlnAndExit("Error writing config file:", err)
 	}
 
 	if err := writeConfigFile(variable.HotkeysFile, common.HotkeysTomlString); err != nil {
-		log.Fatalln("Error writing config file:", err)
+		utils.PrintlnAndExit("Error writing config file:", err)
 	}
 
 	if err := initJSONFile(variable.PinnedFile); err != nil {
-		log.Fatalln("Error initializing json file:", err)
+		utils.PrintlnAndExit("Error initializing json file:", err)
 	}
 }
 
 // We are initializing these, but not sure if we are ever using them
 func InitTrash() error {
 	// Create trash directories
-	if runtime.GOOS != variable.OsDarwin {
+	if runtime.GOOS != utils.OsDarwin {
 		err := createDirectories(
 			variable.CustomTrashDirectory,
 			variable.CustomTrashDirectoryFiles,
@@ -215,7 +214,7 @@ func checkFirstUse() bool {
 	if _, err := os.Stat(file); os.IsNotExist(err) {
 		firstUse = true
 		if err = os.WriteFile(file, nil, 0644); err != nil {
-			log.Fatalf("Failed to create file: %v", err)
+			utils.PrintfAndExit("Failed to create file: %v", err)
 		}
 	}
 	return firstUse

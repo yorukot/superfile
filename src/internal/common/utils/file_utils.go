@@ -31,7 +31,7 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 
 	data, err := os.ReadFile(filePath)
 	if err != nil {
-		LogAndExit("Config file doesn't exist", "error", err)
+		PrintfAndExit("Config file doesn't exist. Error : %v", err)
 	}
 	errMsg := ""
 	hasError := false
@@ -91,7 +91,7 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 	// Now we are fixing the file, we would not return hasError=true even if there was error
 	// Fix the file by writing all fields
 	if err := WriteTomlData(filePath, target); err != nil {
-		LogAndExit("Error while writing config file", "error", err)
+		PrintfAndExit("Error while writing config file : %v", err)
 	}
 	return false
 }

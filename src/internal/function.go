@@ -16,8 +16,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/yorukot/superfile/src/internal/common/utils"
+
 	tea "github.com/charmbracelet/bubbletea"
-	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/internal/common"
 
 	"github.com/lithammer/shortuuid"
@@ -36,7 +37,7 @@ func isExternalDiskPath(path string) bool {
 	// This is very vague. You cannot tell if a path is belonging to an external partition
 	// if you dont define the source path to compare with
 	// But making this true will cause slow file operations based on current implementation
-	if runtime.GOOS == variable.OsWindows {
+	if runtime.GOOS == utils.OsWindows {
 		return false
 	}
 
@@ -53,7 +54,7 @@ func isExternalDiskPath(path string) bool {
 }
 
 func shouldListDisk(mountPoint string) bool {
-	if runtime.GOOS == variable.OsWindows {
+	if runtime.GOOS == utils.OsWindows {
 		// We need to get C:, D: drive etc in the list
 		return true
 	}
@@ -90,7 +91,7 @@ func diskName(mountPoint string) string {
 	// In windows we dont want to use filepath.Base as it returns "\" for when
 	// mountPoint is any drive root "C:", "D:", etc. Hence causing same name
 	// for each drive
-	if runtime.GOOS == variable.OsWindows {
+	if runtime.GOOS == utils.OsWindows {
 		return mountPoint
 	}
 
@@ -103,7 +104,7 @@ func diskName(mountPoint string) string {
 func diskLocation(mountPoint string) string {
 	// In windows if you are in "C:\some\path", "cd C:" will not cd to root of C: drive
 	// but "cd C:\" will
-	if runtime.GOOS == variable.OsWindows {
+	if runtime.GOOS == utils.OsWindows {
 		return filepath.Join(mountPoint, "\\")
 	}
 	return mountPoint

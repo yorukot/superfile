@@ -6,8 +6,6 @@ import (
 	"runtime"
 	"testing"
 
-	variable "github.com/yorukot/superfile/src/config"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -138,7 +136,7 @@ func TestWriteBoolFile(t *testing.T) {
 			assert.Equal(t, expected, string(content))
 
 			// Verify permissions (Unix only)
-			if runtime.GOOS != variable.OsWindows {
+			if runtime.GOOS != OsWindows {
 				info, err := os.Stat(filePath)
 				require.NoError(t, err)
 				assert.Equal(t, os.FileMode(0644), info.Mode().Perm())
@@ -157,7 +155,7 @@ func TestWriteBoolFileError(t *testing.T) {
 
 func TestReadBoolFilePermissionDenied(t *testing.T) {
 	// Skip on Windows as permission handling differs
-	if runtime.GOOS == variable.OsWindows {
+	if runtime.GOOS == OsWindows {
 		t.Skip("Skipping permission test on Windows")
 	}
 
@@ -183,7 +181,7 @@ func TestReadBoolFilePermissionDenied(t *testing.T) {
 
 func TestWriteBoolFilePermissionDenied(t *testing.T) {
 	// Skip on Windows as permission handling differs
-	if runtime.GOOS == variable.OsWindows {
+	if runtime.GOOS == OsWindows {
 		t.Skip("Skipping permission test on Windows")
 	}
 

@@ -1,11 +1,11 @@
 package variable
 
 import (
-	"log"
 	"os"
 	"path/filepath"
 
 	"github.com/urfave/cli/v2"
+	"github.com/yorukot/superfile/src/internal/common/utils"
 
 	"github.com/adrg/xdg"
 )
@@ -21,12 +21,6 @@ const (
 	EmbedHotkeysFile         = EmbedConfigDir + "/hotkeys.toml"
 	EmbedThemeDir            = EmbedConfigDir + "/theme"
 	EmbedThemeCatppuccinFile = EmbedThemeDir + "/catppuccin.toml"
-
-	// These are used while comparing with runtime.GOOS
-	// OsWindows represents the Windows operating system identifier
-	OsWindows = "windows"
-	// OsDarwin represents the macOS (Darwin) operating system identifier
-	OsDarwin = "darwin"
 )
 
 var (
@@ -83,7 +77,7 @@ func UpdateVarFromCliArgs(c *cli.Context) {
 	// Validate the config file exists
 	if configFileArg != "" {
 		if _, err := os.Stat(configFileArg); err != nil {
-			log.Fatalf("Error: While reading config file '%s' from argument : %v", configFileArg, err)
+			utils.PrintfAndExit("Error: While reading config file '%s' from argument : %v", configFileArg, err)
 		}
 		ConfigFile = configFileArg
 	}
@@ -92,7 +86,7 @@ func UpdateVarFromCliArgs(c *cli.Context) {
 
 	if hotkeyFileArg != "" {
 		if _, err := os.Stat(hotkeyFileArg); err != nil {
-			log.Fatalf("Error: While reading hotkey file '%s' from argument : %v", hotkeyFileArg, err)
+			utils.PrintfAndExit("Error: While reading hotkey file '%s' from argument : %v", hotkeyFileArg, err)
 		}
 		HotkeysFile = hotkeyFileArg
 	}

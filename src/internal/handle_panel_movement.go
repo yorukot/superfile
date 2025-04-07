@@ -93,9 +93,9 @@ func (m *model) enterPanel() {
 		}
 
 		openCommand := "xdg-open"
-		if runtime.GOOS == variable.OsDarwin {
+		if runtime.GOOS == utils.OsDarwin {
 			openCommand = "open"
-		} else if runtime.GOOS == variable.OsWindows {
+		} else if runtime.GOOS == utils.OsWindows {
 			dllpath := filepath.Join(os.Getenv("SYSTEMROOT"), "System32", "rundll32.exe")
 			dllfile := "url.dll,FileProtocolHandler"
 

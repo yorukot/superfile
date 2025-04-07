@@ -27,7 +27,7 @@ func LoadConfigFile() {
 
 	if err := ValidateConfig(&Config); err != nil {
 		// If config is incorrect we cannot continue. We need to exit
-		utils.LogAndExit(err.Error())
+		utils.PrintlnAndExit(err.Error())
 	}
 }
 
@@ -65,12 +65,12 @@ func LoadHotkeysFile() {
 		// This adds a layer against accidental struct modifications
 		// Makes sure its always be a string slice. It's somewhat like a unit test
 		if value.Kind() != reflect.Slice || value.Type().Elem().Kind() != reflect.String {
-			utils.LogAndExit(LoadHotkeysError(field.Name))
+			utils.PrintlnAndExit(LoadHotkeysError(field.Name))
 		}
 
 		hotkeysList, ok := value.Interface().([]string)
 		if !ok || len(hotkeysList) == 0 || hotkeysList[0] == "" {
-			utils.LogAndExit(LoadHotkeysError(field.Name))
+			utils.PrintlnAndExit(LoadHotkeysError(field.Name))
 		}
 	}
 }
@@ -93,7 +93,7 @@ func LoadThemeFile() {
 
 	err = toml.Unmarshal([]byte(DefaultThemeString), &Theme)
 	if err != nil {
-		utils.LogAndExit("Unexpected error while reading default theme file. Exiting...", "error", err)
+		utils.PrintfAndExit("Unexpected error while reading default theme file : %v. Exiting...", err)
 	}
 }
 
