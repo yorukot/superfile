@@ -28,7 +28,7 @@ func Run(content embed.FS) {
 	// Before we open log file, set all "non debug" logs to stdout
 	utils.SetRootLoggerToStdout(false)
 
-	common.LoadinitialPrerenderedvariables()
+	common.LoadInitialPrerenderedVariables()
 	common.LoadAllDefaultConfig(content)
 
 	app := &cli.App{

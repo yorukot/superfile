@@ -17,7 +17,8 @@ import (
 
 // initialConfig load and handle all configuration files (spf config,Hotkeys
 // themes) setted up. Returns absolute path of dir pointing to the file Panel
-func initialConfig(dir string) (bool, bool, string) {
+
+func initialConfig(dir string) (toggleDotFile bool, toggleFooter bool, firstFilePanelDir string) { //nolint: nonamedreturns // This is the only usecase of named returns, distinguish between multiple return values
 	// Open log stream
 	file, err := os.OpenFile(variable.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 
@@ -54,7 +55,7 @@ func initialConfig(dir string) (bool, bool, string) {
 	}
 
 	// spf was not called with an argument
-	firstFilePanelDir := dir
+	firstFilePanelDir = dir
 	if firstFilePanelDir == "" {
 		firstFilePanelDir = common.Config.DefaultDirectory
 	}
@@ -74,8 +75,8 @@ func initialConfig(dir string) (bool, bool, string) {
 	slog.Debug("Runtime information", "runtime.GOOS", runtime.GOOS,
 		"start directory", firstFilePanelDir)
 
-	toggleDotFile := utils.ReadBoolFile(variable.ToggleDotFile, false)
-	toggleFooter := utils.ReadBoolFile(variable.ToggleFooter, true)
+	toggleDotFile = utils.ReadBoolFile(variable.ToggleDotFile, false)
+	toggleFooter = utils.ReadBoolFile(variable.ToggleFooter, true)
 
 	return toggleDotFile, toggleFooter, firstFilePanelDir
 }

@@ -30,7 +30,7 @@ var hasTrash = true                                             //nolint: gochec
 var batCmd = ""                                                 //nolint: gochecknoglobals // Todo : Move to model struct
 var et *exiftool.Exiftool                                       //nolint: gochecknoglobals // Todo : Move to model struct
 var channel = make(chan channelMessage, 1000)                   //nolint: gochecknoglobals // Todo : Move to model struct
-var progressBarLastRenderTime time.Time = time.Now()            //nolint: gochecknoglobals // Todo : Move to model struct
+var progressBarLastRenderTime = time.Now()                      //nolint: gochecknoglobals // Todo : Move to model struct
 
 // Initialize and return model with default configs
 // It returns only tea.Model because when it used in main, the return value
