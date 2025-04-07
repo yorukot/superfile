@@ -37,12 +37,12 @@ var progressBarLastRenderTime = time.Now()                      //nolint: gochec
 // is passed to tea.NewProgram() which accepts tea.Model
 // Either way type 'model' is not exported, so there is not way main package can
 // be aware of it, and use it directly
-func InitialModel(dir string, firstUseCheck, hasTrashCheck bool) tea.Model {
-	toggleDotFile, toggleFooter, firstFilePanelDir := initialConfig(dir)
+func InitialModel(firstFilePanelDirs []string, firstUseCheck, hasTrashCheck bool) tea.Model {
+	toggleDotFile, toggleFooter := initialConfig(firstFilePanelDirs)
 	firstUse = firstUseCheck
 	hasTrash = hasTrashCheck
 	batCmd = checkBatCmd()
-	return defaultModelConfig(toggleDotFile, toggleFooter, firstFilePanelDir)
+	return defaultModelConfig(toggleDotFile, toggleFooter, firstFilePanelDirs)
 }
 
 // Init function to be called by Bubble tea framework, sets windows title,

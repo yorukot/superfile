@@ -8,7 +8,7 @@ import (
 )
 
 // Generate and return model containing default configurations for interface
-func defaultModelConfig(toggleDotFile bool, toggleFooter bool, firstFilePanelDir string) model {
+func defaultModelConfig(toggleDotFile bool, toggleFooter bool, firstFilePanelDirs []string) model {
 	return model{
 		filePanelFocusIndex: 0,
 		focusPanel:          nonePanelFocus,
@@ -23,28 +23,7 @@ func defaultModelConfig(toggleDotFile bool, toggleFooter bool, firstFilePanelDir
 			searchBar:   common.GenerateSearchBar(),
 		},
 		fileModel: fileModel{
-			filePanels: []filePanel{
-				{
-					render:   0,
-					cursor:   0,
-					location: firstFilePanelDir,
-					sortOptions: sortOptionsModel{
-						width:  20,
-						height: 4,
-						open:   false,
-						cursor: common.Config.DefaultSortType,
-						data: sortOptionsModelData{
-							options:  []string{"Name", "Size", "Date Modified"},
-							selected: common.Config.DefaultSortType,
-							reversed: common.Config.SortOrderReversed,
-						},
-					},
-					panelMode:        browserMode,
-					focusType:        focus,
-					directoryRecords: make(map[string]directoryRecord),
-					searchBar:        common.GenerateSearchBar(),
-				},
-			},
+			filePanels: filePanelSlice(firstFilePanelDirs),
 			filePreview: filePreviewPanel{
 				open: common.Config.DefaultOpenFilePreview,
 			},

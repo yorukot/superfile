@@ -44,6 +44,39 @@ func (d directory) requiredHeight() int {
 	return 1
 }
 
+// ================ filepanel
+
+func filePanelSlice(dir []string) []filePanel {
+	res := make([]filePanel, len(dir))
+	for i := range dir {
+		res[i] = defaultFilePanel(dir[i])
+	}
+	return res
+}
+
+func defaultFilePanel(dir string) filePanel {
+	return filePanel{
+		render:   0,
+		cursor:   0,
+		location: dir,
+		sortOptions: sortOptionsModel{
+			width:  20,
+			height: 4,
+			open:   false,
+			cursor: common.Config.DefaultSortType,
+			data: sortOptionsModelData{
+				options:  []string{"Name", "Size", "Date Modified"},
+				selected: common.Config.DefaultSortType,
+				reversed: common.Config.SortOrderReversed,
+			},
+		},
+		panelMode:        browserMode,
+		focusType:        focus,
+		directoryRecords: make(map[string]directoryRecord),
+		searchBar:        common.GenerateSearchBar(),
+	}
+}
+
 // ================ String method for easy logging =====================
 
 func (f focusPanelType) String() string {
