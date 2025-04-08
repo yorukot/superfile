@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+
 	"github.com/yorukot/superfile/src/cmd"
 )
 

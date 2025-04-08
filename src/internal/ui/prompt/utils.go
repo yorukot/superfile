@@ -2,8 +2,9 @@ package prompt
 
 import (
 	"fmt"
-	"github.com/yorukot/superfile/src/internal/common"
 	"strings"
+
+	"github.com/yorukot/superfile/src/internal/common"
 )
 
 func getPromptAction(shellMode bool, value string, cwdLocation string) (common.ModelAction, error) {

@@ -17,6 +17,12 @@ const (
 	EmbedHotkeysFile         string = EmbedConfigDir + "/hotkeys.toml"
 	EmbedThemeDir            string = EmbedConfigDir + "/theme"
 	EmbedThemeCatppuccinFile string = EmbedThemeDir + "/catppuccin.toml"
+
+	// These are used while comparing with runtime.GOOS
+	// OS_WINDOWS represents the Windows operating system identifier
+	OS_WINDOWS = "windows"
+	// OS_DARWIN represents the macOS (Darwin) operating system identifier
+	OS_DARWIN = "darwin"
 )
 
 var (

@@ -3,7 +3,6 @@ package internal
 import (
 	"errors"
 	"fmt"
-	"github.com/yorukot/superfile/src/internal/common"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -11,6 +10,9 @@ import (
 	"runtime"
 	"strings"
 	"time"
+
+	variable "github.com/yorukot/superfile/src/config"
+	"github.com/yorukot/superfile/src/internal/common"
 
 	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/progress"
@@ -226,7 +228,7 @@ func (m *model) deleteMultipleItems() {
 		}
 	}
 
-	// This feels a bit fuzzy and unclean. Todo : Review and simplifiy this.
+	// This feels a bit fuzzy and unclean. Todo : Review and simplify this.
 	// We should never get to this condition of panel.cursor getting negative
 	// and if we do, we should error log that.
 	if panel.cursor >= len(panel.element)-len(panel.selected)-1 {
@@ -576,9 +578,8 @@ func (m *model) openFileWithEditor() tea.Cmd {
 	}
 
 	// Make sure there is an editor
-	// Todo : Move hardcoded strings to constants : "windows", and editors
 	if editor == "" {
-		if runtime.GOOS == "windows" {
+		if runtime.GOOS == variable.OS_WINDOWS {
 			editor = "notepad"
 		} else {
 			editor = "nano"
@@ -599,13 +600,12 @@ func (m *model) openFileWithEditor() tea.Cmd {
 
 // Open directory with default editor
 func (m *model) openDirectoryWithEditor() tea.Cmd {
-	// Todo : Move hardcoded strings to constants : "windows", and editors
 	editor := common.Config.DirEditor
 
 	if editor == "" {
-		if runtime.GOOS == "windows" {
+		if runtime.GOOS == variable.OS_WINDOWS {
 			editor = "explorer"
-		} else if runtime.GOOS == "darwin" {
+		} else if runtime.GOOS == variable.OS_DARWIN {
 			// open is command for MacOS Finder
 			editor = "open"
 		} else {

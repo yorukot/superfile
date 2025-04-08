@@ -1,12 +1,14 @@
 package prompt
 
 import (
+	"errors"
 	"fmt"
-	"github.com/yorukot/superfile/src/internal/common/utils"
 	"log/slog"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/yorukot/superfile/src/internal/common/utils"
 )
 
 // split into tokens
@@ -32,7 +34,7 @@ func resolveShellSubstitution(subCmdTimeout time.Duration, command string, cwdLo
 				// Look for Ending '}'
 				end := findEndingBracket(cmdRunes, i+1, '{', '}')
 				if end == -1 {
-					return "", fmt.Errorf("unexpected error in tokenization")
+					return "", errors.New("unexpected error in tokenization")
 				}
 				if end == len(cmdRunes) {
 					return "", curlyBracketMatchError()
@@ -56,7 +58,7 @@ func resolveShellSubstitution(subCmdTimeout time.Duration, command string, cwdLo
 				// Look for ending ')'
 				end := findEndingBracket(cmdRunes, i+1, '(', ')')
 				if end == -1 {
-					return "", fmt.Errorf("unexpected error in tokenization")
+					return "", errors.New("unexpected error in tokenization")
 				}
 
 				if end == len(cmdRunes) {

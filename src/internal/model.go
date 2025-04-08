@@ -1,9 +1,8 @@
 package internal
 
 import (
+	"errors"
 	"fmt"
-	"github.com/yorukot/superfile/src/internal/common"
-	"github.com/yorukot/superfile/src/internal/common/utils"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -11,6 +10,9 @@ import (
 	"reflect"
 	"strings"
 	"time"
+
+	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/common/utils"
 
 	"github.com/barasher/go-exiftool"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -34,11 +36,11 @@ var progressBarLastRenderTime time.Time = time.Now()
 
 // Initialize and return model with default configs
 func InitialModel(dir string, firstUseCheck, hasTrashCheck bool) model {
-	toggleDotFileBool, toggleFooter, firstFilePanelDir := initialConfig(dir)
+	toggleDotFile, toggleFooter, firstFilePanelDir := initialConfig(dir)
 	firstUse = firstUseCheck
 	hasTrash = hasTrashCheck
 	batCmd = checkBatCmd()
-	return defaultModelConfig(toggleDotFileBool, toggleFooter, firstFilePanelDir)
+	return defaultModelConfig(toggleDotFile, toggleFooter, firstFilePanelDir)
 }
 
 // Init function to be called by Bubble tea framework, sets windows title,
@@ -80,7 +82,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.updateFilePanelsState(msg, &cmd)
 
 	if m.sidebarModel.searchBar.Value() != "" {
-		// Todo : All updates of sideBar must be moved to seperate struct functions
+		// Todo : All updates of sideBar must be moved to separate struct functions
 		// we have to keep the state of sidebar consistent, and keep values of
 		// cursor, directories, renderIndex sane for each update, and it has to
 		// take care at one single place, not everywhere we use sideBar
@@ -114,11 +116,14 @@ func (m *model) handleChannelMessage(msg channelMessage) {
 		m.warnModal = msg.warnModal
 	case sendMetadata:
 		m.fileMetaData.metaData = msg.metadata
-	default:
+	case sendProcess:
 		if !arrayContains(m.processBarModel.processList, msg.messageId) {
 			m.processBarModel.processList = append(m.processBarModel.processList, msg.messageId)
 		}
 		m.processBarModel.process[msg.messageId] = msg.processNewState
+	default:
+		slog.Error("Unhandled channelMessageType in handleChannelMessage()",
+			"messageType", msg.messageType)
 	}
 }
 
@@ -179,8 +184,8 @@ func (m *model) setHeightValues(height int) {
 	// Todo : Make it grow even more for bigger screen sizes.
 	// Todo : Calculate the value , instead of manually hard coding it.
 
-	// Main panel height = Total terminal height - footer height - 2(footer border) - 2(file panel border)
-	m.mainPanelHeight = height - m.footerHeight - 2 - 2
+	// Main panel height = Total terminal height- 2(file panel border) - footer height
+	m.mainPanelHeight = height - 2 - utils.FullFooterHeight(m.footerHeight, m.toggleFooter)
 }
 
 // Set help menu size
@@ -326,7 +331,7 @@ func (m *model) applyPromptModalAction(action common.ModelAction) {
 		actionErr = m.createNewFilePanel(action.Location)
 		successMsg = "New panel opened"
 	default:
-		actionErr = fmt.Errorf("unhandled action type")
+		actionErr = errors.New("unhandled action type")
 	}
 
 	if actionErr != nil {
@@ -346,7 +351,7 @@ func (m *model) applyShellCommandAction(shellCommand string) {
 
 	if err != nil {
 		slog.Error("Command execution failed", "retCode", retCode,
-			"error", err, "output", string(output))
+			"error", err, "output", output)
 		return
 	}
 }
@@ -533,6 +538,8 @@ func (m *model) getFilePanelItems() {
 		nowTime := time.Now()
 		// Check last time each element was updated, if less then 3 seconds ignore
 		if filePanel.focusType == noneFocus && nowTime.Sub(filePanel.lastTimeGetElement) < 3*time.Second {
+			// Todo : revisit this. This feels like a duct tape solution of an actual
+			// deep rooted problem. This feels very hacky.
 			if !m.updatedToggleDotFile {
 				continue
 			}
@@ -569,7 +576,7 @@ func (m *model) getFilePanelItems() {
 	m.updatedToggleDotFile = false
 }
 
-// Close superfile application. Cd into the curent dir if CdOnQuit on and save
+// Close superfile application. Cd into the current dir if CdOnQuit on and save
 // the path in state direcotory
 func (m *model) quitSuperfile() {
 	// close exiftool session

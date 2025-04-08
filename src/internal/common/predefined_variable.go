@@ -1,10 +1,11 @@
 package common
 
 import (
+	"time"
+
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/x/exp/term/ansi"
 	"github.com/yorukot/superfile/src/config/icon"
-	"time"
 )
 
 const WheelRunTime = 5

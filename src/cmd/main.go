@@ -1,11 +1,10 @@
 package cmd
 
 import (
+	"context"
 	"embed"
 	"encoding/json"
 	"fmt"
-	"github.com/yorukot/superfile/src/internal/common"
-	"github.com/yorukot/superfile/src/internal/common/utils"
 	"io"
 	"log"
 	"log/slog"
@@ -13,6 +12,9 @@ import (
 	"os"
 	"runtime"
 	"time"
+
+	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/common/utils"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -95,7 +97,7 @@ func Run(content embed.FS) {
 			// Validate the config file exists
 			if configFileArg != "" {
 				if _, err := os.Stat(configFileArg); err != nil {
-					log.Fatalf("Error: While reading config file '%s' from arguement : %v", configFileArg, err)
+					log.Fatalf("Error: While reading config file '%s' from argument : %v", configFileArg, err)
 				} else {
 					variable.ConfigFile = configFileArg
 				}
@@ -105,7 +107,7 @@ func Run(content embed.FS) {
 
 			if hotkeyFileArg != "" {
 				if _, err := os.Stat(hotkeyFileArg); err != nil {
-					log.Fatalf("Error: While reading hotkey file '%s' from arguement : %v", hotkeyFileArg, err)
+					log.Fatalf("Error: While reading hotkey file '%s' from argument : %v", hotkeyFileArg, err)
 				} else {
 					variable.HotkeysFile = hotkeyFileArg
 				}
@@ -131,7 +133,9 @@ func Run(content embed.FS) {
 
 			// This must be after calling internal.InitialModel()
 			// so that we know `common.Config` is loaded
-			go CheckForUpdates()
+			// Should not be a goroutine, Otherwise the main
+			// goroutine will exit first, and this will not be able to finish
+			CheckForUpdates()
 
 			if variable.PrintLastDir {
 				fmt.Println(variable.LastDir)
@@ -187,7 +191,7 @@ func InitConfigFile() {
 // We are initializing these, but not sure if we are ever using them
 func InitTrash() error {
 	// Create trash directories
-	if runtime.GOOS != "darwin" {
+	if runtime.GOOS != variable.OS_DARWIN {
 		err := createDirectories(
 			variable.CustomTrashDirectory,
 			variable.CustomTrashDirectoryFiles,
@@ -302,11 +306,22 @@ func CheckForUpdates() {
 		defer func() {
 			writeLastCheckTime(currentTime)
 		}()
-		client := &http.Client{
-			Timeout: 5 * time.Second,
-		}
-		resp, err := client.Get(variable.LatestVersionURL)
+		// Create a context with a 5-second timeout
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel() // Cancel the context when done
+		client := &http.Client{}
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, variable.LatestVersionURL, nil)
 		if err != nil {
+			slog.Error("Error forming updates request:", "error", err)
+			return
+		}
+
+		resp, err := client.Do(req)
+		if err != nil {
+			if ctx.Err() == context.DeadlineExceeded {
+				slog.Error("Update check request timed out")
+				return
+			}
 			slog.Error("Error checking for updates:", "error", err)
 			return
 		}

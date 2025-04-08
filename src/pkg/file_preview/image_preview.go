@@ -1,6 +1,7 @@
 package filepreview
 
 import (
+	"errors"
 	"fmt"
 	"image"
 	"image/color"
@@ -153,9 +154,9 @@ func adjustOrientation(img image.Image, orientation int) image.Image {
 
 func hexToColor(hex string) (color.RGBA, error) {
 	if len(hex) != 7 || hex[0] != '#' {
-		return color.RGBA{}, fmt.Errorf("invalid hex color format")
+		return color.RGBA{}, errors.New("invalid hex color format")
 	}
-	values, err := strconv.ParseUint(string(hex[1:]), 16, 32)
+	values, err := strconv.ParseUint(hex[1:], 16, 32)
 	if err != nil {
 		return color.RGBA{}, err
 	}

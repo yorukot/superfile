@@ -13,3 +13,5 @@ var diskDividerDir = directory{
 
 // superfile logo + blank line + search bar
 const sideBarInitialHeight = 3
+
+const invalidTypeString = "InvalidType"

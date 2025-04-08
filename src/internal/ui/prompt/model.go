@@ -2,11 +2,12 @@ package prompt
 
 import (
 	"fmt"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/yorukot/superfile/src/internal/common"
 	"log/slog"
 	"slices"
 	"strings"
+
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/yorukot/superfile/src/internal/common"
 
 	"github.com/yorukot/superfile/src/config/icon"
 )

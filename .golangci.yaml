@@ -278,12 +278,10 @@ linters:
     - errname # checks that sentinel errors are prefixed with the Err and error types are suffixed with the Error
     # Todo enable
     #- errorlint # finds code that will cause problems with the error wrapping scheme introduced in Go 1.13
-    # Todo enable - Need on small fix
-    #- exhaustive # checks exhaustiveness of enum switch statements
+    - exhaustive # checks exhaustiveness of enum switch statements
     - exptostd # detects functions from golang.org/x/exp/ that can be replaced by std functions
     - fatcontext # detects nested contexts in loops
-    # Todo enable - no . this blocks only fmt.Print family and is not useful right now
-    # - forbidigo # forbids identifiers
+    # - forbidigo # forbids identifiers # Not needed. this blocks only fmt.Print family and is not useful right now
     # Todo enable - need to make functions shorter
     #- funlen # tool for detection of long functions
     - gocheckcompilerdirectives # validates go compiler directive comments (//go:)
@@ -293,16 +291,14 @@ linters:
     - gochecksumtype # checks exhaustiveness on Go "sum types"
     # Todo enable - Need to refactor many functions
     # - gocognit # computes and checks the cognitive complexity of functions
-    # Todo enable - Need a few changes - easy
-    # - goconst # finds repeated strings that could be replaced by a constant
+    - goconst # finds repeated strings that could be replaced by a constant
     # Todo enable - Some few changes. There are good suggestions
     # - gocritic # provides diagnostics that check for bugs, performance and style issues
     # Todo enable
     #- gocyclo # computes and checks the cyclomatic complexity of functions
     # Todo enable - too much for us
     #- godot # checks if comments end in a period
-    # Todo enable - one small fix
-    #- goimports # in addition to fixing imports, goimports also formats your code in the same style as gofmt
+    - goimports # in addition to fixing imports, goimports also formats your code in the same style as gofmt
     - gomoddirectives # manages the use of 'replace', 'retract', and 'excludes' directives in go.mod
     - goprintffuncname # checks that printf-like functions are named with f at the end
     # Todo enable - ignore for a few int overflow, and fix file permissions
@@ -325,15 +321,12 @@ linters:
     - nilerr # finds the code that returns nil even if it checks that the error is not nil
     - nilnesserr # reports that it checks for err != nil, but it returns a different nil value error (powered by nilness and nilerr)
     - nilnil # checks that there is no simultaneous return of nil error and an invalid value
-    # Todo enable : Need to fix one client.Get usage
-    # - noctx # finds sending http request without context.Context
-    # Todo enable : Needs some fixes
-    # - nolintlint # reports ill-formed or insufficient nolint directives
+    - noctx # finds sending http request without context.Context
+    - nolintlint # reports ill-formed or insufficient nolint directives
     # Todo enable - maybe too strict for us
     # - nonamedreturns # reports all named returns
     - nosprintfhostport # checks for misuse of Sprintf to construct a host with port in a URL
-    # Todo enable : One small fix
-    # - perfsprint # checks that fmt.Sprintf can be replaced with a faster alternative
+    - perfsprint # checks that fmt.Sprintf can be replaced with a faster alternative
     - predeclared # finds code that shadows one of Go's predeclared identifiers
     - promlinter # checks Prometheus metrics naming via promlint
     - protogetter # reports direct reads from proto message fields when getters should be used
@@ -351,13 +344,11 @@ linters:
     # Todo enable : Many changes, but good changes.
     # - stylecheck # is a replacement for golint
     - testableexamples # checks if examples are testable (have an expected output)
-    # Todo enable - some test bugs. To be fixed
-    # - testifylint # checks usage of github.com/stretchr/testify
+    - testifylint # checks usage of github.com/stretchr/testify
     # Todo enable - Might be too strict for us
     # - testpackage # makes you use a separate _test package
     - tparallel # detects inappropriate usage of t.Parallel() method in your Go test codes
-    # Todo enable - One small change. Good find.
-    # - unconvert # removes unnecessary type conversions
+    - unconvert # removes unnecessary type conversions
     - unparam # reports unused function parameters
     - usestdlibvars # detects the possibility to use variables/constants from the Go standard library
     - usetesting # reports uses of functions with replacement inside the testing package
@@ -403,7 +394,7 @@ linters:
     # - err113 # [too strict] checks the errors handling expressions
     # - errchkjson # [don't see profit + I'm against of omitting errors like in the first example https://github.com/breml/errchkjson] checks types passed to the json encoding functions. Reports unsupported types and optionally reports occasions, where the check for the returned error can be omitted
     # - forcetypeassert # [replaced by errcheck] finds forced type assertions
-    # Todo : rely on this, and skip seperate go fmt check in cicd
+    # Todo : rely on this, and skip separate go fmt check in cicd
     # - gofmt # [replaced by goimports] checks whether code was gofmt-ed
     # Todo : Check this
     #- gofumpt # [replaced by goimports, gofumports is not available yet] checks whether code was gofumpt-ed
@@ -412,8 +403,7 @@ linters:
     - grouper # analyzes expression groups
     - importas # enforces consistent import aliases
     - maintidx # measures the maintainability index of each function
-    # Todo - might enable this. This is not so bad
-    # - misspell # [useless] finds commonly misspelled English words in comments
+    - misspell # [useless] finds commonly misspelled English words in comments
     # - nlreturn # [too strict and mostly code is not more readable] checks for a new line before return and branch statements to increase code clarity
     # Todo : might make tests parallel
     #- paralleltest # [too many false positives] detects missing usage of t.Parallel() method in your Go test

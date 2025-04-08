@@ -4,8 +4,6 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/yorukot/superfile/src/internal/common"
 	"io"
 	"log/slog"
 	"os"
@@ -17,6 +15,10 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	tea "github.com/charmbracelet/bubbletea"
+	variable "github.com/yorukot/superfile/src/config"
+	"github.com/yorukot/superfile/src/internal/common"
 
 	"github.com/lithammer/shortuuid"
 	"github.com/reinhrst/fzf-lib"
@@ -34,7 +36,7 @@ func isExternalDiskPath(path string) bool {
 	// This is very vague. You cannot tell if a path is belonging to an external partition
 	// if you dont define the source path to compare with
 	// But making this true will cause slow file operations based on current implementation
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS == variable.OS_WINDOWS {
 		return false
 	}
 
@@ -51,7 +53,7 @@ func isExternalDiskPath(path string) bool {
 }
 
 func shouldListDisk(mountPoint string) bool {
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS == variable.OS_WINDOWS {
 		// We need to get C:, D: drive etc in the list
 		return true
 	}
@@ -88,7 +90,7 @@ func diskName(mountPoint string) string {
 	// In windows we dont want to use filepath.Base as it returns "\" for when
 	// mountPoint is any drive root "C:", "D:", etc. Hence causing same name
 	// for each drive
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS == variable.OS_WINDOWS {
 		return mountPoint
 	}
 
@@ -101,7 +103,7 @@ func diskName(mountPoint string) string {
 func diskLocation(mountPoint string) string {
 	// In windows if you are in "C:\some\path", "cd C:" will not cd to root of C: drive
 	// but "cd C:\" will
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS == variable.OS_WINDOWS {
 		return filepath.Join(mountPoint, "\\")
 	}
 	return mountPoint
@@ -586,7 +588,7 @@ func getElementIcon(file string, IsDir bool) icon.IconStyle {
 }
 
 // TeaUpdate : Utility to send update to model , majorly used in tests
-// Not using pointer reciever as this is more like a utility, than
+// Not using pointer receiver as this is more like a utility, than
 // a member function of model
 func TeaUpdate(m *model, msg tea.Msg) (tea.Cmd, error) {
 	resModel, cmd := m.Update(msg)

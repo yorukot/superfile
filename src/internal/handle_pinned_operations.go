@@ -2,9 +2,10 @@ package internal
 
 import (
 	"encoding/json"
-	"github.com/yorukot/superfile/src/internal/common"
 	"log/slog"
 	"os"
+
+	"github.com/yorukot/superfile/src/internal/common"
 
 	variable "github.com/yorukot/superfile/src/config"
 )

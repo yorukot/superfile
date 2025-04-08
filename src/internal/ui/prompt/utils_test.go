@@ -1,9 +1,10 @@
 package prompt
 
 import (
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/yorukot/superfile/src/internal/common"
-	"testing"
 )
 
 func TestModel_getPromptAction(t *testing.T) {

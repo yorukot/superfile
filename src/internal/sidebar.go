@@ -80,7 +80,7 @@ func (s *sidebarModel) updateRenderIndex(mainPanelHeight int) {
 
 	curEndIndex := s.lastRenderedIndex(mainPanelHeight, s.renderIndex)
 
-	// Case II : new cursor also comes in range of rendered directores
+	// Case II : new cursor also comes in range of rendered directories
 	// Taking this case later avoid extra lastRenderedIndex() call
 	if s.renderIndex <= s.cursor && s.cursor <= curEndIndex {
 		// no need to update s.renderIndex

@@ -25,14 +25,14 @@ func genProcessBarModel(count int, cursor int, render int) processBarModel {
 }
 
 func Test_cntRenderableProcess(t *testing.T) {
-	assert.Equal(t, cntRenderableProcess(4), 1)
-	assert.Equal(t, cntRenderableProcess(5), 2)
-	assert.Equal(t, cntRenderableProcess(6), 2)
-	assert.Equal(t, cntRenderableProcess(7), 2)
-	assert.Equal(t, cntRenderableProcess(8), 3)
-	assert.Equal(t, cntRenderableProcess(9), 3)
-	assert.Equal(t, cntRenderableProcess(10), 3)
-	assert.Equal(t, cntRenderableProcess(11), 4)
+	assert.Equal(t, 1, cntRenderableProcess(4))
+	assert.Equal(t, 2, cntRenderableProcess(5))
+	assert.Equal(t, 2, cntRenderableProcess(6))
+	assert.Equal(t, 2, cntRenderableProcess(7))
+	assert.Equal(t, 3, cntRenderableProcess(8))
+	assert.Equal(t, 3, cntRenderableProcess(9))
+	assert.Equal(t, 3, cntRenderableProcess(10))
+	assert.Equal(t, 4, cntRenderableProcess(11))
 }
 
 func Test_processBarModelUpDown(t *testing.T) {
