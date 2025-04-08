@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"strings"
 	"time"
 
@@ -262,7 +263,7 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 		}
 		// If quiting input pressed, check if has any running process and displays a
 		// warn. Otherwise just quits application
-	case msg.String() == containsKey(msg.String(), common.Hotkeys.Quit):
+	case slices.Contains(common.Hotkeys.Quit, msg.String()):
 		if m.hasRunningProcesses() {
 			m.warnModalForQuit()
 			return cmd
