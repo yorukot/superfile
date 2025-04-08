@@ -84,9 +84,9 @@ func Run(content embed.FS) {
 		},
 		Action: func(c *cli.Context) error {
 			// If no args are called along with "spf" use current dir
-			path := ""
+			firstFilePanelDirs := []string{""}
 			if c.Args().Present() {
-				path = c.Args().First()
+				firstFilePanelDirs = c.Args().Slice()
 			}
 
 			variable.UpdateVarFromCliArgs(c)
@@ -100,7 +100,7 @@ func Run(content embed.FS) {
 
 			firstUse := checkFirstUse()
 
-			p := tea.NewProgram(internal.InitialModel(path, firstUse, hasTrash), tea.WithAltScreen(), tea.WithMouseCellMotion())
+			p := tea.NewProgram(internal.InitialModel(firstFilePanelDirs, firstUse, hasTrash), tea.WithAltScreen(), tea.WithMouseCellMotion())
 			if _, err := p.Run(); err != nil {
 				utils.PrintfAndExit("Alas, there's been an error: %v", err)
 			}

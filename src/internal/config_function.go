@@ -16,9 +16,8 @@ import (
 )
 
 // initialConfig load and handle all configuration files (spf config,Hotkeys
-// themes) setted up. Returns absolute path of dir pointing to the file Panel
-
-func initialConfig(dir string) (toggleDotFile bool, toggleFooter bool, firstFilePanelDir string) { //nolint: nonamedreturns // This is the only usecase of named returns, distinguish between multiple return values
+// themes) setted up. Processes input directories and returns toggle states.
+func initialConfig(firstFilePanelDirs []string) (toggleDotFile bool, toggleFooter bool) { //nolint: nonamedreturns // This is the only usecase of named returns, distinguish between multiple return values
 	// Open log stream
 	file, err := os.OpenFile(variable.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 
@@ -54,29 +53,29 @@ func initialConfig(dir string) (toggleDotFile bool, toggleFooter bool, firstFile
 		}
 	}
 
-	// spf was not called with an argument
-	firstFilePanelDir = dir
-	if firstFilePanelDir == "" {
-		firstFilePanelDir = common.Config.DefaultDirectory
-	}
+	for i := range firstFilePanelDirs {
+		if firstFilePanelDirs[i] == "" {
+			firstFilePanelDirs[i] = common.Config.DefaultDirectory
+		}
 
-	if strings.HasPrefix(firstFilePanelDir, "~") {
-		// We only need to replace the first ~ , not all of them
-		// And only if its a prefix
-		firstFilePanelDir = strings.Replace(firstFilePanelDir, "~", variable.HomeDir, 1)
-	}
-	firstFilePanelDir, err = filepath.Abs(firstFilePanelDir)
-	// In case of unexpected path error, fallback to home dir
-	if err != nil {
-		slog.Error("Unexpected error while calculating firstFilePanelDir", "error", err)
-		firstFilePanelDir = variable.HomeDir
+		if strings.HasPrefix(firstFilePanelDirs[i], "~") {
+			// We only need to replace the first ~ , not all of them
+			// And only if its a prefix
+			firstFilePanelDirs[i] = strings.Replace(firstFilePanelDirs[i], "~", variable.HomeDir, 1)
+		}
+		firstFilePanelDirs[i], err = filepath.Abs(firstFilePanelDirs[i])
+		// In case of unexpected path error, fallback to home dir
+		if err != nil {
+			slog.Error("Unexpected error while calculating firstFilePanelDir", "error", err)
+			firstFilePanelDirs[i] = variable.HomeDir
+		}
 	}
 
 	slog.Debug("Runtime information", "runtime.GOOS", runtime.GOOS,
-		"start directory", firstFilePanelDir)
+		"start directories", firstFilePanelDirs)
 
 	toggleDotFile = utils.ReadBoolFile(variable.ToggleDotFile, false)
 	toggleFooter = utils.ReadBoolFile(variable.ToggleFooter, true)
 
-	return toggleDotFile, toggleFooter, firstFilePanelDir
+	return toggleDotFile, toggleFooter
 }
