@@ -27,9 +27,8 @@ func LoadConfigFile() {
 
 	if err := ValidateConfig(&Config); err != nil {
 		// If config is incorrect we cannot continue. We need to exit
-		utils.LogAndExit(err.Error())
+		utils.PrintlnAndExit(err.Error())
 	}
-
 }
 
 func ValidateConfig(c *ConfigType) error {
@@ -58,7 +57,7 @@ func LoadHotkeysFile() {
 
 	// Validate hotkey values
 	val := reflect.ValueOf(Hotkeys)
-	for i := 0; i < val.NumField(); i++ {
+	for i := range val.NumField() {
 		field := val.Type().Field(i)
 		value := val.Field(i)
 
@@ -66,12 +65,12 @@ func LoadHotkeysFile() {
 		// This adds a layer against accidental struct modifications
 		// Makes sure its always be a string slice. It's somewhat like a unit test
 		if value.Kind() != reflect.Slice || value.Type().Elem().Kind() != reflect.String {
-			utils.LogAndExit(LoadHotkeysError(field.Name))
+			utils.PrintlnAndExit(LoadHotkeysError(field.Name))
 		}
 
 		hotkeysList, ok := value.Interface().([]string)
 		if !ok || len(hotkeysList) == 0 || hotkeysList[0] == "" {
-			utils.LogAndExit(LoadHotkeysError(field.Name))
+			utils.PrintlnAndExit(LoadHotkeysError(field.Name))
 		}
 	}
 }
@@ -82,26 +81,25 @@ func LoadThemeFile() {
 	themeFile := filepath.Join(variable.ThemeFolder, Config.Theme+".toml")
 	data, err := os.ReadFile(themeFile)
 	if err == nil {
-		if unmarshalErr := toml.Unmarshal(data, &Theme); unmarshalErr == nil {
+		unmarshalErr := toml.Unmarshal(data, &Theme)
+		if unmarshalErr == nil {
 			return
-		} else {
-			slog.Error("Could not unmarshal theme file. Falling back to default theme",
-				"unmarshalErr", unmarshalErr)
 		}
+		slog.Error("Could not unmarshal theme file. Falling back to default theme",
+			"unmarshalErr", unmarshalErr)
 	} else {
 		slog.Error("Could not read user's theme file. Falling back to default theme", "path", themeFile, "error", err)
 	}
 
 	err = toml.Unmarshal([]byte(DefaultThemeString), &Theme)
 	if err != nil {
-		utils.LogAndExit("Unexpected error while reading default theme file. Exiting...", "error", err)
+		utils.PrintfAndExit("Unexpected error while reading default theme file : %v. Exiting...", err)
 	}
 }
 
 // LoadAllDefaultConfig : Load all default configurations from embedded superfile_config folder into global
 // configurations variables and write theme files if its needed.
 func LoadAllDefaultConfig(content embed.FS) {
-
 	err := LoadConfigStringGlobals(content)
 	if err != nil {
 		slog.Error("Could not load default config from embed FS", "error", err)

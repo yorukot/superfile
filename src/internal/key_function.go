@@ -23,18 +23,17 @@ func containsKey(v string, a []string) string {
 // keys that performs actions in multiple panels, like going up or down,
 // check the state of model m and handle properly.
 func (m *model) mainKey(msg string, cmd tea.Cmd) tea.Cmd {
-
 	switch msg {
-
 	// If move up Key is pressed, check the current state and executes
 	case containsKey(msg, common.Hotkeys.ListUp):
-		if m.focusPanel == sidebarFocus {
+		switch m.focusPanel {
+		case sidebarFocus:
 			m.sidebarModel.listUp(m.mainPanelHeight)
-		} else if m.focusPanel == processBarFocus {
+		case processBarFocus:
 			m.processBarModel.listUp(m.footerHeight)
-		} else if m.focusPanel == metadataFocus {
+		case metadataFocus:
 			m.fileMetaData.listUp()
-		} else if m.focusPanel == nonePanelFocus {
+		case nonePanelFocus:
 			m.fileModel.filePanels[m.filePanelFocusIndex].listUp(m.mainPanelHeight)
 			m.fileMetaData.renderIndex = 0
 			go func() {
@@ -44,13 +43,14 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) tea.Cmd {
 
 		// If move down Key is pressed, check the current state and executes
 	case containsKey(msg, common.Hotkeys.ListDown):
-		if m.focusPanel == sidebarFocus {
+		switch m.focusPanel {
+		case sidebarFocus:
 			m.sidebarModel.listDown(m.mainPanelHeight)
-		} else if m.focusPanel == processBarFocus {
+		case processBarFocus:
 			m.processBarModel.listDown(m.footerHeight)
-		} else if m.focusPanel == metadataFocus {
+		case metadataFocus:
 			m.fileMetaData.listDown()
-		} else if m.focusPanel == nonePanelFocus {
+		case nonePanelFocus:
 			m.fileModel.filePanels[m.filePanelFocusIndex].listDown(m.mainPanelHeight)
 			m.fileMetaData.renderIndex = 0
 			go func() {
@@ -218,7 +218,6 @@ func (m *model) typingModalOpenKey(msg string) {
 	case containsKey(msg, common.Hotkeys.ConfirmTyping):
 		m.createItem()
 	}
-
 }
 
 // Todo : There is a lot of duplication for these models, each one of them has to handle
@@ -257,7 +256,6 @@ func (m *model) warnModalOpenKey(msg string) {
 						m.deleteSingleItem()
 					}()
 				}
-
 			}
 		case confirmRenameItem:
 			m.confirmRename()

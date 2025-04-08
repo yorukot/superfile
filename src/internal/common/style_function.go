@@ -15,7 +15,8 @@ func FilePanelBorderStyle(height int, width int, filePanelFocussed bool, borderB
 	border := GenerateBorder()
 	border.Left = ""
 	border.Right = ""
-	for i := 0; i < height; i++ {
+
+	for i := range height {
 		if i == 1 {
 			border.Left += Config.BorderMiddleLeft
 			border.Right += Config.BorderMiddleRight

@@ -2,11 +2,13 @@ package internal
 
 // Todo , merge this and predefined variables file
 // These are effectively consts
-var pinnedDividerDir = directory{
+// Had to use `var` as go doesn't allows const structs
+var pinnedDividerDir = directory{ //nolint: gochecknoglobals // This is more like a const.
 	name:     "",
 	location: "Pinned+-*/=?",
 }
-var diskDividerDir = directory{
+
+var diskDividerDir = directory{ //nolint: gochecknoglobals // This is more like a const.
 	name:     "",
 	location: "Disks+-*/=?",
 }

@@ -16,7 +16,7 @@ const (
 	spfTestEnvVar4 = "SPF_TEST_ENV_VAR4"
 )
 
-var testEnvValues = map[string]string{
+var testEnvValues = map[string]string{ //nolint:gochecknoglobals // This is more like a const. Had to use `var` as go doesn't allows const maps
 	spfTestEnvVar1: "1",
 	spfTestEnvVar2: "hello",
 	spfTestEnvVar3: "",
@@ -187,7 +187,6 @@ func Test_resolveShellSubstitution(t *testing.T) {
 }
 
 func Test_findEndingParenthesis(t *testing.T) {
-
 	testdata := []struct {
 		name        string
 		value       string

@@ -13,7 +13,6 @@ import (
 
 // split into tokens
 func tokenizePromptCommand(command string, cwdLocation string) ([]string, error) {
-
 	command, err := resolveShellSubstitution(shellSubTimeout, command, cwdLocation)
 	if err != nil {
 		return nil, err
@@ -27,10 +26,10 @@ func resolveShellSubstitution(subCmdTimeout time.Duration, command string, cwdLo
 	cmdRunes := []rune(command)
 	i := 0
 	for i < len(cmdRunes) {
-
 		if i+1 < len(cmdRunes) && cmdRunes[i] == '$' {
+			switch cmdRunes[i+1] {
 			// ${ spotted
-			if cmdRunes[i+1] == '{' {
+			case '{':
 				// Look for Ending '}'
 				end := findEndingBracket(cmdRunes, i+1, '{', '}')
 				if end == -1 {
@@ -43,18 +42,17 @@ func resolveShellSubstitution(subCmdTimeout time.Duration, command string, cwdLo
 				envVarName := string(cmdRunes[i+2 : end])
 
 				// We can add a layer of abstraction for better unit testing
-				if value, ok := os.LookupEnv(envVarName); !ok {
+				value, ok := os.LookupEnv(envVarName)
+				if !ok {
 					return "", envVarNotFoundError{varName: envVarName}
-				} else {
-					// Might Handle values being too big, or having multiple lines
-					// But this is based on user input, so it is probably okay for now
-					// Same comment for command substitution
-					resCommand.WriteString(value)
 				}
+				// Might Handle values being too big, or having multiple lines
+				// But this is based on user input, so it is probably okay for now
+				// Same comment for command substitution
+				resCommand.WriteString(value)
 
 				i = end + 1
-
-			} else if cmdRunes[i+1] == '(' {
+			case '(':
 				// Look for ending ')'
 				end := findEndingBracket(cmdRunes, i+1, '(', ')')
 				if end == -1 {
@@ -70,18 +68,17 @@ func resolveShellSubstitution(subCmdTimeout time.Duration, command string, cwdLo
 
 				if retCode == -1 {
 					return "", fmt.Errorf("could not execute shell substitution command : %s : %w", subCmd, err)
-				} else {
-					// We are allowing commands that exit with non zero status code
-					// We still use its output
-					if retCode != 0 {
-						slog.Debug("substitution command exited with non zero status", "retCode", retCode,
-							"command", subCmd)
-					}
-					resCommand.WriteString(output)
 				}
+				// We are allowing commands that exit with non zero status code
+				// We still use its output
+				if retCode != 0 {
+					slog.Debug("substitution command exited with non zero status", "retCode", retCode,
+						"command", subCmd)
+				}
+				resCommand.WriteString(output)
 
 				i = end + 1
-			} else {
+			default:
 				resCommand.WriteRune(cmdRunes[i])
 				i++
 			}
@@ -89,7 +86,6 @@ func resolveShellSubstitution(subCmdTimeout time.Duration, command string, cwdLo
 			resCommand.WriteRune(cmdRunes[i])
 			i++
 		}
-
 	}
 
 	return resCommand.String(), nil

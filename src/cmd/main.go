@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"log/slog"
 	"net/http"
 	"os"
@@ -26,11 +25,10 @@ import (
 
 // Run superfile app
 func Run(content embed.FS) {
-
 	// Before we open log file, set all "non debug" logs to stdout
 	utils.SetRootLoggerToStdout(false)
 
-	common.LoadInitial_PrerenderedVariables()
+	common.LoadInitialPrerenderedVariables()
 	common.LoadAllDefaultConfig(content)
 
 	app := &cli.App{
@@ -43,7 +41,7 @@ func Run(content embed.FS) {
 				Name:    "path-list",
 				Aliases: []string{"pl"},
 				Usage:   "Print the path to the configuration and directory",
-				Action: func(c *cli.Context) error {
+				Action: func(_ *cli.Context) error {
 					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#66b2ff")).Render("[Configuration file path]"), variable.ConfigFile)
 					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#ffcc66")).Render("[Hotkeys file path]"), variable.HotkeysFile)
 					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#66ff66")).Render("[Log file path]"), variable.LogFile)
@@ -91,27 +89,7 @@ func Run(content embed.FS) {
 				path = c.Args().First()
 			}
 
-			// Setting the config file path
-			configFileArg := c.String("config-file")
-
-			// Validate the config file exists
-			if configFileArg != "" {
-				if _, err := os.Stat(configFileArg); err != nil {
-					log.Fatalf("Error: While reading config file '%s' from argument : %v", configFileArg, err)
-				} else {
-					variable.ConfigFile = configFileArg
-				}
-			}
-
-			hotkeyFileArg := c.String("hotkey-file")
-
-			if hotkeyFileArg != "" {
-				if _, err := os.Stat(hotkeyFileArg); err != nil {
-					log.Fatalf("Error: While reading hotkey file '%s' from argument : %v", hotkeyFileArg, err)
-				} else {
-					variable.HotkeysFile = hotkeyFileArg
-				}
-			}
+			variable.UpdateVarFromCliArgs(c)
 
 			InitConfigFile()
 
@@ -120,15 +98,11 @@ func Run(content embed.FS) {
 				hasTrash = false
 			}
 
-			variable.FixHotkeys = c.Bool("fix-hotkeys")
-			variable.FixConfigFile = c.Bool("fix-config-file")
-			variable.PrintLastDir = c.Bool("print-last-dir")
-
 			firstUse := checkFirstUse()
 
 			p := tea.NewProgram(internal.InitialModel(path, firstUse, hasTrash), tea.WithAltScreen(), tea.WithMouseCellMotion())
 			if _, err := p.Run(); err != nil {
-				log.Fatalf("Alas, there's been an error: %v", err)
+				utils.PrintfAndExit("Alas, there's been an error: %v", err)
 			}
 
 			// This must be after calling internal.InitialModel()
@@ -147,7 +121,7 @@ func Run(content embed.FS) {
 
 	err := app.Run(os.Args)
 	if err != nil {
-		log.Fatalln(err)
+		utils.PrintlnAndExit(err)
 	}
 }
 
@@ -161,7 +135,7 @@ func InitConfigFile() {
 		variable.SuperFileStateDir,
 		variable.ThemeFolder,
 	); err != nil {
-		log.Fatalln("Error creating directories:", err)
+		utils.PrintlnAndExit("Error creating directories:", err)
 	}
 
 	// Create files
@@ -171,27 +145,27 @@ func InitConfigFile() {
 		variable.ThemeFileVersion,
 		variable.ToggleFooter,
 	); err != nil {
-		log.Fatalln("Error creating files:", err)
+		utils.PrintlnAndExit("Error creating files:", err)
 	}
 
 	// Write config file
 	if err := writeConfigFile(variable.ConfigFile, common.ConfigTomlString); err != nil {
-		log.Fatalln("Error writing config file:", err)
+		utils.PrintlnAndExit("Error writing config file:", err)
 	}
 
 	if err := writeConfigFile(variable.HotkeysFile, common.HotkeysTomlString); err != nil {
-		log.Fatalln("Error writing config file:", err)
+		utils.PrintlnAndExit("Error writing config file:", err)
 	}
 
-	if err := initJsonFile(variable.PinnedFile); err != nil {
-		log.Fatalln("Error initializing json file:", err)
+	if err := initJSONFile(variable.PinnedFile); err != nil {
+		utils.PrintlnAndExit("Error initializing json file:", err)
 	}
 }
 
 // We are initializing these, but not sure if we are ever using them
 func InitTrash() error {
 	// Create trash directories
-	if runtime.GOOS != variable.OS_DARWIN {
+	if runtime.GOOS != utils.OsDarwin {
 		err := createDirectories(
 			variable.CustomTrashDirectory,
 			variable.CustomTrashDirectoryFiles,
@@ -240,7 +214,7 @@ func checkFirstUse() bool {
 	if _, err := os.Stat(file); os.IsNotExist(err) {
 		firstUse = true
 		if err = os.WriteFile(file, nil, 0644); err != nil {
-			log.Fatalf("Failed to create file: %v", err)
+			utils.PrintfAndExit("Failed to create file: %v", err)
 		}
 	}
 	return firstUse
@@ -256,7 +230,7 @@ func writeConfigFile(path, data string) error {
 	return nil
 }
 
-func initJsonFile(path string) error {
+func initJSONFile(path string) error {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		if err = os.WriteFile(path, []byte("null"), 0644); err != nil {
 			return fmt.Errorf("failed to initialize json file %s: %w", path, err)

@@ -37,7 +37,6 @@ func (s *sidebarModel) resetCursor() {
 // This could be made constant time by keeping Indexes ot special directories saved,
 // but that too much.
 func (s *sidebarModel) lastRenderedIndex(mainPanelHeight int, startIndex int) int {
-
 	curHeight := sideBarInitialHeight
 	endIndex := startIndex - 1
 	for i := startIndex; i < len(s.directories); i++ {
@@ -121,7 +120,6 @@ func (s *sidebarModel) listUp(mainPanelHeight int) {
 		// cause another listUp trigger to move up.
 		s.listUp(mainPanelHeight)
 	}
-
 }
 
 func (s *sidebarModel) listDown(mainPanelHeight int) {

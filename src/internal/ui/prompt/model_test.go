@@ -19,7 +19,6 @@ func initGlobals() {
 	// Since this is config that would likely stay same, maybe this is okay.
 	common.Hotkeys.ConfirmTyping = []string{"enter"}
 	common.Hotkeys.CancelTyping = []string{"ctrl+c", "esc"}
-
 }
 
 func TestMain(m *testing.M) {
@@ -53,7 +52,6 @@ func TestModel_HandleUpdate(t *testing.T) {
 	})
 
 	t.Run("Pressing confirm on empty input", func(t *testing.T) {
-
 		actualTest := func(closeOnSuccess bool, openAfterEnter bool) {
 			m := GenerateModel(spfPromptChar, shellPromptChar, closeOnSuccess)
 			m.Open(true)
@@ -69,7 +67,6 @@ func TestModel_HandleUpdate(t *testing.T) {
 
 		actualTest(true, false)
 		actualTest(false, true)
-
 	})
 
 	t.Run("Validate Prompt Actions", func(t *testing.T) {
@@ -109,11 +106,9 @@ func TestModel_HandleUpdate(t *testing.T) {
 		actualTest(tea.KeyMsg{Type: tea.KeyCtrlC}, false)
 		actualTest(tea.KeyMsg{Type: tea.KeyEscape}, false)
 		actualTest(tea.KeyMsg{Type: tea.KeyCtrlD}, true)
-
 	})
 
 	t.Run("Switching between shell and SPF mode", func(t *testing.T) {
-
 		actualTest := func(promptChar string, shellChar string) {
 			m := GenerateModel(promptChar, shellChar, true)
 			m.Open(true)
@@ -188,7 +183,6 @@ func TestMode_HandleResults(t *testing.T) {
 		assert.True(t, m.actionSuccess)
 		assert.Equal(t, "Command exited with status 0", m.resultMsg)
 		assert.True(t, m.IsOpen())
-
 	})
 
 	t.Run("Verify SPF results update", func(t *testing.T) {
@@ -205,6 +199,5 @@ func TestMode_HandleResults(t *testing.T) {
 		// Validate close happens when closeOnSuccess is true
 		m.HandleSPFActionResults(true, "")
 		assert.False(t, m.IsOpen())
-
 	})
 }

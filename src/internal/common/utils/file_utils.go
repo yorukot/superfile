@@ -14,26 +14,27 @@ func WriteTomlData(filePath string, data interface{}) error {
 	tomlData, err := toml.Marshal(data)
 	if err != nil {
 		// return a wrapped error
-		return fmt.Errorf("Error encoding data : %w", err)
+		return fmt.Errorf("error encoding data : %w", err)
 	}
 	err = os.WriteFile(filePath, tomlData, 0644)
 	if err != nil {
-		return fmt.Errorf("Error writing file : %w", err)
+		return fmt.Errorf("error writing file : %w", err)
 	}
 	return nil
 }
 
 // Helper function to load and validate TOML files with field checking
 // errorPrefix is appended before every error message
-func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFlag bool, errorPrefix string) (hasError bool) {
+func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFlag bool, errorPrefix string) bool {
 	// Initialize with default config
 	_ = toml.Unmarshal([]byte(defaultData), target)
 
 	data, err := os.ReadFile(filePath)
 	if err != nil {
-		LogAndExit("Config file doesn't exist", "error", err)
+		PrintfAndExit("Config file doesn't exist. Error : %v", err)
 	}
 	errMsg := ""
+	hasError := false
 
 	// Create a map to track which fields are present
 	// Have to do this manually as toml.Unmarshal does not return an error when it encounters a TOML key
@@ -50,6 +51,7 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 	if !hasError {
 		if err = toml.Unmarshal(data, target); err != nil {
 			hasError = true
+			//nolint: errorlint // Type assertion is better here, and we need to read data from error
 			if decodeErr, ok := err.(*toml.DecodeError); ok {
 				row, col := decodeErr.Position()
 				errMsg = errorPrefix + fmt.Sprintf("Error in field at line %d column %d: %s\n",
@@ -64,7 +66,7 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 		// Check for missing fields if no errors yet
 		targetType := reflect.TypeOf(target).Elem()
 
-		for i := 0; i < targetType.NumField(); i++ {
+		for i := range targetType.NumField() {
 			field := targetType.Field(i)
 			if _, exists := rawData[field.Tag.Get("toml")]; !exists {
 				hasError = true
@@ -89,7 +91,7 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 	// Now we are fixing the file, we would not return hasError=true even if there was error
 	// Fix the file by writing all fields
 	if err := WriteTomlData(filePath, target); err != nil {
-		LogAndExit("Error while writing config file", "error", err)
+		PrintfAndExit("Error while writing config file : %v", err)
 	}
 	return false
 }

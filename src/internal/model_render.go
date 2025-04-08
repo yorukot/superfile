@@ -3,6 +3,7 @@ package internal
 import (
 	"bufio"
 	"context"
+	"errors"
 	"fmt"
 	"image"
 	"log/slog"
@@ -50,7 +51,6 @@ func (m *model) sidebarRender() string {
 }
 
 func (s *sidebarModel) directoriesRender(mainPanelHeight int, curFilePanelFileLocation string, sideBarFocussed bool) string {
-
 	// Cursor should always point to a valid directory at this point
 	if s.isCursorInvalid() {
 		slog.Error("Unexpected situation in sideBar Model. "+
@@ -69,11 +69,12 @@ func (s *sidebarModel) directoriesRender(mainPanelHeight int, curFilePanelFileLo
 
 		totalHeight += s.directories[i].requiredHeight()
 
-		if s.directories[i] == pinnedDividerDir {
+		switch s.directories[i] {
+		case pinnedDividerDir:
 			res += "\n" + common.SideBarPinnedDivider
-		} else if s.directories[i] == diskDividerDir {
+		case diskDividerDir:
 			res += "\n" + common.SideBarDisksDivider
-		} else {
+		default:
 			cursor := " "
 			if s.cursor == i && sideBarFocussed && !s.searchBar.Focused() {
 				cursor = icon.Cursor
@@ -100,7 +101,6 @@ func (m *model) filePanelRender() string {
 	// file panel
 	f := make([]string, 10)
 	for i, filePanel := range m.fileModel.filePanels {
-
 		// check if cursor or render out of range
 		if filePanel.cursor > len(filePanel.element)-1 {
 			filePanel.cursor = 0
@@ -109,22 +109,22 @@ func (m *model) filePanelRender() string {
 		m.fileModel.filePanels[i] = filePanel
 
 		f[i] += common.FilePanelTopDirectoryIconStyle.Render(" "+icon.Directory+icon.Space) + common.FilePanelTopPathStyle.Render(truncateTextBeginning(filePanel.location, m.fileModel.width-4, "...")) + "\n"
-		filePanelWidth := 0
-		footerBorderWidth := 0
+		var filePanelWidth int
+		footerBorderWidth := m.fileModel.width + 15
 
+		// Todo : Move this to a utility function and clarify the calculation via comments
+		// Maybe even write unit tests
 		if (m.fullWidth-common.Config.SidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels) != 0 && i == len(m.fileModel.filePanels)-1 {
 			if m.fileModel.filePreview.open {
 				filePanelWidth = m.fileModel.width
 			} else {
 				filePanelWidth = (m.fileModel.width + (m.fullWidth-common.Config.SidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels))
 			}
-			footerBorderWidth = m.fileModel.width + 15
 		} else {
 			filePanelWidth = m.fileModel.width
-			footerBorderWidth = m.fileModel.width + 15
 		}
 
-		sortDirectionString := ""
+		var sortDirectionString string
 		if filePanel.sortOptions.data.reversed {
 			if common.Config.Nerdfont {
 				sortDirectionString = icon.SortDesc
@@ -138,7 +138,7 @@ func (m *model) filePanelRender() string {
 				sortDirectionString = "A"
 			}
 		}
-		sortTypeString := ""
+		var sortTypeString string
 		if filePanelWidth < 23 {
 			sortTypeString = sortDirectionString
 		} else {
@@ -284,8 +284,8 @@ func (m *model) processBarRender() string {
 
 		curProcess := processes[i]
 		curProcess.progress.Width = utils.FooterWidth(m.fullWidth) - 3
-		symbol := ""
-		cursor := ""
+		var symbol string
+		var cursor string
 		if i == m.processBarModel.cursor {
 			cursor = common.FooterCursorStyle.Render("┃ ")
 		} else {
@@ -312,9 +312,7 @@ func (m *model) processBarRender() string {
 
 func (m *model) wrapProcessBardBorder(processRender string) string {
 	courseNumber := 0
-	if len(m.processBarModel.processList) == 0 {
-		courseNumber = 0
-	} else {
+	if len(m.processBarModel.processList) != 0 {
 		courseNumber = m.processBarModel.cursor + 1
 	}
 	bottomBorder := common.GenerateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(courseNumber), strconv.Itoa(len(m.processBarModel.processList))), utils.FooterWidth(m.fullWidth)-3)
@@ -381,7 +379,6 @@ func (m *model) metadataRender() string {
 			metadataName = truncateMiddleText(m.fileMetaData.metaData[i][0], valueLength, "...")
 		}
 		metaDataBar += fmt.Sprintf("%-*s %s", sprintfLength, metadataName, data)
-
 	}
 	bottomBorder := common.GenerateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(m.fileMetaData.renderIndex+1), strconv.Itoa(len(m.fileMetaData.metaData))), utils.FooterWidth(m.fullWidth)-3)
 	metaDataBar = common.MetadataBorder(m.footerHeight, utils.FooterWidth(m.fullWidth), bottomBorder, m.focusPanel == metadataFocus).Render(metaDataBar)
@@ -390,7 +387,6 @@ func (m *model) metadataRender() string {
 }
 
 func (m *model) clipboardRender() string {
-
 	// render
 	clipboardRender := ""
 	if len(m.copyItems.items) == 0 {
@@ -415,8 +411,8 @@ func (m *model) clipboardRender() string {
 			}
 		}
 	}
-	bottomWidth := 0
 
+	var bottomWidth int
 	if m.fullWidth%3 != 0 {
 		bottomWidth = utils.FooterWidth(m.fullWidth + m.fullWidth%3 + 2)
 	} else {
@@ -511,9 +507,7 @@ func (m *model) warnModalRender() string {
 }
 
 func (m *model) promptModalRender() string {
-
 	return m.promptModal.Render(m.helpMenu.width)
-
 }
 
 func (m *model) helpMenuRender() string {
@@ -569,7 +563,6 @@ func (m *model) helpMenuRender() string {
 	}
 
 	for i := m.helpMenu.renderIndex; i < m.helpMenu.height+m.helpMenu.renderIndex && i < len(m.helpMenu.data); i++ {
-
 		if i != m.helpMenu.renderIndex {
 			helpMenuContent += "\n"
 		}
@@ -667,10 +660,10 @@ func (m *model) filePreviewPanelRender() string {
 	itemPath := panel.element[panel.cursor].location
 
 	// Renamed it to info_err to prevent shadowing with err below
-	fileInfo, info_err := os.Stat(itemPath)
+	fileInfo, infoErr := os.Stat(itemPath)
 
-	if info_err != nil {
-		slog.Error("Error get file info", "error", info_err)
+	if infoErr != nil {
+		slog.Error("Error get file info", "error", infoErr)
 		return box.Render("\n --- " + icon.Error + " Error get file info ---")
 	}
 
@@ -726,7 +719,7 @@ func (m *model) filePreviewPanelRender() string {
 		}
 
 		ansiRender, err := filepreview.ImagePreview(itemPath, m.fileModel.filePreview.width, previewLine, common.Theme.FilePanelBG)
-		if err == image.ErrFormat {
+		if errors.Is(err, image.ErrFormat) {
 			return box.Render("\n --- " + icon.Error + " Unsupported image formats ---")
 		}
 
@@ -786,7 +779,6 @@ func (m *model) filePreviewPanelRender() string {
 }
 
 func getBatSyntaxHighlightedContent(itemPath string, previewLine int, background string) (string, error) {
-	fileContent := ""
 	// --plain: use the plain style without line numbers and decorations
 	// --force-colorization: force colorization for non-interactive shell output
 	// --line-range <:m>: only read from line 1 to line "m"
@@ -804,7 +796,7 @@ func getBatSyntaxHighlightedContent(itemPath string, previewLine int, background
 		return "", err
 	}
 
-	fileContent = string(fileContentBytes)
+	fileContent := string(fileContentBytes)
 	if !common.Config.TransparentBackground {
 		fileContent = setBatBackground(fileContent, background)
 	}

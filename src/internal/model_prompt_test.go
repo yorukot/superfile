@@ -43,7 +43,6 @@ func TestMain(m *testing.M) {
 // Model is huge. Just one test file ain't enough
 
 func TestModel_Update_Prompt(t *testing.T) {
-
 	// We want to test these. Todo : complete important tests
 	// 1. Being able to open prompt
 	// 2. Being able to execute shell commands

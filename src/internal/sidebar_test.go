@@ -9,7 +9,7 @@ import (
 
 func dirSlice(count int) []directory {
 	res := make([]directory, count)
-	for i := 0; i < count; i++ {
+	for i := range count {
 		res[i] = directory{name: "Dir" + strconv.Itoa(i), location: "/a/" + strconv.Itoa(i)}
 	}
 	return res
@@ -67,7 +67,6 @@ func Test_noActualDir(t *testing.T) {
 }
 
 func Test_isCursorInvalid(t *testing.T) {
-
 	testcases := []struct {
 		name     string
 		sidebar  sidebarModel
@@ -158,12 +157,12 @@ func Test_resetCursor(t *testing.T) {
 
 func Test_lastRenderIndex(t *testing.T) {
 	// Setup test data
-	sidebar_a := sidebarModel{
+	sidebarA := sidebarModel{
 		directories: formDirctorySlice(
 			dirSlice(10), dirSlice(10), dirSlice(10),
 		),
 	}
-	sidebar_b := sidebarModel{
+	sidebarB := sidebarModel{
 		directories: formDirctorySlice(
 			dirSlice(1), nil, dirSlice(5),
 		),
@@ -179,7 +178,7 @@ func Test_lastRenderIndex(t *testing.T) {
 	}{
 		{
 			name:              "Small viewport with home directories",
-			sidebar:           sidebar_a,
+			sidebar:           sidebarA,
 			mainPanelHeight:   10,
 			startIndex:        0,
 			expectedLastIndex: 6,
@@ -187,7 +186,7 @@ func Test_lastRenderIndex(t *testing.T) {
 		},
 		{
 			name:              "Medium viewport showing home and some pinned",
-			sidebar:           sidebar_a,
+			sidebar:           sidebarA,
 			mainPanelHeight:   20,
 			startIndex:        0,
 			expectedLastIndex: 14,
@@ -195,7 +194,7 @@ func Test_lastRenderIndex(t *testing.T) {
 		},
 		{
 			name:              "Medium viewport starting from pinned dirs",
-			sidebar:           sidebar_a,
+			sidebar:           sidebarA,
 			mainPanelHeight:   20,
 			startIndex:        11,
 			expectedLastIndex: 25,
@@ -203,7 +202,7 @@ func Test_lastRenderIndex(t *testing.T) {
 		},
 		{
 			name:              "Large viewport showing all directories",
-			sidebar:           sidebar_a,
+			sidebar:           sidebarA,
 			mainPanelHeight:   100,
 			startIndex:        11,
 			expectedLastIndex: 31,
@@ -211,7 +210,7 @@ func Test_lastRenderIndex(t *testing.T) {
 		},
 		{
 			name:              "Start index beyond directory count",
-			sidebar:           sidebar_a,
+			sidebar:           sidebarA,
 			mainPanelHeight:   100,
 			startIndex:        32,
 			expectedLastIndex: 31,
@@ -219,7 +218,7 @@ func Test_lastRenderIndex(t *testing.T) {
 		},
 		{
 			name:              "Asymmetric directory distribution",
-			sidebar:           sidebar_b,
+			sidebar:           sidebarB,
 			mainPanelHeight:   12,
 			startIndex:        0,
 			expectedLastIndex: 4,
@@ -234,31 +233,30 @@ func Test_lastRenderIndex(t *testing.T) {
 				"lastRenderedIndex failed: %s", tt.explanation)
 		})
 	}
-
 }
 
 func Test_firstRenderIndex(t *testing.T) {
-	sidebar_a := sidebarModel{
+	sidebarA := sidebarModel{
 		directories: fullDirSlice(10),
 	}
-	sidebar_b := sidebarModel{
+	sidebarB := sidebarModel{
 		directories: formDirctorySlice(
 			dirSlice(1), nil, dirSlice(5),
 		),
 	}
-	sidebar_c := sidebarModel{
+	sidebarC := sidebarModel{
 		directories: formDirctorySlice(
 			nil, dirSlice(5), dirSlice(5),
 		),
 	}
-	sidebar_d := sidebarModel{
+	sidebarD := sidebarModel{
 		directories: formDirctorySlice(
 			nil, nil, dirSlice(3),
 		),
 	}
 
 	// Empty sidebar with only dividers
-	sidebar_e := sidebarModel{
+	sidebarE := sidebarModel{
 		directories: fullDirSlice(0),
 	}
 
@@ -272,7 +270,7 @@ func Test_firstRenderIndex(t *testing.T) {
 	}{
 		{
 			name:               "Basic calculation from end index",
-			sidebar:            sidebar_a,
+			sidebar:            sidebarA,
 			mainPanelHeight:    10,
 			endIndex:           10,
 			expectedFirstIndex: 6,
@@ -280,7 +278,7 @@ func Test_firstRenderIndex(t *testing.T) {
 		},
 		{
 			name:               "Small panel height",
-			sidebar:            sidebar_a,
+			sidebar:            sidebarA,
 			mainPanelHeight:    5,
 			endIndex:           15,
 			expectedFirstIndex: 14,
@@ -288,7 +286,7 @@ func Test_firstRenderIndex(t *testing.T) {
 		},
 		{
 			name:               "End index near beginning",
-			sidebar:            sidebar_a,
+			sidebar:            sidebarA,
 			mainPanelHeight:    20,
 			endIndex:           3,
 			expectedFirstIndex: 0,
@@ -296,7 +294,7 @@ func Test_firstRenderIndex(t *testing.T) {
 		},
 		{
 			name:               "End index at disk divider",
-			sidebar:            sidebar_a,
+			sidebar:            sidebarA,
 			mainPanelHeight:    15,
 			endIndex:           21, // Disk divider in sidebar_a
 			expectedFirstIndex: 12,
@@ -304,7 +302,7 @@ func Test_firstRenderIndex(t *testing.T) {
 		},
 		{
 			name:               "Very large panel height showing all items",
-			sidebar:            sidebar_a,
+			sidebar:            sidebarA,
 			mainPanelHeight:    100,
 			endIndex:           31, // Last disk dir in sidebar_a
 			expectedFirstIndex: 0,
@@ -312,7 +310,7 @@ func Test_firstRenderIndex(t *testing.T) {
 		},
 		{
 			name:               "Asymetric sidebar with few directories",
-			sidebar:            sidebar_b,
+			sidebar:            sidebarB,
 			mainPanelHeight:    12,
 			endIndex:           4, // Last disk dir in sidebar_b
 			expectedFirstIndex: 0,
@@ -320,7 +318,7 @@ func Test_firstRenderIndex(t *testing.T) {
 		},
 		{
 			name:               "No home directories case",
-			sidebar:            sidebar_c,
+			sidebar:            sidebarC,
 			mainPanelHeight:    10,
 			endIndex:           6, // Disk dir in sidebar_c
 			expectedFirstIndex: 2, // Pinned divider
@@ -328,7 +326,7 @@ func Test_firstRenderIndex(t *testing.T) {
 		},
 		{
 			name:               "Only disk directories case",
-			sidebar:            sidebar_d,
+			sidebar:            sidebarD,
 			mainPanelHeight:    8,
 			endIndex:           4, // Last disk dir
 			expectedFirstIndex: 2, // Disk divider
@@ -336,7 +334,7 @@ func Test_firstRenderIndex(t *testing.T) {
 		},
 		{
 			name:               "Empty sidebar case",
-			sidebar:            sidebar_e,
+			sidebar:            sidebarE,
 			mainPanelHeight:    10,
 			endIndex:           1, // Disk divider
 			expectedFirstIndex: 0, // Pinned divider
@@ -344,7 +342,7 @@ func Test_firstRenderIndex(t *testing.T) {
 		},
 		{
 			name:               "End index at the start",
-			sidebar:            sidebar_a,
+			sidebar:            sidebarA,
 			mainPanelHeight:    5,
 			endIndex:           0,
 			expectedFirstIndex: 0,
@@ -352,7 +350,7 @@ func Test_firstRenderIndex(t *testing.T) {
 		},
 		{
 			name:               "End index out of bounds",
-			sidebar:            sidebar_a,
+			sidebar:            sidebarA,
 			mainPanelHeight:    20,
 			endIndex:           32, // Out of bounds for sidebar_a
 			expectedFirstIndex: 33, // endIndex + 1
@@ -360,7 +358,7 @@ func Test_firstRenderIndex(t *testing.T) {
 		},
 		{
 			name:               "Very small panel height",
-			sidebar:            sidebar_a,
+			sidebar:            sidebarA,
 			mainPanelHeight:    2, // Too small to fit anything
 			endIndex:           10,
 			expectedFirstIndex: 11,
@@ -368,7 +366,7 @@ func Test_firstRenderIndex(t *testing.T) {
 		},
 		{
 			name:               "Panel height exactly matches divider",
-			sidebar:            sidebar_a,
+			sidebar:            sidebarA,
 			mainPanelHeight:    6,  // Just enough for initialHeight + divider
 			endIndex:           10, // Pinned divider
 			expectedFirstIndex: 10,
@@ -376,7 +374,7 @@ func Test_firstRenderIndex(t *testing.T) {
 		},
 		{
 			name:               "Boundary case between directory types",
-			sidebar:            sidebar_a,
+			sidebar:            sidebarA,
 			mainPanelHeight:    7,
 			endIndex:           11, // First pinned dir
 			expectedFirstIndex: 10, // Pinned divider
