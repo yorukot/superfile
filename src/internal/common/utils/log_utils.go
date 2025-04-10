@@ -1,13 +1,24 @@
 package utils
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
 )
 
-// Todo : Eventually we want to remove all such usage that can result in app exiting abruptly
-func LogAndExit(msg string, values ...any) {
-	slog.Error(msg, values...)
+// Print line to stderr and exit with status 1
+// Cannot use log.Fataln() as slog.SetDefault() causes those lines to
+// go into log file
+func PrintlnAndExit(args ...any) {
+	fmt.Fprintln(os.Stderr, args...)
+	os.Exit(1)
+}
+
+// Print formatted output line to stderr and exit with status 1
+// Cannot use log.Fataln() as slog.SetDefault() causes those lines to
+// go into log file
+func PrintfAndExit(format string, args ...any) {
+	fmt.Fprintf(os.Stderr, format, args...)
 	os.Exit(1)
 }
 

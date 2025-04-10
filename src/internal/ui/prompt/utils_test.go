@@ -109,6 +109,7 @@ func TestModel_getPromptAction(t *testing.T) {
 			action, err := getPromptAction(tt.shellMode, tt.text, "/")
 			if err != nil {
 				assert.True(t, tt.expectedErr)
+				//nolint: errorlint // We don't expect a wrapped error here, so using type assertion
 				cmdErr, ok := err.(invalidCmdError)
 				assert.True(t, ok)
 				if tt.expectedErrMsg != "" {
@@ -117,10 +118,8 @@ func TestModel_getPromptAction(t *testing.T) {
 			}
 
 			assert.Equal(t, tt.expectecAction, action)
-
 		})
 	}
-
 }
 
 func Test_getFirstToken(t *testing.T) {

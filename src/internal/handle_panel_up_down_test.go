@@ -10,7 +10,7 @@ import (
 func genProcessBarModel(count int, cursor int, render int) processBarModel {
 	pList := make([]string, count)
 	pMap := map[string]process{}
-	for i := 0; i < count; i++ {
+	for i := range count {
 		pList[i] = strconv.Itoa(i)
 		pMap[pList[i]] = process{
 			name: pList[i],

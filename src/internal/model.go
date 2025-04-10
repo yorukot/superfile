@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"strings"
 	"time"
 
@@ -22,25 +23,27 @@ import (
 	stringfunction "github.com/yorukot/superfile/src/pkg/string_function"
 )
 
-var LastTimeCursorMove = [2]int{int(time.Now().UnixMicro()), 0}
-var ListeningMessage = true
-
-var firstUse = false
-var hasTrash = true
-var batCmd = ""
-
-var et *exiftool.Exiftool
-
-var channel = make(chan channelMessage, 1000)
-var progressBarLastRenderTime time.Time = time.Now()
+// These represent model's state information, its not a global preperty
+var LastTimeCursorMove = [2]int{int(time.Now().UnixMicro()), 0} //nolint: gochecknoglobals // Todo : Move to model struct
+var ListeningMessage = true                                     //nolint: gochecknoglobals // Todo : Move to model struct
+var firstUse = false                                            //nolint: gochecknoglobals // Todo : Move to model struct
+var hasTrash = true                                             //nolint: gochecknoglobals // Todo : Move to model struct
+var batCmd = ""                                                 //nolint: gochecknoglobals // Todo : Move to model struct
+var et *exiftool.Exiftool                                       //nolint: gochecknoglobals // Todo : Move to model struct
+var channel = make(chan channelMessage, 1000)                   //nolint: gochecknoglobals // Todo : Move to model struct
+var progressBarLastRenderTime = time.Now()                      //nolint: gochecknoglobals // Todo : Move to model struct
 
 // Initialize and return model with default configs
-func InitialModel(dir string, firstUseCheck, hasTrashCheck bool) model {
-	toggleDotFile, toggleFooter, firstFilePanelDir := initialConfig(dir)
+// It returns only tea.Model because when it used in main, the return value
+// is passed to tea.NewProgram() which accepts tea.Model
+// Either way type 'model' is not exported, so there is not way main package can
+// be aware of it, and use it directly
+func InitialModel(firstFilePanelDirs []string, firstUseCheck, hasTrashCheck bool) tea.Model {
+	toggleDotFile, toggleFooter := initialConfig(firstFilePanelDirs)
 	firstUse = firstUseCheck
 	hasTrash = hasTrashCheck
 	batCmd = checkBatCmd()
-	return defaultModelConfig(toggleDotFile, toggleFooter, firstFilePanelDir)
+	return defaultModelConfig(toggleDotFile, toggleFooter, firstFilePanelDirs)
 }
 
 // Init function to be called by Bubble tea framework, sets windows title,
@@ -117,10 +120,10 @@ func (m *model) handleChannelMessage(msg channelMessage) {
 	case sendMetadata:
 		m.fileMetaData.metaData = msg.metadata
 	case sendProcess:
-		if !arrayContains(m.processBarModel.processList, msg.messageId) {
-			m.processBarModel.processList = append(m.processBarModel.processList, msg.messageId)
+		if !arrayContains(m.processBarModel.processList, msg.messageID) {
+			m.processBarModel.processList = append(m.processBarModel.processList, msg.messageID)
 		}
-		m.processBarModel.process[msg.messageId] = msg.processNewState
+		m.processBarModel.process[msg.messageID] = msg.processNewState
 	default:
 		slog.Error("Unhandled channelMessageType in handleChannelMessage()",
 			"messageType", msg.messageType)
@@ -150,8 +153,6 @@ func (m *model) handleWindowResize(msg tea.WindowSizeMsg) {
 func (m *model) setFilePreviewWidth(width int) {
 	if common.Config.FilePreviewWidth == 0 {
 		m.fileModel.filePreview.width = (width - common.Config.SidebarWidth - (4 + (len(m.fileModel.filePanels))*2)) / (len(m.fileModel.filePanels) + 1)
-	} else if common.Config.FilePreviewWidth > 10 || common.Config.FilePreviewWidth == 1 {
-		utils.LogAndExit("Config file file_preview_width invalidation")
 	} else {
 		m.fileModel.filePreview.width = (width - common.Config.SidebarWidth) / common.Config.FilePreviewWidth
 	}
@@ -168,6 +169,7 @@ func (m *model) setFilePanelsSize(width int) {
 }
 
 func (m *model) setHeightValues(height int) {
+	//nolint: gocritic // This is to be separated out to a function, and made better later. No need to refactor here
 	if !m.toggleFooter {
 		m.footerHeight = 0
 	} else if height < 30 {
@@ -205,7 +207,6 @@ func (m *model) setHelpMenuSize() {
 // Identify the current state of the application m and properly handle the
 // msg keybind pressed
 func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
-
 	slog.Debug("model.handleKeyInput", "msg", msg, "typestr", msg.Type.String(),
 		"runes", msg.Runes, "type", int(msg.Type), "paste", msg.Paste,
 		"alt", msg.Alt)
@@ -227,35 +228,34 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 		firstUse = false
 		return cmd
 	}
-
-	if m.typingModal.open {
+	switch {
+	case m.typingModal.open:
 		m.typingModalOpenKey(msg.String())
-
-	} else if m.promptModal.IsOpen() {
+	case m.promptModal.IsOpen():
 		// Ignore keypress. It will be handled in Update call via
 		// updateFilePanelState
 
-	} else if m.warnModal.open {
+	case m.warnModal.open:
 		m.warnModalOpenKey(msg.String())
 		// If renaming a object
-	} else if m.fileModel.renaming {
+	case m.fileModel.renaming:
 		m.renamingKey(msg.String())
-	} else if m.sidebarModel.renaming {
+	case m.sidebarModel.renaming:
 		m.sidebarRenamingKey(msg.String())
 		// If search bar is open
-	} else if m.fileModel.filePanels[m.filePanelFocusIndex].searchBar.Focused() {
+	case m.fileModel.filePanels[m.filePanelFocusIndex].searchBar.Focused():
 		m.focusOnSearchbarKey(msg.String())
 		// If sort options menu is open
-	} else if m.sidebarModel.searchBar.Focused() {
+	case m.sidebarModel.searchBar.Focused():
 		m.sidebarSearchBarKey(msg.String())
 		// If sort options menu is open
-	} else if m.fileModel.filePanels[m.filePanelFocusIndex].sortOptions.open {
+	case m.fileModel.filePanels[m.filePanelFocusIndex].sortOptions.open:
 		m.sortOptionsKey(msg.String())
 		// If help menu is open
-	} else if m.helpMenu.open {
+	case m.helpMenu.open:
 		m.helpMenuKey(msg.String())
 		// If asking to confirm quiting
-	} else if m.confirmToQuit {
+	case m.confirmToQuit:
 		quit := m.confirmToQuitSuperfile(msg.String())
 		if quit {
 			m.quitSuperfile()
@@ -263,7 +263,7 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 		}
 		// If quiting input pressed, check if has any running process and displays a
 		// warn. Otherwise just quits application
-	} else if msg.String() == containsKey(msg.String(), common.Hotkeys.Quit) {
+	case slices.Contains(common.Hotkeys.Quit, msg.String()):
 		if m.hasRunningProcesses() {
 			m.warnModalForQuit()
 			return cmd
@@ -271,7 +271,7 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 
 		m.quitSuperfile()
 		return tea.Quit
-	} else {
+	default:
 		// Handles general kinds of inputs in the regular state of the application
 		cmd = m.mainKey(msg.String(), cmd)
 	}
@@ -282,15 +282,16 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 // in search, update typingb bar, etc
 func (m *model) updateFilePanelsState(msg tea.Msg, cmd *tea.Cmd) {
 	focusPanel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-	if m.firstTextInput {
+	switch {
+	case m.firstTextInput:
 		m.firstTextInput = false
-	} else if m.fileModel.renaming {
+	case m.fileModel.renaming:
 		focusPanel.rename, *cmd = focusPanel.rename.Update(msg)
-	} else if focusPanel.searchBar.Focused() {
+	case focusPanel.searchBar.Focused():
 		focusPanel.searchBar, *cmd = focusPanel.searchBar.Update(msg)
-	} else if m.typingModal.open {
+	case m.typingModal.open:
 		m.typingModal.textInput, *cmd = m.typingModal.textInput.Update(msg)
-	} else if m.promptModal.IsOpen() {
+	case m.promptModal.IsOpen():
 		// *cmd is a non-name, and cannot be used on left of :=
 		var action common.ModelAction
 		// Taking returned cmd is necessary for blinking
@@ -585,7 +586,7 @@ func (m *model) quitSuperfile() {
 	}
 	// cd on quit
 	currentDir := m.fileModel.filePanels[m.filePanelFocusIndex].location
-	variable.LastDir = currentDir
+	variable.SetLastDir(currentDir)
 
 	if common.Config.CdOnQuit {
 		// escape single quote

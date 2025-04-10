@@ -16,8 +16,8 @@ import (
 )
 
 // initialConfig load and handle all configuration files (spf config,Hotkeys
-// themes) setted up. Returns absolute path of dir pointing to the file Panel
-func initialConfig(dir string) (toggleDotFile bool, toggleFooter bool, firstFilePanelDir string) {
+// themes) setted up. Processes input directories and returns toggle states.
+func initialConfig(firstFilePanelDirs []string) (toggleDotFile bool, toggleFooter bool) { //nolint: nonamedreturns // This is the only usecase of named returns, distinguish between multiple return values
 	// Open log stream
 	file, err := os.OpenFile(variable.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 
@@ -25,8 +25,7 @@ func initialConfig(dir string) (toggleDotFile bool, toggleFooter bool, firstFile
 	// For example if the log file directories have access issues.
 	// we could pass a dummy object to log.SetOutput() and the app would still function.
 	if err != nil {
-		// At this point, it will go to stdout since log file is not initilized
-		utils.LogAndExit("Error while opening superfile.log file", "error", err)
+		utils.PrintfAndExit("Error while opening superfile.log file : %v", err)
 	}
 	common.LoadConfigFile()
 
@@ -44,10 +43,6 @@ func initialConfig(dir string) (toggleDotFile bool, toggleFooter bool, firstFile
 
 	icon.InitIcon(common.Config.Nerdfont, common.Theme.DirectoryIconColor)
 
-	toggleDotFile = utils.ReadBoolFile(variable.ToggleDotFile, false)
-
-	toggleFooter = utils.ReadBoolFile(variable.ToggleFooter, true)
-
 	common.LoadThemeConfig()
 	common.LoadPrerenderedVariables()
 
@@ -58,19 +53,29 @@ func initialConfig(dir string) (toggleDotFile bool, toggleFooter bool, firstFile
 		}
 	}
 
-	if dir != "" {
-		firstFilePanelDir, err = filepath.Abs(dir)
-	} else {
-		common.Config.DefaultDirectory = strings.Replace(common.Config.DefaultDirectory, "~", variable.HomeDir, -1)
-		firstFilePanelDir, err = filepath.Abs(common.Config.DefaultDirectory)
-	}
+	for i := range firstFilePanelDirs {
+		if firstFilePanelDirs[i] == "" {
+			firstFilePanelDirs[i] = common.Config.DefaultDirectory
+		}
 
-	if err != nil {
-		firstFilePanelDir = variable.HomeDir
+		if strings.HasPrefix(firstFilePanelDirs[i], "~") {
+			// We only need to replace the first ~ , not all of them
+			// And only if its a prefix
+			firstFilePanelDirs[i] = strings.Replace(firstFilePanelDirs[i], "~", variable.HomeDir, 1)
+		}
+		firstFilePanelDirs[i], err = filepath.Abs(firstFilePanelDirs[i])
+		// In case of unexpected path error, fallback to home dir
+		if err != nil {
+			slog.Error("Unexpected error while calculating firstFilePanelDir", "error", err)
+			firstFilePanelDirs[i] = variable.HomeDir
+		}
 	}
 
 	slog.Debug("Runtime information", "runtime.GOOS", runtime.GOOS,
-		"start directory", firstFilePanelDir)
+		"start directories", firstFilePanelDirs)
 
-	return toggleDotFile, toggleFooter, firstFilePanelDir
+	toggleDotFile = utils.ReadBoolFile(variable.ToggleDotFile, false)
+	toggleFooter = utils.ReadBoolFile(variable.ToggleFooter, true)
+
+	return toggleDotFile, toggleFooter
 }

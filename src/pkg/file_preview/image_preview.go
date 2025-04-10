@@ -52,7 +52,7 @@ func ConvertImageToANSI(img image.Image, defaultBGColor color.Color) string {
 	defaultBGHex := colorToHex(defaultBGColor)
 
 	for y := 0; y < height; y += 2 {
-		for x := 0; x < width; x++ {
+		for x := range width {
 			upperColor := cache.getTermenvColor(img.At(x, y), defaultBGHex)
 			lowerColor := cache.getTermenvColor(defaultBGColor, "")
 
@@ -99,7 +99,7 @@ func ImagePreview(path string, maxWidth, maxHeight int, defaultBGColor string) (
 	// Convert image to ANSI
 	bgColor, err := hexToColor(defaultBGColor)
 	if err != nil {
-		return "", fmt.Errorf("invalid background color: %v", err)
+		return "", fmt.Errorf("invalid background color: %w", err)
 	}
 	ansiImage := ConvertImageToANSI(resizedImg, bgColor)
 
@@ -163,10 +163,7 @@ func hexToColor(hex string) (color.RGBA, error) {
 	return color.RGBA{R: uint8(values >> 16), G: uint8((values >> 8) & 0xFF), B: uint8(values & 0xFF), A: 255}, nil
 }
 
-func colorToHex(color color.Color) (fullbackHex string) {
+func colorToHex(color color.Color) string {
 	r, g, b, _ := color.RGBA()
-
-	fullbackHex = fmt.Sprintf("#%02x%02x%02x", uint8(r>>8), uint8(g>>8), uint8(b>>8))
-	return fullbackHex
-
+	return fmt.Sprintf("#%02x%02x%02x", uint8(r>>8), uint8(g>>8), uint8(b>>8))
 }

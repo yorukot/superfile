@@ -215,7 +215,6 @@ func LoadThemeConfig() {
 }
 
 func TransparentAllBackgroundColor() {
-
 	if SidebarBGColor == sidebarItemSelectedBGColor {
 		sidebarItemSelectedBGColor = lipgloss.Color(TransparentBackgroundColor)
 	}

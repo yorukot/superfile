@@ -56,7 +56,6 @@ func (m *Model) HandleUpdate(msg tea.Msg, cwdLocation string) (common.ModelActio
 	default:
 		// Non keypress updates like Cursor Blink
 		m.textInput, cmd = m.textInput.Update(msg)
-
 	}
 	return action, cmd
 }
@@ -73,8 +72,7 @@ func (m *Model) handleConfirm(cwdLocation string) common.ModelAction {
 	if err == nil {
 		m.resultMsg = ""
 		m.actionSuccess = true
-	} else if cmdErr, ok := err.(invalidCmdError); ok {
-		// We don't expect a wrapped error here, so using type assertion
+	} else if cmdErr, ok := err.(invalidCmdError); ok { //nolint: errorlint // We don't expect a wrapped error here, so using type assertion
 		m.resultMsg = cmdErr.uiMessage()
 		m.actionSuccess = false
 	} else {
@@ -88,11 +86,12 @@ func (m *Model) handleConfirm(cwdLocation string) common.ModelAction {
 
 func (m *Model) handleNormalKeyInput(msg tea.KeyMsg) tea.Cmd {
 	var cmd tea.Cmd
-	if m.textInput.Value() == "" && msg.String() == m.spfPromptHotkey {
+	switch {
+	case m.textInput.Value() == "" && msg.String() == m.spfPromptHotkey:
 		m.shellMode = false
-	} else if m.textInput.Value() == "" && msg.String() == m.shellPromptHotkey {
+	case m.textInput.Value() == "" && msg.String() == m.shellPromptHotkey:
 		m.shellMode = true
-	} else {
+	default:
 		m.textInput, cmd = m.textInput.Update(msg)
 	}
 	m.resultMsg = ""
@@ -124,7 +123,6 @@ func (m *Model) HandleSPFActionResults(success bool, msg string) {
 // a generic way. We would have all our components use that.
 // And we could unit test this Render() easility.
 func (m *Model) Render(width int) string {
-
 	divider := strings.Repeat(common.Config.BorderTop, width)
 	content := " " + m.headline + modeString(m.shellMode)
 	content += "\n" + divider

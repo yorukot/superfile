@@ -25,7 +25,7 @@ func (m *model) validateLayout() error {
 	}
 	// PanelHeight + 2 lines (main border) + actual footer height
 	if m.fullHeight != (m.mainPanelHeight+2)+utils.FullFooterHeight(m.footerHeight, m.toggleFooter) {
-		return fmt.Errorf("Invalid model layout, fullHeight : %v, mainPanelHeight : %v, footerHeight : %v\n",
+		return fmt.Errorf("invalid model layout, fullHeight : %v, mainPanelHeight : %v, footerHeight : %v",
 			m.fullHeight, m.mainPanelHeight, m.footerHeight)
 	}
 	// Todo : Add check for width as well
@@ -42,6 +42,39 @@ func (d directory) requiredHeight() int {
 		return 3
 	}
 	return 1
+}
+
+// ================ filepanel
+
+func filePanelSlice(dir []string) []filePanel {
+	res := make([]filePanel, len(dir))
+	for i := range dir {
+		res[i] = defaultFilePanel(dir[i])
+	}
+	return res
+}
+
+func defaultFilePanel(dir string) filePanel {
+	return filePanel{
+		render:   0,
+		cursor:   0,
+		location: dir,
+		sortOptions: sortOptionsModel{
+			width:  20,
+			height: 4,
+			open:   false,
+			cursor: common.Config.DefaultSortType,
+			data: sortOptionsModelData{
+				options:  []string{"Name", "Size", "Date Modified"},
+				selected: common.Config.DefaultSortType,
+				reversed: common.Config.SortOrderReversed,
+			},
+		},
+		panelMode:        browserMode,
+		focusType:        focus,
+		directoryRecords: make(map[string]directoryRecord),
+		searchBar:        common.GenerateSearchBar(),
+	}
 }
 
 // ================ String method for easy logging =====================
@@ -72,7 +105,6 @@ func (f filePanelFocusType) String() string {
 	default:
 		return invalidTypeString
 	}
-
 }
 
 func (p panelMode) String() string {

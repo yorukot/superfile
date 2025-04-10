@@ -33,7 +33,7 @@ func zipSource(source, target string) error {
 	}
 
 	message := channelMessage{
-		messageId:       id,
+		messageID:       id,
 		messageType:     sendProcess,
 		processNewState: p,
 	}
@@ -102,7 +102,6 @@ func zipSource(source, target string) error {
 		}
 		p.done++
 		if len(channel) < 5 {
-
 			message.processNewState = p
 			channel <- message
 		}

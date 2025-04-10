@@ -116,7 +116,6 @@ func (m *model) closeFilePanel() {
 		if common.Config.FilePreviewWidth == 0 {
 			m.fileModel.filePreview.width = (m.fullWidth - common.Config.SidebarWidth - (4 + (len(m.fileModel.filePanels))*2)) / (len(m.fileModel.filePanels) + 1)
 		} else {
-
 			m.fileModel.filePreview.width = (m.fullWidth - common.Config.SidebarWidth) / common.Config.FilePreviewWidth
 		}
 	}
@@ -154,7 +153,6 @@ func (m *model) toggleFilePreviewPanel() {
 	for i := range m.fileModel.filePanels {
 		m.fileModel.filePanels[i].searchBar.Width = m.fileModel.width - 4
 	}
-
 }
 
 // Focus on next file panel

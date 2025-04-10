@@ -43,7 +43,6 @@ func TestMain(m *testing.M) {
 // Model is huge. Just one test file ain't enough
 
 func TestModel_Update_Prompt(t *testing.T) {
-
 	// We want to test these. Todo : complete important tests
 	// 1. Being able to open prompt
 	// 2. Being able to execute shell commands
@@ -71,7 +70,7 @@ func TestModel_Update_Prompt(t *testing.T) {
 	// too big Shell command output
 
 	t.Run("Basic Prompt Opening", func(t *testing.T) {
-		m := defaultModelConfig(false, false, "/")
+		m := defaultModelConfig(false, false, []string{"/"})
 		firstUse = false
 		_, err := TeaUpdate(&m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenCommandLine[0]))
 		require.NoError(t, err, "Opening the prompt should not produce an error")
@@ -79,7 +78,7 @@ func TestModel_Update_Prompt(t *testing.T) {
 	})
 
 	t.Run("Split Panel", func(t *testing.T) {
-		m := defaultModelConfig(false, false, "/")
+		m := defaultModelConfig(false, false, []string{"/"})
 		firstUse = false
 		assert.Len(t, m.fileModel.filePanels, 1)
 		_, _ = TeaUpdate(&m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenSPFPrompt[0]))
