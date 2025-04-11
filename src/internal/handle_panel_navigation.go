@@ -21,16 +21,16 @@ func (m *model) pinnedDirectory() {
 
 	dirs := getPinnedDirectories()
 	for i, other := range dirs {
-		if other.location == panel.location {
+		if other.Location == panel.location {
 			dirs = append(dirs[:i], dirs[i+1:]...)
 			unPinned = true
 		}
 	}
 
 	if !unPinned {
-		dirs = append(dirs, directory{
-			location: panel.location,
-			name:     filepath.Base(panel.location),
+		dirs = append(dirs, Directory{
+			Location: panel.location,
+			Name:     filepath.Base(panel.location),
 		})
 	}
 
@@ -41,7 +41,7 @@ func (m *model) pinnedDirectory() {
 	}
 	var pinnedDirs []pinnedDir
 	for _, dir := range dirs {
-		pinnedDirs = append(pinnedDirs, pinnedDir{Location: dir.location, Name: dir.name})
+		pinnedDirs = append(pinnedDirs, pinnedDir{Location: dir.Location, Name: dir.Name})
 	}
 
 	updatedData, err := json.Marshal(pinnedDirs)

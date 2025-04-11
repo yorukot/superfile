@@ -14,34 +14,34 @@ import (
 func (m *model) pinnedItemRename() {
 	sidebar := m.sidebarModel
 
-	pinnedBegin, pinnedEnd := m.sidebarModel.pinnedIndexRange()
+	pinnedBegin, pinnedEnd := m.sidebarModel.PinnedIndexRange()
 	// We have not selected a pinned directory, rename is not allowed
-	if sidebar.cursor < pinnedBegin || sidebar.cursor > pinnedEnd {
+	if sidebar.Cursor < pinnedBegin || sidebar.Cursor > pinnedEnd {
 		return
 	}
 
-	nameLen := len(sidebar.directories[sidebar.cursor].name)
+	nameLen := len(sidebar.Directories[sidebar.Cursor].Name)
 	cursorPos := nameLen
 
-	m.sidebarModel.renaming = true
-	m.sidebarModel.rename = common.GeneratePinnedRenameTextInput(cursorPos, sidebar.directories[sidebar.cursor].name)
+	m.sidebarModel.Renaming = true
+	m.sidebarModel.Rename = common.GeneratePinnedRenameTextInput(cursorPos, sidebar.Directories[sidebar.Cursor].Name)
 }
 
 // Cancel rename pinned directory
 func (m *model) cancelSidebarRename() {
 	sidebar := &m.sidebarModel
-	sidebar.rename.Blur()
-	sidebar.renaming = false
+	sidebar.Rename.Blur()
+	sidebar.Renaming = false
 }
 
 // Confirm rename pinned directory
 func (m *model) confirmSidebarRename() {
 	sidebar := &m.sidebarModel
 
-	itemLocation := sidebar.directories[sidebar.cursor].location
-	newItemName := sidebar.rename.Value()
+	itemLocation := sidebar.Directories[sidebar.Cursor].Location
+	newItemName := sidebar.Rename.Value()
 	// This is needed to update the current pinned directory data loaded into memory
-	sidebar.directories[sidebar.cursor].name = newItemName
+	sidebar.Directories[sidebar.Cursor].Name = newItemName
 
 	// recover the state of rename
 	m.cancelSidebarRename()
@@ -56,10 +56,10 @@ func (m *model) confirmSidebarRename() {
 	// sidebar.directories could have less directories in case a search filter is used
 	for _, dir := range getPinnedDirectories() {
 		// Considering the situation when many
-		if dir.location == itemLocation {
-			dir.name = newItemName
+		if dir.Location == itemLocation {
+			dir.Name = newItemName
 		}
-		pinnedDirs = append(pinnedDirs, pinnedDir{Location: dir.location, Name: dir.name})
+		pinnedDirs = append(pinnedDirs, pinnedDir{Location: dir.Location, Name: dir.Name})
 	}
 
 	jsonData, err := json.Marshal(pinnedDirs)
@@ -73,7 +73,7 @@ func (m *model) confirmSidebarRename() {
 	}
 }
 
-func (s *sidebarModel) pinnedIndexRange() (int, int) {
+func (s *SidebarModel) PinnedIndexRange() (int, int) {
 	// pinned directories start after well-known directories and the divider
 	// Can't use getPinnedDirectories() here, as if we are in search mode, we would be showing
 	// and having less directories in sideBar.directories slice
@@ -82,11 +82,11 @@ func (s *sidebarModel) pinnedIndexRange() (int, int) {
 	// This information can be kept precomputed
 	pinnedDividerIdx := -1
 	diskDividerIdx := -1
-	for i, d := range s.directories {
-		if d == pinnedDividerDir {
+	for i, d := range s.Directories {
+		if d == PinnedDividerDir {
 			pinnedDividerIdx = i
 		}
-		if d == diskDividerDir {
+		if d == DiskDividerDir {
 			diskDividerIdx = i
 			break
 		}

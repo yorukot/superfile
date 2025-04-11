@@ -84,19 +84,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	m.updateFilePanelsState(msg, &cmd)
 
-	if m.sidebarModel.searchBar.Value() != "" {
+	if m.sidebarModel.SearchBar.Value() != "" {
 		// Todo : All updates of sideBar must be moved to separate struct functions
 		// we have to keep the state of sidebar consistent, and keep values of
 		// cursor, directories, renderIndex sane for each update, and it has to
 		// take care at one single place, not everywhere we use sideBar
-		m.sidebarModel.directories = getFilteredDirectories(m.sidebarModel.searchBar.Value())
-		if m.sidebarModel.isCursorInvalid() {
-			m.sidebarModel.resetCursor()
+		m.sidebarModel.Directories = getFilteredDirectories(m.sidebarModel.SearchBar.Value())
+		if m.sidebarModel.IsCursorInvalid() {
+			m.sidebarModel.ResetCursor()
 		}
 	} else {
-		m.sidebarModel.directories = getDirectories()
-		if m.sidebarModel.isCursorInvalid() {
-			m.sidebarModel.resetCursor()
+		m.sidebarModel.Directories = getDirectories()
+		if m.sidebarModel.IsCursorInvalid() {
+			m.sidebarModel.ResetCursor()
 		}
 	}
 
@@ -240,13 +240,13 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 		// If renaming a object
 	case m.fileModel.renaming:
 		m.renamingKey(msg.String())
-	case m.sidebarModel.renaming:
+	case m.sidebarModel.Renaming:
 		m.sidebarRenamingKey(msg.String())
 		// If search bar is open
 	case m.fileModel.filePanels[m.filePanelFocusIndex].searchBar.Focused():
 		m.focusOnSearchbarKey(msg.String())
 		// If sort options menu is open
-	case m.sidebarModel.searchBar.Focused():
+	case m.sidebarModel.SearchBar.Focused():
 		m.sidebarSearchBarKey(msg.String())
 		// If sort options menu is open
 	case m.fileModel.filePanels[m.filePanelFocusIndex].sortOptions.open:
@@ -382,14 +382,14 @@ func (m *model) updateCurrentFilePanelDir(dir string) error {
 // Update the sidebar state. Change name of the renaming pinned directory.
 func (m *model) updateSidebarState(msg tea.Msg, cmd *tea.Cmd) {
 	sidebar := &m.sidebarModel
-	if sidebar.renaming {
-		sidebar.rename, *cmd = sidebar.rename.Update(msg)
-	} else if sidebar.searchBar.Focused() {
-		sidebar.searchBar, *cmd = sidebar.searchBar.Update(msg)
+	if sidebar.Renaming {
+		sidebar.Rename, *cmd = sidebar.Rename.Update(msg)
+	} else if sidebar.SearchBar.Focused() {
+		sidebar.SearchBar, *cmd = sidebar.SearchBar.Update(msg)
 	}
 
-	if sidebar.cursor < 0 {
-		sidebar.cursor = 0
+	if sidebar.Cursor < 0 {
+		sidebar.Cursor = 0
 	}
 }
 

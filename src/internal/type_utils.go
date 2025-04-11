@@ -34,10 +34,10 @@ func (m *model) validateLayout() error {
 
 // ================ Sidebar related utils =====================
 // Hopefully compiler inlines it
-func (d directory) isDivider() bool {
-	return d == pinnedDividerDir || d == diskDividerDir
+func (d Directory) isDivider() bool {
+	return d == PinnedDividerDir || d == DiskDividerDir
 }
-func (d directory) requiredHeight() int {
+func (d Directory) requiredHeight() int {
 	if d.isDivider() {
 		return 3
 	}

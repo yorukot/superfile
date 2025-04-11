@@ -30,64 +30,64 @@ func (m *model) sidebarRender() string {
 	if common.Config.SidebarWidth == 0 {
 		return ""
 	}
-	slog.Debug("Rendering sidebar.", "cursor", m.sidebarModel.cursor,
-		"renderIndex", m.sidebarModel.renderIndex, "dirs count", len(m.sidebarModel.directories),
+	slog.Debug("Rendering sidebar.", "cursor", m.sidebarModel.Cursor,
+		"renderIndex", m.sidebarModel.RenderIndex, "dirs count", len(m.sidebarModel.Directories),
 		"sidebar focused", m.focusPanel == sidebarFocus)
 
 	s := common.SideBarSuperfileTitle + "\n"
 
-	if m.sidebarModel.searchBar.Focused() || m.sidebarModel.searchBar.Value() != "" || m.focusPanel == sidebarFocus {
-		m.sidebarModel.searchBar.Placeholder = "(" + common.Hotkeys.SearchBar[0] + ")" + " Search"
-		s += "\n" + ansi.Truncate(m.sidebarModel.searchBar.View(), common.Config.SidebarWidth-2, "...")
+	if m.sidebarModel.SearchBar.Focused() || m.sidebarModel.SearchBar.Value() != "" || m.focusPanel == sidebarFocus {
+		m.sidebarModel.SearchBar.Placeholder = "(" + common.Hotkeys.SearchBar[0] + ")" + " Search"
+		s += "\n" + ansi.Truncate(m.sidebarModel.SearchBar.View(), common.Config.SidebarWidth-2, "...")
 	}
 
-	if m.sidebarModel.noActualDir() {
+	if m.sidebarModel.NoActualDir() {
 		s += "\n" + common.SideBarNoneText
 	} else {
-		s += m.sidebarModel.directoriesRender(m.mainPanelHeight,
+		s += m.sidebarModel.DirectoriesRender(m.mainPanelHeight,
 			m.fileModel.filePanels[m.filePanelFocusIndex].location, m.focusPanel == sidebarFocus)
 	}
 	return common.SideBarBorderStyle(m.mainPanelHeight, m.focusPanel == sidebarFocus).Render(s)
 }
 
-func (s *sidebarModel) directoriesRender(mainPanelHeight int, curFilePanelFileLocation string, sideBarFocussed bool) string {
+func (s *SidebarModel) DirectoriesRender(mainPanelHeight int, curFilePanelFileLocation string, sideBarFocussed bool) string {
 	// Cursor should always point to a valid directory at this point
-	if s.isCursorInvalid() {
+	if s.IsCursorInvalid() {
 		slog.Error("Unexpected situation in sideBar Model. "+
-			"Cursor is at invalid position, while there are valide directories", "cursor", s.cursor,
-			"directory count", len(s.directories))
+			"Cursor is at invalid position, while there are valide directories", "cursor", s.Cursor,
+			"directory count", len(s.Directories))
 		return ""
 	}
 
 	res := ""
-	totalHeight := sideBarInitialHeight
-	for i := s.renderIndex; i < len(s.directories); i++ {
-		if totalHeight+s.directories[i].requiredHeight() > mainPanelHeight {
+	totalHeight := SideBarInitialHeight
+	for i := s.RenderIndex; i < len(s.Directories); i++ {
+		if totalHeight+s.Directories[i].requiredHeight() > mainPanelHeight {
 			break
 		}
 		res += "\n"
 
-		totalHeight += s.directories[i].requiredHeight()
+		totalHeight += s.Directories[i].requiredHeight()
 
-		switch s.directories[i] {
-		case pinnedDividerDir:
+		switch s.Directories[i] {
+		case PinnedDividerDir:
 			res += "\n" + common.SideBarPinnedDivider
-		case diskDividerDir:
+		case DiskDividerDir:
 			res += "\n" + common.SideBarDisksDivider
 		default:
 			cursor := " "
-			if s.cursor == i && sideBarFocussed && !s.searchBar.Focused() {
+			if s.Cursor == i && sideBarFocussed && !s.SearchBar.Focused() {
 				cursor = icon.Cursor
 			}
-			if s.renaming && s.cursor == i {
-				res += s.rename.View()
+			if s.Renaming && s.Cursor == i {
+				res += s.Rename.View()
 			} else {
 				renderStyle := common.SidebarStyle
-				if s.directories[i].location == curFilePanelFileLocation {
+				if s.Directories[i].Location == curFilePanelFileLocation {
 					renderStyle = common.SidebarSelectedStyle
 				}
 				res += common.FilePanelCursorStyle.Render(cursor+" ") +
-					renderStyle.Render(truncateText(s.directories[i].name, common.Config.SidebarWidth-2, "..."))
+					renderStyle.Render(truncateText(s.Directories[i].Name, common.Config.SidebarWidth-2, "..."))
 			}
 		}
 	}

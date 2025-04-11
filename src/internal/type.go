@@ -75,7 +75,7 @@ const (
 // Main model
 type model struct {
 	fileModel            fileModel
-	sidebarModel         sidebarModel
+	sidebarModel         SidebarModel
 	processBarModel      processBarModel
 	focusPanel           focusPanelType
 	copyItems            copyItems
@@ -210,18 +210,18 @@ type element struct {
 
 /* SIDE BAR internal TYPE START*/
 // Model for sidebar internal
-type sidebarModel struct {
-	directories []directory
-	renderIndex int
-	cursor      int
-	rename      textinput.Model
-	renaming    bool
-	searchBar   textinput.Model
+type SidebarModel struct {
+	Directories []Directory
+	RenderIndex int
+	Cursor      int
+	Rename      textinput.Model
+	Renaming    bool
+	SearchBar   textinput.Model
 }
 
-type directory struct {
-	location string
-	name     string
+type Directory struct {
+	Location string
+	Name     string
 }
 
 /* SIDE BAR internal TYPE END*/

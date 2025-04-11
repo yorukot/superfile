@@ -14,45 +14,45 @@ import (
 )
 
 // Return all sidebar directories
-func getDirectories() []directory {
+func getDirectories() []Directory {
 	return formDirctorySlice(getWellKnownDirectories(), getPinnedDirectories(), getExternalMediaFolders())
 }
 
-func formDirctorySlice(homeDirectories []directory, pinnedDirectories []directory, diskDirectories []directory) []directory {
+func formDirctorySlice(homeDirectories []Directory, pinnedDirectories []Directory, diskDirectories []Directory) []Directory {
 	// Preallocation for efficiency
 	totalCapacity := len(homeDirectories) + len(pinnedDirectories) + len(diskDirectories) + 2
-	directories := make([]directory, 0, totalCapacity)
+	directories := make([]Directory, 0, totalCapacity)
 
 	directories = append(directories, homeDirectories...)
-	directories = append(directories, pinnedDividerDir)
+	directories = append(directories, PinnedDividerDir)
 	directories = append(directories, pinnedDirectories...)
-	directories = append(directories, diskDividerDir)
+	directories = append(directories, DiskDividerDir)
 	directories = append(directories, diskDirectories...)
 	return directories
 }
 
 // Return system default directory e.g. Home, Downloads, etc
-func getWellKnownDirectories() []directory {
-	wellKnownDirectories := []directory{
-		{location: xdg.Home, name: icon.Home + icon.Space + "Home"},
-		{location: xdg.UserDirs.Download, name: icon.Download + icon.Space + "Downloads"},
-		{location: xdg.UserDirs.Documents, name: icon.Documents + icon.Space + "Documents"},
-		{location: xdg.UserDirs.Pictures, name: icon.Pictures + icon.Space + "Pictures"},
-		{location: xdg.UserDirs.Videos, name: icon.Videos + icon.Space + "Videos"},
-		{location: xdg.UserDirs.Music, name: icon.Music + icon.Space + "Music"},
-		{location: xdg.UserDirs.Templates, name: icon.Templates + icon.Space + "Templates"},
-		{location: xdg.UserDirs.PublicShare, name: icon.PublicShare + icon.Space + "PublicShare"},
+func getWellKnownDirectories() []Directory {
+	wellKnownDirectories := []Directory{
+		{Location: xdg.Home, Name: icon.Home + icon.Space + "Home"},
+		{Location: xdg.UserDirs.Download, Name: icon.Download + icon.Space + "Downloads"},
+		{Location: xdg.UserDirs.Documents, Name: icon.Documents + icon.Space + "Documents"},
+		{Location: xdg.UserDirs.Pictures, Name: icon.Pictures + icon.Space + "Pictures"},
+		{Location: xdg.UserDirs.Videos, Name: icon.Videos + icon.Space + "Videos"},
+		{Location: xdg.UserDirs.Music, Name: icon.Music + icon.Space + "Music"},
+		{Location: xdg.UserDirs.Templates, Name: icon.Templates + icon.Space + "Templates"},
+		{Location: xdg.UserDirs.PublicShare, Name: icon.PublicShare + icon.Space + "PublicShare"},
 	}
 
-	return slices.DeleteFunc(wellKnownDirectories, func(d directory) bool {
-		_, err := os.Stat(d.location)
+	return slices.DeleteFunc(wellKnownDirectories, func(d Directory) bool {
+		_, err := os.Stat(d.Location)
 		return err != nil
 	})
 }
 
 // Get user pinned directories
-func getPinnedDirectories() []directory {
-	directories := []directory{}
+func getPinnedDirectories() []Directory {
+	directories := []Directory{}
 	var paths []string
 	var pinnedDirs []struct {
 		Location string `json:"location"`
@@ -69,14 +69,14 @@ func getPinnedDirectories() []directory {
 	if err := json.Unmarshal(jsonData, &paths); err == nil {
 		for _, path := range paths {
 			directoryName := filepath.Base(path)
-			directories = append(directories, directory{location: path, name: directoryName})
+			directories = append(directories, Directory{Location: path, Name: directoryName})
 		}
 		// Check if the data is in the new format
 	} else if err := json.Unmarshal(jsonData, &pinnedDirs); err == nil {
 		// Todo : we can optimize this. pinnedDirs and directories have exact same struct format
 		// we are just copying data needlessly. We should directly unmarshal to 'directories'
 		for _, pinnedDir := range pinnedDirs {
-			directories = append(directories, directory{location: pinnedDir.Location, name: pinnedDir.Name})
+			directories = append(directories, Directory{Location: pinnedDir.Location, Name: pinnedDir.Name})
 		}
 		// If the data is in neither format, log the error
 	} else {
@@ -86,7 +86,7 @@ func getPinnedDirectories() []directory {
 }
 
 // Get external media directories
-func getExternalMediaFolders() []directory {
+func getExternalMediaFolders() []Directory {
 	// only get physical drives
 	parts, err := disk.Partitions(false)
 
@@ -94,14 +94,14 @@ func getExternalMediaFolders() []directory {
 		slog.Error("Error while getting external media: ", "error", err)
 		return nil
 	}
-	var disks []directory
+	var disks []Directory
 	for _, disk := range parts {
 		// shouldListDisk, diskName, and diskLocation, each has runtime.GOOS checks
 		// We can ideally reduce it to one check only.
 		if shouldListDisk(disk.Mountpoint) {
-			disks = append(disks, directory{
-				name:     diskName(disk.Mountpoint),
-				location: diskLocation(disk.Mountpoint),
+			disks = append(disks, Directory{
+				Name:     diskName(disk.Mountpoint),
+				Location: diskLocation(disk.Mountpoint),
 			})
 		}
 	}
@@ -109,20 +109,20 @@ func getExternalMediaFolders() []directory {
 }
 
 // Fuzzy search function for a list of directories.
-func fuzzySearch(query string, dirs []directory) []directory {
+func fuzzySearch(query string, dirs []Directory) []Directory {
 	if len(dirs) == 0 {
-		return []directory{}
+		return []Directory{}
 	}
 
-	var filteredDirs []directory
+	var filteredDirs []Directory
 
 	// Optimization - This haystack can be kept precomputed based on directories
 	// instead of re computing it in each call
 	haystack := make([]string, len(dirs))
-	dirMap := make(map[string]directory, len(dirs))
+	dirMap := make(map[string]Directory, len(dirs))
 	for i, dir := range dirs {
-		haystack[i] = dir.name
-		dirMap[dir.name] = dir
+		haystack[i] = dir.Name
+		dirMap[dir.Name] = dir
 	}
 
 	for _, match := range fzfSearch(query, haystack) {
@@ -135,7 +135,7 @@ func fuzzySearch(query string, dirs []directory) []directory {
 }
 
 // Get filtered directories using fuzzy search logic with three haystacks.
-func getFilteredDirectories(query string) []directory {
+func getFilteredDirectories(query string) []Directory {
 	return formDirctorySlice(
 		fuzzySearch(query, getWellKnownDirectories()),
 		fuzzySearch(query, getPinnedDirectories()),
