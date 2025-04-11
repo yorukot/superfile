@@ -19,7 +19,7 @@ func (m *model) pinnedDirectory() {
 
 	unPinned := false
 
-	dirs := getPinnedDirectories()
+	dirs := GetPinnedDirectories()
 	for i, other := range dirs {
 		if other.Location == panel.location {
 			dirs = append(dirs[:i], dirs[i+1:]...)

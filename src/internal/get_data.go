@@ -14,11 +14,11 @@ import (
 )
 
 // Return all sidebar directories
-func getDirectories() []Directory {
-	return formDirctorySlice(getWellKnownDirectories(), getPinnedDirectories(), getExternalMediaFolders())
+func GetDirectories() []Directory {
+	return FormDirctorySlice(GetWellKnownDirectories(), GetPinnedDirectories(), GetExternalMediaFolders())
 }
 
-func formDirctorySlice(homeDirectories []Directory, pinnedDirectories []Directory, diskDirectories []Directory) []Directory {
+func FormDirctorySlice(homeDirectories []Directory, pinnedDirectories []Directory, diskDirectories []Directory) []Directory {
 	// Preallocation for efficiency
 	totalCapacity := len(homeDirectories) + len(pinnedDirectories) + len(diskDirectories) + 2
 	directories := make([]Directory, 0, totalCapacity)
@@ -32,7 +32,7 @@ func formDirctorySlice(homeDirectories []Directory, pinnedDirectories []Director
 }
 
 // Return system default directory e.g. Home, Downloads, etc
-func getWellKnownDirectories() []Directory {
+func GetWellKnownDirectories() []Directory {
 	wellKnownDirectories := []Directory{
 		{Location: xdg.Home, Name: icon.Home + icon.Space + "Home"},
 		{Location: xdg.UserDirs.Download, Name: icon.Download + icon.Space + "Downloads"},
@@ -51,7 +51,7 @@ func getWellKnownDirectories() []Directory {
 }
 
 // Get user pinned directories
-func getPinnedDirectories() []Directory {
+func GetPinnedDirectories() []Directory {
 	directories := []Directory{}
 	var paths []string
 
@@ -79,7 +79,7 @@ func getPinnedDirectories() []Directory {
 }
 
 // Get external media directories
-func getExternalMediaFolders() []Directory {
+func GetExternalMediaFolders() []Directory {
 	// only get physical drives
 	parts, err := disk.Partitions(false)
 
@@ -102,7 +102,7 @@ func getExternalMediaFolders() []Directory {
 }
 
 // Fuzzy search function for a list of directories.
-func fuzzySearch(query string, dirs []Directory) []Directory {
+func FuzzySearch(query string, dirs []Directory) []Directory {
 	if len(dirs) == 0 {
 		return []Directory{}
 	}
@@ -128,10 +128,10 @@ func fuzzySearch(query string, dirs []Directory) []Directory {
 }
 
 // Get filtered directories using fuzzy search logic with three haystacks.
-func getFilteredDirectories(query string) []Directory {
-	return formDirctorySlice(
-		fuzzySearch(query, getWellKnownDirectories()),
-		fuzzySearch(query, getPinnedDirectories()),
-		fuzzySearch(query, getExternalMediaFolders()),
+func GetFilteredDirectories(query string) []Directory {
+	return FormDirctorySlice(
+		FuzzySearch(query, GetWellKnownDirectories()),
+		FuzzySearch(query, GetPinnedDirectories()),
+		FuzzySearch(query, GetExternalMediaFolders()),
 	)
 }

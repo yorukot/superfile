@@ -16,7 +16,7 @@ func dirSlice(count int) []Directory {
 }
 
 func fullDirSlice(count int) []Directory {
-	return formDirctorySlice(dirSlice(count), dirSlice(count), dirSlice(count))
+	return FormDirctorySlice(dirSlice(count), dirSlice(count), dirSlice(count))
 }
 
 // Todo : Use t.Run(tt.name
@@ -47,7 +47,7 @@ func Test_noActualDir(t *testing.T) {
 		{
 			"Non-Empty Sidebar with only pinned directories",
 			SidebarModel{
-				Directories: formDirctorySlice(nil, dirSlice(10), nil),
+				Directories: FormDirctorySlice(nil, dirSlice(10), nil),
 			},
 			false,
 		},
@@ -120,7 +120,7 @@ func Test_resetCursor(t *testing.T) {
 		{
 			name: "Only Pinned directories",
 			curSideBar: SidebarModel{
-				Directories: formDirctorySlice(nil, dirSlice(10), nil),
+				Directories: FormDirctorySlice(nil, dirSlice(10), nil),
 			},
 			expectedCursorPos: 1, // After pinned divider
 		},
@@ -134,7 +134,7 @@ func Test_resetCursor(t *testing.T) {
 		{
 			name: "Only Disk",
 			curSideBar: SidebarModel{
-				Directories: formDirctorySlice(nil, nil, dirSlice(10)),
+				Directories: FormDirctorySlice(nil, nil, dirSlice(10)),
 			},
 			expectedCursorPos: 2, // After pinned and dist divider
 		},
@@ -158,12 +158,12 @@ func Test_resetCursor(t *testing.T) {
 func Test_lastRenderIndex(t *testing.T) {
 	// Setup test data
 	sidebarA := SidebarModel{
-		Directories: formDirctorySlice(
+		Directories: FormDirctorySlice(
 			dirSlice(10), dirSlice(10), dirSlice(10),
 		),
 	}
 	sidebarB := SidebarModel{
-		Directories: formDirctorySlice(
+		Directories: FormDirctorySlice(
 			dirSlice(1), nil, dirSlice(5),
 		),
 	}
@@ -240,17 +240,17 @@ func Test_firstRenderIndex(t *testing.T) {
 		Directories: fullDirSlice(10),
 	}
 	sidebarB := SidebarModel{
-		Directories: formDirctorySlice(
+		Directories: FormDirctorySlice(
 			dirSlice(1), nil, dirSlice(5),
 		),
 	}
 	sidebarC := SidebarModel{
-		Directories: formDirctorySlice(
+		Directories: FormDirctorySlice(
 			nil, dirSlice(5), dirSlice(5),
 		),
 	}
 	sidebarD := SidebarModel{
-		Directories: formDirctorySlice(
+		Directories: FormDirctorySlice(
 			nil, nil, dirSlice(3),
 		),
 	}
@@ -449,7 +449,7 @@ func Test_updateRenderIndex(t *testing.T) {
 		{
 			name: "Edge case: Large panel showing everything",
 			sidebar: SidebarModel{
-				Directories: formDirctorySlice(dirSlice(1), nil, dirSlice(5)),
+				Directories: FormDirctorySlice(dirSlice(1), nil, dirSlice(5)),
 				RenderIndex: 2,
 				Cursor:      4,
 			},
@@ -568,7 +568,7 @@ func Test_listUp(t *testing.T) {
 			name: "Skip multiple consecutive dividers",
 			sidebar: SidebarModel{
 				// Create a sidebar with consecutive dividers for testing
-				Directories: formDirctorySlice(dirSlice(5), nil, dirSlice(5)),
+				Directories: FormDirctorySlice(dirSlice(5), nil, dirSlice(5)),
 				RenderIndex: 5,
 				Cursor:      7, // Position after consecutive dividers
 			},
@@ -592,7 +592,7 @@ func Test_listUp(t *testing.T) {
 		{
 			name: "Large panel showing all directories",
 			sidebar: SidebarModel{
-				Directories: formDirctorySlice(dirSlice(2), dirSlice(2), dirSlice(2)),
+				Directories: FormDirctorySlice(dirSlice(2), dirSlice(2), dirSlice(2)),
 				RenderIndex: 0,
 				Cursor:      3, // Some directory in the middle
 			},
@@ -669,7 +669,7 @@ func Test_listDown(t *testing.T) {
 			name: "Skip multiple consecutive dividers",
 			sidebar: SidebarModel{
 				// Create a sidebar with consecutive dividers for testing
-				Directories: formDirctorySlice(dirSlice(5), nil, dirSlice(5)),
+				Directories: FormDirctorySlice(dirSlice(5), nil, dirSlice(5)),
 				RenderIndex: 0,
 				Cursor:      4, // Position before consecutive dividers
 			},
@@ -706,7 +706,7 @@ func Test_listDown(t *testing.T) {
 		{
 			name: "Large panel showing all directories",
 			sidebar: SidebarModel{
-				Directories: formDirctorySlice(dirSlice(2), dirSlice(2), dirSlice(2)),
+				Directories: FormDirctorySlice(dirSlice(2), dirSlice(2), dirSlice(2)),
 				RenderIndex: 0,
 				Cursor:      3, // Some directory in the middle
 			},

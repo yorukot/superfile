@@ -46,7 +46,7 @@ func (m *model) confirmSidebarRename() {
 	// recover the state of rename
 	m.cancelSidebarRename()
 
-	pinnedDirs := getPinnedDirectories()
+	pinnedDirs := GetPinnedDirectories()
 	// Call getPinnedDirectories, instead of using what is stored in sidebar.directories
 	// sidebar.directories could have less directories in case a search filter is used
 	for i := range pinnedDirs {

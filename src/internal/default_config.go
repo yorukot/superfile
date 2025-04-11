@@ -19,7 +19,7 @@ func defaultModelConfig(toggleDotFile bool, toggleFooter bool, firstFilePanelDir
 		},
 		sidebarModel: SidebarModel{
 			RenderIndex: 0,
-			Directories: getDirectories(),
+			Directories: GetDirectories(),
 			SearchBar:   common.GenerateSearchBar(),
 		},
 		fileModel: fileModel{
