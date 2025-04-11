@@ -1,4 +1,4 @@
-package internal
+package common
 
 import (
 	"fmt"
@@ -14,15 +14,15 @@ func TestStringTruncate(t *testing.T) {
 		talis    string
 		expected string
 	}{
-		{truncateText, "truncateText", "Hello world", 4, "...", "H..."},
-		{truncateText, "truncateText", "Hello world", 6, "...", "Hel..."},
-		{truncateText, "truncateText", "Hello", 100, "...", "Hello"},
-		{truncateTextBeginning, "truncateTextBeginning", "Hello world", 4, "...", "...d"},
-		{truncateTextBeginning, "truncateTextBeginning", "Hello world", 6, "...", "...rld"},
-		{truncateTextBeginning, "truncateTextBeginning", "Hello", 100, "...", "Hello"},
-		{truncateMiddleText, "truncateMiddleText", "Hello world", 5, "...", "H...d"},
-		{truncateMiddleText, "truncateMiddleText", "Hello world", 7, "...", "He...ld"},
-		{truncateMiddleText, "truncateMiddleText", "Hello", 100, "...", "Hello"},
+		{TruncateText, "TruncateText", "Hello world", 4, "...", "H..."},
+		{TruncateText, "TruncateText", "Hello world", 6, "...", "Hel..."},
+		{TruncateText, "TruncateText", "Hello", 100, "...", "Hello"},
+		{TruncateTextBeginning, "TruncateTextBeginning", "Hello world", 4, "...", "...d"},
+		{TruncateTextBeginning, "TruncateTextBeginning", "Hello world", 6, "...", "...rld"},
+		{TruncateTextBeginning, "TruncateTextBeginning", "Hello", 100, "...", "Hello"},
+		{TruncateMiddleText, "TruncateMiddleText", "Hello world", 5, "...", "H...d"},
+		{TruncateMiddleText, "TruncateMiddleText", "Hello world", 7, "...", "He...ld"},
+		{TruncateMiddleText, "TruncateMiddleText", "Hello", 100, "...", "Hello"},
 	}
 
 	for _, tt := range inputs {
@@ -50,7 +50,7 @@ func TestFilenameWithouText(t *testing.T) {
 
 	for _, tt := range inputs {
 		t.Run(fmt.Sprintf("Remove extension from %s", tt.input), func(t *testing.T) {
-			result := fileNameWithoutExtension(tt.input)
+			result := FileNameWithoutExtension(tt.input)
 			if result != tt.expected {
 				t.Errorf("Expected %s, got %s", tt.expected, result)
 			}
@@ -78,7 +78,7 @@ func TestIsBufferPrintable(t *testing.T) {
 	}
 	for _, tt := range inputs {
 		t.Run(fmt.Sprintf("Testing if buffer %q is printable", tt.input), func(t *testing.T) {
-			result := isBufferPrintable([]byte(tt.input))
+			result := IsBufferPrintable([]byte(tt.input))
 			if result != tt.expected {
 				t.Errorf("Expected %v, got %v", tt.expected, result)
 			}
@@ -109,9 +109,9 @@ func TestIsExtensionExtractable(t *testing.T) {
 
 	for _, tt := range inputs {
 		t.Run(tt.ext, func(t *testing.T) {
-			result := isExensionExtractable(tt.ext)
+			result := IsExensionExtractable(tt.ext)
 			if result != tt.expected {
-				t.Errorf("isExensionExtractable (%q) = %v; want %v", tt.ext, result, tt.expected)
+				t.Errorf("IsExensionExtractable (%q) = %v; want %v", tt.ext, result, tt.expected)
 			}
 		})
 	}
@@ -137,7 +137,7 @@ func TestMakePrintable(t *testing.T) {
 	}
 	for _, tt := range inputs {
 		t.Run(fmt.Sprintf("Make %q printable", tt.input), func(t *testing.T) {
-			result := makePrintable(tt.input)
+			result := MakePrintable(tt.input)
 			if result != tt.expected {
 				t.Errorf("Expected %v, got %v", tt.expected, result)
 			}
