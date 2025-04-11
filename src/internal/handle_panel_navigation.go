@@ -15,7 +15,7 @@ import (
 
 // Pinned directory
 func (m *model) pinnedDirectory() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 
 	unPinned := false
 
@@ -34,17 +34,7 @@ func (m *model) pinnedDirectory() {
 		})
 	}
 
-	// Todo : This anonymous struct is defined at 3 places. Too much duplication. Need to fix.
-	type pinnedDir struct {
-		Location string `json:"location"`
-		Name     string `json:"name"`
-	}
-	var pinnedDirs []pinnedDir
-	for _, dir := range dirs {
-		pinnedDirs = append(pinnedDirs, pinnedDir{Location: dir.Location, Name: dir.Name})
-	}
-
-	updatedData, err := json.Marshal(pinnedDirs)
+	updatedData, err := json.Marshal(dirs)
 	if err != nil {
 		slog.Error("Error while pinned folder function updatedData superfile data", "error", err)
 	}
@@ -53,8 +43,6 @@ func (m *model) pinnedDirectory() {
 	if err != nil {
 		slog.Error("Error while pinned folder function updatedData superfile data", "error", err)
 	}
-
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 // Create new file panel

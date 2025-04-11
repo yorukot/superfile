@@ -46,20 +46,14 @@ func (m *model) confirmSidebarRename() {
 	// recover the state of rename
 	m.cancelSidebarRename()
 
-	type pinnedDir struct {
-		Location string `json:"location"`
-		Name     string `json:"name"`
-	}
-	var pinnedDirs []pinnedDir
-
+	pinnedDirs := getPinnedDirectories()
 	// Call getPinnedDirectories, instead of using what is stored in sidebar.directories
 	// sidebar.directories could have less directories in case a search filter is used
-	for _, dir := range getPinnedDirectories() {
+	for i := range pinnedDirs {
 		// Considering the situation when many
-		if dir.Location == itemLocation {
-			dir.Name = newItemName
+		if pinnedDirs[i].Location == itemLocation {
+			pinnedDirs[i].Name = newItemName
 		}
-		pinnedDirs = append(pinnedDirs, pinnedDir{Location: dir.Location, Name: dir.Name})
 	}
 
 	jsonData, err := json.Marshal(pinnedDirs)

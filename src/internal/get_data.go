@@ -54,10 +54,6 @@ func getWellKnownDirectories() []Directory {
 func getPinnedDirectories() []Directory {
 	directories := []Directory{}
 	var paths []string
-	var pinnedDirs []struct {
-		Location string `json:"location"`
-		Name     string `json:"name"`
-	}
 
 	jsonData, err := os.ReadFile(variable.PinnedFile)
 	if err != nil {
@@ -66,21 +62,18 @@ func getPinnedDirectories() []Directory {
 	}
 
 	// Check if the data is in the old format
+	// TODO: Remove this after a release 1.2.4
 	if err := json.Unmarshal(jsonData, &paths); err == nil {
 		for _, path := range paths {
 			directoryName := filepath.Base(path)
 			directories = append(directories, Directory{Location: path, Name: directoryName})
 		}
-		// Check if the data is in the new format
-	} else if err := json.Unmarshal(jsonData, &pinnedDirs); err == nil {
-		// Todo : we can optimize this. pinnedDirs and directories have exact same struct format
-		// we are just copying data needlessly. We should directly unmarshal to 'directories'
-		for _, pinnedDir := range pinnedDirs {
-			directories = append(directories, Directory{Location: pinnedDir.Location, Name: pinnedDir.Name})
-		}
-		// If the data is in neither format, log the error
 	} else {
-		slog.Error("Error parsing pinned data", "error", err)
+		// Check if the data is in the new format
+		if err := json.Unmarshal(jsonData, &directories); err != nil {
+			// If the data is in neither format, log the error
+			slog.Error("Error parsing pinned data", "error", err)
+		}
 	}
 	return directories
 }

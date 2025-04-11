@@ -220,8 +220,8 @@ type SidebarModel struct {
 }
 
 type Directory struct {
-	Location string
-	Name     string
+	Location string `json:"location"`
+	Name     string `json:"name"`
 }
 
 /* SIDE BAR internal TYPE END*/
