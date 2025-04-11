@@ -46,7 +46,7 @@ func (m *model) confirmSidebarRename() {
 	// recover the state of rename
 	m.cancelSidebarRename()
 
-	pinnedDirs := GetPinnedDirectories()
+	pinnedDirs := common.GetPinnedDirectories()
 	// Call getPinnedDirectories, instead of using what is stored in sidebar.directories
 	// sidebar.directories could have less directories in case a search filter is used
 	for i := range pinnedDirs {
@@ -65,25 +65,4 @@ func (m *model) confirmSidebarRename() {
 	if err != nil {
 		slog.Error("Error updating pinned directories data", "error", err)
 	}
-}
-
-func (s *SidebarModel) PinnedIndexRange() (int, int) {
-	// pinned directories start after well-known directories and the divider
-	// Can't use getPinnedDirectories() here, as if we are in search mode, we would be showing
-	// and having less directories in sideBar.directories slice
-
-	// Todo : This is inefficient to iterate each time for this.
-	// This information can be kept precomputed
-	pinnedDividerIdx := -1
-	diskDividerIdx := -1
-	for i, d := range s.Directories {
-		if d == PinnedDividerDir {
-			pinnedDividerIdx = i
-		}
-		if d == DiskDividerDir {
-			diskDividerIdx = i
-			break
-		}
-	}
-	return pinnedDividerIdx + 1, diskDividerIdx - 1
 }

@@ -3,6 +3,8 @@ package internal
 import (
 	"time"
 
+	"github.com/yorukot/superfile/src/internal/ui/sidebar"
+
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/yorukot/superfile/src/internal/ui/prompt"
@@ -75,7 +77,7 @@ const (
 // Main model
 type model struct {
 	fileModel            fileModel
-	sidebarModel         SidebarModel
+	sidebarModel         sidebar.Model
 	processBarModel      processBarModel
 	focusPanel           focusPanelType
 	copyItems            copyItems
@@ -207,22 +209,6 @@ type element struct {
 }
 
 /* FILE WINDOWS TYPE END*/
-
-/* SIDE BAR internal TYPE START*/
-// Model for sidebar internal
-type SidebarModel struct {
-	Directories []Directory
-	RenderIndex int
-	Cursor      int
-	Rename      textinput.Model
-	Renaming    bool
-	SearchBar   textinput.Model
-}
-
-type Directory struct {
-	Location string `json:"location"`
-	Name     string `json:"name"`
-}
 
 /* SIDE BAR internal TYPE END*/
 

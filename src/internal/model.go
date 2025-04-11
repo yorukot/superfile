@@ -89,12 +89,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// we have to keep the state of sidebar consistent, and keep values of
 		// cursor, directories, renderIndex sane for each update, and it has to
 		// take care at one single place, not everywhere we use sideBar
-		m.sidebarModel.Directories = GetFilteredDirectories(m.sidebarModel.SearchBar.Value())
+		m.sidebarModel.Directories = common.GetFilteredDirectories(m.sidebarModel.SearchBar.Value())
 		if m.sidebarModel.IsCursorInvalid() {
 			m.sidebarModel.ResetCursor()
 		}
 	} else {
-		m.sidebarModel.Directories = GetDirectories()
+		m.sidebarModel.Directories = common.GetDirectories()
 		if m.sidebarModel.IsCursorInvalid() {
 			m.sidebarModel.ResetCursor()
 		}

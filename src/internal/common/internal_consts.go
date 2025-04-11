@@ -1,4 +1,4 @@
-package internal
+package common
 
 // Todo , merge this and predefined variables file
 // These are effectively consts
@@ -16,4 +16,4 @@ var DiskDividerDir = Directory{ //nolint: gochecknoglobals // This is more like 
 // superfile logo + blank line + search bar
 const SideBarInitialHeight = 3
 
-const invalidTypeString = "InvalidType"
+const InvalidTypeString = "InvalidType"

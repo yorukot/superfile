@@ -19,7 +19,7 @@ func (m *model) pinnedDirectory() {
 
 	unPinned := false
 
-	dirs := GetPinnedDirectories()
+	dirs := common.GetPinnedDirectories()
 	for i, other := range dirs {
 		if other.Location == panel.location {
 			dirs = append(dirs[:i], dirs[i+1:]...)
@@ -28,7 +28,7 @@ func (m *model) pinnedDirectory() {
 	}
 
 	if !unPinned {
-		dirs = append(dirs, Directory{
+		dirs = append(dirs, common.Directory{
 			Location: panel.location,
 			Name:     filepath.Base(panel.location),
 		})

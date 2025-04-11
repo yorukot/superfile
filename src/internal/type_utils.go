@@ -32,18 +32,6 @@ func (m *model) validateLayout() error {
 	return nil
 }
 
-// ================ Sidebar related utils =====================
-// Hopefully compiler inlines it
-func (d Directory) isDivider() bool {
-	return d == PinnedDividerDir || d == DiskDividerDir
-}
-func (d Directory) requiredHeight() int {
-	if d.isDivider() {
-		return 3
-	}
-	return 1
-}
-
 // ================ filepanel
 
 func filePanelSlice(dir []string) []filePanel {
@@ -90,7 +78,7 @@ func (f focusPanelType) String() string {
 	case metadataFocus:
 		return "metadataFocus"
 	default:
-		return invalidTypeString
+		return common.InvalidTypeString
 	}
 }
 
@@ -103,7 +91,7 @@ func (f filePanelFocusType) String() string {
 	case focus:
 		return "focus"
 	default:
-		return invalidTypeString
+		return common.InvalidTypeString
 	}
 }
 
@@ -114,6 +102,6 @@ func (p panelMode) String() string {
 	case browserMode:
 		return "browserMode"
 	default:
-		return invalidTypeString
+		return common.InvalidTypeString
 	}
 }
