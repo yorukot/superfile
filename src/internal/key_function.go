@@ -147,7 +147,7 @@ func (m *model) normalAndBrowserModeKey(msg string) {
 			m.sidebarSelectDirectory()
 		}
 		if m.focusPanel == sidebarFocus && slices.Contains(common.Hotkeys.FilePanelItemRename, msg) {
-			m.pinnedItemRename()
+			m.sidebarModel.PinnedItemRename()
 		}
 		if m.focusPanel == sidebarFocus && slices.Contains(common.Hotkeys.SearchBar, msg) {
 			m.sidebarSearchBarFocus()
@@ -300,9 +300,9 @@ func (m *model) renamingKey(msg string) {
 func (m *model) sidebarRenamingKey(msg string) {
 	switch {
 	case slices.Contains(common.Hotkeys.CancelTyping, msg):
-		m.cancelSidebarRename()
+		m.sidebarModel.CancelSidebarRename()
 	case slices.Contains(common.Hotkeys.ConfirmTyping, msg):
-		m.confirmSidebarRename()
+		m.sidebarModel.ConfirmSidebarRename()
 	}
 }
 

@@ -1,9 +1,12 @@
 package sidebar
 
 import (
+	"encoding/json"
 	"log/slog"
+	"os"
 
 	"github.com/charmbracelet/bubbles/textinput"
+	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
 )
@@ -19,7 +22,7 @@ type Model struct {
 	SearchBar   textinput.Model
 }
 
-// True ff only dividers are in directories slice,
+// True if only dividers are in directories slice,
 // but no actual directories
 // This will be pretty quick. But we can replace it with
 // len(s.directories) <= 2 - More hacky and hardcoded-like, but faster
@@ -228,4 +231,56 @@ func (s *Model) PinnedIndexRange() (int, int) {
 		}
 	}
 	return pinnedDividerIdx + 1, diskDividerIdx - 1
+}
+
+// Rename file where the cursor is located
+func (s *Model) PinnedItemRename() {
+	pinnedBegin, pinnedEnd := s.PinnedIndexRange()
+	// We have not selected a pinned directory, rename is not allowed
+	if s.Cursor < pinnedBegin || s.Cursor > pinnedEnd {
+		return
+	}
+
+	nameLen := len(s.Directories[s.Cursor].Name)
+	cursorPos := nameLen
+
+	s.Renaming = true
+	s.Rename = common.GeneratePinnedRenameTextInput(cursorPos, s.Directories[s.Cursor].Name)
+}
+
+// Cancel rename pinned directory
+func (s *Model) CancelSidebarRename() {
+	s.Rename.Blur()
+	s.Renaming = false
+}
+
+// Confirm rename pinned directory
+func (s *Model) ConfirmSidebarRename() {
+	itemLocation := s.Directories[s.Cursor].Location
+	newItemName := s.Rename.Value()
+	// This is needed to update the current pinned directory data loaded into memory
+	s.Directories[s.Cursor].Name = newItemName
+
+	// recover the state of rename
+	s.CancelSidebarRename()
+
+	pinnedDirs := common.GetPinnedDirectories()
+	// Call getPinnedDirectories, instead of using what is stored in sidebar.directories
+	// sidebar.directories could have less directories in case a search filter is used
+	for i := range pinnedDirs {
+		// Considering the situation when many
+		if pinnedDirs[i].Location == itemLocation {
+			pinnedDirs[i].Name = newItemName
+		}
+	}
+
+	jsonData, err := json.Marshal(pinnedDirs)
+	if err != nil {
+		slog.Error("Error marshaling pinned directories data", "error", err)
+	}
+
+	err = os.WriteFile(variable.PinnedFile, jsonData, 0644)
+	if err != nil {
+		slog.Error("Error updating pinned directories data", "error", err)
+	}
 }
