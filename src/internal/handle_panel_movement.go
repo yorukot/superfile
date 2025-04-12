@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/yorukot/superfile/src/internal/common/utils"
+	"github.com/yorukot/superfile/src/internal/utils"
 
 	variable "github.com/yorukot/superfile/src/config"
 )
@@ -120,7 +120,7 @@ func (m *model) enterPanel() {
 func (m *model) sidebarSelectDirectory() {
 	// We can't do this when we have only divider directories
 	// m.sidebarModel.directories[m.sidebarModel.cursor].location would point to a divider dir.
-	if m.sidebarModel.noActualDir() {
+	if m.sidebarModel.NoActualDir() {
 		return
 	}
 	m.focusPanel = nonePanelFocus
@@ -131,7 +131,7 @@ func (m *model) sidebarSelectDirectory() {
 		directoryRender: panel.render,
 	}
 
-	panel.location = m.sidebarModel.directories[m.sidebarModel.cursor].location
+	panel.location = m.sidebarModel.GetCurrentDirectoryLocation()
 	curDirectoryRecord, hasRecord := panel.directoryRecords[panel.location]
 	if hasRecord {
 		panel.cursor = curDirectoryRecord.directoryCursor
@@ -204,14 +204,13 @@ func (m *model) searchBarFocus() {
 }
 
 func (m *model) sidebarSearchBarFocus() {
-	if m.sidebarModel.searchBar.Focused() {
+	if m.sidebarModel.SearchBarFocused() {
 		// Ideally Code should never reach here. Once sidebar is focussed, we should
 		// not cause sidebarSearchBarFocus() event by pressing search key
-		// Should we use Runtime panic asserts ?
 		slog.Error("sidebarSearchBarFocus() called on Focussed sidebar")
-		m.sidebarModel.searchBar.Blur()
-	} else {
-		m.sidebarModel.searchBar.Focus()
-		m.firstTextInput = true
+		m.sidebarModel.SearchBarBlur()
+		return
 	}
+	m.sidebarModel.SearchBarFocus()
+	m.firstTextInput = true
 }

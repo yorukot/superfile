@@ -12,8 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/yorukot/superfile/src/internal/common"
-	"github.com/yorukot/superfile/src/internal/common/utils"
 	"github.com/yorukot/superfile/src/internal/ui/prompt"
+	"github.com/yorukot/superfile/src/internal/utils"
 )
 
 func TestMain(m *testing.M) {

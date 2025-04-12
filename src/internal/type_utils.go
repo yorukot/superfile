@@ -4,8 +4,10 @@ import (
 	"fmt"
 
 	"github.com/yorukot/superfile/src/internal/common"
-	"github.com/yorukot/superfile/src/internal/common/utils"
+	"github.com/yorukot/superfile/src/internal/utils"
 )
+
+const invalidTypeString = "InvalidType"
 
 // reset the items slice and set the cut value
 func (c *copyItems) reset(cut bool) {
@@ -30,18 +32,6 @@ func (m *model) validateLayout() error {
 	}
 	// Todo : Add check for width as well
 	return nil
-}
-
-// ================ Sidebar related utils =====================
-// Hopefully compiler inlines it
-func (d directory) isDivider() bool {
-	return d == pinnedDividerDir || d == diskDividerDir
-}
-func (d directory) requiredHeight() int {
-	if d.isDivider() {
-		return 3
-	}
-	return 1
 }
 
 // ================ filepanel

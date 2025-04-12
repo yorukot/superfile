@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/yorukot/superfile/src/internal/common"
-	"github.com/yorukot/superfile/src/internal/common/utils"
+	"github.com/yorukot/superfile/src/internal/utils"
 
 	"github.com/barasher/go-exiftool"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -62,7 +62,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	slog.Debug("model.Update() called")
 	var cmd tea.Cmd
 
-	m.updateSidebarState(msg, &cmd)
+	cmd = m.sidebarModel.UpdateState(msg)
 
 	switch msg := msg.(type) {
 	case channelMessage:
@@ -83,22 +83,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	m.updateFilePanelsState(msg, &cmd)
-
-	if m.sidebarModel.searchBar.Value() != "" {
-		// Todo : All updates of sideBar must be moved to separate struct functions
-		// we have to keep the state of sidebar consistent, and keep values of
-		// cursor, directories, renderIndex sane for each update, and it has to
-		// take care at one single place, not everywhere we use sideBar
-		m.sidebarModel.directories = getFilteredDirectories(m.sidebarModel.searchBar.Value())
-		if m.sidebarModel.isCursorInvalid() {
-			m.sidebarModel.resetCursor()
-		}
-	} else {
-		m.sidebarModel.directories = getDirectories()
-		if m.sidebarModel.isCursorInvalid() {
-			m.sidebarModel.resetCursor()
-		}
-	}
+	m.sidebarModel.UpdateDirectories()
 
 	// check if there already have listening message
 	if !ListeningMessage {
@@ -237,32 +222,31 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 
 	case m.warnModal.open:
 		m.warnModalOpenKey(msg.String())
-		// If renaming a object
+	// If renaming a object
 	case m.fileModel.renaming:
 		m.renamingKey(msg.String())
-	case m.sidebarModel.renaming:
+	case m.sidebarModel.IsRenaming():
 		m.sidebarRenamingKey(msg.String())
-		// If search bar is open
+	// If search bar is open
 	case m.fileModel.filePanels[m.filePanelFocusIndex].searchBar.Focused():
 		m.focusOnSearchbarKey(msg.String())
-		// If sort options menu is open
-	case m.sidebarModel.searchBar.Focused():
-		m.sidebarSearchBarKey(msg.String())
-		// If sort options menu is open
+	// If sort options menu is open
+	case m.sidebarModel.SearchBarFocused():
+		m.sidebarModel.HandleSearchBarKey(msg.String())
 	case m.fileModel.filePanels[m.filePanelFocusIndex].sortOptions.open:
 		m.sortOptionsKey(msg.String())
-		// If help menu is open
+	// If help menu is open
 	case m.helpMenu.open:
 		m.helpMenuKey(msg.String())
-		// If asking to confirm quiting
+	// If asking to confirm quiting
 	case m.confirmToQuit:
 		quit := m.confirmToQuitSuperfile(msg.String())
 		if quit {
 			m.quitSuperfile()
 			return tea.Quit
 		}
-		// If quiting input pressed, check if has any running process and displays a
-		// warn. Otherwise just quits application
+	// If quiting input pressed, check if has any running process and displays a
+	// warn. Otherwise just quits application
 	case slices.Contains(common.Hotkeys.Quit, msg.String()):
 		if m.hasRunningProcesses() {
 			m.warnModalForQuit()
@@ -377,20 +361,6 @@ func (m *model) updateCurrentFilePanelDir(dir string) error {
 
 	m.fileModel.filePanels[m.filePanelFocusIndex].location = newPath
 	return nil
-}
-
-// Update the sidebar state. Change name of the renaming pinned directory.
-func (m *model) updateSidebarState(msg tea.Msg, cmd *tea.Cmd) {
-	sidebar := &m.sidebarModel
-	if sidebar.renaming {
-		sidebar.rename, *cmd = sidebar.rename.Update(msg)
-	} else if sidebar.searchBar.Focused() {
-		sidebar.searchBar, *cmd = sidebar.searchBar.Update(msg)
-	}
-
-	if sidebar.cursor < 0 {
-		sidebar.cursor = 0
-	}
 }
 
 // Check if there's any processes running in background

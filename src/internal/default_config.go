@@ -3,6 +3,8 @@ package internal
 import (
 	"path/filepath"
 
+	"github.com/yorukot/superfile/src/internal/ui/sidebar"
+
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/prompt"
 )
@@ -17,11 +19,7 @@ func defaultModelConfig(toggleDotFile bool, toggleFooter bool, firstFilePanelDir
 			cursor:  0,
 			render:  0,
 		},
-		sidebarModel: sidebarModel{
-			renderIndex: 0,
-			directories: getDirectories(),
-			searchBar:   common.GenerateSearchBar(),
-		},
+		sidebarModel: sidebar.New(sidebar.GetDirectories(), common.GenerateSearchBar()),
 		fileModel: fileModel{
 			filePanels: filePanelSlice(firstFilePanelDirs),
 			filePreview: filePreviewPanel{

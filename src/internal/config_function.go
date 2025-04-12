@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/yorukot/superfile/src/internal/common/utils"
+	"github.com/yorukot/superfile/src/internal/utils"
 
 	"github.com/barasher/go-exiftool"
 	variable "github.com/yorukot/superfile/src/config"

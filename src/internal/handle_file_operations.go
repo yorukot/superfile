@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yorukot/superfile/src/internal/common/utils"
+	"github.com/yorukot/superfile/src/internal/utils"
 
 	"github.com/yorukot/superfile/src/internal/common"
 
@@ -502,12 +502,12 @@ func (m *model) extractFile() {
 	}
 
 	ext := strings.ToLower(filepath.Ext(panel.element[panel.cursor].location))
-	if !isExensionExtractable(ext) {
+	if !common.IsExensionExtractable(ext) {
 		slog.Error(fmt.Sprintf("Error unexpected file extension type: %s", ext), "error", errors.ErrUnsupported)
 		return
 	}
 
-	outputDir := fileNameWithoutExtension(panel.element[panel.cursor].location)
+	outputDir := common.FileNameWithoutExtension(panel.element[panel.cursor].location)
 	outputDir, err = renameIfDuplicate(outputDir)
 	if err != nil {
 		slog.Error("Error extract file when create new directory", "error", err)
