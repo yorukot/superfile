@@ -16,7 +16,7 @@ import (
 	"time"
 
 	"github.com/yorukot/superfile/src/internal/common"
-	"github.com/yorukot/superfile/src/internal/common/utils"
+	"github.com/yorukot/superfile/src/internal/utils"
 
 	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/charmbracelet/lipgloss"

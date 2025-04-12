@@ -1,171 +1,20 @@
 package sidebar
 
 import (
-	"strconv"
 	"testing"
-
-	"github.com/yorukot/superfile/src/internal/common"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func dirSlice(count int) []common.Directory {
-	res := make([]common.Directory, count)
-	for i := range count {
-		res[i] = common.Directory{Name: "Dir" + strconv.Itoa(i), Location: "/a/" + strconv.Itoa(i)}
-	}
-	return res
-}
-
-func fullDirSlice(count int) []common.Directory {
-	return common.FormDirctorySlice(dirSlice(count), dirSlice(count), dirSlice(count))
-}
-
-// Todo : Use t.Run(tt.name
-// Todo : Get rid of global vars, use testdata in each test, even if there is a bit of
-// duplication.
-// Todo : Add tt.names
-
-func Test_noActualDir(t *testing.T) {
-	testcases := []struct {
-		name     string
-		sidebar  Model
-		expected bool
-	}{
-		{
-			"Empty invalid sidebar should have no actual directories",
-			Model{},
-			true,
-		},
-		{
-			"Empty sidebar should have no actual directories",
-			Model{
-				directories: fullDirSlice(0),
-				renderIndex: 0,
-				cursor:      0,
-			},
-			true,
-		},
-		{
-			"Non-Empty Sidebar with only pinned directories",
-			Model{
-				directories: common.FormDirctorySlice(nil, dirSlice(10), nil),
-			},
-			false,
-		},
-		{
-			"Non-Empty Sidebar with all directories",
-			Model{
-				directories: fullDirSlice(10),
-			},
-			false,
-		},
-	}
-	for _, tt := range testcases {
-		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.expected, tt.sidebar.NoActualDir())
-		})
-	}
-}
-
-func Test_isCursorInvalid(t *testing.T) {
-	testcases := []struct {
-		name     string
-		sidebar  Model
-		expected bool
-	}{
-		{
-			"Empty invalid sidebar",
-			Model{},
-			true,
-		},
-		{
-			"Cursor after all directories",
-			Model{
-				directories: fullDirSlice(10),
-				renderIndex: 0,
-				cursor:      32,
-			},
-			true,
-		},
-		{
-			"Curson points to pinned divider",
-			Model{
-				directories: fullDirSlice(10),
-				cursor:      10,
-			},
-			true,
-		},
-		{
-			"Non-Empty Sidebar with all directories",
-			Model{
-				directories: fullDirSlice(10),
-				cursor:      5,
-			},
-			false,
-		},
-	}
-
-	for _, tt := range testcases {
-		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.expected, tt.sidebar.IsCursorInvalid())
-		})
-	}
-}
-
-func Test_resetCursor(t *testing.T) {
-	data := []struct {
-		name              string
-		curSideBar        Model
-		expectedCursorPos int
-	}{
-		{
-			name: "Only Pinned directories",
-			curSideBar: Model{
-				directories: common.FormDirctorySlice(nil, dirSlice(10), nil),
-			},
-			expectedCursorPos: 1, // After pinned divider
-		},
-		{
-			name: "All kind of directories",
-			curSideBar: Model{
-				directories: fullDirSlice(10),
-			},
-			expectedCursorPos: 0, // First home
-		},
-		{
-			name: "Only Disk",
-			curSideBar: Model{
-				directories: common.FormDirctorySlice(nil, nil, dirSlice(10)),
-			},
-			expectedCursorPos: 2, // After pinned and dist divider
-		},
-		{
-			name: "Empty Sidebar",
-			curSideBar: Model{
-				directories: fullDirSlice(0),
-			},
-			expectedCursorPos: 0, // Empty sidebar, cursor should reset to 0
-		},
-	}
-
-	for _, tt := range data {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.curSideBar.ResetCursor()
-			assert.Equal(t, tt.expectedCursorPos, tt.curSideBar.cursor)
-		})
-	}
-}
-
 func Test_lastRenderIndex(t *testing.T) {
 	// Setup test data
 	sidebarA := Model{
-		directories: common.FormDirctorySlice(
+		directories: FormDirctorySlice(
 			dirSlice(10), dirSlice(10), dirSlice(10),
 		),
 	}
 	sidebarB := Model{
-		directories: common.FormDirctorySlice(
+		directories: FormDirctorySlice(
 			dirSlice(1), nil, dirSlice(5),
 		),
 	}
@@ -230,7 +79,7 @@ func Test_lastRenderIndex(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			result := tt.sidebar.LastRenderedIndex(tt.mainPanelHeight, tt.startIndex)
+			result := tt.sidebar.lastRenderedIndex(tt.mainPanelHeight, tt.startIndex)
 			assert.Equal(t, tt.expectedLastIndex, result,
 				"lastRenderedIndex failed: %s", tt.explanation)
 		})
@@ -242,17 +91,17 @@ func Test_firstRenderIndex(t *testing.T) {
 		directories: fullDirSlice(10),
 	}
 	sidebarB := Model{
-		directories: common.FormDirctorySlice(
+		directories: FormDirctorySlice(
 			dirSlice(1), nil, dirSlice(5),
 		),
 	}
 	sidebarC := Model{
-		directories: common.FormDirctorySlice(
+		directories: FormDirctorySlice(
 			nil, dirSlice(5), dirSlice(5),
 		),
 	}
 	sidebarD := Model{
-		directories: common.FormDirctorySlice(
+		directories: FormDirctorySlice(
 			nil, nil, dirSlice(3),
 		),
 	}
@@ -386,7 +235,7 @@ func Test_firstRenderIndex(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			result := tt.sidebar.FirstRenderedIndex(tt.mainPanelHeight, tt.endIndex)
+			result := tt.sidebar.firstRenderedIndex(tt.mainPanelHeight, tt.endIndex)
 			assert.Equal(t, tt.expectedFirstIndex, result,
 				"firstRenderedIndex failed: %s", tt.explanation)
 		})
@@ -451,7 +300,7 @@ func Test_updateRenderIndex(t *testing.T) {
 		{
 			name: "Edge case: Large panel showing everything",
 			sidebar: Model{
-				directories: common.FormDirctorySlice(dirSlice(1), nil, dirSlice(5)),
+				directories: FormDirctorySlice(dirSlice(1), nil, dirSlice(5)),
 				renderIndex: 2,
 				cursor:      4,
 			},
@@ -511,7 +360,7 @@ func Test_updateRenderIndex(t *testing.T) {
 			sidebar := tt.sidebar
 
 			// Update render index
-			sidebar.UpdateRenderIndex(tt.mainPanelHeight)
+			sidebar.updateRenderIndex(tt.mainPanelHeight)
 
 			// Check the result
 			assert.Equal(t, tt.expectedRenderIndex, sidebar.renderIndex,
@@ -570,7 +419,7 @@ func Test_listUp(t *testing.T) {
 			name: "Skip multiple consecutive dividers",
 			sidebar: Model{
 				// Create a sidebar with consecutive dividers for testing
-				directories: common.FormDirctorySlice(dirSlice(5), nil, dirSlice(5)),
+				directories: FormDirctorySlice(dirSlice(5), nil, dirSlice(5)),
 				renderIndex: 5,
 				cursor:      7, // Position after consecutive dividers
 			},
@@ -594,7 +443,7 @@ func Test_listUp(t *testing.T) {
 		{
 			name: "Large panel showing all directories",
 			sidebar: Model{
-				directories: common.FormDirctorySlice(dirSlice(2), dirSlice(2), dirSlice(2)),
+				directories: FormDirctorySlice(dirSlice(2), dirSlice(2), dirSlice(2)),
 				renderIndex: 0,
 				cursor:      3, // Some directory in the middle
 			},
@@ -671,7 +520,7 @@ func Test_listDown(t *testing.T) {
 			name: "Skip multiple consecutive dividers",
 			sidebar: Model{
 				// Create a sidebar with consecutive dividers for testing
-				directories: common.FormDirctorySlice(dirSlice(5), nil, dirSlice(5)),
+				directories: FormDirctorySlice(dirSlice(5), nil, dirSlice(5)),
 				renderIndex: 0,
 				cursor:      4, // Position before consecutive dividers
 			},
@@ -708,7 +557,7 @@ func Test_listDown(t *testing.T) {
 		{
 			name: "Large panel showing all directories",
 			sidebar: Model{
-				directories: common.FormDirctorySlice(dirSlice(2), dirSlice(2), dirSlice(2)),
+				directories: FormDirctorySlice(dirSlice(2), dirSlice(2), dirSlice(2)),
 				renderIndex: 0,
 				cursor:      3, // Some directory in the middle
 			},

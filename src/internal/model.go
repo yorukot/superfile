@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/yorukot/superfile/src/internal/common"
-	"github.com/yorukot/superfile/src/internal/common/utils"
+	"github.com/yorukot/superfile/src/internal/utils"
 
 	"github.com/barasher/go-exiftool"
 	"github.com/charmbracelet/bubbles/textinput"

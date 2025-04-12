@@ -9,7 +9,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/yorukot/superfile/src/internal/common/utils"
+	"github.com/yorukot/superfile/src/internal/utils"
 
 	trash_win "github.com/hymkor/trash-go"
 	"github.com/rkoesters/xdg/trash"

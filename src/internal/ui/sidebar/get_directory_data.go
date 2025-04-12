@@ -1,4 +1,4 @@
-package common
+package sidebar
 
 import (
 	"encoding/json"
@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/reinhrst/fzf-lib"
-	"github.com/yorukot/superfile/src/internal/common/utils"
+	"github.com/yorukot/superfile/src/internal/utils"
 
 	"github.com/adrg/xdg"
 	"github.com/shirou/gopsutil/v4/disk"

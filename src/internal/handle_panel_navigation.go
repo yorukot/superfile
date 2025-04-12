@@ -8,6 +8,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/yorukot/superfile/src/internal/ui/sidebar"
+
 	"github.com/yorukot/superfile/src/internal/common"
 
 	variable "github.com/yorukot/superfile/src/config"
@@ -19,7 +21,7 @@ func (m *model) pinnedDirectory() {
 
 	unPinned := false
 
-	dirs := common.GetPinnedDirectories()
+	dirs := sidebar.GetPinnedDirectories()
 	for i, other := range dirs {
 		if other.Location == panel.location {
 			dirs = append(dirs[:i], dirs[i+1:]...)
@@ -28,7 +30,7 @@ func (m *model) pinnedDirectory() {
 	}
 
 	if !unPinned {
-		dirs = append(dirs, common.Directory{
+		dirs = append(dirs, sidebar.Directory{
 			Location: panel.location,
 			Name:     filepath.Base(panel.location),
 		})

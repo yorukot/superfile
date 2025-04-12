@@ -4,8 +4,10 @@ import (
 	"fmt"
 
 	"github.com/yorukot/superfile/src/internal/common"
-	"github.com/yorukot/superfile/src/internal/common/utils"
+	"github.com/yorukot/superfile/src/internal/utils"
 )
+
+const invalidTypeString = "InvalidType"
 
 // reset the items slice and set the cut value
 func (c *copyItems) reset(cut bool) {
@@ -78,7 +80,7 @@ func (f focusPanelType) String() string {
 	case metadataFocus:
 		return "metadataFocus"
 	default:
-		return common.InvalidTypeString
+		return invalidTypeString
 	}
 }
 
@@ -91,7 +93,7 @@ func (f filePanelFocusType) String() string {
 	case focus:
 		return "focus"
 	default:
-		return common.InvalidTypeString
+		return invalidTypeString
 	}
 }
 
@@ -102,6 +104,6 @@ func (p panelMode) String() string {
 	case browserMode:
 		return "browserMode"
 	default:
-		return common.InvalidTypeString
+		return invalidTypeString
 	}
 }

@@ -306,6 +306,7 @@ func (m *model) sidebarRenamingKey(msg string) {
 	}
 }
 
+// Check the key input and cancel or confirms the search
 func (m *model) focusOnSearchbarKey(msg string) {
 	switch {
 	case slices.Contains(common.Hotkeys.CancelTyping, msg):

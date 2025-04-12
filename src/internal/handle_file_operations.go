@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yorukot/superfile/src/internal/common/utils"
+	"github.com/yorukot/superfile/src/internal/utils"
 
 	"github.com/yorukot/superfile/src/internal/common"
 
