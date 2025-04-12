@@ -204,14 +204,13 @@ func (m *model) searchBarFocus() {
 }
 
 func (m *model) sidebarSearchBarFocus() {
-	if m.sidebarModel.SearchBar.Focused() {
+	if m.sidebarModel.SearchBarFocused() {
 		// Ideally Code should never reach here. Once sidebar is focussed, we should
 		// not cause sidebarSearchBarFocus() event by pressing search key
-		// Should we use Runtime panic asserts ?
 		slog.Error("sidebarSearchBarFocus() called on Focussed sidebar")
-		m.sidebarModel.SearchBar.Blur()
-	} else {
-		m.sidebarModel.SearchBar.Focus()
-		m.firstTextInput = true
+		m.sidebarModel.SearchBarBlur()
+		return
 	}
+	m.sidebarModel.SearchBarFocus()
+	m.firstTextInput = true
 }

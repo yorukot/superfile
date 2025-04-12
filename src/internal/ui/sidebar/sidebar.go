@@ -8,6 +8,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/x/exp/term/ansi"
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
@@ -306,10 +307,65 @@ func (s *Model) UpdateState(msg tea.Msg) tea.Cmd {
 func (s *Model) HandleSearchBarKey(msg string) {
 	switch {
 	case slices.Contains(common.Hotkeys.CancelTyping, msg):
-		s.SearchBar.Blur()
+		s.SearchBarBlur()
 		s.SearchBar.SetValue("")
 	case slices.Contains(common.Hotkeys.ConfirmTyping, msg):
-		s.SearchBar.Blur()
+		s.SearchBarBlur()
 		s.ResetCursor()
 	}
+}
+
+// SearchBarFocused returns whether the search bar is focused
+func (s *Model) SearchBarFocused() bool {
+	return s.SearchBar.Focused()
+}
+
+// SearchBarBlur removes focus from the search bar
+func (s *Model) SearchBarBlur() {
+	s.SearchBar.Blur()
+}
+
+// SearchBarFocus sets focus on the search bar
+func (s *Model) SearchBarFocus() {
+	s.SearchBar.Focus()
+}
+
+// UpdateDirectories updates the directories list based on search value
+// This is a bit inefficient, as we already had the directories when we
+// initialized the sidebar. We call the directory fetching logic many times
+// which is a disk heavy operation.
+func (s *Model) UpdateDirectories() {
+	if s.SearchBar.Value() != "" {
+		s.Directories = common.GetFilteredDirectories(s.SearchBar.Value())
+	} else {
+		s.Directories = common.GetDirectories()
+	}
+	// This is needed, as due to filtering, the cursor might be invalid
+	if s.IsCursorInvalid() {
+		s.ResetCursor()
+	}
+}
+
+// Render returns the rendered sidebar string
+func (s *Model) Render(mainPanelHeight int, isSidebarFocussed bool, currentFilePanelLocation string) string {
+	if common.Config.SidebarWidth == 0 {
+		return ""
+	}
+	slog.Debug("Rendering sidebar.", "cursor", s.Cursor,
+		"renderIndex", s.RenderIndex, "dirs count", len(s.Directories),
+		"sidebar focused", isSidebarFocussed)
+
+	content := common.SideBarSuperfileTitle + "\n"
+
+	if s.SearchBar.Focused() || s.SearchBar.Value() != "" || isSidebarFocussed {
+		s.SearchBar.Placeholder = "(" + common.Hotkeys.SearchBar[0] + ")" + " Search"
+		content += "\n" + ansi.Truncate(s.SearchBar.View(), common.Config.SidebarWidth-2, "...")
+	}
+
+	if s.NoActualDir() {
+		content += "\n" + common.SideBarNoneText
+	} else {
+		content += s.DirectoriesRender(mainPanelHeight, currentFilePanelLocation, isSidebarFocussed)
+	}
+	return common.SideBarBorderStyle(mainPanelHeight, isSidebarFocussed).Render(content)
 }

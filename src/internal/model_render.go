@@ -20,34 +20,13 @@ import (
 
 	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/x/exp/term/ansi"
 	"github.com/yorukot/ansichroma"
 	"github.com/yorukot/superfile/src/config/icon"
 	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
 )
 
 func (m *model) sidebarRender() string {
-	if common.Config.SidebarWidth == 0 {
-		return ""
-	}
-	slog.Debug("Rendering sidebar.", "cursor", m.sidebarModel.Cursor,
-		"renderIndex", m.sidebarModel.RenderIndex, "dirs count", len(m.sidebarModel.Directories),
-		"sidebar focused", m.focusPanel == sidebarFocus)
-
-	s := common.SideBarSuperfileTitle + "\n"
-
-	if m.sidebarModel.SearchBar.Focused() || m.sidebarModel.SearchBar.Value() != "" || m.focusPanel == sidebarFocus {
-		m.sidebarModel.SearchBar.Placeholder = "(" + common.Hotkeys.SearchBar[0] + ")" + " Search"
-		s += "\n" + ansi.Truncate(m.sidebarModel.SearchBar.View(), common.Config.SidebarWidth-2, "...")
-	}
-
-	if m.sidebarModel.NoActualDir() {
-		s += "\n" + common.SideBarNoneText
-	} else {
-		s += m.sidebarModel.DirectoriesRender(m.mainPanelHeight,
-			m.fileModel.filePanels[m.filePanelFocusIndex].location, m.focusPanel == sidebarFocus)
-	}
-	return common.SideBarBorderStyle(m.mainPanelHeight, m.focusPanel == sidebarFocus).Render(s)
+	return m.sidebarModel.Render(m.mainPanelHeight, m.focusPanel == sidebarFocus, m.fileModel.filePanels[m.filePanelFocusIndex].location)
 }
 
 // This also modifies the m.fileModel.filePanels, which it should not

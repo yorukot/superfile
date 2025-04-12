@@ -83,22 +83,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	m.updateFilePanelsState(msg, &cmd)
-
-	if m.sidebarModel.SearchBar.Value() != "" {
-		// Todo : All updates of sideBar must be moved to separate struct functions
-		// we have to keep the state of sidebar consistent, and keep values of
-		// cursor, directories, renderIndex sane for each update, and it has to
-		// take care at one single place, not everywhere we use sideBar
-		m.sidebarModel.Directories = common.GetFilteredDirectories(m.sidebarModel.SearchBar.Value())
-		if m.sidebarModel.IsCursorInvalid() {
-			m.sidebarModel.ResetCursor()
-		}
-	} else {
-		m.sidebarModel.Directories = common.GetDirectories()
-		if m.sidebarModel.IsCursorInvalid() {
-			m.sidebarModel.ResetCursor()
-		}
-	}
+	m.sidebarModel.UpdateDirectories()
 
 	// check if there already have listening message
 	if !ListeningMessage {
@@ -246,7 +231,7 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 	case m.fileModel.filePanels[m.filePanelFocusIndex].searchBar.Focused():
 		m.focusOnSearchbarKey(msg.String())
 	// If sort options menu is open
-	case m.sidebarModel.SearchBar.Focused():
+	case m.sidebarModel.SearchBarFocused():
 		m.sidebarModel.HandleSearchBarKey(msg.String())
 	case m.fileModel.filePanels[m.filePanelFocusIndex].sortOptions.open:
 		m.sortOptionsKey(msg.String())
