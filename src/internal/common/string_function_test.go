@@ -109,7 +109,7 @@ func TestIsExtensionExtractable(t *testing.T) {
 
 	for _, tt := range inputs {
 		t.Run(tt.ext, func(t *testing.T) {
-			result := IsExensionExtractable(tt.ext)
+			result := IsExtensionExtractable(tt.ext)
 			if result != tt.expected {
 				t.Errorf("IsExensionExtractable (%q) = %v; want %v", tt.ext, result, tt.expected)
 			}

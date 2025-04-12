@@ -325,6 +325,8 @@ func (m *model) returnMetaData() {
 	if fileInfo.IsDir() {
 		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"Name", fileInfo.Name()})
 		if m.focusPanel == metadataFocus {
+			// Todo : Calling dirSize() could be expensive for large directories, as it recursively
+			// walks the entire tree. Consider lazy loading, caching, or an async approach to avoid UI lockups.
 			m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"Size", common.FormatFileSize(dirSize(filePath))})
 		}
 		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"Date Modified", fileInfo.ModTime().String()})

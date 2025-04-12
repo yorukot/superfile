@@ -15,16 +15,16 @@ import (
 	"github.com/charmbracelet/x/exp/term/ansi"
 )
 
-func TruncateText(text string, maxChars int, talis string) string {
-	truncatedText := ansi.Truncate(text, maxChars-len(talis), "")
+func TruncateText(text string, maxChars int, tails string) string {
+	truncatedText := ansi.Truncate(text, maxChars-len(tails), "")
 	if text != truncatedText {
-		return truncatedText + talis
+		return truncatedText + tails
 	}
 
 	return text
 }
 
-func TruncateTextBeginning(text string, maxChars int, talis string) string {
+func TruncateTextBeginning(text string, maxChars int, tails string) string {
 	if ansi.StringWidth(text) <= maxChars {
 		return text
 	}
@@ -38,27 +38,27 @@ func TruncateTextBeginning(text string, maxChars int, talis string) string {
 		truncatedWidth = ansi.StringWidth(string(truncatedRunes))
 	}
 
-	if len(truncatedRunes) > len(talis) {
-		truncatedRunes = append([]rune(talis), truncatedRunes[len(talis):]...)
+	if len(truncatedRunes) > len(tails) {
+		truncatedRunes = append([]rune(tails), truncatedRunes[len(tails):]...)
 	}
 
 	return string(truncatedRunes)
 }
 
-func TruncateMiddleText(text string, maxChars int, talis string) string {
+func TruncateMiddleText(text string, maxChars int, tails string) string {
 	if utf8.RuneCountInString(text) <= maxChars {
 		return text
 	}
 
 	halfEllipsisLength := (maxChars - 3) / 2
-
-	truncatedText := text[:halfEllipsisLength] + talis + text[utf8.RuneCountInString(text)-halfEllipsisLength:]
+	// Todo : Use ansi.Substring to correctly handle ANSI escape codes
+	truncatedText := text[:halfEllipsisLength] + tails + text[utf8.RuneCountInString(text)-halfEllipsisLength:]
 
 	return truncatedText
 }
 
 func PrettierName(name string, width int, isDir bool, isSelected bool, bgColor lipgloss.Color) string {
-	style := GetElementIcon(name, isDir)
+	style := GetElementIcon(name, isDir, Config.Nerdfont)
 	if isSelected {
 		return StringColorRender(lipgloss.Color(style.Color), bgColor).
 			Background(bgColor).
@@ -73,7 +73,7 @@ func PrettierName(name string, width int, isDir bool, isSelected bool, bgColor l
 }
 
 func PrettierDirectoryPreviewName(name string, isDir bool, bgColor lipgloss.Color) string {
-	style := GetElementIcon(name, isDir)
+	style := GetElementIcon(name, isDir, Config.Nerdfont)
 	return StringColorRender(lipgloss.Color(style.Color), bgColor).
 		Background(bgColor).
 		Render(style.Icon+" ") +
@@ -81,7 +81,7 @@ func PrettierDirectoryPreviewName(name string, isDir bool, bgColor lipgloss.Colo
 }
 
 func ClipboardPrettierName(name string, width int, isDir bool, isSelected bool) string {
-	style := GetElementIcon(name, isDir)
+	style := GetElementIcon(name, isDir, Config.Nerdfont)
 	if isSelected {
 		return StringColorRender(lipgloss.Color(style.Color), FooterBGColor).
 			Background(FooterBGColor).
@@ -152,8 +152,8 @@ func IsBufferPrintable(buffer []byte) bool {
 	return true
 }
 
-// IsExensionExtractable checks if a string is a valid compressed archive file extension.
-func IsExensionExtractable(ext string) bool {
+// IsExtensionExtractable checks if a string is a valid compressed archive file extension.
+func IsExtensionExtractable(ext string) bool {
 	// Extensions based on the types that package: `xtractr` `ExtractFile` function handles.
 	validExtensions := map[string]struct{}{
 		".zip":     {},

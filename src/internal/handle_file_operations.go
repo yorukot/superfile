@@ -502,7 +502,7 @@ func (m *model) extractFile() {
 	}
 
 	ext := strings.ToLower(filepath.Ext(panel.element[panel.cursor].location))
-	if !common.IsExensionExtractable(ext) {
+	if !common.IsExtensionExtractable(ext) {
 		slog.Error(fmt.Sprintf("Error unexpected file extension type: %s", ext), "error", errors.ErrUnsupported)
 		return
 	}

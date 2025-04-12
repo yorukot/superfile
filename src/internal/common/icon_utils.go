@@ -7,11 +7,11 @@ import (
 	"github.com/yorukot/superfile/src/config/icon"
 )
 
-func GetElementIcon(file string, isDir bool) icon.Style {
+func GetElementIcon(file string, isDir bool, nerdFont bool) icon.Style {
 	ext := strings.TrimPrefix(filepath.Ext(file), ".")
 	name := file
 
-	if !Config.Nerdfont {
+	if !nerdFont {
 		return icon.Style{
 			Icon:  "",
 			Color: Theme.FilePanelFG,

@@ -9,11 +9,9 @@ This is for the sidebar UI, and for fetching and updating sidebar directories
 - Some methods could be made more pure by reducing side effects
 
 # Coverage
-# Coverage
 
 ```bash
-cd /path/to/ui/prompt
+cd /path/to/ui/sidebar
 go test -cover
 ```
-Current coverage is 74.0%.
-Current coverage
+Current coverage is 29.3%.
