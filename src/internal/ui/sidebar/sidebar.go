@@ -6,7 +6,6 @@ import (
 	"os"
 	"slices"
 
-	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/internal/common"
@@ -43,7 +42,7 @@ func (s *Model) ConfirmSidebarRename() {
 	// recover the state of rename
 	s.CancelSidebarRename()
 
-	pinnedDirs := GetPinnedDirectories()
+	pinnedDirs := getPinnedDirectories()
 	// Call getPinnedDirectories, instead of using what is stored in sidebar.directories
 	// sidebar.directories could have less directories in case a search filter is used
 	for i := range pinnedDirs {
@@ -97,9 +96,9 @@ func (s *Model) HandleSearchBarKey(msg string) {
 // which is a disk heavy operation.
 func (s *Model) UpdateDirectories() {
 	if s.searchBar.Value() != "" {
-		s.directories = GetFilteredDirectories(s.searchBar.Value())
+		s.directories = getFilteredDirectories(s.searchBar.Value())
 	} else {
-		s.directories = GetDirectories()
+		s.directories = getDirectories()
 	}
 	// This is needed, as due to filtering, the cursor might be invalid
 	if s.isCursorInvalid() {
@@ -108,10 +107,10 @@ func (s *Model) UpdateDirectories() {
 }
 
 // New creates a new sidebar model with the given parameters
-func New(directories []directory, searchBar textinput.Model) Model {
+func New() Model {
 	return Model{
 		renderIndex: 0,
-		directories: directories,
-		searchBar:   searchBar,
+		directories: getDirectories(),
+		searchBar:   common.GenerateSearchBar(),
 	}
 }

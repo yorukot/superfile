@@ -1,7 +1,7 @@
 package sidebar
 
 func (d directory) IsDivider() bool {
-	return d == PinnedDividerDir || d == DiskDividerDir
+	return d == pinnedDividerDir || d == diskDividerDir
 }
 func (d directory) RequiredHeight() int {
 	if d.IsDivider() {
@@ -78,10 +78,10 @@ func (s *Model) pinnedIndexRange() (int, int) {
 	pinnedDividerIdx := -1
 	diskDividerIdx := -1
 	for i, d := range s.directories {
-		if d == PinnedDividerDir {
+		if d == pinnedDividerDir {
 			pinnedDividerIdx = i
 		}
-		if d == DiskDividerDir {
+		if d == diskDividerDir {
 			diskDividerIdx = i
 			break
 		}

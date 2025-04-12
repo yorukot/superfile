@@ -16,7 +16,7 @@ func dirSlice(count int) []directory {
 }
 
 func fullDirSlice(count int) []directory {
-	return FormDirctorySlice(dirSlice(count), dirSlice(count), dirSlice(count))
+	return formDirctorySlice(dirSlice(count), dirSlice(count), dirSlice(count))
 }
 
 // Todo : Use t.Run(tt.name
@@ -47,7 +47,7 @@ func Test_noActualDir(t *testing.T) {
 		{
 			"Non-Empty Sidebar with only pinned directories",
 			Model{
-				directories: FormDirctorySlice(nil, dirSlice(10), nil),
+				directories: formDirctorySlice(nil, dirSlice(10), nil),
 			},
 			false,
 		},
@@ -120,7 +120,7 @@ func Test_resetCursor(t *testing.T) {
 		{
 			name: "Only Pinned directories",
 			curSideBar: Model{
-				directories: FormDirctorySlice(nil, dirSlice(10), nil),
+				directories: formDirctorySlice(nil, dirSlice(10), nil),
 			},
 			expectedCursorPos: 1, // After pinned divider
 		},
@@ -134,7 +134,7 @@ func Test_resetCursor(t *testing.T) {
 		{
 			name: "Only Disk",
 			curSideBar: Model{
-				directories: FormDirctorySlice(nil, nil, dirSlice(10)),
+				directories: formDirctorySlice(nil, nil, dirSlice(10)),
 			},
 			expectedCursorPos: 2, // After pinned and dist divider
 		},

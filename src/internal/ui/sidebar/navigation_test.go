@@ -9,12 +9,12 @@ import (
 func Test_lastRenderIndex(t *testing.T) {
 	// Setup test data
 	sidebarA := Model{
-		directories: FormDirctorySlice(
+		directories: formDirctorySlice(
 			dirSlice(10), dirSlice(10), dirSlice(10),
 		),
 	}
 	sidebarB := Model{
-		directories: FormDirctorySlice(
+		directories: formDirctorySlice(
 			dirSlice(1), nil, dirSlice(5),
 		),
 	}
@@ -91,17 +91,17 @@ func Test_firstRenderIndex(t *testing.T) {
 		directories: fullDirSlice(10),
 	}
 	sidebarB := Model{
-		directories: FormDirctorySlice(
+		directories: formDirctorySlice(
 			dirSlice(1), nil, dirSlice(5),
 		),
 	}
 	sidebarC := Model{
-		directories: FormDirctorySlice(
+		directories: formDirctorySlice(
 			nil, dirSlice(5), dirSlice(5),
 		),
 	}
 	sidebarD := Model{
-		directories: FormDirctorySlice(
+		directories: formDirctorySlice(
 			nil, nil, dirSlice(3),
 		),
 	}
@@ -300,7 +300,7 @@ func Test_updateRenderIndex(t *testing.T) {
 		{
 			name: "Edge case: Large panel showing everything",
 			sidebar: Model{
-				directories: FormDirctorySlice(dirSlice(1), nil, dirSlice(5)),
+				directories: formDirctorySlice(dirSlice(1), nil, dirSlice(5)),
 				renderIndex: 2,
 				cursor:      4,
 			},
@@ -419,7 +419,7 @@ func Test_listUp(t *testing.T) {
 			name: "Skip multiple consecutive dividers",
 			sidebar: Model{
 				// Create a sidebar with consecutive dividers for testing
-				directories: FormDirctorySlice(dirSlice(5), nil, dirSlice(5)),
+				directories: formDirctorySlice(dirSlice(5), nil, dirSlice(5)),
 				renderIndex: 5,
 				cursor:      7, // Position after consecutive dividers
 			},
@@ -443,7 +443,7 @@ func Test_listUp(t *testing.T) {
 		{
 			name: "Large panel showing all directories",
 			sidebar: Model{
-				directories: FormDirctorySlice(dirSlice(2), dirSlice(2), dirSlice(2)),
+				directories: formDirctorySlice(dirSlice(2), dirSlice(2), dirSlice(2)),
 				renderIndex: 0,
 				cursor:      3, // Some directory in the middle
 			},
@@ -520,7 +520,7 @@ func Test_listDown(t *testing.T) {
 			name: "Skip multiple consecutive dividers",
 			sidebar: Model{
 				// Create a sidebar with consecutive dividers for testing
-				directories: FormDirctorySlice(dirSlice(5), nil, dirSlice(5)),
+				directories: formDirctorySlice(dirSlice(5), nil, dirSlice(5)),
 				renderIndex: 0,
 				cursor:      4, // Position before consecutive dividers
 			},
@@ -557,7 +557,7 @@ func Test_listDown(t *testing.T) {
 		{
 			name: "Large panel showing all directories",
 			sidebar: Model{
-				directories: FormDirctorySlice(dirSlice(2), dirSlice(2), dirSlice(2)),
+				directories: formDirctorySlice(dirSlice(2), dirSlice(2), dirSlice(2)),
 				renderIndex: 0,
 				cursor:      3, // Some directory in the middle
 			},

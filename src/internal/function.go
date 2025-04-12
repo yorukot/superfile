@@ -16,8 +16,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yorukot/superfile/src/internal/ui/sidebar"
-
 	"github.com/yorukot/superfile/src/internal/utils"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -181,7 +179,7 @@ func returnDirElementBySearchString(location string, displayDotFile bool, search
 	}
 	// https://github.com/reinhrst/fzf-lib/blob/main/core.go#L43
 	// No sorting needed. fzf.DefaultOptions() already return values ordered on Score
-	fzfResults := sidebar.FzfSearch(searchString, fileAndDirectories)
+	fzfResults := utils.FzfSearch(searchString, fileAndDirectories)
 	dirElement := make([]element, 0, len(fzfResults))
 	for _, item := range fzfResults {
 		resultItem := folderElementMap[item.Key]

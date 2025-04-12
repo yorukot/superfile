@@ -58,7 +58,7 @@ func (s *Model) ListDown(mainPanelHeight int) {
 // This could be made constant time by keeping Indexes ot special directories saved,
 // but that too much.
 func (s *Model) lastRenderedIndex(mainPanelHeight int, startIndex int) int {
-	curHeight := SideBarInitialHeight
+	curHeight := sideBarInitialHeight
 	endIndex := startIndex - 1
 	for i := startIndex; i < len(s.directories); i++ {
 		curHeight += s.directories[i].RequiredHeight()
@@ -78,7 +78,7 @@ func (s *Model) firstRenderedIndex(mainPanelHeight int, endIndex int) int {
 		return endIndex + 1
 	}
 
-	curHeight := SideBarInitialHeight
+	curHeight := sideBarInitialHeight
 	startIndex := endIndex + 1
 	for i := endIndex; i >= 0; i-- {
 		curHeight += s.directories[i].RequiredHeight()

@@ -42,7 +42,7 @@ func (s *Model) directoriesRender(mainPanelHeight int, curFilePanelFileLocation 
 	}
 
 	res := ""
-	totalHeight := SideBarInitialHeight
+	totalHeight := sideBarInitialHeight
 	for i := s.renderIndex; i < len(s.directories); i++ {
 		if totalHeight+s.directories[i].RequiredHeight() > mainPanelHeight {
 			break
@@ -52,9 +52,9 @@ func (s *Model) directoriesRender(mainPanelHeight int, curFilePanelFileLocation 
 		totalHeight += s.directories[i].RequiredHeight()
 
 		switch s.directories[i] {
-		case PinnedDividerDir:
+		case pinnedDividerDir:
 			res += "\n" + common.SideBarPinnedDivider
-		case DiskDividerDir:
+		case diskDividerDir:
 			res += "\n" + common.SideBarDisksDivider
 		default:
 			cursor := " "
