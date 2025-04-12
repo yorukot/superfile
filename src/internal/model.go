@@ -222,10 +222,10 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 
 	case m.warnModal.open:
 		m.warnModalOpenKey(msg.String())
-		// If renaming a object
+	// If renaming a object
 	case m.fileModel.renaming:
 		m.renamingKey(msg.String())
-	case m.sidebarModel.Renaming:
+	case m.sidebarModel.IsRenaming():
 		m.sidebarRenamingKey(msg.String())
 	// If search bar is open
 	case m.fileModel.filePanels[m.filePanelFocusIndex].searchBar.Focused():

@@ -131,7 +131,7 @@ func (m *model) sidebarSelectDirectory() {
 		directoryRender: panel.render,
 	}
 
-	panel.location = m.sidebarModel.Directories[m.sidebarModel.Cursor].Location
+	panel.location = m.sidebarModel.GetCurrentDirectoryLocation()
 	curDirectoryRecord, hasRecord := panel.directoryRecords[panel.location]
 	if hasRecord {
 		panel.cursor = curDirectoryRecord.directoryCursor

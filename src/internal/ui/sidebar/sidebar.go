@@ -17,12 +17,12 @@ import (
 /* SIDE BAR internal TYPE START*/
 // Model for sidebar internal
 type Model struct {
-	Directories []common.Directory
-	RenderIndex int
-	Cursor      int
-	Rename      textinput.Model
-	Renaming    bool
-	SearchBar   textinput.Model
+	directories []common.Directory
+	renderIndex int
+	cursor      int
+	rename      textinput.Model
+	renaming    bool
+	searchBar   textinput.Model
 }
 
 // True if only dividers are in directories slice,
@@ -30,7 +30,7 @@ type Model struct {
 // This will be pretty quick. But we can replace it with
 // len(s.directories) <= 2 - More hacky and hardcoded-like, but faster
 func (s *Model) NoActualDir() bool {
-	for _, d := range s.Directories {
+	for _, d := range s.directories {
 		if !d.IsDivider() {
 			return false
 		}
@@ -39,15 +39,15 @@ func (s *Model) NoActualDir() bool {
 }
 
 func (s *Model) IsCursorInvalid() bool {
-	return s.Cursor < 0 || s.Cursor >= len(s.Directories) || s.Directories[s.Cursor].IsDivider()
+	return s.cursor < 0 || s.cursor >= len(s.directories) || s.directories[s.cursor].IsDivider()
 }
 
 func (s *Model) ResetCursor() {
-	s.Cursor = 0
+	s.cursor = 0
 	// Move to first non Divider dir
-	for i, d := range s.Directories {
+	for i, d := range s.directories {
 		if !d.IsDivider() {
-			s.Cursor = i
+			s.cursor = i
 			return
 		}
 	}
@@ -62,8 +62,8 @@ func (s *Model) ResetCursor() {
 func (s *Model) LastRenderedIndex(mainPanelHeight int, startIndex int) int {
 	curHeight := common.SideBarInitialHeight
 	endIndex := startIndex - 1
-	for i := startIndex; i < len(s.Directories); i++ {
-		curHeight += s.Directories[i].RequiredHeight()
+	for i := startIndex; i < len(s.directories); i++ {
+		curHeight += s.directories[i].RequiredHeight()
 		if curHeight > mainPanelHeight {
 			break
 		}
@@ -76,14 +76,14 @@ func (s *Model) LastRenderedIndex(mainPanelHeight int, startIndex int) int {
 // if returned value is `endIndex + 1`, that means nothing can be rendered
 func (s *Model) FirstRenderedIndex(mainPanelHeight int, endIndex int) int {
 	// This should ideally never happen. Maybe we should panic ?
-	if endIndex >= len(s.Directories) {
+	if endIndex >= len(s.directories) {
 		return endIndex + 1
 	}
 
 	curHeight := common.SideBarInitialHeight
 	startIndex := endIndex + 1
 	for i := endIndex; i >= 0; i-- {
-		curHeight += s.Directories[i].RequiredHeight()
+		curHeight += s.directories[i].RequiredHeight()
 		if curHeight > mainPanelHeight {
 			break
 		}
@@ -94,69 +94,69 @@ func (s *Model) FirstRenderedIndex(mainPanelHeight int, endIndex int) int {
 
 func (s *Model) UpdateRenderIndex(mainPanelHeight int) {
 	// Case I : New cursor moved above current renderable range
-	if s.Cursor < s.RenderIndex {
+	if s.cursor < s.renderIndex {
 		// We will start rendering from there
-		s.RenderIndex = s.Cursor
+		s.renderIndex = s.cursor
 		return
 	}
 
-	curEndIndex := s.LastRenderedIndex(mainPanelHeight, s.RenderIndex)
+	curEndIndex := s.LastRenderedIndex(mainPanelHeight, s.renderIndex)
 
 	// Case II : new cursor also comes in range of rendered directories
 	// Taking this case later avoid extra lastRenderedIndex() call
-	if s.RenderIndex <= s.Cursor && s.Cursor <= curEndIndex {
+	if s.renderIndex <= s.cursor && s.cursor <= curEndIndex {
 		// no need to update s.renderIndex
 		return
 	}
 
 	// Case III : New cursor is too below
-	if curEndIndex < s.Cursor {
-		s.RenderIndex = s.FirstRenderedIndex(mainPanelHeight, s.Cursor)
+	if curEndIndex < s.cursor {
+		s.renderIndex = s.FirstRenderedIndex(mainPanelHeight, s.cursor)
 		return
 	}
 
 	// Code should never reach here
-	slog.Error("Unexpected situation in updateRenderIndex", "cursor", s.Cursor,
-		"renderIndex", s.RenderIndex, "directory count", len(s.Directories))
+	slog.Error("Unexpected situation in updateRenderIndex", "cursor", s.cursor,
+		"renderIndex", s.renderIndex, "directory count", len(s.directories))
 }
 
 // ======================================== Sidebar controller ========================================
 
 func (s *Model) ListUp(mainPanelHeight int) {
-	slog.Debug("controlListUp called", "cursor", s.Cursor,
-		"renderIndex", s.RenderIndex, "directory count", len(s.Directories))
+	slog.Debug("controlListUp called", "cursor", s.cursor,
+		"renderIndex", s.renderIndex, "directory count", len(s.directories))
 	if s.NoActualDir() {
 		return
 	}
-	if s.Cursor > 0 {
+	if s.cursor > 0 {
 		// Not at the top, can safely decrease
-		s.Cursor--
+		s.cursor--
 	} else {
 		// We are at the top. Move to the bottom
-		s.Cursor = len(s.Directories) - 1
+		s.cursor = len(s.directories) - 1
 	}
 	// We should update even if cursor is at divider for now
 	// Otherwise dividers are sometimes skipped in render in case of
 	// large pinned directories
 	s.UpdateRenderIndex(mainPanelHeight)
-	if s.Directories[s.Cursor].IsDivider() {
+	if s.directories[s.cursor].IsDivider() {
 		// cause another listUp trigger to move up.
 		s.ListUp(mainPanelHeight)
 	}
 }
 
 func (s *Model) ListDown(mainPanelHeight int) {
-	slog.Debug("controlListDown called", "cursor", s.Cursor,
-		"renderIndex", s.RenderIndex, "directory count", len(s.Directories))
+	slog.Debug("controlListDown called", "cursor", s.cursor,
+		"renderIndex", s.renderIndex, "directory count", len(s.directories))
 	if s.NoActualDir() {
 		return
 	}
-	if s.Cursor < len(s.Directories)-1 {
+	if s.cursor < len(s.directories)-1 {
 		// Not at the bottom, can safely increase
-		s.Cursor++
+		s.cursor++
 	} else {
 		// We are at the bottom. Move to the top
-		s.Cursor = 0
+		s.cursor = 0
 	}
 
 	// We should update even if cursor is at divider for now
@@ -165,7 +165,7 @@ func (s *Model) ListDown(mainPanelHeight int) {
 	s.UpdateRenderIndex(mainPanelHeight)
 
 	// Move below special divider directories
-	if s.Directories[s.Cursor].IsDivider() {
+	if s.directories[s.cursor].IsDivider() {
 		// cause another listDown trigger to move down.
 		s.ListDown(mainPanelHeight)
 	}
@@ -175,40 +175,40 @@ func (s *Model) DirectoriesRender(mainPanelHeight int, curFilePanelFileLocation 
 	// Cursor should always point to a valid directory at this point
 	if s.IsCursorInvalid() {
 		slog.Error("Unexpected situation in sideBar Model. "+
-			"Cursor is at invalid position, while there are valide directories", "cursor", s.Cursor,
-			"directory count", len(s.Directories))
+			"Cursor is at invalid position, while there are valide directories", "cursor", s.cursor,
+			"directory count", len(s.directories))
 		return ""
 	}
 
 	res := ""
 	totalHeight := common.SideBarInitialHeight
-	for i := s.RenderIndex; i < len(s.Directories); i++ {
-		if totalHeight+s.Directories[i].RequiredHeight() > mainPanelHeight {
+	for i := s.renderIndex; i < len(s.directories); i++ {
+		if totalHeight+s.directories[i].RequiredHeight() > mainPanelHeight {
 			break
 		}
 		res += "\n"
 
-		totalHeight += s.Directories[i].RequiredHeight()
+		totalHeight += s.directories[i].RequiredHeight()
 
-		switch s.Directories[i] {
+		switch s.directories[i] {
 		case common.PinnedDividerDir:
 			res += "\n" + common.SideBarPinnedDivider
 		case common.DiskDividerDir:
 			res += "\n" + common.SideBarDisksDivider
 		default:
 			cursor := " "
-			if s.Cursor == i && sideBarFocussed && !s.SearchBar.Focused() {
+			if s.cursor == i && sideBarFocussed && !s.searchBar.Focused() {
 				cursor = icon.Cursor
 			}
-			if s.Renaming && s.Cursor == i {
-				res += s.Rename.View()
+			if s.renaming && s.cursor == i {
+				res += s.rename.View()
 			} else {
 				renderStyle := common.SidebarStyle
-				if s.Directories[i].Location == curFilePanelFileLocation {
+				if s.directories[i].Location == curFilePanelFileLocation {
 					renderStyle = common.SidebarSelectedStyle
 				}
 				res += common.FilePanelCursorStyle.Render(cursor+" ") +
-					renderStyle.Render(common.TruncateText(s.Directories[i].Name, common.Config.SidebarWidth-2, "..."))
+					renderStyle.Render(common.TruncateText(s.directories[i].Name, common.Config.SidebarWidth-2, "..."))
 			}
 		}
 	}
@@ -224,7 +224,7 @@ func (s *Model) PinnedIndexRange() (int, int) {
 	// This information can be kept precomputed
 	pinnedDividerIdx := -1
 	diskDividerIdx := -1
-	for i, d := range s.Directories {
+	for i, d := range s.directories {
 		if d == common.PinnedDividerDir {
 			pinnedDividerIdx = i
 		}
@@ -240,29 +240,29 @@ func (s *Model) PinnedIndexRange() (int, int) {
 func (s *Model) PinnedItemRename() {
 	pinnedBegin, pinnedEnd := s.PinnedIndexRange()
 	// We have not selected a pinned directory, rename is not allowed
-	if s.Cursor < pinnedBegin || s.Cursor > pinnedEnd {
+	if s.cursor < pinnedBegin || s.cursor > pinnedEnd {
 		return
 	}
 
-	nameLen := len(s.Directories[s.Cursor].Name)
+	nameLen := len(s.directories[s.cursor].Name)
 	cursorPos := nameLen
 
-	s.Renaming = true
-	s.Rename = common.GeneratePinnedRenameTextInput(cursorPos, s.Directories[s.Cursor].Name)
+	s.renaming = true
+	s.rename = common.GeneratePinnedRenameTextInput(cursorPos, s.directories[s.cursor].Name)
 }
 
 // Cancel rename pinned directory
 func (s *Model) CancelSidebarRename() {
-	s.Rename.Blur()
-	s.Renaming = false
+	s.rename.Blur()
+	s.renaming = false
 }
 
 // Confirm rename pinned directory
 func (s *Model) ConfirmSidebarRename() {
-	itemLocation := s.Directories[s.Cursor].Location
-	newItemName := s.Rename.Value()
+	itemLocation := s.directories[s.cursor].Location
+	newItemName := s.rename.Value()
 	// This is needed to update the current pinned directory data loaded into memory
-	s.Directories[s.Cursor].Name = newItemName
+	s.directories[s.cursor].Name = newItemName
 
 	// recover the state of rename
 	s.CancelSidebarRename()
@@ -291,14 +291,14 @@ func (s *Model) ConfirmSidebarRename() {
 // UpdateState handles the sidebar's state updates
 func (s *Model) UpdateState(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
-	if s.Renaming {
-		s.Rename, cmd = s.Rename.Update(msg)
-	} else if s.SearchBar.Focused() {
-		s.SearchBar, cmd = s.SearchBar.Update(msg)
+	if s.renaming {
+		s.rename, cmd = s.rename.Update(msg)
+	} else if s.searchBar.Focused() {
+		s.searchBar, cmd = s.searchBar.Update(msg)
 	}
 
-	if s.Cursor < 0 {
-		s.Cursor = 0
+	if s.cursor < 0 {
+		s.cursor = 0
 	}
 	return cmd
 }
@@ -308,7 +308,7 @@ func (s *Model) HandleSearchBarKey(msg string) {
 	switch {
 	case slices.Contains(common.Hotkeys.CancelTyping, msg):
 		s.SearchBarBlur()
-		s.SearchBar.SetValue("")
+		s.searchBar.SetValue("")
 	case slices.Contains(common.Hotkeys.ConfirmTyping, msg):
 		s.SearchBarBlur()
 		s.ResetCursor()
@@ -317,17 +317,17 @@ func (s *Model) HandleSearchBarKey(msg string) {
 
 // SearchBarFocused returns whether the search bar is focused
 func (s *Model) SearchBarFocused() bool {
-	return s.SearchBar.Focused()
+	return s.searchBar.Focused()
 }
 
 // SearchBarBlur removes focus from the search bar
 func (s *Model) SearchBarBlur() {
-	s.SearchBar.Blur()
+	s.searchBar.Blur()
 }
 
 // SearchBarFocus sets focus on the search bar
 func (s *Model) SearchBarFocus() {
-	s.SearchBar.Focus()
+	s.searchBar.Focus()
 }
 
 // UpdateDirectories updates the directories list based on search value
@@ -335,10 +335,10 @@ func (s *Model) SearchBarFocus() {
 // initialized the sidebar. We call the directory fetching logic many times
 // which is a disk heavy operation.
 func (s *Model) UpdateDirectories() {
-	if s.SearchBar.Value() != "" {
-		s.Directories = common.GetFilteredDirectories(s.SearchBar.Value())
+	if s.searchBar.Value() != "" {
+		s.directories = common.GetFilteredDirectories(s.searchBar.Value())
 	} else {
-		s.Directories = common.GetDirectories()
+		s.directories = common.GetDirectories()
 	}
 	// This is needed, as due to filtering, the cursor might be invalid
 	if s.IsCursorInvalid() {
@@ -351,15 +351,15 @@ func (s *Model) Render(mainPanelHeight int, isSidebarFocussed bool, currentFileP
 	if common.Config.SidebarWidth == 0 {
 		return ""
 	}
-	slog.Debug("Rendering sidebar.", "cursor", s.Cursor,
-		"renderIndex", s.RenderIndex, "dirs count", len(s.Directories),
+	slog.Debug("Rendering sidebar.", "cursor", s.cursor,
+		"renderIndex", s.renderIndex, "dirs count", len(s.directories),
 		"sidebar focused", isSidebarFocussed)
 
 	content := common.SideBarSuperfileTitle + "\n"
 
-	if s.SearchBar.Focused() || s.SearchBar.Value() != "" || isSidebarFocussed {
-		s.SearchBar.Placeholder = "(" + common.Hotkeys.SearchBar[0] + ")" + " Search"
-		content += "\n" + ansi.Truncate(s.SearchBar.View(), common.Config.SidebarWidth-2, "...")
+	if s.searchBar.Focused() || s.searchBar.Value() != "" || isSidebarFocussed {
+		s.searchBar.Placeholder = "(" + common.Hotkeys.SearchBar[0] + ")" + " Search"
+		content += "\n" + ansi.Truncate(s.searchBar.View(), common.Config.SidebarWidth-2, "...")
 	}
 
 	if s.NoActualDir() {
@@ -368,4 +368,26 @@ func (s *Model) Render(mainPanelHeight int, isSidebarFocussed bool, currentFileP
 		content += s.DirectoriesRender(mainPanelHeight, currentFilePanelLocation, isSidebarFocussed)
 	}
 	return common.SideBarBorderStyle(mainPanelHeight, isSidebarFocussed).Render(content)
+}
+
+// GetCurrentDirectoryLocation returns the location of the currently selected directory
+func (s *Model) GetCurrentDirectoryLocation() string {
+	if s.IsCursorInvalid() || s.NoActualDir() {
+		return ""
+	}
+	return s.directories[s.cursor].Location
+}
+
+// New creates a new sidebar model with the given parameters
+func New(directories []common.Directory, searchBar textinput.Model) Model {
+	return Model{
+		renderIndex: 0,
+		directories: directories,
+		searchBar:   searchBar,
+	}
+}
+
+// IsRenaming returns whether the sidebar is currently in renaming mode
+func (s *Model) IsRenaming() bool {
+	return s.renaming
 }
