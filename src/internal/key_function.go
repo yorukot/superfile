@@ -306,18 +306,6 @@ func (m *model) sidebarRenamingKey(msg string) {
 	}
 }
 
-func (m *model) sidebarSearchBarKey(msg string) {
-	switch {
-	case slices.Contains(common.Hotkeys.CancelTyping, msg):
-		m.sidebarModel.SearchBar.Blur()
-		m.sidebarModel.SearchBar.SetValue("")
-	case slices.Contains(common.Hotkeys.ConfirmTyping, msg):
-		m.sidebarModel.SearchBar.Blur()
-		m.sidebarModel.ResetCursor()
-	}
-}
-
-// Check the key input and cancel or confirms the search
 func (m *model) focusOnSearchbarKey(msg string) {
 	switch {
 	case slices.Contains(common.Hotkeys.CancelTyping, msg):

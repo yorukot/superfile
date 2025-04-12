@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"log/slog"
 	"os"
+	"slices"
 
 	"github.com/charmbracelet/bubbles/textinput"
+	tea "github.com/charmbracelet/bubbletea"
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
@@ -282,5 +284,32 @@ func (s *Model) ConfirmSidebarRename() {
 	err = os.WriteFile(variable.PinnedFile, jsonData, 0644)
 	if err != nil {
 		slog.Error("Error updating pinned directories data", "error", err)
+	}
+}
+
+// UpdateState handles the sidebar's state updates
+func (s *Model) UpdateState(msg tea.Msg) tea.Cmd {
+	var cmd tea.Cmd
+	if s.Renaming {
+		s.Rename, cmd = s.Rename.Update(msg)
+	} else if s.SearchBar.Focused() {
+		s.SearchBar, cmd = s.SearchBar.Update(msg)
+	}
+
+	if s.Cursor < 0 {
+		s.Cursor = 0
+	}
+	return cmd
+}
+
+// HandleSearchBarKey handles key events for the sidebar search bar
+func (s *Model) HandleSearchBarKey(msg string) {
+	switch {
+	case slices.Contains(common.Hotkeys.CancelTyping, msg):
+		s.SearchBar.Blur()
+		s.SearchBar.SetValue("")
+	case slices.Contains(common.Hotkeys.ConfirmTyping, msg):
+		s.SearchBar.Blur()
+		s.ResetCursor()
 	}
 }

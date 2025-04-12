@@ -62,7 +62,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	slog.Debug("model.Update() called")
 	var cmd tea.Cmd
 
-	m.updateSidebarState(msg, &cmd)
+	cmd = m.sidebarModel.UpdateState(msg)
 
 	switch msg := msg.(type) {
 	case channelMessage:
@@ -242,27 +242,26 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 		m.renamingKey(msg.String())
 	case m.sidebarModel.Renaming:
 		m.sidebarRenamingKey(msg.String())
-		// If search bar is open
+	// If search bar is open
 	case m.fileModel.filePanels[m.filePanelFocusIndex].searchBar.Focused():
 		m.focusOnSearchbarKey(msg.String())
-		// If sort options menu is open
+	// If sort options menu is open
 	case m.sidebarModel.SearchBar.Focused():
-		m.sidebarSearchBarKey(msg.String())
-		// If sort options menu is open
+		m.sidebarModel.HandleSearchBarKey(msg.String())
 	case m.fileModel.filePanels[m.filePanelFocusIndex].sortOptions.open:
 		m.sortOptionsKey(msg.String())
-		// If help menu is open
+	// If help menu is open
 	case m.helpMenu.open:
 		m.helpMenuKey(msg.String())
-		// If asking to confirm quiting
+	// If asking to confirm quiting
 	case m.confirmToQuit:
 		quit := m.confirmToQuitSuperfile(msg.String())
 		if quit {
 			m.quitSuperfile()
 			return tea.Quit
 		}
-		// If quiting input pressed, check if has any running process and displays a
-		// warn. Otherwise just quits application
+	// If quiting input pressed, check if has any running process and displays a
+	// warn. Otherwise just quits application
 	case slices.Contains(common.Hotkeys.Quit, msg.String()):
 		if m.hasRunningProcesses() {
 			m.warnModalForQuit()
@@ -377,20 +376,6 @@ func (m *model) updateCurrentFilePanelDir(dir string) error {
 
 	m.fileModel.filePanels[m.filePanelFocusIndex].location = newPath
 	return nil
-}
-
-// Update the sidebar state. Change name of the renaming pinned directory.
-func (m *model) updateSidebarState(msg tea.Msg, cmd *tea.Cmd) {
-	sidebar := &m.sidebarModel
-	if sidebar.Renaming {
-		sidebar.Rename, *cmd = sidebar.Rename.Update(msg)
-	} else if sidebar.SearchBar.Focused() {
-		sidebar.SearchBar, *cmd = sidebar.SearchBar.Update(msg)
-	}
-
-	if sidebar.Cursor < 0 {
-		sidebar.Cursor = 0
-	}
 }
 
 // Check if there's any processes running in background
