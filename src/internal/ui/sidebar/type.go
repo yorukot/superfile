@@ -2,13 +2,13 @@ package sidebar
 
 import "github.com/charmbracelet/bubbles/textinput"
 
-type Directory struct {
+type directory struct {
 	Location string `json:"location"`
 	Name     string `json:"name"`
 }
 
 type Model struct {
-	directories []Directory
+	directories []directory
 	renderIndex int
 	cursor      int
 	rename      textinput.Model

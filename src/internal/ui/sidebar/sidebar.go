@@ -108,7 +108,7 @@ func (s *Model) UpdateDirectories() {
 }
 
 // New creates a new sidebar model with the given parameters
-func New(directories []Directory, searchBar textinput.Model) Model {
+func New(directories []directory, searchBar textinput.Model) Model {
 	return Model{
 		renderIndex: 0,
 		directories: directories,

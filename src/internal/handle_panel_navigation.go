@@ -1,12 +1,10 @@
 package internal
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
 	"os"
-	"path/filepath"
 
 	"github.com/yorukot/superfile/src/internal/ui/sidebar"
 
@@ -18,32 +16,9 @@ import (
 // Pinned directory
 func (m *model) pinnedDirectory() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-
-	unPinned := false
-
-	dirs := sidebar.GetPinnedDirectories()
-	for i, other := range dirs {
-		if other.Location == panel.location {
-			dirs = append(dirs[:i], dirs[i+1:]...)
-			unPinned = true
-		}
-	}
-
-	if !unPinned {
-		dirs = append(dirs, sidebar.Directory{
-			Location: panel.location,
-			Name:     filepath.Base(panel.location),
-		})
-	}
-
-	updatedData, err := json.Marshal(dirs)
+	err := sidebar.TogglePinnedDirectory(panel.location)
 	if err != nil {
-		slog.Error("Error while pinned folder function updatedData superfile data", "error", err)
-	}
-
-	err = os.WriteFile(variable.PinnedFile, updatedData, 0644)
-	if err != nil {
-		slog.Error("Error while pinned folder function updatedData superfile data", "error", err)
+		slog.Error("Error while toggling pinned directory", "error", err)
 	}
 }
 

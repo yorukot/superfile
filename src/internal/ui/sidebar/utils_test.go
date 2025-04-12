@@ -7,15 +7,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func dirSlice(count int) []Directory {
-	res := make([]Directory, count)
+func dirSlice(count int) []directory {
+	res := make([]directory, count)
 	for i := range count {
-		res[i] = Directory{Name: "Dir" + strconv.Itoa(i), Location: "/a/" + strconv.Itoa(i)}
+		res[i] = directory{Name: "Dir" + strconv.Itoa(i), Location: "/a/" + strconv.Itoa(i)}
 	}
 	return res
 }
 
-func fullDirSlice(count int) []Directory {
+func fullDirSlice(count int) []directory {
 	return FormDirctorySlice(dirSlice(count), dirSlice(count), dirSlice(count))
 }
 

@@ -1,9 +1,9 @@
 package sidebar
 
-func (d Directory) IsDivider() bool {
+func (d directory) IsDivider() bool {
 	return d == PinnedDividerDir || d == DiskDividerDir
 }
-func (d Directory) RequiredHeight() int {
+func (d directory) RequiredHeight() int {
 	if d.IsDivider() {
 		return 3
 	}
