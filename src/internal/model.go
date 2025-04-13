@@ -421,7 +421,6 @@ func (m model) View() string {
 
 		footer = lipgloss.JoinHorizontal(0, processBar, metaData, clipboardBar)
 	}
-
 	var finalRender string
 
 	if m.toggleFooter {
