@@ -1,12 +1,12 @@
 package internal
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
 	"os"
-	"path/filepath"
+
+	"github.com/yorukot/superfile/src/internal/ui/sidebar"
 
 	"github.com/yorukot/superfile/src/internal/common"
 
@@ -15,46 +15,11 @@ import (
 
 // Pinned directory
 func (m *model) pinnedDirectory() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-
-	unPinned := false
-
-	dirs := getPinnedDirectories()
-	for i, other := range dirs {
-		if other.location == panel.location {
-			dirs = append(dirs[:i], dirs[i+1:]...)
-			unPinned = true
-		}
-	}
-
-	if !unPinned {
-		dirs = append(dirs, directory{
-			location: panel.location,
-			name:     filepath.Base(panel.location),
-		})
-	}
-
-	// Todo : This anonymous struct is defined at 3 places. Too much duplication. Need to fix.
-	type pinnedDir struct {
-		Location string `json:"location"`
-		Name     string `json:"name"`
-	}
-	var pinnedDirs []pinnedDir
-	for _, dir := range dirs {
-		pinnedDirs = append(pinnedDirs, pinnedDir{Location: dir.location, Name: dir.name})
-	}
-
-	updatedData, err := json.Marshal(pinnedDirs)
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+	err := sidebar.TogglePinnedDirectory(panel.location)
 	if err != nil {
-		slog.Error("Error while pinned folder function updatedData superfile data", "error", err)
+		slog.Error("Error while toggling pinned directory", "error", err)
 	}
-
-	err = os.WriteFile(variable.PinnedFile, updatedData, 0644)
-	if err != nil {
-		slog.Error("Error while pinned folder function updatedData superfile data", "error", err)
-	}
-
-	m.fileModel.filePanels[m.filePanelFocusIndex] = panel
 }
 
 // Create new file panel

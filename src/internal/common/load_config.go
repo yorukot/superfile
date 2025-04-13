@@ -10,7 +10,7 @@ import (
 	"reflect"
 
 	"github.com/pelletier/go-toml/v2"
-	"github.com/yorukot/superfile/src/internal/common/utils"
+	"github.com/yorukot/superfile/src/internal/utils"
 
 	variable "github.com/yorukot/superfile/src/config"
 )

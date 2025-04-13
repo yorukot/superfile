@@ -19,7 +19,7 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) tea.Cmd {
 	case slices.Contains(common.Hotkeys.ListUp, msg):
 		switch m.focusPanel {
 		case sidebarFocus:
-			m.sidebarModel.listUp(m.mainPanelHeight)
+			m.sidebarModel.ListUp(m.mainPanelHeight)
 		case processBarFocus:
 			m.processBarModel.listUp(m.footerHeight)
 		case metadataFocus:
@@ -36,7 +36,7 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) tea.Cmd {
 	case slices.Contains(common.Hotkeys.ListDown, msg):
 		switch m.focusPanel {
 		case sidebarFocus:
-			m.sidebarModel.listDown(m.mainPanelHeight)
+			m.sidebarModel.ListDown(m.mainPanelHeight)
 		case processBarFocus:
 			m.processBarModel.listDown(m.footerHeight)
 		case metadataFocus:
@@ -147,7 +147,7 @@ func (m *model) normalAndBrowserModeKey(msg string) {
 			m.sidebarSelectDirectory()
 		}
 		if m.focusPanel == sidebarFocus && slices.Contains(common.Hotkeys.FilePanelItemRename, msg) {
-			m.pinnedItemRename()
+			m.sidebarModel.PinnedItemRename()
 		}
 		if m.focusPanel == sidebarFocus && slices.Contains(common.Hotkeys.SearchBar, msg) {
 			m.sidebarSearchBarFocus()
@@ -300,20 +300,9 @@ func (m *model) renamingKey(msg string) {
 func (m *model) sidebarRenamingKey(msg string) {
 	switch {
 	case slices.Contains(common.Hotkeys.CancelTyping, msg):
-		m.cancelSidebarRename()
+		m.sidebarModel.CancelSidebarRename()
 	case slices.Contains(common.Hotkeys.ConfirmTyping, msg):
-		m.confirmSidebarRename()
-	}
-}
-
-func (m *model) sidebarSearchBarKey(msg string) {
-	switch {
-	case slices.Contains(common.Hotkeys.CancelTyping, msg):
-		m.sidebarModel.searchBar.Blur()
-		m.sidebarModel.searchBar.SetValue("")
-	case slices.Contains(common.Hotkeys.ConfirmTyping, msg):
-		m.sidebarModel.searchBar.Blur()
-		m.sidebarModel.resetCursor()
+		m.sidebarModel.ConfirmSidebarRename()
 	}
 }
 

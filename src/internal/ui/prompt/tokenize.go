@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yorukot/superfile/src/internal/common/utils"
+	"github.com/yorukot/superfile/src/internal/utils"
 )
 
 // split into tokens

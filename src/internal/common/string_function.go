@@ -1,4 +1,4 @@
-package internal
+package common
 
 import (
 	"bufio"
@@ -11,22 +11,20 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/yorukot/superfile/src/internal/common"
-
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/x/exp/term/ansi"
 )
 
-func truncateText(text string, maxChars int, talis string) string {
-	truncatedText := ansi.Truncate(text, maxChars-len(talis), "")
+func TruncateText(text string, maxChars int, tails string) string {
+	truncatedText := ansi.Truncate(text, maxChars-len(tails), "")
 	if text != truncatedText {
-		return truncatedText + talis
+		return truncatedText + tails
 	}
 
 	return text
 }
 
-func truncateTextBeginning(text string, maxChars int, talis string) string {
+func TruncateTextBeginning(text string, maxChars int, tails string) string {
 	if ansi.StringWidth(text) <= maxChars {
 		return text
 	}
@@ -40,63 +38,63 @@ func truncateTextBeginning(text string, maxChars int, talis string) string {
 		truncatedWidth = ansi.StringWidth(string(truncatedRunes))
 	}
 
-	if len(truncatedRunes) > len(talis) {
-		truncatedRunes = append([]rune(talis), truncatedRunes[len(talis):]...)
+	if len(truncatedRunes) > len(tails) {
+		truncatedRunes = append([]rune(tails), truncatedRunes[len(tails):]...)
 	}
 
 	return string(truncatedRunes)
 }
 
-func truncateMiddleText(text string, maxChars int, talis string) string {
+func TruncateMiddleText(text string, maxChars int, tails string) string {
 	if utf8.RuneCountInString(text) <= maxChars {
 		return text
 	}
 
 	halfEllipsisLength := (maxChars - 3) / 2
-
-	truncatedText := text[:halfEllipsisLength] + talis + text[utf8.RuneCountInString(text)-halfEllipsisLength:]
+	// Todo : Use ansi.Substring to correctly handle ANSI escape codes
+	truncatedText := text[:halfEllipsisLength] + tails + text[utf8.RuneCountInString(text)-halfEllipsisLength:]
 
 	return truncatedText
 }
 
-func prettierName(name string, width int, isDir bool, isSelected bool, bgColor lipgloss.Color) string {
-	style := getElementIcon(name, isDir)
+func PrettierName(name string, width int, isDir bool, isSelected bool, bgColor lipgloss.Color) string {
+	style := GetElementIcon(name, isDir, Config.Nerdfont)
 	if isSelected {
-		return common.StringColorRender(lipgloss.Color(style.Color), bgColor).
+		return StringColorRender(lipgloss.Color(style.Color), bgColor).
 			Background(bgColor).
 			Render(style.Icon+" ") +
-			common.FilePanelItemSelectedStyle.
-				Render(truncateText(name, width, "..."))
+			FilePanelItemSelectedStyle.
+				Render(TruncateText(name, width, "..."))
 	}
-	return common.StringColorRender(lipgloss.Color(style.Color), bgColor).
+	return StringColorRender(lipgloss.Color(style.Color), bgColor).
 		Background(bgColor).
 		Render(style.Icon+" ") +
-		common.FilePanelStyle.Render(truncateText(name, width, "..."))
+		FilePanelStyle.Render(TruncateText(name, width, "..."))
 }
 
-func prettierDirectoryPreviewName(name string, isDir bool, bgColor lipgloss.Color) string {
-	style := getElementIcon(name, isDir)
-	return common.StringColorRender(lipgloss.Color(style.Color), bgColor).
+func PrettierDirectoryPreviewName(name string, isDir bool, bgColor lipgloss.Color) string {
+	style := GetElementIcon(name, isDir, Config.Nerdfont)
+	return StringColorRender(lipgloss.Color(style.Color), bgColor).
 		Background(bgColor).
 		Render(style.Icon+" ") +
-		common.FilePanelStyle.Render(name)
+		FilePanelStyle.Render(name)
 }
 
-func clipboardPrettierName(name string, width int, isDir bool, isSelected bool) string {
-	style := getElementIcon(name, isDir)
+func ClipboardPrettierName(name string, width int, isDir bool, isSelected bool) string {
+	style := GetElementIcon(name, isDir, Config.Nerdfont)
 	if isSelected {
-		return common.StringColorRender(lipgloss.Color(style.Color), common.FooterBGColor).
-			Background(common.FooterBGColor).
+		return StringColorRender(lipgloss.Color(style.Color), FooterBGColor).
+			Background(FooterBGColor).
 			Render(style.Icon+" ") +
-			common.FilePanelItemSelectedStyle.Render(truncateTextBeginning(name, width, "..."))
+			FilePanelItemSelectedStyle.Render(TruncateTextBeginning(name, width, "..."))
 	}
-	return common.StringColorRender(lipgloss.Color(style.Color), common.FooterBGColor).
-		Background(common.FooterBGColor).
+	return StringColorRender(lipgloss.Color(style.Color), FooterBGColor).
+		Background(FooterBGColor).
 		Render(style.Icon+" ") +
-		common.FilePanelStyle.Render(truncateTextBeginning(name, width, "..."))
+		FilePanelStyle.Render(TruncateTextBeginning(name, width, "..."))
 }
 
-func fileNameWithoutExtension(fileName string) string {
+func FileNameWithoutExtension(fileName string) string {
 	for {
 		pos := strings.LastIndexByte(fileName, '.')
 		if pos <= 0 {
@@ -107,7 +105,7 @@ func fileNameWithoutExtension(fileName string) string {
 	return fileName
 }
 
-func formatFileSize(size int64) string {
+func FormatFileSize(size int64) string {
 	if size == 0 {
 		return "0B"
 	}
@@ -116,7 +114,7 @@ func formatFileSize(size int64) string {
 	unitsBin := []string{"B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB"}
 
 	// Todo : Remove duplication here
-	if common.Config.FileSizeUseSI {
+	if Config.FileSizeUseSI {
 		unitIndex := int(math.Floor(math.Log(float64(size)) / math.Log(1000)))
 		adjustedSize := float64(size) / math.Pow(1000, float64(unitIndex))
 		return fmt.Sprintf("%.2f %s", adjustedSize, unitsDec[unitIndex])
@@ -127,7 +125,7 @@ func formatFileSize(size int64) string {
 }
 
 // Truncate line lengths and keep ANSI
-func checkAndTruncateLineLengths(text string, maxLength int) string {
+func CheckAndTruncateLineLengths(text string, maxLength int) string {
 	lines := strings.Split(text, "\n")
 	var result strings.Builder
 
@@ -144,7 +142,7 @@ func checkAndTruncateLineLengths(text string, maxLength int) string {
 }
 
 // Separated this out out for easy testing
-func isBufferPrintable(buffer []byte) bool {
+func IsBufferPrintable(buffer []byte) bool {
 	for _, b := range buffer {
 		// This will also handle b==0
 		if !unicode.IsPrint(rune(b)) && !unicode.IsSpace(rune(b)) {
@@ -154,8 +152,8 @@ func isBufferPrintable(buffer []byte) bool {
 	return true
 }
 
-// isExensionExtractable checks if a string is a valid compressed archive file extension.
-func isExensionExtractable(ext string) bool {
+// IsExtensionExtractable checks if a string is a valid compressed archive file extension.
+func IsExtensionExtractable(ext string) bool {
 	// Extensions based on the types that package: `xtractr` `ExtractFile` function handles.
 	validExtensions := map[string]struct{}{
 		".zip":     {},
@@ -173,7 +171,7 @@ func isExensionExtractable(ext string) bool {
 }
 
 // Check file is text file or not
-func isTextFile(filename string) (bool, error) {
+func IsTextFile(filename string) (bool, error) {
 	file, err := os.Open(filename)
 	if err != nil {
 		return false, err
@@ -186,14 +184,14 @@ func isTextFile(filename string) (bool, error) {
 	if err != nil && !errors.Is(err, io.EOF) {
 		return false, err
 	}
-	return isBufferPrintable(buffer[:cnt]), nil
+	return IsBufferPrintable(buffer[:cnt]), nil
 }
 
 // Although some characters like `\x0b`(vertical tab) are printable,
 // previewing them breaks the layout.
 // So, among the "non-graphic" printable characters, we only need \n and \t
 // Space and NBSP are already considered graphic by unicode.
-func makePrintable(line string) string {
+func MakePrintable(line string) string {
 	var sb strings.Builder
 	// This has to be looped byte-wise, looping it rune-wise
 	// or by using strings.Map would cause issues with strings like

@@ -16,82 +16,17 @@ import (
 	"time"
 
 	"github.com/yorukot/superfile/src/internal/common"
-	"github.com/yorukot/superfile/src/internal/common/utils"
+	"github.com/yorukot/superfile/src/internal/utils"
 
 	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/x/exp/term/ansi"
 	"github.com/yorukot/ansichroma"
 	"github.com/yorukot/superfile/src/config/icon"
 	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
 )
 
 func (m *model) sidebarRender() string {
-	if common.Config.SidebarWidth == 0 {
-		return ""
-	}
-	slog.Debug("Rendering sidebar.", "cursor", m.sidebarModel.cursor,
-		"renderIndex", m.sidebarModel.renderIndex, "dirs count", len(m.sidebarModel.directories),
-		"sidebar focused", m.focusPanel == sidebarFocus)
-
-	s := common.SideBarSuperfileTitle + "\n"
-
-	if m.sidebarModel.searchBar.Focused() || m.sidebarModel.searchBar.Value() != "" || m.focusPanel == sidebarFocus {
-		m.sidebarModel.searchBar.Placeholder = "(" + common.Hotkeys.SearchBar[0] + ")" + " Search"
-		s += "\n" + ansi.Truncate(m.sidebarModel.searchBar.View(), common.Config.SidebarWidth-2, "...")
-	}
-
-	if m.sidebarModel.noActualDir() {
-		s += "\n" + common.SideBarNoneText
-	} else {
-		s += m.sidebarModel.directoriesRender(m.mainPanelHeight,
-			m.fileModel.filePanels[m.filePanelFocusIndex].location, m.focusPanel == sidebarFocus)
-	}
-	return common.SideBarBorderStyle(m.mainPanelHeight, m.focusPanel == sidebarFocus).Render(s)
-}
-
-func (s *sidebarModel) directoriesRender(mainPanelHeight int, curFilePanelFileLocation string, sideBarFocussed bool) string {
-	// Cursor should always point to a valid directory at this point
-	if s.isCursorInvalid() {
-		slog.Error("Unexpected situation in sideBar Model. "+
-			"Cursor is at invalid position, while there are valide directories", "cursor", s.cursor,
-			"directory count", len(s.directories))
-		return ""
-	}
-
-	res := ""
-	totalHeight := sideBarInitialHeight
-	for i := s.renderIndex; i < len(s.directories); i++ {
-		if totalHeight+s.directories[i].requiredHeight() > mainPanelHeight {
-			break
-		}
-		res += "\n"
-
-		totalHeight += s.directories[i].requiredHeight()
-
-		switch s.directories[i] {
-		case pinnedDividerDir:
-			res += "\n" + common.SideBarPinnedDivider
-		case diskDividerDir:
-			res += "\n" + common.SideBarDisksDivider
-		default:
-			cursor := " "
-			if s.cursor == i && sideBarFocussed && !s.searchBar.Focused() {
-				cursor = icon.Cursor
-			}
-			if s.renaming && s.cursor == i {
-				res += s.rename.View()
-			} else {
-				renderStyle := common.SidebarStyle
-				if s.directories[i].location == curFilePanelFileLocation {
-					renderStyle = common.SidebarSelectedStyle
-				}
-				res += common.FilePanelCursorStyle.Render(cursor+" ") +
-					renderStyle.Render(truncateText(s.directories[i].name, common.Config.SidebarWidth-2, "..."))
-			}
-		}
-	}
-	return res
+	return m.sidebarModel.Render(m.mainPanelHeight, m.focusPanel == sidebarFocus, m.fileModel.filePanels[m.filePanelFocusIndex].location)
 }
 
 // This also modifies the m.fileModel.filePanels, which it should not
@@ -108,7 +43,7 @@ func (m *model) filePanelRender() string {
 		}
 		m.fileModel.filePanels[i] = filePanel
 
-		f[i] += common.FilePanelTopDirectoryIconStyle.Render(" "+icon.Directory+icon.Space) + common.FilePanelTopPathStyle.Render(truncateTextBeginning(filePanel.location, m.fileModel.width-4, "...")) + "\n"
+		f[i] += common.FilePanelTopDirectoryIconStyle.Render(" "+icon.Directory+icon.Space) + common.FilePanelTopPathStyle.Render(common.TruncateTextBeginning(filePanel.location, m.fileModel.width-4, "...")) + "\n"
 		var filePanelWidth int
 		footerBorderWidth := m.fileModel.width + 15
 
@@ -194,7 +129,7 @@ func (m *model) filePanelRender() string {
 					f[i] += filePanel.rename.View() + endl
 				} else {
 					_, err := os.ReadDir(filePanel.element[h].location)
-					f[i] += common.FilePanelCursorStyle.Render(cursor+" ") + prettierName(filePanel.element[h].name, m.fileModel.width-5, filePanel.element[h].directory || (err == nil), isItemSelected, common.FilePanelBGColor) + endl
+					f[i] += common.FilePanelCursorStyle.Render(cursor+" ") + common.PrettierName(filePanel.element[h].name, m.fileModel.width-5, filePanel.element[h].directory || (err == nil), isItemSelected, common.FilePanelBGColor) + endl
 				}
 			}
 			cursorPosition := strconv.Itoa(filePanel.cursor + 1)
@@ -302,7 +237,7 @@ func (m *model) processBarRender() string {
 			symbol = common.ProcessCancelStyle.Render(icon.Error)
 		}
 
-		processRender += cursor + common.FooterStyle.Render(truncateText(curProcess.name, utils.FooterWidth(m.fullWidth)-7, "...")+" ") + symbol + "\n"
+		processRender += cursor + common.FooterStyle.Render(common.TruncateText(curProcess.name, utils.FooterWidth(m.fullWidth)-7, "...")+" ") + symbol + "\n"
 
 		processRender += cursor + curProcess.progress.ViewAs(float64(curProcess.done)/float64(curProcess.total)) + endSeparator
 	}
@@ -373,10 +308,10 @@ func (m *model) metadataRender() string {
 		if i != m.fileMetaData.renderIndex {
 			metaDataBar += "\n"
 		}
-		data := truncateMiddleText(m.fileMetaData.metaData[i][1], valueLength, "...")
+		data := common.TruncateMiddleText(m.fileMetaData.metaData[i][1], valueLength, "...")
 		metadataName := m.fileMetaData.metaData[i][0]
 		if utils.FooterWidth(m.fullWidth)-maxKeyLength-3 < utils.FooterWidth(m.fullWidth)/2 {
-			metadataName = truncateMiddleText(m.fileMetaData.metaData[i][0], valueLength, "...")
+			metadataName = common.TruncateMiddleText(m.fileMetaData.metaData[i][0], valueLength, "...")
 		}
 		metaDataBar += fmt.Sprintf("%-*s %s", sprintfLength, metadataName, data)
 	}
@@ -406,7 +341,7 @@ func (m *model) clipboardRender() string {
 					slog.Error("Clipboard render function get item state ", "error", err)
 				}
 				if !os.IsNotExist(err) {
-					clipboardRender += clipboardPrettierName(m.copyItems.items[i], utils.FooterWidth(m.fullWidth)-3, fileInfo.IsDir(), false)
+					clipboardRender += common.ClipboardPrettierName(m.copyItems.items[i], utils.FooterWidth(m.fullWidth)-3, fileInfo.IsDir(), false)
 				}
 			}
 		}
@@ -475,7 +410,7 @@ func (m *model) typineModalRender() string {
 	previewPath := filepath.Join(m.typingModal.location, m.typingModal.textInput.Value())
 
 	fileLocation := common.FilePanelTopDirectoryIconStyle.Render(" "+icon.Directory+icon.Space) +
-		common.FilePanelTopPathStyle.Render(truncateTextBeginning(previewPath, common.ModalWidth-4, "...")) + "\n"
+		common.FilePanelTopPathStyle.Render(common.TruncateTextBeginning(previewPath, common.ModalWidth-4, "...")) + "\n"
 
 	confirm := common.ModalConfirm.Render(" (" + common.Hotkeys.ConfirmTyping[0] + ") Create ")
 	cancel := common.ModalCancel.Render(" (" + common.Hotkeys.CancelTyping[0] + ") Cancel ")
@@ -573,7 +508,7 @@ func (m *model) helpMenuRender() string {
 		}
 
 		hotkey := ""
-		description := truncateText(m.helpMenu.data[i].description, valueLength, "...")
+		description := common.TruncateText(m.helpMenu.data[i].description, valueLength, "...")
 
 		for i, key := range m.helpMenu.data[i].hotkey {
 			if i != 0 {
@@ -627,7 +562,7 @@ func readFileContent(filepath string, maxLineLength int, previewLine int) (strin
 			line = line[:maxLineLength]
 		}
 		// This is critical to avoid layout break, removes non Printable ASCII control characters.
-		line = makePrintable(line)
+		line = common.MakePrintable(line)
 		resultBuilder.WriteString(line + "\n")
 		lineCount++
 		if previewLine > 0 && lineCount >= previewLine {
@@ -699,12 +634,12 @@ func (m *model) filePreviewPanelRender() string {
 
 		for i := 0; i < previewLine && i < len(files); i++ {
 			file := files[i]
-			directoryContent += prettierDirectoryPreviewName(file.Name(), file.IsDir(), common.FilePanelBGColor)
+			directoryContent += common.PrettierDirectoryPreviewName(file.Name(), file.IsDir(), common.FilePanelBGColor)
 			if i != previewLine-1 && i != len(files)-1 {
 				directoryContent += "\n"
 			}
 		}
-		directoryContent = checkAndTruncateLineLengths(directoryContent, m.fileModel.filePreview.width)
+		directoryContent = common.CheckAndTruncateLineLengths(directoryContent, m.fileModel.filePreview.width)
 		return box.Render(directoryContent)
 	}
 
@@ -734,7 +669,7 @@ func (m *model) filePreviewPanelRender() string {
 	format := lexers.Match(filepath.Base(itemPath))
 
 	if format == nil {
-		isText, err := isTextFile(itemPath)
+		isText, err := common.IsTextFile(itemPath)
 		if err != nil {
 			slog.Error("Error while checking text file", "error", err)
 			return box.Render("\n --- " + icon.Error + " Error get file info ---")
@@ -774,7 +709,7 @@ func (m *model) filePreviewPanelRender() string {
 		}
 	}
 
-	fileContent = checkAndTruncateLineLengths(fileContent, m.fileModel.filePreview.width)
+	fileContent = common.CheckAndTruncateLineLengths(fileContent, m.fileModel.filePreview.width)
 	return box.Render(fileContent)
 }
 
