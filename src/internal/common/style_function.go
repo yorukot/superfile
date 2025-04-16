@@ -237,6 +237,9 @@ func LoadHotkeysError(value string) string {
 	return lipgloss.NewStyle().Foreground(lipgloss.Color("#FF5555")).Render("■ ERROR: ") + "Hotkeys file \"" + lipgloss.NewStyle().Foreground(lipgloss.Color("#00D9FF")).Render(value) + "\" invalidation"
 }
 
+// Todo : Fix Code duplication in textInput.Model creation
+// This eventually caused a bug, where we created new model for sidebar search, and
+// Didn't set `Width` in that. Take Width and other parameters as input in one function
 // Generate search bar for file panel
 func GenerateSearchBar() textinput.Model {
 	ti := textinput.New()

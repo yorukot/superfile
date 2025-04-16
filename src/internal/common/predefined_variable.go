@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/x/exp/term/ansi"
 	"github.com/yorukot/superfile/src/config/icon"
 )
 
@@ -41,14 +40,11 @@ func LoadInitialPrerenderedVariables() {
 // loadConfigFile() in config_types.go should be finished
 // InitIcon() in config package in function.go should be finished
 func LoadPrerenderedVariables() {
-	SideBarSuperfileTitle = SidebarTitleStyle.Render("    " + icon.SuperfileIcon + " superfile")
-	SideBarSuperfileTitle = ansi.Truncate(SideBarSuperfileTitle, Config.SidebarWidth, "")
+	SideBarSuperfileTitle = SidebarTitleStyle.Render(" " + icon.SuperfileIcon + " superfile")
 
-	SideBarPinnedDivider = SidebarTitleStyle.Render("󰐃 Pinned") + SidebarDividerStyle.Render(" ───────────") + "\n"
-	SideBarPinnedDivider = ansi.Truncate(SideBarPinnedDivider, Config.SidebarWidth, "")
+	SideBarPinnedDivider = SidebarTitleStyle.Render("󰐃 Pinned") + SidebarDividerStyle.Render(" ───────────")
 
-	SideBarDisksDivider = SidebarTitleStyle.Render("󱇰 Disks") + SidebarDividerStyle.Render(" ────────────") + "\n"
-	SideBarDisksDivider = ansi.Truncate(SideBarDisksDivider, Config.SidebarWidth, "")
+	SideBarDisksDivider = SidebarTitleStyle.Render("󱇰 Disks") + SidebarDividerStyle.Render(" ────────────")
 
 	SideBarNoneText = SidebarStyle.Render(" " + icon.Error + " None")
 }
