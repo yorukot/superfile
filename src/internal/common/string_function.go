@@ -191,16 +191,28 @@ func IsTextFile(filename string) (bool, error) {
 // previewing them breaks the layout.
 // So, among the "non-graphic" printable characters, we only need \n and \t
 // Space and NBSP are already considered graphic by unicode.
-func MakePrintable(line string) string {
+// Allow Any rune that is above ASCII control characters range 0x7f
+// for valid unicodes like nerdfont \uf410 \U000f0868
+// Also allow \x0b that is for escape sequences
+func MakePrintableWithEscCheck(line string, allowEsc bool) string {
 	var sb strings.Builder
-	// This has to be looped byte-wise, looping it rune-wise
-	// or by using strings.Map would cause issues with strings like
-	// "(NBSP)\xa0"
-	for i := range len(line) {
-		r := rune(line[i])
-		if unicode.IsGraphic(r) || r == rune('\t') || r == rune('\n') {
-			sb.WriteByte(line[i])
+	for _, r := range line {
+		if r == utf8.RuneError {
+			continue
+		}
+		if r > 0x7f || unicode.IsGraphic(r) ||
+			r == rune('\t') || r == rune('\n') || (allowEsc && r == rune('\x1b')) {
+			sb.WriteRune(r)
 		}
 	}
 	return sb.String()
+}
+
+func MakePrintable(line string) string {
+	// Todo : Need to evaluate if defaul behaviour of allowing ESC can be a problem
+	// If you disallow ESC, then you would see ansi codes afer \x1b and it will look ugly
+	// But thats only for files with that kind of data, and its rare.
+	// And yazi does it too.
+	// We will keep it false only if it can cause a rendering problem
+	return MakePrintableWithEscCheck(line, true)
 }

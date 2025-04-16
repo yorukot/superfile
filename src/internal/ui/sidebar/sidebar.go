@@ -108,9 +108,15 @@ func (s *Model) UpdateDirectories() {
 
 // New creates a new sidebar model with the given parameters
 func New() Model {
-	return Model{
+	res := Model{
 		renderIndex: 0,
 		directories: getDirectories(),
 		searchBar:   common.GenerateSearchBar(),
 	}
+
+	// Excluding borders(2), Searchbar Prompt(2), and one extra character than is appended
+	// by searchBar.View()
+	res.searchBar.Width = common.Config.SidebarWidth - 2 - 2 - 1
+	res.searchBar.Placeholder = "(" + common.Hotkeys.SearchBar[0] + ")" + " Search"
+	return res
 }
