@@ -9,7 +9,7 @@
    <br>
    <br>
    <a href="https://www.warp.dev/?utm_source=github&utm_medium=referral&utm_campaign=superfile">
-      <img alt="Warp sponsorship" width="500" src="https://github.com/user-attachments/assets/ab8dd143-b0fd-4904-bdc5-dd7ecac94eae">
+      <img alt="Warp sponsorship" width="500" src="/asset/warp.png">
    </a>
 
 ### [Warp, the AI terminal for developers](https://www.warp.dev/?utm_source=github&utm_medium=referral&utm_campaign=superfile)
