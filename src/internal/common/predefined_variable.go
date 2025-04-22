@@ -26,7 +26,10 @@ var (
 	SideBarPinnedDivider  string
 	SideBarDisksDivider   string
 	SideBarNoneText       string
-	LipglossError         string
+
+	ProcessBarNoneText string
+
+	LipglossError string
 )
 
 // No dependencies
@@ -35,7 +38,8 @@ func LoadInitialPrerenderedVariables() {
 		lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFEE")).Render(" ┃ ")
 }
 
-// Dependecies
+// Dependecies - Todo We should programmatically guarantee these dependencies. And log error
+// if its not satisfied.
 // LoadThemeConfig() in style.go should be finished
 // loadConfigFile() in config_types.go should be finished
 // InitIcon() in config package in function.go should be finished
@@ -47,4 +51,6 @@ func LoadPrerenderedVariables() {
 	SideBarDisksDivider = SidebarTitleStyle.Render("󱇰 Disks") + SidebarDividerStyle.Render(" ────────────")
 
 	SideBarNoneText = SidebarStyle.Render(" " + icon.Error + " None")
+
+	ProcessBarNoneText = icon.Error + "  No processes running"
 }

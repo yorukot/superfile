@@ -11,7 +11,14 @@ import (
 
 type Renderer struct {
 	content ContentRenderer
-	border  BorderConfig
+
+	// Border should not be coupled with content at all. A separate struct is better
+	// If you want a borderless content, you will have all these extra variables
+	// Renderer's interaction with Border isn't related to content , so usage as a separate
+	// struct is okay ?
+	// No... Border itself is not an independent renderer. You need width and height
+	// If you want to save memory, use pointers
+	border BorderConfig
 
 	// Should this go in contentRenderer - No . ContentRenderer is not for storing style configs
 	contentFGColor lipgloss.Color
@@ -38,7 +45,7 @@ func (r *Renderer) AddLineWithCustomTruncate(line string, truncateStyle Truncate
 	r.content.AddLineWithCustomTruncate(line, truncateStyle)
 }
 
-func (r *Renderer) UpdateBorderTitle(title string) {
+func (r *Renderer) SetBorderTitle(title string) {
 	r.border.SetTitle(title)
 }
 
@@ -66,7 +73,7 @@ func (r *Renderer) Style() lipgloss.Style {
 		Height(r.content.maxLines)
 
 	if r.borderRequired {
-		s = s.Border(r.border.lipglossBorder).
+		s = s.Border(r.border.GetBorder()).
 			BorderForeground(r.borderFGColor).
 			BorderBackground(r.borderBGColor)
 	}
@@ -88,7 +95,7 @@ func NewRenderer(totalHeight int, totalWidth int, borderRequired bool, truncateS
 	}
 	return Renderer{
 		content: NewContentRenderer(contentLines, contentWidth, truncateStyle),
-		border:  NewBorderConfig(),
+		border:  NewBorderConfig(totalWidth, totalHeight),
 
 		contentFGColor: contentFGColor,
 		contentBGColor: contentBGColor,
@@ -109,4 +116,18 @@ func SidebarRenderer(totalHeight int, totalWidth int, sidebarFocussed bool) Rend
 	}
 	return NewRenderer(totalHeight, totalWidth, true, PlainTruncateRight,
 		common.SidebarFGColor, common.SidebarBGColor, borderFG, common.SidebarBGColor)
+}
+
+// Todo : Move to diff package
+func ProcessBarRenderer(totalHeight int, totalWidth int, processBarFocussed bool) Renderer {
+	borderFGColor := common.FooterBorderColor
+	if processBarFocussed {
+		borderFGColor = common.FooterBorderActiveColor
+	}
+
+	r := NewRenderer(totalHeight, totalWidth, true, PlainTruncateRight,
+		common.FooterFGColor, common.FooterBGColor, borderFGColor, common.FooterBGColor)
+	r.SetBorderTitle("Process")
+
+	return r
 }

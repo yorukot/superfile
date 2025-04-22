@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/ui/rendering"
 	"github.com/yorukot/superfile/src/internal/utils"
 
 	"github.com/alecthomas/chroma/v2/lexers"
@@ -153,9 +154,20 @@ func (m *model) processBarRender() string {
 			"cursor", m.processBarModel.cursor, "footerHeight", m.footerHeight)
 	}
 
+	r := rendering.ProcessBarRenderer(m.footerHeight+2, utils.FooterWidth(m.fullWidth)+2, m.focusPanel == processBarFocus)
+
+	// cursor's value itself cannot be used as its zero indexed
+	cursorNumber := 0
+	// Todo : Instead of directly accessing slice, there should be a method .IsEmpty() , or .CntProcess()
+	if len(m.processBarModel.processList) != 0 {
+		cursorNumber = m.processBarModel.cursor + 1
+	}
+
+	item := fmt.Sprintf("%s/%s", strconv.Itoa(cursorNumber), strconv.Itoa(len(m.processBarModel.processList)))
+	r.SetBorderInfoItems([]string{item})
 	if len(m.processBarModel.processList) == 0 {
-		processRender := "\n " + icon.Error + "  No processes running"
-		return m.wrapProcessBardBorder(processRender)
+		r.AddLines("", " "+common.ProcessBarNoneText)
+		return r.Render()
 	}
 
 	// save process in the array and sort the process by finished or not,
@@ -190,42 +202,28 @@ func (m *model) processBarRender() string {
 		return processes[j].doneTime.Before(processes[i].doneTime)
 	})
 
-	// render
-	processRender := ""
 	renderedHeight := 0
 
 	for i := m.processBarModel.render; i < len(processes); i++ {
-		// Cant render any more processes
-
 		// We allow rendering of a process if we have at least 2 lines left
-		// Then we dont add a separator newline
 		if m.footerHeight < renderedHeight+2 {
 			break
 		}
 		renderedHeight += 3
-		endSeparator := "\n\n"
-
-		// Last process, but can render full in three lines
-		// Although there is no next process, so dont add extra newline
-		if m.footerHeight == renderedHeight {
-			endSeparator = "\n"
-		}
-
-		// Cant add newline after last process. Only have two lines
-		if m.footerHeight < renderedHeight {
-			endSeparator = ""
-			renderedHeight--
-		}
 
 		curProcess := processes[i]
 		curProcess.progress.Width = utils.FooterWidth(m.fullWidth) - 3
+
+		// Todo : get them via a separate function.
 		var symbol string
 		var cursor string
 		if i == m.processBarModel.cursor {
+			// Todo : Prerender it.
 			cursor = common.FooterCursorStyle.Render("┃ ")
 		} else {
 			cursor = common.FooterCursorStyle.Render("  ")
 		}
+		// Todo : Prerender
 		switch curProcess.state {
 		case failure:
 			symbol = common.ProcessErrorStyle.Render(icon.Warn)
@@ -237,23 +235,11 @@ func (m *model) processBarRender() string {
 			symbol = common.ProcessCancelStyle.Render(icon.Error)
 		}
 
-		processRender += cursor + common.FooterStyle.Render(common.TruncateText(curProcess.name, utils.FooterWidth(m.fullWidth)-7, "...")+" ") + symbol + "\n"
-
-		processRender += cursor + curProcess.progress.ViewAs(float64(curProcess.done)/float64(curProcess.total)) + endSeparator
+		r.AddLines(cursor + common.FooterStyle.Render(common.TruncateText(curProcess.name, utils.FooterWidth(m.fullWidth)-7, "...")+" ") + symbol)
+		r.AddLines(cursor+curProcess.progress.ViewAs(float64(curProcess.done)/float64(curProcess.total)), "")
 	}
 
-	return m.wrapProcessBardBorder(processRender)
-}
-
-func (m *model) wrapProcessBardBorder(processRender string) string {
-	courseNumber := 0
-	if len(m.processBarModel.processList) != 0 {
-		courseNumber = m.processBarModel.cursor + 1
-	}
-	bottomBorder := common.GenerateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(courseNumber), strconv.Itoa(len(m.processBarModel.processList))), utils.FooterWidth(m.fullWidth)-3)
-	processRender = common.ProcsssBarBorder(m.footerHeight, utils.FooterWidth(m.fullWidth), bottomBorder, m.focusPanel == processBarFocus).Render(processRender)
-
-	return processRender
+	return r.Render()
 }
 
 // This updates m.fileMetaData
