@@ -163,6 +163,7 @@ func (m *model) processBarRender() string {
 		cursorNumber = m.processBarModel.cursor + 1
 	}
 
+	// Todo : Use %d, not this
 	item := fmt.Sprintf("%s/%s", strconv.Itoa(cursorNumber), strconv.Itoa(len(m.processBarModel.processList)))
 	r.SetBorderInfoItems([]string{item})
 	if len(m.processBarModel.processList) == 0 {
@@ -245,15 +246,16 @@ func (m *model) processBarRender() string {
 // This updates m.fileMetaData
 func (m *model) metadataRender() string {
 	// process bar
-	metaDataBar := ""
 	if len(m.fileMetaData.metaData) == 0 && len(m.fileModel.filePanels[m.filePanelFocusIndex].element) > 0 && !m.fileModel.renaming {
 		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"", ""})
 		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{" " + icon.InOperation + "  Loading metadata...", ""})
+		// Todo : This needs to be improved, we are updating m.fileMetaData is a separate goroutine
+		// while also modifying it here in the function. It could cause issues.
 		go func() {
 			m.returnMetaData()
 		}()
 	}
-	maxKeyLength := 0
+	
 	// Todo : The whole intention of this is to get the comparisonFields come before
 	// other fields. Sorting like this is a bad way of achieving that. This can be improved
 	sort.Slice(m.fileMetaData.metaData, func(i, j int) bool {
@@ -272,6 +274,9 @@ func (m *model) metadataRender() string {
 		// Default comparison
 		return m.fileMetaData.metaData[i][0] < m.fileMetaData.metaData[j][0]
 	})
+
+	// Part where actual rendering happens.
+	maxKeyLength := 0
 	for _, data := range m.fileMetaData.metaData {
 		if len(data[0]) > maxKeyLength {
 			maxKeyLength = len(data[0])
@@ -287,61 +292,53 @@ func (m *model) metadataRender() string {
 		valueLength = utils.FooterWidth(m.fullWidth)/2 - 2
 		sprintfLength = valueLength
 	}
-
+	r := rendering.MetadataRenderer(m.footerHeight+2, utils.FooterWidth(m.fullWidth) + 2, m.focusPanel == metadataFocus)
+	// Todo : Take that as input in metadata renderer constructor 
+	// Todo : Use %d, not this
+	r.SetBorderInfoItems([]string{fmt.Sprintf("%s/%s", strconv.Itoa(m.fileMetaData.renderIndex+1), strconv.Itoa(len(m.fileMetaData.metaData)))})
+	
 	imax := min(m.footerHeight+m.fileMetaData.renderIndex, len(m.fileMetaData.metaData))
 	for i := m.fileMetaData.renderIndex; i < imax; i++ {
-		// Newline separator before all entries except first
-		if i != m.fileMetaData.renderIndex {
-			metaDataBar += "\n"
-		}
 		data := common.TruncateMiddleText(m.fileMetaData.metaData[i][1], valueLength, "...")
 		metadataName := m.fileMetaData.metaData[i][0]
 		if utils.FooterWidth(m.fullWidth)-maxKeyLength-3 < utils.FooterWidth(m.fullWidth)/2 {
 			metadataName = common.TruncateMiddleText(m.fileMetaData.metaData[i][0], valueLength, "...")
 		}
-		metaDataBar += fmt.Sprintf("%-*s %s", sprintfLength, metadataName, data)
+		r.AddLines(fmt.Sprintf("%-*s %s", sprintfLength, metadataName, data))
 	}
-	bottomBorder := common.GenerateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(m.fileMetaData.renderIndex+1), strconv.Itoa(len(m.fileMetaData.metaData))), utils.FooterWidth(m.fullWidth)-3)
-	metaDataBar = common.MetadataBorder(m.footerHeight, utils.FooterWidth(m.fullWidth), bottomBorder, m.focusPanel == metadataFocus).Render(metaDataBar)
-
-	return metaDataBar
+	return r.Render()
 }
 
 func (m *model) clipboardRender() string {
 	// render
-	clipboardRender := ""
-	if len(m.copyItems.items) == 0 {
-		clipboardRender += "\n " + icon.Error + "  No content in clipboard"
-	} else {
-		for i := 0; i < len(m.copyItems.items) && i < m.footerHeight; i++ {
-			// Newline separator before all entries except first
-			if i != 0 {
-				clipboardRender += "\n"
-			}
-			if i == m.footerHeight-1 && i != len(m.copyItems.items)-1 {
-				// Last Entry we can render, but there are more that one left
-				clipboardRender += strconv.Itoa(len(m.copyItems.items)-i) + " item left...."
-			} else {
-				fileInfo, err := os.Stat(m.copyItems.items[i])
-				if err != nil {
-					slog.Error("Clipboard render function get item state ", "error", err)
-				}
-				if !os.IsNotExist(err) {
-					clipboardRender += common.ClipboardPrettierName(m.copyItems.items[i], utils.FooterWidth(m.fullWidth)-3, fileInfo.IsDir(), false)
-				}
-			}
-		}
-	}
-
 	var bottomWidth int
 	if m.fullWidth%3 != 0 {
 		bottomWidth = utils.FooterWidth(m.fullWidth + m.fullWidth%3 + 2)
 	} else {
 		bottomWidth = utils.FooterWidth(m.fullWidth)
 	}
-	clipboardRender = common.ClipboardBorder(m.footerHeight, bottomWidth, common.Config.BorderBottom).Render(clipboardRender)
-
-	return clipboardRender
+	r := rendering.ClipboardRenderer(m.footerHeight+2, bottomWidth+2)
+	if len(m.copyItems.items) == 0 {
+		// Todo move this to a string
+		r.AddLines("", " " + icon.Error + "  No content in clipboard")
+	} else {
+		for i := 0; i < len(m.copyItems.items) && i < m.footerHeight; i++ {
+			if i == m.footerHeight-1 && i != len(m.copyItems.items)-1 {
+				// Last Entry we can render, but there are more that one left
+				r.AddLines(strconv.Itoa(len(m.copyItems.items)-i) + " item left....")
+			} else {
+				fileInfo, err := os.Stat(m.copyItems.items[i])
+				if err != nil {
+					slog.Error("Clipboard render function get item state ", "error", err)
+				}
+				if !os.IsNotExist(err) {
+					// Todo : There is an inconsistency in parameter that is being passed, and its name in ClipboardPrettierName function
+					r.AddLines(common.ClipboardPrettierName(m.copyItems.items[i], utils.FooterWidth(m.fullWidth)-3, fileInfo.IsDir(), false))
+				}
+			}
+		}
+	}
+	return r.Render()
 }
 
 func (m *model) terminalSizeWarnRender() string {

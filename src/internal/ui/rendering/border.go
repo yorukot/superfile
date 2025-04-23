@@ -8,7 +8,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/x/exp/term/ansi"
 	"github.com/mattn/go-runewidth"
-	"github.com/yorukot/superfile/src/internal/common"
 )
 
 type BorderConfig struct {
@@ -23,7 +22,7 @@ type BorderConfig struct {
 	// Optional info items at the bottom of the border
 	infoItems []string
 
-	bordeStrings lipgloss.Border
+	borderStrings lipgloss.Border
 
 	// Including corners. Both should be >= 2
 	width  int
@@ -36,6 +35,7 @@ func (b *BorderConfig) SetTitle(title string) {
 	b.title = ansi.Strip(title)
 }
 
+// Todo - take varidiac args
 func (b *BorderConfig) SetInfoItems(infoItems []string) {
 	for i := range infoItems {
 		infoItems[i] = ansi.Strip(infoItems[i])
@@ -48,7 +48,7 @@ func (b *BorderConfig) SetInfoItems(infoItems []string) {
 // multiple things like corner characters must be single rune, or else it would break things.
 // Todo - Write thorough unit tests that have bigger title which needs to be truncated.
 func (b *BorderConfig) GetBorder() lipgloss.Border {
-	res := b.bordeStrings
+	res := b.borderStrings
 
 	// width excluding corners
 	actualWidth := b.width - 2
@@ -67,13 +67,13 @@ func (b *BorderConfig) GetBorder() lipgloss.Border {
 
 		margin := ""
 		if remainingWidth > b.titleLeftMargin {
-			margin = strings.Repeat(b.bordeStrings.Top, b.titleLeftMargin)
+			margin = strings.Repeat(b.borderStrings.Top, b.titleLeftMargin)
 			remainingWidth -= b.titleLeftMargin
 		}
 
 		// Title alignment is by default Left for now
-		res.Top = margin + b.bordeStrings.MiddleRight + " " + truncatedTitle + " " + b.bordeStrings.MiddleLeft +
-			strings.Repeat(b.bordeStrings.Top, remainingWidth)
+		res.Top = margin + b.borderStrings.MiddleRight + " " + truncatedTitle + " " + b.borderStrings.MiddleLeft +
+			strings.Repeat(b.borderStrings.Top, remainingWidth)
 	}
 
 	cnt := len(b.infoItems)
@@ -92,43 +92,28 @@ func (b *BorderConfig) GetBorder() lipgloss.Border {
 		infoText := ""
 		for _, item := range b.infoItems {
 			item = runewidth.Truncate(item, availWidth, "")
-			infoText += b.bordeStrings.MiddleRight + item + b.bordeStrings.MiddleLeft
+			infoText += b.borderStrings.MiddleRight + item + b.borderStrings.MiddleLeft
 		}
 
 		// Fill the rest with border char.
 		remainingWidth := actualWidth - runewidth.StringWidth(infoText)
 
-		res.Bottom = strings.Repeat(b.bordeStrings.Bottom, remainingWidth) + infoText
+		res.Bottom = strings.Repeat(b.borderStrings.Bottom, remainingWidth) + infoText
 
 		slog.Debug("Border rendering", "bottom len", len(res.Bottom),
 			"actualWidth", actualWidth, "infoText Len", len(infoText),
 			"bottom", res.Bottom, "bottom bytes", fmt.Sprintf("%v", []byte(res.Bottom)))
 	}
-
 	return res
 }
 
-func NewBorderConfig(width int, height int) BorderConfig {
+func NewBorderConfig(height int, width int, borderStrings lipgloss.Border) BorderConfig {
 	return BorderConfig{
-		bordeStrings:    DefaultLipglossBorder(),
-		width:           width,
+		borderStrings:   borderStrings,
 		height:          height,
+		width:           width,
 		titleLeftMargin: 1,
 	}
 }
 
-// Todo : Maybe this doesn't belongs in here ? Put it in style functions ?
-func DefaultLipglossBorder() lipgloss.Border {
-	return lipgloss.Border{
-		Top:         common.Config.BorderTop,
-		Bottom:      common.Config.BorderBottom,
-		Left:        common.Config.BorderLeft,
-		Right:       common.Config.BorderRight,
-		TopLeft:     common.Config.BorderTopLeft,
-		TopRight:    common.Config.BorderTopRight,
-		BottomLeft:  common.Config.BorderBottomLeft,
-		BottomRight: common.Config.BorderBottomRight,
-		MiddleLeft:  common.Config.BorderMiddleLeft,
-		MiddleRight: common.Config.BorderMiddleRight,
-	}
-}
+

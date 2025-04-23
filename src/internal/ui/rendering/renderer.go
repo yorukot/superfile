@@ -1,12 +1,12 @@
 package rendering
 
 import (
+	"fmt"
 	"log/slog"
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/x/exp/term/ansi"
-	"github.com/yorukot/superfile/src/internal/common"
 )
 
 type Renderer struct {
@@ -21,23 +21,33 @@ type Renderer struct {
 	border BorderConfig
 
 	// Should this go in contentRenderer - No . ContentRenderer is not for storing style configs
-	contentFGColor lipgloss.Color
-	contentBGColor lipgloss.Color
+	contentFGColor lipgloss.TerminalColor
+	contentBGColor lipgloss.TerminalColor
 
 	// Should this go in borderConfig ?
-	borderFGColor lipgloss.Color
-	borderBGColor lipgloss.Color
+	borderFGColor lipgloss.TerminalColor
+	borderBGColor lipgloss.TerminalColor
 
 	// Final rendered string should have exactly this many lines, including borders
 	totalHeight int
 	// Every line should have at most this many characters, including borders
 	totalWidth     int
 	borderRequired bool
+
+	// Dont add any colors.
+	// Todo : Is it needed, Is using .Foreground(lipgloss.NoColor{}) equivalent to not Using .Foreground()
+	noColor bool
 }
 
 // Add lines as much as the remaining capacity allows
 func (r *Renderer) AddLines(lines ...string) {
 	r.content.AddLines(lines...)
+}
+
+// Lines until now will belong to current section, and
+// Any new lines will belong to a new section
+func (r *Renderer) AddSection() {
+
 }
 
 // Truncate would always preserve ansi codes.
@@ -73,61 +83,93 @@ func (r *Renderer) Style() lipgloss.Style {
 		Height(r.content.maxLines)
 
 	if r.borderRequired {
-		s = s.Border(r.border.GetBorder()).
-			BorderForeground(r.borderFGColor).
-			BorderBackground(r.borderBGColor)
+		s = s.Border(r.border.GetBorder())
+
+		if !r.noColor {
+			s = s.BorderForeground(r.borderFGColor).
+				BorderBackground(r.borderBGColor)
+		}
 	}
-	s = s.Background(r.contentBGColor).
-		Foreground(r.contentFGColor)
+	if !r.noColor {
+		s = s.Background(r.contentBGColor).
+			Foreground(r.contentFGColor)
+	}
 	return s
 }
 
-func NewRenderer(totalHeight int, totalWidth int, borderRequired bool, truncateStyle TruncateStyle,
-	contentFGColor lipgloss.Color, contentBGColor lipgloss.Color,
-	borderFGColor lipgloss.Color, borderBGColor lipgloss.Color) Renderer {
-	contentLines := totalHeight
-	if borderRequired {
+type RendererConfig struct{
+	TotalHeight int 
+	TotalWidth int 
+	
+	DefTruncateStyle TruncateStyle
+
+	BorderRequired bool
+
+	ContentFGColor lipgloss.TerminalColor
+	ContentBGColor lipgloss.TerminalColor
+
+	BorderFGColor lipgloss.TerminalColor
+	BorderBGColor lipgloss.TerminalColor
+
+	Border lipgloss.Border
+}
+
+func DefaultRendererConfig(totalHeight int, totalWidth int) RendererConfig {
+	return RendererConfig{
+		TotalHeight: totalHeight,
+		TotalWidth:  totalWidth,
+		BorderRequired: false,
+		DefTruncateStyle: PlainTruncateRight,
+		ContentFGColor: lipgloss.NoColor{},
+		ContentBGColor: lipgloss.NoColor{},
+		BorderFGColor: lipgloss.NoColor{},
+		BorderBGColor: lipgloss.NoColor{},
+	}
+}
+
+func NewRenderer(cfg RendererConfig) Renderer {
+	
+	// Validations of config
+	cfg, err := ValidateAndFix(cfg)
+	if err != nil {
+		// Config cannot be fixed. Too bad
+		panic(fmt.Sprintf("Invalid renderer config : %v", err))
+	}
+
+	contentLines := cfg.TotalHeight
+	if cfg.BorderRequired {
 		contentLines -= 2
 	}
-	contentWidth := totalWidth
-	if borderRequired {
+	contentWidth := cfg.TotalWidth
+	if cfg.BorderRequired {
 		contentWidth -= 2
 	}
+
 	return Renderer{
-		content: NewContentRenderer(contentLines, contentWidth, truncateStyle),
-		border:  NewBorderConfig(totalWidth, totalHeight),
+		content: NewContentRenderer(contentLines, contentWidth, cfg.DefTruncateStyle),
+		border:  NewBorderConfig(cfg.TotalHeight, cfg.TotalWidth, cfg.Border),
+		
+		contentFGColor: cfg.ContentFGColor,
+		contentBGColor: cfg.ContentBGColor,
+		borderFGColor: cfg.BorderFGColor,
+		borderBGColor: cfg.BorderBGColor,
 
-		contentFGColor: contentFGColor,
-		contentBGColor: contentBGColor,
-		borderFGColor:  borderFGColor,
-		borderBGColor:  borderBGColor,
+		totalHeight: cfg.TotalHeight,
+		totalWidth: cfg.TotalWidth,
 
-		totalWidth:     totalWidth,
-		totalHeight:    totalHeight,
-		borderRequired: borderRequired,
+		borderRequired: cfg.BorderRequired,
 	}
 }
 
-// Todo : rendering package should not be aware of sidebar
-func SidebarRenderer(totalHeight int, totalWidth int, sidebarFocussed bool) Renderer {
-	borderFG := common.SidebarBorderColor
-	if sidebarFocussed {
-		borderFG = common.SidebarBorderActiveColor
-	}
-	return NewRenderer(totalHeight, totalWidth, true, PlainTruncateRight,
-		common.SidebarFGColor, common.SidebarBGColor, borderFG, common.SidebarBGColor)
+// Log any fix that is needed
+// Todo : What is better ? This or pass by pointer ?
+// Does passing by pointer means object has to be moved to heap ?
+func ValidateAndFix(cfg RendererConfig) (RendererConfig, error) {
+	// Todo : Validations
+	// 1 - Width and Height should be >=2 if border is required
+	// 2 - Border should have single runewidth strings 
+
+
+	return cfg, nil
 }
 
-// Todo : Move to diff package
-func ProcessBarRenderer(totalHeight int, totalWidth int, processBarFocussed bool) Renderer {
-	borderFGColor := common.FooterBorderColor
-	if processBarFocussed {
-		borderFGColor = common.FooterBorderActiveColor
-	}
-
-	r := NewRenderer(totalHeight, totalWidth, true, PlainTruncateRight,
-		common.FooterFGColor, common.FooterBGColor, borderFGColor, common.FooterBGColor)
-	r.SetBorderTitle("Process")
-
-	return r
-}
