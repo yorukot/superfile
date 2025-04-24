@@ -9,7 +9,10 @@ import (
 
 // This is not zero safe. Please only use New function
 type ContentRenderer struct {
-	lines    []string
+	lines []string
+
+	// Allow at max this much lines. If there are less lines
+	// the Render() will still only return content with line count of len(lines)
 	maxLines int
 	// Every line should have at most this many characters
 	maxLineWidth    int
@@ -19,12 +22,17 @@ type ContentRenderer struct {
 	truncateStyle TruncateStyle
 }
 
+func (r *ContentRenderer) CntLines() int {
+	return len(r.lines)
+}
+
 func (r *ContentRenderer) AddLines(lines ...string) {
 	for _, line := range lines {
 		r.AddLineWithCustomTruncate(line, r.truncateStyle)
 	}
 }
 
+// Todo : Maybe better return error ?
 // AddLineWithCustomTruncate adds lines to the renderer, truncating each line according to the specified style.
 // It does not trims whitespace, and its possible to add multiple empty lines using this.
 func (r *ContentRenderer) AddLineWithCustomTruncate(lineStr string, truncateStyle TruncateStyle) {

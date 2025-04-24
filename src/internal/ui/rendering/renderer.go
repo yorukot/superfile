@@ -9,8 +9,26 @@ import (
 	"github.com/charmbracelet/x/exp/term/ansi"
 )
 
+// For now we are not allowing to add/update/remove lines to previous sections
+// We may allow that later.
+// Also we could have functions about getting sections count, line count, adding updating a
+// specific line in a specific section, and adjusting section sizes. But not needed now.
 type Renderer struct {
-	content ContentRenderer
+
+	// Current sectionization will not allow to predefine section
+	// but only allow adding them via AddSection(). Hence trucateWill be applicable to
+	// last section only.
+	contentSections []ContentRenderer
+
+	// Empty for last section . len(sectionDividers) should be equal to len(contentSections) - 1
+	sectionDividers []string
+	curSectionIdx   int
+	// Including Dividers - Count of actual lines that were added. It maybe <= totalHeight - 2
+	actualContentHeight int
+	defTruncateStyle    TruncateStyle
+
+	// Whether to reduce rendered height to fit number of lines
+	truncateHeight bool
 
 	// Border should not be coupled with content at all. A separate struct is better
 	// If you want a borderless content, you will have all these extra variables
@@ -28,11 +46,19 @@ type Renderer struct {
 	borderFGColor lipgloss.TerminalColor
 	borderBGColor lipgloss.TerminalColor
 
+	// Maybe better rename these to maxHeight
 	// Final rendered string should have exactly this many lines, including borders
+	// But if truncateHeight is true, it maybe be <= totalHeight
 	totalHeight int
 	// Every line should have at most this many characters, including borders
-	totalWidth     int
+	totalWidth int
+
+	contentHeight int
+	contentWidth  int
+
 	borderRequired bool
+
+	borderStrings lipgloss.Border
 
 	// Dont add any colors.
 	// Todo : Is it needed, Is using .Foreground(lipgloss.NoColor{}) equivalent to not Using .Foreground()
@@ -41,18 +67,38 @@ type Renderer struct {
 
 // Add lines as much as the remaining capacity allows
 func (r *Renderer) AddLines(lines ...string) {
-	r.content.AddLines(lines...)
+	r.contentSections[r.curSectionIdx].AddLines(lines...)
 }
 
 // Lines until now will belong to current section, and
 // Any new lines will belong to a new section
 func (r *Renderer) AddSection() {
+	// r.actualContentHeight before this point only includes sections
+	// before r.curSectionIdx
+	r.actualContentHeight += r.contentSections[r.curSectionIdx].CntLines()
 
+	// Silently Fail if cannot add
+	if r.contentHeight <= r.actualContentHeight {
+		slog.Error("Cannot add any more sections", "actualHeight", r.actualContentHeight,
+			"contentHeight", r.contentHeight)
+		return
+	}
+
+	// Add divider
+	r.border.AddDivider(r.actualContentHeight)
+	r.sectionDividers = append(r.sectionDividers, strings.Repeat(r.borderStrings.Top, r.contentWidth))
+	r.actualContentHeight++
+
+	remainingHeight := r.contentHeight - r.actualContentHeight
+	r.contentSections = append(r.contentSections,
+		NewContentRenderer(remainingHeight, r.contentWidth, r.defTruncateStyle))
+	// Adjust index
+	r.curSectionIdx++
 }
 
 // Truncate would always preserve ansi codes.
 func (r *Renderer) AddLineWithCustomTruncate(line string, truncateStyle TruncateStyle) {
-	r.content.AddLineWithCustomTruncate(line, truncateStyle)
+	r.contentSections[r.curSectionIdx].AddLineWithCustomTruncate(line, truncateStyle)
 }
 
 func (r *Renderer) SetBorderTitle(title string) {
@@ -63,8 +109,34 @@ func (r *Renderer) SetBorderInfoItems(infoItems []string) {
 	r.border.SetInfoItems(infoItems)
 }
 
+// Should not do any updates on 'r'
 func (r *Renderer) Render() string {
-	res := r.Style().Render(r.content.Render())
+	// Todo : Do a validate before performing render
+	// Check that 	contentSections []ContentRenderer
+	// len(sectionDividers) should be equal to len(contentSections) - 1
+	// curSectionIdx is okay
+	// actualContentHeight is <= contentHeight
+	content := strings.Builder{}
+	for i := range r.contentSections {
+		// After every iteration, current cursor will be on next newline
+		curContent := r.contentSections[i].Render()
+		content.WriteString(curContent)
+		// == "" check cant differentiate between no data, vs empty line
+		if r.contentSections[i].CntLines() > 0 {
+			content.WriteString("\n")
+		}
+
+		if i < len(r.contentSections)-1 {
+			// True for all except last section
+			content.WriteString(r.sectionDividers[i])
+			content.WriteString("\n")
+		}
+	}
+	contentStr := strings.TrimSuffix(content.String(), "\n")
+
+	slog.Debug("contentStr is", "contentStr", contentStr)
+
+	res := r.Style().Render(contentStr)
 
 	maxW := 0
 	for line := range strings.Lines(res) {
@@ -78,12 +150,16 @@ func (r *Renderer) Render() string {
 }
 
 func (r *Renderer) Style() lipgloss.Style {
+	contentHeight := r.contentHeight
+	if r.truncateHeight {
+		contentHeight = r.actualContentHeight
+	}
 	s := lipgloss.NewStyle().
-		Width(r.content.maxLineWidth).
-		Height(r.content.maxLines)
+		Width(r.contentWidth).
+		Height(contentHeight)
 
 	if r.borderRequired {
-		s = s.Border(r.border.GetBorder())
+		s = s.Border(r.border.GetBorder(r.borderStrings))
 
 		if !r.noColor {
 			s = s.BorderForeground(r.borderFGColor).
@@ -97,13 +173,13 @@ func (r *Renderer) Style() lipgloss.Style {
 	return s
 }
 
-type RendererConfig struct{
-	TotalHeight int 
-	TotalWidth int 
-	
-	DefTruncateStyle TruncateStyle
+type RendererConfig struct {
+	TotalHeight int
+	TotalWidth  int
 
-	BorderRequired bool
+	DefTruncateStyle TruncateStyle
+	TruncateHeight   bool
+	BorderRequired   bool
 
 	ContentFGColor lipgloss.TerminalColor
 	ContentBGColor lipgloss.TerminalColor
@@ -116,19 +192,19 @@ type RendererConfig struct{
 
 func DefaultRendererConfig(totalHeight int, totalWidth int) RendererConfig {
 	return RendererConfig{
-		TotalHeight: totalHeight,
-		TotalWidth:  totalWidth,
-		BorderRequired: false,
+		TotalHeight:      totalHeight,
+		TotalWidth:       totalWidth,
+		TruncateHeight:   false,
+		BorderRequired:   false,
 		DefTruncateStyle: PlainTruncateRight,
-		ContentFGColor: lipgloss.NoColor{},
-		ContentBGColor: lipgloss.NoColor{},
-		BorderFGColor: lipgloss.NoColor{},
-		BorderBGColor: lipgloss.NoColor{},
+		ContentFGColor:   lipgloss.NoColor{},
+		ContentBGColor:   lipgloss.NoColor{},
+		BorderFGColor:    lipgloss.NoColor{},
+		BorderBGColor:    lipgloss.NoColor{},
 	}
 }
 
 func NewRenderer(cfg RendererConfig) Renderer {
-	
 	// Validations of config
 	cfg, err := ValidateAndFix(cfg)
 	if err != nil {
@@ -136,9 +212,9 @@ func NewRenderer(cfg RendererConfig) Renderer {
 		panic(fmt.Sprintf("Invalid renderer config : %v", err))
 	}
 
-	contentLines := cfg.TotalHeight
+	contentHeight := cfg.TotalHeight
 	if cfg.BorderRequired {
-		contentLines -= 2
+		contentHeight -= 2
 	}
 	contentWidth := cfg.TotalWidth
 	if cfg.BorderRequired {
@@ -146,18 +222,28 @@ func NewRenderer(cfg RendererConfig) Renderer {
 	}
 
 	return Renderer{
-		content: NewContentRenderer(contentLines, contentWidth, cfg.DefTruncateStyle),
-		border:  NewBorderConfig(cfg.TotalHeight, cfg.TotalWidth, cfg.Border),
-		
+
+		contentSections:     []ContentRenderer{NewContentRenderer(contentHeight, contentWidth, cfg.DefTruncateStyle)},
+		sectionDividers:     nil,
+		curSectionIdx:       0,
+		actualContentHeight: 0,
+		defTruncateStyle:    cfg.DefTruncateStyle,
+		truncateHeight:      cfg.TruncateHeight,
+
+		border: NewBorderConfig(cfg.TotalHeight, cfg.TotalWidth),
+
 		contentFGColor: cfg.ContentFGColor,
 		contentBGColor: cfg.ContentBGColor,
-		borderFGColor: cfg.BorderFGColor,
-		borderBGColor: cfg.BorderBGColor,
+		borderFGColor:  cfg.BorderFGColor,
+		borderBGColor:  cfg.BorderBGColor,
 
-		totalHeight: cfg.TotalHeight,
-		totalWidth: cfg.TotalWidth,
+		totalHeight:   cfg.TotalHeight,
+		totalWidth:    cfg.TotalWidth,
+		contentHeight: contentHeight,
+		contentWidth:  contentWidth,
 
 		borderRequired: cfg.BorderRequired,
+		borderStrings:  cfg.Border,
 	}
 }
 
@@ -167,9 +253,14 @@ func NewRenderer(cfg RendererConfig) Renderer {
 func ValidateAndFix(cfg RendererConfig) (RendererConfig, error) {
 	// Todo : Validations
 	// 1 - Width and Height should be >=2 if border is required
-	// 2 - Border should have single runewidth strings 
-
+	// 2 - Border should have single runewidth strings
+	if cfg.BorderRequired {
+		if cfg.TotalWidth < 2 || cfg.TotalHeight < 2 {
+			cfg.TotalHeight = 0
+			cfg.TotalWidth = 0
+			cfg.BorderRequired = false
+		}
+	}
 
 	return cfg, nil
 }
-

@@ -255,7 +255,7 @@ func (m *model) metadataRender() string {
 			m.returnMetaData()
 		}()
 	}
-	
+
 	// Todo : The whole intention of this is to get the comparisonFields come before
 	// other fields. Sorting like this is a bad way of achieving that. This can be improved
 	sort.Slice(m.fileMetaData.metaData, func(i, j int) bool {
@@ -292,11 +292,11 @@ func (m *model) metadataRender() string {
 		valueLength = utils.FooterWidth(m.fullWidth)/2 - 2
 		sprintfLength = valueLength
 	}
-	r := rendering.MetadataRenderer(m.footerHeight+2, utils.FooterWidth(m.fullWidth) + 2, m.focusPanel == metadataFocus)
-	// Todo : Take that as input in metadata renderer constructor 
+	r := rendering.MetadataRenderer(m.footerHeight+2, utils.FooterWidth(m.fullWidth)+2, m.focusPanel == metadataFocus)
+	// Todo : Take that as input in metadata renderer constructor
 	// Todo : Use %d, not this
 	r.SetBorderInfoItems([]string{fmt.Sprintf("%s/%s", strconv.Itoa(m.fileMetaData.renderIndex+1), strconv.Itoa(len(m.fileMetaData.metaData)))})
-	
+
 	imax := min(m.footerHeight+m.fileMetaData.renderIndex, len(m.fileMetaData.metaData))
 	for i := m.fileMetaData.renderIndex; i < imax; i++ {
 		data := common.TruncateMiddleText(m.fileMetaData.metaData[i][1], valueLength, "...")
@@ -320,7 +320,7 @@ func (m *model) clipboardRender() string {
 	r := rendering.ClipboardRenderer(m.footerHeight+2, bottomWidth+2)
 	if len(m.copyItems.items) == 0 {
 		// Todo move this to a string
-		r.AddLines("", " " + icon.Error + "  No content in clipboard")
+		r.AddLines("", " "+icon.Error+"  No content in clipboard")
 	} else {
 		for i := 0; i < len(m.copyItems.items) && i < m.footerHeight; i++ {
 			if i == m.footerHeight-1 && i != len(m.copyItems.items)-1 {

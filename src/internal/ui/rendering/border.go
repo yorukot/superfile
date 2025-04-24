@@ -22,7 +22,10 @@ type BorderConfig struct {
 	// Optional info items at the bottom of the border
 	infoItems []string
 
-	borderStrings lipgloss.Border
+	// Section dividers - A slice of values within [0,height-2]
+	// Signifying usage of MiddleLeft and MiddleRight borders in Left and Right borders for
+	// Section divider line.
+	dividerIdx []int
 
 	// Including corners. Both should be >= 2
 	width  int
@@ -43,15 +46,20 @@ func (b *BorderConfig) SetInfoItems(infoItems []string) {
 	b.infoItems = infoItems
 }
 
+func (b *BorderConfig) AddDivider(idx int) {
+	b.dividerIdx = append(b.dividerIdx, idx)
+}
+
 // Todo - unit test with border.Top with something that takes up more than 1 runewidth
 // Sadly that might now work, so maybe only allow 1 runewidth for now, in the config ?
 // multiple things like corner characters must be single rune, or else it would break things.
 // Todo - Write thorough unit tests that have bigger title which needs to be truncated.
-func (b *BorderConfig) GetBorder() lipgloss.Border {
-	res := b.borderStrings
+func (b *BorderConfig) GetBorder(borderStrings lipgloss.Border) lipgloss.Border {
+	res := borderStrings
 
-	// width excluding corners
+	// excluding corners
 	actualWidth := b.width - 2
+	actualHeight := b.height - 2
 
 	// Min 5 width is needed for title so that at least one character can be
 	// rendered
@@ -67,13 +75,13 @@ func (b *BorderConfig) GetBorder() lipgloss.Border {
 
 		margin := ""
 		if remainingWidth > b.titleLeftMargin {
-			margin = strings.Repeat(b.borderStrings.Top, b.titleLeftMargin)
+			margin = strings.Repeat(borderStrings.Top, b.titleLeftMargin)
 			remainingWidth -= b.titleLeftMargin
 		}
 
 		// Title alignment is by default Left for now
-		res.Top = margin + b.borderStrings.MiddleRight + " " + truncatedTitle + " " + b.borderStrings.MiddleLeft +
-			strings.Repeat(b.borderStrings.Top, remainingWidth)
+		res.Top = margin + borderStrings.MiddleRight + " " + truncatedTitle + " " + borderStrings.MiddleLeft +
+			strings.Repeat(borderStrings.Top, remainingWidth)
 	}
 
 	cnt := len(b.infoItems)
@@ -92,28 +100,46 @@ func (b *BorderConfig) GetBorder() lipgloss.Border {
 		infoText := ""
 		for _, item := range b.infoItems {
 			item = runewidth.Truncate(item, availWidth, "")
-			infoText += b.borderStrings.MiddleRight + item + b.borderStrings.MiddleLeft
+			infoText += borderStrings.MiddleRight + item + borderStrings.MiddleLeft
 		}
 
 		// Fill the rest with border char.
 		remainingWidth := actualWidth - runewidth.StringWidth(infoText)
 
-		res.Bottom = strings.Repeat(b.borderStrings.Bottom, remainingWidth) + infoText
+		res.Bottom = strings.Repeat(borderStrings.Bottom, remainingWidth) + infoText
 
 		slog.Debug("Border rendering", "bottom len", len(res.Bottom),
 			"actualWidth", actualWidth, "infoText Len", len(infoText),
 			"bottom", res.Bottom, "bottom bytes", fmt.Sprintf("%v", []byte(res.Bottom)))
 	}
+
+	if len(b.dividerIdx) > 0 {
+		// Update res.Left and res.Right
+		leftBorder := strings.Builder{}
+		rightBorder := strings.Builder{}
+		di := 0
+		for i := range actualHeight {
+			if di < len(b.dividerIdx) && b.dividerIdx[di] == i {
+				di++
+				leftBorder.WriteString(borderStrings.MiddleLeft)
+				rightBorder.WriteString(borderStrings.MiddleRight)
+			} else {
+				leftBorder.WriteString(borderStrings.Left)
+				rightBorder.WriteString(borderStrings.Right)
+			}
+		}
+
+		res.Left = leftBorder.String()
+		res.Right = rightBorder.String()
+	}
+
 	return res
 }
 
-func NewBorderConfig(height int, width int, borderStrings lipgloss.Border) BorderConfig {
+func NewBorderConfig(height int, width int) BorderConfig {
 	return BorderConfig{
-		borderStrings:   borderStrings,
 		height:          height,
 		width:           width,
 		titleLeftMargin: 1,
 	}
 }
-
-

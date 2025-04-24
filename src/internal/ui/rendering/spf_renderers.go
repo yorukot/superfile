@@ -12,7 +12,7 @@ func SidebarRenderer(totalHeight int, totalWidth int, sidebarFocussed bool) Rend
 	cfg.ContentFGColor = common.SidebarFGColor
 	cfg.ContentBGColor = common.SidebarBGColor
 
-	cfg.BorderRequired = true 
+	cfg.BorderRequired = true
 	cfg.BorderBGColor = common.SidebarBGColor
 	cfg.BorderFGColor = common.SidebarBorderColor
 	if sidebarFocussed {
@@ -26,11 +26,11 @@ func SidebarRenderer(totalHeight int, totalWidth int, sidebarFocussed bool) Rend
 // Todo : Move to diff package
 func DefaultFooterRenderer(totalHeight int, totalWidth int, focussed bool) Renderer {
 	cfg := DefaultRendererConfig(totalHeight, totalWidth)
-	
+
 	cfg.ContentFGColor = common.FooterFGColor
 	cfg.ContentBGColor = common.FooterBGColor
 
-	cfg.BorderRequired = true 
+	cfg.BorderRequired = true
 	cfg.BorderBGColor = common.FooterBGColor
 	cfg.BorderFGColor = common.FooterBorderColor
 	if focussed {
