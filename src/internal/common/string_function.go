@@ -209,7 +209,7 @@ func MakePrintableWithEscCheck(line string, allowEsc bool) string {
 }
 
 func MakePrintable(line string) string {
-	// Todo : Need to evaluate if defaul behaviour of allowing ESC can be a problem
+	// We assume default behaviour of allowing ESC is not  a problem
 	// If you disallow ESC, then you would see ansi codes afer \x1b and it will look ugly
 	// But thats only for files with that kind of data, and its rare.
 	// And yazi does it too.

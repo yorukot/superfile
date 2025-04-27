@@ -3,6 +3,8 @@ package sidebar
 import (
 	"log/slog"
 
+	"github.com/yorukot/superfile/src/internal/ui"
+
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
@@ -17,7 +19,7 @@ func (s *Model) Render(mainPanelHeight int, sidebarFocussed bool, currentFilePan
 		"renderIndex", s.renderIndex, "dirs count", len(s.directories),
 		"sidebar focused", sidebarFocussed)
 
-	r := rendering.SidebarRenderer(mainPanelHeight+2, common.Config.SidebarWidth+2, sidebarFocussed)
+	r := ui.SidebarRenderer(mainPanelHeight+2, common.Config.SidebarWidth+2, sidebarFocussed)
 
 	r.AddLines(common.SideBarSuperfileTitle, "")
 
@@ -28,7 +30,7 @@ func (s *Model) Render(mainPanelHeight int, sidebarFocussed bool, currentFilePan
 	if s.NoActualDir() {
 		r.AddLines(common.SideBarNoneText)
 	} else {
-		s.directoriesRender(mainPanelHeight, currentFilePanelLocation, sidebarFocussed, &r)
+		s.directoriesRender(mainPanelHeight, currentFilePanelLocation, sidebarFocussed, r)
 	}
 	return r.Render()
 }

@@ -45,7 +45,6 @@ func ValidateConfig(c *ConfigType) error {
 		return errors.New(LoadConfigError("default_sort_type"))
 	}
 
-	// Todo : Add this clarification in config.toml
 	if runewidth.StringWidth(c.BorderTop) != 1 {
 		return errors.New(LoadConfigError("border_top"))
 	}

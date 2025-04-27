@@ -30,7 +30,7 @@ var (
 	ProcessBarNoneText string
 
 	FilePanelTopDirectoryIcon string
-	FilePanleNoneText         string
+	FilePanelNoneText         string
 
 	LipglossError string
 )
@@ -58,5 +58,5 @@ func LoadPrerenderedVariables() {
 	ProcessBarNoneText = icon.Error + "  No processes running"
 
 	FilePanelTopDirectoryIcon = FilePanelTopDirectoryIconStyle.Render(" " + icon.Directory + icon.Space)
-	FilePanleNoneText = FilePanelStyle.Render(" " + icon.Error + "  No such file or directory")
+	FilePanelNoneText = FilePanelStyle.Render(" " + icon.Error + "  No such file or directory")
 }

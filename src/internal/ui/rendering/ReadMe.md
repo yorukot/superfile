@@ -6,22 +6,8 @@ This package should not not import any other UI package, and should have minimal
 It also should not be even in-directly coupled with any UI components. Assume anything like color, style, border config of any other UI component change. This package should not have any changes.
 
 # To-dos
-x Rename to rendering package
-x Sectionization
-x Dynamic Height / Height truncation
-- Complete unit tests ?
-x Use in filepanel
-x Use in prompt
-- Fix empty border issue
-
-- Fix expensive debug logs
-- Finish Code todos
-- One self review
-- sanity testing 
-- Windows testing ?
-- Rabbit AI comments
+- [ ] Use rendering package for other models like sort Menu, Help menu, etc.
 
 
 # Notes
-- Prefer Test Driven development
 - Can we move this whole thing into a good useful TUI library outside of this repo ?. At least code it in a way that it can be moved

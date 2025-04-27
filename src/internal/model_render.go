@@ -15,8 +15,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/yorukot/superfile/src/internal/ui"
+
 	"github.com/yorukot/superfile/src/internal/common"
-	"github.com/yorukot/superfile/src/internal/ui/rendering"
 	"github.com/yorukot/superfile/src/internal/utils"
 
 	"github.com/alecthomas/chroma/v2/lexers"
@@ -34,9 +35,7 @@ func (m *model) sidebarRender() string {
 // what modifications we do on this model object are of no consequence.
 // Since bubblea passed this 'model' by value in View() function.
 func (m *model) filePanelRender() string {
-	// file panel
-	// Todo : this 10 should be replaced with len(m.fileModel.filePanels)
-	f := make([]string, 10)
+	res := ""
 	for i, filePanel := range m.fileModel.filePanels {
 		// check if cursor or render out of range
 		// Todo - instead of this, have a filepanel.validateAndFix(), and log Error
@@ -47,10 +46,9 @@ func (m *model) filePanelRender() string {
 		}
 		m.fileModel.filePanels[i] = filePanel
 
-		f[i] += common.FilePanelTopDirectoryIconStyle.Render(" "+icon.Directory+icon.Space) + common.FilePanelTopPathStyle.Render(common.TruncateTextBeginning(filePanel.location, m.fileModel.width-4, "...")) + "\n"
-		var filePanelWidth int
 		// Todo : Move this to a utility function and clarify the calculation via comments
 		// Maybe even write unit tests
+		var filePanelWidth int
 		if (m.fullWidth-common.Config.SidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels) != 0 && i == len(m.fileModel.filePanels)-1 {
 			if m.fileModel.filePreview.open {
 				filePanelWidth = m.fileModel.width
@@ -61,19 +59,14 @@ func (m *model) filePanelRender() string {
 			filePanelWidth = m.fileModel.width
 		}
 
-		f[i] = filePanel.Render(m.mainPanelHeight, filePanelWidth, filePanel.focusType != noneFocus)
+		res = lipgloss.JoinHorizontal(lipgloss.Top, res,
+			filePanel.Render(m.mainPanelHeight, filePanelWidth, filePanel.focusType != noneFocus))
 	}
-
-	// file panel render together
-	filePanelRender := ""
-	for _, f := range f {
-		filePanelRender = lipgloss.JoinHorizontal(lipgloss.Top, filePanelRender, f)
-	}
-	return filePanelRender
+	return res
 }
 
 func (panel *filePanel) Render(mainPanelHeight int, filePanelWidth int, focussed bool) string {
-	r := rendering.FilePanelRenderer(mainPanelHeight+2, filePanelWidth+2, focussed)
+	r := ui.FilePanelRenderer(mainPanelHeight+2, filePanelWidth+2, focussed)
 
 	// Todo - Add ansitruncate left in renderer and remove truncation here
 	r.AddLines(common.FilePanelTopDirectoryIcon + common.FilePanelTopPathStyle.Render(
@@ -144,7 +137,7 @@ func (panel *filePanel) Render(mainPanelHeight int, filePanelWidth int, focussed
 	}
 
 	if len(panel.element) == 0 {
-		r.AddLines(common.FilePanleNoneText)
+		r.AddLines(common.FilePanelNoneText)
 	} else {
 		for h := panel.render; h < panel.render+panelElementHeight(mainPanelHeight) && h < len(panel.element); h++ {
 			cursor := " "
@@ -173,7 +166,7 @@ func (m *model) processBarRender() string {
 			"cursor", m.processBarModel.cursor, "footerHeight", m.footerHeight)
 	}
 
-	r := rendering.ProcessBarRenderer(m.footerHeight+2, utils.FooterWidth(m.fullWidth)+2, m.focusPanel == processBarFocus)
+	r := ui.ProcessBarRenderer(m.footerHeight+2, utils.FooterWidth(m.fullWidth)+2, m.focusPanel == processBarFocus)
 
 	// cursor's value itself cannot be used as its zero indexed
 	cursorNumber := 0
@@ -309,10 +302,13 @@ func (m *model) metadataRender() string {
 		valueLength = utils.FooterWidth(m.fullWidth)/2 - 2
 		sprintfLength = valueLength
 	}
-	r := rendering.MetadataRenderer(m.footerHeight+2, utils.FooterWidth(m.fullWidth)+2, m.focusPanel == metadataFocus)
-	// Todo : Take that as input in metadata renderer constructor
-	// Todo : Use %d, not this
-	r.SetBorderInfoItems(fmt.Sprintf("%s/%s", strconv.Itoa(m.fileMetaData.renderIndex+1), strconv.Itoa(len(m.fileMetaData.metaData))))
+	r := ui.MetadataRenderer(m.footerHeight+2, utils.FooterWidth(m.fullWidth)+2, m.focusPanel == metadataFocus)
+	// Todo : We can take this info as input in metadata renderer constructor
+	renderIndex := m.fileMetaData.renderIndex
+	if len(m.fileMetaData.metaData) > 0 {
+		renderIndex++
+	}
+	r.SetBorderInfoItems(fmt.Sprintf("%d/%d", renderIndex, len(m.fileMetaData.metaData)))
 
 	imax := min(m.footerHeight+m.fileMetaData.renderIndex, len(m.fileMetaData.metaData))
 	for i := m.fileMetaData.renderIndex; i < imax; i++ {
@@ -334,7 +330,7 @@ func (m *model) clipboardRender() string {
 	} else {
 		bottomWidth = utils.FooterWidth(m.fullWidth)
 	}
-	r := rendering.ClipboardRenderer(m.footerHeight+2, bottomWidth+2)
+	r := ui.ClipboardRenderer(m.footerHeight+2, bottomWidth+2)
 	if len(m.copyItems.items) == 0 {
 		// Todo move this to a string
 		r.AddLines("", " "+icon.Error+"  No content in clipboard")

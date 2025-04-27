@@ -1,12 +1,9 @@
 package rendering
 
 import (
-	"fmt"
-	"log/slog"
-	"strings"
+	"errors"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/x/exp/term/ansi"
 )
 
 // For now we are not allowing to add/update/remove lines to previous sections
@@ -59,126 +56,6 @@ type Renderer struct {
 	borderRequired bool
 
 	borderStrings lipgloss.Border
-
-	// Dont add any colors.
-	// Todo : Is it needed, Is using .Foreground(lipgloss.NoColor{}) equivalent to not Using .Foreground()
-	noColor bool
-}
-
-// Add lines as much as the remaining capacity allows
-func (r *Renderer) AddLines(lines ...string) {
-	r.contentSections[r.curSectionIdx].AddLines(lines...)
-}
-
-// Lines until now will belong to current section, and
-// Any new lines will belong to a new section
-func (r *Renderer) AddSection() {
-	// r.actualContentHeight before this point only includes sections
-	// before r.curSectionIdx
-	r.actualContentHeight += r.contentSections[r.curSectionIdx].CntLines()
-
-	// Silently Fail if cannot add
-	if r.contentHeight <= r.actualContentHeight {
-		slog.Error("Cannot add any more sections", "actualHeight", r.actualContentHeight,
-			"contentHeight", r.contentHeight)
-		return
-	}
-
-	// Add divider
-	r.border.AddDivider(r.actualContentHeight)
-	// sectionDivider should be of borderstyle
-	r.sectionDividers = append(r.sectionDividers, lipgloss.NewStyle().
-		Foreground(r.borderFGColor).
-		Background(r.borderBGColor).
-		Render(strings.Repeat(r.borderStrings.Top, r.contentWidth)))
-	r.actualContentHeight++
-
-	remainingHeight := r.contentHeight - r.actualContentHeight
-	r.contentSections = append(r.contentSections,
-		NewContentRenderer(remainingHeight, r.contentWidth, r.defTruncateStyle))
-	// Adjust index
-	r.curSectionIdx++
-}
-
-// Truncate would always preserve ansi codes.
-func (r *Renderer) AddLineWithCustomTruncate(line string, truncateStyle TruncateStyle) {
-	r.contentSections[r.curSectionIdx].AddLineWithCustomTruncate(line, truncateStyle)
-}
-
-func (r *Renderer) SetBorderTitle(title string) {
-	r.border.SetTitle(title)
-}
-
-func (r *Renderer) SetBorderInfoItems(infoItems ...string) {
-	r.border.SetInfoItems(infoItems...)
-}
-
-func (r *Renderer) AreInfoItemsTruncated() bool {
-	return r.border.AreInfoItemsTruncated()
-}
-
-// Should not do any updates on 'r'
-func (r *Renderer) Render() string {
-	// Todo : Do a validate before performing render
-	// Check that 	contentSections []ContentRenderer
-	// len(sectionDividers) should be equal to len(contentSections) - 1
-	// curSectionIdx is okay
-	// actualContentHeight is <= contentHeight
-	content := strings.Builder{}
-	for i := range r.contentSections {
-		// After every iteration, current cursor will be on next newline
-		curContent := r.contentSections[i].Render()
-		content.WriteString(curContent)
-		// == "" check cant differentiate between no data, vs empty line
-		if r.contentSections[i].CntLines() > 0 {
-			content.WriteString("\n")
-		}
-
-		if i < len(r.contentSections)-1 {
-			// True for all except last section
-			content.WriteString(r.sectionDividers[i])
-			content.WriteString("\n")
-		}
-	}
-	contentStr := strings.TrimSuffix(content.String(), "\n")
-
-	slog.Debug("contentStr is", "contentStr", contentStr)
-
-	res := r.Style().Render(contentStr)
-
-	maxW := 0
-	for line := range strings.Lines(res) {
-		maxW = max(maxW, ansi.StringWidth(line))
-	}
-	lineCnt := strings.Count(res, "\n") + 1
-	slog.Debug("Rendered output", "line count", lineCnt, "totalHeight", r.totalHeight,
-		"totalWidth", r.totalWidth, "maxW", maxW)
-
-	return res
-}
-
-func (r *Renderer) Style() lipgloss.Style {
-	contentHeight := r.contentHeight
-	if r.truncateHeight {
-		contentHeight = r.actualContentHeight
-	}
-	s := lipgloss.NewStyle().
-		Width(r.contentWidth).
-		Height(contentHeight)
-
-	if r.borderRequired {
-		s = s.Border(r.border.GetBorder(r.borderStrings))
-
-		if !r.noColor {
-			s = s.BorderForeground(r.borderFGColor).
-				BorderBackground(r.borderBGColor)
-		}
-	}
-	if !r.noColor {
-		s = s.Background(r.contentBGColor).
-			Foreground(r.contentFGColor)
-	}
-	return s
 }
 
 type RendererConfig struct {
@@ -212,12 +89,9 @@ func DefaultRendererConfig(totalHeight int, totalWidth int) RendererConfig {
 	}
 }
 
-func NewRenderer(cfg RendererConfig) Renderer {
-	// Validations of config
-	cfg, err := ValidateAndFix(cfg)
-	if err != nil {
-		// Config cannot be fixed. Too bad
-		panic(fmt.Sprintf("Invalid renderer config : %v", err))
+func NewRenderer(cfg RendererConfig) (*Renderer, error) {
+	if err := Validate(cfg); err != nil {
+		return nil, err
 	}
 
 	contentHeight := cfg.TotalHeight
@@ -229,7 +103,7 @@ func NewRenderer(cfg RendererConfig) Renderer {
 		contentWidth -= 2
 	}
 
-	return Renderer{
+	return &Renderer{
 
 		contentSections:     []ContentRenderer{NewContentRenderer(contentHeight, contentWidth, cfg.DefTruncateStyle)},
 		sectionDividers:     nil,
@@ -252,23 +126,14 @@ func NewRenderer(cfg RendererConfig) Renderer {
 
 		borderRequired: cfg.BorderRequired,
 		borderStrings:  cfg.Border,
-	}
+	}, nil
 }
 
-// Log any fix that is needed
-// Todo : What is better ? This or pass by pointer ?
-// Does passing by pointer means object has to be moved to heap ?
-func ValidateAndFix(cfg RendererConfig) (RendererConfig, error) {
-	// Todo : Validations
-	// 1 - Width and Height should be >=2 if border is required
-	// 2 - Border should have single runewidth strings
+func Validate(cfg RendererConfig) error {
 	if cfg.BorderRequired {
 		if cfg.TotalWidth < 2 || cfg.TotalHeight < 2 {
-			cfg.TotalHeight = 0
-			cfg.TotalWidth = 0
-			cfg.BorderRequired = false
+			return errors.New("need at least 2 width and height for borders")
 		}
 	}
-
-	return cfg, nil
+	return nil
 }

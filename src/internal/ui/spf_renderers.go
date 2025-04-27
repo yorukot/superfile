@@ -1,13 +1,15 @@
-package rendering
+package ui
 
 import (
+	"log/slog"
+
 	"github.com/charmbracelet/lipgloss"
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/ui/rendering"
 )
 
-// Todo : rendering package should not be aware of sidebar
-func SidebarRenderer(totalHeight int, totalWidth int, sidebarFocussed bool) Renderer {
-	cfg := DefaultRendererConfig(totalHeight, totalWidth)
+func SidebarRenderer(totalHeight int, totalWidth int, sidebarFocussed bool) *rendering.Renderer {
+	cfg := rendering.DefaultRendererConfig(totalHeight, totalWidth)
 
 	cfg.ContentFGColor = common.SidebarFGColor
 	cfg.ContentBGColor = common.SidebarBGColor
@@ -20,11 +22,16 @@ func SidebarRenderer(totalHeight int, totalWidth int, sidebarFocussed bool) Rend
 	}
 	cfg.Border = DefaultLipglossBorder()
 
-	return NewRenderer(cfg)
+	r, err := rendering.NewRenderer(cfg)
+	if err != nil {
+		slog.Error("Error in creating renderer. Falling back to default renderer", "error", err)
+		r = &rendering.Renderer{}
+	}
+	return r
 }
 
-func FilePanelRenderer(totalHeight int, totalWidth int, filePanelFocussed bool) Renderer {
-	cfg := DefaultRendererConfig(totalHeight, totalWidth)
+func FilePanelRenderer(totalHeight int, totalWidth int, filePanelFocussed bool) *rendering.Renderer {
+	cfg := rendering.DefaultRendererConfig(totalHeight, totalWidth)
 
 	cfg.ContentFGColor = common.FilePanelFGColor
 	cfg.ContentBGColor = common.FilePanelBGColor
@@ -37,11 +44,16 @@ func FilePanelRenderer(totalHeight int, totalWidth int, filePanelFocussed bool) 
 	}
 	cfg.Border = DefaultLipglossBorder()
 
-	return NewRenderer(cfg)
+	r, err := rendering.NewRenderer(cfg)
+	if err != nil {
+		slog.Error("Error in creating renderer. Falling back to default renderer", "error", err)
+		r = &rendering.Renderer{}
+	}
+	return r
 }
 
-func PromptRenderer(totalHeight int, totalWidth int) Renderer {
-	cfg := DefaultRendererConfig(totalHeight, totalWidth)
+func PromptRenderer(totalHeight int, totalWidth int) *rendering.Renderer {
+	cfg := rendering.DefaultRendererConfig(totalHeight, totalWidth)
 	cfg.TruncateHeight = true
 	cfg.ContentFGColor = common.ModalFGColor
 	cfg.ContentBGColor = common.ModalBGColor
@@ -52,12 +64,16 @@ func PromptRenderer(totalHeight int, totalWidth int) Renderer {
 
 	cfg.Border = DefaultLipglossBorder()
 
-	return NewRenderer(cfg)
+	r, err := rendering.NewRenderer(cfg)
+	if err != nil {
+		slog.Error("Error in creating renderer. Falling back to default renderer", "error", err)
+		r = &rendering.Renderer{}
+	}
+	return r
 }
 
-// Todo : Move to diff package
-func DefaultFooterRenderer(totalHeight int, totalWidth int, focussed bool) Renderer {
-	cfg := DefaultRendererConfig(totalHeight, totalWidth)
+func DefaultFooterRenderer(totalHeight int, totalWidth int, focussed bool) *rendering.Renderer {
+	cfg := rendering.DefaultRendererConfig(totalHeight, totalWidth)
 
 	cfg.ContentFGColor = common.FooterFGColor
 	cfg.ContentBGColor = common.FooterBGColor
@@ -70,30 +86,32 @@ func DefaultFooterRenderer(totalHeight int, totalWidth int, focussed bool) Rende
 	}
 	cfg.Border = DefaultLipglossBorder()
 
-	return NewRenderer(cfg)
-}
-
-func ProcessBarRenderer(totalHeight int, totalWidth int, processBarFocussed bool) Renderer {
-	r := DefaultFooterRenderer(totalHeight, totalWidth, processBarFocussed)
-	r.SetBorderTitle("Process")
+	r, err := rendering.NewRenderer(cfg)
+	if err != nil {
+		slog.Error("Error in creating renderer. Falling back to default renderer", "error", err)
+		r = &rendering.Renderer{}
+	}
 	return r
 }
 
-func MetadataRenderer(totalHeight int, totalWidth int, metadataFocussed bool) Renderer {
+func ProcessBarRenderer(totalHeight int, totalWidth int, processBarFocussed bool) *rendering.Renderer {
+	r := DefaultFooterRenderer(totalHeight, totalWidth, processBarFocussed)
+	r.SetBorderTitle("Processes")
+	return r
+}
+
+func MetadataRenderer(totalHeight int, totalWidth int, metadataFocussed bool) *rendering.Renderer {
 	r := DefaultFooterRenderer(totalHeight, totalWidth, metadataFocussed)
-	// Todo : Move hardcoded string to constant
 	r.SetBorderTitle("Metadata")
 	return r
 }
 
-func ClipboardRenderer(totalHeight int, totalWidth int) Renderer {
+func ClipboardRenderer(totalHeight int, totalWidth int) *rendering.Renderer {
 	r := DefaultFooterRenderer(totalHeight, totalWidth, false)
-	// Todo : Move hardcoded string to constant
 	r.SetBorderTitle("Clipboard")
 	return r
 }
 
-// Todo : Maybe this doesn't belongs in here ? Put it in style functions ?
 func DefaultLipglossBorder() lipgloss.Border {
 	return lipgloss.Border{
 		Top:         common.Config.BorderTop,

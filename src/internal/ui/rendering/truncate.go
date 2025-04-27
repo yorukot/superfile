@@ -16,8 +16,6 @@ const (
 )
 
 func TruncateBasedOnStyle(line string, maxWidth int, truncateStyle TruncateStyle) string {
-	// Todo : Do we need ansi.Width check ?
-
 	switch truncateStyle {
 	case PlainTruncateRight:
 		return ansi.Truncate(line, maxWidth, "")

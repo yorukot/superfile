@@ -6,11 +6,11 @@ import (
 	"slices"
 	"strings"
 
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/yorukot/superfile/src/internal/common"
-	"github.com/yorukot/superfile/src/internal/ui/rendering"
+	"github.com/yorukot/superfile/src/internal/ui"
 
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/yorukot/superfile/src/config/icon"
+	"github.com/yorukot/superfile/src/internal/common"
 )
 
 func DefaultModel() Model {
@@ -119,7 +119,7 @@ func (m *Model) HandleSPFActionResults(success bool, msg string) {
 }
 
 func (m *Model) Render(maxHeight int, width int) string {
-	r := rendering.PromptRenderer(maxHeight, width)
+	r := ui.PromptRenderer(maxHeight, width)
 	r.SetBorderTitle(m.headline + modeString(m.shellMode))
 	r.AddLines(" " + shellPrompt(m.shellMode) + " " + m.textInput.View())
 

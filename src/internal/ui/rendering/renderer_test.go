@@ -6,6 +6,7 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/yorukot/superfile/src/internal/utils"
 )
 
@@ -47,8 +48,9 @@ func getDefaultTestRendererConfig(totalHeight int, totalWidth int, borderRequire
 	return cfg
 }
 
-func getDefaultTestRenderer(totalHeight int, totalWidth int, borderRequired bool) Renderer {
-	return NewRenderer(getDefaultTestRendererConfig(totalHeight, totalWidth, borderRequired, false))
+func getDefaultTestRenderer(totalHeight int, totalWidth int, borderRequired bool) *Renderer {
+	r, _ := NewRenderer(getDefaultTestRendererConfig(totalHeight, totalWidth, borderRequired, false))
+	return r
 }
 
 func TestRendererBasic(t *testing.T) {
@@ -77,13 +79,9 @@ func TestRendererBasic(t *testing.T) {
 	})
 
 	t.Run("Invalid config Renderer", func(t *testing.T) {
-		r := getDefaultTestRenderer(0, 0, true)
-		r.AddLines("L1")
-		r.AddLines("L2--Extra line should truncated")
-		r.AddLines("L3--Extra line should not be added")
-		res := r.Render()
-		expected := ""
-		assert.Equal(t, expected, res)
+		r, err := NewRenderer(getDefaultTestRendererConfig(0, 0, true, false))
+		assert.Nil(t, r)
+		require.Error(t, err)
 	})
 }
 
@@ -209,7 +207,7 @@ func TestSections(t *testing.T) {
 
 	for _, tt := range sectionTests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := NewRenderer(getDefaultTestRendererConfig(
+			r, _ := NewRenderer(getDefaultTestRendererConfig(
 				tt.totalHeight, tt.totalWidth, tt.borderRequired, tt.trucateheight))
 			// maxL := r.contentWidth
 			// if i >= maxL, check for errors here
@@ -275,7 +273,7 @@ func TestDynamicHeight(t *testing.T) {
 
 	for _, tt := range dynmaicHeightTests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := NewRenderer(getDefaultTestRendererConfig(
+			r, _ := NewRenderer(getDefaultTestRendererConfig(
 				tt.totalHeight, 4, true, tt.trucateheight))
 			for _, l := range tt.lines {
 				if l == sectionStr {
@@ -312,13 +310,105 @@ func TestBorders(t *testing.T) {
 		assert.Equal(t, expected, res, "Margin should be there if title fits well")
 
 		r.border.SetInfoItems("A", "B")
-
+		assert.False(t, r.AreInfoItemsTruncated())
 		res = r.Render()
 		expected = "" +
 			"╭─┤ T ├──╮\n" +
 			"│L1      │\n" +
 			"│L2      │\n" +
 			"╰┤A├─┤B├─╯"
-		assert.Equal(t, expected, res, "Info Items")
+		assert.Equal(t, expected, res)
+
+		r.border.SetInfoItems("A1", "B2")
+		assert.True(t, r.AreInfoItemsTruncated())
+		res = r.Render()
+		expected = "" +
+			"╭─┤ T ├──╮\n" +
+			"│L1      │\n" +
+			"│L2      │\n" +
+			"╰┤A├─┤B├─╯"
+		assert.Equal(t, expected, res)
+
+		r.border.SetInfoItems("A12345")
+		assert.True(t, r.AreInfoItemsTruncated())
+		res = r.Render()
+		expected = "" +
+			"╭─┤ T ├──╮\n" +
+			"│L1      │\n" +
+			"│L2      │\n" +
+			"╰┤A1234├─╯"
+		assert.Equal(t, expected, res, "Info Items Truncation")
+
+		r.SetBorderTitle("✅1✅2✅3")
+		r.SetBorderInfoItems()
+		res = r.Render()
+		expected = "" +
+			"╭┤ ✅1 ├─╮\n" +
+			"│L1      │\n" +
+			"│L2      │\n" +
+			"╰────────╯"
+		assert.Equal(t, expected, res, "Double terminal width characters in Title")
+
+		testStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#0000ff"))
+		title := testStyle.Render("Title")
+
+		r.SetBorderTitle(title)
+		res = r.Render()
+		expected = "" +
+			"╭┤ Titl ├╮\n" +
+			"│L1      │\n" +
+			"│L2      │\n" +
+			"╰────────╯"
+
+		assert.Equal(t, expected, res, "Ansi escapes are not preserved")
+
+		r.SetBorderTitle("")
+		r.SetBorderInfoItems("A", "")
+
+		res = r.Render()
+		expected = "" +
+			"╭────────╮\n" +
+			"│L1      │\n" +
+			"│L2      │\n" +
+			"╰─┤A├─┤├─╯"
+		assert.Equal(t, expected, res, "Empty title is ignored, but not empty infoitems")
+	})
+
+	t.Run("Different Border", func(t *testing.T) {
+		cfg := getDefaultTestRendererConfig(6, 10, true, false)
+		cfg.Border = lipgloss.Border{
+			Top:    "─",
+			Bottom: "*",
+			Left:   "+",
+			Right:  "│",
+
+			TopLeft:  "╭",
+			TopRight: "╮",
+
+			BottomLeft:  "╰",
+			BottomRight: "╯",
+
+			MiddleLeft:  "├",
+			MiddleRight: "┤",
+		}
+
+		r, _ := NewRenderer(cfg)
+		r.SetBorderTitle("Title")
+		r.SetBorderInfoItems("A")
+		r.AddLines("L1")
+		r.AddSection()
+		r.AddLines("")
+		r.AddLines("L2")
+
+		res := r.Render()
+		expected := "" +
+			"╭┤ Titl ├╮\n" +
+			"+L1      │\n" +
+			"├────────┤\n" +
+			"+        │\n" +
+			"+L2      │\n" +
+			"╰****┤A├*╯"
+
+		assert.Equal(t, expected, res, "Ansi escape is preserved")
 	})
 }

@@ -7,18 +7,16 @@ import (
 	"github.com/yorukot/superfile/src/internal/common"
 )
 
-// This is not zero safe. Please only use New function
 type ContentRenderer struct {
 	lines []string
 
-	// Allow at max this much lines. If there are less lines
-	// the Render() will still only return content with line count of len(lines)
+	// Allow at max this many lines. If there are lesser lines
 	maxLines int
 	// Every line should have at most this many characters
 	maxLineWidth    int
 	sanitizeContent bool
 
-	// Todo - Do we need alignStyle ? Not yet
+	// We can add alignStyle if needed
 	truncateStyle TruncateStyle
 }
 
@@ -32,22 +30,22 @@ func (r *ContentRenderer) AddLines(lines ...string) {
 	}
 }
 
-// Todo : Maybe better return error ?
+func (r *ContentRenderer) ClearLines() {
+	r.lines = r.lines[:0]
+}
+
+// Maybe better return an error ?
 // AddLineWithCustomTruncate adds lines to the renderer, truncating each line according to the specified style.
 // It does not trims whitespace, and its possible to add multiple empty lines using this.
 func (r *ContentRenderer) AddLineWithCustomTruncate(lineStr string, truncateStyle TruncateStyle) {
 	// If string is multiline, add individual lines separately
-
-	// Dont use strings.Lines() we need to allow adding empty strings "" as line.
+	// We dont use strings.Lines() we need to allow adding empty strings "" as line.
 	for line := range strings.SplitSeq(lineStr, "\n") {
-		// Todo : AnsiTree calculation should not be needed in non-debug mode.
-		slog.Debug("Adding line", "cur size", len(r.lines), "line", AnsiTree(line))
 		if len(r.lines) >= r.maxLines {
 			slog.Error("Max lines reached", "maxLines", r.maxLines)
 			return
 		}
-		// Todo : Move this tails to const
-		// Todo : What if there is a "\t" will truncate take care of it ?
+		// Some characters like "\t" are considered 1 width
 		line = TruncateBasedOnStyle(line, r.maxLineWidth, truncateStyle)
 		if r.sanitizeContent {
 			line = common.MakePrintableWithEscCheck(line, true)
