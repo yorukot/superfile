@@ -39,11 +39,22 @@ func (b *BorderConfig) SetTitle(title string) {
 }
 
 // Todo - take varidiac args
-func (b *BorderConfig) SetInfoItems(infoItems []string) {
+func (b *BorderConfig) SetInfoItems(infoItems ...string) {
 	for i := range infoItems {
 		infoItems[i] = ansi.Strip(infoItems[i])
 	}
 	b.infoItems = infoItems
+}
+
+// Todo : Unit test this too
+func (b *BorderConfig) AreInfoItemsTruncated() bool {
+	reqWidth := 0
+	for _, item := range b.infoItems {
+		// border.MiddleLeft <content> border.MiddleRight border.Bottom
+		reqWidth += 3 + runewidth.StringWidth(item)
+	}
+
+	return reqWidth > b.width-2
 }
 
 func (b *BorderConfig) AddDivider(idx int) {
@@ -54,6 +65,7 @@ func (b *BorderConfig) AddDivider(idx int) {
 // Sadly that might now work, so maybe only allow 1 runewidth for now, in the config ?
 // multiple things like corner characters must be single rune, or else it would break things.
 // Todo - Write thorough unit tests that have bigger title which needs to be truncated.
+// Todo - Test with different border.Top and bottom, left and right
 func (b *BorderConfig) GetBorder(borderStrings lipgloss.Border) lipgloss.Border {
 	res := borderStrings
 
@@ -87,8 +99,9 @@ func (b *BorderConfig) GetBorder(borderStrings lipgloss.Border) lipgloss.Border 
 	cnt := len(b.infoItems)
 	// Minimum 3 character for each info item
 	// We can make it 4 if we want a padding of 1 border.Bottom character
-	// after each item - Todo - Do it.
-	if cnt > 0 && actualWidth >= cnt*3 {
+	// after each item - Todo - Do it - Only then it keeps the existing behaviour.
+	// Also fix
+	if cnt > 0 && actualWidth >= cnt*4 {
 		// Todo : Do this. What if maxCnt > cnt ?
 		// maxCnt := actualWidth / 4
 		// infoItems := b.infoItems[:maxCnt]
@@ -96,11 +109,12 @@ func (b *BorderConfig) GetBorder(borderStrings lipgloss.Border) lipgloss.Border 
 		// Right aligned // Individually Truncated
 
 		// Max available width for each item's actual content
-		availWidth := actualWidth/cnt - 2
+		// border.MiddleLeft <content> border.MiddleRight border.Bottom
+		availWidth := actualWidth/cnt - 3
 		infoText := ""
 		for _, item := range b.infoItems {
 			item = runewidth.Truncate(item, availWidth, "")
-			infoText += borderStrings.MiddleRight + item + borderStrings.MiddleLeft
+			infoText += borderStrings.MiddleRight + item + borderStrings.MiddleLeft + borderStrings.Bottom
 		}
 
 		// Fill the rest with border char.

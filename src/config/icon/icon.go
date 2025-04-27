@@ -42,6 +42,14 @@ var (
 	Terminal    = "\ue795"     // Printable Rune : ""
 )
 
+// Alternative single width characters used in place of Icons
+const (
+	SortAscAlt  = "A"
+	SortDescAlt = "D"
+	BrowserAlt  = "B"
+	SelectAlt   = "S"
+)
+
 /*
 THESE CODE BASE ON https://github.com/acarl005/ls-go
 thanks for the great work!!

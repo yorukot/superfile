@@ -35,9 +35,12 @@ func (m *model) sidebarRender() string {
 // Since bubblea passed this 'model' by value in View() function.
 func (m *model) filePanelRender() string {
 	// file panel
+	// Todo : this 10 should be replaced with len(m.fileModel.filePanels)
 	f := make([]string, 10)
 	for i, filePanel := range m.fileModel.filePanels {
 		// check if cursor or render out of range
+		// Todo - instead of this, have a filepanel.validateAndFix(), and log Error
+		// This should not ever happen
 		if filePanel.cursor > len(filePanel.element)-1 {
 			filePanel.cursor = 0
 			filePanel.render = 0
@@ -46,8 +49,6 @@ func (m *model) filePanelRender() string {
 
 		f[i] += common.FilePanelTopDirectoryIconStyle.Render(" "+icon.Directory+icon.Space) + common.FilePanelTopPathStyle.Render(common.TruncateTextBeginning(filePanel.location, m.fileModel.width-4, "...")) + "\n"
 		var filePanelWidth int
-		footerBorderWidth := m.fileModel.width + 15
-
 		// Todo : Move this to a utility function and clarify the calculation via comments
 		// Maybe even write unit tests
 		if (m.fullWidth-common.Config.SidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels) != 0 && i == len(m.fileModel.filePanels)-1 {
@@ -60,85 +61,7 @@ func (m *model) filePanelRender() string {
 			filePanelWidth = m.fileModel.width
 		}
 
-		var sortDirectionString string
-		if filePanel.sortOptions.data.reversed {
-			if common.Config.Nerdfont {
-				sortDirectionString = icon.SortDesc
-			} else {
-				sortDirectionString = "D"
-			}
-		} else {
-			if common.Config.Nerdfont {
-				sortDirectionString = icon.SortAsc
-			} else {
-				sortDirectionString = "A"
-			}
-		}
-		var sortTypeString string
-		if filePanelWidth < 23 {
-			sortTypeString = sortDirectionString
-		} else {
-			if filePanel.sortOptions.data.options[filePanel.sortOptions.data.selected] == "Date Modified" {
-				sortTypeString = sortDirectionString + icon.Space + "Date"
-			} else {
-				sortTypeString = sortDirectionString + icon.Space + filePanel.sortOptions.data.options[filePanel.sortOptions.data.selected]
-			}
-		}
-
-		panelModeString := ""
-		if filePanelWidth < 23 {
-			if filePanel.panelMode == browserMode {
-				if common.Config.Nerdfont {
-					panelModeString = icon.Browser
-				} else {
-					panelModeString = "B"
-				}
-			} else if filePanel.panelMode == selectMode {
-				if common.Config.Nerdfont {
-					panelModeString = icon.Select
-				} else {
-					panelModeString = "S"
-				}
-			}
-		} else {
-			if filePanel.panelMode == browserMode {
-				panelModeString = icon.Browser + icon.Space + "Browser"
-			} else if filePanel.panelMode == selectMode {
-				panelModeString = icon.Select + icon.Space + "Select"
-			}
-		}
-
-		f[i] += common.FilePanelDividerStyle(filePanel.focusType != noneFocus).Render(strings.Repeat(common.Config.BorderTop, filePanelWidth)) + "\n"
-		f[i] += " " + filePanel.searchBar.View() + "\n"
-		if len(filePanel.element) == 0 {
-			f[i] += common.FilePanelStyle.Render(" " + icon.Error + "  No such file or directory")
-			bottomBorder := common.GenerateFooterBorder(fmt.Sprintf("%s%s%s%s%s", sortTypeString, common.BottomMiddleBorderSplit, panelModeString, common.BottomMiddleBorderSplit, "0/0"), footerBorderWidth)
-			f[i] = common.FilePanelBorderStyle(m.mainPanelHeight, filePanelWidth, filePanel.focusType != noneFocus, bottomBorder).Render(f[i])
-		} else {
-			for h := filePanel.render; h < filePanel.render+panelElementHeight(m.mainPanelHeight) && h < len(filePanel.element); h++ {
-				endl := "\n"
-				if h == filePanel.render+panelElementHeight(m.mainPanelHeight)-1 || h == len(filePanel.element)-1 {
-					endl = ""
-				}
-				cursor := " "
-				// Check if the cursor needs to be displayed, if the user is using the search bar, the cursor is not displayed
-				if h == filePanel.cursor && !filePanel.searchBar.Focused() {
-					cursor = icon.Cursor
-				}
-				isItemSelected := arrayContains(filePanel.selected, filePanel.element[h].location)
-				if filePanel.renaming && h == filePanel.cursor {
-					f[i] += filePanel.rename.View() + endl
-				} else {
-					_, err := os.ReadDir(filePanel.element[h].location)
-					f[i] += common.FilePanelCursorStyle.Render(cursor+" ") + common.PrettierName(filePanel.element[h].name, m.fileModel.width-5, filePanel.element[h].directory || (err == nil), isItemSelected, common.FilePanelBGColor) + endl
-				}
-			}
-			cursorPosition := strconv.Itoa(filePanel.cursor + 1)
-			totalElement := strconv.Itoa(len(filePanel.element))
-
-			bottomBorder := common.GenerateFooterBorder(fmt.Sprintf("%s%s%s%s%s/%s", sortTypeString, common.BottomMiddleBorderSplit, panelModeString, common.BottomMiddleBorderSplit, cursorPosition, totalElement), footerBorderWidth)
-			f[i] = common.FilePanelBorderStyle(m.mainPanelHeight, filePanelWidth, filePanel.focusType != noneFocus, bottomBorder).Render(f[i])
-		}
+		f[i] = filePanel.Render(m.mainPanelHeight, filePanelWidth, filePanel.focusType != noneFocus)
 	}
 
 	// file panel render together
@@ -148,6 +71,102 @@ func (m *model) filePanelRender() string {
 	}
 	return filePanelRender
 }
+
+func (panel *filePanel) Render(mainPanelHeight int, filePanelWidth int, focussed bool) string {
+	r := rendering.FilePanelRenderer(mainPanelHeight+2, filePanelWidth+2, focussed)
+
+	// Todo - Add ansitruncate left in renderer and remove truncation here
+	r.AddLines(common.FilePanelTopDirectoryIcon + common.FilePanelTopPathStyle.Render(
+		common.TruncateTextBeginning(panel.location, filePanelWidth-4, "...")))
+
+	// Todo : Unit test all these if else chains (?)
+	// Todo : Better move it out to a separate function
+	var sortTypeString string
+	var sortTypeStringSmall string
+	if panel.sortOptions.data.reversed {
+		if common.Config.Nerdfont {
+			sortTypeString = icon.SortDesc
+			sortTypeStringSmall = icon.SortDesc
+		} else {
+			sortTypeStringSmall = icon.SortDescAlt
+		}
+	} else {
+		if common.Config.Nerdfont {
+			sortTypeString = icon.SortAsc
+			sortTypeStringSmall = icon.SortAsc
+		} else {
+			sortTypeStringSmall = icon.SortAscAlt
+		}
+	}
+	// Todo : Make "Date Modified" constant
+	if panel.sortOptions.data.options[panel.sortOptions.data.selected] == "Date Modified" {
+		sortTypeString = sortTypeString + icon.Space + "Date"
+	} else {
+		sortTypeString = sortTypeString + icon.Space + panel.sortOptions.data.options[panel.sortOptions.data.selected]
+	}
+
+	// Todo : Better move calculation of these strings out to a separate function
+	// Then unit test that function
+	var panelModeString string
+	var panelModeStringSmall string
+
+	if panel.panelMode == browserMode {
+		panelModeString = icon.Browser + icon.Space + "Browser"
+		if common.Config.Nerdfont {
+			panelModeStringSmall = icon.Browser
+		} else {
+			panelModeStringSmall = icon.BrowserAlt
+		}
+	} else if panel.panelMode == selectMode {
+		panelModeString = icon.Select + icon.Space + "Select"
+		if common.Config.Nerdfont {
+			panelModeStringSmall = icon.Select
+		} else {
+			panelModeStringSmall = icon.SelectAlt
+		}
+	}
+
+	r.AddSection()
+	r.AddLines(" " + panel.searchBar.View())
+
+	cursorNumber := panel.cursor
+
+	// Make 1-indexed only for non zero filePanel len
+	if len(panel.element) > 0 {
+		cursorNumber++
+	}
+	cursorNumberString := fmt.Sprintf("%d/%d", cursorNumber, len(panel.element))
+
+	r.SetBorderInfoItems(sortTypeString, panelModeString, cursorNumberString)
+	if r.AreInfoItemsTruncated() {
+		// Use smaller values
+		r.SetBorderInfoItems(sortTypeStringSmall, panelModeStringSmall, cursorNumberString)
+	}
+
+	if len(panel.element) == 0 {
+		r.AddLines(common.FilePanleNoneText)
+	} else {
+		for h := panel.render; h < panel.render+panelElementHeight(mainPanelHeight) && h < len(panel.element); h++ {
+			cursor := " "
+			// Check if the cursor needs to be displayed, if the user is using the search bar, the cursor is not displayed
+			if h == panel.cursor && !panel.searchBar.Focused() {
+				cursor = icon.Cursor
+			}
+			isItemSelected := arrayContains(panel.selected, panel.element[h].location)
+			if panel.renaming && h == panel.cursor {
+				r.AddLines(panel.rename.View())
+			} else {
+				// Todo (Performance) : Figure out why we are doing this. This will unnecessarily slow down
+				// rendering. There should be a way to avoid this at render
+				_, err := os.ReadDir(panel.element[h].location)
+				r.AddLines(common.FilePanelCursorStyle.Render(cursor+" ") + common.PrettierName(panel.element[h].name, filePanelWidth-5,
+					panel.element[h].directory || (err == nil), isItemSelected, common.FilePanelBGColor))
+			}
+		}
+	}
+	return r.Render()
+}
+
 func (m *model) processBarRender() string {
 	if !m.processBarModel.isValid(m.footerHeight) {
 		slog.Error("processBar in invalid state", "render", m.processBarModel.render,
@@ -163,9 +182,7 @@ func (m *model) processBarRender() string {
 		cursorNumber = m.processBarModel.cursor + 1
 	}
 
-	// Todo : Use %d, not this
-	item := fmt.Sprintf("%s/%s", strconv.Itoa(cursorNumber), strconv.Itoa(len(m.processBarModel.processList)))
-	r.SetBorderInfoItems([]string{item})
+	r.SetBorderInfoItems(fmt.Sprintf("%d/%d", cursorNumber, len(m.processBarModel.processList)))
 	if len(m.processBarModel.processList) == 0 {
 		r.AddLines("", " "+common.ProcessBarNoneText)
 		return r.Render()
@@ -295,7 +312,7 @@ func (m *model) metadataRender() string {
 	r := rendering.MetadataRenderer(m.footerHeight+2, utils.FooterWidth(m.fullWidth)+2, m.focusPanel == metadataFocus)
 	// Todo : Take that as input in metadata renderer constructor
 	// Todo : Use %d, not this
-	r.SetBorderInfoItems([]string{fmt.Sprintf("%s/%s", strconv.Itoa(m.fileMetaData.renderIndex+1), strconv.Itoa(len(m.fileMetaData.metaData)))})
+	r.SetBorderInfoItems(fmt.Sprintf("%s/%s", strconv.Itoa(m.fileMetaData.renderIndex+1), strconv.Itoa(len(m.fileMetaData.metaData))))
 
 	imax := min(m.footerHeight+m.fileMetaData.renderIndex, len(m.fileMetaData.metaData))
 	for i := m.fileMetaData.renderIndex; i < imax; i++ {
@@ -425,7 +442,7 @@ func (m *model) warnModalRender() string {
 }
 
 func (m *model) promptModalRender() string {
-	return m.promptModal.Render(m.helpMenu.width)
+	return m.promptModal.Render(m.helpMenu.height, m.helpMenu.width)
 }
 
 func (m *model) helpMenuRender() string {

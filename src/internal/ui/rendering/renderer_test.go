@@ -311,14 +311,14 @@ func TestBorders(t *testing.T) {
 			"╰────────╯"
 		assert.Equal(t, expected, res, "Margin should be there if title fits well")
 
-		r.border.SetInfoItems([]string{"A", "B"})
+		r.border.SetInfoItems("A", "B")
 
 		res = r.Render()
 		expected = "" +
 			"╭─┤ T ├──╮\n" +
 			"│L1      │\n" +
 			"│L2      │\n" +
-			"╰──┤A├┤B├╯"
+			"╰┤A├─┤B├─╯"
 		assert.Equal(t, expected, res, "Info Items")
 	})
 }

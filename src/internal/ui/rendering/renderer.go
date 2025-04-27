@@ -86,7 +86,11 @@ func (r *Renderer) AddSection() {
 
 	// Add divider
 	r.border.AddDivider(r.actualContentHeight)
-	r.sectionDividers = append(r.sectionDividers, strings.Repeat(r.borderStrings.Top, r.contentWidth))
+	// sectionDivider should be of borderstyle
+	r.sectionDividers = append(r.sectionDividers, lipgloss.NewStyle().
+		Foreground(r.borderFGColor).
+		Background(r.borderBGColor).
+		Render(strings.Repeat(r.borderStrings.Top, r.contentWidth)))
 	r.actualContentHeight++
 
 	remainingHeight := r.contentHeight - r.actualContentHeight
@@ -105,8 +109,12 @@ func (r *Renderer) SetBorderTitle(title string) {
 	r.border.SetTitle(title)
 }
 
-func (r *Renderer) SetBorderInfoItems(infoItems []string) {
-	r.border.SetInfoItems(infoItems)
+func (r *Renderer) SetBorderInfoItems(infoItems ...string) {
+	r.border.SetInfoItems(infoItems...)
+}
+
+func (r *Renderer) AreInfoItemsTruncated() bool {
+	return r.border.AreInfoItemsTruncated()
 }
 
 // Should not do any updates on 'r'

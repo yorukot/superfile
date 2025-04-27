@@ -23,6 +23,38 @@ func SidebarRenderer(totalHeight int, totalWidth int, sidebarFocussed bool) Rend
 	return NewRenderer(cfg)
 }
 
+func FilePanelRenderer(totalHeight int, totalWidth int, filePanelFocussed bool) Renderer {
+	cfg := DefaultRendererConfig(totalHeight, totalWidth)
+
+	cfg.ContentFGColor = common.FilePanelFGColor
+	cfg.ContentBGColor = common.FilePanelBGColor
+
+	cfg.BorderRequired = true
+	cfg.BorderBGColor = common.FilePanelBGColor
+	cfg.BorderFGColor = common.FilePanelBorderColor
+	if filePanelFocussed {
+		cfg.BorderFGColor = common.FilePanelBorderActiveColor
+	}
+	cfg.Border = DefaultLipglossBorder()
+
+	return NewRenderer(cfg)
+}
+
+func PromptRenderer(totalHeight int, totalWidth int) Renderer {
+	cfg := DefaultRendererConfig(totalHeight, totalWidth)
+	cfg.TruncateHeight = true
+	cfg.ContentFGColor = common.ModalFGColor
+	cfg.ContentBGColor = common.ModalBGColor
+
+	cfg.BorderRequired = true
+	cfg.BorderBGColor = common.ModalBGColor
+	cfg.BorderFGColor = common.ModalBorderActiveColor
+
+	cfg.Border = DefaultLipglossBorder()
+
+	return NewRenderer(cfg)
+}
+
 // Todo : Move to diff package
 func DefaultFooterRenderer(totalHeight int, totalWidth int, focussed bool) Renderer {
 	cfg := DefaultRendererConfig(totalHeight, totalWidth)

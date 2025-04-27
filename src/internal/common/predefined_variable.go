@@ -29,6 +29,9 @@ var (
 
 	ProcessBarNoneText string
 
+	FilePanelTopDirectoryIcon string
+	FilePanleNoneText         string
+
 	LipglossError string
 )
 
@@ -53,4 +56,7 @@ func LoadPrerenderedVariables() {
 	SideBarNoneText = SidebarStyle.Render(" " + icon.Error + " None")
 
 	ProcessBarNoneText = icon.Error + "  No processes running"
+
+	FilePanelTopDirectoryIcon = FilePanelTopDirectoryIconStyle.Render(" " + icon.Directory + icon.Space)
+	FilePanleNoneText = FilePanelStyle.Render(" " + icon.Error + "  No such file or directory")
 }
