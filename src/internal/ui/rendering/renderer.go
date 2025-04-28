@@ -28,12 +28,6 @@ type Renderer struct {
 	// Whether to reduce rendered height to fit number of lines
 	truncateHeight bool
 
-	// Border should not be coupled with content at all. A separate struct is better
-	// If you want a borderless content, you will have all these extra variables
-	// Renderer's interaction with Border isn't related to content , so usage as a separate
-	// struct is okay ?
-	// No... Border itself is not an independent renderer. You need width and height
-	// If you want to save memory, use pointers
 	border BorderConfig
 
 	// Should this go in contentRenderer - No . ContentRenderer is not for storing style configs
@@ -91,7 +85,7 @@ func DefaultRendererConfig(totalHeight int, totalWidth int) RendererConfig {
 }
 
 func NewRenderer(cfg RendererConfig) (*Renderer, error) {
-	if err := Validate(cfg); err != nil {
+	if err := validate(cfg); err != nil {
 		return nil, err
 	}
 
@@ -130,7 +124,7 @@ func NewRenderer(cfg RendererConfig) (*Renderer, error) {
 	}, nil
 }
 
-func Validate(cfg RendererConfig) error {
+func validate(cfg RendererConfig) error {
 	if cfg.TotalHeight < 0 || cfg.TotalWidth < 0 {
 		return fmt.Errorf("dimensions must be non-negative (h=%d, w=%d)", cfg.TotalHeight, cfg.TotalWidth)
 	}

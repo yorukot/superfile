@@ -224,7 +224,7 @@ func TestSections(t *testing.T) {
 }
 
 func TestDynamicHeight(t *testing.T) {
-	dynmaicHeightTests := []struct {
+	dynamicHeightTests := []struct {
 		name          string
 		totalHeight   int
 		lines         []string
@@ -271,7 +271,7 @@ func TestDynamicHeight(t *testing.T) {
 		},
 	}
 
-	for _, tt := range dynmaicHeightTests {
+	for _, tt := range dynamicHeightTests {
 		t.Run(tt.name, func(t *testing.T) {
 			r, _ := NewRenderer(getDefaultTestRendererConfig(
 				tt.totalHeight, 4, true, tt.trucateheight))

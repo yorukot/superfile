@@ -11,6 +11,7 @@ func TestContentRendererBasic(t *testing.T) {
 		r := NewContentRenderer(6, 5, PlainTruncateRight)
 		r.AddLines("123456")
 		r.AddLines("12345\n12345", "123")
+		assert.Equal(t, 4, r.CntLines())
 		r.AddLineWithCustomTruncate("123456", TailsTruncateRight)
 		r.AddLines("\t1234")
 		// Should be ignored

@@ -35,7 +35,7 @@ func (m *model) sidebarRender() string {
 // what modifications we do on this model object are of no consequence.
 // Since bubblea passed this 'model' by value in View() function.
 func (m *model) filePanelRender() string {
-	res := ""
+	f := make([]string, len(m.fileModel.filePanels))
 	for i, filePanel := range m.fileModel.filePanels {
 		// check if cursor or render out of range
 		// Todo - instead of this, have a filepanel.validateAndFix(), and log Error
@@ -59,10 +59,9 @@ func (m *model) filePanelRender() string {
 			filePanelWidth = m.fileModel.width
 		}
 
-		res = lipgloss.JoinHorizontal(lipgloss.Top, res,
-			filePanel.Render(m.mainPanelHeight, filePanelWidth, filePanel.focusType != noneFocus))
+		f[i] = filePanel.Render(m.mainPanelHeight, filePanelWidth, filePanel.focusType != noneFocus)
 	}
-	return res
+	return lipgloss.JoinHorizontal(lipgloss.Top, f...)
 }
 
 func (panel *filePanel) Render(mainPanelHeight int, filePanelWidth int, focussed bool) string {

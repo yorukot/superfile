@@ -39,6 +39,13 @@ func TestTruncate(t *testing.T) {
 			expected: "ab...",
 		},
 		{
+			name:     "Invalid style",
+			line:     "abcdefgh",
+			maxWidth: 5,
+			style:    10,
+			expected: "",
+		},
+		{
 			name:     "Tails truncate with too less width",
 			line:     "abcdefgh",
 			maxWidth: 2,
