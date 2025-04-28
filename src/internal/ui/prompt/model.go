@@ -6,10 +6,11 @@ import (
 	"slices"
 	"strings"
 
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/ui"
 
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/yorukot/superfile/src/config/icon"
+	"github.com/yorukot/superfile/src/internal/common"
 )
 
 func DefaultModel() Model {
@@ -117,35 +118,25 @@ func (m *Model) HandleSPFActionResults(success bool, msg string) {
 	m.CloseOnSuccessIfNeeded()
 }
 
-// Todo : We would make a separate Render object, that is initialized by
-// a give width and height, and then we can provide string as lines to it
-// it would handle everything from wrapping lines count, lines width, in
-// a generic way. We would have all our components use that.
-// And we could unit test this Render() easility.
-func (m *Model) Render(width int) string {
-	divider := strings.Repeat(common.Config.BorderTop, width)
-	content := " " + m.headline + modeString(m.shellMode)
-	content += "\n" + divider
-	content += "\n" + " " + shellPrompt(m.shellMode) + " " + m.textInput.View()
-	suggestionText := ""
+func (m *Model) Render(maxHeight int, width int) string {
+	r := ui.PromptRenderer(maxHeight, width)
+	r.SetBorderTitle(m.headline + modeString(m.shellMode))
+	r.AddLines(" " + shellPrompt(m.shellMode) + " " + m.textInput.View())
 
 	if !m.shellMode {
+		r.AddSection()
 		if m.textInput.Value() == "" {
-			suggestionText += "\n '" + m.shellPromptHotkey + "' - Get into Shell mode"
+			r.AddLines(" '" + m.shellPromptHotkey + "' - Get into Shell mode")
 		}
 		command := getFirstToken(m.textInput.Value())
 		for _, cmd := range m.commands {
 			if strings.HasPrefix(cmd.command, command) {
-				suggestionText += "\n '" + cmd.usage + "' - " + cmd.description
+				r.AddLines(" '" + cmd.usage + "' - " + cmd.description)
 			}
 		}
 	} else if m.textInput.Value() == "" {
-		suggestionText += "\n '" + m.spfPromptHotkey + "' - Get into SPF Prompt mode"
-	}
-
-	if suggestionText != "" {
-		content += "\n" + divider
-		content += suggestionText
+		r.AddSection()
+		r.AddLines(" '" + m.spfPromptHotkey + "' - Get into SPF Prompt mode")
 	}
 
 	if m.resultMsg != "" {
@@ -155,10 +146,10 @@ func (m *Model) Render(width int) string {
 			resultStyle = common.PromptFailureStyle
 			msgPrefix = failureMessagePrefix
 		}
-		content += "\n" + divider
-		content += "\n " + resultStyle.Render(msgPrefix+" : "+m.resultMsg)
+		r.AddSection()
+		r.AddLines(resultStyle.Render(" " + msgPrefix + " : " + m.resultMsg))
 	}
-	return common.ModalBorderStyleLeft(1, width+1).Render(content)
+	return r.Render()
 }
 
 func (m *Model) Open(shellMode bool) {

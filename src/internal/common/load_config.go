@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"reflect"
 
+	"github.com/mattn/go-runewidth"
 	"github.com/pelletier/go-toml/v2"
 	"github.com/yorukot/superfile/src/internal/utils"
 
@@ -43,6 +44,38 @@ func ValidateConfig(c *ConfigType) error {
 	if c.DefaultSortType < 0 || c.DefaultSortType > 2 {
 		return errors.New(LoadConfigError("default_sort_type"))
 	}
+
+	if runewidth.StringWidth(c.BorderTop) != 1 {
+		return errors.New(LoadConfigError("border_top"))
+	}
+	if runewidth.StringWidth(c.BorderBottom) != 1 {
+		return errors.New(LoadConfigError("border_bottom"))
+	}
+	if runewidth.StringWidth(c.BorderLeft) != 1 {
+		return errors.New(LoadConfigError("border_left"))
+	}
+	if runewidth.StringWidth(c.BorderRight) != 1 {
+		return errors.New(LoadConfigError("border_right"))
+	}
+	if runewidth.StringWidth(c.BorderBottomLeft) != 1 {
+		return errors.New(LoadConfigError("border_bottom_left"))
+	}
+	if runewidth.StringWidth(c.BorderBottomRight) != 1 {
+		return errors.New(LoadConfigError("border_bottom_right"))
+	}
+	if runewidth.StringWidth(c.BorderTopLeft) != 1 {
+		return errors.New(LoadConfigError("border_top_left"))
+	}
+	if runewidth.StringWidth(c.BorderTopRight) != 1 {
+		return errors.New(LoadConfigError("border_top_right"))
+	}
+	if runewidth.StringWidth(c.BorderMiddleLeft) != 1 {
+		return errors.New(LoadConfigError("border_middle_left"))
+	}
+	if runewidth.StringWidth(c.BorderMiddleRight) != 1 {
+		return errors.New(LoadConfigError("border_middle_right"))
+	}
+
 	return nil
 }
 

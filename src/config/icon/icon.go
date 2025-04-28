@@ -40,6 +40,9 @@ var (
 	SortAsc     = "\uf0de"     // Printable Rune : ""
 	SortDesc    = "\uf0dd"     // Printable Rune : ""
 	Terminal    = "\ue795"     // Printable Rune : ""
+	Pinned      = "\U000f0403" // Printable Rune : "󰐃"
+	Disk        = "\U000f11f0" // Printable Rune : "󱇰"
+
 )
 
 /*
@@ -48,10 +51,7 @@ thanks for the great work!!
 */
 
 var Icons = map[string]Style{
-	"ai": {
-		Icon:  "\ue669", // Printable Rune : ""
-		Color: "#ce6f14",
-	},
+	"ai":           {Icon: "\ue669", Color: "#ce6f14"},     // Printable Rune : ""
 	"android":      {Icon: "\uf17b", Color: "#a7c83f"},     // Printable Rune : ""
 	"apple":        {Icon: "\ue711", Color: "#78909c"},     // Printable Rune : ""
 	"asm":          {Icon: "\U000f061a", Color: "#ff7844"}, // Printable Rune : "󰘚"

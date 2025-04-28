@@ -3,75 +3,76 @@ package sidebar
 import (
 	"log/slog"
 
-	"github.com/charmbracelet/x/exp/term/ansi"
+	"github.com/yorukot/superfile/src/internal/ui"
+
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/ui/rendering"
 )
 
 // Render returns the rendered sidebar string
-func (s *Model) Render(mainPanelHeight int, isSidebarFocussed bool, currentFilePanelLocation string) string {
+func (s *Model) Render(mainPanelHeight int, sidebarFocussed bool, currentFilePanelLocation string) string {
 	if common.Config.SidebarWidth == 0 {
 		return ""
 	}
 	slog.Debug("Rendering sidebar.", "cursor", s.cursor,
 		"renderIndex", s.renderIndex, "dirs count", len(s.directories),
-		"sidebar focused", isSidebarFocussed)
+		"sidebar focused", sidebarFocussed)
 
-	content := common.SideBarSuperfileTitle + "\n"
+	r := ui.SidebarRenderer(mainPanelHeight+2, common.Config.SidebarWidth+2, sidebarFocussed)
 
-	if s.searchBar.Focused() || s.searchBar.Value() != "" || isSidebarFocussed {
-		s.searchBar.Placeholder = "(" + common.Hotkeys.SearchBar[0] + ")" + " Search"
-		content += "\n" + ansi.Truncate(s.searchBar.View(), common.Config.SidebarWidth-2, "...")
+	r.AddLines(common.SideBarSuperfileTitle, "")
+
+	if s.searchBar.Focused() || s.searchBar.Value() != "" || sidebarFocussed {
+		r.AddLines(s.searchBar.View())
 	}
 
 	if s.NoActualDir() {
-		content += "\n" + common.SideBarNoneText
+		r.AddLines(common.SideBarNoneText)
 	} else {
-		content += s.directoriesRender(mainPanelHeight, currentFilePanelLocation, isSidebarFocussed)
+		s.directoriesRender(mainPanelHeight, currentFilePanelLocation, sidebarFocussed, r)
 	}
-	return common.SideBarBorderStyle(mainPanelHeight, isSidebarFocussed).Render(content)
+	return r.Render()
 }
 
-func (s *Model) directoriesRender(mainPanelHeight int, curFilePanelFileLocation string, sideBarFocussed bool) string {
+func (s *Model) directoriesRender(mainPanelHeight int, curFilePanelFileLocation string, sideBarFocussed bool, r *rendering.Renderer) {
 	// Cursor should always point to a valid directory at this point
 	if s.isCursorInvalid() {
 		slog.Error("Unexpected situation in sideBar Model. "+
 			"Cursor is at invalid position, while there are valid directories", "cursor", s.cursor,
 			"directory count", len(s.directories))
-		return ""
 	}
 
-	res := ""
+	// Todo : This is not true when searchbar is not rendered(totalHeight is 2, not 3),
+	// so we end up underutilizing one line for our render. But it wont break anything.
 	totalHeight := sideBarInitialHeight
 	for i := s.renderIndex; i < len(s.directories); i++ {
 		if totalHeight+s.directories[i].RequiredHeight() > mainPanelHeight {
 			break
 		}
-		res += "\n"
 
 		totalHeight += s.directories[i].RequiredHeight()
 
 		switch s.directories[i] {
 		case pinnedDividerDir:
-			res += "\n" + common.SideBarPinnedDivider
+			r.AddLines("", common.SideBarPinnedDivider, "")
 		case diskDividerDir:
-			res += "\n" + common.SideBarDisksDivider
+			r.AddLines("", common.SideBarDisksDivider, "")
 		default:
 			cursor := " "
 			if s.cursor == i && sideBarFocussed && !s.searchBar.Focused() {
 				cursor = icon.Cursor
 			}
 			if s.renaming && s.cursor == i {
-				res += s.rename.View()
+				r.AddLines(s.rename.View())
 			} else {
 				renderStyle := common.SidebarStyle
 				if s.directories[i].Location == curFilePanelFileLocation {
 					renderStyle = common.SidebarSelectedStyle
 				}
-				res += common.FilePanelCursorStyle.Render(cursor+" ") +
-					renderStyle.Render(common.TruncateText(s.directories[i].Name, common.Config.SidebarWidth-2, "..."))
+				line := common.FilePanelCursorStyle.Render(cursor+" ") + renderStyle.Render(s.directories[i].Name)
+				r.AddLineWithCustomTruncate(line, rendering.TailsTruncateRight)
 			}
 		}
 	}
-	return res
 }
