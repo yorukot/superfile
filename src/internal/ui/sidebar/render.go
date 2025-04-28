@@ -43,6 +43,8 @@ func (s *Model) directoriesRender(mainPanelHeight int, curFilePanelFileLocation 
 			"directory count", len(s.directories))
 	}
 
+	// Todo : This is not true when searchbar is not rendered(totalHeight is 2, not 3),
+	// so we end up underutilizing one line for our render. But it wont break anything.
 	totalHeight := sideBarInitialHeight
 	for i := s.renderIndex; i < len(s.directories); i++ {
 		if totalHeight+s.directories[i].RequiredHeight() > mainPanelHeight {

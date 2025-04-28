@@ -77,46 +77,39 @@ func (panel *filePanel) Render(mainPanelHeight int, filePanelWidth int, focussed
 	var sortTypeString string
 	var sortTypeStringSmall string
 	if panel.sortOptions.data.reversed {
-		if common.Config.Nerdfont {
-			sortTypeString = icon.SortDesc
-			sortTypeStringSmall = icon.SortDesc
-		} else {
-			sortTypeStringSmall = icon.SortDescAlt
-		}
+		sortTypeStringSmall = icon.SortDesc
 	} else {
-		if common.Config.Nerdfont {
-			sortTypeString = icon.SortAsc
-			sortTypeStringSmall = icon.SortAsc
-		} else {
-			sortTypeStringSmall = icon.SortAscAlt
-		}
-	}
-	// Todo : Make "Date Modified" constant
-	if panel.sortOptions.data.options[panel.sortOptions.data.selected] == "Date Modified" {
-		sortTypeString = sortTypeString + icon.Space + "Date"
-	} else {
-		sortTypeString = sortTypeString + icon.Space + panel.sortOptions.data.options[panel.sortOptions.data.selected]
+		sortTypeStringSmall = icon.SortAsc
 	}
 
-	// Todo : Better move calculation of these strings out to a separate function
-	// Then unit test that function
+	// Todo : Make "Date Modified" a constant, and move this to a utility function
+	if panel.sortOptions.data.options[panel.sortOptions.data.selected] == "Date Modified" {
+		sortTypeString = "Date"
+	} else {
+		sortTypeString = panel.sortOptions.data.options[panel.sortOptions.data.selected]
+	}
+
+	if common.Config.Nerdfont {
+		sortTypeString = sortTypeStringSmall + icon.Space + sortTypeString
+	} else {
+		// Todo : Figure out if we can set icon.Space to " " if nerdfont is false
+		sortTypeString = sortTypeStringSmall + " " + sortTypeString
+	}
+
 	var panelModeString string
 	var panelModeStringSmall string
 
 	if panel.panelMode == browserMode {
-		panelModeString = icon.Browser + icon.Space + "Browser"
-		if common.Config.Nerdfont {
-			panelModeStringSmall = icon.Browser
-		} else {
-			panelModeStringSmall = icon.BrowserAlt
-		}
+		panelModeStringSmall = icon.Browser
+		panelModeString = "Browser"
 	} else if panel.panelMode == selectMode {
-		panelModeString = icon.Select + icon.Space + "Select"
-		if common.Config.Nerdfont {
-			panelModeStringSmall = icon.Select
-		} else {
-			panelModeStringSmall = icon.SelectAlt
-		}
+		panelModeStringSmall = icon.Select
+		panelModeString = "Select"
+	}
+
+	// Only append Icon in case of nerdfont being true
+	if common.Config.Nerdfont {
+		panelModeString = panelModeStringSmall + icon.Space + panelModeString
 	}
 
 	r.AddSection()

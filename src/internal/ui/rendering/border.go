@@ -42,13 +42,20 @@ func (b *BorderConfig) SetInfoItems(infoItems ...string) {
 }
 
 func (b *BorderConfig) AreInfoItemsTruncated() bool {
-	reqWidth := 0
-	for _, item := range b.infoItems {
-		// border.MiddleLeft <content> border.MiddleRight border.Bottom
-		reqWidth += 3 + runewidth.StringWidth(item)
+	cnt := len(b.infoItems)
+	if cnt == 0 {
+		return false
 	}
 
-	return reqWidth > b.width-2
+	actualWidth := b.width - 2
+	// border.MiddleLeft <content> border.MiddleRight border.Bottom
+	availWidth := actualWidth/cnt - 3
+	for i := range b.infoItems {
+		if runewidth.StringWidth(b.infoItems[i]) > availWidth {
+			return true
+		}
+	}
+	return false
 }
 
 func (b *BorderConfig) AddDivider(idx int) {
@@ -63,7 +70,7 @@ func (b *BorderConfig) AddDivider(idx int) {
 func (b *BorderConfig) GetBorder(borderStrings lipgloss.Border) lipgloss.Border {
 	res := borderStrings
 
-	// excluding corners
+	// excluding corners. Maybe we can move this to a utility function
 	actualWidth := b.width - 2
 	actualHeight := b.height - 2
 

@@ -298,6 +298,7 @@ func TestBorders(t *testing.T) {
 			"│L1      │\n" +
 			"│L2      │\n" +
 			"╰────────╯"
+		assert.False(t, r.AreInfoItemsTruncated())
 		assert.Equal(t, expected, res, "No margin if title is too big")
 		r.SetBorderTitle("T")
 
@@ -371,7 +372,19 @@ func TestBorders(t *testing.T) {
 			"│L1      │\n" +
 			"│L2      │\n" +
 			"╰─┤A├─┤├─╯"
+
 		assert.Equal(t, expected, res, "Empty title is ignored, but not empty infoitems")
+
+		r.SetBorderInfoItems("AA", "")
+
+		res = r.Render()
+		expected = "" +
+			"╭────────╮\n" +
+			"│L1      │\n" +
+			"│L2      │\n" +
+			"╰─┤A├─┤├─╯"
+		assert.True(t, r.AreInfoItemsTruncated())
+		assert.Equal(t, expected, res, "Truncated even if there was enough space because one item was too big")
 	})
 
 	t.Run("Different Border", func(t *testing.T) {

@@ -2,6 +2,7 @@ package rendering
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/charmbracelet/lipgloss"
 )
@@ -130,6 +131,9 @@ func NewRenderer(cfg RendererConfig) (*Renderer, error) {
 }
 
 func Validate(cfg RendererConfig) error {
+	if cfg.TotalHeight < 0 || cfg.TotalWidth < 0 {
+		return fmt.Errorf("dimensions must be non-negative (h=%d, w=%d)", cfg.TotalHeight, cfg.TotalWidth)
+	}
 	if cfg.BorderRequired {
 		if cfg.TotalWidth < 2 || cfg.TotalHeight < 2 {
 			return errors.New("need at least 2 width and height for borders")

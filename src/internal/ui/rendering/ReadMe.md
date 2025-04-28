@@ -8,6 +8,5 @@ It also should not be even in-directly coupled with any UI components. Assume an
 # To-dos
 - [ ] Use rendering package for other models like sort Menu, Help menu, etc.
 
-
 # Notes
 - Can we move this whole thing into a good useful TUI library outside of this repo ?. At least code it in a way that it can be moved
