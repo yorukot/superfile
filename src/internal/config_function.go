@@ -4,9 +4,12 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"reflect"
 	"runtime"
 	"strings"
 
+	"github.com/yorukot/superfile/src/internal/ui/rendering"
+	"github.com/yorukot/superfile/src/internal/ui/sidebar"
 	"github.com/yorukot/superfile/src/internal/utils"
 
 	"github.com/barasher/go-exiftool"
@@ -71,8 +74,22 @@ func initialConfig(firstFilePanelDirs []string) (toggleDotFile bool, toggleFoote
 		}
 	}
 
-	slog.Debug("Runtime information", "runtime.GOOS", runtime.GOOS,
-		"start directories", firstFilePanelDirs)
+	slog.Debug("Runtime information", "runtime.GOOS", runtime.GOOS)
+	slog.Debug("Directory configuration", "start_directories", firstFilePanelDirs)
+
+	var memStats runtime.MemStats
+	runtime.ReadMemStats(&memStats)
+	slog.Debug("Memory usage",
+		"alloc_bytes", memStats.Alloc,
+		"total_alloc_bytes", memStats.TotalAlloc,
+		"heap_objects", memStats.HeapObjects,
+		"sys_bytes", memStats.Sys)
+	slog.Debug("Object sizes",
+		"model_size_bytes", reflect.TypeOf(model{}).Size(),
+		"filePanel_size_bytes", reflect.TypeOf(filePanel{}).Size(),
+		"sidebarModel_size_bytes", reflect.TypeOf(sidebar.Model{}).Size(),
+		"renderer_size_bytes", reflect.TypeOf(rendering.Renderer{}).Size(),
+		"borderConfig_size_bytes", reflect.TypeOf(rendering.BorderConfig{}).Size())
 
 	toggleDotFile = utils.ReadBoolFile(variable.ToggleDotFile, false)
 	toggleFooter = utils.ReadBoolFile(variable.ToggleFooter, true)

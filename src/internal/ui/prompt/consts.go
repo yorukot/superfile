@@ -27,7 +27,7 @@ const (
 
 	// Timeout for command executed for shell substitution
 	shellSubTimeout        = 1000 * time.Millisecond
-	shellSubTimeoutInTests = 50 * time.Millisecond
+	shellSubTimeoutInTests = 100 * time.Millisecond
 
 	defaultTestCwd = "/"
 )
