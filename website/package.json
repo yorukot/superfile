@@ -10,13 +10,13 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/starlight": "^0.34.0",
-    "@expressive-code/plugin-collapsible-sections": "^0.40.2",
-    "@expressive-code/plugin-line-numbers": "^0.40.2",
-    "@fontsource/ibm-plex-mono": "^5.1.1",
-    "@fontsource/ibm-plex-serif": "^5.1.1",
-    "astro": "^5.3.0",
-    "hast-util-to-html": "^9.0.4",
-    "sharp": "^0.34.0"
+    "@astrojs/starlight": "^0.34.1",
+    "@expressive-code/plugin-collapsible-sections": "^0.41.2",
+    "@expressive-code/plugin-line-numbers": "^0.41.2",
+    "@fontsource/ibm-plex-mono": "^5.2.5",
+    "@fontsource/ibm-plex-serif": "^5.2.5",
+    "astro": "^5.7.7",
+    "hast-util-to-html": "^9.0.5",
+    "sharp": "^0.34.1"
   }
 }
