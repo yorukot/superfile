@@ -83,8 +83,8 @@ schema = 3
     version = "v1.1.1"
     hash = "sha256-ANzPEUJIZIlToxR89Mn7Db73d9LGI51ssy7eNnUgmlA="
   [mod."github.com/hymkor/trash-go"]
-    version = "v0.2.0"
-    hash = "sha256-p7zJYJpPjNAYKRNW7No+BXRemNabGp/No1mp9ItHXII="
+    version = "v0.3.0"
+    hash = "sha256-wY8jGo74PtHDi5yQcjaKXdO13+YYZ4w+rya2KeW7sVE="
   [mod."github.com/kdomanski/iso9660"]
     version = "v0.3.3"
     hash = "sha256-iMyzZnZCKXUfBKJDdqwEYyzcFKo/VEkoo4Lm/Ct8tj4="
