@@ -126,6 +126,8 @@ github.com/hexops/gotextdiff v1.0.3 h1:gitA9+qJrrTCsiCl7+kh75nPqQt1cx4ZkudSTLoUq
 github.com/hexops/gotextdiff v1.0.3/go.mod h1:pSWU5MAI3yDq+fZBTazCSJysOMbxWL1BSow5/V2vxeg=
 github.com/hymkor/trash-go v0.2.0 h1:t51zidKT8WuMTeeiMBsJxx+BDwnJtaaf/ckpjle2GOE=
 github.com/hymkor/trash-go v0.2.0/go.mod h1:pZ07qBUuGdTWPdymNtE97NAXHDY5W/b5szvoBVOhJ3U=
+github.com/hymkor/trash-go v0.3.0 h1:vVeZFI8PNqbnBlLZAiJngkEKz/Ejpg6mY2dO6741P2Y=
+github.com/hymkor/trash-go v0.3.0/go.mod h1:pZ07qBUuGdTWPdymNtE97NAXHDY5W/b5szvoBVOhJ3U=
 github.com/ianlancetaylor/demangle v0.0.0-20181102032728-5e5cf60278f6/go.mod h1:aSSvb/t6k1mPoxDqO4vJh6VOCGPwU4O0C2/Eqndh1Sc=
 github.com/jstemmer/go-junit-report v0.0.0-20190106144839-af01ea7f8024/go.mod h1:6v2b51hI/fHJwM22ozAgKL4VKDeJcHhJFhtBdhmNjmU=
 github.com/jstemmer/go-junit-report v0.9.1/go.mod h1:Brl9GWCQeLvo8nXZwPNNblvFj/XSXhF0NWZEnDohbsk=
