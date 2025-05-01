@@ -152,8 +152,8 @@ schema = 3
     version = "v0.0.0-20190401172101-9e8deecbddbd"
     hash = "sha256-AiY2T9hXj6jnfldYDoe4WNr3FldpVTxc3lScR++HOLc="
   [mod."github.com/shirou/gopsutil/v4"]
-    version = "v4.25.3"
-    hash = "sha256-228uzJCtvhEGj9C1CKTKy1Y4Glz0LrxqkSYJp5YRc9g="
+    version = "v4.25.4"
+    hash = "sha256-yvwmdickuZKzFHJSEBn9r9+7Gxm8kSozdh7ffCOsmZM="
   [mod."github.com/stretchr/testify"]
     version = "v1.10.0"
     hash = "sha256-fJ4gnPr0vnrOhjQYQwJ3ARDKPsOtA7d4olQmQWR+wpI="
