@@ -9,30 +9,46 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"slices"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/yorukot/superfile/src/internal/utils"
+
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/yorukot/superfile/src/internal/common"
+
 	"github.com/lithammer/shortuuid"
-	"github.com/reinhrst/fzf-lib"
-	"github.com/yorukot/superfile/src/config/icon"
 )
 
 // Check if the directory is external disk path
+// Todo : This function should be give two directories, and it should return
+// if the two share a different disk partition.
+// Ideally we shouldn't even try to figure that out in our file operations, and let OS handles it.
+// But at least right now its not okay. This returns if `path` is an External disk
+// from perspective of `/`, but it should tell from perspective of currently open directory
+// The usage of this function in cut/paste is not as expected.
 func isExternalDiskPath(path string) bool {
-	dir := filepath.Dir(path)
-
-	// exclude timemachine
-	if strings.HasPrefix(dir, "/Volumes/.timemachine") {
+	// This is very vague. You cannot tell if a path is belonging to an external partition
+	// if you dont define the source path to compare with
+	// But making this true will cause slow file operations based on current implementation
+	if runtime.GOOS == utils.OsWindows {
 		return false
 	}
 
-	return strings.HasPrefix(dir, "/mnt") ||
-		strings.HasPrefix(dir, "/media") ||
-		strings.HasPrefix(dir, "/run/media") ||
-		strings.HasPrefix(dir, "/Volumes")
+	// exclude timemachine on MacOS
+	if strings.HasPrefix(path, "/Volumes/.timemachine") {
+		return false
+	}
+
+	// to filter out mounted partitions like /, /boot etc
+	return strings.HasPrefix(path, "/mnt") ||
+		strings.HasPrefix(path, "/media") ||
+		strings.HasPrefix(path, "/run/media") ||
+		strings.HasPrefix(path, "/Volumes")
 }
 
 func returnFocusType(focusPanel focusPanelType) filePanelFocusType {
@@ -42,11 +58,11 @@ func returnFocusType(focusPanel focusPanelType) filePanelFocusType {
 	return secondFocus
 }
 
-func returnDirElement(location string, displayDotFile bool, sortOptions sortOptionsModelData) (directoryElement []element) {
+func returnDirElement(location string, displayDotFile bool, sortOptions sortOptionsModelData) []element {
 	dirEntries, err := os.ReadDir(location)
 	if err != nil {
 		slog.Error("Error while return folder element function", "error", err)
-		return directoryElement
+		return nil
 	}
 
 	dirEntries = slices.DeleteFunc(dirEntries, func(e os.DirEntry) bool {
@@ -57,7 +73,7 @@ func returnDirElement(location string, displayDotFile bool, sortOptions sortOpti
 
 	// No files/directoes to process
 	if len(dirEntries) == 0 {
-		return directoryElement
+		return nil
 	}
 
 	// Sort files
@@ -72,11 +88,10 @@ func returnDirElement(location string, displayDotFile bool, sortOptions sortOpti
 			if dirEntries[i].IsDir() != dirEntries[j].IsDir() {
 				return dirEntries[i].IsDir()
 			}
-			if Config.CaseSensitiveSort {
+			if common.Config.CaseSensitiveSort {
 				return dirEntries[i].Name() < dirEntries[j].Name() != reversed
-			} else {
-				return strings.ToLower(dirEntries[i].Name()) < strings.ToLower(dirEntries[j].Name()) != reversed
 			}
+			return strings.ToLower(dirEntries[i].Name()) < strings.ToLower(dirEntries[j].Name()) != reversed
 		}
 	case "Size":
 		order = func(i, j int) bool {
@@ -102,13 +117,11 @@ func returnDirElement(location string, displayDotFile bool, sortOptions sortOpti
 					slog.Error("Error when reading directory during sort", "error", err)
 				}
 				return len(filesI) < len(filesJ) != reversed
-			} else {
-				// No need for err check, we already filtered out dirEntries with err != nil in Info() call
-				fileInfoI, _ := dirEntries[i].Info()
-				fileInfoJ, _ := dirEntries[j].Info()
-				return fileInfoI.Size() < fileInfoJ.Size() != reversed
 			}
-
+			// No need for err check, we already filtered out dirEntries with err != nil in Info() call
+			fileInfoI, _ := dirEntries[i].Info()
+			fileInfoJ, _ := dirEntries[j].Info()
+			return fileInfoI.Size() < fileInfoJ.Size() != reversed
 		}
 	case "Date Modified":
 		order = func(i, j int) bool {
@@ -120,6 +133,8 @@ func returnDirElement(location string, displayDotFile bool, sortOptions sortOpti
 	}
 
 	sort.Slice(dirEntries, order)
+	// Preallocate for efficiency
+	directoryElement := make([]element, 0, len(dirEntries))
 	for _, item := range dirEntries {
 		directoryElement = append(directoryElement, element{
 			name:      item.Name(),
@@ -130,11 +145,14 @@ func returnDirElement(location string, displayDotFile bool, sortOptions sortOpti
 	return directoryElement
 }
 
-func returnDirElementBySearchString(location string, displayDotFile bool, searchString string) (dirElement []element) {
-
+func returnDirElementBySearchString(location string, displayDotFile bool, searchString string) []element {
 	items, err := os.ReadDir(location)
 	if err != nil {
 		slog.Error("Error while return folder element function", "error", err)
+		return []element{}
+	}
+
+	if len(items) == 0 {
 		return []element{}
 	}
 
@@ -161,21 +179,14 @@ func returnDirElementBySearchString(location string, displayDotFile bool, search
 	}
 	// https://github.com/reinhrst/fzf-lib/blob/main/core.go#L43
 	// No sorting needed. fzf.DefaultOptions() already return values ordered on Score
-	for _, item := range fzfSearch(searchString, fileAndDirectories) {
+	fzfResults := utils.FzfSearch(searchString, fileAndDirectories)
+	dirElement := make([]element, 0, len(fzfResults))
+	for _, item := range fzfResults {
 		resultItem := folderElementMap[item.Key]
 		dirElement = append(dirElement, resultItem)
 	}
 
 	return dirElement
-}
-
-// Returning a string slice causes inefficiency in current usage
-func fzfSearch(query string, source []string) []fzf.MatchResult {
-	fzfSearcher := fzf.New(source, fzf.DefaultOptions())
-	fzfSearcher.Search(query)
-	fzfResults := <-fzfSearcher.GetResultChannel()
-	fzfSearcher.End()
-	return fzfResults.Matches
 }
 
 func panelElementHeight(mainPanelHeight int) int {
@@ -190,12 +201,6 @@ func arrayContains(s []string, str string) bool {
 		}
 	}
 	return false
-}
-
-// Todo : Eventually we want to remove all such usage that can result in app exiting abruptly
-func LogAndExit(msg string, values ...any) {
-	slog.Error(msg, values...)
-	os.Exit(1)
 }
 
 func removeElementByValue(slice []string, value string) []string {
@@ -271,7 +276,7 @@ func (m *model) returnMetaData() {
 	id := shortuuid.New()
 
 	message := channelMessage{
-		messageId:   id,
+		messageID:   id,
 		messageType: sendMetadata,
 		metadata:    m.fileMetaData.metaData,
 	}
@@ -302,8 +307,8 @@ func (m *model) returnMetaData() {
 	fileInfo, err := os.Stat(filePath)
 
 	if isSymlink(filePath) {
-		_, err := filepath.EvalSymlinks(filePath)
-		if err != nil {
+		_, symlinkErr := filepath.EvalSymlinks(filePath)
+		if symlinkErr != nil {
 			m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"Link file is broken!", ""})
 		} else {
 			m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"This is a link file.", ""})
@@ -311,7 +316,6 @@ func (m *model) returnMetaData() {
 		message.metadata = m.fileMetaData.metaData
 		channel <- message
 		return
-
 	}
 
 	if err != nil {
@@ -319,12 +323,14 @@ func (m *model) returnMetaData() {
 	}
 
 	if fileInfo.IsDir() {
-		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"FolderName", fileInfo.Name()})
+		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"Name", fileInfo.Name()})
 		if m.focusPanel == metadataFocus {
-			m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"FolderSize", formatFileSize(dirSize(filePath))})
+			// Todo : Calling dirSize() could be expensive for large directories, as it recursively
+			// walks the entire tree. Consider lazy loading, caching, or an async approach to avoid UI lockups.
+			m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"Size", common.FormatFileSize(dirSize(filePath))})
 		}
-		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"FolderModifyDate", fileInfo.ModTime().String()})
-		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"FolderPermissions", fileInfo.Mode().String()})
+		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"Date Modified", fileInfo.ModTime().String()})
+		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"Permissions", fileInfo.Mode().String()})
 		message.metadata = m.fileMetaData.metaData
 		channel <- message
 		return
@@ -336,8 +342,7 @@ func (m *model) returnMetaData() {
 		return
 	}
 
-	if Config.Metadata && checkIsSymlinked.Mode()&os.ModeSymlink == 0 && et != nil {
-
+	if common.Config.Metadata && checkIsSymlinked.Mode()&os.ModeSymlink == 0 && et != nil {
 		fileInfos := et.ExtractMetadata(filePath)
 
 		for _, fileInfo := range fileInfos {
@@ -352,12 +357,12 @@ func (m *model) returnMetaData() {
 			}
 		}
 	} else {
-		fileName := [2]string{"FileName", fileInfo.Name()}
-		fileSize := [2]string{"FileSize", formatFileSize(fileInfo.Size())}
-		fileModifyData := [2]string{"FileModifyDate", fileInfo.ModTime().String()}
-		filePermissions := [2]string{"FilePermissions", fileInfo.Mode().String()}
+		fileName := [2]string{"Name", fileInfo.Name()}
+		fileSize := [2]string{"Size", common.FormatFileSize(fileInfo.Size())}
+		fileModifyData := [2]string{"Date Modified", fileInfo.ModTime().String()}
+		filePermissions := [2]string{"Permissions", fileInfo.Mode().String()}
 
-		if Config.EnableMD5Checksum {
+		if common.Config.EnableMD5Checksum {
 			// Calculate MD5 checksum
 			checksum, err := calculateMD5Checksum(filePath)
 			if err != nil {
@@ -380,13 +385,13 @@ func (m *model) returnMetaData() {
 func calculateMD5Checksum(filePath string) (string, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
-		return "", fmt.Errorf("failed to open file: %v", err)
+		return "", fmt.Errorf("failed to open file: %w", err)
 	}
 	defer file.Close()
 
 	hash := md5.New()
 	if _, err := io.Copy(hash, file); err != nil {
-		return "", fmt.Errorf("failed to calculate MD5 checksum: %v", err)
+		return "", fmt.Errorf("failed to calculate MD5 checksum: %w", err)
 	}
 
 	checksum := hex.EncodeToString(hash.Sum(nil))
@@ -396,20 +401,21 @@ func calculateMD5Checksum(filePath string) (string, error) {
 // Get directory total size
 func dirSize(path string) int64 {
 	var size int64
-	err := filepath.WalkDir(path, func(_ string, entry os.DirEntry, err error) error {
+	// Its named walkErr to prevent shadowing
+	walkErr := filepath.WalkDir(path, func(_ string, entry os.DirEntry, err error) error {
 		if err != nil {
 			slog.Error("Dir size function error", "error", err)
 		}
 		if !entry.IsDir() {
-			info, err := entry.Info()
-			if err == nil {
+			info, infoErr := entry.Info()
+			if infoErr == nil {
 				size += info.Size()
 			}
 		}
 		return err
 	})
-	if err != nil {
-		slog.Error("errors during WalkDir", "error", err)
+	if walkErr != nil {
+		slog.Error("errors during WalkDir", "error", walkErr)
 	}
 	return size
 }
@@ -418,7 +424,7 @@ func dirSize(path string) int64 {
 func countFiles(dirPath string) (int, error) {
 	count := 0
 
-	err := filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk(dirPath, func(_ string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -433,7 +439,6 @@ func countFiles(dirPath string) (int, error) {
 
 // Check whether is symlinks
 func isSymlink(filePath string) bool {
-
 	fileInfo, err := os.Lstat(filePath)
 	if err != nil {
 		return true
@@ -458,58 +463,16 @@ func isImageFile(filename string) bool {
 	return imageExtensions[ext]
 }
 
-func getElementIcon(file string, IsDir bool) icon.IconStyle {
-	ext := strings.TrimPrefix(filepath.Ext(file), ".")
-	name := file
+// TeaUpdate : Utility to send update to model , majorly used in tests
+// Not using pointer receiver as this is more like a utility, than
+// a member function of model
+func TeaUpdate(m *model, msg tea.Msg) (tea.Cmd, error) {
+	resModel, cmd := m.Update(msg)
 
-	if !Config.Nerdfont {
-		return icon.IconStyle{
-			Icon:  "",
-			Color: theme.FilePanelFG,
-		}
+	mObj, ok := resModel.(model)
+	if !ok {
+		return cmd, fmt.Errorf("unexpected model type: %T", resModel)
 	}
-
-	if IsDir {
-		resultIcon := icon.Folders["folder"]
-		betterIcon, hasBetterIcon := icon.Folders[name]
-		if hasBetterIcon {
-			resultIcon = betterIcon
-		}
-		return resultIcon
-	} else {
-		// default icon for all files. try to find a better one though...
-		resultIcon := icon.Icons["file"]
-		// resolve aliased extensions
-		extKey := strings.ToLower(ext)
-		alias, hasAlias := icon.Aliases[extKey]
-		if hasAlias {
-			extKey = alias
-		}
-
-		// see if we can find a better icon based on extension alone
-		betterIcon, hasBetterIcon := icon.Icons[extKey]
-		if hasBetterIcon {
-			resultIcon = betterIcon
-		}
-
-		// now look for icons based on full names
-		fullName := name
-
-		fullName = strings.ToLower(fullName)
-		fullAlias, hasFullAlias := icon.Aliases[fullName]
-		if hasFullAlias {
-			fullName = fullAlias
-		}
-		bestIcon, hasBestIcon := icon.Icons[fullName]
-		if hasBestIcon {
-			resultIcon = bestIcon
-		}
-		if resultIcon.Color == "NONE" {
-			return icon.IconStyle{
-				Icon:  resultIcon.Icon,
-				Color: theme.FilePanelFG,
-			}
-		}
-		return resultIcon
-	}
+	*m = mObj
+	return cmd, nil
 }

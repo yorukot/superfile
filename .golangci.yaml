@@ -1,0 +1,444 @@
+# This file is licensed under the terms of the MIT license https://opensource.org/license/mit
+# Copyright (c) 2021-2025 Marat Reymers
+
+## Golden config for golangci-lint v1.64.5
+#
+# This is the best config for golangci-lint based on my experience and opinion.
+# It is very strict, but not extremely strict.
+# Feel free to adapt it to suit your needs.
+# If this config helps you, please consider keeping a link to this file (see the next comment).
+
+# Based on https://gist.github.com/maratori/47a4d00457a92aa426dbd48a18776322
+
+# Custom changes
+# (1) govet shadow analyzer is set to "strict : false" settings.
+# strict : true causes too much noise
+
+run:
+  # Timeout for analysis, e.g. 30s, 5m.
+  # Default: 1m
+  timeout: 3m
+
+  # The mode used to evaluate relative paths.
+  # It's used by exclusions, Go plugins, and some linters.
+  # The value can be:
+  # - `gomod`: the paths will be relative to the directory of the `go.mod` file.
+  # - `gitroot`: the paths will be relative to the git root (the parent directory of `.git`).
+  # - `cfg`: the paths will be relative to the configuration file.
+  # - `wd` (NOT recommended): the paths will be relative to the place where golangci-lint is run.
+  # Default: wd
+  relative-path-mode: gomod
+
+
+# This file contains only configs which differ from defaults.
+# All possible options can be found here https://github.com/golangci/golangci-lint/blob/HEAD/.golangci.reference.yml
+linters-settings:
+  cyclop:
+    # The maximal code complexity to report.
+    # Default: 10
+    max-complexity: 30
+    # The maximal average package complexity.
+    # If it's higher than 0.0 (float) the check is enabled
+    # Default: 0.0
+    package-average: 10.0
+
+  depguard:
+    # Rules to apply.
+    #
+    # Variables:
+    # - File Variables
+    #   Use an exclamation mark `!` to negate a variable.
+    #   Example: `!$test` matches any file that is not a go test file.
+    #
+    #   `$all` - matches all go files
+    #   `$test` - matches all go test files
+    #
+    # - Package Variables
+    #
+    #   `$gostd` - matches all of go's standard library (Pulled from `GOROOT`)
+    #
+    # Default (applies if no custom rules are defined): Only allow $gostd in all files.
+    rules:
+      # Name of a rule.
+      legacy:
+        # List of packages that are not allowed.
+        # Entries can be a variable (starting with $), a string prefix, or an exact match (if ending with $).
+        # Default: []
+        deny:
+          - pkg: "math/rand$"
+            desc: "Use math/rand/v2 instead, see https://go.dev/blog/randv2"
+          - pkg: "github.com/golang/protobuf"
+            desc: "Use google.golang.org/protobuf instead, see https://developers.google.com/protocol-buffers/docs/reference/go/faq#modules"
+          - pkg: "github.com/satori/go.uuid"
+            desc: "Use github.com/google/uuid instead, satori's package is not maintained"
+          - pkg: "github.com/gofrs/uuid$"
+            desc: "Use github.com/gofrs/uuid/v5 or later, it was not a go module before v5"
+
+  errcheck:
+    # Report about not checking of errors in type assertions: `a := b.(MyStruct)`.
+    # Such cases aren't reported by default.
+    # Default: false
+    check-type-assertions: true
+
+  exhaustive:
+    # Program elements to check for exhaustiveness.
+    # Default: [ switch ]
+    check:
+      - switch
+      - map
+
+  exhaustruct:
+    # List of regular expressions to exclude struct packages and their names from checks.
+    # Regular expressions must match complete canonical struct package/name/structname.
+    # Default: []
+    exclude:
+      # std libs
+      - "^net/http.Client$"
+      - "^net/http.Cookie$"
+      - "^net/http.Request$"
+      - "^net/http.Response$"
+      - "^net/http.Server$"
+      - "^net/http.Transport$"
+      - "^net/url.URL$"
+      - "^os/exec.Cmd$"
+      - "^reflect.StructField$"
+      # public libs
+      - "^github.com/Shopify/sarama.Config$"
+      - "^github.com/Shopify/sarama.ProducerMessage$"
+      - "^github.com/mitchellh/mapstructure.DecoderConfig$"
+      - "^github.com/prometheus/client_golang/.+Opts$"
+      - "^github.com/spf13/cobra.Command$"
+      - "^github.com/spf13/cobra.CompletionOptions$"
+      - "^github.com/stretchr/testify/mock.Mock$"
+      - "^github.com/testcontainers/testcontainers-go.+Request$"
+      - "^github.com/testcontainers/testcontainers-go.FromDockerfile$"
+      - "^golang.org/x/tools/go/analysis.Analyzer$"
+      - "^google.golang.org/protobuf/.+Options$"
+      - "^gopkg.in/yaml.v3.Node$"
+
+  funlen:
+    # Checks the number of lines in a function.
+    # If lower than 0, disable the check.
+    # Default: 60
+    lines: 100
+    # Checks the number of statements in a function.
+    # If lower than 0, disable the check.
+    # Default: 40
+    statements: 50
+    # Ignore comments when counting lines.
+    # Default false
+    ignore-comments: true
+  gochecksumtype:
+    # Presence of `default` case in switch statements satisfies exhaustiveness, if all members are not listed.
+    # Default: true
+    default-signifies-exhaustive: false
+
+  gocognit:
+    # Minimal code complexity to report.
+    # Default: 30 (but we recommend 10-20)
+    min-complexity: 20
+
+  gocritic:
+    # Settings passed to gocritic.
+    # The settings key is the name of a supported gocritic checker.
+    # The list of supported checkers can be find in https://go-critic.github.io/overview.
+    settings:
+      captLocal:
+        # Whether to restrict checker to params only.
+        # Default: true
+        paramsOnly: false
+      underef:
+        # Whether to skip (*x).method() calls where x is a pointer receiver.
+        # Default: true
+        skipRecvDeref: false
+
+  govet:
+    # Enable all analyzers.
+    # Default: false
+    enable-all: true
+    # Disable analyzers by name.
+    # Run `go tool vet help` to see all analyzers.
+    # Default: []
+    disable:
+      - fieldalignment # too strict
+    # Settings per analyzer.
+    settings:
+      shadow:
+        # Whether to be strict about shadowing; can be noisy.
+        # Default: false
+        strict: false
+
+  inamedparam:
+    # Skips check for interface methods with only a single parameter.
+    # Default: false
+    skip-single-param: true
+
+  mnd:
+    # List of function patterns to exclude from analysis.
+    # Values always ignored: `time.Date`,
+    # `strconv.FormatInt`, `strconv.FormatUint`, `strconv.FormatFloat`,
+    # `strconv.ParseInt`, `strconv.ParseUint`, `strconv.ParseFloat`.
+    # Default: []
+    ignored-functions:
+      - args.Error
+      - flag.Arg
+      - flag.Duration.*
+      - flag.Float.*
+      - flag.Int.*
+      - flag.Uint.*
+      - os.Chmod
+      - os.Mkdir.*
+      - os.OpenFile
+      - os.WriteFile
+      - prometheus.ExponentialBuckets.*
+      - prometheus.LinearBuckets
+
+  nakedret:
+    # Make an issue if func has more lines of code than this setting, and it has naked returns.
+    # Default: 30
+    max-func-lines: 0
+
+  nolintlint:
+    # Exclude following linters from requiring an explanation.
+    # Default: []
+    allow-no-explanation: [ funlen, gocognit, lll ]
+    # Enable to require an explanation of nonzero length after each nolint directive.
+    # Default: false
+    require-explanation: true
+    # Enable to require nolint directives to mention the specific linter being suppressed.
+    # Default: false
+    require-specific: true
+
+  perfsprint:
+    # Optimizes into strings concatenation.
+    # Default: true
+    strconcat: false
+
+  reassign:
+    # Patterns for global variable names that are checked for reassignment.
+    # See https://github.com/curioswitch/go-reassign#usage
+    # Default: ["EOF", "Err.*"]
+    patterns:
+      - ".*"
+
+  rowserrcheck:
+    # database/sql is always checked
+    # Default: []
+    packages:
+      - github.com/jmoiron/sqlx
+
+  sloglint:
+    # Enforce not using global loggers.
+    # Values:
+    # - "": disabled
+    # - "all": report all global loggers
+    # - "default": report only the default slog logger
+    # https://github.com/go-simpler/sloglint?tab=readme-ov-file#no-global
+    # Default: ""
+    no-global: "all"
+    # Enforce using methods that accept a context.
+    # Values:
+    # - "": disabled
+    # - "all": report all contextless calls
+    # - "scope": report only if a context exists in the scope of the outermost function
+    # https://github.com/go-simpler/sloglint?tab=readme-ov-file#context-only
+    # Default: ""
+    context: "scope"
+
+  usetesting:
+    # Enable/disable `os.TempDir()` detections.
+    # Default: false
+    os-temp-dir: true
+
+
+linters:
+  disable-all: true
+  enable:
+    ## enabled by default
+    - errcheck # checking for unchecked errors, these unchecked errors can be critical bugs in some cases
+    - gosimple # specializes in simplifying a code
+    - govet # reports suspicious constructs, such as Printf calls whose arguments do not align with the format string
+    - ineffassign # detects when assignments to existing variables are not used
+    - staticcheck # is a go vet on steroids, applying a ton of static analysis checks
+    - typecheck # like the front-end of a Go compiler, parses and type-checks Go code
+    - unused # checks for unused constants, variables, functions and types
+    ## disabled by default
+    - asasalint # checks for pass []any as any in variadic func(...any)
+    - asciicheck # checks that your code does not contain non-ASCII identifiers
+    - bidichk # checks for dangerous unicode character sequences
+    - bodyclose # checks whether HTTP response body is closed successfully
+    - canonicalheader # checks whether net/http.Header uses canonical header
+    - copyloopvar # detects places where loop variables are copied (Go 1.22+)
+    # Todo enable this - This needs a fix in few of our functions
+    #- cyclop # checks function and package cyclomatic complexity
+    - depguard # checks if package imports are in a list of acceptable packages
+    - dupl # tool for code clone detection
+    - durationcheck # checks for two durations multiplied together
+    - errname # checks that sentinel errors are prefixed with the Err and error types are suffixed with the Error
+    - errorlint # finds code that will cause problems with the error wrapping scheme introduced in Go 1.13
+    - exhaustive # checks exhaustiveness of enum switch statements
+    - exptostd # detects functions from golang.org/x/exp/ that can be replaced by std functions
+    - fatcontext # detects nested contexts in loops
+    # - forbidigo # forbids identifiers # Not needed. this blocks only fmt.Print family and is not useful right now
+    # Todo enable - need to make functions shorter
+    #- funlen # tool for detection of long functions
+    - gocheckcompilerdirectives # validates go compiler directive comments (//go:)
+    # Todo enable - This is too much for us right now
+    - gochecknoglobals # checks that no global variables exist
+    - gochecknoinits # checks that no init functions are present in Go code
+    - gochecksumtype # checks exhaustiveness on Go "sum types"
+    # Todo enable - Need to refactor many functions
+    # - gocognit # computes and checks the cognitive complexity of functions
+    - goconst # finds repeated strings that could be replaced by a constant
+    - gocritic # provides diagnostics that check for bugs, performance and style issues
+    # Todo enable
+    #- gocyclo # computes and checks the cyclomatic complexity of functions
+    #- godot # checks if comments end in a period # Too much for us right now
+    - goimports # in addition to fixing imports, goimports also formats your code in the same style as gofmt
+    - gomoddirectives # manages the use of 'replace', 'retract', and 'excludes' directives in go.mod
+    - goprintffuncname # checks that printf-like functions are named with f at the end
+    # Todo enable - ignore for a few int overflow, and fix file permissions
+    # weak md5 cryptography, Subprocess launched with a potential tainted input
+    # - gosec # inspects source code for security problems
+    - iface # checks the incorrect use of interfaces, helping developers avoid interface pollution
+    - intrange # finds places where for loops could make use of an integer range
+    # Todo enable : Need many fixes
+    # - lll # reports long lines
+    - loggercheck # checks key value pairs for common logger libraries (kitlog,klog,logr,zap)
+    - makezero # finds slice declarations with non-zero initial length
+    - mirror # reports wrong mirror patterns of bytes/strings usage
+    # Todo enable - Many many magic numbers, and this should be fixed.
+    # - mnd # detects magic numbers
+    - musttag # enforces field tags in (un)marshaled structs
+    - nakedret # finds naked returns in functions greater than a specified function length
+    # Todo enable : Many reports. A bit hard to understand the nesting value.
+    # - nestif # reports deeply nested if statements
+    - nilerr # finds the code that returns nil even if it checks that the error is not nil
+    - nilnesserr # reports that it checks for err != nil, but it returns a different nil value error (powered by nilness and nilerr)
+    - nilnil # checks that there is no simultaneous return of nil error and an invalid value
+    - noctx # finds sending http request without context.Context
+    - nolintlint # reports ill-formed or insufficient nolint directives
+    - nonamedreturns # reports all named returns
+    - nosprintfhostport # checks for misuse of Sprintf to construct a host with port in a URL
+    - perfsprint # checks that fmt.Sprintf can be replaced with a faster alternative
+    - predeclared # finds code that shadows one of Go's predeclared identifiers
+    - promlinter # checks Prometheus metrics naming via promlint
+    - protogetter # reports direct reads from proto message fields when getters should be used
+    - reassign # checks that package variables are not reassigned
+    # Todo enable - Issue due to model struct
+    # - recvcheck # checks for receiver type consistency
+    - revive # fast, configurable, extensible, flexible, and beautiful linter for Go, drop-in replacement of golint
+    - rowserrcheck # checks whether Err of rows is checked successfully
+    # Todo enable - Need to use non-root logger
+    # - sloglint # ensure consistent code style when using log/slog
+    - spancheck # checks for mistakes with OpenTelemetry/Census spans
+    - sqlclosecheck # checks that sql.Rows and sql.Stmt are closed
+    - stylecheck # is a replacement for golint
+    - testableexamples # checks if examples are testable (have an expected output)
+    - testifylint # checks usage of github.com/stretchr/testify
+    # - testpackage # makes you use a separate _test package # Not needed - Makes it harder to test unexported package functions.
+    - tparallel # detects inappropriate usage of t.Parallel() method in your Go test codes
+    - unconvert # removes unnecessary type conversions
+    - unparam # reports unused function parameters
+    - usestdlibvars # detects the possibility to use variables/constants from the Go standard library
+    - usetesting # reports uses of functions with replacement inside the testing package
+    - wastedassign # finds wasted assignment statements
+    - whitespace # detects leading and trailing whitespace
+
+    ## Todo : Enable some of them
+    ## you may want to enable
+    - decorder # checks declaration order and count of types, constants, variables and functions
+    # We have so many false positives
+    #- exhaustruct # [highly recommend to enable] checks if all structure fields are initialized
+    # Not needed
+    #- gci # controls golang package import order and makes it always deterministic
+    #- ginkgolinter # [if you use ginkgo/gomega] enforces standards of using ginkgo and gomega
+    # We have too many already
+    #- godox # detects usage of FIXME, TODO and other keywords inside comments
+    - goheader # checks is file header matches to pattern
+    #- inamedparam # [great idea, but too strict, need to ignore a lot of cases by default] reports interfaces with unnamed method parameters
+    - interfacebloat # checks the number of methods inside an interface
+    # Function Update() is caught
+    #- ireturn # accept interfaces, return concrete types
+    # Too premature
+    #- prealloc # [premature optimization, but can be used in some cases] finds slice declarations that could potentially be preallocated
+    # Gotta see if this points to any issue
+    #- tagalign # checks that struct tags are well aligned
+    # Useless
+    #- varnamelen # [great idea, but too many false positives] checks that the length of a variable's name matches its scope
+    # Too much for us
+    #- wrapcheck # checks that errors returned from external packages are wrapped
+    # We dont use zerolog
+    #- zerologlint # detects the wrong usage of zerolog that a user forgets to dispatch zerolog.Event
+
+    ## disabled
+    #- containedctx # detects struct contained context.Context field
+    #- contextcheck # [too many false positives] checks the function whether use a non-inherited context
+    # False positives
+    # - dogsled # checks assignments with too many blank identifiers (e.g. x, _, _, _, := f())
+    # False positives
+    # - dupword # [useless without config] checks for duplicate words in the source code
+
+    # It gave some useful errors optimization. Should fix eventually. But this is low priority
+    # - err113 # [too strict] checks the errors handling expressions #
+    # - errchkjson # [don't see profit + I'm against of omitting errors like in the first example https://github.com/breml/errchkjson] checks types passed to the json encoding functions. Reports unsupported types and optionally reports occasions, where the check for the returned error can be omitted
+    # - forcetypeassert # [replaced by errcheck] finds forced type assertions
+    # - gofmt # [replaced by goimports] checks whether code was gofmt-ed
+    #- gofumpt # [replaced by goimports, gofumports is not available yet] checks whether code was gofumpt-ed
+    #- gomodguard # [use more powerful depguard] allow and block lists linter for direct Go module dependencies
+    - gosmopolitan # reports certain i18n/l10n anti-patterns in your Go codebase
+    - grouper # analyzes expression groups
+    - importas # enforces consistent import aliases
+    - maintidx # measures the maintainability index of each function
+    - misspell # [useless] finds commonly misspelled English words in comments
+    # - nlreturn # [too strict and mostly code is not more readable] checks for a new line before return and branch statements to increase code clarity
+    #- paralleltest # [too many false positives] detects missing usage of t.Parallel() method in your Go test
+    # - tagliatelle # checks the struct tags
+    # - tenv # [deprecated, replaced by usetesting] detects using os.Setenv instead of t.Setenv since Go1.17
+    #- thelper # detects golang test helpers without t.Helper() call and checks the consistency of test helpers
+    # - wsl # [too strict and mostly code is not more readable] whitespace linter forces you to use empty lines
+  exclusions:
+    rules:
+      # Stores globally accessible icon strings
+      - path: 'src/config/icon/icon.go'
+        linters:
+          - gochecknoglobals
+      # Stores prerendered styles
+      - path: 'src/internal/common/style.go'
+        linters:
+          - gochecknoglobals
+      # Some fixed variables like default config paths, version, etc.
+      - path: 'src/config/fixed_variable.go'
+        linters:
+          - gochecknoglobals
+      # Stores predefined variables, like re-used non-const strings
+      - path: 'src/internal/common/predefined_variable.go'
+        linters:
+          - gochecknoglobals
+      # Global variables storing config
+      - path: 'src/internal/common/default_config.go'
+        linters:
+          - gochecknoglobals    
+          
+
+issues:
+  # Maximum count of issues with the same text.
+  # Set to 0 to disable.
+  # Default: 3
+  max-same-issues: 50
+
+  exclude-rules:
+    - source: "(noinspection|TODO)"
+      linters: [ godot ]
+    - source: "//noinspection"
+      linters: [ gocritic ]
+    - path: "_test\\.go"
+      linters:
+        - bodyclose
+        - dupl
+        - errcheck
+        - funlen
+        - goconst
+        - gosec
+        - noctx
+        - wrapcheck

@@ -1,6 +1,13 @@
 package internal
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/utils"
+)
+
+const invalidTypeString = "InvalidType"
 
 // reset the items slice and set the cut value
 func (c *copyItems) reset(cut bool) {
@@ -12,42 +19,52 @@ func (c *copyItems) reset(cut bool) {
 
 // Non fatal Validations. This indicates bug / programming errors, not user configuration mistake
 func (m *model) validateLayout() error {
-	if 0 < m.footerHeight && m.footerHeight < minFooterHeight {
+	if 0 < m.footerHeight && m.footerHeight < common.MinFooterHeight {
 		return fmt.Errorf("footerHeight %v is too small", m.footerHeight)
 	}
+	if !m.toggleFooter && m.footerHeight != 0 {
+		return fmt.Errorf("footer closed and footerHeight %v is non zero", m.footerHeight)
+	}
 	// PanelHeight + 2 lines (main border) + actual footer height
-	if m.fullHeight != (m.mainPanelHeight+2)+actualfooterHeight(m.footerHeight, m.commandLine.input.Focused()) {
-		return fmt.Errorf("Invalid model layout, fullHeight : %v, mainPanelHeight : %v, footerHeight : %v\n",
+	if m.fullHeight != (m.mainPanelHeight+2)+utils.FullFooterHeight(m.footerHeight, m.toggleFooter) {
+		return fmt.Errorf("invalid model layout, fullHeight : %v, mainPanelHeight : %v, footerHeight : %v",
 			m.fullHeight, m.mainPanelHeight, m.footerHeight)
 	}
 	// Todo : Add check for width as well
 	return nil
 }
 
-func actualfooterHeight(footerHeight int, commandLineFocussed bool) int {
-	// footerHeight + 2 or 0 lines (footer border)
-	// + 1 lines ( commmand line only if footersize is >0)
-	footerBorder := 2
-	if footerHeight == 0 {
-		footerBorder = 0
+// ================ filepanel
+
+func filePanelSlice(dir []string) []filePanel {
+	res := make([]filePanel, len(dir))
+	for i := range dir {
+		res[i] = defaultFilePanel(dir[i])
 	}
-	commandLineHeight := 0
-	if commandLineFocussed && footerHeight != 0 {
-		commandLineHeight = 1
-	}
-	return footerHeight + footerBorder + commandLineHeight
+	return res
 }
 
-// ================ Sidebar related utils =====================
-// Hopefully compiler inlines it
-func (d directory) isDivider() bool {
-	return d == pinnedDividerDir || d == diskDividerDir
-}
-func (d directory) requiredHeight() int {
-	if d.isDivider() {
-		return 3
+func defaultFilePanel(dir string) filePanel {
+	return filePanel{
+		render:   0,
+		cursor:   0,
+		location: dir,
+		sortOptions: sortOptionsModel{
+			width:  20,
+			height: 4,
+			open:   false,
+			cursor: common.Config.DefaultSortType,
+			data: sortOptionsModelData{
+				options:  []string{"Name", "Size", "Date Modified"},
+				selected: common.Config.DefaultSortType,
+				reversed: common.Config.SortOrderReversed,
+			},
+		},
+		panelMode:        browserMode,
+		focusType:        focus,
+		directoryRecords: make(map[string]directoryRecord),
+		searchBar:        common.GenerateSearchBar(),
 	}
-	return 1
 }
 
 // ================ String method for easy logging =====================
@@ -63,7 +80,7 @@ func (f focusPanelType) String() string {
 	case metadataFocus:
 		return "metadataFocus"
 	default:
-		return "Invalid"
+		return invalidTypeString
 	}
 }
 
@@ -76,7 +93,7 @@ func (f filePanelFocusType) String() string {
 	case focus:
 		return "focus"
 	default:
-		return "Invalid"
+		return invalidTypeString
 	}
 }
 
@@ -87,6 +104,6 @@ func (p panelMode) String() string {
 	case browserMode:
 		return "browserMode"
 	default:
-		return "Invalid"
+		return invalidTypeString
 	}
 }

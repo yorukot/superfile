@@ -101,7 +101,7 @@ func PlaceOverlay(x, y int, fg, bg string, opts ...WhitespaceOption) string {
 		pos += ansi.PrintableRuneWidth(fgLine)
 
 		right := cutLeft(bgLine, pos)
-		bgWidth := ansi.PrintableRuneWidth(bgLine)
+		bgWidth = ansi.PrintableRuneWidth(bgLine)
 		rightWidth := ansi.PrintableRuneWidth(right)
 		if rightWidth <= bgWidth-pos {
 			b.WriteString(ws.render(bgWidth - rightWidth - pos))
@@ -160,9 +160,9 @@ func clamp(v, lower, upper int) int {
 
 // Split a string into lines, additionally returning the size of the widest
 // line.
-func getLines(s string) (lines []string, widest int) {
-	lines = strings.Split(s, "\n")
-
+func getLines(s string) ([]string, int) {
+	lines := strings.Split(s, "\n")
+	widest := 0
 	for _, l := range lines {
 		w := charmansi.StringWidth(l)
 		if widest < w {

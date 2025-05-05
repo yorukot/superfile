@@ -3,9 +3,7 @@ package internal
 import (
 	"log/slog"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"runtime"
 	"strings"
 )
 
@@ -61,6 +59,14 @@ func (m *model) cancelRename() {
 // Connfirm rename file or directory
 func (m *model) confirmRename() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+
+	// Although we dont expect this to happen based on our current flow
+	// Just adding it here to be safe
+	if len(panel.element) == 0 {
+		slog.Error("confirmRename called on empty panel")
+		return
+	}
+
 	oldPath := panel.element[panel.cursor].location
 	newPath := filepath.Join(panel.location, panel.rename.Value())
 
@@ -185,53 +191,4 @@ func (m *model) openHelpMenu() {
 // Quit help menu
 func (m *model) quitHelpMenu() {
 	m.helpMenu.open = false
-}
-
-// Command line
-func (m *model) openCommandLine() {
-	m.firstTextInput = true
-	m.footerHeight--
-	m.commandLine.input = generateCommandLineInputBox()
-	m.commandLine.input.Width = m.fullWidth - 3
-	m.commandLine.input.Focus()
-}
-
-func (m *model) closeCommandLine() {
-	m.footerHeight++
-	m.commandLine.input.SetValue("")
-	m.commandLine.input.Blur()
-}
-
-// Exec a command line input inside the pointing file dir. Like opening the
-// focused file in the text editor
-func (m *model) enterCommandLine() {
-	focusPanelDir := ""
-	for _, panel := range m.fileModel.filePanels {
-		if panel.focusType == focus {
-			focusPanelDir = panel.location
-		}
-	}
-
-	var cmd *exec.Cmd
-	switch runtime.GOOS {
-	case "windows":
-		// On Windows, we use PowerShell with -Command flag for single command execution
-		cmd = exec.Command("powershell.exe", "-Command", m.commandLine.input.Value())
-	default:
-		// On Unix-like systems, use bash/sh
-		cmd = exec.Command("/bin/sh", "-c", m.commandLine.input.Value())
-	}
-
-	cmd.Dir = focusPanelDir // switch to the focused panel directory
-
-	output, err := cmd.CombinedOutput()
-
-	if err != nil {
-		slog.Error("Command execution failed", "error", err, "output", string(output))
-		return
-	}
-
-	m.commandLine.input.SetValue("")
-	m.commandLine.input.Blur()
-	m.footerHeight++
 }

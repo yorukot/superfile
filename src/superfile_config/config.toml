@@ -17,6 +17,9 @@ cd_on_quit = false
 #
 # Whether to open file preview automatically every time superfile is opened.
 default_open_file_preview = true
+#
+# Whether to show image preview
+show_image_preview = true
 # 
 # The path of the first file panel when superfile is opened.
 default_directory = "."
@@ -32,6 +35,9 @@ sort_order_reversed = false
 #
 # Case sensitive sort by name (upper "B" comes before lower "a" if true).
 case_sensitive_sort = false
+#
+# Whether to exit the shell on successful command execution.
+shell_close_on_success = false
 #
 # Whether to enable debug mode.
 debug = false
@@ -54,6 +60,7 @@ file_preview_width = 0
 sidebar_width = 20
 #
 # Border style
+# Make sure to add strings exactly one character wide. Use ' ' for borderless 
 border_top = '─'
 border_bottom = '─'
 border_left = '│'

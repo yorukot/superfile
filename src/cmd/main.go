@@ -1,20 +1,22 @@
 package cmd
 
 import (
+	"context"
 	"embed"
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"log/slog"
 	"net/http"
 	"os"
 	"runtime"
 	"time"
 
+	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/utils"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/pelletier/go-toml/v2"
 	"github.com/urfave/cli/v2"
 	variable "github.com/yorukot/superfile/src/config"
 	internal "github.com/yorukot/superfile/src/internal"
@@ -23,8 +25,11 @@ import (
 
 // Run superfile app
 func Run(content embed.FS) {
-	internal.LoadInitial_PrerenderedVariables()
-	internal.LoadAllDefaultConfig(content)
+	// Before we open log file, set all "non debug" logs to stdout
+	utils.SetRootLoggerToStdout(false)
+
+	common.LoadInitialPrerenderedVariables()
+	common.LoadAllDefaultConfig(content)
 
 	app := &cli.App{
 		Name:        "superfile",
@@ -36,7 +41,7 @@ func Run(content embed.FS) {
 				Name:    "path-list",
 				Aliases: []string{"pl"},
 				Usage:   "Print the path to the configuration and directory",
-				Action: func(c *cli.Context) error {
+				Action: func(_ *cli.Context) error {
 					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#66b2ff")).Render("[Configuration file path]"), variable.ConfigFile)
 					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#ffcc66")).Render("[Hotkeys file path]"), variable.HotkeysFile)
 					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#66ff66")).Render("[Log file path]"), variable.LogFile)
@@ -79,53 +84,32 @@ func Run(content embed.FS) {
 		},
 		Action: func(c *cli.Context) error {
 			// If no args are called along with "spf" use current dir
-			path := ""
+			firstFilePanelDirs := []string{""}
 			if c.Args().Present() {
-				path = c.Args().First()
+				firstFilePanelDirs = c.Args().Slice()
 			}
 
-			// Setting the config file path
-			configFileArg := c.String("config-file")
-
-			// Validate the config file exists
-			if configFileArg != "" {
-				if _, err := os.Stat(configFileArg); err != nil {
-					log.Fatalf("Error: While reading config file '%s' from arguement : %v", configFileArg, err)
-				} else {
-					variable.ConfigFile = configFileArg
-				}
-			}
-
-			hotkeyFileArg := c.String("hotkey-file")
-
-			if hotkeyFileArg != "" {
-				if _, err := os.Stat(hotkeyFileArg); err != nil {
-					log.Fatalf("Error: While reading hotkey file '%s' from arguement : %v", hotkeyFileArg, err)
-				} else {
-					variable.HotkeysFile = hotkeyFileArg
-				}
-			}
+			variable.UpdateVarFromCliArgs(c)
 
 			InitConfigFile()
 
-			err := InitTrash()
 			hasTrash := true
-			if err != nil {
+			if err := InitTrash(); err != nil {
 				hasTrash = false
 			}
 
-			variable.FixHotkeys = c.Bool("fix-hotkeys")
-			variable.FixConfigFile = c.Bool("fix-config-file")
-			variable.PrintLastDir = c.Bool("print-last-dir")
-
 			firstUse := checkFirstUse()
 
-			go CheckForUpdates()
-
-			p := tea.NewProgram(internal.InitialModel(path, firstUse, hasTrash), tea.WithAltScreen(), tea.WithMouseCellMotion())
+			p := tea.NewProgram(internal.InitialModel(firstFilePanelDirs, firstUse, hasTrash), tea.WithAltScreen(), tea.WithMouseCellMotion())
 			if _, err := p.Run(); err != nil {
-				log.Fatalf("Alas, there's been an error: %v", err)
+				utils.PrintfAndExit("Alas, there's been an error: %v", err)
 			}
+
+			// This must be after calling internal.InitialModel()
+			// so that we know `common.Config` is loaded
+			// Should not be a goroutine, Otherwise the main
+			// goroutine will exit first, and this will not be able to finish
+			CheckForUpdates()
 
 			if variable.PrintLastDir {
 				fmt.Println(variable.LastDir)
@@ -137,7 +121,7 @@ func Run(content embed.FS) {
 
 	err := app.Run(os.Args)
 	if err != nil {
-		log.Fatalln(err)
+		utils.PrintlnAndExit(err)
 	}
 }
 
@@ -151,7 +135,7 @@ func InitConfigFile() {
 		variable.SuperFileStateDir,
 		variable.ThemeFolder,
 	); err != nil {
-		log.Fatalln("Error creating directories:", err)
+		utils.PrintlnAndExit("Error creating directories:", err)
 	}
 
 	// Create files
@@ -161,27 +145,27 @@ func InitConfigFile() {
 		variable.ThemeFileVersion,
 		variable.ToggleFooter,
 	); err != nil {
-		log.Fatalln("Error creating files:", err)
+		utils.PrintlnAndExit("Error creating files:", err)
 	}
 
 	// Write config file
-	if err := writeConfigFile(variable.ConfigFile, internal.ConfigTomlString); err != nil {
-		log.Fatalln("Error writing config file:", err)
+	if err := writeConfigFile(variable.ConfigFile, common.ConfigTomlString); err != nil {
+		utils.PrintlnAndExit("Error writing config file:", err)
 	}
 
-	if err := writeConfigFile(variable.HotkeysFile, internal.HotkeysTomlString); err != nil {
-		log.Fatalln("Error writing config file:", err)
+	if err := writeConfigFile(variable.HotkeysFile, common.HotkeysTomlString); err != nil {
+		utils.PrintlnAndExit("Error writing config file:", err)
 	}
 
-	if err := initJsonFile(variable.PinnedFile); err != nil {
-		log.Fatalln("Error initializing json file:", err)
+	if err := initJSONFile(variable.PinnedFile); err != nil {
+		utils.PrintlnAndExit("Error initializing json file:", err)
 	}
 }
 
 // We are initializing these, but not sure if we are ever using them
 func InitTrash() error {
 	// Create trash directories
-	if runtime.GOOS != "darwin" {
+	if runtime.GOOS != utils.OsDarwin {
 		err := createDirectories(
 			variable.CustomTrashDirectory,
 			variable.CustomTrashDirectoryFiles,
@@ -198,7 +182,7 @@ func createDirectories(dirs ...string) error {
 	for _, dir := range dirs {
 		if _, err := os.Stat(dir); os.IsNotExist(err) {
 			// Directory doesn't exist, create it
-			if err := os.MkdirAll(dir, 0755); err != nil {
+			if err = os.MkdirAll(dir, 0755); err != nil {
 				return fmt.Errorf("failed to create directory %s: %w", dir, err)
 			}
 		} else if err != nil {
@@ -214,7 +198,7 @@ func createDirectories(dirs ...string) error {
 func createFiles(files ...string) error {
 	for _, file := range files {
 		if _, err := os.Stat(file); os.IsNotExist(err) {
-			if err := os.WriteFile(file, nil, 0644); err != nil {
+			if err = os.WriteFile(file, nil, 0644); err != nil {
 				return fmt.Errorf("failed to create file %s: %w", file, err)
 			}
 		}
@@ -229,8 +213,8 @@ func checkFirstUse() bool {
 	firstUse := false
 	if _, err := os.Stat(file); os.IsNotExist(err) {
 		firstUse = true
-		if err := os.WriteFile(file, nil, 0644); err != nil {
-			log.Fatalf("Failed to create file: %v", err)
+		if err = os.WriteFile(file, nil, 0644); err != nil {
+			utils.PrintfAndExit("Failed to create file: %v", err)
 		}
 	}
 	return firstUse
@@ -239,16 +223,16 @@ func checkFirstUse() bool {
 // Write data to the path file if it does not exists
 func writeConfigFile(path, data string) error {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		if err := os.WriteFile(path, []byte(data), 0644); err != nil {
+		if err = os.WriteFile(path, []byte(data), 0644); err != nil {
 			return fmt.Errorf("failed to write config file %s: %w", path, err)
 		}
 	}
 	return nil
 }
 
-func initJsonFile(path string) error {
+func initJSONFile(path string) error {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		if err := os.WriteFile(path, []byte("null"), 0644); err != nil {
+		if err = os.WriteFile(path, []byte("null"), 0644); err != nil {
 			return fmt.Errorf("failed to initialize json file %s: %w", path, err)
 		}
 	}
@@ -268,22 +252,7 @@ func writeLastCheckTime(t time.Time) {
 // Todo : This is too big of a function. Refactor it to displayUpdateNotification, fetchLatestVersion,
 // shouldCheckForUpdates, chucks
 func CheckForUpdates() {
-	var Config internal.ConfigType
-
-	// Get AutoCheck flag from configuration files
-
-	// Todo : We are reading the config file here, and also in the loadConfigFile functions
-	// This needs to be fixed.
-	data, err := os.ReadFile(variable.ConfigFile)
-	if err != nil {
-		log.Fatalf("Config file doesn't exist: %v", err)
-	}
-	err = toml.Unmarshal(data, &Config)
-	if err != nil {
-		log.Fatalf("Error decoding config file ( your config file may be misconfigured ): %v", err)
-	}
-
-	if !Config.AutoCheckUpdate {
+	if !common.Config.AutoCheckUpdate {
 		return
 	}
 
@@ -311,11 +280,22 @@ func CheckForUpdates() {
 		defer func() {
 			writeLastCheckTime(currentTime)
 		}()
-		client := &http.Client{
-			Timeout: 5 * time.Second,
-		}
-		resp, err := client.Get(variable.LatestVersionURL)
+		// Create a context with a 5-second timeout
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel() // Cancel the context when done
+		client := &http.Client{}
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, variable.LatestVersionURL, nil)
 		if err != nil {
+			slog.Error("Error forming updates request:", "error", err)
+			return
+		}
+
+		resp, err := client.Do(req)
+		if err != nil {
+			if ctx.Err() == context.DeadlineExceeded {
+				slog.Error("Update check request timed out")
+				return
+			}
 			slog.Error("Error checking for updates:", "error", err)
 			return
 		}

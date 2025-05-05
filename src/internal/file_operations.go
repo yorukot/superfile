@@ -9,6 +9,8 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/yorukot/superfile/src/internal/utils"
+
 	trash_win "github.com/hymkor/trash-go"
 	"github.com/rkoesters/xdg/trash"
 	variable "github.com/yorukot/superfile/src/config"
@@ -20,15 +22,15 @@ func isSamePartition(path1, path2 string) (bool, error) {
 	// Get the absolute path to handle relative paths
 	absPath1, err := filepath.Abs(path1)
 	if err != nil {
-		return false, fmt.Errorf("failed to get absolute path of the first path: %v", err)
+		return false, fmt.Errorf("failed to get absolute path of the first path: %w", err)
 	}
 
 	absPath2, err := filepath.Abs(path2)
 	if err != nil {
-		return false, fmt.Errorf("failed to get absolute path of the second path: %v", err)
+		return false, fmt.Errorf("failed to get absolute path of the second path: %w", err)
 	}
 
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS == utils.OsWindows {
 		// On Windows, we can check if both paths are on the same drive (same letter)
 		drive1 := getDriveLetter(absPath1)
 		drive2 := getDriveLetter(absPath2)
@@ -51,13 +53,12 @@ func moveElement(src, dst string) error {
 	// Check if source and destination are on the same partition
 	sameDev, err := isSamePartition(src, dst)
 	if err != nil {
-		return fmt.Errorf("failed to check partitions: %v", err)
+		return fmt.Errorf("failed to check partitions: %w", err)
 	}
 
 	// If on the same partition, attempt to rename (which will use the same inode)
 	if sameDev {
-		err := os.Rename(src, dst)
-		if err == nil {
+		if err = os.Rename(src, dst); err == nil {
 			return nil
 		}
 		// If rename fails, fall back to copy+delete
@@ -66,12 +67,12 @@ func moveElement(src, dst string) error {
 	// If on different partitions or rename failed, fall back to copy+delete
 	err = copyElement(src, dst)
 	if err != nil {
-		return fmt.Errorf("failed to copy: %v", err)
+		return fmt.Errorf("failed to copy: %w", err)
 	}
 
 	err = os.RemoveAll(src)
 	if err != nil {
-		return fmt.Errorf("failed to remove source after copy: %v", err)
+		return fmt.Errorf("failed to remove source after copy: %w", err)
 	}
 
 	return nil
@@ -81,7 +82,7 @@ func moveElement(src, dst string) error {
 func copyElement(src, dst string) error {
 	srcInfo, err := os.Stat(src)
 	if err != nil {
-		return fmt.Errorf("failed to stat source: %v", err)
+		return fmt.Errorf("failed to stat source: %w", err)
 	}
 
 	if srcInfo.IsDir() {
@@ -94,12 +95,12 @@ func copyElement(src, dst string) error {
 func copyDir(src, dst string, srcInfo os.FileInfo) error {
 	err := os.MkdirAll(dst, srcInfo.Mode())
 	if err != nil {
-		return fmt.Errorf("failed to create destination directory: %v", err)
+		return fmt.Errorf("failed to create destination directory: %w", err)
 	}
 
 	entries, err := os.ReadDir(src)
 	if err != nil {
-		return fmt.Errorf("failed to read source directory: %v", err)
+		return fmt.Errorf("failed to read source directory: %w", err)
 	}
 
 	for _, entry := range entries {
@@ -108,7 +109,7 @@ func copyDir(src, dst string, srcInfo os.FileInfo) error {
 
 		entryInfo, err := entry.Info()
 		if err != nil {
-			return fmt.Errorf("failed to get entry info: %v", err)
+			return fmt.Errorf("failed to get entry info: %w", err)
 		}
 
 		if entryInfo.IsDir() {
@@ -127,18 +128,18 @@ func copyDir(src, dst string, srcInfo os.FileInfo) error {
 func copyFile(src, dst string, srcInfo os.FileInfo) error {
 	srcFile, err := os.Open(src)
 	if err != nil {
-		return fmt.Errorf("failed to open source file: %v", err)
+		return fmt.Errorf("failed to open source file: %w", err)
 	}
 	defer srcFile.Close()
 
 	dstFile, err := os.OpenFile(dst, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, srcInfo.Mode())
 	if err != nil {
-		return fmt.Errorf("failed to create destination file: %v", err)
+		return fmt.Errorf("failed to create destination file: %w", err)
 	}
 	defer dstFile.Close()
 
 	if _, err := io.Copy(dstFile, srcFile); err != nil {
-		return fmt.Errorf("failed to copy file contents: %v", err)
+		return fmt.Errorf("failed to copy file contents: %w", err)
 	}
 	return nil
 }
@@ -146,15 +147,16 @@ func copyFile(src, dst string, srcInfo os.FileInfo) error {
 // Move file to trash can and can auto switch macos trash can or linux trash can
 func trashMacOrLinux(src string) error {
 	var err error
-	if runtime.GOOS == "darwin" {
+	switch runtime.GOOS {
+	case utils.OsDarwin:
 		err = moveElement(src, filepath.Join(variable.DarwinTrashDirectory, filepath.Base(src)))
-	} else if runtime.GOOS == "windows" {
+	case utils.OsWindows:
 		err = trash_win.Throw(src)
-	} else {
+	default:
 		err = trash.Trash(src)
 	}
 	if err != nil {
-		slog.Error("Error while delete single item function move file to trash can", "error", err)
+		slog.Error("Error while deleting single item, in function to move file to trash can", "error", err)
 	}
 	return err
 }
@@ -201,7 +203,7 @@ func pasteDir(src, dst string, id string, m *model) error {
 		} else {
 			p := m.processBarModel.process[id]
 			message := channelMessage{
-				messageId:       id,
+				messageID:       id,
 				messageType:     sendProcess,
 				processNewState: p,
 			}
@@ -249,7 +251,7 @@ func pasteDir(src, dst string, id string, m *model) error {
 	if m.copyItems.cut && !sameDev {
 		err = os.RemoveAll(src)
 		if err != nil {
-			return fmt.Errorf("failed to remove source after move: %v", err)
+			return fmt.Errorf("failed to remove source after move: %w", err)
 		}
 	}
 

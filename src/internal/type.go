@@ -3,8 +3,11 @@ package internal
 import (
 	"time"
 
+	"github.com/yorukot/superfile/src/internal/ui/sidebar"
+
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/textinput"
+	"github.com/yorukot/superfile/src/internal/ui/prompt"
 )
 
 // Type representing the mode of the panel
@@ -74,15 +77,15 @@ const (
 // Main model
 type model struct {
 	fileModel            fileModel
-	sidebarModel         sidebarModel
+	sidebarModel         sidebar.Model
 	processBarModel      processBarModel
 	focusPanel           focusPanelType
 	copyItems            copyItems
 	typingModal          typingModal
 	warnModal            warnModal
 	helpMenu             helpMenuModal
+	promptModal          prompt.Model
 	fileMetaData         fileMetadata
-	commandLine          commandLineModal
 	confirmToQuit        bool
 	firstTextInput       bool
 	toggleDotFile        bool
@@ -103,10 +106,6 @@ type model struct {
 }
 
 // Modal
-type commandLineModal struct {
-	input textinput.Model
-}
-
 type helpMenuModal struct {
 	height      int
 	width       int
@@ -173,7 +172,7 @@ type filePanel struct {
 	panelMode          panelMode
 	selected           []string
 	element            []element
-	directoryRecord    map[string]directoryRecord
+	directoryRecords   map[string]directoryRecord
 	rename             textinput.Model
 	renaming           bool
 	searchBar          textinput.Model
@@ -211,22 +210,6 @@ type element struct {
 
 /* FILE WINDOWS TYPE END*/
 
-/* SIDE BAR internal TYPE START*/
-// Model for sidebar internal
-type sidebarModel struct {
-	directories []directory
-	renderIndex int
-	cursor      int
-	rename      textinput.Model
-	renaming    bool
-	searchBar   textinput.Model
-}
-
-type directory struct {
-	location string
-	name     string
-}
-
 /* SIDE BAR internal TYPE END*/
 
 /*PROCESS BAR internal TYPE START*/
@@ -251,7 +234,7 @@ type process struct {
 
 // Message for process bar
 type channelMessage struct {
-	messageId       string
+	messageID       string
 	messageType     channelMessageType
 	processNewState process
 	warnModal       warnModal

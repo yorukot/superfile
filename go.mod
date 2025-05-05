@@ -4,7 +4,7 @@ go 1.24.1
 
 require (
 	github.com/adrg/xdg v0.5.3
-	github.com/alecthomas/chroma/v2 v2.15.0
+	github.com/alecthomas/chroma/v2 v2.16.0
 	github.com/atotto/clipboard v0.1.4
 	github.com/barasher/go-exiftool v1.10.0
 	github.com/charmbracelet/bubbles v0.20.0
@@ -15,7 +15,7 @@ require (
 	github.com/muesli/termenv v0.16.0
 	github.com/reinhrst/fzf-lib v0.9.0
 	github.com/rkoesters/xdg v0.0.1
-	github.com/shirou/gopsutil/v4 v4.25.2
+	github.com/shirou/gopsutil/v4 v4.25.3
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v2 v2.27.6
 	golang.org/x/mod v0.24.0
@@ -37,7 +37,7 @@ require (
 	github.com/bodgit/sevenzip v1.4.0 // indirect
 	github.com/bodgit/windows v1.0.1 // indirect
 	github.com/connesc/cipherio v0.2.1 // indirect
-	github.com/dlclark/regexp2 v1.11.4 // indirect
+	github.com/dlclark/regexp2 v1.11.5 // indirect
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
@@ -67,7 +67,7 @@ require (
 	github.com/muesli/cancelreader v0.2.2 // indirect
 	github.com/muesli/reflow v0.3.0
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
-	github.com/pelletier/go-toml/v2 v2.2.3
+	github.com/pelletier/go-toml/v2 v2.2.4
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect

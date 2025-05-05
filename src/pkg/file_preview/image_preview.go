@@ -1,6 +1,7 @@
 package filepreview
 
 import (
+	"errors"
 	"fmt"
 	"image"
 	"image/color"
@@ -28,8 +29,8 @@ func newColorCache() *colorCache {
 }
 
 func (c *colorCache) getTermenvColor(col color.Color, fallbackColor string) termenv.RGBColor {
-	rgba := color.RGBAModel.Convert(col).(color.RGBA)
-	if rgba.A == 0 {
+	rgba, ok := color.RGBAModel.Convert(col).(color.RGBA)
+	if !ok || rgba.A == 0 {
 		return termenv.RGBColor(fallbackColor)
 	}
 
@@ -51,7 +52,7 @@ func ConvertImageToANSI(img image.Image, defaultBGColor color.Color) string {
 	defaultBGHex := colorToHex(defaultBGColor)
 
 	for y := 0; y < height; y += 2 {
-		for x := 0; x < width; x++ {
+		for x := range width {
 			upperColor := cache.getTermenvColor(img.At(x, y), defaultBGHex)
 			lowerColor := cache.getTermenvColor(defaultBGColor, "")
 
@@ -85,7 +86,7 @@ func ImagePreview(path string, maxWidth, maxHeight int, defaultBGColor string) (
 	}
 
 	// Seek back to the beginning of the file before reading EXIF data
-	if _, err := file.Seek(0, 0); err != nil {
+	if _, err = file.Seek(0, 0); err != nil {
 		return "", err
 	}
 
@@ -98,7 +99,7 @@ func ImagePreview(path string, maxWidth, maxHeight int, defaultBGColor string) (
 	// Convert image to ANSI
 	bgColor, err := hexToColor(defaultBGColor)
 	if err != nil {
-		return "", fmt.Errorf("invalid background color: %v", err)
+		return "", fmt.Errorf("invalid background color: %w", err)
 	}
 	ansiImage := ConvertImageToANSI(resizedImg, bgColor)
 
@@ -153,19 +154,16 @@ func adjustOrientation(img image.Image, orientation int) image.Image {
 
 func hexToColor(hex string) (color.RGBA, error) {
 	if len(hex) != 7 || hex[0] != '#' {
-		return color.RGBA{}, fmt.Errorf("invalid hex color format")
+		return color.RGBA{}, errors.New("invalid hex color format")
 	}
-	values, err := strconv.ParseUint(string(hex[1:]), 16, 32)
+	values, err := strconv.ParseUint(hex[1:], 16, 32)
 	if err != nil {
 		return color.RGBA{}, err
 	}
 	return color.RGBA{R: uint8(values >> 16), G: uint8((values >> 8) & 0xFF), B: uint8(values & 0xFF), A: 255}, nil
 }
 
-func colorToHex(color color.Color) (fullbackHex string) {
+func colorToHex(color color.Color) string {
 	r, g, b, _ := color.RGBA()
-
-	fullbackHex = fmt.Sprintf("#%02x%02x%02x", uint8(r>>8), uint8(g>>8), uint8(b>>8))
-	return fullbackHex
-
+	return fmt.Sprintf("#%02x%02x%02x", uint8(r>>8), uint8(g>>8), uint8(b>>8))
 }

@@ -1,55 +1,4 @@
-package internal
-
-import "github.com/charmbracelet/lipgloss"
-
-var wheelRunTime = 5
-
-var (
-	filePanelBorderColor lipgloss.Color
-	sidebarBorderColor   lipgloss.Color
-	footerBorderColor    lipgloss.Color
-
-	filePanelBorderActiveColor lipgloss.Color
-	sidebarBorderActiveColor   lipgloss.Color
-	footerBorderActiveColor    lipgloss.Color
-	modalBorderActiveColor     lipgloss.Color
-
-	fullScreenBGColor lipgloss.Color
-	filePanelBGColor  lipgloss.Color
-	sidebarBGColor    lipgloss.Color
-	footerBGColor     lipgloss.Color
-	modalBGColor      lipgloss.Color
-
-	fullScreenFGColor lipgloss.Color
-	filePanelFGColor  lipgloss.Color
-	sidebarFGColor    lipgloss.Color
-	footerFGColor     lipgloss.Color
-	modalFGColor      lipgloss.Color
-
-	cursorColor  lipgloss.Color
-	correctColor lipgloss.Color
-	errorColor   lipgloss.Color
-	hintColor    lipgloss.Color
-	cancelColor  lipgloss.Color
-
-	filePanelTopDirectoryIconColor lipgloss.Color
-	filePanelTopPathColor          lipgloss.Color
-	filePanelItemSelectedFGColor   lipgloss.Color
-	filePanelItemSelectedBGColor   lipgloss.Color
-
-	sidebarTitleColor          lipgloss.Color
-	sidebarItemSelectedFGColor lipgloss.Color
-	sidebarItemSelectedBGColor lipgloss.Color
-	sidebarDividerColor        lipgloss.Color
-
-	modalCancelFGColor  lipgloss.Color
-	modalCancelBGColor  lipgloss.Color
-	modalConfirmFGColor lipgloss.Color
-	modalConfirmBGColor lipgloss.Color
-
-	helpMenuHotkeyColor lipgloss.Color
-	helpMenuTitleColor  lipgloss.Color
-)
+package common
 
 // Theme configuration
 type ThemeType struct {
@@ -121,11 +70,13 @@ type ConfigType struct {
 	AutoCheckUpdate        bool   `toml:"auto_check_update" comment:"\nAuto check for update"`
 	CdOnQuit               bool   `toml:"cd_on_quit" comment:"\nCd on quit (For more details, please check out https://superfile.netlify.app/configure/superfile-config/#cd_on_quit)"`
 	DefaultOpenFilePreview bool   `toml:"default_open_file_preview" comment:"\nWhether to open file preview automatically every time superfile is opened."`
+	ShowImagePreview       bool   `toml:"show_image_preview" comment:"\nWhether to show image preview."`
 	DefaultDirectory       string `toml:"default_directory" comment:"\nThe path of the first file panel when superfile is opened."`
 	FileSizeUseSI          bool   `toml:"file_size_use_si" comment:"\nDisplay file sizes using powers of 1000 (kB, MB, GB) instead of powers of 1024 (KiB, MiB, GiB)."`
 	DefaultSortType        int    `toml:"default_sort_type" comment:"\nDefault sort type (0: Name, 1: Size, 2: Date Modified)."`
 	SortOrderReversed      bool   `toml:"sort_order_reversed" comment:"\nDefault sort order (false: Ascending, true: Descending)."`
 	CaseSensitiveSort      bool   `toml:"case_sensitive_sort" comment:"\nCase sensitive sort by name (captal \"B\" comes before \"a\" if true)."`
+	ShellCloseOnSuccess    bool   `toml:"shell_close_on_success" comment:"\nWhether to close the shell on successful command execution."`
 	Debug                  bool   `toml:"debug" comment:"\nWhether to enable debug mode."`
 
 	Nerdfont              bool   `toml:"nerdfont" comment:"\n================   Style =================\n\n If you don't have or don't want Nerdfont installed you can turn this off"`
@@ -189,6 +140,7 @@ type HotkeysType struct {
 	ChangePanelMode []string `toml:"change_panel_mode"`
 	OpenHelpMenu    []string `toml:"open_help_menu"`
 	OpenCommandLine []string `toml:"open_command_line"`
+	OpenSPFPrompt   []string `toml:"open_spf_prompt"`
 
 	CopyPath []string `toml:"copy_path"`
 	CopyPWD  []string `toml:"copy_present_working_directory"`

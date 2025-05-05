@@ -1,168 +1,19 @@
-package internal
+package sidebar
 
 import (
-	"github.com/stretchr/testify/assert"
-	"strconv"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
-
-func dirSlice(count int) []directory {
-	res := make([]directory, count)
-	for i := 0; i < count; i++ {
-		res[i] = directory{name: "Dir" + strconv.Itoa(i), location: "/a/" + strconv.Itoa(i)}
-	}
-	return res
-}
-
-func fullDirSlice(count int) []directory {
-	return formDirctorySlice(dirSlice(count), dirSlice(count), dirSlice(count))
-}
-
-// Todo : Use t.Run(tt.name
-// Todo : Get rid of global vars, use testdata in each test, even if there is a bit of
-// duplication.
-// Todo : Add tt.names
-
-func Test_noActualDir(t *testing.T) {
-	testcases := []struct {
-		name     string
-		sidebar  sidebarModel
-		expected bool
-	}{
-		{
-			"Empty invalid sidebar should have no actual directories",
-			sidebarModel{},
-			true,
-		},
-		{
-			"Empty sidebar should have no actual directories",
-			sidebarModel{
-				directories: fullDirSlice(0),
-				renderIndex: 0,
-				cursor:      0,
-			},
-			true,
-		},
-		{
-			"Non-Empty Sidebar with only pinned directories",
-			sidebarModel{
-				directories: formDirctorySlice(nil, dirSlice(10), nil),
-			},
-			false,
-		},
-		{
-			"Non-Empty Sidebar with all directories",
-			sidebarModel{
-				directories: fullDirSlice(10),
-			},
-			false,
-		},
-	}
-	for _, tt := range testcases {
-		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.expected, tt.sidebar.noActualDir())
-		})
-	}
-}
-
-func Test_isCursorInvalid(t *testing.T) {
-
-	testcases := []struct {
-		name     string
-		sidebar  sidebarModel
-		expected bool
-	}{
-		{
-			"Empty invalid sidebar",
-			sidebarModel{},
-			true,
-		},
-		{
-			"Cursor after all directories",
-			sidebarModel{
-				directories: fullDirSlice(10),
-				renderIndex: 0,
-				cursor:      32,
-			},
-			true,
-		},
-		{
-			"Curson points to pinned divider",
-			sidebarModel{
-				directories: fullDirSlice(10),
-				cursor:      10,
-			},
-			true,
-		},
-		{
-			"Non-Empty Sidebar with all directories",
-			sidebarModel{
-				directories: fullDirSlice(10),
-				cursor:      5,
-			},
-			false,
-		},
-	}
-
-	for _, tt := range testcases {
-		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.expected, tt.sidebar.isCursorInvalid())
-		})
-	}
-}
-
-func Test_resetCursor(t *testing.T) {
-	data := []struct {
-		name              string
-		curSideBar        sidebarModel
-		expectedCursorPos int
-	}{
-		{
-			name: "Only Pinned directories",
-			curSideBar: sidebarModel{
-				directories: formDirctorySlice(nil, dirSlice(10), nil),
-			},
-			expectedCursorPos: 1, // After pinned divider
-		},
-		{
-			name: "All kind of directories",
-			curSideBar: sidebarModel{
-				directories: fullDirSlice(10),
-			},
-			expectedCursorPos: 0, // First home
-		},
-		{
-			name: "Only Disk",
-			curSideBar: sidebarModel{
-				directories: formDirctorySlice(nil, nil, dirSlice(10)),
-			},
-			expectedCursorPos: 2, // After pinned and dist divider
-		},
-		{
-			name: "Empty Sidebar",
-			curSideBar: sidebarModel{
-				directories: fullDirSlice(0),
-			},
-			expectedCursorPos: 0, // Empty sidebar, cursor should reset to 0
-		},
-	}
-
-	for _, tt := range data {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.curSideBar.resetCursor()
-			assert.Equal(t, tt.expectedCursorPos, tt.curSideBar.cursor)
-		})
-	}
-}
 
 func Test_lastRenderIndex(t *testing.T) {
 	// Setup test data
-	sidebar_a := sidebarModel{
+	sidebarA := Model{
 		directories: formDirctorySlice(
 			dirSlice(10), dirSlice(10), dirSlice(10),
 		),
 	}
-	sidebar_b := sidebarModel{
+	sidebarB := Model{
 		directories: formDirctorySlice(
 			dirSlice(1), nil, dirSlice(5),
 		),
@@ -170,7 +21,7 @@ func Test_lastRenderIndex(t *testing.T) {
 
 	testCases := []struct {
 		name              string
-		sidebar           sidebarModel
+		sidebar           Model
 		mainPanelHeight   int
 		startIndex        int
 		expectedLastIndex int
@@ -178,7 +29,7 @@ func Test_lastRenderIndex(t *testing.T) {
 	}{
 		{
 			name:              "Small viewport with home directories",
-			sidebar:           sidebar_a,
+			sidebar:           sidebarA,
 			mainPanelHeight:   10,
 			startIndex:        0,
 			expectedLastIndex: 6,
@@ -186,7 +37,7 @@ func Test_lastRenderIndex(t *testing.T) {
 		},
 		{
 			name:              "Medium viewport showing home and some pinned",
-			sidebar:           sidebar_a,
+			sidebar:           sidebarA,
 			mainPanelHeight:   20,
 			startIndex:        0,
 			expectedLastIndex: 14,
@@ -194,7 +45,7 @@ func Test_lastRenderIndex(t *testing.T) {
 		},
 		{
 			name:              "Medium viewport starting from pinned dirs",
-			sidebar:           sidebar_a,
+			sidebar:           sidebarA,
 			mainPanelHeight:   20,
 			startIndex:        11,
 			expectedLastIndex: 25,
@@ -202,7 +53,7 @@ func Test_lastRenderIndex(t *testing.T) {
 		},
 		{
 			name:              "Large viewport showing all directories",
-			sidebar:           sidebar_a,
+			sidebar:           sidebarA,
 			mainPanelHeight:   100,
 			startIndex:        11,
 			expectedLastIndex: 31,
@@ -210,7 +61,7 @@ func Test_lastRenderIndex(t *testing.T) {
 		},
 		{
 			name:              "Start index beyond directory count",
-			sidebar:           sidebar_a,
+			sidebar:           sidebarA,
 			mainPanelHeight:   100,
 			startIndex:        32,
 			expectedLastIndex: 31,
@@ -218,7 +69,7 @@ func Test_lastRenderIndex(t *testing.T) {
 		},
 		{
 			name:              "Asymmetric directory distribution",
-			sidebar:           sidebar_b,
+			sidebar:           sidebarB,
 			mainPanelHeight:   12,
 			startIndex:        0,
 			expectedLastIndex: 4,
@@ -233,37 +84,36 @@ func Test_lastRenderIndex(t *testing.T) {
 				"lastRenderedIndex failed: %s", tt.explanation)
 		})
 	}
-
 }
 
 func Test_firstRenderIndex(t *testing.T) {
-	sidebar_a := sidebarModel{
+	sidebarA := Model{
 		directories: fullDirSlice(10),
 	}
-	sidebar_b := sidebarModel{
+	sidebarB := Model{
 		directories: formDirctorySlice(
 			dirSlice(1), nil, dirSlice(5),
 		),
 	}
-	sidebar_c := sidebarModel{
+	sidebarC := Model{
 		directories: formDirctorySlice(
 			nil, dirSlice(5), dirSlice(5),
 		),
 	}
-	sidebar_d := sidebarModel{
+	sidebarD := Model{
 		directories: formDirctorySlice(
 			nil, nil, dirSlice(3),
 		),
 	}
 
 	// Empty sidebar with only dividers
-	sidebar_e := sidebarModel{
+	sidebarE := Model{
 		directories: fullDirSlice(0),
 	}
 
 	testCases := []struct {
 		name               string
-		sidebar            sidebarModel
+		sidebar            Model
 		mainPanelHeight    int
 		endIndex           int
 		expectedFirstIndex int
@@ -271,7 +121,7 @@ func Test_firstRenderIndex(t *testing.T) {
 	}{
 		{
 			name:               "Basic calculation from end index",
-			sidebar:            sidebar_a,
+			sidebar:            sidebarA,
 			mainPanelHeight:    10,
 			endIndex:           10,
 			expectedFirstIndex: 6,
@@ -279,7 +129,7 @@ func Test_firstRenderIndex(t *testing.T) {
 		},
 		{
 			name:               "Small panel height",
-			sidebar:            sidebar_a,
+			sidebar:            sidebarA,
 			mainPanelHeight:    5,
 			endIndex:           15,
 			expectedFirstIndex: 14,
@@ -287,7 +137,7 @@ func Test_firstRenderIndex(t *testing.T) {
 		},
 		{
 			name:               "End index near beginning",
-			sidebar:            sidebar_a,
+			sidebar:            sidebarA,
 			mainPanelHeight:    20,
 			endIndex:           3,
 			expectedFirstIndex: 0,
@@ -295,7 +145,7 @@ func Test_firstRenderIndex(t *testing.T) {
 		},
 		{
 			name:               "End index at disk divider",
-			sidebar:            sidebar_a,
+			sidebar:            sidebarA,
 			mainPanelHeight:    15,
 			endIndex:           21, // Disk divider in sidebar_a
 			expectedFirstIndex: 12,
@@ -303,15 +153,15 @@ func Test_firstRenderIndex(t *testing.T) {
 		},
 		{
 			name:               "Very large panel height showing all items",
-			sidebar:            sidebar_a,
+			sidebar:            sidebarA,
 			mainPanelHeight:    100,
 			endIndex:           31, // Last disk dir in sidebar_a
 			expectedFirstIndex: 0,
 			explanation:        "Large panel should show all directories from start",
 		},
 		{
-			name:               "Assymetric sidebar with few directories",
-			sidebar:            sidebar_b,
+			name:               "Asymetric sidebar with few directories",
+			sidebar:            sidebarB,
 			mainPanelHeight:    12,
 			endIndex:           4, // Last disk dir in sidebar_b
 			expectedFirstIndex: 0,
@@ -319,7 +169,7 @@ func Test_firstRenderIndex(t *testing.T) {
 		},
 		{
 			name:               "No home directories case",
-			sidebar:            sidebar_c,
+			sidebar:            sidebarC,
 			mainPanelHeight:    10,
 			endIndex:           6, // Disk dir in sidebar_c
 			expectedFirstIndex: 2, // Pinned divider
@@ -327,7 +177,7 @@ func Test_firstRenderIndex(t *testing.T) {
 		},
 		{
 			name:               "Only disk directories case",
-			sidebar:            sidebar_d,
+			sidebar:            sidebarD,
 			mainPanelHeight:    8,
 			endIndex:           4, // Last disk dir
 			expectedFirstIndex: 2, // Disk divider
@@ -335,7 +185,7 @@ func Test_firstRenderIndex(t *testing.T) {
 		},
 		{
 			name:               "Empty sidebar case",
-			sidebar:            sidebar_e,
+			sidebar:            sidebarE,
 			mainPanelHeight:    10,
 			endIndex:           1, // Disk divider
 			expectedFirstIndex: 0, // Pinned divider
@@ -343,7 +193,7 @@ func Test_firstRenderIndex(t *testing.T) {
 		},
 		{
 			name:               "End index at the start",
-			sidebar:            sidebar_a,
+			sidebar:            sidebarA,
 			mainPanelHeight:    5,
 			endIndex:           0,
 			expectedFirstIndex: 0,
@@ -351,7 +201,7 @@ func Test_firstRenderIndex(t *testing.T) {
 		},
 		{
 			name:               "End index out of bounds",
-			sidebar:            sidebar_a,
+			sidebar:            sidebarA,
 			mainPanelHeight:    20,
 			endIndex:           32, // Out of bounds for sidebar_a
 			expectedFirstIndex: 33, // endIndex + 1
@@ -359,7 +209,7 @@ func Test_firstRenderIndex(t *testing.T) {
 		},
 		{
 			name:               "Very small panel height",
-			sidebar:            sidebar_a,
+			sidebar:            sidebarA,
 			mainPanelHeight:    2, // Too small to fit anything
 			endIndex:           10,
 			expectedFirstIndex: 11,
@@ -367,7 +217,7 @@ func Test_firstRenderIndex(t *testing.T) {
 		},
 		{
 			name:               "Panel height exactly matches divider",
-			sidebar:            sidebar_a,
+			sidebar:            sidebarA,
 			mainPanelHeight:    6,  // Just enough for initialHeight + divider
 			endIndex:           10, // Pinned divider
 			expectedFirstIndex: 10,
@@ -375,7 +225,7 @@ func Test_firstRenderIndex(t *testing.T) {
 		},
 		{
 			name:               "Boundary case between directory types",
-			sidebar:            sidebar_a,
+			sidebar:            sidebarA,
 			mainPanelHeight:    7,
 			endIndex:           11, // First pinned dir
 			expectedFirstIndex: 10, // Pinned divider
@@ -395,7 +245,7 @@ func Test_firstRenderIndex(t *testing.T) {
 func Test_updateRenderIndex(t *testing.T) {
 	testCases := []struct {
 		name                string
-		sidebar             sidebarModel
+		sidebar             Model
 		mainPanelHeight     int
 		initialRenderIndex  int
 		initialCursor       int
@@ -404,7 +254,7 @@ func Test_updateRenderIndex(t *testing.T) {
 	}{
 		{
 			name: "Case I: Cursor moved above render range",
-			sidebar: sidebarModel{
+			sidebar: Model{
 				directories: fullDirSlice(10),
 				renderIndex: 10, // Start rendering from pinned divider
 				cursor:      5,  // Cursor moved to home directory
@@ -415,7 +265,7 @@ func Test_updateRenderIndex(t *testing.T) {
 		},
 		{
 			name: "Case II: Cursor within render range",
-			sidebar: sidebarModel{
+			sidebar: Model{
 				directories: fullDirSlice(10),
 				renderIndex: 5, // Start rendering from a home directory
 				cursor:      8, // Cursor within visible range
@@ -426,7 +276,7 @@ func Test_updateRenderIndex(t *testing.T) {
 		},
 		{
 			name: "Case III: Cursor moved below render range",
-			sidebar: sidebarModel{
+			sidebar: Model{
 				directories: fullDirSlice(10),
 				renderIndex: 0,  // Start rendering from beginning
 				cursor:      20, // Cursor moved to a pinned directory outside visible range
@@ -438,7 +288,7 @@ func Test_updateRenderIndex(t *testing.T) {
 		},
 		{
 			name: "Edge case: Small panel with cursor at end",
-			sidebar: sidebarModel{
+			sidebar: Model{
 				directories: fullDirSlice(10),
 				renderIndex: 0,
 				cursor:      31, // Last disk directory
@@ -449,7 +299,7 @@ func Test_updateRenderIndex(t *testing.T) {
 		},
 		{
 			name: "Edge case: Large panel showing everything",
-			sidebar: sidebarModel{
+			sidebar: Model{
 				directories: formDirctorySlice(dirSlice(1), nil, dirSlice(5)),
 				renderIndex: 2,
 				cursor:      4,
@@ -460,7 +310,7 @@ func Test_updateRenderIndex(t *testing.T) {
 		},
 		{
 			name: "Edge case: Empty sidebar",
-			sidebar: sidebarModel{
+			sidebar: Model{
 				directories: fullDirSlice(0),
 				renderIndex: 0,
 				cursor:      1,
@@ -471,7 +321,7 @@ func Test_updateRenderIndex(t *testing.T) {
 		},
 		{
 			name: "Case I and III overlap: Cursor exactly at current renderIndex",
-			sidebar: sidebarModel{
+			sidebar: Model{
 				directories: fullDirSlice(10),
 				renderIndex: 15,
 				cursor:      15,
@@ -482,7 +332,7 @@ func Test_updateRenderIndex(t *testing.T) {
 		},
 		{
 			name: "Boundary case: Cursor at edge of visible range",
-			sidebar: sidebarModel{
+			sidebar: Model{
 				directories: fullDirSlice(10),
 				renderIndex: 5,
 				cursor:      9, // Just at the edge of what's visible
@@ -493,7 +343,7 @@ func Test_updateRenderIndex(t *testing.T) {
 		},
 		{
 			name: "Boundary case: Cursor just beyond visible range",
-			sidebar: sidebarModel{
+			sidebar: Model{
 				directories: fullDirSlice(10),
 				renderIndex: 5,
 				cursor:      11, // Just beyond visible range
@@ -522,7 +372,7 @@ func Test_updateRenderIndex(t *testing.T) {
 func Test_listUp(t *testing.T) {
 	testCases := []struct {
 		name                string
-		sidebar             sidebarModel
+		sidebar             Model
 		mainPanelHeight     int
 		expectedCursor      int
 		expectedRenderIndex int
@@ -530,7 +380,7 @@ func Test_listUp(t *testing.T) {
 	}{
 		{
 			name: "Basic cursor movement from middle position",
-			sidebar: sidebarModel{
+			sidebar: Model{
 				directories: fullDirSlice(10),
 				renderIndex: 5,
 				cursor:      5, // Starting from a home directory
@@ -542,7 +392,7 @@ func Test_listUp(t *testing.T) {
 		},
 		{
 			name: "Skip divider when moving up",
-			sidebar: sidebarModel{
+			sidebar: Model{
 				directories: fullDirSlice(10),
 				renderIndex: 8,
 				cursor:      11, // Position just after pinned divider
@@ -554,7 +404,7 @@ func Test_listUp(t *testing.T) {
 		},
 		{
 			name: "Wrap around from top to bottom",
-			sidebar: sidebarModel{
+			sidebar: Model{
 				directories: fullDirSlice(10),
 				renderIndex: 0,
 				cursor:      0, // At the very top
@@ -567,7 +417,7 @@ func Test_listUp(t *testing.T) {
 		},
 		{
 			name: "Skip multiple consecutive dividers",
-			sidebar: sidebarModel{
+			sidebar: Model{
 				// Create a sidebar with consecutive dividers for testing
 				directories: formDirctorySlice(dirSlice(5), nil, dirSlice(5)),
 				renderIndex: 5,
@@ -580,7 +430,7 @@ func Test_listUp(t *testing.T) {
 		},
 		{
 			name: "No actual directories case",
-			sidebar: sidebarModel{
+			sidebar: Model{
 				directories: fullDirSlice(0), // Empty sidebar with just dividers
 				renderIndex: 0,
 				cursor:      0,
@@ -592,7 +442,7 @@ func Test_listUp(t *testing.T) {
 		},
 		{
 			name: "Large panel showing all directories",
-			sidebar: sidebarModel{
+			sidebar: Model{
 				directories: formDirctorySlice(dirSlice(2), dirSlice(2), dirSlice(2)),
 				renderIndex: 0,
 				cursor:      3, // Some directory in the middle
@@ -610,7 +460,7 @@ func Test_listUp(t *testing.T) {
 			sidebar := tt.sidebar
 
 			// Call the function to test
-			sidebar.listUp(tt.mainPanelHeight)
+			sidebar.ListUp(tt.mainPanelHeight)
 
 			// Check the results
 			assert.Equal(t, tt.expectedCursor, sidebar.cursor,
@@ -624,7 +474,7 @@ func Test_listUp(t *testing.T) {
 func Test_listDown(t *testing.T) {
 	testCases := []struct {
 		name                string
-		sidebar             sidebarModel
+		sidebar             Model
 		mainPanelHeight     int
 		expectedCursor      int
 		expectedRenderIndex int
@@ -632,7 +482,7 @@ func Test_listDown(t *testing.T) {
 	}{
 		{
 			name: "Basic cursor movement from middle position",
-			sidebar: sidebarModel{
+			sidebar: Model{
 				directories: fullDirSlice(10),
 				renderIndex: 5,
 				cursor:      5, // Starting from a home directory
@@ -644,7 +494,7 @@ func Test_listDown(t *testing.T) {
 		},
 		{
 			name: "Skip divider when moving down",
-			sidebar: sidebarModel{
+			sidebar: Model{
 				directories: fullDirSlice(10),
 				renderIndex: 8,
 				cursor:      9, // Position just before pinned divider
@@ -656,7 +506,7 @@ func Test_listDown(t *testing.T) {
 		},
 		{
 			name: "Wrap around from bottom to top",
-			sidebar: sidebarModel{
+			sidebar: Model{
 				directories: fullDirSlice(10),
 				renderIndex: 26,
 				cursor:      31, // At the very bottom
@@ -668,7 +518,7 @@ func Test_listDown(t *testing.T) {
 		},
 		{
 			name: "Skip multiple consecutive dividers",
-			sidebar: sidebarModel{
+			sidebar: Model{
 				// Create a sidebar with consecutive dividers for testing
 				directories: formDirctorySlice(dirSlice(5), nil, dirSlice(5)),
 				renderIndex: 0,
@@ -682,7 +532,7 @@ func Test_listDown(t *testing.T) {
 		},
 		{
 			name: "No actual directories case",
-			sidebar: sidebarModel{
+			sidebar: Model{
 				directories: fullDirSlice(0), // Empty sidebar with just dividers
 				renderIndex: 0,
 				cursor:      0,
@@ -694,7 +544,7 @@ func Test_listDown(t *testing.T) {
 		},
 		{
 			name: "Move down from home to pinned section",
-			sidebar: sidebarModel{
+			sidebar: Model{
 				directories: fullDirSlice(10),
 				renderIndex: 6,
 				cursor:      9, // Last home directory
@@ -706,7 +556,7 @@ func Test_listDown(t *testing.T) {
 		},
 		{
 			name: "Large panel showing all directories",
-			sidebar: sidebarModel{
+			sidebar: Model{
 				directories: formDirctorySlice(dirSlice(2), dirSlice(2), dirSlice(2)),
 				renderIndex: 0,
 				cursor:      3, // Some directory in the middle
@@ -718,7 +568,7 @@ func Test_listDown(t *testing.T) {
 		},
 		{
 			name: "Cursor at the end of visible range",
-			sidebar: sidebarModel{
+			sidebar: Model{
 				directories: fullDirSlice(10),
 				renderIndex: 5,
 				cursor:      14, // At the end of visible range
@@ -736,7 +586,7 @@ func Test_listDown(t *testing.T) {
 			sidebar := tt.sidebar
 
 			// Call the function to test
-			sidebar.listDown(tt.mainPanelHeight)
+			sidebar.ListDown(tt.mainPanelHeight)
 
 			// Check the results
 			assert.Equal(t, tt.expectedCursor, sidebar.cursor,

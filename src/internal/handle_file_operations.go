@@ -11,9 +11,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/yorukot/superfile/src/internal/utils"
+
+	"github.com/yorukot/superfile/src/internal/common"
+
 	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/progress"
-	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/lithammer/shortuuid"
 	"github.com/yorukot/superfile/src/config/icon"
@@ -22,26 +25,23 @@ import (
 // Create a file in the currently focus file panel
 func (m *model) panelCreateNewFile() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-	ti := textinput.New()
-	ti.Cursor.Style = modalCursorStyle
-	ti.Cursor.TextStyle = modalStyle
-	ti.TextStyle = modalStyle
-	ti.Cursor.Blink = true
-	ti.Placeholder = "Add \"" + string(filepath.Separator) + "\" transcend folders"
-	ti.PlaceholderStyle = modalStyle
-	ti.Focus()
-	ti.CharLimit = 156
-	ti.Width = modalWidth - 10
 
 	m.typingModal.location = panel.location
 	m.typingModal.open = true
-	m.typingModal.textInput = ti
+	m.typingModal.textInput = common.GenerateNewFileTextInput()
 	m.firstTextInput = true
-
 }
 
+// Todo : This function does not needs the entire model. Only pass the panel object
 func (m *model) IsRenamingConflicting() bool {
+	// Todo : Replace this with m.getCurrentFilePanel() everywhere
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+
+	if len(panel.element) == 0 {
+		slog.Error("IsRenamingConflicting() being called on empty panel")
+		return false
+	}
+
 	oldPath := panel.element[panel.cursor].location
 	newPath := filepath.Join(panel.location, panel.rename.Value())
 
@@ -56,7 +56,7 @@ func (m *model) IsRenamingConflicting() bool {
 func (m *model) warnModalForRenaming() {
 	id := shortuuid.New()
 	message := channelMessage{
-		messageId:   id,
+		messageID:   id,
 		messageType: sendWarnModal,
 	}
 
@@ -82,34 +82,22 @@ func (m *model) panelItemRename() {
 		cursorPos = nameLen
 	}
 
-	ti := textinput.New()
-	ti.Cursor.Style = filePanelCursorStyle
-	ti.Cursor.TextStyle = filePanelStyle
-	ti.Prompt = filePanelCursorStyle.Render(icon.Cursor + " ")
-	ti.TextStyle = modalStyle
-	ti.Cursor.Blink = true
-	ti.Placeholder = "New name"
-	ti.PlaceholderStyle = modalStyle
-	ti.SetValue(panel.element[panel.cursor].name)
-	ti.SetCursor(cursorPos)
-	ti.Focus()
-	ti.CharLimit = 156
-	ti.Width = m.fileModel.width - 4
-
 	m.fileModel.renaming = true
 	panel.renaming = true
 	m.firstTextInput = true
-	panel.rename = ti
+	panel.rename = common.GenerateRenameTextInput(m.fileModel.width-4, cursorPos, panel.element[panel.cursor].name)
 }
 
 func (m *model) deleteItemWarn() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-	if !((panel.panelMode == selectMode && len(panel.selected) != 0) || (panel.panelMode == browserMode)) {
+
+	if panel.panelMode == browserMode && len(panel.element) == 0 || panel.panelMode == selectMode && len(panel.selected) == 0 {
 		return
 	}
+
 	id := shortuuid.New()
 	message := channelMessage{
-		messageId:   id,
+		messageID:   id,
 		messageType: sendWarnModal,
 	}
 
@@ -122,16 +110,14 @@ func (m *model) deleteItemWarn() {
 		}
 		channel <- message
 		return
-	} else {
-		message.warnModal = warnModal{
-			open:     true,
-			title:    "Are you sure you want to move this to trash can",
-			content:  "This operation will move file or directory to trash can.",
-			warnType: confirmDeleteItem,
-		}
-		channel <- message
-		return
 	}
+	message.warnModal = warnModal{
+		open:     true,
+		title:    "Are you sure you want to move this to trash can",
+		content:  "This operation will move file or directory to trash can.",
+		warnType: confirmDeleteItem,
+	}
+	channel <- message
 }
 
 // Move file or directory to the trash can
@@ -143,8 +129,7 @@ func (m *model) deleteSingleItem() {
 		return
 	}
 
-	prog := progress.New(generateGradientColor())
-	prog.PercentageStyle = footerStyle
+	prog := common.GenerateDefaultProgress()
 
 	newProcess := process{
 		name:     icon.Delete + icon.Space + panel.element[panel.cursor].name,
@@ -156,7 +141,7 @@ func (m *model) deleteSingleItem() {
 	m.processBarModel.process[id] = newProcess
 
 	message := channelMessage{
-		messageId:       id,
+		messageID:       id,
 		messageType:     sendProcess,
 		processNewState: newProcess,
 	}
@@ -179,10 +164,8 @@ func (m *model) deleteSingleItem() {
 	}
 	if len(panel.element) == 0 {
 		panel.cursor = 0
-	} else {
-		if panel.cursor >= len(panel.element) {
-			panel.cursor = len(panel.element) - 1
-		}
+	} else if panel.cursor >= len(panel.element) {
+		panel.cursor = len(panel.element) - 1
 	}
 }
 
@@ -191,8 +174,8 @@ func (m *model) deleteMultipleItems() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	if len(panel.selected) != 0 {
 		id := shortuuid.New()
-		prog := progress.New(generateGradientColor())
-		prog.PercentageStyle = footerStyle
+		prog := progress.New(common.GenerateGradientColor())
+		prog.PercentageStyle = common.FooterStyle
 
 		newProcess := process{
 			name:     icon.Delete + icon.Space + filepath.Base(panel.selected[0]),
@@ -205,7 +188,7 @@ func (m *model) deleteMultipleItems() {
 		m.processBarModel.process[id] = newProcess
 
 		message := channelMessage{
-			messageId:       id,
+			messageID:       id,
 			messageType:     sendProcess,
 			processNewState: newProcess,
 		}
@@ -213,7 +196,6 @@ func (m *model) deleteMultipleItems() {
 		channel <- message
 
 		for _, filePath := range panel.selected {
-
 			p := m.processBarModel.process[id]
 			p.name = icon.Delete + icon.Space + filepath.Base(filePath)
 			p.done++
@@ -231,17 +213,19 @@ func (m *model) deleteMultipleItems() {
 				slog.Error("Error while delete multiple item function", "error", err)
 				m.processBarModel.process[id] = p
 				break
-			} else {
-				if p.done == p.total {
-					p.state = successful
-					message.processNewState = p
-					channel <- message
-				}
-				m.processBarModel.process[id] = p
 			}
+			if p.done == p.total {
+				p.state = successful
+				message.processNewState = p
+				channel <- message
+			}
+			m.processBarModel.process[id] = p
 		}
 	}
 
+	// This feels a bit fuzzy and unclean. Todo : Review and simplify this.
+	// We should never get to this condition of panel.cursor getting negative
+	// and if we do, we should error log that.
 	if panel.cursor >= len(panel.element)-len(panel.selected)-1 {
 		panel.cursor = len(panel.element) - len(panel.selected) - 1
 		if panel.cursor < 0 {
@@ -260,8 +244,7 @@ func (m *model) completelyDeleteSingleItem() {
 		return
 	}
 
-	prog := progress.New(generateGradientColor())
-	prog.PercentageStyle = footerStyle
+	prog := common.GenerateDefaultProgress()
 
 	newProcess := process{
 		name:     "󰆴 " + panel.element[panel.cursor].name,
@@ -273,7 +256,7 @@ func (m *model) completelyDeleteSingleItem() {
 	m.processBarModel.process[id] = newProcess
 
 	message := channelMessage{
-		messageId:       id,
+		messageID:       id,
 		messageType:     sendProcess,
 		processNewState: newProcess,
 	}
@@ -298,12 +281,11 @@ func (m *model) completelyDeleteSingleItem() {
 		message.processNewState = p
 		channel <- message
 	}
+	// Todo : This is duplicated code fragment. Remove this duplication
 	if len(panel.element) == 0 {
 		panel.cursor = 0
-	} else {
-		if panel.cursor >= len(panel.element) {
-			panel.cursor = len(panel.element) - 1
-		}
+	} else if panel.cursor >= len(panel.element) {
+		panel.cursor = len(panel.element) - 1
 	}
 }
 
@@ -312,8 +294,7 @@ func (m *model) completelyDeleteMultipleItems() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	if len(panel.selected) != 0 {
 		id := shortuuid.New()
-		prog := progress.New(generateGradientColor())
-		prog.PercentageStyle = footerStyle
+		prog := common.GenerateDefaultProgress()
 
 		newProcess := process{
 			name:     icon.Delete + icon.Space + filepath.Base(panel.selected[0]),
@@ -326,14 +307,13 @@ func (m *model) completelyDeleteMultipleItems() {
 		m.processBarModel.process[id] = newProcess
 
 		message := channelMessage{
-			messageId:       id,
+			messageID:       id,
 			messageType:     sendProcess,
 			processNewState: newProcess,
 		}
 
 		channel <- message
 		for _, filePath := range panel.selected {
-
 			p := m.processBarModel.process[id]
 			p.name = icon.Delete + icon.Space + filepath.Base(filePath)
 			p.done++
@@ -354,14 +334,13 @@ func (m *model) completelyDeleteMultipleItems() {
 				slog.Error("Error while completely delete multiple item function", "error", err)
 				m.processBarModel.process[id] = p
 				break
-			} else {
-				if p.done == p.total {
-					p.state = successful
-					message.processNewState = p
-					channel <- message
-				}
-				m.processBarModel.process[id] = p
 			}
+			if p.done == p.total {
+				p.state = successful
+				message.processNewState = p
+				channel <- message
+			}
+			m.processBarModel.process[id] = p
 		}
 	}
 
@@ -433,8 +412,7 @@ func (m *model) pasteItem() {
 	slog.Debug("model.pasteItem", "items", m.copyItems.items, "cut", m.copyItems.cut,
 		"totalFiles", totalFiles, "panel location", panel.location)
 
-	prog := progress.New(generateGradientColor())
-	prog.PercentageStyle = footerStyle
+	prog := common.GenerateDefaultProgress()
 
 	prefixIcon := icon.Copy + icon.Space
 	if m.copyItems.cut {
@@ -452,7 +430,7 @@ func (m *model) pasteItem() {
 	m.processBarModel.process[id] = newProcess
 
 	message := channelMessage{
-		messageId:       id,
+		messageID:       id,
 		messageType:     sendProcess,
 		processNewState: newProcess,
 	}
@@ -475,15 +453,13 @@ func (m *model) pasteItem() {
 		if m.copyItems.cut && !isExternalDiskPath(filePath) {
 			err = moveElement(filePath, filepath.Join(panel.location, filepath.Base(filePath)))
 		} else {
+			// Todo : These error cases are hard to test. We have to somehow make the paste operations fail,
+			// which is time consuming and manual. We should test these with automated testcases
 			err = pasteDir(filePath, filepath.Join(panel.location, filepath.Base(filePath)), id, m)
 			if err != nil {
 				errMessage = "paste item error"
-			} else {
-				// Todo : These error cases are hard to test. We have to somehow make the paste operations fail,
-				// which is time consuming and manual. We should test these with automated testcases
-				if m.copyItems.cut {
-					os.RemoveAll(filePath)
-				}
+			} else if m.copyItems.cut {
+				os.RemoveAll(filePath)
 			}
 		}
 		p = m.processBarModel.process[id]
@@ -520,13 +496,18 @@ func (m *model) pasteItem() {
 func (m *model) extractFile() {
 	var err error
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+
+	if len(panel.element) == 0 {
+		return
+	}
+
 	ext := strings.ToLower(filepath.Ext(panel.element[panel.cursor].location))
-	if !isExensionExtractable(ext) {
+	if !common.IsExtensionExtractable(ext) {
 		slog.Error(fmt.Sprintf("Error unexpected file extension type: %s", ext), "error", errors.ErrUnsupported)
 		return
 	}
 
-	outputDir := fileNameWithoutExtension(panel.element[panel.cursor].location)
+	outputDir := common.FileNameWithoutExtension(panel.element[panel.cursor].location)
 	outputDir, err = renameIfDuplicate(outputDir)
 	if err != nil {
 		slog.Error("Error extract file when create new directory", "error", err)
@@ -548,6 +529,11 @@ func (m *model) extractFile() {
 // Compress file or directory
 func (m *model) compressFile() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+
+	if len(panel.element) == 0 {
+		return
+	}
+
 	fileName := filepath.Base(panel.element[panel.cursor].location)
 
 	zipName := strings.TrimSuffix(fileName, filepath.Ext(fileName)) + ".zip"
@@ -571,15 +557,19 @@ func (m *model) compressFile() {
 func (m *model) openFileWithEditor() tea.Cmd {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 
-	editor := Config.Editor
+	// Check if panel is empty
+	if len(panel.element) == 0 {
+		return nil
+	}
+
+	editor := common.Config.Editor
 	if editor == "" {
 		editor = os.Getenv("EDITOR")
 	}
 
 	// Make sure there is an editor
-	// Todo : Move hardcoded strings to constants : "windows", and editors
 	if editor == "" {
-		if runtime.GOOS == "windows" {
+		if runtime.GOOS == utils.OsWindows {
 			editor = "notepad"
 		} else {
 			editor = "nano"
@@ -589,6 +579,8 @@ func (m *model) openFileWithEditor() tea.Cmd {
 	// Split the editor command into command and arguments
 	parts := strings.Fields(editor)
 	cmd := parts[0]
+
+	//nolint:gocritic // appendAssign: intentionally creating a new slice
 	args := append(parts[1:], panel.element[panel.cursor].location)
 
 	c := exec.Command(cmd, args...)
@@ -600,16 +592,15 @@ func (m *model) openFileWithEditor() tea.Cmd {
 
 // Open directory with default editor
 func (m *model) openDirectoryWithEditor() tea.Cmd {
-	// Todo : Move hardcoded strings to constants : "windows", and editors
-	editor := Config.DirEditor
+	editor := common.Config.DirEditor
 
 	if editor == "" {
-		if runtime.GOOS == "windows" {
+		switch runtime.GOOS {
+		case utils.OsWindows:
 			editor = "explorer"
-		} else if runtime.GOOS == "darwin" {
-			// open is command for MacOS Finder
+		case utils.OsDarwin:
 			editor = "open"
-		} else {
+		default:
 			editor = "vi"
 		}
 	}
@@ -617,6 +608,7 @@ func (m *model) openDirectoryWithEditor() tea.Cmd {
 	// Split the editor command into command and arguments
 	parts := strings.Fields(editor)
 	cmd := parts[0]
+	//nolint:gocritic // appendAssign: intentionally creating a new slice
 	args := append(parts[1:], m.fileModel.filePanels[m.filePanelFocusIndex].location)
 
 	c := exec.Command(cmd, args...)
@@ -628,6 +620,11 @@ func (m *model) openDirectoryWithEditor() tea.Cmd {
 // Copy file path
 func (m *model) copyPath() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+
+	if len(panel.element) == 0 {
+		return
+	}
+
 	if err := clipboard.WriteAll(panel.element[panel.cursor].location); err != nil {
 		slog.Error("Error while copy path", "error", err)
 	}

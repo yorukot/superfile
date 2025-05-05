@@ -1,14 +1,16 @@
-package internal
+package sidebar
 
 import (
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"os"
 	"path/filepath"
 	"slices"
 
+	"github.com/yorukot/superfile/src/internal/utils"
+
 	"github.com/adrg/xdg"
-	"github.com/shirou/gopsutil/v4/disk"
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/config/icon"
 )
@@ -19,7 +21,12 @@ func getDirectories() []directory {
 }
 
 func formDirctorySlice(homeDirectories []directory, pinnedDirectories []directory, diskDirectories []directory) []directory {
-	directories := append(homeDirectories, pinnedDividerDir)
+	// Preallocation for efficiency
+	totalCapacity := len(homeDirectories) + len(pinnedDirectories) + len(diskDirectories) + 2
+	directories := make([]directory, 0, totalCapacity)
+
+	directories = append(directories, homeDirectories...)
+	directories = append(directories, pinnedDividerDir)
 	directories = append(directories, pinnedDirectories...)
 	directories = append(directories, diskDividerDir)
 	directories = append(directories, diskDirectories...)
@@ -29,18 +36,18 @@ func formDirctorySlice(homeDirectories []directory, pinnedDirectories []director
 // Return system default directory e.g. Home, Downloads, etc
 func getWellKnownDirectories() []directory {
 	wellKnownDirectories := []directory{
-		{location: xdg.Home, name: icon.Home + icon.Space + "Home"},
-		{location: xdg.UserDirs.Download, name: icon.Download + icon.Space + "Downloads"},
-		{location: xdg.UserDirs.Documents, name: icon.Documents + icon.Space + "Documents"},
-		{location: xdg.UserDirs.Pictures, name: icon.Pictures + icon.Space + "Pictures"},
-		{location: xdg.UserDirs.Videos, name: icon.Videos + icon.Space + "Videos"},
-		{location: xdg.UserDirs.Music, name: icon.Music + icon.Space + "Music"},
-		{location: xdg.UserDirs.Templates, name: icon.Templates + icon.Space + "Templates"},
-		{location: xdg.UserDirs.PublicShare, name: icon.PublicShare + icon.Space + "PublicShare"},
+		{Location: xdg.Home, Name: icon.Home + icon.Space + "Home"},
+		{Location: xdg.UserDirs.Download, Name: icon.Download + icon.Space + "Downloads"},
+		{Location: xdg.UserDirs.Documents, Name: icon.Documents + icon.Space + "Documents"},
+		{Location: xdg.UserDirs.Pictures, Name: icon.Pictures + icon.Space + "Pictures"},
+		{Location: xdg.UserDirs.Videos, Name: icon.Videos + icon.Space + "Videos"},
+		{Location: xdg.UserDirs.Music, Name: icon.Music + icon.Space + "Music"},
+		{Location: xdg.UserDirs.Templates, Name: icon.Templates + icon.Space + "Templates"},
+		{Location: xdg.UserDirs.PublicShare, Name: icon.PublicShare + icon.Space + "PublicShare"},
 	}
 
 	return slices.DeleteFunc(wellKnownDirectories, func(d directory) bool {
-		_, err := os.Stat(d.location)
+		_, err := os.Stat(d.Location)
 		return err != nil
 	})
 }
@@ -49,10 +56,6 @@ func getWellKnownDirectories() []directory {
 func getPinnedDirectories() []directory {
 	directories := []directory{}
 	var paths []string
-	var pinnedDirs []struct {
-		Location string `json:"location"`
-		Name     string `json:"name"`
-	}
 
 	jsonData, err := os.ReadFile(variable.PinnedFile)
 	if err != nil {
@@ -61,42 +64,20 @@ func getPinnedDirectories() []directory {
 	}
 
 	// Check if the data is in the old format
+	// TODO: Remove this after a release 1.2.4
 	if err := json.Unmarshal(jsonData, &paths); err == nil {
 		for _, path := range paths {
 			directoryName := filepath.Base(path)
-			directories = append(directories, directory{location: path, name: directoryName})
+			directories = append(directories, directory{Location: path, Name: directoryName})
 		}
-		// Check if the data is in the new format
-	} else if err := json.Unmarshal(jsonData, &pinnedDirs); err == nil {
-		// Todo : we can optimize this. pinnedDirs and directories have exact same struct format
-		// we are just copying data needlessly. We should directly unmarshal to 'directories'
-		for _, pinnedDir := range pinnedDirs {
-			directories = append(directories, directory{location: pinnedDir.Location, name: pinnedDir.Name})
-		}
-		// If the data is in neither format, log the error
 	} else {
-		slog.Error("Error parsing pinned data", "error", err)
+		// Check if the data is in the new format
+		if err := json.Unmarshal(jsonData, &directories); err != nil {
+			// If the data is in neither format, log the error
+			slog.Error("Error parsing pinned data", "error", err)
+		}
 	}
 	return directories
-}
-
-// Get external media directories
-func getExternalMediaFolders() (disks []directory) {
-	parts, err := disk.Partitions(true)
-
-	if err != nil {
-		slog.Error("Error while getting external media: ", "error", err)
-		return disks
-	}
-	for _, disk := range parts {
-		if isExternalDiskPath(disk.Mountpoint) {
-			disks = append(disks, directory{
-				name:     filepath.Base(disk.Mountpoint),
-				location: disk.Mountpoint,
-			})
-		}
-	}
-	return disks
 }
 
 // Fuzzy search function for a list of directories.
@@ -112,11 +93,11 @@ func fuzzySearch(query string, dirs []directory) []directory {
 	haystack := make([]string, len(dirs))
 	dirMap := make(map[string]directory, len(dirs))
 	for i, dir := range dirs {
-		haystack[i] = dir.name
-		dirMap[dir.name] = dir
+		haystack[i] = dir.Name
+		dirMap[dir.Name] = dir
 	}
 
-	for _, match := range fzfSearch(query, haystack) {
+	for _, match := range utils.FzfSearch(query, haystack) {
 		if d, ok := dirMap[match.Key]; ok {
 			filteredDirs = append(filteredDirs, d)
 		}
@@ -132,4 +113,37 @@ func getFilteredDirectories(query string) []directory {
 		fuzzySearch(query, getPinnedDirectories()),
 		fuzzySearch(query, getExternalMediaFolders()),
 	)
+}
+
+// TogglePinnedDirectory adds or removes a directory from the pinned directories list
+func TogglePinnedDirectory(dir string) error {
+	dirs := getPinnedDirectories()
+	unPinned := false
+
+	for i, other := range dirs {
+		if other.Location == dir {
+			dirs = append(dirs[:i], dirs[i+1:]...)
+			unPinned = true
+			break
+		}
+	}
+
+	if !unPinned {
+		dirs = append(dirs, directory{
+			Location: dir,
+			Name:     filepath.Base(dir),
+		})
+	}
+
+	updatedData, err := json.Marshal(dirs)
+	if err != nil {
+		return fmt.Errorf("error marshaling pinned directories: %w", err)
+	}
+
+	err = os.WriteFile(variable.PinnedFile, updatedData, 0644)
+	if err != nil {
+		return fmt.Errorf("error writing pinned directories file: %w", err)
+	}
+
+	return nil
 }
