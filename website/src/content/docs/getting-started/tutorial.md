@@ -183,7 +183,7 @@ If your directory editor does not support opening the current directory with an 
 superfile also has a list of commands, that are not triggerable via Keyboard shortcuts.
 To open the list just hit the `>` key (`shift`+`.` on QWERTY).
 
-![image](https://github.com/user-attachments/assets/a13cf09b-c4fb-4bf6-8433-7a05d2f20608)
+![SuperFile-Prompt](https://github.com/yorukot/superfile/blob/main/asset/superfileprompt.png?raw=true)
 
 currently the Prompt comes with 4 different commands.
 
@@ -193,7 +193,7 @@ Will open a new filepanel that points to the same location as the currently acti
 #### `cd [your path here]`
 Changes the currently active Filepanels location to the path you enter.
 
-> [!NOTE] 
+> [!NOTE]
 > currently, you don't have access to shell specific values like `~` or `$HOME`
 > allthough, that may change in the future.
 
@@ -204,7 +204,7 @@ cd /home/user/.config
 #### `open [your path here]`
 Opens a new Filepanel that points to the given path.
 
-> [!NOTE] 
+> [!NOTE]
 > currently, you don't have access to shell specific values like `~` or `$HOME`
 > allthough, that may change in the future.
 
@@ -217,7 +217,7 @@ open /home/user/.config
 With the `$ ` command, any following inputs will be send to the shell.
 (`sh` or `PowerShell`, depending on your System).
 
-> [!IMPORTANT] 
+> [!IMPORTANT]
 > Please note, that you won't receive any stdout outputs.
 > for now, this is meant for executing more complex file manipulations via the shell,
 > rather than handling interactive outputs.
