@@ -249,84 +249,92 @@ func writeLastCheckTime(t time.Time) {
 // Check for the need of updates if AutoCheckUpdate is on, if its the first time
 // that version is checked or if has more than 24h since the last version check,
 // look into the repo if  there's any more recent version
-// Todo : This is too big of a function. Refactor it to displayUpdateNotification, fetchLatestVersion,
-// shouldCheckForUpdates, chucks
 func CheckForUpdates() {
 	if !common.Config.AutoCheckUpdate {
 		return
 	}
 
-	// Get current time in UTC
 	currentTime := time.Now().UTC()
+	lastCheckTime := readLastCheckTime()
 
-	// Check last time the version was checked
+	if !shouldCheckForUpdate(currentTime, lastCheckTime) {
+		return
+	}
+
+	defer writeLastCheckTime(currentTime)
+	checkAndNotifyUpdate()
+}
+
+// Default to zero time if file doesn't exist, is empty, or has errors
+func readLastCheckTime() time.Time {
 	content, err := os.ReadFile(variable.LastCheckVersion)
-
-	// Default to zero time if file doesn't exist, is empty, or has errors
-	lastTime := time.Time{}
-
-	if err == nil && len(content) > 0 {
-		parsedTime, parseErr := time.Parse(time.RFC3339, string(content))
-		if parseErr == nil {
-			lastTime = parsedTime.UTC()
-		} else {
-			// Let the time stay as zero initialized value
-			slog.Error("Error parsing time from LastCheckVersion file. Setting last time to zero", "error", parseErr)
-		}
+	if err != nil || len(content) == 0 {
+		return time.Time{}
 	}
 
-	if lastTime.IsZero() || currentTime.Sub(lastTime) >= 24*time.Hour {
-		// We would make sure to update the file in all return paths
-		defer func() {
-			writeLastCheckTime(currentTime)
-		}()
-		// Create a context with a 5-second timeout
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel() // Cancel the context when done
-		client := &http.Client{}
-		req, err := http.NewRequestWithContext(ctx, http.MethodGet, variable.LatestVersionURL, nil)
-		if err != nil {
-			slog.Error("Error forming updates request:", "error", err)
-			return
-		}
-
-		resp, err := client.Do(req)
-		if err != nil {
-			if ctx.Err() == context.DeadlineExceeded {
-				slog.Error("Update check request timed out")
-				return
-			}
-			slog.Error("Error checking for updates:", "error", err)
-			return
-		}
-		defer resp.Body.Close()
-
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			slog.Error("Error reading response body", "error", err)
-			return
-		}
-
-		type GitHubRelease struct {
-			TagName string `json:"tag_name"`
-		}
-
-		var release GitHubRelease
-		if err := json.Unmarshal(body, &release); err != nil {
-			// Update the timestamp file even if JSON parsing fails
-			slog.Error("Error parsing JSON from Github", "error", err)
-			return
-		}
-
-		// Check if the local version is outdated
-		if semver.Compare(release.TagName, variable.CurrentVersion) > 0 {
-			fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("#FF69E1")).Render("┃ ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color("#FFBA52")).Bold(true).Render("A new version ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFF2")).Bold(true).Italic(true).Render(release.TagName) +
-				lipgloss.NewStyle().Foreground(lipgloss.Color("#FFBA52")).Bold(true).Render(" is available."))
-
-			fmt.Printf(lipgloss.NewStyle().Foreground(lipgloss.Color("#FF69E1")).Render("┃ ")+"Please update.\n┏\n\n      => %s\n\n", variable.LatestVersionGithub)
-			fmt.Printf("                                                               ┛\n")
-		}
+	parsedTime, parseErr := time.Parse(time.RFC3339, string(content))
+	if parseErr != nil {
+		slog.Error("Failed to parse LastCheckVersion timestamp", "error", parseErr)
+		return time.Time{}
 	}
+
+	return parsedTime.UTC()
+}
+
+func shouldCheckForUpdate(now, last time.Time) bool {
+	return last.IsZero() || now.Sub(last) >= 24*time.Hour
+}
+
+func checkAndNotifyUpdate() {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	resp, err := fetchLatestRelease(ctx)
+	if err != nil {
+		slog.Error("Failed to fetch update", "error", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		slog.Error("Failed to read update response", "error", err)
+		return
+	}
+
+	type GitHubRelease struct {
+		TagName string `json:"tag_name"`
+	}
+
+	var release GitHubRelease
+	if err := json.Unmarshal(body, &release); err != nil {
+		slog.Error("Failed to parse GitHub JSON", "error", err)
+		return
+	}
+
+	if semver.Compare(release.TagName, variable.CurrentVersion) > 0 {
+		notifyUpdateAvailable(release.TagName)
+	}
+}
+
+func fetchLatestRelease(ctx context.Context) (*http.Response, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, variable.LatestVersionURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	return (&http.Client{}).Do(req)
+}
+
+func notifyUpdateAvailable(latest string) {
+	fmt.Println(
+		lipgloss.NewStyle().Foreground(lipgloss.Color("#FF69E1")).Render("┃ ") +
+			lipgloss.NewStyle().Foreground(lipgloss.Color("#FFBA52")).Bold(true).Render("A new version ") +
+			lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFF2")).Bold(true).Italic(true).Render(latest) +
+			lipgloss.NewStyle().Foreground(lipgloss.Color("#FFBA52")).Bold(true).Render(" is available."),
+	)
+	fmt.Printf(
+		lipgloss.NewStyle().Foreground(lipgloss.Color("#FF69E1")).Render("┃ ")+"Please update.\n┏\n\n      => %s\n\n",
+		variable.LatestVersionGithub,
+	)
+	fmt.Println("                                                               ┛")
 }
