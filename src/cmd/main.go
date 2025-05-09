@@ -249,46 +249,47 @@ func writeLastCheckTime(t time.Time) {
 // Check for the need of updates if AutoCheckUpdate is on, if its the first time
 // that version is checked or if has more than 24h since the last version check,
 // look into the repo if  there's any more recent version
-func CheckForUpdates(){
-	if !commonConfig.AutoCheckUpdate{
+func CheckForUpdates() {
+	if !common.Config.AutoCheckUpdate {
 		return
 	}
-	
+
 	currentTime := time.Now().UTC()
 	lastCheckTime := readLastCheckTime()
 
-	if !shouldCheckForUpdate(currentTime, lastCheckTime){
+	if !shouldCheckForUpdate(currentTime, lastCheckTime) {
 		return
 	}
-	
+
 	defer writeLastCheckTime(currentTime)
-	checkAndNotifyUpdate(currentTime)
+	checkAndNotifyUpdate()
 }
 
-func readLastCheckTime() time.Time{
+// Default to zero time if file doesn't exist, is empty, or has errors
+func readLastCheckTime() time.Time {
 	content, err := os.ReadFile(variable.LastCheckVersion)
-	if err != nill || len(content) == 0 {
+	if err != nil || len(content) == 0 {
 		return time.Time{}
 	}
 
-	parsedTime, parseErr := timeParse(time.RFC3339, string(content))
+	parsedTime, parseErr := time.Parse(time.RFC3339, string(content))
 	if parseErr != nil {
 		slog.Error("Failed to parse LastCheckVersion timestamp", "error", parseErr)
-		return timeTime{}
+		return time.Time{}
 	}
 
 	return parsedTime.UTC()
 }
 
 func shouldCheckForUpdate(now, last time.Time) bool {
-	return  last.IsZero() || now.Sub(last) >= 24*time.Hour
+	return last.IsZero() || now.Sub(last) >= 24*time.Hour
 }
 
-func checkAndNotifyUpdate(cureentTime time.Time) {
-	ctx, cancel := context.withTimeout(context.Background(), 5*time.Second)
+func checkAndNotifyUpdate() {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	resp, err := fetchLastestRelease(ctx)
+	resp, err := fetchLatestRelease(ctx)
 	if err != nil {
 		slog.Error("Failed to fetch update", "error", err)
 		return
@@ -297,7 +298,17 @@ func checkAndNotifyUpdate(cureentTime time.Time) {
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		slog.Error("Failed to read update response","error", err)
+		slog.Error("Failed to read update response", "error", err)
+		return
+	}
+
+	type GitHubRelease struct {
+		TagName string `json:"tag_name"`
+	}
+
+	var release GitHubRelease
+	if err := json.Unmarshal(body, &release); err != nil {
+		slog.Error("Failed to parse GitHub JSON", "error", err)
 		return
 	}
 
@@ -306,8 +317,8 @@ func checkAndNotifyUpdate(cureentTime time.Time) {
 	}
 }
 
-func fetchLastestRelease(ctx context.Context) (*http.Response, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, variable.LastVersionURL, nil)
+func fetchLatestRelease(ctx context.Context) (*http.Response, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, variable.LatestVersionURL, nil)
 	if err != nil {
 		return nil, err
 	}
