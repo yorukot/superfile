@@ -313,7 +313,7 @@ func (m *model) applyPromptModalAction(action common.ModelAction) {
 		actionErr = m.updateCurrentFilePanelDir(action.Location)
 		successMsg = "Panel directory changed"
 	case common.OpenPanelAction:
-		actionErr = m.createNewFilePanel(action.Location)
+		actionErr = m.creteNewFilePanelRelativeToCurrent(action.Location)
 		successMsg = "New panel opened"
 	default:
 		actionErr = errors.New("unhandled action type")
@@ -345,17 +345,24 @@ func (m *model) splitPanel() error {
 	return m.createNewFilePanel(m.fileModel.filePanels[m.filePanelFocusIndex].location)
 }
 
-func (m *model) updateCurrentFilePanelDir(dir string) error {
-	currentPath := m.fileModel.filePanels[m.filePanelFocusIndex].location
-	newPath := dir
-	if !filepath.IsAbs(dir) {
-		// Assume relative path from current
-		newPath = filepath.Join(currentPath, dir)
+func (m *model) creteNewFilePanelRelativeToCurrent(path string) error {
+	currentDir := m.fileModel.filePanels[m.filePanelFocusIndex].location
+	newPath, err := utils.ResolveAbsPath(currentDir, path)
+	if err != nil {
+		return fmt.Errorf("cannot resolve %s from %s err : %w", path, currentDir, err)
 	}
+	return m.createNewFilePanel(newPath)
+}
 
-	if info, err := os.Stat(newPath); err != nil {
-		return fmt.Errorf("%s : no such file or directory, stats err : %w", newPath, err)
-	} else if !info.IsDir() {
+// simulates a 'cd' action
+func (m *model) updateCurrentFilePanelDir(path string) error {
+	currentDir := m.fileModel.filePanels[m.filePanelFocusIndex].location
+	newPath, err := utils.ResolveAbsPath(currentDir, path)
+	
+	if err != nil {
+		return fmt.Errorf("cannot resolve %s from %s err : %w", path, currentDir, err)
+	} 
+	if info, _ := os.Stat(newPath); !info.IsDir() {
 		return fmt.Errorf("%s is not a directory", newPath)
 	}
 
