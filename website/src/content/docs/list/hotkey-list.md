@@ -33,7 +33,8 @@ These are the default hotkeys and you can [change](/configure/custom-hotkeys) th
 | Focus on the processbar panel    | `p`                        | `focus_on_process_bar`      |
 | Focus on the sidebar             | `s`                        | `focus_on_side_bar`         |
 | Focus on the metadata panel      | `m`                        | `focus_on_metadata`         |
-| Open command execution bar       | `:`                        | `open_command_line`         |
+| Open shell-command execution bar | `:`                        | `open_command_line`         |
+| Open superfile command-prompt    | `>`                        | `open_spf_prompt`           |
 
 ## Panel movement
 

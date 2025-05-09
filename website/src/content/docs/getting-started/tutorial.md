@@ -153,7 +153,7 @@ To open a file with an editor, press `e`.
 
 To open the current directory with an editor, press `E` (shift+e).
 
-To change the default file editor, you can set the `EDITOR` environment variable in your terminal or you can use the `editor` config option (take priority over `EDITOR` environment variable). 
+To change the default file editor, you can set the `EDITOR` environment variable in your terminal or you can use the `editor` config option (take priority over `EDITOR` environment variable).
 To change the default directory editor, you can use the `dir_editor` config option.
 For example:
 
@@ -177,3 +177,56 @@ If your directory editor does not support opening the current directory with an 
 
 (Sorry, this video has a little bit of lag)
 [demo video](https://github.com/yorukot/superfile/assets/107802416/d0770b3f-025e-40c9-ad3f-8b2adaf1c6c5)
+
+### The Command-Prompt
+
+superfile also has a list of commands, that are not triggerable via Keyboard shortcuts.
+To open the list just hit the `>` key (`shift`+`.` on QWERTY).
+
+![SuperFile-Prompt](https://github.com/yorukot/superfile/blob/main/asset/superfileprompt.png?raw=true)
+
+currently the Prompt comes with 4 different commands.
+
+#### `split`
+Will open a new filepanel that points to the same location as the currently active filepanel.
+
+#### `cd [your path here]`
+Changes the currently active Filepanels location to the path you enter.
+
+> [!NOTE]
+> currently, you don't have access to shell specific values like `~` or `$HOME`
+> allthough, that may change in the future.
+
+##### example:
+```
+cd /home/user/.config
+```
+#### `open [your path here]`
+Opens a new Filepanel that points to the given path.
+
+> [!NOTE]
+> currently, you don't have access to shell specific values like `~` or `$HOME`
+> allthough, that may change in the future.
+
+##### example:
+```
+open /home/user/.config
+```
+
+#### `$ [your shell command here]`
+With the `$ ` command, any following inputs will be send to the shell.
+(`sh` or `PowerShell`, depending on your System).
+
+> [!IMPORTANT]
+> Please note, that you won't receive any stdout outputs.
+> for now, this is meant for executing more complex file manipulations via the shell,
+> rather than handling interactive outputs.
+>
+> You can however check for errors, by checking the `superfile.log`
+
+##### example
+```
+$ touch note-$(date "+%Y-%m-%d_%H-%M-%S").md
+```
+would create a new file that has the current timestamp in it. Something like this. `note-2025-03-29_05:21:34.md`
+
