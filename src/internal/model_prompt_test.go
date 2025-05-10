@@ -1,11 +1,7 @@
 package internal
 
 import (
-	"flag"
-	"fmt"
-	"os"
 	"path/filepath"
-	"runtime"
 	"testing"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -16,45 +12,41 @@ import (
 	"github.com/yorukot/superfile/src/internal/utils"
 )
 
-func TestMain(m *testing.M) {
-	_, filename, _, _ := runtime.Caller(0)
-	spfConfigDir := filepath.Join(filepath.Dir(filepath.Dir(filename)),
-		"superfile_config")
-
-	err := common.PopulateGlobalConfigs(
-		filepath.Join(spfConfigDir, "config.toml"),
-		filepath.Join(spfConfigDir, "hotkeys.toml"),
-		filepath.Join(spfConfigDir, "theme", "monokai.toml"))
-
-	if err != nil {
-		fmt.Printf("error while populating config, err : %v", err)
-		os.Exit(1)
-	}
-
-	flag.Parse()
-	if testing.Verbose() {
-		utils.SetRootLoggerToStdout(true)
-	} else {
-		utils.SetRootLoggerToDiscarded()
-	}
-	m.Run()
-}
-
-// Model is huge. Just one test file ain't enough
 
 func TestModel_Update_Prompt(t *testing.T) {
+	curTestDir := filepath.Join(testDir, "TestPrompt")
+	dir1 := filepath.Join(curTestDir, "dir1")
+	dir2 := filepath.Join(curTestDir, "dir2")
+	file1 := filepath.Join(dir1, "file1.txt")
+
+	setupDirectories(t,  curTestDir, dir1, dir2)
+	setupFiles(t, file1)
+
+
+
 	// We want to test these. Todo : complete important tests
 	// 1. Being able to open prompt
+	// 1a. Open in shell mode, 1b. Open in prompt mode
+	
 	// 2. Being able to execute shell commands
-	// 3. Shell command scenarios like failure (validate failure)
+	// 3. Shell command failure is handled and prompt stays open
 	// 4. Successful Model actions - Split, Cd, Open new panel
+	// 4a. Working split
+	// 4b. Working cd : cd to abs path, cd to relative path, cd to home
+	// 4c. Working open : open to abs path, open to relative path, open to home
 	// 5. Split - Failure due to reaching max no. of panels
 	// 6. cd - failure due to invalid path
 	// 7. open - failure due to reaching max no. of panels
 	// 8. open - failure due to invalid path
 	// 9. cd and open - handling absolute and relative paths correctly
+	// 10. Model closing
+	// 10a. Pressing escape or ctrl+c and model closes
+	// 10b. Autoclose based on config
+	
+	// Dont test shell command substitution here.
+
 	// We might want to wrap os command execution in an interface and
-	// Use a mock os command executor to have timeouts, and
+	// ? Use a mock os command executor to have timeouts, and
 	// custom command behaviour
 
 	// Other tests cases
@@ -70,11 +62,13 @@ func TestModel_Update_Prompt(t *testing.T) {
 	// too big Shell command output
 
 	t.Run("Basic Prompt Opening", func(t *testing.T) {
-		m := defaultModelConfig(false, false, []string{"/"})
+		m := defaultModelConfig(false, false, []string{curTestDir})
 		firstUse = false
+		assert.False(t, m.promptModal.IsOpen())
 		_, err := TeaUpdate(&m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenCommandLine[0]))
 		require.NoError(t, err, "Opening the prompt should not produce an error")
 		assert.True(t, m.promptModal.IsOpen())
+		assert.True(t, m.promptModal.IsShellMode())
 	})
 
 	t.Run("Split Panel", func(t *testing.T) {
