@@ -112,23 +112,23 @@ func TestModel_HandleUpdate(t *testing.T) {
 		actualTest := func(promptChar string, shellChar string) {
 			m := GenerateModel(promptChar, shellChar, true)
 			m.Open(true)
-			assert.True(t, m.shellMode)
+			assert.True(t, m.IsShellMode())
 
 			// Shell to prompt
 			action, _ := m.HandleUpdate(utils.TeaRuneKeyMsg(promptChar), defaultTestCwd)
-			assert.False(t, m.shellMode)
+			assert.False(t, m.IsShellMode())
 			assert.True(t, m.actionSuccess)
 			assert.Equal(t, common.NoAction{}, action)
 
 			// Prompt to shell
 			action, _ = m.HandleUpdate(utils.TeaRuneKeyMsg(shellChar), defaultTestCwd)
-			assert.True(t, m.shellMode)
+			assert.True(t, m.IsShellMode())
 			assert.True(t, m.actionSuccess)
 			assert.Equal(t, common.NoAction{}, action)
 
 			// Pressing shellChar when you are already on shell shouldn't to anything
 			action, _ = m.HandleUpdate(utils.TeaRuneKeyMsg(shellChar), defaultTestCwd)
-			assert.True(t, m.shellMode)
+			assert.True(t, m.IsShellMode())
 			assert.True(t, m.actionSuccess)
 			assert.Equal(t, common.NoAction{}, action)
 		}

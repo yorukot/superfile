@@ -26,7 +26,6 @@ import (
 // These represent model's state information, its not a global preperty
 var LastTimeCursorMove = [2]int{int(time.Now().UnixMicro()), 0} //nolint: gochecknoglobals // Todo : Move to model struct
 var ListeningMessage = true                                     //nolint: gochecknoglobals // Todo : Move to model struct
-var firstUse = false                                            //nolint: gochecknoglobals // Todo : Move to model struct
 var hasTrash = true                                             //nolint: gochecknoglobals // Todo : Move to model struct
 var batCmd = ""                                                 //nolint: gochecknoglobals // Todo : Move to model struct
 var et *exiftool.Exiftool                                       //nolint: gochecknoglobals // Todo : Move to model struct
@@ -40,14 +39,16 @@ var progressBarLastRenderTime = time.Now()                      //nolint: gochec
 // be aware of it, and use it directly
 func InitialModel(firstFilePanelDirs []string, firstUseCheck, hasTrashCheck bool) tea.Model {
 	toggleDotFile, toggleFooter := initialConfig(firstFilePanelDirs)
-	firstUse = firstUseCheck
 	hasTrash = hasTrashCheck
 	batCmd = checkBatCmd()
-	return defaultModelConfig(toggleDotFile, toggleFooter, firstFilePanelDirs)
+	return defaultModelConfig(toggleDotFile, toggleFooter, firstUseCheck, firstFilePanelDirs)
 }
 
 // Init function to be called by Bubble tea framework, sets windows title,
 // cursos blinking and starts message streamming channel
+// Note : What init should do, for example read file panel data, read sidebar directories, and
+// disk, is being done in at the creation of model of object. Right now creation of model object
+// and its initialization isn't well separated.
 func (m model) Init() tea.Cmd {
 	return tea.Batch(
 		tea.SetWindowTitle("superfile"),
@@ -209,8 +210,8 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 		"focusPanel", m.focusPanel,
 	)
 
-	if firstUse {
-		firstUse = false
+	if m.firstUse {
+		m.firstUse = false
 		return cmd
 	}
 	switch {
@@ -453,7 +454,7 @@ func (m model) View() string {
 		return stringfunction.PlaceOverlay(overlayX, overlayY, sortOptions, finalRender)
 	}
 
-	if firstUse {
+	if m.firstUse {
 		introduceModal := m.introduceModalRender()
 		overlayX := m.fullWidth/2 - m.helpMenu.width/2
 		overlayY := m.fullHeight/2 - m.helpMenu.height/2
