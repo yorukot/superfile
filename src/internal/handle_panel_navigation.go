@@ -25,6 +25,7 @@ func (m *model) pinnedDirectory() {
 // Create new file panel
 func (m *model) createNewFilePanel(location string) error {
 	if len(m.fileModel.filePanels) == m.fileModel.maxFilePanel {
+		// Todo : Define as a predefined error in errors.go
 		return errors.New("maximum panel count reached")
 	}
 
