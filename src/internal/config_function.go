@@ -3,10 +3,8 @@ package internal
 import (
 	"log/slog"
 	"os"
-	"path/filepath"
 	"reflect"
 	"runtime"
-	"strings"
 
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
 	"github.com/yorukot/superfile/src/internal/ui/sidebar"
@@ -56,26 +54,22 @@ func initialConfig(firstFilePanelDirs []string) (toggleDotFile bool, toggleFoote
 		}
 	}
 
+	cwd, _ := os.Getwd()
 	for i := range firstFilePanelDirs {
 		if firstFilePanelDirs[i] == "" {
 			firstFilePanelDirs[i] = common.Config.DefaultDirectory
 		}
 
-		if strings.HasPrefix(firstFilePanelDirs[i], "~") {
-			// We only need to replace the first ~ , not all of them
-			// And only if its a prefix
-			firstFilePanelDirs[i] = strings.Replace(firstFilePanelDirs[i], "~", variable.HomeDir, 1)
-		}
-		firstFilePanelDirs[i], err = filepath.Abs(firstFilePanelDirs[i])
+		firstFilePanelDirs[i] = utils.ResolveAbsPath(cwd, firstFilePanelDirs[i])
 		// In case of unexpected path error, fallback to home dir
-		if err != nil {
-			slog.Error("Unexpected error while calculating firstFilePanelDir", "error", err)
+		if _, err := os.Stat(firstFilePanelDirs[i]); err != nil {
+			slog.Error("cannot get stats for firstFilePanelDir", "error", err)
 			firstFilePanelDirs[i] = variable.HomeDir
 		}
 	}
 
 	slog.Debug("Runtime information", "runtime.GOOS", runtime.GOOS)
-	slog.Debug("Directory configuration", "start_directories", firstFilePanelDirs)
+	slog.Debug("Directory configuration", "cwd", cwd, "start_directories", firstFilePanelDirs)
 
 	var memStats runtime.MemStats
 	runtime.ReadMemStats(&memStats)
