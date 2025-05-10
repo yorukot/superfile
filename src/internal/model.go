@@ -48,6 +48,9 @@ func InitialModel(firstFilePanelDirs []string, firstUseCheck, hasTrashCheck bool
 
 // Init function to be called by Bubble tea framework, sets windows title,
 // cursos blinking and starts message streamming channel
+// Note : What init should do, for example read file panel data, read sidebar directories, and
+// disk, is being done in at the creation of model of object. Right now creation of model object
+// and its initialization isn't well separated.
 func (m model) Init() tea.Cmd {
 	return tea.Batch(
 		tea.SetWindowTitle("superfile"),

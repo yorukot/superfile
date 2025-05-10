@@ -10,6 +10,7 @@ import (
 )
 
 // Generate and return model containing default configurations for interface
+// Maybe we can replace slice of strings with var args - Should we ?
 func defaultModelConfig(toggleDotFile bool, toggleFooter bool, firstFilePanelDirs []string) model {
 	return model{
 		filePanelFocusIndex: 0,
