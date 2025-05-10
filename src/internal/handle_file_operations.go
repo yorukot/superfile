@@ -527,28 +527,29 @@ func (m *model) extractFile() {
 }
 
 // Compress file or directory
+
 func (m *model) compressFile() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 
-	if len(panel.element) == 0 {
+	selected := []string{panel.element[panel.cursor].location}
+
+	if len(selected) == 0 {
+		slog.Warn("No files selected for compression")
 		return
 	}
 
-	fileName := filepath.Base(panel.element[panel.cursor].location)
-
+	fileName := filepath.Base(panel.selected[0])
 	zipName := strings.TrimSuffix(fileName, filepath.Ext(fileName)) + ".zip"
-	zipName, err := renameIfDuplicate(zipName)
 
+	zipName, err := renameIfDuplicate(zipName)
 	if err != nil {
 		slog.Error("Error in compressing files during rename duplicate", "error", err)
 		return
 	}
 
-	err = zipSource(panel.element[panel.cursor].location, filepath.Join(filepath.Dir(panel.element[panel.cursor].location), zipName))
+	err = zipSource(panel.selected, filepath.Join(filepath.Dir(panel.selected[0]), zipName))
 	if err != nil {
 		slog.Error("Error in zipping files", "error", err)
-		// Although return is not needed here at the moment. This clarifies the intent of
-		// not continuing after the error even if any further code is added in this function later
 		return
 	}
 }
