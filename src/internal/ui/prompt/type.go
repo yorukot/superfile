@@ -15,12 +15,18 @@ type Model struct {
 	// State
 	open bool
 	// whether its shellMode or spfMode
+	// Always use setShellMode to adjust
 	shellMode bool
 	textInput textinput.Model
 	resultMsg string
 
 	// Whether the user intended action was successful
 	actionSuccess bool
+
+	// Dimensions - Exported, since model will be dynamically adjusting them
+	width int
+	// Height is dynamically adjusted based on content
+	maxHeight int
 }
 
 // This is only used to render suggestions

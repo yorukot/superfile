@@ -40,10 +40,14 @@ func TestMain(m *testing.M) {
 	m.Run()
 }
 
+func defaultTestModel() Model {
+	return GenerateModel(spfPromptChar, shellPromptChar, true, defaultTestMaxHeight, defaultTestWidth)
+}
+
 func TestModel_HandleUpdate(t *testing.T) {
 	// We don't test getPromptAction here. It is a separate test
 	t.Run("Handle update called on closed Model", func(t *testing.T) {
-		m := GenerateModel(spfPromptChar, shellPromptChar, true)
+		m := defaultTestModel()
 		action, _ := m.HandleUpdate(utils.TeaRuneKeyMsg("x"), defaultTestCwd)
 		assert.Empty(t, m.textInput.Value())
 		assert.True(t, m.validate())
@@ -53,7 +57,7 @@ func TestModel_HandleUpdate(t *testing.T) {
 
 	t.Run("Pressing confirm on empty input", func(t *testing.T) {
 		actualTest := func(closeOnSuccess bool, openAfterEnter bool) {
-			m := GenerateModel(spfPromptChar, shellPromptChar, closeOnSuccess)
+			m := GenerateModel(spfPromptChar, shellPromptChar, closeOnSuccess, defaultTestMaxHeight, defaultTestWidth)
 			m.Open(true)
 			assert.True(t, m.IsOpen())
 
@@ -70,7 +74,7 @@ func TestModel_HandleUpdate(t *testing.T) {
 	})
 
 	t.Run("Validate Prompt Actions", func(t *testing.T) {
-		m := GenerateModel(spfPromptChar, shellPromptChar, true)
+		m := defaultTestModel()
 		m.Open(false)
 
 		action, _ := m.HandleUpdate(utils.TeaRuneKeyMsg(SplitCommand), defaultTestCwd)
@@ -85,7 +89,7 @@ func TestModel_HandleUpdate(t *testing.T) {
 		assert.False(t, m.LastActionSucceeded())
 		assert.NotEmpty(t, m.resultMsg)
 
-		m.shellMode = true
+		m.setShellMode(true)
 		command := "abc def /xyz"
 		_, _ = m.HandleUpdate(utils.TeaRuneKeyMsg(command), defaultTestCwd)
 		action, _ = m.HandleUpdate(tea.KeyMsg{Type: tea.KeyEnter}, defaultTestCwd)
@@ -93,7 +97,7 @@ func TestModel_HandleUpdate(t *testing.T) {
 	})
 
 	t.Run("Validate Cancel typing", func(t *testing.T) {
-		m := GenerateModel(spfPromptChar, shellPromptChar, true)
+		m := defaultTestModel()
 
 		actualTest := func(closeKey tea.KeyMsg, shouldBeOpen bool) {
 			m.Open(true)
@@ -110,7 +114,7 @@ func TestModel_HandleUpdate(t *testing.T) {
 
 	t.Run("Switching between shell and SPF mode", func(t *testing.T) {
 		actualTest := func(promptChar string, shellChar string) {
-			m := GenerateModel(promptChar, shellChar, true)
+			m := GenerateModel(promptChar, shellChar, true, defaultTestMaxHeight, defaultTestWidth)
 			m.Open(true)
 			assert.True(t, m.IsShellMode())
 
@@ -137,7 +141,7 @@ func TestModel_HandleUpdate(t *testing.T) {
 	})
 
 	t.Run("Validate Cursor Blink update", func(t *testing.T) {
-		m := GenerateModel(spfPromptChar, shellPromptChar, true)
+		m := defaultTestModel()
 		m.Open(true)
 		assert.False(t, m.textInput.Cursor.Blink)
 
@@ -162,7 +166,7 @@ func TestModel_HandleUpdate(t *testing.T) {
 
 func TestMode_HandleResults(t *testing.T) {
 	t.Run("Verify Shell results update", func(t *testing.T) {
-		m := GenerateModel(spfPromptChar, shellPromptChar, true)
+		m := defaultTestModel()
 		m.Open(true)
 		m.HandleShellCommandResults(0, "")
 
@@ -186,7 +190,7 @@ func TestMode_HandleResults(t *testing.T) {
 	})
 
 	t.Run("Verify SPF results update", func(t *testing.T) {
-		m := GenerateModel(spfPromptChar, shellPromptChar, false)
+		m := GenerateModel(spfPromptChar, shellPromptChar, false, defaultTestMaxHeight, defaultTestWidth)
 		m.Open(true)
 		msg := "Test message"
 		m.HandleSPFActionResults(true, msg)
