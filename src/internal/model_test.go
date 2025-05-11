@@ -27,6 +27,14 @@ The purpose of this test file is to have the
 // Helps to have centralized cleanup
 var testDir string //nolint: gochecknoglobals // One-time initialized, and then read-only global test variable
 
+func cleanupTestDir() {
+	err := os.RemoveAll(testDir)
+	if err != nil {
+		fmt.Printf("error while cleaning up test directory, err : %v", err)
+		os.Exit(1)
+	}
+}
+
 func TestMain(m *testing.M) {
 	_, filename, _, _ := runtime.Caller(0)
 	spfConfigDir := filepath.Join(filepath.Dir(filepath.Dir(filename)),
@@ -45,25 +53,11 @@ func TestMain(m *testing.M) {
 	// Create testDir
 	testDir = filepath.Join(os.TempDir(), "spf_testdir")
 
-	// Temp code duplication
-	err = os.RemoveAll(testDir)
-	if err != nil {
-		fmt.Printf("error while cleaning up test directory, err : %v", err)
-		// os.Exit(1)
-		// Todo : Fixxx
-	}
-
-	if err := os.Mkdir(testDir, 0755); err != nil && !os.IsExist(err) {
+	if err := os.Mkdir(testDir, 0755); err != nil {
 		fmt.Printf("error while creating test directory, err : %v", err)
 		os.Exit(1)
 	}
-	defer func() {
-		err := os.RemoveAll(testDir)
-		if err != nil {
-			fmt.Printf("error while cleaning up test directory, err : %v", err)
-			os.Exit(1)
-		}
-	}()
+	defer cleanupTestDir()
 
 	flag.Parse()
 	if testing.Verbose() {
@@ -76,7 +70,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestBasic(t *testing.T) {
-	curTestDir := filepath.Join(testDir, "TestCopy")
+	curTestDir := filepath.Join(testDir, "TestBasic")
 	dir1 := filepath.Join(curTestDir, "dir1")
 	dir2 := filepath.Join(curTestDir, "dir2")
 	file1 := filepath.Join(dir1, "file1.txt")

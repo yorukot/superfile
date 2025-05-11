@@ -69,22 +69,22 @@ func TestCopy(t *testing.T) {
 		_, _ = TeaUpdate(&m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
 
 		// Actual paste may take time, since its an os operations
-		// Hence wait for some operational delay
-		time.Sleep(10 * time.Millisecond)
-
-		// Another update to refresh the data
-		_, _ = TeaUpdate(&m, nil)
-
-		assert.FileExists(t, filepath.Join(dir2, "file1.txt"))
+		assert.Eventually(t, func() bool {
+			_, err := os.Lstat(filepath.Join(dir2, "file1.txt"))
+			return err == nil
+		}, time.Second, 10*time.Millisecond)
 
 		// Todo : still on clipboard
 		assert.False(t, m.copyItems.cut)
 		assert.Equal(t, file1, m.copyItems.items[0])
 
 		_, _ = TeaUpdate(&m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
-		// Another update to refresh the data
-		_, _ = TeaUpdate(&m, nil)
 
+		// Actual paste may take time, since its an os operations
+		assert.Eventually(t, func() bool {
+			_, err := os.Lstat(filepath.Join(dir2, "file1(1).txt"))
+			return err == nil
+		}, time.Second, 10*time.Millisecond)
 		assert.FileExists(t, filepath.Join(dir2, "file1(1).txt"))
 		// Todo : Also validate process bar having two processes.
 	})

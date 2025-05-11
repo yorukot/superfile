@@ -61,7 +61,7 @@ func TestModel_HandleUpdate(t *testing.T) {
 			assert.Equal(t, openAfterEnter, m.IsOpen())
 			assert.Equal(t, common.NoAction{}, action)
 			assert.Equal(t, "", m.resultMsg)
-			assert.True(t, m.actionSuccess)
+			assert.True(t, m.LastActionSucceeded())
 			assert.True(t, m.validate())
 		}
 
@@ -82,7 +82,7 @@ func TestModel_HandleUpdate(t *testing.T) {
 		_, _ = m.HandleUpdate(utils.TeaRuneKeyMsg("bad_command"), defaultTestCwd)
 		action, _ = m.HandleUpdate(tea.KeyMsg{Type: tea.KeyEnter}, defaultTestCwd)
 		assert.Equal(t, common.NoAction{}, action)
-		assert.False(t, m.actionSuccess)
+		assert.False(t, m.LastActionSucceeded())
 		assert.NotEmpty(t, m.resultMsg)
 
 		m.shellMode = true
@@ -117,19 +117,19 @@ func TestModel_HandleUpdate(t *testing.T) {
 			// Shell to prompt
 			action, _ := m.HandleUpdate(utils.TeaRuneKeyMsg(promptChar), defaultTestCwd)
 			assert.False(t, m.IsShellMode())
-			assert.True(t, m.actionSuccess)
+			assert.True(t, m.LastActionSucceeded())
 			assert.Equal(t, common.NoAction{}, action)
 
 			// Prompt to shell
 			action, _ = m.HandleUpdate(utils.TeaRuneKeyMsg(shellChar), defaultTestCwd)
 			assert.True(t, m.IsShellMode())
-			assert.True(t, m.actionSuccess)
+			assert.True(t, m.LastActionSucceeded())
 			assert.Equal(t, common.NoAction{}, action)
 
 			// Pressing shellChar when you are already on shell shouldn't to anything
 			action, _ = m.HandleUpdate(utils.TeaRuneKeyMsg(shellChar), defaultTestCwd)
 			assert.True(t, m.IsShellMode())
-			assert.True(t, m.actionSuccess)
+			assert.True(t, m.LastActionSucceeded())
 			assert.Equal(t, common.NoAction{}, action)
 		}
 		actualTest(">", ":")
@@ -167,20 +167,20 @@ func TestMode_HandleResults(t *testing.T) {
 		m.HandleShellCommandResults(0, "")
 
 		// Validate close happens when closeOnSuccess is true
-		assert.True(t, m.actionSuccess)
+		assert.True(t, m.LastActionSucceeded())
 		assert.Equal(t, "Command exited with status 0", m.resultMsg)
 		assert.False(t, m.IsOpen())
 
 		m.Open(true)
 		m.HandleShellCommandResults(1, "")
-		assert.False(t, m.actionSuccess)
+		assert.False(t, m.LastActionSucceeded())
 		assert.Equal(t, "Command exited with status 1", m.resultMsg)
 		assert.True(t, m.IsOpen())
 
 		m.closeOnSuccess = false
 		m.HandleShellCommandResults(0, "")
 		// Validate that close does not happen when closeOnSuccess is true
-		assert.True(t, m.actionSuccess)
+		assert.True(t, m.LastActionSucceeded())
 		assert.Equal(t, "Command exited with status 0", m.resultMsg)
 		assert.True(t, m.IsOpen())
 	})
@@ -191,7 +191,7 @@ func TestMode_HandleResults(t *testing.T) {
 		msg := "Test message"
 		m.HandleSPFActionResults(true, msg)
 
-		assert.True(t, m.actionSuccess)
+		assert.True(t, m.LastActionSucceeded())
 		assert.Equal(t, msg, m.resultMsg)
 		assert.True(t, m.IsOpen())
 

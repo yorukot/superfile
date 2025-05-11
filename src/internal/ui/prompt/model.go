@@ -172,6 +172,10 @@ func (m *Model) IsShellMode() bool {
 	return m.shellMode
 }
 
+func (m *Model) LastActionSucceeded() bool {
+	return m.actionSuccess
+}
+
 func (m *Model) validate() bool {
 	// Prompt was closed, but textInput was not cleared
 	if !m.open && m.textInput.Value() != "" {

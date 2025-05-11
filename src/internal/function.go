@@ -64,8 +64,6 @@ func returnDirElement(location string, displayDotFile bool, sortOptions sortOpti
 		return nil
 	}
 
-	slog.Debug("returnDirElement", "dent", dirEntries)
-
 	dirEntries = slices.DeleteFunc(dirEntries, func(e os.DirEntry) bool {
 		// Entries not needed to be considered
 		_, err := e.Info()
@@ -381,6 +379,10 @@ func (m *model) returnMetaData() {
 	channel <- message
 
 	panel.element[panel.cursor].metaData = m.fileMetaData.metaData
+}
+
+func (m *model) getFocussedFilePanel() *filePanel {
+	return &m.fileModel.filePanels[m.filePanelFocusIndex]
 }
 
 func calculateMD5Checksum(filePath string) (string, error) {
