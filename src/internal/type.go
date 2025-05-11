@@ -75,6 +75,10 @@ const (
 )
 
 // Main model
+// Todo : We could consider using *model as tea.Model, instead of model.
+// for reducing re-allocations. The struct is 20K bytes. But this could lead to
+// issues like race conditions and whatnot, which are hidden since we are creating
+// new model in each tea update.
 type model struct {
 	fileModel            fileModel
 	sidebarModel         sidebar.Model
@@ -92,6 +96,7 @@ type model struct {
 	updatedToggleDotFile bool
 	toggleFooter         bool
 	firstLoadingComplete bool
+	firstUse             bool
 	filePanelFocusIndex  int
 
 	// Height in number of lines of actual viewport of
