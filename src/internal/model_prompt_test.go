@@ -184,6 +184,7 @@ func TestModel_Update_Prompt(t *testing.T) {
 
 		m.closeFilePanel()
 
+		// Note : resolving shell subsitution is flaky in windows.
 		_, _ = TeaUpdate(&m, utils.TeaRuneKeyMsg(prompt.OpenCommand+" ${HOME}"))
 		_, _ = TeaUpdate(&m, tea.KeyMsg{Type: tea.KeyEnter})
 		assert.True(t, m.promptModal.LastActionSucceeded(), "open using variable substitution should work")
@@ -191,6 +192,7 @@ func TestModel_Update_Prompt(t *testing.T) {
 
 		m.closeFilePanel()
 
+		// Note : resolving shell subsitution is flaky in windows.
 		_, _ = TeaUpdate(&m, utils.TeaRuneKeyMsg(prompt.OpenCommand+" $(echo \"~\")"))
 		_, _ = TeaUpdate(&m, tea.KeyMsg{Type: tea.KeyEnter})
 		assert.True(t, m.promptModal.LastActionSucceeded(), "open using command substitution should work")

@@ -129,6 +129,7 @@ func (m *model) handleWindowResize(msg tea.WindowSizeMsg) {
 	m.setFilePanelsSize(msg.Width)
 	m.setHeightValues(msg.Height)
 	m.setHelpMenuSize()
+	m.setPromptModelSize()
 
 	if m.fileModel.maxFilePanel >= 10 {
 		m.fileModel.maxFilePanel = 10
@@ -188,6 +189,14 @@ func (m *model) setHelpMenuSize() {
 	if m.fullWidth > 95 {
 		m.helpMenu.width = 90
 	}
+}
+
+func (m *model) setPromptModelSize() {
+	// Scale prompt model's maxHeight - 33% of total height
+	m.promptModal.SetMaxHeight(m.fullHeight / 3)
+
+	// Scale prompt model's maxHeight - 50% of total height
+	m.promptModal.SetWidth(m.fullWidth / 2)
 }
 
 // Identify the current state of the application m and properly handle the
@@ -442,8 +451,8 @@ func (m model) View() string {
 
 	if m.promptModal.IsOpen() {
 		promptModal := m.promptModalRender()
-		overlayX := m.fullWidth/2 - m.helpMenu.width/2
-		overlayY := m.fullHeight/2 - m.helpMenu.height/2
+		overlayX := m.fullWidth/2 - m.promptModal.GetWidth()/2
+		overlayY := m.fullHeight/2 - m.promptModal.GetMaxHeight()/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, promptModal, finalRender)
 	}
 

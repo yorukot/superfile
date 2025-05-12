@@ -3,7 +3,9 @@ package prompt
 import (
 	"context"
 	"fmt"
+	"runtime"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -81,7 +83,20 @@ func Test_tokenizePromptCommand(t *testing.T) {
 	}
 }
 
+// Note : resolving shell subsitution is flaky in windows.
+// It usually times out, and environment variables sometimes dont work.
 func Test_resolveShellSubstitution(t *testing.T) {
+	timeout := shellSubTimeoutInTests
+	newLineSuffix := "\n"
+	noopCommand := "true"
+	if runtime.GOOS == "windows" {
+		// Substitution is slow in windows
+		timeout = 2 * time.Second
+		// Windows uses \r\n as new line for echo
+		newLineSuffix = "\r\n"
+		noopCommand = "cd ."
+	}
+
 	testdata := []struct {
 		name            string
 		command         string
@@ -123,7 +138,7 @@ func Test_resolveShellSubstitution(t *testing.T) {
 		{
 			name:            "Basic substitution",
 			command:         "$(echo abc)",
-			expectedResult:  "abc\n",
+			expectedResult:  "abc" + newLineSuffix,
 			isErrorExpected: false,
 			errorToMatch:    nil,
 		},
@@ -131,14 +146,15 @@ func Test_resolveShellSubstitution(t *testing.T) {
 		{
 			name:            "Command with internal substitution",
 			command:         "$(echo $(echo abc))",
-			expectedResult:  "abc\n",
+			expectedResult:  "abc" + newLineSuffix,
 			isErrorExpected: false,
 			errorToMatch:    nil,
 		},
 		{
-			name:            "Multiple substitution",
-			command:         fmt.Sprintf("$(echo $(echo $%s)) ${%s}", spfTestEnvVar1, spfTestEnvVar2),
-			expectedResult:  fmt.Sprintf("%s\n %s", testEnvValues[spfTestEnvVar1], testEnvValues[spfTestEnvVar2]),
+			name:    "Multiple substitution",
+			command: fmt.Sprintf("$(echo $(echo $%s)) ${%s}", spfTestEnvVar1, spfTestEnvVar2),
+			expectedResult: fmt.Sprintf("%s%s %s", testEnvValues[spfTestEnvVar1],
+				newLineSuffix, testEnvValues[spfTestEnvVar2]),
 			isErrorExpected: false,
 			errorToMatch:    nil,
 		},
@@ -158,7 +174,7 @@ func Test_resolveShellSubstitution(t *testing.T) {
 		},
 		{
 			name:            "Empty output",
-			command:         "cd abc $(true)",
+			command:         "cd abc $(" + noopCommand + ")",
 			expectedResult:  "cd abc ",
 			isErrorExpected: false,
 			errorToMatch:    nil,
@@ -167,7 +183,8 @@ func Test_resolveShellSubstitution(t *testing.T) {
 
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := resolveShellSubstitution(shellSubTimeoutInTests, tt.command, defaultTestCwd)
+			result, err := resolveShellSubstitution(timeout, tt.command, defaultTestCwd)
+
 			assert.Equal(t, tt.expectedResult, result)
 			if err != nil {
 				assert.True(t, tt.isErrorExpected)
@@ -179,7 +196,7 @@ func Test_resolveShellSubstitution(t *testing.T) {
 	}
 
 	t.Run("Testing shell substitution timeout", func(t *testing.T) {
-		result, err := resolveShellSubstitution(shellSubTimeoutInTests, "$(sleep 0.1)", defaultTestCwd)
+		result, err := resolveShellSubstitution(timeout, "$(sleep 2)", defaultTestCwd)
 		assert.Empty(t, result)
 		require.Error(t, err)
 		require.ErrorIs(t, err, context.DeadlineExceeded)
