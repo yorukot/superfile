@@ -381,7 +381,9 @@ func (m *model) returnMetaData() {
 	panel.element[panel.cursor].metaData = m.fileMetaData.metaData
 }
 
-func (m *model) getFocussedFilePanel() *filePanel {
+// Todo : Replace all usage of "m.fileModel.filePanels[m.filePanelFocusIndex]" with this
+// There are many usage
+func (m *model) getFocusedFilePanel() *filePanel {
 	return &m.fileModel.filePanels[m.filePanelFocusIndex]
 }
 

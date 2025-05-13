@@ -49,3 +49,8 @@ func TeaUpdate(m *model, msg tea.Msg) (tea.Cmd, error) {
 	*m = mObj
 	return cmd, nil
 }
+
+func TeaUpdateWithErrCheck(t *testing.T, m *model, msg tea.Msg) {
+	_, err := TeaUpdate(m, msg)
+	require.NoError(t, err)
+}

@@ -31,6 +31,9 @@ const (
 
 	defaultTestCwd = "/"
 
+	PromptMinWidth  = 10
+	PromptMinHeight = 3
+
 	defaultTestWidth     = 100
 	defaultTestMaxHeight = 100
 )

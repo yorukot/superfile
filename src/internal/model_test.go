@@ -8,7 +8,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/assert"
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/utils"
 )
@@ -76,22 +76,13 @@ func TestBasic(t *testing.T) {
 	file1 := filepath.Join(dir1, "file1.txt")
 
 	t.Run("Basic Checks", func(t *testing.T) {
-		err := os.Mkdir(curTestDir, 0755)
-		require.NoError(t, err)
-		err = os.Mkdir(dir1, 0755)
-		require.NoError(t, err)
-		err = os.Mkdir(dir2, 0755)
-		require.NoError(t, err)
-
-		// Should permission be made lesser than this ?
-		// Keep text in a const
-		err = os.WriteFile(file1, SampleDataBytes, 0755)
-
-		require.NoError(t, err)
+		setupDirectories(t, curTestDir, dir1, dir2)
+		setupFiles(t, file1)
+		t.Cleanup(func() {
+			os.RemoveAll(curTestDir)
+		})
 
 		m := defaultTestModel(dir1)
-
-		_, _ = TeaUpdate(&m, nil)
 
 		// Validate the most of the data stored in model object
 		// Inspect model struct to see what more can be validated.
@@ -101,5 +92,7 @@ func TestBasic(t *testing.T) {
 		// 4 - process panel is empty
 		// 5 - clipboard is empty
 		// 6 - model's dimenstion
+
+		assert.Equal(t, dir1, m.getFocusedFilePanel().location)
 	})
 }

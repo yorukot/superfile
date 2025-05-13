@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -103,6 +104,9 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 // Resolve paths starting with "~"
 // currentDir should be an absolute path
 func ResolveAbsPath(currentDir string, path string) string {
+	if !filepath.IsAbs(currentDir) {
+		slog.Warn("currentDir is not absolute", "currentDir", currentDir)
+	}
 	if strings.HasPrefix(path, "~") {
 		// We dont use variable.HomeDir here, as the util package cannot have dependency
 		// on variable package

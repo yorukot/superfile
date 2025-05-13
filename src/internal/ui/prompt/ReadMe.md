@@ -17,4 +17,4 @@ go test -coverprofile=coverage.out && go tool cover -html=coverage.out -o covera
 Current coverage is 74.0%.
 
 # To-dos
-- Use bubbltea's textinput Model's .prompt field for '>' or ':' prompt
+- Prompt's Rendering unit tests

@@ -54,7 +54,11 @@ func initialConfig(firstFilePanelDirs []string) (toggleDotFile bool, toggleFoote
 		}
 	}
 
-	cwd, _ := os.Getwd()
+	cwd, err := os.Getwd()
+	if err != nil {
+		slog.Error("cannot get current working directory", "error", err)
+		cwd = variable.HomeDir
+	}
 	for i := range firstFilePanelDirs {
 		if firstFilePanelDirs[i] == "" {
 			firstFilePanelDirs[i] = common.Config.DefaultDirectory

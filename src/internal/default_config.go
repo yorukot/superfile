@@ -34,7 +34,7 @@ func defaultModelConfig(toggleDotFile bool, toggleFooter bool, firstUse bool, fi
 			data:        getHelpMenuData(),
 			open:        false,
 		},
-		promptModal:   prompt.DefaultModel(0, 0),
+		promptModal:   prompt.DefaultModel(prompt.PromptMinHeight, prompt.PromptMinWidth),
 		toggleDotFile: toggleDotFile,
 		toggleFooter:  toggleFooter,
 		firstUse:      firstUse,

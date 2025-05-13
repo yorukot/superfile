@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/utils"
 )
@@ -24,18 +23,11 @@ func TestCopy(t *testing.T) {
 	dir2 := filepath.Join(curTestDir, "dir2")
 	file1 := filepath.Join(dir1, "file1.txt")
 	t.Run("Basic Copy", func(t *testing.T) {
-		err := os.Mkdir(curTestDir, 0755)
-		require.NoError(t, err)
-		err = os.Mkdir(dir1, 0755)
-		require.NoError(t, err)
-		err = os.Mkdir(dir2, 0755)
-		require.NoError(t, err)
-
-		// Should permission be made lesser than this ?
-		// Keep text in a const
-		err = os.WriteFile(file1, SampleDataBytes, 0755)
-
-		require.NoError(t, err)
+		setupDirectories(t, curTestDir, dir1, dir2)
+		setupFiles(t, file1)
+		t.Cleanup(func() {
+			os.RemoveAll(curTestDir)
+		})
 
 		m := defaultTestModel(dir1)
 
@@ -50,14 +42,14 @@ func TestCopy(t *testing.T) {
 
 		// Todo : Having to send a random keypress to initiate model init.
 		// Should not have to do that
-		_, _ = TeaUpdate(&m, nil)
+		TeaUpdateWithErrCheck(t, &m, nil)
 
 		fmt.Println(m.fileModel.filePanels[m.filePanelFocusIndex].location)
 
 		assert.Equal(t, "file1.txt",
 			m.fileModel.filePanels[m.filePanelFocusIndex].element[0].name)
 
-		_, _ = TeaUpdate(&m, utils.TeaRuneKeyMsg(common.Hotkeys.CopyItems[0]))
+		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.CopyItems[0]))
 
 		// Todo : validate clipboard
 		assert.False(t, m.copyItems.cut)
@@ -66,7 +58,7 @@ func TestCopy(t *testing.T) {
 		// move to dir2
 		m.updateCurrentFilePanelDir("../dir2")
 		fmt.Println(m.fileModel.filePanels[m.filePanelFocusIndex].location)
-		_, _ = TeaUpdate(&m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
 
 		// Actual paste may take time, since its an os operations
 		assert.Eventually(t, func() bool {
@@ -78,7 +70,7 @@ func TestCopy(t *testing.T) {
 		assert.False(t, m.copyItems.cut)
 		assert.Equal(t, file1, m.copyItems.items[0])
 
-		_, _ = TeaUpdate(&m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
 
 		// Actual paste may take time, since its an os operations
 		assert.Eventually(t, func() bool {

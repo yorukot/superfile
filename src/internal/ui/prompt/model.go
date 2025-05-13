@@ -19,7 +19,7 @@ func DefaultModel(maxHeight int, width int) Model {
 }
 
 func GenerateModel(spfPromptHotkey string, shellPromptHotkey string, closeOnSuccess bool, maxHeight int, width int) Model {
-	return Model{
+	m := Model{
 		headline:          icon.Terminal + " " + promptHeadlineText,
 		open:              false,
 		shellMode:         true,
@@ -33,6 +33,9 @@ func GenerateModel(spfPromptHotkey string, shellPromptHotkey string, closeOnSucc
 		maxHeight: maxHeight,
 		width:     width,
 	}
+	m.SetMaxHeight(maxHeight)
+	m.SetWidth(width)
+	return m
 }
 
 func (m *Model) HandleUpdate(msg tea.Msg, cwdLocation string) (common.ModelAction, tea.Cmd) {
@@ -127,8 +130,7 @@ func (m *Model) Render() string {
 	r.AddLines(" " + m.textInput.View())
 
 	if !m.shellMode {
-		// To make sure its added one time only
-		// Todo : Validate using prompt render unit tests
+		// To make sure its added one time only per render call
 		hintSectionAdded := false
 		if m.textInput.Value() == "" {
 			if !hintSectionAdded {
@@ -203,6 +205,10 @@ func (m *Model) GetMaxHeight() int {
 }
 
 func (m *Model) SetWidth(width int) {
+	if width < PromptMinWidth {
+		slog.Warn("Prompt initialized with too less width", "width", width)
+		width = PromptMinWidth
+	}
 	m.width = width
 	// Excluding borders(2), SpacePadding(1), Prompt(2), and one extra character that is appended
 	// by textInput.View()
@@ -210,6 +216,10 @@ func (m *Model) SetWidth(width int) {
 }
 
 func (m *Model) SetMaxHeight(maxHeight int) {
+	if maxHeight < PromptMinHeight {
+		slog.Warn("Prompt initialized with too less maxHeight", "maxHeight", maxHeight)
+		maxHeight = PromptMinHeight
+	}
 	m.maxHeight = maxHeight
 }
 
