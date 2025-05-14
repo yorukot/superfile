@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"runtime"
 
 	"github.com/mattn/go-runewidth"
 	"github.com/pelletier/go-toml/v2"
@@ -234,7 +235,17 @@ func WriteThemeFiles(content embed.FS) error {
 
 // Used only in unit tests
 // Populate config variables based on given file
-func PopulateGlobalConfigs(configFilePath string, hotkeyFilePath string, themeFilePath string) error {
+func PopulateGlobalConfigs() error {
+	_, filename, _, _ := runtime.Caller(0)
+	// This is src/internal/common/load_config.go
+	// we want src/superfile_config
+	spfConfigDir := filepath.Join(filepath.Dir(filepath.Dir(filepath.Dir(filename))),
+		"superfile_config")
+
+	configFilePath := filepath.Join(spfConfigDir, "config.toml")
+	hotkeyFilePath := filepath.Join(spfConfigDir, "hotkeys.toml")
+	themeFilePath := filepath.Join(spfConfigDir, "theme", "monokai.toml")
+
 	err := PopulateConfigFromFile(configFilePath)
 	if err != nil {
 		return err

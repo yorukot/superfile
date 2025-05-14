@@ -4,10 +4,14 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/x/exp/term/ansi"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/utils"
 )
@@ -17,8 +21,13 @@ func initGlobals() {
 	// Updating globals for test is not a good idea and can lead to all sorts of issue
 	// When multiple tests depend on same global variable and want different values
 	// Since this is config that would likely stay same, maybe this is okay.
-	common.Hotkeys.ConfirmTyping = []string{"enter"}
-	common.Hotkeys.CancelTyping = []string{"ctrl+c", "esc"}
+	// Also, this is done in main model's test too.
+	// We need to find a better way to do this
+	err := common.PopulateGlobalConfigs()
+	if err != nil {
+		fmt.Printf("error while populating config, err : %v", err)
+		os.Exit(1)
+	}
 }
 
 func TestMain(m *testing.M) {
@@ -164,7 +173,7 @@ func TestModel_HandleUpdate(t *testing.T) {
 	})
 }
 
-func TestMode_HandleResults(t *testing.T) {
+func TestModel_HandleResults(t *testing.T) {
 	t.Run("Verify Shell results update", func(t *testing.T) {
 		m := defaultTestModel()
 		m.Open(true)
@@ -204,4 +213,202 @@ func TestMode_HandleResults(t *testing.T) {
 		m.HandleSPFActionResults(true, "")
 		assert.False(t, m.IsOpen())
 	})
+}
+
+func TestModel_Render(t *testing.T) {
+	// Test
+	// 1 - Default view with shell mode and spf prompt mode
+	// 2 - User input
+	// 3 - User input, that is truncated due to being too large
+	// 4 - User input with special characters, emojies, etc.
+	// 5 - Prompt mode suggestion with these prefixes
+	//   - "cd"
+	//   - "c"
+	//   - "open <PATH>"
+	//   - "open <PATH> <Extra arg>"
+	//   - "non_existent_command"
+
+	// 6 - Model with result message (Without is tested above)
+	// 7 - Color of result message green on success, red on failure
+	// This one is hard, and we will likely not do it soon.
+	// Needs global style variables
+
+	// Challenges - needs border config strings for render test
+	t.Run("Basic Render Checks", func(t *testing.T) {
+		m := GenerateModel(spfPromptChar, shellPromptChar, true, 10, 40)
+		m.setShellMode(true)
+		res := ansi.Strip(m.Render())
+		exp := "" +
+			"╭─┤ " + icon.Terminal + " Superfile Prompt(Shell Mode) ├───╮\n" +
+			// 000123--------4------------56789012345678901234567890123456789
+			"│ :                                    │\n" +
+			// 000123456789012345678901234567890123456789
+			"├──────────────────────────────────────┤\n" +
+			"│ '>' - Get into SPF Prompt mode       │\n" +
+			"╰──────────────────────────────────────╯"
+		assert.Equal(t, exp, res)
+		m.setShellMode(false)
+		res = ansi.Strip(m.Render())
+		exp = "" +
+			"╭─┤ " + icon.Terminal + " Superfile Prompt(Prompt Mode) ├──╮\n" +
+			// 000123--------4------------56789012345678901234567890123456789
+			"│ >                                    │\n" +
+			"├──────────────────────────────────────┤\n" +
+			"│ ':' - Get into Shell mode            │\n" +
+			"│ 'open <PATH>' - Open a new panel at a│\n" +
+			"│ 'split' - Open a new panel at a curre│\n" +
+			"│ 'cd <PATH>' - Change directory of cur│\n" +
+			"╰──────────────────────────────────────╯"
+		assert.Equal(t, exp, res)
+	})
+
+	t.Run("Test User Input", func(t *testing.T) {
+		execute := func(input string, expected string) {
+			// Changing this will need test adjustments
+			width := 10
+			m := GenerateModel(spfPromptChar, shellPromptChar, true, 10, width)
+			m.Open(true)
+			m.textInput.SetValue(input)
+			m.textInput.Cursor.Blink = false
+			res := ansi.Strip(m.Render())
+			inputLine := strings.Split(res, "\n")[1]
+			require.Equal(t, width, ansi.StringWidth(inputLine))
+			// | : xxxx |
+			// 0123456789
+			content := strings.TrimPrefix(inputLine, "│ : ")
+			content = strings.TrimSuffix(content, " │")
+
+			assert.Equal(t, expected, content)
+		}
+		execute("abc", "abc ")
+		execute("0123456789", "6789")
+		execute("✅1✅2", "1✅2")
+		execute("✅1✅2✅", "2✅ ")
+	})
+
+	t.Run("Result Message", func(t *testing.T) {
+		m := GenerateModel(spfPromptChar, shellPromptChar, true, 10, 50)
+		m.setShellMode(true)
+		m.HandleShellCommandResults(0, "")
+		res := ansi.Strip(m.Render())
+		exp := "" +
+			"╭─┤ " + icon.Terminal + " Superfile Prompt(Shell Mode) ├─────────────╮\n" +
+			// 000123--------4------------567890123456789012345678901234567890123456789
+			"│ :                                              │\n" +
+			// 0001234567890123456789012345678901234567890123456789
+			"├────────────────────────────────────────────────┤\n" +
+			"│ '>' - Get into SPF Prompt mode                 │\n" +
+			"├────────────────────────────────────────────────┤\n" +
+			"│ Success : Command exited with status 0         │\n" +
+			"╰────────────────────────────────────────────────╯"
+		assert.Equal(t, exp, res)
+		m.HandleShellCommandResults(1, "")
+		res = ansi.Strip(m.Render())
+		exp = "" +
+			"╭─┤ " + icon.Terminal + " Superfile Prompt(Shell Mode) ├─────────────╮\n" +
+			// 000123--------4------------567890123456789012345678901234567890123456789
+			"│ :                                              │\n" +
+			// 0001234567890123456789012345678901234567890123456789
+			"├────────────────────────────────────────────────┤\n" +
+			"│ '>' - Get into SPF Prompt mode                 │\n" +
+			"├────────────────────────────────────────────────┤\n" +
+			"│ Error : Command exited with status 1           │\n" +
+			"╰────────────────────────────────────────────────╯"
+		assert.Equal(t, exp, res)
+	})
+	shellModeSuggestion := "':' - Get into Shell mode"
+	var openCmdSuggestion string
+	var splitCmdSuggestion string
+	var cdCmdSuggestion string
+	for _, cmd := range defaultCommandSlice() {
+		curSuggestion := "'" + cmd.usage + "' - " + cmd.description
+
+		switch cmd.command {
+		case OpenCommand:
+			openCmdSuggestion = curSuggestion
+		case SplitCommand:
+			splitCmdSuggestion = curSuggestion
+		case CdCommand:
+			cdCmdSuggestion = curSuggestion
+		default:
+			assert.Fail(t, "Unknow command")
+		}
+	}
+
+	testdataSuggestions := []struct {
+		name                string
+		textInput           string
+		expectedSuggestions []string
+	}{
+		{
+			name:      "No Input",
+			textInput: "",
+			expectedSuggestions: []string{
+				shellModeSuggestion,
+				openCmdSuggestion,
+				splitCmdSuggestion,
+				cdCmdSuggestion,
+			},
+		},
+		{
+			name:      "Command without args",
+			textInput: "cd",
+			expectedSuggestions: []string{
+				cdCmdSuggestion,
+			},
+		},
+		{
+			name:      "Incomplete Command",
+			textInput: "c",
+			expectedSuggestions: []string{
+				cdCmdSuggestion,
+			},
+		},
+		{
+			name:      "Command with args",
+			textInput: "open /abc",
+			expectedSuggestions: []string{
+				openCmdSuggestion,
+			},
+		},
+		{
+			name:      "Command with extra args",
+			textInput: "open /abc /abc",
+			expectedSuggestions: []string{
+				openCmdSuggestion,
+			},
+		},
+		{
+			name:                "Invalid command",
+			textInput:           "non_existent_command",
+			expectedSuggestions: []string{},
+		},
+	}
+
+	for _, tt := range testdataSuggestions {
+		t.Run(tt.name, func(t *testing.T) {
+			m := DefaultModel(defaultTestMaxHeight, defaultTestWidth)
+			m.Open(false)
+			m.textInput.SetValue(tt.textInput)
+			res := ansi.Strip(m.Render())
+			resLines := strings.Split(res, "\n")
+			if len(tt.expectedSuggestions) == 0 {
+				require.Len(t, resLines, 3)
+				return
+			}
+
+			require.Len(t, resLines, 4+len(tt.expectedSuggestions))
+			suggestionLines := resLines[3 : len(resLines)-1]
+			require.Len(t, suggestionLines, len(tt.expectedSuggestions))
+
+			for i := range tt.expectedSuggestions {
+				exp := tt.expectedSuggestions[i]
+				actualLine := suggestionLines[i]
+				actualLine = strings.TrimPrefix(actualLine, "│ ")
+				actualLine = strings.TrimSuffix(actualLine, "│")
+				actualLine = strings.TrimSpace(actualLine)
+				assert.Equal(t, exp, actualLine)
+			}
+		})
+	}
 }
