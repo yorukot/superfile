@@ -236,7 +236,11 @@ func WriteThemeFiles(content embed.FS) error {
 // Used only in unit tests
 // Populate config variables based on given file
 func PopulateGlobalConfigs() error {
-	_, filename, _, _ := runtime.Caller(0)
+	_, filename, _, ok := runtime.Caller(0)
+	if !ok {
+		return errors.New("failed to determine source file location")
+	}
+
 	// This is src/internal/common/load_config.go
 	// we want src/superfile_config
 	spfConfigDir := filepath.Join(filepath.Dir(filepath.Dir(filepath.Dir(filename))),
