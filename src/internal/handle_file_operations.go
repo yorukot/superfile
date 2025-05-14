@@ -527,81 +527,43 @@ func (m *model) extractFile() {
 	}
 }
 
-// Compress file or directory
 func (m *model) compressFile() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 
 	if len(panel.element) == 0 {
 		return
 	}
-	//var fileName string
 
 	if len(panel.selected) == 0 {
 		fileName := filepath.Base(panel.element[panel.cursor].location)
 		zipName := strings.TrimSuffix(fileName, filepath.Ext(fileName)) + ".zip"
 		zipName, err := renameIfDuplicate(zipName)
-
 		if err != nil {
 			slog.Error("Error in compressing files during rename duplicate", "error", err)
 			return
 		}
 
-		err = zipSource(panel.element[panel.cursor].location, filepath.Join(filepath.Dir(panel.element[panel.cursor].location), zipName))
-		if err != nil {
+		src := panel.element[panel.cursor].location
+		dst := filepath.Join(filepath.Dir(src), zipName)
+		if err := zipSources([]string{src}, dst); err != nil {
 			slog.Error("Error in zipping files", "error", err)
-			// Although return is not needed here at the moment. This clarifies the intent of
-			// not continuing after the error even if any further code is added in this function later
 			return
 		}
+
 	} else {
-		tempDir, err := os.MkdirTemp("", "temp-dir")
-		if err != nil {
-			slog.Error("Error in creating temp dir", "error", err)
-			return
-		}
-		defer os.RemoveAll(tempDir)
-
-		if len(panel.selected) == 0 {
-			slog.Error("No elements selected")
-			return
-		}
-
-		for _, elem := range panel.selected {
-			baseName := filepath.Base(elem)
-			destPath := filepath.Join(tempDir, baseName)
-
-			fileInfo, err := os.Stat(elem)
-			if err != nil {
-				slog.Error("Error getting file info", "element", elem, "error", err)
-				continue
-			}
-
-			if fileInfo.IsDir() {
-				err = copyDir(elem, destPath, fileInfo)
-			} else {
-				err = copyFile(elem, destPath, fileInfo)
-			}
-
-			if err != nil {
-				slog.Error("Error copying element", "element", elem, "error", err)
-				continue
-			}
-		}
-
-		firstSelectedName := filepath.Base(panel.selected[0])
-		zipName := strings.TrimSuffix(firstSelectedName, filepath.Ext(firstSelectedName)) + ".zip"
-
-		zipName, err = renameIfDuplicate(zipName)
+		first := panel.selected[0]
+		base := filepath.Base(first)
+		zipName := strings.TrimSuffix(base, filepath.Ext(base)) + ".zip"
+		zipName, err := renameIfDuplicate(zipName)
 		if err != nil {
 			slog.Error("Error in compressing files during rename duplicate", "error", err)
 			return
 		}
 
 		currentDir := filepath.Dir(panel.element[panel.cursor].location)
-		zipPath := filepath.Join(currentDir, zipName)
+		dst := filepath.Join(currentDir, zipName)
 
-		err = zipSource(tempDir, zipPath)
-		if err != nil {
+		if err := zipSources(panel.selected, dst); err != nil {
 			slog.Error("Error in zipping files", "error", err)
 			return
 		}
