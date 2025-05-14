@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -36,15 +35,7 @@ func cleanupTestDir() {
 }
 
 func TestMain(m *testing.M) {
-	_, filename, _, _ := runtime.Caller(0)
-	spfConfigDir := filepath.Join(filepath.Dir(filepath.Dir(filename)),
-		"superfile_config")
-
-	err := common.PopulateGlobalConfigs(
-		filepath.Join(spfConfigDir, "config.toml"),
-		filepath.Join(spfConfigDir, "hotkeys.toml"),
-		filepath.Join(spfConfigDir, "theme", "monokai.toml"))
-
+	err := common.PopulateGlobalConfigs()
 	if err != nil {
 		fmt.Printf("error while populating config, err : %v", err)
 		os.Exit(1)
