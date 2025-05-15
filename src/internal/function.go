@@ -242,6 +242,17 @@ func removeElementByValue(slice []string, value string) []string {
 	return newSlice
 }
 
+func isValidFileName(name string) bool {
+	switch {
+	case name == ".", name == ".":
+		return false
+	case strings.HasSuffix(name, "/."), strings.HasSuffix(name, "/.."):
+		return false
+	default:
+		return true
+	}
+}
+
 func renameIfDuplicate(destination string) (string, error) {
 	info, err := os.Stat(destination)
 	if os.IsNotExist(err) {
