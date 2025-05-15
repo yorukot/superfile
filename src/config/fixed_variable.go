@@ -56,6 +56,7 @@ var (
 var (
 	ConfigFile  = filepath.Join(SuperFileMainDir, "config.toml")
 	HotkeysFile = filepath.Join(SuperFileMainDir, "hotkeys.toml")
+	ChooserFile = ""
 
 	// Other state variables
 	FixHotkeys    = false
@@ -68,6 +69,10 @@ var (
 
 func SetLastDir(path string) {
 	LastDir = path
+}
+
+func SetChooserFile(path string) {
+	ChooserFile = path
 }
 
 func UpdateVarFromCliArgs(c *cli.Context) {
@@ -90,6 +95,8 @@ func UpdateVarFromCliArgs(c *cli.Context) {
 		}
 		HotkeysFile = hotkeyFileArg
 	}
+
+	SetChooserFile(c.String("chooser-file"))
 
 	FixHotkeys = c.Bool("fix-hotkeys")
 	FixConfigFile = c.Bool("fix-config-file")

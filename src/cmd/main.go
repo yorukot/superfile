@@ -41,13 +41,24 @@ func Run(content embed.FS) {
 				Name:    "path-list",
 				Aliases: []string{"pl"},
 				Usage:   "Print the path to the configuration and directory",
-				Action: func(_ *cli.Context) error {
+				Action: func(c *cli.Context) error {
+					if c.Bool("lastdir-file") {
+						fmt.Println(variable.LastDirFile)
+						return nil
+					}
 					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#66b2ff")).Render("[Configuration file path]"), variable.ConfigFile)
 					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#ffcc66")).Render("[Hotkeys file path]"), variable.HotkeysFile)
 					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#66ff66")).Render("[Log file path]"), variable.LogFile)
 					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#ff9999")).Render("[Configuration directory path]"), variable.SuperFileMainDir)
 					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#ff66ff")).Render("[Data directory path]"), variable.SuperFileDataDir)
 					return nil
+				},
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:  "lastdir-file",
+						Usage: "Print path to lastdir file (Where last dir is written when cd_on_quit config is true)",
+						Value: false,
+					},
 				},
 			},
 		},
@@ -77,9 +88,16 @@ func Run(content embed.FS) {
 				Value:   "", // Default to the blank string indicating non-usage of flag
 			},
 			&cli.StringFlag{
-				Name:  "hotkey-file",
-				Usage: "Specify the path to a different hotkey file",
-				Value: "", // Default to the blank string indicating non-usage of flag
+				Name:    "hotkey-file",
+				Aliases: []string{"hf"},
+				Usage:   "Specify the path to a different hotkey file",
+				Value:   "", // Default to the blank string indicating non-usage of flag
+			},
+			&cli.StringFlag{
+				Name:    "chooser-file",
+				Aliases: []string{"cf"},
+				Usage:   "On trying to preview any file, superfile will write to its path to this file, and exit",
+				Value:   "", // Default to the blank string indicating non-usage of flag
 			},
 		},
 		Action: func(c *cli.Context) error {

@@ -87,9 +87,17 @@ func (m *model) enterPanel() {
 
 			if targetInfo.IsDir() {
 				m.fileModel.filePanels[m.filePanelFocusIndex].location = targetPath
+				return
 			}
+		}
 
-			return
+		if variable.ChooserFile != "" {
+			chooserErr := m.chooserFileWriteAndQuit(panel.element[panel.cursor].location)
+			if chooserErr == nil {
+				return
+			}
+			// Continue with preview if file is not writable
+			slog.Error("Error while writing to chooser file, continuing with file open", "error", chooserErr)
 		}
 
 		openCommand := "xdg-open"
