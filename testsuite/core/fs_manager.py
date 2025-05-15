@@ -18,6 +18,12 @@ class TestFSManager:
     
     def check_exists(self, relative_path : Path) -> bool:
         return self.abspath(relative_path).exists()
+    
+    def read_file(self, relative_path: Path) -> str:
+        content = ""
+        with open(self.temp_dir / relative_path, 'r') as f:
+            content = f.read()
+        return content
 
     def makedirs(self, relative_path : Path) -> None:
         # Overloaded '/' operator

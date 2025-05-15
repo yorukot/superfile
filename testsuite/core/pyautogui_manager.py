@@ -15,8 +15,13 @@ class PyAutoGuiSPFManager(BaseSPFManager):
         self.spf_process = None
 
 
-    def start_spf(self, start_dir : str = None) -> None:
-        self.spf_process = subprocess.Popen([self.spf_path, start_dir],
+    def start_spf(self, start_dir : str = None, args : list[str] = None) -> None:
+        spf_args = [self.spf_path]
+        if args :
+            spf_args += args
+        spf_args.append(start_dir)
+
+        self.spf_process = subprocess.Popen(spf_args,
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         time.sleep(PyAutoGuiSPFManager.SPF_START_DELAY)
 

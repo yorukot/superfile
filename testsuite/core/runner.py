@@ -18,6 +18,7 @@ if platform.system() == "Windows" :
 else:
     from core.tmux_manager import TmuxSPFManager
 
+
 logger = logging.getLogger()
 
 def get_testcases(test_env : Environment, only_run_tests : List[str] = None) -> List[BaseTest]:
@@ -55,6 +56,7 @@ def run_tests(spf_path : Path, stop_on_fail : bool = True, only_run_tests : List
         spf_manager = PyAutoGuiSPFManager(str(spf_path))
     else:
         spf_manager = TmuxSPFManager(str(spf_path))
+
         
     fs_manager = TestFSManager()
 
