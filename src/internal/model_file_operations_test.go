@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -44,8 +43,6 @@ func TestCopy(t *testing.T) {
 		// Should not have to do that
 		TeaUpdateWithErrCheck(t, &m, nil)
 
-		fmt.Println(m.fileModel.filePanels[m.filePanelFocusIndex].location)
-
 		assert.Equal(t, "file1.txt",
 			m.fileModel.filePanels[m.filePanelFocusIndex].element[0].name)
 
@@ -57,7 +54,6 @@ func TestCopy(t *testing.T) {
 
 		// move to dir2
 		m.updateCurrentFilePanelDir("../dir2")
-		fmt.Println(m.fileModel.filePanels[m.filePanelFocusIndex].location)
 		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
 
 		// Actual paste may take time, since its an os operations

@@ -21,8 +21,13 @@ class TestFSManager:
     
     def read_file(self, relative_path: Path) -> str:
         content = ""
-        with open(self.temp_dir / relative_path, 'r') as f:
-            content = f.read()
+        try:
+            with open(self.temp_dir / relative_path, 'r', encoding="utf-8") as f:
+                content = f.read()
+        except FileNotFoundError:
+            self.logger.error("File not found: %s", relative_path)
+        except PermissionError:
+            self.logger.error("Permission denied when reading file: %s", relative_path)
         return content
 
     def makedirs(self, relative_path : Path) -> None:

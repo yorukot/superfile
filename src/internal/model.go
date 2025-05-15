@@ -60,6 +60,9 @@ func (m model) Init() tea.Cmd {
 // Update function for bubble tea to provide internal communication to the
 // application
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	// Todo : We could check for m.modelQuitState and skip doing anything
+	// If its quitDone. But if we are at this state, its already bad, so we need
+	// to first figure out if its possible in testing, and fix it.
 	slog.Debug("model.Update() called")
 	var cmd tea.Cmd
 

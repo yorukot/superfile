@@ -29,9 +29,6 @@ func GenerateModel(spfPromptHotkey string, shellPromptHotkey string, closeOnSucc
 		shellPromptHotkey: shellPromptHotkey,
 		actionSuccess:     true,
 		closeOnSuccess:    closeOnSuccess,
-
-		maxHeight: maxHeight,
-		width:     width,
 	}
 	m.SetMaxHeight(maxHeight)
 	m.SetWidth(width)

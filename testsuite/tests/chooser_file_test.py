@@ -4,7 +4,6 @@ import time
 from core.base_test import GenericTestImpl
 from core.environment import Environment
 import core.test_constants as tconst
-import core.keys as keys
 
 TESTROOT = Path("chooser_file_ops")
 DIR1 = TESTROOT / "dir1"

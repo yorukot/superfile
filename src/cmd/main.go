@@ -96,7 +96,7 @@ func Run(content embed.FS) {
 			&cli.StringFlag{
 				Name:    "chooser-file",
 				Aliases: []string{"cf"},
-				Usage:   "On trying to preview any file, superfile will write to its path to this file, and exit",
+				Usage:   "On trying to open any file, superfile will write to its path to this file, and exit",
 				Value:   "", // Default to the blank string indicating non-usage of flag
 			},
 		},

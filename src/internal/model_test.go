@@ -144,7 +144,7 @@ func TestChooserFile(t *testing.T) {
 	//     2a - file preview
 	//     2b - directory preview
 	// 3 - No quit - invalid chooser file
-	curTestDir := filepath.Join(testDir, "TestBasic")
+	curTestDir := filepath.Join(testDir, "TestChooserFile")
 	dir1 := filepath.Join(curTestDir, "dir1")
 	dir2 := filepath.Join(curTestDir, "dir2")
 	file1 := filepath.Join(dir1, "file1.txt")
@@ -178,7 +178,7 @@ func TestChooserFile(t *testing.T) {
 			hotkey:          common.Hotkeys.OpenCurrentDirectoryWithEditor[0],
 			chooserFile:     testChooserFile,
 			expectedQuit:    true,
-			expectedContent: file1,
+			expectedContent: dir1,
 		},
 		{
 			name:            "Open with file editor with Blank chooser file",
@@ -205,8 +205,7 @@ func TestChooserFile(t *testing.T) {
 				require.NoError(t, err)
 			}
 			variable.SetChooserFile(tt.chooserFile)
-			cmd := TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(
-				common.Hotkeys.OpenFileWithEditor[0]))
+			cmd := TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(tt.hotkey))
 
 			if tt.expectedQuit {
 				assert.Equal(t, quitDone, m.modelQuitState)
