@@ -174,7 +174,7 @@ func TestChooserFile(t *testing.T) {
 			expectedContent: file1,
 		},
 		{
-			name:            "Open with direcotory editor valid chooser file",
+			name:            "Open with directory editor valid chooser file",
 			hotkey:          common.Hotkeys.OpenCurrentDirectoryWithEditor[0],
 			chooserFile:     testChooserFile,
 			expectedQuit:    true,

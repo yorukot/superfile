@@ -22,7 +22,7 @@ class TestFSManager:
     def read_file(self, relative_path: Path) -> str:
         content = ""
         try:
-            with open(self.temp_dir / relative_path, 'r', encoding="utf-8") as f:
+            with open(self.abspath(relative_path), 'r', encoding="utf-8") as f:
                 content = f.read()
         except FileNotFoundError:
             self.logger.error("File not found: %s", relative_path)
