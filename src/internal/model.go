@@ -60,6 +60,9 @@ func (m model) Init() tea.Cmd {
 // Update function for bubble tea to provide internal communication to the
 // application
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	// Todo : We could check for m.modelQuitState and skip doing anything
+	// If its quitDone. But if we are at this state, its already bad, so we need
+	// to first figure out if its possible in testing, and fix it.
 	slog.Debug("model.Update() called")
 	var cmd tea.Cmd
 
@@ -78,7 +81,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			slog.Debug("Mouse event of type that is not handled", "msg", msgStr)
 		}
 	case tea.KeyMsg:
-		cmd = m.handleKeyInput(msg, cmd)
+		cmd = tea.Batch(cmd, m.handleKeyInput(msg))
 	default:
 		slog.Debug("Message of type that is not handled", "type", reflect.TypeOf(msg))
 	}
@@ -201,7 +204,7 @@ func (m *model) setPromptModelSize() {
 
 // Identify the current state of the application m and properly handle the
 // msg keybind pressed
-func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
+func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 	slog.Debug("model.handleKeyInput", "msg", msg, "typestr", msg.Type.String(),
 		"runes", msg.Runes, "type", int(msg.Type), "paste", msg.Paste,
 		"alt", msg.Alt)
@@ -218,11 +221,12 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 		"firstTextInput", m.firstTextInput,
 		"focusPanel", m.focusPanel,
 	)
-
 	if m.firstUse {
 		m.firstUse = false
-		return cmd
+		return nil
 	}
+	var cmd tea.Cmd
+	quitSuperfile := false
 	switch {
 	case m.typingModal.open:
 		m.typingModalOpenKey(msg.String())
@@ -230,6 +234,7 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 		// Ignore keypress. It will be handled in Update call via
 		// updateFilePanelState
 
+	// Handles all warn models except the warn model for confirming to quit
 	case m.warnModal.open:
 		m.warnModalOpenKey(msg.String())
 	// If renaming a object
@@ -249,25 +254,29 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 	case m.helpMenu.open:
 		m.helpMenuKey(msg.String())
 	// If asking to confirm quiting
-	case m.confirmToQuit:
-		quit := m.confirmToQuitSuperfile(msg.String())
-		if quit {
-			m.quitSuperfile()
-			return tea.Quit
-		}
+	case m.modelQuitState == confirmToQuit:
+		quitSuperfile = m.confirmToQuitSuperfile(msg.String())
+
+	case slices.Contains(common.Hotkeys.Quit, msg.String()):
+		m.modelQuitState = quitInitiated
+
+	default:
+		// Handles general kinds of inputs in the regular state of the application
+		cmd = m.mainKey(msg.String())
+	}
 	// If quiting input pressed, check if has any running process and displays a
 	// warn. Otherwise just quits application
-	case slices.Contains(common.Hotkeys.Quit, msg.String()):
+	if m.modelQuitState == quitInitiated {
 		if m.hasRunningProcesses() {
+			// Dont quit now, get a confirmation first.
 			m.warnModalForQuit()
 			return cmd
 		}
-
+		quitSuperfile = true
+	}
+	if quitSuperfile {
 		m.quitSuperfile()
 		return tea.Quit
-	default:
-		// Handles general kinds of inputs in the regular state of the application
-		cmd = m.mainKey(msg.String(), cmd)
 	}
 	return cmd
 }
@@ -387,7 +396,7 @@ func (m *model) hasRunningProcesses() bool {
 
 // Triggers a warn for confirm quiting
 func (m *model) warnModalForQuit() {
-	m.confirmToQuit = true
+	m.modelQuitState = confirmToQuit
 	m.warnModal.title = "Confirm to quit superfile"
 	m.warnModal.content = "You still have files being processed. Are you sure you want to exit?"
 }
@@ -484,7 +493,9 @@ func (m model) View() string {
 		return stringfunction.PlaceOverlay(overlayX, overlayY, warnModal, finalRender)
 	}
 
-	if m.confirmToQuit {
+	// This is also a render for warnmodal, but its being driven via a different flag
+	// we should also drive it via warnModal.open
+	if m.modelQuitState == confirmToQuit {
 		warnModal := m.warnModalRender()
 		overlayX := m.fullWidth/2 - common.ModalWidth/2
 		overlayY := m.fullHeight/2 - common.ModalHeight/2
@@ -578,6 +589,7 @@ func (m *model) quitSuperfile() {
 			slog.Error("Error during writing lastdir file", "error", err)
 		}
 	}
+	m.modelQuitState = quitDone
 	slog.Debug("Quitting superfile", "current dir", currentDir)
 }
 

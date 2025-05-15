@@ -50,7 +50,29 @@ func TeaUpdate(m *model, msg tea.Msg) (tea.Cmd, error) {
 	return cmd, nil
 }
 
-func TeaUpdateWithErrCheck(t *testing.T, m *model, msg tea.Msg) {
-	_, err := TeaUpdate(m, msg)
+func TeaUpdateWithErrCheck(t *testing.T, m *model, msg tea.Msg) tea.Cmd {
+	cmd, err := TeaUpdate(m, msg)
 	require.NoError(t, err)
+	return cmd
+}
+
+// Is the command tea.quit, or a batch that contains tea.quit
+func IsTeaQuit(cmd tea.Cmd) bool {
+	if cmd == nil {
+		return false
+	}
+	msg := cmd()
+	switch msg := msg.(type) {
+	case tea.QuitMsg:
+		return true
+	case tea.BatchMsg:
+		for _, curCmd := range msg {
+			if IsTeaQuit(curCmd) {
+				return true
+			}
+		}
+		return false
+	default:
+		return false
+	}
 }
