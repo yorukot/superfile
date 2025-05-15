@@ -30,6 +30,12 @@ const (
 	shellSubTimeoutInTests = 100 * time.Millisecond
 
 	defaultTestCwd = "/"
+
+	PromptMinWidth  = 10
+	PromptMinHeight = 3
+
+	defaultTestWidth     = 100
+	defaultTestMaxHeight = 100
 )
 
 func modeString(shellMode bool) string {

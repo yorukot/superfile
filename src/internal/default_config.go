@@ -10,7 +10,8 @@ import (
 )
 
 // Generate and return model containing default configurations for interface
-func defaultModelConfig(toggleDotFile bool, toggleFooter bool, firstFilePanelDirs []string) model {
+// Maybe we can replace slice of strings with var args - Should we ?
+func defaultModelConfig(toggleDotFile bool, toggleFooter bool, firstUse bool, firstFilePanelDirs []string) model {
 	return model{
 		filePanelFocusIndex: 0,
 		focusPanel:          nonePanelFocus,
@@ -33,9 +34,11 @@ func defaultModelConfig(toggleDotFile bool, toggleFooter bool, firstFilePanelDir
 			data:        getHelpMenuData(),
 			open:        false,
 		},
-		promptModal:   prompt.DefaultModel(),
-		toggleDotFile: toggleDotFile,
-		toggleFooter:  toggleFooter,
+		promptModal:    prompt.DefaultModel(prompt.PromptMinHeight, prompt.PromptMinWidth),
+		modelQuitState: notQuitting,
+		toggleDotFile:  toggleDotFile,
+		toggleFooter:   toggleFooter,
+		firstUse:       firstUse,
 	}
 }
 

@@ -24,9 +24,16 @@ class TmuxSPFManager(BaseSPFManager):
         self.spf_session : libtmux.Session = None
         self.spf_pane : libtmux.Pane = None
 
-    def start_spf(self, start_dir : str = None) -> None:
+    def start_spf(self, start_dir : str = None, args : list[str] = None) -> None:
+        spf_command = self.spf_path
+        if args:
+            spf_command += " " + " ".join(args)
+
+        self.logger.debug("windows_command : %s", spf_command)
+        
+
         self.spf_session= self.server.new_session('spf_session',
-                window_command=self.spf_path, 
+                window_command=spf_command, 
                 start_directory=start_dir)
         time.sleep(TmuxSPFManager.SPF_START_DELAY)
         self.logger.debug("spf_session initialised : %s", self.spf_session)

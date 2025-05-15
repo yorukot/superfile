@@ -13,13 +13,13 @@ import (
 	"github.com/yorukot/superfile/src/internal/common"
 )
 
-func DefaultModel() Model {
+func DefaultModel(maxHeight int, width int) Model {
 	return GenerateModel(common.Hotkeys.OpenSPFPrompt[0],
-		common.Hotkeys.OpenCommandLine[0], common.Config.ShellCloseOnSuccess)
+		common.Hotkeys.OpenCommandLine[0], common.Config.ShellCloseOnSuccess, maxHeight, width)
 }
 
-func GenerateModel(spfPromptHotkey string, shellPromptHotkey string, closeOnSuccess bool) Model {
-	return Model{
+func GenerateModel(spfPromptHotkey string, shellPromptHotkey string, closeOnSuccess bool, maxHeight int, width int) Model {
+	m := Model{
 		headline:          icon.Terminal + " " + promptHeadlineText,
 		open:              false,
 		shellMode:         true,
@@ -30,6 +30,9 @@ func GenerateModel(spfPromptHotkey string, shellPromptHotkey string, closeOnSucc
 		actionSuccess:     true,
 		closeOnSuccess:    closeOnSuccess,
 	}
+	m.SetMaxHeight(maxHeight)
+	m.SetWidth(width)
+	return m
 }
 
 func (m *Model) HandleUpdate(msg tea.Msg, cwdLocation string) (common.ModelAction, tea.Cmd) {
@@ -89,9 +92,9 @@ func (m *Model) handleNormalKeyInput(msg tea.KeyMsg) tea.Cmd {
 	var cmd tea.Cmd
 	switch {
 	case m.textInput.Value() == "" && msg.String() == m.spfPromptHotkey:
-		m.shellMode = false
+		m.setShellMode(false)
 	case m.textInput.Value() == "" && msg.String() == m.shellPromptHotkey:
-		m.shellMode = true
+		m.setShellMode(true)
 	default:
 		m.textInput, cmd = m.textInput.Update(msg)
 	}
@@ -118,19 +121,28 @@ func (m *Model) HandleSPFActionResults(success bool, msg string) {
 	m.CloseOnSuccessIfNeeded()
 }
 
-func (m *Model) Render(maxHeight int, width int) string {
-	r := ui.PromptRenderer(maxHeight, width)
+func (m *Model) Render() string {
+	r := ui.PromptRenderer(m.maxHeight, m.width)
 	r.SetBorderTitle(m.headline + modeString(m.shellMode))
-	r.AddLines(" " + shellPrompt(m.shellMode) + " " + m.textInput.View())
+	r.AddLines(" " + m.textInput.View())
 
 	if !m.shellMode {
-		r.AddSection()
+		// To make sure its added one time only per render call
+		hintSectionAdded := false
 		if m.textInput.Value() == "" {
+			if !hintSectionAdded {
+				r.AddSection()
+				hintSectionAdded = true
+			}
 			r.AddLines(" '" + m.shellPromptHotkey + "' - Get into Shell mode")
 		}
 		command := getFirstToken(m.textInput.Value())
 		for _, cmd := range m.commands {
 			if strings.HasPrefix(cmd.command, command) {
+				if !hintSectionAdded {
+					r.AddSection()
+					hintSectionAdded = true
+				}
 				r.AddLines(" '" + cmd.usage + "' - " + cmd.description)
 			}
 		}
@@ -154,18 +166,58 @@ func (m *Model) Render(maxHeight int, width int) string {
 
 func (m *Model) Open(shellMode bool) {
 	m.open = true
-	m.shellMode = shellMode
+	m.setShellMode(shellMode)
 	_ = m.textInput.Focus()
+}
+
+func (m *Model) setShellMode(shellMode bool) {
+	m.shellMode = shellMode
+	m.textInput.Prompt = shellPrompt(m.shellMode) + " "
 }
 
 func (m *Model) Close() {
 	m.open = false
-	m.shellMode = true
+	m.setShellMode(true)
 	m.textInput.SetValue("")
 }
 
 func (m *Model) IsOpen() bool {
 	return m.open
+}
+
+func (m *Model) IsShellMode() bool {
+	return m.shellMode
+}
+
+func (m *Model) LastActionSucceeded() bool {
+	return m.actionSuccess
+}
+
+func (m *Model) GetWidth() int {
+	return m.width
+}
+
+func (m *Model) GetMaxHeight() int {
+	return m.maxHeight
+}
+
+func (m *Model) SetWidth(width int) {
+	if width < PromptMinWidth {
+		slog.Warn("Prompt initialized with too less width", "width", width)
+		width = PromptMinWidth
+	}
+	m.width = width
+	// Excluding borders(2), SpacePadding(1), Prompt(2), and one extra character that is appended
+	// by textInput.View()
+	m.textInput.Width = width - 2 - 1 - 2 - 1
+}
+
+func (m *Model) SetMaxHeight(maxHeight int) {
+	if maxHeight < PromptMinHeight {
+		slog.Warn("Prompt initialized with too less maxHeight", "maxHeight", maxHeight)
+		maxHeight = PromptMinHeight
+	}
+	m.maxHeight = maxHeight
 }
 
 func (m *Model) validate() bool {

@@ -430,7 +430,7 @@ func (m *model) warnModalRender() string {
 }
 
 func (m *model) promptModalRender() string {
-	return m.promptModal.Render(m.helpMenu.height, m.helpMenu.width)
+	return m.promptModal.Render()
 }
 
 func (m *model) helpMenuRender() string {
