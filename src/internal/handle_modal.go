@@ -25,6 +25,11 @@ func (m *model) createItem() {
 		m.typingModal.open = false
 		m.typingModal.textInput.Blur()
 	}()
+
+	if isValid := isValidFileName(m.typingModal.textInput.Value()); !isValid {
+		return
+	}
+
 	path := filepath.Join(m.typingModal.location, m.typingModal.textInput.Value())
 	if !strings.HasSuffix(m.typingModal.textInput.Value(), string(filepath.Separator)) {
 		path, _ = renameIfDuplicate(path)
