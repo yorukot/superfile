@@ -57,7 +57,7 @@ func getPromptAction(shellMode bool, value string, cwdLocation string) (common.M
 
 	default:
 		return noAction, invalidCmdError{
-			uiMsg: "Invalid spf prompt command : " + promptArgs[0],
+			uiMsg: "Invalid spf command : " + promptArgs[0],
 		}
 	}
 }

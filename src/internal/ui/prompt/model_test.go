@@ -239,19 +239,19 @@ func TestModel_Render(t *testing.T) {
 		m.setShellMode(true)
 		res := ansi.Strip(m.Render())
 		exp := "" +
-			"╭─┤ " + icon.Terminal + " Superfile Prompt(Shell Mode) ├───╮\n" +
-			// 000123--------4------------56789012345678901234567890123456789
+			"╭─┤ " + icon.Terminal + " Superfile Prompt (Shell Mode) ├──╮\n" +
+			// 23--------4------------56789012345678901234567890123456789
 			"│ :                                    │\n" +
-			// 000123456789012345678901234567890123456789
+			// 23456789012345678901234567890123456789
 			"├──────────────────────────────────────┤\n" +
-			"│ '>' - Get into SPF Prompt mode       │\n" +
+			"│ '>' - Get into SPF mode              │\n" +
 			"╰──────────────────────────────────────╯"
 		assert.Equal(t, exp, res)
 		m.setShellMode(false)
 		res = ansi.Strip(m.Render())
 		exp = "" +
-			"╭─┤ " + icon.Terminal + " Superfile Prompt(Prompt Mode) ├──╮\n" +
-			// 000123--------4------------56789012345678901234567890123456789
+			"╭─┤ " + icon.Terminal + " Superfile Prompt (SPF Mode) ├────╮\n" +
+			// 23--------4------------56789012345678901234567890123456789
 			"│ >                                    │\n" +
 			"├──────────────────────────────────────┤\n" +
 			"│ ':' - Get into Shell mode            │\n" +
@@ -292,12 +292,12 @@ func TestModel_Render(t *testing.T) {
 		m.HandleShellCommandResults(0, "")
 		res := ansi.Strip(m.Render())
 		exp := "" +
-			"╭─┤ " + icon.Terminal + " Superfile Prompt(Shell Mode) ├─────────────╮\n" +
-			// 000123--------4------------567890123456789012345678901234567890123456789
+			"╭─┤ " + icon.Terminal + " Superfile Prompt (Shell Mode) ├────────────╮\n" +
+			// 23--------4------------567890123456789012345678901234567890123456789
 			"│ :                                              │\n" +
-			// 0001234567890123456789012345678901234567890123456789
+			// 234567890123456789012345678901234567890123456789
 			"├────────────────────────────────────────────────┤\n" +
-			"│ '>' - Get into SPF Prompt mode                 │\n" +
+			"│ '>' - Get into SPF mode                        │\n" +
 			"├────────────────────────────────────────────────┤\n" +
 			"│ Success : Command exited with status 0         │\n" +
 			"╰────────────────────────────────────────────────╯"
@@ -305,12 +305,12 @@ func TestModel_Render(t *testing.T) {
 		m.HandleShellCommandResults(1, "")
 		res = ansi.Strip(m.Render())
 		exp = "" +
-			"╭─┤ " + icon.Terminal + " Superfile Prompt(Shell Mode) ├─────────────╮\n" +
-			// 000123--------4------------567890123456789012345678901234567890123456789
+			"╭─┤ " + icon.Terminal + " Superfile Prompt (Shell Mode) ├────────────╮\n" +
+			// 23--------4------------567890123456789012345678901234567890123456789
 			"│ :                                              │\n" +
-			// 0001234567890123456789012345678901234567890123456789
+			// 234567890123456789012345678901234567890123456789
 			"├────────────────────────────────────────────────┤\n" +
-			"│ '>' - Get into SPF Prompt mode                 │\n" +
+			"│ '>' - Get into SPF mode                        │\n" +
 			"├────────────────────────────────────────────────┤\n" +
 			"│ Error : Command exited with status 1           │\n" +
 			"╰────────────────────────────────────────────────╯"
