@@ -123,7 +123,7 @@ func (m *Model) HandleSPFActionResults(success bool, msg string) {
 
 func (m *Model) Render() string {
 	r := ui.PromptRenderer(m.maxHeight, m.width)
-	r.SetBorderTitle(m.headline + modeString(m.shellMode))
+	r.SetBorderTitle(m.headline + " " + modeString(m.shellMode))
 	r.AddLines(" " + m.textInput.View())
 
 	if !m.shellMode {
@@ -148,7 +148,7 @@ func (m *Model) Render() string {
 		}
 	} else if m.textInput.Value() == "" {
 		r.AddSection()
-		r.AddLines(" '" + m.spfPromptHotkey + "' - Get into SPF Prompt mode")
+		r.AddLines(" '" + m.spfPromptHotkey + "' - Get into SPF mode")
 	}
 
 	if m.resultMsg != "" {

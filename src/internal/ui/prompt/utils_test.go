@@ -68,7 +68,7 @@ func TestModel_getPromptAction(t *testing.T) {
 			shellMode:      false,
 			expectecAction: common.NoAction{},
 			expectedErr:    true,
-			expectedErrMsg: "Invalid spf prompt command : abcd",
+			expectedErrMsg: "Invalid spf command : abcd",
 		},
 		{
 			name:           "Correct split command",
