@@ -527,7 +527,6 @@ func (m *model) extractFile() {
 	}
 }
 
-// Compress file or directory
 func (m *model) compressFile() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 
@@ -535,22 +534,39 @@ func (m *model) compressFile() {
 		return
 	}
 
-	fileName := filepath.Base(panel.element[panel.cursor].location)
+	if len(panel.selected) == 0 {
+		fileName := filepath.Base(panel.element[panel.cursor].location)
+		zipName := strings.TrimSuffix(fileName, filepath.Ext(fileName)) + ".zip"
+		zipName, err := renameIfDuplicate(zipName)
+		if err != nil {
+			slog.Error("Error in compressing files during rename duplicate", "error", err)
+			return
+		}
 
-	zipName := strings.TrimSuffix(fileName, filepath.Ext(fileName)) + ".zip"
-	zipName, err := renameIfDuplicate(zipName)
+		src := panel.element[panel.cursor].location
+		dst := filepath.Join(filepath.Dir(src), zipName)
+		if err := zipSources([]string{src}, dst); err != nil {
+			slog.Error("Error in zipping files", "error", err)
+			return
+		}
 
-	if err != nil {
-		slog.Error("Error in compressing files during rename duplicate", "error", err)
-		return
-	}
+	} else {
+		first := panel.selected[0]
+		base := filepath.Base(first)
+		zipName := strings.TrimSuffix(base, filepath.Ext(base)) + ".zip"
+		zipName, err := renameIfDuplicate(zipName)
+		if err != nil {
+			slog.Error("Error in compressing files during rename duplicate", "error", err)
+			return
+		}
 
-	err = zipSource(panel.element[panel.cursor].location, filepath.Join(filepath.Dir(panel.element[panel.cursor].location), zipName))
-	if err != nil {
-		slog.Error("Error in zipping files", "error", err)
-		// Although return is not needed here at the moment. This clarifies the intent of
-		// not continuing after the error even if any further code is added in this function later
-		return
+		currentDir := filepath.Dir(panel.element[panel.cursor].location)
+		dst := filepath.Join(currentDir, zipName)
+
+		if err := zipSources(panel.selected, dst); err != nil {
+			slog.Error("Error in zipping files", "error", err)
+			return
+		}
 	}
 }
 
