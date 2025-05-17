@@ -19,7 +19,7 @@ const (
 	failureMessagePrefix = "Error"
 
 	shellModeString = "(Shell Mode)"
-	spfModeString   = "(Prompt Mode)"
+	spfModeString   = "(SPF Mode)"
 
 	// Error message string
 	tokenizationError    = "Failed during tokenization"

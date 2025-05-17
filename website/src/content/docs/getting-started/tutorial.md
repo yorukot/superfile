@@ -177,3 +177,31 @@ If your directory editor does not support opening the current directory with an 
 
 (Sorry, this video has a little bit of lag)
 [demo video](https://github.com/yorukot/superfile/assets/107802416/d0770b3f-025e-40c9-ad3f-8b2adaf1c6c5)
+
+### SPF Prompt
+#### Shell Mode
+Press `:` to open the prompt in shell mode, and execute any shell command in the current directory.
+![Prompt-Shell-Mode](https://github.com/yorukot/superfile/blob/main/asset/prompt_shell_mode.png?raw=true)
+
+:::note
+You won't receive any stdout outputs.
+For now, this is meant for executing more complex file manipulations via the shell,
+rather than handling interactive outputs.
+You will be able to see the exit code of the command.
+:::
+
+#### SPF Mode
+Press `>` to open the prompt in SPF mode. 
+![Prompt-SPF-Mode](https://github.com/yorukot/superfile/blob/main/asset/prompt_spf_mode.png?raw=true)
+
+In this mode, you can execute these spf commands :
+- `split` - Open a new panel at a current file panel's path.
+- `open <PATH>` - Open a new panel at a specified path.
+- `cd <PATH>` - Change directory of current panel.
+
+In this mode, You can substitute shell environment variables via `${}`, shell commands via `$()` and prefix path with `~` to get substituted to home directory 
+For example 
+- `cd ${HOME}` or `cd ~/xyz`
+- `open $(dirname $(which bash))`
+
+Press `esc` or `ctrl`+`c` to exit Prompt.
