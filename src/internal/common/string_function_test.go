@@ -141,12 +141,14 @@ func TestMakePrintable(t *testing.T) {
 		{"Invalid Unicodes\ufffd", "Invalid Unicodes"},
 		{"Invalid Unicodes\xa0", "Invalid Unicodes"},
 		{"Ascii color sequence\x1b[38;2;230;219;116;48;2;39;40;34m\ue68f \x1b[0m", "Ascii color sequence\x1b[38;2;230;219;116;48;2;39;40;34m\ue68f \x1b[0m"},
+		{"Unicodes spaces\u202f\u205f\u2029", "Unicodes spaces   "},
+		{"IDEOGRAPHIC SPACE\u3000", "IDEOGRAPHIC SPACE "},
 	}
 	for _, tt := range inputs {
 		t.Run(fmt.Sprintf("Make %q printable", tt.input), func(t *testing.T) {
 			result := MakePrintable(tt.input)
 			if result != tt.expected {
-				t.Errorf("Expected %v, got %v", tt.expected, result)
+				t.Errorf("Expected '%v', got '%v' (input : '%v')", tt.expected, result, tt.input)
 			}
 		})
 	}
