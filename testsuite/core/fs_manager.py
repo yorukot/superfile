@@ -18,6 +18,17 @@ class TestFSManager:
     
     def check_exists(self, relative_path : Path) -> bool:
         return self.abspath(relative_path).exists()
+    
+    def read_file(self, relative_path: Path) -> str:
+        content = ""
+        try:
+            with open(self.abspath(relative_path), 'r', encoding="utf-8") as f:
+                content = f.read()
+        except FileNotFoundError:
+            self.logger.error("File not found: %s", relative_path)
+        except PermissionError:
+            self.logger.error("Permission denied when reading file: %s", relative_path)
+        return content
 
     def makedirs(self, relative_path : Path) -> None:
         # Overloaded '/' operator

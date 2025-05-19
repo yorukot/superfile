@@ -122,10 +122,14 @@ func (panel *filePanel) Render(mainPanelHeight int, filePanelWidth int, focussed
 	}
 	cursorNumberString := fmt.Sprintf("%d/%d", cursorNumber, len(panel.element))
 
-	r.SetBorderInfoItems(sortTypeString, panelModeString, cursorNumberString)
-	if r.AreInfoItemsTruncated() {
-		// Use smaller values
-		r.SetBorderInfoItems(sortTypeStringSmall, panelModeStringSmall, cursorNumberString)
+	if common.Config.ShowPanelFooterInfo {
+		r.SetBorderInfoItems(sortTypeString, panelModeString, cursorNumberString)
+		if r.AreInfoItemsTruncated() {
+			// Use smaller values
+			r.SetBorderInfoItems(sortTypeStringSmall, panelModeStringSmall, cursorNumberString)
+		}
+	} else {
+		r.SetBorderInfoItems(cursorNumberString)
 	}
 
 	if len(panel.element) == 0 {
@@ -430,7 +434,7 @@ func (m *model) warnModalRender() string {
 }
 
 func (m *model) promptModalRender() string {
-	return m.promptModal.Render(m.helpMenu.height, m.helpMenu.width)
+	return m.promptModal.Render()
 }
 
 func (m *model) helpMenuRender() string {

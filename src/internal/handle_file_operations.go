@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/internal/utils"
 
 	"github.com/yorukot/superfile/src/internal/common"
@@ -554,6 +555,16 @@ func (m *model) compressFile() {
 	}
 }
 
+func (m *model) chooserFileWriteAndQuit(path string) error {
+	// Attempt to write to the file
+	err := os.WriteFile(variable.ChooserFile, []byte(path), 0644)
+	if err != nil {
+		return err
+	}
+	m.modelQuitState = quitInitiated
+	return nil
+}
+
 // Open file with default editor
 func (m *model) openFileWithEditor() tea.Cmd {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
@@ -561,6 +572,15 @@ func (m *model) openFileWithEditor() tea.Cmd {
 	// Check if panel is empty
 	if len(panel.element) == 0 {
 		return nil
+	}
+
+	if variable.ChooserFile != "" {
+		err := m.chooserFileWriteAndQuit(panel.element[panel.cursor].location)
+		if err == nil {
+			return nil
+		}
+		// Continue with preview if file is not writable
+		slog.Error("Error while writing to chooser file, continuing with open via file editor", "error", err)
 	}
 
 	editor := common.Config.Editor
@@ -593,6 +613,15 @@ func (m *model) openFileWithEditor() tea.Cmd {
 
 // Open directory with default editor
 func (m *model) openDirectoryWithEditor() tea.Cmd {
+	if variable.ChooserFile != "" {
+		err := m.chooserFileWriteAndQuit(m.fileModel.filePanels[m.filePanelFocusIndex].location)
+		if err == nil {
+			return nil
+		}
+		// Continue with preview if file is not writable
+		slog.Error("Error while writing to chooser file, continuing with open via directory editor", "error", err)
+	}
+
 	editor := common.Config.DirEditor
 
 	if editor == "" {

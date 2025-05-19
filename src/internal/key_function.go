@@ -13,7 +13,7 @@ import (
 // mainKey handles most of key commands in the regular state of the application. For
 // keys that performs actions in multiple panels, like going up or down,
 // check the state of model m and handle properly.
-func (m *model) mainKey(msg string, cmd tea.Cmd) tea.Cmd {
+func (m *model) mainKey(msg string) tea.Cmd {
 	switch {
 	// If move up Key is pressed, check the current state and executes
 	case slices.Contains(common.Hotkeys.ListUp, msg):
@@ -128,16 +128,16 @@ func (m *model) mainKey(msg string, cmd tea.Cmd) tea.Cmd {
 		m.toggleReverseSort()
 
 	case slices.Contains(common.Hotkeys.OpenFileWithEditor, msg):
-		cmd = m.openFileWithEditor()
+		return m.openFileWithEditor()
 
 	case slices.Contains(common.Hotkeys.OpenCurrentDirectoryWithEditor, msg):
-		cmd = m.openDirectoryWithEditor()
+		return m.openDirectoryWithEditor()
 
 	default:
 		m.normalAndBrowserModeKey(msg)
 	}
 
-	return cmd
+	return nil
 }
 
 func (m *model) normalAndBrowserModeKey(msg string) {
@@ -258,8 +258,7 @@ func (m *model) warnModalOpenKey(msg string) {
 func (m *model) confirmToQuitSuperfile(msg string) bool {
 	switch {
 	case slices.Contains(common.Hotkeys.CancelTyping, msg) || slices.Contains(common.Hotkeys.Quit, msg):
-		m.cancelWarnModal()
-		m.confirmToQuit = false
+		m.modelQuitState = notQuitting
 		return false
 	case slices.Contains(common.Hotkeys.Confirm, msg):
 		return true

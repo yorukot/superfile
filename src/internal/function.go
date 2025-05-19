@@ -18,7 +18,6 @@ import (
 
 	"github.com/yorukot/superfile/src/internal/utils"
 
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/yorukot/superfile/src/internal/common"
 
 	"github.com/lithammer/shortuuid"
@@ -382,6 +381,12 @@ func (m *model) returnMetaData() {
 	panel.element[panel.cursor].metaData = m.fileMetaData.metaData
 }
 
+// Todo : Replace all usage of "m.fileModel.filePanels[m.filePanelFocusIndex]" with this
+// There are many usage
+func (m *model) getFocusedFilePanel() *filePanel {
+	return &m.fileModel.filePanels[m.filePanelFocusIndex]
+}
+
 func calculateMD5Checksum(filePath string) (string, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -461,18 +466,4 @@ func isImageFile(filename string) bool {
 
 	ext := strings.ToLower(filepath.Ext(filename))
 	return imageExtensions[ext]
-}
-
-// TeaUpdate : Utility to send update to model , majorly used in tests
-// Not using pointer receiver as this is more like a utility, than
-// a member function of model
-func TeaUpdate(m *model, msg tea.Msg) (tea.Cmd, error) {
-	resModel, cmd := m.Update(msg)
-
-	mObj, ok := resModel.(model)
-	if !ok {
-		return cmd, fmt.Errorf("unexpected model type: %T", resModel)
-	}
-	*m = mObj
-	return cmd, nil
 }

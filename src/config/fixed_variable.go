@@ -57,6 +57,10 @@ var (
 	ConfigFile  = filepath.Join(SuperFileMainDir, "config.toml")
 	HotkeysFile = filepath.Join(SuperFileMainDir, "hotkeys.toml")
 
+	// ChooserFile is the path where superfile will write the file's path, which is to be
+	// opened, before exiting
+	ChooserFile = ""
+
 	// Other state variables
 	FixHotkeys    = false
 	FixConfigFile = false
@@ -68,6 +72,10 @@ var (
 
 func SetLastDir(path string) {
 	LastDir = path
+}
+
+func SetChooserFile(path string) {
+	ChooserFile = path
 }
 
 func UpdateVarFromCliArgs(c *cli.Context) {
@@ -90,6 +98,9 @@ func UpdateVarFromCliArgs(c *cli.Context) {
 		}
 		HotkeysFile = hotkeyFileArg
 	}
+
+	// It could be non existent. We are writing to the file. If file doesn't exists, we would attempt to create it.
+	SetChooserFile(c.String("chooser-file"))
 
 	FixHotkeys = c.Bool("fix-hotkeys")
 	FixConfigFile = c.Bool("fix-config-file")

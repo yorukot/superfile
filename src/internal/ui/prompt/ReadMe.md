@@ -14,7 +14,4 @@ go test -cover
 # HTML report
 go test -coverprofile=coverage.out && go tool cover -html=coverage.out -o coverage.html
 ```
-Current coverage is 74.0%.
-
-# To-dos
-- Use bubbltea's textinput Model's .prompt field for '>' or ':' prompt
+Current coverage is 91.3%.

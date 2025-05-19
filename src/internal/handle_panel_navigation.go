@@ -24,7 +24,11 @@ func (m *model) pinnedDirectory() {
 
 // Create new file panel
 func (m *model) createNewFilePanel(location string) error {
+	// In case we have model width and height zero, maxFilePanel would be 0
+	// But we would have len() here as 1. Hence there would be discrepency here.
+	// Although this is not possible in actual usage, and can be only reproduced in tests.
 	if len(m.fileModel.filePanels) == m.fileModel.maxFilePanel {
+		// Todo : Define as a predefined error in errors.go
 		return errors.New("maximum panel count reached")
 	}
 

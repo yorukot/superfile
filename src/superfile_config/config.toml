@@ -21,6 +21,10 @@ default_open_file_preview = true
 # Whether to show image preview
 show_image_preview = true
 # 
+#
+# Whether to hide additional footer info for file panel.
+show_panel_footer_info = true
+#
 # The path of the first file panel when superfile is opened.
 default_directory = "."
 #
