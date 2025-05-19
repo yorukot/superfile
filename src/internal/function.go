@@ -242,14 +242,14 @@ func removeElementByValue(slice []string, value string) []string {
 	return newSlice
 }
 
-func isValidFileName(name string) bool {
+func checkFileNameValidity(name string) error {
 	switch {
 	case name == ".", name == "..":
-		return false
+		return fmt.Errorf("file name cannot be '.' or '..'")
 	case strings.HasSuffix(name, fmt.Sprintf("%c.", filepath.Separator)), strings.HasSuffix(name, fmt.Sprintf("%c..", filepath.Separator)):
-		return false
+		return fmt.Errorf("file name cannot end with '/.' or '/..'")
 	default:
-		return true
+		return nil
 	}
 }
 

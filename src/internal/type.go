@@ -145,9 +145,10 @@ type warnModal struct {
 }
 
 type typingModal struct {
-	location  string
-	open      bool
-	textInput textinput.Model
+	location      string
+	open          bool
+	textInput     textinput.Model
+	errorMesssage string
 }
 
 // File metadata

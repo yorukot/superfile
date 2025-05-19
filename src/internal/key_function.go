@@ -205,6 +205,7 @@ func (m *model) normalAndBrowserModeKey(msg string) {
 func (m *model) typingModalOpenKey(msg string) {
 	switch {
 	case slices.Contains(common.Hotkeys.CancelTyping, msg):
+		m.typingModal.errorMesssage = ""
 		m.cancelTypingModal()
 	case slices.Contains(common.Hotkeys.ConfirmTyping, msg):
 		m.createItem()
