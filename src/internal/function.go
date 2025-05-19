@@ -244,9 +244,9 @@ func removeElementByValue(slice []string, value string) []string {
 
 func isValidFileName(name string) bool {
 	switch {
-	case name == ".", name == ".":
+	case name == ".", name == "..":
 		return false
-	case strings.HasSuffix(name, "/."), strings.HasSuffix(name, "/.."):
+	case strings.HasSuffix(name, fmt.Sprintf("%c.", filepath.Separator)), strings.HasSuffix(name, fmt.Sprintf("%c..", filepath.Separator)):
 		return false
 	default:
 		return true
