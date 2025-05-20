@@ -129,6 +129,33 @@ func returnDirElement(location string, displayDotFile bool, sortOptions sortOpti
 			fileInfoJ, _ := dirEntries[j].Info()
 			return fileInfoI.ModTime().After(fileInfoJ.ModTime()) != reversed
 		}
+	case "Type":
+		order = func(i, j int) bool {
+			// One of them is a directory, and the other is not
+			if dirEntries[i].IsDir() != dirEntries[j].IsDir() {
+				return dirEntries[i].IsDir()
+			}
+
+			var extI, extJ string
+			if !dirEntries[i].IsDir() {
+				extI = strings.ToLower(filepath.Ext(dirEntries[i].Name()))
+			}
+			if !dirEntries[j].IsDir() {
+				extJ = strings.ToLower(filepath.Ext(dirEntries[j].Name()))
+			}
+
+			// Compare by extension/type
+			if extI != extJ {
+				return (extI < extJ) != reversed
+			}
+
+			// If same type, fall back to name
+			if common.Config.CaseSensitiveSort {
+				return (dirEntries[i].Name() < dirEntries[j].Name()) != reversed
+			}
+
+			return (strings.ToLower(dirEntries[i].Name()) < strings.ToLower(dirEntries[j].Name())) != reversed
+		}
 	}
 
 	sort.Slice(dirEntries, order)
