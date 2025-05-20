@@ -1,0 +1,67 @@
+# Gruvbox Dark Hard
+# Theme create by: https://github.com/frost-phoenix
+# Update by(sort by time):
+#
+# Thanks for all contributor!!
+
+# If you want to make border display just set it same as sidebar background color
+
+# Code syntax highlight theme (you can go to https://github.com/alecthomas/chroma/blob/master/styles to find one you like)
+code_syntax_highlight = "gruvbox"
+
+# ========= Border =========
+file_panel_border = "#FBF1C7"
+sidebar_border = "#928374"
+footer_border = "#928374"
+
+# ========= Border Active =========
+file_panel_border_active = "#98971A"
+sidebar_border_active = "#B16286"
+footer_border_active = "#D79921"
+modal_border_active = "#689D6A"
+
+# ========= Background (bg) =========
+full_screen_bg = "#1D2021"
+file_panel_bg = "#1D2021"
+sidebar_bg = "#1D2021"
+footer_bg = "#1D2021"
+modal_bg = "#1D2021"
+
+# ========= Foreground (fg) =========
+full_screen_fg = "#FBF1C7"
+file_panel_fg = "#FBF1C7"
+sidebar_fg = "#FBF1C7"
+footer_fg = "#FBF1C7"
+modal_fg = "#FBF1C7"
+
+# ========= Special Color =========
+cursor = "#689D6A"
+correct = "#98971A"
+error = "#FF6969"
+hint = "#468588"
+cancel = "#838383"
+# Gradient color can only have two color!
+gradient_color = ["#FB4934", "#B8BB26"]
+
+# ========= File Panel Special Items =========
+file_panel_top_directory_icon = "#689D6A"
+file_panel_top_path = "#458588"
+file_panel_item_selected_fg = "#D65D0E"
+file_panel_item_selected_bg = ""
+
+# ========= Sidebar Special Items =========
+sidebar_title = "#B16286"
+sidebar_item_selected_fg = "#D65D0E"
+sidebar_item_selected_bg = ""
+sidebar_divider = "#928374"
+
+# ========= Modal Special Items =========
+modal_cancel_fg = "#FB4934"
+modal_cancel_bg = ""
+
+modal_confirm_fg = "#B8BB26"
+modal_confirm_bg = ""
+
+# ========= Help Menu =========
+help_menu_hotkey = "#689D6A"
+help_menu_title = "#B16286"
