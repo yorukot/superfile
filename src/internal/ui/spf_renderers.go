@@ -52,6 +52,20 @@ func FilePanelRenderer(totalHeight int, totalWidth int, filePanelFocussed bool) 
 	return r
 }
 
+func FilePreviewPanelRenderer(totalHeight int, totalWidth int) *rendering.Renderer {
+	cfg := rendering.DefaultRendererConfig(totalHeight, totalWidth)
+	cfg.ContentFGColor = common.FilePanelFGColor
+	cfg.ContentBGColor = common.FilePanelBGColor
+	cfg.BorderRequired = false
+
+	r, err := rendering.NewRenderer(cfg)
+	if err != nil {
+		slog.Error("Error in creating renderer. Falling back to default renderer", "error", err)
+		r = &rendering.Renderer{}
+	}
+	return r
+}
+
 func PromptRenderer(totalHeight int, totalWidth int) *rendering.Renderer {
 	cfg := rendering.DefaultRendererConfig(totalHeight, totalWidth)
 	cfg.TruncateHeight = true

@@ -206,6 +206,13 @@ func MakePrintableWithEscCheck(line string, allowEsc bool) string {
 			sb.WriteRune(r)
 			continue
 		}
+		// It needs to be handled separately since considered a space,
+		// Since we are using ansi.StringWidth() for truncation, and \t is
+		// considered zero width
+		if r == '\t' {
+			sb.WriteString("    ")
+			continue
+		}
 		if r == 0x1b {
 			if allowEsc {
 				sb.WriteRune(r)
@@ -220,10 +227,9 @@ func MakePrintableWithEscCheck(line string, allowEsc bool) string {
 				r = ' '
 			}
 			sb.WriteRune(r)
-
 			continue
 		}
-		if unicode.IsGraphic(r) || r == rune('\t') || r == rune('\n') {
+		if unicode.IsGraphic(r) || r == rune('\n') {
 			sb.WriteRune(r)
 		}
 	}

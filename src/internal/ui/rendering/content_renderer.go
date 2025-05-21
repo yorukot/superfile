@@ -45,11 +45,14 @@ func (r *ContentRenderer) AddLineWithCustomTruncate(lineStr string, truncateStyl
 			slog.Error("Max lines reached", "maxLines", r.maxLines)
 			return
 		}
-		// Some characters like "\t" are considered 1 width
-		line = TruncateBasedOnStyle(line, r.maxLineWidth, truncateStyle)
+		// Sanitazation should be done before truncate. Sanitization can increase width
+		// For ex: Converting problematic unicode nbsp to spaces.
 		if r.sanitizeContent {
 			line = common.MakePrintableWithEscCheck(line, true)
 		}
+		// Some characters like "\t" are considered 1 width
+		line = TruncateBasedOnStyle(line, r.maxLineWidth, truncateStyle)
+
 		r.lines = append(r.lines, line)
 	}
 }

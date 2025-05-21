@@ -80,7 +80,6 @@ func (r *Renderer) Render() string {
 	}
 	contentStr := strings.TrimSuffix(content.String(), "\n")
 	res := r.Style().Render(contentStr)
-
 	// Post rendering validations - Maybe we can return an error instead of logging
 	maxW := 0
 	for line := range strings.Lines(res) {

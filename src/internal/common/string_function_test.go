@@ -127,7 +127,7 @@ func TestMakePrintable(t *testing.T) {
 		{"", ""},
 		{"hello", "hello"},
 		{"abcdABCD0123~!@#$%^&*()_+-={}|:\"<>?,./;'[]", "abcdABCD0123~!@#$%^&*()_+-={}|:\"<>?,./;'[]"},
-		{"Horizontal Tab and NewLine\t\t\n\n", "Horizontal Tab and NewLine\t\t\n\n"},
+		{"Horizontal Tab and NewLine\t\t\n\n", "Horizontal Tab and NewLine        \n\n"},
 		{"(NBSP)\u00a0\u00a0\u00a0\u00a0;", "(NBSP)\u00a0\u00a0\u00a0\u00a0;"},
 		{"\x0b(Vertical Tab)", "(Vertical Tab)"},
 		{"\x0d(CR)", "(CR)"},
