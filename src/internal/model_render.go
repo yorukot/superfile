@@ -23,7 +23,7 @@ import (
 
 	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/x/ansi"
+	"github.com/charmbracelet/x/exp/term/ansi"
 	"github.com/yorukot/ansichroma"
 	"github.com/yorukot/superfile/src/config/icon"
 	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
@@ -562,17 +562,18 @@ func readFileContent(filepath string, maxLineLength int, previewLine int) (strin
 	return resultBuilder.String(), scanner.Err()
 }
 
-// Todo : we really need tests for file preview. Files with tabs, ascii control characters,
-// emojies, wide unicodes characters, etc.
 func (m *model) filePreviewPanelRender() string {
-	previewLine := m.mainPanelHeight + 2
 	// Todo : This width adjustment must not be done inside render function. It should
 	// only be triggered via Update()
 	m.fileModel.filePreview.width += m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.width - ((m.fileModel.width + 2) * len(m.fileModel.filePanels)) - 2
 
+	return m.filePreviewPanelRenderWithDimensions(m.mainPanelHeight+2, m.fileModel.filePreview.width)
+}
+
+func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewWidth int) string {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	box := common.FilePreviewBox(previewLine, m.fileModel.filePreview.width)
-	r := ui.FilePreviewPanelRenderer(m.mainPanelHeight+2, m.fileModel.filePreview.width)
+	box := common.FilePreviewBox(previewHeight, previewWidth)
+	r := ui.FilePreviewPanelRenderer(previewHeight, previewWidth)
 
 	if len(panel.element) == 0 {
 		r.AddLines(common.FilePreviewNoContentText)
@@ -630,7 +631,7 @@ func (m *model) filePreviewPanelRender() string {
 			return files[i].Name() < files[j].Name()
 		})
 
-		for i := 0; i < previewLine && i < len(files); i++ {
+		for i := 0; i < previewHeight && i < len(files); i++ {
 			file := files[i]
 
 			style := common.GetElementIcon(file.Name(), file.IsDir(), common.Config.Nerdfont)
@@ -653,7 +654,7 @@ func (m *model) filePreviewPanelRender() string {
 			return box.Render("\n --- Image preview is disabled ---")
 		}
 
-		ansiRender, err := filepreview.ImagePreview(itemPath, m.fileModel.filePreview.width, previewLine, common.Theme.FilePanelBG)
+		ansiRender, err := filepreview.ImagePreview(itemPath, previewWidth, previewHeight, common.Theme.FilePanelBG)
 		if errors.Is(err, image.ErrFormat) {
 			return box.Render("\n --- " + icon.Error + " Unsupported image formats ---")
 		}
@@ -679,7 +680,7 @@ func (m *model) filePreviewPanelRender() string {
 	}
 
 	// At this point either format is not nil, or we can read the file
-	fileContent, err := readFileContent(itemPath, m.fileModel.width+20, previewLine)
+	fileContent, err := readFileContent(itemPath, previewWidth, previewHeight)
 	if err != nil {
 		slog.Error("Error open file", "error", err)
 		return box.Render("\n --- " + icon.Error + " Error open file ---")
@@ -699,7 +700,7 @@ func (m *model) filePreviewPanelRender() string {
 			if batCmd == "" {
 				return box.Render("\n --- " + icon.Error + " 'bat' is not installed or not found. ---\n --- Cannot render file preview. ---")
 			}
-			fileContent, err = getBatSyntaxHighlightedContent(itemPath, previewLine, background)
+			fileContent, err = getBatSyntaxHighlightedContent(itemPath, previewHeight, background)
 		} else {
 			fileContent, err = ansichroma.HightlightString(fileContent, format.Config().Name, common.Theme.CodeSyntaxHighlightTheme, background)
 		}

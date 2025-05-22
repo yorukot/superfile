@@ -85,10 +85,27 @@ func (r *Renderer) Render() string {
 	for line := range strings.Lines(res) {
 		maxW = max(maxW, ansi.StringWidth(line))
 	}
+
 	lineCnt := strings.Count(res, "\n") + 1
 	if maxW > r.totalWidth || lineCnt > r.totalHeight {
-		slog.Error("Rendered output data", "line count", lineCnt, "totalHeight", r.totalHeight,
+		slog.Error("Rendered output data", "lineCnt", lineCnt, "totalHeight", r.totalHeight,
 			"totalWidth", r.totalWidth, "maxW", maxW)
+		// lipgloss Render() doesn't always respects the "height" value,
+		// so res can have more height than intended. In that case, we must truncate lines here.
+		newRes := strings.Builder{}
+		curCnt := 0
+		// Dont use strings.Lines(), that wont allow us to have empty lines
+		for line := range strings.SplitSeq(res, "\n") {
+			if curCnt == r.totalHeight {
+				break
+			}
+			newRes.WriteString(ansi.Truncate(line, r.totalWidth, ""))
+			curCnt++
+			if curCnt < r.totalHeight {
+				newRes.WriteByte('\n')
+			}
+		}
+		return newRes.String()
 	}
 
 	return res
