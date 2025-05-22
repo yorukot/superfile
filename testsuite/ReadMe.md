@@ -1,4 +1,4 @@
-## Coding style rules
+gi## Coding style rules
 - Prefer using strong typing 
 - Prefer using type hinting for the first time the variable is declared, and for functions paremeters and return types
 - Use `-> None` to explicitly indicate no return value
