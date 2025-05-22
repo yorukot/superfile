@@ -33,7 +33,8 @@ These are the default hotkeys and you can [change](/configure/custom-hotkeys) th
 | Focus on the processbar panel    | `p`                        | `focus_on_process_bar`      |
 | Focus on the sidebar             | `s`                        | `focus_on_side_bar`         |
 | Focus on the metadata panel      | `m`                        | `focus_on_metadata`         |
-| Open command execution bar       | `:`                        | `open_command_line`         |
+| Open prompt in shell mode        | `:`                        | `open_command_line`         |
+| Open prompt in spf mode          | `>`                        | `open_spf_prompt`           |
 
 ## Panel movement
 
@@ -64,5 +65,5 @@ These are the default hotkeys and you can [change](/configure/custom-hotkeys) th
 | Copy current file or directory path                  | `ctrl+p`           | `copy_path`                                                                            |
 | Extract zip file                                     | `ctrl+e`           | `extract_file` (normal mode)                                                           |
 | Zip file or folder to .zip file                      | `ctrl+a`           | `compress_file` (normal mode)                                                          |
-| Open file with your default editor                   | `e`                | `oepn_file_with_editor` (normal node)                                                  |
+| Open file with your default editor                   | `e`                | `open_file_with_editor` (normal node)                                                  |
 | Open current directory with default editor           | `E` (shift+e)      | `current_directory_with_editor` (normal node)                                          |

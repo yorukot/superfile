@@ -1,13 +1,19 @@
 package internal
 
 import (
+	"errors"
+	"fmt"
 	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"strings"
 	"time"
+
+	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/utils"
 
 	"github.com/barasher/go-exiftool"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -17,36 +23,35 @@ import (
 	stringfunction "github.com/yorukot/superfile/src/pkg/string_function"
 )
 
-var LastTimeCursorMove = [2]int{int(time.Now().UnixMicro()), 0}
-var ListeningMessage = true
-
-var firstUse = false
-var hasTrash = true
-var batCmd = ""
-
-var theme ThemeType
-var Config ConfigType
-var hotkeys HotkeysType
-
-var et *exiftool.Exiftool
-
-var channel = make(chan channelMessage, 1000)
-var progressBarLastRenderTime time.Time = time.Now()
+// These represent model's state information, its not a global preperty
+var LastTimeCursorMove = [2]int{int(time.Now().UnixMicro()), 0} //nolint: gochecknoglobals // Todo : Move to model struct
+var ListeningMessage = true                                     //nolint: gochecknoglobals // Todo : Move to model struct
+var hasTrash = true                                             //nolint: gochecknoglobals // Todo : Move to model struct
+var batCmd = ""                                                 //nolint: gochecknoglobals // Todo : Move to model struct
+var et *exiftool.Exiftool                                       //nolint: gochecknoglobals // Todo : Move to model struct
+var channel = make(chan channelMessage, 1000)                   //nolint: gochecknoglobals // Todo : Move to model struct
+var progressBarLastRenderTime = time.Now()                      //nolint: gochecknoglobals // Todo : Move to model struct
 
 // Initialize and return model with default configs
-func InitialModel(dir string, firstUseCheck, hasTrashCheck bool) model {
-	toggleDotFileBool, toggleFooter, firstFilePanelDir := initialConfig(dir)
-	firstUse = firstUseCheck
+// It returns only tea.Model because when it used in main, the return value
+// is passed to tea.NewProgram() which accepts tea.Model
+// Either way type 'model' is not exported, so there is not way main package can
+// be aware of it, and use it directly
+func InitialModel(firstFilePanelDirs []string, firstUseCheck, hasTrashCheck bool) tea.Model {
+	toggleDotFile, toggleFooter := initialConfig(firstFilePanelDirs)
 	hasTrash = hasTrashCheck
 	batCmd = checkBatCmd()
-	return defaultModelConfig(toggleDotFileBool, toggleFooter, firstFilePanelDir)
+	return defaultModelConfig(toggleDotFile, toggleFooter, firstUseCheck, firstFilePanelDirs)
 }
 
 // Init function to be called by Bubble tea framework, sets windows title,
 // cursos blinking and starts message streamming channel
+// Note : What init should do, for example read file panel data, read sidebar directories, and
+// disk, is being done in at the creation of model of object. Right now creation of model object
+// and its initialization isn't well separated.
 func (m model) Init() tea.Cmd {
 	return tea.Batch(
-		tea.SetWindowTitle("SuperFile"),
+		tea.SetWindowTitle("superfile"),
 		textinput.Blink, // Assuming textinput.Blink is a valid command
 		listenForChannelMessage(channel),
 	)
@@ -55,10 +60,13 @@ func (m model) Init() tea.Cmd {
 // Update function for bubble tea to provide internal communication to the
 // application
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	// Todo : We could check for m.modelQuitState and skip doing anything
+	// If its quitDone. But if we are at this state, its already bad, so we need
+	// to first figure out if its possible in testing, and fix it.
 	slog.Debug("model.Update() called")
 	var cmd tea.Cmd
 
-	m.updateSidebarState(msg, &cmd)
+	cmd = m.sidebarModel.UpdateState(msg)
 
 	switch msg := msg.(type) {
 	case channelMessage:
@@ -73,28 +81,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			slog.Debug("Mouse event of type that is not handled", "msg", msgStr)
 		}
 	case tea.KeyMsg:
-		cmd = m.handleKeyInput(msg, cmd)
+		cmd = tea.Batch(cmd, m.handleKeyInput(msg))
 	default:
 		slog.Debug("Message of type that is not handled", "type", reflect.TypeOf(msg))
 	}
 
 	m.updateFilePanelsState(msg, &cmd)
-
-	if m.sidebarModel.searchBar.Value() != "" {
-		// Todo : All updates of sideBar must be moved to seperate struct functions
-		// we have to keep the state of sidebar consistent, and keep values of
-		// cursor, directories, renderIndex sane for each update, and it has to
-		// take care at one single place, not everywhere we use sideBar
-		m.sidebarModel.directories = getFilteredDirectories(m.sidebarModel.searchBar.Value())
-		if m.sidebarModel.isCursorInvalid() {
-			m.sidebarModel.resetCursor()
-		}
-	} else {
-		m.sidebarModel.directories = getDirectories()
-		if m.sidebarModel.isCursorInvalid() {
-			m.sidebarModel.resetCursor()
-		}
-	}
+	m.sidebarModel.UpdateDirectories()
 
 	// check if there already have listening message
 	if !ListeningMessage {
@@ -115,11 +108,14 @@ func (m *model) handleChannelMessage(msg channelMessage) {
 		m.warnModal = msg.warnModal
 	case sendMetadata:
 		m.fileMetaData.metaData = msg.metadata
-	default:
-		if !arrayContains(m.processBarModel.processList, msg.messageId) {
-			m.processBarModel.processList = append(m.processBarModel.processList, msg.messageId)
+	case sendProcess:
+		if !arrayContains(m.processBarModel.processList, msg.messageID) {
+			m.processBarModel.processList = append(m.processBarModel.processList, msg.messageID)
 		}
-		m.processBarModel.process[msg.messageId] = msg.processNewState
+		m.processBarModel.process[msg.messageID] = msg.processNewState
+	default:
+		slog.Error("Unhandled channelMessageType in handleChannelMessage()",
+			"messageType", msg.messageType)
 	}
 }
 
@@ -136,6 +132,7 @@ func (m *model) handleWindowResize(msg tea.WindowSizeMsg) {
 	m.setFilePanelsSize(msg.Width)
 	m.setHeightValues(msg.Height)
 	m.setHelpMenuSize()
+	m.setPromptModelSize()
 
 	if m.fileModel.maxFilePanel >= 10 {
 		m.fileModel.maxFilePanel = 10
@@ -144,26 +141,25 @@ func (m *model) handleWindowResize(msg tea.WindowSizeMsg) {
 
 // Set file preview panel Widht to width. Assure that
 func (m *model) setFilePreviewWidth(width int) {
-	if Config.FilePreviewWidth == 0 {
-		m.fileModel.filePreview.width = (width - Config.SidebarWidth - (4 + (len(m.fileModel.filePanels))*2)) / (len(m.fileModel.filePanels) + 1)
-	} else if Config.FilePreviewWidth > 10 || Config.FilePreviewWidth == 1 {
-		LogAndExit("Config file file_preview_width invalidation")
+	if common.Config.FilePreviewWidth == 0 {
+		m.fileModel.filePreview.width = (width - common.Config.SidebarWidth - (4 + (len(m.fileModel.filePanels))*2)) / (len(m.fileModel.filePanels) + 1)
 	} else {
-		m.fileModel.filePreview.width = (width - Config.SidebarWidth) / Config.FilePreviewWidth
+		m.fileModel.filePreview.width = (width - common.Config.SidebarWidth) / common.Config.FilePreviewWidth
 	}
 }
 
 // Proper set panels size. Assure that panels do not overlap
 func (m *model) setFilePanelsSize(width int) {
 	// set each file panel size and max file panel amount
-	m.fileModel.width = (width - Config.SidebarWidth - m.fileModel.filePreview.width - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
-	m.fileModel.maxFilePanel = (width - Config.SidebarWidth - m.fileModel.filePreview.width) / 20
+	m.fileModel.width = (width - common.Config.SidebarWidth - m.fileModel.filePreview.width - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
+	m.fileModel.maxFilePanel = (width - common.Config.SidebarWidth - m.fileModel.filePreview.width) / 20
 	for i := range m.fileModel.filePanels {
 		m.fileModel.filePanels[i].searchBar.Width = m.fileModel.width - 4
 	}
 }
 
 func (m *model) setHeightValues(height int) {
+	//nolint: gocritic // This is to be separated out to a function, and made better later. No need to refactor here
 	if !m.toggleFooter {
 		m.footerHeight = 0
 	} else if height < 30 {
@@ -180,9 +176,8 @@ func (m *model) setHeightValues(height int) {
 	// Todo : Make it grow even more for bigger screen sizes.
 	// Todo : Calculate the value , instead of manually hard coding it.
 
-	// Total Height = mainPanelHeight + 2 (border) + footerHeight (including borders and command line)
-	m.mainPanelHeight = height -
-		actualfooterHeight(m.footerHeight, m.commandLine.input.Focused()) - 2
+	// Main panel height = Total terminal height- 2(file panel border) - footer height
+	m.mainPanelHeight = height - 2 - utils.FullFooterHeight(m.footerHeight, m.toggleFooter)
 }
 
 // Set help menu size
@@ -199,10 +194,17 @@ func (m *model) setHelpMenuSize() {
 	}
 }
 
+func (m *model) setPromptModelSize() {
+	// Scale prompt model's maxHeight - 33% of total height
+	m.promptModal.SetMaxHeight(m.fullHeight / 3)
+
+	// Scale prompt model's maxHeight - 50% of total height
+	m.promptModal.SetWidth(m.fullWidth / 2)
+}
+
 // Identify the current state of the application m and properly handle the
 // msg keybind pressed
-func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
-
+func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 	slog.Debug("model.handleKeyInput", "msg", msg, "typestr", msg.Type.String(),
 		"runes", msg.Runes, "type", int(msg.Type), "paste", msg.Paste,
 		"alt", msg.Alt)
@@ -212,62 +214,69 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 		"filePanel.panelMode", m.fileModel.filePanels[m.filePanelFocusIndex].panelMode,
 		"typingModal.open", m.typingModal.open,
 		"warnModal.open", m.warnModal.open,
+		"promptModal.open", m.promptModal.IsOpen(),
 		"fileModel.renaming", m.fileModel.renaming,
 		"searchBar.focussed", m.fileModel.filePanels[m.filePanelFocusIndex].searchBar.Focused(),
 		"helpMenu.open", m.helpMenu.open,
 		"firstTextInput", m.firstTextInput,
 		"focusPanel", m.focusPanel,
 	)
-
-	if firstUse {
-		firstUse = false
-		return cmd
+	if m.firstUse {
+		m.firstUse = false
+		return nil
 	}
-
-	if m.typingModal.open {
+	var cmd tea.Cmd
+	quitSuperfile := false
+	switch {
+	case m.typingModal.open:
 		m.typingModalOpenKey(msg.String())
-	} else if m.warnModal.open {
+	case m.promptModal.IsOpen():
+		// Ignore keypress. It will be handled in Update call via
+		// updateFilePanelState
+
+	// Handles all warn models except the warn model for confirming to quit
+	case m.warnModal.open:
 		m.warnModalOpenKey(msg.String())
-		// If renaming a object
-	} else if m.fileModel.renaming {
+	// If renaming a object
+	case m.fileModel.renaming:
 		m.renamingKey(msg.String())
-	} else if m.sidebarModel.renaming {
+	case m.sidebarModel.IsRenaming():
 		m.sidebarRenamingKey(msg.String())
-		// If search bar is open
-	} else if m.fileModel.filePanels[m.filePanelFocusIndex].searchBar.Focused() {
+	// If search bar is open
+	case m.fileModel.filePanels[m.filePanelFocusIndex].searchBar.Focused():
 		m.focusOnSearchbarKey(msg.String())
-		// If sort options menu is open
-	} else if m.sidebarModel.searchBar.Focused() {
-		m.sidebarSearchBarKey(msg.String())
-		// If sort options menu is open
-	} else if m.fileModel.filePanels[m.filePanelFocusIndex].sortOptions.open {
+	// If sort options menu is open
+	case m.sidebarModel.SearchBarFocused():
+		m.sidebarModel.HandleSearchBarKey(msg.String())
+	case m.fileModel.filePanels[m.filePanelFocusIndex].sortOptions.open:
 		m.sortOptionsKey(msg.String())
-		// If help menu is open
-	} else if m.helpMenu.open {
+	// If help menu is open
+	case m.helpMenu.open:
 		m.helpMenuKey(msg.String())
-		// If command line input is send
-	} else if m.commandLine.input.Focused() {
-		m.commandLineKey(msg.String())
-		// If asking to confirm quiting
-	} else if m.confirmToQuit {
-		quit := m.confirmToQuitSuperfile(msg.String())
-		if quit {
-			m.quitSuperfile()
-			return tea.Quit
-		}
-		// If quiting input pressed, check if has any running process and displays a
-		// warn. Otherwise just quits application
-	} else if msg.String() == containsKey(msg.String(), hotkeys.Quit) {
+	// If asking to confirm quiting
+	case m.modelQuitState == confirmToQuit:
+		quitSuperfile = m.confirmToQuitSuperfile(msg.String())
+
+	case slices.Contains(common.Hotkeys.Quit, msg.String()):
+		m.modelQuitState = quitInitiated
+
+	default:
+		// Handles general kinds of inputs in the regular state of the application
+		cmd = m.mainKey(msg.String())
+	}
+	// If quiting input pressed, check if has any running process and displays a
+	// warn. Otherwise just quits application
+	if m.modelQuitState == quitInitiated {
 		if m.hasRunningProcesses() {
+			// Dont quit now, get a confirmation first.
 			m.warnModalForQuit()
 			return cmd
 		}
-
+		quitSuperfile = true
+	}
+	if quitSuperfile {
 		m.quitSuperfile()
 		return tea.Quit
-	} else {
-		// Handles general kinds of inputs in the regular state of the application
-		cmd = m.mainKey(msg.String(), cmd)
 	}
 	return cmd
 }
@@ -276,35 +285,103 @@ func (m *model) handleKeyInput(msg tea.KeyMsg, cmd tea.Cmd) tea.Cmd {
 // in search, update typingb bar, etc
 func (m *model) updateFilePanelsState(msg tea.Msg, cmd *tea.Cmd) {
 	focusPanel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-	if m.firstTextInput {
+	switch {
+	case m.firstTextInput:
 		m.firstTextInput = false
-	} else if m.fileModel.renaming {
+	case m.fileModel.renaming:
 		focusPanel.rename, *cmd = focusPanel.rename.Update(msg)
-	} else if focusPanel.searchBar.Focused() {
+	case focusPanel.searchBar.Focused():
 		focusPanel.searchBar, *cmd = focusPanel.searchBar.Update(msg)
-	} else if m.commandLine.input.Focused() {
-		m.commandLine.input, *cmd = m.commandLine.input.Update(msg)
-	} else if m.typingModal.open {
+	case m.typingModal.open:
 		m.typingModal.textInput, *cmd = m.typingModal.textInput.Update(msg)
+	case m.promptModal.IsOpen():
+		// *cmd is a non-name, and cannot be used on left of :=
+		var action common.ModelAction
+		// Taking returned cmd is necessary for blinking
+		// Todo : Separate this to a utility
+		cwdLocation := m.fileModel.filePanels[m.filePanelFocusIndex].location
+		action, *cmd = m.promptModal.HandleUpdate(msg, cwdLocation)
+		m.applyPromptModalAction(action)
 	}
 
+	// Todo : This is like duct taping a bigger problem
+	// The code should never reach this state.
 	if focusPanel.cursor < 0 {
 		focusPanel.cursor = 0
 	}
 }
 
-// Update the sidebar state. Change name of the renaming pinned directory.
-func (m *model) updateSidebarState(msg tea.Msg, cmd *tea.Cmd) {
-	sidebar := &m.sidebarModel
-	if sidebar.renaming {
-		sidebar.rename, *cmd = sidebar.rename.Update(msg)
-	} else if sidebar.searchBar.Focused() {
-		sidebar.searchBar, *cmd = sidebar.searchBar.Update(msg)
+// Apply the Action and notify the promptModal
+func (m *model) applyPromptModalAction(action common.ModelAction) {
+	if _, ok := action.(common.NoAction); !ok {
+		slog.Debug("applyPromptModalAction", "action", action)
+	}
+	var actionErr error
+	var successMsg string
+	switch action := action.(type) {
+	case common.NoAction:
+		return
+	case common.ShellCommandAction:
+		// Update to promptModal is handled here
+		m.applyShellCommandAction(action.Command)
+		return
+	case common.SplitPanelAction:
+		actionErr = m.splitPanel()
+		successMsg = "Panel successfully split"
+	case common.CDCurrentPanelAction:
+		actionErr = m.updateCurrentFilePanelDir(action.Location)
+		successMsg = "Panel directory changed"
+	case common.OpenPanelAction:
+		actionErr = m.createNewFilePanelRelativeToCurrent(action.Location)
+		successMsg = "New panel opened"
+	default:
+		actionErr = errors.New("unhandled action type")
 	}
 
-	if sidebar.cursor < 0 {
-		sidebar.cursor = 0
+	if actionErr != nil {
+		m.promptModal.HandleSPFActionResults(false, actionErr.Error())
+	} else {
+		m.promptModal.HandleSPFActionResults(true, successMsg)
 	}
+}
+
+// Todo : Move them around to appropriate places
+func (m *model) applyShellCommandAction(shellCommand string) {
+	focusPanelDir := m.fileModel.filePanels[m.filePanelFocusIndex].location
+
+	retCode, output, err := utils.ExecuteCommandInShell(common.DefaultCommandTimeout, focusPanelDir, shellCommand)
+
+	m.promptModal.HandleShellCommandResults(retCode, output)
+
+	if err != nil {
+		slog.Error("Command execution failed", "retCode", retCode,
+			"error", err, "output", output)
+		return
+	}
+}
+
+func (m *model) splitPanel() error {
+	return m.createNewFilePanel(m.fileModel.filePanels[m.filePanelFocusIndex].location)
+}
+
+func (m *model) createNewFilePanelRelativeToCurrent(path string) error {
+	currentDir := m.fileModel.filePanels[m.filePanelFocusIndex].location
+	return m.createNewFilePanel(utils.ResolveAbsPath(currentDir, path))
+}
+
+// simulates a 'cd' action
+func (m *model) updateCurrentFilePanelDir(path string) error {
+	currentDir := m.fileModel.filePanels[m.filePanelFocusIndex].location
+	path = utils.ResolveAbsPath(currentDir, path)
+
+	if info, err := os.Stat(path); err != nil {
+		return fmt.Errorf("%s : no such file or directory, stats err : %w", path, err)
+	} else if !info.IsDir() {
+		return fmt.Errorf("%s is not a directory", path)
+	}
+
+	m.fileModel.filePanels[m.filePanelFocusIndex].location = path
+	return nil
 }
 
 // Check if there's any processes running in background
@@ -319,7 +396,7 @@ func (m *model) hasRunningProcesses() bool {
 
 // Triggers a warn for confirm quiting
 func (m *model) warnModalForQuit() {
-	m.confirmToQuit = true
+	m.modelQuitState = confirmToQuit
 	m.warnModal.title = "Confirm to quit superfile"
 	m.warnModal.content = "You still have files being processed. Are you sure you want to exit?"
 }
@@ -335,7 +412,7 @@ func (m model) View() string {
 	}
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	// check is the terminal size enough
-	if m.fullHeight < minimumHeight || m.fullWidth < minimumWidth {
+	if m.fullHeight < common.MinimumHeight || m.fullWidth < common.MinimumWidth {
 		return m.terminalSizeWarnRender()
 	}
 	if m.fileModel.width < 18 {
@@ -366,12 +443,6 @@ func (m model) View() string {
 		footer = lipgloss.JoinHorizontal(0, processBar, metaData, clipboardBar)
 	}
 
-	if m.commandLine.input.Focused() {
-		commandLine := m.commandLineInputBoxRender()
-		footer = lipgloss.JoinVertical(0, footer, commandLine)
-
-	}
-
 	var finalRender string
 
 	if m.toggleFooter {
@@ -387,6 +458,13 @@ func (m model) View() string {
 		return stringfunction.PlaceOverlay(overlayX, overlayY, helpMenu, finalRender)
 	}
 
+	if m.promptModal.IsOpen() {
+		promptModal := m.promptModalRender()
+		overlayX := m.fullWidth/2 - m.promptModal.GetWidth()/2
+		overlayY := m.fullHeight/2 - m.promptModal.GetMaxHeight()/2
+		return stringfunction.PlaceOverlay(overlayX, overlayY, promptModal, finalRender)
+	}
+
 	if panel.sortOptions.open {
 		sortOptions := m.sortOptionsRender()
 		overlayX := m.fullWidth/2 - panel.sortOptions.width/2
@@ -394,7 +472,7 @@ func (m model) View() string {
 		return stringfunction.PlaceOverlay(overlayX, overlayY, sortOptions, finalRender)
 	}
 
-	if firstUse {
+	if m.firstUse {
 		introduceModal := m.introduceModalRender()
 		overlayX := m.fullWidth/2 - m.helpMenu.width/2
 		overlayY := m.fullHeight/2 - m.helpMenu.height/2
@@ -403,22 +481,24 @@ func (m model) View() string {
 
 	if m.typingModal.open {
 		typingModal := m.typineModalRender()
-		overlayX := m.fullWidth/2 - modalWidth/2
-		overlayY := m.fullHeight/2 - modalHeight/2
+		overlayX := m.fullWidth/2 - common.ModalWidth/2
+		overlayY := m.fullHeight/2 - common.ModalHeight/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, typingModal, finalRender)
 	}
 
 	if m.warnModal.open {
 		warnModal := m.warnModalRender()
-		overlayX := m.fullWidth/2 - modalWidth/2
-		overlayY := m.fullHeight/2 - modalHeight/2
+		overlayX := m.fullWidth/2 - common.ModalWidth/2
+		overlayY := m.fullHeight/2 - common.ModalHeight/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, warnModal, finalRender)
 	}
 
-	if m.confirmToQuit {
+	// This is also a render for warnmodal, but its being driven via a different flag
+	// we should also drive it via warnModal.open
+	if m.modelQuitState == confirmToQuit {
 		warnModal := m.warnModalRender()
-		overlayX := m.fullWidth/2 - modalWidth/2
-		overlayY := m.fullHeight/2 - modalHeight/2
+		overlayX := m.fullWidth/2 - common.ModalWidth/2
+		overlayY := m.fullHeight/2 - common.ModalHeight/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, warnModal, finalRender)
 	}
 
@@ -452,6 +532,8 @@ func (m *model) getFilePanelItems() {
 		nowTime := time.Now()
 		// Check last time each element was updated, if less then 3 seconds ignore
 		if filePanel.focusType == noneFocus && nowTime.Sub(filePanel.lastTimeGetElement) < 3*time.Second {
+			// Todo : revisit this. This feels like a duct tape solution of an actual
+			// deep rooted problem. This feels very hacky.
 			if !m.updatedToggleDotFile {
 				continue
 			}
@@ -488,18 +570,18 @@ func (m *model) getFilePanelItems() {
 	m.updatedToggleDotFile = false
 }
 
-// Close superfile application. Cd into the curent dir if CdOnQuit on and save
+// Close superfile application. Cd into the current dir if CdOnQuit on and save
 // the path in state direcotory
 func (m *model) quitSuperfile() {
 	// close exiftool session
-	if Config.Metadata && et != nil {
+	if common.Config.Metadata && et != nil {
 		et.Close()
 	}
 	// cd on quit
 	currentDir := m.fileModel.filePanels[m.filePanelFocusIndex].location
-	variable.LastDir = currentDir
+	variable.SetLastDir(currentDir)
 
-	if Config.CdOnQuit {
+	if common.Config.CdOnQuit {
 		// escape single quote
 		currentDir = strings.ReplaceAll(currentDir, "'", "'\\''")
 		err := os.WriteFile(variable.LastDirFile, []byte("cd '"+currentDir+"'"), 0755)
@@ -507,6 +589,7 @@ func (m *model) quitSuperfile() {
 			slog.Error("Error during writing lastdir file", "error", err)
 		}
 	}
+	m.modelQuitState = quitDone
 	slog.Debug("Quitting superfile", "current dir", currentDir)
 }
 

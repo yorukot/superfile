@@ -3,16 +3,23 @@ package internal
 import (
 	"bufio"
 	"context"
+	"errors"
 	"fmt"
 	"image"
 	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/yorukot/superfile/src/internal/ui"
+
+	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/utils"
 
 	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/charmbracelet/lipgloss"
@@ -23,201 +30,153 @@ import (
 )
 
 func (m *model) sidebarRender() string {
-	if Config.SidebarWidth == 0 {
-		return ""
-	}
-	slog.Debug("Rendering sidebar.", "cursor", m.sidebarModel.cursor,
-		"renderIndex", m.sidebarModel.renderIndex, "dirs count", len(m.sidebarModel.directories),
-		"sidebar focused", m.focusPanel == sidebarFocus)
-
-	s := sideBarSuperfileTitle + "\n"
-
-	if m.sidebarModel.searchBar.Focused() || m.sidebarModel.searchBar.Value() != "" || m.focusPanel == sidebarFocus {
-		m.sidebarModel.searchBar.Placeholder = "(" + hotkeys.SearchBar[0] + ")" + " Search"
-		s += "\n" + ansi.Truncate(m.sidebarModel.searchBar.View(), Config.SidebarWidth-2, "...")
-	}
-
-	if m.sidebarModel.noActualDir() {
-		s += "\n" + sideBarNoneText
-		return sideBarBorderStyle(m.mainPanelHeight, m.focusPanel).Render(s)
-	}
-
-	s += m.sidebarModel.directoriesRender(m.mainPanelHeight,
-		m.fileModel.filePanels[m.filePanelFocusIndex].location, m.focusPanel == sidebarFocus)
-
-	return sideBarBorderStyle(m.mainPanelHeight, m.focusPanel).Render(s)
+	return m.sidebarModel.Render(m.mainPanelHeight, m.focusPanel == sidebarFocus, m.fileModel.filePanels[m.filePanelFocusIndex].location)
 }
 
-func (s *sidebarModel) directoriesRender(mainPanelHeight int, curFilePanelFileLocation string, sideBarFocussed bool) string {
-
-	// Cursor should always point to a valid directory at this point
-	if s.isCursorInvalid() {
-		slog.Error("Unexpected situation in sideBar Model. "+
-			"Cursor is at invalid postion, while there are valide directories", "cursor", s.cursor,
-			"directory count", len(s.directories))
-		return ""
-	}
-
-	res := ""
-	totalHeight := sideBarInitialHeight
-	for i := s.renderIndex; i < len(s.directories); i++ {
-		if totalHeight+s.directories[i].requiredHeight() > mainPanelHeight {
-			break
-		}
-		res += "\n"
-
-		totalHeight += s.directories[i].requiredHeight()
-
-		if s.directories[i] == pinnedDividerDir {
-			res += "\n" + sideBarPinnedDivider
-		} else if s.directories[i] == diskDividerDir {
-			res += "\n" + sideBarDisksDivider
-		} else {
-			cursor := " "
-			if s.cursor == i && sideBarFocussed && !s.searchBar.Focused() {
-				cursor = icon.Cursor
-			}
-			if s.renaming && s.cursor == i {
-				res += s.rename.View()
-			} else {
-				renderStyle := sidebarStyle
-				if s.directories[i].location == curFilePanelFileLocation {
-					renderStyle = sidebarSelectedStyle
-				}
-				res += filePanelCursorStyle.Render(cursor+" ") +
-					renderStyle.Render(truncateText(s.directories[i].name, Config.SidebarWidth-2, "..."))
-			}
-		}
-	}
-	return res
-}
-
-// This also modifies the m.fileModel.filePanels
+// This also modifies the m.fileModel.filePanels, which it should not
+// what modifications we do on this model object are of no consequence.
+// Since bubblea passed this 'model' by value in View() function.
 func (m *model) filePanelRender() string {
-	// file panel
-	f := make([]string, 10)
+	f := make([]string, len(m.fileModel.filePanels))
 	for i, filePanel := range m.fileModel.filePanels {
-
 		// check if cursor or render out of range
+		// Todo - instead of this, have a filepanel.validateAndFix(), and log Error
+		// This should not ever happen
 		if filePanel.cursor > len(filePanel.element)-1 {
 			filePanel.cursor = 0
 			filePanel.render = 0
 		}
 		m.fileModel.filePanels[i] = filePanel
 
-		f[i] += filePanelTopDirectoryIconStyle.Render(" "+icon.Directory+icon.Space) + filePanelTopPathStyle.Render(truncateTextBeginning(filePanel.location, m.fileModel.width-4, "...")) + "\n"
-		filePanelWidth := 0
-		footerBorderWidth := 0
-
-		if (m.fullWidth-Config.SidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels) != 0 && i == len(m.fileModel.filePanels)-1 {
+		// Todo : Move this to a utility function and clarify the calculation via comments
+		// Maybe even write unit tests
+		var filePanelWidth int
+		if (m.fullWidth-common.Config.SidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels) != 0 && i == len(m.fileModel.filePanels)-1 {
 			if m.fileModel.filePreview.open {
 				filePanelWidth = m.fileModel.width
 			} else {
-				filePanelWidth = (m.fileModel.width + (m.fullWidth-Config.SidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels))
+				filePanelWidth = (m.fileModel.width + (m.fullWidth-common.Config.SidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels))
 			}
-			footerBorderWidth = m.fileModel.width + 15
 		} else {
 			filePanelWidth = m.fileModel.width
-			footerBorderWidth = m.fileModel.width + 15
 		}
 
-		sortDirectionString := ""
-		if filePanel.sortOptions.data.reversed {
-			if Config.Nerdfont {
-				sortDirectionString = icon.SortDesc
-			} else {
-				sortDirectionString = "D"
-			}
-		} else {
-			if Config.Nerdfont {
-				sortDirectionString = icon.SortAsc
-			} else {
-				sortDirectionString = "A"
-			}
-		}
-		sortTypeString := ""
-		if filePanelWidth < 23 {
-			sortTypeString = sortDirectionString
-		} else {
-			if filePanel.sortOptions.data.options[filePanel.sortOptions.data.selected] == "Date Modified" {
-				sortTypeString = sortDirectionString + icon.Space + "Date"
-			} else {
-				sortTypeString = sortDirectionString + icon.Space + filePanel.sortOptions.data.options[filePanel.sortOptions.data.selected]
-			}
-		}
-
-		panelModeString := ""
-		if filePanelWidth < 23 {
-			if filePanel.panelMode == browserMode {
-				if Config.Nerdfont {
-					panelModeString = icon.Browser
-				} else {
-					panelModeString = "B"
-				}
-			} else if filePanel.panelMode == selectMode {
-				if Config.Nerdfont {
-					panelModeString = icon.Select
-				} else {
-					panelModeString = "S"
-				}
-			}
-		} else {
-			if filePanel.panelMode == browserMode {
-				panelModeString = icon.Browser + icon.Space + "Browser"
-			} else if filePanel.panelMode == selectMode {
-				panelModeString = icon.Select + icon.Space + "Select"
-			}
-		}
-
-		f[i] += filePanelDividerStyle(filePanel.focusType).Render(strings.Repeat(Config.BorderTop, filePanelWidth)) + "\n"
-		f[i] += " " + filePanel.searchBar.View() + "\n"
-		if len(filePanel.element) == 0 {
-			f[i] += filePanelStyle.Render(" " + icon.Error + "  No such file or directory")
-			bottomBorder := generateFooterBorder(fmt.Sprintf("%s%s%s%s%s", sortTypeString, bottomMiddleBorderSplit, panelModeString, bottomMiddleBorderSplit, "0/0"), footerBorderWidth)
-			f[i] = filePanelBorderStyle(m.mainPanelHeight, filePanelWidth, filePanel.focusType, bottomBorder).Render(f[i])
-		} else {
-			for h := filePanel.render; h < filePanel.render+panelElementHeight(m.mainPanelHeight) && h < len(filePanel.element); h++ {
-				endl := "\n"
-				if h == filePanel.render+panelElementHeight(m.mainPanelHeight)-1 || h == len(filePanel.element)-1 {
-					endl = ""
-				}
-				cursor := " "
-				// Check if the cursor needs to be displayed, if the user is using the search bar, the cursor is not displayed
-				if h == filePanel.cursor && !filePanel.searchBar.Focused() {
-					cursor = icon.Cursor
-				}
-				isItemSelected := arrayContains(filePanel.selected, filePanel.element[h].location)
-				if filePanel.renaming && h == filePanel.cursor {
-					f[i] += filePanel.rename.View() + endl
-				} else {
-					_, err := os.ReadDir(filePanel.element[h].location)
-					f[i] += filePanelCursorStyle.Render(cursor+" ") + prettierName(filePanel.element[h].name, m.fileModel.width-5, filePanel.element[h].directory || (err == nil), isItemSelected, filePanelBGColor) + endl
-				}
-			}
-			cursorPosition := strconv.Itoa(filePanel.cursor + 1)
-			totalElement := strconv.Itoa(len(filePanel.element))
-
-			bottomBorder := generateFooterBorder(fmt.Sprintf("%s%s%s%s%s/%s", sortTypeString, bottomMiddleBorderSplit, panelModeString, bottomMiddleBorderSplit, cursorPosition, totalElement), footerBorderWidth)
-			f[i] = filePanelBorderStyle(m.mainPanelHeight, filePanelWidth, filePanel.focusType, bottomBorder).Render(f[i])
-		}
+		f[i] = filePanel.Render(m.mainPanelHeight, filePanelWidth, filePanel.focusType != noneFocus)
 	}
-
-	// file panel render together
-	filePanelRender := ""
-	for _, f := range f {
-		filePanelRender = lipgloss.JoinHorizontal(lipgloss.Top, filePanelRender, f)
-	}
-	return filePanelRender
+	return lipgloss.JoinHorizontal(lipgloss.Top, f...)
 }
+
+func (panel *filePanel) Render(mainPanelHeight int, filePanelWidth int, focussed bool) string {
+	r := ui.FilePanelRenderer(mainPanelHeight+2, filePanelWidth+2, focussed)
+
+	// Todo - Add ansitruncate left in renderer and remove truncation here
+	r.AddLines(common.FilePanelTopDirectoryIcon + common.FilePanelTopPathStyle.Render(
+		common.TruncateTextBeginning(panel.location, filePanelWidth-4, "...")))
+
+	// Todo : Unit test all these if else chains (?)
+	// Todo : Better move it out to a separate function
+	var sortTypeString string
+	var sortTypeStringSmall string
+	if panel.sortOptions.data.reversed {
+		sortTypeStringSmall = icon.SortDesc
+	} else {
+		sortTypeStringSmall = icon.SortAsc
+	}
+
+	// Todo : Make "Date Modified" a constant, and move this to a utility function
+	if panel.sortOptions.data.options[panel.sortOptions.data.selected] == "Date Modified" {
+		sortTypeString = "Date"
+	} else {
+		sortTypeString = panel.sortOptions.data.options[panel.sortOptions.data.selected]
+	}
+
+	if common.Config.Nerdfont {
+		sortTypeString = sortTypeStringSmall + icon.Space + sortTypeString
+	} else {
+		// Todo : Figure out if we can set icon.Space to " " if nerdfont is false
+		sortTypeString = sortTypeStringSmall + " " + sortTypeString
+	}
+
+	var panelModeString string
+	var panelModeStringSmall string
+
+	if panel.panelMode == browserMode {
+		panelModeStringSmall = icon.Browser
+		panelModeString = "Browser"
+	} else if panel.panelMode == selectMode {
+		panelModeStringSmall = icon.Select
+		panelModeString = "Select"
+	}
+
+	// Only append Icon in case of nerdfont being true
+	if common.Config.Nerdfont {
+		panelModeString = panelModeStringSmall + icon.Space + panelModeString
+	}
+
+	r.AddSection()
+	r.AddLines(" " + panel.searchBar.View())
+
+	cursorNumber := panel.cursor
+
+	// Make 1-indexed only for non zero filePanel len
+	if len(panel.element) > 0 {
+		cursorNumber++
+	}
+	cursorNumberString := fmt.Sprintf("%d/%d", cursorNumber, len(panel.element))
+
+	if common.Config.ShowPanelFooterInfo {
+		r.SetBorderInfoItems(sortTypeString, panelModeString, cursorNumberString)
+		if r.AreInfoItemsTruncated() {
+			// Use smaller values
+			r.SetBorderInfoItems(sortTypeStringSmall, panelModeStringSmall, cursorNumberString)
+		}
+	} else {
+		r.SetBorderInfoItems(cursorNumberString)
+	}
+
+	if len(panel.element) == 0 {
+		r.AddLines(common.FilePanelNoneText)
+	} else {
+		for h := panel.render; h < panel.render+panelElementHeight(mainPanelHeight) && h < len(panel.element); h++ {
+			cursor := " "
+			// Check if the cursor needs to be displayed, if the user is using the search bar, the cursor is not displayed
+			if h == panel.cursor && !panel.searchBar.Focused() {
+				cursor = icon.Cursor
+			}
+			isItemSelected := arrayContains(panel.selected, panel.element[h].location)
+			if panel.renaming && h == panel.cursor {
+				r.AddLines(panel.rename.View())
+			} else {
+				// Todo (Performance) : Figure out why we are doing this. This will unnecessarily slow down
+				// rendering. There should be a way to avoid this at render
+				_, err := os.ReadDir(panel.element[h].location)
+				r.AddLines(common.FilePanelCursorStyle.Render(cursor+" ") + common.PrettierName(panel.element[h].name, filePanelWidth-5,
+					panel.element[h].directory || (err == nil), isItemSelected, common.FilePanelBGColor))
+			}
+		}
+	}
+	return r.Render()
+}
+
 func (m *model) processBarRender() string {
 	if !m.processBarModel.isValid(m.footerHeight) {
 		slog.Error("processBar in invalid state", "render", m.processBarModel.render,
 			"cursor", m.processBarModel.cursor, "footerHeight", m.footerHeight)
 	}
 
+	r := ui.ProcessBarRenderer(m.footerHeight+2, utils.FooterWidth(m.fullWidth)+2, m.focusPanel == processBarFocus)
+
+	// cursor's value itself cannot be used as its zero indexed
+	cursorNumber := 0
+	// Todo : Instead of directly accessing slice, there should be a method .IsEmpty() , or .CntProcess()
+	if len(m.processBarModel.processList) != 0 {
+		cursorNumber = m.processBarModel.cursor + 1
+	}
+
+	r.SetBorderInfoItems(fmt.Sprintf("%d/%d", cursorNumber, len(m.processBarModel.processList)))
 	if len(m.processBarModel.processList) == 0 {
-		processRender := "\n " + icon.Error + "  No processes running"
-		return m.wrapProcessBardBorder(processRender)
+		r.AddLines("", " "+common.ProcessBarNoneText)
+		return r.Render()
 	}
 
 	// save process in the array and sort the process by finished or not,
@@ -252,92 +211,65 @@ func (m *model) processBarRender() string {
 		return processes[j].doneTime.Before(processes[i].doneTime)
 	})
 
-	// render
-	processRender := ""
 	renderedHeight := 0
 
 	for i := m.processBarModel.render; i < len(processes); i++ {
-		// Cant render any more processes
-
 		// We allow rendering of a process if we have at least 2 lines left
-		// Then we dont add a separator newline
 		if m.footerHeight < renderedHeight+2 {
 			break
 		}
 		renderedHeight += 3
-		endSeparator := "\n\n"
 
-		// Last process, but can render full in three lines
-		// Although there is no next process, so dont add extra newline
-		if m.footerHeight == renderedHeight {
-			endSeparator = "\n"
-		}
+		curProcess := processes[i]
+		curProcess.progress.Width = utils.FooterWidth(m.fullWidth) - 3
 
-		// Cant add newline after last process. Only have two lines
-		if m.footerHeight < renderedHeight {
-			endSeparator = ""
-			renderedHeight--
-		}
-
-		process := processes[i]
-		process.progress.Width = footerWidth(m.fullWidth) - 3
-		symbol := ""
-		cursor := ""
+		// Todo : get them via a separate function.
+		var symbol string
+		var cursor string
 		if i == m.processBarModel.cursor {
-			cursor = footerCursorStyle.Render("┃ ")
+			// Todo : Prerender it.
+			cursor = common.FooterCursorStyle.Render("┃ ")
 		} else {
-			cursor = footerCursorStyle.Render("  ")
+			cursor = common.FooterCursorStyle.Render("  ")
 		}
-		switch process.state {
+		// Todo : Prerender
+		switch curProcess.state {
 		case failure:
-			symbol = processErrorStyle.Render(icon.Warn)
+			symbol = common.ProcessErrorStyle.Render(icon.Warn)
 		case successful:
-			symbol = processSuccessfulStyle.Render(icon.Done)
+			symbol = common.ProcessSuccessfulStyle.Render(icon.Done)
 		case inOperation:
-			symbol = processInOperationStyle.Render(icon.InOperation)
+			symbol = common.ProcessInOperationStyle.Render(icon.InOperation)
 		case cancel:
-			symbol = processCancelStyle.Render(icon.Error)
+			symbol = common.ProcessCancelStyle.Render(icon.Error)
 		}
 
-		processRender += cursor + footerStyle.Render(truncateText(process.name, footerWidth(m.fullWidth)-7, "...")+" ") + symbol + "\n"
-
-		processRender += cursor + process.progress.ViewAs(float64(process.done)/float64(process.total)) + endSeparator
+		r.AddLines(cursor + common.FooterStyle.Render(common.TruncateText(curProcess.name, utils.FooterWidth(m.fullWidth)-7, "...")+" ") + symbol)
+		r.AddLines(cursor+curProcess.progress.ViewAs(float64(curProcess.done)/float64(curProcess.total)), "")
 	}
 
-	return m.wrapProcessBardBorder(processRender)
-}
-
-func (m *model) wrapProcessBardBorder(processRender string) string {
-	courseNumber := 0
-	if len(m.processBarModel.processList) == 0 {
-		courseNumber = 0
-	} else {
-		courseNumber = m.processBarModel.cursor + 1
-	}
-	bottomBorder := generateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(courseNumber), strconv.Itoa(len(m.processBarModel.processList))), footerWidth(m.fullWidth)-3)
-	processRender = procsssBarBorder(m.footerHeight, footerWidth(m.fullWidth), bottomBorder, m.focusPanel).Render(processRender)
-
-	return processRender
+	return r.Render()
 }
 
 // This updates m.fileMetaData
 func (m *model) metadataRender() string {
 	// process bar
-	metaDataBar := ""
 	if len(m.fileMetaData.metaData) == 0 && len(m.fileModel.filePanels[m.filePanelFocusIndex].element) > 0 && !m.fileModel.renaming {
 		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"", ""})
 		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{" " + icon.InOperation + "  Loading metadata...", ""})
+		// Todo : This needs to be improved, we are updating m.fileMetaData is a separate goroutine
+		// while also modifying it here in the function. It could cause issues.
 		go func() {
 			m.returnMetaData()
 		}()
 	}
-	maxKeyLength := 0
+
 	// Todo : The whole intention of this is to get the comparisonFields come before
 	// other fields. Sorting like this is a bad way of achieving that. This can be improved
 	sort.Slice(m.fileMetaData.metaData, func(i, j int) bool {
 		// Initialising a new slice in each check by sort functions is too ineffinceint.
 		// Todo : Fix it
-		comparisonFields := []string{"FileName", "FileSize", "FolderName", "FolderSize", "FileModifyDate", "FileAccessDate"}
+		comparisonFields := []string{"Name", "Size", "Date Modified", "Date Accessed"}
 
 		for _, field := range comparisonFields {
 			if m.fileMetaData.metaData[i][0] == field {
@@ -350,6 +282,9 @@ func (m *model) metadataRender() string {
 		// Default comparison
 		return m.fileMetaData.metaData[i][0] < m.fileMetaData.metaData[j][0]
 	})
+
+	// Part where actual rendering happens.
+	maxKeyLength := 0
 	for _, data := range m.fileMetaData.metaData {
 		if len(data[0]) > maxKeyLength {
 			maxKeyLength = len(data[0])
@@ -360,153 +295,148 @@ func (m *model) metadataRender() string {
 	// unit tested, and have no proper explanation. This makes it
 	// very hard to maintain and add any changes
 	sprintfLength := maxKeyLength + 1
-	valueLength := footerWidth(m.fullWidth) - maxKeyLength - 2
-	if valueLength < footerWidth(m.fullWidth)/2 {
-		valueLength = footerWidth(m.fullWidth)/2 - 2
+	valueLength := utils.FooterWidth(m.fullWidth) - maxKeyLength - 2
+	if valueLength < utils.FooterWidth(m.fullWidth)/2 {
+		valueLength = utils.FooterWidth(m.fullWidth)/2 - 2
 		sprintfLength = valueLength
 	}
+	r := ui.MetadataRenderer(m.footerHeight+2, utils.FooterWidth(m.fullWidth)+2, m.focusPanel == metadataFocus)
+	// Todo : We can take this info as input in metadata renderer constructor
+	renderIndex := m.fileMetaData.renderIndex
+	if len(m.fileMetaData.metaData) > 0 {
+		renderIndex++
+	}
+	r.SetBorderInfoItems(fmt.Sprintf("%d/%d", renderIndex, len(m.fileMetaData.metaData)))
 
 	imax := min(m.footerHeight+m.fileMetaData.renderIndex, len(m.fileMetaData.metaData))
 	for i := m.fileMetaData.renderIndex; i < imax; i++ {
-		// Newline separator before all entries except first
-		if i != m.fileMetaData.renderIndex {
-			metaDataBar += "\n"
-		}
-		data := truncateMiddleText(m.fileMetaData.metaData[i][1], valueLength, "...")
+		data := common.TruncateMiddleText(m.fileMetaData.metaData[i][1], valueLength, "...")
 		metadataName := m.fileMetaData.metaData[i][0]
-		if footerWidth(m.fullWidth)-maxKeyLength-3 < footerWidth(m.fullWidth)/2 {
-			metadataName = truncateMiddleText(m.fileMetaData.metaData[i][0], valueLength, "...")
+		if utils.FooterWidth(m.fullWidth)-maxKeyLength-3 < utils.FooterWidth(m.fullWidth)/2 {
+			metadataName = common.TruncateMiddleText(m.fileMetaData.metaData[i][0], valueLength, "...")
 		}
-		metaDataBar += fmt.Sprintf("%-*s %s", sprintfLength, metadataName, data)
-
+		r.AddLines(fmt.Sprintf("%-*s %s", sprintfLength, metadataName, data))
 	}
-	bottomBorder := generateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(m.fileMetaData.renderIndex+1), strconv.Itoa(len(m.fileMetaData.metaData))), footerWidth(m.fullWidth)-3)
-	metaDataBar = metadataBorder(m.footerHeight, footerWidth(m.fullWidth), bottomBorder, m.focusPanel).Render(metaDataBar)
-
-	return metaDataBar
+	return r.Render()
 }
 
 func (m *model) clipboardRender() string {
-
 	// render
-	clipboardRender := ""
+	var bottomWidth int
+	if m.fullWidth%3 != 0 {
+		bottomWidth = utils.FooterWidth(m.fullWidth + m.fullWidth%3 + 2)
+	} else {
+		bottomWidth = utils.FooterWidth(m.fullWidth)
+	}
+	r := ui.ClipboardRenderer(m.footerHeight+2, bottomWidth+2)
 	if len(m.copyItems.items) == 0 {
-		clipboardRender += "\n " + icon.Error + "  No content in clipboard"
+		// Todo move this to a string
+		r.AddLines("", " "+icon.Error+"  No content in clipboard")
 	} else {
 		for i := 0; i < len(m.copyItems.items) && i < m.footerHeight; i++ {
-			// Newline separator before all entries except first
-			if i != 0 {
-				clipboardRender += "\n"
-			}
 			if i == m.footerHeight-1 && i != len(m.copyItems.items)-1 {
 				// Last Entry we can render, but there are more that one left
-				clipboardRender += strconv.Itoa(len(m.copyItems.items)-i) + " item left...."
+				r.AddLines(strconv.Itoa(len(m.copyItems.items)-i) + " item left....")
 			} else {
 				fileInfo, err := os.Stat(m.copyItems.items[i])
 				if err != nil {
 					slog.Error("Clipboard render function get item state ", "error", err)
 				}
 				if !os.IsNotExist(err) {
-					clipboardRender += clipboardPrettierName(m.copyItems.items[i], footerWidth(m.fullWidth)-3, fileInfo.IsDir(), false)
+					// Todo : There is an inconsistency in parameter that is being passed, and its name in ClipboardPrettierName function
+					r.AddLines(common.ClipboardPrettierName(m.copyItems.items[i], utils.FooterWidth(m.fullWidth)-3, fileInfo.IsDir(), false))
 				}
 			}
 		}
 	}
-	bottomWidth := 0
-
-	if m.fullWidth%3 != 0 {
-		bottomWidth = footerWidth(m.fullWidth + m.fullWidth%3 + 2)
-	} else {
-		bottomWidth = footerWidth(m.fullWidth)
-	}
-	clipboardRender = clipboardBorder(m.footerHeight, bottomWidth, Config.BorderBottom).Render(clipboardRender)
-
-	return clipboardRender
+	return r.Render()
 }
 
 func (m *model) terminalSizeWarnRender() string {
 	fullWidthString := strconv.Itoa(m.fullWidth)
 	fullHeightString := strconv.Itoa(m.fullHeight)
-	minimumWidthString := strconv.Itoa(minimumWidth)
-	minimumHeightString := strconv.Itoa(minimumHeight)
-	if m.fullHeight < minimumHeight {
-		fullHeightString = terminalTooSmall.Render(fullHeightString)
+	minimumWidthString := strconv.Itoa(common.MinimumWidth)
+	minimumHeightString := strconv.Itoa(common.MinimumHeight)
+	if m.fullHeight < common.MinimumHeight {
+		fullHeightString = common.TerminalTooSmall.Render(fullHeightString)
 	}
-	if m.fullWidth < minimumWidth {
-		fullWidthString = terminalTooSmall.Render(fullWidthString)
+	if m.fullWidth < common.MinimumWidth {
+		fullWidthString = common.TerminalTooSmall.Render(fullWidthString)
 	}
-	fullHeightString = terminalCorrectSize.Render(fullHeightString)
-	fullWidthString = terminalCorrectSize.Render(fullWidthString)
+	fullHeightString = common.TerminalCorrectSize.Render(fullHeightString)
+	fullWidthString = common.TerminalCorrectSize.Render(fullWidthString)
 
-	heightString := mainStyle.Render(" Height = ")
-	return fullScreenStyle(m.fullHeight, m.fullWidth).Render(`Terminal size too small:` + "\n" +
+	heightString := common.MainStyle.Render(" Height = ")
+	return common.FullScreenStyle(m.fullHeight, m.fullWidth).Render(`Terminal size too small:` + "\n" +
 		"Width = " + fullWidthString +
 		heightString + fullHeightString + "\n\n" +
-
 		"Needed for current config:" + "\n" +
-		"Width = " + terminalCorrectSize.Render(minimumWidthString) +
-		heightString + terminalCorrectSize.Render(minimumHeightString))
+		"Width = " + common.TerminalCorrectSize.Render(minimumWidthString) +
+		heightString + common.TerminalCorrectSize.Render(minimumHeightString))
 }
 
 func (m *model) terminalSizeWarnAfterFirstRender() string {
-	minimumWidthInt := Config.SidebarWidth + 20*len(m.fileModel.filePanels) + 20 - 1
+	minimumWidthInt := common.Config.SidebarWidth + 20*len(m.fileModel.filePanels) + 20 - 1
 	minimumWidthString := strconv.Itoa(minimumWidthInt)
 	fullWidthString := strconv.Itoa(m.fullWidth)
 	fullHeightString := strconv.Itoa(m.fullHeight)
-	minimumHeightString := strconv.Itoa(minimumHeight)
+	minimumHeightString := strconv.Itoa(common.MinimumHeight)
 
-	if m.fullHeight < minimumHeight {
-		fullHeightString = terminalTooSmall.Render(fullHeightString)
+	if m.fullHeight < common.MinimumHeight {
+		fullHeightString = common.TerminalTooSmall.Render(fullHeightString)
 	}
 	if m.fullWidth < minimumWidthInt {
-		fullWidthString = terminalTooSmall.Render(fullWidthString)
+		fullWidthString = common.TerminalTooSmall.Render(fullWidthString)
 	}
-	fullHeightString = terminalCorrectSize.Render(fullHeightString)
-	fullWidthString = terminalCorrectSize.Render(fullWidthString)
+	fullHeightString = common.TerminalCorrectSize.Render(fullHeightString)
+	fullWidthString = common.TerminalCorrectSize.Render(fullWidthString)
 
-	heightString := mainStyle.Render(" Height = ")
-	return fullScreenStyle(m.fullHeight, m.fullWidth).Render(`You change your terminal size too small:` + "\n" +
+	heightString := common.MainStyle.Render(" Height = ")
+	return common.FullScreenStyle(m.fullHeight, m.fullWidth).Render(`You change your terminal size too small:` + "\n" +
 		"Width = " + fullWidthString +
 		heightString + fullHeightString + "\n\n" +
-
 		"Needed for current config:" + "\n" +
-		"Width = " + terminalCorrectSize.Render(minimumWidthString) +
-		heightString + terminalCorrectSize.Render(minimumHeightString))
+		"Width = " + common.TerminalCorrectSize.Render(minimumWidthString) +
+		heightString + common.TerminalCorrectSize.Render(minimumHeightString))
 }
 
 func (m *model) typineModalRender() string {
 	previewPath := filepath.Join(m.typingModal.location, m.typingModal.textInput.Value())
 
-	fileLocation := filePanelTopDirectoryIconStyle.Render(" "+icon.Directory+icon.Space) +
-		filePanelTopPathStyle.Render(truncateTextBeginning(previewPath, modalWidth-4, "...")) + "\n"
+	fileLocation := common.FilePanelTopDirectoryIconStyle.Render(" "+icon.Directory+icon.Space) +
+		common.FilePanelTopPathStyle.Render(common.TruncateTextBeginning(previewPath, common.ModalWidth-4, "...")) + "\n"
 
-	confirm := modalConfirm.Render(" (" + hotkeys.ConfirmTyping[0] + ") Create ")
-	cancel := modalCancel.Render(" (" + hotkeys.CancelTyping[0] + ") Cancel ")
+	confirm := common.ModalConfirm.Render(" (" + common.Hotkeys.ConfirmTyping[0] + ") Create ")
+	cancel := common.ModalCancel.Render(" (" + common.Hotkeys.CancelTyping[0] + ") Cancel ")
 
 	tip := confirm +
-		lipgloss.NewStyle().Background(modalBGColor).Render("           ") +
+		lipgloss.NewStyle().Background(common.ModalBGColor).Render("           ") +
 		cancel
 
-	return modalBorderStyle(modalHeight, modalWidth).Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip)
+	return common.ModalBorderStyle(common.ModalHeight, common.ModalWidth).Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip)
 }
 
 func (m *model) introduceModalRender() string {
-	title := sidebarTitleStyle.Render(" Thanks for using superfile!!") + modalStyle.Render("\n You can read the following information before starting to use it!")
-	vimUserWarn := processErrorStyle.Render("  ** Very importantly ** If you are a Vim/Nvim user, go to:\n  https://superfile.netlify.app/configure/custom-hotkeys/ to change your hotkey settings!")
-	subOne := sidebarTitleStyle.Render("  (1)") + modalStyle.Render(" If this is your first time, make sure you read:\n      https://superfile.netlify.app/getting-started/tutorial/")
-	subTwo := sidebarTitleStyle.Render("  (2)") + modalStyle.Render(" If you forget the relevant keys during use,\n      you can press \"?\" (shift+/) at any time to query the keys!")
-	subThree := sidebarTitleStyle.Render("  (3)") + modalStyle.Render(" For more customization you can refer to:\n      https://superfile.netlify.app/")
-	subFour := sidebarTitleStyle.Render("  (4)") + modalStyle.Render(" Thank you again for using superfile.\n      If you have any questions, please feel free to ask at:\n      https://github.com/yorukot/superfile\n      Of course, you can always open a new issue to share your idea \n      or report a bug!")
-	return firstUseModal(m.helpMenu.height, m.helpMenu.width).Render(title + "\n\n" + vimUserWarn + "\n\n" + subOne + "\n\n" + subTwo + "\n\n" + subThree + "\n\n" + subFour + "\n\n")
+	title := common.SidebarTitleStyle.Render(" Thanks for using superfile!!") + common.ModalStyle.Render("\n You can read the following information before starting to use it!")
+	vimUserWarn := common.ProcessErrorStyle.Render("  ** Very importantly ** If you are a Vim/Nvim user, go to:\n  https://superfile.netlify.app/configure/custom-hotkeys/ to change your hotkey settings!")
+	subOne := common.SidebarTitleStyle.Render("  (1)") + common.ModalStyle.Render(" If this is your first time, make sure you read:\n      https://superfile.netlify.app/getting-started/tutorial/")
+	subTwo := common.SidebarTitleStyle.Render("  (2)") + common.ModalStyle.Render(" If you forget the relevant keys during use,\n      you can press \"?\" (shift+/) at any time to query the keys!")
+	subThree := common.SidebarTitleStyle.Render("  (3)") + common.ModalStyle.Render(" For more customization you can refer to:\n      https://superfile.netlify.app/")
+	subFour := common.SidebarTitleStyle.Render("  (4)") + common.ModalStyle.Render(" Thank you again for using superfile.\n      If you have any questions, please feel free to ask at:\n      https://github.com/yorukot/superfile\n      Of course, you can always open a new issue to share your idea \n      or report a bug!")
+	return common.FirstUseModal(m.helpMenu.height, m.helpMenu.width).Render(title + "\n\n" + vimUserWarn + "\n\n" + subOne + "\n\n" + subTwo + "\n\n" + subThree + "\n\n" + subFour + "\n\n")
 }
 
 func (m *model) warnModalRender() string {
 	title := m.warnModal.title
 	content := m.warnModal.content
-	confirm := modalConfirm.Render(" (" + hotkeys.Confirm[0] + ") Confirm ")
-	cancel := modalCancel.Render(" (" + hotkeys.Quit[0] + ") Cancel ")
-	tip := confirm + lipgloss.NewStyle().Background(modalBGColor).Render("           ") + cancel
-	return modalBorderStyle(modalHeight, modalWidth).Render(title + "\n\n" + content + "\n\n" + tip)
+	confirm := common.ModalConfirm.Render(" (" + common.Hotkeys.Confirm[0] + ") Confirm ")
+	cancel := common.ModalCancel.Render(" (" + common.Hotkeys.Quit[0] + ") Cancel ")
+	tip := confirm + lipgloss.NewStyle().Background(common.ModalBGColor).Render("           ") + cancel
+	return common.ModalBorderStyle(common.ModalHeight, common.ModalWidth).Render(title + "\n\n" + content + "\n\n" + tip)
+}
+
+func (m *model) promptModalRender() string {
+	return m.promptModal.Render()
 }
 
 func (m *model) helpMenuRender() string {
@@ -556,24 +486,23 @@ func (m *model) helpMenuRender() string {
 			hotkey += key
 		}
 
-		if len(helpMenuHotkeyStyle.Render(hotkey)) > renderHotkeyLength {
-			renderHotkeyLength = len(helpMenuHotkeyStyle.Render(hotkey))
+		if len(common.HelpMenuHotkeyStyle.Render(hotkey)) > renderHotkeyLength {
+			renderHotkeyLength = len(common.HelpMenuHotkeyStyle.Render(hotkey))
 		}
 	}
 
 	for i := m.helpMenu.renderIndex; i < m.helpMenu.height+m.helpMenu.renderIndex && i < len(m.helpMenu.data); i++ {
-
 		if i != m.helpMenu.renderIndex {
 			helpMenuContent += "\n"
 		}
 
 		if m.helpMenu.data[i].subTitle != "" {
-			helpMenuContent += helpMenuTitleStyle.Render(" " + m.helpMenu.data[i].subTitle)
+			helpMenuContent += common.HelpMenuTitleStyle.Render(" " + m.helpMenu.data[i].subTitle)
 			continue
 		}
 
 		hotkey := ""
-		description := truncateText(m.helpMenu.data[i].description, valueLength, "...")
+		description := common.TruncateText(m.helpMenu.data[i].description, valueLength, "...")
 
 		for i, key := range m.helpMenu.data[i].hotkey {
 			if i != 0 {
@@ -584,34 +513,32 @@ func (m *model) helpMenuRender() string {
 
 		cursor := "  "
 		if m.helpMenu.cursor == i {
-			cursor = filePanelCursorStyle.Render(icon.Cursor + " ")
+			cursor = common.FilePanelCursorStyle.Render(icon.Cursor + " ")
 		}
-		helpMenuContent += cursor + modalStyle.Render(fmt.Sprintf("%*s%s", renderHotkeyLength, helpMenuHotkeyStyle.Render(hotkey+" "), modalStyle.Render(description)))
+		helpMenuContent += cursor + common.ModalStyle.Render(fmt.Sprintf("%*s%s", renderHotkeyLength, common.HelpMenuHotkeyStyle.Render(hotkey+" "), common.ModalStyle.Render(description)))
 	}
 
-	bottomBorder := generateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(m.helpMenu.cursor+1-cursorBeenTitleCount), strconv.Itoa(len(m.helpMenu.data)-totalTitleCount)), m.helpMenu.width-2)
+	bottomBorder := common.GenerateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(m.helpMenu.cursor+1-cursorBeenTitleCount), strconv.Itoa(len(m.helpMenu.data)-totalTitleCount)), m.helpMenu.width-2)
 
-	return helpMenuModalBorderStyle(m.helpMenu.height, m.helpMenu.width, bottomBorder).Render(helpMenuContent)
+	return common.HelpMenuModalBorderStyle(m.helpMenu.height, m.helpMenu.width, bottomBorder).Render(helpMenuContent)
 }
 
 func (m *model) sortOptionsRender() string {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	sortOptionsContent := modalTitleStyle.Render(" Sort Options") + "\n\n"
+	sortOptionsContent := common.ModalTitleStyle.Render(" Sort Options") + "\n\n"
 	for i, option := range panel.sortOptions.data.options {
 		cursor := " "
 		if i == panel.sortOptions.cursor {
-			cursor = filePanelCursorStyle.Render(icon.Cursor)
+			cursor = common.FilePanelCursorStyle.Render(icon.Cursor)
 		}
-		sortOptionsContent += cursor + modalStyle.Render(" "+option) + "\n"
+		sortOptionsContent += cursor + common.ModalStyle.Render(" "+option) + "\n"
 	}
-	bottomBorder := generateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(panel.sortOptions.cursor+1), strconv.Itoa(len(panel.sortOptions.data.options))), panel.sortOptions.width-2)
+	bottomBorder := common.GenerateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(panel.sortOptions.cursor+1), strconv.Itoa(len(panel.sortOptions.data.options))), panel.sortOptions.width-2)
 
-	return sortOptionsModalBorderStyle(panel.sortOptions.height, panel.sortOptions.width, bottomBorder).Render(sortOptionsContent)
+	return common.SortOptionsModalBorderStyle(panel.sortOptions.height, panel.sortOptions.width, bottomBorder).Render(sortOptionsContent)
 }
 
 func readFileContent(filepath string, maxLineLength int, previewLine int) (string, error) {
-	// String builder is much better for efficiency
-	// See - https://stackoverflow.com/questions/1760757/how-to-efficiently-concatenate-strings-in-go/47798475#47798475
 	var resultBuilder strings.Builder
 	file, err := os.Open(filepath)
 	if err != nil {
@@ -623,12 +550,9 @@ func readFileContent(filepath string, maxLineLength int, previewLine int) (strin
 	lineCount := 0
 	for scanner.Scan() {
 		line := scanner.Text()
-		if len(line) > maxLineLength {
-			line = line[:maxLineLength]
-		}
-		// This is critical to avoid layout break, removes non Printable ASCII control characters.
-		line = makePrintable(line)
-		resultBuilder.WriteString(line + "\n")
+		line = ansi.Truncate(line, maxLineLength, "")
+		resultBuilder.WriteString(line)
+		resultBuilder.WriteRune('\n')
 		lineCount++
 		if previewLine > 0 && lineCount >= previewLine {
 			break
@@ -639,43 +563,62 @@ func readFileContent(filepath string, maxLineLength int, previewLine int) (strin
 }
 
 func (m *model) filePreviewPanelRender() string {
-	previewLine := m.mainPanelHeight + 2
-	m.fileModel.filePreview.width += m.fullWidth - Config.SidebarWidth - m.fileModel.filePreview.width - ((m.fileModel.width + 2) * len(m.fileModel.filePanels)) - 2
+	// Todo : This width adjustment must not be done inside render function. It should
+	// only be triggered via Update()
+	m.fileModel.filePreview.width += m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.width - ((m.fileModel.width + 2) * len(m.fileModel.filePanels)) - 2
 
+	return m.filePreviewPanelRenderWithDimensions(m.mainPanelHeight+2, m.fileModel.filePreview.width)
+}
+
+func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewWidth int) string {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	box := filePreviewBox(previewLine, m.fileModel.filePreview.width)
+	box := common.FilePreviewBox(previewHeight, previewWidth)
+	r := ui.FilePreviewPanelRenderer(previewHeight, previewWidth)
 
 	if len(panel.element) == 0 {
-		return box.Render("\n --- " + icon.Error + " No content to preview ---")
+		r.AddLines(common.FilePreviewNoContentText)
+		return r.Render()
 	}
-
+	// This could create errors if panel.cursor ever becomes negative, or goes out of bounds
+	// We should have a panel validation function in our View() function
+	// Panel is a full fledged object with own state, its accessed and modified so many times.
+	// Ideally we dont should never access data from it via directly accessing its variables
+	// Todo : Instead we should have helper functions for panel object and access data that way
+	// like panel.GetCurrentSelectedElem() . This abstration of implemetation of panel is needed.
+	// Now this lack of abstraction has caused issues ( See PR#730 ) . And now
+	// someone needs to scan through the entire codebase to figure out which access of panel
+	// data is causing crash.
 	itemPath := panel.element[panel.cursor].location
 
-	fileInfo, err := os.Stat(itemPath)
+	// Renamed it to info_err to prevent shadowing with err below
+	fileInfo, infoErr := os.Stat(itemPath)
 
-	if err != nil {
-		slog.Error("Error get file info", "error", err)
-		return box.Render("\n --- " + icon.Error + " Error get file info ---")
+	if infoErr != nil {
+		slog.Error("Error get file info", "error", infoErr)
+		r.AddLines(common.FilePreviewNoFileInfoText)
+		return r.Render()
 	}
 
 	ext := filepath.Ext(itemPath)
 	// check if the file is unsupported file, cuz pdf will cause error
-	if ext == ".pdf" || ext == ".torrent" {
-		return box.Render("\n --- " + icon.Error + " Unsupported formats ---")
+	if slices.Contains(common.UnsupportedPreviewFormats, ext) {
+		r.AddLines(common.FilePreviewUnsupportedFormatText)
+		return r.Render()
 	}
 
 	if fileInfo.IsDir() {
-		directoryContent := ""
 		dirPath := itemPath
 
 		files, err := os.ReadDir(dirPath)
 		if err != nil {
 			slog.Error("Error render directory preview", "error", err)
-			return box.Render("\n --- " + icon.Error + " Error render directory preview ---")
+			r.AddLines(common.FilePreviewDirectoryUnreadableText)
+			return r.Render()
 		}
 
 		if len(files) == 0 {
-			return box.Render("\n --- empty ---")
+			r.AddLines(common.FilePreviewEmptyText)
+			return r.Render()
 		}
 
 		sort.Slice(files, func(i, j int) bool {
@@ -688,15 +631,17 @@ func (m *model) filePreviewPanelRender() string {
 			return files[i].Name() < files[j].Name()
 		})
 
-		for i := 0; i < previewLine && i < len(files); i++ {
+		for i := 0; i < previewHeight && i < len(files); i++ {
 			file := files[i]
-			directoryContent += prettierDirectoryPreviewName(file.Name(), file.IsDir(), filePanelBGColor)
-			if i != previewLine-1 && i != len(files)-1 {
-				directoryContent += "\n"
-			}
+
+			style := common.GetElementIcon(file.Name(), file.IsDir(), common.Config.Nerdfont)
+
+			res := lipgloss.NewStyle().Foreground(lipgloss.Color(style.Color)).Background(common.FilePanelBGColor).
+				Render(style.Icon+" ") + common.FilePanelStyle.Render(file.Name())
+
+			r.AddLines(res)
 		}
-		directoryContent = checkAndTruncateLineLengths(directoryContent, m.fileModel.filePreview.width)
-		return box.Render(directoryContent)
+		return r.Render()
 	}
 
 	if isImageFile(itemPath) {
@@ -705,12 +650,12 @@ func (m *model) filePreviewPanelRender() string {
 			return box.Render("\n --- Preview panel is closed ---")
 		}
 
-		if !Config.ShowImagePreview {
+		if !common.Config.ShowImagePreview {
 			return box.Render("\n --- Image preview is disabled ---")
 		}
 
-		ansiRender, err := filepreview.ImagePreview(itemPath, m.fileModel.filePreview.width, previewLine, theme.FilePanelBG)
-		if err == image.ErrFormat {
+		ansiRender, err := filepreview.ImagePreview(itemPath, previewWidth, previewHeight, common.Theme.FilePanelBG)
+		if errors.Is(err, image.ErrFormat) {
 			return box.Render("\n --- " + icon.Error + " Unsupported image formats ---")
 		}
 
@@ -725,7 +670,7 @@ func (m *model) filePreviewPanelRender() string {
 	format := lexers.Match(filepath.Base(itemPath))
 
 	if format == nil {
-		isText, err := isTextFile(itemPath)
+		isText, err := common.IsTextFile(itemPath)
 		if err != nil {
 			slog.Error("Error while checking text file", "error", err)
 			return box.Render("\n --- " + icon.Error + " Error get file info ---")
@@ -735,7 +680,7 @@ func (m *model) filePreviewPanelRender() string {
 	}
 
 	// At this point either format is not nil, or we can read the file
-	fileContent, err := readFileContent(itemPath, m.fileModel.width+20, previewLine)
+	fileContent, err := readFileContent(itemPath, previewWidth, previewHeight)
 	if err != nil {
 		slog.Error("Error open file", "error", err)
 		return box.Render("\n --- " + icon.Error + " Error open file ---")
@@ -748,33 +693,27 @@ func (m *model) filePreviewPanelRender() string {
 	// We know the format of file, and we can apply syntax highlighting
 	if format != nil {
 		background := ""
-		if !Config.TransparentBackground {
-			background = theme.FilePanelBG
+		if !common.Config.TransparentBackground {
+			background = common.Theme.FilePanelBG
 		}
-		if Config.CodePreviewer == "bat" {
+		if common.Config.CodePreviewer == "bat" {
 			if batCmd == "" {
 				return box.Render("\n --- " + icon.Error + " 'bat' is not installed or not found. ---\n --- Cannot render file preview. ---")
 			}
-			fileContent, err = getBatSyntaxHighlightedContent(itemPath, previewLine, background)
+			fileContent, err = getBatSyntaxHighlightedContent(itemPath, previewHeight, background)
 		} else {
-			fileContent, err = ansichroma.HightlightString(fileContent, format.Config().Name, theme.CodeSyntaxHighlightTheme, background)
+			fileContent, err = ansichroma.HightlightString(fileContent, format.Config().Name, common.Theme.CodeSyntaxHighlightTheme, background)
 		}
 		if err != nil {
 			slog.Error("Error render code highlight", "error", err)
 			return box.Render("\n --- " + icon.Error + " Error render code highlight ---")
 		}
 	}
-
-	fileContent = checkAndTruncateLineLengths(fileContent, m.fileModel.filePreview.width)
-	return box.Render(fileContent)
-}
-
-func (m *model) commandLineInputBoxRender() string {
-	return m.commandLine.input.View()
+	r.AddLines(fileContent)
+	return r.Render()
 }
 
 func getBatSyntaxHighlightedContent(itemPath string, previewLine int, background string) (string, error) {
-	fileContent := ""
 	// --plain: use the plain style without line numbers and decorations
 	// --force-colorization: force colorization for non-interactive shell output
 	// --line-range <:m>: only read from line 1 to line "m"
@@ -792,8 +731,8 @@ func getBatSyntaxHighlightedContent(itemPath string, previewLine int, background
 		return "", err
 	}
 
-	fileContent = string(fileContentBytes)
-	if !Config.TransparentBackground {
+	fileContent := string(fileContentBytes)
+	if !common.Config.TransparentBackground {
 		fileContent = setBatBackground(fileContent, background)
 	}
 	return fileContent, nil

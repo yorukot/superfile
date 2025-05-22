@@ -7,14 +7,15 @@ import (
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/lithammer/shortuuid"
 	"github.com/yorukot/superfile/src/config/icon"
+	"github.com/yorukot/superfile/src/internal/common"
 	"golift.io/xtractr"
 )
 
 func extractCompressFile(src, dest string) error {
 	id := shortuuid.New()
 
-	prog := progress.New(generateGradientColor())
-	prog.PercentageStyle = footerStyle
+	prog := progress.New(common.GenerateGradientColor())
+	prog.PercentageStyle = common.FooterStyle
 
 	p := process{
 		name:     icon.ExtractFile + icon.Space + "unzip file",
@@ -25,7 +26,7 @@ func extractCompressFile(src, dest string) error {
 		doneTime: time.Time{},
 	}
 	message := channelMessage{
-		messageId:       id,
+		messageID:       id,
 		messageType:     sendProcess,
 		processNewState: p,
 	}

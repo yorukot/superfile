@@ -80,6 +80,14 @@ head:
 
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/gruvbox.png?raw=true)
 
+## Gruvbox Dark Hard
+
+- Theme name: `gruvbox-dark-hard`
+- Ported by: https://github.com/frost-phoenix
+- Original Author: https://github.com/morhetz/
+
+![](https://github.com/yorukot/superfile/blob/main/asset/theme/gruvbox-dark-hard.png?raw=true)
+
 ## Hacks
 
 - Theme name: `hacks`

@@ -3,8 +3,11 @@ package internal
 import (
 	"time"
 
+	"github.com/yorukot/superfile/src/internal/ui/sidebar"
+
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/textinput"
+	"github.com/yorukot/superfile/src/internal/ui/prompt"
 )
 
 // Type representing the mode of the panel
@@ -24,6 +27,8 @@ type warnType int
 type hotkeyType int
 
 type channelMessageType int
+
+type modelQuitStateType int
 
 const (
 	globalType hotkeyType = iota
@@ -71,24 +76,37 @@ const (
 	sendProcess
 )
 
+const (
+	notQuitting modelQuitStateType = iota
+	quitInitiated
+	confirmToQuit
+	quitDone
+)
+
 // Main model
+// Todo : We could consider using *model as tea.Model, instead of model.
+// for reducing re-allocations. The struct is 20K bytes. But this could lead to
+// issues like race conditions and whatnot, which are hidden since we are creating
+// new model in each tea update.
 type model struct {
-	fileModel            fileModel
-	sidebarModel         sidebarModel
-	processBarModel      processBarModel
-	focusPanel           focusPanelType
-	copyItems            copyItems
-	typingModal          typingModal
-	warnModal            warnModal
-	helpMenu             helpMenuModal
-	fileMetaData         fileMetadata
-	commandLine          commandLineModal
-	confirmToQuit        bool
+	fileModel       fileModel
+	sidebarModel    sidebar.Model
+	processBarModel processBarModel
+	focusPanel      focusPanelType
+	copyItems       copyItems
+	typingModal     typingModal
+	warnModal       warnModal
+	helpMenu        helpMenuModal
+	promptModal     prompt.Model
+	fileMetaData    fileMetadata
+
+	modelQuitState       modelQuitStateType
 	firstTextInput       bool
 	toggleDotFile        bool
 	updatedToggleDotFile bool
 	toggleFooter         bool
 	firstLoadingComplete bool
+	firstUse             bool
 	filePanelFocusIndex  int
 
 	// Height in number of lines of actual viewport of
@@ -103,10 +121,6 @@ type model struct {
 }
 
 // Modal
-type commandLineModal struct {
-	input textinput.Model
-}
-
 type helpMenuModal struct {
 	height      int
 	width       int
@@ -173,7 +187,7 @@ type filePanel struct {
 	panelMode          panelMode
 	selected           []string
 	element            []element
-	directoryRecord    map[string]directoryRecord
+	directoryRecords   map[string]directoryRecord
 	rename             textinput.Model
 	renaming           bool
 	searchBar          textinput.Model
@@ -211,22 +225,6 @@ type element struct {
 
 /* FILE WINDOWS TYPE END*/
 
-/* SIDE BAR internal TYPE START*/
-// Model for sidebar internal
-type sidebarModel struct {
-	directories []directory
-	renderIndex int
-	cursor      int
-	rename      textinput.Model
-	renaming    bool
-	searchBar   textinput.Model
-}
-
-type directory struct {
-	location string
-	name     string
-}
-
 /* SIDE BAR internal TYPE END*/
 
 /*PROCESS BAR internal TYPE START*/
@@ -251,7 +249,7 @@ type process struct {
 
 // Message for process bar
 type channelMessage struct {
-	messageId       string
+	messageID       string
 	messageType     channelMessageType
 	processNewState process
 	warnModal       warnModal

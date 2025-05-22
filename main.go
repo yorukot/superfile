@@ -3,7 +3,7 @@ package main
 import (
 	"embed"
 
-	cmd "github.com/yorukot/superfile/src/cmd"
+	"github.com/yorukot/superfile/src/cmd"
 )
 
 var (

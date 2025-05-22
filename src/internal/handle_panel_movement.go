@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"runtime"
 
+	"github.com/yorukot/superfile/src/internal/utils"
+
 	variable "github.com/yorukot/superfile/src/config"
 )
 
@@ -24,17 +26,17 @@ func (m *model) changeFilePanelMode() {
 // Back to parent directory
 func (m *model) parentDirectory() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-	panel.directoryRecord[panel.location] = directoryRecord{
+	panel.directoryRecords[panel.location] = directoryRecord{
 		directoryCursor: panel.cursor,
 		directoryRender: panel.render,
 	}
 	fullPath := panel.location
 	parentDir := filepath.Dir(fullPath)
 	panel.location = parentDir
-	directoryRecord, hasRecord := panel.directoryRecord[panel.location]
+	curDirectoryRecord, hasRecord := panel.directoryRecords[panel.location]
 	if hasRecord {
-		panel.cursor = directoryRecord.directoryCursor
-		panel.render = directoryRecord.directoryRender
+		panel.cursor = curDirectoryRecord.directoryCursor
+		panel.render = curDirectoryRecord.directoryRender
 	} else {
 		panel.cursor = 0
 		panel.render = 0
@@ -50,15 +52,15 @@ func (m *model) enterPanel() {
 	}
 
 	if panel.element[panel.cursor].directory {
-		panel.directoryRecord[panel.location] = directoryRecord{
+		panel.directoryRecords[panel.location] = directoryRecord{
 			directoryCursor: panel.cursor,
 			directoryRender: panel.render,
 		}
 		panel.location = panel.element[panel.cursor].location
-		directoryRecord, hasRecord := panel.directoryRecord[panel.location]
+		curDirectoryRecord, hasRecord := panel.directoryRecords[panel.location]
 		if hasRecord {
-			panel.cursor = directoryRecord.directoryCursor
-			panel.render = directoryRecord.directoryRender
+			panel.cursor = curDirectoryRecord.directoryCursor
+			panel.render = curDirectoryRecord.directoryRender
 		} else {
 			panel.cursor = 0
 			panel.render = 0
@@ -72,29 +74,36 @@ func (m *model) enterPanel() {
 		}
 
 		if fileInfo.Mode()&os.ModeSymlink != 0 {
-			targetPath, err := filepath.EvalSymlinks(panel.element[panel.cursor].location)
-			if err != nil {
+			targetPath, symlinkErr := filepath.EvalSymlinks(panel.element[panel.cursor].location)
+			if symlinkErr != nil {
 				return
 			}
 
-			targetInfo, err := os.Lstat(targetPath)
+			targetInfo, lstatErr := os.Lstat(targetPath)
 
-			if err != nil {
+			if lstatErr != nil {
 				return
 			}
 
 			if targetInfo.IsDir() {
 				m.fileModel.filePanels[m.filePanelFocusIndex].location = targetPath
+				return
 			}
+		}
 
-			return
+		if variable.ChooserFile != "" {
+			chooserErr := m.chooserFileWriteAndQuit(panel.element[panel.cursor].location)
+			if chooserErr == nil {
+				return
+			}
+			// Continue with preview if file is not writable
+			slog.Error("Error while writing to chooser file, continuing with file open", "error", chooserErr)
 		}
 
 		openCommand := "xdg-open"
-		if runtime.GOOS == "darwin" {
+		if runtime.GOOS == utils.OsDarwin {
 			openCommand = "open"
-		} else if runtime.GOOS == "windows" {
-
+		} else if runtime.GOOS == utils.OsWindows {
 			dllpath := filepath.Join(os.Getenv("SYSTEMROOT"), "System32", "rundll32.exe")
 			dllfile := "url.dll,FileProtocolHandler"
 
@@ -112,31 +121,29 @@ func (m *model) enterPanel() {
 		if err != nil {
 			slog.Error("Error while open file with", "error", err)
 		}
-
 	}
-
 }
 
 // Switch to the directory where the sidebar cursor is located
 func (m *model) sidebarSelectDirectory() {
 	// We can't do this when we have only divider directories
 	// m.sidebarModel.directories[m.sidebarModel.cursor].location would point to a divider dir.
-	if m.sidebarModel.noActualDir() {
+	if m.sidebarModel.NoActualDir() {
 		return
 	}
 	m.focusPanel = nonePanelFocus
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 
-	panel.directoryRecord[panel.location] = directoryRecord{
+	panel.directoryRecords[panel.location] = directoryRecord{
 		directoryCursor: panel.cursor,
 		directoryRender: panel.render,
 	}
 
-	panel.location = m.sidebarModel.directories[m.sidebarModel.cursor].location
-	directoryRecord, hasRecord := panel.directoryRecord[panel.location]
+	panel.location = m.sidebarModel.GetCurrentDirectoryLocation()
+	curDirectoryRecord, hasRecord := panel.directoryRecords[panel.location]
 	if hasRecord {
-		panel.cursor = directoryRecord.directoryCursor
-		panel.render = directoryRecord.directoryRender
+		panel.cursor = curDirectoryRecord.directoryCursor
+		panel.render = curDirectoryRecord.directoryRender
 	} else {
 		panel.cursor = 0
 		panel.render = 0
@@ -153,13 +160,15 @@ func (m *model) selectAllItem() {
 }
 
 // Select the item where cursor located (only work on select mode)
-func (m *model) singleItemSelect() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex] // Access the current panel
-
+func (panel *filePanel) singleItemSelect() {
 	if len(panel.element) > 0 && panel.cursor >= 0 && panel.cursor < len(panel.element) {
 		elementLocation := panel.element[panel.cursor].location
 
 		if arrayContains(panel.selected, elementLocation) {
+			// This is inefficient. Once you select 1000 items,
+			// each select / deselect operation can take 1000 operations
+			// It can be easily made constant time.
+			// Todo : (performance)convert panel.selected to a set (map[string]struct{})
 			panel.selected = removeElementByValue(panel.selected, elementLocation)
 		} else {
 			panel.selected = append(panel.selected, elementLocation)
@@ -169,38 +178,23 @@ func (m *model) singleItemSelect() {
 
 // Toggle dotfile display or not
 func (m *model) toggleDotFileController() {
-	newToggleDotFile := ""
-	if m.toggleDotFile {
-		newToggleDotFile = "false"
-		m.toggleDotFile = false
-	} else {
-		newToggleDotFile = "true"
-		m.toggleDotFile = true
-	}
+	m.toggleDotFile = !m.toggleDotFile
 	m.updatedToggleDotFile = true
-	err := os.WriteFile(variable.ToggleDotFile, []byte(newToggleDotFile), 0644)
+	err := utils.WriteBoolFile(variable.ToggleDotFile, m.toggleDotFile)
 	if err != nil {
-		slog.Error("Error while pinned folder function updatedData superfile data", "error", err)
+		slog.Error("Error while updating toggleDotFile data", "error", err)
 	}
-
 }
 
 // Toggle dotfile display or not
 func (m *model) toggleFooterController() {
-	newToggleFooterFile := ""
-	if m.toggleFooter {
-		newToggleFooterFile = "false"
-		m.toggleFooter = false
-	} else {
-		newToggleFooterFile = "true"
-		m.toggleFooter = true
-	}
-	err := os.WriteFile(variable.ToggleFooter, []byte(newToggleFooterFile), 0644)
+	m.toggleFooter = !m.toggleFooter
+	err := utils.WriteBoolFile(variable.ToggleFooter, m.toggleFooter)
 	if err != nil {
-		slog.Error("Error while Toggle footer function updatedData superfile data", "error", err)
+		slog.Error("Error while updating toggleFooter data", "error", err)
 	}
+	// Todo : Revisit this. Is this really need here, is this correct ?
 	m.setHeightValues(m.fullHeight)
-
 }
 
 // Focus on search bar
@@ -218,15 +212,13 @@ func (m *model) searchBarFocus() {
 }
 
 func (m *model) sidebarSearchBarFocus() {
-
-	if m.sidebarModel.searchBar.Focused() {
+	if m.sidebarModel.SearchBarFocused() {
 		// Ideally Code should never reach here. Once sidebar is focussed, we should
 		// not cause sidebarSearchBarFocus() event by pressing search key
-		// Should we use Runtime panic asserts ?
 		slog.Error("sidebarSearchBarFocus() called on Focussed sidebar")
-		m.sidebarModel.searchBar.Blur()
-	} else {
-		m.sidebarModel.searchBar.Focus()
-		m.firstTextInput = true
+		m.sidebarModel.SearchBarBlur()
+		return
 	}
+	m.sidebarModel.SearchBarFocus()
+	m.firstTextInput = true
 }

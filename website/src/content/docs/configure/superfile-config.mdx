@@ -99,7 +99,14 @@ Example command to enable - `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned`
 
 `true` => Shows the image preview in file preview panel when an image file is selected.
 
-`false` => Does not shows the image preview.
+`false` => Does not show the image preview.
+
+- ###### show_panel_footer_info
+
+`true` => Shows additional footer info for file panel like panel mode and sort type.
+
+`false` => Does not show additional footer info for file panel
+
 
 - ###### file_size_use_si
 
@@ -191,6 +198,10 @@ This setting is an integer.
 - ###### Border style
 
 Here are a few suggested styles, of course you can change them to your own:
+
+:::caution
+Make sure to add strings exactly one character wide. Use ' ' for borderless 
+:::
 
 ```toml
 # ...

@@ -9,7 +9,7 @@ class BaseSPFManager(ABC):
         self._is_spf_running : bool = False
 
     @abstractmethod
-    def start_spf(self, start_dir : str = None) -> None:
+    def start_spf(self, start_dir : str = None, args : list[str] = None) -> None:
         pass 
     
     @abstractmethod
