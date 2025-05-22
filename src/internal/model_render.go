@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -22,6 +23,7 @@ import (
 
 	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/x/exp/term/ansi"
 	"github.com/yorukot/ansichroma"
 	"github.com/yorukot/superfile/src/config/icon"
 	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
@@ -537,8 +539,6 @@ func (m *model) sortOptionsRender() string {
 }
 
 func readFileContent(filepath string, maxLineLength int, previewLine int) (string, error) {
-	// String builder is much better for efficiency
-	// See - https://stackoverflow.com/questions/1760757/how-to-efficiently-concatenate-strings-in-go/47798475#47798475
 	var resultBuilder strings.Builder
 	file, err := os.Open(filepath)
 	if err != nil {
@@ -550,12 +550,9 @@ func readFileContent(filepath string, maxLineLength int, previewLine int) (strin
 	lineCount := 0
 	for scanner.Scan() {
 		line := scanner.Text()
-		if len(line) > maxLineLength {
-			line = line[:maxLineLength]
-		}
-		// This is critical to avoid layout break, removes non Printable ASCII control characters.
-		line = common.MakePrintable(line)
-		resultBuilder.WriteString(line + "\n")
+		line = ansi.Truncate(line, maxLineLength, "")
+		resultBuilder.WriteString(line)
+		resultBuilder.WriteRune('\n')
 		lineCount++
 		if previewLine > 0 && lineCount >= previewLine {
 			break
@@ -566,14 +563,21 @@ func readFileContent(filepath string, maxLineLength int, previewLine int) (strin
 }
 
 func (m *model) filePreviewPanelRender() string {
-	previewLine := m.mainPanelHeight + 2
+	// Todo : This width adjustment must not be done inside render function. It should
+	// only be triggered via Update()
 	m.fileModel.filePreview.width += m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.width - ((m.fileModel.width + 2) * len(m.fileModel.filePanels)) - 2
 
+	return m.filePreviewPanelRenderWithDimensions(m.mainPanelHeight+2, m.fileModel.filePreview.width)
+}
+
+func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewWidth int) string {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	box := common.FilePreviewBox(previewLine, m.fileModel.filePreview.width)
+	box := common.FilePreviewBox(previewHeight, previewWidth)
+	r := ui.FilePreviewPanelRenderer(previewHeight, previewWidth)
 
 	if len(panel.element) == 0 {
-		return box.Render("\n --- " + icon.Error + " No content to preview ---")
+		r.AddLines(common.FilePreviewNoContentText)
+		return r.Render()
 	}
 	// This could create errors if panel.cursor ever becomes negative, or goes out of bounds
 	// We should have a panel validation function in our View() function
@@ -591,27 +595,30 @@ func (m *model) filePreviewPanelRender() string {
 
 	if infoErr != nil {
 		slog.Error("Error get file info", "error", infoErr)
-		return box.Render("\n --- " + icon.Error + " Error get file info ---")
+		r.AddLines(common.FilePreviewNoFileInfoText)
+		return r.Render()
 	}
 
 	ext := filepath.Ext(itemPath)
 	// check if the file is unsupported file, cuz pdf will cause error
-	if ext == ".pdf" || ext == ".torrent" {
-		return box.Render("\n --- " + icon.Error + " Unsupported formats ---")
+	if slices.Contains(common.UnsupportedPreviewFormats, ext) {
+		r.AddLines(common.FilePreviewUnsupportedFormatText)
+		return r.Render()
 	}
 
 	if fileInfo.IsDir() {
-		directoryContent := ""
 		dirPath := itemPath
 
 		files, err := os.ReadDir(dirPath)
 		if err != nil {
 			slog.Error("Error render directory preview", "error", err)
-			return box.Render("\n --- " + icon.Error + " Error render directory preview ---")
+			r.AddLines(common.FilePreviewDirectoryUnreadableText)
+			return r.Render()
 		}
 
 		if len(files) == 0 {
-			return box.Render("\n --- empty ---")
+			r.AddLines(common.FilePreviewEmptyText)
+			return r.Render()
 		}
 
 		sort.Slice(files, func(i, j int) bool {
@@ -624,15 +631,17 @@ func (m *model) filePreviewPanelRender() string {
 			return files[i].Name() < files[j].Name()
 		})
 
-		for i := 0; i < previewLine && i < len(files); i++ {
+		for i := 0; i < previewHeight && i < len(files); i++ {
 			file := files[i]
-			directoryContent += common.PrettierDirectoryPreviewName(file.Name(), file.IsDir(), common.FilePanelBGColor)
-			if i != previewLine-1 && i != len(files)-1 {
-				directoryContent += "\n"
-			}
+
+			style := common.GetElementIcon(file.Name(), file.IsDir(), common.Config.Nerdfont)
+
+			res := lipgloss.NewStyle().Foreground(lipgloss.Color(style.Color)).Background(common.FilePanelBGColor).
+				Render(style.Icon+" ") + common.FilePanelStyle.Render(file.Name())
+
+			r.AddLines(res)
 		}
-		directoryContent = common.CheckAndTruncateLineLengths(directoryContent, m.fileModel.filePreview.width)
-		return box.Render(directoryContent)
+		return r.Render()
 	}
 
 	if isImageFile(itemPath) {
@@ -645,7 +654,7 @@ func (m *model) filePreviewPanelRender() string {
 			return box.Render("\n --- Image preview is disabled ---")
 		}
 
-		ansiRender, err := filepreview.ImagePreview(itemPath, m.fileModel.filePreview.width, previewLine, common.Theme.FilePanelBG)
+		ansiRender, err := filepreview.ImagePreview(itemPath, previewWidth, previewHeight, common.Theme.FilePanelBG)
 		if errors.Is(err, image.ErrFormat) {
 			return box.Render("\n --- " + icon.Error + " Unsupported image formats ---")
 		}
@@ -671,7 +680,7 @@ func (m *model) filePreviewPanelRender() string {
 	}
 
 	// At this point either format is not nil, or we can read the file
-	fileContent, err := readFileContent(itemPath, m.fileModel.width+20, previewLine)
+	fileContent, err := readFileContent(itemPath, previewWidth, previewHeight)
 	if err != nil {
 		slog.Error("Error open file", "error", err)
 		return box.Render("\n --- " + icon.Error + " Error open file ---")
@@ -691,7 +700,7 @@ func (m *model) filePreviewPanelRender() string {
 			if batCmd == "" {
 				return box.Render("\n --- " + icon.Error + " 'bat' is not installed or not found. ---\n --- Cannot render file preview. ---")
 			}
-			fileContent, err = getBatSyntaxHighlightedContent(itemPath, previewLine, background)
+			fileContent, err = getBatSyntaxHighlightedContent(itemPath, previewHeight, background)
 		} else {
 			fileContent, err = ansichroma.HightlightString(fileContent, format.Config().Name, common.Theme.CodeSyntaxHighlightTheme, background)
 		}
@@ -700,9 +709,8 @@ func (m *model) filePreviewPanelRender() string {
 			return box.Render("\n --- " + icon.Error + " Error render code highlight ---")
 		}
 	}
-
-	fileContent = common.CheckAndTruncateLineLengths(fileContent, m.fileModel.filePreview.width)
-	return box.Render(fileContent)
+	r.AddLines(fileContent)
+	return r.Render()
 }
 
 func getBatSyntaxHighlightedContent(itemPath string, previewLine int, background string) (string, error) {

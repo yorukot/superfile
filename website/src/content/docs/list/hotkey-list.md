@@ -65,5 +65,5 @@ These are the default hotkeys and you can [change](/configure/custom-hotkeys) th
 | Copy current file or directory path                  | `ctrl+p`           | `copy_path`                                                                            |
 | Extract zip file                                     | `ctrl+e`           | `extract_file` (normal mode)                                                           |
 | Zip file or folder to .zip file                      | `ctrl+a`           | `compress_file` (normal mode)                                                          |
-| Open file with your default editor                   | `e`                | `oepn_file_with_editor` (normal node)                                                  |
+| Open file with your default editor                   | `e`                | `open_file_with_editor` (normal node)                                                  |
 | Open current directory with default editor           | `E` (shift+e)      | `current_directory_with_editor` (normal node)                                          |

@@ -32,7 +32,17 @@ var (
 	FilePanelTopDirectoryIcon string
 	FilePanelNoneText         string
 
+	FilePreviewNoContentText           string
+	FilePreviewNoFileInfoText          string
+	FilePreviewUnsupportedFormatText   string
+	FilePreviewDirectoryUnreadableText string
+	FilePreviewEmptyText               string
+
 	LipglossError string
+)
+
+var (
+	UnsupportedPreviewFormats = []string{".pdf", ".torrent"}
 )
 
 // No dependencies
@@ -59,4 +69,10 @@ func LoadPrerenderedVariables() {
 
 	FilePanelTopDirectoryIcon = FilePanelTopDirectoryIconStyle.Render(" " + icon.Directory + icon.Space)
 	FilePanelNoneText = FilePanelStyle.Render(" " + icon.Error + "  No such file or directory")
+
+	FilePreviewNoContentText = "--- " + icon.Error + " No content to preview ---"
+	FilePreviewNoFileInfoText = "--- " + icon.Error + " Could not get file info ---"
+	FilePreviewUnsupportedFormatText = "--- " + icon.Error + " Unsupported formats ---"
+	FilePreviewDirectoryUnreadableText = "--- " + icon.Error + " Cannot read directory ---"
+	FilePreviewEmptyText = "--- Empty ---"
 }

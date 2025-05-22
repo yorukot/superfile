@@ -23,7 +23,7 @@ func TestContentRendererBasic(t *testing.T) {
 			"12345\n" +
 			"123\n" +
 			"12...\n" +
-			"\t1234"
+			"    1"
 		assert.Equal(t, expected, res, "Basic truncation, and adding lines")
 
 		r.ClearLines()
