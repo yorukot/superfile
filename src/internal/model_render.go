@@ -256,71 +256,101 @@ func (m *model) processBarRender() string {
 
 // This updates m.fileMetaData
 func (m *model) metadataRender() string {
-	// process bar
-	if len(m.fileMetaData.metaData) == 0 && len(m.fileModel.filePanels[m.filePanelFocusIndex].element) > 0 && !m.fileModel.renaming {
-		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"", ""})
-		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{" " + icon.InOperation + "  Loading metadata...", ""})
+	m.ensureMetadataLoaded()
+
+	sortedMeta := sortMetadata(m.fileMetaData.metaData)
+	maxKeyLen := getMaxKeyLength(sortedMeta)
+	sprintfLen, valLen := computeWidths(m.fullWidth, maxKeyLen)
+
+	lines := formatMetadataLines(sortedMeta, m.fileMetaData.renderIndex, m.footerHeight, sprintfLen, valLen)
+
+	r := ui.MetadataRenderer(m.footerHeight+2, utils.FooterWidth(m.fullWidth)+2, m.focusPanel == metadataFocus)
+	if len(sortedMeta) > 0 {
+		r.SetBorderInfoItems(fmt.Sprintf("%d/%d", m.fileMetaData.renderIndex+1, len(sortedMeta)))
+	}
+	for _, line := range lines {
+		r.AddLines(line)
+	}
+	return r.Render()
+}
+
+
+func (m *model) ensureMetadataLoaded() {
+	if len(m.fileMetaData.metaData) == 0 &&
+		len(m.fileModel.filePanels[m.filePanelFocusIndex].element) > 0 &&
+		!m.fileModel.renaming {
+
+		m.fileMetaData.metaData = [][2]string{
+			{"", ""},
+			{" " + icon.InOperation + "  Loading metadata...", ""},
+		}
 		// Todo : This needs to be improved, we are updating m.fileMetaData is a separate goroutine
 		// while also modifying it here in the function. It could cause issues.
 		go func() {
 			m.returnMetaData()
 		}()
 	}
+}
 
-	// Todo : The whole intention of this is to get the comparisonFields come before
-	// other fields. Sorting like this is a bad way of achieving that. This can be improved
-	sort.Slice(m.fileMetaData.metaData, func(i, j int) bool {
-		// Initialising a new slice in each check by sort functions is too ineffinceint.
-		// Todo : Fix it
-		comparisonFields := []string{"Name", "Size", "Date Modified", "Date Accessed"}
+func sortMetadata(meta [][2]string) [][2]string {
+	priority := map[string]int{
+		"Name":          0,
+		"Size":          1,
+		"Date Modified": 2,
+		"Date Accessed": 3,
+	}
 
-		for _, field := range comparisonFields {
-			if m.fileMetaData.metaData[i][0] == field {
-				return true
-			} else if m.fileMetaData.metaData[j][0] == field {
-				return false
-			}
+	sort.SliceStable(meta, func(i, j int) bool {
+		pi, iok := priority[meta[i][0]]
+		pj, jok := priority[meta[j][0]]
+		if iok && jok {
+			return pi < pj
+		}else if iok{
+			return true
+		}else if jok{
+			return false
 		}
-
-		// Default comparison
-		return m.fileMetaData.metaData[i][0] < m.fileMetaData.metaData[j][0]
+		return meta[i][0] < meta[j][0]
 	})
 
-	// Part where actual rendering happens.
-	maxKeyLength := 0
-	for _, data := range m.fileMetaData.metaData {
-		if len(data[0]) > maxKeyLength {
-			maxKeyLength = len(data[0])
+	return meta
+}
+
+func getMaxKeyLength(meta [][2]string) int {
+	maxLen := 0
+	for _, pair := range meta {
+		if len(pair[0]) > maxLen {
+			maxLen = len(pair[0])
 		}
 	}
+	return maxLen
+}
 
-	// Todo : Too much calculations that are not in a fuctions, are not
-	// unit tested, and have no proper explanation. This makes it
-	// very hard to maintain and add any changes
-	sprintfLength := maxKeyLength + 1
-	valueLength := utils.FooterWidth(m.fullWidth) - maxKeyLength - 2
-	if valueLength < utils.FooterWidth(m.fullWidth)/2 {
-		valueLength = utils.FooterWidth(m.fullWidth)/2 - 2
-		sprintfLength = valueLength
+func computeWidths(fullWidth, maxKeyLen int) (sprintfLen int, valueLen int) {
+	totalWidth := utils.FooterWidth(fullWidth)
+	valueLen = totalWidth - maxKeyLen - 2
+	if valueLen < totalWidth/2 {
+		valueLen = totalWidth/2 - 2
+		sprintfLen = valueLen
+	} else {
+		sprintfLen = maxKeyLen + 1
 	}
-	r := ui.MetadataRenderer(m.footerHeight+2, utils.FooterWidth(m.fullWidth)+2, m.focusPanel == metadataFocus)
-	// Todo : We can take this info as input in metadata renderer constructor
-	renderIndex := m.fileMetaData.renderIndex
-	if len(m.fileMetaData.metaData) > 0 {
-		renderIndex++
-	}
-	r.SetBorderInfoItems(fmt.Sprintf("%d/%d", renderIndex, len(m.fileMetaData.metaData)))
+	return
+}
 
-	imax := min(m.footerHeight+m.fileMetaData.renderIndex, len(m.fileMetaData.metaData))
-	for i := m.fileMetaData.renderIndex; i < imax; i++ {
-		data := common.TruncateMiddleText(m.fileMetaData.metaData[i][1], valueLength, "...")
-		metadataName := m.fileMetaData.metaData[i][0]
-		if utils.FooterWidth(m.fullWidth)-maxKeyLength-3 < utils.FooterWidth(m.fullWidth)/2 {
-			metadataName = common.TruncateMiddleText(m.fileMetaData.metaData[i][0], valueLength, "...")
+func formatMetadataLines(meta [][2]string, startIdx, height, sprintfLen, valueLen int) []string {
+	lines := []string{}
+	endIdx := min(startIdx+height, len(meta))
+	for i := startIdx; i < endIdx; i++ {
+		key := meta[i][0]
+		value := common.TruncateMiddleText(meta[i][1], valueLen, "...")
+		if utils.FooterWidth(0)-sprintfLen-3 < utils.FooterWidth(0)/2 {
+			key = common.TruncateMiddleText(key, valueLen, "...")
 		}
-		r.AddLines(fmt.Sprintf("%-*s %s", sprintfLength, metadataName, data))
+		line := fmt.Sprintf("%-*s %s", sprintfLen, key, value)
+		lines = append(lines, line)
 	}
-	return r.Render()
+	return lines
 }
 
 func (m *model) clipboardRender() string {
