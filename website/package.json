@@ -17,6 +17,7 @@
     "@fontsource/ibm-plex-serif": "^5.2.5",
     "astro": "^5.7.7",
     "hast-util-to-html": "^9.0.5",
-    "sharp": "^0.34.1"
+    "sharp": "^0.34.1",
+    "starlight-giscus": "^0.6.1"
   }
 }
