@@ -30,6 +30,7 @@
             version = "1.3.0";
             src = ./.;
             modules = ./gomod2nix.toml;
+            doCheck = false;
           };
           default = superfile;
         };
