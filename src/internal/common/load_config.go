@@ -42,7 +42,7 @@ func ValidateConfig(c *ConfigType) error {
 		return errors.New(LoadConfigError("sidebar_width"))
 	}
 
-	if c.DefaultSortType < 0 || c.DefaultSortType > 2 {
+	if c.DefaultSortType < 0 || c.DefaultSortType > 3 {
 		return errors.New(LoadConfigError("default_sort_type"))
 	}
 

@@ -57,6 +57,9 @@ func returnFocusType(focusPanel focusPanelType) filePanelFocusType {
 	return secondFocus
 }
 
+// Todo : Take common.Config.CaseSensitiveSort as a function parameter
+// and also consider testing this caseSensitive with both true and false in
+// our unit_test TestReturnDirElement
 func returnDirElement(location string, displayDotFile bool, sortOptions sortOptionsModelData) []element {
 	dirEntries, err := os.ReadDir(location)
 	if err != nil {
