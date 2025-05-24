@@ -199,16 +199,9 @@ func InitTrash() error {
 // Create all dirs that does not already exists
 func createDirectories(dirs ...string) error {
 	for _, dir := range dirs {
-		if _, err := os.Stat(dir); os.IsNotExist(err) {
-			// Directory doesn't exist, create it
-			if err = os.MkdirAll(dir, 0755); err != nil {
-				return fmt.Errorf("failed to create directory %s: %w", dir, err)
-			}
-		} else if err != nil {
-			// Some other error occurred while checking if the directory exists
-			return fmt.Errorf("failed to check directory status %s: %w", dir, err)
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			return fmt.Errorf("failed to create directory %s: %w", dir, err)
 		}
-		// else: directory already exists
 	}
 	return nil
 }
