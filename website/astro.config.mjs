@@ -1,6 +1,7 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import { pluginLineNumbers } from '@expressive-code/plugin-line-numbers';
+import starlightGiscus from 'starlight-giscus';
 
 const site = 'https://superfile.netlify.app/';
 
@@ -21,6 +22,22 @@ export default defineConfig({
       components: {
         LastUpdated: './src/components/LastUpdated.astro',
       },
+      plugins: [
+        starlightGiscus({
+          repo: 'yorukot/superfile',
+          repoId: 'R_kgDOLil1MA',
+          category: 'Docs Comments',
+          categoryId: 'DIC_kwDOLil1MM4CfbH7',
+          mapping: 'title',
+          strict: false,
+          reactionsEnabled: true,
+          emitMetadata: false,
+          inputPosition: 'bottom',
+          theme: 'preferred_color_scheme',
+          lang: 'en',
+          loading: 'lazy',
+        }),
+      ],
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/yorukot/superfile' },
       ],
