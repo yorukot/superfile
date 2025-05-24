@@ -212,6 +212,17 @@ func removeElementByValue(slice []string, value string) []string {
 	return newSlice
 }
 
+func checkFileNameValidity(name string) error {
+	switch {
+	case name == ".", name == "..":
+		return fmt.Errorf("file name cannot be '.' or '..'")
+	case strings.HasSuffix(name, fmt.Sprintf("%c.", filepath.Separator)), strings.HasSuffix(name, fmt.Sprintf("%c..", filepath.Separator)):
+		return fmt.Errorf("file name cannot end with '/.' or '/..'")
+	default:
+		return nil
+	}
+}
+
 func renameIfDuplicate(destination string) (string, error) {
 	info, err := os.Stat(destination)
 	if os.IsNotExist(err) {
