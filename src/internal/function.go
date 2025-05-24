@@ -57,33 +57,16 @@ func returnFocusType(focusPanel focusPanelType) filePanelFocusType {
 	return secondFocus
 }
 
-func returnDirElement(location string, displayDotFile bool, sortOptions sortOptionsModelData) []element {
-	dirEntries, err := os.ReadDir(location)
-	if err != nil {
-		slog.Error("Error while return folder element function", "error", err)
-		return nil
-	}
-
-	dirEntries = slices.DeleteFunc(dirEntries, func(e os.DirEntry) bool {
-		// Entries not needed to be considered
-		_, err := e.Info()
-		return err != nil || (strings.HasPrefix(e.Name(), ".") && !displayDotFile)
-	})
-
-	// No files/directoes to process
+// sortFileElements sorts the given slice of os.DirEntry based on the provided sort options.
+func sortFileElements(dirEntries []os.DirEntry, sortOptions sortOptionsModelData, location string) []os.DirEntry {
 	if len(dirEntries) == 0 {
 		return nil
 	}
-
-	// Sort files
 	var order func(i, j int) bool
 	reversed := sortOptions.reversed
-
-	// Todo : These strings should not be hardcoded here, but defined as constants
 	switch sortOptions.options[sortOptions.selected] {
 	case "Name":
 		order = func(i, j int) bool {
-			// One of them is a directory, and other is not
 			if dirEntries[i].IsDir() != dirEntries[j].IsDir() {
 				return dirEntries[i].IsDir()
 			}
@@ -94,45 +77,52 @@ func returnDirElement(location string, displayDotFile bool, sortOptions sortOpti
 		}
 	case "Size":
 		order = func(i, j int) bool {
-			// Directories at the top sorted by direct child count (not recursive)
-			// Files sorted by size
-
-			// One of them is a directory, and other is not
 			if dirEntries[i].IsDir() != dirEntries[j].IsDir() {
 				return dirEntries[i].IsDir()
 			}
-
-			// This needs to be improved, and we should sort by actual size only
-			// Repeated recursive read would be slow, so we could cache
 			if dirEntries[i].IsDir() && dirEntries[j].IsDir() {
-				filesI, err := os.ReadDir(filepath.Join(location, dirEntries[i].Name()))
-				// No need of early return, we only call len() on filesI, so nil would
-				// just result in 0
+				dirPathI := filepath.Join(location, dirEntries[i].Name())
+				dirPathJ := filepath.Join(location, dirEntries[j].Name())
+				filesI, err := os.ReadDir(dirPathI)
 				if err != nil {
 					slog.Error("Error when reading directory during sort", "error", err)
 				}
-				filesJ, err := os.ReadDir(filepath.Join(location, dirEntries[j].Name()))
+				filesJ, err := os.ReadDir(dirPathJ)
 				if err != nil {
 					slog.Error("Error when reading directory during sort", "error", err)
 				}
 				return len(filesI) < len(filesJ) != reversed
 			}
-			// No need for err check, we already filtered out dirEntries with err != nil in Info() call
 			fileInfoI, _ := dirEntries[i].Info()
 			fileInfoJ, _ := dirEntries[j].Info()
 			return fileInfoI.Size() < fileInfoJ.Size() != reversed
 		}
 	case "Date Modified":
 		order = func(i, j int) bool {
-			// No need for err check, we already filtered out dirEntries with err != nil in Info() call
 			fileInfoI, _ := dirEntries[i].Info()
 			fileInfoJ, _ := dirEntries[j].Info()
 			return fileInfoI.ModTime().After(fileInfoJ.ModTime()) != reversed
 		}
 	}
-
 	sort.Slice(dirEntries, order)
-	// Preallocate for efficiency
+	return dirEntries
+}
+
+// returnDirElement returns a slice of element for the given directory, applying sorting based on sortOptions.
+func returnDirElement(location string, displayDotFile bool, sortOptions sortOptionsModelData) []element {
+	dirEntries, err := os.ReadDir(location)
+	if err != nil {
+		slog.Error("Error while return folder element function", "error", err)
+		return nil
+	}
+	dirEntries = slices.DeleteFunc(dirEntries, func(e os.DirEntry) bool {
+		_, err := e.Info()
+		return err != nil || (strings.HasPrefix(e.Name(), ".") && !displayDotFile)
+	})
+	if len(dirEntries) == 0 {
+		return nil
+	}
+	dirEntries = sortFileElements(dirEntries, sortOptions, location)
 	directoryElement := make([]element, 0, len(dirEntries))
 	for _, item := range dirEntries {
 		directoryElement = append(directoryElement, element{
@@ -144,20 +134,18 @@ func returnDirElement(location string, displayDotFile bool, sortOptions sortOpti
 	return directoryElement
 }
 
-func returnDirElementBySearchString(location string, displayDotFile bool, searchString string) []element {
+// returnDirElementBySearchString returns a slice of element for the given directory, filtered by searchString and sorted based on sortOptions.
+func returnDirElementBySearchString(location string, displayDotFile bool, searchString string, sortOptions sortOptionsModelData) []element {
 	items, err := os.ReadDir(location)
 	if err != nil {
 		slog.Error("Error while return folder element function", "error", err)
 		return []element{}
 	}
-
 	if len(items) == 0 {
 		return []element{}
 	}
-
 	folderElementMap := map[string]element{}
 	fileAndDirectories := []string{}
-
 	for _, item := range items {
 		fileInfo, err := item.Info()
 		if err != nil {
@@ -166,9 +154,7 @@ func returnDirElementBySearchString(location string, displayDotFile bool, search
 		if !displayDotFile && strings.HasPrefix(fileInfo.Name(), ".") {
 			continue
 		}
-
 		folderElementLocation := filepath.Join(location, item.Name())
-
 		fileAndDirectories = append(fileAndDirectories, item.Name())
 		folderElementMap[item.Name()] = element{
 			name:      item.Name(),
@@ -176,16 +162,51 @@ func returnDirElementBySearchString(location string, displayDotFile bool, search
 			location:  folderElementLocation,
 		}
 	}
-	// https://github.com/reinhrst/fzf-lib/blob/main/core.go#L43
-	// No sorting needed. fzf.DefaultOptions() already return values ordered on Score
 	fzfResults := utils.FzfSearch(searchString, fileAndDirectories)
 	dirElement := make([]element, 0, len(fzfResults))
 	for _, item := range fzfResults {
 		resultItem := folderElementMap[item.Key]
 		dirElement = append(dirElement, resultItem)
 	}
+	// Apply sorting to the filtered results
+	dirEntries := make([]os.DirEntry, 0, len(dirElement))
+	for _, elem := range dirElement {
+		fileInfo, err := os.Stat(elem.location)
+		if err == nil {
+			dirEntries = append(dirEntries, &customDirEntry{fileInfo: fileInfo})
+		}
+	}
+	dirEntries = sortFileElements(dirEntries, sortOptions, location)
+	sortedDirElement := make([]element, 0, len(dirEntries))
+	for _, entry := range dirEntries {
+		sortedDirElement = append(sortedDirElement, element{
+			name:      entry.Name(),
+			directory: entry.IsDir(),
+			location:  filepath.Join(location, entry.Name()),
+		})
+	}
+	return sortedDirElement
+}
 
-	return dirElement
+// customDirEntry implements os.DirEntry for sorting purposes
+type customDirEntry struct {
+	fileInfo os.FileInfo
+}
+
+func (c *customDirEntry) Name() string {
+	return c.fileInfo.Name()
+}
+
+func (c *customDirEntry) IsDir() bool {
+	return c.fileInfo.IsDir()
+}
+
+func (c *customDirEntry) Type() os.FileMode {
+	return c.fileInfo.Mode()
+}
+
+func (c *customDirEntry) Info() (os.FileInfo, error) {
+	return c.fileInfo, nil
 }
 
 func panelElementHeight(mainPanelHeight int) int {
