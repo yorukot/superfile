@@ -10,6 +10,63 @@ head:
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC(YYYY-MM-DD).
 
+# [**v1.3.1**](https://github.com/yorukot/superfile/releases/tag/v1.3.1)
+
+> 2025-05-27
+
+#### Update
+
+- Replace custom giscus implementation with official starlight-giscus plugin [`#843`](https://github.com/yorukot/superfile/pull/843)
+- Add 'Type' option for sorting by file extension with fallback [`#829`](https://github.com/yorukot/superfile/pull/829)
+
+#### Bug Fixes
+
+- Correct icons for clipboard files [`#845`](https://github.com/yorukot/superfile/pull/845)
+- Replace mattn/rundwidth with ansi package for more robust StringWidth [`#848`](https://github.com/yorukot/superfile/pull/848)  
+- Purego package update [`#837`](https://github.com/yorukot/superfile/pull/837)
+
+#### Optimization
+
+- Update main.go [`#839`](https://github.com/yorukot/superfile/pull/839)
+
+# [**v1.3.0**](https://github.com/yorukot/superfile/releases/tag/v1.3.0)
+
+> 2025-05-22
+
+#### Update
+
+- Added a Command-Prompt for SuperFile specific actions [`#752`](https://github.com/yorukot/superfile/pull/752)
+- Allow specifying multiple panels at startup [`#759`](https://github.com/yorukot/superfile/pull/759)
+- Initial draft of rendering package [`#775`](https://github.com/yorukot/superfile/pull/775)
+- Render unit tests for prompt model [`#809`](https://github.com/yorukot/superfile/pull/809)
+- Chooser file option, --lastdir-file option, and improvements in quit, and bug fixes [`#812`](https://github.com/yorukot/superfile/pull/812)
+- Prompt feature leftover items [`#804`](https://github.com/yorukot/superfile/pull/804)
+- SPF Prompt tutorial and fixes [`#814`](https://github.com/yorukot/superfile/pull/814)
+- Write prompt tutorial, rename prompt mode to spf mode, add develop branch in GitHub workflow, show_panel_footer_info flag [`#815`](https://github.com/yorukot/superfile/pull/815)
+- Theme: Add gruvbox-dark-hard [`#828`](https://github.com/yorukot/superfile/pull/828)
+- Sidebar separation [`#767`](https://github.com/yorukot/superfile/pull/767)
+- Sidebar code separation [`#770`](https://github.com/yorukot/superfile/pull/770)
+- Rendering package and rendering bug fixes [`#781`](https://github.com/yorukot/superfile/pull/781)
+- Refactor CheckForUpdates [`#797`](https://github.com/yorukot/superfile/pull/797)
+- Rename metadata strings [`#731`](https://github.com/yorukot/superfile/pull/731)
+
+#### Bug Fixes
+
+- Fix crash with opening file with editor on an empty panel [`#730`](https://github.com/yorukot/superfile/pull/730)
+- Fix: Add some of the remaining linter and fix errors [`#756`](https://github.com/yorukot/superfile/pull/756)
+- Golangci lint fixes [`#757`](https://github.com/yorukot/superfile/pull/757)
+- Fix: Remove redundant function containsKey [`#765`](https://github.com/yorukot/superfile/pull/765)
+- Fix: Correctly resolve path in open and cd prompt actions [`#802`](https://github.com/yorukot/superfile/pull/802)
+- Prompt dynamic dimensions and unit tests fix [`#805`](https://github.com/yorukot/superfile/pull/805)
+- Fix: Convert unicode space to normal space, use rendered in file preview to fix layout bugs, Release 1.3.0 [`#825`](https://github.com/yorukot/superfile/pull/825)
+
+#### Optimization
+
+- Adding linter to CI/CD and fix some lint issues [`#739`](https://github.com/yorukot/superfile/pull/739)
+- Linter fixes, new feature of allowing multiple directories at startup, other code improvements [`#764`](https://github.com/yorukot/superfile/pull/764)
+- Model unit tests [`#803`](https://github.com/yorukot/superfile/pull/803)
+
+
 # [**v1.2.1**](https://github.com/yorukot/superfile/releases/tag/v1.2.1)
 
 > 2025-03-26

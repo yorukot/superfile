@@ -10,7 +10,7 @@ import (
 	"reflect"
 	"runtime"
 
-	"github.com/mattn/go-runewidth"
+	"github.com/charmbracelet/x/exp/term/ansi"
 	"github.com/pelletier/go-toml/v2"
 	"github.com/yorukot/superfile/src/internal/utils"
 
@@ -42,38 +42,38 @@ func ValidateConfig(c *ConfigType) error {
 		return errors.New(LoadConfigError("sidebar_width"))
 	}
 
-	if c.DefaultSortType < 0 || c.DefaultSortType > 2 {
+	if c.DefaultSortType < 0 || c.DefaultSortType > 3 {
 		return errors.New(LoadConfigError("default_sort_type"))
 	}
 
-	if runewidth.StringWidth(c.BorderTop) != 1 {
+	if ansi.StringWidth(c.BorderTop) != 1 {
 		return errors.New(LoadConfigError("border_top"))
 	}
-	if runewidth.StringWidth(c.BorderBottom) != 1 {
+	if ansi.StringWidth(c.BorderBottom) != 1 {
 		return errors.New(LoadConfigError("border_bottom"))
 	}
-	if runewidth.StringWidth(c.BorderLeft) != 1 {
+	if ansi.StringWidth(c.BorderLeft) != 1 {
 		return errors.New(LoadConfigError("border_left"))
 	}
-	if runewidth.StringWidth(c.BorderRight) != 1 {
+	if ansi.StringWidth(c.BorderRight) != 1 {
 		return errors.New(LoadConfigError("border_right"))
 	}
-	if runewidth.StringWidth(c.BorderBottomLeft) != 1 {
+	if ansi.StringWidth(c.BorderBottomLeft) != 1 {
 		return errors.New(LoadConfigError("border_bottom_left"))
 	}
-	if runewidth.StringWidth(c.BorderBottomRight) != 1 {
+	if ansi.StringWidth(c.BorderBottomRight) != 1 {
 		return errors.New(LoadConfigError("border_bottom_right"))
 	}
-	if runewidth.StringWidth(c.BorderTopLeft) != 1 {
+	if ansi.StringWidth(c.BorderTopLeft) != 1 {
 		return errors.New(LoadConfigError("border_top_left"))
 	}
-	if runewidth.StringWidth(c.BorderTopRight) != 1 {
+	if ansi.StringWidth(c.BorderTopRight) != 1 {
 		return errors.New(LoadConfigError("border_top_right"))
 	}
-	if runewidth.StringWidth(c.BorderMiddleLeft) != 1 {
+	if ansi.StringWidth(c.BorderMiddleLeft) != 1 {
 		return errors.New(LoadConfigError("border_middle_left"))
 	}
-	if runewidth.StringWidth(c.BorderMiddleRight) != 1 {
+	if ansi.StringWidth(c.BorderMiddleRight) != 1 {
 		return errors.New(LoadConfigError("border_middle_right"))
 	}
 
