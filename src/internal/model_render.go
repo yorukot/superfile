@@ -20,6 +20,7 @@ import (
 	"golang.org/x/text/transform"
 
 	"github.com/yorukot/superfile/src/internal/ui"
+	"github.com/yorukot/superfile/src/internal/ui/rendering"
 
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/utils"
@@ -72,93 +73,120 @@ func (m *model) filePanelRender() string {
 func (panel *filePanel) Render(mainPanelHeight int, filePanelWidth int, focussed bool) string {
 	r := ui.FilePanelRenderer(mainPanelHeight+2, filePanelWidth+2, focussed)
 
-	// Todo - Add ansitruncate left in renderer and remove truncation here
-	r.AddLines(common.FilePanelTopDirectoryIcon + common.FilePanelTopPathStyle.Render(
-		common.TruncateTextBeginning(panel.location, filePanelWidth-4, "...")))
+	panel.renderTopBar(r, filePanelWidth)
+	panel.renderSearchBar(r)
+	panel.renderFooter(r)
+	panel.renderFileEntries(r, mainPanelHeight, filePanelWidth)
 
-	// Todo : Unit test all these if else chains (?)
-	// Todo : Better move it out to a separate function
-	var sortTypeString string
-	var sortTypeStringSmall string
-	if panel.sortOptions.data.reversed {
-		sortTypeStringSmall = icon.SortDesc
-	} else {
-		sortTypeStringSmall = icon.SortAsc
-	}
+	return r.Render()
+}
 
-	// Todo : Make "Date Modified" a constant, and move this to a utility function
-	if panel.sortOptions.data.options[panel.sortOptions.data.selected] == "Date Modified" {
-		sortTypeString = "Date"
-	} else {
-		sortTypeString = panel.sortOptions.data.options[panel.sortOptions.data.selected]
-	}
+func (panel *filePanel) renderTopBar(r *rendering.Renderer, filePanelWidth int) {
+	truncatedPath := common.TruncateTextBeginning(panel.location, filePanelWidth-4, "...")
+	r.AddLines(common.FilePanelTopDirectoryIcon + common.FilePanelTopPathStyle.Render(truncatedPath))
+}
 
-	if common.Config.Nerdfont {
-		sortTypeString = sortTypeStringSmall + icon.Space + sortTypeString
-	} else {
-		// Todo : Figure out if we can set icon.Space to " " if nerdfont is false
-		sortTypeString = sortTypeStringSmall + " " + sortTypeString
-	}
-
-	var panelModeString string
-	var panelModeStringSmall string
-
-	if panel.panelMode == browserMode {
-		panelModeStringSmall = icon.Browser
-		panelModeString = "Browser"
-	} else if panel.panelMode == selectMode {
-		panelModeStringSmall = icon.Select
-		panelModeString = "Select"
-	}
-
-	// Only append Icon in case of nerdfont being true
-	if common.Config.Nerdfont {
-		panelModeString = panelModeStringSmall + icon.Space + panelModeString
-	}
-
+func (panel *filePanel) renderSearchBar(r *rendering.Renderer) {
 	r.AddSection()
 	r.AddLines(" " + panel.searchBar.View())
+}
 
-	cursorNumber := panel.cursor
+func (panel *filePanel) renderFooter(r *rendering.Renderer) {
+	sortLabel, sortIcon := panel.getSortInfo()
+	modeLabel, modeIcon := panel.getPanelModeInfo()
+	cursorStr := panel.getCursorPosition()
 
-	// Make 1-indexed only for non zero filePanel len
-	if len(panel.element) > 0 {
-		cursorNumber++
+	if common.Config.Nerdfont {
+		sortLabel = sortIcon + icon.Space + sortLabel
+		modeLabel = modeIcon + icon.Space + modeLabel
+	} else {
+		sortLabel = sortIcon + " " + sortLabel
 	}
-	cursorNumberString := fmt.Sprintf("%d/%d", cursorNumber, len(panel.element))
 
 	if common.Config.ShowPanelFooterInfo {
-		r.SetBorderInfoItems(sortTypeString, panelModeString, cursorNumberString)
+		r.SetBorderInfoItems(sortLabel, modeLabel, cursorStr)
 		if r.AreInfoItemsTruncated() {
-			// Use smaller values
-			r.SetBorderInfoItems(sortTypeStringSmall, panelModeStringSmall, cursorNumberString)
+			r.SetBorderInfoItems(sortIcon, modeIcon, cursorStr)
 		}
 	} else {
-		r.SetBorderInfoItems(cursorNumberString)
+		r.SetBorderInfoItems(cursorStr)
 	}
+}
 
+func (panel *filePanel) renderFileEntries(r *rendering.Renderer, mainPanelHeight, filePanelWidth int) {
 	if len(panel.element) == 0 {
 		r.AddLines(common.FilePanelNoneText)
-	} else {
-		for h := panel.render; h < panel.render+panelElementHeight(mainPanelHeight) && h < len(panel.element); h++ {
-			cursor := " "
-			// Check if the cursor needs to be displayed, if the user is using the search bar, the cursor is not displayed
-			if h == panel.cursor && !panel.searchBar.Focused() {
-				cursor = icon.Cursor
-			}
-			isItemSelected := arrayContains(panel.selected, panel.element[h].location)
-			if panel.renaming && h == panel.cursor {
-				r.AddLines(panel.rename.View())
-			} else {
-				// Todo (Performance) : Figure out why we are doing this. This will unnecessarily slow down
-				// rendering. There should be a way to avoid this at render
-				_, err := os.ReadDir(panel.element[h].location)
-				r.AddLines(common.FilePanelCursorStyle.Render(cursor+" ") + common.PrettierName(panel.element[h].name, filePanelWidth-5,
-					panel.element[h].directory || (err == nil), isItemSelected, common.FilePanelBGColor))
-			}
-		}
+		return
 	}
-	return r.Render()
+
+	end := panel.render + panelElementHeight(mainPanelHeight)
+	if end > len(panel.element) {
+		end = len(panel.element)
+	}
+
+	for i := panel.render; i < end; i++ {
+		isCursor := i == panel.cursor && !panel.searchBar.Focused()
+		isSelected := arrayContains(panel.selected, panel.element[i].location)
+
+		if panel.renaming && i == panel.cursor {
+			r.AddLines(panel.rename.View())
+			continue
+		}
+
+		cursor := " "
+		if isCursor {
+			cursor = icon.Cursor
+		}
+
+		// Performance TODO: Remove or cache this if not needed at render time
+		_, err := os.ReadDir(panel.element[i].location)
+		dirExists := err == nil || panel.element[i].directory
+
+		renderedName := common.PrettierName(
+			panel.element[i].name,
+			filePanelWidth-5,
+			dirExists,
+			isSelected,
+			common.FilePanelBGColor,
+		)
+
+		r.AddLines(common.FilePanelCursorStyle.Render(cursor+" ") + renderedName)
+	}
+}
+
+func (panel *filePanel) getSortInfo() (string, string) {
+	opts := panel.sortOptions.data
+	selected := opts.options[opts.selected]
+	label := selected
+	if selected == "Date Modified" {
+		label = "Date"
+	}
+
+	iconStr := icon.SortAsc
+
+	if opts.reversed {
+		iconStr = icon.SortDesc
+	}
+	return label, iconStr
+}
+
+func (panel *filePanel) getPanelModeInfo() (string, string) {
+	switch panel.panelMode {
+	case browserMode:
+		return "Browser", icon.Browser
+	case selectMode:
+		return "Select", icon.Select
+	default:
+		return "", ""
+	}
+}
+
+func (panel *filePanel) getCursorPosition() string {
+	cursor := panel.cursor
+	if len(panel.element) > 0 {
+		cursor++ // Convert to 1-based
+	}
+	return fmt.Sprintf("%d/%d", cursor, len(panel.element))
 }
 
 func (m *model) processBarRender() string {
@@ -274,7 +302,6 @@ func (m *model) metadataRender() string {
 	return r.Render()
 }
 
-
 func (m *model) ensureMetadataLoaded() {
 	if len(m.fileMetaData.metaData) == 0 &&
 		len(m.fileModel.filePanels[m.filePanelFocusIndex].element) > 0 &&
@@ -305,9 +332,9 @@ func sortMetadata(meta [][2]string) [][2]string {
 		pj, jok := priority[meta[j][0]]
 		if iok && jok {
 			return pi < pj
-		}else if iok{
+		} else if iok {
 			return true
-		}else if jok{
+		} else if jok {
 			return false
 		}
 		return meta[i][0] < meta[j][0]
@@ -688,7 +715,8 @@ func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewW
 			return box.Render("\n --- Image preview is disabled ---")
 		}
 
-		ansiRender, err := filepreview.ImagePreview(itemPath, previewWidth, previewHeight, common.Theme.FilePanelBG)
+		// Use the new auto-detection function to choose the best renderer
+		imageRender, err := filepreview.ImagePreview(itemPath, previewWidth, previewHeight, common.Theme.FilePanelBG)
 		if errors.Is(err, image.ErrFormat) {
 			return box.Render("\n --- " + icon.Error + " Unsupported image formats ---")
 		}
@@ -698,7 +726,7 @@ func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewW
 			return box.Render("\n --- " + icon.Error + " Error covernt image to ansi ---")
 		}
 
-		return box.AlignVertical(lipgloss.Center).AlignHorizontal(lipgloss.Center).Render(ansiRender)
+		return box.AlignVertical(lipgloss.Center).AlignHorizontal(lipgloss.Center).Render(imageRender)
 	}
 
 	format := lexers.Match(filepath.Base(itemPath))
