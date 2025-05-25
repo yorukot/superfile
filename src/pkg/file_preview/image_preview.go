@@ -1,21 +1,28 @@
 package filepreview
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"image"
 	"image/color"
-	_ "image/gif"  // Import to enable GIF support
-	_ "image/jpeg" // Import to enable JPEG support
-	_ "image/png"  // Import to enable PNG support
-	"log/slog"
+	_ "image/gif"
+	_ "image/jpeg"
+	"log"
 	"os"
 	"strconv"
 
+	"github.com/BourgeoisBear/rasterm"
 	"github.com/disintegration/imaging"
 	"github.com/muesli/termenv"
-	"github.com/nfnt/resize"
 	"github.com/rwcarlsen/goexif/exif"
+)
+
+type ImageRenderer int
+
+const (
+	RendererANSI ImageRenderer = iota
+	RendererKitty
 )
 
 type colorCache struct {
@@ -70,62 +77,71 @@ func ConvertImageToANSI(img image.Image, defaultBGColor color.Color) string {
 	return output
 }
 
-// Return image preview ansi string
-func ImagePreview(path string, maxWidth, maxHeight int, defaultBGColor string) (string, error) {
-	// Load image file
-	file, err := os.Open(path)
-	if err != nil {
-		return "", err
+func ImagePreview(path string, maxWidth int, maxHeight int, defaultBGColor string) (string, error) {
+	if rasterm.IsKittyCapable() {
+		return ImagePreviewWithRenderer(path, maxWidth, maxHeight, defaultBGColor, RendererKitty)
 	}
-	defer file.Close()
-
-	// Decode image
-	img, _, err := image.Decode(file)
-	if err != nil {
-		return "", err
-	}
-
-	// Seek back to the beginning of the file before reading EXIF data
-	if _, err = file.Seek(0, 0); err != nil {
-		return "", err
-	}
-
-	// Try to adjust image orientation based on EXIF data
-	img = adjustImageOrientation(file, img)
-
-	// Resize image to fit terminal
-	resizedImg := resize.Thumbnail(uint(maxWidth), uint(maxHeight), img, resize.Lanczos3)
-
-	// Convert image to ANSI
-	bgColor, err := hexToColor(defaultBGColor)
-	if err != nil {
-		return "", fmt.Errorf("invalid background color: %w", err)
-	}
-	ansiImage := ConvertImageToANSI(resizedImg, bgColor)
-
-	return ansiImage, nil
+	return ImagePreviewWithRenderer(path, maxWidth, maxHeight, defaultBGColor, RendererANSI)
 }
 
-func adjustImageOrientation(file *os.File, img image.Image) image.Image {
-	exifData, err := exif.Decode(file)
+func ImagePreviewWithRenderer(path string, maxWidth int, maxHeight int, defaultBGColor string, renderer ImageRenderer) (string, error) {
+	data, err := os.ReadFile(path)
 	if err != nil {
-		slog.Error("exif error", "error", err)
-		return img
+		return "", err
+	}
+	imgReader := bytes.NewReader(data)
+
+	img, _, err := image.Decode(imgReader)
+	if err != nil {
+		return "", err
 	}
 
-	orientation, err := exifData.Get(exif.Orientation)
+	exifReader := bytes.NewReader(data)
+	img = adjustImageOrientation(exifReader, img)
+
+	resizedImg := imaging.Fit(img, maxWidth, maxHeight, imaging.Lanczos)
+
+	
+	switch renderer {
+	case RendererKitty:
+		opts := rasterm.KittyImgOpts{
+			SrcWidth:     uint32(maxWidth),
+			SrcHeight:    uint32(maxHeight),
+		}
+		err := rasterm.KittyWriteImage(os.Stdout, resizedImg, opts)
+		if err != nil {
+			return "", err
+		}
+		return "", nil
+	case RendererANSI:
+		fallthrough
+	default:
+		// Convert image to ANSI
+		bgColor, err := hexToColor(defaultBGColor)
+		if err != nil {
+			return "", fmt.Errorf("invalid background color: %w", err)
+		}
+		return ConvertImageToANSI(resizedImg, bgColor), nil
+	}
+}
+
+func adjustImageOrientation(r *bytes.Reader, img image.Image) image.Image {
+	exifData, err := exif.Decode(r)
 	if err != nil {
-		slog.Error("exif orientation error", "error", err)
+		log.Printf("exif error: %v", err)
 		return img
 	}
-
-	orientationValue, err := orientation.Int(0)
+	tag, err := exifData.Get(exif.Orientation)
 	if err != nil {
-		slog.Error("exif orientation value error", "error", err)
+		log.Printf("exif orientation error: %v", err)
 		return img
 	}
-
-	return adjustOrientation(img, orientationValue)
+	orientation, err := tag.Int(0)
+	if err != nil {
+		log.Printf("exif orientation value error: %v", err)
+		return img
+	}
+	return adjustOrientation(img, orientation)
 }
 
 func adjustOrientation(img image.Image, orientation int) image.Image {
@@ -147,8 +163,8 @@ func adjustOrientation(img image.Image, orientation int) image.Image {
 	case 8:
 		return imaging.Rotate90(img)
 	default:
-		slog.Error("invalid orientation value", "orientation", orientation)
-		return img // Return the original image for invalid orientation values
+		log.Printf("invalid orientation value: %d", orientation)
+		return img
 	}
 }
 
