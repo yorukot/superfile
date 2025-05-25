@@ -76,10 +76,15 @@ func (panel *filePanel) Render(mainPanelHeight int, filePanelWidth int, focussed
 	panel.renderFooter(r)
 	panel.renderFileEntries(r, mainPanelHeight, filePanelWidth)
 
+// Todo - Add AnsiTruncateLeft in ui/renderer package and remove truncation here
+	panel.renderTopBar(r, filePanelWidth)
+	panel.renderSearchBar(r)
+	panel.renderFooter(r)
+	panel.renderFileEntries(r, mainPanelHeight, filePanelWidth)
+
 	return r.Render()
 }
 
-// Todo - Add AnsiTruncateLeft in ui/renderer package and remove truncation here
 func (panel *filePanel) renderTopBar(r *rendering.Renderer, filePanelWidth int) {
 	truncatedPath := common.TruncateTextBeginning(panel.location, filePanelWidth-4, "...")
 	r.AddLines(common.FilePanelTopDirectoryIcon + common.FilePanelTopPathStyle.Render(truncatedPath))
