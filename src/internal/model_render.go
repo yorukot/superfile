@@ -359,7 +359,7 @@ func computeWidths(fullWidth, maxKeyLen int) (sprintfLen int, valueLen int) {
 	} else {
 		sprintfLen = maxKeyLen + 1
 	}
-	return
+	return sprintfLen, valueLen
 }
 
 func formatMetadataLines(meta [][2]string, startIdx, height, sprintfLen, valueLen int) []string {

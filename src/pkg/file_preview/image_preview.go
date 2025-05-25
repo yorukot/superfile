@@ -8,7 +8,7 @@ import (
 	"image/color"
 	_ "image/gif"
 	_ "image/jpeg"
-	"log"
+	"log/slog"
 	"os"
 	"strconv"
 
@@ -85,6 +85,16 @@ func ImagePreview(path string, maxWidth int, maxHeight int, defaultBGColor strin
 }
 
 func ImagePreviewWithRenderer(path string, maxWidth int, maxHeight int, defaultBGColor string, renderer ImageRenderer) (string, error) {
+
+	info, err := os.Stat(path)
+    if err != nil {
+        return "", err
+    }
+    const maxFileSize = 100 * 1024 * 1024 // 100MB limit
+    if info.Size() > maxFileSize {
+        return "", fmt.Errorf("image file too large: %d bytes", info.Size())
+    }
+
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return "", err
@@ -101,17 +111,15 @@ func ImagePreviewWithRenderer(path string, maxWidth int, maxHeight int, defaultB
 
 	resizedImg := imaging.Fit(img, maxWidth, maxHeight, imaging.Lanczos)
 
-	
 	switch renderer {
 	case RendererKitty:
 		opts := rasterm.KittyImgOpts{
 			SrcWidth:     uint32(maxWidth),
 			SrcHeight:    uint32(maxHeight),
 		}
-		err := rasterm.KittyWriteImage(os.Stdout, resizedImg, opts)
-		if err != nil {
-			return "", err
-		}
+		if err := rasterm.KittyWriteImage(os.Stdout, resizedImg, opts); err != nil {
+            return "", err
+        }
 		return "", nil
 	case RendererANSI:
 		fallthrough
@@ -128,17 +136,17 @@ func ImagePreviewWithRenderer(path string, maxWidth int, maxHeight int, defaultB
 func adjustImageOrientation(r *bytes.Reader, img image.Image) image.Image {
 	exifData, err := exif.Decode(r)
 	if err != nil {
-		log.Printf("exif error: %v", err)
+		slog.Error("exif error", "error", err)
 		return img
 	}
 	tag, err := exifData.Get(exif.Orientation)
 	if err != nil {
-		log.Printf("exif orientation error: %v", err)
+		slog.Error("exif orientation error", "error", err)
 		return img
 	}
 	orientation, err := tag.Int(0)
 	if err != nil {
-		log.Printf("exif orientation value error: %v", err)
+		slog.Error("exif orientation value error", "error", err)
 		return img
 	}
 	return adjustOrientation(img, orientation)
@@ -163,7 +171,7 @@ func adjustOrientation(img image.Image, orientation int) image.Image {
 	case 8:
 		return imaging.Rotate90(img)
 	default:
-		log.Printf("invalid orientation value: %d", orientation)
+		slog.Error("Invalid orientation value","error", orientation)
 		return img
 	}
 }
