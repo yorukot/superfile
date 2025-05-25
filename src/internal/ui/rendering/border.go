@@ -3,8 +3,6 @@ package rendering
 import (
 	"strings"
 
-	"github.com/mattn/go-runewidth"
-
 	"github.com/charmbracelet/x/exp/term/ansi"
 
 	"github.com/charmbracelet/lipgloss"
@@ -51,7 +49,7 @@ func (b *BorderConfig) AreInfoItemsTruncated() bool {
 	// border.MiddleLeft <content> border.MiddleRight border.Bottom
 	availWidth := actualWidth/cnt - 3
 	for i := range b.infoItems {
-		if runewidth.StringWidth(b.infoItems[i]) > availWidth {
+		if ansi.StringWidth(b.infoItems[i]) > availWidth {
 			return true
 		}
 	}
@@ -82,8 +80,8 @@ func (b *BorderConfig) GetBorder(borderStrings lipgloss.Border) lipgloss.Border 
 		titleAvailWidth := actualWidth - 4
 
 		// Basic Right truncation
-		truncatedTitle := runewidth.Truncate(b.title, titleAvailWidth, "")
-		remainingWidth := actualWidth - 4 - runewidth.StringWidth(truncatedTitle)
+		truncatedTitle := ansi.Truncate(b.title, titleAvailWidth, "")
+		remainingWidth := actualWidth - 4 - ansi.StringWidth(truncatedTitle)
 
 		margin := ""
 		if remainingWidth > b.titleLeftMargin {
@@ -104,12 +102,12 @@ func (b *BorderConfig) GetBorder(borderStrings lipgloss.Border) lipgloss.Border 
 		availWidth := actualWidth/cnt - 3
 		infoText := ""
 		for _, item := range b.infoItems {
-			item = runewidth.Truncate(item, availWidth, "")
+			item = ansi.Truncate(item, availWidth, "")
 			infoText += borderStrings.MiddleRight + item + borderStrings.MiddleLeft + borderStrings.Bottom
 		}
 
 		// Fill the rest with border char.
-		remainingWidth := actualWidth - runewidth.StringWidth(infoText)
+		remainingWidth := actualWidth - ansi.StringWidth(infoText)
 
 		res.Bottom = strings.Repeat(borderStrings.Bottom, remainingWidth) + infoText
 	}

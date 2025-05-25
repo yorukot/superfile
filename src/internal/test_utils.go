@@ -26,12 +26,16 @@ func setupDirectories(t *testing.T, dirs ...string) {
 	}
 }
 
-func setupFiles(t *testing.T, files ...string) {
+func setupFilesWithData(t *testing.T, data []byte, files ...string) {
 	t.Helper()
 	for _, file := range files {
-		err := os.WriteFile(file, SampleDataBytes, 0644)
+		err := os.WriteFile(file, data, 0644)
 		require.NoError(t, err)
 	}
+}
+
+func setupFiles(t *testing.T, files ...string) {
+	setupFilesWithData(t, SampleDataBytes, files...)
 }
 
 // TeaUpdate : Utility to send update to model , majorly used in tests

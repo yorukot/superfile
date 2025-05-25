@@ -65,8 +65,8 @@ schema = 3
     version = "v1.11.5"
     hash = "sha256-jN5+2ED+YbIoPIuyJ4Ou5pqJb2w1uNKzp5yTjKY6rEQ="
   [mod."github.com/ebitengine/purego"]
-    version = "v0.8.2"
-    hash = "sha256-f3Q8KVX+RkHa1EsGF+U8E9MHHOCZ9j2jtMJOTPCZw08="
+    version = "v0.8.3"
+    hash = "sha256-JWKkqPOAa3Unq9eZrdyTjL13vZ07DDQh43IcpgCuze4="
   [mod."github.com/erikgeiser/coninput"]
     version = "v0.0.0-20211004153227-1c3628e74d0f"
     hash = "sha256-OWSqN1+IoL73rWXWdbbcahZu8n2al90Y3eT5Z0vgHvU="

@@ -39,7 +39,7 @@ if [ $? -ne 0 ]; then
 fi
 
 package=superfile
-version=1.3.0
+version=${SPF_INSTALL_VERSION:-1.3.1}
 arch=$(uname -m)
 os=$(uname -s)
 

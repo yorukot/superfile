@@ -55,7 +55,7 @@ func defaultFilePanel(dir string) filePanel {
 			open:   false,
 			cursor: common.Config.DefaultSortType,
 			data: sortOptionsModelData{
-				options:  []string{"Name", "Size", "Date Modified"},
+				options:  []string{"Name", "Size", "Date Modified", "Type"},
 				selected: common.Config.DefaultSortType,
 				reversed: common.Config.SortOrderReversed,
 			},

@@ -10,6 +10,7 @@ require (
 	github.com/charmbracelet/bubbles v0.20.0
 	github.com/charmbracelet/bubbletea v1.3.4
 	github.com/charmbracelet/lipgloss v1.0.0
+	github.com/charmbracelet/x/ansi v0.8.0
 	github.com/hymkor/trash-go v0.2.0
 	github.com/lithammer/shortuuid v3.0.0+incompatible
 	github.com/muesli/termenv v0.16.0
@@ -23,9 +24,8 @@ require (
 )
 
 require (
-	github.com/charmbracelet/x/ansi v0.8.0 // indirect
 	github.com/charmbracelet/x/term v0.2.1 // indirect
-	github.com/ebitengine/purego v0.8.2 // indirect
+	github.com/ebitengine/purego v0.8.3 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
 	golang.org/x/image v0.18.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

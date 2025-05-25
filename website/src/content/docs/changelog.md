@@ -10,6 +10,25 @@ head:
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC(YYYY-MM-DD).
 
+# [**v1.3.1**](https://github.com/yorukot/superfile/releases/tag/v1.3.1)
+
+> 2025-05-27
+
+#### Update
+
+- Replace custom giscus implementation with official starlight-giscus plugin [`#843`](https://github.com/yorukot/superfile/pull/843)
+- Add 'Type' option for sorting by file extension with fallback [`#829`](https://github.com/yorukot/superfile/pull/829)
+
+#### Bug Fixes
+
+- Correct icons for clipboard files [`#845`](https://github.com/yorukot/superfile/pull/845)
+- Replace mattn/rundwidth with ansi package for more robust StringWidth [`#848`](https://github.com/yorukot/superfile/pull/848)  
+- Purego package update [`#837`](https://github.com/yorukot/superfile/pull/837)
+
+#### Optimization
+
+- Update main.go [`#839`](https://github.com/yorukot/superfile/pull/839)
+
 # [**v1.3.0**](https://github.com/yorukot/superfile/releases/tag/v1.3.0)
 
 > 2025-05-22

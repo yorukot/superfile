@@ -7,6 +7,7 @@ import (
 	"io"
 	"math"
 	"os"
+	"path/filepath"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -81,7 +82,7 @@ func PrettierDirectoryPreviewName(name string, isDir bool, bgColor lipgloss.Colo
 }
 
 func ClipboardPrettierName(name string, width int, isDir bool, isSelected bool) string {
-	style := GetElementIcon(name, isDir, Config.Nerdfont)
+	style := GetElementIcon(filepath.Base(name), isDir, Config.Nerdfont)
 	if isSelected {
 		return StringColorRender(lipgloss.Color(style.Color), FooterBGColor).
 			Background(FooterBGColor).
