@@ -22,7 +22,7 @@ Write-Host -ForegroundColor Red         "                    `$`$/              
 Write-Host ""
 
 $package = "superfile"
-$version = "1.3.0"
+$version = if ($env:SPF_INSTALL_VERSION) { $env:SPF_INSTALL_VERSION } else { "1.3.1" }
 
 $installInstructions = @'
 This installer is only available for Windows.
@@ -111,7 +111,7 @@ if (-not (Test-Path $superfileProgramPath)) {
     }
 }
 
-Write-Host "Downloading superfile..."
+Write-Host "Downloading superfile...(Version v$version)"
 
 $url = "https://github.com/yorukot/superfile/releases/download/v$version/$filename"
 try {
