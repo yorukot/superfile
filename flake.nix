@@ -30,6 +30,7 @@
             version = "1.3.1";
             src = ./.;
             modules = ./gomod2nix.toml;
+            nativeCheckInputs = [ pkgs.writableTmpDirAsHomeHook ];
           };
           default = superfile;
         };
