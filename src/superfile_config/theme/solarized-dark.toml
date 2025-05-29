@@ -1,0 +1,65 @@
+# Solarized Dark
+# Theme created by: https://github.com/Hesoyamaezk
+# Update by(sort by time):
+#
+# Thanks you!!!
+
+# Code syntax highlight theme (you can go to https://github.com/alecthomas/chroma/blob/master/styles to find one you like)
+code_syntax_highlight = "solarized-dark"
+
+# ========= Border =========
+file_panel_border = "#586e75"
+sidebar_border = "#586375"
+footer_border = "#586e75"
+
+# ========= Border Active =========
+file_panel_border_active = "#93a1a1"
+sidebar_border_active = "#b58900"
+footer_border_active = "#2aa198"
+modal_border_active = "#657b83"
+
+# ========= Background (bg) =========
+full_screen_bg = "#002b36"
+file_panel_bg = "#002b36"
+sidebar_bg = "#002b36"
+footer_bg = "#002b36"
+modal_bg = "#002b36"
+
+# ========= Foreground (fg) =========
+full_screen_fg = "#839496"
+file_panel_fg = "#839496"
+sidebar_fg = "#839496"
+footer_fg = "#839496"
+modal_fg = "#839496"
+
+# ========= Special Color =========
+cursor = "#fdf6e3"
+correct = "#2aa198"
+error = "#dc322f"
+hint = "#268bd2"
+cancel = "#cb4b16"
+# Gradient color can only have two color!
+gradient_color = ["#268bd2", "#d33682"]
+
+# ========= File Panel Special Items =========
+file_panel_top_directory_icon = "#2aa198"
+file_panel_top_path = "#268bd2"
+file_panel_item_selected_fg = "#fdf6e3"
+file_panel_item_selected_bg = "#073642"
+
+# ========= Sidebar Special Items =========
+sidebar_title = "#b58900"
+sidebar_item_selected_fg = "#93a1a1"
+sidebar_item_selected_bg = "#073642"
+sidebar_divider = "#586e75"
+
+# ========= Modal Special Items =========
+modal_cancel_fg = "#073642"
+modal_cancel_bg = "#cb4b16"
+
+modal_confirm_fg = "#073642"
+modal_confirm_bg = "#268bd2"
+
+# ========= Help Menu =========
+help_menu_hotkey = "#268bd2"
+help_menu_title = "#cb4b16"
