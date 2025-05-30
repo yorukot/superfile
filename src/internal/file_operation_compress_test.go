@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestZipSources(t *testing.T) {
@@ -73,7 +73,7 @@ func TestZipSources(t *testing.T) {
 		},
 		{
 			name: "empty list",
-			setupFunc: func(tempDir string) ([]string, error) {
+			setupFunc: func(_ string) ([]string, error) {
 				return []string{}, nil
 			},
 			expectedFiles: map[string]string{},
@@ -81,7 +81,7 @@ func TestZipSources(t *testing.T) {
 		},
 		{
 			name: "non-existent source",
-			setupFunc: func(tempDir string) ([]string, error) {
+			setupFunc: func(_ string) ([]string, error) {
 				return []string{"/non/existent/path"}, nil
 			},
 			expectedFiles: nil,
@@ -101,28 +101,28 @@ func TestZipSources(t *testing.T) {
 			err = zipSources(sources, targetZip)
 
 			if tt.expectError {
-				assert.Error(t, err, "zipSources should return error")
+				require.Error(t, err, "zipSources should return error")
 				return
 			}
 
-			assert.NoError(t, err, "zipSources should not return error")
+			require.NoError(t, err, "zipSources should not return error")
 
 			zipReader, err := zip.OpenReader(targetZip)
-			assert.NoError(t, err, "should be able to open ZIP file")
+			require.NoError(t, err, "should be able to open ZIP file")
 			defer zipReader.Close()
 
-			assert.Equal(t, len(tt.expectedFiles), len(zipReader.File), "ZIP should contain expected number of files")
+			require.Equal(t, len(tt.expectedFiles), len(zipReader.File), "ZIP should contain expected number of files")
 
 			foundFiles := make(map[string]string)
 			for _, file := range zipReader.File {
 				foundFiles[file.Name] = ""
 				if !strings.HasSuffix(file.Name, "/") {
 					rc, err := file.Open()
-					assert.NoError(t, err, "should be able to open file %s in ZIP", file.Name)
+					require.NoError(t, err, "should be able to open file %s in ZIP", file.Name)
 
 					content, err := io.ReadAll(rc)
 					rc.Close()
-					assert.NoError(t, err, "should be able to read file %s", file.Name)
+					require.NoError(t, err, "should be able to read file %s", file.Name)
 
 					foundFiles[file.Name] = string(content)
 				}
@@ -130,15 +130,15 @@ func TestZipSources(t *testing.T) {
 
 			for expectedFile, expectedContent := range tt.expectedFiles {
 				foundContent, exists := foundFiles[expectedFile]
-				assert.True(t, exists, "expected file %s should be found in ZIP", expectedFile)
+				require.True(t, exists, "expected file %s should be found in ZIP", expectedFile)
 				if expectedContent != "" {
-					assert.Equal(t, expectedContent, foundContent, "content should match for file %s", expectedFile)
+					require.Equal(t, expectedContent, foundContent, "content should match for file %s", expectedFile)
 				}
 			}
 
 			for foundFile := range foundFiles {
 				_, expected := tt.expectedFiles[foundFile]
-				assert.True(t, expected, "unexpected file %s found in ZIP", foundFile)
+				require.True(t, expected, "unexpected file %s found in ZIP", foundFile)
 			}
 		})
 	}
@@ -148,9 +148,9 @@ func TestZipSourcesInvalidTarget(t *testing.T) {
 	tempDir := t.TempDir()
 	testFile := filepath.Join(tempDir, "test.txt")
 	err := os.WriteFile(testFile, []byte("test"), 0644)
-	assert.NoError(t, err, "should be able to create test file")
+	require.NoError(t, err, "should be able to create test file")
 
 	invalidTarget := "/invalid/path/test.zip"
 	err = zipSources([]string{testFile}, invalidTarget)
-	assert.Error(t, err, "zipSources should return error for invalid target")
+	require.Error(t, err, "zipSources should return error for invalid target")
 }
