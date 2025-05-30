@@ -28,6 +28,7 @@ require (
 	github.com/ebitengine/purego v0.8.3 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
 	golang.org/x/image v0.18.0 // indirect
+	golang.org/x/term v0.18.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
@@ -52,6 +53,7 @@ require (
 )
 
 require (
+	github.com/BourgeoisBear/rasterm v1.1.1
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/charmbracelet/harmonica v0.2.0 // indirect
 	github.com/charmbracelet/x/exp/term v0.0.0-20240814160751-e2dc8b53b604
