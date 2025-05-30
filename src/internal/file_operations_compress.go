@@ -19,22 +19,20 @@ func zipSources(sources []string, target string) error {
 	id := shortuuid.New()
 	prog := progress.New()
 	prog.PercentageStyle = common.FooterStyle
-	var err error = nil
-
-	for _, src := range sources {
-		if _, err := os.Stat(src); os.IsNotExist(err) {
-			return fmt.Errorf("source path does not exist: %s", src)
-		}
-	}
+	var err error
 
 	totalFiles := 0
 	for _, src := range sources {
-		count, err := countFiles(src)
-		if err != nil {
-			slog.Error("Error while zip file count files ", "error", err)
+		if _, err = os.Stat(src); os.IsNotExist(err) {
+			return fmt.Errorf("source path does not exist: %s", src)
+		}
+		count, e := countFiles(src)
+		if e != nil {
+			slog.Error("Error while zip file count files ", "error", e)
 		}
 		totalFiles += count
 	}
+
 	p := process{
 		name:     "zip files",
 		progress: prog,
