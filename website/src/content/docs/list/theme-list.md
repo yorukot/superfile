@@ -8,6 +8,14 @@ head:
 
 > Sort by A-Z
 
+## 0x96f
+
+- Theme name: `0x96f`
+- Ported by: https://github.com/filipjanevski
+- Original Author: https://github.com/filipjanevski/
+
+![](https://github.com/yorukot/superfile/blob/main/asset/theme/0x96f.png?raw=true)
+
 ## Ayu Dark
 
 - Theme name: `ayu-dark`
@@ -145,6 +153,7 @@ head:
 ![](https://github.com/yorukot/superfile/blob/main/asset/theme/rose-pine.png?raw=true)
 
 ## Sugarplum
+
 - Theme name: `sugarplum`
 - Ported by: https://github.com/lemonlime0x3C33
 - Original Author: https://github.com/lemonlime0x3C33
