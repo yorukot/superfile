@@ -9,6 +9,7 @@ import (
 
 const WheelRunTime = 5
 const DefaultCommandTimeout = 5000 * time.Millisecond
+const DateModifiedOption = "Date Modified"
 
 var (
 	MinimumHeight = 24

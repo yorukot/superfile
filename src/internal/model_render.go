@@ -16,6 +16,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/lithammer/shortuuid"
 	"github.com/yorukot/superfile/src/internal/ui"
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
 
@@ -69,7 +70,7 @@ func (m *model) filePanelRender() string {
 
 func (panel *filePanel) Render(mainPanelHeight int, filePanelWidth int, focussed bool) string {
 	r := ui.FilePanelRenderer(mainPanelHeight+2, filePanelWidth+2, focussed)
-
+	// Todo : Unit test for all the functions
 	panel.renderTopBar(r, filePanelWidth)
 	panel.renderSearchBar(r)
 	panel.renderFooter(r)
@@ -78,6 +79,7 @@ func (panel *filePanel) Render(mainPanelHeight int, filePanelWidth int, focussed
 	return r.Render()
 }
 
+// Todo - Add AnsiTruncateLeft in ui/renderer package and remove truncation here
 func (panel *filePanel) renderTopBar(r *rendering.Renderer, filePanelWidth int) {
 	truncatedPath := common.TruncateTextBeginning(panel.location, filePanelWidth-4, "...")
 	r.AddLines(common.FilePanelTopDirectoryIcon + common.FilePanelTopPathStyle.Render(truncatedPath))
@@ -136,6 +138,8 @@ func (panel *filePanel) renderFileEntries(r *rendering.Renderer, mainPanelHeight
 		}
 
 		// Performance TODO: Remove or cache this if not needed at render time
+		// Figure out why we are doing this. This will unnecessarily slow down
+		// rendering. There should be a way to avoid this at render
 		_, err := os.ReadDir(panel.element[i].location)
 		dirExists := err == nil || panel.element[i].directory
 
@@ -155,7 +159,8 @@ func (panel *filePanel) getSortInfo() (string, string) {
 	opts := panel.sortOptions.data
 	selected := opts.options[opts.selected]
 	label := selected
-	if selected == "Date Modified" {
+
+	if selected == common.DateModifiedOption {
 		label = "Date"
 	}
 
@@ -286,8 +291,9 @@ func (m *model) metadataRender() string {
 	sortedMeta := sortMetadata(m.fileMetaData.metaData)
 	maxKeyLen := getMaxKeyLength(sortedMeta)
 	sprintfLen, valLen := computeWidths(m.fullWidth, maxKeyLen)
+	totalWidth := utils.FooterWidth(m.fullWidth)
 
-	lines := formatMetadataLines(sortedMeta, m.fileMetaData.renderIndex, m.footerHeight, sprintfLen, valLen)
+	lines := formatMetadataLines(sortedMeta, m.fileMetaData.renderIndex, m.footerHeight, sprintfLen, totalWidth, valLen)
 
 	r := ui.MetadataRenderer(m.footerHeight+2, utils.FooterWidth(m.fullWidth)+2, m.focusPanel == metadataFocus)
 	if len(sortedMeta) > 0 {
@@ -304,10 +310,15 @@ func (m *model) ensureMetadataLoaded() {
 		len(m.fileModel.filePanels[m.filePanelFocusIndex].element) > 0 &&
 		!m.fileModel.renaming {
 
-		m.fileMetaData.metaData = [][2]string{
-			{"", ""},
-			{" " + icon.InOperation + "  Loading metadata...", ""},
+		loadingMessage := channelMessage{
+			messageID:   shortuuid.New(),
+			messageType: sendMetadata,
+			metadata: [][2]string{
+				{"", ""},
+				{" " + icon.InOperation + "  Loading metadata...", ""},
+			},
 		}
+		channel <- loadingMessage
 		// Todo : This needs to be improved, we are updating m.fileMetaData is a separate goroutine
 		// while also modifying it here in the function. It could cause issues.
 		go func() {
@@ -362,13 +373,14 @@ func computeWidths(fullWidth, maxKeyLen int) (sprintfLen int, valueLen int) {
 	return sprintfLen, valueLen
 }
 
-func formatMetadataLines(meta [][2]string, startIdx, height, sprintfLen, valueLen int) []string {
+func formatMetadataLines(meta [][2]string, startIdx, height, sprintfLen, totalWidth, valueLen int) []string {
 	lines := []string{}
 	endIdx := min(startIdx+height, len(meta))
 	for i := startIdx; i < endIdx; i++ {
 		key := meta[i][0]
 		value := common.TruncateMiddleText(meta[i][1], valueLen, "...")
-		if utils.FooterWidth(0)-sprintfLen-3 < utils.FooterWidth(0)/2 {
+
+		if totalWidth-sprintfLen-3 < totalWidth/2 {
 			key = common.TruncateMiddleText(key, valueLen, "...")
 		}
 		line := fmt.Sprintf("%-*s %s", sprintfLen, key, value)
@@ -722,7 +734,9 @@ func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewW
 			return box.Render("\n --- " + icon.Error + " Error covernt image to ansi ---")
 		}
 
-		return box.AlignVertical(lipgloss.Center).AlignHorizontal(lipgloss.Center).Render(imageRender)
+		// return box.AlignVertical(lipgloss.Center).AlignHorizontal(lipgloss.Center).Render(imageRender)
+		fmt.Print(imageRender)
+		return ""
 	}
 
 	format := lexers.Match(filepath.Base(itemPath))
