@@ -733,10 +733,7 @@ func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewW
 			slog.Error("Error covernt image to ansi", "error", err)
 			return box.Render("\n --- " + icon.Error + " Error covernt image to ansi ---")
 		}
-
-		// return box.AlignVertical(lipgloss.Center).AlignHorizontal(lipgloss.Center).Render(imageRender)
-		fmt.Print(imageRender)
-		return ""
+		return box.AlignVertical(lipgloss.Center).AlignHorizontal(lipgloss.Center).Render(imageRender)
 	}
 
 	format := lexers.Match(filepath.Base(itemPath))

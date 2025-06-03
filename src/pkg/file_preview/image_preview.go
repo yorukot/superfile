@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"strings"
+
 	"image"
 	"image/color"
 	_ "image/gif"
@@ -12,7 +14,6 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/BourgeoisBear/rasterm"
 	"github.com/disintegration/imaging"
 	"github.com/muesli/termenv"
 	"github.com/rwcarlsen/goexif/exif"
@@ -54,46 +55,36 @@ func (c *colorCache) getTermenvColor(col color.Color, fallbackColor string) term
 func ConvertImageToANSI(img image.Image, defaultBGColor color.Color) string {
 	width := img.Bounds().Dx()
 	height := img.Bounds().Dy()
-	output := ""
+	var output strings.Builder
 	cache := newColorCache()
 	defaultBGHex := colorToHex(defaultBGColor)
 
 	for y := 0; y < height; y += 2 {
-		for x := range width {
-			upperColor := cache.getTermenvColor(img.At(x, y), defaultBGHex)
-			lowerColor := cache.getTermenvColor(defaultBGColor, "")
-
-			if y+1 < height {
-				lowerColor = cache.getTermenvColor(img.At(x, y+1), defaultBGHex)
-			}
-
-			// Using the "▄" character which fills the lower half
-			cell := termenv.String("▄").Foreground(lowerColor).Background(upperColor)
-			output += cell.String()
+		for x := 0; x < width; x++ {
+			bg := cache.getTermenvColor(img.At(x, y), defaultBGHex)
+			cell := termenv.String(" ").Background(bg)
+			output.WriteString(cell.String())
 		}
-		output += "\n"
+		output.WriteString("\n")
 	}
 
-	return output
+	return output.String()
 }
 
 func ImagePreview(path string, maxWidth int, maxHeight int, defaultBGColor string) (string, error) {
-	if rasterm.IsKittyCapable() {
-		return ImagePreviewWithRenderer(path, maxWidth, maxHeight, defaultBGColor, RendererKitty)
-	}
+
 	return ImagePreviewWithRenderer(path, maxWidth, maxHeight, defaultBGColor, RendererANSI)
 }
 
 func ImagePreviewWithRenderer(path string, maxWidth int, maxHeight int, defaultBGColor string, renderer ImageRenderer) (string, error) {
-
 	info, err := os.Stat(path)
-    if err != nil {
-        return "", err
-    }
-    const maxFileSize = 100 * 1024 * 1024 // 100MB limit
-    if info.Size() > maxFileSize {
-        return "", fmt.Errorf("image file too large: %d bytes", info.Size())
-    }
+	if err != nil {
+		return "", err
+	}
+	const maxFileSize = 100 * 1024 * 1024
+	if info.Size() > maxFileSize {
+		return "", fmt.Errorf("image file too large: %d bytes", info.Size())
+	}
 
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -112,19 +103,9 @@ func ImagePreviewWithRenderer(path string, maxWidth int, maxHeight int, defaultB
 	resizedImg := imaging.Fit(img, maxWidth, maxHeight, imaging.Lanczos)
 
 	switch renderer {
-	case RendererKitty:
-		opts := rasterm.KittyImgOpts{
-			SrcWidth:     uint32(maxWidth),
-			SrcHeight:    uint32(maxHeight),
-		}
-		if err := rasterm.KittyWriteImage(os.Stdout, resizedImg, opts); err != nil {
-            return "", err
-        }
-		return "", nil
 	case RendererANSI:
 		fallthrough
 	default:
-		// Convert image to ANSI
 		bgColor, err := hexToColor(defaultBGColor)
 		if err != nil {
 			return "", fmt.Errorf("invalid background color: %w", err)
@@ -171,7 +152,7 @@ func adjustOrientation(img image.Image, orientation int) image.Image {
 	case 8:
 		return imaging.Rotate90(img)
 	default:
-		slog.Error("Invalid orientation value","error", orientation)
+		slog.Error("Invalid orientation value", "error", orientation)
 		return img
 	}
 }
