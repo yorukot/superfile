@@ -129,5 +129,4 @@ func getZipArchiveName(base string) (string, error) {
 	zipName := strings.TrimSuffix(base, filepath.Ext(base)) + ".zip"
 	zipName, err := renameIfDuplicate(zipName)
 	return zipName, err
-
 }

@@ -631,7 +631,6 @@ func (m *model) compressFile() {
 			slog.Error("Error in zipping files", "error", err)
 			return
 		}
-
 	} else {
 		first := panel.selected[0]
 		base := filepath.Base(first)
