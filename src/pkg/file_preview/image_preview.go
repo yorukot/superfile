@@ -1,11 +1,8 @@
 package filepreview
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
-	"strings"
-
 	"image"
 	"image/color"
 	_ "image/gif"
@@ -14,9 +11,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/disintegration/imaging"
 	"github.com/muesli/termenv"
-	"github.com/rwcarlsen/goexif/exif"
 )
 
 type ImageRenderer int
@@ -55,24 +50,33 @@ func (c *colorCache) getTermenvColor(col color.Color, fallbackColor string) term
 func ConvertImageToANSI(img image.Image, defaultBGColor color.Color) string {
 	width := img.Bounds().Dx()
 	height := img.Bounds().Dy()
-	var output strings.Builder
+	output := ""
 	cache := newColorCache()
 	defaultBGHex := colorToHex(defaultBGColor)
 
 	for y := 0; y < height; y += 2 {
-		for x := 0; x < width; x++ {
-			bg := cache.getTermenvColor(img.At(x, y), defaultBGHex)
-			cell := termenv.String(" ").Background(bg)
-			output.WriteString(cell.String())
+		for x := range width {
+			upperColor := cache.getTermenvColor(img.At(x, y), defaultBGHex)
+			lowerColor := cache.getTermenvColor(defaultBGColor, "")
+
+			if y+1 < height {
+				lowerColor = cache.getTermenvColor(img.At(x, y+1), defaultBGHex)
+			}
+
+			// Using the "▄" character which fills the lower half
+			cell := termenv.String("▄").Foreground(lowerColor).Background(upperColor)
+			output += cell.String()
 		}
-		output.WriteString("\n")
+		output += "\n"
 	}
 
-	return output.String()
+	return output
 }
 
 func ImagePreview(path string, maxWidth int, maxHeight int, defaultBGColor string) (string, error) {
-
+	if isKittyCapable() {
+		return ImagePreviewWithRenderer(path, maxWidth, maxHeight, defaultBGColor, RendererKitty)
+	}
 	return ImagePreviewWithRenderer(path, maxWidth, maxHeight, defaultBGColor, RendererANSI)
 }
 
@@ -81,7 +85,7 @@ func ImagePreviewWithRenderer(path string, maxWidth int, maxHeight int, defaultB
 	if err != nil {
 		return "", err
 	}
-	const maxFileSize = 100 * 1024 * 1024
+	const maxFileSize = 100 * 1024 * 1024 // 100MB limit
 	if info.Size() > maxFileSize {
 		return "", fmt.Errorf("image file too large: %d bytes", info.Size())
 	}
@@ -90,70 +94,41 @@ func ImagePreviewWithRenderer(path string, maxWidth int, maxHeight int, defaultB
 	if err != nil {
 		return "", err
 	}
-	imgReader := bytes.NewReader(data)
 
-	img, _, err := image.Decode(imgReader)
+	// Use the new image preparation pipeline
+	img, originalWidth, originalHeight, err := prepareImageForPreview(data)
 	if err != nil {
 		return "", err
 	}
 
-	exifReader := bytes.NewReader(data)
-	img = adjustImageOrientation(exifReader, img)
-
-	resizedImg := imaging.Fit(img, maxWidth, maxHeight, imaging.Lanczos)
-
 	switch renderer {
+	case RendererKitty:
+		result, err := renderWithKitty(img, path, maxWidth, maxHeight, originalWidth, originalHeight)
+		if err != nil {
+			// If kitty fails, fall back to ANSI renderer
+			slog.Error("Kitty renderer failed, falling back to ANSI", "error", err)
+			bgColor, bgErr := hexToColor(defaultBGColor)
+			if bgErr != nil {
+				return "", fmt.Errorf("kitty failed and invalid background color: %w", bgErr)
+			}
+			// For ANSI fallback, fit the image to preview dimensions maintaining aspect ratio
+			ansiImg := resizeForANSI(img, maxWidth, maxHeight)
+			return ConvertImageToANSI(ansiImg, bgColor), nil
+		}
+		return result, nil
+
 	case RendererANSI:
 		fallthrough
 	default:
+		// Convert image to ANSI
 		bgColor, err := hexToColor(defaultBGColor)
 		if err != nil {
 			return "", fmt.Errorf("invalid background color: %w", err)
 		}
-		return ConvertImageToANSI(resizedImg, bgColor), nil
-	}
-}
 
-func adjustImageOrientation(r *bytes.Reader, img image.Image) image.Image {
-	exifData, err := exif.Decode(r)
-	if err != nil {
-		slog.Error("exif error", "error", err)
-		return img
-	}
-	tag, err := exifData.Get(exif.Orientation)
-	if err != nil {
-		slog.Error("exif orientation error", "error", err)
-		return img
-	}
-	orientation, err := tag.Int(0)
-	if err != nil {
-		slog.Error("exif orientation value error", "error", err)
-		return img
-	}
-	return adjustOrientation(img, orientation)
-}
-
-func adjustOrientation(img image.Image, orientation int) image.Image {
-	switch orientation {
-	case 1:
-		return img
-	case 2:
-		return imaging.FlipH(img)
-	case 3:
-		return imaging.Rotate180(img)
-	case 4:
-		return imaging.FlipV(img)
-	case 5:
-		return imaging.Transpose(img)
-	case 6:
-		return imaging.Rotate270(img)
-	case 7:
-		return imaging.Transverse(img)
-	case 8:
-		return imaging.Rotate90(img)
-	default:
-		slog.Error("Invalid orientation value", "error", orientation)
-		return img
+		// For ANSI rendering, resize image appropriately
+		fittedImg := resizeForANSI(img, maxWidth, maxHeight)
+		return ConvertImageToANSI(fittedImg, bgColor), nil
 	}
 }
 
