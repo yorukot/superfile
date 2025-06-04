@@ -36,7 +36,7 @@ func TestCopy(t *testing.T) {
 		// Everything that doesn't have anything to do with copy paste
 
 		// validate file1
-		// Todo : improve the interface we use to interact with filepaneltestChildDir
+		// Todo : improve the interface we use to interact with filepanel
 
 		// Todo : file1.txt should not be duplicated
 
@@ -79,7 +79,8 @@ func TestCopy(t *testing.T) {
 	})
 }
 
-func TestFileNaming(t *testing.T) {
+func TestFileCreation(t *testing.T) {
+	// Todo Also add directory creation test to this
 	curTestDir := filepath.Join(testDir, "TestNaming")
 	testParentDir := filepath.Join(curTestDir, "parentDir")
 	testChildDir := filepath.Join(testParentDir, "childDir")
@@ -99,7 +100,7 @@ func TestFileNaming(t *testing.T) {
 		{"invalid single dot", ".", true},
 		{"invalid double dot", "..", true},
 		{"invalid trailing slash-dot", fmt.Sprintf("test%c.", filepath.Separator), true},
-		{"invalid trailig slash-dot-dot", fmt.Sprintf("test%c..", filepath.Separator), true},
+		{"invalid trailing slash-dot-dot", fmt.Sprintf("test%c..", filepath.Separator), true},
 		{"valid name with trailing .", "abc.", false},
 	}
 
@@ -118,7 +119,8 @@ func TestFileNaming(t *testing.T) {
 		if tt.expectedError {
 			assert.NotEqual(t, "", m.typingModal.errorMesssage, "expected an error for input: %q", tt.fileName)
 		} else {
-			assert.Equal(t, "", m.typingModal.errorMesssage, "did not expect an error for input: %q", tt.fileName)
+			assert.Empty(t, m.typingModal.errorMesssage, "expected an error for input: %q", tt.fileName)
+			assert.FileExists(t, filepath.Join(testChildDir, tt.fileName), "expected file to be created: %q", tt.fileName)
 		}
 	}
 }

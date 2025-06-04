@@ -492,11 +492,10 @@ func (m *model) typineModalRender() string {
 
 	var err string
 	if m.typingModal.errorMesssage != "" {
-		err = lipgloss.NewStyle().Foreground(lipgloss.Color("9")).
-			BorderForeground(lipgloss.Color("9")).Render(lipgloss.NewStyle().Border(lipgloss.DoubleBorder()).Width(44).Render(m.typingModal.errorMesssage))
+		err = common.ModalErrorStyle.Render(m.typingModal.errorMesssage)
 	}
 
-	return common.ModalBorderStyle(common.ModalHeight, common.ModalWidth).Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip + "\n\n" + err)
+	return common.ModalBorderStyle(common.ModalHeight, common.ModalWidth).Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip + "\n\n" + err + "\n")
 }
 
 func (m *model) introduceModalRender() string {

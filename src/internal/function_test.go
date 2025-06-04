@@ -183,17 +183,17 @@ func TestCheckFileNameValidity(t *testing.T) {
 			name:    "invalid - double dot",
 			input:   "..",
 			wantErr: true,
-			errMsg:  "file name cnnot be '.' or '..'",
+			errMsg:  "file name cannot be '.' or '..'",
 		}, {
 			name:    "invalid - ends with /.. (platform separator)",
 			input:   fmt.Sprintf("testDir%c..", filepath.Separator),
 			wantErr: true,
-			errMsg:  "file name cannot end with '/.' or '/..'",
+			errMsg:  fmt.Sprintf("file name cannot end with '%c.' or '%c..'", filepath.Separator, filepath.Separator),
 		}, {
 			name:    "invalid - ends with /. (platform separator)",
 			input:   fmt.Sprintf("testDir%c.", filepath.Separator),
 			wantErr: true,
-			errMsg:  "file name cannot end with '/.' or '/..'",
+			errMsg:  fmt.Sprintf("file name cannot end with '%c.' or '%c..'", filepath.Separator, filepath.Separator),
 		}, {
 			name:    "valid - normal file name",
 			input:   "valid_file.txt",
@@ -219,15 +219,13 @@ func TestCheckFileNameValidity(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			err := checkFileNameValidity(tt.input)
-			if (err != nil) != tt.wantErr {
-				if (err != nil) != tt.wantErr {
-					t.Errorf("checkFileNameValidity(%q) error = %v, wantErr %v", tt.input, err, tt.wantErr)
-				}
-				if err != nil && !strings.Contains(err.Error(), tt.errMsg) {
-					t.Errorf("checkFileNameValidity(%q) error = %q, want to contain %q", tt.input, err.Error(), tt.errMsg)
-				}
+
+			if !tt.wantErr {
+				require.NoError(t, err)
+			} else {
+				require.Error(t, err)
+				assert.True(t, strings.Contains(err.Error(), tt.errMsg))
 			}
 		})
 	}
-
 }
