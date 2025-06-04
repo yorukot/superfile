@@ -137,11 +137,11 @@ func renderWithKitty(img image.Image, path string, maxWidth, maxHeight, original
 	)
 
 	// Generate placement ID and options
-	placementId := generatePlacementID(path)
+	placementID := generatePlacementID(path)
 	opts := rasterm.KittyImgOpts{
 		DstCols:     uint32(cols),
 		DstRows:     uint32(rows),
-		PlacementId: placementId,
+		PlacementId: placementID,
 	}
 
 	// Write image using Kitty protocol

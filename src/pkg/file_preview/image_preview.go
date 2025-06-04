@@ -5,15 +5,15 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	_ "image/gif"
-	_ "image/jpeg"
-	_ "image/png"
+	_ "image/gif"  // Register GIF decoder
+	_ "image/jpeg" // Register JPEG decoder
+	_ "image/png"  // Register PNG decoder
 	"log/slog"
 	"os"
 	"strconv"
 
 	"github.com/muesli/termenv"
-	_ "golang.org/x/image/webp"
+	_ "golang.org/x/image/webp" // Register WebP decoder
 )
 
 type ImageRenderer int
