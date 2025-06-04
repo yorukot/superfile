@@ -76,6 +76,11 @@ func ConvertImageToANSI(img image.Image, defaultBGColor color.Color) string {
 }
 
 func ImagePreview(path string, maxWidth int, maxHeight int, defaultBGColor string) (string, error) {
+	// Validate dimensions
+	if maxWidth <= 0 || maxHeight <= 0 {
+		return "", fmt.Errorf("dimensions must be positive (maxWidth=%d, maxHeight=%d)", maxWidth, maxHeight)
+	}
+
 	if isKittyCapable() {
 		return ImagePreviewWithRenderer(path, maxWidth, maxHeight, defaultBGColor, RendererKitty)
 	}
@@ -83,6 +88,11 @@ func ImagePreview(path string, maxWidth int, maxHeight int, defaultBGColor strin
 }
 
 func ImagePreviewWithRenderer(path string, maxWidth int, maxHeight int, defaultBGColor string, renderer ImageRenderer) (string, error) {
+	// Validate dimensions
+	if maxWidth <= 0 || maxHeight <= 0 {
+		return "", fmt.Errorf("dimensions must be positive (maxWidth=%d, maxHeight=%d)", maxWidth, maxHeight)
+	}
+
 	info, err := os.Stat(path)
 	if err != nil {
 		return "", err
