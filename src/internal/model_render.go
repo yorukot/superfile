@@ -645,7 +645,14 @@ func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewW
 	r := ui.FilePreviewPanelRenderer(previewHeight, previewWidth)
 
 	if len(panel.element) == 0 {
-		r.AddLines(common.FilePreviewNoContentText)
+		// Clear any Kitty images when no files are selected
+		clearCmd := filepreview.ClearKittyImages()
+		if clearCmd != "" {
+			// Add clear command to output but don't show it to user
+			r.AddLines(clearCmd + common.FilePreviewNoContentText)
+		} else {
+			r.AddLines(common.FilePreviewNoContentText)
+		}
 		return r.Render()
 	}
 	// This could create errors if panel.cursor ever becomes negative, or goes out of bounds
@@ -664,29 +671,51 @@ func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewW
 
 	if infoErr != nil {
 		slog.Error("Error get file info", "error", infoErr)
-		r.AddLines(common.FilePreviewNoFileInfoText)
+		// Clear any Kitty images when file info is not available
+		clearCmd := filepreview.ClearKittyImages()
+		if clearCmd != "" {
+			r.AddLines(clearCmd + common.FilePreviewNoFileInfoText)
+		} else {
+			r.AddLines(common.FilePreviewNoFileInfoText)
+		}
 		return r.Render()
 	}
 
 	ext := filepath.Ext(itemPath)
 	// check if the file is unsupported file, cuz pdf will cause error
 	if slices.Contains(common.UnsupportedPreviewFormats, ext) {
-		r.AddLines(common.FilePreviewUnsupportedFormatText)
+		// Clear any Kitty images when showing unsupported formats
+		clearCmd := filepreview.ClearKittyImages()
+		if clearCmd != "" {
+			r.AddLines(clearCmd + common.FilePreviewUnsupportedFormatText)
+		} else {
+			r.AddLines(common.FilePreviewUnsupportedFormatText)
+		}
 		return r.Render()
 	}
 
 	if fileInfo.IsDir() {
+		// Clear any Kitty images when showing directory preview
+		clearCmd := filepreview.ClearKittyImages()
 		dirPath := itemPath
 
 		files, err := os.ReadDir(dirPath)
 		if err != nil {
 			slog.Error("Error render directory preview", "error", err)
-			r.AddLines(common.FilePreviewDirectoryUnreadableText)
+			if clearCmd != "" {
+				r.AddLines(clearCmd + common.FilePreviewDirectoryUnreadableText)
+			} else {
+				r.AddLines(common.FilePreviewDirectoryUnreadableText)
+			}
 			return r.Render()
 		}
 
 		if len(files) == 0 {
-			r.AddLines(common.FilePreviewEmptyText)
+			if clearCmd != "" {
+				r.AddLines(clearCmd + common.FilePreviewEmptyText)
+			} else {
+				r.AddLines(common.FilePreviewEmptyText)
+			}
 			return r.Render()
 		}
 
@@ -699,6 +728,11 @@ func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewW
 			}
 			return files[i].Name() < files[j].Name()
 		})
+
+		// Add clear command before directory listing
+		if clearCmd != "" {
+			r.AddLines(clearCmd)
+		}
 
 		for i := 0; i < previewHeight && i < len(files); i++ {
 			file := files[i]
@@ -715,23 +749,46 @@ func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewW
 
 	if isImageFile(itemPath) {
 		if !m.fileModel.filePreview.open {
-			// Todo : These variables can be pre rendered for efficiency and less duplicacy
-			return box.Render("\n --- Preview panel is closed ---")
+			// Clear any Kitty images when preview panel is closed
+			clearCmd := filepreview.ClearKittyImages()
+			if clearCmd != "" {
+				return box.Render(clearCmd + "\n --- Preview panel is closed ---")
+			} else {
+				return box.Render("\n --- Preview panel is closed ---")
+			}
 		}
 
 		if !common.Config.ShowImagePreview {
-			return box.Render("\n --- Image preview is disabled ---")
+			// Clear any Kitty images when image preview is disabled
+			clearCmd := filepreview.ClearKittyImages()
+			if clearCmd != "" {
+				return box.Render(clearCmd + "\n --- Image preview is disabled ---")
+			} else {
+				return box.Render("\n --- Image preview is disabled ---")
+			}
 		}
 
 		// Use the new auto-detection function to choose the best renderer
 		imageRender, err := filepreview.ImagePreview(itemPath, previewWidth, previewHeight, common.Theme.FilePanelBG)
 		if errors.Is(err, image.ErrFormat) {
-			return box.Render("\n --- " + icon.Error + " Unsupported image formats ---")
+			// Clear any Kitty images when image format is unsupported
+			clearCmd := filepreview.ClearKittyImages()
+			if clearCmd != "" {
+				return box.Render(clearCmd + "\n --- " + icon.Error + " Unsupported image formats ---")
+			} else {
+				return box.Render("\n --- " + icon.Error + " Unsupported image formats ---")
+			}
 		}
 
 		if err != nil {
 			slog.Error("Error covernt image to ansi", "error", err)
-			return box.Render("\n --- " + icon.Error + " Error covernt image to ansi ---")
+			// Clear any Kitty images when image conversion fails
+			clearCmd := filepreview.ClearKittyImages()
+			if clearCmd != "" {
+				return box.Render(clearCmd + "\n --- " + icon.Error + " Error covernt image to ansi ---")
+			} else {
+				return box.Render("\n --- " + icon.Error + " Error covernt image to ansi ---")
+			}
 		}
 
 		// Check if this looks like Kitty protocol output (starts with escape sequences)
@@ -746,15 +803,26 @@ func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewW
 		return box.AlignVertical(lipgloss.Center).Render(imageRender)
 	}
 
+	// Clear any Kitty images when showing text/code files
+	clearCmd := filepreview.ClearKittyImages()
+
 	format := lexers.Match(filepath.Base(itemPath))
 
 	if format == nil {
 		isText, err := common.IsTextFile(itemPath)
 		if err != nil {
 			slog.Error("Error while checking text file", "error", err)
-			return box.Render("\n --- " + icon.Error + " Error get file info ---")
+			if clearCmd != "" {
+				return box.Render(clearCmd + "\n --- " + icon.Error + " Error get file info ---")
+			} else {
+				return box.Render("\n --- " + icon.Error + " Error get file info ---")
+			}
 		} else if !isText {
-			return box.Render("\n --- " + icon.Error + " Unsupported formats ---")
+			if clearCmd != "" {
+				return box.Render(clearCmd + "\n --- " + icon.Error + " Unsupported formats ---")
+			} else {
+				return box.Render("\n --- " + icon.Error + " Unsupported formats ---")
+			}
 		}
 	}
 
@@ -762,11 +830,19 @@ func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewW
 	fileContent, err := readFileContent(itemPath, previewWidth, previewHeight)
 	if err != nil {
 		slog.Error("Error open file", "error", err)
-		return box.Render("\n --- " + icon.Error + " Error open file ---")
+		if clearCmd != "" {
+			return box.Render(clearCmd + "\n --- " + icon.Error + " Error open file ---")
+		} else {
+			return box.Render("\n --- " + icon.Error + " Error open file ---")
+		}
 	}
 
 	if fileContent == "" {
-		return box.Render("\n --- empty ---")
+		if clearCmd != "" {
+			return box.Render(clearCmd + "\n --- empty ---")
+		} else {
+			return box.Render("\n --- empty ---")
+		}
 	}
 
 	// We know the format of file, and we can apply syntax highlighting
@@ -777,7 +853,11 @@ func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewW
 		}
 		if common.Config.CodePreviewer == "bat" {
 			if batCmd == "" {
-				return box.Render("\n --- " + icon.Error + " 'bat' is not installed or not found. ---\n --- Cannot render file preview. ---")
+				if clearCmd != "" {
+					return box.Render(clearCmd + "\n --- " + icon.Error + " 'bat' is not installed or not found. ---\n --- Cannot render file preview. ---")
+				} else {
+					return box.Render("\n --- " + icon.Error + " 'bat' is not installed or not found. ---\n --- Cannot render file preview. ---")
+				}
 			}
 			fileContent, err = getBatSyntaxHighlightedContent(itemPath, previewHeight, background)
 		} else {
@@ -785,8 +865,17 @@ func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewW
 		}
 		if err != nil {
 			slog.Error("Error render code highlight", "error", err)
-			return box.Render("\n --- " + icon.Error + " Error render code highlight ---")
+			if clearCmd != "" {
+				return box.Render(clearCmd + "\n --- " + icon.Error + " Error render code highlight ---")
+			} else {
+				return box.Render("\n --- " + icon.Error + " Error render code highlight ---")
+			}
 		}
+	}
+
+	// Add clear command before text content
+	if clearCmd != "" {
+		r.AddLines(clearCmd)
 	}
 	r.AddLines(fileContent)
 	return r.Render()
