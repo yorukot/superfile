@@ -19,10 +19,10 @@ const (
 )
 
 // calculateTerminalCells calculates how many terminal cells are needed for given pixel dimensions
-func calculateTerminalCells(pixelWidth, pixelHeight, maxCols, maxRows int) (cols, rows int) {
+func calculateTerminalCells(pixelWidth, pixelHeight, maxCols, maxRows int) (int, int) {
 	// Convert pixel dimensions to terminal cell dimensions
-	cols = (pixelWidth + DefaultPixelsPerColumn - 1) / DefaultPixelsPerColumn // round up
-	rows = (pixelHeight + DefaultPixelsPerRow - 1) / DefaultPixelsPerRow      // round up
+	cols := (pixelWidth + DefaultPixelsPerColumn - 1) / DefaultPixelsPerColumn // round up
+	rows := (pixelHeight + DefaultPixelsPerRow - 1) / DefaultPixelsPerRow      // round up
 
 	// Ensure we don't exceed the preview area
 	if cols > maxCols {

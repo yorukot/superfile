@@ -338,14 +338,16 @@ func sortMetadata(meta [][2]string) [][2]string {
 	sort.SliceStable(meta, func(i, j int) bool {
 		pi, iok := priority[meta[i][0]]
 		pj, jok := priority[meta[j][0]]
-		if iok && jok {
+		switch {
+		case iok && jok:
 			return pi < pj
-		} else if iok {
+		case iok:
 			return true
-		} else if jok {
+		case jok:
 			return false
+		default:
+			return meta[i][0] < meta[j][0]
 		}
-		return meta[i][0] < meta[j][0]
 	})
 
 	return meta
@@ -361,9 +363,10 @@ func getMaxKeyLength(meta [][2]string) int {
 	return maxLen
 }
 
-func computeWidths(fullWidth, maxKeyLen int) (sprintfLen int, valueLen int) {
+func computeWidths(fullWidth, maxKeyLen int) (int, int) {
 	totalWidth := utils.FooterWidth(fullWidth)
-	valueLen = totalWidth - maxKeyLen - 2
+	valueLen := totalWidth - maxKeyLen - 2
+	var sprintfLen int
 	if valueLen < totalWidth/2 {
 		valueLen = totalWidth/2 - 2
 		sprintfLen = valueLen
@@ -753,9 +756,8 @@ func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewW
 			clearCmd := filepreview.ClearKittyImages()
 			if clearCmd != "" {
 				return box.Render(clearCmd + "\n --- Preview panel is closed ---")
-			} else {
-				return box.Render("\n --- Preview panel is closed ---")
 			}
+			return box.Render("\n --- Preview panel is closed ---")
 		}
 
 		if !common.Config.ShowImagePreview {
@@ -763,9 +765,8 @@ func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewW
 			clearCmd := filepreview.ClearKittyImages()
 			if clearCmd != "" {
 				return box.Render(clearCmd + "\n --- Image preview is disabled ---")
-			} else {
-				return box.Render("\n --- Image preview is disabled ---")
 			}
+			return box.Render("\n --- Image preview is disabled ---")
 		}
 
 		// Use the new auto-detection function to choose the best renderer
@@ -776,9 +777,8 @@ func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewW
 			clearCmd := filepreview.ClearKittyImages()
 			if clearCmd != "" {
 				return box.Render(clearCmd + "\n --- " + icon.Error + " Unsupported image formats ---")
-			} else {
-				return box.Render("\n --- " + icon.Error + " Unsupported image formats ---")
 			}
+			return box.Render("\n --- " + icon.Error + " Unsupported image formats ---")
 		}
 
 		if err != nil {
@@ -787,9 +787,8 @@ func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewW
 			clearCmd := filepreview.ClearKittyImages()
 			if clearCmd != "" {
 				return box.Render(clearCmd + "\n --- " + icon.Error + " Error covernt image to ansi ---")
-			} else {
-				return box.Render("\n --- " + icon.Error + " Error covernt image to ansi ---")
 			}
+			return box.Render("\n --- " + icon.Error + " Error covernt image to ansi ---")
 		}
 
 		// Check if this looks like Kitty protocol output (starts with escape sequences)
@@ -815,15 +814,13 @@ func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewW
 			slog.Error("Error while checking text file", "error", err)
 			if clearCmd != "" {
 				return box.Render(clearCmd + "\n --- " + icon.Error + " Error get file info ---")
-			} else {
-				return box.Render("\n --- " + icon.Error + " Error get file info ---")
 			}
+			return box.Render("\n --- " + icon.Error + " Error get file info ---")
 		} else if !isText {
 			if clearCmd != "" {
 				return box.Render(clearCmd + "\n --- " + icon.Error + " Unsupported formats ---")
-			} else {
-				return box.Render("\n --- " + icon.Error + " Unsupported formats ---")
 			}
+			return box.Render("\n --- " + icon.Error + " Unsupported formats ---")
 		}
 	}
 
@@ -833,17 +830,15 @@ func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewW
 		slog.Error("Error open file", "error", err)
 		if clearCmd != "" {
 			return box.Render(clearCmd + "\n --- " + icon.Error + " Error open file ---")
-		} else {
-			return box.Render("\n --- " + icon.Error + " Error open file ---")
 		}
+		return box.Render("\n --- " + icon.Error + " Error open file ---")
 	}
 
 	if fileContent == "" {
 		if clearCmd != "" {
 			return box.Render(clearCmd + "\n --- empty ---")
-		} else {
-			return box.Render("\n --- empty ---")
 		}
+		return box.Render("\n --- empty ---")
 	}
 
 	// We know the format of file, and we can apply syntax highlighting
@@ -856,9 +851,8 @@ func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewW
 			if batCmd == "" {
 				if clearCmd != "" {
 					return box.Render(clearCmd + "\n --- " + icon.Error + " 'bat' is not installed or not found. ---\n --- Cannot render file preview. ---")
-				} else {
-					return box.Render("\n --- " + icon.Error + " 'bat' is not installed or not found. ---\n --- Cannot render file preview. ---")
 				}
+				return box.Render("\n --- " + icon.Error + " 'bat' is not installed or not found. ---\n --- Cannot render file preview. ---")
 			}
 			fileContent, err = getBatSyntaxHighlightedContent(itemPath, previewHeight, background)
 		} else {
@@ -868,9 +862,8 @@ func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewW
 			slog.Error("Error render code highlight", "error", err)
 			if clearCmd != "" {
 				return box.Render(clearCmd + "\n --- " + icon.Error + " Error render code highlight ---")
-			} else {
-				return box.Render("\n --- " + icon.Error + " Error render code highlight ---")
 			}
+			return box.Render("\n --- " + icon.Error + " Error render code highlight ---")
 		}
 	}
 
