@@ -734,9 +734,16 @@ func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewW
 			return box.Render("\n --- " + icon.Error + " Error covernt image to ansi ---")
 		}
 
-		// return box.AlignVertical(lipgloss.Center).AlignHorizontal(lipgloss.Center).Render(imageRender)
-		fmt.Print(imageRender)
-		return ""
+		// Check if this looks like Kitty protocol output (starts with escape sequences)
+		// For Kitty protocol, avoid using lipgloss alignment to prevent layout drift
+		if strings.HasPrefix(imageRender, "\x1b_G") {
+			// This is Kitty protocol output - render directly in a simple box
+			// without vertical alignment to avoid layout issues
+			return common.FilePreviewBox(previewHeight, previewWidth).Render(imageRender)
+		}
+
+		// For ANSI output, we can safely use vertical alignment
+		return box.AlignVertical(lipgloss.Center).Render(imageRender)
 	}
 
 	format := lexers.Match(filepath.Base(itemPath))
