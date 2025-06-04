@@ -121,9 +121,6 @@ schema = 3
   [mod."github.com/muesli/termenv"]
     version = "v0.16.0"
     hash = "sha256-hGo275DJlyLtcifSLpWnk8jardOksdeX9lH4lBeE3gI="
-  [mod."github.com/nfnt/resize"]
-    version = "v0.0.0-20180221191011-83c6a9932646"
-    hash = "sha256-yvPV+HlDOyJsiwAcVHQkmtw8DHSXyw+cXHkigXm8rAA="
   [mod."github.com/nwaples/rardecode"]
     version = "v1.1.3"
     hash = "sha256-X7Cg0kEygyy6Xw6sxRF9HirgefkH9tn9UPPelxRaAGg="
