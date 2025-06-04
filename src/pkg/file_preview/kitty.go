@@ -115,6 +115,11 @@ func generatePlacementID(path string) uint32 {
 
 // renderWithKitty renders an image using Kitty graphics protocol
 func renderWithKitty(img image.Image, path string, maxWidth, maxHeight, originalWidth, originalHeight int) (string, error) {
+	// Validate dimensions
+	if maxWidth <= 0 || maxHeight <= 0 {
+		return "", fmt.Errorf("dimensions must be positive (maxWidth=%d, maxHeight=%d)", maxWidth, maxHeight)
+	}
+
 	var buf bytes.Buffer
 
 	// Add clearing commands
