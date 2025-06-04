@@ -309,7 +309,6 @@ func (m *model) ensureMetadataLoaded() {
 	if len(m.fileMetaData.metaData) == 0 &&
 		len(m.fileModel.filePanels[m.filePanelFocusIndex].element) > 0 &&
 		!m.fileModel.renaming {
-
 		loadingMessage := channelMessage{
 			messageID:   shortuuid.New(),
 			messageType: sendMetadata,
@@ -642,170 +641,139 @@ func (m *model) filePreviewPanelRender() string {
 	return m.filePreviewPanelRenderWithDimensions(m.mainPanelHeight+2, m.fileModel.filePreview.width)
 }
 
-func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewWidth int) string {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	box := common.FilePreviewBox(previewHeight, previewWidth)
-	r := ui.FilePreviewPanelRenderer(previewHeight, previewWidth)
-
-	if len(panel.element) == 0 {
-		// Clear any Kitty images when no files are selected
-		clearCmd := filepreview.ClearKittyImages()
-		if clearCmd != "" {
-			// Add clear command to output but don't show it to user
-			r.AddLines(clearCmd + common.FilePreviewNoContentText)
-		} else {
-			r.AddLines(common.FilePreviewNoContentText)
-		}
-		return r.Render()
-	}
-	// This could create errors if panel.cursor ever becomes negative, or goes out of bounds
-	// We should have a panel validation function in our View() function
-	// Panel is a full fledged object with own state, its accessed and modified so many times.
-	// Ideally we dont should never access data from it via directly accessing its variables
-	// Todo : Instead we should have helper functions for panel object and access data that way
-	// like panel.GetCurrentSelectedElem() . This abstration of implemetation of panel is needed.
-	// Now this lack of abstraction has caused issues ( See PR#730 ) . And now
-	// someone needs to scan through the entire codebase to figure out which access of panel
-	// data is causing crash.
-	itemPath := panel.element[panel.cursor].location
-
-	// Renamed it to info_err to prevent shadowing with err below
-	fileInfo, infoErr := os.Stat(itemPath)
-
-	if infoErr != nil {
-		slog.Error("Error get file info", "error", infoErr)
-		// Clear any Kitty images when file info is not available
-		clearCmd := filepreview.ClearKittyImages()
-		if clearCmd != "" {
-			r.AddLines(clearCmd + common.FilePreviewNoFileInfoText)
-		} else {
-			r.AddLines(common.FilePreviewNoFileInfoText)
-		}
-		return r.Render()
-	}
-
-	ext := filepath.Ext(itemPath)
-	// check if the file is unsupported file, cuz pdf will cause error
-	if slices.Contains(common.UnsupportedPreviewFormats, ext) {
-		// Clear any Kitty images when showing unsupported formats
-		clearCmd := filepreview.ClearKittyImages()
-		if clearCmd != "" {
-			r.AddLines(clearCmd + common.FilePreviewUnsupportedFormatText)
-		} else {
-			r.AddLines(common.FilePreviewUnsupportedFormatText)
-		}
-		return r.Render()
-	}
-
-	if fileInfo.IsDir() {
-		// Clear any Kitty images when showing directory preview
-		clearCmd := filepreview.ClearKittyImages()
-		dirPath := itemPath
-
-		files, err := os.ReadDir(dirPath)
-		if err != nil {
-			slog.Error("Error render directory preview", "error", err)
-			if clearCmd != "" {
-				r.AddLines(clearCmd + common.FilePreviewDirectoryUnreadableText)
-			} else {
-				r.AddLines(common.FilePreviewDirectoryUnreadableText)
-			}
-			return r.Render()
-		}
-
-		if len(files) == 0 {
-			if clearCmd != "" {
-				r.AddLines(clearCmd + common.FilePreviewEmptyText)
-			} else {
-				r.AddLines(common.FilePreviewEmptyText)
-			}
-			return r.Render()
-		}
-
-		sort.Slice(files, func(i, j int) bool {
-			if files[i].IsDir() && !files[j].IsDir() {
-				return true
-			}
-			if !files[i].IsDir() && files[j].IsDir() {
-				return false
-			}
-			return files[i].Name() < files[j].Name()
-		})
-
-		// Add clear command before directory listing
-		if clearCmd != "" {
-			r.AddLines(clearCmd)
-		}
-
-		for i := 0; i < previewHeight && i < len(files); i++ {
-			file := files[i]
-
-			style := common.GetElementIcon(file.Name(), file.IsDir(), common.Config.Nerdfont)
-
-			res := lipgloss.NewStyle().Foreground(lipgloss.Color(style.Color)).Background(common.FilePanelBGColor).
-				Render(style.Icon+" ") + common.FilePanelStyle.Render(file.Name())
-
-			r.AddLines(res)
-		}
-		return r.Render()
-	}
-
-	if isImageFile(itemPath) {
-		if !m.fileModel.filePreview.open {
-			// Clear any Kitty images when preview panel is closed
-			clearCmd := filepreview.ClearKittyImages()
-			if clearCmd != "" {
-				return box.Render(clearCmd + "\n --- Preview panel is closed ---")
-			}
-			return box.Render("\n --- Preview panel is closed ---")
-		}
-
-		if !common.Config.ShowImagePreview {
-			// Clear any Kitty images when image preview is disabled
-			clearCmd := filepreview.ClearKittyImages()
-			if clearCmd != "" {
-				return box.Render(clearCmd + "\n --- Image preview is disabled ---")
-			}
-			return box.Render("\n --- Image preview is disabled ---")
-		}
-
-		// Use the new auto-detection function to choose the best renderer
-		// TODO: Consider storing this in memory and possibly running it in parallel.
-		imageRender, err := filepreview.ImagePreview(itemPath, previewWidth, previewHeight, common.Theme.FilePanelBG)
-		if errors.Is(err, image.ErrFormat) {
-			// Clear any Kitty images when image format is unsupported
-			clearCmd := filepreview.ClearKittyImages()
-			if clearCmd != "" {
-				return box.Render(clearCmd + "\n --- " + icon.Error + " Unsupported image formats ---")
-			}
-			return box.Render("\n --- " + icon.Error + " Unsupported image formats ---")
-		}
-
-		if err != nil {
-			slog.Error("Error covernt image to ansi", "error", err)
-			// Clear any Kitty images when image conversion fails
-			clearCmd := filepreview.ClearKittyImages()
-			if clearCmd != "" {
-				return box.Render(clearCmd + "\n --- " + icon.Error + " Error covernt image to ansi ---")
-			}
-			return box.Render("\n --- " + icon.Error + " Error covernt image to ansi ---")
-		}
-
-		// Check if this looks like Kitty protocol output (starts with escape sequences)
-		// For Kitty protocol, avoid using lipgloss alignment to prevent layout drift
-		if strings.HasPrefix(imageRender, "\x1b_G") {
-			// This is Kitty protocol output - render directly in a simple box
-			// without vertical alignment to avoid layout issues
-			return common.FilePreviewBox(previewHeight, previewWidth).Render(imageRender)
-		}
-
-		// For ANSI output, we can safely use vertical alignment
-		return box.AlignVertical(lipgloss.Center).Render(imageRender)
-	}
-
-	// Clear any Kitty images when showing text/code files
+// Helper function to handle empty panel case
+func (m *model) renderEmptyFilePreview(r *rendering.Renderer) string {
 	clearCmd := filepreview.ClearKittyImages()
+	if clearCmd != "" {
+		r.AddLines(clearCmd + common.FilePreviewNoContentText)
+	} else {
+		r.AddLines(common.FilePreviewNoContentText)
+	}
+	return r.Render()
+}
 
+// Helper function to handle file info errors
+func (m *model) renderFileInfoError(r *rendering.Renderer, _ lipgloss.Style, err error) string {
+	slog.Error("Error get file info", "error", err)
+	clearCmd := filepreview.ClearKittyImages()
+	if clearCmd != "" {
+		r.AddLines(clearCmd + common.FilePreviewNoFileInfoText)
+	} else {
+		r.AddLines(common.FilePreviewNoFileInfoText)
+	}
+	return r.Render()
+}
+
+// Helper function to handle unsupported formats
+func (m *model) renderUnsupportedFormat(r *rendering.Renderer, _ lipgloss.Style) string {
+	clearCmd := filepreview.ClearKittyImages()
+	if clearCmd != "" {
+		r.AddLines(clearCmd + common.FilePreviewUnsupportedFormatText)
+	} else {
+		r.AddLines(common.FilePreviewUnsupportedFormatText)
+	}
+	return r.Render()
+}
+
+// Helper function to handle directory preview
+func (m *model) renderDirectoryPreview(r *rendering.Renderer, itemPath string, previewHeight int) string {
+	clearCmd := filepreview.ClearKittyImages()
+	files, err := os.ReadDir(itemPath)
+	if err != nil {
+		slog.Error("Error render directory preview", "error", err)
+		if clearCmd != "" {
+			r.AddLines(clearCmd + common.FilePreviewDirectoryUnreadableText)
+		} else {
+			r.AddLines(common.FilePreviewDirectoryUnreadableText)
+		}
+		return r.Render()
+	}
+
+	if len(files) == 0 {
+		if clearCmd != "" {
+			r.AddLines(clearCmd + common.FilePreviewEmptyText)
+		} else {
+			r.AddLines(common.FilePreviewEmptyText)
+		}
+		return r.Render()
+	}
+
+	sort.Slice(files, func(i, j int) bool {
+		if files[i].IsDir() && !files[j].IsDir() {
+			return true
+		}
+		if !files[i].IsDir() && files[j].IsDir() {
+			return false
+		}
+		return files[i].Name() < files[j].Name()
+	})
+
+	// Add clear command before directory listing
+	if clearCmd != "" {
+		r.AddLines(clearCmd)
+	}
+
+	for i := 0; i < previewHeight && i < len(files); i++ {
+		file := files[i]
+		style := common.GetElementIcon(file.Name(), file.IsDir(), common.Config.Nerdfont)
+		res := lipgloss.NewStyle().Foreground(lipgloss.Color(style.Color)).Background(common.FilePanelBGColor).
+			Render(style.Icon+" ") + common.FilePanelStyle.Render(file.Name())
+		r.AddLines(res)
+	}
+	return r.Render()
+}
+
+// Helper function to handle image preview
+func (m *model) renderImagePreview(box lipgloss.Style, itemPath string, previewWidth, previewHeight int) string {
+	if !m.fileModel.filePreview.open {
+		clearCmd := filepreview.ClearKittyImages()
+		if clearCmd != "" {
+			return box.Render(clearCmd + "\n --- Preview panel is closed ---")
+		}
+		return box.Render("\n --- Preview panel is closed ---")
+	}
+
+	if !common.Config.ShowImagePreview {
+		clearCmd := filepreview.ClearKittyImages()
+		if clearCmd != "" {
+			return box.Render(clearCmd + "\n --- Image preview is disabled ---")
+		}
+		return box.Render("\n --- Image preview is disabled ---")
+	}
+
+	imageRender, err := filepreview.ImagePreview(itemPath, previewWidth, previewHeight, common.Theme.FilePanelBG)
+	if errors.Is(err, image.ErrFormat) {
+		clearCmd := filepreview.ClearKittyImages()
+		if clearCmd != "" {
+			return box.Render(clearCmd + "\n --- " + icon.Error + " Unsupported image formats ---")
+		}
+		return box.Render("\n --- " + icon.Error + " Unsupported image formats ---")
+	}
+
+	if err != nil {
+		slog.Error("Error convert image to ansi", "error", err)
+		clearCmd := filepreview.ClearKittyImages()
+		if clearCmd != "" {
+			return box.Render(clearCmd + "\n --- " + icon.Error + " Error convert image to ansi ---")
+		}
+		return box.Render("\n --- " + icon.Error + " Error convert image to ansi ---")
+	}
+
+	// Check if this looks like Kitty protocol output (starts with escape sequences)
+	// For Kitty protocol, avoid using lipgloss alignment to prevent layout drift
+	if strings.HasPrefix(imageRender, "\x1b_G") {
+		// This is Kitty protocol output - render directly in a simple box
+		// without vertical alignment to avoid layout issues
+		return common.FilePreviewBox(previewHeight, previewWidth).Render(imageRender)
+	}
+
+	// For ANSI output, we can safely use vertical alignment
+	return box.AlignVertical(lipgloss.Center).Render(imageRender)
+}
+
+// Helper function to handle text file preview
+func (m *model) renderTextPreview(r *rendering.Renderer, box lipgloss.Style, itemPath string, previewWidth, previewHeight int) string {
+	clearCmd := filepreview.ClearKittyImages()
 	format := lexers.Match(filepath.Base(itemPath))
 
 	if format == nil {
@@ -824,7 +792,6 @@ func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewW
 		}
 	}
 
-	// At this point either format is not nil, or we can read the file
 	fileContent, err := readFileContent(itemPath, previewWidth, previewHeight)
 	if err != nil {
 		slog.Error("Error open file", "error", err)
@@ -841,7 +808,6 @@ func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewW
 		return box.Render("\n --- empty ---")
 	}
 
-	// We know the format of file, and we can apply syntax highlighting
 	if format != nil {
 		background := ""
 		if !common.Config.TransparentBackground {
@@ -873,6 +839,38 @@ func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewW
 	}
 	r.AddLines(fileContent)
 	return r.Render()
+}
+
+func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewWidth int) string {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	box := common.FilePreviewBox(previewHeight, previewWidth)
+	r := ui.FilePreviewPanelRenderer(previewHeight, previewWidth)
+
+	if len(panel.element) == 0 {
+		return m.renderEmptyFilePreview(r)
+	}
+
+	itemPath := panel.element[panel.cursor].location
+	fileInfo, infoErr := os.Stat(itemPath)
+
+	if infoErr != nil {
+		return m.renderFileInfoError(r, box, infoErr)
+	}
+
+	ext := filepath.Ext(itemPath)
+	if slices.Contains(common.UnsupportedPreviewFormats, ext) {
+		return m.renderUnsupportedFormat(r, box)
+	}
+
+	if fileInfo.IsDir() {
+		return m.renderDirectoryPreview(r, itemPath, previewHeight)
+	}
+
+	if isImageFile(itemPath) {
+		return m.renderImagePreview(box, itemPath, previewWidth, previewHeight)
+	}
+
+	return m.renderTextPreview(r, box, itemPath, previewWidth, previewHeight)
 }
 
 func getBatSyntaxHighlightedContent(itemPath string, previewLine int, background string) (string, error) {
