@@ -7,11 +7,13 @@ import (
 	"image/color"
 	_ "image/gif"
 	_ "image/jpeg"
+	_ "image/png"
 	"log/slog"
 	"os"
 	"strconv"
 
 	"github.com/muesli/termenv"
+	_ "golang.org/x/image/webp"
 )
 
 type ImageRenderer int

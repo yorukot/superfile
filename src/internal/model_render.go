@@ -769,6 +769,7 @@ func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewW
 		}
 
 		// Use the new auto-detection function to choose the best renderer
+		// TODO: Consider storing this in memory and possibly running it in parallel.
 		imageRender, err := filepreview.ImagePreview(itemPath, previewWidth, previewHeight, common.Theme.FilePanelBG)
 		if errors.Is(err, image.ErrFormat) {
 			// Clear any Kitty images when image format is unsupported

@@ -11,6 +11,48 @@ import (
 	"github.com/disintegration/imaging"
 )
 
+// Terminal cell to pixel conversion constants
+// These approximate the pixel dimensions of terminal cells
+const (
+	DefaultPixelsPerColumn = 10 // approximate pixels per terminal column
+	DefaultPixelsPerRow    = 20 // approximate pixels per terminal row
+)
+
+// calculateTerminalCells calculates how many terminal cells are needed for given pixel dimensions
+func calculateTerminalCells(pixelWidth, pixelHeight, maxCols, maxRows int) (cols, rows int) {
+	// Convert pixel dimensions to terminal cell dimensions
+	cols = (pixelWidth + DefaultPixelsPerColumn - 1) / DefaultPixelsPerColumn // round up
+	rows = (pixelHeight + DefaultPixelsPerRow - 1) / DefaultPixelsPerRow      // round up
+
+	// Ensure we don't exceed the preview area
+	if cols > maxCols {
+		cols = maxCols
+	}
+	if rows > maxRows {
+		rows = maxRows
+	}
+
+	// Ensure minimum bounds
+	if cols < 1 {
+		cols = 1
+	}
+	if rows < 1 {
+		rows = 1
+	}
+
+	return cols, rows
+}
+
+// prepareImageForKittyDisplay resizes image to fit within terminal preview area
+func prepareImageForKittyDisplay(img image.Image, maxCols, maxRows int) image.Image {
+	// Calculate the maximum pixel dimensions we can use for the preview
+	maxPixelWidth := maxCols * DefaultPixelsPerColumn
+	maxPixelHeight := maxRows * DefaultPixelsPerRow
+
+	// Resize image to fit within these pixel bounds while maintaining aspect ratio
+	return imaging.Fit(img, maxPixelWidth, maxPixelHeight, imaging.Lanczos)
+}
+
 // isKittyCapable checks if the terminal supports Kitty graphics protocol
 func isKittyCapable() bool {
 	isCapable := rasterm.IsKittyCapable()
@@ -37,20 +79,7 @@ func ClearKittyImages() string {
 		return "" // No need to clear if terminal doesn't support Kitty protocol
 	}
 
-	var buf bytes.Buffer
-
-	// Clear all images
-	clearAllCmd := "\x1b_Ga=d\x1b\\"
-	buf.WriteString(clearAllCmd)
-
-	// Clear all placements
-	clearPlacementsCmd := "\x1b_Ga=d,p=1\x1b\\"
-	buf.WriteString(clearPlacementsCmd)
-
-	// Add reset command
-	buf.WriteString("\x1b[0m")
-
-	return buf.String()
+	return generateKittyClearCommands()
 }
 
 // generateKittyClearCommands generates the clearing commands for Kitty protocol
@@ -69,43 +98,6 @@ func generateKittyClearCommands() string {
 	buf.WriteString("\x1b[0m")
 
 	return buf.String()
-}
-
-// calculateKittyDisplaySize calculates appropriate display size for Kitty rendering
-func calculateKittyDisplaySize(img image.Image, maxWidth, maxHeight int) (cols, rows int) {
-	// Calculate the maximum pixel dimensions we can use for the preview
-	// considering terminal cell aspect ratio (roughly 1:2, width:height)
-	maxPixelWidth := maxWidth * 10   // approximate pixels per column
-	maxPixelHeight := maxHeight * 20 // approximate pixels per row
-
-	// Resize image to fit within these pixel bounds while maintaining aspect ratio
-	previewImg := imaging.Fit(img, maxPixelWidth, maxPixelHeight, imaging.Lanczos)
-
-	// Calculate how many terminal cells this will occupy
-	finalWidth := previewImg.Bounds().Dx()
-	finalHeight := previewImg.Bounds().Dy()
-
-	// Convert back to terminal cell dimensions
-	cols = (finalWidth + 9) / 10   // round up
-	rows = (finalHeight + 19) / 20 // round up
-
-	// Ensure we don't exceed the preview area
-	if cols > maxWidth {
-		cols = maxWidth
-	}
-	if rows > maxHeight {
-		rows = maxHeight
-	}
-
-	// Ensure minimum bounds
-	if cols < 1 {
-		cols = 1
-	}
-	if rows < 1 {
-		rows = 1
-	}
-
-	return cols, rows
 }
 
 // generatePlacementID generates a unique placement ID based on file path
@@ -132,12 +124,9 @@ func renderWithKitty(img image.Image, path string, maxWidth, maxHeight, original
 	imgWidth := img.Bounds().Dx()
 	imgHeight := img.Bounds().Dy()
 
-	// Calculate display size and prepare image
-	maxPixelWidth := maxWidth * 10
-	maxPixelHeight := maxHeight * 20
-	previewImg := imaging.Fit(img, maxPixelWidth, maxPixelHeight, imaging.Lanczos)
-
-	cols, rows := calculateKittyDisplaySize(img, maxWidth, maxHeight)
+	// Prepare image for display and calculate terminal cells needed
+	previewImg := prepareImageForKittyDisplay(img, maxWidth, maxHeight)
+	cols, rows := calculateTerminalCells(previewImg.Bounds().Dx(), previewImg.Bounds().Dy(), maxWidth, maxHeight)
 
 	slog.Info("Kitty rendering",
 		"originalSize", fmt.Sprintf("%dx%d", originalWidth, originalHeight),
