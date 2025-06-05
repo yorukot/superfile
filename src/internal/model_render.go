@@ -5,6 +5,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"golang.org/x/text/encoding/unicode"
+	"golang.org/x/text/transform"
 	"image"
 	"log/slog"
 	"os"
@@ -546,7 +548,8 @@ func readFileContent(filepath string, maxLineLength int, previewLine int) (strin
 	}
 	defer file.Close()
 
-	scanner := bufio.NewScanner(file)
+	reader := transform.NewReader(file, unicode.BOMOverride(unicode.UTF8.NewDecoder()))
+	scanner := bufio.NewScanner(reader)
 	lineCount := 0
 	for scanner.Scan() {
 		line := scanner.Text()
