@@ -527,43 +527,31 @@ func (m *model) extractFile() {
 	}
 }
 
-func (m *model) compressFile() {
+func (m *model) compressSelectedFiles() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 
 	if len(panel.element) == 0 {
 		return
 	}
+	var filesToCompress []string
+	var firstFile string
 
 	if len(panel.selected) == 0 {
-		fileName := filepath.Base(panel.element[panel.cursor].location)
-		zipName, err := getZipArchiveName(fileName)
-		if err != nil {
-			slog.Error("Error in compressing files during rename duplicate", "error", err)
-			return
-		}
-
-		src := panel.element[panel.cursor].location
-		dst := filepath.Join(filepath.Dir(src), zipName)
-		if err := zipSources([]string{src}, dst); err != nil {
-			slog.Error("Error in zipping files", "error", err)
-			return
-		}
+		firstFile = panel.element[panel.cursor].location
+		filesToCompress = append(filesToCompress, firstFile)
 	} else {
-		first := panel.selected[0]
-		base := filepath.Base(first)
-		zipName, err := getZipArchiveName(base)
-		if err != nil {
-			slog.Error("Error in compressing files during rename duplicate", "error", err)
-			return
-		}
-
-		currentDir := filepath.Dir(panel.element[panel.cursor].location)
-		dst := filepath.Join(currentDir, zipName)
-
-		if err := zipSources(panel.selected, dst); err != nil {
-			slog.Error("Error in zipping files", "error", err)
-			return
-		}
+		firstFile = panel.selected[0]
+		filesToCompress = panel.selected
+	}
+	zipName, err := getZipArchiveName(filepath.Base(firstFile))
+	if err != nil {
+		slog.Error("Error in getZipArchiveName", "error", err)
+		return
+	}
+	zipPath := filepath.Join(panel.location, zipName)
+	if err := zipSources(filesToCompress, zipPath); err != nil {
+		slog.Error("Error in zipping files", "error", err)
+		return
 	}
 }
 

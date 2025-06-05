@@ -110,7 +110,7 @@ func (m *model) mainKey(msg string) tea.Cmd {
 
 	case slices.Contains(common.Hotkeys.CompressFile, msg):
 		go func() {
-			m.compressFile()
+			m.compressSelectedFiles()
 		}()
 
 	case slices.Contains(common.Hotkeys.OpenCommandLine, msg):
