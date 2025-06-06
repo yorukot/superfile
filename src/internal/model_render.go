@@ -16,6 +16,9 @@ import (
 	"strings"
 	"time"
 
+	"golang.org/x/text/encoding/unicode"
+	"golang.org/x/text/transform"
+
 	"github.com/yorukot/superfile/src/internal/ui"
 
 	"github.com/yorukot/superfile/src/internal/common"
@@ -546,7 +549,8 @@ func readFileContent(filepath string, maxLineLength int, previewLine int) (strin
 	}
 	defer file.Close()
 
-	scanner := bufio.NewScanner(file)
+	reader := transform.NewReader(file, unicode.BOMOverride(unicode.UTF8.NewDecoder()))
+	scanner := bufio.NewScanner(reader)
 	lineCount := 0
 	for scanner.Scan() {
 		line := scanner.Text()
