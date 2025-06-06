@@ -14,35 +14,20 @@ import (
 func TestZipSources(t *testing.T) {
 	tests := []struct {
 		name          string
-		setupFunc     func(tempDir string) ([]string, error)
+		setupFunc     func(t *testing.T, tempDir string) ([]string, error)
 		expectedFiles map[string]string
 		expectError   bool
 	}{
 		{
 			name: "multiple directories with subdirectories",
-			setupFunc: func(tempDir string) ([]string, error) {
+			setupFunc: func(t *testing.T, tempDir string) ([]string, error) {
 				testDir1 := filepath.Join(tempDir, "testdir1")
 				testDir2 := filepath.Join(tempDir, "testdir2")
 				subDir := filepath.Join(testDir1, "subdir")
-
-				if err := os.MkdirAll(subDir, 0755); err != nil {
-					return nil, err
-				}
-				if err := os.MkdirAll(testDir2, 0755); err != nil {
-					return nil, err
-				}
-
-				testFiles := map[string]string{
-					filepath.Join(testDir1, "file1.txt"): "Content of file1",
-					filepath.Join(subDir, "file2.txt"):   "Content of file2",
-					filepath.Join(testDir2, "file3.txt"): "Content of file3",
-				}
-
-				for filePath, content := range testFiles {
-					if err := os.WriteFile(filePath, []byte(content), 0644); err != nil {
-						return nil, err
-					}
-				}
+				setupDirectories(t, testDir1, testDir2, subDir)
+				setupFilesWithData(t, []byte("Content of file1"), filepath.Join(testDir1, "file1.txt"))
+				setupFilesWithData(t, []byte("Content of file2"), filepath.Join(subDir, "file2.txt"))
+				setupFilesWithData(t, []byte("Content of file3"), filepath.Join(testDir2, "file3.txt"))
 
 				return []string{testDir1, testDir2}, nil
 			},
@@ -58,12 +43,9 @@ func TestZipSources(t *testing.T) {
 		},
 		{
 			name: "single file",
-			setupFunc: func(tempDir string) ([]string, error) {
+			setupFunc: func(t *testing.T, tempDir string) ([]string, error) {
 				testFile := filepath.Join(tempDir, "single.txt")
-				testContent := "Single file content"
-				if err := os.WriteFile(testFile, []byte(testContent), 0644); err != nil {
-					return nil, err
-				}
+				setupFilesWithData(t, []byte("Single file content"), testFile)
 				return []string{testFile}, nil
 			},
 			expectedFiles: map[string]string{
@@ -73,7 +55,7 @@ func TestZipSources(t *testing.T) {
 		},
 		{
 			name: "empty list",
-			setupFunc: func(_ string) ([]string, error) {
+			setupFunc: func(_ *testing.T, _ string) ([]string, error) {
 				return []string{}, nil
 			},
 			expectedFiles: map[string]string{},
@@ -81,7 +63,7 @@ func TestZipSources(t *testing.T) {
 		},
 		{
 			name: "non-existent source",
-			setupFunc: func(_ string) ([]string, error) {
+			setupFunc: func(_ *testing.T, _ string) ([]string, error) {
 				return []string{"/non/existent/path"}, nil
 			},
 			expectedFiles: nil,
@@ -92,7 +74,7 @@ func TestZipSources(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
-			sources, err := tt.setupFunc(tempDir)
+			sources, err := tt.setupFunc(t, tempDir)
 			if err != nil {
 				t.Fatalf("Setup failed: %v", err)
 			}
