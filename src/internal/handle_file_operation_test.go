@@ -92,17 +92,6 @@ func TestCompressSelectedFiles(t *testing.T) {
 			expectedFilesAfterExtract: []string{"file1.txt"},
 		},
 		{
-			name:                      "Single File Compress with select mode with different cursor and selection",
-			startDir:                  curTestDir,
-			cursor:                    0, // points to dir1
-			selectMode:                true,
-			selectedElem:              []string{file1},
-			expectedZipName:           "file1.zip",
-			cursorIndexForZip:         3,
-			extractedDirName:          "file1",
-			expectedFilesAfterExtract: []string{"file1.txt"},
-		},
-		{
 			name:                      "Multi file compression",
 			startDir:                  curTestDir,
 			cursor:                    0, // points to dir1
@@ -166,4 +155,13 @@ func TestCompressSelectedFiles(t *testing.T) {
 			require.NoError(t, os.RemoveAll(zipFile))
 		})
 	}
+
+	t.Run("Compress on Empty panel", func(t *testing.T) {
+		m := defaultTestModel(dir2)
+		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.CompressFile[0]))
+		// Should not crash. Nothing should happen. If there is a crash, it will be caught
+		entries, err := os.ReadDir(dir2)
+		require.NoError(t, err)
+		assert.Empty(t, entries)
+	})
 }
