@@ -71,7 +71,7 @@ Notes
 
 ## Tips while running tests
 - Use `-d` or `--debug` to enable debug logs during test run.
-- If you see flakiness in test runs due to superfile being still open, consider using `--close-wait-time` options to increase wait time for superfile to close. Note : For now we have enforing superfile to close within a specific time window in tests to reduce test flakiness
+- If you see flakiness in test runs due to superfile being still open, consider using `--close-wait-time` options to increase wait time for superfile to close. Note : For now we have enforcing superfile to close within a specific time window in tests to reduce test flakiness
 - Make sure that your hotkeys are set to default hotkeys. Tests use default hotkeys for now.
 - Use `-t` or `--tests` to only run specific tests
   - Example `python main.py -d -t RenameTest CopyTest`
