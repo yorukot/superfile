@@ -5,8 +5,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"golang.org/x/text/encoding/unicode"
-	"golang.org/x/text/transform"
 	"image"
 	"log/slog"
 	"os"
@@ -17,6 +15,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"golang.org/x/text/encoding/unicode"
+	"golang.org/x/text/transform"
 
 	"github.com/yorukot/superfile/src/internal/ui"
 
