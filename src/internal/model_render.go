@@ -123,7 +123,7 @@ func (panel *filePanel) renderFileEntries(r *rendering.Renderer, mainPanelHeight
 		return
 	}
 
-	end := min(panel.render + panelElementHeight(mainPanelHeight), len(panel.element))
+	end := min(panel.render+panelElementHeight(mainPanelHeight), len(panel.element))
 
 	for i := panel.render; i < end; i++ {
 		// Todo : Fix this, this is O(n^2) complexity. Considered a file panel with 200 files, and 100 selected
@@ -290,19 +290,21 @@ func (m *model) processBarRender() string {
 func (m *model) metadataRender() string {
 	m.ensureMetadataLoaded()
 
-	sortedMeta := sortMetadata(m.fileMetaData.metaData)
-	maxKeyLen := getMaxKeyLength(sortedMeta)
-	sprintfLen, valLen := computeWidths(m.fullWidth, maxKeyLen)
-
-	lines := formatMetadataLines(sortedMeta, m.fileMetaData.renderIndex, m.footerHeight, sprintfLen, valLen)
+	// Todo : This is bad, this is bad mixing rendering of content and loading of content.
+	// The metadata should be filled in slice correctly at the time its loaded, not when we
+	// are rendering it.
+	sortMetadata(m.fileMetaData.metaData)
+	maxKeyLen := getMaxKeyLength(m.fileMetaData.metaData)
+	sprintfLen, valLen := computeMetadataWidths(m.fullWidth, maxKeyLen)
 
 	r := ui.MetadataRenderer(m.footerHeight+2, utils.FooterWidth(m.fullWidth)+2, m.focusPanel == metadataFocus)
-	if len(sortedMeta) > 0 {
-		r.SetBorderInfoItems(fmt.Sprintf("%d/%d", m.fileMetaData.renderIndex+1, len(sortedMeta)))
+	if len(m.fileMetaData.metaData) > 0 {
+		r.SetBorderInfoItems(fmt.Sprintf("%d/%d", m.fileMetaData.renderIndex+1, len(m.fileMetaData.metaData)))
 	}
-	for _, line := range lines {
-		r.AddLines(line)
-	}
+
+	lines := formatMetadataLines(m.fileMetaData.metaData, m.fileMetaData.renderIndex, m.footerHeight, sprintfLen, valLen)
+	r.AddLines(lines...)
+
 	return r.Render()
 }
 
@@ -310,7 +312,6 @@ func (m *model) ensureMetadataLoaded() {
 	if len(m.fileMetaData.metaData) == 0 &&
 		len(m.fileModel.filePanels[m.filePanelFocusIndex].element) > 0 &&
 		!m.fileModel.renaming {
-
 		m.fileMetaData.metaData = [][2]string{
 			{"", ""},
 			{" " + icon.InOperation + "  Loading metadata...", ""},
@@ -323,7 +324,9 @@ func (m *model) ensureMetadataLoaded() {
 	}
 }
 
-func sortMetadata(meta [][2]string) [][2]string {
+// Todo : Move this and many other utility function to separate files
+// and unit test them too.
+func sortMetadata(meta [][2]string) {
 	priority := map[string]int{
 		"Name":          0,
 		"Size":          1,
@@ -332,19 +335,26 @@ func sortMetadata(meta [][2]string) [][2]string {
 	}
 
 	sort.SliceStable(meta, func(i, j int) bool {
-		pi, iok := priority[meta[i][0]]
-		pj, jok := priority[meta[j][0]]
-		if iok && jok {
+		pi, iOkay := priority[meta[i][0]]
+		pj, jOkay := priority[meta[j][0]]
+
+		// Both are priority fields
+		if iOkay && jOkay {
 			return pi < pj
-		} else if iok {
+		}
+		// i is a priority field, and j is not
+		if iOkay {
 			return true
-		} else if jok {
+		}
+
+		// j is a priority field, and i is not
+		if jOkay {
 			return false
 		}
+
+		// None of them are priority fields, sort with name
 		return meta[i][0] < meta[j][0]
 	})
-
-	return meta
 }
 
 func getMaxKeyLength(meta [][2]string) int {
@@ -357,18 +367,21 @@ func getMaxKeyLength(meta [][2]string) int {
 	return maxLen
 }
 
-func computeWidths(fullWidth, maxKeyLen int) (sprintfLen int, valueLen int) {
-	totalWidth := utils.FooterWidth(fullWidth)
-	valueLen = totalWidth - maxKeyLen - 2
-	if valueLen < totalWidth/2 {
-		valueLen = totalWidth/2 - 2
+func computeMetadataWidths(fullWidth, maxKeyLen int) (int, int) {
+	metadataPanelWidth := utils.FooterWidth(fullWidth)
+
+	// Value Length = PanelLength - Key length - 2 (for border)
+	valueLen := metadataPanelWidth - maxKeyLen - 2
+	sprintfLen := maxKeyLen + 1
+	if valueLen < metadataPanelWidth/2 {
+		valueLen = metadataPanelWidth/2 - 2
 		sprintfLen = valueLen
-	} else {
-		sprintfLen = maxKeyLen + 1
 	}
-	return
+
+	return sprintfLen, valueLen
 }
 
+// Todo : Simplify these mystic calculations, or add explanation comments.
 func formatMetadataLines(meta [][2]string, startIdx, height, sprintfLen, valueLen int) []string {
 	lines := []string{}
 	endIdx := min(startIdx+height, len(meta))
@@ -720,7 +733,7 @@ func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewW
 		}
 
 		// Use the new auto-detection function to choose the best renderer
-		imageRender, err := filepreview.ImagePreview(itemPath, previewWidth, previewHeight, common.Theme.FilePanelBG)
+		ansiRender, err := filepreview.ImagePreview(itemPath, previewWidth, previewHeight, common.Theme.FilePanelBG)
 		if errors.Is(err, image.ErrFormat) {
 			return box.Render("\n --- " + icon.Error + " Unsupported image formats ---")
 		}
@@ -730,7 +743,7 @@ func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewW
 			return box.Render("\n --- " + icon.Error + " Error covernt image to ansi ---")
 		}
 
-		return box.AlignVertical(lipgloss.Center).AlignHorizontal(lipgloss.Center).Render(imageRender)
+		return box.AlignVertical(lipgloss.Center).AlignHorizontal(lipgloss.Center).Render(ansiRender)
 	}
 
 	format := lexers.Match(filepath.Base(itemPath))
