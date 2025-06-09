@@ -82,24 +82,28 @@ func (panel *filePanel) Render(mainPanelHeight int, filePanelWidth int, focussed
 }
 
 func (panel *filePanel) renderTopBar(r *rendering.Renderer, filePanelWidth int) {
+	// Todo - Add ansitruncate left in renderer and remove truncation here
 	truncatedPath := common.TruncateTextBeginning(panel.location, filePanelWidth-4, "...")
 	r.AddLines(common.FilePanelTopDirectoryIcon + common.FilePanelTopPathStyle.Render(truncatedPath))
+	r.AddSection()
 }
 
 func (panel *filePanel) renderSearchBar(r *rendering.Renderer) {
-	r.AddSection()
 	r.AddLines(" " + panel.searchBar.View())
 }
 
+// Todo : Unit test this
 func (panel *filePanel) renderFooter(r *rendering.Renderer) {
 	sortLabel, sortIcon := panel.getSortInfo()
 	modeLabel, modeIcon := panel.getPanelModeInfo()
-	cursorStr := panel.getCursorPosition()
+	cursorStr := panel.getCursorString()
 
 	if common.Config.Nerdfont {
 		sortLabel = sortIcon + icon.Space + sortLabel
 		modeLabel = modeIcon + icon.Space + modeLabel
 	} else {
+		// Todo : Figure out if we can set icon.Space to " " if nerdfont is false
+		// That would simplify code
 		sortLabel = sortIcon + " " + sortLabel
 	}
 
@@ -119,13 +123,11 @@ func (panel *filePanel) renderFileEntries(r *rendering.Renderer, mainPanelHeight
 		return
 	}
 
-	end := panel.render + panelElementHeight(mainPanelHeight)
-	if end > len(panel.element) {
-		end = len(panel.element)
-	}
+	end := min(panel.render + panelElementHeight(mainPanelHeight), len(panel.element))
 
 	for i := panel.render; i < end; i++ {
-		isCursor := i == panel.cursor && !panel.searchBar.Focused()
+		// Todo : Fix this, this is O(n^2) complexity. Considered a file panel with 200 files, and 100 selected
+		// We will be doing a search in 100 item slice for all 200 files.
 		isSelected := arrayContains(panel.selected, panel.element[i].location)
 
 		if panel.renaming && i == panel.cursor {
@@ -134,11 +136,12 @@ func (panel *filePanel) renderFileEntries(r *rendering.Renderer, mainPanelHeight
 		}
 
 		cursor := " "
-		if isCursor {
+		if i == panel.cursor && !panel.searchBar.Focused() {
 			cursor = icon.Cursor
 		}
 
 		// Performance TODO: Remove or cache this if not needed at render time
+		// This will unnecessarily slow down rendering. There should be a way to avoid this at render
 		_, err := os.ReadDir(panel.element[i].location)
 		dirExists := err == nil || panel.element[i].directory
 
@@ -154,6 +157,7 @@ func (panel *filePanel) renderFileEntries(r *rendering.Renderer, mainPanelHeight
 	}
 }
 
+// Todo : Make these strings : "Date Modified", "Date", "Browser", "Select" a constant
 func (panel *filePanel) getSortInfo() (string, string) {
 	opts := panel.sortOptions.data
 	selected := opts.options[opts.selected]
@@ -181,7 +185,7 @@ func (panel *filePanel) getPanelModeInfo() (string, string) {
 	}
 }
 
-func (panel *filePanel) getCursorPosition() string {
+func (panel *filePanel) getCursorString() string {
 	cursor := panel.cursor
 	if len(panel.element) > 0 {
 		cursor++ // Convert to 1-based
