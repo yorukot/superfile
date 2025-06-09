@@ -20,7 +20,6 @@ func (m *model) cancelWarnModal() {
 
 // Confirm to create file or directory
 func (m *model) createItem() {
-
 	if err := checkFileNameValidity(m.typingModal.textInput.Value()); err != nil {
 		m.typingModal.errorMesssage = err.Error()
 		slog.Error("Errow while createItem during item creation", "error", err)

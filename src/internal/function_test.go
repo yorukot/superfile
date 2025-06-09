@@ -3,7 +3,6 @@ package internal
 import (
 	"fmt"
 	"path/filepath"
-	"strings"
 	"testing"
 	"time"
 
@@ -168,7 +167,6 @@ func TestReturnDirElement(t *testing.T) {
 }
 
 func TestCheckFileNameValidity(t *testing.T) {
-
 	tests := []struct {
 		name    string
 		input   string
@@ -224,7 +222,7 @@ func TestCheckFileNameValidity(t *testing.T) {
 				require.NoError(t, err)
 			} else {
 				require.Error(t, err)
-				assert.True(t, strings.Contains(err.Error(), tt.errMsg))
+				assert.Contains(t, err.Error(), tt.errMsg)
 			}
 		})
 	}
