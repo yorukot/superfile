@@ -18,9 +18,16 @@ func DefaultModel(maxHeight int, width int) Model {
 		common.Hotkeys.OpenCommandLine[0], common.Config.ShellCloseOnSuccess, maxHeight, width)
 }
 
+func getHeadLine() string {
+	if common.Config.Nerdfont == true {
+		return icon.Terminal + " "
+	}
+	return ""
+}
+
 func GenerateModel(spfPromptHotkey string, shellPromptHotkey string, closeOnSuccess bool, maxHeight int, width int) Model {
 	m := Model{
-		headline:          icon.Terminal + " " + promptHeadlineText,
+		headline:          getHeadLine() + promptHeadlineText,
 		open:              false,
 		shellMode:         true,
 		textInput:         common.GeneratePromptTextInput(),
@@ -125,7 +132,6 @@ func (m *Model) Render() string {
 	r := ui.PromptRenderer(m.maxHeight, m.width)
 	r.SetBorderTitle(m.headline + " " + modeString(m.shellMode))
 	r.AddLines(" " + m.textInput.View())
-
 	if !m.shellMode {
 		// To make sure its added one time only per render call
 		hintSectionAdded := false
