@@ -19,7 +19,7 @@ func DefaultModel(maxHeight int, width int) Model {
 }
 
 func getHeadLine() string {
-	if common.Config.Nerdfont == true {
+	if common.Config.Nerdfont {
 		return icon.Terminal + " "
 	}
 	return ""
@@ -132,7 +132,7 @@ func (m *Model) Render() string {
 	r := ui.PromptRenderer(m.maxHeight, m.width)
 	r.SetBorderTitle(m.headline + " " + modeString(m.shellMode))
 	r.AddLines(" " + m.textInput.View())
-	
+
 	if !m.shellMode {
 		// To make sure its added one time only per render call
 		hintSectionAdded := false
