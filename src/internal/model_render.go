@@ -492,10 +492,10 @@ func (m *model) typineModalRender() string {
 
 	var err string
 	if m.typingModal.errorMesssage != "" {
-		err = common.ModalErrorStyle.Render(m.typingModal.errorMesssage)
+		err = "\n\n" + common.ModalErrorStyle.Render(m.typingModal.errorMesssage)
 	}
-
-	return common.ModalBorderStyle(common.ModalHeight, common.ModalWidth).Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip + "\n\n" + err + "\n")
+	// Todo : Move this all to rendering package to avoid specifying newlines manually
+	return common.ModalBorderStyle(common.ModalHeight, common.ModalWidth).Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip + err)
 }
 
 func (m *model) introduceModalRender() string {
