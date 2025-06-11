@@ -28,6 +28,7 @@ func (m *model) createItem() {
 	}
 
 	defer func() {
+		m.typingModal.errorMesssage = ""
 		m.typingModal.open = false
 		m.typingModal.textInput.Blur()
 	}()
