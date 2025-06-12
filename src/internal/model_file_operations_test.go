@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -76,4 +77,50 @@ func TestCopy(t *testing.T) {
 		assert.FileExists(t, filepath.Join(dir2, "file1(1).txt"))
 		// Todo : Also validate process bar having two processes.
 	})
+}
+
+func TestFileCreation(t *testing.T) {
+	// Todo Also add directory creation test to this
+	curTestDir := filepath.Join(testDir, "TestNaming")
+	testParentDir := filepath.Join(curTestDir, "parentDir")
+	testChildDir := filepath.Join(testParentDir, "childDir")
+
+	setupDirectories(t, curTestDir, testParentDir, testChildDir)
+
+	t.Cleanup(func() {
+		os.RemoveAll(curTestDir)
+	})
+
+	testdata := []struct {
+		name          string
+		fileName      string
+		expectedError bool
+	}{
+		{"valid name", "file.txt", false},
+		{"invalid single dot", ".", true},
+		{"invalid double dot", "..", true},
+		{"invalid trailing slash-dot", fmt.Sprintf("test%c.", filepath.Separator), true},
+		{"invalid trailing slash-dot-dot", fmt.Sprintf("test%c..", filepath.Separator), true},
+		{"valid name with trailing .", "abc.", false},
+	}
+
+	for _, tt := range testdata {
+		m := defaultTestModel(testChildDir)
+
+		TeaUpdateWithErrCheck(t, &m, nil)
+		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.FilePanelItemCreate[0]))
+
+		assert.Equal(t, "", m.typingModal.errorMesssage)
+
+		m.typingModal.textInput.SetValue(tt.fileName)
+
+		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.ConfirmTyping[0]))
+
+		if tt.expectedError {
+			assert.NotEqual(t, "", m.typingModal.errorMesssage, "expected an error for input: %q", tt.fileName)
+		} else {
+			assert.Empty(t, m.typingModal.errorMesssage, "expected an error for input: %q", tt.fileName)
+			assert.FileExists(t, filepath.Join(testChildDir, tt.fileName), "expected file to be created: %q", tt.fileName)
+		}
+	}
 }
