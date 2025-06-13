@@ -18,16 +18,9 @@ func DefaultModel(maxHeight int, width int) Model {
 		common.Hotkeys.OpenCommandLine[0], common.Config.ShellCloseOnSuccess, maxHeight, width)
 }
 
-func getHeadLine() string {
-	if common.Config.Nerdfont {
-		return icon.Terminal + " "
-	}
-	return ""
-}
-
 func GenerateModel(spfPromptHotkey string, shellPromptHotkey string, closeOnSuccess bool, maxHeight int, width int) Model {
 	m := Model{
-		headline:          getHeadLine() + promptHeadlineText,
+		headline:          icon.Terminal + icon.Space + promptHeadlineText,
 		open:              false,
 		shellMode:         true,
 		textInput:         common.GeneratePromptTextInput(),
