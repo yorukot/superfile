@@ -5,7 +5,7 @@ import "time"
 // These could as well be property of prompt Model vs being global consts
 // But its fine
 const (
-	promptHeadlineText = "Superfile Prompt"
+	promptHeadlineText = "superfile Prompt"
 
 	OpenCommand  = "open"
 	SplitCommand = "split"

@@ -133,7 +133,7 @@ go build -o bin/spf.exe
 
 Edit System Environment Variables and add superfile repo's `bin` directory to your PATH  
 
-## Start Superfile
+## Start superfile
 
 ```bash
 spf

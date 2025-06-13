@@ -77,7 +77,7 @@ class GenericTestImpl(BaseTest):
     
     def start_spf(self) -> None:
         self.env.spf_mgr.start_spf(self.env.fs_mgr.abspath(self.start_dir))
-        assert self.env.spf_mgr.is_spf_running(), "Superfile is not running"
+        assert self.env.spf_mgr.is_spf_running(), "superfile is not running"
 
     def end_execution(self) -> None:
         self.env.spf_mgr.send_special_input(keys.KEY_ESC)    
@@ -112,9 +112,9 @@ class GenericTestImpl(BaseTest):
             self.env.spf_mgr.runtime_info(), self.env.fs_mgr.tree(self.test_root))
         try:
             if self.validate_spf_closed :
-                assert not self.env.spf_mgr.is_spf_running(), "Superfile is still running"
+                assert not self.env.spf_mgr.is_spf_running(), "superfile is still running"
             if self.validate_spf_running :
-                assert self.env.spf_mgr.is_spf_running(), "Superfile is not running"
+                assert self.env.spf_mgr.is_spf_running(), "superfile is not running"
 
             if self.validate_exists is not None:
                 for file_path in self.validate_exists:
