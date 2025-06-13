@@ -79,6 +79,7 @@ type ConfigType struct {
 	CaseSensitiveSort      bool   `toml:"case_sensitive_sort" comment:"\nCase sensitive sort by name (captal \"B\" comes before \"a\" if true)."`
 	ShellCloseOnSuccess    bool   `toml:"shell_close_on_success" comment:"\nWhether to close the shell on successful command execution."`
 	Debug                  bool   `toml:"debug" comment:"\nWhether to enable debug mode."`
+	IgnoreMissingFields    bool   `toml:"ignore_missing_fields" comment:"\nWhether to ignore warnings about missing fields in the config file."`
 
 	Nerdfont              bool   `toml:"nerdfont" comment:"\n================   Style =================\n\n If you don't have or don't want Nerdfont installed you can turn this off"`
 	TransparentBackground bool   `toml:"transparent_background" comment:"\nSet transparent background or not (this only work when your terminal background is transparent)"`
@@ -99,6 +100,11 @@ type ConfigType struct {
 
 	Metadata          bool `toml:"metadata" comment:"\n==========PLUGINS========== #\n\nShow more detailed metadata, please install exiftool before enabling this plugin!"`
 	EnableMD5Checksum bool `toml:"enable_md5_checksum" comment:"Enable MD5 checksum generation for files"`
+}
+
+// GetIgnoreMissingFields returns whether missing fields should be ignored
+func (c *ConfigType) GetIgnoreMissingFields() bool {
+	return c.IgnoreMissingFields
 }
 
 type HotkeysType struct {
