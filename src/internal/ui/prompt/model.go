@@ -27,7 +27,7 @@ func getHeadLine() string {
 
 func GenerateModel(spfPromptHotkey string, shellPromptHotkey string, closeOnSuccess bool, maxHeight int, width int) Model {
 	m := Model{
-		headline:          getHeadLine() + promptHeadlineText,
+		headline:          icon.Terminal + icon.Space + promptHeadlineText,
 		open:              false,
 		shellMode:         true,
 		textInput:         common.GeneratePromptTextInput(),
