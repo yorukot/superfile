@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -47,7 +48,8 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 
 	// Replace default values with file values
 	if err := toml.Unmarshal(data, target); err != nil {
-		if decodeErr, ok := err.(*toml.DecodeError); ok {
+		var decodeErr *toml.DecodeError
+		if errors.As(err, &decodeErr) {
 			row, col := decodeErr.Position()
 			fmt.Print(errorPrefix + fmt.Sprintf("Error in field at line %d column %d: %s\n",
 				row, col, decodeErr.Error()))
@@ -57,36 +59,50 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 		return true
 	}
 
-	// Check if we should ignore missing fields after loading the config
-	ignoreMissing := false
-	if config, ok := target.(interface{ GetIgnoreMissingFields() bool }); ok {
+	// Check for missing fields
+	var ignoreMissing bool
+	if config, ok := target.(ConfigInterface); ok {
 		ignoreMissing = config.GetIgnoreMissingFields()
 	}
 
 	// Check for missing fields
-	if !ignoreMissing {
-		targetType := reflect.TypeOf(target).Elem()
-		errMsg := ""
-		hasMissingFields := false
+	targetType := reflect.TypeOf(target).Elem()
+	missingFields := []string{}
 
-		for i := range targetType.NumField() {
-			field := targetType.Field(i)
-			if _, exists := rawData[field.Tag.Get("toml")]; !exists {
-				hasMissingFields = true
-				errMsg += errorPrefix + fmt.Sprintf("Field \"%s\" is missing\n", field.Tag.Get("toml"))
-			}
+	for i := 0; i < targetType.NumField(); i++ {
+		field := targetType.Field(i)
+		fieldName := field.Tag.Get("toml")
+		if fieldName == "" {
+			fieldName = field.Name
 		}
+		if _, exists := rawData[fieldName]; !exists && !ignoreMissing {
+			missingFields = append(missingFields, fieldName)
+		}
+	}
 
-		// Todo: Ideally this should behave as an internal function with no side effects
-		if hasMissingFields {
-			if !fixFlag {
-				fmt.Print(errMsg)
-				return true
+	// Todo: Ideally this should behave as an internal function with no side effects
+	if len(missingFields) > 0 {
+		if !fixFlag {
+			fmt.Print(errorPrefix + fmt.Sprintf("Missing fields: %v\n", missingFields))
+			return true
+		}
+		// Create a backup of the current config file
+		backupPath := filePath + ".bak"
+		if err := os.Rename(filePath, backupPath); err != nil {
+			fmt.Print(errorPrefix + fmt.Sprintf("Failed to create backup of config file: %v\n", err))
+			return true
+		}
+		// Fix the file by writing all fields
+		if err := WriteTomlData(filePath, target); err != nil {
+			// Restore from backup if write fails
+			if restoreErr := os.Rename(backupPath, filePath); restoreErr != nil {
+				fmt.Print(errorPrefix + fmt.Sprintf("Failed to restore config from backup: %v\n", restoreErr))
 			}
-			// Fix the file by writing all fields
-			if err := WriteTomlData(filePath, target); err != nil {
-				PrintfAndExit("Error while writing config file : %v", err)
-			}
+			PrintfAndExit("Error while writing config file : %v", err)
+		}
+		// Remove backup after successful write
+		if err := os.Remove(backupPath); err != nil {
+			fmt.Print(errorPrefix + fmt.Sprintf("Warning: Failed to remove backup file %s: %v\n", backupPath, err))
 		}
 	}
 
