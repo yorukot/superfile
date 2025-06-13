@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 
 	"github.com/yorukot/superfile/src/internal/ui/sidebar"
+	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
 
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/prompt"
@@ -34,6 +35,7 @@ func defaultModelConfig(toggleDotFile bool, toggleFooter bool, firstUse bool, fi
 			data:        getHelpMenuData(),
 			open:        false,
 		},
+		imagePreviewer: filepreview.NewImagePreviewer(),
 		promptModal:    prompt.DefaultModel(prompt.PromptMinHeight, prompt.PromptMinWidth),
 		modelQuitState: notQuitting,
 		toggleDotFile:  toggleDotFile,

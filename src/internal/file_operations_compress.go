@@ -2,10 +2,12 @@ package internal
 
 import (
 	"archive/zip"
+	"fmt"
 	"io"
 	"log/slog"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/lithammer/shortuuid"
@@ -13,15 +15,22 @@ import (
 	"github.com/yorukot/superfile/src/internal/common"
 )
 
-func zipSource(source, target string) error {
+func zipSources(sources []string, target string) error {
 	id := shortuuid.New()
 	prog := progress.New()
 	prog.PercentageStyle = common.FooterStyle
+	var err error
 
-	totalFiles, err := countFiles(source)
-
-	if err != nil {
-		slog.Error("Error while zip file count files ", "error", err)
+	totalFiles := 0
+	for _, src := range sources {
+		if _, err = os.Stat(src); os.IsNotExist(err) {
+			return fmt.Errorf("source path does not exist: %s", src)
+		}
+		count, e := countFiles(src)
+		if e != nil {
+			slog.Error("Error while zip file count files ", "error", e)
+		}
+		totalFiles += count
 	}
 
 	p := process{
@@ -31,7 +40,6 @@ func zipSource(source, target string) error {
 		total:    totalFiles,
 		done:     0,
 	}
-
 	message := channelMessage{
 		messageID:       id,
 		messageType:     sendProcess,
@@ -39,7 +47,7 @@ func zipSource(source, target string) error {
 	}
 
 	_, err = os.Stat(target)
-	if os.IsExist(err) {
+	if err == nil {
 		p.name = icon.CompressFile + icon.Space + "File already exist"
 		message.processNewState = p
 		channel <- message
@@ -51,74 +59,74 @@ func zipSource(source, target string) error {
 		return err
 	}
 	defer f.Close()
-
 	writer := zip.NewWriter(f)
 	defer writer.Close()
 
-	err = filepath.Walk(source, func(path string, info os.FileInfo, err error) error {
-		p.name = icon.CompressFile + icon.Space + filepath.Base(path)
-		if len(channel) < 5 {
-			message.processNewState = p
-			channel <- message
-		}
-
-		if err != nil {
-			return err
-		}
-
-		header, err := zip.FileInfoHeader(info)
-		if err != nil {
-			return err
-		}
-
-		header.Method = zip.Deflate
-
-		header.Name, err = filepath.Rel(filepath.Dir(source), path)
-		if err != nil {
-			return err
-		}
-		if info.IsDir() {
-			header.Name += "/"
-		}
-
-		headerWriter, err := writer.CreateHeader(header)
-		if err != nil {
-			return err
-		}
-
-		if info.IsDir() {
+	for _, src := range sources {
+		srcParentDir := filepath.Dir(src)
+		err = filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
+			p.name = icon.CompressFile + icon.Space + filepath.Base(path)
+			if len(channel) < 5 {
+				message.processNewState = p
+				channel <- message
+			}
+			if err != nil {
+				return err
+			}
+			relPath, err := filepath.Rel(srcParentDir, path)
+			if err != nil {
+				return err
+			}
+			header, err := zip.FileInfoHeader(info)
+			if err != nil {
+				return err
+			}
+			header.Method = zip.Deflate
+			header.Name = relPath
+			if info.IsDir() {
+				header.Name += "/"
+			}
+			headerWriter, err := writer.CreateHeader(header)
+			if err != nil {
+				return err
+			}
+			if info.IsDir() {
+				return nil
+			}
+			file, err := os.Open(path)
+			if err != nil {
+				return err
+			}
+			defer file.Close()
+			_, err = io.Copy(headerWriter, file)
+			if err != nil {
+				return err
+			}
+			p.done++
+			if len(channel) < 5 {
+				message.processNewState = p
+				channel <- message
+			}
 			return nil
-		}
-
-		f, err := os.Open(path)
+		})
 		if err != nil {
-			return err
-		}
-		defer f.Close()
-
-		_, err = io.Copy(headerWriter, f)
-		if err != nil {
-			return err
-		}
-		p.done++
-		if len(channel) < 5 {
+			slog.Error("Error while zip file", "error", err)
+			p.state = failure
 			message.processNewState = p
 			channel <- message
+			return err
 		}
-		return nil
-	})
-
-	if err != nil {
-		slog.Error("Error while zip file", "error", err)
-		p.state = failure
-		message.processNewState = p
-		channel <- message
 	}
+
 	p.state = successful
 	p.done = totalFiles
-
 	message.processNewState = p
 	channel <- message
-
 	return nil
+}
+
+func getZipArchiveName(base string) (string, error) {
+	zipName := strings.TrimSuffix(base, filepath.Ext(base)) + ".zip"
+	zipName, err := renameIfDuplicate(zipName)
+	return zipName, err
 }

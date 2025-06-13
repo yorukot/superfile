@@ -38,6 +38,7 @@ var (
 	FilePreviewUnsupportedFormatText   string
 	FilePreviewDirectoryUnreadableText string
 	FilePreviewEmptyText               string
+	FilePreviewError                   string
 
 	LipglossError string
 )
@@ -58,22 +59,23 @@ func LoadInitialPrerenderedVariables() {
 // loadConfigFile() in config_types.go should be finished
 // InitIcon() in config package in function.go should be finished
 func LoadPrerenderedVariables() {
-	SideBarSuperfileTitle = SidebarTitleStyle.Render(" " + icon.SuperfileIcon + " superfile")
+	SideBarSuperfileTitle = SidebarTitleStyle.Render(" " + icon.SuperfileIcon + icon.Space + "superfile")
 
-	SideBarPinnedDivider = SidebarTitleStyle.Render(icon.Pinned+" Pinned") + SidebarDividerStyle.Render(" ───────────")
+	SideBarPinnedDivider = SidebarTitleStyle.Render(icon.Pinned+icon.Space+"Pinned") + SidebarDividerStyle.Render(" ───────────")
 
-	SideBarDisksDivider = SidebarTitleStyle.Render(icon.Disk+" Disks") + SidebarDividerStyle.Render(" ────────────")
+	SideBarDisksDivider = SidebarTitleStyle.Render(icon.Disk+icon.Space+"Disks") + SidebarDividerStyle.Render(" ────────────")
 
-	SideBarNoneText = SidebarStyle.Render(" " + icon.Error + " None")
+	SideBarNoneText = SidebarStyle.Render(" " + icon.Error + icon.Space + "None")
 
-	ProcessBarNoneText = icon.Error + "  No processes running"
+	ProcessBarNoneText = icon.Error + icon.Space + "No processes running"
 
 	FilePanelTopDirectoryIcon = FilePanelTopDirectoryIconStyle.Render(" " + icon.Directory + icon.Space)
-	FilePanelNoneText = FilePanelStyle.Render(" " + icon.Error + "  No such file or directory")
+	FilePanelNoneText = FilePanelStyle.Render(" " + icon.Error + icon.Space + "No such file or directory")
 
-	FilePreviewNoContentText = "--- " + icon.Error + " No content to preview ---"
-	FilePreviewNoFileInfoText = "--- " + icon.Error + " Could not get file info ---"
-	FilePreviewUnsupportedFormatText = "--- " + icon.Error + " Unsupported formats ---"
-	FilePreviewDirectoryUnreadableText = "--- " + icon.Error + " Cannot read directory ---"
+	FilePreviewNoContentText = "--- " + icon.Error + icon.Space + "No content to preview" + icon.Space + "---"
+	FilePreviewNoFileInfoText = "--- " + icon.Error + icon.Space + "Could not get file info" + icon.Space + "---"
+	FilePreviewUnsupportedFormatText = "--- " + icon.Error + icon.Space + "Unsupported formats" + icon.Space + "---"
+	FilePreviewDirectoryUnreadableText = "--- " + icon.Error + icon.Space + "Cannot read directory" + icon.Space + "---"
+	FilePreviewError = "--- " + icon.Error + icon.Space + "Error" + icon.Space + "---"
 	FilePreviewEmptyText = "--- Empty ---"
 }

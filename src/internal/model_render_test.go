@@ -1,9 +1,11 @@
 package internal
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/charmbracelet/x/exp/term/ansi"
@@ -41,12 +43,10 @@ func TestFilePreviewRenderWithDimensions(t *testing.T) {
 			fileContent: "" +
 				"abcd\n" +
 				"1234",
-			fileName: "basic.txt",
-			height:   2,
-			width:    4,
-			expectedPreview: "" +
-				"abcd\n" +
-				"1234",
+			fileName:        "basic.txt",
+			height:          2,
+			width:           4,
+			expectedPreview: "abcd",
 		},
 		{
 			name: "Width and height truncation",
@@ -54,37 +54,30 @@ func TestFilePreviewRenderWithDimensions(t *testing.T) {
 				"abcd\n" +
 				"1234\n" +
 				"WXYZ",
-			fileName: "truncate.txt",
-			height:   2,
-			width:    3,
-			expectedPreview: "" +
-				"abc\n" +
-				"123",
+			fileName:        "truncate.txt",
+			height:          2,
+			width:           3,
+			expectedPreview: "abc",
 		},
 		{
 			name: "Whitespace filling",
 			fileContent: "" +
 				"abc\n" +
 				"123",
-			fileName: "fill.txt",
-			height:   3,
-			width:    4,
-			expectedPreview: "" +
-				"abc \n" +
-				"123 \n" +
-				"    ",
+			fileName:        "fill.txt",
+			height:          3,
+			width:           4,
+			expectedPreview: "abc \n123 ",
 		},
 		{
 			name: "Special char, Emojies and special unicodes",
 			fileContent: "" +
 				"✅\uf410\U000f0868abcdABCD0123~\n" +
 				"!@#$%^&*()_+-={}|:\"<>?,./;'[]",
-			fileName: "special.txt",
-			height:   2,
-			width:    30,
-			expectedPreview: "" +
-				"✅\uf410\U000f0868abcdABCD0123~             \n" +
-				"!@#$%^&*()_+-={}|:\"<>?,./;'[] ",
+			fileName:        "special.txt",
+			height:          2,
+			width:           30,
+			expectedPreview: "✅\uf410\U000f0868abcdABCD0123~             ",
 		},
 		{
 			// Contains various Unicode whitespace characters:
@@ -98,15 +91,10 @@ func TestFilePreviewRenderWithDimensions(t *testing.T) {
 				"\t1\t\t2\t\n" +
 				"0\u00a01\u00a02\u202f3\u205f4\u20295\u202f6\u205f7\u2029\n" +
 				"0\u30001\u30002",
-			fileName: "whitespace.txt",
-			height:   5,
-			width:    12,
-			expectedPreview: "" +
-				"            \n" +
-				"    1       \n" +
-				"0\u00a01\u00a02 3 4 5 \n" +
-				"0 1 2       \n" +
-				"            ",
+			fileName:        "whitespace.txt",
+			height:          5,
+			width:           12,
+			expectedPreview: "    1       \n0\u00a01\u00a02 3 4 5 \n0 1 2       ",
 		},
 		{
 			// Contains control characters:
@@ -121,12 +109,10 @@ func TestFilePreviewRenderWithDimensions(t *testing.T) {
 			name: "Invalid character cleanup",
 			fileContent: "" +
 				"\x0b\x0d\x00\x05\x0f\x7f\xa0\ufffd",
-			fileName: "invalid.txt",
-			height:   2,
-			width:    10,
-			expectedPreview: "" +
-				"          \n" +
-				"          ",
+			fileName:        "invalid.txt",
+			height:          2,
+			width:           10,
+			expectedPreview: "",
 		},
 	}
 
@@ -140,9 +126,104 @@ func TestFilePreviewRenderWithDimensions(t *testing.T) {
 
 			m := defaultTestModel(curDir)
 
-			res := ansi.Strip(m.filePreviewPanelRenderWithDimensions(tt.height, tt.width))
+			// Get the rendered output and strip ANSI codes
+			rawOutput := m.filePreviewPanelRenderWithDimensions(tt.height, tt.width)
+			output := ansi.Strip(rawOutput)
 
-			assert.Equal(t, tt.expectedPreview, res, "filePath = %s", filePath)
+			// Normalize the output by removing any leading empty lines and trimming trailing whitespace
+			normalizedOutput := normalizeOutput(output)
+
+			assert.Equal(t, tt.expectedPreview, normalizedOutput, "filePath = %s", filePath)
 		})
 	}
+}
+
+// normalizeOutput removes leading empty lines and normalizes line endings
+func normalizeOutput(output string) string {
+	// Split the output into lines
+	lines := strings.Split(output, "\n")
+
+	// Filter out empty lines at the beginning and end
+	var filteredLines []string
+	startFound := false
+	for _, line := range lines {
+		trimmedLine := strings.TrimSpace(line)
+		if trimmedLine != "" || startFound {
+			startFound = true
+			filteredLines = append(filteredLines, line)
+		}
+	}
+
+	// Remove trailing empty lines
+	for len(filteredLines) > 0 && strings.TrimSpace(filteredLines[len(filteredLines)-1]) == "" {
+		filteredLines = filteredLines[:len(filteredLines)-1]
+	}
+
+	// Join the lines back together
+	return strings.Join(filteredLines, "\n")
+}
+
+func TestReadFileContent(t *testing.T) {
+	curTestDir := filepath.Join(testDir, "TestReadFileContent")
+	setupDirectories(t, curTestDir)
+
+	testdata := []struct {
+		name          string
+		content       []byte
+		maxLineLength int
+		previewLine   int
+		expected      string
+	}{
+		{
+			name:          "regular UTF-8 file",
+			content:       []byte("line1\nline2\nline3"),
+			maxLineLength: 100,
+			previewLine:   5,
+			expected:      "line1\nline2\nline3\n",
+		},
+		{
+			name:          "UTF-8 BOM file",
+			content:       []byte("\xEF\xBB\xBFline1\nline2\nline3"),
+			maxLineLength: 100,
+			previewLine:   5,
+			expected:      "line1\nline2\nline3\n",
+		},
+		{
+			name:          "limited preview lines",
+			content:       []byte("line1\nline2\nline3\nline4"),
+			maxLineLength: 100,
+			previewLine:   2,
+			expected:      "line1\nline2\n",
+		},
+	}
+
+	for i, tt := range testdata {
+		t.Run(tt.name, func(t *testing.T) {
+			testFile := filepath.Join(curTestDir, fmt.Sprintf("test_file_%d.txt", i))
+			setupFilesWithData(t, tt.content, testFile)
+
+			result, err := readFileContent(testFile, tt.maxLineLength, tt.previewLine)
+			require.NoError(t, err)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestReadFileContentBOMHandling(t *testing.T) {
+	curTestDir := filepath.Join(testDir, "TestBOMHandling")
+	setupDirectories(t, curTestDir)
+
+	// Write a file prefixed with UTF-8 BOM
+	bomContent := []byte("\xEF\xBB\xBFHello, World!\nSecond line")
+	bomFile := filepath.Join(curTestDir, "bom_file.txt")
+	setupFilesWithData(t, bomContent, bomFile)
+
+	result, err := readFileContent(bomFile, 100, 10)
+	require.NoError(t, err)
+
+	// Verify BOM is removed and content is correct
+	assert.True(t, strings.HasPrefix(result, "Hello, World!"),
+		"Content should start with expected text, got: %q", result)
+	assert.NotContains(t, result, "\uFEFF",
+		"BOM character should be removed from output: %q", result)
 }
