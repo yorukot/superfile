@@ -46,6 +46,9 @@ shell_close_on_success = false
 # Whether to enable debug mode.
 debug = false
 #
+# Whether to ignore warnings about missing fields in the config file.
+ignore_missing_fields = false
+#
 # ================   Style =================
 #
 # Whether to use the builtin syntax highlighting with chroma or use bat. Values: "" for builtin chroma, "bat" for bat
