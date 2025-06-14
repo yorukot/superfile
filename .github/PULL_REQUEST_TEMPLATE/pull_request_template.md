@@ -1,31 +1,26 @@
 # Description
 
-Please give a summary of the changes made to this repo through this change. Also include context and motivation behind this along with dependencies that are required for this change (if any).
+Briefly summarize what this PR changes.  
+Include any context or motivation behind the change. If it depends on other changes or tools, please mention that too.
 
-# Fixes
+# Related Issues
 
-If there are any issues that this fixes, please mention it/them.
+If this PR fixes or relates to existing issues, list them here.  
+Example: `Fixes #123`
 
-## Type of change
+# Screenshots (Optional)
 
-Please delete options that are not relevant.
+Add screenshots if this helps reviewers understand the change.
 
-- [ ] Bug fix
-- [ ] New feature
-- [ ] New Theme
-- [ ] Theme update
-- [ ] Enhancement
+---
 
-# Tests
+# ✅ Pre-Submission Checklist
 
-If this has been tested, then please describe how it has been tested and if it passed those tests. If it didn't pass, then why so?
+Please go through the following steps **before** submitting this PR.  
+You can delete this section after confirming everything is done.
 
-Also mention the configurations for the tests below:
-
-**Test Configurations**
-* OS:
-* Version:
-
-# Screenshots (if appropriate)
-
-Include screenshots here if appropriate.
+- [ ] I have run `go fmt ./...` to format the code
+- [ ] I have run `golangci-lint run` and fixed any reported issues
+- [ ] I have tested my changes and verified they work as expected
+- [ ] I have reviewed the diff to make sure I’m not committing any debug logs or TODOs
+- [ ] I have checked that the PR title follows the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) format
