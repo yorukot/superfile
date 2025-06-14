@@ -251,6 +251,8 @@ func (m *model) warnModalOpenKey(msg string) {
 			}
 		case confirmRenameItem:
 			m.confirmRename()
+		case notificationWarn:
+			m.cancelWarnModal()
 		}
 	}
 }
