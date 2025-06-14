@@ -40,6 +40,7 @@ const (
 const (
 	confirmDeleteItem warnType = iota
 	confirmRenameItem
+	notificationWarn
 )
 
 // Constants for panel with no focus

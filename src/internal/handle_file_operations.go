@@ -389,6 +389,40 @@ func (m *model) pasteItem() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	totalFiles := 0
 
+	// Check if trying to paste into source or subdirectory when cutting
+	if m.copyItems.cut {
+		for _, srcPath := range m.copyItems.items {
+			// Get absolute paths to handle relative path cases
+			srcAbs, err := filepath.Abs(srcPath)
+			if err != nil {
+				slog.Error("model.pasteItem - Error getting absolute source path", "error", err)
+				return
+			}
+			dstAbs, err := filepath.Abs(panel.location)
+			if err != nil {
+				slog.Error("model.pasteItem - Error getting absolute destination path", "error", err)
+				return
+			}
+
+			// Check if destination is source or subdirectory of source
+			if strings.HasPrefix(dstAbs, srcAbs) {
+				slog.Error("Cannot cut and paste a directory into itself or its subdirectory")
+				message := channelMessage{
+					messageID:   id,
+					messageType: sendWarnModal,
+					warnModal: warnModal{
+						open:     true,
+						title:    "Invalid paste location",
+						content:  "Cannot cut and paste a directory into itself or its subdirectory",
+						warnType: confirmDeleteItem, // Reusing existing warn type since it's just for display
+					},
+				}
+				channel <- message
+				return
+			}
+		}
+	}
+
 	for _, folderPath := range m.copyItems.items {
 		// Todo : Fix this. This is inefficient
 		// In case of a cut operations for a directory with a lot of files
