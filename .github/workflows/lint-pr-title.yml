@@ -15,8 +15,6 @@ jobs:
   lint:
     name: Check PR title format
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: read
     steps:
       - uses: amannn/action-semantic-pull-request@v5
         id: lint_pr_title
