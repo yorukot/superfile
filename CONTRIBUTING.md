@@ -1,49 +1,76 @@
 # Contributing to superfile
 
-Welcome to superfile! This document shall serve as a guide for you to follow in your journey to contributing to this project.
-There are many ways to contribute to superfile:
-- Reporting Bugs
-- Resolving issues
-- Adding a theme
-- Sharing an idea and working on it
-- Working on a feature with other contributors.
-- And More…
+Welcome to **superfile**! This guide will help you get started contributing to the project, whether you're fixing bugs, building features, or just sharing ideas.
 
-To get started, take a look at the following sections.
+There are many ways to contribute:
 
-## Issues
+* Reporting bugs
+* Fixing issues
+* Adding a theme
+* Suggesting and implementing new features
+* Sharing ideas or feedback
 
-### Did you spot a problem in superfile?
+---
 
-Firstly you should check if such an issue was previously opened/closed for your problem on the repository. If it doesn't then you should create a new issue.
+## 🐞 Issues
 
-### Do you want to solve an issue?
+### Found a bug?
 
-If there is an issue you think you can solve, and want to solve, then you should create a new fork of this repository.
-In that repository you should create a new branch for the issue you are working on and commit changes there.
-When the issue is solved, and you want it to be integrated into the official repository, you may create a pull request for the same.
-The description of the pull request should clearly describe both the issue and the solution along with other necessary information.
-The developers will merge after making the necessary changes (if arises a need to do so).
+Check if there's already an open or closed issue for it. If not, open a new one and describe the problem clearly.
 
-### Do you want to add a new theme?
+### Want to fix an issue?
 
-Firstly check if the theme you want to add is not already added. If it is, then you work may go waste and be left redundant.
-If no such theme exists, then you may create your own theme. Following steps will guide you for it:
-- As a template, copy an existing theme's TOML file to your theme and then do the customizations. This will reduce errors from your side and make your work easy.
-- To tests your theme, go to `~/.config/superfile/config/config.toml` and change description.
-- Make the changes you want and finish the theme.
-- Then you can open a pull request for the same and follow the steps described in the previous section.
+1. Fork this repository
+2. Create a new branch for the issue you're working on
+3. Commit your changes with clear messages
+4. Open a pull request (PR) with a description of the problem and your solution
 
-### Do you want to share an idea?
+Maintainers may request changes before merging.
 
-superfile welcomes new ideas. If you have an idea you should first check if a similar or identical idea was presented previously or not, or check thoroughly if the idea is already present in superfile.
-To share your idea you can open a discussion in https://github.com/MHNightCat/superfile/discussions
-There you can share your idea and if you want to work on it, you can follow the same steps as mentioned in previously.
+---
 
-### Do you want to contribute but don't know how?
+## 🎨 Adding a Theme
 
-Your first resource in this should be https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-a-project
-This file serves as your guide specifically for this project to help you get your contributions into the project.
-If you still have some questions or need help, feel free to open a discussion on the same.
+Before starting, make sure the theme you want to add doesn’t already exist.
 
-# Thank You 🙏
+1. Copy an existing theme's `.toml` file as a base
+2. Customize it to your needs
+3. Test it by editing your `~/.config/superfile/config/config.toml`
+4. When ready, submit a pull request
+
+---
+
+## 💡 Sharing Ideas
+
+Got a new idea? Awesome!
+
+1. Check if similar ideas exist in Discussions or Issues
+2. Open a discussion at: [https://github.com/yorukot/superfile/discussions](https://github.com/yorukot/superfile/discussions)
+3. If you want to implement it yourself, follow the PR steps above
+
+---
+
+## 🧩 Don’t Know Where to Start?
+
+Check out GitHub’s official guide:
+[https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-a-project](https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-a-project)
+
+Still unsure? Open a discussion — we’re happy to help.
+
+---
+
+## ✅ Pull Request Checklist
+
+Please make sure your PR follows these steps:
+
+* [ ] I have run `go fmt ./...` to format the code
+* [ ] I have run `golangci-lint run` and fixed any reported issues
+* [ ] I have tested my changes and verified they work as expected
+* [ ] I have reviewed the diff to make sure I’m not committing any debug logs or TODOs
+* [ ] I have filled out the PR template with description, context, and screenshots if needed
+
+---
+
+## 🙏 Thank You
+
+Thank you for contributing to superfile! We appreciate every issue, pull request, and idea. Your help makes this project better for everyone.
