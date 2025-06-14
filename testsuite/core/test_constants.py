@@ -7,6 +7,7 @@ OPERATION_DELAY : float = 0.3 # seconds
 
 # 0.3 second was too less for windows
 # 0.5 second Github workflow failed for with superfile is still running errors
+START_WAIT_TIME : float     = 0.5 # seconds
 CLOSE_WAIT_TIME : float     = 0.5 # seconds
 
 # Platform specific consts

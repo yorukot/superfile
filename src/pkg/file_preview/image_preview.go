@@ -286,29 +286,27 @@ func (p *ImagePreviewer) ImagePreviewWithRenderer(path string, maxWidth int, max
 		if err != nil {
 			// If kitty fails, fall back to ANSI renderer
 			slog.Error("Kitty renderer failed, falling back to ANSI", "error", err)
-			bgColor, bgErr := hexToColor(defaultBGColor)
-			if bgErr != nil {
-				return "", fmt.Errorf("kitty failed and invalid background color: %w", bgErr)
-			}
-			// For ANSI fallback, fit the image to preview dimensions maintaining aspect ratio
-			ansiImg := resizeForANSI(img, maxWidth, maxHeight)
-			return ConvertImageToANSI(ansiImg, bgColor), nil
+			return p.ANSIRenderer(img, defaultBGColor, maxWidth, maxHeight)
 		}
 		return result, nil
 
 	case RendererANSI:
-		fallthrough
+		return p.ANSIRenderer(img, defaultBGColor, maxWidth, maxHeight)
 	default:
-		// Convert image to ANSI
-		bgColor, err := hexToColor(defaultBGColor)
-		if err != nil {
-			return "", fmt.Errorf("invalid background color: %w", err)
-		}
-
-		// For ANSI rendering, resize image appropriately
-		fittedImg := resizeForANSI(img, maxWidth, maxHeight)
-		return ConvertImageToANSI(fittedImg, bgColor), nil
+		return "", fmt.Errorf("invalid renderer : %v", renderer)
 	}
+}
+
+// Convert image to ansi
+func (p *ImagePreviewer) ANSIRenderer(img image.Image, defaultBGColor string, maxWidth int, maxHeight int) (string, error) {
+	bgColor, err := hexToColor(defaultBGColor)
+	if err != nil {
+		return "", fmt.Errorf("invalid background color: %w", err)
+	}
+
+	// For ANSI rendering, resize image appropriately
+	fittedImg := resizeForANSI(img, maxWidth, maxHeight)
+	return ConvertImageToANSI(fittedImg, bgColor), nil
 }
 
 func hexToColor(hex string) (color.RGBA, error) {

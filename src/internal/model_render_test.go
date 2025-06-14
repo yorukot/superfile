@@ -43,10 +43,12 @@ func TestFilePreviewRenderWithDimensions(t *testing.T) {
 			fileContent: "" +
 				"abcd\n" +
 				"1234",
-			fileName:        "basic.txt",
-			height:          2,
-			width:           4,
-			expectedPreview: "abcd\n1234",
+			fileName: "basic.txt",
+			height:   2,
+			width:    4,
+			expectedPreview: "" +
+				"abcd\n" +
+				"1234",
 		},
 		{
 			name: "Width and height truncation",
@@ -54,30 +56,37 @@ func TestFilePreviewRenderWithDimensions(t *testing.T) {
 				"abcd\n" +
 				"1234\n" +
 				"WXYZ",
-			fileName:        "truncate.txt",
-			height:          2,
-			width:           3,
-			expectedPreview: "abc\n123",
+			fileName: "truncate.txt",
+			height:   2,
+			width:    3,
+			expectedPreview: "" +
+				"abc\n" +
+				"123",
 		},
 		{
 			name: "Whitespace filling",
 			fileContent: "" +
 				"abc\n" +
 				"123",
-			fileName:        "fill.txt",
-			height:          3,
-			width:           4,
-			expectedPreview: "abc \n123 ",
+			fileName: "fill.txt",
+			height:   3,
+			width:    4,
+			expectedPreview: "" +
+				"abc \n" +
+				"123 \n" +
+				"    ",
 		},
 		{
 			name: "Special char, Emojies and special unicodes",
 			fileContent: "" +
 				"✅\uf410\U000f0868abcdABCD0123~\n" +
 				"!@#$%^&*()_+-={}|:\"<>?,./;'[]",
-			fileName:        "special.txt",
-			height:          2,
-			width:           30,
-			expectedPreview: "✅\uf410\U000f0868abcdABCD0123~             \n!@#$%^&*()_+-={}|:\"<>?,./;'[] ",
+			fileName: "special.txt",
+			height:   2,
+			width:    30,
+			expectedPreview: "" +
+				"✅\uf410\U000f0868abcdABCD0123~             \n" +
+				"!@#$%^&*()_+-={}|:\"<>?,./;'[] ",
 		},
 		{
 			// Contains various Unicode whitespace characters:
@@ -91,10 +100,15 @@ func TestFilePreviewRenderWithDimensions(t *testing.T) {
 				"\t1\t\t2\t\n" +
 				"0\u00a01\u00a02\u202f3\u205f4\u20295\u202f6\u205f7\u2029\n" +
 				"0\u30001\u30002",
-			fileName:        "whitespace.txt",
-			height:          5,
-			width:           12,
-			expectedPreview: "    1       \n0\u00a01\u00a02 3 4 5 \n0 1 2       ",
+			fileName: "whitespace.txt",
+			height:   5,
+			width:    12,
+			expectedPreview: "" +
+				"            \n" +
+				"    1       \n" +
+				"0\u00a01\u00a02 3 4 5 \n" +
+				"0 1 2       \n" +
+				"            ",
 		},
 		{
 			// Contains control characters:
@@ -109,10 +123,12 @@ func TestFilePreviewRenderWithDimensions(t *testing.T) {
 			name: "Invalid character cleanup",
 			fileContent: "" +
 				"\x0b\x0d\x00\x05\x0f\x7f\xa0\ufffd",
-			fileName:        "invalid.txt",
-			height:          2,
-			width:           10,
-			expectedPreview: "",
+			fileName: "invalid.txt",
+			height:   2,
+			width:    10,
+			expectedPreview: "" +
+				"          \n" +
+				"          ",
 		},
 	}
 
@@ -126,16 +142,14 @@ func TestFilePreviewRenderWithDimensions(t *testing.T) {
 
 			m := defaultTestModel(curDir)
 
-			// Get the rendered output and strip ANSI codes
-			rawOutput := m.filePreviewPanelRenderWithDimensions(tt.height, tt.width)
-			output := ansi.Strip(rawOutput)
+			res := ansi.Strip(m.filePreviewPanelRenderWithDimensions(tt.height, tt.width))
 
-			// Normalize the output by removing any leading empty lines and trimming trailing whitespace
-			normalizedOutput := normalizeOutput(output)
-
-			assert.Equal(t, tt.expectedPreview, normalizedOutput, "filePath = %s", filePath)
+			assert.Equal(t, tt.expectedPreview, res, "filePath = %s", filePath)
 		})
 	}
+
+	// To prevent "normalizeOutput function unused" error.
+	_ = normalizeOutput("")
 }
 
 // normalizeOutput removes leading empty lines and normalizes line endings
