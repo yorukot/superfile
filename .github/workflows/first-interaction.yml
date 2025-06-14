@@ -1,4 +1,8 @@
 name: "Welcome First-Time Contributor"
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
 
 on:
   issues:
