@@ -45,6 +45,53 @@ Before starting, make sure the theme you want to add doesn’t already exist.
 2. Customize it to your needs
 3. Test it by editing your `~/.config/superfile/config/config.toml`
 4. When ready, submit a pull request
+5. To ensure the theme looks consistent and functions properly, please include the following screenshots in your PR:
+- Full view of superfile (Including sidebar, file previewer, process panel, metadata panel, and clipboard panel )
+    - Make sure that file previewer is non empty, process panel has at least one process, and clipboard has at least one entry
+- Add a screenshot of these individual panel being focussed (To make sure border focus color is good)
+    - Sidebar
+    - Processbar
+- Add a screenshot of help menu (Press ?)
+- Add a screenshot of popup that opens when you create a new file (Ctrl+n)
+- Add a screenshot of image being preview using your theme.
+- Add a screenshot of successful and unsuccessful shell command.
+<details>
+<summary>Example:</summary>
+
+- Full view of superfile (Including sidebar, file previewer, process panel, metadata panel, and clipboard panel)
+
+  - Make sure that file previewer is non empty, process panel has at least one process, and clipboard has at least one entry
+
+  ![Full view of superfile](https://raw.githubusercontent.com/yorukot/superfile/main/asset/theme-example/1.png)
+
+- Add a screenshot of these individual panels being focused (To make sure border focus color is good)
+
+  - Sidebar
+  - Processbar
+
+  ![Sidebar focused](https://raw.githubusercontent.com/yorukot/superfile/main/asset/theme-example/2.png)
+
+  ![Processbar focused](https://raw.githubusercontent.com/yorukot/superfile/main/asset/theme-example/3.png)
+
+- Add a screenshot of help menu (Press `?`)
+
+  ![Help menu](https://raw.githubusercontent.com/yorukot/superfile/main/asset/theme-example/4.png)
+
+- Add a screenshot of popup that opens when you create a new file (Ctrl+n)
+
+  ![New file popup](https://raw.githubusercontent.com/yorukot/superfile/main/asset/theme-example/5.png)
+
+- Add a screenshot of image being previewed using your theme
+
+  ![Image preview](https://raw.githubusercontent.com/yorukot/superfile/main/asset/theme-example/6.png)
+
+- Add a screenshot of successful and unsuccessful shell command
+
+  ![Successful shell command](https://raw.githubusercontent.com/yorukot/superfile/main/asset/theme-example/7.png)
+
+  ![Failed shell command](https://raw.githubusercontent.com/yorukot/superfile/main/asset/theme-example/8.png)
+
+</details>
 
 ---
 
