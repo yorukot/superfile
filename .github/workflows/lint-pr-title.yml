@@ -1,0 +1,67 @@
+name: "Lint PR Title"
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+
+permissions:
+  pull-requests: write
+
+jobs:
+  lint:
+    name: Check PR title format
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5
+        id: lint_pr_title
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            refactor
+            chore
+            docs
+            test
+            style
+            perf
+            ci
+            build
+
+      - uses: marocchino/sticky-pull-request-comment@v2
+        if: always() && (steps.lint_pr_title.outputs.error_message != null)
+        with:
+          header: pr-title-lint-error
+          message: |
+            ⚠️ PR title format invalid.
+
+            superfile uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for squash merges.
+
+            Allowed types:
+            ```
+            feat, fix, refactor, chore, docs, test, style, perf, ci, build
+            ```
+
+            👉 While not required, it’s **recommended** to include a scope like:
+            ```
+            feat(file-preview): support Kitty image protocol
+            fix(renderer): correct ANSI fallback
+            ```
+
+            ---
+            ```
+            ${{ steps.lint_pr_title.outputs.error_message }}
+            ```
+
+      - if: ${{ steps.lint_pr_title.outputs.error_message == null }}
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: pr-title-lint-error
+          delete: true
