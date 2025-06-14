@@ -76,6 +76,7 @@ Please make sure your PR follows these steps:
 * [ ] I have tested my changes and verified they work as expected
 * [ ] I have reviewed the diff to make sure I’m not committing any debug logs or TODOs
 * [ ] I have filled out the PR template with description, context, and screenshots if needed
+- [ ] I have checked that the PR title follows the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) format
 
 ---
 

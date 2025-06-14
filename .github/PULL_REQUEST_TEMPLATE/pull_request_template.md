@@ -23,3 +23,4 @@ You can delete this section after confirming everything is done.
 - [ ] I have run `golangci-lint run` and fixed any reported issues
 - [ ] I have tested my changes and verified they work as expected
 - [ ] I have reviewed the diff to make sure I’m not committing any debug logs or TODOs
+- [ ] I have checked that the PR title follows the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) format
