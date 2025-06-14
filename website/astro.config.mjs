@@ -103,6 +103,10 @@ export default defineConfig({
               label: 'Tutorial',
               link: '/getting-started/tutorial/',
             },
+            {
+              label: 'Image Preview',
+              link: '/getting-started/image-preview/',
+            }
           ],
         },
         {
