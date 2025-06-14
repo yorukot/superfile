@@ -654,53 +654,31 @@ func (m *model) filePreviewPanelRender() string {
 
 // Helper function to handle empty panel case
 func (m *model) renderEmptyFilePreview(r *rendering.Renderer) string {
-	clearCmd := m.imagePreviewer.ClearKittyImages()
-	if clearCmd != "" {
-		r.AddLines(clearCmd + common.FilePreviewNoContentText)
-	} else {
-		r.AddLines(common.FilePreviewNoContentText)
-	}
 	return r.Render()
 }
 
 // Helper function to handle file info errors
 func (m *model) renderFileInfoError(r *rendering.Renderer, _ lipgloss.Style, err error) string {
 	slog.Error("Error get file info", "error", err)
-	clearCmd := m.imagePreviewer.ClearKittyImages()
-	if clearCmd != "" {
-		r.AddLines(clearCmd + common.FilePreviewNoFileInfoText)
-	} else {
-		r.AddLines(common.FilePreviewNoFileInfoText)
-	}
 	return r.Render()
 }
 
 // Helper function to handle unsupported formats
 func (m *model) renderUnsupportedFormat(box lipgloss.Style) string {
-	clearCmd := m.imagePreviewer.ClearKittyImages()
-	return box.Render(clearCmd + "\n" + common.FilePreviewUnsupportedFormatText)
+	return box.Render(common.FilePreviewUnsupportedFormatText)
 }
 
 // Helper function to handle directory preview
 func (m *model) renderDirectoryPreview(r *rendering.Renderer, itemPath string, previewHeight int) string {
-	clearCmd := m.imagePreviewer.ClearKittyImages()
 	files, err := os.ReadDir(itemPath)
 	if err != nil {
 		slog.Error("Error render directory preview", "error", err)
-		if clearCmd != "" {
-			r.AddLines(clearCmd + common.FilePreviewDirectoryUnreadableText)
-		} else {
-			r.AddLines(common.FilePreviewDirectoryUnreadableText)
-		}
+		r.AddLines(common.FilePreviewDirectoryUnreadableText)
 		return r.Render()
 	}
 
 	if len(files) == 0 {
-		if clearCmd != "" {
-			r.AddLines(clearCmd + common.FilePreviewEmptyText)
-		} else {
-			r.AddLines(common.FilePreviewEmptyText)
-		}
+		r.AddLines(common.FilePreviewEmptyText)
 		return r.Render()
 	}
 
@@ -713,11 +691,6 @@ func (m *model) renderDirectoryPreview(r *rendering.Renderer, itemPath string, p
 		}
 		return files[i].Name() < files[j].Name()
 	})
-
-	// Add clear command before directory listing
-	if clearCmd != "" {
-		r.AddLines(clearCmd)
-	}
 
 	for i := 0; i < previewHeight && i < len(files); i++ {
 		file := files[i]
@@ -732,18 +705,10 @@ func (m *model) renderDirectoryPreview(r *rendering.Renderer, itemPath string, p
 // Helper function to handle image preview
 func (m *model) renderImagePreview(box lipgloss.Style, itemPath string, previewWidth, previewHeight int, sideAreaWidth int) string {
 	if !m.fileModel.filePreview.open {
-		clearCmd := m.imagePreviewer.ClearKittyImages()
-		if clearCmd != "" {
-			return box.Render(clearCmd + "\n --- Preview panel is closed ---")
-		}
 		return box.Render("\n --- Preview panel is closed ---")
 	}
 
 	if !common.Config.ShowImagePreview {
-		clearCmd := m.imagePreviewer.ClearKittyImages()
-		if clearCmd != "" {
-			return box.Render(clearCmd + "\n --- Image preview is disabled ---")
-		}
 		return box.Render("\n --- Image preview is disabled ---")
 	}
 
@@ -755,10 +720,6 @@ func (m *model) renderImagePreview(box lipgloss.Style, itemPath string, previewW
 
 	if err != nil {
 		slog.Error("Error convert image to ansi", "error", err)
-		clearCmd := m.imagePreviewer.ClearKittyImages()
-		if clearCmd != "" {
-			return box.Render(clearCmd + "\n --- " + icon.Error + " Error convert image to ansi ---")
-		}
 		return box.Render("\n --- " + icon.Error + " Error convert image to ansi ---")
 	}
 
@@ -775,27 +736,25 @@ func (m *model) renderImagePreview(box lipgloss.Style, itemPath string, previewW
 
 // Helper function to handle text file preview
 func (m *model) renderTextPreview(r *rendering.Renderer, box lipgloss.Style, itemPath string, previewWidth, previewHeight int) string {
-	clearCmd := m.imagePreviewer.ClearKittyImages()
 	format := lexers.Match(filepath.Base(itemPath))
-
 	if format == nil {
 		isText, err := common.IsTextFile(itemPath)
 		if err != nil {
 			slog.Error("Error while checking text file", "error", err)
-			return box.Render(clearCmd + "\n" + common.FilePreviewError)
+			return box.Render(common.FilePreviewError)
 		} else if !isText {
-			return box.Render(clearCmd + "\n" + common.FilePreviewUnsupportedFormatText)
+			return box.Render(common.FilePreviewUnsupportedFormatText)
 		}
 	}
 
 	fileContent, err := readFileContent(itemPath, previewWidth, previewHeight)
 	if err != nil {
 		slog.Error("Error open file", "error", err)
-		return box.Render(clearCmd + "\n" + common.FilePreviewError)
+		return box.Render(common.FilePreviewError)
 	}
 
 	if fileContent == "" {
-		return box.Render(clearCmd + "\n" + common.FilePreviewEmptyText)
+		return box.Render(common.FilePreviewEmptyText)
 	}
 
 	if format != nil {
@@ -805,9 +764,6 @@ func (m *model) renderTextPreview(r *rendering.Renderer, box lipgloss.Style, ite
 		}
 		if common.Config.CodePreviewer == "bat" {
 			if batCmd == "" {
-				if clearCmd != "" {
-					return box.Render(clearCmd + "\n --- " + icon.Error + " 'bat' is not installed or not found. ---\n --- Cannot render file preview. ---")
-				}
 				return box.Render("\n --- " + icon.Error + " 'bat' is not installed or not found. ---\n --- Cannot render file preview. ---")
 			}
 			fileContent, err = getBatSyntaxHighlightedContent(itemPath, previewHeight, background)
@@ -816,12 +772,10 @@ func (m *model) renderTextPreview(r *rendering.Renderer, box lipgloss.Style, ite
 		}
 		if err != nil {
 			slog.Error("Error render code highlight", "error", err)
-			return box.Render(clearCmd + "\n" + common.FilePreviewError)
+			return box.Render("\n" + common.FilePreviewError)
 		}
 	}
 
-	// Add clear command before text content
-	r.AddLines(clearCmd)
 	r.AddLines(fileContent)
 	return r.Render()
 }
@@ -830,33 +784,32 @@ func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewW
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	box := common.FilePreviewBox(previewHeight, previewWidth)
 	r := ui.FilePreviewPanelRenderer(previewHeight, previewWidth)
-
+	clearCmd := m.imagePreviewer.ClearKittyImages()
 	if len(panel.element) == 0 {
-		return m.renderEmptyFilePreview(r)
+		return m.renderEmptyFilePreview(r) + clearCmd
 	}
 
 	itemPath := panel.element[panel.cursor].location
 	fileInfo, infoErr := os.Stat(itemPath)
 
 	if infoErr != nil {
-		return m.renderFileInfoError(r, box, infoErr)
+		return m.renderFileInfoError(r, box, infoErr) + clearCmd
 	}
 
 	ext := filepath.Ext(itemPath)
 	if slices.Contains(common.UnsupportedPreviewFormats, ext) {
-		return m.renderUnsupportedFormat(box)
+		return m.renderUnsupportedFormat(box) + clearCmd
 	}
 
 	if fileInfo.IsDir() {
-		return m.renderDirectoryPreview(r, itemPath, previewHeight)
+		return m.renderDirectoryPreview(r, itemPath, previewHeight) + clearCmd
 	}
 
 	if isImageFile(itemPath) {
-		// Add one to avoid the border
 		return m.renderImagePreview(box, itemPath, previewWidth, previewHeight, m.fullWidth-previewWidth+1)
 	}
 
-	return m.renderTextPreview(r, box, itemPath, previewWidth, previewHeight)
+	return m.renderTextPreview(r, box, itemPath, previewWidth, previewHeight) + clearCmd
 }
 
 func getBatSyntaxHighlightedContent(itemPath string, previewLine int, background string) (string, error) {

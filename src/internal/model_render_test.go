@@ -46,7 +46,7 @@ func TestFilePreviewRenderWithDimensions(t *testing.T) {
 			fileName:        "basic.txt",
 			height:          2,
 			width:           4,
-			expectedPreview: "abcd",
+			expectedPreview: "abcd\n1234",
 		},
 		{
 			name: "Width and height truncation",
@@ -57,7 +57,7 @@ func TestFilePreviewRenderWithDimensions(t *testing.T) {
 			fileName:        "truncate.txt",
 			height:          2,
 			width:           3,
-			expectedPreview: "abc",
+			expectedPreview: "abc\n123",
 		},
 		{
 			name: "Whitespace filling",
@@ -77,7 +77,7 @@ func TestFilePreviewRenderWithDimensions(t *testing.T) {
 			fileName:        "special.txt",
 			height:          2,
 			width:           30,
-			expectedPreview: "✅\uf410\U000f0868abcdABCD0123~             ",
+			expectedPreview: "✅\uf410\U000f0868abcdABCD0123~             \n!@#$%^&*()_+-={}|:\"<>?,./;'[] ",
 		},
 		{
 			// Contains various Unicode whitespace characters:
