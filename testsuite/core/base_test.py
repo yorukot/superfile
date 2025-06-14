@@ -40,7 +40,8 @@ class BaseTest(ABC):
 
 
 class GenericTestImpl(BaseTest):
-    def __init__(self, test_env : Environment,
+    def __init__(self, *, # Barrier to explicitly require keyword arguements only
+        test_env : Environment,
         test_root : Path,
         start_dir : Path,
         test_dirs : List[Path],
@@ -50,17 +51,29 @@ class GenericTestImpl(BaseTest):
         validate_not_exists : List[Path] = None,
         validate_spf_closed: bool = False,
         validate_spf_running: bool = False,
+        start_wait_time : float = tconst.START_WAIT_TIME,
         close_wait_time : float = tconst.CLOSE_WAIT_TIME ):
         super().__init__(test_env)
         self.test_root = test_root
         self.start_dir = start_dir
         self.test_dirs = test_dirs
         self.test_files = test_files
+        
+        # Todo fix it : For now first keypress in not being registered, 
+        # Need Additional no-operation key press as the first keypress
+        if key_inputs is None:
+            key_inputs = []
+        key_inputs= ['a'] + key_inputs
+
         self.key_inputs = key_inputs
         self.validate_exists = validate_exists
         self.validate_not_exists = validate_not_exists
         self.validate_spf_closed = validate_spf_closed
         self.validate_spf_running = validate_spf_running
+
+        if start_wait_time < 0 or close_wait_time < 0:
+            raise ValueError("wait times must be non-negative")
+        self.start_wait_time = start_wait_time
         self.close_wait_time = close_wait_time
     
     def setup(self) -> None:
@@ -77,6 +90,7 @@ class GenericTestImpl(BaseTest):
     
     def start_spf(self) -> None:
         self.env.spf_mgr.start_spf(self.env.fs_mgr.abspath(self.start_dir))
+        time.sleep(self.start_wait_time)
         assert self.env.spf_mgr.is_spf_running(), "superfile is not running"
 
     def end_execution(self) -> None:

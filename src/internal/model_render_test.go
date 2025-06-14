@@ -147,6 +147,34 @@ func TestFilePreviewRenderWithDimensions(t *testing.T) {
 			assert.Equal(t, tt.expectedPreview, res, "filePath = %s", filePath)
 		})
 	}
+
+	// To prevent "normalizeOutput function unused" error.
+	_ = normalizeOutput("")
+}
+
+// normalizeOutput removes leading empty lines and normalizes line endings
+func normalizeOutput(output string) string {
+	// Split the output into lines
+	lines := strings.Split(output, "\n")
+
+	// Filter out empty lines at the beginning and end
+	var filteredLines []string
+	startFound := false
+	for _, line := range lines {
+		trimmedLine := strings.TrimSpace(line)
+		if trimmedLine != "" || startFound {
+			startFound = true
+			filteredLines = append(filteredLines, line)
+		}
+	}
+
+	// Remove trailing empty lines
+	for len(filteredLines) > 0 && strings.TrimSpace(filteredLines[len(filteredLines)-1]) == "" {
+		filteredLines = filteredLines[:len(filteredLines)-1]
+	}
+
+	// Join the lines back together
+	return strings.Join(filteredLines, "\n")
 }
 
 func TestReadFileContent(t *testing.T) {

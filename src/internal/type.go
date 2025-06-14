@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/yorukot/superfile/src/internal/ui/sidebar"
+	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
 
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -89,17 +90,17 @@ const (
 // issues like race conditions and whatnot, which are hidden since we are creating
 // new model in each tea update.
 type model struct {
-	fileModel       fileModel
-	sidebarModel    sidebar.Model
-	processBarModel processBarModel
-	focusPanel      focusPanelType
-	copyItems       copyItems
-	typingModal     typingModal
-	warnModal       warnModal
-	helpMenu        helpMenuModal
-	promptModal     prompt.Model
-	fileMetaData    fileMetadata
-
+	fileModel            fileModel
+	sidebarModel         sidebar.Model
+	processBarModel      processBarModel
+	focusPanel           focusPanelType
+	copyItems            copyItems
+	typingModal          typingModal
+	warnModal            warnModal
+	helpMenu             helpMenuModal
+	promptModal          prompt.Model
+	fileMetaData         fileMetadata
+	imagePreviewer       *filepreview.ImagePreviewer
 	modelQuitState       modelQuitStateType
 	firstTextInput       bool
 	toggleDotFile        bool

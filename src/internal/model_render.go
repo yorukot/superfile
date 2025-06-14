@@ -30,7 +30,6 @@ import (
 	"github.com/charmbracelet/x/exp/term/ansi"
 	"github.com/yorukot/ansichroma"
 	"github.com/yorukot/superfile/src/config/icon"
-	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
 )
 
 func (m *model) sidebarRender() string {
@@ -653,128 +652,111 @@ func (m *model) filePreviewPanelRender() string {
 	return m.filePreviewPanelRenderWithDimensions(m.mainPanelHeight+2, m.fileModel.filePreview.width)
 }
 
-func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewWidth int) string {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	box := common.FilePreviewBox(previewHeight, previewWidth)
-	r := ui.FilePreviewPanelRenderer(previewHeight, previewWidth)
+// Helper function to handle empty panel case
+func (m *model) renderEmptyFilePreview(r *rendering.Renderer) string {
+	return r.Render()
+}
 
-	if len(panel.element) == 0 {
-		r.AddLines(common.FilePreviewNoContentText)
-		return r.Render()
-	}
-	// This could create errors if panel.cursor ever becomes negative, or goes out of bounds
-	// We should have a panel validation function in our View() function
-	// Panel is a full fledged object with own state, its accessed and modified so many times.
-	// Ideally we dont should never access data from it via directly accessing its variables
-	// Todo : Instead we should have helper functions for panel object and access data that way
-	// like panel.GetCurrentSelectedElem() . This abstration of implemetation of panel is needed.
-	// Now this lack of abstraction has caused issues ( See PR#730 ) . And now
-	// someone needs to scan through the entire codebase to figure out which access of panel
-	// data is causing crash.
-	itemPath := panel.element[panel.cursor].location
+// Helper function to handle file info errors
+func (m *model) renderFileInfoError(r *rendering.Renderer, _ lipgloss.Style, err error) string {
+	slog.Error("Error get file info", "error", err)
+	return r.Render()
+}
 
-	// Renamed it to info_err to prevent shadowing with err below
-	fileInfo, infoErr := os.Stat(itemPath)
+// Helper function to handle unsupported formats
+func (m *model) renderUnsupportedFormat(box lipgloss.Style) string {
+	return box.Render(common.FilePreviewUnsupportedFormatText)
+}
 
-	if infoErr != nil {
-		slog.Error("Error get file info", "error", infoErr)
-		r.AddLines(common.FilePreviewNoFileInfoText)
+// Helper function to handle directory preview
+func (m *model) renderDirectoryPreview(r *rendering.Renderer, itemPath string, previewHeight int) string {
+	files, err := os.ReadDir(itemPath)
+	if err != nil {
+		slog.Error("Error render directory preview", "error", err)
+		r.AddLines(common.FilePreviewDirectoryUnreadableText)
 		return r.Render()
 	}
 
-	ext := filepath.Ext(itemPath)
-	// check if the file is unsupported file, cuz pdf will cause error
-	if slices.Contains(common.UnsupportedPreviewFormats, ext) {
-		r.AddLines(common.FilePreviewUnsupportedFormatText)
+	if len(files) == 0 {
+		r.AddLines(common.FilePreviewEmptyText)
 		return r.Render()
 	}
 
-	if fileInfo.IsDir() {
-		dirPath := itemPath
-
-		files, err := os.ReadDir(dirPath)
-		if err != nil {
-			slog.Error("Error render directory preview", "error", err)
-			r.AddLines(common.FilePreviewDirectoryUnreadableText)
-			return r.Render()
+	sort.Slice(files, func(i, j int) bool {
+		if files[i].IsDir() && !files[j].IsDir() {
+			return true
 		}
-
-		if len(files) == 0 {
-			r.AddLines(common.FilePreviewEmptyText)
-			return r.Render()
+		if !files[i].IsDir() && files[j].IsDir() {
+			return false
 		}
+		return files[i].Name() < files[j].Name()
+	})
 
-		sort.Slice(files, func(i, j int) bool {
-			if files[i].IsDir() && !files[j].IsDir() {
-				return true
-			}
-			if !files[i].IsDir() && files[j].IsDir() {
-				return false
-			}
-			return files[i].Name() < files[j].Name()
-		})
+	for i := 0; i < previewHeight && i < len(files); i++ {
+		file := files[i]
+		style := common.GetElementIcon(file.Name(), file.IsDir(), common.Config.Nerdfont)
+		res := lipgloss.NewStyle().Foreground(lipgloss.Color(style.Color)).Background(common.FilePanelBGColor).
+			Render(style.Icon+" ") + common.FilePanelStyle.Render(file.Name())
+		r.AddLines(res)
+	}
+	return r.Render()
+}
 
-		for i := 0; i < previewHeight && i < len(files); i++ {
-			file := files[i]
-
-			style := common.GetElementIcon(file.Name(), file.IsDir(), common.Config.Nerdfont)
-
-			res := lipgloss.NewStyle().Foreground(lipgloss.Color(style.Color)).Background(common.FilePanelBGColor).
-				Render(style.Icon+" ") + common.FilePanelStyle.Render(file.Name())
-
-			r.AddLines(res)
-		}
-		return r.Render()
+// Helper function to handle image preview
+func (m *model) renderImagePreview(box lipgloss.Style, itemPath string, previewWidth, previewHeight int, sideAreaWidth int) string {
+	if !m.fileModel.filePreview.open {
+		return box.Render("\n --- Preview panel is closed ---")
 	}
 
-	if isImageFile(itemPath) {
-		if !m.fileModel.filePreview.open {
-			// Todo : These variables can be pre rendered for efficiency and less duplicacy
-			return box.Render("\n --- Preview panel is closed ---")
-		}
-
-		if !common.Config.ShowImagePreview {
-			return box.Render("\n --- Image preview is disabled ---")
-		}
-
-		// Use the new auto-detection function to choose the best renderer
-		ansiRender, err := filepreview.ImagePreview(itemPath, previewWidth, previewHeight, common.Theme.FilePanelBG)
-		if errors.Is(err, image.ErrFormat) {
-			return box.Render("\n --- " + icon.Error + " Unsupported image formats ---")
-		}
-
-		if err != nil {
-			slog.Error("Error covernt image to ansi", "error", err)
-			return box.Render("\n --- " + icon.Error + " Error covernt image to ansi ---")
-		}
-
-		return box.AlignVertical(lipgloss.Center).AlignHorizontal(lipgloss.Center).Render(ansiRender)
+	if !common.Config.ShowImagePreview {
+		return box.Render("\n --- Image preview is disabled ---")
 	}
 
+	// Use the new auto-detection function to choose the best renderer
+	imageRender, err := m.imagePreviewer.ImagePreview(itemPath, previewWidth, previewHeight, common.Theme.FilePanelBG, sideAreaWidth)
+	if errors.Is(err, image.ErrFormat) {
+		return box.Render("\n --- " + icon.Error + " Unsupported image formats ---")
+	}
+
+	if err != nil {
+		slog.Error("Error convert image to ansi", "error", err)
+		return box.Render("\n --- " + icon.Error + " Error convert image to ansi ---")
+	}
+
+	// Check if this looks like Kitty protocol output (starts with escape sequences)
+	// For Kitty protocol, avoid using lipgloss alignment to prevent layout drift
+	if strings.HasPrefix(imageRender, "\x1b_G") {
+		rendered := common.FilePreviewBox(previewHeight, previewWidth).Render(imageRender)
+		return rendered
+	}
+
+	// For ANSI output, we can safely use vertical alignment
+	return box.AlignVertical(lipgloss.Center).AlignHorizontal(lipgloss.Center).Render(imageRender)
+}
+
+// Helper function to handle text file preview
+func (m *model) renderTextPreview(r *rendering.Renderer, box lipgloss.Style, itemPath string, previewWidth, previewHeight int) string {
 	format := lexers.Match(filepath.Base(itemPath))
-
 	if format == nil {
 		isText, err := common.IsTextFile(itemPath)
 		if err != nil {
 			slog.Error("Error while checking text file", "error", err)
-			return box.Render("\n --- " + icon.Error + " Error get file info ---")
+			return box.Render(common.FilePreviewError)
 		} else if !isText {
-			return box.Render("\n --- " + icon.Error + " Unsupported formats ---")
+			return box.Render(common.FilePreviewUnsupportedFormatText)
 		}
 	}
 
-	// At this point either format is not nil, or we can read the file
 	fileContent, err := readFileContent(itemPath, previewWidth, previewHeight)
 	if err != nil {
 		slog.Error("Error open file", "error", err)
-		return box.Render("\n --- " + icon.Error + " Error open file ---")
+		return box.Render(common.FilePreviewError)
 	}
 
 	if fileContent == "" {
-		return box.Render("\n --- empty ---")
+		return box.Render(common.FilePreviewEmptyText)
 	}
 
-	// We know the format of file, and we can apply syntax highlighting
 	if format != nil {
 		background := ""
 		if !common.Config.TransparentBackground {
@@ -790,11 +772,53 @@ func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewW
 		}
 		if err != nil {
 			slog.Error("Error render code highlight", "error", err)
-			return box.Render("\n --- " + icon.Error + " Error render code highlight ---")
+			return box.Render("\n" + common.FilePreviewError)
 		}
 	}
+
 	r.AddLines(fileContent)
 	return r.Render()
+}
+
+func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewWidth int) string {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	box := common.FilePreviewBox(previewHeight, previewWidth)
+	r := ui.FilePreviewPanelRenderer(previewHeight, previewWidth)
+	clearCmd := m.imagePreviewer.ClearKittyImages()
+	if len(panel.element) == 0 {
+		return m.renderEmptyFilePreview(r) + clearCmd
+	}
+
+	// This could create errors if panel.cursor ever becomes negative, or goes out of bounds
+	// We should have a panel validation function in our View() function
+	// Panel is a full fledged object with own state, its accessed and modified so many times.
+	// Ideally we dont should never access data from it via directly accessing its variables
+	// Todo : Instead we should have helper functions for panel object and access data that way
+	// like panel.GetCurrentSelectedElem() . This abstration of implemetation of panel is needed.
+	// Now this lack of abstraction has caused issues ( See PR#730 ) . And now
+	// someone needs to scan through the entire codebase to figure out which access of panel
+	// data is causing crash.
+	itemPath := panel.element[panel.cursor].location
+	fileInfo, infoErr := os.Stat(itemPath)
+
+	if infoErr != nil {
+		return m.renderFileInfoError(r, box, infoErr) + clearCmd
+	}
+
+	ext := filepath.Ext(itemPath)
+	if slices.Contains(common.UnsupportedPreviewFormats, ext) {
+		return m.renderUnsupportedFormat(box) + clearCmd
+	}
+
+	if fileInfo.IsDir() {
+		return m.renderDirectoryPreview(r, itemPath, previewHeight) + clearCmd
+	}
+
+	if isImageFile(itemPath) {
+		return m.renderImagePreview(box, itemPath, previewWidth, previewHeight, m.fullWidth-previewWidth+1)
+	}
+
+	return m.renderTextPreview(r, box, itemPath, previewWidth, previewHeight) + clearCmd
 }
 
 func getBatSyntaxHighlightedContent(itemPath string, previewLine int, background string) (string, error) {
