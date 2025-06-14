@@ -72,11 +72,17 @@ func (tc *TerminalCapabilities) GetTerminalCellSize() TerminalCellSize {
 // using CSI 16t escape sequence. Falls back to defaults if detection fails.
 func DetectTerminalCellSize() TerminalCellSize {
 	// Save current terminal state
-	os.Stdout.WriteString("\x1b[s") // Save cursor position
+	if _, err := os.Stdout.WriteString("\x1b[s"); err != nil {
+		slog.Error("Error saving terminal state", "error", err)
+	} // Save cursor position
 
 	// Request cell size information
-	os.Stdout.WriteString("\x1b[16t")
-	os.Stdout.Sync()
+	if _, err := os.Stdout.WriteString("\x1b[16t"); err != nil {
+		slog.Error("Error requesting terminal cell size", "error", err)
+	}
+	if err := os.Stdout.Sync(); err != nil {
+		slog.Error("Error syncing terminal state", "error", err)
+	}
 
 	// Read response with timeout
 	var response string
@@ -86,7 +92,7 @@ func DetectTerminalCellSize() TerminalCellSize {
 		buf := make([]byte, 32)
 		n, err := os.Stdin.Read(buf)
 		if err != nil {
-			slog.Debug("Error reading terminal response", "error", err)
+			slog.Error("Error reading terminal response", "error", err)
 			responseChan <- ""
 			return
 		}
@@ -96,10 +102,12 @@ func DetectTerminalCellSize() TerminalCellSize {
 	select {
 	case response = <-responseChan:
 		slog.Debug("Received terminal response", "raw_response", fmt.Sprintf("%q", response))
-	case <-time.After(500 * time.Millisecond):
+	case <-time.After(100 * time.Millisecond):
 		// Timeout occurred, use default values
 		slog.Debug("Terminal response timeout, using default values")
-		os.Stdout.WriteString("\x1b[u") // Restore cursor position
+		if _, err := os.Stdout.WriteString("\x1b[u"); err != nil {
+			slog.Error("Error restoring terminal state", "error", err)
+		} // Restore cursor position
 		return TerminalCellSize{
 			PixelsPerColumn: DefaultPixelsPerColumn,
 			PixelsPerRow:    DefaultPixelsPerRow,
@@ -107,7 +115,9 @@ func DetectTerminalCellSize() TerminalCellSize {
 	}
 
 	// Restore cursor position
-	os.Stdout.WriteString("\x1b[u")
+	if _, err := os.Stdout.WriteString("\x1b[u"); err != nil {
+		slog.Error("Error restoring terminal state", "error", err)
+	}
 
 	// Parse the response which should be in format: ESC[6;height;widtht
 	if width, height, ok := parseCSI16tResponse(response); ok {

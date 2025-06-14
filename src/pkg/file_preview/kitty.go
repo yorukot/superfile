@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"image"
+	"log/slog"
 	"os"
 	"strconv"
 	"strings"
@@ -114,8 +115,12 @@ func (p *ImagePreviewer) renderWithKittyUsingTermCap(img image.Image, path strin
 	pixelsPerColumn := cellSize.PixelsPerColumn
 	pixelsPerRow := cellSize.PixelsPerRow
 
+	slog.Debug("pixelsPerColumn", "pixelsPerColumn", pixelsPerColumn, "pixelsPerRow", pixelsPerRow)
+
 	imgRatio := float64(originalWidth) / float64(originalHeight)
 	termRatio := float64(maxWidth*pixelsPerColumn) / float64(maxHeight*pixelsPerRow)
+
+	slog.Debug("imgRatio", "imgRatio", imgRatio, "termRatio", termRatio)
 
 	if imgRatio > termRatio {
 		dstCols := maxWidth
