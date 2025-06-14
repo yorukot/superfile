@@ -404,8 +404,8 @@ func (m *model) pasteItem() {
 				return
 			}
 
-			// Check if destination is source or subdirectory of source
-			if strings.HasPrefix(dstAbs, srcAbs) {
+			// Use filepath.Rel to check if destination is inside source
+			if rel, err := filepath.Rel(srcAbs, dstAbs); err == nil && (rel == "." || !strings.HasPrefix(rel, "..")) {
 				slog.Error("Cannot cut and paste a directory into itself or its subdirectory")
 				message := channelMessage{
 					messageID:   id,
@@ -414,7 +414,7 @@ func (m *model) pasteItem() {
 						open:     true,
 						title:    "Invalid paste location",
 						content:  "Cannot cut and paste a directory into itself or its subdirectory",
-						warnType: confirmDeleteItem, // Reusing existing warn type since it's just for display
+						warnType: notificationWarn,
 					},
 				}
 				channel <- message
