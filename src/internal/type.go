@@ -99,11 +99,11 @@ type model struct {
 	copyItems       copyItems
 
 	// Modals
-	notifyModal          notifyModal
-	typingModal          typingModal
-	warnModal            warnModal
-	helpMenu             helpMenuModal
-	promptModal          prompt.Model
+	notifyModal notifyModal
+	typingModal typingModal
+	warnModal   warnModal
+	helpMenu    helpMenuModal
+	promptModal prompt.Model
 
 	fileMetaData         fileMetadata
 	imagePreviewer       *filepreview.ImagePreviewer
