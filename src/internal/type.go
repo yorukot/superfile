@@ -91,17 +91,20 @@ const (
 // issues like race conditions and whatnot, which are hidden since we are creating
 // new model in each tea update.
 type model struct {
+	// Main Panels
 	fileModel       fileModel
 	sidebarModel    sidebar.Model
 	processBarModel processBarModel
 	focusPanel      focusPanelType
 	copyItems       copyItems
+
 	// Modals
 	notifyModal          notifyModal
 	typingModal          typingModal
 	warnModal            warnModal
 	helpMenu             helpMenuModal
 	promptModal          prompt.Model
+
 	fileMetaData         fileMetadata
 	imagePreviewer       *filepreview.ImagePreviewer
 	modelQuitState       modelQuitStateType
