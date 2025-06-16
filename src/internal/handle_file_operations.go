@@ -248,7 +248,7 @@ func (m *model) completelyDeleteSingleItem() {
 	prog := common.GenerateDefaultProgress()
 
 	newProcess := process{
-		name:     "󰆴 " + panel.element[panel.cursor].name,
+		name:     icon.Delete + icon.Space + panel.element[panel.cursor].name,
 		progress: prog,
 		state:    inOperation,
 		total:    1,
