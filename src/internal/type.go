@@ -40,7 +40,6 @@ const (
 const (
 	confirmDeleteItem warnType = iota
 	confirmRenameItem
-	notificationWarn
 )
 
 // Constants for panel with no focus
@@ -76,6 +75,7 @@ const (
 	sendWarnModal channelMessageType = iota
 	sendMetadata
 	sendProcess
+	sendNotifyModal
 )
 
 const (
@@ -91,11 +91,13 @@ const (
 // issues like race conditions and whatnot, which are hidden since we are creating
 // new model in each tea update.
 type model struct {
-	fileModel            fileModel
-	sidebarModel         sidebar.Model
-	processBarModel      processBarModel
-	focusPanel           focusPanelType
-	copyItems            copyItems
+	fileModel       fileModel
+	sidebarModel    sidebar.Model
+	processBarModel processBarModel
+	focusPanel      focusPanelType
+	copyItems       copyItems
+	// Modals
+	notifyModal          notifyModal
 	typingModal          typingModal
 	warnModal            warnModal
 	helpMenu             helpMenuModal
@@ -151,6 +153,12 @@ type typingModal struct {
 	open          bool
 	textInput     textinput.Model
 	errorMesssage string
+}
+
+type notifyModal struct {
+	open    bool
+	title   string
+	content string
 }
 
 // File metadata
@@ -256,6 +264,7 @@ type channelMessage struct {
 	messageType     channelMessageType
 	processNewState process
 	warnModal       warnModal
+	notifyModal     notifyModal
 	metadata        [][2]string
 }
 

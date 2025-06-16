@@ -516,6 +516,14 @@ func (m *model) warnModalRender() string {
 	return common.ModalBorderStyle(common.ModalHeight, common.ModalWidth).Render(title + "\n\n" + content + "\n\n" + tip)
 }
 
+func (m *model) notifyModalRender() string {
+	title := m.notifyModal.title
+	content := m.notifyModal.content
+	okay := common.ModalConfirm.Render(" (" + common.Hotkeys.Confirm[0] + ") Okay ")
+	okay = common.MainStyle.AlignHorizontal(lipgloss.Center).AlignVertical(lipgloss.Center).Render(okay)
+	return common.ModalBorderStyle(common.ModalHeight, common.ModalWidth).Render(title + "\n\n" + content + "\n\n" + okay)
+}
+
 func (m *model) promptModalRender() string {
 	return m.promptModal.Render()
 }

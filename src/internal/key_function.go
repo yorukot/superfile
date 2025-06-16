@@ -251,9 +251,14 @@ func (m *model) warnModalOpenKey(msg string) {
 			}
 		case confirmRenameItem:
 			m.confirmRename()
-		case notificationWarn:
-			m.cancelWarnModal()
 		}
+	}
+}
+
+func (m *model) notifyModalOpenKey(msg string) {
+	switch {
+	case slices.Contains(common.Hotkeys.Confirm, msg):
+		m.notifyModal.open = false
 	}
 }
 

@@ -106,6 +106,8 @@ func (m *model) handleChannelMessage(msg channelMessage) {
 	switch msg.messageType {
 	case sendWarnModal:
 		m.warnModal = msg.warnModal
+	case sendNotifyModal:
+		m.notifyModal = msg.notifyModal
 	case sendMetadata:
 		m.fileMetaData.metaData = msg.metadata
 	case sendProcess:
@@ -237,6 +239,8 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 	// Handles all warn models except the warn model for confirming to quit
 	case m.warnModal.open:
 		m.warnModalOpenKey(msg.String())
+	case m.notifyModal.open:
+		m.notifyModalOpenKey(msg.String())
 	// If renaming a object
 	case m.fileModel.renaming:
 		m.renamingKey(msg.String())
@@ -491,6 +495,13 @@ func (m model) View() string {
 		overlayX := m.fullWidth/2 - common.ModalWidth/2
 		overlayY := m.fullHeight/2 - common.ModalHeight/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, warnModal, finalRender)
+	}
+
+	if m.notifyModal.open {
+		notifyModal := m.notifyModalRender()
+		overlayX := m.fullWidth/2 - common.ModalWidth/2
+		overlayY := m.fullHeight/2 - common.ModalHeight/2
+		return stringfunction.PlaceOverlay(overlayX, overlayY, notifyModal, finalRender)
 	}
 
 	// This is also a render for warnmodal, but its being driven via a different flag

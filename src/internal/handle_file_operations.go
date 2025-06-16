@@ -409,12 +409,11 @@ func (m *model) pasteItem() {
 				slog.Error("Cannot cut and paste a directory into itself or its subdirectory")
 				message := channelMessage{
 					messageID:   id,
-					messageType: sendWarnModal,
-					warnModal: warnModal{
-						open:     true,
-						title:    "Invalid paste location",
-						content:  "Cannot cut and paste a directory into itself or its subdirectory",
-						warnType: notificationWarn,
+					messageType: sendNotifyModal,
+					notifyModal: notifyModal{
+						open:    true,
+						title:   "Invalid paste location",
+						content: "Cannot cut and paste a directory into itself or its subdirectory",
 					},
 				}
 				channel <- message
