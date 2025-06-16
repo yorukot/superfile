@@ -444,6 +444,38 @@ func (m *model) pasteItem() {
 
 	// Check if trying to paste into source or subdirectory for both cut and copy operations
 	for _, srcPath := range m.copyItems.items {
+		// check if the srcPath and target path are the same
+		// Check if trying to paste into parent directory of source
+		if filepath.Dir(srcPath) == panel.location {
+			slog.Error("Cannot paste into parent directory of source", "src", srcPath, "dst", panel.location)
+			message := channelMessage{
+				messageID:   id,
+				messageType: sendNotifyModal,
+				notifyModal: notifyModal{
+					open:    true,
+					title:   "Invalid paste location",
+					content: "Cannot paste into parent directory of source",
+				},
+			}
+			channel <- message
+			return
+		}
+		slog.Debug("model.pasteItem", "srcPath", srcPath, "panel location", panel.location)
+		if m.copyItems.cut && srcPath == panel.location {
+			slog.Error("Cannot paste a directory into itself", "operation", "cut", "src", srcPath, "dst", panel.location)
+			message := channelMessage{
+				messageID:   id,
+				messageType: sendNotifyModal,
+				notifyModal: notifyModal{
+					open:    true,
+					title:   "Invalid paste location",
+					content: "Cannot paste a directory into itself",
+				},
+			}
+			channel <- message
+			return
+		}
+
 		if isAncestor(srcPath, panel.location) {
 			operation := "copy"
 			if m.copyItems.cut {
@@ -561,11 +593,6 @@ func (m *model) pasteItem() {
 	channel <- message
 
 	m.processBarModel.process[id] = p
-	// Reset after paste is done. Only in case of cut
-	// because current items in clipboard are deleted now
-	if m.copyItems.cut {
-		m.copyItems.reset(false)
-	}
 }
 
 // Extract compressed file

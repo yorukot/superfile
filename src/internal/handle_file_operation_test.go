@@ -167,6 +167,156 @@ func TestCompressSelectedFiles(t *testing.T) {
 	})
 }
 
+// Helper function to find item index in panel by name
+func findItemIndexInPanel(panel *filePanel, itemName string) int {
+	for i, elem := range panel.element {
+		if elem.name == itemName {
+			return i
+		}
+	}
+	return -1
+}
+
+// Helper function to setup panel mode and selection
+func setupPanelModeAndSelection(t *testing.T, m *model, useSelectMode bool, itemName string, selectedItems []string) {
+	t.Helper()
+	panel := m.getFocusedFilePanel()
+
+	if useSelectMode {
+		// Switch to select mode and set selected items
+		m.changeFilePanelMode()
+		require.Equal(t, selectMode, panel.panelMode)
+		panel.selected = selectedItems
+	} else {
+		// Find the item in browser mode
+		itemIndex := findItemIndexInPanel(panel, itemName)
+		require.NotEqual(t, -1, itemIndex, "%s should be found in panel", itemName)
+		panel.cursor = itemIndex
+	}
+}
+
+// Helper function to perform copy or cut operation
+func performCopyOrCutOperation(t *testing.T, m *model, isCut bool) {
+	t.Helper()
+	if isCut {
+		TeaUpdateWithErrCheck(t, m, utils.TeaRuneKeyMsg(common.Hotkeys.CutItems[0]))
+	} else {
+		TeaUpdateWithErrCheck(t, m, utils.TeaRuneKeyMsg(common.Hotkeys.CopyItems[0]))
+	}
+}
+
+// Helper function to verify clipboard state after copy/cut
+func verifyClipboardState(t *testing.T, m *model, isCut bool, useSelectMode bool, selectedItemsCount int) {
+	t.Helper()
+	assert.Equal(t, isCut, m.copyItems.cut, "Clipboard cut state should match operation")
+	if useSelectMode {
+		assert.Len(t, m.copyItems.items, selectedItemsCount, "Clipboard should contain all selected items")
+	} else {
+		assert.Len(t, m.copyItems.items, 1, "Clipboard should contain one item")
+	}
+}
+
+// Helper function to navigate to target directory if different from start
+func navigateToTargetDir(t *testing.T, m *model, startDir, targetDir string) {
+	t.Helper()
+	if targetDir != startDir {
+		m.updateCurrentFilePanelDir(targetDir)
+		TeaUpdateWithErrCheck(t, m, nil)
+	}
+}
+
+// Helper function to get original path for existence check
+func getOriginalPath(useSelectMode bool, itemName, startDir string) string {
+	if !useSelectMode && itemName != "" {
+		return filepath.Join(startDir, itemName)
+	}
+	return ""
+}
+
+// Helper function to verify file or directory exists
+func verifyPathExists(t *testing.T, path, message string) {
+	t.Helper()
+	if strings.Contains(path, ".txt") {
+		assert.FileExists(t, path, message)
+	} else {
+		assert.DirExists(t, path, message)
+	}
+}
+
+// Helper function to verify file or directory doesn't exist after cut
+func verifyPathNotExistsEventually(t *testing.T, path, message string) {
+	t.Helper()
+	assert.Eventually(t, func() bool {
+		_, err := os.Stat(path)
+		return os.IsNotExist(err)
+	}, time.Second, 10*time.Millisecond, message)
+}
+
+// Helper function to verify expected destination files exist
+func verifyDestinationFiles(t *testing.T, targetDir string, expectedDestFiles []string) {
+	t.Helper()
+	for _, expectedFile := range expectedDestFiles {
+		destPath := filepath.Join(targetDir, expectedFile)
+		assert.Eventually(t, func() bool {
+			_, err := os.Stat(destPath)
+			return err == nil
+		}, time.Second, 10*time.Millisecond, "%s should exist in destination", expectedFile)
+	}
+}
+
+// Helper function to verify prevented paste results
+func verifyPreventedPasteResults(t *testing.T, m *model, originalPath string) {
+	t.Helper()
+	if originalPath != "" {
+		verifyPathExists(t, originalPath, "Original file should still exist when paste is prevented")
+	}
+	// Clipboard should not be cleared when paste is prevented
+	assert.NotEqual(t, 0, len(m.copyItems.items), "Clipboard should not be cleared when paste is prevented")
+}
+
+// Helper function to verify successful paste results
+func verifySuccessfulPasteResults(t *testing.T, targetDir string, expectedDestFiles []string, originalPath string, shouldOriginalExist bool, shouldClipboardClear bool, m *model) {
+	t.Helper()
+	// Verify expected files were created in destination
+	verifyDestinationFiles(t, targetDir, expectedDestFiles)
+
+	// Verify original file existence based on operation type
+	if originalPath != "" {
+		if shouldOriginalExist {
+			verifyPathExists(t, originalPath, "Original file should exist after copy operation")
+		} else {
+			verifyPathNotExistsEventually(t, originalPath, "Original file should not exist after cut operation")
+		}
+	}
+
+	// Verify clipboard state after paste
+	if shouldClipboardClear {
+		assert.Eventually(t, func() bool {
+			return len(m.copyItems.items) == 0
+		}, time.Second, 10*time.Millisecond, "Clipboard should be cleared after cut operation")
+	} else {
+		assert.NotEqual(t, 0, len(m.copyItems.items), "Clipboard should not be cleared after copy operation")
+	}
+}
+
+// Helper function to setup model and perform copy/cut operation
+func setupModelAndPerformOperation(t *testing.T, startDir string, useSelectMode bool, itemName string, selectedItems []string, isCut bool) *model {
+	t.Helper()
+	m := defaultTestModel(startDir)
+	TeaUpdateWithErrCheck(t, &m, nil)
+
+	setupPanelModeAndSelection(t, &m, useSelectMode, itemName, selectedItems)
+	performCopyOrCutOperation(t, &m, isCut)
+
+	selectedItemsCount := len(selectedItems)
+	if !useSelectMode {
+		selectedItemsCount = 1
+	}
+	verifyClipboardState(t, &m, isCut, useSelectMode, selectedItemsCount)
+
+	return &m
+}
+
 func TestPasteItem(t *testing.T) {
 	curTestDir := t.TempDir()
 	sourceDir := filepath.Join(curTestDir, "source")
@@ -239,95 +389,22 @@ func TestPasteItem(t *testing.T) {
 
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
-			m := defaultTestModel(tt.startDir)
-			TeaUpdateWithErrCheck(t, &m, nil)
-
-			panel := m.getFocusedFilePanel()
-
-			if tt.selectMode {
-				// Switch to select mode and set selected items
-				m.changeFilePanelMode()
-				require.Equal(t, selectMode, panel.panelMode)
-				panel.selected = tt.selectedItems
-			} else {
-				// Find the item in browser mode
-				itemIndex := -1
-				for i, elem := range panel.element {
-					if elem.name == tt.itemName {
-						itemIndex = i
-						break
-					}
-				}
-				require.NotEqual(t, -1, itemIndex, "%s should be found in panel", tt.itemName)
-				panel.cursor = itemIndex
-			}
-
-			// Perform copy or cut operation
-			if tt.isCut {
-				TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.CutItems[0]))
-			} else {
-				TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.CopyItems[0]))
-			}
-
-			// Verify clipboard state after copy/cut
-			assert.Equal(t, tt.isCut, m.copyItems.cut, "Clipboard cut state should match operation")
-			if tt.selectMode {
-				assert.Len(t, m.copyItems.items, len(tt.selectedItems), "Clipboard should contain all selected items")
-			} else {
-				assert.Len(t, m.copyItems.items, 1, "Clipboard should contain one item")
-			}
+			m := setupModelAndPerformOperation(t, tt.startDir, tt.selectMode, tt.itemName, tt.selectedItems, tt.isCut)
 
 			// Navigate to target directory
-			if tt.targetDir != tt.startDir {
-				m.updateCurrentFilePanelDir(tt.targetDir)
-				TeaUpdateWithErrCheck(t, &m, nil)
-			}
+			navigateToTargetDir(t, m, tt.startDir, tt.targetDir)
 
 			// Get original file path for existence check
-			var originalPath string
-			if !tt.selectMode && tt.itemName != "" {
-				originalPath = filepath.Join(tt.startDir, tt.itemName)
-			}
+			originalPath := getOriginalPath(tt.selectMode, tt.itemName, tt.startDir)
 
 			// Perform paste operation
-			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+			TeaUpdateWithErrCheck(t, m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
 
+			// Verify results based on whether paste should be prevented
 			if tt.shouldPreventPaste {
-				// Verify that paste was prevented (original should still exist, clipboard not cleared)
-				if originalPath != "" {
-					if strings.Contains(originalPath, ".txt") {
-						assert.FileExists(t, originalPath, "Original file should still exist when paste is prevented")
-					} else {
-						assert.DirExists(t, originalPath, "Original directory should still exist when paste is prevented")
-					}
-				}
-				// Clipboard should not be cleared when paste is prevented
-				assert.NotEqual(t, 0, len(m.copyItems.items), "Clipboard should not be cleared when paste is prevented")
+				verifyPreventedPasteResults(t, m, originalPath)
 			} else {
-				// Verify expected files were created in destination
-				for _, expectedFile := range tt.expectedDestFiles {
-					destPath := filepath.Join(tt.targetDir, expectedFile)
-					assert.Eventually(t, func() bool {
-						_, err := os.Stat(destPath)
-						return err == nil
-					}, time.Second, 10*time.Millisecond, "%s should exist in destination", expectedFile)
-				}
-
-				// Verify original file existence based on operation type
-				if originalPath != "" {
-					if tt.shouldOriginalExist {
-						if strings.Contains(originalPath, ".txt") {
-							assert.FileExists(t, originalPath, "Original file should exist after copy operation")
-						} else {
-							assert.DirExists(t, originalPath, "Original directory should exist after copy operation")
-						}
-					} else {
-						assert.Eventually(t, func() bool {
-							_, err := os.Stat(originalPath)
-							return os.IsNotExist(err)
-						}, time.Second, 10*time.Millisecond, "Original file should not exist after cut operation")
-					}
-				}
+				verifySuccessfulPasteResults(t, tt.targetDir, tt.expectedDestFiles, originalPath, tt.shouldOriginalExist, tt.shouldClipboardClear, m)
 			}
 		})
 	}
@@ -363,40 +440,18 @@ func TestPasteItem(t *testing.T) {
 		multiFile2 := filepath.Join(sourceDir, "multi2.txt")
 		setupFiles(t, multiFile1, multiFile2)
 
-		m := defaultTestModel(sourceDir)
-		TeaUpdateWithErrCheck(t, &m, nil)
-
-		// Switch to select mode
-		m.changeFilePanelMode()
-		require.Equal(t, selectMode, m.getFocusedFilePanel().panelMode)
-
-		// Select multiple files
-		panel := m.getFocusedFilePanel()
-		panel.selected = []string{multiFile1, multiFile2}
-
-		// Copy selected items
-		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.CopyItems[0]))
-
-		// Verify clipboard
-		assert.False(t, m.copyItems.cut, "Should be copy operation")
-		assert.Len(t, m.copyItems.items, 2, "Should have two items in clipboard")
+		selectedItems := []string{multiFile1, multiFile2}
+		m := setupModelAndPerformOperation(t, sourceDir, true, "", selectedItems, false)
 
 		// Navigate to destination
-		m.updateCurrentFilePanelDir(destDir)
-		TeaUpdateWithErrCheck(t, &m, nil)
+		navigateToTargetDir(t, m, sourceDir, destDir)
 
 		// Paste items
-		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+		TeaUpdateWithErrCheck(t, m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
 
 		// Verify both files were copied
-		destMulti1 := filepath.Join(destDir, "multi1.txt")
-		destMulti2 := filepath.Join(destDir, "multi2.txt")
-
-		assert.Eventually(t, func() bool {
-			_, err1 := os.Stat(destMulti1)
-			_, err2 := os.Stat(destMulti2)
-			return err1 == nil && err2 == nil
-		}, time.Second, 10*time.Millisecond, "Both files should be copied to destination")
+		expectedDestFiles := []string{"multi1.txt", "multi2.txt"}
+		verifyDestinationFiles(t, destDir, expectedDestFiles)
 	})
 
 	t.Run("Cut into Subdirectory Prevention", func(t *testing.T) {
@@ -407,28 +462,11 @@ func TestPasteItem(t *testing.T) {
 		setupFiles(t, testDirFile)
 
 		// Test the logic that prevents cutting a directory into its subdirectory
-		m := defaultTestModel(sourceDir)
-		TeaUpdateWithErrCheck(t, &m, nil)
-
-		// Find testsubdir and cut it
-		panel := m.getFocusedFilePanel()
-		subdirIndex := -1
-		for i, elem := range panel.element {
-			if elem.name == "testsubdir" {
-				subdirIndex = i
-				break
-			}
-		}
-		require.NotEqual(t, -1, subdirIndex, "testsubdir should be found in panel")
-		panel.cursor = subdirIndex
-
-		// Cut the directory
-		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.CutItems[0]))
+		m := setupModelAndPerformOperation(t, sourceDir, false, "testsubdir", nil, true)
 
 		// Navigate into the subdirectory and try to paste there (should be prevented)
-		m.updateCurrentFilePanelDir(testSubDir)
-		TeaUpdateWithErrCheck(t, &m, nil)
-		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+		navigateToTargetDir(t, m, sourceDir, testSubDir)
+		TeaUpdateWithErrCheck(t, m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
 
 		// Directory should still exist in original location after prevention
 		assert.DirExists(t, testSubDir, "Directory should still exist after failed paste into subdirectory")
@@ -439,43 +477,19 @@ func TestPasteItem(t *testing.T) {
 		dupFile := filepath.Join(sourceDir, "duplicate.txt")
 		setupFiles(t, dupFile)
 
-		m := defaultTestModel(sourceDir)
-		TeaUpdateWithErrCheck(t, &m, nil)
-
-		// Find and copy the file
-		panel := m.getFocusedFilePanel()
-		dupIndex := -1
-		for i, elem := range panel.element {
-			if elem.name == "duplicate.txt" {
-				dupIndex = i
-				break
-			}
-		}
-		require.NotEqual(t, -1, dupIndex, "duplicate.txt should be found in panel")
-		panel.cursor = dupIndex
-
-		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.CopyItems[0]))
+		m := setupModelAndPerformOperation(t, sourceDir, false, "duplicate.txt", nil, false)
 
 		// Navigate to destination and paste
-		m.updateCurrentFilePanelDir(destDir)
-		TeaUpdateWithErrCheck(t, &m, nil)
-		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+		navigateToTargetDir(t, m, sourceDir, destDir)
+		TeaUpdateWithErrCheck(t, m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
 
 		// Verify first copy
-		destDup1 := filepath.Join(destDir, "duplicate.txt")
-		assert.Eventually(t, func() bool {
-			_, err := os.Stat(destDup1)
-			return err == nil
-		}, time.Second, 10*time.Millisecond, "First copy should succeed")
+		verifyDestinationFiles(t, destDir, []string{"duplicate.txt"})
 
 		// Paste again to test duplicate handling
-		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+		TeaUpdateWithErrCheck(t, m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
 
 		// Verify duplicate file with different name
-		destDup2 := filepath.Join(destDir, "duplicate(1).txt")
-		assert.Eventually(t, func() bool {
-			_, err := os.Stat(destDup2)
-			return err == nil
-		}, time.Second, 10*time.Millisecond, "Duplicate file should be created with (1) suffix")
+		verifyDestinationFiles(t, destDir, []string{"duplicate(1).txt"})
 	})
 }

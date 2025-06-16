@@ -286,9 +286,9 @@ func (m *model) processBarRender() string {
 		if curProcess.total != 0 {
 			progressPercentage := float64(curProcess.done) / float64(curProcess.total)
 			slog.Debug("progress", "percentage", progressPercentage)
-			r.AddLines(cursor+curProcess.progress.ViewAs(progressPercentage), "")
+			r.AddLines(cursor + curProcess.progress.ViewAs(progressPercentage), "")
 		} else {
-			r.AddLines(cursor+curProcess.progress.ViewAs(1))
+			r.AddLines(cursor + curProcess.progress.ViewAs(1))
 		}
 	}
 

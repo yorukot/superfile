@@ -115,6 +115,10 @@ func (m *model) handleChannelMessage(msg channelMessage) {
 			m.processBarModel.processList = append(m.processBarModel.processList, msg.messageID)
 		}
 		m.processBarModel.process[msg.messageID] = msg.processNewState
+		// Check if the process is cut and if the clipboard is empty
+		if (msg.processNewState.state == successful || msg.processNewState.state == failure) {
+			m.copyItems.reset(false)
+		}
 	default:
 		slog.Error("Unhandled channelMessageType in handleChannelMessage()",
 			"messageType", msg.messageType)
