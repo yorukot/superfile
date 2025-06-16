@@ -115,8 +115,8 @@ func (m *model) handleChannelMessage(msg channelMessage) {
 			m.processBarModel.processList = append(m.processBarModel.processList, msg.messageID)
 		}
 		m.processBarModel.process[msg.messageID] = msg.processNewState
-		// Check if the process is cut and if the clipboard is empty
-		if (msg.processNewState.state == successful || msg.processNewState.state == failure) {
+		// Check if the process is cut and if the process is successful or failure, both need to be reset
+		if (msg.processNewState.state == successful || msg.processNewState.state == failure) && m.copyItems.cut {
 			m.copyItems.reset(false)
 		}
 	default:
