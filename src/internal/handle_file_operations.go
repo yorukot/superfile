@@ -23,6 +23,59 @@ import (
 	"github.com/yorukot/superfile/src/config/icon"
 )
 
+// isAncestor checks if dst is the same as src or a subdirectory of src.
+// It handles symlinks by resolving them and applies case-insensitive comparison on Windows.
+func isAncestor(src, dst string) bool {
+	// Resolve symlinks for both paths
+	srcResolved, err := filepath.EvalSymlinks(src)
+	if err != nil {
+		// If we can't resolve symlinks, fall back to original path
+		srcResolved = src
+	}
+
+	dstResolved, err := filepath.EvalSymlinks(dst)
+	if err != nil {
+		// If we can't resolve symlinks, fall back to original path
+		dstResolved = dst
+	}
+
+	// Get absolute paths
+	srcAbs, err := filepath.Abs(srcResolved)
+	if err != nil {
+		return false
+	}
+
+	dstAbs, err := filepath.Abs(dstResolved)
+	if err != nil {
+		return false
+	}
+
+	// Clean paths to normalize separators and resolve . and ..
+	srcAbs = filepath.Clean(srcAbs)
+	dstAbs = filepath.Clean(dstAbs)
+
+	// On Windows, perform case-insensitive comparison
+	if runtime.GOOS == "windows" {
+		srcAbs = strings.ToLower(srcAbs)
+		dstAbs = strings.ToLower(dstAbs)
+	}
+
+	// Check if dst is the same as src
+	if srcAbs == dstAbs {
+		return true
+	}
+
+	// Check if dst is a subdirectory of src
+	// Use filepath.Rel to check the relationship
+	rel, err := filepath.Rel(srcAbs, dstAbs)
+	if err != nil {
+		return false
+	}
+
+	// If rel is "." or doesn't start with "..", then dst is inside src
+	return rel == "." || !strings.HasPrefix(rel, "..")
+}
+
 // Create a file in the currently focus file panel
 func (m *model) panelCreateNewFile() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
@@ -389,36 +442,26 @@ func (m *model) pasteItem() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	totalFiles := 0
 
-	// Check if trying to paste into source or subdirectory when cutting
-	if m.copyItems.cut {
-		for _, srcPath := range m.copyItems.items {
-			// Get absolute paths to handle relative path cases
-			srcAbs, err := filepath.Abs(srcPath)
-			if err != nil {
-				slog.Error("model.pasteItem - Error getting absolute source path", "error", err)
-				return
-			}
-			dstAbs, err := filepath.Abs(panel.location)
-			if err != nil {
-				slog.Error("model.pasteItem - Error getting absolute destination path", "error", err)
-				return
+	// Check if trying to paste into source or subdirectory for both cut and copy operations
+	for _, srcPath := range m.copyItems.items {
+		if isAncestor(srcPath, panel.location) {
+			operation := "copy"
+			if m.copyItems.cut {
+				operation = "cut"
 			}
 
-			// Use filepath.Rel to check if destination is inside source
-			if rel, err := filepath.Rel(srcAbs, dstAbs); err == nil && (rel == "." || !strings.HasPrefix(rel, "..")) {
-				slog.Error("Cannot cut and paste a directory into itself or its subdirectory")
-				message := channelMessage{
-					messageID:   id,
-					messageType: sendNotifyModal,
-					notifyModal: notifyModal{
-						open:    true,
-						title:   "Invalid paste location",
-						content: "Cannot cut and paste a directory into itself or its subdirectory",
-					},
-				}
-				channel <- message
-				return
+			slog.Error("Cannot paste a directory into itself or its subdirectory", "operation", operation, "src", srcPath, "dst", panel.location)
+			message := channelMessage{
+				messageID:   id,
+				messageType: sendNotifyModal,
+				notifyModal: notifyModal{
+					open:    true,
+					title:   "Invalid paste location",
+					content: fmt.Sprintf("Cannot %s and paste a directory into itself or its subdirectory", operation),
+				},
 			}
+			channel <- message
+			return
 		}
 	}
 
