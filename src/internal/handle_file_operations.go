@@ -595,7 +595,6 @@ func (m *model) pasteItem() {
 	channel <- message
 
 	m.processBarModel.process[id] = p
-	m.copyItems.reset(false)
 }
 
 // Extract compressed file
