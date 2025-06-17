@@ -271,11 +271,11 @@ func verifyPreventedPasteResults(t *testing.T, m *model, originalPath string) {
 		verifyPathExists(t, originalPath, "Original file should still exist when paste is prevented")
 	}
 	// Clipboard should not be cleared when paste is prevented
-	assert.NotEqual(t, 0, len(m.copyItems.items), "Clipboard should not be cleared when paste is prevented")
+	assert.NotEmpty(t, m.copyItems.items, "Clipboard should not be cleared when paste is prevented")
 }
 
 // Helper function to verify successful paste results
-func verifySuccessfulPasteResults(t *testing.T, targetDir string, expectedDestFiles []string, originalPath string, shouldOriginalExist bool, m *model) {
+func verifySuccessfulPasteResults(t *testing.T, targetDir string, expectedDestFiles []string, originalPath string, shouldOriginalExist bool) {
 	t.Helper()
 	// Verify expected files were created in destination
 	verifyDestinationFiles(t, targetDir, expectedDestFiles)
@@ -397,7 +397,7 @@ func TestPasteItem(t *testing.T) {
 			if tt.shouldPreventPaste {
 				verifyPreventedPasteResults(t, m, originalPath)
 			} else {
-				verifySuccessfulPasteResults(t, tt.targetDir, tt.expectedDestFiles, originalPath, tt.shouldOriginalExist, m)
+				verifySuccessfulPasteResults(t, tt.targetDir, tt.expectedDestFiles, originalPath, tt.shouldOriginalExist)
 			}
 		})
 	}

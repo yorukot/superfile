@@ -256,6 +256,7 @@ func (m *model) warnModalOpenKey(msg string) {
 }
 
 func (m *model) notifyModalOpenKey(msg string) {
+	//nolint:gocritic // We use switch here because other key logic is also using switch, so it's more consistent.
 	switch {
 	case slices.Contains(common.Hotkeys.Confirm, msg):
 		m.notifyModal.open = false
