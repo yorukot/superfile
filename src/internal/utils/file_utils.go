@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -37,66 +39,114 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 	if err != nil {
 		PrintfAndExit("Config file doesn't exist. Error : %v", err)
 	}
-	errMsg := ""
-	hasError := false
 
 	// Create a map to track which fields are present
-	// Have to do this manually as toml.Unmarshal does not return an error when it encounters a TOML key
-	// that does not match any field in the struct.
-	// Instead, it simply ignores that key and continues parsing.
 	var rawData map[string]interface{}
-	rawError := toml.Unmarshal(data, &rawData)
-	if rawError != nil {
-		hasError = true
-		errMsg = errorPrefix + "Error decoding file: " + rawError.Error() + "\n"
+	if err := toml.Unmarshal(data, &rawData); err != nil {
+		slog.Error(errorPrefix+"Error decoding TOML file", "err", err)
+		return true
 	}
 
 	// Replace default values with file values
-	if !hasError {
-		if err = toml.Unmarshal(data, target); err != nil {
-			hasError = true
-			//nolint: errorlint // Type assertion is better here, and we need to read data from error
-			if decodeErr, ok := err.(*toml.DecodeError); ok {
-				row, col := decodeErr.Position()
-				errMsg = errorPrefix + fmt.Sprintf("Error in field at line %d column %d: %s\n",
-					row, col, decodeErr.Error())
-			} else {
-				errMsg = errorPrefix + "Error unmarshalling data: " + err.Error() + "\n"
-			}
+	if err := toml.Unmarshal(data, target); err != nil {
+		var decodeErr *toml.DecodeError
+		if errors.As(err, &decodeErr) {
+			row, col := decodeErr.Position()
+			fmt.Print(errorPrefix + fmt.Sprintf("Error in field at line %d column %d: %s\n",
+				row, col, decodeErr.Error()))
+		} else {
+			fmt.Print(errorPrefix + "Error unmarshalling data: " + err.Error() + "\n")
 		}
-	}
-
-	if !hasError {
-		// Check for missing fields if no errors yet
-		targetType := reflect.TypeOf(target).Elem()
-
-		for i := range targetType.NumField() {
-			field := targetType.Field(i)
-			if _, exists := rawData[field.Tag.Get("toml")]; !exists {
-				hasError = true
-				// A field doesn't exist in the toml config file
-				errMsg += errorPrefix + fmt.Sprintf("Field \"%s\" is missing\n", field.Tag.Get("toml"))
-			}
-		}
-	}
-	// File is okay
-	if !hasError {
-		return false
-	}
-
-	// File is bad, but we arent' allowed to fix
-	// We just print error message to stdout
-	// Todo : Ideally this should behave as an intenal function with no side effects
-	// and the caller should do the printing to stdout
-	if !fixFlag {
-		fmt.Print(errMsg)
 		return true
 	}
-	// Now we are fixing the file, we would not return hasError=true even if there was error
-	// Fix the file by writing all fields
-	if err := WriteTomlData(filePath, target); err != nil {
-		PrintfAndExit("Error while writing config file : %v", err)
+
+	// Check for missing fields
+	var ignoreMissing bool
+	if config, ok := target.(MissingFieldIgnorer); ok {
+		ignoreMissing = config.GetIgnoreMissingFields()
 	}
+
+	// Check for missing fields
+	targetType := reflect.TypeOf(target).Elem()
+	missingFields := []string{}
+
+	for i := range targetType.NumField() {
+		field := targetType.Field(i)
+		var fieldName string
+		tag := field.Tag.Get("toml")
+		if tag != "" {
+			// Discard options such as ",omitempty"
+			fieldName = strings.Split(tag, ",")[0]
+		} else {
+			fieldName = field.Name
+		}
+		if _, exists := rawData[fieldName]; !exists && !ignoreMissing {
+			missingFields = append(missingFields, fieldName)
+		}
+	}
+
+	// Todo: Ideally this should behave as an internal function with no side effects
+	if len(missingFields) > 0 {
+		if !fixFlag {
+			fmt.Print(errorPrefix + fmt.Sprintf("Missing fields: %v\n", missingFields))
+			return true
+		}
+		// Create a unique backup of the current config file
+		backupFile, err := os.CreateTemp(filepath.Dir(filePath), filepath.Base(filePath)+".bak-")
+		if err != nil {
+			slog.Error(errorPrefix+"Failed to create backup file", "err", err)
+			return true
+		}
+		backupPath := backupFile.Name()
+		// Copy the original file to the backup
+		origFile, err := os.Open(filePath)
+		if err != nil {
+			slog.Error(errorPrefix+"Failed to open original file for backup", "err", err)
+			backupFile.Close()
+			os.Remove(backupPath)
+			return true
+		}
+		_, err = io.Copy(backupFile, origFile)
+		origFile.Close()
+		backupFile.Close()
+		if err != nil {
+			slog.Error(errorPrefix+"Failed to copy original file to backup", "err", err)
+			os.Remove(backupPath)
+			return true
+		}
+		// Write the new config to a temp file
+		tmpFile, err := os.CreateTemp(filepath.Dir(filePath), filepath.Base(filePath)+".tmp-")
+		if err != nil {
+			slog.Error(errorPrefix+"Failed to create temp file for new config", "err", err)
+			return true
+		}
+		tmpPath := tmpFile.Name()
+		tomlData, err := toml.Marshal(target)
+		if err != nil {
+			slog.Error(errorPrefix+"Failed to marshal config to TOML", "err", err)
+			tmpFile.Close()
+			os.Remove(tmpPath)
+			return true
+		}
+		_, err = tmpFile.Write(tomlData)
+		tmpFile.Close()
+		if err != nil {
+			slog.Error(errorPrefix+"Failed to write TOML data to temp file", "err", err)
+			os.Remove(tmpPath)
+			return true
+		}
+		// Atomically replace the original file with the new config
+		if err := os.Rename(tmpPath, filePath); err != nil {
+			slog.Error(errorPrefix+"Failed to atomically replace config file", "err", err)
+			// Do not remove backup; user may want to restore manually
+			return true
+		}
+		// Remove backup after successful write
+		if err := os.Remove(backupPath); err != nil {
+			slog.Error(errorPrefix+"Warning: Failed to remove backup file", "backupPath", backupPath, "err", err)
+		}
+	}
+
 	return false
 }
 
