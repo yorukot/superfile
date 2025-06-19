@@ -3,6 +3,7 @@ package utils
 import (
 	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -42,7 +43,7 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 	// Create a map to track which fields are present
 	var rawData map[string]interface{}
 	if err := toml.Unmarshal(data, &rawData); err != nil {
-		fmt.Print(errorPrefix + "Error decoding file: " + err.Error() + "\n")
+		slog.Error(errorPrefix+"Error decoding TOML file", "err", err)
 		return true
 	}
 
@@ -61,7 +62,7 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 
 	// Check for missing fields
 	var ignoreMissing bool
-	if config, ok := target.(ConfigInterface); ok {
+	if config, ok := target.(MissingFieldIgnorer); ok {
 		ignoreMissing = config.GetIgnoreMissingFields()
 	}
 
@@ -69,7 +70,7 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 	targetType := reflect.TypeOf(target).Elem()
 	missingFields := []string{}
 
-	for i := 0; i < targetType.NumField(); i++ {
+	for i := range targetType.NumField() {
 		field := targetType.Field(i)
 		var fieldName string
 		tag := field.Tag.Get("toml")
@@ -90,23 +91,59 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 			fmt.Print(errorPrefix + fmt.Sprintf("Missing fields: %v\n", missingFields))
 			return true
 		}
-		// Create a backup of the current config file
-		backupPath := filePath + ".bak"
-		if err := os.Rename(filePath, backupPath); err != nil {
-			fmt.Print(errorPrefix + fmt.Sprintf("Failed to create backup of config file: %v\n", err))
+		// Create a unique backup of the current config file
+		backupFile, err := os.CreateTemp(filepath.Dir(filePath), filepath.Base(filePath)+".bak-")
+		if err != nil {
+			slog.Error(errorPrefix+"Failed to create backup file", "err", err)
 			return true
 		}
-		// Fix the file by writing all fields
-		if err := WriteTomlData(filePath, target); err != nil {
-			// Restore from backup if write fails
-			if restoreErr := os.Rename(backupPath, filePath); restoreErr != nil {
-				fmt.Print(errorPrefix + fmt.Sprintf("Failed to restore config from backup: %v\n", restoreErr))
-			}
-			PrintfAndExit("Error while writing config file : %v", err)
+		backupPath := backupFile.Name()
+		// Copy the original file to the backup
+		origFile, err := os.Open(filePath)
+		if err != nil {
+			slog.Error(errorPrefix+"Failed to open original file for backup", "err", err)
+			backupFile.Close()
+			os.Remove(backupPath)
+			return true
+		}
+		_, err = io.Copy(backupFile, origFile)
+		origFile.Close()
+		backupFile.Close()
+		if err != nil {
+			slog.Error(errorPrefix+"Failed to copy original file to backup", "err", err)
+			os.Remove(backupPath)
+			return true
+		}
+		// Write the new config to a temp file
+		tmpFile, err := os.CreateTemp(filepath.Dir(filePath), filepath.Base(filePath)+".tmp-")
+		if err != nil {
+			slog.Error(errorPrefix+"Failed to create temp file for new config", "err", err)
+			return true
+		}
+		tmpPath := tmpFile.Name()
+		tomlData, err := toml.Marshal(target)
+		if err != nil {
+			slog.Error(errorPrefix+"Failed to marshal config to TOML", "err", err)
+			tmpFile.Close()
+			os.Remove(tmpPath)
+			return true
+		}
+		_, err = tmpFile.Write(tomlData)
+		tmpFile.Close()
+		if err != nil {
+			slog.Error(errorPrefix+"Failed to write TOML data to temp file", "err", err)
+			os.Remove(tmpPath)
+			return true
+		}
+		// Atomically replace the original file with the new config
+		if err := os.Rename(tmpPath, filePath); err != nil {
+			slog.Error(errorPrefix+"Failed to atomically replace config file", "err", err)
+			// Do not remove backup; user may want to restore manually
+			return true
 		}
 		// Remove backup after successful write
 		if err := os.Remove(backupPath); err != nil {
-			fmt.Print(errorPrefix + fmt.Sprintf("Warning: Failed to remove backup file %s: %v\n", backupPath, err))
+			slog.Error(errorPrefix+"Warning: Failed to remove backup file", "backupPath", backupPath, "err", err)
 		}
 	}
 
