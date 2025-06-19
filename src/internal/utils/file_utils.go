@@ -71,8 +71,12 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 
 	for i := 0; i < targetType.NumField(); i++ {
 		field := targetType.Field(i)
-		fieldName := field.Tag.Get("toml")
-		if fieldName == "" {
+		var fieldName string
+		tag := field.Tag.Get("toml")
+		if tag != "" {
+			// Discard options such as ",omitempty"
+			fieldName = strings.Split(tag, ",")[0]
+		} else {
 			fieldName = field.Name
 		}
 		if _, exists := rawData[fieldName]; !exists && !ignoreMissing {
