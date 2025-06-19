@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 
+	"os"
+
 	"github.com/adrg/xdg"
 	"github.com/stretchr/testify/assert"
 )
@@ -69,5 +71,35 @@ func TestResolveAbsPath(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			assert.Equal(t, tt.expectedRes, ResolveAbsPath(tt.cwd, tt.path))
 		})
+	}
+}
+
+func TestLoadTomlFile_MissingFieldsWithOmitEmpty(t *testing.T) {
+	type testConfig struct {
+		FieldA string `toml:"field_a,omitempty"`
+		FieldB string `toml:"field_b"`
+	}
+
+	defaultData := `field_a = "A"
+field_b = "B"`
+
+	// Only field_b present in file
+	tomlData := `field_b = "B"`
+
+	tmpFile, err := os.CreateTemp("", "testconfig-*.toml")
+	if err != nil {
+		t.Fatalf("failed to create temp file: %v", err)
+	}
+	defer os.Remove(tmpFile.Name())
+	_, err = tmpFile.Write([]byte(tomlData))
+	tmpFile.Close()
+	if err != nil {
+		t.Fatalf("failed to write temp file: %v", err)
+	}
+
+	var cfg testConfig
+	missing := LoadTomlFile(tmpFile.Name(), defaultData, &cfg, false, "test: ")
+	if !missing {
+		t.Errorf("expected missing fields to be detected when field_a is omitted")
 	}
 }
