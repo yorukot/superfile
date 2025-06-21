@@ -39,7 +39,7 @@ func isAncestor(src, dst string) bool {
 		dstResolved = dst
 	}
 
-	// Get absolute paths
+	// Get absolute paths. Abs() also Cleans paths to normalize separators and resolve . and ..
 	srcAbs, err := filepath.Abs(srcResolved)
 	if err != nil {
 		return false
@@ -49,10 +49,6 @@ func isAncestor(src, dst string) bool {
 	if err != nil {
 		return false
 	}
-
-	// Clean paths to normalize separators and resolve . and ..
-	srcAbs = filepath.Clean(srcAbs)
-	dstAbs = filepath.Clean(dstAbs)
 
 	// On Windows, perform case-insensitive comparison
 	if runtime.GOOS == "windows" {
