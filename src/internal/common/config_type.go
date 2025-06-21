@@ -97,8 +97,9 @@ type ConfigType struct {
 	BorderMiddleLeft  string `toml:"border_middle_left"`
 	BorderMiddleRight string `toml:"border_middle_right"`
 
-	Metadata          bool `toml:"metadata" comment:"\n==========PLUGINS========== #\n\nShow more detailed metadata, please install exiftool before enabling this plugin!"`
+	Metadata          bool `toml:"metadata" comment:"\n==========PLUGINS========== #\nPlugins means that you need to install some external dependencies to use them.\n\nShow more detailed metadata, please install exiftool before enabling this plugin!"`
 	EnableMD5Checksum bool `toml:"enable_md5_checksum" comment:"Enable MD5 checksum generation for files"`
+	ZoxideSupport     bool `toml:"zoxide_support" comment:"Zoxide support for the fast navigation"`
 }
 
 type HotkeysType struct {
