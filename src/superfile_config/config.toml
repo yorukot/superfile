@@ -76,10 +76,14 @@ border_bottom_right = '╯'
 border_middle_left = '├'
 border_middle_right = '┤'
 # 
-# ==========PLUGINS========== #
+# ========== PLUGINS ========== #
+# Plugins means that you need to install some external dependencies to use them.
 # 
 # Show more detailed metadata, please install exiftool before enabling this plugin!
 metadata = false
 #
 # Enable MD5 checksum generation for files
 enable_md5_checksum = false
+#
+# Zoxide support for the fast navigation
+zoxide_support = false
