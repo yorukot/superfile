@@ -277,9 +277,19 @@ func (m *model) processBarRender() string {
 		case cancel:
 			symbol = common.ProcessCancelStyle.Render(icon.Error)
 		}
-
+		slog.Debug("process", "name", curProcess.name, "done", curProcess.done, "total", curProcess.total, "state", curProcess.state, "symbol", symbol)
 		r.AddLines(cursor + common.FooterStyle.Render(common.TruncateText(curProcess.name, utils.FooterWidth(m.fullWidth)-7, "...")+" ") + symbol)
-		r.AddLines(cursor+curProcess.progress.ViewAs(float64(curProcess.done)/float64(curProcess.total)), "")
+
+		// calculate progress percentage
+		// if the total is 0 mean the process only have directory
+		// so we can set the progress to 100%
+		if curProcess.total != 0 {
+			progressPercentage := float64(curProcess.done) / float64(curProcess.total)
+			slog.Debug("progress", "percentage", progressPercentage)
+			r.AddLines(cursor+curProcess.progress.ViewAs(progressPercentage), "")
+		} else {
+			r.AddLines(cursor + curProcess.progress.ViewAs(1))
+		}
 	}
 
 	return r.Render()
@@ -514,6 +524,14 @@ func (m *model) warnModalRender() string {
 	cancel := common.ModalCancel.Render(" (" + common.Hotkeys.Quit[0] + ") Cancel ")
 	tip := confirm + lipgloss.NewStyle().Background(common.ModalBGColor).Render("           ") + cancel
 	return common.ModalBorderStyle(common.ModalHeight, common.ModalWidth).Render(title + "\n\n" + content + "\n\n" + tip)
+}
+
+func (m *model) notifyModalRender() string {
+	title := m.notifyModal.title
+	content := m.notifyModal.content
+	okay := common.ModalConfirm.Render(" (" + common.Hotkeys.Confirm[0] + ") Okay ")
+	okay = common.MainStyle.AlignHorizontal(lipgloss.Center).AlignVertical(lipgloss.Center).Render(okay)
+	return common.ModalBorderStyle(common.ModalHeight, common.ModalWidth).Render(title + "\n\n" + content + "\n\n" + okay)
 }
 
 func (m *model) promptModalRender() string {

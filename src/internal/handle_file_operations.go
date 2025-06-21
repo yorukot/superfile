@@ -23,6 +23,55 @@ import (
 	"github.com/yorukot/superfile/src/config/icon"
 )
 
+// isAncestor checks if dst is the same as src or a subdirectory of src.
+// It handles symlinks by resolving them and applies case-insensitive comparison on Windows.
+func isAncestor(src, dst string) bool {
+	// Resolve symlinks for both paths
+	srcResolved, err := filepath.EvalSymlinks(src)
+	if err != nil {
+		// If we can't resolve symlinks, fall back to original path
+		srcResolved = src
+	}
+
+	dstResolved, err := filepath.EvalSymlinks(dst)
+	if err != nil {
+		// If we can't resolve symlinks, fall back to original path
+		dstResolved = dst
+	}
+
+	// Get absolute paths. Abs() also Cleans paths to normalize separators and resolve . and ..
+	srcAbs, err := filepath.Abs(srcResolved)
+	if err != nil {
+		return false
+	}
+
+	dstAbs, err := filepath.Abs(dstResolved)
+	if err != nil {
+		return false
+	}
+
+	// On Windows, perform case-insensitive comparison
+	if runtime.GOOS == "windows" {
+		srcAbs = strings.ToLower(srcAbs)
+		dstAbs = strings.ToLower(dstAbs)
+	}
+
+	// Check if dst is the same as src
+	if srcAbs == dstAbs {
+		return true
+	}
+
+	// Check if dst is a subdirectory of src
+	// Use filepath.Rel to check the relationship
+	rel, err := filepath.Rel(srcAbs, dstAbs)
+	if err != nil {
+		return false
+	}
+
+	// If rel is "." or doesn't start with "..", then dst is inside src
+	return rel == "." || !strings.HasPrefix(rel, "..")
+}
+
 // Create a file in the currently focus file panel
 func (m *model) panelCreateNewFile() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
@@ -248,7 +297,7 @@ func (m *model) completelyDeleteSingleItem() {
 	prog := common.GenerateDefaultProgress()
 
 	newProcess := process{
-		name:     "󰆴 " + panel.element[panel.cursor].name,
+		name:     icon.Delete + icon.Space + panel.element[panel.cursor].name,
 		progress: prog,
 		state:    inOperation,
 		total:    1,
@@ -389,6 +438,63 @@ func (m *model) pasteItem() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	totalFiles := 0
 
+	// Check if trying to paste into source or subdirectory for both cut and copy operations
+	for _, srcPath := range m.copyItems.items {
+		// Check if trying to cut and paste into the same directory - this would be a no-op
+		// and could potentially cause issues, so we prevent it
+		if filepath.Dir(srcPath) == panel.location && m.copyItems.cut {
+			slog.Error("Cannot paste into parent directory of source", "src", srcPath, "dst", panel.location)
+			message := channelMessage{
+				messageID:   id,
+				messageType: sendNotifyModal,
+				notifyModal: notifyModal{
+					open:    true,
+					title:   "Invalid paste location",
+					content: "Cannot paste into parent directory of source",
+				},
+			}
+			channel <- message
+			return
+		}
+
+		slog.Debug("model.pasteItem", "srcPath", srcPath, "panel location", panel.location)
+
+		if m.copyItems.cut && srcPath == panel.location {
+			slog.Error("Cannot paste a directory into itself", "operation", "cut", "src", srcPath, "dst", panel.location)
+			message := channelMessage{
+				messageID:   id,
+				messageType: sendNotifyModal,
+				notifyModal: notifyModal{
+					open:    true,
+					title:   "Invalid paste location",
+					content: "Cannot paste a directory into itself",
+				},
+			}
+			channel <- message
+			return
+		}
+
+		if isAncestor(srcPath, panel.location) {
+			operation := "copy"
+			if m.copyItems.cut {
+				operation = "cut"
+			}
+
+			slog.Error("Cannot paste a directory into itself or its subdirectory", "operation", operation, "src", srcPath, "dst", panel.location)
+			message := channelMessage{
+				messageID:   id,
+				messageType: sendNotifyModal,
+				notifyModal: notifyModal{
+					open:    true,
+					title:   "Invalid paste location",
+					content: fmt.Sprintf("Cannot %s and paste a directory into itself or its subdirectory", operation),
+				},
+			}
+			channel <- message
+			return
+		}
+	}
+
 	for _, folderPath := range m.copyItems.items {
 		// Todo : Fix this. This is inefficient
 		// In case of a cut operations for a directory with a lot of files
@@ -485,11 +591,6 @@ func (m *model) pasteItem() {
 	channel <- message
 
 	m.processBarModel.process[id] = p
-	// Reset after paste is done. Only in case of cut
-	// because current items in clipboard are deleted now
-	if m.copyItems.cut {
-		m.copyItems.reset(false)
-	}
 }
 
 // Extract compressed file
