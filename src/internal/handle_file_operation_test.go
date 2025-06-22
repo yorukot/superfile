@@ -165,3 +165,200 @@ func TestCompressSelectedFiles(t *testing.T) {
 		assert.Empty(t, entries)
 	})
 }
+
+func TestPasteItem(t *testing.T) {
+	curTestDir := t.TempDir()
+	sourceDir := filepath.Join(curTestDir, "source")
+	destDir := filepath.Join(curTestDir, "dest")
+	subDir := filepath.Join(sourceDir, "subdir")
+	file1 := filepath.Join(sourceDir, "file1.txt")
+	file2 := filepath.Join(sourceDir, "file2.txt")
+	dirFile1 := filepath.Join(subDir, "dirfile1.txt")
+
+	setupDirectories(t, curTestDir, sourceDir, destDir, subDir)
+	setupFiles(t, file1, file2, dirFile1)
+
+	testdata := []struct {
+		name                 string
+		startDir             string
+		targetDir            string
+		itemName             string
+		isCut                bool
+		selectMode           bool
+		selectedItems        []string
+		shouldClipboardClear bool
+		shouldOriginalExist  bool
+		expectedDestFiles    []string
+		shouldPreventPaste   bool
+		description          string
+	}{
+		{
+			name:                 "Copy Single File",
+			startDir:             sourceDir,
+			targetDir:            destDir,
+			itemName:             "file1.txt",
+			isCut:                false,
+			selectMode:           false,
+			selectedItems:        nil,
+			shouldClipboardClear: false,
+			shouldOriginalExist:  true,
+			expectedDestFiles:    []string{"file1.txt"},
+			shouldPreventPaste:   false,
+			description:          "Copy a single file from source to destination",
+		},
+		{
+			name:                 "Cut Single File",
+			startDir:             sourceDir,
+			targetDir:            destDir,
+			itemName:             "file2.txt",
+			isCut:                true,
+			selectMode:           false,
+			selectedItems:        nil,
+			shouldClipboardClear: true,
+			shouldOriginalExist:  false,
+			expectedDestFiles:    []string{"file2.txt"},
+			shouldPreventPaste:   false,
+			description:          "Cut a single file from source to destination",
+		},
+		{
+			name:                 "Cut Directory into Same Location",
+			startDir:             sourceDir,
+			targetDir:            sourceDir, // Same directory
+			itemName:             "subdir",
+			isCut:                true,
+			selectMode:           false,
+			selectedItems:        nil,
+			shouldClipboardClear: false,      // Should not clear because paste should be prevented
+			shouldOriginalExist:  true,       // Should still exist because paste prevented
+			expectedDestFiles:    []string{}, // No files should be created in dest
+			shouldPreventPaste:   true,
+			description:          "Cutting directory into same location should be prevented",
+		},
+	}
+
+	for _, tt := range testdata {
+		t.Run(tt.name, func(t *testing.T) {
+			m := setupModelAndPerformOperation(t, tt.startDir, tt.selectMode, tt.itemName, tt.selectedItems, tt.isCut)
+
+			// Navigate to target directory
+			navigateToTargetDir(t, m, tt.startDir, tt.targetDir)
+
+			// Get original file path for existence check
+			originalPath := getOriginalPath(tt.selectMode, tt.itemName, tt.startDir)
+
+			// Perform paste operation
+			TeaUpdateWithErrCheck(t, m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+
+			// Verify results based on whether paste should be prevented
+			if tt.shouldPreventPaste {
+				verifyPreventedPasteResults(t, m, originalPath)
+			} else {
+				verifySuccessfulPasteResults(t, tt.targetDir, tt.expectedDestFiles, originalPath, tt.shouldOriginalExist)
+			}
+		})
+	}
+
+	// Special test cases that don't fit the table-driven pattern
+	t.Run("Paste with Empty Clipboard", func(t *testing.T) {
+		emptyTestDir := filepath.Join(curTestDir, "empty_test")
+		setupDirectories(t, emptyTestDir)
+
+		m := defaultTestModel(emptyTestDir)
+		TeaUpdateWithErrCheck(t, &m, nil)
+
+		// Ensure clipboard is empty
+		m.copyItems.items = []string{}
+
+		// Get initial count
+		entriesBefore, err := os.ReadDir(emptyTestDir)
+		require.NoError(t, err)
+
+		// Attempt to paste (should do nothing)
+		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+
+		// Should not crash and no new files should be created
+		entriesAfter, err := os.ReadDir(emptyTestDir)
+		require.NoError(t, err)
+
+		assert.Equal(t, len(entriesBefore), len(entriesAfter), "No new files should be created when pasting with empty clipboard")
+	})
+
+	t.Run("Multiple Items Copy and Paste", func(t *testing.T) {
+		// Create fresh files for this test
+		multiFile1 := filepath.Join(sourceDir, "multi1.txt")
+		multiFile2 := filepath.Join(sourceDir, "multi2.txt")
+		setupFiles(t, multiFile1, multiFile2)
+
+		selectedItems := []string{multiFile1, multiFile2}
+		m := setupModelAndPerformOperation(t, sourceDir, true, "", selectedItems, false)
+
+		// Navigate to destination
+		navigateToTargetDir(t, m, sourceDir, destDir)
+
+		// Paste items
+		TeaUpdateWithErrCheck(t, m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+
+		// Verify both files were copied
+		expectedDestFiles := []string{"multi1.txt", "multi2.txt"}
+		verifyDestinationFiles(t, destDir, expectedDestFiles)
+	})
+
+	t.Run("Cut into Subdirectory Prevention", func(t *testing.T) {
+		// Create a separate subdirectory for this test to avoid conflicts with table-driven tests
+		testSubDir := filepath.Join(sourceDir, "testsubdir")
+		testDirFile := filepath.Join(testSubDir, "testdirfile.txt")
+		setupDirectories(t, testSubDir)
+		setupFiles(t, testDirFile)
+
+		// Test the logic that prevents cutting a directory into its subdirectory
+		m := setupModelAndPerformOperation(t, sourceDir, false, "testsubdir", nil, true)
+
+		// Navigate into the subdirectory and try to paste there (should be prevented)
+		navigateToTargetDir(t, m, sourceDir, testSubDir)
+		TeaUpdateWithErrCheck(t, m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+
+		// Directory should still exist in original location after prevention
+		assert.DirExists(t, testSubDir, "Directory should still exist after failed paste into subdirectory")
+	})
+
+	t.Run("Duplicate File Handling", func(t *testing.T) {
+		// Create a file to copy
+		dupFile := filepath.Join(sourceDir, "duplicate.txt")
+		setupFiles(t, dupFile)
+
+		m := setupModelAndPerformOperation(t, sourceDir, false, "duplicate.txt", nil, false)
+
+		// Navigate to destination and paste
+		navigateToTargetDir(t, m, sourceDir, destDir)
+		TeaUpdateWithErrCheck(t, m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+
+		// Verify first copy
+		verifyDestinationFiles(t, destDir, []string{"duplicate.txt"})
+
+		// Paste again to test duplicate handling
+		TeaUpdateWithErrCheck(t, m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+
+		// Verify duplicate file with different name
+		verifyDestinationFiles(t, destDir, []string{"duplicate(1).txt"})
+	})
+}
+
+// ------  Very specific utilities that are required for this test case file only
+
+// Helper function to setup model and perform copy/cut operation
+func setupModelAndPerformOperation(t *testing.T, startDir string, useSelectMode bool, itemName string, selectedItems []string, isCut bool) *model {
+	t.Helper()
+	m := defaultTestModel(startDir)
+	TeaUpdateWithErrCheck(t, &m, nil)
+
+	setupPanelModeAndSelection(t, &m, useSelectMode, itemName, selectedItems)
+	performCopyOrCutOperation(t, &m, isCut)
+
+	selectedItemsCount := len(selectedItems)
+	if !useSelectMode {
+		selectedItemsCount = 1
+	}
+	verifyClipboardState(t, &m, isCut, useSelectMode, selectedItemsCount)
+
+	return &m
+}
