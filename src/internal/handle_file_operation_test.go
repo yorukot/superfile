@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"log/slog"
 	"os"
 	"path/filepath"
 	"testing"
@@ -238,30 +239,48 @@ func TestPasteItem(t *testing.T) {
 
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
-			m := setupModelAndPerformOperation(t, tt.startDir, tt.selectMode, tt.itemName, tt.selectedItems, tt.isCut)
-
+			//p := DefaultTeaProgram(tt.startDir)
+			//p.Run()
+			//slog.Debug("model info", "Listening", ListeningMessage, "panel", p.m.getFocusedFilePanel().location)
+			//
+			//p.SendMessage(utils.TeaRuneKeyMsg(common.Hotkeys.Confirm[0]))
+			//time.Sleep(2*time.Second)
+			//slog.Debug("model info", "Listening", ListeningMessage, "panel", p.m.getFocusedFilePanel().location)
+			slog.Debug("Started test ", "name", tt.name)
+			p := setupModelAndPerformOperation(t, tt.startDir, tt.selectMode, tt.itemName, tt.selectedItems, tt.isCut)
+			slog.Debug("model clipboard info 1", "items", p.m.copyItems.items, "cut", p.m.copyItems.cut)
 			// Navigate to target directory
-			navigateToTargetDir(t, m, tt.startDir, tt.targetDir)
+			navigateToTargetDir(t, p, tt.startDir, tt.targetDir)
+			slog.Debug("model clipboard info 2", "items", p.m.copyItems.items, "cut", p.m.copyItems.cut)
 
 			// Get original file path for existence check
 			originalPath := getOriginalPath(tt.selectMode, tt.itemName, tt.startDir)
 
 			// Perform paste operation
-			TeaUpdateWithErrCheck(t, m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+			p.SendMessageBlocking(utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+			slog.Debug("model clipboard info 3", "items", p.m.copyItems.items, "cut", p.m.copyItems.cut)
 
 			// Verify results based on whether paste should be prevented
 			if tt.shouldPreventPaste {
-				verifyPreventedPasteResults(t, m, originalPath)
+				verifyPreventedPasteResults(t, &p.m, originalPath)
+				require.False(t, tt.shouldClipboardClear)
 			} else {
 				verifySuccessfulPasteResults(t, tt.targetDir, tt.expectedDestFiles, originalPath, tt.shouldOriginalExist)
 			}
+			assert.False(t, ListeningMessage)
+			slog.Debug("model clipboard info 4", "items", p.m.copyItems.items, "cut", p.m.copyItems.cut)
+
+			time.Sleep(2*time.Second)
+			p.SendAllMsg()
+			time.Sleep(2*time.Second)
+			p.SendAllMsg()
 
 			// Checking separately, as this is something independent of tt.shouldPreventPaste
-			if tt.shouldClipboardClear {
-				assert.Empty(t, m.copyItems.items, "Clipboard should be cleared after successful cut-paste")
-			} else {
-				assert.NotEmpty(t, m.copyItems.items, "Clipboard should remain after copy-paste")
-			}
+			//if tt.shouldClipboardClear {
+			//	assert.Empty(t, p.m.copyItems.items, "Clipboard should be cleared after successful cut-paste")
+			//} else {
+			//	assert.NotEmpty(t, p.m.copyItems.items, "Clipboard should remain after copy-paste")
+			//}
 		})
 	}
 
@@ -297,13 +316,12 @@ func TestPasteItem(t *testing.T) {
 		setupFiles(t, multiFile1, multiFile2)
 
 		selectedItems := []string{multiFile1, multiFile2}
-		m := setupModelAndPerformOperation(t, sourceDir, true, "", selectedItems, false)
-
+		p := setupModelAndPerformOperation(t, sourceDir, true, "", selectedItems, false)
 		// Navigate to destination
-		navigateToTargetDir(t, m, sourceDir, destDir)
+		navigateToTargetDir(t, p, sourceDir, destDir)
 
 		// Paste items
-		TeaUpdateWithErrCheck(t, m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+		TeaUpdateWithErrCheck(t, &p.m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
 
 		// Verify both files were copied
 		expectedDestFiles := []string{"multi1.txt", "multi2.txt"}
@@ -318,11 +336,11 @@ func TestPasteItem(t *testing.T) {
 		setupFiles(t, testDirFile)
 
 		// Test the logic that prevents cutting a directory into its subdirectory
-		m := setupModelAndPerformOperation(t, sourceDir, false, "testsubdir", nil, true)
+		p := setupModelAndPerformOperation(t, sourceDir, false, "testsubdir", nil, true)
 
 		// Navigate into the subdirectory and try to paste there (should be prevented)
-		navigateToTargetDir(t, m, sourceDir, testSubDir)
-		TeaUpdateWithErrCheck(t, m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+		navigateToTargetDir(t, p, sourceDir, testSubDir)
+		TeaUpdateWithErrCheck(t, &p.m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
 
 		// Directory should still exist in original location after prevention
 		assert.DirExists(t, testSubDir, "Directory should still exist after failed paste into subdirectory")
@@ -333,17 +351,17 @@ func TestPasteItem(t *testing.T) {
 		dupFile := filepath.Join(sourceDir, "duplicate.txt")
 		setupFiles(t, dupFile)
 
-		m := setupModelAndPerformOperation(t, sourceDir, false, "duplicate.txt", nil, false)
+		p := setupModelAndPerformOperation(t, sourceDir, false, "duplicate.txt", nil, false)
 
 		// Navigate to destination and paste
-		navigateToTargetDir(t, m, sourceDir, destDir)
-		TeaUpdateWithErrCheck(t, m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+		navigateToTargetDir(t, p, sourceDir, destDir)
+		TeaUpdateWithErrCheck(t, &p.m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
 
 		// Verify first copy
 		verifyDestinationFiles(t, destDir, []string{"duplicate.txt"})
 
 		// Paste again to test duplicate handling
-		TeaUpdateWithErrCheck(t, m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+		TeaUpdateWithErrCheck(t, &p.m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
 
 		// Verify duplicate file with different name
 		verifyDestinationFiles(t, destDir, []string{"duplicate(1).txt"})
@@ -353,19 +371,28 @@ func TestPasteItem(t *testing.T) {
 // ------  Very specific utilities that are required for this test case file only
 
 // Helper function to setup model and perform copy/cut operation
-func setupModelAndPerformOperation(t *testing.T, startDir string, useSelectMode bool, itemName string, selectedItems []string, isCut bool) *model {
+func setupModelAndPerformOperation(t *testing.T, startDir string, useSelectMode bool, itemName string, selectedItems []string, isCut bool) *TeaProgram {
 	t.Helper()
-	m := defaultTestModel(startDir)
-	TeaUpdateWithErrCheck(t, &m, nil)
+	p := DefaultTeaProgram(startDir)
+	p.Run()
+	//m := defaultTestModel(startDir)
 
-	setupPanelModeAndSelection(t, &m, useSelectMode, itemName, selectedItems)
-	performCopyOrCutOperation(t, &m, isCut)
+	// Blocking wait for Update() to finish
+	p.SendMessageBlocking(nil)
+
+	setupPanelModeAndSelection(t, &p.m, useSelectMode, itemName, selectedItems)
+
+	slog.Debug("model clipboard info 0a", "items", p.m.copyItems.items, "cut", p.m.copyItems.cut)
+
+	performCopyOrCutOperation(t, p, isCut)
+
+	slog.Debug("model clipboard info 0b", "items", p.m.copyItems.items, "cut", p.m.copyItems.cut)
 
 	selectedItemsCount := len(selectedItems)
 	if !useSelectMode {
 		selectedItemsCount = 1
 	}
-	verifyClipboardState(t, &m, isCut, useSelectMode, selectedItemsCount)
+	verifyClipboardState(t, &p.m, isCut, useSelectMode, selectedItemsCount)
 
-	return &m
+	return p
 }

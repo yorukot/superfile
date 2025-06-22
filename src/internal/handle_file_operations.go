@@ -586,8 +586,14 @@ func (m *model) pasteItem() {
 		p.state = successful
 		p.done = totalFiles
 		p.doneTime = time.Now()
+		// Reset after paste is done. Only in case of cut and succesful operation
+		// because current items in clipboard are deleted now
+		//if m.copyItems.cut {
+		//	m.copyItems.reset(false)
+		//}
 	}
 	message.processNewState = p
+	slog.Debug("Sending Success Message to channel", "type", message.messageType)
 	channel <- message
 
 	m.processBarModel.process[id] = p
