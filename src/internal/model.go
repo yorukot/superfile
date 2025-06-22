@@ -63,7 +63,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// Todo : We could check for m.modelQuitState and skip doing anything
 	// If its quitDone. But if we are at this state, its already bad, so we need
 	// to first figure out if its possible in testing, and fix it.
-	slog.Debug("model.Update() called")
+	slog.Debug("model.Update() called", "ListeningMessage", ListeningMessage, "type", reflect.TypeOf(msg))
 	var cmd tea.Cmd
 
 	cmd = m.sidebarModel.UpdateState(msg)
@@ -83,7 +83,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		cmd = tea.Batch(cmd, m.handleKeyInput(msg))
 	default:
-		slog.Debug("Message of type that is not handled", "type", reflect.TypeOf(msg))
+		slog.Debug("Message of type that is not handled")
 	}
 
 	m.updateFilePanelsState(msg, &cmd)
@@ -103,6 +103,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // Handle message exchanging within the application
 func (m *model) handleChannelMessage(msg channelMessage) {
+	slog.Debug("handleChannelMessage()", "msgType", msg.messageType)
 	switch msg.messageType {
 	case sendWarnModal:
 		m.warnModal = msg.warnModal
@@ -117,6 +118,7 @@ func (m *model) handleChannelMessage(msg channelMessage) {
 		m.processBarModel.process[msg.messageID] = msg.processNewState
 		// Check if the process is cut and if the process is successful or failure, both need to be reset
 		if (msg.processNewState.state == successful || msg.processNewState.state == failure) && m.copyItems.cut {
+			slog.Debug("Clearing clipboard")
 			m.copyItems.reset(false)
 		}
 	default:
@@ -525,6 +527,7 @@ func listenForChannelMessage(msg chan channelMessage) tea.Cmd {
 	return func() tea.Msg {
 		for {
 			m := <-msg
+			slog.Debug("Read Message from channel", "type", m.messageType)
 			if m.messageType != sendProcess {
 				ListeningMessage = false
 				return m

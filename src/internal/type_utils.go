@@ -107,3 +107,19 @@ func (p panelMode) String() string {
 		return invalidTypeString
 	}
 }
+
+
+func (c channelMessageType) String() string {
+	switch c {
+	case sendWarnModal:
+		return "sendWarnModal"
+	case sendMetadata:
+		return "sendMetadata"
+	case sendProcess:
+		return "sendProcess"
+	case sendNotifyModal:
+		return "sendNotifyModal"
+	default:
+		return invalidTypeString
+	}
+}

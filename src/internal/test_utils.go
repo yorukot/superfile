@@ -2,8 +2,11 @@ package internal
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
+	"reflect"
+	"sync"
 	"testing"
 	"time"
 
@@ -40,6 +43,9 @@ func setupFiles(t *testing.T, files ...string) {
 
 func defaultTestModel(dirs ...string) model {
 	m := defaultModelConfig(false, false, false, dirs)
+	cmd := m.Init()
+	msg := cmd
+	slog.Debug("[Test] defaultTestModel()", "msg", msg)
 	_, _ = TeaUpdate(&m, tea.WindowSizeMsg{Width: 2 * common.MinimumWidth, Height: 2 * common.MinimumHeight})
 	return m
 }
@@ -63,6 +69,99 @@ func setupPanelModeAndSelection(t *testing.T, m *model, useSelectMode bool, item
 }
 
 // --------------------  Bubletea utilities
+
+type TeaProgram struct {
+	m          model
+	msgs       chan tea.Msg
+	sentToChan  int
+	sentMsgCnt int
+	mutex      sync.Mutex
+}
+
+func DefaultTeaProgram(startdirs ...string) *TeaProgram {
+	return &TeaProgram{
+		defaultModelConfig(false, false, false, startdirs),
+		// TODO: This might be a hacky way. Figure out if we can
+		// get it working with single buffer channel
+		make(chan tea.Msg, 100),
+		0,
+		0,
+		sync.Mutex{},
+	}
+}
+
+func (p *TeaProgram) SendMessage(msg tea.Msg) {
+	p.sentToChan++
+	slog.Debug("[Test] Writing msg to channel", "type", reflect.TypeOf(msg), "cnt", p.sentToChan)
+	p.msgs <- msg
+	slog.Debug("[Test] Done Writing msg to channel", "type", reflect.TypeOf(msg), "cnt", p.sentToChan)
+
+}
+
+// Only one instance should be running at a time
+func (p *TeaProgram) SendMessageBlocking(msg tea.Msg) {
+	p.SendMessage(msg)
+	p.SendAllMsg()
+}
+
+// Only one instance should be running at a time
+func (p *TeaProgram) sendMessageToModel(msg tea.Msg) {
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
+	// Todo : Add a way to fail tests on err
+	curId := p.sentMsgCnt
+	p.sentMsgCnt++
+	slog.Debug("[Test] Sending message", "id", curId, "type", reflect.TypeOf(msg))
+	slog.Debug("model clipboard info before send", "id", curId, "items", p.m.copyItems.items, "cut", p.m.copyItems.cut)
+
+	cmd, err := TeaUpdate(&p.m, msg)
+	slog.Debug("model clipboard info after send", "id", curId, "items", p.m.copyItems.items, "cut", p.m.copyItems.cut)
+
+	if err == nil {
+		p.RunCmd(cmd)
+	}
+	slog.Debug("model clipboard info after run command", "id", curId, "items", p.m.copyItems.items, "cut", p.m.copyItems.cut)
+
+}
+
+// Block till all current messages are dealt with
+func (p *TeaProgram) SendAllMsg() {
+	for {
+		select {
+		case msg := <-p.msgs:
+			p.sendMessageToModel(msg)
+		default:
+			slog.Debug("[Test] SendAllMsg() : No messages in channel, exiting")
+			return
+		}
+	}
+}
+
+func (p *TeaProgram) Run() {
+	slog.Debug("[Test] TeaProgram : Started")
+
+	p.RunCmd(p.m.Init())
+	p.SendAllMsg()
+}
+
+func (p *TeaProgram) RunCmdBlocking(cmd tea.Cmd) {
+	msg := cmd()
+	switch msg := msg.(type) {
+	case tea.BatchMsg:
+		for _, cur_cmd := range msg {
+			go p.RunCmdBlocking(cur_cmd)
+		}
+	default:
+		p.SendMessage(msg)
+	}
+}
+
+func (p *TeaProgram) RunCmd(cmd tea.Cmd) {
+	if cmd == nil {
+		return
+	}
+	go p.RunCmdBlocking(cmd)
+}
 
 // TeaUpdate : Utility to send update to model , majorly used in tests
 // Not using pointer receiver as this is more like a utility, than
@@ -108,12 +207,12 @@ func IsTeaQuit(cmd tea.Cmd) bool {
 }
 
 // Helper function to perform copy or cut operation
-func performCopyOrCutOperation(t *testing.T, m *model, isCut bool) {
+func performCopyOrCutOperation(t *testing.T, p *TeaProgram, isCut bool) {
 	t.Helper()
 	if isCut {
-		TeaUpdateWithErrCheck(t, m, utils.TeaRuneKeyMsg(common.Hotkeys.CutItems[0]))
+		p.SendMessageBlocking(utils.TeaRuneKeyMsg(common.Hotkeys.CutItems[0]))
 	} else {
-		TeaUpdateWithErrCheck(t, m, utils.TeaRuneKeyMsg(common.Hotkeys.CopyItems[0]))
+		p.SendMessageBlocking(utils.TeaRuneKeyMsg(common.Hotkeys.CopyItems[0]))
 	}
 }
 
@@ -187,8 +286,6 @@ func verifySuccessfulPasteResults(t *testing.T, targetDir string, expectedDestFi
 			verifyPathNotExistsEventually(t, originalPath, "Original file should not exist after cut operation")
 		}
 	}
-
-	// TODO: Need to add a test to verify clipboard state.
 }
 
 // -------------- Other utilities
@@ -204,12 +301,16 @@ func findItemIndexInPanel(panel *filePanel, itemName string) int {
 }
 
 // Helper function to navigate to target directory if different from start
-func navigateToTargetDir(t *testing.T, m *model, startDir, targetDir string) {
+func navigateToTargetDir(t *testing.T, p *TeaProgram, startDir, targetDir string) {
 	t.Helper()
 	if targetDir != startDir {
-		err := m.updateCurrentFilePanelDir(targetDir)
+		slog.Debug("model clipboard info 1a", "items", p.m.copyItems.items, "cut", p.m.copyItems.cut)
+		err := p.m.updateCurrentFilePanelDir(targetDir)
 		require.NoError(t, err)
-		TeaUpdateWithErrCheck(t, m, nil)
+		slog.Debug("model clipboard info 1b", "items", p.m.copyItems.items, "cut", p.m.copyItems.cut)
+
+		p.SendMessageBlocking(nil)
+		slog.Debug("model clipboard info 1c", "items", p.m.copyItems.items, "cut", p.m.copyItems.cut)
 	}
 }
 
