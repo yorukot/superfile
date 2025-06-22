@@ -3,8 +3,10 @@ package internal
 import (
 	"log/slog"
 	"os"
+	"os/exec"
 	"reflect"
 	"runtime"
+	"strings"
 
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
 	"github.com/yorukot/superfile/src/internal/ui/sidebar"
@@ -64,7 +66,26 @@ func initialConfig(firstFilePanelDirs []string) (toggleDotFile bool, toggleFoote
 			firstFilePanelDirs[i] = common.Config.DefaultDirectory
 		}
 
-		firstFilePanelDirs[i] = utils.ResolveAbsPath(cwd, firstFilePanelDirs[i])
+		if common.Config.ZoxideSupport {
+			// Execute zoxide to get the absolute path
+			out, err := exec.Command("zoxide", "query", firstFilePanelDirs[i]).Output()
+			if err != nil {
+				slog.Error("Error while executing zoxide", "error", err, "path", firstFilePanelDirs[i])
+				firstFilePanelDirs[i] = utils.ResolveAbsPath(cwd, firstFilePanelDirs[i])
+			} else {
+				// Remove trailing newline and whitespace from the output
+				trimmedOutput := strings.TrimSpace(string(out))
+
+				if trimmedOutput == "" {
+					slog.Error("Zoxide returned empty output", "path", firstFilePanelDirs[i])
+					firstFilePanelDirs[i] = utils.ResolveAbsPath(cwd, firstFilePanelDirs[i])
+				} else {
+					firstFilePanelDirs[i] = trimmedOutput
+				}
+			}
+		} else {
+			firstFilePanelDirs[i] = utils.ResolveAbsPath(cwd, firstFilePanelDirs[i])
+		}
 		// In case of unexpected path error, fallback to home dir
 		if _, err := os.Stat(firstFilePanelDirs[i]); err != nil {
 			slog.Error("cannot get stats for firstFilePanelDir", "error", err)
