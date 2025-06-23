@@ -270,9 +270,9 @@ func TestPasteItem(t *testing.T) {
 			assert.False(t, ListeningMessage)
 			slog.Debug("model clipboard info 4", "items", p.m.copyItems.items, "cut", p.m.copyItems.cut)
 
-			time.Sleep(2*time.Second)
+			time.Sleep(20*time.Millisecond)
 			p.SendAllMsg()
-			time.Sleep(2*time.Second)
+			time.Sleep(20*time.Millisecond)
 			p.SendAllMsg()
 
 			// Checking separately, as this is something independent of tt.shouldPreventPaste

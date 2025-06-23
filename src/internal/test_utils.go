@@ -76,6 +76,7 @@ type TeaProgram struct {
 	sentToChan  int
 	sentMsgCnt int
 	mutex      sync.Mutex
+	mutex2      sync.Mutex
 }
 
 func DefaultTeaProgram(startdirs ...string) *TeaProgram {
@@ -87,10 +88,13 @@ func DefaultTeaProgram(startdirs ...string) *TeaProgram {
 		0,
 		0,
 		sync.Mutex{},
+		sync.Mutex{},
 	}
 }
 
 func (p *TeaProgram) SendMessage(msg tea.Msg) {
+	p.mutex2.Lock()
+	defer p.mutex2.Unlock()
 	p.sentToChan++
 	slog.Debug("[Test] Writing msg to channel", "type", reflect.TypeOf(msg), "cnt", p.sentToChan)
 	p.msgs <- msg
