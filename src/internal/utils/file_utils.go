@@ -43,7 +43,7 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 	// Create a map to track which fields are present
 	var rawData map[string]interface{}
 	if err := toml.Unmarshal(data, &rawData); err != nil {
-		slog.Error(errorPrefix+"Error decoding TOML file", "err", err)
+		fmt.Printf("%sError decoding TOML file : %v\n", errorPrefix, err)
 		return true
 	}
 
@@ -52,16 +52,16 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 		var decodeErr *toml.DecodeError
 		if errors.As(err, &decodeErr) {
 			row, col := decodeErr.Position()
-			fmt.Print(errorPrefix + fmt.Sprintf("Error in field at line %d column %d: %s\n",
-				row, col, decodeErr.Error()))
+			fmt.Printf("%sError in field at line %d column %d: %s\n",
+				errorPrefix, row, col, decodeErr.Error())
 		} else {
-			fmt.Print(errorPrefix + "Error unmarshalling data: " + err.Error() + "\n")
+			fmt.Printf("%sError unmarshalling data: %v", errorPrefix, err)
 		}
 		return true
 	}
 
-	// Check for missing fields
-	var ignoreMissing bool
+	// Check for missing fields. Explicitly set default value to false
+	ignoreMissing := false
 	if config, ok := target.(MissingFieldIgnorer); ok {
 		ignoreMissing = config.GetIgnoreMissingFields()
 	}
@@ -80,7 +80,7 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 		} else {
 			fieldName = field.Name
 		}
-		if _, exists := rawData[fieldName]; !exists && !ignoreMissing {
+		if _, exists := rawData[fieldName]; !exists {
 			missingFields = append(missingFields, fieldName)
 		}
 	}
@@ -88,63 +88,89 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 	// Todo: Ideally this should behave as an internal function with no side effects
 	if len(missingFields) > 0 {
 		if !fixFlag {
-			fmt.Print(errorPrefix + fmt.Sprintf("Missing fields: %v\n", missingFields))
-			return true
+			if !ignoreMissing {
+				fmt.Printf("%sMissing fields: %v\n", errorPrefix, missingFields)
+				return true
+			}
+			// Need to return false here if we want to ignore missing fields. If this is true
+			// It would cause another print message via the callee
+			return false
 		}
 		// Create a unique backup of the current config file
 		backupFile, err := os.CreateTemp(filepath.Dir(filePath), filepath.Base(filePath)+".bak-")
 		if err != nil {
-			slog.Error(errorPrefix+"Failed to create backup file", "err", err)
+			fmt.Printf("%sFailed to create backup file. Error : %v\n", errorPrefix, err)
 			return true
 		}
+
 		backupPath := backupFile.Name()
+		needsBackupFileRemoval := true
+		defer func() {
+			backupFile.Close()
+			// Remove backup in case of unsuccessful write
+			if needsBackupFileRemoval {
+				if errRem := os.Remove(backupPath); errRem != nil {
+					fmt.Printf("%sWarning: Failed to remove backup file, backupPath : %s, err : %v\n",
+						errorPrefix, backupPath, errRem)
+				}
+			}
+		}()
 		// Copy the original file to the backup
 		origFile, err := os.Open(filePath)
 		if err != nil {
-			slog.Error(errorPrefix+"Failed to open original file for backup", "err", err)
-			backupFile.Close()
-			os.Remove(backupPath)
+			fmt.Printf("%sFailed to open original file for backup. Error : %v\n", errorPrefix, err)
 			return true
 		}
+		defer origFile.Close()
+
 		_, err = io.Copy(backupFile, origFile)
-		origFile.Close()
-		backupFile.Close()
 		if err != nil {
-			slog.Error(errorPrefix+"Failed to copy original file to backup", "err", err)
-			os.Remove(backupPath)
+			fmt.Printf("%sFailed to copy original file to backup. Error : %v\n", errorPrefix, err)
 			return true
 		}
 		// Write the new config to a temp file
 		tmpFile, err := os.CreateTemp(filepath.Dir(filePath), filepath.Base(filePath)+".tmp-")
 		if err != nil {
-			slog.Error(errorPrefix+"Failed to create temp file for new config", "err", err)
+			fmt.Printf("%sFailed to create temp file for new config. Error : %v\n", errorPrefix, err)
 			return true
 		}
 		tmpPath := tmpFile.Name()
+		// Ensure cleanup via defer
+		defer func() {
+			// In usual case, the close would have already happened. Ignore the error here
+			tmpFile.Close()
+			// Cleanup file if it exists
+			if _, errRem := os.Stat(tmpPath); errRem == nil {
+				// File still exists
+				if errRem := os.Remove(tmpPath); errRem != nil {
+					fmt.Printf("%sWarning: Failed to remove temp config file(%s). Error : %v\n", errorPrefix, tmpPath, errRem)
+				}
+			}
+		}()
 		tomlData, err := toml.Marshal(target)
 		if err != nil {
-			slog.Error(errorPrefix+"Failed to marshal config to TOML", "err", err)
-			tmpFile.Close()
-			os.Remove(tmpPath)
+			fmt.Printf("%sFailed to marshal config to TOML. Error : %v\n", errorPrefix, err)
 			return true
 		}
 		_, err = tmpFile.Write(tomlData)
-		tmpFile.Close()
+
 		if err != nil {
-			slog.Error(errorPrefix+"Failed to write TOML data to temp file", "err", err)
-			os.Remove(tmpPath)
+			fmt.Printf("%sFailed to write TOML data to temp file : %v\n", errorPrefix, err)
 			return true
 		}
+
+		// Even though we have a defer to close, we need to close here to make
+		// sure we give up the fd to tmp file, so that os.Rename() can work.
+		tmpFile.Close()
 		// Atomically replace the original file with the new config
 		if err := os.Rename(tmpPath, filePath); err != nil {
-			slog.Error(errorPrefix+"Failed to atomically replace config file", "err", err)
-			// Do not remove backup; user may want to restore manually
+			fmt.Printf("%sFailed to atomically replace config file. Error : %v\n", errorPrefix, err)
 			return true
 		}
-		// Remove backup after successful write
-		if err := os.Remove(backupPath); err != nil {
-			slog.Error(errorPrefix+"Warning: Failed to remove backup file", "backupPath", backupPath, "err", err)
-		}
+		// Inform user about backup location
+		fmt.Printf("%sConfig file had issues. Its fixed successfully. Original backed up to: %s\n", errorPrefix, backupPath)
+		// Do not remove backup; user may want to restore manually
+		needsBackupFileRemoval = false
 	}
 
 	return false
