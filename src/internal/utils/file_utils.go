@@ -31,33 +31,45 @@ func WriteTomlData(filePath string, data interface{}) error {
 
 // Helper function to load and validate TOML files with field checking
 // errorPrefix is appended before every error message
-func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFlag bool, errorPrefix string) bool {
+func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFlag bool) error {
 	// Initialize with default config
 	_ = toml.Unmarshal([]byte(defaultData), target)
 
 	data, err := os.ReadFile(filePath)
 	if err != nil {
-		PrintfAndExit("Config file doesn't exist. Error : %v", err)
+		return &TomlLoadError{
+			userMessage:  "config file doesn't exist",
+			wrappedError: err,
+		}
 	}
 
 	// Create a map to track which fields are present
 	var rawData map[string]interface{}
-	if err := toml.Unmarshal(data, &rawData); err != nil {
-		fmt.Printf("%sError decoding TOML file : %v\n", errorPrefix, err)
-		return true
+	err = toml.Unmarshal(data, &rawData)
+	if err != nil {
+		return &TomlLoadError{
+			userMessage:  "error decoding TOML file",
+			wrappedError: err,
+		}
 	}
 
 	// Replace default values with file values
-	if err := toml.Unmarshal(data, target); err != nil {
+	err = toml.Unmarshal(data, target)
+	if err != nil {
 		var decodeErr *toml.DecodeError
 		if errors.As(err, &decodeErr) {
 			row, col := decodeErr.Position()
-			fmt.Printf("%sError in field at line %d column %d: %s\n",
-				errorPrefix, row, col, decodeErr.Error())
-		} else {
-			fmt.Printf("%sError unmarshalling data: %v", errorPrefix, err)
+			return &TomlLoadError{
+				userMessage:  fmt.Sprintf("error in field at line %d column %d", row, col),
+				wrappedError: decodeErr,
+				isFatal:      true,
+			}
 		}
-		return true
+		return &TomlLoadError{
+			userMessage:  "error unmarshalling data",
+			wrappedError: err,
+			isFatal:      true,
+		}
 	}
 
 	// Check for missing fields. Explicitly set default value to false
@@ -85,95 +97,99 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 		}
 	}
 
-	// Todo: Ideally this should behave as an internal function with no side effects
-	if len(missingFields) > 0 {
-		if !fixFlag {
-			if !ignoreMissing {
-				fmt.Printf("%sMissing fields: %v\n", errorPrefix, missingFields)
-				return true
-			}
-			// Need to return false here if we want to ignore missing fields. If this is true
-			// It would cause another print message via the callee
-			return false
-		}
-		// Create a unique backup of the current config file
-		backupFile, err := os.CreateTemp(filepath.Dir(filePath), filepath.Base(filePath)+".bak-")
-		if err != nil {
-			fmt.Printf("%sFailed to create backup file. Error : %v\n", errorPrefix, err)
-			return true
-		}
-
-		backupPath := backupFile.Name()
-		needsBackupFileRemoval := true
-		defer func() {
-			backupFile.Close()
-			// Remove backup in case of unsuccessful write
-			if needsBackupFileRemoval {
-				if errRem := os.Remove(backupPath); errRem != nil {
-					fmt.Printf("%sWarning: Failed to remove backup file, backupPath : %s, err : %v\n",
-						errorPrefix, backupPath, errRem)
-				}
-			}
-		}()
-		// Copy the original file to the backup
-		origFile, err := os.Open(filePath)
-		if err != nil {
-			fmt.Printf("%sFailed to open original file for backup. Error : %v\n", errorPrefix, err)
-			return true
-		}
-		defer origFile.Close()
-
-		_, err = io.Copy(backupFile, origFile)
-		if err != nil {
-			fmt.Printf("%sFailed to copy original file to backup. Error : %v\n", errorPrefix, err)
-			return true
-		}
-		// Write the new config to a temp file
-		tmpFile, err := os.CreateTemp(filepath.Dir(filePath), filepath.Base(filePath)+".tmp-")
-		if err != nil {
-			fmt.Printf("%sFailed to create temp file for new config. Error : %v\n", errorPrefix, err)
-			return true
-		}
-		tmpPath := tmpFile.Name()
-		// Ensure cleanup via defer
-		defer func() {
-			// In usual case, the close would have already happened. Ignore the error here
-			tmpFile.Close()
-			// Cleanup file if it exists
-			if _, errRem := os.Stat(tmpPath); errRem == nil {
-				// File still exists
-				if errRem := os.Remove(tmpPath); errRem != nil {
-					fmt.Printf("%sWarning: Failed to remove temp config file(%s). Error : %v\n", errorPrefix, tmpPath, errRem)
-				}
-			}
-		}()
-		tomlData, err := toml.Marshal(target)
-		if err != nil {
-			fmt.Printf("%sFailed to marshal config to TOML. Error : %v\n", errorPrefix, err)
-			return true
-		}
-		_, err = tmpFile.Write(tomlData)
-
-		if err != nil {
-			fmt.Printf("%sFailed to write TOML data to temp file : %v\n", errorPrefix, err)
-			return true
-		}
-
-		// Even though we have a defer to close, we need to close here to make
-		// sure we give up the fd to tmp file, so that os.Rename() can work.
-		tmpFile.Close()
-		// Atomically replace the original file with the new config
-		if err := os.Rename(tmpPath, filePath); err != nil {
-			fmt.Printf("%sFailed to atomically replace config file. Error : %v\n", errorPrefix, err)
-			return true
-		}
-		// Inform user about backup location
-		fmt.Printf("%sConfig file had issues. Its fixed successfully. Original backed up to: %s\n", errorPrefix, backupPath)
-		// Do not remove backup; user may want to restore manually
-		needsBackupFileRemoval = false
+	if len(missingFields) == 0 {
+		return nil
+	}
+	if !fixFlag && ignoreMissing {
+		// nil error if we dont wanna fix, and dont wanna print
+		return nil
 	}
 
-	return false
+	resultErr := &TomlLoadError{
+		missingFields: true,
+	}
+	if !fixFlag {
+		resultErr.userMessage = fmt.Sprintf("missing fields: %v", missingFields)
+		return resultErr
+	}
+	// Create a unique backup of the current config file
+	backupFile, err := os.CreateTemp(filepath.Dir(filePath), filepath.Base(filePath)+".bak-")
+	if err != nil {
+		resultErr.UpdateMessageAndError("failed to create backup file", err)
+		return resultErr
+	}
+
+	backupPath := backupFile.Name()
+	needsBackupFileRemoval := true
+	defer func() {
+		backupFile.Close()
+		// Remove backup in case of unsuccessful write
+		if needsBackupFileRemoval {
+			if errRem := os.Remove(backupPath); errRem != nil {
+				// Modify result Error
+				resultErr.AddMessageAndError("warning: failed to remove backup file, backupPath : "+backupPath, errRem)
+			}
+		}
+	}()
+	// Copy the original file to the backup
+	origFile, err := os.Open(filePath)
+	if err != nil {
+		resultErr.UpdateMessageAndError("failed to open original file for backup", err)
+		return resultErr
+	}
+	defer origFile.Close()
+
+	_, err = io.Copy(backupFile, origFile)
+	if err != nil {
+		resultErr.UpdateMessageAndError("failed to copy original file to backup", err)
+		return resultErr
+	}
+	// Write the new config to a temp file
+	tmpFile, err := os.CreateTemp(filepath.Dir(filePath), filepath.Base(filePath)+".tmp-")
+	if err != nil {
+		resultErr.UpdateMessageAndError("failed to create temp file for new config", err)
+		return resultErr
+	}
+	tmpPath := tmpFile.Name()
+	// Ensure cleanup via defer
+	defer func() {
+		// In usual case, the close would have already happened. Ignore the error here
+		tmpFile.Close()
+		// Cleanup file if it exists
+		if _, errRem := os.Stat(tmpPath); errRem == nil {
+			// File still exists
+			if errRem := os.Remove(tmpPath); errRem != nil {
+				resultErr.AddMessageAndError(
+					fmt.Sprintf("warning: failed to remove temp config file(%s)", tmpPath), errRem)
+			}
+		}
+	}()
+	tomlData, err := toml.Marshal(target)
+	if err != nil {
+		resultErr.UpdateMessageAndError("failed to marshal config to TOML", err)
+		return resultErr
+	}
+	_, err = tmpFile.Write(tomlData)
+
+	if err != nil {
+		resultErr.UpdateMessageAndError("failed to write TOML data to temp file", err)
+		return resultErr
+	}
+
+	// Even though we have a defer to close, we need to close here to make
+	// sure we give up the fd to tmp file, so that os.Rename() can work.
+	tmpFile.Close()
+	// Atomically replace the original file with the new config
+	if err := os.Rename(tmpPath, filePath); err != nil {
+		resultErr.UpdateMessageAndError("failed to atomically replace config file", err)
+		return resultErr
+	}
+	// Inform user about backup location
+	resultErr.userMessage = "config file had issues. Its fixed successfully. Original backed up to : " + backupPath
+	// Do not remove backup; user may want to restore manually
+	needsBackupFileRemoval = false
+
+	return resultErr
 }
 
 // If path is not absolute, then append to currentDir and get absolute path
