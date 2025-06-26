@@ -142,16 +142,22 @@ func TestLoadTomlFile(t *testing.T) {
 			}
 		})
 	}
+}
 
-	defaultDataBytes2, err := os.ReadFile(filepath.Join(testdataDir, "default2.toml"))
+func TestLoadTomlFileIgnorer(t *testing.T) {
+	_, curFilename, _, ok := runtime.Caller(0)
+	require.True(t, ok)
+	testdataDir := filepath.Join(filepath.Dir(curFilename), "testdata", "load_toml", "ignorer")
+
+	defaultDataBytes, err := os.ReadFile(filepath.Join(testdataDir, "default.toml"))
 	require.NoError(t, err)
 
-	defaultData2 := string(defaultDataBytes)
-	var defaultTomlVal2 TestTOMLMissingIgnorerType
-	err = toml.Unmarshal(defaultDataBytes2, &defaultTomlVal2)
+	defaultData := string(defaultDataBytes)
+	var defaultTomlVal TestTOMLMissingIgnorerType
+	err = toml.Unmarshal(defaultDataBytes, &defaultTomlVal)
 	require.NoError(t, err)
 	// This is for Ignorer Type
-	testdata2 := []struct {
+	testdata := []struct {
 		name string
 		// Relative to corr
 		configName string
@@ -167,15 +173,15 @@ func TestLoadTomlFile(t *testing.T) {
 	}{
 		{
 			name:            "Config2 Load Default",
-			configName:      "default2.toml",
+			configName:      "default.toml",
 			fixFlag:         false,
 			noError:         true,
 			checkTomlVal:    true,
-			expectedTomlVal: defaultTomlVal2,
+			expectedTomlVal: defaultTomlVal,
 		},
 		{
 			name:       "Config2 Missing fields Not Ignored",
-			configName: "missing_str_int2.toml",
+			configName: "missing_str_int.toml",
 			fixFlag:    false,
 			noError:    false,
 			expectedError: &TomlLoadError{
@@ -185,15 +191,15 @@ func TestLoadTomlFile(t *testing.T) {
 				missingFields: true,
 			},
 			checkTomlVal:    true,
-			expectedTomlVal: defaultTomlVal2,
+			expectedTomlVal: defaultTomlVal,
 		},
 		{
 			name:            "Config2 Missing fields Ignored",
-			configName:      "missing_str2_ignore.toml",
+			configName:      "missing_str_ignore.toml",
 			fixFlag:         false,
 			noError:         true,
 			checkTomlVal:    true,
-			expectedTomlVal: defaultTomlVal2.WithIgnoreMissing(true),
+			expectedTomlVal: defaultTomlVal.WithIgnoreMissing(true),
 		},
 		{
 			name:       "Config2 Non Existent config",
@@ -206,12 +212,36 @@ func TestLoadTomlFile(t *testing.T) {
 			verifyWrappedErr: false,
 			checkTomlVal:     false,
 		},
+		{
+			name:       "Config2 Invalid format",
+			configName: "invalid_format.toml",
+			fixFlag:    false,
+			noError:    false,
+			expectedError: &TomlLoadError{
+				userMessage: "error decoding TOML file",
+				isFatal:     true,
+			},
+			verifyWrappedErr: false,
+			checkTomlVal:     false,
+		},
+		{
+			name:       "Config2 Invalid Value Type",
+			configName: "invalid_value_type.toml",
+			fixFlag:    false,
+			noError:    false,
+			expectedError: &TomlLoadError{
+				userMessage: "error in field at line 2 column 14",
+				isFatal:     true,
+			},
+			verifyWrappedErr: false,
+			checkTomlVal:     false,
+		},
 	}
 
-	for _, tt := range testdata2 {
+	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
 			var tomlVal TestTOMLMissingIgnorerType
-			err := LoadTomlFile(filepath.Join(testdataDir, tt.configName), defaultData2, &tomlVal, tt.fixFlag)
+			err := LoadTomlFile(filepath.Join(testdataDir, tt.configName), defaultData, &tomlVal, tt.fixFlag)
 			if tt.noError {
 				require.NoError(t, err)
 			} else {
@@ -231,4 +261,6 @@ func TestLoadTomlFile(t *testing.T) {
 			}
 		})
 	}
+
+	// Tests for fixing config file
 }

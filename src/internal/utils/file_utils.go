@@ -50,6 +50,7 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 		return &TomlLoadError{
 			userMessage:  "error decoding TOML file",
 			wrappedError: err,
+			isFatal:      true,
 		}
 	}
 
