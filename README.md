@@ -1,9 +1,9 @@
 <div align="center">
 
 <p>
-  <H4>
+  <h4>
     <a href="https://ko-fi.com/yorukot">superfile is supported by the community.</a>
-  </H3>
+  </h4>
 <div align="center" markdown="1">
    <sup>Special thanks to:</sup>
    <br>
