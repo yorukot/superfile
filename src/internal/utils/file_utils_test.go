@@ -180,6 +180,14 @@ func TestLoadTomlFileIgnorer(t *testing.T) {
 			expectedTomlVal: defaultTomlVal,
 		},
 		{
+			name:            "Config2 Extra Fields ignored",
+			configName:      "default_extra_fields.toml",
+			fixFlag:         false,
+			noError:         true,
+			checkTomlVal:    true,
+			expectedTomlVal: defaultTomlVal,
+		},
+		{
 			name:       "Config2 Missing fields Not Ignored",
 			configName: "missing_str_int.toml",
 			fixFlag:    false,
@@ -263,4 +271,44 @@ func TestLoadTomlFileIgnorer(t *testing.T) {
 	}
 
 	// Tests for fixing config file
+
+	t.Run("Config2 Fixing config file", func(t *testing.T) {
+		// To make sure that other values are kept.
+		expectedVal1 := defaultTomlVal
+		expectedVal2 := defaultTomlVal
+		expectedVal1.SampleInt = -1
+		expectedVal2.SampleInt = -1
+		expectedVal2.IgnoreMissing = true
+
+		actualTest := func(fileName string, expectedVal TestTOMLMissingIgnorerType) {
+			var tomlVal TestTOMLMissingIgnorerType
+			orgFile := filepath.Join(testdataDir, fileName)
+			orgContent, err := os.ReadFile(orgFile)
+			require.NoError(t, err)
+
+			err = LoadTomlFile(orgFile, defaultData, &tomlVal, true)
+			var tomlErr *TomlLoadError
+			require.ErrorAs(t, err, &tomlErr)
+
+			assert.True(t, tomlErr.missingFields)
+			assert.Equal(t, expectedVal, tomlVal)
+
+			pref := "config file had issues. Its fixed successfully. Original backed up to : "
+
+			assert.True(t, strings.HasPrefix(tomlErr.userMessage, pref))
+
+			backupFile := strings.TrimPrefix(tomlErr.userMessage, pref)
+
+			assert.FileExists(t, backupFile)
+			backupContent, err := os.ReadFile(backupFile)
+			require.NoError(t, err)
+
+			assert.Equal(t, orgContent, backupContent)
+
+			err = os.WriteFile(orgFile, backupContent, 0644)
+			require.NoError(t, err)
+		}
+		actualTest("missing_str2.toml", expectedVal1)
+		actualTest("missing_str_ignore2.toml", expectedVal2)
+	})
 }
