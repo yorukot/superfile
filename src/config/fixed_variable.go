@@ -4,7 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	"github.com/yorukot/superfile/src/internal/utils"
 
 	"github.com/adrg/xdg"
@@ -78,7 +78,7 @@ func SetChooserFile(path string) {
 	ChooserFile = path
 }
 
-func UpdateVarFromCliArgs(c *cli.Context) {
+func UpdateVarFromCliArgs(c *cli.Command) {
 	// Setting the config file path
 	configFileArg := c.String("config-file")
 

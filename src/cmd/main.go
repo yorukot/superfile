@@ -17,7 +17,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	variable "github.com/yorukot/superfile/src/config"
 	internal "github.com/yorukot/superfile/src/internal"
 	"golang.org/x/mod/semver"
@@ -25,13 +25,16 @@ import (
 
 // Run superfile app
 func Run(content embed.FS) {
+	// Enable custom colored help output
+	cli.HelpPrinter = CustomHelpPrinter //nolint:reassign // Intentionally reassigning cli.HelpPrinter to customize help output
+
 	// Before we open log file, set all "non debug" logs to stdout
 	utils.SetRootLoggerToStdout(false)
 
 	common.LoadInitialPrerenderedVariables()
 	common.LoadAllDefaultConfig(content)
 
-	app := &cli.App{
+	app := &cli.Command{
 		Name:        "superfile",
 		Version:     variable.CurrentVersion,
 		Description: "Pretty fancy and modern terminal file manager ",
@@ -41,7 +44,7 @@ func Run(content embed.FS) {
 				Name:    "path-list",
 				Aliases: []string{"pl"},
 				Usage:   "Print the path to the configuration and directory",
-				Action: func(c *cli.Context) error {
+				Action: func(_ context.Context, c *cli.Command) error {
 					if c.Bool("lastdir-file") {
 						fmt.Println(variable.LastDirFile)
 						return nil
@@ -101,7 +104,7 @@ func Run(content embed.FS) {
 				Value:   "", // Default to the blank string indicating non-usage of flag
 			},
 		},
-		Action: func(c *cli.Context) error {
+		Action: func(_ context.Context, c *cli.Command) error {
 			// If no args are called along with "spf" use current dir
 			firstFilePanelDirs := []string{""}
 			if c.Args().Present() {
@@ -138,7 +141,7 @@ func Run(content embed.FS) {
 		},
 	}
 
-	err := app.Run(os.Args)
+	err := app.Run(context.Background(), os.Args)
 	if err != nil {
 		utils.PrintlnAndExit(err)
 	}
