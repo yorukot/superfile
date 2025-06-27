@@ -41,6 +41,7 @@ func (m *model) parentDirectory() {
 		panel.cursor = 0
 		panel.render = 0
 	}
+	panel.searchBar.SetValue("")
 }
 
 // Enter directory or open file with default application
