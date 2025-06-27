@@ -1,4 +1,5 @@
 //go:build !windows
+
 // Sys do not support terminal detection on windows
 
 package filepreview
@@ -12,7 +13,7 @@ import (
 	"sync"
 	"time"
 
-	"golang.org/x/sys/unix"
+	"golang.org/x/term"
 )
 
 // Terminal cell to pixel conversion constants
@@ -77,7 +78,7 @@ func DetectTerminalCellSize() TerminalCellSize {
 	fd := int(os.Stdin.Fd())
 
 	// Check if we're in a terminal
-	if !isTerminal(fd) {
+	if !term.IsTerminal(fd) {
 		slog.Warn("Stdin is not a terminal; using default cell size")
 		return getDefaultCellSize()
 	}
@@ -135,12 +136,6 @@ func DetectTerminalCellSize() TerminalCellSize {
 
 	slog.Warn("Failed to parse terminal response, using defaults")
 	return getDefaultCellSize()
-}
-
-// isTerminal checks whether a file descriptor refers to a terminal
-func isTerminal(fd int) bool {
-	_, err := unix.IoctlGetTermios(fd, unix.TIOCGETA)
-	return err == nil
 }
 
 // getDefaultCellSize returns default fallback terminal cell size

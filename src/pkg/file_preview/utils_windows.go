@@ -1,4 +1,5 @@
 //go:build windows
+
 // Sys do not support terminal detection on windows
 
 package filepreview
