@@ -20,13 +20,29 @@ import (
 // Load configurations from the configuration file. Compares the content
 // with the default values and modify the config file to include default configs
 // if the FixConfigFile flag is on
+// TODO : Fix the code duplication with LoadHotkeysFile().
 func LoadConfigFile() {
-	hasError := utils.LoadTomlFile(variable.ConfigFile, ConfigTomlString, &Config, variable.FixConfigFile, LipglossError)
-	if hasError {
-		fmt.Println("To add missing fields to configuration file automatically run superfile with the --fix-config-file flag `spf --fix-config-file`")
-	}
-	// Even if there is a missing field, we want to validate fields that are present
+	err := utils.LoadTomlFile(variable.ConfigFile, ConfigTomlString, &Config, variable.FixConfigFile)
+	if err != nil {
+		userMsg := fmt.Sprintf("%s%s", LipglossError, err.Error())
 
+		toExit := true
+		var loadError *utils.TomlLoadError
+		if errors.As(err, &loadError) && loadError != nil {
+			if loadError.MissingFields() && !variable.FixConfigFile {
+				// Had missing fields and we did not fix
+				userMsg += "\nTo add missing fields to configuration file automatically run superfile with the --fix-config-file flag `spf --fix-config-file`"
+			}
+			toExit = loadError.IsFatal()
+		}
+		if toExit {
+			utils.PrintfAndExit("%s\n", userMsg)
+		} else {
+			fmt.Println(userMsg)
+		}
+	}
+
+	// Even if there is a missing field, we want to validate fields that are present
 	if err := ValidateConfig(&Config); err != nil {
 		// If config is incorrect we cannot continue. We need to exit
 		utils.PrintlnAndExit(err.Error())
@@ -83,10 +99,25 @@ func ValidateConfig(c *ConfigType) error {
 // Load keybinds from the hotkeys file. Compares the content
 // with the default values and modify the hotkeys if the FixHotkeys flag is on.
 func LoadHotkeysFile() {
-	hasError := utils.LoadTomlFile(variable.HotkeysFile, HotkeysTomlString, &Hotkeys, variable.FixHotkeys, LipglossError)
-	if hasError {
-		fmt.Println("To add missing fields to hotkeys file automatically run superfile with the --fix-hotkeys flag `spf --fix-hotkeys`")
-		return
+	err := utils.LoadTomlFile(variable.HotkeysFile, HotkeysTomlString, &Hotkeys, variable.FixHotkeys)
+
+	if err != nil {
+		userMsg := fmt.Sprintf("%s%s", LipglossError, err.Error())
+
+		toExit := true
+		var loadError *utils.TomlLoadError
+		if errors.As(err, &loadError) {
+			if loadError.MissingFields() && !variable.FixHotkeys {
+				// Had missing fields and we did not fix
+				userMsg += "\nTo add missing fields to hotkeys file automatically run superfile with the --fix-hotkeys flag `spf --fix-hotkeys`"
+			}
+			toExit = loadError.IsFatal()
+		}
+		if toExit {
+			utils.PrintfAndExit("%s\n", userMsg)
+		} else {
+			fmt.Println(userMsg)
+		}
 	}
 
 	// Validate hotkey values

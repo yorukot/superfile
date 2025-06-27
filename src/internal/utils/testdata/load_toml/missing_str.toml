@@ -1,0 +1,3 @@
+sample_bool = true 
+sample_int = 2
+sample_slice = ['a', 'b']
