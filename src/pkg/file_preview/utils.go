@@ -1,3 +1,6 @@
+//go:build !windows
+// Sys do not support terminal detection on windows
+
 package filepreview
 
 import (
@@ -8,6 +11,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"golang.org/x/sys/unix"
 )
 
 // Terminal cell to pixel conversion constants
@@ -68,28 +73,37 @@ func (tc *TerminalCapabilities) GetTerminalCellSize() TerminalCellSize {
 	return tc.cellSize
 }
 
-// DetectTerminalCellSize attempts to detect the actual pixel dimensions of terminal cells
-// using CSI 16t escape sequence. Falls back to defaults if detection fails.
 func DetectTerminalCellSize() TerminalCellSize {
-	// Save current terminal state
+	fd := int(os.Stdin.Fd())
+
+	// Check if we're in a terminal
+	if !isTerminal(fd) {
+		slog.Warn("Stdin is not a terminal; using default cell size")
+		return getDefaultCellSize()
+	}
+
+	// Save cursor position
 	if _, err := os.Stdout.WriteString("\x1b[s"); err != nil {
 		slog.Error("Error saving terminal state", "error", err)
-	} // Save cursor position
+		return getDefaultCellSize()
+	}
+	defer func() {
+		if _, err := os.Stdout.WriteString("\x1b[u"); err != nil {
+			slog.Error("Error restoring terminal state", "error", err)
+		}
+	}()
 
-	// Request cell size information
+	// Send CSI 16t query to request terminal pixel cell size
 	if _, err := os.Stdout.WriteString("\x1b[16t"); err != nil {
 		slog.Error("Error requesting terminal cell size", "error", err)
-	}
-	if err := os.Stdout.Sync(); err != nil {
-		slog.Error("Error syncing terminal state", "error", err)
+		return getDefaultCellSize()
 	}
 
-	// Read response with timeout
-	var response string
+	// Read response with timeout (blocking read in goroutine, limited by select)
 	responseChan := make(chan string, 1)
 
 	go func() {
-		buf := make([]byte, 32)
+		buf := make([]byte, 64)
 		n, err := os.Stdin.Read(buf)
 		if err != nil {
 			slog.Error("Error reading terminal response", "error", err)
@@ -99,27 +113,16 @@ func DetectTerminalCellSize() TerminalCellSize {
 		responseChan <- string(buf[:n])
 	}()
 
+	var response string
+
 	select {
 	case response = <-responseChan:
 		slog.Debug("Received terminal response", "raw_response", fmt.Sprintf("%q", response))
 	case <-time.After(100 * time.Millisecond):
-		// Timeout occurred, use default values
-		slog.Debug("Terminal response timeout, using default values")
-		if _, err := os.Stdout.WriteString("\x1b[u"); err != nil {
-			slog.Error("Error restoring terminal state", "error", err)
-		} // Restore cursor position
-		return TerminalCellSize{
-			PixelsPerColumn: DefaultPixelsPerColumn,
-			PixelsPerRow:    DefaultPixelsPerRow,
-		}
+		slog.Warn("Timeout waiting for terminal response")
+		return getDefaultCellSize()
 	}
 
-	// Restore cursor position
-	if _, err := os.Stdout.WriteString("\x1b[u"); err != nil {
-		slog.Error("Error restoring terminal state", "error", err)
-	}
-
-	// Parse the response which should be in format: ESC[6;height;widtht
 	if width, height, ok := parseCSI16tResponse(response); ok {
 		slog.Debug("Successfully parsed terminal cell size",
 			"width", width,
@@ -130,8 +133,18 @@ func DetectTerminalCellSize() TerminalCellSize {
 		}
 	}
 
-	// Fall back to defaults if parsing fails
-	slog.Debug("Failed to parse terminal response, using default values")
+	slog.Warn("Failed to parse terminal response, using defaults")
+	return getDefaultCellSize()
+}
+
+// isTerminal checks whether a file descriptor refers to a terminal
+func isTerminal(fd int) bool {
+	_, err := unix.IoctlGetTermios(fd, unix.TIOCGETA)
+	return err == nil
+}
+
+// getDefaultCellSize returns default fallback terminal cell size
+func getDefaultCellSize() TerminalCellSize {
 	return TerminalCellSize{
 		PixelsPerColumn: DefaultPixelsPerColumn,
 		PixelsPerRow:    DefaultPixelsPerRow,
