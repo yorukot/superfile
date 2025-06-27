@@ -15,10 +15,11 @@ import (
 // Change file panel mode (select mode or browser mode)
 func (m *model) changeFilePanelMode() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-	if panel.panelMode == selectMode {
+	switch panel.panelMode {
+	case selectMode:
 		panel.selected = panel.selected[:0]
 		panel.panelMode = browserMode
-	} else if panel.panelMode == browserMode {
+	case browserMode:
 		panel.panelMode = selectMode
 	}
 }
@@ -101,9 +102,10 @@ func (m *model) enterPanel() {
 		}
 
 		openCommand := "xdg-open"
-		if runtime.GOOS == utils.OsDarwin {
+		switch runtime.GOOS {
+		case utils.OsDarwin:
 			openCommand = "open"
-		} else if runtime.GOOS == utils.OsWindows {
+		case utils.OsWindows:
 			dllpath := filepath.Join(os.Getenv("SYSTEMROOT"), "System32", "rundll32.exe")
 			dllfile := "url.dll,FileProtocolHandler"
 
