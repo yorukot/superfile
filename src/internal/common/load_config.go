@@ -20,6 +20,7 @@ import (
 // Load configurations from the configuration file. Compares the content
 // with the default values and modify the config file to include default configs
 // if the FixConfigFile flag is on
+// TODO : Fix the code duplication with LoadHotkeysFile().
 func LoadConfigFile() {
 	err := utils.LoadTomlFile(variable.ConfigFile, ConfigTomlString, &Config, variable.FixConfigFile)
 	if err != nil {
@@ -106,7 +107,7 @@ func LoadHotkeysFile() {
 		toExit := true
 		var loadError *utils.TomlLoadError
 		if errors.As(err, &loadError) {
-			if loadError.MissingFields() {
+			if loadError.MissingFields() && !variable.FixHotkeys {
 				// Had missing fields and we did not fix
 				userMsg += "\nTo add missing fields to hotkeys file automatically run superfile with the --fix-hotkeys flag `spf --fix-hotkeys`"
 			}

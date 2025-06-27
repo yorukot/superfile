@@ -113,6 +113,9 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 		resultErr.userMessage = fmt.Sprintf("missing fields: %v", missingFields)
 		return resultErr
 	}
+
+	// Start fixing
+	resultErr.isFatal = true
 	// Create a unique backup of the current config file
 	backupFile, err := os.CreateTemp(filepath.Dir(filePath), filepath.Base(filePath)+".bak-")
 	if err != nil {
@@ -157,12 +160,9 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 		// In usual case, the close would have already happened. Ignore the error here
 		tmpFile.Close()
 		// Cleanup file if it exists
-		if _, errRem := os.Stat(tmpPath); errRem == nil {
-			// File still exists
-			if errRem := os.Remove(tmpPath); errRem != nil {
-				resultErr.AddMessageAndError(
-					fmt.Sprintf("warning: failed to remove temp config file(%s)", tmpPath), errRem)
-			}
+		if errRem := os.Remove(tmpPath); errRem != nil && !os.IsNotExist(errRem) {
+			resultErr.AddMessageAndError(
+				fmt.Sprintf("warning: failed to remove temp config file(%s)", tmpPath), errRem)
 		}
 	}()
 	tomlData, err := toml.Marshal(target)
@@ -185,8 +185,10 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 		resultErr.UpdateMessageAndError("failed to atomically replace config file", err)
 		return resultErr
 	}
+	// Fix done
 	// Inform user about backup location
 	resultErr.userMessage = "config file had issues. Its fixed successfully. Original backed up to : " + backupPath
+	resultErr.isFatal = false
 	// Do not remove backup; user may want to restore manually
 	needsBackupFileRemoval = false
 
