@@ -2,12 +2,16 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import { pluginLineNumbers } from '@expressive-code/plugin-line-numbers';
 import starlightGiscus from 'starlight-giscus';
+import sitemap from '@astrojs/sitemap';
+
 
 const site = 'https://superfile.netlify.app/';
 
 // https://astro.build/config
 export default defineConfig({
+  site: site,
   integrations: [
+    sitemap(),
     starlight({
       title: 'superfile',
       description: `superfile is a very fancy and modern terminal file manager that can complete the file operations you need!`,
@@ -32,7 +36,7 @@ export default defineConfig({
           strict: false,
           reactionsEnabled: true,
           emitMetadata: false,
-          inputPosition: 'bottom',
+          inputPosition: 'top',
           theme: 'preferred_color_scheme',
           lang: 'en',
           loading: 'lazy',
