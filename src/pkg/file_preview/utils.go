@@ -15,11 +15,6 @@ const (
 	DefaultPixelsPerRow    = 20 // approximate pixels per terminal row
 )
 
-// Global mutex to protect terminal detection
-var (
-	detectionMutex sync.Mutex
-)
-
 // TerminalCellSize represents the pixel dimensions of terminal cells
 type TerminalCellSize struct {
 	PixelsPerColumn int
@@ -28,8 +23,9 @@ type TerminalCellSize struct {
 
 // TerminalCapabilities encapsulates terminal capability detection
 type TerminalCapabilities struct {
-	cellSize     TerminalCellSize
-	cellSizeInit sync.Once
+	cellSize       TerminalCellSize
+	cellSizeInit   sync.Once
+	detectionMutex sync.Mutex
 }
 
 // NewTerminalCapabilities creates a new TerminalCapabilities instance
@@ -50,7 +46,7 @@ func (tc *TerminalCapabilities) InitTerminalCapabilities() {
 	go func() {
 		// Initialize cell size detection
 		tc.cellSizeInit.Do(func() {
-			tc.cellSize = DetectTerminalCellSize()
+			tc.cellSize = tc.detectTerminalCellSize()
 			slog.Info("Terminal cell size detection",
 				"pixels_per_column", tc.cellSize.PixelsPerColumn,
 				"pixels_per_row", tc.cellSize.PixelsPerRow)
@@ -62,7 +58,7 @@ func (tc *TerminalCapabilities) InitTerminalCapabilities() {
 // If detection hasn't been initialized, it performs detection first
 func (tc *TerminalCapabilities) GetTerminalCellSize() TerminalCellSize {
 	tc.cellSizeInit.Do(func() {
-		tc.cellSize = DetectTerminalCellSize()
+		tc.cellSize = tc.detectTerminalCellSize()
 		slog.Info("Terminal cell size detection (lazy init)",
 			"pixels_per_column", tc.cellSize.PixelsPerColumn,
 			"pixels_per_row", tc.cellSize.PixelsPerRow)
@@ -79,11 +75,11 @@ type winsize struct {
 	Ypixel uint16
 }
 
-// DetectTerminalCellSize detects the terminal cell size using ioctl system calls
+// detectTerminalCellSize detects the terminal cell size using ioctl system calls
 // This method is non-blocking and doesn't interfere with stdin
-func DetectTerminalCellSize() TerminalCellSize {
-	detectionMutex.Lock()
-	defer detectionMutex.Unlock()
+func (tc *TerminalCapabilities) detectTerminalCellSize() TerminalCellSize {
+	tc.detectionMutex.Lock()
+	defer tc.detectionMutex.Unlock()
 
 	// Try platform-specific detection
 	if runtime.GOOS == "windows" {

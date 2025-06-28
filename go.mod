@@ -21,7 +21,6 @@ require (
 	github.com/urfave/cli/v2 v2.27.6
 	golang.org/x/image v0.27.0
 	golang.org/x/mod v0.24.0
-	golang.org/x/term v0.18.0
 	golift.io/xtractr v0.2.2
 )
 
@@ -29,6 +28,7 @@ require (
 	github.com/charmbracelet/x/term v0.2.1 // indirect
 	github.com/ebitengine/purego v0.8.3 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
+	golang.org/x/term v0.18.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
