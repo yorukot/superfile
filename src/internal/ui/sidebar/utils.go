@@ -73,7 +73,7 @@ func (s *Model) pinnedIndexRange() (int, int) {
 	// Can't use getPinnedDirectories() here, as if we are in search mode, we would be showing
 	// and having less directories in sideBar.directories slice
 
-	// Todo : This is inefficient to iterate each time for this.
+	// TODO : This is inefficient to iterate each time for this.
 	// This information can be kept precomputed
 	pinnedDividerIdx := -1
 	diskDividerIdx := -1

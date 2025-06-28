@@ -25,7 +25,7 @@ import (
 )
 
 // Check if the directory is external disk path
-// Todo : This function should be give two directories, and it should return
+// TODO : This function should be give two directories, and it should return
 // if the two share a different disk partition.
 // Ideally we shouldn't even try to figure that out in our file operations, and let OS handles it.
 // But at least right now its not okay. This returns if `path` is an External disk
@@ -58,7 +58,7 @@ func returnFocusType(focusPanel focusPanelType) filePanelFocusType {
 	return secondFocus
 }
 
-// Todo : Take common.Config.CaseSensitiveSort as a function parameter
+// TODO : Take common.Config.CaseSensitiveSort as a function parameter
 // and also consider testing this caseSensitive with both true and false in
 // our unit_test TestReturnDirElement
 func returnDirElement(location string, displayDotFile bool, sortOptions sortOptionsModelData) []element {
@@ -83,7 +83,7 @@ func returnDirElement(location string, displayDotFile bool, sortOptions sortOpti
 	var order func(i, j int) bool
 	reversed := sortOptions.reversed
 
-	// Todo : These strings should not be hardcoded here, but defined as constants
+	// TODO : These strings should not be hardcoded here, but defined as constants
 	switch sortOptions.options[sortOptions.selected] {
 	case "Name":
 		order = func(i, j int) bool {
@@ -223,7 +223,7 @@ func panelElementHeight(mainPanelHeight int) int {
 	return mainPanelHeight - 3
 }
 
-// Todo : replace usage of this with slices.contains
+// TODO : replace usage of this with slices.contains
 func arrayContains(s []string, str string) bool {
 	for _, v := range s {
 		if v == str {
@@ -310,7 +310,7 @@ func renameIfDuplicate(destination string) (string, error) {
 	}
 }
 
-// Todo : Move this model related function to the right file. Should not be in functions file.
+// TODO : Move this model related function to the right file. Should not be in functions file.
 func (m *model) returnMetaData() {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	cursor := panel.cursor
@@ -366,7 +366,7 @@ func (m *model) returnMetaData() {
 	if fileInfo.IsDir() {
 		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"Name", fileInfo.Name()})
 		if m.focusPanel == metadataFocus {
-			// Todo : Calling dirSize() could be expensive for large directories, as it recursively
+			// TODO : Calling dirSize() could be expensive for large directories, as it recursively
 			// walks the entire tree. Consider lazy loading, caching, or an async approach to avoid UI lockups.
 			m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"Size", common.FormatFileSize(dirSize(filePath))})
 		}
@@ -423,7 +423,7 @@ func (m *model) returnMetaData() {
 	panel.element[panel.cursor].metaData = m.fileMetaData.metaData
 }
 
-// Todo : Replace all usage of "m.fileModel.filePanels[m.filePanelFocusIndex]" with this
+// TODO : Replace all usage of "m.fileModel.filePanels[m.filePanelFocusIndex]" with this
 // There are many usage
 func (m *model) getFocusedFilePanel() *filePanel {
 	return &m.fileModel.filePanels[m.filePanelFocusIndex]

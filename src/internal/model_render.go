@@ -43,7 +43,7 @@ func (m *model) filePanelRender() string {
 	f := make([]string, len(m.fileModel.filePanels))
 	for i, filePanel := range m.fileModel.filePanels {
 		// check if cursor or render out of range
-		// Todo - instead of this, have a filepanel.validateAndFix(), and log Error
+		// TODO - instead of this, have a filepanel.validateAndFix(), and log Error
 		// This should not ever happen
 		if filePanel.cursor > len(filePanel.element)-1 {
 			filePanel.cursor = 0
@@ -51,7 +51,7 @@ func (m *model) filePanelRender() string {
 		}
 		m.fileModel.filePanels[i] = filePanel
 
-		// Todo : Move this to a utility function and clarify the calculation via comments
+		// TODO : Move this to a utility function and clarify the calculation via comments
 		// Maybe even write unit tests
 		var filePanelWidth int
 		if (m.fullWidth-common.Config.SidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels) != 0 && i == len(m.fileModel.filePanels)-1 {
@@ -81,7 +81,7 @@ func (panel *filePanel) Render(mainPanelHeight int, filePanelWidth int, focussed
 }
 
 func (panel *filePanel) renderTopBar(r *rendering.Renderer, filePanelWidth int) {
-	// Todo - Add ansitruncate left in renderer and remove truncation here
+	// TODO - Add ansitruncate left in renderer and remove truncation here
 	truncatedPath := common.TruncateTextBeginning(panel.location, filePanelWidth-4, "...")
 	r.AddLines(common.FilePanelTopDirectoryIcon + common.FilePanelTopPathStyle.Render(truncatedPath))
 	r.AddSection()
@@ -91,7 +91,7 @@ func (panel *filePanel) renderSearchBar(r *rendering.Renderer) {
 	r.AddLines(" " + panel.searchBar.View())
 }
 
-// Todo : Unit test this
+// TODO : Unit test this
 func (panel *filePanel) renderFooter(r *rendering.Renderer) {
 	sortLabel, sortIcon := panel.getSortInfo()
 	modeLabel, modeIcon := panel.getPanelModeInfo()
@@ -101,7 +101,7 @@ func (panel *filePanel) renderFooter(r *rendering.Renderer) {
 		sortLabel = sortIcon + icon.Space + sortLabel
 		modeLabel = modeIcon + icon.Space + modeLabel
 	} else {
-		// Todo : Figure out if we can set icon.Space to " " if nerdfont is false
+		// TODO : Figure out if we can set icon.Space to " " if nerdfont is false
 		// That would simplify code
 		sortLabel = sortIcon + " " + sortLabel
 	}
@@ -125,7 +125,7 @@ func (panel *filePanel) renderFileEntries(r *rendering.Renderer, mainPanelHeight
 	end := min(panel.render+panelElementHeight(mainPanelHeight), len(panel.element))
 
 	for i := panel.render; i < end; i++ {
-		// Todo : Fix this, this is O(n^2) complexity. Considered a file panel with 200 files, and 100 selected
+		// TODO : Fix this, this is O(n^2) complexity. Considered a file panel with 200 files, and 100 selected
 		// We will be doing a search in 100 item slice for all 200 files.
 		isSelected := arrayContains(panel.selected, panel.element[i].location)
 
@@ -156,7 +156,7 @@ func (panel *filePanel) renderFileEntries(r *rendering.Renderer, mainPanelHeight
 	}
 }
 
-// Todo : Make these strings : "Date Modified", "Date", "Browser", "Select" a constant
+// TODO : Make these strings : "Date Modified", "Date", "Browser", "Select" a constant
 func (panel *filePanel) getSortInfo() (string, string) {
 	opts := panel.sortOptions.data
 	selected := opts.options[opts.selected]
@@ -202,7 +202,7 @@ func (m *model) processBarRender() string {
 
 	// cursor's value itself cannot be used as its zero indexed
 	cursorNumber := 0
-	// Todo : Instead of directly accessing slice, there should be a method .IsEmpty() , or .CntProcess()
+	// TODO : Instead of directly accessing slice, there should be a method .IsEmpty() , or .CntProcess()
 	if len(m.processBarModel.processList) != 0 {
 		cursorNumber = m.processBarModel.cursor + 1
 	}
@@ -215,7 +215,7 @@ func (m *model) processBarRender() string {
 
 	// save process in the array and sort the process by finished or not,
 	// completion percetage, or finish time
-	// Todo : This is very inefficient and can be improved.
+	// TODO : This is very inefficient and can be improved.
 	// The whole design needs to be changed so that we dont need to recreate the slice
 	// and sort on each render. Idea : Maintain two slices - completed, ongoing
 	// Processes should be added / removed to the slice on correct time, and we dont
@@ -257,16 +257,16 @@ func (m *model) processBarRender() string {
 		curProcess := processes[i]
 		curProcess.progress.Width = utils.FooterWidth(m.fullWidth) - 3
 
-		// Todo : get them via a separate function.
+		// TODO : get them via a separate function.
 		var symbol string
 		var cursor string
 		if i == m.processBarModel.cursor {
-			// Todo : Prerender it.
+			// TODO : Prerender it.
 			cursor = common.FooterCursorStyle.Render("┃ ")
 		} else {
 			cursor = common.FooterCursorStyle.Render("  ")
 		}
-		// Todo : Prerender
+		// TODO : Prerender
 		switch curProcess.state {
 		case failure:
 			symbol = common.ProcessErrorStyle.Render(icon.Warn)
@@ -299,7 +299,7 @@ func (m *model) processBarRender() string {
 func (m *model) metadataRender() string {
 	m.ensureMetadataLoaded()
 
-	// Todo : This is bad, this is bad mixing rendering of content and loading of content.
+	// TODO : This is bad, this is bad mixing rendering of content and loading of content.
 	// The metadata should be filled in slice correctly at the time its loaded, not when we
 	// are rendering it.
 	sortMetadata(m.fileMetaData.metaData)
@@ -325,7 +325,7 @@ func (m *model) ensureMetadataLoaded() {
 			{"", ""},
 			{" " + icon.InOperation + "  Loading metadata...", ""},
 		}
-		// Todo : This needs to be improved, we are updating m.fileMetaData is a separate goroutine
+		// TODO : This needs to be improved, we are updating m.fileMetaData is a separate goroutine
 		// while also modifying it here in the function. It could cause issues.
 		go func() {
 			m.returnMetaData()
@@ -333,7 +333,7 @@ func (m *model) ensureMetadataLoaded() {
 	}
 }
 
-// Todo : Move this and many other utility function to separate files
+// TODO : Move this and many other utility function to separate files
 // and unit test them too.
 func sortMetadata(meta [][2]string) {
 	priority := map[string]int{
@@ -390,7 +390,7 @@ func computeMetadataWidths(fullWidth, maxKeyLen int) (int, int) {
 	return sprintfLen, valueLen
 }
 
-// Todo : Simplify these mystic calculations, or add explanation comments.
+// TODO : Simplify these mystic calculations, or add explanation comments.
 func formatMetadataLines(meta [][2]string, startIdx, height, sprintfLen, valueLen int) []string {
 	lines := []string{}
 	endIdx := min(startIdx+height, len(meta))
@@ -416,7 +416,7 @@ func (m *model) clipboardRender() string {
 	}
 	r := ui.ClipboardRenderer(m.footerHeight+2, bottomWidth+2)
 	if len(m.copyItems.items) == 0 {
-		// Todo move this to a string
+		// TODO move this to a string
 		r.AddLines("", " "+icon.Error+"  No content in clipboard")
 	} else {
 		for i := 0; i < len(m.copyItems.items) && i < m.footerHeight; i++ {
@@ -429,7 +429,7 @@ func (m *model) clipboardRender() string {
 					slog.Error("Clipboard render function get item state ", "error", err)
 				}
 				if !os.IsNotExist(err) {
-					// Todo : There is an inconsistency in parameter that is being passed, and its name in ClipboardPrettierName function
+					// TODO : There is an inconsistency in parameter that is being passed, and its name in ClipboardPrettierName function
 					r.AddLines(common.ClipboardPrettierName(m.copyItems.items[i], utils.FooterWidth(m.fullWidth)-3, fileInfo.IsDir(), false))
 				}
 			}
@@ -503,7 +503,7 @@ func (m *model) typineModalRender() string {
 	if m.typingModal.errorMesssage != "" {
 		err = "\n\n" + common.ModalErrorStyle.Render(m.typingModal.errorMesssage)
 	}
-	// Todo : Move this all to rendering package to avoid specifying newlines manually
+	// TODO : Move this all to rendering package to avoid specifying newlines manually
 	return common.ModalBorderStyle(common.ModalHeight, common.ModalWidth).Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip + err)
 }
 
@@ -663,7 +663,7 @@ func readFileContent(filepath string, maxLineLength int, previewLine int) (strin
 }
 
 func (m *model) filePreviewPanelRender() string {
-	// Todo : This width adjustment must not be done inside render function. It should
+	// TODO : This width adjustment must not be done inside render function. It should
 	// only be triggered via Update()
 	m.fileModel.filePreview.width += m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.width - ((m.fileModel.width + 2) * len(m.fileModel.filePanels)) - 2
 
@@ -811,7 +811,7 @@ func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewW
 	// We should have a panel validation function in our View() function
 	// Panel is a full fledged object with own state, its accessed and modified so many times.
 	// Ideally we dont should never access data from it via directly accessing its variables
-	// Todo : Instead we should have helper functions for panel object and access data that way
+	// TODO : Instead we should have helper functions for panel object and access data that way
 	// like panel.GetCurrentSelectedElem() . This abstration of implemetation of panel is needed.
 	// Now this lack of abstraction has caused issues ( See PR#730 ) . And now
 	// someone needs to scan through the entire codebase to figure out which access of panel

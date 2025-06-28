@@ -15,7 +15,7 @@ var (
 	MinimumHeight = 24
 	MinimumWidth  = 60
 
-	// Todo : These are model object properties, not global properties
+	// TODO : These are model object properties, not global properties
 	// We are modifying them in the code many time. They need to be part of model struct.
 	MinFooterHeight = 6
 	ModalWidth      = 60
@@ -53,7 +53,7 @@ func LoadInitialPrerenderedVariables() {
 		lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFEE")).Render(" ┃ ")
 }
 
-// Dependecies - Todo We should programmatically guarantee these dependencies. And log error
+// Dependecies - TODO We should programmatically guarantee these dependencies. And log error
 // if its not satisfied.
 // LoadThemeConfig() in style.go should be finished
 // loadConfigFile() in config_types.go should be finished
