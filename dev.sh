@@ -16,19 +16,19 @@ VERBOSE=false
 
 # Function to print colored output
 print_step() {
-    echo -e "${BLUE}==>${NC} $1"
+    echo "${BLUE}==>${NC} $1"
 }
 
 print_success() {
-    echo -e "${GREEN}✓${NC} $1"
+    echo "${GREEN}✓${NC} $1"
 }
 
 print_warning() {
-    echo -e "${YELLOW}⚠${NC} $1"
+    echo "${YELLOW}⚠${NC} $1"
 }
 
 print_error() {
-    echo -e "${RED}✗${NC} $1"
+    echo "${RED}✗${NC} $1"
 }
 
 # Function to show usage
@@ -85,7 +85,7 @@ if [ "$VERBOSE" = true ]; then
     VERBOSE_FLAG="-v"
 fi
 
-echo -e "${BLUE}🚀 Starting superfile development workflow${NC}"
+echo "${BLUE}🚀 Starting superfile development workflow${NC}"
 echo ""
 
 # Step 1: Tidy up the go mod
@@ -195,11 +195,11 @@ else
 fi
 
 echo ""
-echo -e "${GREEN}🎉 All steps completed successfully!${NC}"
-echo -e "${BLUE}Binary location:${NC} ./bin/spf"
+echo "${GREEN}🎉 All steps completed successfully!${NC}"
+echo "${BLUE}Binary location:${NC} ./bin/spf"
 
 # Show binary info
 if [ -f "./bin/spf" ]; then
     BINARY_SIZE=$(du -h ./bin/spf | cut -f1)
-    echo -e "${BLUE}Binary size:${NC} $BINARY_SIZE"
+    echo "${BLUE}Binary size:${NC} $BINARY_SIZE"
 fi
