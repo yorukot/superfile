@@ -14,11 +14,10 @@ import (
 // CustomHelpPrinter provides cargo-style colored help output for superfile CLI
 func CustomHelpPrinter(w io.Writer, templ string, data interface{}) {
 	// Define color styles matching superfile's aesthetic
-	titleColor := color.New(color.FgHiGreen, color.Bold)
-	flagColor := color.New(color.FgHiYellow)
-	commandColor := color.New(color.FgHiBlue)
-	descColor := color.New(color.FgWhite)
-	accentColor := color.New(color.FgHiCyan)
+	titleColor := color.New(color.FgGreen, color.Bold)
+	flagColor := color.New(color.FgCyan, color.Bold)
+	commandColor := color.New(color.FgBlue, color.Bold)
+	accentColor := color.New(color.FgCyan)
 
 	switch v := data.(type) {
 	case *cli.Command:
@@ -42,7 +41,7 @@ func CustomHelpPrinter(w io.Writer, templ string, data interface{}) {
 
 		// Print description if available
 		if v.Description != "" {
-			descColor.Fprintf(w, "%s\n\n", strings.TrimSpace(v.Description))
+			fmt.Fprintf(w, "%s\n\n", strings.TrimSpace(v.Description))
 		}
 
 		// Print commands section
@@ -56,7 +55,7 @@ func CustomHelpPrinter(w io.Writer, templ string, data interface{}) {
 				}
 
 				commandColor.Fprintf(w, "  %-20s", cmdDisplay)
-				descColor.Fprintf(w, " %s\n", cmd.Usage)
+				fmt.Fprintf(w, " %s\n", cmd.Usage)
 			}
 			fmt.Fprintln(w)
 		}
@@ -101,7 +100,7 @@ func CustomHelpPrinter(w io.Writer, templ string, data interface{}) {
 					usage = "No description available"
 				}
 
-				descColor.Fprintf(w, " %s\n", usage)
+				fmt.Fprintf(w, " %s\n", usage)
 			}
 			fmt.Fprintln(w)
 		}
@@ -112,7 +111,7 @@ func CustomHelpPrinter(w io.Writer, templ string, data interface{}) {
 		}
 
 		// Print help footer using the actual binary name
-		descColor.Fprintf(w, "Use \"%s [COMMAND] --help\" for more information about a command.\n", binaryName)
+		fmt.Fprintf(w, "Use \"%s [COMMAND] --help\" for more information about a command.\n", binaryName)
 
 	default:
 		// Fallback to default template rendering for other cases
