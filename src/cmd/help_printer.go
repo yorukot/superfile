@@ -69,6 +69,35 @@ func CustomHelpPrinter(w io.Writer, templ string, data interface{}) {
 
 				// Format flag names with proper prefixes and aliases
 				var flagParts []string
+				var valuePlaceholder string
+				var usage string
+
+				// Determine flag type, value placeholder, and usage in one switch
+				switch f := flag.(type) {
+				case *cli.BoolFlag:
+					// Boolean flags don't need values
+					valuePlaceholder = ""
+					usage = f.Usage
+				case *cli.StringFlag:
+					valuePlaceholder = " <value>"
+					usage = f.Usage
+					if f.Value != "" {
+						usage += fmt.Sprintf(" (default: %q)", f.Value)
+					}
+				case *cli.StringSliceFlag:
+					valuePlaceholder = " <value>..."
+					usage = f.Usage
+				case *cli.IntFlag:
+					valuePlaceholder = " <number>"
+					usage = f.Usage
+					if f.Value != 0 {
+						usage += fmt.Sprintf(" (default: %d)", f.Value)
+					}
+				default:
+					valuePlaceholder = " <value>"
+					usage = "No description available"
+				}
+
 				for _, name := range names {
 					if len(name) == 1 {
 						flagParts = append(flagParts, "-"+name)
@@ -76,31 +105,9 @@ func CustomHelpPrinter(w io.Writer, templ string, data interface{}) {
 						flagParts = append(flagParts, "--"+name)
 					}
 				}
-				flagStr := strings.Join(flagParts, ", ")
+				flagStr := strings.Join(flagParts, ", ") + valuePlaceholder
 
-				flagColor.Fprintf(w, "  %-24s", flagStr)
-
-				// Get usage text from different flag types
-				var usage string
-				switch f := flag.(type) {
-				case *cli.BoolFlag:
-					usage = f.Usage
-				case *cli.StringFlag:
-					usage = f.Usage
-					if f.Value != "" {
-						usage += fmt.Sprintf(" (default: %q)", f.Value)
-					}
-				case *cli.StringSliceFlag:
-					usage = f.Usage
-				case *cli.IntFlag:
-					usage = f.Usage
-					if f.Value != 0 {
-						usage += fmt.Sprintf(" (default: %d)", f.Value)
-					}
-				default:
-					usage = "No description available"
-				}
-
+				flagColor.Fprintf(w, "  %-30s", flagStr)
 				fmt.Fprintf(w, " %s\n", usage)
 			}
 			fmt.Fprintln(w)
