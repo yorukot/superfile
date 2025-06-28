@@ -55,9 +55,6 @@ schema = 3
   [mod."github.com/connesc/cipherio"]
     version = "v0.2.1"
     hash = "sha256-PeuFnTak2WADesP8YTBqHP/XyvBue9bdKHYser2v6LU="
-  [mod."github.com/cpuguy83/go-md2man/v2"]
-    version = "v2.0.5"
-    hash = "sha256-UX9FajFqZApVFED3MYcq167iPwztnIck25ehfcOeFD8="
   [mod."github.com/davecgh/go-spew"]
     version = "v1.1.2-0.20180830191138-d8f796af33cc"
     hash = "sha256-fV9oI51xjHdOmEx6+dlq7Ku2Ag+m/bmbzPo6A4Y74qc="
@@ -73,6 +70,9 @@ schema = 3
   [mod."github.com/erikgeiser/coninput"]
     version = "v0.0.0-20211004153227-1c3628e74d0f"
     hash = "sha256-OWSqN1+IoL73rWXWdbbcahZu8n2al90Y3eT5Z0vgHvU="
+  [mod."github.com/fatih/color"]
+    version = "v1.18.0"
+    hash = "sha256-pP5y72FSbi4j/BjyVq/XbAOFjzNjMxZt2R/lFFxGWvY="
   [mod."github.com/go-ole/go-ole"]
     version = "v1.2.6"
     hash = "sha256-+oxitLeJxYF19Z6g+6CgmCHJ1Y5D8raMi2Cb3M6nXCs="
@@ -100,6 +100,9 @@ schema = 3
   [mod."github.com/lucasb-eyer/go-colorful"]
     version = "v1.2.0"
     hash = "sha256-Gg9dDJFCTaHrKHRR1SrJgZ8fWieJkybljybkI9x0gyE="
+  [mod."github.com/mattn/go-colorable"]
+    version = "v0.1.13"
+    hash = "sha256-qb3Qbo0CELGRIzvw7NVM1g/aayaz4Tguppk9MD2/OI8="
   [mod."github.com/mattn/go-isatty"]
     version = "v0.0.20"
     hash = "sha256-qhw9hWtU5wnyFyuMbKx+7RB8ckQaFQ8D+8GKPkN3HHQ="
@@ -145,9 +148,6 @@ schema = 3
   [mod."github.com/rkoesters/xdg"]
     version = "v0.0.1"
     hash = "sha256-+ckoKNaiEqQIpRFPr3CNRE3w8+OHmRKZ2cn6MquNIOE="
-  [mod."github.com/russross/blackfriday/v2"]
-    version = "v2.1.0"
-    hash = "sha256-R+84l1si8az5yDqd5CYcFrTyNZ1eSYlpXKq6nFt4OTQ="
   [mod."github.com/rwcarlsen/goexif"]
     version = "v0.0.0-20190401172101-9e8deecbddbd"
     hash = "sha256-AiY2T9hXj6jnfldYDoe4WNr3FldpVTxc3lScR++HOLc="
@@ -160,12 +160,9 @@ schema = 3
   [mod."github.com/ulikunitz/xz"]
     version = "v0.5.11"
     hash = "sha256-SUyrjc2wyN3cTGKe5JdBEXjtZC1rJySRxJHVUZ59row="
-  [mod."github.com/urfave/cli/v2"]
-    version = "v2.27.6"
-    hash = "sha256-u4yUgMwphs/7iwkhWrLgsHZru1InycgvY2ZmuxHQeLI="
-  [mod."github.com/xrash/smetrics"]
-    version = "v0.0.0-20240521201337-686a1a2994c1"
-    hash = "sha256-CsyN59w6sKERDI5kkdpq0YKmqdixyCHuN4FYE/56/BQ="
+  [mod."github.com/urfave/cli/v3"]
+    version = "v3.3.8"
+    hash = "sha256-ADC+I90dVQcxDx0x4NJfGbpuSR/iOAM1ax1ZK0GYIIg="
   [mod."github.com/yorukot/ansichroma"]
     version = "v0.1.0"
     hash = "sha256-aIQZ16auuGfGLltKt2lm2T83f4sALrmRpOujxQepkS4="
