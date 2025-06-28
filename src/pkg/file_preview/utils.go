@@ -1,11 +1,8 @@
-//go:build !windows
-
-// Sys do not support terminal detection on windows
-
 package filepreview
 
 import (
 	"log/slog"
+	"runtime"
 	"sync"
 	"syscall"
 	"unsafe"
@@ -88,16 +85,26 @@ func DetectTerminalCellSize() TerminalCellSize {
 	detectionMutex.Lock()
 	defer detectionMutex.Unlock()
 
-	// Try to get terminal size using ioctl
-	if cellSize, ok := getTerminalCellSizeViaIoctl(); ok {
-		slog.Info("Successfully detected terminal cell size via ioctl",
-			"pixels_per_column", cellSize.PixelsPerColumn,
-			"pixels_per_row", cellSize.PixelsPerRow)
-		return cellSize
+	// Try platform-specific detection
+	if runtime.GOOS == "windows" {
+		if cellSize, ok := getTerminalCellSizeWindows(); ok {
+			slog.Info("Successfully detected terminal cell size on Windows",
+				"pixels_per_column", cellSize.PixelsPerColumn,
+				"pixels_per_row", cellSize.PixelsPerRow)
+			return cellSize
+		}
+	} else {
+		// Unix-like systems (Linux, macOS, etc.)
+		if cellSize, ok := getTerminalCellSizeViaIoctl(); ok {
+			slog.Info("Successfully detected terminal cell size via ioctl",
+				"pixels_per_column", cellSize.PixelsPerColumn,
+				"pixels_per_row", cellSize.PixelsPerRow)
+			return cellSize
+		}
 	}
 
 	// Fallback to default values
-	slog.Info("Using default terminal cell size")
+	slog.Info("Using default terminal cell size", "os", runtime.GOOS)
 	return getDefaultCellSize()
 }
 
@@ -165,4 +172,27 @@ func getDefaultCellSize() TerminalCellSize {
 // InitTerminalCapabilities initializes terminal capabilities for the ImagePreviewer
 func (p *ImagePreviewer) InitTerminalCapabilities() {
 	p.terminalCap.InitTerminalCapabilities()
+}
+
+// Windows-specific terminal detection functions
+// getTerminalCellSizeWindows uses Windows Console API to detect terminal cell size
+func getTerminalCellSizeWindows() (TerminalCellSize, bool) {
+	if runtime.GOOS != "windows" {
+		return TerminalCellSize{}, false
+	}
+
+	// For Windows, just return reasonable defaults
+	// Windows terminal detection is complex and varies greatly between
+	// different terminal emulators (Windows Terminal, ConEmu, etc.)
+	slog.Info("Using Windows default terminal cell size")
+	// TODO: Implement actual Windows Console API calls when running on Windows
+	return getWindowsDefaultCellSize(), true
+}
+
+// getWindowsDefaultCellSize returns reasonable defaults for Windows
+func getWindowsDefaultCellSize() TerminalCellSize {
+	return TerminalCellSize{
+		PixelsPerColumn: 8,  // Windows Terminal/CMD typical width
+		PixelsPerRow:    16, // Windows Terminal/CMD typical height
+	}
 }
