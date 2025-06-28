@@ -9,6 +9,16 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
+# Check if colors should be disabled
+if [ "$FORCE_COLOR" != "1" ] && ([ -n "$MAKEFLAGS" ] || [ "$TERM" = "dumb" ] || [ ! -t 1 ]); then
+    # Disable colors when running under Make or non-interactive
+    RED=''
+    GREEN=''
+    YELLOW=''
+    BLUE=''
+    NC=''
+fi
+
 # Default values
 RUN_TESTSUITE=false
 SKIP_TESTS=false
@@ -16,19 +26,19 @@ VERBOSE=false
 
 # Function to print colored output
 print_step() {
-    echo "${BLUE}==>${NC} $1"
+    printf "${BLUE}==>${NC} %s\n" "$1"
 }
 
 print_success() {
-    echo "${GREEN}✓${NC} $1"
+    printf "${GREEN}✓${NC} %s\n" "$1"
 }
 
 print_warning() {
-    echo "${YELLOW}⚠${NC} $1"
+    printf "${YELLOW}⚠${NC} %s\n" "$1"
 }
 
 print_error() {
-    echo "${RED}✗${NC} $1"
+    printf "${RED}✗${NC} %s\n" "$1"
 }
 
 # Function to show usage
@@ -85,7 +95,7 @@ if [ "$VERBOSE" = true ]; then
     VERBOSE_FLAG="-v"
 fi
 
-echo "${BLUE}🚀 Starting superfile development workflow${NC}"
+printf "${BLUE}🚀 Starting superfile development workflow${NC}\n"
 echo ""
 
 # Step 1: Tidy up the go mod
@@ -195,11 +205,11 @@ else
 fi
 
 echo ""
-echo "${GREEN}🎉 All steps completed successfully!${NC}"
-echo "${BLUE}Binary location:${NC} ./bin/spf"
+printf "${GREEN}🎉 All steps completed successfully!${NC}\n"
+printf "${BLUE}Binary location:${NC} ./bin/spf\n"
 
 # Show binary info
 if [ -f "./bin/spf" ]; then
     BINARY_SIZE=$(du -h ./bin/spf | cut -f1)
-    echo "${BLUE}Binary size:${NC} $BINARY_SIZE"
+    printf "${BLUE}Binary size:${NC} $BINARY_SIZE\n"
 fi
