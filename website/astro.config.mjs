@@ -36,7 +36,7 @@ export default defineConfig({
           strict: false,
           reactionsEnabled: true,
           emitMetadata: false,
-          inputPosition: 'bottom',
+          inputPosition: 'top',
           theme: 'preferred_color_scheme',
           lang: 'en',
           loading: 'lazy',
