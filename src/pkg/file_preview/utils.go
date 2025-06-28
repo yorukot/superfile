@@ -1,13 +1,11 @@
 package filepreview
 
 import (
-	"fmt"
 	"log/slog"
-	"os"
-	"strconv"
-	"strings"
+	"runtime"
 	"sync"
-	"time"
+	"syscall"
+	"unsafe"
 )
 
 // Terminal cell to pixel conversion constants
@@ -17,7 +15,7 @@ const (
 	DefaultPixelsPerRow    = 20 // approximate pixels per terminal row
 )
 
-// TerminalCellSize represents the pixel dimensions of a terminal cell
+// TerminalCellSize represents the pixel dimensions of terminal cells
 type TerminalCellSize struct {
 	PixelsPerColumn int
 	PixelsPerRow    int
@@ -25,8 +23,9 @@ type TerminalCellSize struct {
 
 // TerminalCapabilities encapsulates terminal capability detection
 type TerminalCapabilities struct {
-	cellSize     TerminalCellSize
-	cellSizeInit sync.Once
+	cellSize       TerminalCellSize
+	cellSizeInit   sync.Once
+	detectionMutex sync.Mutex
 }
 
 // NewTerminalCapabilities creates a new TerminalCapabilities instance
@@ -47,7 +46,7 @@ func (tc *TerminalCapabilities) InitTerminalCapabilities() {
 	go func() {
 		// Initialize cell size detection
 		tc.cellSizeInit.Do(func() {
-			tc.cellSize = DetectTerminalCellSize()
+			tc.cellSize = tc.detectTerminalCellSize()
 			slog.Info("Terminal cell size detection",
 				"pixels_per_column", tc.cellSize.PixelsPerColumn,
 				"pixels_per_row", tc.cellSize.PixelsPerRow)
@@ -59,7 +58,7 @@ func (tc *TerminalCapabilities) InitTerminalCapabilities() {
 // If detection hasn't been initialized, it performs detection first
 func (tc *TerminalCapabilities) GetTerminalCellSize() TerminalCellSize {
 	tc.cellSizeInit.Do(func() {
-		tc.cellSize = DetectTerminalCellSize()
+		tc.cellSize = tc.detectTerminalCellSize()
 		slog.Info("Terminal cell size detection (lazy init)",
 			"pixels_per_column", tc.cellSize.PixelsPerColumn,
 			"pixels_per_row", tc.cellSize.PixelsPerRow)
@@ -68,108 +67,128 @@ func (tc *TerminalCapabilities) GetTerminalCellSize() TerminalCellSize {
 	return tc.cellSize
 }
 
-// DetectTerminalCellSize attempts to detect the actual pixel dimensions of terminal cells
-// using CSI 16t escape sequence. Falls back to defaults if detection fails.
-func DetectTerminalCellSize() TerminalCellSize {
-	// Save current terminal state
-	if _, err := os.Stdout.WriteString("\x1b[s"); err != nil {
-		slog.Error("Error saving terminal state", "error", err)
-	} // Save cursor position
+// winsize struct for ioctl TIOCGWINSZ
+type winsize struct {
+	Row    uint16
+	Col    uint16
+	Xpixel uint16
+	Ypixel uint16
+}
 
-	// Request cell size information
-	if _, err := os.Stdout.WriteString("\x1b[16t"); err != nil {
-		slog.Error("Error requesting terminal cell size", "error", err)
-	}
-	if err := os.Stdout.Sync(); err != nil {
-		slog.Error("Error syncing terminal state", "error", err)
-	}
+// detectTerminalCellSize detects the terminal cell size using ioctl system calls
+// This method is non-blocking and doesn't interfere with stdin
+func (tc *TerminalCapabilities) detectTerminalCellSize() TerminalCellSize {
+	tc.detectionMutex.Lock()
+	defer tc.detectionMutex.Unlock()
 
-	// Read response with timeout
-	var response string
-	responseChan := make(chan string, 1)
-
-	go func() {
-		buf := make([]byte, 32)
-		n, err := os.Stdin.Read(buf)
-		if err != nil {
-			slog.Error("Error reading terminal response", "error", err)
-			responseChan <- ""
-			return
+	// Try platform-specific detection
+	if runtime.GOOS == "windows" {
+		if cellSize, ok := getTerminalCellSizeWindows(); ok {
+			slog.Info("Successfully detected terminal cell size on Windows",
+				"pixels_per_column", cellSize.PixelsPerColumn,
+				"pixels_per_row", cellSize.PixelsPerRow)
+			return cellSize
 		}
-		responseChan <- string(buf[:n])
-	}()
-
-	select {
-	case response = <-responseChan:
-		slog.Debug("Received terminal response", "raw_response", fmt.Sprintf("%q", response))
-	case <-time.After(100 * time.Millisecond):
-		// Timeout occurred, use default values
-		slog.Debug("Terminal response timeout, using default values")
-		if _, err := os.Stdout.WriteString("\x1b[u"); err != nil {
-			slog.Error("Error restoring terminal state", "error", err)
-		} // Restore cursor position
-		return TerminalCellSize{
-			PixelsPerColumn: DefaultPixelsPerColumn,
-			PixelsPerRow:    DefaultPixelsPerRow,
+	} else {
+		// Unix-like systems (Linux, macOS, etc.)
+		if cellSize, ok := getTerminalCellSizeViaIoctl(); ok {
+			slog.Info("Successfully detected terminal cell size via ioctl",
+				"pixels_per_column", cellSize.PixelsPerColumn,
+				"pixels_per_row", cellSize.PixelsPerRow)
+			return cellSize
 		}
 	}
 
-	// Restore cursor position
-	if _, err := os.Stdout.WriteString("\x1b[u"); err != nil {
-		slog.Error("Error restoring terminal state", "error", err)
+	// Fallback to default values
+	slog.Info("Using default terminal cell size", "os", runtime.GOOS)
+	return getDefaultCellSize()
+}
+
+// getTerminalCellSizeViaIoctl uses ioctl system call to get terminal size
+func getTerminalCellSizeViaIoctl() (TerminalCellSize, bool) {
+	// Try different file descriptors in order of preference
+	fds := []uintptr{
+		1, // stdout
+		0, // stdin
+		2, // stderr
 	}
 
-	// Parse the response which should be in format: ESC[6;height;widtht
-	if width, height, ok := parseCSI16tResponse(response); ok {
-		slog.Debug("Successfully parsed terminal cell size",
-			"width", width,
-			"height", height)
-		return TerminalCellSize{
-			PixelsPerColumn: width,
-			PixelsPerRow:    height,
+	for _, fd := range fds {
+		if cellSize, ok := getTerminalSizeFromFd(fd); ok {
+			return cellSize, true
 		}
 	}
 
-	// Fall back to defaults if parsing fails
-	slog.Debug("Failed to parse terminal response, using default values")
+	return TerminalCellSize{}, false
+}
+
+// getTerminalSizeFromFd gets terminal size from a specific file descriptor
+func getTerminalSizeFromFd(fd uintptr) (TerminalCellSize, bool) {
+	var ws winsize
+
+	// TIOCGWINSZ ioctl call to get window size
+	// This is the same method used by most terminal libraries
+	_, _, errno := syscall.Syscall(
+		syscall.SYS_IOCTL,
+		fd,
+		syscall.TIOCGWINSZ,
+		uintptr(unsafe.Pointer(&ws)),
+	)
+
+	if errno != 0 {
+		return TerminalCellSize{}, false
+	}
+
+	// Check if we got valid pixel dimensions
+	if ws.Xpixel > 0 && ws.Ypixel > 0 && ws.Col > 0 && ws.Row > 0 {
+		pixelsPerColumn := int(ws.Xpixel) / int(ws.Col)
+		pixelsPerRow := int(ws.Ypixel) / int(ws.Row)
+
+		// Sanity check the values
+		if pixelsPerColumn > 0 && pixelsPerRow > 0 &&
+			pixelsPerColumn < 100 && pixelsPerRow < 100 {
+			return TerminalCellSize{
+				PixelsPerColumn: pixelsPerColumn,
+				PixelsPerRow:    pixelsPerRow,
+			}, true
+		}
+	}
+
+	return TerminalCellSize{}, false
+}
+
+// getDefaultCellSize returns default fallback terminal cell size
+func getDefaultCellSize() TerminalCellSize {
 	return TerminalCellSize{
 		PixelsPerColumn: DefaultPixelsPerColumn,
 		PixelsPerRow:    DefaultPixelsPerRow,
 	}
 }
 
-// parseCSI16tResponse parses the CSI 16t response from the terminal
-// The format is: ESC[6;height;widtht
-func parseCSI16tResponse(response string) (int, int, bool) {
-	if !strings.Contains(response, "\x1b[6;") {
-		return 0, 0, false
-	}
-
-	parts := strings.Split(strings.TrimPrefix(response, "\x1b[6;"), ";")
-	if len(parts) < 2 {
-		return 0, 0, false
-	}
-
-	// Extract height and width
-	heightStr := parts[0]
-	widthParts := strings.Split(parts[1], "t")
-	if len(widthParts) < 1 {
-		return 0, 0, false
-	}
-	widthStr := widthParts[0]
-
-	// Parse as integers
-	h, err1 := strconv.Atoi(heightStr)
-	w, err2 := strconv.Atoi(widthStr)
-
-	if err1 != nil || err2 != nil || h <= 0 || w <= 0 {
-		return 0, 0, false
-	}
-
-	return w, h, true
-}
-
 // InitTerminalCapabilities initializes terminal capabilities for the ImagePreviewer
 func (p *ImagePreviewer) InitTerminalCapabilities() {
 	p.terminalCap.InitTerminalCapabilities()
+}
+
+// Windows-specific terminal detection functions
+// getTerminalCellSizeWindows uses Windows Console API to detect terminal cell size
+func getTerminalCellSizeWindows() (TerminalCellSize, bool) {
+	if runtime.GOOS != "windows" {
+		return TerminalCellSize{}, false
+	}
+
+	// For Windows, just return reasonable defaults
+	// Windows terminal detection is complex and varies greatly between
+	// different terminal emulators (Windows Terminal, ConEmu, etc.)
+	slog.Info("Using Windows default terminal cell size")
+	// TODO: Implement actual Windows Console API calls when running on Windows
+	return getWindowsDefaultCellSize(), true
+}
+
+// getWindowsDefaultCellSize returns reasonable defaults for Windows
+func getWindowsDefaultCellSize() TerminalCellSize {
+	return TerminalCellSize{
+		PixelsPerColumn: 8,  // Windows Terminal/CMD typical width
+		PixelsPerRow:    16, // Windows Terminal/CMD typical height
+	}
 }
