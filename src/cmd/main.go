@@ -38,7 +38,7 @@ func Run(content embed.FS) {
 		Name:        "superfile",
 		Version:     variable.CurrentVersion,
 		Description: "Pretty fancy and modern terminal file manager ",
-		ArgsUsage:   "[path]",
+		ArgsUsage:   "[PATH]...",
 		Commands: []*cli.Command{
 			{
 				Name:    "path-list",
