@@ -11,6 +11,7 @@ require (
 	github.com/charmbracelet/bubbletea v1.3.4
 	github.com/charmbracelet/lipgloss v1.0.0
 	github.com/charmbracelet/x/ansi v0.8.0
+	github.com/fatih/color v1.18.0
 	github.com/hymkor/trash-go v0.2.0
 	github.com/lithammer/shortuuid v3.0.0+incompatible
 	github.com/muesli/termenv v0.16.0
@@ -18,7 +19,7 @@ require (
 	github.com/rkoesters/xdg v0.0.1
 	github.com/shirou/gopsutil/v4 v4.25.3
 	github.com/stretchr/testify v1.10.0
-	github.com/urfave/cli/v2 v2.27.6
+	github.com/urfave/cli/v3 v3.3.8
 	golang.org/x/image v0.27.0
 	golang.org/x/mod v0.24.0
 	golift.io/xtractr v0.2.2
@@ -27,6 +28,7 @@ require (
 require (
 	github.com/charmbracelet/x/term v0.2.1 // indirect
 	github.com/ebitengine/purego v0.8.3 // indirect
+	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
 	golang.org/x/term v0.18.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
@@ -57,7 +59,6 @@ require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/charmbracelet/harmonica v0.2.0 // indirect
 	github.com/charmbracelet/x/exp/term v0.0.0-20240814160751-e2dc8b53b604
-	github.com/cpuguy83/go-md2man/v2 v2.0.5 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/disintegration/imaging v1.6.2
 	github.com/go-ole/go-ole v1.2.6 // indirect
@@ -71,9 +72,7 @@ require (
 	github.com/pelletier/go-toml/v2 v2.2.4
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
-	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/rwcarlsen/goexif v0.0.0-20190401172101-9e8deecbddbd
-	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	golang.org/x/sync v0.14.0 // indirect
 	golang.org/x/sys v0.30.0 // indirect
