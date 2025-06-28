@@ -67,7 +67,7 @@ func setupPanelModeAndSelection(t *testing.T, m *model, useSelectMode bool, item
 // TeaUpdate : Utility to send update to model , majorly used in tests
 // Not using pointer receiver as this is more like a utility, than
 // a member function of model
-// Todo : Consider wrapping TeaUpdate with a helper that both forwards the return
+// TODO : Consider wrapping TeaUpdate with a helper that both forwards the return
 // values and does a require.NoError(t, err)
 func TeaUpdate(m *model, msg tea.Msg) (tea.Cmd, error) {
 	resModel, cmd := m.Update(msg)

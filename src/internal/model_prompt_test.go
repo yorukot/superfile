@@ -26,7 +26,7 @@ func TestModel_Update_Prompt(t *testing.T) {
 		os.RemoveAll(curTestDir)
 	})
 
-	// We want to test these. Todo : complete important tests
+	// We want to test these. TODO : complete important tests
 	// 1. Being able to open prompt
 	// 1a. Open in shell mode, 1b. Open in prompt mode 1c. Switching between then
 

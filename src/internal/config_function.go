@@ -24,7 +24,7 @@ func initialConfig(firstFilePanelDirs []string) (toggleDotFile bool, toggleFoote
 	// Open log stream
 	file, err := os.OpenFile(variable.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 
-	// Todo : This could be improved if we want to make superfile more resilient to errors
+	// TODO : This could be improved if we want to make superfile more resilient to errors
 	// For example if the log file directories have access issues.
 	// we could pass a dummy object to log.SetOutput() and the app would still function.
 	if err != nil {

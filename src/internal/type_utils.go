@@ -30,7 +30,7 @@ func (m *model) validateLayout() error {
 		return fmt.Errorf("invalid model layout, fullHeight : %v, mainPanelHeight : %v, footerHeight : %v",
 			m.fullHeight, m.mainPanelHeight, m.footerHeight)
 	}
-	// Todo : Add check for width as well
+	// TODO : Add check for width as well
 	return nil
 }
 

@@ -93,7 +93,7 @@ func (panel *filePanel) pgDown(mainPanelHeight int) {
 // Handles the action of selecting an item in the file panel upwards. (only work on select mode)
 // This basically just toggles the "selected" status of element that is pointed by the cursor
 // and then moves the cursor up
-// Todo : Add unit tests for itemSelectUp and singleItemSelect
+// TODO : Add unit tests for itemSelectUp and singleItemSelect
 func (panel *filePanel) itemSelectUp(mainPanelHeight int) {
 	panel.singleItemSelect()
 	panel.listUp(mainPanelHeight)

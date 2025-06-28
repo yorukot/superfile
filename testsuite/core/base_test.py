@@ -59,7 +59,7 @@ class GenericTestImpl(BaseTest):
         self.test_dirs = test_dirs
         self.test_files = test_files
         
-        # Todo fix it : For now first keypress in not being registered, 
+        # TODO fix it : For now first keypress in not being registered, 
         # Need Additional no-operation key press as the first keypress
         if key_inputs is None:
             key_inputs = []
