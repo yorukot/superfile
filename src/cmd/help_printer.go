@@ -17,7 +17,7 @@ func CustomHelpPrinter(w io.Writer, templ string, data interface{}) {
 	titleColor := color.New(color.FgGreen, color.Bold)
 	flagColor := color.New(color.FgCyan, color.Bold)
 	commandColor := color.New(color.FgBlue, color.Bold)
-	accentColor := color.New(color.FgCyan)
+	accentColor := color.New(color.FgMagenta, color.Bold)
 
 	switch v := data.(type) {
 	case *cli.Command:
@@ -26,7 +26,8 @@ func CustomHelpPrinter(w io.Writer, templ string, data interface{}) {
 
 		// Print usage section
 		titleColor.Fprintf(w, "Usage:")
-		fmt.Fprintf(w, " %s", binaryName)
+		fmt.Fprint(w, " ")
+		accentColor.Fprintf(w, "%s", binaryName)
 		if len(v.Commands) > 0 {
 			fmt.Fprint(w, " [COMMAND]")
 		}
@@ -107,11 +108,14 @@ func CustomHelpPrinter(w io.Writer, templ string, data interface{}) {
 
 		// Print version info if available
 		if v.Version != "" {
-			accentColor.Fprintf(w, "Version: %s\n\n", v.Version)
+			fmt.Printf("Version: ")
+			accentColor.Fprintf(w, "%s\n\n", v.Version)
 		}
 
 		// Print help footer using the actual binary name
-		fmt.Fprintf(w, "Use \"%s [COMMAND] --help\" for more information about a command.\n", binaryName)
+		fmt.Fprint(w, "Use \"")
+		accentColor.Fprintf(w, "%s", binaryName)
+		fmt.Fprint(w, " [COMMAND] --help\" for more information about a command.\n")
 
 	default:
 		// Fallback to default template rendering for other cases
