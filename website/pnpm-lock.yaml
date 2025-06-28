@@ -24,13 +24,13 @@ importers:
         specifier: ^5.2.5
         version: 5.2.5
       astro:
-        specifier: ^5.8.0
+        specifier: ^5.7.7
         version: 5.8.0(@types/node@22.15.21)(rollup@4.41.1)(typescript@5.7.3)
       hast-util-to-html:
         specifier: ^9.0.5
         version: 9.0.5
       sharp:
-        specifier: ^0.34.1
+        specifier: ^0.34.2
         version: 0.34.2
       starlight-giscus:
         specifier: ^0.6.1
