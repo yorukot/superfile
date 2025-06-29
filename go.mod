@@ -21,7 +21,7 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v3 v3.3.8
 	golang.org/x/image v0.27.0
-	golang.org/x/mod v0.24.0
+	golang.org/x/mod v0.25.0
 	golift.io/xtractr v0.2.2
 )
 
