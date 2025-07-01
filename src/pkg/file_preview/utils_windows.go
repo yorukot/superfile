@@ -7,8 +7,3 @@ package filepreview
 func getTerminalCellSizeViaIoctl() (TerminalCellSize, bool) {
 	return TerminalCellSize{}, false
 }
-
-// getTerminalSizeFromFd is not supported on Windows, so always return false
-func getTerminalSizeFromFd(fd uintptr) (TerminalCellSize, bool) {
-	return TerminalCellSize{}, false
-}
