@@ -112,6 +112,8 @@ func (c *ConfigType) GetIgnoreMissingFields() bool {
 type HotkeysType struct {
 	Confirm []string `toml:"confirm" comment:"=================================================================================================\nGlobal hotkeys (cannot conflict with other hotkeys)"`
 	Quit    []string `toml:"quit"`
+	CdQuit  []string `toml:"cd_quit"`
+
 	// movement
 	ListUp   []string `toml:"list_up" comment:"movement"`
 	ListDown []string `toml:"list_down"`
