@@ -65,6 +65,11 @@ func getHelpMenuData() []helpMenuModalData { //nolint: funlen // This should be 
 			hotkeyWorkType: globalType,
 		},
 		{
+			hotkey:         common.Hotkeys.CdQuit,
+			description:    "Quit superfile and change directory to current folder",
+			hotkeyWorkType: globalType,
+		},
+		{
 			hotkey:         common.Hotkeys.ConfirmTyping,
 			description:    "Confirm typing",
 			hotkeyWorkType: globalType,
