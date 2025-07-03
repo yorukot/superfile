@@ -283,7 +283,6 @@ func TestLoadTomlFileIgnorer(t *testing.T) {
 		tempDir := t.TempDir()
 
 		actualTest := func(fileName string, expectedVal TestTOMLMissingIgnorerType) {
-
 			var tomlVal TestTOMLMissingIgnorerType
 			testFile := filepath.Join(testdataDir, fileName)
 			orgFile := filepath.Join(tempDir, fileName)
