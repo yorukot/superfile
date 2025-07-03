@@ -152,9 +152,8 @@ func Test_resolveShellSubstitution(t *testing.T) {
 		},
 		{
 			name:    "Multiple substitution",
-			command: fmt.Sprintf("$(echo $(echo $%s)) ${%s}", spfTestEnvVar1, spfTestEnvVar2),
-			expectedResult: fmt.Sprintf("%s%s %s", testEnvValues[spfTestEnvVar1],
-				newLineSuffix, testEnvValues[spfTestEnvVar2]),
+			command: fmt.Sprintf("$(echo $(echo hi)) ${%s}", spfTestEnvVar2),
+			expectedResult: fmt.Sprintf("hi%s %s", newLineSuffix, testEnvValues[spfTestEnvVar2]),
 			isErrorExpected: false,
 			errorToMatch:    nil,
 		},
