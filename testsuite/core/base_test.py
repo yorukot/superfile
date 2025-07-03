@@ -53,9 +53,12 @@ class GenericTestImpl(BaseTest):
         validate_spf_running: bool = False,
         start_wait_time : float = tconst.START_WAIT_TIME,
         close_wait_time : float = tconst.CLOSE_WAIT_TIME ):
+
         super().__init__(test_env)
         self.test_root = test_root
         self.start_dir = start_dir
+        self.spf_opts : List[str] = ["-c", str(tconst.CONFIG_FILE), "--hf", str(tconst.HOTKEY_FILE)]
+        
         self.test_dirs = test_dirs
         self.test_files = test_files
         
@@ -89,7 +92,7 @@ class GenericTestImpl(BaseTest):
         
     
     def start_spf(self) -> None:
-        self.env.spf_mgr.start_spf(self.env.fs_mgr.abspath(self.start_dir))
+        self.env.spf_mgr.start_spf(self.env.fs_mgr.abspath(self.start_dir), self.spf_opts)
         time.sleep(self.start_wait_time)
         assert self.env.spf_mgr.is_spf_running(), "superfile is not running"
 
