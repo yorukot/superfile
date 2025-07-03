@@ -12,14 +12,19 @@ These are the default hotkeys and you can [change](/configure/custom-hotkeys) th
 
 ## General
 
-| Function                        | Key              | Variable name    |
-| ------------------------------- | ---------------- | ---------------- |
-| Open superfile                  | `spf`            |                  |
-| Confirm your select or typing   | `enter`, `right` | `confirm_typing` |
-| Quit typing, modal or superfile | `esc`, `q`       | `quit`           |
-| Cancel typing                   | `ctrl+c`, `esc`  | `cancel_typing`  |
-| Open help menu(hotkeylist)      | `?`              | `open_help_menu` |
-| Toggle footer                   | `F`              | `toggle_footer`  |
+| Function                                | Key              | Variable name    |
+| --------------------------------------- | ---------------- | ---------------- |
+| Open superfile                          | `spf`            |                  |
+| Confirm your select or typing           | `enter`, `right` | `confirm_typing` |
+| Quit typing, modal or superfile         | `esc`, `q`       | `quit`           |
+| Quit superfile and cd to current folder | `Q`              | `cd_quit`        |
+| Cancel typing                           | `ctrl+c`, `esc`  | `cancel_typing`  |
+| Open help menu(hotkeylist)              | `?`              | `open_help_menu` |
+| Toggle footer                           | `F`              | `toggle_footer`  |
+
+:::note
+Quit superfile and cd to current folder "cd_quit" require the same scripts as ["cd_on_quit"](/configure/superfile-config/#cd_on_quit) setting
+:::
 
 ## Panel navigation
 
