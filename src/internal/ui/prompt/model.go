@@ -77,6 +77,7 @@ func (m *Model) handleConfirm(cwdLocation string) common.ModelAction {
 		m.resultMsg = ""
 		m.actionSuccess = true
 	} else if cmdErr, ok := err.(invalidCmdError); ok { //nolint: errorlint // We don't expect a wrapped error here, so using type assertion
+		slog.Error("Error from getPromptAction", "error", cmdErr, "uiMsg", cmdErr.uiMsg)
 		m.resultMsg = cmdErr.uiMessage()
 		m.actionSuccess = false
 	} else {

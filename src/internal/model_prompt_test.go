@@ -1,8 +1,10 @@
 package internal
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/adrg/xdg"
@@ -185,8 +187,11 @@ func TestModel_Update_Prompt(t *testing.T) {
 
 		m.closeFilePanel()
 
-		// Note : resolving shell subsitution is flaky in windows.
-		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(prompt.OpenCommand+" ${HOME}"))
+		userHomeEnv := "HOME"
+		if runtime.GOOS == utils.OsWindows {
+			userHomeEnv = "USERPROFILE"
+		}
+		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(prompt.OpenCommand+fmt.Sprintf(" ${%s}", userHomeEnv)))
 		TeaUpdateWithErrCheck(t, &m, tea.KeyMsg{Type: tea.KeyEnter})
 		assert.True(t, m.promptModal.LastActionSucceeded(), "open using variable substitution should work")
 		assert.Equal(t, xdg.Home, m.getFocusedFilePanel().location)
