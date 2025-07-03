@@ -4,6 +4,7 @@
 # Global hotkeys (cannot conflict with other hotkeys)
 confirm = ['enter', '']
 quit = ['ctrl+c', ''] # also know as, theprimeagen troller
+cd_quit = ['Q', '']
 # movement
 list_up = ['k', '']
 list_down = ['j', '']
