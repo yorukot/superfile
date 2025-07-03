@@ -280,11 +280,20 @@ func TestLoadTomlFileIgnorer(t *testing.T) {
 		expectedVal2.SampleInt = -1
 		expectedVal2.IgnoreMissing = true
 
+		tempDir := t.TempDir()
+
 		actualTest := func(fileName string, expectedVal TestTOMLMissingIgnorerType) {
+
 			var tomlVal TestTOMLMissingIgnorerType
-			orgFile := filepath.Join(testdataDir, fileName)
-			orgContent, err := os.ReadFile(orgFile)
+			testFile := filepath.Join(testdataDir, fileName)
+			orgFile := filepath.Join(tempDir, fileName)
+
+			testContent, err := os.ReadFile(testFile)
 			require.NoError(t, err)
+
+			// Copy to temp directory first to avoid permission errors
+			err = os.WriteFile(orgFile, testContent, 0644)
+			require.NoError(t, err, "Error writing config file to temp directory")
 
 			err = LoadTomlFile(orgFile, defaultData, &tomlVal, true)
 			var tomlErr *TomlLoadError
@@ -295,7 +304,7 @@ func TestLoadTomlFileIgnorer(t *testing.T) {
 
 			pref := "config file had issues. Its fixed successfully. Original backed up to : "
 
-			assert.True(t, strings.HasPrefix(tomlErr.userMessage, pref))
+			assert.True(t, strings.HasPrefix(tomlErr.userMessage, pref), "Unexpectd error : "+tomlErr.Error())
 
 			backupFile := strings.TrimPrefix(tomlErr.userMessage, pref)
 
@@ -303,7 +312,7 @@ func TestLoadTomlFileIgnorer(t *testing.T) {
 			backupContent, err := os.ReadFile(backupFile)
 			require.NoError(t, err)
 
-			assert.Equal(t, orgContent, backupContent)
+			assert.Equal(t, testContent, backupContent)
 
 			err = os.WriteFile(orgFile, backupContent, 0644)
 			require.NoError(t, err)
