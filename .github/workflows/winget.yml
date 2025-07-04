@@ -13,7 +13,7 @@ jobs:
         uses: vedantmgoyal2009/winget-releaser@v2
         with:
           identifier: yorukot.superfile
-          installers-regex: '\\.(zip|msi)$'
+          installers-regex: '\.zip$'
           version: ${{ github.event.release.tag_name }}
           release-tag: ${{ github.event.release.tag_name }}
           token: ${{ secrets.WINGET_TOKEN }} 
