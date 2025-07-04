@@ -6,6 +6,9 @@ on:
 
 jobs:
   winget:
+    permissions:
+      contents: read
+      pull-requests: write
     name: Publish WinGet package
     runs-on: ubuntu-latest
     steps:
