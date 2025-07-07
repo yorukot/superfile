@@ -2,15 +2,12 @@ name: Publish to WinGet
 
 on:
   release:
-    types: [published]
+    types: [released]
 
 jobs:
-  winget:
+  publish:
     name: Publish WinGet package
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
+    runs-on: windows-latest
     steps:
       - name: Submit package to Windows Package Manager Community Repository
         uses: vedantmgoyal2009/winget-releaser@v2
