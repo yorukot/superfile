@@ -79,10 +79,10 @@ scoop install superfile
 sudo pacman -S superfile
 ```
 
-###### Fetches prebuilt binaries from GitHub
+###### Builds most recent version from GitHub
 
 ```bash
-yay -S superfile-bin
+yay -S superfile-git
 ```
 
 ### Homebrew
