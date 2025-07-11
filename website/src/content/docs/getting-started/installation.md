@@ -76,7 +76,7 @@ scoop install superfile
 ###### Builds package from sources
 
 ```bash
-yay -S superfile
+sudo pacman -S superfile
 ```
 
 ###### Fetches prebuilt binaries from GitHub
