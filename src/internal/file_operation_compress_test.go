@@ -3,6 +3,7 @@ package internal
 import (
 	"archive/zip"
 	"io"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -31,13 +32,15 @@ func TestZipSources(t *testing.T) {
 
 				return []string{testDir1, testDir2}, nil
 			},
+
+			// End for directory is always "/" regardless of windows and linux for zipReader library
 			expectedFiles: map[string]string{
-				"testdir1/":                 "",
-				"testdir1/file1.txt":        "Content of file1",
-				"testdir1/subdir/":          "",
-				"testdir1/subdir/file2.txt": "Content of file2",
-				"testdir2/":                 "",
-				"testdir2/file3.txt":        "Content of file3",
+				"testdir1/":                                      "",
+				filepath.Join("testdir1", "file1.txt"):           "Content of file1",
+				filepath.Join("testdir1", "subdir") + "/":        "",
+				filepath.Join("testdir1", "subdir", "file2.txt"): "Content of file2",
+				"testdir2/":                            "",
+				filepath.Join("testdir2", "file3.txt"): "Content of file3",
 			},
 			expectError: false,
 		},
@@ -97,6 +100,7 @@ func TestZipSources(t *testing.T) {
 
 			foundFiles := make(map[string]string)
 			for _, file := range zipReader.File {
+				slog.Debug("files : ", "files", file.Name)
 				foundFiles[file.Name] = ""
 				if !strings.HasSuffix(file.Name, "/") {
 					rc, err := file.Open()
