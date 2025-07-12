@@ -51,7 +51,8 @@ jobs:
           go fmt ./...
           git diff --exit-code
 
-      - name: golangci-lint
+      - name: golangci-lint (skip on Windows)
+        if: runner.os != 'Windows'
         uses: golangci/golangci-lint-action@v6
         with:
           version: v1.64
