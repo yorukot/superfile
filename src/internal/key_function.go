@@ -56,7 +56,7 @@ func (m *model) mainKey(msg string) tea.Cmd {
 		m.fileModel.filePanels[m.filePanelFocusIndex].pgDown(m.mainPanelHeight)
 
 	case slices.Contains(common.Hotkeys.ChangePanelMode, msg):
-		m.changeFilePanelMode()
+		m.getFocusedFilePanel().changeFilePanelMode()
 
 	case slices.Contains(common.Hotkeys.NextFilePanel, msg):
 		m.nextFilePanel()
