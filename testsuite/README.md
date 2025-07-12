@@ -49,9 +49,11 @@ Coming soon.
 ```
 # cd to this directory
 cd <path/to/here>
+
+# If your python command refers to python3, you can use 'python' below
 python3 -m venv .venv
 .venv\Scripts\python -m pip install --upgrade pip
-.venv\Scripts\pip -r requirements.txt
+.venv\Scripts\pip install -r requirements.txt
 ```
 
 ### Make sure you build spf
