@@ -2,6 +2,7 @@ package internal
 
 import (
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -30,6 +31,12 @@ func TestFilePanelNavigation(t *testing.T) {
 	file1 := filepath.Join(curTestDir, "file1.txt")
 	file2 := filepath.Join(dir1, "file2.txt")
 
+	rootDir := "/"
+
+	if runtime.GOOS == utils.OsWindows {
+		rootDir = "\\"
+	}
+
 	setupDirectories(t, dir1, dir2)
 	setupFiles(t, file1, file2)
 
@@ -54,9 +61,9 @@ func TestFilePanelNavigation(t *testing.T) {
 			searchBarClear: true,
 		},
 		{
-			name:        "Switch to parent when at /",
-			startDir:    "/",
-			resultDir:   "/",
+			name:        "Switch to parent when at root",
+			startDir:    rootDir,
+			resultDir:   rootDir,
 			startCursor: 0,
 			startRender: 0,
 			keyInput: []string{

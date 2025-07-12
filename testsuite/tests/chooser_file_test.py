@@ -26,12 +26,8 @@ class ChooserFileTest(GenericTestImpl):
             validate_spf_closed=True,
             close_wait_time=3
         )
-    
-    # Override
-    def start_spf(self) -> None:
-        self.env.spf_mgr.start_spf(self.env.fs_mgr.abspath(self.start_dir), 
-            ["--chooser-file", str(self.env.fs_mgr.abspath(CHOOSER_FILE))])
-        assert self.env.spf_mgr.is_spf_running(), "superfile is not running"
+
+        self.spf_opts += ["--chooser-file", str(self.env.fs_mgr.abspath(CHOOSER_FILE))]
 
     # Override
     def end_execution(self) -> None:
