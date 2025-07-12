@@ -28,6 +28,7 @@ func (panel *filePanel) changeFilePanelMode() {
 
 // This should be the function that is always called whenever we are updating a directory.
 func (panel *filePanel) updateCurrentFilePanelDir(path string) error {
+	slog.Debug("updateCurrentFilePanelDir", "panel.location", panel.location, "path", path)
 	// In case non Absolute path is passed, make sure to resolve it.
 	path = utils.ResolveAbsPath(panel.location, path)
 
@@ -38,7 +39,6 @@ func (panel *filePanel) updateCurrentFilePanelDir(path string) error {
 
 	// NOTE: This could be a configurable feature
 	// Update the cursor and render status in case we switch back to this.
-	// TODO : Have a unit tests to verify this feature
 	panel.directoryRecords[panel.location] = directoryRecord{
 		directoryCursor: panel.cursor,
 		directoryRender: panel.render,
@@ -74,6 +74,5 @@ func (panel *filePanel) updateCurrentFilePanelDir(path string) error {
 }
 
 func (panel *filePanel) parentDirectory() error {
-	// TODO(Urgent): Validate that this works in all cases, Linux and windows
 	return panel.updateCurrentFilePanelDir("..")
 }
