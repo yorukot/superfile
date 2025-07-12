@@ -44,7 +44,7 @@ func shouldListDisk(mountPoint string) bool {
 		return true
 	}
 
-	// Todo : make a configurable field in config.yaml
+	// TODO : make a configurable field in config.yaml
 	// excluded_disk_mounts = ["/Volumes/.timemachine"]
 	// Mountpoints that are in subdirectory of disk_mounts
 	// but still are to be excluded in disk section of sidebar
@@ -57,7 +57,7 @@ func shouldListDisk(mountPoint string) bool {
 	// For example : mounts like /boot, /var/ will get skipped
 	// This can be inaccurate based on your system setup if you mount any external devices
 	// on other directories, or if you have some extra mounts on these directories
-	// Todo : make a configurable field in config.yaml
+	// TODO : make a configurable field in config.yaml
 	// disk_mounts = ["/mnt", "/media", "/run/media", "/Volumes"]
 	// Only block devicies that are mounted on these or any subdirectory of these Mountpoints
 	// Will be shown in disk sidebar

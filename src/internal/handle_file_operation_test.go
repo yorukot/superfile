@@ -33,7 +33,7 @@ func TestCompressSelectedFiles(t *testing.T) {
 	// 5 - Compress multiple selected files and directories
 	// 6 - Pressing compress hotkey on empty panel doesn't do anything or crashes on both browser/select mode
 
-	// Copied from CopyTest. Todo - work on it.
+	// Copied from CopyTest. TODO - work on it.
 
 	testdata := []struct {
 		name              string
@@ -126,7 +126,7 @@ func TestCompressSelectedFiles(t *testing.T) {
 			}, time.Second, 10*time.Millisecond)
 
 			// No-op update to get the filepanel updated
-			// Todo - This should not be needed. Only operation finish SPF should refresh
+			// TODO - This should not be needed. Only operation finish SPF should refresh
 			// on its own
 			TeaUpdateWithErrCheck(t, &m, nil)
 

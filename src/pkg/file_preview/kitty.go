@@ -29,8 +29,6 @@ func isKittyCapable() bool {
 			"xterm-kitty",
 			"kitty",
 			"Konsole",
-			"Alacritty",
-			"alacritty",
 			"WarpTerminal",
 		}
 

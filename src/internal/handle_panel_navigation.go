@@ -28,7 +28,7 @@ func (m *model) createNewFilePanel(location string) error {
 	// But we would have len() here as 1. Hence there would be discrepency here.
 	// Although this is not possible in actual usage, and can be only reproduced in tests.
 	if len(m.fileModel.filePanels) == m.fileModel.maxFilePanel {
-		// Todo : Define as a predefined error in errors.go
+		// TODO : Define as a predefined error in errors.go
 		return errors.New("maximum panel count reached")
 	}
 

@@ -82,9 +82,9 @@ func (m *model) panelCreateNewFile() {
 	m.firstTextInput = true
 }
 
-// Todo : This function does not needs the entire model. Only pass the panel object
+// TODO : This function does not needs the entire model. Only pass the panel object
 func (m *model) IsRenamingConflicting() bool {
-	// Todo : Replace this with m.getCurrentFilePanel() everywhere
+	// TODO : Replace this with m.getCurrentFilePanel() everywhere
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 
 	if len(panel.element) == 0 {
@@ -273,7 +273,7 @@ func (m *model) deleteMultipleItems() {
 		}
 	}
 
-	// This feels a bit fuzzy and unclean. Todo : Review and simplify this.
+	// This feels a bit fuzzy and unclean. TODO : Review and simplify this.
 	// We should never get to this condition of panel.cursor getting negative
 	// and if we do, we should error log that.
 	if panel.cursor >= len(panel.element)-len(panel.selected)-1 {
@@ -331,7 +331,7 @@ func (m *model) completelyDeleteSingleItem() {
 		message.processNewState = p
 		channel <- message
 	}
-	// Todo : This is duplicated code fragment. Remove this duplication
+	// TODO : This is duplicated code fragment. Remove this duplication
 	if len(panel.element) == 0 {
 		panel.cursor = 0
 	} else if panel.cursor >= len(panel.element) {
@@ -496,7 +496,7 @@ func (m *model) pasteItem() {
 	}
 
 	for _, folderPath := range m.copyItems.items {
-		// Todo : Fix this. This is inefficient
+		// TODO : Fix this. This is inefficient
 		// In case of a cut operations for a directory with a lot of files
 		// we are unnecessarily walking the whole directory recursively
 		// while os will just perform a rename
@@ -560,7 +560,7 @@ func (m *model) pasteItem() {
 		if m.copyItems.cut && !isExternalDiskPath(filePath) {
 			err = moveElement(filePath, filepath.Join(panel.location, filepath.Base(filePath)))
 		} else {
-			// Todo : These error cases are hard to test. We have to somehow make the paste operations fail,
+			// TODO : These error cases are hard to test. We have to somehow make the paste operations fail,
 			// which is time consuming and manual. We should test these with automated testcases
 			err = pasteDir(filePath, filepath.Join(panel.location, filepath.Base(filePath)), id, m)
 			if err != nil {
@@ -594,7 +594,7 @@ func (m *model) pasteItem() {
 }
 
 // Extract compressed file
-// Todo : err should be returned and properly handled by the caller
+// TODO : err should be returned and properly handled by the caller
 func (m *model) extractFile() {
 	var err error
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
