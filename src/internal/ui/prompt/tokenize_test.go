@@ -298,3 +298,236 @@ func Test_findEndingParenthesis(t *testing.T) {
 		})
 	}
 }
+
+func Test_tokenizeWithQuotes(t *testing.T) {
+	testdata := []struct {
+		name            string
+		command         string
+		expectedRes     []string
+		isErrorExpected bool
+	}{
+		// Basic cases
+		{
+			name:            "Empty String",
+			command:         "",
+			expectedRes:     []string{},
+			isErrorExpected: false,
+		},
+		{
+			name:            "Simple tokens",
+			command:         "a b c",
+			expectedRes:     []string{"a", "b", "c"},
+			isErrorExpected: false,
+		},
+		{
+			name:            "Whitespace handling",
+			command:         "    a   b   c    ",
+			expectedRes:     []string{"a", "b", "c"},
+			isErrorExpected: false,
+		},
+		{
+			name:            "Tab and newline handling",
+			command:         "a\tb\nc",
+			expectedRes:     []string{"a", "b", "c"},
+			isErrorExpected: false,
+		},
+		{
+			name:            "Multiple spaces",
+			command:         "command    arg",
+			expectedRes:     []string{"command", "arg"},
+			isErrorExpected: false,
+		},
+
+		// Basic quoting
+		{
+			name:            "Double quotes",
+			command:         `"hello world"`,
+			expectedRes:     []string{"hello world"},
+			isErrorExpected: false,
+		},
+		{
+			name:            "Single quotes",
+			command:         `'hello world'`,
+			expectedRes:     []string{"hello world"},
+			isErrorExpected: false,
+		},
+		{
+			name:            "Mixed quotes and unquoted",
+			command:         `command "arg with spaces" normal`,
+			expectedRes:     []string{"command", "arg with spaces", "normal"},
+			isErrorExpected: false,
+		},
+		{
+			name:            "Leading and trailing quotes",
+			command:         `"command" arg "trailing"`,
+			expectedRes:     []string{"command", "arg", "trailing"},
+			isErrorExpected: false,
+		},
+
+		// Empty quotes
+		{
+			name:            "Empty double quotes",
+			command:         `command ""`,
+			expectedRes:     []string{"command", ""},
+			isErrorExpected: false,
+		},
+		{
+			name:            "Empty single quotes",
+			command:         `command ''`,
+			expectedRes:     []string{"command", ""},
+			isErrorExpected: false,
+		},
+		{
+			name:            "Only empty quotes",
+			command:         `""`,
+			expectedRes:     []string{""},
+			isErrorExpected: false,
+		},
+
+		// Nested different quotes
+		{
+			name:            "Single quotes inside double quotes",
+			command:         `"it's working"`,
+			expectedRes:     []string{"it's working"},
+			isErrorExpected: false,
+		},
+		{
+			name:            "Double quotes inside single quotes",
+			command:         `'he said "hello"'`,
+			expectedRes:     []string{`he said "hello"`},
+			isErrorExpected: false,
+		},
+
+		// Escaping
+		{
+			name:            "Escaped double quote",
+			command:         `"escaped \" quote"`,
+			expectedRes:     []string{`escaped " quote`},
+			isErrorExpected: false,
+		},
+		{
+			name:            "Escaped single quote",
+			command:         `'can\'t'`,
+			expectedRes:     []string{`can't`},
+			isErrorExpected: false,
+		},
+		{
+			name:            "Escaped backslash",
+			command:         `"path\\to\\file"`,
+			expectedRes:     []string{`path\to\file`},
+			isErrorExpected: false,
+		},
+		{
+			name:            "Multiple escaped backslashes",
+			command:         `"\\\\"`,
+			expectedRes:     []string{`\\`},
+			isErrorExpected: false,
+		},
+		{
+			name:            "Escaped characters outside quotes",
+			command:         `a\ b c`,
+			expectedRes:     []string{`a b`, `c`},
+			isErrorExpected: false,
+		},
+
+		// Special characters
+		{
+			name:            "Special characters in quotes",
+			command:         `"$HOME" '${USER}' "$(pwd)"`,
+			expectedRes:     []string{"$HOME", "${USER}", "$(pwd)"},
+			isErrorExpected: false,
+		},
+		{
+			name:            "Unicode in quotes",
+			command:         `"こんにちは" '世界'`,
+			expectedRes:     []string{"こんにちは", "世界"},
+			isErrorExpected: false,
+		},
+
+		// Error cases
+		{
+			name:            "Unmatched double quote",
+			command:         `abcd "sdf`,
+			expectedRes:     nil,
+			isErrorExpected: true,
+		},
+		{
+			name:            "Unmatched single quote",
+			command:         `"abcd'`,
+			expectedRes:     nil,
+			isErrorExpected: true,
+		},
+		{
+			name:            "Unmatched quotes mixed",
+			command:         `abc "def' ghi`,
+			expectedRes:     nil,
+			isErrorExpected: true,
+		},
+		{
+			name:            "Trailing escape",
+			command:         `abc\`,
+			expectedRes:     nil,
+			isErrorExpected: true,
+		},
+		{
+			name:            "Escape at end of quoted string",
+			command:         `"abc\`,
+			expectedRes:     nil,
+			isErrorExpected: true,
+		},
+
+		// Complex cases
+		{
+			name:            "Multiple quoted sections",
+			command:         `"first part" "second part" third`,
+			expectedRes:     []string{"first part", "second part", "third"},
+			isErrorExpected: false,
+		},
+		{
+			name:            "Quotes with no spaces",
+			command:         `"hello""world"`,
+			expectedRes:     []string{"hello", "world"},
+			isErrorExpected: false,
+		},
+		{
+			name:            "Mixed quotes no spaces",
+			command:         `"hello"'world'`,
+			expectedRes:     []string{"hello", "world"},
+			isErrorExpected: false,
+		},
+
+		// Invalid escape sequences (should preserve backslash)
+		{
+			name:            "Invalid escape sequence \\n",
+			command:         `"hello\nworld"`,
+			expectedRes:     []string{`hello\nworld`},
+			isErrorExpected: false,
+		},
+		{
+			name:            "Invalid escape sequence \\t",
+			command:         `"hello\tworld"`,
+			expectedRes:     []string{`hello\tworld`},
+			isErrorExpected: false,
+		},
+		{
+			name:            "Invalid escape sequence \\x",
+			command:         `"hello\xworld"`,
+			expectedRes:     []string{`hello\xworld`},
+			isErrorExpected: false,
+		},
+		{
+			name:            "Invalid escape sequence \\$",
+			command:         `"hello\$world"`,
+			expectedRes:     []string{`hello\$world`},
+			isErrorExpected: false,
+		},
+	}
+
+	for _, tt := range testdata {
+		t.Run(tt.name, func(t *testing.T) {
+			res, err := tokenizeWithQuotes(tt.command)
+			assert.Equal(t, tt.expectedRes, res)
+			assert.Equal(t, tt.isErrorExpected, err != nil)
+		})
+	}
+}

@@ -133,7 +133,16 @@ func tokenizeWithQuotes(command string) ([]string, error) {
 	for _, r := range command {
 		switch {
 		case escaped:
-			buffer.WriteRune(r)
+			// Only allow escaping of specific characters that have special meaning
+			switch r {
+			case '"', '\'', '\\', ' ':
+				// These are valid escape sequences
+				buffer.WriteRune(r)
+			default:
+				// Invalid escape sequence - treat backslash as literal
+				buffer.WriteRune('\\')
+				buffer.WriteRune(r)
+			}
 			escaped = false
 		case r == '\\':
 			escaped = true
