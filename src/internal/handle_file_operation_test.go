@@ -113,7 +113,7 @@ func TestCompressSelectedFiles(t *testing.T) {
 
 			require.Equal(t, browserMode, m.getFocusedFilePanel().panelMode)
 			if tt.selectMode {
-				m.changeFilePanelMode()
+				m.getFocusedFilePanel().changeFilePanelMode()
 				m.getFocusedFilePanel().selected = tt.selectedElem
 			}
 

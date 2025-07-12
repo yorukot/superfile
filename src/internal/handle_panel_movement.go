@@ -12,70 +12,38 @@ import (
 	variable "github.com/yorukot/superfile/src/config"
 )
 
-// Change file panel mode (select mode or browser mode)
-func (m *model) changeFilePanelMode() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-	switch panel.panelMode {
-	case selectMode:
-		panel.selected = panel.selected[:0]
-		panel.panelMode = browserMode
-	case browserMode:
-		panel.panelMode = selectMode
-	}
-}
-
 // Back to parent directory
 func (m *model) parentDirectory() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-	panel.directoryRecords[panel.location] = directoryRecord{
-		directoryCursor: panel.cursor,
-		directoryRender: panel.render,
-	}
-	fullPath := panel.location
-	parentDir := filepath.Dir(fullPath)
-	panel.location = parentDir
-	curDirectoryRecord, hasRecord := panel.directoryRecords[panel.location]
-	if hasRecord {
-		panel.cursor = curDirectoryRecord.directoryCursor
-		panel.render = curDirectoryRecord.directoryRender
-	} else {
-		panel.cursor = 0
-		panel.render = 0
+	err := m.getFocusedFilePanel().parentDirectory()
+	if err != nil {
+		slog.Error("Error while changing to parent directory", "error", err)
 	}
 }
 
 // Enter directory or open file with default application
+// TODO: Unit test this
 func (m *model) enterPanel() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := m.getFocusedFilePanel()
 
 	if len(panel.element) == 0 {
 		return
 	}
-
-	if panel.element[panel.cursor].directory {
-		panel.directoryRecords[panel.location] = directoryRecord{
-			directoryCursor: panel.cursor,
-			directoryRender: panel.render,
+	selectedItem := panel.getSelectedItem()
+	if selectedItem.directory {
+		// TODO : Propagate error out from this this function. Return here, instead of logging
+		err := panel.updateCurrentFilePanelDir(selectedItem.location)
+		if err != nil {
+			slog.Error("Error while changing to directory", "error", err, "target", selectedItem.location)
 		}
-		panel.location = panel.element[panel.cursor].location
-		curDirectoryRecord, hasRecord := panel.directoryRecords[panel.location]
-		if hasRecord {
-			panel.cursor = curDirectoryRecord.directoryCursor
-			panel.render = curDirectoryRecord.directoryRender
-		} else {
-			panel.cursor = 0
-			panel.render = 0
-		}
-		panel.searchBar.SetValue("")
-	} else if !panel.element[panel.cursor].directory {
-		fileInfo, err := os.Lstat(panel.element[panel.cursor].location)
+	} else if !selectedItem.directory {
+		fileInfo, err := os.Lstat(selectedItem.location)
 		if err != nil {
 			slog.Error("Error while getting file info", "error", err)
 			return
 		}
 
 		if fileInfo.Mode()&os.ModeSymlink != 0 {
-			targetPath, symlinkErr := filepath.EvalSymlinks(panel.element[panel.cursor].location)
+			targetPath, symlinkErr := filepath.EvalSymlinks(selectedItem.location)
 			if symlinkErr != nil {
 				return
 			}
@@ -87,7 +55,10 @@ func (m *model) enterPanel() {
 			}
 
 			if targetInfo.IsDir() {
-				m.fileModel.filePanels[m.filePanelFocusIndex].location = targetPath
+				err = panel.updateCurrentFilePanelDir(targetPath)
+				if err != nil {
+					slog.Error("Error while changing to directory", "error", err, "target", targetPath)
+				}
 				return
 			}
 		}
@@ -133,22 +104,13 @@ func (m *model) sidebarSelectDirectory() {
 	if m.sidebarModel.NoActualDir() {
 		return
 	}
+	// TODO(Refactor): Move this to a function m.ResetFocus()
 	m.focusPanel = nonePanelFocus
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := m.getFocusedFilePanel()
 
-	panel.directoryRecords[panel.location] = directoryRecord{
-		directoryCursor: panel.cursor,
-		directoryRender: panel.render,
-	}
-
-	panel.location = m.sidebarModel.GetCurrentDirectoryLocation()
-	curDirectoryRecord, hasRecord := panel.directoryRecords[panel.location]
-	if hasRecord {
-		panel.cursor = curDirectoryRecord.directoryCursor
-		panel.render = curDirectoryRecord.directoryRender
-	} else {
-		panel.cursor = 0
-		panel.render = 0
+	err := panel.updateCurrentFilePanelDir(m.sidebarModel.GetCurrentDirectoryLocation())
+	if err != nil {
+		slog.Error("Error switching to sidebar directory", "error", err)
 	}
 	panel.focusType = focus
 }

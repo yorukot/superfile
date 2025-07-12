@@ -2,7 +2,6 @@ package internal
 
 import (
 	"errors"
-	"fmt"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -379,17 +378,7 @@ func (m *model) createNewFilePanelRelativeToCurrent(path string) error {
 
 // simulates a 'cd' action
 func (m *model) updateCurrentFilePanelDir(path string) error {
-	currentDir := m.fileModel.filePanels[m.filePanelFocusIndex].location
-	path = utils.ResolveAbsPath(currentDir, path)
-
-	if info, err := os.Stat(path); err != nil {
-		return fmt.Errorf("%s : no such file or directory, stats err : %w", path, err)
-	} else if !info.IsDir() {
-		return fmt.Errorf("%s is not a directory", path)
-	}
-
-	m.fileModel.filePanels[m.filePanelFocusIndex].location = path
-	return nil
+	return m.getFocusedFilePanel().updateCurrentFilePanelDir(path)
 }
 
 // Check if there's any processes running in background
