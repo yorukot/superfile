@@ -136,7 +136,8 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 		}
 	}()
 	// Copy the original file to the backup
-	origFile, err := os.Open(filePath)
+	// Open it in read write mode
+	origFile, err := os.OpenFile(filePath, os.O_RDWR, 0644)
 	if err != nil {
 		resultErr.UpdateMessageAndError("failed to open original file for backup", err)
 		return resultErr
@@ -148,43 +149,19 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 		resultErr.UpdateMessageAndError("failed to copy original file to backup", err)
 		return resultErr
 	}
-	// Write the new config to a temp file
-	tmpFile, err := os.CreateTemp(filepath.Dir(filePath), filepath.Base(filePath)+".tmp-")
-	if err != nil {
-		resultErr.UpdateMessageAndError("failed to create temp file for new config", err)
-		return resultErr
-	}
-	tmpPath := tmpFile.Name()
-	// Ensure cleanup via defer
-	defer func() {
-		// In usual case, the close would have already happened. Ignore the error here
-		tmpFile.Close()
-		// Cleanup file if it exists
-		if errRem := os.Remove(tmpPath); errRem != nil && !os.IsNotExist(errRem) {
-			resultErr.AddMessageAndError(
-				fmt.Sprintf("warning: failed to remove temp config file(%s)", tmpPath), errRem)
-		}
-	}()
+
 	tomlData, err := toml.Marshal(target)
 	if err != nil {
 		resultErr.UpdateMessageAndError("failed to marshal config to TOML", err)
 		return resultErr
 	}
-	_, err = tmpFile.Write(tomlData)
+	_, err = origFile.Write(tomlData)
 
 	if err != nil {
-		resultErr.UpdateMessageAndError("failed to write TOML data to temp file", err)
+		resultErr.UpdateMessageAndError("failed to write TOML data to original file", err)
 		return resultErr
 	}
 
-	// Even though we have a defer to close, we need to close here to make
-	// sure we give up the fd to tmp file, so that os.Rename() can work.
-	tmpFile.Close()
-	// Atomically replace the original file with the new config
-	if err := os.Rename(tmpPath, filePath); err != nil {
-		resultErr.UpdateMessageAndError("failed to atomically replace config file", err)
-		return resultErr
-	}
 	// Fix done
 	// Inform user about backup location
 	resultErr.userMessage = "config file had issues. Its fixed successfully. Original backed up to : " + backupPath
