@@ -74,7 +74,6 @@ func TestModel_Update_Prompt(t *testing.T) {
 
 // testBasicPromptFunctionality tests opening, closing and basic command execution
 func testBasicPromptFunctionality(t *testing.T, dir1 string) {
-
 	t.Run("Basic Prompt Opening", func(t *testing.T) {
 		m := defaultTestModel(dir1)
 		assert.False(t, m.promptModal.IsOpen())
