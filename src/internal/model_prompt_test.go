@@ -66,6 +66,15 @@ func TestModel_Update_Prompt(t *testing.T) {
 	// 2. In case we plan to show output, we need to test case of
 	// too big Shell command output
 
+	testBasicPromptFunctionality(t, dir1)
+	testPanelOperations(t, dir1, dir2, curTestDir)
+	testDirectoryHandlingWithQuotes(t, curTestDir, dir1)
+	testShellCommandsWithQuotes(t, curTestDir, dir1)
+}
+
+// testBasicPromptFunctionality tests opening, closing and basic command execution
+func testBasicPromptFunctionality(t *testing.T, dir1 string) {
+
 	t.Run("Basic Prompt Opening", func(t *testing.T) {
 		m := defaultTestModel(dir1)
 		assert.False(t, m.promptModal.IsOpen())
@@ -80,7 +89,6 @@ func TestModel_Update_Prompt(t *testing.T) {
 		assert.True(t, m.promptModal.IsShellMode(), "Pressing shell key should switch to shell mode")
 
 		// Closing and opening in prompt mode
-
 		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.CancelTyping[0]))
 		assert.False(t, m.promptModal.IsOpen())
 		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenSPFPrompt[0]))
@@ -105,6 +113,19 @@ func TestModel_Update_Prompt(t *testing.T) {
 		assert.True(t, m.promptModal.IsOpen())
 	})
 
+	t.Run("Model closing", func(t *testing.T) {
+		m := defaultTestModel(dir1)
+		for _, key := range common.Hotkeys.CancelTyping {
+			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenSPFPrompt[0]))
+			assert.True(t, m.promptModal.IsOpen())
+			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(key))
+			assert.False(t, m.promptModal.IsOpen(), "Prompt should get closed")
+		}
+	})
+}
+
+// testPanelOperations tests split, cd, and open panel operations
+func testPanelOperations(t *testing.T, dir1, dir2, curTestDir string) {
 	t.Run("Split Panel", func(t *testing.T) {
 		m := defaultTestModel(dir1)
 		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenSPFPrompt[0]))
@@ -226,17 +247,10 @@ func TestModel_Update_Prompt(t *testing.T) {
 		TeaUpdateWithErrCheck(t, &m, tea.KeyMsg{Type: tea.KeyEnter})
 		assert.False(t, m.promptModal.LastActionSucceeded())
 	})
+}
 
-	t.Run("Model closing", func(t *testing.T) {
-		m := defaultTestModel(dir1)
-		for _, key := range common.Hotkeys.CancelTyping {
-			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenSPFPrompt[0]))
-			assert.True(t, m.promptModal.IsOpen())
-			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(key))
-			assert.False(t, m.promptModal.IsOpen(), "Prompt should get closed")
-		}
-	})
-
+// testDirectoryHandlingWithQuotes tests handling directories with spaces and quotes
+func testDirectoryHandlingWithQuotes(t *testing.T, curTestDir, dir1 string) {
 	t.Run("Directory names with spaces and quotes", func(t *testing.T) {
 		// Create test directories with spaces and special characters
 		dirWithSpaces := filepath.Join(curTestDir, "dir with spaces")
@@ -338,7 +352,10 @@ func TestModel_Update_Prompt(t *testing.T) {
 			assert.Equal(t, xdg.Home, m.getFocusedFilePanel().location)
 		})
 	})
+}
 
+// testShellCommandsWithQuotes tests shell command execution with quoted arguments
+func testShellCommandsWithQuotes(t *testing.T, curTestDir, dir1 string) {
 	t.Run("Shell command with quotes", func(t *testing.T) {
 		dirWithSpaces := filepath.Join(curTestDir, "test dir with spaces")
 		setupDirectories(t, dirWithSpaces)
