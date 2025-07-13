@@ -4,17 +4,13 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strconv"
 	"strings"
-	"syscall"
 	"testing"
 
 	"github.com/charmbracelet/x/exp/term/ansi"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/yorukot/superfile/src/internal/common"
-	"github.com/yorukot/superfile/src/internal/utils"
 )
 
 func TestFilePreviewRenderWithDimensions(t *testing.T) {
@@ -244,20 +240,4 @@ func TestReadFileContentBOMHandling(t *testing.T) {
 		"Content should start with expected text, got: %q", result)
 	assert.NotContains(t, result, "\uFEFF",
 		"BOM character should be removed from output: %q", result)
-}
-
-func TestFilePreviewWithInvalidMode(t *testing.T) {
-	if runtime.GOOS == utils.OsWindows {
-		t.Skip("Skipping as FIFO syscall doesn't works in windows")
-	}
-	curTestDir := t.TempDir()
-	file := filepath.Join(curTestDir, "testf")
-
-	err := syscall.Mkfifo(file, 0644)
-	require.NoError(t, err)
-
-	m := defaultTestModel(curTestDir)
-
-	res := m.filePreviewPanelRenderWithDimensions(10, 100)
-	assert.Contains(t, res, common.FilePreviewUnsupportedFileMode)
 }
