@@ -246,80 +246,121 @@ func TestModel_Update_Prompt(t *testing.T) {
 
 		setupDirectories(t, dirWithSpaces, dirWithQuotes, dirWithDoubleQuotes, dirWithMixed)
 
-		m := defaultTestModel(dir1)
-		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenSPFPrompt[0]))
+		t.Run("cd with double quotes", func(t *testing.T) {
+			m := defaultTestModel(dir1)
+			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenSPFPrompt[0]))
 
-		// Test cd with spaces using quotes
-		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(prompt.CdCommand+` "`+dirWithSpaces+`"`))
-		TeaUpdateWithErrCheck(t, &m, tea.KeyMsg{Type: tea.KeyEnter})
-		assert.True(t, m.promptModal.LastActionSucceeded(), "cd with double quotes should work")
-		assert.Equal(t, dirWithSpaces, m.getFocusedFilePanel().location)
+			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(prompt.CdCommand+` "`+dirWithSpaces+`"`))
+			TeaUpdateWithErrCheck(t, &m, tea.KeyMsg{Type: tea.KeyEnter})
+			assert.True(t, m.promptModal.LastActionSucceeded(), "cd with double quotes should work")
+			assert.Equal(t, dirWithSpaces, m.getFocusedFilePanel().location)
+		})
 
-		// Test cd with spaces using single quotes
-		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(prompt.CdCommand+` '`+dirWithSpaces+`'`))
-		TeaUpdateWithErrCheck(t, &m, tea.KeyMsg{Type: tea.KeyEnter})
-		assert.True(t, m.promptModal.LastActionSucceeded(), "cd with single quotes should work")
-		assert.Equal(t, dirWithSpaces, m.getFocusedFilePanel().location)
+		t.Run("cd with single quotes", func(t *testing.T) {
+			m := defaultTestModel(dir1)
+			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenSPFPrompt[0]))
 
-		// Test cd with single quotes in path using double quotes
-		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(prompt.CdCommand+` "`+dirWithQuotes+`"`))
-		TeaUpdateWithErrCheck(t, &m, tea.KeyMsg{Type: tea.KeyEnter})
-		assert.True(t, m.promptModal.LastActionSucceeded(), "cd with single quotes in path should work")
-		assert.Equal(t, dirWithQuotes, m.getFocusedFilePanel().location)
+			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(prompt.CdCommand+` '`+dirWithSpaces+`'`))
+			TeaUpdateWithErrCheck(t, &m, tea.KeyMsg{Type: tea.KeyEnter})
+			assert.True(t, m.promptModal.LastActionSucceeded(), "cd with single quotes should work")
+			assert.Equal(t, dirWithSpaces, m.getFocusedFilePanel().location)
+		})
 
-		// Test cd with double quotes in path using single quotes
-		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(prompt.CdCommand+` '`+dirWithDoubleQuotes+`'`))
-		TeaUpdateWithErrCheck(t, &m, tea.KeyMsg{Type: tea.KeyEnter})
-		assert.True(t, m.promptModal.LastActionSucceeded(), "cd with double quotes in path should work")
-		assert.Equal(t, dirWithDoubleQuotes, m.getFocusedFilePanel().location)
+		t.Run("cd with single quotes in path using double quotes", func(t *testing.T) {
+			m := defaultTestModel(dir1)
+			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenSPFPrompt[0]))
 
-		// Test cd with escaped quotes
-		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(prompt.CdCommand+` `+strings.ReplaceAll(dirWithSpaces, " ", `\ `)))
-		TeaUpdateWithErrCheck(t, &m, tea.KeyMsg{Type: tea.KeyEnter})
-		assert.True(t, m.promptModal.LastActionSucceeded(), "cd with escaped spaces should work")
-		assert.Equal(t, dirWithSpaces, m.getFocusedFilePanel().location)
+			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(prompt.CdCommand+` "`+dirWithQuotes+`"`))
+			TeaUpdateWithErrCheck(t, &m, tea.KeyMsg{Type: tea.KeyEnter})
+			assert.True(t, m.promptModal.LastActionSucceeded(), "cd with single quotes in path should work")
+			assert.Equal(t, dirWithQuotes, m.getFocusedFilePanel().location)
+		})
 
-		// Test open with spaces and quotes
-		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(prompt.OpenCommand+` "`+dirWithSpaces+`"`))
-		TeaUpdateWithErrCheck(t, &m, tea.KeyMsg{Type: tea.KeyEnter})
-		assert.True(t, m.promptModal.LastActionSucceeded(), "open with double quotes should work")
-		assert.Equal(t, dirWithSpaces, m.getFocusedFilePanel().location)
+		t.Run("cd with double quotes in path using single quotes", func(t *testing.T) {
+			m := defaultTestModel(dir1)
+			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenSPFPrompt[0]))
 
-		m.closeFilePanel()
+			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(prompt.CdCommand+` '`+dirWithDoubleQuotes+`'`))
+			TeaUpdateWithErrCheck(t, &m, tea.KeyMsg{Type: tea.KeyEnter})
+			assert.True(t, m.promptModal.LastActionSucceeded(), "cd with double quotes in path should work")
+			assert.Equal(t, dirWithDoubleQuotes, m.getFocusedFilePanel().location)
+		})
 
-		// Test shell substitution with quotes
-		userHomeEnv := "HOME"
-		if runtime.GOOS == utils.OsWindows {
-			userHomeEnv = "USERPROFILE"
-		}
-		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(prompt.CdCommand+` "${`+userHomeEnv+`}"`))
-		TeaUpdateWithErrCheck(t, &m, tea.KeyMsg{Type: tea.KeyEnter})
-		assert.True(t, m.promptModal.LastActionSucceeded(), "cd with quoted env var should work")
-		assert.Equal(t, xdg.Home, m.getFocusedFilePanel().location)
+		t.Run("cd with escaped spaces", func(t *testing.T) {
+			m := defaultTestModel(dir1)
+			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenSPFPrompt[0]))
 
-		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(prompt.CdCommand+` '${`+userHomeEnv+`}'`))
-		TeaUpdateWithErrCheck(t, &m, tea.KeyMsg{Type: tea.KeyEnter})
-		assert.True(t, m.promptModal.LastActionSucceeded(), "cd with single quoted env var works in superfile (unlike bash)")
-		assert.Equal(t, xdg.Home, m.getFocusedFilePanel().location)
+			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(prompt.CdCommand+` `+strings.ReplaceAll(dirWithSpaces, " ", `\ `)))
+			TeaUpdateWithErrCheck(t, &m, tea.KeyMsg{Type: tea.KeyEnter})
+			assert.True(t, m.promptModal.LastActionSucceeded(), "cd with escaped spaces should work")
+			assert.Equal(t, dirWithSpaces, m.getFocusedFilePanel().location)
+		})
+
+		t.Run("open with double quotes", func(t *testing.T) {
+			m := defaultTestModel(dir1)
+			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenSPFPrompt[0]))
+
+			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(prompt.OpenCommand+` "`+dirWithSpaces+`"`))
+			TeaUpdateWithErrCheck(t, &m, tea.KeyMsg{Type: tea.KeyEnter})
+			assert.True(t, m.promptModal.LastActionSucceeded(), "open with double quotes should work")
+			assert.Equal(t, dirWithSpaces, m.getFocusedFilePanel().location)
+
+			m.closeFilePanel()
+		})
+
+		t.Run("cd with quoted environment variable", func(t *testing.T) {
+			m := defaultTestModel(dir1)
+			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenSPFPrompt[0]))
+
+			userHomeEnv := "HOME"
+			if runtime.GOOS == utils.OsWindows {
+				userHomeEnv = "USERPROFILE"
+			}
+
+			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(prompt.CdCommand+` "${`+userHomeEnv+`}"`))
+			TeaUpdateWithErrCheck(t, &m, tea.KeyMsg{Type: tea.KeyEnter})
+			assert.True(t, m.promptModal.LastActionSucceeded(), "cd with quoted env var should work")
+			assert.Equal(t, xdg.Home, m.getFocusedFilePanel().location)
+		})
+
+		t.Run("cd with single quoted environment variable", func(t *testing.T) {
+			m := defaultTestModel(dir1)
+			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenSPFPrompt[0]))
+
+			userHomeEnv := "HOME"
+			if runtime.GOOS == utils.OsWindows {
+				userHomeEnv = "USERPROFILE"
+			}
+
+			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(prompt.CdCommand+` '${`+userHomeEnv+`}'`))
+			TeaUpdateWithErrCheck(t, &m, tea.KeyMsg{Type: tea.KeyEnter})
+			assert.True(t, m.promptModal.LastActionSucceeded(), "cd with single quoted env var works in superfile (unlike bash)")
+			assert.Equal(t, xdg.Home, m.getFocusedFilePanel().location)
+		})
 	})
 
 	t.Run("Shell command with quotes", func(t *testing.T) {
 		dirWithSpaces := filepath.Join(curTestDir, "test dir with spaces")
 		setupDirectories(t, dirWithSpaces)
 
-		m := defaultTestModel(dir1)
-		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenCommandLine[0]))
+		t.Run("shell command with double quotes", func(t *testing.T) {
+			m := defaultTestModel(dir1)
+			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenCommandLine[0]))
 
-		// Test shell command with quoted directory
-		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(`mkdir "`+filepath.Join(dir1, "new dir with spaces")+`"`))
-		TeaUpdateWithErrCheck(t, &m, tea.KeyMsg{Type: tea.KeyEnter})
-		assert.True(t, m.promptModal.LastActionSucceeded(), "shell command with quotes should work")
-		assert.DirExists(t, filepath.Join(dir1, "new dir with spaces"))
+			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(`mkdir "`+filepath.Join(dir1, "new dir with spaces")+`"`))
+			TeaUpdateWithErrCheck(t, &m, tea.KeyMsg{Type: tea.KeyEnter})
+			assert.True(t, m.promptModal.LastActionSucceeded(), "shell command with quotes should work")
+			assert.DirExists(t, filepath.Join(dir1, "new dir with spaces"))
+		})
 
-		// Test shell command with single quotes
-		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(`mkdir '`+filepath.Join(dir1, "another dir with spaces")+`'`))
-		TeaUpdateWithErrCheck(t, &m, tea.KeyMsg{Type: tea.KeyEnter})
-		assert.True(t, m.promptModal.LastActionSucceeded(), "shell command with single quotes should work")
-		assert.DirExists(t, filepath.Join(dir1, "another dir with spaces"))
+		t.Run("shell command with single quotes", func(t *testing.T) {
+			m := defaultTestModel(dir1)
+			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenCommandLine[0]))
+
+			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(`mkdir '`+filepath.Join(dir1, "another dir with spaces")+`'`))
+			TeaUpdateWithErrCheck(t, &m, tea.KeyMsg{Type: tea.KeyEnter})
+			assert.True(t, m.promptModal.LastActionSucceeded(), "shell command with single quotes should work")
+			assert.DirExists(t, filepath.Join(dir1, "another dir with spaces"))
+		})
 	})
 }
