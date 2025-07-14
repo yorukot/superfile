@@ -254,10 +254,24 @@ func testDirectoryHandlingWithQuotes(t *testing.T, curTestDir, dir1 string) {
 		// Create test directories with spaces and special characters
 		dirWithSpaces := filepath.Join(curTestDir, "dir with spaces")
 		dirWithQuotes := filepath.Join(curTestDir, "dir'with'quotes")
-		dirWithDoubleQuotes := filepath.Join(curTestDir, `dir"with"quotes`)
-		dirWithMixed := filepath.Join(curTestDir, `dir with 'mixed' "quotes"`)
 
-		setupDirectories(t, dirWithSpaces, dirWithQuotes, dirWithDoubleQuotes, dirWithMixed)
+		// Windows doesn't allow double quotes in directory names
+		var dirWithSpecialChars, dirWithMixed string
+		var directoriesToCreate []string
+
+		if runtime.GOOS == "windows" {
+			// On Windows, use alternative characters that don't conflict with filesystem restrictions
+			dirWithSpecialChars = filepath.Join(curTestDir, `dir[with]quotes`)
+			dirWithMixed = filepath.Join(curTestDir, `dir with 'mixed' [quotes]`)
+			directoriesToCreate = []string{dirWithSpaces, dirWithQuotes, dirWithSpecialChars, dirWithMixed}
+		} else {
+			// On Unix-like systems, double quotes are allowed in directory names
+			dirWithSpecialChars = filepath.Join(curTestDir, `dir"with"quotes`)
+			dirWithMixed = filepath.Join(curTestDir, `dir with 'mixed' "quotes"`)
+			directoriesToCreate = []string{dirWithSpaces, dirWithQuotes, dirWithSpecialChars, dirWithMixed}
+		}
+
+		setupDirectories(t, directoriesToCreate...)
 
 		t.Run("cd with double quotes", func(t *testing.T) {
 			m := defaultTestModel(dir1)
@@ -293,10 +307,10 @@ func testDirectoryHandlingWithQuotes(t *testing.T, curTestDir, dir1 string) {
 			m := defaultTestModel(dir1)
 			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenSPFPrompt[0]))
 
-			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(prompt.CdCommand+` '`+dirWithDoubleQuotes+`'`))
+			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(prompt.CdCommand+` '`+dirWithSpecialChars+`'`))
 			TeaUpdateWithErrCheck(t, &m, tea.KeyMsg{Type: tea.KeyEnter})
 			assert.True(t, m.promptModal.LastActionSucceeded(), "cd with double quotes in path should work")
-			assert.Equal(t, dirWithDoubleQuotes, m.getFocusedFilePanel().location)
+			assert.Equal(t, dirWithSpecialChars, m.getFocusedFilePanel().location)
 		})
 
 		t.Run("cd with escaped spaces", func(t *testing.T) {
