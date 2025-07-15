@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"image"
+	"io/fs"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -686,6 +687,12 @@ func (m *model) renderUnsupportedFormat(box lipgloss.Style) string {
 	return box.Render(common.FilePreviewUnsupportedFormatText)
 }
 
+// Helper function to handle unsupported mode
+func (m *model) renderUnsupportedFileMode(r *rendering.Renderer) string {
+	r.AddLines(common.FilePreviewUnsupportedFileMode)
+	return r.Render()
+}
+
 // Helper function to handle directory preview
 func (m *model) renderDirectoryPreview(r *rendering.Renderer, itemPath string, previewHeight int) string {
 	files, err := os.ReadDir(itemPath)
@@ -818,9 +825,16 @@ func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewW
 	// data is causing crash.
 	itemPath := panel.element[panel.cursor].location
 	fileInfo, infoErr := os.Stat(itemPath)
-
 	if infoErr != nil {
 		return m.renderFileInfoError(r, box, infoErr) + clearCmd
+	}
+	slog.Debug("Attempting to render preview", "itemPath", itemPath,
+		"mode", fileInfo.Mode().String(), "isRegular", fileInfo.Mode().IsRegular())
+
+	// For non regular files which are not directories Dont try to read them
+	// See Issue
+	if !fileInfo.Mode().IsRegular() && (fileInfo.Mode()&fs.ModeDir) == 0 {
+		return m.renderUnsupportedFileMode(r) + clearCmd
 	}
 
 	ext := filepath.Ext(itemPath)
