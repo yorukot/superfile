@@ -10,6 +10,62 @@ head:
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC(YYYY-MM-DD).
 
+# [**v1.3.2**](https://github.com/yorukot/superfile/releases/tag/v1.3.2)
+
+> 2025-07-16
+
+#### Update
+- Normalize user-facing naming to superfile [`#880`](https://github.com/yorukot/superfile/pull/880)
+- Add kitty protocol for image preview [`#841`](https://github.com/yorukot/superfile/pull/841)
+- feat: add Zoxide support for path resolution in initial configuration [`#892`](https://github.com/yorukot/superfile/pull/892)
+- feat: update superfile's help output [`#908`](https://github.com/yorukot/superfile/pull/908)
+- feat: Add Action to Publish to Winget [`#925`](https://github.com/yorukot/superfile/pull/925)
+- feat: update superfile build test for the windows and macOS [`#922`](https://github.com/yorukot/superfile/pull/922)
+- Compress all files selected [`#821`](https://github.com/yorukot/superfile/pull/821)
+- Theme: add 0x96f theme [`#860`](https://github.com/yorukot/superfile/pull/860)
+
+#### Bug fix
+- fix: outdated and broken nix flake [`#846`](https://github.com/yorukot/superfile/pull/846)
+- fix: handle UTF-8 BOM in file reader [`#865`](https://github.com/yorukot/superfile/pull/865)
+- fix icon displayed on spf prompt when nerdfont disabled [`#878`](https://github.com/yorukot/superfile/pull/878)
+- fix: create item check for dot-entries [`#817`](https://github.com/yorukot/superfile/pull/817)
+- fix: prevent pasting a directory into itself, avoiding infinite loop [`#887`](https://github.com/yorukot/superfile/pull/887)
+- fix: clear search bar value on parent directory reset [`#906`](https://github.com/yorukot/superfile/pull/906)
+- fix: enhance terminal pixel detection and response handling [`#904`](https://github.com/yorukot/superfile/pull/904)
+- fix: Cannot Build superfile on Windows [`#921`](https://github.com/yorukot/superfile/pull/921)
+- fix: Improve command tokenization to handle quotes and escapes [`#931`](https://github.com/yorukot/superfile/pull/931)
+- fix: Dont read special files, and prevent freeze [`#932`](https://github.com/yorukot/superfile/pull/932)
+
+#### Optimization
+- Metadata and filepanel rendering refactor [`#867`](https://github.com/yorukot/superfile/pull/867)
+- refactor: simplify panel mode handling in file movement logic [`#907`](https://github.com/yorukot/superfile/pull/907)
+- refactor: standardize TODO comments and ReadMe to README [`#913`](https://github.com/yorukot/superfile/pull/913)
+
+#### Documentation
+- enhance: add detailed documentation for InitIcon function and update … [`#879`](https://github.com/yorukot/superfile/pull/879)
+- docs: add documentation for image preview [`#882`](https://github.com/yorukot/superfile/pull/882)
+- docs: update contributing guide and PR template [`#885`](https://github.com/yorukot/superfile/pull/885)
+- docs: update README and plugin documentation for clarity and structure [`#902`](https://github.com/yorukot/superfile/pull/902)
+- feat(docs): Update arch install package docs [`#929`](https://github.com/yorukot/superfile/pull/929)
+
+#### CI/CD
+- ci: add PR title linting with semantic-pull-request action [`#884`](https://github.com/yorukot/superfile/pull/884)
+- ci: improve PR workflows with contributor greeting and title linter fix [`#886`](https://github.com/yorukot/superfile/pull/886)
+
+#### Dependencies
+- build(deps): bump prismjs from 1.29.0 to 1.30.0 in /website [`#786`](https://github.com/yorukot/superfile/pull/786)
+- fix(deps): update dependency astro to v5.8.0 [`#787`](https://github.com/yorukot/superfile/pull/787)
+- chore(deps): bump vite from 6.3.3 to 6.3.5 in /website [`#822`](https://github.com/yorukot/superfile/pull/822)
+- fix(deps): update dependency sharp to v0.34.2 [`#909`](https://github.com/yorukot/superfile/pull/909)
+- fix(deps): update astro monorepo [`#894`](https://github.com/yorukot/superfile/pull/894)
+- fix(deps): update fontsource monorepo to v5.2.6 [`#910`](https://github.com/yorukot/superfile/pull/910)
+
+#### Misc
+- chore(license): update copyright year [`#895`](https://github.com/yorukot/superfile/pull/895)
+- feat: add ignore missing field flag [`#881`](https://github.com/yorukot/superfile/pull/881)
+- feat: add sitemap integration and update giscus input position [`#912`](https://github.com/yorukot/superfile/pull/912)
+
+
 # [**v1.3.1**](https://github.com/yorukot/superfile/releases/tag/v1.3.1)
 
 > 2025-05-27
