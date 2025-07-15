@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/yorukot/superfile/src/internal/utils"
 )
@@ -17,7 +18,7 @@ func tokenizePromptCommand(command string, cwdLocation string) ([]string, error)
 	if err != nil {
 		return nil, err
 	}
-	return strings.Fields(command), nil
+	return tokenizeWithQuotes(command)
 }
 
 // Replace ${} and $() with values
@@ -109,4 +110,66 @@ func findEndingBracket(r []rune, openIdx int, openParan rune, closeParan rune) i
 		}
 	}
 	return i
+}
+
+// splits command into tokens while respecting quotes and escapes
+func tokenizeWithQuotes(command string) ([]string, error) {
+	var (
+		tokens    []string
+		buffer    strings.Builder
+		quoteOpen rune // 0:none, '\'' or '"'
+		escaped   bool
+	)
+
+	// Initialize tokens as empty slice instead of nil
+	tokens = []string{}
+
+	// Helper function to flush the current buffer into tokens
+	flush := func() {
+		tokens = append(tokens, buffer.String())
+		buffer.Reset()
+	}
+
+	for _, r := range command {
+		switch {
+		case escaped:
+			// Only allow escaping of specific characters that have special meaning
+			switch r {
+			case '"', '\'', '\\', ' ':
+				// These are valid escape sequences
+				buffer.WriteRune(r)
+			default:
+				// Invalid escape sequence - treat backslash as literal
+				buffer.WriteRune('\\')
+				buffer.WriteRune(r)
+			}
+			escaped = false
+		case r == '\\':
+			escaped = true
+		case quoteOpen == 0 && (r == '"' || r == '\''):
+			quoteOpen = r
+		case quoteOpen == r:
+			// End of quoted section - always flush (even if empty)
+			flush()
+			quoteOpen = 0
+		case unicode.IsSpace(r) && quoteOpen == 0:
+			// Only flush if we have content
+			if buffer.Len() > 0 {
+				flush()
+			}
+		default:
+			buffer.WriteRune(r)
+		}
+	}
+
+	if escaped || quoteOpen != 0 {
+		return nil, errors.New("unmatched quotes or escape characters in command")
+	}
+
+	// Flush any remaining content
+	if buffer.Len() > 0 {
+		flush()
+	}
+
+	return tokens, nil
 }
