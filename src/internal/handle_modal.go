@@ -20,11 +20,19 @@ func (m *model) cancelWarnModal() {
 
 // Confirm to create file or directory
 func (m *model) createItem() {
-	// Reset the typingModal in all cases
+	if err := checkFileNameValidity(m.typingModal.textInput.Value()); err != nil {
+		m.typingModal.errorMesssage = err.Error()
+		slog.Error("Errow while createItem during item creation", "error", err)
+
+		return
+	}
+
 	defer func() {
+		m.typingModal.errorMesssage = ""
 		m.typingModal.open = false
 		m.typingModal.textInput.Blur()
 	}()
+
 	path := filepath.Join(m.typingModal.location, m.typingModal.textInput.Value())
 	if !strings.HasSuffix(m.typingModal.textInput.Value(), string(filepath.Separator)) {
 		path, _ = renameIfDuplicate(path)
@@ -39,7 +47,6 @@ func (m *model) createItem() {
 		}
 		defer f.Close()
 	} else {
-		// Directory creation
 		err := os.MkdirAll(path, 0755)
 		if err != nil {
 			slog.Error("Error while createItem during directory creation", "error", err)

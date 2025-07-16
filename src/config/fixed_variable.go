@@ -4,14 +4,14 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	"github.com/yorukot/superfile/src/internal/utils"
 
 	"github.com/adrg/xdg"
 )
 
 const (
-	CurrentVersion      = "v1.3.1"
+	CurrentVersion      = "v1.3.2"
 	LatestVersionURL    = "https://api.github.com/repos/yorukot/superfile/releases/latest"
 	LatestVersionGithub = "github.com/yorukot/superfile/releases/latest"
 
@@ -78,7 +78,7 @@ func SetChooserFile(path string) {
 	ChooserFile = path
 }
 
-func UpdateVarFromCliArgs(c *cli.Context) {
+func UpdateVarFromCliArgs(c *cli.Command) {
 	// Setting the config file path
 	configFileArg := c.String("config-file")
 

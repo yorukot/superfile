@@ -1,14 +1,25 @@
 ---
-title: Plugin list
-description: superfile plugin list
+title: Plugin List
+description: Complete list of available superfile plugins
 head:
   - tag: title
-    content: Plugin list | superfile
+    content: Plugin List | superfile
 ---
 
-## Metadata
-description: Show more detailed metadata
+Superfile supports various plugins to extend its functionality. Below is a complete list of available plugins and their requirements.
 
-Requirements: `exiftool`
+### Metadata
 
-name in config.toml: `metadata`
+- **Description:** Show more detailed metadata for files and directories
+
+- **Requirements:** [`exiftool`](https://exiftool.org)
+
+- **Config name:** `metadata`
+
+### Zoxide
+
+- **Description:** Smart directory jumping integration with zoxide
+
+- **Requirements:** [`zoxide`](https://github.com/ajeetdsouza/zoxide)
+
+- **Config name:** `zoxide`

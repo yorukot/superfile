@@ -1,0 +1,4 @@
+sample_bool = true
+sample_int = -1
+sample_slice = ['a', 'b']
+ignore_missing = true

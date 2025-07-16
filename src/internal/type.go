@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/yorukot/superfile/src/internal/ui/sidebar"
+	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
 
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -74,6 +75,7 @@ const (
 	sendWarnModal channelMessageType = iota
 	sendMetadata
 	sendProcess
+	sendNotifyModal
 )
 
 const (
@@ -84,22 +86,27 @@ const (
 )
 
 // Main model
-// Todo : We could consider using *model as tea.Model, instead of model.
+// TODO : We could consider using *model as tea.Model, instead of model.
 // for reducing re-allocations. The struct is 20K bytes. But this could lead to
 // issues like race conditions and whatnot, which are hidden since we are creating
 // new model in each tea update.
 type model struct {
+	// Main Panels
 	fileModel       fileModel
 	sidebarModel    sidebar.Model
 	processBarModel processBarModel
 	focusPanel      focusPanelType
 	copyItems       copyItems
-	typingModal     typingModal
-	warnModal       warnModal
-	helpMenu        helpMenuModal
-	promptModal     prompt.Model
-	fileMetaData    fileMetadata
 
+	// Modals
+	notifyModal notifyModal
+	typingModal typingModal
+	warnModal   warnModal
+	helpMenu    helpMenuModal
+	promptModal prompt.Model
+
+	fileMetaData         fileMetadata
+	imagePreviewer       *filepreview.ImagePreviewer
 	modelQuitState       modelQuitStateType
 	firstTextInput       bool
 	toggleDotFile        bool
@@ -145,9 +152,16 @@ type warnModal struct {
 }
 
 type typingModal struct {
-	location  string
-	open      bool
-	textInput textinput.Model
+	location      string
+	open          bool
+	textInput     textinput.Model
+	errorMesssage string
+}
+
+type notifyModal struct {
+	open    bool
+	title   string
+	content string
 }
 
 // File metadata
@@ -253,6 +267,7 @@ type channelMessage struct {
 	messageType     channelMessageType
 	processNewState process
 	warnModal       warnModal
+	notifyModal     notifyModal
 	metadata        [][2]string
 }
 

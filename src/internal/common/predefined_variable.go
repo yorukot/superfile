@@ -9,12 +9,13 @@ import (
 
 const WheelRunTime = 5
 const DefaultCommandTimeout = 5000 * time.Millisecond
+const DateModifiedOption = "Date Modified"
 
 var (
 	MinimumHeight = 24
 	MinimumWidth  = 60
 
-	// Todo : These are model object properties, not global properties
+	// TODO : These are model object properties, not global properties
 	// We are modifying them in the code many time. They need to be part of model struct.
 	MinFooterHeight = 6
 	ModalWidth      = 60
@@ -35,8 +36,10 @@ var (
 	FilePreviewNoContentText           string
 	FilePreviewNoFileInfoText          string
 	FilePreviewUnsupportedFormatText   string
+	FilePreviewUnsupportedFileMode     string
 	FilePreviewDirectoryUnreadableText string
 	FilePreviewEmptyText               string
+	FilePreviewError                   string
 
 	LipglossError string
 )
@@ -51,28 +54,31 @@ func LoadInitialPrerenderedVariables() {
 		lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFEE")).Render(" ┃ ")
 }
 
-// Dependecies - Todo We should programmatically guarantee these dependencies. And log error
+// Dependecies - TODO We should programmatically guarantee these dependencies. And log error
 // if its not satisfied.
 // LoadThemeConfig() in style.go should be finished
 // loadConfigFile() in config_types.go should be finished
 // InitIcon() in config package in function.go should be finished
 func LoadPrerenderedVariables() {
-	SideBarSuperfileTitle = SidebarTitleStyle.Render(" " + icon.SuperfileIcon + " superfile")
+	SideBarSuperfileTitle = SidebarTitleStyle.Render(" " + icon.SuperfileIcon + icon.Space + "superfile")
 
-	SideBarPinnedDivider = SidebarTitleStyle.Render(icon.Pinned+" Pinned") + SidebarDividerStyle.Render(" ───────────")
+	SideBarPinnedDivider = SidebarTitleStyle.Render(icon.Pinned+icon.Space+"Pinned") + SidebarDividerStyle.Render(" ───────────")
 
-	SideBarDisksDivider = SidebarTitleStyle.Render(icon.Disk+" Disks") + SidebarDividerStyle.Render(" ────────────")
+	SideBarDisksDivider = SidebarTitleStyle.Render(icon.Disk+icon.Space+"Disks") + SidebarDividerStyle.Render(" ────────────")
 
-	SideBarNoneText = SidebarStyle.Render(" " + icon.Error + " None")
+	SideBarNoneText = SidebarStyle.Render(" " + icon.Error + icon.Space + "None")
 
-	ProcessBarNoneText = icon.Error + "  No processes running"
+	ProcessBarNoneText = icon.Error + icon.Space + "No processes running"
 
 	FilePanelTopDirectoryIcon = FilePanelTopDirectoryIconStyle.Render(" " + icon.Directory + icon.Space)
-	FilePanelNoneText = FilePanelStyle.Render(" " + icon.Error + "  No such file or directory")
+	FilePanelNoneText = FilePanelStyle.Render(" " + icon.Error + icon.Space + "No such file or directory")
 
-	FilePreviewNoContentText = "--- " + icon.Error + " No content to preview ---"
-	FilePreviewNoFileInfoText = "--- " + icon.Error + " Could not get file info ---"
-	FilePreviewUnsupportedFormatText = "--- " + icon.Error + " Unsupported formats ---"
-	FilePreviewDirectoryUnreadableText = "--- " + icon.Error + " Cannot read directory ---"
-	FilePreviewEmptyText = "--- Empty ---"
+	// TODO : This "---" being appended before and after should be done via a function
+	FilePreviewNoContentText = "\n--- " + icon.Error + icon.Space + "No content to preview" + icon.Space + "---"
+	FilePreviewNoFileInfoText = "\n--- " + icon.Error + icon.Space + "Could not get file info" + icon.Space + "---"
+	FilePreviewUnsupportedFormatText = "\n--- " + icon.Error + icon.Space + "Unsupported formats" + icon.Space + "---"
+	FilePreviewUnsupportedFileMode = "\n--- " + icon.Error + icon.Space + "Unsupported File Mode" + icon.Space + "---"
+	FilePreviewDirectoryUnreadableText = "\n--- " + icon.Error + icon.Space + "Cannot read directory" + icon.Space + "---"
+	FilePreviewError = "\n--- " + icon.Error + icon.Space + "Error" + icon.Space + "---"
+	FilePreviewEmptyText = "\n--- Empty ---"
 }

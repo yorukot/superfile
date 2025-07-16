@@ -269,7 +269,7 @@ linters:
     - bodyclose # checks whether HTTP response body is closed successfully
     - canonicalheader # checks whether net/http.Header uses canonical header
     - copyloopvar # detects places where loop variables are copied (Go 1.22+)
-    # Todo enable this - This needs a fix in few of our functions
+    # TODO enable this - This needs a fix in few of our functions
     #- cyclop # checks function and package cyclomatic complexity
     - depguard # checks if package imports are in a list of acceptable packages
     - dupl # tool for code clone detection
@@ -280,38 +280,38 @@ linters:
     - exptostd # detects functions from golang.org/x/exp/ that can be replaced by std functions
     - fatcontext # detects nested contexts in loops
     # - forbidigo # forbids identifiers # Not needed. this blocks only fmt.Print family and is not useful right now
-    # Todo enable - need to make functions shorter
+    # TODO enable - need to make functions shorter
     #- funlen # tool for detection of long functions
     - gocheckcompilerdirectives # validates go compiler directive comments (//go:)
-    # Todo enable - This is too much for us right now
+    # TODO enable - This is too much for us right now
     - gochecknoglobals # checks that no global variables exist
     - gochecknoinits # checks that no init functions are present in Go code
     - gochecksumtype # checks exhaustiveness on Go "sum types"
-    # Todo enable - Need to refactor many functions
+    # TODO enable - Need to refactor many functions
     # - gocognit # computes and checks the cognitive complexity of functions
     - goconst # finds repeated strings that could be replaced by a constant
     - gocritic # provides diagnostics that check for bugs, performance and style issues
-    # Todo enable
+    # TODO enable
     #- gocyclo # computes and checks the cyclomatic complexity of functions
     #- godot # checks if comments end in a period # Too much for us right now
     - goimports # in addition to fixing imports, goimports also formats your code in the same style as gofmt
     - gomoddirectives # manages the use of 'replace', 'retract', and 'excludes' directives in go.mod
     - goprintffuncname # checks that printf-like functions are named with f at the end
-    # Todo enable - ignore for a few int overflow, and fix file permissions
+    # TODO enable - ignore for a few int overflow, and fix file permissions
     # weak md5 cryptography, Subprocess launched with a potential tainted input
     # - gosec # inspects source code for security problems
     - iface # checks the incorrect use of interfaces, helping developers avoid interface pollution
     - intrange # finds places where for loops could make use of an integer range
-    # Todo enable : Need many fixes
+    # TODO enable : Need many fixes
     # - lll # reports long lines
     - loggercheck # checks key value pairs for common logger libraries (kitlog,klog,logr,zap)
     - makezero # finds slice declarations with non-zero initial length
     - mirror # reports wrong mirror patterns of bytes/strings usage
-    # Todo enable - Many many magic numbers, and this should be fixed.
+    # TODO enable - Many many magic numbers, and this should be fixed.
     # - mnd # detects magic numbers
     - musttag # enforces field tags in (un)marshaled structs
     - nakedret # finds naked returns in functions greater than a specified function length
-    # Todo enable : Many reports. A bit hard to understand the nesting value.
+    # TODO enable : Many reports. A bit hard to understand the nesting value.
     # - nestif # reports deeply nested if statements
     - nilerr # finds the code that returns nil even if it checks that the error is not nil
     - nilnesserr # reports that it checks for err != nil, but it returns a different nil value error (powered by nilness and nilerr)
@@ -325,11 +325,11 @@ linters:
     - promlinter # checks Prometheus metrics naming via promlint
     - protogetter # reports direct reads from proto message fields when getters should be used
     - reassign # checks that package variables are not reassigned
-    # Todo enable - Issue due to model struct
+    # TODO enable - Issue due to model struct
     # - recvcheck # checks for receiver type consistency
     - revive # fast, configurable, extensible, flexible, and beautiful linter for Go, drop-in replacement of golint
     - rowserrcheck # checks whether Err of rows is checked successfully
-    # Todo enable - Need to use non-root logger
+    # TODO enable - Need to use non-root logger
     # - sloglint # ensure consistent code style when using log/slog
     - spancheck # checks for mistakes with OpenTelemetry/Census spans
     - sqlclosecheck # checks that sql.Rows and sql.Stmt are closed
@@ -345,7 +345,7 @@ linters:
     - wastedassign # finds wasted assignment statements
     - whitespace # detects leading and trailing whitespace
 
-    ## Todo : Enable some of them
+    ## TODO : Enable some of them
     ## you may want to enable
     - decorder # checks declaration order and count of types, constants, variables and functions
     # We have so many false positives

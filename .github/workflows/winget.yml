@@ -1,0 +1,19 @@
+name: Publish to WinGet
+
+on:
+  release:
+    types: [released]
+
+jobs:
+  publish:
+    name: Publish WinGet package
+    runs-on: windows-latest
+    steps:
+      - name: Submit package to Windows Package Manager Community Repository
+        uses: vedantmgoyal2009/winget-releaser@v2
+        with:
+          identifier: yorukot.superfile
+          installers-regex: '\.(zip|msi)$'
+          version: ${{ github.event.release.tag_name }}
+          release-tag: ${{ github.event.release.tag_name }}
+          token: ${{ secrets.WINGET_TOKEN }}

@@ -1,0 +1,61 @@
+# 0x96f
+# Theme create by: https://github.com/filipjanevski
+
+code_syntax_highlight = "monokai"
+
+# ========= Border =========
+file_panel_border = "#757075"
+sidebar_border = "#757075"
+footer_border = "#757075"
+
+# ========= Border Active =========
+file_panel_border_active = "#ffca58"
+sidebar_border_active = "#baebf6"
+footer_border_active = "#ffca58"
+modal_border_active = "#ffca58"
+
+# ========= Background (bg) =========
+full_screen_bg = "#262427"
+file_panel_bg = "#262427"
+sidebar_bg = "#262427"
+footer_bg = "#262427"
+modal_bg = "#262427"
+
+# ========= Foreground (fg) =========
+full_screen_fg = "#fcfcfc"
+file_panel_fg = "#fcfcfc"
+sidebar_fg = "#fcfcfc"
+footer_fg = "#fcfcfc"
+modal_fg = "#fcfcfc"
+
+# ========= Special Color =========
+cursor = "#ffca58"
+correct = "#c6e472"
+error = "#ff8787"
+hint = "#baebf6"
+cancel = "#fcfcfc"
+# Gradient color can only have two colors!
+gradient_color = ["#ff7272", "#bcdf59"]
+
+# ========= File Panel Special Items =========
+file_panel_top_directory_icon = "#64d2e8"
+file_panel_top_path = "#fcfcfc"
+file_panel_item_selected_fg = "#c6e472"
+file_panel_item_selected_bg = "#262427"
+
+# ========= Sidebar Special Items =========
+sidebar_title = "#64d2e8"
+sidebar_item_selected_fg = "#c6e472"
+sidebar_item_selected_bg = "#262427"
+sidebar_divider = "#757075"
+
+# ========= Modal Special Items =========
+modal_cancel_fg = "#262427"
+modal_cancel_bg = "#ff8787"
+
+modal_confirm_fg = "#262427"
+modal_confirm_bg = "#bcdf59"
+
+# ========= Help Menu =========
+help_menu_hotkey = "#ff8787"
+help_menu_title = "#64d2e8"

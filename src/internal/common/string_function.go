@@ -52,7 +52,7 @@ func TruncateMiddleText(text string, maxChars int, tails string) string {
 	}
 
 	halfEllipsisLength := (maxChars - 3) / 2
-	// Todo : Use ansi.Substring to correctly handle ANSI escape codes
+	// TODO : Use ansi.Substring to correctly handle ANSI escape codes
 	truncatedText := text[:halfEllipsisLength] + tails + text[utf8.RuneCountInString(text)-halfEllipsisLength:]
 
 	return truncatedText
@@ -114,7 +114,7 @@ func FormatFileSize(size int64) string {
 	unitsDec := []string{"B", "kB", "MB", "GB", "TB", "PB", "EB"}
 	unitsBin := []string{"B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB"}
 
-	// Todo : Remove duplication here
+	// TODO : Remove duplication here
 	if Config.FileSizeUseSI {
 		unitIndex := int(math.Floor(math.Log(float64(size)) / math.Log(1000)))
 		adjustedSize := float64(size) / math.Pow(1000, float64(unitIndex))

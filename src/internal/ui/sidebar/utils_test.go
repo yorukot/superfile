@@ -19,10 +19,10 @@ func fullDirSlice(count int) []directory {
 	return formDirctorySlice(dirSlice(count), dirSlice(count), dirSlice(count))
 }
 
-// Todo : Use t.Run(tt.name
-// Todo : Get rid of global vars, use testdata in each test, even if there is a bit of
+// TODO : Use t.Run(tt.name
+// TODO : Get rid of global vars, use testdata in each test, even if there is a bit of
 // duplication.
-// Todo : Add tt.names
+// TODO : Add tt.names
 
 func Test_noActualDir(t *testing.T) {
 	testcases := []struct {

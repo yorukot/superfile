@@ -56,7 +56,7 @@ func (m *model) mainKey(msg string) tea.Cmd {
 		m.fileModel.filePanels[m.filePanelFocusIndex].pgDown(m.mainPanelHeight)
 
 	case slices.Contains(common.Hotkeys.ChangePanelMode, msg):
-		m.changeFilePanelMode()
+		m.getFocusedFilePanel().changeFilePanelMode()
 
 	case slices.Contains(common.Hotkeys.NextFilePanel, msg):
 		m.nextFilePanel()
@@ -110,7 +110,7 @@ func (m *model) mainKey(msg string) tea.Cmd {
 
 	case slices.Contains(common.Hotkeys.CompressFile, msg):
 		go func() {
-			m.compressFile()
+			m.compressSelectedFiles()
 		}()
 
 	case slices.Contains(common.Hotkeys.OpenCommandLine, msg):
@@ -205,13 +205,14 @@ func (m *model) normalAndBrowserModeKey(msg string) {
 func (m *model) typingModalOpenKey(msg string) {
 	switch {
 	case slices.Contains(common.Hotkeys.CancelTyping, msg):
+		m.typingModal.errorMesssage = ""
 		m.cancelTypingModal()
 	case slices.Contains(common.Hotkeys.ConfirmTyping, msg):
 		m.createItem()
 	}
 }
 
-// Todo : There is a lot of duplication for these models, each one of them has to handle
+// TODO : There is a lot of duplication for these models, each one of them has to handle
 // ConfirmTyping and CancleTyping in a similar way. There is a scope of some good refactoring here.
 func (m *model) warnModalOpenKey(msg string) {
 	switch {
@@ -251,6 +252,14 @@ func (m *model) warnModalOpenKey(msg string) {
 		case confirmRenameItem:
 			m.confirmRename()
 		}
+	}
+}
+
+func (m *model) notifyModalOpenKey(msg string) {
+	//nolint:gocritic // We use switch here because other key logic is also using switch, so it's more consistent.
+	switch {
+	case slices.Contains(common.Hotkeys.Confirm, msg):
+		m.notifyModal.open = false
 	}
 }
 

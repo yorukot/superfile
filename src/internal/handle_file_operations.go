@@ -23,6 +23,55 @@ import (
 	"github.com/yorukot/superfile/src/config/icon"
 )
 
+// isAncestor checks if dst is the same as src or a subdirectory of src.
+// It handles symlinks by resolving them and applies case-insensitive comparison on Windows.
+func isAncestor(src, dst string) bool {
+	// Resolve symlinks for both paths
+	srcResolved, err := filepath.EvalSymlinks(src)
+	if err != nil {
+		// If we can't resolve symlinks, fall back to original path
+		srcResolved = src
+	}
+
+	dstResolved, err := filepath.EvalSymlinks(dst)
+	if err != nil {
+		// If we can't resolve symlinks, fall back to original path
+		dstResolved = dst
+	}
+
+	// Get absolute paths. Abs() also Cleans paths to normalize separators and resolve . and ..
+	srcAbs, err := filepath.Abs(srcResolved)
+	if err != nil {
+		return false
+	}
+
+	dstAbs, err := filepath.Abs(dstResolved)
+	if err != nil {
+		return false
+	}
+
+	// On Windows, perform case-insensitive comparison
+	if runtime.GOOS == "windows" {
+		srcAbs = strings.ToLower(srcAbs)
+		dstAbs = strings.ToLower(dstAbs)
+	}
+
+	// Check if dst is the same as src
+	if srcAbs == dstAbs {
+		return true
+	}
+
+	// Check if dst is a subdirectory of src
+	// Use filepath.Rel to check the relationship
+	rel, err := filepath.Rel(srcAbs, dstAbs)
+	if err != nil {
+		return false
+	}
+
+	// If rel is "." or doesn't start with "..", then dst is inside src
+	return rel == "." || !strings.HasPrefix(rel, "..")
+}
+
 // Create a file in the currently focus file panel
 func (m *model) panelCreateNewFile() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
@@ -33,9 +82,9 @@ func (m *model) panelCreateNewFile() {
 	m.firstTextInput = true
 }
 
-// Todo : This function does not needs the entire model. Only pass the panel object
+// TODO : This function does not needs the entire model. Only pass the panel object
 func (m *model) IsRenamingConflicting() bool {
-	// Todo : Replace this with m.getCurrentFilePanel() everywhere
+	// TODO : Replace this with m.getCurrentFilePanel() everywhere
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 
 	if len(panel.element) == 0 {
@@ -224,7 +273,7 @@ func (m *model) deleteMultipleItems() {
 		}
 	}
 
-	// This feels a bit fuzzy and unclean. Todo : Review and simplify this.
+	// This feels a bit fuzzy and unclean. TODO : Review and simplify this.
 	// We should never get to this condition of panel.cursor getting negative
 	// and if we do, we should error log that.
 	if panel.cursor >= len(panel.element)-len(panel.selected)-1 {
@@ -248,7 +297,7 @@ func (m *model) completelyDeleteSingleItem() {
 	prog := common.GenerateDefaultProgress()
 
 	newProcess := process{
-		name:     "󰆴 " + panel.element[panel.cursor].name,
+		name:     icon.Delete + icon.Space + panel.element[panel.cursor].name,
 		progress: prog,
 		state:    inOperation,
 		total:    1,
@@ -282,7 +331,7 @@ func (m *model) completelyDeleteSingleItem() {
 		message.processNewState = p
 		channel <- message
 	}
-	// Todo : This is duplicated code fragment. Remove this duplication
+	// TODO : This is duplicated code fragment. Remove this duplication
 	if len(panel.element) == 0 {
 		panel.cursor = 0
 	} else if panel.cursor >= len(panel.element) {
@@ -389,8 +438,65 @@ func (m *model) pasteItem() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	totalFiles := 0
 
+	// Check if trying to paste into source or subdirectory for both cut and copy operations
+	for _, srcPath := range m.copyItems.items {
+		// Check if trying to cut and paste into the same directory - this would be a no-op
+		// and could potentially cause issues, so we prevent it
+		if filepath.Dir(srcPath) == panel.location && m.copyItems.cut {
+			slog.Error("Cannot paste into parent directory of source", "src", srcPath, "dst", panel.location)
+			message := channelMessage{
+				messageID:   id,
+				messageType: sendNotifyModal,
+				notifyModal: notifyModal{
+					open:    true,
+					title:   "Invalid paste location",
+					content: "Cannot paste into parent directory of source",
+				},
+			}
+			channel <- message
+			return
+		}
+
+		slog.Debug("model.pasteItem", "srcPath", srcPath, "panel location", panel.location)
+
+		if m.copyItems.cut && srcPath == panel.location {
+			slog.Error("Cannot paste a directory into itself", "operation", "cut", "src", srcPath, "dst", panel.location)
+			message := channelMessage{
+				messageID:   id,
+				messageType: sendNotifyModal,
+				notifyModal: notifyModal{
+					open:    true,
+					title:   "Invalid paste location",
+					content: "Cannot paste a directory into itself",
+				},
+			}
+			channel <- message
+			return
+		}
+
+		if isAncestor(srcPath, panel.location) {
+			operation := "copy"
+			if m.copyItems.cut {
+				operation = "cut"
+			}
+
+			slog.Error("Cannot paste a directory into itself or its subdirectory", "operation", operation, "src", srcPath, "dst", panel.location)
+			message := channelMessage{
+				messageID:   id,
+				messageType: sendNotifyModal,
+				notifyModal: notifyModal{
+					open:    true,
+					title:   "Invalid paste location",
+					content: fmt.Sprintf("Cannot %s and paste a directory into itself or its subdirectory", operation),
+				},
+			}
+			channel <- message
+			return
+		}
+	}
+
 	for _, folderPath := range m.copyItems.items {
-		// Todo : Fix this. This is inefficient
+		// TODO : Fix this. This is inefficient
 		// In case of a cut operations for a directory with a lot of files
 		// we are unnecessarily walking the whole directory recursively
 		// while os will just perform a rename
@@ -454,7 +560,7 @@ func (m *model) pasteItem() {
 		if m.copyItems.cut && !isExternalDiskPath(filePath) {
 			err = moveElement(filePath, filepath.Join(panel.location, filepath.Base(filePath)))
 		} else {
-			// Todo : These error cases are hard to test. We have to somehow make the paste operations fail,
+			// TODO : These error cases are hard to test. We have to somehow make the paste operations fail,
 			// which is time consuming and manual. We should test these with automated testcases
 			err = pasteDir(filePath, filepath.Join(panel.location, filepath.Base(filePath)), id, m)
 			if err != nil {
@@ -485,15 +591,10 @@ func (m *model) pasteItem() {
 	channel <- message
 
 	m.processBarModel.process[id] = p
-	// Reset after paste is done. Only in case of cut
-	// because current items in clipboard are deleted now
-	if m.copyItems.cut {
-		m.copyItems.reset(false)
-	}
 }
 
 // Extract compressed file
-// Todo : err should be returned and properly handled by the caller
+// TODO : err should be returned and properly handled by the caller
 func (m *model) extractFile() {
 	var err error
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
@@ -527,29 +628,30 @@ func (m *model) extractFile() {
 	}
 }
 
-// Compress file or directory
-func (m *model) compressFile() {
+func (m *model) compressSelectedFiles() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 
 	if len(panel.element) == 0 {
 		return
 	}
+	var filesToCompress []string
+	var firstFile string
 
-	fileName := filepath.Base(panel.element[panel.cursor].location)
-
-	zipName := strings.TrimSuffix(fileName, filepath.Ext(fileName)) + ".zip"
-	zipName, err := renameIfDuplicate(zipName)
-
+	if len(panel.selected) == 0 {
+		firstFile = panel.element[panel.cursor].location
+		filesToCompress = append(filesToCompress, firstFile)
+	} else {
+		firstFile = panel.selected[0]
+		filesToCompress = panel.selected
+	}
+	zipName, err := getZipArchiveName(filepath.Base(firstFile))
 	if err != nil {
-		slog.Error("Error in compressing files during rename duplicate", "error", err)
+		slog.Error("Error in getZipArchiveName", "error", err)
 		return
 	}
-
-	err = zipSource(panel.element[panel.cursor].location, filepath.Join(filepath.Dir(panel.element[panel.cursor].location), zipName))
-	if err != nil {
+	zipPath := filepath.Join(panel.location, zipName)
+	if err := zipSources(filesToCompress, zipPath); err != nil {
 		slog.Error("Error in zipping files", "error", err)
-		// Although return is not needed here at the moment. This clarifies the intent of
-		// not continuing after the error even if any further code is added in this function later
 		return
 	}
 }

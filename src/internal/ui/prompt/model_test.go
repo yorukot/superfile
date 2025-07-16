@@ -239,7 +239,7 @@ func TestModel_Render(t *testing.T) {
 		m.setShellMode(true)
 		res := ansi.Strip(m.Render())
 		exp := "" +
-			"╭─┤ " + icon.Terminal + " Superfile Prompt (Shell Mode) ├──╮\n" +
+			"╭─┤ " + icon.Terminal + " superfile Prompt (Shell Mode) ├──╮\n" +
 			// 23--------4------------56789012345678901234567890123456789
 			"│ :                                    │\n" +
 			// 23456789012345678901234567890123456789
@@ -250,7 +250,7 @@ func TestModel_Render(t *testing.T) {
 		m.setShellMode(false)
 		res = ansi.Strip(m.Render())
 		exp = "" +
-			"╭─┤ " + icon.Terminal + " Superfile Prompt (SPF Mode) ├────╮\n" +
+			"╭─┤ " + icon.Terminal + " superfile Prompt (SPF Mode) ├────╮\n" +
 			// 23--------4------------56789012345678901234567890123456789
 			"│ >                                    │\n" +
 			"├──────────────────────────────────────┤\n" +
@@ -292,7 +292,7 @@ func TestModel_Render(t *testing.T) {
 		m.HandleShellCommandResults(0, "")
 		res := ansi.Strip(m.Render())
 		exp := "" +
-			"╭─┤ " + icon.Terminal + " Superfile Prompt (Shell Mode) ├────────────╮\n" +
+			"╭─┤ " + icon.Terminal + " superfile Prompt (Shell Mode) ├────────────╮\n" +
 			// 23--------4------------567890123456789012345678901234567890123456789
 			"│ :                                              │\n" +
 			// 234567890123456789012345678901234567890123456789
@@ -305,7 +305,7 @@ func TestModel_Render(t *testing.T) {
 		m.HandleShellCommandResults(1, "")
 		res = ansi.Strip(m.Render())
 		exp = "" +
-			"╭─┤ " + icon.Terminal + " Superfile Prompt (Shell Mode) ├────────────╮\n" +
+			"╭─┤ " + icon.Terminal + " superfile Prompt (Shell Mode) ├────────────╮\n" +
 			// 23--------4------------567890123456789012345678901234567890123456789
 			"│ :                                              │\n" +
 			// 234567890123456789012345678901234567890123456789

@@ -2,7 +2,6 @@ package internal
 
 import (
 	"errors"
-	"fmt"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -24,13 +23,13 @@ import (
 )
 
 // These represent model's state information, its not a global preperty
-var LastTimeCursorMove = [2]int{int(time.Now().UnixMicro()), 0} //nolint: gochecknoglobals // Todo : Move to model struct
-var ListeningMessage = true                                     //nolint: gochecknoglobals // Todo : Move to model struct
-var hasTrash = true                                             //nolint: gochecknoglobals // Todo : Move to model struct
-var batCmd = ""                                                 //nolint: gochecknoglobals // Todo : Move to model struct
-var et *exiftool.Exiftool                                       //nolint: gochecknoglobals // Todo : Move to model struct
-var channel = make(chan channelMessage, 1000)                   //nolint: gochecknoglobals // Todo : Move to model struct
-var progressBarLastRenderTime = time.Now()                      //nolint: gochecknoglobals // Todo : Move to model struct
+var LastTimeCursorMove = [2]int{int(time.Now().UnixMicro()), 0} //nolint: gochecknoglobals // TODO : Move to model struct
+var ListeningMessage = true                                     //nolint: gochecknoglobals // TODO : Move to model struct
+var hasTrash = true                                             //nolint: gochecknoglobals // TODO : Move to model struct
+var batCmd = ""                                                 //nolint: gochecknoglobals // TODO : Move to model struct
+var et *exiftool.Exiftool                                       //nolint: gochecknoglobals // TODO : Move to model struct
+var channel = make(chan channelMessage, 1000)                   //nolint: gochecknoglobals // TODO : Move to model struct
+var progressBarLastRenderTime = time.Now()                      //nolint: gochecknoglobals // TODO : Move to model struct
 
 // Initialize and return model with default configs
 // It returns only tea.Model because when it used in main, the return value
@@ -60,7 +59,7 @@ func (m model) Init() tea.Cmd {
 // Update function for bubble tea to provide internal communication to the
 // application
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	// Todo : We could check for m.modelQuitState and skip doing anything
+	// TODO : We could check for m.modelQuitState and skip doing anything
 	// If its quitDone. But if we are at this state, its already bad, so we need
 	// to first figure out if its possible in testing, and fix it.
 	slog.Debug("model.Update() called")
@@ -106,6 +105,8 @@ func (m *model) handleChannelMessage(msg channelMessage) {
 	switch msg.messageType {
 	case sendWarnModal:
 		m.warnModal = msg.warnModal
+	case sendNotifyModal:
+		m.notifyModal = msg.notifyModal
 	case sendMetadata:
 		m.fileMetaData.metaData = msg.metadata
 	case sendProcess:
@@ -113,6 +114,10 @@ func (m *model) handleChannelMessage(msg channelMessage) {
 			m.processBarModel.processList = append(m.processBarModel.processList, msg.messageID)
 		}
 		m.processBarModel.process[msg.messageID] = msg.processNewState
+		// Check if the process is cut and if the process is successful or failure, both need to be reset
+		if (msg.processNewState.state == successful || msg.processNewState.state == failure) && m.copyItems.cut {
+			m.copyItems.reset(false)
+		}
 	default:
 		slog.Error("Unhandled channelMessageType in handleChannelMessage()",
 			"messageType", msg.messageType)
@@ -173,8 +178,8 @@ func (m *model) setHeightValues(height int) {
 	} else {
 		m.footerHeight = 10
 	}
-	// Todo : Make it grow even more for bigger screen sizes.
-	// Todo : Calculate the value , instead of manually hard coding it.
+	// TODO : Make it grow even more for bigger screen sizes.
+	// TODO : Calculate the value , instead of manually hard coding it.
 
 	// Main panel height = Total terminal height- 2(file panel border) - footer height
 	m.mainPanelHeight = height - 2 - utils.FullFooterHeight(m.footerHeight, m.toggleFooter)
@@ -237,6 +242,8 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 	// Handles all warn models except the warn model for confirming to quit
 	case m.warnModal.open:
 		m.warnModalOpenKey(msg.String())
+	case m.notifyModal.open:
+		m.notifyModalOpenKey(msg.String())
 	// If renaming a object
 	case m.fileModel.renaming:
 		m.renamingKey(msg.String())
@@ -298,13 +305,13 @@ func (m *model) updateFilePanelsState(msg tea.Msg, cmd *tea.Cmd) {
 		// *cmd is a non-name, and cannot be used on left of :=
 		var action common.ModelAction
 		// Taking returned cmd is necessary for blinking
-		// Todo : Separate this to a utility
+		// TODO : Separate this to a utility
 		cwdLocation := m.fileModel.filePanels[m.filePanelFocusIndex].location
 		action, *cmd = m.promptModal.HandleUpdate(msg, cwdLocation)
 		m.applyPromptModalAction(action)
 	}
 
-	// Todo : This is like duct taping a bigger problem
+	// TODO : This is like duct taping a bigger problem
 	// The code should never reach this state.
 	if focusPanel.cursor < 0 {
 		focusPanel.cursor = 0
@@ -345,7 +352,7 @@ func (m *model) applyPromptModalAction(action common.ModelAction) {
 	}
 }
 
-// Todo : Move them around to appropriate places
+// TODO : Move them around to appropriate places
 func (m *model) applyShellCommandAction(shellCommand string) {
 	focusPanelDir := m.fileModel.filePanels[m.filePanelFocusIndex].location
 
@@ -371,17 +378,7 @@ func (m *model) createNewFilePanelRelativeToCurrent(path string) error {
 
 // simulates a 'cd' action
 func (m *model) updateCurrentFilePanelDir(path string) error {
-	currentDir := m.fileModel.filePanels[m.filePanelFocusIndex].location
-	path = utils.ResolveAbsPath(currentDir, path)
-
-	if info, err := os.Stat(path); err != nil {
-		return fmt.Errorf("%s : no such file or directory, stats err : %w", path, err)
-	} else if !info.IsDir() {
-		return fmt.Errorf("%s is not a directory", path)
-	}
-
-	m.fileModel.filePanels[m.filePanelFocusIndex].location = path
-	return nil
+	return m.getFocusedFilePanel().updateCurrentFilePanelDir(path)
 }
 
 // Check if there's any processes running in background
@@ -493,6 +490,13 @@ func (m model) View() string {
 		return stringfunction.PlaceOverlay(overlayX, overlayY, warnModal, finalRender)
 	}
 
+	if m.notifyModal.open {
+		notifyModal := m.notifyModalRender()
+		overlayX := m.fullWidth/2 - common.ModalWidth/2
+		overlayY := m.fullHeight/2 - common.ModalHeight/2
+		return stringfunction.PlaceOverlay(overlayX, overlayY, notifyModal, finalRender)
+	}
+
 	// This is also a render for warnmodal, but its being driven via a different flag
 	// we should also drive it via warnModal.open
 	if m.modelQuitState == confirmToQuit {
@@ -532,7 +536,7 @@ func (m *model) getFilePanelItems() {
 		nowTime := time.Now()
 		// Check last time each element was updated, if less then 3 seconds ignore
 		if filePanel.focusType == noneFocus && nowTime.Sub(filePanel.lastTimeGetElement) < 3*time.Second {
-			// Todo : revisit this. This feels like a duct tape solution of an actual
+			// TODO : revisit this. This feels like a duct tape solution of an actual
 			// deep rooted problem. This feels very hacky.
 			if !m.updatedToggleDotFile {
 				continue

@@ -70,7 +70,7 @@ Contains the main business logic of the application, organized by functionality:
 - `style.go` - UI styling definitions
 - `style_function.go` - UI styling functions
 
-### `testsuite/` - Superfile's testsuite written in Python
+### `testsuite/` - superfile's testsuite written in Python
 
 - Automatically tests superfile's functionality.
 - See `testsuite/ReadMe.md` for more info
