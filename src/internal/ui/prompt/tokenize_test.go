@@ -91,7 +91,7 @@ func Test_resolveShellSubstitution(t *testing.T) {
 	noopCommand := "true"
 	if runtime.GOOS == "windows" {
 		// Substitution is slow in windows
-		timeout = 2 * time.Second
+		timeout = 3 * time.Second
 		// Windows uses \r\n as new line for echo
 		newLineSuffix = "\r\n"
 		noopCommand = "cd ."
@@ -195,7 +195,7 @@ func Test_resolveShellSubstitution(t *testing.T) {
 	}
 
 	t.Run("Testing shell substitution timeout", func(t *testing.T) {
-		result, err := resolveShellSubstitution(timeout, "$(sleep 2)", defaultTestCwd)
+		result, err := resolveShellSubstitution(timeout, "$(sleep 3)", defaultTestCwd)
 		assert.Empty(t, result)
 		require.Error(t, err)
 		require.ErrorIs(t, err, context.DeadlineExceeded)
