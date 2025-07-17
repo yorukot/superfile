@@ -27,7 +27,10 @@ func setupDirectories(t *testing.T, dirs ...string) {
 func setupFilesWithData(t *testing.T, data []byte, files ...string) {
 	t.Helper()
 	for _, file := range files {
-		err := os.WriteFile(file, data, 0644)
+		dir := filepath.Dir(file)
+		err := os.MkdirAll(dir, 0755)
+		require.NoError(t, err)
+		err = os.WriteFile(file, data, 0644)
 		require.NoError(t, err)
 	}
 }
