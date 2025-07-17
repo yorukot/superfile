@@ -31,19 +31,25 @@ jobs:
         with:
           path: |
             ~/.cache/go-build
-            ~/go/pkg/mod
+            ${{ runner.temp }}/gomodcache
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
 
       - name: Install dependencies
         run: go mod download
+        env:
+          GOMODCACHE: ${{ runner.temp }}/gomodcache
 
       - name: Build
-        run: go build ./...
+        run: go build -v ./...
+        env:
+          GOMODCACHE: ${{ runner.temp }}/gomodcache
 
       - name: Test
         run: go test -v ./...
+        env:
+          GOMODCACHE: ${{ runner.temp }}/gomodcache
 
       - name: Check gofmt (skip on Windows)
         if: runner.os != 'Windows'

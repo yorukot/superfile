@@ -128,7 +128,7 @@ func Test_resolveShellSubstitution(t *testing.T) {
 		},
 		{
 			name:            "Ill formed command 2",
-			command:         "abc $(abc) syt ${ sdfc ( {)}",
+			command:         "abc $(echo abc) syt ${ sdfc ( {)}",
 			expectedResult:  "",
 			isErrorExpected: true,
 			errorToMatch:    curlyBracketMatchError(),

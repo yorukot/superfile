@@ -19,6 +19,9 @@ var SampleDataBytes = []byte("This is sample") //nolint: gochecknoglobals // Eff
 func setupDirectories(t *testing.T, dirs ...string) {
 	t.Helper()
 	for _, dir := range dirs {
+		if dir == "" {
+			continue
+		}
 		err := os.MkdirAll(dir, 0755)
 		require.NoError(t, err)
 	}
