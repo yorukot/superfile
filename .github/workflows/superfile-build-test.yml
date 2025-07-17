@@ -13,6 +13,8 @@ jobs:
   build:
     name: Build and Test (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    env:
+      GOMODCACHE: ${{ runner.temp }}/gomodcache
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
@@ -31,7 +33,7 @@ jobs:
         with:
           path: |
             ~/.cache/go-build
-            ~/go/pkg/mod
+            ${{ env.GOMODCACHE }}
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
