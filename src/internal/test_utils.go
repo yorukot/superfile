@@ -18,9 +18,8 @@ var SampleDataBytes = []byte("This is sample") //nolint: gochecknoglobals // Eff
 
 func setupDirectories(t *testing.T, dirs ...string) {
 	t.Helper()
-	for i, dir := range dirs {
+	for _, dir := range dirs {
 		if dir == "" {
-			dirs[i] = t.TempDir()
 			continue
 		}
 		err := os.MkdirAll(dir, 0755)
@@ -31,20 +30,7 @@ func setupDirectories(t *testing.T, dirs ...string) {
 func setupFilesWithData(t *testing.T, data []byte, files ...string) {
 	t.Helper()
 	for _, file := range files {
-		dir := filepath.Dir(file)
-		if dir == "" {
-			dir = t.TempDir()
-			file = filepath.Join(dir, filepath.Base(file))
-		}
-		err := os.MkdirAll(dir, 0755)
-		require.NoError(t, err)
-		base := filepath.Base(file)
-		tempFile, err := os.CreateTemp(dir, base+"-*")
-		require.NoError(t, err)
-		_, err = tempFile.Write(data)
-		require.NoError(t, err)
-		require.NoError(t, tempFile.Close())
-		err = os.Rename(tempFile.Name(), file)
+		err := os.WriteFile(file, data, 0644)
 		require.NoError(t, err)
 	}
 }
