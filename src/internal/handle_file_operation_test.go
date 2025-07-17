@@ -125,6 +125,9 @@ func TestCompressSelectedFiles(t *testing.T) {
 				return err == nil
 			}, time.Second, 10*time.Millisecond)
 
+			// Assert zip file exists right after compression
+			require.FileExists(t, zipFile, "Expected zip file does not exist after compression")
+
 			// No-op update to get the filepanel updated
 			// TODO - This should not be needed. Only operation finish SPF should refresh
 			// on its own
