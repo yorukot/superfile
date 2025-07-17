@@ -31,7 +31,7 @@ jobs:
         with:
           path: |
             ~/.cache/go-build
-            ~/go/pkg/mod
+            ${{ runner.temp }}/gomodcache
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
@@ -42,7 +42,7 @@ jobs:
           GOMODCACHE: ${{ runner.temp }}/gomodcache
 
       - name: Build
-        run: go build ./...
+        run: go build -v ./...
         env:
           GOMODCACHE: ${{ runner.temp }}/gomodcache
 
