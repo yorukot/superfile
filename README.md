@@ -80,7 +80,7 @@ If you want to inspect the script, see : [install.ps1](./website/public/install.
 
 #### [Winget](https://winget.run/)
 ```powershell
-winget install superfile
+winget install yorukot.superfile
 ```
 
 #### [Scoop](https://scoop.sh/)
