@@ -78,6 +78,11 @@ powershell -ExecutionPolicy Bypass -Command "Invoke-Expression ((New-Object Syst
 ```
 If you want to inspect the script, see : [install.ps1](./website/public/install.ps1)
 
+#### [Winget](https://winget.run/)
+```powershell
+winget install superfile
+```
+
 #### [Scoop](https://scoop.sh/)
 ```
 scoop install superfile
