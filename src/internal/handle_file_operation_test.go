@@ -125,15 +125,26 @@ func TestCompressSelectedFiles(t *testing.T) {
 				return err == nil
 			}, time.Second, 10*time.Millisecond)
 
+			// Assert zip file exists right after compression
+			require.FileExists(t, zipFile, "Expected zip file does not exist after compression")
+
 			// No-op update to get the filepanel updated
 			// TODO - This should not be needed. Only operation finish SPF should refresh
 			// on its own
 			TeaUpdateWithErrCheck(t, &m, nil)
 
 			require.Greater(t, len(m.getFocusedFilePanel().element), tt.cursorIndexForZip)
-			assert.Equal(t, zipFile, m.getFocusedFilePanel().element[tt.cursorIndexForZip].location,
+			panelLocation := m.getFocusedFilePanel().element[tt.cursorIndexForZip].location
+			// Debug output for panel element
+			t.Logf("Panel element at cursorIndexForZip: %s", panelLocation)
+			assert.Equal(t, zipFile, panelLocation,
 				"%s does not exists at index %d among %v", zipFile, tt.cursorIndexForZip,
 				m.getFocusedFilePanel().element)
+
+			// Ensure we are extracting the zip file, not a directory
+			fileInfo, err := os.Stat(panelLocation)
+			require.NoError(t, err, "Failed to stat panel location before extraction")
+			require.False(t, fileInfo.IsDir(), "Panel location for extraction is a directory, expected a zip file: %s", panelLocation)
 
 			m.getFocusedFilePanel().cursor = tt.cursorIndexForZip
 
