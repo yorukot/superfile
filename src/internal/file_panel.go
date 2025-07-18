@@ -8,9 +8,9 @@ import (
 	"github.com/yorukot/superfile/src/internal/utils"
 )
 
-func (panel *filePanel) getSelectedItem() element {
+func (panel *filePanel) getSelectedItem() *element {
 	// TODO: Have a bound check here, and return empty element in case of out of bound
-	return panel.element[panel.cursor]
+	return &panel.element[panel.cursor]
 }
 
 // Note : This will soon be moved to its own package.

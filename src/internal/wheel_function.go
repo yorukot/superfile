@@ -44,8 +44,5 @@ func wheelMainAction(msg string, m *model) {
 
 	if m.focusPanel == nonePanelFocus {
 		m.fileMetaData.renderIndex = 0
-		go func() {
-			m.returnMetaData()
-		}()
 	}
 }

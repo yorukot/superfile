@@ -15,13 +15,10 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/yorukot/superfile/src/internal/utils"
 
 	"github.com/yorukot/superfile/src/internal/common"
-
-	"github.com/lithammer/shortuuid"
 )
 
 // Check if the directory is external disk path
@@ -310,77 +307,81 @@ func renameIfDuplicate(destination string) (string, error) {
 	}
 }
 
-// TODO : Move this model related function to the right file. Should not be in functions file.
-func (m *model) returnMetaData() {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	cursor := panel.cursor
-	id := shortuuid.New()
-
-	message := channelMessage{
-		messageID:   id,
-		messageType: sendMetadata,
-		metadata:    m.fileMetaData.metaData,
+// TODO : Move this and many other utility function to separate files
+// and unit test them too.
+func sortMetadata(meta [][2]string) {
+	priority := map[string]int{
+		"Name":          0,
+		"Size":          1,
+		"Date Modified": 2,
+		"Date Accessed": 3,
 	}
 
-	// Obtaining metadata will take time. If metadata is obtained for every passing file, it will cause lag.
-	// Therefore, it is necessary to detect whether it is just browsing or stopping on that file or directory.
-	LastTimeCursorMove = [2]int{int(time.Now().UnixMicro()), cursor}
-	time.Sleep(150 * time.Millisecond)
+	sort.SliceStable(meta, func(i, j int) bool {
+		pi, iOkay := priority[meta[i][0]]
+		pj, jOkay := priority[meta[j][0]]
 
-	if LastTimeCursorMove[1] != cursor && m.focusPanel != metadataFocus {
-		return
-	}
+		// Both are priority fields
+		if iOkay && jOkay {
+			return pi < pj
+		}
+		// i is a priority field, and j is not
+		if iOkay {
+			return true
+		}
 
-	m.fileMetaData.metaData = m.fileMetaData.metaData[:0]
-	if len(panel.element) == 0 {
-		message.metadata = m.fileMetaData.metaData
-		channel <- message
-		return
-	}
-	if len(panel.element[panel.cursor].metaData) != 0 && m.focusPanel != metadataFocus {
-		m.fileMetaData.metaData = panel.element[panel.cursor].metaData
-		message.metadata = m.fileMetaData.metaData
-		channel <- message
-		return
-	}
-	filePath := panel.element[panel.cursor].location
+		// j is a priority field, and i is not
+		if jOkay {
+			return false
+		}
 
+		// None of them are priority fields, sort with name
+		return meta[i][0] < meta[j][0]
+	})
+}
+
+func getMetadata(filePath string, metadataFocussed bool) [][2]string {
+	meta := getMetaDataUnsorted(filePath, metadataFocussed)
+	sortMetadata(meta)
+	return meta
+}
+
+func getMetaDataUnsorted(filePath string, metadataFocussed bool) [][2]string {
+	var res [][2]string
 	fileInfo, err := os.Stat(filePath)
 
 	if isSymlink(filePath) {
 		_, symlinkErr := filepath.EvalSymlinks(filePath)
 		if symlinkErr != nil {
-			m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"Link file is broken!", ""})
+			res = append(res, [2]string{"Link file is broken!", ""})
 		} else {
-			m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"This is a link file.", ""})
+			res = append(res, [2]string{"This is a link file.", ""})
 		}
-		message.metadata = m.fileMetaData.metaData
-		channel <- message
-		return
+		return res
 	}
 
 	if err != nil {
-		slog.Error("Error while return meta data function get file state", "error", err)
+		slog.Error("Error while getting file state in getMetadata", "error", err)
+		return res
 	}
 
 	if fileInfo.IsDir() {
-		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"Name", fileInfo.Name()})
-		if m.focusPanel == metadataFocus {
+		res = append(res, [2]string{"Name", fileInfo.Name()})
+		if metadataFocussed {
 			// TODO : Calling dirSize() could be expensive for large directories, as it recursively
 			// walks the entire tree. Consider lazy loading, caching, or an async approach to avoid UI lockups.
-			m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"Size", common.FormatFileSize(dirSize(filePath))})
+			res = append(res, [2]string{"Size", common.FormatFileSize(dirSize(filePath))})
 		}
-		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"Date Modified", fileInfo.ModTime().String()})
-		m.fileMetaData.metaData = append(m.fileMetaData.metaData, [2]string{"Permissions", fileInfo.Mode().String()})
-		message.metadata = m.fileMetaData.metaData
-		channel <- message
-		return
+		res = append(res,
+			[2]string{"Date Modified", fileInfo.ModTime().String()},
+			[2]string{"Permissions", fileInfo.Mode().String()})
+		return res
 	}
 
 	checkIsSymlinked, err := os.Lstat(filePath)
 	if err != nil {
 		slog.Error("Error when getting file info", "error", err)
-		return
+		return res
 	}
 
 	if common.Config.Metadata && checkIsSymlinked.Mode()&os.ModeSymlink == 0 && et != nil {
@@ -391,10 +392,8 @@ func (m *model) returnMetaData() {
 				slog.Error("Error while return metadata function", "fileInfo", fileInfo, "error", fileInfo.Err)
 				continue
 			}
-
 			for k, v := range fileInfo.Fields {
-				temp := [2]string{k, fmt.Sprintf("%v", v)}
-				m.fileMetaData.metaData = append(m.fileMetaData.metaData, temp)
+				res = append(res, [2]string{k, fmt.Sprintf("%v", v)})
 			}
 		}
 	} else {
@@ -410,17 +409,13 @@ func (m *model) returnMetaData() {
 				slog.Error("Error calculating MD5 checksum", "error", err)
 			} else {
 				md5Data := [2]string{"MD5Checksum", checksum}
-				m.fileMetaData.metaData = append(m.fileMetaData.metaData, md5Data)
+				res = append(res, md5Data)
 			}
 		}
 
-		m.fileMetaData.metaData = append(m.fileMetaData.metaData, fileName, fileSize, fileModifyData, filePermissions)
+		res = append(res, fileName, fileSize, fileModifyData, filePermissions)
 	}
-
-	message.metadata = m.fileMetaData.metaData
-	channel <- message
-
-	panel.element[panel.cursor].metaData = m.fileMetaData.metaData
+	return res
 }
 
 // TODO : Replace all usage of "m.fileModel.filePanels[m.filePanelFocusIndex]" with this
