@@ -9,8 +9,18 @@ import (
 )
 
 func (panel *filePanel) getSelectedItem() element {
-	// TODO: Have a bound check here, and return empty element in case of out of bound
+	if panel.cursor < 0 || len(panel.element) <= panel.cursor {
+		return element{}
+	}
 	return panel.element[panel.cursor]
+}
+
+// For modification. Make sure to do a nil check
+func (panel *filePanel) getSelectedItemPtr() *element {
+	if panel.cursor < 0 || len(panel.element) <= panel.cursor {
+		return nil
+	}
+	return &panel.element[panel.cursor]
 }
 
 // Note : This will soon be moved to its own package.
@@ -65,6 +75,8 @@ func (panel *filePanel) updateCurrentFilePanelDir(path string) error {
 		panel.cursor = 0
 		panel.render = 0
 	}
+
+	slog.Debug("updateCurrentFilePanelDir : After update", "cursor", panel.cursor, "render", panel.render)
 
 	// Reset the searchbar Value
 	// TODO(Refactoring) : Have a common searchBar type for sidebar and this search bar.
