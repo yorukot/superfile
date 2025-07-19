@@ -27,9 +27,6 @@ func (m *model) mainKey(msg string) tea.Cmd {
 		case nonePanelFocus:
 			m.fileModel.filePanels[m.filePanelFocusIndex].listUp(m.mainPanelHeight)
 			m.fileMetaData.renderIndex = 0
-			go func() {
-				m.returnMetaData()
-			}()
 		}
 
 		// If move down Key is pressed, check the current state and executes
@@ -44,9 +41,6 @@ func (m *model) mainKey(msg string) tea.Cmd {
 		case nonePanelFocus:
 			m.fileModel.filePanels[m.filePanelFocusIndex].listDown(m.mainPanelHeight)
 			m.fileMetaData.renderIndex = 0
-			go func() {
-				m.returnMetaData()
-			}()
 		}
 
 	case slices.Contains(common.Hotkeys.PageUp, msg):
@@ -83,9 +77,6 @@ func (m *model) mainKey(msg string) tea.Cmd {
 
 	case slices.Contains(common.Hotkeys.FocusOnMetaData, msg):
 		m.focusOnMetadata()
-		go func() {
-			m.returnMetaData()
-		}()
 
 	case slices.Contains(common.Hotkeys.PasteItems, msg):
 		go func() {

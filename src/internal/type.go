@@ -166,6 +166,7 @@ type notifyModal struct {
 
 // File metadata
 type fileMetadata struct {
+	path        string
 	metaData    [][2]string
 	renderIndex int
 }

@@ -298,12 +298,11 @@ func (m *model) processBarRender() string {
 
 // This updates m.fileMetaData
 func (m *model) metadataRender() string {
-	m.ensureMetadataLoaded()
+	if len(m.fileMetaData.metaData) == 0 {
+		return ""
+	}
 
-	// TODO : This is bad, this is bad mixing rendering of content and loading of content.
-	// The metadata should be filled in slice correctly at the time its loaded, not when we
-	// are rendering it.
-	sortMetadata(m.fileMetaData.metaData)
+	// TODO : These calculations should be a part of Update()
 	maxKeyLen := getMaxKeyLength(m.fileMetaData.metaData)
 	sprintfLen, valLen := computeMetadataWidths(m.fullWidth, maxKeyLen)
 
@@ -316,55 +315,6 @@ func (m *model) metadataRender() string {
 	r.AddLines(lines...)
 
 	return r.Render()
-}
-
-func (m *model) ensureMetadataLoaded() {
-	if len(m.fileMetaData.metaData) == 0 &&
-		len(m.fileModel.filePanels[m.filePanelFocusIndex].element) > 0 &&
-		!m.fileModel.renaming {
-		m.fileMetaData.metaData = [][2]string{
-			{"", ""},
-			{" " + icon.InOperation + "  Loading metadata...", ""},
-		}
-		// TODO : This needs to be improved, we are updating m.fileMetaData is a separate goroutine
-		// while also modifying it here in the function. It could cause issues.
-		go func() {
-			m.returnMetaData()
-		}()
-	}
-}
-
-// TODO : Move this and many other utility function to separate files
-// and unit test them too.
-func sortMetadata(meta [][2]string) {
-	priority := map[string]int{
-		"Name":          0,
-		"Size":          1,
-		"Date Modified": 2,
-		"Date Accessed": 3,
-	}
-
-	sort.SliceStable(meta, func(i, j int) bool {
-		pi, iOkay := priority[meta[i][0]]
-		pj, jOkay := priority[meta[j][0]]
-
-		// Both are priority fields
-		if iOkay && jOkay {
-			return pi < pj
-		}
-		// i is a priority field, and j is not
-		if iOkay {
-			return true
-		}
-
-		// j is a priority field, and i is not
-		if jOkay {
-			return false
-		}
-
-		// None of them are priority fields, sort with name
-		return meta[i][0] < meta[j][0]
-	})
 }
 
 func getMaxKeyLength(meta [][2]string) int {

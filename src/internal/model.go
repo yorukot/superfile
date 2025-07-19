@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/utils"
 
@@ -56,6 +57,12 @@ func (m model) Init() tea.Cmd {
 	)
 }
 
+type MetadataMsg struct {
+	// Path of the file whose metadata is this
+	path     string
+	metadata [][2]string
+}
+
 // Update function for bubble tea to provide internal communication to the
 // application
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -81,6 +88,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case tea.KeyMsg:
 		cmd = tea.Batch(cmd, m.handleKeyInput(msg))
+	case MetadataMsg:
+		// Update the metadata and return
+		m.handleMetadataMsg(msg)
+		return m, cmd
 	default:
 		slog.Debug("Message of type that is not handled", "type", reflect.TypeOf(msg))
 	}
@@ -89,15 +100,92 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.sidebarModel.UpdateDirectories()
 
 	// check if there already have listening message
+	// TODO: Fix this. This is wrong, and it will cause unnecessary goroutines spawned continuously
+	// for every Update() , stuck listening for channel message
+	// We could move to only issuing listen commands on receiving channel messages.
+	// Have the channel as a part of model struct, and remove ListeningMessage variable altogether.
+	// See - Issue #946
+	var listenChannelCommand tea.Cmd
 	if !ListeningMessage {
-		cmd = tea.Batch(cmd, listenForChannelMessage(channel))
+		listenChannelCommand = listenForChannelMessage(channel)
 	}
 
 	m.getFilePanelItems()
+
+	metadataCmd := m.getMetadataCmd()
+
+	// TODO: Entirely remove the need of this variable, and handle first loading via Init()
+	// Init() should return a basic model object with all IO waiting via a tea.Cmd
 	if !m.firstLoadingComplete {
 		m.firstLoadingComplete = true
 	}
-	return m, tea.Batch(cmd)
+	return m, tea.Batch(cmd, listenChannelCommand, metadataCmd)
+}
+
+func (fm *fileMetadata) setBlank() {
+	fm.path = ""
+	fm.metaData = fm.metaData[:0]
+}
+
+func (fm *fileMetadata) isBlank() bool {
+	return len(fm.metaData) == 0
+}
+
+func (fm *fileMetadata) setLoading() {
+	// Note : This will cause gc of current metadata slice
+	// This will cause frequent allocations and gc.
+	fm.metaData = [][2]string{
+		{"", ""},
+		{" " + icon.InOperation + icon.Space + "Loading metadata...", ""},
+	}
+}
+
+func (m *model) handleMetadataMsg(msg MetadataMsg) {
+	selectedItem := m.getFocusedFilePanel().getSelectedItemPtr()
+	if selectedItem == nil {
+		slog.Debug("Panel empty or cursor invalid. Ignoring MetadataMsg")
+		return
+	}
+	if selectedItem.location != msg.path {
+		slog.Debug("MetadataMsg for older files. Ignoring")
+		return
+	}
+	m.fileMetaData.metaData = msg.metadata
+	selectedItem.metaData = msg.metadata
+}
+
+// TODO : rename
+func (m *model) getMetadataCmd() tea.Cmd {
+	if len(m.getFocusedFilePanel().element) == 0 {
+		m.fileMetaData.setBlank()
+		return nil
+	}
+	selectedItem := m.getFocusedFilePanel().getSelectedItem()
+	m.fileMetaData.path = selectedItem.location
+
+	// Note : This will cause metadata not being refreshed when you are not scrolling,
+	// or filepanel is not getting updated. Its not a big problem as we repeatedly refresh filepanel
+	// In case this is a significant issue, we would implement metadata caching.
+	// But need to implement it carefully if we do. Make sure cache is not unbounded
+	// Remove metadata from filepanel.elemets[] and have cache as source of truth.
+	// Have a TTL for expiry, or lister for file update events.
+	if len(selectedItem.metaData) > 0 {
+		m.fileMetaData.metaData = selectedItem.metaData
+		return nil
+	}
+	if m.fileMetaData.isBlank() {
+		m.fileMetaData.setLoading()
+	}
+	metadataFocussed := m.focusPanel == metadataFocus
+
+	// If there are too many metadata fetches, we need to have a cache with path as a key
+	// and timeout based eviction
+	return func() tea.Msg {
+		return MetadataMsg{
+			path:     selectedItem.location,
+			metadata: getMetadata(selectedItem.location, metadataFocussed),
+		}
+	}
 }
 
 // Handle message exchanging within the application
