@@ -138,21 +138,27 @@ func (fm *fileMetadata) setLoading() {
 }
 
 func (m *model) handleMetadataMsg(msg MetadataMsg) {
-	selectedItem := m.getFocusedFilePanel().getSelectedItem()
+	selectedItem := m.getFocusedFilePanel().getSelectedItemPtr()
+	if selectedItem == nil {
+		slog.Debug("Panel empty or cursor invalid. Ignoring MetadataMsg")
+		return
+	}
 	if selectedItem.location != msg.path {
+		slog.Debug("MetadataMsg for older files. Ignoring")
 		return
 	}
 	m.fileMetaData.metaData = msg.metadata
 	selectedItem.metaData = msg.metadata
 }
 
+// TODO : rename
 func (m *model) getMetadataCmd() tea.Cmd {
 	if len(m.getFocusedFilePanel().element) == 0 {
 		m.fileMetaData.setBlank()
 		return nil
 	}
 	selecteItem := m.getFocusedFilePanel().getSelectedItem()
-
+	
 	m.fileMetaData.path = selecteItem.location
 
 	// This will cause metadata not being refreshed when you are not scrolling

@@ -29,7 +29,13 @@ func TestFilePanelNavigation(t *testing.T) {
 	dir1 := filepath.Join(curTestDir, "dir1")
 	dir2 := filepath.Join(curTestDir, "dir2")
 	file1 := filepath.Join(curTestDir, "file1.txt")
+	// We >=3 files in dir1 and >=2 files in dir2
+	// so that cursor=2, and cursor=1 are valid values.
 	file2 := filepath.Join(dir1, "file2.txt")
+	file3 := filepath.Join(dir1, "file3.txt")
+	file4 := filepath.Join(dir1, "file4.txt")
+	file5 := filepath.Join(dir2, "file5.txt")
+	file6 := filepath.Join(dir2, "file6.txt")
 
 	rootDir := "/"
 
@@ -38,7 +44,7 @@ func TestFilePanelNavigation(t *testing.T) {
 	}
 
 	setupDirectories(t, dir1, dir2)
-	setupFiles(t, file1, file2)
+	setupFiles(t, file1, file2, file3, file4, file5, file6)
 
 	testdata := []struct {
 		name           string
