@@ -102,6 +102,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// check if there already have listening message
 	// TODO: Fix this. This is wrong, and it will cause unnecessary goroutines spawned continuously
 	// for every Update() , stuck listening for channel message
+	// We could move to only issuing listen commands on receiving channel messages.
+	// Have the channel as a part of model struct, and remove ListeningMessage variable altogether.
+	// See - Issue #946
 	var listenChannelCommand tea.Cmd
 	if !ListeningMessage {
 		listenChannelCommand = listenForChannelMessage(channel)
@@ -157,13 +160,17 @@ func (m *model) getMetadataCmd() tea.Cmd {
 		m.fileMetaData.setBlank()
 		return nil
 	}
-	selecteItem := m.getFocusedFilePanel().getSelectedItem()
-	
-	m.fileMetaData.path = selecteItem.location
+	selectedItem := m.getFocusedFilePanel().getSelectedItem()
+	m.fileMetaData.path = selectedItem.location
 
-	// This will cause metadata not being refreshed when you are not scrolling
-	if len(selecteItem.metaData) > 0 {
-		m.fileMetaData.metaData = selecteItem.metaData
+	// Note : This will cause metadata not being refreshed when you are not scrolling,
+	// or filepanel is not getting updated. Its not a big problem as we repeatedly refresh filepanel
+	// In case this is a significant issue, we would implement metadata caching.
+	// But need to implement it carefully if we do. Make sure cache is not unbounded
+	// Remove metadata from filepanel.elemets[] and have cache as source of truth.
+	// Have a TTL for expiry, or lister for file update events.
+	if len(selectedItem.metaData) > 0 {
+		m.fileMetaData.metaData = selectedItem.metaData
 		return nil
 	}
 	if m.fileMetaData.isBlank() {
@@ -175,8 +182,8 @@ func (m *model) getMetadataCmd() tea.Cmd {
 	// and timeout based eviction
 	return func() tea.Msg {
 		return MetadataMsg{
-			path:     selecteItem.location,
-			metadata: getMetadata(selecteItem.location, metadataFocussed),
+			path:     selectedItem.location,
+			metadata: getMetadata(selectedItem.location, metadataFocussed),
 		}
 	}
 }

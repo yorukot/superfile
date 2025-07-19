@@ -369,7 +369,8 @@ func getMetaDataUnsorted(filePath string, metadataFocussed bool) [][2]string {
 		res = append(res, [2]string{"Name", fileInfo.Name()})
 		if metadataFocussed {
 			// TODO : Calling dirSize() could be expensive for large directories, as it recursively
-			// walks the entire tree. Consider lazy loading, caching, or an async approach to avoid UI lockups.
+			// walks the entire tree. For now we have async approach of loading metadata,
+			// and its only loaded when metadata panel is focussed.
 			res = append(res, [2]string{"Size", common.FormatFileSize(dirSize(filePath))})
 		}
 		res = append(res,
