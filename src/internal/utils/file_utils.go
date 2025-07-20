@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -188,4 +190,54 @@ func ResolveAbsPath(currentDir string, path string) string {
 		path = filepath.Join(currentDir, path)
 	}
 	return filepath.Clean(path)
+}
+
+// Check whether is symlinks
+// TODO: unit test this
+func IsSymlink(filePath string) bool {
+	fileInfo, err := os.Lstat(filePath)
+	if err != nil {
+		return true
+	}
+	return fileInfo.Mode()&os.ModeSymlink != 0
+}
+
+// Get directory total size
+// TODO: Uni test this
+func DirSize(path string) int64 {
+	var size int64
+	// Its named walkErr to prevent shadowing
+	walkErr := filepath.WalkDir(path, func(_ string, entry os.DirEntry, err error) error {
+		if err != nil {
+			slog.Error("Dir size function error", "error", err)
+		}
+		if !entry.IsDir() {
+			info, infoErr := entry.Info()
+			if infoErr == nil {
+				size += info.Size()
+			}
+		}
+		return err
+	})
+	if walkErr != nil {
+		slog.Error("errors during WalkDir", "error", walkErr)
+	}
+	return size
+}
+
+// TODO : Unit test this
+func CalculateMD5Checksum(filePath string) (string, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return "", fmt.Errorf("failed to open file: %w", err)
+	}
+	defer file.Close()
+
+	hash := md5.New()
+	if _, err := io.Copy(hash, file); err != nil {
+		return "", fmt.Errorf("failed to calculate MD5 checksum: %w", err)
+	}
+
+	checksum := hex.EncodeToString(hash.Sum(nil))
+	return checksum, nil
 }
