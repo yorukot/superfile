@@ -34,6 +34,7 @@
 [![Release](https://img.shields.io/github/v/release/yorukot/superfile.svg?style=flat-square)](https://github.com/yorukot/superfile/releases/latest)
 [![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/yorukot/superfile?utm_source=oss&utm_medium=github&utm_campaign=yorukot%2Fsuperfile&labelColor=171717&color=FF570A&&label=CodeRabbit+Reviews)](https://www.coderabbit.ai/)
 
+[![Packaging status](https://repology.org/badge/vertical-allrepos/superfile.svg)](https://repology.org/project/superfile/versions)
 ![](/asset/demo.png)
 
 </div>
