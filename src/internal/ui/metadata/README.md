@@ -4,7 +4,11 @@ Since metadata fetching is not fully contained, some part of functionality is
 offloaded to main model
 
 # To-dos
+- Fix scrolling
+- Add unit tests
+- Finish required TODOs
 
+- Add coverage stats
 
 # Coverage
 
