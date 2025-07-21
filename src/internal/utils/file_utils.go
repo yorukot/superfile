@@ -155,7 +155,7 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 		resultErr.UpdateMessageAndError("failed to marshal config to TOML", err)
 		return resultErr
 	}
-	_, err = origFile.Write(tomlData)
+	_, err = origFile.WriteAt(tomlData, 0)
 
 	if err != nil {
 		resultErr.UpdateMessageAndError("failed to write TOML data to original file", err)
