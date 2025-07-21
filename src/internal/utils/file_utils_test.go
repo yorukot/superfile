@@ -313,6 +313,10 @@ func TestLoadTomlFileIgnorer(t *testing.T) {
 
 			assert.Equal(t, testContent, backupContent)
 
+			// Validate that if you Load Original File again, it loads without any errors
+			err = LoadTomlFile(orgFile, defaultData, &tomlVal, true)
+			require.NoError(t, err)
+
 			err = os.WriteFile(orgFile, backupContent, 0644)
 			require.NoError(t, err)
 		}
