@@ -1,7 +1,7 @@
 #!/usr/bin/env -S bash -euo pipefail
 
 projectName="superfile"
-version="v1.3.2"
+version="v1.3.3"
 osList=("darwin" "linux" "windows")
 archList=("amd64" "arm64")
 mkdir dist
@@ -27,4 +27,3 @@ for os in "${osList[@]}"; do
         done
     fi
 done
-w

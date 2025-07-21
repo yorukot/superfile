@@ -27,7 +27,7 @@
         packages = rec {
           superfile = pkgs.buildGoApplication {
             pname = "superfile";
-            version = "1.3.2";
+            version = "1.3.3";
             src = ./.;
             modules = ./gomod2nix.toml;
             nativeCheckInputs = [ pkgs.writableTmpDirAsHomeHook ];
