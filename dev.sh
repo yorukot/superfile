@@ -53,7 +53,7 @@ setup_venv() {
             rm -rf "$venv_path"
         else
             # Test if pip works in the existing virtual environment
-            if ! (source "$venv_path/bin/activate" && pip --version > /dev/null 2>&1); then
+            if ! (source "$venv_path/bin/activate" && python -m pip --version > /dev/null 2>&1); then
                 print_warning "Removing broken virtual environment (pip not working)..."
                 rm -rf "$venv_path"
             fi
@@ -107,6 +107,9 @@ cleanup_venv() {
         deactivate 2>/dev/null || true
     fi
 }
+
+# Setup trap for cleanup on exit/interruption
+trap cleanup_venv EXIT INT TERM
 
 # Function to show usage
 usage() {
@@ -249,11 +252,10 @@ if [ "$RUN_TESTSUITE" = true ]; then
         
         # Install requirements in virtual environment
         print_step "Installing testsuite requirements in virtual environment..."
-        if pip install -r requirements.txt > /dev/null 2>&1; then
+        if python -m pip install -r requirements.txt > /dev/null 2>&1; then
             print_success "Testsuite requirements installed in virtual environment"
         else
             print_error "Failed to install testsuite requirements in virtual environment"
-            cleanup_venv
             cd ..
             exit 1
         fi
@@ -261,7 +263,7 @@ if [ "$RUN_TESTSUITE" = true ]; then
         # Install requirements globally (original behavior)
         print_step "Installing testsuite requirements globally..."
         print_warning "Using global Python environment - consider using --use-venv flag"
-        if pip3 install -r requirements.txt > /dev/null 2>&1; then
+        if python3 -m pip install -r requirements.txt > /dev/null 2>&1; then
             print_success "Testsuite requirements installed globally"
         else
             print_warning "Failed to install testsuite requirements - continuing anyway"
@@ -274,7 +276,6 @@ if [ "$RUN_TESTSUITE" = true ]; then
             print_success "Integration testsuite passed"
         else
             print_error "Integration testsuite failed"
-            cleanup_venv
             cd ..
             exit 1
         fi
@@ -283,14 +284,11 @@ if [ "$RUN_TESTSUITE" = true ]; then
             print_success "Integration testsuite passed"
         else
             print_error "Integration testsuite failed"
-            cleanup_venv
             cd ..
             exit 1
         fi
     fi
 
-    # Cleanup virtual environment
-    cleanup_venv
     cd ..
 fi
 
