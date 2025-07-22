@@ -18,7 +18,7 @@ func TestReturnDirElement(t *testing.T) {
 	dir2 := filepath.Join(curTestDir, "dir2")
 	setupDirectories(t, curTestDir, dir1, dir2)
 
-	creationDelay := time.Millisecond * 5
+	creationDelay := time.Millisecond * 50
 	// Cleanup is handled by TestMain
 
 	// Setup files
