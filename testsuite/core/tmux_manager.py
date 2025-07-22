@@ -38,13 +38,8 @@ class TmuxSPFManager(BaseSPFManager):
         time.sleep(TmuxSPFManager.SPF_START_DELAY)
         self.logger.debug("spf_session initialised : %s", self.spf_session)
 
-        # Get active pane through active window
-        active_window = self.spf_session.active_window
-        if active_window is None:
-            raise RuntimeError("Failed to get active window from tmux session")
-        self.spf_pane = active_window.active_pane
-        if self.spf_pane is None:
-            raise RuntimeError("Failed to get active pane from tmux window")
+        # If libtmux version is less than 0.3.1, active_pane does not exist.
+        self.spf_pane = self.spf_session.active_pane
         self._is_spf_running = True
 
     def _send_key(self, key : str) -> None:
