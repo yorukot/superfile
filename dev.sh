@@ -46,9 +46,23 @@ print_error() {
 setup_venv() {
     local venv_path="$1"
     
+    # Remove existing incomplete virtual environment if activate script is missing or pip is broken
+    if [ -d "$venv_path" ]; then
+        if [ ! -f "$venv_path/bin/activate" ]; then
+            print_warning "Removing incomplete virtual environment (missing activate)..."
+            rm -rf "$venv_path"
+        else
+            # Test if pip works in the existing virtual environment
+            if ! (source "$venv_path/bin/activate" && pip --version > /dev/null 2>&1); then
+                print_warning "Removing broken virtual environment (pip not working)..."
+                rm -rf "$venv_path"
+            fi
+        fi
+    fi
+    
     if [ ! -d "$venv_path" ]; then
         print_step "Creating Python virtual environment..."
-        if python3 -m venv "$venv_path"; then
+        if python3 -m venv "$venv_path" --upgrade-deps; then
             print_success "Virtual environment created at $venv_path"
         else
             print_error "Failed to create virtual environment"
@@ -58,12 +72,27 @@ setup_venv() {
         print_step "Using existing virtual environment at $venv_path"
     fi
     
+    # Check if activate script exists and has proper permissions
+    if [ ! -f "$venv_path/bin/activate" ]; then
+        print_error "Virtual environment activate script not found at $venv_path/bin/activate"
+        return 1
+    fi
+    
+    # Ensure activate script has execution permissions
+    chmod +x "$venv_path/bin/activate"
+    
     # Activate virtual environment
     source "$venv_path/bin/activate"
     
+    # Verify that we're in the virtual environment
+    if [ -z "$VIRTUAL_ENV" ]; then
+        print_error "Failed to activate virtual environment"
+        return 1
+    fi
+    
     # Upgrade pip to latest version
     print_step "Upgrading pip in virtual environment..."
-    if pip install --upgrade pip > /dev/null 2>&1; then
+    if python -m pip install --upgrade pip > /dev/null 2>&1; then
         print_success "Pip upgraded successfully"
     else
         print_warning "Failed to upgrade pip - continuing anyway"

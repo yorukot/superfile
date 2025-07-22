@@ -24,5 +24,11 @@ coverage.html
 .env.production
 .direnv
 
+# Python virtual environments
+venv/
+.venv/
+testsuite/venv/
+testsuite/.venv/
+
 # macOS-specific files
 .DS_Store
