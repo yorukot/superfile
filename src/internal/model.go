@@ -140,7 +140,7 @@ func (m *model) handleMetadataMsg(msg MetadataMsg) {
 		slog.Debug("MetadataMsg for older files. Ignoring")
 		return
 	}
-	m.fileMetaData.SetMedatada(msg.metadata)
+	m.fileMetaData.SetMetadata(msg.metadata)
 	selectedItem.metaData = msg.metadata.GetData()
 }
 
@@ -162,7 +162,7 @@ func (m *model) getMetadataCmd() tea.Cmd {
 	// Remove metadata from filepanel.elemets[] and have cache as source of truth.
 	// Have a TTL for expiry, or lister for file update events.
 	if len(selectedItem.metaData) > 0 {
-		m.fileMetaData.SetMedatada(metadata.NewMetadata(selectedItem.metaData,
+		m.fileMetaData.SetMetadata(metadata.NewMetadata(selectedItem.metaData,
 			selectedItem.location, ""))
 		return nil
 	}

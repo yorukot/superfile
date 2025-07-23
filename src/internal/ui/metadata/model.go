@@ -29,7 +29,7 @@ func (m *Model) SetDimensions(width int, height int) {
 	m.height = height
 }
 
-func (m *Model) SetMedatada(metadata Metadata) {
+func (m *Model) SetMetadata(metadata Metadata) {
 	m.metadata = metadata
 	// Note : Dont always reset render to 0
 	// We would have udpate requests coming in during user scrolling through metadata

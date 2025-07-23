@@ -192,16 +192,6 @@ func ResolveAbsPath(currentDir string, path string) string {
 	return filepath.Clean(path)
 }
 
-// Check whether is symlinks
-// TODO: unit test this
-func IsSymlink(filePath string) bool {
-	fileInfo, err := os.Lstat(filePath)
-	if err != nil {
-		return true
-	}
-	return fileInfo.Mode()&os.ModeSymlink != 0
-}
-
 // Get directory total size
 // TODO: Uni test this
 func DirSize(path string) int64 {
