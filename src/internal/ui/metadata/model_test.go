@@ -7,6 +7,9 @@ import (
 )
 
 func TestUpDown(t *testing.T) {
+	defaultMetadata := Metadata{
+		data: make([][2]string, 5),
+	}
 	testdata := []struct {
 		name               string
 		m                  Model
@@ -16,7 +19,7 @@ func TestUpDown(t *testing.T) {
 		{
 			name: "Basic down movement 1",
 			m: Model{
-				metadata:    make([][2]string, 5),
+				metadata:    defaultMetadata,
 				renderIndex: 0,
 			},
 			listDown:           true,
@@ -25,7 +28,7 @@ func TestUpDown(t *testing.T) {
 		{
 			name: "Down wraps to top",
 			m: Model{
-				metadata:    make([][2]string, 5),
+				metadata:    defaultMetadata,
 				renderIndex: 4,
 			},
 			listDown:           true,
@@ -34,7 +37,7 @@ func TestUpDown(t *testing.T) {
 		{
 			name: "Basic up movement 1",
 			m: Model{
-				metadata:    make([][2]string, 5),
+				metadata:    defaultMetadata,
 				renderIndex: 4,
 			},
 			listDown:           false,
@@ -43,7 +46,7 @@ func TestUpDown(t *testing.T) {
 		{
 			name: "Up wraps to top",
 			m: Model{
-				metadata:    make([][2]string, 5),
+				metadata:    defaultMetadata,
 				renderIndex: 0,
 			},
 			listDown:           false,

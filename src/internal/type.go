@@ -106,6 +106,7 @@ type model struct {
 	promptModal prompt.Model
 
 	fileMetaData         metadata.Model
+	metadataRequestCnt   int
 	imagePreviewer       *filepreview.ImagePreviewer
 	modelQuitState       modelQuitStateType
 	firstTextInput       bool

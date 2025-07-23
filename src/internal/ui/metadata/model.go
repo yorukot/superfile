@@ -3,16 +3,12 @@ package metadata
 import (
 	"fmt"
 
-	"github.com/yorukot/superfile/src/config/icon"
-	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui"
-	"github.com/yorukot/superfile/src/internal/utils"
 )
 
 type Model struct {
 	// Data
-	metadata [][2]string
-	filePath string
+	metadata Metadata
 
 	// Render state
 	renderIndex int
@@ -20,11 +16,6 @@ type Model struct {
 	// Model Dimensions, including borders
 	width  int
 	height int
-
-	// Render dimensions
-	maxKeyLen  int
-	sprintfLen int
-	valLen     int
 }
 
 func New() Model {
@@ -38,86 +29,71 @@ func (m *Model) SetDimensions(width int, height int) {
 	m.height = height
 }
 
-func (m *Model) SetMedatada(filepath string, metadata [][2]string) {
-	m.filePath = filepath
+func (m *Model) SetMedatada(metadata Metadata) {
 	m.metadata = metadata
-	m.renderIndex = 0
+	// Note : Dont always reset render to 0
+	// We would have udpate requests coming in during user scrolling through metadata
+	m.ResetRenderIfInvalid()
+}
+
+func (m *Model) ResetRenderIfInvalid() {
+	if m.renderIndex >= m.MetadataLen() {
+		m.ResetRender()
+	}
 }
 
 func (m *Model) ResetRender() {
 	m.renderIndex = 0
 }
 
+func (m *Model) MetadataLen() int {
+	return len(m.metadata.data)
+}
+
 // Control metadata panel up
 func (m *Model) ListUp() {
-	if len(m.metadata) == 0 {
+	if m.MetadataLen() == 0 {
 		return
 	}
 	if m.renderIndex > 0 {
 		m.renderIndex--
 	} else {
-		m.renderIndex = len(m.metadata) - 1
-	}
-}
-
-func (m *Model) SetBlank() {
-	m.filePath = ""
-	m.metadata = m.metadata[:0]
-}
-
-func (m *Model) IsBlank() bool {
-	return len(m.metadata) == 0
-}
-
-func (m *Model) SetLoading() {
-	// Note : This will cause gc of current metadata slice
-	// This will cause frequent allocations and gc.
-	m.metadata = [][2]string{
-		{"", ""},
-		{" " + icon.InOperation + icon.Space + "Loading metadata...", ""},
+		m.renderIndex = m.MetadataLen() - 1
 	}
 }
 
 // Control metadata panel down
 func (m *Model) ListDown() {
-	if m.renderIndex < len(m.metadata)-1 {
+	if m.renderIndex < m.MetadataLen()-1 {
 		m.renderIndex++
 	} else {
 		m.renderIndex = 0
 	}
 }
 
-func (m *Model) computeRenderDimensions() {
-	// Recompute dimension based values
-	m.maxKeyLen = getMaxKeyLength(m.metadata)
-	m.sprintfLen, m.valLen = computeMetadataWidths(m.width-2, m.maxKeyLen)
+func (m *Model) SetBlank() {
+	m.metadata.filepath = ""
+	m.metadata.data = m.metadata.data[:0]
+	m.metadata.infoMsg = "No metadata present"
+}
+
+func (m *Model) IsBlank() bool {
+	return m.MetadataLen() == 0 && m.metadata.infoMsg == ""
+}
+
+func (m *Model) SetInfoMsg(msg string) {
+	m.metadata.infoMsg = msg
 }
 
 func (m *Model) Render(metadataFocussed bool) string {
-	if len(m.metadata) == 0 {
-		return ""
-	}
-	m.computeRenderDimensions()
 	r := ui.MetadataRenderer(m.height, m.width, metadataFocussed)
-	r.SetBorderInfoItems(fmt.Sprintf("%d/%d", m.renderIndex+1, len(m.metadata)))
-	lines := formatMetadataLines(m.metadata, m.renderIndex, m.height-2, m.sprintfLen, m.valLen)
+	if m.MetadataLen() == 0 {
+		r.AddLines("", m.metadata.infoMsg)
+		return r.Render()
+	}
+	sprintfLen, valueLen := computeRenderDimensions(m.metadata.data, m.width)
+	r.SetBorderInfoItems(fmt.Sprintf("%d/%d", m.renderIndex+1, len(m.metadata.data)))
+	lines := formatMetadataLines(m.metadata.data, m.renderIndex, m.height-2, sprintfLen, valueLen)
 	r.AddLines(lines...)
 	return r.Render()
-}
-
-// TODO : Simplify these mystic calculations, or add explanation comments.
-// TODO : unit test and fix this mess
-func formatMetadataLines(meta [][2]string, startIdx, height, sprintfLen, valueLen int) []string {
-	lines := []string{}
-	endIdx := min(startIdx+height, len(meta))
-	for i := startIdx; i < endIdx; i++ {
-		key := meta[i][0]
-		value := common.TruncateMiddleText(meta[i][1], valueLen, "...")
-		if utils.FooterWidth(0)-sprintfLen-3 < utils.FooterWidth(0)/2 {
-			key = common.TruncateMiddleText(key, valueLen, "...")
-		}
-		line := fmt.Sprintf("%-*s %s", sprintfLen, key, value)
-		lines = append(lines, line)
-	}
-	return lines
 }

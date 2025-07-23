@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/utils"
@@ -59,8 +60,8 @@ func (m model) Init() tea.Cmd {
 
 type MetadataMsg struct {
 	// Path of the file whose metadata is this
-	path     string
-	metadata [][2]string
+	metadata metadata.Metadata
+	reqID    int
 }
 
 // Update function for bubble tea to provide internal communication to the
@@ -128,20 +129,25 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *model) handleMetadataMsg(msg MetadataMsg) {
+	slog.Debug("Got metadata message", "id", msg.reqID)
+
 	selectedItem := m.getFocusedFilePanel().getSelectedItemPtr()
 	if selectedItem == nil {
 		slog.Debug("Panel empty or cursor invalid. Ignoring MetadataMsg")
 		return
 	}
-	if selectedItem.location != msg.path {
+	if selectedItem.location != msg.metadata.GetPath() {
 		slog.Debug("MetadataMsg for older files. Ignoring")
 		return
 	}
-	m.fileMetaData.SetMedatada(msg.path, msg.metadata)
-	selectedItem.metaData = msg.metadata
+	m.fileMetaData.SetMedatada(msg.metadata)
+	selectedItem.metaData = msg.metadata.GetData()
 }
 
-// TODO : rename
+// Note : Maybe we should not trigger metadata fetch for updates
+// that dont change the currently selected file panel element
+// TODO : At least dont trigger metadata fetch when user is scrolling
+// through the metadata panel
 func (m *model) getMetadataCmd() tea.Cmd {
 	if len(m.getFocusedFilePanel().element) == 0 {
 		m.fileMetaData.SetBlank()
@@ -156,20 +162,23 @@ func (m *model) getMetadataCmd() tea.Cmd {
 	// Remove metadata from filepanel.elemets[] and have cache as source of truth.
 	// Have a TTL for expiry, or lister for file update events.
 	if len(selectedItem.metaData) > 0 {
-		m.fileMetaData.SetMedatada(selectedItem.location, selectedItem.metaData)
+		m.fileMetaData.SetMedatada(metadata.NewMetadata(selectedItem.metaData,
+			selectedItem.location, ""))
 		return nil
 	}
 	if m.fileMetaData.IsBlank() {
-		m.fileMetaData.SetLoading()
+		m.fileMetaData.SetInfoMsg(icon.InOperation + icon.Space + "Loading metadata...")
 	}
 	metadataFocussed := m.focusPanel == metadataFocus
-
+	reqCnt := m.metadataRequestCnt
+	m.metadataRequestCnt++
 	// If there are too many metadata fetches, we need to have a cache with path as a key
 	// and timeout based eviction
+	slog.Debug("Submitting metadata fetch request", "id", reqCnt, "path", selectedItem.location)
 	return func() tea.Msg {
 		return MetadataMsg{
-			path:     selectedItem.location,
 			metadata: metadata.GetMetadata(selectedItem.location, metadataFocussed, et),
+			reqID:    reqCnt,
 		}
 	}
 }
