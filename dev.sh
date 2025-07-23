@@ -23,7 +23,7 @@ fi
 RUN_TESTSUITE=false
 SKIP_TESTS=false
 VERBOSE=false
-USE_VENV=false
+USE_GLOBAL_ENV=false
 
 # Function to print colored output
 print_step() {
@@ -121,7 +121,7 @@ usage() {
     echo "  -t, --testsuite     Run integration testsuite after unit tests"
     echo "  -s, --skip-tests    Skip unit tests (only format, lint, and build)"
     echo "  -v, --verbose       Enable verbose output"
-    echo "  --use-venv          Use Python virtual environment for testsuite"
+    echo "  --use-global-env    Use global Python environment instead of virtual environment"
     echo "  -h, --help          Show this help message"
     echo ""
     echo "STEPS PERFORMED:"
@@ -148,8 +148,8 @@ while [[ $# -gt 0 ]]; do
             VERBOSE=true
             shift
             ;;
-        --use-venv)
-            USE_VENV=true
+        --use-global-env)
+            USE_GLOBAL_ENV=true
             shift
             ;;
         -h|--help)
@@ -240,8 +240,18 @@ if [ "$RUN_TESTSUITE" = true ]; then
 
     cd testsuite
 
-    # Setup virtual environment if requested
-    if [ "$USE_VENV" = true ]; then
+    # Use virtual environment by default, global environment if requested
+    if [ "$USE_GLOBAL_ENV" = true ]; then
+        # Install requirements globally
+        print_step "Installing testsuite requirements globally..."
+        print_warning "Using global Python environment - consider removing --use-global-env flag to use virtual environment"
+        if python3 -m pip install -r requirements.txt > /dev/null 2>&1; then
+            print_success "Testsuite requirements installed globally"
+        else
+            print_warning "Failed to install testsuite requirements - continuing anyway"
+        fi
+    else
+        # Setup virtual environment (default behavior)
         VENV_PATH="./venv"
         
         if ! setup_venv "$VENV_PATH"; then
@@ -258,15 +268,6 @@ if [ "$RUN_TESTSUITE" = true ]; then
             print_error "Failed to install testsuite requirements in virtual environment"
             cd ..
             exit 1
-        fi
-    else
-        # Install requirements globally (original behavior)
-        print_step "Installing testsuite requirements globally..."
-        print_warning "Using global Python environment - consider using --use-venv flag"
-        if python3 -m pip install -r requirements.txt > /dev/null 2>&1; then
-            print_success "Testsuite requirements installed globally"
-        else
-            print_warning "Failed to install testsuite requirements - continuing anyway"
         fi
     fi
 
