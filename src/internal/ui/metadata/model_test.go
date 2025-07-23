@@ -14,7 +14,7 @@ func TestUpDown(t *testing.T) {
 		name               string
 		m                  Model
 		listDown           bool // Whether to do listDown or listUp
-		expectedRendeIndex int
+		expectedRenderIndex int
 	}{
 		{
 			name: "Basic down movement 1",
@@ -23,7 +23,7 @@ func TestUpDown(t *testing.T) {
 				renderIndex: 0,
 			},
 			listDown:           true,
-			expectedRendeIndex: 1,
+			expectedRenderIndex: 1,
 		},
 		{
 			name: "Down wraps to top",
@@ -32,7 +32,7 @@ func TestUpDown(t *testing.T) {
 				renderIndex: 4,
 			},
 			listDown:           true,
-			expectedRendeIndex: 0,
+			expectedRenderIndex: 0,
 		},
 		{
 			name: "Basic up movement 1",
@@ -41,7 +41,7 @@ func TestUpDown(t *testing.T) {
 				renderIndex: 4,
 			},
 			listDown:           false,
-			expectedRendeIndex: 3,
+			expectedRenderIndex: 3,
 		},
 		{
 			name: "Up wraps to top",
@@ -50,7 +50,7 @@ func TestUpDown(t *testing.T) {
 				renderIndex: 0,
 			},
 			listDown:           false,
-			expectedRendeIndex: 4,
+			expectedRenderIndex: 4,
 		},
 	}
 
@@ -61,7 +61,7 @@ func TestUpDown(t *testing.T) {
 			} else {
 				tt.m.ListUp()
 			}
-			assert.Equal(t, tt.expectedRendeIndex, tt.m.renderIndex)
+			assert.Equal(t, tt.expectedRenderIndex, tt.m.renderIndex)
 		})
 	}
 }

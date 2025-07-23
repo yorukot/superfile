@@ -58,12 +58,6 @@ func (m model) Init() tea.Cmd {
 	)
 }
 
-type MetadataMsg struct {
-	// Path of the file whose metadata is this
-	metadata metadata.Metadata
-	reqID    int
-}
-
 // Update function for bubble tea to provide internal communication to the
 // application
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
