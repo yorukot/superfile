@@ -11,9 +11,9 @@ func TestUpDown(t *testing.T) {
 		data: make([][2]string, 5),
 	}
 	testdata := []struct {
-		name               string
-		m                  Model
-		listDown           bool // Whether to do listDown or listUp
+		name                string
+		m                   Model
+		listDown            bool // Whether to do listDown or listUp
 		expectedRenderIndex int
 	}{
 		{
@@ -22,7 +22,7 @@ func TestUpDown(t *testing.T) {
 				metadata:    defaultMetadata,
 				renderIndex: 0,
 			},
-			listDown:           true,
+			listDown:            true,
 			expectedRenderIndex: 1,
 		},
 		{
@@ -31,7 +31,7 @@ func TestUpDown(t *testing.T) {
 				metadata:    defaultMetadata,
 				renderIndex: 4,
 			},
-			listDown:           true,
+			listDown:            true,
 			expectedRenderIndex: 0,
 		},
 		{
@@ -40,7 +40,7 @@ func TestUpDown(t *testing.T) {
 				metadata:    defaultMetadata,
 				renderIndex: 4,
 			},
-			listDown:           false,
+			listDown:            false,
 			expectedRenderIndex: 3,
 		},
 		{
@@ -49,7 +49,7 @@ func TestUpDown(t *testing.T) {
 				metadata:    defaultMetadata,
 				renderIndex: 0,
 			},
-			listDown:           false,
+			listDown:            false,
 			expectedRenderIndex: 4,
 		},
 	}

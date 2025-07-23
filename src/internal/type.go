@@ -90,7 +90,6 @@ type MetadataMsg struct {
 	reqID    int
 }
 
-
 // Main model
 // TODO : We could consider using *model as tea.Model, instead of model.
 // for reducing re-allocations. The struct is 20K bytes. But this could lead to

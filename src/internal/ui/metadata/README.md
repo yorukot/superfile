@@ -4,11 +4,9 @@ Since metadata fetching is not fully contained, some part of functionality is
 offloaded to main model
 
 # To-dos
-- Fix scrolling
 - Add unit tests
 - Finish required TODOs
-
-- Add coverage stats
+- Update coverage stats
 
 # Coverage
 
@@ -16,4 +14,4 @@ offloaded to main model
 cd /path/to/ui/metadata
 go test -cover
 ```
-Current coverage is .
+Current coverage is 0%
