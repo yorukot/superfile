@@ -38,7 +38,7 @@ func formatMetadataLines(meta [][2]string, startIdx, height, keyLen, valueLen in
 	endIdx := min(startIdx+height, len(meta))
 	for i := startIdx; i < endIdx; i++ {
 		value := common.TruncateMiddleText(meta[i][1], valueLen, "...")
-		key := common.TruncateMiddleText(meta[i][0], keyLen-1, "...")
+		key := common.TruncateMiddleText(meta[i][0], keyLen, "...")
 		line := fmt.Sprintf("%-*s%s%s", keyLen, key, keyValueSpacing, value)
 		lines = append(lines, line)
 	}
