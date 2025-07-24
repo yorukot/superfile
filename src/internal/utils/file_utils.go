@@ -1,8 +1,6 @@
 package utils
 
 import (
-	"crypto/md5"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -213,21 +211,4 @@ func DirSize(path string) int64 {
 		slog.Error("errors during WalkDir", "error", walkErr)
 	}
 	return size
-}
-
-// TODO : Unit test this
-func CalculateMD5Checksum(filePath string) (string, error) {
-	file, err := os.Open(filePath)
-	if err != nil {
-		return "", fmt.Errorf("failed to open file: %w", err)
-	}
-	defer file.Close()
-
-	hash := md5.New()
-	if _, err := io.Copy(hash, file); err != nil {
-		return "", fmt.Errorf("failed to calculate MD5 checksum: %w", err)
-	}
-
-	checksum := hex.EncodeToString(hash.Sum(nil))
-	return checksum, nil
 }

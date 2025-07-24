@@ -88,10 +88,10 @@ func (m *Model) SetInfoMsg(msg string) {
 func (m *Model) Render(metadataFocussed bool) string {
 	r := ui.MetadataRenderer(m.height, m.width, metadataFocussed)
 	if m.MetadataLen() == 0 {
-		r.AddLines("", m.metadata.infoMsg)
+		r.AddLines("", " "+m.metadata.infoMsg)
 		return r.Render()
 	}
-	keyLen, valueLen := computeRenderDimensions(m.metadata.data, m.width-2)
+	keyLen, valueLen := computeRenderDimensions(m.metadata.data, m.width-2-keyValueSpacingLen)
 	r.SetBorderInfoItems(fmt.Sprintf("%d/%d", m.renderIndex+1, len(m.metadata.data)))
 	lines := formatMetadataLines(m.metadata.data, m.renderIndex, m.height-2, keyLen, valueLen)
 	r.AddLines(lines...)

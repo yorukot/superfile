@@ -35,21 +35,24 @@ func (m Metadata) GetData() [][2]string {
 	return m.data
 }
 
+func (m Metadata) GetValue(key string) (string, error) {
+	for _, m := range m.data {
+		if m[0] == key {
+			return m[1], nil
+		}
+	}
+
+	return "", fmt.Errorf("key %s not found", key)
+}
+
 // Note : We dont use map[string]string, as metadata
 // 1 -> We dont need to support get(key) yet. Only usage is via iterating the whole list
 // 2 -> We need custom ordering
 
 func sortMetadata(meta [][2]string) {
-	priority := map[string]int{
-		"Name":          0,
-		"Size":          1,
-		"Date Modified": 2,
-		"Date Accessed": 3,
-	}
-
 	sort.SliceStable(meta, func(i, j int) bool {
-		pi, iOkay := priority[meta[i][0]]
-		pj, jOkay := priority[meta[j][0]]
+		pi, iOkay := sortPriority[meta[i][0]]
+		pj, jOkay := sortPriority[meta[j][0]]
 
 		// Both are priority fields
 		if iOkay && jOkay {
@@ -83,30 +86,30 @@ func getMetaDataUnsorted(filePath string, metadataFocussed bool, et *exiftool.Ex
 
 	fileInfo, err := os.Lstat(filePath)
 	if err != nil {
-		res.infoMsg = "Cannot load file stats"
+		res.infoMsg = fileStatErrorMsg
 		return res
 	}
 	if fileInfo.Mode()&os.ModeSymlink != 0 {
 		_, symlinkErr := filepath.EvalSymlinks(filePath)
 		if symlinkErr != nil {
-			res.infoMsg = "Link file is broken!"
+			res.infoMsg = linkFileBrokenMsg
 		} else {
-			res.infoMsg = "This is a link file."
+			res.infoMsg = linkFileMsg
 		}
 		return res
 	}
 	// Add basic metadata information irrespective of what is fetched from exiftool
 	// Note : we prioritize these while sorting Metadata
-	name := [2]string{"Name", fileInfo.Name()}
-	size := [2]string{"Size", common.FormatFileSize(fileInfo.Size())}
-	modifyDate := [2]string{"Date Modified", fileInfo.ModTime().String()}
-	permissions := [2]string{"Permissions", fileInfo.Mode().String()}
+	name := [2]string{keyName, fileInfo.Name()}
+	size := [2]string{keySize, common.FormatFileSize(fileInfo.Size())}
+	modifyDate := [2]string{keyDataModified, fileInfo.ModTime().String()}
+	permissions := [2]string{keyPermissions, fileInfo.Mode().String()}
 
 	if fileInfo.IsDir() && metadataFocussed {
 		// TODO : Calling dirSize() could be expensive for large directories, as it recursively
 		// walks the entire tree. For now we have async approach of loading metadata,
 		// and its only loaded when metadata panel is focussed.
-		size = [2]string{"Size", common.FormatFileSize(utils.DirSize(filePath))}
+		size = [2]string{keySize, common.FormatFileSize(utils.DirSize(filePath))}
 	}
 	res.data = append(res.data, name, size, modifyDate, permissions)
 
@@ -115,6 +118,7 @@ func getMetaDataUnsorted(filePath string, metadataFocussed bool, et *exiftool.Ex
 
 		for _, fileInfo := range fileInfos {
 			if fileInfo.Err != nil {
+				res.infoMsg = etFetchErrorMsg
 				slog.Error("Error while return metadata function", "fileInfo", fileInfo, "error", fileInfo.Err)
 				continue
 			}
@@ -126,11 +130,11 @@ func getMetaDataUnsorted(filePath string, metadataFocussed bool, et *exiftool.Ex
 
 	if common.Config.EnableMD5Checksum {
 		// Calculate MD5 checksum
-		checksum, err := utils.CalculateMD5Checksum(filePath)
+		checksum, err := calculateMD5Checksum(filePath)
 		if err != nil {
 			slog.Error("Error calculating MD5 checksum", "error", err)
 		} else {
-			md5Data := [2]string{"MD5Checksum", checksum}
+			md5Data := [2]string{keyMd5Checksum, checksum}
 			res.data = append(res.data, md5Data)
 		}
 	}

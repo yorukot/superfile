@@ -1,7 +1,11 @@
 package metadata
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
+	"io"
+	"os"
 
 	"github.com/yorukot/superfile/src/internal/common"
 )
@@ -33,10 +37,9 @@ func formatMetadataLines(meta [][2]string, startIdx, height, keyLen, valueLen in
 	lines := []string{}
 	endIdx := min(startIdx+height, len(meta))
 	for i := startIdx; i < endIdx; i++ {
-		key := meta[i][0]
 		value := common.TruncateMiddleText(meta[i][1], valueLen, "...")
-		key = common.TruncateMiddleText(key, keyLen-1, "...")
-		line := fmt.Sprintf("%-*s %s", keyLen, key, value)
+		key := common.TruncateMiddleText(meta[i][0], keyLen-1, "...")
+		line := fmt.Sprintf("%-*s%s%s", keyLen, key, keyValueSpacing, value)
 		lines = append(lines, line)
 	}
 	return lines
@@ -46,4 +49,21 @@ func computeRenderDimensions(metadata [][2]string, viewWidth int) (int, int) {
 	// Compute dimension based values
 	maxKeyLen := getMaxKeyLength(metadata)
 	return computeMetadataWidths(viewWidth, maxKeyLen)
+}
+
+// TODO : Unit test this
+func calculateMD5Checksum(filePath string) (string, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return "", fmt.Errorf("failed to open file: %w", err)
+	}
+	defer file.Close()
+
+	hash := md5.New()
+	if _, err := io.Copy(hash, file); err != nil {
+		return "", fmt.Errorf("failed to calculate MD5 checksum: %w", err)
+	}
+
+	checksum := hex.EncodeToString(hash.Sum(nil))
+	return checksum, nil
 }
