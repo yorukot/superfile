@@ -3,6 +3,7 @@ package internal
 import (
 	"time"
 
+	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/sidebar"
 	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
 
@@ -73,7 +74,6 @@ const (
 
 const (
 	sendWarnModal channelMessageType = iota
-	sendMetadata
 	sendProcess
 	sendNotifyModal
 )
@@ -84,6 +84,11 @@ const (
 	confirmToQuit
 	quitDone
 )
+
+type MetadataMsg struct {
+	metadata metadata.Metadata
+	reqID    int
+}
 
 // Main model
 // TODO : We could consider using *model as tea.Model, instead of model.
@@ -105,7 +110,8 @@ type model struct {
 	helpMenu    helpMenuModal
 	promptModal prompt.Model
 
-	fileMetaData         fileMetadata
+	fileMetaData         metadata.Model
+	metadataRequestCnt   int
 	imagePreviewer       *filepreview.ImagePreviewer
 	modelQuitState       modelQuitStateType
 	firstTextInput       bool
@@ -162,13 +168,6 @@ type notifyModal struct {
 	open    bool
 	title   string
 	content string
-}
-
-// File metadata
-type fileMetadata struct {
-	path        string
-	metaData    [][2]string
-	renderIndex int
 }
 
 // Copied items
@@ -269,7 +268,6 @@ type channelMessage struct {
 	processNewState process
 	warnModal       warnModal
 	notifyModal     notifyModal
-	metadata        [][2]string
 }
 
 /*PROCESS BAR internal TYPE END*/

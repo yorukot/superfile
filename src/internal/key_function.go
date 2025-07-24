@@ -23,10 +23,9 @@ func (m *model) mainKey(msg string) tea.Cmd {
 		case processBarFocus:
 			m.processBarModel.listUp(m.footerHeight)
 		case metadataFocus:
-			m.fileMetaData.listUp()
+			m.fileMetaData.ListUp()
 		case nonePanelFocus:
 			m.fileModel.filePanels[m.filePanelFocusIndex].listUp(m.mainPanelHeight)
-			m.fileMetaData.renderIndex = 0
 		}
 
 		// If move down Key is pressed, check the current state and executes
@@ -37,10 +36,9 @@ func (m *model) mainKey(msg string) tea.Cmd {
 		case processBarFocus:
 			m.processBarModel.listDown(m.footerHeight)
 		case metadataFocus:
-			m.fileMetaData.listDown()
+			m.fileMetaData.ListDown()
 		case nonePanelFocus:
 			m.fileModel.filePanels[m.filePanelFocusIndex].listDown(m.mainPanelHeight)
-			m.fileMetaData.renderIndex = 0
 		}
 
 	case slices.Contains(common.Hotkeys.PageUp, msg):

@@ -296,67 +296,6 @@ func (m *model) processBarRender() string {
 	return r.Render()
 }
 
-// This updates m.fileMetaData
-func (m *model) metadataRender() string {
-	if len(m.fileMetaData.metaData) == 0 {
-		return ""
-	}
-
-	// TODO : These calculations should be a part of Update()
-	maxKeyLen := getMaxKeyLength(m.fileMetaData.metaData)
-	sprintfLen, valLen := computeMetadataWidths(m.fullWidth, maxKeyLen)
-
-	r := ui.MetadataRenderer(m.footerHeight+2, utils.FooterWidth(m.fullWidth)+2, m.focusPanel == metadataFocus)
-	if len(m.fileMetaData.metaData) > 0 {
-		r.SetBorderInfoItems(fmt.Sprintf("%d/%d", m.fileMetaData.renderIndex+1, len(m.fileMetaData.metaData)))
-	}
-
-	lines := formatMetadataLines(m.fileMetaData.metaData, m.fileMetaData.renderIndex, m.footerHeight, sprintfLen, valLen)
-	r.AddLines(lines...)
-
-	return r.Render()
-}
-
-func getMaxKeyLength(meta [][2]string) int {
-	maxLen := 0
-	for _, pair := range meta {
-		if len(pair[0]) > maxLen {
-			maxLen = len(pair[0])
-		}
-	}
-	return maxLen
-}
-
-func computeMetadataWidths(fullWidth, maxKeyLen int) (int, int) {
-	metadataPanelWidth := utils.FooterWidth(fullWidth)
-
-	// Value Length = PanelLength - Key length - 2 (for border)
-	valueLen := metadataPanelWidth - maxKeyLen - 2
-	sprintfLen := maxKeyLen + 1
-	if valueLen < metadataPanelWidth/2 {
-		valueLen = metadataPanelWidth/2 - 2
-		sprintfLen = valueLen
-	}
-
-	return sprintfLen, valueLen
-}
-
-// TODO : Simplify these mystic calculations, or add explanation comments.
-func formatMetadataLines(meta [][2]string, startIdx, height, sprintfLen, valueLen int) []string {
-	lines := []string{}
-	endIdx := min(startIdx+height, len(meta))
-	for i := startIdx; i < endIdx; i++ {
-		key := meta[i][0]
-		value := common.TruncateMiddleText(meta[i][1], valueLen, "...")
-		if utils.FooterWidth(0)-sprintfLen-3 < utils.FooterWidth(0)/2 {
-			key = common.TruncateMiddleText(key, valueLen, "...")
-		}
-		line := fmt.Sprintf("%-*s %s", sprintfLen, key, value)
-		lines = append(lines, line)
-	}
-	return lines
-}
-
 func (m *model) clipboardRender() string {
 	// render
 	var bottomWidth int

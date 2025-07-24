@@ -8,4 +8,5 @@ const (
 	OsWindows = "windows"
 	// OsDarwin represents the macOS (Darwin) operating system identifier
 	OsDarwin = "darwin"
+	OsLinux  = "linux"
 )

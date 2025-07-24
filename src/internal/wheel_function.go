@@ -17,7 +17,7 @@ func wheelMainAction(msg string, m *model) {
 		case processBarFocus:
 			action = func() { m.processBarModel.listUp(m.footerHeight) }
 		case metadataFocus:
-			action = func() { m.fileMetaData.listUp() }
+			action = func() { m.fileMetaData.ListUp() }
 		case nonePanelFocus:
 			action = func() { m.fileModel.filePanels[m.filePanelFocusIndex].listUp(m.mainPanelHeight) }
 		}
@@ -29,7 +29,7 @@ func wheelMainAction(msg string, m *model) {
 		case processBarFocus:
 			action = func() { m.processBarModel.listDown(m.footerHeight) }
 		case metadataFocus:
-			action = func() { m.fileMetaData.listDown() }
+			action = func() { m.fileMetaData.ListDown() }
 		case nonePanelFocus:
 			action = func() { m.fileModel.filePanels[m.filePanelFocusIndex].listDown(m.mainPanelHeight) }
 		}
@@ -40,9 +40,5 @@ func wheelMainAction(msg string, m *model) {
 
 	for range common.WheelRunTime {
 		action()
-	}
-
-	if m.focusPanel == nonePanelFocus {
-		m.fileMetaData.renderIndex = 0
 	}
 }

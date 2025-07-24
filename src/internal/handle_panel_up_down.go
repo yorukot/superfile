@@ -107,27 +107,6 @@ func (panel *filePanel) itemSelectDown(mainPanelHeight int) {
 
 // ======================================== Metadata controller ========================================
 
-// Control metadata panel up
-func (fm *fileMetadata) listUp() {
-	if len(fm.metaData) == 0 {
-		return
-	}
-	if fm.renderIndex > 0 {
-		fm.renderIndex--
-	} else {
-		fm.renderIndex = len(fm.metaData) - 1
-	}
-}
-
-// Control metadata panel down
-func (fm *fileMetadata) listDown() {
-	if fm.renderIndex < len(fm.metaData)-1 {
-		fm.renderIndex++
-	} else {
-		fm.renderIndex = 0
-	}
-}
-
 // ======================================== Processbar controller ========================================
 
 // Control processbar panel list up

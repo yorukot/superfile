@@ -3,6 +3,7 @@ package internal
 import (
 	"path/filepath"
 
+	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/sidebar"
 	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
 
@@ -22,6 +23,7 @@ func defaultModelConfig(toggleDotFile bool, toggleFooter bool, firstUse bool, fi
 			render:  0,
 		},
 		sidebarModel: sidebar.New(),
+		fileMetaData: metadata.New(),
 		fileModel: fileModel{
 			filePanels: filePanelSlice(firstFilePanelDirs),
 			filePreview: filePreviewPanel{

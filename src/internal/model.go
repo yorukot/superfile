@@ -13,6 +13,7 @@ import (
 
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/utils"
 
 	"github.com/barasher/go-exiftool"
@@ -55,12 +56,6 @@ func (m model) Init() tea.Cmd {
 		textinput.Blink, // Assuming textinput.Blink is a valid command
 		listenForChannelMessage(channel),
 	)
-}
-
-type MetadataMsg struct {
-	// Path of the file whose metadata is this
-	path     string
-	metadata [][2]string
 }
 
 // Update function for bubble tea to provide internal communication to the
@@ -114,6 +109,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	metadataCmd := m.getMetadataCmd()
 
+	// TODO: Move to utility
+	if m.focusPanel != metadataFocus {
+		m.fileMetaData.ResetRender()
+	}
+
 	// TODO: Entirely remove the need of this variable, and handle first loading via Init()
 	// Init() should return a basic model object with all IO waiting via a tea.Cmd
 	if !m.firstLoadingComplete {
@@ -122,46 +122,32 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, tea.Batch(cmd, listenChannelCommand, metadataCmd)
 }
 
-func (fm *fileMetadata) setBlank() {
-	fm.path = ""
-	fm.metaData = fm.metaData[:0]
-}
-
-func (fm *fileMetadata) isBlank() bool {
-	return len(fm.metaData) == 0
-}
-
-func (fm *fileMetadata) setLoading() {
-	// Note : This will cause gc of current metadata slice
-	// This will cause frequent allocations and gc.
-	fm.metaData = [][2]string{
-		{"", ""},
-		{" " + icon.InOperation + icon.Space + "Loading metadata...", ""},
-	}
-}
-
 func (m *model) handleMetadataMsg(msg MetadataMsg) {
+	slog.Debug("Got metadata message", "id", msg.reqID)
+
 	selectedItem := m.getFocusedFilePanel().getSelectedItemPtr()
 	if selectedItem == nil {
 		slog.Debug("Panel empty or cursor invalid. Ignoring MetadataMsg")
 		return
 	}
-	if selectedItem.location != msg.path {
+	if selectedItem.location != msg.metadata.GetPath() {
 		slog.Debug("MetadataMsg for older files. Ignoring")
 		return
 	}
-	m.fileMetaData.metaData = msg.metadata
-	selectedItem.metaData = msg.metadata
+	m.fileMetaData.SetMetadata(msg.metadata)
+	selectedItem.metaData = msg.metadata.GetData()
 }
 
-// TODO : rename
+// Note : Maybe we should not trigger metadata fetch for updates
+// that dont change the currently selected file panel element
+// TODO : At least dont trigger metadata fetch when user is scrolling
+// through the metadata panel
 func (m *model) getMetadataCmd() tea.Cmd {
 	if len(m.getFocusedFilePanel().element) == 0 {
-		m.fileMetaData.setBlank()
+		m.fileMetaData.SetBlank()
 		return nil
 	}
 	selectedItem := m.getFocusedFilePanel().getSelectedItem()
-	m.fileMetaData.path = selectedItem.location
 
 	// Note : This will cause metadata not being refreshed when you are not scrolling,
 	// or filepanel is not getting updated. Its not a big problem as we repeatedly refresh filepanel
@@ -170,20 +156,23 @@ func (m *model) getMetadataCmd() tea.Cmd {
 	// Remove metadata from filepanel.elemets[] and have cache as source of truth.
 	// Have a TTL for expiry, or lister for file update events.
 	if len(selectedItem.metaData) > 0 {
-		m.fileMetaData.metaData = selectedItem.metaData
+		m.fileMetaData.SetMetadata(metadata.NewMetadata(selectedItem.metaData,
+			selectedItem.location, ""))
 		return nil
 	}
-	if m.fileMetaData.isBlank() {
-		m.fileMetaData.setLoading()
+	if m.fileMetaData.IsBlank() {
+		m.fileMetaData.SetInfoMsg(icon.InOperation + icon.Space + "Loading metadata...")
 	}
 	metadataFocussed := m.focusPanel == metadataFocus
-
+	reqCnt := m.metadataRequestCnt
+	m.metadataRequestCnt++
 	// If there are too many metadata fetches, we need to have a cache with path as a key
 	// and timeout based eviction
+	slog.Debug("Submitting metadata fetch request", "id", reqCnt, "path", selectedItem.location)
 	return func() tea.Msg {
 		return MetadataMsg{
-			path:     selectedItem.location,
-			metadata: getMetadata(selectedItem.location, metadataFocussed),
+			metadata: metadata.GetMetadata(selectedItem.location, metadataFocussed, et),
+			reqID:    reqCnt,
 		}
 	}
 }
@@ -195,8 +184,6 @@ func (m *model) handleChannelMessage(msg channelMessage) {
 		m.warnModal = msg.warnModal
 	case sendNotifyModal:
 		m.notifyModal = msg.notifyModal
-	case sendMetadata:
-		m.fileMetaData.metaData = msg.metadata
 	case sendProcess:
 		if !arrayContains(m.processBarModel.processList, msg.messageID) {
 			m.processBarModel.processList = append(m.processBarModel.processList, msg.messageID)
@@ -225,6 +212,7 @@ func (m *model) handleWindowResize(msg tea.WindowSizeMsg) {
 	m.setFilePanelsSize(msg.Width)
 	m.setHeightValues(msg.Height)
 	m.setHelpMenuSize()
+	m.setMetadataModelSize()
 	m.setPromptModelSize()
 
 	if m.fileModel.maxFilePanel >= 10 {
@@ -293,6 +281,10 @@ func (m *model) setPromptModelSize() {
 
 	// Scale prompt model's maxHeight - 50% of total height
 	m.promptModal.SetWidth(m.fullWidth / 2)
+}
+
+func (m *model) setMetadataModelSize() {
+	m.fileMetaData.SetDimensions(utils.FooterWidth(m.fullWidth)+2, m.footerHeight+2)
 }
 
 // Identify the current state of the application m and properly handle the
@@ -521,7 +513,7 @@ func (m model) View() string {
 	if m.toggleFooter {
 		processBar := m.processBarRender()
 
-		metaData := m.metadataRender()
+		metaData := m.fileMetaData.Render(m.focusPanel == metadataFocus)
 
 		clipboardBar := m.clipboardRender()
 
