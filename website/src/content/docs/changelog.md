@@ -12,10 +12,11 @@ All notable changes to this project will be documented in this file. Dates are d
 
 # [**v1.3.3**](https://github.com/yorukot/superfile/releases/tag/v1.3.3)
 
-> 2025-07-22
+> 2025-07-25
 
 #### Update
 - feat: Metadata loading via bubbletea's tea.Cmd method, removed usage channels and custom goroutines by [`#947`](https://github.com/yorukot/superfile/pull/947)
+- feat: Metadata panel into separate package, UI bug fixes, Code improvements[`#950`](https://github.com/yorukot/superfile/pull/950)
 
 #### Bug Fix
 - fix: windows test ci by [`#941`](https://github.com/yorukot/superfile/pull/941)
@@ -23,7 +24,7 @@ All notable changes to this project will be documented in this file. Dates are d
 
 #### Misc
 - chore: update pnpm-lcok.yaml by [`#937`](https://github.com/yorukot/superfile/pull/937)
-
+- feat: add support for Python virtual environment in testsuite setup[`#956`](https://github.com/yorukot/superfile/pull/956)
 
 # [**v1.3.2**](https://github.com/yorukot/superfile/releases/tag/v1.3.2)
 
