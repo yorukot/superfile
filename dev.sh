@@ -23,6 +23,7 @@ fi
 RUN_TESTSUITE=false
 SKIP_TESTS=false
 VERBOSE=false
+USE_GLOBAL_ENV=false
 
 # Function to print colored output
 print_step() {
@@ -41,6 +42,75 @@ print_error() {
     printf "${RED}✗${NC} %s\n" "$1"
 }
 
+# Function to setup Python virtual environment
+setup_venv() {
+    local venv_path="$1"
+    
+    # Remove existing incomplete virtual environment if activate script is missing or pip is broken
+    if [ -d "$venv_path" ]; then
+        if [ ! -f "$venv_path/bin/activate" ]; then
+            print_warning "Removing incomplete virtual environment (missing activate)..."
+            rm -rf "$venv_path"
+        else
+            # Test if pip works in the existing virtual environment
+            if ! (source "$venv_path/bin/activate" && python -m pip --version > /dev/null 2>&1); then
+                print_warning "Removing broken virtual environment (pip not working)..."
+                rm -rf "$venv_path"
+            fi
+        fi
+    fi
+    
+    if [ ! -d "$venv_path" ]; then
+        print_step "Creating Python virtual environment..."
+        if python3 -m venv "$venv_path" --upgrade-deps; then
+            print_success "Virtual environment created at $venv_path"
+        else
+            print_error "Failed to create virtual environment"
+            return 1
+        fi
+    else
+        print_step "Using existing virtual environment at $venv_path"
+    fi
+    
+    # Check if activate script exists and has proper permissions
+    if [ ! -f "$venv_path/bin/activate" ]; then
+        print_error "Virtual environment activate script not found at $venv_path/bin/activate"
+        return 1
+    fi
+    
+    # Ensure activate script has execution permissions
+    chmod +x "$venv_path/bin/activate"
+    
+    # Activate virtual environment
+    source "$venv_path/bin/activate"
+    
+    # Verify that we're in the virtual environment
+    if [ -z "$VIRTUAL_ENV" ]; then
+        print_error "Failed to activate virtual environment"
+        return 1
+    fi
+    
+    # Upgrade pip to latest version
+    print_step "Upgrading pip in virtual environment..."
+    if python -m pip install --upgrade pip > /dev/null 2>&1; then
+        print_success "Pip upgraded successfully"
+    else
+        print_warning "Failed to upgrade pip - continuing anyway"
+    fi
+    
+    return 0
+}
+
+# Function to cleanup virtual environment
+cleanup_venv() {
+    if [ -n "$VIRTUAL_ENV" ]; then
+        deactivate 2>/dev/null || true
+    fi
+}
+
+# Setup trap for cleanup on exit/interruption
+trap cleanup_venv EXIT INT TERM
+
 # Function to show usage
 usage() {
     echo "Usage: $0 [OPTIONS]"
@@ -51,6 +121,7 @@ usage() {
     echo "  -t, --testsuite     Run integration testsuite after unit tests"
     echo "  -s, --skip-tests    Skip unit tests (only format, lint, and build)"
     echo "  -v, --verbose       Enable verbose output"
+    echo "  --use-global-env    Use global Python environment instead of virtual environment"
     echo "  -h, --help          Show this help message"
     echo ""
     echo "STEPS PERFORMED:"
@@ -75,6 +146,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         -v|--verbose)
             VERBOSE=true
+            shift
+            ;;
+        --use-global-env)
+            USE_GLOBAL_ENV=true
             shift
             ;;
         -h|--help)
@@ -165,12 +240,35 @@ if [ "$RUN_TESTSUITE" = true ]; then
 
     cd testsuite
 
-    # Install requirements if needed (you might want to do this manually)
-    print_step "Installing testsuite requirements..."
-    if pip3 install -r requirements.txt > /dev/null 2>&1; then
-        print_success "Testsuite requirements installed"
+    # Use virtual environment by default, global environment if requested
+    if [ "$USE_GLOBAL_ENV" = true ]; then
+        # Install requirements globally
+        print_step "Installing testsuite requirements globally..."
+        print_warning "Using global Python environment - consider removing --use-global-env flag to use virtual environment"
+        if python3 -m pip install -r requirements.txt > /dev/null 2>&1; then
+            print_success "Testsuite requirements installed globally"
+        else
+            print_warning "Failed to install testsuite requirements - continuing anyway"
+        fi
     else
-        print_warning "Failed to install testsuite requirements - continuing anyway"
+        # Setup virtual environment (default behavior)
+        VENV_PATH="./venv"
+        
+        if ! setup_venv "$VENV_PATH"; then
+            print_error "Failed to setup virtual environment"
+            cd ..
+            exit 1
+        fi
+        
+        # Install requirements in virtual environment
+        print_step "Installing testsuite requirements in virtual environment..."
+        if python -m pip install -r requirements.txt > /dev/null 2>&1; then
+            print_success "Testsuite requirements installed in virtual environment"
+        else
+            print_error "Failed to install testsuite requirements in virtual environment"
+            cd ..
+            exit 1
+        fi
     fi
 
     # Run the testsuite

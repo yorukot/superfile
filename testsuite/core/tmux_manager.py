@@ -18,6 +18,24 @@ class TmuxSPFManager(BaseSPFManager):
     # Init should not allocate any resources
     def __init__(self, spf_path : str):
         super().__init__(spf_path)
+        
+        # Check libtmux version requirement
+        min_version = (0, 31, 0)
+        current_version_str = libtmux.__version__
+        
+        # Parse version string to tuple for comparison
+        try:
+            current_version = tuple(map(int, current_version_str.split('.')[:3]))
+        except (ValueError, AttributeError):
+            current_version = (0, 0, 0)
+        
+        if current_version < min_version:
+            raise RuntimeError(
+                f"libtmux version 0.31.0 or higher is required. "
+                f"Current version: {current_version_str}. "
+                f"Please upgrade with: pip install 'libtmux>=0.31.0'"
+            )
+        
         self.logger = logging.getLogger()
         self.server = libtmux.Server(socket_name=TmuxSPFManager.SPF_SOCKET_NAME)
         self.logger.debug("server object : %s", self.server)
@@ -38,6 +56,7 @@ class TmuxSPFManager(BaseSPFManager):
         time.sleep(TmuxSPFManager.SPF_START_DELAY)
         self.logger.debug("spf_session initialised : %s", self.spf_session)
 
+        # If libtmux version is less than 0.3.1, active_pane does not exist.
         self.spf_pane = self.spf_session.active_pane
         self._is_spf_running = True
 
