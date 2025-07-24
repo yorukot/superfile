@@ -36,9 +36,9 @@ func (m Metadata) GetData() [][2]string {
 }
 
 func (m Metadata) GetValue(key string) (string, error) {
-	for _, m := range m.data {
-		if m[0] == key {
-			return m[1], nil
+	for _, pair := range m.data {
+		if pair[0] == key {
+			return pair[1], nil
 		}
 	}
 
