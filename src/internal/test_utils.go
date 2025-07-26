@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -41,9 +40,9 @@ func setupFiles(t *testing.T, files ...string) {
 
 // -------------------- Model setup utils
 
-func defaultTestModel(dirs ...string) model {
+func defaultTestModel(dirs ...string) *model {
 	m := defaultModelConfig(false, false, false, dirs)
-	_, _ = TeaUpdate(&m, tea.WindowSizeMsg{Width: 2 * common.MinimumWidth, Height: 2 * common.MinimumHeight})
+	_, _ = TeaUpdate(m, tea.WindowSizeMsg{Width: 2 * common.MinimumWidth, Height: 2 * common.MinimumHeight})
 	return m
 }
 
@@ -73,19 +72,12 @@ func setupPanelModeAndSelection(t *testing.T, m *model, useSelectMode bool, item
 // TODO : Consider wrapping TeaUpdate with a helper that both forwards the return
 // values and does a require.NoError(t, err)
 func TeaUpdate(m *model, msg tea.Msg) (tea.Cmd, error) {
-	resModel, cmd := m.Update(msg)
-
-	mObj, ok := resModel.(model)
-	if !ok {
-		return cmd, fmt.Errorf("unexpected model type: %T", resModel)
-	}
-	*m = mObj
+	_, cmd := m.Update(msg)
 	return cmd, nil
 }
 
 func TeaUpdateWithErrCheck(t *testing.T, m *model, msg tea.Msg) tea.Cmd {
-	cmd, err := TeaUpdate(m, msg)
-	require.NoError(t, err)
+	_, cmd := m.Update(msg)
 	return cmd
 }
 

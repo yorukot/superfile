@@ -50,7 +50,7 @@ func InitialModel(firstFilePanelDirs []string, firstUseCheck, hasTrashCheck bool
 // Note : What init should do, for example read file panel data, read sidebar directories, and
 // disk, is being done in at the creation of model of object. Right now creation of model object
 // and its initialization isn't well separated.
-func (m model) Init() tea.Cmd {
+func (m *model) Init() tea.Cmd {
 	return tea.Batch(
 		tea.SetWindowTitle("superfile"),
 		textinput.Blink, // Assuming textinput.Blink is a valid command
@@ -60,7 +60,7 @@ func (m model) Init() tea.Cmd {
 
 // Update function for bubble tea to provide internal communication to the
 // application
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// TODO : We could check for m.modelQuitState and skip doing anything
 	// If its quitDone. But if we are at this state, its already bad, so we need
 	// to first figure out if its possible in testing, and fix it.
@@ -77,7 +77,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.MouseMsg:
 		msgStr := msg.String()
 		if msgStr == "wheel up" || msgStr == "wheel down" {
-			wheelMainAction(msgStr, &m)
+			wheelMainAction(msgStr, m)
 		} else {
 			slog.Debug("Mouse event of type that is not handled", "msg", msgStr)
 		}
@@ -86,7 +86,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case ModelUpdateMessage:
 		// Update the metadata and return
 		slog.Debug("Got ModelUpdate message", "id", msg.GetReqID())
-		cmd = tea.Batch(cmd, msg.ApplyToModel(&m))
+		cmd = tea.Batch(cmd, msg.ApplyToModel(m))
 		return m, cmd
 	default:
 		slog.Debug("Message of type that is not handled", "type", reflect.TypeOf(msg))
@@ -458,7 +458,7 @@ func (m *model) warnModalForQuit() {
 }
 
 // Implement View function for bubble tea model to handle visualization.
-func (m model) View() string {
+func (m *model) View() string {
 	slog.Debug("model.View() called", "mainPanelHeight", m.mainPanelHeight,
 		"footerHeight", m.footerHeight, "fullHeight", m.fullHeight,
 		"fullWidth", m.fullWidth)
