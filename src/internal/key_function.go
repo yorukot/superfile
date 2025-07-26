@@ -77,9 +77,7 @@ func (m *model) mainKey(msg string) tea.Cmd {
 		m.focusOnMetadata()
 
 	case slices.Contains(common.Hotkeys.PasteItems, msg):
-		go func() {
-			m.pasteItem()
-		}()
+		return m.getPasteItemCmd()
 
 	case slices.Contains(common.Hotkeys.FilePanelItemCreate, msg):
 		m.panelCreateNewFile()

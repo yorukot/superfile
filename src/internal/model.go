@@ -83,9 +83,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case tea.KeyMsg:
 		cmd = tea.Batch(cmd, m.handleKeyInput(msg))
-	case MetadataMsg:
+	case ModelUpdateMessage:
 		// Update the metadata and return
-		m.handleMetadataMsg(msg)
+		slog.Debug("Got ModelUpdate message", "id", msg.GetReqID())
+		cmd = tea.Batch(cmd, msg.ApplyToModel(&m))
 		return m, cmd
 	default:
 		slog.Debug("Message of type that is not handled", "type", reflect.TypeOf(msg))
@@ -122,22 +123,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, tea.Batch(cmd, listenChannelCommand, metadataCmd)
 }
 
-func (m *model) handleMetadataMsg(msg MetadataMsg) {
-	slog.Debug("Got metadata message", "id", msg.reqID)
-
-	selectedItem := m.getFocusedFilePanel().getSelectedItemPtr()
-	if selectedItem == nil {
-		slog.Debug("Panel empty or cursor invalid. Ignoring MetadataMsg")
-		return
-	}
-	if selectedItem.location != msg.metadata.GetPath() {
-		slog.Debug("MetadataMsg for older files. Ignoring")
-		return
-	}
-	m.fileMetaData.SetMetadata(msg.metadata)
-	selectedItem.metaData = msg.metadata.GetData()
-}
-
 // Note : Maybe we should not trigger metadata fetch for updates
 // that dont change the currently selected file panel element
 // TODO : At least dont trigger metadata fetch when user is scrolling
@@ -164,16 +149,14 @@ func (m *model) getMetadataCmd() tea.Cmd {
 		m.fileMetaData.SetInfoMsg(icon.InOperation + icon.Space + "Loading metadata...")
 	}
 	metadataFocussed := m.focusPanel == metadataFocus
-	reqCnt := m.metadataRequestCnt
-	m.metadataRequestCnt++
+	reqCnt := m.ioReqCnt
+	m.ioReqCnt++
 	// If there are too many metadata fetches, we need to have a cache with path as a key
 	// and timeout based eviction
 	slog.Debug("Submitting metadata fetch request", "id", reqCnt, "path", selectedItem.location)
 	return func() tea.Msg {
-		return MetadataMsg{
-			metadata: metadata.GetMetadata(selectedItem.location, metadataFocussed, et),
-			reqID:    reqCnt,
-		}
+		return NewMetadataMsg(
+			metadata.GetMetadata(selectedItem.location, metadataFocussed, et), reqCnt)
 	}
 }
 
@@ -189,10 +172,6 @@ func (m *model) handleChannelMessage(msg channelMessage) {
 			m.processBarModel.processList = append(m.processBarModel.processList, msg.messageID)
 		}
 		m.processBarModel.process[msg.messageID] = msg.processNewState
-		// Check if the process is cut and if the process is successful or failure, both need to be reset
-		if (msg.processNewState.state == successful || msg.processNewState.state == failure) && m.copyItems.cut {
-			m.copyItems.reset(false)
-		}
 	default:
 		slog.Error("Unhandled channelMessageType in handleChannelMessage()",
 			"messageType", msg.messageType)

@@ -428,22 +428,42 @@ func (m *model) copyMultipleItem(cut bool) {
 	m.copyItems.items = panel.selected
 }
 
+func (m *model) getPasteItemCmd() tea.Cmd {
+	copyItems := m.copyItems.items
+	cut := m.copyItems.cut
+	if len(copyItems) == 0 {
+		return nil
+	}
+
+	//TODO: Do it via m.getNewReqID()
+	//TODO: Have an IO Req Management, collecting info about pending IO Req too
+	reqID := m.ioReqCnt
+	m.ioReqCnt++
+	panelLocation := m.getFocusedFilePanel().location
+
+	slog.Debug("Submitting pasteItems request", "id", reqID, "items cnt", len(copyItems), "dest", panelLocation)
+	return func() tea.Msg {
+		state := pasteItemFuncton(&m.processBarModel, panelLocation, copyItems, cut)
+		return NewPasteOperationMsg(state, reqID)
+	}
+}
+
 // Paste all clipboard items
-func (m *model) pasteItem() {
-	if len(m.copyItems.items) == 0 {
-		return
+func pasteItemFuncton(processBarModel *processBarModel,
+	panelLocation string, copyItems []string, cut bool) processState {
+	if len(copyItems) == 0 {
+		return cancel
 	}
 
 	id := shortuuid.New()
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	totalFiles := 0
 
 	// Check if trying to paste into source or subdirectory for both cut and copy operations
-	for _, srcPath := range m.copyItems.items {
+	for _, srcPath := range copyItems {
 		// Check if trying to cut and paste into the same directory - this would be a no-op
 		// and could potentially cause issues, so we prevent it
-		if filepath.Dir(srcPath) == panel.location && m.copyItems.cut {
-			slog.Error("Cannot paste into parent directory of source", "src", srcPath, "dst", panel.location)
+		if filepath.Dir(srcPath) == panelLocation && cut {
+			slog.Error("Cannot paste into parent directory of source", "src", srcPath, "dst", panelLocation)
 			message := channelMessage{
 				messageID:   id,
 				messageType: sendNotifyModal,
@@ -454,13 +474,13 @@ func (m *model) pasteItem() {
 				},
 			}
 			channel <- message
-			return
+			return cancel
 		}
 
-		slog.Debug("model.pasteItem", "srcPath", srcPath, "panel location", panel.location)
+		slog.Debug("model.pasteItem", "srcPath", srcPath, "panel location", panelLocation)
 
-		if m.copyItems.cut && srcPath == panel.location {
-			slog.Error("Cannot paste a directory into itself", "operation", "cut", "src", srcPath, "dst", panel.location)
+		if cut && srcPath == panelLocation {
+			slog.Error("Cannot paste a directory into itself", "operation", "cut", "src", srcPath, "dst", panelLocation)
 			message := channelMessage{
 				messageID:   id,
 				messageType: sendNotifyModal,
@@ -471,16 +491,16 @@ func (m *model) pasteItem() {
 				},
 			}
 			channel <- message
-			return
+			return cancel
 		}
 
-		if isAncestor(srcPath, panel.location) {
+		if isAncestor(srcPath, panelLocation) {
 			operation := "copy"
-			if m.copyItems.cut {
+			if cut {
 				operation = "cut"
 			}
 
-			slog.Error("Cannot paste a directory into itself or its subdirectory", "operation", operation, "src", srcPath, "dst", panel.location)
+			slog.Error("Cannot paste a directory into itself or its subdirectory", "operation", operation, "src", srcPath, "dst", panelLocation)
 			message := channelMessage{
 				messageID:   id,
 				messageType: sendNotifyModal,
@@ -491,11 +511,11 @@ func (m *model) pasteItem() {
 				},
 			}
 			channel <- message
-			return
+			return cancel
 		}
 	}
 
-	for _, folderPath := range m.copyItems.items {
+	for _, folderPath := range copyItems {
 		// TODO : Fix this. This is inefficient
 		// In case of a cut operations for a directory with a lot of files
 		// we are unnecessarily walking the whole directory recursively
@@ -506,7 +526,7 @@ func (m *model) pasteItem() {
 		// Although this allows us a more detailed progress tracking
 		// this make the copy/cut more inefficient
 		// instead, we could just track progress based on total items in
-		// m.copyItems.items
+		// copyItems
 		// efficiency should be prioritized over more detailed feedback.
 		count, err := countFiles(folderPath)
 		if err != nil {
@@ -516,25 +536,25 @@ func (m *model) pasteItem() {
 		totalFiles += count
 	}
 
-	slog.Debug("model.pasteItem", "items", m.copyItems.items, "cut", m.copyItems.cut,
-		"totalFiles", totalFiles, "panel location", panel.location)
+	slog.Debug("model.pasteItem", "items", copyItems, "cut", cut,
+		"totalFiles", totalFiles, "panel location", panelLocation)
 
 	prog := common.GenerateDefaultProgress()
 
 	prefixIcon := icon.Copy + icon.Space
-	if m.copyItems.cut {
+	if cut {
 		prefixIcon = icon.Cut + icon.Space
 	}
 
 	newProcess := process{
-		name:     prefixIcon + filepath.Base(m.copyItems.items[0]),
+		name:     prefixIcon + filepath.Base(copyItems[0]),
 		progress: prog,
 		state:    inOperation,
 		total:    totalFiles,
 		done:     0,
 	}
 
-	m.processBarModel.process[id] = newProcess
+	processBarModel.process[id] = newProcess
 
 	message := channelMessage{
 		messageID:       id,
@@ -544,32 +564,36 @@ func (m *model) pasteItem() {
 
 	channel <- message
 
-	p := m.processBarModel.process[id]
-	for _, filePath := range m.copyItems.items {
+	//TODO: This is wrong. We are mutating this model object, that will
+	// get changed after Update()
+	// Mutation of model should not happen in this function
+	p := processBarModel.process[id]
+	for _, filePath := range copyItems {
 		var err error
-		if m.copyItems.cut && !isExternalDiskPath(filePath) {
+		if cut && !isExternalDiskPath(filePath) {
 			p.name = icon.Cut + icon.Space + filepath.Base(filePath)
 		} else {
-			if m.copyItems.cut {
+			if cut {
 				p.name = icon.Cut + icon.Space + filepath.Base(filePath)
 			}
 			p.name = icon.Copy + icon.Space + filepath.Base(filePath)
 		}
 
 		errMessage := "cut item error"
-		if m.copyItems.cut && !isExternalDiskPath(filePath) {
-			err = moveElement(filePath, filepath.Join(panel.location, filepath.Base(filePath)))
+		if cut && !isExternalDiskPath(filePath) {
+			err = moveElement(filePath, filepath.Join(panelLocation, filepath.Base(filePath)))
 		} else {
 			// TODO : These error cases are hard to test. We have to somehow make the paste operations fail,
 			// which is time consuming and manual. We should test these with automated testcases
-			err = pasteDir(filePath, filepath.Join(panel.location, filepath.Base(filePath)), id, m)
+			err = pasteDir(filePath, filepath.Join(panelLocation, filepath.Base(filePath)), id, cut, processBarModel)
 			if err != nil {
 				errMessage = "paste item error"
-			} else if m.copyItems.cut {
+			} else if cut {
+				//TODO: Fix unhandled error
 				os.RemoveAll(filePath)
 			}
 		}
-		p = m.processBarModel.process[id]
+		p = processBarModel.process[id]
 		if err != nil {
 			slog.Debug("model.pasteItem - paste failure", "error", err,
 				"current item", filePath, "errMessage", errMessage)
@@ -577,7 +601,7 @@ func (m *model) pasteItem() {
 			message.processNewState = p
 			channel <- message
 			slog.Error(errMessage, "error", err)
-			m.processBarModel.process[id] = p
+			processBarModel.process[id] = p
 			break
 		}
 	}
@@ -590,7 +614,8 @@ func (m *model) pasteItem() {
 	message.processNewState = p
 	channel <- message
 
-	m.processBarModel.process[id] = p
+	processBarModel.process[id] = p
+	return p.state
 }
 
 // Extract compressed file

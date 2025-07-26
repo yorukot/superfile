@@ -65,6 +65,7 @@ const (
 )
 
 // Constants for operation, success, cancel, failure
+// TODO: Rename it to past verbs like canceled, failed
 const (
 	inOperation processState = iota
 	successful
@@ -84,11 +85,6 @@ const (
 	confirmToQuit
 	quitDone
 )
-
-type MetadataMsg struct {
-	metadata metadata.Metadata
-	reqID    int
-}
 
 // Main model
 // TODO : We could consider using *model as tea.Model, instead of model.
@@ -111,7 +107,7 @@ type model struct {
 	promptModal prompt.Model
 
 	fileMetaData         metadata.Model
-	metadataRequestCnt   int
+	ioReqCnt             int
 	imagePreviewer       *filepreview.ImagePreviewer
 	modelQuitState       modelQuitStateType
 	firstTextInput       bool
@@ -266,8 +262,9 @@ type channelMessage struct {
 	messageID       string
 	messageType     channelMessageType
 	processNewState process
-	warnModal       warnModal
-	notifyModal     notifyModal
+	// TODO : We will stop using channel for this, and use tea.Cmd
+	warnModal   warnModal
+	notifyModal notifyModal
 }
 
 /*PROCESS BAR internal TYPE END*/

@@ -163,7 +163,7 @@ func trashMacOrLinux(src string) error {
 
 // pasteDir handles directory copying with progress tracking
 // model would only have changes in m.processBarModel.process[id]
-func pasteDir(src, dst string, id string, m *model) error {
+func pasteDir(src, dst string, id string, cut bool, processBarModel *processBarModel) error {
 	dst, err := renameIfDuplicate(dst)
 	if err != nil {
 		return err
@@ -171,7 +171,7 @@ func pasteDir(src, dst string, id string, m *model) error {
 
 	// Check if we can do a fast move within the same partition
 	sameDev, err := isSamePartition(src, dst)
-	if err == nil && sameDev && m.copyItems.cut {
+	if err == nil && sameDev && cut {
 		// For cut operations on same partition, try fast rename first
 		err = os.Rename(src, dst)
 		if err == nil {
@@ -201,14 +201,14 @@ func pasteDir(src, dst string, id string, m *model) error {
 				return err
 			}
 		} else {
-			p := m.processBarModel.process[id]
+			p := processBarModel.process[id]
 			message := channelMessage{
 				messageID:       id,
 				messageType:     sendProcess,
 				processNewState: p,
 			}
 
-			if m.copyItems.cut {
+			if cut {
 				p.name = icon.Cut + icon.Space + filepath.Base(path)
 			} else {
 				p.name = icon.Copy + icon.Space + filepath.Base(path)
@@ -220,7 +220,7 @@ func pasteDir(src, dst string, id string, m *model) error {
 			}
 
 			var err error
-			if m.copyItems.cut && sameDev {
+			if cut && sameDev {
 				err = os.Rename(path, newPath)
 			} else {
 				err = copyFile(path, newPath, info)
@@ -238,7 +238,7 @@ func pasteDir(src, dst string, id string, m *model) error {
 				message.processNewState = p
 				channel <- message
 			}
-			m.processBarModel.process[id] = p
+			processBarModel.process[id] = p
 		}
 		return nil
 	})
@@ -248,7 +248,7 @@ func pasteDir(src, dst string, id string, m *model) error {
 	}
 
 	// If this was a cut operation and we had to do a manual copy, remove the source
-	if m.copyItems.cut && !sameDev {
+	if cut && !sameDev {
 		err = os.RemoveAll(src)
 		if err != nil {
 			return fmt.Errorf("failed to remove source after move: %w", err)
