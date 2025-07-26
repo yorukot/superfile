@@ -59,6 +59,12 @@ Use `SPF_INSTALL_VERSION` to specify a version :
 powershell -ExecutionPolicy Bypass -Command "$env:SPF_INSTALL_VERSION=1.2.1; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://superfile.netlify.app/install.ps1'))"
 ```
 
+With [Winget](https://winget.run/):
+
+```powershell
+winget install --id yorukot.superfile
+``````
+
 With [Scoop](https://scoop.sh/):
 
 ```bash
