@@ -443,13 +443,13 @@ func (m *model) getPasteItemCmd() tea.Cmd {
 
 	slog.Debug("Submitting pasteItems request", "id", reqID, "items cnt", len(copyItems), "dest", panelLocation)
 	return func() tea.Msg {
-		state := pasteItemFuncton(&m.processBarModel, panelLocation, copyItems, cut)
+		state := executePasteOperation(&m.processBarModel, panelLocation, copyItems, cut)
 		return NewPasteOperationMsg(state, reqID)
 	}
 }
 
 // Paste all clipboard items
-func pasteItemFuncton(processBarModel *processBarModel,
+func executePasteOperation(processBarModel *processBarModel,
 	panelLocation string, copyItems []string, cut bool) processState {
 	if len(copyItems) == 0 {
 		return cancel
