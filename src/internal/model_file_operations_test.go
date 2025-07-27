@@ -30,10 +30,7 @@ func TestCopy(t *testing.T) {
 			os.RemoveAll(curTestDir)
 		})
 
-		p := NewTeaProgWithEventLoop(defaultTestModel(dir1))
-		t.Cleanup(func() {
-			p.Close()
-		})
+		p := NewTestTeaProgWithEventLoop(t, defaultTestModel(dir1))
 
 		require.Equal(t, "file1.txt",
 			p.GetModel().getFocusedFilePanel().element[0].name)

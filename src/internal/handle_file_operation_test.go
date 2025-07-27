@@ -250,7 +250,7 @@ func TestPasteItem(t *testing.T) {
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
 			m := setupModelAndPerformOperation(t, tt.startDir, tt.selectMode, tt.itemName, tt.selectedItems, tt.isCut)
-
+			p := NewTestTeaProgWithEventLoop(t, m)
 			// Navigate to target directory
 			navigateToTargetDir(t, m, tt.startDir, tt.targetDir)
 
@@ -258,7 +258,7 @@ func TestPasteItem(t *testing.T) {
 			originalPath := getOriginalPath(tt.selectMode, tt.itemName, tt.startDir)
 
 			// Perform paste operation
-			TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+			p.SendKey(common.Hotkeys.PasteItems[0])
 
 			// Verify results based on whether paste should be prevented
 			if tt.shouldPreventPaste {
@@ -273,9 +273,8 @@ func TestPasteItem(t *testing.T) {
 	t.Run("Paste with Empty Clipboard", func(t *testing.T) {
 		emptyTestDir := filepath.Join(curTestDir, "empty_test")
 		setupDirectories(t, emptyTestDir)
-
 		m := defaultTestModel(emptyTestDir)
-		TeaUpdateWithErrCheck(m, nil)
+		p := NewTestTeaProgWithEventLoop(t, m)
 
 		// Ensure clipboard is empty
 		m.copyItems.items = []string{}
@@ -285,7 +284,7 @@ func TestPasteItem(t *testing.T) {
 		require.NoError(t, err)
 
 		// Attempt to paste (should do nothing)
-		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+		p.SendKey(common.Hotkeys.PasteItems[0])
 
 		// Should not crash and no new files should be created
 		entriesAfter, err := os.ReadDir(emptyTestDir)
@@ -302,12 +301,13 @@ func TestPasteItem(t *testing.T) {
 
 		selectedItems := []string{multiFile1, multiFile2}
 		m := setupModelAndPerformOperation(t, sourceDir, true, "", selectedItems, false)
+		p := NewTestTeaProgWithEventLoop(t, m)
 
 		// Navigate to destination
 		navigateToTargetDir(t, m, sourceDir, destDir)
 
 		// Paste items
-		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+		p.SendKey(common.Hotkeys.PasteItems[0])
 
 		// Verify both files were copied
 		expectedDestFiles := []string{"multi1.txt", "multi2.txt"}
@@ -323,10 +323,11 @@ func TestPasteItem(t *testing.T) {
 
 		// Test the logic that prevents cutting a directory into its subdirectory
 		m := setupModelAndPerformOperation(t, sourceDir, false, "testsubdir", nil, true)
+		p := NewTestTeaProgWithEventLoop(t, m)
 
 		// Navigate into the subdirectory and try to paste there (should be prevented)
 		navigateToTargetDir(t, m, sourceDir, testSubDir)
-		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+		p.SendKey(common.Hotkeys.PasteItems[0])
 
 		// Directory should still exist in original location after prevention
 		assert.DirExists(t, testSubDir, "Directory should still exist after failed paste into subdirectory")
@@ -338,16 +339,16 @@ func TestPasteItem(t *testing.T) {
 		setupFiles(t, dupFile)
 
 		m := setupModelAndPerformOperation(t, sourceDir, false, "duplicate.txt", nil, false)
-
+		p := NewTestTeaProgWithEventLoop(t, m)
 		// Navigate to destination and paste
 		navigateToTargetDir(t, m, sourceDir, destDir)
-		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+		p.SendKey(common.Hotkeys.PasteItems[0])
 
 		// Verify first copy
 		verifyDestinationFiles(t, destDir, []string{"duplicate.txt"})
 
 		// Paste again to test duplicate handling
-		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+		p.SendKey(common.Hotkeys.PasteItems[0])
 
 		// Verify duplicate file with different name
 		verifyDestinationFiles(t, destDir, []string{"duplicate(1).txt"})

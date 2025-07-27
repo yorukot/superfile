@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"testing"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/yorukot/superfile/src/internal/utils"
 )
@@ -16,6 +18,7 @@ type TeaProg struct {
 	prog *tea.Program
 }
 
+// If you use this, make sure to handle cleanup
 func NewTeaProg(m *model, eventLoop bool) *TeaProg {
 	p := &TeaProg{m: m, prog: tea.NewProgram(m, tea.WithInput(nil), tea.WithOutput(IgnorerWriter{}))}
 	if eventLoop {
@@ -28,8 +31,12 @@ func (p *TeaProg) GetModel() *model {
 	return p.m
 }
 
-func NewTeaProgWithEventLoop(m *model) *TeaProg {
-	return NewTeaProg(m, true)
+func NewTestTeaProgWithEventLoop(t *testing.T, m *model) *TeaProg {
+	p := NewTeaProg(m, true)
+	t.Cleanup(func() {
+		p.Close()
+	})
+	return p
 }
 
 func (p *TeaProg) StartEventLoop() {
