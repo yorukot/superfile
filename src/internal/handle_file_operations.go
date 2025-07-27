@@ -570,14 +570,11 @@ func executePasteOperation(processBarModel *processBarModel,
 	p := processBarModel.process[id]
 	for _, filePath := range copyItems {
 		var err error
-		if cut && !isExternalDiskPath(filePath) {
-			p.name = icon.Cut + icon.Space + filepath.Base(filePath)
-		} else {
-			if cut {
-				p.name = icon.Cut + icon.Space + filepath.Base(filePath)
-			}
-			p.name = icon.Copy + icon.Space + filepath.Base(filePath)
+		prefixIcon := icon.Copy
+		if cut {
+			prefixIcon = icon.Cut
 		}
+		p.name = prefixIcon + icon.Space + filepath.Base(filePath)
 
 		errMessage := "cut item error"
 		if cut && !isExternalDiskPath(filePath) {
