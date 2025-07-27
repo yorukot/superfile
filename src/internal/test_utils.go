@@ -76,7 +76,7 @@ func TeaUpdate(m *model, msg tea.Msg) (tea.Cmd, error) {
 	return cmd, nil
 }
 
-func TeaUpdateWithErrCheck(t *testing.T, m *model, msg tea.Msg) tea.Cmd {
+func TeaUpdateWithErrCheck(m *model, msg tea.Msg) tea.Cmd {
 	_, cmd := m.Update(msg)
 	return cmd
 }
@@ -106,9 +106,9 @@ func IsTeaQuit(cmd tea.Cmd) bool {
 func performCopyOrCutOperation(t *testing.T, m *model, isCut bool) {
 	t.Helper()
 	if isCut {
-		TeaUpdateWithErrCheck(t, m, utils.TeaRuneKeyMsg(common.Hotkeys.CutItems[0]))
+		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.CutItems[0]))
 	} else {
-		TeaUpdateWithErrCheck(t, m, utils.TeaRuneKeyMsg(common.Hotkeys.CopyItems[0]))
+		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.CopyItems[0]))
 	}
 }
 
@@ -204,7 +204,7 @@ func navigateToTargetDir(t *testing.T, m *model, startDir, targetDir string) {
 	if targetDir != startDir {
 		err := m.updateCurrentFilePanelDir(targetDir)
 		require.NoError(t, err)
-		TeaUpdateWithErrCheck(t, m, nil)
+		TeaUpdateWithErrCheck(m, nil)
 	}
 }
 

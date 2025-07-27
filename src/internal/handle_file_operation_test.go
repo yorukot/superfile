@@ -117,7 +117,7 @@ func TestCompressSelectedFiles(t *testing.T) {
 				m.getFocusedFilePanel().selected = tt.selectedElem
 			}
 
-			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.CompressFile[0]))
+			TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.CompressFile[0]))
 			zipFile := filepath.Join(tt.startDir, tt.expectedZipName)
 			// Actual compress may take time, since its an os operations
 			assert.Eventually(t, func() bool {
@@ -131,7 +131,7 @@ func TestCompressSelectedFiles(t *testing.T) {
 			// No-op update to get the filepanel updated
 			// TODO - This should not be needed. Only operation finish SPF should refresh
 			// on its own
-			TeaUpdateWithErrCheck(t, &m, nil)
+			TeaUpdateWithErrCheck(m, nil)
 
 			require.Greater(t, len(m.getFocusedFilePanel().element), tt.cursorIndexForZip)
 			selectedItemLocation := m.getFocusedFilePanel().element[tt.cursorIndexForZip].location
@@ -148,7 +148,7 @@ func TestCompressSelectedFiles(t *testing.T) {
 
 			m.getFocusedFilePanel().cursor = tt.cursorIndexForZip
 
-			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.ExtractFile[0]))
+			TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.ExtractFile[0]))
 			// File extraction is supposedly async. So function's return doesn't means its done.
 			extractedDir := filepath.Join(tt.startDir, tt.extractedDirName)
 			assert.Eventually(t, func() bool {
@@ -169,7 +169,7 @@ func TestCompressSelectedFiles(t *testing.T) {
 
 	t.Run("Compress on Empty panel", func(t *testing.T) {
 		m := defaultTestModel(dir2)
-		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.CompressFile[0]))
+		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.CompressFile[0]))
 		// Should not crash. Nothing should happen. If there is a crash, it will be caught
 		entries, err := os.ReadDir(dir2)
 		require.NoError(t, err)
@@ -258,7 +258,7 @@ func TestPasteItem(t *testing.T) {
 			originalPath := getOriginalPath(tt.selectMode, tt.itemName, tt.startDir)
 
 			// Perform paste operation
-			TeaUpdateWithErrCheck(t, m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+			TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
 
 			// Verify results based on whether paste should be prevented
 			if tt.shouldPreventPaste {
@@ -275,7 +275,7 @@ func TestPasteItem(t *testing.T) {
 		setupDirectories(t, emptyTestDir)
 
 		m := defaultTestModel(emptyTestDir)
-		TeaUpdateWithErrCheck(t, &m, nil)
+		TeaUpdateWithErrCheck(m, nil)
 
 		// Ensure clipboard is empty
 		m.copyItems.items = []string{}
@@ -285,7 +285,7 @@ func TestPasteItem(t *testing.T) {
 		require.NoError(t, err)
 
 		// Attempt to paste (should do nothing)
-		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
 
 		// Should not crash and no new files should be created
 		entriesAfter, err := os.ReadDir(emptyTestDir)
@@ -307,7 +307,7 @@ func TestPasteItem(t *testing.T) {
 		navigateToTargetDir(t, m, sourceDir, destDir)
 
 		// Paste items
-		TeaUpdateWithErrCheck(t, m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
 
 		// Verify both files were copied
 		expectedDestFiles := []string{"multi1.txt", "multi2.txt"}
@@ -326,7 +326,7 @@ func TestPasteItem(t *testing.T) {
 
 		// Navigate into the subdirectory and try to paste there (should be prevented)
 		navigateToTargetDir(t, m, sourceDir, testSubDir)
-		TeaUpdateWithErrCheck(t, m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
 
 		// Directory should still exist in original location after prevention
 		assert.DirExists(t, testSubDir, "Directory should still exist after failed paste into subdirectory")
@@ -341,13 +341,13 @@ func TestPasteItem(t *testing.T) {
 
 		// Navigate to destination and paste
 		navigateToTargetDir(t, m, sourceDir, destDir)
-		TeaUpdateWithErrCheck(t, m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
 
 		// Verify first copy
 		verifyDestinationFiles(t, destDir, []string{"duplicate.txt"})
 
 		// Paste again to test duplicate handling
-		TeaUpdateWithErrCheck(t, m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
 
 		// Verify duplicate file with different name
 		verifyDestinationFiles(t, destDir, []string{"duplicate(1).txt"})
@@ -360,16 +360,16 @@ func TestPasteItem(t *testing.T) {
 func setupModelAndPerformOperation(t *testing.T, startDir string, useSelectMode bool, itemName string, selectedItems []string, isCut bool) *model {
 	t.Helper()
 	m := defaultTestModel(startDir)
-	TeaUpdateWithErrCheck(t, &m, nil)
+	TeaUpdateWithErrCheck(m, nil)
 
-	setupPanelModeAndSelection(t, &m, useSelectMode, itemName, selectedItems)
-	performCopyOrCutOperation(t, &m, isCut)
+	setupPanelModeAndSelection(t, m, useSelectMode, itemName, selectedItems)
+	performCopyOrCutOperation(t, m, isCut)
 
 	selectedItemsCount := len(selectedItems)
 	if !useSelectMode {
 		selectedItemsCount = 1
 	}
-	verifyClipboardState(t, &m, isCut, useSelectMode, selectedItemsCount)
+	verifyClipboardState(t, m, isCut, useSelectMode, selectedItemsCount)
 
-	return &m
+	return m
 }
