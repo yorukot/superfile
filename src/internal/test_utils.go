@@ -105,8 +105,8 @@ func IsTeaQuit(cmd tea.Cmd) bool {
 
 func ExecuteTeaCmdWithTimeout(cmd tea.Cmd, timeout time.Duration) tea.Msg {
 	result := make(chan tea.Msg, 1)
-	go func(){
-		result <- cmd()	
+	go func() {
+		result <- cmd()
 	}()
 	select {
 	case msg := <-result:

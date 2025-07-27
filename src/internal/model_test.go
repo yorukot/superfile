@@ -94,7 +94,6 @@ func TestBasic(t *testing.T) {
 }
 
 func TestQuit(t *testing.T) {
-	t.SkipNow()
 	// Test
 	// 1 - Normal quit
 	// 2 - Normal quit with running process causing a warn modal
@@ -140,7 +139,6 @@ func TestQuit(t *testing.T) {
 }
 
 func TestChooserFile(t *testing.T) {
-	//t.SkipNow()
 	// 1 - No quit - blank chooser file
 	// 2 - Quit with valid chooser file
 	//     2a - file preview
