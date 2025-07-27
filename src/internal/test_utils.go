@@ -69,8 +69,8 @@ func setupPanelModeAndSelection(t *testing.T, m *model, useSelectMode bool, item
 // TeaUpdate : Utility to send update to model , majorly used in tests
 // Not using pointer receiver as this is more like a utility, than
 // a member function of model
-// TODO : Consider wrapping TeaUpdate with a helper that both forwards the return
-// values and does a require.NoError(t, err)
+// TODO : Should we validate that returned value is of type *model ?
+// and equal to m ? We are assuming that to be true as of now
 func TeaUpdate(m *model, msg tea.Msg) (tea.Cmd, error) {
 	_, cmd := m.Update(msg)
 	return cmd, nil
@@ -86,7 +86,8 @@ func IsTeaQuit(cmd tea.Cmd) bool {
 	if cmd == nil {
 		return false
 	}
-	msg := cmd()
+	// Ignore commands with longer IO Operations, which waits on a channel
+	msg := ExecuteTeaCmdWithTimeout(cmd, time.Millisecond)
 	switch msg := msg.(type) {
 	case tea.QuitMsg:
 		return true
@@ -99,6 +100,19 @@ func IsTeaQuit(cmd tea.Cmd) bool {
 		return false
 	default:
 		return false
+	}
+}
+
+func ExecuteTeaCmdWithTimeout(cmd tea.Cmd, timeout time.Duration) tea.Msg {
+	result := make(chan tea.Msg, 1)
+	go func(){
+		result <- cmd()	
+	}()
+	select {
+	case msg := <-result:
+		return msg
+	case <-time.After(timeout):
+		return nil
 	}
 }
 

@@ -33,12 +33,12 @@ func TestCopy(t *testing.T) {
 		p := NewTestTeaProgWithEventLoop(t, defaultTestModel(dir1))
 
 		require.Equal(t, "file1.txt",
-			p.GetModel().getFocusedFilePanel().element[0].name)
+			p.getModel().getFocusedFilePanel().element[0].name)
 		p.SendKeyDirectly(common.Hotkeys.CopyItems[0])
-		assert.False(t, p.GetModel().copyItems.cut)
-		assert.Equal(t, file1, p.GetModel().copyItems.items[0])
+		assert.False(t, p.getModel().copyItems.cut)
+		assert.Equal(t, file1, p.getModel().copyItems.items[0])
 
-		p.GetModel().updateCurrentFilePanelDir("../dir2")
+		p.getModel().updateCurrentFilePanelDir("../dir2")
 		p.SendKey(common.Hotkeys.PasteItems[0])
 
 		assert.Eventually(t, func() bool {
@@ -46,8 +46,8 @@ func TestCopy(t *testing.T) {
 			return err == nil
 		}, time.Second, 10*time.Millisecond)
 
-		assert.False(t, p.GetModel().copyItems.cut)
-		assert.Equal(t, file1, p.GetModel().copyItems.items[0])
+		assert.False(t, p.getModel().copyItems.cut)
+		assert.Equal(t, file1, p.getModel().copyItems.items[0])
 
 		p.SendKey(common.Hotkeys.PasteItems[0])
 		assert.Eventually(t, func() bool {
@@ -55,7 +55,7 @@ func TestCopy(t *testing.T) {
 			return err == nil
 		}, time.Second, 10*time.Millisecond)
 		assert.FileExists(t, filepath.Join(dir2, "file1(1).txt"))
-		assert.Len(t, p.GetModel().processBarModel.process, 2)
+		assert.Len(t, p.getModel().processBarModel.process, 2)
 	})
 }
 

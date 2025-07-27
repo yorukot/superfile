@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"log/slog"
 	"testing"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -9,7 +10,7 @@ import (
 
 type IgnorerWriter struct{}
 
-func (w IgnorerWriter) Write(p []byte) (n int, err error) {
+func (w IgnorerWriter) Write(_ []byte) (int, error) {
 	return 0, nil
 }
 
@@ -27,7 +28,7 @@ func NewTeaProg(m *model, eventLoop bool) *TeaProg {
 	return p
 }
 
-func (p *TeaProg) GetModel() *model {
+func (p *TeaProg) getModel() *model {
 	return p.m
 }
 
@@ -40,7 +41,13 @@ func NewTestTeaProgWithEventLoop(t *testing.T, m *model) *TeaProg {
 }
 
 func (p *TeaProg) StartEventLoop() {
-	go p.prog.Run()
+	go func() {
+		_, err := p.prog.Run()
+		// This will return only after Run() is completed
+		if err != nil {
+			slog.Error("TeaProg finished with error", "error", err)
+		}
+	}()
 	// Send nil to block for start of event loop
 	p.prog.Send(nil)
 }
@@ -78,4 +85,5 @@ func (p *TeaProg) SendKeyDirectly(key string) tea.Cmd {
 
 func (p *TeaProg) Close() {
 	p.prog.Quit()
+	p.prog.Kill()
 }

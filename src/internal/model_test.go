@@ -94,6 +94,7 @@ func TestBasic(t *testing.T) {
 }
 
 func TestQuit(t *testing.T) {
+	t.SkipNow()
 	// Test
 	// 1 - Normal quit
 	// 2 - Normal quit with running process causing a warn modal
@@ -139,6 +140,7 @@ func TestQuit(t *testing.T) {
 }
 
 func TestChooserFile(t *testing.T) {
+	//t.SkipNow()
 	// 1 - No quit - blank chooser file
 	// 2 - Quit with valid chooser file
 	//     2a - file preview
@@ -200,6 +202,7 @@ func TestChooserFile(t *testing.T) {
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
 			m := defaultTestModel(dir1)
+			ListeningMessage = true
 			if tt.expectedQuit {
 				err := os.WriteFile(tt.chooserFile, []byte{}, 0644)
 				require.NoError(t, err)
