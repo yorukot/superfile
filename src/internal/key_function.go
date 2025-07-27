@@ -94,9 +94,7 @@ func (m *model) mainKey(msg string) tea.Cmd {
 		return m.getExtractFileCmd()
 
 	case slices.Contains(common.Hotkeys.CompressFile, msg):
-		go func() {
-			m.compressSelectedFiles()
-		}()
+		return m.getCompressSelectedFilesCmd()
 
 	case slices.Contains(common.Hotkeys.OpenCommandLine, msg):
 		m.promptModal.Open(true)

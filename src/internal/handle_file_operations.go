@@ -453,11 +453,11 @@ func (m *model) getExtractFileCmd() tea.Cmd {
 	}
 }
 
-func (m *model) compressSelectedFiles() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+func (m *model) getCompressSelectedFilesCmd() tea.Cmd {
+	panel := m.getFocusedFilePanel()
 
 	if len(panel.element) == 0 {
-		return
+		return nil
 	}
 	var filesToCompress []string
 	var firstFile string
@@ -469,15 +469,22 @@ func (m *model) compressSelectedFiles() {
 		firstFile = panel.selected[0]
 		filesToCompress = panel.selected
 	}
-	zipName, err := getZipArchiveName(filepath.Base(firstFile))
-	if err != nil {
-		slog.Error("Error in getZipArchiveName", "error", err)
-		return
-	}
-	zipPath := filepath.Join(panel.location, zipName)
-	if err := zipSources(filesToCompress, zipPath); err != nil {
-		slog.Error("Error in zipping files", "error", err)
-		return
+
+	reqID := m.ioReqCnt
+	m.ioReqCnt++
+
+	return func() tea.Msg {
+		zipName, err := getZipArchiveName(filepath.Base(firstFile))
+		if err != nil {
+			slog.Error("Error in getZipArchiveName", "error", err)
+			return NewCompressOperationMsg(failure, reqID)
+		}
+		zipPath := filepath.Join(panel.location, zipName)
+		if err := zipSources(filesToCompress, zipPath); err != nil {
+			slog.Error("Error in zipping files", "error", err)
+			return NewCompressOperationMsg(failure, reqID)
+		}
+		return NewCompressOperationMsg(successful, reqID)
 	}
 }
 
@@ -574,6 +581,7 @@ func (m *model) openDirectoryWithEditor() tea.Cmd {
 }
 
 // Copy file path
+// TODO: This is also an IO operations, do it via tea.Cmd
 func (m *model) copyPath() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 
@@ -586,6 +594,7 @@ func (m *model) copyPath() {
 	}
 }
 
+// TODO: This is also an IO operations, do it via tea.Cmd
 func (m *model) copyPWD() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	if err := clipboard.WriteAll(panel.location); err != nil {

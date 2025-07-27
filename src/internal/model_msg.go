@@ -75,9 +75,27 @@ func NewCompressOperationMsg(state processState, reqID int) CompressOperationMsg
 	}
 }
 
-// On receiving any such update, model should updates its filepanel, etc.
+// On receiving any such update, model should update its filepanel, etc.
 // That we dont need to duplicate in every ApplyToModel
 func (msg CompressOperationMsg) ApplyToModel(_ *model) tea.Cmd {
+	return nil
+}
+
+type ExtractOperationMsg struct {
+	BaseMessage
+	state processState
+}
+
+func NewExtractOperationMsg(state processState, reqID int) ExtractOperationMsg {
+	return ExtractOperationMsg{
+		state: state,
+		BaseMessage: BaseMessage{
+			reqID: reqID,
+		},
+	}
+}
+
+func (msg ExtractOperationMsg) ApplyToModel(_ *model) tea.Cmd {
 	return nil
 }
 
