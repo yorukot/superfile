@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/yorukot/superfile/src/internal/common"
-	"github.com/yorukot/superfile/src/internal/utils"
 )
 
 func TestCompressSelectedFiles(t *testing.T) {
@@ -107,6 +106,7 @@ func TestCompressSelectedFiles(t *testing.T) {
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
 			m := defaultTestModel(tt.startDir)
+			p := NewTestTeaProgWithEventLoop(t, m)
 			require.Greater(t, len(m.getFocusedFilePanel().element), tt.cursor)
 			// Update cursor
 			m.getFocusedFilePanel().cursor = tt.cursor
@@ -117,7 +117,7 @@ func TestCompressSelectedFiles(t *testing.T) {
 				m.getFocusedFilePanel().selected = tt.selectedElem
 			}
 
-			TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.CompressFile[0]))
+			p.SendKey(common.Hotkeys.CompressFile[0])
 			zipFile := filepath.Join(tt.startDir, tt.expectedZipName)
 			// Actual compress may take time, since its an os operations
 			assert.Eventually(t, func() bool {
@@ -131,7 +131,7 @@ func TestCompressSelectedFiles(t *testing.T) {
 			// No-op update to get the filepanel updated
 			// TODO - This should not be needed. Only operation finish SPF should refresh
 			// on its own
-			TeaUpdateWithErrCheck(m, nil)
+			p.SendDirectly(nil)
 
 			require.Greater(t, len(m.getFocusedFilePanel().element), tt.cursorIndexForZip)
 			selectedItemLocation := m.getFocusedFilePanel().element[tt.cursorIndexForZip].location
@@ -148,7 +148,7 @@ func TestCompressSelectedFiles(t *testing.T) {
 
 			m.getFocusedFilePanel().cursor = tt.cursorIndexForZip
 
-			TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.ExtractFile[0]))
+			p.SendKey(common.Hotkeys.ExtractFile[0])
 			// File extraction is supposedly async. So function's return doesn't means its done.
 			extractedDir := filepath.Join(tt.startDir, tt.extractedDirName)
 			assert.Eventually(t, func() bool {
@@ -168,8 +168,8 @@ func TestCompressSelectedFiles(t *testing.T) {
 	}
 
 	t.Run("Compress on Empty panel", func(t *testing.T) {
-		m := defaultTestModel(dir2)
-		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.CompressFile[0]))
+		NewTestTeaProgWithEventLoop(t, defaultTestModel(dir2)).
+			SendKey(common.Hotkeys.CompressFile[0])
 		// Should not crash. Nothing should happen. If there is a crash, it will be caught
 		entries, err := os.ReadDir(dir2)
 		require.NoError(t, err)

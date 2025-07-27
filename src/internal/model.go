@@ -84,7 +84,6 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		cmd = tea.Batch(cmd, m.handleKeyInput(msg))
 	case ModelUpdateMessage:
-		// Update the metadata and return
 		slog.Debug("Got ModelUpdate message", "id", msg.GetReqID())
 		cmd = tea.Batch(cmd, msg.ApplyToModel(m))
 		return m, cmd
