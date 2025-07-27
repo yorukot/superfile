@@ -91,9 +91,7 @@ func (m *model) mainKey(msg string) tea.Cmd {
 		m.toggleFooterController()
 
 	case slices.Contains(common.Hotkeys.ExtractFile, msg):
-		go func() {
-			m.extractFile()
-		}()
+		return m.getExtractFileCmd()
 
 	case slices.Contains(common.Hotkeys.CompressFile, msg):
 		go func() {

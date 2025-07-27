@@ -61,6 +61,26 @@ func (msg DeleteOperationMsg) ApplyToModel(m *model) tea.Cmd {
 	return nil
 }
 
+type CompressOperationMsg struct {
+	BaseMessage
+	state processState
+}
+
+func NewCompressOperationMsg(state processState, reqID int) CompressOperationMsg {
+	return CompressOperationMsg{
+		state: state,
+		BaseMessage: BaseMessage{
+			reqID: reqID,
+		},
+	}
+}
+
+// On receiving any such update, model should updates its filepanel, etc.
+// That we dont need to duplicate in every ApplyToModel
+func (msg CompressOperationMsg) ApplyToModel(_ *model) tea.Cmd {
+	return nil
+}
+
 type MetadataMsg struct {
 	// Using struct embedding over composition, because behaviour with GetReqID will not change
 	BaseMessage

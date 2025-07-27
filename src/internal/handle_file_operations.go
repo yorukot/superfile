@@ -415,36 +415,41 @@ func executePasteOperation(processBarModel *processBarModel,
 
 // Extract compressed file
 // TODO : err should be returned and properly handled by the caller
-func (m *model) extractFile() {
-	var err error
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-
+func (m *model) getExtractFileCmd() tea.Cmd {
+	panel := m.getFocusedFilePanel()
 	if len(panel.element) == 0 {
-		return
+		return nil
 	}
 
-	ext := strings.ToLower(filepath.Ext(panel.element[panel.cursor].location))
+	item := panel.getSelectedItem().location
+
+	ext := strings.ToLower(filepath.Ext(item))
 	if !common.IsExtensionExtractable(ext) {
 		slog.Error(fmt.Sprintf("Error unexpected file extension type: %s", ext), "error", errors.ErrUnsupported)
-		return
+		return nil
 	}
+	reqID := m.ioReqCnt
+	m.ioReqCnt++
 
-	outputDir := common.FileNameWithoutExtension(panel.element[panel.cursor].location)
-	outputDir, err = renameIfDuplicate(outputDir)
-	if err != nil {
-		slog.Error("Error extract file when create new directory", "error", err)
-		return
-	}
+	return func() tea.Msg {
+		outputDir := common.FileNameWithoutExtension(item)
+		outputDir, err := renameIfDuplicate(outputDir)
+		if err != nil {
+			slog.Error("Error while renaming for duplicates", "error", err)
+			return NewCompressOperationMsg(failure, reqID)
+		}
 
-	err = os.MkdirAll(outputDir, 0755)
-	if err != nil {
-		slog.Error("Error while making directory for extracting files", "error", err)
-		return
-	}
-	err = extractCompressFile(panel.element[panel.cursor].location, outputDir)
-	if err != nil {
-		slog.Error("Error extract file", "error", err)
-		return
+		err = os.MkdirAll(outputDir, 0755)
+		if err != nil {
+			slog.Error("Error while making directory for extracting files", "error", err)
+			return NewCompressOperationMsg(failure, reqID)
+		}
+		err = extractCompressFile(panel.element[panel.cursor].location, outputDir)
+		if err != nil {
+			slog.Error("Error extract file", "error", err)
+			return NewCompressOperationMsg(failure, reqID)
+		}
+		return NewCompressOperationMsg(successful, reqID)
 	}
 }
 
