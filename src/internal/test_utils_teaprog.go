@@ -10,8 +10,8 @@ import (
 
 type IgnorerWriter struct{}
 
-func (w IgnorerWriter) Write(_ []byte) (int, error) {
-	return 0, nil
+func (w IgnorerWriter) Write(p []byte) (int, error) {
+	return len(p), nil
 }
 
 type TeaProg struct {
