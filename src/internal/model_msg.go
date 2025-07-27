@@ -41,6 +41,26 @@ func (msg PasteOperationMsg) ApplyToModel(m *model) tea.Cmd {
 	return nil
 }
 
+type DeleteOperationMsg struct {
+	BaseMessage
+	state processState
+}
+
+func NewDeleteOperationMsg(state processState, reqID int) DeleteOperationMsg {
+	return DeleteOperationMsg{
+		state: state,
+		BaseMessage: BaseMessage{
+			reqID: reqID,
+		},
+	}
+}
+
+func (msg DeleteOperationMsg) ApplyToModel(m *model) tea.Cmd {
+	// Remove selection
+	m.getFocusedFilePanel().resetSelected()
+	return nil
+}
+
 type MetadataMsg struct {
 	// Using struct embedding over composition, because behaviour with GetReqID will not change
 	BaseMessage

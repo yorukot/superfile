@@ -200,8 +200,8 @@ func (m *model) typingModalOpenKey(msg string) {
 }
 
 // TODO : There is a lot of duplication for these models, each one of them has to handle
-// ConfirmTyping and CancleTyping in a similar way. There is a scope of some good refactoring here.
-func (m *model) warnModalOpenKey(msg string) {
+// ConfirmTyping and CancelTyping in a similar way. There is a scope of some good refactoring here.
+func (m *model) warnModalOpenKey(msg string) tea.Cmd {
 	switch {
 	case slices.Contains(common.Hotkeys.CancelTyping, msg) || slices.Contains(common.Hotkeys.Quit, msg):
 		m.cancelWarnModal()
@@ -212,34 +212,12 @@ func (m *model) warnModalOpenKey(msg string) {
 		m.warnModal.open = false
 		switch m.warnModal.warnType {
 		case confirmDeleteItem:
-			panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-			if m.fileModel.filePanels[m.filePanelFocusIndex].panelMode == selectMode {
-				if !hasTrash || isExternalDiskPath(panel.location) {
-					go func() {
-						m.completelyDeleteMultipleItems()
-						m.fileModel.filePanels[m.filePanelFocusIndex].selected = m.fileModel.filePanels[m.filePanelFocusIndex].selected[:0]
-					}()
-				} else {
-					go func() {
-						m.deleteMultipleItems()
-						m.fileModel.filePanels[m.filePanelFocusIndex].selected = m.fileModel.filePanels[m.filePanelFocusIndex].selected[:0]
-					}()
-				}
-			} else {
-				if !hasTrash || isExternalDiskPath(panel.location) {
-					go func() {
-						m.completelyDeleteSingleItem()
-					}()
-				} else {
-					go func() {
-						m.deleteSingleItem()
-					}()
-				}
-			}
+			return m.getDeleteCmd()
 		case confirmRenameItem:
 			m.confirmRename()
 		}
 	}
+	return nil
 }
 
 func (m *model) notifyModalOpenKey(msg string) {

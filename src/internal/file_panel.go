@@ -15,6 +15,10 @@ func (panel *filePanel) getSelectedItem() element {
 	return panel.element[panel.cursor]
 }
 
+func (panel *filePanel) resetSelected() {
+	panel.selected = panel.selected[:0]
+}
+
 // For modification. Make sure to do a nil check
 func (panel *filePanel) getSelectedItemPtr() *element {
 	if panel.cursor < 0 || len(panel.element) <= panel.cursor {

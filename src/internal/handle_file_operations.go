@@ -17,62 +17,14 @@ import (
 	"github.com/yorukot/superfile/src/internal/common"
 
 	"github.com/atotto/clipboard"
-	"github.com/charmbracelet/bubbles/progress"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/lithammer/shortuuid"
 	"github.com/yorukot/superfile/src/config/icon"
 )
 
-// isAncestor checks if dst is the same as src or a subdirectory of src.
-// It handles symlinks by resolving them and applies case-insensitive comparison on Windows.
-func isAncestor(src, dst string) bool {
-	// Resolve symlinks for both paths
-	srcResolved, err := filepath.EvalSymlinks(src)
-	if err != nil {
-		// If we can't resolve symlinks, fall back to original path
-		srcResolved = src
-	}
-
-	dstResolved, err := filepath.EvalSymlinks(dst)
-	if err != nil {
-		// If we can't resolve symlinks, fall back to original path
-		dstResolved = dst
-	}
-
-	// Get absolute paths. Abs() also Cleans paths to normalize separators and resolve . and ..
-	srcAbs, err := filepath.Abs(srcResolved)
-	if err != nil {
-		return false
-	}
-
-	dstAbs, err := filepath.Abs(dstResolved)
-	if err != nil {
-		return false
-	}
-
-	// On Windows, perform case-insensitive comparison
-	if runtime.GOOS == "windows" {
-		srcAbs = strings.ToLower(srcAbs)
-		dstAbs = strings.ToLower(dstAbs)
-	}
-
-	// Check if dst is the same as src
-	if srcAbs == dstAbs {
-		return true
-	}
-
-	// Check if dst is a subdirectory of src
-	// Use filepath.Rel to check the relationship
-	rel, err := filepath.Rel(srcAbs, dstAbs)
-	if err != nil {
-		return false
-	}
-
-	// If rel is "." or doesn't start with "..", then dst is inside src
-	return rel == "." || !strings.HasPrefix(rel, "..")
-}
-
 // Create a file in the currently focus file panel
+// TODO: Fix it. It doesn't creates a new file. It just opens a file model,
+// that allows you to create a file. Actual creation happens here - createItem() in handle_modal.go
 func (m *model) panelCreateNewFile() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 
@@ -103,6 +55,7 @@ func (m *model) IsRenamingConflicting() bool {
 	return err == nil
 }
 
+// TODO: Remove channel messaging and use tea.Cmd
 func (m *model) warnModalForRenaming() {
 	id := shortuuid.New()
 	message := channelMessage{
@@ -120,6 +73,8 @@ func (m *model) warnModalForRenaming() {
 }
 
 // Rename file where the cusror is located
+// TODO: Fix this. It doesn't do any rename, just opens the rename text input
+// Actual rename happens at confirmRename() in handle_modal.go
 func (m *model) panelItemRename() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	if len(panel.element) == 0 {
@@ -136,6 +91,82 @@ func (m *model) panelItemRename() {
 	panel.renaming = true
 	m.firstTextInput = true
 	panel.rename = common.GenerateRenameTextInput(m.fileModel.width-4, cursorPos, panel.element[panel.cursor].name)
+}
+
+func (m *model) getDeleteCmd() tea.Cmd {
+	panel := m.getFocusedFilePanel()
+	if len(panel.element) == 0 {
+		return nil
+	}
+
+	var items []string
+	if panel.panelMode == selectMode {
+		items = panel.selected
+	} else {
+		items = []string{panel.getSelectedItem().location}
+	}
+
+	useTrash := hasTrash && !isExternalDiskPath(panel.location)
+
+	reqID := m.ioReqCnt
+	m.ioReqCnt++
+	slog.Debug("Submitting delete request", "id", reqID, "items cnt", len(items))
+	return func() tea.Msg {
+		state := deleteOperation(&m.processBarModel, items, useTrash)
+		return NewDeleteOperationMsg(state, reqID)
+	}
+}
+
+func deleteOperation(processBarModel *processBarModel, items []string, useTrash bool) processState {
+	if len(items) == 0 {
+		return cancel
+	}
+	id := shortuuid.New()
+	prog := common.GenerateDefaultProgress()
+
+	p := process{
+		name:     icon.Delete + icon.Space + filepath.Base(items[0]),
+		progress: prog,
+		state:    inOperation,
+		total:    len(items),
+		done:     0,
+	}
+	processBarModel.process[id] = p
+	message := channelMessage{
+		messageID:       id,
+		messageType:     sendProcess,
+		processNewState: p,
+	}
+	channel <- message
+	deleteFunc := os.RemoveAll
+	if useTrash {
+		deleteFunc = trashMacOrLinux
+	}
+	for _, item := range items {
+		err := deleteFunc(item)
+
+		if err != nil {
+			p.state = failure
+			slog.Error("Error in delete operation", "item", item, "useTrash", useTrash, "error", err)
+			break
+		}
+		p.name = icon.Delete + icon.Space + filepath.Base(item)
+		p.done++
+		if p.done == p.total {
+			p.state = successful
+			p.doneTime = time.Now()
+		} else {
+			p.state = inOperation
+			if len(channel) < 5 {
+				message.processNewState = p
+				channel <- message
+			}
+		}
+	}
+	message.processNewState = p
+	channel <- message
+	processBarModel.process[id] = p
+	return p.state
 }
 
 func (m *model) deleteItemWarn() {
@@ -168,239 +199,6 @@ func (m *model) deleteItemWarn() {
 		warnType: confirmDeleteItem,
 	}
 	channel <- message
-}
-
-// Move file or directory to the trash can
-func (m *model) deleteSingleItem() {
-	id := shortuuid.New()
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-
-	if len(panel.element) == 0 {
-		return
-	}
-
-	prog := common.GenerateDefaultProgress()
-
-	newProcess := process{
-		name:     icon.Delete + icon.Space + panel.element[panel.cursor].name,
-		progress: prog,
-		state:    inOperation,
-		total:    1,
-		done:     0,
-	}
-	m.processBarModel.process[id] = newProcess
-
-	message := channelMessage{
-		messageID:       id,
-		messageType:     sendProcess,
-		processNewState: newProcess,
-	}
-
-	channel <- message
-	err := trashMacOrLinux(panel.element[panel.cursor].location)
-
-	if err != nil {
-		p := m.processBarModel.process[id]
-		p.state = failure
-		message.processNewState = p
-		channel <- message
-	} else {
-		p := m.processBarModel.process[id]
-		p.done = 1
-		p.state = successful
-		p.doneTime = time.Now()
-		message.processNewState = p
-		channel <- message
-	}
-	if len(panel.element) == 0 {
-		panel.cursor = 0
-	} else if panel.cursor >= len(panel.element) {
-		panel.cursor = len(panel.element) - 1
-	}
-}
-
-// Move file or directory to the trash can
-func (m *model) deleteMultipleItems() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-	if len(panel.selected) != 0 {
-		id := shortuuid.New()
-		prog := progress.New(common.GenerateGradientColor())
-		prog.PercentageStyle = common.FooterStyle
-
-		newProcess := process{
-			name:     icon.Delete + icon.Space + filepath.Base(panel.selected[0]),
-			progress: prog,
-			state:    inOperation,
-			total:    len(panel.selected),
-			done:     0,
-		}
-
-		m.processBarModel.process[id] = newProcess
-
-		message := channelMessage{
-			messageID:       id,
-			messageType:     sendProcess,
-			processNewState: newProcess,
-		}
-
-		channel <- message
-
-		for _, filePath := range panel.selected {
-			p := m.processBarModel.process[id]
-			p.name = icon.Delete + icon.Space + filepath.Base(filePath)
-			p.done++
-			p.state = inOperation
-			if len(channel) < 5 {
-				message.processNewState = p
-				channel <- message
-			}
-			err := trashMacOrLinux(filePath)
-
-			if err != nil {
-				p.state = failure
-				message.processNewState = p
-				channel <- message
-				slog.Error("Error while delete multiple item function", "error", err)
-				m.processBarModel.process[id] = p
-				break
-			}
-			if p.done == p.total {
-				p.state = successful
-				message.processNewState = p
-				channel <- message
-			}
-			m.processBarModel.process[id] = p
-		}
-	}
-
-	// This feels a bit fuzzy and unclean. TODO : Review and simplify this.
-	// We should never get to this condition of panel.cursor getting negative
-	// and if we do, we should error log that.
-	if panel.cursor >= len(panel.element)-len(panel.selected)-1 {
-		panel.cursor = len(panel.element) - len(panel.selected) - 1
-		if panel.cursor < 0 {
-			panel.cursor = 0
-		}
-	}
-	panel.selected = panel.selected[:0]
-}
-
-// Completely delete file or folder (Not move to the trash can)
-func (m *model) completelyDeleteSingleItem() {
-	id := shortuuid.New()
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-
-	if len(panel.element) == 0 {
-		return
-	}
-
-	prog := common.GenerateDefaultProgress()
-
-	newProcess := process{
-		name:     icon.Delete + icon.Space + panel.element[panel.cursor].name,
-		progress: prog,
-		state:    inOperation,
-		total:    1,
-		done:     0,
-	}
-	m.processBarModel.process[id] = newProcess
-
-	message := channelMessage{
-		messageID:       id,
-		messageType:     sendProcess,
-		processNewState: newProcess,
-	}
-
-	channel <- message
-
-	err := os.RemoveAll(panel.element[panel.cursor].location)
-	if err != nil {
-		slog.Error("Error while completely delete single item function remove file", "error", err)
-	}
-
-	if err != nil {
-		p := m.processBarModel.process[id]
-		p.state = failure
-		message.processNewState = p
-		channel <- message
-	} else {
-		p := m.processBarModel.process[id]
-		p.done = 1
-		p.state = successful
-		p.doneTime = time.Now()
-		message.processNewState = p
-		channel <- message
-	}
-	// TODO : This is duplicated code fragment. Remove this duplication
-	if len(panel.element) == 0 {
-		panel.cursor = 0
-	} else if panel.cursor >= len(panel.element) {
-		panel.cursor = len(panel.element) - 1
-	}
-}
-
-// Completely delete all file or folder from clipboard (Not move to the trash can)
-func (m *model) completelyDeleteMultipleItems() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-	if len(panel.selected) != 0 {
-		id := shortuuid.New()
-		prog := common.GenerateDefaultProgress()
-
-		newProcess := process{
-			name:     icon.Delete + icon.Space + filepath.Base(panel.selected[0]),
-			progress: prog,
-			state:    inOperation,
-			total:    len(panel.selected),
-			done:     0,
-		}
-
-		m.processBarModel.process[id] = newProcess
-
-		message := channelMessage{
-			messageID:       id,
-			messageType:     sendProcess,
-			processNewState: newProcess,
-		}
-
-		channel <- message
-		for _, filePath := range panel.selected {
-			p := m.processBarModel.process[id]
-			p.name = icon.Delete + icon.Space + filepath.Base(filePath)
-			p.done++
-			p.state = inOperation
-			if len(channel) < 5 {
-				message.processNewState = p
-				channel <- message
-			}
-			err := os.RemoveAll(filePath)
-			if err != nil {
-				slog.Error("Error while completely delete multiple item function remove file", "error", err)
-			}
-
-			if err != nil {
-				p.state = failure
-				message.processNewState = p
-				channel <- message
-				slog.Error("Error while completely delete multiple item function", "error", err)
-				m.processBarModel.process[id] = p
-				break
-			}
-			if p.done == p.total {
-				p.state = successful
-				message.processNewState = p
-				channel <- message
-			}
-			m.processBarModel.process[id] = p
-		}
-	}
-
-	if panel.cursor >= len(panel.element)-len(panel.selected)-1 {
-		panel.cursor = len(panel.element) - len(panel.selected) - 1
-		if panel.cursor < 0 {
-			panel.cursor = 0
-		}
-	}
-	panel.selected = panel.selected[:0]
 }
 
 // Copy directory or file's path to superfile's clipboard

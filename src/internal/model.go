@@ -300,7 +300,7 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 
 	// Handles all warn models except the warn model for confirming to quit
 	case m.warnModal.open:
-		m.warnModalOpenKey(msg.String())
+		cmd = m.warnModalOpenKey(msg.String())
 	case m.notifyModal.open:
 		m.notifyModalOpenKey(msg.String())
 	// If renaming a object

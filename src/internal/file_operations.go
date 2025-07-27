@@ -257,3 +257,52 @@ func pasteDir(src, dst string, id string, cut bool, processBarModel *processBarM
 
 	return nil
 }
+
+// isAncestor checks if dst is the same as src or a subdirectory of src.
+// It handles symlinks by resolving them and applies case-insensitive comparison on Windows.
+func isAncestor(src, dst string) bool {
+	// Resolve symlinks for both paths
+	srcResolved, err := filepath.EvalSymlinks(src)
+	if err != nil {
+		// If we can't resolve symlinks, fall back to original path
+		srcResolved = src
+	}
+
+	dstResolved, err := filepath.EvalSymlinks(dst)
+	if err != nil {
+		// If we can't resolve symlinks, fall back to original path
+		dstResolved = dst
+	}
+
+	// Get absolute paths. Abs() also Cleans paths to normalize separators and resolve . and ..
+	srcAbs, err := filepath.Abs(srcResolved)
+	if err != nil {
+		return false
+	}
+
+	dstAbs, err := filepath.Abs(dstResolved)
+	if err != nil {
+		return false
+	}
+
+	// On Windows, perform case-insensitive comparison
+	if runtime.GOOS == "windows" {
+		srcAbs = strings.ToLower(srcAbs)
+		dstAbs = strings.ToLower(dstAbs)
+	}
+
+	// Check if dst is the same as src
+	if srcAbs == dstAbs {
+		return true
+	}
+
+	// Check if dst is a subdirectory of src
+	// Use filepath.Rel to check the relationship
+	rel, err := filepath.Rel(srcAbs, dstAbs)
+	if err != nil {
+		return false
+	}
+
+	// If rel is "." or doesn't start with "..", then dst is inside src
+	return rel == "." || !strings.HasPrefix(rel, "..")
+}
