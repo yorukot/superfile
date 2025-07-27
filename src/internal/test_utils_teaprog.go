@@ -84,6 +84,5 @@ func (p *TeaProg) SendKeyDirectly(key string) tea.Cmd {
 }
 
 func (p *TeaProg) Close() {
-	p.prog.Quit()
 	p.prog.Kill()
 }
