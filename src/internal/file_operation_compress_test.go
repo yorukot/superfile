@@ -10,9 +10,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/yorukot/superfile/src/internal/ui/processbar"
 )
 
 func TestZipSources(t *testing.T) {
+	processBar := processbar.New()
+	processBar.ListenForUpdates()
+	t.Cleanup(processBar.SendStopListeningMsgBlocking)
 	tests := []struct {
 		name          string
 		setupFunc     func(t *testing.T, tempDir string) ([]string, error)
@@ -83,7 +87,7 @@ func TestZipSources(t *testing.T) {
 			}
 
 			targetZip := filepath.Join(tempDir, "test.zip")
-			err = zipSources(sources, targetZip)
+			err = zipSources(sources, targetZip, &processBar)
 
 			if tt.expectError {
 				require.Error(t, err, "zipSources should return error")
@@ -131,12 +135,15 @@ func TestZipSources(t *testing.T) {
 }
 
 func TestZipSourcesInvalidTarget(t *testing.T) {
+	processBar := processbar.New()
+	processBar.ListenForUpdates()
+	t.Cleanup(processBar.SendStopListeningMsgBlocking)
 	tempDir := t.TempDir()
 	testFile := filepath.Join(tempDir, "test.txt")
 	err := os.WriteFile(testFile, []byte("test"), 0644)
 	require.NoError(t, err, "should be able to create test file")
 
 	invalidTarget := "/invalid/path/test.zip"
-	err = zipSources([]string{testFile}, invalidTarget)
+	err = zipSources([]string{testFile}, invalidTarget, &processBar)
 	require.Error(t, err, "zipSources should return error for invalid target")
 }

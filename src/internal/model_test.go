@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/utils"
 )
 
@@ -109,11 +110,12 @@ func TestQuit(t *testing.T) {
 	})
 	t.Run("Quit with running process", func(t *testing.T) {
 		m := defaultTestModel(testDir)
-		m.processBarModel.process["1"] = process{
-			state: inOperation,
-			done:  0,
-			total: 100,
-		}
+		m.processBarModel.AddOrUpdateProcess(processbar.Process{
+			State: processbar.InOperation,
+			Done:  0,
+			Total: 100,
+			ID:    "1",
+		})
 
 		assert.Equal(t, notQuitting, m.modelQuitState)
 		cmd := TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.Quit[0]))

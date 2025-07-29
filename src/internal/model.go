@@ -31,7 +31,6 @@ var hasTrash = true                                             //nolint: gochec
 var batCmd = ""                                                 //nolint: gochecknoglobals // TODO : Move to model struct
 var et *exiftool.Exiftool                                       //nolint: gochecknoglobals // TODO : Move to model struct
 var channel = make(chan channelMessage, 1000)                   //nolint: gochecknoglobals // TODO : Move to model struct
-var progressBarLastRenderTime = time.Now()                      //nolint: gochecknoglobals // TODO : Move to model struct
 
 // Initialize and return model with default configs
 // It returns only tea.Model because when it used in main, the return value
@@ -55,6 +54,10 @@ func (m *model) Init() tea.Cmd {
 		tea.SetWindowTitle("superfile"),
 		textinput.Blink, // Assuming textinput.Blink is a valid command
 		listenForChannelMessage(channel),
+		func() tea.Msg {
+			m.processBarModel.ListenForUpdates()
+			return nil
+		},
 	)
 }
 
@@ -84,6 +87,11 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		cmd = tea.Batch(cmd, m.handleKeyInput(msg))
 	case ModelUpdateMessage:
+		// TODO: Some of these updates messages should trigger filePanel state update
+		// For example a success message for delete operation
+		// But, we cant do that as of now, because if every opertion including metadata operation
+		// keeps triggering model update below, which will trigger another metadata fetch,
+		// we will be stuck in a loop.
 		slog.Debug("Got ModelUpdate message", "id", msg.GetReqID())
 		cmd = tea.Batch(cmd, msg.ApplyToModel(m))
 		return m, cmd
@@ -166,11 +174,6 @@ func (m *model) handleChannelMessage(msg channelMessage) {
 		m.warnModal = msg.warnModal
 	case sendNotifyModal:
 		m.notifyModal = msg.notifyModal
-	case sendProcess:
-		if !arrayContains(m.processBarModel.processList, msg.messageID) {
-			m.processBarModel.processList = append(m.processBarModel.processList, msg.messageID)
-		}
-		m.processBarModel.process[msg.messageID] = msg.processNewState
 	default:
 		slog.Error("Unhandled channelMessageType in handleChannelMessage()",
 			"messageType", msg.messageType)
@@ -191,6 +194,7 @@ func (m *model) handleWindowResize(msg tea.WindowSizeMsg) {
 	m.setHeightValues(msg.Height)
 	m.setHelpMenuSize()
 	m.setMetadataModelSize()
+	m.setProcessBarModelSize()
 	m.setPromptModelSize()
 
 	if m.fileModel.maxFilePanel >= 10 {
@@ -265,6 +269,11 @@ func (m *model) setMetadataModelSize() {
 	m.fileMetaData.SetDimensions(utils.FooterWidth(m.fullWidth)+2, m.footerHeight+2)
 }
 
+// TODO: Remove this code duplication with footer models
+func (m *model) setProcessBarModelSize() {
+	m.processBarModel.SetDimensions(utils.FooterWidth(m.fullWidth)+2, m.footerHeight+2)
+}
+
 // Identify the current state of the application m and properly handle the
 // msg keybind pressed
 func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
@@ -332,7 +341,7 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 	// If quiting input pressed, check if has any running process and displays a
 	// warn. Otherwise just quits application
 	if m.modelQuitState == quitInitiated {
-		if m.hasRunningProcesses() {
+		if m.processBarModel.HasRunningProcesses() {
 			// Dont quit now, get a confirmation first.
 			m.warnModalForQuit()
 			return cmd
@@ -440,14 +449,6 @@ func (m *model) updateCurrentFilePanelDir(path string) error {
 }
 
 // Check if there's any processes running in background
-func (m *model) hasRunningProcesses() bool {
-	for _, data := range m.processBarModel.process {
-		if data.state == inOperation && data.done != data.total {
-			return true
-		}
-	}
-	return false
-}
 
 // Triggers a warn for confirm quiting
 func (m *model) warnModalForQuit() {
@@ -571,16 +572,8 @@ func (m *model) View() string {
 func listenForChannelMessage(msg chan channelMessage) tea.Cmd {
 	return func() tea.Msg {
 		for {
-			m := <-msg
-			if m.messageType != sendProcess {
-				ListeningMessage = false
-				return m
-			}
-			if time.Since(progressBarLastRenderTime).Seconds() > 2 || m.processNewState.state == successful || m.processNewState.done < 2 {
-				ListeningMessage = false
-				progressBarLastRenderTime = time.Now()
-				return m
-			}
+			ListeningMessage = false
+			return <-msg
 		}
 	}
 }

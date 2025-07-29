@@ -9,6 +9,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/utils"
 
 	trash_win "github.com/hymkor/trash-go"
@@ -162,8 +163,8 @@ func trashMacOrLinux(src string) error {
 }
 
 // pasteDir handles directory copying with progress tracking
-// model would only have changes in m.processBarModel.process[id]
-func pasteDir(src, dst string, id string, cut bool, processBarModel *processBarModel) error {
+// model would only have changes in m.Model.process[id]
+func pasteDir(src, dst string, p *processbar.Process, cut bool, processBarModel *processbar.Model) error {
 	dst, err := renameIfDuplicate(dst)
 	if err != nil {
 		return err
@@ -201,24 +202,11 @@ func pasteDir(src, dst string, id string, cut bool, processBarModel *processBarM
 				return err
 			}
 		} else {
-			p := processBarModel.process[id]
-			message := channelMessage{
-				messageID:       id,
-				messageType:     sendProcess,
-				processNewState: p,
-			}
-
 			if cut {
-				p.name = icon.Cut + icon.Space + filepath.Base(path)
+				p.Name = icon.Cut + icon.Space + filepath.Base(path)
 			} else {
-				p.name = icon.Copy + icon.Space + filepath.Base(path)
+				p.Name = icon.Copy + icon.Space + filepath.Base(path)
 			}
-
-			if len(channel) < 5 {
-				message.processNewState = p
-				channel <- message
-			}
-
 			var err error
 			if cut && sameDev {
 				err = os.Rename(path, newPath)
@@ -227,18 +215,16 @@ func pasteDir(src, dst string, id string, cut bool, processBarModel *processBarM
 			}
 
 			if err != nil {
-				p.state = failure
-				message.processNewState = p
-				channel <- message
+				p.State = processbar.Failed
+				pSendErr := processBarModel.SendUpdateProcessNameMsg(*p, true)
+				if pSendErr != nil {
+					slog.Error("Error sending process udpate", "error", pSendErr)
+				}
 				return err
 			}
 
-			p.done++
-			if len(channel) < 5 {
-				message.processNewState = p
-				channel <- message
-			}
-			processBarModel.process[id] = p
+			p.Done++
+			processBarModel.TrySendingUpdateProcessNameMsg(*p)
 		}
 		return nil
 	})

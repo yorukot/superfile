@@ -12,6 +12,7 @@ import (
 	"time"
 
 	variable "github.com/yorukot/superfile/src/config"
+	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/utils"
 
 	"github.com/yorukot/superfile/src/internal/common"
@@ -117,27 +118,16 @@ func (m *model) getDeleteCmd() tea.Cmd {
 	}
 }
 
-func deleteOperation(processBarModel *processBarModel, items []string, useTrash bool) processState {
+func deleteOperation(processBarModel *processbar.Model, items []string, useTrash bool) processbar.ProcessState {
 	if len(items) == 0 {
-		return cancel
+		return processbar.Cancelled
 	}
-	id := shortuuid.New()
-	prog := common.GenerateDefaultProgress()
+	p, err := processBarModel.SendAddProcessMsg(icon.Delete+icon.Space+filepath.Base(items[0]), len(items), true)
+	if err != nil {
+		slog.Error("Cannot spawn a new process", "error", err)
+		return processbar.Failed
+	}
 
-	p := process{
-		name:     icon.Delete + icon.Space + filepath.Base(items[0]),
-		progress: prog,
-		state:    inOperation,
-		total:    len(items),
-		done:     0,
-	}
-	processBarModel.process[id] = p
-	message := channelMessage{
-		messageID:       id,
-		messageType:     sendProcess,
-		processNewState: p,
-	}
-	channel <- message
 	deleteFunc := os.RemoveAll
 	if useTrash {
 		deleteFunc = trashMacOrLinux
@@ -146,27 +136,21 @@ func deleteOperation(processBarModel *processBarModel, items []string, useTrash 
 		err := deleteFunc(item)
 
 		if err != nil {
-			p.state = failure
+			p.State = processbar.Failed
 			slog.Error("Error in delete operation", "item", item, "useTrash", useTrash, "error", err)
 			break
 		}
-		p.name = icon.Delete + icon.Space + filepath.Base(item)
-		p.done++
-		if p.done == p.total {
-			p.state = successful
-			p.doneTime = time.Now()
-		} else {
-			p.state = inOperation
-			if len(channel) < 5 {
-				message.processNewState = p
-				channel <- message
-			}
-		}
+		p.Name = icon.Delete + icon.Space + filepath.Base(item)
+		p.Done++
+		processBarModel.TrySendingUpdateProcessNameMsg(p)
 	}
-	message.processNewState = p
-	channel <- message
-	processBarModel.process[id] = p
-	return p.state
+
+	if p.State != processbar.Failed {
+		p.State = processbar.Successful
+	}
+	p.DoneTime = time.Now()
+	processBarModel.TrySendingUpdateProcessNameMsg(p)
+	return p.State
 }
 
 func (m *model) deleteItemWarn() {
@@ -247,14 +231,13 @@ func (m *model) getPasteItemCmd() tea.Cmd {
 }
 
 // Paste all clipboard items
-func executePasteOperation(processBarModel *processBarModel,
-	panelLocation string, copyItems []string, cut bool) processState {
+func executePasteOperation(processBarModel *processbar.Model,
+	panelLocation string, copyItems []string, cut bool) processbar.ProcessState {
 	if len(copyItems) == 0 {
-		return cancel
+		return processbar.Cancelled
 	}
 
 	id := shortuuid.New()
-	totalFiles := 0
 
 	// Check if trying to paste into source or subdirectory for both cut and copy operations
 	for _, srcPath := range copyItems {
@@ -272,7 +255,7 @@ func executePasteOperation(processBarModel *processBarModel,
 				},
 			}
 			channel <- message
-			return cancel
+			return processbar.Cancelled
 		}
 
 		slog.Debug("model.pasteItem", "srcPath", srcPath, "panel location", panelLocation)
@@ -289,7 +272,7 @@ func executePasteOperation(processBarModel *processBarModel,
 				},
 			}
 			channel <- message
-			return cancel
+			return processbar.Cancelled
 		}
 
 		if isAncestor(srcPath, panelLocation) {
@@ -309,78 +292,31 @@ func executePasteOperation(processBarModel *processBarModel,
 				},
 			}
 			channel <- message
-			return cancel
+			return processbar.Cancelled
 		}
 	}
 
-	for _, folderPath := range copyItems {
-		// TODO : Fix this. This is inefficient
-		// In case of a cut operations for a directory with a lot of files
-		// we are unnecessarily walking the whole directory recursively
-		// while os will just perform a rename
-		// So instead of few operations this will cause the cut paste
-		// to read the whole directory recursively
-		// we should avoid doing this.
-		// Although this allows us a more detailed progress tracking
-		// this make the copy/cut more inefficient
-		// instead, we could just track progress based on total items in
-		// copyItems
-		// efficiency should be prioritized over more detailed feedback.
-		count, err := countFiles(folderPath)
-		if err != nil {
-			slog.Error("mode.pasteItem - Error in countFiles", "error", err)
-			continue
-		}
-		totalFiles += count
-	}
-
-	slog.Debug("model.pasteItem", "items", copyItems, "cut", cut,
-		"totalFiles", totalFiles, "panel location", panelLocation)
-
-	prog := common.GenerateDefaultProgress()
+	slog.Debug("model.pasteItem", "items", copyItems, "cut", cut, "panel location", panelLocation)
 
 	prefixIcon := icon.Copy + icon.Space
 	if cut {
 		prefixIcon = icon.Cut + icon.Space
 	}
 
-	newProcess := process{
-		name:     prefixIcon + filepath.Base(copyItems[0]),
-		progress: prog,
-		state:    inOperation,
-		total:    totalFiles,
-		done:     0,
+	p, err := processBarModel.SendAddProcessMsg(prefixIcon+filepath.Base(copyItems[0]), len(copyItems), true)
+	if err != nil {
+		slog.Error("Cannot spawn a new process", "error", err)
+		return processbar.Failed
 	}
 
-	processBarModel.process[id] = newProcess
-
-	message := channelMessage{
-		messageID:       id,
-		messageType:     sendProcess,
-		processNewState: newProcess,
-	}
-
-	channel <- message
-
-	//TODO: This is wrong. We are mutating this model object, that will
-	// get changed after Update()
-	// Mutation of model should not happen in this function
-	p := processBarModel.process[id]
 	for _, filePath := range copyItems {
-		var err error
-		prefixIcon := icon.Copy
-		if cut {
-			prefixIcon = icon.Cut
-		}
-		p.name = prefixIcon + icon.Space + filepath.Base(filePath)
-
 		errMessage := "cut item error"
 		if cut && !isExternalDiskPath(filePath) {
 			err = moveElement(filePath, filepath.Join(panelLocation, filepath.Base(filePath)))
 		} else {
 			// TODO : These error cases are hard to test. We have to somehow make the paste operations fail,
 			// which is time consuming and manual. We should test these with automated testcases
-			err = pasteDir(filePath, filepath.Join(panelLocation, filepath.Base(filePath)), id, cut, processBarModel)
+			err = pasteDir(filePath, filepath.Join(panelLocation, filepath.Base(filePath)), &p, cut, processBarModel)
 			if err != nil {
 				errMessage = "paste item error"
 			} else if cut {
@@ -388,29 +324,34 @@ func executePasteOperation(processBarModel *processBarModel,
 				os.RemoveAll(filePath)
 			}
 		}
-		p = processBarModel.process[id]
+
+		prefixIcon := icon.Copy
+		if cut {
+			prefixIcon = icon.Cut
+		}
+		p.Name = prefixIcon + icon.Space + filepath.Base(filePath)
 		if err != nil {
 			slog.Debug("model.pasteItem - paste failure", "error", err,
 				"current item", filePath, "errMessage", errMessage)
-			p.state = failure
-			message.processNewState = p
-			channel <- message
+			p.State = processbar.Failed
 			slog.Error(errMessage, "error", err)
-			processBarModel.process[id] = p
 			break
 		}
+
+		p.Done++
+		processBarModel.TrySendingUpdateProcessNameMsg(p)
 	}
 
-	if p.state != failure {
-		p.state = successful
-		p.done = totalFiles
-		p.doneTime = time.Now()
+	if p.State != processbar.Failed {
+		p.State = processbar.Successful
 	}
-	message.processNewState = p
-	channel <- message
+	p.DoneTime = time.Now()
+	err = processBarModel.SendUpdateProcessNameMsg(p, true)
+	if err != nil {
+		slog.Error("Could not send final update for process Bar", "error", err)
+	}
 
-	processBarModel.process[id] = p
-	return p.state
+	return p.State
 }
 
 // Extract compressed file
@@ -436,20 +377,20 @@ func (m *model) getExtractFileCmd() tea.Cmd {
 		outputDir, err := renameIfDuplicate(outputDir)
 		if err != nil {
 			slog.Error("Error while renaming for duplicates", "error", err)
-			return NewCompressOperationMsg(failure, reqID)
+			return NewCompressOperationMsg(processbar.Failed, reqID)
 		}
 
 		err = os.MkdirAll(outputDir, 0755)
 		if err != nil {
 			slog.Error("Error while making directory for extracting files", "error", err)
-			return NewCompressOperationMsg(failure, reqID)
+			return NewCompressOperationMsg(processbar.Failed, reqID)
 		}
-		err = extractCompressFile(panel.element[panel.cursor].location, outputDir)
+		err = extractCompressFile(panel.element[panel.cursor].location, outputDir, &m.processBarModel)
 		if err != nil {
 			slog.Error("Error extract file", "error", err)
-			return NewCompressOperationMsg(failure, reqID)
+			return NewCompressOperationMsg(processbar.Failed, reqID)
 		}
-		return NewCompressOperationMsg(successful, reqID)
+		return NewCompressOperationMsg(processbar.Successful, reqID)
 	}
 }
 
@@ -477,14 +418,14 @@ func (m *model) getCompressSelectedFilesCmd() tea.Cmd {
 		zipName, err := getZipArchiveName(filepath.Base(firstFile))
 		if err != nil {
 			slog.Error("Error in getZipArchiveName", "error", err)
-			return NewCompressOperationMsg(failure, reqID)
+			return NewCompressOperationMsg(processbar.Failed, reqID)
 		}
 		zipPath := filepath.Join(panel.location, zipName)
-		if err := zipSources(filesToCompress, zipPath); err != nil {
+		if err := zipSources(filesToCompress, zipPath, &m.processBarModel); err != nil {
 			slog.Error("Error in zipping files", "error", err)
-			return NewCompressOperationMsg(failure, reqID)
+			return NewCompressOperationMsg(processbar.Failed, reqID)
 		}
-		return NewCompressOperationMsg(successful, reqID)
+		return NewCompressOperationMsg(processbar.Successful, reqID)
 	}
 }
 

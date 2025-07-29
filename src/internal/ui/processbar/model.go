@@ -1,0 +1,143 @@
+package processbar
+
+import (
+	"errors"
+	"fmt"
+	"log/slog"
+
+	"github.com/lithammer/shortuuid"
+	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/ui"
+)
+
+// Model for process bar internal
+type Model struct {
+	renderIndex int
+	cursor      int
+
+	// Including borders
+	height int
+	width  int
+
+	// TODO: Fix this. No mechanism to remove completed processes from memory
+	// processes map grows indefinitely
+	// Maybe, TTL or cleanup mechanism for successful/failed processes
+	processes map[string]Process
+	msgChan   chan updateMsg
+	reqCnt    int
+}
+
+func New() Model {
+	return NewModelWithOptions(minHeight, minWidth)
+}
+
+// Should be returning pointer object
+func NewModelWithOptions(height int, width int) Model {
+	return Model{
+		renderIndex: 0,
+		cursor:      0,
+		height:      height,
+		width:       width,
+		processes:   make(map[string]Process),
+		msgChan:     make(chan updateMsg, msgChannelSize),
+		reqCnt:      0,
+	}
+}
+
+func (m *Model) NewReqCnt() int {
+	m.reqCnt++
+	return m.reqCnt
+}
+
+// TODO: Maybe make sure that there isn't any existing process with this UUID
+func (m *Model) NewUUIDForProcess() string {
+	return shortuuid.New()
+}
+
+func (m *Model) AddProcess(p Process) error {
+	if _, ok := m.processes[p.ID]; ok {
+		return errors.New("process already exists")
+	}
+	m.processes[p.ID] = p
+	return nil
+}
+
+func (m *Model) AddOrUpdateProcess(p Process) {
+	m.processes[p.ID] = p
+}
+
+func (m *Model) UpdateExistingProcess(p Process) error {
+	if _, ok := m.processes[p.ID]; !ok {
+		return &NoProcessFoundError{id: p.ID}
+	}
+	m.processes[p.ID] = p
+	return nil
+}
+
+func (m *Model) GetByID(id string) (Process, bool) {
+	p, ok := m.processes[id]
+	return p, ok
+}
+
+func (m *Model) HasRunningProcesses() bool {
+	for _, data := range m.processes {
+		if data.State == InOperation && data.Done != data.Total {
+			return true
+		}
+	}
+	return false
+}
+
+func (m *Model) Render(processBarFocussed bool) string {
+	r := ui.ProcessBarRenderer(m.height, m.width, processBarFocussed)
+	if !m.IsValid() {
+		slog.Error("processBar in invalid state", "render", m.renderIndex,
+			"cursor", m.cursor, "Height", m.height)
+		r.AddLines("Invalid state")
+		return r.Render()
+	}
+	if m.CntProcesses() == 0 {
+		r.AddLines("", " "+common.ProcessBarNoneText)
+		return r.Render()
+	}
+
+	r.SetBorderInfoItems(fmt.Sprintf("%d/%d", m.cursor+1, m.CntProcesses()))
+
+	renderedHeight := 0
+	processes := m.getSortedProcesses()
+	for i := m.renderIndex; i < len(processes); i++ {
+		// We allow rendering of a process if we have at least 2 lines left
+		if m.ViewHeight() < renderedHeight+2 {
+			break
+		}
+		renderedHeight += 3
+
+		curProcess := processes[i]
+		curProcess.Progress.Width = m.ViewWidth() - 3
+
+		// TODO : get them via a separate function.
+		var cursor string
+		if i == m.cursor {
+			// TODO : Prerender it.
+			cursor = common.FooterCursorStyle.Render("┃ ")
+		} else {
+			cursor = common.FooterCursorStyle.Render("  ")
+		}
+
+		r.AddLines(cursor + common.FooterStyle.Render(
+			common.TruncateText(curProcess.Name, m.ViewWidth()-7, "...")+" ") +
+			curProcess.State.Icon())
+
+		// calculate progress percentage
+		// if the total is 0 mean the process only have directory
+		// so we can set the progress to 100%
+		if curProcess.Total != 0 {
+			progressPercentage := float64(curProcess.Done) / float64(curProcess.Total)
+			r.AddLines(cursor+curProcess.Progress.ViewAs(progressPercentage), "")
+		} else {
+			r.AddLines(cursor + curProcess.Progress.ViewAs(1))
+		}
+	}
+
+	return r.Render()
+}
