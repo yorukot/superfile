@@ -163,7 +163,7 @@ func trashMacOrLinux(src string) error {
 
 // pasteDir handles directory copying with progress tracking
 // model would only have changes in m.processBarModel.process[id]
-func pasteDir(src, dst string, id string, m *model) error {
+func pasteDir(src, dst string, id string, cut bool, processBarModel *processBarModel) error {
 	dst, err := renameIfDuplicate(dst)
 	if err != nil {
 		return err
@@ -171,7 +171,7 @@ func pasteDir(src, dst string, id string, m *model) error {
 
 	// Check if we can do a fast move within the same partition
 	sameDev, err := isSamePartition(src, dst)
-	if err == nil && sameDev && m.copyItems.cut {
+	if err == nil && sameDev && cut {
 		// For cut operations on same partition, try fast rename first
 		err = os.Rename(src, dst)
 		if err == nil {
@@ -201,14 +201,14 @@ func pasteDir(src, dst string, id string, m *model) error {
 				return err
 			}
 		} else {
-			p := m.processBarModel.process[id]
+			p := processBarModel.process[id]
 			message := channelMessage{
 				messageID:       id,
 				messageType:     sendProcess,
 				processNewState: p,
 			}
 
-			if m.copyItems.cut {
+			if cut {
 				p.name = icon.Cut + icon.Space + filepath.Base(path)
 			} else {
 				p.name = icon.Copy + icon.Space + filepath.Base(path)
@@ -220,7 +220,7 @@ func pasteDir(src, dst string, id string, m *model) error {
 			}
 
 			var err error
-			if m.copyItems.cut && sameDev {
+			if cut && sameDev {
 				err = os.Rename(path, newPath)
 			} else {
 				err = copyFile(path, newPath, info)
@@ -238,7 +238,7 @@ func pasteDir(src, dst string, id string, m *model) error {
 				message.processNewState = p
 				channel <- message
 			}
-			m.processBarModel.process[id] = p
+			processBarModel.process[id] = p
 		}
 		return nil
 	})
@@ -248,7 +248,7 @@ func pasteDir(src, dst string, id string, m *model) error {
 	}
 
 	// If this was a cut operation and we had to do a manual copy, remove the source
-	if m.copyItems.cut && !sameDev {
+	if cut && !sameDev {
 		err = os.RemoveAll(src)
 		if err != nil {
 			return fmt.Errorf("failed to remove source after move: %w", err)
@@ -256,4 +256,53 @@ func pasteDir(src, dst string, id string, m *model) error {
 	}
 
 	return nil
+}
+
+// isAncestor checks if dst is the same as src or a subdirectory of src.
+// It handles symlinks by resolving them and applies case-insensitive comparison on Windows.
+func isAncestor(src, dst string) bool {
+	// Resolve symlinks for both paths
+	srcResolved, err := filepath.EvalSymlinks(src)
+	if err != nil {
+		// If we can't resolve symlinks, fall back to original path
+		srcResolved = src
+	}
+
+	dstResolved, err := filepath.EvalSymlinks(dst)
+	if err != nil {
+		// If we can't resolve symlinks, fall back to original path
+		dstResolved = dst
+	}
+
+	// Get absolute paths. Abs() also Cleans paths to normalize separators and resolve . and ..
+	srcAbs, err := filepath.Abs(srcResolved)
+	if err != nil {
+		return false
+	}
+
+	dstAbs, err := filepath.Abs(dstResolved)
+	if err != nil {
+		return false
+	}
+
+	// On Windows, perform case-insensitive comparison
+	if runtime.GOOS == "windows" {
+		srcAbs = strings.ToLower(srcAbs)
+		dstAbs = strings.ToLower(dstAbs)
+	}
+
+	// Check if dst is the same as src
+	if srcAbs == dstAbs {
+		return true
+	}
+
+	// Check if dst is a subdirectory of src
+	// Use filepath.Rel to check the relationship
+	rel, err := filepath.Rel(srcAbs, dstAbs)
+	if err != nil {
+		return false
+	}
+
+	// If rel is "." or doesn't start with "..", then dst is inside src
+	return rel == "." || !strings.HasPrefix(rel, "..")
 }

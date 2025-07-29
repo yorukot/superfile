@@ -103,7 +103,7 @@ func TestQuit(t *testing.T) {
 	t.Run("Normal Quit", func(t *testing.T) {
 		m := defaultTestModel(testDir)
 		assert.Equal(t, notQuitting, m.modelQuitState)
-		cmd := TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.Quit[0]))
+		cmd := TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.Quit[0]))
 		assert.Equal(t, quitDone, m.modelQuitState)
 		assert.True(t, IsTeaQuit(cmd))
 	})
@@ -116,23 +116,23 @@ func TestQuit(t *testing.T) {
 		}
 
 		assert.Equal(t, notQuitting, m.modelQuitState)
-		cmd := TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.Quit[0]))
+		cmd := TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.Quit[0]))
 		assert.Equal(t, confirmToQuit, m.modelQuitState)
 		assert.False(t, IsTeaQuit(cmd))
 
 		// Now we would be asked for confirmation.
 		// Cancel the quit
-		cmd = TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.CancelTyping[0]))
+		cmd = TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.CancelTyping[0]))
 		assert.Equal(t, notQuitting, m.modelQuitState)
 		assert.False(t, IsTeaQuit(cmd))
 
 		// Again trigger quit
-		cmd = TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.Quit[0]))
+		cmd = TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.Quit[0]))
 		assert.Equal(t, confirmToQuit, m.modelQuitState)
 		assert.False(t, IsTeaQuit(cmd))
 
 		// Confirm this time
-		cmd = TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.Confirm[0]))
+		cmd = TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.Confirm[0]))
 		assert.Equal(t, quitDone, m.modelQuitState)
 		assert.True(t, IsTeaQuit(cmd))
 	})
@@ -200,12 +200,13 @@ func TestChooserFile(t *testing.T) {
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
 			m := defaultTestModel(dir1)
+			ListeningMessage = true
 			if tt.expectedQuit {
 				err := os.WriteFile(tt.chooserFile, []byte{}, 0644)
 				require.NoError(t, err)
 			}
 			variable.SetChooserFile(tt.chooserFile)
-			cmd := TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(tt.hotkey))
+			cmd := TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(tt.hotkey))
 
 			if tt.expectedQuit {
 				assert.Equal(t, quitDone, m.modelQuitState)

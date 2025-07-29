@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -41,9 +40,9 @@ func setupFiles(t *testing.T, files ...string) {
 
 // -------------------- Model setup utils
 
-func defaultTestModel(dirs ...string) model {
+func defaultTestModel(dirs ...string) *model {
 	m := defaultModelConfig(false, false, false, dirs)
-	_, _ = TeaUpdate(&m, tea.WindowSizeMsg{Width: 2 * common.MinimumWidth, Height: 2 * common.MinimumHeight})
+	_, _ = TeaUpdate(m, tea.WindowSizeMsg{Width: 2 * common.MinimumWidth, Height: 2 * common.MinimumHeight})
 	return m
 }
 
@@ -70,22 +69,15 @@ func setupPanelModeAndSelection(t *testing.T, m *model, useSelectMode bool, item
 // TeaUpdate : Utility to send update to model , majorly used in tests
 // Not using pointer receiver as this is more like a utility, than
 // a member function of model
-// TODO : Consider wrapping TeaUpdate with a helper that both forwards the return
-// values and does a require.NoError(t, err)
+// TODO : Should we validate that returned value is of type *model ?
+// and equal to m ? We are assuming that to be true as of now
 func TeaUpdate(m *model, msg tea.Msg) (tea.Cmd, error) {
-	resModel, cmd := m.Update(msg)
-
-	mObj, ok := resModel.(model)
-	if !ok {
-		return cmd, fmt.Errorf("unexpected model type: %T", resModel)
-	}
-	*m = mObj
+	_, cmd := m.Update(msg)
 	return cmd, nil
 }
 
-func TeaUpdateWithErrCheck(t *testing.T, m *model, msg tea.Msg) tea.Cmd {
-	cmd, err := TeaUpdate(m, msg)
-	require.NoError(t, err)
+func TeaUpdateWithErrCheck(m *model, msg tea.Msg) tea.Cmd {
+	_, cmd := m.Update(msg)
 	return cmd
 }
 
@@ -94,7 +86,8 @@ func IsTeaQuit(cmd tea.Cmd) bool {
 	if cmd == nil {
 		return false
 	}
-	msg := cmd()
+	// Ignore commands with longer IO Operations, which waits on a channel
+	msg := ExecuteTeaCmdWithTimeout(cmd, time.Millisecond)
 	switch msg := msg.(type) {
 	case tea.QuitMsg:
 		return true
@@ -110,13 +103,26 @@ func IsTeaQuit(cmd tea.Cmd) bool {
 	}
 }
 
+func ExecuteTeaCmdWithTimeout(cmd tea.Cmd, timeout time.Duration) tea.Msg {
+	result := make(chan tea.Msg, 1)
+	go func() {
+		result <- cmd()
+	}()
+	select {
+	case msg := <-result:
+		return msg
+	case <-time.After(timeout):
+		return nil
+	}
+}
+
 // Helper function to perform copy or cut operation
 func performCopyOrCutOperation(t *testing.T, m *model, isCut bool) {
 	t.Helper()
 	if isCut {
-		TeaUpdateWithErrCheck(t, m, utils.TeaRuneKeyMsg(common.Hotkeys.CutItems[0]))
+		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.CutItems[0]))
 	} else {
-		TeaUpdateWithErrCheck(t, m, utils.TeaRuneKeyMsg(common.Hotkeys.CopyItems[0]))
+		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.CopyItems[0]))
 	}
 }
 
@@ -212,7 +218,7 @@ func navigateToTargetDir(t *testing.T, m *model, startDir, targetDir string) {
 	if targetDir != startDir {
 		err := m.updateCurrentFilePanelDir(targetDir)
 		require.NoError(t, err)
-		TeaUpdateWithErrCheck(t, m, nil)
+		TeaUpdateWithErrCheck(m, nil)
 	}
 }
 

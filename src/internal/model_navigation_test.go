@@ -125,7 +125,7 @@ func TestFilePanelNavigation(t *testing.T) {
 			m.getFocusedFilePanel().render = tt.startRender
 			m.getFocusedFilePanel().searchBar.SetValue("asdf")
 			for _, s := range tt.keyInput {
-				TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(s))
+				TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(s))
 			}
 
 			assert.Equal(t, tt.resultDir, m.getFocusedFilePanel().location)
@@ -136,9 +136,9 @@ func TestFilePanelNavigation(t *testing.T) {
 
 			// Go back to original directory
 
-			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenSPFPrompt[0]))
-			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg("cd "+tt.startDir))
-			TeaUpdateWithErrCheck(t, &m, tea.KeyMsg{Type: tea.KeyEnter})
+			TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenSPFPrompt[0]))
+			TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg("cd "+tt.startDir))
+			TeaUpdateWithErrCheck(m, tea.KeyMsg{Type: tea.KeyEnter})
 
 			// Make sure we have original curson and render
 			assert.Equal(t, tt.startCursor, m.getFocusedFilePanel().cursor)

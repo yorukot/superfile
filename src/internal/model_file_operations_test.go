@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/utils"
 )
@@ -29,53 +30,32 @@ func TestCopy(t *testing.T) {
 			os.RemoveAll(curTestDir)
 		})
 
-		m := defaultTestModel(dir1)
+		p := NewTestTeaProgWithEventLoop(t, defaultTestModel(dir1))
 
-		// TODO validate current panel is "dir1"
-		// TODO : Move all basic validation to a separate test
-		// Everything that doesn't have anything to do with copy paste
+		require.Equal(t, "file1.txt",
+			p.getModel().getFocusedFilePanel().element[0].name)
+		p.SendKeyDirectly(common.Hotkeys.CopyItems[0])
+		assert.False(t, p.getModel().copyItems.cut)
+		assert.Equal(t, file1, p.getModel().copyItems.items[0])
 
-		// validate file1
-		// TODO : improve the interface we use to interact with filepanel
+		p.getModel().updateCurrentFilePanelDir("../dir2")
+		p.SendKey(common.Hotkeys.PasteItems[0])
 
-		// TODO : file1.txt should not be duplicated
-
-		// TODO : Having to send a random keypress to initiate model init.
-		// Should not have to do that
-		TeaUpdateWithErrCheck(t, &m, nil)
-
-		assert.Equal(t, "file1.txt",
-			m.fileModel.filePanels[m.filePanelFocusIndex].element[0].name)
-
-		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.CopyItems[0]))
-
-		// TODO : validate clipboard
-		assert.False(t, m.copyItems.cut)
-		assert.Equal(t, file1, m.copyItems.items[0])
-
-		// move to dir2
-		m.updateCurrentFilePanelDir("../dir2")
-		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
-
-		// Actual paste may take time, since its an os operations
 		assert.Eventually(t, func() bool {
 			_, err := os.Lstat(filepath.Join(dir2, "file1.txt"))
 			return err == nil
 		}, time.Second, 10*time.Millisecond)
 
-		// TODO : still on clipboard
-		assert.False(t, m.copyItems.cut)
-		assert.Equal(t, file1, m.copyItems.items[0])
+		assert.False(t, p.getModel().copyItems.cut)
+		assert.Equal(t, file1, p.getModel().copyItems.items[0])
 
-		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
-
-		// Actual paste may take time, since its an os operations
+		p.SendKey(common.Hotkeys.PasteItems[0])
 		assert.Eventually(t, func() bool {
 			_, err := os.Lstat(filepath.Join(dir2, "file1(1).txt"))
 			return err == nil
 		}, time.Second, 10*time.Millisecond)
 		assert.FileExists(t, filepath.Join(dir2, "file1(1).txt"))
-		// TODO : Also validate process bar having two processes.
+		//TODO: Also verify if there are only 2 items in process bar
 	})
 }
 
@@ -107,14 +87,14 @@ func TestFileCreation(t *testing.T) {
 	for _, tt := range testdata {
 		m := defaultTestModel(testChildDir)
 
-		TeaUpdateWithErrCheck(t, &m, nil)
-		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.FilePanelItemCreate[0]))
+		TeaUpdateWithErrCheck(m, nil)
+		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.FilePanelItemCreate[0]))
 
 		assert.Equal(t, "", m.typingModal.errorMesssage)
 
 		m.typingModal.textInput.SetValue(tt.fileName)
 
-		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.ConfirmTyping[0]))
+		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.ConfirmTyping[0]))
 
 		if tt.expectedError {
 			assert.NotEqual(t, "", m.typingModal.errorMesssage, "expected an error for input: %q", tt.fileName)

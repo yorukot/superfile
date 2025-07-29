@@ -278,7 +278,6 @@ func (m *model) processBarRender() string {
 		case cancel:
 			symbol = common.ProcessCancelStyle.Render(icon.Error)
 		}
-		slog.Debug("process", "name", curProcess.name, "done", curProcess.done, "total", curProcess.total, "state", curProcess.state, "symbol", symbol)
 		r.AddLines(cursor + common.FooterStyle.Render(common.TruncateText(curProcess.name, utils.FooterWidth(m.fullWidth)-7, "...")+" ") + symbol)
 
 		// calculate progress percentage
@@ -286,7 +285,6 @@ func (m *model) processBarRender() string {
 		// so we can set the progress to 100%
 		if curProcess.total != 0 {
 			progressPercentage := float64(curProcess.done) / float64(curProcess.total)
-			slog.Debug("progress", "percentage", progressPercentage)
 			r.AddLines(cursor+curProcess.progress.ViewAs(progressPercentage), "")
 		} else {
 			r.AddLines(cursor + curProcess.progress.ViewAs(1))
