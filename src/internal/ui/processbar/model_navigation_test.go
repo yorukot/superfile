@@ -162,7 +162,7 @@ func Test_processBarModelUpDown(t *testing.T) {
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
 			pModel := genProcessBarModel(tt.processCnt, tt.cursor, tt.render, tt.footerHeight)
-			assert.True(t, pModel.IsValid())
+			assert.True(t, pModel.isValid())
 			if tt.listDown {
 				pModel.ListDown(tt.footerHeight)
 			} else {

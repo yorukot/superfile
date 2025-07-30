@@ -1,28 +1,38 @@
 package processbar
 
-import "sort"
+import (
+	"log/slog"
+	"sort"
 
-func (m *Model) CntProcesses() int {
+	"github.com/lithammer/shortuuid"
+)
+
+func (m *Model) cntProcesses() int {
 	return len(m.processes)
 }
 
-func (m *Model) IsValid() bool {
+func (m *Model) isValid() bool {
 	return m.renderIndex <= m.cursor &&
 		m.cursor <= m.renderIndex+cntRenderableProcess(m.height-2)-1
 }
 
-func (m *Model) ViewHeight() int {
+func (m *Model) viewHeight() int {
 	return m.height - 2
 }
 
-func (m *Model) ViewWidth() int {
+func (m *Model) viewWidth() int {
 	return m.width - 2
 }
 
 // TODO : Check for minWidth and minHeight
-func (m *Model) SetDimensions(width int, height int) {
-	m.width = width
+func (m *Model) SetDimensions(height int, width int) {
+	if height < minHeight || width < minWidth {
+		slog.Warn("Invalid width or height, ignoring passed values", "height", height, "width", width)
+		height = minHeight
+		width = minWidth
+	}
 	m.height = height
+	m.width = width
 }
 
 func (m *Model) getSortedProcesses() []Process {
@@ -63,4 +73,15 @@ func (m *Model) getSortedProcesses() []Process {
 	})
 
 	return processes
+}
+
+
+func (m *Model) NewReqCnt() int {
+	m.reqCnt++
+	return m.reqCnt
+}
+
+// TODO: Maybe make sure that there isn't any existing process with this UUID
+func (m *Model) NewUUIDForProcess() string {
+	return shortuuid.New()
 }

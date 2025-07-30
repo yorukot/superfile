@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/lithammer/shortuuid"
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui"
 )
@@ -33,7 +32,7 @@ func New() Model {
 
 // Should be returning pointer object
 func NewModelWithOptions(height int, width int) Model {
-	return Model{
+	m := Model{
 		renderIndex: 0,
 		cursor:      0,
 		height:      height,
@@ -42,16 +41,8 @@ func NewModelWithOptions(height int, width int) Model {
 		msgChan:     make(chan updateMsg, msgChannelSize),
 		reqCnt:      0,
 	}
-}
-
-func (m *Model) NewReqCnt() int {
-	m.reqCnt++
-	return m.reqCnt
-}
-
-// TODO: Maybe make sure that there isn't any existing process with this UUID
-func (m *Model) NewUUIDForProcess() string {
-	return shortuuid.New()
+	m.SetDimensions(height, width)
+	return m
 }
 
 func (m *Model) AddProcess(p Process) error {
@@ -90,30 +81,30 @@ func (m *Model) HasRunningProcesses() bool {
 
 func (m *Model) Render(processBarFocussed bool) string {
 	r := ui.ProcessBarRenderer(m.height, m.width, processBarFocussed)
-	if !m.IsValid() {
+	if !m.isValid() {
 		slog.Error("processBar in invalid state", "render", m.renderIndex,
 			"cursor", m.cursor, "Height", m.height)
 		r.AddLines("Invalid state")
 		return r.Render()
 	}
-	if m.CntProcesses() == 0 {
+	if m.cntProcesses() == 0 {
 		r.AddLines("", " "+common.ProcessBarNoneText)
 		return r.Render()
 	}
 
-	r.SetBorderInfoItems(fmt.Sprintf("%d/%d", m.cursor+1, m.CntProcesses()))
+	r.SetBorderInfoItems(fmt.Sprintf("%d/%d", m.cursor+1, m.cntProcesses()))
 
 	renderedHeight := 0
 	processes := m.getSortedProcesses()
 	for i := m.renderIndex; i < len(processes); i++ {
 		// We allow rendering of a process if we have at least 2 lines left
-		if m.ViewHeight() < renderedHeight+2 {
+		if m.viewHeight() < renderedHeight+2 {
 			break
 		}
 		renderedHeight += 3
 
 		curProcess := processes[i]
-		curProcess.Progress.Width = m.ViewWidth() - 3
+		curProcess.Progress.Width = m.viewWidth() - 3
 
 		// TODO : get them via a separate function.
 		var cursor string
@@ -125,7 +116,7 @@ func (m *Model) Render(processBarFocussed bool) string {
 		}
 
 		r.AddLines(cursor + common.FooterStyle.Render(
-			common.TruncateText(curProcess.Name, m.ViewWidth()-7, "...")+" ") +
+			common.TruncateText(curProcess.Name, m.viewWidth()-7, "...")+" ") +
 			curProcess.State.Icon())
 
 		// calculate progress percentage

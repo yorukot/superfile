@@ -7,7 +7,7 @@ import "log/slog"
 // Once we make footerHeight part of model struct
 func (m *Model) ListUp(footerHeight int) {
 	slog.Debug("Model.ListUp()", "footerHeight", footerHeight)
-	cntP := m.CntProcesses()
+	cntP := m.cntProcesses()
 	if cntP == 0 {
 		return
 	}
@@ -27,7 +27,7 @@ func (m *Model) ListUp(footerHeight int) {
 // Control processbar panel list down
 func (m *Model) ListDown(footerHeight int) {
 	slog.Debug("Model.ListDown()", "footerHeight", footerHeight)
-	cntP := m.CntProcesses()
+	cntP := m.cntProcesses()
 	if cntP == 0 {
 		return
 	}
