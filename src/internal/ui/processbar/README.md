@@ -11,6 +11,7 @@ For cleanup call SendStopListeningMsg()
 - Finish code TODOs
 - Add unit tests to cover it
 - Add end to end test with model
+- Add unit tests for Render(), and getSortedProcesses()
 
 ## Unit test plan
 - 

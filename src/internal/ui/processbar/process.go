@@ -37,7 +37,6 @@ func NewProcess(id string, name string, total int) Process {
 type ProcessState int
 
 // Constants for operation, success, Cancelled, Failed
-// TODO: Rename it to past verbs like canceled, failed
 const (
 	InOperation ProcessState = iota
 	Successful

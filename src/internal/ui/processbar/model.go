@@ -1,7 +1,6 @@
 package processbar
 
 import (
-	"errors"
 	"fmt"
 	"log/slog"
 
@@ -21,9 +20,10 @@ type Model struct {
 	// TODO: Fix this. No mechanism to remove completed processes from memory
 	// processes map grows indefinitely
 	// Maybe, TTL or cleanup mechanism for successful/failed processes
-	processes map[string]Process
-	msgChan   chan updateMsg
-	reqCnt    int
+	processes   map[string]Process
+	msgChan     chan updateMsg
+	isListening bool
+	reqCnt      int
 }
 
 func New() Model {
@@ -40,14 +40,26 @@ func NewModelWithOptions(height int, width int) Model {
 		processes:   make(map[string]Process),
 		msgChan:     make(chan updateMsg, msgChannelSize),
 		reqCnt:      0,
+		isListening: false,
 	}
 	m.SetDimensions(height, width)
 	return m
 }
 
+// TODO : Check for minWidth and minHeight
+func (m *Model) SetDimensions(height int, width int) {
+	if height < minHeight || width < minWidth {
+		slog.Warn("Invalid width or height, ignoring passed values", "height", height, "width", width)
+		height = minHeight
+		width = minWidth
+	}
+	m.height = height
+	m.width = width
+}
+
 func (m *Model) AddProcess(p Process) error {
 	if _, ok := m.processes[p.ID]; ok {
-		return errors.New("process already exists")
+		return &ProcessAlreadyExistsError{id: p.ID}
 	}
 	m.processes[p.ID] = p
 	return nil

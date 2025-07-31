@@ -12,5 +12,13 @@ type NoProcessFoundError struct {
 }
 
 func (p *NoProcessFoundError) Error() string {
-	return "no process with id " + p.id
+	return "no process with id : " + p.id
+}
+
+type ProcessAlreadyExistsError struct {
+	id string
+}
+
+func (p *ProcessAlreadyExistsError) Error() string {
+	return "process already exists with id : " + p.id
 }
