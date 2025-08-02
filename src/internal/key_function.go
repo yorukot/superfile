@@ -42,10 +42,14 @@ func (m *model) mainKey(msg string) tea.Cmd {
 		}
 
 	case slices.Contains(common.Hotkeys.PageUp, msg):
-		m.fileModel.filePanels[m.filePanelFocusIndex].pgUp(m.mainPanelHeight)
+		if m.focusPanel == nonePanelFocus {
+			m.fileModel.filePanels[m.filePanelFocusIndex].pgUp(m.mainPanelHeight)
+		}
 
 	case slices.Contains(common.Hotkeys.PageDown, msg):
-		m.fileModel.filePanels[m.filePanelFocusIndex].pgDown(m.mainPanelHeight)
+		if m.focusPanel == nonePanelFocus {
+			m.fileModel.filePanels[m.filePanelFocusIndex].pgDown(m.mainPanelHeight)
+		}
 
 	case slices.Contains(common.Hotkeys.ChangePanelMode, msg):
 		m.getFocusedFilePanel().changeFilePanelMode()
