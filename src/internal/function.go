@@ -13,6 +13,8 @@ import (
 	"strconv"
 	"strings"
 
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/utils"
 
 	"github.com/yorukot/superfile/src/internal/common"
@@ -342,4 +344,16 @@ func isImageFile(filename string) bool {
 
 	ext := strings.ToLower(filepath.Ext(filename))
 	return imageExtensions[ext]
+}
+
+
+func processCmdToTeaCmd(cmd processbar.Cmd) tea.Cmd {
+	return func() tea.Msg {
+		updateMsg := cmd()
+		return ProcessBarUpdateMsg{pMsg: updateMsg, 
+			BaseMessage: BaseMessage{
+				reqID: updateMsg.GetReqID(),
+			},
+		}
+	}
 }

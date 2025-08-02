@@ -2,37 +2,36 @@ package processbar
 
 import (
 	"log/slog"
+
 )
 
-// Very hard to do this via tea.Cmd, where we want to send progress updates in the middle of
-// io operatins. Like 100 update messages in during a copy.
-func (m *Model) ListenForUpdates() {
-	m.isListening = true
-	// A goroutine running forever
-	go func() {
-		for {
-			msg := <-m.msgChan
-			slog.Debug("Received message", "id", msg.GetReqID())
-			if _, ok := msg.(stopListeningMsg); ok {
-				m.isListening = false
-				return
-			}
-			err := msg.Apply(m)
-			if err != nil {
-				slog.Error("Could not apply update to processbar", "error", err)
-			}
-			// TODO: We could consider adding a way to gracefully stop
-			// the goroutine (context cancellation or stop channel)
-		}
-	}()
+// Only used in tests, to have processbar used in a standalone way without model
+func (m *Model) ListenForChannelUpdates() {
+       // A goroutine running forever
+       go func() {
+               for {
+                       msg := <-m.msgChan
+                       slog.Debug("Received message", "id", msg.GetReqID())
+                       if _, ok := msg.(stopListeningMsg); ok {
+                               return
+                       }
+                       _, err := msg.Apply(m)
+                       if err != nil {
+                               slog.Error("Could not apply update to processbar", "error", err)
+                       }
+               }
+       }()
 }
 
-func (m *Model) IsListeningForUpdates() bool {
-	return m.isListening
+// An IO Operation, that will wait forever on msgChannel
+func (m *Model) GetListenCmd() Cmd {
+	return func() UpdateMsg {
+		return <-m.msgChan
+	}
 }
 
 // Might add options to drain the channel in case msg is high priority.
-func (m *Model) trySendMsgToChannel(msg updateMsg) error {
+func (m *Model) trySendMsgToChannel(msg UpdateMsg) error {
 	select {
 	case m.msgChan <- msg:
 		return nil
@@ -43,11 +42,11 @@ func (m *Model) trySendMsgToChannel(msg updateMsg) error {
 }
 
 // Block till message is sent
-func (m *Model) sendMsgToChannelBlocking(msg updateMsg) {
+func (m *Model) sendMsgToChannelBlocking(msg UpdateMsg) {
 	m.msgChan <- msg
 }
 
-func (m *Model) sendMsgToChannel(msg updateMsg, blocking bool) error {
+func (m *Model) sendMsgToChannel(msg UpdateMsg, blocking bool) error {
 	if blocking {
 		m.sendMsgToChannelBlocking(msg)
 		return nil

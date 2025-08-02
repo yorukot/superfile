@@ -54,10 +54,7 @@ func (m *model) Init() tea.Cmd {
 		tea.SetWindowTitle("superfile"),
 		textinput.Blink, // Assuming textinput.Blink is a valid command
 		listenForChannelMessage(channel),
-		func() tea.Msg {
-			m.processBarModel.ListenForUpdates()
-			return nil
-		},
+		processCmdToTeaCmd(m.processBarModel.GetListenCmd()),
 	)
 }
 

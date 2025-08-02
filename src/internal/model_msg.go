@@ -62,6 +62,20 @@ func (msg DeleteOperationMsg) ApplyToModel(m *model) tea.Cmd {
 	return nil
 }
 
+type ProcessBarUpdateMsg struct {
+	BaseMessage
+	pMsg processbar.UpdateMsg
+}
+
+func (msg ProcessBarUpdateMsg) ApplyToModel(m *model) tea.Cmd {
+	cmd, err := msg.pMsg.Apply(&m.processBarModel)
+	if err != nil {
+		slog.Error("Error applying processbar update", "error", err)
+	}
+	return processCmdToTeaCmd(cmd)
+	
+}
+
 type CompressOperationMsg struct {
 	BaseMessage
 	state processbar.ProcessState

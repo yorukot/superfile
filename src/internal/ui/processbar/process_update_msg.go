@@ -1,7 +1,9 @@
 package processbar
 
-type updateMsg interface {
-	Apply(m *Model) error
+type Cmd func() UpdateMsg
+
+type UpdateMsg interface {
+	Apply(m *Model) (Cmd, error)
 	GetReqID() int
 }
 
@@ -19,8 +21,8 @@ type newProcessMsg struct {
 	NewProcess Process
 }
 
-func (msg newProcessMsg) Apply(m *Model) error {
-	return m.AddProcess(msg.NewProcess)
+func (msg newProcessMsg) Apply(m *Model) (Cmd, error) {
+	return m.GetListenCmd(), m.AddProcess(msg.NewProcess)
 }
 
 type updateProcessMsg struct {
@@ -28,8 +30,8 @@ type updateProcessMsg struct {
 	NewProcess Process
 }
 
-func (msg updateProcessMsg) Apply(m *Model) error {
-	return m.UpdateExistingProcess(msg.NewProcess)
+func (msg updateProcessMsg) Apply(m *Model) (Cmd, error) {
+	return m.GetListenCmd(), m.UpdateExistingProcess(msg.NewProcess)
 }
 
 // Construction will be options UpdateName(), UpdateDone(), etc..
@@ -38,6 +40,6 @@ type stopListeningMsg struct {
 	BaseMsg
 }
 
-func (msg stopListeningMsg) Apply(_ *Model) error {
-	return nil
+func (msg stopListeningMsg) Apply(_ *Model) (Cmd, error) {
+	return nil, nil
 }

@@ -21,8 +21,7 @@ type Model struct {
 	// processes map grows indefinitely
 	// Maybe, TTL or cleanup mechanism for successful/failed processes
 	processes   map[string]Process
-	msgChan     chan updateMsg
-	isListening bool
+	msgChan     chan UpdateMsg
 	reqCnt      int
 }
 
@@ -38,9 +37,8 @@ func NewModelWithOptions(height int, width int) Model {
 		height:      height,
 		width:       width,
 		processes:   make(map[string]Process),
-		msgChan:     make(chan updateMsg, msgChannelSize),
+		msgChan:     make(chan UpdateMsg, msgChannelSize),
 		reqCnt:      0,
-		isListening: false,
 	}
 	m.SetDimensions(height, width)
 	return m

@@ -15,7 +15,7 @@ import (
 
 func TestZipSources(t *testing.T) {
 	processBar := processbar.New()
-	processBar.ListenForUpdates()
+	processBar.ListenForChannelUpdates()
 	t.Cleanup(processBar.SendStopListeningMsgBlocking)
 	tests := []struct {
 		name          string
@@ -136,7 +136,7 @@ func TestZipSources(t *testing.T) {
 
 func TestZipSourcesInvalidTarget(t *testing.T) {
 	processBar := processbar.New()
-	processBar.ListenForUpdates()
+	processBar.ListenForChannelUpdates()
 	t.Cleanup(processBar.SendStopListeningMsgBlocking)
 	tempDir := t.TempDir()
 	testFile := filepath.Join(tempDir, "test.txt")
