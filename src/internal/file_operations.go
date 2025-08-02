@@ -198,34 +198,27 @@ func pasteDir(src, dst string, p *processbar.Process, cut bool, processBarModel 
 				return err
 			}
 			err = os.MkdirAll(newPath, info.Mode())
-			if err != nil {
-				return err
-			}
-		} else {
-			if cut {
-				p.Name = icon.Cut + icon.Space + filepath.Base(path)
-			} else {
-				p.Name = icon.Copy + icon.Space + filepath.Base(path)
-			}
-			var err error
-			if cut && sameDev {
-				err = os.Rename(path, newPath)
-			} else {
-				err = copyFile(path, newPath, info)
-			}
-
-			if err != nil {
-				p.State = processbar.Failed
-				pSendErr := processBarModel.SendUpdateProcessNameMsg(*p, true)
-				if pSendErr != nil {
-					slog.Error("Error sending process udpate", "error", pSendErr)
-				}
-				return err
-			}
-
-			p.Done++
-			processBarModel.TrySendingUpdateProcessNameMsg(*p)
+			return err
 		}
+		// File
+		p.Name = icon.GetCopyIcon(cut) + icon.Space + filepath.Base(path)
+		if cut && sameDev {
+			err = os.Rename(path, newPath)
+		} else {
+			err = copyFile(path, newPath, info)
+		}
+
+		if err != nil {
+			p.State = processbar.Failed
+			pSendErr := processBarModel.SendUpdateProcessNameMsg(*p, true)
+			if pSendErr != nil {
+				slog.Error("Error sending process udpate", "error", pSendErr)
+			}
+			return err
+		}
+
+		p.Done++
+		processBarModel.TrySendingUpdateProcessNameMsg(*p)
 		return nil
 	})
 
