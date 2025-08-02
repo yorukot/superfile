@@ -3,7 +3,7 @@ package internal
 import "testing"
 
 func TestProcess(_ *testing.T) {
-	// TODO : 
+	// TODO :
 	// We need to test - We could implement these checks in other tests like Test Copy
 	// 1 - Successful process for Copy, Delete, Compress, Extract
 	// Validate donetime, done value, state, etc.

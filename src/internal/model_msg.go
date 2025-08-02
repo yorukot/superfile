@@ -73,7 +73,6 @@ func (msg ProcessBarUpdateMsg) ApplyToModel(m *model) tea.Cmd {
 		slog.Error("Error applying processbar update", "error", err)
 	}
 	return processCmdToTeaCmd(cmd)
-	
 }
 
 type CompressOperationMsg struct {

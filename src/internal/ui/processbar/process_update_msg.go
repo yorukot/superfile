@@ -41,5 +41,6 @@ type stopListeningMsg struct {
 }
 
 func (msg stopListeningMsg) Apply(_ *Model) (Cmd, error) {
+	//nolint:nilnil // This is a no-op apply.
 	return nil, nil
 }

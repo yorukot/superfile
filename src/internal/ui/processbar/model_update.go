@@ -2,25 +2,24 @@ package processbar
 
 import (
 	"log/slog"
-
 )
 
 // Only used in tests, to have processbar used in a standalone way without model
 func (m *Model) ListenForChannelUpdates() {
-       // A goroutine running forever
-       go func() {
-               for {
-                       msg := <-m.msgChan
-                       slog.Debug("Received message", "id", msg.GetReqID())
-                       if _, ok := msg.(stopListeningMsg); ok {
-                               return
-                       }
-                       _, err := msg.Apply(m)
-                       if err != nil {
-                               slog.Error("Could not apply update to processbar", "error", err)
-                       }
-               }
-       }()
+	// A goroutine running forever
+	go func() {
+		for {
+			msg := <-m.msgChan
+			slog.Debug("Received message", "id", msg.GetReqID())
+			if _, ok := msg.(stopListeningMsg); ok {
+				return
+			}
+			_, err := msg.Apply(m)
+			if err != nil {
+				slog.Error("Could not apply update to processbar", "error", err)
+			}
+		}
+	}()
 }
 
 // An IO Operation, that will wait forever on msgChannel

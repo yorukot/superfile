@@ -20,9 +20,9 @@ type Model struct {
 	// TODO: Fix this. No mechanism to remove completed processes from memory
 	// processes map grows indefinitely
 	// Maybe, TTL or cleanup mechanism for successful/failed processes
-	processes   map[string]Process
-	msgChan     chan UpdateMsg
-	reqCnt      int
+	processes map[string]Process
+	msgChan   chan UpdateMsg
+	reqCnt    int
 }
 
 func New() Model {

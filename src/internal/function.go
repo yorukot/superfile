@@ -346,11 +346,14 @@ func isImageFile(filename string) bool {
 	return imageExtensions[ext]
 }
 
-
 func processCmdToTeaCmd(cmd processbar.Cmd) tea.Cmd {
+	if cmd == nil {
+		// To prevent us from running cmd() on nil cmd
+		return nil
+	}
 	return func() tea.Msg {
 		updateMsg := cmd()
-		return ProcessBarUpdateMsg{pMsg: updateMsg, 
+		return ProcessBarUpdateMsg{pMsg: updateMsg,
 			BaseMessage: BaseMessage{
 				reqID: updateMsg.GetReqID(),
 			},
