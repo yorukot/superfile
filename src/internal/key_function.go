@@ -10,42 +10,124 @@ import (
 	variable "github.com/yorukot/superfile/src/config"
 )
 
+// TODO : Remove duplication here.
+// See Issue #968
+
+// NavigationType defines the type of navigation action that can be performed across panels.
+// This enum ensures type safety and makes the navigation system extensible.
+type NavigationType int
+
+const (
+	NavigateUp NavigationType = iota
+	NavigateDown
+	NavigatePageUp
+	NavigatePageDown
+)
+
+// Navigation Strategy Documentation:
+//
+// The navigation system uses a unified approach where:
+// 1. File panels use dedicated navigation methods (listUp/Down, pgUp/Down) for precise control
+// 2. Non-file panels (sidebar, metadata, processbar) use ListUp/Down methods as fallbacks
+// 3. Page navigation maps to single-step navigation for panels without native page support
+// 4. This provides consistent UX while respecting each panel's capabilities
+
+// handleSidebarNavigation handles navigation for the sidebar panel.
+// Uses ListUp/ListDown for both regular and page navigation as the sidebar
+// doesn't distinguish between single-step and page-based navigation.
+func (m *model) handleSidebarNavigation(navType NavigationType) {
+	switch navType {
+	case NavigateUp, NavigatePageUp:
+		m.sidebarModel.ListUp(m.mainPanelHeight)
+	case NavigateDown, NavigatePageDown:
+		m.sidebarModel.ListDown(m.mainPanelHeight)
+	}
+}
+
+// handleProcessBarNavigation handles navigation for the process bar panel.
+// Similar to sidebar, uses single-step navigation for all navigation types
+// since the process bar doesn't have dedicated page navigation methods.
+func (m *model) handleProcessBarNavigation(navType NavigationType) {
+	switch navType {
+	case NavigateUp, NavigatePageUp:
+		m.processBarModel.listUp(m.footerHeight)
+	case NavigateDown, NavigatePageDown:
+		m.processBarModel.listDown(m.footerHeight)
+	}
+}
+
+// handleMetadataNavigation handles navigation for the metadata panel.
+// Uses ListUp/ListDown methods for all navigation types as metadata
+// doesn't support page-based navigation.
+func (m *model) handleMetadataNavigation(navType NavigationType) {
+	switch navType {
+	case NavigateUp, NavigatePageUp:
+		m.fileMetaData.ListUp()
+	case NavigateDown, NavigatePageDown:
+		m.fileMetaData.ListDown()
+	}
+}
+
+// handleFilePanelNavigation handles navigation for file panels.
+// This is the only panel type that distinguishes between single-step
+// navigation (listUp/Down) and page navigation (pgUp/Down).
+// This provides the most precise navigation control for file browsing.
+func (m *model) handleFilePanelNavigation(navType NavigationType) {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	switch navType {
+	case NavigateUp:
+		panel.listUp(m.mainPanelHeight)
+	case NavigateDown:
+		panel.listDown(m.mainPanelHeight)
+	case NavigatePageUp:
+		panel.pgUp(m.mainPanelHeight)
+	case NavigatePageDown:
+		panel.pgDown(m.mainPanelHeight)
+	}
+}
+
+// handlePanelNavigation dispatches navigation commands to the appropriate panel handler
+// based on the currently focused panel. This provides a unified navigation interface
+// while respecting each panel's specific navigation capabilities.
+//
+// Panel Focus Mapping:
+// - sidebarFocus -> handleSidebarNavigation
+// - processBarFocus -> handleProcessBarNavigation
+// - metadataFocus -> handleMetadataNavigation
+// - nonePanelFocus -> handleFilePanelNavigation
+func (m *model) handlePanelNavigation(navType NavigationType) {
+	switch m.focusPanel {
+	case sidebarFocus:
+		m.handleSidebarNavigation(navType)
+	case processBarFocus:
+		m.handleProcessBarNavigation(navType)
+	case metadataFocus:
+		m.handleMetadataNavigation(navType)
+	case nonePanelFocus:
+		m.handleFilePanelNavigation(navType)
+	}
+}
+
 // mainKey handles most of key commands in the regular state of the application. For
 // keys that performs actions in multiple panels, like going up or down,
 // check the state of model m and handle properly.
+//
+// Navigation Keys:
+// - ListUp/ListDown: Single-step navigation (arrow keys)
+// - PageUp/PageDown: Page-based navigation (respects focused panel)
 func (m *model) mainKey(msg string) tea.Cmd {
 	switch {
-	// If move up Key is pressed, check the current state and executes
 	case slices.Contains(common.Hotkeys.ListUp, msg):
-		switch m.focusPanel {
-		case sidebarFocus:
-			m.sidebarModel.ListUp(m.mainPanelHeight)
-		case processBarFocus:
-			m.processBarModel.listUp(m.footerHeight)
-		case metadataFocus:
-			m.fileMetaData.ListUp()
-		case nonePanelFocus:
-			m.fileModel.filePanels[m.filePanelFocusIndex].listUp(m.mainPanelHeight)
-		}
+		m.handlePanelNavigation(NavigateUp)
 
-		// If move down Key is pressed, check the current state and executes
 	case slices.Contains(common.Hotkeys.ListDown, msg):
-		switch m.focusPanel {
-		case sidebarFocus:
-			m.sidebarModel.ListDown(m.mainPanelHeight)
-		case processBarFocus:
-			m.processBarModel.listDown(m.footerHeight)
-		case metadataFocus:
-			m.fileMetaData.ListDown()
-		case nonePanelFocus:
-			m.fileModel.filePanels[m.filePanelFocusIndex].listDown(m.mainPanelHeight)
-		}
+		m.handlePanelNavigation(NavigateDown)
 
 	case slices.Contains(common.Hotkeys.PageUp, msg):
-		m.fileModel.filePanels[m.filePanelFocusIndex].pgUp(m.mainPanelHeight)
+		m.handlePanelNavigation(NavigatePageUp)
 
 	case slices.Contains(common.Hotkeys.PageDown, msg):
-		m.fileModel.filePanels[m.filePanelFocusIndex].pgDown(m.mainPanelHeight)
+		m.handlePanelNavigation(NavigatePageDown)
 
 	case slices.Contains(common.Hotkeys.ChangePanelMode, msg):
 		m.getFocusedFilePanel().changeFilePanelMode()
@@ -297,3 +379,4 @@ func (m *model) helpMenuKey(msg string) {
 		m.quitHelpMenu()
 	}
 }
+
