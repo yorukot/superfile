@@ -163,7 +163,6 @@ func trashMacOrLinux(src string) error {
 }
 
 // pasteDir handles directory copying with progress tracking
-// model would only have changes in m.Model.process[id]
 func pasteDir(src, dst string, p *processbar.Process, cut bool, processBarModel *processbar.Model) error {
 	dst, err := renameIfDuplicate(dst)
 	if err != nil {
@@ -212,7 +211,7 @@ func pasteDir(src, dst string, p *processbar.Process, cut bool, processBarModel 
 			p.State = processbar.Failed
 			pSendErr := processBarModel.SendUpdateProcessMsg(*p, true)
 			if pSendErr != nil {
-				slog.Error("Error sending process udpate", "error", pSendErr)
+				slog.Error("Error sending process update", "error", pSendErr)
 			}
 			return err
 		}

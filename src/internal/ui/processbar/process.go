@@ -33,10 +33,8 @@ func NewProcess(id string, name string, total int) Process {
 	}
 }
 
-// Type representing the state of a process
 type ProcessState int
 
-// Constants for operation, success, Cancelled, Failed
 const (
 	InOperation ProcessState = iota
 	Successful

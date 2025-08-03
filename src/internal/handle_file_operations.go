@@ -133,7 +133,7 @@ func deleteOperation(processBarModel *processbar.Model, items []string, useTrash
 		deleteFunc = trashMacOrLinux
 	}
 	for _, item := range items {
-		err := deleteFunc(item)
+		err = deleteFunc(item)
 
 		if err != nil {
 			p.State = processbar.Failed
@@ -149,7 +149,10 @@ func deleteOperation(processBarModel *processbar.Model, items []string, useTrash
 		p.State = processbar.Successful
 	}
 	p.DoneTime = time.Now()
-	processBarModel.TrySendingUpdateProcessMsg(p)
+	err = processBarModel.SendUpdateProcessMsg(p, true)
+	if err != nil {
+		slog.Error("Failed to send final delete operation update", "error", err)
+	}
 	return p.State
 }
 

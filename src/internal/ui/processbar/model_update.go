@@ -66,7 +66,8 @@ func (m *Model) SendAddProcessMsg(name string, total int, blockingSend bool) (Pr
 	}
 	err := m.sendMsgToChannel(msg, blockingSend)
 	if err != nil {
-		return p, err
+		// Return zero-value process to indicate failure
+		return Process{}, err
 	}
 	return p, nil
 }

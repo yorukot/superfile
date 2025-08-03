@@ -36,7 +36,7 @@ func extractCompressFile(src, dest string, processBar *processbar.Model) error {
 	p.DoneTime = time.Now()
 	pSendErr := processBar.SendUpdateProcessMsg(p, true)
 	if pSendErr != nil {
-		slog.Error("Error sending process udpate", "error", pSendErr)
+		slog.Error("Error sending process update", "error", pSendErr)
 	}
 
 	return err

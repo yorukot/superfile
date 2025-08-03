@@ -43,7 +43,6 @@ func NewModelWithOptions(width int, height int) Model {
 	return m
 }
 
-// TODO : Check for minWidth and minHeight
 func (m *Model) SetDimensions(width int, height int) {
 	if width < minWidth {
 		slog.Warn("Invalid width, using minimum", "provided", width, "minimum", minWidth)
@@ -115,6 +114,10 @@ func (m *Model) Render(processBarFocussed bool) string {
 		}
 		renderedHeight += 3
 
+		// Note : We will be updating this on each Render, although harmless from performance
+		// perspective. We are rendering modified version of the data.
+		// TODO: We could, save pointer of process in map and update progressbar of each
+		// map on each SetWidth. This would be cleaner and more efficient.
 		curProcess := processes[i]
 		curProcess.Progress.Width = m.viewWidth() - 3
 
@@ -132,7 +135,7 @@ func (m *Model) Render(processBarFocussed bool) string {
 			curProcess.State.Icon())
 
 		// calculate progress percentage
-		// if the total is 0 mean the process only have directory
+		// if the total is 0, that means the process only have directory
 		// so we can set the progress to 100%
 		if curProcess.Total != 0 {
 			progressPercentage := float64(curProcess.Done) / float64(curProcess.Total)

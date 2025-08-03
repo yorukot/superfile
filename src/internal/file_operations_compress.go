@@ -40,7 +40,7 @@ func zipSources(sources []string, target string, processBar *processbar.Model) e
 		p.DoneTime = time.Now()
 		pSendErr := processBar.SendUpdateProcessMsg(p, true)
 		if pSendErr != nil {
-			slog.Error("Error sending process udpate", "error", pSendErr)
+			slog.Error("Error sending process update", "error", pSendErr)
 		}
 		return errors.New("file already exists")
 	}
@@ -107,7 +107,7 @@ func zipSources(sources []string, target string, processBar *processbar.Model) e
 	p.DoneTime = time.Now()
 	pSendErr := processBar.SendUpdateProcessMsg(p, true)
 	if pSendErr != nil {
-		slog.Error("Error sending process udpate", "error", pSendErr)
+		slog.Error("Error sending process update", "error", pSendErr)
 	}
 	return nil
 }
