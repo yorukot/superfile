@@ -4,6 +4,29 @@ import (
 	"testing"
 )
 
+// Test KeyMessage type functionality
+func TestKeyMessage(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{"Basic key", "a", "a"},
+		{"Arrow key", "↑", "↑"},
+		{"Special key", "ctrl+c", "ctrl+c"},
+		{"Empty string", "", ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			keyMsg := NewKeyMessage(tt.input)
+			if keyMsg.String() != tt.expected {
+				t.Errorf("Expected %s, got %s", tt.expected, keyMsg.String())
+			}
+		})
+	}
+}
+
 // Test the NavigationType enum values
 func TestNavigationType(t *testing.T) {
 	tests := []struct {
@@ -53,7 +76,32 @@ func TestNavigationTypeOrdering(t *testing.T) {
 	}
 }
 
-// Mock test to verify the navigation strategy documentation matches implementation
+// Helper function to check if direction counts are equal
+func assertEqualDirectionCounts(t *testing.T, upCount, downCount int) {
+	if upCount != downCount {
+		t.Error("Should have equal number of up and down navigation types")
+	}
+}
+
+// Helper function to validate up direction parity
+func validateUpDirections(t *testing.T, directions []NavigationType) {
+	for _, upType := range directions {
+		if int(upType)%2 != 0 {
+			t.Errorf("Up navigation type %v should be even number", upType)
+		}
+	}
+}
+
+// Helper function to validate down direction parity
+func validateDownDirections(t *testing.T, directions []NavigationType) {
+	for _, downType := range directions {
+		if int(downType)%2 != 1 {
+			t.Errorf("Down navigation type %v should be odd number", downType)
+		}
+	}
+}
+
+// Test to verify the navigation strategy documentation matches implementation
 func TestNavigationStrategyConsistency(t *testing.T) {
 	// This test ensures that our documented navigation strategy is consistent
 	// with the actual implementation by checking that up/down directions are paired
@@ -62,21 +110,9 @@ func TestNavigationStrategyConsistency(t *testing.T) {
 	downDirections := []NavigationType{NavigateDown, NavigatePageDown}
 
 	// Verify we have equal number of up and down directions
-	if len(upDirections) != len(downDirections) {
-		t.Error("Should have equal number of up and down navigation types")
-	}
+	assertEqualDirectionCounts(t, len(upDirections), len(downDirections))
 
 	// Verify up directions are even numbers, down directions are odd
-	for _, upType := range upDirections {
-		if int(upType)%2 != 0 {
-			t.Errorf("Up navigation type %v should be even number", upType)
-		}
-	}
-
-	for _, downType := range downDirections {
-		if int(downType)%2 != 1 {
-			t.Errorf("Down navigation type %v should be odd number", downType)
-		}
-	}
+	validateUpDirections(t, upDirections)
+	validateDownDirections(t, downDirections)
 }
-

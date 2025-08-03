@@ -292,42 +292,42 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 	quitSuperfile := false
 	switch {
 	case m.typingModal.open:
-		m.typingModalOpenKey(msg.String())
+		m.typingModalOpenKey(NewKeyMessage(msg.String()))
 	case m.promptModal.IsOpen():
 		// Ignore keypress. It will be handled in Update call via
 		// updateFilePanelState
 
 	// Handles all warn models except the warn model for confirming to quit
 	case m.warnModal.open:
-		cmd = m.warnModalOpenKey(msg.String())
+		cmd = m.warnModalOpenKey(NewKeyMessage(msg.String()))
 	case m.notifyModal.open:
-		m.notifyModalOpenKey(msg.String())
+		m.notifyModalOpenKey(NewKeyMessage(msg.String()))
 	// If renaming a object
 	case m.fileModel.renaming:
-		m.renamingKey(msg.String())
+		m.renamingKey(NewKeyMessage(msg.String()))
 	case m.sidebarModel.IsRenaming():
-		m.sidebarRenamingKey(msg.String())
+		m.sidebarRenamingKey(NewKeyMessage(msg.String()))
 	// If search bar is open
 	case m.fileModel.filePanels[m.filePanelFocusIndex].searchBar.Focused():
-		m.focusOnSearchbarKey(msg.String())
+		m.focusOnSearchbarKey(NewKeyMessage(msg.String()))
 	// If sort options menu is open
 	case m.sidebarModel.SearchBarFocused():
 		m.sidebarModel.HandleSearchBarKey(msg.String())
 	case m.fileModel.filePanels[m.filePanelFocusIndex].sortOptions.open:
-		m.sortOptionsKey(msg.String())
+		m.sortOptionsKey(NewKeyMessage(msg.String()))
 	// If help menu is open
 	case m.helpMenu.open:
-		m.helpMenuKey(msg.String())
+		m.helpMenuKey(NewKeyMessage(msg.String()))
 	// If asking to confirm quiting
 	case m.modelQuitState == confirmToQuit:
-		quitSuperfile = m.confirmToQuitSuperfile(msg.String())
+		quitSuperfile = m.confirmToQuitSuperfile(NewKeyMessage(msg.String()))
 
 	case slices.Contains(common.Hotkeys.Quit, msg.String()):
 		m.modelQuitState = quitInitiated
 
 	default:
 		// Handles general kinds of inputs in the regular state of the application
-		cmd = m.mainKey(msg.String())
+		cmd = m.mainKey(NewKeyMessage(msg.String()))
 	}
 	// If quiting input pressed, check if has any running process and displays a
 	// warn. Otherwise just quits application
