@@ -28,6 +28,65 @@ func (k KeyMessage) String() string {
 	return string(k)
 }
 
+// CancelConfirmHandler defines the interface for handling cancel/confirm operations.
+// This eliminates code duplication across modal and typing handlers.
+type CancelConfirmHandler interface {
+	HandleCancel()
+	HandleConfirm()
+}
+
+// handleCancelConfirmKey provides a unified way to handle cancel/confirm key patterns.
+// This reduces code duplication across multiple similar functions.
+func (m *model) handleCancelConfirmKey(msg KeyMessage, handler CancelConfirmHandler) {
+	msgStr := msg.String()
+	switch {
+	case slices.Contains(common.Hotkeys.CancelTyping, msgStr):
+		handler.HandleCancel()
+	case slices.Contains(common.Hotkeys.ConfirmTyping, msgStr):
+		handler.HandleConfirm()
+	}
+}
+
+// typingModalHandler implements CancelConfirmHandler for typing modal operations.
+type typingModalHandler struct {
+	model *model
+}
+
+func (h *typingModalHandler) HandleCancel() {
+	h.model.typingModal.errorMesssage = ""
+	h.model.cancelTypingModal()
+}
+
+func (h *typingModalHandler) HandleConfirm() {
+	h.model.createItem()
+}
+
+// searchbarHandler implements CancelConfirmHandler for searchbar operations.
+type searchbarHandler struct {
+	model *model
+}
+
+func (h *searchbarHandler) HandleCancel() {
+	h.model.cancelSearch()
+}
+
+func (h *searchbarHandler) HandleConfirm() {
+	h.model.confirmSearch()
+}
+
+// sidebarRenamingHandler implements CancelConfirmHandler for sidebar renaming operations.
+type sidebarRenamingHandler struct {
+	model *model
+}
+
+func (h *sidebarRenamingHandler) HandleCancel() {
+	h.model.sidebarModel.CancelSidebarRename()
+}
+
+func (h *sidebarRenamingHandler) HandleConfirm() {
+	h.model.sidebarModel.ConfirmSidebarRename()
+}
+
 // NavigationType defines the type of navigation action that can be performed across panels.
 // This enum ensures type safety and makes the navigation system extensible.
 type NavigationType int
@@ -285,14 +344,8 @@ func (m *model) normalAndBrowserModeKey(msg KeyMessage) {
 
 // Check the hotkey to cancel operation or create file
 func (m *model) typingModalOpenKey(msg KeyMessage) {
-	msgStr := msg.String()
-	switch {
-	case slices.Contains(common.Hotkeys.CancelTyping, msgStr):
-		m.typingModal.errorMesssage = ""
-		m.cancelTypingModal()
-	case slices.Contains(common.Hotkeys.ConfirmTyping, msgStr):
-		m.createItem()
-	}
+	handler := &typingModalHandler{model: m}
+	m.handleCancelConfirmKey(msg, handler)
 }
 
 // TODO : There is a lot of duplication for these models, each one of them has to handle
@@ -372,24 +425,14 @@ func (m *model) renamingKey(msg KeyMessage) {
 }
 
 func (m *model) sidebarRenamingKey(msg KeyMessage) {
-	msgStr := msg.String()
-	switch {
-	case slices.Contains(common.Hotkeys.CancelTyping, msgStr):
-		m.sidebarModel.CancelSidebarRename()
-	case slices.Contains(common.Hotkeys.ConfirmTyping, msgStr):
-		m.sidebarModel.ConfirmSidebarRename()
-	}
+	handler := &sidebarRenamingHandler{model: m}
+	m.handleCancelConfirmKey(msg, handler)
 }
 
 // Check the key input and cancel or confirms the search
 func (m *model) focusOnSearchbarKey(msg KeyMessage) {
-	msgStr := msg.String()
-	switch {
-	case slices.Contains(common.Hotkeys.CancelTyping, msgStr):
-		m.cancelSearch()
-	case slices.Contains(common.Hotkeys.ConfirmTyping, msgStr):
-		m.confirmSearch()
-	}
+	handler := &searchbarHandler{model: m}
+	m.handleCancelConfirmKey(msg, handler)
 }
 
 // Check hotkey input in help menu. Possible actions are moving up, down
