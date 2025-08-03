@@ -2,23 +2,20 @@ package internal
 
 import (
 	"archive/zip"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
-	"github.com/charmbracelet/bubbles/progress"
-	"github.com/lithammer/shortuuid"
 	"github.com/yorukot/superfile/src/config/icon"
-	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/ui/processbar"
 )
 
-func zipSources(sources []string, target string) error {
-	id := shortuuid.New()
-	prog := progress.New()
-	prog.PercentageStyle = common.FooterStyle
+func zipSources(sources []string, target string, processBar *processbar.Model) error {
 	var err error
 
 	totalFiles := 0
@@ -32,26 +29,20 @@ func zipSources(sources []string, target string) error {
 		}
 		totalFiles += count
 	}
-
-	p := process{
-		name:     "zip files",
-		progress: prog,
-		state:    inOperation,
-		total:    totalFiles,
-		done:     0,
+	p, err := processBar.SendAddProcessMsg("zip file", totalFiles, true)
+	if err != nil {
+		return fmt.Errorf("cannot spawn process : %w", err)
 	}
-	message := channelMessage{
-		messageID:       id,
-		messageType:     sendProcess,
-		processNewState: p,
-	}
-
 	_, err = os.Stat(target)
 	if err == nil {
-		p.name = icon.CompressFile + icon.Space + "File already exist"
-		message.processNewState = p
-		channel <- message
-		return nil
+		p.Name = icon.CompressFile + icon.Space + "File already exist"
+		p.State = processbar.Cancelled
+		p.DoneTime = time.Now()
+		pSendErr := processBar.SendUpdateProcessMsg(p, true)
+		if pSendErr != nil {
+			slog.Error("Error sending process udpate", "error", pSendErr)
+		}
+		return errors.New("file already exists")
 	}
 
 	f, err := os.Create(target)
@@ -65,11 +56,7 @@ func zipSources(sources []string, target string) error {
 	for _, src := range sources {
 		srcParentDir := filepath.Dir(src)
 		err = filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
-			p.name = icon.CompressFile + icon.Space + filepath.Base(path)
-			if len(channel) < 5 {
-				message.processNewState = p
-				channel <- message
-			}
+			p.Name = icon.CompressFile + icon.Space + filepath.Base(path)
 			if err != nil {
 				return err
 			}
@@ -102,26 +89,26 @@ func zipSources(sources []string, target string) error {
 			if err != nil {
 				return err
 			}
-			p.done++
-			if len(channel) < 5 {
-				message.processNewState = p
-				channel <- message
-			}
+			p.Done++
+			processBar.TrySendingUpdateProcessMsg(p)
 			return nil
 		})
 		if err != nil {
 			slog.Error("Error while zip file", "error", err)
-			p.state = failure
-			message.processNewState = p
-			channel <- message
-			return err
+			p.State = processbar.Failed
+			break
 		}
 	}
-
-	p.state = successful
-	p.done = totalFiles
-	message.processNewState = p
-	channel <- message
+	if p.State != processbar.Failed {
+		// TODO: User p.SetSuccessful(), p.SetFailed()
+		p.State = processbar.Successful
+		p.Done = totalFiles
+	}
+	p.DoneTime = time.Now()
+	pSendErr := processBar.SendUpdateProcessMsg(p, true)
+	if pSendErr != nil {
+		slog.Error("Error sending process udpate", "error", pSendErr)
+	}
 	return nil
 }
 

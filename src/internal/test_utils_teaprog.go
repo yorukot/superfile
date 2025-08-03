@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"errors"
 	"log/slog"
 	"testing"
 
@@ -44,7 +45,8 @@ func (p *TeaProg) StartEventLoop() {
 	go func() {
 		_, err := p.prog.Run()
 		// This will return only after Run() is completed
-		if err != nil {
+		// This will not be error if its due to p.Close() being called
+		if err != nil && !errors.Is(err, tea.ErrProgramKilled) {
 			slog.Error("TeaProg finished with error", "error", err)
 		}
 	}()

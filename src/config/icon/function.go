@@ -68,3 +68,10 @@ func InitIcon(nerdfont bool, directoryIconColor string) {
 		Color: directoryIconColor,
 	}
 }
+
+func GetCopyOrCutIcon(cut bool) string {
+	if cut {
+		return Cut
+	}
+	return Copy
+}

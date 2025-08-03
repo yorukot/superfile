@@ -21,7 +21,7 @@ func (m *model) mainKey(msg string) tea.Cmd {
 		case sidebarFocus:
 			m.sidebarModel.ListUp(m.mainPanelHeight)
 		case processBarFocus:
-			m.processBarModel.listUp(m.footerHeight)
+			m.processBarModel.ListUp(m.footerHeight)
 		case metadataFocus:
 			m.fileMetaData.ListUp()
 		case nonePanelFocus:
@@ -34,7 +34,7 @@ func (m *model) mainKey(msg string) tea.Cmd {
 		case sidebarFocus:
 			m.sidebarModel.ListDown(m.mainPanelHeight)
 		case processBarFocus:
-			m.processBarModel.listDown(m.footerHeight)
+			m.processBarModel.ListDown(m.footerHeight)
 		case metadataFocus:
 			m.fileMetaData.ListDown()
 		case nonePanelFocus:

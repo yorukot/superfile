@@ -20,6 +20,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/x/ansi"
 	variable "github.com/yorukot/superfile/src/config"
 	stringfunction "github.com/yorukot/superfile/src/pkg/string_function"
 )
@@ -31,7 +32,6 @@ var hasTrash = true                                             //nolint: gochec
 var batCmd = ""                                                 //nolint: gochecknoglobals // TODO : Move to model struct
 var et *exiftool.Exiftool                                       //nolint: gochecknoglobals // TODO : Move to model struct
 var channel = make(chan channelMessage, 1000)                   //nolint: gochecknoglobals // TODO : Move to model struct
-var progressBarLastRenderTime = time.Now()                      //nolint: gochecknoglobals // TODO : Move to model struct
 
 // Initialize and return model with default configs
 // It returns only tea.Model because when it used in main, the return value
@@ -55,6 +55,7 @@ func (m *model) Init() tea.Cmd {
 		tea.SetWindowTitle("superfile"),
 		textinput.Blink, // Assuming textinput.Blink is a valid command
 		listenForChannelMessage(channel),
+		processCmdToTeaCmd(m.processBarModel.GetListenCmd()),
 	)
 }
 
@@ -65,7 +66,8 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// If its quitDone. But if we are at this state, its already bad, so we need
 	// to first figure out if its possible in testing, and fix it.
 	slog.Debug("model.Update() called")
-	var cmd tea.Cmd
+	var cmd, updateCmd, metadataCmd tea.Cmd
+	gotModelUpdateMsg := false
 
 	cmd = m.sidebarModel.UpdateState(msg)
 
@@ -75,24 +77,27 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.handleWindowResize(msg)
 	case tea.MouseMsg:
-		msgStr := msg.String()
-		if msgStr == "wheel up" || msgStr == "wheel down" {
-			wheelMainAction(msgStr, m)
-		} else {
-			slog.Debug("Mouse event of type that is not handled", "msg", msgStr)
-		}
+		m.handleMouseMsg(msg)
 	case tea.KeyMsg:
 		cmd = tea.Batch(cmd, m.handleKeyInput(msg))
 	case ModelUpdateMessage:
+		// TODO: Some of these updates messages should trigger filePanel state update
+		// For example a success message for delete operation
+		// But, we cant do that as of now, because if every opertion including metadata operation
+		// keeps triggering model update below, which will trigger another metadata fetch,
+		// we will be stuck in a loop.
 		slog.Debug("Got ModelUpdate message", "id", msg.GetReqID())
-		cmd = tea.Batch(cmd, msg.ApplyToModel(m))
-		return m, cmd
+		gotModelUpdateMsg = true
+		updateCmd = msg.ApplyToModel(m)
+
 	default:
 		slog.Debug("Message of type that is not handled", "type", reflect.TypeOf(msg))
 	}
 
+	// This is needed for blink, etc to work
 	m.updateFilePanelsState(msg, &cmd)
-	m.sidebarModel.UpdateDirectories()
+
+	m.updateModelStateAfterMsg()
 
 	// check if there already have listening message
 	// TODO: Fix this. This is wrong, and it will cause unnecessary goroutines spawned continuously
@@ -105,21 +110,36 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		listenChannelCommand = listenForChannelMessage(channel)
 	}
 
+	// Temp fix till we add metadata cache, to prevent multiple metadata fetch spawns
+	// Ideally we might want to fetch only if the current file selected in filepanel changes
+	if !gotModelUpdateMsg {
+		metadataCmd = m.getMetadataCmd()
+	}
+
+	return m, tea.Batch(cmd, listenChannelCommand, metadataCmd, updateCmd)
+}
+
+func (m *model) handleMouseMsg(msg tea.MouseMsg) {
+	msgStr := msg.String()
+	if msgStr == "wheel up" || msgStr == "wheel down" {
+		wheelMainAction(msgStr, m)
+	} else {
+		slog.Debug("Mouse event of type that is not handled", "msg", msgStr)
+	}
+}
+
+func (m *model) updateModelStateAfterMsg() {
+	m.sidebarModel.UpdateDirectories()
 	m.getFilePanelItems()
-
-	metadataCmd := m.getMetadataCmd()
-
 	// TODO: Move to utility
 	if m.focusPanel != metadataFocus {
 		m.fileMetaData.ResetRender()
 	}
-
 	// TODO: Entirely remove the need of this variable, and handle first loading via Init()
 	// Init() should return a basic model object with all IO waiting via a tea.Cmd
 	if !m.firstLoadingComplete {
 		m.firstLoadingComplete = true
 	}
-	return m, tea.Batch(cmd, listenChannelCommand, metadataCmd)
 }
 
 // Note : Maybe we should not trigger metadata fetch for updates
@@ -166,11 +186,6 @@ func (m *model) handleChannelMessage(msg channelMessage) {
 		m.warnModal = msg.warnModal
 	case sendNotifyModal:
 		m.notifyModal = msg.notifyModal
-	case sendProcess:
-		if !arrayContains(m.processBarModel.processList, msg.messageID) {
-			m.processBarModel.processList = append(m.processBarModel.processList, msg.messageID)
-		}
-		m.processBarModel.process[msg.messageID] = msg.processNewState
 	default:
 		slog.Error("Unhandled channelMessageType in handleChannelMessage()",
 			"messageType", msg.messageType)
@@ -191,6 +206,7 @@ func (m *model) handleWindowResize(msg tea.WindowSizeMsg) {
 	m.setHeightValues(msg.Height)
 	m.setHelpMenuSize()
 	m.setMetadataModelSize()
+	m.setProcessBarModelSize()
 	m.setPromptModelSize()
 
 	if m.fileModel.maxFilePanel >= 10 {
@@ -265,6 +281,11 @@ func (m *model) setMetadataModelSize() {
 	m.fileMetaData.SetDimensions(utils.FooterWidth(m.fullWidth)+2, m.footerHeight+2)
 }
 
+// TODO: Remove this code duplication with footer models
+func (m *model) setProcessBarModelSize() {
+	m.processBarModel.SetDimensions(utils.FooterWidth(m.fullWidth)+2, m.footerHeight+2)
+}
+
 // Identify the current state of the application m and properly handle the
 // msg keybind pressed
 func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
@@ -332,7 +353,7 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 	// If quiting input pressed, check if has any running process and displays a
 	// warn. Otherwise just quits application
 	if m.modelQuitState == quitInitiated {
-		if m.hasRunningProcesses() {
+		if m.processBarModel.HasRunningProcesses() {
 			// Dont quit now, get a confirmation first.
 			m.warnModalForQuit()
 			return cmd
@@ -440,14 +461,6 @@ func (m *model) updateCurrentFilePanelDir(path string) error {
 }
 
 // Check if there's any processes running in background
-func (m *model) hasRunningProcesses() bool {
-	for _, data := range m.processBarModel.process {
-		if data.state == inOperation && data.done != data.total {
-			return true
-		}
-	}
-	return false
-}
 
 // Triggers a warn for confirm quiting
 func (m *model) warnModalForQuit() {
@@ -486,8 +499,11 @@ func (m *model) View() string {
 
 	mainPanel := lipgloss.JoinHorizontal(0, sidebar, filePanel, filePreview)
 
-	var footer string
+	if common.Config.Debug {
+		showRenderDebugStatsMain(sidebar, filePanel, filePreview)
+	}
 
+	var footer string
 	if m.toggleFooter {
 		processBar := m.processBarRender()
 
@@ -496,6 +512,8 @@ func (m *model) View() string {
 		clipboardBar := m.clipboardRender()
 
 		footer = lipgloss.JoinHorizontal(0, processBar, metaData, clipboardBar)
+
+		showRenderDebugStatsFooter(processBar, metaData, clipboardBar)
 	}
 
 	var finalRender string
@@ -567,20 +585,40 @@ func (m *model) View() string {
 	return finalRender
 }
 
+func showRenderDebugStatsMain(sidebar, filePanel, filePreview string) {
+	slog.Debug("Render stats for main panel",
+		"sidebarLineCnt", getLineCnt(sidebar), "sidebarMaxW", getMaxW(sidebar),
+		"filePanelLineCnt", getLineCnt(filePanel), "filePanelMaxW", getMaxW(filePanel),
+		"filePreviewLineCnt", getLineCnt(filePreview), "filePreviewMaxW", getMaxW(filePreview),
+	)
+}
+
+func showRenderDebugStatsFooter(processBar, metaData, clipboardBar string) {
+	slog.Debug("Render stats for footer",
+		"processBarLineCnt", getLineCnt(processBar), "processBarMaxW", getMaxW(processBar),
+		"metaDataLineCnt", getLineCnt(metaData), "metaDataMaxW", getMaxW(metaData),
+		"clipboardBarLineCnt", getLineCnt(clipboardBar), "clipboardBarMaxW", getMaxW(clipboardBar),
+	)
+}
+
+func getLineCnt(s string) int {
+	return strings.Count(s, "\n") + 1
+}
+
+func getMaxW(s string) int {
+	maxW := 0
+	for line := range strings.Lines(s) {
+		maxW = max(maxW, ansi.StringWidth(line))
+	}
+	return maxW
+}
+
 // Returns a tea.cmd responsible for listening messages from msg channel
 func listenForChannelMessage(msg chan channelMessage) tea.Cmd {
 	return func() tea.Msg {
 		for {
-			m := <-msg
-			if m.messageType != sendProcess {
-				ListeningMessage = false
-				return m
-			}
-			if time.Since(progressBarLastRenderTime).Seconds() > 2 || m.processNewState.state == successful || m.processNewState.done < 2 {
-				ListeningMessage = false
-				progressBarLastRenderTime = time.Now()
-				return m
-			}
+			ListeningMessage = false
+			return <-msg
 		}
 	}
 }

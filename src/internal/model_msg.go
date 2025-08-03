@@ -5,6 +5,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
+	"github.com/yorukot/superfile/src/internal/ui/processbar"
 )
 
 type ModelUpdateMessage interface {
@@ -22,10 +23,10 @@ func (msg BaseMessage) GetReqID() int {
 
 type PasteOperationMsg struct {
 	BaseMessage
-	state processState
+	state processbar.ProcessState
 }
 
-func NewPasteOperationMsg(state processState, reqID int) PasteOperationMsg {
+func NewPasteOperationMsg(state processbar.ProcessState, reqID int) PasteOperationMsg {
 	return PasteOperationMsg{
 		state: state,
 		BaseMessage: BaseMessage{
@@ -35,7 +36,7 @@ func NewPasteOperationMsg(state processState, reqID int) PasteOperationMsg {
 }
 
 func (msg PasteOperationMsg) ApplyToModel(m *model) tea.Cmd {
-	if (msg.state == failure || msg.state == successful) && m.copyItems.cut {
+	if (msg.state == processbar.Failed || msg.state == processbar.Successful) && m.copyItems.cut {
 		m.copyItems.reset(false)
 	}
 	return nil
@@ -43,10 +44,10 @@ func (msg PasteOperationMsg) ApplyToModel(m *model) tea.Cmd {
 
 type DeleteOperationMsg struct {
 	BaseMessage
-	state processState
+	state processbar.ProcessState
 }
 
-func NewDeleteOperationMsg(state processState, reqID int) DeleteOperationMsg {
+func NewDeleteOperationMsg(state processbar.ProcessState, reqID int) DeleteOperationMsg {
 	return DeleteOperationMsg{
 		state: state,
 		BaseMessage: BaseMessage{
@@ -61,12 +62,25 @@ func (msg DeleteOperationMsg) ApplyToModel(m *model) tea.Cmd {
 	return nil
 }
 
-type CompressOperationMsg struct {
+type ProcessBarUpdateMsg struct {
 	BaseMessage
-	state processState
+	pMsg processbar.UpdateMsg
 }
 
-func NewCompressOperationMsg(state processState, reqID int) CompressOperationMsg {
+func (msg ProcessBarUpdateMsg) ApplyToModel(m *model) tea.Cmd {
+	cmd, err := msg.pMsg.Apply(&m.processBarModel)
+	if err != nil {
+		slog.Error("Error applying processbar update", "error", err)
+	}
+	return processCmdToTeaCmd(cmd)
+}
+
+type CompressOperationMsg struct {
+	BaseMessage
+	state processbar.ProcessState
+}
+
+func NewCompressOperationMsg(state processbar.ProcessState, reqID int) CompressOperationMsg {
 	return CompressOperationMsg{
 		state: state,
 		BaseMessage: BaseMessage{
@@ -83,10 +97,10 @@ func (msg CompressOperationMsg) ApplyToModel(_ *model) tea.Cmd {
 
 type ExtractOperationMsg struct {
 	BaseMessage
-	state processState
+	state processbar.ProcessState
 }
 
-func NewExtractOperationMsg(state processState, reqID int) ExtractOperationMsg {
+func NewExtractOperationMsg(state processbar.ProcessState, reqID int) ExtractOperationMsg {
 	return ExtractOperationMsg{
 		state: state,
 		BaseMessage: BaseMessage{

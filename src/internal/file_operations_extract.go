@@ -1,38 +1,19 @@
 package internal
 
 import (
+	"fmt"
 	"log/slog"
 	"time"
 
-	"github.com/charmbracelet/bubbles/progress"
-	"github.com/lithammer/shortuuid"
 	"github.com/yorukot/superfile/src/config/icon"
-	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"golift.io/xtractr"
 )
 
-func extractCompressFile(src, dest string) error {
-	id := shortuuid.New()
-
-	prog := progress.New(common.GenerateGradientColor())
-	prog.PercentageStyle = common.FooterStyle
-
-	p := process{
-		name:     icon.ExtractFile + icon.Space + "unzip file",
-		progress: prog,
-		state:    inOperation,
-		total:    1,
-		done:     0,
-		doneTime: time.Time{},
-	}
-	message := channelMessage{
-		messageID:       id,
-		messageType:     sendProcess,
-		processNewState: p,
-	}
-
-	if len(channel) < 5 {
-		channel <- message
+func extractCompressFile(src, dest string, processBar *processbar.Model) error {
+	p, err := processBar.SendAddProcessMsg(icon.ExtractFile+icon.Space+"unzip file", 1, true)
+	if err != nil {
+		return fmt.Errorf("cannot spawn process : %w", err)
 	}
 
 	x := &xtractr.XFile{
@@ -42,26 +23,21 @@ func extractCompressFile(src, dest string) error {
 		DirMode:   0755,
 	}
 
-	_, _, _, err := xtractr.ExtractFile(x)
+	_, _, _, err = xtractr.ExtractFile(x)
 
 	if err != nil {
-		p.state = failure
-		p.doneTime = time.Now()
-		message.processNewState = p
-		if len(channel) < 5 {
-			channel <- message
-		}
+		p.State = processbar.Failed
 		slog.Error("Error extracting", "path", src, "error", err)
-		return err
+	} else {
+		p.State = processbar.Successful
+		p.Done = 1
 	}
 
-	p.state = successful
-	p.done = 1
-	p.doneTime = time.Now()
-	message.processNewState = p
-	if len(channel) < 5 {
-		channel <- message
+	p.DoneTime = time.Now()
+	pSendErr := processBar.SendUpdateProcessMsg(p, true)
+	if pSendErr != nil {
+		slog.Error("Error sending process udpate", "error", pSendErr)
 	}
 
-	return nil
+	return err
 }

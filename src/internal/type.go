@@ -4,10 +4,10 @@ import (
 	"time"
 
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
+	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/ui/sidebar"
 	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
 
-	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/yorukot/superfile/src/internal/ui/prompt"
 )
@@ -17,9 +17,6 @@ type panelMode uint
 
 // Type representing the focus type of the file panel
 type filePanelFocusType uint
-
-// Type representing the state of a process
-type processState int
 
 // Type representing the type of focused panel
 type focusPanelType int
@@ -64,18 +61,8 @@ const (
 	browserMode
 )
 
-// Constants for operation, success, cancel, failure
-// TODO: Rename it to past verbs like canceled, failed
-const (
-	inOperation processState = iota
-	successful
-	cancel
-	failure
-)
-
 const (
 	sendWarnModal channelMessageType = iota
-	sendProcess
 	sendNotifyModal
 )
 
@@ -95,7 +82,7 @@ type model struct {
 	// Main Panels
 	fileModel       fileModel
 	sidebarModel    sidebar.Model
-	processBarModel processBarModel
+	processBarModel processbar.Model
 	focusPanel      focusPanelType
 	copyItems       copyItems
 
@@ -239,29 +226,10 @@ type element struct {
 
 /*PROCESS BAR internal TYPE START*/
 
-// Model for process bar internal
-type processBarModel struct {
-	render      int
-	cursor      int
-	processList []string
-	process     map[string]process
-}
-
-// Model for an individual process
-type process struct {
-	name     string
-	progress progress.Model
-	state    processState
-	total    int
-	done     int
-	doneTime time.Time
-}
-
 // Message for process bar
 type channelMessage struct {
-	messageID       string
-	messageType     channelMessageType
-	processNewState process
+	messageID   string
+	messageType channelMessageType
 	// TODO : We will stop using channel for this, and use tea.Cmd
 	warnModal   warnModal
 	notifyModal notifyModal

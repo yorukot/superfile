@@ -1,9 +1,5 @@
 package internal
 
-import (
-	"log/slog"
-)
-
 // ======================================== File panel controller ========================================
 
 // Control file panel list up
@@ -108,53 +104,3 @@ func (panel *filePanel) itemSelectDown(mainPanelHeight int) {
 // ======================================== Metadata controller ========================================
 
 // ======================================== Processbar controller ========================================
-
-// Control processbar panel list up
-// There is a shadowing happening here, but it will be removed
-// Once we make footerHeight part of model struct
-func (p *processBarModel) listUp(footerHeight int) {
-	slog.Debug("processBarModel.listUp()", "footerHeight", footerHeight)
-	if len(p.processList) == 0 {
-		return
-	}
-	if p.cursor > 0 {
-		p.cursor--
-		if p.cursor < p.render {
-			p.render--
-		}
-	} else {
-		p.cursor = len(p.processList) - 1
-		// Either start from beginning or
-		// from a process so that we could render last one
-		p.render = max(0, len(p.processList)-cntRenderableProcess(footerHeight))
-	}
-}
-
-// Control processbar panel list down
-func (p *processBarModel) listDown(footerHeight int) {
-	slog.Debug("processBarModel.listDown()", "footerHeight", footerHeight)
-	if len(p.processList) == 0 {
-		return
-	}
-	if p.cursor < len(p.processList)-1 {
-		p.cursor++
-		if p.cursor > p.render+cntRenderableProcess(footerHeight)-1 {
-			p.render++
-		}
-	} else {
-		p.render = 0
-		p.cursor = 0
-	}
-}
-
-func (p *processBarModel) isValid(footerHeight int) bool {
-	return p.render <= p.cursor &&
-		p.cursor <= p.render+cntRenderableProcess(footerHeight)-1
-}
-
-// Separate out this calculation for better documentation
-func cntRenderableProcess(footerHeight int) int {
-	// We can render one process in three lines
-	// And last process in two or three lines ( with/without a line separtor)
-	return (footerHeight + 1) / 3
-}
