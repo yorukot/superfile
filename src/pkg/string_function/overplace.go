@@ -1,11 +1,12 @@
-// ======================================= overplace these is from the lipgloss PR =======================================
+// ====================== overplace these is from the lipgloss PR ==============
 
 // These code is from the https://github.com/charmbracelet/lipgloss/pull/102
 // Thanks a lot!!!!!
 
-// Edit - cutLeft has been replaced with charmansi.TruncateLeft. See https://github.com/charmbracelet/lipgloss/pull/102#issuecomment-2900110821
+// Edit - cutLeft has been replaced with charmansi.TruncateLeft.
+// See https://github.com/charmbracelet/lipgloss/pull/102#issuecomment-2900110821
 
-// =======================================================================================================================
+// =============================================================================
 package stringfunction
 
 import (

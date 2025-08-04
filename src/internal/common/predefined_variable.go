@@ -62,9 +62,11 @@ func LoadInitialPrerenderedVariables() {
 func LoadPrerenderedVariables() {
 	SideBarSuperfileTitle = SidebarTitleStyle.Render(" " + icon.SuperfileIcon + icon.Space + "superfile")
 
-	SideBarPinnedDivider = SidebarTitleStyle.Render(icon.Pinned+icon.Space+"Pinned") + SidebarDividerStyle.Render(" ───────────")
+	SideBarPinnedDivider = SidebarTitleStyle.Render(icon.Pinned+icon.Space+"Pinned") +
+		SidebarDividerStyle.Render(" ───────────")
 
-	SideBarDisksDivider = SidebarTitleStyle.Render(icon.Disk+icon.Space+"Disks") + SidebarDividerStyle.Render(" ────────────")
+	SideBarDisksDivider = SidebarTitleStyle.Render(icon.Disk+icon.Space+"Disks") +
+		SidebarDividerStyle.Render(" ────────────")
 
 	SideBarNoneText = SidebarStyle.Render(" " + icon.Error + icon.Space + "None")
 

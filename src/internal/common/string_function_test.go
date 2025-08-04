@@ -140,7 +140,8 @@ func TestMakePrintable(t *testing.T) {
 		{"Valid unicodes like nerdfont \uf410 \U000f0868", "Valid unicodes like nerdfont \uf410 \U000f0868"},
 		{"Invalid Unicodes\ufffd", "Invalid Unicodes"},
 		{"Invalid Unicodes\xa0", "Invalid Unicodes"},
-		{"Ascii color sequence\x1b[38;2;230;219;116;48;2;39;40;34m\ue68f \x1b[0m", "Ascii color sequence\x1b[38;2;230;219;116;48;2;39;40;34m\ue68f \x1b[0m"},
+		{"Ascii color sequence\x1b[38;2;230;219;116;48;2;39;40;34m\ue68f \x1b[0m",
+			"Ascii color sequence\x1b[38;2;230;219;116;48;2;39;40;34m\ue68f \x1b[0m"},
 		{"Unicodes spaces\u202f\u205f\u2029", "Unicodes spaces   "},
 		{"IDEOGRAPHIC SPACE\u3000", "IDEOGRAPHIC SPACE "},
 	}

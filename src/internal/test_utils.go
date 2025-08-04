@@ -183,7 +183,8 @@ func verifyPreventedPasteResults(t *testing.T, m *model, originalPath string) {
 }
 
 // Helper function to verify successful paste results
-func verifySuccessfulPasteResults(t *testing.T, targetDir string, expectedDestFiles []string, originalPath string, shouldOriginalExist bool) {
+func verifySuccessfulPasteResults(t *testing.T, targetDir string, expectedDestFiles []string,
+	originalPath string, shouldOriginalExist bool) {
 	t.Helper()
 	// Verify expected files were created in destination
 	verifyDestinationFiles(t, targetDir, expectedDestFiles)

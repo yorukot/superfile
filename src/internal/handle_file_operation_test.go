@@ -145,7 +145,8 @@ func TestCompressSelectedFiles(t *testing.T) {
 			// Ensure we are extracting the zip file, not a directory
 			fileInfo, err := os.Stat(selectedItemLocation)
 			require.NoError(t, err, "Failed to stat panel location before extraction")
-			require.False(t, fileInfo.IsDir(), "Panel location for extraction is a directory, expected a zip file: %s", selectedItemLocation)
+			require.False(t, fileInfo.IsDir(),
+				"Panel location for extraction is a directory, expected a zip file: %s", selectedItemLocation)
 
 			m.getFocusedFilePanel().cursor = tt.cursorIndexForZip
 
@@ -291,7 +292,8 @@ func TestPasteItem(t *testing.T) {
 		entriesAfter, err := os.ReadDir(emptyTestDir)
 		require.NoError(t, err)
 
-		assert.Equal(t, len(entriesBefore), len(entriesAfter), "No new files should be created when pasting with empty clipboard")
+		assert.Equal(t, len(entriesBefore), len(entriesAfter),
+			"No new files should be created when pasting with empty clipboard")
 	})
 
 	t.Run("Multiple Items Copy and Paste", func(t *testing.T) {
@@ -359,7 +361,8 @@ func TestPasteItem(t *testing.T) {
 // ------  Very specific utilities that are required for this test case file only
 
 // Helper function to setup model and perform copy/cut operation
-func setupModelAndPerformOperation(t *testing.T, startDir string, useSelectMode bool, itemName string, selectedItems []string, isCut bool) *model {
+func setupModelAndPerformOperation(t *testing.T, startDir string, useSelectMode bool,
+	itemName string, selectedItems []string, isCut bool) *model {
 	t.Helper()
 	m := defaultTestModel(startDir)
 	TeaUpdateWithErrCheck(m, nil)

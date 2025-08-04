@@ -186,14 +186,17 @@ func LoadThemeConfig() {
 	ModalCursorStyle = lipgloss.NewStyle().Foreground(cursorColor).Background(ModalBGColor)
 
 	// File Panel Special Style
-	FilePanelTopDirectoryIconStyle = lipgloss.NewStyle().Foreground(filePanelTopDirectoryIconColor).Background(FilePanelBGColor)
+	FilePanelTopDirectoryIconStyle = lipgloss.NewStyle().Foreground(filePanelTopDirectoryIconColor).
+		Background(FilePanelBGColor)
 	FilePanelTopPathStyle = lipgloss.NewStyle().Foreground(filePanelTopPathColor).Background(FilePanelBGColor)
-	FilePanelItemSelectedStyle = lipgloss.NewStyle().Foreground(filePanelItemSelectedFGColor).Background(filePanelItemSelectedBGColor)
+	FilePanelItemSelectedStyle = lipgloss.NewStyle().Foreground(filePanelItemSelectedFGColor).
+		Background(filePanelItemSelectedBGColor)
 
 	// Sidebar Special Style
 	SidebarDividerStyle = lipgloss.NewStyle().Foreground(sidebarDividerColor).Background(SidebarBGColor)
 	SidebarTitleStyle = lipgloss.NewStyle().Foreground(sidebarTitleColor).Background(SidebarBGColor)
-	SidebarSelectedStyle = lipgloss.NewStyle().Foreground(sidebarItemSelectedFGColor).Background(sidebarItemSelectedBGColor)
+	SidebarSelectedStyle = lipgloss.NewStyle().Foreground(sidebarItemSelectedFGColor).
+		Background(sidebarItemSelectedBGColor)
 
 	// Footer Special Style
 	ProcessErrorStyle = lipgloss.NewStyle().Foreground(errorColor).Background(FooterBGColor)

@@ -32,7 +32,8 @@ func LoadConfigFile() {
 		if errors.As(err, &loadError) && loadError != nil {
 			if loadError.MissingFields() && !variable.FixConfigFile {
 				// Had missing fields and we did not fix
-				userMsg += "\nTo add missing fields to configuration file automatically run superfile with the --fix-config-file flag `spf --fix-config-file`"
+				userMsg += "\nTo add missing fields to configuration file automatically run superfile " +
+					"with the --fix-config-file flag `spf --fix-config-file`"
 			}
 			toExit = loadError.IsFatal()
 		}
@@ -110,7 +111,8 @@ func LoadHotkeysFile() {
 		if errors.As(err, &loadError) {
 			if loadError.MissingFields() && !variable.FixHotkeys {
 				// Had missing fields and we did not fix
-				userMsg += "\nTo add missing fields to hotkeys file automatically run superfile with the --fix-hotkeys flag `spf --fix-hotkeys`"
+				userMsg += "\nTo add missing fields to hotkeys file automatically run superfile " +
+					"with the --fix-hotkeys flag `spf --fix-hotkeys`"
 			}
 			toExit = loadError.IsFatal()
 		}

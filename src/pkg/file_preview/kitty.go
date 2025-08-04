@@ -93,7 +93,8 @@ func generatePlacementID(path string) uint32 {
 }
 
 // renderWithKittyUsingTermCap renders an image using Kitty graphics protocol with terminal capabilities
-func (p *ImagePreviewer) renderWithKittyUsingTermCap(img image.Image, path string, originalWidth, originalHeight, maxWidth, maxHeight int, sideAreaWidth int) (string, error) {
+func (p *ImagePreviewer) renderWithKittyUsingTermCap(img image.Image, path string,
+	originalWidth, originalHeight, maxWidth, maxHeight int, sideAreaWidth int) (string, error) {
 	// Validate dimensions
 	if maxWidth <= 0 || maxHeight <= 0 {
 		return "", fmt.Errorf("dimensions must be positive (maxWidth=%d, maxHeight=%d)", maxWidth, maxHeight)
