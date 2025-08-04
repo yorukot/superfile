@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
 	"github.com/yorukot/superfile/src/internal/ui/sidebar"
 	"github.com/yorukot/superfile/src/internal/utils"
@@ -49,6 +50,9 @@ func initialConfig(firstFilePanelDirs []string) (toggleDotFile bool, toggleFoote
 	common.LoadThemeConfig()
 	common.LoadPrerenderedVariables()
 
+	// TODO: Make sure to clean it up. Via et.Close()
+	// Note: All the tool we use to interact with OS, should be abstracted behind a struc
+	// Have exiftool manager, Zoxide Manager, OS Manager, Xtractor, Zipper, Command Executor
 	if common.Config.Metadata {
 		et, err = exiftool.NewExiftool()
 		if err != nil {
@@ -108,7 +112,8 @@ func initialConfig(firstFilePanelDirs []string) (toggleDotFile bool, toggleFoote
 		"filePanel_size_bytes", reflect.TypeOf(filePanel{}).Size(),
 		"sidebarModel_size_bytes", reflect.TypeOf(sidebar.Model{}).Size(),
 		"renderer_size_bytes", reflect.TypeOf(rendering.Renderer{}).Size(),
-		"borderConfig_size_bytes", reflect.TypeOf(rendering.BorderConfig{}).Size())
+		"borderConfig_size_bytes", reflect.TypeOf(rendering.BorderConfig{}).Size(),
+		"process_size_bytes", reflect.TypeOf(processbar.Process{}).Size())
 
 	toggleDotFile = utils.ReadBoolFile(variable.ToggleDotFile, false)
 	toggleFooter = utils.ReadBoolFile(variable.ToggleFooter, true)

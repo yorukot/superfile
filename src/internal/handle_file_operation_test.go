@@ -136,7 +136,8 @@ func TestCompressSelectedFiles(t *testing.T) {
 			require.Greater(t, len(m.getFocusedFilePanel().element), tt.cursorIndexForZip)
 			selectedItemLocation := m.getFocusedFilePanel().element[tt.cursorIndexForZip].location
 			// Debug output for panel element
-			t.Logf("Panel element at cursorIndexForZip: %s", selectedItemLocation)
+			t.Logf("Panel element at cursorIndexForZip: %s, cursor : %d",
+				selectedItemLocation, m.getFocusedFilePanel().cursor)
 			assert.Equal(t, zipFile, selectedItemLocation,
 				"%s does not exists at index %d among %v", zipFile, tt.cursorIndexForZip,
 				m.getFocusedFilePanel().element)
