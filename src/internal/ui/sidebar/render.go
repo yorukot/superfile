@@ -35,7 +35,8 @@ func (s *Model) Render(mainPanelHeight int, sidebarFocussed bool, currentFilePan
 	return r.Render()
 }
 
-func (s *Model) directoriesRender(mainPanelHeight int, curFilePanelFileLocation string, sideBarFocussed bool, r *rendering.Renderer) {
+func (s *Model) directoriesRender(mainPanelHeight int, curFilePanelFileLocation string,
+	sideBarFocussed bool, r *rendering.Renderer) {
 	// Cursor should always point to a valid directory at this point
 	if s.isCursorInvalid() {
 		slog.Error("Unexpected situation in sideBar Model. "+

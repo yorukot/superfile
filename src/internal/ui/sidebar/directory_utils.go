@@ -20,7 +20,8 @@ func getDirectories() []directory {
 	return formDirctorySlice(getWellKnownDirectories(), getPinnedDirectories(), getExternalMediaFolders())
 }
 
-func formDirctorySlice(homeDirectories []directory, pinnedDirectories []directory, diskDirectories []directory) []directory {
+func formDirctorySlice(homeDirectories []directory, pinnedDirectories []directory,
+	diskDirectories []directory) []directory {
 	// Preallocation for efficiency
 	totalCapacity := len(homeDirectories) + len(pinnedDirectories) + len(diskDirectories) + 2
 	directories := make([]directory, 0, totalCapacity)

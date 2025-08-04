@@ -243,7 +243,8 @@ func checkFileNameValidity(name string) error {
 	switch {
 	case name == ".", name == "..":
 		return errors.New("file name cannot be '.' or '..'")
-	case strings.HasSuffix(name, fmt.Sprintf("%c.", filepath.Separator)), strings.HasSuffix(name, fmt.Sprintf("%c..", filepath.Separator)):
+	case strings.HasSuffix(name, fmt.Sprintf("%c.", filepath.Separator)),
+		strings.HasSuffix(name, fmt.Sprintf("%c..", filepath.Separator)):
 		return fmt.Errorf("file name cannot end with '%c.' or '%c..'", filepath.Separator, filepath.Separator)
 	default:
 		return nil
