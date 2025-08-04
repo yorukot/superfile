@@ -159,8 +159,8 @@ func deleteOperation(processBarModel *processbar.Model, items []string, useTrash
 func (m *model) deleteItemWarn() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 
-	if panel.panelMode == browserMode && len(panel.selected) == 0 &&
-		len(panel.element) == 0 || panel.panelMode == selectMode {
+	if (panel.panelMode == selectMode && len(panel.selected) == 0) ||
+		(panel.panelMode == browserMode && len(panel.element) == 0) {
 		return
 	}
 

@@ -109,48 +109,50 @@ func Run(content embed.FS) {
 				Value:   "", // Default to the blank string indicating non-usage of flag
 			},
 		},
-		Action: func(_ context.Context, c *cli.Command) error {
-			// If no args are called along with "spf" use current dir
-			firstFilePanelDirs := []string{""}
-			if c.Args().Present() {
-				firstFilePanelDirs = c.Args().Slice()
-			}
-
-			variable.UpdateVarFromCliArgs(c)
-
-			InitConfigFile()
-
-			hasTrash := true
-			if err := InitTrash(); err != nil {
-				hasTrash = false
-			}
-
-			firstUse := checkFirstUse()
-
-			p := tea.NewProgram(internal.InitialModel(firstFilePanelDirs, firstUse, hasTrash),
-				tea.WithAltScreen(), tea.WithMouseCellMotion())
-			if _, err := p.Run(); err != nil {
-				utils.PrintfAndExit("Alas, there's been an error: %v", err)
-			}
-
-			// This must be after calling internal.InitialModel()
-			// so that we know `common.Config` is loaded
-			// Should not be a goroutine, Otherwise the main
-			// goroutine will exit first, and this will not be able to finish
-			CheckForUpdates()
-
-			if variable.PrintLastDir {
-				fmt.Println(variable.LastDir)
-			}
-
-			return nil
-		},
+		Action: spfAppAction,
 	}
 
 	err := app.Run(context.Background(), os.Args)
 	if err != nil {
 		utils.PrintlnAndExit(err)
 	}
+}
+
+func spfAppAction(_ context.Context, c *cli.Command) error {
+	// If no args are called along with "spf" use current dir
+	firstFilePanelDirs := []string{""}
+	if c.Args().Present() {
+		firstFilePanelDirs = c.Args().Slice()
+	}
+
+	variable.UpdateVarFromCliArgs(c)
+
+	InitConfigFile()
+
+	hasTrash := true
+	if err := InitTrash(); err != nil {
+		hasTrash = false
+	}
+
+	firstUse := checkFirstUse()
+
+	p := tea.NewProgram(internal.InitialModel(firstFilePanelDirs, firstUse, hasTrash),
+		tea.WithAltScreen(), tea.WithMouseCellMotion())
+	if _, err := p.Run(); err != nil {
+		utils.PrintfAndExit("Alas, there's been an error: %v", err)
+	}
+
+	// This must be after calling internal.InitialModel()
+	// so that we know `common.Config` is loaded
+	// Should not be a goroutine, Otherwise the main
+	// goroutine will exit first, and this will not be able to finish
+	CheckForUpdates()
+
+	if variable.PrintLastDir {
+		fmt.Println(variable.LastDir)
+	}
+
+	return nil
 }
 
 // Create proper directories for storing configuration and write default

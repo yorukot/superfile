@@ -35,14 +35,13 @@ func TestCompressSelectedFiles(t *testing.T) {
 	// Copied from CopyTest. TODO - work on it.
 
 	testdata := []struct {
-		name              string
-		startDir          string
-		cursor            int
-		selectMode        bool
-		selectedElem      []string
-		expectedZipName   string
-		cursorIndexForZip int
-		extractedDirName  string
+		name             string
+		startDir         string
+		cursor           int
+		selectMode       bool
+		selectedElem     []string
+		expectedZipName  string
+		extractedDirName string
 		// Relative to extractedDir
 		expectedFilesAfterExtract []string
 	}{
@@ -53,7 +52,6 @@ func TestCompressSelectedFiles(t *testing.T) {
 			selectMode:                false,
 			selectedElem:              nil,
 			expectedZipName:           "file1.zip",
-			cursorIndexForZip:         3,
 			extractedDirName:          "file1",
 			expectedFilesAfterExtract: []string{"file1.txt"},
 		},
@@ -64,7 +62,6 @@ func TestCompressSelectedFiles(t *testing.T) {
 			selectMode:                false,
 			selectedElem:              nil,
 			expectedZipName:           "dir1.zip",
-			cursorIndexForZip:         2,
 			extractedDirName:          "dir1(1)",
 			expectedFilesAfterExtract: []string{filepath.Join("dir1", "file2.txt")},
 		},
@@ -75,7 +72,6 @@ func TestCompressSelectedFiles(t *testing.T) {
 			selectMode:                true,
 			selectedElem:              []string{},
 			expectedZipName:           "file1.zip",
-			cursorIndexForZip:         3,
 			extractedDirName:          "file1",
 			expectedFilesAfterExtract: []string{"file1.txt"},
 		},
@@ -86,7 +82,6 @@ func TestCompressSelectedFiles(t *testing.T) {
 			selectMode:                true,
 			selectedElem:              []string{file1},
 			expectedZipName:           "file1.zip",
-			cursorIndexForZip:         3,
 			extractedDirName:          "file1",
 			expectedFilesAfterExtract: []string{"file1.txt"},
 		},
@@ -97,7 +92,6 @@ func TestCompressSelectedFiles(t *testing.T) {
 			selectMode:                true,
 			selectedElem:              []string{dir2, dir1, file1},
 			expectedZipName:           "dir2.zip",
-			cursorIndexForZip:         2,
 			extractedDirName:          "dir2(1)",
 			expectedFilesAfterExtract: []string{"dir2", filepath.Join("dir1", "file2.txt"), "file1.txt"},
 		},
@@ -133,22 +127,25 @@ func TestCompressSelectedFiles(t *testing.T) {
 			// on its own
 			p.SendDirectly(nil)
 
-			require.Greater(t, len(m.getFocusedFilePanel().element), tt.cursorIndexForZip)
-			selectedItemLocation := m.getFocusedFilePanel().element[tt.cursorIndexForZip].location
-			// Debug output for panel element
-			t.Logf("Panel element at cursorIndexForZip: %s, cursor : %d",
-				selectedItemLocation, m.getFocusedFilePanel().cursor)
-			assert.Equal(t, zipFile, selectedItemLocation,
-				"%s does not exists at index %d among %v", zipFile, tt.cursorIndexForZip,
-				m.getFocusedFilePanel().element)
+			cursorIndexForZip := -1
+			for i, elem := range m.getFocusedFilePanel().element {
+				if elem.location == zipFile {
+					cursorIndexForZip = i
+					break
+				}
+			}
 
+			require.NotEqual(t, -1, cursorIndexForZip)
+
+			m.getFocusedFilePanel().cursor = cursorIndexForZip
+
+			selectedItemLocation := m.getFocusedFilePanel().getSelectedItem().location
+			assert.Equal(t, zipFile, selectedItemLocation)
 			// Ensure we are extracting the zip file, not a directory
 			fileInfo, err := os.Stat(selectedItemLocation)
 			require.NoError(t, err, "Failed to stat panel location before extraction")
 			require.False(t, fileInfo.IsDir(),
 				"Panel location for extraction is a directory, expected a zip file: %s", selectedItemLocation)
-
-			m.getFocusedFilePanel().cursor = tt.cursorIndexForZip
 
 			p.SendKey(common.Hotkeys.ExtractFile[0])
 			// File extraction is supposedly async. So function's return doesn't means its done.
