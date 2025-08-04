@@ -303,7 +303,7 @@ linters:
     - iface # checks the incorrect use of interfaces, helping developers avoid interface pollution
     - intrange # finds places where for loops could make use of an integer range
     # TODO enable : Need many fixes
-    # - lll # reports long lines
+    - lll # reports long lines
     - loggercheck # checks key value pairs for common logger libraries (kitlog,klog,logr,zap)
     - makezero # finds slice declarations with non-zero initial length
     - mirror # reports wrong mirror patterns of bytes/strings usage
@@ -325,8 +325,7 @@ linters:
     - promlinter # checks Prometheus metrics naming via promlint
     - protogetter # reports direct reads from proto message fields when getters should be used
     - reassign # checks that package variables are not reassigned
-    # TODO enable - Issue due to model struct
-    # - recvcheck # checks for receiver type consistency
+    - recvcheck # checks for receiver type consistency
     - revive # fast, configurable, extensible, flexible, and beautiful linter for Go, drop-in replacement of golint
     - rowserrcheck # checks whether Err of rows is checked successfully
     # TODO enable - Need to use non-root logger
@@ -403,6 +402,7 @@ linters:
       - path: 'src/config/icon/icon.go'
         linters:
           - gochecknoglobals
+          - lll
       # Stores prerendered styles
       - path: 'src/internal/common/style.go'
         linters:
@@ -419,6 +419,10 @@ linters:
       - path: 'src/internal/common/default_config.go'
         linters:
           - gochecknoglobals    
+      # Type defining config.toml and hotkey.toml
+      - path: 'src/internal/common/config_type.go'
+        linters:
+          - lll    
           
 
 issues:

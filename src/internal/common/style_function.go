@@ -62,7 +62,8 @@ func SideBarBorderStyle(height int, sidebarFocussed bool) lipgloss.Style {
 // Generate border style for process and can custom bottom border
 func ProcsssBarBorder(height int, width int, borderBottom string, processBarFocussed bool) lipgloss.Style {
 	border := GenerateBorder()
-	border.Top = Config.BorderTop + Config.BorderMiddleRight + " Processes " + Config.BorderMiddleLeft + strings.Repeat(Config.BorderTop, width)
+	border.Top = Config.BorderTop + Config.BorderMiddleRight + " Processes " +
+		Config.BorderMiddleLeft + strings.Repeat(Config.BorderTop, width)
 	border.Bottom = borderBottom
 
 	processBorderStateColor := FooterBorderColor
@@ -83,7 +84,8 @@ func ProcsssBarBorder(height int, width int, borderBottom string, processBarFocu
 // Generate border style for metadata and can custom bottom border
 func MetadataBorder(height int, width int, borderBottom string, metadataFocussed bool) lipgloss.Style {
 	border := GenerateBorder()
-	border.Top = Config.BorderTop + Config.BorderMiddleRight + " Metadata " + Config.BorderMiddleLeft + strings.Repeat(Config.BorderTop, width)
+	border.Top = Config.BorderTop + Config.BorderMiddleRight + " Metadata " +
+		Config.BorderMiddleLeft + strings.Repeat(Config.BorderTop, width)
 	border.Bottom = borderBottom
 
 	metadataBorderStateColor := FooterBorderColor
@@ -104,7 +106,8 @@ func MetadataBorder(height int, width int, borderBottom string, metadataFocussed
 // Generate border style for clipboard and can custom bottom border
 func ClipboardBorder(height int, width int, borderBottom string) lipgloss.Style {
 	border := GenerateBorder()
-	border.Top = Config.BorderTop + Config.BorderMiddleRight + " Clipboard " + Config.BorderMiddleLeft + strings.Repeat(Config.BorderTop, width)
+	border.Top = Config.BorderTop + Config.BorderMiddleRight + " Clipboard " +
+		Config.BorderMiddleLeft + strings.Repeat(Config.BorderTop, width)
 	border.Bottom = borderBottom
 
 	return lipgloss.NewStyle().
@@ -229,12 +232,14 @@ func GenerateBorder() lipgloss.Border {
 
 // Generate config error style
 func LoadConfigError(value string) string {
-	return lipgloss.NewStyle().Foreground(lipgloss.Color("#FF5555")).Render("■ ERROR: ") + "Config file \"" + lipgloss.NewStyle().Foreground(lipgloss.Color("#00D9FF")).Render(value) + "\" invalidation"
+	return lipgloss.NewStyle().Foreground(lipgloss.Color("#FF5555")).Render("■ ERROR: ") +
+		"Config file \"" + lipgloss.NewStyle().Foreground(lipgloss.Color("#00D9FF")).Render(value) + "\" invalidation"
 }
 
 // Generate config error style
 func LoadHotkeysError(value string) string {
-	return lipgloss.NewStyle().Foreground(lipgloss.Color("#FF5555")).Render("■ ERROR: ") + "Hotkeys file \"" + lipgloss.NewStyle().Foreground(lipgloss.Color("#00D9FF")).Render(value) + "\" invalidation"
+	return lipgloss.NewStyle().Foreground(lipgloss.Color("#FF5555")).Render("■ ERROR: ") +
+		"Hotkeys file \"" + lipgloss.NewStyle().Foreground(lipgloss.Color("#00D9FF")).Render(value) + "\" invalidation"
 }
 
 // TODO : Fix Code duplication in textInput.Model creation
@@ -332,5 +337,6 @@ func GenerateFooterBorder(countString string, width int) string {
 	if repeatCount < 0 {
 		repeatCount = 0
 	}
-	return strings.Repeat(Config.BorderBottom, repeatCount) + Config.BorderMiddleRight + countString + Config.BorderMiddleLeft
+	return strings.Repeat(Config.BorderBottom, repeatCount) + Config.BorderMiddleRight +
+		countString + Config.BorderMiddleLeft
 }

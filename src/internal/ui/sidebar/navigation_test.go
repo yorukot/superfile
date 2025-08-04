@@ -328,7 +328,8 @@ func Test_updateRenderIndex(t *testing.T) {
 			},
 			mainPanelHeight:     10,
 			expectedRenderIndex: 15, // No change needed, Case I takes precedence
-			explanation:         "When cursor is exactly at renderIndex, Case I takes precedence and renderIndex remains unchanged",
+			explanation: "When cursor is exactly at renderIndex, " +
+				"Case I takes precedence and renderIndex remains unchanged",
 		},
 		{
 			name: "Boundary case: Cursor at edge of visible range",
@@ -552,7 +553,8 @@ func Test_listDown(t *testing.T) {
 			mainPanelHeight:     10,
 			expectedCursor:      11, // Should move to first pinned directory
 			expectedRenderIndex: 7,  // Should adjust render index to show cursor
-			explanation:         "When moving down from last home directory, cursor should skip divider and go to first pinned directory",
+			explanation: "When moving down from last home directory," +
+				" cursor should skip divider and go to first pinned directory",
 		},
 		{
 			name: "Large panel showing all directories",

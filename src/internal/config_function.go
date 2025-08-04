@@ -21,7 +21,8 @@ import (
 
 // initialConfig load and handle all configuration files (spf config,Hotkeys
 // themes) setted up. Processes input directories and returns toggle states.
-func initialConfig(firstFilePanelDirs []string) (toggleDotFile bool, toggleFooter bool) { //nolint: nonamedreturns // This is the only usecase of named returns, distinguish between multiple return values
+// nolint: nonamedreturns // This is the only usecase of named returns, distinguish between multiple return values
+func initialConfig(firstFilePanelDirs []string) (toggleDotFile bool, toggleFooter bool) {
 	// Open log stream
 	file, err := os.OpenFile(variable.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 

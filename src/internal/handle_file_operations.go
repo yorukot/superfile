@@ -159,7 +159,8 @@ func deleteOperation(processBarModel *processbar.Model, items []string, useTrash
 func (m *model) deleteItemWarn() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 
-	if panel.panelMode == browserMode && len(panel.element) == 0 || panel.panelMode == selectMode && len(panel.selected) == 0 {
+	if panel.panelMode == browserMode && len(panel.selected) == 0 &&
+		len(panel.element) == 0 || panel.panelMode == selectMode {
 		return
 	}
 
@@ -284,7 +285,8 @@ func executePasteOperation(processBarModel *processbar.Model,
 				operation = "cut"
 			}
 
-			slog.Error("Cannot paste a directory into itself or its subdirectory", "operation", operation, "src", srcPath, "dst", panelLocation)
+			slog.Error("Cannot paste a directory into itself or its subdirectory",
+				"operation", operation, "src", srcPath, "dst", panelLocation)
 			message := channelMessage{
 				messageID:   id,
 				messageType: sendNotifyModal,

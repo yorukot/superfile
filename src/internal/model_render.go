@@ -34,7 +34,8 @@ import (
 )
 
 func (m *model) sidebarRender() string {
-	return m.sidebarModel.Render(m.mainPanelHeight, m.focusPanel == sidebarFocus, m.fileModel.filePanels[m.filePanelFocusIndex].location)
+	return m.sidebarModel.Render(m.mainPanelHeight, m.focusPanel == sidebarFocus,
+		m.fileModel.filePanels[m.filePanelFocusIndex].location)
 }
 
 // This also modifies the m.fileModel.filePanels, which it should not
@@ -55,11 +56,13 @@ func (m *model) filePanelRender() string {
 		// TODO : Move this to a utility function and clarify the calculation via comments
 		// Maybe even write unit tests
 		var filePanelWidth int
-		if (m.fullWidth-common.Config.SidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels) != 0 && i == len(m.fileModel.filePanels)-1 {
+		if (m.fullWidth-common.Config.SidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels) != 0 &&
+			i == len(m.fileModel.filePanels)-1 {
 			if m.fileModel.filePreview.open {
 				filePanelWidth = m.fileModel.width
 			} else {
-				filePanelWidth = (m.fileModel.width + (m.fullWidth-common.Config.SidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels))
+				filePanelWidth = (m.fileModel.width + (m.fullWidth-common.Config.SidebarWidth-
+					(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels))
 			}
 		} else {
 			filePanelWidth = m.fileModel.width
@@ -220,8 +223,10 @@ func (m *model) clipboardRender() string {
 					slog.Error("Clipboard render function get item state ", "error", err)
 				}
 				if !os.IsNotExist(err) {
-					// TODO : There is an inconsistency in parameter that is being passed, and its name in ClipboardPrettierName function
-					r.AddLines(common.ClipboardPrettierName(m.copyItems.items[i], utils.FooterWidth(m.fullWidth)-3, fileInfo.IsDir(), false))
+					// TODO : There is an inconsistency in parameter that is being passed,
+					// and its name in ClipboardPrettierName function
+					r.AddLines(common.ClipboardPrettierName(m.copyItems.items[i],
+						utils.FooterWidth(m.fullWidth)-3, fileInfo.IsDir(), false))
 				}
 			}
 		}
@@ -295,17 +300,33 @@ func (m *model) typineModalRender() string {
 		err = "\n\n" + common.ModalErrorStyle.Render(m.typingModal.errorMesssage)
 	}
 	// TODO : Move this all to rendering package to avoid specifying newlines manually
-	return common.ModalBorderStyle(common.ModalHeight, common.ModalWidth).Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip + err)
+	return common.ModalBorderStyle(common.ModalHeight, common.ModalWidth).
+		Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip + err)
 }
 
 func (m *model) introduceModalRender() string {
-	title := common.SidebarTitleStyle.Render(" Thanks for using superfile!!") + common.ModalStyle.Render("\n You can read the following information before starting to use it!")
-	vimUserWarn := common.ProcessErrorStyle.Render("  ** Very importantly ** If you are a Vim/Nvim user, go to:\n  https://superfile.netlify.app/configure/custom-hotkeys/ to change your hotkey settings!")
-	subOne := common.SidebarTitleStyle.Render("  (1)") + common.ModalStyle.Render(" If this is your first time, make sure you read:\n      https://superfile.netlify.app/getting-started/tutorial/")
-	subTwo := common.SidebarTitleStyle.Render("  (2)") + common.ModalStyle.Render(" If you forget the relevant keys during use,\n      you can press \"?\" (shift+/) at any time to query the keys!")
-	subThree := common.SidebarTitleStyle.Render("  (3)") + common.ModalStyle.Render(" For more customization you can refer to:\n      https://superfile.netlify.app/")
-	subFour := common.SidebarTitleStyle.Render("  (4)") + common.ModalStyle.Render(" Thank you again for using superfile.\n      If you have any questions, please feel free to ask at:\n      https://github.com/yorukot/superfile\n      Of course, you can always open a new issue to share your idea \n      or report a bug!")
-	return common.FirstUseModal(m.helpMenu.height, m.helpMenu.width).Render(title + "\n\n" + vimUserWarn + "\n\n" + subOne + "\n\n" + subTwo + "\n\n" + subThree + "\n\n" + subFour + "\n\n")
+	title := common.SidebarTitleStyle.Render(" Thanks for using superfile!!") +
+		common.ModalStyle.Render("\n You can read the following information before starting to use it!")
+	vimUserWarn := common.ProcessErrorStyle.Render("  ** Very importantly ** If you are a Vim/Nvim user, go to:\n" +
+		"  https://superfile.netlify.app/configure/custom-hotkeys/ to change your hotkey settings!")
+	subOne := common.SidebarTitleStyle.Render("  (1)") +
+		common.ModalStyle.Render(" If this is your first time, make sure you read:\n"+
+			"      https://superfile.netlify.app/getting-started/tutorial/")
+	subTwo := common.SidebarTitleStyle.Render("  (2)") +
+		common.ModalStyle.Render(" If you forget the relevant keys during use,\n"+
+			"      you can press \"?\" (shift+/) at any time to query the keys!")
+	subThree := common.SidebarTitleStyle.Render("  (3)") +
+		common.ModalStyle.Render(" For more customization you can refer to:\n"+
+			"      https://superfile.netlify.app/")
+	subFour := common.SidebarTitleStyle.Render("  (4)") +
+		common.ModalStyle.Render(" Thank you again for using superfile.\n"+
+			"      If you have any questions, please feel free to ask at:\n"+
+			"      https://github.com/yorukot/superfile\n"+
+			"      Of course, you can always open a new issue to share your idea \n"+
+			"      or report a bug!")
+	return common.FirstUseModal(m.helpMenu.height, m.helpMenu.width).
+		Render(title + "\n\n" + vimUserWarn + "\n\n" + subOne + "\n\n" +
+			subTwo + "\n\n" + subThree + "\n\n" + subFour + "\n\n")
 }
 
 func (m *model) warnModalRender() string {
@@ -405,10 +426,13 @@ func (m *model) helpMenuRender() string {
 		if m.helpMenu.cursor == i {
 			cursor = common.FilePanelCursorStyle.Render(icon.Cursor + " ")
 		}
-		helpMenuContent += cursor + common.ModalStyle.Render(fmt.Sprintf("%*s%s", renderHotkeyLength, common.HelpMenuHotkeyStyle.Render(hotkey+" "), common.ModalStyle.Render(description)))
+		helpMenuContent += cursor + common.ModalStyle.Render(fmt.Sprintf("%*s%s", renderHotkeyLength,
+			common.HelpMenuHotkeyStyle.Render(hotkey+" "), common.ModalStyle.Render(description)))
 	}
 
-	bottomBorder := common.GenerateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(m.helpMenu.cursor+1-cursorBeenTitleCount), strconv.Itoa(len(m.helpMenu.data)-totalTitleCount)), m.helpMenu.width-2)
+	bottomBorder := common.GenerateFooterBorder(fmt.Sprintf("%s/%s",
+		strconv.Itoa(m.helpMenu.cursor+1-cursorBeenTitleCount),
+		strconv.Itoa(len(m.helpMenu.data)-totalTitleCount)), m.helpMenu.width-2)
 
 	return common.HelpMenuModalBorderStyle(m.helpMenu.height, m.helpMenu.width, bottomBorder).Render(helpMenuContent)
 }
@@ -423,9 +447,11 @@ func (m *model) sortOptionsRender() string {
 		}
 		sortOptionsContent += cursor + common.ModalStyle.Render(" "+option) + "\n"
 	}
-	bottomBorder := common.GenerateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(panel.sortOptions.cursor+1), strconv.Itoa(len(panel.sortOptions.data.options))), panel.sortOptions.width-2)
+	bottomBorder := common.GenerateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(panel.sortOptions.cursor+1),
+		strconv.Itoa(len(panel.sortOptions.data.options))), panel.sortOptions.width-2)
 
-	return common.SortOptionsModalBorderStyle(panel.sortOptions.height, panel.sortOptions.width, bottomBorder).Render(sortOptionsContent)
+	return common.SortOptionsModalBorderStyle(panel.sortOptions.height, panel.sortOptions.width,
+		bottomBorder).Render(sortOptionsContent)
 }
 
 func readFileContent(filepath string, maxLineLength int, previewLine int) (string, error) {
@@ -456,7 +482,8 @@ func readFileContent(filepath string, maxLineLength int, previewLine int) (strin
 func (m *model) filePreviewPanelRender() string {
 	// TODO : This width adjustment must not be done inside render function. It should
 	// only be triggered via Update()
-	m.fileModel.filePreview.width += m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.width - ((m.fileModel.width + 2) * len(m.fileModel.filePanels)) - 2
+	m.fileModel.filePreview.width += m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.width -
+		((m.fileModel.width + 2) * len(m.fileModel.filePanels)) - 2
 
 	return m.filePreviewPanelRenderWithDimensions(m.mainPanelHeight+2, m.fileModel.filePreview.width)
 }
@@ -518,7 +545,8 @@ func (m *model) renderDirectoryPreview(r *rendering.Renderer, itemPath string, p
 }
 
 // Helper function to handle image preview
-func (m *model) renderImagePreview(box lipgloss.Style, itemPath string, previewWidth, previewHeight int, sideAreaWidth int) string {
+func (m *model) renderImagePreview(box lipgloss.Style, itemPath string, previewWidth,
+	previewHeight int, sideAreaWidth int) string {
 	if !m.fileModel.filePreview.open {
 		return box.Render("\n --- Preview panel is closed ---")
 	}
@@ -528,7 +556,8 @@ func (m *model) renderImagePreview(box lipgloss.Style, itemPath string, previewW
 	}
 
 	// Use the new auto-detection function to choose the best renderer
-	imageRender, err := m.imagePreviewer.ImagePreview(itemPath, previewWidth, previewHeight, common.Theme.FilePanelBG, sideAreaWidth)
+	imageRender, err := m.imagePreviewer.ImagePreview(itemPath, previewWidth, previewHeight,
+		common.Theme.FilePanelBG, sideAreaWidth)
 	if errors.Is(err, image.ErrFormat) {
 		return box.Render("\n --- " + icon.Error + " Unsupported image formats ---")
 	}
@@ -550,7 +579,8 @@ func (m *model) renderImagePreview(box lipgloss.Style, itemPath string, previewW
 }
 
 // Helper function to handle text file preview
-func (m *model) renderTextPreview(r *rendering.Renderer, box lipgloss.Style, itemPath string, previewWidth, previewHeight int) string {
+func (m *model) renderTextPreview(r *rendering.Renderer, box lipgloss.Style, itemPath string,
+	previewWidth, previewHeight int) string {
 	format := lexers.Match(filepath.Base(itemPath))
 	if format == nil {
 		isText, err := common.IsTextFile(itemPath)
@@ -579,11 +609,13 @@ func (m *model) renderTextPreview(r *rendering.Renderer, box lipgloss.Style, ite
 		}
 		if common.Config.CodePreviewer == "bat" {
 			if batCmd == "" {
-				return box.Render("\n --- " + icon.Error + " 'bat' is not installed or not found. ---\n --- Cannot render file preview. ---")
+				return box.Render("\n --- " + icon.Error +
+					" 'bat' is not installed or not found. ---\n --- Cannot render file preview. ---")
 			}
 			fileContent, err = getBatSyntaxHighlightedContent(itemPath, previewHeight, background)
 		} else {
-			fileContent, err = ansichroma.HightlightString(fileContent, format.Config().Name, common.Theme.CodeSyntaxHighlightTheme, background)
+			fileContent, err = ansichroma.HightlightString(fileContent, format.Config().Name,
+				common.Theme.CodeSyntaxHighlightTheme, background)
 		}
 		if err != nil {
 			slog.Error("Error render code highlight", "error", err)

@@ -26,12 +26,12 @@ import (
 )
 
 // These represent model's state information, its not a global preperty
-var LastTimeCursorMove = [2]int{int(time.Now().UnixMicro()), 0} //nolint: gochecknoglobals // TODO : Move to model struct
-var ListeningMessage = true                                     //nolint: gochecknoglobals // TODO : Move to model struct
-var hasTrash = true                                             //nolint: gochecknoglobals // TODO : Move to model struct
-var batCmd = ""                                                 //nolint: gochecknoglobals // TODO : Move to model struct
-var et *exiftool.Exiftool                                       //nolint: gochecknoglobals // TODO : Move to model struct
-var channel = make(chan channelMessage, 1000)                   //nolint: gochecknoglobals // TODO : Move to model struct
+var LastTimeCursorMove = [2]int{int(time.Now().UnixMicro()), 0} //nolint: gochecknoglobals // TODO: Move to model struct
+var ListeningMessage = true                                     //nolint: gochecknoglobals // TODO: Move to model struct
+var hasTrash = true                                             //nolint: gochecknoglobals // TODO: Move to model struct
+var batCmd = ""                                                 //nolint: gochecknoglobals // TODO: Move to model struct
+var et *exiftool.Exiftool                                       //nolint: gochecknoglobals // TODO: Move to model struct
+var channel = make(chan channelMessage, 1000)                   //nolint: gochecknoglobals // TODO: Move to model struct
 
 // Initialize and return model with default configs
 // It returns only tea.Model because when it used in main, the return value
@@ -217,7 +217,8 @@ func (m *model) handleWindowResize(msg tea.WindowSizeMsg) {
 // Set file preview panel Widht to width. Assure that
 func (m *model) setFilePreviewWidth(width int) {
 	if common.Config.FilePreviewWidth == 0 {
-		m.fileModel.filePreview.width = (width - common.Config.SidebarWidth - (4 + (len(m.fileModel.filePanels))*2)) / (len(m.fileModel.filePanels) + 1)
+		m.fileModel.filePreview.width = (width - common.Config.SidebarWidth -
+			(4 + (len(m.fileModel.filePanels))*2)) / (len(m.fileModel.filePanels) + 1)
 	} else {
 		m.fileModel.filePreview.width = (width - common.Config.SidebarWidth) / common.Config.FilePreviewWidth
 	}
@@ -226,7 +227,8 @@ func (m *model) setFilePreviewWidth(width int) {
 // Proper set panels size. Assure that panels do not overlap
 func (m *model) setFilePanelsSize(width int) {
 	// set each file panel size and max file panel amount
-	m.fileModel.width = (width - common.Config.SidebarWidth - m.fileModel.filePreview.width - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
+	m.fileModel.width = (width - common.Config.SidebarWidth - m.fileModel.filePreview.width -
+		(4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
 	m.fileModel.maxFilePanel = (width - common.Config.SidebarWidth - m.fileModel.filePreview.width) / 20
 	for i := range m.fileModel.filePanels {
 		m.fileModel.filePanels[i].searchBar.Width = m.fileModel.width - 4
@@ -651,7 +653,8 @@ func (m *model) getFilePanelItems() {
 
 		reRenderTime := int(float64(len(filePanel.element)) / 100)
 
-		if filePanel.focusType != noneFocus && nowTime.Sub(filePanel.lastTimeGetElement) < time.Duration(reRenderTime)*time.Second && !focusPanelReRender {
+		if filePanel.focusType != noneFocus && !focusPanelReRender &&
+			nowTime.Sub(filePanel.lastTimeGetElement) < time.Duration(reRenderTime)*time.Second {
 			continue
 		}
 
