@@ -256,7 +256,7 @@ func executePasteOperation(processBarModel *processbar.Model,
 
 	p, err := processBarModel.SendAddProcessMsg(
 		icon.GetCopyOrCutIcon(cut)+icon.Space+filepath.Base(copyItems[0]),
-		len(copyItems), true)
+		getTotalFilesCnt(copyItems), true)
 	if err != nil {
 		slog.Error("Cannot spawn a new process", "error", err)
 		return processbar.Failed
@@ -286,13 +286,12 @@ func executePasteOperation(processBarModel *processbar.Model,
 			slog.Error(errMessage, "error", err)
 			break
 		}
-
-		p.Done++
 		processBarModel.TrySendingUpdateProcessMsg(p)
 	}
 
 	if p.State != processbar.Failed {
 		p.State = processbar.Successful
+		p.Done = p.Total
 	}
 	p.DoneTime = time.Now()
 	err = processBarModel.SendUpdateProcessMsg(p, true)
@@ -301,6 +300,31 @@ func executePasteOperation(processBarModel *processbar.Model,
 	}
 
 	return p.State
+}
+
+func getTotalFilesCnt(copyItems []string) int {
+	totalFiles := 0
+	for _, folderPath := range copyItems {
+		// TODO : Fix this. This is inefficient
+		// In case of a cut operations for a directory with a lot of files
+		// we are unnecessarily walking the whole directory recursively
+		// while os will just perform a rename
+		// So instead of few operations this will cause the cut paste
+		// to read the whole directory recursively
+		// we should avoid doing this.
+		// Although this allows us a more detailed progress tracking
+		// this make the copy/cut more inefficient
+		// instead, we could just track progress based on total items in
+		// copyItems
+		// efficiency should be prioritized over more detailed feedback.
+		count, err := countFiles(folderPath)
+		if err != nil {
+			slog.Error("Error in countFiles", "error", err)
+			continue
+		}
+		totalFiles += count
+	}
+	return totalFiles
 }
 
 // Extract compressed file
