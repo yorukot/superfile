@@ -27,11 +27,9 @@ import (
 
 // These represent model's state information, its not a global preperty
 var LastTimeCursorMove = [2]int{int(time.Now().UnixMicro()), 0} //nolint: gochecknoglobals // TODO: Move to model struct
-var ListeningMessage = true                                     //nolint: gochecknoglobals // TODO: Move to model struct
 var hasTrash = true                                             //nolint: gochecknoglobals // TODO: Move to model struct
 var batCmd = ""                                                 //nolint: gochecknoglobals // TODO: Move to model struct
 var et *exiftool.Exiftool                                       //nolint: gochecknoglobals // TODO: Move to model struct
-var channel = make(chan channelMessage, 1000)                   //nolint: gochecknoglobals // TODO: Move to model struct
 
 // Initialize and return model with default configs
 // It returns only tea.Model because when it used in main, the return value
@@ -54,7 +52,6 @@ func (m *model) Init() tea.Cmd {
 	return tea.Batch(
 		tea.SetWindowTitle("superfile"),
 		textinput.Blink, // Assuming textinput.Blink is a valid command
-		listenForChannelMessage(channel),
 		processCmdToTeaCmd(m.processBarModel.GetListenCmd()),
 	)
 }
@@ -72,8 +69,6 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	cmd = m.sidebarModel.UpdateState(msg)
 
 	switch msg := msg.(type) {
-	case channelMessage:
-		m.handleChannelMessage(msg)
 	case tea.WindowSizeMsg:
 		m.handleWindowResize(msg)
 	case tea.MouseMsg:
@@ -106,9 +101,6 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// Have the channel as a part of model struct, and remove ListeningMessage variable altogether.
 	// See - Issue #946
 	var listenChannelCommand tea.Cmd
-	if !ListeningMessage {
-		listenChannelCommand = listenForChannelMessage(channel)
-	}
 
 	// Temp fix till we add metadata cache, to prevent multiple metadata fetch spawns
 	// Ideally we might want to fetch only if the current file selected in filepanel changes
@@ -176,19 +168,6 @@ func (m *model) getMetadataCmd() tea.Cmd {
 	return func() tea.Msg {
 		return NewMetadataMsg(
 			metadata.GetMetadata(selectedItem.location, metadataFocussed, et), reqCnt)
-	}
-}
-
-// Handle message exchanging within the application
-func (m *model) handleChannelMessage(msg channelMessage) {
-	switch msg.messageType {
-	case sendWarnModal:
-		m.warnModal = msg.warnModal
-	case sendNotifyModal:
-		m.notifyModal = msg.notifyModal
-	default:
-		slog.Error("Unhandled channelMessageType in handleChannelMessage()",
-			"messageType", msg.messageType)
 	}
 }
 
@@ -320,6 +299,8 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 		// Ignore keypress. It will be handled in Update call via
 		// updateFilePanelState
 
+	case m.nofigyModel.IsOpen():
+		cmd = m.notifyModelOpenKey(msg.String())
 	// Handles all warn models except the warn model for confirming to quit
 	case m.warnModal.open:
 		cmd = m.warnModalOpenKey(msg.String())
@@ -327,7 +308,7 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 		m.notifyModalOpenKey(msg.String())
 	// If renaming a object
 	case m.fileModel.renaming:
-		m.renamingKey(msg.String())
+		cmd = m.renamingKey(msg.String())
 	case m.sidebarModel.IsRenaming():
 		m.sidebarRenamingKey(msg.String())
 	// If search bar is open
@@ -613,16 +594,6 @@ func getMaxW(s string) int {
 		maxW = max(maxW, ansi.StringWidth(line))
 	}
 	return maxW
-}
-
-// Returns a tea.cmd responsible for listening messages from msg channel
-func listenForChannelMessage(msg chan channelMessage) tea.Cmd {
-	return func() tea.Msg {
-		for {
-			ListeningMessage = false
-			return <-msg
-		}
-	}
 }
 
 // Render and update file panel items. Check for changes and updates in files and

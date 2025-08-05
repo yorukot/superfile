@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
+	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/ui/sidebar"
 	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
@@ -24,8 +25,6 @@ type focusPanelType int
 type warnType int
 
 type hotkeyType int
-
-type channelMessageType int
 
 type modelQuitStateType int
 
@@ -62,11 +61,6 @@ const (
 )
 
 const (
-	sendWarnModal channelMessageType = iota
-	sendNotifyModal
-)
-
-const (
 	notQuitting modelQuitStateType = iota
 	quitInitiated
 	confirmToQuit
@@ -87,6 +81,7 @@ type model struct {
 	copyItems       copyItems
 
 	// Modals
+	nofigyModel notify.Model
 	notifyModal notifyModal
 	typingModal typingModal
 	warnModal   warnModal
@@ -225,15 +220,6 @@ type element struct {
 /* SIDE BAR internal TYPE END*/
 
 /*PROCESS BAR internal TYPE START*/
-
-// Message for process bar
-type channelMessage struct {
-	messageID   string
-	messageType channelMessageType
-	// TODO : We will stop using channel for this, and use tea.Cmd
-	warnModal   warnModal
-	notifyModal notifyModal
-}
 
 /*PROCESS BAR internal TYPE END*/
 
