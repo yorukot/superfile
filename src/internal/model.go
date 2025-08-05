@@ -14,6 +14,7 @@ import (
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
+	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/utils"
 
 	"github.com/barasher/go-exiftool"
@@ -278,7 +279,7 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 		"filePanel.focusType", m.fileModel.filePanels[m.filePanelFocusIndex].focusType,
 		"filePanel.panelMode", m.fileModel.filePanels[m.filePanelFocusIndex].panelMode,
 		"typingModal.open", m.typingModal.open,
-		"warnModal.open", m.warnModal.open,
+		"notifyModel.open", m.notifyModel.IsOpen(),
 		"promptModal.open", m.promptModal.IsOpen(),
 		"fileModel.renaming", m.fileModel.renaming,
 		"searchBar.focussed", m.fileModel.filePanels[m.filePanelFocusIndex].searchBar.Focused(),
@@ -291,21 +292,18 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 		return nil
 	}
 	var cmd tea.Cmd
-	quitSuperfile := false
 	switch {
 	case m.typingModal.open:
 		m.typingModalOpenKey(msg.String())
 	case m.promptModal.IsOpen():
 		// Ignore keypress. It will be handled in Update call via
 		// updateFilePanelState
+		// TODO: Convert that to async via tea.Cmd
 
-	case m.nofigyModel.IsOpen():
-		cmd = m.notifyModelOpenKey(msg.String())
 	// Handles all warn models except the warn model for confirming to quit
-	case m.warnModal.open:
-		cmd = m.warnModalOpenKey(msg.String())
-	case m.notifyModal.open:
-		m.notifyModalOpenKey(msg.String())
+	case m.notifyModel.IsOpen():
+		cmd = m.notifyModelOpenKey(msg.String())
+
 	// If renaming a object
 	case m.fileModel.renaming:
 		cmd = m.renamingKey(msg.String())
@@ -322,9 +320,6 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 	// If help menu is open
 	case m.helpMenu.open:
 		m.helpMenuKey(msg.String())
-	// If asking to confirm quiting
-	case m.modelQuitState == confirmToQuit:
-		quitSuperfile = m.confirmToQuitSuperfile(msg.String())
 
 	case slices.Contains(common.Hotkeys.Quit, msg.String()):
 		m.modelQuitState = quitInitiated
@@ -338,12 +333,13 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 	if m.modelQuitState == quitInitiated {
 		if m.processBarModel.HasRunningProcesses() {
 			// Dont quit now, get a confirmation first.
+			m.modelQuitState = quitConfirmationInitiated
 			m.warnModalForQuit()
 			return cmd
 		}
-		quitSuperfile = true
+		m.modelQuitState = quitConfirmationReceived
 	}
-	if quitSuperfile {
+	if m.modelQuitState == quitConfirmationReceived {
 		m.quitSuperfile()
 		return tea.Quit
 	}
@@ -447,9 +443,9 @@ func (m *model) updateCurrentFilePanelDir(path string) error {
 
 // Triggers a warn for confirm quiting
 func (m *model) warnModalForQuit() {
-	m.modelQuitState = confirmToQuit
-	m.warnModal.title = "Confirm to quit superfile"
-	m.warnModal.content = "You still have files being processed. Are you sure you want to exit?"
+	m.notifyModel = notify.New(true, "Confirm to quit superfile",
+		"You still have files being processed. Are you sure you want to exit?",
+		notify.QuitAction)
 }
 
 // Implement View function for bubble tea model to handle visualization.
@@ -542,27 +538,11 @@ func (m *model) View() string {
 		return stringfunction.PlaceOverlay(overlayX, overlayY, typingModal, finalRender)
 	}
 
-	if m.warnModal.open {
-		warnModal := m.warnModalRender()
-		overlayX := m.fullWidth/2 - common.ModalWidth/2
-		overlayY := m.fullHeight/2 - common.ModalHeight/2
-		return stringfunction.PlaceOverlay(overlayX, overlayY, warnModal, finalRender)
-	}
-
-	if m.notifyModal.open {
-		notifyModal := m.notifyModalRender()
+	if m.notifyModel.IsOpen() {
+		notifyModal := m.notifyModel.Render()
 		overlayX := m.fullWidth/2 - common.ModalWidth/2
 		overlayY := m.fullHeight/2 - common.ModalHeight/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, notifyModal, finalRender)
-	}
-
-	// This is also a render for warnmodal, but its being driven via a different flag
-	// we should also drive it via warnModal.open
-	if m.modelQuitState == confirmToQuit {
-		warnModal := m.warnModalRender()
-		overlayX := m.fullWidth/2 - common.ModalWidth/2
-		overlayY := m.fullHeight/2 - common.ModalHeight/2
-		return stringfunction.PlaceOverlay(overlayX, overlayY, warnModal, finalRender)
 	}
 
 	return finalRender

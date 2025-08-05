@@ -146,7 +146,7 @@ type NotifyModalUpdateMsg struct {
 	m notify.Model
 }
 
-func NewNofifyModalMsg(m notify.Model, reqID int) NotifyModalUpdateMsg {
+func NewNotifyModalMsg(m notify.Model, reqID int) NotifyModalUpdateMsg {
 	return NotifyModalUpdateMsg{
 		m: m,
 		BaseMessage: BaseMessage{
@@ -156,6 +156,6 @@ func NewNofifyModalMsg(m notify.Model, reqID int) NotifyModalUpdateMsg {
 }
 
 func (msg NotifyModalUpdateMsg) ApplyToModel(m *model) tea.Cmd {
-	m.nofigyModel = msg.m
+	m.notifyModel = msg.m
 	return nil
 }

@@ -361,3 +361,10 @@ func processCmdToTeaCmd(cmd processbar.Cmd) tea.Cmd {
 		}
 	}
 }
+
+func getCopyOrCutOperationName(cut bool) string {
+	if cut {
+		return "cut"
+	}
+	return "copy"
+}

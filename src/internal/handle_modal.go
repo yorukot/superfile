@@ -13,11 +13,6 @@ func (m *model) cancelTypingModal() {
 	m.typingModal.open = false
 }
 
-// Close warn modal
-func (m *model) cancelWarnModal() {
-	m.warnModal.open = false
-}
-
 // Confirm to create file or directory
 func (m *model) createItem() {
 	if err := checkFileNameValidity(m.typingModal.textInput.Value()); err != nil {

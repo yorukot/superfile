@@ -22,8 +22,6 @@ type filePanelFocusType uint
 // Type representing the type of focused panel
 type focusPanelType int
 
-type warnType int
-
 type hotkeyType int
 
 type modelQuitStateType int
@@ -32,11 +30,6 @@ const (
 	globalType hotkeyType = iota
 	normalType
 	selectType
-)
-
-const (
-	confirmDeleteItem warnType = iota
-	confirmRenameItem
 )
 
 // Constants for panel with no focus
@@ -63,7 +56,8 @@ const (
 const (
 	notQuitting modelQuitStateType = iota
 	quitInitiated
-	confirmToQuit
+	quitConfirmationInitiated
+	quitConfirmationReceived
 	quitDone
 )
 
@@ -81,10 +75,8 @@ type model struct {
 	copyItems       copyItems
 
 	// Modals
-	nofigyModel notify.Model
-	notifyModal notifyModal
+	notifyModel notify.Model
 	typingModal typingModal
-	warnModal   warnModal
 	helpMenu    helpMenuModal
 	promptModal prompt.Model
 
@@ -128,24 +120,11 @@ type helpMenuModalData struct {
 	subTitle       string
 }
 
-type warnModal struct {
-	open     bool
-	warnType warnType
-	title    string
-	content  string
-}
-
 type typingModal struct {
 	location      string
 	open          bool
 	textInput     textinput.Model
 	errorMesssage string
-}
-
-type notifyModal struct {
-	open    bool
-	title   string
-	content string
 }
 
 // Copied items

@@ -119,7 +119,7 @@ func TestQuit(t *testing.T) {
 
 		assert.Equal(t, notQuitting, m.modelQuitState)
 		cmd := TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.Quit[0]))
-		assert.Equal(t, confirmToQuit, m.modelQuitState)
+		assert.Equal(t, quitConfirmationInitiated, m.modelQuitState)
 		assert.False(t, IsTeaQuit(cmd))
 
 		// Now we would be asked for confirmation.
@@ -130,7 +130,7 @@ func TestQuit(t *testing.T) {
 
 		// Again trigger quit
 		cmd = TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.Quit[0]))
-		assert.Equal(t, confirmToQuit, m.modelQuitState)
+		assert.Equal(t, quitConfirmationInitiated, m.modelQuitState)
 		assert.False(t, IsTeaQuit(cmd))
 
 		// Confirm this time

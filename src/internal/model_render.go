@@ -329,23 +329,6 @@ func (m *model) introduceModalRender() string {
 			subTwo + "\n\n" + subThree + "\n\n" + subFour + "\n\n")
 }
 
-func (m *model) warnModalRender() string {
-	title := m.warnModal.title
-	content := m.warnModal.content
-	confirm := common.ModalConfirm.Render(" (" + common.Hotkeys.Confirm[0] + ") Confirm ")
-	cancel := common.ModalCancel.Render(" (" + common.Hotkeys.Quit[0] + ") Cancel ")
-	tip := confirm + lipgloss.NewStyle().Background(common.ModalBGColor).Render("           ") + cancel
-	return common.ModalBorderStyle(common.ModalHeight, common.ModalWidth).Render(title + "\n\n" + content + "\n\n" + tip)
-}
-
-func (m *model) notifyModalRender() string {
-	title := m.notifyModal.title
-	content := m.notifyModal.content
-	okay := common.ModalConfirm.Render(" (" + common.Hotkeys.Confirm[0] + ") Okay ")
-	okay = common.MainStyle.AlignHorizontal(lipgloss.Center).AlignVertical(lipgloss.Center).Render(okay)
-	return common.ModalBorderStyle(common.ModalHeight, common.ModalWidth).Render(title + "\n\n" + content + "\n\n" + okay)
-}
-
 func (m *model) promptModalRender() string {
 	return m.promptModal.Render()
 }

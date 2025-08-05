@@ -193,71 +193,50 @@ func (m *model) typingModalOpenKey(msg string) {
 	}
 }
 
-// TODO : There is a lot of duplication for these models, each one of them has to handle
-// ConfirmTyping and CancelTyping in a similar way. There is a scope of some good refactoring here.
-func (m *model) warnModalOpenKey(msg string) tea.Cmd {
-	switch {
-	case slices.Contains(common.Hotkeys.CancelTyping, msg) || slices.Contains(common.Hotkeys.Quit, msg):
-		m.cancelWarnModal()
-		if m.warnModal.warnType == confirmRenameItem {
-			m.cancelRename()
-		}
-	case slices.Contains(common.Hotkeys.Confirm, msg):
-		m.warnModal.open = false
-		switch m.warnModal.warnType {
-		case confirmDeleteItem:
-			return m.getDeleteCmd()
-		case confirmRenameItem:
-			m.confirmRename()
-		}
-	}
-	return nil
-}
-
-func (m *model) notifyModalOpenKey(msg string) {
-	//nolint:gocritic // We use switch here because other key logic is also using switch, so it's more consistent.
-	switch {
-	case slices.Contains(common.Hotkeys.Confirm, msg):
-		m.notifyModal.open = false
-	}
-}
-
 func (m *model) notifyModelOpenKey(msg string) tea.Cmd {
-	switch {
-	case slices.Contains(common.Hotkeys.CancelTyping, msg) || slices.Contains(common.Hotkeys.Quit, msg):
-		m.nofigyModel.Close()
-		if m.nofigyModel.GetConfirmAction() == notify.RenameAction {
-			m.cancelRename()
-		}
-	case slices.Contains(common.Hotkeys.Confirm, msg):
-		m.nofigyModel.Close()
-		switch m.nofigyModel.GetConfirmAction() {
-		case notify.DeleteAction:
-			return m.getDeleteCmd()
-		case notify.RenameAction:
-			m.confirmRename()
-		case notify.NoAction:
-			// Do nothing
-		default:
-			slog.Error("Unknown type of action", "action", m.nofigyModel.GetConfirmAction())
-		}
-	default:
+	isCancel := slices.Contains(common.Hotkeys.CancelTyping, msg) || slices.Contains(common.Hotkeys.Quit, msg)
+	isConfirm := slices.Contains(common.Hotkeys.Confirm, msg)
+
+	if !isCancel && !isConfirm {
 		slog.Warn("Invalid keypress in notifyModel", "msg", msg)
+		return nil
+	}
+	m.notifyModel.Close()
+	action := m.notifyModel.GetConfirmAction()
+	if isCancel {
+		return m.handleNotifyModelCancel(action)
+	}
+	return m.handleNotifyModelConfirm(action)
+}
+
+func (m *model) handleNotifyModelCancel(action notify.ConfirmActionType) tea.Cmd {
+	switch action {
+	case notify.RenameAction:
+		m.cancelRename()
+	case notify.QuitAction:
+		m.modelQuitState = notQuitting
+	case notify.DeleteAction, notify.NoAction:
+		// Do nothing
+	default:
+		slog.Error("Unknown type of action", "action", action)
 	}
 	return nil
 }
 
-// Handle key input to confirm or cancel and close quiting warn in SPF
-func (m *model) confirmToQuitSuperfile(msg string) bool {
-	switch {
-	case slices.Contains(common.Hotkeys.CancelTyping, msg) || slices.Contains(common.Hotkeys.Quit, msg):
-		m.modelQuitState = notQuitting
-		return false
-	case slices.Contains(common.Hotkeys.Confirm, msg):
-		return true
+func (m *model) handleNotifyModelConfirm(action notify.ConfirmActionType) tea.Cmd {
+	switch action {
+	case notify.DeleteAction:
+		return m.getDeleteCmd()
+	case notify.RenameAction:
+		m.confirmRename()
+	case notify.QuitAction:
+		m.modelQuitState = quitConfirmationReceived
+	case notify.NoAction:
+		// Ignore
 	default:
-		return false
+		slog.Error("Unknown type of action", "action", action)
 	}
+	return nil
 }
 
 // Handles key inputs inside sort options menu

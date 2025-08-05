@@ -65,7 +65,7 @@ func (m *model) warnModalForRenaming() tea.Cmd {
 			"There is already a file or directory with that name",
 			"This operation will override the existing file",
 			notify.RenameAction)
-		return NewNofifyModalMsg(notifyModel, reqID)
+		return NewNotifyModalMsg(notifyModel, reqID)
 	}
 }
 
@@ -170,7 +170,7 @@ func (m *model) getDeleteTriggerCmd() tea.Cmd {
 			title = "Are you sure you want to completely delete"
 			content = "This operation cannot be undone and your data will be completely lost."
 		}
-		return NewNofifyModalMsg(notify.New(true, title, content, notify.DeleteAction), reqID)
+		return NewNotifyModalMsg(notify.New(true, title, content, notify.DeleteAction), reqID)
 	}
 }
 
@@ -216,7 +216,7 @@ func (m *model) getPasteItemCmd() tea.Cmd {
 	return func() tea.Msg {
 		err := validatePasteOperation(panelLocation, copyItems, cut)
 		if err != nil {
-			return NewNofifyModalMsg(notify.New(true, "Invalid paste location", err.Error(), notify.NoAction),
+			return NewNotifyModalMsg(notify.New(true, "Invalid paste location", err.Error(), notify.NoAction),
 				reqID)
 		}
 		state := executePasteOperation(&m.processBarModel, panelLocation, copyItems, cut)
@@ -238,11 +238,8 @@ func validatePasteOperation(panelLocation string, copyItems []string, cut bool) 
 		}
 
 		if isAncestor(srcPath, panelLocation) {
-			operation := "copy"
-			if cut {
-				operation = "cut"
-			}
-			return fmt.Errorf("cannot %s and paste a directory into itself or its subdirectory", operation)
+			return fmt.Errorf("cannot %s and paste a directory into itself or its subdirectory",
+				getCopyOrCutOperationName(cut))
 		}
 	}
 
