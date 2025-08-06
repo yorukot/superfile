@@ -63,11 +63,11 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// TODO : We could check for m.modelQuitState and skip doing anything
 	// If its quitDone. But if we are at this state, its already bad, so we need
 	// to first figure out if its possible in testing, and fix it.
-	slog.Debug("model.Update() called")
-	var cmd, updateCmd, metadataCmd tea.Cmd
+	slog.Debug("model.Update() called", "msgType", reflect.TypeOf(msg))
+	var sidebarCmd, inputCmd, updateCmd, panelCmd, metadataCmd tea.Cmd
 	gotModelUpdateMsg := false
 
-	cmd = m.sidebarModel.UpdateState(msg)
+	sidebarCmd = m.sidebarModel.UpdateState(msg)
 
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
@@ -75,7 +75,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.MouseMsg:
 		m.handleMouseMsg(msg)
 	case tea.KeyMsg:
-		cmd = tea.Batch(cmd, m.handleKeyInput(msg))
+		inputCmd = m.handleKeyInput(msg)
 	case ModelUpdateMessage:
 		// TODO: Some of these updates messages should trigger filePanel state update
 		// For example a success message for delete operation
@@ -87,21 +87,13 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		updateCmd = msg.ApplyToModel(m)
 
 	default:
-		slog.Debug("Message of type that is not handled", "type", reflect.TypeOf(msg))
+		slog.Debug("Message of type that is not handled")
 	}
 
 	// This is needed for blink, etc to work
-	m.updateFilePanelsState(msg, &cmd)
+	panelCmd = m.updateFilePanelsState(msg)
 
 	m.updateModelStateAfterMsg()
-
-	// check if there already have listening message
-	// TODO: Fix this. This is wrong, and it will cause unnecessary goroutines spawned continuously
-	// for every Update() , stuck listening for channel message
-	// We could move to only issuing listen commands on receiving channel messages.
-	// Have the channel as a part of model struct, and remove ListeningMessage variable altogether.
-	// See - Issue #946
-	var listenChannelCommand tea.Cmd
 
 	// Temp fix till we add metadata cache, to prevent multiple metadata fetch spawns
 	// Ideally we might want to fetch only if the current file selected in filepanel changes
@@ -109,7 +101,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		metadataCmd = m.getMetadataCmd()
 	}
 
-	return m, tea.Batch(cmd, listenChannelCommand, metadataCmd, updateCmd)
+	return m, tea.Batch(sidebarCmd, inputCmd, updateCmd, panelCmd, metadataCmd)
 }
 
 func (m *model) handleMouseMsg(msg tea.MouseMsg) {
@@ -140,6 +132,9 @@ func (m *model) updateModelStateAfterMsg() {
 // TODO : At least dont trigger metadata fetch when user is scrolling
 // through the metadata panel
 func (m *model) getMetadataCmd() tea.Cmd {
+	if m.disableMetatdata {
+		return nil
+	}
 	if len(m.getFocusedFilePanel().element) == 0 {
 		m.fileMetaData.SetBlank()
 		return nil
@@ -328,6 +323,7 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 		// Handles general kinds of inputs in the regular state of the application
 		cmd = m.mainKey(msg.String())
 	}
+
 	// If quiting input pressed, check if has any running process and displays a
 	// warn. Otherwise just quits application
 	if m.modelQuitState == quitInitiated {
@@ -348,24 +344,25 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 
 // Update the file panel state. Change name of renamed files, filter out files
 // in search, update typingb bar, etc
-func (m *model) updateFilePanelsState(msg tea.Msg, cmd *tea.Cmd) {
+func (m *model) updateFilePanelsState(msg tea.Msg) tea.Cmd {
 	focusPanel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+	var cmd tea.Cmd
 	switch {
 	case m.firstTextInput:
 		m.firstTextInput = false
 	case m.fileModel.renaming:
-		focusPanel.rename, *cmd = focusPanel.rename.Update(msg)
+		focusPanel.rename, cmd = focusPanel.rename.Update(msg)
 	case focusPanel.searchBar.Focused():
-		focusPanel.searchBar, *cmd = focusPanel.searchBar.Update(msg)
+		focusPanel.searchBar, cmd = focusPanel.searchBar.Update(msg)
 	case m.typingModal.open:
-		m.typingModal.textInput, *cmd = m.typingModal.textInput.Update(msg)
+		m.typingModal.textInput, cmd = m.typingModal.textInput.Update(msg)
 	case m.promptModal.IsOpen():
 		// *cmd is a non-name, and cannot be used on left of :=
 		var action common.ModelAction
 		// Taking returned cmd is necessary for blinking
 		// TODO : Separate this to a utility
 		cwdLocation := m.fileModel.filePanels[m.filePanelFocusIndex].location
-		action, *cmd = m.promptModal.HandleUpdate(msg, cwdLocation)
+		action, cmd = m.promptModal.HandleUpdate(msg, cwdLocation)
 		m.applyPromptModalAction(action)
 	}
 
@@ -374,6 +371,8 @@ func (m *model) updateFilePanelsState(msg tea.Msg, cmd *tea.Cmd) {
 	if focusPanel.cursor < 0 {
 		focusPanel.cursor = 0
 	}
+
+	return cmd
 }
 
 // Apply the Action and notify the promptModal

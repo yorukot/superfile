@@ -127,14 +127,7 @@ func TestCompressSelectedFiles(t *testing.T) {
 			// on its own
 			p.SendDirectly(nil)
 
-			cursorIndexForZip := -1
-			for i, elem := range m.getFocusedFilePanel().element {
-				if elem.location == zipFile {
-					cursorIndexForZip = i
-					break
-				}
-			}
-
+			cursorIndexForZip := findItemIndexInPanelByLocation(m.getFocusedFilePanel(), zipFile)
 			require.NotEqual(t, -1, cursorIndexForZip)
 
 			m.getFocusedFilePanel().cursor = cursorIndexForZip

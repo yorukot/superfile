@@ -7,9 +7,11 @@ import (
 	"testing"
 	"time"
 
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/utils"
 )
 
@@ -103,4 +105,85 @@ func TestFileCreation(t *testing.T) {
 			assert.FileExists(t, filepath.Join(testChildDir, tt.fileName), "expected file to be created: %q", tt.fileName)
 		}
 	}
+}
+
+func TestFileRename(t *testing.T) {
+	curTestDir := t.TempDir()
+	file1 := filepath.Join(curTestDir, "file1.txt")
+	file2 := filepath.Join(curTestDir, "file2.txt")
+	file3 := filepath.Join(curTestDir, "file3.txt")
+
+	setupFilesWithData(t, []byte("f1"), file1)
+	setupFilesWithData(t, []byte("f2"), file2)
+	setupFilesWithData(t, []byte("f3"), file3)
+
+	file1New := filepath.Join(curTestDir, "file1_new.txt")
+
+	t.Run("Basic rename", func(t *testing.T) {
+		m := defaultTestModel(curTestDir)
+		p := NewTestTeaProgWithEventLoop(t, m)
+		idx := findItemIndexInPanelByLocation(m.getFocusedFilePanel(), file1)
+		require.NotEqual(t, -1, idx, "%s should be found in panel", file1)
+		m.getFocusedFilePanel().cursor = idx
+
+		p.SendKey(common.Hotkeys.FilePanelItemRename[0])
+		p.SendKey("_new")
+		p.Send(tea.KeyMsg{Type: tea.KeyEnter})
+
+		assert.Eventually(t, func() bool {
+			_, err1 := os.Stat(file1)
+			_, err1New := os.Stat(file1New)
+			return err1New == nil && os.IsNotExist(err1)
+		}, time.Second, 10*time.Millisecond, "File never got renamed")
+	})
+
+	t.Run("Rename confirmation for same name", func(t *testing.T) {
+		actualTest := func(doRename bool) {
+			m := defaultTestModel(curTestDir)
+			p := NewTestTeaProgWithEventLoop(t, m)
+			idx := findItemIndexInPanelByLocation(m.getFocusedFilePanel(), file3)
+			require.NotEqual(t, -1, idx, "%s should be found in panel", file3)
+
+			m.getFocusedFilePanel().cursor = idx
+
+			p.SendKeyDirectly(common.Hotkeys.FilePanelItemRename[0])
+			m.getFocusedFilePanel().rename.SetValue("file2.txt")
+			p.Send(tea.KeyMsg{Type: tea.KeyEnter})
+
+			// This will result in async
+			assert.Eventually(t, func() bool {
+				return m.notifyModel.IsOpen()
+			}, time.Second, 10*time.Millisecond, "Notify modal never opened, filepanel items : %v",
+				m.getFocusedFilePanel().element)
+
+			assert.Equal(t, notify.New(true,
+				common.SameRenameWarnTitle,
+				common.SameRenameWarnContent,
+				notify.RenameAction), m.notifyModel, "Notify model should be as expected")
+
+			if doRename {
+				p.Send(tea.KeyMsg{Type: tea.KeyEnter})
+			} else {
+				p.SendKey(common.Hotkeys.CancelTyping[0])
+			}
+
+			assert.Eventually(t, func() bool {
+				_, err2 := os.Stat(file2)
+				_, err3 := os.Stat(file3)
+				f2Data, err := os.ReadFile(file2)
+				require.NoError(t, err)
+				if doRename {
+					// f3 should be gone. f2 should have content of f3
+					return os.IsNotExist(err3) && err2 == nil &&
+						string(f2Data) == "f3"
+				}
+				return err2 == nil && err3 == nil
+			}, time.Second, 10*time.Millisecond,
+				"Rename should be done/not done appropriately, file : %v",
+				m.getFocusedFilePanel().element)
+		}
+
+		actualTest(false)
+		actualTest(true)
+	})
 }

@@ -11,6 +11,9 @@ const WheelRunTime = 5
 const DefaultCommandTimeout = 5000 * time.Millisecond
 const DateModifiedOption = "Date Modified"
 
+const SameRenameWarnTitle = "There is already a file or directory with that name"
+const SameRenameWarnContent = "This operation will override the existing file"
+
 var (
 	MinimumHeight = 24
 	MinimumWidth  = 60

@@ -60,13 +60,15 @@ func (m *model) IsRenamingConflicting() bool {
 func (m *model) warnModalForRenaming() tea.Cmd {
 	reqID := m.ioReqCnt
 	m.ioReqCnt++
-	return func() tea.Msg {
+	slog.Debug("Submitting rename notify model request", "reqID", reqID)
+	res := func() tea.Msg {
 		notifyModel := notify.New(true,
-			"There is already a file or directory with that name",
-			"This operation will override the existing file",
+			common.SameRenameWarnTitle,
+			common.SameRenameWarnContent,
 			notify.RenameAction)
 		return NewNotifyModalMsg(notifyModel, reqID)
 	}
+	return res
 }
 
 // Rename file where the cusror is located

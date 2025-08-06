@@ -90,7 +90,10 @@ type model struct {
 	toggleFooter         bool
 	firstLoadingComplete bool
 	firstUse             bool
-	filePanelFocusIndex  int
+
+	// This entirely disables metadata fetching. Used in test model
+	disableMetatdata    bool
+	filePanelFocusIndex int
 
 	// Height in number of lines of actual viewport of
 	// main panel and sidebar excluding border

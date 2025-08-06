@@ -42,6 +42,7 @@ func setupFiles(t *testing.T, files ...string) {
 
 func defaultTestModel(dirs ...string) *model {
 	m := defaultModelConfig(false, false, false, dirs)
+	m.disableMetatdata = true
 	_, _ = TeaUpdate(m, tea.WindowSizeMsg{Width: 2 * common.MinimumWidth, Height: 2 * common.MinimumHeight})
 	return m
 }
@@ -207,6 +208,16 @@ func verifySuccessfulPasteResults(t *testing.T, targetDir string, expectedDestFi
 func findItemIndexInPanel(panel *filePanel, itemName string) int {
 	for i, elem := range panel.element {
 		if elem.name == itemName {
+			return i
+		}
+	}
+	return -1
+}
+
+// Helper function to find item index in panel by name
+func findItemIndexInPanelByLocation(panel *filePanel, itemLocation string) int {
+	for i, elem := range panel.element {
+		if elem.location == itemLocation {
 			return i
 		}
 	}
