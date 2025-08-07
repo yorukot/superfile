@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
+	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/ui/sidebar"
 	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
@@ -21,11 +22,7 @@ type filePanelFocusType uint
 // Type representing the type of focused panel
 type focusPanelType int
 
-type warnType int
-
 type hotkeyType int
-
-type channelMessageType int
 
 type modelQuitStateType int
 
@@ -33,11 +30,6 @@ const (
 	globalType hotkeyType = iota
 	normalType
 	selectType
-)
-
-const (
-	confirmDeleteItem warnType = iota
-	confirmRenameItem
 )
 
 // Constants for panel with no focus
@@ -62,14 +54,10 @@ const (
 )
 
 const (
-	sendWarnModal channelMessageType = iota
-	sendNotifyModal
-)
-
-const (
 	notQuitting modelQuitStateType = iota
 	quitInitiated
-	confirmToQuit
+	quitConfirmationInitiated
+	quitConfirmationReceived
 	quitDone
 )
 
@@ -87,9 +75,8 @@ type model struct {
 	copyItems       copyItems
 
 	// Modals
-	notifyModal notifyModal
+	notifyModel notify.Model
 	typingModal typingModal
-	warnModal   warnModal
 	helpMenu    helpMenuModal
 	promptModal prompt.Model
 
@@ -103,7 +90,10 @@ type model struct {
 	toggleFooter         bool
 	firstLoadingComplete bool
 	firstUse             bool
-	filePanelFocusIndex  int
+
+	// This entirely disables metadata fetching. Used in test model
+	disableMetatdata    bool
+	filePanelFocusIndex int
 
 	// Height in number of lines of actual viewport of
 	// main panel and sidebar excluding border
@@ -133,24 +123,11 @@ type helpMenuModalData struct {
 	subTitle       string
 }
 
-type warnModal struct {
-	open     bool
-	warnType warnType
-	title    string
-	content  string
-}
-
 type typingModal struct {
 	location      string
 	open          bool
 	textInput     textinput.Model
 	errorMesssage string
-}
-
-type notifyModal struct {
-	open    bool
-	title   string
-	content string
 }
 
 // Copied items
@@ -225,15 +202,6 @@ type element struct {
 /* SIDE BAR internal TYPE END*/
 
 /*PROCESS BAR internal TYPE START*/
-
-// Message for process bar
-type channelMessage struct {
-	messageID   string
-	messageType channelMessageType
-	// TODO : We will stop using channel for this, and use tea.Cmd
-	warnModal   warnModal
-	notifyModal notifyModal
-}
 
 /*PROCESS BAR internal TYPE END*/
 

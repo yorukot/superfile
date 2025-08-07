@@ -14,6 +14,7 @@ import (
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
+	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/utils"
 
 	"github.com/barasher/go-exiftool"
@@ -27,11 +28,9 @@ import (
 
 // These represent model's state information, its not a global preperty
 var LastTimeCursorMove = [2]int{int(time.Now().UnixMicro()), 0} //nolint: gochecknoglobals // TODO: Move to model struct
-var ListeningMessage = true                                     //nolint: gochecknoglobals // TODO: Move to model struct
 var hasTrash = true                                             //nolint: gochecknoglobals // TODO: Move to model struct
 var batCmd = ""                                                 //nolint: gochecknoglobals // TODO: Move to model struct
 var et *exiftool.Exiftool                                       //nolint: gochecknoglobals // TODO: Move to model struct
-var channel = make(chan channelMessage, 1000)                   //nolint: gochecknoglobals // TODO: Move to model struct
 
 // Initialize and return model with default configs
 // It returns only tea.Model because when it used in main, the return value
@@ -54,7 +53,6 @@ func (m *model) Init() tea.Cmd {
 	return tea.Batch(
 		tea.SetWindowTitle("superfile"),
 		textinput.Blink, // Assuming textinput.Blink is a valid command
-		listenForChannelMessage(channel),
 		processCmdToTeaCmd(m.processBarModel.GetListenCmd()),
 	)
 }
@@ -65,21 +63,19 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// TODO : We could check for m.modelQuitState and skip doing anything
 	// If its quitDone. But if we are at this state, its already bad, so we need
 	// to first figure out if its possible in testing, and fix it.
-	slog.Debug("model.Update() called")
-	var cmd, updateCmd, metadataCmd tea.Cmd
+	slog.Debug("model.Update() called", "msgType", reflect.TypeOf(msg))
+	var sidebarCmd, inputCmd, updateCmd, panelCmd, metadataCmd tea.Cmd
 	gotModelUpdateMsg := false
 
-	cmd = m.sidebarModel.UpdateState(msg)
+	sidebarCmd = m.sidebarModel.UpdateState(msg)
 
 	switch msg := msg.(type) {
-	case channelMessage:
-		m.handleChannelMessage(msg)
 	case tea.WindowSizeMsg:
 		m.handleWindowResize(msg)
 	case tea.MouseMsg:
 		m.handleMouseMsg(msg)
 	case tea.KeyMsg:
-		cmd = tea.Batch(cmd, m.handleKeyInput(msg))
+		inputCmd = m.handleKeyInput(msg)
 	case ModelUpdateMessage:
 		// TODO: Some of these updates messages should trigger filePanel state update
 		// For example a success message for delete operation
@@ -91,24 +87,13 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		updateCmd = msg.ApplyToModel(m)
 
 	default:
-		slog.Debug("Message of type that is not handled", "type", reflect.TypeOf(msg))
+		slog.Debug("Message of type that is not handled")
 	}
 
 	// This is needed for blink, etc to work
-	m.updateFilePanelsState(msg, &cmd)
+	panelCmd = m.updateFilePanelsState(msg)
 
 	m.updateModelStateAfterMsg()
-
-	// check if there already have listening message
-	// TODO: Fix this. This is wrong, and it will cause unnecessary goroutines spawned continuously
-	// for every Update() , stuck listening for channel message
-	// We could move to only issuing listen commands on receiving channel messages.
-	// Have the channel as a part of model struct, and remove ListeningMessage variable altogether.
-	// See - Issue #946
-	var listenChannelCommand tea.Cmd
-	if !ListeningMessage {
-		listenChannelCommand = listenForChannelMessage(channel)
-	}
 
 	// Temp fix till we add metadata cache, to prevent multiple metadata fetch spawns
 	// Ideally we might want to fetch only if the current file selected in filepanel changes
@@ -116,7 +101,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		metadataCmd = m.getMetadataCmd()
 	}
 
-	return m, tea.Batch(cmd, listenChannelCommand, metadataCmd, updateCmd)
+	return m, tea.Batch(sidebarCmd, inputCmd, updateCmd, panelCmd, metadataCmd)
 }
 
 func (m *model) handleMouseMsg(msg tea.MouseMsg) {
@@ -147,6 +132,9 @@ func (m *model) updateModelStateAfterMsg() {
 // TODO : At least dont trigger metadata fetch when user is scrolling
 // through the metadata panel
 func (m *model) getMetadataCmd() tea.Cmd {
+	if m.disableMetatdata {
+		return nil
+	}
 	if len(m.getFocusedFilePanel().element) == 0 {
 		m.fileMetaData.SetBlank()
 		return nil
@@ -176,19 +164,6 @@ func (m *model) getMetadataCmd() tea.Cmd {
 	return func() tea.Msg {
 		return NewMetadataMsg(
 			metadata.GetMetadata(selectedItem.location, metadataFocussed, et), reqCnt)
-	}
-}
-
-// Handle message exchanging within the application
-func (m *model) handleChannelMessage(msg channelMessage) {
-	switch msg.messageType {
-	case sendWarnModal:
-		m.warnModal = msg.warnModal
-	case sendNotifyModal:
-		m.notifyModal = msg.notifyModal
-	default:
-		slog.Error("Unhandled channelMessageType in handleChannelMessage()",
-			"messageType", msg.messageType)
 	}
 }
 
@@ -299,7 +274,7 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 		"filePanel.focusType", m.fileModel.filePanels[m.filePanelFocusIndex].focusType,
 		"filePanel.panelMode", m.fileModel.filePanels[m.filePanelFocusIndex].panelMode,
 		"typingModal.open", m.typingModal.open,
-		"warnModal.open", m.warnModal.open,
+		"notifyModel.open", m.notifyModel.IsOpen(),
 		"promptModal.open", m.promptModal.IsOpen(),
 		"fileModel.renaming", m.fileModel.renaming,
 		"searchBar.focussed", m.fileModel.filePanels[m.filePanelFocusIndex].searchBar.Focused(),
@@ -312,22 +287,21 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 		return nil
 	}
 	var cmd tea.Cmd
-	quitSuperfile := false
 	switch {
 	case m.typingModal.open:
 		m.typingModalOpenKey(msg.String())
 	case m.promptModal.IsOpen():
 		// Ignore keypress. It will be handled in Update call via
 		// updateFilePanelState
+		// TODO: Convert that to async via tea.Cmd
 
 	// Handles all warn models except the warn model for confirming to quit
-	case m.warnModal.open:
-		cmd = m.warnModalOpenKey(msg.String())
-	case m.notifyModal.open:
-		m.notifyModalOpenKey(msg.String())
+	case m.notifyModel.IsOpen():
+		cmd = m.notifyModelOpenKey(msg.String())
+
 	// If renaming a object
 	case m.fileModel.renaming:
-		m.renamingKey(msg.String())
+		cmd = m.renamingKey(msg.String())
 	case m.sidebarModel.IsRenaming():
 		m.sidebarRenamingKey(msg.String())
 	// If search bar is open
@@ -341,9 +315,6 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 	// If help menu is open
 	case m.helpMenu.open:
 		m.helpMenuKey(msg.String())
-	// If asking to confirm quiting
-	case m.modelQuitState == confirmToQuit:
-		quitSuperfile = m.confirmToQuitSuperfile(msg.String())
 
 	case slices.Contains(common.Hotkeys.Quit, msg.String()):
 		m.modelQuitState = quitInitiated
@@ -352,17 +323,19 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 		// Handles general kinds of inputs in the regular state of the application
 		cmd = m.mainKey(msg.String())
 	}
+
 	// If quiting input pressed, check if has any running process and displays a
 	// warn. Otherwise just quits application
 	if m.modelQuitState == quitInitiated {
 		if m.processBarModel.HasRunningProcesses() {
 			// Dont quit now, get a confirmation first.
+			m.modelQuitState = quitConfirmationInitiated
 			m.warnModalForQuit()
 			return cmd
 		}
-		quitSuperfile = true
+		m.modelQuitState = quitConfirmationReceived
 	}
-	if quitSuperfile {
+	if m.modelQuitState == quitConfirmationReceived {
 		m.quitSuperfile()
 		return tea.Quit
 	}
@@ -371,24 +344,25 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 
 // Update the file panel state. Change name of renamed files, filter out files
 // in search, update typingb bar, etc
-func (m *model) updateFilePanelsState(msg tea.Msg, cmd *tea.Cmd) {
+func (m *model) updateFilePanelsState(msg tea.Msg) tea.Cmd {
 	focusPanel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+	var cmd tea.Cmd
 	switch {
 	case m.firstTextInput:
 		m.firstTextInput = false
 	case m.fileModel.renaming:
-		focusPanel.rename, *cmd = focusPanel.rename.Update(msg)
+		focusPanel.rename, cmd = focusPanel.rename.Update(msg)
 	case focusPanel.searchBar.Focused():
-		focusPanel.searchBar, *cmd = focusPanel.searchBar.Update(msg)
+		focusPanel.searchBar, cmd = focusPanel.searchBar.Update(msg)
 	case m.typingModal.open:
-		m.typingModal.textInput, *cmd = m.typingModal.textInput.Update(msg)
+		m.typingModal.textInput, cmd = m.typingModal.textInput.Update(msg)
 	case m.promptModal.IsOpen():
 		// *cmd is a non-name, and cannot be used on left of :=
 		var action common.ModelAction
 		// Taking returned cmd is necessary for blinking
 		// TODO : Separate this to a utility
 		cwdLocation := m.fileModel.filePanels[m.filePanelFocusIndex].location
-		action, *cmd = m.promptModal.HandleUpdate(msg, cwdLocation)
+		action, cmd = m.promptModal.HandleUpdate(msg, cwdLocation)
 		m.applyPromptModalAction(action)
 	}
 
@@ -397,6 +371,8 @@ func (m *model) updateFilePanelsState(msg tea.Msg, cmd *tea.Cmd) {
 	if focusPanel.cursor < 0 {
 		focusPanel.cursor = 0
 	}
+
+	return cmd
 }
 
 // Apply the Action and notify the promptModal
@@ -466,9 +442,9 @@ func (m *model) updateCurrentFilePanelDir(path string) error {
 
 // Triggers a warn for confirm quiting
 func (m *model) warnModalForQuit() {
-	m.modelQuitState = confirmToQuit
-	m.warnModal.title = "Confirm to quit superfile"
-	m.warnModal.content = "You still have files being processed. Are you sure you want to exit?"
+	m.notifyModel = notify.New(true, "Confirm to quit superfile",
+		"You still have files being processed. Are you sure you want to exit?",
+		notify.QuitAction)
 }
 
 // Implement View function for bubble tea model to handle visualization.
@@ -561,27 +537,11 @@ func (m *model) View() string {
 		return stringfunction.PlaceOverlay(overlayX, overlayY, typingModal, finalRender)
 	}
 
-	if m.warnModal.open {
-		warnModal := m.warnModalRender()
-		overlayX := m.fullWidth/2 - common.ModalWidth/2
-		overlayY := m.fullHeight/2 - common.ModalHeight/2
-		return stringfunction.PlaceOverlay(overlayX, overlayY, warnModal, finalRender)
-	}
-
-	if m.notifyModal.open {
-		notifyModal := m.notifyModalRender()
+	if m.notifyModel.IsOpen() {
+		notifyModal := m.notifyModel.Render()
 		overlayX := m.fullWidth/2 - common.ModalWidth/2
 		overlayY := m.fullHeight/2 - common.ModalHeight/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, notifyModal, finalRender)
-	}
-
-	// This is also a render for warnmodal, but its being driven via a different flag
-	// we should also drive it via warnModal.open
-	if m.modelQuitState == confirmToQuit {
-		warnModal := m.warnModalRender()
-		overlayX := m.fullWidth/2 - common.ModalWidth/2
-		overlayY := m.fullHeight/2 - common.ModalHeight/2
-		return stringfunction.PlaceOverlay(overlayX, overlayY, warnModal, finalRender)
 	}
 
 	return finalRender
@@ -613,16 +573,6 @@ func getMaxW(s string) int {
 		maxW = max(maxW, ansi.StringWidth(line))
 	}
 	return maxW
-}
-
-// Returns a tea.cmd responsible for listening messages from msg channel
-func listenForChannelMessage(msg chan channelMessage) tea.Cmd {
-	return func() tea.Msg {
-		for {
-			ListeningMessage = false
-			return <-msg
-		}
-	}
 }
 
 // Render and update file panel items. Check for changes and updates in files and

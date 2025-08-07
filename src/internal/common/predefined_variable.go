@@ -11,6 +11,9 @@ const WheelRunTime = 5
 const DefaultCommandTimeout = 5000 * time.Millisecond
 const DateModifiedOption = "Date Modified"
 
+const SameRenameWarnTitle = "There is already a file or directory with that name"
+const SameRenameWarnContent = "This operation will override the existing file"
+
 var (
 	MinimumHeight = 24
 	MinimumWidth  = 60
@@ -41,7 +44,11 @@ var (
 	FilePreviewEmptyText               string
 	FilePreviewError                   string
 
-	LipglossError string
+	ModalConfirmInputText string
+	ModalCancelInputText  string
+	ModalOkayInputText    string
+	ModalInputSpacingText string
+	LipglossError         string
 )
 
 var (
@@ -83,4 +90,10 @@ func LoadPrerenderedVariables() {
 	FilePreviewDirectoryUnreadableText = "\n--- " + icon.Error + icon.Space + "Cannot read directory" + icon.Space + "---"
 	FilePreviewError = "\n--- " + icon.Error + icon.Space + "Error" + icon.Space + "---"
 	FilePreviewEmptyText = "\n--- Empty ---"
+
+	ModalOkayInputText = MainStyle.AlignHorizontal(lipgloss.Center).AlignVertical(lipgloss.Center).Render(
+		ModalConfirm.Render(" (" + Hotkeys.Confirm[0] + ") Okay "))
+	ModalConfirmInputText = ModalConfirm.Render(" (" + Hotkeys.Confirm[0] + ") Confirm ")
+	ModalCancelInputText = ModalCancel.Render(" (" + Hotkeys.Quit[0] + ") Cancel ")
+	ModalInputSpacingText = lipgloss.NewStyle().Background(ModalBGColor).Render("           ")
 }

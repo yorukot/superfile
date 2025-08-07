@@ -5,6 +5,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
+	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 )
 
@@ -89,8 +90,6 @@ func NewCompressOperationMsg(state processbar.ProcessState, reqID int) CompressO
 	}
 }
 
-// On receiving any such update, model should update its filepanel, etc.
-// That we dont need to duplicate in every ApplyToModel
 func (msg CompressOperationMsg) ApplyToModel(_ *model) tea.Cmd {
 	return nil
 }
@@ -114,7 +113,6 @@ func (msg ExtractOperationMsg) ApplyToModel(_ *model) tea.Cmd {
 }
 
 type MetadataMsg struct {
-	// Using struct embedding over composition, because behaviour with GetReqID will not change
 	BaseMessage
 	meta metadata.Metadata
 }
@@ -140,5 +138,24 @@ func (msg MetadataMsg) ApplyToModel(m *model) tea.Cmd {
 	}
 	m.fileMetaData.SetMetadata(msg.meta)
 	selectedItem.metaData = msg.meta.GetData()
+	return nil
+}
+
+type NotifyModalUpdateMsg struct {
+	BaseMessage
+	m notify.Model
+}
+
+func NewNotifyModalMsg(m notify.Model, reqID int) NotifyModalUpdateMsg {
+	return NotifyModalUpdateMsg{
+		m: m,
+		BaseMessage: BaseMessage{
+			reqID: reqID,
+		},
+	}
+}
+
+func (msg NotifyModalUpdateMsg) ApplyToModel(m *model) tea.Cmd {
+	m.notifyModel = msg.m
 	return nil
 }

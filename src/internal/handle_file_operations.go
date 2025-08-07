@@ -12,6 +12,7 @@ import (
 	"time"
 
 	variable "github.com/yorukot/superfile/src/config"
+	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/utils"
 
@@ -19,7 +20,6 @@ import (
 
 	"github.com/atotto/clipboard"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/lithammer/shortuuid"
 	"github.com/yorukot/superfile/src/config/icon"
 )
 
@@ -57,20 +57,18 @@ func (m *model) IsRenamingConflicting() bool {
 }
 
 // TODO: Remove channel messaging and use tea.Cmd
-func (m *model) warnModalForRenaming() {
-	id := shortuuid.New()
-	message := channelMessage{
-		messageID:   id,
-		messageType: sendWarnModal,
+func (m *model) warnModalForRenaming() tea.Cmd {
+	reqID := m.ioReqCnt
+	m.ioReqCnt++
+	slog.Debug("Submitting rename notify model request", "reqID", reqID)
+	res := func() tea.Msg {
+		notifyModel := notify.New(true,
+			common.SameRenameWarnTitle,
+			common.SameRenameWarnContent,
+			notify.RenameAction)
+		return NewNotifyModalMsg(notifyModel, reqID)
 	}
-
-	message.warnModal = warnModal{
-		open:     true,
-		title:    "There is already a file or directory with that name",
-		content:  "This operation will override the existing file",
-		warnType: confirmRenameItem,
-	}
-	channel <- message
+	return res
 }
 
 // Rename file where the cusror is located
@@ -156,37 +154,26 @@ func deleteOperation(processBarModel *processbar.Model, items []string, useTrash
 	return p.State
 }
 
-func (m *model) deleteItemWarn() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-
+func (m *model) getDeleteTriggerCmd() tea.Cmd {
+	panel := m.getFocusedFilePanel()
 	if (panel.panelMode == selectMode && len(panel.selected) == 0) ||
 		(panel.panelMode == browserMode && len(panel.element) == 0) {
-		return
+		return nil
 	}
 
-	id := shortuuid.New()
-	message := channelMessage{
-		messageID:   id,
-		messageType: sendWarnModal,
-	}
+	reqID := m.ioReqCnt
+	m.ioReqCnt++
 
-	if !hasTrash || isExternalDiskPath(panel.location) {
-		message.warnModal = warnModal{
-			open:     true,
-			title:    "Are you sure you want to completely delete",
-			content:  "This operation cannot be undone and your data will be completely lost.",
-			warnType: confirmDeleteItem,
+	return func() tea.Msg {
+		title := "Are you sure you want to move this to trash can"
+		content := "This operation will move file or directory to trash can."
+
+		if !hasTrash || isExternalDiskPath(panel.location) {
+			title = "Are you sure you want to completely delete"
+			content = "This operation cannot be undone and your data will be completely lost."
 		}
-		channel <- message
-		return
+		return NewNotifyModalMsg(notify.New(true, title, content, notify.DeleteAction), reqID)
 	}
-	message.warnModal = warnModal{
-		open:     true,
-		title:    "Are you sure you want to move this to trash can",
-		content:  "This operation will move file or directory to trash can.",
-		warnType: confirmDeleteItem,
-	}
-	channel <- message
 }
 
 // Copy directory or file's path to superfile's clipboard
@@ -229,86 +216,49 @@ func (m *model) getPasteItemCmd() tea.Cmd {
 
 	slog.Debug("Submitting pasteItems request", "id", reqID, "items cnt", len(copyItems), "dest", panelLocation)
 	return func() tea.Msg {
+		err := validatePasteOperation(panelLocation, copyItems, cut)
+		if err != nil {
+			return NewNotifyModalMsg(notify.New(true, "Invalid paste location", err.Error(), notify.NoAction),
+				reqID)
+		}
 		state := executePasteOperation(&m.processBarModel, panelLocation, copyItems, cut)
 		return NewPasteOperationMsg(state, reqID)
 	}
 }
 
-// Paste all clipboard items
-func executePasteOperation(processBarModel *processbar.Model,
-	panelLocation string, copyItems []string, cut bool) processbar.ProcessState {
-	if len(copyItems) == 0 {
-		return processbar.Cancelled
-	}
-
-	id := shortuuid.New()
-
+func validatePasteOperation(panelLocation string, copyItems []string, cut bool) error {
 	// Check if trying to paste into source or subdirectory for both cut and copy operations
 	for _, srcPath := range copyItems {
 		// Check if trying to cut and paste into the same directory - this would be a no-op
 		// and could potentially cause issues, so we prevent it
 		if filepath.Dir(srcPath) == panelLocation && cut {
-			slog.Error("Cannot paste into parent directory of source", "src", srcPath, "dst", panelLocation)
-			message := channelMessage{
-				messageID:   id,
-				messageType: sendNotifyModal,
-				notifyModal: notifyModal{
-					open:    true,
-					title:   "Invalid paste location",
-					content: "Cannot paste into parent directory of source",
-				},
-			}
-			channel <- message
-			return processbar.Cancelled
+			return fmt.Errorf("cannot paste into parent directory of source, srcPath : %v, panelLocation : %v",
+				srcPath, panelLocation)
 		}
-
-		slog.Debug("model.pasteItem", "srcPath", srcPath, "panel location", panelLocation)
-
 		if cut && srcPath == panelLocation {
-			slog.Error("Cannot paste a directory into itself", "operation", "cut", "src", srcPath, "dst", panelLocation)
-			message := channelMessage{
-				messageID:   id,
-				messageType: sendNotifyModal,
-				notifyModal: notifyModal{
-					open:    true,
-					title:   "Invalid paste location",
-					content: "Cannot paste a directory into itself",
-				},
-			}
-			channel <- message
-			return processbar.Cancelled
+			return errors.New("cannot paste a directory into itself")
 		}
 
 		if isAncestor(srcPath, panelLocation) {
-			operation := "copy"
-			if cut {
-				operation = "cut"
-			}
-
-			slog.Error("Cannot paste a directory into itself or its subdirectory",
-				"operation", operation, "src", srcPath, "dst", panelLocation)
-			message := channelMessage{
-				messageID:   id,
-				messageType: sendNotifyModal,
-				notifyModal: notifyModal{
-					open:    true,
-					title:   "Invalid paste location",
-					content: fmt.Sprintf("Cannot %s and paste a directory into itself or its subdirectory", operation),
-				},
-			}
-			channel <- message
-			return processbar.Cancelled
+			return fmt.Errorf("cannot %s and paste a directory into itself or its subdirectory",
+				getCopyOrCutOperationName(cut))
 		}
 	}
 
-	slog.Debug("model.pasteItem", "items", copyItems, "cut", cut, "panel location", panelLocation)
+	return nil
+}
 
-	prefixIcon := icon.Copy + icon.Space
-	if cut {
-		prefixIcon = icon.Cut + icon.Space
-	}
+// new func to check and return an error that will go in m.content
+// create a new error type
 
-	p, err := processBarModel.SendAddProcessMsg(prefixIcon+filepath.Base(copyItems[0]), len(copyItems), true)
+// Paste all clipboard items
+func executePasteOperation(processBarModel *processbar.Model,
+	panelLocation string, copyItems []string, cut bool) processbar.ProcessState {
+	slog.Debug("executePasteOperation", "items", copyItems, "cut", cut, "panel location", panelLocation)
+
+	p, err := processBarModel.SendAddProcessMsg(
+		icon.GetCopyOrCutIcon(cut)+icon.Space+filepath.Base(copyItems[0]),
+		getTotalFilesCnt(copyItems), true)
 	if err != nil {
 		slog.Error("Cannot spawn a new process", "error", err)
 		return processbar.Failed
@@ -330,11 +280,7 @@ func executePasteOperation(processBarModel *processbar.Model,
 			}
 		}
 
-		prefixIcon := icon.Copy
-		if cut {
-			prefixIcon = icon.Cut
-		}
-		p.Name = prefixIcon + icon.Space + filepath.Base(filePath)
+		p.Name = icon.GetCopyOrCutIcon(cut) + icon.Space + filepath.Base(filePath)
 		if err != nil {
 			slog.Debug("model.pasteItem - paste failure", "error", err,
 				"current item", filePath, "errMessage", errMessage)
@@ -342,13 +288,12 @@ func executePasteOperation(processBarModel *processbar.Model,
 			slog.Error(errMessage, "error", err)
 			break
 		}
-
-		p.Done++
 		processBarModel.TrySendingUpdateProcessMsg(p)
 	}
 
 	if p.State != processbar.Failed {
 		p.State = processbar.Successful
+		p.Done = p.Total
 	}
 	p.DoneTime = time.Now()
 	err = processBarModel.SendUpdateProcessMsg(p, true)
@@ -357,6 +302,31 @@ func executePasteOperation(processBarModel *processbar.Model,
 	}
 
 	return p.State
+}
+
+func getTotalFilesCnt(copyItems []string) int {
+	totalFiles := 0
+	for _, folderPath := range copyItems {
+		// TODO : Fix this. This is inefficient
+		// In case of a cut operations for a directory with a lot of files
+		// we are unnecessarily walking the whole directory recursively
+		// while os will just perform a rename
+		// So instead of few operations this will cause the cut paste
+		// to read the whole directory recursively
+		// we should avoid doing this.
+		// Although this allows us a more detailed progress tracking
+		// this make the copy/cut more inefficient
+		// instead, we could just track progress based on total items in
+		// copyItems
+		// efficiency should be prioritized over more detailed feedback.
+		count, err := countFiles(folderPath)
+		if err != nil {
+			slog.Error("Error in countFiles", "error", err)
+			continue
+		}
+		totalFiles += count
+	}
+	return totalFiles
 }
 
 // Extract compressed file
