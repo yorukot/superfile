@@ -14,7 +14,9 @@ import (
 // mainKey handles most of key commands in the regular state of the application. For
 // keys that performs actions in multiple panels, like going up or down,
 // check the state of model m and handle properly.
-func (m *model) mainKey(msg string) tea.Cmd {
+// TODO: This function has grown too big. It needs to be fixed, via major
+// updates and fixes in key handling code
+func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen // See above
 	switch {
 	// If move up Key is pressed, check the current state and executes
 	case slices.Contains(common.Hotkeys.ListUp, msg):

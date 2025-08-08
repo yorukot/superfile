@@ -44,6 +44,8 @@ func initialConfig(firstFilePanelDirs []string) (toggleDotFile bool, //nolint: n
 	slog.SetDefault(slog.New(slog.NewTextHandler(
 		file, &slog.HandlerOptions{Level: logLevel})))
 
+	printRuntimeInfo()
+
 	common.LoadHotkeysFile()
 
 	common.LoadThemeFile()
@@ -68,6 +70,19 @@ func initialConfig(firstFilePanelDirs []string) (toggleDotFile bool, //nolint: n
 		slog.Error("cannot get current working directory", "error", err)
 		cwd = variable.HomeDir
 	}
+
+	updateFirstFilePanelDirs(firstFilePanelDirs, cwd)
+
+	slog.Debug("Directory configuration", "cwd", cwd, "start_directories", firstFilePanelDirs)
+	printRuntimeInfo()
+
+	toggleDotFile = utils.ReadBoolFile(variable.ToggleDotFile, false)
+	toggleFooter = utils.ReadBoolFile(variable.ToggleFooter, true)
+
+	return toggleDotFile, toggleFooter
+}
+
+func updateFirstFilePanelDirs(firstFilePanelDirs []string, cwd string) {
 	for i := range firstFilePanelDirs {
 		if firstFilePanelDirs[i] == "" {
 			firstFilePanelDirs[i] = common.Config.DefaultDirectory
@@ -99,10 +114,10 @@ func initialConfig(firstFilePanelDirs []string) (toggleDotFile bool, //nolint: n
 			firstFilePanelDirs[i] = variable.HomeDir
 		}
 	}
+}
 
+func printRuntimeInfo() {
 	slog.Debug("Runtime information", "runtime.GOOS", runtime.GOOS)
-	slog.Debug("Directory configuration", "cwd", cwd, "start_directories", firstFilePanelDirs)
-
 	var memStats runtime.MemStats
 	runtime.ReadMemStats(&memStats)
 	slog.Debug("Memory usage",
@@ -117,9 +132,4 @@ func initialConfig(firstFilePanelDirs []string) (toggleDotFile bool, //nolint: n
 		"renderer_size_bytes", reflect.TypeOf(rendering.Renderer{}).Size(),
 		"borderConfig_size_bytes", reflect.TypeOf(rendering.BorderConfig{}).Size(),
 		"process_size_bytes", reflect.TypeOf(processbar.Process{}).Size())
-
-	toggleDotFile = utils.ReadBoolFile(variable.ToggleDotFile, false)
-	toggleFooter = utils.ReadBoolFile(variable.ToggleFooter, true)
-
-	return toggleDotFile, toggleFooter
 }

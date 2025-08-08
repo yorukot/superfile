@@ -53,7 +53,7 @@ func zipSources(sources []string, target string, processBar *processbar.Model) e
 	writer := zip.NewWriter(f)
 	defer writer.Close()
 
-	zipSourcesCore(sources, target, processBar, &p, writer)
+	zipSourcesCore(sources, processBar, &p, writer)
 
 	if p.State != processbar.Failed {
 		// TODO: User p.SetSuccessful(), p.SetFailed()
@@ -68,7 +68,7 @@ func zipSources(sources []string, target string, processBar *processbar.Model) e
 	return nil
 }
 
-func zipSourcesCore(sources []string, target string, processBar *processbar.Model,
+func zipSourcesCore(sources []string, processBar *processbar.Model,
 	p *processbar.Process, writer *zip.Writer) {
 	for _, src := range sources {
 		srcParentDir := filepath.Dir(src)

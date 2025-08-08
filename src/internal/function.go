@@ -261,7 +261,8 @@ func checkFileNameValidity(name string) error {
 	}
 }
 
-func renameIfDuplicate(destination string) (string, error) {
+// This functions has very high code duplication. Need to refactor the logic into
+func renameIfDuplicate(destination string) (string, error) { //nolint: gocognit // see above todo
 	info, err := os.Stat(destination)
 	if os.IsNotExist(err) {
 		return destination, nil
