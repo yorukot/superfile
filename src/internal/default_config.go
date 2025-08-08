@@ -44,7 +44,7 @@ func defaultModelConfig(toggleDotFile bool, toggleFooter bool, firstUse bool, fi
 }
 
 // Return help menu for Hotkeys
-func getHelpMenuData() []helpMenuModalData {
+func getHelpMenuData() []helpMenuModalData { //nolint: funlen // This should be self contained
 	data := []helpMenuModalData{
 		{
 			subTitle: "General",

@@ -456,7 +456,7 @@ func (m *model) View() string {
 	if !m.firstLoadingComplete {
 		return "Loading..."
 	}
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+
 	// check is the terminal size enough
 	if m.fullHeight < common.MinimumHeight || m.fullWidth < common.MinimumWidth {
 		return m.terminalSizeWarnRender()
@@ -490,8 +490,9 @@ func (m *model) View() string {
 		clipboardBar := m.clipboardRender()
 
 		footer = lipgloss.JoinHorizontal(0, processBar, metaData, clipboardBar)
-
-		showRenderDebugStatsFooter(processBar, metaData, clipboardBar)
+		if common.Config.Debug {
+			showRenderDebugStatsFooter(processBar, metaData, clipboardBar)
+		}
 	}
 
 	var finalRender string
@@ -501,6 +502,13 @@ func (m *model) View() string {
 	} else {
 		finalRender = mainPanel
 	}
+
+	finalRender = m.updateRenderForOverlay(finalRender)
+
+	return finalRender
+}
+
+func (m *model) updateRenderForOverlay(finalRender string) string {
 	// check if need pop up modal
 	if m.helpMenu.open {
 		helpMenu := m.helpMenuRender()
@@ -515,6 +523,8 @@ func (m *model) View() string {
 		overlayY := m.fullHeight/2 - m.promptModal.GetMaxHeight()/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, promptModal, finalRender)
 	}
+
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 
 	if panel.sortOptions.open {
 		sortOptions := m.sortOptionsRender()
@@ -543,7 +553,6 @@ func (m *model) View() string {
 		overlayY := m.fullHeight/2 - common.ModalHeight/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, notifyModal, finalRender)
 	}
-
 	return finalRender
 }
 

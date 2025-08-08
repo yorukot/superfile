@@ -76,11 +76,24 @@ func returnDirElement(location string, displayDotFile bool, sortOptions sortOpti
 	}
 
 	// Sort files
-	var order func(i, j int) bool
-	reversed := sortOptions.reversed
+	sort.Slice(dirEntries, getOrderingFunc(location, dirEntries,
+		sortOptions.reversed, sortOptions.options[sortOptions.selected]))
+	// Preallocate for efficiency
+	directoryElement := make([]element, 0, len(dirEntries))
+	for _, item := range dirEntries {
+		directoryElement = append(directoryElement, element{
+			name:      item.Name(),
+			directory: item.IsDir(),
+			location:  filepath.Join(location, item.Name()),
+		})
+	}
+	return directoryElement
+}
 
+func getOrderingFunc(location string, dirEntries []os.DirEntry, reversed bool, sortOption string) sliceOrderFunc {
+	var order func(i, j int) bool
 	// TODO : These strings should not be hardcoded here, but defined as constants
-	switch sortOptions.options[sortOptions.selected] {
+	switch sortOption {
 	case "Name":
 		order = func(i, j int) bool {
 			// One of them is a directory, and other is not
@@ -93,35 +106,7 @@ func returnDirElement(location string, displayDotFile bool, sortOptions sortOpti
 			return strings.ToLower(dirEntries[i].Name()) < strings.ToLower(dirEntries[j].Name()) != reversed
 		}
 	case "Size":
-		order = func(i, j int) bool {
-			// Directories at the top sorted by direct child count (not recursive)
-			// Files sorted by size
-
-			// One of them is a directory, and other is not
-			if dirEntries[i].IsDir() != dirEntries[j].IsDir() {
-				return dirEntries[i].IsDir()
-			}
-
-			// This needs to be improved, and we should sort by actual size only
-			// Repeated recursive read would be slow, so we could cache
-			if dirEntries[i].IsDir() && dirEntries[j].IsDir() {
-				filesI, err := os.ReadDir(filepath.Join(location, dirEntries[i].Name()))
-				// No need of early return, we only call len() on filesI, so nil would
-				// just result in 0
-				if err != nil {
-					slog.Error("Error when reading directory during sort", "error", err)
-				}
-				filesJ, err := os.ReadDir(filepath.Join(location, dirEntries[j].Name()))
-				if err != nil {
-					slog.Error("Error when reading directory during sort", "error", err)
-				}
-				return len(filesI) < len(filesJ) != reversed
-			}
-			// No need for err check, we already filtered out dirEntries with err != nil in Info() call
-			fileInfoI, _ := dirEntries[i].Info()
-			fileInfoJ, _ := dirEntries[j].Info()
-			return fileInfoI.Size() < fileInfoJ.Size() != reversed
-		}
+		order = getSizeOrderingFunc(dirEntries, reversed, location)
 	case "Date Modified":
 		order = func(i, j int) bool {
 			// No need for err check, we already filtered out dirEntries with err != nil in Info() call
@@ -130,45 +115,70 @@ func returnDirElement(location string, displayDotFile bool, sortOptions sortOpti
 			return fileInfoI.ModTime().After(fileInfoJ.ModTime()) != reversed
 		}
 	case "Type":
-		order = func(i, j int) bool {
-			// One of them is a directory, and the other is not
-			if dirEntries[i].IsDir() != dirEntries[j].IsDir() {
-				return dirEntries[i].IsDir()
-			}
+		order = getTypeOrderingFunc(dirEntries, reversed)
+	}
+	return order
+}
 
-			var extI, extJ string
-			if !dirEntries[i].IsDir() {
-				extI = strings.ToLower(filepath.Ext(dirEntries[i].Name()))
-			}
-			if !dirEntries[j].IsDir() {
-				extJ = strings.ToLower(filepath.Ext(dirEntries[j].Name()))
-			}
+func getSizeOrderingFunc(dirEntries []os.DirEntry, reversed bool, location string) sliceOrderFunc {
+	return func(i, j int) bool {
+		// Directories at the top sorted by direct child count (not recursive)
+		// Files sorted by size
 
-			// Compare by extension/type
-			if extI != extJ {
-				return (extI < extJ) != reversed
-			}
-
-			// If same type, fall back to name
-			if common.Config.CaseSensitiveSort {
-				return (dirEntries[i].Name() < dirEntries[j].Name()) != reversed
-			}
-
-			return (strings.ToLower(dirEntries[i].Name()) < strings.ToLower(dirEntries[j].Name())) != reversed
+		// One of them is a directory, and other is not
+		if dirEntries[i].IsDir() != dirEntries[j].IsDir() {
+			return dirEntries[i].IsDir()
 		}
-	}
 
-	sort.Slice(dirEntries, order)
-	// Preallocate for efficiency
-	directoryElement := make([]element, 0, len(dirEntries))
-	for _, item := range dirEntries {
-		directoryElement = append(directoryElement, element{
-			name:      item.Name(),
-			directory: item.IsDir(),
-			location:  filepath.Join(location, item.Name()),
-		})
+		// This needs to be improved, and we should sort by actual size only
+		// Repeated recursive read would be slow, so we could cache
+		if dirEntries[i].IsDir() && dirEntries[j].IsDir() {
+			filesI, err := os.ReadDir(filepath.Join(location, dirEntries[i].Name()))
+			// No need of early return, we only call len() on filesI, so nil would
+			// just result in 0
+			if err != nil {
+				slog.Error("Error when reading directory during sort", "error", err)
+			}
+			filesJ, err := os.ReadDir(filepath.Join(location, dirEntries[j].Name()))
+			if err != nil {
+				slog.Error("Error when reading directory during sort", "error", err)
+			}
+			return len(filesI) < len(filesJ) != reversed
+		}
+		// No need for err check, we already filtered out dirEntries with err != nil in Info() call
+		fileInfoI, _ := dirEntries[i].Info()
+		fileInfoJ, _ := dirEntries[j].Info()
+		return fileInfoI.Size() < fileInfoJ.Size() != reversed
 	}
-	return directoryElement
+}
+
+func getTypeOrderingFunc(dirEntries []os.DirEntry, reversed bool) sliceOrderFunc {
+	return func(i, j int) bool {
+		// One of them is a directory, and the other is not
+		if dirEntries[i].IsDir() != dirEntries[j].IsDir() {
+			return dirEntries[i].IsDir()
+		}
+
+		var extI, extJ string
+		if !dirEntries[i].IsDir() {
+			extI = strings.ToLower(filepath.Ext(dirEntries[i].Name()))
+		}
+		if !dirEntries[j].IsDir() {
+			extJ = strings.ToLower(filepath.Ext(dirEntries[j].Name()))
+		}
+
+		// Compare by extension/type
+		if extI != extJ {
+			return (extI < extJ) != reversed
+		}
+
+		// If same type, fall back to name
+		if common.Config.CaseSensitiveSort {
+			return (dirEntries[i].Name() < dirEntries[j].Name()) != reversed
+		}
+
+		return (strings.ToLower(dirEntries[i].Name()) < strings.ToLower(dirEntries[j].Name())) != reversed
+	}
 }
 
 func returnDirElementBySearchString(location string, displayDotFile bool, searchString string) []element {

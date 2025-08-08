@@ -199,10 +199,6 @@ type element struct {
 
 /* FILE WINDOWS TYPE END*/
 
-/* SIDE BAR internal TYPE END*/
-
-/*PROCESS BAR internal TYPE START*/
-
-/*PROCESS BAR internal TYPE END*/
-
 type editorFinishedMsg struct{ err error }
+
+type sliceOrderFunc func(i, j int) bool
