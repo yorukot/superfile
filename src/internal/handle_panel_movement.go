@@ -35,65 +35,69 @@ func (m *model) enterPanel() {
 		if err != nil {
 			slog.Error("Error while changing to directory", "error", err, "target", selectedItem.location)
 		}
-	} else if !selectedItem.directory {
-		fileInfo, err := os.Lstat(selectedItem.location)
-		if err != nil {
-			slog.Error("Error while getting file info", "error", err)
+		return
+	}
+	fileInfo, err := os.Lstat(selectedItem.location)
+	if err != nil {
+		slog.Error("Error while getting file info", "error", err)
+		return
+	}
+
+	if fileInfo.Mode()&os.ModeSymlink != 0 {
+		targetPath, symlinkErr := filepath.EvalSymlinks(selectedItem.location)
+		if symlinkErr != nil {
 			return
 		}
 
-		if fileInfo.Mode()&os.ModeSymlink != 0 {
-			targetPath, symlinkErr := filepath.EvalSymlinks(selectedItem.location)
-			if symlinkErr != nil {
-				return
-			}
+		targetInfo, lstatErr := os.Lstat(targetPath)
 
-			targetInfo, lstatErr := os.Lstat(targetPath)
-
-			if lstatErr != nil {
-				return
-			}
-
-			if targetInfo.IsDir() {
-				err = panel.updateCurrentFilePanelDir(targetPath)
-				if err != nil {
-					slog.Error("Error while changing to directory", "error", err, "target", targetPath)
-				}
-				return
-			}
+		if lstatErr != nil {
+			return
 		}
 
-		if variable.ChooserFile != "" {
-			chooserErr := m.chooserFileWriteAndQuit(panel.element[panel.cursor].location)
-			if chooserErr == nil {
-				return
-			}
-			// Continue with preview if file is not writable
-			slog.Error("Error while writing to chooser file, continuing with file open", "error", chooserErr)
-		}
-
-		openCommand := "xdg-open"
-		switch runtime.GOOS {
-		case utils.OsDarwin:
-			openCommand = "open"
-		case utils.OsWindows:
-			dllpath := filepath.Join(os.Getenv("SYSTEMROOT"), "System32", "rundll32.exe")
-			dllfile := "url.dll,FileProtocolHandler"
-
-			cmd := exec.Command(dllpath, dllfile, panel.element[panel.cursor].location)
-			err = cmd.Start()
+		if targetInfo.IsDir() {
+			err = panel.updateCurrentFilePanelDir(targetPath)
 			if err != nil {
-				slog.Error("Error while open file with", "error", err)
+				slog.Error("Error while changing to directory", "error", err, "target", targetPath)
 			}
-
 			return
 		}
+	}
 
-		cmd := exec.Command(openCommand, panel.element[panel.cursor].location)
-		err = cmd.Start()
+	if variable.ChooserFile != "" {
+		chooserErr := m.chooserFileWriteAndQuit(panel.element[panel.cursor].location)
+		if chooserErr == nil {
+			return
+		}
+		// Continue with preview if file is not writable
+		slog.Error("Error while writing to chooser file, continuing with file open", "error", chooserErr)
+	}
+	m.executeOpenCommand()
+}
+
+func (m *model) executeOpenCommand() {
+	panel := m.getFocusedFilePanel()
+	openCommand := "xdg-open"
+	switch runtime.GOOS {
+	case utils.OsDarwin:
+		openCommand = "open"
+	case utils.OsWindows:
+		dllpath := filepath.Join(os.Getenv("SYSTEMROOT"), "System32", "rundll32.exe")
+		dllfile := "url.dll,FileProtocolHandler"
+
+		cmd := exec.Command(dllpath, dllfile, panel.element[panel.cursor].location)
+		err := cmd.Start()
 		if err != nil {
 			slog.Error("Error while open file with", "error", err)
 		}
+
+		return
+	}
+
+	cmd := exec.Command(openCommand, panel.element[panel.cursor].location)
+	err := cmd.Start()
+	if err != nil {
+		slog.Error("Error while open file with", "error", err)
 	}
 }
 

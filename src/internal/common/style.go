@@ -113,7 +113,7 @@ var (
 	promptFailureColor lipgloss.Color
 )
 
-func LoadThemeConfig() {
+func LoadThemeConfig() { //nolint: funlen // Variable initialization
 	BottomMiddleBorderSplit = Config.BorderMiddleLeft + Config.BorderBottom + Config.BorderMiddleRight
 
 	FilePanelBorderColor = lipgloss.Color(Theme.FilePanelBorder)

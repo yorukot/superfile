@@ -53,52 +53,8 @@ func zipSources(sources []string, target string, processBar *processbar.Model) e
 	writer := zip.NewWriter(f)
 	defer writer.Close()
 
-	for _, src := range sources {
-		srcParentDir := filepath.Dir(src)
-		err = filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
-			p.Name = icon.CompressFile + icon.Space + filepath.Base(path)
-			if err != nil {
-				return err
-			}
-			relPath, err := filepath.Rel(srcParentDir, path)
-			if err != nil {
-				return err
-			}
-			header, err := zip.FileInfoHeader(info)
-			if err != nil {
-				return err
-			}
-			header.Method = zip.Deflate
-			header.Name = relPath
-			if info.IsDir() {
-				header.Name += "/"
-			}
-			headerWriter, err := writer.CreateHeader(header)
-			if err != nil {
-				return err
-			}
-			if info.IsDir() {
-				return nil
-			}
-			file, err := os.Open(path)
-			if err != nil {
-				return err
-			}
-			defer file.Close()
-			_, err = io.Copy(headerWriter, file)
-			if err != nil {
-				return err
-			}
-			p.Done++
-			processBar.TrySendingUpdateProcessMsg(p)
-			return nil
-		})
-		if err != nil {
-			slog.Error("Error while zip file", "error", err)
-			p.State = processbar.Failed
-			break
-		}
-	}
+	zipSourcesCore(sources, processBar, &p, writer)
+
 	if p.State != processbar.Failed {
 		// TODO: User p.SetSuccessful(), p.SetFailed()
 		p.State = processbar.Successful
@@ -108,6 +64,66 @@ func zipSources(sources []string, target string, processBar *processbar.Model) e
 	pSendErr := processBar.SendUpdateProcessMsg(p, true)
 	if pSendErr != nil {
 		slog.Error("Error sending process update", "error", pSendErr)
+	}
+	return nil
+}
+
+func zipSourcesCore(sources []string, processBar *processbar.Model,
+	p *processbar.Process, writer *zip.Writer) {
+	for _, src := range sources {
+		srcParentDir := filepath.Dir(src)
+		err := filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
+			p.Name = icon.CompressFile + icon.Space + filepath.Base(path)
+			if err != nil {
+				return err
+			}
+			relPath, err := filepath.Rel(srcParentDir, path)
+			if err != nil {
+				return err
+			}
+
+			err = writeZipFile(path, relPath, info, writer)
+			if err != nil {
+				return err
+			}
+
+			p.Done++
+			processBar.TrySendingUpdateProcessMsg(*p)
+			return nil
+		})
+		if err != nil {
+			slog.Error("Error while zip file", "error", err)
+			p.State = processbar.Failed
+			break
+		}
+	}
+}
+
+func writeZipFile(path string, relPath string, info os.FileInfo, writer *zip.Writer) error {
+	header, err := zip.FileInfoHeader(info)
+	if err != nil {
+		return err
+	}
+	header.Method = zip.Deflate
+	header.Name = relPath
+	if info.IsDir() {
+		header.Name += "/"
+	}
+	headerWriter, err := writer.CreateHeader(header)
+	if err != nil {
+		return err
+	}
+	if info.IsDir() {
+		return nil
+	}
+	file, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	_, err = io.Copy(headerWriter, file)
+	if err != nil {
+		return err
 	}
 	return nil
 }

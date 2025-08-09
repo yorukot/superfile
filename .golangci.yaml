@@ -269,8 +269,7 @@ linters:
     - bodyclose # checks whether HTTP response body is closed successfully
     - canonicalheader # checks whether net/http.Header uses canonical header
     - copyloopvar # detects places where loop variables are copied (Go 1.22+)
-    # TODO enable this - This needs a fix in few of our functions
-    #- cyclop # checks function and package cyclomatic complexity
+    - cyclop # checks function and package cyclomatic complexity
     - depguard # checks if package imports are in a list of acceptable packages
     - dupl # tool for code clone detection
     - durationcheck # checks for two durations multiplied together
@@ -280,19 +279,15 @@ linters:
     - exptostd # detects functions from golang.org/x/exp/ that can be replaced by std functions
     - fatcontext # detects nested contexts in loops
     # - forbidigo # forbids identifiers # Not needed. this blocks only fmt.Print family and is not useful right now
-    # TODO enable - need to make functions shorter
-    #- funlen # tool for detection of long functions
+    - funlen # tool for detection of long functions
     - gocheckcompilerdirectives # validates go compiler directive comments (//go:)
-    # TODO enable - This is too much for us right now
     - gochecknoglobals # checks that no global variables exist
     - gochecknoinits # checks that no init functions are present in Go code
     - gochecksumtype # checks exhaustiveness on Go "sum types"
-    # TODO enable - Need to refactor many functions
-    # - gocognit # computes and checks the cognitive complexity of functions
+    - gocognit # computes and checks the cognitive complexity of functions
     - goconst # finds repeated strings that could be replaced by a constant
     - gocritic # provides diagnostics that check for bugs, performance and style issues
-    # TODO enable
-    #- gocyclo # computes and checks the cyclomatic complexity of functions
+    - gocyclo # computes and checks the cyclomatic complexity of functions
     #- godot # checks if comments end in a period # Too much for us right now
     - goimports # in addition to fixing imports, goimports also formats your code in the same style as gofmt
     - gomoddirectives # manages the use of 'replace', 'retract', and 'excludes' directives in go.mod
@@ -302,7 +297,6 @@ linters:
     # - gosec # inspects source code for security problems
     - iface # checks the incorrect use of interfaces, helping developers avoid interface pollution
     - intrange # finds places where for loops could make use of an integer range
-    # TODO enable : Need many fixes
     - lll # reports long lines
     - loggercheck # checks key value pairs for common logger libraries (kitlog,klog,logr,zap)
     - makezero # finds slice declarations with non-zero initial length

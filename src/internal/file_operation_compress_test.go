@@ -99,38 +99,41 @@ func TestZipSources(t *testing.T) {
 			zipReader, err := zip.OpenReader(targetZip)
 			require.NoError(t, err, "should be able to open ZIP file")
 			defer zipReader.Close()
-
-			require.Equal(t, len(tt.expectedFiles), len(zipReader.File), "ZIP should contain expected number of files")
-
-			foundFiles := make(map[string]string)
-			for _, file := range zipReader.File {
-				slog.Debug("files : ", "files", file.Name)
-				foundFiles[file.Name] = ""
-				if !strings.HasSuffix(file.Name, "/") {
-					rc, err := file.Open()
-					require.NoError(t, err, "should be able to open file %s in ZIP", file.Name)
-
-					content, err := io.ReadAll(rc)
-					rc.Close()
-					require.NoError(t, err, "should be able to read file %s", file.Name)
-
-					foundFiles[file.Name] = string(content)
-				}
-			}
-
-			for expectedFile, expectedContent := range tt.expectedFiles {
-				foundContent, exists := foundFiles[expectedFile]
-				require.True(t, exists, "expected file %s should be found in ZIP", expectedFile)
-				if expectedContent != "" {
-					require.Equal(t, expectedContent, foundContent, "content should match for file %s", expectedFile)
-				}
-			}
-
-			for foundFile := range foundFiles {
-				_, expected := tt.expectedFiles[foundFile]
-				require.True(t, expected, "unexpected file %s found in ZIP", foundFile)
-			}
+			validateZipExtraction(t, zipReader, tt.expectedFiles)
 		})
+	}
+}
+
+func validateZipExtraction(t *testing.T, zipReader *zip.ReadCloser, expectedFiles map[string]string) {
+	require.Equal(t, len(expectedFiles), len(zipReader.File), "ZIP should contain expected number of files")
+
+	foundFiles := make(map[string]string)
+	for _, file := range zipReader.File {
+		slog.Debug("files : ", "files", file.Name)
+		foundFiles[file.Name] = ""
+		if !strings.HasSuffix(file.Name, "/") {
+			rc, err := file.Open()
+			require.NoError(t, err, "should be able to open file %s in ZIP", file.Name)
+
+			content, err := io.ReadAll(rc)
+			rc.Close()
+			require.NoError(t, err, "should be able to read file %s", file.Name)
+
+			foundFiles[file.Name] = string(content)
+		}
+	}
+
+	for expectedFile, expectedContent := range expectedFiles {
+		foundContent, exists := foundFiles[expectedFile]
+		require.True(t, exists, "expected file %s should be found in ZIP", expectedFile)
+		if expectedContent != "" {
+			require.Equal(t, expectedContent, foundContent, "content should match for file %s", expectedFile)
+		}
+	}
+
+	for foundFile := range foundFiles {
+		_, expected := expectedFiles[foundFile]
+		require.True(t, expected, "unexpected file %s found in ZIP", foundFile)
 	}
 }
 

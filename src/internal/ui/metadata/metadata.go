@@ -113,20 +113,7 @@ func getMetaDataUnsorted(filePath string, metadataFocussed bool, et *exiftool.Ex
 	}
 	res.data = append(res.data, name, size, modifyDate, permissions)
 
-	if common.Config.Metadata && et != nil {
-		fileInfos := et.ExtractMetadata(filePath)
-
-		for _, fileInfo := range fileInfos {
-			if fileInfo.Err != nil {
-				res.infoMsg = etFetchErrorMsg
-				slog.Error("Error while return metadata function", "fileInfo", fileInfo, "error", fileInfo.Err)
-				continue
-			}
-			for k, v := range fileInfo.Fields {
-				res.data = append(res.data, [2]string{k, fmt.Sprintf("%v", v)})
-			}
-		}
-	}
+	updateExiftoolMetadata(filePath, et, &res)
 
 	if common.Config.EnableMD5Checksum {
 		// Calculate MD5 checksum
@@ -140,4 +127,22 @@ func getMetaDataUnsorted(filePath string, metadataFocussed bool, et *exiftool.Ex
 	}
 
 	return res
+}
+
+func updateExiftoolMetadata(filePath string, et *exiftool.Exiftool, res *Metadata) {
+	if !common.Config.Metadata || et == nil {
+		return
+	}
+	fileInfos := et.ExtractMetadata(filePath)
+
+	for _, fileInfo := range fileInfos {
+		if fileInfo.Err != nil {
+			res.infoMsg = etFetchErrorMsg
+			slog.Error("Error while return metadata function", "fileInfo", fileInfo, "error", fileInfo.Err)
+			continue
+		}
+		for k, v := range fileInfo.Fields {
+			res.data = append(res.data, [2]string{k, fmt.Sprintf("%v", v)})
+		}
+	}
 }

@@ -190,35 +190,7 @@ func pasteDir(src, dst string, p *processbar.Process, cut bool, processBarModel 
 			return err
 		}
 		newPath := filepath.Join(dst, relPath)
-
-		if info.IsDir() {
-			newPath, err = renameIfDuplicate(newPath)
-			if err != nil {
-				return err
-			}
-			err = os.MkdirAll(newPath, info.Mode())
-			return err
-		}
-		// File
-		p.Name = icon.GetCopyOrCutIcon(cut) + icon.Space + filepath.Base(path)
-		if cut && sameDev {
-			err = os.Rename(path, newPath)
-		} else {
-			err = copyFile(path, newPath, info)
-		}
-
-		if err != nil {
-			p.State = processbar.Failed
-			pSendErr := processBarModel.SendUpdateProcessMsg(*p, true)
-			if pSendErr != nil {
-				slog.Error("Error sending process update", "error", pSendErr)
-			}
-			return err
-		}
-
-		p.Done++
-		processBarModel.TrySendingUpdateProcessMsg(*p)
-		return nil
+		return actualPasteOperation(info, path, newPath, cut, sameDev, p, processBarModel)
 	})
 
 	if err != nil {
@@ -233,6 +205,42 @@ func pasteDir(src, dst string, p *processbar.Process, cut bool, processBarModel 
 		}
 	}
 
+	return nil
+}
+
+func actualPasteOperation(info os.FileInfo, path string, newPath string, cut bool, sameDev bool,
+	p *processbar.Process, processBarModel *processbar.Model) error {
+	var err error
+	if info.IsDir() {
+		// TODO - this is likely not needed because we did
+		// dst, err := renameIfDuplicate(dst) above
+		newPath, err = renameIfDuplicate(newPath)
+		if err != nil {
+			return err
+		}
+		err = os.MkdirAll(newPath, info.Mode())
+		return err
+	}
+
+	// File
+	p.Name = icon.GetCopyOrCutIcon(cut) + icon.Space + filepath.Base(path)
+	if cut && sameDev {
+		err = os.Rename(path, newPath)
+	} else {
+		err = copyFile(path, newPath, info)
+	}
+
+	if err != nil {
+		p.State = processbar.Failed
+		pSendErr := processBarModel.SendUpdateProcessMsg(*p, true)
+		if pSendErr != nil {
+			slog.Error("Error sending process update", "error", pSendErr)
+		}
+		return err
+	}
+
+	p.Done++
+	processBarModel.TrySendingUpdateProcessMsg(*p)
 	return nil
 }
 

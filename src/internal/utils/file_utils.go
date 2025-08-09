@@ -115,6 +115,10 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 	}
 
 	// Start fixing
+	return fixTomlFile(resultErr, filePath, target)
+}
+
+func fixTomlFile(resultErr *TomlLoadError, filePath string, target interface{}) error {
 	resultErr.isFatal = true
 	// Create a unique backup of the current config file
 	backupFile, err := os.CreateTemp(filepath.Dir(filePath), filepath.Base(filePath)+".bak-")

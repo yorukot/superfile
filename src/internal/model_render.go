@@ -334,7 +334,6 @@ func (m *model) promptModalRender() string {
 }
 
 func (m *model) helpMenuRender() string {
-	helpMenuContent := ""
 	maxKeyLength := 0
 
 	for _, data := range m.helpMenu.data {
@@ -353,7 +352,6 @@ func (m *model) helpMenuRender() string {
 		valueLength = m.helpMenu.width/2 - 2
 	}
 
-	renderHotkeyLength := 0
 	totalTitleCount := 0
 	cursorBeenTitleCount := 0
 
@@ -366,6 +364,18 @@ func (m *model) helpMenuRender() string {
 		}
 	}
 
+	renderHotkeyLength := m.getRenderHotkeyLengthHelpmenuModal()
+	helpMenuContent := m.getHelpMenuContent(renderHotkeyLength, valueLength)
+
+	bottomBorder := common.GenerateFooterBorder(fmt.Sprintf("%s/%s",
+		strconv.Itoa(m.helpMenu.cursor+1-cursorBeenTitleCount),
+		strconv.Itoa(len(m.helpMenu.data)-totalTitleCount)), m.helpMenu.width-2)
+
+	return common.HelpMenuModalBorderStyle(m.helpMenu.height, m.helpMenu.width, bottomBorder).Render(helpMenuContent)
+}
+
+func (m *model) getRenderHotkeyLengthHelpmenuModal() int {
+	renderHotkeyLength := 0
 	for i := m.helpMenu.renderIndex; i < m.helpMenu.height+m.helpMenu.renderIndex && i < len(m.helpMenu.data); i++ {
 		hotkey := ""
 
@@ -380,11 +390,13 @@ func (m *model) helpMenuRender() string {
 			hotkey += key
 		}
 
-		if len(common.HelpMenuHotkeyStyle.Render(hotkey)) > renderHotkeyLength {
-			renderHotkeyLength = len(common.HelpMenuHotkeyStyle.Render(hotkey))
-		}
+		renderHotkeyLength = max(renderHotkeyLength, len(common.HelpMenuHotkeyStyle.Render(hotkey)))
 	}
+	return renderHotkeyLength
+}
 
+func (m *model) getHelpMenuContent(renderHotkeyLength int, valueLength int) string {
+	helpMenuContent := ""
 	for i := m.helpMenu.renderIndex; i < m.helpMenu.height+m.helpMenu.renderIndex && i < len(m.helpMenu.data); i++ {
 		if i != m.helpMenu.renderIndex {
 			helpMenuContent += "\n"
@@ -412,12 +424,7 @@ func (m *model) helpMenuRender() string {
 		helpMenuContent += cursor + common.ModalStyle.Render(fmt.Sprintf("%*s%s", renderHotkeyLength,
 			common.HelpMenuHotkeyStyle.Render(hotkey+" "), common.ModalStyle.Render(description)))
 	}
-
-	bottomBorder := common.GenerateFooterBorder(fmt.Sprintf("%s/%s",
-		strconv.Itoa(m.helpMenu.cursor+1-cursorBeenTitleCount),
-		strconv.Itoa(len(m.helpMenu.data)-totalTitleCount)), m.helpMenu.width-2)
-
-	return common.HelpMenuModalBorderStyle(m.helpMenu.height, m.helpMenu.width, bottomBorder).Render(helpMenuContent)
+	return helpMenuContent
 }
 
 func (m *model) sortOptionsRender() string {
