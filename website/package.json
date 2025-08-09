@@ -16,7 +16,7 @@
     "@expressive-code/plugin-line-numbers": "^0.41.2",
     "@fontsource/ibm-plex-mono": "^5.2.5",
     "@fontsource/ibm-plex-serif": "^5.2.5",
-    "astro": "^5.7.7",
+    "astro": "^5.12.8",
     "hast-util-to-html": "^9.0.5",
     "sharp": "^0.34.1",
     "starlight-giscus": "^0.6.1"
