@@ -26,6 +26,8 @@ type hotkeyType int
 
 type modelQuitStateType int
 
+type sorting string
+
 const (
 	globalType hotkeyType = iota
 	normalType

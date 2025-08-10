@@ -619,7 +619,7 @@ func (m *model) getFilePanelItems() {
 
 		// Get file names based on search bar filter
 		if filePanel.searchBar.Value() != "" {
-			fileElement = returnDirElementBySearchString(filePanel.location, m.toggleDotFile, filePanel.searchBar.Value())
+			fileElement = returnDirElementBySearchString(filePanel.location, m.toggleDotFile, filePanel.searchBar.Value(), filePanel.sortOptions.data)
 		} else {
 			fileElement = returnDirElement(filePanel.location, m.toggleDotFile, filePanel.sortOptions.data)
 		}
