@@ -161,6 +161,8 @@ func getOrderingFunc(location string, dirEntries []os.DirEntry, reversed bool, s
 			// No need for err check, we already filtered out dirEntries with err != nil in Info() call
 			fileInfoI, _ := dirEntries[i].Info()
 			fileInfoJ, _ := dirEntries[j].Info()
+			// Note : If ModTime matches, the comparator returns false both ways; order becomes non-deterministic
+			// TODO: Fix this
 			return fileInfoI.ModTime().After(fileInfoJ.ModTime()) != reversed
 		}
 	case string(sortingFileType):
