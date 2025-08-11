@@ -160,12 +160,11 @@ func (panel *filePanel) renderFileEntries(r *rendering.Renderer, mainPanelHeight
 	}
 }
 
-// TODO : Make these strings : "Date Modified", "Date", "Browser", "Select" a constant
 func (panel *filePanel) getSortInfo() (string, string) {
 	opts := panel.sortOptions.data
 	selected := opts.options[opts.selected]
 	label := selected
-	if selected == "Date Modified" {
+	if selected == string(sortingDateModified) {
 		label = "Date"
 	}
 
