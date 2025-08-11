@@ -21,10 +21,10 @@ import (
 )
 
 const (
-	sortingName         sorting = "Name"
-	sortingSize         sorting = "Size"
-	sortingDateModified sorting = "Date Modified"
-	sortingFileType     sorting = "Type"
+	sortingName         sortingKind = "Name"
+	sortingSize         sortingKind = "Size"
+	sortingDateModified sortingKind = "Date Modified"
+	sortingFileType     sortingKind = "Type"
 )
 
 // Check if the directory is external disk path
@@ -84,7 +84,8 @@ func returnDirElement(location string, displayDotFile bool, sortOptions sortOpti
 	return sortFileElement(sortOptions, dirEntries, location)
 }
 
-func returnDirElementBySearchString(location string, displayDotFile bool, searchString string, sortOptions sortOptionsModelData) []element {
+func returnDirElementBySearchString(location string, displayDotFile bool, searchString string,
+	sortOptions sortOptionsModelData) []element {
 	items, err := os.ReadDir(location)
 	if err != nil {
 		slog.Error("Error while return folder element function", "error", err)
