@@ -67,7 +67,7 @@ func returnFocusType(focusPanel focusPanelType) filePanelFocusType {
 func returnDirElement(location string, displayDotFile bool, sortOptions sortOptionsModelData) []element {
 	dirEntries, err := os.ReadDir(location)
 	if err != nil {
-		slog.Error("Error while return folder element function", "error", err)
+		slog.Error("Error while returning folder elements", "error", err)
 		return nil
 	}
 
@@ -89,11 +89,11 @@ func returnDirElementBySearchString(location string, displayDotFile bool, search
 	items, err := os.ReadDir(location)
 	if err != nil {
 		slog.Error("Error while return folder element function", "error", err)
-		return []element{}
+		return nil
 	}
 
 	if len(items) == 0 {
-		return []element{}
+		return nil
 	}
 
 	folderElementMap := map[string]os.DirEntry{}
@@ -112,7 +112,7 @@ func returnDirElementBySearchString(location string, displayDotFile bool, search
 		folderElementMap[item.Name()] = item
 	}
 	// https://github.com/reinhrst/fzf-lib/blob/main/core.go#L43
-	// No sorting needed. fzf.DefaultOptions() already return values ordered on Score
+	// fzf returns matches ordered by score; we subsequently sort by the chosen sort option.
 	fzfResults := utils.FzfSearch(searchString, fileAndDirectories)
 	dirElements := make([]os.DirEntry, 0, len(fzfResults))
 	for _, item := range fzfResults {
@@ -141,7 +141,6 @@ func sortFileElement(sortOptions sortOptionsModelData, dirEntries []os.DirEntry,
 
 func getOrderingFunc(location string, dirEntries []os.DirEntry, reversed bool, sortOption string) sliceOrderFunc {
 	var order func(i, j int) bool
-	// TODO : These strings should not be hardcoded here, but defined as constants
 	switch sortOption {
 	case string(sortingName):
 		order = func(i, j int) bool {
