@@ -20,6 +20,13 @@ import (
 	"github.com/yorukot/superfile/src/internal/common"
 )
 
+const (
+	sortingName         sortingKind = "Name"
+	sortingSize         sortingKind = "Size"
+	sortingDateModified sortingKind = "Date Modified"
+	sortingFileType     sortingKind = "Type"
+)
+
 // Check if the directory is external disk path
 // TODO : This function should be give two directories, and it should return
 // if the two share a different disk partition.
@@ -60,7 +67,7 @@ func returnFocusType(focusPanel focusPanelType) filePanelFocusType {
 func returnDirElement(location string, displayDotFile bool, sortOptions sortOptionsModelData) []element {
 	dirEntries, err := os.ReadDir(location)
 	if err != nil {
-		slog.Error("Error while return folder element function", "error", err)
+		slog.Error("Error while returning folder elements", "error", err)
 		return nil
 	}
 
@@ -74,7 +81,49 @@ func returnDirElement(location string, displayDotFile bool, sortOptions sortOpti
 	if len(dirEntries) == 0 {
 		return nil
 	}
+	return sortFileElement(sortOptions, dirEntries, location)
+}
 
+func returnDirElementBySearchString(location string, displayDotFile bool, searchString string,
+	sortOptions sortOptionsModelData) []element {
+	items, err := os.ReadDir(location)
+	if err != nil {
+		slog.Error("Error while return folder element function", "error", err)
+		return nil
+	}
+
+	if len(items) == 0 {
+		return nil
+	}
+
+	folderElementMap := map[string]os.DirEntry{}
+	fileAndDirectories := []string{}
+
+	for _, item := range items {
+		fileInfo, err := item.Info()
+		if err != nil {
+			continue
+		}
+		if !displayDotFile && strings.HasPrefix(fileInfo.Name(), ".") {
+			continue
+		}
+
+		fileAndDirectories = append(fileAndDirectories, item.Name())
+		folderElementMap[item.Name()] = item
+	}
+	// https://github.com/reinhrst/fzf-lib/blob/main/core.go#L43
+	// fzf returns matches ordered by score; we subsequently sort by the chosen sort option.
+	fzfResults := utils.FzfSearch(searchString, fileAndDirectories)
+	dirElements := make([]os.DirEntry, 0, len(fzfResults))
+	for _, item := range fzfResults {
+		resultItem := folderElementMap[item.Key]
+		dirElements = append(dirElements, resultItem)
+	}
+
+	return sortFileElement(sortOptions, dirElements, location)
+}
+
+func sortFileElement(sortOptions sortOptionsModelData, dirEntries []os.DirEntry, location string) []element {
 	// Sort files
 	sort.Slice(dirEntries, getOrderingFunc(location, dirEntries,
 		sortOptions.reversed, sortOptions.options[sortOptions.selected]))
@@ -92,9 +141,8 @@ func returnDirElement(location string, displayDotFile bool, sortOptions sortOpti
 
 func getOrderingFunc(location string, dirEntries []os.DirEntry, reversed bool, sortOption string) sliceOrderFunc {
 	var order func(i, j int) bool
-	// TODO : These strings should not be hardcoded here, but defined as constants
 	switch sortOption {
-	case "Name":
+	case string(sortingName):
 		order = func(i, j int) bool {
 			// One of them is a directory, and other is not
 			if dirEntries[i].IsDir() != dirEntries[j].IsDir() {
@@ -105,16 +153,18 @@ func getOrderingFunc(location string, dirEntries []os.DirEntry, reversed bool, s
 			}
 			return strings.ToLower(dirEntries[i].Name()) < strings.ToLower(dirEntries[j].Name()) != reversed
 		}
-	case "Size":
+	case string(sortingSize):
 		order = getSizeOrderingFunc(dirEntries, reversed, location)
-	case "Date Modified":
+	case string(sortingDateModified):
 		order = func(i, j int) bool {
 			// No need for err check, we already filtered out dirEntries with err != nil in Info() call
 			fileInfoI, _ := dirEntries[i].Info()
 			fileInfoJ, _ := dirEntries[j].Info()
+			// Note : If ModTime matches, the comparator returns false both ways; order becomes non-deterministic
+			// TODO: Fix this
 			return fileInfoI.ModTime().After(fileInfoJ.ModTime()) != reversed
 		}
-	case "Type":
+	case string(sortingFileType):
 		order = getTypeOrderingFunc(dirEntries, reversed)
 	}
 	return order
@@ -179,50 +229,6 @@ func getTypeOrderingFunc(dirEntries []os.DirEntry, reversed bool) sliceOrderFunc
 
 		return (strings.ToLower(dirEntries[i].Name()) < strings.ToLower(dirEntries[j].Name())) != reversed
 	}
-}
-
-func returnDirElementBySearchString(location string, displayDotFile bool, searchString string) []element {
-	items, err := os.ReadDir(location)
-	if err != nil {
-		slog.Error("Error while return folder element function", "error", err)
-		return []element{}
-	}
-
-	if len(items) == 0 {
-		return []element{}
-	}
-
-	folderElementMap := map[string]element{}
-	fileAndDirectories := []string{}
-
-	for _, item := range items {
-		fileInfo, err := item.Info()
-		if err != nil {
-			continue
-		}
-		if !displayDotFile && strings.HasPrefix(fileInfo.Name(), ".") {
-			continue
-		}
-
-		folderElementLocation := filepath.Join(location, item.Name())
-
-		fileAndDirectories = append(fileAndDirectories, item.Name())
-		folderElementMap[item.Name()] = element{
-			name:      item.Name(),
-			directory: item.IsDir(),
-			location:  folderElementLocation,
-		}
-	}
-	// https://github.com/reinhrst/fzf-lib/blob/main/core.go#L43
-	// No sorting needed. fzf.DefaultOptions() already return values ordered on Score
-	fzfResults := utils.FzfSearch(searchString, fileAndDirectories)
-	dirElement := make([]element, 0, len(fzfResults))
-	for _, item := range fzfResults {
-		resultItem := folderElementMap[item.Key]
-		dirElement = append(dirElement, resultItem)
-	}
-
-	return dirElement
 }
 
 func panelElementHeight(mainPanelHeight int) int {

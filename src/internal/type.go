@@ -26,6 +26,9 @@ type hotkeyType int
 
 type modelQuitStateType int
 
+// TODO: Convert to integer enum
+type sortingKind string
+
 const (
 	globalType hotkeyType = iota
 	normalType
