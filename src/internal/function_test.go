@@ -61,6 +61,7 @@ func TestReturnDirElement(t *testing.T) {
 		sortOption        string
 		reversed          bool
 		sortOptions       sortOptionsModelData
+		searchString      string
 		expectedElemNames []string
 	}{
 		{
@@ -145,6 +146,33 @@ func TestReturnDirElement(t *testing.T) {
 			expectedElemNames: []string{"dir2", "dir1", ".xyz", "file2.txt", "file1.txt",
 				"xyz.json", "1.json", "aBcD", "abc"},
 		},
+		{
+			name:              "Sort by Type Reversed and dotfiles with search",
+			location:          curTestDir,
+			dotFiles:          true,
+			sortOption:        "Type",
+			reversed:          true,
+			searchString:      "x",
+			expectedElemNames: []string{".xyz", "file2.txt", "file1.txt", "xyz.json"},
+		},
+		{
+			name:              "Sort by Size Reversed with search ftt",
+			location:          curTestDir,
+			dotFiles:          false,
+			sortOption:        "Size",
+			reversed:          true,
+			searchString:      "ftt",
+			expectedElemNames: []string{"file2.txt", "file1.txt"},
+		},
+		{
+			name:              "Sort by Size Reversed with search d",
+			location:          curTestDir,
+			dotFiles:          false,
+			sortOption:        "Size",
+			reversed:          true,
+			searchString:      "d",
+			expectedElemNames: []string{"dir1", "dir2", "aBcD"},
+		},
 	}
 
 	for _, tt := range testdata {
@@ -154,7 +182,12 @@ func TestReturnDirElement(t *testing.T) {
 				selected: 0,
 				reversed: tt.reversed,
 			}
-			res := returnDirElement(tt.location, tt.dotFiles, sortOptionsModel)
+			var res []element
+			if tt.searchString == "" {
+				res = returnDirElement(tt.location, tt.dotFiles, sortOptionsModel)
+			} else {
+				res = returnDirElementBySearchString(tt.location, tt.dotFiles, tt.searchString, sortOptionsModel)
+			}
 
 			assert.Len(t, res, len(tt.expectedElemNames))
 			actualNames := []string{}
@@ -224,157 +257,6 @@ func TestCheckFileNameValidity(t *testing.T) {
 				require.Error(t, err)
 				assert.Contains(t, err.Error(), tt.errMsg)
 			}
-		})
-	}
-}
-
-func TestReturnDirElementByStringSearch(t *testing.T) {
-	// using 'testDir' set up by testMain of our internal package.
-	require.DirExists(t, testDir, "Main test directory should be pre created")
-	curTestDir := filepath.Join(testDir, "TestRDE")
-	dir1 := filepath.Join(curTestDir, "dir1")
-	dir2 := filepath.Join(curTestDir, "dir2")
-	setupDirectories(t, curTestDir, dir1, dir2)
-
-	creationDelay := time.Millisecond * 5
-	// Cleanup is handled by TestMain
-
-	// Setup files
-	// All files with 10 bytes of text
-
-	// dir1
-	// - file1.txt
-	// dir2 (Empty)
-	// .xyz
-	// 1.json
-	// abc - Add 15 bytes of text
-	// aBcD
-	// file1.txt
-	// file2.txt - Add 20 bytes of text
-	// xyz.json
-
-	fileSetup := []struct {
-		path string
-		data []byte
-	}{
-		{filepath.Join(curTestDir, ".dot"), []byte("0123456789")},
-		{filepath.Join(dir1, "file1.txt"), []byte("0123456789")},
-		{filepath.Join(dir1, "docs.txt"), []byte("0123456789")},
-		{filepath.Join(curTestDir, "aBcD"), []byte("0123456789")},
-		{filepath.Join(curTestDir, "file1.txt"), []byte("0123456789")},
-		{filepath.Join(curTestDir, "xyz.json"), []byte("0123456789")},
-		{filepath.Join(curTestDir, "todo"), []byte("012345678901234")},
-		{filepath.Join(curTestDir, "file2.txt"), []byte("01234567890123456789")},
-		{filepath.Join(curTestDir, "d.json"), []byte("0123456789")},
-	}
-
-	for _, f := range fileSetup {
-		setupFilesWithData(t, f.data, f.path)
-		time.Sleep(creationDelay)
-	}
-
-	testdata := []struct {
-		name              string
-		location          string
-		dotFiles          bool
-		sortOption        string
-		reversed          bool
-		sortOptions       sortOptionsModelData
-		expectedElemNames []string
-	}{
-		{
-			name:              "Empty Directory",
-			location:          dir2,
-			dotFiles:          false,
-			sortOption:        "Name",
-			reversed:          false,
-			expectedElemNames: []string{},
-		},
-		{
-			name:              "Sort by Name",
-			location:          curTestDir,
-			dotFiles:          false,
-			sortOption:        "Name",
-			reversed:          false,
-			expectedElemNames: []string{"dir1", "dir2", "aBcD", "d.json", "todo"},
-		},
-		{
-			name:              "Sort by Name, with dotfiles",
-			location:          curTestDir,
-			dotFiles:          true,
-			sortOption:        "Name",
-			reversed:          false,
-			expectedElemNames: []string{"dir1", "dir2", ".dot", "aBcD", "d.json", "todo"},
-		},
-		{
-			name:              "Sort by Name Reversed",
-			location:          curTestDir,
-			dotFiles:          false,
-			sortOption:        "Name",
-			reversed:          true,
-			expectedElemNames: []string{"dir2", "dir1", "todo", "d.json", "aBcD"},
-		},
-		{
-			name:              "Sort by Size",
-			location:          curTestDir,
-			dotFiles:          false,
-			sortOption:        "Size",
-			reversed:          false,
-			expectedElemNames: []string{"dir2", "dir1", "d.json", "aBcD", "todo"},
-		},
-		{
-			name:              "Sort by Size Reversed",
-			location:          curTestDir,
-			dotFiles:          false,
-			sortOption:        "Size",
-			reversed:          true,
-			expectedElemNames: []string{"dir1", "dir2", "todo", "aBcD", "d.json"},
-		},
-		// This one could be flakey if files are created to quickly, or maybe created in
-		// parallel
-		{
-			name:              "Sort by Date",
-			location:          curTestDir,
-			dotFiles:          false,
-			sortOption:        "Date Modified",
-			reversed:          false,
-			expectedElemNames: []string{"d.json", "todo", "aBcD", "dir1", "dir2"},
-		},
-		{
-			name:              "Sort by Type",
-			location:          curTestDir,
-			dotFiles:          false,
-			sortOption:        "Type",
-			reversed:          false,
-			expectedElemNames: []string{"dir1", "dir2", "aBcD", "todo", "d.json"},
-		},
-		{
-			name:              "Sort by Type Reversed and dotfiles",
-			location:          curTestDir,
-			dotFiles:          true,
-			sortOption:        "Type",
-			reversed:          true,
-			expectedElemNames: []string{"dir2", "dir1", "d.json", ".dot", "todo", "aBcD"},
-		},
-	}
-
-	searchKey := "d"
-
-	for _, tt := range testdata {
-		t.Run(tt.name, func(t *testing.T) {
-			sortOptionsModel := sortOptionsModelData{
-				options:  []string{tt.sortOption},
-				selected: 0,
-				reversed: tt.reversed,
-			}
-			res := returnDirElementBySearchString(tt.location, tt.dotFiles, searchKey, sortOptionsModel)
-
-			assert.Len(t, res, len(tt.expectedElemNames))
-			actualNames := []string{}
-			for i := range res {
-				actualNames = append(actualNames, res[i].name)
-			}
-			assert.Equal(t, tt.expectedElemNames, actualNames)
 		})
 	}
 }
