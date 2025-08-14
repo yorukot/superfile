@@ -100,6 +100,7 @@ func TestQuit(t *testing.T) {
 	// 2 - Normal quit with running process causing a warn modal
 	//     2a - Cancelling quit
 	//     2b - Proceeding with the quit
+	// 3 - Cd on quit test that LastDir is written on
 
 	t.Run("Normal Quit", func(t *testing.T) {
 		m := defaultTestModel(testDir)
@@ -137,6 +138,26 @@ func TestQuit(t *testing.T) {
 		cmd = TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.Confirm[0]))
 		assert.Equal(t, quitDone, m.modelQuitState)
 		assert.True(t, IsTeaQuit(cmd))
+	})
+
+	t.Run("Cd on quit test that LastDir is written on", func(t *testing.T) {
+		lastDirFile := filepath.Join(variable.SuperFileStateDir, "lastdir")
+		require.NoError(t, os.MkdirAll(filepath.Dir(lastDirFile), 0o755))
+		m := defaultTestModel(testDir)
+
+		assert.Equal(t, notQuitting, m.modelQuitState)
+
+		cmd := TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.CdQuit[0]))
+
+		assert.Equal(t, quitDone, m.modelQuitState)
+		assert.True(t, IsTeaQuit(cmd))
+
+		data, err := os.ReadFile(lastDirFile)
+		require.NoError(t, err)
+		assert.Equal(t, "cd '"+testDir+"'", string(data), "LastDir file should contain the tempDir path")
+
+		err = os.Remove(lastDirFile)
+		require.NoError(t, err)
 	})
 }
 

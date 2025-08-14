@@ -27,10 +27,12 @@ import (
 )
 
 // These represent model's state information, its not a global preperty
-var LastTimeCursorMove = [2]int{int(time.Now().UnixMicro()), 0} //nolint: gochecknoglobals // TODO: Move to model struct
-var hasTrash = true                                             //nolint: gochecknoglobals // TODO: Move to model struct
-var batCmd = ""                                                 //nolint: gochecknoglobals // TODO: Move to model struct
-var et *exiftool.Exiftool                                       //nolint: gochecknoglobals // TODO: Move to model struct
+var (
+	LastTimeCursorMove = [2]int{int(time.Now().UnixMicro()), 0} //nolint: gochecknoglobals // TODO: Move to model struct
+	hasTrash           = true                                   //nolint: gochecknoglobals // TODO: Move to model struct
+	batCmd             = ""                                     //nolint: gochecknoglobals // TODO: Move to model struct
+	et                 *exiftool.Exiftool                       //nolint: gochecknoglobals // TODO: Move to model struct
+)
 
 // Initialize and return model with default configs
 // It returns only tea.Model because when it used in main, the return value
@@ -287,6 +289,7 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 		return nil
 	}
 	var cmd tea.Cmd
+	cdOnQuit := common.Config.CdOnQuit
 	switch {
 	case m.typingModal.open:
 		m.typingModalOpenKey(msg.String())
@@ -319,6 +322,10 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 	case slices.Contains(common.Hotkeys.Quit, msg.String()):
 		m.modelQuitState = quitInitiated
 
+	case slices.Contains(common.Hotkeys.CdQuit, msg.String()):
+		m.modelQuitState = quitInitiated
+		cdOnQuit = true
+
 	default:
 		// Handles general kinds of inputs in the regular state of the application
 		cmd = m.mainKey(msg.String())
@@ -336,7 +343,7 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 		m.modelQuitState = quitConfirmationReceived
 	}
 	if m.modelQuitState == quitConfirmationReceived {
-		m.quitSuperfile()
+		m.quitSuperfile(cdOnQuit)
 		return tea.Quit
 	}
 	return cmd
@@ -635,7 +642,7 @@ func (m *model) getFilePanelItems() {
 
 // Close superfile application. Cd into the current dir if CdOnQuit on and save
 // the path in state direcotory
-func (m *model) quitSuperfile() {
+func (m *model) quitSuperfile(cdOnQuit bool) {
 	// close exiftool session
 	if common.Config.Metadata && et != nil {
 		et.Close()
@@ -644,7 +651,7 @@ func (m *model) quitSuperfile() {
 	currentDir := m.fileModel.filePanels[m.filePanelFocusIndex].location
 	variable.SetLastDir(currentDir)
 
-	if common.Config.CdOnQuit {
+	if cdOnQuit {
 		// escape single quote
 		currentDir = strings.ReplaceAll(currentDir, "'", "'\\''")
 		err := os.WriteFile(variable.LastDirFile, []byte("cd '"+currentDir+"'"), 0755)
