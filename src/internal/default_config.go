@@ -14,7 +14,7 @@ import (
 
 // Generate and return model containing default configurations for interface
 // Maybe we can replace slice of strings with var args - Should we ?
-func defaultModelConfig(toggleDotFile bool, toggleFooter bool, firstUse bool, firstFilePanelDirs []string) *model {
+func defaultModelConfig(toggleDotFile, toggleFooter, firstUse, hasTrash bool, firstFilePanelDirs []string) *model {
 	return &model{
 		filePanelFocusIndex: 0,
 		focusPanel:          nonePanelFocus,
@@ -40,6 +40,7 @@ func defaultModelConfig(toggleDotFile bool, toggleFooter bool, firstUse bool, fi
 		toggleDotFile:  toggleDotFile,
 		toggleFooter:   toggleFooter,
 		firstUse:       firstUse,
+		hasTrash:       hasTrash,
 	}
 }
 

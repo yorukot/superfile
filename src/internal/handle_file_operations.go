@@ -92,7 +92,7 @@ func (m *model) panelItemRename() {
 	panel.rename = common.GenerateRenameTextInput(m.fileModel.width-4, cursorPos, panel.element[panel.cursor].name)
 }
 
-func (m *model) getDeleteCmd() tea.Cmd {
+func (m *model) getDeleteCmd(permDelete bool) tea.Cmd {
 	panel := m.getFocusedFilePanel()
 	if len(panel.element) == 0 {
 		return nil
@@ -105,7 +105,7 @@ func (m *model) getDeleteCmd() tea.Cmd {
 		items = []string{panel.getSelectedItem().location}
 	}
 
-	useTrash := hasTrash && !isExternalDiskPath(panel.location)
+	useTrash := m.hasTrash && !isExternalDiskPath(panel.location) && !permDelete
 
 	reqID := m.ioReqCnt
 	m.ioReqCnt++
@@ -154,7 +154,7 @@ func deleteOperation(processBarModel *processbar.Model, items []string, useTrash
 	return p.State
 }
 
-func (m *model) getDeleteTriggerCmd() tea.Cmd {
+func (m *model) getDeleteTriggerCmd(deletePermanent bool) tea.Cmd {
 	panel := m.getFocusedFilePanel()
 	if (panel.panelMode == selectMode && len(panel.selected) == 0) ||
 		(panel.panelMode == browserMode && len(panel.element) == 0) {
@@ -167,12 +167,14 @@ func (m *model) getDeleteTriggerCmd() tea.Cmd {
 	return func() tea.Msg {
 		title := "Are you sure you want to move this to trash can"
 		content := "This operation will move file or directory to trash can."
+		notifyModel := notify.New(true, title, content, notify.DeleteAction)
 
-		if !hasTrash || isExternalDiskPath(panel.location) {
+		if !m.hasTrash || isExternalDiskPath(panel.location) || deletePermanent {
 			title = "Are you sure you want to completely delete"
 			content = "This operation cannot be undone and your data will be completely lost."
+			notifyModel = notify.New(true, title, content, notify.PermanentDeleteAction)
 		}
-		return NewNotifyModalMsg(notify.New(true, title, content, notify.DeleteAction), reqID)
+		return NewNotifyModalMsg(notifyModel, reqID)
 	}
 }
 

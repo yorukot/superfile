@@ -135,10 +135,11 @@ type HotkeysType struct {
 	FilePanelItemCreate []string `toml:"file_panel_item_create" comment:"create file/directory and rename "`
 	FilePanelItemRename []string `toml:"file_panel_item_rename"`
 
-	CopyItems   []string `toml:"copy_items" comment:"file operate"`
-	PasteItems  []string `toml:"paste_items"`
-	CutItems    []string `toml:"cut_items"`
-	DeleteItems []string `toml:"delete_items"`
+	CopyItems              []string `toml:"copy_items" comment:"file operate"`
+	PasteItems             []string `toml:"paste_items"`
+	CutItems               []string `toml:"cut_items"`
+	DeleteItems            []string `toml:"delete_items"`
+	PermanentlyDeleteItems []string `toml:"permanently_delete_items"`
 
 	ExtractFile  []string `toml:"extract_file" comment:"compress and extract"`
 	CompressFile []string `toml:"compress_file"`
