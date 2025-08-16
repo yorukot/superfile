@@ -41,7 +41,7 @@ func setupFiles(t *testing.T, files ...string) {
 // -------------------- Model setup utils
 
 func defaultTestModel(dirs ...string) *model {
-	m := defaultModelConfig(false, false, false, dirs)
+	m := defaultModelConfig(false, false, false, false, dirs)
 	m.disableMetatdata = true
 	_, _ = TeaUpdate(m, tea.WindowSizeMsg{Width: 2 * common.MinimumWidth, Height: 2 * common.MinimumHeight})
 	return m

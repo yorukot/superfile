@@ -30,6 +30,7 @@ copy_items = ['y', '']
 cut_items = ['x', '']
 paste_items = ['p', '']
 delete_items = ['d', '']
+permanently_delete_items = ['D', '']
 # compress and extract
 extract_file = ['ctrl+e', '']
 compress_file = ['ctrl+a', '']

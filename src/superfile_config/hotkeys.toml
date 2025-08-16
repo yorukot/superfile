@@ -28,6 +28,7 @@ copy_items = ['ctrl+c', '']
 cut_items = ['ctrl+x', '']
 paste_items = ['ctrl+v', 'ctrl+w', '']
 delete_items = ['ctrl+d', 'delete', '']
+permanently_delete_items = ['D', '']
 # compress and extract
 extract_file = ['ctrl+e', '']
 compress_file = ['ctrl+a', '']

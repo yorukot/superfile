@@ -7,4 +7,5 @@ const (
 	DeleteAction
 	QuitAction
 	NoAction
+	PermanentDeleteAction
 )

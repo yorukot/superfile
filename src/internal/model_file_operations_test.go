@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/utils"
@@ -185,5 +187,106 @@ func TestFileRename(t *testing.T) {
 
 		actualTest(false)
 		actualTest(true)
+	})
+}
+
+func createDirectories(dirs ...string) error {
+	for _, dir := range dirs {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			return fmt.Errorf("failed to create directory %s: %w", dir, err)
+		}
+	}
+	return nil
+}
+
+func initTrash() error {
+	return createDirectories(
+		variable.CustomTrashDirectory,
+		variable.CustomTrashDirectoryFiles,
+		variable.CustomTrashDirectoryInfo,
+	)
+}
+
+func getTrashPath(src string) string {
+	home, _ := os.UserHomeDir()
+	src = filepath.Base(src)
+	switch runtime.GOOS {
+	case utils.OsDarwin:
+		return filepath.Join(variable.DarwinTrashDirectory, src)
+	default:
+		return filepath.Join(home, ".local", "share", "Trash", "files", src)
+	}
+}
+
+func TestFileDelete(t *testing.T) {
+	curTestDir := t.TempDir()
+	file1 := filepath.Join(curTestDir, "file1.txt")
+	file2 := filepath.Join(curTestDir, "file2.txt")
+
+	setupFilesWithData(t, []byte("f1"), file1)
+	setupFilesWithData(t, []byte("f2"), file2)
+
+	t.Run("move to trash", func(t *testing.T) {
+		m := defaultTestModel(curTestDir)
+		err := initTrash()
+		if err == nil {
+			m.hasTrash = true
+		} else {
+			fmt.Println("Unable to create trash directories.")
+		}
+		p := NewTestTeaProgWithEventLoop(t, m)
+		idx := findItemIndexInPanelByLocation(m.getFocusedFilePanel(), file1)
+		require.NotEqual(t, -1, idx, "%s should be found in panel", file1)
+		m.getFocusedFilePanel().cursor = idx
+
+		p.SendKey(common.Hotkeys.DeleteItems[0])
+
+		assert.Eventually(t, func() bool {
+			return m.notifyModel.IsOpen()
+		}, time.Second, 10*time.Microsecond, "Notify model never opened")
+
+		p.Send(tea.KeyMsg{Type: tea.KeyRight})
+
+		assert.Eventually(t, func() bool {
+			_, err1 := os.Stat(file1)
+			trashFile := getTrashPath(file1)
+			_, errTrash := os.Stat(trashFile)
+			if runtime.GOOS == utils.OsWindows {
+				return err1 != nil && os.IsNotExist(err1)
+			}
+			return err1 != nil && os.IsNotExist(err1) && errTrash == nil
+		}, time.Second, 10*time.Millisecond, "File never moved to trash.")
+	})
+
+	t.Run("move to trash", func(t *testing.T) {
+		m := defaultTestModel(curTestDir)
+		err := initTrash()
+		if err == nil {
+			m.hasTrash = true
+		} else {
+			fmt.Println("Unable to create trash directories.")
+		}
+		p := NewTestTeaProgWithEventLoop(t, m)
+		idx := findItemIndexInPanelByLocation(m.getFocusedFilePanel(), file2)
+		require.NotEqual(t, -1, idx, "%s should be found in panel", file2)
+		m.getFocusedFilePanel().cursor = idx
+
+		p.SendKey(common.Hotkeys.PermanentlyDeleteItems[0])
+
+		assert.Eventually(t, func() bool {
+			return m.notifyModel.IsOpen()
+		}, time.Second, 10*time.Microsecond, "Notify model never opened")
+
+		p.Send(tea.KeyMsg{Type: tea.KeyRight})
+
+		assert.Eventually(t, func() bool {
+			_, err1 := os.Stat(file2)
+			trashFile := getTrashPath(file2)
+			_, errTrash := os.Stat(trashFile)
+			if runtime.GOOS == utils.OsWindows {
+				return err1 != nil && os.IsNotExist(err1)
+			}
+			return err1 != nil && os.IsNotExist(err1) && errTrash != nil && os.IsNotExist(err1)
+		}, time.Second, 10*time.Millisecond, "File never moved to trash.")
 	})
 }
