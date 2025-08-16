@@ -108,7 +108,7 @@ type model struct {
 	fullWidth    int
 	fullHeight   int
 
-	// wheather trash folder exists or not
+	// whether usable trash directory exists or not
 	hasTrash bool
 }
 
