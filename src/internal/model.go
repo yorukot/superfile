@@ -145,6 +145,7 @@ func (m *model) getFilePreviewCmd(forcePreviewRender bool) tea.Cmd {
 	}
 
 	m.fileModel.filePreview.SetContextWithRenderText("Loading...")
+	m.fileModel.filePreview.location = selectedItem.location
 	reqCnt := m.ioReqCnt
 	m.ioReqCnt++
 	slog.Debug("Submitting file preview render request", "id", reqCnt, "path", selectedItem.location)
