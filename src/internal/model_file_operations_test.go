@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"testing"
-	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/rkoesters/xdg/trash"
@@ -49,7 +48,7 @@ func TestCopy(t *testing.T) {
 		assert.Eventually(t, func() bool {
 			_, err := os.Lstat(filepath.Join(dir2, "file1.txt"))
 			return err == nil
-		}, time.Second, DefaultTestTick)
+		}, DefaultTestTimeout, DefaultTestTick)
 
 		assert.False(t, p.getModel().copyItems.cut)
 		assert.Equal(t, file1, p.getModel().copyItems.items[0])
@@ -58,7 +57,7 @@ func TestCopy(t *testing.T) {
 		assert.Eventually(t, func() bool {
 			_, err := os.Lstat(filepath.Join(dir2, "file1(1).txt"))
 			return err == nil
-		}, time.Second, DefaultTestTick)
+		}, DefaultTestTimeout, DefaultTestTick)
 		assert.FileExists(t, filepath.Join(dir2, "file1(1).txt"))
 		//TODO: Also verify if there are only 2 items in process bar
 	})
@@ -137,7 +136,7 @@ func TestFileRename(t *testing.T) {
 			_, err1 := os.Stat(file1)
 			_, err1New := os.Stat(file1New)
 			return err1New == nil && os.IsNotExist(err1)
-		}, time.Second, DefaultTestTick, "File never got renamed")
+		}, DefaultTestTimeout, DefaultTestTick, "File never got renamed")
 	})
 
 	t.Run("Rename confirmation for same name", func(t *testing.T) {
@@ -156,7 +155,7 @@ func TestFileRename(t *testing.T) {
 			// This will result in async
 			assert.Eventually(t, func() bool {
 				return m.notifyModel.IsOpen()
-			}, time.Second, DefaultTestTick, "Notify modal never opened, filepanel items : %v",
+			}, DefaultTestTimeout, DefaultTestTick, "Notify modal never opened, filepanel items : %v",
 				m.getFocusedFilePanel().element)
 
 			assert.Equal(t, notify.New(true,
@@ -181,7 +180,7 @@ func TestFileRename(t *testing.T) {
 						string(f2Data) == "f3"
 				}
 				return err2 == nil && err3 == nil
-			}, time.Second, DefaultTestTick,
+			}, DefaultTestTimeout, DefaultTestTick,
 				"Rename should be done/not done appropriately, file : %v",
 				m.getFocusedFilePanel().element)
 		}

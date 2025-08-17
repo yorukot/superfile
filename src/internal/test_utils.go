@@ -161,7 +161,7 @@ func verifyPathNotExistsEventually(t *testing.T, path, message string) {
 	assert.Eventually(t, func() bool {
 		_, err := os.Stat(path)
 		return os.IsNotExist(err)
-	}, time.Second, DefaultTestTick, message)
+	}, DefaultTestTimeout, DefaultTestTick, message)
 }
 
 // Helper function to verify expected destination files exist
@@ -172,7 +172,7 @@ func verifyDestinationFiles(t *testing.T, targetDir string, expectedDestFiles []
 		assert.Eventually(t, func() bool {
 			_, err := os.Stat(destPath)
 			return err == nil
-		}, time.Second, DefaultTestTick, "%s should exist in destination", expectedFile)
+		}, DefaultTestTimeout, DefaultTestTick, "%s should exist in destination", expectedFile)
 	}
 }
 

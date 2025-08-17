@@ -14,6 +14,8 @@ import (
 
 // Generate and return model containing default configurations for interface
 // Maybe we can replace slice of strings with var args - Should we ?
+// TODO: Move the configuration parameters to a ModelConfig struct.
+// Something like `RendererConfig` struct for `Renderer` struct in ui/renderer package
 func defaultModelConfig(toggleDotFile, toggleFooter, firstUse, hasTrash bool, firstFilePanelDirs []string) *model {
 	return &model{
 		filePanelFocusIndex: 0,
@@ -227,6 +229,11 @@ func getHelpMenuData() []helpMenuModalData { //nolint: funlen // This should be 
 		{
 			hotkey:         common.Hotkeys.DeleteItems,
 			description:    "Delete selected items",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey:         common.Hotkeys.PermanentlyDeleteItems,
+			description:    "Permanently delete selected items",
 			hotkeyWorkType: globalType,
 		},
 		{

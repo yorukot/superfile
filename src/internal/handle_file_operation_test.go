@@ -4,7 +4,6 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -117,7 +116,7 @@ func TestCompressSelectedFiles(t *testing.T) {
 			assert.Eventually(t, func() bool {
 				_, err := os.Lstat(zipFile)
 				return err == nil
-			}, time.Second, DefaultTestTick)
+			}, DefaultTestTimeout, DefaultTestTick)
 
 			// Assert zip file exists right after compression
 			require.FileExists(t, zipFile, "Expected zip file does not exist after compression")
@@ -151,7 +150,7 @@ func TestCompressSelectedFiles(t *testing.T) {
 					}
 				}
 				return true
-			}, time.Second, DefaultTestTick, "Extraction of files failed Required - [%s]+%v",
+			}, DefaultTestTimeout, DefaultTestTick, "Extraction of files failed Required - [%s]+%v",
 				extractedDir, tt.expectedFilesAfterExtract)
 
 			require.NoError(t, os.RemoveAll(extractedDir))
