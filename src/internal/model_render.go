@@ -611,14 +611,19 @@ func (m *model) renderTextPreview(r *rendering.Renderer, box lipgloss.Style, ite
 	return r.Render()
 }
 func (m *model) filePreviewPanelRenderWithDimensions() string {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := m.getFocusedFilePanel()
 	if len(panel.element) == 0 {
 		return m.fileModel.filePreview.RenderText("")
 	}
-	itemPath := panel.element[panel.cursor].location
+	itemPath := panel.getSelectedItem().location
 	return m.filePreviewPanelRenderWithPath(itemPath)
 }
 
+// TODO: Avoid accessing the model here.
+// There is used in tea.Cmd for async rendering. Avoid access inside async
+// command closures to reduce data-race risk. Require immutable values as parameter
+// (e.g., previewW, previewH, sideAreaWidth, imagePreviewer, theme colors) and pass
+// them to a pure renderer that doesn’t touch m.
 func (m *model) filePreviewPanelRenderWithPath(itemPath string) string {
 	previewHeight := m.fileModel.filePreview.height
 	previewWidth := m.fileModel.filePreview.width
