@@ -167,3 +167,34 @@ func (msg NotifyModalUpdateMsg) ApplyToModel(m *model) tea.Cmd {
 	m.notifyModel = msg.m
 	return nil
 }
+
+type FilePreviewUpdateMsg struct {
+	BaseMessage
+
+	location string
+	content  string
+}
+
+func NewFilePreviewUpdateMsg(location string, content string, reqID int) FilePreviewUpdateMsg {
+	return FilePreviewUpdateMsg{
+		location: location,
+		content:  content,
+		BaseMessage: BaseMessage{
+			reqID: reqID,
+		},
+	}
+}
+
+func (msg FilePreviewUpdateMsg) ApplyToModel(m *model) tea.Cmd {
+	selectedItem := m.getFocusedFilePanel().getSelectedItemPtr()
+	if selectedItem == nil {
+		slog.Debug("Panel empty or cursor invalid. Ignoring FilePreviewUpdateMsg")
+		return nil
+	}
+	if selectedItem.location != msg.location {
+		slog.Debug("FilePreviewUpdateMsg for older files. Ignoring")
+		return nil
+	}
+	m.fileModel.filePreview.content = msg.content
+	return nil
+}

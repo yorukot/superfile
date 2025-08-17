@@ -150,12 +150,7 @@ type fileModel struct {
 	width        int
 	renaming     bool
 	maxFilePanel int
-	filePreview  filePreviewPanel
-}
-
-type filePreviewPanel struct {
-	open  bool
-	width int
+	filePreview  FilePreviewPanel
 }
 
 // Panel representing a file
