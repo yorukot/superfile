@@ -46,10 +46,7 @@ var (
 	LastDirFile = filepath.Join(SuperFileStateDir, "lastdir")
 
 	// Trash Directories
-	DarwinTrashDirectory      = filepath.Join(HomeDir, ".Trash")
-	CustomTrashDirectory      = filepath.Join(xdg.DataHome, "Trash")
-	CustomTrashDirectoryFiles = filepath.Join(xdg.DataHome, "Trash", "files")
-	CustomTrashDirectoryInfo  = filepath.Join(xdg.DataHome, "Trash", "info")
+	DarwinTrashDirectory = filepath.Join(HomeDir, ".Trash")
 )
 
 // These variables are actually not fixed, they are sometimes updated dynamically

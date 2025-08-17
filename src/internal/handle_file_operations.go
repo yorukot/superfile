@@ -128,7 +128,7 @@ func deleteOperation(processBarModel *processbar.Model, items []string, useTrash
 
 	deleteFunc := os.RemoveAll
 	if useTrash {
-		deleteFunc = trashMacOrLinux
+		deleteFunc = moveToTrash
 	}
 	for _, item := range items {
 		err = deleteFunc(item)
@@ -167,14 +167,14 @@ func (m *model) getDeleteTriggerCmd(deletePermanent bool) tea.Cmd {
 	return func() tea.Msg {
 		title := "Are you sure you want to move this to trash can"
 		content := "This operation will move file or directory to trash can."
-		notifyModel := notify.New(true, title, content, notify.DeleteAction)
+		action := notify.DeleteAction
 
 		if !m.hasTrash || isExternalDiskPath(panel.location) || deletePermanent {
 			title = "Are you sure you want to completely delete"
 			content = "This operation cannot be undone and your data will be completely lost."
-			notifyModel = notify.New(true, title, content, notify.PermanentDeleteAction)
+			action = notify.PermanentDeleteAction
 		}
-		return NewNotifyModalMsg(notifyModel, reqID)
+		return NewNotifyModalMsg(notify.New(true, title, content, action), reqID)
 	}
 }
 

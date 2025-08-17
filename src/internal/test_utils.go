@@ -13,6 +13,9 @@ import (
 	"github.com/yorukot/superfile/src/internal/utils"
 )
 
+const DefaultTestTick = 10 * time.Millisecond
+const DefaultTestTimeout = time.Second
+
 var SampleDataBytes = []byte("This is sample") //nolint: gochecknoglobals // Effectively const
 
 func setupDirectories(t *testing.T, dirs ...string) {
@@ -158,7 +161,7 @@ func verifyPathNotExistsEventually(t *testing.T, path, message string) {
 	assert.Eventually(t, func() bool {
 		_, err := os.Stat(path)
 		return os.IsNotExist(err)
-	}, time.Second, 10*time.Millisecond, message)
+	}, time.Second, DefaultTestTick, message)
 }
 
 // Helper function to verify expected destination files exist
@@ -169,7 +172,7 @@ func verifyDestinationFiles(t *testing.T, targetDir string, expectedDestFiles []
 		assert.Eventually(t, func() bool {
 			_, err := os.Stat(destPath)
 			return err == nil
-		}, time.Second, 10*time.Millisecond, "%s should exist in destination", expectedFile)
+		}, time.Second, DefaultTestTick, "%s should exist in destination", expectedFile)
 	}
 }
 

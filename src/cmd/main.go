@@ -9,7 +9,6 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
-	"runtime"
 	"time"
 
 	"github.com/yorukot/superfile/src/internal/common"
@@ -129,14 +128,9 @@ func spfAppAction(_ context.Context, c *cli.Command) error {
 
 	InitConfigFile()
 
-	hasTrash := true
-	if err := InitTrash(); err != nil {
-		hasTrash = false
-	}
-
 	firstUse := checkFirstUse()
 
-	p := tea.NewProgram(internal.InitialModel(firstFilePanelDirs, firstUse, hasTrash),
+	p := tea.NewProgram(internal.InitialModel(firstFilePanelDirs, firstUse, true),
 		tea.WithAltScreen(), tea.WithMouseCellMotion())
 	if _, err := p.Run(); err != nil {
 		utils.PrintfAndExit("Alas, there's been an error: %v", err)
@@ -190,20 +184,6 @@ func InitConfigFile() {
 	if err := initJSONFile(variable.PinnedFile); err != nil {
 		utils.PrintlnAndExit("Error initializing json file:", err)
 	}
-}
-
-// We are initializing these, but not sure if we are ever using them
-func InitTrash() error {
-	// Create trash directories
-	if runtime.GOOS != utils.OsDarwin {
-		err := createDirectories(
-			variable.CustomTrashDirectory,
-			variable.CustomTrashDirectoryFiles,
-			variable.CustomTrashDirectoryInfo,
-		)
-		return err
-	}
-	return nil
 }
 
 // Helper functions

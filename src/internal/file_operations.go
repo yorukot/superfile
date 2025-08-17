@@ -145,8 +145,7 @@ func copyFile(src, dst string, srcInfo os.FileInfo) error {
 	return nil
 }
 
-// Move file to trash can and can auto switch macos trash can or linux trash can
-func trashMacOrLinux(src string) error {
+func moveToTrash(src string) error {
 	var err error
 	switch runtime.GOOS {
 	case utils.OsDarwin:
@@ -154,6 +153,7 @@ func trashMacOrLinux(src string) error {
 	case utils.OsWindows:
 		err = trash_win.Throw(src)
 	default:
+		// TODO: We should consider moving away from this package. Its not well written.
 		err = trash.Trash(src)
 	}
 	if err != nil {

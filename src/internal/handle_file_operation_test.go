@@ -117,7 +117,7 @@ func TestCompressSelectedFiles(t *testing.T) {
 			assert.Eventually(t, func() bool {
 				_, err := os.Lstat(zipFile)
 				return err == nil
-			}, time.Second, 10*time.Millisecond)
+			}, time.Second, DefaultTestTick)
 
 			// Assert zip file exists right after compression
 			require.FileExists(t, zipFile, "Expected zip file does not exist after compression")
@@ -151,7 +151,7 @@ func TestCompressSelectedFiles(t *testing.T) {
 					}
 				}
 				return true
-			}, time.Second, 10*time.Millisecond, "Extraction of files failed Required - [%s]+%v",
+			}, time.Second, DefaultTestTick, "Extraction of files failed Required - [%s]+%v",
 				extractedDir, tt.expectedFilesAfterExtract)
 
 			require.NoError(t, os.RemoveAll(extractedDir))
