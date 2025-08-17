@@ -22,6 +22,8 @@ func TestFilePreviewWithInvalidMode(t *testing.T) {
 
 	m := defaultTestModel(curTestDir)
 
-	res := m.filePreviewPanelRenderWithDimensions(10, 100)
+	m.fileModel.filePreview.SetWidth(40)
+	m.fileModel.filePreview.SetHeight(10)
+	res := m.filePreviewPanelRenderWithDimensions()
 	assert.Contains(t, res, common.FilePreviewUnsupportedFileMode)
 }
