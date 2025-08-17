@@ -200,8 +200,6 @@ func verifySuccessfulPasteResults(t *testing.T, targetDir string, expectedDestFi
 			verifyPathNotExistsEventually(t, originalPath, "Original file should not exist after cut operation")
 		}
 	}
-
-	// TODO: Need to add a test to verify clipboard state.
 }
 
 // -------------- Other utilities
