@@ -124,9 +124,7 @@ func TestFileRename(t *testing.T) {
 	t.Run("Basic rename", func(t *testing.T) {
 		m := defaultTestModel(curTestDir)
 		p := NewTestTeaProgWithEventLoop(t, m)
-		idx := findItemIndexInPanelByLocation(m.getFocusedFilePanel(), file1)
-		require.NotEqual(t, -1, idx, "%s should be found in panel", file1)
-		m.getFocusedFilePanel().cursor = idx
+		setFilePanelSelectedItemByLocation(t, m.getFocusedFilePanel(), file1)
 
 		p.SendKey(common.Hotkeys.FilePanelItemRename[0])
 		p.SendKey("_new")
@@ -143,10 +141,7 @@ func TestFileRename(t *testing.T) {
 		actualTest := func(doRename bool) {
 			m := defaultTestModel(curTestDir)
 			p := NewTestTeaProgWithEventLoop(t, m)
-			idx := findItemIndexInPanelByLocation(m.getFocusedFilePanel(), file3)
-			require.NotEqual(t, -1, idx, "%s should be found in panel", file3)
-
-			m.getFocusedFilePanel().cursor = idx
+			setFilePanelSelectedItemByLocation(t, m.getFocusedFilePanel(), file2)
 
 			p.SendKeyDirectly(common.Hotkeys.FilePanelItemRename[0])
 			m.getFocusedFilePanel().rename.SetValue("file2.txt")
@@ -234,7 +229,7 @@ func TestFileDelete(t *testing.T) {
 			m := defaultTestModel(curTestDir)
 			m.hasTrash = common.InitTrash()
 			p := NewTestTeaProgWithEventLoop(t, m)
-			setFilePanelSelectedFile(t, m.getFocusedFilePanel(), tt.filePath)
+			setFilePanelSelectedItemByLocation(t, m.getFocusedFilePanel(), tt.filePath)
 			if tt.permanentDelete {
 				p.SendKey(common.Hotkeys.PermanentlyDeleteItems[0])
 			} else {
@@ -266,11 +261,4 @@ func TestFileDelete(t *testing.T) {
 			}
 		})
 	}
-}
-
-func setFilePanelSelectedFile(t *testing.T, panel *filePanel, filePath string) {
-	t.Helper()
-	idx := findItemIndexInPanelByLocation(panel, filePath)
-	require.NotEqual(t, -1, idx, "%s should be found in panel", filePath)
-	panel.cursor = idx
 }

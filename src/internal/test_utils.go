@@ -62,9 +62,7 @@ func setupPanelModeAndSelection(t *testing.T, m *model, useSelectMode bool, item
 		panel.selected = selectedItems
 	} else {
 		// Find the item in browser mode
-		itemIndex := findItemIndexInPanel(panel, itemName)
-		require.NotEqual(t, -1, itemIndex, "%s should be found in panel", itemName)
-		panel.cursor = itemIndex
+		setFilePanelSelectedItemByName(t, panel, itemName)
 	}
 }
 
@@ -243,4 +241,18 @@ func getOriginalPath(useSelectMode bool, itemName, startDir string) string {
 		return filepath.Join(startDir, itemName)
 	}
 	return ""
+}
+
+func setFilePanelSelectedItemByLocation(t *testing.T, panel *filePanel, filePath string) {
+	t.Helper()
+	idx := findItemIndexInPanelByLocation(panel, filePath)
+	require.NotEqual(t, -1, idx, "%s should be found in panel", filePath)
+	panel.cursor = idx
+}
+
+func setFilePanelSelectedItemByName(t *testing.T, panel *filePanel, fileName string) {
+	t.Helper()
+	idx := findItemIndexInPanel(panel, fileName)
+	require.NotEqual(t, -1, idx, "%s should be found in panel", fileName)
+	panel.cursor = idx
 }
