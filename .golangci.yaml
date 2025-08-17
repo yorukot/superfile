@@ -494,7 +494,6 @@ linters:
       - path: 'src/config/icon/icon.go'
         linters:
           - gochecknoglobals
-          - lll
       # Stores prerendered styles
       - path: 'src/internal/common/style.go'
         linters:
@@ -514,8 +513,4 @@ linters:
       # Type defining config.toml and hotkey.toml
       - path: 'src/internal/common/config_type.go'
         linters:
-          - lll 
-          # TODO: Fix this. There are "bad syntax for struct tag value" errors
-          - govet   
-          # TODO: Fix this. There are "SA5008: unparseable struct tag" errors
-          - staticcheck
+          - golines 
