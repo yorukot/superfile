@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup exiftool (only on linux)
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y exiftool
