@@ -221,6 +221,9 @@ func DirSize(path string) int64 {
 // Create all dirs that does not already exists
 func CreateDirectories(dirs ...string) error {
 	for _, dir := range dirs {
+		if dir == "" {
+			continue
+		}
 		if err := os.MkdirAll(dir, 0755); err != nil {
 			return fmt.Errorf("failed to create directory %s: %w", dir, err)
 		}

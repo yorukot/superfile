@@ -141,7 +141,7 @@ func TestFileRename(t *testing.T) {
 		actualTest := func(doRename bool) {
 			m := defaultTestModel(curTestDir)
 			p := NewTestTeaProgWithEventLoop(t, m)
-			setFilePanelSelectedItemByLocation(t, m.getFocusedFilePanel(), file2)
+			setFilePanelSelectedItemByLocation(t, m.getFocusedFilePanel(), file3)
 
 			p.SendKeyDirectly(common.Hotkeys.FilePanelItemRename[0])
 			m.getFocusedFilePanel().rename.SetValue("file2.txt")

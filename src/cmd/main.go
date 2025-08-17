@@ -130,7 +130,7 @@ func spfAppAction(_ context.Context, c *cli.Command) error {
 
 	firstUse := checkFirstUse()
 
-	p := tea.NewProgram(internal.InitialModel(firstFilePanelDirs, firstUse, common.InitTrash()),
+	p := tea.NewProgram(internal.InitialModel(firstFilePanelDirs, firstUse),
 		tea.WithAltScreen(), tea.WithMouseCellMotion())
 	if _, err := p.Run(); err != nil {
 		utils.PrintfAndExit("Alas, there's been an error: %v", err)

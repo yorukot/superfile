@@ -16,7 +16,7 @@ import (
 // Maybe we can replace slice of strings with var args - Should we ?
 // TODO: Move the configuration parameters to a ModelConfig struct.
 // Something like `RendererConfig` struct for `Renderer` struct in ui/renderer package
-func defaultModelConfig(toggleDotFile, toggleFooter, firstUse, hasTrash bool, firstFilePanelDirs []string) *model {
+func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool, firstFilePanelDirs []string) *model {
 	return &model{
 		filePanelFocusIndex: 0,
 		focusPanel:          nonePanelFocus,
@@ -42,7 +42,7 @@ func defaultModelConfig(toggleDotFile, toggleFooter, firstUse, hasTrash bool, fi
 		toggleDotFile:  toggleDotFile,
 		toggleFooter:   toggleFooter,
 		firstUse:       firstUse,
-		hasTrash:       hasTrash,
+		hasTrash:       common.InitTrash(),
 	}
 }
 

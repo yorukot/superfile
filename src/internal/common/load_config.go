@@ -334,9 +334,15 @@ func InitTrash() bool {
 	if runtime.GOOS != utils.OsLinux {
 		return true
 	}
-	return utils.CreateDirectories(
+	err := utils.CreateDirectories(
 		variable.LinuxTrashDirectory,
 		variable.LinuxTrashDirectoryFiles,
 		variable.LinuxTrashDirectoryInfo,
-	) == nil
+	)
+	if err != nil {
+		slog.Warn("Failed to initialize XDG trash; falling back to permanent delete",
+			"error", err, "trashDir", variable.LinuxTrashDirectory)
+		return false
+	}
+	return true
 }

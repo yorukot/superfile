@@ -36,10 +36,10 @@ var et *exiftool.Exiftool                                       //nolint: gochec
 // is passed to tea.NewProgram() which accepts tea.Model
 // Either way type 'model' is not exported, so there is not way main package can
 // be aware of it, and use it directly
-func InitialModel(firstFilePanelDirs []string, firstUseCheck, hasTrash bool) tea.Model {
+func InitialModel(firstFilePanelDirs []string, firstUseCheck bool) tea.Model {
 	toggleDotFile, toggleFooter := initialConfig(firstFilePanelDirs)
 	batCmd = checkBatCmd()
-	return defaultModelConfig(toggleDotFile, toggleFooter, firstUseCheck, hasTrash, firstFilePanelDirs)
+	return defaultModelConfig(toggleDotFile, toggleFooter, firstUseCheck, firstFilePanelDirs)
 }
 
 // Init function to be called by Bubble tea framework, sets windows title,
