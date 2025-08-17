@@ -8,6 +8,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 
 	tea "github.com/charmbracelet/bubbletea"
+
 	variable "github.com/yorukot/superfile/src/config"
 )
 

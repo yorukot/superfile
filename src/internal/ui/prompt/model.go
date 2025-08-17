@@ -9,6 +9,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui"
 
 	tea "github.com/charmbracelet/bubbletea"
+
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
 )

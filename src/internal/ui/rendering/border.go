@@ -28,6 +28,14 @@ type BorderConfig struct {
 	titleLeftMargin int
 }
 
+func NewBorderConfig(height int, width int) BorderConfig {
+	return BorderConfig{
+		height:          height,
+		width:           width,
+		titleLeftMargin: 1,
+	}
+}
+
 func (b *BorderConfig) SetTitle(title string) {
 	b.title = ansi.Strip(title)
 }
@@ -133,12 +141,4 @@ func (b *BorderConfig) GetBorder(borderStrings lipgloss.Border) lipgloss.Border 
 	}
 
 	return res
-}
-
-func NewBorderConfig(height int, width int) BorderConfig {
-	return BorderConfig{
-		height:          height,
-		width:           width,
-		titleLeftMargin: 1,
-	}
 }

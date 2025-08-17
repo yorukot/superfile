@@ -17,9 +17,10 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/urfave/cli/v3"
+	"golang.org/x/mod/semver"
+
 	variable "github.com/yorukot/superfile/src/config"
 	internal "github.com/yorukot/superfile/src/internal"
-	"golang.org/x/mod/semver"
 )
 
 // Run superfile app

@@ -14,6 +14,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/utils"
 
 	"github.com/barasher/go-exiftool"
+
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"

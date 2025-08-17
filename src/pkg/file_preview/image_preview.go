@@ -229,7 +229,14 @@ func (p *ImagePreviewer) ImagePreview(path string, maxWidth int, maxHeight int,
 			return preview, nil
 		}
 
-		preview, err := p.ImagePreviewWithRenderer(path, maxWidth, maxHeight, defaultBGColor, RendererKitty, sideAreaWidth)
+		preview, err := p.ImagePreviewWithRenderer(
+			path,
+			maxWidth,
+			maxHeight,
+			defaultBGColor,
+			RendererKitty,
+			sideAreaWidth,
+		)
 		if err == nil {
 			// Cache the successful result
 			p.cache.Set(path, dimensions, preview, RendererKitty)

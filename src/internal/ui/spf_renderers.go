@@ -4,6 +4,7 @@ import (
 	"log/slog"
 
 	"github.com/charmbracelet/lipgloss"
+
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
 )

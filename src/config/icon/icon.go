@@ -395,20 +395,23 @@ var Aliases = map[string]string{
 }
 
 var Folders = map[string]Style{
-	".atom":                 {Icon: "\ue764", Color: "#66595c"}, // Atom folder - Dark gray // Printable Rune : ""
-	".aws":                  {Icon: "\ue7ad", Color: "#ff9900"}, // AWS folder - Orange // Printable Rune : ""
-	".docker":               {Icon: "\ue7b0", Color: "#0db7ed"}, // Docker folder - Blue // Printable Rune : ""
-	".gem":                  {Icon: "\ue21e", Color: "#e9573f"}, // Gem folder - Red // Printable Rune : ""
-	".git":                  {Icon: "\ue5fb", Color: "#f14e32"}, // Git folder - Red // Printable Rune : ""
-	".git-credential-cache": {Icon: "\ue5fb", Color: "#f14e32"}, // Git credential cache folder - Red // Printable Rune : ""
-	".github":               {Icon: "\ue5fd", Color: "#000000"}, // GitHub folder - Black // Printable Rune : ""
-	".npm":                  {Icon: "\ue5fa", Color: "#cb3837"}, // npm folder - Red // Printable Rune : ""
-	".nvm":                  {Icon: "\ue718", Color: "#cb3837"}, // nvm folder - Red // Printable Rune : ""
-	".rvm":                  {Icon: "\ue21e", Color: "#e9573f"}, // rvm folder - Red // Printable Rune : ""
-	".Trash":                {Icon: "\uf1f8", Color: "#7f8c8d"}, // Trash folder - Light gray // Printable Rune : ""
-	".vscode":               {Icon: "\ue70c", Color: "#007acc"}, // VSCode folder - Blue // Printable Rune : ""
-	".vim":                  {Icon: "\ue62b", Color: "#019833"}, // Vim folder - Green // Printable Rune : ""
-	"config":                {Icon: "\ue5fc", Color: "#ffb86c"}, // Config folder - Light orange // Printable Rune : ""
+	".atom":   {Icon: "\ue764", Color: "#66595c"}, // Atom folder - Dark gray // Printable Rune : ""
+	".aws":    {Icon: "\ue7ad", Color: "#ff9900"}, // AWS folder - Orange // Printable Rune : ""
+	".docker": {Icon: "\ue7b0", Color: "#0db7ed"}, // Docker folder - Blue // Printable Rune : ""
+	".gem":    {Icon: "\ue21e", Color: "#e9573f"}, // Gem folder - Red // Printable Rune : ""
+	".git":    {Icon: "\ue5fb", Color: "#f14e32"}, // Git folder - Red // Printable Rune : ""
+	".git-credential-cache": {
+		Icon:  "\ue5fb",
+		Color: "#f14e32",
+	}, // Git credential cache folder - Red // Printable Rune : ""
+	".github": {Icon: "\ue5fd", Color: "#000000"}, // GitHub folder - Black // Printable Rune : ""
+	".npm":    {Icon: "\ue5fa", Color: "#cb3837"}, // npm folder - Red // Printable Rune : ""
+	".nvm":    {Icon: "\ue718", Color: "#cb3837"}, // nvm folder - Red // Printable Rune : ""
+	".rvm":    {Icon: "\ue21e", Color: "#e9573f"}, // rvm folder - Red // Printable Rune : ""
+	".Trash":  {Icon: "\uf1f8", Color: "#7f8c8d"}, // Trash folder - Light gray // Printable Rune : ""
+	".vscode": {Icon: "\ue70c", Color: "#007acc"}, // VSCode folder - Blue // Printable Rune : ""
+	".vim":    {Icon: "\ue62b", Color: "#019833"}, // Vim folder - Green // Printable Rune : ""
+	"config":  {Icon: "\ue5fc", Color: "#ffb86c"}, // Config folder - Light orange // Printable Rune : ""
 	// Item for Generic folder, with key "folder" is initialized in InitIcon()
 	"hidden":       {Icon: "\uf023", Color: "#75715e"}, // Hidden folder - Dark yellowish // Printable Rune : ""
 	"node_modules": {Icon: "\ue5fa", Color: "#cb3837"}, // Node modules folder - Red // Printable Rune : ""

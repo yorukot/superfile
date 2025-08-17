@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 )
 
@@ -105,7 +106,7 @@ func TestZipSources(t *testing.T) {
 }
 
 func validateZipExtraction(t *testing.T, zipReader *zip.ReadCloser, expectedFiles map[string]string) {
-	require.Equal(t, len(expectedFiles), len(zipReader.File), "ZIP should contain expected number of files")
+	require.Len(t, zipReader.File, len(expectedFiles), "ZIP should contain expected number of files")
 
 	foundFiles := make(map[string]string)
 	for _, file := range zipReader.File {

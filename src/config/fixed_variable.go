@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/urfave/cli/v3"
+
 	"github.com/yorukot/superfile/src/internal/utils"
 
 	"github.com/adrg/xdg"

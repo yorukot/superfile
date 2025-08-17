@@ -11,6 +11,7 @@ import (
 	"github.com/rkoesters/xdg/trash"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
@@ -94,14 +95,14 @@ func TestFileCreation(t *testing.T) {
 		TeaUpdateWithErrCheck(m, nil)
 		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.FilePanelItemCreate[0]))
 
-		assert.Equal(t, "", m.typingModal.errorMesssage)
+		assert.Empty(t, m.typingModal.errorMesssage)
 
 		m.typingModal.textInput.SetValue(tt.fileName)
 
 		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.ConfirmTyping[0]))
 
 		if tt.expectedError {
-			assert.NotEqual(t, "", m.typingModal.errorMesssage, "expected an error for input: %q", tt.fileName)
+			assert.NotEmpty(t, m.typingModal.errorMesssage, "expected an error for input: %q", tt.fileName)
 		} else {
 			assert.Empty(t, m.typingModal.errorMesssage, "expected an error for input: %q", tt.fileName)
 			assert.FileExists(t, filepath.Join(testChildDir, tt.fileName), "expected file to be created: %q", tt.fileName)

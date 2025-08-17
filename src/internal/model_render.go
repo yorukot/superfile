@@ -30,6 +30,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/x/exp/term/ansi"
 	"github.com/yorukot/ansichroma"
+
 	"github.com/yorukot/superfile/src/config/icon"
 )
 
@@ -56,7 +57,9 @@ func (m *model) filePanelRender() string {
 		// TODO : Move this to a utility function and clarify the calculation via comments
 		// Maybe even write unit tests
 		var filePanelWidth int
-		if (m.fullWidth-common.Config.SidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels) != 0 &&
+		if (m.fullWidth-common.Config.SidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(
+			m.fileModel.filePanels,
+		) != 0 &&
 			i == len(m.fileModel.filePanels)-1 {
 			if m.fileModel.filePreview.open {
 				filePanelWidth = m.fileModel.width
@@ -285,7 +288,9 @@ func (m *model) typineModalRender() string {
 	previewPath := filepath.Join(m.typingModal.location, m.typingModal.textInput.Value())
 
 	fileLocation := common.FilePanelTopDirectoryIconStyle.Render(" "+icon.Directory+icon.Space) +
-		common.FilePanelTopPathStyle.Render(common.TruncateTextBeginning(previewPath, common.ModalWidth-4, "...")) + "\n"
+		common.FilePanelTopPathStyle.Render(
+			common.TruncateTextBeginning(previewPath, common.ModalWidth-4, "..."),
+		) + "\n"
 
 	confirm := common.ModalConfirm.Render(" (" + common.Hotkeys.ConfirmTyping[0] + ") Create ")
 	cancel := common.ModalCancel.Render(" (" + common.Hotkeys.CancelTyping[0] + ") Cancel ")

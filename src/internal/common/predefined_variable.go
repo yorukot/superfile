@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/lipgloss"
+
 	"github.com/yorukot/superfile/src/config/icon"
 )
 

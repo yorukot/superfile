@@ -11,6 +11,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/utils"
 
 	"github.com/adrg/xdg"
+
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/config/icon"
 )
