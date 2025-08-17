@@ -192,7 +192,7 @@ func isTrashed(fileAbsPath string) bool {
 		_, err := os.Stat(filepath.Join(variable.DarwinTrashDirectory, fileName))
 		return err == nil
 	case utils.OsLinux:
-		_, err := trash.Stat(fileName)
+		_, err := trash.Stat(fileAbsPath)
 		return err == nil
 	default:
 		return false
