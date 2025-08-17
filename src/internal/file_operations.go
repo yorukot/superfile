@@ -154,6 +154,9 @@ func moveToTrash(src string) error {
 		err = trash_win.Throw(src)
 	default:
 		// TODO: We should consider moving away from this package. Its not well written.
+		// It uses package globals, It doesn't initializes trash directory, and we have to do it
+		// separately outside of the this package. There is not documentation about this
+		// It also uses deprecated libraries, and isn't well maintained.
 		err = trash.Trash(src)
 	}
 	if err != nil {

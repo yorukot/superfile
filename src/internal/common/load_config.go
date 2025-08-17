@@ -328,3 +328,15 @@ func PopulateHotkeyFromFile(hotkeyFilePath string) error {
 func PopulateThemeFromFile(themeFilePath string) error {
 	return populateFromFile(themeFilePath, &Theme)
 }
+
+func InitTrash() bool {
+	// Create trash directories
+	if runtime.GOOS != utils.OsLinux {
+		return true
+	}
+	return utils.CreateDirectories(
+		variable.LinuxTrashDirectory,
+		variable.LinuxTrashDirectoryFiles,
+		variable.LinuxTrashDirectoryInfo,
+	) == nil
+}

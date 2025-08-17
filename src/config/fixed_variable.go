@@ -47,6 +47,12 @@ var (
 
 	// Trash Directories
 	DarwinTrashDirectory = filepath.Join(HomeDir, ".Trash")
+
+	// These are used by github.com/rkoesters/xdg/trash package
+	// We need to make sure that these directories exists
+	LinuxTrashDirectory      = filepath.Join(xdg.DataHome, "Trash")
+	LinuxTrashDirectoryFiles = filepath.Join(xdg.DataHome, "Trash", "files")
+	LinuxTrashDirectoryInfo  = filepath.Join(xdg.DataHome, "Trash", "info")
 )
 
 // These variables are actually not fixed, they are sometimes updated dynamically

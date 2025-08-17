@@ -130,7 +130,7 @@ func spfAppAction(_ context.Context, c *cli.Command) error {
 
 	firstUse := checkFirstUse()
 
-	p := tea.NewProgram(internal.InitialModel(firstFilePanelDirs, firstUse, true),
+	p := tea.NewProgram(internal.InitialModel(firstFilePanelDirs, firstUse, common.InitTrash()),
 		tea.WithAltScreen(), tea.WithMouseCellMotion())
 	if _, err := p.Run(); err != nil {
 		utils.PrintfAndExit("Alas, there's been an error: %v", err)
@@ -153,7 +153,7 @@ func spfAppAction(_ context.Context, c *cli.Command) error {
 // configurations to Config and Hotkeys toml
 func InitConfigFile() {
 	// Create directories
-	if err := createDirectories(
+	if err := utils.CreateDirectories(
 		variable.SuperFileMainDir,
 		variable.SuperFileDataDir,
 		variable.SuperFileStateDir,
@@ -163,7 +163,7 @@ func InitConfigFile() {
 	}
 
 	// Create files
-	if err := createFiles(
+	if err := utils.CreateFiles(
 		variable.ToggleDotFile,
 		variable.LogFile,
 		variable.ThemeFileVersion,
@@ -184,29 +184,6 @@ func InitConfigFile() {
 	if err := initJSONFile(variable.PinnedFile); err != nil {
 		utils.PrintlnAndExit("Error initializing json file:", err)
 	}
-}
-
-// Helper functions
-// Create all dirs that does not already exists
-func createDirectories(dirs ...string) error {
-	for _, dir := range dirs {
-		if err := os.MkdirAll(dir, 0755); err != nil {
-			return fmt.Errorf("failed to create directory %s: %w", dir, err)
-		}
-	}
-	return nil
-}
-
-// Create all files if they do not exists yet
-func createFiles(files ...string) error {
-	for _, file := range files {
-		if _, err := os.Stat(file); os.IsNotExist(err) {
-			if err = os.WriteFile(file, nil, 0644); err != nil {
-				return fmt.Errorf("failed to create file %s: %w", file, err)
-			}
-		}
-	}
-	return nil
 }
 
 // Check if is the first time initializing the app, if it is create

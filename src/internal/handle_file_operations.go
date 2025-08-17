@@ -165,13 +165,13 @@ func (m *model) getDeleteTriggerCmd(deletePermanent bool) tea.Cmd {
 	m.ioReqCnt++
 
 	return func() tea.Msg {
-		title := "Are you sure you want to move this to trash can"
-		content := "This operation will move file or directory to trash can."
+		title := common.TrashWarnTitle
+		content := common.TrashWarnContent
 		action := notify.DeleteAction
 
 		if !m.hasTrash || isExternalDiskPath(panel.location) || deletePermanent {
-			title = "Are you sure you want to completely delete"
-			content = "This operation cannot be undone and your data will be completely lost."
+			title = common.PermanentDeleteWarnTitle
+			content = common.PermanentDeleteWarnContent
 			action = notify.PermanentDeleteAction
 		}
 		return NewNotifyModalMsg(notify.New(true, title, content, action), reqID)

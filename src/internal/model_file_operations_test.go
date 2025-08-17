@@ -190,7 +190,8 @@ func TestFileRename(t *testing.T) {
 	})
 }
 
-func isTrashed(fileName string) bool {
+func isTrashed(fileAbsPath string) bool {
+	fileName := filepath.Base(fileAbsPath)
 	switch runtime.GOOS {
 	case utils.OsDarwin:
 		_, err := os.Stat(filepath.Join(variable.DarwinTrashDirectory, fileName))
@@ -231,7 +232,7 @@ func TestFileDelete(t *testing.T) {
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
 			m := defaultTestModel(curTestDir)
-			m.hasTrash = true
+			m.hasTrash = common.InitTrash()
 			p := NewTestTeaProgWithEventLoop(t, m)
 			setFilePanelSelectedFile(t, m.getFocusedFilePanel(), tt.filePath)
 			if tt.permanentDelete {
