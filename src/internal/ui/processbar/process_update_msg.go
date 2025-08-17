@@ -18,6 +18,7 @@ func (msg BaseMsg) GetReqID() int {
 
 type newProcessMsg struct {
 	BaseMsg
+
 	NewProcess Process
 }
 
@@ -27,6 +28,7 @@ func (msg newProcessMsg) Apply(m *Model) (Cmd, error) {
 
 type updateProcessMsg struct {
 	BaseMsg
+
 	NewProcess Process
 }
 

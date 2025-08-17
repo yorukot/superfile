@@ -7,6 +7,7 @@ import (
 	"slices"
 
 	tea "github.com/charmbracelet/bubbletea"
+
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/internal/common"
 )

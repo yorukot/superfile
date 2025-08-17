@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	tea "github.com/charmbracelet/bubbletea"
+
 	"github.com/yorukot/superfile/src/internal/utils"
 )
 
@@ -29,16 +30,16 @@ func NewTeaProg(m *model, eventLoop bool) *TeaProg {
 	return p
 }
 
-func (p *TeaProg) getModel() *model {
-	return p.m
-}
-
 func NewTestTeaProgWithEventLoop(t *testing.T, m *model) *TeaProg {
 	p := NewTeaProg(m, true)
 	t.Cleanup(func() {
 		p.Close()
 	})
 	return p
+}
+
+func (p *TeaProg) getModel() *model {
+	return p.m
 }
 
 func (p *TeaProg) StartEventLoop() {

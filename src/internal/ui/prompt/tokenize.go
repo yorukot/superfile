@@ -97,9 +97,10 @@ func findEndingBracket(r []rune, openIdx int, openParan rune, closeParan rune) i
 	openCount := 1
 	i := openIdx + 1
 	for i < len(r) && openCount != 0 {
-		if r[i] == openParan {
+		switch r[i] {
+		case openParan:
 			openCount++
-		} else if r[i] == closeParan {
+		case closeParan:
 			openCount--
 		}
 		if openCount != 0 {

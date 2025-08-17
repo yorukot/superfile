@@ -11,6 +11,15 @@ type TomlLoadError struct {
 	missingFields bool
 }
 
+func NewTomlLoadError(msg string, wrapped error, fatal bool, missing bool) *TomlLoadError {
+	return &TomlLoadError{
+		userMessage:   msg,
+		isFatal:       fatal,
+		missingFields: missing,
+		wrappedError:  wrapped,
+	}
+}
+
 func (t *TomlLoadError) Error() string {
 	res := t.userMessage
 	if t.wrappedError != nil {
@@ -40,13 +49,4 @@ func (t *TomlLoadError) UpdateMessageAndError(msg string, err error) {
 func (t *TomlLoadError) AddMessageAndError(msg string, err error) {
 	t.userMessage += " " + msg
 	t.wrappedError = errors.Join(t.wrappedError, err)
-}
-
-func NewTomlLoadError(msg string, wrapped error, fatal bool, missing bool) *TomlLoadError {
-	return &TomlLoadError{
-		userMessage:   msg,
-		isFatal:       fatal,
-		missingFields: missing,
-		wrappedError:  wrapped,
-	}
 }

@@ -4,6 +4,7 @@ import (
 	"log/slog"
 
 	tea "github.com/charmbracelet/bubbletea"
+
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
@@ -24,6 +25,7 @@ func (msg BaseMessage) GetReqID() int {
 
 type PasteOperationMsg struct {
 	BaseMessage
+
 	state processbar.ProcessState
 }
 
@@ -45,6 +47,7 @@ func (msg PasteOperationMsg) ApplyToModel(m *model) tea.Cmd {
 
 type DeleteOperationMsg struct {
 	BaseMessage
+
 	state processbar.ProcessState
 }
 
@@ -65,6 +68,7 @@ func (msg DeleteOperationMsg) ApplyToModel(m *model) tea.Cmd {
 
 type ProcessBarUpdateMsg struct {
 	BaseMessage
+
 	pMsg processbar.UpdateMsg
 }
 
@@ -78,6 +82,7 @@ func (msg ProcessBarUpdateMsg) ApplyToModel(m *model) tea.Cmd {
 
 type CompressOperationMsg struct {
 	BaseMessage
+
 	state processbar.ProcessState
 }
 
@@ -96,6 +101,7 @@ func (msg CompressOperationMsg) ApplyToModel(_ *model) tea.Cmd {
 
 type ExtractOperationMsg struct {
 	BaseMessage
+
 	state processbar.ProcessState
 }
 
@@ -114,6 +120,7 @@ func (msg ExtractOperationMsg) ApplyToModel(_ *model) tea.Cmd {
 
 type MetadataMsg struct {
 	BaseMessage
+
 	meta metadata.Metadata
 }
 
@@ -143,6 +150,7 @@ func (msg MetadataMsg) ApplyToModel(m *model) tea.Cmd {
 
 type NotifyModalUpdateMsg struct {
 	BaseMessage
+
 	m notify.Model
 }
 

@@ -12,6 +12,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/prompt"
 	"github.com/yorukot/superfile/src/internal/utils"
@@ -317,7 +318,10 @@ func testDirectoryHandlingWithQuotes(t *testing.T, curTestDir, dir1 string) {
 			m := defaultTestModel(dir1)
 			TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenSPFPrompt[0]))
 
-			TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(prompt.CdCommand+` `+strings.ReplaceAll(dirWithSpaces, " ", `\ `)))
+			TeaUpdateWithErrCheck(
+				m,
+				utils.TeaRuneKeyMsg(prompt.CdCommand+` `+strings.ReplaceAll(dirWithSpaces, " ", `\ `)),
+			)
 			TeaUpdateWithErrCheck(m, tea.KeyMsg{Type: tea.KeyEnter})
 			assert.True(t, m.promptModal.LastActionSucceeded(), "cd with escaped spaces should work")
 			assert.Equal(t, dirWithSpaces, m.getFocusedFilePanel().location)
@@ -361,7 +365,11 @@ func testDirectoryHandlingWithQuotes(t *testing.T, curTestDir, dir1 string) {
 
 			TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(prompt.CdCommand+` '${`+userHomeEnv+`}'`))
 			TeaUpdateWithErrCheck(m, tea.KeyMsg{Type: tea.KeyEnter})
-			assert.True(t, m.promptModal.LastActionSucceeded(), "cd with single quoted env var works in superfile (unlike bash)")
+			assert.True(
+				t,
+				m.promptModal.LastActionSucceeded(),
+				"cd with single quoted env var works in superfile (unlike bash)",
+			)
 			assert.Equal(t, xdg.Home, m.getFocusedFilePanel().location)
 		})
 	})

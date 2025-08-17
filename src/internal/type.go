@@ -10,6 +10,7 @@ import (
 	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
 
 	"github.com/charmbracelet/bubbles/textinput"
+
 	"github.com/yorukot/superfile/src/internal/ui/prompt"
 )
 

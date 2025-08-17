@@ -20,6 +20,7 @@ import (
 
 	"github.com/atotto/clipboard"
 	tea "github.com/charmbracelet/bubbletea"
+
 	"github.com/yorukot/superfile/src/config/icon"
 )
 

@@ -12,6 +12,7 @@ import (
 
 	"github.com/charmbracelet/x/exp/term/ansi"
 	"github.com/pelletier/go-toml/v2"
+
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/utils"
 

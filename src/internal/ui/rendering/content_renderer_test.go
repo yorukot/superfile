@@ -42,6 +42,6 @@ func TestContentRendererBasic(t *testing.T) {
 		r = NewContentRenderer(0, 0, PlainTruncateRight)
 		r.AddLines("L1")
 		r.AddLines("L2")
-		assert.Equal(t, "", r.Render())
+		assert.Empty(t, r.Render())
 	})
 }

@@ -7,6 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
 	"github.com/yorukot/superfile/src/internal/common"
 )
 
@@ -278,7 +279,7 @@ func TestPasteItem(t *testing.T) {
 		entriesAfter, err := os.ReadDir(emptyTestDir)
 		require.NoError(t, err)
 
-		assert.Equal(t, len(entriesBefore), len(entriesAfter),
+		assert.Len(t, entriesAfter, len(entriesBefore),
 			"No new files should be created when pasting with empty clipboard")
 	})
 

@@ -27,7 +27,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: 1.24.1
+          go-version: 1.24.3
 
       - name: Cache Go modules
         uses: actions/cache@v4
@@ -62,7 +62,7 @@ jobs:
 
       - name: golangci-lint (skip on Windows)
         if: runner.os != 'Windows'
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v8
         with:
-          version: v1.64
+          version: v2.4.0
           args: --timeout 3m

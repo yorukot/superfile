@@ -8,6 +8,7 @@ import (
 	"sort"
 
 	"github.com/barasher/go-exiftool"
+
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/utils"
 )

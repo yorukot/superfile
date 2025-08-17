@@ -5,9 +5,10 @@ import (
 	"log/slog"
 	"time"
 
+	"golift.io/xtractr"
+
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
-	"golift.io/xtractr"
 )
 
 func extractCompressFile(src, dest string, processBar *processbar.Model) error {
