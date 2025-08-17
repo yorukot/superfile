@@ -7,29 +7,32 @@ require (
 	github.com/alecthomas/chroma/v2 v2.16.0
 	github.com/atotto/clipboard v0.1.4
 	github.com/barasher/go-exiftool v1.10.0
-	github.com/charmbracelet/bubbles v0.20.0
-	github.com/charmbracelet/bubbletea v1.3.4
-	github.com/charmbracelet/lipgloss v1.0.0
-	github.com/charmbracelet/x/ansi v0.8.0
+	github.com/charmbracelet/bubbles v0.21.0
+	github.com/charmbracelet/bubbletea v1.3.5
+	github.com/charmbracelet/lipgloss v1.1.0
+	github.com/charmbracelet/x/ansi v0.9.3
 	github.com/fatih/color v1.18.0
 	github.com/hymkor/trash-go v0.2.0
 	github.com/lithammer/shortuuid v3.0.0+incompatible
 	github.com/muesli/termenv v0.16.0
 	github.com/reinhrst/fzf-lib v0.9.0
 	github.com/rkoesters/xdg v0.0.1
-	github.com/shirou/gopsutil/v4 v4.25.3
+	github.com/shirou/gopsutil/v4 v4.25.4
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v3 v3.3.8
-	golang.org/x/image v0.27.0
-	golang.org/x/mod v0.24.0
+	golang.org/x/image v0.28.0
+	golang.org/x/mod v0.27.0
 	golift.io/xtractr v0.2.2
 )
 
 require (
+	github.com/charmbracelet/colorprofile v0.2.3-0.20250311203215-f60798e515dc // indirect
+	github.com/charmbracelet/x/cellbuf v0.0.13-0.20250311204145-2c3ea96c31dd // indirect
 	github.com/charmbracelet/x/term v0.2.1 // indirect
 	github.com/ebitengine/purego v0.8.3 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
+	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	golang.org/x/term v0.18.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
@@ -74,7 +77,7 @@ require (
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rwcarlsen/goexif v0.0.0-20190401172101-9e8deecbddbd
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
-	golang.org/x/sync v0.14.0 // indirect
-	golang.org/x/sys v0.30.0 // indirect
-	golang.org/x/text v0.25.0
+	golang.org/x/sync v0.15.0 // indirect
+	golang.org/x/sys v0.32.0 // indirect
+	golang.org/x/text v0.26.0
 )
