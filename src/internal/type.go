@@ -107,6 +107,9 @@ type model struct {
 	footerHeight int
 	fullWidth    int
 	fullHeight   int
+
+	// whether usable trash directory exists or not
+	hasTrash bool
 }
 
 // Modal

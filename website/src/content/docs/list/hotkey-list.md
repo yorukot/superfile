@@ -72,3 +72,4 @@ Quit superfile and cd to current folder "cd_quit" require the same scripts as ["
 | Zip file or folder to .zip file                      | `ctrl+a`           | `compress_file` (normal mode)                                                          |
 | Open file with your default editor                   | `e`                | `open_file_with_editor` (normal node)                                                  |
 | Open current directory with default editor           | `E` (shift+e)      | `current_directory_with_editor` (normal node)                                          |
+| Permanently Delete file or folder (or both)          | `D` (shift+d) | `permanently_delete_items` (normal mode) <br> `file_panel_select_mode_item_delete` (select mode)    |

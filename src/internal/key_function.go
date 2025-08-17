@@ -128,7 +128,7 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 
 func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
 	// if not focus on the filepanel return
-	if m.fileModel.filePanels[m.filePanelFocusIndex].focusType != focus {
+	if m.getFocusedFilePanel().focusType != focus {
 		if m.focusPanel == sidebarFocus && slices.Contains(common.Hotkeys.Confirm, msg) {
 			m.sidebarSelectDirectory()
 		}
@@ -141,7 +141,7 @@ func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
 		return nil
 	}
 	// Check if in the select mode and focusOn filepanel
-	if m.fileModel.filePanels[m.filePanelFocusIndex].panelMode == selectMode {
+	if m.getFocusedFilePanel().panelMode == selectMode {
 		switch {
 		case slices.Contains(common.Hotkeys.Confirm, msg):
 			m.fileModel.filePanels[m.filePanelFocusIndex].singleItemSelect()
@@ -150,7 +150,9 @@ func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
 		case slices.Contains(common.Hotkeys.FilePanelSelectModeItemsSelectDown, msg):
 			m.fileModel.filePanels[m.filePanelFocusIndex].itemSelectDown(m.mainPanelHeight)
 		case slices.Contains(common.Hotkeys.DeleteItems, msg):
-			return m.getDeleteTriggerCmd()
+			return m.getDeleteTriggerCmd(false)
+		case slices.Contains(common.Hotkeys.PermanentlyDeleteItems, msg):
+			return m.getDeleteTriggerCmd(true)
 		case slices.Contains(common.Hotkeys.CopyItems, msg):
 			m.copyMultipleItem(false)
 		case slices.Contains(common.Hotkeys.CutItems, msg):
@@ -167,7 +169,9 @@ func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
 	case slices.Contains(common.Hotkeys.ParentDirectory, msg):
 		m.parentDirectory()
 	case slices.Contains(common.Hotkeys.DeleteItems, msg):
-		return m.getDeleteTriggerCmd()
+		return m.getDeleteTriggerCmd(false)
+	case slices.Contains(common.Hotkeys.PermanentlyDeleteItems, msg):
+		return m.getDeleteTriggerCmd(true)
 	case slices.Contains(common.Hotkeys.CopyItems, msg):
 		m.copySingleItem(false)
 	case slices.Contains(common.Hotkeys.CutItems, msg):
@@ -217,7 +221,7 @@ func (m *model) handleNotifyModelCancel(action notify.ConfirmActionType) tea.Cmd
 		m.cancelRename()
 	case notify.QuitAction:
 		m.modelQuitState = notQuitting
-	case notify.DeleteAction, notify.NoAction:
+	case notify.DeleteAction, notify.NoAction, notify.PermanentDeleteAction:
 		// Do nothing
 	default:
 		slog.Error("Unknown type of action", "action", action)
@@ -228,7 +232,9 @@ func (m *model) handleNotifyModelCancel(action notify.ConfirmActionType) tea.Cmd
 func (m *model) handleNotifyModelConfirm(action notify.ConfirmActionType) tea.Cmd {
 	switch action {
 	case notify.DeleteAction:
-		return m.getDeleteCmd()
+		return m.getDeleteCmd(false)
+	case notify.PermanentDeleteAction:
+		return m.getDeleteCmd(true)
 	case notify.RenameAction:
 		m.confirmRename()
 	case notify.QuitAction:

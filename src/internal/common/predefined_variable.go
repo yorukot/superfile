@@ -14,6 +14,11 @@ const DateModifiedOption = "Date Modified"
 const SameRenameWarnTitle = "There is already a file or directory with that name"
 const SameRenameWarnContent = "This operation will override the existing file"
 
+const TrashWarnTitle = "Are you sure you want to move this to trash can"
+const TrashWarnContent = "This operation will move file or directory to trash can."
+const PermanentDeleteWarnTitle = "Are you sure you want to completely delete"
+const PermanentDeleteWarnContent = "This operation cannot be undone and your data will be completely lost."
+
 var (
 	MinimumHeight = 24
 	MinimumWidth  = 60

@@ -216,3 +216,29 @@ func DirSize(path string) int64 {
 	}
 	return size
 }
+
+// Helper functions
+// Create all dirs that does not already exists
+func CreateDirectories(dirs ...string) error {
+	for _, dir := range dirs {
+		if dir == "" {
+			continue
+		}
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			return fmt.Errorf("failed to create directory %s: %w", dir, err)
+		}
+	}
+	return nil
+}
+
+// Create all files if they do not exists yet
+func CreateFiles(files ...string) error {
+	for _, file := range files {
+		if _, err := os.Stat(file); os.IsNotExist(err) {
+			if err = os.WriteFile(file, nil, 0644); err != nil {
+				return fmt.Errorf("failed to create file %s: %w", file, err)
+			}
+		}
+	}
+	return nil
+}

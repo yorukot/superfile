@@ -46,10 +46,13 @@ var (
 	LastDirFile = filepath.Join(SuperFileStateDir, "lastdir")
 
 	// Trash Directories
-	DarwinTrashDirectory      = filepath.Join(HomeDir, ".Trash")
-	CustomTrashDirectory      = filepath.Join(xdg.DataHome, "Trash")
-	CustomTrashDirectoryFiles = filepath.Join(xdg.DataHome, "Trash", "files")
-	CustomTrashDirectoryInfo  = filepath.Join(xdg.DataHome, "Trash", "info")
+	DarwinTrashDirectory = filepath.Join(HomeDir, ".Trash")
+
+	// These are used by github.com/rkoesters/xdg/trash package
+	// We need to make sure that these directories exist
+	LinuxTrashDirectory      = filepath.Join(xdg.DataHome, "Trash")
+	LinuxTrashDirectoryFiles = filepath.Join(xdg.DataHome, "Trash", "files")
+	LinuxTrashDirectoryInfo  = filepath.Join(xdg.DataHome, "Trash", "info")
 )
 
 // These variables are actually not fixed, they are sometimes updated dynamically

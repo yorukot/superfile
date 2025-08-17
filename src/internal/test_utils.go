@@ -13,6 +13,9 @@ import (
 	"github.com/yorukot/superfile/src/internal/utils"
 )
 
+const DefaultTestTick = 10 * time.Millisecond
+const DefaultTestTimeout = time.Second
+
 var SampleDataBytes = []byte("This is sample") //nolint: gochecknoglobals // Effectively const
 
 func setupDirectories(t *testing.T, dirs ...string) {
@@ -59,9 +62,7 @@ func setupPanelModeAndSelection(t *testing.T, m *model, useSelectMode bool, item
 		panel.selected = selectedItems
 	} else {
 		// Find the item in browser mode
-		itemIndex := findItemIndexInPanel(panel, itemName)
-		require.NotEqual(t, -1, itemIndex, "%s should be found in panel", itemName)
-		panel.cursor = itemIndex
+		setFilePanelSelectedItemByName(t, panel, itemName)
 	}
 }
 
@@ -158,7 +159,7 @@ func verifyPathNotExistsEventually(t *testing.T, path, message string) {
 	assert.Eventually(t, func() bool {
 		_, err := os.Stat(path)
 		return os.IsNotExist(err)
-	}, time.Second, 10*time.Millisecond, message)
+	}, DefaultTestTimeout, DefaultTestTick, message)
 }
 
 // Helper function to verify expected destination files exist
@@ -169,7 +170,7 @@ func verifyDestinationFiles(t *testing.T, targetDir string, expectedDestFiles []
 		assert.Eventually(t, func() bool {
 			_, err := os.Stat(destPath)
 			return err == nil
-		}, time.Second, 10*time.Millisecond, "%s should exist in destination", expectedFile)
+		}, DefaultTestTimeout, DefaultTestTick, "%s should exist in destination", expectedFile)
 	}
 }
 
@@ -240,4 +241,18 @@ func getOriginalPath(useSelectMode bool, itemName, startDir string) string {
 		return filepath.Join(startDir, itemName)
 	}
 	return ""
+}
+
+func setFilePanelSelectedItemByLocation(t *testing.T, panel *filePanel, filePath string) {
+	t.Helper()
+	idx := findItemIndexInPanelByLocation(panel, filePath)
+	require.NotEqual(t, -1, idx, "%s should be found in panel", filePath)
+	panel.cursor = idx
+}
+
+func setFilePanelSelectedItemByName(t *testing.T, panel *filePanel, fileName string) {
+	t.Helper()
+	idx := findItemIndexInPanel(panel, fileName)
+	require.NotEqual(t, -1, idx, "%s should be found in panel", fileName)
+	panel.cursor = idx
 }

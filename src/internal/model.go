@@ -27,21 +27,17 @@ import (
 )
 
 // These represent model's state information, its not a global preperty
-var (
-	LastTimeCursorMove = [2]int{int(time.Now().UnixMicro()), 0} //nolint: gochecknoglobals // TODO: Move to model struct
-	hasTrash           = true                                   //nolint: gochecknoglobals // TODO: Move to model struct
-	batCmd             = ""                                     //nolint: gochecknoglobals // TODO: Move to model struct
-	et                 *exiftool.Exiftool                       //nolint: gochecknoglobals // TODO: Move to model struct
-)
+var LastTimeCursorMove = [2]int{int(time.Now().UnixMicro()), 0} //nolint: gochecknoglobals // TODO: Move to model struct
+var batCmd = ""                                                 //nolint: gochecknoglobals // TODO: Move to model struct
+var et *exiftool.Exiftool                                       //nolint: gochecknoglobals // TODO: Move to model struct
 
 // Initialize and return model with default configs
 // It returns only tea.Model because when it used in main, the return value
 // is passed to tea.NewProgram() which accepts tea.Model
 // Either way type 'model' is not exported, so there is not way main package can
 // be aware of it, and use it directly
-func InitialModel(firstFilePanelDirs []string, firstUseCheck, hasTrashCheck bool) tea.Model {
+func InitialModel(firstFilePanelDirs []string, firstUseCheck bool) tea.Model {
 	toggleDotFile, toggleFooter := initialConfig(firstFilePanelDirs)
-	hasTrash = hasTrashCheck
 	batCmd = checkBatCmd()
 	return defaultModelConfig(toggleDotFile, toggleFooter, firstUseCheck, firstFilePanelDirs)
 }

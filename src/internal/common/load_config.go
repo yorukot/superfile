@@ -328,3 +328,21 @@ func PopulateHotkeyFromFile(hotkeyFilePath string) error {
 func PopulateThemeFromFile(themeFilePath string) error {
 	return populateFromFile(themeFilePath, &Theme)
 }
+
+func InitTrash() bool {
+	// Create trash directories
+	if runtime.GOOS != utils.OsLinux {
+		return true
+	}
+	err := utils.CreateDirectories(
+		variable.LinuxTrashDirectory,
+		variable.LinuxTrashDirectoryFiles,
+		variable.LinuxTrashDirectoryInfo,
+	)
+	if err != nil {
+		slog.Warn("Failed to initialize XDG trash; falling back to permanent delete",
+			"error", err, "trashDir", variable.LinuxTrashDirectory)
+		return false
+	}
+	return true
+}
