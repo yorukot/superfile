@@ -33,6 +33,7 @@ formatters:
     - golines # checks if code is formatted, and fixes long lines
 
     ## you may want to enable
+    # TODO
     #- gci # checks if code and import statements are formatted, with additional rules
     #- gofmt # checks if the code is formatted according to 'gofmt' command
     #- gofumpt # enforces a stricter format than 'gofmt', while being backwards compatible
@@ -45,7 +46,7 @@ formatters:
       # with the given prefixes are grouped after 3rd-party packages.
       # Default: []
       local-prefixes:
-        - github.com/my/project
+        - github.com/yorukot/superfile
 
     golines:
       # Target maximum line length.
@@ -71,7 +72,8 @@ linters:
     - exhaustive # checks exhaustiveness of enum switch statements
     - exptostd # detects functions from golang.org/x/exp/ that can be replaced by std functions
     - fatcontext # detects nested contexts in loops
-    - forbidigo # forbids identifiers
+    # Not needed. this blocks only fmt.Print family and is not useful right now
+    # - forbidigo # forbids identifiers
     - funcorder # checks the order of functions, methods, and constructors
     - funlen # tool for detection of long functions
     - gocheckcompilerdirectives # validates go compiler directive comments (//go:)
@@ -82,10 +84,13 @@ linters:
     - goconst # finds repeated strings that could be replaced by a constant
     - gocritic # provides diagnostics that check for bugs, performance and style issues
     - gocyclo # computes and checks the cyclomatic complexity of functions
-    - godot # checks if comments end in a period
+    # TODO: Enable. Too much for us right now
+    # - godot # checks if comments end in a period
     - gomoddirectives # manages the use of 'replace', 'retract', and 'excludes' directives in go.mod
     - goprintffuncname # checks that printf-like functions are named with f at the end
-    - gosec # inspects source code for security problems
+    # TODO enable - ignore for a few int overflow, and fix file permissions
+    # weak md5 cryptography, Subprocess launched with a potential tainted input
+    # - gosec # inspects source code for security problems
     - govet # reports suspicious constructs, such as Printf calls whose arguments do not align with the format string
     - iface # checks the incorrect use of interfaces, helping developers avoid interface pollution
     - ineffassign # detects when assignments to existing variables are not used
@@ -93,10 +98,12 @@ linters:
     - loggercheck # checks key value pairs for common logger libraries (kitlog,klog,logr,zap)
     - makezero # finds slice declarations with non-zero initial length
     - mirror # reports wrong mirror patterns of bytes/strings usage
-    - mnd # detects magic numbers
+    # TODO enable
+    # - mnd # detects magic numbers
     - musttag # enforces field tags in (un)marshaled structs
     - nakedret # finds naked returns in functions greater than a specified function length
-    - nestif # reports deeply nested if statements
+    # TODO enable : Many reports. A bit hard to understand the nesting value.
+    # - nestif # reports deeply nested if statements
     - nilerr # finds the code that returns nil even if it checks that the error is not nil
     - nilnesserr # reports that it checks for err != nil, but it returns a different nil value error (powered by nilness and nilerr)
     - nilnil # checks that there is no simultaneous return of nil error and an invalid value
@@ -112,13 +119,16 @@ linters:
     - recvcheck # checks for receiver type consistency
     - revive # fast, configurable, extensible, flexible, and beautiful linter for Go, drop-in replacement of golint
     - rowserrcheck # checks whether Err of rows is checked successfully
-    - sloglint # ensure consistent code style when using log/slog
+    # TODO enable - Need to use non-root logger
+    # - sloglint # ensure consistent code style when using log/slog
     - spancheck # checks for mistakes with OpenTelemetry/Census spans
     - sqlclosecheck # checks that sql.Rows and sql.Stmt are closed
     - staticcheck # is a go vet on steroids, applying a ton of static analysis checks
     - testableexamples # checks if examples are testable (have an expected output)
     - testifylint # checks usage of github.com/stretchr/testify
-    - testpackage # makes you use a separate _test package
+    # [SPF Specific] Not needed - Makes it harder to test unexported package functions.
+    # - testpackage # makes you use a separate _test package
+
     - tparallel # detects inappropriate usage of t.Parallel() method in your Go test codes
     - unconvert # removes unnecessary type conversions
     - unparam # reports unused function parameters
@@ -130,13 +140,16 @@ linters:
 
     ## you may want to enable
     #- arangolint # opinionated best practices for arangodb client
-    #- decorder # checks declaration order and count of types, constants, variables and functions
+    - decorder # checks declaration order and count of types, constants, variables and functions
+    # TODO Enable: Many issues right now.
     #- exhaustruct # [highly recommend to enable] checks if all structure fields are initialized
     #- ginkgolinter # [if you use ginkgo/gomega] enforces standards of using ginkgo and gomega
+    # TODO Enable. After fixing all TODOs
     #- godox # detects usage of FIXME, TODO and other keywords inside comments
-    #- goheader # checks is file header matches to pattern
+    - goheader # checks is file header matches to pattern
     #- inamedparam # [great idea, but too strict, need to ignore a lot of cases by default] reports interfaces with unnamed method parameters
-    #- interfacebloat # checks the number of methods inside an interface
+    - interfacebloat # checks the number of methods inside an interface
+    # TODO Enable: Function Update() is caught
     #- ireturn # accept interfaces, return concrete types
     #- noinlineerr # disallows inline error handling `if err := ...; err != nil {`
     #- prealloc # [premature optimization, but can be used in some cases] finds slice declarations that could potentially be preallocated
@@ -154,12 +167,12 @@ linters:
     #- errchkjson # [don't see profit + I'm against of omitting errors like in the first example https://github.com/breml/errchkjson] checks types passed to the json encoding functions. Reports unsupported types and optionally reports occasions, where the check for the returned error can be omitted
     #- forcetypeassert # [replaced by errcheck] finds forced type assertions
     #- gomodguard # [use more powerful depguard] allow and block lists linter for direct Go module dependencies
-    #- gosmopolitan # reports certain i18n/l10n anti-patterns in your Go codebase
-    #- grouper # analyzes expression groups
-    #- importas # enforces consistent import aliases
+    - gosmopolitan # reports certain i18n/l10n anti-patterns in your Go codebase
+    - grouper # analyzes expression groups
+    - importas # enforces consistent import aliases
     #- lll # [replaced by golines] reports long lines
-    #- maintidx # measures the maintainability index of each function
-    #- misspell # [useless] finds commonly misspelled English words in comments
+    - maintidx # measures the maintainability index of each function
+    - misspell # [useless] finds commonly misspelled English words in comments
     #- nlreturn # [too strict and mostly code is not more readable] checks for a new line before return and branch statements to increase code clarity
     #- paralleltest # [too many false positives] detects missing usage of t.Parallel() method in your Go test
     #- tagliatelle # checks the struct tags
@@ -333,7 +346,7 @@ linters:
         shadow:
           # Whether to be strict about shadowing; can be noisy.
           # Default: false
-          strict: true
+          strict: false
 
     inamedparam:
       # Skips check for interface methods with only a single parameter.
@@ -387,7 +400,12 @@ linters:
       # Default: ["EOF", "Err.*"]
       patterns:
         - ".*"
-
+    revive:
+      rules:
+        - name: exported
+          disabled: true
+        - name: package-comments
+          disabled: true
     rowserrcheck:
       # database/sql is always checked.
       # Default: []
@@ -436,7 +454,7 @@ linters:
   exclusions:
     # Log a warning if an exclusion rule is unused.
     # Default: false
-    warn-unused: true
+    warn-unused: false
     # Predefined exclusion rules.
     # Default: []
     presets:
@@ -464,5 +482,40 @@ linters:
           - funlen
           - goconst
           - gosec
+          - gosmopolitan
           - noctx
           - wrapcheck
+      - text: 'ST102[0-2]: comment.*should be of the form'
+        linters: [staticcheck]
+      # TODO: Fix this
+      - text: 'os/exec\.Command must not be called'
+        linters: [noctx]
+      # Stores globally accessible icon strings
+      - path: 'src/config/icon/icon.go'
+        linters:
+          - gochecknoglobals
+          - lll
+      # Stores prerendered styles
+      - path: 'src/internal/common/style.go'
+        linters:
+          - gochecknoglobals
+      # Some fixed variables like default config paths, version, etc.
+      - path: 'src/config/fixed_variable.go'
+        linters:
+          - gochecknoglobals
+      # Stores predefined variables, like re-used non-const strings
+      - path: 'src/internal/common/predefined_variable.go'
+        linters:
+          - gochecknoglobals
+      # Global variables storing config
+      - path: 'src/internal/common/default_config.go'
+        linters:
+          - gochecknoglobals    
+      # Type defining config.toml and hotkey.toml
+      - path: 'src/internal/common/config_type.go'
+        linters:
+          - lll 
+          # TODO: Fix this. There are "bad syntax for struct tag value" errors
+          - govet   
+          # TODO: Fix this. There are "SA5008: unparseable struct tag" errors
+          - staticcheck
