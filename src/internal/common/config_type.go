@@ -76,7 +76,7 @@ type ConfigType struct {
 	FileSizeUseSI          bool   `toml:"file_size_use_si" comment:"\nDisplay file sizes using powers of 1000 (kB, MB, GB) instead of powers of 1024 (KiB, MiB, GiB)."`
 	DefaultSortType        int    `toml:"default_sort_type" comment:"\nDefault sort type (0: Name, 1: Size, 2: Date Modified, 3: Type)."`
 	SortOrderReversed      bool   `toml:"sort_order_reversed" comment:"\nDefault sort order (false: Ascending, true: Descending)."`
-	CaseSensitiveSort      bool   `toml:"case_sensitive_sort" comment:"\nCase sensitive sort by name (captal \"B\" comes before \"a\" if true)."`
+	CaseSensitiveSort      bool   `toml:"case_sensitive_sort" comment:"\nCase sensitive sort by name (capital \"B\" comes before \"a\" if true)."`
 	ShellCloseOnSuccess    bool   `toml:"shell_close_on_success" comment:"\nWhether to close the shell on successful command execution."`
 	Debug                  bool   `toml:"debug" comment:"\nWhether to enable debug mode."`
 	// IgnoreMissingFields controls whether warnings about missing TOML fields are suppressed.
@@ -165,7 +165,7 @@ type HotkeysType struct {
 	ParentDirectory []string `toml:"parent_directory" comment:"=================================================================================================\nNormal mode hotkeys (can conflict with other modes, cannot conflict with global hotkeys)"`
 	SearchBar       []string `toml:"search_bar"`
 
-	FilePanelSelectModeItemsSelectDown []string `toml:"file_panel_select_mode_items_select_down" comment:"=================================================================================================\nSelect mode hotkeys (can conflict with other modes, cananot conflict with global hotkeys)"`
+	FilePanelSelectModeItemsSelectDown []string `toml:"file_panel_select_mode_items_select_down" comment:"=================================================================================================\nSelect mode hotkeys (can conflict with other modes, cannot conflict with global hotkeys)"`
 	FilePanelSelectModeItemsSelectUp   []string `toml:"file_panel_select_mode_items_select_up"`
 	FilePanelSelectAllItem             []string `toml:"file_panel_select_all_items"`
 }
