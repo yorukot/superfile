@@ -222,6 +222,11 @@ func TestFileDelete(t *testing.T) {
 			filePath:        file1,
 			permanentDelete: false,
 		},
+		{
+			name:            "Permanently delete",
+			filePath:        file2,
+			permanentDelete: true,
+		},
 	}
 
 	for _, tt := range testdata {
