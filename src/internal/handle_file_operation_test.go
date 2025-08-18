@@ -255,6 +255,12 @@ func TestPasteItem(t *testing.T) {
 			} else {
 				verifySuccessfulPasteResults(t, tt.targetDir, tt.expectedDestFiles, originalPath, tt.shouldOriginalExist)
 			}
+			// Checking separately, as this is something independent of tt.shouldPreventPaste
+			if tt.shouldClipboardClear {
+				assert.Empty(t, p.m.copyItems.items, "Clipboard should be cleared after successful cut-paste")
+			} else {
+				assert.NotEmpty(t, p.m.copyItems.items, "Clipboard should remain after copy-paste")
+			}
 		})
 	}
 

@@ -474,17 +474,7 @@ func readFileContent(filepath string, maxLineLength int, previewLine int) (strin
 }
 
 func (m *model) filePreviewPanelRender() string {
-	// TODO : This width adjustment must not be done inside render function. It should
-	// only be triggered via Update()
-	m.fileModel.filePreview.width += m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.width -
-		((m.fileModel.width + 2) * len(m.fileModel.filePanels)) - 2
-
-	return m.filePreviewPanelRenderWithDimensions(m.mainPanelHeight+2, m.fileModel.filePreview.width)
-}
-
-// Helper function to handle empty panel case
-func (m *model) renderEmptyFilePreview(r *rendering.Renderer) string {
-	return r.Render()
+	return m.fileModel.filePreview.content
 }
 
 // Helper function to handle file info errors
@@ -620,15 +610,27 @@ func (m *model) renderTextPreview(r *rendering.Renderer, box lipgloss.Style, ite
 	r.AddLines(fileContent)
 	return r.Render()
 }
+func (m *model) filePreviewPanelRenderWithDimensions() string {
+	panel := m.getFocusedFilePanel()
+	if len(panel.element) == 0 {
+		return m.fileModel.filePreview.RenderText("")
+	}
+	itemPath := panel.getSelectedItem().location
+	return m.filePreviewPanelRenderWithPath(itemPath)
+}
 
-func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewWidth int) string {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+// TODO: Avoid accessing the model here.
+// There is used in tea.Cmd for async rendering. Avoid access inside async
+// command closures to reduce data-race risk. Require immutable values as parameter
+// (e.g., previewW, previewH, sideAreaWidth, imagePreviewer, theme colors) and pass
+// them to a pure renderer that doesn’t touch m.
+func (m *model) filePreviewPanelRenderWithPath(itemPath string) string {
+	previewHeight := m.fileModel.filePreview.height
+	previewWidth := m.fileModel.filePreview.width
+
 	box := common.FilePreviewBox(previewHeight, previewWidth)
 	r := ui.FilePreviewPanelRenderer(previewHeight, previewWidth)
 	clearCmd := m.imagePreviewer.ClearKittyImages()
-	if len(panel.element) == 0 {
-		return m.renderEmptyFilePreview(r) + clearCmd
-	}
 
 	// This could create errors if panel.cursor ever becomes negative, or goes out of bounds
 	// We should have a panel validation function in our View() function
@@ -639,7 +641,7 @@ func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewW
 	// Now this lack of abstraction has caused issues ( See PR#730 ) . And now
 	// someone needs to scan through the entire codebase to figure out which access of panel
 	// data is causing crash.
-	itemPath := panel.element[panel.cursor].location
+
 	fileInfo, infoErr := os.Stat(itemPath)
 	if infoErr != nil {
 		return m.renderFileInfoError(r, box, infoErr) + clearCmd

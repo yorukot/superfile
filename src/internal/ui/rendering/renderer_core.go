@@ -9,8 +9,9 @@ import (
 )
 
 // Add lines as much as the remaining capacity allows
-func (r *Renderer) AddLines(lines ...string) {
+func (r *Renderer) AddLines(lines ...string) *Renderer {
 	r.contentSections[r.curSectionIdx].AddLines(lines...)
+	return r
 }
 
 // Lines until now will belong to current section, and

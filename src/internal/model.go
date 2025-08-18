@@ -63,14 +63,17 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// If its quitDone. But if we are at this state, its already bad, so we need
 	// to first figure out if its possible in testing, and fix it.
 	slog.Debug("model.Update() called", "msgType", reflect.TypeOf(msg))
-	var sidebarCmd, inputCmd, updateCmd, panelCmd, metadataCmd tea.Cmd
+	var sidebarCmd, inputCmd, updateCmd, panelCmd, metadataCmd, filePreviewCmd tea.Cmd
 	gotModelUpdateMsg := false
 
 	sidebarCmd = m.sidebarModel.UpdateState(msg)
+	forcePreviewRender := false
 
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
+		// Must re-render file preview on resize
 		m.handleWindowResize(msg)
+		forcePreviewRender = true
 	case tea.MouseMsg:
 		m.handleMouseMsg(msg)
 	case tea.KeyMsg:
@@ -98,9 +101,10 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// Ideally we might want to fetch only if the current file selected in filepanel changes
 	if !gotModelUpdateMsg {
 		metadataCmd = m.getMetadataCmd()
+		filePreviewCmd = m.getFilePreviewCmd(forcePreviewRender)
 	}
 
-	return m, tea.Batch(sidebarCmd, inputCmd, updateCmd, panelCmd, metadataCmd)
+	return m, tea.Batch(sidebarCmd, inputCmd, updateCmd, panelCmd, metadataCmd, filePreviewCmd)
 }
 
 func (m *model) handleMouseMsg(msg tea.MouseMsg) {
@@ -123,6 +127,32 @@ func (m *model) updateModelStateAfterMsg() {
 	// Init() should return a basic model object with all IO waiting via a tea.Cmd
 	if !m.firstLoadingComplete {
 		m.firstLoadingComplete = true
+	}
+}
+
+func (m *model) getFilePreviewCmd(forcePreviewRender bool) tea.Cmd {
+	if !m.fileModel.filePreview.open {
+		return nil
+	}
+	if len(m.getFocusedFilePanel().element) == 0 {
+		// Sync call because this will be fast
+		m.fileModel.filePreview.SetContextWithRenderText("")
+		return nil
+	}
+	selectedItem := m.getFocusedFilePanel().getSelectedItem()
+	if m.fileModel.filePreview.location == selectedItem.location && !forcePreviewRender {
+		return nil
+	}
+
+	m.fileModel.filePreview.SetContextWithRenderText("Loading...")
+	m.fileModel.filePreview.location = selectedItem.location
+	reqCnt := m.ioReqCnt
+	m.ioReqCnt++
+	slog.Debug("Submitting file preview render request", "id", reqCnt, "path", selectedItem.location)
+
+	return func() tea.Msg {
+		return NewFilePreviewUpdateMsg(selectedItem.location,
+			m.filePreviewPanelRenderWithPath(selectedItem.location), reqCnt)
 	}
 }
 
@@ -171,13 +201,14 @@ func (m *model) handleWindowResize(msg tea.WindowSizeMsg) {
 	m.fullHeight = msg.Height
 	m.fullWidth = msg.Width
 
+	m.setHeightValues(msg.Height)
+
 	if m.fileModel.filePreview.open {
 		// File preview panel width same as file panel
-		m.setFilePreviewWidth(msg.Width)
+		m.setFilePreviewPanelSize()
 	}
 
 	m.setFilePanelsSize(msg.Width)
-	m.setHeightValues(msg.Height)
 	m.setHelpMenuSize()
 	m.setMetadataModelSize()
 	m.setProcessBarModelSize()
@@ -188,14 +219,18 @@ func (m *model) handleWindowResize(msg tea.WindowSizeMsg) {
 	}
 }
 
+func (m *model) setFilePreviewPanelSize() {
+	m.fileModel.filePreview.SetWidth(m.getFilePreviewWidth())
+	m.fileModel.filePreview.SetHeight(m.mainPanelHeight + 2)
+}
+
 // Set file preview panel Widht to width. Assure that
-func (m *model) setFilePreviewWidth(width int) {
+func (m *model) getFilePreviewWidth() int {
 	if common.Config.FilePreviewWidth == 0 {
-		m.fileModel.filePreview.width = (width - common.Config.SidebarWidth -
+		return (m.fullWidth - common.Config.SidebarWidth -
 			(4 + (len(m.fileModel.filePanels))*2)) / (len(m.fileModel.filePanels) + 1)
-	} else {
-		m.fileModel.filePreview.width = (width - common.Config.SidebarWidth) / common.Config.FilePreviewWidth
 	}
+	return (m.fullWidth - common.Config.SidebarWidth) / common.Config.FilePreviewWidth
 }
 
 // Proper set panels size. Assure that panels do not overlap
