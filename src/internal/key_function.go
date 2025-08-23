@@ -300,6 +300,19 @@ func (m *model) focusOnSearchbarKey(msg string) {
 // Check hotkey input in help menu. Possible actions are moving up, down
 // and quiting the menu
 func (m *model) helpMenuKey(msg string) {
+	if m.helpMenu.searchBar.Focused() {
+		switch {
+		case slices.Contains(common.Hotkeys.ConfirmTyping, msg), slices.Contains(common.Hotkeys.CancelTyping, msg):
+			m.helpMenu.searchBar.Blur()
+		default:
+			m.filterHelpMenu(m.helpMenu.searchBar.Value())
+		}
+	} else {
+		m.handleHelpMenuNavKeys(msg)
+	}
+}
+
+func (m *model) handleHelpMenuNavKeys(msg string) {
 	switch {
 	case slices.Contains(common.Hotkeys.ListUp, msg):
 		m.helpMenuListUp()
@@ -307,5 +320,7 @@ func (m *model) helpMenuKey(msg string) {
 		m.helpMenuListDown()
 	case slices.Contains(common.Hotkeys.Quit, msg):
 		m.quitHelpMenu()
+	case slices.Contains(common.Hotkeys.SearchBar, msg):
+		m.helpMenu.searchBar.Focus()
 	}
 }

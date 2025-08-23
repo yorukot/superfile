@@ -67,6 +67,14 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	gotModelUpdateMsg := false
 
 	sidebarCmd = m.sidebarModel.UpdateState(msg)
+
+	// this is similar to m.sidebarModel.UpdateState(msg) but since helpMenu is not a Model
+	// we call .Update() manually here
+	var helpMenuCmd tea.Cmd
+	if m.helpMenu.searchBar.Focused() {
+		m.helpMenu.searchBar, helpMenuCmd = m.helpMenu.searchBar.Update(msg)
+	}
+
 	forcePreviewRender := false
 
 	switch msg := msg.(type) {
@@ -104,7 +112,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		filePreviewCmd = m.getFilePreviewCmd(forcePreviewRender)
 	}
 
-	return m, tea.Batch(sidebarCmd, inputCmd, updateCmd, panelCmd, metadataCmd, filePreviewCmd)
+	return m, tea.Batch(sidebarCmd, helpMenuCmd, inputCmd, updateCmd, panelCmd, metadataCmd, filePreviewCmd)
 }
 
 func (m *model) handleMouseMsg(msg tea.MouseMsg) {
@@ -278,6 +286,7 @@ func (m *model) setHelpMenuSize() {
 	if m.fullWidth > 95 {
 		m.helpMenu.width = 90
 	}
+	m.helpMenu.searchBar.Width = m.helpMenu.width - 4
 }
 
 func (m *model) setPromptModelSize() {
