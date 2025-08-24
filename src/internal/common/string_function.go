@@ -188,6 +188,57 @@ func IsTextFile(filename string) (bool, error) {
 	return IsBufferPrintable(buffer[:cnt]), nil
 }
 
+func IsCodeFile(filename string) bool {
+	ext := strings.ToLower(filepath.Ext(filename))
+
+	// Common code file extensions
+	codeExtensions := map[string]bool{
+		".c":      true,
+		".h":      true,
+		".cpp":    true,
+		".cc":     true,
+		".cxx":    true,
+		".hpp":    true,
+		".hh":     true,
+		".hxx":    true,
+		".go":     true,
+		".zig":    true,
+		".rs":     true,
+		".py":     true,
+		".sh":     true,
+		".bash":   true,
+		".zsh":    true,
+		".fish":   true,
+		".lua":    true,
+		".rb":     true,
+		".php":    true,
+		".java":   true,
+		".js":     true,
+		".ts":     true,
+		".jsx":    true,
+		".tsx":    true,
+		".vue":    true,
+		".svelte": true,
+		".astro":  true,
+		".md":     true,
+		".txt":    true,
+		".log":    true,
+		".json":   true,
+		".toml":   true,
+		".yaml":   true,
+		".yml":    true,
+		".xml":    true,
+		".html":   true,
+		".css":    true,
+		".scss":   true,
+		".sass":   true,
+		".less":   true,
+	}
+
+	return codeExtensions[ext]
+}
+
+
 // Although some characters like `\x0b`(vertical tab) are printable,
 // previewing them breaks the layout.
 // So, among the "non-graphic" printable characters, we only need \n and \t

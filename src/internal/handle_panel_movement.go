@@ -8,6 +8,8 @@ import (
 	"runtime"
 
 	"github.com/yorukot/superfile/src/internal/utils"
+	"github.com/yorukot/superfile/src/internal/common"
+	tea "github.com/charmbracelet/bubbletea"
 
 	variable "github.com/yorukot/superfile/src/config"
 )
@@ -22,11 +24,11 @@ func (m *model) parentDirectory() {
 
 // Enter directory or open file with default application
 // TODO: Unit test this
-func (m *model) enterPanel() {
+func (m *model) enterPanel() tea.Cmd {
 	panel := m.getFocusedFilePanel()
 
 	if len(panel.element) == 0 {
-		return
+		return nil
 	}
 	selectedItem := panel.getSelectedItem()
 	if selectedItem.directory {
@@ -35,24 +37,24 @@ func (m *model) enterPanel() {
 		if err != nil {
 			slog.Error("Error while changing to directory", "error", err, "target", selectedItem.location)
 		}
-		return
+		return nil
 	}
 	fileInfo, err := os.Lstat(selectedItem.location)
 	if err != nil {
 		slog.Error("Error while getting file info", "error", err)
-		return
+		return nil
 	}
 
 	if fileInfo.Mode()&os.ModeSymlink != 0 {
 		targetPath, symlinkErr := filepath.EvalSymlinks(selectedItem.location)
 		if symlinkErr != nil {
-			return
+			return nil
 		}
 
 		targetInfo, lstatErr := os.Lstat(targetPath)
 
 		if lstatErr != nil {
-			return
+			return nil
 		}
 
 		if targetInfo.IsDir() {
@@ -60,23 +62,35 @@ func (m *model) enterPanel() {
 			if err != nil {
 				slog.Error("Error while changing to directory", "error", err, "target", targetPath)
 			}
-			return
+			return nil
 		}
 	}
 
 	if variable.ChooserFile != "" {
 		chooserErr := m.chooserFileWriteAndQuit(panel.element[panel.cursor].location)
 		if chooserErr == nil {
-			return
+			return nil
 		}
 		// Continue with preview if file is not writable
 		slog.Error("Error while writing to chooser file, continuing with file open", "error", chooserErr)
 	}
-	m.executeOpenCommand()
+	return m.executeOpenCommand()
 }
 
-func (m *model) executeOpenCommand() {
+func (m *model) executeOpenCommand() tea.Cmd {
 	panel := m.getFocusedFilePanel()
+	selectedFile := panel.element[panel.cursor].location // panel.element[panel.cursor] as a variable
+
+	// check for code files on Linux
+	if runtime.GOOS == "linux" && common.IsCodeFile(selectedFile) {
+		// Using Nano to open since its the default installed editor on most Linux distros
+		cmd := exec.Command("nano", selectedFile)
+		return tea.ExecProcess(cmd, func(err error) tea.Msg {
+			return editorFinishedMsg{err}
+		})
+	}
+
+
 	openCommand := "xdg-open"
 	switch runtime.GOOS {
 	case utils.OsDarwin:
@@ -85,20 +99,21 @@ func (m *model) executeOpenCommand() {
 		dllpath := filepath.Join(os.Getenv("SYSTEMROOT"), "System32", "rundll32.exe")
 		dllfile := "url.dll,FileProtocolHandler"
 
-		cmd := exec.Command(dllpath, dllfile, panel.element[panel.cursor].location)
+		cmd := exec.Command(dllpath, dllfile, selectedFile)
 		err := cmd.Start()
 		if err != nil {
 			slog.Error("Error while open file with", "error", err)
 		}
 
-		return
+		return nil
 	}
 
-	cmd := exec.Command(openCommand, panel.element[panel.cursor].location)
+	cmd := exec.Command(openCommand, selectedFile)
 	err := cmd.Start()
 	if err != nil {
 		slog.Error("Error while open file with", "error", err)
 	}
+	return nil
 }
 
 // Switch to the directory where the sidebar cursor is located

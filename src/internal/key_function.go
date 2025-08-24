@@ -155,9 +155,9 @@ func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
 		case slices.Contains(common.Hotkeys.PermanentlyDeleteItems, msg):
 			return m.getDeleteTriggerCmd(true)
 		case slices.Contains(common.Hotkeys.CopyItems, msg):
-			m.copyMultipleItem(false)
+			m.copySingleItem(false)
 		case slices.Contains(common.Hotkeys.CutItems, msg):
-			m.copyMultipleItem(true)
+			m.copySingleItem(true)
 		case slices.Contains(common.Hotkeys.FilePanelSelectAllItem, msg):
 			m.selectAllItem()
 		}
@@ -166,7 +166,7 @@ func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
 
 	switch {
 	case slices.Contains(common.Hotkeys.Confirm, msg):
-		m.enterPanel()
+		return m.enterPanel()
 	case slices.Contains(common.Hotkeys.ParentDirectory, msg):
 		m.parentDirectory()
 	case slices.Contains(common.Hotkeys.DeleteItems, msg):
