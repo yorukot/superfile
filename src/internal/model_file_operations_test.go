@@ -29,8 +29,8 @@ func TestCopy(t *testing.T) {
 	dir2 := filepath.Join(curTestDir, "dir2")
 	file1 := filepath.Join(dir1, "file1.txt")
 	t.Run("Basic Copy", func(t *testing.T) {
-		setupDirectories(t, curTestDir, dir1, dir2)
-		setupFiles(t, file1)
+		utils.SetupDirectories(t, curTestDir, dir1, dir2)
+		utils.SetupFiles(t, file1)
 		t.Cleanup(func() {
 			os.RemoveAll(curTestDir)
 		})
@@ -70,7 +70,7 @@ func TestFileCreation(t *testing.T) {
 	testParentDir := filepath.Join(curTestDir, "parentDir")
 	testChildDir := filepath.Join(testParentDir, "childDir")
 
-	setupDirectories(t, curTestDir, testParentDir, testChildDir)
+	utils.SetupDirectories(t, curTestDir, testParentDir, testChildDir)
 
 	t.Cleanup(func() {
 		os.RemoveAll(curTestDir)
@@ -116,9 +116,9 @@ func TestFileRename(t *testing.T) {
 	file2 := filepath.Join(curTestDir, "file2.txt")
 	file3 := filepath.Join(curTestDir, "file3.txt")
 
-	setupFilesWithData(t, []byte("f1"), file1)
-	setupFilesWithData(t, []byte("f2"), file2)
-	setupFilesWithData(t, []byte("f3"), file3)
+	utils.SetupFilesWithData(t, []byte("f1"), file1)
+	utils.SetupFilesWithData(t, []byte("f2"), file2)
+	utils.SetupFilesWithData(t, []byte("f3"), file3)
 
 	file1New := filepath.Join(curTestDir, "file1_new.txt")
 
@@ -205,8 +205,8 @@ func TestFileDelete(t *testing.T) {
 	file1 := filepath.Join(curTestDir, "file1.txt")
 	file2 := filepath.Join(curTestDir, "file2.txt")
 
-	setupFilesWithData(t, []byte("f1"), file1)
-	setupFilesWithData(t, []byte("f2"), file2)
+	utils.SetupFilesWithData(t, []byte("f1"), file1)
+	utils.SetupFilesWithData(t, []byte("f2"), file2)
 
 	testdata := []struct {
 		name            string

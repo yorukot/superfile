@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"bufio"
 	"context"
 	"errors"
 	"fmt"
@@ -17,9 +16,6 @@ import (
 	"strings"
 	"time"
 
-	"golang.org/x/text/encoding/unicode"
-	"golang.org/x/text/transform"
-
 	"github.com/yorukot/superfile/src/internal/ui"
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
 
@@ -28,7 +24,7 @@ import (
 
 	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/x/exp/term/ansi"
+
 	"github.com/yorukot/ansichroma"
 
 	"github.com/yorukot/superfile/src/config/icon"
@@ -448,33 +444,8 @@ func (m *model) sortOptionsRender() string {
 		bottomBorder).Render(sortOptionsContent)
 }
 
-func readFileContent(filepath string, maxLineLength int, previewLine int) (string, error) {
-	var resultBuilder strings.Builder
-	file, err := os.Open(filepath)
-	if err != nil {
-		return resultBuilder.String(), err
-	}
-	defer file.Close()
-
-	reader := transform.NewReader(file, unicode.BOMOverride(unicode.UTF8.NewDecoder()))
-	scanner := bufio.NewScanner(reader)
-	lineCount := 0
-	for scanner.Scan() {
-		line := scanner.Text()
-		line = ansi.Truncate(line, maxLineLength, "")
-		resultBuilder.WriteString(line)
-		resultBuilder.WriteRune('\n')
-		lineCount++
-		if previewLine > 0 && lineCount >= previewLine {
-			break
-		}
-	}
-	// returns the first non-EOF error that was encountered by the [Scanner]
-	return resultBuilder.String(), scanner.Err()
-}
-
 func (m *model) filePreviewPanelRender() string {
-	return m.fileModel.filePreview.content
+	return m.fileModel.filePreview.GetContent()
 }
 
 // Helper function to handle file info errors
@@ -576,7 +547,7 @@ func (m *model) renderTextPreview(r *rendering.Renderer, box lipgloss.Style, ite
 		}
 	}
 
-	fileContent, err := readFileContent(itemPath, previewWidth, previewHeight)
+	fileContent, err := utils.ReadFileContent(itemPath, previewWidth, previewHeight)
 	if err != nil {
 		slog.Error("Error open file", "error", err)
 		return box.Render(common.FilePreviewError)
