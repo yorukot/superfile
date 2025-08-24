@@ -129,7 +129,8 @@ func TestCompressSelectedFiles(t *testing.T) {
 			p.SendDirectly(nil)
 
 			setFilePanelSelectedItemByLocation(t, m.getFocusedFilePanel(), zipFile)
-
+			t.Logf("Panel elements : %v, cursor : %v",
+				m.getFocusedFilePanel().element, m.getFocusedFilePanel().cursor)
 			selectedItemLocation := m.getFocusedFilePanel().getSelectedItem().location
 			assert.Equal(t, zipFile, selectedItemLocation)
 			// Ensure we are extracting the zip file, not a directory
