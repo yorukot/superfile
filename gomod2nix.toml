@@ -161,8 +161,8 @@ schema = 3
     version = "v4.25.4"
     hash = "sha256-yvwmdickuZKzFHJSEBn9r9+7Gxm8kSozdh7ffCOsmZM="
   [mod."github.com/stretchr/testify"]
-    version = "v1.10.0"
-    hash = "sha256-fJ4gnPr0vnrOhjQYQwJ3ARDKPsOtA7d4olQmQWR+wpI="
+    version = "v1.11.0"
+    hash = "sha256-qCXP0GTTZpPtOuBE4BkdEXC4cZim2yuZE0T88ehTayY="
   [mod."github.com/ulikunitz/xz"]
     version = "v0.5.11"
     hash = "sha256-SUyrjc2wyN3cTGKe5JdBEXjtZC1rJySRxJHVUZ59row="
