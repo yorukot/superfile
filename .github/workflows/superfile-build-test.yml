@@ -53,7 +53,7 @@ jobs:
           GOMODCACHE: ${{ runner.temp }}/gomodcache
 
       - name: Test
-        run: go test -v ./...
+        run: go test -v ./... -count=10 -failfast
         env:
           GOMODCACHE: ${{ runner.temp }}/gomodcache
 
