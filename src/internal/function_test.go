@@ -8,6 +8,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/yorukot/superfile/src/internal/utils"
 )
 
 func TestReturnDirElement(t *testing.T) {
@@ -16,7 +18,7 @@ func TestReturnDirElement(t *testing.T) {
 	curTestDir := filepath.Join(testDir, "TestRDE")
 	dir1 := filepath.Join(curTestDir, "dir1")
 	dir2 := filepath.Join(curTestDir, "dir2")
-	setupDirectories(t, curTestDir, dir1, dir2)
+	utils.SetupDirectories(t, curTestDir, dir1, dir2)
 
 	creationDelay := time.Millisecond * 5
 	// Cleanup is handled by TestMain
@@ -50,7 +52,7 @@ func TestReturnDirElement(t *testing.T) {
 	}
 
 	for _, f := range fileSetup {
-		setupFilesWithData(t, f.data, f.path)
+		utils.SetupFilesWithData(t, f.data, f.path)
 		time.Sleep(creationDelay)
 	}
 

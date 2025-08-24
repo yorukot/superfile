@@ -17,31 +17,6 @@ import (
 const DefaultTestTick = 10 * time.Millisecond
 const DefaultTestTimeout = time.Second
 
-var SampleDataBytes = []byte("This is sample") //nolint: gochecknoglobals // Effectively const
-
-func setupDirectories(t *testing.T, dirs ...string) {
-	t.Helper()
-	for _, dir := range dirs {
-		if dir == "" {
-			continue
-		}
-		err := os.MkdirAll(dir, 0755)
-		require.NoError(t, err)
-	}
-}
-
-func setupFilesWithData(t *testing.T, data []byte, files ...string) {
-	t.Helper()
-	for _, file := range files {
-		err := os.WriteFile(file, data, 0644)
-		require.NoError(t, err)
-	}
-}
-
-func setupFiles(t *testing.T, files ...string) {
-	setupFilesWithData(t, SampleDataBytes, files...)
-}
-
 // -------------------- Model setup utils
 
 func defaultTestModel(dirs ...string) *model {

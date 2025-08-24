@@ -12,6 +12,12 @@ import (
 
 	"github.com/adrg/xdg"
 	"github.com/pelletier/go-toml/v2"
+
+	"bufio"
+
+	"github.com/charmbracelet/x/exp/term/ansi"
+	"golang.org/x/text/encoding/unicode"
+	"golang.org/x/text/transform"
 )
 
 // Utility functions related to file operations
@@ -241,4 +247,29 @@ func CreateFiles(files ...string) error {
 		}
 	}
 	return nil
+}
+
+func ReadFileContent(filepath string, maxLineLength int, previewLine int) (string, error) {
+	var resultBuilder strings.Builder
+	file, err := os.Open(filepath)
+	if err != nil {
+		return resultBuilder.String(), err
+	}
+	defer file.Close()
+
+	reader := transform.NewReader(file, unicode.BOMOverride(unicode.UTF8.NewDecoder()))
+	scanner := bufio.NewScanner(reader)
+	lineCount := 0
+	for scanner.Scan() {
+		line := scanner.Text()
+		line = ansi.Truncate(line, maxLineLength, "")
+		resultBuilder.WriteString(line)
+		resultBuilder.WriteRune('\n')
+		lineCount++
+		if previewLine > 0 && lineCount >= previewLine {
+			break
+		}
+	}
+	// returns the first non-EOF error that was encountered by the [Scanner]
+	return resultBuilder.String(), scanner.Err()
 }

@@ -39,3 +39,7 @@ func (m *FilePreviewPanel) RenderText(text string) string {
 func (m *FilePreviewPanel) SetContextWithRenderText(text string) {
 	m.content = m.RenderText(text)
 }
+
+func (m *FilePreviewPanel) GetContent() string {
+	return m.content
+}

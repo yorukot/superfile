@@ -44,8 +44,8 @@ func TestFilePanelNavigation(t *testing.T) {
 		rootDir = "\\"
 	}
 
-	setupDirectories(t, dir1, dir2)
-	setupFiles(t, file1, file2, file3, file4, file5, file6)
+	utils.SetupDirectories(t, dir1, dir2)
+	utils.SetupFiles(t, file1, file2, file3, file4, file5, file6)
 
 	testdata := []struct {
 		name           string
