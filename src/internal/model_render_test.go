@@ -144,7 +144,7 @@ func TestFilePreviewRenderWithDimensions(t *testing.T) {
 			m := defaultTestModel(curDir)
 			m.fileModel.filePreview.SetWidth(tt.width)
 			m.fileModel.filePreview.SetHeight(tt.height)
-			res := ansi.Strip(m.filePreviewPanelRenderWithDimensions())
+			res := ansi.Strip(m.fileModel.filePreview.RenderWithPath(filePath, m.fullWidth))
 
 			assert.Equal(t, tt.expectedPreview, res, "filePath = %s", filePath)
 		})
