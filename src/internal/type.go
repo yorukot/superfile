@@ -11,8 +11,8 @@ import (
 
 	"github.com/charmbracelet/bubbles/textinput"
 
-	"github.com/yorukot/superfile/src/internal/ui/prompt"
 	"github.com/yorukot/superfile/src/internal/ui/preview"
+	"github.com/yorukot/superfile/src/internal/ui/prompt"
 )
 
 // Type representing the mode of the panel

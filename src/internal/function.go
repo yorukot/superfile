@@ -348,23 +348,6 @@ func countFiles(dirPath string) (int, error) {
 	return count, err
 }
 
-func isImageFile(filename string) bool {
-	imageExtensions := map[string]bool{
-		".jpg":  true,
-		".jpeg": true,
-		".png":  true,
-		".gif":  true,
-		".bmp":  true,
-		".tiff": true,
-		".svg":  true,
-		".webp": true,
-		".ico":  true,
-	}
-
-	ext := strings.ToLower(filepath.Ext(filename))
-	return imageExtensions[ext]
-}
-
 func processCmdToTeaCmd(cmd processbar.Cmd) tea.Cmd {
 	if cmd == nil {
 		// To prevent us from running cmd() on nil cmd

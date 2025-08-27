@@ -9,8 +9,8 @@ import (
 	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
 
 	"github.com/yorukot/superfile/src/internal/common"
-	"github.com/yorukot/superfile/src/internal/ui/prompt"
 	"github.com/yorukot/superfile/src/internal/ui/preview"
+	"github.com/yorukot/superfile/src/internal/ui/prompt"
 )
 
 // Generate and return model containing default configurations for interface

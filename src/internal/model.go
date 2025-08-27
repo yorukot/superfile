@@ -696,14 +696,3 @@ func (m *model) quitSuperfile(cdOnQuit bool) {
 	slog.Debug("Quitting superfile", "current dir", currentDir)
 }
 
-// Check if bat is an executable in PATH and whether to use bat or batcat as command
-func checkBatCmd() string {
-	if _, err := exec.LookPath("bat"); err == nil {
-		return "bat"
-	}
-	// on ubuntu bat executable is called batcat
-	if _, err := exec.LookPath("batcat"); err == nil {
-		return "batcat"
-	}
-	return ""
-}
