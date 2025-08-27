@@ -356,6 +356,8 @@ func (m *model) helpMenuRender() string {
 	renderHotkeyLength := m.getRenderHotkeyLengthHelpmenuModal()
 	helpMenuContent := m.getHelpMenuContent(renderHotkeyLength, valueLength)
 	searchBar := m.helpMenu.searchBar.View()
+	m.helpMenu.searchBar.Width = m.helpMenu.width - 2
+
 	helpMenuContent = lipgloss.JoinVertical(lipgloss.Left, searchBar, helpMenuContent)
 	bottomBorder := common.GenerateFooterBorder(fmt.Sprintf("%s/%s",
 		strconv.Itoa(m.helpMenu.cursor+1-cursorBeenTitleCount),
