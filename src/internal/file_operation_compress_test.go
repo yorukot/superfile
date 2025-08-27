@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
+	"github.com/yorukot/superfile/src/internal/utils"
 )
 
 func TestZipSources(t *testing.T) {
@@ -30,10 +31,10 @@ func TestZipSources(t *testing.T) {
 				testDir1 := filepath.Join(tempDir, "testdir1")
 				testDir2 := filepath.Join(tempDir, "testdir2")
 				subDir := filepath.Join(testDir1, "subdir")
-				setupDirectories(t, testDir1, testDir2, subDir)
-				setupFilesWithData(t, []byte("Content of file1"), filepath.Join(testDir1, "file1.txt"))
-				setupFilesWithData(t, []byte("Content of file2"), filepath.Join(subDir, "file2.txt"))
-				setupFilesWithData(t, []byte("Content of file3"), filepath.Join(testDir2, "file3.txt"))
+				utils.SetupDirectories(t, testDir1, testDir2, subDir)
+				utils.SetupFilesWithData(t, []byte("Content of file1"), filepath.Join(testDir1, "file1.txt"))
+				utils.SetupFilesWithData(t, []byte("Content of file2"), filepath.Join(subDir, "file2.txt"))
+				utils.SetupFilesWithData(t, []byte("Content of file3"), filepath.Join(testDir2, "file3.txt"))
 
 				return []string{testDir1, testDir2}, nil
 			},
@@ -53,7 +54,7 @@ func TestZipSources(t *testing.T) {
 			name: "single file",
 			setupFunc: func(t *testing.T, tempDir string) ([]string, error) {
 				testFile := filepath.Join(tempDir, "single.txt")
-				setupFilesWithData(t, []byte("Single file content"), testFile)
+				utils.SetupFilesWithData(t, []byte("Single file content"), testFile)
 				return []string{testFile}, nil
 			},
 			expectedFiles: map[string]string{

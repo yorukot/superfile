@@ -24,8 +24,8 @@ func TestModel_Update_Prompt(t *testing.T) {
 	dir2 := filepath.Join(curTestDir, "dir2")
 	file1 := filepath.Join(dir1, "file1.txt")
 
-	setupDirectories(t, curTestDir, dir1, dir2)
-	setupFiles(t, file1)
+	utils.SetupDirectories(t, curTestDir, dir1, dir2)
+	utils.SetupFiles(t, file1)
 	t.Cleanup(func() {
 		os.RemoveAll(curTestDir)
 	})
@@ -272,7 +272,7 @@ func testDirectoryHandlingWithQuotes(t *testing.T, curTestDir, dir1 string) {
 			directoriesToCreate = []string{dirWithSpaces, dirWithQuotes, dirWithSpecialChars, dirWithMixed}
 		}
 
-		setupDirectories(t, directoriesToCreate...)
+		utils.SetupDirectories(t, directoriesToCreate...)
 
 		t.Run("cd with double quotes", func(t *testing.T) {
 			m := defaultTestModel(dir1)
@@ -379,7 +379,7 @@ func testDirectoryHandlingWithQuotes(t *testing.T, curTestDir, dir1 string) {
 func testShellCommandsWithQuotes(t *testing.T, curTestDir, dir1 string) {
 	t.Run("Shell command with quotes", func(t *testing.T) {
 		dirWithSpaces := filepath.Join(curTestDir, "test dir with spaces")
-		setupDirectories(t, dirWithSpaces)
+		utils.SetupDirectories(t, dirWithSpaces)
 
 		t.Run("shell command with double quotes", func(t *testing.T) {
 			m := defaultTestModel(dir1)

@@ -74,8 +74,8 @@ func TestBasic(t *testing.T) {
 	file1 := filepath.Join(dir1, "file1.txt")
 
 	t.Run("Basic Checks", func(t *testing.T) {
-		setupDirectories(t, curTestDir, dir1, dir2)
-		setupFiles(t, file1)
+		utils.SetupDirectories(t, curTestDir, dir1, dir2)
+		utils.SetupFiles(t, file1)
 		t.Cleanup(func() {
 			os.RemoveAll(curTestDir)
 		})
@@ -173,8 +173,8 @@ func TestChooserFile(t *testing.T) {
 	dir2 := filepath.Join(curTestDir, "dir2")
 	file1 := filepath.Join(dir1, "file1.txt")
 	testChooserFile := filepath.Join(dir2, "chooser_file.txt")
-	setupDirectories(t, curTestDir, dir1, dir2)
-	setupFiles(t, file1)
+	utils.SetupDirectories(t, curTestDir, dir1, dir2)
+	utils.SetupFiles(t, file1)
 
 	testdata := []struct {
 		name            string

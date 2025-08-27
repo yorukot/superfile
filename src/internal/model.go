@@ -4,7 +4,6 @@ import (
 	"errors"
 	"log/slog"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"reflect"
 	"slices"
@@ -29,7 +28,6 @@ import (
 
 // These represent model's state information, its not a global preperty
 var LastTimeCursorMove = [2]int{int(time.Now().UnixMicro()), 0} //nolint: gochecknoglobals // TODO: Move to model struct
-var batCmd = ""                                                 //nolint: gochecknoglobals // TODO: Move to model struct
 var et *exiftool.Exiftool                                       //nolint: gochecknoglobals // TODO: Move to model struct
 
 // Initialize and return model with default configs
@@ -39,7 +37,6 @@ var et *exiftool.Exiftool                                       //nolint: gochec
 // be aware of it, and use it directly
 func InitialModel(firstFilePanelDirs []string, firstUseCheck bool) tea.Model {
 	toggleDotFile, toggleFooter := initialConfig(firstFilePanelDirs)
-	batCmd = checkBatCmd()
 	return defaultModelConfig(toggleDotFile, toggleFooter, firstUseCheck, firstFilePanelDirs)
 }
 
@@ -139,28 +136,31 @@ func (m *model) updateModelStateAfterMsg() {
 }
 
 func (m *model) getFilePreviewCmd(forcePreviewRender bool) tea.Cmd {
-	if !m.fileModel.filePreview.open {
+	if !m.fileModel.filePreview.IsOpen() {
 		return nil
 	}
 	if len(m.getFocusedFilePanel().element) == 0 {
 		// Sync call because this will be fast
-		m.fileModel.filePreview.SetContextWithRenderText("")
+		m.fileModel.filePreview.SetContentWithRenderText("")
 		return nil
 	}
 	selectedItem := m.getFocusedFilePanel().getSelectedItem()
-	if m.fileModel.filePreview.location == selectedItem.location && !forcePreviewRender {
+	if m.fileModel.filePreview.GetLocation() == selectedItem.location && !forcePreviewRender {
 		return nil
 	}
 
-	m.fileModel.filePreview.SetContextWithRenderText("Loading...")
-	m.fileModel.filePreview.location = selectedItem.location
+	m.fileModel.filePreview.SetLocation(selectedItem.location)
+	m.fileModel.filePreview.SetContentWithRenderText("Loading...")
 	reqCnt := m.ioReqCnt
 	m.ioReqCnt++
 	slog.Debug("Submitting file preview render request", "id", reqCnt, "path", selectedItem.location)
 
+	// Copy to a local variable to be used in below closure.
+	fullModalWidth := m.fullWidth
+
 	return func() tea.Msg {
 		return NewFilePreviewUpdateMsg(selectedItem.location,
-			m.filePreviewPanelRenderWithPath(selectedItem.location), reqCnt)
+			m.fileModel.filePreview.RenderWithPath(selectedItem.location, fullModalWidth), reqCnt)
 	}
 }
 
@@ -211,7 +211,7 @@ func (m *model) handleWindowResize(msg tea.WindowSizeMsg) {
 
 	m.setHeightValues(msg.Height)
 
-	if m.fileModel.filePreview.open {
+	if m.fileModel.filePreview.IsOpen() {
 		// File preview panel width same as file panel
 		m.setFilePreviewPanelSize()
 	}
@@ -244,9 +244,9 @@ func (m *model) getFilePreviewWidth() int {
 // Proper set panels size. Assure that panels do not overlap
 func (m *model) setFilePanelsSize(width int) {
 	// set each file panel size and max file panel amount
-	m.fileModel.width = (width - common.Config.SidebarWidth - m.fileModel.filePreview.width -
+	m.fileModel.width = (width - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth() -
 		(4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
-	m.fileModel.maxFilePanel = (width - common.Config.SidebarWidth - m.fileModel.filePreview.width) / 20
+	m.fileModel.maxFilePanel = (width - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth()) / 20
 	for i := range m.fileModel.filePanels {
 		m.fileModel.filePanels[i].searchBar.Width = m.fileModel.width - 4
 	}
@@ -702,16 +702,4 @@ func (m *model) quitSuperfile(cdOnQuit bool) {
 	}
 	m.modelQuitState = quitDone
 	slog.Debug("Quitting superfile", "current dir", currentDir)
-}
-
-// Check if bat is an executable in PATH and whether to use bat or batcat as command
-func checkBatCmd() string {
-	if _, err := exec.LookPath("bat"); err == nil {
-		return "bat"
-	}
-	// on ubuntu bat executable is called batcat
-	if _, err := exec.LookPath("batcat"); err == nil {
-		return "batcat"
-	}
-	return ""
 }
