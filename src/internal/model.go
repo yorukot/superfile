@@ -4,7 +4,6 @@ import (
 	"errors"
 	"log/slog"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"reflect"
 	"slices"
