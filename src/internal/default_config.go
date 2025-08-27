@@ -10,6 +10,7 @@ import (
 
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/prompt"
+	"github.com/yorukot/superfile/src/internal/ui/preview"
 )
 
 // Generate and return model containing default configurations for interface
@@ -26,7 +27,7 @@ func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool, firstFilePan
 		fileMetaData:        metadata.New(),
 		fileModel: fileModel{
 			filePanels:  filePanelSlice(firstFilePanelDirs),
-			filePreview: New(),
+			filePreview: preview.New(),
 			width:       10,
 		},
 		helpMenu: helpMenuModal{

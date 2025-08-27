@@ -1,4 +1,4 @@
-package internal
+package preview
 
 import (
 	"context"
@@ -30,9 +30,7 @@ import (
 	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
 )
 
-// TODO : Move this to a separate package. Keeping all relevant stuff here for now.
-
-type FilePreviewPanel struct {
+type Model struct {
 	open           bool
 	width          int
 	height         int
@@ -42,8 +40,8 @@ type FilePreviewPanel struct {
 	batCmd         string
 }
 
-func New() FilePreviewPanel {
-	return FilePreviewPanel{
+func New() Model {
+	return Model{
 		open:           common.Config.DefaultOpenFilePreview,
 		imagePreviewer: filepreview.NewImagePreviewer(),
 		// TODO:  This is an IO operation, move to async ?
@@ -51,67 +49,67 @@ func New() FilePreviewPanel {
 	}
 }
 
-func (m *FilePreviewPanel) SetWidth(width int) {
+func (m *Model) SetWidth(width int) {
 	m.width = width
 }
 
-func (m *FilePreviewPanel) SetHeight(height int) {
+func (m *Model) SetHeight(height int) {
 	m.height = height
 }
 
-func (m *FilePreviewPanel) IsOpen() bool {
+func (m *Model) IsOpen() bool {
 	return m.open
 }
 
-func (m *FilePreviewPanel) Open() {
+func (m *Model) Open() {
 	m.open = true
 }
 
-func (m *FilePreviewPanel) Close() {
+func (m *Model) Close() {
 	m.open = false
 }
 
 // Simple rendered string with given text
-func (m *FilePreviewPanel) RenderText(text string) string {
+func (m *Model) RenderText(text string) string {
 	return ui.FilePreviewPanelRenderer(m.height, m.width).
 		AddLines(text).
 		Render() + m.imagePreviewer.ClearKittyImages()
 }
 
-func (m *FilePreviewPanel) SetContentWithRenderText(text string) {
+func (m *Model) SetContentWithRenderText(text string) {
 	m.content = m.RenderText(text)
 }
 
-func (m *FilePreviewPanel) GetContent() string {
+func (m *Model) GetContent() string {
 	return m.content
 }
 
-func (m *FilePreviewPanel) GetWidth() int {
+func (m *Model) GetWidth() int {
 	return m.width
 }
 
-func (m *FilePreviewPanel) GetHeight() int {
+func (m *Model) GetHeight() int {
 	return m.height
 }
 
-func (m *FilePreviewPanel) GetLocation() string {
+func (m *Model) GetLocation() string {
 	return m.location
 }
 
 // Additional setter methods
-func (m *FilePreviewPanel) SetOpen(open bool) {
+func (m *Model) SetOpen(open bool) {
 	m.open = open
 }
 
-func (m *FilePreviewPanel) SetLocation(location string) {
+func (m *Model) SetLocation(location string) {
 	m.location = location
 }
 
-func (m *FilePreviewPanel) SetContent(content string) {
+func (m *Model) SetContent(content string) {
 	m.content = content
 }
 
-func (m *FilePreviewPanel) ToggleOpen() {
+func (m *Model) ToggleOpen() {
 	m.open = !m.open
 }
 
@@ -167,7 +165,7 @@ func renderDirectoryPreview(r *rendering.Renderer, itemPath string, previewHeigh
 }
 
 // Helper function to handle image preview
-func (m *FilePreviewPanel) renderImagePreview(box lipgloss.Style, itemPath string, previewWidth,
+func (m *Model) renderImagePreview(box lipgloss.Style, itemPath string, previewWidth,
 	previewHeight int, sideAreaWidth int) string {
 	if !m.open {
 		return box.Render("\n --- Preview panel is closed ---")
@@ -201,7 +199,7 @@ func (m *FilePreviewPanel) renderImagePreview(box lipgloss.Style, itemPath strin
 }
 
 // Helper function to handle text file preview
-func (m *FilePreviewPanel) renderTextPreview(r *rendering.Renderer, box lipgloss.Style, itemPath string,
+func (m *Model) renderTextPreview(r *rendering.Renderer, box lipgloss.Style, itemPath string,
 	previewWidth, previewHeight int) string {
 	format := lexers.Match(filepath.Base(itemPath))
 	if format == nil {
@@ -249,7 +247,7 @@ func (m *FilePreviewPanel) renderTextPreview(r *rendering.Renderer, box lipgloss
 	return r.Render()
 }
 
-func (m *FilePreviewPanel) RenderWithPath(itemPath string, fullModelWidth int) string {
+func (m *Model) RenderWithPath(itemPath string, fullModelWidth int) string {
 	previewHeight := m.height
 	previewWidth := m.width
 
@@ -323,4 +321,23 @@ func setBatBackground(input string, background string) string {
 		tokens[idx] = backgroundStyle.Render(token)
 	}
 	return strings.Join(tokens, "\x1b[0m")
+}
+
+// Check if bat is an executable in PATH and whether to use bat or batcat as command
+func checkBatCmd() string {
+	if _, err := exec.LookPath("bat"); err == nil {
+		return "bat"
+	}
+	// on ubuntu bat executable is called batcat
+	if _, err := exec.LookPath("batcat"); err == nil {
+		return "batcat"
+	}
+	return ""
+}
+
+// Check if the file is an image based on extension
+func isImageFile(filepath string) bool {
+	imageExts := []string{".png", ".jpg", ".jpeg", ".gif", ".bmp", ".tiff", ".webp", ".svg", ".ico"}
+	ext := strings.ToLower(filepath[strings.LastIndex(filepath, "."):])
+	return slices.Contains(imageExts, ext)
 }

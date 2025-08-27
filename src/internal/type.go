@@ -12,6 +12,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 
 	"github.com/yorukot/superfile/src/internal/ui/prompt"
+	"github.com/yorukot/superfile/src/internal/ui/preview"
 )
 
 // Type representing the mode of the panel
@@ -150,7 +151,7 @@ type fileModel struct {
 	width        int
 	renaming     bool
 	maxFilePanel int
-	filePreview  FilePreviewPanel
+	filePreview  preview.Model
 }
 
 // Panel representing a file
