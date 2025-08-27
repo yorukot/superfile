@@ -328,8 +328,19 @@ func checkBatCmd() string {
 	return ""
 }
 
-func isImageFile(filepath string) bool {
-	imageExts := []string{".png", ".jpg", ".jpeg", ".gif", ".bmp", ".tiff", ".webp", ".svg", ".ico"}
-	ext := strings.ToLower(filepath[strings.LastIndex(filepath, "."):])
-	return slices.Contains(imageExts, ext)
+func isImageFile(filename string) bool {
+	imageExtensions := map[string]bool{
+		".jpg":  true,
+		".jpeg": true,
+		".png":  true,
+		".gif":  true,
+		".bmp":  true,
+		".tiff": true,
+		".svg":  true,
+		".webp": true,
+		".ico":  true,
+	}
+
+	ext := strings.ToLower(filepath.Ext(filename))
+	return imageExtensions[ext]
 }
