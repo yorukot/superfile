@@ -694,4 +694,3 @@ func (m *model) quitSuperfile(cdOnQuit bool) {
 	m.modelQuitState = quitDone
 	slog.Debug("Quitting superfile", "current dir", currentDir)
 }
-
