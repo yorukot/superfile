@@ -6,7 +6,6 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/ui/sidebar"
-	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
 
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/preview"
@@ -18,7 +17,6 @@ import (
 // TODO: Move the configuration parameters to a ModelConfig struct.
 // Something like `RendererConfig` struct for `Renderer` struct in ui/renderer package
 func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool, firstFilePanelDirs []string) *model {
-	imagePreviewer := filepreview.NewImagePreviewer()
 	return &model{
 		filePanelFocusIndex: 0,
 		focusPanel:          nonePanelFocus,
@@ -36,7 +34,6 @@ func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool, firstFilePan
 			data:        getHelpMenuData(),
 			open:        false,
 		},
-		imagePreviewer: imagePreviewer,
 		promptModal:    prompt.DefaultModel(prompt.PromptMinHeight, prompt.PromptMinWidth),
 		modelQuitState: notQuitting,
 		toggleDotFile:  toggleDotFile,

@@ -7,7 +7,6 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/ui/sidebar"
-	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
 
 	"github.com/charmbracelet/bubbles/textinput"
 
@@ -87,7 +86,6 @@ type model struct {
 
 	fileMetaData         metadata.Model
 	ioReqCnt             int
-	imagePreviewer       *filepreview.ImagePreviewer
 	modelQuitState       modelQuitStateType
 	firstTextInput       bool
 	toggleDotFile        bool

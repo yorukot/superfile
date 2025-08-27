@@ -163,6 +163,11 @@ func (m *model) toggleFooterController() {
 	}
 	// TODO : Revisit this. Is this really need here, is this correct ?
 	m.setHeightValues(m.fullHeight)
+	// File preview panel requires explicit height update, unlike sidebar/file panels 
+	// which receive height as render parameters and update automatically on each frame
+	if m.fileModel.filePreview.IsOpen() {
+		m.setFilePreviewPanelSize()
+	}
 }
 
 // Focus on search bar
