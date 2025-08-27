@@ -355,7 +355,13 @@ func (m *model) helpMenuRender() string {
 
 	renderHotkeyLength := m.getRenderHotkeyLengthHelpmenuModal()
 	helpMenuContent := m.getHelpMenuContent(renderHotkeyLength, valueLength)
-	searchBar := m.helpMenu.searchBar.View()
+	searchBarStyle := m.helpMenu.searchBar.TextStyle.
+		// Add one space of padding to the left
+		PaddingLeft(1).
+		// Add a one-line margin at the bottom
+		MarginBottom(1)
+
+	searchBar := searchBarStyle.Render(m.helpMenu.searchBar.View())
 	m.helpMenu.searchBar.Width = m.helpMenu.width - 2
 
 	helpMenuContent = lipgloss.JoinVertical(lipgloss.Left, searchBar, helpMenuContent)
