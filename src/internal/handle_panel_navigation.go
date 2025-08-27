@@ -111,7 +111,7 @@ func (m *model) closeFilePanel() {
 func (m *model) toggleFilePreviewPanel() {
 	m.fileModel.filePreview.ToggleOpen()
 	m.fileModel.filePreview.SetWidth(0)
-	m.fileModel.filePreview.SetHeight(m.mainPanelHeight+2)
+	m.fileModel.filePreview.SetHeight(m.mainPanelHeight + 2)
 	if m.fileModel.filePreview.IsOpen() {
 		// File preview panel width same as file panel
 		if common.Config.FilePreviewWidth == 0 {

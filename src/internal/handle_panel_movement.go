@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"runtime"
 
+	tea "github.com/charmbracelet/bubbletea"
+
 	"github.com/yorukot/superfile/src/internal/utils"
 
 	variable "github.com/yorukot/superfile/src/config"
@@ -155,7 +157,7 @@ func (m *model) toggleDotFileController() {
 }
 
 // Toggle dotfile display or not
-func (m *model) toggleFooterController() {
+func (m *model) toggleFooterController() tea.Cmd {
 	m.toggleFooter = !m.toggleFooter
 	err := utils.WriteBoolFile(variable.ToggleFooter, m.toggleFooter)
 	if err != nil {
@@ -163,11 +165,14 @@ func (m *model) toggleFooterController() {
 	}
 	// TODO : Revisit this. Is this really need here, is this correct ?
 	m.setHeightValues(m.fullHeight)
-	// File preview panel requires explicit height update, unlike sidebar/file panels 
+	// File preview panel requires explicit height update, unlike sidebar/file panels
 	// which receive height as render parameters and update automatically on each frame
 	if m.fileModel.filePreview.IsOpen() {
 		m.setFilePreviewPanelSize()
+		// Force re-render of preview content with new dimensions
+		return m.getFilePreviewCmd(true)
 	}
+	return nil
 }
 
 // Focus on search bar
