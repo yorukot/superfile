@@ -25,12 +25,9 @@ func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool, firstFilePan
 		sidebarModel:        sidebar.New(),
 		fileMetaData:        metadata.New(),
 		fileModel: fileModel{
-			filePanels: filePanelSlice(firstFilePanelDirs),
-			filePreview: FilePreviewPanel{
-				open:           common.Config.DefaultOpenFilePreview,
-				imagePreviewer: imagePreviewer,
-			},
-			width: 10,
+			filePanels:  filePanelSlice(firstFilePanelDirs),
+			filePreview: New(),
+			width:       10,
 		},
 		helpMenu: helpMenuModal{
 			renderIndex: 0,
