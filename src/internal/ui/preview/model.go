@@ -96,7 +96,6 @@ func (m *Model) GetLocation() string {
 	return m.location
 }
 
-// Additional setter methods
 func (m *Model) SetOpen(open bool) {
 	m.open = open
 }
@@ -113,24 +112,20 @@ func (m *Model) ToggleOpen() {
 	m.open = !m.open
 }
 
-// Helper function to handle file info errors
 func renderFileInfoError(r *rendering.Renderer, err error) string {
 	slog.Error("Error get file info", "error", err)
 	return r.Render()
 }
 
-// Helper function to handle unsupported formats
 func renderUnsupportedFormat(box lipgloss.Style) string {
 	return box.Render(common.FilePreviewUnsupportedFormatText)
 }
 
-// Helper function to handle unsupported mode
 func renderUnsupportedFileMode(r *rendering.Renderer) string {
 	r.AddLines(common.FilePreviewUnsupportedFileMode)
 	return r.Render()
 }
 
-// Helper function to handle directory preview
 func renderDirectoryPreview(r *rendering.Renderer, itemPath string, previewHeight int) string {
 	files, err := os.ReadDir(itemPath)
 	if err != nil {
@@ -164,7 +159,6 @@ func renderDirectoryPreview(r *rendering.Renderer, itemPath string, previewHeigh
 	return r.Render()
 }
 
-// Helper function to handle image preview
 func (m *Model) renderImagePreview(box lipgloss.Style, itemPath string, previewWidth,
 	previewHeight int, sideAreaWidth int) string {
 	if !m.open {
@@ -198,7 +192,6 @@ func (m *Model) renderImagePreview(box lipgloss.Style, itemPath string, previewW
 	return box.AlignVertical(lipgloss.Center).AlignHorizontal(lipgloss.Center).Render(imageRender)
 }
 
-// Helper function to handle text file preview
 func (m *Model) renderTextPreview(r *rendering.Renderer, box lipgloss.Style, itemPath string,
 	previewWidth, previewHeight int) string {
 	format := lexers.Match(filepath.Base(itemPath))
@@ -335,7 +328,6 @@ func checkBatCmd() string {
 	return ""
 }
 
-// Check if the file is an image based on extension
 func isImageFile(filepath string) bool {
 	imageExts := []string{".png", ".jpg", ".jpeg", ".gif", ".bmp", ".tiff", ".webp", ".svg", ".ico"}
 	ext := strings.ToLower(filepath[strings.LastIndex(filepath, "."):])
