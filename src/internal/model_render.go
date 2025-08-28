@@ -323,7 +323,6 @@ func (m *model) promptModalRender() string {
 
 func (m *model) helpMenuRender() string {
 	r := ui.HelpMenuRenderer(m.helpMenu.height, m.helpMenu.width)
-	m.helpMenu.searchBar.Width = m.helpMenu.width - 3 // 2 for border, 1 for padding
 	r.AddLines(" " + m.helpMenu.searchBar.View())
 	r.AddLines("") // one-line separation between searchbar and content
 

@@ -286,7 +286,9 @@ func (m *model) setHelpMenuSize() {
 	if m.fullWidth > 95 {
 		m.helpMenu.width = 90
 	}
-	m.helpMenu.searchBar.Width = m.helpMenu.width - 4
+	// 2 for border, 1 for left padding, 2 for placeholder icon of searchbar
+	// 1 for additional character that View() of search bar function mysteriously adds.
+	m.helpMenu.searchBar.Width = m.helpMenu.width - 6
 }
 
 func (m *model) setPromptModelSize() {
