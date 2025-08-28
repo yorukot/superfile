@@ -322,8 +322,14 @@ func (m *model) promptModalRender() string {
 }
 
 func (m *model) helpMenuRender() string {
-	maxKeyLength := 0
+	r := ui.HelpMenuRenderer(m.helpMenu.height, m.helpMenu.width)
+	m.helpMenu.searchBar.Width = m.helpMenu.width - 3 // 2 for border, 1 for padding
+	r.AddLines(" " + m.helpMenu.searchBar.View())
+	r.AddLines("") // one-line separation between searchbar and content
 
+	// TODO : This computation should not happen at render time. Move this to update
+	// TODO : Move these computations to a utility function
+	maxKeyLength := 0
 	for _, data := range m.helpMenu.filteredData {
 		totalKeyLen := 0
 		for _, key := range data.hotkey {
@@ -354,22 +360,12 @@ func (m *model) helpMenuRender() string {
 	}
 
 	renderHotkeyLength := m.getRenderHotkeyLengthHelpmenuModal()
-	helpMenuContent := m.getHelpMenuContent(renderHotkeyLength, valueLength)
-	searchBarStyle := m.helpMenu.searchBar.TextStyle.
-		// Add one space of padding to the left
-		PaddingLeft(1).
-		// Add a one-line margin at the bottom
-		MarginBottom(1)
+	m.getHelpMenuContent(r, renderHotkeyLength, valueLength)
 
-	searchBar := searchBarStyle.Render(m.helpMenu.searchBar.View())
-	m.helpMenu.searchBar.Width = m.helpMenu.width - 2
-
-	helpMenuContent = lipgloss.JoinVertical(lipgloss.Left, searchBar, helpMenuContent)
-	bottomBorder := common.GenerateFooterBorder(fmt.Sprintf("%s/%s",
+	r.SetBorderInfoItems(fmt.Sprintf("%s/%s",
 		strconv.Itoa(m.helpMenu.cursor+1-cursorBeenTitleCount),
-		strconv.Itoa(len(m.helpMenu.filteredData)-totalTitleCount)), m.helpMenu.width-2)
-
-	return common.HelpMenuModalBorderStyle(m.helpMenu.height, m.helpMenu.width, bottomBorder).Render(helpMenuContent)
+		strconv.Itoa(len(m.helpMenu.filteredData)-totalTitleCount)))
+	return r.Render()
 }
 
 func (m *model) getRenderHotkeyLengthHelpmenuModal() int {
@@ -393,15 +389,10 @@ func (m *model) getRenderHotkeyLengthHelpmenuModal() int {
 	return renderHotkeyLength
 }
 
-func (m *model) getHelpMenuContent(renderHotkeyLength int, valueLength int) string {
-	helpMenuContent := ""
+func (m *model) getHelpMenuContent(r *rendering.Renderer, renderHotkeyLength int, valueLength int) {
 	for i := m.helpMenu.renderIndex; i < m.helpMenu.height+m.helpMenu.renderIndex && i < len(m.helpMenu.filteredData); i++ {
-		if i != m.helpMenu.renderIndex {
-			helpMenuContent += "\n"
-		}
-
 		if m.helpMenu.filteredData[i].subTitle != "" {
-			helpMenuContent += common.HelpMenuTitleStyle.Render(" " + m.helpMenu.filteredData[i].subTitle)
+			r.AddLines(common.HelpMenuTitleStyle.Render(" " + m.helpMenu.filteredData[i].subTitle))
 			continue
 		}
 
@@ -419,10 +410,9 @@ func (m *model) getHelpMenuContent(renderHotkeyLength int, valueLength int) stri
 		if m.helpMenu.cursor == i {
 			cursor = common.FilePanelCursorStyle.Render(icon.Cursor + " ")
 		}
-		helpMenuContent += cursor + common.ModalStyle.Render(fmt.Sprintf("%*s%s", renderHotkeyLength,
-			common.HelpMenuHotkeyStyle.Render(hotkey+" "), common.ModalStyle.Render(description)))
+		r.AddLines(cursor + common.ModalStyle.Render(fmt.Sprintf("%*s%s", renderHotkeyLength,
+			common.HelpMenuHotkeyStyle.Render(hotkey+" "), common.ModalStyle.Render(description))))
 	}
-	return helpMenuContent
 }
 
 func (m *model) sortOptionsRender() string {
