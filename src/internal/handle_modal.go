@@ -230,7 +230,11 @@ func (m *model) filterHelpMenu(query string) {
 	filtered = removeOrphanSections(filtered)
 
 	m.helpMenu.filteredData = filtered
-	m.helpMenu.cursor = 1
+	if len(filtered) == 0 {
+		m.helpMenu.cursor = 0
+	} else {
+		m.helpMenu.cursor = 1
+	}
 	m.helpMenu.renderIndex = 0
 }
 

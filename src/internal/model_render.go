@@ -361,8 +361,12 @@ func (m *model) helpMenuRender() string {
 	renderHotkeyLength := m.getRenderHotkeyLengthHelpmenuModal()
 	m.getHelpMenuContent(r, renderHotkeyLength, valueLength)
 
+	current := m.helpMenu.cursor + 1 - cursorBeenTitleCount
+	if len(m.helpMenu.filteredData) == 0 {
+		current = 0
+	}
 	r.SetBorderInfoItems(fmt.Sprintf("%s/%s",
-		strconv.Itoa(m.helpMenu.cursor+1-cursorBeenTitleCount),
+		strconv.Itoa(current),
 		strconv.Itoa(len(m.helpMenu.filteredData)-totalTitleCount)))
 	return r.Render()
 }
