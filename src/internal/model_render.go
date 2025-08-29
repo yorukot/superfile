@@ -373,7 +373,7 @@ func (m *model) helpMenuRender() string {
 
 func (m *model) getRenderHotkeyLengthHelpmenuModal() int {
 	renderHotkeyLength := 0
-	for i := m.helpMenu.renderIndex; i < m.helpMenu.height+m.helpMenu.renderIndex && i < len(m.helpMenu.filteredData); i++ {
+	for i := m.helpMenu.renderIndex; i < m.helpMenu.renderIndex+(m.helpMenu.height-4) && i < len(m.helpMenu.filteredData); i++ {
 		hotkey := ""
 
 		if m.helpMenu.filteredData[i].subTitle != "" {
@@ -393,7 +393,7 @@ func (m *model) getRenderHotkeyLengthHelpmenuModal() int {
 }
 
 func (m *model) getHelpMenuContent(r *rendering.Renderer, renderHotkeyLength int, valueLength int) {
-	for i := m.helpMenu.renderIndex; i < m.helpMenu.height+m.helpMenu.renderIndex && i < len(m.helpMenu.filteredData); i++ {
+	for i := m.helpMenu.renderIndex; i < m.helpMenu.renderIndex+(m.helpMenu.height-4) && i < len(m.helpMenu.filteredData); i++ {
 		if m.helpMenu.filteredData[i].subTitle != "" {
 			r.AddLines(common.HelpMenuTitleStyle.Render(" " + m.helpMenu.filteredData[i].subTitle))
 			continue

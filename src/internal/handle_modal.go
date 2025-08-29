@@ -145,10 +145,7 @@ func (m *model) helpMenuListUp() {
 	if m.helpMenu.cursor > 1 {
 		m.helpMenu.cursor--
 		if m.helpMenu.cursor < m.helpMenu.renderIndex {
-			m.helpMenu.renderIndex--
-			if m.helpMenu.filteredData[m.helpMenu.cursor].subTitle != "" {
-				m.helpMenu.renderIndex--
-			}
+			m.helpMenu.renderIndex = m.helpMenu.cursor
 		}
 		if m.helpMenu.filteredData[m.helpMenu.cursor].subTitle != "" {
 			m.helpMenu.cursor--
@@ -163,7 +160,7 @@ func (m *model) helpMenuListUp() {
 		// Similarly, we use max(..., 0) to ensure the renderIndex doesn't become negative,
 		// which can happen if the number of items is less than the view height.
 		// This prevents a potential out-of-bounds panic during rendering.
-		m.helpMenu.renderIndex = max(len(m.helpMenu.filteredData)-m.helpMenu.height, 0)
+		m.helpMenu.renderIndex = max(len(m.helpMenu.filteredData)-(m.helpMenu.height-4), 0)
 	}
 }
 
@@ -188,11 +185,11 @@ func (m *model) helpMenuListDown() {
 		m.helpMenu.cursor = next
 
 		// Scroll down if cursor moved past the viewport.
-		if m.helpMenu.cursor > m.helpMenu.renderIndex+m.helpMenu.height-2 {
+		if m.helpMenu.cursor > m.helpMenu.renderIndex+m.helpMenu.height-5 {
 			m.helpMenu.renderIndex++
 		}
 		// Clamp renderIndex to bottom.
-		bottom := len(m.helpMenu.filteredData) - m.helpMenu.height
+		bottom := len(m.helpMenu.filteredData) - (m.helpMenu.height - 4)
 		if bottom < 0 {
 			bottom = 0
 		}
