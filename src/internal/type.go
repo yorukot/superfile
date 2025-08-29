@@ -114,12 +114,14 @@ type model struct {
 
 // Modal
 type helpMenuModal struct {
-	height      int
-	width       int
-	open        bool
-	renderIndex int
-	cursor      int
-	data        []helpMenuModalData
+	height       int
+	width        int
+	open         bool
+	renderIndex  int
+	cursor       int
+	data         []helpMenuModalData
+	filteredData []helpMenuModalData
+	searchBar    textinput.Model
 }
 
 type helpMenuModalData struct {

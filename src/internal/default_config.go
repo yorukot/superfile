@@ -28,18 +28,26 @@ func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool, firstFilePan
 			filePreview: preview.New(),
 			width:       10,
 		},
-		helpMenu: helpMenuModal{
-			renderIndex: 0,
-			cursor:      1,
-			data:        getHelpMenuData(),
-			open:        false,
-		},
+		helpMenu:       newHelpMenuModal(),
 		promptModal:    prompt.DefaultModel(prompt.PromptMinHeight, prompt.PromptMinWidth),
 		modelQuitState: notQuitting,
 		toggleDotFile:  toggleDotFile,
 		toggleFooter:   toggleFooter,
 		firstUse:       firstUse,
 		hasTrash:       common.InitTrash(),
+	}
+}
+
+func newHelpMenuModal() helpMenuModal {
+	helpMenuData := getHelpMenuData()
+
+	return helpMenuModal{
+		renderIndex:  0,
+		cursor:       1,
+		data:         helpMenuData,
+		filteredData: helpMenuData,
+		open:         false,
+		searchBar:    common.GenerateSearchBar(),
 	}
 }
 

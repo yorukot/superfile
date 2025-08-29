@@ -322,16 +322,22 @@ func (m *model) promptModalRender() string {
 }
 
 func (m *model) helpMenuRender() string {
-	maxKeyLength := 0
+	r := ui.HelpMenuRenderer(m.helpMenu.height, m.helpMenu.width)
+	r.AddLines(" " + m.helpMenu.searchBar.View())
+	r.AddLines("") // one-line separation between searchbar and content
 
-	for _, data := range m.helpMenu.data {
+	// TODO : This computation should not happen at render time. Move this to update
+	// TODO : Move these computations to a utility function
+	maxKeyLength := 0
+	for _, data := range m.helpMenu.filteredData {
 		totalKeyLen := 0
 		for _, key := range data.hotkey {
 			totalKeyLen += len(key)
 		}
-		saprateLen := len(data.hotkey) - 1*3
-		if data.subTitle == "" && totalKeyLen+saprateLen > maxKeyLength {
-			maxKeyLength = totalKeyLen + saprateLen
+
+		separatorLen := max(0, (len(data.hotkey)-1)) * 3
+		if data.subTitle == "" && totalKeyLen+separatorLen > maxKeyLength {
+			maxKeyLength = totalKeyLen + separatorLen
 		}
 	}
 
@@ -343,7 +349,7 @@ func (m *model) helpMenuRender() string {
 	totalTitleCount := 0
 	cursorBeenTitleCount := 0
 
-	for i, data := range m.helpMenu.data {
+	for i, data := range m.helpMenu.filteredData {
 		if data.subTitle != "" {
 			if i < m.helpMenu.cursor {
 				cursorBeenTitleCount++
@@ -353,25 +359,28 @@ func (m *model) helpMenuRender() string {
 	}
 
 	renderHotkeyLength := m.getRenderHotkeyLengthHelpmenuModal()
-	helpMenuContent := m.getHelpMenuContent(renderHotkeyLength, valueLength)
+	m.getHelpMenuContent(r, renderHotkeyLength, valueLength)
 
-	bottomBorder := common.GenerateFooterBorder(fmt.Sprintf("%s/%s",
-		strconv.Itoa(m.helpMenu.cursor+1-cursorBeenTitleCount),
-		strconv.Itoa(len(m.helpMenu.data)-totalTitleCount)), m.helpMenu.width-2)
-
-	return common.HelpMenuModalBorderStyle(m.helpMenu.height, m.helpMenu.width, bottomBorder).Render(helpMenuContent)
+	current := m.helpMenu.cursor + 1 - cursorBeenTitleCount
+	if len(m.helpMenu.filteredData) == 0 {
+		current = 0
+	}
+	r.SetBorderInfoItems(fmt.Sprintf("%s/%s",
+		strconv.Itoa(current),
+		strconv.Itoa(len(m.helpMenu.filteredData)-totalTitleCount)))
+	return r.Render()
 }
 
 func (m *model) getRenderHotkeyLengthHelpmenuModal() int {
 	renderHotkeyLength := 0
-	for i := m.helpMenu.renderIndex; i < m.helpMenu.height+m.helpMenu.renderIndex && i < len(m.helpMenu.data); i++ {
+	for i := m.helpMenu.renderIndex; i < m.helpMenu.renderIndex+(m.helpMenu.height-4) && i < len(m.helpMenu.filteredData); i++ {
 		hotkey := ""
 
-		if m.helpMenu.data[i].subTitle != "" {
+		if m.helpMenu.filteredData[i].subTitle != "" {
 			continue
 		}
 
-		for i, key := range m.helpMenu.data[i].hotkey {
+		for i, key := range m.helpMenu.filteredData[i].hotkey {
 			if i != 0 {
 				hotkey += " | "
 			}
@@ -383,22 +392,17 @@ func (m *model) getRenderHotkeyLengthHelpmenuModal() int {
 	return renderHotkeyLength
 }
 
-func (m *model) getHelpMenuContent(renderHotkeyLength int, valueLength int) string {
-	helpMenuContent := ""
-	for i := m.helpMenu.renderIndex; i < m.helpMenu.height+m.helpMenu.renderIndex && i < len(m.helpMenu.data); i++ {
-		if i != m.helpMenu.renderIndex {
-			helpMenuContent += "\n"
-		}
-
-		if m.helpMenu.data[i].subTitle != "" {
-			helpMenuContent += common.HelpMenuTitleStyle.Render(" " + m.helpMenu.data[i].subTitle)
+func (m *model) getHelpMenuContent(r *rendering.Renderer, renderHotkeyLength int, valueLength int) {
+	for i := m.helpMenu.renderIndex; i < m.helpMenu.renderIndex+(m.helpMenu.height-4) && i < len(m.helpMenu.filteredData); i++ {
+		if m.helpMenu.filteredData[i].subTitle != "" {
+			r.AddLines(common.HelpMenuTitleStyle.Render(" " + m.helpMenu.filteredData[i].subTitle))
 			continue
 		}
 
 		hotkey := ""
-		description := common.TruncateText(m.helpMenu.data[i].description, valueLength, "...")
+		description := common.TruncateText(m.helpMenu.filteredData[i].description, valueLength, "...")
 
-		for i, key := range m.helpMenu.data[i].hotkey {
+		for i, key := range m.helpMenu.filteredData[i].hotkey {
 			if i != 0 {
 				hotkey += " | "
 			}
@@ -409,10 +413,9 @@ func (m *model) getHelpMenuContent(renderHotkeyLength int, valueLength int) stri
 		if m.helpMenu.cursor == i {
 			cursor = common.FilePanelCursorStyle.Render(icon.Cursor + " ")
 		}
-		helpMenuContent += cursor + common.ModalStyle.Render(fmt.Sprintf("%*s%s", renderHotkeyLength,
-			common.HelpMenuHotkeyStyle.Render(hotkey+" "), common.ModalStyle.Render(description)))
+		r.AddLines(cursor + common.ModalStyle.Render(fmt.Sprintf("%*s%s", renderHotkeyLength,
+			common.HelpMenuHotkeyStyle.Render(hotkey+" "), common.ModalStyle.Render(description))))
 	}
-	return helpMenuContent
 }
 
 func (m *model) sortOptionsRender() string {

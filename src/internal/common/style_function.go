@@ -155,21 +155,6 @@ func FirstUseModal(height int, width int) lipgloss.Style {
 		Foreground(ModalFGColor)
 }
 
-// Generate help menu modal border style
-func HelpMenuModalBorderStyle(height int, width int, borderBottom string) lipgloss.Style {
-	border := GenerateBorder()
-	border.Bottom = borderBottom
-
-	return lipgloss.NewStyle().
-		Border(border).
-		BorderForeground(ModalBorderActiveColor).
-		BorderBackground(ModalBGColor).
-		Width(width).
-		Height(height).
-		Background(ModalBGColor).
-		Foreground(ModalFGColor)
-}
-
 // Generate sort options modal border style
 func SortOptionsModalBorderStyle(height int, width int, borderBottom string) lipgloss.Style {
 	border := GenerateBorder()

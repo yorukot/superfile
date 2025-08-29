@@ -87,6 +87,25 @@ func PromptRenderer(totalHeight int, totalWidth int) *rendering.Renderer {
 	return r
 }
 
+func HelpMenuRenderer(totalHeight int, totalWidth int) *rendering.Renderer {
+	cfg := rendering.DefaultRendererConfig(totalHeight, totalWidth)
+	cfg.ContentFGColor = common.ModalFGColor
+	cfg.ContentBGColor = common.ModalBGColor
+
+	cfg.BorderRequired = true
+	cfg.BorderBGColor = common.ModalBGColor
+	cfg.BorderFGColor = common.ModalBorderActiveColor
+
+	cfg.Border = DefaultLipglossBorder()
+
+	r, err := rendering.NewRenderer(cfg)
+	if err != nil {
+		slog.Error("Error in creating renderer. Falling back to default renderer", "error", err)
+		r = &rendering.Renderer{}
+	}
+	return r
+}
+
 func DefaultFooterRenderer(totalHeight int, totalWidth int, focussed bool) *rendering.Renderer {
 	cfg := rendering.DefaultRendererConfig(totalHeight, totalWidth)
 
