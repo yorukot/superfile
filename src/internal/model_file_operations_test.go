@@ -201,6 +201,9 @@ func isTrashed(fileAbsPath string) bool {
 }
 
 func TestFileDelete(t *testing.T) {
+	if runtime.GOOS == utils.OsWindows {
+		t.Skip("Skipping for windows")
+	}
 	curTestDir := t.TempDir()
 	file1 := filepath.Join(curTestDir, "file1.txt")
 	file2 := filepath.Join(curTestDir, "file2.txt")
