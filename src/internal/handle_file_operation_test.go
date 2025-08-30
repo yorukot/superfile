@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/utils"
 )
 
 func TestCompressSelectedFiles(t *testing.T) {
@@ -18,8 +19,8 @@ func TestCompressSelectedFiles(t *testing.T) {
 	file1 := filepath.Join(curTestDir, "file1.txt")
 	file2 := filepath.Join(dir1, "file2.txt")
 
-	setupDirectories(t, curTestDir, dir1, dir2)
-	setupFiles(t, file1, file2)
+	utils.SetupDirectories(t, curTestDir, dir1, dir2)
+	utils.SetupFiles(t, file1, file2)
 
 	// Note this is to validate the end to end user interface, not to extensively validate
 	// that compress works as expected. For that, we have TestZipSources
@@ -175,8 +176,8 @@ func TestPasteItem(t *testing.T) {
 	file2 := filepath.Join(sourceDir, "file2.txt")
 	dirFile1 := filepath.Join(subDir, "dirfile1.txt")
 
-	setupDirectories(t, curTestDir, sourceDir, destDir, subDir)
-	setupFiles(t, file1, file2, dirFile1)
+	utils.SetupDirectories(t, curTestDir, sourceDir, destDir, subDir)
+	utils.SetupFiles(t, file1, file2, dirFile1)
 
 	testdata := []struct {
 		name                 string
@@ -267,7 +268,7 @@ func TestPasteItem(t *testing.T) {
 	// Special test cases that don't fit the table-driven pattern
 	t.Run("Paste with Empty Clipboard", func(t *testing.T) {
 		emptyTestDir := filepath.Join(curTestDir, "empty_test")
-		setupDirectories(t, emptyTestDir)
+		utils.SetupDirectories(t, emptyTestDir)
 		m := defaultTestModel(emptyTestDir)
 		p := NewTestTeaProgWithEventLoop(t, m)
 
@@ -293,7 +294,7 @@ func TestPasteItem(t *testing.T) {
 		// Create fresh files for this test
 		multiFile1 := filepath.Join(sourceDir, "multi1.txt")
 		multiFile2 := filepath.Join(sourceDir, "multi2.txt")
-		setupFiles(t, multiFile1, multiFile2)
+		utils.SetupFiles(t, multiFile1, multiFile2)
 
 		selectedItems := []string{multiFile1, multiFile2}
 		m := setupModelAndPerformOperation(t, sourceDir, true, "", selectedItems, false)
@@ -314,8 +315,8 @@ func TestPasteItem(t *testing.T) {
 		// Create a separate subdirectory for this test to avoid conflicts with table-driven tests
 		testSubDir := filepath.Join(sourceDir, "testsubdir")
 		testDirFile := filepath.Join(testSubDir, "testdirfile.txt")
-		setupDirectories(t, testSubDir)
-		setupFiles(t, testDirFile)
+		utils.SetupDirectories(t, testSubDir)
+		utils.SetupFiles(t, testDirFile)
 
 		// Test the logic that prevents cutting a directory into its subdirectory
 		m := setupModelAndPerformOperation(t, sourceDir, false, "testsubdir", nil, true)
@@ -332,7 +333,7 @@ func TestPasteItem(t *testing.T) {
 	t.Run("Duplicate File Handling", func(t *testing.T) {
 		// Create a file to copy
 		dupFile := filepath.Join(sourceDir, "duplicate.txt")
-		setupFiles(t, dupFile)
+		utils.SetupFiles(t, dupFile)
 
 		m := setupModelAndPerformOperation(t, sourceDir, false, "duplicate.txt", nil, false)
 		p := NewTestTeaProgWithEventLoop(t, m)

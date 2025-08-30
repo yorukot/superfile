@@ -7,10 +7,10 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/ui/sidebar"
-	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
 
 	"github.com/charmbracelet/bubbles/textinput"
 
+	"github.com/yorukot/superfile/src/internal/ui/preview"
 	"github.com/yorukot/superfile/src/internal/ui/prompt"
 )
 
@@ -86,7 +86,6 @@ type model struct {
 
 	fileMetaData         metadata.Model
 	ioReqCnt             int
-	imagePreviewer       *filepreview.ImagePreviewer
 	modelQuitState       modelQuitStateType
 	firstTextInput       bool
 	toggleDotFile        bool
@@ -115,12 +114,14 @@ type model struct {
 
 // Modal
 type helpMenuModal struct {
-	height      int
-	width       int
-	open        bool
-	renderIndex int
-	cursor      int
-	data        []helpMenuModalData
+	height       int
+	width        int
+	open         bool
+	renderIndex  int
+	cursor       int
+	data         []helpMenuModalData
+	filteredData []helpMenuModalData
+	searchBar    textinput.Model
 }
 
 type helpMenuModalData struct {
@@ -150,7 +151,7 @@ type fileModel struct {
 	width        int
 	renaming     bool
 	maxFilePanel int
-	filePreview  FilePreviewPanel
+	filePreview  preview.Model
 }
 
 // Panel representing a file

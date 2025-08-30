@@ -6,9 +6,9 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/ui/sidebar"
-	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
 
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/ui/preview"
 	"github.com/yorukot/superfile/src/internal/ui/prompt"
 )
 
@@ -17,7 +17,6 @@ import (
 // TODO: Move the configuration parameters to a ModelConfig struct.
 // Something like `RendererConfig` struct for `Renderer` struct in ui/renderer package
 func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool, firstFilePanelDirs []string) *model {
-	imagePreviewer := filepreview.NewImagePreviewer()
 	return &model{
 		filePanelFocusIndex: 0,
 		focusPanel:          nonePanelFocus,
@@ -25,26 +24,30 @@ func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool, firstFilePan
 		sidebarModel:        sidebar.New(),
 		fileMetaData:        metadata.New(),
 		fileModel: fileModel{
-			filePanels: filePanelSlice(firstFilePanelDirs),
-			filePreview: FilePreviewPanel{
-				open:           common.Config.DefaultOpenFilePreview,
-				imagePreviewer: imagePreviewer,
-			},
-			width: 10,
+			filePanels:  filePanelSlice(firstFilePanelDirs),
+			filePreview: preview.New(),
+			width:       10,
 		},
-		helpMenu: helpMenuModal{
-			renderIndex: 0,
-			cursor:      1,
-			data:        getHelpMenuData(),
-			open:        false,
-		},
-		imagePreviewer: imagePreviewer,
+		helpMenu:       newHelpMenuModal(),
 		promptModal:    prompt.DefaultModel(prompt.PromptMinHeight, prompt.PromptMinWidth),
 		modelQuitState: notQuitting,
 		toggleDotFile:  toggleDotFile,
 		toggleFooter:   toggleFooter,
 		firstUse:       firstUse,
 		hasTrash:       common.InitTrash(),
+	}
+}
+
+func newHelpMenuModal() helpMenuModal {
+	helpMenuData := getHelpMenuData()
+
+	return helpMenuModal{
+		renderIndex:  0,
+		cursor:       1,
+		data:         helpMenuData,
+		filteredData: helpMenuData,
+		open:         false,
+		searchBar:    common.GenerateSearchBar(),
 	}
 }
 
