@@ -39,12 +39,18 @@ func (m *model) validateLayout() error {
 func filePanelSlice(dir []string) []filePanel {
 	res := make([]filePanel, len(dir))
 	for i := range dir {
-		res[i] = defaultFilePanel(dir[i])
+		// Making the first panel as the default focus panel
+		// while others remain secondFocus
+		focusType := secondFocus
+		if i == 0 {
+			focusType = focus
+		}
+		res[i] = defaultFilePanel(dir[i], focusType)
 	}
 	return res
 }
 
-func defaultFilePanel(dir string) filePanel {
+func defaultFilePanel(dir string, currentFocusType filePanelFocusType) filePanel {
 	return filePanel{
 		render:   0,
 		cursor:   0,
@@ -55,14 +61,16 @@ func defaultFilePanel(dir string) filePanel {
 			open:   false,
 			cursor: common.Config.DefaultSortType,
 			data: sortOptionsModelData{
-				options: []string{string(sortingName), string(sortingSize),
-					string(sortingDateModified), string(sortingFileType)},
+				options: []string{
+					string(sortingName), string(sortingSize),
+					string(sortingDateModified), string(sortingFileType),
+				},
 				selected: common.Config.DefaultSortType,
 				reversed: common.Config.SortOrderReversed,
 			},
 		},
 		panelMode:        browserMode,
-		focusType:        focus,
+		focusType:        currentFocusType,
 		directoryRecords: make(map[string]directoryRecord),
 		searchBar:        common.GenerateSearchBar(),
 	}
