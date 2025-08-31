@@ -19,6 +19,6 @@
     "astro": "^5.12.8",
     "hast-util-to-html": "^9.0.5",
     "sharp": "^0.34.1",
-    "starlight-giscus": "^0.6.1"
+    "starlight-giscus": "^0.7.0"
   }
 }
