@@ -41,16 +41,16 @@ func filePanelSlice(dir []string) []filePanel {
 	for i := range dir {
 		// Making the first panel as the default focus panel
 		// while others remain secondFocus
-		focusType := secondFocus
+		isFocus := false
 		if i == 0 {
-			focusType = focus
+			isFocus = true
 		}
-		res[i] = defaultFilePanel(dir[i], focusType)
+		res[i] = defaultFilePanel(dir[i], isFocus)
 	}
 	return res
 }
 
-func defaultFilePanel(dir string, currentFocusType filePanelFocusType) filePanel {
+func defaultFilePanel(dir string, focused bool) filePanel {
 	return filePanel{
 		render:   0,
 		cursor:   0,
@@ -70,7 +70,7 @@ func defaultFilePanel(dir string, currentFocusType filePanelFocusType) filePanel
 			},
 		},
 		panelMode:        browserMode,
-		focusType:        currentFocusType,
+		isFocused:        focused,
 		directoryRecords: make(map[string]directoryRecord),
 		searchBar:        common.GenerateSearchBar(),
 	}
@@ -93,18 +93,18 @@ func (f focusPanelType) String() string {
 	}
 }
 
-func (f filePanelFocusType) String() string {
-	switch f {
-	case noneFocus:
-		return "noneFocus"
-	case secondFocus:
-		return "secondFocus"
-	case focus:
-		return "focus"
-	default:
-		return invalidTypeString
-	}
-}
+//func (f filePanelFocusType) String() string {
+//switch f {
+//case noneFocus:
+//return "noneFocus"
+//case secondFocus:
+//return "secondFocus"
+//case focus:
+//return "focus"
+//default:
+//return invalidTypeString
+//}
+//}
 
 func (p panelMode) String() string {
 	switch p {

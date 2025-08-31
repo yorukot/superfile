@@ -17,13 +17,16 @@ import (
 // Type representing the mode of the panel
 type panelMode uint
 
+// [Depreciated]
+// Replaced By a simple bool variable isFocused , which is a part of the FilePanel struct itself
 // Type representing the focus type of the file panel
-type filePanelFocusType uint
+// type filePanelFocusType uint
 
 // Type representing the type of focused panel
-type focusPanelType int
-
-type hotkeyType int
+type (
+	focusPanelType int
+	hotkeyType     int
+)
 
 type modelQuitStateType int
 
@@ -44,12 +47,17 @@ const (
 	metadataFocus
 )
 
+//[Depreciating] The below typed constants used to determine which
+//panel is currently being focued , is being replaced with simpler
+//isFocused bool value , This tells wheather the focus is currently on the panel =>TRUE
+//else for other oher case ,where the panel is not under foucs,the value is =>FALSE
+
 // Constants for file panel with no focus
-const (
-	noneFocus filePanelFocusType = iota
-	secondFocus
-	focus
-)
+//const (
+//noneFocus filePanelFocusType = iota
+//secondFocus
+//focus
+//)
 
 // Constants for select mode or browser mode
 const (
@@ -158,7 +166,7 @@ type fileModel struct {
 type filePanel struct {
 	cursor             int
 	render             int
-	focusType          filePanelFocusType
+	isFocused          bool
 	location           string
 	sortOptions        sortOptionsModel
 	panelMode          panelMode

@@ -27,8 +27,10 @@ import (
 )
 
 // These represent model's state information, its not a global preperty
-var LastTimeCursorMove = [2]int{int(time.Now().UnixMicro()), 0} //nolint: gochecknoglobals // TODO: Move to model struct
-var et *exiftool.Exiftool                                       //nolint: gochecknoglobals // TODO: Move to model struct
+var (
+	LastTimeCursorMove = [2]int{int(time.Now().UnixMicro()), 0} //nolint: gochecknoglobals // TODO: Move to model struct
+	et                 *exiftool.Exiftool                       //nolint: gochecknoglobals // TODO: Move to model struct
+)
 
 // Initialize and return model with default configs
 // It returns only tea.Model because when it used in main, the return value
@@ -316,7 +318,7 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 		"alt", msg.Alt)
 	slog.Debug("model.handleKeyInput. model info. ",
 		"filePanelFocusIndex", m.filePanelFocusIndex,
-		"filePanel.focusType", m.fileModel.filePanels[m.filePanelFocusIndex].focusType,
+		"filePanel.isFocused", m.fileModel.filePanels[m.filePanelFocusIndex].isFocused,
 		"filePanel.panelMode", m.fileModel.filePanels[m.filePanelFocusIndex].panelMode,
 		"typingModal.open", m.typingModal.open,
 		"notifyModel.open", m.notifyModel.IsOpen(),
@@ -642,7 +644,7 @@ func (m *model) getFilePanelItems() {
 		var fileElement []element
 		nowTime := time.Now()
 		// Check last time each element was updated, if less then 3 seconds ignore
-		if filePanel.focusType == noneFocus && nowTime.Sub(filePanel.lastTimeGetElement) < 3*time.Second {
+		if filePanel.isFocused == false && nowTime.Sub(filePanel.lastTimeGetElement) < 3*time.Second {
 			// TODO : revisit this. This feels like a duct tape solution of an actual
 			// deep rooted problem. This feels very hacky.
 			if !m.updatedToggleDotFile {
@@ -662,7 +664,7 @@ func (m *model) getFilePanelItems() {
 
 		reRenderTime := int(float64(len(filePanel.element)) / 100)
 
-		if filePanel.focusType != noneFocus && !focusPanelReRender &&
+		if filePanel.isFocused != false && !focusPanelReRender &&
 			nowTime.Sub(filePanel.lastTimeGetElement) < time.Duration(reRenderTime)*time.Second {
 			continue
 		}
@@ -697,7 +699,7 @@ func (m *model) quitSuperfile(cdOnQuit bool) {
 	if cdOnQuit {
 		// escape single quote
 		currentDir = strings.ReplaceAll(currentDir, "'", "'\\''")
-		err := os.WriteFile(variable.LastDirFile, []byte("cd '"+currentDir+"'"), 0755)
+		err := os.WriteFile(variable.LastDirFile, []byte("cd '"+currentDir+"'"), 0o755)
 		if err != nil {
 			slog.Error("Error during writing lastdir file", "error", err)
 		}

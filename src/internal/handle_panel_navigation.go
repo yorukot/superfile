@@ -41,11 +41,10 @@ func (m *model) createNewFilePanel(location string) error {
 	}
 
 	m.fileModel.filePanels = append(m.fileModel.filePanels, filePanel{
-
 		location:         location,
 		sortOptions:      m.fileModel.filePanels[m.filePanelFocusIndex].sortOptions,
 		panelMode:        browserMode,
-		focusType:        secondFocus,
+		isFocused:        false,
 		directoryRecords: make(map[string]directoryRecord),
 		searchBar:        common.GenerateSearchBar(),
 	})
@@ -60,8 +59,8 @@ func (m *model) createNewFilePanel(location string) error {
 		}
 	}
 
-	m.fileModel.filePanels[m.filePanelFocusIndex].focusType = noneFocus
-	m.fileModel.filePanels[m.filePanelFocusIndex+1].focusType = returnFocusType(m.focusPanel)
+	m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = false
+	m.fileModel.filePanels[m.filePanelFocusIndex+1].isFocused = returnFocusType(m.focusPanel)
 	m.fileModel.width = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth() -
 		(4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
 	m.filePanelFocusIndex++
@@ -99,7 +98,7 @@ func (m *model) closeFilePanel() {
 
 	m.fileModel.width = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth() -
 		(4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
-	m.fileModel.filePanels[m.filePanelFocusIndex].focusType = returnFocusType(m.focusPanel)
+	m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = returnFocusType(m.focusPanel)
 
 	m.fileModel.maxFilePanel = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth()) / 20
 
@@ -134,26 +133,26 @@ func (m *model) toggleFilePreviewPanel() {
 
 // Focus on next file panel
 func (m *model) nextFilePanel() {
-	m.fileModel.filePanels[m.filePanelFocusIndex].focusType = noneFocus
+	m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = false
 	if m.filePanelFocusIndex == (len(m.fileModel.filePanels) - 1) {
 		m.filePanelFocusIndex = 0
 	} else {
 		m.filePanelFocusIndex++
 	}
 
-	m.fileModel.filePanels[m.filePanelFocusIndex].focusType = returnFocusType(m.focusPanel)
+	m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = returnFocusType(m.focusPanel)
 }
 
 // Focus on previous file panel
 func (m *model) previousFilePanel() {
-	m.fileModel.filePanels[m.filePanelFocusIndex].focusType = noneFocus
+	m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = false
 	if m.filePanelFocusIndex == 0 {
 		m.filePanelFocusIndex = (len(m.fileModel.filePanels) - 1)
 	} else {
 		m.filePanelFocusIndex--
 	}
 
-	m.fileModel.filePanels[m.filePanelFocusIndex].focusType = returnFocusType(m.focusPanel)
+	m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = returnFocusType(m.focusPanel)
 }
 
 // Focus on sidebar
@@ -163,10 +162,10 @@ func (m *model) focusOnSideBar() {
 	}
 	if m.focusPanel == sidebarFocus {
 		m.focusPanel = nonePanelFocus
-		m.fileModel.filePanels[m.filePanelFocusIndex].focusType = focus
+		m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = true
 	} else {
 		m.focusPanel = sidebarFocus
-		m.fileModel.filePanels[m.filePanelFocusIndex].focusType = secondFocus
+		m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = true
 	}
 }
 
@@ -178,10 +177,10 @@ func (m *model) focusOnProcessBar() {
 
 	if m.focusPanel == processBarFocus {
 		m.focusPanel = nonePanelFocus
-		m.fileModel.filePanels[m.filePanelFocusIndex].focusType = focus
+		m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = true
 	} else {
 		m.focusPanel = processBarFocus
-		m.fileModel.filePanels[m.filePanelFocusIndex].focusType = secondFocus
+		m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = false
 	}
 }
 
@@ -193,9 +192,9 @@ func (m *model) focusOnMetadata() {
 
 	if m.focusPanel == metadataFocus {
 		m.focusPanel = nonePanelFocus
-		m.fileModel.filePanels[m.filePanelFocusIndex].focusType = focus
+		m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = true
 	} else {
 		m.focusPanel = metadataFocus
-		m.fileModel.filePanels[m.filePanelFocusIndex].focusType = secondFocus
+		m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = false
 	}
 }

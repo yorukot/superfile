@@ -55,11 +55,11 @@ func isExternalDiskPath(path string) bool {
 		strings.HasPrefix(path, "/Volumes")
 }
 
-func returnFocusType(focusPanel focusPanelType) filePanelFocusType {
+func returnFocusType(focusPanel focusPanelType) bool {
 	if focusPanel == nonePanelFocus {
-		return focus
+		return true
 	}
-	return secondFocus
+	return false
 }
 
 // TODO : Take common.Config.CaseSensitiveSort as a function parameter
@@ -86,7 +86,8 @@ func returnDirElement(location string, displayDotFile bool, sortOptions sortOpti
 }
 
 func returnDirElementBySearchString(location string, displayDotFile bool, searchString string,
-	sortOptions sortOptionsModelData) []element {
+	sortOptions sortOptionsModelData,
+) []element {
 	items, err := os.ReadDir(location)
 	if err != nil {
 		slog.Error("Error while return folder element function", "error", err)
@@ -355,7 +356,8 @@ func processCmdToTeaCmd(cmd processbar.Cmd) tea.Cmd {
 	}
 	return func() tea.Msg {
 		updateMsg := cmd()
-		return ProcessBarUpdateMsg{pMsg: updateMsg,
+		return ProcessBarUpdateMsg{
+			pMsg: updateMsg,
 			BaseMessage: BaseMessage{
 				reqID: updateMsg.GetReqID(),
 			},

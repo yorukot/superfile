@@ -14,8 +14,10 @@ import (
 	"github.com/yorukot/superfile/src/internal/utils"
 )
 
-const DefaultTestTick = 10 * time.Millisecond
-const DefaultTestTimeout = time.Second
+const (
+	DefaultTestTick    = 10 * time.Millisecond
+	DefaultTestTimeout = time.Second
+)
 
 // -------------------- Model setup utils
 
@@ -162,7 +164,8 @@ func verifyPreventedPasteResults(t *testing.T, m *model, originalPath string) {
 
 // Helper function to verify successful paste results
 func verifySuccessfulPasteResults(t *testing.T, targetDir string, expectedDestFiles []string,
-	originalPath string, shouldOriginalExist bool) {
+	originalPath string, shouldOriginalExist bool,
+) {
 	t.Helper()
 	// Verify expected files were created in destination
 	verifyDestinationFiles(t, targetDir, expectedDestFiles)
