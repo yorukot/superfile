@@ -16,6 +16,7 @@ func (m *Model) Open() {
 
 func (m *Model) Close() {
 	m.open = false
+	m.textInput.Blur()
 	m.textInput.SetValue("")
 	m.results = []zoxidelib.Result{}
 	m.cursor = 0
@@ -51,4 +52,10 @@ func (m *Model) SetMaxHeight(maxHeight int) {
 		maxHeight = ZoxideMinHeight
 	}
 	m.maxHeight = maxHeight
+}
+
+func (m *Model) GetResults() []zoxidelib.Result {
+	out := make([]zoxidelib.Result, len(m.results))
+	copy(out, m.results)
+	return out
 }

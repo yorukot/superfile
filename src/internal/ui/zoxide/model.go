@@ -60,6 +60,7 @@ func (m *Model) HandleUpdate(msg tea.Msg) (common.ModelAction, tea.Cmd) {
 		switch {
 		case slices.Contains(common.Hotkeys.ConfirmTyping, msg.String()):
 			action = m.handleConfirm()
+			m.Close()
 		case slices.Contains(common.Hotkeys.CancelTyping, msg.String()):
 			m.Close()
 		case slices.Contains(common.Hotkeys.ListUp, msg.String()):
@@ -106,7 +107,10 @@ func (m *Model) handleNormalKeyInput(msg tea.KeyMsg) tea.Cmd {
 }
 
 func (m *Model) updateSuggestions() {
-	if m.zClient == nil {
+	if m.zClient == nil || !common.Config.ZoxideSupport {
+		m.results = []zoxidelib.Result{}
+		m.cursor = 0
+		m.renderIndex = 0
 		return
 	}
 

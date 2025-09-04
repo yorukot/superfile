@@ -13,7 +13,7 @@ require (
 	github.com/charmbracelet/x/ansi v0.9.3
 	github.com/fatih/color v1.18.0
 	github.com/hymkor/trash-go v0.2.0
-	github.com/lazysegtree/go-zoxide v0.0.1
+	github.com/lazysegtree/go-zoxide v0.1.0
 	github.com/lithammer/shortuuid v3.0.0+incompatible
 	github.com/muesli/termenv v0.16.0
 	github.com/reinhrst/fzf-lib v0.9.0

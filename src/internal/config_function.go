@@ -1,12 +1,13 @@
 package internal
 
 import (
+	"errors"
 	"log/slog"
 	"os"
 	"reflect"
 	"runtime"
 
-	"github.com/lazysegtree/go-zoxide"
+	zoxidelib "github.com/lazysegtree/go-zoxide"
 
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
@@ -25,7 +26,7 @@ import (
 
 // This is the only usecase of named returns, distinguish between multiple return values
 func initialConfig(firstFilePanelDirs []string) (toggleDotFile bool, //nolint: nonamedreturns // See above
-	toggleFooter bool, zClient *zoxide.Client) {
+	toggleFooter bool, zClient *zoxidelib.Client) {
 	// Open log stream
 	file, err := os.OpenFile(variable.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 
@@ -73,7 +74,7 @@ func initialConfig(firstFilePanelDirs []string) (toggleDotFile bool, //nolint: n
 	}
 
 	if common.Config.ZoxideSupport {
-		zClient, err = zoxide.New()
+		zClient, err = zoxidelib.New()
 		if err != nil {
 			slog.Error("Error initializing zoxide client", "error", err)
 		}
@@ -90,29 +91,45 @@ func initialConfig(firstFilePanelDirs []string) (toggleDotFile bool, //nolint: n
 	return toggleDotFile, toggleFooter, zClient
 }
 
-func updateFirstFilePanelDirs(firstFilePanelDirs []string, cwd string, zClient *zoxide.Client) {
+func updateFirstFilePanelDirs(firstFilePanelDirs []string, cwd string, zClient *zoxidelib.Client) {
 	for i := range firstFilePanelDirs {
 		if firstFilePanelDirs[i] == "" {
 			firstFilePanelDirs[i] = common.Config.DefaultDirectory
 		}
-
-		if common.Config.ZoxideSupport && zClient != nil {
-			path, err := zClient.Query(firstFilePanelDirs[i])
-			if err == nil && path != "" {
-				firstFilePanelDirs[i] = path
-			} else {
-				slog.Error("Zoxide execution error", "path", path, "error", err)
-				firstFilePanelDirs[i] = utils.ResolveAbsPath(cwd, firstFilePanelDirs[i])
-			}
-		} else {
-			firstFilePanelDirs[i] = utils.ResolveAbsPath(cwd, firstFilePanelDirs[i])
-		}
-		// In case of unexpected path error, fallback to home dir
+		originalPath := firstFilePanelDirs[i]
+		firstFilePanelDirs[i] = utils.ResolveAbsPath(cwd, firstFilePanelDirs[i])
 		if _, err := os.Stat(firstFilePanelDirs[i]); err != nil {
 			slog.Error("cannot get stats for firstFilePanelDir", "error", err)
-			firstFilePanelDirs[i] = variable.HomeDir
+			// In case the path provided did not exist, use zoxide query
+			// else, fallback to home dir
+			if common.Config.ZoxideSupport && zClient != nil {
+				path, err := attemptZoxideForInitPath(originalPath, zClient)
+				if err != nil {
+					slog.Error("Zoxide query error", "originalPath", originalPath, "error", err)
+					firstFilePanelDirs[i] = variable.HomeDir
+				} else {
+					firstFilePanelDirs[i] = path
+				}
+			} else {
+				firstFilePanelDirs[i] = variable.HomeDir
+			}
 		}
 	}
+}
+
+func attemptZoxideForInitPath(originalPath string, zClient *zoxidelib.Client) (string, error) {
+	path, err := zClient.Query(originalPath)
+
+	if err != nil {
+		return "", err
+	}
+	if path == "" {
+		return "", errors.New("zoxide returned empty path")
+	}
+	if stat, statErr := os.Stat(path); statErr != nil || !stat.IsDir() {
+		return "", errors.New("zoxide returned invalid path")
+	}
+	return path, nil
 }
 
 func printRuntimeInfo() {

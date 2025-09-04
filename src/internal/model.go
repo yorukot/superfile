@@ -169,7 +169,7 @@ func (m *model) getFilePreviewCmd(forcePreviewRender bool) tea.Cmd {
 // TODO : At least dont trigger metadata fetch when user is scrolling
 // through the metadata panel
 func (m *model) getMetadataCmd() tea.Cmd {
-	if m.disableMetatdata {
+	if m.disableMetadata {
 		return nil
 	}
 	if len(m.getFocusedFilePanel().element) == 0 {

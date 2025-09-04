@@ -102,7 +102,7 @@ type model struct {
 	firstUse             bool
 
 	// This entirely disables metadata fetching. Used in test model
-	disableMetatdata    bool
+	disableMetadata     bool
 	filePanelFocusIndex int
 
 	// Height in number of lines of actual viewport of
