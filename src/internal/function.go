@@ -56,10 +56,7 @@ func isExternalDiskPath(path string) bool {
 }
 
 func returnFocusType(focusPanel focusPanelType) bool {
-	if focusPanel == nonePanelFocus {
-		return true
-	}
-	return false
+	return focusPanel == nonePanelFocus
 }
 
 // TODO : Take common.Config.CaseSensitiveSort as a function parameter

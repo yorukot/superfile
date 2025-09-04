@@ -644,7 +644,7 @@ func (m *model) getFilePanelItems() {
 		var fileElement []element
 		nowTime := time.Now()
 		// Check last time each element was updated, if less then 3 seconds ignore
-		if filePanel.isFocused == false && nowTime.Sub(filePanel.lastTimeGetElement) < 3*time.Second {
+		if !filePanel.isFocused && nowTime.Sub(filePanel.lastTimeGetElement) < 3*time.Second {
 			// TODO : revisit this. This feels like a duct tape solution of an actual
 			// deep rooted problem. This feels very hacky.
 			if !m.updatedToggleDotFile {
@@ -664,7 +664,7 @@ func (m *model) getFilePanelItems() {
 
 		reRenderTime := int(float64(len(filePanel.element)) / 100)
 
-		if filePanel.isFocused != false && !focusPanelReRender &&
+		if filePanel.isFocused && !focusPanelReRender &&
 			nowTime.Sub(filePanel.lastTimeGetElement) < time.Duration(reRenderTime)*time.Second {
 			continue
 		}
