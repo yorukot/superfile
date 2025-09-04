@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 
 	"github.com/lazysegtree/go-zoxide"
+
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/ui/sidebar"

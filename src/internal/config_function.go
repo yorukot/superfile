@@ -7,6 +7,7 @@ import (
 	"runtime"
 
 	"github.com/lazysegtree/go-zoxide"
+
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
 	"github.com/yorukot/superfile/src/internal/ui/sidebar"
