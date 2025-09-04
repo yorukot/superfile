@@ -3,6 +3,8 @@ package internal
 import (
 	"time"
 
+	"github.com/lazysegtree/go-zoxide"
+
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
@@ -110,6 +112,9 @@ type model struct {
 
 	// whether usable trash directory exists or not
 	hasTrash bool
+
+	// Executors for plugins
+	zClient *zoxide.Client
 }
 
 // Modal
