@@ -95,22 +95,26 @@ func updateFirstFilePanelDirs(firstFilePanelDirs []string, cwd string, zClient *
 		if firstFilePanelDirs[i] == "" {
 			firstFilePanelDirs[i] = common.Config.DefaultDirectory
 		}
+		originalPath := firstFilePanelDirs[i]
+		firstFilePanelDirs[i] = utils.ResolveAbsPath(cwd, firstFilePanelDirs[i])
 
-		if common.Config.ZoxideSupport && zClient != nil {
-			path, err := zClient.Query(firstFilePanelDirs[i])
-			if err == nil && path != "" {
-				firstFilePanelDirs[i] = path
-			} else {
-				slog.Error("Zoxide execution error", "path", path, "error", err)
-				firstFilePanelDirs[i] = utils.ResolveAbsPath(cwd, firstFilePanelDirs[i])
-			}
-		} else {
-			firstFilePanelDirs[i] = utils.ResolveAbsPath(cwd, firstFilePanelDirs[i])
-		}
-		// In case of unexpected path error, fallback to home dir
 		if _, err := os.Stat(firstFilePanelDirs[i]); err != nil {
 			slog.Error("cannot get stats for firstFilePanelDir", "error", err)
-			firstFilePanelDirs[i] = variable.HomeDir
+			// In case the path provided did not exist, use zoxide query
+			// else, fallback to home dir
+			if common.Config.ZoxideSupport && zClient != nil {
+				path, err := zClient.Query(originalPath)
+				slog.Error("Zoxide execution error", "path", path, "originalPath", originalPath, "error", err)
+
+				if err == nil && path != "" {
+					firstFilePanelDirs[i] = path
+				} else {
+					slog.Error("Zoxide execution error", "path", path, "originalPath", originalPath, "error", err)
+					firstFilePanelDirs[i] = variable.HomeDir
+				}
+			} else {
+				firstFilePanelDirs[i] = variable.HomeDir
+			}
 		}
 	}
 }
