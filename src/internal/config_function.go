@@ -98,10 +98,10 @@ func updateFirstFilePanelDirs(firstFilePanelDirs []string, cwd string, zClient *
 
 		if common.Config.ZoxideSupport && zClient != nil {
 			path, err := zClient.Query(firstFilePanelDirs[i])
-			if err != nil && path != "" {
+			if err == nil && path != "" {
 				firstFilePanelDirs[i] = path
 			} else {
-				slog.Error("Zoxide returned empty output", "path", firstFilePanelDirs[i])
+				slog.Error("Zoxide execution error", "path", path, "error", err)
 				firstFilePanelDirs[i] = utils.ResolveAbsPath(cwd, firstFilePanelDirs[i])
 			}
 		} else {
