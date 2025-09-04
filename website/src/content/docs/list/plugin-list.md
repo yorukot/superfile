@@ -18,8 +18,10 @@ Superfile supports various plugins to extend its functionality. Below is a compl
 
 ### Zoxide
 
-- **Description:** Smart directory jumping integration with zoxide
+- **Description:** Smart directory jumping integration with zoxide. Navigate to frequently used directories quickly with a searchable modal interface.
 
 - **Requirements:** [`zoxide`](https://github.com/ajeetdsouza/zoxide)
 
 - **Config name:** `zoxide`
+
+- **Usage:** Press `z` to open the zoxide navigation modal. Start typing to search directories, use arrow keys to navigate results, and press Enter to jump to a directory.

@@ -221,6 +221,7 @@ func (m *model) handleWindowResize(msg tea.WindowSizeMsg) {
 	m.setMetadataModelSize()
 	m.setProcessBarModelSize()
 	m.setPromptModelSize()
+	m.setZoxideModelSize()
 
 	if m.fileModel.maxFilePanel >= 10 {
 		m.fileModel.maxFilePanel = 10
@@ -299,6 +300,14 @@ func (m *model) setPromptModelSize() {
 	m.promptModal.SetWidth(m.fullWidth / 2)
 }
 
+func (m *model) setZoxideModelSize() {
+	// Scale zoxide model's maxHeight - 50% of total height to accommodate scroll indicators
+	m.zoxideModal.SetMaxHeight(m.fullHeight / 2)
+
+	// Scale zoxide model's width - 50% of total width
+	m.zoxideModal.SetWidth(m.fullWidth / 2)
+}
+
 func (m *model) setMetadataModelSize() {
 	m.fileMetaData.SetDimensions(utils.FooterWidth(m.fullWidth)+2, m.footerHeight+2)
 }
@@ -340,6 +349,9 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 		// Ignore keypress. It will be handled in Update call via
 		// updateFilePanelState
 		// TODO: Convert that to async via tea.Cmd
+	case m.zoxideModal.IsOpen():
+		// Ignore keypress. It will be handled in Update call via
+		// updateFilePanelState
 
 	// Handles all warn models except the warn model for confirming to quit
 	case m.notifyModel.IsOpen():
@@ -414,6 +426,10 @@ func (m *model) updateFilePanelsState(msg tea.Msg) tea.Cmd {
 		cwdLocation := m.fileModel.filePanels[m.filePanelFocusIndex].location
 		action, cmd = m.promptModal.HandleUpdate(msg, cwdLocation)
 		m.applyPromptModalAction(action)
+	case m.zoxideModal.IsOpen():
+		var action common.ModelAction
+		action, cmd = m.zoxideModal.HandleUpdate(msg)
+		m.applyZoxideModalAction(action)
 	}
 
 	// TODO : This is like duct taping a bigger problem
@@ -427,36 +443,42 @@ func (m *model) updateFilePanelsState(msg tea.Msg) tea.Cmd {
 
 // Apply the Action and notify the promptModal
 func (m *model) applyPromptModalAction(action common.ModelAction) {
-	if _, ok := action.(common.NoAction); !ok {
-		slog.Debug("applyPromptModalAction", "action", action)
-	}
-	var actionErr error
-	var successMsg string
-	switch action := action.(type) {
-	case common.NoAction:
-		return
-	case common.ShellCommandAction:
-		// Update to promptModal is handled here
-		m.applyShellCommandAction(action.Command)
-		return
-	case common.SplitPanelAction:
-		actionErr = m.splitPanel()
-		successMsg = "Panel successfully split"
-	case common.CDCurrentPanelAction:
-		actionErr = m.updateCurrentFilePanelDir(action.Location)
-		successMsg = "Panel directory changed"
-	case common.OpenPanelAction:
-		actionErr = m.createNewFilePanelRelativeToCurrent(action.Location)
-		successMsg = "New panel opened"
-	default:
-		actionErr = errors.New("unhandled action type")
-	}
-
+	successMsg, actionErr := m.logAndExecuteAction(action)
 	if actionErr != nil {
 		m.promptModal.HandleSPFActionResults(false, actionErr.Error())
-	} else {
+	} else if successMsg != "" {
 		m.promptModal.HandleSPFActionResults(true, successMsg)
 	}
+}
+
+// Utility function to log and execute actions, reducing duplication
+func (m *model) logAndExecuteAction(action common.ModelAction) (string, error) {
+	// Only log actions that aren't NoAction to reduce debug noise
+	if _, ok := action.(common.NoAction); !ok {
+		slog.Debug("Applying model action", "action", action)
+	}
+
+	switch action := action.(type) {
+	case common.NoAction:
+		return "", nil
+	case common.ShellCommandAction:
+		// Shell commands are handled separately and don't return here
+		m.applyShellCommandAction(action.Command)
+		return "", nil
+	case common.SplitPanelAction:
+		return "Panel successfully split", m.splitPanel()
+	case common.CDCurrentPanelAction:
+		return "Panel directory changed", m.updateCurrentFilePanelDir(action.Location)
+	case common.OpenPanelAction:
+		return "New panel opened", m.createNewFilePanelRelativeToCurrent(action.Location)
+	default:
+		return "", errors.New("unhandled action type")
+	}
+}
+
+// Apply the Action for zoxide modal (no result notifications needed)
+func (m *model) applyZoxideModalAction(action common.ModelAction) {
+	_, _ = m.logAndExecuteAction(action)
 }
 
 // TODO : Move them around to appropriate places
@@ -572,6 +594,13 @@ func (m *model) updateRenderForOverlay(finalRender string) string {
 		overlayX := m.fullWidth/2 - m.promptModal.GetWidth()/2
 		overlayY := m.fullHeight/2 - m.promptModal.GetMaxHeight()/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, promptModal, finalRender)
+	}
+
+	if m.zoxideModal.IsOpen() {
+		zoxideModal := m.zoxideModalRender()
+		overlayX := m.fullWidth/2 - m.zoxideModal.GetWidth()/2
+		overlayY := m.fullHeight/2 - m.zoxideModal.GetMaxHeight()/2
+		return stringfunction.PlaceOverlay(overlayX, overlayY, zoxideModal, finalRender)
 	}
 
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]

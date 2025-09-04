@@ -40,6 +40,7 @@ Quit superfile and cd to current folder "cd_quit" require the same scripts as ["
 | Focus on the metadata panel      | `m`                        | `focus_on_metadata`         |
 | Open prompt in shell mode        | `:`                        | `open_command_line`         |
 | Open prompt in spf mode          | `>`                        | `open_spf_prompt`           |
+| Open zoxide navigation modal     | `z`                        | `open_zoxide`               |
 
 ## Panel movement
 
