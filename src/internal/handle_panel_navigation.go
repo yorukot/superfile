@@ -165,7 +165,7 @@ func (m *model) focusOnSideBar() {
 		m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = true
 	} else {
 		m.focusPanel = sidebarFocus
-		m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = true
+		m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = false
 	}
 }
 
