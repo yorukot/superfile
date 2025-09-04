@@ -3,11 +3,10 @@ package internal
 import (
 	"log/slog"
 	"os"
-	"os/exec"
 	"reflect"
 	"runtime"
-	"strings"
 
+	"github.com/lazysegtree/go-zoxide"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
 	"github.com/yorukot/superfile/src/internal/ui/sidebar"
@@ -25,7 +24,7 @@ import (
 
 // This is the only usecase of named returns, distinguish between multiple return values
 func initialConfig(firstFilePanelDirs []string) (toggleDotFile bool, //nolint: nonamedreturns // See above
-	toggleFooter bool) {
+	toggleFooter bool, zClient *zoxide.Client) {
 	// Open log stream
 	file, err := os.OpenFile(variable.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 
@@ -72,7 +71,14 @@ func initialConfig(firstFilePanelDirs []string) (toggleDotFile bool, //nolint: n
 		cwd = variable.HomeDir
 	}
 
-	updateFirstFilePanelDirs(firstFilePanelDirs, cwd)
+	if common.Config.ZoxideSupport {
+		zClient, err = zoxide.New()
+		if err != nil {
+			slog.Error("Error initializing zoxide client", "error", err)
+		}
+	}
+
+	updateFirstFilePanelDirs(firstFilePanelDirs, cwd, zClient)
 
 	slog.Debug("Directory configuration", "cwd", cwd, "start_directories", firstFilePanelDirs)
 	printRuntimeInfo()
@@ -80,31 +86,22 @@ func initialConfig(firstFilePanelDirs []string) (toggleDotFile bool, //nolint: n
 	toggleDotFile = utils.ReadBoolFile(variable.ToggleDotFile, false)
 	toggleFooter = utils.ReadBoolFile(variable.ToggleFooter, true)
 
-	return toggleDotFile, toggleFooter
+	return toggleDotFile, toggleFooter, zClient
 }
 
-func updateFirstFilePanelDirs(firstFilePanelDirs []string, cwd string) {
+func updateFirstFilePanelDirs(firstFilePanelDirs []string, cwd string, zClient *zoxide.Client) {
 	for i := range firstFilePanelDirs {
 		if firstFilePanelDirs[i] == "" {
 			firstFilePanelDirs[i] = common.Config.DefaultDirectory
 		}
 
-		if common.Config.ZoxideSupport {
-			// Execute zoxide to get the absolute path
-			out, err := exec.Command("zoxide", "query", firstFilePanelDirs[i]).Output()
-			if err != nil {
-				slog.Error("Error while executing zoxide", "error", err, "path", firstFilePanelDirs[i])
-				firstFilePanelDirs[i] = utils.ResolveAbsPath(cwd, firstFilePanelDirs[i])
+		if common.Config.ZoxideSupport && zClient != nil {
+			path, err := zClient.Query(firstFilePanelDirs[i])
+			if err != nil && path != "" {
+				firstFilePanelDirs[i] = path
 			} else {
-				// Remove trailing newline and whitespace from the output
-				trimmedOutput := strings.TrimSpace(string(out))
-
-				if trimmedOutput == "" {
-					slog.Error("Zoxide returned empty output", "path", firstFilePanelDirs[i])
-					firstFilePanelDirs[i] = utils.ResolveAbsPath(cwd, firstFilePanelDirs[i])
-				} else {
-					firstFilePanelDirs[i] = trimmedOutput
-				}
+				slog.Error("Zoxide returned empty output", "path", firstFilePanelDirs[i])
+				firstFilePanelDirs[i] = utils.ResolveAbsPath(cwd, firstFilePanelDirs[i])
 			}
 		} else {
 			firstFilePanelDirs[i] = utils.ResolveAbsPath(cwd, firstFilePanelDirs[i])

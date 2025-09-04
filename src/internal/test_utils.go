@@ -20,7 +20,7 @@ const DefaultTestTimeout = time.Second
 // -------------------- Model setup utils
 
 func defaultTestModel(dirs ...string) *model {
-	m := defaultModelConfig(false, false, false, dirs)
+	m := defaultModelConfig(false, false, false, dirs, nil)
 	m.disableMetatdata = true
 	_, _ = TeaUpdate(m, tea.WindowSizeMsg{Width: 2 * common.MinimumWidth, Height: 2 * common.MinimumHeight})
 	return m

@@ -36,8 +36,8 @@ var et *exiftool.Exiftool                                       //nolint: gochec
 // Either way type 'model' is not exported, so there is not way main package can
 // be aware of it, and use it directly
 func InitialModel(firstFilePanelDirs []string, firstUseCheck bool) tea.Model {
-	toggleDotFile, toggleFooter := initialConfig(firstFilePanelDirs)
-	return defaultModelConfig(toggleDotFile, toggleFooter, firstUseCheck, firstFilePanelDirs)
+	toggleDotFile, toggleFooter, zClient := initialConfig(firstFilePanelDirs)
+	return defaultModelConfig(toggleDotFile, toggleFooter, firstUseCheck, firstFilePanelDirs, zClient)
 }
 
 // Init function to be called by Bubble tea framework, sets windows title,
