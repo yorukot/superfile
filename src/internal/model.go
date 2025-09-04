@@ -507,7 +507,25 @@ func (m *model) createNewFilePanelRelativeToCurrent(path string) error {
 
 // simulates a 'cd' action
 func (m *model) updateCurrentFilePanelDir(path string) error {
-	return m.getFocusedFilePanel().updateCurrentFilePanelDir(path)
+	panel := m.getFocusedFilePanel()
+	err := panel.updateCurrentFilePanelDir(path)
+	if err == nil {
+		// Track the directory change with zoxide
+		m.trackDirectoryWithZoxide(panel.location)
+	}
+	return err
+}
+
+// trackDirectoryWithZoxide adds the directory to zoxide database if zoxide is available and enabled
+func (m *model) trackDirectoryWithZoxide(path string) {
+	if !common.Config.ZoxideSupport || m.zClient == nil {
+		return
+	}
+
+	err := m.zClient.Add(path)
+	if err != nil {
+		slog.Debug("Failed to add directory to zoxide", "path", path, "error", err)
+	}
 }
 
 // Check if there's any processes running in background

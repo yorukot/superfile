@@ -3,6 +3,8 @@ package internal
 import (
 	"time"
 
+	zoxidelib "github.com/lazysegtree/go-zoxide"
+
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
@@ -85,6 +87,9 @@ type model struct {
 	helpMenu    helpMenuModal
 	promptModal prompt.Model
 	zoxideModal zoxideui.Model
+
+	// Zoxide client for directory tracking
+	zClient *zoxidelib.Client
 
 	fileMetaData         metadata.Model
 	ioReqCnt             int
