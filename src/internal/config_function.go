@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"runtime"
 
-	"github.com/lazysegtree/go-zoxide"
+	zoxidelib "github.com/lazysegtree/go-zoxide"
 
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
@@ -25,7 +25,7 @@ import (
 
 // This is the only usecase of named returns, distinguish between multiple return values
 func initialConfig(firstFilePanelDirs []string) (toggleDotFile bool, //nolint: nonamedreturns // See above
-	toggleFooter bool, zClient *zoxide.Client) {
+	toggleFooter bool, zClient *zoxidelib.Client) {
 	// Open log stream
 	file, err := os.OpenFile(variable.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 
@@ -73,7 +73,7 @@ func initialConfig(firstFilePanelDirs []string) (toggleDotFile bool, //nolint: n
 	}
 
 	if common.Config.ZoxideSupport {
-		zClient, err = zoxide.New()
+		zClient, err = zoxidelib.New()
 		if err != nil {
 			slog.Error("Error initializing zoxide client", "error", err)
 		}
@@ -90,7 +90,7 @@ func initialConfig(firstFilePanelDirs []string) (toggleDotFile bool, //nolint: n
 	return toggleDotFile, toggleFooter, zClient
 }
 
-func updateFirstFilePanelDirs(firstFilePanelDirs []string, cwd string, zClient *zoxide.Client) {
+func updateFirstFilePanelDirs(firstFilePanelDirs []string, cwd string, zClient *zoxidelib.Client) {
 	for i := range firstFilePanelDirs {
 		if firstFilePanelDirs[i] == "" {
 			firstFilePanelDirs[i] = common.Config.DefaultDirectory

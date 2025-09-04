@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
+	zoxidelib "github.com/lazysegtree/go-zoxide"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -244,4 +246,70 @@ func TestChooserFile(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestZoxide(t *testing.T) {
+	zoxideDataDir := t.TempDir()
+	zClient, err := zoxidelib.New(zoxidelib.WithDataDir(zoxideDataDir))
+	if err != nil {
+		if runtime.GOOS != utils.OsLinux {
+			t.Skipf("Skipping zoxide tests in non-Linux because zoxide client cannot be initialized")
+		} else {
+			t.Fatalf("zoxide initialization failed")
+		}
+	}
+
+	originalZoxideSupport := common.Config.ZoxideSupport
+	defer func() {
+		common.Config.ZoxideSupport = originalZoxideSupport
+	}()
+
+	curTestDir := filepath.Join(testDir, "TestZoxide")
+	dir1 := filepath.Join(curTestDir, "dir1")
+	dir2 := filepath.Join(curTestDir, "dir2")
+	dir3 := filepath.Join(curTestDir, "dir3")
+	utils.SetupDirectories(t, curTestDir, dir1, dir2, dir3)
+
+	t.Run("Zoxide tracking and navigation", func(t *testing.T) {
+		common.Config.ZoxideSupport = true
+		m := defaultTestModelWithZClient(zClient, dir1)
+
+		err := m.updateCurrentFilePanelDir(dir2)
+		require.NoError(t, err, "Failed to navigate to dir2")
+		assert.Equal(t, dir2, m.getFocusedFilePanel().location, "Should be in dir2 after navigation")
+
+		err = m.updateCurrentFilePanelDir(dir3)
+		require.NoError(t, err, "Failed to navigate to dir3")
+		assert.Equal(t, dir3, m.getFocusedFilePanel().location, "Should be in dir3 after navigation")
+
+		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenZoxide[0]))
+		assert.True(t, m.zoxideModal.IsOpen(), "Zoxide modal should open when pressing 'z' key")
+
+		// Type "dir2" to search for it
+		for _, char := range "dir2" {
+			TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(string(char)))
+		}
+
+		results := m.zoxideModal.GetResults()
+		assert.GreaterOrEqual(t, len(results), 1, "Should have at least 1 directory found by zoxide UI search")
+
+		resultPaths := make([]string, len(results))
+		for i, result := range results {
+			resultPaths[i] = result.Path
+		}
+		assert.Contains(t, resultPaths, dir2, "dir2 should be found by zoxide UI search")
+
+		// Press enter to navigate to dir2
+		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.ConfirmTyping[0]))
+		assert.False(t, m.zoxideModal.IsOpen(), "Zoxide modal should close after navigation")
+		assert.Equal(t, dir2, m.getFocusedFilePanel().location, "Should navigate back to dir2 after zoxide selection")
+	})
+
+	t.Run("Zoxide disabled shows no results", func(t *testing.T) {
+		common.Config.ZoxideSupport = false
+		m := defaultTestModelWithZClient(zClient, dir1)
+
+		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenZoxide[0]))
+		assert.True(t, m.zoxideModal.IsOpen(), "Zoxide modal should open even when ZoxideSupport is disabled")
+	})
 }

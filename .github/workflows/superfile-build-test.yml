@@ -20,9 +20,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
-      - name: Setup exiftool (only on linux)
+      - name: Setup dependencies (only on linux)
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y exiftool
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y exiftool
+          curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
 
       - name: Set up Go
         uses: actions/setup-go@v5

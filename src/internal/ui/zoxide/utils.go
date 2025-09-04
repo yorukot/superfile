@@ -52,3 +52,7 @@ func (m *Model) SetMaxHeight(maxHeight int) {
 	}
 	m.maxHeight = maxHeight
 }
+
+func (m *Model) GetResults() []zoxidelib.Result {
+	return m.results
+}
