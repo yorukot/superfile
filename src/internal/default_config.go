@@ -3,7 +3,7 @@ package internal
 import (
 	"path/filepath"
 
-	"github.com/lazysegtree/go-zoxide"
+	zoxidelib "github.com/lazysegtree/go-zoxide"
 
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
@@ -12,6 +12,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/preview"
 	"github.com/yorukot/superfile/src/internal/ui/prompt"
+	zoxideui "github.com/yorukot/superfile/src/internal/ui/zoxide"
 )
 
 // Generate and return model containing default configurations for interface
@@ -19,7 +20,7 @@ import (
 // TODO: Move the configuration parameters to a ModelConfig struct.
 // Something like `RendererConfig` struct for `Renderer` struct in ui/renderer package
 func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool,
-	firstFilePanelDirs []string, zClient *zoxide.Client) *model {
+	firstFilePanelDirs []string, zClient *zoxidelib.Client) *model {
 	return &model{
 		filePanelFocusIndex: 0,
 		focusPanel:          nonePanelFocus,
@@ -33,12 +34,12 @@ func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool,
 		},
 		helpMenu:       newHelpMenuModal(),
 		promptModal:    prompt.DefaultModel(prompt.PromptMinHeight, prompt.PromptMinWidth),
+		zoxideModal:    zoxideui.DefaultModel(zoxideui.ZoxideMinHeight, zoxideui.ZoxideMinWidth, zClient),
 		modelQuitState: notQuitting,
 		toggleDotFile:  toggleDotFile,
 		toggleFooter:   toggleFooter,
 		firstUse:       firstUse,
 		hasTrash:       common.InitTrash(),
-		zClient:        zClient,
 	}
 }
 

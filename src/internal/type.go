@@ -3,8 +3,6 @@ package internal
 import (
 	"time"
 
-	"github.com/lazysegtree/go-zoxide"
-
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
@@ -14,6 +12,7 @@ import (
 
 	"github.com/yorukot/superfile/src/internal/ui/preview"
 	"github.com/yorukot/superfile/src/internal/ui/prompt"
+	zoxideui "github.com/yorukot/superfile/src/internal/ui/zoxide"
 )
 
 // Type representing the mode of the panel
@@ -85,6 +84,7 @@ type model struct {
 	typingModal typingModal
 	helpMenu    helpMenuModal
 	promptModal prompt.Model
+	zoxideModal zoxideui.Model
 
 	fileMetaData         metadata.Model
 	ioReqCnt             int
@@ -112,9 +112,6 @@ type model struct {
 
 	// whether usable trash directory exists or not
 	hasTrash bool
-
-	// Executors for plugins
-	zClient *zoxide.Client
 }
 
 // Modal

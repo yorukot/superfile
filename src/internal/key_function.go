@@ -104,6 +104,8 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 		m.promptModal.Open(true)
 	case slices.Contains(common.Hotkeys.OpenSPFPrompt, msg):
 		m.promptModal.Open(false)
+	case slices.Contains(common.Hotkeys.OpenZoxide, msg):
+		m.zoxideModal.Open()
 
 	case slices.Contains(common.Hotkeys.OpenHelpMenu, msg):
 		m.openHelpMenu()

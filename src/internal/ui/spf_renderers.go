@@ -87,6 +87,10 @@ func PromptRenderer(totalHeight int, totalWidth int) *rendering.Renderer {
 	return r
 }
 
+func ZoxideRenderer(totalHeight int, totalWidth int) *rendering.Renderer {
+	return PromptRenderer(totalHeight, totalWidth)
+}
+
 func HelpMenuRenderer(totalHeight int, totalWidth int) *rendering.Renderer {
 	cfg := rendering.DefaultRendererConfig(totalHeight, totalWidth)
 	cfg.ContentFGColor = common.ModalFGColor
