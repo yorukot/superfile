@@ -7,6 +7,7 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
+	zoxidelib "github.com/lazysegtree/go-zoxide"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -20,8 +21,15 @@ const DefaultTestTimeout = time.Second
 // -------------------- Model setup utils
 
 func defaultTestModel(dirs ...string) *model {
-	m := defaultModelConfig(false, false, false, dirs)
-	m.disableMetatdata = true
+	m := defaultModelConfig(false, false, false, dirs, nil)
+	m.disableMetadata = true
+	_, _ = TeaUpdate(m, tea.WindowSizeMsg{Width: 2 * common.MinimumWidth, Height: 2 * common.MinimumHeight})
+	return m
+}
+
+func defaultTestModelWithZClient(zClient *zoxidelib.Client, dirs ...string) *model {
+	m := defaultModelConfig(false, false, false, dirs, zClient)
+	m.disableMetadata = true
 	_, _ = TeaUpdate(m, tea.WindowSizeMsg{Width: 2 * common.MinimumWidth, Height: 2 * common.MinimumHeight})
 	return m
 }

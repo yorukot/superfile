@@ -153,6 +153,7 @@ type HotkeysType struct {
 	OpenHelpMenu    []string `toml:"open_help_menu"`
 	OpenCommandLine []string `toml:"open_command_line"`
 	OpenSPFPrompt   []string `toml:"open_spf_prompt"`
+	OpenZoxide      []string `toml:"open_zoxide"`
 
 	CopyPath []string `toml:"copy_path"`
 	CopyPWD  []string `toml:"copy_present_working_directory"`

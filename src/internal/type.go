@@ -3,6 +3,8 @@ package internal
 import (
 	"time"
 
+	zoxidelib "github.com/lazysegtree/go-zoxide"
+
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
@@ -12,6 +14,7 @@ import (
 
 	"github.com/yorukot/superfile/src/internal/ui/preview"
 	"github.com/yorukot/superfile/src/internal/ui/prompt"
+	zoxideui "github.com/yorukot/superfile/src/internal/ui/zoxide"
 )
 
 // Type representing the mode of the panel
@@ -83,6 +86,10 @@ type model struct {
 	typingModal typingModal
 	helpMenu    helpMenuModal
 	promptModal prompt.Model
+	zoxideModal zoxideui.Model
+
+	// Zoxide client for directory tracking
+	zClient *zoxidelib.Client
 
 	fileMetaData         metadata.Model
 	ioReqCnt             int
@@ -95,7 +102,7 @@ type model struct {
 	firstUse             bool
 
 	// This entirely disables metadata fetching. Used in test model
-	disableMetatdata    bool
+	disableMetadata     bool
 	filePanelFocusIndex int
 
 	// Height in number of lines of actual viewport of

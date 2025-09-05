@@ -33,7 +33,7 @@ func (m *model) enterPanel() {
 	selectedItem := panel.getSelectedItem()
 	if selectedItem.directory {
 		// TODO : Propagate error out from this this function. Return here, instead of logging
-		err := panel.updateCurrentFilePanelDir(selectedItem.location)
+		err := m.updateCurrentFilePanelDir(selectedItem.location)
 		if err != nil {
 			slog.Error("Error while changing to directory", "error", err, "target", selectedItem.location)
 		}
@@ -58,7 +58,7 @@ func (m *model) enterPanel() {
 		}
 
 		if targetInfo.IsDir() {
-			err = panel.updateCurrentFilePanelDir(targetPath)
+			err = m.updateCurrentFilePanelDir(targetPath)
 			if err != nil {
 				slog.Error("Error while changing to directory", "error", err, "target", targetPath)
 			}
@@ -114,7 +114,7 @@ func (m *model) sidebarSelectDirectory() {
 	m.focusPanel = nonePanelFocus
 	panel := m.getFocusedFilePanel()
 
-	err := panel.updateCurrentFilePanelDir(m.sidebarModel.GetCurrentDirectoryLocation())
+	err := m.updateCurrentFilePanelDir(m.sidebarModel.GetCurrentDirectoryLocation())
 	if err != nil {
 		slog.Error("Error switching to sidebar directory", "error", err)
 	}

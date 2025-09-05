@@ -321,6 +321,10 @@ func (m *model) promptModalRender() string {
 	return m.promptModal.Render()
 }
 
+func (m *model) zoxideModalRender() string {
+	return m.zoxideModal.Render()
+}
+
 func (m *model) helpMenuRender() string {
 	r := ui.HelpMenuRenderer(m.helpMenu.height, m.helpMenu.width)
 	r.AddLines(" " + m.helpMenu.searchBar.View())
