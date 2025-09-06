@@ -20,13 +20,11 @@ import (
 // Type representing the mode of the panel
 type panelMode uint
 
-// Type representing the focus type of the file panel
-type filePanelFocusType uint
-
 // Type representing the type of focused panel
-type focusPanelType int
-
-type hotkeyType int
+type (
+	focusPanelType int
+	hotkeyType     int
+)
 
 type modelQuitStateType int
 
@@ -45,13 +43,6 @@ const (
 	processBarFocus
 	sidebarFocus
 	metadataFocus
-)
-
-// Constants for file panel with no focus
-const (
-	noneFocus filePanelFocusType = iota
-	secondFocus
-	focus
 )
 
 // Constants for select mode or browser mode
@@ -161,11 +152,12 @@ type fileModel struct {
 	filePreview  preview.Model
 }
 
+// filePanel.filePanelFocusType 's implementation  is being replaced with a isFocused bool variable .
 // Panel representing a file
 type filePanel struct {
 	cursor             int
 	render             int
-	focusType          filePanelFocusType
+	isFocused          bool
 	location           string
 	sortOptions        sortOptionsModel
 	panelMode          panelMode

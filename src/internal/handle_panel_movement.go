@@ -118,7 +118,7 @@ func (m *model) sidebarSelectDirectory() {
 	if err != nil {
 		slog.Error("Error switching to sidebar directory", "error", err)
 	}
-	panel.focusType = focus
+	panel.isFocused = true
 }
 
 // Select all item in the file panel (only work on select mode)
