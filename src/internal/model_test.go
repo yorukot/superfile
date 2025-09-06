@@ -53,7 +53,7 @@ func TestMain(m *testing.M) {
 	// Create testDir
 	testDir = filepath.Join(os.TempDir(), "spf_testdir")
 	cleanupTestDir()
-	if err := os.Mkdir(testDir, 0755); err != nil {
+	if err := os.Mkdir(testDir, 0o755); err != nil {
 		fmt.Printf("error while creating test directory, err : %v", err)
 		os.Exit(1)
 	}
@@ -227,7 +227,7 @@ func TestChooserFile(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			m := defaultTestModel(dir1)
 			if tt.expectedQuit {
-				err := os.WriteFile(tt.chooserFile, []byte{}, 0644)
+				err := os.WriteFile(tt.chooserFile, []byte{}, 0o644)
 				require.NoError(t, err)
 			}
 			variable.SetChooserFile(tt.chooserFile)

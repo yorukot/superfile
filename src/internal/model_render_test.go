@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/charmbracelet/x/exp/term/ansi"
+	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -138,7 +138,7 @@ func TestFilePreviewRenderWithDimensions(t *testing.T) {
 			curDir := filepath.Join(curTestDir, "dir"+strconv.Itoa(i))
 			utils.SetupDirectories(t, curDir)
 			filePath := filepath.Join(curDir, tt.fileName)
-			err := os.WriteFile(filePath, []byte(tt.fileContent), 0644)
+			err := os.WriteFile(filePath, []byte(tt.fileContent), 0o644)
 			require.NoError(t, err)
 
 			m := defaultTestModel(curDir)

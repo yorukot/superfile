@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"io"
@@ -13,9 +14,7 @@ import (
 	"github.com/adrg/xdg"
 	"github.com/pelletier/go-toml/v2"
 
-	"bufio"
-
-	"github.com/charmbracelet/x/exp/term/ansi"
+	"github.com/charmbracelet/x/ansi"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
 )
@@ -28,7 +27,7 @@ func WriteTomlData(filePath string, data interface{}) error {
 		// return a wrapped error
 		return fmt.Errorf("error encoding data : %w", err)
 	}
-	err = os.WriteFile(filePath, tomlData, 0644)
+	err = os.WriteFile(filePath, tomlData, 0o644)
 	if err != nil {
 		return fmt.Errorf("error writing file : %w", err)
 	}
@@ -147,7 +146,7 @@ func fixTomlFile(resultErr *TomlLoadError, filePath string, target interface{}) 
 	}()
 	// Copy the original file to the backup
 	// Open it in read write mode
-	origFile, err := os.OpenFile(filePath, os.O_RDWR, 0644)
+	origFile, err := os.OpenFile(filePath, os.O_RDWR, 0o644)
 	if err != nil {
 		resultErr.UpdateMessageAndError("failed to open original file for backup", err)
 		return resultErr
@@ -166,7 +165,6 @@ func fixTomlFile(resultErr *TomlLoadError, filePath string, target interface{}) 
 		return resultErr
 	}
 	_, err = origFile.WriteAt(tomlData, 0)
-
 	if err != nil {
 		resultErr.UpdateMessageAndError("failed to write TOML data to original file", err)
 		return resultErr
@@ -230,7 +228,7 @@ func CreateDirectories(dirs ...string) error {
 		if dir == "" {
 			continue
 		}
-		if err := os.MkdirAll(dir, 0755); err != nil {
+		if err := os.MkdirAll(dir, 0o755); err != nil {
 			return fmt.Errorf("failed to create directory %s: %w", dir, err)
 		}
 	}
@@ -241,7 +239,7 @@ func CreateDirectories(dirs ...string) error {
 func CreateFiles(files ...string) error {
 	for _, file := range files {
 		if _, err := os.Stat(file); os.IsNotExist(err) {
-			if err = os.WriteFile(file, nil, 0644); err != nil {
+			if err = os.WriteFile(file, nil, 0o644); err != nil {
 				return fmt.Errorf("failed to create file %s: %w", file, err)
 			}
 		}
