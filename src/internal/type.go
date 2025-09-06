@@ -17,23 +17,6 @@ import (
 // Type representing the mode of the panel
 type panelMode uint
 
-// [Depreciated] - filePanel.filePanelFocusType 's implementation  is being replaced with a isFocused bool variable .
-
-// The below typed constants used to determine which
-// panel is currently being focused , is being replaced with simpler
-// isFocused bool value , This tells wheather the focus is currently on the panel =>TRUE
-// else for other oher case ,where the panel is not under ,the value is =>FALSE
-
-// Type representing the focus type of the file panel
-// type filePanelFocusType uint
-
-// Earlier implementation
-// const (
-// noneFocus filePanelFocusType = iota
-// secondFocus
-// focus
-// )
-
 // Type representing the type of focused panel
 type (
 	focusPanelType int

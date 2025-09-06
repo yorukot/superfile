@@ -93,20 +93,6 @@ func (f focusPanelType) String() string {
 	}
 }
 
-// [Depreciated] - filePanel.filePanelFocusType 's implementation  is being replaced with a isFocused bool variable .
-// func (f filePanelFocusType) String() string {
-// switch f {
-// case noneFocus:
-// return "noneFocus"
-// case secondFocus:
-// return "secondFocus"
-// case focus:
-// return "focus"
-// default:
-// return invalidTypeString
-// }
-// }
-
 func (p panelMode) String() string {
 	switch p {
 	case selectMode:
