@@ -22,6 +22,6 @@ Superfile supports various plugins to extend its functionality. Below is a compl
 
 - **Requirements:** [`zoxide`](https://github.com/ajeetdsouza/zoxide)
 
-- **Config name:** `zoxide`
+- **Config name:** `zoxide_support`
 
 - **Usage:** Press `z` to open the zoxide navigation modal. Start typing to search directories, use arrow keys to navigate results, and press Enter to jump to a directory.
