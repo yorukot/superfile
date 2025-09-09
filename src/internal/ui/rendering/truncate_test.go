@@ -80,6 +80,13 @@ func TestTruncate(t *testing.T) {
 			style:    TailsTruncateRight,
 			expected: testStyle.Render("1..."),
 		},
+		{
+			name:     "Ansi color sequence with just enough widht",
+			line:     testStyle.Render("1234"),
+			maxWidth: 4,
+			style:    TailsTruncateRight,
+			expected: testStyle.Render("1234"),
+		},
 	}
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
