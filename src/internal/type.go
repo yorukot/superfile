@@ -18,10 +18,9 @@ import (
 type panelMode uint
 
 // Type representing the type of focused panel
-type (
-	focusPanelType int
-	hotkeyType     int
-)
+type focusPanelType int
+
+type hotkeyType int
 
 type modelQuitStateType int
 
