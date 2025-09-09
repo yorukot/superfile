@@ -39,12 +39,8 @@ func (m *model) validateLayout() error {
 func filePanelSlice(dir []string) []filePanel {
 	res := make([]filePanel, len(dir))
 	for i := range dir {
-		// Making the first panel as the default focus panel
-		// while others remain secondFocus
-		isFocus := false
-		if i == 0 {
-			isFocus = true
-		}
+		// Making the first panel as the focussed
+		isFocus := i == 0
 		res[i] = defaultFilePanel(dir[i], isFocus)
 	}
 	return res
