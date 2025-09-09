@@ -20,9 +20,6 @@ import (
 // Type representing the mode of the panel
 type panelMode uint
 
-// Type representing the focus type of the file panel
-type filePanelFocusType uint
-
 // Type representing the type of focused panel
 type focusPanelType int
 
@@ -45,13 +42,6 @@ const (
 	processBarFocus
 	sidebarFocus
 	metadataFocus
-)
-
-// Constants for file panel with no focus
-const (
-	noneFocus filePanelFocusType = iota
-	secondFocus
-	focus
 )
 
 // Constants for select mode or browser mode
@@ -165,7 +155,7 @@ type fileModel struct {
 type filePanel struct {
 	cursor             int
 	render             int
-	focusType          filePanelFocusType
+	isFocused          bool
 	location           string
 	sortOptions        sortOptionsModel
 	panelMode          panelMode

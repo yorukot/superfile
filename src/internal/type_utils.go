@@ -39,18 +39,14 @@ func (m *model) validateLayout() error {
 func filePanelSlice(dir []string) []filePanel {
 	res := make([]filePanel, len(dir))
 	for i := range dir {
-		// Making the first panel as the default focus panel
-		// while others remain secondFocus
-		focusType := secondFocus
-		if i == 0 {
-			focusType = focus
-		}
-		res[i] = defaultFilePanel(dir[i], focusType)
+		// Making the first panel as the focussed
+		isFocus := i == 0
+		res[i] = defaultFilePanel(dir[i], isFocus)
 	}
 	return res
 }
 
-func defaultFilePanel(dir string, currentFocusType filePanelFocusType) filePanel {
+func defaultFilePanel(dir string, focused bool) filePanel {
 	return filePanel{
 		render:   0,
 		cursor:   0,
@@ -70,7 +66,7 @@ func defaultFilePanel(dir string, currentFocusType filePanelFocusType) filePanel
 			},
 		},
 		panelMode:        browserMode,
-		focusType:        currentFocusType,
+		isFocused:        focused,
 		directoryRecords: make(map[string]directoryRecord),
 		searchBar:        common.GenerateSearchBar(),
 	}
@@ -88,19 +84,6 @@ func (f focusPanelType) String() string {
 		return "sidebarFocus"
 	case metadataFocus:
 		return "metadataFocus"
-	default:
-		return invalidTypeString
-	}
-}
-
-func (f filePanelFocusType) String() string {
-	switch f {
-	case noneFocus:
-		return "noneFocus"
-	case secondFocus:
-		return "secondFocus"
-	case focus:
-		return "focus"
 	default:
 		return invalidTypeString
 	}
