@@ -13,7 +13,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/x/exp/term/ansi"
+	"github.com/charmbracelet/x/ansi"
 )
 
 func TruncateText(text string, maxChars int, tails string) string {

@@ -75,10 +75,17 @@ func TestTruncate(t *testing.T) {
 		},
 		{
 			name:     "Ansi color sequence",
-			line:     testStyle.Render("1234"),
+			line:     testStyle.Render("12345"),
 			maxWidth: 4,
 			style:    TailsTruncateRight,
 			expected: testStyle.Render("1..."),
+		},
+		{
+			name:     "Ansi color sequence with just enough widht",
+			line:     testStyle.Render("1234"),
+			maxWidth: 4,
+			style:    TailsTruncateRight,
+			expected: testStyle.Render("1234"),
 		},
 	}
 	for _, tt := range testdata {
