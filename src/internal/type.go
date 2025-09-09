@@ -145,7 +145,6 @@ type fileModel struct {
 	filePreview  preview.Model
 }
 
-// filePanel.filePanelFocusType 's implementation  is being replaced with a isFocused bool variable .
 // Panel representing a file
 type filePanel struct {
 	cursor             int
