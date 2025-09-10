@@ -131,7 +131,8 @@ func TestLoadTomlFile(t *testing.T) {
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
 			var tomlVal TestTOMLType
-			err = LoadTomlFile(filepath.Join(testdataDir, tt.configName), defaultData, &tomlVal, tt.fixFlag)
+			err = LoadTomlFile(filepath.Join(testdataDir, tt.configName), defaultData, &tomlVal,
+				tt.fixFlag, false)
 			if tt.noError {
 				require.NoError(t, err)
 			} else {
@@ -250,7 +251,8 @@ func TestLoadTomlFileIgnorer(t *testing.T) {
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
 			var tomlVal TestTOMLMissingIgnorerType
-			err := LoadTomlFile(filepath.Join(testdataDir, tt.configName), defaultData, &tomlVal, tt.fixFlag)
+			err := LoadTomlFile(filepath.Join(testdataDir, tt.configName), defaultData, &tomlVal,
+				tt.fixFlag, false)
 			if tt.noError {
 				require.NoError(t, err)
 			} else {
@@ -295,7 +297,7 @@ func TestLoadTomlFileIgnorer(t *testing.T) {
 			err = os.WriteFile(orgFile, testContent, 0644)
 			require.NoError(t, err, "Error writing config file to temp directory")
 
-			err = LoadTomlFile(orgFile, defaultData, &tomlVal, true)
+			err = LoadTomlFile(orgFile, defaultData, &tomlVal, true, false)
 			var tomlErr *TomlLoadError
 			require.ErrorAs(t, err, &tomlErr)
 
@@ -315,7 +317,7 @@ func TestLoadTomlFileIgnorer(t *testing.T) {
 			assert.Equal(t, testContent, backupContent)
 
 			// Validate that if you Load Original File again, it loads without any errors
-			err = LoadTomlFile(orgFile, defaultData, &tomlVal, true)
+			err = LoadTomlFile(orgFile, defaultData, &tomlVal, true, false)
 			require.NoError(t, err)
 
 			err = os.WriteFile(orgFile, backupContent, 0644)

@@ -24,7 +24,7 @@ import (
 // if the FixConfigFile flag is on
 // TODO : Fix the code duplication with LoadHotkeysFile().
 func LoadConfigFile() {
-	err := utils.LoadTomlFile(variable.ConfigFile, ConfigTomlString, &Config, variable.FixConfigFile)
+	err := utils.LoadTomlFile(variable.ConfigFile, ConfigTomlString, &Config, variable.FixConfigFile, false)
 	if err != nil {
 		userMsg := fmt.Sprintf("%s%s", LipglossError, err.Error())
 
@@ -101,8 +101,14 @@ func ValidateConfig(c *ConfigType) error {
 
 // Load keybinds from the hotkeys file. Compares the content
 // with the default values and modify the hotkeys if the FixHotkeys flag is on.
-func LoadHotkeysFile() {
-	err := utils.LoadTomlFile(variable.HotkeysFile, HotkeysTomlString, &Hotkeys, variable.FixHotkeys)
+func LoadHotkeysFile(ignoreMissingFields bool) {
+	err := utils.LoadTomlFile(
+		variable.HotkeysFile,
+		HotkeysTomlString,
+		&Hotkeys,
+		variable.FixHotkeys,
+		ignoreMissingFields,
+	)
 	if err != nil {
 		userMsg := fmt.Sprintf("%s%s", LipglossError, err.Error())
 
