@@ -29,7 +29,7 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 		case metadataFocus:
 			m.fileMetaData.ListUp()
 		case nonePanelFocus:
-			m.fileModel.filePanels[m.filePanelFocusIndex].listUp(m.mainPanelHeight)
+			m.fileModel.filePanels[m.filePanelFocusIndex].ListUp(m.mainPanelHeight)
 		}
 
 		// If move down Key is pressed, check the current state and executes
@@ -42,17 +42,17 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 		case metadataFocus:
 			m.fileMetaData.ListDown()
 		case nonePanelFocus:
-			m.fileModel.filePanels[m.filePanelFocusIndex].listDown(m.mainPanelHeight)
+			m.fileModel.filePanels[m.filePanelFocusIndex].ListDown(m.mainPanelHeight)
 		}
 
 	case slices.Contains(common.Hotkeys.PageUp, msg):
-		m.fileModel.filePanels[m.filePanelFocusIndex].pgUp(m.mainPanelHeight)
+		m.fileModel.filePanels[m.filePanelFocusIndex].PgUp(m.mainPanelHeight)
 
 	case slices.Contains(common.Hotkeys.PageDown, msg):
-		m.fileModel.filePanels[m.filePanelFocusIndex].pgDown(m.mainPanelHeight)
+		m.fileModel.filePanels[m.filePanelFocusIndex].PgDown(m.mainPanelHeight)
 
 	case slices.Contains(common.Hotkeys.ChangePanelMode, msg):
-		m.getFocusedFilePanel().changeFilePanelMode()
+		m.getFocusedFilePanel().ChangeFilePanelMode()
 
 	case slices.Contains(common.Hotkeys.NextFilePanel, msg):
 		m.nextFilePanel()
@@ -147,11 +147,11 @@ func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
 	if m.getFocusedFilePanel().panelMode == selectMode {
 		switch {
 		case slices.Contains(common.Hotkeys.Confirm, msg):
-			m.fileModel.filePanels[m.filePanelFocusIndex].singleItemSelect()
+			m.fileModel.filePanels[m.filePanelFocusIndex].SingleItemSelect()
 		case slices.Contains(common.Hotkeys.FilePanelSelectModeItemsSelectUp, msg):
-			m.fileModel.filePanels[m.filePanelFocusIndex].itemSelectUp(m.mainPanelHeight)
+			m.fileModel.filePanels[m.filePanelFocusIndex].ItemSelectUp(m.mainPanelHeight)
 		case slices.Contains(common.Hotkeys.FilePanelSelectModeItemsSelectDown, msg):
-			m.fileModel.filePanels[m.filePanelFocusIndex].itemSelectDown(m.mainPanelHeight)
+			m.fileModel.filePanels[m.filePanelFocusIndex].ItemSelectDown(m.mainPanelHeight)
 		case slices.Contains(common.Hotkeys.DeleteItems, msg):
 			return m.getDeleteTriggerCmd(false)
 		case slices.Contains(common.Hotkeys.PermanentlyDeleteItems, msg):

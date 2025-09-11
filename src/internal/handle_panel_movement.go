@@ -16,7 +16,7 @@ import (
 
 // Back to parent directory
 func (m *model) parentDirectory() {
-	err := m.getFocusedFilePanel().parentDirectory()
+	err := m.getFocusedFilePanel().ParentDirectory()
 	if err != nil {
 		slog.Error("Error while changing to parent directory", "error", err)
 	}
@@ -30,7 +30,7 @@ func (m *model) enterPanel() {
 	if len(panel.element) == 0 {
 		return
 	}
-	selectedItem := panel.getSelectedItem()
+	selectedItem := panel.GetSelectedItem()
 	if selectedItem.directory {
 		// TODO : Propagate error out from this this function. Return here, instead of logging
 		err := m.updateCurrentFilePanelDir(selectedItem.location)
@@ -126,23 +126,6 @@ func (m *model) selectAllItem() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	for _, item := range panel.element {
 		panel.selected = append(panel.selected, item.location)
-	}
-}
-
-// Select the item where cursor located (only work on select mode)
-func (panel *filePanel) singleItemSelect() {
-	if len(panel.element) > 0 && panel.cursor >= 0 && panel.cursor < len(panel.element) {
-		elementLocation := panel.element[panel.cursor].location
-
-		if arrayContains(panel.selected, elementLocation) {
-			// This is inefficient. Once you select 1000 items,
-			// each select / deselect operation can take 1000 operations
-			// It can be easily made constant time.
-			// TODO : (performance)convert panel.selected to a set (map[string]struct{})
-			panel.selected = removeElementByValue(panel.selected, elementLocation)
-		} else {
-			panel.selected = append(panel.selected, elementLocation)
-		}
 	}
 }
 

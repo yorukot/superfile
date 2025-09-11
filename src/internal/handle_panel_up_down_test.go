@@ -116,9 +116,9 @@ func Test_filePanelUpDown(t *testing.T) {
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.listDown {
-				tt.panel.listDown(tt.mainPanelHeight)
+				tt.panel.ListDown(tt.mainPanelHeight)
 			} else {
-				tt.panel.listUp(tt.mainPanelHeight)
+				tt.panel.ListUp(tt.mainPanelHeight)
 			}
 			assert.Equal(t, tt.expectedCursor, tt.panel.cursor)
 			assert.Equal(t, tt.expectedRender, tt.panel.render)

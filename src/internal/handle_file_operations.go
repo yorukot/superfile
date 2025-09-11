@@ -103,7 +103,7 @@ func (m *model) getDeleteCmd(permDelete bool) tea.Cmd {
 	if panel.panelMode == selectMode {
 		items = panel.selected
 	} else {
-		items = []string{panel.getSelectedItem().location}
+		items = []string{panel.GetSelectedItem().location}
 	}
 
 	useTrash := m.hasTrash && !isExternalDiskPath(panel.location) && !permDelete
@@ -340,7 +340,7 @@ func (m *model) getExtractFileCmd() tea.Cmd {
 		return nil
 	}
 
-	item := panel.getSelectedItem().location
+	item := panel.GetSelectedItem().location
 
 	ext := strings.ToLower(filepath.Ext(item))
 	if !common.IsExtensionExtractable(ext) {

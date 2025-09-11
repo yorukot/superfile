@@ -146,7 +146,7 @@ func (m *model) getFilePreviewCmd(forcePreviewRender bool) tea.Cmd {
 		m.fileModel.filePreview.SetContentWithRenderText("")
 		return nil
 	}
-	selectedItem := m.getFocusedFilePanel().getSelectedItem()
+	selectedItem := m.getFocusedFilePanel().GetSelectedItem()
 	if m.fileModel.filePreview.GetLocation() == selectedItem.location && !forcePreviewRender {
 		return nil
 	}
@@ -178,7 +178,7 @@ func (m *model) getMetadataCmd() tea.Cmd {
 		m.fileMetaData.SetBlank()
 		return nil
 	}
-	selectedItem := m.getFocusedFilePanel().getSelectedItem()
+	selectedItem := m.getFocusedFilePanel().GetSelectedItem()
 
 	// Note : This will cause metadata not being refreshed when you are not scrolling,
 	// or filepanel is not getting updated. Its not a big problem as we repeatedly refresh filepanel
@@ -510,7 +510,7 @@ func (m *model) createNewFilePanelRelativeToCurrent(path string) error {
 // simulates a 'cd' action
 func (m *model) updateCurrentFilePanelDir(path string) error {
 	panel := m.getFocusedFilePanel()
-	err := panel.updateCurrentFilePanelDir(path)
+	err := panel.UpdateCurrentFilePanelDir(path)
 	if err == nil {
 		// Track the directory change with zoxide
 		m.trackDirectoryWithZoxide(panel.location)
