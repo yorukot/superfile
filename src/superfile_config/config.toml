@@ -60,7 +60,6 @@ file_preview_width = 0
 sidebar_width = 20
 #
 # Border style
-# Make sure to add strings exactly one character wide. Use ' ' for borderless 
 border_top = '─'
 border_bottom = '─'
 border_left = '│'
