@@ -144,7 +144,7 @@ func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
 		return nil
 	}
 	// Check if in the select mode and focusOn filepanel
-	if m.getFocusedFilePanel().PanelMode == selectMode {
+	if m.getFocusedFilePanel().PanelMode == SelectMode {
 		switch {
 		case slices.Contains(common.Hotkeys.Confirm, msg):
 			m.fileModel.filePanels[m.filePanelFocusIndex].SingleItemSelect()

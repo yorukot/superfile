@@ -22,10 +22,10 @@ import (
 )
 
 const (
-	sortingName         sortingKind = "Name"
-	sortingSize         sortingKind = "Size"
-	sortingDateModified sortingKind = "Date Modified"
-	sortingFileType     sortingKind = "Type"
+	sortingName         SortingKind = "Name"
+	sortingSize         SortingKind = "Size"
+	sortingDateModified SortingKind = "Date Modified"
+	sortingFileType     SortingKind = "Type"
 )
 
 // Check if the directory is external disk path

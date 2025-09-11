@@ -28,7 +28,7 @@ type hotkeyType int
 type modelQuitStateType int
 
 // TODO: Convert to integer enum
-type sortingKind string
+type SortingKind string
 
 const (
 	globalType hotkeyType = iota
@@ -46,8 +46,8 @@ const (
 
 // Constants for select mode or browser mode
 const (
-	selectMode PanelMode = iota
-	browserMode
+	SelectMode PanelMode = iota
+	BrowserMode
 )
 
 const (
