@@ -428,6 +428,13 @@ func (panel *FilePanel) CopyPWD() error {
 	return clipboard.WriteAll(panel.Location)
 }
 
+func (panel *FilePanel) GetSelectedItemLocation() string {
+	if panel.ElementCount() == 0 {
+		return ""
+	}
+	return panel.GetSelectedItem().location
+}
+
 func (panel *FilePanel) SelectAllItems() {
 	for _, item := range panel.Element {
 		panel.Selected = append(panel.Selected, item.location)

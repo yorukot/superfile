@@ -82,7 +82,7 @@ func (m *model) getDeleteCmd(permDelete bool) tea.Cmd {
 	if panel.GetPanelMode() == SelectMode {
 		items = panel.GetSelected()
 	} else {
-		items = []string{panel.GetSelectedItem().location}
+		items = []string{panel.GetSelectedItemLocation()}
 	}
 
 	useTrash := m.hasTrash && !isExternalDiskPath(panel.GetLocation()) && !permDelete
@@ -167,8 +167,8 @@ func (m *model) copySingleItem(cut bool) {
 		return
 	}
 	slog.Debug("handle_file_operations.copySingleItem", "cut", cut,
-		"panel location", panel.GetSelectedItem().location)
-	m.copyItems.items = append(m.copyItems.items, panel.GetSelectedItem().location)
+		"panel location", panel.GetSelectedItemLocation())
+	m.copyItems.items = append(m.copyItems.items, panel.GetSelectedItemLocation())
 }
 
 // Copy all selected file or directory's paths to the clipboard
@@ -319,7 +319,7 @@ func (m *model) getExtractFileCmd() tea.Cmd {
 		return nil
 	}
 
-	item := panel.GetSelectedItem().location
+	item := panel.GetSelectedItemLocation()
 
 	ext := strings.ToLower(filepath.Ext(item))
 	if !common.IsExtensionExtractable(ext) {
@@ -363,7 +363,7 @@ func (m *model) getCompressSelectedFilesCmd() tea.Cmd {
 	var firstFile string
 
 	if len(panel.GetSelected()) == 0 {
-		firstFile = panel.GetSelectedItem().location
+		firstFile = panel.GetSelectedItemLocation()
 		filesToCompress = append(filesToCompress, firstFile)
 	} else {
 		firstFile = panel.GetSelected()[0]
@@ -408,7 +408,7 @@ func (m *model) openFileWithEditor() tea.Cmd {
 	}
 
 	if variable.ChooserFile != "" {
-		err := m.chooserFileWriteAndQuit(panel.GetSelectedItem().location)
+		err := m.chooserFileWriteAndQuit(panel.GetSelectedItemLocation())
 		if err == nil {
 			return nil
 		}
@@ -435,7 +435,7 @@ func (m *model) openFileWithEditor() tea.Cmd {
 	cmd := parts[0]
 
 	//nolint:gocritic // appendAssign: intentionally creating a new slice
-	args := append(parts[1:], panel.GetSelectedItem().location)
+	args := append(parts[1:], panel.GetSelectedItemLocation())
 
 	c := exec.Command(cmd, args...)
 

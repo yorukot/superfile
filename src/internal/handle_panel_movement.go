@@ -67,7 +67,7 @@ func (m *model) enterPanel() {
 	}
 
 	if variable.ChooserFile != "" {
-		chooserErr := m.chooserFileWriteAndQuit(panel.GetSelectedItem().location)
+		chooserErr := m.chooserFileWriteAndQuit(panel.GetSelectedItemLocation())
 		if chooserErr == nil {
 			return
 		}
@@ -87,7 +87,7 @@ func (m *model) executeOpenCommand() {
 		dllpath := filepath.Join(os.Getenv("SYSTEMROOT"), "System32", "rundll32.exe")
 		dllfile := "url.dll,FileProtocolHandler"
 
-		cmd := exec.Command(dllpath, dllfile, panel.GetSelectedItem().location)
+		cmd := exec.Command(dllpath, dllfile, panel.GetSelectedItemLocation())
 		err := cmd.Start()
 		if err != nil {
 			slog.Error("Error while open file with", "error", err)
@@ -96,7 +96,7 @@ func (m *model) executeOpenCommand() {
 		return
 	}
 
-	cmd := exec.Command(openCommand, panel.GetSelectedItem().location)
+	cmd := exec.Command(openCommand, panel.GetSelectedItemLocation())
 	err := cmd.Start()
 	if err != nil {
 		slog.Error("Error while open file with", "error", err)
