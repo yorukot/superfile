@@ -32,7 +32,7 @@ func (m *model) filePanelRender() string {
 		// check if cursor or render out of range
 		// TODO - instead of this, have a filepanel.validateAndFix(), and log Error
 		// This should not ever happen
-		if filePanel.Cursor > len(filePanel.Element)-1 {
+		if filePanel.Cursor > filePanel.ElementCount()-1 {
 			filePanel.Cursor = 0
 			filePanel.RenderIndex = 0
 		}

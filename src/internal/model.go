@@ -141,7 +141,7 @@ func (m *model) getFilePreviewCmd(forcePreviewRender bool) tea.Cmd {
 	if !m.fileModel.filePreview.IsOpen() {
 		return nil
 	}
-	if len(m.getFocusedFilePanel().Element) == 0 {
+	if m.getFocusedFilePanel().ElementCount() == 0 {
 		// Sync call because this will be fast
 		m.fileModel.filePreview.SetContentWithRenderText("")
 		return nil
@@ -174,7 +174,7 @@ func (m *model) getMetadataCmd() tea.Cmd {
 	if m.disableMetadata {
 		return nil
 	}
-	if len(m.getFocusedFilePanel().Element) == 0 {
+	if m.getFocusedFilePanel().ElementCount() == 0 {
 		m.fileMetaData.SetBlank()
 		return nil
 	}
@@ -701,7 +701,7 @@ func (m *model) getFilePanelItems() {
 
 		focusPanelReRender := false
 
-		if len(focusPanel.Element) > 0 {
+		if focusPanel.ElementCount() > 0 {
 			if filepath.Dir(focusPanel.Element[0].location) != focusPanel.Location {
 				focusPanelReRender = true
 			}
@@ -709,7 +709,7 @@ func (m *model) getFilePanelItems() {
 			focusPanelReRender = true
 		}
 
-		reRenderTime := int(float64(len(filePanel.Element)) / 100)
+		reRenderTime := int(float64(filePanel.ElementCount()) / 100)
 
 		if filePanel.isFocused && !focusPanelReRender &&
 			nowTime.Sub(filePanel.LastTimeGetElement) < time.Duration(reRenderTime)*time.Second {

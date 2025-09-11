@@ -102,7 +102,7 @@ func TestCompressSelectedFiles(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			m := defaultTestModel(tt.startDir)
 			p := NewTestTeaProgWithEventLoop(t, m)
-			require.Greater(t, len(m.getFocusedFilePanel().Element), tt.cursor)
+			require.Greater(t, m.getFocusedFilePanel().ElementCount(), tt.cursor)
 			// Update cursor
 			m.getFocusedFilePanel().Cursor = tt.cursor
 
