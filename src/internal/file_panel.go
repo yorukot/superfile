@@ -528,3 +528,7 @@ func (panel *FilePanel) ResetIndexIfInvalid() {
 		panel.RenderIndex = 0
 	}
 }
+
+func (panel *FilePanel) SetSearchBarWidth(width int) {
+	panel.SearchBar.Width = width - 4
+}

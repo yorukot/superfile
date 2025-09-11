@@ -68,7 +68,7 @@ func (m *model) createNewFilePanel(location string) error {
 	m.fileModel.maxFilePanel = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth()) / 20
 
 	for i := range m.fileModel.filePanels {
-		m.fileModel.filePanels[i].SearchBar.Width = m.fileModel.width - 4
+		m.fileModel.filePanels[i].SetSearchBarWidth(m.fileModel.width)
 	}
 	return nil
 }
@@ -103,7 +103,7 @@ func (m *model) closeFilePanel() {
 	m.fileModel.maxFilePanel = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth()) / 20
 
 	for i := range m.fileModel.filePanels {
-		m.fileModel.filePanels[i].SearchBar.Width = m.fileModel.width - 4
+		m.fileModel.filePanels[i].SetSearchBarWidth(m.fileModel.width)
 	}
 }
 
@@ -127,7 +127,7 @@ func (m *model) toggleFilePreviewPanel() {
 	m.fileModel.maxFilePanel = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth()) / 20
 
 	for i := range m.fileModel.filePanels {
-		m.fileModel.filePanels[i].SearchBar.Width = m.fileModel.width - 4
+		m.fileModel.filePanels[i].SetSearchBarWidth(m.fileModel.width)
 	}
 }
 

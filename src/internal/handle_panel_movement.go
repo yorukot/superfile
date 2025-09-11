@@ -161,7 +161,7 @@ func (m *model) searchBarFocus() {
 	}
 
 	// config search bar width
-	panel.SearchBar.Width = m.fileModel.width - 4
+	panel.SetSearchBarWidth(m.fileModel.width)
 }
 
 func (m *model) sidebarSearchBarFocus() {
