@@ -124,7 +124,6 @@ func TestFilePanelNavigation(t *testing.T) {
 			m := defaultTestModel(tt.startDir)
 			m.getFocusedFilePanel().Cursor = tt.startCursor
 			m.getFocusedFilePanel().RenderIndex = tt.startRender
-			m.getFocusedFilePanel().SearchBar.SetValue("asdf")
 			for _, s := range tt.keyInput {
 				TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(s))
 			}
@@ -141,7 +140,7 @@ func TestFilePanelNavigation(t *testing.T) {
 			TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg("cd "+tt.startDir))
 			TeaUpdateWithErrCheck(m, tea.KeyMsg{Type: tea.KeyEnter})
 
-			// Make sure we have original curson and render
+			// Make sure we have original cursor and render
 			assert.Equal(t, tt.startCursor, m.getFocusedFilePanel().Cursor)
 			assert.Equal(t, tt.startRender, m.getFocusedFilePanel().RenderIndex)
 		})

@@ -521,3 +521,10 @@ func (panel *FilePanel) RefreshData(displayDotFile bool) {
 	}
 	panel.LastTimeGetElement = time.Now()
 }
+
+func (panel *FilePanel) ResetIndexIfInvalid() {
+	if panel.Cursor < 0 || panel.Cursor >= panel.ElementCount() {
+		panel.Cursor = 0
+		panel.RenderIndex = 0
+	}
+}

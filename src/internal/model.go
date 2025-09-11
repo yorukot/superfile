@@ -436,9 +436,7 @@ func (m *model) updateFilePanelsState(msg tea.Msg) tea.Cmd {
 
 	// TODO : This is like duct taping a bigger problem
 	// The code should never reach this state.
-	if focusPanel.Cursor < 0 {
-		focusPanel.Cursor = 0
-	}
+	focusPanel.ResetIndexIfInvalid()
 
 	return cmd
 }
