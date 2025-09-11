@@ -129,18 +129,22 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 	return nil
 }
 
+func (m *model) handleKeyOnNoFilePanelFocus(msg string) {
+	if m.focusPanel == sidebarFocus && slices.Contains(common.Hotkeys.Confirm, msg) {
+		m.sidebarSelectDirectory()
+	}
+	if m.focusPanel == sidebarFocus && slices.Contains(common.Hotkeys.FilePanelItemRename, msg) {
+		m.sidebarModel.PinnedItemRename()
+	}
+	if m.focusPanel == sidebarFocus && slices.Contains(common.Hotkeys.SearchBar, msg) {
+		m.sidebarSearchBarFocus()
+	}
+}
+
 func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
 	// if not focus on the filepanel return
 	if !m.getFocusedFilePanel().isFocused {
-		if m.focusPanel == sidebarFocus && slices.Contains(common.Hotkeys.Confirm, msg) {
-			m.sidebarSelectDirectory()
-		}
-		if m.focusPanel == sidebarFocus && slices.Contains(common.Hotkeys.FilePanelItemRename, msg) {
-			m.sidebarModel.PinnedItemRename()
-		}
-		if m.focusPanel == sidebarFocus && slices.Contains(common.Hotkeys.SearchBar, msg) {
-			m.sidebarSearchBarFocus()
-		}
+		m.handleKeyOnNoFilePanelFocus(msg)
 		return nil
 	}
 	// Check if in the select mode and focusOn filepanel
