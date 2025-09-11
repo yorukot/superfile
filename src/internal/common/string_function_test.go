@@ -3,6 +3,8 @@ package common
 import (
 	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestStringTruncate(t *testing.T) {
@@ -126,14 +128,19 @@ func TestMakePrintable(t *testing.T) {
 		{"hello", "hello"},
 		{"abcdABCD0123~!@#$%^&*()_+-={}|:\"<>?,./;'[]", "abcdABCD0123~!@#$%^&*()_+-={}|:\"<>?,./;'[]"},
 		{"Horizontal Tab and NewLine\t\t\n\n", "Horizontal Tab and NewLine\t\t\n\n"},
-		{"(NBSP)\xa0\xa0\xa0\xa0;", "(NBSP)\xa0\xa0\xa0\xa0;"},
+		{"(NBSP)\u00a0\u00a0\u00a0\u00a0;", "(NBSP)\u00a0\u00a0\u00a0\u00a0;"},
 		{"\x0b(Vertical Tab)", "(Vertical Tab)"},
 		{"\x0d(CR)", "(CR)"},
 		{"ASCII control characters : \x00(NULL)", "ASCII control characters : (NULL)"},
 		{"\x05(ENQ)", "(ENQ)"},
 		{"\x0f(SI)", "(SI)"},
-		{"\x1b(ESC)", "(ESC)"},
+		{"\x1b(ESC)", "\x1b(ESC)"},
 		{"\x7f(DEL)", "(DEL)"},
+		{"\x7f(DEL)", "(DEL)"},
+		{"Valid unicodes like nerdfont \uf410 \U000f0868", "Valid unicodes like nerdfont \uf410 \U000f0868"},
+		{"Invalid Unicodes\ufffd", "Invalid Unicodes"},
+		{"Invalid Unicodes\xa0", "Invalid Unicodes"},
+		{"Ascii color sequence\x1b[38;2;230;219;116;48;2;39;40;34m\ue68f \x1b[0m", "Ascii color sequence\x1b[38;2;230;219;116;48;2;39;40;34m\ue68f \x1b[0m"},
 	}
 	for _, tt := range inputs {
 		t.Run(fmt.Sprintf("Make %q printable", tt.input), func(t *testing.T) {
@@ -143,4 +150,10 @@ func TestMakePrintable(t *testing.T) {
 			}
 		})
 	}
+	t.Run("ESC is skipped", func(t *testing.T) {
+		assert.Equal(t, "(ESC)", MakePrintableWithEscCheck("\x1b(ESC)", false))
+	})
+	t.Run("ESC is not skipped", func(t *testing.T) {
+		assert.Equal(t, "\x1b(ESC)", MakePrintableWithEscCheck("\x1b(ESC)", true))
+	})
 }
