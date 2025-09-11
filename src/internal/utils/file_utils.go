@@ -36,7 +36,8 @@ func WriteTomlData(filePath string, data interface{}) error {
 
 // Helper function to load and validate TOML files with field checking
 // errorPrefix is appended before every error message
-func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFlag bool) error {
+func LoadTomlFile(filePath string, defaultData string, target interface{},
+	fixFlag bool, ignoreMissingFields bool) error {
 	// Initialize with default config
 	_ = toml.Unmarshal([]byte(defaultData), target)
 
@@ -78,10 +79,9 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 		}
 	}
 
-	// Check for missing fields. Explicitly set default value to false
-	ignoreMissing := false
+	// Override the default value if it exists default value to false
 	if config, ok := target.(MissingFieldIgnorer); ok {
-		ignoreMissing = config.GetIgnoreMissingFields()
+		ignoreMissingFields = config.GetIgnoreMissingFields()
 	}
 
 	// Check for missing fields
@@ -106,7 +106,7 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 	if len(missingFields) == 0 {
 		return nil
 	}
-	if !fixFlag && ignoreMissing {
+	if !fixFlag && ignoreMissingFields {
 		// nil error if we dont wanna fix, and dont wanna print
 		return nil
 	}

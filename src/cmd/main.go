@@ -36,7 +36,7 @@ func Run(content embed.FS) {
 
 	app := &cli.Command{
 		Name:        "superfile",
-		Version:     variable.CurrentVersion,
+		Version:     variable.CurrentVersion + variable.PreReleaseSuffix,
 		Description: "Pretty fancy and modern terminal file manager ",
 		ArgsUsage:   "[PATH]...",
 		Commands: []*cli.Command{

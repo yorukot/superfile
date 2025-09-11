@@ -48,7 +48,7 @@ func initialConfig(firstFilePanelDirs []string) (toggleDotFile bool, //nolint: n
 
 	printRuntimeInfo()
 
-	common.LoadHotkeysFile()
+	common.LoadHotkeysFile(common.Config.IgnoreMissingFields)
 
 	common.LoadThemeFile()
 

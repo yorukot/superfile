@@ -52,9 +52,6 @@ schema = 3
   [mod."github.com/charmbracelet/x/cellbuf"]
     version = "v0.0.13-0.20250311204145-2c3ea96c31dd"
     hash = "sha256-XAhCOt8qJ2vR77lH1ez0IVU1/2CaLTq9jSmrHVg5HHU="
-  [mod."github.com/charmbracelet/x/exp/term"]
-    version = "v0.0.0-20240814160751-e2dc8b53b604"
-    hash = "sha256-8M7BzhJasT6X5/oo8dpJ4LEuSl60FQf13by5M8t+GwE="
   [mod."github.com/charmbracelet/x/term"]
     version = "v0.2.1"
     hash = "sha256-VBkCZLI90PhMasftGw3403IqoV7d3E5WEGAIVrN5xQM="
@@ -184,6 +181,9 @@ schema = 3
   [mod."go4.org"]
     version = "v0.0.0-20230225012048-214862532bf5"
     hash = "sha256-8y7krSESdxZfxTzo16EDqmF8USRzGmLPYr3iKuVYzzE="
+  [mod."golang.org/x/exp"]
+    version = "v0.0.0-20231006140011-7918f672742d"
+    hash = "sha256-2SO1etTQ6UCUhADR5sgvDEDLHcj77pJKCIa/8mGDbAo="
   [mod."golang.org/x/image"]
     version = "v0.28.0"
     hash = "sha256-TkfNKPRea7gWtH8mQCNHQc0ce6LIO7XDgOoH5U6P51Q="
