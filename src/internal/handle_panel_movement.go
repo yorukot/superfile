@@ -121,14 +121,6 @@ func (m *model) sidebarSelectDirectory() {
 	panel.isFocused = true
 }
 
-// Select all item in the file panel (only work on select mode)
-func (m *model) selectAllItem() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-	for _, item := range panel.Element {
-		panel.Selected = append(panel.Selected, item.location)
-	}
-}
-
 // Toggle dotfile display or not
 func (m *model) toggleDotFileController() {
 	m.toggleDotFile = !m.toggleDotFile

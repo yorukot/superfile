@@ -18,7 +18,6 @@ import (
 
 	"github.com/yorukot/superfile/src/internal/common"
 
-	"github.com/atotto/clipboard"
 	tea "github.com/charmbracelet/bubbletea"
 
 	"github.com/yorukot/superfile/src/config/icon"
@@ -34,27 +33,6 @@ func (m *model) panelCreateNewFile() {
 	m.typingModal.open = true
 	m.typingModal.textInput = common.GenerateNewFileTextInput()
 	m.firstTextInput = true
-}
-
-// TODO : This function does not needs the entire model. Only pass the panel object
-func (m *model) IsRenamingConflicting() bool {
-	// TODO : Replace this with m.getCurrentFilePanel() everywhere
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-
-	if len(panel.Element) == 0 {
-		slog.Error("IsRenamingConflicting() being called on empty panel")
-		return false
-	}
-
-	oldPath := panel.Element[panel.Cursor].location
-	newPath := filepath.Join(panel.Location, panel.Rename.Value())
-
-	if oldPath == newPath {
-		return false
-	}
-
-	_, err := os.Stat(newPath)
-	return err == nil
 }
 
 // TODO: Remove channel messaging and use tea.Cmd
@@ -499,26 +477,4 @@ func (m *model) openDirectoryWithEditor() tea.Cmd {
 	return tea.ExecProcess(c, func(err error) tea.Msg {
 		return editorFinishedMsg{err}
 	})
-}
-
-// Copy file path
-// TODO: This is also an IO operations, do it via tea.Cmd
-func (m *model) copyPath() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-
-	if len(panel.Element) == 0 {
-		return
-	}
-
-	if err := clipboard.WriteAll(panel.Element[panel.Cursor].location); err != nil {
-		slog.Error("Error while copy path", "error", err)
-	}
-}
-
-// TODO: This is also an IO operations, do it via tea.Cmd
-func (m *model) copyPWD() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-	if err := clipboard.WriteAll(panel.Location); err != nil {
-		slog.Error("Error while copy present working directory", "error", err)
-	}
 }

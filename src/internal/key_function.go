@@ -111,7 +111,7 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 		m.openHelpMenu()
 
 	case slices.Contains(common.Hotkeys.OpenSortOptionsMenu, msg):
-		m.openSortOptionsMenu()
+		m.getFocusedFilePanel().OpenSortOptionsMenu()
 
 	case slices.Contains(common.Hotkeys.ToggleReverseSort, msg):
 		m.toggleReverseSort()
@@ -161,7 +161,7 @@ func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
 		case slices.Contains(common.Hotkeys.CutItems, msg):
 			m.copyMultipleItem(true)
 		case slices.Contains(common.Hotkeys.FilePanelSelectAllItem, msg):
-			m.selectAllItem()
+			m.getFocusedFilePanel().SelectAllItems()
 		}
 		return nil
 	}
@@ -184,9 +184,13 @@ func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
 	case slices.Contains(common.Hotkeys.SearchBar, msg):
 		m.searchBarFocus()
 	case slices.Contains(common.Hotkeys.CopyPath, msg):
-		m.copyPath()
+		if err := m.getFocusedFilePanel().CopyPath(); err != nil {
+			slog.Error("Error while copy path", "error", err)
+		}
 	case slices.Contains(common.Hotkeys.CopyPWD, msg):
-		m.copyPWD()
+		if err := m.getFocusedFilePanel().CopyPWD(); err != nil {
+			slog.Error("Error while copy present working directory", "error", err)
+		}
 	}
 	return nil
 }
@@ -239,7 +243,10 @@ func (m *model) handleNotifyModelConfirm(action notify.ConfirmActionType) tea.Cm
 	case notify.PermanentDeleteAction:
 		return m.getDeleteCmd(true)
 	case notify.RenameAction:
-		m.confirmRename()
+		if err := m.getFocusedFilePanel().ConfirmRename(); err != nil {
+			slog.Error("Error confirming rename", "error", err)
+		}
+		m.fileModel.renaming = false
 	case notify.QuitAction:
 		m.modelQuitState = quitConfirmationReceived
 	case notify.NoAction:
@@ -254,15 +261,15 @@ func (m *model) handleNotifyModelConfirm(action notify.ConfirmActionType) tea.Cm
 func (m *model) sortOptionsKey(msg string) {
 	switch {
 	case slices.Contains(common.Hotkeys.OpenSortOptionsMenu, msg):
-		m.cancelSortOptions()
+		m.getFocusedFilePanel().CancelSortOptions()
 	case slices.Contains(common.Hotkeys.Quit, msg):
-		m.cancelSortOptions()
+		m.getFocusedFilePanel().CancelSortOptions()
 	case slices.Contains(common.Hotkeys.Confirm, msg):
-		m.confirmSortOptions()
+		m.getFocusedFilePanel().ConfirmSortOptions()
 	case slices.Contains(common.Hotkeys.ListUp, msg):
-		m.sortOptionsListUp()
+		m.getFocusedFilePanel().SortOptionsListUp()
 	case slices.Contains(common.Hotkeys.ListDown, msg):
-		m.sortOptionsListDown()
+		m.getFocusedFilePanel().SortOptionsListDown()
 	}
 }
 
@@ -271,10 +278,13 @@ func (m *model) renamingKey(msg string) tea.Cmd {
 	case slices.Contains(common.Hotkeys.CancelTyping, msg):
 		m.cancelRename()
 	case slices.Contains(common.Hotkeys.ConfirmTyping, msg):
-		if m.IsRenamingConflicting() {
+		if m.getFocusedFilePanel().IsRenamingConflicting() {
 			return m.warnModalForRenaming()
 		}
-		m.confirmRename()
+		if err := m.getFocusedFilePanel().ConfirmRename(); err != nil {
+			slog.Error("Error confirming rename", "error", err)
+		}
+		m.fileModel.renaming = false
 	}
 
 	return nil

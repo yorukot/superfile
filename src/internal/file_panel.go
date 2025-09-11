@@ -1,9 +1,13 @@
 package internal
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
+	"path/filepath"
+
+	"github.com/atotto/clipboard"
 
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
@@ -387,4 +391,97 @@ func (panel *FilePanel) IsRenaming() bool {
 
 func (panel *FilePanel) SetRenaming(renaming bool) {
 	panel.Renaming = renaming
+}
+
+// ================ File Operations ================
+
+func (panel *FilePanel) IsRenamingConflicting() bool {
+	if len(panel.Element) == 0 {
+		slog.Error("IsRenamingConflicting() being called on empty panel")
+		return false
+	}
+
+	oldPath := panel.Element[panel.Cursor].location
+	newPath := filepath.Join(panel.Location, panel.Rename.Value())
+
+	if oldPath == newPath {
+		return false
+	}
+
+	_, err := os.Stat(newPath)
+	return err == nil
+}
+
+func (panel *FilePanel) CopyPath() error {
+	if len(panel.Element) == 0 {
+		return nil
+	}
+
+	return clipboard.WriteAll(panel.Element[panel.Cursor].location)
+}
+
+func (panel *FilePanel) CopyPWD() error {
+	return clipboard.WriteAll(panel.Location)
+}
+
+func (panel *FilePanel) SelectAllItems() {
+	for _, item := range panel.Element {
+		panel.Selected = append(panel.Selected, item.location)
+	}
+}
+
+func (panel *FilePanel) ConfirmRename() error {
+	if len(panel.Element) == 0 {
+		slog.Error("confirmRename called on empty panel")
+		return errors.New("cannot rename: panel is empty")
+	}
+
+	oldPath := panel.Element[panel.Cursor].location
+	newPath := filepath.Join(panel.Location, panel.Rename.Value())
+
+	if oldPath == newPath {
+		return nil
+	}
+
+	err := os.Rename(oldPath, newPath)
+	if err != nil {
+		slog.Error("Error rename file", "old", oldPath, "new", newPath, "error", err)
+		return err
+	}
+
+	panel.Rename.Blur()
+	panel.Renaming = false
+	return nil
+}
+
+// ================ Sort Options ================
+
+func (panel *FilePanel) OpenSortOptionsMenu() {
+	panel.SortOptions.open = true
+}
+
+func (panel *FilePanel) CancelSortOptions() {
+	panel.SortOptions.cursor = panel.SortOptions.data.selected
+	panel.SortOptions.open = false
+}
+
+func (panel *FilePanel) ConfirmSortOptions() {
+	panel.SortOptions.data.selected = panel.SortOptions.cursor
+	panel.SortOptions.open = false
+}
+
+func (panel *FilePanel) SortOptionsListUp() {
+	if panel.SortOptions.cursor > 0 {
+		panel.SortOptions.cursor--
+	} else {
+		panel.SortOptions.cursor = len(panel.SortOptions.data.options) - 1
+	}
+}
+
+func (panel *FilePanel) SortOptionsListDown() {
+	if panel.SortOptions.cursor < len(panel.SortOptions.data.options)-1 {
+		panel.SortOptions.cursor++
+	} else {
+		panel.SortOptions.cursor = 0
+	}
 }

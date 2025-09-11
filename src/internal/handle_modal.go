@@ -60,68 +60,6 @@ func (m *model) cancelRename() {
 	m.fileModel.renaming = false
 }
 
-// Connfirm rename file or directory
-func (m *model) confirmRename() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-
-	// Although we dont expect this to happen based on our current flow
-	// Just adding it here to be safe
-	if len(panel.Element) == 0 {
-		slog.Error("confirmRename called on empty panel")
-		return
-	}
-
-	oldPath := panel.Element[panel.Cursor].location
-	newPath := filepath.Join(panel.Location, panel.Rename.Value())
-
-	// Rename the file
-	err := os.Rename(oldPath, newPath)
-	if err != nil {
-		slog.Error("Error while confirmRename during rename", "error", err)
-		// Dont return. We have to also reset the panel and model information
-	}
-	m.fileModel.renaming = false
-	panel.Rename.Blur()
-	panel.Renaming = false
-}
-
-func (m *model) openSortOptionsMenu() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-	panel.SortOptions.open = true
-}
-
-func (m *model) cancelSortOptions() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-	panel.SortOptions.cursor = panel.SortOptions.data.selected
-	panel.SortOptions.open = false
-}
-
-func (m *model) confirmSortOptions() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-	panel.SortOptions.data.selected = panel.SortOptions.cursor
-	panel.SortOptions.open = false
-}
-
-// Move the cursor up in the sort options menu
-func (m *model) sortOptionsListUp() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-	if panel.SortOptions.cursor > 0 {
-		panel.SortOptions.cursor--
-	} else {
-		panel.SortOptions.cursor = len(panel.SortOptions.data.options) - 1
-	}
-}
-
-// Move the cursor down in the sort options menu
-func (m *model) sortOptionsListDown() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-	if panel.SortOptions.cursor < len(panel.SortOptions.data.options)-1 {
-		panel.SortOptions.cursor++
-	} else {
-		panel.SortOptions.cursor = 0
-	}
-}
-
 func (m *model) toggleReverseSort() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	panel.SortOptions.data.reversed = !panel.SortOptions.data.reversed
