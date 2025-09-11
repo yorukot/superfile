@@ -99,7 +99,7 @@ func (panel *FilePanel) ParentDirectory() error {
 // ================ Navigation Methods ================
 
 func (panel *FilePanel) ListUp(mainPanelHeight int) {
-	if len(panel.Element) == 0 {
+	if panel.ElementCount() == 0 {
 		return
 	}
 	if panel.Cursor > 0 {
@@ -118,7 +118,7 @@ func (panel *FilePanel) ListUp(mainPanelHeight int) {
 }
 
 func (panel *FilePanel) ListDown(mainPanelHeight int) {
-	if len(panel.Element) == 0 {
+	if panel.ElementCount() == 0 {
 		return
 	}
 	if panel.Cursor < len(panel.Element)-1 {
@@ -194,7 +194,7 @@ func (panel *FilePanel) ItemSelectDown(mainPanelHeight int) {
 
 func (panel *FilePanel) SingleItemSelect() {
 	if len(panel.Element) > 0 && panel.Cursor >= 0 && panel.Cursor < len(panel.Element) {
-		elementLocation := panel.Element[panel.Cursor].location
+		elementLocation := panel.GetSelectedItem().location
 
 		if arrayContains(panel.Selected, elementLocation) {
 			// This is inefficient. Once you select 1000 items,
@@ -257,7 +257,7 @@ func (panel *FilePanel) renderFooter(r *rendering.Renderer) {
 }
 
 func (panel *FilePanel) renderFileEntries(r *rendering.Renderer, mainPanelHeight, filePanelWidth int) {
-	if len(panel.Element) == 0 {
+	if panel.ElementCount() == 0 {
 		r.AddLines(common.FilePanelNoneText)
 		return
 	}
@@ -325,7 +325,7 @@ func (panel *FilePanel) getPanelModeInfo() (string, string) {
 }
 
 func (panel *FilePanel) getCursorString() string {
-	if len(panel.Element) == 0 {
+	if panel.ElementCount() == 0 {
 		return "0/0"
 	}
 	return fmt.Sprintf("%d/%d", panel.Cursor+1, len(panel.Element))
@@ -393,15 +393,19 @@ func (panel *FilePanel) SetRenaming(renaming bool) {
 	panel.Renaming = renaming
 }
 
+func (panel *FilePanel) ElementCount() int {
+	return len(panel.Element)
+}
+
 // ================ File Operations ================
 
 func (panel *FilePanel) IsRenamingConflicting() bool {
-	if len(panel.Element) == 0 {
+	if panel.ElementCount() == 0 {
 		slog.Error("IsRenamingConflicting() being called on empty panel")
 		return false
 	}
 
-	oldPath := panel.Element[panel.Cursor].location
+	oldPath := panel.GetSelectedItem().location
 	newPath := filepath.Join(panel.Location, panel.Rename.Value())
 
 	if oldPath == newPath {
@@ -413,11 +417,11 @@ func (panel *FilePanel) IsRenamingConflicting() bool {
 }
 
 func (panel *FilePanel) CopyPath() error {
-	if len(panel.Element) == 0 {
+	if panel.ElementCount() == 0 {
 		return nil
 	}
 
-	return clipboard.WriteAll(panel.Element[panel.Cursor].location)
+	return clipboard.WriteAll(panel.GetSelectedItem().location)
 }
 
 func (panel *FilePanel) CopyPWD() error {
@@ -431,12 +435,12 @@ func (panel *FilePanel) SelectAllItems() {
 }
 
 func (panel *FilePanel) ConfirmRename() error {
-	if len(panel.Element) == 0 {
+	if panel.ElementCount() == 0 {
 		slog.Error("confirmRename called on empty panel")
 		return errors.New("cannot rename: panel is empty")
 	}
 
-	oldPath := panel.Element[panel.Cursor].location
+	oldPath := panel.GetSelectedItem().location
 	newPath := filepath.Join(panel.Location, panel.Rename.Value())
 
 	if oldPath == newPath {

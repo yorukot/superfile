@@ -27,7 +27,7 @@ func (m *model) parentDirectory() {
 func (m *model) enterPanel() {
 	panel := m.getFocusedFilePanel()
 
-	if len(panel.Element) == 0 {
+	if panel.ElementCount() == 0 {
 		return
 	}
 	selectedItem := panel.GetSelectedItem()
@@ -67,7 +67,7 @@ func (m *model) enterPanel() {
 	}
 
 	if variable.ChooserFile != "" {
-		chooserErr := m.chooserFileWriteAndQuit(panel.Element[panel.Cursor].location)
+		chooserErr := m.chooserFileWriteAndQuit(panel.GetSelectedItem().location)
 		if chooserErr == nil {
 			return
 		}
@@ -87,7 +87,7 @@ func (m *model) executeOpenCommand() {
 		dllpath := filepath.Join(os.Getenv("SYSTEMROOT"), "System32", "rundll32.exe")
 		dllfile := "url.dll,FileProtocolHandler"
 
-		cmd := exec.Command(dllpath, dllfile, panel.Element[panel.Cursor].location)
+		cmd := exec.Command(dllpath, dllfile, panel.GetSelectedItem().location)
 		err := cmd.Start()
 		if err != nil {
 			slog.Error("Error while open file with", "error", err)
@@ -96,7 +96,7 @@ func (m *model) executeOpenCommand() {
 		return
 	}
 
-	cmd := exec.Command(openCommand, panel.Element[panel.Cursor].location)
+	cmd := exec.Command(openCommand, panel.GetSelectedItem().location)
 	err := cmd.Start()
 	if err != nil {
 		slog.Error("Error while open file with", "error", err)
