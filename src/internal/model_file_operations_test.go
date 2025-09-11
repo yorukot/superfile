@@ -38,7 +38,7 @@ func TestCopy(t *testing.T) {
 		p := NewTestTeaProgWithEventLoop(t, defaultTestModel(dir1))
 
 		require.Equal(t, "file1.txt",
-			p.getModel().getFocusedFilePanel().Element[0].name)
+			p.getModel().getFocusedFilePanel().GetFirstElementName())
 		p.SendKeyDirectly(common.Hotkeys.CopyItems[0])
 		assert.False(t, p.getModel().copyItems.cut)
 		assert.Equal(t, file1, p.getModel().copyItems.items[0])

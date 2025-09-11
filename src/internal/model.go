@@ -688,7 +688,6 @@ func getMaxW(s string) int {
 func (m *model) getFilePanelItems() {
 	focusPanel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	for i, filePanel := range m.fileModel.filePanels {
-		var fileElement []Element
 		nowTime := time.Now()
 		// Check last time each element was updated, if less then 3 seconds ignore
 		if !filePanel.isFocused && nowTime.Sub(filePanel.LastTimeGetElement) < 3*time.Second {
@@ -702,7 +701,7 @@ func (m *model) getFilePanelItems() {
 		focusPanelReRender := false
 
 		if focusPanel.ElementCount() > 0 {
-			if filepath.Dir(focusPanel.Element[0].location) != focusPanel.Location {
+			if filepath.Dir(focusPanel.GetFirstElementLocation()) != focusPanel.Location {
 				focusPanelReRender = true
 			}
 		} else {
@@ -715,18 +714,7 @@ func (m *model) getFilePanelItems() {
 			nowTime.Sub(filePanel.LastTimeGetElement) < time.Duration(reRenderTime)*time.Second {
 			continue
 		}
-
-		// Get file names based on search bar filter
-		if filePanel.SearchBar.Value() != "" {
-			fileElement = returnDirElementBySearchString(filePanel.Location, m.toggleDotFile,
-				filePanel.SearchBar.Value(), filePanel.SortOptions.data)
-		} else {
-			fileElement = returnDirElement(filePanel.Location, m.toggleDotFile, filePanel.SortOptions.data)
-		}
-		// Update file panel list
-		filePanel.Element = fileElement
-		m.fileModel.filePanels[i].Element = fileElement
-		m.fileModel.filePanels[i].LastTimeGetElement = nowTime
+		m.fileModel.filePanels[i].RefreshData(m.toggleDotFile)
 	}
 
 	m.updatedToggleDotFile = false

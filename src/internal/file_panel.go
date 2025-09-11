@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/atotto/clipboard"
 
@@ -435,6 +436,20 @@ func (panel *FilePanel) GetSelectedItemLocation() string {
 	return panel.GetSelectedItem().location
 }
 
+func (panel *FilePanel) GetFirstElementLocation() string {
+	if panel.ElementCount() == 0 {
+		return ""
+	}
+	return panel.Element[0].location
+}
+
+func (panel *FilePanel) GetFirstElementName() string {
+	if panel.ElementCount() == 0 {
+		return ""
+	}
+	return panel.Element[0].name
+}
+
 func (panel *FilePanel) SelectAllItems() {
 	for _, item := range panel.Element {
 		panel.Selected = append(panel.Selected, item.location)
@@ -495,4 +510,14 @@ func (panel *FilePanel) SortOptionsListDown() {
 	} else {
 		panel.SortOptions.cursor = 0
 	}
+}
+
+func (panel *FilePanel) RefreshData(displayDotFile bool) {
+	if panel.SearchBar.Value() != "" {
+		panel.Element = returnDirElementBySearchString(panel.Location, displayDotFile,
+			panel.SearchBar.Value(), panel.SortOptions.data)
+	} else {
+		panel.Element = returnDirElement(panel.Location, displayDotFile, panel.SortOptions.data)
+	}
+	panel.LastTimeGetElement = time.Now()
 }
