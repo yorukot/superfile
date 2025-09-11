@@ -16,7 +16,7 @@ import (
 // Pinned directory
 func (m *model) pinnedDirectory() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-	err := sidebar.TogglePinnedDirectory(panel.location)
+	err := sidebar.TogglePinnedDirectory(panel.Location)
 	if err != nil {
 		slog.Error("Error while toggling pinned directory", "error", err)
 	}
@@ -40,13 +40,13 @@ func (m *model) createNewFilePanel(location string) error {
 		return fmt.Errorf("cannot access location : %s", location)
 	}
 
-	m.fileModel.filePanels = append(m.fileModel.filePanels, filePanel{
-		location:         location,
-		sortOptions:      m.fileModel.filePanels[m.filePanelFocusIndex].sortOptions,
-		panelMode:        browserMode,
+	m.fileModel.filePanels = append(m.fileModel.filePanels, FilePanel{
+		Location:         location,
+		SortOptions:      m.fileModel.filePanels[m.filePanelFocusIndex].SortOptions,
+		PanelMode:        browserMode,
 		isFocused:        false,
-		directoryRecords: make(map[string]directoryRecord),
-		searchBar:        common.GenerateSearchBar(),
+		DirectoryRecords: make(map[string]DirectoryRecord),
+		SearchBar:        common.GenerateSearchBar(),
 	})
 
 	if m.fileModel.filePreview.IsOpen() {
@@ -68,7 +68,7 @@ func (m *model) createNewFilePanel(location string) error {
 	m.fileModel.maxFilePanel = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth()) / 20
 
 	for i := range m.fileModel.filePanels {
-		m.fileModel.filePanels[i].searchBar.Width = m.fileModel.width - 4
+		m.fileModel.filePanels[i].SearchBar.Width = m.fileModel.width - 4
 	}
 	return nil
 }
@@ -103,7 +103,7 @@ func (m *model) closeFilePanel() {
 	m.fileModel.maxFilePanel = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth()) / 20
 
 	for i := range m.fileModel.filePanels {
-		m.fileModel.filePanels[i].searchBar.Width = m.fileModel.width - 4
+		m.fileModel.filePanels[i].SearchBar.Width = m.fileModel.width - 4
 	}
 }
 
@@ -127,7 +127,7 @@ func (m *model) toggleFilePreviewPanel() {
 	m.fileModel.maxFilePanel = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth()) / 20
 
 	for i := range m.fileModel.filePanels {
-		m.fileModel.filePanels[i].searchBar.Width = m.fileModel.width - 4
+		m.fileModel.filePanels[i].SearchBar.Width = m.fileModel.width - 4
 	}
 }
 

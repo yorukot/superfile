@@ -184,7 +184,7 @@ func TestReturnDirElement(t *testing.T) {
 				selected: 0,
 				reversed: tt.reversed,
 			}
-			var res []element
+			var res []Element
 			if tt.searchString == "" {
 				res = returnDirElement(tt.location, tt.dotFiles, sortOptionsModel)
 			} else {

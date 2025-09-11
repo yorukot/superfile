@@ -18,7 +18,7 @@ import (
 )
 
 // Type representing the mode of the panel
-type panelMode uint
+type PanelMode uint
 
 // Type representing the type of focused panel
 type focusPanelType int
@@ -46,7 +46,7 @@ const (
 
 // Constants for select mode or browser mode
 const (
-	selectMode panelMode = iota
+	selectMode PanelMode = iota
 	browserMode
 )
 
@@ -144,7 +144,7 @@ type copyItems struct {
 /* FILE WINDOWS TYPE START*/
 // Model for file windows
 type fileModel struct {
-	filePanels   []filePanel
+	filePanels   []FilePanel
 	width        int
 	renaming     bool
 	maxFilePanel int
@@ -152,24 +152,24 @@ type fileModel struct {
 }
 
 // Panel representing a file
-type filePanel struct {
-	cursor             int
-	render             int
+type FilePanel struct {
+	Cursor             int
+	RenderIndex        int
 	isFocused          bool
-	location           string
-	sortOptions        sortOptionsModel
-	panelMode          panelMode
-	selected           []string
-	element            []element
-	directoryRecords   map[string]directoryRecord
-	rename             textinput.Model
-	renaming           bool
-	searchBar          textinput.Model
-	lastTimeGetElement time.Time
+	Location           string
+	SortOptions        SortOptionsModel
+	PanelMode          PanelMode
+	Selected           []string
+	Element            []Element
+	DirectoryRecords   map[string]DirectoryRecord
+	Rename             textinput.Model
+	Renaming           bool
+	SearchBar          textinput.Model
+	LastTimeGetElement time.Time
 }
 
 // Sort options
-type sortOptionsModel struct {
+type SortOptionsModel struct {
 	width  int
 	height int
 	open   bool
@@ -184,13 +184,13 @@ type sortOptionsModelData struct {
 }
 
 // Record for directory navigation
-type directoryRecord struct {
+type DirectoryRecord struct {
 	directoryCursor int
 	directoryRender int
 }
 
 // Element within a file panel
-type element struct {
+type Element struct {
 	name      string
 	location  string
 	directory bool

@@ -38,7 +38,7 @@ func TestCopy(t *testing.T) {
 		p := NewTestTeaProgWithEventLoop(t, defaultTestModel(dir1))
 
 		require.Equal(t, "file1.txt",
-			p.getModel().getFocusedFilePanel().element[0].name)
+			p.getModel().getFocusedFilePanel().Element[0].name)
 		p.SendKeyDirectly(common.Hotkeys.CopyItems[0])
 		assert.False(t, p.getModel().copyItems.cut)
 		assert.Equal(t, file1, p.getModel().copyItems.items[0])
@@ -145,14 +145,14 @@ func TestFileRename(t *testing.T) {
 			setFilePanelSelectedItemByLocation(t, m.getFocusedFilePanel(), file3)
 
 			p.SendKeyDirectly(common.Hotkeys.FilePanelItemRename[0])
-			m.getFocusedFilePanel().rename.SetValue("file2.txt")
+			m.getFocusedFilePanel().Rename.SetValue("file2.txt")
 			p.Send(tea.KeyMsg{Type: tea.KeyEnter})
 
 			// This will result in async
 			assert.Eventually(t, func() bool {
 				return m.notifyModel.IsOpen()
 			}, DefaultTestTimeout, DefaultTestTick, "Notify modal never opened, filepanel items : %v",
-				m.getFocusedFilePanel().element)
+				m.getFocusedFilePanel().Element)
 
 			assert.Equal(t, notify.New(true,
 				common.SameRenameWarnTitle,
@@ -178,7 +178,7 @@ func TestFileRename(t *testing.T) {
 				return err2 == nil && err3 == nil
 			}, DefaultTestTimeout, DefaultTestTick,
 				"Rename should be done/not done appropriately, file : %v",
-				m.getFocusedFilePanel().element)
+				m.getFocusedFilePanel().Element)
 		}
 
 		actualTest(false)

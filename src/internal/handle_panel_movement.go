@@ -27,7 +27,7 @@ func (m *model) parentDirectory() {
 func (m *model) enterPanel() {
 	panel := m.getFocusedFilePanel()
 
-	if len(panel.element) == 0 {
+	if len(panel.Element) == 0 {
 		return
 	}
 	selectedItem := panel.GetSelectedItem()
@@ -67,7 +67,7 @@ func (m *model) enterPanel() {
 	}
 
 	if variable.ChooserFile != "" {
-		chooserErr := m.chooserFileWriteAndQuit(panel.element[panel.cursor].location)
+		chooserErr := m.chooserFileWriteAndQuit(panel.Element[panel.Cursor].location)
 		if chooserErr == nil {
 			return
 		}
@@ -87,7 +87,7 @@ func (m *model) executeOpenCommand() {
 		dllpath := filepath.Join(os.Getenv("SYSTEMROOT"), "System32", "rundll32.exe")
 		dllfile := "url.dll,FileProtocolHandler"
 
-		cmd := exec.Command(dllpath, dllfile, panel.element[panel.cursor].location)
+		cmd := exec.Command(dllpath, dllfile, panel.Element[panel.Cursor].location)
 		err := cmd.Start()
 		if err != nil {
 			slog.Error("Error while open file with", "error", err)
@@ -96,7 +96,7 @@ func (m *model) executeOpenCommand() {
 		return
 	}
 
-	cmd := exec.Command(openCommand, panel.element[panel.cursor].location)
+	cmd := exec.Command(openCommand, panel.Element[panel.Cursor].location)
 	err := cmd.Start()
 	if err != nil {
 		slog.Error("Error while open file with", "error", err)
@@ -124,8 +124,8 @@ func (m *model) sidebarSelectDirectory() {
 // Select all item in the file panel (only work on select mode)
 func (m *model) selectAllItem() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-	for _, item := range panel.element {
-		panel.selected = append(panel.selected, item.location)
+	for _, item := range panel.Element {
+		panel.Selected = append(panel.Selected, item.location)
 	}
 }
 
@@ -161,15 +161,15 @@ func (m *model) toggleFooterController() tea.Cmd {
 // Focus on search bar
 func (m *model) searchBarFocus() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-	if panel.searchBar.Focused() {
-		panel.searchBar.Blur()
+	if panel.SearchBar.Focused() {
+		panel.SearchBar.Blur()
 	} else {
-		panel.searchBar.Focus()
+		panel.SearchBar.Focus()
 		m.firstTextInput = true
 	}
 
 	// config search bar width
-	panel.searchBar.Width = m.fileModel.width - 4
+	panel.SearchBar.Width = m.fileModel.width - 4
 }
 
 func (m *model) sidebarSearchBarFocus() {

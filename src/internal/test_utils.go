@@ -42,8 +42,8 @@ func setupPanelModeAndSelection(t *testing.T, m *model, useSelectMode bool, item
 	if useSelectMode {
 		// Switch to select mode and set selected items
 		m.getFocusedFilePanel().ChangeFilePanelMode()
-		require.Equal(t, selectMode, panel.panelMode)
-		panel.selected = selectedItems
+		require.Equal(t, selectMode, panel.PanelMode)
+		panel.Selected = selectedItems
 	} else {
 		// Find the item in browser mode
 		setFilePanelSelectedItemByName(t, panel, itemName)
@@ -188,8 +188,8 @@ func verifySuccessfulPasteResults(t *testing.T, targetDir string, expectedDestFi
 // -------------- Other utilities
 
 // Helper function to find item index in panel by name
-func findItemIndexInPanel(panel *filePanel, itemName string) int {
-	for i, elem := range panel.element {
+func findItemIndexInPanel(panel *FilePanel, itemName string) int {
+	for i, elem := range panel.Element {
 		if elem.name == itemName {
 			return i
 		}
@@ -198,8 +198,8 @@ func findItemIndexInPanel(panel *filePanel, itemName string) int {
 }
 
 // Helper function to find item index in panel by name
-func findItemIndexInPanelByLocation(panel *filePanel, itemLocation string) int {
-	for i, elem := range panel.element {
+func findItemIndexInPanelByLocation(panel *FilePanel, itemLocation string) int {
+	for i, elem := range panel.Element {
 		if elem.location == itemLocation {
 			return i
 		}
@@ -225,16 +225,16 @@ func getOriginalPath(useSelectMode bool, itemName, startDir string) string {
 	return ""
 }
 
-func setFilePanelSelectedItemByLocation(t *testing.T, panel *filePanel, filePath string) {
+func setFilePanelSelectedItemByLocation(t *testing.T, panel *FilePanel, filePath string) {
 	t.Helper()
 	idx := findItemIndexInPanelByLocation(panel, filePath)
 	require.NotEqual(t, -1, idx, "%s should be found in panel", filePath)
-	panel.cursor = idx
+	panel.Cursor = idx
 }
 
-func setFilePanelSelectedItemByName(t *testing.T, panel *filePanel, fileName string) {
+func setFilePanelSelectedItemByName(t *testing.T, panel *FilePanel, fileName string) {
 	t.Helper()
 	idx := findItemIndexInPanel(panel, fileName)
 	require.NotEqual(t, -1, idx, "%s should be found in panel", fileName)
-	panel.cursor = idx
+	panel.Cursor = idx
 }

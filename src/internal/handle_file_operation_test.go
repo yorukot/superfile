@@ -102,14 +102,14 @@ func TestCompressSelectedFiles(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			m := defaultTestModel(tt.startDir)
 			p := NewTestTeaProgWithEventLoop(t, m)
-			require.Greater(t, len(m.getFocusedFilePanel().element), tt.cursor)
+			require.Greater(t, len(m.getFocusedFilePanel().Element), tt.cursor)
 			// Update cursor
-			m.getFocusedFilePanel().cursor = tt.cursor
+			m.getFocusedFilePanel().Cursor = tt.cursor
 
-			require.Equal(t, browserMode, m.getFocusedFilePanel().panelMode)
+			require.Equal(t, browserMode, m.getFocusedFilePanel().PanelMode)
 			if tt.selectMode {
 				m.getFocusedFilePanel().ChangeFilePanelMode()
-				m.getFocusedFilePanel().selected = tt.selectedElem
+				m.getFocusedFilePanel().Selected = tt.selectedElem
 			}
 
 			p.SendKey(common.Hotkeys.CompressFile[0])

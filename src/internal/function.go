@@ -62,7 +62,7 @@ func returnFocusType(focusPanel focusPanelType) bool {
 // TODO : Take common.Config.CaseSensitiveSort as a function parameter
 // and also consider testing this caseSensitive with both true and false in
 // our unit_test TestReturnDirElement
-func returnDirElement(location string, displayDotFile bool, sortOptions sortOptionsModelData) []element {
+func returnDirElement(location string, displayDotFile bool, sortOptions sortOptionsModelData) []Element {
 	dirEntries, err := os.ReadDir(location)
 	if err != nil {
 		slog.Error("Error while returning folder elements", "error", err)
@@ -84,7 +84,7 @@ func returnDirElement(location string, displayDotFile bool, sortOptions sortOpti
 
 func returnDirElementBySearchString(location string, displayDotFile bool, searchString string,
 	sortOptions sortOptionsModelData,
-) []element {
+) []Element {
 	items, err := os.ReadDir(location)
 	if err != nil {
 		slog.Error("Error while return folder element function", "error", err)
@@ -122,14 +122,14 @@ func returnDirElementBySearchString(location string, displayDotFile bool, search
 	return sortFileElement(sortOptions, dirElements, location)
 }
 
-func sortFileElement(sortOptions sortOptionsModelData, dirEntries []os.DirEntry, location string) []element {
+func sortFileElement(sortOptions sortOptionsModelData, dirEntries []os.DirEntry, location string) []Element {
 	// Sort files
 	sort.Slice(dirEntries, getOrderingFunc(location, dirEntries,
 		sortOptions.reversed, sortOptions.options[sortOptions.selected]))
 	// Preallocate for efficiency
-	directoryElement := make([]element, 0, len(dirEntries))
+	directoryElement := make([]Element, 0, len(dirEntries))
 	for _, item := range dirEntries {
-		directoryElement = append(directoryElement, element{
+		directoryElement = append(directoryElement, Element{
 			name:      item.Name(),
 			directory: item.IsDir(),
 			location:  filepath.Join(location, item.Name()),
@@ -325,7 +325,7 @@ func renameIfDuplicate(destination string) (string, error) { //nolint: gocognit 
 
 // TODO : Replace all usage of "m.fileModel.filePanels[m.filePanelFocusIndex]" with this
 // There are many usage
-func (m *model) getFocusedFilePanel() *filePanel {
+func (m *model) getFocusedFilePanel() *FilePanel {
 	return &m.fileModel.filePanels[m.filePanelFocusIndex]
 }
 

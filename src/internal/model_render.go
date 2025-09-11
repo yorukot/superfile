@@ -20,7 +20,7 @@ import (
 
 func (m *model) sidebarRender() string {
 	return m.sidebarModel.Render(m.mainPanelHeight, m.focusPanel == sidebarFocus,
-		m.fileModel.filePanels[m.filePanelFocusIndex].location)
+		m.fileModel.filePanels[m.filePanelFocusIndex].Location)
 }
 
 // This also modifies the m.fileModel.filePanels, which it should not
@@ -32,9 +32,9 @@ func (m *model) filePanelRender() string {
 		// check if cursor or render out of range
 		// TODO - instead of this, have a filepanel.validateAndFix(), and log Error
 		// This should not ever happen
-		if filePanel.cursor > len(filePanel.element)-1 {
-			filePanel.cursor = 0
-			filePanel.render = 0
+		if filePanel.Cursor > len(filePanel.Element)-1 {
+			filePanel.Cursor = 0
+			filePanel.RenderIndex = 0
 		}
 		m.fileModel.filePanels[i] = filePanel
 
@@ -303,17 +303,17 @@ func (m *model) getHelpMenuContent(r *rendering.Renderer, renderHotkeyLength int
 func (m *model) sortOptionsRender() string {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	sortOptionsContent := common.ModalTitleStyle.Render(" Sort Options") + "\n\n"
-	for i, option := range panel.sortOptions.data.options {
+	for i, option := range panel.SortOptions.data.options {
 		cursor := " "
-		if i == panel.sortOptions.cursor {
+		if i == panel.SortOptions.cursor {
 			cursor = common.FilePanelCursorStyle.Render(icon.Cursor)
 		}
 		sortOptionsContent += cursor + common.ModalStyle.Render(" "+option) + "\n"
 	}
-	bottomBorder := common.GenerateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(panel.sortOptions.cursor+1),
-		strconv.Itoa(len(panel.sortOptions.data.options))), panel.sortOptions.width-2)
+	bottomBorder := common.GenerateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(panel.SortOptions.cursor+1),
+		strconv.Itoa(len(panel.SortOptions.data.options))), panel.SortOptions.width-2)
 
-	return common.SortOptionsModalBorderStyle(panel.sortOptions.height, panel.sortOptions.width,
+	return common.SortOptionsModalBorderStyle(panel.SortOptions.height, panel.SortOptions.width,
 		bottomBorder).Render(sortOptionsContent)
 }
 

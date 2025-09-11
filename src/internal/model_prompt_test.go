@@ -135,7 +135,7 @@ func testPanelOperations(t *testing.T, dir1, dir2, curTestDir string) {
 			TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(prompt.SplitCommand))
 			TeaUpdateWithErrCheck(m, tea.KeyMsg{Type: tea.KeyEnter})
 			require.Len(t, m.fileModel.filePanels, prevCnt+1)
-			assert.Equal(t, dir1, m.fileModel.filePanels[prevCnt].location)
+			assert.Equal(t, dir1, m.fileModel.filePanels[prevCnt].Location)
 			assert.True(t, m.promptModal.LastActionSucceeded())
 		}
 
@@ -154,32 +154,32 @@ func testPanelOperations(t *testing.T, dir1, dir2, curTestDir string) {
 		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(prompt.CdCommand+" "+dir2))
 		TeaUpdateWithErrCheck(m, tea.KeyMsg{Type: tea.KeyEnter})
 		assert.True(t, m.promptModal.LastActionSucceeded(), "cd using absolute path should work")
-		assert.Equal(t, dir2, m.getFocusedFilePanel().location)
+		assert.Equal(t, dir2, m.getFocusedFilePanel().Location)
 
 		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(prompt.CdCommand+" .."))
 		TeaUpdateWithErrCheck(m, tea.KeyMsg{Type: tea.KeyEnter})
 		assert.True(t, m.promptModal.LastActionSucceeded(), "cd using relative path should work")
-		assert.Equal(t, curTestDir, m.getFocusedFilePanel().location)
+		assert.Equal(t, curTestDir, m.getFocusedFilePanel().Location)
 
 		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(prompt.CdCommand+" "+filepath.Base(dir2)))
 		TeaUpdateWithErrCheck(m, tea.KeyMsg{Type: tea.KeyEnter})
 		assert.True(t, m.promptModal.LastActionSucceeded(), "cd using relative path should work")
-		assert.Equal(t, dir2, m.getFocusedFilePanel().location)
+		assert.Equal(t, dir2, m.getFocusedFilePanel().Location)
 
 		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(prompt.CdCommand+" "+filepath.Join(dir2, "non_existing_dir")))
 		TeaUpdateWithErrCheck(m, tea.KeyMsg{Type: tea.KeyEnter})
 		assert.False(t, m.promptModal.LastActionSucceeded(), "cd invalid abs path should not work")
-		assert.Equal(t, dir2, m.getFocusedFilePanel().location)
+		assert.Equal(t, dir2, m.getFocusedFilePanel().Location)
 
 		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(prompt.CdCommand+" non_existing_dir"))
 		TeaUpdateWithErrCheck(m, tea.KeyMsg{Type: tea.KeyEnter})
 		assert.False(t, m.promptModal.LastActionSucceeded(), "cd invalid relative path should not work")
-		assert.Equal(t, dir2, m.getFocusedFilePanel().location)
+		assert.Equal(t, dir2, m.getFocusedFilePanel().Location)
 
 		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(prompt.CdCommand+" ~"))
 		TeaUpdateWithErrCheck(m, tea.KeyMsg{Type: tea.KeyEnter})
 		assert.True(t, m.promptModal.LastActionSucceeded(), "cd using tilde should work")
-		assert.Equal(t, xdg.Home, m.getFocusedFilePanel().location)
+		assert.Equal(t, xdg.Home, m.getFocusedFilePanel().Location)
 	})
 
 	t.Run("open Panel", func(t *testing.T) {
@@ -189,23 +189,23 @@ func testPanelOperations(t *testing.T, dir1, dir2, curTestDir string) {
 		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(prompt.OpenCommand+" "+dir2))
 		TeaUpdateWithErrCheck(m, tea.KeyMsg{Type: tea.KeyEnter})
 		assert.True(t, m.promptModal.LastActionSucceeded(), "open using absolute path should work")
-		assert.Equal(t, dir2, m.getFocusedFilePanel().location)
+		assert.Equal(t, dir2, m.getFocusedFilePanel().Location)
 
 		m.closeFilePanel()
 		assert.Len(t, m.fileModel.filePanels, orgCnt)
-		assert.Equal(t, dir1, m.getFocusedFilePanel().location)
+		assert.Equal(t, dir1, m.getFocusedFilePanel().Location)
 
 		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(prompt.OpenCommand+" ../dir2"))
 		TeaUpdateWithErrCheck(m, tea.KeyMsg{Type: tea.KeyEnter})
 		assert.True(t, m.promptModal.LastActionSucceeded(), "open using relative path should work")
-		assert.Equal(t, dir2, m.getFocusedFilePanel().location)
+		assert.Equal(t, dir2, m.getFocusedFilePanel().Location)
 
 		m.closeFilePanel()
 
 		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(prompt.OpenCommand+" ~"))
 		TeaUpdateWithErrCheck(m, tea.KeyMsg{Type: tea.KeyEnter})
 		assert.True(t, m.promptModal.LastActionSucceeded(), "open using tilde should work")
-		assert.Equal(t, xdg.Home, m.getFocusedFilePanel().location)
+		assert.Equal(t, xdg.Home, m.getFocusedFilePanel().Location)
 
 		m.closeFilePanel()
 
@@ -216,7 +216,7 @@ func testPanelOperations(t *testing.T, dir1, dir2, curTestDir string) {
 		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(prompt.OpenCommand+fmt.Sprintf(" ${%s}", userHomeEnv)))
 		TeaUpdateWithErrCheck(m, tea.KeyMsg{Type: tea.KeyEnter})
 		assert.True(t, m.promptModal.LastActionSucceeded(), "open using variable substitution should work")
-		assert.Equal(t, xdg.Home, m.getFocusedFilePanel().location)
+		assert.Equal(t, xdg.Home, m.getFocusedFilePanel().Location)
 
 		m.closeFilePanel()
 
@@ -224,7 +224,7 @@ func testPanelOperations(t *testing.T, dir1, dir2, curTestDir string) {
 		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(prompt.OpenCommand+" $(echo \"~\")"))
 		TeaUpdateWithErrCheck(m, tea.KeyMsg{Type: tea.KeyEnter})
 		assert.True(t, m.promptModal.LastActionSucceeded(), "open using command substitution should work")
-		assert.Equal(t, xdg.Home, m.getFocusedFilePanel().location)
+		assert.Equal(t, xdg.Home, m.getFocusedFilePanel().Location)
 
 		m.closeFilePanel()
 
@@ -281,7 +281,7 @@ func testDirectoryHandlingWithQuotes(t *testing.T, curTestDir, dir1 string) {
 			TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(prompt.CdCommand+` "`+dirWithSpaces+`"`))
 			TeaUpdateWithErrCheck(m, tea.KeyMsg{Type: tea.KeyEnter})
 			assert.True(t, m.promptModal.LastActionSucceeded(), "cd with double quotes should work")
-			assert.Equal(t, dirWithSpaces, m.getFocusedFilePanel().location)
+			assert.Equal(t, dirWithSpaces, m.getFocusedFilePanel().Location)
 		})
 
 		t.Run("cd with single quotes", func(t *testing.T) {
@@ -291,7 +291,7 @@ func testDirectoryHandlingWithQuotes(t *testing.T, curTestDir, dir1 string) {
 			TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(prompt.CdCommand+` '`+dirWithSpaces+`'`))
 			TeaUpdateWithErrCheck(m, tea.KeyMsg{Type: tea.KeyEnter})
 			assert.True(t, m.promptModal.LastActionSucceeded(), "cd with single quotes should work")
-			assert.Equal(t, dirWithSpaces, m.getFocusedFilePanel().location)
+			assert.Equal(t, dirWithSpaces, m.getFocusedFilePanel().Location)
 		})
 
 		t.Run("cd with single quotes in path using double quotes", func(t *testing.T) {
@@ -301,7 +301,7 @@ func testDirectoryHandlingWithQuotes(t *testing.T, curTestDir, dir1 string) {
 			TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(prompt.CdCommand+` "`+dirWithQuotes+`"`))
 			TeaUpdateWithErrCheck(m, tea.KeyMsg{Type: tea.KeyEnter})
 			assert.True(t, m.promptModal.LastActionSucceeded(), "cd with single quotes in path should work")
-			assert.Equal(t, dirWithQuotes, m.getFocusedFilePanel().location)
+			assert.Equal(t, dirWithQuotes, m.getFocusedFilePanel().Location)
 		})
 
 		t.Run("cd with double quotes in path using single quotes", func(t *testing.T) {
@@ -311,7 +311,7 @@ func testDirectoryHandlingWithQuotes(t *testing.T, curTestDir, dir1 string) {
 			TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(prompt.CdCommand+` '`+dirWithSpecialChars+`'`))
 			TeaUpdateWithErrCheck(m, tea.KeyMsg{Type: tea.KeyEnter})
 			assert.True(t, m.promptModal.LastActionSucceeded(), "cd with double quotes in path should work")
-			assert.Equal(t, dirWithSpecialChars, m.getFocusedFilePanel().location)
+			assert.Equal(t, dirWithSpecialChars, m.getFocusedFilePanel().Location)
 		})
 
 		t.Run("cd with escaped spaces", func(t *testing.T) {
@@ -324,7 +324,7 @@ func testDirectoryHandlingWithQuotes(t *testing.T, curTestDir, dir1 string) {
 			)
 			TeaUpdateWithErrCheck(m, tea.KeyMsg{Type: tea.KeyEnter})
 			assert.True(t, m.promptModal.LastActionSucceeded(), "cd with escaped spaces should work")
-			assert.Equal(t, dirWithSpaces, m.getFocusedFilePanel().location)
+			assert.Equal(t, dirWithSpaces, m.getFocusedFilePanel().Location)
 		})
 
 		t.Run("open with double quotes", func(t *testing.T) {
@@ -334,7 +334,7 @@ func testDirectoryHandlingWithQuotes(t *testing.T, curTestDir, dir1 string) {
 			TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(prompt.OpenCommand+` "`+dirWithSpaces+`"`))
 			TeaUpdateWithErrCheck(m, tea.KeyMsg{Type: tea.KeyEnter})
 			assert.True(t, m.promptModal.LastActionSucceeded(), "open with double quotes should work")
-			assert.Equal(t, dirWithSpaces, m.getFocusedFilePanel().location)
+			assert.Equal(t, dirWithSpaces, m.getFocusedFilePanel().Location)
 
 			m.closeFilePanel()
 		})
@@ -351,7 +351,7 @@ func testDirectoryHandlingWithQuotes(t *testing.T, curTestDir, dir1 string) {
 			TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(prompt.CdCommand+` "${`+userHomeEnv+`}"`))
 			TeaUpdateWithErrCheck(m, tea.KeyMsg{Type: tea.KeyEnter})
 			assert.True(t, m.promptModal.LastActionSucceeded(), "cd with quoted env var should work")
-			assert.Equal(t, xdg.Home, m.getFocusedFilePanel().location)
+			assert.Equal(t, xdg.Home, m.getFocusedFilePanel().Location)
 		})
 
 		t.Run("cd with single quoted environment variable", func(t *testing.T) {
@@ -370,7 +370,7 @@ func testDirectoryHandlingWithQuotes(t *testing.T, curTestDir, dir1 string) {
 				m.promptModal.LastActionSucceeded(),
 				"cd with single quoted env var works in superfile (unlike bash)",
 			)
-			assert.Equal(t, xdg.Home, m.getFocusedFilePanel().location)
+			assert.Equal(t, xdg.Home, m.getFocusedFilePanel().Location)
 		})
 	})
 }

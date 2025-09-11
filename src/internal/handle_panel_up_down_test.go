@@ -9,7 +9,7 @@ import (
 func Test_filePanelUpDown(t *testing.T) {
 	testdata := []struct {
 		name            string
-		panel           filePanel
+		panel           FilePanel
 		listDown        bool
 		mainPanelHeight int
 		expectedCursor  int
@@ -17,10 +17,10 @@ func Test_filePanelUpDown(t *testing.T) {
 	}{
 		{
 			name: "Down movement within renderable range",
-			panel: filePanel{
-				element: make([]element, 10),
-				cursor:  0,
-				render:  0,
+			panel: FilePanel{
+				Element:     make([]Element, 10),
+				Cursor:      0,
+				RenderIndex: 0,
 			},
 			listDown:        true,
 			mainPanelHeight: 10,
@@ -29,10 +29,10 @@ func Test_filePanelUpDown(t *testing.T) {
 		},
 		{
 			name: "Down movement when cursor is at bottom",
-			panel: filePanel{
-				element: make([]element, 10),
-				cursor:  6, // 3 - Header lines + 7(0-6 files)
-				render:  0,
+			panel: FilePanel{
+				Element:     make([]Element, 10),
+				Cursor:      6, // 3 - Header lines + 7(0-6 files)
+				RenderIndex: 0,
 			},
 			listDown:        true,
 			mainPanelHeight: 10,
@@ -41,10 +41,10 @@ func Test_filePanelUpDown(t *testing.T) {
 		},
 		{
 			name: "Down movement causing wrap to top",
-			panel: filePanel{
-				element: make([]element, 10),
-				cursor:  9, // 3 - Header lines + 7(3-9 files)
-				render:  3,
+			panel: FilePanel{
+				Element:     make([]Element, 10),
+				Cursor:      9, // 3 - Header lines + 7(3-9 files)
+				RenderIndex: 3,
 			},
 			listDown:        true,
 			mainPanelHeight: 10,
@@ -53,10 +53,10 @@ func Test_filePanelUpDown(t *testing.T) {
 		},
 		{
 			name: "Up movement within renderable range",
-			panel: filePanel{
-				element: make([]element, 10),
-				cursor:  2,
-				render:  0,
+			panel: FilePanel{
+				Element:     make([]Element, 10),
+				Cursor:      2,
+				RenderIndex: 0,
 			},
 			listDown:        false,
 			mainPanelHeight: 10,
@@ -65,10 +65,10 @@ func Test_filePanelUpDown(t *testing.T) {
 		},
 		{
 			name: "Up movement when cursor is at top",
-			panel: filePanel{
-				element: make([]element, 10),
-				cursor:  3,
-				render:  3,
+			panel: FilePanel{
+				Element:     make([]Element, 10),
+				Cursor:      3,
+				RenderIndex: 3,
 			},
 			listDown:        false,
 			mainPanelHeight: 10,
@@ -77,10 +77,10 @@ func Test_filePanelUpDown(t *testing.T) {
 		},
 		{
 			name: "Up movement causing wrap to bottom",
-			panel: filePanel{
-				element: make([]element, 10),
-				cursor:  0,
-				render:  0,
+			panel: FilePanel{
+				Element:     make([]Element, 10),
+				Cursor:      0,
+				RenderIndex: 0,
 			},
 			listDown:        false,
 			mainPanelHeight: 10,
@@ -89,10 +89,10 @@ func Test_filePanelUpDown(t *testing.T) {
 		},
 		{
 			name: "Down movement on empty panel",
-			panel: filePanel{
-				element: make([]element, 0),
-				cursor:  0,
-				render:  0,
+			panel: FilePanel{
+				Element:     make([]Element, 0),
+				Cursor:      0,
+				RenderIndex: 0,
 			},
 			listDown:        true,
 			mainPanelHeight: 10,
@@ -101,10 +101,10 @@ func Test_filePanelUpDown(t *testing.T) {
 		},
 		{
 			name: "Up movement on empty panel",
-			panel: filePanel{
-				element: make([]element, 0),
-				cursor:  0,
-				render:  0,
+			panel: FilePanel{
+				Element:     make([]Element, 0),
+				Cursor:      0,
+				RenderIndex: 0,
 			},
 			listDown:        false,
 			mainPanelHeight: 10,
@@ -120,8 +120,8 @@ func Test_filePanelUpDown(t *testing.T) {
 			} else {
 				tt.panel.ListUp(tt.mainPanelHeight)
 			}
-			assert.Equal(t, tt.expectedCursor, tt.panel.cursor)
-			assert.Equal(t, tt.expectedRender, tt.panel.render)
+			assert.Equal(t, tt.expectedCursor, tt.panel.Cursor)
+			assert.Equal(t, tt.expectedRender, tt.panel.RenderIndex)
 		})
 	}
 }

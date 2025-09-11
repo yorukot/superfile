@@ -14,49 +14,49 @@ import (
 
 // ================ File Panel Core Methods ================
 
-func (panel *filePanel) GetSelectedItem() element {
-	if panel.cursor < 0 || len(panel.element) <= panel.cursor {
-		return element{}
+func (panel *FilePanel) GetSelectedItem() Element {
+	if panel.Cursor < 0 || len(panel.Element) <= panel.Cursor {
+		return Element{}
 	}
-	return panel.element[panel.cursor]
+	return panel.Element[panel.Cursor]
 }
 
-func (panel *filePanel) ResetSelected() {
-	panel.selected = panel.selected[:0]
+func (panel *FilePanel) ResetSelected() {
+	panel.Selected = panel.Selected[:0]
 }
 
-func (panel *filePanel) GetSelectedItemPtr() *element {
-	if panel.cursor < 0 || len(panel.element) <= panel.cursor {
+func (panel *FilePanel) GetSelectedItemPtr() *Element {
+	if panel.Cursor < 0 || len(panel.Element) <= panel.Cursor {
 		return nil
 	}
-	return &panel.element[panel.cursor]
+	return &panel.Element[panel.Cursor]
 }
 
-func (panel *filePanel) ChangeFilePanelMode() {
-	switch panel.panelMode {
+func (panel *FilePanel) ChangeFilePanelMode() {
+	switch panel.PanelMode {
 	case selectMode:
-		panel.selected = panel.selected[:0]
-		panel.panelMode = browserMode
+		panel.Selected = panel.Selected[:0]
+		panel.PanelMode = browserMode
 	case browserMode:
-		panel.panelMode = selectMode
+		panel.PanelMode = selectMode
 	default:
-		slog.Error("Unexpected panelMode", "panelMode", panel.panelMode)
+		slog.Error("Unexpected panelMode", "panelMode", panel.PanelMode)
 	}
 }
 
-func (panel *filePanel) UpdateCurrentFilePanelDir(path string) error {
-	slog.Debug("updateCurrentFilePanelDir", "panel.location", panel.location, "path", path)
-	path = utils.ResolveAbsPath(panel.location, path)
+func (panel *FilePanel) UpdateCurrentFilePanelDir(path string) error {
+	slog.Debug("updateCurrentFilePanelDir", "panel.location", panel.Location, "path", path)
+	path = utils.ResolveAbsPath(panel.Location, path)
 
-	if path == panel.location {
+	if path == panel.Location {
 		return nil
 	}
 
 	// NOTE: This could be a configurable feature
 	// Update the cursor and render status in case we switch back to this.
-	panel.directoryRecords[panel.location] = directoryRecord{
-		directoryCursor: panel.cursor,
-		directoryRender: panel.render,
+	panel.DirectoryRecords[panel.Location] = DirectoryRecord{
+		directoryCursor: panel.Cursor,
+		directoryRender: panel.RenderIndex,
 	}
 
 	if info, err := os.Stat(path); err != nil {
@@ -65,71 +65,71 @@ func (panel *filePanel) UpdateCurrentFilePanelDir(path string) error {
 		return fmt.Errorf("%s is not a directory", path)
 	}
 
-	panel.location = path
+	panel.Location = path
 
 	// TODO(BUG) : We are fetching the cursor and render from cache, but this could become invalid
 	// in case user deletes some items in the directory via another file manager and then switch back
 	// Basically this directoryRecords cache can be invalid. On each Update(), we must validate
 	// the cursor and render values.
-	curDirectoryRecord, hasRecord := panel.directoryRecords[panel.location]
+	curDirectoryRecord, hasRecord := panel.DirectoryRecords[panel.Location]
 	if hasRecord {
-		panel.cursor = curDirectoryRecord.directoryCursor
-		panel.render = curDirectoryRecord.directoryRender
+		panel.Cursor = curDirectoryRecord.directoryCursor
+		panel.RenderIndex = curDirectoryRecord.directoryRender
 	} else {
-		panel.cursor = 0
-		panel.render = 0
+		panel.Cursor = 0
+		panel.RenderIndex = 0
 	}
 
-	slog.Debug("updateCurrentFilePanelDir : After update", "cursor", panel.cursor, "render", panel.render)
+	slog.Debug("updateCurrentFilePanelDir : After update", "cursor", panel.Cursor, "render", panel.RenderIndex)
 
 	// TODO(Refactoring) : Have a common searchBar type for sidebar and this search bar.
-	panel.searchBar.SetValue("")
+	panel.SearchBar.SetValue("")
 
 	return nil
 }
 
-func (panel *filePanel) ParentDirectory() error {
+func (panel *FilePanel) ParentDirectory() error {
 	return panel.UpdateCurrentFilePanelDir("..")
 }
 
 // ================ Navigation Methods ================
 
-func (panel *filePanel) ListUp(mainPanelHeight int) {
-	if len(panel.element) == 0 {
+func (panel *FilePanel) ListUp(mainPanelHeight int) {
+	if len(panel.Element) == 0 {
 		return
 	}
-	if panel.cursor > 0 {
-		panel.cursor--
-		if panel.cursor < panel.render {
-			panel.render--
+	if panel.Cursor > 0 {
+		panel.Cursor--
+		if panel.Cursor < panel.RenderIndex {
+			panel.RenderIndex--
 		}
 	} else {
-		if len(panel.element) > panelElementHeight(mainPanelHeight) {
-			panel.render = len(panel.element) - panelElementHeight(mainPanelHeight)
-			panel.cursor = len(panel.element) - 1
+		if len(panel.Element) > panelElementHeight(mainPanelHeight) {
+			panel.RenderIndex = len(panel.Element) - panelElementHeight(mainPanelHeight)
+			panel.Cursor = len(panel.Element) - 1
 		} else {
-			panel.cursor = len(panel.element) - 1
+			panel.Cursor = len(panel.Element) - 1
 		}
 	}
 }
 
-func (panel *filePanel) ListDown(mainPanelHeight int) {
-	if len(panel.element) == 0 {
+func (panel *FilePanel) ListDown(mainPanelHeight int) {
+	if len(panel.Element) == 0 {
 		return
 	}
-	if panel.cursor < len(panel.element)-1 {
-		panel.cursor++
-		if panel.cursor > panel.render+panelElementHeight(mainPanelHeight)-1 {
-			panel.render++
+	if panel.Cursor < len(panel.Element)-1 {
+		panel.Cursor++
+		if panel.Cursor > panel.RenderIndex+panelElementHeight(mainPanelHeight)-1 {
+			panel.RenderIndex++
 		}
 	} else {
-		panel.render = 0
-		panel.cursor = 0
+		panel.RenderIndex = 0
+		panel.Cursor = 0
 	}
 }
 
-func (panel *filePanel) PgUp(mainPanelHeight int) {
-	panlen := len(panel.element)
+func (panel *FilePanel) PgUp(mainPanelHeight int) {
+	panlen := len(panel.Element)
 	if panlen == 0 {
 		return
 	}
@@ -138,24 +138,24 @@ func (panel *filePanel) PgUp(mainPanelHeight int) {
 	panCenter := panHeight / 2
 
 	if panHeight >= panlen {
-		panel.cursor = 0
+		panel.Cursor = 0
 	} else {
-		if panel.cursor-panHeight <= 0 {
-			panel.cursor = 0
-			panel.render = 0
+		if panel.Cursor-panHeight <= 0 {
+			panel.Cursor = 0
+			panel.RenderIndex = 0
 		} else {
-			panel.cursor -= panHeight
-			panel.render = panel.cursor - panCenter
+			panel.Cursor -= panHeight
+			panel.RenderIndex = panel.Cursor - panCenter
 
-			if panel.render < 0 {
-				panel.render = 0
+			if panel.RenderIndex < 0 {
+				panel.RenderIndex = 0
 			}
 		}
 	}
 }
 
-func (panel *filePanel) PgDown(mainPanelHeight int) {
-	panlen := len(panel.element)
+func (panel *FilePanel) PgDown(mainPanelHeight int) {
+	panlen := len(panel.Element)
 	if panlen == 0 {
 		return
 	}
@@ -164,49 +164,49 @@ func (panel *filePanel) PgDown(mainPanelHeight int) {
 	panCenter := panHeight / 2
 
 	if panHeight >= panlen {
-		panel.cursor = panlen - 1
+		panel.Cursor = panlen - 1
 	} else {
-		if panel.cursor+panHeight >= panlen {
-			panel.cursor = panlen - 1
-			panel.render = panel.cursor - panCenter
+		if panel.Cursor+panHeight >= panlen {
+			panel.Cursor = panlen - 1
+			panel.RenderIndex = panel.Cursor - panCenter
 		} else {
-			panel.cursor += panHeight
-			panel.render = panel.cursor - panCenter
+			panel.Cursor += panHeight
+			panel.RenderIndex = panel.Cursor - panCenter
 		}
 	}
 }
 
-func (panel *filePanel) ItemSelectUp(mainPanelHeight int) {
+func (panel *FilePanel) ItemSelectUp(mainPanelHeight int) {
 	panel.SingleItemSelect()
 	panel.ListUp(mainPanelHeight)
 }
 
-func (panel *filePanel) ItemSelectDown(mainPanelHeight int) {
+func (panel *FilePanel) ItemSelectDown(mainPanelHeight int) {
 	panel.SingleItemSelect()
 	panel.ListDown(mainPanelHeight)
 }
 
 // ================ Selection Methods ================
 
-func (panel *filePanel) SingleItemSelect() {
-	if len(panel.element) > 0 && panel.cursor >= 0 && panel.cursor < len(panel.element) {
-		elementLocation := panel.element[panel.cursor].location
+func (panel *FilePanel) SingleItemSelect() {
+	if len(panel.Element) > 0 && panel.Cursor >= 0 && panel.Cursor < len(panel.Element) {
+		elementLocation := panel.Element[panel.Cursor].location
 
-		if arrayContains(panel.selected, elementLocation) {
+		if arrayContains(panel.Selected, elementLocation) {
 			// This is inefficient. Once you select 1000 items,
 			// each select / deselect operation can take 1000 operations
 			// It can be easily made constant time.
 			// TODO : (performance)convert panel.selected to a set (map[string]struct{})
-			panel.selected = removeElementByValue(panel.selected, elementLocation)
+			panel.Selected = removeElementByValue(panel.Selected, elementLocation)
 		} else {
-			panel.selected = append(panel.selected, elementLocation)
+			panel.Selected = append(panel.Selected, elementLocation)
 		}
 	}
 }
 
 // ================ Rendering Methods ================
 
-func (panel *filePanel) Render(mainPanelHeight int, filePanelWidth int, focussed bool) string {
+func (panel *FilePanel) Render(mainPanelHeight int, filePanelWidth int, focussed bool) string {
 	r := ui.FilePanelRenderer(mainPanelHeight+2, filePanelWidth+2, focussed)
 
 	panel.renderTopBar(r, filePanelWidth)
@@ -217,18 +217,18 @@ func (panel *filePanel) Render(mainPanelHeight int, filePanelWidth int, focussed
 	return r.Render()
 }
 
-func (panel *filePanel) renderTopBar(r *rendering.Renderer, filePanelWidth int) {
+func (panel *FilePanel) renderTopBar(r *rendering.Renderer, filePanelWidth int) {
 	// TODO - Add ansitruncate left in renderer and remove truncation here
-	truncatedPath := common.TruncateTextBeginning(panel.location, filePanelWidth-4, "...")
+	truncatedPath := common.TruncateTextBeginning(panel.Location, filePanelWidth-4, "...")
 	r.AddLines(common.FilePanelTopDirectoryIcon + common.FilePanelTopPathStyle.Render(truncatedPath))
 	r.AddSection()
 }
 
-func (panel *filePanel) renderSearchBar(r *rendering.Renderer) {
-	r.AddLines(" " + panel.searchBar.View())
+func (panel *FilePanel) renderSearchBar(r *rendering.Renderer) {
+	r.AddLines(" " + panel.SearchBar.View())
 }
 
-func (panel *filePanel) renderFooter(r *rendering.Renderer) {
+func (panel *FilePanel) renderFooter(r *rendering.Renderer) {
 	sortLabel, sortIcon := panel.getSortInfo()
 	modeLabel, modeIcon := panel.getPanelModeInfo()
 	cursorStr := panel.getCursorString()
@@ -252,36 +252,36 @@ func (panel *filePanel) renderFooter(r *rendering.Renderer) {
 	}
 }
 
-func (panel *filePanel) renderFileEntries(r *rendering.Renderer, mainPanelHeight, filePanelWidth int) {
-	if len(panel.element) == 0 {
+func (panel *FilePanel) renderFileEntries(r *rendering.Renderer, mainPanelHeight, filePanelWidth int) {
+	if len(panel.Element) == 0 {
 		r.AddLines(common.FilePanelNoneText)
 		return
 	}
 
-	end := min(panel.render+panelElementHeight(mainPanelHeight), len(panel.element))
+	end := min(panel.RenderIndex+panelElementHeight(mainPanelHeight), len(panel.Element))
 
-	for i := panel.render; i < end; i++ {
+	for i := panel.RenderIndex; i < end; i++ {
 		// TODO : Fix this, this is O(n^2) complexity. Considered a file panel with 200 files, and 100 selected
 		// We will be doing a search in 100 item slice for all 200 files.
-		isSelected := arrayContains(panel.selected, panel.element[i].location)
+		isSelected := arrayContains(panel.Selected, panel.Element[i].location)
 
-		if panel.renaming && i == panel.cursor {
-			r.AddLines(panel.rename.View())
+		if panel.Renaming && i == panel.Cursor {
+			r.AddLines(panel.Rename.View())
 			continue
 		}
 
 		cursor := " "
-		if i == panel.cursor && !panel.searchBar.Focused() {
+		if i == panel.Cursor && !panel.SearchBar.Focused() {
 			cursor = icon.Cursor
 		}
 
 		// Performance TODO: Remove or cache this if not needed at render time
 		// This will unnecessarily slow down rendering. There should be a way to avoid this at render
-		_, err := os.ReadDir(panel.element[i].location)
-		dirExists := err == nil || panel.element[i].directory
+		_, err := os.ReadDir(panel.Element[i].location)
+		dirExists := err == nil || panel.Element[i].directory
 
 		renderedName := common.PrettierName(
-			panel.element[i].name,
+			panel.Element[i].name,
 			filePanelWidth-5,
 			dirExists,
 			isSelected,
@@ -292,8 +292,8 @@ func (panel *filePanel) renderFileEntries(r *rendering.Renderer, mainPanelHeight
 	}
 }
 
-func (panel *filePanel) getSortInfo() (string, string) {
-	opts := panel.sortOptions.data
+func (panel *FilePanel) getSortInfo() (string, string) {
+	opts := panel.SortOptions.data
 	selected := opts.options[opts.selected]
 	label := selected
 	if selected == string(sortingDateModified) {
@@ -308,11 +308,11 @@ func (panel *filePanel) getSortInfo() (string, string) {
 	return label, iconStr
 }
 
-func (panel *filePanel) getPanelModeInfo() (string, string) {
+func (panel *FilePanel) getPanelModeInfo() (string, string) {
 	label := "Browser"
 	iconStr := icon.Browser
 
-	if panel.panelMode == selectMode {
+	if panel.PanelMode == selectMode {
 		label = "Select"
 		iconStr = icon.Select
 	}
@@ -320,71 +320,71 @@ func (panel *filePanel) getPanelModeInfo() (string, string) {
 	return label, iconStr
 }
 
-func (panel *filePanel) getCursorString() string {
-	if len(panel.element) == 0 {
+func (panel *FilePanel) getCursorString() string {
+	if len(panel.Element) == 0 {
 		return "0/0"
 	}
-	return fmt.Sprintf("%d/%d", panel.cursor+1, len(panel.element))
+	return fmt.Sprintf("%d/%d", panel.Cursor+1, len(panel.Element))
 }
 
 // ================ Accessor Methods ================
 
-func (panel *filePanel) GetLocation() string {
-	return panel.location
+func (panel *FilePanel) GetLocation() string {
+	return panel.Location
 }
 
-func (panel *filePanel) GetCursor() int {
-	return panel.cursor
+func (panel *FilePanel) GetCursor() int {
+	return panel.Cursor
 }
 
-func (panel *filePanel) SetCursor(cursor int) {
-	panel.cursor = cursor
+func (panel *FilePanel) SetCursor(cursor int) {
+	panel.Cursor = cursor
 }
 
-func (panel *filePanel) GetRender() int {
-	return panel.render
+func (panel *FilePanel) GetRender() int {
+	return panel.RenderIndex
 }
 
-func (panel *filePanel) SetRender(render int) {
-	panel.render = render
+func (panel *FilePanel) SetRender(render int) {
+	panel.RenderIndex = render
 }
 
-func (panel *filePanel) GetElement() []element {
-	return panel.element
+func (panel *FilePanel) GetElement() []Element {
+	return panel.Element
 }
 
-func (panel *filePanel) SetElement(elements []element) {
-	panel.element = elements
+func (panel *FilePanel) SetElement(elements []Element) {
+	panel.Element = elements
 }
 
-func (panel *filePanel) GetSelected() []string {
-	return panel.selected
+func (panel *FilePanel) GetSelected() []string {
+	return panel.Selected
 }
 
-func (panel *filePanel) SetSelected(selected []string) {
-	panel.selected = selected
+func (panel *FilePanel) SetSelected(selected []string) {
+	panel.Selected = selected
 }
 
-func (panel *filePanel) GetPanelMode() panelMode {
-	return panel.panelMode
+func (panel *FilePanel) GetPanelMode() PanelMode {
+	return panel.PanelMode
 }
 
-func (panel *filePanel) SetPanelMode(mode panelMode) {
-	panel.panelMode = mode
+func (panel *FilePanel) SetPanelMode(mode PanelMode) {
+	panel.PanelMode = mode
 }
 
-func (panel *filePanel) IsFocused() bool {
+func (panel *FilePanel) IsFocused() bool {
 	return panel.isFocused
 }
 
-func (panel *filePanel) SetFocused(focused bool) {
+func (panel *FilePanel) SetFocused(focused bool) {
 	panel.isFocused = focused
 }
 
-func (panel *filePanel) IsRenaming() bool {
-	return panel.renaming
+func (panel *FilePanel) IsRenaming() bool {
+	return panel.Renaming
 }
 
-func (panel *filePanel) SetRenaming(renaming bool) {
-	panel.renaming = renaming
+func (panel *FilePanel) SetRenaming(renaming bool) {
+	panel.Renaming = renaming
 }

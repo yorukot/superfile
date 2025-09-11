@@ -36,8 +36,8 @@ func (m *model) validateLayout() error {
 
 // ================ filepanel
 
-func filePanelSlice(dir []string) []filePanel {
-	res := make([]filePanel, len(dir))
+func filePanelSlice(dir []string) []FilePanel {
+	res := make([]FilePanel, len(dir))
 	for i := range dir {
 		// Making the first panel as the focussed
 		isFocus := i == 0
@@ -46,12 +46,12 @@ func filePanelSlice(dir []string) []filePanel {
 	return res
 }
 
-func defaultFilePanel(dir string, focused bool) filePanel {
-	return filePanel{
-		render:   0,
-		cursor:   0,
-		location: dir,
-		sortOptions: sortOptionsModel{
+func defaultFilePanel(dir string, focused bool) FilePanel {
+	return FilePanel{
+		RenderIndex: 0,
+		Cursor:      0,
+		Location:    dir,
+		SortOptions: SortOptionsModel{
 			width:  20,
 			height: 4,
 			open:   false,
@@ -65,10 +65,10 @@ func defaultFilePanel(dir string, focused bool) filePanel {
 				reversed: common.Config.SortOrderReversed,
 			},
 		},
-		panelMode:        browserMode,
+		PanelMode:        browserMode,
 		isFocused:        focused,
-		directoryRecords: make(map[string]directoryRecord),
-		searchBar:        common.GenerateSearchBar(),
+		DirectoryRecords: make(map[string]DirectoryRecord),
+		SearchBar:        common.GenerateSearchBar(),
 	}
 }
 
@@ -89,7 +89,7 @@ func (f focusPanelType) String() string {
 	}
 }
 
-func (p panelMode) String() string {
+func (p PanelMode) String() string {
 	switch p {
 	case selectMode:
 		return "selectMode"
