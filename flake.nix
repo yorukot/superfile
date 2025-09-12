@@ -30,8 +30,14 @@
             version = "1.3.3";
             src = ./.;
             modules = ./gomod2nix.toml;
-            nativeCheckInputs = [ pkgs.writableTmpDirAsHomeHook ];
+
+            nativeCheckInputs = with pkgs; [
+              zoxide
+              exiftool
+              writableTmpDirAsHomeHook
+            ];
           };
+
           default = superfile;
         };
 
