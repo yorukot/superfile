@@ -23,6 +23,7 @@ type ImageRenderer int
 const (
 	RendererANSI ImageRenderer = iota
 	RendererKitty
+	RendererInline
 )
 
 // ImagePreviewCache stores cached image previews
@@ -244,8 +245,33 @@ func (p *ImagePreviewer) ImagePreview(path string, maxWidth int, maxHeight int,
 			return preview, nil
 		}
 
-		// Fall through to ANSI if Kitty fails
-		slog.Error("Kitty renderer failed, falling back to ANSI", "error", err)
+		// Fall through to next renderer if Kitty fails
+		slog.Error("Kitty renderer failed, trying other renderers", "error", err)
+	}
+
+	// Try inline renderer (iTerm2, WezTerm, etc.)
+	if p.IsInlineCapable() {
+		// Check cache for Inline renderer
+		if preview, found := p.cache.Get(path, dimensions, RendererInline); found {
+			return preview, nil
+		}
+
+		preview, err := p.ImagePreviewWithRenderer(
+			path,
+			maxWidth,
+			maxHeight,
+			defaultBGColor,
+			RendererInline,
+			sideAreaWidth,
+		)
+		if err == nil {
+			// Cache the successful result
+			p.cache.Set(path, dimensions, preview, RendererInline)
+			return preview, nil
+		}
+
+		// Fall through to ANSI if Inline fails
+		slog.Error("Inline renderer failed, falling back to ANSI", "error", err)
 	}
 
 	// Check cache for ANSI renderer
@@ -292,6 +318,16 @@ func (p *ImagePreviewer) ImagePreviewWithRenderer(path string, maxWidth int, max
 		if err != nil {
 			// If kitty fails, fall back to ANSI renderer
 			slog.Error("Kitty renderer failed, falling back to ANSI", "error", err)
+			return p.ANSIRenderer(img, defaultBGColor, maxWidth, maxHeight)
+		}
+		return result, nil
+
+	case RendererInline:
+		result, err := p.renderWithInlineUsingTermCap(img, path, originalWidth,
+			originalHeight, maxWidth, maxHeight, sideAreaWidth)
+		if err != nil {
+			// If inline fails, fall back to ANSI renderer
+			slog.Error("Inline renderer failed, falling back to ANSI", "error", err)
 			return p.ANSIRenderer(img, defaultBGColor, maxWidth, maxHeight)
 		}
 		return result, nil
