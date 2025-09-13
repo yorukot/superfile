@@ -11,6 +11,7 @@ import (
 	"log/slog"
 	"os"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -215,10 +216,10 @@ func ConvertImageToANSI(img image.Image, defaultBGColor color.Color) string {
 
 // ImagePreview generates a preview of an image file
 func (p *ImagePreviewer) ImagePreview(path string, maxWidth int, maxHeight int,
-	defaultBGColor string, sideAreaWidth int) (string, error) {
+	defaultBGColor string, sideAreaWidth int) (string, error, ImageRenderer) {
 	// Validate dimensions
 	if maxWidth <= 0 || maxHeight <= 0 {
-		return "", fmt.Errorf("dimensions must be positive (maxWidth=%d, maxHeight=%d)", maxWidth, maxHeight)
+		return "", fmt.Errorf("dimensions must be positive (maxWidth=%d, maxHeight=%d)", maxWidth, maxHeight), RendererANSI
 	}
 
 	// Create dimensions string for cache key
@@ -228,7 +229,7 @@ func (p *ImagePreviewer) ImagePreview(path string, maxWidth int, maxHeight int,
 	if p.IsKittyCapable() {
 		// Check cache for Kitty renderer
 		if preview, found := p.cache.Get(path, dimensions, RendererKitty); found {
-			return preview, nil
+			return preview, nil, RendererKitty
 		}
 
 		preview, err := p.ImagePreviewWithRenderer(
@@ -242,7 +243,7 @@ func (p *ImagePreviewer) ImagePreview(path string, maxWidth int, maxHeight int,
 		if err == nil {
 			// Cache the successful result
 			p.cache.Set(path, dimensions, preview, RendererKitty)
-			return preview, nil
+			return preview, nil, RendererKitty
 		}
 
 		// Fall through to next renderer if Kitty fails
@@ -253,7 +254,7 @@ func (p *ImagePreviewer) ImagePreview(path string, maxWidth int, maxHeight int,
 	if p.IsInlineCapable() {
 		// Check cache for Inline renderer
 		if preview, found := p.cache.Get(path, dimensions, RendererInline); found {
-			return preview, nil
+			return preview, nil, RendererInline
 		}
 
 		preview, err := p.ImagePreviewWithRenderer(
@@ -267,7 +268,7 @@ func (p *ImagePreviewer) ImagePreview(path string, maxWidth int, maxHeight int,
 		if err == nil {
 			// Cache the successful result
 			p.cache.Set(path, dimensions, preview, RendererInline)
-			return preview, nil
+			return preview, nil, RendererInline
 		}
 
 		// Fall through to ANSI if Inline fails
@@ -276,7 +277,7 @@ func (p *ImagePreviewer) ImagePreview(path string, maxWidth int, maxHeight int,
 
 	// Check cache for ANSI renderer
 	if preview, found := p.cache.Get(path, dimensions, RendererANSI); found {
-		return preview, nil
+		return preview, nil, RendererANSI
 	}
 
 	// Fall back to ANSI
@@ -285,7 +286,7 @@ func (p *ImagePreviewer) ImagePreview(path string, maxWidth int, maxHeight int,
 		// Cache the successful result
 		p.cache.Set(path, dimensions, preview, RendererANSI)
 	}
-	return preview, err
+	return preview, err, RendererANSI
 }
 
 // ImagePreviewWithRenderer generates an image preview using the specified renderer
@@ -376,4 +377,26 @@ func colorToHex(color color.Color) string {
 		uint8(g>>rgbShift8), //nolint:gosec // RGBA() returns 16-bit values, shifting by 8 gives 8-bit
 		uint8(b>>rgbShift8), //nolint:gosec // RGBA() returns 16-bit values, shifting by 8 gives 8-bit
 	)
+}
+
+// ClearAllImages clears all images from the terminal using the appropriate protocol
+// This method intelligently detects terminal capabilities and clears images accordingly
+func (p *ImagePreviewer) ClearAllImages() string {
+	var result strings.Builder
+
+	// Clear Kitty protocol images if supported
+	if p.IsKittyCapable() {
+		if clearCmd := p.ClearKittyImages(); clearCmd != "" {
+			result.WriteString(clearCmd)
+		}
+	}
+
+	// Clear inline protocol images if supported
+	if p.IsInlineCapable() {
+		if clearCmd := p.ClearInlineImage(); clearCmd != "" {
+			result.WriteString(clearCmd)
+		}
+	}
+
+	return result.String()
 }

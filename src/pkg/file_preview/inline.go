@@ -48,12 +48,19 @@ func isInlineCapable() bool {
 }
 
 
+// ClearInlineImage clears all inline image protocol images from the terminal
+func (p *ImagePreviewer) ClearInlineImage() string {
+	if !p.IsInlineCapable() {
+		return "" // No need to clear if terminal doesn't support inline protocol
+	}
 
+	return strings.Repeat(" ", 9999)
+}
 
 // renderWithInlineUsingTermCap renders an image using inline image protocol
 func (p *ImagePreviewer) renderWithInlineUsingTermCap(img image.Image, path string,
 	originalWidth, originalHeight, maxWidth, maxHeight int, sideAreaWidth int) (string, error) {
-	
+
 	// Validate dimensions
 	if maxWidth <= 0 || maxHeight <= 0 {
 		return "", fmt.Errorf("dimensions must be positive (maxWidth=%d, maxHeight=%d)", maxWidth, maxHeight)
@@ -74,7 +81,7 @@ func (p *ImagePreviewer) renderWithInlineUsingTermCap(img image.Image, path stri
 		displayWidthCells = maxWidth
 		displayHeightCells = int(float64(maxWidth) / imgRatio)
 	} else {
-		// Image is taller, constrain by height  
+		// Image is taller, constrain by height
 		displayHeightCells = maxHeight
 		displayWidthCells = int(float64(maxHeight) * imgRatio)
 	}
@@ -94,11 +101,7 @@ func (p *ImagePreviewer) renderWithInlineUsingTermCap(img image.Image, path stri
 		return "", fmt.Errorf("failed to write image using rasterm: %w", err)
 	}
 
-	// Position cursor after the image output (following kitty.go pattern)
-	buf.WriteString("\x1b[2;" + strconv.Itoa(sideAreaWidth) + "H")
-
-	// Add a newline to ensure proper display
-	buf.WriteString("\n")
+	buf.WriteString("\x1b[1;" + strconv.Itoa(sideAreaWidth) + "H")
 
 	return buf.String(), nil
 }
