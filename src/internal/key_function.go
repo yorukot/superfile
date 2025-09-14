@@ -29,7 +29,7 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 		case metadataFocus:
 			m.fileMetaData.ListUp()
 		case nonePanelFocus:
-			m.fileModel.filePanels[m.filePanelFocusIndex].listUp(m.mainPanelHeight)
+			m.fileModel.filePanels[m.filePanelFocusIndex].ListUp(m.mainPanelHeight)
 		}
 
 		// If move down Key is pressed, check the current state and executes
@@ -42,17 +42,17 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 		case metadataFocus:
 			m.fileMetaData.ListDown()
 		case nonePanelFocus:
-			m.fileModel.filePanels[m.filePanelFocusIndex].listDown(m.mainPanelHeight)
+			m.fileModel.filePanels[m.filePanelFocusIndex].ListDown(m.mainPanelHeight)
 		}
 
 	case slices.Contains(common.Hotkeys.PageUp, msg):
-		m.fileModel.filePanels[m.filePanelFocusIndex].pgUp(m.mainPanelHeight)
+		m.fileModel.filePanels[m.filePanelFocusIndex].PgUp(m.mainPanelHeight)
 
 	case slices.Contains(common.Hotkeys.PageDown, msg):
-		m.fileModel.filePanels[m.filePanelFocusIndex].pgDown(m.mainPanelHeight)
+		m.fileModel.filePanels[m.filePanelFocusIndex].PgDown(m.mainPanelHeight)
 
 	case slices.Contains(common.Hotkeys.ChangePanelMode, msg):
-		m.getFocusedFilePanel().changeFilePanelMode()
+		m.getFocusedFilePanel().ChangeFilePanelMode()
 
 	case slices.Contains(common.Hotkeys.NextFilePanel, msg):
 		m.nextFilePanel()
@@ -111,7 +111,7 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 		m.openHelpMenu()
 
 	case slices.Contains(common.Hotkeys.OpenSortOptionsMenu, msg):
-		m.openSortOptionsMenu()
+		m.getFocusedFilePanel().OpenSortOptionsMenu()
 
 	case slices.Contains(common.Hotkeys.ToggleReverseSort, msg):
 		m.toggleReverseSort()
@@ -129,29 +129,33 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 	return nil
 }
 
+func (m *model) handleKeyOnNoFilePanelFocus(msg string) {
+	if m.focusPanel == sidebarFocus && slices.Contains(common.Hotkeys.Confirm, msg) {
+		m.sidebarSelectDirectory()
+	}
+	if m.focusPanel == sidebarFocus && slices.Contains(common.Hotkeys.FilePanelItemRename, msg) {
+		m.sidebarModel.PinnedItemRename()
+	}
+	if m.focusPanel == sidebarFocus && slices.Contains(common.Hotkeys.SearchBar, msg) {
+		m.sidebarSearchBarFocus()
+	}
+}
+
 func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
 	// if not focus on the filepanel return
 	if !m.getFocusedFilePanel().isFocused {
-		if m.focusPanel == sidebarFocus && slices.Contains(common.Hotkeys.Confirm, msg) {
-			m.sidebarSelectDirectory()
-		}
-		if m.focusPanel == sidebarFocus && slices.Contains(common.Hotkeys.FilePanelItemRename, msg) {
-			m.sidebarModel.PinnedItemRename()
-		}
-		if m.focusPanel == sidebarFocus && slices.Contains(common.Hotkeys.SearchBar, msg) {
-			m.sidebarSearchBarFocus()
-		}
+		m.handleKeyOnNoFilePanelFocus(msg)
 		return nil
 	}
 	// Check if in the select mode and focusOn filepanel
-	if m.getFocusedFilePanel().panelMode == selectMode {
+	if m.getFocusedFilePanel().PanelMode == SelectMode {
 		switch {
 		case slices.Contains(common.Hotkeys.Confirm, msg):
-			m.fileModel.filePanels[m.filePanelFocusIndex].singleItemSelect()
+			m.fileModel.filePanels[m.filePanelFocusIndex].SingleItemSelect()
 		case slices.Contains(common.Hotkeys.FilePanelSelectModeItemsSelectUp, msg):
-			m.fileModel.filePanels[m.filePanelFocusIndex].itemSelectUp(m.mainPanelHeight)
+			m.fileModel.filePanels[m.filePanelFocusIndex].ItemSelectUp(m.mainPanelHeight)
 		case slices.Contains(common.Hotkeys.FilePanelSelectModeItemsSelectDown, msg):
-			m.fileModel.filePanels[m.filePanelFocusIndex].itemSelectDown(m.mainPanelHeight)
+			m.fileModel.filePanels[m.filePanelFocusIndex].ItemSelectDown(m.mainPanelHeight)
 		case slices.Contains(common.Hotkeys.DeleteItems, msg):
 			return m.getDeleteTriggerCmd(false)
 		case slices.Contains(common.Hotkeys.PermanentlyDeleteItems, msg):
@@ -161,7 +165,7 @@ func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
 		case slices.Contains(common.Hotkeys.CutItems, msg):
 			m.copyMultipleItem(true)
 		case slices.Contains(common.Hotkeys.FilePanelSelectAllItem, msg):
-			m.selectAllItem()
+			m.getFocusedFilePanel().SelectAllItems()
 		}
 		return nil
 	}
@@ -184,9 +188,13 @@ func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
 	case slices.Contains(common.Hotkeys.SearchBar, msg):
 		m.searchBarFocus()
 	case slices.Contains(common.Hotkeys.CopyPath, msg):
-		m.copyPath()
+		if err := m.getFocusedFilePanel().CopyPath(); err != nil {
+			slog.Error("Error while copy path", "error", err)
+		}
 	case slices.Contains(common.Hotkeys.CopyPWD, msg):
-		m.copyPWD()
+		if err := m.getFocusedFilePanel().CopyPWD(); err != nil {
+			slog.Error("Error while copy present working directory", "error", err)
+		}
 	}
 	return nil
 }
@@ -239,7 +247,10 @@ func (m *model) handleNotifyModelConfirm(action notify.ConfirmActionType) tea.Cm
 	case notify.PermanentDeleteAction:
 		return m.getDeleteCmd(true)
 	case notify.RenameAction:
-		m.confirmRename()
+		if err := m.getFocusedFilePanel().ConfirmRename(); err != nil {
+			slog.Error("Error confirming rename", "error", err)
+		}
+		m.fileModel.renaming = false
 	case notify.QuitAction:
 		m.modelQuitState = quitConfirmationReceived
 	case notify.NoAction:
@@ -254,15 +265,15 @@ func (m *model) handleNotifyModelConfirm(action notify.ConfirmActionType) tea.Cm
 func (m *model) sortOptionsKey(msg string) {
 	switch {
 	case slices.Contains(common.Hotkeys.OpenSortOptionsMenu, msg):
-		m.cancelSortOptions()
+		m.getFocusedFilePanel().CancelSortOptions()
 	case slices.Contains(common.Hotkeys.Quit, msg):
-		m.cancelSortOptions()
+		m.getFocusedFilePanel().CancelSortOptions()
 	case slices.Contains(common.Hotkeys.Confirm, msg):
-		m.confirmSortOptions()
+		m.getFocusedFilePanel().ConfirmSortOptions()
 	case slices.Contains(common.Hotkeys.ListUp, msg):
-		m.sortOptionsListUp()
+		m.getFocusedFilePanel().SortOptionsListUp()
 	case slices.Contains(common.Hotkeys.ListDown, msg):
-		m.sortOptionsListDown()
+		m.getFocusedFilePanel().SortOptionsListDown()
 	}
 }
 
@@ -271,10 +282,13 @@ func (m *model) renamingKey(msg string) tea.Cmd {
 	case slices.Contains(common.Hotkeys.CancelTyping, msg):
 		m.cancelRename()
 	case slices.Contains(common.Hotkeys.ConfirmTyping, msg):
-		if m.IsRenamingConflicting() {
+		if m.getFocusedFilePanel().IsRenamingConflicting() {
 			return m.warnModalForRenaming()
 		}
-		m.confirmRename()
+		if err := m.getFocusedFilePanel().ConfirmRename(); err != nil {
+			slog.Error("Error confirming rename", "error", err)
+		}
+		m.fileModel.renaming = false
 	}
 
 	return nil

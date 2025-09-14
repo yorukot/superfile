@@ -20,7 +20,7 @@ import (
 
 func (m *model) sidebarRender() string {
 	return m.sidebarModel.Render(m.mainPanelHeight, m.focusPanel == sidebarFocus,
-		m.fileModel.filePanels[m.filePanelFocusIndex].location)
+		m.fileModel.filePanels[m.filePanelFocusIndex].Location)
 }
 
 // This also modifies the m.fileModel.filePanels, which it should not
@@ -32,11 +32,7 @@ func (m *model) filePanelRender() string {
 		// check if cursor or render out of range
 		// TODO - instead of this, have a filepanel.validateAndFix(), and log Error
 		// This should not ever happen
-		if filePanel.cursor > len(filePanel.element)-1 {
-			filePanel.cursor = 0
-			filePanel.render = 0
-		}
-		m.fileModel.filePanels[i] = filePanel
+		m.fileModel.filePanels[i].ResetIndexIfInvalid()
 
 		// TODO : Move this to a utility function and clarify the calculation via comments
 		// Maybe even write unit tests
@@ -58,128 +54,6 @@ func (m *model) filePanelRender() string {
 		f[i] = filePanel.Render(m.mainPanelHeight, filePanelWidth, filePanel.isFocused)
 	}
 	return lipgloss.JoinHorizontal(lipgloss.Top, f...)
-}
-
-func (panel *filePanel) Render(mainPanelHeight int, filePanelWidth int, focussed bool) string {
-	r := ui.FilePanelRenderer(mainPanelHeight+2, filePanelWidth+2, focussed)
-
-	panel.renderTopBar(r, filePanelWidth)
-	panel.renderSearchBar(r)
-	panel.renderFooter(r)
-	panel.renderFileEntries(r, mainPanelHeight, filePanelWidth)
-
-	return r.Render()
-}
-
-func (panel *filePanel) renderTopBar(r *rendering.Renderer, filePanelWidth int) {
-	// TODO - Add ansitruncate left in renderer and remove truncation here
-	truncatedPath := common.TruncateTextBeginning(panel.location, filePanelWidth-4, "...")
-	r.AddLines(common.FilePanelTopDirectoryIcon + common.FilePanelTopPathStyle.Render(truncatedPath))
-	r.AddSection()
-}
-
-func (panel *filePanel) renderSearchBar(r *rendering.Renderer) {
-	r.AddLines(" " + panel.searchBar.View())
-}
-
-// TODO : Unit test this
-func (panel *filePanel) renderFooter(r *rendering.Renderer) {
-	sortLabel, sortIcon := panel.getSortInfo()
-	modeLabel, modeIcon := panel.getPanelModeInfo()
-	cursorStr := panel.getCursorString()
-
-	if common.Config.Nerdfont {
-		sortLabel = sortIcon + icon.Space + sortLabel
-		modeLabel = modeIcon + icon.Space + modeLabel
-	} else {
-		// TODO : Figure out if we can set icon.Space to " " if nerdfont is false
-		// That would simplify code
-		sortLabel = sortIcon + " " + sortLabel
-	}
-
-	if common.Config.ShowPanelFooterInfo {
-		r.SetBorderInfoItems(sortLabel, modeLabel, cursorStr)
-		if r.AreInfoItemsTruncated() {
-			r.SetBorderInfoItems(sortIcon, modeIcon, cursorStr)
-		}
-	} else {
-		r.SetBorderInfoItems(cursorStr)
-	}
-}
-
-func (panel *filePanel) renderFileEntries(r *rendering.Renderer, mainPanelHeight, filePanelWidth int) {
-	if len(panel.element) == 0 {
-		r.AddLines(common.FilePanelNoneText)
-		return
-	}
-
-	end := min(panel.render+panelElementHeight(mainPanelHeight), len(panel.element))
-
-	for i := panel.render; i < end; i++ {
-		// TODO : Fix this, this is O(n^2) complexity. Considered a file panel with 200 files, and 100 selected
-		// We will be doing a search in 100 item slice for all 200 files.
-		isSelected := arrayContains(panel.selected, panel.element[i].location)
-
-		if panel.renaming && i == panel.cursor {
-			r.AddLines(panel.rename.View())
-			continue
-		}
-
-		cursor := " "
-		if i == panel.cursor && !panel.searchBar.Focused() {
-			cursor = icon.Cursor
-		}
-
-		// Performance TODO: Remove or cache this if not needed at render time
-		// This will unnecessarily slow down rendering. There should be a way to avoid this at render
-		_, err := os.ReadDir(panel.element[i].location)
-		dirExists := err == nil || panel.element[i].directory
-
-		renderedName := common.PrettierName(
-			panel.element[i].name,
-			filePanelWidth-5,
-			dirExists,
-			isSelected,
-			common.FilePanelBGColor,
-		)
-
-		r.AddLines(common.FilePanelCursorStyle.Render(cursor+" ") + renderedName)
-	}
-}
-
-func (panel *filePanel) getSortInfo() (string, string) {
-	opts := panel.sortOptions.data
-	selected := opts.options[opts.selected]
-	label := selected
-	if selected == string(sortingDateModified) {
-		label = "Date"
-	}
-
-	iconStr := icon.SortAsc
-
-	if opts.reversed {
-		iconStr = icon.SortDesc
-	}
-	return label, iconStr
-}
-
-func (panel *filePanel) getPanelModeInfo() (string, string) {
-	switch panel.panelMode {
-	case browserMode:
-		return "Browser", icon.Browser
-	case selectMode:
-		return "Select", icon.Select
-	default:
-		return "", ""
-	}
-}
-
-func (panel *filePanel) getCursorString() string {
-	cursor := panel.cursor
-	if len(panel.element) > 0 {
-		cursor++ // Convert to 1-based
-	}
-	return fmt.Sprintf("%d/%d", cursor, len(panel.element))
 }
 
 func (m *model) processBarRender() string {
@@ -425,17 +299,17 @@ func (m *model) getHelpMenuContent(r *rendering.Renderer, renderHotkeyLength int
 func (m *model) sortOptionsRender() string {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	sortOptionsContent := common.ModalTitleStyle.Render(" Sort Options") + "\n\n"
-	for i, option := range panel.sortOptions.data.options {
+	for i, option := range panel.SortOptions.data.options {
 		cursor := " "
-		if i == panel.sortOptions.cursor {
+		if i == panel.SortOptions.cursor {
 			cursor = common.FilePanelCursorStyle.Render(icon.Cursor)
 		}
 		sortOptionsContent += cursor + common.ModalStyle.Render(" "+option) + "\n"
 	}
-	bottomBorder := common.GenerateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(panel.sortOptions.cursor+1),
-		strconv.Itoa(len(panel.sortOptions.data.options))), panel.sortOptions.width-2)
+	bottomBorder := common.GenerateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(panel.SortOptions.cursor+1),
+		strconv.Itoa(len(panel.SortOptions.data.options))), panel.SortOptions.width-2)
 
-	return common.SortOptionsModalBorderStyle(panel.sortOptions.height, panel.sortOptions.width,
+	return common.SortOptionsModalBorderStyle(panel.SortOptions.height, panel.SortOptions.width,
 		bottomBorder).Render(sortOptionsContent)
 }
 

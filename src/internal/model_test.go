@@ -93,7 +93,7 @@ func TestBasic(t *testing.T) {
 		// 5 - clipboard is empty
 		// 6 - model's dimenstion
 
-		assert.Equal(t, dir1, m.getFocusedFilePanel().location)
+		assert.Equal(t, dir1, m.getFocusedFilePanel().Location)
 	})
 }
 
@@ -276,11 +276,11 @@ func TestZoxide(t *testing.T) {
 
 		err := m.updateCurrentFilePanelDir(dir2)
 		require.NoError(t, err, "Failed to navigate to dir2")
-		assert.Equal(t, dir2, m.getFocusedFilePanel().location, "Should be in dir2 after navigation")
+		assert.Equal(t, dir2, m.getFocusedFilePanel().Location, "Should be in dir2 after navigation")
 
 		err = m.updateCurrentFilePanelDir(dir3)
 		require.NoError(t, err, "Failed to navigate to dir3")
-		assert.Equal(t, dir3, m.getFocusedFilePanel().location, "Should be in dir3 after navigation")
+		assert.Equal(t, dir3, m.getFocusedFilePanel().Location, "Should be in dir3 after navigation")
 
 		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenZoxide[0]))
 		assert.True(t, m.zoxideModal.IsOpen(), "Zoxide modal should open when pressing 'z' key")
@@ -302,7 +302,7 @@ func TestZoxide(t *testing.T) {
 		// Press enter to navigate to dir2
 		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.ConfirmTyping[0]))
 		assert.False(t, m.zoxideModal.IsOpen(), "Zoxide modal should close after navigation")
-		assert.Equal(t, dir2, m.getFocusedFilePanel().location, "Should navigate back to dir2 after zoxide selection")
+		assert.Equal(t, dir2, m.getFocusedFilePanel().Location, "Should navigate back to dir2 after zoxide selection")
 	})
 
 	t.Run("Zoxide disabled shows no results", func(t *testing.T) {

@@ -16,7 +16,7 @@ import (
 
 // Back to parent directory
 func (m *model) parentDirectory() {
-	err := m.getFocusedFilePanel().parentDirectory()
+	err := m.getFocusedFilePanel().ParentDirectory()
 	if err != nil {
 		slog.Error("Error while changing to parent directory", "error", err)
 	}
@@ -27,10 +27,10 @@ func (m *model) parentDirectory() {
 func (m *model) enterPanel() {
 	panel := m.getFocusedFilePanel()
 
-	if len(panel.element) == 0 {
+	if panel.ElementCount() == 0 {
 		return
 	}
-	selectedItem := panel.getSelectedItem()
+	selectedItem := panel.GetSelectedItem()
 	if selectedItem.directory {
 		// TODO : Propagate error out from this this function. Return here, instead of logging
 		err := m.updateCurrentFilePanelDir(selectedItem.location)
@@ -67,7 +67,7 @@ func (m *model) enterPanel() {
 	}
 
 	if variable.ChooserFile != "" {
-		chooserErr := m.chooserFileWriteAndQuit(panel.element[panel.cursor].location)
+		chooserErr := m.chooserFileWriteAndQuit(panel.GetSelectedItemLocation())
 		if chooserErr == nil {
 			return
 		}
@@ -87,7 +87,7 @@ func (m *model) executeOpenCommand() {
 		dllpath := filepath.Join(os.Getenv("SYSTEMROOT"), "System32", "rundll32.exe")
 		dllfile := "url.dll,FileProtocolHandler"
 
-		cmd := exec.Command(dllpath, dllfile, panel.element[panel.cursor].location)
+		cmd := exec.Command(dllpath, dllfile, panel.GetSelectedItemLocation())
 		err := cmd.Start()
 		if err != nil {
 			slog.Error("Error while open file with", "error", err)
@@ -96,7 +96,7 @@ func (m *model) executeOpenCommand() {
 		return
 	}
 
-	cmd := exec.Command(openCommand, panel.element[panel.cursor].location)
+	cmd := exec.Command(openCommand, panel.GetSelectedItemLocation())
 	err := cmd.Start()
 	if err != nil {
 		slog.Error("Error while open file with", "error", err)
@@ -119,31 +119,6 @@ func (m *model) sidebarSelectDirectory() {
 		slog.Error("Error switching to sidebar directory", "error", err)
 	}
 	panel.isFocused = true
-}
-
-// Select all item in the file panel (only work on select mode)
-func (m *model) selectAllItem() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-	for _, item := range panel.element {
-		panel.selected = append(panel.selected, item.location)
-	}
-}
-
-// Select the item where cursor located (only work on select mode)
-func (panel *filePanel) singleItemSelect() {
-	if len(panel.element) > 0 && panel.cursor >= 0 && panel.cursor < len(panel.element) {
-		elementLocation := panel.element[panel.cursor].location
-
-		if arrayContains(panel.selected, elementLocation) {
-			// This is inefficient. Once you select 1000 items,
-			// each select / deselect operation can take 1000 operations
-			// It can be easily made constant time.
-			// TODO : (performance)convert panel.selected to a set (map[string]struct{})
-			panel.selected = removeElementByValue(panel.selected, elementLocation)
-		} else {
-			panel.selected = append(panel.selected, elementLocation)
-		}
-	}
 }
 
 // Toggle dotfile display or not
@@ -178,15 +153,15 @@ func (m *model) toggleFooterController() tea.Cmd {
 // Focus on search bar
 func (m *model) searchBarFocus() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-	if panel.searchBar.Focused() {
-		panel.searchBar.Blur()
+	if panel.SearchBar.Focused() {
+		panel.SearchBar.Blur()
 	} else {
-		panel.searchBar.Focus()
+		panel.SearchBar.Focus()
 		m.firstTextInput = true
 	}
 
 	// config search bar width
-	panel.searchBar.Width = m.fileModel.width - 4
+	panel.SetSearchBarWidth(m.fileModel.width)
 }
 
 func (m *model) sidebarSearchBarFocus() {
