@@ -83,6 +83,7 @@ type ConfigType struct {
 	IgnoreMissingFields bool `toml:"ignore_missing_fields" comment:"\nWhether to ignore warnings about missing fields in the config file."`
 
 	Nerdfont              bool   `toml:"nerdfont" comment:"\n================   Style =================\n\n If you don't have or don't want Nerdfont installed you can turn this off"`
+	ShowSelectIcons       bool   `toml:"show_select_icons" comment:"\nShow checkbox icons in select mode (requires nerdfont)"`
 	TransparentBackground bool   `toml:"transparent_background" comment:"\nSet transparent background or not (this only work when your terminal background is transparent)"`
 	FilePreviewWidth      int    `toml:"file_preview_width" comment:"\nFile preview width allow '0' (this mean same as file panel),'x' x must be less than 10 and greater than 1 (This means that the width of the file preview will be one xth of the total width.)"`
 	CodePreviewer         string `toml:"code_previewer" comment:"\nWhether to use the builtin syntax highlighting with chroma or use bat. Values: \"\" for builtin chroma, \"bat\" for bat"`

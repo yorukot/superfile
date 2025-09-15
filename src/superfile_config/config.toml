@@ -57,6 +57,9 @@ code_previewer = ''
 # If you don't have or don't want Nerdfont installed you can turn this off
 nerdfont = true
 #
+# Show checkbox icons in select mode (requires nerdfont = true)
+show_select_icons = true
+#
 # Set transparent background or not (this only work when your terminal background is transparent)
 transparent_background = false
 # 
