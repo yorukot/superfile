@@ -30,6 +30,7 @@ func isKittyCapable() bool {
 			"kitty",
 			"Konsole",
 			"WarpTerminal",
+			"alacritty",
 		}
 
 		for _, knownTerm := range knownTerminals {
@@ -73,7 +74,7 @@ func generateKittyClearCommands() string {
 	clearPlacementsCmd := "\x1b_Ga=d,p=1\x1b\\"
 	buf.WriteString(clearPlacementsCmd)
 
-	// Add a small delay command to ensure clearing is processed
+	// Reset text formatting to default
 	buf.WriteString("\x1b[0m")
 
 	return buf.String()
