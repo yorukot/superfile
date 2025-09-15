@@ -250,7 +250,8 @@ func fuzzySearch(query string, data []helpMenuModalData) []helpMenuModalData {
 		if item.subTitle != "" {
 			continue
 		}
-		haystack = append(haystack, item.description)
+		searchText := strings.Join(item.hotkey," ") + " " + item.description
+		haystack = append(haystack, searchText)
 		idxMap = append(idxMap, i)
 	}
 
