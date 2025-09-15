@@ -141,6 +141,22 @@ func TestCompressSelectedFiles(t *testing.T) {
 			p.SendKey(common.Hotkeys.ExtractFile[0])
 			// File extraction is supposedly async. So function's return doesn't means its done.
 			extractedDir := filepath.Join(tt.startDir, tt.extractedDirName)
+
+			// Setup cleanup to run even if test fails
+			t.Cleanup(func() {
+				cleanupWithRetry := func(path, label string) {
+					var lastErr error
+					ok := assert.Eventually(t, func() bool {
+						lastErr = os.RemoveAll(path)
+						return lastErr == nil
+					}, DefaultTestTimeout, DefaultTestTick)
+					if !ok {
+						t.Fatalf("Failed to remove %s %q: %v", label, path, lastErr)
+					}
+				}
+				cleanupWithRetry(extractedDir, "extracted directory")
+				cleanupWithRetry(zipFile, "zip file")
+			})
 			assert.Eventually(t, func() bool {
 				for _, f := range tt.expectedFilesAfterExtract {
 					_, err := os.Stat(filepath.Join(extractedDir, f))
@@ -151,9 +167,6 @@ func TestCompressSelectedFiles(t *testing.T) {
 				return true
 			}, DefaultTestTimeout, DefaultTestTick, "Extraction of files failed Required - [%s]+%v",
 				extractedDir, tt.expectedFilesAfterExtract)
-
-			require.NoError(t, os.RemoveAll(extractedDir))
-			require.NoError(t, os.RemoveAll(zipFile))
 		})
 	}
 
