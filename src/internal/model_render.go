@@ -135,15 +135,20 @@ func (panel *filePanel) renderFileEntries(r *rendering.Renderer, mainPanelHeight
 		_, err := os.ReadDir(panel.element[i].location)
 		dirExists := err == nil || panel.element[i].directory
 
+		selectBox := panel.renderSelectBox(isSelected)
+
+		// Calculate the actual prefix width for proper alignment
+		prefixWidth := lipgloss.Width(cursor+" ") + lipgloss.Width(selectBox)
+
 		renderedName := common.PrettierName(
 			panel.element[i].name,
-			filePanelWidth-5,
+			filePanelWidth-prefixWidth,
 			dirExists,
 			isSelected,
 			common.FilePanelBGColor,
 		)
 
-		r.AddLines(common.FilePanelCursorStyle.Render(cursor+" ") + renderedName)
+		r.AddLines(common.FilePanelCursorStyle.Render(cursor+" ") + selectBox + renderedName)
 	}
 }
 
@@ -180,6 +185,23 @@ func (panel *filePanel) getCursorString() string {
 		cursor++ // Convert to 1-based
 	}
 	return fmt.Sprintf("%d/%d", cursor, len(panel.element))
+}
+
+func (panel *filePanel) renderSelectBox(isSelected bool) string {
+	if !common.Config.ShowSelectIcons || !common.Config.Nerdfont || panel.panelMode != selectMode {
+		return ""
+	}
+
+	if panel.isFocused {
+		if isSelected {
+			return common.CheckboxCheckedFocused
+		}
+		return common.CheckboxEmptyFocused
+	}
+	if isSelected {
+		return common.CheckboxChecked
+	}
+	return common.CheckboxEmpty
 }
 
 func (m *model) processBarRender() string {

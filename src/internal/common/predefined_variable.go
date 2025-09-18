@@ -50,6 +50,11 @@ var (
 	FilePreviewEmptyText               string
 	FilePreviewError                   string
 
+	CheckboxChecked        string
+	CheckboxCheckedFocused string
+	CheckboxEmpty          string
+	CheckboxEmptyFocused   string
+
 	ModalConfirmInputText string
 	ModalCancelInputText  string
 	ModalOkayInputText    string
@@ -96,6 +101,19 @@ func LoadPrerenderedVariables() {
 	FilePreviewDirectoryUnreadableText = "\n--- " + icon.Error + icon.Space + "Cannot read directory" + icon.Space + "---"
 	FilePreviewError = "\n--- " + icon.Error + icon.Space + "Error" + icon.Space + "---"
 	FilePreviewEmptyText = "\n--- Empty ---"
+
+	CheckboxChecked = FilePanelSelectBoxStyle.
+		Foreground(FilePanelBorderColor).
+		Render(icon.CheckboxChecked + icon.Space)
+	CheckboxCheckedFocused = FilePanelSelectBoxStyle.
+		Foreground(FilePanelBorderActiveColor).
+		Render(icon.CheckboxChecked + icon.Space)
+	CheckboxEmpty = FilePanelSelectBoxStyle.
+		Foreground(FilePanelBorderColor).
+		Render(icon.CheckboxEmpty + icon.Space)
+	CheckboxEmptyFocused = FilePanelSelectBoxStyle.
+		Foreground(FilePanelBorderActiveColor).
+		Render(icon.CheckboxEmpty + icon.Space)
 
 	ModalOkayInputText = MainStyle.AlignHorizontal(lipgloss.Center).AlignVertical(lipgloss.Center).Render(
 		ModalConfirm.Render(" (" + Hotkeys.Confirm[0] + ") Okay "))
