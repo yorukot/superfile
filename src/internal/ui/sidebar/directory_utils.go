@@ -79,12 +79,9 @@ func getPinnedDirectories() []directory {
 		}
 	}
 
-	// Run the cleanup in a separate goroutine
-	go func() {
-		removeNotExistingDirectories(directories)
-	}()
+	clean := removeNotExistingDirectories(directories)
 
-	return directories
+	return clean
 }
 
 // removeNotExistingDirectories removes directories that do not exist from the pinned directories list
