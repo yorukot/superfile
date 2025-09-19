@@ -108,7 +108,7 @@ func TestQuit(t *testing.T) {
 	t.Run("Normal Quit", func(t *testing.T) {
 		m := defaultTestModel(testDir)
 		assert.Equal(t, notQuitting, m.modelQuitState)
-		cmd := TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.Quit[0]))
+		cmd := TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.Quit[0]))
 		assert.Equal(t, quitDone, m.modelQuitState)
 		assert.True(t, IsTeaQuit(cmd))
 	})
@@ -122,23 +122,23 @@ func TestQuit(t *testing.T) {
 		})
 
 		assert.Equal(t, notQuitting, m.modelQuitState)
-		cmd := TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.Quit[0]))
+		cmd := TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.Quit[0]))
 		assert.Equal(t, quitConfirmationInitiated, m.modelQuitState)
 		assert.False(t, IsTeaQuit(cmd))
 
 		// Now we would be asked for confirmation.
 		// Cancel the quit
-		cmd = TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.CancelTyping[0]))
+		cmd = TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.CancelTyping[0]))
 		assert.Equal(t, notQuitting, m.modelQuitState)
 		assert.False(t, IsTeaQuit(cmd))
 
 		// Again trigger quit
-		cmd = TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.Quit[0]))
+		cmd = TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.Quit[0]))
 		assert.Equal(t, quitConfirmationInitiated, m.modelQuitState)
 		assert.False(t, IsTeaQuit(cmd))
 
 		// Confirm this time
-		cmd = TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.Confirm[0]))
+		cmd = TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.Confirm[0]))
 		assert.Equal(t, quitDone, m.modelQuitState)
 		assert.True(t, IsTeaQuit(cmd))
 	})
@@ -150,7 +150,7 @@ func TestQuit(t *testing.T) {
 
 		assert.Equal(t, notQuitting, m.modelQuitState)
 
-		cmd := TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.CdQuit[0]))
+		cmd := TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.CdQuit[0]))
 
 		assert.Equal(t, quitDone, m.modelQuitState)
 		assert.True(t, IsTeaQuit(cmd))
@@ -231,7 +231,7 @@ func TestChooserFile(t *testing.T) {
 				require.NoError(t, err)
 			}
 			variable.SetChooserFile(tt.chooserFile)
-			cmd := TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(tt.hotkey))
+			cmd := TeaUpdate(m, utils.TeaRuneKeyMsg(tt.hotkey))
 
 			if tt.expectedQuit {
 				assert.Equal(t, quitDone, m.modelQuitState)
@@ -282,12 +282,12 @@ func TestZoxide(t *testing.T) {
 		require.NoError(t, err, "Failed to navigate to dir3")
 		assert.Equal(t, dir3, m.getFocusedFilePanel().location, "Should be in dir3 after navigation")
 
-		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenZoxide[0]))
+		TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenZoxide[0]))
 		assert.True(t, m.zoxideModal.IsOpen(), "Zoxide modal should open when pressing 'z' key")
 
 		// Type "dir2" to search for it
 		for _, char := range "dir2" {
-			TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(string(char)))
+			TeaUpdate(m, utils.TeaRuneKeyMsg(string(char)))
 		}
 
 		results := m.zoxideModal.GetResults()
@@ -300,7 +300,7 @@ func TestZoxide(t *testing.T) {
 		assert.Contains(t, resultPaths, dir2, "dir2 should be found by zoxide UI search")
 
 		// Press enter to navigate to dir2
-		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.ConfirmTyping[0]))
+		TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.ConfirmTyping[0]))
 		assert.False(t, m.zoxideModal.IsOpen(), "Zoxide modal should close after navigation")
 		assert.Equal(t, dir2, m.getFocusedFilePanel().location, "Should navigate back to dir2 after zoxide selection")
 	})
@@ -309,7 +309,7 @@ func TestZoxide(t *testing.T) {
 		common.Config.ZoxideSupport = false
 		m := defaultTestModelWithZClient(zClient, dir1)
 
-		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenZoxide[0]))
+		TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenZoxide[0]))
 		assert.True(t, m.zoxideModal.IsOpen(), "Zoxide modal should open even when ZoxideSupport is disabled")
 
 		results := m.zoxideModal.GetResults()

@@ -23,14 +23,14 @@ const DefaultTestTimeout = time.Second
 func defaultTestModel(dirs ...string) *model {
 	m := defaultModelConfig(false, false, false, dirs, nil)
 	m.disableMetadata = true
-	_, _ = TeaUpdate(m, tea.WindowSizeMsg{Width: 2 * common.MinimumWidth, Height: 2 * common.MinimumHeight})
+	TeaUpdate(m, tea.WindowSizeMsg{Width: 2 * common.MinimumWidth, Height: 2 * common.MinimumHeight})
 	return m
 }
 
 func defaultTestModelWithZClient(zClient *zoxidelib.Client, dirs ...string) *model {
 	m := defaultModelConfig(false, false, false, dirs, zClient)
 	m.disableMetadata = true
-	_, _ = TeaUpdate(m, tea.WindowSizeMsg{Width: 2 * common.MinimumWidth, Height: 2 * common.MinimumHeight})
+	TeaUpdate(m, tea.WindowSizeMsg{Width: 2 * common.MinimumWidth, Height: 2 * common.MinimumHeight})
 	return m
 }
 
@@ -52,17 +52,9 @@ func setupPanelModeAndSelection(t *testing.T, m *model, useSelectMode bool, item
 
 // --------------------  Bubletea utilities
 
-// TeaUpdate : Utility to send update to model , majorly used in tests
-// Not using pointer receiver as this is more like a utility, than
-// a member function of model
 // TODO : Should we validate that returned value is of type *model ?
 // and equal to m ? We are assuming that to be true as of now
-func TeaUpdate(m *model, msg tea.Msg) (tea.Cmd, error) {
-	_, cmd := m.Update(msg)
-	return cmd, nil
-}
-
-func TeaUpdateWithErrCheck(m *model, msg tea.Msg) tea.Cmd {
+func TeaUpdate(m *model, msg tea.Msg) tea.Cmd {
 	_, cmd := m.Update(msg)
 	return cmd
 }
@@ -106,9 +98,9 @@ func ExecuteTeaCmdWithTimeout(cmd tea.Cmd, timeout time.Duration) tea.Msg {
 func performCopyOrCutOperation(t *testing.T, m *model, isCut bool) {
 	t.Helper()
 	if isCut {
-		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.CutItems[0]))
+		TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.CutItems[0]))
 	} else {
-		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.CopyItems[0]))
+		TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.CopyItems[0]))
 	}
 }
 
@@ -213,7 +205,7 @@ func navigateToTargetDir(t *testing.T, m *model, startDir, targetDir string) {
 	if targetDir != startDir {
 		err := m.updateCurrentFilePanelDir(targetDir)
 		require.NoError(t, err)
-		TeaUpdateWithErrCheck(m, nil)
+		TeaUpdate(m, nil)
 	}
 }
 

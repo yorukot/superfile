@@ -92,14 +92,14 @@ func TestFileCreation(t *testing.T) {
 	for _, tt := range testdata {
 		m := defaultTestModel(testChildDir)
 
-		TeaUpdateWithErrCheck(m, nil)
-		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.FilePanelItemCreate[0]))
+		TeaUpdate(m, nil)
+		TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.FilePanelItemCreate[0]))
 
 		assert.Empty(t, m.typingModal.errorMesssage)
 
 		m.typingModal.textInput.SetValue(tt.fileName)
 
-		TeaUpdateWithErrCheck(m, utils.TeaRuneKeyMsg(common.Hotkeys.ConfirmTyping[0]))
+		TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.ConfirmTyping[0]))
 
 		if tt.expectedError {
 			assert.NotEmpty(t, m.typingModal.errorMesssage, "expected an error for input: %q", tt.fileName)
