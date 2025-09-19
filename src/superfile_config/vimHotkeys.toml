@@ -1,9 +1,9 @@
-# This is maintain by github.com/nonepork
+# This is maintained by github.com/nonepork
 # I know this is not really that "vim", but the control flow is different.
 # =================================================================================================
 # Global hotkeys (cannot conflict with other hotkeys)
 confirm = ['enter', '']
-quit = ['ctrl+c', ''] # also know as, theprimeagen troller
+quit = ['ctrl+c', ''] # also known as, theprimeagen troller
 cd_quit = ['Q', '']
 # movement
 list_up = ['k', '']
