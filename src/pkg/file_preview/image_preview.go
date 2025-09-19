@@ -264,7 +264,6 @@ func (p *ImagePreviewer) ImagePreview(path string, maxWidth int, maxHeight int,
 // ImagePreviewWithRenderer generates an image preview using the specified renderer
 func (p *ImagePreviewer) ImagePreviewWithRenderer(path string, maxWidth int, maxHeight int,
 	defaultBGColor string, renderer ImageRenderer, sideAreaWidth int) (string, error) {
-
 	info, err := os.Stat(path)
 	if err != nil {
 		return "", err
