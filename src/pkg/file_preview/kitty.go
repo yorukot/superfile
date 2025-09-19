@@ -73,7 +73,7 @@ func generateKittyClearCommands() string {
 	clearPlacementsCmd := "\x1b_Ga=d,p=1\x1b\\"
 	buf.WriteString(clearPlacementsCmd)
 
-	// Add a small delay command to ensure clearing is processed
+	// Reset text formatting to default
 	buf.WriteString("\x1b[0m")
 
 	return buf.String()
@@ -94,7 +94,8 @@ func generatePlacementID(path string) uint32 {
 
 // renderWithKittyUsingTermCap renders an image using Kitty graphics protocol with terminal capabilities
 func (p *ImagePreviewer) renderWithKittyUsingTermCap(img image.Image, path string,
-	originalWidth, originalHeight, maxWidth, maxHeight int, sideAreaWidth int) (string, error) {
+	originalWidth, originalHeight, maxWidth, maxHeight int, sideAreaWidth int,
+) (string, error) {
 	// Validate dimensions
 	if maxWidth <= 0 || maxHeight <= 0 {
 		return "", fmt.Errorf("dimensions must be positive (maxWidth=%d, maxHeight=%d)", maxWidth, maxHeight)

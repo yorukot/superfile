@@ -264,11 +264,6 @@ func (p *ImagePreviewer) ImagePreview(path string, maxWidth int, maxHeight int,
 // ImagePreviewWithRenderer generates an image preview using the specified renderer
 func (p *ImagePreviewer) ImagePreviewWithRenderer(path string, maxWidth int, maxHeight int,
 	defaultBGColor string, renderer ImageRenderer, sideAreaWidth int) (string, error) {
-	// Validate dimensions
-	if maxWidth <= 0 || maxHeight <= 0 {
-		return "", fmt.Errorf("dimensions must be positive (maxWidth=%d, maxHeight=%d)", maxWidth, maxHeight)
-	}
-
 	info, err := os.Stat(path)
 	if err != nil {
 		return "", err

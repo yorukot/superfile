@@ -372,7 +372,7 @@ func setupModelAndPerformOperation(t *testing.T, startDir string, useSelectMode 
 	itemName string, selectedItems []string, isCut bool) *model {
 	t.Helper()
 	m := defaultTestModel(startDir)
-	TeaUpdateWithErrCheck(m, nil)
+	TeaUpdate(m, nil)
 
 	setupPanelModeAndSelection(t, m, useSelectMode, itemName, selectedItems)
 	performCopyOrCutOperation(t, m, isCut)
