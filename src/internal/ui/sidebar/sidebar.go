@@ -1,14 +1,11 @@
 package sidebar
 
 import (
-	"encoding/json"
 	"log/slog"
-	"os"
 	"slices"
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/internal/common"
 )
 
@@ -53,14 +50,8 @@ func (s *Model) ConfirmSidebarRename() {
 		}
 	}
 
-	jsonData, err := json.Marshal(pinnedDirs)
-	if err != nil {
-		slog.Error("Error marshaling pinned directories data", "error", err)
-	}
-
-	err = os.WriteFile(variable.PinnedFile, jsonData, 0644)
-	if err != nil {
-		slog.Error("Error updating pinned directories data", "error", err)
+	if err := savePinnedDirectories(pinnedDirs); err != nil {
+		slog.Error("error saving pinned directories", "error", err)
 	}
 }
 
