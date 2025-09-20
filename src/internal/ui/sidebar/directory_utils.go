@@ -8,12 +8,11 @@ import (
 	"path/filepath"
 	"slices"
 
-	"github.com/yorukot/superfile/src/internal/utils"
-
 	"github.com/adrg/xdg"
 
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/config/icon"
+	"github.com/yorukot/superfile/src/internal/utils"
 )
 
 // Return all sidebar directories
@@ -79,7 +78,39 @@ func getPinnedDirectories() []directory {
 			slog.Error("Error parsing pinned data", "error", err)
 		}
 	}
-	return directories
+
+	clean := removeNotExistingDirectories(directories)
+
+	return clean
+}
+
+// removeNotExistingDirectories removes directories that do not exist from the pinned directories list
+func removeNotExistingDirectories(dirs []directory) []directory {
+	cleanedDirs := make([]directory, 0, len(dirs))
+	for _, dir := range dirs {
+		if _, err := os.Stat(dir.Location); err == nil {
+			cleanedDirs = append(cleanedDirs, dir)
+		} else if !os.IsNotExist(err) {
+			slog.Warn("Error while checking pinned directory", "directory", dir.Location, "error", err)
+		}
+	}
+
+	// if any directory is removed, update the pinned file
+	if len(cleanedDirs) == len(dirs) {
+		return cleanedDirs
+	}
+
+	updatedData, err := json.Marshal(cleanedDirs)
+	if err != nil {
+		slog.Error("Error marshaling pinned directories", "error", err)
+		return cleanedDirs
+	}
+
+	err = os.WriteFile(variable.PinnedFile, updatedData, 0644)
+	if err != nil {
+		slog.Error("Error writing pinned directories file", "error", err)
+	}
+	return cleanedDirs
 }
 
 // Fuzzy search function for a list of directories.
