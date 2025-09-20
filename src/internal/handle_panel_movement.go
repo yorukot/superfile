@@ -6,7 +6,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"syscall"
 
 	tea "github.com/charmbracelet/bubbletea"
 
@@ -98,13 +97,7 @@ func (m *model) executeOpenCommand() {
 	}
 
 	cmd := exec.Command(openCommand, panel.element[panel.cursor].location)
-	if runtime.GOOS != utils.OsWindows {
-		cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
-		// Optionally, redirect stdio to avoid terminal hangups
-		cmd.Stdin = nil
-		cmd.Stdout = nil
-		cmd.Stderr = nil
-	}
+	utils.DetachFromTerminal(cmd)
 	err := cmd.Start()
 	if err != nil {
 		slog.Error("Error while open file with", "error", err)
