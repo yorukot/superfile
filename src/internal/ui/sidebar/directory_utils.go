@@ -96,20 +96,12 @@ func removeNotExistingDirectories(dirs []directory) []directory {
 	}
 
 	// if any directory is removed, update the pinned file
-	if len(cleanedDirs) == len(dirs) {
-		return cleanedDirs
+	if len(cleanedDirs) != len(dirs) {
+		if err := savePinnedDirectories(dirs); err != nil {
+			slog.Error("error saving pinned directories", "error", err)
+		}
 	}
 
-	updatedData, err := json.Marshal(cleanedDirs)
-	if err != nil {
-		slog.Error("Error marshaling pinned directories", "error", err)
-		return cleanedDirs
-	}
-
-	err = os.WriteFile(variable.PinnedFile, updatedData, 0644)
-	if err != nil {
-		slog.Error("Error writing pinned directories file", "error", err)
-	}
 	return cleanedDirs
 }
 
@@ -168,13 +160,21 @@ func TogglePinnedDirectory(dir string) error {
 		})
 	}
 
-	updatedData, err := json.Marshal(dirs)
+	if err := savePinnedDirectories(dirs); err != nil {
+		return fmt.Errorf("error saving pinned directories: %w", err)
+	}
+
+	return nil
+}
+
+// savePinnedDirectories marshals and writes the pinned directories to file.
+func savePinnedDirectories(dirs []directory) error {
+	data, err := json.Marshal(dirs)
 	if err != nil {
 		return fmt.Errorf("error marshaling pinned directories: %w", err)
 	}
 
-	err = os.WriteFile(variable.PinnedFile, updatedData, 0644)
-	if err != nil {
+	if err := os.WriteFile(variable.PinnedFile, data, 0644); err != nil {
 		return fmt.Errorf("error writing pinned directories file: %w", err)
 	}
 
