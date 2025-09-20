@@ -6,6 +6,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
+	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/internal/common"
 )
 
@@ -40,7 +41,7 @@ func (s *Model) ConfirmSidebarRename() {
 	// recover the state of rename
 	s.CancelSidebarRename()
 
-	pinnedDirs := getPinnedDirectories()
+	pinnedDirs := s.pinnedMgr.Load()
 	// Call getPinnedDirectories, instead of using what is stored in sidebar.directories
 	// sidebar.directories could have less directories in case a search filter is used
 	for i := range pinnedDirs {
@@ -50,7 +51,7 @@ func (s *Model) ConfirmSidebarRename() {
 		}
 	}
 
-	if err := savePinnedDirectories(pinnedDirs); err != nil {
+	if err := s.pinnedMgr.Save(pinnedDirs); err != nil {
 		slog.Error("error saving pinned directories", "error", err)
 	}
 }
@@ -88,9 +89,9 @@ func (s *Model) HandleSearchBarKey(msg string) {
 // which is a disk heavy operation.
 func (s *Model) UpdateDirectories() {
 	if s.searchBar.Value() != "" {
-		s.directories = getFilteredDirectories(s.searchBar.Value())
+		s.directories = getFilteredDirectories(s.searchBar.Value(), s.pinnedMgr)
 	} else {
-		s.directories = getDirectories()
+		s.directories = getDirectories(s.pinnedMgr)
 	}
 	// This is needed, as due to filtering, the cursor might be invalid
 	if s.isCursorInvalid() {
@@ -98,12 +99,19 @@ func (s *Model) UpdateDirectories() {
 	}
 }
 
+func (s *Model) TogglePinnedDirectory(dir string) error {
+	return s.pinnedMgr.Toggle(dir)
+}
+
 // New creates a new sidebar model with the given parameters
 func New() Model {
+	// pinnedMgr is created here, can be done higher up in the call chain
+	pinnedMgr := NewPinnedFileManager(variable.PinnedFile)
 	res := Model{
 		renderIndex: 0,
-		directories: getDirectories(),
+		directories: getDirectories(&pinnedMgr),
 		searchBar:   common.GenerateSearchBar(),
+		pinnedMgr:   &pinnedMgr,
 	}
 
 	// Excluding borders(2), Searchbar Prompt(2), and one extra character than is appended
