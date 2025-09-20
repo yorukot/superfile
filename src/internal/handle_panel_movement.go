@@ -98,7 +98,7 @@ func (m *model) executeOpenCommand() {
 	}
 
 	cmd := exec.Command(openCommand, panel.element[panel.cursor].location)
-	if runtime.GOOS != "windows" {
+	if runtime.GOOS != utils.OsWindows {
 		cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
 		// Optionally, redirect stdio to avoid terminal hangups
 		cmd.Stdin = nil
