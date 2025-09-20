@@ -97,6 +97,7 @@ func (m *model) executeOpenCommand() {
 	}
 
 	cmd := exec.Command(openCommand, panel.element[panel.cursor].location)
+	utils.DetachFromTerminal(cmd)
 	err := cmd.Start()
 	if err != nil {
 		slog.Error("Error while open file with", "error", err)
