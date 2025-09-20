@@ -92,10 +92,12 @@ func (mgr *PinnedManager) Clean(dirs []directory) []directory {
 		}
 	}
 
-	if len(cleanedDirs) != len(dirs) {
-		if err := mgr.Save(cleanedDirs); err != nil {
-			slog.Error("error saving pinned directories", "error", err)
-		}
+	if len(cleanedDirs) == len(dirs) {
+		return cleanedDirs
+	}
+
+	if err := mgr.Save(cleanedDirs); err != nil {
+		slog.Error("error saving pinned directories", "error", err)
 	}
 
 	return cleanedDirs
