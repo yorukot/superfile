@@ -21,7 +21,7 @@ func Test_Load(t *testing.T) {
 	// Use t.TempDir for valid and nonexistent cases,
 	// because you need a valid path that is machine derived
 	tempDir := t.TempDir()
-	pinnedDir := filepath.Join(tempDir, "pinnedDir")
+	pinnedDir := filepath.ToSlash(filepath.Join(tempDir, "pinnedDir"))
 	err := os.Mkdir(pinnedDir, 0755)
 	require.NoError(t, err)
 
@@ -95,15 +95,11 @@ func Test_Save(t *testing.T) {
 	rOnlyPath := filepath.Join(pinnedDir, "pinnedRonly.json")
 	file, err := os.OpenFile(rOnlyPath, os.O_CREATE|os.O_RDONLY, 0400)
 	require.NoError(t, err)
-	if runtime.GOOS != "windows" {
-		err = os.Chmod(rOnlyPath, 0400)
-		require.NoError(t, err)
-	}
 	file.Close()
 
 	dirs := []directory{
 		{
-			Location: pinnedDir,
+			Location: filepath.ToSlash(pinnedDir),
 			Name:     "pinnedDir",
 		},
 	}
@@ -182,7 +178,7 @@ func Test_Toggle(t *testing.T) {
 			pinnedMgr: mgr,
 			expected: []directory{
 				{
-					Location: pinnedDir,
+					Location: filepath.ToSlash(pinnedDir),
 					Name:     "pinnedDir",
 				},
 			},
@@ -225,18 +221,18 @@ func Test_Clean(t *testing.T) {
 	rOnlyPath := filepath.Join(pinnedDir, "pinnedRonly.json")
 	file, err := os.OpenFile(rOnlyPath, os.O_CREATE|os.O_RDONLY, 0400)
 	require.NoError(t, err)
-	if runtime.GOOS != "windows" {
-		err = os.Chmod(rOnlyPath, 0400)
-		require.NoError(t, err)
-	}
 	file.Close()
 
 	cleanDirs := []directory{
 		{
-			Location: pinnedDir,
+			Location: filepath.ToSlash(pinnedDir),
 			Name:     "pinnedDir",
 		},
 	}
+	badDirs := append(cleanDirs, directory{
+		Location: filepath.ToSlash(nonexistentDir),
+		Name:     "nonexistentDir",
+	})
 
 	testCases := []struct {
 		name      string
@@ -257,20 +253,14 @@ func Test_Clean(t *testing.T) {
 			pinnedMgr: PinnedManager{filePath: pinnedFile},
 			modified:  true,
 			expected:  cleanDirs,
-			argDirs: append(cleanDirs, directory{
-				Location: nonexistentDir,
-				Name:     "nonexistentDir",
-			}),
+			argDirs:   badDirs,
 		},
 		{
 			name:      "Save Fails",
 			pinnedMgr: PinnedManager{filePath: rOnlyPath},
 			modified:  false,
 			expected:  cleanDirs,
-			argDirs: append(cleanDirs, directory{
-				Location: nonexistentDir,
-				Name:     "nonexistentDir",
-			}),
+			argDirs:   badDirs,
 		},
 		{
 			name:      "Empty Input Slice",
