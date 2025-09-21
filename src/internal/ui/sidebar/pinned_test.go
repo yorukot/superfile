@@ -229,7 +229,8 @@ func Test_Clean(t *testing.T) {
 			Name:     "pinnedDir",
 		},
 	}
-	badDirs := append(cleanDirs, directory{
+	badDirs := append([]directory{}, cleanDirs...)
+	badDirs = append(badDirs, directory{
 		Location: filepath.ToSlash(nonexistentDir),
 		Name:     "nonexistentDir",
 	})
