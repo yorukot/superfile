@@ -14,7 +14,6 @@ import (
 )
 
 func Test_Load(t *testing.T) {
-
 	_, curFilename, _, ok := runtime.Caller(0)
 	require.True(t, ok)
 	testDataDir := filepath.Join(filepath.Dir(curFilename), "testdata", "pinnedFile")
@@ -86,7 +85,6 @@ func Test_Load(t *testing.T) {
 }
 
 func Test_Save(t *testing.T) {
-
 	tempDir := t.TempDir()
 	pinnedDir := filepath.Join(tempDir, "pinnedDir")
 	err := os.Mkdir(pinnedDir, 0755)
@@ -105,9 +103,6 @@ func Test_Save(t *testing.T) {
 			Name:     "pinnedDir",
 		},
 	}
-
-	// Marshalling fails (this failure is practically impossible with
-	// the current setup as directory{} is perfectly JSON-safe)
 
 	testCases := []struct {
 		name      string
@@ -153,7 +148,6 @@ func Test_Save(t *testing.T) {
 }
 
 func Test_Toggle(t *testing.T) {
-
 	tempDir := t.TempDir()
 
 	pinnedDir := filepath.Join(tempDir, "pinnedDir")
@@ -170,14 +164,14 @@ func Test_Toggle(t *testing.T) {
 		pinnedMgr *PinnedManager
 		expected  []directory
 		noError   bool
-		arg_dir   string
+		argDir    string
 	}{
 		{
 			name:      "Add non existing Directory to Pinned",
 			pinnedMgr: mgr,
 			expected:  []directory{},
 			noError:   true,
-			arg_dir:   nonexistentDir,
+			argDir:    nonexistentDir,
 		},
 		{
 			name:      "Add a Directory to Pinned",
@@ -189,21 +183,21 @@ func Test_Toggle(t *testing.T) {
 				},
 			},
 			noError: true,
-			arg_dir: pinnedDir,
+			argDir:  pinnedDir,
 		},
 		{
 			name:      "Remove a Directory from Pinned",
 			pinnedMgr: mgr,
 			expected:  []directory{},
 			noError:   true,
-			arg_dir:   pinnedDir,
+			argDir:    pinnedDir,
 		},
 	}
 
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
 
-			err := tt.pinnedMgr.Toggle(tt.arg_dir)
+			err := tt.pinnedMgr.Toggle(tt.argDir)
 			if tt.noError {
 				require.NoError(t, err)
 
@@ -215,7 +209,6 @@ func Test_Toggle(t *testing.T) {
 }
 
 func Test_Clean(t *testing.T) {
-
 	tempDir := t.TempDir()
 
 	pinnedDir := filepath.Join(tempDir, "pinnedDir")
@@ -243,21 +236,21 @@ func Test_Clean(t *testing.T) {
 		pinnedMgr PinnedManager
 		modified  bool
 		expected  []directory
-		arg_dirs  []directory
+		argDirs   []directory
 	}{
 		{
 			name:      "All Directories Exist",
 			pinnedMgr: PinnedManager{filePath: pinnedFile},
 			modified:  false,
 			expected:  cleanDirs,
-			arg_dirs:  cleanDirs,
+			argDirs:   cleanDirs,
 		},
 		{
 			name:      "Some Directories Exist",
 			pinnedMgr: PinnedManager{filePath: pinnedFile},
 			modified:  true,
 			expected:  cleanDirs,
-			arg_dirs: append(cleanDirs, directory{
+			argDirs: append(cleanDirs, directory{
 				Location: nonexistentDir,
 				Name:     "nonexistentDir",
 			}),
@@ -267,7 +260,7 @@ func Test_Clean(t *testing.T) {
 			pinnedMgr: PinnedManager{filePath: rOnlyPath},
 			modified:  false,
 			expected:  cleanDirs,
-			arg_dirs: append(cleanDirs, directory{
+			argDirs: append(cleanDirs, directory{
 				Location: nonexistentDir,
 				Name:     "nonexistentDir",
 			}),
@@ -277,19 +270,18 @@ func Test_Clean(t *testing.T) {
 			pinnedMgr: PinnedManager{filePath: pinnedFile},
 			modified:  false,
 			expected:  []directory{},
-			arg_dirs:  []directory{},
+			argDirs:   []directory{},
 		},
 	}
 
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-
 			before, err := os.Stat(pinnedFile)
 			if !errors.Is(err, fs.ErrNotExist) {
 				require.NoError(t, err)
 			}
 
-			cleaned := tt.pinnedMgr.Clean(tt.arg_dirs)
+			cleaned := tt.pinnedMgr.Clean(tt.argDirs)
 
 			after, err := os.Stat(pinnedFile)
 			if !errors.Is(err, fs.ErrNotExist) {
