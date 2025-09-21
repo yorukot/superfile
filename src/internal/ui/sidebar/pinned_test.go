@@ -1,12 +1,11 @@
 package sidebar
 
 import (
+	"encoding/json"
 	"errors"
 	"io/fs"
 	"os"
 	"path/filepath"
-	"runtime"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -14,31 +13,57 @@ import (
 )
 
 func Test_Load(t *testing.T) {
-	_, curFilename, _, ok := runtime.Caller(0)
-	require.True(t, ok)
-	testDataDir := filepath.Join(filepath.Dir(curFilename), "testdata", "pinnedFile")
-
-	// Use t.TempDir for valid and nonexistent cases,
-	// because you need a valid path that is machine derived
 	tempDir := t.TempDir()
-	pinnedDir := filepath.ToSlash(filepath.Join(tempDir, "pinnedDir"))
+	pDirName := "pinnedDir"
+	pinnedDir := filepath.Join(tempDir, pDirName)
 	err := os.Mkdir(pinnedDir, 0755)
 	require.NoError(t, err)
 
-	// Read sample case, replace with valid path and write a new file in pinnedDir.
-	valid, err := os.ReadFile(filepath.Join(testDataDir, "valid.json"))
+	emptyData := []directory{}
+	emptyBytes, err := json.Marshal(emptyData)
 	require.NoError(t, err)
-	newValid := strings.ReplaceAll(string(valid), "/REPLACE/ME/WITH/VALID/DIR", filepath.ToSlash(pinnedDir))
-	newValidPath := filepath.Join(pinnedDir, "valid.json")
-	err = os.WriteFile(newValidPath, []byte(newValid), 0644)
+	emptyPath := filepath.Join(pinnedDir, "empty.json")
+	err = os.WriteFile(emptyPath, emptyBytes, 0644)
 	require.NoError(t, err)
 
-	nonexistent, err := os.ReadFile(filepath.Join(testDataDir, "nonexistent.json"))
+	invalidPath := filepath.Join(pinnedDir, "invalid.json")
+	err = os.WriteFile(invalidPath, []byte("{ invalid json }"), 0644)
 	require.NoError(t, err)
-	newNonexistent := strings.ReplaceAll(string(nonexistent), "/REPLACE/ME/WITH/VALID/DIR", filepath.ToSlash(pinnedDir))
+
+	validData := []directory{
+		{
+			Location: pinnedDir,
+			Name:     pDirName,
+		},
+	}
+	validBytes, err := json.Marshal(validData)
+	require.NoError(t, err)
+	newValidPath := filepath.Join(pinnedDir, "valid.json")
+	err = os.WriteFile(newValidPath, validBytes, 0644)
+	require.NoError(t, err)
+
+	nonexistData := []directory{
+		{
+			Location: pinnedDir,
+			Name:     pDirName,
+		},
+		{
+			Location: filepath.Join(pinnedDir, "nonexistent9"),
+			Name:     "nonexistent9",
+		},
+	}
+	nonexistBytes, err := json.Marshal(nonexistData)
+	require.NoError(t, err)
 	newNonexistentPath := filepath.Join(pinnedDir, "nonexistent.json")
-	err = os.WriteFile(newNonexistentPath, []byte(newNonexistent), 0644)
+	err = os.WriteFile(newNonexistentPath, nonexistBytes, 0644)
 	require.NoError(t, err)
+
+	cleanDirs := []directory{
+		{
+			Location: pinnedDir,
+			Name:     pDirName,
+		},
+	}
 
 	testCases := []struct {
 		name      string
@@ -47,33 +72,23 @@ func Test_Load(t *testing.T) {
 	}{
 		{
 			name:      "Empty No Pinned Directories",
-			pinnedMgr: PinnedManager{filePath: filepath.Join(testDataDir, "empty.json")},
+			pinnedMgr: PinnedManager{filePath: emptyPath},
 			expected:  []directory{},
 		},
 		{
 			name:      "Invalid Format File",
-			pinnedMgr: PinnedManager{filePath: filepath.Join(testDataDir, "invalid.json")},
+			pinnedMgr: PinnedManager{filePath: emptyPath},
 			expected:  []directory{},
 		},
 		{
 			name:      "Valid With No Non-Existent Directories",
 			pinnedMgr: PinnedManager{filePath: newValidPath},
-			expected: []directory{
-				{
-					Location: filepath.ToSlash(pinnedDir),
-					Name:     "pinnedDir",
-				},
-			},
+			expected:  cleanDirs,
 		},
 		{
 			name:      "Valid With One Non-Existent Directory",
 			pinnedMgr: PinnedManager{filePath: newNonexistentPath},
-			expected: []directory{
-				{
-					Location: filepath.ToSlash(pinnedDir),
-					Name:     "pinnedDir",
-				},
-			},
+			expected:  cleanDirs,
 		},
 	}
 
@@ -86,7 +101,8 @@ func Test_Load(t *testing.T) {
 
 func Test_Save(t *testing.T) {
 	tempDir := t.TempDir()
-	pinnedDir := filepath.Join(tempDir, "pinnedDir")
+	pDirName := "pinnedDir"
+	pinnedDir := filepath.Join(tempDir, pDirName)
 	err := os.Mkdir(pinnedDir, 0755)
 	require.NoError(t, err)
 
@@ -99,8 +115,8 @@ func Test_Save(t *testing.T) {
 
 	dirs := []directory{
 		{
-			Location: filepath.ToSlash(pinnedDir),
-			Name:     "pinnedDir",
+			Location: pinnedDir,
+			Name:     pDirName,
 		},
 	}
 
@@ -139,9 +155,7 @@ func Test_Save(t *testing.T) {
 			err := tt.pinnedMgr.Save(tt.toSave)
 			if tt.noError {
 				require.NoError(t, err)
-
-				result := tt.pinnedMgr.Load()
-				assert.Equal(t, tt.expected, result)
+				assert.Equal(t, tt.expected, tt.pinnedMgr.Load())
 			}
 		})
 	}
@@ -149,10 +163,11 @@ func Test_Save(t *testing.T) {
 
 func Test_Toggle(t *testing.T) {
 	tempDir := t.TempDir()
-
-	pinnedDir := filepath.Join(tempDir, "pinnedDir")
+	pDirName := "pinnedDir"
+	pinnedDir := filepath.Join(tempDir, pDirName)
 	err := os.Mkdir(pinnedDir, 0755)
 	require.NoError(t, err)
+
 	pinnedFile := filepath.Join(pinnedDir, "pinned.json")
 
 	nonexistentDir := filepath.Join(tempDir, "nonExistentDir9")
@@ -178,8 +193,8 @@ func Test_Toggle(t *testing.T) {
 			pinnedMgr: mgr,
 			expected: []directory{
 				{
-					Location: filepath.ToSlash(pinnedDir),
-					Name:     "pinnedDir",
+					Location: pinnedDir,
+					Name:     pDirName,
 				},
 			},
 			noError: true,
@@ -209,8 +224,8 @@ func Test_Toggle(t *testing.T) {
 
 func Test_Clean(t *testing.T) {
 	tempDir := t.TempDir()
-
-	pinnedDir := filepath.Join(tempDir, "pinnedDir")
+	pDirName := "pinnedDir"
+	pinnedDir := filepath.Join(tempDir, pDirName)
 	err := os.Mkdir(pinnedDir, 0755)
 	require.NoError(t, err)
 
@@ -225,13 +240,13 @@ func Test_Clean(t *testing.T) {
 
 	cleanDirs := []directory{
 		{
-			Location: filepath.ToSlash(pinnedDir),
-			Name:     "pinnedDir",
+			Location: pinnedDir,
+			Name:     pDirName,
 		},
 	}
 	badDirs := append([]directory{}, cleanDirs...)
 	badDirs = append(badDirs, directory{
-		Location: filepath.ToSlash(nonexistentDir),
+		Location: nonexistentDir,
 		Name:     "nonexistentDir",
 	})
 
