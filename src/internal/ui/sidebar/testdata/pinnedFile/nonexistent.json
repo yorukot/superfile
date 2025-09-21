@@ -1,0 +1,11 @@
+[
+  {
+    "Location": "/REPLACE/ME/WITH/VALID/DIR",
+    "Name": "pinnedDir"
+  },
+  {
+    "Location": "/REPLACE/ME/WITH/VALID/DIR/nonexistentDir9",
+    "Name": "nonexistentDir9"
+  }
+]
+  
