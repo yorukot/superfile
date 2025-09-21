@@ -60,7 +60,7 @@ func Test_Load(t *testing.T) {
 			pinnedMgr: PinnedManager{filePath: newValidPath},
 			expected: []directory{
 				{
-					Location: pinnedDir,
+					Location: filepath.ToSlash(pinnedDir),
 					Name:     "pinnedDir",
 				},
 			},
@@ -70,7 +70,7 @@ func Test_Load(t *testing.T) {
 			pinnedMgr: PinnedManager{filePath: newNonexistentPath},
 			expected: []directory{
 				{
-					Location: pinnedDir,
+					Location: filepath.ToSlash(pinnedDir),
 					Name:     "pinnedDir",
 				},
 			},
