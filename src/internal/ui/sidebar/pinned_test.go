@@ -1,6 +1,8 @@
 package sidebar
 
 import (
+	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -26,14 +28,14 @@ func Test_Load(t *testing.T) {
 	// Read sample case, replace with valid path and write a new file in pinnedDir.
 	valid, err := os.ReadFile(filepath.Join(testDataDir, "valid.json"))
 	require.NoError(t, err)
-	newValid := strings.ReplaceAll(string(valid), "/REPLACE/ME/WITH/VALID/DIR", pinnedDir)
+	newValid := strings.ReplaceAll(string(valid), "/REPLACE/ME/WITH/VALID/DIR", filepath.ToSlash(pinnedDir))
 	newValidPath := filepath.Join(pinnedDir, "valid.json")
 	err = os.WriteFile(newValidPath, []byte(newValid), 0644)
 	require.NoError(t, err)
 
 	nonexistent, err := os.ReadFile(filepath.Join(testDataDir, "nonexistent.json"))
 	require.NoError(t, err)
-	newNonexistent := strings.ReplaceAll(string(nonexistent), "/REPLACE/ME/WITH/VALID/DIR", pinnedDir)
+	newNonexistent := strings.ReplaceAll(string(nonexistent), "/REPLACE/ME/WITH/VALID/DIR", filepath.ToSlash(pinnedDir))
 	newNonexistentPath := filepath.Join(pinnedDir, "nonexistent.json")
 	err = os.WriteFile(newNonexistentPath, []byte(newNonexistent), 0644)
 	require.NoError(t, err)
@@ -281,7 +283,21 @@ func Test_Clean(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.expected, tt.pinnedMgr.Clean(tt.argDirs))
+			before, err := os.Stat(pinnedFile)
+			if !errors.Is(err, fs.ErrNotExist) {
+				require.NoError(t, err)
+			}
+
+			cleaned := tt.pinnedMgr.Clean(tt.argDirs)
+
+			after, err := os.Stat(pinnedFile)
+			if !errors.Is(err, fs.ErrNotExist) {
+				require.NoError(t, err)
+			} else if before != nil && !tt.modified {
+				require.Equal(t, before.ModTime(), after.ModTime())
+			}
+
+			assert.Equal(t, tt.expected, cleaned)
 		})
 	}
 }
