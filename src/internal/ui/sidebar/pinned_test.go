@@ -95,6 +95,10 @@ func Test_Save(t *testing.T) {
 	rOnlyPath := filepath.Join(pinnedDir, "pinnedRonly.json")
 	file, err := os.OpenFile(rOnlyPath, os.O_CREATE|os.O_RDONLY, 0400)
 	require.NoError(t, err)
+	if runtime.GOOS != "windows" {
+		err = os.Chmod(rOnlyPath, 0400)
+		require.NoError(t, err)
+	}
 	file.Close()
 
 	dirs := []directory{
@@ -221,6 +225,10 @@ func Test_Clean(t *testing.T) {
 	rOnlyPath := filepath.Join(pinnedDir, "pinnedRonly.json")
 	file, err := os.OpenFile(rOnlyPath, os.O_CREATE|os.O_RDONLY, 0400)
 	require.NoError(t, err)
+	if runtime.GOOS != "windows" {
+		err = os.Chmod(rOnlyPath, 0400)
+		require.NoError(t, err)
+	}
 	file.Close()
 
 	cleanDirs := []directory{
