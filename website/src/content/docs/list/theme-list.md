@@ -14,7 +14,7 @@ head:
 - Ported by: https://github.com/filipjanevski
 - Original Author: https://github.com/filipjanevski/
 
-![](https://github.com/yorukot/superfile/blob/main/asset/theme/0x96f.png?raw=true)
+![](../../../assets/git-assets/theme/0x96f.png)
 
 ## Ayu Dark
 
@@ -22,7 +22,7 @@ head:
 - Ported by: https://github.com/rustnomicon
 - Original Author: https://github.com/ayu-theme/
 
-![](https://github.com/yorukot/superfile/blob/main/asset/theme/ayu-dark.png?raw=true)
+![](../../../assets/git-assets/theme/ayu-dark.png)
 
 ## Blood
 
@@ -30,7 +30,7 @@ head:
 - Ported by: https://github.com/charlesrocket
 - Original Author: https://github.com/charlesrocket
 
-![](https://github.com/yorukot/superfile/blob/main/asset/theme/blood.png?raw=true)
+![](../../../assets/git-assets/theme/blood.png)
 
 ## Catppuccin
 
@@ -38,7 +38,7 @@ head:
 - Ported by: https://github.com/AnshumanNeon
 - Original Author: https://github.com/catppuccin
 
-![](https://github.com/yorukot/superfile/blob/main/asset/theme/catppuccin.png?raw=true)
+![](../../../assets/git-assets/theme/catppuccin.png)
 
 ## Catppuccin Frappe
 
@@ -46,7 +46,7 @@ head:
 - Ported by: https://github.com/GV14982
 - Original Author: https://github.com/catppuccin
 
-![](https://github.com/yorukot/superfile/blob/main/asset/theme/catppuccin-frappe.png?raw=true)
+![](../../../assets/git-assets/theme/catppuccin-frappe.png)
 
 ## Catppuccin Latte
 
@@ -54,7 +54,7 @@ head:
 - Ported by: https://github.com/GV14982
 - Original Author: https://github.com/catppuccin
 
-![](https://github.com/yorukot/superfile/blob/main/asset/theme/catppuccin-latte.png?raw=true)
+![](../../../assets/git-assets/theme/catppuccin-latte.png)
 
 ## Catppuccin Macchiato
 
@@ -62,7 +62,7 @@ head:
 - Ported by: https://github.com/GV14982
 - Original Author: https://github.com/catppuccin
 
-![](https://github.com/yorukot/superfile/blob/main/asset/theme/catppuccin-macchiato.png?raw=true)
+![](../../../assets/git-assets/theme/catppuccin-macchiato.png)
 
 ## Dracula
 
@@ -70,7 +70,7 @@ head:
 - Ported by: https://github.com/BeanieBarrow
 - Original Author: https://github.com/zenorocha
 
-![](https://github.com/yorukot/superfile/blob/main/asset/theme/dracula.png?raw=true)
+![](../../../assets/git-assets/theme/dracula.png)
 
 ## Everforest Dark Medium
 
@@ -78,7 +78,7 @@ head:
 - Ported by: https://github.com/dotintegral
 - Original Author: https://github.com/sainnhe/
 
-![](https://github.com/yorukot/superfile/blob/main/asset/theme/everforest-dark-medium.png?raw=true)
+![](../../../assets/git-assets/theme/everforest-dark-medium.png)
 
 ## Gruvbox
 
@@ -86,7 +86,7 @@ head:
 - Ported by: https://github.com/yorukot
 - Original Author: https://github.com/morhetz/
 
-![](https://github.com/yorukot/superfile/blob/main/asset/theme/gruvbox.png?raw=true)
+![](../../../assets/git-assets/theme/gruvbox.png)
 
 ## Gruvbox Dark Hard
 
@@ -94,7 +94,7 @@ head:
 - Ported by: https://github.com/frost-phoenix
 - Original Author: https://github.com/morhetz/
 
-![](https://github.com/yorukot/superfile/blob/main/asset/theme/gruvbox-dark-hard.png?raw=true)
+![](../../../assets/git-assets/theme/gruvbox-dark-hard.png)
 
 ## Hacks
 
@@ -102,7 +102,7 @@ head:
 - Ported by: https://github.com/charlesrocket
 - Original Author: https://github.com/charlesrocket
 
-![](https://github.com/yorukot/superfile/blob/main/asset/theme/hacks.png?raw=true)
+![](../../../assets/git-assets/theme/hacks.png)
 
 ## Kaolin
 
@@ -110,7 +110,7 @@ head:
 - Ported by: https://github.com/AnshumqanNeon
 - Original Author: https://github.com/ogdenwebb/
 
-![](https://github.com/yorukot/superfile/blob/main/asset/theme/kaolin.png?raw=true)
+![](../../../assets/git-assets/theme/kaolin.png)
 
 ## Monokai
 
@@ -118,7 +118,7 @@ head:
 - Ported by: https://github.com/CommandJoo
 - Original Author: https://github.com/monokai
 
-![](https://github.com/yorukot/superfile/blob/main/asset/theme/monokai.png?raw=true)
+![](../../../assets/git-assets/theme/monokai.png)
 
 ## Nord
 
@@ -126,7 +126,7 @@ head:
 - Ported by: https://github.com/ramses-eltany
 - Original Author: https://github.com/nordtheme
 
-![](https://github.com/yorukot/superfile/blob/main/asset/theme/nord.png?raw=true)
+![](../../../assets/git-assets/theme/nord.png)
 
 ## OneDark
 
@@ -134,7 +134,7 @@ head:
 - Ported by: https://github.com/CommandJoo
 - Original Author: https://github.com/one-dark
 
-![](https://github.com/yorukot/superfile/blob/main/asset/theme/onedark.png?raw=true)
+![](../../../assets/git-assets/theme/onedark.png)
 
 ## Poimandres
 
@@ -142,7 +142,7 @@ head:
 - Ported by: https://github.com/Myles-J
 - Original Author: https://github.com/drcmda/
 
-![](https://github.com/yorukot/superfile/blob/main/asset/theme/poimandres.png?raw=true)
+![](../../../assets/git-assets/theme/poimandres.png)
 
 ## Rosé Pine
 
@@ -150,7 +150,7 @@ head:
 - Ported by: https://github.com/pearcidar
 - Original Author: https://github.com/rose-pine
 
-![](https://github.com/yorukot/superfile/blob/main/asset/theme/rose-pine.png?raw=true)
+![](../../../assets/git-assets/theme/rose-pine.png)
 
 ## Sugarplum
 
@@ -158,7 +158,7 @@ head:
 - Ported by: https://github.com/lemonlime0x3C33
 - Original Author: https://github.com/lemonlime0x3C33
 
-![](https://github.com/yorukot/superfile/blob/main/asset/theme/sugarplum.png?raw=true)
+![](../../../assets/git-assets/theme/sugarplum.png)
 
 ## Tokyonight
 
@@ -166,4 +166,4 @@ head:
 - Ported by: https://github.com/pearcidar
 - Original Author: https://github.com/enkia/
 
-![](https://github.com/yorukot/superfile/blob/main/asset/theme/tokyonight.png?raw=true)
+![](../../../assets/git-assets/theme/tokyonight.png)

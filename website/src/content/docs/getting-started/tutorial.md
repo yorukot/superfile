@@ -181,7 +181,7 @@ If your directory editor does not support opening the current directory with an 
 ### SPF Prompt
 #### Shell Mode
 Press `:` to open the prompt in shell mode, and execute any shell command in the current directory.
-![Prompt-Shell-Mode](https://github.com/yorukot/superfile/blob/main/asset/prompt_shell_mode.png?raw=true)
+![Prompt-Shell-Mode](../../../assets/git-assets/prompt_shell_mode.png)
 
 :::note
 You won't receive any stdout outputs.
@@ -192,7 +192,7 @@ You will be able to see the exit code of the command.
 
 #### SPF Mode
 Press `>` to open the prompt in SPF mode. 
-![Prompt-SPF-Mode](https://github.com/yorukot/superfile/blob/main/asset/prompt_spf_mode.png?raw=true)
+![Prompt-SPF-Mode](../../../assets/git-assets/prompt_spf_mode.png)
 
 In this mode, you can execute these spf commands :
 - `split` - Open a new panel at a current file panel's path.
