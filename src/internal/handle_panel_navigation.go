@@ -6,8 +6,6 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/yorukot/superfile/src/internal/ui/sidebar"
-
 	"github.com/yorukot/superfile/src/internal/common"
 
 	variable "github.com/yorukot/superfile/src/config"
@@ -16,7 +14,7 @@ import (
 // Pinned directory
 func (m *model) pinnedDirectory() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-	err := sidebar.TogglePinnedDirectory(panel.location)
+	err := m.sidebarModel.TogglePinnedDirectory(panel.location)
 	if err != nil {
 		slog.Error("Error while toggling pinned directory", "error", err)
 	}
