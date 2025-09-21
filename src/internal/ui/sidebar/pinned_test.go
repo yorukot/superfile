@@ -196,7 +196,6 @@ func Test_Toggle(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-
 			err := tt.pinnedMgr.Toggle(tt.argDir)
 			if tt.noError {
 				require.NoError(t, err)
