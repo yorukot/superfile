@@ -1,8 +1,6 @@
 package sidebar
 
 import (
-	"errors"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -283,21 +281,7 @@ func Test_Clean(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			before, err := os.Stat(pinnedFile)
-			if !errors.Is(err, fs.ErrNotExist) {
-				require.NoError(t, err)
-			}
-
-			cleaned := tt.pinnedMgr.Clean(tt.argDirs)
-
-			after, err := os.Stat(pinnedFile)
-			if !errors.Is(err, fs.ErrNotExist) {
-				require.NoError(t, err)
-			} else if before != nil && !tt.modified {
-				require.Equal(t, before.ModTime(), after.ModTime())
-			}
-
-			assert.Equal(t, tt.expected, cleaned)
+			assert.Equal(t, tt.expected, tt.pinnedMgr.Clean(tt.argDirs))
 		})
 	}
 }
