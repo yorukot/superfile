@@ -5,7 +5,7 @@ import starlightGiscus from 'starlight-giscus';
 import sitemap from '@astrojs/sitemap';
 
 
-const site = 'https://superfile.netlify.app/';
+const site = 'https://superfile.dev/';
 
 // https://astro.build/config
 export default defineConfig({
@@ -44,6 +44,7 @@ export default defineConfig({
       ],
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/yorukot/superfile' },
+        { icon: 'discord', label: 'Discord', href: 'https://discord.gg/YYtJ23Du7B' },
       ],
       head: [
         {
@@ -86,6 +87,14 @@ export default defineConfig({
             trackingId: 'G-WFLBCRZ7MC',
             autoTrack: true,
           };`,
+        },
+        {
+          tag: 'script',
+          attrs: {
+            defer: true,
+            src: 'https://umami.yorukot.me/script.js',
+            'data-website-id': '9286f04f-4bcd-43f3-8ab7-b479c249f2a7',
+          },
         },
       ],
       editLink: {

@@ -149,5 +149,5 @@ Done!
 Restart you terminal, and for the love of Get-Command
 Take a look at tutorial :)
 
-https://superfile.netlify.app/getting-started/tutorial/
+https://superfile.dev/getting-started/tutorial/
 '@

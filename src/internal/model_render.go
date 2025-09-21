@@ -318,16 +318,16 @@ func (m *model) introduceModalRender() string {
 	title := common.SidebarTitleStyle.Render(" Thanks for using superfile!!") +
 		common.ModalStyle.Render("\n You can read the following information before starting to use it!")
 	vimUserWarn := common.ProcessErrorStyle.Render("  ** Very importantly ** If you are a Vim/Nvim user, go to:\n" +
-		"  https://superfile.netlify.app/configure/custom-hotkeys/ to change your hotkey settings!")
+		"  https://superfile.dev/configure/custom-hotkeys/ to change your hotkey settings!")
 	subOne := common.SidebarTitleStyle.Render("  (1)") +
 		common.ModalStyle.Render(" If this is your first time, make sure you read:\n"+
-			"      https://superfile.netlify.app/getting-started/tutorial/")
+			"      https://superfile.dev/getting-started/tutorial/")
 	subTwo := common.SidebarTitleStyle.Render("  (2)") +
 		common.ModalStyle.Render(" If you forget the relevant keys during use,\n"+
 			"      you can press \"?\" (shift+/) at any time to query the keys!")
 	subThree := common.SidebarTitleStyle.Render("  (3)") +
 		common.ModalStyle.Render(" For more customization you can refer to:\n"+
-			"      https://superfile.netlify.app/")
+			"      https://superfile.dev/")
 	subFour := common.SidebarTitleStyle.Render("  (4)") +
 		common.ModalStyle.Render(" Thank you again for using superfile.\n"+
 			"      If you have any questions, please feel free to ask at:\n"+
