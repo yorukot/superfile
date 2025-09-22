@@ -222,8 +222,8 @@ If you want to contribute please follow the [contribution guide](./CONTRIBUTING.
 
 > We welcome anyone who wants to become a core maintainer. Feel free to reach out!
 
-**[@yorukot](https://github.com/yorukot)** - Original author and maintainer
-**[@lazysegtree](https://github.com/lazysegtree)** - Core maintainer
+- **[@yorukot](https://github.com/yorukot)** - Original author and maintainer
+- **[@lazysegtree](https://github.com/lazysegtree)** - Core maintainer
 
 ### Contributors
 
