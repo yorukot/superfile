@@ -63,12 +63,12 @@ type ThemeType struct {
 
 // Configuration settings
 type ConfigType struct {
-	Theme string `toml:"theme" comment:"More details are at https://superfile.netlify.app/configure/superfile-config/\nchange your theme"`
+	Theme string `toml:"theme" comment:"More details are at https://superfile.dev/configure/superfile-config/\nchange your theme"`
 
 	Editor                 string `toml:"editor" comment:"\nThe editor files will be opened with. (Leave blank to use the EDITOR environment variable)."`
 	DirEditor              string `toml:"dir_editor" comment:"\nThe editor directories will be opened with. (Leave blank to use the default editors)."`
 	AutoCheckUpdate        bool   `toml:"auto_check_update" comment:"\nAuto check for update"`
-	CdOnQuit               bool   `toml:"cd_on_quit" comment:"\nCd on quit (For more details, please check out https://superfile.netlify.app/configure/superfile-config/#cd_on_quit)"`
+	CdOnQuit               bool   `toml:"cd_on_quit" comment:"\nCd on quit (For more details, please check out https://superfile.dev/configure/superfile-config/#cd_on_quit)"`
 	DefaultOpenFilePreview bool   `toml:"default_open_file_preview" comment:"\nWhether to open file preview automatically every time superfile is opened."`
 	ShowImagePreview       bool   `toml:"show_image_preview" comment:"\nWhether to show image preview."`
 	ShowPanelFooterInfo    bool   `toml:"show_panel_footer_info" comment:"\nWhether to show additional footer info for file panel."`
