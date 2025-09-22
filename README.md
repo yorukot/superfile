@@ -58,6 +58,7 @@
 - [Troubleshooting](#troubleshooting)
 - [Thanks](#thanks)
   - [Support](#Support)
+  - [Core maintainer](#core-maintainer)
   - [Contributors](#contributors)
   - [Star History](#star-history)
 
@@ -216,6 +217,13 @@ If you want to contribute please follow the [contribution guide](./CONTRIBUTING.
 - You can buy a coffee for me 💖
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/G2G1JEGGC)
+
+### Core maintainer
+
+> We welcome anyone who wants to become a core maintainer. Feel free to reach out!
+
+- **[@yorukot](https://github.com/yorukot)** - Original author and maintainer
+- **[@lazysegtree](https://github.com/lazysegtree)** - Core maintainer
 
 ### Contributors
 
