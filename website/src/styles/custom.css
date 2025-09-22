@@ -1,5 +1,5 @@
 :root {
-  --sl-font: 'IBM Plex Mono', sans-serif;
+  --sl-font: 'IBM Plex Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
 }
 
 /* Dark mode colors. */
