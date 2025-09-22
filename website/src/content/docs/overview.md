@@ -6,7 +6,7 @@ head:
     content: Overview | superfile
 ---
 
-![](../../assets/git-assets/demo.png)
+![Demo of superfile terminal file manager interface](../../assets/git-assets/demo.png)
 
 # What is superfile?
 superfile is a modern terminal file manager crafted with a strong focus on user interface, functionality, and ease of use. Built with [Go](https://go.dev/) and [Bubble Tea](https://github.com/charmbracelet/bubbletea), it combines a visually appealing design with the simplicity of terminal tools, providing a fresh, accessible approach to file management.
