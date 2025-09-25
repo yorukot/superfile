@@ -4,8 +4,11 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"os/user"
 	"path/filepath"
 	"sort"
+	"strconv"
+	"syscall"
 
 	"github.com/barasher/go-exiftool"
 
@@ -80,6 +83,22 @@ func GetMetadata(filePath string, metadataFocussed bool, et *exiftool.Exiftool) 
 	return meta
 }
 
+func getOwnerAndGroup(fileInfo os.FileInfo) (string, string) {
+	usr := ""
+	grp := ""
+	if stat, ok := fileInfo.Sys().(*syscall.Stat_t); ok {
+		uid := strconv.FormatUint(uint64(stat.Uid), 10)
+		gid := strconv.FormatUint(uint64(stat.Gid), 10)
+		if userData, err := user.LookupId(uid); err == nil {
+			usr = userData.Username
+		}
+		if groupData, err := user.LookupGroupId(gid); err == nil {
+			grp = groupData.Name
+		}
+	}
+	return usr, grp
+}
+
 func getMetaDataUnsorted(filePath string, metadataFocussed bool, et *exiftool.Exiftool) Metadata {
 	res := Metadata{
 		filepath: filePath,
@@ -105,6 +124,9 @@ func getMetaDataUnsorted(filePath string, metadataFocussed bool, et *exiftool.Ex
 	size := [2]string{keySize, common.FormatFileSize(fileInfo.Size())}
 	modifyDate := [2]string{keyDataModified, fileInfo.ModTime().String()}
 	permissions := [2]string{keyPermissions, fileInfo.Mode().String()}
+	ownerVal, groupVal := getOwnerAndGroup(fileInfo)
+	owner := [2]string{keyOwner, ownerVal}
+	group := [2]string{keyGroup, groupVal}
 
 	if fileInfo.IsDir() && metadataFocussed {
 		// TODO : Calling dirSize() could be expensive for large directories, as it recursively
@@ -112,7 +134,7 @@ func getMetaDataUnsorted(filePath string, metadataFocussed bool, et *exiftool.Ex
 		// and its only loaded when metadata panel is focussed.
 		size = [2]string{keySize, common.FormatFileSize(utils.DirSize(filePath))}
 	}
-	res.data = append(res.data, name, size, modifyDate, permissions)
+	res.data = append(res.data, name, size, modifyDate, permissions, owner, group)
 
 	updateExiftoolMetadata(filePath, et, &res)
 
