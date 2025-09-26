@@ -105,6 +105,9 @@ func getMetaDataUnsorted(filePath string, metadataFocussed bool, et *exiftool.Ex
 	size := [2]string{keySize, common.FormatFileSize(fileInfo.Size())}
 	modifyDate := [2]string{keyDataModified, fileInfo.ModTime().String()}
 	permissions := [2]string{keyPermissions, fileInfo.Mode().String()}
+	ownerVal, groupVal := getOwnerAndGroup(fileInfo)
+	owner := [2]string{keyOwner, ownerVal}
+	group := [2]string{keyGroup, groupVal}
 
 	if fileInfo.IsDir() && metadataFocussed {
 		// TODO : Calling dirSize() could be expensive for large directories, as it recursively
@@ -112,7 +115,7 @@ func getMetaDataUnsorted(filePath string, metadataFocussed bool, et *exiftool.Ex
 		// and its only loaded when metadata panel is focussed.
 		size = [2]string{keySize, common.FormatFileSize(utils.DirSize(filePath))}
 	}
-	res.data = append(res.data, name, size, modifyDate, permissions)
+	res.data = append(res.data, name, size, modifyDate, permissions, owner, group)
 
 	updateExiftoolMetadata(filePath, et, &res)
 
