@@ -275,6 +275,13 @@ func (m *model) setHeightValues(height int) {
 
 	// Main panel height = Total terminal height- 2(file panel border) - footer height
 	m.mainPanelHeight = height - 2 - utils.FullFooterHeight(m.footerHeight, m.toggleFooter)
+
+	for index, filePanel := range m.fileModel.filePanels {
+		if filePanel.render < filePanel.cursor-panelElementHeight(m.mainPanelHeight)+1 {
+			filePanel.render = filePanel.cursor - panelElementHeight(m.mainPanelHeight) + 1
+			m.fileModel.filePanels[index] = filePanel
+		}
+	}
 }
 
 // Set help menu size
