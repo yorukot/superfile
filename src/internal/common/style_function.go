@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	"github.com/yorukot/superfile/src/config/icon"
+	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
 )
 
 // Generate border style for file panel
@@ -177,7 +178,7 @@ func FullScreenStyle(height int, width int) lipgloss.Style {
 		Width(width).
 		Align(lipgloss.Center, lipgloss.Center).
 		Background(FullScreenBGColor).
-		Foreground(FullScreenFGColor)
+		Foreground(FullScreenFGColor).SetString(filepreview.ClearKittyImages())
 }
 
 // Generate file panel divider style
