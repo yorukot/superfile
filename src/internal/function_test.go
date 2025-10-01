@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"testing"
 	"time"
@@ -261,4 +262,111 @@ func TestCheckFileNameValidity(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_renameIfDuplicate(t *testing.T) {
+	tests := []struct {
+		name    string
+		prepare func() string
+		want    string
+		wantErr assert.ErrorAssertionFunc
+	}{
+		{
+			name: "file does not exist",
+			prepare: func() string {
+				return filepath.Join(t.TempDir(), "file.txt")
+			},
+			want:    "",
+			wantErr: assert.NoError,
+		},
+		{
+			name: "file exists without suffix",
+			prepare: func() string {
+				dir := t.TempDir()
+				path := filepath.Join(dir, "file.txt")
+				_, err := os.Create(path)
+				require.NoError(t, err)
+				return path
+			},
+			want:    "file(1).txt",
+			wantErr: assert.NoError,
+		},
+		{
+			name: "file exists with suffix",
+			prepare: func() string {
+				dir := t.TempDir()
+				path := filepath.Join(dir, "file(2).txt")
+				_, err := os.Create(path)
+				require.NoError(t, err)
+				return path
+			},
+			want:    "file(3).txt",
+			wantErr: assert.NoError,
+		},
+		{
+			name: "directory exists",
+			prepare: func() string {
+				dir := t.TempDir()
+				existing := filepath.Join(dir, "docs")
+				err := os.Mkdir(existing, 0o755)
+				require.NoError(t, err)
+				return existing
+			},
+			want:    "docs(1)", // without extension
+			wantErr: assert.NoError,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dest := tt.prepare()
+			if tt.want == "" {
+				tt.want = dest // "does not exist"
+			}
+			got, err := renameIfDuplicate(dest)
+			if !tt.wantErr(t, err, fmt.Sprintf("renameIfDuplicate(%v)", dest)) {
+				return
+			}
+			assert.Equalf(t, filepath.Base(tt.want), filepath.Base(got), "renameIfDuplicate(%v)", dest)
+		})
+	}
+}
+
+func Benchmark_renameIfDuplicate(b *testing.B) {
+	dir := b.TempDir()
+	existingFile := filepath.Join(dir, "file.txt")
+	_, err := os.Create(existingFile)
+	require.NoError(b, err)
+
+	existingDir := filepath.Join(dir, "docs")
+	err = os.Mkdir(existingDir, 0o755)
+	require.NoError(b, err)
+
+	b.Run("file_exists", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			_, err := renameIfDuplicate(existingFile)
+			if err != nil {
+				b.Fatal(err)
+			}
+		}
+	})
+
+	b.Run("dir_exists", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			_, err := renameIfDuplicate(existingDir)
+			if err != nil {
+				b.Fatal(err)
+			}
+		}
+	})
+
+	b.Run("file_not_exists", func(b *testing.B) {
+		nonExistent := filepath.Join(dir, "nofile.txt")
+		for i := 0; i < b.N; i++ {
+			_, err := renameIfDuplicate(nonExistent)
+			if err != nil {
+				b.Fatal(err)
+			}
+		}
+	})
 }
