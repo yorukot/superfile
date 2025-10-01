@@ -343,7 +343,7 @@ func Benchmark_renameIfDuplicate(b *testing.B) {
 	require.NoError(b, err)
 
 	b.Run("file_exists", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
+		for range b.N {
 			_, err := renameIfDuplicate(existingFile)
 			if err != nil {
 				b.Fatal(err)
@@ -352,7 +352,7 @@ func Benchmark_renameIfDuplicate(b *testing.B) {
 	})
 
 	b.Run("dir_exists", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
+		for range b.N {
 			_, err := renameIfDuplicate(existingDir)
 			if err != nil {
 				b.Fatal(err)
@@ -362,7 +362,7 @@ func Benchmark_renameIfDuplicate(b *testing.B) {
 
 	b.Run("file_not_exists", func(b *testing.B) {
 		nonExistent := filepath.Join(dir, "nofile.txt")
-		for i := 0; i < b.N; i++ {
+		for range b.N {
 			_, err := renameIfDuplicate(nonExistent)
 			if err != nil {
 				b.Fatal(err)
