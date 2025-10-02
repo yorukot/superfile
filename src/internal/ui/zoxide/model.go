@@ -181,7 +181,7 @@ func (m *Model) renderVisibleResults(r *rendering.Renderer, endIndex int) {
 		availablePathWidth := m.width - 12
 		path := common.TruncateTextBeginning(result.Path, availablePathWidth, "...")
 
-		line := fmt.Sprintf(" %5s | %s", scoreTxt, path)
+		line := fmt.Sprintf(" %6s | %s", scoreTxt, path)
 
 		// Highlight the selected item
 		if i == m.cursor {
