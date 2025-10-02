@@ -64,6 +64,10 @@ func (m *Model) GetResults() []zoxidelib.Result {
 	return out
 }
 
+func (m *Model) GetTextInputValue() string {
+	return m.textInput.Value()
+}
+
 func isKeyAlphaNum(msg tea.KeyMsg) bool {
 	r := []rune(msg.String())
 	if len(r) != 1 {
