@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"slices"
+	"strings"
 
 	"github.com/yorukot/superfile/src/internal/ui"
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
@@ -63,9 +64,13 @@ func (m *Model) HandleUpdate(msg tea.Msg) (common.ModelAction, tea.Cmd) {
 			m.Close()
 		case slices.Contains(common.Hotkeys.CancelTyping, msg.String()):
 			m.Close()
-		case slices.Contains(common.Hotkeys.ListUp, msg.String()):
+		// We dont want keys like `j` and `k` to get stuck here
+		// So if its a navigation key, lets specifically ignore
+		// the alphanumeric keys as zoxide panel is in text input
+		// mode by default
+		case slices.Contains(common.Hotkeys.ListUp, msg.String()) && !isKeyAlphaNum(msg):
 			m.navigateUp()
-		case slices.Contains(common.Hotkeys.ListDown, msg.String()):
+		case slices.Contains(common.Hotkeys.ListDown, msg.String()) && !isKeyAlphaNum(msg):
 			m.navigateDown()
 		case slices.Contains(common.Hotkeys.OpenZoxide, msg.String()) && m.justOpened:
 			// Ignore the 'z' key that just opened this modal to prevent it from appearing in text input
@@ -114,10 +119,10 @@ func (m *Model) updateSuggestions() {
 		return
 	}
 
-	query := m.textInput.Value()
+	query := strings.Fields(m.textInput.Value())
 
 	// Query zoxide with the current input (empty string shows all results)
-	results, err := m.zClient.QueryAll(query)
+	results, err := m.zClient.QueryAll(query...)
 	if err != nil {
 		slog.Debug("Failed to get zoxide suggestions", "query", query, "error", err)
 		m.results = []zoxidelib.Result{}
@@ -170,14 +175,13 @@ func (m *Model) renderResultList(r *rendering.Renderer) {
 func (m *Model) renderVisibleResults(r *rendering.Renderer, endIndex int) {
 	for i := m.renderIndex; i < endIndex; i++ {
 		result := m.results[i]
-		scoreTxt := fmt.Sprintf("%.1f", result.Score)
 
 		// Truncate path if too long (account for score, separator, and padding)
 		// Available width: modal width - borders(2) - padding(2) - score(5) - separator(3) = width - 12
 		availablePathWidth := m.width - 12
 		path := common.TruncateTextBeginning(result.Path, availablePathWidth, "...")
 
-		line := fmt.Sprintf(" %5s | %s", scoreTxt, path)
+		line := fmt.Sprintf(" %6.1f | %s", result.Score, path)
 
 		// Highlight the selected item
 		if i == m.cursor {

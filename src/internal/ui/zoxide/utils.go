@@ -2,7 +2,9 @@ package zoxide
 
 import (
 	"log/slog"
+	"unicode"
 
+	tea "github.com/charmbracelet/bubbletea"
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 )
 
@@ -58,4 +60,12 @@ func (m *Model) GetResults() []zoxidelib.Result {
 	out := make([]zoxidelib.Result, len(m.results))
 	copy(out, m.results)
 	return out
+}
+
+func isKeyAlphaNum(msg tea.KeyMsg) bool {
+	r := []rune(msg.String())
+	if len(r) != 1 {
+		return false
+	}
+	return unicode.IsLetter(r[0]) || unicode.IsNumber(r[0])
 }
