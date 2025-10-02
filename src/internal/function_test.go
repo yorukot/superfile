@@ -284,7 +284,8 @@ func Test_renameIfDuplicate(t *testing.T) {
 			prepare: func() string {
 				dir := t.TempDir()
 				path := filepath.Join(dir, "file.txt")
-				_, err := os.Create(path)
+				f, err := os.Create(path)
+				defer f.Close()
 				require.NoError(t, err)
 				return path
 			},
@@ -296,7 +297,8 @@ func Test_renameIfDuplicate(t *testing.T) {
 			prepare: func() string {
 				dir := t.TempDir()
 				path := filepath.Join(dir, "file(2).txt")
-				_, err := os.Create(path)
+				f, err := os.Create(path)
+				defer f.Close()
 				require.NoError(t, err)
 				return path
 			},
@@ -335,7 +337,8 @@ func Test_renameIfDuplicate(t *testing.T) {
 func Benchmark_renameIfDuplicate(b *testing.B) {
 	dir := b.TempDir()
 	existingFile := filepath.Join(dir, "file.txt")
-	_, err := os.Create(existingFile)
+	f, err := os.Create(existingFile)
+	defer f.Close()
 	require.NoError(b, err)
 
 	existingDir := filepath.Join(dir, "docs")
