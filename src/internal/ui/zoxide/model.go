@@ -63,9 +63,13 @@ func (m *Model) HandleUpdate(msg tea.Msg) (common.ModelAction, tea.Cmd) {
 			m.Close()
 		case slices.Contains(common.Hotkeys.CancelTyping, msg.String()):
 			m.Close()
-		case slices.Contains(common.Hotkeys.ListUp, msg.String()):
+		// We dont want keys like `j` and `k` to get stuck here
+		// So if its a navigation key, lets specifically ignore
+		// the alphanumeric keys as zoxide panel is in text input
+		// mode by default
+		case slices.Contains(common.Hotkeys.ListUp, msg.String()) && !isKeyAlphaNum(msg):
 			m.navigateUp()
-		case slices.Contains(common.Hotkeys.ListDown, msg.String()):
+		case slices.Contains(common.Hotkeys.ListDown, msg.String()) && !isKeyAlphaNum(msg):
 			m.navigateDown()
 		case slices.Contains(common.Hotkeys.OpenZoxide, msg.String()) && m.justOpened:
 			// Ignore the 'z' key that just opened this modal to prevent it from appearing in text input
