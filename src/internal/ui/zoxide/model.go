@@ -174,14 +174,13 @@ func (m *Model) renderResultList(r *rendering.Renderer) {
 func (m *Model) renderVisibleResults(r *rendering.Renderer, endIndex int) {
 	for i := m.renderIndex; i < endIndex; i++ {
 		result := m.results[i]
-		scoreTxt := fmt.Sprintf("%.1f", result.Score)
 
 		// Truncate path if too long (account for score, separator, and padding)
 		// Available width: modal width - borders(2) - padding(2) - score(5) - separator(3) = width - 12
 		availablePathWidth := m.width - 12
 		path := common.TruncateTextBeginning(result.Path, availablePathWidth, "...")
 
-		line := fmt.Sprintf(" %6s | %s", scoreTxt, path)
+		line := fmt.Sprintf(" %6.1f | %s", result.Score, path)
 
 		// Highlight the selected item
 		if i == m.cursor {
