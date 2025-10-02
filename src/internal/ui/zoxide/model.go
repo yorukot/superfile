@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"slices"
+	"strings"
 
 	"github.com/yorukot/superfile/src/internal/ui"
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
@@ -118,10 +119,10 @@ func (m *Model) updateSuggestions() {
 		return
 	}
 
-	query := m.textInput.Value()
+	query := strings.Fields(m.textInput.Value())
 
 	// Query zoxide with the current input (empty string shows all results)
-	results, err := m.zClient.QueryAll(query)
+	results, err := m.zClient.QueryAll(query...)
 	if err != nil {
 		slog.Debug("Failed to get zoxide suggestions", "query", query, "error", err)
 		m.results = []zoxidelib.Result{}
