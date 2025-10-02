@@ -8,12 +8,14 @@ import (
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 )
 
-func (m *Model) Open() {
+func (m *Model) Open() Cmd {
 	m.open = true
 	m.justOpened = true
-	m.textInput.SetValue("") // Clear any unwanted characters
+	m.textInput.SetValue("")
 	_ = m.textInput.Focus()
-	m.updateSuggestions()
+
+	// Return async command for initial query instead of blocking
+	return m.GetQueryCmd("")
 }
 
 func (m *Model) Close() {

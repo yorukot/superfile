@@ -14,6 +14,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
+	zoxideui "github.com/yorukot/superfile/src/internal/ui/zoxide"
 	"github.com/yorukot/superfile/src/internal/utils"
 
 	"github.com/barasher/go-exiftool"
@@ -430,8 +431,11 @@ func (m *model) updateFilePanelsState(msg tea.Msg) tea.Cmd {
 		m.applyPromptModalAction(action)
 	case m.zoxideModal.IsOpen():
 		var action common.ModelAction
-		action, cmd = m.zoxideModal.HandleUpdate(msg)
+		var zCmd zoxideui.Cmd
+		action, zCmd = m.zoxideModal.HandleUpdate(msg)
 		m.applyZoxideModalAction(action)
+		// Wrap zoxide cmd to convert to tea.Cmd
+		return zoxideCmdToTeaCmd(zCmd)
 	}
 
 	// TODO : This is like duct taping a bigger problem

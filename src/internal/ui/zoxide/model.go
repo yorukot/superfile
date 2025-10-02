@@ -34,13 +34,13 @@ func GenerateModel(zClient *zoxidelib.Client, maxHeight int, width int) Model {
 	return m
 }
 
-func (m *Model) HandleUpdate(msg tea.Msg) (common.ModelAction, tea.Cmd) {
+func (m *Model) HandleUpdate(msg tea.Msg) (common.ModelAction, Cmd) {
 	slog.Debug("zoxide.Model HandleUpdate()", "msg", msg,
 		"textInput", m.textInput.Value(),
 		"cursorBlink", m.textInput.Cursor.Blink)
 	var action common.ModelAction
 	action = common.NoAction{}
-	var cmd tea.Cmd
+	var cmd Cmd
 	if !m.IsOpen() {
 		slog.Error("HandleUpdate called on closed zoxide")
 		return action, cmd
@@ -82,7 +82,7 @@ func (m *Model) HandleUpdate(msg tea.Msg) (common.ModelAction, tea.Cmd) {
 		// Non keypress updates like Cursor Blink
 		// Only update text input if zoxide is available
 		if m.zClient != nil {
-			m.textInput, cmd = m.textInput.Update(msg)
+			m.textInput, _ = m.textInput.Update(msg)
 		}
 	}
 	return action, cmd
@@ -101,42 +101,32 @@ func (m *Model) handleConfirm() common.ModelAction {
 	return common.NoAction{}
 }
 
-func (m *Model) handleNormalKeyInput(msg tea.KeyMsg) tea.Cmd {
-	var cmd tea.Cmd
-	m.textInput, cmd = m.textInput.Update(msg)
+func (m *Model) handleNormalKeyInput(msg tea.KeyMsg) Cmd {
+	m.textInput, _ = m.textInput.Update(msg)
 
-	// Update suggestions based on current input
-	m.updateSuggestions()
-
-	return cmd
+	// Return async query command
+	return m.GetQueryCmd(m.textInput.Value())
 }
 
-func (m *Model) updateSuggestions() {
+func (m *Model) GetQueryCmd(query string) Cmd {
 	if m.zClient == nil || !common.Config.ZoxideSupport {
-		m.results = []zoxidelib.Result{}
-		m.cursor = 0
-		m.renderIndex = 0
-		return
+		return nil
 	}
 
-	query := strings.Fields(m.textInput.Value())
+	reqID := m.reqCnt
+	m.reqCnt++
 
-	// Query zoxide with the current input (empty string shows all results)
-	results, err := m.zClient.QueryAll(query...)
-	if err != nil {
-		slog.Debug("Failed to get zoxide suggestions", "query", query, "error", err)
-		m.results = []zoxidelib.Result{}
-		m.cursor = 0
-		m.renderIndex = 0
-		return
+	slog.Debug("Submitting zoxide query request", "query", query, "id", reqID)
+
+	return func() UpdateMsg {
+		queryFields := strings.Fields(query)
+		results, err := m.zClient.QueryAll(queryFields...)
+		if err != nil {
+			slog.Debug("Zoxide query failed", "query", query, "error", err, "id", reqID)
+			return NewUpdateMsg(query, []zoxidelib.Result{}, reqID)
+		}
+		return NewUpdateMsg(query, results, reqID)
 	}
-
-	// Don't limit results here - let scrolling handle display
-	m.results = results
-
-	// Reset selection when results change
-	m.cursor = 0
-	m.renderIndex = 0
 }
 
 func (m *Model) Render() string {

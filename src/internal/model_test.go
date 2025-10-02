@@ -273,24 +273,41 @@ func TestZoxide(t *testing.T) {
 	t.Run("Zoxide tracking and navigation", func(t *testing.T) {
 		common.Config.ZoxideSupport = true
 		m := defaultTestModelWithZClient(zClient, dir1)
+		p := NewTestTeaProgWithEventLoop(t, m)
 
-		err := m.updateCurrentFilePanelDir(dir2)
+		err := p.getModel().updateCurrentFilePanelDir(dir2)
 		require.NoError(t, err, "Failed to navigate to dir2")
-		assert.Equal(t, dir2, m.getFocusedFilePanel().location, "Should be in dir2 after navigation")
+		assert.Equal(t, dir2, p.getModel().getFocusedFilePanel().location, "Should be in dir2 after navigation")
 
-		err = m.updateCurrentFilePanelDir(dir3)
+		err = p.getModel().updateCurrentFilePanelDir(dir3)
 		require.NoError(t, err, "Failed to navigate to dir3")
-		assert.Equal(t, dir3, m.getFocusedFilePanel().location, "Should be in dir3 after navigation")
+		assert.Equal(t, dir3, p.getModel().getFocusedFilePanel().location, "Should be in dir3 after navigation")
 
-		TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenZoxide[0]))
-		assert.True(t, m.zoxideModal.IsOpen(), "Zoxide modal should open when pressing 'z' key")
+		p.SendKey(common.Hotkeys.OpenZoxide[0])
+		assert.Eventually(t, func() bool {
+			return p.getModel().zoxideModal.IsOpen()
+		}, DefaultTestTimeout, DefaultTestTick, "Zoxide modal should open when pressing 'z' key")
 
 		// Type "dir2" to search for it
 		for _, char := range "dir2" {
-			TeaUpdate(m, utils.TeaRuneKeyMsg(string(char)))
+			p.SendKey(string(char))
 		}
 
-		results := m.zoxideModal.GetResults()
+		// Wait for async query results to arrive
+		assert.Eventually(t, func() bool {
+			results := p.getModel().zoxideModal.GetResults()
+			if len(results) == 0 {
+				return false
+			}
+			for _, result := range results {
+				if result.Path == dir2 {
+					return true
+				}
+			}
+			return false
+		}, DefaultTestTimeout, DefaultTestTick, "dir2 should be found by zoxide UI search")
+
+		results := p.getModel().zoxideModal.GetResults()
 		assert.GreaterOrEqual(t, len(results), 1, "Should have at least 1 directory found by zoxide UI search")
 
 		resultPaths := make([]string, len(results))
@@ -299,10 +316,32 @@ func TestZoxide(t *testing.T) {
 		}
 		assert.Contains(t, resultPaths, dir2, "dir2 should be found by zoxide UI search")
 
+		// Find dir2 in results and navigate to it
+		dir2Index := -1
+		for i, result := range results {
+			if result.Path == dir2 {
+				dir2Index = i
+				break
+			}
+		}
+		require.NotEqual(t, -1, dir2Index, "dir2 should be in results")
+
+		// Navigate to dir2's position in the list
+		for range dir2Index {
+			p.SendKey(common.Hotkeys.ListDown[0])
+		}
+
 		// Press enter to navigate to dir2
-		TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.ConfirmTyping[0]))
-		assert.False(t, m.zoxideModal.IsOpen(), "Zoxide modal should close after navigation")
-		assert.Equal(t, dir2, m.getFocusedFilePanel().location, "Should navigate back to dir2 after zoxide selection")
+		p.SendKey(common.Hotkeys.ConfirmTyping[0])
+		assert.Eventually(t, func() bool {
+			return !p.getModel().zoxideModal.IsOpen()
+		}, DefaultTestTimeout, DefaultTestTick, "Zoxide modal should close after navigation")
+		assert.Equal(
+			t,
+			dir2,
+			p.getModel().getFocusedFilePanel().location,
+			"Should navigate back to dir2 after zoxide selection",
+		)
 	})
 
 	t.Run("Zoxide disabled shows no results", func(t *testing.T) {
