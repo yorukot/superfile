@@ -50,46 +50,64 @@ func TestRenderWithTextInput(t *testing.T) {
 	assert.Contains(t, output, "test query", "output should contain text input value")
 }
 
-func TestRenderScrollIndicatorMoreAbove(t *testing.T) {
-	m := setupTestModelWithClient(t)
-	m.results = setupTestModelWithResults(10).results
-	m.renderIndex = 3
-	m.cursor = 5
+func TestRenderScrollIndicator(t *testing.T) {
+	testdata := []struct {
+		name        string
+		resultCnt   int
+		cursor      int
+		expectUp    bool
+		expectDown  bool
+	}{
+		{
+			name:       "More above",
+			resultCnt:  10,
+			cursor:     9,
+			expectUp:   true,
+			expectDown: false,
+		},
+		{
+			name:       "More below",
+			resultCnt:  10,
+			cursor:     0,
+			expectUp:   false,
+			expectDown: true,
+		},
+		{
+			name:       "Both directions",
+			resultCnt:  10,
+			cursor:     5,
+			expectUp:   true,
+			expectDown: true,
+		},
+		{
+			name:       "No scroll needed",
+			resultCnt:  3,
+			cursor:     1,
+			expectUp:   false,
+			expectDown: false,
+		},
+	}
 
-	output := m.Render()
+	for _, tt := range testdata {
+		t.Run(tt.name, func(t *testing.T) {
+			m := setupTestModelWithClient(t)
+			m.results = setupTestModelWithResults(tt.resultCnt).results
+			m.cursor = tt.cursor
+			m.updateRenderIndex()
 
-	assert.Contains(t, output, "↑", "output should contain '↑' indicator when there are results above")
-}
+			rendered := m.Render()
 
-func TestRenderScrollIndicatorMoreBelow(t *testing.T) {
-	m := setupTestModelWithClient(t)
-	m.results = setupTestModelWithResults(10).results
-	m.renderIndex = 0
-	m.cursor = 0
+			if tt.expectUp {
+				assert.Contains(t, rendered, "↑ More results above")
+			} else {
+				assert.NotContains(t, rendered, "↑ More results above")
+			}
 
-	output := m.Render()
-
-	assert.Contains(t, output, "↓", "output should contain '↓' indicator when there are results below")
-}
-
-func TestRenderScrollIndicatorsBothDirections(t *testing.T) {
-	m := setupTestModelWithClient(t)
-	m.results = setupTestModelWithResults(10).results
-	m.renderIndex = 3
-	m.cursor = 5
-
-	output := m.Render()
-
-	assert.Contains(t, output, "↑", "output should contain '↑' indicator when there are results above")
-	assert.Contains(t, output, "↓", "output should contain '↓' indicator when there are results below")
-}
-
-func TestRenderScrollIndicatorsNoneNeeded(t *testing.T) {
-	m := setupTestModelWithClient(t)
-	m.results = setupTestModelWithResults(3).results
-
-	output := m.Render()
-
-	assert.NotContains(t, output, "↑", "output should not contain '↑' indicator with <= maxVisibleResults")
-	assert.NotContains(t, output, "↓", "output should not contain '↓' indicator with <= maxVisibleResults")
+			if tt.expectDown {
+				assert.Contains(t, rendered, "↓ More results below")
+			} else {
+				assert.NotContains(t, rendered, "↓ More results below")
+			}
+		})
+	}
 }
