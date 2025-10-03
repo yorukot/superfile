@@ -52,11 +52,11 @@ func TestRenderWithTextInput(t *testing.T) {
 
 func TestRenderScrollIndicator(t *testing.T) {
 	testdata := []struct {
-		name        string
-		resultCnt   int
-		cursor      int
-		expectUp    bool
-		expectDown  bool
+		name       string
+		resultCnt  int
+		cursor     int
+		expectUp   bool
+		expectDown bool
 	}{
 		{
 			name:       "More above",

@@ -33,7 +33,6 @@ func updateCurrentFilePanelDirOfTestModel(t *testing.T, p *TeaProg, dir string) 
 	assert.Equal(t, dir, p.getModel().getFocusedFilePanel().location, "Should be in %s after navigation", dir)
 }
 
-//nolint:gocognit,maintidx // Integration test with multiple subtests for comprehensive zoxide functionality
 func TestZoxide(t *testing.T) {
 	zoxideDataDir := t.TempDir()
 	zClient, err := zoxidelib.New(zoxidelib.WithDataDir(zoxideDataDir))
@@ -107,7 +106,7 @@ func TestZoxide(t *testing.T) {
 		assert.Empty(t, p.getModel().zoxideModal.GetTextInputValue(),
 			"The 'z' key should not be added to textInput")
 		p.SendKeyDirectly("abc")
-		assert.Equal(t, p.getModel().zoxideModal.GetTextInputValue(), "abc")
+		assert.Equal(t, "abc", p.getModel().zoxideModal.GetTextInputValue())
 	})
 
 	t.Run("Multi-space directory name navigation", func(t *testing.T) {
@@ -140,7 +139,6 @@ func TestZoxide(t *testing.T) {
 			}
 			return false
 		}, DefaultTestTimeout, DefaultTestTick, "dir1 should be found by zoxide")
-
 	})
 
 	t.Run("Zoxide escape key closes modal", func(t *testing.T) {
