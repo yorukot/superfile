@@ -100,10 +100,9 @@ func (m *Model) handleConfirm() common.ModelAction {
 }
 
 func (m *Model) handleNormalKeyInput(msg tea.KeyMsg) tea.Cmd {
-	m.textInput, _ = m.textInput.Update(msg)
-
-	// Return async query command
-	return m.GetQueryCmd(m.textInput.Value())
+	var cmd tea.Cmd
+	m.textInput, cmd = m.textInput.Update(msg)
+	return tea.Batch(cmd, m.GetQueryCmd(m.textInput.Value()))
 }
 
 func (m *Model) GetQueryCmd(query string) tea.Cmd {
