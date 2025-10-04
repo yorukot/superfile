@@ -46,8 +46,12 @@ func (m *Model) renderVisibleResults(r *rendering.Renderer, endIndex int) {
 		result := m.results[i]
 
 		// Truncate path if too long (account for score, separator, and padding)
-		// Available width: modal width - borders(2) - padding(2) - score(5) - separator(3) = width - 12
-		availablePathWidth := m.width - 12
+		// Available width: modal width
+		// - borders(2) - padding(2) - score(6)
+		// - separator(3) = width - 13
+		// 0123456789012345678 => 19 width, path gets 6
+		// | 9999.9 | <path> |
+		availablePathWidth := m.width - 13
 		path := common.TruncateTextBeginning(result.Path, availablePathWidth, "...")
 
 		line := fmt.Sprintf(" %6.1f | %s", result.Score, path)
