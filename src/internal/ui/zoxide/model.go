@@ -1,12 +1,10 @@
 package zoxide
 
 import (
-	"fmt"
 	"log/slog"
+	"reflect"
 	"slices"
-
-	"github.com/yorukot/superfile/src/internal/ui"
-	"github.com/yorukot/superfile/src/internal/ui/rendering"
+	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 	zoxidelib "github.com/lazysegtree/go-zoxide"
@@ -35,6 +33,7 @@ func GenerateModel(zClient *zoxidelib.Client, maxHeight int, width int) Model {
 
 func (m *Model) HandleUpdate(msg tea.Msg) (common.ModelAction, tea.Cmd) {
 	slog.Debug("zoxide.Model HandleUpdate()", "msg", msg,
+		"msgType", reflect.TypeOf(msg),
 		"textInput", m.textInput.Value(),
 		"cursorBlink", m.textInput.Cursor.Blink)
 	var action common.ModelAction
@@ -63,9 +62,13 @@ func (m *Model) HandleUpdate(msg tea.Msg) (common.ModelAction, tea.Cmd) {
 			m.Close()
 		case slices.Contains(common.Hotkeys.CancelTyping, msg.String()):
 			m.Close()
-		case slices.Contains(common.Hotkeys.ListUp, msg.String()):
+		// We dont want keys like `j` and `k` to get stuck here
+		// So if its a navigation key, lets specifically ignore
+		// the alphanumeric keys as zoxide panel is in text input
+		// mode by default
+		case slices.Contains(common.Hotkeys.ListUp, msg.String()) && !isKeyAlphaNum(msg):
 			m.navigateUp()
-		case slices.Contains(common.Hotkeys.ListDown, msg.String()):
+		case slices.Contains(common.Hotkeys.ListDown, msg.String()) && !isKeyAlphaNum(msg):
 			m.navigateDown()
 		case slices.Contains(common.Hotkeys.OpenZoxide, msg.String()) && m.justOpened:
 			// Ignore the 'z' key that just opened this modal to prevent it from appearing in text input
@@ -99,107 +102,45 @@ func (m *Model) handleConfirm() common.ModelAction {
 func (m *Model) handleNormalKeyInput(msg tea.KeyMsg) tea.Cmd {
 	var cmd tea.Cmd
 	m.textInput, cmd = m.textInput.Update(msg)
-
-	// Update suggestions based on current input
-	m.updateSuggestions()
-
-	return cmd
+	return tea.Batch(cmd, m.GetQueryCmd(m.textInput.Value()))
 }
 
-func (m *Model) updateSuggestions() {
+func (m *Model) GetQueryCmd(query string) tea.Cmd {
 	if m.zClient == nil || !common.Config.ZoxideSupport {
-		m.results = []zoxidelib.Result{}
-		m.cursor = 0
-		m.renderIndex = 0
-		return
+		return nil
 	}
 
-	query := m.textInput.Value()
+	reqID := m.reqCnt
+	m.reqCnt++
 
-	// Query zoxide with the current input (empty string shows all results)
-	results, err := m.zClient.QueryAll(query)
-	if err != nil {
-		slog.Debug("Failed to get zoxide suggestions", "query", query, "error", err)
-		m.results = []zoxidelib.Result{}
-		m.cursor = 0
-		m.renderIndex = 0
-		return
+	slog.Debug("Submitting zoxide query request", "query", query, "id", reqID)
+
+	return func() tea.Msg {
+		queryFields := strings.Fields(query)
+		results, err := m.zClient.QueryAll(queryFields...)
+		if err != nil {
+			slog.Debug("Zoxide query failed", "query", query, "error", err, "id", reqID)
+			return NewUpdateMsg(query, []zoxidelib.Result{}, reqID)
+		}
+		return NewUpdateMsg(query, results, reqID)
+	}
+}
+
+// Apply updates the zoxide modal with query results
+func (msg UpdateMsg) Apply(m *Model) tea.Cmd {
+	// Ignore stale results - only apply if query matches current input
+	currentQuery := m.textInput.Value()
+	if msg.query != currentQuery {
+		slog.Debug("Ignoring stale zoxide query result",
+			"msgQuery", msg.query,
+			"currentQuery", currentQuery,
+			"id", msg.reqID)
+		return nil
 	}
 
-	// Don't limit results here - let scrolling handle display
-	m.results = results
-
-	// Reset selection when results change
+	m.results = msg.results
 	m.cursor = 0
 	m.renderIndex = 0
-}
 
-func (m *Model) Render() string {
-	r := ui.ZoxideRenderer(m.maxHeight, m.width)
-	r.SetBorderTitle(m.headline)
-
-	if m.zClient == nil {
-		r.AddSection()
-		r.AddLines(" Zoxide not available (check zoxide_support in config)")
-		return r.Render()
-	}
-
-	r.AddLines(" " + m.textInput.View())
-	r.AddSection()
-	if len(m.results) > 0 {
-		m.renderResultList(r)
-	} else {
-		r.AddLines(" No zoxide results found")
-	}
-	return r.Render()
-}
-
-func (m *Model) renderResultList(r *rendering.Renderer) {
-	// Calculate visible range
-	endIndex := m.renderIndex + maxVisibleResults
-	if endIndex > len(m.results) {
-		endIndex = len(m.results)
-	}
-	// Show visible results
-	m.renderVisibleResults(r, endIndex)
-
-	// Show scroll indicators if needed
-	m.renderScrollIndicators(r, endIndex)
-}
-
-func (m *Model) renderVisibleResults(r *rendering.Renderer, endIndex int) {
-	for i := m.renderIndex; i < endIndex; i++ {
-		result := m.results[i]
-		scoreTxt := fmt.Sprintf("%.1f", result.Score)
-
-		// Truncate path if too long (account for score, separator, and padding)
-		// Available width: modal width - borders(2) - padding(2) - score(5) - separator(3) = width - 12
-		availablePathWidth := m.width - 12
-		path := common.TruncateTextBeginning(result.Path, availablePathWidth, "...")
-
-		line := fmt.Sprintf(" %5s | %s", scoreTxt, path)
-
-		// Highlight the selected item
-		if i == m.cursor {
-			line = common.ModalCursorStyle.Render(line)
-		}
-		r.AddLines(line)
-	}
-}
-
-func (m *Model) renderScrollIndicators(r *rendering.Renderer, endIndex int) {
-	if len(m.results) <= maxVisibleResults {
-		return
-	}
-
-	if m.renderIndex > 0 {
-		r.AddSection()
-		r.AddLines(" ↑ More results above")
-	}
-	if endIndex < len(m.results) {
-		if m.renderIndex == 0 {
-			r.AddSection()
-		}
-		r.AddLines(" ↓ More results below")
-	}
+	return nil
 }
