@@ -17,20 +17,24 @@ import (
 
 const DefaultTestTick = 10 * time.Millisecond
 const DefaultTestTimeout = time.Second
+const DefaultTestModelWidth = 2 * common.MinimumWidth
+const DefaultTestModelHeight = 2 * common.MinimumHeight
 
 // -------------------- Model setup utils
 
 func defaultTestModel(dirs ...string) *model {
 	m := defaultModelConfig(false, false, false, dirs, nil)
-	m.disableMetadata = true
-	TeaUpdate(m, tea.WindowSizeMsg{Width: 2 * common.MinimumWidth, Height: 2 * common.MinimumHeight})
-	return m
+	return setModelParamsForTest(m)
 }
 
 func defaultTestModelWithZClient(zClient *zoxidelib.Client, dirs ...string) *model {
 	m := defaultModelConfig(false, false, false, dirs, zClient)
+	return setModelParamsForTest(m)
+}
+
+func setModelParamsForTest(m *model) *model {
 	m.disableMetadata = true
-	TeaUpdate(m, tea.WindowSizeMsg{Width: 2 * common.MinimumWidth, Height: 2 * common.MinimumHeight})
+	TeaUpdate(m, tea.WindowSizeMsg{Width: DefaultTestModelWidth, Height: DefaultTestModelHeight})
 	return m
 }
 
