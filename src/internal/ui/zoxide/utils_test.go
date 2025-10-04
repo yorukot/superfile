@@ -5,8 +5,6 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/stretchr/testify/assert"
-
-	"github.com/yorukot/superfile/src/internal/common"
 )
 
 func TestIsKeyAlphaNum(t *testing.T) {
@@ -25,7 +23,6 @@ func TestIsKeyAlphaNum(t *testing.T) {
 
 func TestOpenResetsState(t *testing.T) {
 	m := setupTestModelWithClient(t)
-	common.Config.ZoxideSupport = true
 	m.textInput.SetValue("old")
 	m.cursor = 2
 	m.renderIndex = 1

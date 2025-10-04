@@ -12,6 +12,15 @@ import (
 	"github.com/yorukot/superfile/src/internal/utils"
 )
 
+func TestMain(m *testing.M) {
+	originalZoxideSupport := common.Config.ZoxideSupport
+	common.Config.ZoxideSupport = true
+	defer func() {
+		common.Config.ZoxideSupport = originalZoxideSupport
+	}()
+	m.Run()
+}
+
 func TestHandleConfirmWithValidSelection(t *testing.T) {
 	m := setupTestModelWithResults(3)
 	m.cursor = 1
@@ -44,7 +53,7 @@ func TestHandleConfirmWithInvalidCursor(t *testing.T) {
 
 func TestJKKeyHandling(t *testing.T) {
 	m := setupTestModelWithClient(t)
-	common.Config.ZoxideSupport = true
+
 	m.Open()
 
 	originalHotkeys := common.Hotkeys.ListDown
