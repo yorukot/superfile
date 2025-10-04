@@ -16,7 +16,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
-	zoxideui "github.com/yorukot/superfile/src/internal/ui/zoxide"
 	"github.com/yorukot/superfile/src/internal/utils"
 
 	"github.com/yorukot/superfile/src/internal/common"
@@ -360,16 +359,6 @@ func processCmdToTeaCmd(cmd processbar.Cmd) tea.Cmd {
 				reqID: updateMsg.GetReqID(),
 			},
 		}
-	}
-}
-
-func zoxideCmdToTeaCmd(cmd zoxideui.Cmd) tea.Cmd {
-	if cmd == nil {
-		return nil
-	}
-	return func() tea.Msg {
-		updateMsg := cmd()
-		return NewZoxideUpdateMsg(updateMsg)
 	}
 }
 

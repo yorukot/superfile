@@ -29,9 +29,6 @@ type Model struct {
 	reqCnt int
 }
 
-// Cmd is a function that returns an UpdateMsg
-type Cmd func() UpdateMsg
-
 // UpdateMsg represents an async query result
 type UpdateMsg struct {
 	query   string

@@ -8,7 +8,7 @@ import (
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 )
 
-func (m *Model) Open() Cmd {
+func (m *Model) Open() tea.Cmd {
 	m.open = true
 	m.justOpened = true
 	m.textInput.SetValue("")

@@ -2,6 +2,7 @@ package zoxide
 
 import (
 	"log/slog"
+	"reflect"
 	"slices"
 	"strings"
 
@@ -30,13 +31,14 @@ func GenerateModel(zClient *zoxidelib.Client, maxHeight int, width int) Model {
 	return m
 }
 
-func (m *Model) HandleUpdate(msg tea.Msg) (common.ModelAction, Cmd) {
+func (m *Model) HandleUpdate(msg tea.Msg) (common.ModelAction, tea.Cmd) {
 	slog.Debug("zoxide.Model HandleUpdate()", "msg", msg,
+		"msgType", reflect.TypeOf(msg),
 		"textInput", m.textInput.Value(),
 		"cursorBlink", m.textInput.Cursor.Blink)
 	var action common.ModelAction
 	action = common.NoAction{}
-	var cmd Cmd
+	var cmd tea.Cmd
 	if !m.IsOpen() {
 		slog.Error("HandleUpdate called on closed zoxide")
 		return action, cmd
@@ -78,7 +80,7 @@ func (m *Model) HandleUpdate(msg tea.Msg) (common.ModelAction, Cmd) {
 		// Non keypress updates like Cursor Blink
 		// Only update text input if zoxide is available
 		if m.zClient != nil {
-			m.textInput, _ = m.textInput.Update(msg)
+			m.textInput, cmd = m.textInput.Update(msg)
 		}
 	}
 	return action, cmd
@@ -97,14 +99,14 @@ func (m *Model) handleConfirm() common.ModelAction {
 	return common.NoAction{}
 }
 
-func (m *Model) handleNormalKeyInput(msg tea.KeyMsg) Cmd {
+func (m *Model) handleNormalKeyInput(msg tea.KeyMsg) tea.Cmd {
 	m.textInput, _ = m.textInput.Update(msg)
 
 	// Return async query command
 	return m.GetQueryCmd(m.textInput.Value())
 }
 
-func (m *Model) GetQueryCmd(query string) Cmd {
+func (m *Model) GetQueryCmd(query string) tea.Cmd {
 	if m.zClient == nil || !common.Config.ZoxideSupport {
 		return nil
 	}
@@ -114,7 +116,7 @@ func (m *Model) GetQueryCmd(query string) Cmd {
 
 	slog.Debug("Submitting zoxide query request", "query", query, "id", reqID)
 
-	return func() UpdateMsg {
+	return func() tea.Msg {
 		queryFields := strings.Fields(query)
 		results, err := m.zClient.QueryAll(queryFields...)
 		if err != nil {
@@ -123,4 +125,23 @@ func (m *Model) GetQueryCmd(query string) Cmd {
 		}
 		return NewUpdateMsg(query, results, reqID)
 	}
+}
+
+// Apply updates the zoxide modal with query results
+func (msg UpdateMsg) Apply(m *Model) tea.Cmd {
+	// Ignore stale results - only apply if query matches current input
+	currentQuery := m.textInput.Value()
+	if msg.query != currentQuery {
+		slog.Debug("Ignoring stale zoxide query result",
+			"msgQuery", msg.query,
+			"currentQuery", currentQuery,
+			"id", msg.reqID)
+		return nil
+	}
+
+	m.results = msg.results
+	m.cursor = 0
+	m.renderIndex = 0
+
+	return nil
 }

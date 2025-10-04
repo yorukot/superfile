@@ -14,7 +14,6 @@ import (
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
-	zoxideui "github.com/yorukot/superfile/src/internal/ui/zoxide"
 	"github.com/yorukot/superfile/src/internal/utils"
 
 	"github.com/barasher/go-exiftool"
@@ -24,6 +23,7 @@ import (
 	"github.com/charmbracelet/x/ansi"
 
 	variable "github.com/yorukot/superfile/src/config"
+	zoxideui "github.com/yorukot/superfile/src/internal/ui/zoxide"
 	stringfunction "github.com/yorukot/superfile/src/pkg/string_function"
 )
 
@@ -86,6 +86,14 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.handleMouseMsg(msg)
 	case tea.KeyMsg:
 		inputCmd = m.handleKeyInput(msg)
+
+	// Has to handle zoxide messages separately as they could be generated via
+	// zoxide update commands, or batched commands from textinput
+	// Cannot do it like processbar messages
+	case zoxideui.UpdateMsg:
+		slog.Debug("Got ModelUpdate message", "id", msg.GetReqID())
+		gotModelUpdateMsg = true
+		updateCmd = msg.Apply(&m.zoxideModal)
 	case ModelUpdateMessage:
 		// TODO: Some of these updates messages should trigger filePanel state update
 		// For example a success message for delete operation
@@ -412,6 +420,7 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 func (m *model) updateFilePanelsState(msg tea.Msg) tea.Cmd {
 	focusPanel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	var cmd tea.Cmd
+	var action common.ModelAction
 	switch {
 	case m.firstTextInput:
 		m.firstTextInput = false
@@ -422,20 +431,13 @@ func (m *model) updateFilePanelsState(msg tea.Msg) tea.Cmd {
 	case m.typingModal.open:
 		m.typingModal.textInput, cmd = m.typingModal.textInput.Update(msg)
 	case m.promptModal.IsOpen():
-		// *cmd is a non-name, and cannot be used on left of :=
-		var action common.ModelAction
-		// Taking returned cmd is necessary for blinking
 		// TODO : Separate this to a utility
 		cwdLocation := m.fileModel.filePanels[m.filePanelFocusIndex].location
 		action, cmd = m.promptModal.HandleUpdate(msg, cwdLocation)
 		m.applyPromptModalAction(action)
 	case m.zoxideModal.IsOpen():
-		var action common.ModelAction
-		var zCmd zoxideui.Cmd
-		action, zCmd = m.zoxideModal.HandleUpdate(msg)
+		action, cmd = m.zoxideModal.HandleUpdate(msg)
 		m.applyZoxideModalAction(action)
-		// Wrap zoxide cmd to convert to tea.Cmd
-		return zoxideCmdToTeaCmd(zCmd)
 	}
 
 	// TODO : This is like duct taping a bigger problem

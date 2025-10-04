@@ -8,7 +8,6 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
-	zoxideui "github.com/yorukot/superfile/src/internal/ui/zoxide"
 )
 
 type ModelUpdateMessage interface {
@@ -167,26 +166,6 @@ func NewNotifyModalMsg(m notify.Model, reqID int) NotifyModalUpdateMsg {
 func (msg NotifyModalUpdateMsg) ApplyToModel(m *model) tea.Cmd {
 	m.notifyModel = msg.m
 	return nil
-}
-
-type ZoxideUpdateMsg struct {
-	BaseMessage
-
-	zMsg zoxideui.UpdateMsg
-}
-
-func NewZoxideUpdateMsg(zMsg zoxideui.UpdateMsg) ZoxideUpdateMsg {
-	return ZoxideUpdateMsg{
-		zMsg: zMsg,
-		BaseMessage: BaseMessage{
-			reqID: zMsg.GetReqID(),
-		},
-	}
-}
-
-func (msg ZoxideUpdateMsg) ApplyToModel(m *model) tea.Cmd {
-	cmd := msg.zMsg.Apply(&m.zoxideModal)
-	return zoxideCmdToTeaCmd(cmd)
 }
 
 type FilePreviewUpdateMsg struct {
