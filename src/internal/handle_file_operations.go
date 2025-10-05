@@ -81,8 +81,15 @@ func (m *model) panelItemRename() {
 		return
 	}
 
-	cursorPos := strings.LastIndex(panel.element[panel.cursor].name, ".")
-	nameLen := len(panel.element[panel.cursor].name)
+	cursorPos := -1
+	nameRunes := []rune(panel.element[panel.cursor].name)
+	nameLen := len(nameRunes)
+	for i := nameLen - 1; i >= 0; i-- {
+		if nameRunes[i] == '.' {
+			cursorPos = i
+			break
+		}
+	}
 	if cursorPos == -1 || cursorPos == 0 && nameLen > 0 || panel.element[panel.cursor].directory {
 		cursorPos = nameLen
 	}
@@ -133,7 +140,6 @@ func deleteOperation(processBarModel *processbar.Model, items []string, useTrash
 	}
 	for _, item := range items {
 		err = deleteFunc(item)
-
 		if err != nil {
 			p.State = processbar.Failed
 			slog.Error("Error in delete operation", "item", item, "useTrash", useTrash, "error", err)
@@ -211,8 +217,8 @@ func (m *model) getPasteItemCmd() tea.Cmd {
 		return nil
 	}
 
-	//TODO: Do it via m.getNewReqID()
-	//TODO: Have an IO Req Management, collecting info about pending IO Req too
+	// TODO: Do it via m.getNewReqID()
+	// TODO: Have an IO Req Management, collecting info about pending IO Req too
 	reqID := m.ioReqCnt
 	m.ioReqCnt++
 	panelLocation := m.getFocusedFilePanel().location
@@ -256,7 +262,8 @@ func validatePasteOperation(panelLocation string, copyItems []string, cut bool) 
 
 // Paste all clipboard items
 func executePasteOperation(processBarModel *processbar.Model,
-	panelLocation string, copyItems []string, cut bool) processbar.ProcessState {
+	panelLocation string, copyItems []string, cut bool,
+) processbar.ProcessState {
 	slog.Debug("executePasteOperation", "items", copyItems, "cut", cut, "panel location", panelLocation)
 
 	p, err := processBarModel.SendAddProcessMsg(
@@ -278,7 +285,7 @@ func executePasteOperation(processBarModel *processbar.Model,
 			if err != nil {
 				errMessage = "paste item error"
 			} else if cut {
-				//TODO: Fix unhandled error
+				// TODO: Fix unhandled error
 				os.RemoveAll(filePath)
 			}
 		}
@@ -360,7 +367,7 @@ func (m *model) getExtractFileCmd() tea.Cmd {
 			return NewCompressOperationMsg(processbar.Failed, reqID)
 		}
 
-		err = os.MkdirAll(outputDir, 0755)
+		err = os.MkdirAll(outputDir, 0o755)
 		if err != nil {
 			slog.Error("Error while making directory for extracting files", "error", err)
 			return NewCompressOperationMsg(processbar.Failed, reqID)
@@ -411,7 +418,7 @@ func (m *model) getCompressSelectedFilesCmd() tea.Cmd {
 
 func (m *model) chooserFileWriteAndQuit(path string) error {
 	// Attempt to write to the file
-	err := os.WriteFile(variable.ChooserFile, []byte(path), 0644)
+	err := os.WriteFile(variable.ChooserFile, []byte(path), 0o644)
 	if err != nil {
 		return err
 	}
