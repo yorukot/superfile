@@ -440,9 +440,19 @@ func (m *model) hasActiveModal() bool {
 }
 
 func (m *model) isAnyModalActive(state modalStateChecker) bool {
+	if m.hasPrimaryModalsActive(state) {
+		return true
+	}
+	return m.hasSecondaryModalsActive(state)
+}
+
+func (m *model) hasPrimaryModalsActive(state modalStateChecker) bool {
 	return state.typingOpen || state.promptOpen || state.zoxideOpen ||
-		state.notifyOpen || state.bulkRenameOpen || state.renaming ||
-		state.sidebarRenaming || state.searchFocused || state.sidebarSearch ||
+		state.notifyOpen || state.bulkRenameOpen || state.renaming
+}
+
+func (m *model) hasSecondaryModalsActive(state modalStateChecker) bool {
+	return state.sidebarRenaming || state.searchFocused || state.sidebarSearch ||
 		state.sortOpen || state.helpOpen
 }
 
