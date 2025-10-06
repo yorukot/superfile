@@ -3,6 +3,7 @@ package internal
 import (
 	"time"
 
+	"github.com/charmbracelet/lipgloss"
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
@@ -139,13 +140,13 @@ type typingModal struct {
 type bulkRenameModal struct {
 	open         bool
 	renameType   int
-	cursor       int 
+	cursor       int
 	findInput    textinput.Model
 	replaceInput textinput.Model
 	prefixInput  textinput.Model
 	suffixInput  textinput.Model
 	startNumber  int
-	caseType     int 
+	caseType     int
 	preview      []renamePreview
 	errorMessage string
 }
@@ -156,7 +157,18 @@ type renamePreview struct {
 	error   string
 }
 
-// Copied items
+type renameValidation struct {
+	oldName  string
+	newName  string
+	itemPath string
+}
+
+type bulkRenameStyles struct {
+	width               int
+	labelStyle          lipgloss.Style
+	activeLabelStyle    lipgloss.Style
+	inputContainerStyle lipgloss.Style
+} // Copied items
 type copyItems struct {
 	items []string
 	cut   bool

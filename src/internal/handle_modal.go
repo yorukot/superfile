@@ -97,22 +97,34 @@ func (m *model) cancelBulkRename() {
 
 func (m *model) confirmBulkRename() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-
 	previews := m.generateBulkRenamePreview()
 
-	hasValidRenames := false
-	for _, p := range previews {
-		if p.error == "" {
-			hasValidRenames = true
-			break
-		}
-	}
-
-	if !hasValidRenames {
+	if !hasValidRenames(previews) {
 		m.bulkRenameModal.errorMessage = "No valid renames to apply"
 		return
 	}
 
+	successCount, failCount := m.applyBulkRenames(panel, previews)
+	slog.Info("Bulk rename completed", "success", successCount, "failed", failCount)
+
+	m.cancelBulkRename()
+
+	if failCount == 0 {
+		panel.panelMode = browserMode
+		panel.selected = []string{}
+	}
+}
+
+func hasValidRenames(previews []renamePreview) bool {
+	for _, p := range previews {
+		if p.error == "" {
+			return true
+		}
+	}
+	return false
+}
+
+func (m *model) applyBulkRenames(panel *filePanel, previews []renamePreview) (int, int) {
 	successCount := 0
 	failCount := 0
 
@@ -122,31 +134,33 @@ func (m *model) confirmBulkRename() {
 		}
 
 		preview := previews[i]
-
 		if preview.error != "" {
 			failCount++
 			continue
 		}
 
-		newPath := filepath.Join(filepath.Dir(itemPath), preview.newName)
-		err := os.Rename(itemPath, newPath)
-		if err != nil {
-			slog.Error("Error during bulk rename", "oldPath", itemPath, "newPath", newPath, "error", err)
-			failCount++
-		} else {
+		success := m.performRename(itemPath, preview.newName, panel, i)
+		if success {
 			successCount++
-			panel.selected[i] = newPath
+		} else {
+			failCount++
 		}
 	}
 
-	slog.Info("Bulk rename completed", "success", successCount, "failed", failCount)
+	return successCount, failCount
+}
 
-	m.cancelBulkRename()
+func (m *model) performRename(itemPath, newName string, panel *filePanel, index int) bool {
+	newPath := filepath.Join(filepath.Dir(itemPath), newName)
+	err := os.Rename(itemPath, newPath)
 
-	if failCount == 0 {
-		panel.panelMode = browserMode
-		panel.selected = []string{}
+	if err != nil {
+		slog.Error("Error during bulk rename", "oldPath", itemPath, "newPath", newPath, "error", err)
+		return false
 	}
+
+	panel.selected[index] = newPath
+	return true
 }
 
 func (m *model) bulkRenameNextType() {
@@ -186,25 +200,24 @@ func (m *model) bulkRenameNavigateDown() {
 }
 
 func (m *model) bulkRenameFocusInput() {
-	
+
 	m.bulkRenameModal.findInput.Blur()
 	m.bulkRenameModal.replaceInput.Blur()
 	m.bulkRenameModal.prefixInput.Blur()
 	m.bulkRenameModal.suffixInput.Blur()
 
-	
 	switch m.bulkRenameModal.renameType {
-	case 0: 
+	case 0:
 		if m.bulkRenameModal.cursor == 0 {
 			m.bulkRenameModal.findInput.Focus()
 		} else {
 			m.bulkRenameModal.replaceInput.Focus()
 		}
-	case 1: 
+	case 1:
 		m.bulkRenameModal.prefixInput.Focus()
-	case 2: 
+	case 2:
 		m.bulkRenameModal.suffixInput.Focus()
-		
+
 	}
 }
 

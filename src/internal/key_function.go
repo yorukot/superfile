@@ -290,34 +290,49 @@ func (m *model) bulkRenameKey(msg string) tea.Cmd {
 	case slices.Contains(common.Hotkeys.ConfirmTyping, msg):
 		m.confirmBulkRename()
 	case slices.Contains(common.Hotkeys.ListUp, msg):
-		// For numbering and case conversion modes, use up/down to adjust values
-		if m.bulkRenameModal.renameType == 3 { // Numbering
-			if m.bulkRenameModal.startNumber > 0 {
-				m.bulkRenameModal.startNumber--
-			}
-		} else if m.bulkRenameModal.renameType == 4 { // Case conversion
-			if m.bulkRenameModal.caseType > 0 {
-				m.bulkRenameModal.caseType--
-			}
-		} else {
-			m.bulkRenameNavigateUp()
-		}
+		m.handleBulkRenameUpKey()
 	case slices.Contains(common.Hotkeys.ListDown, msg):
-		if m.bulkRenameModal.renameType == 3 { // Numbering
-			m.bulkRenameModal.startNumber++
-		} else if m.bulkRenameModal.renameType == 4 { // Case conversion
-			if m.bulkRenameModal.caseType < 2 {
-				m.bulkRenameModal.caseType++
-			}
-		} else {
-			m.bulkRenameNavigateDown()
-		}
+		m.handleBulkRenameDownKey()
 	case msg == "tab":
 		m.bulkRenameNextType()
 	case msg == "shift+tab":
 		m.bulkRenamePrevType()
 	}
 	return nil
+}
+
+func (m *model) handleBulkRenameUpKey() {
+	if m.bulkRenameModal.renameType == 3 {
+		if m.bulkRenameModal.startNumber > 0 {
+			m.bulkRenameModal.startNumber--
+		}
+		return
+	}
+
+	if m.bulkRenameModal.renameType == 4 {
+		if m.bulkRenameModal.caseType > 0 {
+			m.bulkRenameModal.caseType--
+		}
+		return
+	}
+
+	m.bulkRenameNavigateUp()
+}
+
+func (m *model) handleBulkRenameDownKey() {
+	if m.bulkRenameModal.renameType == 3 {
+		m.bulkRenameModal.startNumber++
+		return
+	}
+
+	if m.bulkRenameModal.renameType == 4 {
+		if m.bulkRenameModal.caseType < 2 {
+			m.bulkRenameModal.caseType++
+		}
+		return
+	}
+
+	m.bulkRenameNavigateDown()
 }
 
 func (m *model) sidebarRenamingKey(msg string) {

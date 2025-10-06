@@ -350,95 +350,46 @@ func (m *model) zoxideModalRender() string {
 
 func (m *model) bulkRenameModalRender() string {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-	bulkRenameModalWidth := 80
+	width := 80
 
+	title := m.renderBulkRenameTitle(panel, width)
+	categoriesAndInputs := m.renderBulkRenameCategoriesAndInputs(width)
+	preview := m.renderBulkRenamePreview(width)
+	tips := m.renderBulkRenameTips(width)
+	errorMsg := m.renderBulkRenameError(width)
+
+	content := title + "\n\n" + categoriesAndInputs + preview + tips + "\n" + errorMsg
+	return m.wrapBulkRenameContent(content, width)
+}
+
+func (m *model) wrapBulkRenameContent(content string, width int) string {
+	modalHeight := common.ModalHeight + 15
+	contentStyle := lipgloss.NewStyle().
+		MaxHeight(modalHeight - 2).
+		MaxWidth(width - 4)
+
+	constrainedContent := contentStyle.Render(content)
+	return common.ModalBorderStyle(modalHeight, width).Render(constrainedContent)
+}
+
+func (m *model) renderBulkRenameTitle(panel *filePanel, width int) string {
 	titleStyle := lipgloss.NewStyle().
-		Width(bulkRenameModalWidth - 4).
+		Width(width - 4).
 		Background(common.ModalBGColor)
 
 	titleText := common.SidebarTitleStyle.Render("  Bulk Rename") +
 		common.ModalStyle.Render(fmt.Sprintf(" (%d files selected)", len(panel.selected)))
-	title := titleStyle.Render(titleText)
+	return titleStyle.Render(titleText)
+}
 
-	renameTypes := []string{
-		"Find & Replace",
-		"Add Prefix",
-		"Add Suffix",
-		"Add Numbering",
-		"Change Case",
-	}
-
+func (m *model) renderBulkRenameCategoriesAndInputs(width int) string {
 	leftColumnWidth := 20
-	rightColumnWidth := bulkRenameModalWidth - 4 - leftColumnWidth - 2 
-	cursorColor := lipgloss.Color(common.Theme.Cursor)
-
-	var typeOptions string
-	typeStyle := lipgloss.NewStyle().
-		Width(leftColumnWidth).
-		Background(common.ModalBGColor).
-		Foreground(common.ModalFGColor)
-
-	for i, typeName := range renameTypes {
-		var line string
-		if i == m.bulkRenameModal.renameType {
-			line = " > " + typeName
-			typeOptions += typeStyle.Foreground(cursorColor).Render(line) + "\n"
-		} else {
-			line = "   " + typeName
-			typeOptions += typeStyle.Render(line) + "\n"
-		}
-	}
-	var inputs string
-	labelStyle := lipgloss.NewStyle().
-		Background(common.ModalBGColor).
-		Foreground(common.ModalFGColor)
-
-	activeLabelStyle := lipgloss.NewStyle().
-		Background(common.ModalBGColor).
-		Foreground(cursorColor)
-
-	inputContainerStyle := lipgloss.NewStyle().
-		Width(rightColumnWidth).
-		Background(common.ModalBGColor)
-
-	switch m.bulkRenameModal.renameType {
-	case 0:
-		findLabel := "Find:    "
-		replaceLabel := "Replace: "
-
-		var findLine, replaceLine string
-		if m.bulkRenameModal.cursor == 0 {
-			findLine = activeLabelStyle.Render(findLabel) + m.bulkRenameModal.findInput.View()
-		} else {
-			findLine = labelStyle.Render(findLabel) + m.bulkRenameModal.findInput.View()
-		}
-
-		if m.bulkRenameModal.cursor == 1 {
-			replaceLine = activeLabelStyle.Render(replaceLabel) + m.bulkRenameModal.replaceInput.View()
-		} else {
-			replaceLine = labelStyle.Render(replaceLabel) + m.bulkRenameModal.replaceInput.View()
-		}
-
-		inputs = inputContainerStyle.Render(findLine) + "\n" + inputContainerStyle.Render(replaceLine)
-	case 1:
-		inputs = inputContainerStyle.Render(activeLabelStyle.Render("Prefix: ") + m.bulkRenameModal.prefixInput.View())
-	case 2:
-		inputs = inputContainerStyle.Render(activeLabelStyle.Render("Suffix: ") + m.bulkRenameModal.suffixInput.View())
-	case 3:
-		numberText := fmt.Sprintf("Start number: %d\n(Use ↑/↓ to adjust)", m.bulkRenameModal.startNumber)
-		inputs = inputContainerStyle.Render(labelStyle.Render(numberText))
-	case 4:
-		caseTypes := []string{"lowercase", "UPPERCASE", "Title Case"}
-		for i, caseType := range caseTypes {
-			if i == m.bulkRenameModal.caseType {
-				inputs += inputContainerStyle.Render(activeLabelStyle.Render(" > "+caseType)) + "\n"
-			} else {
-				inputs += inputContainerStyle.Render(labelStyle.Render("   "+caseType)) + "\n"
-			}
-		}
-	}
-
+	rightColumnWidth := width - 4 - leftColumnWidth - 2
 	columnHeight := 6
+
+	typeOptions := m.renderRenameTypeOptions(leftColumnWidth)
+	inputs := m.renderRenameInputs(rightColumnWidth)
+
 	leftColumnStyle := lipgloss.NewStyle().
 		Width(leftColumnWidth).
 		Height(columnHeight).
@@ -455,87 +406,185 @@ func (m *model) bulkRenameModalRender() string {
 		Background(common.ModalBGColor).
 		Render("  ")
 
-	categoriesAndInputs := lipgloss.JoinHorizontal(
+	return lipgloss.JoinHorizontal(
 		lipgloss.Top,
 		leftColumnStyle.Render(typeOptions),
 		separator,
 		rightColumnStyle.Render(inputs),
 	)
+}
 
-	m.bulkRenameModal.preview = m.generateBulkRenamePreview()
-	previewCount := 3
-	if len(m.bulkRenameModal.preview) < previewCount {
-		previewCount = len(m.bulkRenameModal.preview)
+func (m *model) renderRenameTypeOptions(width int) string {
+	renameTypes := []string{
+		"Find & Replace",
+		"Add Prefix",
+		"Add Suffix",
+		"Add Numbering",
+		"Change Case",
 	}
 
-	var preview string
-	if previewCount > 0 {
-		previewTitle := lipgloss.NewStyle().
-			Width(bulkRenameModalWidth - 4).
+	cursorColor := lipgloss.Color(common.Theme.Cursor)
+	typeStyle := lipgloss.NewStyle().
+		Width(width).
+		Background(common.ModalBGColor).
+		Foreground(common.ModalFGColor)
+
+	var result string
+	for i, typeName := range renameTypes {
+		line := "   " + typeName
+		style := typeStyle
+		if i == m.bulkRenameModal.renameType {
+			line = " > " + typeName
+			style = typeStyle.Foreground(cursorColor)
+		}
+		result += style.Render(line) + "\n"
+	}
+	return result
+}
+
+func (m *model) renderRenameInputs(width int) string {
+	styles := m.createBulkRenameStyles(width)
+
+	switch m.bulkRenameModal.renameType {
+	case 0:
+		return m.renderFindReplaceInputs(styles)
+	case 1:
+		return styles.inputContainerStyle.Render(styles.activeLabelStyle.Render("Prefix: ") + m.bulkRenameModal.prefixInput.View())
+	case 2:
+		return styles.inputContainerStyle.Render(styles.activeLabelStyle.Render("Suffix: ") + m.bulkRenameModal.suffixInput.View())
+	case 3:
+		return m.renderNumberingInput(styles)
+	case 4:
+		return m.renderCaseConversionOptions(styles)
+	}
+	return ""
+}
+
+func (m *model) createBulkRenameStyles(width int) bulkRenameStyles {
+	return bulkRenameStyles{
+		width: width,
+		labelStyle: lipgloss.NewStyle().
+			Background(common.ModalBGColor).
+			Foreground(common.ModalFGColor),
+		activeLabelStyle: lipgloss.NewStyle().
+			Background(common.ModalBGColor).
+			Foreground(lipgloss.Color(common.Theme.Cursor)),
+		inputContainerStyle: lipgloss.NewStyle().
+			Width(width).
+			Background(common.ModalBGColor),
+	}
+}
+
+func (m *model) renderFindReplaceInputs(styles bulkRenameStyles) string {
+	findStyle := styles.labelStyle
+	replaceStyle := styles.labelStyle
+	if m.bulkRenameModal.cursor == 0 {
+		findStyle = styles.activeLabelStyle
+	}
+	if m.bulkRenameModal.cursor == 1 {
+		replaceStyle = styles.activeLabelStyle
+	}
+
+	findLine := findStyle.Render("Find:    ") + m.bulkRenameModal.findInput.View()
+	replaceLine := replaceStyle.Render("Replace: ") + m.bulkRenameModal.replaceInput.View()
+
+	return styles.inputContainerStyle.Render(findLine) + "\n" + styles.inputContainerStyle.Render(replaceLine)
+}
+
+func (m *model) renderNumberingInput(styles bulkRenameStyles) string {
+	numberText := fmt.Sprintf("Start number: %d\n(Use ↑/↓ to adjust)", m.bulkRenameModal.startNumber)
+	return styles.inputContainerStyle.Render(styles.labelStyle.Render(numberText))
+}
+
+func (m *model) renderCaseConversionOptions(styles bulkRenameStyles) string {
+	caseTypes := []string{"lowercase", "UPPERCASE", "Title Case"}
+	var result string
+
+	for i, caseType := range caseTypes {
+		style := styles.labelStyle
+		line := "   " + caseType
+		if i == m.bulkRenameModal.caseType {
+			style = styles.activeLabelStyle
+			line = " > " + caseType
+		}
+		result += styles.inputContainerStyle.Render(style.Render(line)) + "\n"
+	}
+	return result
+}
+
+func (m *model) renderBulkRenamePreview(width int) string {
+	m.bulkRenameModal.preview = m.generateBulkRenamePreview()
+	previewCount := min(3, len(m.bulkRenameModal.preview))
+
+	if previewCount == 0 {
+		return ""
+	}
+
+	previewTitle := lipgloss.NewStyle().
+		Width(width - 4).
+		Align(lipgloss.Center).
+		Background(common.ModalBGColor).
+		Foreground(common.ModalFGColor).
+		Render("Preview:")
+
+	preview := "\n" + previewTitle + "\n"
+
+	for i := 0; i < previewCount; i++ {
+		preview += m.renderPreviewItem(m.bulkRenameModal.preview[i], width)
+	}
+
+	if len(m.bulkRenameModal.preview) > previewCount {
+		moreText := fmt.Sprintf("... and %d more files", len(m.bulkRenameModal.preview)-previewCount)
+		centeredMore := lipgloss.NewStyle().
+			Width(width - 4).
 			Align(lipgloss.Center).
 			Background(common.ModalBGColor).
 			Foreground(common.ModalFGColor).
-			Render("Preview:")
-		preview = "\n" + previewTitle + "\n"
-
-		for i := 0; i < previewCount; i++ {
-			p := m.bulkRenameModal.preview[i]
-
-			centeredLine := lipgloss.NewStyle().
-				Width(bulkRenameModalWidth - 4).
-				Align(lipgloss.Center).
-				Background(common.ModalBGColor).
-				Foreground(common.ModalFGColor).
-				Render(p.newName)
-
-			if p.error != "" {
-				errorStyle := lipgloss.NewStyle().
-					Width(bulkRenameModalWidth - 4).
-					Align(lipgloss.Center).
-					Background(common.ModalBGColor).
-					Foreground(lipgloss.Color(common.Theme.Error))
-				preview += errorStyle.Render(p.newName) + "\n"
-				preview += errorStyle.Render(fmt.Sprintf("(%s)", p.error)) + "\n"
-			} else {
-				preview += centeredLine + "\n"
-			}
-		}
-		if len(m.bulkRenameModal.preview) > previewCount {
-			moreText := fmt.Sprintf("... and %d more files", len(m.bulkRenameModal.preview)-previewCount)
-			centeredMore := lipgloss.NewStyle().
-				Width(bulkRenameModalWidth - 4).
-				Align(lipgloss.Center).
-				Background(common.ModalBGColor).
-				Foreground(common.ModalFGColor).
-				Render(moreText)
-			preview += centeredMore + "\n"
-		}
+			Render(moreText)
+		preview += centeredMore + "\n"
 	}
 
+	return preview
+}
+
+func (m *model) renderPreviewItem(p renamePreview, width int) string {
+	centeredLine := lipgloss.NewStyle().
+		Width(width - 4).
+		Align(lipgloss.Center).
+		Background(common.ModalBGColor).
+		Foreground(common.ModalFGColor).
+		Render(p.newName)
+
+	if p.error == "" {
+		return centeredLine + "\n"
+	}
+
+	errorStyle := lipgloss.NewStyle().
+		Width(width - 4).
+		Align(lipgloss.Center).
+		Background(common.ModalBGColor).
+		Foreground(lipgloss.Color(common.Theme.Error))
+
+	return errorStyle.Render(p.newName) + "\n" + errorStyle.Render(fmt.Sprintf("(%s)", p.error)) + "\n"
+}
+
+func (m *model) renderBulkRenameTips(width int) string {
 	tipsStyle := lipgloss.NewStyle().
-		Width(bulkRenameModalWidth - 4).
+		Width(width - 4).
 		Background(common.ModalBGColor).
 		Foreground(common.ModalFGColor)
-	tips := tipsStyle.Render("\nTab/Shift+Tab: Change type | ↑/↓: Navigate | Enter (Rename) | Esc (Cancel)\n")
+	return tipsStyle.Render("\nTab/Shift+Tab: Change type | ↑/↓: Navigate | Enter (Rename) | Esc (Cancel)\n")
+}
 
-	var err string
-	if m.bulkRenameModal.errorMessage != "" {
-		errStyle := lipgloss.NewStyle().
-			Width(bulkRenameModalWidth - 4).
-			Background(common.ModalBGColor)
-		err = "\n" + errStyle.Render(common.ModalErrorStyle.Render(m.bulkRenameModal.errorMessage))
+func (m *model) renderBulkRenameError(width int) string {
+	if m.bulkRenameModal.errorMessage == "" {
+		return ""
 	}
 
-	content := title + "\n\n" + categoriesAndInputs + preview + tips + "\n" + err
-
-	modalHeight := common.ModalHeight + 15
-	contentStyle := lipgloss.NewStyle().
-		MaxHeight(modalHeight - 2).       
-		MaxWidth(bulkRenameModalWidth - 4)
-
-	constrainedContent := contentStyle.Render(content)
-
-	return common.ModalBorderStyle(modalHeight, bulkRenameModalWidth).Render(constrainedContent)
+	errStyle := lipgloss.NewStyle().
+		Width(width - 4).
+		Background(common.ModalBGColor)
+	return "\n" + errStyle.Render(common.ModalErrorStyle.Render(m.bulkRenameModal.errorMessage))
 }
 
 func (m *model) helpMenuRender() string {

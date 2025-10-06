@@ -73,7 +73,6 @@ func (m *model) warnModalForRenaming() tea.Cmd {
 	return res
 }
 
-
 func (m *model) panelItemRename() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	if len(panel.element) == 0 {
@@ -619,43 +618,61 @@ func (m *model) generateBulkRenamePreview() []renamePreview {
 	previews := make([]renamePreview, 0, len(panel.selected))
 
 	for i, itemPath := range panel.selected {
-		oldName := filepath.Base(itemPath)
-		newName := oldName
-		var err string
-
-		// Apply transformation based on rename type
-		switch m.bulkRenameModal.renameType {
-		case 0: // Find & Replace
-			newName = applyFindReplace(newName, m.bulkRenameModal.findInput.Value(), m.bulkRenameModal.replaceInput.Value())
-		case 1: // Prefix
-			newName = applyPrefix(newName, m.bulkRenameModal.prefixInput.Value())
-		case 2: // Suffix
-			newName = applySuffix(newName, m.bulkRenameModal.suffixInput.Value())
-		case 3: // Numbering
-			newName = applyNumbering(newName, m.bulkRenameModal.startNumber+i)
-		case 4: // Case conversion
-			newName = applyCaseConversion(newName, m.bulkRenameModal.caseType)
-		}
-
-		// Validate new name
-		if newName == "" {
-			err = "Empty filename"
-		} else if newName == oldName {
-			err = "No change"
-		} else {
-			// Check if new name would cause conflict
-			newPath := filepath.Join(filepath.Dir(itemPath), newName)
-			if _, statErr := os.Stat(newPath); statErr == nil && newPath != itemPath {
-				err = "File already exists"
-			}
-		}
-
-		previews = append(previews, renamePreview{
-			oldName: oldName,
-			newName: newName,
-			error:   err,
-		})
+		preview := m.createRenamePreview(itemPath, i)
+		previews = append(previews, preview)
 	}
 
 	return previews
+}
+
+func (m *model) createRenamePreview(itemPath string, index int) renamePreview {
+	oldName := filepath.Base(itemPath)
+	newName := m.applyBulkRenameTransformation(oldName, index)
+
+	validation := renameValidation{
+		oldName:  oldName,
+		newName:  newName,
+		itemPath: itemPath,
+	}
+
+	return renamePreview{
+		oldName: oldName,
+		newName: newName,
+		error:   validateRename(validation),
+	}
+}
+
+func (m *model) applyBulkRenameTransformation(oldName string, index int) string {
+	switch m.bulkRenameModal.renameType {
+	case 0:
+		return applyFindReplace(oldName, m.bulkRenameModal.findInput.Value(), m.bulkRenameModal.replaceInput.Value())
+	case 1:
+		return applyPrefix(oldName, m.bulkRenameModal.prefixInput.Value())
+	case 2:
+		return applySuffix(oldName, m.bulkRenameModal.suffixInput.Value())
+	case 3:
+		return applyNumbering(oldName, m.bulkRenameModal.startNumber+index)
+	case 4:
+		return applyCaseConversion(oldName, m.bulkRenameModal.caseType)
+	default:
+		return oldName
+	}
+}
+
+func validateRename(v renameValidation) string {
+	if v.newName == "" {
+		return "Empty filename"
+	}
+	if v.newName == v.oldName {
+		return "No change"
+	}
+	return checkRenameConflict(v)
+}
+
+func checkRenameConflict(v renameValidation) string {
+	newPath := filepath.Join(filepath.Dir(v.itemPath), v.newName)
+	if _, statErr := os.Stat(newPath); statErr == nil && newPath != v.itemPath {
+		return "File already exists"
+	}
+	return ""
 }
