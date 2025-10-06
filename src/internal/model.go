@@ -351,61 +351,75 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 		m.firstUse = false
 		return nil
 	}
-	var cmd tea.Cmd
-	cdOnQuit := common.Config.CdOnQuit
+	
+	cmd := m.handleModalOrDefaultKey(msg)
+	return m.handleQuitState(cmd, common.Config.CdOnQuit)
+}
+
+func (m *model) handleModalOrDefaultKey(msg tea.KeyMsg) tea.Cmd {
+	if cmd := m.handleActiveModal(msg.String()); cmd != nil || m.hasActiveModal() {
+		return cmd
+	}
+	return m.handleDefaultKey(msg.String())
+}
+
+func (m *model) handleActiveModal(msg string) tea.Cmd {
 	switch {
 	case m.typingModal.open:
-		m.typingModalOpenKey(msg.String())
-	case m.promptModal.IsOpen():
-		// Ignore keypress. It will be handled in Update call via
-		// updateFilePanelState
-		// TODO: Convert that to async via tea.Cmd
-	case m.zoxideModal.IsOpen():
-		// Ignore keypress. It will be handled in Update call via
-		// updateFilePanelState
-
-	// Handles all warn models except the warn model for confirming to quit
+		m.typingModalOpenKey(msg)
+		return nil
+	case m.promptModal.IsOpen(), m.zoxideModal.IsOpen():
+		return nil
 	case m.notifyModel.IsOpen():
-		cmd = m.notifyModelOpenKey(msg.String())
-
-	// If bulk rename modal is open
+		return m.notifyModelOpenKey(msg)
 	case m.bulkRenameModal.open:
-		cmd = m.bulkRenameKey(msg.String())
-
-	// If renaming a object
+		return m.bulkRenameKey(msg)
 	case m.fileModel.renaming:
-		cmd = m.renamingKey(msg.String())
+		return m.renamingKey(msg)
 	case m.sidebarModel.IsRenaming():
-		m.sidebarRenamingKey(msg.String())
-	// If search bar is open
+		m.sidebarRenamingKey(msg)
+		return nil
 	case m.fileModel.filePanels[m.filePanelFocusIndex].searchBar.Focused():
-		m.focusOnSearchbarKey(msg.String())
-	// If sort options menu is open
+		m.focusOnSearchbarKey(msg)
+		return nil
 	case m.sidebarModel.SearchBarFocused():
-		m.sidebarModel.HandleSearchBarKey(msg.String())
+		m.sidebarModel.HandleSearchBarKey(msg)
+		return nil
 	case m.fileModel.filePanels[m.filePanelFocusIndex].sortOptions.open:
-		m.sortOptionsKey(msg.String())
-	// If help menu is open
+		m.sortOptionsKey(msg)
+		return nil
 	case m.helpMenu.open:
-		m.helpMenuKey(msg.String())
-
-	case slices.Contains(common.Hotkeys.Quit, msg.String()):
-		m.modelQuitState = quitInitiated
-
-	case slices.Contains(common.Hotkeys.CdQuit, msg.String()):
-		m.modelQuitState = quitInitiated
-		cdOnQuit = true
-
-	default:
-		// Handles general kinds of inputs in the regular state of the application
-		cmd = m.mainKey(msg.String())
+		m.helpMenuKey(msg)
+		return nil
 	}
+	return nil
+}
 
-	// If quiting input pressed, check if has any running process and displays a
-	// warn. Otherwise just quits application
+func (m *model) hasActiveModal() bool {
+	return m.typingModal.open || m.promptModal.IsOpen() || m.zoxideModal.IsOpen() ||
+		m.notifyModel.IsOpen() || m.bulkRenameModal.open || m.fileModel.renaming ||
+		m.sidebarModel.IsRenaming() || m.fileModel.filePanels[m.filePanelFocusIndex].searchBar.Focused() ||
+		m.sidebarModel.SearchBarFocused() || m.fileModel.filePanels[m.filePanelFocusIndex].sortOptions.open ||
+		m.helpMenu.open
+}
+
+func (m *model) handleDefaultKey(msg string) tea.Cmd {
+	switch {
+	case slices.Contains(common.Hotkeys.Quit, msg):
+		m.modelQuitState = quitInitiated
+		return nil
+	case slices.Contains(common.Hotkeys.CdQuit, msg):
+		m.modelQuitState = quitInitiated
+		common.Config.CdOnQuit = true
+		return nil
+	default:
+		return m.mainKey(msg)
+	}
+}
+
+func (m *model) handleQuitState(cmd tea.Cmd, cdOnQuit bool) tea.Cmd {
 	if m.modelQuitState == quitInitiated {
 		if m.processBarModel.HasRunningProcesses() {
-			// Dont quit now, get a confirmation first.
 			m.modelQuitState = quitConfirmationInitiated
 			m.warnModalForQuit()
 			return cmd
