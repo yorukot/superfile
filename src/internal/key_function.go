@@ -302,37 +302,44 @@ func (m *model) bulkRenameKey(msg string) tea.Cmd {
 }
 
 func (m *model) handleBulkRenameUpKey() {
-	if m.bulkRenameModal.renameType == 3 {
-		if m.bulkRenameModal.startNumber > 0 {
-			m.bulkRenameModal.startNumber--
-		}
-		return
-	}
-
-	if m.bulkRenameModal.renameType == 4 {
-		if m.bulkRenameModal.caseType > 0 {
-			m.bulkRenameModal.caseType--
-		}
-		return
-	}
-
-	m.bulkRenameNavigateUp()
+	m.adjustBulkRenameValue(-1)
 }
 
 func (m *model) handleBulkRenameDownKey() {
-	if m.bulkRenameModal.renameType == 3 {
-		m.bulkRenameModal.startNumber++
-		return
-	}
+	m.adjustBulkRenameValue(1)
+}
 
-	if m.bulkRenameModal.renameType == 4 {
-		if m.bulkRenameModal.caseType < 2 {
-			m.bulkRenameModal.caseType++
-		}
-		return
+func (m *model) adjustBulkRenameValue(delta int) {
+	switch m.bulkRenameModal.renameType {
+	case 3:
+		m.adjustNumberingValue(delta)
+	case 4:
+		m.adjustCaseType(delta)
+	default:
+		m.navigateBulkRename(delta)
 	}
+}
 
-	m.bulkRenameNavigateDown()
+func (m *model) adjustNumberingValue(delta int) {
+	newValue := m.bulkRenameModal.startNumber + delta
+	if newValue >= 0 {
+		m.bulkRenameModal.startNumber = newValue
+	}
+}
+
+func (m *model) adjustCaseType(delta int) {
+	newValue := m.bulkRenameModal.caseType + delta
+	if newValue >= 0 && newValue <= 2 {
+		m.bulkRenameModal.caseType = newValue
+	}
+}
+
+func (m *model) navigateBulkRename(delta int) {
+	if delta < 0 {
+		m.bulkRenameNavigateUp()
+	} else {
+		m.bulkRenameNavigateDown()
+	}
 }
 
 func (m *model) sidebarRenamingKey(msg string) {
