@@ -453,7 +453,7 @@ func (m *model) bulkRenameModalRender() string {
 		Width(leftColumnWidth).
 		Height(columnHeight).
 		Background(common.ModalBGColor)
-	
+
 	rightColumnStyle := lipgloss.NewStyle().
 		Width(rightColumnWidth).
 		Height(columnHeight).
@@ -465,11 +465,11 @@ func (m *model) bulkRenameModalRender() string {
 		Height(columnHeight).
 		Background(common.ModalBGColor).
 		Render("  ")
-	
+
 	categoriesAndInputs := lipgloss.JoinHorizontal(
-		lipgloss.Top, 
-		leftColumnStyle.Render(typeOptions), 
-		separator, 
+		lipgloss.Top,
+		leftColumnStyle.Render(typeOptions),
+		separator,
 		rightColumnStyle.Render(inputs),
 	)
 
