@@ -330,8 +330,9 @@ func GenerateFooterBorder(countString string, width int) string {
 // GenerateBulkRenameTextInput creates a text input for bulk rename modal
 func GenerateBulkRenameTextInput(placeholder string) textinput.Model {
 	ti := textinput.New()
-	ti.Cursor.Style = FilePanelCursorStyle
-	ti.Cursor.TextStyle = FilePanelStyle
+	ti.Cursor.Style = ModalStyle
+	ti.Cursor.TextStyle = ModalStyle
+	ti.PromptStyle = ModalStyle
 	ti.Prompt = ""
 	ti.TextStyle = ModalStyle
 	ti.Cursor.Blink = true
