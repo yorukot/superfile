@@ -667,15 +667,7 @@ func (m *model) updateRenderForOverlay(finalRender string) string {
 	}
 
 	if m.bulkRenameModal.open {
-		config := modalOverlayConfig{
-			width:  80,
-			height: common.ModalHeight + 15,
-		}
-		config.x = m.fullWidth/2 - config.width/2
-		config.y = m.fullHeight/2 - config.height/2
-
-		bulkRenameModal := m.bulkRenameModalRender()
-		return stringfunction.PlaceOverlay(config.x, config.y, bulkRenameModal, finalRender)
+		return m.renderBulkRenameOverlay(finalRender)
 	}
 
 	if m.notifyModel.IsOpen() {
@@ -685,6 +677,22 @@ func (m *model) updateRenderForOverlay(finalRender string) string {
 		return stringfunction.PlaceOverlay(overlayX, overlayY, notifyModal, finalRender)
 	}
 	return finalRender
+}
+
+func (m *model) renderBulkRenameOverlay(finalRender string) string {
+	config := m.getBulkRenameOverlayConfig()
+	bulkRenameModal := m.bulkRenameModalRender()
+	return stringfunction.PlaceOverlay(config.x, config.y, bulkRenameModal, finalRender)
+}
+
+func (m *model) getBulkRenameOverlayConfig() modalOverlayConfig {
+	config := modalOverlayConfig{
+		width:  80,
+		height: common.ModalHeight + 15,
+	}
+	config.x = m.fullWidth/2 - config.width/2
+	config.y = m.fullHeight/2 - config.height/2
+	return config
 }
 
 func showRenderDebugStatsMain(sidebar, filePanel, filePreview string) {
