@@ -133,11 +133,11 @@ func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
 	if !m.getFocusedFilePanel().isFocused {
 		return m.handleSidebarFocusKeys(msg)
 	}
-	
+
 	if m.getFocusedFilePanel().panelMode == selectMode {
 		return m.handleSelectModeKeys(msg)
 	}
-	
+
 	return m.handleBrowserModeKeys(msg)
 }
 
@@ -145,7 +145,7 @@ func (m *model) handleSidebarFocusKeys(msg string) tea.Cmd {
 	if m.focusPanel != sidebarFocus {
 		return nil
 	}
-	
+
 	switch {
 	case slices.Contains(common.Hotkeys.Confirm, msg):
 		m.sidebarSelectDirectory()

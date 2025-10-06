@@ -351,7 +351,7 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 		m.firstUse = false
 		return nil
 	}
-	
+
 	cmd := m.handleModalOrDefaultKey(msg)
 	return m.handleQuitState(cmd, common.Config.CdOnQuit)
 }
