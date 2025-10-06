@@ -85,7 +85,6 @@ func (m *model) confirmRename() {
 	panel.renaming = false
 }
 
-// Cancel bulk rename modal
 func (m *model) cancelBulkRename() {
 	m.bulkRenameModal.open = false
 	m.bulkRenameModal.findInput.Blur()
@@ -96,14 +95,11 @@ func (m *model) cancelBulkRename() {
 	m.bulkRenameModal.preview = nil
 }
 
-// Confirm bulk rename - apply the rename operations
 func (m *model) confirmBulkRename() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 
-	// Generate preview to validate renames
 	previews := m.generateBulkRenamePreview()
 
-	// Check if any renames are valid
 	hasValidRenames := false
 	for _, p := range previews {
 		if p.error == "" {
@@ -117,7 +113,6 @@ func (m *model) confirmBulkRename() {
 		return
 	}
 
-	// Apply renames
 	successCount := 0
 	failCount := 0
 
@@ -128,13 +123,11 @@ func (m *model) confirmBulkRename() {
 
 		preview := previews[i]
 
-		// Skip if there's an error
 		if preview.error != "" {
 			failCount++
 			continue
 		}
 
-		// Perform the rename
 		newPath := filepath.Join(filepath.Dir(itemPath), preview.newName)
 		err := os.Rename(itemPath, newPath)
 		if err != nil {
@@ -142,24 +135,20 @@ func (m *model) confirmBulkRename() {
 			failCount++
 		} else {
 			successCount++
-			// Update the path in selected items
 			panel.selected[i] = newPath
 		}
 	}
 
 	slog.Info("Bulk rename completed", "success", successCount, "failed", failCount)
 
-	// Close the modal
 	m.cancelBulkRename()
 
-	// Exit selection mode if all renames succeeded
 	if failCount == 0 {
 		panel.panelMode = browserMode
 		panel.selected = []string{}
 	}
 }
 
-// Navigate between rename types in bulk rename modal
 func (m *model) bulkRenameNextType() {
 	m.bulkRenameModal.renameType = (m.bulkRenameModal.renameType + 1) % 5
 	m.bulkRenameFocusInput()
@@ -170,7 +159,6 @@ func (m *model) bulkRenamePrevType() {
 	m.bulkRenameFocusInput()
 }
 
-// Navigate within bulk rename modal inputs
 func (m *model) bulkRenameNavigateUp() {
 	if m.bulkRenameModal.cursor > 0 {
 		m.bulkRenameModal.cursor--
@@ -181,13 +169,13 @@ func (m *model) bulkRenameNavigateUp() {
 func (m *model) bulkRenameNavigateDown() {
 	maxCursor := 0
 	switch m.bulkRenameModal.renameType {
-	case 0: // Find & Replace has 2 inputs
+	case 0:
 		maxCursor = 1
-	case 3: // Numbering has start number option
+	case 3:
 		maxCursor = 0
-	case 4: // Case conversion has case type options
+	case 4:
 		maxCursor = 2
-	default: // Prefix/Suffix have 1 input each
+	default:
 		maxCursor = 0
 	}
 
@@ -197,27 +185,26 @@ func (m *model) bulkRenameNavigateDown() {
 	m.bulkRenameFocusInput()
 }
 
-// Focus the appropriate input based on current state
 func (m *model) bulkRenameFocusInput() {
-	// Blur all inputs first
+	
 	m.bulkRenameModal.findInput.Blur()
 	m.bulkRenameModal.replaceInput.Blur()
 	m.bulkRenameModal.prefixInput.Blur()
 	m.bulkRenameModal.suffixInput.Blur()
 
-	// Focus the appropriate input based on rename type and cursor
+	
 	switch m.bulkRenameModal.renameType {
-	case 0: // Find & Replace
+	case 0: 
 		if m.bulkRenameModal.cursor == 0 {
 			m.bulkRenameModal.findInput.Focus()
 		} else {
 			m.bulkRenameModal.replaceInput.Focus()
 		}
-	case 1: // Prefix
+	case 1: 
 		m.bulkRenameModal.prefixInput.Focus()
-	case 2: // Suffix
+	case 2: 
 		m.bulkRenameModal.suffixInput.Focus()
-		// For numbering and case conversion, no text input to focus
+		
 	}
 }
 

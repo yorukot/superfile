@@ -350,11 +350,8 @@ func (m *model) zoxideModalRender() string {
 
 func (m *model) bulkRenameModalRender() string {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-
-	// Use a wider modal for bulk rename
 	bulkRenameModalWidth := 80
 
-	// Title with full width background
 	titleStyle := lipgloss.NewStyle().
 		Width(bulkRenameModalWidth - 4).
 		Background(common.ModalBGColor)
@@ -371,13 +368,10 @@ func (m *model) bulkRenameModalRender() string {
 		"Change Case",
 	}
 
-	// Two-column layout: categories on left, inputs on right
 	leftColumnWidth := 20
-	rightColumnWidth := bulkRenameModalWidth - 4 - leftColumnWidth - 2 // -2 for spacing
-
+	rightColumnWidth := bulkRenameModalWidth - 4 - leftColumnWidth - 2 
 	cursorColor := lipgloss.Color(common.Theme.Cursor)
 
-	// Render type selector (left column)
 	var typeOptions string
 	typeStyle := lipgloss.NewStyle().
 		Width(leftColumnWidth).
@@ -394,8 +388,6 @@ func (m *model) bulkRenameModalRender() string {
 			typeOptions += typeStyle.Render(line) + "\n"
 		}
 	}
-
-	// Render inputs based on selected type (right column)
 	var inputs string
 	labelStyle := lipgloss.NewStyle().
 		Background(common.ModalBGColor).
@@ -405,13 +397,12 @@ func (m *model) bulkRenameModalRender() string {
 		Background(common.ModalBGColor).
 		Foreground(cursorColor)
 
-	// Right column container
 	inputContainerStyle := lipgloss.NewStyle().
 		Width(rightColumnWidth).
 		Background(common.ModalBGColor)
 
 	switch m.bulkRenameModal.renameType {
-	case 0: // Find & Replace
+	case 0:
 		findLabel := "Find:    "
 		replaceLabel := "Replace: "
 
@@ -429,14 +420,14 @@ func (m *model) bulkRenameModalRender() string {
 		}
 
 		inputs = inputContainerStyle.Render(findLine) + "\n" + inputContainerStyle.Render(replaceLine)
-	case 1: // Prefix
+	case 1:
 		inputs = inputContainerStyle.Render(activeLabelStyle.Render("Prefix: ") + m.bulkRenameModal.prefixInput.View())
-	case 2: // Suffix
+	case 2:
 		inputs = inputContainerStyle.Render(activeLabelStyle.Render("Suffix: ") + m.bulkRenameModal.suffixInput.View())
-	case 3: // Numbering
+	case 3:
 		numberText := fmt.Sprintf("Start number: %d\n(Use ↑/↓ to adjust)", m.bulkRenameModal.startNumber)
 		inputs = inputContainerStyle.Render(labelStyle.Render(numberText))
-	case 4: // Case conversion
+	case 4:
 		caseTypes := []string{"lowercase", "UPPERCASE", "Title Case"}
 		for i, caseType := range caseTypes {
 			if i == m.bulkRenameModal.caseType {
@@ -447,8 +438,7 @@ func (m *model) bulkRenameModalRender() string {
 		}
 	}
 
-	// Ensure both columns have the same height by adding a fixed height container
-	columnHeight := 6 // Height to accommodate all rename types
+	columnHeight := 6
 	leftColumnStyle := lipgloss.NewStyle().
 		Width(leftColumnWidth).
 		Height(columnHeight).
@@ -459,7 +449,6 @@ func (m *model) bulkRenameModalRender() string {
 		Height(columnHeight).
 		Background(common.ModalBGColor)
 
-	// Combine left and right columns horizontally with separator
 	separator := lipgloss.NewStyle().
 		Width(2).
 		Height(columnHeight).
@@ -473,7 +462,6 @@ func (m *model) bulkRenameModalRender() string {
 		rightColumnStyle.Render(inputs),
 	)
 
-	// Generate preview
 	m.bulkRenameModal.preview = m.generateBulkRenamePreview()
 	previewCount := 3
 	if len(m.bulkRenameModal.preview) < previewCount {
@@ -490,8 +478,6 @@ func (m *model) bulkRenameModalRender() string {
 			Render("Preview:")
 		preview = "\n" + previewTitle + "\n"
 
-		// Calculate max width for filenames (wider modal - borders - arrows - spacing)
-		//maxNameWidth := (bulkRenameModalWidth - 12) / 2
 		for i := 0; i < previewCount; i++ {
 			p := m.bulkRenameModal.preview[i]
 
@@ -526,7 +512,6 @@ func (m *model) bulkRenameModalRender() string {
 		}
 	}
 
-	// Navigation tips with full width
 	tipsStyle := lipgloss.NewStyle().
 		Width(bulkRenameModalWidth - 4).
 		Background(common.ModalBGColor).
@@ -543,12 +528,10 @@ func (m *model) bulkRenameModalRender() string {
 
 	content := title + "\n\n" + categoriesAndInputs + preview + tips + "\n" + err
 
-	// Use a larger fixed modal size for bulk rename
 	modalHeight := common.ModalHeight + 15
-	// Constrain content to fit within modal
 	contentStyle := lipgloss.NewStyle().
-		MaxHeight(modalHeight - 2).        // Account for borders
-		MaxWidth(bulkRenameModalWidth - 4) // Account for borders and padding
+		MaxHeight(modalHeight - 2).       
+		MaxWidth(bulkRenameModalWidth - 4)
 
 	constrainedContent := contentStyle.Render(content)
 

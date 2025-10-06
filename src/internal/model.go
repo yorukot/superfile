@@ -419,8 +419,6 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 	return cmd
 }
 
-// Update the file panel state. Change name of renamed files, filter out files
-// in search, update typingb bar, etc
 func (m *model) updateFilePanelsState(msg tea.Msg) tea.Cmd {
 	focusPanel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	var cmd tea.Cmd
@@ -429,17 +427,16 @@ func (m *model) updateFilePanelsState(msg tea.Msg) tea.Cmd {
 	case m.firstTextInput:
 		m.firstTextInput = false
 	case m.bulkRenameModal.open:
-		// Update the focused input in bulk rename modal
 		switch m.bulkRenameModal.renameType {
-		case 0: // Find & Replace
+		case 0: 
 			if m.bulkRenameModal.cursor == 0 {
 				m.bulkRenameModal.findInput, cmd = m.bulkRenameModal.findInput.Update(msg)
 			} else {
 				m.bulkRenameModal.replaceInput, cmd = m.bulkRenameModal.replaceInput.Update(msg)
 			}
-		case 1: // Prefix
+		case 1: 
 			m.bulkRenameModal.prefixInput, cmd = m.bulkRenameModal.prefixInput.Update(msg)
-		case 2: // Suffix
+		case 2: 
 			m.bulkRenameModal.suffixInput, cmd = m.bulkRenameModal.suffixInput.Update(msg)
 		}
 	case m.fileModel.renaming:
@@ -458,7 +455,7 @@ func (m *model) updateFilePanelsState(msg tea.Msg) tea.Cmd {
 		m.applyZoxideModalAction(action)
 	}
 
-	// TODO : This is like duct taping a bigger problem
+	
 	// The code should never reach this state.
 	if focusPanel.cursor < 0 {
 		focusPanel.cursor = 0

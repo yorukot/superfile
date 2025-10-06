@@ -136,22 +136,20 @@ type typingModal struct {
 	errorMesssage string
 }
 
-// Bulk rename modal
 type bulkRenameModal struct {
 	open         bool
-	renameType   int // 0: find/replace, 1: prefix, 2: suffix, 3: numbering, 4: case conversion
-	cursor       int // For navigating between input fields and options
+	renameType   int
+	cursor       int 
 	findInput    textinput.Model
 	replaceInput textinput.Model
 	prefixInput  textinput.Model
 	suffixInput  textinput.Model
 	startNumber  int
-	caseType     int // 0: lowercase, 1: uppercase, 2: title case
+	caseType     int 
 	preview      []renamePreview
 	errorMessage string
 }
 
-// Preview for bulk rename
 type renamePreview struct {
 	oldName string
 	newName string
