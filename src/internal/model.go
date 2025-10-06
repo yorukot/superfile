@@ -489,23 +489,29 @@ func (m *model) handleQuitState(cmd tea.Cmd, cdOnQuit bool) tea.Cmd {
 func (m *model) updateFilePanelsState(msg tea.Msg) tea.Cmd {
 	focusPanel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	var cmd tea.Cmd
-	var action common.ModelAction
-	switch {
-	case m.firstTextInput:
+	
+	if m.firstTextInput {
 		m.firstTextInput = false
+		return nil
+	}
+	
+	cmd = m.handleInputUpdates(msg, focusPanel)
+	
+	// The code should never reach this state.
+	if focusPanel.cursor < 0 {
+		focusPanel.cursor = 0
+	}
+
+	return cmd
+}
+
+func (m *model) handleInputUpdates(msg tea.Msg, focusPanel *filePanel) tea.Cmd {
+	var cmd tea.Cmd
+	var action common.ModelAction
+	
+	switch {
 	case m.bulkRenameModal.open:
-		switch m.bulkRenameModal.renameType {
-		case 0:
-			if m.bulkRenameModal.cursor == 0 {
-				m.bulkRenameModal.findInput, cmd = m.bulkRenameModal.findInput.Update(msg)
-			} else {
-				m.bulkRenameModal.replaceInput, cmd = m.bulkRenameModal.replaceInput.Update(msg)
-			}
-		case 1:
-			m.bulkRenameModal.prefixInput, cmd = m.bulkRenameModal.prefixInput.Update(msg)
-		case 2:
-			m.bulkRenameModal.suffixInput, cmd = m.bulkRenameModal.suffixInput.Update(msg)
-		}
+		cmd = m.handleBulkRenameUpdate(msg)
 	case m.fileModel.renaming:
 		focusPanel.rename, cmd = focusPanel.rename.Update(msg)
 	case focusPanel.searchBar.Focused():
@@ -513,7 +519,6 @@ func (m *model) updateFilePanelsState(msg tea.Msg) tea.Cmd {
 	case m.typingModal.open:
 		m.typingModal.textInput, cmd = m.typingModal.textInput.Update(msg)
 	case m.promptModal.IsOpen():
-		// TODO : Separate this to a utility
 		cwdLocation := m.fileModel.filePanels[m.filePanelFocusIndex].location
 		action, cmd = m.promptModal.HandleUpdate(msg, cwdLocation)
 		m.applyPromptModalAction(action)
@@ -521,12 +526,26 @@ func (m *model) updateFilePanelsState(msg tea.Msg) tea.Cmd {
 		action, cmd = m.zoxideModal.HandleUpdate(msg)
 		m.applyZoxideModalAction(action)
 	}
+	
+	return cmd
+}
 
-	// The code should never reach this state.
-	if focusPanel.cursor < 0 {
-		focusPanel.cursor = 0
+func (m *model) handleBulkRenameUpdate(msg tea.Msg) tea.Cmd {
+	var cmd tea.Cmd
+	
+	switch m.bulkRenameModal.renameType {
+	case 0:
+		if m.bulkRenameModal.cursor == 0 {
+			m.bulkRenameModal.findInput, cmd = m.bulkRenameModal.findInput.Update(msg)
+		} else {
+			m.bulkRenameModal.replaceInput, cmd = m.bulkRenameModal.replaceInput.Update(msg)
+		}
+	case 1:
+		m.bulkRenameModal.prefixInput, cmd = m.bulkRenameModal.prefixInput.Update(msg)
+	case 2:
+		m.bulkRenameModal.suffixInput, cmd = m.bulkRenameModal.suffixInput.Update(msg)
 	}
-
+	
 	return cmd
 }
 
