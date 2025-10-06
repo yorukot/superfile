@@ -428,15 +428,15 @@ func (m *model) updateFilePanelsState(msg tea.Msg) tea.Cmd {
 		m.firstTextInput = false
 	case m.bulkRenameModal.open:
 		switch m.bulkRenameModal.renameType {
-		case 0: 
+		case 0:
 			if m.bulkRenameModal.cursor == 0 {
 				m.bulkRenameModal.findInput, cmd = m.bulkRenameModal.findInput.Update(msg)
 			} else {
 				m.bulkRenameModal.replaceInput, cmd = m.bulkRenameModal.replaceInput.Update(msg)
 			}
-		case 1: 
+		case 1:
 			m.bulkRenameModal.prefixInput, cmd = m.bulkRenameModal.prefixInput.Update(msg)
-		case 2: 
+		case 2:
 			m.bulkRenameModal.suffixInput, cmd = m.bulkRenameModal.suffixInput.Update(msg)
 		}
 	case m.fileModel.renaming:
@@ -455,7 +455,6 @@ func (m *model) updateFilePanelsState(msg tea.Msg) tea.Cmd {
 		m.applyZoxideModalAction(action)
 	}
 
-	
 	// The code should never reach this state.
 	if focusPanel.cursor < 0 {
 		focusPanel.cursor = 0
@@ -668,12 +667,15 @@ func (m *model) updateRenderForOverlay(finalRender string) string {
 	}
 
 	if m.bulkRenameModal.open {
+		config := modalOverlayConfig{
+			width:  80,
+			height: common.ModalHeight + 15,
+		}
+		config.x = m.fullWidth/2 - config.width/2
+		config.y = m.fullHeight/2 - config.height/2
+
 		bulkRenameModal := m.bulkRenameModalRender()
-		bulkRenameModalWidth := 80
-		modalHeight := common.ModalHeight + 15
-		overlayX := m.fullWidth/2 - bulkRenameModalWidth/2
-		overlayY := m.fullHeight/2 - modalHeight/2
-		return stringfunction.PlaceOverlay(overlayX, overlayY, bulkRenameModal, finalRender)
+		return stringfunction.PlaceOverlay(config.x, config.y, bulkRenameModal, finalRender)
 	}
 
 	if m.notifyModel.IsOpen() {

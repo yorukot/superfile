@@ -349,32 +349,43 @@ func (m *model) zoxideModalRender() string {
 }
 
 func (m *model) bulkRenameModalRender() string {
+	config := m.createBulkRenameConfig()
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-	width := 80
 
-	title := m.renderBulkRenameTitle(panel, width)
-	categoriesAndInputs := m.renderBulkRenameCategoriesAndInputs(width)
-	preview := m.renderBulkRenamePreview(width)
-	tips := m.renderBulkRenameTips(width)
-	errorMsg := m.renderBulkRenameError(width)
+	title := m.renderBulkRenameTitle(panel, config)
+	categoriesAndInputs := m.renderBulkRenameCategoriesAndInputs(config)
+	preview := m.renderBulkRenamePreview(config)
+	tips := m.renderBulkRenameTips(config)
+	errorMsg := m.renderBulkRenameError(config)
 
 	content := title + "\n\n" + categoriesAndInputs + preview + tips + "\n" + errorMsg
-	return m.wrapBulkRenameContent(content, width)
+	return m.wrapBulkRenameContent(content, config)
 }
 
-func (m *model) wrapBulkRenameContent(content string, width int) string {
-	modalHeight := common.ModalHeight + 15
+func (m *model) createBulkRenameConfig() bulkRenameRenderConfig {
+	width := 80
+	leftColWidth := 20
+	return bulkRenameRenderConfig{
+		width:         width,
+		modalHeight:   common.ModalHeight + 15,
+		leftColWidth:  leftColWidth,
+		rightColWidth: width - 4 - leftColWidth - 2,
+		columnHeight:  6,
+	}
+}
+
+func (m *model) wrapBulkRenameContent(content string, config bulkRenameRenderConfig) string {
 	contentStyle := lipgloss.NewStyle().
-		MaxHeight(modalHeight - 2).
-		MaxWidth(width - 4)
+		MaxHeight(config.modalHeight - 2).
+		MaxWidth(config.width - 4)
 
 	constrainedContent := contentStyle.Render(content)
-	return common.ModalBorderStyle(modalHeight, width).Render(constrainedContent)
+	return common.ModalBorderStyle(config.modalHeight, config.width).Render(constrainedContent)
 }
 
-func (m *model) renderBulkRenameTitle(panel *filePanel, width int) string {
+func (m *model) renderBulkRenameTitle(panel *filePanel, config bulkRenameRenderConfig) string {
 	titleStyle := lipgloss.NewStyle().
-		Width(width - 4).
+		Width(config.width - 4).
 		Background(common.ModalBGColor)
 
 	titleText := common.SidebarTitleStyle.Render("  Bulk Rename") +
@@ -382,27 +393,23 @@ func (m *model) renderBulkRenameTitle(panel *filePanel, width int) string {
 	return titleStyle.Render(titleText)
 }
 
-func (m *model) renderBulkRenameCategoriesAndInputs(width int) string {
-	leftColumnWidth := 20
-	rightColumnWidth := width - 4 - leftColumnWidth - 2
-	columnHeight := 6
-
-	typeOptions := m.renderRenameTypeOptions(leftColumnWidth)
-	inputs := m.renderRenameInputs(rightColumnWidth)
+func (m *model) renderBulkRenameCategoriesAndInputs(config bulkRenameRenderConfig) string {
+	typeOptions := m.renderRenameTypeOptions(config.leftColWidth)
+	inputs := m.renderRenameInputs(config.rightColWidth)
 
 	leftColumnStyle := lipgloss.NewStyle().
-		Width(leftColumnWidth).
-		Height(columnHeight).
+		Width(config.leftColWidth).
+		Height(config.columnHeight).
 		Background(common.ModalBGColor)
 
 	rightColumnStyle := lipgloss.NewStyle().
-		Width(rightColumnWidth).
-		Height(columnHeight).
+		Width(config.rightColWidth).
+		Height(config.columnHeight).
 		Background(common.ModalBGColor)
 
 	separator := lipgloss.NewStyle().
 		Width(2).
-		Height(columnHeight).
+		Height(config.columnHeight).
 		Background(common.ModalBGColor).
 		Render("  ")
 
@@ -512,7 +519,7 @@ func (m *model) renderCaseConversionOptions(styles bulkRenameStyles) string {
 	return result
 }
 
-func (m *model) renderBulkRenamePreview(width int) string {
+func (m *model) renderBulkRenamePreview(config bulkRenameRenderConfig) string {
 	m.bulkRenameModal.preview = m.generateBulkRenamePreview()
 	previewCount := min(3, len(m.bulkRenameModal.preview))
 
@@ -521,7 +528,7 @@ func (m *model) renderBulkRenamePreview(width int) string {
 	}
 
 	previewTitle := lipgloss.NewStyle().
-		Width(width - 4).
+		Width(config.width - 4).
 		Align(lipgloss.Center).
 		Background(common.ModalBGColor).
 		Foreground(common.ModalFGColor).
@@ -530,13 +537,13 @@ func (m *model) renderBulkRenamePreview(width int) string {
 	preview := "\n" + previewTitle + "\n"
 
 	for i := 0; i < previewCount; i++ {
-		preview += m.renderPreviewItem(m.bulkRenameModal.preview[i], width)
+		preview += m.renderPreviewItem(m.bulkRenameModal.preview[i], config.width)
 	}
 
 	if len(m.bulkRenameModal.preview) > previewCount {
 		moreText := fmt.Sprintf("... and %d more files", len(m.bulkRenameModal.preview)-previewCount)
 		centeredMore := lipgloss.NewStyle().
-			Width(width - 4).
+			Width(config.width - 4).
 			Align(lipgloss.Center).
 			Background(common.ModalBGColor).
 			Foreground(common.ModalFGColor).
@@ -568,21 +575,21 @@ func (m *model) renderPreviewItem(p renamePreview, width int) string {
 	return errorStyle.Render(p.newName) + "\n" + errorStyle.Render(fmt.Sprintf("(%s)", p.error)) + "\n"
 }
 
-func (m *model) renderBulkRenameTips(width int) string {
+func (m *model) renderBulkRenameTips(config bulkRenameRenderConfig) string {
 	tipsStyle := lipgloss.NewStyle().
-		Width(width - 4).
+		Width(config.width - 4).
 		Background(common.ModalBGColor).
 		Foreground(common.ModalFGColor)
 	return tipsStyle.Render("\nTab/Shift+Tab: Change type | ↑/↓: Navigate | Enter (Rename) | Esc (Cancel)\n")
 }
 
-func (m *model) renderBulkRenameError(width int) string {
+func (m *model) renderBulkRenameError(config bulkRenameRenderConfig) string {
 	if m.bulkRenameModal.errorMessage == "" {
 		return ""
 	}
 
 	errStyle := lipgloss.NewStyle().
-		Width(width - 4).
+		Width(config.width - 4).
 		Background(common.ModalBGColor)
 	return "\n" + errStyle.Render(common.ModalErrorStyle.Render(m.bulkRenameModal.errorMessage))
 }

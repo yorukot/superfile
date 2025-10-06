@@ -290,23 +290,15 @@ func (m *model) bulkRenameKey(msg string) tea.Cmd {
 	case slices.Contains(common.Hotkeys.ConfirmTyping, msg):
 		m.confirmBulkRename()
 	case slices.Contains(common.Hotkeys.ListUp, msg):
-		m.handleBulkRenameUpKey()
+		m.adjustBulkRenameValue(-1)
 	case slices.Contains(common.Hotkeys.ListDown, msg):
-		m.handleBulkRenameDownKey()
+		m.adjustBulkRenameValue(1)
 	case msg == "tab":
 		m.bulkRenameNextType()
 	case msg == "shift+tab":
 		m.bulkRenamePrevType()
 	}
 	return nil
-}
-
-func (m *model) handleBulkRenameUpKey() {
-	m.adjustBulkRenameValue(-1)
-}
-
-func (m *model) handleBulkRenameDownKey() {
-	m.adjustBulkRenameValue(1)
 }
 
 func (m *model) adjustBulkRenameValue(delta int) {

@@ -168,6 +168,21 @@ type bulkRenameStyles struct {
 	labelStyle          lipgloss.Style
 	activeLabelStyle    lipgloss.Style
 	inputContainerStyle lipgloss.Style
+}
+
+type bulkRenameRenderConfig struct {
+	width         int
+	modalHeight   int
+	leftColWidth  int
+	rightColWidth int
+	columnHeight  int
+}
+
+type modalOverlayConfig struct {
+	width  int
+	height int
+	x      int
+	y      int
 } // Copied items
 type copyItems struct {
 	items []string
