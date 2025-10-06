@@ -348,6 +348,122 @@ func (m *model) zoxideModalRender() string {
 	return m.zoxideModal.Render()
 }
 
+func (m *model) bulkRenameModalRender() string {
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+
+	title := common.SidebarTitleStyle.Render("  Bulk Rename") +
+		common.ModalStyle.Render(fmt.Sprintf(" (%d files selected)", len(panel.selected)))
+
+	renameTypes := []string{
+		"Find & Replace",
+		"Add Prefix",
+		"Add Suffix",
+		"Add Numbering",
+		"Change Case",
+	}
+
+	// Render type selector
+	var typeOptions string
+	for i, typeName := range renameTypes {
+		if i == m.bulkRenameModal.renameType {
+			typeOptions += common.ModalCursorStyle.Render(" > "+typeName) + "\n"
+		} else {
+			typeOptions += common.ModalStyle.Render("   "+typeName) + "\n"
+		}
+	}
+
+	// Render inputs based on selected type
+	var inputs string
+	switch m.bulkRenameModal.renameType {
+	case 0: // Find & Replace
+		findLabel := "Find:    "
+		replaceLabel := "Replace: "
+		if m.bulkRenameModal.cursor == 0 {
+			findLabel = common.ModalCursorStyle.Render(findLabel)
+		} else {
+			findLabel = common.ModalStyle.Render(findLabel)
+		}
+		if m.bulkRenameModal.cursor == 1 {
+			replaceLabel = common.ModalCursorStyle.Render(replaceLabel)
+		} else {
+			replaceLabel = common.ModalStyle.Render(replaceLabel)
+		}
+		inputs = findLabel + m.bulkRenameModal.findInput.View() + "\n" +
+			replaceLabel + m.bulkRenameModal.replaceInput.View()
+	case 1: // Prefix
+		inputs = common.ModalCursorStyle.Render("Prefix: ") + m.bulkRenameModal.prefixInput.View()
+	case 2: // Suffix
+		inputs = common.ModalCursorStyle.Render("Suffix: ") + m.bulkRenameModal.suffixInput.View()
+	case 3: // Numbering
+		inputs = common.ModalStyle.Render(fmt.Sprintf("Start number: %d\n(Use ↑/↓ to adjust)", m.bulkRenameModal.startNumber))
+	case 4: // Case conversion
+		caseTypes := []string{"lowercase", "UPPERCASE", "Title Case"}
+		for i, caseType := range caseTypes {
+			if i == m.bulkRenameModal.caseType {
+				inputs += common.ModalCursorStyle.Render(" > "+caseType) + "\n"
+			} else {
+				inputs += common.ModalStyle.Render("   "+caseType) + "\n"
+			}
+		}
+	}
+
+	// Generate preview
+	m.bulkRenameModal.preview = m.generateBulkRenamePreview()
+	previewCount := 3
+	if len(m.bulkRenameModal.preview) < previewCount {
+		previewCount = len(m.bulkRenameModal.preview)
+	}
+
+	var preview string
+	if previewCount > 0 {
+		preview = "\n" + common.ModalStyle.Render("Preview:") + "\n"
+		// Calculate max width for filenames (ModalWidth - borders - arrows - spacing)
+		maxNameWidth := (common.ModalWidth - 12) / 2
+		for i := 0; i < previewCount; i++ {
+			p := m.bulkRenameModal.preview[i]
+			// Truncate long filenames to keep modal width consistent
+			oldName := common.TruncateText(p.oldName, maxNameWidth, "...")
+			newName := common.TruncateText(p.newName, maxNameWidth, "...")
+
+			if p.error != "" {
+				preview += common.ProcessErrorStyle.Render(fmt.Sprintf("  %s → %s\n", oldName, newName))
+				preview += common.ProcessErrorStyle.Render(fmt.Sprintf("  (%s)\n", p.error))
+			} else {
+				preview += common.ModalStyle.Render(fmt.Sprintf("  %s → %s\n", oldName, newName))
+			}
+		}
+		if len(m.bulkRenameModal.preview) > previewCount {
+			preview += common.ModalStyle.Render(fmt.Sprintf("  ... and %d more files\n", len(m.bulkRenameModal.preview)-previewCount))
+		}
+	}
+
+	// Navigation tips
+	tips := common.ModalStyle.Render("\nTab/Shift+Tab: Change type | ↑/↓: Navigate\n")
+
+	// Buttons
+	confirm := common.ModalConfirm.Render(" (Enter) Rename ")
+	cancel := common.ModalCancel.Render(" (Esc) Cancel ")
+	buttons := confirm + " " + cancel
+
+	var err string
+	if m.bulkRenameModal.errorMessage != "" {
+		err = "\n" + common.ModalErrorStyle.Render(m.bulkRenameModal.errorMessage)
+	}
+
+	content := title + "\n\n" + typeOptions + "\n" + inputs + preview + tips + "\n" + buttons + err
+
+	// Use a fixed modal size for bulk rename
+	modalHeight := common.ModalHeight + 10
+	// Constrain content to fit within modal
+	contentStyle := lipgloss.NewStyle().
+		MaxHeight(modalHeight - 2).     // Account for borders
+		MaxWidth(common.ModalWidth - 4) // Account for borders and padding
+
+	constrainedContent := contentStyle.Render(content)
+
+	return common.ModalBorderStyle(modalHeight, common.ModalWidth).Render(constrainedContent)
+}
+
 func (m *model) helpMenuRender() string {
 	r := ui.HelpMenuRenderer(m.helpMenu.height, m.helpMenu.width)
 	r.AddLines(" " + m.helpMenu.searchBar.View())

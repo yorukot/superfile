@@ -368,6 +368,10 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 	case m.notifyModel.IsOpen():
 		cmd = m.notifyModelOpenKey(msg.String())
 
+	// If bulk rename modal is open
+	case m.bulkRenameModal.open:
+		cmd = m.bulkRenameKey(msg.String())
+
 	// If renaming a object
 	case m.fileModel.renaming:
 		cmd = m.renamingKey(msg.String())
@@ -424,6 +428,20 @@ func (m *model) updateFilePanelsState(msg tea.Msg) tea.Cmd {
 	switch {
 	case m.firstTextInput:
 		m.firstTextInput = false
+	case m.bulkRenameModal.open:
+		// Update the focused input in bulk rename modal
+		switch m.bulkRenameModal.renameType {
+		case 0: // Find & Replace
+			if m.bulkRenameModal.cursor == 0 {
+				m.bulkRenameModal.findInput, cmd = m.bulkRenameModal.findInput.Update(msg)
+			} else {
+				m.bulkRenameModal.replaceInput, cmd = m.bulkRenameModal.replaceInput.Update(msg)
+			}
+		case 1: // Prefix
+			m.bulkRenameModal.prefixInput, cmd = m.bulkRenameModal.prefixInput.Update(msg)
+		case 2: // Suffix
+			m.bulkRenameModal.suffixInput, cmd = m.bulkRenameModal.suffixInput.Update(msg)
+		}
 	case m.fileModel.renaming:
 		focusPanel.rename, cmd = focusPanel.rename.Update(msg)
 	case focusPanel.searchBar.Focused():
@@ -633,7 +651,7 @@ func (m *model) updateRenderForOverlay(finalRender string) string {
 
 	if panel.sortOptions.open {
 		sortOptions := m.sortOptionsRender()
-		overlayX := m.fullWidth/2 - panel.sortOptions.width/2
+		overlayX := m.fullWidth/2 - panel.sortOptions.width/29
 		overlayY := m.fullHeight/2 - panel.sortOptions.height/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, sortOptions, finalRender)
 	}
@@ -650,6 +668,14 @@ func (m *model) updateRenderForOverlay(finalRender string) string {
 		overlayX := m.fullWidth/2 - common.ModalWidth/2
 		overlayY := m.fullHeight/2 - common.ModalHeight/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, typingModal, finalRender)
+	}
+
+	if m.bulkRenameModal.open {
+		bulkRenameModal := m.bulkRenameModalRender()
+		modalHeight := common.ModalHeight + 10
+		overlayX := m.fullWidth/2 - common.ModalWidth/2
+		overlayY := m.fullHeight/2 - modalHeight/2
+		return stringfunction.PlaceOverlay(overlayX, overlayY, bulkRenameModal, finalRender)
 	}
 
 	if m.notifyModel.IsOpen() {

@@ -160,6 +160,8 @@ func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
 			m.copyMultipleItem(false)
 		case slices.Contains(common.Hotkeys.CutItems, msg):
 			m.copyMultipleItem(true)
+		case slices.Contains(common.Hotkeys.BulkRename, msg):
+			m.panelBulkRename()
 		case slices.Contains(common.Hotkeys.FilePanelSelectAllItem, msg):
 			m.selectAllItem()
 		}
@@ -277,6 +279,44 @@ func (m *model) renamingKey(msg string) tea.Cmd {
 		m.confirmRename()
 	}
 
+	return nil
+}
+
+// Handle bulk rename modal keys
+func (m *model) bulkRenameKey(msg string) tea.Cmd {
+	switch {
+	case slices.Contains(common.Hotkeys.CancelTyping, msg) || slices.Contains(common.Hotkeys.Quit, msg):
+		m.cancelBulkRename()
+	case slices.Contains(common.Hotkeys.ConfirmTyping, msg):
+		m.confirmBulkRename()
+	case slices.Contains(common.Hotkeys.ListUp, msg):
+		// For numbering and case conversion modes, use up/down to adjust values
+		if m.bulkRenameModal.renameType == 3 { // Numbering
+			if m.bulkRenameModal.startNumber > 0 {
+				m.bulkRenameModal.startNumber--
+			}
+		} else if m.bulkRenameModal.renameType == 4 { // Case conversion
+			if m.bulkRenameModal.caseType > 0 {
+				m.bulkRenameModal.caseType--
+			}
+		} else {
+			m.bulkRenameNavigateUp()
+		}
+	case slices.Contains(common.Hotkeys.ListDown, msg):
+		if m.bulkRenameModal.renameType == 3 { // Numbering
+			m.bulkRenameModal.startNumber++
+		} else if m.bulkRenameModal.renameType == 4 { // Case conversion
+			if m.bulkRenameModal.caseType < 2 {
+				m.bulkRenameModal.caseType++
+			}
+		} else {
+			m.bulkRenameNavigateDown()
+		}
+	case msg == "tab":
+		m.bulkRenameNextType()
+	case msg == "shift+tab":
+		m.bulkRenamePrevType()
+	}
 	return nil
 }
 

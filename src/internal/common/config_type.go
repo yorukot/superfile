@@ -135,6 +135,7 @@ type HotkeysType struct {
 
 	FilePanelItemCreate []string `toml:"file_panel_item_create" comment:"create file/directory and rename "`
 	FilePanelItemRename []string `toml:"file_panel_item_rename"`
+	BulkRename          []string `toml:"bulk_rename"`
 
 	CopyItems              []string `toml:"copy_items" comment:"file operate"`
 	PasteItems             []string `toml:"paste_items"`

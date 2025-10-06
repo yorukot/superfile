@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"time"
 
@@ -91,6 +92,34 @@ func (m *model) panelItemRename() {
 	panel.renaming = true
 	m.firstTextInput = true
 	panel.rename = common.GenerateRenameTextInput(m.fileModel.width-4, cursorPos, panel.element[panel.cursor].name)
+}
+
+// Bulk rename selected files
+func (m *model) panelBulkRename() {
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+
+	// Check if there are selected files
+	if panel.panelMode != selectMode || len(panel.selected) == 0 {
+		return
+	}
+
+	// Initialize bulk rename modal
+	m.bulkRenameModal.open = true
+	m.bulkRenameModal.renameType = 0 // Default to find/replace
+	m.bulkRenameModal.cursor = 0
+	m.bulkRenameModal.startNumber = 1
+	m.bulkRenameModal.caseType = 0
+	m.bulkRenameModal.errorMessage = ""
+	m.firstTextInput = true
+
+	// Initialize text inputs
+	m.bulkRenameModal.findInput = common.GenerateBulkRenameTextInput("Find text")
+	m.bulkRenameModal.replaceInput = common.GenerateBulkRenameTextInput("Replace with")
+	m.bulkRenameModal.prefixInput = common.GenerateBulkRenameTextInput("Add prefix")
+	m.bulkRenameModal.suffixInput = common.GenerateBulkRenameTextInput("Add suffix")
+
+	// Focus the first input based on rename type
+	m.bulkRenameModal.findInput.Focus()
 }
 
 func (m *model) getDeleteCmd(permDelete bool) tea.Cmd {
@@ -521,4 +550,112 @@ func (m *model) copyPWD() {
 	if err := clipboard.WriteAll(panel.location); err != nil {
 		slog.Error("Error while copy present working directory", "error", err)
 	}
+}
+
+// Bulk rename helper functions
+
+// applyFindReplace applies find and replace to a filename
+func applyFindReplace(filename, find, replace string) string {
+	if find == "" {
+		return filename
+	}
+	return strings.ReplaceAll(filename, find, replace)
+}
+
+// applyPrefix adds a prefix to a filename (before extension)
+func applyPrefix(filename, prefix string) string {
+	if prefix == "" {
+		return filename
+	}
+	ext := filepath.Ext(filename)
+	nameWithoutExt := strings.TrimSuffix(filename, ext)
+	return prefix + nameWithoutExt + ext
+}
+
+// applySuffix adds a suffix to a filename (before extension)
+func applySuffix(filename, suffix string) string {
+	if suffix == "" {
+		return filename
+	}
+	ext := filepath.Ext(filename)
+	nameWithoutExt := strings.TrimSuffix(filename, ext)
+	return nameWithoutExt + suffix + ext
+}
+
+// applyNumbering adds a number to a filename
+func applyNumbering(filename string, number int) string {
+	ext := filepath.Ext(filename)
+	nameWithoutExt := strings.TrimSuffix(filename, ext)
+	return nameWithoutExt + "_" + strconv.Itoa(number) + ext
+}
+
+// applyCaseConversion converts filename case (0: lowercase, 1: uppercase, 2: title case)
+func applyCaseConversion(filename string, caseType int) string {
+	ext := filepath.Ext(filename)
+	nameWithoutExt := strings.TrimSuffix(filename, ext)
+
+	switch caseType {
+	case 0: // lowercase
+		return strings.ToLower(nameWithoutExt) + ext
+	case 1: // uppercase
+		return strings.ToUpper(nameWithoutExt) + ext
+	case 2: // title case
+		// Simple title case implementation (capitalize first letter of each word)
+		words := strings.Fields(strings.ToLower(nameWithoutExt))
+		for i, word := range words {
+			if len(word) > 0 {
+				words[i] = strings.ToUpper(string(word[0])) + word[1:]
+			}
+		}
+		return strings.Join(words, " ") + ext
+	default:
+		return filename
+	}
+}
+
+// generateBulkRenamePreview generates preview for bulk rename
+func (m *model) generateBulkRenamePreview() []renamePreview {
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+	previews := make([]renamePreview, 0, len(panel.selected))
+
+	for i, itemPath := range panel.selected {
+		oldName := filepath.Base(itemPath)
+		newName := oldName
+		var err string
+
+		// Apply transformation based on rename type
+		switch m.bulkRenameModal.renameType {
+		case 0: // Find & Replace
+			newName = applyFindReplace(newName, m.bulkRenameModal.findInput.Value(), m.bulkRenameModal.replaceInput.Value())
+		case 1: // Prefix
+			newName = applyPrefix(newName, m.bulkRenameModal.prefixInput.Value())
+		case 2: // Suffix
+			newName = applySuffix(newName, m.bulkRenameModal.suffixInput.Value())
+		case 3: // Numbering
+			newName = applyNumbering(newName, m.bulkRenameModal.startNumber+i)
+		case 4: // Case conversion
+			newName = applyCaseConversion(newName, m.bulkRenameModal.caseType)
+		}
+
+		// Validate new name
+		if newName == "" {
+			err = "Empty filename"
+		} else if newName == oldName {
+			err = "No change"
+		} else {
+			// Check if new name would cause conflict
+			newPath := filepath.Join(filepath.Dir(itemPath), newName)
+			if _, statErr := os.Stat(newPath); statErr == nil && newPath != itemPath {
+				err = "File already exists"
+			}
+		}
+
+		previews = append(previews, renamePreview{
+			oldName: oldName,
+			newName: newName,
+			error:   err,
+		})
+	}
+
+	return previews
 }

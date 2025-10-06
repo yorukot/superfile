@@ -72,11 +72,12 @@ type model struct {
 	copyItems       copyItems
 
 	// Modals
-	notifyModel notify.Model
-	typingModal typingModal
-	helpMenu    helpMenuModal
-	promptModal prompt.Model
-	zoxideModal zoxideui.Model
+	notifyModel     notify.Model
+	typingModal     typingModal
+	bulkRenameModal bulkRenameModal
+	helpMenu        helpMenuModal
+	promptModal     prompt.Model
+	zoxideModal     zoxideui.Model
 
 	// Zoxide client for directory tracking
 	zClient *zoxidelib.Client
@@ -133,6 +134,28 @@ type typingModal struct {
 	open          bool
 	textInput     textinput.Model
 	errorMesssage string
+}
+
+// Bulk rename modal
+type bulkRenameModal struct {
+	open         bool
+	renameType   int // 0: find/replace, 1: prefix, 2: suffix, 3: numbering, 4: case conversion
+	cursor       int // For navigating between input fields and options
+	findInput    textinput.Model
+	replaceInput textinput.Model
+	prefixInput  textinput.Model
+	suffixInput  textinput.Model
+	startNumber  int
+	caseType     int // 0: lowercase, 1: uppercase, 2: title case
+	preview      []renamePreview
+	errorMessage string
+}
+
+// Preview for bulk rename
+type renamePreview struct {
+	oldName string
+	newName string
+	error   string
 }
 
 // Copied items
