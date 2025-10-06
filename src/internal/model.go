@@ -672,8 +672,9 @@ func (m *model) updateRenderForOverlay(finalRender string) string {
 
 	if m.bulkRenameModal.open {
 		bulkRenameModal := m.bulkRenameModalRender()
+		bulkRenameModalWidth := 80
 		modalHeight := common.ModalHeight + 10
-		overlayX := m.fullWidth/2 - common.ModalWidth/2
+		overlayX := m.fullWidth/2 - bulkRenameModalWidth/2
 		overlayY := m.fullHeight/2 - modalHeight/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, bulkRenameModal, finalRender)
 	}

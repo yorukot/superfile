@@ -338,6 +338,6 @@ func GenerateBulkRenameTextInput(placeholder string) textinput.Model {
 	ti.Placeholder = placeholder
 	ti.PlaceholderStyle = ModalStyle
 	ti.CharLimit = 156
-	ti.Width = ModalWidth - 12
+	ti.Width = 80 - 12 // Wider modal width (80) - padding
 	return ti
 }

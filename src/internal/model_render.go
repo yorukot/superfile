@@ -351,6 +351,9 @@ func (m *model) zoxideModalRender() string {
 func (m *model) bulkRenameModalRender() string {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 
+	// Use a wider modal for bulk rename
+	bulkRenameModalWidth := 80
+
 	title := common.SidebarTitleStyle.Render("  Bulk Rename") +
 		common.ModalStyle.Render(fmt.Sprintf(" (%d files selected)", len(panel.selected)))
 
@@ -416,24 +419,42 @@ func (m *model) bulkRenameModalRender() string {
 
 	var preview string
 	if previewCount > 0 {
-		preview = "\n" + common.ModalStyle.Render("Preview:") + "\n"
-		// Calculate max width for filenames (ModalWidth - borders - arrows - spacing)
-		maxNameWidth := (common.ModalWidth - 12) / 2
+		previewTitle := lipgloss.NewStyle().
+			Width(bulkRenameModalWidth - 4).
+			Align(lipgloss.Center).
+			Render("Preview:")
+		preview = "\n" + common.ModalStyle.Render(previewTitle) + "\n"
+
+		// Calculate max width for filenames (wider modal - borders - arrows - spacing)
+		//maxNameWidth := (bulkRenameModalWidth - 12) / 2
 		for i := 0; i < previewCount; i++ {
 			p := m.bulkRenameModal.preview[i]
-			// Truncate long filenames to keep modal width consistent
-			oldName := common.TruncateText(p.oldName, maxNameWidth, "...")
-			newName := common.TruncateText(p.newName, maxNameWidth, "...")
+			// newName := common.TruncateText(p.newName, maxNameWidth, "...")
+
+			previewLine := fmt.Sprintf("%s", p.newName)
+			centeredLine := lipgloss.NewStyle().
+				Width(bulkRenameModalWidth - 4).
+				Align(lipgloss.Center).
+				Render(previewLine)
 
 			if p.error != "" {
-				preview += common.ProcessErrorStyle.Render(fmt.Sprintf("  %s → %s\n", oldName, newName))
-				preview += common.ProcessErrorStyle.Render(fmt.Sprintf("  (%s)\n", p.error))
+				preview += common.ProcessErrorStyle.Render(centeredLine) + "\n"
+				errorLine := lipgloss.NewStyle().
+					Width(bulkRenameModalWidth - 4).
+					Align(lipgloss.Center).
+					Render(fmt.Sprintf("(%s)", p.error))
+				preview += common.ProcessErrorStyle.Render(errorLine) + "\n"
 			} else {
-				preview += common.ModalStyle.Render(fmt.Sprintf("  %s → %s\n", oldName, newName))
+				preview += common.ModalStyle.Render(centeredLine) + "\n"
 			}
 		}
 		if len(m.bulkRenameModal.preview) > previewCount {
-			preview += common.ModalStyle.Render(fmt.Sprintf("  ... and %d more files\n", len(m.bulkRenameModal.preview)-previewCount))
+			moreText := fmt.Sprintf("... and %d more files", len(m.bulkRenameModal.preview)-previewCount)
+			centeredMore := lipgloss.NewStyle().
+				Width(bulkRenameModalWidth - 4).
+				Align(lipgloss.Center).
+				Render(moreText)
+			preview += common.ModalStyle.Render(centeredMore) + "\n"
 		}
 	}
 
@@ -456,12 +477,12 @@ func (m *model) bulkRenameModalRender() string {
 	modalHeight := common.ModalHeight + 10
 	// Constrain content to fit within modal
 	contentStyle := lipgloss.NewStyle().
-		MaxHeight(modalHeight - 2).     // Account for borders
-		MaxWidth(common.ModalWidth - 4) // Account for borders and padding
+		MaxHeight(modalHeight - 2).        // Account for borders
+		MaxWidth(bulkRenameModalWidth - 4) // Account for borders and padding
 
 	constrainedContent := contentStyle.Render(content)
 
-	return common.ModalBorderStyle(modalHeight, common.ModalWidth).Render(constrainedContent)
+	return common.ModalBorderStyle(modalHeight, bulkRenameModalWidth).Render(constrainedContent)
 }
 
 func (m *model) helpMenuRender() string {
