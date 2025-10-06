@@ -364,43 +364,86 @@ func (m *model) handleModalOrDefaultKey(msg tea.KeyMsg) tea.Cmd {
 }
 
 func (m *model) handleActiveModal(msg string) tea.Cmd {
-	switch {
-	case m.typingModal.open:
+	modalState := m.getModalState()
+
+	if cmd := m.routeModalInput(msg, modalState); cmd != nil || m.isAnyModalActive(modalState) {
+		return cmd
+	}
+	return nil
+}
+
+func (m *model) routeModalInput(msg string, state modalStateChecker) tea.Cmd {
+	if state.typingOpen {
 		m.typingModalOpenKey(msg)
 		return nil
-	case m.promptModal.IsOpen(), m.zoxideModal.IsOpen():
+	}
+	if state.promptOpen || state.zoxideOpen {
 		return nil
-	case m.notifyModel.IsOpen():
+	}
+	if state.notifyOpen {
 		return m.notifyModelOpenKey(msg)
-	case m.bulkRenameModal.open:
+	}
+	if state.bulkRenameOpen {
 		return m.bulkRenameKey(msg)
-	case m.fileModel.renaming:
+	}
+	if state.renaming {
 		return m.renamingKey(msg)
-	case m.sidebarModel.IsRenaming():
+	}
+
+	return m.routeSecondaryModalInput(msg, state)
+}
+
+func (m *model) routeSecondaryModalInput(msg string, state modalStateChecker) tea.Cmd {
+	if state.sidebarRenaming {
 		m.sidebarRenamingKey(msg)
 		return nil
-	case m.fileModel.filePanels[m.filePanelFocusIndex].searchBar.Focused():
+	}
+	if state.searchFocused {
 		m.focusOnSearchbarKey(msg)
 		return nil
-	case m.sidebarModel.SearchBarFocused():
+	}
+	if state.sidebarSearch {
 		m.sidebarModel.HandleSearchBarKey(msg)
 		return nil
-	case m.fileModel.filePanels[m.filePanelFocusIndex].sortOptions.open:
+	}
+	if state.sortOpen {
 		m.sortOptionsKey(msg)
 		return nil
-	case m.helpMenu.open:
+	}
+	if state.helpOpen {
 		m.helpMenuKey(msg)
 		return nil
 	}
 	return nil
 }
 
+func (m *model) getModalState() modalStateChecker {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	return modalStateChecker{
+		typingOpen:      m.typingModal.open,
+		promptOpen:      m.promptModal.IsOpen(),
+		zoxideOpen:      m.zoxideModal.IsOpen(),
+		notifyOpen:      m.notifyModel.IsOpen(),
+		bulkRenameOpen:  m.bulkRenameModal.open,
+		renaming:        m.fileModel.renaming,
+		sidebarRenaming: m.sidebarModel.IsRenaming(),
+		searchFocused:   panel.searchBar.Focused(),
+		sidebarSearch:   m.sidebarModel.SearchBarFocused(),
+		sortOpen:        panel.sortOptions.open,
+		helpOpen:        m.helpMenu.open,
+	}
+}
+
 func (m *model) hasActiveModal() bool {
-	return m.typingModal.open || m.promptModal.IsOpen() || m.zoxideModal.IsOpen() ||
-		m.notifyModel.IsOpen() || m.bulkRenameModal.open || m.fileModel.renaming ||
-		m.sidebarModel.IsRenaming() || m.fileModel.filePanels[m.filePanelFocusIndex].searchBar.Focused() ||
-		m.sidebarModel.SearchBarFocused() || m.fileModel.filePanels[m.filePanelFocusIndex].sortOptions.open ||
-		m.helpMenu.open
+	state := m.getModalState()
+	return m.isAnyModalActive(state)
+}
+
+func (m *model) isAnyModalActive(state modalStateChecker) bool {
+	return state.typingOpen || state.promptOpen || state.zoxideOpen ||
+		state.notifyOpen || state.bulkRenameOpen || state.renaming ||
+		state.sidebarRenaming || state.searchFocused || state.sidebarSearch ||
+		state.sortOpen || state.helpOpen
 }
 
 func (m *model) handleDefaultKey(msg string) tea.Cmd {

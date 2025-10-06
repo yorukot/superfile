@@ -183,6 +183,25 @@ type modalOverlayConfig struct {
 	height int
 	x      int
 	y      int
+}
+
+type modalStateChecker struct {
+	typingOpen      bool
+	promptOpen      bool
+	zoxideOpen      bool
+	notifyOpen      bool
+	bulkRenameOpen  bool
+	renaming        bool
+	sidebarRenaming bool
+	searchFocused   bool
+	sidebarSearch   bool
+	sortOpen        bool
+	helpOpen        bool
+}
+
+type keyInputContext struct {
+	msg          string
+	modalChecker modalStateChecker
 } // Copied items
 type copyItems struct {
 	items []string
