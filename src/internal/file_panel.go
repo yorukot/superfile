@@ -92,3 +92,17 @@ func (panel *filePanel) updateCurrentFilePanelDir(path string) error {
 func (panel *filePanel) parentDirectory() error {
 	return panel.updateCurrentFilePanelDir("..")
 }
+
+func (panel *filePanel) handleResize(height int) {
+	// Min render cursor that keeps the cursor in view
+	minVisibleRenderCursor := panel.cursor - panelElementHeight(height) + 1
+	// Max render cursor. This ensures all elements are rendered if there is space
+	maxRenderCursor := max(len(panel.element)-panelElementHeight(height), 0)
+
+	if panel.render > maxRenderCursor {
+		panel.render = maxRenderCursor
+	}
+	if panel.render < minVisibleRenderCursor {
+		panel.render = minVisibleRenderCursor
+	}
+}
