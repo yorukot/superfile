@@ -24,4 +24,26 @@ type Model struct {
 	width int
 	// Height is dynamically adjusted based on content
 	maxHeight int
+
+	// Request tracking for async queries
+	reqCnt int
+}
+
+// UpdateMsg represents an async query result
+type UpdateMsg struct {
+	query   string
+	results []zoxidelib.Result
+	reqID   int
+}
+
+func NewUpdateMsg(query string, results []zoxidelib.Result, reqID int) UpdateMsg {
+	return UpdateMsg{
+		query:   query,
+		results: results,
+		reqID:   reqID,
+	}
+}
+
+func (msg UpdateMsg) GetReqID() int {
+	return msg.reqID
 }

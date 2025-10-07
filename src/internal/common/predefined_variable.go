@@ -20,7 +20,7 @@ const TrashWarnContent = "This operation will move file or directory to trash ca
 const PermanentDeleteWarnTitle = "Are you sure you want to completely delete"
 const PermanentDeleteWarnContent = "This operation cannot be undone and your data will be completely lost."
 
-var (
+const (
 	MinimumHeight = 24
 	MinimumWidth  = 60
 
