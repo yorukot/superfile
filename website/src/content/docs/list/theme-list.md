@@ -80,6 +80,14 @@ head:
 
 ![Everforest Dark Medium theme preview showing nature-inspired green colors](../../../assets/git-assets/theme/everforest-dark-medium.png)
 
+## Everforest Dark Hard
+
+- Theme name: `everforest-dark-hard`
+- Ported by: https://github.com/fzahner
+- Original Author: https://github.com/sainnhe/
+
+![Everforest Dark hard theme preview showing nature-inspired green colors](../../../assets/git-assets/theme/everforest-dark-hard.png)
+
 ## Gruvbox
 
 - Theme name: `gruvbox`
