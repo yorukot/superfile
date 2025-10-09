@@ -16,7 +16,7 @@ footer_border_active = "#D3C6AA"
 modal_border_active = "#859289"
 
 # ========= Background (bg) =========
-full_screen_bg = "#ff0000"
+full_screen_bg = "#272E33"
 file_panel_bg = "#272E33"
 sidebar_bg = "#272E33"
 footer_bg = "#272E33"
