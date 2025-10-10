@@ -15,18 +15,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yorukot/superfile/src/internal/ui"
-	"github.com/yorukot/superfile/src/internal/ui/rendering"
-
-	"github.com/yorukot/superfile/src/internal/common"
-	"github.com/yorukot/superfile/src/internal/utils"
-
 	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/charmbracelet/lipgloss"
-
 	"github.com/yorukot/ansichroma"
 
 	"github.com/yorukot/superfile/src/config/icon"
+	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/ui"
+	"github.com/yorukot/superfile/src/internal/ui/rendering"
+	"github.com/yorukot/superfile/src/internal/utils"
 	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
 )
 
@@ -73,7 +70,7 @@ func (m *Model) Close() {
 func (m *Model) RenderText(text string) string {
 	return ui.FilePreviewPanelRenderer(m.height, m.width).
 		AddLines(text).
-		Render() + m.imagePreviewer.ClearKittyImages()
+		Render() + m.imagePreviewer.ClearAllImages()
 }
 
 func (m *Model) SetContentWithRenderText(text string) {
@@ -170,7 +167,7 @@ func (m *Model) renderImagePreview(box lipgloss.Style, itemPath string, previewW
 	}
 
 	// Use the new auto-detection function to choose the best renderer
-	imageRender, err := m.imagePreviewer.ImagePreview(itemPath, previewWidth, previewHeight,
+	imageRender, err, renderedType := m.imagePreviewer.ImagePreview(itemPath, previewWidth, previewHeight,
 		common.Theme.FilePanelBG, sideAreaWidth)
 	if errors.Is(err, image.ErrFormat) {
 		return box.Render("\n --- " + icon.Error + " Unsupported image formats ---")
@@ -183,7 +180,7 @@ func (m *Model) renderImagePreview(box lipgloss.Style, itemPath string, previewW
 
 	// Check if this looks like Kitty protocol output (starts with escape sequences)
 	// For Kitty protocol, avoid using lipgloss alignment to prevent layout drift
-	if strings.HasPrefix(imageRender, "\x1b_G") {
+	if renderedType != filepreview.RendererANSI {
 		rendered := common.FilePreviewBox(previewHeight, previewWidth).Render(imageRender)
 		return rendered
 	}
@@ -246,7 +243,7 @@ func (m *Model) RenderWithPath(itemPath string, fullModelWidth int) string {
 
 	box := common.FilePreviewBox(previewHeight, previewWidth)
 	r := ui.FilePreviewPanelRenderer(previewHeight, previewWidth)
-	clearCmd := m.imagePreviewer.ClearKittyImages()
+	clearCmd := m.imagePreviewer.ClearAllImages()
 
 	fileInfo, infoErr := os.Stat(itemPath)
 	if infoErr != nil {
