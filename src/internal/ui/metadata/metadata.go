@@ -119,7 +119,7 @@ func getMetaDataUnsorted(filePath string, metadataFocussed bool, et *exiftool.Ex
 
 	updateExiftoolMetadata(filePath, et, &res)
 
-	if common.Config.EnableMD5Checksum {
+	if fileInfo.Mode().IsRegular() && common.Config.EnableMD5Checksum {
 		// Calculate MD5 checksum
 		checksum, err := calculateMD5Checksum(filePath)
 		if err != nil {
