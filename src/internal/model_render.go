@@ -438,10 +438,14 @@ func (m *model) renderRenameTypeOptions(width int) string {
 
 	var result string
 	for i, typeName := range renameTypes {
+		cursorIcon := icon.Cursor
+		if !common.Config.Nerdfont {
+			cursorIcon = ">"
+		}
 		line := "   " + typeName
 		style := typeStyle
 		if i == m.bulkRenameModal.renameType {
-			line = " > " + typeName
+			line = " " + cursorIcon + " " + typeName
 			style = typeStyle.Foreground(cursorColor)
 		}
 		result += style.Render(line) + "\n"
@@ -506,13 +510,24 @@ func (m *model) renderNumberingInput(styles bulkRenameStyles) string {
 func (m *model) renderCaseConversionOptions(styles bulkRenameStyles) string {
 	caseTypes := []string{"lowercase", "UPPERCASE", "Title Case"}
 	var result string
+	cursorColor := lipgloss.Color(common.Theme.Cursor)
+
+	typeStyle := lipgloss.NewStyle().
+		Background(common.ModalBGColor).
+		Foreground(common.ModalFGColor)
 
 	for i, caseType := range caseTypes {
 		style := styles.labelStyle
+		
+		cursorIcon := icon.Cursor
+
+		if(!common.Config.Nerdfont){
+			cursorIcon = ">"
+		}
 		line := "   " + caseType
 		if i == m.bulkRenameModal.caseType {
-			style = styles.activeLabelStyle
-			line = " > " + caseType
+			line = " " + cursorIcon + " " + caseType
+			style = typeStyle.Foreground(cursorColor)
 		}
 		result += styles.inputContainerStyle.Render(style.Render(line)) + "\n"
 	}
