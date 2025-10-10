@@ -22,7 +22,7 @@ Write-Host -ForegroundColor Red         "                    `$`$/              
 Write-Host ""
 
 $package = "superfile"
-$version = if ($env:SPF_INSTALL_VERSION) { $env:SPF_INSTALL_VERSION } else { "1.3.3" }
+$version = if ($env:SPF_INSTALL_VERSION) { $env:SPF_INSTALL_VERSION } else { "1.4.0" }
 
 $installInstructions = @'
 This installer is only available for Windows.
