@@ -121,6 +121,11 @@ type HotkeysType struct {
 	PageUp   []string `toml:"page_up"`
 	PageDown []string `toml:"page_down"`
 
+	// bulk rename
+	NavBulkRename []string `toml:"nav_bulk_rename"`
+	RevNavBulkRename []string `toml:"rev_nav_bulk_rename"`
+	BulkRename []string `toml:"bulk_rename"`
+
 	CloseFilePanel         []string `toml:"close_file_panel" comment:"file panel control"`
 	CreateNewFilePanel     []string `toml:"create_new_file_panel"`
 	NextFilePanel          []string `toml:"next_file_panel"`
@@ -135,7 +140,6 @@ type HotkeysType struct {
 
 	FilePanelItemCreate []string `toml:"file_panel_item_create" comment:"create file/directory and rename "`
 	FilePanelItemRename []string `toml:"file_panel_item_rename"`
-	BulkRename          []string `toml:"bulk_rename"`
 
 	CopyItems              []string `toml:"copy_items" comment:"file operate"`
 	PasteItems             []string `toml:"paste_items"`

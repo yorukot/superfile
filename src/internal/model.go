@@ -361,15 +361,14 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 }
 
 func (m *model) handleModalOrDefaultKey(msg tea.KeyMsg) tea.Cmd {
-	if cmd := m.handleActiveModal(msg.String()); cmd != nil || m.hasActiveModal() {
+	modalState := m.getModalState()
+	if cmd := m.handleActiveModal(msg.String(), modalState); cmd != nil || m.isAnyModalActive(modalState) {
 		return cmd
 	}
 	return m.handleDefaultKey(msg.String())
 }
 
-func (m *model) handleActiveModal(msg string) tea.Cmd {
-	modalState := m.getModalState()
-
+func (m *model) handleActiveModal(msg string, modalState modalStateChecker) tea.Cmd {
 	if cmd := m.routeModalInput(msg, modalState); cmd != nil || m.isAnyModalActive(modalState) {
 		return cmd
 	}
@@ -493,14 +492,14 @@ func (m *model) handleQuitState(cmd tea.Cmd, cdOnQuit bool) tea.Cmd {
 func (m *model) updateFilePanelsState(msg tea.Msg) tea.Cmd {
 	focusPanel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	var cmd tea.Cmd
-	
+
 	if m.firstTextInput {
 		m.firstTextInput = false
 		return nil
 	}
-	
+
 	cmd = m.handleInputUpdates(msg, focusPanel)
-	
+
 	// The code should never reach this state.
 	if focusPanel.cursor < 0 {
 		focusPanel.cursor = 0
@@ -512,7 +511,7 @@ func (m *model) updateFilePanelsState(msg tea.Msg) tea.Cmd {
 func (m *model) handleInputUpdates(msg tea.Msg, focusPanel *filePanel) tea.Cmd {
 	var cmd tea.Cmd
 	var action common.ModelAction
-	
+
 	switch {
 	case m.bulkRenameModal.open:
 		cmd = m.handleBulkRenameUpdate(msg)
@@ -530,13 +529,13 @@ func (m *model) handleInputUpdates(msg tea.Msg, focusPanel *filePanel) tea.Cmd {
 		action, cmd = m.zoxideModal.HandleUpdate(msg)
 		m.applyZoxideModalAction(action)
 	}
-	
+
 	return cmd
 }
 
 func (m *model) handleBulkRenameUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
-	
+
 	switch m.bulkRenameModal.renameType {
 	case 0:
 		if m.bulkRenameModal.cursor == 0 {
@@ -549,7 +548,7 @@ func (m *model) handleBulkRenameUpdate(msg tea.Msg) tea.Cmd {
 	case 2:
 		m.bulkRenameModal.suffixInput, cmd = m.bulkRenameModal.suffixInput.Update(msg)
 	}
-	
+
 	return cmd
 }
 

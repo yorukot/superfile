@@ -319,7 +319,7 @@ func (m *model) renamingKey(msg string) tea.Cmd {
 // Handle bulk rename modal keys
 func (m *model) bulkRenameKey(msg string) tea.Cmd {
 	switch {
-	case slices.Contains(common.Hotkeys.CancelTyping, msg) || slices.Contains(common.Hotkeys.Quit, msg):
+	case slices.Contains(common.Hotkeys.CancelTyping, msg):
 		m.cancelBulkRename()
 	case slices.Contains(common.Hotkeys.ConfirmTyping, msg):
 		m.confirmBulkRename()
@@ -327,9 +327,9 @@ func (m *model) bulkRenameKey(msg string) tea.Cmd {
 		m.adjustBulkRenameValue(-1)
 	case slices.Contains(common.Hotkeys.ListDown, msg):
 		m.adjustBulkRenameValue(1)
-	case msg == "tab":
+	case slices.Contains(common.Hotkeys.NavBulkRename, msg):
 		m.bulkRenameNextType()
-	case msg == "shift+tab":
+	case slices.Contains(common.Hotkeys.RevNavBulkRename, msg):
 		m.bulkRenamePrevType()
 	}
 	return nil

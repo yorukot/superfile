@@ -388,7 +388,7 @@ func (m *model) renderBulkRenameTitle(panel *filePanel, config bulkRenameRenderC
 		Width(config.width - 4).
 		Background(common.ModalBGColor)
 
-	titleText := common.SidebarTitleStyle.Render("  Bulk Rename") +
+	titleText := common.ModalTitleStyle.Render("  Bulk Rename") +
 		common.ModalStyle.Render(fmt.Sprintf(" (%d files selected)", len(panel.selected)))
 	return titleStyle.Render(titleText)
 }
@@ -518,10 +518,10 @@ func (m *model) renderCaseConversionOptions(styles bulkRenameStyles) string {
 
 	for i, caseType := range caseTypes {
 		style := styles.labelStyle
-		
+
 		cursorIcon := icon.Cursor
 
-		if(!common.Config.Nerdfont){
+		if !common.Config.Nerdfont {
 			cursorIcon = ">"
 		}
 		line := "   " + caseType
@@ -544,10 +544,10 @@ func (m *model) renderBulkRenamePreview(config bulkRenameRenderConfig) string {
 
 	previewTitle := lipgloss.NewStyle().
 		Width(config.width - 4).
-		Align(lipgloss.Center).
 		Background(common.ModalBGColor).
 		Foreground(common.ModalFGColor).
-		Render("Preview:")
+		Align(lipgloss.Left).
+		Render("  Preview:")
 
 	preview := "\n" + previewTitle + "\n"
 
@@ -556,46 +556,50 @@ func (m *model) renderBulkRenamePreview(config bulkRenameRenderConfig) string {
 	}
 
 	if len(m.bulkRenameModal.preview) > previewCount {
-		moreText := fmt.Sprintf("... and %d more files", len(m.bulkRenameModal.preview)-previewCount)
-		centeredMore := lipgloss.NewStyle().
+		moreText := fmt.Sprintf(" ... and %d more files", len(m.bulkRenameModal.preview)-previewCount)
+		More := lipgloss.NewStyle().
 			Width(config.width - 4).
-			Align(lipgloss.Center).
+			Align(lipgloss.Left).
 			Background(common.ModalBGColor).
 			Foreground(common.ModalFGColor).
-			Render(moreText)
-		preview += centeredMore + "\n"
+			Render("  " + moreText)
+		preview += More
 	}
 
 	return preview
 }
 
 func (m *model) renderPreviewItem(p renamePreview, width int) string {
-	centeredLine := lipgloss.NewStyle().
+	availableWidth := width - 4 - 2
+	truncatedName := common.TruncateText(p.newName, availableWidth, "...")
+
+	Line := lipgloss.NewStyle().
 		Width(width - 4).
-		Align(lipgloss.Center).
+		Align(lipgloss.Left).
 		Background(common.ModalBGColor).
 		Foreground(common.ModalFGColor).
-		Render(p.newName)
+		Render("  " + truncatedName)
 
 	if p.error == "" {
-		return centeredLine + "\n"
+		return Line + "\n"
 	}
 
 	errorStyle := lipgloss.NewStyle().
 		Width(width - 4).
-		Align(lipgloss.Center).
+		Align(lipgloss.Left).
 		Background(common.ModalBGColor).
 		Foreground(lipgloss.Color(common.Theme.Error))
 
-	return errorStyle.Render(p.newName) + "\n" + errorStyle.Render(fmt.Sprintf("(%s)", p.error)) + "\n"
+	return errorStyle.Render("  "+truncatedName) + "\n" + errorStyle.Render("  "+fmt.Sprintf("(%s)", p.error)) + "\n"
 }
 
 func (m *model) renderBulkRenameTips(config bulkRenameRenderConfig) string {
 	tipsStyle := lipgloss.NewStyle().
 		Width(config.width - 4).
 		Background(common.ModalBGColor).
-		Foreground(common.ModalFGColor)
-	return tipsStyle.Render("\nTab/Shift+Tab: Change type | ↑/↓: Navigate | Enter (Rename) | Esc (Cancel)\n")
+		Foreground(common.ModalFGColor).
+		MarginTop(2)
+	return tipsStyle.Render("\n Tab/Shift+Tab: Change type | ↑/↓: Navigate | Enter (Rename) | Esc (Cancel)\n")
 }
 
 func (m *model) renderBulkRenameError(config bulkRenameRenderConfig) string {
