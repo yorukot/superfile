@@ -10,6 +10,80 @@ head:
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC(YYYY-MM-DD).
 
+# [**v1.4.0**](https://github.com/yorukot/superfile/releases/tag/v1.4.0)
+
+> 2025-10-10
+
+#### Update
+- feat: File operation via tea cmd by [`#963`](https://github.com/yorukot/superfile/pull/963)
+- feat: processbar improvements, package separation, better channel management by [`#970`](https://github.com/yorukot/superfile/pull/970)
+- feat: processbar improvements, package separation, better channel management by [`#973`](https://github.com/yorukot/superfile/pull/973)
+- feat: enable lll and recvcheck linter, fix tests, more refactors by [`#977`](https://github.com/yorukot/superfile/pull/977)
+- feat: Remove channel for notification models by [`#979`](https://github.com/yorukot/superfile/pull/979)
+- feat: enable cyclop, funlen, gocognit, gocyclo linters, and refactor large functions by [`#984`](https://github.com/yorukot/superfile/pull/984)
+- feat: Add a new hotkey to handle cd-on-quit whenever needed by [`#924`](https://github.com/yorukot/superfile/pull/924)
+- feat: added option to permanently delete files by [`#987`](https://github.com/yorukot/superfile/pull/987)
+- feat: Preview panel separation by [`#1021`](https://github.com/yorukot/superfile/pull/1021)
+- feat: Add search functionality to help menu by [`#1011`](https://github.com/yorukot/superfile/pull/1011)
+- feat: Use zoxide lib by [`#1036`](https://github.com/yorukot/superfile/pull/1036)
+- feat: Add zoxide directory tracking on navigation by [`#1041`](https://github.com/yorukot/superfile/pull/1041)
+- feat: Zoxide integration by [`#1039`](https://github.com/yorukot/superfile/pull/1039)
+- feat: Select mode with better feedback by [`#1074`](https://github.com/yorukot/superfile/pull/1074)
+- feat: owner/group in the metadata by [`#1093`](https://github.com/yorukot/superfile/pull/1093)
+- feat: Async zoxide by [`#1104`](https://github.com/yorukot/superfile/pull/1104)
+
+#### Bug Fix
+- fix: sorting in searchbar by [`#985`](https://github.com/yorukot/superfile/pull/985)
+- fix: Async rendering, Include clipboard check in paste items, and update linter configs by [`#997`](https://github.com/yorukot/superfile/pull/997)
+- fix: Move utility functions to utils package by [`#1012`](https://github.com/yorukot/superfile/pull/1012)
+- fix: Refactoring and separation of preview panel and searchbar in help menu by [`#1013`](https://github.com/yorukot/superfile/pull/1013)
+- fix(filePanel): allow focusType to be set correctly by [`#1033`](https://github.com/yorukot/superfile/pull/1033)
+- fix(ci): Update gomod2nix.toml, allow pre release in version output, release 1.4.0-rc1, bug fixes, and improvements by [`#1054`](https://github.com/yorukot/superfile/pull/1054)
+- fix(nix): resolve build failures in the nix flake by [`#1068`](https://github.com/yorukot/superfile/pull/1068)
+- fix: Retry the file deletion to prevent flakies (#938) by [`#1076`](https://github.com/yorukot/superfile/pull/1076)
+- fix(issue-1066): Fixed issue where enter was not searchable by [`#1078`](https://github.com/yorukot/superfile/pull/1078)
+- fix(#1073): Tech debt fix by [`#1077`](https://github.com/yorukot/superfile/pull/1077)
+- fix: fix deleted directory not able to remove from pins (#1067) by [`#1081`](https://github.com/yorukot/superfile/pull/1081)
+- fix: fix child process spawning attached by [`#1084`](https://github.com/yorukot/superfile/pull/1084)
+- fix: always clear images when showing a FullScreenStyle by [`#1094`](https://github.com/yorukot/superfile/pull/1094)
+- fix: Allow j and k keys in zoxide by [`#1102`](https://github.com/yorukot/superfile/pull/1102)
+- fix: Zoxide improvements and 1.4.0-rc2 by [`#1105`](https://github.com/yorukot/superfile/pull/1105)
+- fix: rename cursor beginning on wrong character because of multiple dots in name (#813) by [`#1112`](https://github.com/yorukot/superfile/pull/1112)
+- fix: check and fix file panel scroll position on height changes by [`#1095`](https://github.com/yorukot/superfile/pull/1095)
+
+#### Optimization
+- perf(website): optimize font loading and asset organization by [`#1089`](https://github.com/yorukot/superfile/pull/1089)
+
+#### Documentation
+- docs: fix incorrect zoxide plugin config name by [`#1049`](https://github.com/yorukot/superfile/pull/1049)
+- docs(hotkeys): Fix typo in vimHotkeys.toml comments by [`#1080`](https://github.com/yorukot/superfile/pull/1080)
+- docs: add section for core maintainers in README.md by [`#1088`](https://github.com/yorukot/superfile/pull/1088)
+- chore: add winget install instruction to readme and website by [`#943`](https://github.com/yorukot/superfile/pull/943)
+
+#### Dependencies
+- chore(deps): update dependency go to v1.25.0, golangci-lint to v2, golangci-lint actions to v8 by [`#750`](https://github.com/yorukot/superfile/pull/750)
+- chore(deps): update amannn/action-semantic-pull-request action to v6 by [`#1006`](https://github.com/yorukot/superfile/pull/1006)
+- chore(deps): update actions/first-interaction action to v3 by [`#1005`](https://github.com/yorukot/superfile/pull/1005)
+- chore(deps): update actions/checkout action to v5 by [`#1004`](https://github.com/yorukot/superfile/pull/1004)
+- chore(deps): bump astro from 5.10.1 to 5.12.8 by [`#982`](https://github.com/yorukot/superfile/pull/982)
+- fix(deps): update module golang.org/x/mod to v0.27.0 by [`#989`](https://github.com/yorukot/superfile/pull/989)
+- fix(deps): update dependency @expressive-code/plugin-collapsible-sections to v0.41.3 by [`#990`](https://github.com/yorukot/superfile/pull/990)
+- fix(deps): update dependency sharp to v0.34.3 by [`#992`](https://github.com/yorukot/superfile/pull/992)
+- fix(deps): update dependency @expressive-code/plugin-line-numbers to v0.41.3 by [`#991`](https://github.com/yorukot/superfile/pull/991)
+- chore(deps): update dependency go to v1.25.0 by [`#994`](https://github.com/yorukot/superfile/pull/994)
+- fix(deps): update astro monorepo by [`#995`](https://github.com/yorukot/superfile/pull/995)
+- fix(deps): update dependency @astrojs/starlight to ^0.35.0 by [`#1000`](https://github.com/yorukot/superfile/pull/1000)
+- fix(deps): update module github.com/urfave/cli/v3 to v3.4.1 by [`#1001`](https://github.com/yorukot/superfile/pull/1001)
+- fix(deps): update module golang.org/x/text to v0.28.0 by [`#1003`](https://github.com/yorukot/superfile/pull/1003)
+
+#### Misc
+- chore: migrate from superfile.netlify.app to superfile.dev by [`#1087`](https://github.com/yorukot/superfile/pull/1087)
+- refactor(filepanel): replace filePanelFocusType with isFocused boolean by [`#1040`](https://github.com/yorukot/superfile/pull/1040)
+- refactor(ansi): Migrate from github.com/charmbracelet/x/exp/term/ansi to github.com/charmbracelet/x/ansi by [`#1044`](https://github.com/yorukot/superfile/pull/1044)
+- refactor: common operation on pinned directory file using PinnedManager by [`#1085`](https://github.com/yorukot/superfile/pull/1085)
+- test: unit tests for pinned manager by [`#1090`](https://github.com/yorukot/superfile/pull/1090)
+
+
 # [**v1.3.3**](https://github.com/yorukot/superfile/releases/tag/v1.3.3)
 
 > 2025-07-25
