@@ -3,6 +3,7 @@ package internal
 import (
 	"time"
 
+	"github.com/charmbracelet/lipgloss"
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
@@ -72,11 +73,12 @@ type model struct {
 	copyItems       copyItems
 
 	// Modals
-	notifyModel notify.Model
-	typingModal typingModal
-	helpMenu    helpMenuModal
-	promptModal prompt.Model
-	zoxideModal zoxideui.Model
+	notifyModel     notify.Model
+	typingModal     typingModal
+	bulkRenameModal bulkRenameModal
+	helpMenu        helpMenuModal
+	promptModal     prompt.Model
+	zoxideModal     zoxideui.Model
 
 	// Zoxide client for directory tracking
 	zClient *zoxidelib.Client
@@ -135,7 +137,72 @@ type typingModal struct {
 	errorMesssage string
 }
 
-// Copied items
+type bulkRenameModal struct {
+	open         bool
+	renameType   int
+	cursor       int
+	findInput    textinput.Model
+	replaceInput textinput.Model
+	prefixInput  textinput.Model
+	suffixInput  textinput.Model
+	startNumber  int
+	caseType     int
+	preview      []renamePreview
+	errorMessage string
+}
+
+type renamePreview struct {
+	oldName string
+	newName string
+	error   string
+}
+
+type renameValidation struct {
+	oldName  string
+	newName  string
+	itemPath string
+}
+
+type bulkRenameStyles struct {
+	width               int
+	labelStyle          lipgloss.Style
+	activeLabelStyle    lipgloss.Style
+	inputContainerStyle lipgloss.Style
+}
+
+type bulkRenameRenderConfig struct {
+	width         int
+	modalHeight   int
+	leftColWidth  int
+	rightColWidth int
+	columnHeight  int
+}
+
+type modalOverlayConfig struct {
+	width  int
+	height int
+	x      int
+	y      int
+}
+
+type modalStateChecker struct {
+	typingOpen      bool
+	promptOpen      bool
+	zoxideOpen      bool
+	notifyOpen      bool
+	bulkRenameOpen  bool
+	renaming        bool
+	sidebarRenaming bool
+	searchFocused   bool
+	sidebarSearch   bool
+	sortOpen        bool
+	helpOpen        bool
+}
+
+type keyInputContext struct {
+	msg          string
+	modalChecker modalStateChecker
+} // Copied items
 type copyItems struct {
 	items []string
 	cut   bool

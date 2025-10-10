@@ -130,42 +130,70 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 }
 
 func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
-	// if not focus on the filepanel return
 	if !m.getFocusedFilePanel().isFocused {
-		if m.focusPanel == sidebarFocus && slices.Contains(common.Hotkeys.Confirm, msg) {
-			m.sidebarSelectDirectory()
-		}
-		if m.focusPanel == sidebarFocus && slices.Contains(common.Hotkeys.FilePanelItemRename, msg) {
-			m.sidebarModel.PinnedItemRename()
-		}
-		if m.focusPanel == sidebarFocus && slices.Contains(common.Hotkeys.SearchBar, msg) {
-			m.sidebarSearchBarFocus()
-		}
-		return nil
+		return m.handleSidebarFocusKeys(msg)
 	}
-	// Check if in the select mode and focusOn filepanel
+
 	if m.getFocusedFilePanel().panelMode == selectMode {
-		switch {
-		case slices.Contains(common.Hotkeys.Confirm, msg):
-			m.fileModel.filePanels[m.filePanelFocusIndex].singleItemSelect()
-		case slices.Contains(common.Hotkeys.FilePanelSelectModeItemsSelectUp, msg):
-			m.fileModel.filePanels[m.filePanelFocusIndex].itemSelectUp(m.mainPanelHeight)
-		case slices.Contains(common.Hotkeys.FilePanelSelectModeItemsSelectDown, msg):
-			m.fileModel.filePanels[m.filePanelFocusIndex].itemSelectDown(m.mainPanelHeight)
-		case slices.Contains(common.Hotkeys.DeleteItems, msg):
-			return m.getDeleteTriggerCmd(false)
-		case slices.Contains(common.Hotkeys.PermanentlyDeleteItems, msg):
-			return m.getDeleteTriggerCmd(true)
-		case slices.Contains(common.Hotkeys.CopyItems, msg):
-			m.copyMultipleItem(false)
-		case slices.Contains(common.Hotkeys.CutItems, msg):
-			m.copyMultipleItem(true)
-		case slices.Contains(common.Hotkeys.FilePanelSelectAllItem, msg):
-			m.selectAllItem()
-		}
+		return m.handleSelectModeKeys(msg)
+	}
+
+	return m.handleBrowserModeKeys(msg)
+}
+
+func (m *model) handleSidebarFocusKeys(msg string) tea.Cmd {
+	if m.focusPanel != sidebarFocus {
 		return nil
 	}
 
+	switch {
+	case slices.Contains(common.Hotkeys.Confirm, msg):
+		m.sidebarSelectDirectory()
+	case slices.Contains(common.Hotkeys.FilePanelItemRename, msg):
+		m.sidebarModel.PinnedItemRename()
+	case slices.Contains(common.Hotkeys.SearchBar, msg):
+		m.sidebarSearchBarFocus()
+	}
+	return nil
+}
+
+func (m *model) handleSelectModeKeys(msg string) tea.Cmd {
+	if slices.Contains(common.Hotkeys.Confirm, msg) {
+		m.fileModel.filePanels[m.filePanelFocusIndex].singleItemSelect()
+		return nil
+	}
+	if slices.Contains(common.Hotkeys.FilePanelSelectModeItemsSelectUp, msg) {
+		m.fileModel.filePanels[m.filePanelFocusIndex].itemSelectUp(m.mainPanelHeight)
+		return nil
+	}
+	if slices.Contains(common.Hotkeys.FilePanelSelectModeItemsSelectDown, msg) {
+		m.fileModel.filePanels[m.filePanelFocusIndex].itemSelectDown(m.mainPanelHeight)
+		return nil
+	}
+	if slices.Contains(common.Hotkeys.DeleteItems, msg) {
+		return m.getDeleteTriggerCmd(false)
+	}
+	if slices.Contains(common.Hotkeys.PermanentlyDeleteItems, msg) {
+		return m.getDeleteTriggerCmd(true)
+	}
+	
+	return m.handleSelectModeFileOperations(msg)
+}
+
+func (m *model) handleSelectModeFileOperations(msg string) tea.Cmd {
+	if slices.Contains(common.Hotkeys.CopyItems, msg) {
+		m.copyMultipleItem(false)
+	} else if slices.Contains(common.Hotkeys.CutItems, msg) {
+		m.copyMultipleItem(true)
+	} else if slices.Contains(common.Hotkeys.BulkRename, msg) {
+		m.panelBulkRename()
+	} else if slices.Contains(common.Hotkeys.FilePanelSelectAllItem, msg) {
+		m.selectAllItem()
+	}
+	return nil
+}
+
+func (m *model) handleBrowserModeKeys(msg string) tea.Cmd {
 	switch {
 	case slices.Contains(common.Hotkeys.Confirm, msg):
 		m.enterPanel()
@@ -175,6 +203,14 @@ func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
 		return m.getDeleteTriggerCmd(false)
 	case slices.Contains(common.Hotkeys.PermanentlyDeleteItems, msg):
 		return m.getDeleteTriggerCmd(true)
+	default:
+		return m.handleBrowserModeFileOperations(msg)
+	}
+	return nil
+}
+
+func (m *model) handleBrowserModeFileOperations(msg string) tea.Cmd {
+	switch {
 	case slices.Contains(common.Hotkeys.CopyItems, msg):
 		m.copySingleItem(false)
 	case slices.Contains(common.Hotkeys.CutItems, msg):
@@ -278,6 +314,58 @@ func (m *model) renamingKey(msg string) tea.Cmd {
 	}
 
 	return nil
+}
+
+// Handle bulk rename modal keys
+func (m *model) bulkRenameKey(msg string) tea.Cmd {
+	switch {
+	case slices.Contains(common.Hotkeys.CancelTyping, msg):
+		m.cancelBulkRename()
+	case slices.Contains(common.Hotkeys.ConfirmTyping, msg):
+		m.confirmBulkRename()
+	case slices.Contains(common.Hotkeys.ListUp, msg):
+		m.adjustBulkRenameValue(-1)
+	case slices.Contains(common.Hotkeys.ListDown, msg):
+		m.adjustBulkRenameValue(1)
+	case slices.Contains(common.Hotkeys.NavBulkRename, msg):
+		m.bulkRenameNextType()
+	case slices.Contains(common.Hotkeys.RevNavBulkRename, msg):
+		m.bulkRenamePrevType()
+	}
+	return nil
+}
+
+func (m *model) adjustBulkRenameValue(delta int) {
+	switch m.bulkRenameModal.renameType {
+	case 3:
+		m.adjustNumberingValue(delta)
+	case 4:
+		m.adjustCaseType(delta)
+	default:
+		m.navigateBulkRename(delta)
+	}
+}
+
+func (m *model) adjustNumberingValue(delta int) {
+	newValue := m.bulkRenameModal.startNumber + delta
+	if newValue >= 0 {
+		m.bulkRenameModal.startNumber = newValue
+	}
+}
+
+func (m *model) adjustCaseType(delta int) {
+	newValue := m.bulkRenameModal.caseType + delta
+	if newValue >= 0 && newValue <= 2 {
+		m.bulkRenameModal.caseType = newValue
+	}
+}
+
+func (m *model) navigateBulkRename(delta int) {
+	if delta < 0 {
+		m.bulkRenameNavigateUp()
+	} else {
+		m.bulkRenameNavigateDown()
+	}
 }
 
 func (m *model) sidebarRenamingKey(msg string) {

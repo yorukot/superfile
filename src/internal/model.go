@@ -355,57 +355,127 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 		m.firstUse = false
 		return nil
 	}
-	var cmd tea.Cmd
-	cdOnQuit := common.Config.CdOnQuit
-	switch {
-	case m.typingModal.open:
-		m.typingModalOpenKey(msg.String())
-	case m.promptModal.IsOpen():
-		// Ignore keypress. It will be handled in Update call via
-		// updateFilePanelState
-		// TODO: Convert that to async via tea.Cmd
-	case m.zoxideModal.IsOpen():
-		// Ignore keypress. It will be handled in Update call via
-		// updateFilePanelState
 
-	// Handles all warn models except the warn model for confirming to quit
-	case m.notifyModel.IsOpen():
-		cmd = m.notifyModelOpenKey(msg.String())
+	cmd := m.handleModalOrDefaultKey(msg)
+	return m.handleQuitState(cmd, common.Config.CdOnQuit)
+}
 
-	// If renaming a object
-	case m.fileModel.renaming:
-		cmd = m.renamingKey(msg.String())
-	case m.sidebarModel.IsRenaming():
-		m.sidebarRenamingKey(msg.String())
-	// If search bar is open
-	case m.fileModel.filePanels[m.filePanelFocusIndex].searchBar.Focused():
-		m.focusOnSearchbarKey(msg.String())
-	// If sort options menu is open
-	case m.sidebarModel.SearchBarFocused():
-		m.sidebarModel.HandleSearchBarKey(msg.String())
-	case m.fileModel.filePanels[m.filePanelFocusIndex].sortOptions.open:
-		m.sortOptionsKey(msg.String())
-	// If help menu is open
-	case m.helpMenu.open:
-		m.helpMenuKey(msg.String())
+func (m *model) handleModalOrDefaultKey(msg tea.KeyMsg) tea.Cmd {
+	modalState := m.getModalState()
+	if cmd := m.handleActiveModal(msg.String(), modalState); cmd != nil || m.isAnyModalActive(modalState) {
+		return cmd
+	}
+	return m.handleDefaultKey(msg.String())
+}
 
-	case slices.Contains(common.Hotkeys.Quit, msg.String()):
-		m.modelQuitState = quitInitiated
+func (m *model) handleActiveModal(msg string, modalState modalStateChecker) tea.Cmd {
+	if cmd := m.routeModalInput(msg, modalState); cmd != nil || m.isAnyModalActive(modalState) {
+		return cmd
+	}
+	return nil
+}
 
-	case slices.Contains(common.Hotkeys.CdQuit, msg.String()):
-		m.modelQuitState = quitInitiated
-		cdOnQuit = true
-
-	default:
-		// Handles general kinds of inputs in the regular state of the application
-		cmd = m.mainKey(msg.String())
+func (m *model) routeModalInput(msg string, state modalStateChecker) tea.Cmd {
+	if state.typingOpen {
+		m.typingModalOpenKey(msg)
+		return nil
+	}
+	if state.promptOpen || state.zoxideOpen {
+		return nil
+	}
+	if state.notifyOpen {
+		return m.notifyModelOpenKey(msg)
+	}
+	if state.bulkRenameOpen {
+		return m.bulkRenameKey(msg)
+	}
+	if state.renaming {
+		return m.renamingKey(msg)
 	}
 
-	// If quiting input pressed, check if has any running process and displays a
-	// warn. Otherwise just quits application
+	return m.routeSecondaryModalInput(msg, state)
+}
+
+func (m *model) routeSecondaryModalInput(msg string, state modalStateChecker) tea.Cmd {
+	if state.sidebarRenaming {
+		m.sidebarRenamingKey(msg)
+		return nil
+	}
+	if state.searchFocused {
+		m.focusOnSearchbarKey(msg)
+		return nil
+	}
+	if state.sidebarSearch {
+		m.sidebarModel.HandleSearchBarKey(msg)
+		return nil
+	}
+	if state.sortOpen {
+		m.sortOptionsKey(msg)
+		return nil
+	}
+	if state.helpOpen {
+		m.helpMenuKey(msg)
+		return nil
+	}
+	return nil
+}
+
+func (m *model) getModalState() modalStateChecker {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	return modalStateChecker{
+		typingOpen:      m.typingModal.open,
+		promptOpen:      m.promptModal.IsOpen(),
+		zoxideOpen:      m.zoxideModal.IsOpen(),
+		notifyOpen:      m.notifyModel.IsOpen(),
+		bulkRenameOpen:  m.bulkRenameModal.open,
+		renaming:        m.fileModel.renaming,
+		sidebarRenaming: m.sidebarModel.IsRenaming(),
+		searchFocused:   panel.searchBar.Focused(),
+		sidebarSearch:   m.sidebarModel.SearchBarFocused(),
+		sortOpen:        panel.sortOptions.open,
+		helpOpen:        m.helpMenu.open,
+	}
+}
+
+func (m *model) hasActiveModal() bool {
+	state := m.getModalState()
+	return m.isAnyModalActive(state)
+}
+
+func (m *model) isAnyModalActive(state modalStateChecker) bool {
+	if m.hasPrimaryModalsActive(state) {
+		return true
+	}
+	return m.hasSecondaryModalsActive(state)
+}
+
+func (m *model) hasPrimaryModalsActive(state modalStateChecker) bool {
+	return state.typingOpen || state.promptOpen || state.zoxideOpen ||
+		state.notifyOpen || state.bulkRenameOpen || state.renaming
+}
+
+func (m *model) hasSecondaryModalsActive(state modalStateChecker) bool {
+	return state.sidebarRenaming || state.searchFocused || state.sidebarSearch ||
+		state.sortOpen || state.helpOpen
+}
+
+func (m *model) handleDefaultKey(msg string) tea.Cmd {
+	switch {
+	case slices.Contains(common.Hotkeys.Quit, msg):
+		m.modelQuitState = quitInitiated
+		return nil
+	case slices.Contains(common.Hotkeys.CdQuit, msg):
+		m.modelQuitState = quitInitiated
+		common.Config.CdOnQuit = true
+		return nil
+	default:
+		return m.mainKey(msg)
+	}
+}
+
+func (m *model) handleQuitState(cmd tea.Cmd, cdOnQuit bool) tea.Cmd {
 	if m.modelQuitState == quitInitiated {
 		if m.processBarModel.HasRunningProcesses() {
-			// Dont quit now, get a confirmation first.
 			m.modelQuitState = quitConfirmationInitiated
 			m.warnModalForQuit()
 			return cmd
@@ -419,15 +489,32 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 	return cmd
 }
 
-// Update the file panel state. Change name of renamed files, filter out files
-// in search, update typingb bar, etc
 func (m *model) updateFilePanelsState(msg tea.Msg) tea.Cmd {
 	focusPanel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	var cmd tea.Cmd
-	var action common.ModelAction
-	switch {
-	case m.firstTextInput:
+
+	if m.firstTextInput {
 		m.firstTextInput = false
+		return nil
+	}
+
+	cmd = m.handleInputUpdates(msg, focusPanel)
+
+	// The code should never reach this state.
+	if focusPanel.cursor < 0 {
+		focusPanel.cursor = 0
+	}
+
+	return cmd
+}
+
+func (m *model) handleInputUpdates(msg tea.Msg, focusPanel *filePanel) tea.Cmd {
+	var cmd tea.Cmd
+	var action common.ModelAction
+
+	switch {
+	case m.bulkRenameModal.open:
+		cmd = m.handleBulkRenameUpdate(msg)
 	case m.fileModel.renaming:
 		focusPanel.rename, cmd = focusPanel.rename.Update(msg)
 	case focusPanel.searchBar.Focused():
@@ -435,7 +522,6 @@ func (m *model) updateFilePanelsState(msg tea.Msg) tea.Cmd {
 	case m.typingModal.open:
 		m.typingModal.textInput, cmd = m.typingModal.textInput.Update(msg)
 	case m.promptModal.IsOpen():
-		// TODO : Separate this to a utility
 		cwdLocation := m.fileModel.filePanels[m.filePanelFocusIndex].location
 		action, cmd = m.promptModal.HandleUpdate(msg, cwdLocation)
 		m.applyPromptModalAction(action)
@@ -444,10 +530,23 @@ func (m *model) updateFilePanelsState(msg tea.Msg) tea.Cmd {
 		m.applyZoxideModalAction(action)
 	}
 
-	// TODO : This is like duct taping a bigger problem
-	// The code should never reach this state.
-	if focusPanel.cursor < 0 {
-		focusPanel.cursor = 0
+	return cmd
+}
+
+func (m *model) handleBulkRenameUpdate(msg tea.Msg) tea.Cmd {
+	var cmd tea.Cmd
+
+	switch m.bulkRenameModal.renameType {
+	case 0:
+		if m.bulkRenameModal.cursor == 0 {
+			m.bulkRenameModal.findInput, cmd = m.bulkRenameModal.findInput.Update(msg)
+		} else {
+			m.bulkRenameModal.replaceInput, cmd = m.bulkRenameModal.replaceInput.Update(msg)
+		}
+	case 1:
+		m.bulkRenameModal.prefixInput, cmd = m.bulkRenameModal.prefixInput.Update(msg)
+	case 2:
+		m.bulkRenameModal.suffixInput, cmd = m.bulkRenameModal.suffixInput.Update(msg)
 	}
 
 	return cmd
@@ -637,7 +736,7 @@ func (m *model) updateRenderForOverlay(finalRender string) string {
 
 	if panel.sortOptions.open {
 		sortOptions := m.sortOptionsRender()
-		overlayX := m.fullWidth/2 - panel.sortOptions.width/2
+		overlayX := m.fullWidth/2 - panel.sortOptions.width/29
 		overlayY := m.fullHeight/2 - panel.sortOptions.height/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, sortOptions, finalRender)
 	}
@@ -656,6 +755,10 @@ func (m *model) updateRenderForOverlay(finalRender string) string {
 		return stringfunction.PlaceOverlay(overlayX, overlayY, typingModal, finalRender)
 	}
 
+	if m.bulkRenameModal.open {
+		return m.renderBulkRenameOverlay(finalRender)
+	}
+
 	if m.notifyModel.IsOpen() {
 		notifyModal := m.notifyModel.Render()
 		overlayX := m.fullWidth/2 - common.ModalWidth/2
@@ -663,6 +766,22 @@ func (m *model) updateRenderForOverlay(finalRender string) string {
 		return stringfunction.PlaceOverlay(overlayX, overlayY, notifyModal, finalRender)
 	}
 	return finalRender
+}
+
+func (m *model) renderBulkRenameOverlay(finalRender string) string {
+	config := m.getBulkRenameOverlayConfig()
+	bulkRenameModal := m.bulkRenameModalRender()
+	return stringfunction.PlaceOverlay(config.x, config.y, bulkRenameModal, finalRender)
+}
+
+func (m *model) getBulkRenameOverlayConfig() modalOverlayConfig {
+	config := modalOverlayConfig{
+		width:  80,
+		height: common.ModalHeight + 15,
+	}
+	config.x = m.fullWidth/2 - config.width/2
+	config.y = m.fullHeight/2 - config.height/2
+	return config
 }
 
 func showRenderDebugStatsMain(sidebar, filePanel, filePreview string) {
