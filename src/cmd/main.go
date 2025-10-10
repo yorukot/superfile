@@ -9,7 +9,6 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
-	"runtime"
 	"time"
 
 	"github.com/yorukot/superfile/src/internal/common"
@@ -18,15 +17,16 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/urfave/cli/v3"
+	"golang.org/x/mod/semver"
+
 	variable "github.com/yorukot/superfile/src/config"
 	internal "github.com/yorukot/superfile/src/internal"
-	"golang.org/x/mod/semver"
 )
 
 // Run superfile app
 func Run(content embed.FS) {
 	// Enable custom colored help output
-	cli.HelpPrinter = CustomHelpPrinter //nolint:reassign // Intentionally reassigning cli.HelpPrinter to customize help output
+	cli.HelpPrinter = CustomHelpPrinter //nolint:reassign // Intentionally reassigning to customize help output
 
 	// Before we open log file, set all "non debug" logs to stdout
 	utils.SetRootLoggerToStdout(false)
@@ -36,7 +36,7 @@ func Run(content embed.FS) {
 
 	app := &cli.Command{
 		Name:        "superfile",
-		Version:     variable.CurrentVersion,
+		Version:     variable.CurrentVersion + variable.PreReleaseSuffix,
 		Description: "Pretty fancy and modern terminal file manager ",
 		ArgsUsage:   "[PATH]...",
 		Commands: []*cli.Command{
@@ -49,11 +49,16 @@ func Run(content embed.FS) {
 						fmt.Println(variable.LastDirFile)
 						return nil
 					}
-					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#66b2ff")).Render("[Configuration file path]"), variable.ConfigFile)
-					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#ffcc66")).Render("[Hotkeys file path]"), variable.HotkeysFile)
-					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#66ff66")).Render("[Log file path]"), variable.LogFile)
-					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#ff9999")).Render("[Configuration directory path]"), variable.SuperFileMainDir)
-					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#ff66ff")).Render("[Data directory path]"), variable.SuperFileDataDir)
+					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#66b2ff")).
+						Render("[Configuration file path]"), variable.ConfigFile)
+					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#ffcc66")).
+						Render("[Hotkeys file path]"), variable.HotkeysFile)
+					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#66ff66")).
+						Render("[Log file path]"), variable.LogFile)
+					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#ff9999")).
+						Render("[Configuration directory path]"), variable.SuperFileMainDir)
+					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#ff66ff")).
+						Render("[Data directory path]"), variable.SuperFileDataDir)
 					return nil
 				},
 				Flags: []cli.Flag{
@@ -104,41 +109,7 @@ func Run(content embed.FS) {
 				Value:   "", // Default to the blank string indicating non-usage of flag
 			},
 		},
-		Action: func(_ context.Context, c *cli.Command) error {
-			// If no args are called along with "spf" use current dir
-			firstFilePanelDirs := []string{""}
-			if c.Args().Present() {
-				firstFilePanelDirs = c.Args().Slice()
-			}
-
-			variable.UpdateVarFromCliArgs(c)
-
-			InitConfigFile()
-
-			hasTrash := true
-			if err := InitTrash(); err != nil {
-				hasTrash = false
-			}
-
-			firstUse := checkFirstUse()
-
-			p := tea.NewProgram(internal.InitialModel(firstFilePanelDirs, firstUse, hasTrash), tea.WithAltScreen(), tea.WithMouseCellMotion())
-			if _, err := p.Run(); err != nil {
-				utils.PrintfAndExit("Alas, there's been an error: %v", err)
-			}
-
-			// This must be after calling internal.InitialModel()
-			// so that we know `common.Config` is loaded
-			// Should not be a goroutine, Otherwise the main
-			// goroutine will exit first, and this will not be able to finish
-			CheckForUpdates()
-
-			if variable.PrintLastDir {
-				fmt.Println(variable.LastDir)
-			}
-
-			return nil
-		},
+		Action: spfAppAction,
 	}
 
 	err := app.Run(context.Background(), os.Args)
@@ -147,11 +118,43 @@ func Run(content embed.FS) {
 	}
 }
 
+func spfAppAction(_ context.Context, c *cli.Command) error {
+	// If no args are called along with "spf" use current dir
+	firstFilePanelDirs := []string{""}
+	if c.Args().Present() {
+		firstFilePanelDirs = c.Args().Slice()
+	}
+
+	variable.UpdateVarFromCliArgs(c)
+
+	InitConfigFile()
+
+	firstUse := checkFirstUse()
+
+	p := tea.NewProgram(internal.InitialModel(firstFilePanelDirs, firstUse),
+		tea.WithAltScreen(), tea.WithMouseCellMotion())
+	if _, err := p.Run(); err != nil {
+		utils.PrintfAndExit("Alas, there's been an error: %v", err)
+	}
+
+	// This must be after calling internal.InitialModel()
+	// so that we know `common.Config` is loaded
+	// Should not be a goroutine, Otherwise the main
+	// goroutine will exit first, and this will not be able to finish
+	CheckForUpdates()
+
+	if variable.PrintLastDir {
+		fmt.Println(variable.LastDir)
+	}
+
+	return nil
+}
+
 // Create proper directories for storing configuration and write default
 // configurations to Config and Hotkeys toml
 func InitConfigFile() {
 	// Create directories
-	if err := createDirectories(
+	if err := utils.CreateDirectories(
 		variable.SuperFileMainDir,
 		variable.SuperFileDataDir,
 		variable.SuperFileStateDir,
@@ -161,7 +164,7 @@ func InitConfigFile() {
 	}
 
 	// Create files
-	if err := createFiles(
+	if err := utils.CreateFiles(
 		variable.ToggleDotFile,
 		variable.LogFile,
 		variable.ThemeFileVersion,
@@ -182,43 +185,6 @@ func InitConfigFile() {
 	if err := initJSONFile(variable.PinnedFile); err != nil {
 		utils.PrintlnAndExit("Error initializing json file:", err)
 	}
-}
-
-// We are initializing these, but not sure if we are ever using them
-func InitTrash() error {
-	// Create trash directories
-	if runtime.GOOS != utils.OsDarwin {
-		err := createDirectories(
-			variable.CustomTrashDirectory,
-			variable.CustomTrashDirectoryFiles,
-			variable.CustomTrashDirectoryInfo,
-		)
-		return err
-	}
-	return nil
-}
-
-// Helper functions
-// Create all dirs that does not already exists
-func createDirectories(dirs ...string) error {
-	for _, dir := range dirs {
-		if err := os.MkdirAll(dir, 0755); err != nil {
-			return fmt.Errorf("failed to create directory %s: %w", dir, err)
-		}
-	}
-	return nil
-}
-
-// Create all files if they do not exists yet
-func createFiles(files ...string) error {
-	for _, file := range files {
-		if _, err := os.Stat(file); os.IsNotExist(err) {
-			if err = os.WriteFile(file, nil, 0644); err != nil {
-				return fmt.Errorf("failed to create file %s: %w", file, err)
-			}
-		}
-	}
-	return nil
 }
 
 // Check if is the first time initializing the app, if it is create

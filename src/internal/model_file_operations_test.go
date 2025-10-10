@@ -4,11 +4,17 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
-	"time"
 
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/rkoesters/xdg/trash"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/utils"
 )
 
@@ -23,59 +29,38 @@ func TestCopy(t *testing.T) {
 	dir2 := filepath.Join(curTestDir, "dir2")
 	file1 := filepath.Join(dir1, "file1.txt")
 	t.Run("Basic Copy", func(t *testing.T) {
-		setupDirectories(t, curTestDir, dir1, dir2)
-		setupFiles(t, file1)
+		utils.SetupDirectories(t, curTestDir, dir1, dir2)
+		utils.SetupFiles(t, file1)
 		t.Cleanup(func() {
 			os.RemoveAll(curTestDir)
 		})
 
-		m := defaultTestModel(dir1)
+		p := NewTestTeaProgWithEventLoop(t, defaultTestModel(dir1))
 
-		// TODO validate current panel is "dir1"
-		// TODO : Move all basic validation to a separate test
-		// Everything that doesn't have anything to do with copy paste
+		require.Equal(t, "file1.txt",
+			p.getModel().getFocusedFilePanel().element[0].name)
+		p.SendKeyDirectly(common.Hotkeys.CopyItems[0])
+		assert.False(t, p.getModel().copyItems.cut)
+		assert.Equal(t, file1, p.getModel().copyItems.items[0])
 
-		// validate file1
-		// TODO : improve the interface we use to interact with filepanel
+		p.getModel().updateCurrentFilePanelDir("../dir2")
+		p.SendKey(common.Hotkeys.PasteItems[0])
 
-		// TODO : file1.txt should not be duplicated
-
-		// TODO : Having to send a random keypress to initiate model init.
-		// Should not have to do that
-		TeaUpdateWithErrCheck(t, &m, nil)
-
-		assert.Equal(t, "file1.txt",
-			m.fileModel.filePanels[m.filePanelFocusIndex].element[0].name)
-
-		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.CopyItems[0]))
-
-		// TODO : validate clipboard
-		assert.False(t, m.copyItems.cut)
-		assert.Equal(t, file1, m.copyItems.items[0])
-
-		// move to dir2
-		m.updateCurrentFilePanelDir("../dir2")
-		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
-
-		// Actual paste may take time, since its an os operations
 		assert.Eventually(t, func() bool {
 			_, err := os.Lstat(filepath.Join(dir2, "file1.txt"))
 			return err == nil
-		}, time.Second, 10*time.Millisecond)
+		}, DefaultTestTimeout, DefaultTestTick)
 
-		// TODO : still on clipboard
-		assert.False(t, m.copyItems.cut)
-		assert.Equal(t, file1, m.copyItems.items[0])
+		assert.False(t, p.getModel().copyItems.cut)
+		assert.Equal(t, file1, p.getModel().copyItems.items[0])
 
-		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
-
-		// Actual paste may take time, since its an os operations
+		p.SendKey(common.Hotkeys.PasteItems[0])
 		assert.Eventually(t, func() bool {
 			_, err := os.Lstat(filepath.Join(dir2, "file1(1).txt"))
 			return err == nil
-		}, time.Second, 10*time.Millisecond)
+		}, DefaultTestTimeout, DefaultTestTick)
 		assert.FileExists(t, filepath.Join(dir2, "file1(1).txt"))
-		// TODO : Also validate process bar having two processes.
+		//TODO: Also verify if there are only 2 items in process bar
 	})
 }
 
@@ -85,7 +70,7 @@ func TestFileCreation(t *testing.T) {
 	testParentDir := filepath.Join(curTestDir, "parentDir")
 	testChildDir := filepath.Join(testParentDir, "childDir")
 
-	setupDirectories(t, curTestDir, testParentDir, testChildDir)
+	utils.SetupDirectories(t, curTestDir, testParentDir, testChildDir)
 
 	t.Cleanup(func() {
 		os.RemoveAll(curTestDir)
@@ -107,20 +92,177 @@ func TestFileCreation(t *testing.T) {
 	for _, tt := range testdata {
 		m := defaultTestModel(testChildDir)
 
-		TeaUpdateWithErrCheck(t, &m, nil)
-		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.FilePanelItemCreate[0]))
+		TeaUpdate(m, nil)
+		TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.FilePanelItemCreate[0]))
 
-		assert.Equal(t, "", m.typingModal.errorMesssage)
+		assert.Empty(t, m.typingModal.errorMesssage)
 
 		m.typingModal.textInput.SetValue(tt.fileName)
 
-		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.ConfirmTyping[0]))
+		TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.ConfirmTyping[0]))
 
 		if tt.expectedError {
-			assert.NotEqual(t, "", m.typingModal.errorMesssage, "expected an error for input: %q", tt.fileName)
+			assert.NotEmpty(t, m.typingModal.errorMesssage, "expected an error for input: %q", tt.fileName)
 		} else {
 			assert.Empty(t, m.typingModal.errorMesssage, "expected an error for input: %q", tt.fileName)
 			assert.FileExists(t, filepath.Join(testChildDir, tt.fileName), "expected file to be created: %q", tt.fileName)
 		}
+	}
+}
+
+func TestFileRename(t *testing.T) {
+	curTestDir := t.TempDir()
+	file1 := filepath.Join(curTestDir, "file1.txt")
+	file2 := filepath.Join(curTestDir, "file2.txt")
+	file3 := filepath.Join(curTestDir, "file3.txt")
+
+	utils.SetupFilesWithData(t, []byte("f1"), file1)
+	utils.SetupFilesWithData(t, []byte("f2"), file2)
+	utils.SetupFilesWithData(t, []byte("f3"), file3)
+
+	file1New := filepath.Join(curTestDir, "file1_new.txt")
+
+	t.Run("Basic rename", func(t *testing.T) {
+		m := defaultTestModel(curTestDir)
+		p := NewTestTeaProgWithEventLoop(t, m)
+		setFilePanelSelectedItemByLocation(t, m.getFocusedFilePanel(), file1)
+
+		p.SendKey(common.Hotkeys.FilePanelItemRename[0])
+		p.SendKey("_new")
+		p.Send(tea.KeyMsg{Type: tea.KeyEnter})
+
+		assert.Eventually(t, func() bool {
+			_, err1 := os.Stat(file1)
+			_, err1New := os.Stat(file1New)
+			return err1New == nil && os.IsNotExist(err1)
+		}, DefaultTestTimeout, DefaultTestTick, "File never got renamed")
+	})
+
+	t.Run("Rename confirmation for same name", func(t *testing.T) {
+		actualTest := func(doRename bool) {
+			m := defaultTestModel(curTestDir)
+			p := NewTestTeaProgWithEventLoop(t, m)
+			setFilePanelSelectedItemByLocation(t, m.getFocusedFilePanel(), file3)
+
+			p.SendKeyDirectly(common.Hotkeys.FilePanelItemRename[0])
+			m.getFocusedFilePanel().rename.SetValue("file2.txt")
+			p.Send(tea.KeyMsg{Type: tea.KeyEnter})
+
+			// This will result in async
+			assert.Eventually(t, func() bool {
+				return m.notifyModel.IsOpen()
+			}, DefaultTestTimeout, DefaultTestTick, "Notify modal never opened, filepanel items : %v",
+				m.getFocusedFilePanel().element)
+
+			assert.Equal(t, notify.New(true,
+				common.SameRenameWarnTitle,
+				common.SameRenameWarnContent,
+				notify.RenameAction), m.notifyModel, "Notify model should be as expected")
+
+			if doRename {
+				p.Send(tea.KeyMsg{Type: tea.KeyEnter})
+			} else {
+				p.SendKey(common.Hotkeys.CancelTyping[0])
+			}
+
+			assert.Eventually(t, func() bool {
+				_, err2 := os.Stat(file2)
+				_, err3 := os.Stat(file3)
+				f2Data, err := os.ReadFile(file2)
+				require.NoError(t, err)
+				if doRename {
+					// f3 should be gone. f2 should have content of f3
+					return os.IsNotExist(err3) && err2 == nil &&
+						string(f2Data) == "f3"
+				}
+				return err2 == nil && err3 == nil
+			}, DefaultTestTimeout, DefaultTestTick,
+				"Rename should be done/not done appropriately, file : %v",
+				m.getFocusedFilePanel().element)
+		}
+
+		actualTest(false)
+		actualTest(true)
+	})
+}
+
+func isTrashed(fileAbsPath string) bool {
+	fileName := filepath.Base(fileAbsPath)
+	switch runtime.GOOS {
+	case utils.OsDarwin:
+		_, err := os.Stat(filepath.Join(variable.DarwinTrashDirectory, fileName))
+		return err == nil
+	case utils.OsLinux:
+		_, err := trash.Stat(fileAbsPath)
+		return err == nil
+	default:
+		return false
+	}
+}
+
+func TestFileDelete(t *testing.T) {
+	if runtime.GOOS == utils.OsWindows {
+		t.Skip("Skipping for windows")
+	}
+	curTestDir := t.TempDir()
+	file1 := filepath.Join(curTestDir, "file1.txt")
+	file2 := filepath.Join(curTestDir, "file2.txt")
+
+	utils.SetupFilesWithData(t, []byte("f1"), file1)
+	utils.SetupFilesWithData(t, []byte("f2"), file2)
+
+	testdata := []struct {
+		name            string
+		filePath        string
+		permanentDelete bool
+	}{
+		{
+			name:            "Move to trash",
+			filePath:        file1,
+			permanentDelete: false,
+		},
+		{
+			name:            "Permanently delete",
+			filePath:        file2,
+			permanentDelete: true,
+		},
+	}
+
+	for _, tt := range testdata {
+		t.Run(tt.name, func(t *testing.T) {
+			m := defaultTestModel(curTestDir)
+			m.hasTrash = common.InitTrash()
+			p := NewTestTeaProgWithEventLoop(t, m)
+			setFilePanelSelectedItemByLocation(t, m.getFocusedFilePanel(), tt.filePath)
+			if tt.permanentDelete {
+				p.SendKey(common.Hotkeys.PermanentlyDeleteItems[0])
+			} else {
+				p.SendKey(common.Hotkeys.DeleteItems[0])
+			}
+			assert.Eventually(t, m.notifyModel.IsOpen, DefaultTestTimeout,
+				DefaultTestTick, "Notify model never opened")
+			expectedTitle := common.TrashWarnTitle
+			expectedAction := notify.DeleteAction
+			if tt.permanentDelete {
+				expectedTitle = common.PermanentDeleteWarnTitle
+				expectedAction = notify.PermanentDeleteAction
+			}
+			assert.Equal(t, expectedTitle, m.notifyModel.GetTitle())
+			assert.Equal(t, expectedAction, m.notifyModel.GetConfirmAction())
+
+			p.Send(tea.KeyMsg{Type: tea.KeyEnter})
+
+			assert.Eventually(t, func() bool {
+				_, err := os.Stat(tt.filePath)
+				return err != nil && os.IsNotExist(err)
+			}, DefaultTestTimeout, DefaultTestTick, "File never removed from original location")
+
+			// Window's trash is not flexible enough for the check.
+			// Sorry windows
+			if runtime.GOOS == utils.OsDarwin || runtime.GOOS == utils.OsLinux {
+				assert.Equal(t, tt.permanentDelete, !isTrashed(filepath.Base(tt.filePath)),
+					"Existence in trash status should be expected only of not permanently deleted")
+			}
+		})
 	}
 }

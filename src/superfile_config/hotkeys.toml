@@ -2,7 +2,7 @@
 # Global hotkeys (cannot conflict with other hotkeys)
 confirm = ['enter', 'right', 'l']
 quit = ['q', 'esc']
-
+cd_quit = ['Q', '']
 # movement
 list_up = ['up', 'k']
 list_down = ['down', 'j']
@@ -28,6 +28,7 @@ copy_items = ['ctrl+c', '']
 cut_items = ['ctrl+x', '']
 paste_items = ['ctrl+v', 'ctrl+w', '']
 delete_items = ['ctrl+d', 'delete', '']
+permanently_delete_items = ['D', '']
 # compress and extract
 extract_file = ['ctrl+e', '']
 compress_file = ['ctrl+a', '']
@@ -41,6 +42,7 @@ change_panel_mode = ['v', '']
 open_help_menu = ['?', '']
 open_command_line = [':', '']
 open_spf_prompt = ['>', '']
+open_zoxide = ['z', '']
 copy_path = ['ctrl+p', '']
 copy_present_working_directory = ['c', '']
 toggle_footer = ['F', '']

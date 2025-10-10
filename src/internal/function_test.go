@@ -8,6 +8,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/yorukot/superfile/src/internal/utils"
 )
 
 func TestReturnDirElement(t *testing.T) {
@@ -16,7 +18,7 @@ func TestReturnDirElement(t *testing.T) {
 	curTestDir := filepath.Join(testDir, "TestRDE")
 	dir1 := filepath.Join(curTestDir, "dir1")
 	dir2 := filepath.Join(curTestDir, "dir2")
-	setupDirectories(t, curTestDir, dir1, dir2)
+	utils.SetupDirectories(t, curTestDir, dir1, dir2)
 
 	creationDelay := time.Millisecond * 5
 	// Cleanup is handled by TestMain
@@ -50,7 +52,7 @@ func TestReturnDirElement(t *testing.T) {
 	}
 
 	for _, f := range fileSetup {
-		setupFilesWithData(t, f.data, f.path)
+		utils.SetupFilesWithData(t, f.data, f.path)
 		time.Sleep(creationDelay)
 	}
 
@@ -61,6 +63,7 @@ func TestReturnDirElement(t *testing.T) {
 		sortOption        string
 		reversed          bool
 		sortOptions       sortOptionsModelData
+		searchString      string
 		expectedElemNames []string
 	}{
 		{
@@ -145,6 +148,33 @@ func TestReturnDirElement(t *testing.T) {
 			expectedElemNames: []string{"dir2", "dir1", ".xyz", "file2.txt", "file1.txt",
 				"xyz.json", "1.json", "aBcD", "abc"},
 		},
+		{
+			name:              "Sort by Type Reversed and dotfiles with search",
+			location:          curTestDir,
+			dotFiles:          true,
+			sortOption:        "Type",
+			reversed:          true,
+			searchString:      "x",
+			expectedElemNames: []string{".xyz", "file2.txt", "file1.txt", "xyz.json"},
+		},
+		{
+			name:              "Sort by Size Reversed with search ftt",
+			location:          curTestDir,
+			dotFiles:          false,
+			sortOption:        "Size",
+			reversed:          true,
+			searchString:      "ftt",
+			expectedElemNames: []string{"file2.txt", "file1.txt"},
+		},
+		{
+			name:              "Sort by Size Reversed with search d",
+			location:          curTestDir,
+			dotFiles:          false,
+			sortOption:        "Size",
+			reversed:          true,
+			searchString:      "d",
+			expectedElemNames: []string{"dir1", "dir2", "aBcD"},
+		},
 	}
 
 	for _, tt := range testdata {
@@ -154,7 +184,12 @@ func TestReturnDirElement(t *testing.T) {
 				selected: 0,
 				reversed: tt.reversed,
 			}
-			res := returnDirElement(tt.location, tt.dotFiles, sortOptionsModel)
+			var res []element
+			if tt.searchString == "" {
+				res = returnDirElement(tt.location, tt.dotFiles, sortOptionsModel)
+			} else {
+				res = returnDirElementBySearchString(tt.location, tt.dotFiles, tt.searchString, sortOptionsModel)
+			}
 
 			assert.Len(t, res, len(tt.expectedElemNames))
 			actualNames := []string{}

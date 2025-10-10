@@ -10,9 +10,15 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+
+	"github.com/yorukot/superfile/src/internal/ui/processbar"
+	"github.com/yorukot/superfile/src/internal/utils"
 )
 
 func TestZipSources(t *testing.T) {
+	processBar := processbar.New()
+	processBar.ListenForChannelUpdates()
+	t.Cleanup(processBar.SendStopListeningMsgBlocking)
 	tests := []struct {
 		name          string
 		setupFunc     func(t *testing.T, tempDir string) ([]string, error)
@@ -25,10 +31,10 @@ func TestZipSources(t *testing.T) {
 				testDir1 := filepath.Join(tempDir, "testdir1")
 				testDir2 := filepath.Join(tempDir, "testdir2")
 				subDir := filepath.Join(testDir1, "subdir")
-				setupDirectories(t, testDir1, testDir2, subDir)
-				setupFilesWithData(t, []byte("Content of file1"), filepath.Join(testDir1, "file1.txt"))
-				setupFilesWithData(t, []byte("Content of file2"), filepath.Join(subDir, "file2.txt"))
-				setupFilesWithData(t, []byte("Content of file3"), filepath.Join(testDir2, "file3.txt"))
+				utils.SetupDirectories(t, testDir1, testDir2, subDir)
+				utils.SetupFilesWithData(t, []byte("Content of file1"), filepath.Join(testDir1, "file1.txt"))
+				utils.SetupFilesWithData(t, []byte("Content of file2"), filepath.Join(subDir, "file2.txt"))
+				utils.SetupFilesWithData(t, []byte("Content of file3"), filepath.Join(testDir2, "file3.txt"))
 
 				return []string{testDir1, testDir2}, nil
 			},
@@ -48,7 +54,7 @@ func TestZipSources(t *testing.T) {
 			name: "single file",
 			setupFunc: func(t *testing.T, tempDir string) ([]string, error) {
 				testFile := filepath.Join(tempDir, "single.txt")
-				setupFilesWithData(t, []byte("Single file content"), testFile)
+				utils.SetupFilesWithData(t, []byte("Single file content"), testFile)
 				return []string{testFile}, nil
 			},
 			expectedFiles: map[string]string{
@@ -83,7 +89,7 @@ func TestZipSources(t *testing.T) {
 			}
 
 			targetZip := filepath.Join(tempDir, "test.zip")
-			err = zipSources(sources, targetZip)
+			err = zipSources(sources, targetZip, &processBar)
 
 			if tt.expectError {
 				require.Error(t, err, "zipSources should return error")
@@ -95,48 +101,54 @@ func TestZipSources(t *testing.T) {
 			zipReader, err := zip.OpenReader(targetZip)
 			require.NoError(t, err, "should be able to open ZIP file")
 			defer zipReader.Close()
-
-			require.Equal(t, len(tt.expectedFiles), len(zipReader.File), "ZIP should contain expected number of files")
-
-			foundFiles := make(map[string]string)
-			for _, file := range zipReader.File {
-				slog.Debug("files : ", "files", file.Name)
-				foundFiles[file.Name] = ""
-				if !strings.HasSuffix(file.Name, "/") {
-					rc, err := file.Open()
-					require.NoError(t, err, "should be able to open file %s in ZIP", file.Name)
-
-					content, err := io.ReadAll(rc)
-					rc.Close()
-					require.NoError(t, err, "should be able to read file %s", file.Name)
-
-					foundFiles[file.Name] = string(content)
-				}
-			}
-
-			for expectedFile, expectedContent := range tt.expectedFiles {
-				foundContent, exists := foundFiles[expectedFile]
-				require.True(t, exists, "expected file %s should be found in ZIP", expectedFile)
-				if expectedContent != "" {
-					require.Equal(t, expectedContent, foundContent, "content should match for file %s", expectedFile)
-				}
-			}
-
-			for foundFile := range foundFiles {
-				_, expected := tt.expectedFiles[foundFile]
-				require.True(t, expected, "unexpected file %s found in ZIP", foundFile)
-			}
+			validateZipExtraction(t, zipReader, tt.expectedFiles)
 		})
 	}
 }
 
+func validateZipExtraction(t *testing.T, zipReader *zip.ReadCloser, expectedFiles map[string]string) {
+	require.Len(t, zipReader.File, len(expectedFiles), "ZIP should contain expected number of files")
+
+	foundFiles := make(map[string]string)
+	for _, file := range zipReader.File {
+		slog.Debug("files : ", "files", file.Name)
+		foundFiles[file.Name] = ""
+		if !strings.HasSuffix(file.Name, "/") {
+			rc, err := file.Open()
+			require.NoError(t, err, "should be able to open file %s in ZIP", file.Name)
+
+			content, err := io.ReadAll(rc)
+			rc.Close()
+			require.NoError(t, err, "should be able to read file %s", file.Name)
+
+			foundFiles[file.Name] = string(content)
+		}
+	}
+
+	for expectedFile, expectedContent := range expectedFiles {
+		foundContent, exists := foundFiles[expectedFile]
+		require.True(t, exists, "expected file %s should be found in ZIP", expectedFile)
+		if expectedContent != "" {
+			require.Equal(t, expectedContent, foundContent, "content should match for file %s", expectedFile)
+		}
+	}
+
+	for foundFile := range foundFiles {
+		_, expected := expectedFiles[foundFile]
+		require.True(t, expected, "unexpected file %s found in ZIP", foundFile)
+	}
+}
+
 func TestZipSourcesInvalidTarget(t *testing.T) {
+	processBar := processbar.New()
+	processBar.ListenForChannelUpdates()
+	t.Cleanup(processBar.SendStopListeningMsgBlocking)
 	tempDir := t.TempDir()
 	testFile := filepath.Join(tempDir, "test.txt")
 	err := os.WriteFile(testFile, []byte("test"), 0644)
 	require.NoError(t, err, "should be able to create test file")
 
 	invalidTarget := "/invalid/path/test.zip"
-	err = zipSources([]string{testFile}, invalidTarget)
+	err = zipSources([]string{testFile}, invalidTarget, &processBar)
 	require.Error(t, err, "zipSources should return error for invalid target")
 }

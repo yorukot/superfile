@@ -5,12 +5,13 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/x/exp/term/ansi"
+	"github.com/charmbracelet/x/ansi"
 )
 
 // Add lines as much as the remaining capacity allows
-func (r *Renderer) AddLines(lines ...string) {
+func (r *Renderer) AddLines(lines ...string) *Renderer {
 	r.contentSections[r.curSectionIdx].AddLines(lines...)
+	return r
 }
 
 // Lines until now will belong to current section, and

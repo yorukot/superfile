@@ -15,6 +15,8 @@ const keyDataModified = "Date Modified"
 const keyDataAccessed = "Date Accessed"
 const keyPermissions = "Permissions"
 const keyMd5Checksum = "MD5Checksum"
+const keyOwner = "Owner"
+const keyGroup = "Group"
 
 var sortPriority = map[string]int{ //nolint: gochecknoglobals // This is effectively const.
 	keyName:         0,
@@ -22,4 +24,6 @@ var sortPriority = map[string]int{ //nolint: gochecknoglobals // This is effecti
 	keyDataModified: 2,
 	keyDataAccessed: 3,
 	keyPermissions:  4,
+	keyOwner:        5,
+	keyGroup:        6,
 }

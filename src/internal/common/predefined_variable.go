@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/lipgloss"
+
 	"github.com/yorukot/superfile/src/config/icon"
 )
 
@@ -11,7 +12,15 @@ const WheelRunTime = 5
 const DefaultCommandTimeout = 5000 * time.Millisecond
 const DateModifiedOption = "Date Modified"
 
-var (
+const SameRenameWarnTitle = "There is already a file or directory with that name"
+const SameRenameWarnContent = "This operation will override the existing file"
+
+const TrashWarnTitle = "Are you sure you want to move this to trash can"
+const TrashWarnContent = "This operation will move file or directory to trash can."
+const PermanentDeleteWarnTitle = "Are you sure you want to completely delete"
+const PermanentDeleteWarnContent = "This operation cannot be undone and your data will be completely lost."
+
+const (
 	MinimumHeight = 24
 	MinimumWidth  = 60
 
@@ -41,7 +50,16 @@ var (
 	FilePreviewEmptyText               string
 	FilePreviewError                   string
 
-	LipglossError string
+	CheckboxChecked        string
+	CheckboxCheckedFocused string
+	CheckboxEmpty          string
+	CheckboxEmptyFocused   string
+
+	ModalConfirmInputText string
+	ModalCancelInputText  string
+	ModalOkayInputText    string
+	ModalInputSpacingText string
+	LipglossError         string
 )
 
 var (
@@ -62,9 +80,11 @@ func LoadInitialPrerenderedVariables() {
 func LoadPrerenderedVariables() {
 	SideBarSuperfileTitle = SidebarTitleStyle.Render(" " + icon.SuperfileIcon + icon.Space + "superfile")
 
-	SideBarPinnedDivider = SidebarTitleStyle.Render(icon.Pinned+icon.Space+"Pinned") + SidebarDividerStyle.Render(" ───────────")
+	SideBarPinnedDivider = SidebarTitleStyle.Render(icon.Pinned+icon.Space+"Pinned") +
+		SidebarDividerStyle.Render(" ───────────")
 
-	SideBarDisksDivider = SidebarTitleStyle.Render(icon.Disk+icon.Space+"Disks") + SidebarDividerStyle.Render(" ────────────")
+	SideBarDisksDivider = SidebarTitleStyle.Render(icon.Disk+icon.Space+"Disks") +
+		SidebarDividerStyle.Render(" ────────────")
 
 	SideBarNoneText = SidebarStyle.Render(" " + icon.Error + icon.Space + "None")
 
@@ -81,4 +101,23 @@ func LoadPrerenderedVariables() {
 	FilePreviewDirectoryUnreadableText = "\n--- " + icon.Error + icon.Space + "Cannot read directory" + icon.Space + "---"
 	FilePreviewError = "\n--- " + icon.Error + icon.Space + "Error" + icon.Space + "---"
 	FilePreviewEmptyText = "\n--- Empty ---"
+
+	CheckboxChecked = FilePanelSelectBoxStyle.
+		Foreground(FilePanelBorderColor).
+		Render(icon.CheckboxChecked + icon.Space)
+	CheckboxCheckedFocused = FilePanelSelectBoxStyle.
+		Foreground(FilePanelBorderActiveColor).
+		Render(icon.CheckboxChecked + icon.Space)
+	CheckboxEmpty = FilePanelSelectBoxStyle.
+		Foreground(FilePanelBorderColor).
+		Render(icon.CheckboxEmpty + icon.Space)
+	CheckboxEmptyFocused = FilePanelSelectBoxStyle.
+		Foreground(FilePanelBorderActiveColor).
+		Render(icon.CheckboxEmpty + icon.Space)
+
+	ModalOkayInputText = MainStyle.AlignHorizontal(lipgloss.Center).AlignVertical(lipgloss.Center).Render(
+		ModalConfirm.Render(" (" + Hotkeys.Confirm[0] + ") Okay "))
+	ModalConfirmInputText = ModalConfirm.Render(" (" + Hotkeys.Confirm[0] + ") Confirm ")
+	ModalCancelInputText = ModalCancel.Render(" (" + Hotkeys.Quit[0] + ") Cancel ")
+	ModalInputSpacingText = lipgloss.NewStyle().Background(ModalBGColor).Render("           ")
 }

@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
 
 permissions:
   contents: read
@@ -19,15 +19,18 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Setup exiftool (only on linux)
+        uses: actions/checkout@v5
+      - name: Setup dependencies (only on linux)
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y exiftool
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y exiftool
+          curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
 
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: 1.24.1
+          go-version: 1.25.0
 
       - name: Cache Go modules
         uses: actions/cache@v4
@@ -62,7 +65,7 @@ jobs:
 
       - name: golangci-lint (skip on Windows)
         if: runner.os != 'Windows'
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v8
         with:
-          version: v1.64
+          version: v2.4.0
           args: --timeout 3m

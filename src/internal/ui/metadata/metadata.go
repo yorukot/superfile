@@ -8,6 +8,7 @@ import (
 	"sort"
 
 	"github.com/barasher/go-exiftool"
+
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/utils"
 )
@@ -104,6 +105,9 @@ func getMetaDataUnsorted(filePath string, metadataFocussed bool, et *exiftool.Ex
 	size := [2]string{keySize, common.FormatFileSize(fileInfo.Size())}
 	modifyDate := [2]string{keyDataModified, fileInfo.ModTime().String()}
 	permissions := [2]string{keyPermissions, fileInfo.Mode().String()}
+	ownerVal, groupVal := getOwnerAndGroup(fileInfo)
+	owner := [2]string{keyOwner, ownerVal}
+	group := [2]string{keyGroup, groupVal}
 
 	if fileInfo.IsDir() && metadataFocussed {
 		// TODO : Calling dirSize() could be expensive for large directories, as it recursively
@@ -111,22 +115,9 @@ func getMetaDataUnsorted(filePath string, metadataFocussed bool, et *exiftool.Ex
 		// and its only loaded when metadata panel is focussed.
 		size = [2]string{keySize, common.FormatFileSize(utils.DirSize(filePath))}
 	}
-	res.data = append(res.data, name, size, modifyDate, permissions)
+	res.data = append(res.data, name, size, modifyDate, permissions, owner, group)
 
-	if common.Config.Metadata && et != nil {
-		fileInfos := et.ExtractMetadata(filePath)
-
-		for _, fileInfo := range fileInfos {
-			if fileInfo.Err != nil {
-				res.infoMsg = etFetchErrorMsg
-				slog.Error("Error while return metadata function", "fileInfo", fileInfo, "error", fileInfo.Err)
-				continue
-			}
-			for k, v := range fileInfo.Fields {
-				res.data = append(res.data, [2]string{k, fmt.Sprintf("%v", v)})
-			}
-		}
-	}
+	updateExiftoolMetadata(filePath, et, &res)
 
 	if common.Config.EnableMD5Checksum {
 		// Calculate MD5 checksum
@@ -140,4 +131,22 @@ func getMetaDataUnsorted(filePath string, metadataFocussed bool, et *exiftool.Ex
 	}
 
 	return res
+}
+
+func updateExiftoolMetadata(filePath string, et *exiftool.Exiftool, res *Metadata) {
+	if !common.Config.Metadata || et == nil {
+		return
+	}
+	fileInfos := et.ExtractMetadata(filePath)
+
+	for _, fileInfo := range fileInfos {
+		if fileInfo.Err != nil {
+			res.infoMsg = etFetchErrorMsg
+			slog.Error("Error while return metadata function", "fileInfo", fileInfo, "error", fileInfo.Err)
+			continue
+		}
+		for k, v := range fileInfo.Fields {
+			res.data = append(res.data, [2]string{k, fmt.Sprintf("%v", v)})
+		}
+	}
 }

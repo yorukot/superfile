@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"runtime"
 
+	tea "github.com/charmbracelet/bubbletea"
+
 	"github.com/yorukot/superfile/src/internal/utils"
 
 	variable "github.com/yorukot/superfile/src/config"
@@ -31,69 +33,74 @@ func (m *model) enterPanel() {
 	selectedItem := panel.getSelectedItem()
 	if selectedItem.directory {
 		// TODO : Propagate error out from this this function. Return here, instead of logging
-		err := panel.updateCurrentFilePanelDir(selectedItem.location)
+		err := m.updateCurrentFilePanelDir(selectedItem.location)
 		if err != nil {
 			slog.Error("Error while changing to directory", "error", err, "target", selectedItem.location)
 		}
-	} else if !selectedItem.directory {
-		fileInfo, err := os.Lstat(selectedItem.location)
-		if err != nil {
-			slog.Error("Error while getting file info", "error", err)
+		return
+	}
+	fileInfo, err := os.Lstat(selectedItem.location)
+	if err != nil {
+		slog.Error("Error while getting file info", "error", err)
+		return
+	}
+
+	if fileInfo.Mode()&os.ModeSymlink != 0 {
+		targetPath, symlinkErr := filepath.EvalSymlinks(selectedItem.location)
+		if symlinkErr != nil {
 			return
 		}
 
-		if fileInfo.Mode()&os.ModeSymlink != 0 {
-			targetPath, symlinkErr := filepath.EvalSymlinks(selectedItem.location)
-			if symlinkErr != nil {
-				return
-			}
+		targetInfo, lstatErr := os.Lstat(targetPath)
 
-			targetInfo, lstatErr := os.Lstat(targetPath)
-
-			if lstatErr != nil {
-				return
-			}
-
-			if targetInfo.IsDir() {
-				err = panel.updateCurrentFilePanelDir(targetPath)
-				if err != nil {
-					slog.Error("Error while changing to directory", "error", err, "target", targetPath)
-				}
-				return
-			}
+		if lstatErr != nil {
+			return
 		}
 
-		if variable.ChooserFile != "" {
-			chooserErr := m.chooserFileWriteAndQuit(panel.element[panel.cursor].location)
-			if chooserErr == nil {
-				return
-			}
-			// Continue with preview if file is not writable
-			slog.Error("Error while writing to chooser file, continuing with file open", "error", chooserErr)
-		}
-
-		openCommand := "xdg-open"
-		switch runtime.GOOS {
-		case utils.OsDarwin:
-			openCommand = "open"
-		case utils.OsWindows:
-			dllpath := filepath.Join(os.Getenv("SYSTEMROOT"), "System32", "rundll32.exe")
-			dllfile := "url.dll,FileProtocolHandler"
-
-			cmd := exec.Command(dllpath, dllfile, panel.element[panel.cursor].location)
-			err = cmd.Start()
+		if targetInfo.IsDir() {
+			err = m.updateCurrentFilePanelDir(targetPath)
 			if err != nil {
-				slog.Error("Error while open file with", "error", err)
+				slog.Error("Error while changing to directory", "error", err, "target", targetPath)
 			}
-
 			return
 		}
+	}
 
-		cmd := exec.Command(openCommand, panel.element[panel.cursor].location)
-		err = cmd.Start()
+	if variable.ChooserFile != "" {
+		chooserErr := m.chooserFileWriteAndQuit(panel.element[panel.cursor].location)
+		if chooserErr == nil {
+			return
+		}
+		// Continue with preview if file is not writable
+		slog.Error("Error while writing to chooser file, continuing with file open", "error", chooserErr)
+	}
+	m.executeOpenCommand()
+}
+
+func (m *model) executeOpenCommand() {
+	panel := m.getFocusedFilePanel()
+	openCommand := "xdg-open"
+	switch runtime.GOOS {
+	case utils.OsDarwin:
+		openCommand = "open"
+	case utils.OsWindows:
+		dllpath := filepath.Join(os.Getenv("SYSTEMROOT"), "System32", "rundll32.exe")
+		dllfile := "url.dll,FileProtocolHandler"
+
+		cmd := exec.Command(dllpath, dllfile, panel.element[panel.cursor].location)
+		err := cmd.Start()
 		if err != nil {
 			slog.Error("Error while open file with", "error", err)
 		}
+
+		return
+	}
+
+	cmd := exec.Command(openCommand, panel.element[panel.cursor].location)
+	utils.DetachFromTerminal(cmd)
+	err := cmd.Start()
+	if err != nil {
+		slog.Error("Error while open file with", "error", err)
 	}
 }
 
@@ -108,11 +115,11 @@ func (m *model) sidebarSelectDirectory() {
 	m.focusPanel = nonePanelFocus
 	panel := m.getFocusedFilePanel()
 
-	err := panel.updateCurrentFilePanelDir(m.sidebarModel.GetCurrentDirectoryLocation())
+	err := m.updateCurrentFilePanelDir(m.sidebarModel.GetCurrentDirectoryLocation())
 	if err != nil {
 		slog.Error("Error switching to sidebar directory", "error", err)
 	}
-	panel.focusType = focus
+	panel.isFocused = true
 }
 
 // Select all item in the file panel (only work on select mode)
@@ -151,7 +158,7 @@ func (m *model) toggleDotFileController() {
 }
 
 // Toggle dotfile display or not
-func (m *model) toggleFooterController() {
+func (m *model) toggleFooterController() tea.Cmd {
 	m.toggleFooter = !m.toggleFooter
 	err := utils.WriteBoolFile(variable.ToggleFooter, m.toggleFooter)
 	if err != nil {
@@ -159,6 +166,14 @@ func (m *model) toggleFooterController() {
 	}
 	// TODO : Revisit this. Is this really need here, is this correct ?
 	m.setHeightValues(m.fullHeight)
+	// File preview panel requires explicit height update, unlike sidebar/file panels
+	// which receive height as render parameters and update automatically on each frame
+	if m.fileModel.filePreview.IsOpen() {
+		m.setFilePreviewPanelSize()
+		// Force re-render of preview content with new dimensions
+		return m.getFilePreviewCmd(true)
+	}
+	return nil
 }
 
 // Focus on search bar

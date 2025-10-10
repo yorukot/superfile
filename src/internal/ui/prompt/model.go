@@ -9,6 +9,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui"
 
 	tea "github.com/charmbracelet/bubbletea"
+
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
 )
@@ -18,7 +19,8 @@ func DefaultModel(maxHeight int, width int) Model {
 		common.Hotkeys.OpenCommandLine[0], common.Config.ShellCloseOnSuccess, maxHeight, width)
 }
 
-func GenerateModel(spfPromptHotkey string, shellPromptHotkey string, closeOnSuccess bool, maxHeight int, width int) Model {
+func GenerateModel(spfPromptHotkey string, shellPromptHotkey string, closeOnSuccess bool,
+	maxHeight int, width int) Model {
 	m := Model{
 		headline:          icon.Terminal + icon.Space + promptHeadlineText,
 		open:              false,
@@ -76,7 +78,7 @@ func (m *Model) handleConfirm(cwdLocation string) common.ModelAction {
 	if err == nil {
 		m.resultMsg = ""
 		m.actionSuccess = true
-	} else if cmdErr, ok := err.(invalidCmdError); ok { //nolint: errorlint // We don't expect a wrapped error here, so using type assertion
+	} else if cmdErr, ok := err.(invalidCmdError); ok { //nolint: errorlint // We don't expect a wrapped error here
 		slog.Error("Error from getPromptAction", "error", cmdErr, "uiMsg", cmdErr.uiMsg)
 		m.resultMsg = cmdErr.uiMessage()
 		m.actionSuccess = false

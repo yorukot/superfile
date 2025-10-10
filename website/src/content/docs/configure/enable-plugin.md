@@ -55,7 +55,7 @@ Find the plugin section in your config and change its value from `false` to `tru
 
 ```toml
 metadata = false
-zoxide = false
+zoxide_support = false
 ```
 
 Set any plugin to `true` to enable it, or `false` to disable it.

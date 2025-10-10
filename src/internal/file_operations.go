@@ -9,10 +9,12 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/utils"
 
 	trash_win "github.com/hymkor/trash-go"
 	"github.com/rkoesters/xdg/trash"
+
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/config/icon"
 )
@@ -144,8 +146,7 @@ func copyFile(src, dst string, srcInfo os.FileInfo) error {
 	return nil
 }
 
-// Move file to trash can and can auto switch macos trash can or linux trash can
-func trashMacOrLinux(src string) error {
+func moveToTrash(src string) error {
 	var err error
 	switch runtime.GOOS {
 	case utils.OsDarwin:
@@ -153,6 +154,10 @@ func trashMacOrLinux(src string) error {
 	case utils.OsWindows:
 		err = trash_win.Throw(src)
 	default:
+		// TODO: We should consider moving away from this package. Its not well written.
+		// It uses package globals, It doesn't initializes trash directory, and we have to do it
+		// separately outside of the this package. There is not documentation about this
+		// It also uses deprecated libraries, and isn't well maintained.
 		err = trash.Trash(src)
 	}
 	if err != nil {
@@ -162,8 +167,7 @@ func trashMacOrLinux(src string) error {
 }
 
 // pasteDir handles directory copying with progress tracking
-// model would only have changes in m.processBarModel.process[id]
-func pasteDir(src, dst string, id string, m *model) error {
+func pasteDir(src, dst string, p *processbar.Process, cut bool, processBarModel *processbar.Model) error {
 	dst, err := renameIfDuplicate(dst)
 	if err != nil {
 		return err
@@ -171,7 +175,7 @@ func pasteDir(src, dst string, id string, m *model) error {
 
 	// Check if we can do a fast move within the same partition
 	sameDev, err := isSamePartition(src, dst)
-	if err == nil && sameDev && m.copyItems.cut {
+	if err == nil && sameDev && cut {
 		// For cut operations on same partition, try fast rename first
 		err = os.Rename(src, dst)
 		if err == nil {
@@ -190,57 +194,7 @@ func pasteDir(src, dst string, id string, m *model) error {
 			return err
 		}
 		newPath := filepath.Join(dst, relPath)
-
-		if info.IsDir() {
-			newPath, err = renameIfDuplicate(newPath)
-			if err != nil {
-				return err
-			}
-			err = os.MkdirAll(newPath, info.Mode())
-			if err != nil {
-				return err
-			}
-		} else {
-			p := m.processBarModel.process[id]
-			message := channelMessage{
-				messageID:       id,
-				messageType:     sendProcess,
-				processNewState: p,
-			}
-
-			if m.copyItems.cut {
-				p.name = icon.Cut + icon.Space + filepath.Base(path)
-			} else {
-				p.name = icon.Copy + icon.Space + filepath.Base(path)
-			}
-
-			if len(channel) < 5 {
-				message.processNewState = p
-				channel <- message
-			}
-
-			var err error
-			if m.copyItems.cut && sameDev {
-				err = os.Rename(path, newPath)
-			} else {
-				err = copyFile(path, newPath, info)
-			}
-
-			if err != nil {
-				p.state = failure
-				message.processNewState = p
-				channel <- message
-				return err
-			}
-
-			p.done++
-			if len(channel) < 5 {
-				message.processNewState = p
-				channel <- message
-			}
-			m.processBarModel.process[id] = p
-		}
-		return nil
+		return actualPasteOperation(info, path, newPath, cut, sameDev, p, processBarModel)
 	})
 
 	if err != nil {
@@ -248,7 +202,7 @@ func pasteDir(src, dst string, id string, m *model) error {
 	}
 
 	// If this was a cut operation and we had to do a manual copy, remove the source
-	if m.copyItems.cut && !sameDev {
+	if cut && !sameDev {
 		err = os.RemoveAll(src)
 		if err != nil {
 			return fmt.Errorf("failed to remove source after move: %w", err)
@@ -256,4 +210,89 @@ func pasteDir(src, dst string, id string, m *model) error {
 	}
 
 	return nil
+}
+
+func actualPasteOperation(info os.FileInfo, path string, newPath string, cut bool, sameDev bool,
+	p *processbar.Process, processBarModel *processbar.Model) error {
+	var err error
+	if info.IsDir() {
+		// TODO - this is likely not needed because we did
+		// dst, err := renameIfDuplicate(dst) above
+		newPath, err = renameIfDuplicate(newPath)
+		if err != nil {
+			return err
+		}
+		err = os.MkdirAll(newPath, info.Mode())
+		return err
+	}
+
+	// File
+	p.Name = icon.GetCopyOrCutIcon(cut) + icon.Space + filepath.Base(path)
+	if cut && sameDev {
+		err = os.Rename(path, newPath)
+	} else {
+		err = copyFile(path, newPath, info)
+	}
+
+	if err != nil {
+		p.State = processbar.Failed
+		pSendErr := processBarModel.SendUpdateProcessMsg(*p, true)
+		if pSendErr != nil {
+			slog.Error("Error sending process update", "error", pSendErr)
+		}
+		return err
+	}
+
+	p.Done++
+	processBarModel.TrySendingUpdateProcessMsg(*p)
+	return nil
+}
+
+// isAncestor checks if dst is the same as src or a subdirectory of src.
+// It handles symlinks by resolving them and applies case-insensitive comparison on Windows.
+func isAncestor(src, dst string) bool {
+	// Resolve symlinks for both paths
+	srcResolved, err := filepath.EvalSymlinks(src)
+	if err != nil {
+		// If we can't resolve symlinks, fall back to original path
+		srcResolved = src
+	}
+
+	dstResolved, err := filepath.EvalSymlinks(dst)
+	if err != nil {
+		// If we can't resolve symlinks, fall back to original path
+		dstResolved = dst
+	}
+
+	// Get absolute paths. Abs() also Cleans paths to normalize separators and resolve . and ..
+	srcAbs, err := filepath.Abs(srcResolved)
+	if err != nil {
+		return false
+	}
+
+	dstAbs, err := filepath.Abs(dstResolved)
+	if err != nil {
+		return false
+	}
+
+	// On Windows, perform case-insensitive comparison
+	if runtime.GOOS == "windows" {
+		srcAbs = strings.ToLower(srcAbs)
+		dstAbs = strings.ToLower(dstAbs)
+	}
+
+	// Check if dst is the same as src
+	if srcAbs == dstAbs {
+		return true
+	}
+
+	// Check if dst is a subdirectory of src
+	// Use filepath.Rel to check the relationship
+	rel, err := filepath.Rel(srcAbs, dstAbs)
+	if err != nil {
+		return false
+	}
+
+	// If rel is "." or doesn't start with "..", then dst is inside src
+	return rel == "." || !strings.HasPrefix(rel, "..")
 }

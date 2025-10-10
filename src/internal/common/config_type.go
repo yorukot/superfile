@@ -63,26 +63,27 @@ type ThemeType struct {
 
 // Configuration settings
 type ConfigType struct {
-	Theme string `toml:"theme" comment:"More details are at https://superfile.netlify.app/configure/superfile-config/\nchange your theme"`
+	Theme string `toml:"theme" comment:"More details are at https://superfile.dev/configure/superfile-config/\nchange your theme"`
 
 	Editor                 string `toml:"editor" comment:"\nThe editor files will be opened with. (Leave blank to use the EDITOR environment variable)."`
 	DirEditor              string `toml:"dir_editor" comment:"\nThe editor directories will be opened with. (Leave blank to use the default editors)."`
 	AutoCheckUpdate        bool   `toml:"auto_check_update" comment:"\nAuto check for update"`
-	CdOnQuit               bool   `toml:"cd_on_quit" comment:"\nCd on quit (For more details, please check out https://superfile.netlify.app/configure/superfile-config/#cd_on_quit)"`
+	CdOnQuit               bool   `toml:"cd_on_quit" comment:"\nCd on quit (For more details, please check out https://superfile.dev/configure/superfile-config/#cd_on_quit)"`
 	DefaultOpenFilePreview bool   `toml:"default_open_file_preview" comment:"\nWhether to open file preview automatically every time superfile is opened."`
 	ShowImagePreview       bool   `toml:"show_image_preview" comment:"\nWhether to show image preview."`
 	ShowPanelFooterInfo    bool   `toml:"show_panel_footer_info" comment:"\nWhether to show additional footer info for file panel."`
 	DefaultDirectory       string `toml:"default_directory" comment:"\nThe path of the first file panel when superfile is opened."`
 	FileSizeUseSI          bool   `toml:"file_size_use_si" comment:"\nDisplay file sizes using powers of 1000 (kB, MB, GB) instead of powers of 1024 (KiB, MiB, GiB)."`
-	DefaultSortType        int    `toml:"default_sort_type" comment:"\nDefault sort type (0: Name, 1: Size, 2: Date Modified)."`
+	DefaultSortType        int    `toml:"default_sort_type" comment:"\nDefault sort type (0: Name, 1: Size, 2: Date Modified, 3: Type)."`
 	SortOrderReversed      bool   `toml:"sort_order_reversed" comment:"\nDefault sort order (false: Ascending, true: Descending)."`
-	CaseSensitiveSort      bool   `toml:"case_sensitive_sort" comment:"\nCase sensitive sort by name (captal \"B\" comes before \"a\" if true)."`
+	CaseSensitiveSort      bool   `toml:"case_sensitive_sort" comment:"\nCase sensitive sort by name (capital \"B\" comes before \"a\" if true)."`
 	ShellCloseOnSuccess    bool   `toml:"shell_close_on_success" comment:"\nWhether to close the shell on successful command execution."`
 	Debug                  bool   `toml:"debug" comment:"\nWhether to enable debug mode."`
 	// IgnoreMissingFields controls whether warnings about missing TOML fields are suppressed.
 	IgnoreMissingFields bool `toml:"ignore_missing_fields" comment:"\nWhether to ignore warnings about missing fields in the config file."`
 
 	Nerdfont              bool   `toml:"nerdfont" comment:"\n================   Style =================\n\n If you don't have or don't want Nerdfont installed you can turn this off"`
+	ShowSelectIcons       bool   `toml:"show_select_icons" comment:"\nShow checkbox icons in select mode (requires nerdfont)"`
 	TransparentBackground bool   `toml:"transparent_background" comment:"\nSet transparent background or not (this only work when your terminal background is transparent)"`
 	FilePreviewWidth      int    `toml:"file_preview_width" comment:"\nFile preview width allow '0' (this mean same as file panel),'x' x must be less than 10 and greater than 1 (This means that the width of the file preview will be one xth of the total width.)"`
 	CodePreviewer         string `toml:"code_previewer" comment:"\nWhether to use the builtin syntax highlighting with chroma or use bat. Values: \"\" for builtin chroma, \"bat\" for bat"`
@@ -112,6 +113,8 @@ func (c *ConfigType) GetIgnoreMissingFields() bool {
 type HotkeysType struct {
 	Confirm []string `toml:"confirm" comment:"=================================================================================================\nGlobal hotkeys (cannot conflict with other hotkeys)"`
 	Quit    []string `toml:"quit"`
+	CdQuit  []string `toml:"cd_quit"`
+
 	// movement
 	ListUp   []string `toml:"list_up" comment:"movement"`
 	ListDown []string `toml:"list_down"`
@@ -133,10 +136,11 @@ type HotkeysType struct {
 	FilePanelItemCreate []string `toml:"file_panel_item_create" comment:"create file/directory and rename "`
 	FilePanelItemRename []string `toml:"file_panel_item_rename"`
 
-	CopyItems   []string `toml:"copy_items" comment:"file operate"`
-	PasteItems  []string `toml:"paste_items"`
-	CutItems    []string `toml:"cut_items"`
-	DeleteItems []string `toml:"delete_items"`
+	CopyItems              []string `toml:"copy_items" comment:"file operate"`
+	PasteItems             []string `toml:"paste_items"`
+	CutItems               []string `toml:"cut_items"`
+	DeleteItems            []string `toml:"delete_items"`
+	PermanentlyDeleteItems []string `toml:"permanently_delete_items"`
 
 	ExtractFile  []string `toml:"extract_file" comment:"compress and extract"`
 	CompressFile []string `toml:"compress_file"`
@@ -150,6 +154,7 @@ type HotkeysType struct {
 	OpenHelpMenu    []string `toml:"open_help_menu"`
 	OpenCommandLine []string `toml:"open_command_line"`
 	OpenSPFPrompt   []string `toml:"open_spf_prompt"`
+	OpenZoxide      []string `toml:"open_zoxide"`
 
 	CopyPath []string `toml:"copy_path"`
 	CopyPWD  []string `toml:"copy_present_working_directory"`
@@ -162,7 +167,7 @@ type HotkeysType struct {
 	ParentDirectory []string `toml:"parent_directory" comment:"=================================================================================================\nNormal mode hotkeys (can conflict with other modes, cannot conflict with global hotkeys)"`
 	SearchBar       []string `toml:"search_bar"`
 
-	FilePanelSelectModeItemsSelectDown []string `toml:"file_panel_select_mode_items_select_down" comment:"=================================================================================================\nSelect mode hotkeys (can conflict with other modes, cananot conflict with global hotkeys)"`
+	FilePanelSelectModeItemsSelectDown []string `toml:"file_panel_select_mode_items_select_down" comment:"=================================================================================================\nSelect mode hotkeys (can conflict with other modes, cannot conflict with global hotkeys)"`
 	FilePanelSelectModeItemsSelectUp   []string `toml:"file_panel_select_mode_items_select_up"`
 	FilePanelSelectAllItem             []string `toml:"file_panel_select_all_items"`
 }

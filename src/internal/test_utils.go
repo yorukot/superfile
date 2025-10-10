@@ -1,49 +1,40 @@
 package internal
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
+	zoxidelib "github.com/lazysegtree/go-zoxide"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/utils"
 )
 
-var SampleDataBytes = []byte("This is sample") //nolint: gochecknoglobals // Effectively const
-
-func setupDirectories(t *testing.T, dirs ...string) {
-	t.Helper()
-	for _, dir := range dirs {
-		if dir == "" {
-			continue
-		}
-		err := os.MkdirAll(dir, 0755)
-		require.NoError(t, err)
-	}
-}
-
-func setupFilesWithData(t *testing.T, data []byte, files ...string) {
-	t.Helper()
-	for _, file := range files {
-		err := os.WriteFile(file, data, 0644)
-		require.NoError(t, err)
-	}
-}
-
-func setupFiles(t *testing.T, files ...string) {
-	setupFilesWithData(t, SampleDataBytes, files...)
-}
+const DefaultTestTick = 10 * time.Millisecond
+const DefaultTestTimeout = time.Second
+const DefaultTestModelWidth = 2 * common.MinimumWidth
+const DefaultTestModelHeight = 2 * common.MinimumHeight
 
 // -------------------- Model setup utils
 
-func defaultTestModel(dirs ...string) model {
-	m := defaultModelConfig(false, false, false, dirs)
-	_, _ = TeaUpdate(&m, tea.WindowSizeMsg{Width: 2 * common.MinimumWidth, Height: 2 * common.MinimumHeight})
+func defaultTestModel(dirs ...string) *model {
+	m := defaultModelConfig(false, false, false, dirs, nil)
+	return setModelParamsForTest(m)
+}
+
+func defaultTestModelWithZClient(zClient *zoxidelib.Client, dirs ...string) *model {
+	m := defaultModelConfig(false, false, false, dirs, zClient)
+	return setModelParamsForTest(m)
+}
+
+func setModelParamsForTest(m *model) *model {
+	m.disableMetadata = true
+	TeaUpdate(m, tea.WindowSizeMsg{Width: DefaultTestModelWidth, Height: DefaultTestModelHeight})
 	return m
 }
 
@@ -59,33 +50,16 @@ func setupPanelModeAndSelection(t *testing.T, m *model, useSelectMode bool, item
 		panel.selected = selectedItems
 	} else {
 		// Find the item in browser mode
-		itemIndex := findItemIndexInPanel(panel, itemName)
-		require.NotEqual(t, -1, itemIndex, "%s should be found in panel", itemName)
-		panel.cursor = itemIndex
+		setFilePanelSelectedItemByName(t, panel, itemName)
 	}
 }
 
 // --------------------  Bubletea utilities
 
-// TeaUpdate : Utility to send update to model , majorly used in tests
-// Not using pointer receiver as this is more like a utility, than
-// a member function of model
-// TODO : Consider wrapping TeaUpdate with a helper that both forwards the return
-// values and does a require.NoError(t, err)
-func TeaUpdate(m *model, msg tea.Msg) (tea.Cmd, error) {
-	resModel, cmd := m.Update(msg)
-
-	mObj, ok := resModel.(model)
-	if !ok {
-		return cmd, fmt.Errorf("unexpected model type: %T", resModel)
-	}
-	*m = mObj
-	return cmd, nil
-}
-
-func TeaUpdateWithErrCheck(t *testing.T, m *model, msg tea.Msg) tea.Cmd {
-	cmd, err := TeaUpdate(m, msg)
-	require.NoError(t, err)
+// TODO : Should we validate that returned value is of type *model ?
+// and equal to m ? We are assuming that to be true as of now
+func TeaUpdate(m *model, msg tea.Msg) tea.Cmd {
+	_, cmd := m.Update(msg)
 	return cmd
 }
 
@@ -94,7 +68,8 @@ func IsTeaQuit(cmd tea.Cmd) bool {
 	if cmd == nil {
 		return false
 	}
-	msg := cmd()
+	// Ignore commands with longer IO Operations, which waits on a channel
+	msg := ExecuteTeaCmdWithTimeout(cmd, time.Millisecond)
 	switch msg := msg.(type) {
 	case tea.QuitMsg:
 		return true
@@ -110,13 +85,26 @@ func IsTeaQuit(cmd tea.Cmd) bool {
 	}
 }
 
+func ExecuteTeaCmdWithTimeout(cmd tea.Cmd, timeout time.Duration) tea.Msg {
+	result := make(chan tea.Msg, 1)
+	go func() {
+		result <- cmd()
+	}()
+	select {
+	case msg := <-result:
+		return msg
+	case <-time.After(timeout):
+		return nil
+	}
+}
+
 // Helper function to perform copy or cut operation
 func performCopyOrCutOperation(t *testing.T, m *model, isCut bool) {
 	t.Helper()
 	if isCut {
-		TeaUpdateWithErrCheck(t, m, utils.TeaRuneKeyMsg(common.Hotkeys.CutItems[0]))
+		TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.CutItems[0]))
 	} else {
-		TeaUpdateWithErrCheck(t, m, utils.TeaRuneKeyMsg(common.Hotkeys.CopyItems[0]))
+		TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.CopyItems[0]))
 	}
 }
 
@@ -151,7 +139,7 @@ func verifyPathNotExistsEventually(t *testing.T, path, message string) {
 	assert.Eventually(t, func() bool {
 		_, err := os.Stat(path)
 		return os.IsNotExist(err)
-	}, time.Second, 10*time.Millisecond, message)
+	}, DefaultTestTimeout, DefaultTestTick, message)
 }
 
 // Helper function to verify expected destination files exist
@@ -162,7 +150,7 @@ func verifyDestinationFiles(t *testing.T, targetDir string, expectedDestFiles []
 		assert.Eventually(t, func() bool {
 			_, err := os.Stat(destPath)
 			return err == nil
-		}, time.Second, 10*time.Millisecond, "%s should exist in destination", expectedFile)
+		}, DefaultTestTimeout, DefaultTestTick, "%s should exist in destination", expectedFile)
 	}
 }
 
@@ -177,7 +165,8 @@ func verifyPreventedPasteResults(t *testing.T, m *model, originalPath string) {
 }
 
 // Helper function to verify successful paste results
-func verifySuccessfulPasteResults(t *testing.T, targetDir string, expectedDestFiles []string, originalPath string, shouldOriginalExist bool) {
+func verifySuccessfulPasteResults(t *testing.T, targetDir string, expectedDestFiles []string,
+	originalPath string, shouldOriginalExist bool) {
 	t.Helper()
 	// Verify expected files were created in destination
 	verifyDestinationFiles(t, targetDir, expectedDestFiles)
@@ -190,8 +179,6 @@ func verifySuccessfulPasteResults(t *testing.T, targetDir string, expectedDestFi
 			verifyPathNotExistsEventually(t, originalPath, "Original file should not exist after cut operation")
 		}
 	}
-
-	// TODO: Need to add a test to verify clipboard state.
 }
 
 // -------------- Other utilities
@@ -206,13 +193,23 @@ func findItemIndexInPanel(panel *filePanel, itemName string) int {
 	return -1
 }
 
+// Helper function to find item index in panel by name
+func findItemIndexInPanelByLocation(panel *filePanel, itemLocation string) int {
+	for i, elem := range panel.element {
+		if elem.location == itemLocation {
+			return i
+		}
+	}
+	return -1
+}
+
 // Helper function to navigate to target directory if different from start
 func navigateToTargetDir(t *testing.T, m *model, startDir, targetDir string) {
 	t.Helper()
 	if targetDir != startDir {
 		err := m.updateCurrentFilePanelDir(targetDir)
 		require.NoError(t, err)
-		TeaUpdateWithErrCheck(t, m, nil)
+		TeaUpdate(m, nil)
 	}
 }
 
@@ -222,4 +219,18 @@ func getOriginalPath(useSelectMode bool, itemName, startDir string) string {
 		return filepath.Join(startDir, itemName)
 	}
 	return ""
+}
+
+func setFilePanelSelectedItemByLocation(t *testing.T, panel *filePanel, filePath string) {
+	t.Helper()
+	idx := findItemIndexInPanelByLocation(panel, filePath)
+	require.NotEqual(t, -1, idx, "%s should be found in panel", filePath)
+	panel.cursor = idx
+}
+
+func setFilePanelSelectedItemByName(t *testing.T, panel *filePanel, fileName string) {
+	t.Helper()
+	idx := findItemIndexInPanel(panel, fileName)
+	require.NotEqual(t, -1, idx, "%s should be found in panel", fileName)
+	panel.cursor = idx
 }

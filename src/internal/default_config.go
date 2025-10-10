@@ -3,51 +3,62 @@ package internal
 import (
 	"path/filepath"
 
+	zoxidelib "github.com/lazysegtree/go-zoxide"
+
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
+	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/ui/sidebar"
-	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
 
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/ui/preview"
 	"github.com/yorukot/superfile/src/internal/ui/prompt"
+	zoxideui "github.com/yorukot/superfile/src/internal/ui/zoxide"
 )
 
 // Generate and return model containing default configurations for interface
 // Maybe we can replace slice of strings with var args - Should we ?
-func defaultModelConfig(toggleDotFile bool, toggleFooter bool, firstUse bool, firstFilePanelDirs []string) model {
-	return model{
+// TODO: Move the configuration parameters to a ModelConfig struct.
+// Something like `RendererConfig` struct for `Renderer` struct in ui/renderer package
+func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool,
+	firstFilePanelDirs []string, zClient *zoxidelib.Client) *model {
+	return &model{
 		filePanelFocusIndex: 0,
 		focusPanel:          nonePanelFocus,
-		processBarModel: processBarModel{
-			process: make(map[string]process),
-			cursor:  0,
-			render:  0,
-		},
-		sidebarModel: sidebar.New(),
-		fileMetaData: metadata.New(),
+		processBarModel:     processbar.New(),
+		sidebarModel:        sidebar.New(),
+		fileMetaData:        metadata.New(),
 		fileModel: fileModel{
-			filePanels: filePanelSlice(firstFilePanelDirs),
-			filePreview: filePreviewPanel{
-				open: common.Config.DefaultOpenFilePreview,
-			},
-			width: 10,
+			filePanels:  filePanelSlice(firstFilePanelDirs),
+			filePreview: preview.New(),
+			width:       10,
 		},
-		helpMenu: helpMenuModal{
-			renderIndex: 0,
-			cursor:      1,
-			data:        getHelpMenuData(),
-			open:        false,
-		},
-		imagePreviewer: filepreview.NewImagePreviewer(),
+		helpMenu:       newHelpMenuModal(),
 		promptModal:    prompt.DefaultModel(prompt.PromptMinHeight, prompt.PromptMinWidth),
+		zoxideModal:    zoxideui.DefaultModel(zoxideui.ZoxideMinHeight, zoxideui.ZoxideMinWidth, zClient),
+		zClient:        zClient,
 		modelQuitState: notQuitting,
 		toggleDotFile:  toggleDotFile,
 		toggleFooter:   toggleFooter,
 		firstUse:       firstUse,
+		hasTrash:       common.InitTrash(),
+	}
+}
+
+func newHelpMenuModal() helpMenuModal {
+	helpMenuData := getHelpMenuData()
+
+	return helpMenuModal{
+		renderIndex:  0,
+		cursor:       1,
+		data:         helpMenuData,
+		filteredData: helpMenuData,
+		open:         false,
+		searchBar:    common.GenerateSearchBar(),
 	}
 }
 
 // Return help menu for Hotkeys
-func getHelpMenuData() []helpMenuModalData {
+func getHelpMenuData() []helpMenuModalData { //nolint: funlen // This should be self contained
 	data := []helpMenuModalData{
 		{
 			subTitle: "General",
@@ -65,6 +76,11 @@ func getHelpMenuData() []helpMenuModalData {
 		{
 			hotkey:         common.Hotkeys.Quit,
 			description:    "Quit typing, modal or superfile",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey:         common.Hotkeys.CdQuit,
+			description:    "Quit superfile and change directory to current folder",
 			hotkeyWorkType: globalType,
 		},
 		{
@@ -224,6 +240,11 @@ func getHelpMenuData() []helpMenuModalData {
 		{
 			hotkey:         common.Hotkeys.DeleteItems,
 			description:    "Delete selected items",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey:         common.Hotkeys.PermanentlyDeleteItems,
+			description:    "Permanently delete selected items",
 			hotkeyWorkType: globalType,
 		},
 		{

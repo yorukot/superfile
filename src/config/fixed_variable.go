@@ -5,13 +5,19 @@ import (
 	"path/filepath"
 
 	"github.com/urfave/cli/v3"
+
 	"github.com/yorukot/superfile/src/internal/utils"
 
 	"github.com/adrg/xdg"
 )
 
 const (
-	CurrentVersion      = "v1.3.3"
+	CurrentVersion = "v1.4.0"
+	// Allowing pre-releases with non production version
+	// Set this to "" for production releases
+	PreReleaseSuffix = ""
+
+	// This gives most recent non-prerelease, non-draft release
 	LatestVersionURL    = "https://api.github.com/repos/yorukot/superfile/releases/latest"
 	LatestVersionGithub = "github.com/yorukot/superfile/releases/latest"
 
@@ -46,10 +52,13 @@ var (
 	LastDirFile = filepath.Join(SuperFileStateDir, "lastdir")
 
 	// Trash Directories
-	DarwinTrashDirectory      = filepath.Join(HomeDir, ".Trash")
-	CustomTrashDirectory      = filepath.Join(xdg.DataHome, "Trash")
-	CustomTrashDirectoryFiles = filepath.Join(xdg.DataHome, "Trash", "files")
-	CustomTrashDirectoryInfo  = filepath.Join(xdg.DataHome, "Trash", "info")
+	DarwinTrashDirectory = filepath.Join(HomeDir, ".Trash")
+
+	// These are used by github.com/rkoesters/xdg/trash package
+	// We need to make sure that these directories exist
+	LinuxTrashDirectory      = filepath.Join(xdg.DataHome, "Trash")
+	LinuxTrashDirectoryFiles = filepath.Join(xdg.DataHome, "Trash", "files")
+	LinuxTrashDirectoryInfo  = filepath.Join(xdg.DataHome, "Trash", "info")
 )
 
 // These variables are actually not fixed, they are sometimes updated dynamically

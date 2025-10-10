@@ -20,6 +20,16 @@ type ContentRenderer struct {
 	truncateStyle TruncateStyle
 }
 
+func NewContentRenderer(maxLines int, maxLineWidth int, truncateStyle TruncateStyle) ContentRenderer {
+	return ContentRenderer{
+		lines:           make([]string, 0),
+		maxLines:        maxLines,
+		maxLineWidth:    maxLineWidth,
+		truncateStyle:   truncateStyle,
+		sanitizeContent: true,
+	}
+}
+
 func (r *ContentRenderer) CntLines() int {
 	return len(r.lines)
 }
@@ -59,14 +69,4 @@ func (r *ContentRenderer) AddLineWithCustomTruncate(lineStr string, truncateStyl
 
 func (r *ContentRenderer) Render() string {
 	return strings.Join(r.lines, "\n")
-}
-
-func NewContentRenderer(maxLines int, maxLineWidth int, truncateStyle TruncateStyle) ContentRenderer {
-	return ContentRenderer{
-		lines:           make([]string, 0),
-		maxLines:        maxLines,
-		maxLineWidth:    maxLineWidth,
-		truncateStyle:   truncateStyle,
-		sanitizeContent: true,
-	}
 }

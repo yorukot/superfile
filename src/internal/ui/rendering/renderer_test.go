@@ -7,6 +7,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
 	"github.com/yorukot/superfile/src/internal/utils"
 )
 
@@ -24,7 +25,8 @@ func TestMain(m *testing.M) {
 	m.Run()
 }
 
-func getDefaultTestRendererConfig(totalHeight int, totalWidth int, borderRequired bool, truncateHeight bool) RendererConfig {
+func getDefaultTestRendererConfig(totalHeight int, totalWidth int, borderRequired bool,
+	truncateHeight bool) RendererConfig {
 	cfg := DefaultRendererConfig(totalHeight, totalWidth)
 	if borderRequired {
 		cfg.BorderRequired = true

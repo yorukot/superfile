@@ -27,11 +27,17 @@
         packages = rec {
           superfile = pkgs.buildGoApplication {
             pname = "superfile";
-            version = "1.3.3";
+            version = "1.4.0";
             src = ./.;
             modules = ./gomod2nix.toml;
-            nativeCheckInputs = [ pkgs.writableTmpDirAsHomeHook ];
+
+            nativeCheckInputs = with pkgs; [
+              zoxide
+              exiftool
+              writableTmpDirAsHomeHook
+            ];
           };
+
           default = superfile;
         };
 

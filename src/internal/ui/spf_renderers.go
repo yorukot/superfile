@@ -4,6 +4,7 @@ import (
 	"log/slog"
 
 	"github.com/charmbracelet/lipgloss"
+
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
 )
@@ -69,6 +70,29 @@ func FilePreviewPanelRenderer(totalHeight int, totalWidth int) *rendering.Render
 func PromptRenderer(totalHeight int, totalWidth int) *rendering.Renderer {
 	cfg := rendering.DefaultRendererConfig(totalHeight, totalWidth)
 	cfg.TruncateHeight = true
+	cfg.ContentFGColor = common.ModalFGColor
+	cfg.ContentBGColor = common.ModalBGColor
+
+	cfg.BorderRequired = true
+	cfg.BorderBGColor = common.ModalBGColor
+	cfg.BorderFGColor = common.ModalBorderActiveColor
+
+	cfg.Border = DefaultLipglossBorder()
+
+	r, err := rendering.NewRenderer(cfg)
+	if err != nil {
+		slog.Error("Error in creating renderer. Falling back to default renderer", "error", err)
+		r = &rendering.Renderer{}
+	}
+	return r
+}
+
+func ZoxideRenderer(totalHeight int, totalWidth int) *rendering.Renderer {
+	return PromptRenderer(totalHeight, totalWidth)
+}
+
+func HelpMenuRenderer(totalHeight int, totalWidth int) *rendering.Renderer {
+	cfg := rendering.DefaultRendererConfig(totalHeight, totalWidth)
 	cfg.ContentFGColor = common.ModalFGColor
 	cfg.ContentBGColor = common.ModalBGColor
 

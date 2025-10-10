@@ -3,7 +3,7 @@ package rendering
 import (
 	"strings"
 
-	"github.com/charmbracelet/x/exp/term/ansi"
+	"github.com/charmbracelet/x/ansi"
 
 	"github.com/charmbracelet/lipgloss"
 )
@@ -26,6 +26,14 @@ type BorderConfig struct {
 	height int
 
 	titleLeftMargin int
+}
+
+func NewBorderConfig(height int, width int) BorderConfig {
+	return BorderConfig{
+		height:          height,
+		width:           width,
+		titleLeftMargin: 1,
+	}
 }
 
 func (b *BorderConfig) SetTitle(title string) {
@@ -133,12 +141,4 @@ func (b *BorderConfig) GetBorder(borderStrings lipgloss.Border) lipgloss.Border 
 	}
 
 	return res
-}
-
-func NewBorderConfig(height int, width int) BorderConfig {
-	return BorderConfig{
-		height:          height,
-		width:           width,
-		titleLeftMargin: 1,
-	}
 }

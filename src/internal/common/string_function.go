@@ -13,7 +13,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/x/exp/term/ansi"
+	"github.com/charmbracelet/x/ansi"
 )
 
 func TruncateText(text string, maxChars int, tails string) string {
@@ -195,7 +195,8 @@ func IsTextFile(filename string) (bool, error) {
 // Allow Any rune that is above ASCII control characters range 0x7f
 // for valid unicodes like nerdfont \uf410 \U000f0868
 // Also allow \x0b that is for escape sequences
-func MakePrintableWithEscCheck(line string, allowEsc bool) string {
+// This function should better not be broken into multiple functions
+func MakePrintableWithEscCheck(line string, allowEsc bool) string { //nolint: gocognit // See above
 	var sb strings.Builder
 	for _, r := range line {
 		if r == utf8.RuneError {

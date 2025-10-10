@@ -212,7 +212,8 @@ func ConvertImageToANSI(img image.Image, defaultBGColor color.Color) string {
 }
 
 // ImagePreview generates a preview of an image file
-func (p *ImagePreviewer) ImagePreview(path string, maxWidth int, maxHeight int, defaultBGColor string, sideAreaWidth int) (string, error) {
+func (p *ImagePreviewer) ImagePreview(path string, maxWidth int, maxHeight int,
+	defaultBGColor string, sideAreaWidth int) (string, error) {
 	// Validate dimensions
 	if maxWidth <= 0 || maxHeight <= 0 {
 		return "", fmt.Errorf("dimensions must be positive (maxWidth=%d, maxHeight=%d)", maxWidth, maxHeight)
@@ -228,7 +229,14 @@ func (p *ImagePreviewer) ImagePreview(path string, maxWidth int, maxHeight int, 
 			return preview, nil
 		}
 
-		preview, err := p.ImagePreviewWithRenderer(path, maxWidth, maxHeight, defaultBGColor, RendererKitty, sideAreaWidth)
+		preview, err := p.ImagePreviewWithRenderer(
+			path,
+			maxWidth,
+			maxHeight,
+			defaultBGColor,
+			RendererKitty,
+			sideAreaWidth,
+		)
 		if err == nil {
 			// Cache the successful result
 			p.cache.Set(path, dimensions, preview, RendererKitty)
@@ -254,12 +262,8 @@ func (p *ImagePreviewer) ImagePreview(path string, maxWidth int, maxHeight int, 
 }
 
 // ImagePreviewWithRenderer generates an image preview using the specified renderer
-func (p *ImagePreviewer) ImagePreviewWithRenderer(path string, maxWidth int, maxHeight int, defaultBGColor string, renderer ImageRenderer, sideAreaWidth int) (string, error) {
-	// Validate dimensions
-	if maxWidth <= 0 || maxHeight <= 0 {
-		return "", fmt.Errorf("dimensions must be positive (maxWidth=%d, maxHeight=%d)", maxWidth, maxHeight)
-	}
-
+func (p *ImagePreviewer) ImagePreviewWithRenderer(path string, maxWidth int, maxHeight int,
+	defaultBGColor string, renderer ImageRenderer, sideAreaWidth int) (string, error) {
 	info, err := os.Stat(path)
 	if err != nil {
 		return "", err
@@ -282,7 +286,8 @@ func (p *ImagePreviewer) ImagePreviewWithRenderer(path string, maxWidth int, max
 
 	switch renderer {
 	case RendererKitty:
-		result, err := p.renderWithKittyUsingTermCap(img, path, originalWidth, originalHeight, maxWidth, maxHeight, sideAreaWidth)
+		result, err := p.renderWithKittyUsingTermCap(img, path, originalWidth,
+			originalHeight, maxWidth, maxHeight, sideAreaWidth)
 		if err != nil {
 			// If kitty fails, fall back to ANSI renderer
 			slog.Error("Kitty renderer failed, falling back to ANSI", "error", err)
@@ -298,7 +303,8 @@ func (p *ImagePreviewer) ImagePreviewWithRenderer(path string, maxWidth int, max
 }
 
 // Convert image to ansi
-func (p *ImagePreviewer) ANSIRenderer(img image.Image, defaultBGColor string, maxWidth int, maxHeight int) (string, error) {
+func (p *ImagePreviewer) ANSIRenderer(img image.Image, defaultBGColor string,
+	maxWidth int, maxHeight int) (string, error) {
 	bgColor, err := hexToColor(defaultBGColor)
 	if err != nil {
 		return "", fmt.Errorf("invalid background color: %w", err)

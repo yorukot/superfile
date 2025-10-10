@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"io"
@@ -12,6 +13,10 @@ import (
 
 	"github.com/adrg/xdg"
 	"github.com/pelletier/go-toml/v2"
+
+	"github.com/charmbracelet/x/ansi"
+	"golang.org/x/text/encoding/unicode"
+	"golang.org/x/text/transform"
 )
 
 // Utility functions related to file operations
@@ -22,7 +27,7 @@ func WriteTomlData(filePath string, data interface{}) error {
 		// return a wrapped error
 		return fmt.Errorf("error encoding data : %w", err)
 	}
-	err = os.WriteFile(filePath, tomlData, 0644)
+	err = os.WriteFile(filePath, tomlData, 0o644)
 	if err != nil {
 		return fmt.Errorf("error writing file : %w", err)
 	}
@@ -31,7 +36,8 @@ func WriteTomlData(filePath string, data interface{}) error {
 
 // Helper function to load and validate TOML files with field checking
 // errorPrefix is appended before every error message
-func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFlag bool) error {
+func LoadTomlFile(filePath string, defaultData string, target interface{},
+	fixFlag bool, ignoreMissingFields bool) error {
 	// Initialize with default config
 	_ = toml.Unmarshal([]byte(defaultData), target)
 
@@ -73,10 +79,9 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 		}
 	}
 
-	// Check for missing fields. Explicitly set default value to false
-	ignoreMissing := false
+	// Override the default value if it exists default value to false
 	if config, ok := target.(MissingFieldIgnorer); ok {
-		ignoreMissing = config.GetIgnoreMissingFields()
+		ignoreMissingFields = config.GetIgnoreMissingFields()
 	}
 
 	// Check for missing fields
@@ -101,7 +106,7 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 	if len(missingFields) == 0 {
 		return nil
 	}
-	if !fixFlag && ignoreMissing {
+	if !fixFlag && ignoreMissingFields {
 		// nil error if we dont wanna fix, and dont wanna print
 		return nil
 	}
@@ -115,6 +120,10 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 	}
 
 	// Start fixing
+	return fixTomlFile(resultErr, filePath, target)
+}
+
+func fixTomlFile(resultErr *TomlLoadError, filePath string, target interface{}) error {
 	resultErr.isFatal = true
 	// Create a unique backup of the current config file
 	backupFile, err := os.CreateTemp(filepath.Dir(filePath), filepath.Base(filePath)+".bak-")
@@ -137,7 +146,7 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 	}()
 	// Copy the original file to the backup
 	// Open it in read write mode
-	origFile, err := os.OpenFile(filePath, os.O_RDWR, 0644)
+	origFile, err := os.OpenFile(filePath, os.O_RDWR, 0o644)
 	if err != nil {
 		resultErr.UpdateMessageAndError("failed to open original file for backup", err)
 		return resultErr
@@ -156,7 +165,6 @@ func LoadTomlFile(filePath string, defaultData string, target interface{}, fixFl
 		return resultErr
 	}
 	_, err = origFile.WriteAt(tomlData, 0)
-
 	if err != nil {
 		resultErr.UpdateMessageAndError("failed to write TOML data to original file", err)
 		return resultErr
@@ -211,4 +219,55 @@ func DirSize(path string) int64 {
 		slog.Error("errors during WalkDir", "error", walkErr)
 	}
 	return size
+}
+
+// Helper functions
+// Create all dirs that does not already exists
+func CreateDirectories(dirs ...string) error {
+	for _, dir := range dirs {
+		if dir == "" {
+			continue
+		}
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			return fmt.Errorf("failed to create directory %s: %w", dir, err)
+		}
+	}
+	return nil
+}
+
+// Create all files if they do not exists yet
+func CreateFiles(files ...string) error {
+	for _, file := range files {
+		if _, err := os.Stat(file); os.IsNotExist(err) {
+			if err = os.WriteFile(file, nil, 0o644); err != nil {
+				return fmt.Errorf("failed to create file %s: %w", file, err)
+			}
+		}
+	}
+	return nil
+}
+
+func ReadFileContent(filepath string, maxLineLength int, previewLine int) (string, error) {
+	var resultBuilder strings.Builder
+	file, err := os.Open(filepath)
+	if err != nil {
+		return resultBuilder.String(), err
+	}
+	defer file.Close()
+
+	reader := transform.NewReader(file, unicode.BOMOverride(unicode.UTF8.NewDecoder()))
+	scanner := bufio.NewScanner(reader)
+	lineCount := 0
+	for scanner.Scan() {
+		line := scanner.Text()
+		line = ansi.Truncate(line, maxLineLength, "")
+		resultBuilder.WriteString(line)
+		resultBuilder.WriteRune('\n')
+		lineCount++
+		if previewLine > 0 && lineCount >= previewLine {
+			break
+		}
+	}
+	// returns the first non-EOF error that was encountered by the [Scanner]
+	return resultBuilder.String(), scanner.Err()
 }

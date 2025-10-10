@@ -1,18 +1,21 @@
 package internal
 
 import (
+	"errors"
 	"log/slog"
 	"os"
-	"os/exec"
 	"reflect"
 	"runtime"
-	"strings"
 
+	zoxidelib "github.com/lazysegtree/go-zoxide"
+
+	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
 	"github.com/yorukot/superfile/src/internal/ui/sidebar"
 	"github.com/yorukot/superfile/src/internal/utils"
 
 	"github.com/barasher/go-exiftool"
+
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
@@ -20,7 +23,10 @@ import (
 
 // initialConfig load and handle all configuration files (spf config,Hotkeys
 // themes) setted up. Processes input directories and returns toggle states.
-func initialConfig(firstFilePanelDirs []string) (toggleDotFile bool, toggleFooter bool) { //nolint: nonamedreturns // This is the only usecase of named returns, distinguish between multiple return values
+
+// This is the only usecase of named returns, distinguish between multiple return values
+func initialConfig(firstFilePanelDirs []string) (toggleDotFile bool, //nolint: nonamedreturns // See above
+	toggleFooter bool, zClient *zoxidelib.Client) {
 	// Open log stream
 	file, err := os.OpenFile(variable.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 
@@ -40,7 +46,9 @@ func initialConfig(firstFilePanelDirs []string) (toggleDotFile bool, toggleFoote
 	slog.SetDefault(slog.New(slog.NewTextHandler(
 		file, &slog.HandlerOptions{Level: logLevel})))
 
-	common.LoadHotkeysFile()
+	printRuntimeInfo()
+
+	common.LoadHotkeysFile(common.Config.IgnoreMissingFields)
 
 	common.LoadThemeFile()
 
@@ -49,6 +57,9 @@ func initialConfig(firstFilePanelDirs []string) (toggleDotFile bool, toggleFoote
 	common.LoadThemeConfig()
 	common.LoadPrerenderedVariables()
 
+	// TODO: Make sure to clean it up. Via et.Close()
+	// Note: All the tool we use to interact with OS, should be abstracted behind a struc
+	// Have exiftool manager, Zoxide Manager, OS Manager, Xtractor, Zipper, Command Executor
 	if common.Config.Metadata {
 		et, err = exiftool.NewExiftool()
 		if err != nil {
@@ -61,41 +72,68 @@ func initialConfig(firstFilePanelDirs []string) (toggleDotFile bool, toggleFoote
 		slog.Error("cannot get current working directory", "error", err)
 		cwd = variable.HomeDir
 	}
+
+	if common.Config.ZoxideSupport {
+		zClient, err = zoxidelib.New()
+		if err != nil {
+			slog.Error("Error initializing zoxide client", "error", err)
+		}
+	}
+
+	updateFirstFilePanelDirs(firstFilePanelDirs, cwd, zClient)
+
+	slog.Debug("Directory configuration", "cwd", cwd, "start_directories", firstFilePanelDirs)
+	printRuntimeInfo()
+
+	toggleDotFile = utils.ReadBoolFile(variable.ToggleDotFile, false)
+	toggleFooter = utils.ReadBoolFile(variable.ToggleFooter, true)
+
+	return toggleDotFile, toggleFooter, zClient
+}
+
+func updateFirstFilePanelDirs(firstFilePanelDirs []string, cwd string, zClient *zoxidelib.Client) {
 	for i := range firstFilePanelDirs {
 		if firstFilePanelDirs[i] == "" {
 			firstFilePanelDirs[i] = common.Config.DefaultDirectory
 		}
-
-		if common.Config.ZoxideSupport {
-			// Execute zoxide to get the absolute path
-			out, err := exec.Command("zoxide", "query", firstFilePanelDirs[i]).Output()
-			if err != nil {
-				slog.Error("Error while executing zoxide", "error", err, "path", firstFilePanelDirs[i])
-				firstFilePanelDirs[i] = utils.ResolveAbsPath(cwd, firstFilePanelDirs[i])
-			} else {
-				// Remove trailing newline and whitespace from the output
-				trimmedOutput := strings.TrimSpace(string(out))
-
-				if trimmedOutput == "" {
-					slog.Error("Zoxide returned empty output", "path", firstFilePanelDirs[i])
-					firstFilePanelDirs[i] = utils.ResolveAbsPath(cwd, firstFilePanelDirs[i])
-				} else {
-					firstFilePanelDirs[i] = trimmedOutput
-				}
-			}
-		} else {
-			firstFilePanelDirs[i] = utils.ResolveAbsPath(cwd, firstFilePanelDirs[i])
-		}
-		// In case of unexpected path error, fallback to home dir
+		originalPath := firstFilePanelDirs[i]
+		firstFilePanelDirs[i] = utils.ResolveAbsPath(cwd, firstFilePanelDirs[i])
 		if _, err := os.Stat(firstFilePanelDirs[i]); err != nil {
 			slog.Error("cannot get stats for firstFilePanelDir", "error", err)
-			firstFilePanelDirs[i] = variable.HomeDir
+			// In case the path provided did not exist, use zoxide query
+			// else, fallback to home dir
+			if common.Config.ZoxideSupport && zClient != nil {
+				path, err := attemptZoxideForInitPath(originalPath, zClient)
+				if err != nil {
+					slog.Error("Zoxide query error", "originalPath", originalPath, "error", err)
+					firstFilePanelDirs[i] = variable.HomeDir
+				} else {
+					firstFilePanelDirs[i] = path
+				}
+			} else {
+				firstFilePanelDirs[i] = variable.HomeDir
+			}
 		}
 	}
+}
 
+func attemptZoxideForInitPath(originalPath string, zClient *zoxidelib.Client) (string, error) {
+	path, err := zClient.Query(originalPath)
+
+	if err != nil {
+		return "", err
+	}
+	if path == "" {
+		return "", errors.New("zoxide returned empty path")
+	}
+	if stat, statErr := os.Stat(path); statErr != nil || !stat.IsDir() {
+		return "", errors.New("zoxide returned invalid path")
+	}
+	return path, nil
+}
+
+func printRuntimeInfo() {
 	slog.Debug("Runtime information", "runtime.GOOS", runtime.GOOS)
-	slog.Debug("Directory configuration", "cwd", cwd, "start_directories", firstFilePanelDirs)
-
 	var memStats runtime.MemStats
 	runtime.ReadMemStats(&memStats)
 	slog.Debug("Memory usage",
@@ -108,10 +146,6 @@ func initialConfig(firstFilePanelDirs []string) (toggleDotFile bool, toggleFoote
 		"filePanel_size_bytes", reflect.TypeOf(filePanel{}).Size(),
 		"sidebarModel_size_bytes", reflect.TypeOf(sidebar.Model{}).Size(),
 		"renderer_size_bytes", reflect.TypeOf(rendering.Renderer{}).Size(),
-		"borderConfig_size_bytes", reflect.TypeOf(rendering.BorderConfig{}).Size())
-
-	toggleDotFile = utils.ReadBoolFile(variable.ToggleDotFile, false)
-	toggleFooter = utils.ReadBoolFile(variable.ToggleFooter, true)
-
-	return toggleDotFile, toggleFooter
+		"borderConfig_size_bytes", reflect.TypeOf(rendering.BorderConfig{}).Size(),
+		"process_size_bytes", reflect.TypeOf(processbar.Process{}).Size())
 }

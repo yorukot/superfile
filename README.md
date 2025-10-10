@@ -58,6 +58,7 @@
 - [Troubleshooting](#troubleshooting)
 - [Thanks](#thanks)
   - [Support](#Support)
+  - [Core maintainer](#core-maintainer)
   - [Contributors](#contributors)
   - [Star History](#star-history)
 
@@ -66,7 +67,7 @@
 ### MacOS and Linux
 
 ```bash
-bash -c "$(curl -sLo- https://superfile.netlify.app/install.sh)"
+bash -c "$(curl -sLo- https://superfile.dev/install.sh)"
 ```
 If you want to inspect the script, see : [install.sh](./website/public/install.sh)
 
@@ -74,9 +75,14 @@ If you want to inspect the script, see : [install.sh](./website/public/install.s
 
 #### Powershell
 ```powershell
-powershell -ExecutionPolicy Bypass -Command "Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://superfile.netlify.app/install.ps1'))"
+powershell -ExecutionPolicy Bypass -Command "Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://superfile.dev/install.ps1'))"
 ```
 If you want to inspect the script, see : [install.ps1](./website/public/install.ps1)
+
+#### [Winget](https://winget.run/)
+```powershell
+winget install --id yorukot.superfile
+```
 
 #### [Scoop](https://scoop.sh/)
 ```
@@ -84,7 +90,7 @@ scoop install superfile
 ```
 
 ### More installation methods
-[Click me to check on how to install](https://superfile.netlify.app/getting-started/installation/)
+[Click me to check on how to install](https://superfile.dev/getting-started/installation/)
 
 ## Build
 
@@ -143,32 +149,32 @@ spf
 
 ## Tutorial
 
-After you install superfile, you can go [here](https://superfile.netlify.app/getting-started/tutorial/) to briefly understand how to use superfile!
+After you install superfile, you can go [here](https://superfile.dev/getting-started/tutorial/) to briefly understand how to use superfile!
 
 ## Plugins
 
-[Click me to the plugins wiki](https://superfile.netlify.app/list/plugin-list/)
+[Click me to the plugins wiki](https://superfile.dev/list/plugin-list/)
 
 ## Themes
 
-[Click me to the theme wiki](https://superfile.netlify.app/configure/custom-theme/)
+[Click me to the theme wiki](https://superfile.dev/configure/custom-theme/)
 
 ## Hotkeys
 
 > [!WARNING]
 > If you are vim/nvim user please change your default hotkeys config to vim version!
 
-[**Click me to see the hotkey wiki**](https://superfile.netlify.app/configure/custom-hotkeys/)
+[**Click me to see the hotkey wiki**](https://superfile.dev/configure/custom-hotkeys/)
 
 ## Notes
 
 We have an auto update functionality, that fetches superfile's latest released version from github (if last timestamp of last version check was less than 24 hours) and prints a prompt to user, if there is a newer version available.
 
-You can turn this off, by setting `auto_check_update` to false in superfile config. [**Click me to see the config wiki**](https://superfile.netlify.app/configure/superfile-config/) 
+You can turn this off, by setting `auto_check_update` to false in superfile config. [**Click me to see the config wiki**](https://superfile.dev/configure/superfile-config/) 
 
 ## Troubleshooting
 
-[**Click me to see common problem fix**](https://superfile.netlify.app/troubleshooting/)
+[**Click me to see common problem fix**](https://superfile.dev/troubleshooting/)
 
 ## Uninstalling
 
@@ -194,14 +200,14 @@ If you don't rember, just try removing both.
 To uninstall superfile on Windows, use this powershell script.
 
 ```powershell
-powershell -ExecutionPolicy Bypass -Command "Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://superfile.netlify.app/uninstall.ps1'))"
+powershell -ExecutionPolicy Bypass -Command "Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://superfile.dev/uninstall.ps1'))"
 ```
 
 ## Contributing
 
 If you want to contribute please follow the [contribution guide](./CONTRIBUTING.md)
 
-[**Click me to see changelog**](https://superfile.netlify.app/changelog)
+[**Click me to see changelog**](https://superfile.dev/changelog)
 
 ## Thanks
 
@@ -211,6 +217,13 @@ If you want to contribute please follow the [contribution guide](./CONTRIBUTING.
 - You can buy a coffee for me 💖
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/G2G1JEGGC)
+
+### Core maintainer
+
+> We welcome anyone who wants to become a core maintainer. Feel free to reach out!
+
+- **[@yorukot](https://github.com/yorukot)** - Original author and maintainer
+- **[@lazysegtree](https://github.com/lazysegtree)** - Core maintainer
 
 ### Contributors
 

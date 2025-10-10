@@ -9,6 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
 	"github.com/yorukot/superfile/src/internal/common"
 )
 
@@ -21,6 +22,8 @@ func TestFilePreviewWithInvalidMode(t *testing.T) {
 
 	m := defaultTestModel(curTestDir)
 
-	res := m.filePreviewPanelRenderWithDimensions(10, 100)
+	m.fileModel.filePreview.SetWidth(40)
+	m.fileModel.filePreview.SetHeight(10)
+	res := m.fileModel.filePreview.RenderWithPath(file, m.fullWidth)
 	assert.Contains(t, res, common.FilePreviewUnsupportedFileMode)
 }

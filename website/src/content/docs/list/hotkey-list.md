@@ -12,14 +12,19 @@ These are the default hotkeys and you can [change](/configure/custom-hotkeys) th
 
 ## General
 
-| Function                        | Key              | Variable name    |
-| ------------------------------- | ---------------- | ---------------- |
-| Open superfile                  | `spf`            |                  |
-| Confirm your select or typing   | `enter`, `right` | `confirm_typing` |
-| Quit typing, modal or superfile | `esc`, `q`       | `quit`           |
-| Cancel typing                   | `ctrl+c`, `esc`  | `cancel_typing`  |
-| Open help menu(hotkeylist)      | `?`              | `open_help_menu` |
-| Toggle footer                   | `F`              | `toggle_footer`  |
+| Function                                | Key              | Variable name    |
+| --------------------------------------- | ---------------- | ---------------- |
+| Open superfile                          | `spf`            |                  |
+| Confirm your select or typing           | `enter`, `right` | `confirm_typing` |
+| Quit typing, modal or superfile         | `esc`, `q`       | `quit`           |
+| Quit superfile and cd to current folder | `Q`              | `cd_quit`        |
+| Cancel typing                           | `ctrl+c`, `esc`  | `cancel_typing`  |
+| Open help menu(hotkeylist)              | `?`              | `open_help_menu` |
+| Toggle footer                           | `F`              | `toggle_footer`  |
+
+:::note
+Quit superfile and cd to current folder "cd_quit" require the same scripts as ["cd_on_quit"](/configure/superfile-config/#cd_on_quit) setting
+:::
 
 ## Panel navigation
 
@@ -35,6 +40,7 @@ These are the default hotkeys and you can [change](/configure/custom-hotkeys) th
 | Focus on the metadata panel      | `m`                        | `focus_on_metadata`         |
 | Open prompt in shell mode        | `:`                        | `open_command_line`         |
 | Open prompt in spf mode          | `>`                        | `open_spf_prompt`           |
+| Open zoxide navigation modal     | `z`                        | `open_zoxide`               |
 
 ## Panel movement
 
@@ -67,3 +73,4 @@ These are the default hotkeys and you can [change](/configure/custom-hotkeys) th
 | Zip file or folder to .zip file                      | `ctrl+a`           | `compress_file` (normal mode)                                                          |
 | Open file with your default editor                   | `e`                | `open_file_with_editor` (normal node)                                                  |
 | Open current directory with default editor           | `E` (shift+e)      | `current_directory_with_editor` (normal node)                                          |
+| Permanently Delete file or folder (or both)          | `D` (shift+d) | `permanently_delete_items` (normal mode) <br> `file_panel_select_mode_item_delete` (select mode)    |

@@ -8,9 +8,10 @@ import (
 	"testing"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/x/exp/term/ansi"
+	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/utils"
@@ -73,7 +74,7 @@ func TestModel_HandleUpdate(t *testing.T) {
 			action, _ := m.HandleUpdate(tea.KeyMsg{Type: tea.KeyEnter}, defaultTestCwd)
 			assert.Equal(t, openAfterEnter, m.IsOpen())
 			assert.Equal(t, common.NoAction{}, action)
-			assert.Equal(t, "", m.resultMsg)
+			assert.Empty(t, m.resultMsg)
 			assert.True(t, m.LastActionSucceeded())
 			assert.True(t, m.validate())
 		}

@@ -61,7 +61,7 @@ class TmuxSPFManager(BaseSPFManager):
         self._is_spf_running = True
 
     def _send_key(self, key : str) -> None:
-        self.logger.debug("sendind key : %s", repr(key))
+        self.logger.debug("sending key : %s", repr(key))
         self.spf_pane.send_keys(key, enter=False)
 
     def send_text_input(self, text : str, all_at_once : bool = True) -> None:

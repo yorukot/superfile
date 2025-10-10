@@ -7,6 +7,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/stretchr/testify/assert"
+
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/utils"
 )
@@ -43,8 +44,8 @@ func TestFilePanelNavigation(t *testing.T) {
 		rootDir = "\\"
 	}
 
-	setupDirectories(t, dir1, dir2)
-	setupFiles(t, file1, file2, file3, file4, file5, file6)
+	utils.SetupDirectories(t, dir1, dir2)
+	utils.SetupFiles(t, file1, file2, file3, file4, file5, file6)
 
 	testdata := []struct {
 		name           string
@@ -125,7 +126,7 @@ func TestFilePanelNavigation(t *testing.T) {
 			m.getFocusedFilePanel().render = tt.startRender
 			m.getFocusedFilePanel().searchBar.SetValue("asdf")
 			for _, s := range tt.keyInput {
-				TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(s))
+				TeaUpdate(m, utils.TeaRuneKeyMsg(s))
 			}
 
 			assert.Equal(t, tt.resultDir, m.getFocusedFilePanel().location)
@@ -136,9 +137,9 @@ func TestFilePanelNavigation(t *testing.T) {
 
 			// Go back to original directory
 
-			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenSPFPrompt[0]))
-			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg("cd "+tt.startDir))
-			TeaUpdateWithErrCheck(t, &m, tea.KeyMsg{Type: tea.KeyEnter})
+			TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenSPFPrompt[0]))
+			TeaUpdate(m, utils.TeaRuneKeyMsg("cd "+tt.startDir))
+			TeaUpdate(m, tea.KeyMsg{Type: tea.KeyEnter})
 
 			// Make sure we have original curson and render
 			assert.Equal(t, tt.startCursor, m.getFocusedFilePanel().cursor)

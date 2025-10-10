@@ -10,8 +10,9 @@ import (
 	"reflect"
 	"runtime"
 
-	"github.com/charmbracelet/x/exp/term/ansi"
+	"github.com/charmbracelet/x/ansi"
 	"github.com/pelletier/go-toml/v2"
+
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/utils"
 
@@ -23,7 +24,7 @@ import (
 // if the FixConfigFile flag is on
 // TODO : Fix the code duplication with LoadHotkeysFile().
 func LoadConfigFile() {
-	err := utils.LoadTomlFile(variable.ConfigFile, ConfigTomlString, &Config, variable.FixConfigFile)
+	err := utils.LoadTomlFile(variable.ConfigFile, ConfigTomlString, &Config, variable.FixConfigFile, false)
 	if err != nil {
 		userMsg := fmt.Sprintf("%s%s", LipglossError, err.Error())
 
@@ -32,7 +33,8 @@ func LoadConfigFile() {
 		if errors.As(err, &loadError) && loadError != nil {
 			if loadError.MissingFields() && !variable.FixConfigFile {
 				// Had missing fields and we did not fix
-				userMsg += "\nTo add missing fields to configuration file automatically run superfile with the --fix-config-file flag `spf --fix-config-file`"
+				userMsg += "\nTo add missing fields to configuration file automatically run superfile " +
+					"with the --fix-config-file flag `spf --fix-config-file`"
 			}
 			toExit = loadError.IsFatal()
 		}
@@ -99,9 +101,14 @@ func ValidateConfig(c *ConfigType) error {
 
 // Load keybinds from the hotkeys file. Compares the content
 // with the default values and modify the hotkeys if the FixHotkeys flag is on.
-func LoadHotkeysFile() {
-	err := utils.LoadTomlFile(variable.HotkeysFile, HotkeysTomlString, &Hotkeys, variable.FixHotkeys)
-
+func LoadHotkeysFile(ignoreMissingFields bool) {
+	err := utils.LoadTomlFile(
+		variable.HotkeysFile,
+		HotkeysTomlString,
+		&Hotkeys,
+		variable.FixHotkeys,
+		ignoreMissingFields,
+	)
 	if err != nil {
 		userMsg := fmt.Sprintf("%s%s", LipglossError, err.Error())
 
@@ -110,7 +117,8 @@ func LoadHotkeysFile() {
 		if errors.As(err, &loadError) {
 			if loadError.MissingFields() && !variable.FixHotkeys {
 				// Had missing fields and we did not fix
-				userMsg += "\nTo add missing fields to hotkeys file automatically run superfile with the --fix-hotkeys flag `spf --fix-hotkeys`"
+				userMsg += "\nTo add missing fields to hotkeys file automatically run superfile " +
+					"with the --fix-hotkeys flag `spf --fix-hotkeys`"
 			}
 			toExit = loadError.IsFatal()
 		}
@@ -191,12 +199,12 @@ func LoadAllDefaultConfig(content embed.FS) {
 	}
 
 	// Prevent failure for first time app run by making sure parent directories exists
-	if err = os.MkdirAll(filepath.Dir(variable.ThemeFileVersion), 0755); err != nil {
+	if err = os.MkdirAll(filepath.Dir(variable.ThemeFileVersion), 0o755); err != nil {
 		slog.Error("Error creating theme file parent directory", "error", err)
 		return
 	}
 
-	err = os.WriteFile(variable.ThemeFileVersion, []byte(variable.CurrentVersion), 0644)
+	err = os.WriteFile(variable.ThemeFileVersion, []byte(variable.CurrentVersion), 0o644)
 	if err != nil {
 		slog.Error("Error writing theme file version", "error", err)
 	}
@@ -227,7 +235,7 @@ func WriteThemeFiles(content embed.FS) error {
 	_, err := os.Stat(variable.ThemeFolder)
 
 	if os.IsNotExist(err) {
-		if err = os.MkdirAll(variable.ThemeFolder, 0755); err != nil {
+		if err = os.MkdirAll(variable.ThemeFolder, 0o755); err != nil {
 			slog.Error("Error creating theme directory", "error", err)
 			return err
 		}
@@ -325,4 +333,22 @@ func PopulateHotkeyFromFile(hotkeyFilePath string) error {
 
 func PopulateThemeFromFile(themeFilePath string) error {
 	return populateFromFile(themeFilePath, &Theme)
+}
+
+func InitTrash() bool {
+	// Create trash directories
+	if runtime.GOOS != utils.OsLinux {
+		return true
+	}
+	err := utils.CreateDirectories(
+		variable.LinuxTrashDirectory,
+		variable.LinuxTrashDirectoryFiles,
+		variable.LinuxTrashDirectoryInfo,
+	)
+	if err != nil {
+		slog.Warn("Failed to initialize XDG trash; falling back to permanent delete",
+			"error", err, "trashDir", variable.LinuxTrashDirectory)
+		return false
+	}
+	return true
 }

@@ -6,8 +6,6 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/yorukot/superfile/src/internal/ui/sidebar"
-
 	"github.com/yorukot/superfile/src/internal/common"
 
 	variable "github.com/yorukot/superfile/src/config"
@@ -16,7 +14,7 @@ import (
 // Pinned directory
 func (m *model) pinnedDirectory() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-	err := sidebar.TogglePinnedDirectory(panel.location)
+	err := m.sidebarModel.TogglePinnedDirectory(panel.location)
 	if err != nil {
 		slog.Error("Error while toggling pinned directory", "error", err)
 	}
@@ -41,30 +39,31 @@ func (m *model) createNewFilePanel(location string) error {
 	}
 
 	m.fileModel.filePanels = append(m.fileModel.filePanels, filePanel{
-
 		location:         location,
 		sortOptions:      m.fileModel.filePanels[m.filePanelFocusIndex].sortOptions,
 		panelMode:        browserMode,
-		focusType:        secondFocus,
+		isFocused:        false,
 		directoryRecords: make(map[string]directoryRecord),
 		searchBar:        common.GenerateSearchBar(),
 	})
 
-	if m.fileModel.filePreview.open {
+	if m.fileModel.filePreview.IsOpen() {
 		// File preview panel width same as file panel
 		if common.Config.FilePreviewWidth == 0 {
-			m.fileModel.filePreview.width = (m.fullWidth - common.Config.SidebarWidth - (4 + (len(m.fileModel.filePanels))*2)) / (len(m.fileModel.filePanels) + 1)
+			m.fileModel.filePreview.SetWidth((m.fullWidth - common.Config.SidebarWidth -
+				(4 + (len(m.fileModel.filePanels))*2)) / (len(m.fileModel.filePanels) + 1))
 		} else {
-			m.fileModel.filePreview.width = (m.fullWidth - common.Config.SidebarWidth) / common.Config.FilePreviewWidth
+			m.fileModel.filePreview.SetWidth((m.fullWidth - common.Config.SidebarWidth) / common.Config.FilePreviewWidth)
 		}
 	}
 
-	m.fileModel.filePanels[m.filePanelFocusIndex].focusType = noneFocus
-	m.fileModel.filePanels[m.filePanelFocusIndex+1].focusType = returnFocusType(m.focusPanel)
-	m.fileModel.width = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.width - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
+	m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = false
+	m.fileModel.filePanels[m.filePanelFocusIndex+1].isFocused = returnFocusType(m.focusPanel)
+	m.fileModel.width = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth() -
+		(4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
 	m.filePanelFocusIndex++
 
-	m.fileModel.maxFilePanel = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.width) / 20
+	m.fileModel.maxFilePanel = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth()) / 20
 
 	for i := range m.fileModel.filePanels {
 		m.fileModel.filePanels[i].searchBar.Width = m.fileModel.width - 4
@@ -78,14 +77,16 @@ func (m *model) closeFilePanel() {
 		return
 	}
 
-	m.fileModel.filePanels = append(m.fileModel.filePanels[:m.filePanelFocusIndex], m.fileModel.filePanels[m.filePanelFocusIndex+1:]...)
+	m.fileModel.filePanels = append(m.fileModel.filePanels[:m.filePanelFocusIndex],
+		m.fileModel.filePanels[m.filePanelFocusIndex+1:]...)
 
-	if m.fileModel.filePreview.open {
+	if m.fileModel.filePreview.IsOpen() {
 		// File preview panel width same as file panel
 		if common.Config.FilePreviewWidth == 0 {
-			m.fileModel.filePreview.width = (m.fullWidth - common.Config.SidebarWidth - (4 + (len(m.fileModel.filePanels))*2)) / (len(m.fileModel.filePanels) + 1)
+			m.fileModel.filePreview.SetWidth((m.fullWidth - common.Config.SidebarWidth -
+				(4 + (len(m.fileModel.filePanels))*2)) / (len(m.fileModel.filePanels) + 1))
 		} else {
-			m.fileModel.filePreview.width = (m.fullWidth - common.Config.SidebarWidth) / common.Config.FilePreviewWidth
+			m.fileModel.filePreview.SetWidth((m.fullWidth - common.Config.SidebarWidth) / common.Config.FilePreviewWidth)
 		}
 	}
 
@@ -93,10 +94,11 @@ func (m *model) closeFilePanel() {
 		m.filePanelFocusIndex--
 	}
 
-	m.fileModel.width = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.width - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
-	m.fileModel.filePanels[m.filePanelFocusIndex].focusType = returnFocusType(m.focusPanel)
+	m.fileModel.width = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth() -
+		(4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
+	m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = returnFocusType(m.focusPanel)
 
-	m.fileModel.maxFilePanel = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.width) / 20
+	m.fileModel.maxFilePanel = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth()) / 20
 
 	for i := range m.fileModel.filePanels {
 		m.fileModel.filePanels[i].searchBar.Width = m.fileModel.width - 4
@@ -104,20 +106,23 @@ func (m *model) closeFilePanel() {
 }
 
 func (m *model) toggleFilePreviewPanel() {
-	m.fileModel.filePreview.open = !m.fileModel.filePreview.open
-	m.fileModel.filePreview.width = 0
-	if m.fileModel.filePreview.open {
+	m.fileModel.filePreview.ToggleOpen()
+	m.fileModel.filePreview.SetWidth(0)
+	m.fileModel.filePreview.SetHeight(m.mainPanelHeight + 2)
+	if m.fileModel.filePreview.IsOpen() {
 		// File preview panel width same as file panel
 		if common.Config.FilePreviewWidth == 0 {
-			m.fileModel.filePreview.width = (m.fullWidth - common.Config.SidebarWidth - (4 + (len(m.fileModel.filePanels))*2)) / (len(m.fileModel.filePanels) + 1)
+			m.fileModel.filePreview.SetWidth((m.fullWidth - common.Config.SidebarWidth -
+				(4 + (len(m.fileModel.filePanels))*2)) / (len(m.fileModel.filePanels) + 1))
 		} else {
-			m.fileModel.filePreview.width = (m.fullWidth - common.Config.SidebarWidth) / common.Config.FilePreviewWidth
+			m.fileModel.filePreview.SetWidth((m.fullWidth - common.Config.SidebarWidth) / common.Config.FilePreviewWidth)
 		}
 	}
 
-	m.fileModel.width = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.width - (4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
+	m.fileModel.width = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth() -
+		(4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
 
-	m.fileModel.maxFilePanel = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.width) / 20
+	m.fileModel.maxFilePanel = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth()) / 20
 
 	for i := range m.fileModel.filePanels {
 		m.fileModel.filePanels[i].searchBar.Width = m.fileModel.width - 4
@@ -126,26 +131,26 @@ func (m *model) toggleFilePreviewPanel() {
 
 // Focus on next file panel
 func (m *model) nextFilePanel() {
-	m.fileModel.filePanels[m.filePanelFocusIndex].focusType = noneFocus
+	m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = false
 	if m.filePanelFocusIndex == (len(m.fileModel.filePanels) - 1) {
 		m.filePanelFocusIndex = 0
 	} else {
 		m.filePanelFocusIndex++
 	}
 
-	m.fileModel.filePanels[m.filePanelFocusIndex].focusType = returnFocusType(m.focusPanel)
+	m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = returnFocusType(m.focusPanel)
 }
 
 // Focus on previous file panel
 func (m *model) previousFilePanel() {
-	m.fileModel.filePanels[m.filePanelFocusIndex].focusType = noneFocus
+	m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = false
 	if m.filePanelFocusIndex == 0 {
 		m.filePanelFocusIndex = (len(m.fileModel.filePanels) - 1)
 	} else {
 		m.filePanelFocusIndex--
 	}
 
-	m.fileModel.filePanels[m.filePanelFocusIndex].focusType = returnFocusType(m.focusPanel)
+	m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = returnFocusType(m.focusPanel)
 }
 
 // Focus on sidebar
@@ -155,10 +160,10 @@ func (m *model) focusOnSideBar() {
 	}
 	if m.focusPanel == sidebarFocus {
 		m.focusPanel = nonePanelFocus
-		m.fileModel.filePanels[m.filePanelFocusIndex].focusType = focus
+		m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = true
 	} else {
 		m.focusPanel = sidebarFocus
-		m.fileModel.filePanels[m.filePanelFocusIndex].focusType = secondFocus
+		m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = false
 	}
 }
 
@@ -170,10 +175,10 @@ func (m *model) focusOnProcessBar() {
 
 	if m.focusPanel == processBarFocus {
 		m.focusPanel = nonePanelFocus
-		m.fileModel.filePanels[m.filePanelFocusIndex].focusType = focus
+		m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = true
 	} else {
 		m.focusPanel = processBarFocus
-		m.fileModel.filePanels[m.filePanelFocusIndex].focusType = secondFocus
+		m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = false
 	}
 }
 
@@ -185,9 +190,9 @@ func (m *model) focusOnMetadata() {
 
 	if m.focusPanel == metadataFocus {
 		m.focusPanel = nonePanelFocus
-		m.fileModel.filePanels[m.filePanelFocusIndex].focusType = focus
+		m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = true
 	} else {
 		m.focusPanel = metadataFocus
-		m.fileModel.filePanels[m.filePanelFocusIndex].focusType = secondFocus
+		m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = false
 	}
 }

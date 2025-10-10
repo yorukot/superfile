@@ -3,7 +3,7 @@ package rendering
 import (
 	"log/slog"
 
-	"github.com/charmbracelet/x/exp/term/ansi"
+	"github.com/charmbracelet/x/ansi"
 )
 
 type TruncateStyle int

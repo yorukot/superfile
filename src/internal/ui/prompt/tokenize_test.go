@@ -18,7 +18,7 @@ const (
 	spfTestEnvVar4 = "SPF_TEST_ENV_VAR4"
 )
 
-var testEnvValues = map[string]string{ //nolint:gochecknoglobals // This is more like a const. Had to use `var` as go doesn't allows const maps
+var testEnvValues = map[string]string{ //nolint:gochecknoglobals // This is more like a const.
 	spfTestEnvVar1: "1",
 	spfTestEnvVar2: "hello",
 	spfTestEnvVar3: "",

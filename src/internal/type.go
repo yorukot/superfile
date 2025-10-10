@@ -3,44 +3,37 @@ package internal
 import (
 	"time"
 
-	"github.com/yorukot/superfile/src/internal/ui/metadata"
-	"github.com/yorukot/superfile/src/internal/ui/sidebar"
-	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
+	zoxidelib "github.com/lazysegtree/go-zoxide"
 
-	"github.com/charmbracelet/bubbles/progress"
+	"github.com/yorukot/superfile/src/internal/ui/metadata"
+	"github.com/yorukot/superfile/src/internal/ui/notify"
+	"github.com/yorukot/superfile/src/internal/ui/processbar"
+	"github.com/yorukot/superfile/src/internal/ui/sidebar"
+
 	"github.com/charmbracelet/bubbles/textinput"
+
+	"github.com/yorukot/superfile/src/internal/ui/preview"
 	"github.com/yorukot/superfile/src/internal/ui/prompt"
+	zoxideui "github.com/yorukot/superfile/src/internal/ui/zoxide"
 )
 
 // Type representing the mode of the panel
 type panelMode uint
 
-// Type representing the focus type of the file panel
-type filePanelFocusType uint
-
-// Type representing the state of a process
-type processState int
-
 // Type representing the type of focused panel
 type focusPanelType int
 
-type warnType int
-
 type hotkeyType int
 
-type channelMessageType int
-
 type modelQuitStateType int
+
+// TODO: Convert to integer enum
+type sortingKind string
 
 const (
 	globalType hotkeyType = iota
 	normalType
 	selectType
-)
-
-const (
-	confirmDeleteItem warnType = iota
-	confirmRenameItem
 )
 
 // Constants for panel with no focus
@@ -51,44 +44,19 @@ const (
 	metadataFocus
 )
 
-// Constants for file panel with no focus
-const (
-	noneFocus filePanelFocusType = iota
-	secondFocus
-	focus
-)
-
 // Constants for select mode or browser mode
 const (
 	selectMode panelMode = iota
 	browserMode
 )
 
-// Constants for operation, success, cancel, failure
-const (
-	inOperation processState = iota
-	successful
-	cancel
-	failure
-)
-
-const (
-	sendWarnModal channelMessageType = iota
-	sendProcess
-	sendNotifyModal
-)
-
 const (
 	notQuitting modelQuitStateType = iota
 	quitInitiated
-	confirmToQuit
+	quitConfirmationInitiated
+	quitConfirmationReceived
 	quitDone
 )
-
-type MetadataMsg struct {
-	metadata metadata.Metadata
-	reqID    int
-}
 
 // Main model
 // TODO : We could consider using *model as tea.Model, instead of model.
@@ -99,20 +67,22 @@ type model struct {
 	// Main Panels
 	fileModel       fileModel
 	sidebarModel    sidebar.Model
-	processBarModel processBarModel
+	processBarModel processbar.Model
 	focusPanel      focusPanelType
 	copyItems       copyItems
 
 	// Modals
-	notifyModal notifyModal
+	notifyModel notify.Model
 	typingModal typingModal
-	warnModal   warnModal
 	helpMenu    helpMenuModal
 	promptModal prompt.Model
+	zoxideModal zoxideui.Model
+
+	// Zoxide client for directory tracking
+	zClient *zoxidelib.Client
 
 	fileMetaData         metadata.Model
-	metadataRequestCnt   int
-	imagePreviewer       *filepreview.ImagePreviewer
+	ioReqCnt             int
 	modelQuitState       modelQuitStateType
 	firstTextInput       bool
 	toggleDotFile        bool
@@ -120,7 +90,10 @@ type model struct {
 	toggleFooter         bool
 	firstLoadingComplete bool
 	firstUse             bool
-	filePanelFocusIndex  int
+
+	// This entirely disables metadata fetching. Used in test model
+	disableMetadata     bool
+	filePanelFocusIndex int
 
 	// Height in number of lines of actual viewport of
 	// main panel and sidebar excluding border
@@ -131,16 +104,21 @@ type model struct {
 	footerHeight int
 	fullWidth    int
 	fullHeight   int
+
+	// whether usable trash directory exists or not
+	hasTrash bool
 }
 
 // Modal
 type helpMenuModal struct {
-	height      int
-	width       int
-	open        bool
-	renderIndex int
-	cursor      int
-	data        []helpMenuModalData
+	height       int
+	width        int
+	open         bool
+	renderIndex  int
+	cursor       int
+	data         []helpMenuModalData
+	filteredData []helpMenuModalData
+	searchBar    textinput.Model
 }
 
 type helpMenuModalData struct {
@@ -150,24 +128,11 @@ type helpMenuModalData struct {
 	subTitle       string
 }
 
-type warnModal struct {
-	open     bool
-	warnType warnType
-	title    string
-	content  string
-}
-
 type typingModal struct {
 	location      string
 	open          bool
 	textInput     textinput.Model
 	errorMesssage string
-}
-
-type notifyModal struct {
-	open    bool
-	title   string
-	content string
 }
 
 // Copied items
@@ -183,19 +148,14 @@ type fileModel struct {
 	width        int
 	renaming     bool
 	maxFilePanel int
-	filePreview  filePreviewPanel
-}
-
-type filePreviewPanel struct {
-	open  bool
-	width int
+	filePreview  preview.Model
 }
 
 // Panel representing a file
 type filePanel struct {
 	cursor             int
 	render             int
-	focusType          filePanelFocusType
+	isFocused          bool
 	location           string
 	sortOptions        sortOptionsModel
 	panelMode          panelMode
@@ -239,37 +199,6 @@ type element struct {
 
 /* FILE WINDOWS TYPE END*/
 
-/* SIDE BAR internal TYPE END*/
-
-/*PROCESS BAR internal TYPE START*/
-
-// Model for process bar internal
-type processBarModel struct {
-	render      int
-	cursor      int
-	processList []string
-	process     map[string]process
-}
-
-// Model for an individual process
-type process struct {
-	name     string
-	progress progress.Model
-	state    processState
-	total    int
-	done     int
-	doneTime time.Time
-}
-
-// Message for process bar
-type channelMessage struct {
-	messageID       string
-	messageType     channelMessageType
-	processNewState process
-	warnModal       warnModal
-	notifyModal     notifyModal
-}
-
-/*PROCESS BAR internal TYPE END*/
-
 type editorFinishedMsg struct{ err error }
+
+type sliceOrderFunc func(i, j int) bool

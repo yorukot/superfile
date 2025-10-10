@@ -25,18 +25,18 @@ Copy and paste the following one-line command into your machine's terminal.
 With `curl`:
 
 ```bash
-bash -c "$(curl -sLo- https://superfile.netlify.app/install.sh)"
+bash -c "$(curl -sLo- https://superfile.dev/install.sh)"
 ```
 
 Or with `wget`:
 ```bash
-bash -c "$(wget -qO- https://superfile.netlify.app/install.sh)"
+bash -c "$(wget -qO- https://superfile.dev/install.sh)"
 ```
 
 Use `SPF_INSTALL_VERSION` to specify a version :
 
 ```bash
-SPF_INSTALL_VERSION=1.2.1 bash -c "$(curl -sLo- https://superfile.netlify.app/install.sh)"
+SPF_INSTALL_VERSION=1.2.1 bash -c "$(curl -sLo- https://superfile.dev/install.sh)"
 ```
 
 ### Windows
@@ -44,20 +44,26 @@ SPF_INSTALL_VERSION=1.2.1 bash -c "$(curl -sLo- https://superfile.netlify.app/in
 With `powershell`:
 
 ```bash
-powershell -ExecutionPolicy Bypass -Command "Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://superfile.netlify.app/install.ps1'))"
+powershell -ExecutionPolicy Bypass -Command "Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://superfile.dev/install.ps1'))"
 ```
 
 :::note
 To uninstall, run the above `powershell` command with the modified URL:
 
-`https://superfile.netlify.app/uninstall.ps1`
+`https://superfile.dev/uninstall.ps1`
 :::
 
 Use `SPF_INSTALL_VERSION` to specify a version :
 
 ```bash
-powershell -ExecutionPolicy Bypass -Command "$env:SPF_INSTALL_VERSION=1.2.1; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://superfile.netlify.app/install.ps1'))"
+powershell -ExecutionPolicy Bypass -Command "$env:SPF_INSTALL_VERSION=1.2.1; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://superfile.dev/install.ps1'))"
 ```
+
+With [Winget](https://winget.run/):
+
+```powershell
+winget install --id yorukot.superfile
+``````
 
 With [Scoop](https://scoop.sh/):
 

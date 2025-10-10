@@ -5,15 +5,19 @@ import (
 	"slices"
 
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/ui/notify"
 
 	tea "github.com/charmbracelet/bubbletea"
+
 	variable "github.com/yorukot/superfile/src/config"
 )
 
 // mainKey handles most of key commands in the regular state of the application. For
 // keys that performs actions in multiple panels, like going up or down,
 // check the state of model m and handle properly.
-func (m *model) mainKey(msg string) tea.Cmd {
+// TODO: This function has grown too big. It needs to be fixed, via major
+// updates and fixes in key handling code
+func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen // See above
 	switch {
 	// If move up Key is pressed, check the current state and executes
 	case slices.Contains(common.Hotkeys.ListUp, msg):
@@ -21,7 +25,7 @@ func (m *model) mainKey(msg string) tea.Cmd {
 		case sidebarFocus:
 			m.sidebarModel.ListUp(m.mainPanelHeight)
 		case processBarFocus:
-			m.processBarModel.listUp(m.footerHeight)
+			m.processBarModel.ListUp(m.footerHeight)
 		case metadataFocus:
 			m.fileMetaData.ListUp()
 		case nonePanelFocus:
@@ -34,7 +38,7 @@ func (m *model) mainKey(msg string) tea.Cmd {
 		case sidebarFocus:
 			m.sidebarModel.ListDown(m.mainPanelHeight)
 		case processBarFocus:
-			m.processBarModel.listDown(m.footerHeight)
+			m.processBarModel.ListDown(m.footerHeight)
 		case metadataFocus:
 			m.fileMetaData.ListDown()
 		case nonePanelFocus:
@@ -77,9 +81,7 @@ func (m *model) mainKey(msg string) tea.Cmd {
 		m.focusOnMetadata()
 
 	case slices.Contains(common.Hotkeys.PasteItems, msg):
-		go func() {
-			m.pasteItem()
-		}()
+		return m.getPasteItemCmd()
 
 	case slices.Contains(common.Hotkeys.FilePanelItemCreate, msg):
 		m.panelCreateNewFile()
@@ -90,22 +92,20 @@ func (m *model) mainKey(msg string) tea.Cmd {
 		m.toggleDotFileController()
 
 	case slices.Contains(common.Hotkeys.ToggleFooter, msg):
-		m.toggleFooterController()
+		return m.toggleFooterController()
 
 	case slices.Contains(common.Hotkeys.ExtractFile, msg):
-		go func() {
-			m.extractFile()
-		}()
+		return m.getExtractFileCmd()
 
 	case slices.Contains(common.Hotkeys.CompressFile, msg):
-		go func() {
-			m.compressSelectedFiles()
-		}()
+		return m.getCompressSelectedFilesCmd()
 
 	case slices.Contains(common.Hotkeys.OpenCommandLine, msg):
 		m.promptModal.Open(true)
 	case slices.Contains(common.Hotkeys.OpenSPFPrompt, msg):
 		m.promptModal.Open(false)
+	case slices.Contains(common.Hotkeys.OpenZoxide, msg):
+		return m.zoxideModal.Open()
 
 	case slices.Contains(common.Hotkeys.OpenHelpMenu, msg):
 		m.openHelpMenu()
@@ -123,15 +123,15 @@ func (m *model) mainKey(msg string) tea.Cmd {
 		return m.openDirectoryWithEditor()
 
 	default:
-		m.normalAndBrowserModeKey(msg)
+		return m.normalAndBrowserModeKey(msg)
 	}
 
 	return nil
 }
 
-func (m *model) normalAndBrowserModeKey(msg string) {
+func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
 	// if not focus on the filepanel return
-	if m.fileModel.filePanels[m.filePanelFocusIndex].focusType != focus {
+	if !m.getFocusedFilePanel().isFocused {
 		if m.focusPanel == sidebarFocus && slices.Contains(common.Hotkeys.Confirm, msg) {
 			m.sidebarSelectDirectory()
 		}
@@ -141,10 +141,10 @@ func (m *model) normalAndBrowserModeKey(msg string) {
 		if m.focusPanel == sidebarFocus && slices.Contains(common.Hotkeys.SearchBar, msg) {
 			m.sidebarSearchBarFocus()
 		}
-		return
+		return nil
 	}
 	// Check if in the select mode and focusOn filepanel
-	if m.fileModel.filePanels[m.filePanelFocusIndex].panelMode == selectMode {
+	if m.getFocusedFilePanel().panelMode == selectMode {
 		switch {
 		case slices.Contains(common.Hotkeys.Confirm, msg):
 			m.fileModel.filePanels[m.filePanelFocusIndex].singleItemSelect()
@@ -153,9 +153,9 @@ func (m *model) normalAndBrowserModeKey(msg string) {
 		case slices.Contains(common.Hotkeys.FilePanelSelectModeItemsSelectDown, msg):
 			m.fileModel.filePanels[m.filePanelFocusIndex].itemSelectDown(m.mainPanelHeight)
 		case slices.Contains(common.Hotkeys.DeleteItems, msg):
-			go func() {
-				m.deleteItemWarn()
-			}()
+			return m.getDeleteTriggerCmd(false)
+		case slices.Contains(common.Hotkeys.PermanentlyDeleteItems, msg):
+			return m.getDeleteTriggerCmd(true)
 		case slices.Contains(common.Hotkeys.CopyItems, msg):
 			m.copyMultipleItem(false)
 		case slices.Contains(common.Hotkeys.CutItems, msg):
@@ -163,7 +163,7 @@ func (m *model) normalAndBrowserModeKey(msg string) {
 		case slices.Contains(common.Hotkeys.FilePanelSelectAllItem, msg):
 			m.selectAllItem()
 		}
-		return
+		return nil
 	}
 
 	switch {
@@ -172,9 +172,9 @@ func (m *model) normalAndBrowserModeKey(msg string) {
 	case slices.Contains(common.Hotkeys.ParentDirectory, msg):
 		m.parentDirectory()
 	case slices.Contains(common.Hotkeys.DeleteItems, msg):
-		go func() {
-			m.deleteItemWarn()
-		}()
+		return m.getDeleteTriggerCmd(false)
+	case slices.Contains(common.Hotkeys.PermanentlyDeleteItems, msg):
+		return m.getDeleteTriggerCmd(true)
 	case slices.Contains(common.Hotkeys.CopyItems, msg):
 		m.copySingleItem(false)
 	case slices.Contains(common.Hotkeys.CutItems, msg):
@@ -188,6 +188,7 @@ func (m *model) normalAndBrowserModeKey(msg string) {
 	case slices.Contains(common.Hotkeys.CopyPWD, msg):
 		m.copyPWD()
 	}
+	return nil
 }
 
 // Check the hotkey to cancel operation or create file
@@ -201,68 +202,52 @@ func (m *model) typingModalOpenKey(msg string) {
 	}
 }
 
-// TODO : There is a lot of duplication for these models, each one of them has to handle
-// ConfirmTyping and CancleTyping in a similar way. There is a scope of some good refactoring here.
-func (m *model) warnModalOpenKey(msg string) {
-	switch {
-	case slices.Contains(common.Hotkeys.CancelTyping, msg) || slices.Contains(common.Hotkeys.Quit, msg):
-		m.cancelWarnModal()
-		if m.warnModal.warnType == confirmRenameItem {
-			m.cancelRename()
-		}
-	case slices.Contains(common.Hotkeys.Confirm, msg):
-		m.warnModal.open = false
-		switch m.warnModal.warnType {
-		case confirmDeleteItem:
-			panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-			if m.fileModel.filePanels[m.filePanelFocusIndex].panelMode == selectMode {
-				if !hasTrash || isExternalDiskPath(panel.location) {
-					go func() {
-						m.completelyDeleteMultipleItems()
-						m.fileModel.filePanels[m.filePanelFocusIndex].selected = m.fileModel.filePanels[m.filePanelFocusIndex].selected[:0]
-					}()
-				} else {
-					go func() {
-						m.deleteMultipleItems()
-						m.fileModel.filePanels[m.filePanelFocusIndex].selected = m.fileModel.filePanels[m.filePanelFocusIndex].selected[:0]
-					}()
-				}
-			} else {
-				if !hasTrash || isExternalDiskPath(panel.location) {
-					go func() {
-						m.completelyDeleteSingleItem()
-					}()
-				} else {
-					go func() {
-						m.deleteSingleItem()
-					}()
-				}
-			}
-		case confirmRenameItem:
-			m.confirmRename()
-		}
+func (m *model) notifyModelOpenKey(msg string) tea.Cmd {
+	isCancel := slices.Contains(common.Hotkeys.CancelTyping, msg) || slices.Contains(common.Hotkeys.Quit, msg)
+	isConfirm := slices.Contains(common.Hotkeys.Confirm, msg)
+
+	if !isCancel && !isConfirm {
+		slog.Warn("Invalid keypress in notifyModel", "msg", msg)
+		return nil
 	}
+	m.notifyModel.Close()
+	action := m.notifyModel.GetConfirmAction()
+	if isCancel {
+		return m.handleNotifyModelCancel(action)
+	}
+	return m.handleNotifyModelConfirm(action)
 }
 
-func (m *model) notifyModalOpenKey(msg string) {
-	//nolint:gocritic // We use switch here because other key logic is also using switch, so it's more consistent.
-	switch {
-	case slices.Contains(common.Hotkeys.Confirm, msg):
-		m.notifyModal.open = false
-	}
-}
-
-// Handle key input to confirm or cancel and close quiting warn in SPF
-func (m *model) confirmToQuitSuperfile(msg string) bool {
-	switch {
-	case slices.Contains(common.Hotkeys.CancelTyping, msg) || slices.Contains(common.Hotkeys.Quit, msg):
+func (m *model) handleNotifyModelCancel(action notify.ConfirmActionType) tea.Cmd {
+	switch action {
+	case notify.RenameAction:
+		m.cancelRename()
+	case notify.QuitAction:
 		m.modelQuitState = notQuitting
-		return false
-	case slices.Contains(common.Hotkeys.Confirm, msg):
-		return true
+	case notify.DeleteAction, notify.NoAction, notify.PermanentDeleteAction:
+		// Do nothing
 	default:
-		return false
+		slog.Error("Unknown type of action", "action", action)
 	}
+	return nil
+}
+
+func (m *model) handleNotifyModelConfirm(action notify.ConfirmActionType) tea.Cmd {
+	switch action {
+	case notify.DeleteAction:
+		return m.getDeleteCmd(false)
+	case notify.PermanentDeleteAction:
+		return m.getDeleteCmd(true)
+	case notify.RenameAction:
+		m.confirmRename()
+	case notify.QuitAction:
+		m.modelQuitState = quitConfirmationReceived
+	case notify.NoAction:
+		// Ignore
+	default:
+		slog.Error("Unknown type of action", "action", action)
+	}
+	return nil
 }
 
 // Handles key inputs inside sort options menu
@@ -281,17 +266,18 @@ func (m *model) sortOptionsKey(msg string) {
 	}
 }
 
-func (m *model) renamingKey(msg string) {
+func (m *model) renamingKey(msg string) tea.Cmd {
 	switch {
 	case slices.Contains(common.Hotkeys.CancelTyping, msg):
 		m.cancelRename()
 	case slices.Contains(common.Hotkeys.ConfirmTyping, msg):
 		if m.IsRenamingConflicting() {
-			m.warnModalForRenaming()
-		} else {
-			m.confirmRename()
+			return m.warnModalForRenaming()
 		}
+		m.confirmRename()
 	}
+
+	return nil
 }
 
 func (m *model) sidebarRenamingKey(msg string) {
@@ -316,6 +302,19 @@ func (m *model) focusOnSearchbarKey(msg string) {
 // Check hotkey input in help menu. Possible actions are moving up, down
 // and quiting the menu
 func (m *model) helpMenuKey(msg string) {
+	if m.helpMenu.searchBar.Focused() {
+		switch {
+		case slices.Contains(common.Hotkeys.ConfirmTyping, msg), slices.Contains(common.Hotkeys.CancelTyping, msg):
+			m.helpMenu.searchBar.Blur()
+		default:
+			m.filterHelpMenu(m.helpMenu.searchBar.Value())
+		}
+	} else {
+		m.handleHelpMenuNavKeys(msg)
+	}
+}
+
+func (m *model) handleHelpMenuNavKeys(msg string) {
 	switch {
 	case slices.Contains(common.Hotkeys.ListUp, msg):
 		m.helpMenuListUp()
@@ -323,5 +322,7 @@ func (m *model) helpMenuKey(msg string) {
 		m.helpMenuListDown()
 	case slices.Contains(common.Hotkeys.Quit, msg):
 		m.quitHelpMenu()
+	case slices.Contains(common.Hotkeys.SearchBar, msg):
+		m.helpMenu.searchBar.Focus()
 	}
 }

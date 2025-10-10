@@ -4,10 +4,10 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/utils"
 )
@@ -19,8 +19,8 @@ func TestCompressSelectedFiles(t *testing.T) {
 	file1 := filepath.Join(curTestDir, "file1.txt")
 	file2 := filepath.Join(dir1, "file2.txt")
 
-	setupDirectories(t, curTestDir, dir1, dir2)
-	setupFiles(t, file1, file2)
+	utils.SetupDirectories(t, curTestDir, dir1, dir2)
+	utils.SetupFiles(t, file1, file2)
 
 	// Note this is to validate the end to end user interface, not to extensively validate
 	// that compress works as expected. For that, we have TestZipSources
@@ -36,14 +36,13 @@ func TestCompressSelectedFiles(t *testing.T) {
 	// Copied from CopyTest. TODO - work on it.
 
 	testdata := []struct {
-		name              string
-		startDir          string
-		cursor            int
-		selectMode        bool
-		selectedElem      []string
-		expectedZipName   string
-		cursorIndexForZip int
-		extractedDirName  string
+		name             string
+		startDir         string
+		cursor           int
+		selectMode       bool
+		selectedElem     []string
+		expectedZipName  string
+		extractedDirName string
 		// Relative to extractedDir
 		expectedFilesAfterExtract []string
 	}{
@@ -54,7 +53,6 @@ func TestCompressSelectedFiles(t *testing.T) {
 			selectMode:                false,
 			selectedElem:              nil,
 			expectedZipName:           "file1.zip",
-			cursorIndexForZip:         3,
 			extractedDirName:          "file1",
 			expectedFilesAfterExtract: []string{"file1.txt"},
 		},
@@ -65,7 +63,6 @@ func TestCompressSelectedFiles(t *testing.T) {
 			selectMode:                false,
 			selectedElem:              nil,
 			expectedZipName:           "dir1.zip",
-			cursorIndexForZip:         2,
 			extractedDirName:          "dir1(1)",
 			expectedFilesAfterExtract: []string{filepath.Join("dir1", "file2.txt")},
 		},
@@ -76,7 +73,6 @@ func TestCompressSelectedFiles(t *testing.T) {
 			selectMode:                true,
 			selectedElem:              []string{},
 			expectedZipName:           "file1.zip",
-			cursorIndexForZip:         3,
 			extractedDirName:          "file1",
 			expectedFilesAfterExtract: []string{"file1.txt"},
 		},
@@ -87,7 +83,6 @@ func TestCompressSelectedFiles(t *testing.T) {
 			selectMode:                true,
 			selectedElem:              []string{file1},
 			expectedZipName:           "file1.zip",
-			cursorIndexForZip:         3,
 			extractedDirName:          "file1",
 			expectedFilesAfterExtract: []string{"file1.txt"},
 		},
@@ -98,7 +93,6 @@ func TestCompressSelectedFiles(t *testing.T) {
 			selectMode:                true,
 			selectedElem:              []string{dir2, dir1, file1},
 			expectedZipName:           "dir2.zip",
-			cursorIndexForZip:         2,
 			extractedDirName:          "dir2(1)",
 			expectedFilesAfterExtract: []string{"dir2", filepath.Join("dir1", "file2.txt"), "file1.txt"},
 		},
@@ -107,6 +101,7 @@ func TestCompressSelectedFiles(t *testing.T) {
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
 			m := defaultTestModel(tt.startDir)
+			p := NewTestTeaProgWithEventLoop(t, m)
 			require.Greater(t, len(m.getFocusedFilePanel().element), tt.cursor)
 			// Update cursor
 			m.getFocusedFilePanel().cursor = tt.cursor
@@ -117,13 +112,13 @@ func TestCompressSelectedFiles(t *testing.T) {
 				m.getFocusedFilePanel().selected = tt.selectedElem
 			}
 
-			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.CompressFile[0]))
+			p.SendKey(common.Hotkeys.CompressFile[0])
 			zipFile := filepath.Join(tt.startDir, tt.expectedZipName)
 			// Actual compress may take time, since its an os operations
 			assert.Eventually(t, func() bool {
 				_, err := os.Lstat(zipFile)
 				return err == nil
-			}, time.Second, 10*time.Millisecond)
+			}, DefaultTestTimeout, DefaultTestTick)
 
 			// Assert zip file exists right after compression
 			require.FileExists(t, zipFile, "Expected zip file does not exist after compression")
@@ -131,26 +126,37 @@ func TestCompressSelectedFiles(t *testing.T) {
 			// No-op update to get the filepanel updated
 			// TODO - This should not be needed. Only operation finish SPF should refresh
 			// on its own
-			TeaUpdateWithErrCheck(t, &m, nil)
+			p.SendDirectly(nil)
 
-			require.Greater(t, len(m.getFocusedFilePanel().element), tt.cursorIndexForZip)
-			selectedItemLocation := m.getFocusedFilePanel().element[tt.cursorIndexForZip].location
-			// Debug output for panel element
-			t.Logf("Panel element at cursorIndexForZip: %s", selectedItemLocation)
-			assert.Equal(t, zipFile, selectedItemLocation,
-				"%s does not exists at index %d among %v", zipFile, tt.cursorIndexForZip,
-				m.getFocusedFilePanel().element)
+			setFilePanelSelectedItemByLocation(t, m.getFocusedFilePanel(), zipFile)
 
+			selectedItemLocation := m.getFocusedFilePanel().getSelectedItem().location
+			assert.Equal(t, zipFile, selectedItemLocation)
 			// Ensure we are extracting the zip file, not a directory
 			fileInfo, err := os.Stat(selectedItemLocation)
 			require.NoError(t, err, "Failed to stat panel location before extraction")
-			require.False(t, fileInfo.IsDir(), "Panel location for extraction is a directory, expected a zip file: %s", selectedItemLocation)
+			require.False(t, fileInfo.IsDir(),
+				"Panel location for extraction is a directory, expected a zip file: %s", selectedItemLocation)
 
-			m.getFocusedFilePanel().cursor = tt.cursorIndexForZip
-
-			TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.ExtractFile[0]))
+			p.SendKey(common.Hotkeys.ExtractFile[0])
 			// File extraction is supposedly async. So function's return doesn't means its done.
 			extractedDir := filepath.Join(tt.startDir, tt.extractedDirName)
+
+			// Setup cleanup to run even if test fails
+			t.Cleanup(func() {
+				cleanupWithRetry := func(path, label string) {
+					var lastErr error
+					ok := assert.Eventually(t, func() bool {
+						lastErr = os.RemoveAll(path)
+						return lastErr == nil
+					}, DefaultTestTimeout, DefaultTestTick)
+					if !ok {
+						t.Fatalf("Failed to remove %s %q: %v", label, path, lastErr)
+					}
+				}
+				cleanupWithRetry(extractedDir, "extracted directory")
+				cleanupWithRetry(zipFile, "zip file")
+			})
 			assert.Eventually(t, func() bool {
 				for _, f := range tt.expectedFilesAfterExtract {
 					_, err := os.Stat(filepath.Join(extractedDir, f))
@@ -159,17 +165,14 @@ func TestCompressSelectedFiles(t *testing.T) {
 					}
 				}
 				return true
-			}, time.Second, 10*time.Millisecond, "Extraction of files failed Required - [%s]+%v",
+			}, DefaultTestTimeout, DefaultTestTick, "Extraction of files failed Required - [%s]+%v",
 				extractedDir, tt.expectedFilesAfterExtract)
-
-			require.NoError(t, os.RemoveAll(extractedDir))
-			require.NoError(t, os.RemoveAll(zipFile))
 		})
 	}
 
 	t.Run("Compress on Empty panel", func(t *testing.T) {
-		m := defaultTestModel(dir2)
-		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.CompressFile[0]))
+		NewTestTeaProgWithEventLoop(t, defaultTestModel(dir2)).
+			SendKey(common.Hotkeys.CompressFile[0])
 		// Should not crash. Nothing should happen. If there is a crash, it will be caught
 		entries, err := os.ReadDir(dir2)
 		require.NoError(t, err)
@@ -186,8 +189,8 @@ func TestPasteItem(t *testing.T) {
 	file2 := filepath.Join(sourceDir, "file2.txt")
 	dirFile1 := filepath.Join(subDir, "dirfile1.txt")
 
-	setupDirectories(t, curTestDir, sourceDir, destDir, subDir)
-	setupFiles(t, file1, file2, dirFile1)
+	utils.SetupDirectories(t, curTestDir, sourceDir, destDir, subDir)
+	utils.SetupFiles(t, file1, file2, dirFile1)
 
 	testdata := []struct {
 		name                 string
@@ -250,7 +253,7 @@ func TestPasteItem(t *testing.T) {
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
 			m := setupModelAndPerformOperation(t, tt.startDir, tt.selectMode, tt.itemName, tt.selectedItems, tt.isCut)
-
+			p := NewTestTeaProgWithEventLoop(t, m)
 			// Navigate to target directory
 			navigateToTargetDir(t, m, tt.startDir, tt.targetDir)
 
@@ -258,7 +261,7 @@ func TestPasteItem(t *testing.T) {
 			originalPath := getOriginalPath(tt.selectMode, tt.itemName, tt.startDir)
 
 			// Perform paste operation
-			TeaUpdateWithErrCheck(t, m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+			p.SendKey(common.Hotkeys.PasteItems[0])
 
 			// Verify results based on whether paste should be prevented
 			if tt.shouldPreventPaste {
@@ -266,16 +269,21 @@ func TestPasteItem(t *testing.T) {
 			} else {
 				verifySuccessfulPasteResults(t, tt.targetDir, tt.expectedDestFiles, originalPath, tt.shouldOriginalExist)
 			}
+			// Checking separately, as this is something independent of tt.shouldPreventPaste
+			if tt.shouldClipboardClear {
+				assert.Empty(t, p.m.copyItems.items, "Clipboard should be cleared after successful cut-paste")
+			} else {
+				assert.NotEmpty(t, p.m.copyItems.items, "Clipboard should remain after copy-paste")
+			}
 		})
 	}
 
 	// Special test cases that don't fit the table-driven pattern
 	t.Run("Paste with Empty Clipboard", func(t *testing.T) {
 		emptyTestDir := filepath.Join(curTestDir, "empty_test")
-		setupDirectories(t, emptyTestDir)
-
+		utils.SetupDirectories(t, emptyTestDir)
 		m := defaultTestModel(emptyTestDir)
-		TeaUpdateWithErrCheck(t, &m, nil)
+		p := NewTestTeaProgWithEventLoop(t, m)
 
 		// Ensure clipboard is empty
 		m.copyItems.items = []string{}
@@ -285,29 +293,31 @@ func TestPasteItem(t *testing.T) {
 		require.NoError(t, err)
 
 		// Attempt to paste (should do nothing)
-		TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+		p.SendKey(common.Hotkeys.PasteItems[0])
 
 		// Should not crash and no new files should be created
 		entriesAfter, err := os.ReadDir(emptyTestDir)
 		require.NoError(t, err)
 
-		assert.Equal(t, len(entriesBefore), len(entriesAfter), "No new files should be created when pasting with empty clipboard")
+		assert.Len(t, entriesAfter, len(entriesBefore),
+			"No new files should be created when pasting with empty clipboard")
 	})
 
 	t.Run("Multiple Items Copy and Paste", func(t *testing.T) {
 		// Create fresh files for this test
 		multiFile1 := filepath.Join(sourceDir, "multi1.txt")
 		multiFile2 := filepath.Join(sourceDir, "multi2.txt")
-		setupFiles(t, multiFile1, multiFile2)
+		utils.SetupFiles(t, multiFile1, multiFile2)
 
 		selectedItems := []string{multiFile1, multiFile2}
 		m := setupModelAndPerformOperation(t, sourceDir, true, "", selectedItems, false)
+		p := NewTestTeaProgWithEventLoop(t, m)
 
 		// Navigate to destination
 		navigateToTargetDir(t, m, sourceDir, destDir)
 
 		// Paste items
-		TeaUpdateWithErrCheck(t, m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+		p.SendKey(common.Hotkeys.PasteItems[0])
 
 		// Verify both files were copied
 		expectedDestFiles := []string{"multi1.txt", "multi2.txt"}
@@ -318,15 +328,16 @@ func TestPasteItem(t *testing.T) {
 		// Create a separate subdirectory for this test to avoid conflicts with table-driven tests
 		testSubDir := filepath.Join(sourceDir, "testsubdir")
 		testDirFile := filepath.Join(testSubDir, "testdirfile.txt")
-		setupDirectories(t, testSubDir)
-		setupFiles(t, testDirFile)
+		utils.SetupDirectories(t, testSubDir)
+		utils.SetupFiles(t, testDirFile)
 
 		// Test the logic that prevents cutting a directory into its subdirectory
 		m := setupModelAndPerformOperation(t, sourceDir, false, "testsubdir", nil, true)
+		p := NewTestTeaProgWithEventLoop(t, m)
 
 		// Navigate into the subdirectory and try to paste there (should be prevented)
 		navigateToTargetDir(t, m, sourceDir, testSubDir)
-		TeaUpdateWithErrCheck(t, m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+		p.SendKey(common.Hotkeys.PasteItems[0])
 
 		// Directory should still exist in original location after prevention
 		assert.DirExists(t, testSubDir, "Directory should still exist after failed paste into subdirectory")
@@ -335,19 +346,19 @@ func TestPasteItem(t *testing.T) {
 	t.Run("Duplicate File Handling", func(t *testing.T) {
 		// Create a file to copy
 		dupFile := filepath.Join(sourceDir, "duplicate.txt")
-		setupFiles(t, dupFile)
+		utils.SetupFiles(t, dupFile)
 
 		m := setupModelAndPerformOperation(t, sourceDir, false, "duplicate.txt", nil, false)
-
+		p := NewTestTeaProgWithEventLoop(t, m)
 		// Navigate to destination and paste
 		navigateToTargetDir(t, m, sourceDir, destDir)
-		TeaUpdateWithErrCheck(t, m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+		p.SendKey(common.Hotkeys.PasteItems[0])
 
 		// Verify first copy
 		verifyDestinationFiles(t, destDir, []string{"duplicate.txt"})
 
 		// Paste again to test duplicate handling
-		TeaUpdateWithErrCheck(t, m, utils.TeaRuneKeyMsg(common.Hotkeys.PasteItems[0]))
+		p.SendKey(common.Hotkeys.PasteItems[0])
 
 		// Verify duplicate file with different name
 		verifyDestinationFiles(t, destDir, []string{"duplicate(1).txt"})
@@ -357,19 +368,20 @@ func TestPasteItem(t *testing.T) {
 // ------  Very specific utilities that are required for this test case file only
 
 // Helper function to setup model and perform copy/cut operation
-func setupModelAndPerformOperation(t *testing.T, startDir string, useSelectMode bool, itemName string, selectedItems []string, isCut bool) *model {
+func setupModelAndPerformOperation(t *testing.T, startDir string, useSelectMode bool,
+	itemName string, selectedItems []string, isCut bool) *model {
 	t.Helper()
 	m := defaultTestModel(startDir)
-	TeaUpdateWithErrCheck(t, &m, nil)
+	TeaUpdate(m, nil)
 
-	setupPanelModeAndSelection(t, &m, useSelectMode, itemName, selectedItems)
-	performCopyOrCutOperation(t, &m, isCut)
+	setupPanelModeAndSelection(t, m, useSelectMode, itemName, selectedItems)
+	performCopyOrCutOperation(t, m, isCut)
 
 	selectedItemsCount := len(selectedItems)
 	if !useSelectMode {
 		selectedItemsCount = 1
 	}
-	verifyClipboardState(t, &m, isCut, useSelectMode, selectedItemsCount)
+	verifyClipboardState(t, m, isCut, useSelectMode, selectedItemsCount)
 
-	return &m
+	return m
 }

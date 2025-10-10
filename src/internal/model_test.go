@@ -9,8 +9,10 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/utils"
 )
 
@@ -49,7 +51,7 @@ func TestMain(m *testing.M) {
 	// Create testDir
 	testDir = filepath.Join(os.TempDir(), "spf_testdir")
 	cleanupTestDir()
-	if err := os.Mkdir(testDir, 0755); err != nil {
+	if err := os.Mkdir(testDir, 0o755); err != nil {
 		fmt.Printf("error while creating test directory, err : %v", err)
 		os.Exit(1)
 	}
@@ -72,8 +74,8 @@ func TestBasic(t *testing.T) {
 	file1 := filepath.Join(dir1, "file1.txt")
 
 	t.Run("Basic Checks", func(t *testing.T) {
-		setupDirectories(t, curTestDir, dir1, dir2)
-		setupFiles(t, file1)
+		utils.SetupDirectories(t, curTestDir, dir1, dir2)
+		utils.SetupFiles(t, file1)
 		t.Cleanup(func() {
 			os.RemoveAll(curTestDir)
 		})
@@ -99,42 +101,64 @@ func TestQuit(t *testing.T) {
 	// 2 - Normal quit with running process causing a warn modal
 	//     2a - Cancelling quit
 	//     2b - Proceeding with the quit
+	// 3 - Cd on quit test that LastDir is written on
 
 	t.Run("Normal Quit", func(t *testing.T) {
 		m := defaultTestModel(testDir)
 		assert.Equal(t, notQuitting, m.modelQuitState)
-		cmd := TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.Quit[0]))
+		cmd := TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.Quit[0]))
 		assert.Equal(t, quitDone, m.modelQuitState)
 		assert.True(t, IsTeaQuit(cmd))
 	})
 	t.Run("Quit with running process", func(t *testing.T) {
 		m := defaultTestModel(testDir)
-		m.processBarModel.process["1"] = process{
-			state: inOperation,
-			done:  0,
-			total: 100,
-		}
+		m.processBarModel.AddOrUpdateProcess(processbar.Process{
+			State: processbar.InOperation,
+			Done:  0,
+			Total: 100,
+			ID:    "1",
+		})
 
 		assert.Equal(t, notQuitting, m.modelQuitState)
-		cmd := TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.Quit[0]))
-		assert.Equal(t, confirmToQuit, m.modelQuitState)
+		cmd := TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.Quit[0]))
+		assert.Equal(t, quitConfirmationInitiated, m.modelQuitState)
 		assert.False(t, IsTeaQuit(cmd))
 
 		// Now we would be asked for confirmation.
 		// Cancel the quit
-		cmd = TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.CancelTyping[0]))
+		cmd = TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.CancelTyping[0]))
 		assert.Equal(t, notQuitting, m.modelQuitState)
 		assert.False(t, IsTeaQuit(cmd))
 
 		// Again trigger quit
-		cmd = TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.Quit[0]))
-		assert.Equal(t, confirmToQuit, m.modelQuitState)
+		cmd = TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.Quit[0]))
+		assert.Equal(t, quitConfirmationInitiated, m.modelQuitState)
 		assert.False(t, IsTeaQuit(cmd))
 
 		// Confirm this time
-		cmd = TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(common.Hotkeys.Confirm[0]))
+		cmd = TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.Confirm[0]))
 		assert.Equal(t, quitDone, m.modelQuitState)
 		assert.True(t, IsTeaQuit(cmd))
+	})
+
+	t.Run("Cd on quit test that LastDir is written on", func(t *testing.T) {
+		lastDirFile := filepath.Join(variable.SuperFileStateDir, "lastdir")
+		require.NoError(t, os.MkdirAll(filepath.Dir(lastDirFile), 0o755))
+		m := defaultTestModel(testDir)
+
+		assert.Equal(t, notQuitting, m.modelQuitState)
+
+		cmd := TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.CdQuit[0]))
+
+		assert.Equal(t, quitDone, m.modelQuitState)
+		assert.True(t, IsTeaQuit(cmd))
+
+		data, err := os.ReadFile(lastDirFile)
+		require.NoError(t, err)
+		assert.Equal(t, "cd '"+testDir+"'", string(data), "LastDir file should contain the tempDir path")
+
+		err = os.Remove(lastDirFile)
+		require.NoError(t, err)
 	})
 }
 
@@ -149,8 +173,8 @@ func TestChooserFile(t *testing.T) {
 	dir2 := filepath.Join(curTestDir, "dir2")
 	file1 := filepath.Join(dir1, "file1.txt")
 	testChooserFile := filepath.Join(dir2, "chooser_file.txt")
-	setupDirectories(t, curTestDir, dir1, dir2)
-	setupFiles(t, file1)
+	utils.SetupDirectories(t, curTestDir, dir1, dir2)
+	utils.SetupFiles(t, file1)
 
 	testdata := []struct {
 		name            string
@@ -201,11 +225,11 @@ func TestChooserFile(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			m := defaultTestModel(dir1)
 			if tt.expectedQuit {
-				err := os.WriteFile(tt.chooserFile, []byte{}, 0644)
+				err := os.WriteFile(tt.chooserFile, []byte{}, 0o644)
 				require.NoError(t, err)
 			}
 			variable.SetChooserFile(tt.chooserFile)
-			cmd := TeaUpdateWithErrCheck(t, &m, utils.TeaRuneKeyMsg(tt.hotkey))
+			cmd := TeaUpdate(m, utils.TeaRuneKeyMsg(tt.hotkey))
 
 			if tt.expectedQuit {
 				assert.Equal(t, quitDone, m.modelQuitState)

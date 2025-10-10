@@ -36,6 +36,7 @@ var (
 	FilePanelTopDirectoryIconStyle lipgloss.Style
 	FilePanelTopPathStyle          lipgloss.Style
 	FilePanelItemSelectedStyle     lipgloss.Style
+	FilePanelSelectBoxStyle        lipgloss.Style
 )
 
 var (
@@ -113,7 +114,7 @@ var (
 	promptFailureColor lipgloss.Color
 )
 
-func LoadThemeConfig() {
+func LoadThemeConfig() { //nolint: funlen // Variable initialization
 	BottomMiddleBorderSplit = Config.BorderMiddleLeft + Config.BorderBottom + Config.BorderMiddleRight
 
 	FilePanelBorderColor = lipgloss.Color(Theme.FilePanelBorder)
@@ -186,14 +187,18 @@ func LoadThemeConfig() {
 	ModalCursorStyle = lipgloss.NewStyle().Foreground(cursorColor).Background(ModalBGColor)
 
 	// File Panel Special Style
-	FilePanelTopDirectoryIconStyle = lipgloss.NewStyle().Foreground(filePanelTopDirectoryIconColor).Background(FilePanelBGColor)
+	FilePanelTopDirectoryIconStyle = lipgloss.NewStyle().Foreground(filePanelTopDirectoryIconColor).
+		Background(FilePanelBGColor)
 	FilePanelTopPathStyle = lipgloss.NewStyle().Foreground(filePanelTopPathColor).Background(FilePanelBGColor)
-	FilePanelItemSelectedStyle = lipgloss.NewStyle().Foreground(filePanelItemSelectedFGColor).Background(filePanelItemSelectedBGColor)
+	FilePanelItemSelectedStyle = lipgloss.NewStyle().Foreground(filePanelItemSelectedFGColor).
+		Background(filePanelItemSelectedBGColor)
+	FilePanelSelectBoxStyle = lipgloss.NewStyle().Background(FilePanelBGColor)
 
 	// Sidebar Special Style
 	SidebarDividerStyle = lipgloss.NewStyle().Foreground(sidebarDividerColor).Background(SidebarBGColor)
 	SidebarTitleStyle = lipgloss.NewStyle().Foreground(sidebarTitleColor).Background(SidebarBGColor)
-	SidebarSelectedStyle = lipgloss.NewStyle().Foreground(sidebarItemSelectedFGColor).Background(sidebarItemSelectedBGColor)
+	SidebarSelectedStyle = lipgloss.NewStyle().Foreground(sidebarItemSelectedFGColor).
+		Background(sidebarItemSelectedBGColor)
 
 	// Footer Special Style
 	ProcessErrorStyle = lipgloss.NewStyle().Foreground(errorColor).Background(FooterBGColor)

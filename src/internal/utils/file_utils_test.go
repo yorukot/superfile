@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -130,7 +131,8 @@ func TestLoadTomlFile(t *testing.T) {
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
 			var tomlVal TestTOMLType
-			err = LoadTomlFile(filepath.Join(testdataDir, tt.configName), defaultData, &tomlVal, tt.fixFlag)
+			err = LoadTomlFile(filepath.Join(testdataDir, tt.configName), defaultData, &tomlVal,
+				tt.fixFlag, false)
 			if tt.noError {
 				require.NoError(t, err)
 			} else {
@@ -249,7 +251,8 @@ func TestLoadTomlFileIgnorer(t *testing.T) {
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
 			var tomlVal TestTOMLMissingIgnorerType
-			err := LoadTomlFile(filepath.Join(testdataDir, tt.configName), defaultData, &tomlVal, tt.fixFlag)
+			err := LoadTomlFile(filepath.Join(testdataDir, tt.configName), defaultData, &tomlVal,
+				tt.fixFlag, false)
 			if tt.noError {
 				require.NoError(t, err)
 			} else {
@@ -294,7 +297,7 @@ func TestLoadTomlFileIgnorer(t *testing.T) {
 			err = os.WriteFile(orgFile, testContent, 0644)
 			require.NoError(t, err, "Error writing config file to temp directory")
 
-			err = LoadTomlFile(orgFile, defaultData, &tomlVal, true)
+			err = LoadTomlFile(orgFile, defaultData, &tomlVal, true, false)
 			var tomlErr *TomlLoadError
 			require.ErrorAs(t, err, &tomlErr)
 
@@ -314,7 +317,7 @@ func TestLoadTomlFileIgnorer(t *testing.T) {
 			assert.Equal(t, testContent, backupContent)
 
 			// Validate that if you Load Original File again, it loads without any errors
-			err = LoadTomlFile(orgFile, defaultData, &tomlVal, true)
+			err = LoadTomlFile(orgFile, defaultData, &tomlVal, true, false)
 			require.NoError(t, err)
 
 			err = os.WriteFile(orgFile, backupContent, 0644)
@@ -323,4 +326,71 @@ func TestLoadTomlFileIgnorer(t *testing.T) {
 		actualTest("missing_str2.toml", expectedVal1)
 		actualTest("missing_str_ignore2.toml", expectedVal2)
 	})
+}
+
+func TestReadFileContent(t *testing.T) {
+	testDir := t.TempDir()
+	curTestDir := filepath.Join(testDir, "TestReadFileContent")
+	SetupDirectories(t, curTestDir)
+
+	testdata := []struct {
+		name          string
+		content       []byte
+		maxLineLength int
+		previewLine   int
+		expected      string
+	}{
+		{
+			name:          "regular UTF-8 file",
+			content:       []byte("line1\nline2\nline3"),
+			maxLineLength: 100,
+			previewLine:   5,
+			expected:      "line1\nline2\nline3\n",
+		},
+		{
+			name:          "UTF-8 BOM file",
+			content:       []byte("\xEF\xBB\xBFline1\nline2\nline3"),
+			maxLineLength: 100,
+			previewLine:   5,
+			expected:      "line1\nline2\nline3\n",
+		},
+		{
+			name:          "limited preview lines",
+			content:       []byte("line1\nline2\nline3\nline4"),
+			maxLineLength: 100,
+			previewLine:   2,
+			expected:      "line1\nline2\n",
+		},
+	}
+
+	for i, tt := range testdata {
+		t.Run(tt.name, func(t *testing.T) {
+			testFile := filepath.Join(curTestDir, fmt.Sprintf("test_file_%d.txt", i))
+			SetupFilesWithData(t, tt.content, testFile)
+
+			result, err := ReadFileContent(testFile, tt.maxLineLength, tt.previewLine)
+			require.NoError(t, err)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestReadFileContentBOMHandling(t *testing.T) {
+	testDir := t.TempDir()
+	curTestDir := filepath.Join(testDir, "TestBOMHandling")
+	SetupDirectories(t, curTestDir)
+
+	// Write a file prefixed with UTF-8 BOM
+	bomContent := []byte("\xEF\xBB\xBFHello, World!\nSecond line")
+	bomFile := filepath.Join(curTestDir, "bom_file.txt")
+	SetupFilesWithData(t, bomContent, bomFile)
+
+	result, err := ReadFileContent(bomFile, 100, 10)
+	require.NoError(t, err)
+
+	// Verify BOM is removed and content is correct
+	assert.True(t, strings.HasPrefix(result, "Hello, World!"),
+		"Content should start with expected text, got: %q", result)
+	assert.NotContains(t, result, "\uFEFF",
+		"BOM character should be removed from output: %q", result)
 }

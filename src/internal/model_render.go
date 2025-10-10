@@ -1,40 +1,27 @@
 package internal
 
 import (
-	"bufio"
-	"context"
-	"errors"
 	"fmt"
-	"image"
-	"io/fs"
 	"log/slog"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"slices"
-	"sort"
 	"strconv"
-	"strings"
-	"time"
-
-	"golang.org/x/text/encoding/unicode"
-	"golang.org/x/text/transform"
 
 	"github.com/yorukot/superfile/src/internal/ui"
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
+	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
 
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/utils"
 
-	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/x/exp/term/ansi"
-	"github.com/yorukot/ansichroma"
+
 	"github.com/yorukot/superfile/src/config/icon"
 )
 
 func (m *model) sidebarRender() string {
-	return m.sidebarModel.Render(m.mainPanelHeight, m.focusPanel == sidebarFocus, m.fileModel.filePanels[m.filePanelFocusIndex].location)
+	return m.sidebarModel.Render(m.mainPanelHeight, m.focusPanel == sidebarFocus,
+		m.fileModel.filePanels[m.filePanelFocusIndex].location)
 }
 
 // This also modifies the m.fileModel.filePanels, which it should not
@@ -55,17 +42,21 @@ func (m *model) filePanelRender() string {
 		// TODO : Move this to a utility function and clarify the calculation via comments
 		// Maybe even write unit tests
 		var filePanelWidth int
-		if (m.fullWidth-common.Config.SidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels) != 0 && i == len(m.fileModel.filePanels)-1 {
-			if m.fileModel.filePreview.open {
+		if (m.fullWidth-common.Config.SidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(
+			m.fileModel.filePanels,
+		) != 0 &&
+			i == len(m.fileModel.filePanels)-1 {
+			if m.fileModel.filePreview.IsOpen() {
 				filePanelWidth = m.fileModel.width
 			} else {
-				filePanelWidth = (m.fileModel.width + (m.fullWidth-common.Config.SidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels))
+				filePanelWidth = (m.fileModel.width + (m.fullWidth-common.Config.SidebarWidth-
+					(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels))
 			}
 		} else {
 			filePanelWidth = m.fileModel.width
 		}
 
-		f[i] = filePanel.Render(m.mainPanelHeight, filePanelWidth, filePanel.focusType != noneFocus)
+		f[i] = filePanel.Render(m.mainPanelHeight, filePanelWidth, filePanel.isFocused)
 	}
 	return lipgloss.JoinHorizontal(lipgloss.Top, f...)
 }
@@ -145,24 +136,28 @@ func (panel *filePanel) renderFileEntries(r *rendering.Renderer, mainPanelHeight
 		_, err := os.ReadDir(panel.element[i].location)
 		dirExists := err == nil || panel.element[i].directory
 
+		selectBox := panel.renderSelectBox(isSelected)
+
+		// Calculate the actual prefix width for proper alignment
+		prefixWidth := lipgloss.Width(cursor+" ") + lipgloss.Width(selectBox)
+
 		renderedName := common.PrettierName(
 			panel.element[i].name,
-			filePanelWidth-5,
+			filePanelWidth-prefixWidth,
 			dirExists,
 			isSelected,
 			common.FilePanelBGColor,
 		)
 
-		r.AddLines(common.FilePanelCursorStyle.Render(cursor+" ") + renderedName)
+		r.AddLines(common.FilePanelCursorStyle.Render(cursor+" ") + selectBox + renderedName)
 	}
 }
 
-// TODO : Make these strings : "Date Modified", "Date", "Browser", "Select" a constant
 func (panel *filePanel) getSortInfo() (string, string) {
 	opts := panel.sortOptions.data
 	selected := opts.options[opts.selected]
 	label := selected
-	if selected == "Date Modified" {
+	if selected == string(sortingDateModified) {
 		label = "Date"
 	}
 
@@ -193,107 +188,25 @@ func (panel *filePanel) getCursorString() string {
 	return fmt.Sprintf("%d/%d", cursor, len(panel.element))
 }
 
+func (panel *filePanel) renderSelectBox(isSelected bool) string {
+	if !common.Config.ShowSelectIcons || !common.Config.Nerdfont || panel.panelMode != selectMode {
+		return ""
+	}
+
+	if panel.isFocused {
+		if isSelected {
+			return common.CheckboxCheckedFocused
+		}
+		return common.CheckboxEmptyFocused
+	}
+	if isSelected {
+		return common.CheckboxChecked
+	}
+	return common.CheckboxEmpty
+}
+
 func (m *model) processBarRender() string {
-	if !m.processBarModel.isValid(m.footerHeight) {
-		slog.Error("processBar in invalid state", "render", m.processBarModel.render,
-			"cursor", m.processBarModel.cursor, "footerHeight", m.footerHeight)
-	}
-
-	r := ui.ProcessBarRenderer(m.footerHeight+2, utils.FooterWidth(m.fullWidth)+2, m.focusPanel == processBarFocus)
-
-	// cursor's value itself cannot be used as its zero indexed
-	cursorNumber := 0
-	// TODO : Instead of directly accessing slice, there should be a method .IsEmpty() , or .CntProcess()
-	if len(m.processBarModel.processList) != 0 {
-		cursorNumber = m.processBarModel.cursor + 1
-	}
-
-	r.SetBorderInfoItems(fmt.Sprintf("%d/%d", cursorNumber, len(m.processBarModel.processList)))
-	if len(m.processBarModel.processList) == 0 {
-		r.AddLines("", " "+common.ProcessBarNoneText)
-		return r.Render()
-	}
-
-	// save process in the array and sort the process by finished or not,
-	// completion percetage, or finish time
-	// TODO : This is very inefficient and can be improved.
-	// The whole design needs to be changed so that we dont need to recreate the slice
-	// and sort on each render. Idea : Maintain two slices - completed, ongoing
-	// Processes should be added / removed to the slice on correct time, and we dont
-	// need to redo slice formation and sorting on each render.
-	var processes []process
-	for _, p := range m.processBarModel.process {
-		processes = append(processes, p)
-	}
-	// sort by the process
-	sort.Slice(processes, func(i, j int) bool {
-		doneI := (processes[i].state == successful)
-		doneJ := (processes[j].state == successful)
-
-		// sort by done or not
-		if doneI != doneJ {
-			return !doneI
-		}
-
-		// if both not done
-		if !doneI {
-			completionI := float64(processes[i].done) / float64(processes[i].total)
-			completionJ := float64(processes[j].done) / float64(processes[j].total)
-			return completionI < completionJ // Those who finish first will be ranked later.
-		}
-
-		// if both done sort by the doneTime
-		return processes[j].doneTime.Before(processes[i].doneTime)
-	})
-
-	renderedHeight := 0
-
-	for i := m.processBarModel.render; i < len(processes); i++ {
-		// We allow rendering of a process if we have at least 2 lines left
-		if m.footerHeight < renderedHeight+2 {
-			break
-		}
-		renderedHeight += 3
-
-		curProcess := processes[i]
-		curProcess.progress.Width = utils.FooterWidth(m.fullWidth) - 3
-
-		// TODO : get them via a separate function.
-		var symbol string
-		var cursor string
-		if i == m.processBarModel.cursor {
-			// TODO : Prerender it.
-			cursor = common.FooterCursorStyle.Render("┃ ")
-		} else {
-			cursor = common.FooterCursorStyle.Render("  ")
-		}
-		// TODO : Prerender
-		switch curProcess.state {
-		case failure:
-			symbol = common.ProcessErrorStyle.Render(icon.Warn)
-		case successful:
-			symbol = common.ProcessSuccessfulStyle.Render(icon.Done)
-		case inOperation:
-			symbol = common.ProcessInOperationStyle.Render(icon.InOperation)
-		case cancel:
-			symbol = common.ProcessCancelStyle.Render(icon.Error)
-		}
-		slog.Debug("process", "name", curProcess.name, "done", curProcess.done, "total", curProcess.total, "state", curProcess.state, "symbol", symbol)
-		r.AddLines(cursor + common.FooterStyle.Render(common.TruncateText(curProcess.name, utils.FooterWidth(m.fullWidth)-7, "...")+" ") + symbol)
-
-		// calculate progress percentage
-		// if the total is 0 mean the process only have directory
-		// so we can set the progress to 100%
-		if curProcess.total != 0 {
-			progressPercentage := float64(curProcess.done) / float64(curProcess.total)
-			slog.Debug("progress", "percentage", progressPercentage)
-			r.AddLines(cursor+curProcess.progress.ViewAs(progressPercentage), "")
-		} else {
-			r.AddLines(cursor + curProcess.progress.ViewAs(1))
-		}
-	}
-
-	return r.Render()
+	return m.processBarModel.Render(m.focusPanel == processBarFocus)
 }
 
 func (m *model) clipboardRender() string {
@@ -319,8 +232,10 @@ func (m *model) clipboardRender() string {
 					slog.Error("Clipboard render function get item state ", "error", err)
 				}
 				if !os.IsNotExist(err) {
-					// TODO : There is an inconsistency in parameter that is being passed, and its name in ClipboardPrettierName function
-					r.AddLines(common.ClipboardPrettierName(m.copyItems.items[i], utils.FooterWidth(m.fullWidth)-3, fileInfo.IsDir(), false))
+					// TODO : There is an inconsistency in parameter that is being passed,
+					// and its name in ClipboardPrettierName function
+					r.AddLines(common.ClipboardPrettierName(m.copyItems.items[i],
+						utils.FooterWidth(m.fullWidth)-3, fileInfo.IsDir(), false))
 				}
 			}
 		}
@@ -343,12 +258,12 @@ func (m *model) terminalSizeWarnRender() string {
 	fullWidthString = common.TerminalCorrectSize.Render(fullWidthString)
 
 	heightString := common.MainStyle.Render(" Height = ")
-	return common.FullScreenStyle(m.fullHeight, m.fullWidth).Render(`Terminal size too small:` + "\n" +
-		"Width = " + fullWidthString +
-		heightString + fullHeightString + "\n\n" +
-		"Needed for current config:" + "\n" +
-		"Width = " + common.TerminalCorrectSize.Render(minimumWidthString) +
-		heightString + common.TerminalCorrectSize.Render(minimumHeightString))
+	return common.FullScreenStyle(m.fullHeight, m.fullWidth).Render(`Terminal size too small:`+"\n"+
+		"Width = "+fullWidthString+
+		heightString+fullHeightString+"\n\n"+
+		"Needed for current config:"+"\n"+
+		"Width = "+common.TerminalCorrectSize.Render(minimumWidthString)+
+		heightString+common.TerminalCorrectSize.Render(minimumHeightString)) + filepreview.ClearKittyImages()
 }
 
 func (m *model) terminalSizeWarnAfterFirstRender() string {
@@ -368,19 +283,21 @@ func (m *model) terminalSizeWarnAfterFirstRender() string {
 	fullWidthString = common.TerminalCorrectSize.Render(fullWidthString)
 
 	heightString := common.MainStyle.Render(" Height = ")
-	return common.FullScreenStyle(m.fullHeight, m.fullWidth).Render(`You change your terminal size too small:` + "\n" +
-		"Width = " + fullWidthString +
-		heightString + fullHeightString + "\n\n" +
-		"Needed for current config:" + "\n" +
-		"Width = " + common.TerminalCorrectSize.Render(minimumWidthString) +
-		heightString + common.TerminalCorrectSize.Render(minimumHeightString))
+	return common.FullScreenStyle(m.fullHeight, m.fullWidth).Render(`You change your terminal size too small:`+"\n"+
+		"Width = "+fullWidthString+
+		heightString+fullHeightString+"\n\n"+
+		"Needed for current config:"+"\n"+
+		"Width = "+common.TerminalCorrectSize.Render(minimumWidthString)+
+		heightString+common.TerminalCorrectSize.Render(minimumHeightString)) + filepreview.ClearKittyImages()
 }
 
 func (m *model) typineModalRender() string {
 	previewPath := filepath.Join(m.typingModal.location, m.typingModal.textInput.Value())
 
 	fileLocation := common.FilePanelTopDirectoryIconStyle.Render(" "+icon.Directory+icon.Space) +
-		common.FilePanelTopPathStyle.Render(common.TruncateTextBeginning(previewPath, common.ModalWidth-4, "...")) + "\n"
+		common.FilePanelTopPathStyle.Render(
+			common.TruncateTextBeginning(previewPath, common.ModalWidth-4, "..."),
+		) + "\n"
 
 	confirm := common.ModalConfirm.Render(" (" + common.Hotkeys.ConfirmTyping[0] + ") Create ")
 	cancel := common.ModalCancel.Render(" (" + common.Hotkeys.CancelTyping[0] + ") Cancel ")
@@ -394,52 +311,60 @@ func (m *model) typineModalRender() string {
 		err = "\n\n" + common.ModalErrorStyle.Render(m.typingModal.errorMesssage)
 	}
 	// TODO : Move this all to rendering package to avoid specifying newlines manually
-	return common.ModalBorderStyle(common.ModalHeight, common.ModalWidth).Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip + err)
+	return common.ModalBorderStyle(common.ModalHeight, common.ModalWidth).
+		Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip + err)
 }
 
 func (m *model) introduceModalRender() string {
-	title := common.SidebarTitleStyle.Render(" Thanks for using superfile!!") + common.ModalStyle.Render("\n You can read the following information before starting to use it!")
-	vimUserWarn := common.ProcessErrorStyle.Render("  ** Very importantly ** If you are a Vim/Nvim user, go to:\n  https://superfile.netlify.app/configure/custom-hotkeys/ to change your hotkey settings!")
-	subOne := common.SidebarTitleStyle.Render("  (1)") + common.ModalStyle.Render(" If this is your first time, make sure you read:\n      https://superfile.netlify.app/getting-started/tutorial/")
-	subTwo := common.SidebarTitleStyle.Render("  (2)") + common.ModalStyle.Render(" If you forget the relevant keys during use,\n      you can press \"?\" (shift+/) at any time to query the keys!")
-	subThree := common.SidebarTitleStyle.Render("  (3)") + common.ModalStyle.Render(" For more customization you can refer to:\n      https://superfile.netlify.app/")
-	subFour := common.SidebarTitleStyle.Render("  (4)") + common.ModalStyle.Render(" Thank you again for using superfile.\n      If you have any questions, please feel free to ask at:\n      https://github.com/yorukot/superfile\n      Of course, you can always open a new issue to share your idea \n      or report a bug!")
-	return common.FirstUseModal(m.helpMenu.height, m.helpMenu.width).Render(title + "\n\n" + vimUserWarn + "\n\n" + subOne + "\n\n" + subTwo + "\n\n" + subThree + "\n\n" + subFour + "\n\n")
-}
-
-func (m *model) warnModalRender() string {
-	title := m.warnModal.title
-	content := m.warnModal.content
-	confirm := common.ModalConfirm.Render(" (" + common.Hotkeys.Confirm[0] + ") Confirm ")
-	cancel := common.ModalCancel.Render(" (" + common.Hotkeys.Quit[0] + ") Cancel ")
-	tip := confirm + lipgloss.NewStyle().Background(common.ModalBGColor).Render("           ") + cancel
-	return common.ModalBorderStyle(common.ModalHeight, common.ModalWidth).Render(title + "\n\n" + content + "\n\n" + tip)
-}
-
-func (m *model) notifyModalRender() string {
-	title := m.notifyModal.title
-	content := m.notifyModal.content
-	okay := common.ModalConfirm.Render(" (" + common.Hotkeys.Confirm[0] + ") Okay ")
-	okay = common.MainStyle.AlignHorizontal(lipgloss.Center).AlignVertical(lipgloss.Center).Render(okay)
-	return common.ModalBorderStyle(common.ModalHeight, common.ModalWidth).Render(title + "\n\n" + content + "\n\n" + okay)
+	title := common.SidebarTitleStyle.Render(" Thanks for using superfile!!") +
+		common.ModalStyle.Render("\n You can read the following information before starting to use it!")
+	vimUserWarn := common.ProcessErrorStyle.Render("  ** Very importantly ** If you are a Vim/Nvim user, go to:\n" +
+		"  https://superfile.dev/configure/custom-hotkeys/ to change your hotkey settings!")
+	subOne := common.SidebarTitleStyle.Render("  (1)") +
+		common.ModalStyle.Render(" If this is your first time, make sure you read:\n"+
+			"      https://superfile.dev/getting-started/tutorial/")
+	subTwo := common.SidebarTitleStyle.Render("  (2)") +
+		common.ModalStyle.Render(" If you forget the relevant keys during use,\n"+
+			"      you can press \"?\" (shift+/) at any time to query the keys!")
+	subThree := common.SidebarTitleStyle.Render("  (3)") +
+		common.ModalStyle.Render(" For more customization you can refer to:\n"+
+			"      https://superfile.dev/")
+	subFour := common.SidebarTitleStyle.Render("  (4)") +
+		common.ModalStyle.Render(" Thank you again for using superfile.\n"+
+			"      If you have any questions, please feel free to ask at:\n"+
+			"      https://github.com/yorukot/superfile\n"+
+			"      Of course, you can always open a new issue to share your idea \n"+
+			"      or report a bug!")
+	return common.FirstUseModal(m.helpMenu.height, m.helpMenu.width).
+		Render(title + "\n\n" + vimUserWarn + "\n\n" + subOne + "\n\n" +
+			subTwo + "\n\n" + subThree + "\n\n" + subFour + "\n\n")
 }
 
 func (m *model) promptModalRender() string {
 	return m.promptModal.Render()
 }
 
-func (m *model) helpMenuRender() string {
-	helpMenuContent := ""
-	maxKeyLength := 0
+func (m *model) zoxideModalRender() string {
+	return m.zoxideModal.Render()
+}
 
-	for _, data := range m.helpMenu.data {
+func (m *model) helpMenuRender() string {
+	r := ui.HelpMenuRenderer(m.helpMenu.height, m.helpMenu.width)
+	r.AddLines(" " + m.helpMenu.searchBar.View())
+	r.AddLines("") // one-line separation between searchbar and content
+
+	// TODO : This computation should not happen at render time. Move this to update
+	// TODO : Move these computations to a utility function
+	maxKeyLength := 0
+	for _, data := range m.helpMenu.filteredData {
 		totalKeyLen := 0
 		for _, key := range data.hotkey {
 			totalKeyLen += len(key)
 		}
-		saprateLen := len(data.hotkey) - 1*3
-		if data.subTitle == "" && totalKeyLen+saprateLen > maxKeyLength {
-			maxKeyLength = totalKeyLen + saprateLen
+
+		separatorLen := max(0, (len(data.hotkey)-1)) * 3
+		if data.subTitle == "" && totalKeyLen+separatorLen > maxKeyLength {
+			maxKeyLength = totalKeyLen + separatorLen
 		}
 	}
 
@@ -448,11 +373,10 @@ func (m *model) helpMenuRender() string {
 		valueLength = m.helpMenu.width/2 - 2
 	}
 
-	renderHotkeyLength := 0
 	totalTitleCount := 0
 	cursorBeenTitleCount := 0
 
-	for i, data := range m.helpMenu.data {
+	for i, data := range m.helpMenu.filteredData {
 		if data.subTitle != "" {
 			if i < m.helpMenu.cursor {
 				cursorBeenTitleCount++
@@ -461,39 +385,51 @@ func (m *model) helpMenuRender() string {
 		}
 	}
 
-	for i := m.helpMenu.renderIndex; i < m.helpMenu.height+m.helpMenu.renderIndex && i < len(m.helpMenu.data); i++ {
+	renderHotkeyLength := m.getRenderHotkeyLengthHelpmenuModal()
+	m.getHelpMenuContent(r, renderHotkeyLength, valueLength)
+
+	current := m.helpMenu.cursor + 1 - cursorBeenTitleCount
+	if len(m.helpMenu.filteredData) == 0 {
+		current = 0
+	}
+	r.SetBorderInfoItems(fmt.Sprintf("%s/%s",
+		strconv.Itoa(current),
+		strconv.Itoa(len(m.helpMenu.filteredData)-totalTitleCount)))
+	return r.Render()
+}
+
+func (m *model) getRenderHotkeyLengthHelpmenuModal() int {
+	renderHotkeyLength := 0
+	for i := m.helpMenu.renderIndex; i < m.helpMenu.renderIndex+(m.helpMenu.height-4) && i < len(m.helpMenu.filteredData); i++ {
 		hotkey := ""
 
-		if m.helpMenu.data[i].subTitle != "" {
+		if m.helpMenu.filteredData[i].subTitle != "" {
 			continue
 		}
 
-		for i, key := range m.helpMenu.data[i].hotkey {
+		for i, key := range m.helpMenu.filteredData[i].hotkey {
 			if i != 0 {
 				hotkey += " | "
 			}
 			hotkey += key
 		}
 
-		if len(common.HelpMenuHotkeyStyle.Render(hotkey)) > renderHotkeyLength {
-			renderHotkeyLength = len(common.HelpMenuHotkeyStyle.Render(hotkey))
-		}
+		renderHotkeyLength = max(renderHotkeyLength, len(common.HelpMenuHotkeyStyle.Render(hotkey)))
 	}
+	return renderHotkeyLength
+}
 
-	for i := m.helpMenu.renderIndex; i < m.helpMenu.height+m.helpMenu.renderIndex && i < len(m.helpMenu.data); i++ {
-		if i != m.helpMenu.renderIndex {
-			helpMenuContent += "\n"
-		}
-
-		if m.helpMenu.data[i].subTitle != "" {
-			helpMenuContent += common.HelpMenuTitleStyle.Render(" " + m.helpMenu.data[i].subTitle)
+func (m *model) getHelpMenuContent(r *rendering.Renderer, renderHotkeyLength int, valueLength int) {
+	for i := m.helpMenu.renderIndex; i < m.helpMenu.renderIndex+(m.helpMenu.height-4) && i < len(m.helpMenu.filteredData); i++ {
+		if m.helpMenu.filteredData[i].subTitle != "" {
+			r.AddLines(common.HelpMenuTitleStyle.Render(" " + m.helpMenu.filteredData[i].subTitle))
 			continue
 		}
 
 		hotkey := ""
-		description := common.TruncateText(m.helpMenu.data[i].description, valueLength, "...")
+		description := common.TruncateText(m.helpMenu.filteredData[i].description, valueLength, "...")
 
-		for i, key := range m.helpMenu.data[i].hotkey {
+		for i, key := range m.helpMenu.filteredData[i].hotkey {
 			if i != 0 {
 				hotkey += " | "
 			}
@@ -504,12 +440,9 @@ func (m *model) helpMenuRender() string {
 		if m.helpMenu.cursor == i {
 			cursor = common.FilePanelCursorStyle.Render(icon.Cursor + " ")
 		}
-		helpMenuContent += cursor + common.ModalStyle.Render(fmt.Sprintf("%*s%s", renderHotkeyLength, common.HelpMenuHotkeyStyle.Render(hotkey+" "), common.ModalStyle.Render(description)))
+		r.AddLines(cursor + common.ModalStyle.Render(fmt.Sprintf("%*s%s", renderHotkeyLength,
+			common.HelpMenuHotkeyStyle.Render(hotkey+" "), common.ModalStyle.Render(description))))
 	}
-
-	bottomBorder := common.GenerateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(m.helpMenu.cursor+1-cursorBeenTitleCount), strconv.Itoa(len(m.helpMenu.data)-totalTitleCount)), m.helpMenu.width-2)
-
-	return common.HelpMenuModalBorderStyle(m.helpMenu.height, m.helpMenu.width, bottomBorder).Render(helpMenuContent)
 }
 
 func (m *model) sortOptionsRender() string {
@@ -522,256 +455,13 @@ func (m *model) sortOptionsRender() string {
 		}
 		sortOptionsContent += cursor + common.ModalStyle.Render(" "+option) + "\n"
 	}
-	bottomBorder := common.GenerateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(panel.sortOptions.cursor+1), strconv.Itoa(len(panel.sortOptions.data.options))), panel.sortOptions.width-2)
+	bottomBorder := common.GenerateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(panel.sortOptions.cursor+1),
+		strconv.Itoa(len(panel.sortOptions.data.options))), panel.sortOptions.width-2)
 
-	return common.SortOptionsModalBorderStyle(panel.sortOptions.height, panel.sortOptions.width, bottomBorder).Render(sortOptionsContent)
-}
-
-func readFileContent(filepath string, maxLineLength int, previewLine int) (string, error) {
-	var resultBuilder strings.Builder
-	file, err := os.Open(filepath)
-	if err != nil {
-		return resultBuilder.String(), err
-	}
-	defer file.Close()
-
-	reader := transform.NewReader(file, unicode.BOMOverride(unicode.UTF8.NewDecoder()))
-	scanner := bufio.NewScanner(reader)
-	lineCount := 0
-	for scanner.Scan() {
-		line := scanner.Text()
-		line = ansi.Truncate(line, maxLineLength, "")
-		resultBuilder.WriteString(line)
-		resultBuilder.WriteRune('\n')
-		lineCount++
-		if previewLine > 0 && lineCount >= previewLine {
-			break
-		}
-	}
-	// returns the first non-EOF error that was encountered by the [Scanner]
-	return resultBuilder.String(), scanner.Err()
+	return common.SortOptionsModalBorderStyle(panel.sortOptions.height, panel.sortOptions.width,
+		bottomBorder).Render(sortOptionsContent)
 }
 
 func (m *model) filePreviewPanelRender() string {
-	// TODO : This width adjustment must not be done inside render function. It should
-	// only be triggered via Update()
-	m.fileModel.filePreview.width += m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.width - ((m.fileModel.width + 2) * len(m.fileModel.filePanels)) - 2
-
-	return m.filePreviewPanelRenderWithDimensions(m.mainPanelHeight+2, m.fileModel.filePreview.width)
-}
-
-// Helper function to handle empty panel case
-func (m *model) renderEmptyFilePreview(r *rendering.Renderer) string {
-	return r.Render()
-}
-
-// Helper function to handle file info errors
-func (m *model) renderFileInfoError(r *rendering.Renderer, _ lipgloss.Style, err error) string {
-	slog.Error("Error get file info", "error", err)
-	return r.Render()
-}
-
-// Helper function to handle unsupported formats
-func (m *model) renderUnsupportedFormat(box lipgloss.Style) string {
-	return box.Render(common.FilePreviewUnsupportedFormatText)
-}
-
-// Helper function to handle unsupported mode
-func (m *model) renderUnsupportedFileMode(r *rendering.Renderer) string {
-	r.AddLines(common.FilePreviewUnsupportedFileMode)
-	return r.Render()
-}
-
-// Helper function to handle directory preview
-func (m *model) renderDirectoryPreview(r *rendering.Renderer, itemPath string, previewHeight int) string {
-	files, err := os.ReadDir(itemPath)
-	if err != nil {
-		slog.Error("Error render directory preview", "error", err)
-		r.AddLines(common.FilePreviewDirectoryUnreadableText)
-		return r.Render()
-	}
-
-	if len(files) == 0 {
-		r.AddLines(common.FilePreviewEmptyText)
-		return r.Render()
-	}
-
-	sort.Slice(files, func(i, j int) bool {
-		if files[i].IsDir() && !files[j].IsDir() {
-			return true
-		}
-		if !files[i].IsDir() && files[j].IsDir() {
-			return false
-		}
-		return files[i].Name() < files[j].Name()
-	})
-
-	for i := 0; i < previewHeight && i < len(files); i++ {
-		file := files[i]
-		style := common.GetElementIcon(file.Name(), file.IsDir(), common.Config.Nerdfont)
-		res := lipgloss.NewStyle().Foreground(lipgloss.Color(style.Color)).Background(common.FilePanelBGColor).
-			Render(style.Icon+" ") + common.FilePanelStyle.Render(file.Name())
-		r.AddLines(res)
-	}
-	return r.Render()
-}
-
-// Helper function to handle image preview
-func (m *model) renderImagePreview(box lipgloss.Style, itemPath string, previewWidth, previewHeight int, sideAreaWidth int) string {
-	if !m.fileModel.filePreview.open {
-		return box.Render("\n --- Preview panel is closed ---")
-	}
-
-	if !common.Config.ShowImagePreview {
-		return box.Render("\n --- Image preview is disabled ---")
-	}
-
-	// Use the new auto-detection function to choose the best renderer
-	imageRender, err := m.imagePreviewer.ImagePreview(itemPath, previewWidth, previewHeight, common.Theme.FilePanelBG, sideAreaWidth)
-	if errors.Is(err, image.ErrFormat) {
-		return box.Render("\n --- " + icon.Error + " Unsupported image formats ---")
-	}
-
-	if err != nil {
-		slog.Error("Error convert image to ansi", "error", err)
-		return box.Render("\n --- " + icon.Error + " Error convert image to ansi ---")
-	}
-
-	// Check if this looks like Kitty protocol output (starts with escape sequences)
-	// For Kitty protocol, avoid using lipgloss alignment to prevent layout drift
-	if strings.HasPrefix(imageRender, "\x1b_G") {
-		rendered := common.FilePreviewBox(previewHeight, previewWidth).Render(imageRender)
-		return rendered
-	}
-
-	// For ANSI output, we can safely use vertical alignment
-	return box.AlignVertical(lipgloss.Center).AlignHorizontal(lipgloss.Center).Render(imageRender)
-}
-
-// Helper function to handle text file preview
-func (m *model) renderTextPreview(r *rendering.Renderer, box lipgloss.Style, itemPath string, previewWidth, previewHeight int) string {
-	format := lexers.Match(filepath.Base(itemPath))
-	if format == nil {
-		isText, err := common.IsTextFile(itemPath)
-		if err != nil {
-			slog.Error("Error while checking text file", "error", err)
-			return box.Render(common.FilePreviewError)
-		} else if !isText {
-			return box.Render(common.FilePreviewUnsupportedFormatText)
-		}
-	}
-
-	fileContent, err := readFileContent(itemPath, previewWidth, previewHeight)
-	if err != nil {
-		slog.Error("Error open file", "error", err)
-		return box.Render(common.FilePreviewError)
-	}
-
-	if fileContent == "" {
-		return box.Render(common.FilePreviewEmptyText)
-	}
-
-	if format != nil {
-		background := ""
-		if !common.Config.TransparentBackground {
-			background = common.Theme.FilePanelBG
-		}
-		if common.Config.CodePreviewer == "bat" {
-			if batCmd == "" {
-				return box.Render("\n --- " + icon.Error + " 'bat' is not installed or not found. ---\n --- Cannot render file preview. ---")
-			}
-			fileContent, err = getBatSyntaxHighlightedContent(itemPath, previewHeight, background)
-		} else {
-			fileContent, err = ansichroma.HightlightString(fileContent, format.Config().Name, common.Theme.CodeSyntaxHighlightTheme, background)
-		}
-		if err != nil {
-			slog.Error("Error render code highlight", "error", err)
-			return box.Render("\n" + common.FilePreviewError)
-		}
-	}
-
-	r.AddLines(fileContent)
-	return r.Render()
-}
-
-func (m *model) filePreviewPanelRenderWithDimensions(previewHeight int, previewWidth int) string {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	box := common.FilePreviewBox(previewHeight, previewWidth)
-	r := ui.FilePreviewPanelRenderer(previewHeight, previewWidth)
-	clearCmd := m.imagePreviewer.ClearKittyImages()
-	if len(panel.element) == 0 {
-		return m.renderEmptyFilePreview(r) + clearCmd
-	}
-
-	// This could create errors if panel.cursor ever becomes negative, or goes out of bounds
-	// We should have a panel validation function in our View() function
-	// Panel is a full fledged object with own state, its accessed and modified so many times.
-	// Ideally we dont should never access data from it via directly accessing its variables
-	// TODO : Instead we should have helper functions for panel object and access data that way
-	// like panel.GetCurrentSelectedElem() . This abstration of implemetation of panel is needed.
-	// Now this lack of abstraction has caused issues ( See PR#730 ) . And now
-	// someone needs to scan through the entire codebase to figure out which access of panel
-	// data is causing crash.
-	itemPath := panel.element[panel.cursor].location
-	fileInfo, infoErr := os.Stat(itemPath)
-	if infoErr != nil {
-		return m.renderFileInfoError(r, box, infoErr) + clearCmd
-	}
-	slog.Debug("Attempting to render preview", "itemPath", itemPath,
-		"mode", fileInfo.Mode().String(), "isRegular", fileInfo.Mode().IsRegular())
-
-	// For non regular files which are not directories Dont try to read them
-	// See Issue
-	if !fileInfo.Mode().IsRegular() && (fileInfo.Mode()&fs.ModeDir) == 0 {
-		return m.renderUnsupportedFileMode(r) + clearCmd
-	}
-
-	ext := filepath.Ext(itemPath)
-	if slices.Contains(common.UnsupportedPreviewFormats, ext) {
-		return m.renderUnsupportedFormat(box) + clearCmd
-	}
-
-	if fileInfo.IsDir() {
-		return m.renderDirectoryPreview(r, itemPath, previewHeight) + clearCmd
-	}
-
-	if isImageFile(itemPath) {
-		return m.renderImagePreview(box, itemPath, previewWidth, previewHeight, m.fullWidth-previewWidth+1)
-	}
-
-	return m.renderTextPreview(r, box, itemPath, previewWidth, previewHeight) + clearCmd
-}
-
-func getBatSyntaxHighlightedContent(itemPath string, previewLine int, background string) (string, error) {
-	// --plain: use the plain style without line numbers and decorations
-	// --force-colorization: force colorization for non-interactive shell output
-	// --line-range <:m>: only read from line 1 to line "m"
-	batArgs := []string{itemPath, "--plain", "--force-colorization", "--line-range", fmt.Sprintf(":%d", previewLine-1)}
-
-	// set timeout for the external command execution to 500ms max
-	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
-	defer cancel()
-
-	cmd := exec.CommandContext(ctx, batCmd, batArgs...)
-
-	fileContentBytes, err := cmd.Output()
-	if err != nil {
-		slog.Error("Error render code highlight", "error", err)
-		return "", err
-	}
-
-	fileContent := string(fileContentBytes)
-	if !common.Config.TransparentBackground {
-		fileContent = setBatBackground(fileContent, background)
-	}
-	return fileContent, nil
-}
-
-func setBatBackground(input string, background string) string {
-	tokens := strings.Split(input, "\x1b[0m")
-	backgroundStyle := lipgloss.NewStyle().Background(lipgloss.Color(background))
-	for idx, token := range tokens {
-		tokens[idx] = backgroundStyle.Render(token)
-	}
-	return strings.Join(tokens, "\x1b[0m")
+	return m.fileModel.filePreview.GetContent()
 }
