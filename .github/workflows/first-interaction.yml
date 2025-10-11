@@ -17,8 +17,8 @@ jobs:
     steps:
       - uses: actions/first-interaction@v3
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          issue-message: |
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          issue_message: |
             👋 Hi there, and welcome to **superfile**!
 
             Thanks for opening your first issue. We really appreciate your interest and involvement.
@@ -28,7 +28,7 @@ jobs:
 
             If you plan to submit a PR, make sure to check our [Contribution Guide](https://github.com/yorukot/superfile/blob/main/CONTRIBUTING.md)
 
-          pr-message: |
+          pr_message: |
             🎉 Thank you for your first contribution to **superfile**!
 
             We’re really excited to have you here 🙌
