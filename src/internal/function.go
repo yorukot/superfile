@@ -28,6 +28,8 @@ const (
 	sortingFileType     sortingKind = "Type"
 )
 
+var suffixRegexp = regexp.MustCompile(`^(.*)\((\d+)\)$`)
+
 // Check if the directory is external disk path
 // TODO : This function should be give two directories, and it should return
 // if the two share a different disk partition.
@@ -266,61 +268,37 @@ func checkFileNameValidity(name string) error {
 	}
 }
 
-// This functions has very high code duplication. Need to refactor the logic into
-func renameIfDuplicate(destination string) (string, error) { //nolint: gocognit // see above todo
-	info, err := os.Stat(destination)
-	if os.IsNotExist(err) {
+func renameIfDuplicate(destination string) (string, error) {
+	if _, err := os.Stat(destination); os.IsNotExist(err) {
 		return destination, nil
 	} else if err != nil {
 		return "", err
 	}
 
-	if info.IsDir() {
-		match := regexp.MustCompile(`\((\d+)\)$`).FindStringSubmatch(info.Name())
-		if len(match) > 1 {
-			number, _ := strconv.Atoi(match[1])
-			for {
-				number++
-				newDirName := fmt.Sprintf("%s(%d)", info.Name()[:len(info.Name())-len(match[0])], number)
-				newPath := filepath.Join(filepath.Dir(destination), newDirName)
-				if _, err := os.Stat(newPath); os.IsNotExist(err) {
-					return newPath, nil
-				}
-			}
-		} else {
-			for i := 1; ; i++ {
-				newDirName := fmt.Sprintf("%s(%d)", info.Name(), i)
-				newPath := filepath.Join(filepath.Dir(destination), newDirName)
-				if _, err := os.Stat(newPath); os.IsNotExist(err) {
-					return newPath, nil
-				}
-			}
-		}
-	} else {
-		baseName := filepath.Base(destination)
-		ext := filepath.Ext(baseName)
-		fileName := baseName[:len(baseName)-len(ext)]
-		match := regexp.MustCompile(`\((\d+)\)$`).FindStringSubmatch(fileName)
-		if len(match) > 1 {
-			number, _ := strconv.Atoi(match[1])
-			for {
-				number++
-				newFileName := fmt.Sprintf("%s(%d)%s", fileName[:len(fileName)-len(match[0])], number, ext)
-				newPath := filepath.Join(filepath.Dir(destination), newFileName)
-				if _, err := os.Stat(newPath); os.IsNotExist(err) {
-					return newPath, nil
-				}
-			}
-		} else {
-			for i := 1; ; i++ {
-				newFileName := fmt.Sprintf("%s(%d)%s", fileName, i, ext)
-				newPath := filepath.Join(filepath.Dir(destination), newFileName)
-				if _, err := os.Stat(newPath); os.IsNotExist(err) {
-					return newPath, nil
-				}
-			}
+	dir := filepath.Dir(destination)
+	base := filepath.Base(destination)
+	ext := filepath.Ext(base)
+	name := base[:len(base)-len(ext)]
+
+	// Extract base name without existing suffix
+	counter := 1
+	if match := suffixRegexp.FindStringSubmatch(name); len(match) == 3 {
+		name = match[1] // base name without (N)
+		if num, err := strconv.Atoi(match[2]); err == nil {
+			counter = num + 1 // start from next number
 		}
 	}
+
+	// Find first available name
+	for i := counter; i < 10_000; i++ {
+		newName := fmt.Sprintf("%s(%d)%s", name, i, ext)
+		newPath := filepath.Join(dir, newName)
+		if _, err := os.Stat(newPath); os.IsNotExist(err) {
+			return newPath, nil
+		}
+	}
+
+	return "", fmt.Errorf("could not find free name for %s after many attempts", destination)
 }
 
 // TODO : Replace all usage of "m.fileModel.filePanels[m.filePanelFocusIndex]" with this
