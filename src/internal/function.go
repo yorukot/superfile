@@ -28,6 +28,8 @@ const (
 	sortingFileType     sortingKind = "Type"
 )
 
+var suffixRegexp = regexp.MustCompile(`^(.*)\((\d+)\)$`)
+
 // Check if the directory is external disk path
 // TODO : This function should be give two directories, and it should return
 // if the two share a different disk partition.
@@ -265,8 +267,6 @@ func checkFileNameValidity(name string) error {
 		return nil
 	}
 }
-
-var suffixRegexp = regexp.MustCompile(`^(.*)\((\d+)\)$`)
 
 func renameIfDuplicate(destination string) (string, error) {
 	if _, err := os.Stat(destination); os.IsNotExist(err) {
