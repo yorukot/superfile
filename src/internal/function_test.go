@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"testing"
 	"time"
@@ -261,4 +262,90 @@ func TestCheckFileNameValidity(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_renameIfDuplicate(t *testing.T) {
+	curTestDir := t.TempDir()
+	f1NonExistent := filepath.Join(curTestDir, "file.txt")
+	f2 := filepath.Join(curTestDir, "file2.txt")
+	f3 := filepath.Join(curTestDir, "file3(3).txt")
+	d1 := filepath.Join(curTestDir, "dir1")
+
+	utils.SetupFiles(t, f2, f3)
+	utils.SetupDirectories(t, d1)
+
+	tests := []struct {
+		name     string
+		fileName string
+		want     string
+	}{
+		{
+			name:     "file does not exist",
+			fileName: f1NonExistent,
+			want:     filepath.Base(f1NonExistent),
+		},
+		{
+			name:     "file exists without suffix",
+			fileName: f2,
+			want:     "file2(1).txt",
+		},
+		{
+			name:     "file exists with suffix",
+			fileName: f3,
+			want:     "file3(4).txt",
+		},
+		{
+			name:     "directory exists",
+			fileName: d1,
+			want:     "dir1(1)", // without extension
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			results, err := renameIfDuplicate(tt.fileName)
+			require.NoError(t, err)
+			assert.Equal(t, filepath.Base(tt.want), filepath.Base(results))
+		})
+	}
+}
+
+func Benchmark_renameIfDuplicate(b *testing.B) {
+	dir := b.TempDir()
+
+	existingFile := filepath.Join(dir, "file.txt")
+	err := os.WriteFile(existingFile, utils.SampleDataBytes, 0644)
+	require.NoError(b, err)
+
+	existingDir := filepath.Join(dir, "docs")
+	err = os.Mkdir(existingDir, 0o755)
+	require.NoError(b, err)
+
+	b.Run("file_exists", func(b *testing.B) {
+		for range b.N {
+			_, err := renameIfDuplicate(existingFile)
+			if err != nil {
+				b.Fatal(err)
+			}
+		}
+	})
+
+	b.Run("dir_exists", func(b *testing.B) {
+		for range b.N {
+			_, err := renameIfDuplicate(existingDir)
+			if err != nil {
+				b.Fatal(err)
+			}
+		}
+	})
+
+	b.Run("file_not_exists", func(b *testing.B) {
+		nonExistent := filepath.Join(dir, "nofile.txt")
+		for range b.N {
+			_, err := renameIfDuplicate(nonExistent)
+			if err != nil {
+				b.Fatal(err)
+			}
+		}
+	})
 }
