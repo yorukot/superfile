@@ -265,80 +265,56 @@ func TestCheckFileNameValidity(t *testing.T) {
 }
 
 func Test_renameIfDuplicate(t *testing.T) {
+	curTestDir := t.TempDir()
+	f1NonExistent := filepath.Join(curTestDir, "file.txt")
+	f2 := filepath.Join(curTestDir, "file2.txt")
+	f3 := filepath.Join(curTestDir, "file3(3).txt")
+	d1 := filepath.Join(curTestDir, "dir1")
+
+	utils.SetupFiles(t, f2, f3)
+	utils.SetupDirectories(t, d1)
+
 	tests := []struct {
-		name    string
-		prepare func() string
-		want    string
-		wantErr assert.ErrorAssertionFunc
+		name     string
+		fileName string
+		want     string
 	}{
 		{
-			name: "file does not exist",
-			prepare: func() string {
-				return filepath.Join(t.TempDir(), "file.txt")
-			},
-			want:    "",
-			wantErr: assert.NoError,
+			name:     "file does not exist",
+			fileName: f1NonExistent,
+			want:     filepath.Base(f1NonExistent),
 		},
 		{
-			name: "file exists without suffix",
-			prepare: func() string {
-				dir := t.TempDir()
-				path := filepath.Join(dir, "file.txt")
-				f, err := os.Create(path)
-				defer f.Close()
-				require.NoError(t, err)
-				return path
-			},
-			want:    "file(1).txt",
-			wantErr: assert.NoError,
+			name:     "file exists without suffix",
+			fileName: f2,
+			want:     "file2(1).txt",
 		},
 		{
-			name: "file exists with suffix",
-			prepare: func() string {
-				dir := t.TempDir()
-				path := filepath.Join(dir, "file(2).txt")
-				f, err := os.Create(path)
-				defer f.Close()
-				require.NoError(t, err)
-				return path
-			},
-			want:    "file(3).txt",
-			wantErr: assert.NoError,
+			name:     "file exists with suffix",
+			fileName: f3,
+			want:     "file3(4).txt",
 		},
 		{
-			name: "directory exists",
-			prepare: func() string {
-				dir := t.TempDir()
-				existing := filepath.Join(dir, "docs")
-				err := os.Mkdir(existing, 0o755)
-				require.NoError(t, err)
-				return existing
-			},
-			want:    "docs(1)", // without extension
-			wantErr: assert.NoError,
+			name:     "directory exists",
+			fileName: d1,
+			want:     "dir1(1)", // without extension
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			dest := tt.prepare()
-			if tt.want == "" {
-				tt.want = dest // "does not exist"
-			}
-			got, err := renameIfDuplicate(dest)
-			if !tt.wantErr(t, err, fmt.Sprintf("renameIfDuplicate(%v)", dest)) {
-				return
-			}
-			assert.Equalf(t, filepath.Base(tt.want), filepath.Base(got), "renameIfDuplicate(%v)", dest)
+			results, err := renameIfDuplicate(tt.fileName)
+			require.NoError(t, err)
+			assert.Equal(t, filepath.Base(tt.want), filepath.Base(results))
 		})
 	}
 }
 
 func Benchmark_renameIfDuplicate(b *testing.B) {
 	dir := b.TempDir()
+
 	existingFile := filepath.Join(dir, "file.txt")
-	f, err := os.Create(existingFile)
-	defer f.Close()
+	err := os.WriteFile(existingFile, utils.SampleDataBytes, 0644)
 	require.NoError(b, err)
 
 	existingDir := filepath.Join(dir, "docs")
