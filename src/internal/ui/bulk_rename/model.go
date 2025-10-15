@@ -149,9 +149,9 @@ func (m *Model) HandleUpdate(msg tea.Msg) (common.ModelAction, tea.Cmd) {
 			m.adjustValue(-1)
 		case slices.Contains(common.Hotkeys.ListDown, msg.String()):
 			m.adjustValue(1)
-		case msg.String() == "tab":
+		case slices.Contains(common.Hotkeys.NavBulkRename, msg.String()):
 			m.nextType()
-		case msg.String() == "shift+tab":
+		case slices.Contains(common.Hotkeys.RevNavBulkRename, msg.String()):
 			m.prevType()
 		default:
 			cmd = m.handleTextInputUpdate(msg)

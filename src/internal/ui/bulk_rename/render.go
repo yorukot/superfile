@@ -130,41 +130,42 @@ func (m *Model) renderInputs() string {
 		Background(common.ModalBGColor).
 		Foreground(GetCursorColor())
 
-	var content string
-
 	switch m.renameType {
 	case FindReplace:
-		findStyle := labelStyle
-		replaceStyle := labelStyle
-		if m.cursor == 0 {
-			findStyle = activeLabelStyle
-		}
-		if m.cursor == 1 {
-			replaceStyle = activeLabelStyle
-		}
-
-		findLine := findStyle.Render("Find:    ") + m.findInput.View()
-		replaceLine := replaceStyle.Render("Replace: ") + m.replaceInput.View()
-		content = inputStyle.Render(findLine) + "\n" + inputStyle.Render(replaceLine)
-
+		return m.renderFindReplaceInputs(inputStyle, labelStyle, activeLabelStyle)
 	case AddPrefix:
-		content = inputStyle.Render(activeLabelStyle.Render("Prefix: ") + m.prefixInput.View())
-
+		return inputStyle.Render(activeLabelStyle.Render("Prefix: ") + m.prefixInput.View())
 	case AddSuffix:
-		content = inputStyle.Render(activeLabelStyle.Render("Suffix: ") + m.suffixInput.View())
-
+		return inputStyle.Render(activeLabelStyle.Render("Suffix: ") + m.suffixInput.View())
 	case AddNumbering:
-		numberText := fmt.Sprintf("Start number: %d\n(Use ↑/↓ to adjust)", m.startNumber)
-		content = inputStyle.Render(labelStyle.Render(numberText))
-
+		return m.renderNumberingInputs(inputStyle, labelStyle)
 	case ChangeCase:
-		content = m.renderCaseOptions(inputStyle, labelStyle)
-
+		return m.renderCaseOptions(inputStyle, labelStyle)
 	case EditorMode:
-		content = inputStyle.Render(labelStyle.Render("Opens your $EDITOR\nwith list of filenames"))
+		return inputStyle.Render(labelStyle.Render("Opens your $EDITOR\nwith list of filenames"))
 	}
 
-	return content
+	return ""
+}
+
+func (m *Model) renderFindReplaceInputs(inputStyle, labelStyle, activeLabelStyle lipgloss.Style) string {
+	findStyle := labelStyle
+	replaceStyle := labelStyle
+	if m.cursor == 0 {
+		findStyle = activeLabelStyle
+	}
+	if m.cursor == 1 {
+		replaceStyle = activeLabelStyle
+	}
+
+	findLine := findStyle.Render("Find:    ") + m.findInput.View()
+	replaceLine := replaceStyle.Render("Replace: ") + m.replaceInput.View()
+	return inputStyle.Render(findLine) + "\n" + inputStyle.Render(replaceLine)
+}
+
+func (m *Model) renderNumberingInputs(inputStyle, labelStyle lipgloss.Style) string {
+	numberText := fmt.Sprintf("Start number: %d\n(Use ↑/↓ to adjust)", m.startNumber)
+	return inputStyle.Render(labelStyle.Render(numberText))
 }
 
 func (m *Model) renderCaseOptions(inputStyle, labelStyle lipgloss.Style) string {

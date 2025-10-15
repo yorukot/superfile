@@ -586,25 +586,20 @@ func (m *model) applyBulkRenameAction(action common.ModelAction) tea.Cmd {
 	return nil
 }
 
-// handleEditorModeAction opens the editor and processes the result
 func (m *model) handleEditorModeAction(action bulkrename.EditorModeAction) tea.Cmd {
-	// Store the action for later use when editor closes
 	m.pendingEditorAction = &action
 
-	// Open editor with tmpfile
 	parts := strings.Fields(action.Editor)
 	cmd := parts[0]
 	args := append(parts[1:], action.TmpfilePath)
 
 	c := exec.Command(cmd, args...)
 
-	// Execute the editor and wait for it to close
 	return tea.ExecProcess(c, func(err error) tea.Msg {
 		return editorFinishedForBulkRenameMsg{err}
 	})
 }
 
-// handleEditorFinishedForBulkRename processes the tmpfile after editor closes
 func (m *model) handleEditorFinishedForBulkRename(err error) tea.Cmd {
 	if m.pendingEditorAction == nil {
 		slog.Error("No pending editor action found")
@@ -613,7 +608,6 @@ func (m *model) handleEditorFinishedForBulkRename(err error) tea.Cmd {
 
 	action := m.pendingEditorAction
 	defer func() {
-		// Clean up the tmpfile
 		os.Remove(action.TmpfilePath)
 		m.pendingEditorAction = nil
 	}()
@@ -623,28 +617,44 @@ func (m *model) handleEditorFinishedForBulkRename(err error) tea.Cmd {
 		return nil
 	}
 
-	// Read the edited tmpfile
-	content, readErr := os.ReadFile(action.TmpfilePath)
+	lines, readErr := m.readEditorOutputLines(action.TmpfilePath)
 	if readErr != nil {
-		slog.Error("Failed to read tmpfile", "error", readErr)
 		return nil
 	}
 
-	// Parse the new filenames (one per line)
-	lines := strings.Split(strings.TrimSpace(string(content)), "\n")
-
-	// Validate that the number of lines matches the number of selected files
 	if len(lines) != len(action.SelectedFiles) {
 		slog.Error("Number of lines in tmpfile doesn't match number of selected files",
 			"expected", len(action.SelectedFiles), "got", len(lines))
 		return nil
 	}
 
-	// Create rename previews
-	previews := make([]bulkrename.RenamePreview, 0, len(lines))
-	for i, itemPath := range action.SelectedFiles {
+	previews := m.buildRenamePreviews(action.SelectedFiles, lines)
+	validPreviews := m.filterValidPreviews(previews)
+
+	if len(validPreviews) == 0 {
+		slog.Info("No valid renames to apply from tmpfile")
+		m.bulkRenameModel.Close()
+		return nil
+	}
+
+	m.bulkRenameModel.Close()
+	return bulkrename.ExecuteBulkRename(&m.processBarModel, validPreviews)
+}
+
+func (m *model) readEditorOutputLines(tmpfilePath string) ([]string, error) {
+	content, err := os.ReadFile(tmpfilePath)
+	if err != nil {
+		slog.Error("Failed to read tmpfile", "error", err)
+		return nil, err
+	}
+	return strings.Split(strings.TrimSpace(string(content)), "\n"), nil
+}
+
+func (m *model) buildRenamePreviews(selectedFiles []string, newNames []string) []bulkrename.RenamePreview {
+	previews := make([]bulkrename.RenamePreview, 0, len(newNames))
+	for i, itemPath := range selectedFiles {
 		oldName := filepath.Base(itemPath)
-		newName := strings.TrimSpace(lines[i])
+		newName := strings.TrimSpace(newNames[i])
 
 		if newName == "" {
 			slog.Warn("Empty filename in tmpfile, skipping", "line", i+1)
@@ -657,44 +667,36 @@ func (m *model) handleEditorFinishedForBulkRename(err error) tea.Cmd {
 			NewName: newName,
 		}
 
-		// Validate the rename
-		if newName == oldName {
-			preview.Error = "No change"
-		} else {
-			newPath := filepath.Join(filepath.Dir(itemPath), newName)
-
-			// Check for case-insensitive filesystem
-			if strings.EqualFold(itemPath, newPath) {
-				// Same file with different case - this is allowed
-				preview.Error = ""
-			} else if _, statErr := os.Stat(newPath); statErr == nil {
-				preview.Error = "File already exists"
-			}
-		}
-
+		preview.Error = m.validateRename(itemPath, oldName, newName)
 		previews = append(previews, preview)
 	}
+	return previews
+}
 
-	// Filter out previews with errors
+func (m *model) validateRename(itemPath, oldName, newName string) string {
+	if newName == oldName {
+		return "No change"
+	}
+
+	newPath := filepath.Join(filepath.Dir(itemPath), newName)
+	if strings.EqualFold(itemPath, newPath) {
+		return ""
+	}
+
+	if _, err := os.Stat(newPath); err == nil {
+		return "File already exists"
+	}
+	return ""
+}
+
+func (m *model) filterValidPreviews(previews []bulkrename.RenamePreview) []bulkrename.RenamePreview {
 	validPreviews := make([]bulkrename.RenamePreview, 0, len(previews))
 	for _, p := range previews {
 		if p.Error == "" {
 			validPreviews = append(validPreviews, p)
 		}
 	}
-
-	if len(validPreviews) == 0 {
-		slog.Info("No valid renames to apply from tmpfile")
-		// Close the bulk rename modal since we're done
-		m.bulkRenameModel.Close()
-		return nil
-	}
-
-	// Close the bulk rename modal before executing renames
-	m.bulkRenameModel.Close()
-
-	// Execute the bulk rename operation
-	return bulkrename.ExecuteBulkRename(&m.processBarModel, validPreviews)
+	return validPreviews
 }
 
 // TODO : Move them around to appropriate places
