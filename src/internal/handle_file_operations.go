@@ -97,6 +97,17 @@ func (m *model) panelItemRename() {
 	panel.rename = common.GenerateRenameTextInput(m.fileModel.width-4, cursorPos, panel.element[panel.cursor].name)
 }
 
+func (m *model) panelBulkRename() {
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+
+	if panel.panelMode != selectMode || len(panel.selected) == 0 {
+		return
+	}
+
+	m.bulkRenameModel.Open(panel.selected, panel.location)
+	m.firstTextInput = true
+}
+
 func (m *model) getDeleteCmd(permDelete bool) tea.Cmd {
 	panel := m.getFocusedFilePanel()
 	if len(panel.element) == 0 {
@@ -526,5 +537,3 @@ func (m *model) copyPWD() {
 		slog.Error("Error while copy present working directory", "error", err)
 	}
 }
-
-

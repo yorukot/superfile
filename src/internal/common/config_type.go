@@ -122,8 +122,6 @@ type HotkeysType struct {
 	PageDown []string `toml:"page_down"`
 
 	// bulk rename
-	NavBulkRename []string `toml:"nav_bulk_rename"`
-	RevNavBulkRename []string `toml:"rev_nav_bulk_rename"`
 	BulkRename []string `toml:"bulk_rename"`
 
 	CloseFilePanel         []string `toml:"close_file_panel" comment:"file panel control"`

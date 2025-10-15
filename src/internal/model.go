@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log/slog"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"reflect"
 	"slices"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
+	bulkrename "github.com/yorukot/superfile/src/internal/ui/bulk_rename"
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/utils"
@@ -86,6 +88,10 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.handleMouseMsg(msg)
 	case tea.KeyMsg:
 		inputCmd = m.handleKeyInput(msg)
+
+	case editorFinishedForBulkRenameMsg:
+		// Editor closed, process the bulk rename from tmpfile
+		updateCmd = m.handleEditorFinishedForBulkRename(msg.err)
 
 	// Has to handle zoxide messages separately as they could be generated via
 	// zoxide update commands, or batched commands from textinput
@@ -380,14 +386,11 @@ func (m *model) routeModalInput(msg string, state modalStateChecker) tea.Cmd {
 		m.typingModalOpenKey(msg)
 		return nil
 	}
-	if state.promptOpen || state.zoxideOpen {
+	if state.promptOpen || state.zoxideOpen || state.bulkRenameOpen {
 		return nil
 	}
 	if state.notifyOpen {
 		return m.notifyModelOpenKey(msg)
-	}
-	if state.bulkRenameOpen {
-		return m.bulkRenameKey(msg)
 	}
 	if state.renaming {
 		return m.renamingKey(msg)
@@ -427,7 +430,7 @@ func (m *model) getModalState() modalStateChecker {
 		promptOpen:      m.promptModal.IsOpen(),
 		zoxideOpen:      m.zoxideModal.IsOpen(),
 		notifyOpen:      m.notifyModel.IsOpen(),
-		bulkRenameOpen:  m.bulkRenameModal.open,
+		bulkRenameOpen:  m.bulkRenameModel.IsOpen(),
 		renaming:        m.fileModel.renaming,
 		sidebarRenaming: m.sidebarModel.IsRenaming(),
 		searchFocused:   panel.searchBar.Focused(),
@@ -435,11 +438,6 @@ func (m *model) getModalState() modalStateChecker {
 		sortOpen:        panel.sortOptions.open,
 		helpOpen:        m.helpMenu.open,
 	}
-}
-
-func (m *model) hasActiveModal() bool {
-	state := m.getModalState()
-	return m.isAnyModalActive(state)
 }
 
 func (m *model) isAnyModalActive(state modalStateChecker) bool {
@@ -513,8 +511,12 @@ func (m *model) handleInputUpdates(msg tea.Msg, focusPanel *filePanel) tea.Cmd {
 	var action common.ModelAction
 
 	switch {
-	case m.bulkRenameModal.open:
-		cmd = m.handleBulkRenameUpdate(msg)
+	case m.bulkRenameModel.IsOpen():
+		action, cmd = m.bulkRenameModel.HandleUpdate(msg)
+		editorCmd := m.applyBulkRenameAction(action)
+		if editorCmd != nil {
+			cmd = tea.Batch(cmd, editorCmd)
+		}
 	case m.fileModel.renaming:
 		focusPanel.rename, cmd = focusPanel.rename.Update(msg)
 	case focusPanel.searchBar.Focused():
@@ -528,25 +530,6 @@ func (m *model) handleInputUpdates(msg tea.Msg, focusPanel *filePanel) tea.Cmd {
 	case m.zoxideModal.IsOpen():
 		action, cmd = m.zoxideModal.HandleUpdate(msg)
 		m.applyZoxideModalAction(action)
-	}
-
-	return cmd
-}
-
-func (m *model) handleBulkRenameUpdate(msg tea.Msg) tea.Cmd {
-	var cmd tea.Cmd
-
-	switch m.bulkRenameModal.renameType {
-	case 0:
-		if m.bulkRenameModal.cursor == 0 {
-			m.bulkRenameModal.findInput, cmd = m.bulkRenameModal.findInput.Update(msg)
-		} else {
-			m.bulkRenameModal.replaceInput, cmd = m.bulkRenameModal.replaceInput.Update(msg)
-		}
-	case 1:
-		m.bulkRenameModal.prefixInput, cmd = m.bulkRenameModal.prefixInput.Update(msg)
-	case 2:
-		m.bulkRenameModal.suffixInput, cmd = m.bulkRenameModal.suffixInput.Update(msg)
 	}
 
 	return cmd
@@ -590,6 +573,128 @@ func (m *model) logAndExecuteAction(action common.ModelAction) (string, error) {
 // Apply the Action for zoxide modal (no result notifications needed)
 func (m *model) applyZoxideModalAction(action common.ModelAction) {
 	_, _ = m.logAndExecuteAction(action)
+}
+
+func (m *model) applyBulkRenameAction(action common.ModelAction) tea.Cmd {
+	if editorAction, ok := action.(bulkrename.EditorModeAction); ok {
+		return m.handleEditorModeAction(editorAction)
+	}
+	if brAction, ok := action.(bulkrename.BulkRenameAction); ok {
+		return bulkrename.ExecuteBulkRename(&m.processBarModel, brAction.Previews)
+	}
+	_, _ = m.logAndExecuteAction(action)
+	return nil
+}
+
+// handleEditorModeAction opens the editor and processes the result
+func (m *model) handleEditorModeAction(action bulkrename.EditorModeAction) tea.Cmd {
+	// Store the action for later use when editor closes
+	m.pendingEditorAction = &action
+
+	// Open editor with tmpfile
+	parts := strings.Fields(action.Editor)
+	cmd := parts[0]
+	args := append(parts[1:], action.TmpfilePath)
+
+	c := exec.Command(cmd, args...)
+
+	// Execute the editor and wait for it to close
+	return tea.ExecProcess(c, func(err error) tea.Msg {
+		return editorFinishedForBulkRenameMsg{err}
+	})
+}
+
+// handleEditorFinishedForBulkRename processes the tmpfile after editor closes
+func (m *model) handleEditorFinishedForBulkRename(err error) tea.Cmd {
+	if m.pendingEditorAction == nil {
+		slog.Error("No pending editor action found")
+		return nil
+	}
+
+	action := m.pendingEditorAction
+	defer func() {
+		// Clean up the tmpfile
+		os.Remove(action.TmpfilePath)
+		m.pendingEditorAction = nil
+	}()
+
+	if err != nil {
+		slog.Error("Editor finished with error", "error", err)
+		return nil
+	}
+
+	// Read the edited tmpfile
+	content, readErr := os.ReadFile(action.TmpfilePath)
+	if readErr != nil {
+		slog.Error("Failed to read tmpfile", "error", readErr)
+		return nil
+	}
+
+	// Parse the new filenames (one per line)
+	lines := strings.Split(strings.TrimSpace(string(content)), "\n")
+
+	// Validate that the number of lines matches the number of selected files
+	if len(lines) != len(action.SelectedFiles) {
+		slog.Error("Number of lines in tmpfile doesn't match number of selected files",
+			"expected", len(action.SelectedFiles), "got", len(lines))
+		return nil
+	}
+
+	// Create rename previews
+	previews := make([]bulkrename.RenamePreview, 0, len(lines))
+	for i, itemPath := range action.SelectedFiles {
+		oldName := filepath.Base(itemPath)
+		newName := strings.TrimSpace(lines[i])
+
+		if newName == "" {
+			slog.Warn("Empty filename in tmpfile, skipping", "line", i+1)
+			continue
+		}
+
+		preview := bulkrename.RenamePreview{
+			OldPath: itemPath,
+			OldName: oldName,
+			NewName: newName,
+		}
+
+		// Validate the rename
+		if newName == oldName {
+			preview.Error = "No change"
+		} else {
+			newPath := filepath.Join(filepath.Dir(itemPath), newName)
+
+			// Check for case-insensitive filesystem
+			if strings.EqualFold(itemPath, newPath) {
+				// Same file with different case - this is allowed
+				preview.Error = ""
+			} else if _, statErr := os.Stat(newPath); statErr == nil {
+				preview.Error = "File already exists"
+			}
+		}
+
+		previews = append(previews, preview)
+	}
+
+	// Filter out previews with errors
+	validPreviews := make([]bulkrename.RenamePreview, 0, len(previews))
+	for _, p := range previews {
+		if p.Error == "" {
+			validPreviews = append(validPreviews, p)
+		}
+	}
+
+	if len(validPreviews) == 0 {
+		slog.Info("No valid renames to apply from tmpfile")
+		// Close the bulk rename modal since we're done
+		m.bulkRenameModel.Close()
+		return nil
+	}
+
+	// Close the bulk rename modal before executing renames
+	m.bulkRenameModel.Close()
+
+	// Execute the bulk rename operation
+	return bulkrename.ExecuteBulkRename(&m.processBarModel, validPreviews)
 }
 
 // TODO : Move them around to appropriate places
@@ -755,8 +860,11 @@ func (m *model) updateRenderForOverlay(finalRender string) string {
 		return stringfunction.PlaceOverlay(overlayX, overlayY, typingModal, finalRender)
 	}
 
-	if m.bulkRenameModal.open {
-		return m.renderBulkRenameOverlay(finalRender)
+	if m.bulkRenameModel.IsOpen() {
+		bulkRenameModal := m.bulkRenameModel.Render()
+		overlayX := m.fullWidth/2 - 40
+		overlayY := m.fullHeight/2 - 12
+		return stringfunction.PlaceOverlay(overlayX, overlayY, bulkRenameModal, finalRender)
 	}
 
 	if m.notifyModel.IsOpen() {
@@ -766,22 +874,6 @@ func (m *model) updateRenderForOverlay(finalRender string) string {
 		return stringfunction.PlaceOverlay(overlayX, overlayY, notifyModal, finalRender)
 	}
 	return finalRender
-}
-
-func (m *model) renderBulkRenameOverlay(finalRender string) string {
-	config := m.getBulkRenameOverlayConfig()
-	bulkRenameModal := m.bulkRenameModalRender()
-	return stringfunction.PlaceOverlay(config.x, config.y, bulkRenameModal, finalRender)
-}
-
-func (m *model) getBulkRenameOverlayConfig() modalOverlayConfig {
-	config := modalOverlayConfig{
-		width:  80,
-		height: common.ModalHeight + 15,
-	}
-	config.x = m.fullWidth/2 - config.width/2
-	config.y = m.fullHeight/2 - config.height/2
-	return config
 }
 
 func showRenderDebugStatsMain(sidebar, filePanel, filePreview string) {

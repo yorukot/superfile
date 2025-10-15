@@ -3,9 +3,9 @@ package internal
 import (
 	"time"
 
-	"github.com/charmbracelet/lipgloss"
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 
+	bulkrename "github.com/yorukot/superfile/src/internal/ui/bulk_rename"
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
@@ -75,7 +75,7 @@ type model struct {
 	// Modals
 	notifyModel     notify.Model
 	typingModal     typingModal
-	bulkRenameModal bulkRenameModal
+	bulkRenameModel bulkrename.Model
 	helpMenu        helpMenuModal
 	promptModal     prompt.Model
 	zoxideModal     zoxideui.Model
@@ -92,6 +92,9 @@ type model struct {
 	toggleFooter         bool
 	firstLoadingComplete bool
 	firstUse             bool
+
+	// Pending editor action for bulk rename
+	pendingEditorAction *bulkrename.EditorModeAction
 
 	// This entirely disables metadata fetching. Used in test model
 	disableMetadata     bool
@@ -135,54 +138,6 @@ type typingModal struct {
 	open          bool
 	textInput     textinput.Model
 	errorMesssage string
-}
-
-type bulkRenameModal struct {
-	open         bool
-	renameType   int
-	cursor       int
-	findInput    textinput.Model
-	replaceInput textinput.Model
-	prefixInput  textinput.Model
-	suffixInput  textinput.Model
-	startNumber  int
-	caseType     int
-	preview      []renamePreview
-	errorMessage string
-}
-
-type renamePreview struct {
-	oldName string
-	newName string
-	error   string
-}
-
-type renameValidation struct {
-	oldName  string
-	newName  string
-	itemPath string
-}
-
-type bulkRenameStyles struct {
-	width               int
-	labelStyle          lipgloss.Style
-	activeLabelStyle    lipgloss.Style
-	inputContainerStyle lipgloss.Style
-}
-
-type bulkRenameRenderConfig struct {
-	width         int
-	modalHeight   int
-	leftColWidth  int
-	rightColWidth int
-	columnHeight  int
-}
-
-type modalOverlayConfig struct {
-	width  int
-	height int
-	x      int
-	y      int
 }
 
 type modalStateChecker struct {
@@ -267,5 +222,6 @@ type element struct {
 /* FILE WINDOWS TYPE END*/
 
 type editorFinishedMsg struct{ err error }
+type editorFinishedForBulkRenameMsg struct{ err error }
 
 type sliceOrderFunc func(i, j int) bool

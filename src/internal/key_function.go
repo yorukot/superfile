@@ -176,7 +176,7 @@ func (m *model) handleSelectModeKeys(msg string) tea.Cmd {
 	if slices.Contains(common.Hotkeys.PermanentlyDeleteItems, msg) {
 		return m.getDeleteTriggerCmd(true)
 	}
-	
+
 	return m.handleSelectModeFileOperations(msg)
 }
 
@@ -314,58 +314,6 @@ func (m *model) renamingKey(msg string) tea.Cmd {
 	}
 
 	return nil
-}
-
-// Handle bulk rename modal keys
-func (m *model) bulkRenameKey(msg string) tea.Cmd {
-	switch {
-	case slices.Contains(common.Hotkeys.CancelTyping, msg):
-		m.cancelBulkRename()
-	case slices.Contains(common.Hotkeys.ConfirmTyping, msg):
-		m.confirmBulkRename()
-	case slices.Contains(common.Hotkeys.ListUp, msg):
-		m.adjustBulkRenameValue(-1)
-	case slices.Contains(common.Hotkeys.ListDown, msg):
-		m.adjustBulkRenameValue(1)
-	case slices.Contains(common.Hotkeys.NavBulkRename, msg):
-		m.bulkRenameNextType()
-	case slices.Contains(common.Hotkeys.RevNavBulkRename, msg):
-		m.bulkRenamePrevType()
-	}
-	return nil
-}
-
-func (m *model) adjustBulkRenameValue(delta int) {
-	switch m.bulkRenameModal.renameType {
-	case 3:
-		m.adjustNumberingValue(delta)
-	case 4:
-		m.adjustCaseType(delta)
-	default:
-		m.navigateBulkRename(delta)
-	}
-}
-
-func (m *model) adjustNumberingValue(delta int) {
-	newValue := m.bulkRenameModal.startNumber + delta
-	if newValue >= 0 {
-		m.bulkRenameModal.startNumber = newValue
-	}
-}
-
-func (m *model) adjustCaseType(delta int) {
-	newValue := m.bulkRenameModal.caseType + delta
-	if newValue >= 0 && newValue <= 2 {
-		m.bulkRenameModal.caseType = newValue
-	}
-}
-
-func (m *model) navigateBulkRename(delta int) {
-	if delta < 0 {
-		m.bulkRenameNavigateUp()
-	} else {
-		m.bulkRenameNavigateDown()
-	}
 }
 
 func (m *model) sidebarRenamingKey(msg string) {

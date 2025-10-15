@@ -5,6 +5,7 @@ import (
 
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 
+	bulkrename "github.com/yorukot/superfile/src/internal/ui/bulk_rename"
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/ui/sidebar"
@@ -32,15 +33,16 @@ func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool,
 			filePreview: preview.New(),
 			width:       10,
 		},
-		helpMenu:       newHelpMenuModal(),
-		promptModal:    prompt.DefaultModel(prompt.PromptMinHeight, prompt.PromptMinWidth),
-		zoxideModal:    zoxideui.DefaultModel(zoxideui.ZoxideMinHeight, zoxideui.ZoxideMinWidth, zClient),
-		zClient:        zClient,
-		modelQuitState: notQuitting,
-		toggleDotFile:  toggleDotFile,
-		toggleFooter:   toggleFooter,
-		firstUse:       firstUse,
-		hasTrash:       common.InitTrash(),
+		helpMenu:        newHelpMenuModal(),
+		promptModal:     prompt.DefaultModel(prompt.PromptMinHeight, prompt.PromptMinWidth),
+		zoxideModal:     zoxideui.DefaultModel(zoxideui.ZoxideMinHeight, zoxideui.ZoxideMinWidth, zClient),
+		bulkRenameModel: bulkrename.DefaultModel(25, 80),
+		zClient:         zClient,
+		modelQuitState:  notQuitting,
+		toggleDotFile:   toggleDotFile,
+		toggleFooter:    toggleFooter,
+		firstUse:        firstUse,
+		hasTrash:        common.InitTrash(),
 	}
 }
 
