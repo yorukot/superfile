@@ -134,7 +134,7 @@ func spfAppAction(_ context.Context, c *cli.Command) error {
 	p := tea.NewProgram(internal.InitialModel(firstFilePanelDirs, firstUse),
 		tea.WithAltScreen(), tea.WithMouseCellMotion())
 	if _, err := p.Run(); err != nil {
-		utils.PrintfAndExitf("Alas, there's been an error: %v", err)
+		utils.PrintfAndExit("Alas, there's been an error: %v", err)
 	}
 
 	// This must be after calling internal.InitialModel()
@@ -195,7 +195,7 @@ func checkFirstUse() bool {
 	if _, err := os.Stat(file); os.IsNotExist(err) {
 		firstUse = true
 		if err = os.WriteFile(file, nil, 0644); err != nil {
-			utils.PrintfAndExitf("Failed to create file: %v", err)
+			utils.PrintfAndExit("Failed to create file: %v", err)
 		}
 	}
 	return firstUse

@@ -94,7 +94,7 @@ func UpdateVarFromCliArgs(c *cli.Command) {
 	// Validate the config file exists
 	if configFileArg != "" {
 		if _, err := os.Stat(configFileArg); err != nil {
-			utils.PrintfAndExitf("Error: While reading config file '%s' from argument : %v", configFileArg, err)
+			utils.PrintfAndExit("Error: While reading config file '%s' from argument : %v", configFileArg, err)
 		}
 		ConfigFile = configFileArg
 	}
@@ -103,7 +103,7 @@ func UpdateVarFromCliArgs(c *cli.Command) {
 
 	if hotkeyFileArg != "" {
 		if _, err := os.Stat(hotkeyFileArg); err != nil {
-			utils.PrintfAndExitf("Error: While reading hotkey file '%s' from argument : %v", hotkeyFileArg, err)
+			utils.PrintfAndExit("Error: While reading hotkey file '%s' from argument : %v", hotkeyFileArg, err)
 		}
 		HotkeysFile = hotkeyFileArg
 	}
