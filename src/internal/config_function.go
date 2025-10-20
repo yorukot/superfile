@@ -34,7 +34,7 @@ func initialConfig(firstFilePanelDirs []string) (toggleDotFile bool, //nolint: n
 	// For example if the log file directories have access issues.
 	// we could pass a dummy object to log.SetOutput() and the app would still function.
 	if err != nil {
-		utils.PrintfAndExit("Error while opening superfile.log file : %v", err)
+		utils.PrintfAndExitf("Error while opening superfile.log file : %v", err)
 	}
 	common.LoadConfigFile()
 

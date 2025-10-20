@@ -17,7 +17,7 @@ func PrintlnAndExit(args ...any) {
 // Print formatted output line to stderr and exit with status 1
 // Cannot use log.Fataln() as slog.SetDefault() causes those lines to
 // go into log file
-func PrintfAndExit(format string, args ...any) {
+func PrintfAndExitf(format string, args ...any) {
 	fmt.Fprintf(os.Stderr, format, args...)
 	os.Exit(1)
 }
