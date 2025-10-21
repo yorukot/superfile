@@ -39,7 +39,7 @@ func LoadConfigFile() {
 			toExit = loadError.IsFatal()
 		}
 		if toExit {
-			utils.PrintfAndExit("%s\n", userMsg)
+			utils.PrintfAndExitf("%s\n", userMsg)
 		} else {
 			fmt.Println(userMsg)
 		}
@@ -123,7 +123,7 @@ func LoadHotkeysFile(ignoreMissingFields bool) {
 			toExit = loadError.IsFatal()
 		}
 		if toExit {
-			utils.PrintfAndExit("%s\n", userMsg)
+			utils.PrintfAndExitf("%s\n", userMsg)
 		} else {
 			fmt.Println(userMsg)
 		}
@@ -167,7 +167,7 @@ func LoadThemeFile() {
 
 	err = toml.Unmarshal([]byte(DefaultThemeString), &Theme)
 	if err != nil {
-		utils.PrintfAndExit("Unexpected error while reading default theme file : %v. Exiting...", err)
+		utils.PrintfAndExitf("Unexpected error while reading default theme file : %v. Exiting...", err)
 	}
 }
 
