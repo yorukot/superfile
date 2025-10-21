@@ -279,19 +279,6 @@ func (m *Model) adjustValue(delta int) {
 		}
 	}
 }
-
-func (m *Model) navigateType(delta int) {
-	newType := int(m.renameType) + delta
-	if newType < 0 {
-		newType = 5
-	} else if newType > 5 {
-		newType = 0
-	}
-	m.renameType = RenameType(newType)
-	m.focusInput()
-	m.preview = nil
-}
-
 func (m *Model) navigateCursor(delta int) {
 	if delta > 0 {
 		m.navigateDown()
@@ -465,11 +452,9 @@ func (m *Model) validateRename(itemPath, oldName, newName string) string {
 
 	newPath := filepath.Join(filepath.Dir(itemPath), newName)
 
-
 	if strings.EqualFold(itemPath, newPath) {
 		return ""
 	}
-
 
 	if _, statErr := os.Stat(newPath); statErr == nil {
 		return "File already exists"
@@ -496,7 +481,6 @@ func bulkRenameOperation(processBarModel *processbar.Model, previews []RenamePre
 	if len(previews) == 0 {
 		return processbar.Cancelled
 	}
-
 
 	p, err := processBarModel.SendAddProcessMsg(icon.Terminal+icon.Space+"Bulk Rename", len(previews), true)
 	if err != nil {

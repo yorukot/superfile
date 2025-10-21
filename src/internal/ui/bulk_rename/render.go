@@ -14,7 +14,7 @@ const (
 	modalWidth      = 80
 	modalHeight     = 25
 	leftColWidth    = 20
-	rightColWidth   = 56 // modalWidth - 4 (borders) - leftColWidth - 2 (separator)
+	rightColWidth   = 56
 	columnHeight    = 6
 	maxPreviewItems = 3
 )
@@ -25,7 +25,7 @@ func (m *Model) Render() string {
 		return ""
 	}
 
-	r := ui.BulkRenameRenderer(modalHeight, modalWidth)
+	r := ui.HelpMenuRenderer(modalHeight, modalWidth)
 
 	m.renderTitle(r)
 	r.AddSection()
@@ -149,6 +149,7 @@ func (m *Model) renderInputs() string {
 }
 
 func (m *Model) renderFindReplaceInputs(inputStyle, labelStyle, activeLabelStyle lipgloss.Style) string {
+
 	findStyle := labelStyle
 	replaceStyle := labelStyle
 	if m.cursor == 0 {
@@ -249,11 +250,4 @@ func (m *Model) renderError(r *rendering.Renderer) {
 		Background(common.ModalBGColor).
 		Foreground(lipgloss.Color(common.Theme.Error))
 	r.AddLines(errorStyle.Render("  " + m.errorMessage))
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
 }

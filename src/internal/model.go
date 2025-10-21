@@ -90,7 +90,6 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		inputCmd = m.handleKeyInput(msg)
 
 	case editorFinishedForBulkRenameMsg:
-		// Editor closed, process the bulk rename from tmpfile
 		updateCmd = m.handleEditorFinishedForBulkRename(msg.err)
 
 	// Has to handle zoxide messages separately as they could be generated via

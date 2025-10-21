@@ -150,25 +150,6 @@ func ClipboardRenderer(totalHeight int, totalWidth int) *rendering.Renderer {
 	return r
 }
 
-func BulkRenameRenderer(totalHeight int, totalWidth int) *rendering.Renderer {
-	cfg := rendering.DefaultRendererConfig(totalHeight, totalWidth)
-
-	cfg.ContentFGColor = common.ModalFGColor
-	cfg.ContentBGColor = common.ModalBGColor
-
-	cfg.BorderRequired = true
-	cfg.BorderBGColor = common.ModalBGColor
-	cfg.BorderFGColor = common.ModalBorderActiveColor
-	cfg.Border = DefaultLipglossBorder()
-
-	r, err := rendering.NewRenderer(cfg)
-	if err != nil {
-		slog.Error("Error in creating renderer. Falling back to default renderer", "error", err)
-		r = &rendering.Renderer{}
-	}
-	return r
-}
-
 func DefaultLipglossBorder() lipgloss.Border {
 	return lipgloss.Border{
 		Top:         common.Config.BorderTop,
