@@ -9,7 +9,7 @@ importers:
   .:
     dependencies:
       '@astrojs/sitemap':
-        specifier: ^3.5.1
+        specifier: ^3.4.1
         version: 3.5.1
       '@astrojs/starlight':
         specifier: ^0.35.0
@@ -27,7 +27,7 @@ importers:
         specifier: ^5.2.5
         version: 5.2.6
       astro:
-        specifier: ^5.13.7
+        specifier: ^5.12.8
         version: 5.13.7(@types/node@24.3.1)(rollup@4.50.1)(typescript@5.8.3)
       hast-util-to-html:
         specifier: ^9.0.5
@@ -36,8 +36,8 @@ importers:
         specifier: ^0.34.1
         version: 0.34.3
       starlight-giscus:
-        specifier: ^0.6.1
-        version: 0.6.1(@astrojs/starlight@0.35.2(astro@5.13.7(@types/node@24.3.1)(rollup@4.50.1)(typescript@5.8.3)))
+        specifier: ^0.8.0
+        version: 0.8.1(@astrojs/starlight@0.35.2(astro@5.13.7(@types/node@24.3.1)(rollup@4.50.1)(typescript@5.8.3)))
 
 packages:
 
@@ -1548,6 +1548,7 @@ packages:
   sitemap@8.0.0:
     resolution: {integrity: sha512-+AbdxhM9kJsHtruUF39bwS/B0Fytw6Fr1o4ZAIAEqA6cke2xcoO2GleBw9Zw7nRzILVEgz7zBM5GiTJjie1G9A==}
     engines: {node: '>=14.0.0', npm: '>=6.0.0'}
+    deprecated: 'SECURITY: Multiple vulnerabilities fixed in 8.0.1 (XML injection, path traversal, command injection, protocol injection). Upgrade immediately: npm install sitemap@8.0.1'
     hasBin: true
 
   smol-toml@1.4.2:
@@ -1565,11 +1566,11 @@ packages:
   space-separated-tokens@2.0.2:
     resolution: {integrity: sha512-PEGlAwrG8yXGXRjW32fGbg66JAlOAwbObuqVoJpv/mRgoWDQfgH1wDPvtzWyUSNAXBGSk8h755YDbbcEy3SH2Q==}
 
-  starlight-giscus@0.6.1:
-    resolution: {integrity: sha512-5vwNb06slZW+UwVBrva3gARYoIegr2t5sowfmQ7x5+W1eFv4VlHmIy/XJO7tvdizWlShiRGsgRcQORqrkcemLg==}
-    engines: {node: ^18.17.1 || ^20.3.0 || >=21.0.0}
+  starlight-giscus@0.8.1:
+    resolution: {integrity: sha512-etgWym6KpHeNSkbggEhpGEPNaLIwypWdvE7BxNFHGUkjiq6EYSJhr5zoMGZ9QfnMdkcj8PqKrJTM88YdCSEiDQ==}
+    engines: {node: ^18.20.8 || ^20.3.0 || >=22.0.0}
     peerDependencies:
-      '@astrojs/starlight': '>=0.32.0'
+      '@astrojs/starlight': '>=0.35.0'
 
   stream-replace-string@2.0.0:
     resolution: {integrity: sha512-TlnjJ1C0QrmxRNrON00JvaFFlNh5TTG00APw23j74ET7gkQpTASi6/L2fuiav8pzK715HXtUeClpBTw2NPSn6w==}
@@ -2142,7 +2143,7 @@ snapshots:
   '@expressive-code/plugin-shiki@0.41.3':
     dependencies:
       '@expressive-code/core': 0.41.3
-      shiki: 3.9.2
+      shiki: 3.12.2
 
   '@expressive-code/plugin-text-markers@0.41.3':
     dependencies:
@@ -2468,7 +2469,7 @@ snapshots:
 
   '@types/sax@1.2.7':
     dependencies:
-      '@types/node': 17.0.45
+      '@types/node': 24.3.1
 
   '@types/unist@2.0.11': {}
 
@@ -4016,7 +4017,7 @@ snapshots:
 
   space-separated-tokens@2.0.2: {}
 
-  starlight-giscus@0.6.1(@astrojs/starlight@0.35.2(astro@5.13.7(@types/node@24.3.1)(rollup@4.50.1)(typescript@5.8.3))):
+  starlight-giscus@0.8.1(@astrojs/starlight@0.35.2(astro@5.13.7(@types/node@24.3.1)(rollup@4.50.1)(typescript@5.8.3))):
     dependencies:
       '@astrojs/starlight': 0.35.2(astro@5.13.7(@types/node@24.3.1)(rollup@4.50.1)(typescript@5.8.3))
 
