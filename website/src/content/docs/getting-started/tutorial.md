@@ -22,7 +22,7 @@ Let's start by running superfile! Open a terminal, type `spf` and press `enter`.
 
 To exit, press `q` or `esc`.
 
-![demo](https://github.com/yorukot/superfile/assets/107802416/ddd9f05c-b39b-4f55-838b-d248c845a589)
+![hotkeys-demo](../../../assets/demo/hotkeys-demo.gif)
 
 ### Panel navigation
 
@@ -53,7 +53,7 @@ You can also press `f` to show or hide the preview window.
 
 Also press `F` to hide or show all footer panel.
 
-![demo](https://github.com/yorukot/superfile/assets/107802416/ec7062ce-1884-4395-b68b-e0546c8a02de)
+![panel-navigation-demo](../../../assets/demo/panel-navigation-demo.gif)
 
 :::tip
 The size of the folder will only be shown when you focus on the metadata.
@@ -65,7 +65,7 @@ To create more file panels, press `n`. Press `w` to close the focused file panel
 
 To move through multiple file panels, press `tab` or `L` (shift+l). To move to the previous panel, press `shift`+`left` or `H` (shift+h).
 
-![demo](https://github.com/yorukot/superfile/assets/107802416/2c2a7632-c5c0-43b6-80a7-d6e21fcf63b1)
+![multiple-panels-demo](../../../assets/demo/multiple-panels-demo.gif)
 
 ### Panel movement
 
@@ -75,7 +75,7 @@ While focused on the file panel, move the cursor up with `up` or `k` and down wi
 
 After navigating to the your file/folder, press `enter` or `l` to confirm your selection. Files are opened with your default application (if none set, there will be no response) and folders are opened for viewing. Press `h` or `backspace` to return to the parent directory.
 
-![demo](https://github.com/yorukot/superfile/assets/107802416/f6fd9e4e-f73f-4848-a113-416732abf126)
+![panel-movement-demo](../../../assets/demo/panel-movement-demo.gif)
 
 Folders can be pinned to the sidebar panel. Navigate to and open your folder. Press `P` (shift+p) to pin or unpin it.
 
@@ -109,7 +109,7 @@ This may become tedious when you have a large number of items. Instead, you can 
 
 You can also press `A` (shift+a) to select everything in the current directory.
 
-![demo](https://github.com/yorukot/superfile/assets/107802416/4306fd31-04e0-456c-b1f2-3923e8d932e1)
+![selection-mode-demo](../../../assets/demo/selection-mode-demo.gif)
 
 ### File operations
 
@@ -175,8 +175,7 @@ This will set `nano` as your default editor, and `vi` as your default directory 
 If your directory editor does not support opening the current directory with an editor, you may encounter an error when pressing `E`.
 :::
 
-(Sorry, this video has a little bit of lag)
-[demo video](https://github.com/yorukot/superfile/assets/107802416/d0770b3f-025e-40c9-ad3f-8b2adaf1c6c5)
+![file-operations-demo](../../../assets/demo/file-operations-demo.gif)
 
 ### SPF Prompt
 #### Shell Mode
