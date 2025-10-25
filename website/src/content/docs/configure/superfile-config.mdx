@@ -46,7 +46,9 @@ The editor your directories will be opened with (Leave blank to use defaults : `
 
 After setting to `true`, you need to update your shell config file. Sample changes :
 
-##### MacOS/Linux (bash)
+##### MacOS/Linux (bash or fish)
+
+###### Bash
 
 Open the file:
 
@@ -62,6 +64,26 @@ Save, exit, and reload your `.bashrc` file:
 
 ```bash
 source ~/.bashrc
+```
+
+###### Fish
+
+Open the file:
+
+```bash
+$EDITOR ~/.config/fish/config.fish
+```
+
+If you suspect your `config.fish` file is located somewhere else, read [the Fish shell documentation](https://fishshell.com/docs/current/language.html#configuration)
+
+Copy the following code into the file:
+
+<CodeBlock file="cd_on_quit/cd_on_quit.fish" />
+
+Save, exit, and reload `config.fish`:
+
+```bash
+source ~/.config/fish/config.fish
 ```
 
 ##### Windows (Powershell)
