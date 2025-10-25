@@ -9,7 +9,7 @@ importers:
   .:
     dependencies:
       '@astrojs/sitemap':
-        specifier: ^3.6.0
+        specifier: ^3.4.1
         version: 3.6.0
       '@astrojs/starlight':
         specifier: ^0.35.0
@@ -2436,7 +2436,7 @@ snapshots:
 
   '@types/sax@1.2.7':
     dependencies:
-      '@types/node': 17.0.45
+      '@types/node': 24.9.1
 
   '@types/unist@2.0.11': {}
 
