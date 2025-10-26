@@ -133,11 +133,25 @@ func sortFileElement(sortOptions sortOptionsModelData, dirEntries []os.DirEntry,
 	for _, item := range dirEntries {
 		directoryElement = append(directoryElement, element{
 			name:      item.Name(),
-			directory: item.IsDir(),
+			directory: isDirOrSymlinkToDir(location, item),
 			location:  filepath.Join(location, item.Name()),
 		})
 	}
 	return directoryElement
+}
+
+// Symlinks to directories are to be identified as directories
+func isDirOrSymlinkToDir(location string, d os.DirEntry) bool {
+	if d.IsDir() {
+		return true
+	}
+	if info, err := d.Info(); err == nil {
+		if info.Mode()&os.ModeSymlink != 0 {
+			targetInfo, errStat := os.Stat(filepath.Join(location, d.Name()))
+			return errStat == nil && targetInfo.IsDir()
+		}
+	}
+	return false
 }
 
 func getOrderingFunc(location string, dirEntries []os.DirEntry, reversed bool, sortOption string) sliceOrderFunc {
