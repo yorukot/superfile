@@ -131,11 +131,6 @@ func (panel *filePanel) renderFileEntries(r *rendering.Renderer, mainPanelHeight
 			cursor = icon.Cursor
 		}
 
-		// Performance TODO: Remove or cache this if not needed at render time
-		// This will unnecessarily slow down rendering. There should be a way to avoid this at render
-		_, err := os.ReadDir(panel.element[i].location)
-		dirExists := err == nil || panel.element[i].directory
-
 		selectBox := panel.renderSelectBox(isSelected)
 
 		// Calculate the actual prefix width for proper alignment
@@ -144,7 +139,7 @@ func (panel *filePanel) renderFileEntries(r *rendering.Renderer, mainPanelHeight
 		renderedName := common.PrettierName(
 			panel.element[i].name,
 			filePanelWidth-prefixWidth,
-			dirExists,
+			panel.element[i].directory,
 			isSelected,
 			common.FilePanelBGColor,
 		)
