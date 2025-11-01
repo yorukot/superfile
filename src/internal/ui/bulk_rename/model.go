@@ -170,7 +170,7 @@ func (m *Model) handleConfirm() common.ModelAction {
 		return m.handleEditorMode()
 	}
 
-	previews := m.GeneratePreview()
+	previews := m.GeneratePreviewWithValidation()
 
 	validPreviews := make([]RenamePreview, 0, len(previews))
 	for _, p := range previews {
@@ -347,10 +347,18 @@ func (m *Model) prevType() {
 	m.preview = nil
 }
 func (m *Model) GeneratePreview() []RenamePreview {
+	return m.generatePreview(false)
+}
+
+func (m *Model) GeneratePreviewWithValidation() []RenamePreview {
+	return m.generatePreview(true)
+}
+
+func (m *Model) generatePreview(validate bool) []RenamePreview {
 	previews := make([]RenamePreview, 0, len(m.selectedFiles))
 
 	for i, itemPath := range m.selectedFiles {
-		preview := m.createRenamePreview(itemPath, i)
+		preview := m.createRenamePreview(itemPath, i, validate)
 		previews = append(previews, preview)
 	}
 
@@ -358,15 +366,22 @@ func (m *Model) GeneratePreview() []RenamePreview {
 	return previews
 }
 
-func (m *Model) createRenamePreview(itemPath string, index int) RenamePreview {
+func (m *Model) createRenamePreview(itemPath string, index int, validate bool) RenamePreview {
 	oldName := filepath.Base(itemPath)
 	newName := m.applyTransformation(oldName, index)
+
+	var err string
+	if validate {
+		err = m.validateRename(itemPath, oldName, newName)
+	} else {
+		err = m.validateRenameWithoutStat(oldName, newName)
+	}
 
 	return RenamePreview{
 		OldPath: itemPath,
 		OldName: oldName,
 		NewName: newName,
-		Error:   m.validateRename(itemPath, oldName, newName),
+		Error:   err,
 	}
 }
 
@@ -449,6 +464,16 @@ func toTitleCase(text string) string {
 		}
 	}
 	return strings.Join(words, " ")
+}
+
+func (m *Model) validateRenameWithoutStat(oldName, newName string) string {
+	if newName == "" {
+		return "Empty filename"
+	}
+	if newName == oldName {
+		return "No change"
+	}
+	return ""
 }
 
 func (m *Model) validateRename(itemPath, oldName, newName string) string {

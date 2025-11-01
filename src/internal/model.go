@@ -393,7 +393,7 @@ func (m *model) routeModalInput(msg string) tea.Cmd {
 		m.sidebarRenamingKey(msg)
 		return nil
 	}
-	
+
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
 	if panel.searchBar.Focused() {
 		m.focusOnSearchbarKey(msg)
@@ -829,8 +829,8 @@ func (m *model) updateRenderForOverlay(finalRender string) string {
 
 	if m.bulkRenameModel.IsOpen() {
 		bulkRenameModal := m.bulkRenameModel.Render()
-		overlayX := m.fullWidth/2 - 40
-		overlayY := m.fullHeight/2 - 12
+		overlayX := m.fullWidth/2 - m.helpMenu.width/2
+		overlayY := m.fullHeight/2 - m.helpMenu.height/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, bulkRenameModal, finalRender)
 	}
 
