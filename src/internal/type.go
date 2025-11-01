@@ -5,6 +5,7 @@ import (
 
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 
+	bulkrename "github.com/yorukot/superfile/src/internal/ui/bulk_rename"
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
@@ -72,11 +73,12 @@ type model struct {
 	copyItems       copyItems
 
 	// Modals
-	notifyModel notify.Model
-	typingModal typingModal
-	helpMenu    helpMenuModal
-	promptModal prompt.Model
-	zoxideModal zoxideui.Model
+	notifyModel     notify.Model
+	typingModal     typingModal
+	bulkRenameModel bulkrename.Model
+	helpMenu        helpMenuModal
+	promptModal     prompt.Model
+	zoxideModal     zoxideui.Model
 
 	// Zoxide client for directory tracking
 	zClient *zoxidelib.Client
@@ -90,6 +92,9 @@ type model struct {
 	toggleFooter         bool
 	firstLoadingComplete bool
 	firstUse             bool
+
+	// Pending editor action for bulk rename
+	pendingEditorAction *bulkrename.EditorModeAction
 
 	// This entirely disables metadata fetching. Used in test model
 	disableMetadata     bool
@@ -135,7 +140,9 @@ type typingModal struct {
 	errorMesssage string
 }
 
-// Copied items
+type keyInputContext struct {
+	msg string
+} // Copied items
 type copyItems struct {
 	items []string
 	cut   bool
@@ -200,5 +207,6 @@ type element struct {
 /* FILE WINDOWS TYPE END*/
 
 type editorFinishedMsg struct{ err error }
+type editorFinishedForBulkRenameMsg struct{ err error }
 
 type sliceOrderFunc func(i, j int) bool
