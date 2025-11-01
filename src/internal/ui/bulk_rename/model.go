@@ -495,15 +495,13 @@ func (m *Model) validateRename(itemPath, oldName, newName string) string {
 	}
 	return ""
 }
-
-func (m *Model) SetWidth(width int) {
-	m.width = width
+func (m *Model) GetWidth() int {
+	return 80
 }
 
-func (m *Model) SetHeight(height int) {
-	m.height = height
+func (m *Model) GetHeight() int {
+	return 25
 }
-
 func ExecuteBulkRename(processBarModel *processbar.Model, previews []RenamePreview) tea.Cmd {
 	return func() tea.Msg {
 		state := bulkRenameOperation(processBarModel, previews)

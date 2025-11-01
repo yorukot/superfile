@@ -829,8 +829,8 @@ func (m *model) updateRenderForOverlay(finalRender string) string {
 
 	if m.bulkRenameModel.IsOpen() {
 		bulkRenameModal := m.bulkRenameModel.Render()
-		overlayX := m.fullWidth/2 - m.helpMenu.width/2
-		overlayY := m.fullHeight/2 - m.helpMenu.height/2
+		overlayX := m.fullWidth/2 - m.bulkRenameModel.GetWidth()/2
+		overlayY := m.fullHeight/2 - m.bulkRenameModel.GetHeight()/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, bulkRenameModal, finalRender)
 	}
 
