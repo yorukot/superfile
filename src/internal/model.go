@@ -366,94 +366,60 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 }
 
 func (m *model) handleModalOrDefaultKey(msg tea.KeyMsg) tea.Cmd {
-	modalState := m.getModalState()
-	if cmd := m.handleActiveModal(msg.String(), modalState); cmd != nil || m.isAnyModalActive(modalState) {
+	if cmd := m.routeModalInput(msg.String()); cmd != nil {
 		return cmd
+	}
+	if m.isAnyModalActive() {
+		return nil
 	}
 	return m.handleDefaultKey(msg.String())
 }
 
-func (m *model) handleActiveModal(msg string, modalState modalStateChecker) tea.Cmd {
-	if cmd := m.routeModalInput(msg, modalState); cmd != nil || m.isAnyModalActive(modalState) {
-		return cmd
-	}
-	return nil
-}
-
-func (m *model) routeModalInput(msg string, state modalStateChecker) tea.Cmd {
-	if state.typingOpen {
+func (m *model) routeModalInput(msg string) tea.Cmd {
+	if m.typingModal.open {
 		m.typingModalOpenKey(msg)
 		return nil
 	}
-	if state.promptOpen || state.zoxideOpen || state.bulkRenameOpen {
+	if m.promptModal.IsOpen() || m.zoxideModal.IsOpen() || m.bulkRenameModel.IsOpen() {
 		return nil
 	}
-	if state.notifyOpen {
+	if m.notifyModel.IsOpen() {
 		return m.notifyModelOpenKey(msg)
 	}
-	if state.renaming {
+	if m.fileModel.renaming {
 		return m.renamingKey(msg)
 	}
-
-	return m.routeSecondaryModalInput(msg, state)
-}
-
-func (m *model) routeSecondaryModalInput(msg string, state modalStateChecker) tea.Cmd {
-	if state.sidebarRenaming {
+	if m.sidebarModel.IsRenaming() {
 		m.sidebarRenamingKey(msg)
 		return nil
 	}
-	if state.searchFocused {
+	
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	if panel.searchBar.Focused() {
 		m.focusOnSearchbarKey(msg)
 		return nil
 	}
-	if state.sidebarSearch {
+	if m.sidebarModel.SearchBarFocused() {
 		m.sidebarModel.HandleSearchBarKey(msg)
 		return nil
 	}
-	if state.sortOpen {
+	if panel.sortOptions.open {
 		m.sortOptionsKey(msg)
 		return nil
 	}
-	if state.helpOpen {
+	if m.helpMenu.open {
 		m.helpMenuKey(msg)
 		return nil
 	}
 	return nil
 }
 
-func (m *model) getModalState() modalStateChecker {
+func (m *model) isAnyModalActive() bool {
 	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	return modalStateChecker{
-		typingOpen:      m.typingModal.open,
-		promptOpen:      m.promptModal.IsOpen(),
-		zoxideOpen:      m.zoxideModal.IsOpen(),
-		notifyOpen:      m.notifyModel.IsOpen(),
-		bulkRenameOpen:  m.bulkRenameModel.IsOpen(),
-		renaming:        m.fileModel.renaming,
-		sidebarRenaming: m.sidebarModel.IsRenaming(),
-		searchFocused:   panel.searchBar.Focused(),
-		sidebarSearch:   m.sidebarModel.SearchBarFocused(),
-		sortOpen:        panel.sortOptions.open,
-		helpOpen:        m.helpMenu.open,
-	}
-}
-
-func (m *model) isAnyModalActive(state modalStateChecker) bool {
-	if m.hasPrimaryModalsActive(state) {
-		return true
-	}
-	return m.hasSecondaryModalsActive(state)
-}
-
-func (m *model) hasPrimaryModalsActive(state modalStateChecker) bool {
-	return state.typingOpen || state.promptOpen || state.zoxideOpen ||
-		state.notifyOpen || state.bulkRenameOpen || state.renaming
-}
-
-func (m *model) hasSecondaryModalsActive(state modalStateChecker) bool {
-	return state.sidebarRenaming || state.searchFocused || state.sidebarSearch ||
-		state.sortOpen || state.helpOpen
+	return m.typingModal.open || m.promptModal.IsOpen() || m.zoxideModal.IsOpen() ||
+		m.notifyModel.IsOpen() || m.bulkRenameModel.IsOpen() || m.fileModel.renaming ||
+		m.sidebarModel.IsRenaming() || panel.searchBar.Focused() ||
+		m.sidebarModel.SearchBarFocused() || panel.sortOptions.open || m.helpMenu.open
 }
 
 func (m *model) handleDefaultKey(msg string) tea.Cmd {

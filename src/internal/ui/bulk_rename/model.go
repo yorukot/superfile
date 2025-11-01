@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"runtime"
 	"slices"
 	"strconv"
 	"strings"
@@ -15,6 +16,7 @@ import (
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
+	"github.com/yorukot/superfile/src/internal/utils"
 )
 
 type RenameType int
@@ -189,9 +191,16 @@ func (m *Model) handleConfirm() common.ModelAction {
 }
 
 func (m *Model) handleEditorMode() common.ModelAction {
-	editor := os.Getenv("EDITOR")
+	editor := common.Config.Editor
 	if editor == "" {
-		editor = "vi"
+		editor = os.Getenv("EDITOR")
+	}
+	if editor == "" {
+		if runtime.GOOS == utils.OsWindows {
+			editor = "notepad"
+		} else {
+			editor = "nano"
+		}
 	}
 
 	tmpfile, err := os.CreateTemp("", "superfile-bulk-rename-*.txt")

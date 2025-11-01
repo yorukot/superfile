@@ -140,23 +140,8 @@ type typingModal struct {
 	errorMesssage string
 }
 
-type modalStateChecker struct {
-	typingOpen      bool
-	promptOpen      bool
-	zoxideOpen      bool
-	notifyOpen      bool
-	bulkRenameOpen  bool
-	renaming        bool
-	sidebarRenaming bool
-	searchFocused   bool
-	sidebarSearch   bool
-	sortOpen        bool
-	helpOpen        bool
-}
-
 type keyInputContext struct {
-	msg          string
-	modalChecker modalStateChecker
+	msg string
 } // Copied items
 type copyItems struct {
 	items []string
