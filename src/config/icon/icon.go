@@ -107,7 +107,6 @@ var Icons = map[string]Style{
 	"key":          {Icon: "\uf43d", Color: "#f1c40f"},     // Printable Rune : ""
 	"ko":           {Icon: "\uebc6", Color: "#9b59b6"},     // Printable Rune : ""
 	"kt":           {Icon: "\ue634", Color: "#2980b9"},     // Printable Rune : ""
-	"kts":          {Icon: "\ue634", Color: "#2980b9"},     // Printable Rune : ""
 	"less":         {Icon: "\ue758", Color: "#3498db"},     // Printable Rune : ""
 	"lock":         {Icon: "\uf023", Color: "#f1c40f"},     // Printable Rune : ""
 	"log":          {Icon: "\uf18d", Color: "#7f8c8d"},     // Printable Rune : ""
@@ -280,6 +279,7 @@ var Aliases = map[string]string{
 	"vhdx":             "iso",
 	"vmdk":             "iso",
 	"jar":              "java",
+	"kts":              "kt",
 	"cjs":              "js",
 	"properties":       "json",
 	"webmanifest":      "json",
