@@ -279,6 +279,7 @@ var Aliases = map[string]string{
 	"vhdx":             "iso",
 	"vmdk":             "iso",
 	"jar":              "java",
+	"kts":              "kt",
 	"cjs":              "js",
 	"properties":       "json",
 	"webmanifest":      "json",
