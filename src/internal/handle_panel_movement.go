@@ -36,7 +36,7 @@ func (m *model) enterPanel() {
 
 		if selectedItem.info.Mode()&os.ModeSymlink != 0 {
 			var symlinkErr error
-			targetPath, symlinkErr = filepath.EvalSymlinks(selectedItem.location)
+			targetPath, symlinkErr = filepath.EvalSymlinks(targetPath)
 			if symlinkErr != nil {
 				return
 			}
@@ -49,7 +49,7 @@ func (m *model) enterPanel() {
 		// TODO : Propagate error out from this this function. Return here, instead of logging
 		err := m.updateCurrentFilePanelDir(targetPath)
 		if err != nil {
-			slog.Error("Error while changing to directory", "error", err, "target", selectedItem.location)
+			slog.Error("Error while changing to directory", "error", err, "target", targetPath)
 		}
 		return
 	}
