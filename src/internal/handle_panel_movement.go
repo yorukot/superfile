@@ -32,38 +32,26 @@ func (m *model) enterPanel() {
 	}
 	selectedItem := panel.getSelectedItem()
 	if selectedItem.directory {
+		targetPath := selectedItem.location
+
+		if selectedItem.info.Mode()&os.ModeSymlink != 0 {
+			var symlinkErr error
+			targetPath, symlinkErr = filepath.EvalSymlinks(selectedItem.location)
+			if symlinkErr != nil {
+				return
+			}
+
+			// targetPath shouldn't be a link now, so Stat and Lstat should be same
+			if targetInfo, lstatErr := os.Lstat(targetPath); lstatErr != nil || !targetInfo.IsDir() {
+				return
+			}
+		}
 		// TODO : Propagate error out from this this function. Return here, instead of logging
-		err := m.updateCurrentFilePanelDir(selectedItem.location)
+		err := m.updateCurrentFilePanelDir(targetPath)
 		if err != nil {
 			slog.Error("Error while changing to directory", "error", err, "target", selectedItem.location)
 		}
 		return
-	}
-	fileInfo, err := os.Lstat(selectedItem.location)
-	if err != nil {
-		slog.Error("Error while getting file info", "error", err)
-		return
-	}
-
-	if fileInfo.Mode()&os.ModeSymlink != 0 {
-		targetPath, symlinkErr := filepath.EvalSymlinks(selectedItem.location)
-		if symlinkErr != nil {
-			return
-		}
-
-		targetInfo, lstatErr := os.Lstat(targetPath)
-
-		if lstatErr != nil {
-			return
-		}
-
-		if targetInfo.IsDir() {
-			err = m.updateCurrentFilePanelDir(targetPath)
-			if err != nil {
-				slog.Error("Error while changing to directory", "error", err, "target", targetPath)
-			}
-			return
-		}
 	}
 
 	if variable.ChooserFile != "" {
