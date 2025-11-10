@@ -129,7 +129,8 @@ func sortFileElement(sortOptions sortOptionsModelData, dirEntries []os.DirEntry,
 	for _, item := range dirEntries {
 		info, err := item.Info()
 		if err != nil {
-			slog.Error("Error while retrieving file info during sort", "error", err, "path", filepath.Join(location, item.Name()))
+			slog.Error("Error while retrieving file info during sort",
+				"error", err, "path", filepath.Join(location, item.Name()))
 			continue
 		}
 
