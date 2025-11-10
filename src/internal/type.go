@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"os"
 	"time"
 
 	zoxidelib "github.com/lazysegtree/go-zoxide"
@@ -195,6 +196,7 @@ type element struct {
 	location  string
 	directory bool
 	metaData  [][2]string
+	info      os.FileInfo
 }
 
 /* FILE WINDOWS TYPE END*/
