@@ -38,8 +38,28 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+fetch_latest_version() {
+    local temp_file=$(mktemp)
+    if curl -s --connect-timeout 5 --max-time 10 "https://api.github.com/repos/yorukot/superfile/releases/latest" -o "$temp_file"; then
+        local version=$(grep '"tag_name"' "$temp_file" | cut -d'"' -f4 | sed 's/^v//')
+        rm -f "$temp_file"
+        if [ -n "$version" ]; then
+            echo "$version"
+        else
+            echo -e "${red}❌ Failed to parse version from GitHub API${nc}" >&2
+            rm -rf "$temp_dir"
+            exit 1
+        fi
+    else
+        rm -f "$temp_file"
+        echo -e "${red}❌ Failed to fetch latest version from GitHub API${nc}" >&2
+        rm -rf "$temp_dir"
+        exit 1
+    fi
+}
+
 package=superfile
-version=${SPF_INSTALL_VERSION:-1.4.0}
+version=${SPF_INSTALL_VERSION:-$(fetch_latest_version)}
 arch=$(uname -m)
 os=$(uname -s)
 
