@@ -1,8 +1,6 @@
 # =================================================================================================
 # Global hotkeys (cannot conflict with other hotkeys)
 
-# Need to add vim hotkeys for bulk_rename
-
 confirm = ['enter', 'right', 'l']
 quit = ['q', 'esc']
 cd_quit = ['Q', '']

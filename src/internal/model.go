@@ -808,7 +808,7 @@ func (m *model) updateRenderForOverlay(finalRender string) string {
 
 	if panel.sortOptions.open {
 		sortOptions := m.sortOptionsRender()
-		overlayX := m.fullWidth/2 - panel.sortOptions.width/29
+		overlayX := m.fullWidth/2 - panel.sortOptions.width/2
 		overlayY := m.fullHeight/2 - panel.sortOptions.height/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, sortOptions, finalRender)
 	}

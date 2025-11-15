@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
@@ -18,8 +17,6 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/utils"
 )
-
-type RenameType int
 
 const (
 	FindReplace RenameType = iota
@@ -30,48 +27,11 @@ const (
 	EditorMode
 )
 
-type CaseType int
-
 const (
 	CaseLower CaseType = iota
 	CaseUpper
 	CaseTitle
 )
-
-type Model struct {
-	open         bool
-	renameType   RenameType
-	caseType     CaseType
-	cursor       int
-	startNumber  int
-	errorMessage string
-
-	findInput    textinput.Model
-	replaceInput textinput.Model
-	prefixInput  textinput.Model
-	suffixInput  textinput.Model
-
-	preview []RenamePreview
-
-	reqCnt int
-
-	width  int
-	height int
-
-	selectedFiles []string
-	currentDir    string
-}
-
-type RenamePreview struct {
-	OldPath string
-	OldName string
-	NewName string
-	Error   string
-}
-
-type UpdateMsg struct {
-	reqID int
-}
 
 func (msg UpdateMsg) GetReqID() int {
 	return msg.reqID
@@ -230,19 +190,8 @@ func (m *Model) handleEditorMode() common.ModelAction {
 	}
 }
 
-type EditorModeAction struct {
-	TmpfilePath   string
-	Editor        string
-	SelectedFiles []string
-	CurrentDir    string
-}
-
 func (a EditorModeAction) String() string {
 	return "EditorModeAction with editor: " + a.Editor
-}
-
-type BulkRenameAction struct {
-	Previews []RenamePreview
 }
 
 func (a BulkRenameAction) String() string {
@@ -287,64 +236,6 @@ func (m *Model) adjustValue(delta int) {
 			m.preview = nil
 		}
 	}
-}
-func (m *Model) navigateCursor(delta int) {
-	if delta > 0 {
-		m.navigateDown()
-	} else {
-		m.navigateUp()
-	}
-}
-
-func (m *Model) navigateUp() {
-	if m.cursor > 0 {
-		m.cursor--
-		m.focusInput()
-	}
-}
-
-func (m *Model) navigateDown() {
-	if m.cursor < 1 {
-		m.cursor++
-		m.focusInput()
-	}
-}
-
-func (m *Model) focusInput() {
-	m.findInput.Blur()
-	m.replaceInput.Blur()
-	m.prefixInput.Blur()
-	m.suffixInput.Blur()
-
-	switch m.renameType {
-	case FindReplace:
-		if m.cursor == 0 {
-			m.findInput.Focus()
-		} else {
-			m.replaceInput.Focus()
-		}
-	case AddPrefix:
-		m.prefixInput.Focus()
-	case AddSuffix:
-		m.suffixInput.Focus()
-
-	}
-}
-
-func (m *Model) nextType() {
-	m.renameType = RenameType((int(m.renameType) + 1) % 6)
-	m.focusInput()
-	m.preview = nil
-}
-
-func (m *Model) prevType() {
-	newType := int(m.renameType) - 1
-	if newType < 0 {
-		newType = 5
-	}
-	m.renameType = RenameType(newType)
-	m.focusInput()
-	m.preview = nil
 }
 func (m *Model) GeneratePreview() []RenamePreview {
 	return m.generatePreview(false)
@@ -541,11 +432,6 @@ func bulkRenameOperation(processBarModel *processbar.Model, previews []RenamePre
 	}
 
 	return p.State
-}
-
-type BulkRenameResultMsg struct {
-	state processbar.ProcessState
-	count int
 }
 
 func NewBulkRenameResultMsg(state processbar.ProcessState, count int) BulkRenameResultMsg {
