@@ -181,13 +181,14 @@ func (m *model) handleSelectModeKeys(msg string) tea.Cmd {
 }
 
 func (m *model) handleSelectModeFileOperations(msg string) tea.Cmd {
-	if slices.Contains(common.Hotkeys.CopyItems, msg) {
+	switch {
+	case slices.Contains(common.Hotkeys.CopyItems, msg):
 		m.copyMultipleItem(false)
-	} else if slices.Contains(common.Hotkeys.CutItems, msg) {
+	case slices.Contains(common.Hotkeys.CutItems, msg):
 		m.copyMultipleItem(true)
-	} else if slices.Contains(common.Hotkeys.BulkRename, msg) {
+	case slices.Contains(common.Hotkeys.BulkRename, msg):
 		m.panelBulkRename()
-	} else if slices.Contains(common.Hotkeys.FilePanelSelectAllItem, msg) {
+	case slices.Contains(common.Hotkeys.FilePanelSelectAllItem, msg):
 		m.selectAllItem()
 	}
 	return nil

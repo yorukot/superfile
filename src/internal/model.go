@@ -556,7 +556,8 @@ func (m *model) handleEditorModeAction(action bulkrename.EditorModeAction) tea.C
 
 	parts := strings.Fields(action.Editor)
 	cmd := parts[0]
-	args := append(parts[1:], action.TmpfilePath)
+	args := parts[1:]
+	args = append(args, action.TmpfilePath)
 
 	c := exec.Command(cmd, args...)
 

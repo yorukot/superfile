@@ -200,7 +200,7 @@ func TestNavigateTypes(t *testing.T) {
 	m.Open(files, tmpDir)
 
 	types := []RenameType{FindReplace, AddPrefix, AddSuffix, AddNumbering, ChangeCase, EditorMode}
-	
+
 	for i := 0; i < len(types); i++ {
 		assert.Equal(t, types[i], m.renameType)
 		m.nextType()
@@ -241,7 +241,7 @@ func TestBulkRenameOperation(t *testing.T) {
 	t.Run("successful rename", func(t *testing.T) {
 		tmpDir := t.TempDir()
 		files := map[string]string{"old1.txt": "content1", "old2.txt": "content2"}
-		
+
 		for name, content := range files {
 			require.NoError(t, os.WriteFile(filepath.Join(tmpDir, name), []byte(content), 0644))
 		}

@@ -140,9 +140,7 @@ type typingModal struct {
 	errorMesssage string
 }
 
-type keyInputContext struct {
-	msg string
-} // Copied items
+// Copied items
 type copyItems struct {
 	items []string
 	cut   bool

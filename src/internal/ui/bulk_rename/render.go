@@ -149,7 +149,6 @@ func (m *Model) renderInputs() string {
 }
 
 func (m *Model) renderFindReplaceInputs(inputStyle, labelStyle, activeLabelStyle lipgloss.Style) string {
-
 	findStyle := labelStyle
 	replaceStyle := labelStyle
 	if m.cursor == 0 {
@@ -207,7 +206,7 @@ func (m *Model) renderPreview(r *rendering.Renderer) {
 
 	r.AddLines(previewTitleStyle.Render("  Preview:"))
 
-	for i := 0; i < previewCount; i++ {
+	for i := range previewCount {
 		preview := m.preview[i]
 		availableWidth := modalWidth - 6
 		truncatedName := common.TruncateText(preview.NewName, availableWidth, "...")

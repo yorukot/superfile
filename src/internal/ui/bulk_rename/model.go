@@ -33,6 +33,11 @@ const (
 	CaseTitle
 )
 
+const (
+	DefaultHeight = 25
+	DefaultWidth  = 80
+)
+
 func (msg UpdateMsg) GetReqID() int {
 	return msg.reqID
 }
@@ -288,6 +293,9 @@ func (m *Model) applyTransformation(oldName string, index int) string {
 		return m.applyNumbering(oldName, index)
 	case ChangeCase:
 		return m.applyCaseConversion(oldName)
+	case EditorMode:
+		// EditorMode doesn't use real-time transformation
+		return oldName
 	default:
 		return oldName
 	}

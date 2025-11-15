@@ -39,7 +39,6 @@ func (m *Model) focusInput() {
 		m.prefixInput.Focus()
 	case AddSuffix:
 		m.suffixInput.Focus()
-
 	}
 }
 
