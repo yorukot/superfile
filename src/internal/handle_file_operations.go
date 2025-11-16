@@ -452,19 +452,7 @@ func (m *model) openFileWithEditor() tea.Cmd {
 		slog.Error("Error while writing to chooser file, continuing with open via file editor", "error", err)
 	}
 
-	editor := common.Config.Editor
-	if editor == "" {
-		editor = os.Getenv("EDITOR")
-	}
-
-	// Make sure there is an editor
-	if editor == "" {
-		if runtime.GOOS == utils.OsWindows {
-			editor = "notepad"
-		} else {
-			editor = "nano"
-		}
-	}
+	editor := common.ResolveEditor()
 
 	// Split the editor command into command and arguments
 	parts := strings.Fields(editor)

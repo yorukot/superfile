@@ -4,7 +4,6 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
-	"runtime"
 	"slices"
 	"strconv"
 	"strings"
@@ -15,7 +14,6 @@ import (
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
-	"github.com/yorukot/superfile/src/internal/utils"
 )
 
 const (
@@ -156,17 +154,7 @@ func (m *Model) handleConfirm() common.ModelAction {
 }
 
 func (m *Model) handleEditorMode() common.ModelAction {
-	editor := common.Config.Editor
-	if editor == "" {
-		editor = os.Getenv("EDITOR")
-	}
-	if editor == "" {
-		if runtime.GOOS == utils.OsWindows {
-			editor = "notepad"
-		} else {
-			editor = "nano"
-		}
-	}
+	editor := common.ResolveEditor()
 
 	tmpfile, err := os.CreateTemp("", "superfile-bulk-rename-*.txt")
 	if err != nil {
