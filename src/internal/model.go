@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log/slog"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"reflect"
 	"slices"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
+	bulkrename "github.com/yorukot/superfile/src/internal/ui/bulk_rename"
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/utils"
@@ -86,6 +88,9 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.handleMouseMsg(msg)
 	case tea.KeyMsg:
 		inputCmd = m.handleKeyInput(msg)
+
+	case editorFinishedForBulkRenameMsg:
+		updateCmd = m.handleEditorFinishedForBulkRename(msg.err)
 
 	// Has to handle zoxide messages separately as they could be generated via
 	// zoxide update commands, or batched commands from textinput
@@ -355,57 +360,85 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 		m.firstUse = false
 		return nil
 	}
-	var cmd tea.Cmd
-	cdOnQuit := common.Config.CdOnQuit
-	switch {
-	case m.typingModal.open:
-		m.typingModalOpenKey(msg.String())
-	case m.promptModal.IsOpen():
-		// Ignore keypress. It will be handled in Update call via
-		// updateFilePanelState
-		// TODO: Convert that to async via tea.Cmd
-	case m.zoxideModal.IsOpen():
-		// Ignore keypress. It will be handled in Update call via
-		// updateFilePanelState
 
-	// Handles all warn models except the warn model for confirming to quit
-	case m.notifyModel.IsOpen():
-		cmd = m.notifyModelOpenKey(msg.String())
+	cmd := m.handleModalOrDefaultKey(msg)
+	return m.handleQuitState(cmd, common.Config.CdOnQuit)
+}
 
-	// If renaming a object
-	case m.fileModel.renaming:
-		cmd = m.renamingKey(msg.String())
-	case m.sidebarModel.IsRenaming():
-		m.sidebarRenamingKey(msg.String())
-	// If search bar is open
-	case m.fileModel.filePanels[m.filePanelFocusIndex].searchBar.Focused():
-		m.focusOnSearchbarKey(msg.String())
-	// If sort options menu is open
-	case m.sidebarModel.SearchBarFocused():
-		m.sidebarModel.HandleSearchBarKey(msg.String())
-	case m.fileModel.filePanels[m.filePanelFocusIndex].sortOptions.open:
-		m.sortOptionsKey(msg.String())
-	// If help menu is open
-	case m.helpMenu.open:
-		m.helpMenuKey(msg.String())
+func (m *model) handleModalOrDefaultKey(msg tea.KeyMsg) tea.Cmd {
+	if cmd := m.routeModalInput(msg.String()); cmd != nil {
+		return cmd
+	}
+	if m.isAnyModalActive() {
+		return nil
+	}
+	return m.handleDefaultKey(msg.String())
+}
 
-	case slices.Contains(common.Hotkeys.Quit, msg.String()):
-		m.modelQuitState = quitInitiated
-
-	case slices.Contains(common.Hotkeys.CdQuit, msg.String()):
-		m.modelQuitState = quitInitiated
-		cdOnQuit = true
-
-	default:
-		// Handles general kinds of inputs in the regular state of the application
-		cmd = m.mainKey(msg.String())
+func (m *model) routeModalInput(msg string) tea.Cmd {
+	if m.typingModal.open {
+		m.typingModalOpenKey(msg)
+		return nil
+	}
+	if m.promptModal.IsOpen() || m.zoxideModal.IsOpen() || m.bulkRenameModel.IsOpen() {
+		return nil
+	}
+	if m.notifyModel.IsOpen() {
+		return m.notifyModelOpenKey(msg)
+	}
+	if m.fileModel.renaming {
+		return m.renamingKey(msg)
+	}
+	if m.sidebarModel.IsRenaming() {
+		m.sidebarRenamingKey(msg)
+		return nil
 	}
 
-	// If quiting input pressed, check if has any running process and displays a
-	// warn. Otherwise just quits application
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	if panel.searchBar.Focused() {
+		m.focusOnSearchbarKey(msg)
+		return nil
+	}
+	if m.sidebarModel.SearchBarFocused() {
+		m.sidebarModel.HandleSearchBarKey(msg)
+		return nil
+	}
+	if panel.sortOptions.open {
+		m.sortOptionsKey(msg)
+		return nil
+	}
+	if m.helpMenu.open {
+		m.helpMenuKey(msg)
+		return nil
+	}
+	return nil
+}
+
+func (m *model) isAnyModalActive() bool {
+	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	return m.typingModal.open || m.promptModal.IsOpen() || m.zoxideModal.IsOpen() ||
+		m.notifyModel.IsOpen() || m.bulkRenameModel.IsOpen() || m.fileModel.renaming ||
+		m.sidebarModel.IsRenaming() || panel.searchBar.Focused() ||
+		m.sidebarModel.SearchBarFocused() || panel.sortOptions.open || m.helpMenu.open
+}
+
+func (m *model) handleDefaultKey(msg string) tea.Cmd {
+	switch {
+	case slices.Contains(common.Hotkeys.Quit, msg):
+		m.modelQuitState = quitInitiated
+		return nil
+	case slices.Contains(common.Hotkeys.CdQuit, msg):
+		m.modelQuitState = quitInitiated
+		common.Config.CdOnQuit = true
+		return nil
+	default:
+		return m.mainKey(msg)
+	}
+}
+
+func (m *model) handleQuitState(cmd tea.Cmd, cdOnQuit bool) tea.Cmd {
 	if m.modelQuitState == quitInitiated {
 		if m.processBarModel.HasRunningProcesses() {
-			// Dont quit now, get a confirmation first.
 			m.modelQuitState = quitConfirmationInitiated
 			m.warnModalForQuit()
 			return cmd
@@ -419,15 +452,36 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 	return cmd
 }
 
-// Update the file panel state. Change name of renamed files, filter out files
-// in search, update typingb bar, etc
 func (m *model) updateFilePanelsState(msg tea.Msg) tea.Cmd {
 	focusPanel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	var cmd tea.Cmd
-	var action common.ModelAction
-	switch {
-	case m.firstTextInput:
+
+	if m.firstTextInput {
 		m.firstTextInput = false
+		return nil
+	}
+
+	cmd = m.handleInputUpdates(msg, focusPanel)
+
+	// The code should never reach this state.
+	if focusPanel.cursor < 0 {
+		focusPanel.cursor = 0
+	}
+
+	return cmd
+}
+
+func (m *model) handleInputUpdates(msg tea.Msg, focusPanel *filePanel) tea.Cmd {
+	var cmd tea.Cmd
+	var action common.ModelAction
+
+	switch {
+	case m.bulkRenameModel.IsOpen():
+		action, cmd = m.bulkRenameModel.HandleUpdate(msg)
+		editorCmd := m.applyBulkRenameAction(action)
+		if editorCmd != nil {
+			cmd = tea.Batch(cmd, editorCmd)
+		}
 	case m.fileModel.renaming:
 		focusPanel.rename, cmd = focusPanel.rename.Update(msg)
 	case focusPanel.searchBar.Focused():
@@ -435,19 +489,12 @@ func (m *model) updateFilePanelsState(msg tea.Msg) tea.Cmd {
 	case m.typingModal.open:
 		m.typingModal.textInput, cmd = m.typingModal.textInput.Update(msg)
 	case m.promptModal.IsOpen():
-		// TODO : Separate this to a utility
 		cwdLocation := m.fileModel.filePanels[m.filePanelFocusIndex].location
 		action, cmd = m.promptModal.HandleUpdate(msg, cwdLocation)
 		m.applyPromptModalAction(action)
 	case m.zoxideModal.IsOpen():
 		action, cmd = m.zoxideModal.HandleUpdate(msg)
 		m.applyZoxideModalAction(action)
-	}
-
-	// TODO : This is like duct taping a bigger problem
-	// The code should never reach this state.
-	if focusPanel.cursor < 0 {
-		focusPanel.cursor = 0
 	}
 
 	return cmd
@@ -491,6 +538,131 @@ func (m *model) logAndExecuteAction(action common.ModelAction) (string, error) {
 // Apply the Action for zoxide modal (no result notifications needed)
 func (m *model) applyZoxideModalAction(action common.ModelAction) {
 	_, _ = m.logAndExecuteAction(action)
+}
+
+func (m *model) applyBulkRenameAction(action common.ModelAction) tea.Cmd {
+	if editorAction, ok := action.(bulkrename.EditorModeAction); ok {
+		return m.handleEditorModeAction(editorAction)
+	}
+	if brAction, ok := action.(bulkrename.BulkRenameAction); ok {
+		return bulkrename.ExecuteBulkRename(&m.processBarModel, brAction.Previews)
+	}
+	_, _ = m.logAndExecuteAction(action)
+	return nil
+}
+
+func (m *model) handleEditorModeAction(action bulkrename.EditorModeAction) tea.Cmd {
+	m.pendingEditorAction = &action
+
+	parts := strings.Fields(action.Editor)
+	cmd := parts[0]
+	args := parts[1:]
+	args = append(args, action.TmpfilePath)
+
+	c := exec.Command(cmd, args...)
+
+	return tea.ExecProcess(c, func(err error) tea.Msg {
+		return editorFinishedForBulkRenameMsg{err}
+	})
+}
+
+func (m *model) handleEditorFinishedForBulkRename(err error) tea.Cmd {
+	if m.pendingEditorAction == nil {
+		slog.Error("No pending editor action found")
+		return nil
+	}
+
+	action := m.pendingEditorAction
+	defer func() {
+		os.Remove(action.TmpfilePath)
+		m.pendingEditorAction = nil
+	}()
+
+	if err != nil {
+		slog.Error("Editor finished with error", "error", err)
+		return nil
+	}
+
+	lines, readErr := m.readEditorOutputLines(action.TmpfilePath)
+	if readErr != nil {
+		return nil
+	}
+
+	if len(lines) != len(action.SelectedFiles) {
+		slog.Error("Number of lines in tmpfile doesn't match number of selected files",
+			"expected", len(action.SelectedFiles), "got", len(lines))
+		return nil
+	}
+
+	previews := m.buildRenamePreviews(action.SelectedFiles, lines)
+	validPreviews := m.filterValidPreviews(previews)
+
+	if len(validPreviews) == 0 {
+		slog.Info("No valid renames to apply from tmpfile")
+		m.bulkRenameModel.Close()
+		return nil
+	}
+
+	m.bulkRenameModel.Close()
+	return bulkrename.ExecuteBulkRename(&m.processBarModel, validPreviews)
+}
+
+func (m *model) readEditorOutputLines(tmpfilePath string) ([]string, error) {
+	content, err := os.ReadFile(tmpfilePath)
+	if err != nil {
+		slog.Error("Failed to read tmpfile", "error", err)
+		return nil, err
+	}
+	return strings.Split(strings.TrimSpace(string(content)), "\n"), nil
+}
+
+func (m *model) buildRenamePreviews(selectedFiles []string, newNames []string) []bulkrename.RenamePreview {
+	previews := make([]bulkrename.RenamePreview, 0, len(newNames))
+	for i, itemPath := range selectedFiles {
+		oldName := filepath.Base(itemPath)
+		newName := strings.TrimSpace(newNames[i])
+
+		if newName == "" {
+			slog.Warn("Empty filename in tmpfile, skipping", "line", i+1)
+			continue
+		}
+
+		preview := bulkrename.RenamePreview{
+			OldPath: itemPath,
+			OldName: oldName,
+			NewName: newName,
+		}
+
+		preview.Error = m.validateRename(itemPath, oldName, newName)
+		previews = append(previews, preview)
+	}
+	return previews
+}
+
+func (m *model) validateRename(itemPath, oldName, newName string) string {
+	if newName == oldName {
+		return "No change"
+	}
+
+	newPath := filepath.Join(filepath.Dir(itemPath), newName)
+	if strings.EqualFold(itemPath, newPath) {
+		return ""
+	}
+
+	if _, err := os.Stat(newPath); err == nil {
+		return "File already exists"
+	}
+	return ""
+}
+
+func (m *model) filterValidPreviews(previews []bulkrename.RenamePreview) []bulkrename.RenamePreview {
+	validPreviews := make([]bulkrename.RenamePreview, 0, len(previews))
+	for _, p := range previews {
+		if p.Error == "" {
+			validPreviews = append(validPreviews, p)
+		}
+	}
+	return validPreviews
 }
 
 // TODO : Move them around to appropriate places
@@ -654,6 +826,13 @@ func (m *model) updateRenderForOverlay(finalRender string) string {
 		overlayX := m.fullWidth/2 - common.ModalWidth/2
 		overlayY := m.fullHeight/2 - common.ModalHeight/2
 		return stringfunction.PlaceOverlay(overlayX, overlayY, typingModal, finalRender)
+	}
+
+	if m.bulkRenameModel.IsOpen() {
+		bulkRenameModal := m.bulkRenameModel.Render()
+		overlayX := m.fullWidth/2 - m.bulkRenameModel.GetWidth()/2
+		overlayY := m.fullHeight/2 - m.bulkRenameModel.GetHeight()/2
+		return stringfunction.PlaceOverlay(overlayX, overlayY, bulkRenameModal, finalRender)
 	}
 
 	if m.notifyModel.IsOpen() {

@@ -60,3 +60,8 @@ search_bar = ['/', '']
 file_panel_select_mode_items_select_down = ['J', '']
 file_panel_select_mode_items_select_up = ['K', '']
 file_panel_select_all_items = ['A', '']
+# =================================================================================================
+# Bulk rename hotkeys
+bulk_rename = ['B', '']
+nav_bulk_rename = ['tab','']
+rev_nav_bulk_rename = ['shift+tab','']
