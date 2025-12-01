@@ -7,25 +7,11 @@ import (
 	"github.com/yorukot/superfile/src/config/icon"
 )
 
-func GetElementIcon(file string, isDir bool, nerdFont bool) icon.Style {
+func getFileIcon(file string, isLink bool) icon.Style {
+	if isLink {
+		return icon.Icons["link_file"]
+	}
 	ext := strings.TrimPrefix(filepath.Ext(file), ".")
-	name := file
-
-	if !nerdFont {
-		return icon.Style{
-			Icon:  "",
-			Color: Theme.FilePanelFG,
-		}
-	}
-
-	if isDir {
-		resultIcon := icon.Folders["folder"]
-		betterIcon, hasBetterIcon := icon.Folders[name]
-		if hasBetterIcon {
-			resultIcon = betterIcon
-		}
-		return resultIcon
-	}
 	// default icon for all files. try to find a better one though...
 	resultIcon := icon.Icons["file"]
 	// resolve aliased extensions
@@ -42,7 +28,7 @@ func GetElementIcon(file string, isDir bool, nerdFont bool) icon.Style {
 	}
 
 	// now look for icons based on full names
-	fullName := name
+	fullName := file
 
 	fullName = strings.ToLower(fullName)
 	fullAlias, hasFullAlias := icon.Aliases[fullName]
@@ -60,4 +46,27 @@ func GetElementIcon(file string, isDir bool, nerdFont bool) icon.Style {
 		}
 	}
 	return resultIcon
+}
+
+func GetElementIcon(file string, isDir bool, isLink bool, nerdFont bool) icon.Style {
+	if !nerdFont {
+		return icon.Style{
+			Icon:  "",
+			Color: Theme.FilePanelFG,
+		}
+	}
+
+	if isDir {
+		if isLink {
+			return icon.Folders["link_folder"]
+		}
+		resultIcon := icon.Folders["folder"]
+		betterIcon, hasBetterIcon := icon.Folders[file]
+		if hasBetterIcon {
+			resultIcon = betterIcon
+		}
+		return resultIcon
+	}
+
+	return getFileIcon(file, isLink)
 }

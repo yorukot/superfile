@@ -5,7 +5,7 @@ const keyValueSpacing = " "
 const keyValueSpacingLen = 1
 
 const fileStatErrorMsg = "Cannot load file stats"
-const linkFileMsg = "This is a link file."
+
 const linkFileBrokenMsg = "Link file is broken!"
 const etFetchErrorMsg = "Errors while fetching metadata via exiftool"
 

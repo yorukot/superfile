@@ -91,11 +91,11 @@ func getMetaDataUnsorted(filePath string, metadataFocussed bool, et *exiftool.Ex
 		return res
 	}
 	if fileInfo.Mode()&os.ModeSymlink != 0 {
-		_, symlinkErr := filepath.EvalSymlinks(filePath)
+		linkPath, symlinkErr := filepath.EvalSymlinks(filePath)
 		if symlinkErr != nil {
 			res.infoMsg = linkFileBrokenMsg
 		} else {
-			res.infoMsg = linkFileMsg
+			res.infoMsg = linkPath
 		}
 		return res
 	}

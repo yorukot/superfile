@@ -11,6 +11,7 @@ func TestGetElementIcon(t *testing.T) {
 		name     string
 		file     string
 		isDir    bool
+		isLink   bool
 		nerdFont bool
 		expected icon.Style
 	}{
@@ -18,6 +19,7 @@ func TestGetElementIcon(t *testing.T) {
 			name:     "Non-nerdfont returns empty icon",
 			file:     "test.txt",
 			isDir:    false,
+			isLink:   false,
 			nerdFont: false,
 			expected: icon.Style{
 				Icon:  "",
@@ -28,6 +30,7 @@ func TestGetElementIcon(t *testing.T) {
 			name:     "Directory with nerd font",
 			file:     "folder",
 			isDir:    true,
+			isLink:   false,
 			nerdFont: true,
 			expected: icon.Folders["folder"],
 		},
@@ -35,6 +38,7 @@ func TestGetElementIcon(t *testing.T) {
 			name:     "File with known extension",
 			file:     "test.js",
 			isDir:    false,
+			isLink:   false,
 			nerdFont: true,
 			expected: icon.Icons["js"],
 		},
@@ -42,6 +46,7 @@ func TestGetElementIcon(t *testing.T) {
 			name:     "Full name takes priority over extension",
 			file:     "gulpfile.js",
 			isDir:    false,
+			isLink:   false,
 			nerdFont: true,
 			expected: icon.Icons["gulpfile.js"],
 		},
@@ -49,6 +54,7 @@ func TestGetElementIcon(t *testing.T) {
 			name:     ".git directory",
 			file:     ".git",
 			isDir:    true,
+			isLink:   false,
 			nerdFont: true,
 			expected: icon.Folders[".git"],
 		},
@@ -56,6 +62,7 @@ func TestGetElementIcon(t *testing.T) {
 			name:     "superfile directory",
 			file:     "superfile",
 			isDir:    true,
+			isLink:   false,
 			nerdFont: true,
 			expected: icon.Folders["superfile"],
 		},
@@ -63,6 +70,7 @@ func TestGetElementIcon(t *testing.T) {
 			name:     "package.json file",
 			file:     "package.json",
 			isDir:    false,
+			isLink:   false,
 			nerdFont: true,
 			expected: icon.Icons["package"],
 		},
@@ -70,6 +78,7 @@ func TestGetElementIcon(t *testing.T) {
 			name:     "File with unknown extension",
 			file:     "test.xyz",
 			isDir:    false,
+			isLink:   false,
 			nerdFont: true,
 			expected: icon.Style{
 				Icon: icon.Icons["file"].Icon,
@@ -81,14 +90,31 @@ func TestGetElementIcon(t *testing.T) {
 			name:     "File with aliased name",
 			file:     "dockerfile",
 			isDir:    false,
+			isLink:   false,
 			nerdFont: true,
 			expected: icon.Icons["dockerfile"],
+		},
+		{
+			name:     "Link to Directory with nerd font",
+			file:     "folder",
+			isDir:    true,
+			isLink:   true,
+			nerdFont: true,
+			expected: icon.Folders["link_folder"],
+		},
+		{
+			name:     "Link to File",
+			file:     "test.js",
+			isDir:    false,
+			isLink:   true,
+			nerdFont: true,
+			expected: icon.Icons["link_file"],
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := GetElementIcon(tt.file, tt.isDir, tt.nerdFont)
+			result := GetElementIcon(tt.file, tt.isDir, tt.isLink, tt.nerdFont)
 			if result.Icon != tt.expected.Icon || result.Color != tt.expected.Color {
 				t.Errorf("GetElementIcon() = %v, want %v", result, tt.expected)
 			}

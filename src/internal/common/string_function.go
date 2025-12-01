@@ -58,8 +58,8 @@ func TruncateMiddleText(text string, maxChars int, tails string) string {
 	return truncatedText
 }
 
-func PrettierName(name string, width int, isDir bool, isSelected bool, bgColor lipgloss.Color) string {
-	style := GetElementIcon(name, isDir, Config.Nerdfont)
+func PrettierName(name string, width int, isDir bool, isLink bool, isSelected bool, bgColor lipgloss.Color) string {
+	style := GetElementIcon(name, isDir, isLink, Config.Nerdfont)
 	if isSelected {
 		return StringColorRender(lipgloss.Color(style.Color), bgColor).
 			Background(bgColor).
@@ -73,16 +73,16 @@ func PrettierName(name string, width int, isDir bool, isSelected bool, bgColor l
 		FilePanelStyle.Render(TruncateText(name, width, "..."))
 }
 
-func PrettierDirectoryPreviewName(name string, isDir bool, bgColor lipgloss.Color) string {
-	style := GetElementIcon(name, isDir, Config.Nerdfont)
+func PrettierDirectoryPreviewName(name string, isDir bool, isLink bool, bgColor lipgloss.Color) string {
+	style := GetElementIcon(name, isDir, isLink, Config.Nerdfont)
 	return StringColorRender(lipgloss.Color(style.Color), bgColor).
 		Background(bgColor).
 		Render(style.Icon+" ") +
 		FilePanelStyle.Render(name)
 }
 
-func ClipboardPrettierName(name string, width int, isDir bool, isSelected bool) string {
-	style := GetElementIcon(filepath.Base(name), isDir, Config.Nerdfont)
+func ClipboardPrettierName(name string, width int, isDir bool, isLink bool, isSelected bool) string {
+	style := GetElementIcon(filepath.Base(name), isDir, isLink, Config.Nerdfont)
 	if isSelected {
 		return StringColorRender(lipgloss.Color(style.Color), FooterBGColor).
 			Background(FooterBGColor).

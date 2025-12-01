@@ -151,7 +151,11 @@ func renderDirectoryPreview(r *rendering.Renderer, itemPath string, previewHeigh
 
 	for i := 0; i < previewHeight && i < len(files); i++ {
 		file := files[i]
-		style := common.GetElementIcon(file.Name(), file.IsDir(), common.Config.Nerdfont)
+		isLink := false
+		if info, err := file.Info(); err == nil {
+			isLink = info.Mode()&os.ModeSymlink != 0
+		}
+		style := common.GetElementIcon(file.Name(), file.IsDir(), isLink, common.Config.Nerdfont)
 		res := lipgloss.NewStyle().Foreground(lipgloss.Color(style.Color)).Background(common.FilePanelBGColor).
 			Render(style.Icon+" ") + common.FilePanelStyle.Render(file.Name())
 		r.AddLines(res)
