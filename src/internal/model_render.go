@@ -136,10 +136,12 @@ func (panel *filePanel) renderFileEntries(r *rendering.Renderer, mainPanelHeight
 		// Calculate the actual prefix width for proper alignment
 		prefixWidth := lipgloss.Width(cursor+" ") + lipgloss.Width(selectBox)
 
+		isLink := panel.element[i].info.Mode()&os.ModeSymlink != 0
 		renderedName := common.PrettierName(
 			panel.element[i].name,
 			filePanelWidth-prefixWidth,
 			panel.element[i].directory,
+			isLink,
 			isSelected,
 			common.FilePanelBGColor,
 		)
@@ -222,15 +224,16 @@ func (m *model) clipboardRender() string {
 				// Last Entry we can render, but there are more that one left
 				r.AddLines(strconv.Itoa(len(m.copyItems.items)-i) + " item left....")
 			} else {
-				fileInfo, err := os.Stat(m.copyItems.items[i])
+				fileInfo, err := os.Lstat(m.copyItems.items[i])
 				if err != nil {
 					slog.Error("Clipboard render function get item state ", "error", err)
 				}
 				if !os.IsNotExist(err) {
+					isLink := fileInfo.Mode()&os.ModeSymlink != 0
 					// TODO : There is an inconsistency in parameter that is being passed,
 					// and its name in ClipboardPrettierName function
 					r.AddLines(common.ClipboardPrettierName(m.copyItems.items[i],
-						utils.FooterWidth(m.fullWidth)-3, fileInfo.IsDir(), false))
+						utils.FooterWidth(m.fullWidth)-3, fileInfo.IsDir(), isLink, false))
 				}
 			}
 		}

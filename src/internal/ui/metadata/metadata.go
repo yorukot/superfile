@@ -80,6 +80,20 @@ func GetMetadata(filePath string, metadataFocussed bool, et *exiftool.Exiftool) 
 	return meta
 }
 
+func getSymLinkMetaData(filePath string) Metadata {
+	res := Metadata{
+		filepath: filePath,
+	}
+	linkPath, symlinkErr := filepath.EvalSymlinks(filePath)
+	if symlinkErr != nil {
+		res.infoMsg = linkFileBrokenMsg
+	} else {
+		path := [2]string{keyPath, linkPath}
+		res.data = append(res.data, path)
+	}
+	return res
+}
+
 func getMetaDataUnsorted(filePath string, metadataFocussed bool, et *exiftool.Exiftool) Metadata {
 	res := Metadata{
 		filepath: filePath,
@@ -91,13 +105,7 @@ func getMetaDataUnsorted(filePath string, metadataFocussed bool, et *exiftool.Ex
 		return res
 	}
 	if fileInfo.Mode()&os.ModeSymlink != 0 {
-		_, symlinkErr := filepath.EvalSymlinks(filePath)
-		if symlinkErr != nil {
-			res.infoMsg = linkFileBrokenMsg
-		} else {
-			res.infoMsg = linkFileMsg
-		}
-		return res
+		return getSymLinkMetaData(filePath)
 	}
 	// Add basic metadata information irrespective of what is fetched from exiftool
 	// Note : we prioritize these while sorting Metadata

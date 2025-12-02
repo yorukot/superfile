@@ -5,7 +5,6 @@ const keyValueSpacing = " "
 const keyValueSpacingLen = 1
 
 const fileStatErrorMsg = "Cannot load file stats"
-const linkFileMsg = "This is a link file."
 const linkFileBrokenMsg = "Link file is broken!"
 const etFetchErrorMsg = "Errors while fetching metadata via exiftool"
 
@@ -17,6 +16,7 @@ const keyPermissions = "Permissions"
 const keyMd5Checksum = "MD5Checksum"
 const keyOwner = "Owner"
 const keyGroup = "Group"
+const keyPath = "Path"
 
 var sortPriority = map[string]int{ //nolint: gochecknoglobals // This is effectively const.
 	keyName:         0,
@@ -26,4 +26,5 @@ var sortPriority = map[string]int{ //nolint: gochecknoglobals // This is effecti
 	keyPermissions:  4,
 	keyOwner:        5,
 	keyGroup:        6,
+	keyPath:         7,
 }

@@ -108,6 +108,7 @@ var Icons = map[string]Style{
 	"ko":           {Icon: "\uebc6", Color: "#9b59b6"},     // Printable Rune : ""
 	"kt":           {Icon: "\ue634", Color: "#2980b9"},     // Printable Rune : ""
 	"less":         {Icon: "\ue758", Color: "#3498db"},     // Printable Rune : ""
+	"link_file":    {Icon: "\uf481", Color: "NONE"},        // Printable Rune : ""
 	"lock":         {Icon: "\uf023", Color: "#f1c40f"},     // Printable Rune : ""
 	"log":          {Icon: "\uf18d", Color: "#7f8c8d"},     // Printable Rune : ""
 	"lua":          {Icon: "\ue620", Color: "#e74c3c"},     // Printable Rune : ""
@@ -418,6 +419,7 @@ var Folders = map[string]Style{
 	// Item for Generic folder, with key "folder" is initialized in InitIcon()
 	"hidden":       {Icon: "\uf023", Color: "#75715e"}, // Hidden folder - Dark yellowish // Printable Rune : ""
 	"node_modules": {Icon: "\ue5fa", Color: "#cb3837"}, // Node modules folder - Red // Printable Rune : ""
+	"link_folder":  {Icon: "\uf482", Color: "NONE"},    // link folder - None // Printable Rune : ""
 
 	"superfile": {Icon: "\U000f069d", Color: "#FF6F00"}, // Printable Rune : "󰚝"
 }
