@@ -761,6 +761,7 @@ func (m *model) quitSuperfile(cdOnQuit bool) {
 			slog.Error("Error during writing lastdir file", "error", err)
 		}
 	}
+	m.fileModel.filePreview.CleanUp()
 	m.modelQuitState = quitDone
 	slog.Debug("Quitting superfile", "current dir", currentDir)
 }

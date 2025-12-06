@@ -31,19 +31,26 @@ import (
 )
 
 type Model struct {
-	open           bool
-	width          int
-	height         int
-	location       string
-	content        string
-	imagePreviewer *filepreview.ImagePreviewer
-	batCmd         string
+	open               bool
+	width              int
+	height             int
+	location           string
+	content            string
+	imagePreviewer     *filepreview.ImagePreviewer
+	batCmd             string
+	thumbnailGenerator *filepreview.ThumbnailGenerator
 }
 
 func New() Model {
+	generator, err := filepreview.NewThumbnailGenerator()
+	if err != nil {
+		slog.Error("Error: Could not create TempDirectory", "Error:", err)
+	}
+
 	return Model{
-		open:           common.Config.DefaultOpenFilePreview,
-		imagePreviewer: filepreview.NewImagePreviewer(),
+		open:               common.Config.DefaultOpenFilePreview,
+		imagePreviewer:     filepreview.NewImagePreviewer(),
+		thumbnailGenerator: generator,
 		// TODO:  This is an IO operation, move to async ?
 		batCmd: checkBatCmd(),
 	}
@@ -112,6 +119,15 @@ func (m *Model) ToggleOpen() {
 	m.open = !m.open
 }
 
+func (m *Model) CleanUp() {
+	if m.thumbnailGenerator != nil {
+		err := m.thumbnailGenerator.CleanUp()
+		if err != nil {
+			slog.Error("Error While cleaning up TempDirectory", "Error:", err)
+		}
+	}
+}
+
 func renderFileInfoError(r *rendering.Renderer, err error) string {
 	slog.Error("Error get file info", "error", err)
 	return r.Render()
@@ -164,7 +180,8 @@ func renderDirectoryPreview(r *rendering.Renderer, itemPath string, previewHeigh
 }
 
 func (m *Model) renderImagePreview(box lipgloss.Style, itemPath string, previewWidth,
-	previewHeight int, sideAreaWidth int) string {
+	previewHeight int, sideAreaWidth int,
+) string {
 	if !m.open {
 		return box.Render("\n --- Preview panel is closed ---")
 	}
@@ -197,7 +214,8 @@ func (m *Model) renderImagePreview(box lipgloss.Style, itemPath string, previewW
 }
 
 func (m *Model) renderTextPreview(r *rendering.Renderer, box lipgloss.Style, itemPath string,
-	previewWidth, previewHeight int) string {
+	previewWidth, previewHeight int,
+) string {
 	format := lexers.Match(filepath.Base(itemPath))
 	if format == nil {
 		isText, err := common.IsTextFile(itemPath)
@@ -274,6 +292,15 @@ func (m *Model) RenderWithPath(itemPath string, fullModelWidth int) string {
 		return renderDirectoryPreview(r, itemPath, previewHeight) + clearCmd
 	}
 
+	if isVideoFile(itemPath) && m.thumbnailGenerator != nil {
+		thumbnailPath, err := m.thumbnailGenerator.GetThumbnailOrGenerate(itemPath)
+		if err != nil {
+			return renderUnsupportedFormat(box) + clearCmd
+		}
+
+		return m.renderImagePreview(box, thumbnailPath, previewWidth, previewHeight, fullModelWidth-previewWidth+1)
+	}
+
 	if isImageFile(itemPath) {
 		return m.renderImagePreview(box, itemPath, previewWidth, previewHeight, fullModelWidth-previewWidth+1)
 	}
@@ -347,4 +374,20 @@ func isImageFile(filename string) bool {
 
 	ext := strings.ToLower(filepath.Ext(filename))
 	return imageExtensions[ext]
+}
+
+func isVideoFile(filename string) bool {
+	videoExtensions := map[string]bool{
+		".mkv":  true,
+		".mp4":  true,
+		".mov":  true,
+		".avi":  true,
+		".flv":  true,
+		".webm": true,
+		".wmv":  true,
+	}
+
+	ext := strings.ToLower(filepath.Ext(filename))
+
+	return videoExtensions[ext]
 }
