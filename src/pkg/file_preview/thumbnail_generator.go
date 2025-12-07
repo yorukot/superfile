@@ -1,10 +1,13 @@
 package filepreview
 
 import (
+	"context"
 	"errors"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sync"
+	"time"
 )
 
 const (
@@ -15,6 +18,7 @@ const (
 type ThumbnailGenerator struct {
 	tempFiles     map[string]string
 	tempDirectory string
+	mu            sync.Mutex
 }
 
 func NewThumbnailGenerator() (*ThumbnailGenerator, error) {
@@ -36,7 +40,9 @@ func NewThumbnailGenerator() (*ThumbnailGenerator, error) {
 }
 
 func (g *ThumbnailGenerator) GetThumbnailOrGenerate(path string) (string, error) {
+	g.mu.Lock()
 	file, ok := g.tempFiles[path]
+	g.mu.Unlock()
 
 	if ok {
 		_, err := os.Stat(file)
@@ -44,7 +50,9 @@ func (g *ThumbnailGenerator) GetThumbnailOrGenerate(path string) (string, error)
 			return file, nil
 		}
 
+		g.mu.Lock()
 		delete(g.tempFiles, path)
+		g.mu.Unlock()
 	}
 
 	generatedThumbnailPath, err := g.generateThumbnail(path)
@@ -52,7 +60,9 @@ func (g *ThumbnailGenerator) GetThumbnailOrGenerate(path string) (string, error)
 		return "", err
 	}
 
+	g.mu.Lock()
 	g.tempFiles[path] = generatedThumbnailPath
+	g.mu.Unlock()
 
 	return generatedThumbnailPath, nil
 }
@@ -70,8 +80,11 @@ func (g *ThumbnailGenerator) generateThumbnail(inputPath string) (string, error)
 
 	outputFilePath := outputFile.Name()
 
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
 	// ffmpeg -v warning -t 60 -hwaccel auto -an -sn -dn -skip_frame nokey -i input.mkv -vf scale='min(1024,iw)':'min(720,ih)':force_original_aspect_ratio=decrease:flags=fast_bilinear -vf "thumbnail" -frames:v 1 -y thumb.jpg
-	ffmpeg := exec.Command("ffmpeg",
+	ffmpeg := exec.CommandContext(ctx, "ffmpeg",
 		"-v", "warning", // set log level to warning
 		"-an",       // disable Audio stream
 		"-sn",       // disable Subtitle stream
@@ -100,7 +113,6 @@ func (g *ThumbnailGenerator) CleanUp() error {
 }
 
 func isFFmpegInstalled() bool {
-	err := exec.Command("ffmpeg", "-version").Run()
-
+	_, err := exec.LookPath("ffmpeg")
 	return err == nil
 }

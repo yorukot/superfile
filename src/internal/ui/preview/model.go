@@ -370,6 +370,13 @@ func isImageFile(filename string) bool {
 		".svg":  true,
 		".webp": true,
 		".ico":  true,
+		".m4v":  true,
+		".mpeg": true,
+		".mpg":  true,
+		".3gp":  true,
+		".ogv":  true,
+		".ts":   true,
+		".m2ts": true,
 	}
 
 	ext := strings.ToLower(filepath.Ext(filename))
