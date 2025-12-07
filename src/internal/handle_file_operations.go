@@ -72,6 +72,9 @@ func (m *model) warnModalForRenaming() tea.Cmd {
 	return res
 }
 
+// Rename file where the cusror is located
+// TODO: Fix this. It doesn't do any rename, just opens the rename text input
+// Actual rename happens at confirmRename() in handle_modal.go
 func (m *model) panelItemRename() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
 	if len(panel.element) == 0 {
