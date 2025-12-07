@@ -1,6 +1,7 @@
 package filepreview
 
 import (
+	"errors"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -17,6 +18,10 @@ type ThumbnailGenerator struct {
 }
 
 func NewThumbnailGenerator() (*ThumbnailGenerator, error) {
+	if !isFFmpegInstalled() {
+		return nil, errors.New("ffmpeg is not installed")
+	}
+
 	tmp, err := os.MkdirTemp("", "superfiles-*")
 	if err != nil {
 		return nil, err
@@ -92,4 +97,10 @@ func (g *ThumbnailGenerator) generateThumbnail(inputPath string) (string, error)
 
 func (g *ThumbnailGenerator) CleanUp() error {
 	return os.RemoveAll(g.tempDirectory)
+}
+
+func isFFmpegInstalled() bool {
+	err := exec.Command("ffmpeg", "-version").Run()
+
+	return err == nil
 }

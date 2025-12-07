@@ -44,7 +44,7 @@ type Model struct {
 func New() Model {
 	generator, err := filepreview.NewThumbnailGenerator()
 	if err != nil {
-		slog.Error("Error: Could not create TempDirectory", "Error:", err)
+		slog.Error("Could not create TempDirectory", "error", err)
 	}
 
 	return Model{
