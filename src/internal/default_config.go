@@ -225,6 +225,11 @@ func getHelpMenuData() []helpMenuModalData { //nolint: funlen // This should be 
 			hotkeyWorkType: globalType,
 		},
 		{
+			hotkey:         common.Hotkeys.BulkRename,
+			description:    "Open bulk rename modal",
+			hotkeyWorkType: globalType,
+		},
+		{
 			hotkey:         common.Hotkeys.CopyItems,
 			description:    "Copy selected items to the clipboard",
 			hotkeyWorkType: globalType,
