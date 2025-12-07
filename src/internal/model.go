@@ -762,6 +762,7 @@ func (panel *filePanel) applyTargetFileCursor() {
 	for idx, el := range panel.element {
 		if el.name == panel.targetFile {
 			panel.cursor = idx
+			break
 		}
 	}
 	panel.targetFile = ""

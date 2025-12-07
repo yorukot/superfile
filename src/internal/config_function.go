@@ -99,7 +99,7 @@ func updateFirstFilePanelPaths(firstPanelPaths []string, cwd string, zClient *zo
 		originalPath := firstPanelPaths[i]
 		firstPanelPaths[i] = utils.ResolveAbsPath(cwd, firstPanelPaths[i])
 		if _, err := os.Stat(firstPanelPaths[i]); err != nil {
-			slog.Error("cannot get stats for firstFilePanelDir", "error", err)
+			slog.Error("cannot get stats", "path", firstPanelPaths[i], "error", err)
 			// In case the path provided did not exist, use zoxide query
 			// else, fallback to home dir
 			if common.Config.ZoxideSupport && zClient != nil {
