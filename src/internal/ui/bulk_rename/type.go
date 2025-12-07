@@ -1,4 +1,5 @@
 package bulkrename
+
 import (
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"

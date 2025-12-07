@@ -41,15 +41,24 @@ func (msg UpdateMsg) GetReqID() int {
 }
 
 func DefaultModel(maxHeight int, width int) Model {
+	findInput := common.GenerateBulkRenameTextInput("Find text")
+	replaceInput := common.GenerateBulkRenameTextInput("Replace with")
+	prefixInput := common.GenerateBulkRenameTextInput("Add prefix")
+	suffixInput := common.GenerateBulkRenameTextInput("Add suffix")
+
 	return Model{
-		open:        false,
-		renameType:  FindReplace,
-		caseType:    CaseLower,
-		cursor:      0,
-		startNumber: 1,
-		width:       width,
-		height:      maxHeight,
-		reqCnt:      0,
+		open:         false,
+		renameType:   FindReplace,
+		caseType:     CaseLower,
+		cursor:       0,
+		startNumber:  1,
+		width:        width,
+		height:       maxHeight,
+		reqCnt:       0,
+		findInput:    findInput,
+		replaceInput: replaceInput,
+		prefixInput:  prefixInput,
+		suffixInput:  suffixInput,
 	}
 }
 
@@ -72,10 +81,10 @@ func (m *Model) Open(selectedFiles []string, currentDir string) {
 	m.errorMessage = ""
 	m.preview = nil
 
-	m.findInput = common.GenerateBulkRenameTextInput("Find text")
-	m.replaceInput = common.GenerateBulkRenameTextInput("Replace with")
-	m.prefixInput = common.GenerateBulkRenameTextInput("Add prefix")
-	m.suffixInput = common.GenerateBulkRenameTextInput("Add suffix")
+	m.findInput.Reset()
+	m.replaceInput.Reset()
+	m.prefixInput.Reset()
+	m.suffixInput.Reset()
 
 	m.focusInput()
 }
