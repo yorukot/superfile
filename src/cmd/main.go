@@ -59,15 +59,15 @@ func Run(content embed.FS) {
 						lipgloss.NewStyle().Foreground(lipgloss.Color("#ffcc66")).Render("[Hotkeys file path]"),
 						variable.HotkeysFile,
 					)
-					fmt.Printf("%-*s %s\n",
-						common.HelpKeyColumnWidth,
-						lipgloss.NewStyle().Foreground(lipgloss.Color("#66ff66")).Render("[Log file path]"), variable.LogFile)
-					fmt.Printf("%-*s %s\n",
-						common.HelpKeyColumnWidth,
-						lipgloss.NewStyle().Foreground(lipgloss.Color("#ff9999")).Render("[Configuration directory path]"), variable.SuperFileMainDir)
-					fmt.Printf("%-*s %s\n",
-						common.HelpKeyColumnWidth,
-						lipgloss.NewStyle().Foreground(lipgloss.Color("#ff66ff")).Render("[Data directory path]"), variable.SuperFileDataDir)
+					logStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#66ff66"))
+					configStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff9999"))
+					dataStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff66ff"))
+					fmt.Printf("%-*s %s\n", common.HelpKeyColumnWidth,
+						logStyle.Render("[Log file path]"), variable.LogFile)
+					fmt.Printf("%-*s %s\n", common.HelpKeyColumnWidth,
+						configStyle.Render("[Configuration directory path]"), variable.SuperFileMainDir)
+					fmt.Printf("%-*s %s\n", common.HelpKeyColumnWidth,
+						dataStyle.Render("[Data directory path]"), variable.SuperFileDataDir)
 					return nil
 				},
 				Flags: []cli.Flag{

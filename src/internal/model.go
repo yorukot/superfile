@@ -331,7 +331,9 @@ func (m *model) setMetadataModelSize() {
 
 // TODO: Remove this code duplication with footer models
 func (m *model) setProcessBarModelSize() {
-	m.processBarModel.SetDimensions(utils.FooterWidth(m.fullWidth)+common.BorderPadding, m.footerHeight+common.BorderPadding)
+	m.processBarModel.SetDimensions(
+		utils.FooterWidth(m.fullWidth)+common.BorderPadding,
+		m.footerHeight+common.BorderPadding)
 }
 
 // Identify the current state of the application m and properly handle the
