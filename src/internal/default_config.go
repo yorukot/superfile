@@ -20,7 +20,7 @@ import (
 // TODO: Move the configuration parameters to a ModelConfig struct.
 // Something like `RendererConfig` struct for `Renderer` struct in ui/renderer package
 func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool,
-	firstFilePanelDirs []string, zClient *zoxidelib.Client) *model {
+	firstPanelPaths []string, zClient *zoxidelib.Client) *model {
 	return &model{
 		filePanelFocusIndex: 0,
 		focusPanel:          nonePanelFocus,
@@ -28,7 +28,7 @@ func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool,
 		sidebarModel:        sidebar.New(),
 		fileMetaData:        metadata.New(),
 		fileModel: fileModel{
-			filePanels:  filePanelSlice(firstFilePanelDirs),
+			filePanels:  filePanelSlice(firstPanelPaths),
 			filePreview: preview.New(),
 			width:       10,
 		},

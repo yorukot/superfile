@@ -2,6 +2,8 @@ package internal
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/utils"
@@ -36,21 +38,29 @@ func (m *model) validateLayout() error {
 
 // ================ filepanel
 
-func filePanelSlice(dir []string) []filePanel {
-	res := make([]filePanel, len(dir))
-	for i := range dir {
+func filePanelSlice(paths []string) []filePanel {
+	res := make([]filePanel, len(paths))
+	for i := range paths {
 		// Making the first panel as the focussed
 		isFocus := i == 0
-		res[i] = defaultFilePanel(dir[i], isFocus)
+		res[i] = defaultFilePanel(paths[i], isFocus)
 	}
 	return res
 }
 
-func defaultFilePanel(dir string, focused bool) filePanel {
+func defaultFilePanel(path string, focused bool) filePanel {
+	targetFile := ""
+	panelPath := path
+	// If path refers to a file, switch to its parent and remember the filename
+	if stat, err := os.Stat(panelPath); err == nil && !stat.IsDir() {
+		targetFile = filepath.Base(panelPath)
+		panelPath = filepath.Dir(panelPath)
+	}
+
 	return filePanel{
 		render:   0,
 		cursor:   0,
-		location: dir,
+		location: panelPath,
 		sortOptions: sortOptionsModel{
 			width:  20,
 			height: 4,
@@ -69,6 +79,7 @@ func defaultFilePanel(dir string, focused bool) filePanel {
 		isFocused:        focused,
 		directoryRecords: make(map[string]directoryRecord),
 		searchBar:        common.GenerateSearchBar(),
+		targetFile:       targetFile,
 	}
 }
 

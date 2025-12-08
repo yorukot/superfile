@@ -2,6 +2,21 @@ package internal
 
 // ======================================== File panel controller ========================================
 
+func (panel *filePanel) scrollToCursor(mainPanelHeight int) {
+	if panel.cursor < 0 || panel.cursor >= len(panel.element) {
+		panel.cursor = 0
+		panel.render = 0
+		return
+	}
+
+	renderCount := panelElementHeight(mainPanelHeight)
+	if panel.cursor < panel.render {
+		panel.render = max(0, panel.cursor-renderCount+1)
+	} else if panel.cursor > panel.render+renderCount-1 {
+		panel.render = panel.cursor - renderCount + 1
+	}
+}
+
 // Control file panel list up
 func (panel *filePanel) listUp(mainPanelHeight int) {
 	if len(panel.element) == 0 {
