@@ -16,6 +16,13 @@ import (
 	"github.com/charmbracelet/x/ansi"
 )
 
+// Size calculation constants
+const (
+	KilobyteSize = 1000 // SI decimal unit
+	KibibyteSize = 1024 // Binary unit
+	TabWidth     = 4    // Standard tab expansion width
+)
+
 func TruncateText(text string, maxChars int, tails string) string {
 	truncatedText := ansi.Truncate(text, maxChars-len(tails), "")
 	if text != truncatedText {
@@ -116,12 +123,12 @@ func FormatFileSize(size int64) string {
 
 	// TODO : Remove duplication here
 	if Config.FileSizeUseSI {
-		unitIndex := int(math.Floor(math.Log(float64(size)) / math.Log(1000)))
-		adjustedSize := float64(size) / math.Pow(1000, float64(unitIndex))
+		unitIndex := int(math.Floor(math.Log(float64(size)) / math.Log(KilobyteSize)))
+		adjustedSize := float64(size) / math.Pow(KilobyteSize, float64(unitIndex))
 		return fmt.Sprintf("%.2f %s", adjustedSize, unitsDec[unitIndex])
 	}
-	unitIndex := int(math.Floor(math.Log(float64(size)) / math.Log(1024)))
-	adjustedSize := float64(size) / math.Pow(1024, float64(unitIndex))
+	unitIndex := int(math.Floor(math.Log(float64(size)) / math.Log(KibibyteSize)))
+	adjustedSize := float64(size) / math.Pow(KibibyteSize, float64(unitIndex))
 	return fmt.Sprintf("%.2f %s", adjustedSize, unitsBin[unitIndex])
 }
 
@@ -132,7 +139,7 @@ func CheckAndTruncateLineLengths(text string, maxLength int) string {
 
 	for _, line := range lines {
 		// Replace tabs with spaces
-		expandedLine := strings.ReplaceAll(line, "\t", strings.Repeat(" ", 4))
+		expandedLine := strings.ReplaceAll(line, "\t", strings.Repeat(" ", TabWidth))
 		truncatedLine := ansi.Truncate(expandedLine, maxLength, "")
 		result.WriteString(truncatedLine + "\n")
 	}
