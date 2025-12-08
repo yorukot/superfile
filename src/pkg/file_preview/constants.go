@@ -1,10 +1,12 @@
 package filepreview
 
+import "time"
+
 // Image preview constants
 const (
 	// Cache configuration
 	DefaultThumbnailCacheSize = 100 // Default number of thumbnails to cache
-
+	DefaultCacheExpiration    = 5 * time.Minute
 	// Image processing
 	HeightScaleFactor = 2  // Factor for height scaling in terminal display
 	RGBShift16        = 16 // Bit shift for red channel in RGB operations

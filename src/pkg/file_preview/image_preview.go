@@ -49,8 +49,7 @@ type ImagePreviewer struct {
 
 // NewImagePreviewer creates a new ImagePreviewer with default cache settings
 func NewImagePreviewer() *ImagePreviewer {
-	//nolint:mnd // default cache expiration
-	return NewImagePreviewerWithConfig(DefaultThumbnailCacheSize, 5*time.Minute)
+	return NewImagePreviewerWithConfig(DefaultThumbnailCacheSize, DefaultCacheExpiration)
 }
 
 // NewImagePreviewerWithConfig creates a new ImagePreviewer with custom cache configuration
