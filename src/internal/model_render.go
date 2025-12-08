@@ -42,7 +42,7 @@ func (m *model) filePanelRender() string {
 		// TODO : Move this to a utility function and clarify the calculation via comments
 		// Maybe even write unit tests
 		var filePanelWidth int
-		if (m.fullWidth-common.Config.SidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(
+		if (m.fullWidth-common.Config.SidebarWidth-(common.InnerPadding+(len(m.fileModel.filePanels)-1)*common.BorderPadding))%len(
 			m.fileModel.filePanels,
 		) != 0 &&
 			i == len(m.fileModel.filePanels)-1 {
@@ -50,7 +50,7 @@ func (m *model) filePanelRender() string {
 				filePanelWidth = m.fileModel.width
 			} else {
 				filePanelWidth = (m.fileModel.width + (m.fullWidth-common.Config.SidebarWidth-
-					(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels))
+					(common.InnerPadding+(len(m.fileModel.filePanels)-1)*common.BorderPadding))%len(m.fileModel.filePanels))
 			}
 		} else {
 			filePanelWidth = m.fileModel.width
@@ -265,7 +265,7 @@ func (m *model) terminalSizeWarnRender() string {
 }
 
 func (m *model) terminalSizeWarnAfterFirstRender() string {
-	minimumWidthInt := common.Config.SidebarWidth + 20*len(m.fileModel.filePanels) + 20 - 1
+	minimumWidthInt := common.Config.SidebarWidth + common.FilePanelWidthUnit*len(m.fileModel.filePanels) + common.FilePanelWidthUnit - 1
 	minimumWidthString := strconv.Itoa(minimumWidthInt)
 	fullWidthString := strconv.Itoa(m.fullWidth)
 	fullHeightString := strconv.Itoa(m.fullHeight)
@@ -360,15 +360,15 @@ func (m *model) helpMenuRender() string {
 			totalKeyLen += len(key)
 		}
 
-		separatorLen := max(0, (len(data.hotkey)-1)) * 3
+		separatorLen := max(0, (len(data.hotkey)-1)) * common.FooterGroupCols
 		if data.subTitle == "" && totalKeyLen+separatorLen > maxKeyLength {
 			maxKeyLength = totalKeyLen + separatorLen
 		}
 	}
 
 	valueLength := m.helpMenu.width - maxKeyLength - 2
-	if valueLength < m.helpMenu.width/2 {
-		valueLength = m.helpMenu.width/2 - 2
+	if valueLength < m.helpMenu.width/common.CenterDivisor {
+		valueLength = m.helpMenu.width/common.CenterDivisor - common.BorderPadding
 	}
 
 	totalTitleCount := 0
@@ -398,7 +398,7 @@ func (m *model) helpMenuRender() string {
 
 func (m *model) getRenderHotkeyLengthHelpmenuModal() int {
 	renderHotkeyLength := 0
-	for i := m.helpMenu.renderIndex; i < m.helpMenu.renderIndex+(m.helpMenu.height-4) && i < len(m.helpMenu.filteredData); i++ {
+	for i := m.helpMenu.renderIndex; i < m.helpMenu.renderIndex+(m.helpMenu.height-common.InnerPadding) && i < len(m.helpMenu.filteredData); i++ {
 		hotkey := ""
 
 		if m.helpMenu.filteredData[i].subTitle != "" {
@@ -418,7 +418,7 @@ func (m *model) getRenderHotkeyLengthHelpmenuModal() int {
 }
 
 func (m *model) getHelpMenuContent(r *rendering.Renderer, renderHotkeyLength int, valueLength int) {
-	for i := m.helpMenu.renderIndex; i < m.helpMenu.renderIndex+(m.helpMenu.height-4) && i < len(m.helpMenu.filteredData); i++ {
+	for i := m.helpMenu.renderIndex; i < m.helpMenu.renderIndex+(m.helpMenu.height-common.InnerPadding) && i < len(m.helpMenu.filteredData); i++ {
 		if m.helpMenu.filteredData[i].subTitle != "" {
 			r.AddLines(common.HelpMenuTitleStyle.Render(" " + m.helpMenu.filteredData[i].subTitle))
 			continue

@@ -248,7 +248,7 @@ func (m *model) setFilePreviewPanelSize() {
 func (m *model) getFilePreviewWidth() int {
 	if common.Config.FilePreviewWidth == 0 {
 		return (m.fullWidth - common.Config.SidebarWidth -
-			(4 + (len(m.fileModel.filePanels))*2)) / (len(m.fileModel.filePanels) + 1)
+			(common.InnerPadding + (len(m.fileModel.filePanels))*common.BorderPadding)) / (len(m.fileModel.filePanels) + 1)
 	}
 	return (m.fullWidth - common.Config.SidebarWidth) / common.Config.FilePreviewWidth
 }
@@ -618,22 +618,22 @@ func (m *model) updateRenderForOverlay(finalRender string) string {
 	// check if need pop up modal
 	if m.helpMenu.open {
 		helpMenu := m.helpMenuRender()
-		overlayX := m.fullWidth/2 - m.helpMenu.width/2
-		overlayY := m.fullHeight/2 - m.helpMenu.height/2
+		overlayX := m.fullWidth/common.CenterDivisor - m.helpMenu.width/common.CenterDivisor
+		overlayY := m.fullHeight/common.CenterDivisor - m.helpMenu.height/common.CenterDivisor
 		return stringfunction.PlaceOverlay(overlayX, overlayY, helpMenu, finalRender)
 	}
 
 	if m.promptModal.IsOpen() {
 		promptModal := m.promptModalRender()
-		overlayX := m.fullWidth/2 - m.promptModal.GetWidth()/2
-		overlayY := m.fullHeight/2 - m.promptModal.GetMaxHeight()/2
+		overlayX := m.fullWidth/common.CenterDivisor - m.promptModal.GetWidth()/common.CenterDivisor
+		overlayY := m.fullHeight/common.CenterDivisor - m.promptModal.GetMaxHeight()/common.CenterDivisor
 		return stringfunction.PlaceOverlay(overlayX, overlayY, promptModal, finalRender)
 	}
 
 	if m.zoxideModal.IsOpen() {
 		zoxideModal := m.zoxideModalRender()
-		overlayX := m.fullWidth/2 - m.zoxideModal.GetWidth()/2
-		overlayY := m.fullHeight/2 - m.zoxideModal.GetMaxHeight()/2
+		overlayX := m.fullWidth/common.CenterDivisor - m.zoxideModal.GetWidth()/common.CenterDivisor
+		overlayY := m.fullHeight/common.CenterDivisor - m.zoxideModal.GetMaxHeight()/common.CenterDivisor
 		return stringfunction.PlaceOverlay(overlayX, overlayY, zoxideModal, finalRender)
 	}
 
@@ -641,29 +641,29 @@ func (m *model) updateRenderForOverlay(finalRender string) string {
 
 	if panel.sortOptions.open {
 		sortOptions := m.sortOptionsRender()
-		overlayX := m.fullWidth/2 - panel.sortOptions.width/2
-		overlayY := m.fullHeight/2 - panel.sortOptions.height/2
+		overlayX := m.fullWidth/common.CenterDivisor - panel.sortOptions.width/common.CenterDivisor
+		overlayY := m.fullHeight/common.CenterDivisor - panel.sortOptions.height/common.CenterDivisor
 		return stringfunction.PlaceOverlay(overlayX, overlayY, sortOptions, finalRender)
 	}
 
 	if m.firstUse {
 		introduceModal := m.introduceModalRender()
-		overlayX := m.fullWidth/2 - m.helpMenu.width/2
-		overlayY := m.fullHeight/2 - m.helpMenu.height/2
+		overlayX := m.fullWidth/common.CenterDivisor - m.helpMenu.width/common.CenterDivisor
+		overlayY := m.fullHeight/common.CenterDivisor - m.helpMenu.height/common.CenterDivisor
 		return stringfunction.PlaceOverlay(overlayX, overlayY, introduceModal, finalRender)
 	}
 
 	if m.typingModal.open {
 		typingModal := m.typineModalRender()
-		overlayX := m.fullWidth/2 - common.ModalWidth/2
-		overlayY := m.fullHeight/2 - common.ModalHeight/2
+		overlayX := m.fullWidth/common.CenterDivisor - common.ModalWidth/common.CenterDivisor
+		overlayY := m.fullHeight/common.CenterDivisor - common.ModalHeight/common.CenterDivisor
 		return stringfunction.PlaceOverlay(overlayX, overlayY, typingModal, finalRender)
 	}
 
 	if m.notifyModel.IsOpen() {
 		notifyModal := m.notifyModel.Render()
-		overlayX := m.fullWidth/2 - common.ModalWidth/2
-		overlayY := m.fullHeight/2 - common.ModalHeight/2
+		overlayX := m.fullWidth/common.CenterDivisor - common.ModalWidth/common.CenterDivisor
+		overlayY := m.fullHeight/common.CenterDivisor - common.ModalHeight/common.CenterDivisor
 		return stringfunction.PlaceOverlay(overlayX, overlayY, notifyModal, finalRender)
 	}
 	return finalRender
@@ -732,7 +732,7 @@ func (m *model) shouldSkipPanelUpdate(filePanel *filePanel, focusPanel *filePane
 	}
 
 	focusPanelReRender := focusPanel.needsReRender()
-	reRenderTime := int(float64(len(filePanel.element)) / 100)
+	reRenderTime := int(float64(len(filePanel.element)) / common.ReRenderChunkDivisor)
 	if filePanel.isFocused && !focusPanelReRender &&
 		nowTime.Sub(filePanel.lastTimeGetElement) < time.Duration(reRenderTime)*time.Second {
 		return true

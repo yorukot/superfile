@@ -30,7 +30,7 @@ func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool,
 		fileModel: fileModel{
 			filePanels:  filePanelSlice(firstPanelPaths),
 			filePreview: preview.New(),
-			width:       10,
+			width:       common.DefaultFilePanelWidth,
 		},
 		helpMenu:       newHelpMenuModal(),
 		promptModal:    prompt.DefaultModel(prompt.PromptMinHeight, prompt.PromptMinWidth),

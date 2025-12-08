@@ -21,7 +21,7 @@ const keyPath = "Path"
 var sortPriority = map[string]int{ //nolint: gochecknoglobals // This is effectively const.
 	keyName:         0,
 	keySize:         1,
-	keyDataModified: 2,
+	keyDataModified: 2, //nolint:mnd // metadata sort priority index
 	keyDataAccessed: 3,
 	keyPermissions:  4,
 	keyOwner:        5,
