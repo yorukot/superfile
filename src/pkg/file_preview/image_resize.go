@@ -71,19 +71,19 @@ func adjustOrientation(img image.Image, orientation int) image.Image {
 	switch orientation {
 	case 1:
 		return img
-	case 2:
+	case 2: //nolint:mnd // EXIF orientation: horizontal flip
 		return imaging.FlipH(img)
-	case 3:
+	case 3: //nolint:mnd // EXIF orientation: 180 rotation
 		return imaging.Rotate180(img)
-	case 4:
+	case 4: //nolint:mnd // EXIF orientation: vertical flip
 		return imaging.FlipV(img)
-	case 5:
+	case 5: //nolint:mnd // EXIF orientation: transpose
 		return imaging.Transpose(img)
-	case 6:
+	case 6: //nolint:mnd // EXIF orientation: 270 rotation
 		return imaging.Rotate270(img)
-	case 7:
+	case 7: //nolint:mnd // EXIF orientation: transverse
 		return imaging.Transverse(img)
-	case 8:
+	case 8: //nolint:mnd // EXIF orientation: 90 rotation
 		return imaging.Rotate90(img)
 	default:
 		slog.Error("Invalid orientation value", "error", orientation)
@@ -94,5 +94,5 @@ func adjustOrientation(img image.Image, orientation int) image.Image {
 // resizeForANSI resizes image specifically for ANSI rendering
 func resizeForANSI(img image.Image, maxWidth, maxHeight int) image.Image {
 	// Use maxHeight*2 because each terminal row represents 2 pixel rows in ANSI rendering
-	return imaging.Fit(img, maxWidth, maxHeight*2, imaging.Lanczos)
+	return imaging.Fit(img, maxWidth, maxHeight*HeightScaleFactor, imaging.Lanczos)
 }

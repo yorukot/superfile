@@ -49,7 +49,7 @@ type ImagePreviewer struct {
 
 // NewImagePreviewer creates a new ImagePreviewer with default cache settings
 func NewImagePreviewer() *ImagePreviewer {
-	return NewImagePreviewerWithConfig(100, 5*time.Minute)
+	return NewImagePreviewerWithConfig(DefaultThumbnailCacheSize, 5*time.Minute) //nolint:mnd // default cache expiration
 }
 
 // NewImagePreviewerWithConfig creates a new ImagePreviewer with custom cache configuration
@@ -81,6 +81,7 @@ func NewImagePreviewCache(maxEntries int, expiration time.Duration) *ImagePrevie
 
 // periodicCleanup removes expired entries periodically
 func (c *ImagePreviewCache) periodicCleanup() {
+	//nolint:mnd // half of expiration for cleanup interval
 	ticker := time.NewTicker(c.expiration / 2)
 	defer ticker.Stop()
 
@@ -323,10 +324,15 @@ func hexToColor(hex string) (color.RGBA, error) {
 	if err != nil {
 		return color.RGBA{}, err
 	}
-	return color.RGBA{R: uint8(values >> 16), G: uint8((values >> 8) & 0xFF), B: uint8(values & 0xFF), A: 255}, nil
+	return color.RGBA{
+		R: uint8(values >> RGBShift16),
+		G: uint8((values >> RGBShift8) & 0xFF),
+		B: uint8(values & 0xFF),
+		A: 255,
+	}, nil
 }
 
 func colorToHex(color color.Color) string {
 	r, g, b, _ := color.RGBA()
-	return fmt.Sprintf("#%02x%02x%02x", uint8(r>>8), uint8(g>>8), uint8(b>>8))
+	return fmt.Sprintf("#%02x%02x%02x", uint8(r>>RGBShift8), uint8(g>>RGBShift8), uint8(b>>RGBShift8))
 }
