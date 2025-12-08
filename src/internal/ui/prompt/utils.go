@@ -35,7 +35,7 @@ func getPromptAction(shellMode bool, value string, cwdLocation string) (common.M
 		}
 		return common.SplitPanelAction{}, nil
 	case "cd":
-		if len(promptArgs) != 2 {
+		if len(promptArgs) != ExpectedArgCount {
 			return noAction, invalidCmdError{
 				uiMsg: fmt.Sprintf("cd command needs exactly one argument, received %d",
 					len(promptArgs)-1),
@@ -45,7 +45,7 @@ func getPromptAction(shellMode bool, value string, cwdLocation string) (common.M
 			Location: promptArgs[1],
 		}, nil
 	case "open":
-		if len(promptArgs) != 2 {
+		if len(promptArgs) != ExpectedArgCount {
 			return noAction, invalidCmdError{
 				uiMsg: fmt.Sprintf("open command needs exactly one argument, received %d",
 					len(promptArgs)-1),

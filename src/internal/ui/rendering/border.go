@@ -53,9 +53,9 @@ func (b *BorderConfig) AreInfoItemsTruncated() bool {
 		return false
 	}
 
-	actualWidth := b.width - 2
+	actualWidth := b.width - BorderCornerWidth
 	// border.MiddleLeft <content> border.MiddleRight border.Bottom
-	availWidth := actualWidth/cnt - 3
+	availWidth := actualWidth/cnt - BorderDividerWidth
 	for i := range b.infoItems {
 		if ansi.StringWidth(b.infoItems[i]) > availWidth {
 			return true
@@ -77,19 +77,19 @@ func (b *BorderConfig) GetBorder(borderStrings lipgloss.Border) lipgloss.Border 
 	res := borderStrings
 
 	// excluding corners. Maybe we can move this to a utility function
-	actualWidth := b.width - 2
-	actualHeight := b.height - 2
+	actualWidth := b.width - BorderCornerWidth
+	actualHeight := b.height - BorderCornerWidth
 
 	// Min 5 width is needed for title so that at least one character can be
 	// rendered
-	if b.title != "" && actualWidth >= 5 {
+	if b.title != "" && actualWidth >= MinTitleWidth {
 		// We need to plain truncate the title if needed.
 		// topWidth - 1( for BorderMiddleLeft) - 1 (for BorderMiddleRight) - 2 (padding)
-		titleAvailWidth := actualWidth - 4
+		titleAvailWidth := actualWidth - BorderCornerWidth - BorderPaddingWidth
 
 		// Basic Right truncation
 		truncatedTitle := ansi.Truncate(b.title, titleAvailWidth, "")
-		remainingWidth := actualWidth - 4 - ansi.StringWidth(truncatedTitle)
+		remainingWidth := actualWidth - BorderCornerWidth - BorderPaddingWidth - ansi.StringWidth(truncatedTitle)
 
 		margin := ""
 		if remainingWidth > b.titleLeftMargin {
@@ -104,10 +104,10 @@ func (b *BorderConfig) GetBorder(borderStrings lipgloss.Border) lipgloss.Border 
 
 	cnt := len(b.infoItems)
 	// Minimum 4 character for each info item so that at least first character is rendered
-	if cnt > 0 && actualWidth >= cnt*4 {
+	if cnt > 0 && actualWidth >= cnt*MinInfoItemWidth {
 		// Max available width for each item's actual content
 		// border.MiddleLeft <content> border.MiddleRight border.Bottom
-		availWidth := actualWidth/cnt - 3
+		availWidth := actualWidth/cnt - BorderDividerWidth
 		infoText := ""
 		for _, item := range b.infoItems {
 			item = ansi.Truncate(item, availWidth, "")

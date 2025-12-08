@@ -116,7 +116,7 @@ func New() Model {
 
 	// Excluding borders(2), Searchbar Prompt(2), and one extra character than is appended
 	// by searchBar.View()
-	res.searchBar.Width = common.Config.SidebarWidth - 2 - 2 - 1
+	res.searchBar.Width = common.Config.SidebarWidth - SearchBarPadding
 	res.searchBar.Placeholder = "(" + common.Hotkeys.SearchBar[0] + ")" + " Search"
 	return res
 }

@@ -51,7 +51,7 @@ func (m *Model) renderVisibleResults(r *rendering.Renderer, endIndex int) {
 		// - separator(3) = width - 13
 		// 0123456789012345678 => 19 width, path gets 6
 		// | 9999.9 | <path> |
-		availablePathWidth := m.width - 13
+		availablePathWidth := m.width - ScoreColumnWidth
 		path := common.TruncateTextBeginning(result.Path, availablePathWidth, "...")
 
 		line := fmt.Sprintf(" %6.1f | %s", result.Score, path)
