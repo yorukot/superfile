@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/utils"
 )
 
@@ -160,7 +161,8 @@ func (m *model) helpMenuListUp() {
 		// Similarly, we use max(..., 0) to ensure the renderIndex doesn't become negative,
 		// which can happen if the number of items is less than the view height.
 		// This prevents a potential out-of-bounds panic during rendering.
-		m.helpMenu.renderIndex = max(len(m.helpMenu.filteredData)-(m.helpMenu.height-4), 0)
+		// 4 = visible rows lost to borders/title in help list (mnd)
+		m.helpMenu.renderIndex = max(len(m.helpMenu.filteredData)-(m.helpMenu.height-common.InnerPadding), 0)
 	}
 }
 
@@ -189,7 +191,8 @@ func (m *model) helpMenuListDown() {
 			m.helpMenu.renderIndex++
 		}
 		// Clamp renderIndex to bottom.
-		bottom := len(m.helpMenu.filteredData) - (m.helpMenu.height - 4)
+		// 4 = visible rows lost to borders/title in help list (mnd)
+		bottom := len(m.helpMenu.filteredData) - (m.helpMenu.height - common.InnerPadding)
 		if bottom < 0 {
 			bottom = 0
 		}

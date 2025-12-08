@@ -62,7 +62,7 @@ func (m *model) filePanelRender() string {
 }
 
 func (panel *filePanel) Render(mainPanelHeight int, filePanelWidth int, focussed bool) string {
-	r := ui.FilePanelRenderer(mainPanelHeight+2, filePanelWidth+2, focussed)
+	r := ui.FilePanelRenderer(mainPanelHeight+common.BorderPadding, filePanelWidth+common.BorderPadding, focussed)
 
 	panel.renderTopBar(r, filePanelWidth)
 	panel.renderSearchBar(r)
@@ -74,7 +74,7 @@ func (panel *filePanel) Render(mainPanelHeight int, filePanelWidth int, focussed
 
 func (panel *filePanel) renderTopBar(r *rendering.Renderer, filePanelWidth int) {
 	// TODO - Add ansitruncate left in renderer and remove truncation here
-	truncatedPath := common.TruncateTextBeginning(panel.location, filePanelWidth-4, "...")
+	truncatedPath := common.TruncateTextBeginning(panel.location, filePanelWidth-common.InnerPadding, "...")
 	r.AddLines(common.FilePanelTopDirectoryIcon + common.FilePanelTopPathStyle.Render(truncatedPath))
 	r.AddSection()
 }
@@ -210,11 +210,11 @@ func (m *model) clipboardRender() string {
 	// render
 	var bottomWidth int
 	if m.fullWidth%3 != 0 {
-		bottomWidth = utils.FooterWidth(m.fullWidth + m.fullWidth%3 + 2)
+		bottomWidth = utils.FooterWidth(m.fullWidth + m.fullWidth%common.FooterGroupCols + common.BorderPadding)
 	} else {
 		bottomWidth = utils.FooterWidth(m.fullWidth)
 	}
-	r := ui.ClipboardRenderer(m.footerHeight+2, bottomWidth+2)
+	r := ui.ClipboardRenderer(m.footerHeight+common.BorderPadding, bottomWidth+common.BorderPadding)
 	if len(m.copyItems.items) == 0 {
 		// TODO move this to a string
 		r.AddLines("", " "+icon.Error+"  No content in clipboard")
@@ -233,7 +233,7 @@ func (m *model) clipboardRender() string {
 					// TODO : There is an inconsistency in parameter that is being passed,
 					// and its name in ClipboardPrettierName function
 					r.AddLines(common.ClipboardPrettierName(m.copyItems.items[i],
-						utils.FooterWidth(m.fullWidth)-3, fileInfo.IsDir(), isLink, false))
+						utils.FooterWidth(m.fullWidth)-common.PanelPadding, fileInfo.IsDir(), isLink, false))
 				}
 			}
 		}
@@ -294,7 +294,7 @@ func (m *model) typineModalRender() string {
 
 	fileLocation := common.FilePanelTopDirectoryIconStyle.Render(" "+icon.Directory+icon.Space) +
 		common.FilePanelTopPathStyle.Render(
-			common.TruncateTextBeginning(previewPath, common.ModalWidth-4, "..."),
+			common.TruncateTextBeginning(previewPath, common.ModalWidth-common.InnerPadding, "..."),
 		) + "\n"
 
 	confirm := common.ModalConfirm.Render(" (" + common.Hotkeys.ConfirmTyping[0] + ") Create ")
@@ -454,7 +454,7 @@ func (m *model) sortOptionsRender() string {
 		sortOptionsContent += cursor + common.ModalStyle.Render(" "+option) + "\n"
 	}
 	bottomBorder := common.GenerateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(panel.sortOptions.cursor+1),
-		strconv.Itoa(len(panel.sortOptions.data.options))), panel.sortOptions.width-2)
+		strconv.Itoa(len(panel.sortOptions.data.options))), panel.sortOptions.width-common.BorderPadding)
 
 	return common.SortOptionsModalBorderStyle(panel.sortOptions.height, panel.sortOptions.width,
 		bottomBorder).Render(sortOptionsContent)

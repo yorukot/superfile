@@ -242,7 +242,8 @@ func getTypeOrderingFunc(elements []element, reversed bool) sliceOrderFunc {
 }
 
 func panelElementHeight(mainPanelHeight int) int {
-	return mainPanelHeight - 3
+	// visible rows exclude borders/header/footer paddings (mnd)
+	return mainPanelHeight - common.PanelPadding
 }
 
 // TODO : replace usage of this with slices.contains
@@ -291,7 +292,7 @@ func renameIfDuplicate(destination string) (string, error) {
 
 	// Extract base name without existing suffix
 	counter := 1
-	if match := suffixRegexp.FindStringSubmatch(name); len(match) == 3 {
+	if match := suffixRegexp.FindStringSubmatch(name); len(match) == 3 { //nolint:mnd // 3 = full match + 2 capture groups
 		name = match[1] // base name without (N)
 		if num, err := strconv.Atoi(match[2]); err == nil {
 			counter = num + 1 // start from next number

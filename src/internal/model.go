@@ -234,14 +234,14 @@ func (m *model) handleWindowResize(msg tea.WindowSizeMsg) {
 	m.setPromptModelSize()
 	m.setZoxideModelSize()
 
-	if m.fileModel.maxFilePanel >= 10 {
-		m.fileModel.maxFilePanel = 10
+	if m.fileModel.maxFilePanel >= common.FilePanelMax {
+		m.fileModel.maxFilePanel = common.FilePanelMax
 	}
 }
 
 func (m *model) setFilePreviewPanelSize() {
 	m.fileModel.filePreview.SetWidth(m.getFilePreviewWidth())
-	m.fileModel.filePreview.SetHeight(m.mainPanelHeight + 2)
+	m.fileModel.filePreview.SetHeight(m.mainPanelHeight + common.BorderPadding)
 }
 
 // Set file preview panel Widht to width. Assure that
@@ -257,10 +257,10 @@ func (m *model) getFilePreviewWidth() int {
 func (m *model) setFilePanelsSize(width int) {
 	// set each file panel size and max file panel amount
 	m.fileModel.width = (width - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth() -
-		(4 + (len(m.fileModel.filePanels)-1)*2)) / len(m.fileModel.filePanels)
-	m.fileModel.maxFilePanel = (width - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth()) / 20
+		(common.InnerPadding + (len(m.fileModel.filePanels)-1)*common.BorderPadding)) / len(m.fileModel.filePanels)
+	m.fileModel.maxFilePanel = (width - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth()) / common.FilePanelWidthUnit
 	for i := range m.fileModel.filePanels {
-		m.fileModel.filePanels[i].searchBar.Width = m.fileModel.width - 4
+		m.fileModel.filePanels[i].searchBar.Width = m.fileModel.width - common.InnerPadding
 	}
 }
 
@@ -268,13 +268,13 @@ func (m *model) setHeightValues(height int) {
 	//nolint: gocritic // This is to be separated out to a function, and made better later. No need to refactor here
 	if !m.toggleFooter {
 		m.footerHeight = 0
-	} else if height < 30 {
+	} else if height < common.HeightBreakA {
 		m.footerHeight = 6
-	} else if height < 35 {
+	} else if height < common.HeightBreakB {
 		m.footerHeight = 7
-	} else if height < 40 {
+	} else if height < common.HeightBreakC {
 		m.footerHeight = 8
-	} else if height < 45 {
+	} else if height < common.HeightBreakD {
 		m.footerHeight = 9
 	} else {
 		m.footerHeight = 10
@@ -283,7 +283,7 @@ func (m *model) setHeightValues(height int) {
 	// TODO : Calculate the value , instead of manually hard coding it.
 
 	// Main panel height = Total terminal height- 2(file panel border) - footer height
-	m.mainPanelHeight = height - 2 - utils.FullFooterHeight(m.footerHeight, m.toggleFooter)
+	m.mainPanelHeight = height - common.BorderPadding - utils.FullFooterHeight(m.footerHeight, m.toggleFooter)
 
 	for index := range m.fileModel.filePanels {
 		m.fileModel.filePanels[index].handleResize(m.mainPanelHeight)
@@ -292,44 +292,44 @@ func (m *model) setHeightValues(height int) {
 
 // Set help menu size
 func (m *model) setHelpMenuSize() {
-	m.helpMenu.height = m.fullHeight - 2
-	m.helpMenu.width = m.fullWidth - 2
+	m.helpMenu.height = m.fullHeight - common.BorderPadding
+	m.helpMenu.width = m.fullWidth - common.BorderPadding
 
-	if m.fullHeight > 35 {
+	if m.fullHeight > common.HeightBreakB {
 		m.helpMenu.height = 30
 	}
 
-	if m.fullWidth > 95 {
+	if m.fullWidth > common.ResponsiveWidthThreshold {
 		m.helpMenu.width = 90
 	}
 	// 2 for border, 1 for left padding, 2 for placeholder icon of searchbar
 	// 1 for additional character that View() of search bar function mysteriously adds.
-	m.helpMenu.searchBar.Width = m.helpMenu.width - 6
+	m.helpMenu.searchBar.Width = m.helpMenu.width - (common.InnerPadding + common.BorderPadding)
 }
 
 func (m *model) setPromptModelSize() {
 	// Scale prompt model's maxHeight - 33% of total height
-	m.promptModal.SetMaxHeight(m.fullHeight / 3)
+	m.promptModal.SetMaxHeight(m.fullHeight / 3) //nolint:mnd // modal uses third height for layout
 
 	// Scale prompt model's maxHeight - 50% of total height
-	m.promptModal.SetWidth(m.fullWidth / 2)
+	m.promptModal.SetWidth(m.fullWidth / 2) //nolint:mnd // modal uses half width for layout
 }
 
 func (m *model) setZoxideModelSize() {
 	// Scale zoxide model's maxHeight - 50% of total height to accommodate scroll indicators
-	m.zoxideModal.SetMaxHeight(m.fullHeight / 2)
+	m.zoxideModal.SetMaxHeight(m.fullHeight / 2) //nolint:mnd // modal uses half height for layout
 
 	// Scale zoxide model's width - 50% of total width
-	m.zoxideModal.SetWidth(m.fullWidth / 2)
+	m.zoxideModal.SetWidth(m.fullWidth / 2) //nolint:mnd // modal uses half width for layout
 }
 
 func (m *model) setMetadataModelSize() {
-	m.fileMetaData.SetDimensions(utils.FooterWidth(m.fullWidth)+2, m.footerHeight+2)
+	m.fileMetaData.SetDimensions(utils.FooterWidth(m.fullWidth)+common.BorderPadding, m.footerHeight+common.BorderPadding)
 }
 
 // TODO: Remove this code duplication with footer models
 func (m *model) setProcessBarModelSize() {
-	m.processBarModel.SetDimensions(utils.FooterWidth(m.fullWidth)+2, m.footerHeight+2)
+	m.processBarModel.SetDimensions(utils.FooterWidth(m.fullWidth)+common.BorderPadding, m.footerHeight+common.BorderPadding)
 }
 
 // Identify the current state of the application m and properly handle the
@@ -563,7 +563,7 @@ func (m *model) View() string {
 	if m.fullHeight < common.MinimumHeight || m.fullWidth < common.MinimumWidth {
 		return m.terminalSizeWarnRender()
 	}
-	if m.fileModel.width < 18 {
+	if m.fileModel.width < common.MinWidthForRename {
 		return m.terminalSizeWarnAfterFirstRender()
 	}
 

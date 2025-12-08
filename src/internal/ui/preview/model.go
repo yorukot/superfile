@@ -13,7 +13,6 @@ import (
 	"slices"
 	"sort"
 	"strings"
-	"time"
 
 	"github.com/yorukot/superfile/src/internal/ui"
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
@@ -293,7 +292,7 @@ func getBatSyntaxHighlightedContent(
 	batArgs := []string{itemPath, "--plain", "--force-colorization", "--line-range", fmt.Sprintf(":%d", previewLine-1)}
 
 	// set timeout for the external command execution to 500ms max
-	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+	ctx, cancel := context.WithTimeout(context.Background(), common.DefaultPreviewTimeout)
 	defer cancel()
 
 	cmd := exec.CommandContext(ctx, batCmd, batArgs...)
