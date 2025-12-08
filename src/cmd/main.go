@@ -61,19 +61,13 @@ func Run(content embed.FS) {
 					)
 					fmt.Printf("%-*s %s\n",
 						common.HelpKeyColumnWidth,
-						lipgloss.NewStyle().Foreground(lipgloss.Color("#66ff66")).Render("[Log file path]"),
-						variable.LogFile,
-					)
+						lipgloss.NewStyle().Foreground(lipgloss.Color("#66ff66")).Render("[Log file path]"), variable.LogFile)
 					fmt.Printf("%-*s %s\n",
 						common.HelpKeyColumnWidth,
-						lipgloss.NewStyle().Foreground(lipgloss.Color("#ff9999")).Render("[Configuration directory path]"),
-						variable.SuperFileMainDir,
-					)
+						lipgloss.NewStyle().Foreground(lipgloss.Color("#ff9999")).Render("[Configuration directory path]"), variable.SuperFileMainDir)
 					fmt.Printf("%-*s %s\n",
 						common.HelpKeyColumnWidth,
-						lipgloss.NewStyle().Foreground(lipgloss.Color("#ff66ff")).Render("[Data directory path]"),
-						variable.SuperFileDataDir,
-					)
+						lipgloss.NewStyle().Foreground(lipgloss.Color("#ff66ff")).Render("[Data directory path]"), variable.SuperFileDataDir)
 					return nil
 				},
 				Flags: []cli.Flag{

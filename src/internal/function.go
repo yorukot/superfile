@@ -291,7 +291,8 @@ func renameIfDuplicate(destination string) (string, error) {
 
 	// Extract base name without existing suffix
 	counter := 1
-	if match := suffixRegexp.FindStringSubmatch(name); len(match) == 3 { //nolint:mnd // 3 = full match + 2 capture groups
+	//nolint:mnd // 3 = full match + 2 capture groups
+	if match := suffixRegexp.FindStringSubmatch(name); len(match) == 3 {
 		name = match[1] // base name without (N)
 		if num, err := strconv.Atoi(match[2]); err == nil {
 			counter = num + 1 // start from next number

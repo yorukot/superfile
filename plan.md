@@ -12,6 +12,42 @@ Prerequisites
 - Build baseline: CGO_ENABLED=0 go build -o bin/spf ./src/cmd
 - Lint baseline: golangci-lint run --enable=mnd
 
+Current Progress (executed)
+- Added shared constants: src/internal/common/ui_consts.go (HelpKeyColumnWidth, DefaultCLIContextTimeout, PanelPadding, BorderPadding, InnerPadding, FooterGroupCols, FilePanelMax, MinWidthForRename, ResponsiveWidthThreshold, HeightBreakA–D, ReRenderChunkDivisor, FilePanelWidthUnit, DefaultPreviewTimeout).
+- CLI updates: src/cmd/main.go uses HelpKeyColumnWidth and DefaultCLIContextTimeout; long fmt.Printf lines reformatted.
+- Core model/layout: src/internal/model.go replaced hardcoded 10/18/95/height breaks; applied BorderPadding/InnerPadding; SetDimensions + preview height updated; searchBar widths use InnerPadding.
+- Panel nav: src/internal/handle_panel_navigation.go width math updated to constants; preview height uses BorderPadding; searchBar width uses InnerPadding; max panels uses FilePanelWidthUnit.
+- Rendering: src/internal/model_render.go applied paddings, truncation widths, footer group cols, and window padding constants.
+- Sorting utils: src/internal/function.go panelElementHeight uses PanelPadding; regex submatch check annotated with //nolint:mnd.
+- Modal/help: src/internal/handle_modal.go switched to InnerPadding for calculations; removed redundant inline comments.
+- Panel movement: src/internal/handle_panel_movement.go searchBar width uses InnerPadding; imported common.
+- Preview: src/internal/ui/preview/model.go timeout uses DefaultPreviewTimeout.
+- Build validated after each batch.
+
+Outstanding Work (next up)
+- Fix remaining golines long-line warnings (a few lines in cmd/main.go, function.go, handle_file_operations.go, model.go).
+- Replace or justify remaining mnd sites in internal:
+  - src/internal/default_config.go: width: 10 → constant or //nolint:mnd.
+  - Overlay math (/2 occurrences) in src/internal/model.go → consider //nolint:mnd with rationale or new constants.
+  - src/internal/type_utils.go: layout check uses +2 → replace with BorderPadding.
+  - src/internal/utils/ui_utils.go: replace /3 and +2 with constants or add //nolint with rationale.
+- Preview/image and kitty packages:
+  - src/pkg/file_preview/image_preview.go: 100, 5*time.Minute, /2, bit shifts/masks → constants with brief doc; selectively //nolint where clearer.
+  - src/pkg/file_preview/image_resize.go: switch cases 2..8 → add concise //nolint:mnd per case (quality mapping) or local constants.
+  - src/pkg/file_preview/kitty.go: 42, 31, 0xFFFF, +1000 → constants.
+  - src/pkg/file_preview/utils.go: PixelsPerColumn/Row → constants.
+
+Open Lint Items (from latest run)
+- golines (formatting):
+  - src/cmd/main.go (fmt.Printf block), src/internal/function.go (regex nolint line), src/internal/handle_file_operations.go (rename line), src/internal/model.go (SetDimensions line).
+- mnd (magic numbers) remain in:
+  - src/internal/default_config.go, src/internal/handle_panel_navigation.go (some math remnants), src/internal/model.go (overlay /2), src/internal/model_render.go (counts and mins), src/internal/type_utils.go (+2), src/internal/utils/ui_utils.go (/3, +2), and several pkg/file_preview/* files including kitty.go and image_resize.go.
+
+Handoff Notes
+- Behavior unchanged; only constants and formatting so far.
+- Keep diffs focused; avoid unrelated reformatting.
+- After finishing internal mnd items, handle preview/kitty in a separate commit for easier review.
+
 Step 1 — Enable mnd in existing linter config (uncomment only)
 1. File to edit: .golangci.yaml (do NOT add .golangci.yml).
 2. In the `linters.enable` list, locate the commented mnd entry:

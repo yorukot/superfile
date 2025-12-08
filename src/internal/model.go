@@ -324,7 +324,9 @@ func (m *model) setZoxideModelSize() {
 }
 
 func (m *model) setMetadataModelSize() {
-	m.fileMetaData.SetDimensions(utils.FooterWidth(m.fullWidth)+common.BorderPadding, m.footerHeight+common.BorderPadding)
+	m.fileMetaData.SetDimensions(
+		utils.FooterWidth(m.fullWidth)+common.BorderPadding,
+		m.footerHeight+common.BorderPadding)
 }
 
 // TODO: Remove this code duplication with footer models
