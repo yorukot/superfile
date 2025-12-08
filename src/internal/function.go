@@ -242,7 +242,6 @@ func getTypeOrderingFunc(elements []element, reversed bool) sliceOrderFunc {
 }
 
 func panelElementHeight(mainPanelHeight int) int {
-	// visible rows exclude borders/header/footer paddings (mnd)
 	return mainPanelHeight - common.PanelPadding
 }
 

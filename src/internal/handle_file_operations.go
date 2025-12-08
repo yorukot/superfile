@@ -97,7 +97,6 @@ func (m *model) panelItemRename() {
 	m.fileModel.renaming = true
 	panel.renaming = true
 	m.firstTextInput = true
-	// leave inner padding for input field (mnd)
 	panel.rename = common.GenerateRenameTextInput(m.fileModel.width-common.InnerPadding, cursorPos, panel.element[panel.cursor].name)
 }
 

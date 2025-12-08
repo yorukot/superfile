@@ -49,7 +49,6 @@ func Run(content embed.FS) {
 						fmt.Println(variable.LastDirFile)
 						return nil
 					}
-					// use shared help column width (mnd)
 					fmt.Printf("%-*s %s\n",
 						common.HelpKeyColumnWidth,
 						lipgloss.NewStyle().Foreground(lipgloss.Color("#66b2ff")).Render("[Configuration file path]"),
@@ -283,7 +282,6 @@ func shouldCheckForUpdate(now, last time.Time) bool {
 }
 
 func checkAndNotifyUpdate() {
-	// shared CLI timeout (mnd)
 	ctx, cancel := context.WithTimeout(context.Background(), common.DefaultCLIContextTimeout)
 	defer cancel()
 
