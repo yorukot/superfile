@@ -18,9 +18,13 @@ import (
 
 // Size calculation constants
 const (
-	KilobyteSize = 1000 // SI decimal unit
-	KibibyteSize = 1024 // Binary unit
-	TabWidth     = 4    // Standard tab expansion width
+	KilobyteSize      = 1000 // SI decimal unit
+	KibibyteSize      = 1024 // Binary unit
+	TabWidth          = 4    // Standard tab expansion width
+	DefaultBufferSize = 1024 // Default buffer size for string operations
+	NonBreakingSpace  = 0xa0 // Unicode non-breaking space
+	EscapeChar        = 0x1b // ANSI escape character
+	ASCIIMax          = 0x7f // Maximum ASCII character value
 )
 
 func TruncateText(text string, maxChars int, tails string) string {
@@ -58,6 +62,7 @@ func TruncateMiddleText(text string, maxChars int, tails string) string {
 		return text
 	}
 
+	//nolint:mnd // standard halving for center truncation
 	halfEllipsisLength := (maxChars - 3) / 2
 	// TODO : Use ansi.Substring to correctly handle ANSI escape codes
 	truncatedText := text[:halfEllipsisLength] + tails + text[utf8.RuneCountInString(text)-halfEllipsisLength:]
@@ -187,7 +192,7 @@ func IsTextFile(filename string) (bool, error) {
 	defer file.Close()
 
 	reader := bufio.NewReader(file)
-	buffer := make([]byte, 1024)
+	buffer := make([]byte, DefaultBufferSize)
 	cnt, err := reader.Read(buffer)
 	if err != nil && !errors.Is(err, io.EOF) {
 		return false, err
@@ -211,7 +216,7 @@ func MakePrintableWithEscCheck(line string, allowEsc bool) string { //nolint: go
 		}
 		// It needs to be handled separately since considered a space,
 		// It is multi-byte in UTF-8, But it has zero display width
-		if r == 0xa0 {
+		if r == NonBreakingSpace {
 			sb.WriteRune(r)
 			continue
 		}
@@ -222,13 +227,13 @@ func MakePrintableWithEscCheck(line string, allowEsc bool) string { //nolint: go
 			sb.WriteString("    ")
 			continue
 		}
-		if r == 0x1b {
+		if r == EscapeChar {
 			if allowEsc {
 				sb.WriteRune(r)
 			}
 			continue
 		}
-		if r > 0x7f {
+		if r > ASCIIMax {
 			if unicode.IsSpace(r) && utf8.RuneLen(r) > 1 {
 				// See https://github.com/charmbracelet/x/issues/466
 				// Space chacters spanning more than one bytes are not handled well by

@@ -269,6 +269,7 @@ func GenerateNewFileTextInput() textinput.Model {
 	t.PlaceholderStyle = ModalStyle
 	t.Focus()
 	t.CharLimit = 156
+	//nolint:mnd // modal width minus padding
 	t.Width = ModalWidth - 10
 	return t
 }
@@ -304,7 +305,7 @@ func GeneratePinnedRenameTextInput(cursorPos int, defaultValue string) textinput
 	ti.SetCursor(cursorPos)
 	ti.Focus()
 	ti.CharLimit = 156
-	ti.Width = Config.SidebarWidth - 4
+	ti.Width = Config.SidebarWidth - PanelPadding
 	return ti
 }
 

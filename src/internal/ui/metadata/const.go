@@ -22,7 +22,7 @@ var sortPriority = map[string]int{ //nolint: gochecknoglobals // This is effecti
 	// Metadata field priority indices for display ordering
 	keyName:         0,
 	keySize:         1,
-	keyDataModified: 2,
+	keyDataModified: 2, //nolint:mnd // display order index
 	keyDataAccessed: 3, //nolint:mnd // display order index
 	keyPermissions:  4, //nolint:mnd // display order index
 	keyOwner:        5, //nolint:mnd // display order index

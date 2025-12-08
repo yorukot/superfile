@@ -19,7 +19,10 @@ func (s *Model) Render(mainPanelHeight int, sidebarFocussed bool, currentFilePan
 		"renderIndex", s.renderIndex, "dirs count", len(s.directories),
 		"sidebar focused", sidebarFocussed)
 
-	r := ui.SidebarRenderer(mainPanelHeight+common.BorderPadding, common.Config.SidebarWidth+common.BorderPadding, sidebarFocussed)
+	r := ui.SidebarRenderer(
+		mainPanelHeight+common.BorderPadding,
+		common.Config.SidebarWidth+common.BorderPadding,
+		sidebarFocussed)
 
 	r.AddLines(common.SideBarSuperfileTitle, "")
 

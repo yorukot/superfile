@@ -24,6 +24,7 @@ func computeMetadataWidths(viewWidth, maxKeyLen int) (int, int) {
 	keyLen := maxKeyLen
 	valueLen := viewWidth - keyLen
 	if valueLen < viewWidth/2 {
+		//nolint:mnd // standard halving for center split
 		valueLen = viewWidth / 2
 		keyLen = viewWidth - valueLen
 	}

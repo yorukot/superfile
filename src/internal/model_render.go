@@ -368,7 +368,7 @@ func (m *model) helpMenuRender() string {
 		}
 	}
 
-	valueLength := m.helpMenu.width - maxKeyLength - 2
+	valueLength := m.helpMenu.width - maxKeyLength - common.BorderPadding
 	if valueLength < m.helpMenu.width/common.CenterDivisor {
 		valueLength = m.helpMenu.width/common.CenterDivisor - common.BorderPadding
 	}

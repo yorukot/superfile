@@ -327,9 +327,9 @@ func hexToColor(hex string) (color.RGBA, error) {
 	}
 	return color.RGBA{
 		R: uint8(values >> RGBShift16),
-		G: uint8((values >> RGBShift8) & 0xFF),
-		B: uint8(values & 0xFF),
-		A: 255,
+		G: uint8((values >> RGBShift8) & RGBMask),
+		B: uint8(values & RGBMask),
+		A: AlphaOpaque,
 	}, nil
 }
 

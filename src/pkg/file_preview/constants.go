@@ -15,4 +15,8 @@ const (
 	KittyHashPrime     = 31     // Prime multiplier for hash calculation
 	KittyMaxID         = 0xFFFF // Maximum ID value for kitty images
 	KittyNonZeroOffset = 1000   // Offset to ensure non-zero IDs
+
+	// RGB color masks
+	RGBMask     = 0xFF // Mask for extracting 8-bit RGB channel values
+	AlphaOpaque = 255  // Fully opaque alpha channel value
 )
