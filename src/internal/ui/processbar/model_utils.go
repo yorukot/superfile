@@ -12,15 +12,15 @@ func (m *Model) cntProcesses() int {
 
 func (m *Model) isValid() bool {
 	return m.renderIndex <= m.cursor &&
-		m.cursor <= m.renderIndex+cntRenderableProcess(m.height-2)-1
+		m.cursor <= m.renderIndex+cntRenderableProcess(m.height-BorderSize)-1
 }
 
 func (m *Model) viewHeight() int {
-	return m.height - 2
+	return m.height - BorderSize
 }
 
 func (m *Model) viewWidth() int {
-	return m.width - 2
+	return m.width - BorderSize
 }
 
 func (m *Model) getSortedProcesses() []Process {
