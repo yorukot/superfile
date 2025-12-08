@@ -167,6 +167,7 @@ type filePanel struct {
 	renaming           bool
 	searchBar          textinput.Model
 	lastTimeGetElement time.Time
+	targetFile         string // filename to position cursor on after load
 }
 
 // Sort options

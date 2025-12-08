@@ -8,6 +8,11 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
 )
 
+const (
+	scrollIndicatorUp   = "↑ More results above"
+	scrollIndicatorDown = "↓ More results below"
+)
+
 func (m *Model) Render() string {
 	r := ui.ZoxideRenderer(m.maxHeight, m.width)
 	r.SetBorderTitle(m.headline)
@@ -71,12 +76,12 @@ func (m *Model) renderScrollIndicators(r *rendering.Renderer, endIndex int) {
 
 	if m.renderIndex > 0 {
 		r.AddSection()
-		r.AddLines(" ↑ More results above")
+		r.AddLines(" " + scrollIndicatorUp)
 	}
 	if endIndex < len(m.results) {
 		if m.renderIndex == 0 {
 			r.AddSection()
 		}
-		r.AddLines(" ↓ More results below")
+		r.AddLines(" " + scrollIndicatorDown)
 	}
 }

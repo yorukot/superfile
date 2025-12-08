@@ -120,9 +120,9 @@ func Run(content embed.FS) {
 
 func spfAppAction(_ context.Context, c *cli.Command) error {
 	// If no args are called along with "spf" use current dir
-	firstFilePanelDirs := []string{""}
+	firstPanelPaths := []string{""}
 	if c.Args().Present() {
-		firstFilePanelDirs = c.Args().Slice()
+		firstPanelPaths = c.Args().Slice()
 	}
 
 	variable.UpdateVarFromCliArgs(c)
@@ -131,7 +131,7 @@ func spfAppAction(_ context.Context, c *cli.Command) error {
 
 	firstUse := checkFirstUse()
 
-	p := tea.NewProgram(internal.InitialModel(firstFilePanelDirs, firstUse),
+	p := tea.NewProgram(internal.InitialModel(firstPanelPaths, firstUse),
 		tea.WithAltScreen(), tea.WithMouseCellMotion())
 	if _, err := p.Run(); err != nil {
 		utils.PrintfAndExitf("Alas, there's been an error: %v", err)

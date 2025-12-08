@@ -38,9 +38,9 @@ var (
 // is passed to tea.NewProgram() which accepts tea.Model
 // Either way type 'model' is not exported, so there is not way main package can
 // be aware of it, and use it directly
-func InitialModel(firstFilePanelDirs []string, firstUseCheck bool) tea.Model {
-	toggleDotFile, toggleFooter, zClient := initialConfig(firstFilePanelDirs)
-	return defaultModelConfig(toggleDotFile, toggleFooter, firstUseCheck, firstFilePanelDirs, zClient)
+func InitialModel(firstPanelPaths []string, firstUseCheck bool) tea.Model {
+	toggleDotFile, toggleFooter, zClient := initialConfig(firstPanelPaths)
+	return defaultModelConfig(toggleDotFile, toggleFooter, firstUseCheck, firstPanelPaths, zClient)
 }
 
 // Init function to be called by Bubble tea framework, sets windows title,
@@ -696,50 +696,76 @@ func getMaxW(s string) int {
 // Render and update file panel items. Check for changes and updates in files and
 // folders in the current directory.
 func (m *model) getFilePanelItems() {
-	focusPanel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	for i, filePanel := range m.fileModel.filePanels {
-		var fileElement []element
+	focusPanel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+	for i := range m.fileModel.filePanels {
+		filePanel := &m.fileModel.filePanels[i]
 		nowTime := time.Now()
-		// Check last time each element was updated, if less then 3 seconds ignore
-		if !filePanel.isFocused && nowTime.Sub(filePanel.lastTimeGetElement) < 3*time.Second {
-			// TODO : revisit this. This feels like a duct tape solution of an actual
-			// deep rooted problem. This feels very hacky.
-			if !m.updatedToggleDotFile {
-				continue
+		if !m.shouldSkipPanelUpdate(filePanel, focusPanel, nowTime) {
+			// Load elements for this panel (with/without search filter)
+			filePanel.element = m.getElementsForPanel(filePanel)
+			// Update file panel list
+			filePanel.lastTimeGetElement = nowTime
+
+			// For hover to file on first time loading
+			if filePanel.targetFile != "" {
+				filePanel.applyTargetFileCursor()
 			}
 		}
-
-		focusPanelReRender := false
-
-		if len(focusPanel.element) > 0 {
-			if filepath.Dir(focusPanel.element[0].location) != focusPanel.location {
-				focusPanelReRender = true
-			}
-		} else {
-			focusPanelReRender = true
-		}
-
-		reRenderTime := int(float64(len(filePanel.element)) / 100)
-
-		if filePanel.isFocused && !focusPanelReRender &&
-			nowTime.Sub(filePanel.lastTimeGetElement) < time.Duration(reRenderTime)*time.Second {
-			continue
-		}
-
-		// Get file names based on search bar filter
-		if filePanel.searchBar.Value() != "" {
-			fileElement = returnDirElementBySearchString(filePanel.location, m.toggleDotFile,
-				filePanel.searchBar.Value(), filePanel.sortOptions.data)
-		} else {
-			fileElement = returnDirElement(filePanel.location, m.toggleDotFile, filePanel.sortOptions.data)
-		}
-		// Update file panel list
-		filePanel.element = fileElement
-		m.fileModel.filePanels[i].element = fileElement
-		m.fileModel.filePanels[i].lastTimeGetElement = nowTime
+		// Due to applyTargetFileCursor, cursor might go out of range
+		filePanel.scrollToCursor(m.mainPanelHeight)
 	}
 
 	m.updatedToggleDotFile = false
+}
+
+// Helper to decide whether to skip updating a panel this tick.
+func (m *model) shouldSkipPanelUpdate(filePanel *filePanel, focusPanel *filePanel, nowTime time.Time) bool {
+	// Throttle non-focused panels unless dotfile toggle changed
+	if !filePanel.isFocused && nowTime.Sub(filePanel.lastTimeGetElement) < 3*time.Second {
+		if !m.updatedToggleDotFile {
+			return true
+		}
+	}
+
+	focusPanelReRender := focusPanel.needsReRender()
+	reRenderTime := int(float64(len(filePanel.element)) / 100)
+	if filePanel.isFocused && !focusPanelReRender &&
+		nowTime.Sub(filePanel.lastTimeGetElement) < time.Duration(reRenderTime)*time.Second {
+		return true
+	}
+	return false
+}
+
+// Checks whether the focus panel directory changed and forces a re-render.
+func (panel *filePanel) needsReRender() bool {
+	if len(panel.element) > 0 {
+		return filepath.Dir(panel.element[0].location) != panel.location
+	}
+	return true
+}
+
+// Retrieves elements for a panel based on search bar value and sort options.
+func (m *model) getElementsForPanel(filePanel *filePanel) []element {
+	if filePanel.searchBar.Value() != "" {
+		return returnDirElementBySearchString(
+			filePanel.location,
+			m.toggleDotFile,
+			filePanel.searchBar.Value(),
+			filePanel.sortOptions.data,
+		)
+	}
+	return returnDirElement(filePanel.location, m.toggleDotFile, filePanel.sortOptions.data)
+}
+
+// Applies targetFile cursor positioning, if configured for the panel.
+func (panel *filePanel) applyTargetFileCursor() {
+	for idx, el := range panel.element {
+		if el.name == panel.targetFile {
+			panel.cursor = idx
+			break
+		}
+	}
+	panel.targetFile = ""
 }
 
 // Close superfile application. Cd into the current dir if CdOnQuit on and save
