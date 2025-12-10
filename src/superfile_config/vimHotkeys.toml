@@ -27,7 +27,7 @@ list_down = ['j', '']
 page_up = ['pgup','']
 page_down = ['pgdown','']
 
-#-- File Panel Controls]
+#-- File Panel Controls
 create_new_file_panel = ['n', '']
 close_file_panel = ['q', '']
 next_file_panel = ['tab', '']
