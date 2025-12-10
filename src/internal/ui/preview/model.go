@@ -298,6 +298,7 @@ func (m *Model) RenderWithPath(itemPath string, fullModelWidth int) string {
 		}
 		thumbnailPath, err := m.thumbnailGenerator.GetThumbnailOrGenerate(itemPath)
 		if err != nil {
+			slog.Error("Error generating thumbnail", "error", err)
 			return renderUnsupportedFormat(box) + clearCmd
 		}
 		return m.renderImagePreview(box, thumbnailPath, previewWidth, previewHeight, fullModelWidth-previewWidth+1)
