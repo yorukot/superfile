@@ -80,9 +80,8 @@ func (g *ThumbnailGenerator) generateThumbnail(inputPath string) (string, error)
 	if err != nil {
 		return "", err
 	}
-	defer outputFile.Close()
-
 	outputFilePath := outputFile.Name()
+	outputFile.Close()
 
 	ctx, cancel := context.WithTimeout(context.Background(), generationTimeout)
 	defer cancel()
