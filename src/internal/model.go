@@ -771,10 +771,12 @@ func (panel *filePanel) applyTargetFileCursor() {
 // Close superfile application. Cd into the current dir if CdOnQuit on and save
 // the path in state direcotory
 func (m *model) quitSuperfile(cdOnQuit bool) {
-	// close exiftool session
+	// Resource cleanup
 	if common.Config.Metadata && et != nil {
 		et.Close()
 	}
+	m.fileModel.filePreview.CleanUp()
+
 	// cd on quit
 	currentDir := m.fileModel.filePanels[m.filePanelFocusIndex].location
 	variable.SetLastDir(currentDir)
@@ -787,7 +789,6 @@ func (m *model) quitSuperfile(cdOnQuit bool) {
 			slog.Error("Error during writing lastdir file", "error", err)
 		}
 	}
-	m.fileModel.filePreview.CleanUp()
 	m.modelQuitState = quitDone
 	slog.Debug("Quitting superfile", "current dir", currentDir)
 }

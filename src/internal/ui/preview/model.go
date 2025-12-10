@@ -44,7 +44,7 @@ type Model struct {
 func New() Model {
 	generator, err := filepreview.NewThumbnailGenerator()
 	if err != nil {
-		slog.Error("Could not create TempDirectory", "error", err)
+		slog.Error("Could not NewThumbnailGenerator object", "error", err)
 	}
 
 	return Model{
@@ -292,12 +292,15 @@ func (m *Model) RenderWithPath(itemPath string, fullModelWidth int) string {
 		return renderDirectoryPreview(r, itemPath, previewHeight) + clearCmd
 	}
 
-	if isVideoFile(itemPath) && m.thumbnailGenerator != nil {
-		thumbnailPath, err := m.thumbnailGenerator.GetThumbnailOrGenerate(itemPath)
-		if err != nil {
+	if isVideoFile(itemPath) {
+		if m.thumbnailGenerator == nil {
 			return renderUnsupportedFormat(box) + clearCmd
 		}
-
+		thumbnailPath, err := m.thumbnailGenerator.GetThumbnailOrGenerate(itemPath)
+		if err != nil {
+			slog.Error("Error generating thumbnail", "error", err)
+			return renderUnsupportedFormat(box) + clearCmd
+		}
 		return m.renderImagePreview(box, thumbnailPath, previewWidth, previewHeight, fullModelWidth-previewWidth+1)
 	}
 
@@ -360,38 +363,9 @@ func checkBatCmd() string {
 }
 
 func isImageFile(filename string) bool {
-	imageExtensions := map[string]bool{
-		".jpg":  true,
-		".jpeg": true,
-		".png":  true,
-		".gif":  true,
-		".bmp":  true,
-		".tiff": true,
-		".svg":  true,
-		".webp": true,
-		".ico":  true,
-	}
-
-	ext := strings.ToLower(filepath.Ext(filename))
-	return imageExtensions[ext]
+	return common.ImageExtensions[strings.ToLower(filepath.Ext(filename))]
 }
 
 func isVideoFile(filename string) bool {
-	videoExtensions := map[string]bool{
-		".mkv":  true,
-		".mp4":  true,
-		".mov":  true,
-		".avi":  true,
-		".flv":  true,
-		".webm": true,
-		".wmv":  true,
-		".m4v":  true,
-		".mpeg": true,
-		".3gp":  true,
-		".ogv":  true,
-	}
-
-	ext := strings.ToLower(filepath.Ext(filename))
-
-	return videoExtensions[ext]
+	return common.VideoExtensions[strings.ToLower(filepath.Ext(filename))]
 }

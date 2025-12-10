@@ -11,14 +11,18 @@ import (
 )
 
 const (
-	maxFileSize = "104857600" // 100MB limit
-	outputExt   = ".jpg"
+	maxFileSize       = "104857600" // 100MB limit
+	outputExt         = ".jpg"
+	generationTimeout = 30 * time.Second
 )
 
 type ThumbnailGenerator struct {
-	tempFiles     map[string]string
-	tempDirectory string
-	mu            sync.Mutex
+	// This is a cache. Key -> Video file path, Value -> Thumbnail file path
+	// TODO: We can potentially make it persisitent, preventing generation
+	// of thumbnail on every launch or superfile
+	tempFilesCache map[string]string
+	tempDirectory  string
+	mu             sync.Mutex
 }
 
 func NewThumbnailGenerator() (*ThumbnailGenerator, error) {
@@ -32,8 +36,8 @@ func NewThumbnailGenerator() (*ThumbnailGenerator, error) {
 	}
 
 	thumbnailGenerator := &ThumbnailGenerator{
-		tempFiles:     make(map[string]string),
-		tempDirectory: tmp,
+		tempFilesCache: make(map[string]string),
+		tempDirectory:  tmp,
 	}
 
 	return thumbnailGenerator, nil
@@ -41,7 +45,7 @@ func NewThumbnailGenerator() (*ThumbnailGenerator, error) {
 
 func (g *ThumbnailGenerator) GetThumbnailOrGenerate(path string) (string, error) {
 	g.mu.Lock()
-	file, ok := g.tempFiles[path]
+	file, ok := g.tempFilesCache[path]
 	g.mu.Unlock()
 
 	if ok {
@@ -51,7 +55,7 @@ func (g *ThumbnailGenerator) GetThumbnailOrGenerate(path string) (string, error)
 		}
 
 		g.mu.Lock()
-		delete(g.tempFiles, path)
+		delete(g.tempFilesCache, path)
 		g.mu.Unlock()
 	}
 
@@ -61,7 +65,7 @@ func (g *ThumbnailGenerator) GetThumbnailOrGenerate(path string) (string, error)
 	}
 
 	g.mu.Lock()
-	g.tempFiles[path] = generatedThumbnailPath
+	g.tempFilesCache[path] = generatedThumbnailPath
 	g.mu.Unlock()
 
 	return generatedThumbnailPath, nil
@@ -76,11 +80,10 @@ func (g *ThumbnailGenerator) generateThumbnail(inputPath string) (string, error)
 	if err != nil {
 		return "", err
 	}
-	defer outputFile.Close()
-
 	outputFilePath := outputFile.Name()
+	outputFile.Close()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), generationTimeout)
 	defer cancel()
 
 	// ffmpeg -v warning -t 60 -hwaccel auto -an -sn -dn -skip_frame nokey -i input.mkv -vf scale='min(1024,iw)':'min(720,ih)':force_original_aspect_ratio=decrease:flags=fast_bilinear -vf "thumbnail" -frames:v 1 -y thumb.jpg
