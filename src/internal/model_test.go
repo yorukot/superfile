@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	tea "github.com/charmbracelet/bubbletea"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -93,6 +95,41 @@ func TestBasic(t *testing.T) {
 
 		assert.Equal(t, dir1, m.getFocusedFilePanel().location)
 	})
+}
+
+func TestInitialFilePathPositionsCursorWindow(t *testing.T) {
+	curTestDir := t.TempDir()
+	dir1 := filepath.Join(curTestDir, "dir1")
+
+	utils.SetupDirectories(t, curTestDir, dir1)
+
+	var file7 string
+	var file2 string
+	for i := range 10 {
+		f := filepath.Join(dir1, fmt.Sprintf("file%d.txt", i))
+		utils.SetupFiles(t, f)
+		if i == 7 {
+			file7 = f
+		}
+		if i == 2 {
+			file2 = f
+		}
+	}
+
+	m := defaultTestModel(dir1, file2, file7)
+	// View port of 5
+	TeaUpdate(m, tea.WindowSizeMsg{Width: common.MinimumWidth, Height: 10})
+	// Uncomment below to understand the distribution
+	// t.Logf("Heights : %d [%d - [%d] %d]\n", m.fullHeight, m.footerHeight, m.mainPanelHeight,
+	//	panelElementHeight(m.mainPanelHeight))
+	require.Len(t, m.fileModel.filePanels, 3)
+	assert.Equal(t, dir1, m.fileModel.filePanels[0].location)
+	assert.Equal(t, file2, m.fileModel.filePanels[1].getSelectedItem().location)
+	assert.Equal(t, 2, m.fileModel.filePanels[1].cursor)
+	assert.Equal(t, 0, m.fileModel.filePanels[1].render)
+	assert.Equal(t, file7, m.fileModel.filePanels[2].getSelectedItem().location)
+	assert.Equal(t, 7, m.fileModel.filePanels[2].cursor)
+	assert.Equal(t, 3, m.fileModel.filePanels[2].render)
 }
 
 func TestQuit(t *testing.T) {

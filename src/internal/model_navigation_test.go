@@ -124,7 +124,6 @@ func TestFilePanelNavigation(t *testing.T) {
 			m := defaultTestModel(tt.startDir)
 			m.getFocusedFilePanel().cursor = tt.startCursor
 			m.getFocusedFilePanel().render = tt.startRender
-			m.getFocusedFilePanel().searchBar.SetValue("asdf")
 			for _, s := range tt.keyInput {
 				TeaUpdate(m, utils.TeaRuneKeyMsg(s))
 			}
