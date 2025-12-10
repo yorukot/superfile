@@ -11,8 +11,9 @@ import (
 )
 
 const (
-	maxFileSize = "104857600" // 100MB limit
-	outputExt   = ".jpg"
+	maxFileSize       = "104857600" // 100MB limit
+	outputExt         = ".jpg"
+	generationTimeout = 30 * time.Second
 )
 
 type ThumbnailGenerator struct {
@@ -83,7 +84,7 @@ func (g *ThumbnailGenerator) generateThumbnail(inputPath string) (string, error)
 
 	outputFilePath := outputFile.Name()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), generationTimeout)
 	defer cancel()
 
 	// ffmpeg -v warning -t 60 -hwaccel auto -an -sn -dn -skip_frame nokey -i input.mkv -vf scale='min(1024,iw)':'min(720,ih)':force_original_aspect_ratio=decrease:flags=fast_bilinear -vf "thumbnail" -frames:v 1 -y thumb.jpg
