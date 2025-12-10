@@ -1,61 +1,95 @@
-# =================================================================================================
-# Global hotkeys (cannot conflict with other hotkeys)
+##############################################
+#                                            #
+#           Superfile Configuration          #
+#                                            #
+##############################################
+
+# This houses the hotkey config file for superfile! More details can be found at
+# https://superfile.dev/configure/custom-hotkeys/.
+
+###############################################################################
+#                                Global hotkeys                               #
+###############################################################################
+
+# Note: These hotkeys should be unique.
+
+#-- Basic Actions
 confirm = ['enter', 'right', 'l']
-quit = ['q', 'esc']
 cd_quit = ['Q', '']
-# movement
-list_up = ['up', 'k']
+quit = ['q', 'esc']
+
+#-- Navigation
 list_down = ['down', 'j']
-page_up = ['pgup','']
+list_up = ['up', 'k']
 page_down = ['pgdown','']
-# file panel control
-create_new_file_panel = ['n', '']
+page_up = ['pgup','']
+
+#-- File Panel Controls
 close_file_panel = ['w', '']
+create_new_file_panel = ['n', '']
 next_file_panel = ['tab', 'L']
+open_sort_options_menu = ['o', '']
+pinned_directory = ['P', '']
 previous_file_panel = ['shift+left', 'H']
 toggle_file_preview_panel = ['f', '']
-open_sort_options_menu = ['o', '']
 toggle_reverse_sort = ['R', '']
-# change focus
+
+#-- Focus Manipulation
+focus_on_metadata = ['m', '']
 focus_on_process_bar = ['p', '']
 focus_on_sidebar = ['s', '']
-focus_on_metadata = ['m', '']
-# create file/directory and rename
+
+#-- File/Dir Creation/Renaming
 file_panel_item_create = ['ctrl+n', '']
 file_panel_item_rename = ['ctrl+r', '']
-# file operations
+
+#-- Main File Operations
 copy_items = ['ctrl+c', '']
 cut_items = ['ctrl+x', '']
-paste_items = ['ctrl+v', 'ctrl+w', '']
 delete_items = ['ctrl+d', 'delete', '']
+paste_items = ['ctrl+v', 'ctrl+w', '']
 permanently_delete_items = ['D', '']
-# compress and extract
-extract_file = ['ctrl+e', '']
+
+#-- Archive Manipulation
 compress_file = ['ctrl+a', '']
-# editor
-open_file_with_editor = ['e', '']
+extract_file = ['ctrl+e', '']
+
+#-- Editor Actions
 open_current_directory_with_editor = ['E', '']
-# other
-pinned_directory = ['P', '']
-toggle_dot_file = ['.', '']
+open_file_with_editor = ['e', '']
+
+#-- Other Actions
 change_panel_mode = ['v', '']
-open_help_menu = ['?', '']
-open_command_line = [':', '']
-open_spf_prompt = ['>', '']
-open_zoxide = ['z', '']
 copy_path = ['ctrl+p', '']
 copy_present_working_directory = ['c', '']
+open_command_line = [':', '']
+open_help_menu = ['?', '']
+open_spf_prompt = ['>', '']
+open_zoxide = ['z', '']
+toggle_dot_file = ['.', '']
 toggle_footer = ['F', '']
-# =================================================================================================
-# Typing hotkeys (can conflict with all hotkeys)
+
+###############################################################################
+#                                Typing hotkeys                               #
+###############################################################################
+
+# Note: These hotkeys can override all hotkeys.
+
 confirm_typing = ['enter', '']
 cancel_typing = ['ctrl+c', 'esc']
-# =================================================================================================
-# Normal mode hotkeys (can conflict with other modes, cannot conflict with global hotkeys)
+
+###############################################################################
+#                            Mode-Specific Hotkeys                            #
+###############################################################################
+
+# Note: These hotkeys can conflict with other modes, but not with global
+# hotkeys.
+
+#-- Normal Mode Actions
 parent_directory = ['h', 'left', 'backspace']
 search_bar = ['/', '']
-# =================================================================================================
-# Select mode hotkeys (can conflict with other modes, cannot conflict with global hotkeys)
+
+#-- Selection Mode Actions
 file_panel_select_mode_items_select_down = ['shift+down', 'J']
 file_panel_select_mode_items_select_up = ['shift+up', 'K']
 file_panel_select_all_items = ['A', '']
