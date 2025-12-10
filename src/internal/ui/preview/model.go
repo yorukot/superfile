@@ -292,12 +292,14 @@ func (m *Model) RenderWithPath(itemPath string, fullModelWidth int) string {
 		return renderDirectoryPreview(r, itemPath, previewHeight) + clearCmd
 	}
 
-	if isVideoFile(itemPath) && m.thumbnailGenerator != nil {
+	if isVideoFile(itemPath) {
+		if m.thumbnailGenerator == nil {
+			return renderUnsupportedFormat(box) + clearCmd
+		}
 		thumbnailPath, err := m.thumbnailGenerator.GetThumbnailOrGenerate(itemPath)
 		if err != nil {
 			return renderUnsupportedFormat(box) + clearCmd
 		}
-
 		return m.renderImagePreview(box, thumbnailPath, previewWidth, previewHeight, fullModelWidth-previewWidth+1)
 	}
 
