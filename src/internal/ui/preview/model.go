@@ -362,38 +362,9 @@ func checkBatCmd() string {
 }
 
 func isImageFile(filename string) bool {
-	imageExtensions := map[string]bool{
-		".jpg":  true,
-		".jpeg": true,
-		".png":  true,
-		".gif":  true,
-		".bmp":  true,
-		".tiff": true,
-		".svg":  true,
-		".webp": true,
-		".ico":  true,
-	}
-
-	ext := strings.ToLower(filepath.Ext(filename))
-	return imageExtensions[ext]
+	return common.ImageExtensions[strings.ToLower(filepath.Ext(filename))]
 }
 
 func isVideoFile(filename string) bool {
-	videoExtensions := map[string]bool{
-		".mkv":  true,
-		".mp4":  true,
-		".mov":  true,
-		".avi":  true,
-		".flv":  true,
-		".webm": true,
-		".wmv":  true,
-		".m4v":  true,
-		".mpeg": true,
-		".3gp":  true,
-		".ogv":  true,
-	}
-
-	ext := strings.ToLower(filepath.Ext(filename))
-
-	return videoExtensions[ext]
+	return common.VideoExtensions[strings.ToLower(filepath.Ext(filename))]
 }
