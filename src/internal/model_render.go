@@ -66,7 +66,7 @@ func (panel *filePanel) Render(mainPanelHeight int, filePanelWidth int, focussed
 
 	panel.renderTopBar(r, filePanelWidth)
 	panel.renderSearchBar(r)
-	panel.renderFooter(r)
+	panel.renderFooter(r, uint(len(panel.selected)))
 	panel.renderFileEntries(r, mainPanelHeight, filePanelWidth)
 
 	return r.Render()
@@ -84,9 +84,9 @@ func (panel *filePanel) renderSearchBar(r *rendering.Renderer) {
 }
 
 // TODO : Unit test this
-func (panel *filePanel) renderFooter(r *rendering.Renderer) {
+func (panel *filePanel) renderFooter(r *rendering.Renderer, selectedCount uint) {
 	sortLabel, sortIcon := panel.getSortInfo()
-	modeLabel, modeIcon := panel.getPanelModeInfo()
+	modeLabel, modeIcon := panel.getPanelModeInfo(selectedCount)
 	cursorStr := panel.getCursorString()
 
 	if common.Config.Nerdfont {
@@ -166,12 +166,12 @@ func (panel *filePanel) getSortInfo() (string, string) {
 	return label, iconStr
 }
 
-func (panel *filePanel) getPanelModeInfo() (string, string) {
+func (panel *filePanel) getPanelModeInfo(selectedCount uint) (string, string) {
 	switch panel.panelMode {
 	case browserMode:
 		return "Browser", icon.Browser
 	case selectMode:
-		return "Select", icon.Select
+		return "Select" + icon.Space + fmt.Sprintf("(%d)", selectedCount), icon.Select
 	default:
 		return "", ""
 	}
