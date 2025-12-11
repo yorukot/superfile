@@ -2,8 +2,8 @@ package processbar
 
 // UI dimension constants for process bar rendering
 const (
-	// BorderSize is the border width for the process bar panel
-	BorderSize = 2
+	// borderSize is the border width for the process bar panel
+	borderSize = 2
 
 	// progressBarRightPadding is padding after progress bar
 	progressBarRightPadding = 3

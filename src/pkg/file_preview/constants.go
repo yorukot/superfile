@@ -22,4 +22,8 @@ const (
 	// RGB color masks
 	rgbMask     = 0xFF // Mask for extracting 8-bit RGB channel values
 	alphaOpaque = 255  // Fully opaque alpha channel value
+
+	maxVideoFileSizeForThumb = "104857600" // 100MB limit
+	thumbOutputExt           = ".jpg"
+	thumbGenerationTimeout   = 30 * time.Second
 )

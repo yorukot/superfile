@@ -7,13 +7,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"sync"
-	"time"
-)
-
-const (
-	maxFileSize       = "104857600" // 100MB limit
-	outputExt         = ".jpg"
-	generationTimeout = 30 * time.Second
 )
 
 type ThumbnailGenerator struct {
@@ -76,14 +69,14 @@ func (g *ThumbnailGenerator) generateThumbnail(inputPath string) (string, error)
 	filename := filepath.Base(inputPath)
 	baseName := filename[:len(filename)-len(fileExt)]
 
-	outputFile, err := os.CreateTemp(g.tempDirectory, "*-"+baseName+outputExt)
+	outputFile, err := os.CreateTemp(g.tempDirectory, "*-"+baseName+thumbOutputExt)
 	if err != nil {
 		return "", err
 	}
 	outputFilePath := outputFile.Name()
 	outputFile.Close()
 
-	ctx, cancel := context.WithTimeout(context.Background(), generationTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), thumbGenerationTimeout)
 	defer cancel()
 
 	// ffmpeg -v warning -t 60 -hwaccel auto -an -sn -dn -skip_frame nokey -i input.mkv -vf scale='min(1024,iw)':'min(720,ih)':force_original_aspect_ratio=decrease:flags=fast_bilinear -vf "thumbnail" -frames:v 1 -y thumb.jpg
@@ -99,7 +92,7 @@ func (g *ThumbnailGenerator) generateThumbnail(inputPath string) (string, error)
 		"-vf", "thumbnail", // use ffmpeg default thumbnail filter
 		"-frames:v", "1", // output only one frame (one image)
 		"-f", "image2", // set format to image2
-		"-fs", maxFileSize, // limit the max file size to match image previewer limit
+		"-fs", maxVideoFileSizeForThumb, // limit the max file size to match image previewer limit
 		"-y", outputFilePath, // set the outputFile and overwrite it without confirmation if already exists
 	)
 

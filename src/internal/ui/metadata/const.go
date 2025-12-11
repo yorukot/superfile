@@ -17,6 +17,7 @@ const keyMd5Checksum = "MD5Checksum"
 const keyOwner = "Owner"
 const keyGroup = "Group"
 const keyPath = "Path"
+const borderSize = 2
 
 var sortPriority = map[string]int{ //nolint: gochecknoglobals // This is effectively const.
 	// Metadata field priority indices for display ordering
