@@ -99,7 +99,7 @@ linters:
     - makezero # finds slice declarations with non-zero initial length
     - mirror # reports wrong mirror patterns of bytes/strings usage
     # TODO enable
-    # - mnd # detects magic numbers
+    - mnd # detects magic numbers
     - musttag # enforces field tags in (un)marshaled structs
     - nakedret # finds naked returns in functions greater than a specified function length
     # TODO enable : Many reports. A bit hard to understand the nesting value.

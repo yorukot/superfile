@@ -49,16 +49,25 @@ func Run(content embed.FS) {
 						fmt.Println(variable.LastDirFile)
 						return nil
 					}
-					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#66b2ff")).
-						Render("[Configuration file path]"), variable.ConfigFile)
-					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#ffcc66")).
-						Render("[Hotkeys file path]"), variable.HotkeysFile)
-					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#66ff66")).
-						Render("[Log file path]"), variable.LogFile)
-					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#ff9999")).
-						Render("[Configuration directory path]"), variable.SuperFileMainDir)
-					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#ff66ff")).
-						Render("[Data directory path]"), variable.SuperFileDataDir)
+					fmt.Printf("%-*s %s\n",
+						common.HelpKeyColumnWidth,
+						lipgloss.NewStyle().Foreground(lipgloss.Color("#66b2ff")).Render("[Configuration file path]"),
+						variable.ConfigFile,
+					)
+					fmt.Printf("%-*s %s\n",
+						common.HelpKeyColumnWidth,
+						lipgloss.NewStyle().Foreground(lipgloss.Color("#ffcc66")).Render("[Hotkeys file path]"),
+						variable.HotkeysFile,
+					)
+					logStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#66ff66"))
+					configStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff9999"))
+					dataStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff66ff"))
+					fmt.Printf("%-*s %s\n", common.HelpKeyColumnWidth,
+						logStyle.Render("[Log file path]"), variable.LogFile)
+					fmt.Printf("%-*s %s\n", common.HelpKeyColumnWidth,
+						configStyle.Render("[Configuration directory path]"), variable.SuperFileMainDir)
+					fmt.Printf("%-*s %s\n", common.HelpKeyColumnWidth,
+						dataStyle.Render("[Data directory path]"), variable.SuperFileDataDir)
 					return nil
 				},
 				Flags: []cli.Flag{
@@ -267,7 +276,7 @@ func shouldCheckForUpdate(now, last time.Time) bool {
 }
 
 func checkAndNotifyUpdate() {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), common.DefaultCLIContextTimeout)
 	defer cancel()
 
 	resp, err := fetchLatestRelease(ctx)

@@ -93,7 +93,7 @@ func (m *Model) Render(metadataFocussed bool) string {
 	}
 	keyLen, valueLen := computeRenderDimensions(m.metadata.data, m.width-2-keyValueSpacingLen)
 	r.SetBorderInfoItems(fmt.Sprintf("%d/%d", m.renderIndex+1, len(m.metadata.data)))
-	lines := formatMetadataLines(m.metadata.data, m.renderIndex, m.height-2, keyLen, valueLen)
+	lines := formatMetadataLines(m.metadata.data, m.renderIndex, m.height-borderSize, keyLen, valueLen)
 	r.AddLines(lines...)
 	return r.Render()
 }

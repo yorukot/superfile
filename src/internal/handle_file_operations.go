@@ -97,7 +97,10 @@ func (m *model) panelItemRename() {
 	m.fileModel.renaming = true
 	panel.renaming = true
 	m.firstTextInput = true
-	panel.rename = common.GenerateRenameTextInput(m.fileModel.width-4, cursorPos, panel.element[panel.cursor].name)
+	panel.rename = common.GenerateRenameTextInput(
+		m.fileModel.width-common.InnerPadding,
+		cursorPos,
+		panel.element[panel.cursor].name)
 }
 
 func (m *model) getDeleteCmd(permDelete bool) tea.Cmd {
