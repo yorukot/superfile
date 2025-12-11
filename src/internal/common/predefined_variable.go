@@ -64,6 +64,30 @@ var (
 
 var (
 	UnsupportedPreviewFormats = []string{".pdf", ".torrent"}
+	ImageExtensions           = map[string]bool{
+		".jpg":  true,
+		".jpeg": true,
+		".png":  true,
+		".gif":  true,
+		".bmp":  true,
+		".tiff": true,
+		".svg":  true,
+		".webp": true,
+		".ico":  true,
+	}
+	VideoExtensions = map[string]bool{
+		".mkv":  true,
+		".mp4":  true,
+		".mov":  true,
+		".avi":  true,
+		".flv":  true,
+		".webm": true,
+		".wmv":  true,
+		".m4v":  true,
+		".mpeg": true,
+		".3gp":  true,
+		".ogv":  true,
+	}
 )
 
 // No dependencies
