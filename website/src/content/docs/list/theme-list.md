@@ -58,7 +58,7 @@ head:
 
 ## Catppuccin Mocha
 
-- Theme name: `catppuccin`
+- Theme name: `catppuccin-mocha`
 - Ported by: https://github.com/AnshumanNeon
 - Original Author: https://github.com/catppuccin
 
