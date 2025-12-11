@@ -5,7 +5,7 @@ func (d directory) IsDivider() bool {
 }
 func (d directory) RequiredHeight() int {
 	if d.IsDivider() {
-		return DefaultRenderHeight
+		return defaultRenderHeight
 	}
 	return 1
 }

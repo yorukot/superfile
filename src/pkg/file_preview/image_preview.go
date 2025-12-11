@@ -49,7 +49,7 @@ type ImagePreviewer struct {
 
 // NewImagePreviewer creates a new ImagePreviewer with default cache settings
 func NewImagePreviewer() *ImagePreviewer {
-	return NewImagePreviewerWithConfig(DefaultThumbnailCacheSize, DefaultCacheExpiration)
+	return NewImagePreviewerWithConfig(defaultThumbnailCacheSize, defaultCacheExpiration)
 }
 
 // NewImagePreviewerWithConfig creates a new ImagePreviewer with custom cache configuration
@@ -325,14 +325,14 @@ func hexToColor(hex string) (color.RGBA, error) {
 		return color.RGBA{}, err
 	}
 	return color.RGBA{
-		R: uint8(values >> RGBShift16),
-		G: uint8((values >> RGBShift8) & RGBMask),
-		B: uint8(values & RGBMask),
-		A: AlphaOpaque,
+		R: uint8(values >> rgbShift16),
+		G: uint8((values >> rgbShift8) & rgbMask),
+		B: uint8(values & rgbMask),
+		A: alphaOpaque,
 	}, nil
 }
 
 func colorToHex(color color.Color) string {
 	r, g, b, _ := color.RGBA()
-	return fmt.Sprintf("#%02x%02x%02x", uint8(r>>RGBShift8), uint8(g>>RGBShift8), uint8(b>>RGBShift8))
+	return fmt.Sprintf("#%02x%02x%02x", uint8(r>>rgbShift8), uint8(g>>rgbShift8), uint8(b>>rgbShift8))
 }

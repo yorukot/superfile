@@ -47,7 +47,7 @@ func (m *Model) SetWidth(width int) {
 	m.width = width
 	// Excluding borders(2), SpacePadding(1), Prompt(2), and one extra character that is appended
 	// by textInput.View()
-	m.textInput.Width = width - ModalInputPadding
+	m.textInput.Width = width - modalInputPadding
 }
 
 func (m *Model) SetMaxHeight(maxHeight int) {

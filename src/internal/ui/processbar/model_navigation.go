@@ -46,5 +46,5 @@ func (m *Model) ListDown(footerHeight int) {
 func cntRenderableProcess(footerHeight int) int {
 	// We can render one process in three lines
 	// And last process in two or three lines ( with/without a line separtor)
-	return (footerHeight + 1) / LinesPerProcess
+	return (footerHeight + 1) / linesPerProcess
 }

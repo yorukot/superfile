@@ -72,7 +72,7 @@ func getFilteredDirectories(query string, pinnedMgr *PinnedManager) []directory 
 func formDirctorySlice(homeDirectories []directory, pinnedDirectories []directory,
 	diskDirectories []directory) []directory {
 	// Preallocation for efficiency
-	totalCapacity := len(homeDirectories) + len(pinnedDirectories) + len(diskDirectories) + DirectoryCapacityExtra
+	totalCapacity := len(homeDirectories) + len(pinnedDirectories) + len(diskDirectories) + directoryCapacityExtra
 	directories := make([]directory, 0, totalCapacity)
 
 	directories = append(directories, homeDirectories...)

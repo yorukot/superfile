@@ -94,5 +94,5 @@ func adjustOrientation(img image.Image, orientation int) image.Image {
 // resizeForANSI resizes image specifically for ANSI rendering
 func resizeForANSI(img image.Image, maxWidth, maxHeight int) image.Image {
 	// Use maxHeight*2 because each terminal row represents 2 pixel rows in ANSI rendering
-	return imaging.Fit(img, maxWidth, maxHeight*HeightScaleFactor, imaging.Lanczos)
+	return imaging.Fit(img, maxWidth, maxHeight*heightScaleFactor, imaging.Lanczos)
 }

@@ -82,14 +82,14 @@ func generateKittyClearCommands() string {
 // generatePlacementID generates a unique placement ID based on file path
 func generatePlacementID(path string) uint32 {
 	if len(path) == 0 {
-		return KittyHashSeed // Default fallback
+		return kittyHashSeed // Default fallback
 	}
 
 	hash := 0
 	for _, c := range path {
-		hash = hash*KittyHashPrime + int(c)
+		hash = hash*kittyHashPrime + int(c)
 	}
-	return uint32(hash&KittyMaxID) + KittyNonZeroOffset // Ensure it's not 0 and avoid low numbers
+	return uint32(hash&kittyMaxID) + kittyNonZeroOffset // Ensure it's not 0 and avoid low numbers
 }
 
 // renderWithKittyUsingTermCap renders an image using Kitty graphics protocol with terminal capabilities
