@@ -9,6 +9,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
+	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/utils"
 
 	variable "github.com/yorukot/superfile/src/config"
@@ -175,7 +176,7 @@ func (m *model) searchBarFocus() {
 	}
 
 	// config search bar width
-	panel.searchBar.Width = m.fileModel.width - 4
+	panel.searchBar.Width = m.fileModel.width - common.InnerPadding
 }
 
 func (m *model) sidebarSearchBarFocus() {

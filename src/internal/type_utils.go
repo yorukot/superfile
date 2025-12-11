@@ -28,7 +28,7 @@ func (m *model) validateLayout() error {
 		return fmt.Errorf("footer closed and footerHeight %v is non zero", m.footerHeight)
 	}
 	// PanelHeight + 2 lines (main border) + actual footer height
-	if m.fullHeight != (m.mainPanelHeight+2)+utils.FullFooterHeight(m.footerHeight, m.toggleFooter) {
+	if m.fullHeight != (m.mainPanelHeight+common.BorderPadding)+utils.FullFooterHeight(m.footerHeight, m.toggleFooter) {
 		return fmt.Errorf("invalid model layout, fullHeight : %v, mainPanelHeight : %v, footerHeight : %v",
 			m.fullHeight, m.mainPanelHeight, m.footerHeight)
 	}
@@ -62,7 +62,9 @@ func defaultFilePanel(path string, focused bool) filePanel {
 		cursor:   0,
 		location: panelPath,
 		sortOptions: sortOptionsModel{
-			width:  20,
+			//nolint:mnd // default sort options dimensions
+			width: 20,
+			//nolint:mnd // default sort options dimensions
 			height: 4,
 			open:   false,
 			cursor: common.Config.DefaultSortType,

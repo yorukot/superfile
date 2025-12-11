@@ -60,7 +60,7 @@ func (panel *filePanel) pgUp(mainPanelHeight int) {
 	}
 
 	panHeight := panelElementHeight(mainPanelHeight)
-	panCenter := panHeight / 2 // For making sure the cursor is at the center of the panel
+	panCenter := panHeight / 2 //nolint:mnd // For making sure the cursor is at the center of the panel
 
 	if panHeight >= panlen {
 		panel.cursor = 0
@@ -86,7 +86,7 @@ func (panel *filePanel) pgDown(mainPanelHeight int) {
 	}
 
 	panHeight := panelElementHeight(mainPanelHeight)
-	panCenter := panHeight / 2 // For making sure the cursor is at the center of the panel
+	panCenter := panHeight / 2 //nolint:mnd // For making sure the cursor is at the center of the panel
 
 	if panHeight >= panlen {
 		panel.cursor = panlen - 1

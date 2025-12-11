@@ -11,6 +11,8 @@ import (
 const (
 	DefaultPixelsPerColumn = 10 // approximate pixels per terminal column
 	DefaultPixelsPerRow    = 20 // approximate pixels per terminal row
+	WindowsPixelsPerColumn = 8  // Windows Terminal/CMD typical width
+	WindowsPixelsPerRow    = 16 // Windows Terminal/CMD typical height
 )
 
 // TerminalCellSize represents the pixel dimensions of terminal cells
@@ -133,7 +135,7 @@ func getTerminalCellSizeWindows() (TerminalCellSize, bool) {
 // getWindowsDefaultCellSize returns reasonable defaults for Windows
 func getWindowsDefaultCellSize() TerminalCellSize {
 	return TerminalCellSize{
-		PixelsPerColumn: 8,  // Windows Terminal/CMD typical width
-		PixelsPerRow:    16, // Windows Terminal/CMD typical height
+		PixelsPerColumn: WindowsPixelsPerColumn, // Windows Terminal/CMD typical width
+		PixelsPerRow:    WindowsPixelsPerRow,    // Windows Terminal/CMD typical height
 	}
 }

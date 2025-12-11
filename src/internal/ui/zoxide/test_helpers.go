@@ -10,7 +10,7 @@ import (
 )
 
 func setupTestModel() Model {
-	return GenerateModel(nil, 50, 80)
+	return GenerateModel(nil, 50, 80) //nolint:mnd // test dimensions
 }
 
 func setupTestModelWithClient(t *testing.T) Model {
@@ -23,7 +23,7 @@ func setupTestModelWithClient(t *testing.T) Model {
 			t.Fatalf("zoxide initialization failed")
 		}
 	}
-	return GenerateModel(zClient, 50, 80)
+	return GenerateModel(zClient, 50, 80) //nolint:mnd // test dimensions
 }
 
 func setupTestModelWithResults(resultCount int) Model {
@@ -32,7 +32,7 @@ func setupTestModelWithResults(resultCount int) Model {
 	for i := range resultCount {
 		m.results[i] = zoxidelib.Result{
 			Path:  "/test/path" + string(rune('0'+i)),
-			Score: float64(100 - i*10),
+			Score: float64(100 - i*10), //nolint:mnd // test scores
 		}
 	}
 	return m

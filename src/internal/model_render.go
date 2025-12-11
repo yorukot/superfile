@@ -42,7 +42,7 @@ func (m *model) filePanelRender() string {
 		// TODO : Move this to a utility function and clarify the calculation via comments
 		// Maybe even write unit tests
 		var filePanelWidth int
-		if (m.fullWidth-common.Config.SidebarWidth-(4+(len(m.fileModel.filePanels)-1)*2))%len(
+		if (m.fullWidth-common.Config.SidebarWidth-(common.InnerPadding+(len(m.fileModel.filePanels)-1)*common.BorderPadding))%len(
 			m.fileModel.filePanels,
 		) != 0 &&
 			i == len(m.fileModel.filePanels)-1 {
@@ -50,7 +50,7 @@ func (m *model) filePanelRender() string {
 				filePanelWidth = m.fileModel.width
 			} else {
 				filePanelWidth = (m.fileModel.width + (m.fullWidth-common.Config.SidebarWidth-
-					(4+(len(m.fileModel.filePanels)-1)*2))%len(m.fileModel.filePanels))
+					(common.InnerPadding+(len(m.fileModel.filePanels)-1)*common.BorderPadding))%len(m.fileModel.filePanels))
 			}
 		} else {
 			filePanelWidth = m.fileModel.width
@@ -62,7 +62,7 @@ func (m *model) filePanelRender() string {
 }
 
 func (panel *filePanel) Render(mainPanelHeight int, filePanelWidth int, focussed bool) string {
-	r := ui.FilePanelRenderer(mainPanelHeight+2, filePanelWidth+2, focussed)
+	r := ui.FilePanelRenderer(mainPanelHeight+common.BorderPadding, filePanelWidth+common.BorderPadding, focussed)
 
 	panel.renderTopBar(r, filePanelWidth)
 	panel.renderSearchBar(r)
@@ -74,7 +74,7 @@ func (panel *filePanel) Render(mainPanelHeight int, filePanelWidth int, focussed
 
 func (panel *filePanel) renderTopBar(r *rendering.Renderer, filePanelWidth int) {
 	// TODO - Add ansitruncate left in renderer and remove truncation here
-	truncatedPath := common.TruncateTextBeginning(panel.location, filePanelWidth-4, "...")
+	truncatedPath := common.TruncateTextBeginning(panel.location, filePanelWidth-common.InnerPadding, "...")
 	r.AddLines(common.FilePanelTopDirectoryIcon + common.FilePanelTopPathStyle.Render(truncatedPath))
 	r.AddSection()
 }
@@ -210,11 +210,11 @@ func (m *model) clipboardRender() string {
 	// render
 	var bottomWidth int
 	if m.fullWidth%3 != 0 {
-		bottomWidth = utils.FooterWidth(m.fullWidth + m.fullWidth%3 + 2)
+		bottomWidth = utils.FooterWidth(m.fullWidth + m.fullWidth%common.FooterGroupCols + common.BorderPadding)
 	} else {
 		bottomWidth = utils.FooterWidth(m.fullWidth)
 	}
-	r := ui.ClipboardRenderer(m.footerHeight+2, bottomWidth+2)
+	r := ui.ClipboardRenderer(m.footerHeight+common.BorderPadding, bottomWidth+common.BorderPadding)
 	if len(m.copyItems.items) == 0 {
 		// TODO move this to a string
 		r.AddLines("", " "+icon.Error+"  No content in clipboard")
@@ -233,7 +233,7 @@ func (m *model) clipboardRender() string {
 					// TODO : There is an inconsistency in parameter that is being passed,
 					// and its name in ClipboardPrettierName function
 					r.AddLines(common.ClipboardPrettierName(m.copyItems.items[i],
-						utils.FooterWidth(m.fullWidth)-3, fileInfo.IsDir(), isLink, false))
+						utils.FooterWidth(m.fullWidth)-common.PanelPadding, fileInfo.IsDir(), isLink, false))
 				}
 			}
 		}
@@ -265,7 +265,9 @@ func (m *model) terminalSizeWarnRender() string {
 }
 
 func (m *model) terminalSizeWarnAfterFirstRender() string {
-	minimumWidthInt := common.Config.SidebarWidth + 20*len(m.fileModel.filePanels) + 20 - 1
+	minimumWidthInt := common.Config.SidebarWidth + common.FilePanelWidthUnit*len(
+		m.fileModel.filePanels,
+	) + common.FilePanelWidthUnit - 1
 	minimumWidthString := strconv.Itoa(minimumWidthInt)
 	fullWidthString := strconv.Itoa(m.fullWidth)
 	fullHeightString := strconv.Itoa(m.fullHeight)
@@ -294,7 +296,7 @@ func (m *model) typineModalRender() string {
 
 	fileLocation := common.FilePanelTopDirectoryIconStyle.Render(" "+icon.Directory+icon.Space) +
 		common.FilePanelTopPathStyle.Render(
-			common.TruncateTextBeginning(previewPath, common.ModalWidth-4, "..."),
+			common.TruncateTextBeginning(previewPath, common.ModalWidth-common.InnerPadding, "..."),
 		) + "\n"
 
 	confirm := common.ModalConfirm.Render(" (" + common.Hotkeys.ConfirmTyping[0] + ") Create ")
@@ -360,15 +362,15 @@ func (m *model) helpMenuRender() string {
 			totalKeyLen += len(key)
 		}
 
-		separatorLen := max(0, (len(data.hotkey)-1)) * 3
+		separatorLen := max(0, (len(data.hotkey)-1)) * common.FooterGroupCols
 		if data.subTitle == "" && totalKeyLen+separatorLen > maxKeyLength {
 			maxKeyLength = totalKeyLen + separatorLen
 		}
 	}
 
-	valueLength := m.helpMenu.width - maxKeyLength - 2
-	if valueLength < m.helpMenu.width/2 {
-		valueLength = m.helpMenu.width/2 - 2
+	valueLength := m.helpMenu.width - maxKeyLength - common.BorderPadding
+	if valueLength < m.helpMenu.width/common.CenterDivisor {
+		valueLength = m.helpMenu.width/common.CenterDivisor - common.BorderPadding
 	}
 
 	totalTitleCount := 0
@@ -398,7 +400,7 @@ func (m *model) helpMenuRender() string {
 
 func (m *model) getRenderHotkeyLengthHelpmenuModal() int {
 	renderHotkeyLength := 0
-	for i := m.helpMenu.renderIndex; i < m.helpMenu.renderIndex+(m.helpMenu.height-4) && i < len(m.helpMenu.filteredData); i++ {
+	for i := m.helpMenu.renderIndex; i < m.helpMenu.renderIndex+(m.helpMenu.height-common.InnerPadding) && i < len(m.helpMenu.filteredData); i++ {
 		hotkey := ""
 
 		if m.helpMenu.filteredData[i].subTitle != "" {
@@ -418,7 +420,7 @@ func (m *model) getRenderHotkeyLengthHelpmenuModal() int {
 }
 
 func (m *model) getHelpMenuContent(r *rendering.Renderer, renderHotkeyLength int, valueLength int) {
-	for i := m.helpMenu.renderIndex; i < m.helpMenu.renderIndex+(m.helpMenu.height-4) && i < len(m.helpMenu.filteredData); i++ {
+	for i := m.helpMenu.renderIndex; i < m.helpMenu.renderIndex+(m.helpMenu.height-common.InnerPadding) && i < len(m.helpMenu.filteredData); i++ {
 		if m.helpMenu.filteredData[i].subTitle != "" {
 			r.AddLines(common.HelpMenuTitleStyle.Render(" " + m.helpMenu.filteredData[i].subTitle))
 			continue
@@ -454,7 +456,7 @@ func (m *model) sortOptionsRender() string {
 		sortOptionsContent += cursor + common.ModalStyle.Render(" "+option) + "\n"
 	}
 	bottomBorder := common.GenerateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(panel.sortOptions.cursor+1),
-		strconv.Itoa(len(panel.sortOptions.data.options))), panel.sortOptions.width-2)
+		strconv.Itoa(len(panel.sortOptions.data.options))), panel.sortOptions.width-common.BorderPadding)
 
 	return common.SortOptionsModalBorderStyle(panel.sortOptions.height, panel.sortOptions.width,
 		bottomBorder).Render(sortOptionsContent)
