@@ -56,8 +56,8 @@ sidebar_item_selected_bg = "#ff8d34"
 sidebar_divider = "#615250"
 
 #-- Modals
-modal_fg = "#f9f9fe"
-modal_bg = "#000042"
+modal_fg = "#f8f8f2"
+modal_bg = "#000000"
 modal_border_active = "#6532ff"
 modal_cancel_fg = "#f9f9fe"
 modal_cancel_bg = "#000042"
