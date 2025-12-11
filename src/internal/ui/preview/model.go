@@ -291,10 +291,7 @@ func (m *Model) RenderWithPath(itemPath string, fullModelWidth int) string {
 		return renderDirectoryPreview(r, itemPath, previewHeight) + clearCmd
 	}
 
-	if isVideoFile(itemPath) {
-		if m.thumbnailGenerator == nil {
-			return renderUnsupportedFormat(box) + clearCmd
-		}
+	if m.thumbnailGenerator != nil && m.thumbnailGenerator.SupportsExt(ext) {
 		thumbnailPath, err := m.thumbnailGenerator.GetThumbnailOrGenerate(itemPath)
 		if err != nil {
 			slog.Error("Error generating thumbnail", "error", err)
@@ -363,8 +360,4 @@ func checkBatCmd() string {
 
 func isImageFile(filename string) bool {
 	return common.ImageExtensions[strings.ToLower(filepath.Ext(filename))]
-}
-
-func isVideoFile(filename string) bool {
-	return common.VideoExtensions[strings.ToLower(filepath.Ext(filename))]
 }
