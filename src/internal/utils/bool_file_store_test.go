@@ -159,6 +159,11 @@ func TestReadBoolFilePermissionDenied(t *testing.T) {
 		t.Skip("Skipping permission test on Windows")
 	}
 
+	// Skip when running as root since root can read files with 000 permissions
+	if os.Geteuid() == 0 {
+		t.Skip("Skipping permission test when running as root")
+	}
+
 	tempDir := t.TempDir()
 
 	// Create a file
@@ -183,6 +188,11 @@ func TestWriteBoolFilePermissionDenied(t *testing.T) {
 	// Skip on Windows as permission handling differs
 	if runtime.GOOS == OsWindows {
 		t.Skip("Skipping permission test on Windows")
+	}
+
+	// Skip when running as root since root can write to read-only directories
+	if os.Geteuid() == 0 {
+		t.Skip("Skipping permission test when running as root")
 	}
 
 	tempDir := t.TempDir()
