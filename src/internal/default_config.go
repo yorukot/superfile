@@ -5,6 +5,7 @@ import (
 
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 
+	bulkrename "github.com/yorukot/superfile/src/internal/ui/bulk_rename"
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/ui/sidebar"
@@ -32,15 +33,16 @@ func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool,
 			filePreview: preview.New(),
 			width:       common.DefaultFilePanelWidth,
 		},
-		helpMenu:       newHelpMenuModal(),
-		promptModal:    prompt.DefaultModel(prompt.PromptMinHeight, prompt.PromptMinWidth),
-		zoxideModal:    zoxideui.DefaultModel(zoxideui.ZoxideMinHeight, zoxideui.ZoxideMinWidth, zClient),
-		zClient:        zClient,
-		modelQuitState: notQuitting,
-		toggleDotFile:  toggleDotFile,
-		toggleFooter:   toggleFooter,
-		firstUse:       firstUse,
-		hasTrash:       common.InitTrash(),
+		helpMenu:        newHelpMenuModal(),
+		promptModal:     prompt.DefaultModel(prompt.PromptMinHeight, prompt.PromptMinWidth),
+		zoxideModal:     zoxideui.DefaultModel(zoxideui.ZoxideMinHeight, zoxideui.ZoxideMinWidth, zClient),
+		bulkRenameModel: bulkrename.DefaultModel(bulkrename.DefaultHeight, bulkrename.DefaultWidth),
+		zClient:         zClient,
+		modelQuitState:  notQuitting,
+		toggleDotFile:   toggleDotFile,
+		toggleFooter:    toggleFooter,
+		firstUse:        firstUse,
+		hasTrash:        common.InitTrash(),
 	}
 }
 
@@ -220,6 +222,11 @@ func getHelpMenuData() []helpMenuModalData { //nolint: funlen // This should be 
 		{
 			hotkey:         common.Hotkeys.FilePanelItemRename,
 			description:    "Rename file or folder",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey:         common.Hotkeys.BulkRename,
+			description:    "Open bulk rename modal",
 			hotkeyWorkType: globalType,
 		},
 		{

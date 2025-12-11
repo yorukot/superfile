@@ -103,6 +103,17 @@ func (m *model) panelItemRename() {
 		panel.element[panel.cursor].name)
 }
 
+func (m *model) panelBulkRename() {
+	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+
+	if panel.panelMode != selectMode || len(panel.selected) == 0 {
+		return
+	}
+
+	m.bulkRenameModel.Open(panel.selected, panel.location)
+	m.firstTextInput = true
+}
+
 func (m *model) getDeleteCmd(permDelete bool) tea.Cmd {
 	panel := m.getFocusedFilePanel()
 	if len(panel.element) == 0 {
@@ -447,19 +458,7 @@ func (m *model) openFileWithEditor() tea.Cmd {
 		slog.Error("Error while writing to chooser file, continuing with open via file editor", "error", err)
 	}
 
-	editor := common.Config.Editor
-	if editor == "" {
-		editor = os.Getenv("EDITOR")
-	}
-
-	// Make sure there is an editor
-	if editor == "" {
-		if runtime.GOOS == utils.OsWindows {
-			editor = "notepad"
-		} else {
-			editor = "nano"
-		}
-	}
+	editor := common.ResolveEditor()
 
 	// Split the editor command into command and arguments
 	parts := strings.Fields(editor)
