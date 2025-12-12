@@ -139,7 +139,7 @@ func TestWriteBoolFile(t *testing.T) {
 			if runtime.GOOS != OsWindows {
 				info, err := os.Stat(filePath)
 				require.NoError(t, err)
-				assert.Equal(t, os.FileMode(0644), info.Mode().Perm())
+				assert.Equal(t, os.FileMode(ConfigFilePerm), info.Mode().Perm())
 			}
 		})
 	}
@@ -168,13 +168,13 @@ func TestReadBoolFilePermissionDenied(t *testing.T) {
 
 	// Create a file
 	filePath := filepath.Join(tempDir, "no_read_perm.txt")
-	err := os.WriteFile(filePath, []byte(TrueString), 0644)
+	err := os.WriteFile(filePath, []byte(TrueString), ConfigFilePerm)
 	require.NoError(t, err)
 
 	// Remove read permissions
 	err = os.Chmod(filePath, 0)
 	require.NoError(t, err)
-	defer os.Chmod(filePath, 0644) // Reset permissions for cleanup
+	defer os.Chmod(filePath, ConfigFilePerm) // Reset permissions for cleanup
 
 	// The function should return the default value when it can't read the file
 	result := ReadBoolFile(filePath, false)

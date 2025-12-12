@@ -8,8 +8,8 @@ import (
 	"golift.io/xtractr"
 
 	"github.com/yorukot/superfile/src/config/icon"
-	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
+	"github.com/yorukot/superfile/src/internal/utils"
 )
 
 func extractCompressFile(src, dest string, processBar *processbar.Model) error {
@@ -21,8 +21,8 @@ func extractCompressFile(src, dest string, processBar *processbar.Model) error {
 	x := &xtractr.XFile{
 		FilePath:  src,
 		OutputDir: dest,
-		FileMode:  common.ExtractedFileMode,
-		DirMode:   common.ExtractedDirMode,
+		FileMode:  utils.ExtractedFileMode,
+		DirMode:   utils.ExtractedDirMode,
 	}
 
 	_, _, _, err = xtractr.ExtractFile(x)

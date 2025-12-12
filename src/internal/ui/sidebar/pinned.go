@@ -6,6 +6,8 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+
+	"github.com/yorukot/superfile/src/internal/utils"
 )
 
 type PinnedManager struct {
@@ -47,7 +49,7 @@ func (mgr *PinnedManager) Save(dirs []directory) error {
 		return fmt.Errorf("error marshaling pinned directories: %w", err)
 	}
 
-	if err := os.WriteFile(mgr.filePath, data, 0644); err != nil {
+	if err := os.WriteFile(mgr.filePath, data, utils.ConfigFilePerm); err != nil {
 		return fmt.Errorf("error writing pinned directories file: %w", err)
 	}
 

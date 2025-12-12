@@ -89,7 +89,8 @@ func generatePlacementID(path string) uint32 {
 	for _, c := range path {
 		hash = hash*kittyHashPrime + int(c)
 	}
-	return uint32(hash&kittyMaxID) + kittyNonZeroOffset // Ensure it's not 0 and avoid low numbers
+	return uint32(hash&kittyMaxID) + //nolint:gosec // Hash is bounded by kittyMaxID mask before conversion
+		kittyNonZeroOffset
 }
 
 // renderWithKittyUsingTermCap renders an image using Kitty graphics protocol with terminal capabilities
@@ -125,13 +126,13 @@ func (p *ImagePreviewer) renderWithKittyUsingTermCap(img image.Image, path strin
 	if imgRatio > termRatio {
 		dstCols := maxWidth
 		dstRows := int(float64(dstCols*pixelsPerColumn) / imgRatio / float64(pixelsPerRow))
-		opts.DstCols = uint32(dstCols)
-		opts.DstRows = uint32(dstRows)
+		opts.DstCols = uint32(dstCols) //nolint:gosec // Terminal dimensions are bounded by maxWidth/maxHeight
+		opts.DstRows = uint32(dstRows) //nolint:gosec // Terminal dimensions are bounded by maxWidth/maxHeight
 	} else {
 		dstRows := maxHeight
 		dstCols := int(float64(dstRows*pixelsPerRow) * imgRatio / float64(pixelsPerColumn))
-		opts.DstRows = uint32(dstRows)
-		opts.DstCols = uint32(dstCols)
+		opts.DstRows = uint32(dstRows) //nolint:gosec // Terminal dimensions are bounded by maxWidth/maxHeight
+		opts.DstCols = uint32(dstCols) //nolint:gosec // Terminal dimensions are bounded by maxWidth/maxHeight
 	}
 
 	// Write image using Kitty protocol

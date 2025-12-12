@@ -34,7 +34,7 @@ func (m *model) createItem() {
 	path := filepath.Join(m.typingModal.location, m.typingModal.textInput.Value())
 	if !strings.HasSuffix(m.typingModal.textInput.Value(), string(filepath.Separator)) {
 		path, _ = renameIfDuplicate(path)
-		if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		if err := os.MkdirAll(filepath.Dir(path), utils.UserDirPerm); err != nil {
 			slog.Error("Error while createItem during directory creation", "error", err)
 			return
 		}
@@ -45,7 +45,7 @@ func (m *model) createItem() {
 		}
 		defer f.Close()
 	} else {
-		err := os.MkdirAll(path, 0755)
+		err := os.MkdirAll(path, utils.UserDirPerm)
 		if err != nil {
 			slog.Error("Error while createItem during directory creation", "error", err)
 			return

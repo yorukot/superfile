@@ -39,7 +39,7 @@ func SetupDirectories(t *testing.T, dirs ...string) {
 		if dir == "" {
 			continue
 		}
-		err := os.MkdirAll(dir, 0755)
+		err := os.MkdirAll(dir, UserDirPerm)
 		require.NoError(t, err)
 	}
 }
@@ -47,7 +47,7 @@ func SetupDirectories(t *testing.T, dirs ...string) {
 func SetupFilesWithData(t *testing.T, data []byte, files ...string) {
 	t.Helper()
 	for _, file := range files {
-		err := os.WriteFile(file, data, 0644)
+		err := os.WriteFile(file, data, UserFilePerm)
 		require.NoError(t, err)
 	}
 }
