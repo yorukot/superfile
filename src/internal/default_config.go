@@ -99,6 +99,21 @@ func getHelpMenuData() []helpMenuModalData { //nolint: funlen // This should be 
 			hotkeyWorkType: globalType,
 		},
 		{
+			hotkey:         common.Hotkeys.OpenCommandLine,
+			description:    "Open command line",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey:         common.Hotkeys.OpenSPFPrompt,
+			description:    "Open SPF prompt",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey:         common.Hotkeys.OpenZoxide,
+			description:    "Open zoxide navigation",
+			hotkeyWorkType: globalType,
+		},
+		{
 			subTitle: "Panel navigation",
 		},
 		{
@@ -167,6 +182,16 @@ func getHelpMenuData() []helpMenuModalData { //nolint: funlen // This should be 
 		{
 			hotkey:         common.Hotkeys.ListDown,
 			description:    "Down",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey:         common.Hotkeys.PageUp,
+			description:    "Page up",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey:         common.Hotkeys.PageDown,
+			description:    "Page down",
 			hotkeyWorkType: globalType,
 		},
 		{
@@ -250,6 +275,11 @@ func getHelpMenuData() []helpMenuModalData { //nolint: funlen // This should be 
 		{
 			hotkey:         common.Hotkeys.CopyPath,
 			description:    "Copy current file or directory path",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey:         common.Hotkeys.CopyPWD,
+			description:    "Copy current working directory",
 			hotkeyWorkType: globalType,
 		},
 		{
