@@ -32,14 +32,6 @@ head:
 
 ![Blood theme preview showing dark red color scheme](../../../assets/git-assets/theme/blood.png)
 
-## Catppuccin
-
-- Theme name: `catppuccin`
-- Ported by: https://github.com/AnshumanNeon
-- Original Author: https://github.com/catppuccin
-
-![Catppuccin theme preview showing pastel color palette](../../../assets/git-assets/theme/catppuccin.png)
-
 ## Catppuccin Frappe
 
 - Theme name: `catppuccin-frappe`
@@ -63,6 +55,14 @@ head:
 - Original Author: https://github.com/catppuccin
 
 ![Catppuccin Macchiato theme preview showing medium dark colors](../../../assets/git-assets/theme/catppuccin-macchiato.png)
+
+## Catppuccin Mocha
+
+- Theme name: `catppuccin-mocha`
+- Ported by: https://github.com/AnshumanNeon
+- Original Author: https://github.com/catppuccin
+
+![Catppuccin theme preview showing pastel color palette](../../../assets/git-assets/theme/catppuccin.png)
 
 ## Dracula
 

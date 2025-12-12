@@ -26,7 +26,7 @@ const (
 	EmbedConfigFile          = EmbedConfigDir + "/config.toml"
 	EmbedHotkeysFile         = EmbedConfigDir + "/hotkeys.toml"
 	EmbedThemeDir            = EmbedConfigDir + "/theme"
-	EmbedThemeCatppuccinFile = EmbedThemeDir + "/catppuccin.toml"
+	EmbedThemeCatppuccinFile = EmbedThemeDir + "/catppuccin-mocha.toml"
 )
 
 var (
