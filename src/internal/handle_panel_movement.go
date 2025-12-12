@@ -68,6 +68,9 @@ func (m *model) enterPanel() {
 
 func (m *model) executeOpenCommand() {
 	panel := m.getFocusedFilePanel()
+
+	filePath := panel.element[panel.cursor].location
+
 	openCommand := "xdg-open"
 	switch runtime.GOOS {
 	case utils.OsDarwin:
@@ -76,7 +79,7 @@ func (m *model) executeOpenCommand() {
 		dllpath := filepath.Join(os.Getenv("SYSTEMROOT"), "System32", "rundll32.exe")
 		dllfile := "url.dll,FileProtocolHandler"
 
-		cmd := exec.Command(dllpath, dllfile, panel.element[panel.cursor].location)
+		cmd := exec.Command(dllpath, dllfile, filePath)
 		err := cmd.Start()
 		if err != nil {
 			slog.Error("Error while open file with", "error", err)
@@ -85,7 +88,7 @@ func (m *model) executeOpenCommand() {
 		return
 	}
 
-	cmd := exec.Command(openCommand, panel.element[panel.cursor].location)
+	cmd := exec.Command(openCommand, filePath)
 	utils.DetachFromTerminal(cmd)
 	err := cmd.Start()
 	if err != nil {

@@ -1,7 +1,7 @@
 package metadata
 
 import (
-	"crypto/md5"
+	"crypto/md5" //nolint:gosec // MD5 used for file checksum display only, not for security
 	"encoding/hex"
 	"fmt"
 	"io"
@@ -60,7 +60,7 @@ func calculateMD5Checksum(filePath string) (string, error) {
 	}
 	defer file.Close()
 
-	hash := md5.New()
+	hash := md5.New() //nolint:gosec // MD5 is sufficient for file integrity display, not used for security
 	if _, err := io.Copy(hash, file); err != nil {
 		return "", fmt.Errorf("failed to calculate MD5 checksum: %w", err)
 	}
