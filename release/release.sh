@@ -6,6 +6,9 @@ osList=("darwin" "linux" "windows")
 archList=("amd64" "arm64")
 mkdir dist
 
+# Prevent macOS from adding ._* files to archives
+export COPYFILE_DISABLE=1
+
 for os in "${osList[@]}"; do
     if [ "$os" = "windows" ]; then
         for arch in "${archList[@]}"; do
