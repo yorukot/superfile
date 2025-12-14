@@ -28,8 +28,6 @@ const (
 	DefaultPreviewTimeout = 500 * time.Millisecond // preview operation timeout
 
 	// File permissions
-	ExtractedFileMode = 0644 // default permissions for extracted files
-	ExtractedDirMode  = 0755 // default permissions for extracted directories
 
 	// UI positioning
 	CenterDivisor = 2 // divisor for centering UI elements

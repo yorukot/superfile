@@ -28,7 +28,7 @@ import (
 func initialConfig(firstPanelPaths []string) (toggleDotFile bool, //nolint: nonamedreturns // See above
 	toggleFooter bool, zClient *zoxidelib.Client) {
 	// Open log stream
-	file, err := os.OpenFile(variable.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	file, err := os.OpenFile(variable.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, utils.LogFilePerm)
 
 	// TODO : This could be improved if we want to make superfile more resilient to errors
 	// For example if the log file directories have access issues.

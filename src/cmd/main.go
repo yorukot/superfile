@@ -203,7 +203,7 @@ func checkFirstUse() bool {
 	firstUse := false
 	if _, err := os.Stat(file); os.IsNotExist(err) {
 		firstUse = true
-		if err = os.WriteFile(file, nil, 0644); err != nil {
+		if err = os.WriteFile(file, nil, utils.ConfigFilePerm); err != nil {
 			utils.PrintfAndExitf("Failed to create file: %v", err)
 		}
 	}
@@ -213,7 +213,7 @@ func checkFirstUse() bool {
 // Write data to the path file if it does not exists
 func writeConfigFile(path, data string) error {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		if err = os.WriteFile(path, []byte(data), 0644); err != nil {
+		if err = os.WriteFile(path, []byte(data), utils.ConfigFilePerm); err != nil {
 			return fmt.Errorf("failed to write config file %s: %w", path, err)
 		}
 	}
@@ -222,7 +222,7 @@ func writeConfigFile(path, data string) error {
 
 func initJSONFile(path string) error {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		if err = os.WriteFile(path, []byte("null"), 0644); err != nil {
+		if err = os.WriteFile(path, []byte("null"), utils.ConfigFilePerm); err != nil {
 			return fmt.Errorf("failed to initialize json file %s: %w", path, err)
 		}
 	}
@@ -230,7 +230,7 @@ func initJSONFile(path string) error {
 }
 
 func writeLastCheckTime(t time.Time) {
-	err := os.WriteFile(variable.LastCheckVersion, []byte(t.Format(time.RFC3339)), 0644)
+	err := os.WriteFile(variable.LastCheckVersion, []byte(t.Format(time.RFC3339)), utils.ConfigFilePerm)
 	if err != nil {
 		slog.Error("Error writing LastCheckVersion file", "error", err)
 	}

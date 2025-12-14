@@ -287,9 +287,6 @@ func executePasteOperation(processBarModel *processbar.Model,
 			err = pasteDir(filePath, filepath.Join(panelLocation, filepath.Base(filePath)), &p, cut, processBarModel)
 			if err != nil {
 				errMessage = "paste item error"
-			} else if cut {
-				// TODO: Fix unhandled error
-				os.RemoveAll(filePath)
 			}
 		}
 
@@ -370,7 +367,10 @@ func (m *model) getExtractFileCmd() tea.Cmd {
 			return NewCompressOperationMsg(processbar.Failed, reqID)
 		}
 
-		err = os.MkdirAll(outputDir, 0o755)
+		err = os.MkdirAll(
+			outputDir,
+			utils.ExtractedDirMode,
+		)
 		if err != nil {
 			slog.Error("Error while making directory for extracting files", "error", err)
 			return NewCompressOperationMsg(processbar.Failed, reqID)
@@ -421,7 +421,7 @@ func (m *model) getCompressSelectedFilesCmd() tea.Cmd {
 
 func (m *model) chooserFileWriteAndQuit(path string) error {
 	// Attempt to write to the file
-	err := os.WriteFile(variable.ChooserFile, []byte(path), 0o644)
+	err := os.WriteFile(variable.ChooserFile, []byte(path), utils.ConfigFilePerm)
 	if err != nil {
 		return err
 	}
