@@ -70,7 +70,6 @@ func (m *model) enterPanel() {
 // opens the file with respective default editor
 func (m *model) executeOpenCommand() {
 	panel := m.getFocusedFilePanel()
-	// path is a string
 	openCommand := "xdg-open"
 	switch runtime.GOOS {
 	case utils.OsDarwin:
@@ -81,8 +80,6 @@ func (m *model) executeOpenCommand() {
 
 		cmd := exec.Command(dllpath, dllfile, panel.element[panel.cursor].location)
 
-		// windows structure is quite similar though, the file path is simply added on top of it
-
 		err := cmd.Start()
 		if err != nil {
 			slog.Error("Error while open file with", "error", err)
@@ -91,7 +88,6 @@ func (m *model) executeOpenCommand() {
 		return
 	}
 
-	// i need to understand how opening file from shell works on windows
 	// for unix based systems the openCommand variable is simply read from the config
 
 	// for now open_with works only for mac and linux
