@@ -70,6 +70,8 @@ func (m *model) enterPanel() {
 // opens the file with respective default editor
 func (m *model) executeOpenCommand() {
 	panel := m.getFocusedFilePanel()
+	filePath := panel.element[panel.cursor].location
+
 	openCommand := "xdg-open"
 	switch runtime.GOOS {
 	case utils.OsDarwin:
@@ -78,7 +80,7 @@ func (m *model) executeOpenCommand() {
 		dllpath := filepath.Join(os.Getenv("SYSTEMROOT"), "System32", "rundll32.exe")
 		dllfile := "url.dll,FileProtocolHandler"
 
-		cmd := exec.Command(dllpath, dllfile, panel.element[panel.cursor].location)
+		cmd := exec.Command(dllpath, dllfile, filePath)
 
 		err := cmd.Start()
 		if err != nil {
@@ -88,12 +90,10 @@ func (m *model) executeOpenCommand() {
 		return
 	}
 
-	// for unix based systems the openCommand variable is simply read from the config
-
 	// for now open_with works only for mac and linux
 
 	// get the file extension, trim the dot and make it lowercase
-	ext := filepath.Ext(panel.element[panel.cursor].location)
+	ext := filepath.Ext(filePath)
 	ext = strings.ToLower(strings.TrimPrefix(ext, "."))
 
 	ext_editor, ok := common.Config.OpenWith[ext]
@@ -103,7 +103,7 @@ func (m *model) executeOpenCommand() {
 		openCommand = ext_editor
 	}
 
-	cmd := exec.Command(openCommand, panel.element[panel.cursor].location)
+	cmd := exec.Command(openCommand, filePath)
 	utils.DetachFromTerminal(cmd)
 	err := cmd.Start()
 	if err != nil {
