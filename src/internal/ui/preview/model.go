@@ -243,31 +243,51 @@ func (m *Model) renderTextPreview(r *rendering.Renderer, box lipgloss.Style, ite
 
 	if format != nil {
 		background := ""
-	if !common.Config.TransparentBackground {
-		background = common.Theme.FilePanelBG
-	}
-	slog.Debug("[BAT DEBUG] Code preview check", "CodePreviewer", common.Config.CodePreviewer, "format", format.Config().Name)
-	if common.Config.CodePreviewer == "bat" {
-		slog.Debug("[BAT DEBUG] Using bat previewer", "batCmd", m.batCmd, "isEmpty", m.batCmd == "")
-		if m.batCmd == "" {
-			slog.Error("[BAT DEBUG] bat command is empty - bat not found", "batCmd", m.batCmd)
-			return box.Render("\n --- " + icon.Error +
-				" 'bat' is not installed or not found. ---\n --- Cannot render file preview. ---")
+		if !common.Config.TransparentBackground {
+			background = common.Theme.FilePanelBG
 		}
-		slog.Debug("[BAT DEBUG] Calling getBatSyntaxHighlightedContent", "itemPath", itemPath, "previewHeight", previewHeight, "batCmd", m.batCmd)
-		fileContent, err = getBatSyntaxHighlightedContent(itemPath, previewHeight, background, m.batCmd)
-		if err != nil {
-			slog.Error("[BAT DEBUG] bat execution failed", "error", err)
+		slog.Debug(
+			"[BAT DEBUG] Code preview check",
+			"CodePreviewer",
+			common.Config.CodePreviewer,
+			"format",
+			format.Config().Name,
+		)
+		if common.Config.CodePreviewer == "bat" {
+			slog.Debug("[BAT DEBUG] Using bat previewer", "batCmd", m.batCmd, "isEmpty", m.batCmd == "")
+			if m.batCmd == "" {
+				slog.Error("[BAT DEBUG] bat command is empty - bat not found", "batCmd", m.batCmd)
+				return box.Render("\n --- " + icon.Error +
+					" 'bat' is not installed or not found. ---\n --- Cannot render file preview. ---")
+			}
+			slog.Debug(
+				"[BAT DEBUG] Calling getBatSyntaxHighlightedContent",
+				"itemPath",
+				itemPath,
+				"previewHeight",
+				previewHeight,
+				"batCmd",
+				m.batCmd,
+			)
+			fileContent, err = getBatSyntaxHighlightedContent(itemPath, previewHeight, background, m.batCmd)
+			if err != nil {
+				slog.Error("[BAT DEBUG] bat execution failed", "error", err)
+			} else {
+				slog.Debug("[BAT DEBUG] bat execution successful", "contentLength", len(fileContent))
+			}
 		} else {
-			slog.Debug("[BAT DEBUG] bat execution successful", "contentLength", len(fileContent))
+			slog.Debug("[BAT DEBUG] Using chroma previewer (not bat)")
+			fileContent, err = ansichroma.HightlightString(fileContent, format.Config().Name,
+				common.Theme.CodeSyntaxHighlightTheme, background)
 		}
-	} else {
-		slog.Debug("[BAT DEBUG] Using chroma previewer (not bat)")
-		fileContent, err = ansichroma.HightlightString(fileContent, format.Config().Name,
-			common.Theme.CodeSyntaxHighlightTheme, background)
-	}
 		if err != nil {
-			slog.Error("[BAT DEBUG] Error rendering code highlight", "error", err, "previewer", common.Config.CodePreviewer)
+			slog.Error(
+				"[BAT DEBUG] Error rendering code highlight",
+				"error",
+				err,
+				"previewer",
+				common.Config.CodePreviewer,
+			)
 			slog.Error("Error render code highlight", "error", err)
 			return box.Render("\n" + common.FilePreviewError)
 		}
@@ -332,8 +352,16 @@ func getBatSyntaxHighlightedContent(
 	background string,
 	batCmd string,
 ) (string, error) {
-	slog.Debug("[BAT DEBUG] getBatSyntaxHighlightedContent called", "itemPath", itemPath, "previewLine", previewLine, "batCmd", batCmd)
-	
+	slog.Debug(
+		"[BAT DEBUG] getBatSyntaxHighlightedContent called",
+		"itemPath",
+		itemPath,
+		"previewLine",
+		previewLine,
+		"batCmd",
+		batCmd,
+	)
+
 	// Check if file exists and is readable
 	if fileInfo, err := os.Stat(itemPath); err != nil {
 		slog.Error("[BAT DEBUG] File stat error", "error", err, "path", itemPath)
@@ -341,7 +369,7 @@ func getBatSyntaxHighlightedContent(
 	} else {
 		slog.Debug("[BAT DEBUG] File info", "path", itemPath, "size", fileInfo.Size(), "mode", fileInfo.Mode().String())
 	}
-	
+
 	// --plain: use the plain style without line numbers and decorations
 	// --force-colorization: force colorization for non-interactive shell output
 	// --line-range <:m>: only read from line 1 to line "m"
@@ -357,15 +385,24 @@ func getBatSyntaxHighlightedContent(
 
 	fileContentBytes, err := cmd.Output()
 	slog.Debug("[BAT DEBUG] Command executed", "error", err, "outputLen", len(fileContentBytes))
-	
+
 	if err != nil {
-		if exitError, ok := err.(*exec.ExitError); ok {
-			slog.Error("[BAT DEBUG] Command failed with exit error", "error", err, "stderr", string(exitError.Stderr), "stdout", string(fileContentBytes))
+		exitError := &exec.ExitError{}
+		if errors.As(err, &exitError) {
+			slog.Error(
+				"[BAT DEBUG] Command failed with exit error",
+				"error",
+				err,
+				"stderr",
+				string(exitError.Stderr),
+				"stdout",
+				string(fileContentBytes),
+			)
 		} else {
 			slog.Error("[BAT DEBUG] Command failed", "error", err, "type", fmt.Sprintf("%T", err))
 		}
 	}
-	
+
 	if err != nil {
 		slog.Error("Error render code highlight", "error", err)
 		return "", err
@@ -390,11 +427,11 @@ func setBatBackground(input string, background string) string {
 // Check if bat is an executable in PATH and whether to use bat or batcat as command
 func checkBatCmd() string {
 	slog.Debug("[BAT DEBUG] Checking for bat executable in PATH")
-	
+
 	// Check PATH env var
 	pathEnv := os.Getenv("PATH")
 	slog.Debug("[BAT DEBUG] PATH environment", "PATH", pathEnv)
-	
+
 	if _, err := exec.LookPath("bat"); err == nil {
 		slog.Debug("[BAT DEBUG] Found 'bat' executable")
 		// Get full path
@@ -411,7 +448,7 @@ func checkBatCmd() string {
 	} else {
 		slog.Debug("[BAT DEBUG] 'bat' not found in PATH", "error", err)
 	}
-	
+
 	// on ubuntu bat executable is called batcat
 	if _, err := exec.LookPath("batcat"); err == nil {
 		slog.Debug("[BAT DEBUG] Found 'batcat' executable")
@@ -429,7 +466,7 @@ func checkBatCmd() string {
 	} else {
 		slog.Debug("[BAT DEBUG] 'batcat' not found in PATH", "error", err)
 	}
-	
+
 	slog.Debug("[BAT DEBUG] No bat executable found")
 	return ""
 }
