@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 
@@ -66,11 +67,10 @@ func (m *model) enterPanel() {
 	m.executeOpenCommand()
 }
 
+// opens the file with respective default editor
 func (m *model) executeOpenCommand() {
 	panel := m.getFocusedFilePanel()
-
-	filePath := panel.element[panel.cursor].location
-
+	// path is a string
 	openCommand := "xdg-open"
 	switch runtime.GOOS {
 	case utils.OsDarwin:
@@ -79,7 +79,10 @@ func (m *model) executeOpenCommand() {
 		dllpath := filepath.Join(os.Getenv("SYSTEMROOT"), "System32", "rundll32.exe")
 		dllfile := "url.dll,FileProtocolHandler"
 
-		cmd := exec.Command(dllpath, dllfile, filePath)
+		cmd := exec.Command(dllpath, dllfile, panel.element[panel.cursor].location)
+
+		// windows structure is quite similar though, the file path is simply added on top of it
+
 		err := cmd.Start()
 		if err != nil {
 			slog.Error("Error while open file with", "error", err)
@@ -88,7 +91,23 @@ func (m *model) executeOpenCommand() {
 		return
 	}
 
-	cmd := exec.Command(openCommand, filePath)
+	// i need to understand how opening file from shell works on windows
+	// for unix based systems the openCommand variable is simply read from the config
+
+	// for now open_with works only for mac and linux
+
+	// get the file extension, trim the dot and make it lowercase
+	ext := filepath.Ext(panel.element[panel.cursor].location)
+	ext = strings.ToLower(strings.TrimPrefix(ext, "."))
+
+	ext_editor, ok := common.Config.OpenWith[ext]
+	// If the extension is in the config table
+	if ok {
+		// change the command to the matching one from the config
+		openCommand = ext_editor
+	}
+
+	cmd := exec.Command(openCommand, panel.element[panel.cursor].location)
 	utils.DetachFromTerminal(cmd)
 	err := cmd.Start()
 	if err != nil {
