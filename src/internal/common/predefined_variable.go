@@ -56,7 +56,7 @@ var (
 	FilePreviewEmptyText               string
 	FilePreviewError                   string
 
-	FilePreviewThumbailGenerationErrorText string
+	FilePreviewThumbnailGenerationErrorText string
 
 	CheckboxChecked        string
 	CheckboxCheckedFocused string
@@ -134,7 +134,7 @@ func LoadPrerenderedVariables() {
 	FilePreviewError = "\n--- " + icon.Error + icon.Space + "Error" + icon.Space + "---"
 	FilePreviewEmptyText = "\n--- Empty ---"
 
-	FilePreviewThumbailGenerationErrorText = "\n--- " + icon.Error + icon.Space + "Thumbnail generation failed" + icon.Space + "---"
+	FilePreviewThumbnailGenerationErrorText = "\n--- " + icon.Error + icon.Space + "Thumbnail generation failed" + icon.Space + "---"
 
 	CheckboxChecked = FilePanelSelectBoxStyle.
 		Foreground(FilePanelBorderColor).

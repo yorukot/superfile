@@ -141,8 +141,8 @@ func renderUnsupportedFileMode(r *rendering.Renderer) string {
 	return r.Render()
 }
 
-func renderThumbailGenerationError(box lipgloss.Style) string {
-	return box.Render(common.FilePreviewThumbailGenerationErrorText)
+func renderThumbnailGenerationError(box lipgloss.Style) string {
+	return box.Render(common.FilePreviewThumbnailGenerationErrorText)
 }
 
 func renderDirectoryPreview(r *rendering.Renderer, itemPath string, previewHeight int) string {
@@ -299,7 +299,7 @@ func (m *Model) RenderWithPath(itemPath string, fullModelWidth int) string {
 		thumbnailPath, err := m.thumbnailGenerator.GetThumbnailOrGenerate(itemPath)
 		if err != nil {
 			slog.Error("Error generating thumbnail", "error", err)
-			return renderThumbailGenerationError(box) + clearCmd
+			return renderThumbnailGenerationError(box) + clearCmd
 		}
 		return m.renderImagePreview(box, thumbnailPath, previewWidth, previewHeight, fullModelWidth-previewWidth+1)
 	}
