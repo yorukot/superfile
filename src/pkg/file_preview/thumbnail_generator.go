@@ -17,7 +17,7 @@ import (
 
 type thumbnailGeneratorInterface interface {
 	supportsExt(ext string) bool
-	generateThumbnail(inputPath string, outputPath string) error
+	generateThumbnail(inputPath string, outputPathWithoutExt string) error
 }
 
 type VideoGenerator struct{}
@@ -34,9 +34,10 @@ func (g *VideoGenerator) supportsExt(ext string) bool {
 	return common.VideoExtensions[strings.ToLower(ext)]
 }
 
-func (g *VideoGenerator) generateThumbnail(inputPath string, outputPath string) error {
+func (g *VideoGenerator) generateThumbnail(inputPath string, outputPathWithoutExt string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), thumbGenerationTimeout)
 	defer cancel()
+	outputPath := outputPathWithoutExt + thumbOutputExt
 
 	// ffmpeg -v warning -t 60 -hwaccel auto -an -sn -dn -skip_frame nokey -i input.mkv -vf scale='min(1024,iw)':'min(720,ih)':force_original_aspect_ratio=decrease:flags=fast_bilinear -vf "thumbnail" -frames:v 1 -y thumb.jpg
 	ffmpeg := exec.CommandContext(ctx, "ffmpeg",
@@ -77,22 +78,22 @@ func (g *pdfGenerator) supportsExt(ext string) bool {
 	return strings.ToLower(ext) == ".pdf"
 }
 
-func (g *pdfGenerator) generateThumbnail(inputPath string, outputPath string) error {
+func (g *pdfGenerator) generateThumbnail(inputPath string, outputPathWithoutExt string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), thumbGenerationTimeout)
 	defer cancel()
 
 	// pdftoppm -singlefile -png prefixFilename
 	pdftoppm := exec.CommandContext(ctx, "pdftoppm",
-		"-singlefile", // output only the first page as image
-		"-jpeg",       // Image extension
-		inputPath,     // Set input file
-		outputPath,    // The output prefix. (pdftoppm will add the .jpg ext)
-
+		"-singlefile",        // output only the first page as image
+		"-jpeg",              // Image extension
+		inputPath,            // Set input file
+		outputPathWithoutExt, // The output prefix. (pdftoppm will add the .jpg ext)
 	)
 
 	err := pdftoppm.Run()
 	if err != nil {
-		return fmt.Errorf("error generating pdf thumbnail, outputPath: %s : %w", outputPath, err)
+		return fmt.Errorf("error generating pdf thumbnail, outputPath: %s : %w",
+			outputPathWithoutExt+thumbOutputExt, err)
 	}
 
 	return nil
@@ -188,15 +189,15 @@ func (g *ThumbnailGenerator) generateThumbnail(path string) (string, error) {
 		filename := filepath.Base(path)
 		baseName := filename[:len(filename)-len(fileExt)]
 
-		outputPath := filepath.Join(g.tempDirectory,
-			fmt.Sprintf("%s-%d%s", baseName, time.Now().UnixNano(), thumbOutputExt))
+		outputPathWithoutExt := filepath.Join(g.tempDirectory,
+			fmt.Sprintf("%s-%d", baseName, time.Now().UnixNano()))
 
-		err := generator.generateThumbnail(path, outputPath)
+		err := generator.generateThumbnail(path, outputPathWithoutExt)
 		if err != nil {
 			return "", err
 		}
 
-		return outputPath, nil
+		return outputPathWithoutExt, nil
 	}
 
 	return "", errors.New("unsupported file format")
