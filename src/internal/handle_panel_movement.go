@@ -67,9 +67,9 @@ func (m *model) enterPanel() {
 	m.executeOpenCommand()
 }
 
-// opens the file with respective default editor
 func (m *model) executeOpenCommand() {
 	panel := m.getFocusedFilePanel()
+
 	filePath := panel.element[panel.cursor].location
 
 	openCommand := "xdg-open"
@@ -81,7 +81,6 @@ func (m *model) executeOpenCommand() {
 		dllfile := "url.dll,FileProtocolHandler"
 
 		cmd := exec.Command(dllpath, dllfile, filePath)
-
 		err := cmd.Start()
 		if err != nil {
 			slog.Error("Error while open file with", "error", err)
