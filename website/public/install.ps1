@@ -21,8 +21,23 @@ Write-Host -ForegroundColor DarkRed     "                    `$`$ |             
 Write-Host -ForegroundColor Red         "                    `$`$/                                                       "
 Write-Host ""
 
+function Get-LatestVersion {
+    try {
+        $release = Invoke-RestMethod -Uri "https://api.github.com/repos/yorukot/superfile/releases/latest" -TimeoutSec 5
+        $version = $release.tag_name -replace '^v', ''
+        if ([string]::IsNullOrEmpty($version)) {
+            Write-Host "Failed to parse version from GitHub API"
+            exit 1
+        }
+        return $version
+    } catch {
+        Write-Host "Failed to fetch latest version from GitHub API: $_"
+        exit 1
+    }
+}
+
 $package = "superfile"
-$version = if ($env:SPF_INSTALL_VERSION) { $env:SPF_INSTALL_VERSION } else { "1.4.0" }
+$version = if ($env:SPF_INSTALL_VERSION) { $env:SPF_INSTALL_VERSION } else { Get-LatestVersion }
 
 $installInstructions = @'
 This installer is only available for Windows.
