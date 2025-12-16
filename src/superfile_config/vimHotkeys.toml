@@ -1,16 +1,33 @@
-# This is maintained by github.com/nonepork
-# I know this is not really that "vim", but the control flow is different.
-# =================================================================================================
-# Global hotkeys (cannot conflict with other hotkeys)
+##############################################
+#                                            #
+#         Superfile vim-like Hotkeys         #
+#                                            #
+##############################################
+
+#-- Maintainer: nonepork <https://github.com/nonepork>
+
+# This contains a hotkey config file for superfile, that's themed around vim
+# controls! More details can be found at
+# https://superfile.dev/configure/custom-hotkeys/.
+
+###############################################################################
+#                                Global hotkeys                               #
+###############################################################################
+
+# Note: These hotkeys should be unique.
+
+#-- Basic Actions
 confirm = ['enter', '']
-quit = ['ctrl+c', ''] # also known as, theprimeagen troller
+quit = ['ctrl+c', ''] # a.k.a. "theprimeagen troller"
 cd_quit = ['Q', '']
-# movement
+
+#-- Navigation
 list_up = ['k', '']
 list_down = ['j', '']
 page_up = ['pgup','']
 page_down = ['pgdown','']
-# file panel control
+
+#-- File Panel Controls
 create_new_file_panel = ['n', '']
 close_file_panel = ['q', '']
 next_file_panel = ['tab', '']
@@ -18,26 +35,32 @@ previous_file_panel = ['shift+tab', '']
 toggle_file_preview_panel = ['f', '']
 open_sort_options_menu = ['o', '']
 toggle_reverse_sort = ['R', '']
-# change focus
+
+#-- Focus Manipulation
 focus_on_process_bar = ['ctrl+p', '']
 focus_on_sidebar = ['ctrl+s', '']
 focus_on_metadata = ['ctrl+d', '']
-# create file/directory and rename
+
+#-- File/Dir Creation/Renaming
 file_panel_item_create = ['a', '']
 file_panel_item_rename = ['r', '']
-# file operations
+
+#-- Main File Operations
 copy_items = ['y', '']
 cut_items = ['x', '']
 paste_items = ['p', '']
 delete_items = ['d', '']
 permanently_delete_items = ['D', '']
-# compress and extract
+
+#-- Archive Manipulation
 extract_file = ['ctrl+e', '']
 compress_file = ['ctrl+a', '']
-# editor
+
+#-- Editor Actions
 open_file_with_editor = ['e', '']
 open_current_directory_with_editor = ['E', '']
-# other
+
+#-- Other Actions
 pinned_directory = ['P', '']
 toggle_dot_file = ['.', '']
 change_panel_mode = ['m', '']
@@ -47,16 +70,28 @@ open_zoxide = ['z', '']
 copy_path = ['Y', '']
 copy_present_working_directory = ['c', '']
 toggle_footer = ['ctrl+f', '']
-# =================================================================================================
-# Typing hotkeys (can conflict with all hotkeys)
+
+###############################################################################
+#                                Typing hotkeys                               #
+###############################################################################
+
+# Note: These hotkeys can override all hotkeys.
+
 confirm_typing = ['enter', '']
 cancel_typing = ['esc', '']
-# =================================================================================================
-# Normal mode hotkeys (can conflict with other modes, cannot conflict with global hotkeys)
+
+###############################################################################
+#                            Mode-Specific Hotkeys                            #
+###############################################################################
+
+# Note: These hotkeys can conflict with other modes, but not with global
+# hotkeys.
+
+#-- Normal Mode Actions
 parent_directory = ['-', '']
 search_bar = ['/', '']
-# =================================================================================================
-# Select mode hotkeys (can conflict with other modes, cannot conflict with global hotkeys)
+
+#-- Selection Mode Actions
 file_panel_select_mode_items_select_down = ['J', '']
 file_panel_select_mode_items_select_up = ['K', '']
 file_panel_select_all_items = ['A', '']

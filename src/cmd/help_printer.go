@@ -31,12 +31,12 @@ func CustomHelpPrinter(w io.Writer, templ string, data interface{}) {
 		// Print version info if available
 		if v.Version != "" {
 			fmt.Printf("Version: ")
-			accentColor.Fprintf(w, "%s\n\n", v.Version)
+			_, _ = accentColor.Fprintf(w, "%s\n\n", v.Version)
 		}
 
 		// Print help footer using the actual binary name
 		fmt.Fprint(w, "Use \"")
-		accentColor.Fprintf(w, "%s", binaryName)
+		_, _ = accentColor.Fprintf(w, "%s", binaryName)
 		fmt.Fprint(w, " [COMMAND] --help\" for more information about a command.\n")
 
 	default:
@@ -46,9 +46,9 @@ func CustomHelpPrinter(w io.Writer, templ string, data interface{}) {
 }
 
 func printUsage(w io.Writer, titleColor *color.Color, accentColor *color.Color, binaryName string, v *cli.Command) {
-	titleColor.Fprintf(w, "Usage:")
+	_, _ = titleColor.Fprintf(w, "Usage:")
 	fmt.Fprint(w, " ")
-	accentColor.Fprintf(w, "%s", binaryName)
+	_, _ = accentColor.Fprintf(w, "%s", binaryName)
 	if len(v.Commands) > 0 {
 		fmt.Fprint(w, " [COMMAND]")
 	}
@@ -69,7 +69,7 @@ func printCommands(w io.Writer, titleColor *color.Color, commandColor *color.Col
 	if len(v.Commands) == 0 {
 		return
 	}
-	titleColor.Fprintf(w, "Commands:\n")
+	_, _ = titleColor.Fprintf(w, "Commands:\n")
 	for _, cmd := range v.Commands {
 		// Format command name with aliases
 		cmdDisplay := cmd.Name
@@ -77,7 +77,7 @@ func printCommands(w io.Writer, titleColor *color.Color, commandColor *color.Col
 			cmdDisplay = fmt.Sprintf("%s, %s", cmd.Name, strings.Join(cmd.Aliases, ", "))
 		}
 
-		commandColor.Fprintf(w, "  %-20s", cmdDisplay)
+		_, _ = commandColor.Fprintf(w, "  %-20s", cmdDisplay)
 		fmt.Fprintf(w, " %s\n", cmd.Usage)
 	}
 	fmt.Fprintln(w)
@@ -87,7 +87,7 @@ func printFlags(w io.Writer, titleColor *color.Color, flagColor *color.Color, v 
 	if len(v.Flags) == 0 {
 		return
 	}
-	titleColor.Fprintf(w, "Options:\n")
+	_, _ = titleColor.Fprintf(w, "Options:\n")
 	for _, flag := range v.Flags {
 		names := flag.Names()
 
@@ -131,7 +131,7 @@ func printFlags(w io.Writer, titleColor *color.Color, flagColor *color.Color, v 
 		}
 		flagStr := strings.Join(flagParts, ", ") + valuePlaceholder
 
-		flagColor.Fprintf(w, "  %-30s", flagStr)
+		_, _ = flagColor.Fprintf(w, "  %-30s", flagStr)
 		fmt.Fprintf(w, " %s\n", usage)
 	}
 	fmt.Fprintln(w)

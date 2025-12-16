@@ -42,7 +42,7 @@ func (g *VideoGenerator) generateThumbnail(inputPath string, outputDir string) (
 		return "", err
 	}
 	outputFilePath := outputFile.Name()
-	outputFile.Close()
+	_ = outputFile.Close()
 
 	ctx, cancel := context.WithTimeout(context.Background(), thumbGenerationTimeout)
 	defer cancel()

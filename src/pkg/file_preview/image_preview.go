@@ -325,14 +325,19 @@ func hexToColor(hex string) (color.RGBA, error) {
 		return color.RGBA{}, err
 	}
 	return color.RGBA{
-		R: uint8(values >> rgbShift16),
-		G: uint8((values >> rgbShift8) & rgbMask),
-		B: uint8(values & rgbMask),
+		R: uint8(values >> rgbShift16),            //nolint:gosec // RGB values are masked to 8-bit range
+		G: uint8((values >> rgbShift8) & rgbMask), //nolint:gosec // RGB values are masked to 8-bit range
+		B: uint8(values & rgbMask),                //nolint:gosec // RGB values are masked to 8-bit range
 		A: alphaOpaque,
 	}, nil
 }
 
 func colorToHex(color color.Color) string {
 	r, g, b, _ := color.RGBA()
-	return fmt.Sprintf("#%02x%02x%02x", uint8(r>>rgbShift8), uint8(g>>rgbShift8), uint8(b>>rgbShift8))
+	return fmt.Sprintf(
+		"#%02x%02x%02x",
+		uint8(r>>rgbShift8), //nolint:gosec // RGBA() returns 16-bit values, shifting by 8 gives 8-bit
+		uint8(g>>rgbShift8), //nolint:gosec // RGBA() returns 16-bit values, shifting by 8 gives 8-bit
+		uint8(b>>rgbShift8), //nolint:gosec // RGBA() returns 16-bit values, shifting by 8 gives 8-bit
+	)
 }

@@ -19,10 +19,10 @@ require (
 	github.com/reinhrst/fzf-lib v0.9.0
 	github.com/rkoesters/xdg v0.0.1
 	github.com/shirou/gopsutil/v4 v4.25.4
-	github.com/stretchr/testify v1.10.0
-	github.com/urfave/cli/v3 v3.4.1
+	github.com/stretchr/testify v1.11.1
+	github.com/urfave/cli/v3 v3.5.0
 	golang.org/x/image v0.28.0
-	golang.org/x/mod v0.27.0
+	golang.org/x/mod v0.28.0
 	golift.io/xtractr v0.2.2
 )
 
@@ -54,7 +54,7 @@ require (
 	github.com/klauspost/compress v1.16.3 // indirect
 	github.com/nwaples/rardecode v1.1.3 // indirect
 	github.com/pierrec/lz4/v4 v4.1.17 // indirect
-	github.com/ulikunitz/xz v0.5.11 // indirect
+	github.com/ulikunitz/xz v0.5.14 // indirect
 	github.com/yorukot/ansichroma v0.1.0
 	go4.org v0.0.0-20230225012048-214862532bf5 // indirect
 )
@@ -78,7 +78,7 @@ require (
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rwcarlsen/goexif v0.0.0-20190401172101-9e8deecbddbd
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
-	golang.org/x/sync v0.16.0 // indirect
+	golang.org/x/sync v0.17.0 // indirect
 	golang.org/x/sys v0.32.0 // indirect
-	golang.org/x/text v0.28.0
+	golang.org/x/text v0.29.0
 )

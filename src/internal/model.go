@@ -777,7 +777,7 @@ func (panel *filePanel) applyTargetFileCursor() {
 func (m *model) quitSuperfile(cdOnQuit bool) {
 	// Resource cleanup
 	if common.Config.Metadata && et != nil {
-		et.Close()
+		_ = et.Close()
 	}
 	m.fileModel.filePreview.CleanUp()
 
@@ -788,7 +788,7 @@ func (m *model) quitSuperfile(cdOnQuit bool) {
 	if cdOnQuit {
 		// escape single quote
 		currentDir = strings.ReplaceAll(currentDir, "'", "'\\''")
-		err := os.WriteFile(variable.LastDirFile, []byte("cd '"+currentDir+"'"), 0o755)
+		err := os.WriteFile(variable.LastDirFile, []byte("cd '"+currentDir+"'"), utils.ConfigFilePerm)
 		if err != nil {
 			slog.Error("Error during writing lastdir file", "error", err)
 		}

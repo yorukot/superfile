@@ -27,7 +27,7 @@ func WriteTomlData(filePath string, data interface{}) error {
 		// return a wrapped error
 		return fmt.Errorf("error encoding data : %w", err)
 	}
-	err = os.WriteFile(filePath, tomlData, 0o644)
+	err = os.WriteFile(filePath, tomlData, ConfigFilePerm)
 	if err != nil {
 		return fmt.Errorf("error writing file : %w", err)
 	}
@@ -135,7 +135,11 @@ func fixTomlFile(resultErr *TomlLoadError, filePath string, target interface{}) 
 	backupPath := backupFile.Name()
 	needsBackupFileRemoval := true
 	defer func() {
-		backupFile.Close()
+		if closeErr := backupFile.Close(); closeErr != nil {
+			if resultErr.wrappedError == nil {
+				resultErr.UpdateMessageAndError("failed to close backup file", closeErr)
+			}
+		}
 		// Remove backup in case of unsuccessful write
 		if needsBackupFileRemoval {
 			if errRem := os.Remove(backupPath); errRem != nil {
@@ -146,7 +150,7 @@ func fixTomlFile(resultErr *TomlLoadError, filePath string, target interface{}) 
 	}()
 	// Copy the original file to the backup
 	// Open it in read write mode
-	origFile, err := os.OpenFile(filePath, os.O_RDWR, 0o644)
+	origFile, err := os.OpenFile(filePath, os.O_RDWR, ConfigFilePerm)
 	if err != nil {
 		resultErr.UpdateMessageAndError("failed to open original file for backup", err)
 		return resultErr
@@ -228,7 +232,7 @@ func CreateDirectories(dirs ...string) error {
 		if dir == "" {
 			continue
 		}
-		if err := os.MkdirAll(dir, 0o755); err != nil {
+		if err := os.MkdirAll(dir, ConfigDirPerm); err != nil {
 			return fmt.Errorf("failed to create directory %s: %w", dir, err)
 		}
 	}
@@ -239,7 +243,7 @@ func CreateDirectories(dirs ...string) error {
 func CreateFiles(files ...string) error {
 	for _, file := range files {
 		if _, err := os.Stat(file); os.IsNotExist(err) {
-			if err = os.WriteFile(file, nil, 0o644); err != nil {
+			if err = os.WriteFile(file, nil, ConfigFilePerm); err != nil {
 				return fmt.Errorf("failed to create file %s: %w", file, err)
 			}
 		}
