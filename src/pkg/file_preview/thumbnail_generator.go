@@ -17,7 +17,7 @@ import (
 
 type thumbnailGeneratorInterface interface {
 	supportsExt(ext string) bool
-	generateThumbnail(inputPath string, outputPathWithoutExt string) error
+	generateThumbnail(inputPath string, outputPathWithoutExt string) (string, error)
 }
 
 type VideoGenerator struct{}
@@ -34,7 +34,7 @@ func (g *VideoGenerator) supportsExt(ext string) bool {
 	return common.VideoExtensions[strings.ToLower(ext)]
 }
 
-func (g *VideoGenerator) generateThumbnail(inputPath string, outputPathWithoutExt string) error {
+func (g *VideoGenerator) generateThumbnail(inputPath string, outputPathWithoutExt string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), thumbGenerationTimeout)
 	defer cancel()
 	outputPath := outputPathWithoutExt + thumbOutputExt
@@ -58,10 +58,10 @@ func (g *VideoGenerator) generateThumbnail(inputPath string, outputPathWithoutEx
 
 	err := ffmpeg.Run()
 	if err != nil {
-		return fmt.Errorf("error generating video thumbnail, outputPath: %s : %w", outputPath, err)
+		return "", fmt.Errorf("error generating video thumbnail, outputPath: %s : %w", outputPath, err)
 	}
 
-	return nil
+	return outputPath, nil
 }
 
 type pdfGenerator struct{}
@@ -78,7 +78,8 @@ func (g *pdfGenerator) supportsExt(ext string) bool {
 	return strings.ToLower(ext) == ".pdf"
 }
 
-func (g *pdfGenerator) generateThumbnail(inputPath string, outputPathWithoutExt string) error {
+func (g *pdfGenerator) generateThumbnail(inputPath string, outputPathWithoutExt string) (string, error) {
+	outputPath := outputPathWithoutExt + thumbOutputExt
 	ctx, cancel := context.WithTimeout(context.Background(), thumbGenerationTimeout)
 	defer cancel()
 
@@ -92,11 +93,11 @@ func (g *pdfGenerator) generateThumbnail(inputPath string, outputPathWithoutExt 
 
 	err := pdftoppm.Run()
 	if err != nil {
-		return fmt.Errorf("error generating pdf thumbnail, outputPath: %s : %w",
-			outputPathWithoutExt+thumbOutputExt, err)
+		return "", fmt.Errorf("error generating pdf thumbnail, outputPath: %s : %w",
+			outputPath, err)
 	}
 
-	return nil
+	return outputPath, nil
 }
 
 type ThumbnailGenerator struct {
@@ -192,12 +193,12 @@ func (g *ThumbnailGenerator) generateThumbnail(path string) (string, error) {
 		outputPathWithoutExt := filepath.Join(g.tempDirectory,
 			fmt.Sprintf("%s-%d", baseName, time.Now().UnixNano()))
 
-		err := generator.generateThumbnail(path, outputPathWithoutExt)
+		outputPath, err := generator.generateThumbnail(path, outputPathWithoutExt)
 		if err != nil {
 			return "", err
 		}
 
-		return outputPathWithoutExt, nil
+		return outputPath, nil
 	}
 
 	return "", errors.New("unsupported file format")
