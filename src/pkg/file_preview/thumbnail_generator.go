@@ -10,13 +10,14 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/yorukot/superfile/src/internal/common"
 )
 
 type thumbnailGeneratorInterface interface {
 	supportsExt(ext string) bool
-	generateThumbnail(inputPath string, outputDir string) (string, error)
+	generateThumbnail(inputPath string, outputPath string) error
 }
 
 type VideoGenerator struct{}
@@ -33,18 +34,7 @@ func (g *VideoGenerator) supportsExt(ext string) bool {
 	return common.VideoExtensions[strings.ToLower(ext)]
 }
 
-func (g *VideoGenerator) generateThumbnail(inputPath string, outputDir string) (string, error) {
-	fileExt := filepath.Ext(inputPath)
-	filename := filepath.Base(inputPath)
-	baseName := filename[:len(filename)-len(fileExt)]
-
-	outputFile, err := os.CreateTemp(outputDir, "*-"+baseName+thumbOutputExt)
-	if err != nil {
-		return "", err
-	}
-	outputFilePath := outputFile.Name()
-	_ = outputFile.Close()
-
+func (g *VideoGenerator) generateThumbnail(inputPath string, outputPath string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), thumbGenerationTimeout)
 	defer cancel()
 
@@ -62,15 +52,15 @@ func (g *VideoGenerator) generateThumbnail(inputPath string, outputDir string) (
 		"-frames:v", "1", // output only one frame (one image)
 		"-f", "image2", // set format to image2
 		"-fs", maxVideoFileSizeForThumb, // limit the max file size to match image previewer limit
-		"-y", outputFilePath, // set the outputFile and overwrite it without confirmation if already exists
+		"-y", outputPath, // set the outputFile and overwrite it without confirmation if already exists
 	)
 
-	err = ffmpeg.Run()
+	err := ffmpeg.Run()
 	if err != nil {
-		return "", err
+		return fmt.Errorf("error generating video thumbnail, outputPath: %s : %w", outputPath, err)
 	}
 
-	return outputFilePath, nil
+	return nil
 }
 
 type pdfGenerator struct{}
@@ -87,12 +77,7 @@ func (g *pdfGenerator) supportsExt(ext string) bool {
 	return strings.ToLower(ext) == ".pdf"
 }
 
-func (g *pdfGenerator) generateThumbnail(inputPath string, outputDir string) (string, error) {
-	fileExt := filepath.Ext(inputPath)
-	filename := filepath.Base(inputPath)
-	baseName := filename[:len(filename)-len(fileExt)]
-	outputPath := filepath.Join(outputDir, baseName)
-
+func (g *pdfGenerator) generateThumbnail(inputPath string, outputPath string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), thumbGenerationTimeout)
 	defer cancel()
 
@@ -107,10 +92,10 @@ func (g *pdfGenerator) generateThumbnail(inputPath string, outputDir string) (st
 
 	err := pdftoppm.Run()
 	if err != nil {
-		return "", fmt.Errorf("error generating thumbnail, outputPath: %s : %w", outputPath, err)
+		return fmt.Errorf("error generating pdf thumbnail, outputPath: %s : %w", outputPath, err)
 	}
 
-	return outputPath + thumbOutputExt, nil
+	return nil
 }
 
 type ThumbnailGenerator struct {
@@ -193,19 +178,25 @@ func (g *ThumbnailGenerator) GetThumbnailOrGenerate(path string) (string, error)
 }
 
 func (g *ThumbnailGenerator) generateThumbnail(path string) (string, error) {
+	fileExt := filepath.Ext(path)
 	for index := range g.generators {
 		generator := g.generators[index]
 
-		if !generator.supportsExt(filepath.Ext(path)) {
+		if !generator.supportsExt(fileExt) {
 			continue
 		}
+		filename := filepath.Base(path)
+		baseName := filename[:len(filename)-len(fileExt)]
 
-		generatedThumbnailPath, err := generator.generateThumbnail(path, g.tempDirectory)
+		outputPath := filepath.Join(g.tempDirectory,
+			fmt.Sprintf("%s-%d%s", baseName, time.Now().UnixNano(), thumbOutputExt))
+
+		err := generator.generateThumbnail(path, outputPath)
 		if err != nil {
 			return "", err
 		}
 
-		return generatedThumbnailPath, nil
+		return outputPath, nil
 	}
 
 	return "", errors.New("unsupported file format")
