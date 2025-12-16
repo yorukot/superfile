@@ -107,8 +107,7 @@ func (g *pdfGenerator) generateThumbnail(inputPath string, outputDir string) (st
 
 	err := pdftoppm.Run()
 	if err != nil {
-		fmt.Printf("Thumbnail: %s %s", outputPath, err)
-		return "", err
+		return "", fmt.Errorf("error generating thumbnail, outputPath: %s : %w", outputPath, err)
 	}
 
 	return outputPath + thumbOutputExt, nil
