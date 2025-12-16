@@ -90,23 +90,18 @@ func (m *model) executeOpenCommand() {
 		return
 	}
 
-	// for now open_with works only for mac and linux
-
-	// get the file extension, trim the dot and make it lowercase
-	ext := filepath.Ext(filePath)
-	ext = strings.ToLower(strings.TrimPrefix(ext, "."))
-
-	ext_editor, ok := common.Config.OpenWith[ext]
-	// If the extension is in the config table
-	if ok {
-		// change the command to the matching one from the config
-		openCommand = ext_editor
+	// For now open_with works only for mac and linux
+	// TODO: Make it in parity with windows.
+	ext := strings.ToLower(strings.TrimPrefix(filepath.Ext(filePath), "."))
+	if extEditor, ok := common.Config.OpenWith[ext]; ok {
+		openCommand = extEditor
 	}
 
 	cmd := exec.Command(openCommand, filePath)
 	utils.DetachFromTerminal(cmd)
 	err := cmd.Start()
 	if err != nil {
+		// TODO: This kind of errors should go to user facing pop ups
 		slog.Error("Error while open file with", "error", err)
 	}
 }

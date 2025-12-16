@@ -155,4 +155,3 @@ zoxide_support = false
 #   pdf = "zathura"
 #   conf = "nvim"
 [open_with]
-xopp = "xournalpp" 

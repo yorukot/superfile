@@ -275,6 +275,21 @@ border_middle_right = "┤"
 #...
 ```
 
+- ###### open_with
+
+Allows users to map file extensions to commands used to open them.
+The file path will be appended as the last argument.
+
+:::caution
+Must be at the very end of the file 
+:::
+
+```toml
+[open_with]
+xopp = "xournalpp"
+conf = "nvim"
+```
+
 ### Default superfile config
 
 <CodeBlock file="src/superfile_config/config.toml" />
