@@ -76,7 +76,7 @@ func (g *VideoGenerator) generateThumbnail(inputPath string, outputDir string) (
 type pdfGenerator struct{}
 
 func newPdfGenerator() (*pdfGenerator, error) {
-	if !isPoppolerInstalled() {
+	if !isPopplerInstalled() {
 		return nil, errors.New("poppler is not installed")
 	}
 
@@ -97,7 +97,7 @@ func (g *pdfGenerator) generateThumbnail(inputPath string, outputDir string) (st
 	defer cancel()
 
 	// pdftoppm -singlefile -png prefixFilename
-	pdfttoppm := exec.CommandContext(ctx, "pdftoppm",
+	pdftoppm := exec.CommandContext(ctx, "pdftoppm",
 		"-singlefile", // output only the first page as image
 		"-jpeg",       // Image extension
 		inputPath,     // Set input file
@@ -105,7 +105,7 @@ func (g *pdfGenerator) generateThumbnail(inputPath string, outputDir string) (st
 
 	)
 
-	err := pdfttoppm.Run()
+	err := pdftoppm.Run()
 	if err != nil {
 		fmt.Printf("Thumbnail: %s %s", outputPath, err)
 		return "", err
@@ -216,7 +216,7 @@ func (g *ThumbnailGenerator) CleanUp() error {
 	return os.RemoveAll(g.tempDirectory)
 }
 
-func isPoppolerInstalled() bool {
+func isPopplerInstalled() bool {
 	_, err := exec.LookPath("pdftoppm")
 	return err == nil
 }
