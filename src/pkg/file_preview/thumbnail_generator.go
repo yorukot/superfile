@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/yorukot/superfile/src/internal/common"
@@ -29,7 +30,7 @@ func newVideoGenerator() (*VideoGenerator, error) {
 }
 
 func (g *VideoGenerator) supportsExt(ext string) bool {
-	return common.VideoExtensions[ext]
+	return common.VideoExtensions[strings.ToLower(ext)]
 }
 
 func (g *VideoGenerator) generateThumbnail(inputPath string, outputDir string) (string, error) {
@@ -83,7 +84,7 @@ func newPdfGenerator() (*pdfGenerator, error) {
 }
 
 func (g *pdfGenerator) supportsExt(ext string) bool {
-	return ext == ".pdf"
+	return strings.ToLower(ext) == ".pdf"
 }
 
 func (g *pdfGenerator) generateThumbnail(inputPath string, outputDir string) (string, error) {
