@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 
@@ -88,10 +89,18 @@ func (m *model) executeOpenCommand() {
 		return
 	}
 
+	// For now open_with works only for mac and linux
+	// TODO: Make it in parity with windows.
+	ext := strings.ToLower(strings.TrimPrefix(filepath.Ext(filePath), "."))
+	if extEditor, ok := common.Config.OpenWith[ext]; ok {
+		openCommand = extEditor
+	}
+
 	cmd := exec.Command(openCommand, filePath)
 	utils.DetachFromTerminal(cmd)
 	err := cmd.Start()
 	if err != nil {
+		// TODO: This kind of errors should go to user facing pop ups
 		slog.Error("Error while open file with", "error", err)
 	}
 }

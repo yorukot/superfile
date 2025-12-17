@@ -145,3 +145,13 @@ enable_md5_checksum = false
 #-- Zoxide Support - Smart directory navigation!
 # Requires: zoxide
 zoxide_support = false
+
+#-- File opening rules
+# Map file extensions to commands used to open them.
+# The file path will be appended as the last argument.
+# MUST BE IN THE VERY END OF THE FILE BECAUSE TOML CANNOT CLOSE TABLES
+# Example:
+#   png = "feh"
+#   pdf = "zathura"
+#   conf = "nvim"
+[open_with]
