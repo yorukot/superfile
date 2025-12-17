@@ -141,6 +141,10 @@ func renderUnsupportedFileMode(r *rendering.Renderer) string {
 	return r.Render()
 }
 
+func renderThumbnailGenerationError(box lipgloss.Style) string {
+	return box.Render(common.FilePreviewThumbnailGenerationErrorText)
+}
+
 func renderDirectoryPreview(r *rendering.Renderer, itemPath string, previewHeight int) string {
 	files, err := os.ReadDir(itemPath)
 	if err != nil {
@@ -291,14 +295,11 @@ func (m *Model) RenderWithPath(itemPath string, fullModelWidth int) string {
 		return renderDirectoryPreview(r, itemPath, previewHeight) + clearCmd
 	}
 
-	if isVideoFile(itemPath) {
-		if m.thumbnailGenerator == nil {
-			return renderUnsupportedFormat(box) + clearCmd
-		}
+	if m.thumbnailGenerator != nil && m.thumbnailGenerator.SupportsExt(ext) {
 		thumbnailPath, err := m.thumbnailGenerator.GetThumbnailOrGenerate(itemPath)
 		if err != nil {
 			slog.Error("Error generating thumbnail", "error", err)
-			return renderUnsupportedFormat(box) + clearCmd
+			return renderThumbnailGenerationError(box) + clearCmd
 		}
 		return m.renderImagePreview(box, thumbnailPath, previewWidth, previewHeight, fullModelWidth-previewWidth+1)
 	}
@@ -363,8 +364,4 @@ func checkBatCmd() string {
 
 func isImageFile(filename string) bool {
 	return common.ImageExtensions[strings.ToLower(filepath.Ext(filename))]
-}
-
-func isVideoFile(filename string) bool {
-	return common.VideoExtensions[strings.ToLower(filepath.Ext(filename))]
 }

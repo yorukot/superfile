@@ -8,17 +8,23 @@ import (
 	"github.com/yorukot/superfile/src/config/icon"
 )
 
-const WheelRunTime = 5
-const DefaultCommandTimeout = 5000 * time.Millisecond
-const DateModifiedOption = "Date Modified"
+const (
+	WheelRunTime          = 5
+	DefaultCommandTimeout = 5000 * time.Millisecond
+	DateModifiedOption    = "Date Modified"
+)
 
-const SameRenameWarnTitle = "There is already a file or directory with that name"
-const SameRenameWarnContent = "This operation will override the existing file"
+const (
+	SameRenameWarnTitle   = "There is already a file or directory with that name"
+	SameRenameWarnContent = "This operation will override the existing file"
+)
 
-const TrashWarnTitle = "Are you sure you want to move this to trash can"
-const TrashWarnContent = "This operation will move file or directory to trash can."
-const PermanentDeleteWarnTitle = "Are you sure you want to completely delete"
-const PermanentDeleteWarnContent = "This operation cannot be undone and your data will be completely lost."
+const (
+	TrashWarnTitle             = "Are you sure you want to move this to trash can"
+	TrashWarnContent           = "This operation will move file or directory to trash can."
+	PermanentDeleteWarnTitle   = "Are you sure you want to completely delete"
+	PermanentDeleteWarnContent = "This operation cannot be undone and your data will be completely lost."
+)
 
 const (
 	MinimumHeight = 24
@@ -50,6 +56,8 @@ var (
 	FilePreviewEmptyText               string
 	FilePreviewError                   string
 
+	FilePreviewThumbnailGenerationErrorText string
+
 	CheckboxChecked        string
 	CheckboxCheckedFocused string
 	CheckboxEmpty          string
@@ -63,7 +71,7 @@ var (
 )
 
 var (
-	UnsupportedPreviewFormats = []string{".pdf", ".torrent"}
+	UnsupportedPreviewFormats = []string{".torrent"}
 	ImageExtensions           = map[string]bool{
 		".jpg":  true,
 		".jpeg": true,
@@ -125,6 +133,8 @@ func LoadPrerenderedVariables() {
 	FilePreviewDirectoryUnreadableText = "\n--- " + icon.Error + icon.Space + "Cannot read directory" + icon.Space + "---"
 	FilePreviewError = "\n--- " + icon.Error + icon.Space + "Error" + icon.Space + "---"
 	FilePreviewEmptyText = "\n--- Empty ---"
+
+	FilePreviewThumbnailGenerationErrorText = "\n--- " + icon.Error + icon.Space + "Thumbnail generation failed" + icon.Space + "---"
 
 	CheckboxChecked = FilePanelSelectBoxStyle.
 		Foreground(FilePanelBorderColor).
