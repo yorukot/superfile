@@ -9,7 +9,7 @@ import (
 func Test_filePanelUpDown(t *testing.T) {
 	testdata := []struct {
 		name            string
-		panel           Model
+		panel           FilePanel
 		listDown        bool
 		mainPanelHeight int
 		expectedCursor  int
@@ -17,7 +17,7 @@ func Test_filePanelUpDown(t *testing.T) {
 	}{
 		{
 			name: "Down movement within renderable range",
-			panel: Model{
+			panel: FilePanel{
 				Element:     make([]Element, 10),
 				Cursor:      0,
 				RenderIndex: 0,
@@ -29,7 +29,7 @@ func Test_filePanelUpDown(t *testing.T) {
 		},
 		{
 			name: "Down movement when cursor is at bottom",
-			panel: Model{
+			panel: FilePanel{
 				Element:     make([]Element, 10),
 				Cursor:      6, // 3 - Header lines + 7(0-6 files)
 				RenderIndex: 0,
@@ -41,7 +41,7 @@ func Test_filePanelUpDown(t *testing.T) {
 		},
 		{
 			name: "Down movement causing wrap to top",
-			panel: Model{
+			panel: FilePanel{
 				Element:     make([]Element, 10),
 				Cursor:      9, // 3 - Header lines + 7(3-9 files)
 				RenderIndex: 3,
@@ -53,7 +53,7 @@ func Test_filePanelUpDown(t *testing.T) {
 		},
 		{
 			name: "Up movement within renderable range",
-			panel: Model{
+			panel: FilePanel{
 				Element:     make([]Element, 10),
 				Cursor:      2,
 				RenderIndex: 0,
@@ -65,7 +65,7 @@ func Test_filePanelUpDown(t *testing.T) {
 		},
 		{
 			name: "Up movement when cursor is at top",
-			panel: Model{
+			panel: FilePanel{
 				Element:     make([]Element, 10),
 				Cursor:      3,
 				RenderIndex: 3,
@@ -77,7 +77,7 @@ func Test_filePanelUpDown(t *testing.T) {
 		},
 		{
 			name: "Up movement causing wrap to bottom",
-			panel: Model{
+			panel: FilePanel{
 				Element:     make([]Element, 10),
 				Cursor:      0,
 				RenderIndex: 0,
@@ -89,7 +89,7 @@ func Test_filePanelUpDown(t *testing.T) {
 		},
 		{
 			name: "Down movement on empty panel",
-			panel: Model{
+			panel: FilePanel{
 				Element:     make([]Element, 0),
 				Cursor:      0,
 				RenderIndex: 0,
@@ -101,7 +101,7 @@ func Test_filePanelUpDown(t *testing.T) {
 		},
 		{
 			name: "Up movement on empty panel",
-			panel: Model{
+			panel: FilePanel{
 				Element:     make([]Element, 0),
 				Cursor:      0,
 				RenderIndex: 0,

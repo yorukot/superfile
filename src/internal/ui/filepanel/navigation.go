@@ -1,6 +1,6 @@
 package filepanel
 
-func (panel *Model) scrollToCursor(mainPanelHeight int) {
+func (panel *FilePanel) scrollToCursor(mainPanelHeight int) {
 	if panel.Cursor < 0 || panel.Cursor >= len(panel.Element) {
 		panel.Cursor = 0
 		panel.RenderIndex = 0
@@ -16,7 +16,7 @@ func (panel *Model) scrollToCursor(mainPanelHeight int) {
 }
 
 // Control file panel list up
-func (panel *Model) ListUp(mainPanelHeight int) {
+func (panel *FilePanel) ListUp(mainPanelHeight int) {
 	if len(panel.Element) == 0 {
 		return
 	}
@@ -36,7 +36,7 @@ func (panel *Model) ListUp(mainPanelHeight int) {
 }
 
 // Control file panel list down
-func (panel *Model) ListDown(mainPanelHeight int) {
+func (panel *FilePanel) ListDown(mainPanelHeight int) {
 	if len(panel.Element) == 0 {
 		return
 	}
@@ -51,7 +51,7 @@ func (panel *Model) ListDown(mainPanelHeight int) {
 	}
 }
 
-func (panel *Model) PgUp(mainPanelHeight int) {
+func (panel *FilePanel) PgUp(mainPanelHeight int) {
 	panlen := len(panel.Element)
 	if panlen == 0 {
 		return
@@ -77,7 +77,7 @@ func (panel *Model) PgUp(mainPanelHeight int) {
 	}
 }
 
-func (panel *Model) PgDown(mainPanelHeight int) {
+func (panel *FilePanel) PgDown(mainPanelHeight int) {
 	panlen := len(panel.Element)
 	if panlen == 0 {
 		return
@@ -103,19 +103,19 @@ func (panel *Model) PgDown(mainPanelHeight int) {
 // This basically just toggles the "selected" status of element that is pointed by the cursor
 // and then moves the cursor up
 // TODO : Add unit tests for ItemSelectUp and singleItemSelect
-func (panel *Model) ItemSelectUp(mainPanelHeight int) {
+func (panel *FilePanel) ItemSelectUp(mainPanelHeight int) {
 	panel.SingleItemSelect()
 	panel.ListUp(mainPanelHeight)
 }
 
 // Handles the action of selecting an item in the file panel downwards. (only work on select mode)
-func (panel *Model) ItemSelectDown(mainPanelHeight int) {
+func (panel *FilePanel) ItemSelectDown(mainPanelHeight int) {
 	panel.SingleItemSelect()
 	panel.ListDown(mainPanelHeight)
 }
 
 // Applies targetFile cursor positioning, if configured for the panel.
-func (panel *Model) applyTargetFileCursor() {
+func (panel *FilePanel) applyTargetFileCursor() {
 	for idx, el := range panel.Element {
 		if el.Name == panel.TargetFile {
 			panel.Cursor = idx

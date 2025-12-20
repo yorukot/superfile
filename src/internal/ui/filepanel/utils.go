@@ -15,7 +15,7 @@ import (
 )
 
 // defaultFilePanel creates a new FilePanel with default settings
-func defaultFilePanel(path string, focused bool) Model {
+func defaultFilePanel(path string, focused bool) FilePanel {
 	targetFile := ""
 	panelPath := path
 	// If path refers to a file, switch to its parent and remember the filename
@@ -24,7 +24,7 @@ func defaultFilePanel(path string, focused bool) Model {
 		panelPath = filepath.Dir(panelPath)
 	}
 
-	return Model{
+	return FilePanel{
 		RenderIndex: 0,
 		Cursor:      0,
 		Location:    panelPath,
@@ -155,7 +155,7 @@ func panelElementHeight(mainPanelHeight int) int {
 // and also consider testing this caseSensitive with both true and false in
 // our unit_test TestReturnDirElement
 // getDirectoryElements returns the directory elements for the panel's current location
-func (panel *Model) getDirectoryElements(displayDotFile bool) []Element {
+func (panel *FilePanel) getDirectoryElements(displayDotFile bool) []Element {
 	dirEntries, err := os.ReadDir(panel.Location)
 	if err != nil {
 		slog.Error("Error while returning folder elements", "error", err)
@@ -176,7 +176,7 @@ func (panel *Model) getDirectoryElements(displayDotFile bool) []Element {
 }
 
 // getDirectoryElementsBySearch returns filtered directory elements based on search string
-func (panel *Model) getDirectoryElementsBySearch(displayDotFile bool) []Element {
+func (panel *FilePanel) getDirectoryElementsBySearch(displayDotFile bool) []Element {
 	searchString := panel.SearchBar.Value()
 	items, err := os.ReadDir(panel.Location)
 	if err != nil {
@@ -258,19 +258,19 @@ func removeElementByValue(slice []string, value string) []string {
 	return newSlice
 }
 
-func (panel *Model) GetSelectedItem() Element {
+func (panel *FilePanel) GetSelectedItem() Element {
 	if panel.Cursor < 0 || len(panel.Element) <= panel.Cursor {
 		return Element{}
 	}
 	return panel.Element[panel.Cursor]
 }
 
-func (panel *Model) ResetSelected() {
+func (panel *FilePanel) ResetSelected() {
 	panel.Selected = panel.Selected[:0]
 }
 
 // For modification. Make sure to do a nil check
-func (panel *Model) GetSelectedItemPtr() *Element {
+func (panel *FilePanel) GetSelectedItemPtr() *Element {
 	if panel.Cursor < 0 || len(panel.Element) <= panel.Cursor {
 		return nil
 	}
@@ -278,7 +278,7 @@ func (panel *Model) GetSelectedItemPtr() *Element {
 }
 
 // Note : This will soon be moved to its own package.
-func (panel *Model) ChangeFilePanelMode() {
+func (panel *FilePanel) ChangeFilePanelMode() {
 	switch panel.PanelMode {
 	case SelectMode:
 		panel.Selected = panel.Selected[:0]
@@ -291,7 +291,7 @@ func (panel *Model) ChangeFilePanelMode() {
 }
 
 // This should be the function that is always called whenever we are updating a directory.
-func (panel *Model) UpdateCurrentFilePanelDir(path string) error {
+func (panel *FilePanel) UpdateCurrentFilePanelDir(path string) error {
 	slog.Debug("updateCurrentFilePanelDir", "panel.location", panel.Location, "path", path)
 	// In case non Absolute path is passed, make sure to resolve it.
 	path = utils.ResolveAbsPath(panel.Location, path)
@@ -339,11 +339,11 @@ func (panel *Model) UpdateCurrentFilePanelDir(path string) error {
 	return nil
 }
 
-func (panel *Model) ParentDirectory() error {
+func (panel *FilePanel) ParentDirectory() error {
 	return panel.UpdateCurrentFilePanelDir("..")
 }
 
-func (panel *Model) HandleResize(height int) {
+func (panel *FilePanel) HandleResize(height int) {
 	// Min render cursor that keeps the cursor in view
 	minVisibleRenderCursor := panel.Cursor - panelElementHeight(height) + 1
 	// Max render cursor. This ensures all elements are rendered if there is space
@@ -358,7 +358,7 @@ func (panel *Model) HandleResize(height int) {
 }
 
 // Select the item where cursor located (only work on select mode)
-func (panel *Model) SingleItemSelect() {
+func (panel *FilePanel) SingleItemSelect() {
 	if len(panel.Element) > 0 && panel.Cursor >= 0 && panel.Cursor < len(panel.Element) {
 		elementLocation := panel.Element[panel.Cursor].Location
 
@@ -375,8 +375,8 @@ func (panel *Model) SingleItemSelect() {
 }
 
 // FilePanelSlice creates a slice of FilePanels from the given paths
-func FilePanelSlice(paths []string) []Model {
-	res := make([]Model, len(paths))
+func FilePanelSlice(paths []string) []FilePanel {
+	res := make([]FilePanel, len(paths))
 	for i := range paths {
 		// Making the first panel as the focussed
 		isFocus := i == 0
@@ -386,7 +386,7 @@ func FilePanelSlice(paths []string) []Model {
 }
 
 // Helper to decide whether to skip updating a panel this tick.
-func (panel *Model) shouldSkipPanelUpdate(focusPanelReRender bool,
+func (panel *FilePanel) shouldSkipPanelUpdate(focusPanelReRender bool,
 	nowTime time.Time, updatedModelToggleDotFile bool) bool {
 	// Throttle non-focused panels unless dotfile toggle changed
 	if !panel.IsFocused && nowTime.Sub(panel.LastTimeGetElement) < 3*time.Second {
@@ -403,7 +403,7 @@ func (panel *Model) shouldSkipPanelUpdate(focusPanelReRender bool,
 	return false
 }
 
-func (panel *Model) UpdateElementsIfNeeded(focusPanelReRender bool, toggleDotFile bool,
+func (panel *FilePanel) UpdateElementsIfNeeded(focusPanelReRender bool, toggleDotFile bool,
 	updatedToggleDotFile bool, mainPanelHeight int) {
 	nowTime := time.Now()
 	if !panel.shouldSkipPanelUpdate(focusPanelReRender, nowTime, updatedToggleDotFile) {
@@ -422,9 +422,9 @@ func (panel *Model) UpdateElementsIfNeeded(focusPanelReRender bool, toggleDotFil
 }
 
 // Retrieves elements for a panel based on search bar value and sort options.
-func (filePanel *Model) getElements(toggleDotFile bool) []Element {
-	if filePanel.SearchBar.Value() != "" {
-		return filePanel.getDirectoryElementsBySearch(toggleDotFile)
+func (panel *FilePanel) getElements(toggleDotFile bool) []Element {
+	if panel.SearchBar.Value() != "" {
+		return panel.getDirectoryElementsBySearch(toggleDotFile)
 	}
-	return filePanel.getDirectoryElements(toggleDotFile)
+	return panel.getDirectoryElements(toggleDotFile)
 }

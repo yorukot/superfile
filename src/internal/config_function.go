@@ -145,7 +145,7 @@ func printRuntimeInfo() {
 		"sys_bytes", memStats.Sys)
 	slog.Debug("Object sizes",
 		"model_size_bytes", reflect.TypeOf(model{}).Size(),
-		"filePanel_size_bytes", reflect.TypeOf(filepanel.Model{}).Size(),
+		"filePanel_size_bytes", reflect.TypeOf(filepanel.FilePanel{}).Size(),
 		"sidebarModel_size_bytes", reflect.TypeOf(sidebar.Model{}).Size(),
 		"renderer_size_bytes", reflect.TypeOf(rendering.Renderer{}).Size(),
 		"borderConfig_size_bytes", reflect.TypeOf(rendering.BorderConfig{}).Size(),

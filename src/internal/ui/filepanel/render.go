@@ -14,7 +14,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
 )
 
-func (panel *Model) Render(mainPanelHeight int, filePanelWidth int, focussed bool) string {
+func (panel *FilePanel) Render(mainPanelHeight int, filePanelWidth int, focussed bool) string {
 	r := ui.FilePanelRenderer(mainPanelHeight+common.BorderPadding, filePanelWidth+common.BorderPadding, focussed)
 
 	panel.renderTopBar(r, filePanelWidth)
@@ -25,19 +25,19 @@ func (panel *Model) Render(mainPanelHeight int, filePanelWidth int, focussed boo
 	return r.Render()
 }
 
-func (panel *Model) renderTopBar(r *rendering.Renderer, filePanelWidth int) {
+func (panel *FilePanel) renderTopBar(r *rendering.Renderer, filePanelWidth int) {
 	// TODO - Add ansitruncate left in renderer and remove truncation here
 	truncatedPath := common.TruncateTextBeginning(panel.Location, filePanelWidth-common.InnerPadding, "...")
 	r.AddLines(common.FilePanelTopDirectoryIcon + common.FilePanelTopPathStyle.Render(truncatedPath))
 	r.AddSection()
 }
 
-func (panel *Model) renderSearchBar(r *rendering.Renderer) {
+func (panel *FilePanel) renderSearchBar(r *rendering.Renderer) {
 	r.AddLines(" " + panel.SearchBar.View())
 }
 
 // TODO : Unit test this
-func (panel *Model) renderFooter(r *rendering.Renderer, selectedCount uint) {
+func (panel *FilePanel) renderFooter(r *rendering.Renderer, selectedCount uint) {
 	sortLabel, sortIcon := panel.getSortInfo()
 	modeLabel, modeIcon := panel.getPanelModeInfo(selectedCount)
 	cursorStr := panel.getCursorString()
@@ -61,7 +61,7 @@ func (panel *Model) renderFooter(r *rendering.Renderer, selectedCount uint) {
 	}
 }
 
-func (panel *Model) renderFileEntries(r *rendering.Renderer, mainPanelHeight, filePanelWidth int) {
+func (panel *FilePanel) renderFileEntries(r *rendering.Renderer, mainPanelHeight, filePanelWidth int) {
 	if len(panel.Element) == 0 {
 		r.AddLines(common.FilePanelNoneText)
 		return
@@ -103,7 +103,7 @@ func (panel *Model) renderFileEntries(r *rendering.Renderer, mainPanelHeight, fi
 	}
 }
 
-func (panel *Model) getSortInfo() (string, string) {
+func (panel *FilePanel) getSortInfo() (string, string) {
 	opts := panel.SortOptions.Data
 	selected := opts.Options[opts.Selected]
 	label := selected
@@ -119,7 +119,7 @@ func (panel *Model) getSortInfo() (string, string) {
 	return label, iconStr
 }
 
-func (panel *Model) getPanelModeInfo(selectedCount uint) (string, string) {
+func (panel *FilePanel) getPanelModeInfo(selectedCount uint) (string, string) {
 	switch panel.PanelMode {
 	case BrowserMode:
 		return "Browser", icon.Browser
@@ -130,7 +130,7 @@ func (panel *Model) getPanelModeInfo(selectedCount uint) (string, string) {
 	}
 }
 
-func (panel *Model) getCursorString() string {
+func (panel *FilePanel) getCursorString() string {
 	cursor := panel.Cursor
 	if len(panel.Element) > 0 {
 		cursor++ // Convert to 1-based
@@ -138,7 +138,7 @@ func (panel *Model) getCursorString() string {
 	return fmt.Sprintf("%d/%d", cursor, len(panel.Element))
 }
 
-func (panel *Model) renderSelectBox(isSelected bool) string {
+func (panel *FilePanel) renderSelectBox(isSelected bool) string {
 	if !common.Config.ShowSelectIcons || !common.Config.Nerdfont || panel.PanelMode != SelectMode {
 		return ""
 	}
@@ -156,7 +156,7 @@ func (panel *Model) renderSelectBox(isSelected bool) string {
 }
 
 // Checks whether the focus panel directory changed and forces a re-render.
-func (panel *Model) NeedsReRender() bool {
+func (panel *FilePanel) NeedsReRender() bool {
 	if len(panel.Element) > 0 {
 		return filepath.Dir(panel.Element[0].Location) != panel.Location
 	}

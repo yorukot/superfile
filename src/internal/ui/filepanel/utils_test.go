@@ -180,7 +180,7 @@ func TestReturnDirElement(t *testing.T) {
 				Selected: 0,
 				Reversed: tt.reversed,
 			}
-			panel := &Model{
+			panel := &FilePanel{
 				Location: tt.location,
 				SortOptions: SortOptionsModel{
 					Data: sortOptionsModel,
