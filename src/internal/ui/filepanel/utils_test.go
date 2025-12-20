@@ -180,11 +180,18 @@ func TestReturnDirElement(t *testing.T) {
 				Selected: 0,
 				Reversed: tt.reversed,
 			}
+			panel := &FilePanel{
+				Location: tt.location,
+				SortOptions: SortOptionsModel{
+					Data: sortOptionsModel,
+				},
+			}
+			panel.SearchBar.SetValue(tt.searchString)
 			var res []Element
 			if tt.searchString == "" {
-				res = returnDirElement(tt.location, tt.dotFiles, sortOptionsModel)
+				res = panel.GetDirectoryElements(tt.dotFiles)
 			} else {
-				res = returnDirElementBySearchString(tt.location, tt.dotFiles, tt.searchString, sortOptionsModel)
+				res = panel.GetDirectoryElementsBySearch(tt.dotFiles)
 			}
 
 			assert.Len(t, res, len(tt.expectedElemNames))

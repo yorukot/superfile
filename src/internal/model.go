@@ -748,7 +748,7 @@ func (m *model) shouldSkipPanelUpdate(
 // Retrieves elements for a panel based on search bar value and sort options.
 func (m *model) getElementsForPanel(filePanel *filepanel.FilePanel) []filepanel.Element {
 	if filePanel.SearchBar.Value() != "" {
-		return filePanel.GetDirectoryElementsBySearch(m.toggleDotFile, filePanel.SearchBar.Value())
+		return filePanel.GetDirectoryElementsBySearch(m.toggleDotFile)
 	}
 	return filePanel.GetDirectoryElements(m.toggleDotFile)
 }
