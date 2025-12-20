@@ -9,7 +9,7 @@ func (panel *FilePanel) ScrollToCursor(mainPanelHeight int) {
 		return
 	}
 
-	renderCount := panelElementHeight(mainPanelHeight)
+	renderCount := PanelElementHeight(mainPanelHeight)
 	if panel.Cursor < panel.RenderIndex {
 		panel.RenderIndex = max(0, panel.Cursor-renderCount+1)
 	} else if panel.Cursor > panel.RenderIndex+renderCount-1 {
@@ -28,8 +28,8 @@ func (panel *FilePanel) ListUp(mainPanelHeight int) {
 			panel.RenderIndex--
 		}
 	} else {
-		if len(panel.Element) > panelElementHeight(mainPanelHeight) {
-			panel.RenderIndex = len(panel.Element) - panelElementHeight(mainPanelHeight)
+		if len(panel.Element) > PanelElementHeight(mainPanelHeight) {
+			panel.RenderIndex = len(panel.Element) - PanelElementHeight(mainPanelHeight)
 			panel.Cursor = len(panel.Element) - 1
 		} else {
 			panel.Cursor = len(panel.Element) - 1
@@ -44,7 +44,7 @@ func (panel *FilePanel) ListDown(mainPanelHeight int) {
 	}
 	if panel.Cursor < len(panel.Element)-1 {
 		panel.Cursor++
-		if panel.Cursor > panel.RenderIndex+panelElementHeight(mainPanelHeight)-1 {
+		if panel.Cursor > panel.RenderIndex+PanelElementHeight(mainPanelHeight)-1 {
 			panel.RenderIndex++
 		}
 	} else {
@@ -59,7 +59,7 @@ func (panel *FilePanel) PgUp(mainPanelHeight int) {
 		return
 	}
 
-	panHeight := panelElementHeight(mainPanelHeight)
+	panHeight := PanelElementHeight(mainPanelHeight)
 	panCenter := panHeight / 2 //nolint:mnd // For making sure the cursor is at the center of the panel
 
 	if panHeight >= panlen {
@@ -85,7 +85,7 @@ func (panel *FilePanel) PgDown(mainPanelHeight int) {
 		return
 	}
 
-	panHeight := panelElementHeight(mainPanelHeight)
+	panHeight := PanelElementHeight(mainPanelHeight)
 	panCenter := panHeight / 2 //nolint:mnd // For making sure the cursor is at the center of the panel
 
 	if panHeight >= panlen {

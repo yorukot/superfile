@@ -187,9 +187,9 @@ func TestReturnDirElement(t *testing.T) {
 			}
 			var res []Element
 			if tt.searchString == "" {
-				res = returnDirElement(tt.location, tt.dotFiles, sortOptionsModel)
+				res = ReturnDirElement(tt.location, tt.dotFiles, sortOptionsModel)
 			} else {
-				res = returnDirElementBySearchString(tt.location, tt.dotFiles, tt.searchString, sortOptionsModel)
+				res = ReturnDirElementBySearchString(tt.location, tt.dotFiles, tt.searchString, sortOptionsModel)
 			}
 
 			assert.Len(t, res, len(tt.expectedElemNames))

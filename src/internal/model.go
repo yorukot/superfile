@@ -742,14 +742,14 @@ func (m *model) shouldSkipPanelUpdate(filePanel *FilePanel, focusPanel *FilePane
 // Retrieves elements for a panel based on search bar value and sort options.
 func (m *model) getElementsForPanel(filePanel *FilePanel) []Element {
 	if filePanel.SearchBar.Value() != "" {
-		return returnDirElementBySearchString(
+		return ReturnDirElementBySearchString(
 			filePanel.Location,
 			m.toggleDotFile,
 			filePanel.SearchBar.Value(),
 			filePanel.SortOptions.Data,
 		)
 	}
-	return returnDirElement(filePanel.Location, m.toggleDotFile, filePanel.SortOptions.Data)
+	return ReturnDirElement(filePanel.Location, m.toggleDotFile, filePanel.SortOptions.Data)
 }
 
 // Applies targetFile cursor positioning, if configured for the panel.

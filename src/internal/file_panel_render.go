@@ -66,12 +66,12 @@ func (panel *FilePanel) RenderFileEntries(r *rendering.Renderer, mainPanelHeight
 		return
 	}
 
-	end := min(panel.RenderIndex+panelElementHeight(mainPanelHeight), len(panel.Element))
+	end := min(panel.RenderIndex+PanelElementHeight(mainPanelHeight), len(panel.Element))
 
 	for i := panel.RenderIndex; i < end; i++ {
 		// TODO : Fix this, this is O(n^2) complexity. Considered a file panel with 200 files, and 100 selected
 		// We will be doing a search in 100 item slice for all 200 files.
-		isSelected := arrayContains(panel.Selected, panel.Element[i].Location)
+		isSelected := ArrayContains(panel.Selected, panel.Element[i].Location)
 
 		if panel.Renaming && i == panel.Cursor {
 			r.AddLines(panel.Rename.View())
@@ -106,7 +106,7 @@ func (panel *FilePanel) GetSortInfo() (string, string) {
 	opts := panel.SortOptions.Data
 	selected := opts.Options[opts.Selected]
 	label := selected
-	if selected == string(sortingDateModified) {
+	if selected == string(SortingDateModified) {
 		label = "Date"
 	}
 

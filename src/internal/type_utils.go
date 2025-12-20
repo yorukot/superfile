@@ -7,7 +7,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/utils"
 )
 
-const invalidTypeString = "InvalidType"
+
 
 // reset the items slice and set the cut value
 func (c *copyItems) reset(cut bool) {

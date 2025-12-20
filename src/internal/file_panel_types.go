@@ -7,6 +7,10 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 )
 
+
+// TODO: Convert to integer enum
+type SortingKind string
+
 // Panel representing a file
 type FilePanel struct {
 	Cursor      int
@@ -65,3 +69,5 @@ const (
 	SelectMode PanelMode = iota
 	BrowserMode
 )
+
+type SliceOrderFunc func(i, j int) bool

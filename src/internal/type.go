@@ -15,16 +15,12 @@ import (
 	zoxideui "github.com/yorukot/superfile/src/internal/ui/zoxide"
 )
 
-
 // Type representing the type of focused panel
 type focusPanelType int
 
 type hotkeyType int
 
 type modelQuitStateType int
-
-// TODO: Convert to integer enum
-type sortingKind string
 
 const (
 	globalType hotkeyType = iota
@@ -39,8 +35,6 @@ const (
 	sidebarFocus
 	metadataFocus
 )
-
-
 
 const (
 	notQuitting modelQuitStateType = iota
@@ -147,4 +141,3 @@ type fileModel struct {
 
 type editorFinishedMsg struct{ err error }
 
-type sliceOrderFunc func(i, j int) bool
