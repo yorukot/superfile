@@ -22,7 +22,7 @@ type Model struct {
 	PanelMode          PanelMode
 	Selected           []string
 	Element            []Element
-	DirectoryRecords   map[string]DirectoryRecord
+	DirectoryRecords   map[string]directoryRecord
 	Rename             textinput.Model
 	Renaming           bool
 	SearchBar          textinput.Model
@@ -46,9 +46,9 @@ type sortOptionsModelData struct {
 }
 
 // Record for directory navigation
-type DirectoryRecord struct {
-	DirectoryCursor int
-	DirectoryRender int
+type directoryRecord struct {
+	directoryCursor int
+	directoryRender int
 }
 
 // Element within a file panel

@@ -39,14 +39,8 @@ func (m *model) createNewFilePanel(location string) error {
 		return fmt.Errorf("cannot access location : %s", location)
 	}
 
-	m.fileModel.filePanels = append(m.fileModel.filePanels, filepanel.Model{
-		Location:         location,
-		SortOptions:      m.fileModel.filePanels[m.filePanelFocusIndex].SortOptions,
-		PanelMode:        filepanel.BrowserMode,
-		IsFocused:        false,
-		DirectoryRecords: make(map[string]filepanel.DirectoryRecord),
-		SearchBar:        common.GenerateSearchBar(),
-	})
+	m.fileModel.filePanels = append(m.fileModel.filePanels, filepanel.New(
+		location, m.getFocusedFilePanel().SortOptions, false, ""))
 
 	if m.fileModel.filePreview.IsOpen() {
 		// File preview panel width same as file panel

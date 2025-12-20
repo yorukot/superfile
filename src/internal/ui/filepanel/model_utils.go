@@ -122,9 +122,9 @@ func (m *Model) UpdateCurrentFilePanelDir(path string) error {
 
 	// NOTE: This could be a configurable feature
 	// Update the cursor and render status in case we switch back to this.
-	m.DirectoryRecords[m.Location] = DirectoryRecord{
-		DirectoryCursor: m.Cursor,
-		DirectoryRender: m.RenderIndex,
+	m.DirectoryRecords[m.Location] = directoryRecord{
+		directoryCursor: m.Cursor,
+		directoryRender: m.RenderIndex,
 	}
 
 	if info, err := os.Stat(path); err != nil {
@@ -142,8 +142,8 @@ func (m *Model) UpdateCurrentFilePanelDir(path string) error {
 	// the cursor and render values.
 	curDirectoryRecord, hasRecord := m.DirectoryRecords[m.Location]
 	if hasRecord {
-		m.Cursor = curDirectoryRecord.DirectoryCursor
-		m.RenderIndex = curDirectoryRecord.DirectoryRender
+		m.Cursor = curDirectoryRecord.directoryCursor
+		m.RenderIndex = curDirectoryRecord.directoryRender
 	} else {
 		m.Cursor = 0
 		m.RenderIndex = 0
@@ -257,30 +257,34 @@ func defaultFilePanel(path string, focused bool) Model {
 		targetFile = filepath.Base(panelPath)
 		panelPath = filepath.Dir(panelPath)
 	}
-
-	return Model{
-		RenderIndex: 0,
-		Cursor:      0,
-		Location:    panelPath,
-		SortOptions: sortOptionsModel{
-			//nolint:mnd // default sort options dimensions
-			Width: 20,
-			//nolint:mnd // default sort options dimensions
-			Height: 4,
-			Open:   false,
-			Cursor: common.Config.DefaultSortType,
-			Data: sortOptionsModelData{
-				Options: []string{
-					string(sortingName), string(sortingSize),
-					string(sortingDateModified), string(sortingFileType),
-				},
-				Selected: common.Config.DefaultSortType,
-				Reversed: common.Config.SortOrderReversed,
+	sortOptions := sortOptionsModel{
+		//nolint:mnd // default sort options dimensions
+		Width: 20,
+		//nolint:mnd // default sort options dimensions
+		Height: 4,
+		Open:   false,
+		Cursor: common.Config.DefaultSortType,
+		Data: sortOptionsModelData{
+			Options: []string{
+				string(sortingName), string(sortingSize),
+				string(sortingDateModified), string(sortingFileType),
 			},
+			Selected: common.Config.DefaultSortType,
+			Reversed: common.Config.SortOrderReversed,
 		},
+	}
+	return New(panelPath, sortOptions, focused, targetFile)
+}
+
+func New(location string, sortOptions sortOptionsModel, focused bool, targetFile string) Model {
+	return Model{
+		Cursor:           0,
+		RenderIndex:      0,
+		Location:         location,
+		SortOptions:      sortOptions,
 		PanelMode:        BrowserMode,
 		IsFocused:        focused,
-		DirectoryRecords: make(map[string]DirectoryRecord),
+		DirectoryRecords: make(map[string]directoryRecord),
 		SearchBar:        common.GenerateSearchBar(),
 		TargetFile:       targetFile,
 	}
