@@ -224,7 +224,7 @@ func SortFileElement(sortOptions SortOptionsModelData, dirEntries []os.DirEntry,
 
 		elements = append(elements, Element{
 			Name:      item.Name(),
-			Directory: item.IsDir() || IsSymlinkToDir(location, info, item.Name()),
+			Directory: item.IsDir() || isSymlinkToDir(location, info, item.Name()),
 			Location:  filepath.Join(location, item.Name()),
 			Info:      info,
 		})
@@ -237,7 +237,7 @@ func SortFileElement(sortOptions SortOptionsModelData, dirEntries []os.DirEntry,
 }
 
 // Symlinks to directories are to be identified as directories
-func IsSymlinkToDir(location string, info os.FileInfo, name string) bool {
+func isSymlinkToDir(location string, info os.FileInfo, name string) bool {
 	if info.Mode()&os.ModeSymlink != 0 {
 		targetInfo, errStat := os.Stat(filepath.Join(location, name))
 		return errStat == nil && targetInfo.IsDir()
