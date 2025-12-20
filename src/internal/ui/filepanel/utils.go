@@ -212,8 +212,8 @@ func (panel *FilePanel) GetDirectoryElementsBySearch(displayDotFile bool, search
 	return sortFileElement(panel.SortOptions.Data, dirElements, panel.Location)
 }
 
-// ReturnDirElement is a wrapper for backward compatibility, will be removed
-func ReturnDirElement(location string, displayDotFile bool, sortOptions SortOptionsModelData) []Element {
+// returnDirElement is a wrapper for backward compatibility, will be removed
+func returnDirElement(location string, displayDotFile bool, sortOptions SortOptionsModelData) []Element {
 	panel := &FilePanel{
 		Location: location,
 		SortOptions: SortOptionsModel{
@@ -223,8 +223,8 @@ func ReturnDirElement(location string, displayDotFile bool, sortOptions SortOpti
 	return panel.GetDirectoryElements(displayDotFile)
 }
 
-// ReturnDirElementBySearchString is a wrapper for backward compatibility, will be removed
-func ReturnDirElementBySearchString(location string, displayDotFile bool, searchString string,
+// returnDirElementBySearchString is a wrapper for backward compatibility, will be removed
+func returnDirElementBySearchString(location string, displayDotFile bool, searchString string,
 	sortOptions SortOptionsModelData,
 ) []Element {
 	panel := &FilePanel{
