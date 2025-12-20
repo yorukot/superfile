@@ -175,7 +175,7 @@ func TestReturnDirElement(t *testing.T) {
 
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
-			sortOptionsModel := sortOptionsModelData{
+			data := sortOptionsModelData{
 				Options:  []string{tt.sortOption},
 				Selected: 0,
 				Reversed: tt.reversed,
@@ -183,7 +183,7 @@ func TestReturnDirElement(t *testing.T) {
 			panel := &Model{
 				Location: tt.location,
 				SortOptions: sortOptionsModel{
-					Data: sortOptionsModel,
+					Data: data,
 				},
 			}
 			panel.SearchBar.SetValue(tt.searchString)
