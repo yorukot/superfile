@@ -15,7 +15,7 @@
 ## Setup
 Requires python 3.9 or later.
 
-## Setup for MacOS / Linux
+## Setup for macOS / Linux
 
 ### Install tmux
 - You need to have tmux installed. See https://github.com/tmux/tmux/wiki

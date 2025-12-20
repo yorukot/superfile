@@ -13,7 +13,7 @@
    </a>
 
 ### [Warp, the AI terminal for developers](https://www.warp.dev/?utm_source=github&utm_medium=referral&utm_campaign=superfile)
-[Available for MacOS, Linux, & Windows](https://www.warp.dev/?utm_source=github&utm_medium=referral&utm_campaign=superfile)<br>
+[Available for macOS, Linux, & Windows](https://www.warp.dev/?utm_source=github&utm_medium=referral&utm_campaign=superfile)<br>
 
 </div>
 <hr>
@@ -64,7 +64,7 @@
 
 ## Installation
 
-### MacOS and Linux
+### macOS and Linux
 
 ```bash
 bash -c "$(curl -sLo- https://superfile.dev/install.sh)"
@@ -114,7 +114,7 @@ Enter the downloaded directory:
 cd superfile
 ```
 
-### For MacOS/Linux
+### For macOS/Linux
 Run the `build.sh` file:
 
 ```bash
@@ -144,7 +144,7 @@ spf
 ## Supported Systems
 
 - \[x\] Linux
-- \[x\] MacOS
+- \[x\] macOS
 - \[x\] Windows (Not fully supported yet)
 
 ## Tutorial
@@ -178,9 +178,9 @@ You can turn this off, by setting `auto_check_update` to false in superfile conf
 
 ## Uninstalling
 
-### MacOS and Linux
+### macOS and Linux
 
-On MacOS and Linux, you can uninstall superfile by simply removing the binary. If you installed superfile with sudo, runw
+On macOS and Linux, you can uninstall superfile by simply removing the binary. If you installed superfile with sudo, runw
 
 ```bash
 sudo rm /usr/local/bin/spf
