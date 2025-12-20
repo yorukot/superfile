@@ -169,7 +169,7 @@ func ReturnDirElement(location string, displayDotFile bool, sortOptions SortOpti
 	if len(dirEntries) == 0 {
 		return nil
 	}
-	return SortFileElement(sortOptions, dirEntries, location)
+	return sortFileElement(sortOptions, dirEntries, location)
 }
 
 func ReturnDirElementBySearchString(location string, displayDotFile bool, searchString string,
@@ -209,10 +209,10 @@ func ReturnDirElementBySearchString(location string, displayDotFile bool, search
 		dirElements = append(dirElements, resultItem)
 	}
 
-	return SortFileElement(sortOptions, dirElements, location)
+	return sortFileElement(sortOptions, dirElements, location)
 }
 
-func SortFileElement(sortOptions SortOptionsModelData, dirEntries []os.DirEntry, location string) []Element {
+func sortFileElement(sortOptions SortOptionsModelData, dirEntries []os.DirEntry, location string) []Element {
 	elements := make([]Element, 0, len(dirEntries))
 	for _, item := range dirEntries {
 		info, err := item.Info()
