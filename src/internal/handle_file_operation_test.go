@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/utils"
 )
 
@@ -113,20 +114,13 @@ func TestCompressSelectedFiles(t *testing.T) {
 			}
 
 			p.SendKey(common.Hotkeys.CompressFile[0])
+
+			// This is a bit of an indirect validation, but there aren't many ways.
+			// We many add a process type later, and ensure that a process of
+			// type compress was done
+			ensureOneProcessDone(t, m)
 			zipFile := filepath.Join(tt.startDir, tt.expectedZipName)
-			// Actual compress may take time, since its an os operations
-			assert.Eventually(t, func() bool {
-				_, err := os.Lstat(zipFile)
-				return err == nil
-			}, DefaultTestTimeout, DefaultTestTick)
-
-			// Assert zip file exists right after compression
 			require.FileExists(t, zipFile, "Expected zip file does not exist after compression")
-
-			// No-op update to get the filepanel updated
-			// TODO - This should not be needed. Only operation finish SPF should refresh
-			// on its own
-			p.SendDirectly(nil)
 
 			setFilePanelSelectedItemByLocation(t, m.getFocusedFilePanel(), zipFile)
 
@@ -384,4 +378,14 @@ func setupModelAndPerformOperation(t *testing.T, startDir string, useSelectMode 
 	verifyClipboardState(t, m, isCut, useSelectMode, selectedItemsCount)
 
 	return m
+}
+
+func ensureOneProcessDone(t *testing.T, m *model) {
+	// Don't attempt to print
+	// m.processBarModel.GetProcessesSlice() in the failure message
+	// This will print values calculated at the beginning of the call
+	require.Eventually(t, func() bool {
+		processes := m.processBarModel.GetProcessesSlice()
+		return len(processes) == 1 && processes[0].State == processbar.Successful
+	}, DefaultTestTimeout, DefaultTestTick, "Compress process not done")
 }

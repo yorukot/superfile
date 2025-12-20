@@ -35,10 +35,7 @@ func (m *Model) getSortedProcesses() []Process {
 	// have process implement a Less() method, and we can do O(logn) inserts/deletes
 	// To make sure its always stored in an order we want. And then iterate in O(n)
 	// in render()
-	var processes []Process
-	for _, p := range m.processes {
-		processes = append(processes, p)
-	}
+	processes := m.GetProcessesSlice()
 	// sort by the process
 	sort.Slice(processes, func(i, j int) bool {
 		doneI := (processes[i].State == Successful || processes[i].State == Failed)
@@ -71,4 +68,13 @@ func (m *Model) newReqCnt() int {
 // TODO: Maybe make sure that there isn't any existing process with this UUID
 func (m *Model) newUUIDForProcess() string {
 	return shortuuid.New()
+}
+
+// Copy of the current processes for read only purpose
+func (m *Model) GetProcessesSlice() []Process {
+	var processes []Process
+	for _, p := range m.processes {
+		processes = append(processes, p)
+	}
+	return processes
 }
