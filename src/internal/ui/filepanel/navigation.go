@@ -2,7 +2,7 @@ package filepanel
 
 // ======================================== File panel controller ========================================
 
-func (panel *FilePanel) ScrollToCursor(mainPanelHeight int) {
+func (panel *FilePanel) scrollToCursor(mainPanelHeight int) {
 	if panel.Cursor < 0 || panel.Cursor >= len(panel.Element) {
 		panel.Cursor = 0
 		panel.RenderIndex = 0
@@ -121,7 +121,7 @@ func (panel *FilePanel) ItemSelectDown(mainPanelHeight int) {
 // ======================================== Processbar controller ========================================
 
 // Applies targetFile cursor positioning, if configured for the panel.
-func (panel *FilePanel) ApplyTargetFileCursor() {
+func (panel *FilePanel) applyTargetFileCursor() {
 	for idx, el := range panel.Element {
 		if el.Name == panel.TargetFile {
 			panel.Cursor = idx

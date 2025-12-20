@@ -414,11 +414,11 @@ func (panel *FilePanel) GetItems(focusPanelReRender bool, toggleDotFile bool,
 
 		// For hover to file on first time loading
 		if panel.TargetFile != "" {
-			panel.ApplyTargetFileCursor()
+			panel.applyTargetFileCursor()
 		}
 	}
 	// Due to applyTargetFileCursor, cursor might go out of range
-	panel.ScrollToCursor(mainPanelHeight)
+	panel.scrollToCursor(mainPanelHeight)
 }
 
 // Retrieves elements for a panel based on search bar value and sort options.
