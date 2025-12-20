@@ -61,7 +61,7 @@ func (p PanelMode) String() string {
 	}
 }
 
-func GetOrderingFunc(elements []Element, reversed bool, sortOption string) sliceOrderFunc {
+func getOrderingFunc(elements []Element, reversed bool, sortOption string) sliceOrderFunc {
 	var order func(i, j int) bool
 	switch sortOption {
 	case string(sortingName):
@@ -76,18 +76,18 @@ func GetOrderingFunc(elements []Element, reversed bool, sortOption string) slice
 			return strings.ToLower(elements[i].Name) < strings.ToLower(elements[j].Name) != reversed
 		}
 	case string(sortingSize):
-		order = GetSizeOrderingFunc(elements, reversed)
+		order = getSizeOrderingFunc(elements, reversed)
 	case string(sortingDateModified):
 		order = func(i, j int) bool {
 			return elements[i].Info.ModTime().After(elements[j].Info.ModTime()) != reversed
 		}
 	case string(sortingFileType):
-		order = GetTypeOrderingFunc(elements, reversed)
+		order = getTypeOrderingFunc(elements, reversed)
 	}
 	return order
 }
 
-func GetSizeOrderingFunc(elements []Element, reversed bool) sliceOrderFunc {
+func getSizeOrderingFunc(elements []Element, reversed bool) sliceOrderFunc {
 	return func(i, j int) bool {
 		// Directories at the top sorted by direct child count (not recursive)
 		// Files sorted by size
@@ -116,7 +116,7 @@ func GetSizeOrderingFunc(elements []Element, reversed bool) sliceOrderFunc {
 	}
 }
 
-func GetTypeOrderingFunc(elements []Element, reversed bool) sliceOrderFunc {
+func getTypeOrderingFunc(elements []Element, reversed bool) sliceOrderFunc {
 	return func(i, j int) bool {
 		// One of them is a directory, and the other is not
 		if elements[i].Directory != elements[j].Directory {
@@ -230,7 +230,7 @@ func SortFileElement(sortOptions SortOptionsModelData, dirEntries []os.DirEntry,
 		})
 	}
 
-	sort.Slice(elements, GetOrderingFunc(elements,
+	sort.Slice(elements, getOrderingFunc(elements,
 		sortOptions.Reversed, sortOptions.Options[sortOptions.Selected]))
 
 	return elements
