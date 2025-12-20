@@ -154,8 +154,8 @@ func panelElementHeight(mainPanelHeight int) int {
 // TODO : Take common.Config.CaseSensitiveSort as a function parameter
 // and also consider testing this caseSensitive with both true and false in
 // our unit_test TestReturnDirElement
-// GetDirectoryElements returns the directory elements for the panel's current location
-func (panel *FilePanel) GetDirectoryElements(displayDotFile bool) []Element {
+// getDirectoryElements returns the directory elements for the panel's current location
+func (panel *FilePanel) getDirectoryElements(displayDotFile bool) []Element {
 	dirEntries, err := os.ReadDir(panel.Location)
 	if err != nil {
 		slog.Error("Error while returning folder elements", "error", err)
@@ -175,8 +175,8 @@ func (panel *FilePanel) GetDirectoryElements(displayDotFile bool) []Element {
 	return sortFileElement(panel.SortOptions.Data, dirEntries, panel.Location)
 }
 
-// GetDirectoryElementsBySearch returns filtered directory elements based on search string
-func (panel *FilePanel) GetDirectoryElementsBySearch(displayDotFile bool) []Element {
+// getDirectoryElementsBySearch returns filtered directory elements based on search string
+func (panel *FilePanel) getDirectoryElementsBySearch(displayDotFile bool) []Element {
 	searchString := panel.SearchBar.Value()
 	items, err := os.ReadDir(panel.Location)
 	if err != nil {
@@ -386,7 +386,7 @@ func FilePanelSlice(paths []string) []FilePanel {
 }
 
 // Helper to decide whether to skip updating a panel this tick.
-func (panel *FilePanel) ShouldSkipPanelUpdate(focusPanelReRender bool,
+func (panel *FilePanel) shouldSkipPanelUpdate(focusPanelReRender bool,
 	nowTime time.Time, updatedModelToggleDotFile bool) bool {
 	// Throttle non-focused panels unless dotfile toggle changed
 	if !panel.IsFocused && nowTime.Sub(panel.LastTimeGetElement) < 3*time.Second {
@@ -403,10 +403,10 @@ func (panel *FilePanel) ShouldSkipPanelUpdate(focusPanelReRender bool,
 	return false
 }
 
-func (panel *FilePanel) GetItems(focusPanelReRender bool, toggleDotFile bool,
+func (panel *FilePanel) UpdateElementsIfNeeded(focusPanelReRender bool, toggleDotFile bool,
 	updatedToggleDotFile bool, mainPanelHeight int) {
 	nowTime := time.Now()
-	if !panel.ShouldSkipPanelUpdate(focusPanelReRender, nowTime, updatedToggleDotFile) {
+	if !panel.shouldSkipPanelUpdate(focusPanelReRender, nowTime, updatedToggleDotFile) {
 		// Load elements for this panel (with/without search filter)
 		panel.Element = panel.getElements(toggleDotFile)
 		// Update file panel list
@@ -424,7 +424,7 @@ func (panel *FilePanel) GetItems(focusPanelReRender bool, toggleDotFile bool,
 // Retrieves elements for a panel based on search bar value and sort options.
 func (filePanel *FilePanel) getElements(toggleDotFile bool) []Element {
 	if filePanel.SearchBar.Value() != "" {
-		return filePanel.GetDirectoryElementsBySearch(toggleDotFile)
+		return filePanel.getDirectoryElementsBySearch(toggleDotFile)
 	}
-	return filePanel.GetDirectoryElements(toggleDotFile)
+	return filePanel.getDirectoryElements(toggleDotFile)
 }

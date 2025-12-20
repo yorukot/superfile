@@ -189,9 +189,9 @@ func TestReturnDirElement(t *testing.T) {
 			panel.SearchBar.SetValue(tt.searchString)
 			var res []Element
 			if tt.searchString == "" {
-				res = panel.GetDirectoryElements(tt.dotFiles)
+				res = panel.getDirectoryElements(tt.dotFiles)
 			} else {
-				res = panel.GetDirectoryElementsBySearch(tt.dotFiles)
+				res = panel.getDirectoryElementsBySearch(tt.dotFiles)
 			}
 
 			assert.Len(t, res, len(tt.expectedElemNames))
