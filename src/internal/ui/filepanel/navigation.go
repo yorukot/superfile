@@ -1,58 +1,58 @@
 package filepanel
 
-func (panel *FilePanel) scrollToCursor(mainPanelHeight int) {
-	if panel.Cursor < 0 || panel.Cursor >= len(panel.Element) {
-		panel.Cursor = 0
-		panel.RenderIndex = 0
+func (m *Model) scrollToCursor(mainPanelHeight int) {
+	if m.Cursor < 0 || m.Cursor >= len(m.Element) {
+		m.Cursor = 0
+		m.RenderIndex = 0
 		return
 	}
 
 	renderCount := panelElementHeight(mainPanelHeight)
-	if panel.Cursor < panel.RenderIndex {
-		panel.RenderIndex = max(0, panel.Cursor-renderCount+1)
-	} else if panel.Cursor > panel.RenderIndex+renderCount-1 {
-		panel.RenderIndex = panel.Cursor - renderCount + 1
+	if m.Cursor < m.RenderIndex {
+		m.RenderIndex = max(0, m.Cursor-renderCount+1)
+	} else if m.Cursor > m.RenderIndex+renderCount-1 {
+		m.RenderIndex = m.Cursor - renderCount + 1
 	}
 }
 
 // Control file panel list up
-func (panel *FilePanel) ListUp(mainPanelHeight int) {
-	if len(panel.Element) == 0 {
+func (m *Model) ListUp(mainPanelHeight int) {
+	if len(m.Element) == 0 {
 		return
 	}
-	if panel.Cursor > 0 {
-		panel.Cursor--
-		if panel.Cursor < panel.RenderIndex {
-			panel.RenderIndex--
+	if m.Cursor > 0 {
+		m.Cursor--
+		if m.Cursor < m.RenderIndex {
+			m.RenderIndex--
 		}
 	} else {
-		if len(panel.Element) > panelElementHeight(mainPanelHeight) {
-			panel.RenderIndex = len(panel.Element) - panelElementHeight(mainPanelHeight)
-			panel.Cursor = len(panel.Element) - 1
+		if len(m.Element) > panelElementHeight(mainPanelHeight) {
+			m.RenderIndex = len(m.Element) - panelElementHeight(mainPanelHeight)
+			m.Cursor = len(m.Element) - 1
 		} else {
-			panel.Cursor = len(panel.Element) - 1
+			m.Cursor = len(m.Element) - 1
 		}
 	}
 }
 
 // Control file panel list down
-func (panel *FilePanel) ListDown(mainPanelHeight int) {
-	if len(panel.Element) == 0 {
+func (m *Model) ListDown(mainPanelHeight int) {
+	if len(m.Element) == 0 {
 		return
 	}
-	if panel.Cursor < len(panel.Element)-1 {
-		panel.Cursor++
-		if panel.Cursor > panel.RenderIndex+panelElementHeight(mainPanelHeight)-1 {
-			panel.RenderIndex++
+	if m.Cursor < len(m.Element)-1 {
+		m.Cursor++
+		if m.Cursor > m.RenderIndex+panelElementHeight(mainPanelHeight)-1 {
+			m.RenderIndex++
 		}
 	} else {
-		panel.RenderIndex = 0
-		panel.Cursor = 0
+		m.RenderIndex = 0
+		m.Cursor = 0
 	}
 }
 
-func (panel *FilePanel) PgUp(mainPanelHeight int) {
-	panlen := len(panel.Element)
+func (m *Model) PgUp(mainPanelHeight int) {
+	panlen := len(m.Element)
 	if panlen == 0 {
 		return
 	}
@@ -61,24 +61,24 @@ func (panel *FilePanel) PgUp(mainPanelHeight int) {
 	panCenter := panHeight / 2 //nolint:mnd // For making sure the cursor is at the center of the panel
 
 	if panHeight >= panlen {
-		panel.Cursor = 0
+		m.Cursor = 0
 	} else {
-		if panel.Cursor-panHeight <= 0 {
-			panel.Cursor = 0
-			panel.RenderIndex = 0
+		if m.Cursor-panHeight <= 0 {
+			m.Cursor = 0
+			m.RenderIndex = 0
 		} else {
-			panel.Cursor -= panHeight
-			panel.RenderIndex = panel.Cursor - panCenter
+			m.Cursor -= panHeight
+			m.RenderIndex = m.Cursor - panCenter
 
-			if panel.RenderIndex < 0 {
-				panel.RenderIndex = 0
+			if m.RenderIndex < 0 {
+				m.RenderIndex = 0
 			}
 		}
 	}
 }
 
-func (panel *FilePanel) PgDown(mainPanelHeight int) {
-	panlen := len(panel.Element)
+func (m *Model) PgDown(mainPanelHeight int) {
+	panlen := len(m.Element)
 	if panlen == 0 {
 		return
 	}
@@ -87,14 +87,14 @@ func (panel *FilePanel) PgDown(mainPanelHeight int) {
 	panCenter := panHeight / 2 //nolint:mnd // For making sure the cursor is at the center of the panel
 
 	if panHeight >= panlen {
-		panel.Cursor = panlen - 1
+		m.Cursor = panlen - 1
 	} else {
-		if panel.Cursor+panHeight >= panlen {
-			panel.Cursor = panlen - 1
-			panel.RenderIndex = panel.Cursor - panCenter
+		if m.Cursor+panHeight >= panlen {
+			m.Cursor = panlen - 1
+			m.RenderIndex = m.Cursor - panCenter
 		} else {
-			panel.Cursor += panHeight
-			panel.RenderIndex = panel.Cursor - panCenter
+			m.Cursor += panHeight
+			m.RenderIndex = m.Cursor - panCenter
 		}
 	}
 }
@@ -103,24 +103,24 @@ func (panel *FilePanel) PgDown(mainPanelHeight int) {
 // This basically just toggles the "selected" status of element that is pointed by the cursor
 // and then moves the cursor up
 // TODO : Add unit tests for ItemSelectUp and singleItemSelect
-func (panel *FilePanel) ItemSelectUp(mainPanelHeight int) {
-	panel.SingleItemSelect()
-	panel.ListUp(mainPanelHeight)
+func (m *Model) ItemSelectUp(mainPanelHeight int) {
+	m.SingleItemSelect()
+	m.ListUp(mainPanelHeight)
 }
 
 // Handles the action of selecting an item in the file panel downwards. (only work on select mode)
-func (panel *FilePanel) ItemSelectDown(mainPanelHeight int) {
-	panel.SingleItemSelect()
-	panel.ListDown(mainPanelHeight)
+func (m *Model) ItemSelectDown(mainPanelHeight int) {
+	m.SingleItemSelect()
+	m.ListDown(mainPanelHeight)
 }
 
 // Applies targetFile cursor positioning, if configured for the panel.
-func (panel *FilePanel) applyTargetFileCursor() {
-	for idx, el := range panel.Element {
-		if el.Name == panel.TargetFile {
-			panel.Cursor = idx
+func (m *Model) applyTargetFileCursor() {
+	for idx, el := range m.Element {
+		if el.Name == m.TargetFile {
+			m.Cursor = idx
 			break
 		}
 	}
-	panel.TargetFile = ""
+	m.TargetFile = ""
 }

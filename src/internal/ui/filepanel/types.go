@@ -11,7 +11,7 @@ import (
 type sortingKind string
 
 // Panel representing a file
-type FilePanel struct {
+type Model struct {
 	Cursor      int
 	RenderIndex int
 	IsFocused   bool

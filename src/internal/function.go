@@ -99,7 +99,7 @@ func renameIfDuplicate(destination string) (string, error) {
 
 // TODO : Replace all usage of "m.fileModel.filePanels[m.filePanelFocusIndex]" with this
 // There are many usage
-func (m *model) getFocusedFilePanel() *filepanel.FilePanel {
+func (m *model) getFocusedFilePanel() *filepanel.Model {
 	return &m.fileModel.filePanels[m.filePanelFocusIndex]
 }
 

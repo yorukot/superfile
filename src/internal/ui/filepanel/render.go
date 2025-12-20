@@ -14,33 +14,33 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
 )
 
-func (panel *FilePanel) Render(mainPanelHeight int, filePanelWidth int, focussed bool) string {
+func (m *Model) Render(mainPanelHeight int, filePanelWidth int, focussed bool) string {
 	r := ui.FilePanelRenderer(mainPanelHeight+common.BorderPadding, filePanelWidth+common.BorderPadding, focussed)
 
-	panel.renderTopBar(r, filePanelWidth)
-	panel.renderSearchBar(r)
-	panel.renderFooter(r, uint(len(panel.Selected)))
-	panel.renderFileEntries(r, mainPanelHeight, filePanelWidth)
+	m.renderTopBar(r, filePanelWidth)
+	m.renderSearchBar(r)
+	m.renderFooter(r, uint(len(m.Selected)))
+	m.renderFileEntries(r, mainPanelHeight, filePanelWidth)
 
 	return r.Render()
 }
 
-func (panel *FilePanel) renderTopBar(r *rendering.Renderer, filePanelWidth int) {
+func (m *Model) renderTopBar(r *rendering.Renderer, filePanelWidth int) {
 	// TODO - Add ansitruncate left in renderer and remove truncation here
-	truncatedPath := common.TruncateTextBeginning(panel.Location, filePanelWidth-common.InnerPadding, "...")
+	truncatedPath := common.TruncateTextBeginning(m.Location, filePanelWidth-common.InnerPadding, "...")
 	r.AddLines(common.FilePanelTopDirectoryIcon + common.FilePanelTopPathStyle.Render(truncatedPath))
 	r.AddSection()
 }
 
-func (panel *FilePanel) renderSearchBar(r *rendering.Renderer) {
-	r.AddLines(" " + panel.SearchBar.View())
+func (m *Model) renderSearchBar(r *rendering.Renderer) {
+	r.AddLines(" " + m.SearchBar.View())
 }
 
 // TODO : Unit test this
-func (panel *FilePanel) renderFooter(r *rendering.Renderer, selectedCount uint) {
-	sortLabel, sortIcon := panel.getSortInfo()
-	modeLabel, modeIcon := panel.getPanelModeInfo(selectedCount)
-	cursorStr := panel.getCursorString()
+func (m *Model) renderFooter(r *rendering.Renderer, selectedCount uint) {
+	sortLabel, sortIcon := m.getSortInfo()
+	modeLabel, modeIcon := m.getPanelModeInfo(selectedCount)
+	cursorStr := m.getCursorString()
 
 	if common.Config.Nerdfont {
 		sortLabel = sortIcon + icon.Space + sortLabel
@@ -61,39 +61,39 @@ func (panel *FilePanel) renderFooter(r *rendering.Renderer, selectedCount uint) 
 	}
 }
 
-func (panel *FilePanel) renderFileEntries(r *rendering.Renderer, mainPanelHeight, filePanelWidth int) {
-	if len(panel.Element) == 0 {
+func (m *Model) renderFileEntries(r *rendering.Renderer, mainPanelHeight, filePanelWidth int) {
+	if len(m.Element) == 0 {
 		r.AddLines(common.FilePanelNoneText)
 		return
 	}
 
-	end := min(panel.RenderIndex+panelElementHeight(mainPanelHeight), len(panel.Element))
+	end := min(m.RenderIndex+panelElementHeight(mainPanelHeight), len(m.Element))
 
-	for i := panel.RenderIndex; i < end; i++ {
+	for i := m.RenderIndex; i < end; i++ {
 		// TODO : Fix this, this is O(n^2) complexity. Considered a file panel with 200 files, and 100 selected
 		// We will be doing a search in 100 item slice for all 200 files.
-		isSelected := slices.Contains(panel.Selected, panel.Element[i].Location)
+		isSelected := slices.Contains(m.Selected, m.Element[i].Location)
 
-		if panel.Renaming && i == panel.Cursor {
-			r.AddLines(panel.Rename.View())
+		if m.Renaming && i == m.Cursor {
+			r.AddLines(m.Rename.View())
 			continue
 		}
 
 		cursor := " "
-		if i == panel.Cursor && !panel.SearchBar.Focused() {
+		if i == m.Cursor && !m.SearchBar.Focused() {
 			cursor = icon.Cursor
 		}
 
-		selectBox := panel.renderSelectBox(isSelected)
+		selectBox := m.renderSelectBox(isSelected)
 
 		// Calculate the actual prefix width for proper alignment
 		prefixWidth := lipgloss.Width(cursor+" ") + lipgloss.Width(selectBox)
 
-		isLink := panel.Element[i].Info.Mode()&os.ModeSymlink != 0
+		isLink := m.Element[i].Info.Mode()&os.ModeSymlink != 0
 		renderedName := common.PrettierName(
-			panel.Element[i].Name,
+			m.Element[i].Name,
 			filePanelWidth-prefixWidth,
-			panel.Element[i].Directory,
+			m.Element[i].Directory,
 			isLink,
 			isSelected,
 			common.FilePanelBGColor,
@@ -103,8 +103,8 @@ func (panel *FilePanel) renderFileEntries(r *rendering.Renderer, mainPanelHeight
 	}
 }
 
-func (panel *FilePanel) getSortInfo() (string, string) {
-	opts := panel.SortOptions.Data
+func (m *Model) getSortInfo() (string, string) {
+	opts := m.SortOptions.Data
 	selected := opts.Options[opts.Selected]
 	label := selected
 	if selected == string(sortingDateModified) {
@@ -119,8 +119,8 @@ func (panel *FilePanel) getSortInfo() (string, string) {
 	return label, iconStr
 }
 
-func (panel *FilePanel) getPanelModeInfo(selectedCount uint) (string, string) {
-	switch panel.PanelMode {
+func (m *Model) getPanelModeInfo(selectedCount uint) (string, string) {
+	switch m.PanelMode {
 	case BrowserMode:
 		return "Browser", icon.Browser
 	case SelectMode:
@@ -130,20 +130,20 @@ func (panel *FilePanel) getPanelModeInfo(selectedCount uint) (string, string) {
 	}
 }
 
-func (panel *FilePanel) getCursorString() string {
-	cursor := panel.Cursor
-	if len(panel.Element) > 0 {
+func (m *Model) getCursorString() string {
+	cursor := m.Cursor
+	if len(m.Element) > 0 {
 		cursor++ // Convert to 1-based
 	}
-	return fmt.Sprintf("%d/%d", cursor, len(panel.Element))
+	return fmt.Sprintf("%d/%d", cursor, len(m.Element))
 }
 
-func (panel *FilePanel) renderSelectBox(isSelected bool) string {
-	if !common.Config.ShowSelectIcons || !common.Config.Nerdfont || panel.PanelMode != SelectMode {
+func (m *Model) renderSelectBox(isSelected bool) string {
+	if !common.Config.ShowSelectIcons || !common.Config.Nerdfont || m.PanelMode != SelectMode {
 		return ""
 	}
 
-	if panel.IsFocused {
+	if m.IsFocused {
 		if isSelected {
 			return common.CheckboxCheckedFocused
 		}
@@ -156,9 +156,9 @@ func (panel *FilePanel) renderSelectBox(isSelected bool) string {
 }
 
 // Checks whether the focus panel directory changed and forces a re-render.
-func (panel *FilePanel) NeedsReRender() bool {
-	if len(panel.Element) > 0 {
-		return filepath.Dir(panel.Element[0].Location) != panel.Location
+func (m *Model) NeedsReRender() bool {
+	if len(m.Element) > 0 {
+		return filepath.Dir(m.Element[0].Location) != m.Location
 	}
 	return true
 }
