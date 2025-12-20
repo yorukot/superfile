@@ -132,7 +132,7 @@ type copyItems struct {
 /* FILE WINDOWS TYPE START*/
 // Model for file windows
 type fileModel struct {
-	filePanels   []filepanel.FilePanel
+	filePanels   []filepanel.Model
 	width        int
 	renaming     bool
 	maxFilePanel int

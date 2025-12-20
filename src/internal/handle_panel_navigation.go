@@ -39,7 +39,7 @@ func (m *model) createNewFilePanel(location string) error {
 		return fmt.Errorf("cannot access location : %s", location)
 	}
 
-	m.fileModel.filePanels = append(m.fileModel.filePanels, filepanel.FilePanel{
+	m.fileModel.filePanels = append(m.fileModel.filePanels, filepanel.Model{
 		Location:         location,
 		SortOptions:      m.fileModel.filePanels[m.filePanelFocusIndex].SortOptions,
 		PanelMode:        filepanel.BrowserMode,
