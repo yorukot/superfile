@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/yorukot/superfile/src/internal/utils"
+	"golang.org/x/exp/slices"
 
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
@@ -72,7 +72,7 @@ func (panel *FilePanel) RenderFileEntries(r *rendering.Renderer, mainPanelHeight
 	for i := panel.RenderIndex; i < end; i++ {
 		// TODO : Fix this, this is O(n^2) complexity. Considered a file panel with 200 files, and 100 selected
 		// We will be doing a search in 100 item slice for all 200 files.
-		isSelected := utils.ArrayContains(panel.Selected, panel.Element[i].Location)
+		isSelected := slices.Contains(panel.Selected, panel.Element[i].Location)
 
 		if panel.Renaming && i == panel.Cursor {
 			r.AddLines(panel.Rename.View())
