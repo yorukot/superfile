@@ -724,7 +724,11 @@ func (m *model) getFilePanelItems() {
 }
 
 // Helper to decide whether to skip updating a panel this tick.
-func (m *model) shouldSkipPanelUpdate(filePanel *filepanel.FilePanel, focusPanel *filepanel.FilePanel, nowTime time.Time) bool {
+func (m *model) shouldSkipPanelUpdate(
+	filePanel *filepanel.FilePanel,
+	focusPanel *filepanel.FilePanel,
+	nowTime time.Time,
+) bool {
 	// Throttle non-focused panels unless dotfile toggle changed
 	if !filePanel.IsFocused && nowTime.Sub(filePanel.LastTimeGetElement) < 3*time.Second {
 		if !m.updatedToggleDotFile {

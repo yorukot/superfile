@@ -8,6 +8,7 @@ import (
 	"runtime"
 
 	zoxidelib "github.com/lazysegtree/go-zoxide"
+
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
