@@ -107,7 +107,7 @@ func TestCompressSelectedFiles(t *testing.T) {
 			// Update cursor
 			m.getFocusedFilePanel().Cursor = tt.cursor
 
-			require.Equal(t, browserMode, m.getFocusedFilePanel().PanelMode)
+			require.Equal(t, BrowserMode, m.getFocusedFilePanel().PanelMode)
 			if tt.selectMode {
 				m.getFocusedFilePanel().ChangeFilePanelMode()
 				m.getFocusedFilePanel().Selected = tt.selectedElem

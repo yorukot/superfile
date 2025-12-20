@@ -30,11 +30,11 @@ func (panel *FilePanel) GetSelectedItemPtr() *Element {
 // Note : This will soon be moved to its own package.
 func (panel *FilePanel) ChangeFilePanelMode() {
 	switch panel.PanelMode {
-	case selectMode:
+	case SelectMode:
 		panel.Selected = panel.Selected[:0]
-		panel.PanelMode = browserMode
-	case browserMode:
-		panel.PanelMode = selectMode
+		panel.PanelMode = BrowserMode
+	case BrowserMode:
+		panel.PanelMode = SelectMode
 	default:
 		slog.Error("Unexpected panelMode", "panelMode", panel.PanelMode)
 	}

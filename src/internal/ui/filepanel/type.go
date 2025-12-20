@@ -62,6 +62,6 @@ type PanelMode uint
 
 // Constants for select mode or browser mode
 const (
-	SelectMode PanelMode = iota
-	BrowserMode
+	selectMode PanelMode = iota
+	browserMode
 )

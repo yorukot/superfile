@@ -36,7 +36,7 @@ func DefaultFilePanel(path string, focused bool) FilePanel {
 				Reversed: common.Config.SortOrderReversed,
 			},
 		},
-		PanelMode:        browserMode,
+		PanelMode:        BrowserMode,
 		IsFocused:        focused,
 		DirectoryRecords: make(map[string]DirectoryRecord),
 		SearchBar:        common.GenerateSearchBar(),
@@ -46,9 +46,9 @@ func DefaultFilePanel(path string, focused bool) FilePanel {
 
 func (p PanelMode) String() string {
 	switch p {
-	case selectMode:
+	case SelectMode:
 		return "selectMode"
-	case browserMode:
+	case BrowserMode:
 		return "browserMode"
 	default:
 		return invalidTypeString

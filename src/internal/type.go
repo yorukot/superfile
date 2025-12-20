@@ -15,8 +15,6 @@ import (
 	zoxideui "github.com/yorukot/superfile/src/internal/ui/zoxide"
 )
 
-// Type representing the mode of the panel
-type PanelMode uint
 
 // Type representing the type of focused panel
 type focusPanelType int
@@ -42,11 +40,7 @@ const (
 	metadataFocus
 )
 
-// Constants for select mode or browser mode
-const (
-	selectMode PanelMode = iota
-	browserMode
-)
+
 
 const (
 	notQuitting modelQuitStateType = iota

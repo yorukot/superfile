@@ -120,9 +120,9 @@ func (panel *FilePanel) GetSortInfo() (string, string) {
 
 func (panel *FilePanel) GetPanelModeInfo(selectedCount uint) (string, string) {
 	switch panel.PanelMode {
-	case browserMode:
+	case BrowserMode:
 		return "Browser", icon.Browser
-	case selectMode:
+	case SelectMode:
 		return "Select" + icon.Space + fmt.Sprintf("(%d)", selectedCount), icon.Select
 	default:
 		return "", ""
@@ -138,7 +138,7 @@ func (panel *FilePanel) GetCursorString() string {
 }
 
 func (panel *FilePanel) RenderSelectBox(isSelected bool) string {
-	if !common.Config.ShowSelectIcons || !common.Config.Nerdfont || panel.PanelMode != selectMode {
+	if !common.Config.ShowSelectIcons || !common.Config.Nerdfont || panel.PanelMode != SelectMode {
 		return ""
 	}
 

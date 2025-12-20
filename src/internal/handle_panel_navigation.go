@@ -41,7 +41,7 @@ func (m *model) createNewFilePanel(location string) error {
 	m.fileModel.filePanels = append(m.fileModel.filePanels, FilePanel{
 		Location:         location,
 		SortOptions:      m.fileModel.filePanels[m.filePanelFocusIndex].SortOptions,
-		PanelMode:        browserMode,
+		PanelMode:        BrowserMode,
 		IsFocused:        false,
 		DirectoryRecords: make(map[string]DirectoryRecord),
 		SearchBar:        common.GenerateSearchBar(),
