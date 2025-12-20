@@ -145,7 +145,7 @@ func getTypeOrderingFunc(elements []Element, reversed bool) sliceOrderFunc {
 	}
 }
 
-func PanelElementHeight(mainPanelHeight int) int {
+func panelElementHeight(mainPanelHeight int) int {
 	return mainPanelHeight - common.PanelPadding
 }
 
@@ -342,9 +342,9 @@ func (panel *FilePanel) ParentDirectory() error {
 
 func (panel *FilePanel) HandleResize(height int) {
 	// Min render cursor that keeps the cursor in view
-	minVisibleRenderCursor := panel.Cursor - PanelElementHeight(height) + 1
+	minVisibleRenderCursor := panel.Cursor - panelElementHeight(height) + 1
 	// Max render cursor. This ensures all elements are rendered if there is space
-	maxRenderCursor := max(len(panel.Element)-PanelElementHeight(height), 0)
+	maxRenderCursor := max(len(panel.Element)-panelElementHeight(height), 0)
 
 	if panel.RenderIndex > maxRenderCursor {
 		panel.RenderIndex = maxRenderCursor

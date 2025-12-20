@@ -67,7 +67,7 @@ func (panel *FilePanel) RenderFileEntries(r *rendering.Renderer, mainPanelHeight
 		return
 	}
 
-	end := min(panel.RenderIndex+PanelElementHeight(mainPanelHeight), len(panel.Element))
+	end := min(panel.RenderIndex+panelElementHeight(mainPanelHeight), len(panel.Element))
 
 	for i := panel.RenderIndex; i < end; i++ {
 		// TODO : Fix this, this is O(n^2) complexity. Considered a file panel with 200 files, and 100 selected
