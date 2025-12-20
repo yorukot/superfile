@@ -125,5 +125,3 @@ func Test_filePanelUpDown(t *testing.T) {
 		})
 	}
 }
-
-// TODO : Write tests for File Panel pgUp and pgDown and itemSelectUp/itemSelectDown

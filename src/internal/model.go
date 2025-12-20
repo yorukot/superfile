@@ -11,7 +11,6 @@ import (
 
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
-	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
@@ -702,55 +701,13 @@ func getMaxW(s string) int {
 // folders in the current directory.
 func (m *model) getFilePanelItems() {
 	focusPanel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+	focusPanelReRender := focusPanel.NeedsReRender()
 	for i := range m.fileModel.filePanels {
-		filePanel := &m.fileModel.filePanels[i]
-		nowTime := time.Now()
-		if !m.shouldSkipPanelUpdate(filePanel, focusPanel, nowTime) {
-			// Load elements for this panel (with/without search filter)
-			filePanel.Element = m.getElementsForPanel(filePanel)
-			// Update file panel list
-			filePanel.LastTimeGetElement = nowTime
-
-			// For hover to file on first time loading
-			if filePanel.TargetFile != "" {
-				filePanel.ApplyTargetFileCursor()
-			}
-		}
-		// Due to applyTargetFileCursor, cursor might go out of range
-		filePanel.ScrollToCursor(m.mainPanelHeight)
+		m.fileModel.filePanels[i].GetItems(focusPanelReRender, m.toggleDotFile,
+			m.updatedToggleDotFile, m.mainPanelHeight)
 	}
 
 	m.updatedToggleDotFile = false
-}
-
-// Helper to decide whether to skip updating a panel this tick.
-func (m *model) shouldSkipPanelUpdate(
-	filePanel *filepanel.FilePanel,
-	focusPanel *filepanel.FilePanel,
-	nowTime time.Time,
-) bool {
-	// Throttle non-focused panels unless dotfile toggle changed
-	if !filePanel.IsFocused && nowTime.Sub(filePanel.LastTimeGetElement) < 3*time.Second {
-		if !m.updatedToggleDotFile {
-			return true
-		}
-	}
-
-	focusPanelReRender := focusPanel.NeedsReRender()
-	reRenderTime := int(float64(len(filePanel.Element)) / common.ReRenderChunkDivisor)
-	if filePanel.IsFocused && !focusPanelReRender &&
-		nowTime.Sub(filePanel.LastTimeGetElement) < time.Duration(reRenderTime)*time.Second {
-		return true
-	}
-	return false
-}
-
-// Retrieves elements for a panel based on search bar value and sort options.
-func (m *model) getElementsForPanel(filePanel *filepanel.FilePanel) []filepanel.Element {
-	if filePanel.SearchBar.Value() != "" {
-		return filePanel.GetDirectoryElementsBySearch(m.toggleDotFile)
-	}
-	return filePanel.GetDirectoryElements(m.toggleDotFile)
 }
 
 // Close superfile application. Cd into the current dir if CdOnQuit on and save

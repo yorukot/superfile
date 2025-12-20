@@ -8,6 +8,7 @@ import (
 	"slices"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/utils"
@@ -167,7 +168,7 @@ func (panel *FilePanel) GetDirectoryElements(displayDotFile bool) []Element {
 		return err != nil || (strings.HasPrefix(e.Name(), ".") && !displayDotFile)
 	})
 
-	// No files/directoes to process
+	// No files/directories to process
 	if len(dirEntries) == 0 {
 		return nil
 	}
@@ -382,4 +383,48 @@ func FilePanelSlice(paths []string) []FilePanel {
 		res[i] = defaultFilePanel(paths[i], isFocus)
 	}
 	return res
+}
+
+// Helper to decide whether to skip updating a panel this tick.
+func (panel *FilePanel) ShouldSkipPanelUpdate(focusPanelReRender bool,
+	nowTime time.Time, updatedModelToggleDotFile bool) bool {
+	// Throttle non-focused panels unless dotfile toggle changed
+	if !panel.IsFocused && nowTime.Sub(panel.LastTimeGetElement) < 3*time.Second {
+		if !updatedModelToggleDotFile {
+			return true
+		}
+	}
+
+	reRenderTime := int(float64(len(panel.Element)) / common.ReRenderChunkDivisor)
+	if panel.IsFocused && !focusPanelReRender &&
+		nowTime.Sub(panel.LastTimeGetElement) < time.Duration(reRenderTime)*time.Second {
+		return true
+	}
+	return false
+}
+
+func (panel *FilePanel) GetItems(focusPanelReRender bool, toggleDotFile bool,
+	updatedToggleDotFile bool, mainPanelHeight int) {
+	nowTime := time.Now()
+	if !panel.ShouldSkipPanelUpdate(focusPanelReRender, nowTime, updatedToggleDotFile) {
+		// Load elements for this panel (with/without search filter)
+		panel.Element = panel.getElements(toggleDotFile)
+		// Update file panel list
+		panel.LastTimeGetElement = nowTime
+
+		// For hover to file on first time loading
+		if panel.TargetFile != "" {
+			panel.ApplyTargetFileCursor()
+		}
+	}
+	// Due to applyTargetFileCursor, cursor might go out of range
+	panel.ScrollToCursor(mainPanelHeight)
+}
+
+// Retrieves elements for a panel based on search bar value and sort options.
+func (filePanel *FilePanel) getElements(toggleDotFile bool) []Element {
+	if filePanel.SearchBar.Value() != "" {
+		return filePanel.GetDirectoryElementsBySearch(toggleDotFile)
+	}
+	return filePanel.GetDirectoryElements(toggleDotFile)
 }
