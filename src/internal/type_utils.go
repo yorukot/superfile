@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/yorukot/superfile/src/internal/common"
-	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 
 	"github.com/yorukot/superfile/src/internal/utils"
 )
@@ -51,14 +50,4 @@ func (f focusPanelType) String() string {
 	default:
 		return common.InvalidTypeString
 	}
-}
-
-func FilePanelSlice(paths []string) []filepanel.FilePanel {
-	res := make([]filepanel.FilePanel, len(paths))
-	for i := range paths {
-		// Making the first panel as the focussed
-		isFocus := i == 0
-		res[i] = filepanel.DefaultFilePanel(paths[i], isFocus)
-	}
-	return res
 }

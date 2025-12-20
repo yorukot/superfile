@@ -13,7 +13,8 @@ import (
 	"github.com/yorukot/superfile/src/internal/utils"
 )
 
-func DefaultFilePanel(path string, focused bool) FilePanel {
+// defaultFilePanel creates a new FilePanel with default settings
+func defaultFilePanel(path string, focused bool) FilePanel {
 	targetFile := ""
 	panelPath := path
 	// If path refers to a file, switch to its parent and remember the filename
@@ -370,4 +371,15 @@ func (panel *FilePanel) SingleItemSelect() {
 			panel.Selected = append(panel.Selected, elementLocation)
 		}
 	}
+}
+
+// FilePanelSlice creates a slice of FilePanels from the given paths
+func FilePanelSlice(paths []string) []FilePanel {
+	res := make([]FilePanel, len(paths))
+	for i := range paths {
+		// Making the first panel as the focussed
+		isFocus := i == 0
+		res[i] = defaultFilePanel(paths[i], isFocus)
+	}
+	return res
 }
