@@ -1,0 +1,55 @@
+name: Compression Test Stress
+
+on:
+  push:
+    branches: [compress-test-stress]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+jobs:
+  stress-test:
+    name: Stress Test Compression (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y exiftool
+          curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: 1.23.0
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ${{ runner.temp }}/gomodcache
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Install dependencies
+        run: go mod download
+        env:
+          GOMODCACHE: ${{ runner.temp }}/gomodcache
+
+      - name: Run Compression Test 100 times
+        run: |
+          echo "Running Single_Directory_Compress test 100 times..."
+          go test ./src/internal -count=100 -run="TestCompressSelectedFiles/Single_Directory_Compress" -failfast -v
+        env:
+          GOMODCACHE: ${{ runner.temp }}/gomodcache
