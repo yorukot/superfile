@@ -69,7 +69,7 @@ const (
 	BrowserMode
 )
 
-type SliceOrderFunc func(i, j int) bool
+type sliceOrderFunc func(i, j int) bool
 
 const (
 	sortingName         sortingKind = "Name"

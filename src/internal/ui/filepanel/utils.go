@@ -61,7 +61,7 @@ func (p PanelMode) String() string {
 	}
 }
 
-func GetOrderingFunc(elements []Element, reversed bool, sortOption string) SliceOrderFunc {
+func GetOrderingFunc(elements []Element, reversed bool, sortOption string) sliceOrderFunc {
 	var order func(i, j int) bool
 	switch sortOption {
 	case string(sortingName):
@@ -87,7 +87,7 @@ func GetOrderingFunc(elements []Element, reversed bool, sortOption string) Slice
 	return order
 }
 
-func GetSizeOrderingFunc(elements []Element, reversed bool) SliceOrderFunc {
+func GetSizeOrderingFunc(elements []Element, reversed bool) sliceOrderFunc {
 	return func(i, j int) bool {
 		// Directories at the top sorted by direct child count (not recursive)
 		// Files sorted by size
@@ -116,7 +116,7 @@ func GetSizeOrderingFunc(elements []Element, reversed bool) SliceOrderFunc {
 	}
 }
 
-func GetTypeOrderingFunc(elements []Element, reversed bool) SliceOrderFunc {
+func GetTypeOrderingFunc(elements []Element, reversed bool) sliceOrderFunc {
 	return func(i, j int) bool {
 		// One of them is a directory, and the other is not
 		if elements[i].Directory != elements[j].Directory {
