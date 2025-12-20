@@ -21,16 +21,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Setup dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y exiftool
-          curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
-
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version: 1.23.0
+          go-version: 1.25.0
 
       - name: Cache Go modules
         uses: actions/cache@v4
