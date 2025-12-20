@@ -7,8 +7,6 @@ import (
 	"github.com/yorukot/superfile/src/internal/utils"
 )
 
-
-
 // reset the items slice and set the cut value
 func (c *copyItems) reset(cut bool) {
 	c.cut = cut
@@ -49,7 +47,7 @@ func (f focusPanelType) String() string {
 	case metadataFocus:
 		return "metadataFocus"
 	default:
-		return invalidTypeString
+		return common.InvalidTypeString
 	}
 }
 

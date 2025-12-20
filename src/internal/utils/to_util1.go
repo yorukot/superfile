@@ -1,4 +1,5 @@
-package internal
+package utils
+
 // TODO : replace usage of this with slices.contains
 func ArrayContains(s []string, str string) bool {
 	for _, v := range s {

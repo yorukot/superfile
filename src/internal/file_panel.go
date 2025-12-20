@@ -112,7 +112,7 @@ func (panel *FilePanel) SingleItemSelect() {
 	if len(panel.Element) > 0 && panel.Cursor >= 0 && panel.Cursor < len(panel.Element) {
 		elementLocation := panel.Element[panel.Cursor].Location
 
-		if ArrayContains(panel.Selected, elementLocation) {
+		if utils.ArrayContains(panel.Selected, elementLocation) {
 			// This is inefficient. Once you select 1000 items,
 			// each select / deselect operation can take 1000 operations
 			// It can be easily made constant time.

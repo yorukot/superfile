@@ -7,7 +7,6 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 )
 
-
 // TODO: Convert to integer enum
 type SortingKind string
 
@@ -71,3 +70,10 @@ const (
 )
 
 type SliceOrderFunc func(i, j int) bool
+
+const (
+	SortingName         SortingKind = "Name"
+	SortingSize         SortingKind = "Size"
+	SortingDateModified SortingKind = "Date Modified"
+	SortingFileType     SortingKind = "Type"
+)

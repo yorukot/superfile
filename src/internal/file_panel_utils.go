@@ -56,7 +56,7 @@ func (p PanelMode) String() string {
 	case BrowserMode:
 		return "browserMode"
 	default:
-		return invalidTypeString
+		return common.InvalidTypeString
 	}
 }
 
