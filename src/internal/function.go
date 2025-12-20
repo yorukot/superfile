@@ -45,7 +45,7 @@ func isExternalDiskPath(path string) bool {
 		return false
 	}
 
-	// exclude timemachine on MacOS
+	// exclude timemachine on macOS
 	if strings.HasPrefix(path, "/Volumes/.timemachine") {
 		return false
 	}
