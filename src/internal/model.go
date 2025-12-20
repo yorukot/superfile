@@ -711,7 +711,7 @@ func (m *model) getFilePanelItems() {
 
 			// For hover to file on first time loading
 			if filePanel.TargetFile != "" {
-				filePanel.applyTargetFileCursor()
+				filePanel.ApplyTargetFileCursor()
 			}
 		}
 		// Due to applyTargetFileCursor, cursor might go out of range
@@ -750,17 +750,6 @@ func (m *model) getElementsForPanel(filePanel *FilePanel) []Element {
 		)
 	}
 	return ReturnDirElement(filePanel.Location, m.toggleDotFile, filePanel.SortOptions.Data)
-}
-
-// Applies targetFile cursor positioning, if configured for the panel.
-func (panel *FilePanel) applyTargetFileCursor() {
-	for idx, el := range panel.Element {
-		if el.Name == panel.TargetFile {
-			panel.Cursor = idx
-			break
-		}
-	}
-	panel.TargetFile = ""
 }
 
 // Close superfile application. Cd into the current dir if CdOnQuit on and save

@@ -119,3 +119,14 @@ func (panel *FilePanel) ItemSelectDown(mainPanelHeight int) {
 // ======================================== Metadata controller ========================================
 
 // ======================================== Processbar controller ========================================
+
+// Applies targetFile cursor positioning, if configured for the panel.
+func (panel *FilePanel) ApplyTargetFileCursor() {
+	for idx, el := range panel.Element {
+		if el.Name == panel.TargetFile {
+			panel.Cursor = idx
+			break
+		}
+	}
+	panel.TargetFile = ""
+}
