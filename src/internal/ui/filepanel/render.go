@@ -107,7 +107,7 @@ func (panel *FilePanel) GetSortInfo() (string, string) {
 	opts := panel.SortOptions.Data
 	selected := opts.Options[opts.Selected]
 	label := selected
-	if selected == string(SortingDateModified) {
+	if selected == string(sortingDateModified) {
 		label = "Date"
 	}
 

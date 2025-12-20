@@ -35,8 +35,8 @@ func DefaultFilePanel(path string, focused bool) FilePanel {
 			Cursor: common.Config.DefaultSortType,
 			Data: SortOptionsModelData{
 				Options: []string{
-					string(SortingName), string(SortingSize),
-					string(SortingDateModified), string(SortingFileType),
+					string(sortingName), string(sortingSize),
+					string(sortingDateModified), string(sortingFileType),
 				},
 				Selected: common.Config.DefaultSortType,
 				Reversed: common.Config.SortOrderReversed,
@@ -64,7 +64,7 @@ func (p PanelMode) String() string {
 func GetOrderingFunc(elements []Element, reversed bool, sortOption string) SliceOrderFunc {
 	var order func(i, j int) bool
 	switch sortOption {
-	case string(SortingName):
+	case string(sortingName):
 		order = func(i, j int) bool {
 			// One of them is a directory, and other is not
 			if elements[i].Directory != elements[j].Directory {
@@ -75,13 +75,13 @@ func GetOrderingFunc(elements []Element, reversed bool, sortOption string) Slice
 			}
 			return strings.ToLower(elements[i].Name) < strings.ToLower(elements[j].Name) != reversed
 		}
-	case string(SortingSize):
+	case string(sortingSize):
 		order = GetSizeOrderingFunc(elements, reversed)
-	case string(SortingDateModified):
+	case string(sortingDateModified):
 		order = func(i, j int) bool {
 			return elements[i].Info.ModTime().After(elements[j].Info.ModTime()) != reversed
 		}
-	case string(SortingFileType):
+	case string(sortingFileType):
 		order = GetTypeOrderingFunc(elements, reversed)
 	}
 	return order
