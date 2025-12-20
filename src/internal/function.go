@@ -64,7 +64,7 @@ func returnFocusType(focusPanel focusPanelType) bool {
 // TODO : Take common.Config.CaseSensitiveSort as a function parameter
 // and also consider testing this caseSensitive with both true and false in
 // our unit_test TestReturnDirElement
-func returnDirElement(location string, displayDotFile bool, sortOptions sortOptionsModelData) []element {
+func returnDirElement(location string, displayDotFile bool, sortOptions SortOptionsModelData) []Element {
 	dirEntries, err := os.ReadDir(location)
 	if err != nil {
 		slog.Error("Error while returning folder elements", "error", err)
@@ -85,8 +85,8 @@ func returnDirElement(location string, displayDotFile bool, sortOptions sortOpti
 }
 
 func returnDirElementBySearchString(location string, displayDotFile bool, searchString string,
-	sortOptions sortOptionsModelData,
-) []element {
+	sortOptions SortOptionsModelData,
+) []Element {
 	items, err := os.ReadDir(location)
 	if err != nil {
 		slog.Error("Error while return folder element function", "error", err)
@@ -124,8 +124,8 @@ func returnDirElementBySearchString(location string, displayDotFile bool, search
 	return sortFileElement(sortOptions, dirElements, location)
 }
 
-func sortFileElement(sortOptions sortOptionsModelData, dirEntries []os.DirEntry, location string) []element {
-	elements := make([]element, 0, len(dirEntries))
+func sortFileElement(sortOptions SortOptionsModelData, dirEntries []os.DirEntry, location string) []Element {
+	elements := make([]Element, 0, len(dirEntries))
 	for _, item := range dirEntries {
 		info, err := item.Info()
 		if err != nil {
@@ -134,16 +134,16 @@ func sortFileElement(sortOptions sortOptionsModelData, dirEntries []os.DirEntry,
 			continue
 		}
 
-		elements = append(elements, element{
-			name:      item.Name(),
-			directory: item.IsDir() || isSymlinkToDir(location, info, item.Name()),
-			location:  filepath.Join(location, item.Name()),
-			info:      info,
+		elements = append(elements, Element{
+			Name:      item.Name(),
+			Directory: item.IsDir() || isSymlinkToDir(location, info, item.Name()),
+			Location:  filepath.Join(location, item.Name()),
+			Info:      info,
 		})
 	}
 
 	sort.Slice(elements, getOrderingFunc(elements,
-		sortOptions.reversed, sortOptions.options[sortOptions.selected]))
+		sortOptions.Reversed, sortOptions.Options[sortOptions.Selected]))
 
 	return elements
 }
@@ -157,25 +157,25 @@ func isSymlinkToDir(location string, info os.FileInfo, name string) bool {
 	return false
 }
 
-func getOrderingFunc(elements []element, reversed bool, sortOption string) sliceOrderFunc {
+func getOrderingFunc(elements []Element, reversed bool, sortOption string) sliceOrderFunc {
 	var order func(i, j int) bool
 	switch sortOption {
 	case string(sortingName):
 		order = func(i, j int) bool {
 			// One of them is a directory, and other is not
-			if elements[i].directory != elements[j].directory {
-				return elements[i].directory
+			if elements[i].Directory != elements[j].Directory {
+				return elements[i].Directory
 			}
 			if common.Config.CaseSensitiveSort {
-				return elements[i].name < elements[j].name != reversed
+				return elements[i].Name < elements[j].Name != reversed
 			}
-			return strings.ToLower(elements[i].name) < strings.ToLower(elements[j].name) != reversed
+			return strings.ToLower(elements[i].Name) < strings.ToLower(elements[j].Name) != reversed
 		}
 	case string(sortingSize):
 		order = getSizeOrderingFunc(elements, reversed)
 	case string(sortingDateModified):
 		order = func(i, j int) bool {
-			return elements[i].info.ModTime().After(elements[j].info.ModTime()) != reversed
+			return elements[i].Info.ModTime().After(elements[j].Info.ModTime()) != reversed
 		}
 	case string(sortingFileType):
 		order = getTypeOrderingFunc(elements, reversed)
@@ -183,48 +183,48 @@ func getOrderingFunc(elements []element, reversed bool, sortOption string) slice
 	return order
 }
 
-func getSizeOrderingFunc(elements []element, reversed bool) sliceOrderFunc {
+func getSizeOrderingFunc(elements []Element, reversed bool) sliceOrderFunc {
 	return func(i, j int) bool {
 		// Directories at the top sorted by direct child count (not recursive)
 		// Files sorted by size
 
 		// One of them is a directory, and other is not
-		if elements[i].directory != elements[j].directory {
-			return elements[i].directory
+		if elements[i].Directory != elements[j].Directory {
+			return elements[i].Directory
 		}
 
 		// This needs to be improved, and we should sort by actual size only
 		// Repeated recursive read would be slow, so we could cache
-		if elements[i].directory && elements[j].directory {
-			filesI, err := os.ReadDir(elements[i].location)
+		if elements[i].Directory && elements[j].Directory {
+			filesI, err := os.ReadDir(elements[i].Location)
 			// No need of early return, we only call len() on filesI, so nil would
 			// just result in 0
 			if err != nil {
 				slog.Error("Error when reading directory during sort", "error", err)
 			}
-			filesJ, err := os.ReadDir(elements[j].location)
+			filesJ, err := os.ReadDir(elements[j].Location)
 			if err != nil {
 				slog.Error("Error when reading directory during sort", "error", err)
 			}
 			return len(filesI) < len(filesJ) != reversed
 		}
-		return elements[i].info.Size() < elements[j].info.Size() != reversed
+		return elements[i].Info.Size() < elements[j].Info.Size() != reversed
 	}
 }
 
-func getTypeOrderingFunc(elements []element, reversed bool) sliceOrderFunc {
+func getTypeOrderingFunc(elements []Element, reversed bool) sliceOrderFunc {
 	return func(i, j int) bool {
 		// One of them is a directory, and the other is not
-		if elements[i].directory != elements[j].directory {
-			return elements[i].directory
+		if elements[i].Directory != elements[j].Directory {
+			return elements[i].Directory
 		}
 
 		var extI, extJ string
-		if !elements[i].directory {
-			extI = strings.ToLower(filepath.Ext(elements[i].name))
+		if !elements[i].Directory {
+			extI = strings.ToLower(filepath.Ext(elements[i].Name))
 		}
-		if !elements[j].directory {
-			extJ = strings.ToLower(filepath.Ext(elements[j].name))
+		if !elements[j].Directory {
+			extJ = strings.ToLower(filepath.Ext(elements[j].Name))
 		}
 
 		// Compare by extension/type
@@ -234,10 +234,10 @@ func getTypeOrderingFunc(elements []element, reversed bool) sliceOrderFunc {
 
 		// If same type, fall back to name
 		if common.Config.CaseSensitiveSort {
-			return (elements[i].name < elements[j].name) != reversed
+			return (elements[i].Name < elements[j].Name) != reversed
 		}
 
-		return (strings.ToLower(elements[i].name) < strings.ToLower(elements[j].name)) != reversed
+		return (strings.ToLower(elements[i].Name) < strings.ToLower(elements[j].Name)) != reversed
 	}
 }
 
@@ -313,7 +313,7 @@ func renameIfDuplicate(destination string) (string, error) {
 
 // TODO : Replace all usage of "m.fileModel.filePanels[m.filePanelFocusIndex]" with this
 // There are many usage
-func (m *model) getFocusedFilePanel() *filePanel {
+func (m *model) getFocusedFilePanel() *FilePanel {
 	return &m.fileModel.filePanels[m.filePanelFocusIndex]
 }
 

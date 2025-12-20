@@ -28,7 +28,7 @@ func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool,
 		sidebarModel:        sidebar.New(),
 		fileMetaData:        metadata.New(),
 		fileModel: fileModel{
-			filePanels:  filePanelSlice(firstPanelPaths),
+			filePanels:  FilePanelSlice(firstPanelPaths),
 			filePreview: preview.New(),
 			width:       common.DefaultFilePanelWidth,
 		},

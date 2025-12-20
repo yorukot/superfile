@@ -63,7 +63,7 @@ func TestReturnDirElement(t *testing.T) {
 		dotFiles          bool
 		sortOption        string
 		reversed          bool
-		sortOptions       sortOptionsModelData
+		sortOptions       SortOptionsModelData
 		searchString      string
 		expectedElemNames []string
 	}{
@@ -180,12 +180,12 @@ func TestReturnDirElement(t *testing.T) {
 
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
-			sortOptionsModel := sortOptionsModelData{
-				options:  []string{tt.sortOption},
-				selected: 0,
-				reversed: tt.reversed,
+			sortOptionsModel := SortOptionsModelData{
+				Options:  []string{tt.sortOption},
+				Selected: 0,
+				Reversed: tt.reversed,
 			}
-			var res []element
+			var res []Element
 			if tt.searchString == "" {
 				res = returnDirElement(tt.location, tt.dotFiles, sortOptionsModel)
 			} else {
@@ -195,7 +195,7 @@ func TestReturnDirElement(t *testing.T) {
 			assert.Len(t, res, len(tt.expectedElemNames))
 			actualNames := []string{}
 			for i := range res {
-				actualNames = append(actualNames, res[i].name)
+				actualNames = append(actualNames, res[i].Name)
 			}
 			assert.Equal(t, tt.expectedElemNames, actualNames)
 		})

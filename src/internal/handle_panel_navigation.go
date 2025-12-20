@@ -14,7 +14,7 @@ import (
 // Pinned directory
 func (m *model) pinnedDirectory() {
 	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-	err := m.sidebarModel.TogglePinnedDirectory(panel.location)
+	err := m.sidebarModel.TogglePinnedDirectory(panel.Location)
 	if err != nil {
 		slog.Error("Error while toggling pinned directory", "error", err)
 	}
@@ -38,13 +38,13 @@ func (m *model) createNewFilePanel(location string) error {
 		return fmt.Errorf("cannot access location : %s", location)
 	}
 
-	m.fileModel.filePanels = append(m.fileModel.filePanels, filePanel{
-		location:         location,
-		sortOptions:      m.fileModel.filePanels[m.filePanelFocusIndex].sortOptions,
-		panelMode:        browserMode,
-		isFocused:        false,
-		directoryRecords: make(map[string]directoryRecord),
-		searchBar:        common.GenerateSearchBar(),
+	m.fileModel.filePanels = append(m.fileModel.filePanels, FilePanel{
+		Location:         location,
+		SortOptions:      m.fileModel.filePanels[m.filePanelFocusIndex].SortOptions,
+		PanelMode:        browserMode,
+		IsFocused:        false,
+		DirectoryRecords: make(map[string]DirectoryRecord),
+		SearchBar:        common.GenerateSearchBar(),
 	})
 
 	if m.fileModel.filePreview.IsOpen() {
@@ -57,8 +57,8 @@ func (m *model) createNewFilePanel(location string) error {
 		}
 	}
 
-	m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = false
-	m.fileModel.filePanels[m.filePanelFocusIndex+1].isFocused = returnFocusType(m.focusPanel)
+	m.fileModel.filePanels[m.filePanelFocusIndex].IsFocused = false
+	m.fileModel.filePanels[m.filePanelFocusIndex+1].IsFocused = returnFocusType(m.focusPanel)
 	m.fileModel.width = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth() -
 		(common.InnerPadding + (len(m.fileModel.filePanels)-1)*common.BorderPadding)) / len(m.fileModel.filePanels)
 	m.filePanelFocusIndex++
@@ -66,7 +66,7 @@ func (m *model) createNewFilePanel(location string) error {
 	m.fileModel.maxFilePanel = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth()) / common.FilePanelWidthUnit
 
 	for i := range m.fileModel.filePanels {
-		m.fileModel.filePanels[i].searchBar.Width = m.fileModel.width - common.InnerPadding
+		m.fileModel.filePanels[i].SearchBar.Width = m.fileModel.width - common.InnerPadding
 	}
 	return nil
 }
@@ -96,12 +96,12 @@ func (m *model) closeFilePanel() {
 
 	m.fileModel.width = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth() -
 		(common.InnerPadding + (len(m.fileModel.filePanels)-1)*common.BorderPadding)) / len(m.fileModel.filePanels)
-	m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = returnFocusType(m.focusPanel)
+	m.fileModel.filePanels[m.filePanelFocusIndex].IsFocused = returnFocusType(m.focusPanel)
 
 	m.fileModel.maxFilePanel = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth()) / common.FilePanelWidthUnit
 
 	for i := range m.fileModel.filePanels {
-		m.fileModel.filePanels[i].searchBar.Width = m.fileModel.width - common.InnerPadding
+		m.fileModel.filePanels[i].SearchBar.Width = m.fileModel.width - common.InnerPadding
 	}
 }
 
@@ -125,32 +125,32 @@ func (m *model) toggleFilePreviewPanel() {
 	m.fileModel.maxFilePanel = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth()) / common.FilePanelWidthUnit
 
 	for i := range m.fileModel.filePanels {
-		m.fileModel.filePanels[i].searchBar.Width = m.fileModel.width - common.InnerPadding
+		m.fileModel.filePanels[i].SearchBar.Width = m.fileModel.width - common.InnerPadding
 	}
 }
 
 // Focus on next file panel
 func (m *model) nextFilePanel() {
-	m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = false
+	m.fileModel.filePanels[m.filePanelFocusIndex].IsFocused = false
 	if m.filePanelFocusIndex == (len(m.fileModel.filePanels) - 1) {
 		m.filePanelFocusIndex = 0
 	} else {
 		m.filePanelFocusIndex++
 	}
 
-	m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = returnFocusType(m.focusPanel)
+	m.fileModel.filePanels[m.filePanelFocusIndex].IsFocused = returnFocusType(m.focusPanel)
 }
 
 // Focus on previous file panel
 func (m *model) previousFilePanel() {
-	m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = false
+	m.fileModel.filePanels[m.filePanelFocusIndex].IsFocused = false
 	if m.filePanelFocusIndex == 0 {
 		m.filePanelFocusIndex = (len(m.fileModel.filePanels) - 1)
 	} else {
 		m.filePanelFocusIndex--
 	}
 
-	m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = returnFocusType(m.focusPanel)
+	m.fileModel.filePanels[m.filePanelFocusIndex].IsFocused = returnFocusType(m.focusPanel)
 }
 
 // Focus on sidebar
@@ -160,10 +160,10 @@ func (m *model) focusOnSideBar() {
 	}
 	if m.focusPanel == sidebarFocus {
 		m.focusPanel = nonePanelFocus
-		m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = true
+		m.fileModel.filePanels[m.filePanelFocusIndex].IsFocused = true
 	} else {
 		m.focusPanel = sidebarFocus
-		m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = false
+		m.fileModel.filePanels[m.filePanelFocusIndex].IsFocused = false
 	}
 }
 
@@ -175,10 +175,10 @@ func (m *model) focusOnProcessBar() {
 
 	if m.focusPanel == processBarFocus {
 		m.focusPanel = nonePanelFocus
-		m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = true
+		m.fileModel.filePanels[m.filePanelFocusIndex].IsFocused = true
 	} else {
 		m.focusPanel = processBarFocus
-		m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = false
+		m.fileModel.filePanels[m.filePanelFocusIndex].IsFocused = false
 	}
 }
 
@@ -190,9 +190,9 @@ func (m *model) focusOnMetadata() {
 
 	if m.focusPanel == metadataFocus {
 		m.focusPanel = nonePanelFocus
-		m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = true
+		m.fileModel.filePanels[m.filePanelFocusIndex].IsFocused = true
 	} else {
 		m.focusPanel = metadataFocus
-		m.fileModel.filePanels[m.filePanelFocusIndex].isFocused = false
+		m.fileModel.filePanels[m.filePanelFocusIndex].IsFocused = false
 	}
 }

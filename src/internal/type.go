@@ -19,7 +19,7 @@ import (
 )
 
 // Type representing the mode of the panel
-type panelMode uint
+type PanelMode uint
 
 // Type representing the type of focused panel
 type focusPanelType int
@@ -47,7 +47,7 @@ const (
 
 // Constants for select mode or browser mode
 const (
-	selectMode panelMode = iota
+	selectMode PanelMode = iota
 	browserMode
 )
 
@@ -145,7 +145,7 @@ type copyItems struct {
 /* FILE WINDOWS TYPE START*/
 // Model for file windows
 type fileModel struct {
-	filePanels   []filePanel
+	filePanels   []FilePanel
 	width        int
 	renaming     bool
 	maxFilePanel int
@@ -153,51 +153,53 @@ type fileModel struct {
 }
 
 // Panel representing a file
-type filePanel struct {
-	cursor             int
-	render             int
-	isFocused          bool
-	location           string
-	sortOptions        sortOptionsModel
-	panelMode          panelMode
-	selected           []string
-	element            []element
-	directoryRecords   map[string]directoryRecord
-	rename             textinput.Model
-	renaming           bool
-	searchBar          textinput.Model
-	lastTimeGetElement time.Time
-	targetFile         string // filename to position cursor on after load
+type FilePanel struct {
+	Cursor      int
+	RenderIndex int
+	IsFocused   bool
+	Location    string
+	// TODO: Every file panel doesn't needs sort options model
+	// They just need to store their current sort config.
+	SortOptions        SortOptionsModel
+	PanelMode          PanelMode
+	Selected           []string
+	Element            []Element
+	DirectoryRecords   map[string]DirectoryRecord
+	Rename             textinput.Model
+	Renaming           bool
+	SearchBar          textinput.Model
+	LastTimeGetElement time.Time
+	TargetFile         string // filename to position cursor on after load
 }
 
 // Sort options
-type sortOptionsModel struct {
-	width  int
-	height int
-	open   bool
-	cursor int
-	data   sortOptionsModelData
+type SortOptionsModel struct {
+	Width  int
+	Height int
+	Open   bool
+	Cursor int
+	Data   SortOptionsModelData
 }
 
-type sortOptionsModelData struct {
-	options  []string
-	selected int
-	reversed bool
+type SortOptionsModelData struct {
+	Options  []string
+	Selected int
+	Reversed bool
 }
 
 // Record for directory navigation
-type directoryRecord struct {
-	directoryCursor int
-	directoryRender int
+type DirectoryRecord struct {
+	DirectoryCursor int
+	DirectoryRender int
 }
 
 // Element within a file panel
-type element struct {
-	name      string
-	location  string
-	directory bool
-	metaData  [][2]string
-	info      os.FileInfo
+type Element struct {
+	Name      string
+	Location  string
+	Directory bool
+	MetaData  [][2]string
+	Info      os.FileInfo
 }
 
 /* FILE WINDOWS TYPE END*/
