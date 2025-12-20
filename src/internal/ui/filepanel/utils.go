@@ -152,8 +152,9 @@ func panelElementHeight(mainPanelHeight int) int {
 // TODO : Take common.Config.CaseSensitiveSort as a function parameter
 // and also consider testing this caseSensitive with both true and false in
 // our unit_test TestReturnDirElement
-func ReturnDirElement(location string, displayDotFile bool, sortOptions SortOptionsModelData) []Element {
-	dirEntries, err := os.ReadDir(location)
+// GetDirectoryElements returns the directory elements for the panel's current location
+func (panel *FilePanel) GetDirectoryElements(displayDotFile bool) []Element {
+	dirEntries, err := os.ReadDir(panel.Location)
 	if err != nil {
 		slog.Error("Error while returning folder elements", "error", err)
 		return nil
@@ -169,13 +170,12 @@ func ReturnDirElement(location string, displayDotFile bool, sortOptions SortOpti
 	if len(dirEntries) == 0 {
 		return nil
 	}
-	return sortFileElement(sortOptions, dirEntries, location)
+	return sortFileElement(panel.SortOptions.Data, dirEntries, panel.Location)
 }
 
-func ReturnDirElementBySearchString(location string, displayDotFile bool, searchString string,
-	sortOptions SortOptionsModelData,
-) []Element {
-	items, err := os.ReadDir(location)
+// GetDirectoryElementsBySearch returns filtered directory elements based on search string
+func (panel *FilePanel) GetDirectoryElementsBySearch(displayDotFile bool, searchString string) []Element {
+	items, err := os.ReadDir(panel.Location)
 	if err != nil {
 		slog.Error("Error while return folder element function", "error", err)
 		return nil
@@ -209,7 +209,31 @@ func ReturnDirElementBySearchString(location string, displayDotFile bool, search
 		dirElements = append(dirElements, resultItem)
 	}
 
-	return sortFileElement(sortOptions, dirElements, location)
+	return sortFileElement(panel.SortOptions.Data, dirElements, panel.Location)
+}
+
+// ReturnDirElement is a wrapper for backward compatibility, will be removed
+func ReturnDirElement(location string, displayDotFile bool, sortOptions SortOptionsModelData) []Element {
+	panel := &FilePanel{
+		Location: location,
+		SortOptions: SortOptionsModel{
+			Data: sortOptions,
+		},
+	}
+	return panel.GetDirectoryElements(displayDotFile)
+}
+
+// ReturnDirElementBySearchString is a wrapper for backward compatibility, will be removed
+func ReturnDirElementBySearchString(location string, displayDotFile bool, searchString string,
+	sortOptions SortOptionsModelData,
+) []Element {
+	panel := &FilePanel{
+		Location: location,
+		SortOptions: SortOptionsModel{
+			Data: sortOptions,
+		},
+	}
+	return panel.GetDirectoryElementsBySearch(displayDotFile, searchString)
 }
 
 func sortFileElement(sortOptions SortOptionsModelData, dirEntries []os.DirEntry, location string) []Element {

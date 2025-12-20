@@ -748,14 +748,9 @@ func (m *model) shouldSkipPanelUpdate(
 // Retrieves elements for a panel based on search bar value and sort options.
 func (m *model) getElementsForPanel(filePanel *filepanel.FilePanel) []filepanel.Element {
 	if filePanel.SearchBar.Value() != "" {
-		return filepanel.ReturnDirElementBySearchString(
-			filePanel.Location,
-			m.toggleDotFile,
-			filePanel.SearchBar.Value(),
-			filePanel.SortOptions.Data,
-		)
+		return filePanel.GetDirectoryElementsBySearch(m.toggleDotFile, filePanel.SearchBar.Value())
 	}
-	return filepanel.ReturnDirElement(filePanel.Location, m.toggleDotFile, filePanel.SortOptions.Data)
+	return filePanel.GetDirectoryElements(m.toggleDotFile)
 }
 
 // Close superfile application. Cd into the current dir if CdOnQuit on and save
