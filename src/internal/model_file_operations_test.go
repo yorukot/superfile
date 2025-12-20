@@ -144,15 +144,16 @@ func TestFileRename(t *testing.T) {
 			p := NewTestTeaProgWithEventLoop(t, m)
 			setFilePanelSelectedItemByLocation(t, m.getFocusedFilePanel(), file3)
 
-			p.SendKeyDirectly(common.Hotkeys.FilePanelItemRename[0])
-			m.getFocusedFilePanel().rename.SetValue("file2.txt")
+			p.SendKey(common.Hotkeys.FilePanelItemRename[0])
+			p.Send(tea.KeyMsg{Type: tea.KeyBackspace})
+			p.SendKey("2")
 			p.Send(tea.KeyMsg{Type: tea.KeyEnter})
 
-			// This will result in async
-			assert.Eventually(t, func() bool {
+			require.Eventually(t, func() bool {
 				return m.notifyModel.IsOpen()
-			}, DefaultTestTimeout, DefaultTestTick, "Notify modal never opened, filepanel items : %v",
-				m.getFocusedFilePanel().element)
+			}, DefaultTestTimeout, DefaultTestTick,
+				"Notify modal never opened, filepanel items : %v, renaming text : %v",
+				m.getFocusedFilePanel().element, m.getFocusedFilePanel().rename.Value())
 
 			assert.Equal(t, notify.New(true,
 				common.SameRenameWarnTitle,

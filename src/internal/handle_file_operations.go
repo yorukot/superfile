@@ -97,6 +97,9 @@ func (m *model) panelItemRename() {
 	m.fileModel.renaming = true
 	panel.renaming = true
 	m.firstTextInput = true
+	// TODO: Don't re-create a new model on each rename. Don't create
+	// unnecessary gargage for collection. Reuse the existing model.
+	// Maintain its state, dimensions. Update its cursor and text when needed
 	panel.rename = common.GenerateRenameTextInput(
 		m.fileModel.width-common.InnerPadding,
 		cursorPos,
