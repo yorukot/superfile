@@ -58,7 +58,7 @@ func TestReturnDirElement(t *testing.T) {
 		dotFiles          bool
 		sortOption        string
 		reversed          bool
-		sortOptions       SortOptionsModelData
+		sortOptions       sortOptionsModelData
 		searchString      string
 		expectedElemNames []string
 	}{
@@ -175,14 +175,14 @@ func TestReturnDirElement(t *testing.T) {
 
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
-			sortOptionsModel := SortOptionsModelData{
+			sortOptionsModel := sortOptionsModelData{
 				Options:  []string{tt.sortOption},
 				Selected: 0,
 				Reversed: tt.reversed,
 			}
 			panel := &Model{
 				Location: tt.location,
-				SortOptions: SortOptionsModel{
+				SortOptions: sortOptionsModel{
 					Data: sortOptionsModel,
 				},
 			}

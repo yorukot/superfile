@@ -109,7 +109,7 @@ func panelElementHeight(mainPanelHeight int) int {
 	return mainPanelHeight - common.PanelPadding
 }
 
-func sortFileElement(sortOptions SortOptionsModelData, dirEntries []os.DirEntry, location string) []Element {
+func sortFileElement(sortOptions sortOptionsModelData, dirEntries []os.DirEntry, location string) []Element {
 	elements := make([]Element, 0, len(dirEntries))
 	for _, item := range dirEntries {
 		info, err := item.Info()

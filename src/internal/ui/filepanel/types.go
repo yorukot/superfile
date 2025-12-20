@@ -18,7 +18,7 @@ type Model struct {
 	Location    string
 	// TODO: Every file panel doesn't needs sort options model
 	// They just need to store their current sort config.
-	SortOptions        SortOptionsModel
+	SortOptions        sortOptionsModel
 	PanelMode          PanelMode
 	Selected           []string
 	Element            []Element
@@ -31,15 +31,15 @@ type Model struct {
 }
 
 // Sort options
-type SortOptionsModel struct {
+type sortOptionsModel struct {
 	Width  int
 	Height int
 	Open   bool
 	Cursor int
-	Data   SortOptionsModelData
+	Data   sortOptionsModelData
 }
 
-type SortOptionsModelData struct {
+type sortOptionsModelData struct {
 	Options  []string
 	Selected int
 	Reversed bool

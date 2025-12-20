@@ -262,14 +262,14 @@ func defaultFilePanel(path string, focused bool) Model {
 		RenderIndex: 0,
 		Cursor:      0,
 		Location:    panelPath,
-		SortOptions: SortOptionsModel{
+		SortOptions: sortOptionsModel{
 			//nolint:mnd // default sort options dimensions
 			Width: 20,
 			//nolint:mnd // default sort options dimensions
 			Height: 4,
 			Open:   false,
 			Cursor: common.Config.DefaultSortType,
-			Data: SortOptionsModelData{
+			Data: sortOptionsModelData{
 				Options: []string{
 					string(sortingName), string(sortingSize),
 					string(sortingDateModified), string(sortingFileType),
