@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
-	internal2 "github.com/yorukot/superfile/src/internal/ui/filepanel"
+	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/utils"
@@ -98,7 +98,7 @@ func renameIfDuplicate(destination string) (string, error) {
 
 // TODO : Replace all usage of "m.fileModel.filePanels[m.filePanelFocusIndex]" with this
 // There are many usage
-func (m *model) getFocusedFilePanel() *internal2.FilePanel {
+func (m *model) getFocusedFilePanel() *filepanel.FilePanel {
 	return &m.fileModel.filePanels[m.filePanelFocusIndex]
 }
 

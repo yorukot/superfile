@@ -4,7 +4,8 @@ import (
 	"fmt"
 
 	"github.com/yorukot/superfile/src/internal/common"
-	internal2 "github.com/yorukot/superfile/src/internal/ui/filepanel"
+	"github.com/yorukot/superfile/src/internal/ui/filepanel"
+
 	"github.com/yorukot/superfile/src/internal/utils"
 )
 
@@ -52,12 +53,12 @@ func (f focusPanelType) String() string {
 	}
 }
 
-func FilePanelSlice(paths []string) []internal2.FilePanel {
-	res := make([]internal2.FilePanel, len(paths))
+func FilePanelSlice(paths []string) []filepanel.FilePanel {
+	res := make([]filepanel.FilePanel, len(paths))
 	for i := range paths {
 		// Making the first panel as the focussed
 		isFocus := i == 0
-		res[i] = internal2.DefaultFilePanel(paths[i], isFocus)
+		res[i] = filepanel.DefaultFilePanel(paths[i], isFocus)
 	}
 	return res
 }

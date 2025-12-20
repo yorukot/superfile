@@ -2,7 +2,7 @@ package internal
 
 import (
 	zoxidelib "github.com/lazysegtree/go-zoxide"
-	internal2 "github.com/yorukot/superfile/src/internal/ui/filepanel"
+	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
@@ -131,7 +131,7 @@ type copyItems struct {
 /* FILE WINDOWS TYPE START*/
 // Model for file windows
 type fileModel struct {
-	filePanels   []internal2.FilePanel
+	filePanels   []filepanel.FilePanel
 	width        int
 	renaming     bool
 	maxFilePanel int

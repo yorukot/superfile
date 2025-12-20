@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	internal2 "github.com/yorukot/superfile/src/internal/ui/filepanel"
+	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
@@ -108,7 +108,7 @@ func TestCompressSelectedFiles(t *testing.T) {
 			// Update cursor
 			m.getFocusedFilePanel().Cursor = tt.cursor
 
-			require.Equal(t, internal2.BrowserMode, m.getFocusedFilePanel().PanelMode)
+			require.Equal(t, filepanel.BrowserMode, m.getFocusedFilePanel().PanelMode)
 			if tt.selectMode {
 				m.getFocusedFilePanel().ChangeFilePanelMode()
 				m.getFocusedFilePanel().Selected = tt.selectedElem

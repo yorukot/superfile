@@ -12,7 +12,8 @@ import (
 	"time"
 
 	variable "github.com/yorukot/superfile/src/config"
-	internal2 "github.com/yorukot/superfile/src/internal/ui/filepanel"
+	"github.com/yorukot/superfile/src/internal/ui/filepanel"
+
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/utils"
@@ -114,7 +115,7 @@ func (m *model) getDeleteCmd(permDelete bool) tea.Cmd {
 	}
 
 	var items []string
-	if panel.PanelMode == internal2.SelectMode {
+	if panel.PanelMode == filepanel.SelectMode {
 		items = panel.Selected
 	} else {
 		items = []string{panel.GetSelectedItem().Location}
@@ -170,8 +171,8 @@ func deleteOperation(processBarModel *processbar.Model, items []string, useTrash
 
 func (m *model) getDeleteTriggerCmd(deletePermanent bool) tea.Cmd {
 	panel := m.getFocusedFilePanel()
-	if (panel.PanelMode == internal2.SelectMode && len(panel.Selected) == 0) ||
-		(panel.PanelMode == internal2.BrowserMode && len(panel.Element) == 0) {
+	if (panel.PanelMode == filepanel.SelectMode && len(panel.Selected) == 0) ||
+		(panel.PanelMode == filepanel.BrowserMode && len(panel.Element) == 0) {
 		return nil
 	}
 

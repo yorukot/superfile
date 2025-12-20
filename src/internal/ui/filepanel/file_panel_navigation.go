@@ -1,4 +1,4 @@
-package internal
+package filepanel
 
 // ======================================== File panel controller ========================================
 
