@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/yorukot/superfile/src/config/icon"
+	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/utils"
 )
 
@@ -70,9 +72,19 @@ func (mgr *PinnedManager) Toggle(dir string) error {
 	}
 
 	if !unPinned {
+		// Get directory-specific icon for the directory being pinned
+		baseName := filepath.Base(dir)
+		dirName := baseName
+		if common.Config.Nerdfont {
+			// Use GetElementIcon to get directory-specific icon
+			dirStyle := common.GetElementIcon(baseName, true, false, common.Config.Nerdfont)
+			if dirStyle.Icon != "" {
+				dirName = dirStyle.Icon + icon.Space + baseName
+			}
+		}
 		dirs = append(dirs, directory{
 			Location: dir,
-			Name:     filepath.Base(dir),
+			Name:     dirName,
 		})
 	}
 

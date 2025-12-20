@@ -50,6 +50,8 @@ func (s *Model) directoriesRender(mainPanelHeight int, curFilePanelFileLocation 
 	// TODO : This is not true when searchbar is not rendered(totalHeight is 2, not 3),
 	// so we end up underutilizing one line for our render. But it wont break anything.
 	totalHeight := sideBarInitialHeight
+	// Track if we're in the pinned section
+	inPinnedSection := false
 	for i := s.renderIndex; i < len(s.directories); i++ {
 		if totalHeight+s.directories[i].RequiredHeight() > mainPanelHeight {
 			break
@@ -60,8 +62,10 @@ func (s *Model) directoriesRender(mainPanelHeight int, curFilePanelFileLocation 
 		switch s.directories[i] {
 		case pinnedDividerDir:
 			r.AddLines("", common.SideBarPinnedDivider, "")
+			inPinnedSection = true
 		case diskDividerDir:
 			r.AddLines("", common.SideBarDisksDivider, "")
+			inPinnedSection = false
 		default:
 			cursor := " "
 			if s.cursor == i && sideBarFocussed && !s.searchBar.Focused() {
@@ -74,7 +78,16 @@ func (s *Model) directoriesRender(mainPanelHeight int, curFilePanelFileLocation 
 				if s.directories[i].Location == curFilePanelFileLocation {
 					renderStyle = common.SidebarSelectedStyle
 				}
-				line := common.FilePanelCursorStyle.Render(cursor+" ") + renderStyle.Render(s.directories[i].Name)
+				// Get directory-specific icon for pinned directories
+				dirName := s.directories[i].Name
+				if inPinnedSection && common.Config.Nerdfont {
+					// Use GetElementIcon to get directory-specific icon
+					dirStyle := common.GetElementIcon(s.directories[i].Name, true, false, common.Config.Nerdfont)
+					if dirStyle.Icon != "" {
+						dirName = dirStyle.Icon + icon.Space + dirName
+					}
+				}
+				line := common.FilePanelCursorStyle.Render(cursor+" ") + renderStyle.Render(dirName)
 				r.AddLineWithCustomTruncate(line, rendering.TailsTruncateRight)
 			}
 		}
