@@ -73,7 +73,9 @@ func TestZoxide(t *testing.T) {
 		assert.Eventually(t, func() bool {
 			return !p.getModel().zoxideModal.IsOpen() &&
 				p.getModel().getFocusedFilePanel().location == dir2
-		}, DefaultTestTimeout, DefaultTestTick, "Should navigate to dir2 after zoxide selection")
+		}, DefaultTestTimeout, DefaultTestTick,
+			"Zoxide modal should close and navigate to %s (current location: %s)",
+			dir2, p.getModel().getFocusedFilePanel().location)
 	})
 
 	t.Run("Zoxide disabled shows no results", func(t *testing.T) {
