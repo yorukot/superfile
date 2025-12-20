@@ -9,6 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	internal2 "github.com/yorukot/superfile/src/internal/ui/filepanel"
 
 	"github.com/yorukot/superfile/src/internal/utils"
 )
@@ -63,7 +64,7 @@ func TestReturnDirElement(t *testing.T) {
 		dotFiles          bool
 		sortOption        string
 		reversed          bool
-		sortOptions       SortOptionsModelData
+		sortOptions       internal2.SortOptionsModelData
 		searchString      string
 		expectedElemNames []string
 	}{
@@ -180,16 +181,16 @@ func TestReturnDirElement(t *testing.T) {
 
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
-			sortOptionsModel := SortOptionsModelData{
+			sortOptionsModel := internal2.SortOptionsModelData{
 				Options:  []string{tt.sortOption},
 				Selected: 0,
 				Reversed: tt.reversed,
 			}
-			var res []Element
+			var res []internal2.Element
 			if tt.searchString == "" {
-				res = ReturnDirElement(tt.location, tt.dotFiles, sortOptionsModel)
+				res = internal2.ReturnDirElement(tt.location, tt.dotFiles, sortOptionsModel)
 			} else {
-				res = ReturnDirElementBySearchString(tt.location, tt.dotFiles, tt.searchString, sortOptionsModel)
+				res = internal2.ReturnDirElementBySearchString(tt.location, tt.dotFiles, tt.searchString, sortOptionsModel)
 			}
 
 			assert.Len(t, res, len(tt.expectedElemNames))

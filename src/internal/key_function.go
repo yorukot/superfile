@@ -5,6 +5,7 @@ import (
 	"slices"
 
 	"github.com/yorukot/superfile/src/internal/common"
+	internal2 "github.com/yorukot/superfile/src/internal/ui/filepanel"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -144,7 +145,7 @@ func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
 		return nil
 	}
 	// Check if in the select mode and focusOn filepanel
-	if m.getFocusedFilePanel().PanelMode == SelectMode {
+	if m.getFocusedFilePanel().PanelMode == internal2.SelectMode {
 		switch {
 		case slices.Contains(common.Hotkeys.Confirm, msg):
 			m.fileModel.filePanels[m.filePanelFocusIndex].SingleItemSelect()

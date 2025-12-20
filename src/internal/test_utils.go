@@ -10,6 +10,7 @@ import (
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	internal2 "github.com/yorukot/superfile/src/internal/ui/filepanel"
 
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/utils"
@@ -46,7 +47,7 @@ func setupPanelModeAndSelection(t *testing.T, m *model, useSelectMode bool, item
 	if useSelectMode {
 		// Switch to select mode and set selected items
 		m.getFocusedFilePanel().ChangeFilePanelMode()
-		require.Equal(t, SelectMode, panel.PanelMode)
+		require.Equal(t, internal2.SelectMode, panel.PanelMode)
 		panel.Selected = selectedItems
 	} else {
 		// Find the item in browser mode
@@ -184,7 +185,7 @@ func verifySuccessfulPasteResults(t *testing.T, targetDir string, expectedDestFi
 // -------------- Other utilities
 
 // Helper function to find item index in panel by name
-func findItemIndexInPanel(panel *FilePanel, itemName string) int {
+func findItemIndexInPanel(panel *internal2.FilePanel, itemName string) int {
 	for i, elem := range panel.Element {
 		if elem.Name == itemName {
 			return i
@@ -194,7 +195,7 @@ func findItemIndexInPanel(panel *FilePanel, itemName string) int {
 }
 
 // Helper function to find item index in panel by name
-func findItemIndexInPanelByLocation(panel *FilePanel, itemLocation string) int {
+func findItemIndexInPanelByLocation(panel *internal2.FilePanel, itemLocation string) int {
 	for i, elem := range panel.Element {
 		if elem.Location == itemLocation {
 			return i
@@ -221,14 +222,14 @@ func getOriginalPath(useSelectMode bool, itemName, startDir string) string {
 	return ""
 }
 
-func setFilePanelSelectedItemByLocation(t *testing.T, panel *FilePanel, filePath string) {
+func setFilePanelSelectedItemByLocation(t *testing.T, panel *internal2.FilePanel, filePath string) {
 	t.Helper()
 	idx := findItemIndexInPanelByLocation(panel, filePath)
 	require.NotEqual(t, -1, idx, "%s should be found in panel", filePath)
 	panel.Cursor = idx
 }
 
-func setFilePanelSelectedItemByName(t *testing.T, panel *FilePanel, fileName string) {
+func setFilePanelSelectedItemByName(t *testing.T, panel *internal2.FilePanel, fileName string) {
 	t.Helper()
 	idx := findItemIndexInPanel(panel, fileName)
 	require.NotEqual(t, -1, idx, "%s should be found in panel", fileName)

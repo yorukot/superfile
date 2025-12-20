@@ -11,6 +11,7 @@ import (
 
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
+	internal2 "github.com/yorukot/superfile/src/internal/ui/filepanel"
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/utils"
@@ -722,7 +723,7 @@ func (m *model) getFilePanelItems() {
 }
 
 // Helper to decide whether to skip updating a panel this tick.
-func (m *model) shouldSkipPanelUpdate(filePanel *FilePanel, focusPanel *FilePanel, nowTime time.Time) bool {
+func (m *model) shouldSkipPanelUpdate(filePanel *internal2.FilePanel, focusPanel *internal2.FilePanel, nowTime time.Time) bool {
 	// Throttle non-focused panels unless dotfile toggle changed
 	if !filePanel.IsFocused && nowTime.Sub(filePanel.LastTimeGetElement) < 3*time.Second {
 		if !m.updatedToggleDotFile {
@@ -740,16 +741,16 @@ func (m *model) shouldSkipPanelUpdate(filePanel *FilePanel, focusPanel *FilePane
 }
 
 // Retrieves elements for a panel based on search bar value and sort options.
-func (m *model) getElementsForPanel(filePanel *FilePanel) []Element {
+func (m *model) getElementsForPanel(filePanel *internal2.FilePanel) []internal2.Element {
 	if filePanel.SearchBar.Value() != "" {
-		return ReturnDirElementBySearchString(
+		return internal2.ReturnDirElementBySearchString(
 			filePanel.Location,
 			m.toggleDotFile,
 			filePanel.SearchBar.Value(),
 			filePanel.SortOptions.Data,
 		)
 	}
-	return ReturnDirElement(filePanel.Location, m.toggleDotFile, filePanel.SortOptions.Data)
+	return internal2.ReturnDirElement(filePanel.Location, m.toggleDotFile, filePanel.SortOptions.Data)
 }
 
 // Close superfile application. Cd into the current dir if CdOnQuit on and save

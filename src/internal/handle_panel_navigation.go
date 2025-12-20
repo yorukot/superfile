@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/yorukot/superfile/src/internal/common"
+	internal2 "github.com/yorukot/superfile/src/internal/ui/filepanel"
 
 	variable "github.com/yorukot/superfile/src/config"
 )
@@ -38,12 +39,12 @@ func (m *model) createNewFilePanel(location string) error {
 		return fmt.Errorf("cannot access location : %s", location)
 	}
 
-	m.fileModel.filePanels = append(m.fileModel.filePanels, FilePanel{
+	m.fileModel.filePanels = append(m.fileModel.filePanels, internal2.FilePanel{
 		Location:         location,
 		SortOptions:      m.fileModel.filePanels[m.filePanelFocusIndex].SortOptions,
-		PanelMode:        BrowserMode,
+		PanelMode:        internal2.BrowserMode,
 		IsFocused:        false,
-		DirectoryRecords: make(map[string]DirectoryRecord),
+		DirectoryRecords: make(map[string]internal2.DirectoryRecord),
 		SearchBar:        common.GenerateSearchBar(),
 	})
 
