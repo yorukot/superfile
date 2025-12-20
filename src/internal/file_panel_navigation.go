@@ -2,7 +2,7 @@ package internal
 
 // ======================================== File panel controller ========================================
 
-func (panel *FilePanel) scrollToCursor(mainPanelHeight int) {
+func (panel *FilePanel) ScrollToCursor(mainPanelHeight int) {
 	if panel.Cursor < 0 || panel.Cursor >= len(panel.Element) {
 		panel.Cursor = 0
 		panel.RenderIndex = 0
@@ -18,7 +18,7 @@ func (panel *FilePanel) scrollToCursor(mainPanelHeight int) {
 }
 
 // Control file panel list up
-func (panel *FilePanel) listUp(mainPanelHeight int) {
+func (panel *FilePanel) ListUp(mainPanelHeight int) {
 	if len(panel.Element) == 0 {
 		return
 	}
@@ -38,7 +38,7 @@ func (panel *FilePanel) listUp(mainPanelHeight int) {
 }
 
 // Control file panel list down
-func (panel *FilePanel) listDown(mainPanelHeight int) {
+func (panel *FilePanel) ListDown(mainPanelHeight int) {
 	if len(panel.Element) == 0 {
 		return
 	}
@@ -53,7 +53,7 @@ func (panel *FilePanel) listDown(mainPanelHeight int) {
 	}
 }
 
-func (panel *FilePanel) pgUp(mainPanelHeight int) {
+func (panel *FilePanel) PgUp(mainPanelHeight int) {
 	panlen := len(panel.Element)
 	if panlen == 0 {
 		return
@@ -79,7 +79,7 @@ func (panel *FilePanel) pgUp(mainPanelHeight int) {
 	}
 }
 
-func (panel *FilePanel) pgDown(mainPanelHeight int) {
+func (panel *FilePanel) PgDown(mainPanelHeight int) {
 	panlen := len(panel.Element)
 	if panlen == 0 {
 		return
@@ -104,16 +104,16 @@ func (panel *FilePanel) pgDown(mainPanelHeight int) {
 // Handles the action of selecting an item in the file panel upwards. (only work on select mode)
 // This basically just toggles the "selected" status of element that is pointed by the cursor
 // and then moves the cursor up
-// TODO : Add unit tests for itemSelectUp and singleItemSelect
-func (panel *FilePanel) itemSelectUp(mainPanelHeight int) {
-	panel.singleItemSelect()
-	panel.listUp(mainPanelHeight)
+// TODO : Add unit tests for ItemSelectUp and singleItemSelect
+func (panel *FilePanel) ItemSelectUp(mainPanelHeight int) {
+	panel.SingleItemSelect()
+	panel.ListUp(mainPanelHeight)
 }
 
 // Handles the action of selecting an item in the file panel downwards. (only work on select mode)
-func (panel *FilePanel) itemSelectDown(mainPanelHeight int) {
-	panel.singleItemSelect()
-	panel.listDown(mainPanelHeight)
+func (panel *FilePanel) ItemSelectDown(mainPanelHeight int) {
+	panel.SingleItemSelect()
+	panel.ListDown(mainPanelHeight)
 }
 
 // ======================================== Metadata controller ========================================

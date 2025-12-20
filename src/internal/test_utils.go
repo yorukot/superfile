@@ -45,7 +45,7 @@ func setupPanelModeAndSelection(t *testing.T, m *model, useSelectMode bool, item
 
 	if useSelectMode {
 		// Switch to select mode and set selected items
-		m.getFocusedFilePanel().changeFilePanelMode()
+		m.getFocusedFilePanel().ChangeFilePanelMode()
 		require.Equal(t, selectMode, panel.PanelMode)
 		panel.Selected = selectedItems
 	} else {

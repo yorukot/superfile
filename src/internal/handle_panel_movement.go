@@ -18,7 +18,7 @@ import (
 
 // Back to parent directory
 func (m *model) parentDirectory() {
-	err := m.getFocusedFilePanel().parentDirectory()
+	err := m.getFocusedFilePanel().ParentDirectory()
 	if err != nil {
 		slog.Error("Error while changing to parent directory", "error", err)
 	}
@@ -32,7 +32,7 @@ func (m *model) enterPanel() {
 	if len(panel.Element) == 0 {
 		return
 	}
-	selectedItem := panel.getSelectedItem()
+	selectedItem := panel.GetSelectedItem()
 	if selectedItem.Directory {
 		targetPath := selectedItem.Location
 

@@ -154,7 +154,7 @@ func (m *model) getFilePreviewCmd(forcePreviewRender bool) tea.Cmd {
 		m.fileModel.filePreview.SetContentWithRenderText("")
 		return nil
 	}
-	selectedItem := m.getFocusedFilePanel().getSelectedItem()
+	selectedItem := m.getFocusedFilePanel().GetSelectedItem()
 	if m.fileModel.filePreview.GetLocation() == selectedItem.Location && !forcePreviewRender {
 		return nil
 	}
@@ -186,7 +186,7 @@ func (m *model) getMetadataCmd() tea.Cmd {
 		m.fileMetaData.SetBlank()
 		return nil
 	}
-	selectedItem := m.getFocusedFilePanel().getSelectedItem()
+	selectedItem := m.getFocusedFilePanel().GetSelectedItem()
 
 	// Note : This will cause metadata not being refreshed when you are not scrolling,
 	// or filepanel is not getting updated. Its not a big problem as we repeatedly refresh filepanel
@@ -285,7 +285,7 @@ func (m *model) setHeightValues(height int) {
 	m.mainPanelHeight = height - common.BorderPadding - utils.FullFooterHeight(m.footerHeight, m.toggleFooter)
 
 	for index := range m.fileModel.filePanels {
-		m.fileModel.filePanels[index].handleResize(m.mainPanelHeight)
+		m.fileModel.filePanels[index].HandleResize(m.mainPanelHeight)
 	}
 }
 
@@ -523,7 +523,7 @@ func (m *model) createNewFilePanelRelativeToCurrent(path string) error {
 // simulates a 'cd' action
 func (m *model) updateCurrentFilePanelDir(path string) error {
 	panel := m.getFocusedFilePanel()
-	err := panel.updateCurrentFilePanelDir(path)
+	err := panel.UpdateCurrentFilePanelDir(path)
 	if err == nil {
 		// Track the directory change with zoxide
 		m.trackDirectoryWithZoxide(panel.Location)
@@ -715,7 +715,7 @@ func (m *model) getFilePanelItems() {
 			}
 		}
 		// Due to applyTargetFileCursor, cursor might go out of range
-		filePanel.scrollToCursor(m.mainPanelHeight)
+		filePanel.ScrollToCursor(m.mainPanelHeight)
 	}
 
 	m.updatedToggleDotFile = false
@@ -730,7 +730,7 @@ func (m *model) shouldSkipPanelUpdate(filePanel *FilePanel, focusPanel *FilePane
 		}
 	}
 
-	focusPanelReRender := focusPanel.needsReRender()
+	focusPanelReRender := focusPanel.NeedsReRender()
 	reRenderTime := int(float64(len(filePanel.Element)) / common.ReRenderChunkDivisor)
 	if filePanel.IsFocused && !focusPanelReRender &&
 		nowTime.Sub(filePanel.LastTimeGetElement) < time.Duration(reRenderTime)*time.Second {

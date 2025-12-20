@@ -8,19 +8,19 @@ import (
 	"github.com/yorukot/superfile/src/internal/utils"
 )
 
-func (panel *FilePanel) getSelectedItem() Element {
+func (panel *FilePanel) GetSelectedItem() Element {
 	if panel.Cursor < 0 || len(panel.Element) <= panel.Cursor {
 		return Element{}
 	}
 	return panel.Element[panel.Cursor]
 }
 
-func (panel *FilePanel) resetSelected() {
+func (panel *FilePanel) ResetSelected() {
 	panel.Selected = panel.Selected[:0]
 }
 
 // For modification. Make sure to do a nil check
-func (panel *FilePanel) getSelectedItemPtr() *Element {
+func (panel *FilePanel) GetSelectedItemPtr() *Element {
 	if panel.Cursor < 0 || len(panel.Element) <= panel.Cursor {
 		return nil
 	}
@@ -28,7 +28,7 @@ func (panel *FilePanel) getSelectedItemPtr() *Element {
 }
 
 // Note : This will soon be moved to its own package.
-func (panel *FilePanel) changeFilePanelMode() {
+func (panel *FilePanel) ChangeFilePanelMode() {
 	switch panel.PanelMode {
 	case selectMode:
 		panel.Selected = panel.Selected[:0]
@@ -41,7 +41,7 @@ func (panel *FilePanel) changeFilePanelMode() {
 }
 
 // This should be the function that is always called whenever we are updating a directory.
-func (panel *FilePanel) updateCurrentFilePanelDir(path string) error {
+func (panel *FilePanel) UpdateCurrentFilePanelDir(path string) error {
 	slog.Debug("updateCurrentFilePanelDir", "panel.location", panel.Location, "path", path)
 	// In case non Absolute path is passed, make sure to resolve it.
 	path = utils.ResolveAbsPath(panel.Location, path)
@@ -89,11 +89,11 @@ func (panel *FilePanel) updateCurrentFilePanelDir(path string) error {
 	return nil
 }
 
-func (panel *FilePanel) parentDirectory() error {
-	return panel.updateCurrentFilePanelDir("..")
+func (panel *FilePanel) ParentDirectory() error {
+	return panel.UpdateCurrentFilePanelDir("..")
 }
 
-func (panel *FilePanel) handleResize(height int) {
+func (panel *FilePanel) HandleResize(height int) {
 	// Min render cursor that keeps the cursor in view
 	minVisibleRenderCursor := panel.Cursor - panelElementHeight(height) + 1
 	// Max render cursor. This ensures all elements are rendered if there is space
@@ -108,7 +108,7 @@ func (panel *FilePanel) handleResize(height int) {
 }
 
 // Select the item where cursor located (only work on select mode)
-func (panel *FilePanel) singleItemSelect() {
+func (panel *FilePanel) SingleItemSelect() {
 	if len(panel.Element) > 0 && panel.Cursor >= 0 && panel.Cursor < len(panel.Element) {
 		elementLocation := panel.Element[panel.Cursor].Location
 

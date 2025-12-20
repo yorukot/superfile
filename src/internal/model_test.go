@@ -124,10 +124,10 @@ func TestInitialFilePathPositionsCursorWindow(t *testing.T) {
 	//	panelElementHeight(m.mainPanelHeight))
 	require.Len(t, m.fileModel.filePanels, 3)
 	assert.Equal(t, dir1, m.fileModel.filePanels[0].Location)
-	assert.Equal(t, file2, m.fileModel.filePanels[1].getSelectedItem().Location)
+	assert.Equal(t, file2, m.fileModel.filePanels[1].GetSelectedItem().Location)
 	assert.Equal(t, 2, m.fileModel.filePanels[1].Cursor)
 	assert.Equal(t, 0, m.fileModel.filePanels[1].RenderIndex)
-	assert.Equal(t, file7, m.fileModel.filePanels[2].getSelectedItem().Location)
+	assert.Equal(t, file7, m.fileModel.filePanels[2].GetSelectedItem().Location)
 	assert.Equal(t, 7, m.fileModel.filePanels[2].Cursor)
 	assert.Equal(t, 3, m.fileModel.filePanels[2].RenderIndex)
 }
