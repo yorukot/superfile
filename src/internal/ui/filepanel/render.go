@@ -17,30 +17,30 @@ import (
 func (panel *FilePanel) Render(mainPanelHeight int, filePanelWidth int, focussed bool) string {
 	r := ui.FilePanelRenderer(mainPanelHeight+common.BorderPadding, filePanelWidth+common.BorderPadding, focussed)
 
-	panel.RenderTopBar(r, filePanelWidth)
-	panel.RenderSearchBar(r)
-	panel.RenderFooter(r, uint(len(panel.Selected)))
-	panel.RenderFileEntries(r, mainPanelHeight, filePanelWidth)
+	panel.renderTopBar(r, filePanelWidth)
+	panel.renderSearchBar(r)
+	panel.renderFooter(r, uint(len(panel.Selected)))
+	panel.renderFileEntries(r, mainPanelHeight, filePanelWidth)
 
 	return r.Render()
 }
 
-func (panel *FilePanel) RenderTopBar(r *rendering.Renderer, filePanelWidth int) {
+func (panel *FilePanel) renderTopBar(r *rendering.Renderer, filePanelWidth int) {
 	// TODO - Add ansitruncate left in renderer and remove truncation here
 	truncatedPath := common.TruncateTextBeginning(panel.Location, filePanelWidth-common.InnerPadding, "...")
 	r.AddLines(common.FilePanelTopDirectoryIcon + common.FilePanelTopPathStyle.Render(truncatedPath))
 	r.AddSection()
 }
 
-func (panel *FilePanel) RenderSearchBar(r *rendering.Renderer) {
+func (panel *FilePanel) renderSearchBar(r *rendering.Renderer) {
 	r.AddLines(" " + panel.SearchBar.View())
 }
 
 // TODO : Unit test this
-func (panel *FilePanel) RenderFooter(r *rendering.Renderer, selectedCount uint) {
-	sortLabel, sortIcon := panel.GetSortInfo()
-	modeLabel, modeIcon := panel.GetPanelModeInfo(selectedCount)
-	cursorStr := panel.GetCursorString()
+func (panel *FilePanel) renderFooter(r *rendering.Renderer, selectedCount uint) {
+	sortLabel, sortIcon := panel.getSortInfo()
+	modeLabel, modeIcon := panel.getPanelModeInfo(selectedCount)
+	cursorStr := panel.getCursorString()
 
 	if common.Config.Nerdfont {
 		sortLabel = sortIcon + icon.Space + sortLabel
@@ -61,7 +61,7 @@ func (panel *FilePanel) RenderFooter(r *rendering.Renderer, selectedCount uint) 
 	}
 }
 
-func (panel *FilePanel) RenderFileEntries(r *rendering.Renderer, mainPanelHeight, filePanelWidth int) {
+func (panel *FilePanel) renderFileEntries(r *rendering.Renderer, mainPanelHeight, filePanelWidth int) {
 	if len(panel.Element) == 0 {
 		r.AddLines(common.FilePanelNoneText)
 		return
@@ -84,7 +84,7 @@ func (panel *FilePanel) RenderFileEntries(r *rendering.Renderer, mainPanelHeight
 			cursor = icon.Cursor
 		}
 
-		selectBox := panel.RenderSelectBox(isSelected)
+		selectBox := panel.renderSelectBox(isSelected)
 
 		// Calculate the actual prefix width for proper alignment
 		prefixWidth := lipgloss.Width(cursor+" ") + lipgloss.Width(selectBox)
@@ -103,7 +103,7 @@ func (panel *FilePanel) RenderFileEntries(r *rendering.Renderer, mainPanelHeight
 	}
 }
 
-func (panel *FilePanel) GetSortInfo() (string, string) {
+func (panel *FilePanel) getSortInfo() (string, string) {
 	opts := panel.SortOptions.Data
 	selected := opts.Options[opts.Selected]
 	label := selected
@@ -119,7 +119,7 @@ func (panel *FilePanel) GetSortInfo() (string, string) {
 	return label, iconStr
 }
 
-func (panel *FilePanel) GetPanelModeInfo(selectedCount uint) (string, string) {
+func (panel *FilePanel) getPanelModeInfo(selectedCount uint) (string, string) {
 	switch panel.PanelMode {
 	case BrowserMode:
 		return "Browser", icon.Browser
@@ -130,7 +130,7 @@ func (panel *FilePanel) GetPanelModeInfo(selectedCount uint) (string, string) {
 	}
 }
 
-func (panel *FilePanel) GetCursorString() string {
+func (panel *FilePanel) getCursorString() string {
 	cursor := panel.Cursor
 	if len(panel.Element) > 0 {
 		cursor++ // Convert to 1-based
@@ -138,7 +138,7 @@ func (panel *FilePanel) GetCursorString() string {
 	return fmt.Sprintf("%d/%d", cursor, len(panel.Element))
 }
 
-func (panel *FilePanel) RenderSelectBox(isSelected bool) string {
+func (panel *FilePanel) renderSelectBox(isSelected bool) string {
 	if !common.Config.ShowSelectIcons || !common.Config.Nerdfont || panel.PanelMode != SelectMode {
 		return ""
 	}
