@@ -59,11 +59,9 @@ func (m *model) Init() tea.Cmd {
 // Update function for bubble tea to provide internal communication to the
 // application
 func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	// TODO : We could check for m.modelQuitState and skip doing anything
-	// If its quitDone. But if we are at this state, its already bad, so we need
-	// to first figure out if its possible in testing, and fix it.
 	slog.Debug("model.Update() called", "msgType", reflect.TypeOf(msg))
-	var sidebarCmd, inputCmd, updateCmd, panelCmd, metadataCmd, filePreviewCmd tea.Cmd
+	var sidebarCmd, inputCmd, updateCmd, panelCmd,
+		metadataCmd, filePreviewCmd, resizeCmd tea.Cmd
 	gotModelUpdateMsg := false
 
 	sidebarCmd = m.sidebarModel.UpdateState(msg)
@@ -75,13 +73,9 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.helpMenu.searchBar, helpMenuCmd = m.helpMenu.searchBar.Update(msg)
 	}
 
-	forcePreviewRender := false
-
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		// Must re-render file preview on resize
-		m.handleWindowResize(msg)
-		forcePreviewRender = true
+		resizeCmd = m.handleWindowResize(msg)
 	case tea.MouseMsg:
 		m.handleMouseMsg(msg)
 	case tea.KeyMsg:
@@ -95,17 +89,12 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		gotModelUpdateMsg = true
 		updateCmd = msg.Apply(&m.zoxideModal)
 	case ModelUpdateMessage:
-		// TODO: Some of these updates messages should trigger filePanel state update
-		// For example a success message for delete operation
-		// But, we cant do that as of now, because if every opertion including metadata operation
-		// keeps triggering model update below, which will trigger another metadata fetch,
-		// we will be stuck in a loop.
 		slog.Debug("Got ModelUpdate message", "id", msg.GetReqID())
 		gotModelUpdateMsg = true
 		updateCmd = msg.ApplyToModel(m)
 
 	default:
-		slog.Debug("Message of type that is not handled")
+		slog.Debug("Message of type that is not explicitly handled")
 	}
 
 	// This is needed for blink, etc to work
@@ -117,10 +106,11 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// Ideally we might want to fetch only if the current file selected in filepanel changes
 	if !gotModelUpdateMsg {
 		metadataCmd = m.getMetadataCmd()
-		filePreviewCmd = m.getFilePreviewCmd(forcePreviewRender)
+		filePreviewCmd = m.getFilePreviewCmd(false)
 	}
 
-	return m, tea.Batch(sidebarCmd, helpMenuCmd, inputCmd, updateCmd, panelCmd, metadataCmd, filePreviewCmd)
+	return m, tea.Batch(sidebarCmd, helpMenuCmd, inputCmd, updateCmd,
+		panelCmd, metadataCmd, filePreviewCmd, resizeCmd)
 }
 
 func (m *model) handleMouseMsg(msg tea.MouseMsg) {
@@ -216,18 +206,45 @@ func (m *model) getMetadataCmd() tea.Cmd {
 }
 
 // Adjust window size based on msg information
-func (m *model) handleWindowResize(msg tea.WindowSizeMsg) {
+func (m *model) handleWindowResize(msg tea.WindowSizeMsg) tea.Cmd {
 	m.fullHeight = msg.Height
 	m.fullWidth = msg.Width
+	m.setHeightValues()
+	return m.updateComponentDimensions()
+}
 
-	m.setHeightValues(msg.Height)
+func (m *model) setHeightValues() {
+	//nolint: gocritic // This is to be separated out to a function, and made better later. No need to refactor here
+	if !m.toggleFooter {
+		m.footerHeight = 0
+	} else if m.fullHeight < common.HeightBreakA {
+		m.footerHeight = 6
+	} else if m.fullHeight < common.HeightBreakB {
+		m.footerHeight = 7
+	} else if m.fullHeight < common.HeightBreakC {
+		m.footerHeight = 8
+	} else if m.fullHeight < common.HeightBreakD {
+		m.footerHeight = 9
+	} else {
+		m.footerHeight = 10
+	}
+	// TODO : Make it grow even more for bigger screen sizes.
+	// TODO : Calculate the value , instead of manually hard coding it.
 
+	// Main panel height = Total terminal height- 2(file panel border) - footer height
+	m.mainPanelHeight = m.fullHeight - common.BorderPadding - utils.FullFooterHeight(m.footerHeight, m.toggleFooter)
+}
+
+func (m *model) updateComponentDimensions() tea.Cmd {
+	for index := range m.fileModel.filePanels {
+		m.fileModel.filePanels[index].HandleResize(m.mainPanelHeight)
+	}
 	if m.fileModel.filePreview.IsOpen() {
 		// File preview panel width same as file panel
 		m.setFilePreviewPanelSize()
 	}
 
-	m.setFilePanelsSize(msg.Width)
+	m.setFilePanelsSize()
 	m.setHelpMenuSize()
 	m.setMetadataModelSize()
 	m.setProcessBarModelSize()
@@ -237,6 +254,15 @@ func (m *model) handleWindowResize(msg tea.WindowSizeMsg) {
 	if m.fileModel.maxFilePanel >= common.FilePanelMax {
 		m.fileModel.maxFilePanel = common.FilePanelMax
 	}
+
+	// File preview panel requires explicit height update, unlike sidebar/file panels
+	// which receive height as render parameters and update automatically on each frame
+	if m.fileModel.filePreview.IsOpen() {
+		m.setFilePreviewPanelSize()
+		// Force re-render of preview content with new dimensions
+		return m.getFilePreviewCmd(true)
+	}
+	return nil
 }
 
 func (m *model) setFilePreviewPanelSize() {
@@ -254,39 +280,14 @@ func (m *model) getFilePreviewWidth() int {
 }
 
 // Proper set panels size. Assure that panels do not overlap
-func (m *model) setFilePanelsSize(width int) {
+func (m *model) setFilePanelsSize() {
+	width := m.fullWidth
 	// set each file panel size and max file panel amount
 	m.fileModel.width = (width - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth() -
 		(common.InnerPadding + (len(m.fileModel.filePanels)-1)*common.BorderPadding)) / len(m.fileModel.filePanels)
 	m.fileModel.maxFilePanel = (width - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth()) / common.FilePanelWidthUnit
 	for i := range m.fileModel.filePanels {
 		m.fileModel.filePanels[i].SearchBar.Width = m.fileModel.width - common.InnerPadding
-	}
-}
-
-func (m *model) setHeightValues(height int) {
-	//nolint: gocritic // This is to be separated out to a function, and made better later. No need to refactor here
-	if !m.toggleFooter {
-		m.footerHeight = 0
-	} else if height < common.HeightBreakA {
-		m.footerHeight = 6
-	} else if height < common.HeightBreakB {
-		m.footerHeight = 7
-	} else if height < common.HeightBreakC {
-		m.footerHeight = 8
-	} else if height < common.HeightBreakD {
-		m.footerHeight = 9
-	} else {
-		m.footerHeight = 10
-	}
-	// TODO : Make it grow even more for bigger screen sizes.
-	// TODO : Calculate the value , instead of manually hard coding it.
-
-	// Main panel height = Total terminal height- 2(file panel border) - footer height
-	m.mainPanelHeight = height - common.BorderPadding - utils.FullFooterHeight(m.footerHeight, m.toggleFooter)
-
-	for index := range m.fileModel.filePanels {
-		m.fileModel.filePanels[index].HandleResize(m.mainPanelHeight)
 	}
 }
 
