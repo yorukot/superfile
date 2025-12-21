@@ -540,7 +540,7 @@ func TestApplyTargetFileCursor(t *testing.T) {
 	panel.applyTargetFileCursor(height)
 	assert.Equal(t, expCursor, panel.Cursor)
 	assert.Equal(t, expRender, panel.RenderIndex)
-	assert.Equal(t, "", panel.TargetFile)
+	assert.Empty(t, panel.TargetFile)
 
 	// Shouldn't do anything
 	panel.applyTargetFileCursor(height)
