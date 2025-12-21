@@ -70,7 +70,7 @@ type ConfigType struct {
 	// The table (map) for editor by file extension
 	OpenWith map[string]string `toml:"open_with" comment:"\nCustom open commands by file extension."`
 
-	FastMovementFactor int `toml:"fast_movement_factor" comment:"\nNumber of entires per fast scroll"`
+	FastMovementFactor int `toml:"fast_movement_factor" comment:"\nNumber of entries per fast scroll"`
 
 	AutoCheckUpdate        bool   `toml:"auto_check_update" comment:"\nAuto check for update"`
 	CdOnQuit               bool   `toml:"cd_on_quit" comment:"\nCd on quit (For more details, please check out https://superfile.dev/configure/superfile-config/#cd_on_quit)"`
