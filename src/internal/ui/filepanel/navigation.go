@@ -1,5 +1,9 @@
 package filepanel
 
+import (
+	"github.com/yorukot/superfile/src/internal/common"
+)
+
 func (m *Model) scrollToCursor(cursor int, mainPanelHeight int) {
 	if cursor < 0 || cursor >= m.ElemCount() {
 		return
@@ -38,11 +42,21 @@ func (m *Model) ListDown(mainPanelHeight int) {
 }
 
 func (m *Model) PgUp(mainPanelHeight int) {
-	m.moveCursorBy(-panelElementHeight(mainPanelHeight), mainPanelHeight)
+	scrollSize := common.Config.PageScrollSize
+	if scrollSize <= 0 {
+		// Use default full page behavior
+		scrollSize = panelElementHeight(mainPanelHeight)
+	}
+	m.moveCursorBy(-scrollSize, mainPanelHeight)
 }
 
 func (m *Model) PgDown(mainPanelHeight int) {
-	m.moveCursorBy(panelElementHeight(mainPanelHeight), mainPanelHeight)
+	scrollSize := common.Config.PageScrollSize
+	if scrollSize <= 0 {
+		// Use default full page behavior
+		scrollSize = panelElementHeight(mainPanelHeight)
+	}
+	m.moveCursorBy(scrollSize, mainPanelHeight)
 }
 
 // Handles the action of selecting an item in the file panel upwards. (only work on select mode)
