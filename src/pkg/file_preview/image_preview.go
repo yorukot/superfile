@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/termenv"
 	_ "golang.org/x/image/webp" // Register WebP decoder
 )
@@ -107,14 +108,14 @@ func ConvertImageToANSI(img image.Image, defaultBGColor color.Color) string {
 
 // ImagePreview generates a preview of an image file
 func (p *ImagePreviewer) ImagePreview(path string, maxWidth int, maxHeight int,
-	defaultBGColor string, sideAreaWidth int) (string, error, ImageRenderer) {
+	defaultBGColor string, sideAreaWidth int, filePreviewStyle lipgloss.Style) (string, error) {
 	// Validate dimensions
 	if maxWidth <= 0 || maxHeight <= 0 {
 		return "", fmt.Errorf(
 			"dimensions must be positive (maxWidth=%d, maxHeight=%d)",
 			maxWidth,
 			maxHeight,
-		), RendererANSI
+		)
 	}
 
 	// Create dimensions string for cache key
@@ -124,7 +125,7 @@ func (p *ImagePreviewer) ImagePreview(path string, maxWidth int, maxHeight int,
 	if p.IsKittyCapable() {
 		// Check cache for Kitty renderer
 		if preview, found := p.cache.Get(path, dimensions, RendererKitty); found {
-			return preview, nil, RendererKitty
+			return preview, nil
 		}
 
 		preview, err := p.ImagePreviewWithRenderer(
@@ -134,11 +135,12 @@ func (p *ImagePreviewer) ImagePreview(path string, maxWidth int, maxHeight int,
 			defaultBGColor,
 			RendererKitty,
 			sideAreaWidth,
+			filePreviewStyle,
 		)
 		if err == nil {
 			// Cache the successful result
 			p.cache.Set(path, dimensions, preview, RendererKitty)
-			return preview, nil, RendererKitty
+			return preview, nil
 		}
 
 		// Fall through to next renderer if Kitty fails
@@ -149,7 +151,7 @@ func (p *ImagePreviewer) ImagePreview(path string, maxWidth int, maxHeight int,
 	if p.IsInlineCapable() {
 		// Check cache for Inline renderer
 		if preview, found := p.cache.Get(path, dimensions, RendererInline); found {
-			return preview, nil, RendererInline
+			return preview, nil
 		}
 
 		preview, err := p.ImagePreviewWithRenderer(
@@ -159,11 +161,12 @@ func (p *ImagePreviewer) ImagePreview(path string, maxWidth int, maxHeight int,
 			defaultBGColor,
 			RendererInline,
 			sideAreaWidth,
+			filePreviewStyle,
 		)
 		if err == nil {
 			// Cache the successful result
 			p.cache.Set(path, dimensions, preview, RendererInline)
-			return preview, nil, RendererInline
+			return preview, nil
 		}
 
 		// Fall through to ANSI if Inline fails
@@ -172,21 +175,29 @@ func (p *ImagePreviewer) ImagePreview(path string, maxWidth int, maxHeight int,
 
 	// Check cache for ANSI renderer
 	if preview, found := p.cache.Get(path, dimensions, RendererANSI); found {
-		return preview, nil, RendererANSI
+		return preview, nil
 	}
 
 	// Fall back to ANSI
-	preview, err := p.ImagePreviewWithRenderer(path, maxWidth, maxHeight, defaultBGColor, RendererANSI, sideAreaWidth)
+	preview, err := p.ImagePreviewWithRenderer(
+		path,
+		maxWidth,
+		maxHeight,
+		defaultBGColor,
+		RendererANSI,
+		sideAreaWidth,
+		filePreviewStyle,
+	)
 	if err == nil {
 		// Cache the successful result
 		p.cache.Set(path, dimensions, preview, RendererANSI)
 	}
-	return preview, err, RendererANSI
+	return preview, err
 }
 
 // ImagePreviewWithRenderer generates an image preview using the specified renderer
 func (p *ImagePreviewer) ImagePreviewWithRenderer(path string, maxWidth int, maxHeight int,
-	defaultBGColor string, renderer ImageRenderer, sideAreaWidth int) (string, error) {
+	defaultBGColor string, renderer ImageRenderer, sideAreaWidth int, filePreviewStyle lipgloss.Style) (string, error) {
 	info, err := os.Stat(path)
 	if err != nil {
 		return "", err
@@ -210,26 +221,26 @@ func (p *ImagePreviewer) ImagePreviewWithRenderer(path string, maxWidth int, max
 	switch renderer {
 	case RendererKitty:
 		result, err := p.renderWithKittyUsingTermCap(img, path, originalWidth,
-			originalHeight, maxWidth, maxHeight, sideAreaWidth)
+			originalHeight, maxWidth, maxHeight, sideAreaWidth, filePreviewStyle)
 		if err != nil {
 			// If kitty fails, fall back to ANSI renderer
 			slog.Error("Kitty renderer failed, falling back to ANSI", "error", err)
-			return p.ANSIRenderer(img, defaultBGColor, maxWidth, maxHeight)
+			return p.ANSIRenderer(img, defaultBGColor, maxWidth, maxHeight, filePreviewStyle)
 		}
 		return result, nil
 
 	case RendererInline:
 		result, err := p.renderWithInlineUsingTermCap(img, path, originalWidth,
-			originalHeight, maxWidth, maxHeight, sideAreaWidth)
+			originalHeight, maxWidth, maxHeight, sideAreaWidth, filePreviewStyle)
 		if err != nil {
 			// If inline fails, fall back to ANSI renderer
 			slog.Error("Inline renderer failed, falling back to ANSI", "error", err)
-			return p.ANSIRenderer(img, defaultBGColor, maxWidth, maxHeight)
+			return p.ANSIRenderer(img, defaultBGColor, maxWidth, maxHeight, filePreviewStyle)
 		}
 		return result, nil
 
 	case RendererANSI:
-		return p.ANSIRenderer(img, defaultBGColor, maxWidth, maxHeight)
+		return p.ANSIRenderer(img, defaultBGColor, maxWidth, maxHeight, filePreviewStyle)
 	default:
 		return "", fmt.Errorf("invalid renderer : %v", renderer)
 	}
@@ -237,7 +248,7 @@ func (p *ImagePreviewer) ImagePreviewWithRenderer(path string, maxWidth int, max
 
 // Convert image to ansi
 func (p *ImagePreviewer) ANSIRenderer(img image.Image, defaultBGColor string,
-	maxWidth int, maxHeight int) (string, error) {
+	maxWidth int, maxHeight int, filePreviewStyle lipgloss.Style) (string, error) {
 	bgColor, err := hexToColor(defaultBGColor)
 	if err != nil {
 		return "", fmt.Errorf("invalid background color: %w", err)
@@ -245,7 +256,11 @@ func (p *ImagePreviewer) ANSIRenderer(img image.Image, defaultBGColor string,
 
 	// For ANSI rendering, resize image appropriately
 	fittedImg := resizeForANSI(img, maxWidth, maxHeight)
-	return ConvertImageToANSI(fittedImg, bgColor), nil
+	res := ConvertImageToANSI(fittedImg, bgColor)
+
+	return filePreviewStyle.
+		AlignVertical(lipgloss.Center).
+		AlignHorizontal(lipgloss.Center).Render(res), nil
 }
 
 func hexToColor(hex string) (color.RGBA, error) {

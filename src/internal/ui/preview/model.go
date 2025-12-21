@@ -191,8 +191,8 @@ func (m *Model) renderImagePreview(filePreviewStyle lipgloss.Style, itemPath str
 	}
 
 	// Use the new auto-detection function to choose the best renderer
-	imageRender, err, renderedType := m.imagePreviewer.ImagePreview(itemPath, previewWidth, previewHeight,
-		common.Theme.FilePanelBG, sideAreaWidth)
+	imageRender, err := m.imagePreviewer.ImagePreview(itemPath, previewWidth, previewHeight,
+		common.Theme.FilePanelBG, sideAreaWidth, filePreviewStyle)
 	if errors.Is(err, image.ErrFormat) {
 		return filePreviewStyle.Render("\n --- " + icon.Error + " Unsupported image formats ---")
 	}
@@ -201,17 +201,13 @@ func (m *Model) renderImagePreview(filePreviewStyle lipgloss.Style, itemPath str
 		slog.Error("Error convert image to ansi", "error", err)
 		return filePreviewStyle.Render("\n --- " + icon.Error + " Error convert image to ansi ---")
 	}
+	return imageRender
 
 	// Check if this looks like Kitty protocol output (starts with escape sequences)
 	// For Kitty protocol, avoid using lipgloss alignment to prevent layout drift
-	if renderedType != filepreview.RendererANSI {
-		rendered := filePreviewStyle.Render(imageRender)
-		slog.Debug("[TEMP]", "final", rendered, "initial", imageRender)
-		return rendered
-	}
 
 	// For ANSI output, we can safely use vertical alignment
-	return filePreviewStyle.AlignVertical(lipgloss.Center).AlignHorizontal(lipgloss.Center).Render(imageRender)
+
 }
 
 func (m *Model) renderTextPreview(r *rendering.Renderer, filePreviewStyle lipgloss.Style, itemPath string,

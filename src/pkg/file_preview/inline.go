@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/BourgeoisBear/rasterm"
+	"github.com/charmbracelet/lipgloss"
 )
 
 // isInlineCapable checks if the terminal supports inline image protocol (iTerm2, WezTerm, etc.)
@@ -50,16 +51,17 @@ func isInlineCapable() bool {
 
 // ClearInlineImage clears all inline image protocol images from the terminal
 func (p *ImagePreviewer) ClearInlineImage() string {
-	if !p.IsInlineCapable() {
-		return "" // No need to clear if terminal doesn't support inline protocol
-	}
-
-	return strings.Repeat(" ", 9999)
+	return ""
 }
 
 // renderWithInlineUsingTermCap renders an image using inline image protocol
-func (p *ImagePreviewer) renderWithInlineUsingTermCap(img image.Image, path string,
-	originalWidth, originalHeight, maxWidth, maxHeight int, sideAreaWidth int) (string, error) {
+func (p *ImagePreviewer) renderWithInlineUsingTermCap(
+	img image.Image,
+	path string,
+	originalWidth, originalHeight, maxWidth, maxHeight int,
+	sideAreaWidth int,
+	filePreviewStyle lipgloss.Style,
+) (string, error) {
 	// Validate dimensions
 	if maxWidth <= 0 || maxHeight <= 0 {
 		return "", fmt.Errorf("dimensions must be positive (maxWidth=%d, maxHeight=%d)", maxWidth, maxHeight)
@@ -102,7 +104,7 @@ func (p *ImagePreviewer) renderWithInlineUsingTermCap(img image.Image, path stri
 
 	buf.WriteString("\x1b[1;" + strconv.Itoa(sideAreaWidth) + "H")
 
-	return buf.String(), nil
+	return filePreviewStyle.Render(buf.String()), nil
 }
 
 // IsInlineCapable checks if the terminal supports inline image protocol
