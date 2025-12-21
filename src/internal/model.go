@@ -236,14 +236,6 @@ func (m *model) setHeightValues() {
 }
 
 func (m *model) updateComponentDimensions() tea.Cmd {
-	for index := range m.fileModel.filePanels {
-		m.fileModel.filePanels[index].HandleResize(m.mainPanelHeight)
-	}
-	if m.fileModel.filePreview.IsOpen() {
-		// File preview panel width same as file panel
-		m.setFilePreviewPanelSize()
-	}
-
 	m.setFilePanelsSize()
 	m.setHelpMenuSize()
 	m.setMetadataModelSize()
@@ -288,6 +280,7 @@ func (m *model) setFilePanelsSize() {
 	m.fileModel.maxFilePanel = (width - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth()) / common.FilePanelWidthUnit
 	for i := range m.fileModel.filePanels {
 		m.fileModel.filePanels[i].SearchBar.Width = m.fileModel.width - common.InnerPadding
+		m.fileModel.filePanels[i].HandleResize(m.mainPanelHeight)
 	}
 }
 
