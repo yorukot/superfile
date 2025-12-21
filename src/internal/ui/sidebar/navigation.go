@@ -64,7 +64,7 @@ func (s *Model) FastUp(mainPanelHeight int) {
 	}
 	if s.cursor > n-1 {
 		// There are enough entries above, can safely decrease
-		s.cursor = s.cursor - n
+		s.cursor -= n
 	} else {
 		if s.cursor == 0 {
 			// We are at the top. Move to the bottom
@@ -93,7 +93,7 @@ func (s *Model) FastDown(mainPanelHeight int) {
 	}
 	if s.cursor < len(s.directories)-n-1 {
 		// There are enough entries below, can safely increase
-		s.cursor = s.cursor + n
+		s.cursor += n
 	} else {
 		if s.cursor == len(s.directories)-1 {
 			// We are at the bottom. Move to the top
