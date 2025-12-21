@@ -51,6 +51,10 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 		switch m.focusPanel {
 		case sidebarFocus:
 			m.sidebarModel.FastUp(m.mainPanelHeight)
+		case processBarFocus:
+			m.processBarModel.ListUp(m.footerHeight)
+		case metadataFocus:
+			m.fileMetaData.ListUp()
 		case nonePanelFocus:
 			m.fileModel.filePanels[m.filePanelFocusIndex].FastUp()
 		}
@@ -60,6 +64,10 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 		switch m.focusPanel {
 		case sidebarFocus:
 			m.sidebarModel.FastDown(m.mainPanelHeight)
+		case processBarFocus:
+			m.processBarModel.ListUp(m.footerHeight)
+		case metadataFocus:
+			m.fileMetaData.ListUp()
 		case nonePanelFocus:
 			m.fileModel.filePanels[m.filePanelFocusIndex].FastDown()
 		}
