@@ -148,16 +148,8 @@ func (m *model) toggleFooterController() tea.Cmd {
 	if err != nil {
 		slog.Error("Error while updating toggleFooter data", "error", err)
 	}
-	// TODO : Revisit this. Is this really need here, is this correct ?
-	m.setHeightValues(m.fullHeight)
-	// File preview panel requires explicit height update, unlike sidebar/file panels
-	// which receive height as render parameters and update automatically on each frame
-	if m.fileModel.filePreview.IsOpen() {
-		m.setFilePreviewPanelSize()
-		// Force re-render of preview content with new dimensions
-		return m.getFilePreviewCmd(true)
-	}
-	return nil
+	m.setHeightValues()
+	return m.updateComponentDimensions()
 }
 
 // Focus on search bar
