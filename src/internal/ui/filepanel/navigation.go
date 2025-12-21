@@ -59,7 +59,7 @@ func (m *Model) FastUp() {
 	n := common.Config.FastMovementFactor
 	if m.Cursor > n-1 {
 		// There are enough entries above, can safely decrease
-		m.Cursor = m.Cursor - n
+		m.Cursor -= n
 	} else {
 		// Not enough entries above, move to the top
 		m.Cursor = 0
@@ -70,7 +70,7 @@ func (m *Model) FastDown() {
 	n := common.Config.FastMovementFactor
 	if m.Cursor < len(m.Element)-n-1 {
 		// There are enough entries below, can safely increase
-		m.Cursor = m.Cursor + n
+		m.Cursor += n
 	} else {
 		// Not enough entries below, move to the bottom
 		m.Cursor = len(m.Element) - 1
