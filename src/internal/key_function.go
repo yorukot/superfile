@@ -47,6 +47,23 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 			m.fileModel.filePanels[m.filePanelFocusIndex].ListDown(m.mainPanelHeight)
 		}
 
+	case slices.Contains(common.Hotkeys.FastUp, msg):
+		switch m.focusPanel {
+		case sidebarFocus:
+			m.sidebarModel.FastUp(m.mainPanelHeight)
+		case nonePanelFocus:
+			m.fileModel.filePanels[m.filePanelFocusIndex].FastUp()
+		}
+
+		// If move down Key is pressed, check the current state and executes
+	case slices.Contains(common.Hotkeys.FastDown, msg):
+		switch m.focusPanel {
+		case sidebarFocus:
+			m.sidebarModel.FastDown(m.mainPanelHeight)
+		case nonePanelFocus:
+			m.fileModel.filePanels[m.filePanelFocusIndex].FastDown()
+		}
+
 	case slices.Contains(common.Hotkeys.PageUp, msg):
 		m.fileModel.filePanels[m.filePanelFocusIndex].PgUp(m.mainPanelHeight)
 

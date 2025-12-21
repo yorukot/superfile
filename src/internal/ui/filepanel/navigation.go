@@ -1,5 +1,9 @@
 package filepanel
 
+import (
+	"github.com/yorukot/superfile/src/internal/common"
+)
+
 func (m *Model) scrollToCursor(mainPanelHeight int) {
 	if m.Cursor < 0 || m.Cursor >= len(m.Element) {
 		m.Cursor = 0
@@ -48,6 +52,28 @@ func (m *Model) ListDown(mainPanelHeight int) {
 	} else {
 		m.RenderIndex = 0
 		m.Cursor = 0
+	}
+}
+
+func (m *Model) FastUp() {
+	n := common.Config.FastMovementFactor
+	if m.Cursor > n-1 {
+		// There are enough entries above, can safely decrease
+		m.Cursor = m.Cursor - n
+	} else {
+		// Not enough entries above, move to the top
+		m.Cursor = 0
+	}
+}
+
+func (m *Model) FastDown() {
+	n := common.Config.FastMovementFactor
+	if m.Cursor < len(m.Element)-n-1 {
+		// There are enough entries below, can safely increase
+		m.Cursor = m.Cursor + n
+	} else {
+		// Not enough entries below, move to the bottom
+		m.Cursor = len(m.Element) - 1
 	}
 }
 

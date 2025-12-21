@@ -19,6 +19,10 @@ editor = ""
 # 
 dir_editor = ""
 
+#-- Fast navigation margin
+#
+fast_movement_factor = 5
+
 #-- Auto check for update
 auto_check_update = true
 

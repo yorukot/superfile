@@ -2,6 +2,8 @@ package sidebar
 
 import (
 	"log/slog"
+
+	"github.com/yorukot/superfile/src/internal/common"
 )
 
 func (s *Model) ListUp(mainPanelHeight int) {
@@ -50,6 +52,64 @@ func (s *Model) ListDown(mainPanelHeight int) {
 	if s.directories[s.cursor].IsDivider() {
 		// cause another listDown trigger to move down.
 		s.ListDown(mainPanelHeight)
+	}
+}
+
+func (s *Model) FastUp(mainPanelHeight int) {
+	n := common.Config.FastMovementFactor
+	slog.Debug("controlListUp called", "cursor", s.cursor,
+		"renderIndex", s.renderIndex, "directory count", len(s.directories))
+	if s.NoActualDir() {
+		return
+	}
+	if s.cursor > n-1 {
+		// There are enough entries above, can safely decrease
+		s.cursor = s.cursor - n
+	} else {
+		if s.cursor == 0 {
+			// We are at the top. Move to the bottom
+			s.cursor = len(s.directories) - 1
+		} else {
+			// Not enough entries above, move to the top
+			s.cursor = 0
+		}
+	}
+	// We should update even if cursor is at divider for now
+	// Otherwise dividers are sometimes skipped in render in case of
+	// large pinned directories
+	s.updateRenderIndex(mainPanelHeight)
+	if s.directories[s.cursor].IsDivider() {
+		// cause another listUp trigger to move up.
+		s.ListUp(mainPanelHeight)
+	}
+}
+
+func (s *Model) FastDown(mainPanelHeight int) {
+	n := common.Config.FastMovementFactor
+	slog.Debug("controlListUp called", "cursor", s.cursor,
+		"renderIndex", s.renderIndex, "directory count", len(s.directories))
+	if s.NoActualDir() {
+		return
+	}
+	if s.cursor < len(s.directories)-n-1 {
+		// There are enough entries below, can safely increase
+		s.cursor = s.cursor + n
+	} else {
+		if s.cursor == len(s.directories)-1 {
+			// We are at the bottom. Move to the top
+			s.cursor = 0
+		} else {
+			// Not enough entries below, move to the bottom
+			s.cursor = len(s.directories) - 1
+		}
+	}
+	// We should update even if cursor is at divider for now
+	// Otherwise dividers are sometimes skipped in render in case of
+	// large pinned directories
+	s.updateRenderIndex(mainPanelHeight)
+	if s.directories[s.cursor].IsDivider() {
+		// cause another listUp trigger to move up.
+		s.ListUp(mainPanelHeight)
 	}
 }
 

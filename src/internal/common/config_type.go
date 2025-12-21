@@ -70,6 +70,8 @@ type ConfigType struct {
 	// The table (map) for editor by file extension
 	OpenWith map[string]string `toml:"open_with" comment:"\nCustom open commands by file extension."`
 
+	FastMovementFactor int `toml:"fast_movement_factor" comment:"\nNumber of entires per fast scroll"`
+
 	AutoCheckUpdate        bool   `toml:"auto_check_update" comment:"\nAuto check for update"`
 	CdOnQuit               bool   `toml:"cd_on_quit" comment:"\nCd on quit (For more details, please check out https://superfile.dev/configure/superfile-config/#cd_on_quit)"`
 	DefaultOpenFilePreview bool   `toml:"default_open_file_preview" comment:"\nWhether to open file preview automatically every time superfile is opened."`
@@ -123,6 +125,9 @@ type HotkeysType struct {
 	ListDown []string `toml:"list_down"`
 	PageUp   []string `toml:"page_up"`
 	PageDown []string `toml:"page_down"`
+	// fast movement
+	FastUp   []string `toml:"fast_up"`
+	FastDown []string `toml:"fast_down"`
 
 	CloseFilePanel         []string `toml:"close_file_panel" comment:"file panel control"`
 	CreateNewFilePanel     []string `toml:"create_new_file_panel"`
