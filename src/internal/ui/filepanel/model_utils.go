@@ -163,17 +163,7 @@ func (m *Model) ParentDirectory() error {
 }
 
 func (m *Model) HandleResize(height int) {
-	// Min render cursor that keeps the cursor in view
-	minVisibleRenderCursor := m.Cursor - panelElementHeight(height) + 1
-	// Max render cursor. This ensures all elements are rendered if there is space
-	maxRenderCursor := max(len(m.Element)-panelElementHeight(height), 0)
-
-	if m.RenderIndex > maxRenderCursor {
-		m.RenderIndex = maxRenderCursor
-	}
-	if m.RenderIndex < minVisibleRenderCursor {
-		m.RenderIndex = minVisibleRenderCursor
-	}
+	m.scrollToCursor(m.Cursor, height)
 }
 
 // Select the item where cursor located (only work on select mode)
@@ -222,11 +212,9 @@ func (m *Model) UpdateElementsIfNeeded(focusPanelReRender bool, toggleDotFile bo
 
 		// For hover to file on first time loading
 		if m.TargetFile != "" {
-			m.applyTargetFileCursor()
+			m.applyTargetFileCursor(mainPanelHeight)
 		}
 	}
-	// Due to applyTargetFileCursor, cursor might go out of range
-	m.scrollToCursor(mainPanelHeight)
 }
 
 // Retrieves elements for a panel based on search bar value and sort options.
@@ -288,4 +276,12 @@ func New(location string, sortOptions sortOptionsModel, focused bool, targetFile
 		SearchBar:        common.GenerateSearchBar(),
 		TargetFile:       targetFile,
 	}
+}
+
+func (m *Model) ElemCount() int {
+	return len(m.Element)
+}
+
+func (m *Model) Empty() bool {
+	return m.ElemCount() == 0
 }
