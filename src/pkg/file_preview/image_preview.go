@@ -110,7 +110,11 @@ func (p *ImagePreviewer) ImagePreview(path string, maxWidth int, maxHeight int,
 	defaultBGColor string, sideAreaWidth int) (string, error, ImageRenderer) {
 	// Validate dimensions
 	if maxWidth <= 0 || maxHeight <= 0 {
-		return "", fmt.Errorf("dimensions must be positive (maxWidth=%d, maxHeight=%d)", maxWidth, maxHeight), RendererANSI
+		return "", fmt.Errorf(
+			"dimensions must be positive (maxWidth=%d, maxHeight=%d)",
+			maxWidth,
+			maxHeight,
+		), RendererANSI
 	}
 
 	// Create dimensions string for cache key

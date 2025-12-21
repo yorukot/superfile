@@ -60,7 +60,6 @@ func (p *ImagePreviewer) ClearInlineImage() string {
 // renderWithInlineUsingTermCap renders an image using inline image protocol
 func (p *ImagePreviewer) renderWithInlineUsingTermCap(img image.Image, path string,
 	originalWidth, originalHeight, maxWidth, maxHeight int, sideAreaWidth int) (string, error) {
-
 	// Validate dimensions
 	if maxWidth <= 0 || maxHeight <= 0 {
 		return "", fmt.Errorf("dimensions must be positive (maxWidth=%d, maxHeight=%d)", maxWidth, maxHeight)

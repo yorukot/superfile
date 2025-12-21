@@ -36,7 +36,7 @@ func FilePanelBorderStyle(height int, width int, filePanelFocussed bool, borderB
 }
 
 // Generate filePreview Box
-func FilePreviewBox(height int, width int) lipgloss.Style {
+func FilePreviewStyle(height int, width int) lipgloss.Style {
 	return lipgloss.NewStyle().
 		Width(width).
 		Height(height).
