@@ -9,6 +9,8 @@ import (
 
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 
+	"github.com/yorukot/superfile/src/internal/ui/filepanel"
+
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
 	"github.com/yorukot/superfile/src/internal/ui/sidebar"
@@ -143,7 +145,7 @@ func printRuntimeInfo() {
 		"sys_bytes", memStats.Sys)
 	slog.Debug("Object sizes",
 		"model_size_bytes", reflect.TypeOf(model{}).Size(),
-		"filePanel_size_bytes", reflect.TypeOf(filePanel{}).Size(),
+		"filePanel_size_bytes", reflect.TypeOf(filepanel.Model{}).Size(),
 		"sidebarModel_size_bytes", reflect.TypeOf(sidebar.Model{}).Size(),
 		"renderer_size_bytes", reflect.TypeOf(rendering.Renderer{}).Size(),
 		"borderConfig_size_bytes", reflect.TypeOf(rendering.BorderConfig{}).Size(),

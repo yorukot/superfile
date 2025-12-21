@@ -12,6 +12,7 @@ const (
 	WheelRunTime          = 5
 	DefaultCommandTimeout = 5000 * time.Millisecond
 	DateModifiedOption    = "Date Modified"
+	InvalidTypeString     = "InvalidType"
 )
 
 const (

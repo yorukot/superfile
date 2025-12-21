@@ -93,7 +93,7 @@ func TestBasic(t *testing.T) {
 		// 5 - clipboard is empty
 		// 6 - model's dimenstion
 
-		assert.Equal(t, dir1, m.getFocusedFilePanel().location)
+		assert.Equal(t, dir1, m.getFocusedFilePanel().Location)
 	})
 }
 
@@ -123,13 +123,13 @@ func TestInitialFilePathPositionsCursorWindow(t *testing.T) {
 	// t.Logf("Heights : %d [%d - [%d] %d]\n", m.fullHeight, m.footerHeight, m.mainPanelHeight,
 	//	panelElementHeight(m.mainPanelHeight))
 	require.Len(t, m.fileModel.filePanels, 3)
-	assert.Equal(t, dir1, m.fileModel.filePanels[0].location)
-	assert.Equal(t, file2, m.fileModel.filePanels[1].getSelectedItem().location)
-	assert.Equal(t, 2, m.fileModel.filePanels[1].cursor)
-	assert.Equal(t, 0, m.fileModel.filePanels[1].render)
-	assert.Equal(t, file7, m.fileModel.filePanels[2].getSelectedItem().location)
-	assert.Equal(t, 7, m.fileModel.filePanels[2].cursor)
-	assert.Equal(t, 3, m.fileModel.filePanels[2].render)
+	assert.Equal(t, dir1, m.fileModel.filePanels[0].Location)
+	assert.Equal(t, file2, m.fileModel.filePanels[1].GetSelectedItem().Location)
+	assert.Equal(t, 2, m.fileModel.filePanels[1].Cursor)
+	assert.Equal(t, 0, m.fileModel.filePanels[1].RenderIndex)
+	assert.Equal(t, file7, m.fileModel.filePanels[2].GetSelectedItem().Location)
+	assert.Equal(t, 7, m.fileModel.filePanels[2].Cursor)
+	assert.Equal(t, 3, m.fileModel.filePanels[2].RenderIndex)
 }
 
 func TestQuit(t *testing.T) {

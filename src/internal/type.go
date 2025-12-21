@@ -1,10 +1,9 @@
 package internal
 
 import (
-	"os"
-	"time"
-
 	zoxidelib "github.com/lazysegtree/go-zoxide"
+
+	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
@@ -18,18 +17,12 @@ import (
 	zoxideui "github.com/yorukot/superfile/src/internal/ui/zoxide"
 )
 
-// Type representing the mode of the panel
-type panelMode uint
-
 // Type representing the type of focused panel
 type focusPanelType int
 
 type hotkeyType int
 
 type modelQuitStateType int
-
-// TODO: Convert to integer enum
-type sortingKind string
 
 const (
 	globalType hotkeyType = iota
@@ -43,12 +36,6 @@ const (
 	processBarFocus
 	sidebarFocus
 	metadataFocus
-)
-
-// Constants for select mode or browser mode
-const (
-	selectMode panelMode = iota
-	browserMode
 )
 
 const (
@@ -145,63 +132,13 @@ type copyItems struct {
 /* FILE WINDOWS TYPE START*/
 // Model for file windows
 type fileModel struct {
-	filePanels   []filePanel
+	filePanels   []filepanel.Model
 	width        int
 	renaming     bool
 	maxFilePanel int
 	filePreview  preview.Model
 }
 
-// Panel representing a file
-type filePanel struct {
-	cursor             int
-	render             int
-	isFocused          bool
-	location           string
-	sortOptions        sortOptionsModel
-	panelMode          panelMode
-	selected           []string
-	element            []element
-	directoryRecords   map[string]directoryRecord
-	rename             textinput.Model
-	renaming           bool
-	searchBar          textinput.Model
-	lastTimeGetElement time.Time
-	targetFile         string // filename to position cursor on after load
-}
-
-// Sort options
-type sortOptionsModel struct {
-	width  int
-	height int
-	open   bool
-	cursor int
-	data   sortOptionsModelData
-}
-
-type sortOptionsModelData struct {
-	options  []string
-	selected int
-	reversed bool
-}
-
-// Record for directory navigation
-type directoryRecord struct {
-	directoryCursor int
-	directoryRender int
-}
-
-// Element within a file panel
-type element struct {
-	name      string
-	location  string
-	directory bool
-	metaData  [][2]string
-	info      os.FileInfo
-}
-
 /* FILE WINDOWS TYPE END*/
 
 type editorFinishedMsg struct{ err error }
-
-type sliceOrderFunc func(i, j int) bool

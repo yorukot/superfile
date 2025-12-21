@@ -62,7 +62,7 @@ func NewDeleteOperationMsg(state processbar.ProcessState, reqID int) DeleteOpera
 
 func (msg DeleteOperationMsg) ApplyToModel(m *model) tea.Cmd {
 	// Remove selection
-	m.getFocusedFilePanel().resetSelected()
+	m.getFocusedFilePanel().ResetSelected()
 	return nil
 }
 
@@ -134,17 +134,17 @@ func NewMetadataMsg(meta metadata.Metadata, reqID int) MetadataMsg {
 }
 
 func (msg MetadataMsg) ApplyToModel(m *model) tea.Cmd {
-	selectedItem := m.getFocusedFilePanel().getSelectedItemPtr()
+	selectedItem := m.getFocusedFilePanel().GetSelectedItemPtr()
 	if selectedItem == nil {
 		slog.Debug("Panel empty or cursor invalid. Ignoring MetadataMsg")
 		return nil
 	}
-	if selectedItem.location != msg.meta.GetPath() {
+	if selectedItem.Location != msg.meta.GetPath() {
 		slog.Debug("MetadataMsg for older files. Ignoring")
 		return nil
 	}
 	m.fileMetaData.SetMetadata(msg.meta)
-	selectedItem.metaData = msg.meta.GetData()
+	selectedItem.MetaData = msg.meta.GetData()
 	return nil
 }
 
@@ -186,12 +186,12 @@ func NewFilePreviewUpdateMsg(location string, content string, reqID int) FilePre
 }
 
 func (msg FilePreviewUpdateMsg) ApplyToModel(m *model) tea.Cmd {
-	selectedItem := m.getFocusedFilePanel().getSelectedItemPtr()
+	selectedItem := m.getFocusedFilePanel().GetSelectedItemPtr()
 	if selectedItem == nil {
 		slog.Debug("Panel empty or cursor invalid. Ignoring FilePreviewUpdateMsg")
 		return nil
 	}
-	if selectedItem.location != msg.location {
+	if selectedItem.Location != msg.location {
 		slog.Debug("FilePreviewUpdateMsg for older files. Ignoring")
 		return nil
 	}
