@@ -67,8 +67,6 @@ func (p *ImagePreviewer) renderWithInlineUsingTermCap(
 		return "", fmt.Errorf("dimensions must be positive (maxWidth=%d, maxHeight=%d)", maxWidth, maxHeight)
 	}
 
-	var buf bytes.Buffer
-
 	slog.Debug("inline renderer starting", "path", path, "maxWidth", maxWidth, "maxHeight", maxHeight)
 
 	// Calculate display dimensions in character cells
@@ -97,14 +95,26 @@ func (p *ImagePreviewer) renderWithInlineUsingTermCap(
 
 	slog.Debug("inline display dimensions", "widthCells", displayWidthCells, "heightCells", displayHeightCells)
 
+	var buf bytes.Buffer
+	line := strings.Repeat("-", maxWidth)
+	block := strings.Repeat(line+"\n", maxHeight-1) + line
+	//block := strings.Repeat("------------------\n", 10)
+	buf.WriteString(filePreviewStyle.Render(block))
+	buf.WriteString("\x1b[s")
+	buf.WriteString("\x1b[1;" + strconv.Itoa(sideAreaWidth) + "H")
+	opts := rasterm.ItermImgOpts{
+		Width:             strconv.FormatInt(int64(displayWidthCells), 10),
+		Height:            strconv.FormatInt(int64(displayHeightCells), 10),
+		IgnoreAspectRatio: true,
+		DisplayInline:     true,
+	}
 	// Use rasterm to write the image using iTerm2/WezTerm protocol
-	if err := rasterm.ItermWriteImage(&buf, img); err != nil {
+	if err := rasterm.ItermWriteImageWithOptions(&buf, img, opts); err != nil {
 		return "", fmt.Errorf("failed to write image using rasterm: %w", err)
 	}
-
-	buf.WriteString("\x1b[1;" + strconv.Itoa(sideAreaWidth) + "H")
-
-	return filePreviewStyle.Render(buf.String()), nil
+	buf.WriteString("\x1b[u")
+	slog.Debug("[TEMP]", "res", buf.String())
+	return buf.String(), nil
 }
 
 // IsInlineCapable checks if the terminal supports inline image protocol
