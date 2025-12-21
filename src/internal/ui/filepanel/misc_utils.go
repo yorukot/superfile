@@ -151,3 +151,12 @@ func removeElementByValue(slice []string, value string) []string {
 	}
 	return newSlice
 }
+
+func getScrollSize(mainPanelHeight int) int {
+	scrollSize := common.Config.PageScrollSize
+	if scrollSize <= 0 {
+		// Use default full page behavior
+		scrollSize = panelElementHeight(mainPanelHeight)
+	}
+	return scrollSize
+}

@@ -68,6 +68,10 @@ case_sensitive_sort = false
 # Whether to exit the shell on successful command execution.
 shell_close_on_success = false
 
+#-- Page Scroll Size
+# Number of lines to scroll for PgUp/PgDown keys (0: full page, default behavior).
+page_scroll_size = 0
+
 #-- Debug Mode
 debug = false
 
