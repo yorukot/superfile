@@ -206,6 +206,7 @@ func (m *Model) renderImagePreview(box lipgloss.Style, itemPath string, previewW
 	// For Kitty protocol, avoid using lipgloss alignment to prevent layout drift
 	if renderedType != filepreview.RendererANSI {
 		rendered := common.FilePreviewBox(previewHeight, previewWidth).Render(imageRender)
+		slog.Debug("[TEMP]", "final", rendered, "initial", imageRender)
 		return rendered
 	}
 

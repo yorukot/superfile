@@ -43,10 +43,10 @@ func isInlineCapable() bool {
 			isCapable = true
 		}
 	}
+	slog.Debug("[TEMP] ", "inlineCapabale", isCapable)
 
 	return isCapable
 }
-
 
 // ClearInlineImage clears all inline image protocol images from the terminal
 func (p *ImagePreviewer) ClearInlineImage() string {

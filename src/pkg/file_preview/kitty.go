@@ -40,6 +40,8 @@ func isKittyCapable() bool {
 		}
 	}
 
+	slog.Debug("[TEMP] ", "kittyCapabale", isCapable)
+
 	return isCapable
 }
 
