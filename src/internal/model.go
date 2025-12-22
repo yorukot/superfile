@@ -256,9 +256,7 @@ func (m *model) updateComponentDimensions() tea.Cmd {
 	// which receive height as render parameters and update automatically on each frame
 	// Force re-render of preview content with new dimensions
 	return m.getFilePreviewCmd(true)
-
 }
-
 
 // Set help menu size
 func (m *model) setHelpMenuSize() {

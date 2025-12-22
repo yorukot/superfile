@@ -31,7 +31,10 @@ func (m *model) setFileModelDimensions() {
 		(common.InnerPadding + (len(m.fileModel.filePanels)-1)*common.BorderPadding)) / len(m.fileModel.filePanels)
 	m.fileModel.maxFilePanel = (width - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth()) / common.FilePanelWidthUnit
 	for i := range m.fileModel.filePanels {
-		m.fileModel.filePanels[i].UpdateDimensions(m.fileModel.width+common.BorderPadding, m.mainPanelHeight+common.BorderPadding)
+		m.fileModel.filePanels[i].UpdateDimensions(
+			m.fileModel.width+common.BorderPadding,
+			m.mainPanelHeight+common.BorderPadding,
+		)
 	}
 	if m.fileModel.maxFilePanel >= common.FilePanelMax {
 		m.fileModel.maxFilePanel = common.FilePanelMax
