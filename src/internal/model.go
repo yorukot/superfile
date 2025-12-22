@@ -258,6 +258,11 @@ func (m *model) updateComponentDimensions() tea.Cmd {
 	return m.getFilePreviewCmd(true)
 }
 
+func (m *model) setFileModelDimensions() {
+	m.fileModel.SetWidth(m.fullWidth - common.Config.SidebarWidth)
+	m.fileModel.SetHeight(m.mainPanelHeight + common.BorderPadding)
+}
+
 // Set help menu size
 func (m *model) setHelpMenuSize() {
 	m.helpMenu.height = m.fullHeight - common.BorderPadding
@@ -481,12 +486,12 @@ func (m *model) applyShellCommandAction(shellCommand string) {
 }
 
 func (m *model) splitPanel() error {
-	return m.createNewFilePanel(m.getFocusedFilePanel().Location)
+	return m.fileModel.CreateNewFilePanel(m.getFocusedFilePanel().Location)
 }
 
 func (m *model) createNewFilePanelRelativeToCurrent(path string) error {
 	currentDir := m.getFocusedFilePanel().Location
-	return m.createNewFilePanel(utils.ResolveAbsPath(currentDir, path))
+	return m.fileModel.CreateNewFilePanel(utils.ResolveAbsPath(currentDir, path))
 }
 
 // simulates a 'cd' action

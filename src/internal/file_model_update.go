@@ -8,7 +8,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 )
 
-func (m *FileModel) createNewFilePanel(location string) error {
+func (m *FileModel) CreateNewFilePanel(location string) error {
 	if m.PanelCount() >= m.MaxFilePanel {
 		return ErrMaximumPanelCount
 	}

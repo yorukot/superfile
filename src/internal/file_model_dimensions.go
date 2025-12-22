@@ -59,8 +59,3 @@ func (m *FileModel) UpdateChildComponentWidth() {
 	m.SinglePanelWidth = panelWidth
 	m.MaxFilePanel = widthForPanels / filepanel.FilePanelMinWidth
 }
-
-func (m *model) setFileModelDimensions() {
-	m.fileModel.SetWidth(m.fullWidth - common.Config.SidebarWidth)
-	m.fileModel.SetHeight(m.mainPanelHeight + common.BorderPadding)
-}

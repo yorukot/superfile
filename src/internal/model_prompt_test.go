@@ -191,7 +191,7 @@ func testPanelOperations(t *testing.T, dir1, dir2, curTestDir string) {
 		assert.True(t, m.promptModal.LastActionSucceeded(), "open using absolute path should work")
 		assert.Equal(t, dir2, m.getFocusedFilePanel().Location)
 
-		m.closeFilePanel()
+		m.fileModel.CloseFilePanel()
 		assert.Len(t, m.fileModel.FilePanels, orgCnt)
 		assert.Equal(t, dir1, m.getFocusedFilePanel().Location)
 
@@ -200,14 +200,14 @@ func testPanelOperations(t *testing.T, dir1, dir2, curTestDir string) {
 		assert.True(t, m.promptModal.LastActionSucceeded(), "open using relative path should work")
 		assert.Equal(t, dir2, m.getFocusedFilePanel().Location)
 
-		m.closeFilePanel()
+		m.fileModel.CloseFilePanel()
 
 		TeaUpdate(m, utils.TeaRuneKeyMsg(prompt.OpenCommand+" ~"))
 		TeaUpdate(m, tea.KeyMsg{Type: tea.KeyEnter})
 		assert.True(t, m.promptModal.LastActionSucceeded(), "open using tilde should work")
 		assert.Equal(t, xdg.Home, m.getFocusedFilePanel().Location)
 
-		m.closeFilePanel()
+		m.fileModel.CloseFilePanel()
 
 		userHomeEnv := "HOME"
 		if runtime.GOOS == utils.OsWindows {
@@ -218,7 +218,7 @@ func testPanelOperations(t *testing.T, dir1, dir2, curTestDir string) {
 		assert.True(t, m.promptModal.LastActionSucceeded(), "open using variable substitution should work")
 		assert.Equal(t, xdg.Home, m.getFocusedFilePanel().Location)
 
-		m.closeFilePanel()
+		m.fileModel.CloseFilePanel()
 
 		// Note : resolving shell subsitution is flaky in windows.
 		TeaUpdate(m, utils.TeaRuneKeyMsg(prompt.OpenCommand+" $(echo \"~\")"))
@@ -226,7 +226,7 @@ func testPanelOperations(t *testing.T, dir1, dir2, curTestDir string) {
 		assert.True(t, m.promptModal.LastActionSucceeded(), "open using command substitution should work")
 		assert.Equal(t, xdg.Home, m.getFocusedFilePanel().Location)
 
-		m.closeFilePanel()
+		m.fileModel.CloseFilePanel()
 
 		TeaUpdate(m, utils.TeaRuneKeyMsg(prompt.OpenCommand+" non_existing_dir"))
 		TeaUpdate(m, tea.KeyMsg{Type: tea.KeyEnter})
@@ -336,7 +336,7 @@ func testDirectoryHandlingWithQuotes(t *testing.T, curTestDir, dir1 string) {
 			assert.True(t, m.promptModal.LastActionSucceeded(), "open with double quotes should work")
 			assert.Equal(t, dirWithSpaces, m.getFocusedFilePanel().Location)
 
-			m.closeFilePanel()
+			m.fileModel.CloseFilePanel()
 		})
 
 		t.Run("cd with quoted environment variable", func(t *testing.T) {
