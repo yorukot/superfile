@@ -53,7 +53,7 @@ const (
 // new model in each tea update.
 type model struct {
 	// Main Panels
-	fileModel       fileModel
+	fileModel       FileModel
 	sidebarModel    sidebar.Model
 	processBarModel processbar.Model
 	focusPanel      focusPanelType
@@ -131,12 +131,13 @@ type copyItems struct {
 
 /* FILE WINDOWS TYPE START*/
 // Model for file windows
-type fileModel struct {
-	filePanels   []filepanel.Model
-	width        int
-	renaming     bool
-	maxFilePanel int
-	filePreview  preview.Model
+type FileModel struct {
+	FilePanels   []filepanel.Model
+	Width        int
+	Height       int
+	Renaming     bool
+	MaxFilePanel int
+	FilePreview  preview.Model
 }
 
 /* FILE WINDOWS TYPE END*/

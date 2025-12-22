@@ -21,15 +21,15 @@ import (
 
 func (m *model) sidebarRender() string {
 	return m.sidebarModel.Render(m.mainPanelHeight, m.focusPanel == sidebarFocus,
-		m.fileModel.filePanels[m.filePanelFocusIndex].Location)
+		m.fileModel.FilePanels[m.filePanelFocusIndex].Location)
 }
 
 // This also modifies the m.fileModel.filePanels, which it should not
 // what modifications we do on this model object are of no consequence.
 // Since bubblea passed this 'model' by value in View() function.
 func (m *model) filePanelRender() string {
-	f := make([]string, len(m.fileModel.filePanels))
-	for i, filePanel := range m.fileModel.filePanels {
+	f := make([]string, len(m.fileModel.FilePanels))
+	for i, filePanel := range m.fileModel.FilePanels {
 		// check if cursor or render out of range
 		// TODO - instead of this, have a filepanel.validateAndFix(), and log Error
 		// This should not ever happen
@@ -37,23 +37,23 @@ func (m *model) filePanelRender() string {
 			filePanel.Cursor = 0
 			filePanel.RenderIndex = 0
 		}
-		m.fileModel.filePanels[i] = filePanel
+		m.fileModel.FilePanels[i] = filePanel
 
 		// TODO : Move this to a utility function and clarify the calculation via comments
 		// Maybe even write unit tests
 		var filePanelWidth int
-		if (m.fullWidth-common.Config.SidebarWidth-(common.InnerPadding+(len(m.fileModel.filePanels)-1)*common.BorderPadding))%len(
-			m.fileModel.filePanels,
+		if (m.fullWidth-common.Config.SidebarWidth-(common.InnerPadding+(len(m.fileModel.FilePanels)-1)*common.BorderPadding))%len(
+			m.fileModel.FilePanels,
 		) != 0 &&
-			i == len(m.fileModel.filePanels)-1 {
-			if m.fileModel.filePreview.IsOpen() {
-				filePanelWidth = m.fileModel.width
+			i == len(m.fileModel.FilePanels)-1 {
+			if m.fileModel.FilePreview.IsOpen() {
+				filePanelWidth = m.fileModel.Width
 			} else {
-				filePanelWidth = (m.fileModel.width + (m.fullWidth-common.Config.SidebarWidth-
-					(common.InnerPadding+(len(m.fileModel.filePanels)-1)*common.BorderPadding))%len(m.fileModel.filePanels))
+				filePanelWidth = (m.fileModel.Width + (m.fullWidth-common.Config.SidebarWidth-
+					(common.InnerPadding+(len(m.fileModel.FilePanels)-1)*common.BorderPadding))%len(m.fileModel.FilePanels))
 			}
 		} else {
-			filePanelWidth = m.fileModel.width
+			filePanelWidth = m.fileModel.Width
 		}
 		filePanel.UpdateDimensions(filePanelWidth+common.BorderPadding, m.mainPanelHeight+common.BorderPadding)
 
@@ -126,7 +126,7 @@ func (m *model) terminalSizeWarnRender() string {
 
 func (m *model) terminalSizeWarnAfterFirstRender() string {
 	minimumWidthInt := common.Config.SidebarWidth + common.FilePanelWidthUnit*len(
-		m.fileModel.filePanels,
+		m.fileModel.FilePanels,
 	) + common.FilePanelWidthUnit - 1
 	minimumWidthString := strconv.Itoa(minimumWidthInt)
 	fullWidthString := strconv.Itoa(m.fullWidth)
@@ -306,7 +306,7 @@ func (m *model) getHelpMenuContent(r *rendering.Renderer, renderHotkeyLength int
 }
 
 func (m *model) sortOptionsRender() string {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := m.fileModel.FilePanels[m.filePanelFocusIndex]
 	sortOptionsContent := common.ModalTitleStyle.Render(" Sort Options") + "\n\n"
 	for i, option := range panel.SortOptions.Data.Options {
 		cursor := " "
@@ -323,5 +323,5 @@ func (m *model) sortOptionsRender() string {
 }
 
 func (m *model) filePreviewPanelRender() string {
-	return m.fileModel.filePreview.GetContent()
+	return m.fileModel.FilePreview.GetContent()
 }

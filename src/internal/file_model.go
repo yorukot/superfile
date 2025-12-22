@@ -14,30 +14,31 @@ import (
 func (m *model) getFilePreviewWidth() int {
 	if common.Config.FilePreviewWidth == 0 {
 		return (m.fullWidth - common.Config.SidebarWidth -
-			(common.InnerPadding + (len(m.fileModel.filePanels))*common.BorderPadding)) / (len(m.fileModel.filePanels) + 1)
+			(common.InnerPadding + (len(m.fileModel.FilePanels))*common.BorderPadding)) / (len(m.fileModel.FilePanels) + 1)
 	}
 	return (m.fullWidth - common.Config.SidebarWidth) / common.Config.FilePreviewWidth
 }
 
 // Proper set panels size. Assure that panels do not overlap
 func (m *model) setFileModelDimensions() {
+
 	width := m.fullWidth
-	if m.fileModel.filePreview.IsOpen() {
-		m.fileModel.filePreview.SetWidth(m.getFilePreviewWidth())
-		m.fileModel.filePreview.SetHeight(m.mainPanelHeight + common.BorderPadding)
+	if m.fileModel.FilePreview.IsOpen() {
+		m.fileModel.FilePreview.SetWidth(m.getFilePreviewWidth())
+		m.fileModel.FilePreview.SetHeight(m.mainPanelHeight + common.BorderPadding)
 	}
 	// set each file panel size and max file panel amount
-	m.fileModel.width = (width - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth() -
-		(common.InnerPadding + (len(m.fileModel.filePanels)-1)*common.BorderPadding)) / len(m.fileModel.filePanels)
-	m.fileModel.maxFilePanel = (width - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth()) / common.FilePanelWidthUnit
-	for i := range m.fileModel.filePanels {
-		m.fileModel.filePanels[i].UpdateDimensions(
-			m.fileModel.width+common.BorderPadding,
+	m.fileModel.Width = (width - common.Config.SidebarWidth - m.fileModel.FilePreview.GetWidth() -
+		(common.InnerPadding + (len(m.fileModel.FilePanels)-1)*common.BorderPadding)) / len(m.fileModel.FilePanels)
+	m.fileModel.MaxFilePanel = (width - common.Config.SidebarWidth - m.fileModel.FilePreview.GetWidth()) / common.FilePanelWidthUnit
+	for i := range m.fileModel.FilePanels {
+		m.fileModel.FilePanels[i].UpdateDimensions(
+			m.fileModel.Width+common.BorderPadding,
 			m.mainPanelHeight+common.BorderPadding,
 		)
 	}
-	if m.fileModel.maxFilePanel >= common.FilePanelMax {
-		m.fileModel.maxFilePanel = common.FilePanelMax
+	if m.fileModel.MaxFilePanel >= common.FilePanelMax {
+		m.fileModel.MaxFilePanel = common.FilePanelMax
 	}
 }
 
@@ -46,7 +47,7 @@ func (m *model) createNewFilePanel(location string) error {
 	// In case we have model width and height zero, maxFilePanel would be 0
 	// But we would have len() here as 1. Hence there would be discrepency here.
 	// Although this is not possible in actual usage, and can be only reproduced in tests.
-	if len(m.fileModel.filePanels) == m.fileModel.maxFilePanel {
+	if len(m.fileModel.FilePanels) == m.fileModel.MaxFilePanel {
 		// TODO : Define as a predefined error in errors.go
 		return errors.New("maximum panel count reached")
 	}
@@ -59,49 +60,49 @@ func (m *model) createNewFilePanel(location string) error {
 		return fmt.Errorf("cannot access location : %s", location)
 	}
 
-	m.fileModel.filePanels = append(m.fileModel.filePanels, filepanel.New(
+	m.fileModel.FilePanels = append(m.fileModel.FilePanels, filepanel.New(
 		location, m.getFocusedFilePanel().SortOptions, false, ""))
 
-	if m.fileModel.filePreview.IsOpen() {
+	if m.fileModel.FilePreview.IsOpen() {
 		// File preview panel width same as file panel
 		if common.Config.FilePreviewWidth == 0 {
-			m.fileModel.filePreview.SetWidth((m.fullWidth - common.Config.SidebarWidth -
-				(common.InnerPadding + (len(m.fileModel.filePanels))*common.BorderPadding)) / (len(m.fileModel.filePanels) + 1))
+			m.fileModel.FilePreview.SetWidth((m.fullWidth - common.Config.SidebarWidth -
+				(common.InnerPadding + (len(m.fileModel.FilePanels))*common.BorderPadding)) / (len(m.fileModel.FilePanels) + 1))
 		} else {
-			m.fileModel.filePreview.SetWidth((m.fullWidth - common.Config.SidebarWidth) / common.Config.FilePreviewWidth)
+			m.fileModel.FilePreview.SetWidth((m.fullWidth - common.Config.SidebarWidth) / common.Config.FilePreviewWidth)
 		}
 	}
 
-	m.fileModel.filePanels[m.filePanelFocusIndex].IsFocused = false
-	m.fileModel.filePanels[m.filePanelFocusIndex+1].IsFocused = returnFocusType(m.focusPanel)
-	m.fileModel.width = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth() -
-		(common.InnerPadding + (len(m.fileModel.filePanels)-1)*common.BorderPadding)) / len(m.fileModel.filePanels)
+	m.fileModel.FilePanels[m.filePanelFocusIndex].IsFocused = false
+	m.fileModel.FilePanels[m.filePanelFocusIndex+1].IsFocused = returnFocusType(m.focusPanel)
+	m.fileModel.Width = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.FilePreview.GetWidth() -
+		(common.InnerPadding + (len(m.fileModel.FilePanels)-1)*common.BorderPadding)) / len(m.fileModel.FilePanels)
 	m.filePanelFocusIndex++
 
-	m.fileModel.maxFilePanel = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth()) / common.FilePanelWidthUnit
+	m.fileModel.MaxFilePanel = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.FilePreview.GetWidth()) / common.FilePanelWidthUnit
 
-	for i := range m.fileModel.filePanels {
-		m.fileModel.filePanels[i].SearchBar.Width = m.fileModel.width - common.InnerPadding
+	for i := range m.fileModel.FilePanels {
+		m.fileModel.FilePanels[i].SearchBar.Width = m.fileModel.Width - common.InnerPadding
 	}
 	return nil
 }
 
 // Close current focus file panel
 func (m *model) closeFilePanel() {
-	if len(m.fileModel.filePanels) == 1 {
+	if len(m.fileModel.FilePanels) == 1 {
 		return
 	}
 
-	m.fileModel.filePanels = append(m.fileModel.filePanels[:m.filePanelFocusIndex],
-		m.fileModel.filePanels[m.filePanelFocusIndex+1:]...)
+	m.fileModel.FilePanels = append(m.fileModel.FilePanels[:m.filePanelFocusIndex],
+		m.fileModel.FilePanels[m.filePanelFocusIndex+1:]...)
 
-	if m.fileModel.filePreview.IsOpen() {
+	if m.fileModel.FilePreview.IsOpen() {
 		// File preview panel width same as file panel
 		if common.Config.FilePreviewWidth == 0 {
-			m.fileModel.filePreview.SetWidth((m.fullWidth - common.Config.SidebarWidth -
-				(common.InnerPadding + (len(m.fileModel.filePanels))*common.BorderPadding)) / (len(m.fileModel.filePanels) + 1))
+			m.fileModel.FilePreview.SetWidth((m.fullWidth - common.Config.SidebarWidth -
+				(common.InnerPadding + (len(m.fileModel.FilePanels))*common.BorderPadding)) / (len(m.fileModel.FilePanels) + 1))
 		} else {
-			m.fileModel.filePreview.SetWidth((m.fullWidth - common.Config.SidebarWidth) / common.Config.FilePreviewWidth)
+			m.fileModel.FilePreview.SetWidth((m.fullWidth - common.Config.SidebarWidth) / common.Config.FilePreviewWidth)
 		}
 	}
 
@@ -109,43 +110,43 @@ func (m *model) closeFilePanel() {
 		m.filePanelFocusIndex--
 	}
 
-	m.fileModel.width = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth() -
-		(common.InnerPadding + (len(m.fileModel.filePanels)-1)*common.BorderPadding)) / len(m.fileModel.filePanels)
-	m.fileModel.filePanels[m.filePanelFocusIndex].IsFocused = returnFocusType(m.focusPanel)
+	m.fileModel.Width = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.FilePreview.GetWidth() -
+		(common.InnerPadding + (len(m.fileModel.FilePanels)-1)*common.BorderPadding)) / len(m.fileModel.FilePanels)
+	m.fileModel.FilePanels[m.filePanelFocusIndex].IsFocused = returnFocusType(m.focusPanel)
 
-	m.fileModel.maxFilePanel = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth()) / common.FilePanelWidthUnit
+	m.fileModel.MaxFilePanel = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.FilePreview.GetWidth()) / common.FilePanelWidthUnit
 
-	for i := range m.fileModel.filePanels {
-		m.fileModel.filePanels[i].SearchBar.Width = m.fileModel.width - common.InnerPadding
+	for i := range m.fileModel.FilePanels {
+		m.fileModel.FilePanels[i].SearchBar.Width = m.fileModel.Width - common.InnerPadding
 	}
 }
 
 func (m *model) toggleFilePreviewPanel() {
-	m.fileModel.filePreview.ToggleOpen()
-	m.fileModel.filePreview.SetWidth(0)
-	m.fileModel.filePreview.SetHeight(m.mainPanelHeight + common.BorderPadding)
-	if m.fileModel.filePreview.IsOpen() {
+	m.fileModel.FilePreview.ToggleOpen()
+	m.fileModel.FilePreview.SetWidth(0)
+	m.fileModel.FilePreview.SetHeight(m.mainPanelHeight + common.BorderPadding)
+	if m.fileModel.FilePreview.IsOpen() {
 		// File preview panel width same as file panel
 		if common.Config.FilePreviewWidth == 0 {
-			m.fileModel.filePreview.SetWidth((m.fullWidth - common.Config.SidebarWidth -
-				(common.InnerPadding + (len(m.fileModel.filePanels))*common.BorderPadding)) / (len(m.fileModel.filePanels) + 1))
+			m.fileModel.FilePreview.SetWidth((m.fullWidth - common.Config.SidebarWidth -
+				(common.InnerPadding + (len(m.fileModel.FilePanels))*common.BorderPadding)) / (len(m.fileModel.FilePanels) + 1))
 		} else {
-			m.fileModel.filePreview.SetWidth((m.fullWidth - common.Config.SidebarWidth) / common.Config.FilePreviewWidth)
+			m.fileModel.FilePreview.SetWidth((m.fullWidth - common.Config.SidebarWidth) / common.Config.FilePreviewWidth)
 		}
 	}
 
-	m.fileModel.width = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth() -
-		(common.InnerPadding + (len(m.fileModel.filePanels)-1)*common.BorderPadding)) / len(m.fileModel.filePanels)
+	m.fileModel.Width = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.FilePreview.GetWidth() -
+		(common.InnerPadding + (len(m.fileModel.FilePanels)-1)*common.BorderPadding)) / len(m.fileModel.FilePanels)
 
-	m.fileModel.maxFilePanel = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth()) / common.FilePanelWidthUnit
+	m.fileModel.MaxFilePanel = (m.fullWidth - common.Config.SidebarWidth - m.fileModel.FilePreview.GetWidth()) / common.FilePanelWidthUnit
 
-	for i := range m.fileModel.filePanels {
-		m.fileModel.filePanels[i].SearchBar.Width = m.fileModel.width - common.InnerPadding
+	for i := range m.fileModel.FilePanels {
+		m.fileModel.FilePanels[i].SearchBar.Width = m.fileModel.Width - common.InnerPadding
 	}
 }
 
 // TODO : Replace all usage of "m.fileModel.filePanels[m.filePanelFocusIndex]" with this
 // There are many usage
 func (m *model) getFocusedFilePanel() *filepanel.Model {
-	return &m.fileModel.filePanels[m.filePanelFocusIndex]
+	return &m.fileModel.FilePanels[m.filePanelFocusIndex]
 }

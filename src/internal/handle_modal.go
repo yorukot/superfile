@@ -55,15 +55,15 @@ func (m *model) createItem() {
 
 // Cancel rename file or directory
 func (m *model) cancelRename() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.FilePanels[m.filePanelFocusIndex]
 	panel.Rename.Blur()
 	panel.Renaming = false
-	m.fileModel.renaming = false
+	m.fileModel.Renaming = false
 }
 
 // Connfirm rename file or directory
 func (m *model) confirmRename() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.FilePanels[m.filePanelFocusIndex]
 
 	// Although we dont expect this to happen based on our current flow
 	// Just adding it here to be safe
@@ -81,31 +81,31 @@ func (m *model) confirmRename() {
 		slog.Error("Error while confirmRename during rename", "error", err)
 		// Dont return. We have to also reset the panel and model information
 	}
-	m.fileModel.renaming = false
+	m.fileModel.Renaming = false
 	panel.Rename.Blur()
 	panel.Renaming = false
 }
 
 func (m *model) openSortOptionsMenu() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.FilePanels[m.filePanelFocusIndex]
 	panel.SortOptions.Open = true
 }
 
 func (m *model) cancelSortOptions() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.FilePanels[m.filePanelFocusIndex]
 	panel.SortOptions.Cursor = panel.SortOptions.Data.Selected
 	panel.SortOptions.Open = false
 }
 
 func (m *model) confirmSortOptions() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.FilePanels[m.filePanelFocusIndex]
 	panel.SortOptions.Data.Selected = panel.SortOptions.Cursor
 	panel.SortOptions.Open = false
 }
 
 // Move the cursor up in the sort options menu
 func (m *model) sortOptionsListUp() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.FilePanels[m.filePanelFocusIndex]
 	if panel.SortOptions.Cursor > 0 {
 		panel.SortOptions.Cursor--
 	} else {
@@ -115,7 +115,7 @@ func (m *model) sortOptionsListUp() {
 
 // Move the cursor down in the sort options menu
 func (m *model) sortOptionsListDown() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.FilePanels[m.filePanelFocusIndex]
 	if panel.SortOptions.Cursor < len(panel.SortOptions.Data.Options)-1 {
 		panel.SortOptions.Cursor++
 	} else {
@@ -124,20 +124,20 @@ func (m *model) sortOptionsListDown() {
 }
 
 func (m *model) toggleReverseSort() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.FilePanels[m.filePanelFocusIndex]
 	panel.SortOptions.Data.Reversed = !panel.SortOptions.Data.Reversed
 }
 
 // Cancel search, this will clear all searchbar input
 func (m *model) cancelSearch() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.FilePanels[m.filePanelFocusIndex]
 	panel.SearchBar.Blur()
 	panel.SearchBar.SetValue("")
 }
 
 // Confirm search. This will exit the search bar and filter the files
 func (m *model) confirmSearch() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := &m.fileModel.FilePanels[m.filePanelFocusIndex]
 	panel.SearchBar.Blur()
 }
 

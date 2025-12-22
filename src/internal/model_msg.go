@@ -195,6 +195,6 @@ func (msg FilePreviewUpdateMsg) ApplyToModel(m *model) tea.Cmd {
 		slog.Debug("FilePreviewUpdateMsg for older files. Ignoring")
 		return nil
 	}
-	m.fileModel.filePreview.SetContent(msg.content)
+	m.fileModel.FilePreview.SetContent(msg.content)
 	return nil
 }
