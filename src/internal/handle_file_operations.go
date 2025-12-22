@@ -103,7 +103,7 @@ func (m *model) panelItemRename() {
 	// unnecessary gargage for collection. Reuse the existing model.
 	// Maintain its state, dimensions. Update its cursor and text when needed
 	panel.Rename = common.GenerateRenameTextInput(
-		m.fileModel.Width-common.InnerPadding,
+		m.fileModel.SinglePanelWidth-common.InnerPadding,
 		cursorPos,
 		panel.Element[panel.Cursor].Name)
 }
@@ -437,7 +437,6 @@ func (m *model) chooserFileWriteAndQuit(path string) error {
 // Open file with default editor
 func (m *model) openFileWithEditor() tea.Cmd {
 	panel := &m.fileModel.FilePanels[m.filePanelFocusIndex]
-
 	// Check if panel is empty
 	if len(panel.Element) == 0 {
 		return nil

@@ -47,13 +47,13 @@ func (m *model) filePanelRender() string {
 		) != 0 &&
 			i == len(m.fileModel.FilePanels)-1 {
 			if m.fileModel.FilePreview.IsOpen() {
-				filePanelWidth = m.fileModel.Width
+				filePanelWidth = m.fileModel.SinglePanelWidth
 			} else {
-				filePanelWidth = (m.fileModel.Width + (m.fullWidth-common.Config.SidebarWidth-
+				filePanelWidth = (m.fileModel.SinglePanelWidth + (m.fullWidth-common.Config.SidebarWidth-
 					(common.InnerPadding+(len(m.fileModel.FilePanels)-1)*common.BorderPadding))%len(m.fileModel.FilePanels))
 			}
 		} else {
-			filePanelWidth = m.fileModel.Width
+			filePanelWidth = m.fileModel.SinglePanelWidth
 		}
 		filePanel.UpdateDimensions(filePanelWidth+common.BorderPadding, m.mainPanelHeight+common.BorderPadding)
 

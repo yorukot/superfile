@@ -535,7 +535,7 @@ func (m *model) View() string {
 	if m.fullHeight < common.MinimumHeight || m.fullWidth < common.MinimumWidth {
 		return m.terminalSizeWarnRender()
 	}
-	if m.fileModel.Width < common.MinWidthForRename {
+	if m.fileModel.SinglePanelWidth < common.MinWidthForRename {
 		return m.terminalSizeWarnAfterFirstRender()
 	}
 

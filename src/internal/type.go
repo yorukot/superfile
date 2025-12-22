@@ -132,12 +132,14 @@ type copyItems struct {
 /* FILE WINDOWS TYPE START*/
 // Model for file windows
 type FileModel struct {
-	FilePanels   []filepanel.Model
-	Width        int
-	Height       int
-	Renaming     bool
-	MaxFilePanel int
-	FilePreview  preview.Model
+	FilePanels        []filepanel.Model
+	SinglePanelWidth  int
+	Width             int
+	Height            int
+	Renaming          bool
+	MaxFilePanel      int
+	FilePreview       preview.Model
+	FocusedPanelIndex int
 }
 
 /* FILE WINDOWS TYPE END*/
