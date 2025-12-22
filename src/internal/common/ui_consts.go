@@ -14,6 +14,8 @@ const (
 
 	DefaultFilePanelWidth    = 10 // default width for file panels
 	FilePanelMax             = 10 // max number of file panels supported
+	FilePanelMinWidth        = 20 // minimum width for file panel
+	FilePanelMinHeight       = 5  // minimum height for file panel
 	MinWidthForRename        = 18 // minimal width for rename input to render
 	ResponsiveWidthThreshold = 95 // width breakpoint for layout behavior
 

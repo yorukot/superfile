@@ -105,10 +105,6 @@ func getTypeOrderingFunc(elements []Element, reversed bool) sliceOrderFunc {
 	}
 }
 
-func panelElementHeight(mainPanelHeight int) int {
-	return mainPanelHeight - common.PanelPadding
-}
-
 func sortFileElement(sortOptions sortOptionsModelData, dirEntries []os.DirEntry, location string) []Element {
 	elements := make([]Element, 0, len(dirEntries))
 	for _, item := range dirEntries {
@@ -152,11 +148,11 @@ func removeElementByValue(slice []string, value string) []string {
 	return newSlice
 }
 
-func getScrollSize(mainPanelHeight int) int {
+func (m *Model) getPageScrollSize() int {
 	scrollSize := common.Config.PageScrollSize
 	if scrollSize <= 0 {
 		// Use default full page behavior
-		scrollSize = panelElementHeight(mainPanelHeight)
+		scrollSize = m.PanelElementHeight()
 	}
 	return scrollSize
 }
