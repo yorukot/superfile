@@ -162,8 +162,8 @@ func (m *Model) ParentDirectory() error {
 	return m.UpdateCurrentFilePanelDir("..")
 }
 
-func (m *Model) HandleResize(height int) {
-	m.scrollToCursor(m.Cursor, height)
+func (m *Model) HandleResize() {
+	m.scrollToCursor(m.Cursor)
 }
 
 // Select the item where cursor located (only work on select mode)
@@ -212,7 +212,7 @@ func (m *Model) UpdateElementsIfNeeded(focusPanelReRender bool, toggleDotFile bo
 
 		// For hover to file on first time loading
 		if m.TargetFile != "" {
-			m.applyTargetFileCursor(mainPanelHeight)
+			m.applyTargetFileCursor()
 		}
 	}
 }
@@ -321,7 +321,7 @@ func (m *Model) GetContentWidth() int {
 // PanelElementHeight calculates the number of visible elements in content area
 func (m *Model) PanelElementHeight() int {
 	contentHeight := m.GetMainPanelHeight()
-	if m.SearchBar != nil {
+	if m.SearchBar.Value() != "" {
 		contentHeight -= 2  // Search bar takes 2 lines
 	}
 	return contentHeight - common.PanelPadding
