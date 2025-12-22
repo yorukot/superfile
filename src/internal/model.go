@@ -236,21 +236,12 @@ func (m *model) setHeightValues() {
 }
 
 func (m *model) updateComponentDimensions() tea.Cmd {
-	slog.Debug("[TEMP]", "fpopen", m.fileModel.FilePreview.IsOpen(),
-		"h", m.fullHeight, "mh", m.mainPanelHeight,
-		"ph", m.getFocusedFilePanel().GetHeight(),
-		"pw", m.getFocusedFilePanel().GetWidth())
 	m.setFileModelDimensions()
 	m.setHelpMenuSize()
 	m.setMetadataModelSize()
 	m.setProcessBarModelSize()
 	m.setPromptModelSize()
 	m.setZoxideModelSize()
-
-	slog.Debug("[TEMP] 2", "fpopen", m.fileModel.FilePreview.IsOpen(),
-		"h", m.fullHeight, "mh", m.mainPanelHeight,
-		"ph", m.getFocusedFilePanel().GetHeight(),
-		"pw", m.getFocusedFilePanel().GetWidth())
 
 	// File preview panel requires explicit height update, unlike sidebar/file panels
 	// which receive height as render parameters and update automatically on each frame

@@ -1,6 +1,8 @@
 package filemodel
 
 import (
+	"log/slog"
+
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 )
@@ -29,6 +31,11 @@ func (m *FileModel) PanelCount() int {
 }
 
 func (m *FileModel) UpdateChildComponentWidth() {
+	// TODO: programatically ensure that this becomes impossible
+	if m.PanelCount() == 0 {
+		slog.Error("Unexpected error: fileModel with 0 panels")
+		return
+	}
 	panelCount := len(m.FilePanels)
 	widthForPanels := m.Width
 
