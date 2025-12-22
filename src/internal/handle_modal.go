@@ -55,7 +55,7 @@ func (m *model) createItem() {
 
 // Cancel rename file or directory
 func (m *model) cancelRename() {
-	panel := &m.fileModel.FilePanels[m.filePanelFocusIndex]
+	panel := m.getFocusedFilePanel()
 	panel.Rename.Blur()
 	panel.Renaming = false
 	m.fileModel.Renaming = false
@@ -63,7 +63,7 @@ func (m *model) cancelRename() {
 
 // Connfirm rename file or directory
 func (m *model) confirmRename() {
-	panel := &m.fileModel.FilePanels[m.filePanelFocusIndex]
+	panel := m.getFocusedFilePanel()
 
 	// Although we dont expect this to happen based on our current flow
 	// Just adding it here to be safe
@@ -87,25 +87,25 @@ func (m *model) confirmRename() {
 }
 
 func (m *model) openSortOptionsMenu() {
-	panel := &m.fileModel.FilePanels[m.filePanelFocusIndex]
+	panel := m.getFocusedFilePanel()
 	panel.SortOptions.Open = true
 }
 
 func (m *model) cancelSortOptions() {
-	panel := &m.fileModel.FilePanels[m.filePanelFocusIndex]
+	panel := m.getFocusedFilePanel()
 	panel.SortOptions.Cursor = panel.SortOptions.Data.Selected
 	panel.SortOptions.Open = false
 }
 
 func (m *model) confirmSortOptions() {
-	panel := &m.fileModel.FilePanels[m.filePanelFocusIndex]
+	panel := m.getFocusedFilePanel()
 	panel.SortOptions.Data.Selected = panel.SortOptions.Cursor
 	panel.SortOptions.Open = false
 }
 
 // Move the cursor up in the sort options menu
 func (m *model) sortOptionsListUp() {
-	panel := &m.fileModel.FilePanels[m.filePanelFocusIndex]
+	panel := m.getFocusedFilePanel()
 	if panel.SortOptions.Cursor > 0 {
 		panel.SortOptions.Cursor--
 	} else {
@@ -115,7 +115,7 @@ func (m *model) sortOptionsListUp() {
 
 // Move the cursor down in the sort options menu
 func (m *model) sortOptionsListDown() {
-	panel := &m.fileModel.FilePanels[m.filePanelFocusIndex]
+	panel := m.getFocusedFilePanel()
 	if panel.SortOptions.Cursor < len(panel.SortOptions.Data.Options)-1 {
 		panel.SortOptions.Cursor++
 	} else {
@@ -124,20 +124,20 @@ func (m *model) sortOptionsListDown() {
 }
 
 func (m *model) toggleReverseSort() {
-	panel := &m.fileModel.FilePanels[m.filePanelFocusIndex]
+	panel := m.getFocusedFilePanel()
 	panel.SortOptions.Data.Reversed = !panel.SortOptions.Data.Reversed
 }
 
 // Cancel search, this will clear all searchbar input
 func (m *model) cancelSearch() {
-	panel := &m.fileModel.FilePanels[m.filePanelFocusIndex]
+	panel := m.getFocusedFilePanel()
 	panel.SearchBar.Blur()
 	panel.SearchBar.SetValue("")
 }
 
 // Confirm search. This will exit the search bar and filter the files
 func (m *model) confirmSearch() {
-	panel := &m.fileModel.FilePanels[m.filePanelFocusIndex]
+	panel := m.getFocusedFilePanel()
 	panel.SearchBar.Blur()
 }
 

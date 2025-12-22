@@ -125,7 +125,7 @@ func (m *model) sidebarSelectDirectory() {
 
 // Select all item in the file panel (only work on select mode)
 func (m *model) selectAllItem() {
-	panel := &m.fileModel.FilePanels[m.filePanelFocusIndex]
+	panel := m.getFocusedFilePanel()
 	for _, item := range panel.Element {
 		panel.Selected = append(panel.Selected, item.Location)
 	}
@@ -154,7 +154,7 @@ func (m *model) toggleFooterController() tea.Cmd {
 
 // Focus on search bar
 func (m *model) searchBarFocus() {
-	panel := &m.fileModel.FilePanels[m.filePanelFocusIndex]
+	panel := m.getFocusedFilePanel()
 	if panel.SearchBar.Focused() {
 		panel.SearchBar.Blur()
 	} else {

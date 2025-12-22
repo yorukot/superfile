@@ -23,11 +23,10 @@ import (
 func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool,
 	firstPanelPaths []string, zClient *zoxidelib.Client) *model {
 	return &model{
-		filePanelFocusIndex: 0,
-		focusPanel:          nonePanelFocus,
-		processBarModel:     processbar.New(),
-		sidebarModel:        sidebar.New(),
-		fileMetaData:        metadata.New(),
+		focusPanel:      nonePanelFocus,
+		processBarModel: processbar.New(),
+		sidebarModel:    sidebar.New(),
+		fileMetaData:    metadata.New(),
 		fileModel: FileModel{
 			FilePanels:       filepanel.FilePanelSlice(firstPanelPaths),
 			FilePreview:      preview.New(),

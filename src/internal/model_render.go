@@ -21,7 +21,7 @@ import (
 
 func (m *model) sidebarRender() string {
 	return m.sidebarModel.Render(m.mainPanelHeight, m.focusPanel == sidebarFocus,
-		m.fileModel.FilePanels[m.filePanelFocusIndex].Location)
+		m.getFocusedFilePanel().Location)
 }
 
 // This also modifies the m.fileModel.filePanels, which it should not
@@ -306,7 +306,7 @@ func (m *model) getHelpMenuContent(r *rendering.Renderer, renderHotkeyLength int
 }
 
 func (m *model) sortOptionsRender() string {
-	panel := m.fileModel.FilePanels[m.filePanelFocusIndex]
+	panel := m.getFocusedFilePanel()
 	sortOptionsContent := common.ModalTitleStyle.Render(" Sort Options") + "\n\n"
 	for i, option := range panel.SortOptions.Data.Options {
 		cursor := " "

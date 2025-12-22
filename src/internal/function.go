@@ -45,10 +45,6 @@ func isExternalDiskPath(path string) bool {
 		strings.HasPrefix(path, "/Volumes")
 }
 
-func returnFocusType(focusPanel focusPanelType) bool {
-	return focusPanel == nonePanelFocus
-}
-
 func checkFileNameValidity(name string) error {
 	switch {
 	case name == ".", name == "..":
