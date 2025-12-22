@@ -120,12 +120,9 @@ func (m *model) validateLayout() error { //nolint:gocognit // cumilation of vali
 }
 
 // validateRender validates rendered output dimensions and border
-func validateRender(
-	out string,
-	height int,
-	width int,
-	border bool,
-) error { //nolint:gocognit // cumilation of validations
+//
+//nolint:gocognit // Validation functions
+func validateRender(out string, height int, width int, border bool) error {
 	strippedOut := ansi.Strip(out)
 
 	lines := strings.Split(strippedOut, "\n")
