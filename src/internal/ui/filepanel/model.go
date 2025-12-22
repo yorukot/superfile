@@ -55,7 +55,7 @@ func New(location string, sortOptions sortOptionsModel, focused bool, targetFile
 		DirectoryRecords: make(map[string]directoryRecord),
 		SearchBar:        common.GenerateSearchBar(),
 		TargetFile:       targetFile,
-		width:            FilePanelMinWidth,
-		height:           FilePanelMinHeight,
+		width:            MinWidth,
+		height:           MinHeight,
 	}
 }

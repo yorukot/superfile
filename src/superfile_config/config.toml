@@ -73,7 +73,7 @@ shell_close_on_success = false
 page_scroll_size = 0
 
 #-- Debug Mode
-debug = false
+debug = true
 
 #-- Ignore Missing Config Fields
 # Whether to silence any warnings about missing config fields.

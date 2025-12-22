@@ -12,6 +12,7 @@ import (
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
 
+	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/utils"
@@ -521,7 +522,11 @@ func (m *model) warnModalForQuit() {
 func (m *model) View() string {
 	slog.Debug("model.View() called", "mainPanelHeight", m.mainPanelHeight,
 		"footerHeight", m.footerHeight, "fullHeight", m.fullHeight,
-		"fullWidth", m.fullWidth)
+		"fullWidth", m.fullWidth, "panelCount", m.fileModel.PanelCount(),
+		"singlePanelWidth", m.fileModel.SinglePanelWidth,
+		"maxPanels", m.fileModel.MaxFilePanel,
+		"sideBarWidth", common.Config.SidebarWidth,
+		"firstFilePanelWidth", m.fileModel.FilePanels[0].GetWidth())
 
 	if !m.firstLoadingComplete {
 		return "Loading..."
@@ -531,38 +536,20 @@ func (m *model) View() string {
 	if m.fullHeight < common.MinimumHeight || m.fullWidth < common.MinimumWidth {
 		return m.terminalSizeWarnRender()
 	}
-	if m.fileModel.SinglePanelWidth < common.MinWidthForRename {
+	if m.fileModel.SinglePanelWidth < filepanel.MinWidth {
 		return m.terminalSizeWarnAfterFirstRender()
 	}
 
-	if err := m.validateLayout(); err != nil {
-		slog.Error("Invalid layout", "error", err)
-	}
-
 	sidebar := m.sidebarRender()
+	fileModel := m.fileModel.Render()
+	mainPanel := lipgloss.JoinHorizontal(0, sidebar, fileModel)
 
-	filePanel := m.fileModel.Render()
-
-	filePreview := m.filePreviewPanelRender()
-
-	mainPanel := lipgloss.JoinHorizontal(0, sidebar, filePanel, filePreview)
-
-	if common.Config.Debug {
-		showRenderDebugStatsMain(sidebar, filePanel, filePreview)
-	}
-
-	var footer string
+	var processBar, metaData, clipboardBar, footer string
 	if m.toggleFooter {
-		processBar := m.processBarRender()
-
-		metaData := m.fileMetaData.Render(m.focusPanel == metadataFocus)
-
-		clipboardBar := m.clipboardRender()
-
+		processBar = m.processBarRender()
+		metaData = m.fileMetaData.Render(m.focusPanel == metadataFocus)
+		clipboardBar = m.clipboardRender()
 		footer = lipgloss.JoinHorizontal(0, processBar, metaData, clipboardBar)
-		if common.Config.Debug {
-			showRenderDebugStatsFooter(processBar, metaData, clipboardBar)
-		}
 	}
 
 	var finalRender string
@@ -574,6 +561,22 @@ func (m *model) View() string {
 	}
 
 	finalRender = m.updateRenderForOverlay(finalRender)
+
+	// Only do all this validation in Debug Model.
+	// This will be a lot of computations, and may take time
+	if common.Config.Debug {
+		showRenderDebugStatsMain(sidebar, fileModel)
+		showRenderDebugStatsFooter(processBar, metaData, clipboardBar)
+		if err := m.validateLayout(); err != nil {
+			slog.Error("Invalid layout", "error", err)
+		}
+		if err := m.validateComponentRender(); err != nil {
+			slog.Error("Component render validation failed", "error", err)
+		}
+		if err := m.validateFinalRender(finalRender); err != nil {
+			slog.Error("Final render validation failed", "error", err)
+		}
+	}
 
 	return finalRender
 }
@@ -633,12 +636,10 @@ func (m *model) updateRenderForOverlay(finalRender string) string {
 	return finalRender
 }
 
-func showRenderDebugStatsMain(sidebar, filePanel, filePreview string) {
+func showRenderDebugStatsMain(sidebar, filePanel string) {
 	slog.Debug("Render stats for main panel",
 		"sidebarLineCnt", getLineCnt(sidebar), "sidebarMaxW", getMaxW(sidebar),
-		"filePanelLineCnt", getLineCnt(filePanel), "filePanelMaxW", getMaxW(filePanel),
-		"filePreviewLineCnt", getLineCnt(filePreview), "filePreviewMaxW", getMaxW(filePreview),
-	)
+		"filePanelLineCnt", getLineCnt(filePanel), "filePanelMaxW", getMaxW(filePanel))
 }
 
 func showRenderDebugStatsFooter(processBar, metaData, clipboardBar string) {
