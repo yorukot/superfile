@@ -130,21 +130,21 @@ func testPanelOperations(t *testing.T, dir1, dir2, curTestDir string) {
 		m := defaultTestModel(dir1)
 		TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenSPFPrompt[0]))
 		require.True(t, m.promptModal.IsOpen())
-		for len(m.fileModel.filePanels) < m.fileModel.maxFilePanel {
-			prevCnt := len(m.fileModel.filePanels)
+		for len(m.fileModel.FilePanels) < m.fileModel.MaxFilePanel {
+			prevCnt := len(m.fileModel.FilePanels)
 			TeaUpdate(m, utils.TeaRuneKeyMsg(prompt.SplitCommand))
 			TeaUpdate(m, tea.KeyMsg{Type: tea.KeyEnter})
-			require.Len(t, m.fileModel.filePanels, prevCnt+1)
-			assert.Equal(t, dir1, m.fileModel.filePanels[prevCnt].Location)
+			require.Len(t, m.fileModel.FilePanels, prevCnt+1)
+			assert.Equal(t, dir1, m.fileModel.FilePanels[prevCnt].Location)
 			assert.True(t, m.promptModal.LastActionSucceeded())
 		}
 
 		// Now doing a split should fail
-		prevCnt := len(m.fileModel.filePanels)
+		prevCnt := len(m.fileModel.FilePanels)
 		TeaUpdate(m, utils.TeaRuneKeyMsg(prompt.SplitCommand))
 		TeaUpdate(m, tea.KeyMsg{Type: tea.KeyEnter})
 		assert.False(t, m.promptModal.LastActionSucceeded())
-		assert.Len(t, m.fileModel.filePanels, prevCnt)
+		assert.Len(t, m.fileModel.FilePanels, prevCnt)
 	})
 
 	t.Run("cd Panel", func(t *testing.T) {
@@ -184,15 +184,15 @@ func testPanelOperations(t *testing.T, dir1, dir2, curTestDir string) {
 
 	t.Run("open Panel", func(t *testing.T) {
 		m := defaultTestModel(dir1)
-		orgCnt := len(m.fileModel.filePanels)
+		orgCnt := len(m.fileModel.FilePanels)
 		TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenSPFPrompt[0]))
 		TeaUpdate(m, utils.TeaRuneKeyMsg(prompt.OpenCommand+" "+dir2))
 		TeaUpdate(m, tea.KeyMsg{Type: tea.KeyEnter})
 		assert.True(t, m.promptModal.LastActionSucceeded(), "open using absolute path should work")
 		assert.Equal(t, dir2, m.getFocusedFilePanel().Location)
 
-		m.closeFilePanel()
-		assert.Len(t, m.fileModel.filePanels, orgCnt)
+		m.fileModel.CloseFilePanel()
+		assert.Len(t, m.fileModel.FilePanels, orgCnt)
 		assert.Equal(t, dir1, m.getFocusedFilePanel().Location)
 
 		TeaUpdate(m, utils.TeaRuneKeyMsg(prompt.OpenCommand+" ../dir2"))
@@ -200,14 +200,14 @@ func testPanelOperations(t *testing.T, dir1, dir2, curTestDir string) {
 		assert.True(t, m.promptModal.LastActionSucceeded(), "open using relative path should work")
 		assert.Equal(t, dir2, m.getFocusedFilePanel().Location)
 
-		m.closeFilePanel()
+		m.fileModel.CloseFilePanel()
 
 		TeaUpdate(m, utils.TeaRuneKeyMsg(prompt.OpenCommand+" ~"))
 		TeaUpdate(m, tea.KeyMsg{Type: tea.KeyEnter})
 		assert.True(t, m.promptModal.LastActionSucceeded(), "open using tilde should work")
 		assert.Equal(t, xdg.Home, m.getFocusedFilePanel().Location)
 
-		m.closeFilePanel()
+		m.fileModel.CloseFilePanel()
 
 		userHomeEnv := "HOME"
 		if runtime.GOOS == utils.OsWindows {
@@ -218,7 +218,7 @@ func testPanelOperations(t *testing.T, dir1, dir2, curTestDir string) {
 		assert.True(t, m.promptModal.LastActionSucceeded(), "open using variable substitution should work")
 		assert.Equal(t, xdg.Home, m.getFocusedFilePanel().Location)
 
-		m.closeFilePanel()
+		m.fileModel.CloseFilePanel()
 
 		// Note : resolving shell subsitution is flaky in windows.
 		TeaUpdate(m, utils.TeaRuneKeyMsg(prompt.OpenCommand+" $(echo \"~\")"))
@@ -226,7 +226,7 @@ func testPanelOperations(t *testing.T, dir1, dir2, curTestDir string) {
 		assert.True(t, m.promptModal.LastActionSucceeded(), "open using command substitution should work")
 		assert.Equal(t, xdg.Home, m.getFocusedFilePanel().Location)
 
-		m.closeFilePanel()
+		m.fileModel.CloseFilePanel()
 
 		TeaUpdate(m, utils.TeaRuneKeyMsg(prompt.OpenCommand+" non_existing_dir"))
 		TeaUpdate(m, tea.KeyMsg{Type: tea.KeyEnter})
@@ -236,7 +236,7 @@ func testPanelOperations(t *testing.T, dir1, dir2, curTestDir string) {
 		TeaUpdate(m, tea.KeyMsg{Type: tea.KeyEnter})
 		assert.False(t, m.promptModal.LastActionSucceeded(), "open using invalid abs path should not work")
 
-		for len(m.fileModel.filePanels) < m.fileModel.maxFilePanel {
+		for len(m.fileModel.FilePanels) < m.fileModel.MaxFilePanel {
 			TeaUpdate(m, utils.TeaRuneKeyMsg(prompt.OpenCommand+" ."))
 			TeaUpdate(m, tea.KeyMsg{Type: tea.KeyEnter})
 			assert.True(t, m.promptModal.LastActionSucceeded())
@@ -336,7 +336,7 @@ func testDirectoryHandlingWithQuotes(t *testing.T, curTestDir, dir1 string) {
 			assert.True(t, m.promptModal.LastActionSucceeded(), "open with double quotes should work")
 			assert.Equal(t, dirWithSpaces, m.getFocusedFilePanel().Location)
 
-			m.closeFilePanel()
+			m.fileModel.CloseFilePanel()
 		})
 
 		t.Run("cd with quoted environment variable", func(t *testing.T) {

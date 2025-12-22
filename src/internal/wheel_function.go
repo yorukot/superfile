@@ -19,7 +19,7 @@ func wheelMainAction(msg string, m *model) {
 		case metadataFocus:
 			action = func() { m.fileMetaData.ListUp() }
 		case nonePanelFocus:
-			action = func() { m.fileModel.filePanels[m.filePanelFocusIndex].ListUp() }
+			action = func() { m.getFocusedFilePanel().ListUp() }
 		}
 
 	case "wheel down":
@@ -31,7 +31,7 @@ func wheelMainAction(msg string, m *model) {
 		case metadataFocus:
 			action = func() { m.fileMetaData.ListDown() }
 		case nonePanelFocus:
-			action = func() { m.fileModel.filePanels[m.filePanelFocusIndex].ListDown() }
+			action = func() { m.getFocusedFilePanel().ListDown() }
 		}
 	default:
 		slog.Error("Unexpected type of mouse action in wheelMainAction", "msg", msg)

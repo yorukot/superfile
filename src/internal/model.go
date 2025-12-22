@@ -137,21 +137,21 @@ func (m *model) updateModelStateAfterMsg() {
 }
 
 func (m *model) getFilePreviewCmd(forcePreviewRender bool) tea.Cmd {
-	if !m.fileModel.filePreview.IsOpen() {
+	if !m.fileModel.FilePreview.IsOpen() {
 		return nil
 	}
 	if len(m.getFocusedFilePanel().Element) == 0 {
 		// Sync call because this will be fast
-		m.fileModel.filePreview.SetContentWithRenderText("")
+		m.fileModel.FilePreview.SetContentWithRenderText("")
 		return nil
 	}
 	selectedItem := m.getFocusedFilePanel().GetSelectedItem()
-	if m.fileModel.filePreview.GetLocation() == selectedItem.Location && !forcePreviewRender {
+	if m.fileModel.FilePreview.GetLocation() == selectedItem.Location && !forcePreviewRender {
 		return nil
 	}
 
-	m.fileModel.filePreview.SetLocation(selectedItem.Location)
-	m.fileModel.filePreview.SetContentWithRenderText("Loading...")
+	m.fileModel.FilePreview.SetLocation(selectedItem.Location)
+	m.fileModel.FilePreview.SetContentWithRenderText("Loading...")
 	reqCnt := m.ioReqCnt
 	m.ioReqCnt++
 	slog.Debug("Submitting file preview render request", "id", reqCnt, "path", selectedItem.Location)
@@ -161,7 +161,7 @@ func (m *model) getFilePreviewCmd(forcePreviewRender bool) tea.Cmd {
 
 	return func() tea.Msg {
 		return NewFilePreviewUpdateMsg(selectedItem.Location,
-			m.fileModel.filePreview.RenderWithPath(selectedItem.Location, fullModalWidth), reqCnt)
+			m.fileModel.FilePreview.RenderWithPath(selectedItem.Location, fullModalWidth), reqCnt)
 	}
 }
 
@@ -236,51 +236,22 @@ func (m *model) setHeightValues() {
 }
 
 func (m *model) updateComponentDimensions() tea.Cmd {
-	m.setFilePanelsSize()
+	m.setFileModelDimensions()
 	m.setHelpMenuSize()
 	m.setMetadataModelSize()
 	m.setProcessBarModelSize()
 	m.setPromptModelSize()
 	m.setZoxideModelSize()
 
-	if m.fileModel.maxFilePanel >= common.FilePanelMax {
-		m.fileModel.maxFilePanel = common.FilePanelMax
-	}
-
 	// File preview panel requires explicit height update, unlike sidebar/file panels
 	// which receive height as render parameters and update automatically on each frame
-	if m.fileModel.filePreview.IsOpen() {
-		m.setFilePreviewPanelSize()
-		// Force re-render of preview content with new dimensions
-		return m.getFilePreviewCmd(true)
-	}
-	return nil
+	// Force re-render of preview content with new dimensions
+	return m.getFilePreviewCmd(true)
 }
 
-func (m *model) setFilePreviewPanelSize() {
-	m.fileModel.filePreview.SetWidth(m.getFilePreviewWidth())
-	m.fileModel.filePreview.SetHeight(m.mainPanelHeight + common.BorderPadding)
-}
-
-// Set file preview panel Widht to width. Assure that
-func (m *model) getFilePreviewWidth() int {
-	if common.Config.FilePreviewWidth == 0 {
-		return (m.fullWidth - common.Config.SidebarWidth -
-			(common.InnerPadding + (len(m.fileModel.filePanels))*common.BorderPadding)) / (len(m.fileModel.filePanels) + 1)
-	}
-	return (m.fullWidth - common.Config.SidebarWidth) / common.Config.FilePreviewWidth
-}
-
-// Proper set panels size. Assure that panels do not overlap
-func (m *model) setFilePanelsSize() {
-	width := m.fullWidth
-	// set each file panel size and max file panel amount
-	m.fileModel.width = (width - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth() -
-		(common.InnerPadding + (len(m.fileModel.filePanels)-1)*common.BorderPadding)) / len(m.fileModel.filePanels)
-	m.fileModel.maxFilePanel = (width - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth()) / common.FilePanelWidthUnit
-	for i := range m.fileModel.filePanels {
-		m.fileModel.filePanels[i].UpdateDimensions(m.fileModel.width, m.mainPanelHeight+common.BorderPadding)
-	}
+func (m *model) setFileModelDimensions() {
+	m.fileModel.SetWidth(m.fullWidth - common.Config.SidebarWidth - common.BorderPadding)
+	m.fileModel.SetHeight(m.mainPanelHeight + common.BorderPadding)
 }
 
 // Set help menu size
@@ -336,14 +307,14 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 		"runes", msg.Runes, "type", int(msg.Type), "paste", msg.Paste,
 		"alt", msg.Alt)
 	slog.Debug("model.handleKeyInput. model info. ",
-		"filePanelFocusIndex", m.filePanelFocusIndex,
-		"filePanel.isFocused", m.fileModel.filePanels[m.filePanelFocusIndex].IsFocused,
-		"filePanel.panelMode", m.fileModel.filePanels[m.filePanelFocusIndex].PanelMode,
+		"fileModel.FocusedPanelIndex", m.fileModel.FocusedPanelIndex,
+		"filePanel.isFocused", m.getFocusedFilePanel().IsFocused,
+		"filePanel.panelMode", m.getFocusedFilePanel().PanelMode,
 		"typingModal.open", m.typingModal.open,
 		"notifyModel.open", m.notifyModel.IsOpen(),
 		"promptModal.open", m.promptModal.IsOpen(),
-		"fileModel.renaming", m.fileModel.renaming,
-		"searchBar.focussed", m.fileModel.filePanels[m.filePanelFocusIndex].SearchBar.Focused(),
+		"fileModel.renaming", m.fileModel.Renaming,
+		"searchBar.focussed", m.getFocusedFilePanel().SearchBar.Focused(),
 		"helpMenu.open", m.helpMenu.open,
 		"firstTextInput", m.firstTextInput,
 		"focusPanel", m.focusPanel,
@@ -370,17 +341,17 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 		cmd = m.notifyModelOpenKey(msg.String())
 
 	// If renaming a object
-	case m.fileModel.renaming:
+	case m.fileModel.Renaming:
 		cmd = m.renamingKey(msg.String())
 	case m.sidebarModel.IsRenaming():
 		m.sidebarRenamingKey(msg.String())
 	// If search bar is open
-	case m.fileModel.filePanels[m.filePanelFocusIndex].SearchBar.Focused():
+	case m.getFocusedFilePanel().SearchBar.Focused():
 		m.focusOnSearchbarKey(msg.String())
 	// If sort options menu is open
 	case m.sidebarModel.SearchBarFocused():
 		m.sidebarModel.HandleSearchBarKey(msg.String())
-	case m.fileModel.filePanels[m.filePanelFocusIndex].SortOptions.Open:
+	case m.getFocusedFilePanel().SortOptions.Open:
 		m.sortOptionsKey(msg.String())
 	// If help menu is open
 	case m.helpMenu.open:
@@ -419,13 +390,13 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 // Update the file panel state. Change name of renamed files, filter out files
 // in search, update typingb bar, etc
 func (m *model) updateFilePanelsState(msg tea.Msg) tea.Cmd {
-	focusPanel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+	focusPanel := m.getFocusedFilePanel()
 	var cmd tea.Cmd
 	var action common.ModelAction
 	switch {
 	case m.firstTextInput:
 		m.firstTextInput = false
-	case m.fileModel.renaming:
+	case m.fileModel.Renaming:
 		focusPanel.Rename, cmd = focusPanel.Rename.Update(msg)
 	case focusPanel.SearchBar.Focused():
 		focusPanel.SearchBar, cmd = focusPanel.SearchBar.Update(msg)
@@ -433,7 +404,7 @@ func (m *model) updateFilePanelsState(msg tea.Msg) tea.Cmd {
 		m.typingModal.textInput, cmd = m.typingModal.textInput.Update(msg)
 	case m.promptModal.IsOpen():
 		// TODO : Separate this to a utility
-		cwdLocation := m.fileModel.filePanels[m.filePanelFocusIndex].Location
+		cwdLocation := m.getFocusedFilePanel().Location
 		action, cmd = m.promptModal.HandleUpdate(msg, cwdLocation)
 		m.applyPromptModalAction(action)
 	case m.zoxideModal.IsOpen():
@@ -492,7 +463,7 @@ func (m *model) applyZoxideModalAction(action common.ModelAction) {
 
 // TODO : Move them around to appropriate places
 func (m *model) applyShellCommandAction(shellCommand string) {
-	focusPanelDir := m.fileModel.filePanels[m.filePanelFocusIndex].Location
+	focusPanelDir := m.getFocusedFilePanel().Location
 
 	retCode, output, err := utils.ExecuteCommandInShell(common.DefaultCommandTimeout, focusPanelDir, shellCommand)
 
@@ -506,12 +477,12 @@ func (m *model) applyShellCommandAction(shellCommand string) {
 }
 
 func (m *model) splitPanel() error {
-	return m.createNewFilePanel(m.fileModel.filePanels[m.filePanelFocusIndex].Location)
+	return m.fileModel.CreateNewFilePanel(m.getFocusedFilePanel().Location)
 }
 
 func (m *model) createNewFilePanelRelativeToCurrent(path string) error {
-	currentDir := m.fileModel.filePanels[m.filePanelFocusIndex].Location
-	return m.createNewFilePanel(utils.ResolveAbsPath(currentDir, path))
+	currentDir := m.getFocusedFilePanel().Location
+	return m.fileModel.CreateNewFilePanel(utils.ResolveAbsPath(currentDir, path))
 }
 
 // simulates a 'cd' action
@@ -560,7 +531,7 @@ func (m *model) View() string {
 	if m.fullHeight < common.MinimumHeight || m.fullWidth < common.MinimumWidth {
 		return m.terminalSizeWarnRender()
 	}
-	if m.fileModel.width < common.MinWidthForRename {
+	if m.fileModel.SinglePanelWidth < common.MinWidthForRename {
 		return m.terminalSizeWarnAfterFirstRender()
 	}
 
@@ -570,7 +541,7 @@ func (m *model) View() string {
 
 	sidebar := m.sidebarRender()
 
-	filePanel := m.filePanelRender()
+	filePanel := m.fileModel.Render()
 
 	filePreview := m.filePreviewPanelRender()
 
@@ -630,7 +601,7 @@ func (m *model) updateRenderForOverlay(finalRender string) string {
 		return stringfunction.PlaceOverlay(overlayX, overlayY, zoxideModal, finalRender)
 	}
 
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := m.getFocusedFilePanel()
 
 	if panel.SortOptions.Open {
 		sortOptions := m.sortOptionsRender()
@@ -693,10 +664,10 @@ func getMaxW(s string) int {
 // Render and update file panel items. Check for changes and updates in files and
 // folders in the current directory.
 func (m *model) getFilePanelItems() {
-	focusPanel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+	focusPanel := m.getFocusedFilePanel()
 	focusPanelReRender := focusPanel.NeedsReRender()
-	for i := range m.fileModel.filePanels {
-		m.fileModel.filePanels[i].UpdateElementsIfNeeded(focusPanelReRender, m.toggleDotFile,
+	for i := range m.fileModel.FilePanels {
+		m.fileModel.FilePanels[i].UpdateElementsIfNeeded(focusPanelReRender, m.toggleDotFile,
 			m.updatedToggleDotFile)
 	}
 
@@ -710,10 +681,10 @@ func (m *model) quitSuperfile(cdOnQuit bool) {
 	if common.Config.Metadata && et != nil {
 		_ = et.Close()
 	}
-	m.fileModel.filePreview.CleanUp()
+	m.fileModel.FilePreview.CleanUp()
 
 	// cd on quit
-	currentDir := m.fileModel.filePanels[m.filePanelFocusIndex].Location
+	currentDir := m.getFocusedFilePanel().Location
 	variable.SetLastDir(currentDir)
 
 	if cdOnQuit {
