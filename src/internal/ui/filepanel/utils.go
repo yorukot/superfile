@@ -23,10 +23,6 @@ func (m *Model) GetSelectedItemPtr() *Element {
 	return &m.Element[m.Cursor]
 }
 
-func (m *Model) HandleResize() {
-	m.scrollToCursor(m.Cursor)
-}
-
 // Select the item where cursor located (only work on select mode)
 func (m *Model) SingleItemSelect() {
 	if len(m.Element) > 0 && m.Cursor >= 0 && m.Cursor < len(m.Element) {

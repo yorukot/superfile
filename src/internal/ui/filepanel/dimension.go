@@ -4,14 +4,26 @@ import "github.com/yorukot/superfile/src/internal/common"
 
 // UpdateDimensions sets the panel dimensions with validation
 func (m *Model) UpdateDimensions(width, height int) {
+	m.SetWidth(width)
+	m.SetHeight(height)
+}
+
+// GetWidth returns the total panel width
+func (m *Model) SetWidth(width int) {
 	if width < FilePanelMinWidth {
 		width = FilePanelMinWidth
 	}
+	m.width = width
+	m.SearchBar.Width = m.width - common.InnerPadding
+}
+
+func (m *Model) SetHeight(height int) {
 	if height < FilePanelMinHeight {
 		height = FilePanelMinHeight
 	}
-	m.width = width
 	m.height = height
+	// Adjust scroll if needed
+	m.scrollToCursor(m.Cursor)
 }
 
 // GetWidth returns the total panel width
