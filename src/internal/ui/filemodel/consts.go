@@ -1,4 +1,4 @@
-package internal
+package filemodel
 
 import (
 	"errors"

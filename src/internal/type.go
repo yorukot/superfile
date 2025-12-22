@@ -3,6 +3,8 @@ package internal
 import (
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 
+	"github.com/yorukot/superfile/src/internal/ui/filemodel"
+
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
@@ -50,7 +52,7 @@ const (
 // new model in each tea update.
 type model struct {
 	// Main Panels
-	fileModel       FileModel
+	fileModel       filemodel.FileModel
 	sidebarModel    sidebar.Model
 	processBarModel processbar.Model
 	focusPanel      focusPanelType

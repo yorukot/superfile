@@ -1,4 +1,4 @@
-package internal
+package filemodel
 
 import (
 	"github.com/yorukot/superfile/src/internal/common"

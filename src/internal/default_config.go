@@ -5,6 +5,8 @@ import (
 
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 
+	"github.com/yorukot/superfile/src/internal/ui/filemodel"
+
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
@@ -27,7 +29,7 @@ func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool,
 		processBarModel: processbar.New(),
 		sidebarModel:    sidebar.New(),
 		fileMetaData:    metadata.New(),
-		fileModel: FileModel{
+		fileModel: filemodel.FileModel{
 			FilePanels:       filepanel.FilePanelSlice(firstPanelPaths),
 			FilePreview:      preview.New(),
 			SinglePanelWidth: common.DefaultFilePanelWidth,
