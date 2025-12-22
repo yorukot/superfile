@@ -8,119 +8,87 @@ import (
 	"github.com/yorukot/superfile/src/internal/common"
 )
 
+func testModel(cursor int, renderIndex int, height int, elemCount int) Model {
+	return Model{
+		Element:     make([]Element, elemCount),
+		Cursor:      cursor,
+		RenderIndex: renderIndex,
+		height:      height,
+	}
+}
+
 func Test_filePanelUpDown(t *testing.T) {
 	testdata := []struct {
-		name            string
-		panel           Model
-		listDown        bool
-		mainPanelHeight int
-		expectedCursor  int
-		expectedRender  int
+		name           string
+		panel          Model
+		listDown       bool
+		expectedCursor int
+		expectedRender int
 	}{
 		{
-			name: "Down movement within renderable range",
-			panel: Model{
-				Element:     make([]Element, 10),
-				Cursor:      0,
-				RenderIndex: 0,
-			},
-			listDown:        true,
-			mainPanelHeight: 10,
-			expectedCursor:  1,
-			expectedRender:  0,
+			name:           "Down movement within renderable range",
+			panel:          testModel(0, 0, 12, 10),
+			listDown:       true,
+			expectedCursor: 1,
+			expectedRender: 0,
 		},
 		{
-			name: "Down movement when cursor is at bottom",
-			panel: Model{
-				Element:     make([]Element, 10),
-				Cursor:      6, // 3 - Header lines + 7(0-6 files)
-				RenderIndex: 0,
-			},
-			listDown:        true,
-			mainPanelHeight: 10,
-			expectedCursor:  7,
-			expectedRender:  1,
+			name:           "Down movement when cursor is at bottom",
+			panel:          testModel(6, 0, 12, 10),
+			listDown:       true,
+			expectedCursor: 7,
+			expectedRender: 1,
 		},
 		{
-			name: "Down movement causing wrap to top",
-			panel: Model{
-				Element:     make([]Element, 10),
-				Cursor:      9, // 3 - Header lines + 7(3-9 files)
-				RenderIndex: 3,
-			},
-			listDown:        true,
-			mainPanelHeight: 10,
-			expectedCursor:  0,
-			expectedRender:  0,
+			name:           "Down movement causing wrap to top",
+			panel:          testModel(9, 3, 12, 10),
+			listDown:       true,
+			expectedCursor: 0,
+			expectedRender: 0,
 		},
 		{
-			name: "Up movement within renderable range",
-			panel: Model{
-				Element:     make([]Element, 10),
-				Cursor:      2,
-				RenderIndex: 0,
-			},
-			listDown:        false,
-			mainPanelHeight: 10,
-			expectedCursor:  1,
-			expectedRender:  0,
+			name:           "Up movement within renderable range",
+			panel:          testModel(2, 0, 12, 10),
+			listDown:       false,
+			expectedCursor: 1,
+			expectedRender: 0,
 		},
 		{
-			name: "Up movement when cursor is at top",
-			panel: Model{
-				Element:     make([]Element, 10),
-				Cursor:      3,
-				RenderIndex: 3,
-			},
-			listDown:        false,
-			mainPanelHeight: 10,
-			expectedCursor:  2,
-			expectedRender:  2,
+			name:           "Up movement when cursor is at top",
+			panel:          testModel(3, 3, 12, 10),
+			listDown:       false,
+			expectedCursor: 2,
+			expectedRender: 2,
 		},
 		{
-			name: "Up movement causing wrap to bottom",
-			panel: Model{
-				Element:     make([]Element, 10),
-				Cursor:      0,
-				RenderIndex: 0,
-			},
-			listDown:        false,
-			mainPanelHeight: 10,
-			expectedCursor:  9,
-			expectedRender:  3,
+			name:           "Up movement causing wrap to bottom",
+			panel:          testModel(0, 0, 12, 10),
+			listDown:       false,
+			expectedCursor: 9,
+			expectedRender: 3,
 		},
 		{
-			name: "Down movement on empty panel",
-			panel: Model{
-				Element:     make([]Element, 0),
-				Cursor:      0,
-				RenderIndex: 0,
-			},
-			listDown:        true,
-			mainPanelHeight: 10,
-			expectedCursor:  0,
-			expectedRender:  0,
+			name:           "Down movement on empty panel",
+			panel:          testModel(0, 0, 12, 0),
+			listDown:       true,
+			expectedCursor: 0,
+			expectedRender: 0,
 		},
 		{
-			name: "Up movement on empty panel",
-			panel: Model{
-				Element:     make([]Element, 0),
-				Cursor:      0,
-				RenderIndex: 0,
-			},
-			listDown:        false,
-			mainPanelHeight: 10,
-			expectedCursor:  0,
-			expectedRender:  0,
+			name:           "Up movement on empty panel",
+			panel:          testModel(0, 0, 12, 0),
+			listDown:       false,
+			expectedCursor: 0,
+			expectedRender: 0,
 		},
 	}
 
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.listDown {
-				tt.panel.ListDown(tt.mainPanelHeight)
+				tt.panel.ListDown()
 			} else {
-				tt.panel.ListUp(tt.mainPanelHeight)
+				tt.panel.ListUp()
 			}
 			assert.Equal(t, tt.expectedCursor, tt.panel.Cursor)
 			assert.Equal(t, tt.expectedRender, tt.panel.RenderIndex)
@@ -213,10 +181,12 @@ func TestPgUpDown(t *testing.T) {
 
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
+			tt.panel.SetHeight(tt.mainPanelHeight + 2)
+
 			if tt.pageDown {
-				tt.panel.PgDown(tt.mainPanelHeight)
+				tt.panel.PgDown()
 			} else {
-				tt.panel.PgUp(tt.mainPanelHeight)
+				tt.panel.PgUp()
 			}
 			assert.Equal(t, tt.expectedCursor, tt.panel.Cursor)
 			assert.Equal(t, tt.expectedRender, tt.panel.RenderIndex)
@@ -346,10 +316,12 @@ func TestItemSelectUpDown(t *testing.T) {
 
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
+			tt.panel.SetHeight(tt.mainPanelHeight + 2)
+
 			if tt.selectDown {
-				tt.panel.ItemSelectDown(tt.mainPanelHeight)
+				tt.panel.ItemSelectDown()
 			} else {
-				tt.panel.ItemSelectUp(tt.mainPanelHeight)
+				tt.panel.ItemSelectUp()
 			}
 			assert.Equal(t, tt.expectedCursor, tt.panel.Cursor)
 			assert.Equal(t, tt.expectedRender, tt.panel.RenderIndex)
@@ -443,7 +415,8 @@ func TestScrollToCursor(t *testing.T) {
 
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.panel.scrollToCursor(tt.cursorPos, tt.mainPanelHeight)
+			tt.panel.SetHeight(tt.mainPanelHeight + 2)
+			tt.panel.scrollToCursor(tt.cursorPos)
 			assert.Equal(t, tt.expectedCursor, tt.panel.Cursor)
 			assert.Equal(t, tt.expectedRender, tt.panel.RenderIndex)
 		})
@@ -463,18 +436,18 @@ func TestApplyTargetFileCursor(t *testing.T) {
 		Cursor:      0,
 		RenderIndex: 0,
 		TargetFile:  "target.txt",
+		height:      8,
 	}
-	height := 6 // 3 viewport
 	expCursor := 4
 	expRender := 2
 
-	panel.applyTargetFileCursor(height)
+	panel.applyTargetFileCursor()
 	assert.Equal(t, expCursor, panel.Cursor)
 	assert.Equal(t, expRender, panel.RenderIndex)
 	assert.Empty(t, panel.TargetFile)
 
 	// Shouldn't do anything
-	panel.applyTargetFileCursor(height)
+	panel.applyTargetFileCursor()
 	assert.Equal(t, expCursor, panel.Cursor)
 	assert.Equal(t, expRender, panel.RenderIndex)
 }
@@ -534,16 +507,11 @@ func TestPageScrollSizeConfig(t *testing.T) {
 			common.Config.PageScrollSize = tt.pageScrollSize
 
 			// Create model with elements
-			m := Model{
-				Element:     make([]Element, tt.totalElements),
-				Cursor:      tt.initialCursor,
-				RenderIndex: 0,
-			}
-
+			m := testModel(tt.initialCursor, 0, tt.panelHeight+2, tt.totalElements)
 			if tt.pgUp {
-				m.PgUp(tt.panelHeight)
+				m.PgUp()
 			} else {
-				m.PgDown(tt.panelHeight)
+				m.PgDown()
 			}
 
 			assert.Equal(t, tt.expectedCursor, m.Cursor,

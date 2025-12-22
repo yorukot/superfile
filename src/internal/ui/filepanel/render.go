@@ -14,20 +14,20 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
 )
 
-func (m *Model) Render(mainPanelHeight int, filePanelWidth int, focussed bool) string {
-	r := ui.FilePanelRenderer(mainPanelHeight+common.BorderPadding, filePanelWidth+common.BorderPadding, focussed)
+func (m *Model) Render(focussed bool) string {
+	r := ui.FilePanelRenderer(m.height, m.width, focussed)
 
-	m.renderTopBar(r, filePanelWidth)
+	m.renderTopBar(r)
 	m.renderSearchBar(r)
 	m.renderFooter(r, uint(len(m.Selected)))
-	m.renderFileEntries(r, mainPanelHeight, filePanelWidth)
+	m.renderFileEntries(r)
 
 	return r.Render()
 }
 
-func (m *Model) renderTopBar(r *rendering.Renderer, filePanelWidth int) {
+func (m *Model) renderTopBar(r *rendering.Renderer) {
 	// TODO - Add ansitruncate left in renderer and remove truncation here
-	truncatedPath := common.TruncateTextBeginning(m.Location, filePanelWidth-common.InnerPadding, "...")
+	truncatedPath := common.TruncateTextBeginning(m.Location, m.GetContentWidth()-common.InnerPadding, "...")
 	r.AddLines(common.FilePanelTopDirectoryIcon + common.FilePanelTopPathStyle.Render(truncatedPath))
 	r.AddSection()
 }
@@ -61,13 +61,13 @@ func (m *Model) renderFooter(r *rendering.Renderer, selectedCount uint) {
 	}
 }
 
-func (m *Model) renderFileEntries(r *rendering.Renderer, mainPanelHeight, filePanelWidth int) {
+func (m *Model) renderFileEntries(r *rendering.Renderer) {
 	if len(m.Element) == 0 {
 		r.AddLines(common.FilePanelNoneText)
 		return
 	}
 
-	end := min(m.RenderIndex+panelElementHeight(mainPanelHeight), len(m.Element))
+	end := min(m.RenderIndex+m.PanelElementHeight(), len(m.Element))
 
 	for i := m.RenderIndex; i < end; i++ {
 		// TODO : Fix this, this is O(n^2) complexity. Considered a file panel with 200 files, and 100 selected
@@ -92,7 +92,7 @@ func (m *Model) renderFileEntries(r *rendering.Renderer, mainPanelHeight, filePa
 		isLink := m.Element[i].Info.Mode()&os.ModeSymlink != 0
 		renderedName := common.PrettierName(
 			m.Element[i].Name,
-			filePanelWidth-prefixWidth,
+			m.GetContentWidth()-prefixWidth,
 			m.Element[i].Directory,
 			isLink,
 			isSelected,
