@@ -93,8 +93,7 @@ func (m *Model) shouldSkipPanelUpdate(focusPanelReRender bool,
 	return false
 }
 
-func (m *Model) UpdateElementsIfNeeded(focusPanelReRender bool, toggleDotFile bool,
-	updatedToggleDotFile bool, mainPanelHeight int) {
+func (m *Model) UpdateElementsIfNeeded(focusPanelReRender bool, toggleDotFile bool, updatedToggleDotFile bool) {
 	nowTime := time.Now()
 	if !m.shouldSkipPanelUpdate(focusPanelReRender, nowTime, updatedToggleDotFile) {
 		// Load elements for this panel (with/without search filter)

@@ -697,7 +697,7 @@ func (m *model) getFilePanelItems() {
 	focusPanelReRender := focusPanel.NeedsReRender()
 	for i := range m.fileModel.filePanels {
 		m.fileModel.filePanels[i].UpdateElementsIfNeeded(focusPanelReRender, m.toggleDotFile,
-			m.updatedToggleDotFile, m.mainPanelHeight)
+			m.updatedToggleDotFile)
 	}
 
 	m.updatedToggleDotFile = false
