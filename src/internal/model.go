@@ -539,6 +539,10 @@ func (m *model) View() string {
 		slog.Error("Invalid layout", "error", err)
 	}
 
+	if err := m.validateComponentRender(); err != nil {
+		slog.Error("Component render validation failed", "error", err)
+	}
+
 	sidebar := m.sidebarRender()
 
 	filePanel := m.fileModel.Render()

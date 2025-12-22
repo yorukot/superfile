@@ -3,9 +3,10 @@ package internal
 import (
 	"errors"
 	"fmt"
+	"strings"
 
+	"github.com/charmbracelet/x/ansi"
 	"github.com/yorukot/superfile/src/internal/common"
-
 	"github.com/yorukot/superfile/src/internal/utils"
 )
 
@@ -117,6 +118,116 @@ func (m *model) validateLayout() error { //nolint:gocognit // cumilation of vali
 	if m.promptModal.IsOpen() {
 		if m.promptModal.GetWidth() >= m.fullWidth {
 			return fmt.Errorf("prompt modal width %v exceeds full width %v", m.promptModal.GetWidth(), m.fullWidth)
+		}
+	}
+
+	return nil
+}
+
+// validateRender validates rendered output dimensions and border
+func validateRender(out string, height int, width int, border bool) error {
+	// Strip ANSI escape sequences for accurate width measurement
+	strippedOut := ansi.Strip(out)
+
+	// Split into lines
+	lines := strings.Split(strippedOut, "\n")
+
+	// Check number of lines
+	if len(lines) != height {
+		return fmt.Errorf("render height mismatch: expected %v lines, got %v", height, len(lines))
+	}
+
+	// Check each line width
+	for i, line := range lines {
+		lineWidth := ansi.StringWidth(line)
+		if lineWidth != width {
+			return fmt.Errorf("render line %v width mismatch: expected %v, got %v", i, width, lineWidth)
+		}
+	}
+
+	// Check for border if required
+	if border && len(lines) > 2 {
+		// Check first line starts with TopLeft and ends with TopRight
+		if !strings.HasPrefix(lines[0], common.Config.BorderTopLeft) {
+			return fmt.Errorf("render missing top left border, expected %q", common.Config.BorderTopLeft)
+		}
+		if !strings.HasSuffix(lines[0], common.Config.BorderTopRight) {
+			return fmt.Errorf("render missing top right border, expected %q", common.Config.BorderTopRight)
+		}
+
+		// Check last line starts with BottomLeft and ends with BottomRight
+		lastLine := lines[len(lines)-1]
+		if !strings.HasPrefix(lastLine, common.Config.BorderBottomLeft) {
+			return fmt.Errorf("render missing bottom left border, expected %q", common.Config.BorderBottomLeft)
+		}
+		if !strings.HasSuffix(lastLine, common.Config.BorderBottomRight) {
+			return fmt.Errorf("render missing bottom right border, expected %q", common.Config.BorderBottomRight)
+		}
+
+		// Check middle lines wrapped with BorderLeft and BorderRight
+		for i := 1; i < len(lines)-1; i++ {
+			if !strings.HasPrefix(lines[i], common.Config.BorderLeft) {
+				return fmt.Errorf("render line %v missing left border, expected %q", i, common.Config.BorderLeft)
+			}
+			if !strings.HasSuffix(lines[i], common.Config.BorderRight) {
+				return fmt.Errorf("render line %v missing right border, expected %q", i, common.Config.BorderRight)
+			}
+		}
+
+		// Check top line contains BorderTop
+		if !strings.Contains(lines[0], common.Config.BorderTop) {
+			return fmt.Errorf("render missing top border character %q", common.Config.BorderTop)
+		}
+
+		// Check bottom line contains BorderBottom
+		if !strings.Contains(lastLine, common.Config.BorderBottom) {
+			return fmt.Errorf("render missing bottom border character %q", common.Config.BorderBottom)
+		}
+	}
+
+	return nil
+}
+
+// validateComponentRender validates render output of all components
+func (m *model) validateComponentRender() error {
+	// Skip validation if dimensions are not set
+	if m.mainPanelHeight <= 0 || m.fullWidth <= 0 {
+		return nil
+	}
+	
+	// Validate sidebar render
+	if common.Config.SidebarWidth > 0 && m.mainPanelHeight > 0 {
+		sidebarRender := m.sidebarRender()
+		// Sidebar render includes borders, so add BorderPadding to expected height
+		// and width includes border padding as well
+		if err := validateRender(sidebarRender, m.mainPanelHeight+common.BorderPadding, common.Config.SidebarWidth+common.BorderPadding, true); err != nil {
+			return fmt.Errorf("sidebar render validation failed: %w", err)
+		}
+	}
+
+	// Validate file panels
+	if m.fileModel.PanelCount() > 0 && m.mainPanelHeight > 0 {
+		for i := range m.fileModel.FilePanels {
+			panel := &m.fileModel.FilePanels[i]
+			if panel.GetWidth() > 0 && panel.GetHeight() > 0 {
+				panelRender := panel.Render(i == m.fileModel.FocusedPanelIndex)
+				if err := validateRender(panelRender, panel.GetHeight(), panel.GetWidth(), true); err != nil {
+					return fmt.Errorf("file panel %v render validation failed: %w", i, err)
+				}
+			}
+		}
+	}
+
+	// Validate footer components if visible
+	if m.toggleFooter && m.footerHeight > 0 {
+		// Validate process bar
+		processBarRender := m.processBarRender()
+		processBarWidth := utils.FooterWidth(m.fullWidth) + common.BorderPadding
+		processBarHeight := m.footerHeight + common.BorderPadding
+		if processBarWidth > 0 && processBarHeight > 0 {
+			if err := validateRender(processBarRender, processBarHeight, processBarWidth, true); err != nil {
+				return fmt.Errorf("process bar render validation failed: %w", err)
+			}
 		}
 	}
 
