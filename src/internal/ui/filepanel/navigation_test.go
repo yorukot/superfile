@@ -8,22 +8,29 @@ import (
 	"github.com/yorukot/superfile/src/internal/common"
 )
 
+func testModel(cursor int, renderIndex int, height int, elemCount int) Model {
+	return Model{
+		Element:     make([]Element, elemCount),
+		Cursor:      cursor,
+		RenderIndex: renderIndex,
+		height:      height,
+	}
+}
+
 func Test_filePanelUpDown(t *testing.T) {
 	testdata := []struct {
 		name            string
 		panel           Model
 		listDown        bool
-		mainPanelHeight int
-		expectedCursor  int
-		expectedRender  int
+		mainPanelHeight int // TODO: Remove this and setup model with
+		// height values. Try to use helper fuctions as much as possible to avoid
+		// duplication
+		expectedCursor int
+		expectedRender int
 	}{
 		{
-			name: "Down movement within renderable range",
-			panel: Model{
-				Element:     make([]Element, 10),
-				Cursor:      0,
-				RenderIndex: 0,
-			},
+			name:            "Down movement within renderable range",
+			panel:           testModel(0, 0, 12, 10),
 			listDown:        true,
 			mainPanelHeight: 10,
 			expectedCursor:  1,
