@@ -78,7 +78,7 @@ func (m *model) validateLayout() error { //nolint:gocognit // cumilation of vali
 		if panel.GetHeight() != m.fileModel.Height {
 			return fmt.Errorf(
 				"file panel %v height mismatch: expected %v, got %v",
-				i, m.mainPanelHeight, panel.GetHeight())
+				i, m.fileModel.Height, panel.GetHeight())
 		}
 
 		// Validate search bar width matches panel width minus padding
@@ -280,10 +280,10 @@ func (m *model) validateComponentPlacement(lines []string, pos compPosition, bor
 
 // Inclusive
 func (m *model) extractComponent(lines []string, pos compPosition) ([]string, error) {
-	if 0 > pos.stRow || pos.stRow > pos.endRow || pos.endRow > len(lines) {
+	if 0 > pos.stRow || pos.stRow > pos.endRow || pos.endRow >= len(lines) {
 		return nil, fmt.Errorf("invalid row range [%v, %v]", pos.stRow, pos.endRow)
 	}
-	if 0 > pos.stCol || pos.stCol > pos.endCol || pos.endCol > ansi.StringWidth(lines[0]) {
+	if 0 > pos.stCol || pos.stCol > pos.endCol || pos.endCol >= ansi.StringWidth(lines[0]) {
 		return nil, fmt.Errorf("invalid col range [%v, %v]", pos.stCol, pos.endCol)
 	}
 

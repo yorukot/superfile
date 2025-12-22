@@ -42,5 +42,5 @@ func (m *Model) GetContentWidth() int {
 
 // PanelElementHeight calculates the number of visible elements in content area
 func (m *Model) PanelElementHeight() int {
-	return m.GetMainPanelHeight() - ContentPadding
+	return m.GetMainPanelHeight() - contentPadding
 }

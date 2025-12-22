@@ -28,8 +28,8 @@ func defaultFilePanel(path string, focused bool) Model {
 		panelPath = filepath.Dir(panelPath)
 	}
 	sortOptions := sortOptionsModel{
-		Width:  SortOptionsDefaultWidth,
-		Height: SortOptionsDefaultHeight,
+		Width:  sortOptionsDefaultWidth,
+		Height: sortOptionsDefaultHeight,
 		Open:   false,
 		Cursor: common.Config.DefaultSortType,
 		Data: sortOptionsModelData{
