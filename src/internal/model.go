@@ -236,52 +236,29 @@ func (m *model) setHeightValues() {
 }
 
 func (m *model) updateComponentDimensions() tea.Cmd {
-	m.setFilePanelsSize()
+	slog.Debug("[TEMP]", "fpopen", m.fileModel.filePreview.IsOpen(),
+		"h", m.fullHeight, "mh", m.mainPanelHeight,
+		"ph", m.getFocusedFilePanel().GetHeight(),
+		"pw", m.getFocusedFilePanel().GetWidth())
+	m.setFileModelDimensions()
 	m.setHelpMenuSize()
 	m.setMetadataModelSize()
 	m.setProcessBarModelSize()
 	m.setPromptModelSize()
 	m.setZoxideModelSize()
 
-	if m.fileModel.maxFilePanel >= common.FilePanelMax {
-		m.fileModel.maxFilePanel = common.FilePanelMax
-	}
+	slog.Debug("[TEMP] 2", "fpopen", m.fileModel.filePreview.IsOpen(),
+		"h", m.fullHeight, "mh", m.mainPanelHeight,
+		"ph", m.getFocusedFilePanel().GetHeight(),
+		"pw", m.getFocusedFilePanel().GetWidth())
 
 	// File preview panel requires explicit height update, unlike sidebar/file panels
 	// which receive height as render parameters and update automatically on each frame
-	if m.fileModel.filePreview.IsOpen() {
-		m.setFilePreviewPanelSize()
-		// Force re-render of preview content with new dimensions
-		return m.getFilePreviewCmd(true)
-	}
-	return nil
+	// Force re-render of preview content with new dimensions
+	return m.getFilePreviewCmd(true)
+
 }
 
-func (m *model) setFilePreviewPanelSize() {
-	m.fileModel.filePreview.SetWidth(m.getFilePreviewWidth())
-	m.fileModel.filePreview.SetHeight(m.mainPanelHeight + common.BorderPadding)
-}
-
-// Set file preview panel Widht to width. Assure that
-func (m *model) getFilePreviewWidth() int {
-	if common.Config.FilePreviewWidth == 0 {
-		return (m.fullWidth - common.Config.SidebarWidth -
-			(common.InnerPadding + (len(m.fileModel.filePanels))*common.BorderPadding)) / (len(m.fileModel.filePanels) + 1)
-	}
-	return (m.fullWidth - common.Config.SidebarWidth) / common.Config.FilePreviewWidth
-}
-
-// Proper set panels size. Assure that panels do not overlap
-func (m *model) setFilePanelsSize() {
-	width := m.fullWidth
-	// set each file panel size and max file panel amount
-	m.fileModel.width = (width - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth() -
-		(common.InnerPadding + (len(m.fileModel.filePanels)-1)*common.BorderPadding)) / len(m.fileModel.filePanels)
-	m.fileModel.maxFilePanel = (width - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth()) / common.FilePanelWidthUnit
-	for i := range m.fileModel.filePanels {
-		m.fileModel.filePanels[i].UpdateDimensions(m.fileModel.width, m.mainPanelHeight+common.BorderPadding)
-	}
-}
 
 // Set help menu size
 func (m *model) setHelpMenuSize() {

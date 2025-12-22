@@ -55,7 +55,7 @@ func (m *model) filePanelRender() string {
 		} else {
 			filePanelWidth = m.fileModel.width
 		}
-		filePanel.UpdateDimensions(filePanelWidth, m.mainPanelHeight)
+		filePanel.UpdateDimensions(filePanelWidth+common.BorderPadding, m.mainPanelHeight+common.BorderPadding)
 
 		f[i] = filePanel.Render(filePanel.IsFocused)
 	}
