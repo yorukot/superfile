@@ -82,9 +82,9 @@ func (m *model) validateLayout() error { //nolint:gocognit // cumilation of vali
 		}
 
 		// Validate search bar width matches panel width minus padding
-		if panel.SearchBar.Value() != "" && panel.SearchBar.Width != m.fileModel.Width-common.InnerPadding {
+		if panel.SearchBar.Width != panel.GetWidth()-common.InnerPadding {
 			return fmt.Errorf("file panel %v search bar width mismatch: expected %v, got %v",
-				i, m.fileModel.Width-common.InnerPadding, panel.SearchBar.Width)
+				i, panel.GetWidth()-common.InnerPadding, panel.SearchBar.Width)
 		}
 	}
 
@@ -147,7 +147,7 @@ func validateRender(out string, height int, width int, border bool) error {
 	// Check for border if required
 	if border {
 		if len(lines) < minLinesForBorder {
-			return fmt.Errorf("too many lines for border : %v", len(lines))
+			return fmt.Errorf("too few lines for border : %v", len(lines))
 		}
 		// Check first line starts with TopLeft and ends with TopRight
 		if !strings.HasPrefix(lines[0], common.Config.BorderTopLeft) {
@@ -253,6 +253,7 @@ func (m *model) validateFinalRender(out string) error {
 			endCol: filePanelColStart + panel.GetWidth() - 1,
 		}
 		filePanelColStart += panel.GetWidth()
+		// Note: This wont work when any overlay model is open
 		if err := m.validateComponentPlacement(lines, panelPos, true); err != nil {
 			return fmt.Errorf("file panel %v position validation failed: %w", i, err)
 		}
