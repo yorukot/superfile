@@ -30,13 +30,9 @@ func (m *model) processBarRender() string {
 
 func (m *model) clipboardRender() string {
 	// render
-	var bottomWidth int
-	if m.fullWidth%3 != 0 {
-		bottomWidth = utils.FooterWidth(m.fullWidth + m.fullWidth%common.FooterGroupCols + common.BorderPadding)
-	} else {
-		bottomWidth = utils.FooterWidth(m.fullWidth)
-	}
-	r := ui.ClipboardRenderer(m.footerHeight+common.BorderPadding, bottomWidth+common.BorderPadding)
+
+	r := ui.ClipboardRenderer(m.footerHeight+common.BorderPadding,
+		m.getClipboardWidth()+common.BorderPadding)
 	if len(m.copyItems.items) == 0 {
 		// TODO move this to a string
 		r.AddLines("", " "+icon.Error+"  No content in clipboard")
@@ -61,6 +57,13 @@ func (m *model) clipboardRender() string {
 		}
 	}
 	return r.Render()
+}
+
+func (m *model) getClipboardWidth() int {
+	if m.fullWidth%3 == 0 {
+		return utils.FooterWidth(m.fullWidth)
+	}
+	return utils.FooterWidth(m.fullWidth + m.fullWidth%common.FooterGroupCols + common.BorderPadding)
 }
 
 func (m *model) terminalSizeWarnRender() string {
@@ -282,8 +285,4 @@ func (m *model) sortOptionsRender() string {
 
 	return common.SortOptionsModalBorderStyle(panel.SortOptions.Height, panel.SortOptions.Width,
 		bottomBorder).Render(sortOptionsContent)
-}
-
-func (m *model) filePreviewPanelRender() string {
-	return m.fileModel.FilePreview.GetContent()
 }

@@ -68,5 +68,5 @@ func (m *FileModel) UpdateChildComponentWidth() {
 	}
 
 	m.SinglePanelWidth = panelWidth
-	m.MaxFilePanel = widthForPanels / filepanel.FilePanelMinWidth
+	m.MaxFilePanel = widthForPanels / filepanel.MinWidth
 }

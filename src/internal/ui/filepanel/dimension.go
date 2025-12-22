@@ -8,16 +8,16 @@ func (m *Model) UpdateDimensions(width, height int) {
 }
 
 func (m *Model) SetWidth(width int) {
-	if width < FilePanelMinWidth {
-		width = FilePanelMinWidth
+	if width < MinWidth {
+		width = MinWidth
 	}
 	m.width = width
 	m.SearchBar.Width = m.width - common.InnerPadding
 }
 
 func (m *Model) SetHeight(height int) {
-	if height < FilePanelMinHeight {
-		height = FilePanelMinHeight
+	if height < MinHeight {
+		height = MinHeight
 	}
 	m.height = height
 	// Adjust scroll if needed
@@ -42,5 +42,5 @@ func (m *Model) GetContentWidth() int {
 
 // PanelElementHeight calculates the number of visible elements in content area
 func (m *Model) PanelElementHeight() int {
-	return m.GetMainPanelHeight() - FilePanelContentPadding
+	return m.GetMainPanelHeight() - ContentPadding
 }

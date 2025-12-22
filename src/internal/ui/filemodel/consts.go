@@ -6,9 +6,12 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 )
 
+// Now they are same doesn't means that they will be forever.
+// Explicitly stating here tells that they are derived from same
+// source, but have inherently different meaning
 const (
-	FileModelMinWidth  = filepanel.FilePanelMinWidth
-	FileModelMinHeight = filepanel.FilePanelMinHeight
+	FileModelMinHeight = filepanel.MinHeight
+	FileModelMinWidth  = filepanel.MinWidth
 )
 
 var ErrMaximumPanelCount = errors.New("maximum panel count reached")

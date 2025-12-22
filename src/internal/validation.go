@@ -11,6 +11,8 @@ import (
 	"github.com/yorukot/superfile/src/internal/utils"
 )
 
+const minLinesForBorder = 3
+
 // Non fatal Validations. This indicates bug / programming errors, not user configuration mistake
 func (m *model) validateLayout() error { //nolint:gocognit // cumilation of validations
 	// Validate footer height
@@ -124,27 +126,32 @@ func validateRender(
 	width int,
 	border bool,
 ) error { //nolint:gocognit // cumilation of validations
-	// Strip ANSI escape sequences for accurate width measurement
 	strippedOut := ansi.Strip(out)
 
-	// Split into lines
 	lines := strings.Split(strippedOut, "\n")
 
-	// Check number of lines
 	if len(lines) != height {
 		return fmt.Errorf("render height mismatch: expected %v lines, got %v", height, len(lines))
 	}
 
-	// Check each line width
 	for i, line := range lines {
 		lineWidth := ansi.StringWidth(line)
 		if lineWidth != width {
-			return fmt.Errorf("render line %v width mismatch: expected %v, got %v", i, width, lineWidth)
+			return fmt.Errorf(
+				"render line %v width mismatch: expected %v width, got %v(line - '%v')",
+				i,
+				width,
+				lineWidth,
+				lines[i],
+			)
 		}
 	}
 
 	// Check for border if required
-	if border && len(lines) > 2 {
+	if border {
+		if len(lines) < minLinesForBorder {
+			return fmt.Errorf("too many lines for border : %v", len(lines))
+		}
 		// Check first line starts with TopLeft and ends with TopRight
 		if !strings.HasPrefix(lines[0], common.Config.BorderTopLeft) {
 			return fmt.Errorf("render missing top left border, expected %q", common.Config.BorderTopLeft)
@@ -189,47 +196,111 @@ func validateRender(
 }
 
 // validateComponentRender validates render output of all components
-func (m *model) validateComponentRender() error { //nolint:gocognit // cumilation of validations
-	// Skip validation if dimensions are not set
-	if m.mainPanelHeight <= 0 || m.fullWidth <= 0 {
-		return nil
-	}
-
+func (m *model) validateComponentRender() error {
 	// Validate sidebar render
-	if common.Config.SidebarWidth > 0 && m.mainPanelHeight > 0 {
+	if common.Config.SidebarWidth > 0 {
 		sidebarRender := m.sidebarRender()
-		// Sidebar render includes borders, so add BorderPadding to expected height
-		// and width includes border padding as well
 		if err := validateRender(sidebarRender, m.mainPanelHeight+common.BorderPadding, common.Config.SidebarWidth+common.BorderPadding, true); err != nil {
 			return fmt.Errorf("sidebar render validation failed: %w", err)
 		}
 	}
 
-	// Validate file panels
-	if m.fileModel.PanelCount() > 0 && m.mainPanelHeight > 0 {
-		for i := range m.fileModel.FilePanels {
-			panel := &m.fileModel.FilePanels[i]
-			if panel.GetWidth() > 0 && panel.GetHeight() > 0 {
-				panelRender := panel.Render(i == m.fileModel.FocusedPanelIndex)
-				if err := validateRender(panelRender, panel.GetHeight(), panel.GetWidth(), true); err != nil {
-					return fmt.Errorf("file panel %v render validation failed: %w", i, err)
-				}
-			}
+	for i := range m.fileModel.FilePanels {
+		panel := &m.fileModel.FilePanels[i]
+		panelRender := panel.Render(i == m.fileModel.FocusedPanelIndex)
+		if err := validateRender(panelRender, panel.GetHeight(), panel.GetWidth(), true); err != nil {
+			return fmt.Errorf("file panel %v render validation failed: %w", i, err)
 		}
 	}
 
+	if err := validateRender(m.fileModel.Render(), m.fileModel.Height, m.fileModel.Width, false); err != nil {
+		return fmt.Errorf("file model render validation failed: %w", err)
+	}
+
 	// Validate footer components if visible
-	if m.toggleFooter && m.footerHeight > 0 {
-		// Validate process bar
-		processBarRender := m.processBarRender()
-		processBarWidth := utils.FooterWidth(m.fullWidth) + common.BorderPadding
-		processBarHeight := m.footerHeight + common.BorderPadding
-		if processBarWidth > 0 && processBarHeight > 0 {
-			if err := validateRender(processBarRender, processBarHeight, processBarWidth, true); err != nil {
-				return fmt.Errorf("process bar render validation failed: %w", err)
-			}
+	if m.toggleFooter {
+		width := utils.FooterWidth(m.fullWidth) + common.BorderPadding
+		height := m.footerHeight + common.BorderPadding
+		if err := validateRender(m.processBarRender(), height, width, true); err != nil {
+			return fmt.Errorf("process bar render validation failed: %w", err)
+		}
+		if err := validateRender(m.fileMetaData.Render(true), height, width, true); err != nil {
+			return fmt.Errorf("metadata render validation failed: %w", err)
+		}
+		if err := validateRender(m.clipboardRender(), height, m.getClipboardWidth()+common.BorderPadding, true); err != nil {
+			return fmt.Errorf("clipboard render validation failed: %w", err)
 		}
 	}
 
 	return nil
+}
+
+func (m *model) validateFinalRender(out string) error {
+	if err := validateRender(out, m.fullHeight, m.fullWidth, false); err != nil {
+		return fmt.Errorf("model rendering failures : %w", err)
+	}
+	strippedOut := ansi.Strip(out)
+
+	lines := strings.Split(strippedOut, "\n")
+
+	filePanelColStart := 0
+	if common.Config.SidebarWidth != 0 {
+		filePanelColStart += common.BorderPadding + common.Config.SidebarWidth
+	}
+	for i := range m.fileModel.FilePanels {
+		panel := &m.fileModel.FilePanels[i]
+		panelPos := compPosition{
+			stRow:  0,
+			endRow: m.mainPanelHeight + 1,
+			stCol:  filePanelColStart,
+			endCol: filePanelColStart + panel.GetWidth() - 1,
+		}
+		filePanelColStart += panel.GetWidth()
+		if err := m.validateComponentPlacement(lines, panelPos, true); err != nil {
+			return fmt.Errorf("file panel %v position validation failed: %w", i, err)
+		}
+	}
+
+	return nil
+}
+
+// Inclusive
+func (m *model) validateComponentPlacement(lines []string, pos compPosition, border bool) error {
+	extractedLines, err := m.extractComponent(lines, pos)
+	if err != nil {
+		return fmt.Errorf("failure while extracting content : %w", err)
+	}
+
+	cntRow := pos.endRow - pos.stRow + 1
+	cntCol := pos.endCol - pos.stCol + 1
+	extractedOut := strings.Join(extractedLines, "\n")
+	if err := validateRender(extractedOut, cntRow, cntCol, border); err != nil {
+		return fmt.Errorf("failure in extracted content : %w", err)
+	}
+	return nil
+}
+
+// Inclusive
+func (m *model) extractComponent(lines []string, pos compPosition) ([]string, error) {
+	if 0 > pos.stRow || pos.stRow > pos.endRow || pos.endRow > len(lines) {
+		return nil, fmt.Errorf("invalid row range [%v, %v]", pos.stRow, pos.endRow)
+	}
+	if 0 > pos.stCol || pos.stCol > pos.endCol || pos.endCol > ansi.StringWidth(lines[0]) {
+		return nil, fmt.Errorf("invalid col range [%v, %v]", pos.stCol, pos.endCol)
+	}
+
+	cntRow := pos.endRow - pos.stRow + 1
+	extractedLines := make([]string, cntRow)
+	for i := range cntRow {
+		orgIdx := pos.stRow + i
+		extractedLines[i] = ansi.Cut(lines[orgIdx], pos.stCol, pos.endCol+1)
+	}
+	return extractedLines, nil
+}
+
+type compPosition struct {
+	stRow  int
+	stCol  int
+	endRow int
+	endCol int
 }
