@@ -55,8 +55,9 @@ func (m *model) filePanelRender() string {
 		} else {
 			filePanelWidth = m.fileModel.width
 		}
+		filePanel.UpdateDimensions(filePanelWidth, m.mainPanelHeight)
 
-		f[i] = filePanel.Render(m.mainPanelHeight, filePanelWidth, filePanel.IsFocused)
+		f[i] = filePanel.Render(filePanel.IsFocused)
 	}
 	return lipgloss.JoinHorizontal(lipgloss.Top, f...)
 }

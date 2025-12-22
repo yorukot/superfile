@@ -279,8 +279,9 @@ func (m *model) setFilePanelsSize() {
 		(common.InnerPadding + (len(m.fileModel.filePanels)-1)*common.BorderPadding)) / len(m.fileModel.filePanels)
 	m.fileModel.maxFilePanel = (width - common.Config.SidebarWidth - m.fileModel.filePreview.GetWidth()) / common.FilePanelWidthUnit
 	for i := range m.fileModel.filePanels {
+		m.fileModel.filePanels[i].UpdateDimensions(m.fileModel.width, m.mainPanelHeight)
 		m.fileModel.filePanels[i].SearchBar.Width = m.fileModel.width - common.InnerPadding
-		m.fileModel.filePanels[i].HandleResize(m.mainPanelHeight)
+		m.fileModel.filePanels[i].HandleResize()
 	}
 }
 

@@ -17,8 +17,8 @@ type Model struct {
 	IsFocused   bool
 	Location    string
 	// Dimension fields
-	width       int // Total width including borders
-	height      int // Total height including borders
+	width  int // Total width including borders
+	height int // Total height including borders
 	// TODO: Every file panel doesn't needs sort options model
 	// They just need to store their current sort config.
 	SortOptions        sortOptionsModel

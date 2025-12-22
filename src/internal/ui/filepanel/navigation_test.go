@@ -118,9 +118,9 @@ func Test_filePanelUpDown(t *testing.T) {
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.listDown {
-				tt.panel.ListDown(tt.mainPanelHeight)
+				tt.panel.ListDown()
 			} else {
-				tt.panel.ListUp(tt.mainPanelHeight)
+				tt.panel.ListUp()
 			}
 			assert.Equal(t, tt.expectedCursor, tt.panel.Cursor)
 			assert.Equal(t, tt.expectedRender, tt.panel.RenderIndex)
@@ -214,9 +214,9 @@ func TestPgUpDown(t *testing.T) {
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.pageDown {
-				tt.panel.PgDown(tt.mainPanelHeight)
+				tt.panel.PgDown()
 			} else {
-				tt.panel.PgUp(tt.mainPanelHeight)
+				tt.panel.PgUp()
 			}
 			assert.Equal(t, tt.expectedCursor, tt.panel.Cursor)
 			assert.Equal(t, tt.expectedRender, tt.panel.RenderIndex)
@@ -347,9 +347,9 @@ func TestItemSelectUpDown(t *testing.T) {
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.selectDown {
-				tt.panel.ItemSelectDown(tt.mainPanelHeight)
+				tt.panel.ItemSelectDown()
 			} else {
-				tt.panel.ItemSelectUp(tt.mainPanelHeight)
+				tt.panel.ItemSelectUp()
 			}
 			assert.Equal(t, tt.expectedCursor, tt.panel.Cursor)
 			assert.Equal(t, tt.expectedRender, tt.panel.RenderIndex)
@@ -443,7 +443,8 @@ func TestScrollToCursor(t *testing.T) {
 
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.panel.scrollToCursor(tt.cursorPos, tt.mainPanelHeight)
+			tt.panel.UpdateDimensions(100, tt.mainPanelHeight)
+			tt.panel.scrollToCursor(tt.cursorPos)
 			assert.Equal(t, tt.expectedCursor, tt.panel.Cursor)
 			assert.Equal(t, tt.expectedRender, tt.panel.RenderIndex)
 		})
@@ -467,14 +468,15 @@ func TestApplyTargetFileCursor(t *testing.T) {
 	height := 6 // 3 viewport
 	expCursor := 4
 	expRender := 2
+	panel.UpdateDimensions(100, height)
 
-	panel.applyTargetFileCursor(height)
+	panel.applyTargetFileCursor()
 	assert.Equal(t, expCursor, panel.Cursor)
 	assert.Equal(t, expRender, panel.RenderIndex)
 	assert.Empty(t, panel.TargetFile)
 
 	// Shouldn't do anything
-	panel.applyTargetFileCursor(height)
+	panel.applyTargetFileCursor()
 	assert.Equal(t, expCursor, panel.Cursor)
 	assert.Equal(t, expRender, panel.RenderIndex)
 }
@@ -539,11 +541,12 @@ func TestPageScrollSizeConfig(t *testing.T) {
 				Cursor:      tt.initialCursor,
 				RenderIndex: 0,
 			}
+			m.UpdateDimensions(100, tt.panelHeight)
 
 			if tt.pgUp {
-				m.PgUp(tt.panelHeight)
+				m.PgUp()
 			} else {
-				m.PgDown(tt.panelHeight)
+				m.PgDown()
 			}
 
 			assert.Equal(t, tt.expectedCursor, m.Cursor,

@@ -31,7 +31,7 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 		case metadataFocus:
 			m.fileMetaData.ListUp()
 		case nonePanelFocus:
-			m.fileModel.filePanels[m.filePanelFocusIndex].ListUp(m.mainPanelHeight)
+			m.fileModel.filePanels[m.filePanelFocusIndex].ListUp()
 		}
 
 		// If move down Key is pressed, check the current state and executes
@@ -44,14 +44,14 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 		case metadataFocus:
 			m.fileMetaData.ListDown()
 		case nonePanelFocus:
-			m.fileModel.filePanels[m.filePanelFocusIndex].ListDown(m.mainPanelHeight)
+			m.fileModel.filePanels[m.filePanelFocusIndex].ListDown()
 		}
 
 	case slices.Contains(common.Hotkeys.PageUp, msg):
-		m.fileModel.filePanels[m.filePanelFocusIndex].PgUp(m.mainPanelHeight)
+		m.fileModel.filePanels[m.filePanelFocusIndex].PgUp()
 
 	case slices.Contains(common.Hotkeys.PageDown, msg):
-		m.fileModel.filePanels[m.filePanelFocusIndex].PgDown(m.mainPanelHeight)
+		m.fileModel.filePanels[m.filePanelFocusIndex].PgDown()
 
 	case slices.Contains(common.Hotkeys.ChangePanelMode, msg):
 		m.getFocusedFilePanel().ChangeFilePanelMode()
@@ -151,9 +151,9 @@ func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
 		case slices.Contains(common.Hotkeys.Confirm, msg):
 			m.fileModel.filePanels[m.filePanelFocusIndex].SingleItemSelect()
 		case slices.Contains(common.Hotkeys.FilePanelSelectModeItemsSelectUp, msg):
-			m.fileModel.filePanels[m.filePanelFocusIndex].ItemSelectUp(m.mainPanelHeight)
+			m.fileModel.filePanels[m.filePanelFocusIndex].ItemSelectUp()
 		case slices.Contains(common.Hotkeys.FilePanelSelectModeItemsSelectDown, msg):
-			m.fileModel.filePanels[m.filePanelFocusIndex].ItemSelectDown(m.mainPanelHeight)
+			m.fileModel.filePanels[m.filePanelFocusIndex].ItemSelectDown()
 		case slices.Contains(common.Hotkeys.DeleteItems, msg):
 			return m.getDeleteTriggerCmd(false)
 		case slices.Contains(common.Hotkeys.PermanentlyDeleteItems, msg):

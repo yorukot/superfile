@@ -322,7 +322,7 @@ func (m *Model) GetContentWidth() int {
 func (m *Model) PanelElementHeight() int {
 	contentHeight := m.GetMainPanelHeight()
 	if m.SearchBar.Value() != "" {
-		contentHeight -= 2  // Search bar takes 2 lines
+		contentHeight -= 2 // Search bar takes 2 lines
 	}
 	return contentHeight - common.PanelPadding
 }
