@@ -12,10 +12,7 @@ func (m *FileModel) SetHeight(height int) {
 		height = FileModelMinHeight
 	}
 	m.Height = height
-	for i := range m.FilePanels {
-		m.FilePanels[i].SetHeight(height)
-	}
-	m.FilePreview.SetHeight(height)
+	m.UpdateChildComponentHeight()
 }
 
 func (m *FileModel) SetWidth(width int) {
@@ -28,6 +25,13 @@ func (m *FileModel) SetWidth(width int) {
 
 func (m *FileModel) PanelCount() int {
 	return len(m.FilePanels)
+}
+
+func (m *FileModel) UpdateChildComponentHeight() {
+	for i := range m.FilePanels {
+		m.FilePanels[i].SetHeight(m.Height)
+	}
+	m.FilePreview.SetHeight(m.Height)
 }
 
 func (m *FileModel) UpdateChildComponentWidth() {

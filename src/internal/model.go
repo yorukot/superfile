@@ -250,7 +250,7 @@ func (m *model) updateComponentDimensions() tea.Cmd {
 }
 
 func (m *model) setFileModelDimensions() {
-	m.fileModel.SetWidth(m.fullWidth - common.Config.SidebarWidth)
+	m.fileModel.SetWidth(m.fullWidth - common.Config.SidebarWidth - common.BorderPadding)
 	m.fileModel.SetHeight(m.mainPanelHeight + common.BorderPadding)
 }
 
@@ -541,7 +541,7 @@ func (m *model) View() string {
 
 	sidebar := m.sidebarRender()
 
-	filePanel := m.filePanelRender()
+	filePanel := m.fileModel.Render()
 
 	filePreview := m.filePreviewPanelRender()
 

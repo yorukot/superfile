@@ -24,44 +24,6 @@ func (m *model) sidebarRender() string {
 		m.getFocusedFilePanel().Location)
 }
 
-// This also modifies the m.fileModel.filePanels, which it should not
-// what modifications we do on this model object are of no consequence.
-// Since bubblea passed this 'model' by value in View() function.
-func (m *model) filePanelRender() string {
-	f := make([]string, len(m.fileModel.FilePanels))
-	for i, filePanel := range m.fileModel.FilePanels {
-		// check if cursor or render out of range
-		// TODO - instead of this, have a filepanel.validateAndFix(), and log Error
-		// This should not ever happen
-		if filePanel.Cursor > len(filePanel.Element)-1 {
-			filePanel.Cursor = 0
-			filePanel.RenderIndex = 0
-		}
-		m.fileModel.FilePanels[i] = filePanel
-
-		// TODO : Move this to a utility function and clarify the calculation via comments
-		// Maybe even write unit tests
-		var filePanelWidth int
-		if (m.fullWidth-common.Config.SidebarWidth-(common.InnerPadding+(len(m.fileModel.FilePanels)-1)*common.BorderPadding))%len(
-			m.fileModel.FilePanels,
-		) != 0 &&
-			i == len(m.fileModel.FilePanels)-1 {
-			if m.fileModel.FilePreview.IsOpen() {
-				filePanelWidth = m.fileModel.SinglePanelWidth
-			} else {
-				filePanelWidth = (m.fileModel.SinglePanelWidth + (m.fullWidth-common.Config.SidebarWidth-
-					(common.InnerPadding+(len(m.fileModel.FilePanels)-1)*common.BorderPadding))%len(m.fileModel.FilePanels))
-			}
-		} else {
-			filePanelWidth = m.fileModel.SinglePanelWidth
-		}
-		filePanel.UpdateDimensions(filePanelWidth+common.BorderPadding, m.mainPanelHeight+common.BorderPadding)
-
-		f[i] = filePanel.Render(filePanel.IsFocused)
-	}
-	return lipgloss.JoinHorizontal(lipgloss.Top, f...)
-}
-
 func (m *model) processBarRender() string {
 	return m.processBarModel.Render(m.focusPanel == processBarFocus)
 }

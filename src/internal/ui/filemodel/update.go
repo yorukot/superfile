@@ -24,6 +24,7 @@ func (m *FileModel) CreateNewFilePanel(location string) error {
 
 	m.FilePanels[m.FocusedPanelIndex].IsFocused = false
 	m.FilePanels[newPanelIndex].IsFocused = true
+	m.FilePanels[newPanelIndex].SetHeight(m.Height)
 	m.FocusedPanelIndex = newPanelIndex
 
 	m.UpdateChildComponentWidth()
