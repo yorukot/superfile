@@ -103,7 +103,7 @@ func (m *Model) GetHeight() int {
 
 func (m *Model) SetHeight(height int) {
 	if height < minHeight {
-		slog.Error("Attempted to set too low hight to sidebar", "height", height)
+		slog.Error("Attempted to set too low height to sidebar", "height", height)
 		return
 	}
 	m.height = height
