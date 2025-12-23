@@ -3,6 +3,8 @@ package internal
 import (
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 
+	"github.com/yorukot/superfile/src/internal/ui/clipboard"
+
 	"github.com/yorukot/superfile/src/internal/ui/filemodel"
 
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
@@ -55,7 +57,7 @@ type model struct {
 	fileModel       filemodel.FileModel
 	sidebarModel    sidebar.Model
 	processBarModel processbar.Model
-	clipboard       clipboardModel
+	clipboard       clipboard.ClipboardModel
 	focusPanel      focusPanelType
 
 	// Modals
@@ -119,12 +121,6 @@ type typingModal struct {
 	open          bool
 	textInput     textinput.Model
 	errorMesssage string
-}
-
-// Copied items
-type CopyItems struct {
-	items []string
-	cut   bool
 }
 
 type editorFinishedMsg struct{ err error }

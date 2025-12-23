@@ -215,9 +215,7 @@ func (m *model) copyMultipleItem(cut bool) {
 	}
 	slog.Debug("handle_file_operations.copyMultipleItem", "cut", cut,
 		"panel selected files", panel.Selected)
-	for _, it := range panel.Selected {
-		m.clipboard.Add(it)
-	}
+	m.clipboard.SetItems(panel.Selected)
 }
 
 func (m *model) getPasteItemCmd() tea.Cmd {
