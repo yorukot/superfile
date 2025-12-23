@@ -54,10 +54,10 @@ const (
 // new model in each tea update.
 type model struct {
 	// Main Panels
-	fileModel       filemodel.FileModel
+	fileModel       filemodel.Model
 	sidebarModel    sidebar.Model
 	processBarModel processbar.Model
-	clipboard       clipboard.ClipboardModel
+	clipboard       clipboard.Model
 	focusPanel      focusPanelType
 
 	// Modals

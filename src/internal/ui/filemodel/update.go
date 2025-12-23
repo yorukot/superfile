@@ -8,7 +8,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 )
 
-func (m *FileModel) CreateNewFilePanel(location string) error {
+func (m *Model) CreateNewFilePanel(location string) error {
 	if m.PanelCount() >= m.MaxFilePanel {
 		return ErrMaximumPanelCount
 	}
@@ -32,7 +32,7 @@ func (m *FileModel) CreateNewFilePanel(location string) error {
 	return nil
 }
 
-func (m *FileModel) CloseFilePanel() {
+func (m *Model) CloseFilePanel() {
 	if m.PanelCount() <= 1 {
 		slog.Error("CloseFilePanel called on with panelCount <= 1")
 		return

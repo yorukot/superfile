@@ -7,7 +7,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 )
 
-func (m *FileModel) SetHeight(height int) {
+func (m *Model) SetHeight(height int) {
 	if height < FileModelMinHeight {
 		height = FileModelMinHeight
 	}
@@ -15,7 +15,7 @@ func (m *FileModel) SetHeight(height int) {
 	m.UpdateChildComponentHeight()
 }
 
-func (m *FileModel) SetWidth(width int) {
+func (m *Model) SetWidth(width int) {
 	if width < FileModelMinWidth {
 		width = FileModelMinWidth
 	}
@@ -23,18 +23,18 @@ func (m *FileModel) SetWidth(width int) {
 	m.UpdateChildComponentWidth()
 }
 
-func (m *FileModel) PanelCount() int {
+func (m *Model) PanelCount() int {
 	return len(m.FilePanels)
 }
 
-func (m *FileModel) UpdateChildComponentHeight() {
+func (m *Model) UpdateChildComponentHeight() {
 	for i := range m.FilePanels {
 		m.FilePanels[i].SetHeight(m.Height)
 	}
 	m.FilePreview.SetHeight(m.Height)
 }
 
-func (m *FileModel) UpdateChildComponentWidth() {
+func (m *Model) UpdateChildComponentWidth() {
 	// TODO: programatically ensure that this becomes impossible
 	if m.PanelCount() == 0 {
 		slog.Error("Unexpected error: fileModel with 0 panels")

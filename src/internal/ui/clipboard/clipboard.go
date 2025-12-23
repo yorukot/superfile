@@ -11,7 +11,7 @@ import (
 )
 
 // The fact that its visible in UI or not, is controlled by the main model
-type ClipboardModel struct {
+type Model struct {
 	width  int
 	height int
 	items  copyItems
@@ -23,12 +23,12 @@ type copyItems struct {
 	cut   bool
 }
 
-func (m *ClipboardModel) SetDimensions(width int, height int) {
+func (m *Model) SetDimensions(width int, height int) {
 	m.width = width
 	m.height = height
 }
 
-func (m *ClipboardModel) Render() string {
+func (m *Model) Render() string {
 	r := ui.ClipboardRenderer(m.height, m.width)
 	viewHeight := m.height - common.BorderPadding
 	viewWidth := m.width - common.InnerPadding
@@ -58,43 +58,43 @@ func (m *ClipboardModel) Render() string {
 	return r.Render()
 }
 
-func (m *ClipboardModel) IsCut() bool {
+func (m *Model) IsCut() bool {
 	return m.items.cut
 }
 
-func (m *ClipboardModel) Reset(cut bool) {
+func (m *Model) Reset(cut bool) {
 	m.items.cut = cut
 	m.items.items = m.items.items[:0]
 }
 
-func (m *ClipboardModel) Add(location string) {
+func (m *Model) Add(location string) {
 	m.items.items = append(m.items.items, location)
 }
 
-func (m *ClipboardModel) SetItems(items []string) {
+func (m *Model) SetItems(items []string) {
 	m.items.items = items
 }
 
-func (m *ClipboardModel) GetItems() []string {
+func (m *Model) GetItems() []string {
 	// return a copy to prevent external mutation
 	items := make([]string, len(m.items.items))
 	copy(items, m.items.items)
 	return items
 }
 
-func (m *ClipboardModel) Len() int {
+func (m *Model) Len() int {
 	return len(m.items.items)
 }
 
-func (m *ClipboardModel) GetWidth() int {
+func (m *Model) GetWidth() int {
 	return m.width
 }
 
-func (m *ClipboardModel) GetHeight() int {
+func (m *Model) GetHeight() int {
 	return m.height
 }
 
-func (m *ClipboardModel) GetFirstItem() string {
+func (m *Model) GetFirstItem() string {
 	if len(m.items.items) == 0 {
 		return ""
 	}
