@@ -117,9 +117,9 @@ func verifyClipboardState(t *testing.T, m *model, isCut bool, useSelectMode bool
 	t.Helper()
 	assert.Equal(t, isCut, m.clipboard.IsCut(), "Clipboard cut state should match operation")
 	if useSelectMode {
-		assert.Len(t, m.clipboard.CopyItems.items, selectedItemsCount, "Clipboard should contain all selected items")
+		assert.Len(t, m.clipboard.GetItems(), selectedItemsCount, "Clipboard should contain all selected items")
 	} else {
-		assert.Len(t, m.clipboard.CopyItems.items, 1, "Clipboard should contain one item")
+		assert.Len(t, m.clipboard.GetItems(), 1, "Clipboard should contain one item")
 	}
 }
 
@@ -163,7 +163,7 @@ func verifyPreventedPasteResults(t *testing.T, m *model, originalPath string) {
 		verifyPathExists(t, originalPath, "Original file should still exist when paste is prevented")
 	}
 	// Clipboard should not be cleared when paste is prevented
-	assert.NotEmpty(t, m.clipboard.CopyItems.items, "Clipboard should not be cleared when paste is prevented")
+	assert.NotEmpty(t, m.clipboard.GetItems(), "Clipboard should not be cleared when paste is prevented")
 }
 
 // Helper function to verify successful paste results

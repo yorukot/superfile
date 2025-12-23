@@ -267,9 +267,9 @@ func TestPasteItem(t *testing.T) {
 			}
 			// Checking separately, as this is something independent of tt.shouldPreventPaste
 			if tt.shouldClipboardClear {
-				assert.Empty(t, p.m.clipboard.CopyItems.items, "Clipboard should be cleared after successful cut-paste")
+				assert.Empty(t, p.m.clipboard.GetItems(), "Clipboard should be cleared after successful cut-paste")
 			} else {
-				assert.NotEmpty(t, p.m.clipboard.CopyItems.items, "Clipboard should remain after copy-paste")
+				assert.NotEmpty(t, p.m.clipboard.GetItems(), "Clipboard should remain after copy-paste")
 			}
 		})
 	}

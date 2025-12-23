@@ -221,7 +221,7 @@ func (m *model) copyMultipleItem(cut bool) {
 }
 
 func (m *model) getPasteItemCmd() tea.Cmd {
-	copyItems := m.clipboard.CopyItems.items
+	copyItems := m.clipboard.GetItems()
 	cut := m.clipboard.IsCut()
 	if len(copyItems) == 0 {
 		return nil

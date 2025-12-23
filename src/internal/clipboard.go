@@ -69,6 +69,25 @@ func (m *clipboardModel) SetItems(items []string) {
 	m.CopyItems.items = items
 }
 
+func (m *clipboardModel) GetItems() []string {
+	// return a copy to prevent external mutation
+	items := make([]string, len(m.CopyItems.items))
+	copy(items, m.CopyItems.items)
+	return items
+}
+
+func (m *clipboardModel) Len() int {
+	return len(m.CopyItems.items)
+}
+
+func (m *clipboardModel) GetWidth() int {
+	return m.Width
+}
+
+func (m *clipboardModel) GetHeight() int {
+	return m.Height
+}
+
 func (m *clipboardModel) GetFirstItem() string {
 	if len(m.CopyItems.items) == 0 {
 		return ""

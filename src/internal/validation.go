@@ -224,7 +224,7 @@ func (m *model) validateComponentRender() error {
 		if err := validateRender(m.fileMetaData.Render(true), height, width, true); err != nil {
 			return fmt.Errorf("metadata render validation failed: %w", err)
 		}
-		if err := validateRender(m.clipboard.Render(), height, m.clipboard.Width, true); err != nil {
+		if err := validateRender(m.clipboard.Render(), height, m.clipboard.GetWidth(), true); err != nil {
 			return fmt.Errorf("clipboard render validation failed: %w", err)
 		}
 	}
