@@ -29,6 +29,14 @@ func (m *Model) SetDimensions(width int, height int) {
 	m.height = height
 }
 
+func (m *Model) GetHeight() int {
+	return m.height
+}
+
+func (m *Model) GetWidth() int {
+	return m.width
+}
+
 func (m *Model) SetMetadata(metadata Metadata) {
 	m.metadata = metadata
 	// Note : Dont always reset render to 0

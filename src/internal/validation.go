@@ -216,15 +216,13 @@ func (m *model) validateComponentRender() error {
 
 	// Validate footer components if visible
 	if m.toggleFooter {
-		width := utils.FooterWidth(m.fullWidth) + common.BorderPadding
-		height := m.footerHeight + common.BorderPadding
-		if err := validateRender(m.processBarRender(), height, width, true); err != nil {
+		if err := validateRender(m.processBarRender(), m.processBarModel.GetHeight(), m.processBarModel.GetWidth(), true); err != nil {
 			return fmt.Errorf("process bar render validation failed: %w", err)
 		}
-		if err := validateRender(m.fileMetaData.Render(true), height, width, true); err != nil {
+		if err := validateRender(m.fileMetaData.Render(true), m.fileMetaData.GetHeight(), m.fileMetaData.GetWidth(), true); err != nil {
 			return fmt.Errorf("metadata render validation failed: %w", err)
 		}
-		if err := validateRender(m.clipboard.Render(), height, m.clipboard.GetWidth(), true); err != nil {
+		if err := validateRender(m.clipboard.Render(), m.clipboard.GetHeight(), m.clipboard.GetWidth(), true); err != nil {
 			return fmt.Errorf("clipboard render validation failed: %w", err)
 		}
 	}

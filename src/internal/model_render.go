@@ -10,7 +10,6 @@ import (
 	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
 
 	"github.com/yorukot/superfile/src/internal/common"
-	"github.com/yorukot/superfile/src/internal/utils"
 
 	"github.com/charmbracelet/lipgloss"
 
@@ -24,13 +23,6 @@ func (m *model) sidebarRender() string {
 
 func (m *model) processBarRender() string {
 	return m.processBarModel.Render(m.focusPanel == processBarFocus)
-}
-
-func (m *model) getClipboardWidth() int {
-	if m.fullWidth%3 == 0 {
-		return utils.FooterWidth(m.fullWidth)
-	}
-	return utils.FooterWidth(m.fullWidth + m.fullWidth%common.FooterGroupCols + common.BorderPadding)
 }
 
 func (m *model) terminalSizeWarnRender() string {

@@ -239,11 +239,9 @@ func (m *model) setHeightValues() {
 func (m *model) updateComponentDimensions() tea.Cmd {
 	m.setFileModelDimensions()
 	m.setHelpMenuSize()
-	m.setMetadataModelSize()
-	m.setProcessBarModelSize()
-	m.setClipboardDimensions()
 	m.setPromptModelSize()
 	m.setZoxideModelSize()
+	m.setFooterComponentSize()
 
 	// File preview panel requires explicit height update, unlike sidebar/file panels
 	// which receive height as render parameters and update automatically on each frame
@@ -289,23 +287,14 @@ func (m *model) setZoxideModelSize() {
 	m.zoxideModal.SetWidth(m.fullWidth / 2) //nolint:mnd // modal uses half width for layout
 }
 
-func (m *model) setMetadataModelSize() {
-	m.fileMetaData.SetDimensions(
-		utils.FooterWidth(m.fullWidth)+common.BorderPadding,
-		m.footerHeight+common.BorderPadding)
-}
-
-// TODO: Remove this code duplication with footer models
-func (m *model) setProcessBarModelSize() {
-	m.processBarModel.SetDimensions(
-		utils.FooterWidth(m.fullWidth)+common.BorderPadding,
-		m.footerHeight+common.BorderPadding)
-}
-
-func (m *model) setClipboardDimensions() {
-	m.clipboard.SetDimensions(
-		m.getClipboardWidth(),
-		m.footerHeight+common.BorderPadding)
+func (m *model) setFooterComponentSize() {
+	var width, clipBoardwidth, height int
+	height = m.footerHeight + common.BorderPadding
+	width = m.fullWidth / utils.CntFooterPanels
+	clipBoardwidth = width + m.fullWidth%utils.CntFooterPanels
+	m.fileMetaData.SetDimensions(width, height)
+	m.processBarModel.SetDimensions(width, height)
+	m.clipboard.SetDimensions(clipBoardwidth, height)
 }
 
 // Identify the current state of the application m and properly handle the

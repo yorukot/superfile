@@ -5,7 +5,6 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
 	"testing"
 
 	"github.com/charmbracelet/x/ansi"
@@ -58,7 +57,7 @@ func TestClipboardRender_OverflowIndicator(t *testing.T) {
 	dir := t.TempDir()
 	// Create 5 files; with height=4 we get viewHeight=2 so "4 item left...." should show
 	var items []string
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		fp := filepath.Join(dir, "f"+strconv.Itoa(i)+".txt")
 		if err := os.WriteFile(fp, []byte("x"), 0o644); err != nil {
 			t.Fatalf("failed to create temp file: %v", err)
@@ -72,5 +71,5 @@ func TestClipboardRender_OverflowIndicator(t *testing.T) {
 
 	out := ansi.Strip(m.Render())
 	// Ensure last visible line is the overflow indicator; use Contains to avoid width/padding coupling
-	assert.True(t, strings.Contains(out, "4 item left...."), "expected overflow indicator in render, got:\n%s", out)
+	assert.Contains(t, out, "4 item left....", "expected overflow indicator in render, got:\n%s", out)
 }
