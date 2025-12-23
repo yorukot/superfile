@@ -12,8 +12,6 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/yorukot/superfile/src/internal/ui/filepanel"
-
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/utils"
 )
@@ -45,10 +43,6 @@ func isExternalDiskPath(path string) bool {
 		strings.HasPrefix(path, "/media") ||
 		strings.HasPrefix(path, "/run/media") ||
 		strings.HasPrefix(path, "/Volumes")
-}
-
-func returnFocusType(focusPanel focusPanelType) bool {
-	return focusPanel == nonePanelFocus
 }
 
 func checkFileNameValidity(name string) error {
@@ -95,12 +89,6 @@ func renameIfDuplicate(destination string) (string, error) {
 	}
 
 	return "", fmt.Errorf("could not find free name for %s after many attempts", destination)
-}
-
-// TODO : Replace all usage of "m.fileModel.filePanels[m.filePanelFocusIndex]" with this
-// There are many usage
-func (m *model) getFocusedFilePanel() *filepanel.Model {
-	return &m.fileModel.filePanels[m.filePanelFocusIndex]
 }
 
 // Count how many file in the directory

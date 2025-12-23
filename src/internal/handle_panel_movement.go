@@ -125,7 +125,7 @@ func (m *model) sidebarSelectDirectory() {
 
 // Select all item in the file panel (only work on select mode)
 func (m *model) selectAllItem() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := m.getFocusedFilePanel()
 	for _, item := range panel.Element {
 		panel.Selected = append(panel.Selected, item.Location)
 	}
@@ -148,21 +148,13 @@ func (m *model) toggleFooterController() tea.Cmd {
 	if err != nil {
 		slog.Error("Error while updating toggleFooter data", "error", err)
 	}
-	// TODO : Revisit this. Is this really need here, is this correct ?
-	m.setHeightValues(m.fullHeight)
-	// File preview panel requires explicit height update, unlike sidebar/file panels
-	// which receive height as render parameters and update automatically on each frame
-	if m.fileModel.filePreview.IsOpen() {
-		m.setFilePreviewPanelSize()
-		// Force re-render of preview content with new dimensions
-		return m.getFilePreviewCmd(true)
-	}
-	return nil
+	m.setHeightValues()
+	return m.updateComponentDimensions()
 }
 
 // Focus on search bar
 func (m *model) searchBarFocus() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := m.getFocusedFilePanel()
 	if panel.SearchBar.Focused() {
 		panel.SearchBar.Blur()
 	} else {
@@ -171,7 +163,7 @@ func (m *model) searchBarFocus() {
 	}
 
 	// config search bar width
-	panel.SearchBar.Width = m.fileModel.width - common.InnerPadding
+	panel.SearchBar.Width = m.fileModel.SinglePanelWidth - common.InnerPadding
 }
 
 func (m *model) sidebarSearchBarFocus() {

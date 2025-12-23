@@ -30,7 +30,7 @@ import (
 // TODO: Fix it. It doesn't creates a new file. It just opens a file model,
 // that allows you to create a file. Actual creation happens here - createItem() in handle_modal.go
 func (m *model) panelCreateNewFile() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := m.getFocusedFilePanel()
 
 	m.typingModal.location = panel.Location
 	m.typingModal.open = true
@@ -41,7 +41,7 @@ func (m *model) panelCreateNewFile() {
 // TODO : This function does not needs the entire model. Only pass the panel object
 func (m *model) IsRenamingConflicting() bool {
 	// TODO : Replace this with m.getCurrentFilePanel() everywhere
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := m.getFocusedFilePanel()
 
 	if len(panel.Element) == 0 {
 		slog.Error("IsRenamingConflicting() being called on empty panel")
@@ -78,7 +78,7 @@ func (m *model) warnModalForRenaming() tea.Cmd {
 // TODO: Fix this. It doesn't do any rename, just opens the rename text input
 // Actual rename happens at confirmRename() in handle_modal.go
 func (m *model) panelItemRename() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := m.getFocusedFilePanel()
 	if len(panel.Element) == 0 {
 		return
 	}
@@ -96,14 +96,14 @@ func (m *model) panelItemRename() {
 		cursorPos = nameLen
 	}
 
-	m.fileModel.renaming = true
+	m.fileModel.Renaming = true
 	panel.Renaming = true
 	m.firstTextInput = true
 	// TODO: Don't re-create a new model on each rename. Don't create
 	// unnecessary gargage for collection. Reuse the existing model.
 	// Maintain its state, dimensions. Update its cursor and text when needed
 	panel.Rename = common.GenerateRenameTextInput(
-		m.fileModel.width-common.InnerPadding,
+		m.fileModel.SinglePanelWidth-common.InnerPadding,
 		cursorPos,
 		panel.Element[panel.Cursor].Name)
 }
@@ -196,31 +196,31 @@ func (m *model) getDeleteTriggerCmd(deletePermanent bool) tea.Cmd {
 // Copy directory or file's path to superfile's clipboard
 // set cut to true/false accordingly
 func (m *model) copySingleItem(cut bool) {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-	m.copyItems.reset(cut)
+	panel := m.getFocusedFilePanel()
+	m.clipboard.Reset(cut)
 	if len(panel.Element) == 0 {
 		return
 	}
 	slog.Debug("handle_file_operations.copySingleItem", "cut", cut,
 		"panel location", panel.Element[panel.Cursor].Location)
-	m.copyItems.items = append(m.copyItems.items, panel.Element[panel.Cursor].Location)
+	m.clipboard.Add(panel.Element[panel.Cursor].Location)
 }
 
 // Copy all selected file or directory's paths to the clipboard
 func (m *model) copyMultipleItem(cut bool) {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-	m.copyItems.reset(cut)
+	panel := m.getFocusedFilePanel()
+	m.clipboard.Reset(cut)
 	if len(panel.Selected) == 0 {
 		return
 	}
 	slog.Debug("handle_file_operations.copyMultipleItem", "cut", cut,
 		"panel selected files", panel.Selected)
-	m.copyItems.items = panel.Selected
+	m.clipboard.SetItems(panel.Selected)
 }
 
 func (m *model) getPasteItemCmd() tea.Cmd {
-	copyItems := m.copyItems.items
-	cut := m.copyItems.cut
+	copyItems := m.clipboard.GetItems()
+	cut := m.clipboard.IsCut()
 	if len(copyItems) == 0 {
 		return nil
 	}
@@ -436,8 +436,7 @@ func (m *model) chooserFileWriteAndQuit(path string) error {
 
 // Open file with default editor
 func (m *model) openFileWithEditor() tea.Cmd {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-
+	panel := m.getFocusedFilePanel()
 	// Check if panel is empty
 	if len(panel.Element) == 0 {
 		return nil
@@ -483,7 +482,7 @@ func (m *model) openFileWithEditor() tea.Cmd {
 // Open directory with default editor
 func (m *model) openDirectoryWithEditor() tea.Cmd {
 	if variable.ChooserFile != "" {
-		err := m.chooserFileWriteAndQuit(m.fileModel.filePanels[m.filePanelFocusIndex].Location)
+		err := m.chooserFileWriteAndQuit(m.getFocusedFilePanel().Location)
 		if err == nil {
 			return nil
 		}
@@ -508,7 +507,7 @@ func (m *model) openDirectoryWithEditor() tea.Cmd {
 	parts := strings.Fields(editor)
 	cmd := parts[0]
 	//nolint:gocritic // appendAssign: intentionally creating a new slice
-	args := append(parts[1:], m.fileModel.filePanels[m.filePanelFocusIndex].Location)
+	args := append(parts[1:], m.getFocusedFilePanel().Location)
 
 	c := exec.Command(cmd, args...)
 	return tea.ExecProcess(c, func(err error) tea.Msg {
@@ -519,7 +518,7 @@ func (m *model) openDirectoryWithEditor() tea.Cmd {
 // Copy file path
 // TODO: This is also an IO operations, do it via tea.Cmd
 func (m *model) copyPath() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := m.getFocusedFilePanel()
 
 	if len(panel.Element) == 0 {
 		return
@@ -532,7 +531,7 @@ func (m *model) copyPath() {
 
 // TODO: This is also an IO operations, do it via tea.Cmd
 func (m *model) copyPWD() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := m.getFocusedFilePanel()
 	if err := clipboard.WriteAll(panel.Location); err != nil {
 		slog.Error("Error while copy present working directory", "error", err)
 	}

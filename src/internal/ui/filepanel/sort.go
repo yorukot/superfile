@@ -10,17 +10,6 @@ import (
 	"github.com/yorukot/superfile/src/internal/common"
 )
 
-func (p PanelMode) String() string {
-	switch p {
-	case SelectMode:
-		return "selectMode"
-	case BrowserMode:
-		return "browserMode"
-	default:
-		return common.InvalidTypeString
-	}
-}
-
 func getOrderingFunc(elements []Element, reversed bool, sortOption string) sliceOrderFunc {
 	var order func(i, j int) bool
 	switch sortOption {
@@ -105,10 +94,6 @@ func getTypeOrderingFunc(elements []Element, reversed bool) sliceOrderFunc {
 	}
 }
 
-func panelElementHeight(mainPanelHeight int) int {
-	return mainPanelHeight - common.PanelPadding
-}
-
 func sortFileElement(sortOptions sortOptionsModelData, dirEntries []os.DirEntry, location string) []Element {
 	elements := make([]Element, 0, len(dirEntries))
 	for _, item := range dirEntries {
@@ -150,4 +135,13 @@ func removeElementByValue(slice []string, value string) []string {
 		}
 	}
 	return newSlice
+}
+
+func (m *Model) getPageScrollSize() int {
+	scrollSize := common.Config.PageScrollSize
+	if scrollSize <= 0 {
+		// Use default full page behavior
+		scrollSize = m.PanelElementHeight()
+	}
+	return scrollSize
 }

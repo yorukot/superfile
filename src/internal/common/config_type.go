@@ -84,6 +84,7 @@ type ConfigType struct {
 	Debug                  bool   `toml:"debug" comment:"\nWhether to enable debug mode."`
 	// IgnoreMissingFields controls whether warnings about missing TOML fields are suppressed.
 	IgnoreMissingFields bool `toml:"ignore_missing_fields" comment:"\nWhether to ignore warnings about missing fields in the config file."`
+	PageScrollSize      int  `toml:"page_scroll_size" comment:"\nNumber of lines to scroll for PgUp/PgDown keys (0: full page, default behavior)."`
 
 	Nerdfont              bool   `toml:"nerdfont" comment:"\n================   Style =================\n\n If you don't have or don't want Nerdfont installed you can turn this off"`
 	ShowSelectIcons       bool   `toml:"show_select_icons" comment:"\nShow checkbox icons in select mode (requires nerdfont)"`

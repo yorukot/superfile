@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/yorukot/superfile/src/internal/common"
 )
 
 func Test_lastRenderIndex(t *testing.T) {
@@ -79,7 +81,9 @@ func Test_lastRenderIndex(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			result := tt.sidebar.lastRenderedIndex(tt.mainPanelHeight, tt.startIndex)
+			tt.sidebar.SetHeight(tt.mainPanelHeight + common.BorderPadding)
+
+			result := tt.sidebar.lastRenderedIndex(tt.startIndex)
 			assert.Equal(t, tt.expectedLastIndex, result,
 				"lastRenderedIndex failed: %s", tt.explanation)
 		})
@@ -235,7 +239,8 @@ func Test_firstRenderIndex(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			result := tt.sidebar.firstRenderedIndex(tt.mainPanelHeight, tt.endIndex)
+			tt.sidebar.SetHeight(tt.mainPanelHeight + common.BorderPadding)
+			result := tt.sidebar.firstRenderedIndex(tt.endIndex)
 			assert.Equal(t, tt.expectedFirstIndex, result,
 				"firstRenderedIndex failed: %s", tt.explanation)
 		})
@@ -359,9 +364,10 @@ func Test_updateRenderIndex(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Create a copy of the sidebar to avoid modifying the original
 			sidebar := tt.sidebar
+			sidebar.SetHeight(tt.mainPanelHeight + common.BorderPadding)
 
 			// Update render index
-			sidebar.updateRenderIndex(tt.mainPanelHeight)
+			sidebar.updateRenderIndex()
 
 			// Check the result
 			assert.Equal(t, tt.expectedRenderIndex, sidebar.renderIndex,
@@ -459,9 +465,10 @@ func Test_listUp(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Create a copy of the sidebar to avoid modifying the original
 			sidebar := tt.sidebar
+			sidebar.SetHeight(tt.mainPanelHeight + common.BorderPadding)
 
 			// Call the function to test
-			sidebar.ListUp(tt.mainPanelHeight)
+			sidebar.ListUp()
 
 			// Check the results
 			assert.Equal(t, tt.expectedCursor, sidebar.cursor,
@@ -586,9 +593,9 @@ func Test_listDown(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Create a copy of the sidebar to avoid modifying the original
 			sidebar := tt.sidebar
-
+			sidebar.SetHeight(tt.mainPanelHeight + common.BorderPadding)
 			// Call the function to test
-			sidebar.ListDown(tt.mainPanelHeight)
+			sidebar.ListDown()
 
 			// Check the results
 			assert.Equal(t, tt.expectedCursor, sidebar.cursor,

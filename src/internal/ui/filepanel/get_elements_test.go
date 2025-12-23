@@ -203,3 +203,74 @@ func TestReturnDirElement(t *testing.T) {
 		})
 	}
 }
+
+func TestSingleItemSelect(t *testing.T) {
+	testdata := []struct {
+		name             string
+		panel            Model
+		expectedSelected []string
+	}{
+		{
+			name: "Select unselected item",
+			panel: Model{
+				Element: []Element{
+					{Name: "file1.txt", Location: "/tmp/file1.txt"},
+					{Name: "file2.txt", Location: "/tmp/file2.txt"},
+				},
+				Cursor:   0,
+				Selected: []string{},
+			},
+			expectedSelected: []string{"/tmp/file1.txt"},
+		},
+		{
+			name: "Deselect selected item",
+			panel: Model{
+				Element: []Element{
+					{Name: "file1.txt", Location: "/tmp/file1.txt"},
+					{Name: "file2.txt", Location: "/tmp/file2.txt"},
+				},
+				Cursor:   0,
+				Selected: []string{"/tmp/file1.txt"},
+			},
+			expectedSelected: []string{},
+		},
+		{
+			name: "Out of bounds cursor negative",
+			panel: Model{
+				Element: []Element{
+					{Name: "file1.txt", Location: "/tmp/file1.txt"},
+				},
+				Cursor:   -1,
+				Selected: []string{},
+			},
+			expectedSelected: []string{},
+		},
+		{
+			name: "Out of bounds cursor beyond count",
+			panel: Model{
+				Element: []Element{
+					{Name: "file1.txt", Location: "/tmp/file1.txt"},
+				},
+				Cursor:   5,
+				Selected: []string{},
+			},
+			expectedSelected: []string{},
+		},
+		{
+			name: "Empty element list",
+			panel: Model{
+				Element:  []Element{},
+				Cursor:   0,
+				Selected: []string{},
+			},
+			expectedSelected: []string{},
+		},
+	}
+
+	for _, tt := range testdata {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.panel.SingleItemSelect()
+			assert.Equal(t, tt.expectedSelected, tt.panel.Selected)
+		})
+	}
+}

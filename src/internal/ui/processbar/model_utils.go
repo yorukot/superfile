@@ -23,6 +23,14 @@ func (m *Model) viewWidth() int {
 	return m.width - borderSize
 }
 
+func (m *Model) GetHeight() int {
+	return m.height
+}
+
+func (m *Model) GetWidth() int {
+	return m.width
+}
+
 func (m *Model) getSortedProcesses() []Process {
 	// save process in the array and sort the process by finished or not,
 	// completion percetage, or finish time

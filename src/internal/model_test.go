@@ -122,14 +122,14 @@ func TestInitialFilePathPositionsCursorWindow(t *testing.T) {
 	// Uncomment below to understand the distribution
 	// t.Logf("Heights : %d [%d - [%d] %d]\n", m.fullHeight, m.footerHeight, m.mainPanelHeight,
 	//	panelElementHeight(m.mainPanelHeight))
-	require.Len(t, m.fileModel.filePanels, 3)
-	assert.Equal(t, dir1, m.fileModel.filePanels[0].Location)
-	assert.Equal(t, file2, m.fileModel.filePanels[1].GetSelectedItem().Location)
-	assert.Equal(t, 2, m.fileModel.filePanels[1].Cursor)
-	assert.Equal(t, 0, m.fileModel.filePanels[1].RenderIndex)
-	assert.Equal(t, file7, m.fileModel.filePanels[2].GetSelectedItem().Location)
-	assert.Equal(t, 7, m.fileModel.filePanels[2].Cursor)
-	assert.Equal(t, 3, m.fileModel.filePanels[2].RenderIndex)
+	require.Len(t, m.fileModel.FilePanels, 3)
+	assert.Equal(t, dir1, m.fileModel.FilePanels[0].Location)
+	assert.Equal(t, file2, m.fileModel.FilePanels[1].GetSelectedItem().Location)
+	assert.Equal(t, 2, m.fileModel.FilePanels[1].Cursor)
+	assert.Equal(t, 0, m.fileModel.FilePanels[1].RenderIndex)
+	assert.Equal(t, file7, m.fileModel.FilePanels[2].GetSelectedItem().Location)
+	assert.Equal(t, 7, m.fileModel.FilePanels[2].Cursor)
+	assert.Equal(t, 3, m.fileModel.FilePanels[2].RenderIndex)
 }
 
 func TestQuit(t *testing.T) {

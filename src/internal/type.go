@@ -3,7 +3,9 @@ package internal
 import (
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 
-	"github.com/yorukot/superfile/src/internal/ui/filepanel"
+	"github.com/yorukot/superfile/src/internal/ui/clipboard"
+
+	"github.com/yorukot/superfile/src/internal/ui/filemodel"
 
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
@@ -12,7 +14,6 @@ import (
 
 	"github.com/charmbracelet/bubbles/textinput"
 
-	"github.com/yorukot/superfile/src/internal/ui/preview"
 	"github.com/yorukot/superfile/src/internal/ui/prompt"
 	zoxideui "github.com/yorukot/superfile/src/internal/ui/zoxide"
 )
@@ -53,11 +54,11 @@ const (
 // new model in each tea update.
 type model struct {
 	// Main Panels
-	fileModel       fileModel
+	fileModel       filemodel.Model
 	sidebarModel    sidebar.Model
 	processBarModel processbar.Model
+	clipboard       clipboard.Model
 	focusPanel      focusPanelType
-	copyItems       copyItems
 
 	// Modals
 	notifyModel notify.Model
@@ -80,8 +81,7 @@ type model struct {
 	firstUse             bool
 
 	// This entirely disables metadata fetching. Used in test model
-	disableMetadata     bool
-	filePanelFocusIndex int
+	disableMetadata bool
 
 	// Height in number of lines of actual viewport of
 	// main panel and sidebar excluding border
@@ -122,23 +122,5 @@ type typingModal struct {
 	textInput     textinput.Model
 	errorMesssage string
 }
-
-// Copied items
-type copyItems struct {
-	items []string
-	cut   bool
-}
-
-/* FILE WINDOWS TYPE START*/
-// Model for file windows
-type fileModel struct {
-	filePanels   []filepanel.Model
-	width        int
-	renaming     bool
-	maxFilePanel int
-	filePreview  preview.Model
-}
-
-/* FILE WINDOWS TYPE END*/
 
 type editorFinishedMsg struct{ err error }

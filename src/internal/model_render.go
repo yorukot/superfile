@@ -2,8 +2,6 @@ package internal
 
 import (
 	"fmt"
-	"log/slog"
-	"os"
 	"path/filepath"
 	"strconv"
 
@@ -12,7 +10,6 @@ import (
 	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
 
 	"github.com/yorukot/superfile/src/internal/common"
-	"github.com/yorukot/superfile/src/internal/utils"
 
 	"github.com/charmbracelet/lipgloss"
 
@@ -20,84 +17,12 @@ import (
 )
 
 func (m *model) sidebarRender() string {
-	return m.sidebarModel.Render(m.mainPanelHeight, m.focusPanel == sidebarFocus,
-		m.fileModel.filePanels[m.filePanelFocusIndex].Location)
-}
-
-// This also modifies the m.fileModel.filePanels, which it should not
-// what modifications we do on this model object are of no consequence.
-// Since bubblea passed this 'model' by value in View() function.
-func (m *model) filePanelRender() string {
-	f := make([]string, len(m.fileModel.filePanels))
-	for i, filePanel := range m.fileModel.filePanels {
-		// check if cursor or render out of range
-		// TODO - instead of this, have a filepanel.validateAndFix(), and log Error
-		// This should not ever happen
-		if filePanel.Cursor > len(filePanel.Element)-1 {
-			filePanel.Cursor = 0
-			filePanel.RenderIndex = 0
-		}
-		m.fileModel.filePanels[i] = filePanel
-
-		// TODO : Move this to a utility function and clarify the calculation via comments
-		// Maybe even write unit tests
-		var filePanelWidth int
-		if (m.fullWidth-common.Config.SidebarWidth-(common.InnerPadding+(len(m.fileModel.filePanels)-1)*common.BorderPadding))%len(
-			m.fileModel.filePanels,
-		) != 0 &&
-			i == len(m.fileModel.filePanels)-1 {
-			if m.fileModel.filePreview.IsOpen() {
-				filePanelWidth = m.fileModel.width
-			} else {
-				filePanelWidth = (m.fileModel.width + (m.fullWidth-common.Config.SidebarWidth-
-					(common.InnerPadding+(len(m.fileModel.filePanels)-1)*common.BorderPadding))%len(m.fileModel.filePanels))
-			}
-		} else {
-			filePanelWidth = m.fileModel.width
-		}
-
-		f[i] = filePanel.Render(m.mainPanelHeight, filePanelWidth, filePanel.IsFocused)
-	}
-	return lipgloss.JoinHorizontal(lipgloss.Top, f...)
+	return m.sidebarModel.Render(m.focusPanel == sidebarFocus,
+		m.getFocusedFilePanel().Location)
 }
 
 func (m *model) processBarRender() string {
 	return m.processBarModel.Render(m.focusPanel == processBarFocus)
-}
-
-func (m *model) clipboardRender() string {
-	// render
-	var bottomWidth int
-	if m.fullWidth%3 != 0 {
-		bottomWidth = utils.FooterWidth(m.fullWidth + m.fullWidth%common.FooterGroupCols + common.BorderPadding)
-	} else {
-		bottomWidth = utils.FooterWidth(m.fullWidth)
-	}
-	r := ui.ClipboardRenderer(m.footerHeight+common.BorderPadding, bottomWidth+common.BorderPadding)
-	if len(m.copyItems.items) == 0 {
-		// TODO move this to a string
-		r.AddLines("", " "+icon.Error+"  No content in clipboard")
-	} else {
-		for i := 0; i < len(m.copyItems.items) && i < m.footerHeight; i++ {
-			if i == m.footerHeight-1 && i != len(m.copyItems.items)-1 {
-				// Last Entry we can render, but there are more that one left
-				r.AddLines(strconv.Itoa(len(m.copyItems.items)-i) + " item left....")
-			} else {
-				fileInfo, err := os.Lstat(m.copyItems.items[i])
-				if err != nil {
-					slog.Error("Clipboard render function get item state ", "error", err)
-				}
-				if !os.IsNotExist(err) {
-					isLink := fileInfo.Mode()&os.ModeSymlink != 0
-					// TODO : There is an inconsistency in parameter that is being passed,
-					// and its name in ClipboardPrettierName function
-					r.AddLines(common.ClipboardPrettierName(m.copyItems.items[i],
-						utils.FooterWidth(m.fullWidth)-common.PanelPadding, fileInfo.IsDir(), isLink, false))
-				}
-			}
-		}
-	}
-	return r.Render()
 }
 
 func (m *model) terminalSizeWarnRender() string {
@@ -125,7 +50,7 @@ func (m *model) terminalSizeWarnRender() string {
 
 func (m *model) terminalSizeWarnAfterFirstRender() string {
 	minimumWidthInt := common.Config.SidebarWidth + common.FilePanelWidthUnit*len(
-		m.fileModel.filePanels,
+		m.fileModel.FilePanels,
 	) + common.FilePanelWidthUnit - 1
 	minimumWidthString := strconv.Itoa(minimumWidthInt)
 	fullWidthString := strconv.Itoa(m.fullWidth)
@@ -305,7 +230,7 @@ func (m *model) getHelpMenuContent(r *rendering.Renderer, renderHotkeyLength int
 }
 
 func (m *model) sortOptionsRender() string {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := m.getFocusedFilePanel()
 	sortOptionsContent := common.ModalTitleStyle.Render(" Sort Options") + "\n\n"
 	for i, option := range panel.SortOptions.Data.Options {
 		cursor := " "
@@ -319,8 +244,4 @@ func (m *model) sortOptionsRender() string {
 
 	return common.SortOptionsModalBorderStyle(panel.SortOptions.Height, panel.SortOptions.Width,
 		bottomBorder).Render(sortOptionsContent)
-}
-
-func (m *model) filePreviewPanelRender() string {
-	return m.fileModel.filePreview.GetContent()
 }

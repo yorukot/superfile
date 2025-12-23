@@ -45,6 +45,7 @@ var (
 	SideBarNoneText       string
 
 	ProcessBarNoneText string
+	ClipboardNoneText  string
 
 	FilePanelTopDirectoryIcon string
 	FilePanelNoneText         string
@@ -122,6 +123,7 @@ func LoadPrerenderedVariables() {
 	SideBarNoneText = SidebarStyle.Render(" " + icon.Error + icon.Space + "None")
 
 	ProcessBarNoneText = icon.Error + icon.Space + "No processes running"
+	ClipboardNoneText = " " + icon.Error + icon.Space + " No content in clipboard"
 
 	FilePanelTopDirectoryIcon = FilePanelTopDirectoryIconStyle.Render(" " + icon.Directory + icon.Space)
 	FilePanelNoneText = FilePanelStyle.Render(" " + icon.Error + icon.Space + "No such file or directory")

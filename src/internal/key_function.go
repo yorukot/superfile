@@ -25,48 +25,48 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 	case slices.Contains(common.Hotkeys.ListUp, msg):
 		switch m.focusPanel {
 		case sidebarFocus:
-			m.sidebarModel.ListUp(m.mainPanelHeight)
+			m.sidebarModel.ListUp()
 		case processBarFocus:
-			m.processBarModel.ListUp(m.footerHeight)
+			m.processBarModel.ListUp()
 		case metadataFocus:
 			m.fileMetaData.ListUp()
 		case nonePanelFocus:
-			m.fileModel.filePanels[m.filePanelFocusIndex].ListUp(m.mainPanelHeight)
+			m.getFocusedFilePanel().ListUp()
 		}
 
 		// If move down Key is pressed, check the current state and executes
 	case slices.Contains(common.Hotkeys.ListDown, msg):
 		switch m.focusPanel {
 		case sidebarFocus:
-			m.sidebarModel.ListDown(m.mainPanelHeight)
+			m.sidebarModel.ListDown()
 		case processBarFocus:
-			m.processBarModel.ListDown(m.footerHeight)
+			m.processBarModel.ListDown()
 		case metadataFocus:
 			m.fileMetaData.ListDown()
 		case nonePanelFocus:
-			m.fileModel.filePanels[m.filePanelFocusIndex].ListDown(m.mainPanelHeight)
+			m.getFocusedFilePanel().ListDown()
 		}
 
 	case slices.Contains(common.Hotkeys.PageUp, msg):
-		m.fileModel.filePanels[m.filePanelFocusIndex].PgUp(m.mainPanelHeight)
+		m.getFocusedFilePanel().PgUp()
 
 	case slices.Contains(common.Hotkeys.PageDown, msg):
-		m.fileModel.filePanels[m.filePanelFocusIndex].PgDown(m.mainPanelHeight)
+		m.getFocusedFilePanel().PgDown()
 
 	case slices.Contains(common.Hotkeys.ChangePanelMode, msg):
 		m.getFocusedFilePanel().ChangeFilePanelMode()
 
 	case slices.Contains(common.Hotkeys.NextFilePanel, msg):
-		m.nextFilePanel()
+		m.fileModel.NextFilePanel()
 
 	case slices.Contains(common.Hotkeys.PreviousFilePanel, msg):
-		m.previousFilePanel()
+		m.fileModel.PreviousFilePanel()
 
 	case slices.Contains(common.Hotkeys.CloseFilePanel, msg):
-		m.closeFilePanel()
+		m.fileModel.CloseFilePanel()
 
 	case slices.Contains(common.Hotkeys.CreateNewFilePanel, msg):
-		err := m.createNewFilePanel(variable.HomeDir)
+		err := m.fileModel.CreateNewFilePanel(variable.HomeDir)
 		if err != nil {
 			slog.Error("error while creating new panel", "error", err)
 		}
@@ -149,11 +149,11 @@ func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
 	if m.getFocusedFilePanel().PanelMode == filepanel.SelectMode {
 		switch {
 		case slices.Contains(common.Hotkeys.Confirm, msg):
-			m.fileModel.filePanels[m.filePanelFocusIndex].SingleItemSelect()
+			m.getFocusedFilePanel().SingleItemSelect()
 		case slices.Contains(common.Hotkeys.FilePanelSelectModeItemsSelectUp, msg):
-			m.fileModel.filePanels[m.filePanelFocusIndex].ItemSelectUp(m.mainPanelHeight)
+			m.getFocusedFilePanel().ItemSelectUp()
 		case slices.Contains(common.Hotkeys.FilePanelSelectModeItemsSelectDown, msg):
-			m.fileModel.filePanels[m.filePanelFocusIndex].ItemSelectDown(m.mainPanelHeight)
+			m.getFocusedFilePanel().ItemSelectDown()
 		case slices.Contains(common.Hotkeys.DeleteItems, msg):
 			return m.getDeleteTriggerCmd(false)
 		case slices.Contains(common.Hotkeys.PermanentlyDeleteItems, msg):
