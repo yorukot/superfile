@@ -127,6 +127,4 @@ type copyItems struct {
 	cut   bool
 }
 
-/* FILE WINDOWS TYPE END*/
-
 type editorFinishedMsg struct{ err error }
