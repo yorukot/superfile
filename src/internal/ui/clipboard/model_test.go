@@ -69,6 +69,6 @@ func TestClipboardRender_Empty(t *testing.T) {
 		for i := range 3 {
 			assert.Contains(t, out, items[i])
 		}
-		assert.Contains(t, out, "2 item left....", "expected overflow indicator in render")
+		assert.Contains(t, out, "2 items left....", "expected overflow indicator in render")
 	})
 }
