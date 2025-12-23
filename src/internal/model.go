@@ -241,6 +241,7 @@ func (m *model) updateComponentDimensions() tea.Cmd {
 	m.setHelpMenuSize()
 	m.setMetadataModelSize()
 	m.setProcessBarModelSize()
+	m.setClipboardDimensions()
 	m.setPromptModelSize()
 	m.setZoxideModelSize()
 
@@ -298,6 +299,12 @@ func (m *model) setMetadataModelSize() {
 func (m *model) setProcessBarModelSize() {
 	m.processBarModel.SetDimensions(
 		utils.FooterWidth(m.fullWidth)+common.BorderPadding,
+		m.footerHeight+common.BorderPadding)
+}
+
+func (m *model) setClipboardDimensions() {
+	m.clipboard.SetDimensions(
+		m.getClipboardWidth(),
 		m.footerHeight+common.BorderPadding)
 }
 
@@ -548,7 +555,7 @@ func (m *model) View() string {
 	if m.toggleFooter {
 		processBar = m.processBarRender()
 		metaData = m.fileMetaData.Render(m.focusPanel == metadataFocus)
-		clipboardBar = m.clipboardRender()
+		clipboardBar = m.clipboard.Render()
 		footer = lipgloss.JoinHorizontal(0, processBar, metaData, clipboardBar)
 	}
 

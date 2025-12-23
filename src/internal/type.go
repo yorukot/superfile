@@ -55,8 +55,9 @@ type model struct {
 	fileModel       filemodel.FileModel
 	sidebarModel    sidebar.Model
 	processBarModel processbar.Model
+	clipboard       clipboardModel
 	focusPanel      focusPanelType
-	copyItems       copyItems
+	copyItems       CopyItems
 
 	// Modals
 	notifyModel notify.Model
@@ -122,7 +123,7 @@ type typingModal struct {
 }
 
 // Copied items
-type copyItems struct {
+type CopyItems struct {
 	items []string
 	cut   bool
 }

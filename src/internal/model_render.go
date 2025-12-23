@@ -2,8 +2,6 @@ package internal
 
 import (
 	"fmt"
-	"log/slog"
-	"os"
 	"path/filepath"
 	"strconv"
 
@@ -26,37 +24,6 @@ func (m *model) sidebarRender() string {
 
 func (m *model) processBarRender() string {
 	return m.processBarModel.Render(m.focusPanel == processBarFocus)
-}
-
-func (m *model) clipboardRender() string {
-	// render
-
-	r := ui.ClipboardRenderer(m.footerHeight+common.BorderPadding,
-		m.getClipboardWidth()+common.BorderPadding)
-	if len(m.copyItems.items) == 0 {
-		// TODO move this to a string
-		r.AddLines("", " "+icon.Error+"  No content in clipboard")
-	} else {
-		for i := 0; i < len(m.copyItems.items) && i < m.footerHeight; i++ {
-			if i == m.footerHeight-1 && i != len(m.copyItems.items)-1 {
-				// Last Entry we can render, but there are more that one left
-				r.AddLines(strconv.Itoa(len(m.copyItems.items)-i) + " item left....")
-			} else {
-				fileInfo, err := os.Lstat(m.copyItems.items[i])
-				if err != nil {
-					slog.Error("Clipboard render function get item state ", "error", err)
-				}
-				if !os.IsNotExist(err) {
-					isLink := fileInfo.Mode()&os.ModeSymlink != 0
-					// TODO : There is an inconsistency in parameter that is being passed,
-					// and its name in ClipboardPrettierName function
-					r.AddLines(common.ClipboardPrettierName(m.copyItems.items[i],
-						utils.FooterWidth(m.fullWidth)-common.PanelPadding, fileInfo.IsDir(), isLink, false))
-				}
-			}
-		}
-	}
-	return r.Render()
 }
 
 func (m *model) getClipboardWidth() int {
