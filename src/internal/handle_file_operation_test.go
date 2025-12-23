@@ -267,9 +267,9 @@ func TestPasteItem(t *testing.T) {
 			}
 			// Checking separately, as this is something independent of tt.shouldPreventPaste
 			if tt.shouldClipboardClear {
-				assert.Empty(t, p.m.copyItems.items, "Clipboard should be cleared after successful cut-paste")
+				assert.Empty(t, p.m.clipboard.GetItems(), "Clipboard should be cleared after successful cut-paste")
 			} else {
-				assert.NotEmpty(t, p.m.copyItems.items, "Clipboard should remain after copy-paste")
+				assert.NotEmpty(t, p.m.clipboard.GetItems(), "Clipboard should remain after copy-paste")
 			}
 		})
 	}
@@ -282,7 +282,7 @@ func TestPasteItem(t *testing.T) {
 		p := NewTestTeaProgWithEventLoop(t, m)
 
 		// Ensure clipboard is empty
-		m.copyItems.items = []string{}
+		m.clipboard.Reset(false)
 
 		// Get initial count
 		entriesBefore, err := os.ReadDir(emptyTestDir)

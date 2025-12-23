@@ -2,15 +2,15 @@ package filemodel
 
 import "log/slog"
 
-func (m *FileModel) NextFilePanel() {
+func (m *Model) NextFilePanel() {
 	m.MoveFocusedPanelBy(1)
 }
 
-func (m *FileModel) PreviousFilePanel() {
+func (m *Model) PreviousFilePanel() {
 	m.MoveFocusedPanelBy(-1)
 }
 
-func (m *FileModel) MoveFocusedPanelBy(delta int) {
+func (m *Model) MoveFocusedPanelBy(delta int) {
 	if m.PanelCount() == 0 {
 		slog.Error("Unexpected error: fileModel with 0 panels")
 		return

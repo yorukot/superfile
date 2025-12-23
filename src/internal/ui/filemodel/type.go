@@ -7,7 +7,7 @@ import (
 
 /* FILE WINDOWS TYPE START*/
 // Model for file windows
-type FileModel struct {
+type Model struct {
 	FilePanels        []filepanel.Model
 	SinglePanelWidth  int
 	Width             int

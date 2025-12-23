@@ -29,7 +29,7 @@ func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool,
 		processBarModel: processbar.New(),
 		sidebarModel:    sidebar.New(),
 		fileMetaData:    metadata.New(),
-		fileModel: filemodel.FileModel{
+		fileModel: filemodel.Model{
 			FilePanels:       filepanel.FilePanelSlice(firstPanelPaths),
 			FilePreview:      preview.New(),
 			SinglePanelWidth: common.DefaultFilePanelWidth,
