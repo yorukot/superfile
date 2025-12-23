@@ -64,3 +64,14 @@ func (m *clipboardModel) Reset(cut bool) {
 func (m *clipboardModel) Add(location string) {
 	m.CopyItems.items = append(m.CopyItems.items, location)
 }
+
+func (m *clipboardModel) SetItems(items []string) {
+	m.CopyItems.items = items
+}
+
+func (m *clipboardModel) GetFirstItem() string {
+	if len(m.CopyItems.items) == 0 {
+		return ""
+	}
+	return m.CopyItems.items[0]
+}

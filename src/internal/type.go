@@ -57,7 +57,6 @@ type model struct {
 	processBarModel processbar.Model
 	clipboard       clipboardModel
 	focusPanel      focusPanelType
-	copyItems       CopyItems
 
 	// Modals
 	notifyModel notify.Model

@@ -40,8 +40,8 @@ func TestCopy(t *testing.T) {
 		require.Equal(t, "file1.txt",
 			p.getModel().getFocusedFilePanel().Element[0].Name)
 		p.SendKeyDirectly(common.Hotkeys.CopyItems[0])
-		assert.False(t, p.getModel().copyItems.cut)
-		assert.Equal(t, file1, p.getModel().copyItems.items[0])
+		assert.False(t, p.getModel().clipboard.IsCut())
+		assert.Equal(t, file1, p.getModel().clipboard.GetFirstItem())
 
 		p.getModel().updateCurrentFilePanelDir("../dir2")
 		p.SendKey(common.Hotkeys.PasteItems[0])
@@ -51,8 +51,8 @@ func TestCopy(t *testing.T) {
 			return err == nil
 		}, DefaultTestTimeout, DefaultTestTick)
 
-		assert.False(t, p.getModel().copyItems.cut)
-		assert.Equal(t, file1, p.getModel().copyItems.items[0])
+		assert.False(t, p.getModel().clipboard.IsCut())
+		assert.Equal(t, file1, p.getModel().clipboard.GetFirstItem())
 
 		p.SendKey(common.Hotkeys.PasteItems[0])
 		assert.Eventually(t, func() bool {

@@ -39,8 +39,8 @@ func NewPasteOperationMsg(state processbar.ProcessState, reqID int) PasteOperati
 }
 
 func (msg PasteOperationMsg) ApplyToModel(m *model) tea.Cmd {
-	if (msg.state == processbar.Failed || msg.state == processbar.Successful) && m.copyItems.cut {
-		m.copyItems.reset(false)
+	if (msg.state == processbar.Failed || msg.state == processbar.Successful) && m.clipboard.IsCut() {
+		m.clipboard.Reset(false)
 	}
 	return nil
 }

@@ -197,30 +197,32 @@ func (m *model) getDeleteTriggerCmd(deletePermanent bool) tea.Cmd {
 // set cut to true/false accordingly
 func (m *model) copySingleItem(cut bool) {
 	panel := m.getFocusedFilePanel()
-	m.copyItems.reset(cut)
+	m.clipboard.Reset(cut)
 	if len(panel.Element) == 0 {
 		return
 	}
 	slog.Debug("handle_file_operations.copySingleItem", "cut", cut,
 		"panel location", panel.Element[panel.Cursor].Location)
-	m.copyItems.items = append(m.copyItems.items, panel.Element[panel.Cursor].Location)
+	m.clipboard.Add(panel.Element[panel.Cursor].Location)
 }
 
 // Copy all selected file or directory's paths to the clipboard
 func (m *model) copyMultipleItem(cut bool) {
 	panel := m.getFocusedFilePanel()
-	m.copyItems.reset(cut)
+	m.clipboard.Reset(cut)
 	if len(panel.Selected) == 0 {
 		return
 	}
 	slog.Debug("handle_file_operations.copyMultipleItem", "cut", cut,
 		"panel selected files", panel.Selected)
-	m.copyItems.items = panel.Selected
+	for _, it := range panel.Selected {
+		m.clipboard.Add(it)
+	}
 }
 
 func (m *model) getPasteItemCmd() tea.Cmd {
-	copyItems := m.copyItems.items
-	cut := m.copyItems.cut
+	copyItems := m.clipboard.CopyItems.items
+	cut := m.clipboard.IsCut()
 	if len(copyItems) == 0 {
 		return nil
 	}
