@@ -1,7 +1,7 @@
 package utils
 
-// FilePanelMax defines the maximum number of file panels
-const FilePanelMax = 3
+// CntFooterPanels defines the maximum number of file panels
+const CntFooterPanels = 3
 
 // BorderPaddingForFooter is the border padding for footer calculations
 const BorderPaddingForFooter = 2
@@ -10,7 +10,7 @@ const BorderPaddingForFooter = 2
 // <---><---><--->
 // Hence we have (fullWidth - 6) / 3 = fullWidth/3 - 2
 func FooterWidth(fullWidth int) int {
-	return fullWidth/FilePanelMax - BorderPaddingForFooter
+	return fullWidth/CntFooterPanels - BorderPaddingForFooter
 }
 
 // Including borders
