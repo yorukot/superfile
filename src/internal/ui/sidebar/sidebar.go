@@ -112,11 +112,13 @@ func New() Model {
 		directories: getDirectories(&pinnedMgr),
 		searchBar:   common.GenerateSearchBar(),
 		pinnedMgr:   &pinnedMgr,
+		width:       common.Config.SidebarWidth + common.BorderPadding,
+		height:      minHeight,
 	}
 
 	// Excluding borders(2), Searchbar Prompt(2), and one extra character than is appended
 	// by searchBar.View()
-	res.searchBar.Width = common.Config.SidebarWidth - searchBarPadding
+	res.searchBar.Width = res.width - common.BorderPadding - searchBarPadding
 	res.searchBar.Placeholder = "(" + common.Hotkeys.SearchBar[0] + ")" + " Search"
 	return res
 }

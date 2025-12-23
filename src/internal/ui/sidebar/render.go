@@ -11,7 +11,7 @@ import (
 )
 
 // Render returns the rendered sidebar string
-func (s *Model) Render(mainPanelHeight int, sidebarFocussed bool, currentFilePanelLocation string) string {
+func (s *Model) Render(sidebarFocussed bool, currentFilePanelLocation string) string {
 	if common.Config.SidebarWidth == 0 {
 		return ""
 	}
@@ -19,10 +19,7 @@ func (s *Model) Render(mainPanelHeight int, sidebarFocussed bool, currentFilePan
 		"renderIndex", s.renderIndex, "dirs count", len(s.directories),
 		"sidebar focused", sidebarFocussed)
 
-	r := ui.SidebarRenderer(
-		mainPanelHeight+common.BorderPadding,
-		common.Config.SidebarWidth+common.BorderPadding,
-		sidebarFocussed)
+	r := ui.SidebarRenderer(s.height, s.width, sidebarFocussed)
 
 	r.AddLines(common.SideBarSuperfileTitle, "")
 
@@ -33,12 +30,12 @@ func (s *Model) Render(mainPanelHeight int, sidebarFocussed bool, currentFilePan
 	if s.NoActualDir() {
 		r.AddLines(common.SideBarNoneText)
 	} else {
-		s.directoriesRender(mainPanelHeight, currentFilePanelLocation, sidebarFocussed, r)
+		s.directoriesRender(currentFilePanelLocation, sidebarFocussed, r)
 	}
 	return r.Render()
 }
 
-func (s *Model) directoriesRender(mainPanelHeight int, curFilePanelFileLocation string,
+func (s *Model) directoriesRender(curFilePanelFileLocation string,
 	sideBarFocussed bool, r *rendering.Renderer) {
 	// Cursor should always point to a valid directory at this point
 	if s.isCursorInvalid() {
@@ -50,6 +47,7 @@ func (s *Model) directoriesRender(mainPanelHeight int, curFilePanelFileLocation 
 	// TODO : This is not true when searchbar is not rendered(totalHeight is 2, not 3),
 	// so we end up underutilizing one line for our render. But it wont break anything.
 	totalHeight := sideBarInitialHeight
+	mainPanelHeight := s.height - common.BorderPadding
 	for i := s.renderIndex; i < len(s.directories); i++ {
 		if totalHeight+s.directories[i].RequiredHeight() > mainPanelHeight {
 			break

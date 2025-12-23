@@ -25,9 +25,9 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 	case slices.Contains(common.Hotkeys.ListUp, msg):
 		switch m.focusPanel {
 		case sidebarFocus:
-			m.sidebarModel.ListUp(m.mainPanelHeight)
+			m.sidebarModel.ListUp()
 		case processBarFocus:
-			m.processBarModel.ListUp(m.footerHeight)
+			m.processBarModel.ListUp()
 		case metadataFocus:
 			m.fileMetaData.ListUp()
 		case nonePanelFocus:
@@ -38,9 +38,9 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 	case slices.Contains(common.Hotkeys.ListDown, msg):
 		switch m.focusPanel {
 		case sidebarFocus:
-			m.sidebarModel.ListDown(m.mainPanelHeight)
+			m.sidebarModel.ListDown()
 		case processBarFocus:
-			m.processBarModel.ListDown(m.footerHeight)
+			m.processBarModel.ListDown()
 		case metadataFocus:
 			m.fileMetaData.ListDown()
 		case nonePanelFocus:

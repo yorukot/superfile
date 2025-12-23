@@ -17,7 +17,7 @@ import (
 )
 
 func (m *model) sidebarRender() string {
-	return m.sidebarModel.Render(m.mainPanelHeight, m.focusPanel == sidebarFocus,
+	return m.sidebarModel.Render(m.focusPanel == sidebarFocus,
 		m.getFocusedFilePanel().Location)
 }
 
