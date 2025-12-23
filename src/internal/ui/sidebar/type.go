@@ -15,4 +15,6 @@ type Model struct {
 	renaming    bool
 	searchBar   textinput.Model
 	pinnedMgr   *PinnedManager
+	width       int
+	height      int
 }

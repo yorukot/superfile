@@ -1,11 +1,13 @@
 package sidebar
 
+import "log/slog"
+
 func (d directory) IsDivider() bool {
 	return d == pinnedDividerDir || d == diskDividerDir
 }
 func (d directory) RequiredHeight() int {
 	if d.IsDivider() {
-		return defaultRenderHeight
+		return dividerDirHeight
 	}
 	return 1
 }
@@ -87,4 +89,22 @@ func (s *Model) pinnedIndexRange() (int, int) {
 		}
 	}
 	return pinnedDividerIdx + 1, diskDividerIdx - 1
+}
+
+// TODO: There are some utils like this that are common in all models
+// Come up with a way to prevent all this code duplication
+func (m *Model) GetWidth() int {
+	return m.width
+}
+
+func (m *Model) GetHeight() int {
+	return m.height
+}
+
+func (m *Model) SetHeight(height int) {
+	if height < minHeight {
+		slog.Error("Attempted to set too low hight to sidebar", "height", height)
+		return
+	}
+	m.height = height
 }

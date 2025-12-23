@@ -13,9 +13,9 @@ func wheelMainAction(msg string, m *model) {
 	case "wheel up":
 		switch m.focusPanel {
 		case sidebarFocus:
-			action = func() { m.sidebarModel.ListUp(m.mainPanelHeight) }
+			action = func() { m.sidebarModel.ListUp() }
 		case processBarFocus:
-			action = func() { m.processBarModel.ListUp(m.footerHeight) }
+			action = func() { m.processBarModel.ListUp() }
 		case metadataFocus:
 			action = func() { m.fileMetaData.ListUp() }
 		case nonePanelFocus:
@@ -25,9 +25,9 @@ func wheelMainAction(msg string, m *model) {
 	case "wheel down":
 		switch m.focusPanel {
 		case sidebarFocus:
-			action = func() { m.sidebarModel.ListDown(m.mainPanelHeight) }
+			action = func() { m.sidebarModel.ListDown() }
 		case processBarFocus:
-			action = func() { m.processBarModel.ListDown(m.footerHeight) }
+			action = func() { m.processBarModel.ListDown() }
 		case metadataFocus:
 			action = func() { m.fileMetaData.ListDown() }
 		case nonePanelFocus:

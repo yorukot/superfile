@@ -121,7 +121,7 @@ func (m *model) validateLayout() error { //nolint:gocognit // cumilation of vali
 
 // validateRender validates rendered output dimensions and border
 //
-//nolint:gocognit // Validation functions
+
 func validateRender(out string, height int, width int, border bool) error {
 	strippedOut := ansi.Strip(out)
 
@@ -144,49 +144,50 @@ func validateRender(out string, height int, width int, border bool) error {
 		}
 	}
 
-	// Check for border if required
-	if border {
-		if len(lines) < minLinesForBorder {
-			return fmt.Errorf("too few lines for border : %v", len(lines))
-		}
-		// Check first line starts with TopLeft and ends with TopRight
-		if !strings.HasPrefix(lines[0], common.Config.BorderTopLeft) {
-			return fmt.Errorf("render missing top left border, expected %q", common.Config.BorderTopLeft)
-		}
-		if !strings.HasSuffix(lines[0], common.Config.BorderTopRight) {
-			return fmt.Errorf("render missing top right border, expected %q", common.Config.BorderTopRight)
-		}
+	if !border {
+		return nil
+	}
 
-		// Check last line starts with BottomLeft and ends with BottomRight
-		lastLine := lines[len(lines)-1]
-		if !strings.HasPrefix(lastLine, common.Config.BorderBottomLeft) {
-			return fmt.Errorf("render missing bottom left border, expected %q", common.Config.BorderBottomLeft)
-		}
-		if !strings.HasSuffix(lastLine, common.Config.BorderBottomRight) {
-			return fmt.Errorf("render missing bottom right border, expected %q", common.Config.BorderBottomRight)
-		}
+	if len(lines) < minLinesForBorder {
+		return fmt.Errorf("too few lines for border : %v", len(lines))
+	}
+	// Check first line starts with TopLeft and ends with TopRight
+	if !strings.HasPrefix(lines[0], common.Config.BorderTopLeft) {
+		return fmt.Errorf("render missing top left border, expected %q", common.Config.BorderTopLeft)
+	}
+	if !strings.HasSuffix(lines[0], common.Config.BorderTopRight) {
+		return fmt.Errorf("render missing top right border, expected %q", common.Config.BorderTopRight)
+	}
 
-		// Check middle lines wrapped with BorderLeft and BorderRight
-		for i := 1; i < len(lines)-1; i++ {
-			if !strings.HasPrefix(lines[i], common.Config.BorderLeft) &&
-				!strings.HasPrefix(lines[i], common.Config.BorderMiddleLeft) {
-				return fmt.Errorf("render line '%v' missing left border", lines[i])
-			}
-			if !strings.HasSuffix(lines[i], common.Config.BorderRight) &&
-				!strings.HasSuffix(lines[i], common.Config.BorderMiddleRight) {
-				return fmt.Errorf("render line '%v' missing right border", lines[i])
-			}
-		}
+	// Check last line starts with BottomLeft and ends with BottomRight
+	lastLine := lines[len(lines)-1]
+	if !strings.HasPrefix(lastLine, common.Config.BorderBottomLeft) {
+		return fmt.Errorf("render missing bottom left border, expected %q", common.Config.BorderBottomLeft)
+	}
+	if !strings.HasSuffix(lastLine, common.Config.BorderBottomRight) {
+		return fmt.Errorf("render missing bottom right border, expected %q", common.Config.BorderBottomRight)
+	}
 
-		// Check top line contains BorderTop
-		if !strings.Contains(lines[0], common.Config.BorderTop) {
-			return fmt.Errorf("render missing top border character %q", common.Config.BorderTop)
+	// Check middle lines wrapped with BorderLeft and BorderRight
+	for i := 1; i < len(lines)-1; i++ {
+		if !strings.HasPrefix(lines[i], common.Config.BorderLeft) &&
+			!strings.HasPrefix(lines[i], common.Config.BorderMiddleLeft) {
+			return fmt.Errorf("render line '%v' missing left border", lines[i])
 		}
+		if !strings.HasSuffix(lines[i], common.Config.BorderRight) &&
+			!strings.HasSuffix(lines[i], common.Config.BorderMiddleRight) {
+			return fmt.Errorf("render line '%v' missing right border", lines[i])
+		}
+	}
 
-		// Check bottom line contains BorderBottom
-		if !strings.Contains(lastLine, common.Config.BorderBottom) {
-			return fmt.Errorf("render missing bottom border character %q", common.Config.BorderBottom)
-		}
+	// Check top line contains BorderTop
+	if !strings.Contains(lines[0], common.Config.BorderTop) {
+		return fmt.Errorf("render missing top border character %q", common.Config.BorderTop)
+	}
+
+	// Check bottom line contains BorderBottom
+	if !strings.Contains(lastLine, common.Config.BorderBottom) {
+		return fmt.Errorf("render missing bottom border character %q", common.Config.BorderBottom)
 	}
 
 	return nil
@@ -234,9 +235,29 @@ func (m *model) validateFinalRender(out string) error {
 	if err := validateRender(out, m.fullHeight, m.fullWidth, false); err != nil {
 		return fmt.Errorf("model rendering failures : %w", err)
 	}
-	strippedOut := ansi.Strip(out)
 
+	// Skip due to overlay model's being open
+	// TODO: Add validations for overlay models
+	// programatically ensure that only one of them is open at a time
+	// We may need some sort of overlay model management
+	if m.IsOverlayModelOpen() {
+		return nil
+	}
+	strippedOut := ansi.Strip(out)
 	lines := strings.Split(strippedOut, "\n")
+
+	if common.Config.SidebarWidth != 0 {
+		sidebarPos := compPosition{
+			stRow:  0,
+			stCol:  0,
+			endRow: m.sidebarModel.GetHeight() - 1,
+			endCol: m.sidebarModel.GetWidth() - 1,
+		}
+		// Note: This wont work when any overlay model is open
+		if err := m.validateComponentPlacement(lines, sidebarPos, true); err != nil {
+			return fmt.Errorf("sidebar position validation failed: %w", err)
+		}
+	}
 
 	filePanelColStart := 0
 	if common.Config.SidebarWidth != 0 {
@@ -254,6 +275,48 @@ func (m *model) validateFinalRender(out string) error {
 		// Note: This wont work when any overlay model is open
 		if err := m.validateComponentPlacement(lines, panelPos, true); err != nil {
 			return fmt.Errorf("file panel %v position validation failed: %w", i, err)
+		}
+	}
+
+	if m.fileModel.FilePreview.IsOpen() {
+		previewPanelPos := compPosition{
+			stRow:  0,
+			endRow: m.mainPanelHeight + 1,
+			stCol:  m.fullWidth - m.fileModel.FilePreview.GetWidth(),
+			endCol: m.fullWidth - 1,
+		}
+		if err := m.validateComponentPlacement(lines, previewPanelPos, false); err != nil {
+			return fmt.Errorf("preview panel position validation failed: %w", err)
+		}
+	}
+
+	if m.toggleFooter {
+		processBarPos := compPosition{
+			stRow:  m.mainPanelHeight + common.BorderPadding,
+			stCol:  0,
+			endRow: m.fullHeight - 1,
+			endCol: m.processBarModel.GetWidth() - 1,
+		}
+		if err := m.validateComponentPlacement(lines, processBarPos, true); err != nil {
+			return fmt.Errorf("process bar position validation failed: %w", err)
+		}
+		metadataPos := compPosition{
+			stRow:  m.mainPanelHeight + common.BorderPadding,
+			stCol:  m.processBarModel.GetWidth(),
+			endRow: m.fullHeight - 1,
+			endCol: m.processBarModel.GetWidth() + m.fileMetaData.GetWidth() - 1,
+		}
+		if err := m.validateComponentPlacement(lines, metadataPos, true); err != nil {
+			return fmt.Errorf("metadata bar position validation failed: %w", err)
+		}
+		clipboardPos := compPosition{
+			stRow:  m.mainPanelHeight + common.BorderPadding,
+			stCol:  m.processBarModel.GetWidth() + m.fileMetaData.GetWidth(),
+			endRow: m.fullHeight - 1,
+			endCol: m.fullWidth - 1,
+		}
+		if err := m.validateComponentPlacement(lines, clipboardPos, true); err != nil {
+			return fmt.Errorf("clipboard position validation failed: %w", err)
 		}
 	}
 
@@ -279,10 +342,13 @@ func (m *model) validateComponentPlacement(lines []string, pos compPosition, bor
 // Inclusive
 func (m *model) extractComponent(lines []string, pos compPosition) ([]string, error) {
 	if 0 > pos.stRow || pos.stRow > pos.endRow || pos.endRow >= len(lines) {
-		return nil, fmt.Errorf("invalid row range [%v, %v]", pos.stRow, pos.endRow)
+		return nil, fmt.Errorf("invalid row range [%v, %v], line count : %v",
+			pos.stRow, pos.endRow, len(lines))
 	}
-	if 0 > pos.stCol || pos.stCol > pos.endCol || pos.endCol >= ansi.StringWidth(lines[0]) {
-		return nil, fmt.Errorf("invalid col range [%v, %v]", pos.stCol, pos.endCol)
+	firstLineWidth := ansi.StringWidth(lines[0])
+	if 0 > pos.stCol || pos.stCol > pos.endCol || pos.endCol >= firstLineWidth {
+		return nil, fmt.Errorf("invalid col range [%v, %v], first line width : %v",
+			pos.stCol, pos.endCol, firstLineWidth)
 	}
 
 	cntRow := pos.endRow - pos.stRow + 1
@@ -299,4 +365,10 @@ type compPosition struct {
 	stCol  int
 	endRow int
 	endCol int
+}
+
+func (m *model) IsOverlayModelOpen() bool {
+	return m.zoxideModal.IsOpen() || m.helpMenu.open || m.promptModal.IsOpen() ||
+		m.getFocusedFilePanel().SortOptions.Open || m.firstUse || m.typingModal.open ||
+		m.notifyModel.IsOpen()
 }

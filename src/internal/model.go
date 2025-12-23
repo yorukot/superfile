@@ -237,7 +237,7 @@ func (m *model) setHeightValues() {
 }
 
 func (m *model) updateComponentDimensions() tea.Cmd {
-	m.setFileModelDimensions()
+	m.setMainModelDimensions()
 	m.setHelpMenuSize()
 	m.setPromptModelSize()
 	m.setZoxideModelSize()
@@ -249,9 +249,10 @@ func (m *model) updateComponentDimensions() tea.Cmd {
 	return m.getFilePreviewCmd(true)
 }
 
-func (m *model) setFileModelDimensions() {
+func (m *model) setMainModelDimensions() {
 	m.fileModel.SetWidth(m.fullWidth - common.Config.SidebarWidth - common.BorderPadding)
 	m.fileModel.SetHeight(m.mainPanelHeight + common.BorderPadding)
+	m.sidebarModel.SetHeight(m.mainPanelHeight + common.BorderPadding)
 }
 
 // Set help menu size
