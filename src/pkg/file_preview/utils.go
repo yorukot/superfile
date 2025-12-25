@@ -1,8 +1,12 @@
 package filepreview
 
 import (
+	"errors"
+	"fmt"
+	"image/color"
 	"log/slog"
 	"runtime"
+	"strconv"
 	"sync"
 )
 
@@ -138,4 +142,30 @@ func getWindowsDefaultCellSize() TerminalCellSize {
 		PixelsPerColumn: WindowsPixelsPerColumn, // Windows Terminal/CMD typical width
 		PixelsPerRow:    WindowsPixelsPerRow,    // Windows Terminal/CMD typical height
 	}
+}
+
+func hexToColor(hex string) (color.RGBA, error) {
+	if len(hex) != 7 || hex[0] != '#' {
+		return color.RGBA{}, errors.New("invalid hex color format")
+	}
+	values, err := strconv.ParseUint(hex[1:], 16, 32)
+	if err != nil {
+		return color.RGBA{}, err
+	}
+	return color.RGBA{
+		R: uint8(values >> rgbShift16),            //nolint:gosec // RGB values are masked to 8-bit range
+		G: uint8((values >> rgbShift8) & rgbMask), //nolint:gosec // RGB values are masked to 8-bit range
+		B: uint8(values & rgbMask),                //nolint:gosec // RGB values are masked to 8-bit range
+		A: alphaOpaque,
+	}, nil
+}
+
+func colorToHex(color color.Color) string {
+	r, g, b, _ := color.RGBA()
+	return fmt.Sprintf(
+		"#%02x%02x%02x",
+		uint8(r>>rgbShift8), //nolint:gosec // RGBA() returns 16-bit values, shifting by 8 gives 8-bit
+		uint8(g>>rgbShift8), //nolint:gosec // RGBA() returns 16-bit values, shifting by 8 gives 8-bit
+		uint8(b>>rgbShift8), //nolint:gosec // RGBA() returns 16-bit values, shifting by 8 gives 8-bit
+	)
 }
