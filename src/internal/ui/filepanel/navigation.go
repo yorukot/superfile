@@ -80,7 +80,7 @@ func (m *Model) ValidateCursorAndRenderIndex() error {
 	renderCount := m.PanelElementHeight()
 	if (m.Cursor < m.RenderIndex) || (m.Cursor > m.RenderIndex+renderCount-1) {
 		return fmt.Errorf("invalid renderIndex : %d, cursor : %d, renderCount : %d",
-			m.Cursor, m.RenderIndex, renderCount)
+			m.RenderIndex, m.Cursor, renderCount)
 	}
 	return nil
 }

@@ -142,15 +142,21 @@ func (m *Model) renderTextPreview(r *rendering.Renderer, box lipgloss.Style, ite
 	return r.Render()
 }
 
-// Only use this when height and width are syned with filemodel's expectations
+// Only use this when height and width are synced with filemodel's expectations
 func (m *Model) RenderText(text string) string {
-	return m.RenderTextWithDimension(text, m.height, m.width)
+	return m.RenderTextWithDimension(text, m.contentHeight, m.contentWidth)
 }
 
 func (m *Model) RenderTextWithDimension(text string, height int, width int) string {
+	// For zero size, don't need to render anything. Its kinda hack, but
+	// its to prevent error logs
+	clearCmd := m.imagePreviewer.ClearKittyImages()
+	if width == 0 && height == 0 {
+		return clearCmd
+	}
 	return ui.FilePreviewPanelRenderer(height, width).
 		AddLines(text).
-		Render() + m.imagePreviewer.ClearKittyImages()
+		Render() + clearCmd
 }
 
 func (m *Model) RenderWithPath(itemPath string, previewWidth int, previewHeight int, fullModelWidth int) string {

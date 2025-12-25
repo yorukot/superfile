@@ -8,7 +8,7 @@ import (
 
 func TestContentRendererBasic(t *testing.T) {
 	t.Run("Basic test", func(t *testing.T) {
-		r := NewContentRenderer(6, 5, PlainTruncateRight)
+		r := NewContentRenderer(6, 5, PlainTruncateRight, "")
 		r.AddLines("123456")
 		r.AddLines("12345\n12345", "123")
 		assert.Equal(t, 4, r.CntLines())
@@ -39,7 +39,7 @@ func TestContentRendererBasic(t *testing.T) {
 
 		assert.Equal(t, "\x00\x11\x1babc", r.Render())
 
-		r = NewContentRenderer(0, 0, PlainTruncateRight)
+		r = NewContentRenderer(0, 0, PlainTruncateRight, "")
 		r.AddLines("L1")
 		r.AddLines("L2")
 		assert.Empty(t, r.Render())

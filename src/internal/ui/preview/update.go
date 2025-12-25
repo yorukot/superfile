@@ -28,11 +28,8 @@ func (msg UpdateMsg) GetReqID() int {
 }
 
 func (m *Model) Apply(msg UpdateMsg) {
-	m.width = msg.width
-	m.height = msg.height
-	m.content = msg.content
 	m.location = msg.location
-	m.loading = false
+	m.setContent(msg.content, msg.width, msg.height)
 }
 
 func (msg UpdateMsg) GetLocation() string {

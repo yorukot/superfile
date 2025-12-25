@@ -1,7 +1,6 @@
 package filemodel
 
 import (
-	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -37,7 +36,7 @@ func (m *Model) CreateNewFilePanel(location string) (tea.Cmd, error) {
 
 func (m *Model) CloseFilePanel() (tea.Cmd, error) {
 	if m.PanelCount() <= 1 {
-		return nil, errors.New("CloseFilePanel called on with panelCount <= 1")
+		return nil, ErrMinimumPanelCount
 	}
 
 	m.FilePanels = append(m.FilePanels[:m.FocusedPanelIndex],
@@ -87,14 +86,18 @@ func (m *Model) GetFilePreviewCmd(forcePreviewRender bool) tea.Cmd {
 
 	// HACK!!!. fileModel must not be aware of other dimensions. but...
 	// Unfortunately, previewPanel isn't completely 'under' fileModel
+	// Note: Must save the dimensions for the closure of the Cmd to avoid
+	// problems
 	fullModalWidth := m.Width + common.Config.SidebarWidth
 	if common.Config.SidebarWidth != 0 {
 		fullModalWidth += common.BorderPadding
 	}
+	width := m.ExpectedPreviewWidth
+	height := m.Height
 
 	return func() tea.Msg {
-		content := m.FilePreview.RenderWithPath(selectedItem.Location, m.ExpectedPreviewWidth, m.Height, fullModalWidth)
+		content := m.FilePreview.RenderWithPath(selectedItem.Location, width, height, fullModalWidth)
 		return preview.NewUpdateMsg(selectedItem.Location, content,
-			m.ExpectedPreviewWidth, m.Height, reqCnt)
+			width, height, reqCnt)
 	}
 }

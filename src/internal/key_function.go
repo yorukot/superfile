@@ -1,10 +1,12 @@
 package internal
 
 import (
+	"errors"
 	"log/slog"
 	"slices"
 
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/ui/filemodel"
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 
 	"github.com/yorukot/superfile/src/internal/ui/notify"
@@ -64,14 +66,14 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 
 	case slices.Contains(common.Hotkeys.CloseFilePanel, msg):
 		cmd, err := m.fileModel.CloseFilePanel()
-		if err != nil {
-			slog.Error("error while closing panel", "error", err)
+		if err != nil && !errors.Is(err, filemodel.ErrMinimumPanelCount) {
+			slog.Error("unexpected error while closing new panel", "error", err)
 		}
 		return cmd
 	case slices.Contains(common.Hotkeys.CreateNewFilePanel, msg):
 		cmd, err := m.fileModel.CreateNewFilePanel(variable.HomeDir)
-		if err != nil {
-			slog.Error("error while creating new panel", "error", err)
+		if err != nil && !errors.Is(err, filemodel.ErrMaximumPanelCount) {
+			slog.Error("unexpected error while creating new panel", "error", err)
 		}
 		return cmd
 	case slices.Contains(common.Hotkeys.ToggleFilePreviewPanel, msg):

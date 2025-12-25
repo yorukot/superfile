@@ -17,3 +17,5 @@ const (
 )
 
 var ErrMaximumPanelCount = errors.New("maximum panel count reached")
+
+var ErrMinimumPanelCount = errors.New("minimum panel count reached")

@@ -16,13 +16,10 @@ func (m *Model) GetFilePreviewRender() string {
 		return ""
 	}
 	// Check if width and height have been synced yet
-	if m.FilePreview.GetHeight() == m.Height &&
-		m.FilePreview.GetWidth() == m.ExpectedPreviewWidth {
+	if m.FilePreview.GetContentHeight() == m.Height &&
+		m.FilePreview.GetContentWidth() == m.ExpectedPreviewWidth {
 		if m.FilePreview.IsLoading() {
 			return m.FilePreview.RenderText(FilePreviewLoadingText)
-		}
-		if m.FilePreview.IsEmpty() {
-			return m.FilePreview.RenderText("")
 		}
 		return m.FilePreview.GetContent()
 	}

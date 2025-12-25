@@ -34,7 +34,7 @@ func (m *Model) UpdateChildComponentHeight() tea.Cmd {
 		m.FilePanels[i].SetHeight(m.Height)
 	}
 
-	if m.FilePreview.GetHeight() == m.Height {
+	if m.FilePreview.GetContentHeight() == m.Height {
 		return nil
 	}
 
@@ -80,7 +80,7 @@ func (m *Model) UpdateChildComponentWidth() tea.Cmd {
 	}
 
 	// Whether needs to re-render preview?
-	if m.FilePreview.GetWidth() != m.ExpectedPreviewWidth {
+	if m.FilePreview.GetContentWidth() != m.ExpectedPreviewWidth {
 		return m.GetFilePreviewCmd(true)
 	}
 	return nil

@@ -22,6 +22,7 @@ func SidebarRenderer(totalHeight int, totalWidth int, sidebarFocused bool) *rend
 		cfg.BorderFGColor = common.SidebarBorderActiveColor
 	}
 	cfg.Border = DefaultLipglossBorder()
+	cfg.RendererName += "-sidebar"
 
 	r, err := rendering.NewRenderer(cfg)
 	if err != nil {
@@ -44,6 +45,7 @@ func FilePanelRenderer(totalHeight int, totalWidth int, filePanelFocused bool) *
 		cfg.BorderFGColor = common.FilePanelBorderActiveColor
 	}
 	cfg.Border = DefaultLipglossBorder()
+	cfg.RendererName += "-filepanel"
 
 	r, err := rendering.NewRenderer(cfg)
 	if err != nil {
@@ -58,6 +60,7 @@ func FilePreviewPanelRenderer(totalHeight int, totalWidth int) *rendering.Render
 	cfg.ContentFGColor = common.FilePanelFGColor
 	cfg.ContentBGColor = common.FilePanelBGColor
 	cfg.BorderRequired = false
+	cfg.RendererName += "-preview"
 
 	r, err := rendering.NewRenderer(cfg)
 	if err != nil {
@@ -110,7 +113,7 @@ func HelpMenuRenderer(totalHeight int, totalWidth int) *rendering.Renderer {
 	return r
 }
 
-func DefaultFooterRenderer(totalHeight int, totalWidth int, focused bool) *rendering.Renderer {
+func DefaultFooterRenderer(totalHeight int, totalWidth int, focused bool, name string) *rendering.Renderer {
 	cfg := rendering.DefaultRendererConfig(totalHeight, totalWidth)
 
 	cfg.ContentFGColor = common.FooterFGColor
@@ -123,31 +126,27 @@ func DefaultFooterRenderer(totalHeight int, totalWidth int, focused bool) *rende
 		cfg.BorderFGColor = common.FooterBorderActiveColor
 	}
 	cfg.Border = DefaultLipglossBorder()
+	cfg.RendererName = name
 
 	r, err := rendering.NewRenderer(cfg)
 	if err != nil {
 		slog.Error("Error in creating renderer. Falling back to default renderer", "error", err)
 		r = &rendering.Renderer{}
 	}
+	r.SetBorderTitle(name)
 	return r
 }
 
 func ProcessBarRenderer(totalHeight int, totalWidth int, processBarFocused bool) *rendering.Renderer {
-	r := DefaultFooterRenderer(totalHeight, totalWidth, processBarFocused)
-	r.SetBorderTitle("Processes")
-	return r
+	return DefaultFooterRenderer(totalHeight, totalWidth, processBarFocused, "Processes")
 }
 
 func MetadataRenderer(totalHeight int, totalWidth int, metadataFocused bool) *rendering.Renderer {
-	r := DefaultFooterRenderer(totalHeight, totalWidth, metadataFocused)
-	r.SetBorderTitle("Metadata")
-	return r
+	return DefaultFooterRenderer(totalHeight, totalWidth, metadataFocused, "Metadata")
 }
 
 func ClipboardRenderer(totalHeight int, totalWidth int) *rendering.Renderer {
-	r := DefaultFooterRenderer(totalHeight, totalWidth, false)
-	r.SetBorderTitle("Clipboard")
-	return r
+	return DefaultFooterRenderer(totalHeight, totalWidth, false, "Clipboard")
 }
 
 func DefaultLipglossBorder() lipgloss.Border {

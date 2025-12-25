@@ -16,4 +16,6 @@ const (
 
 	// minInfoItemWidth is minimum width for each info item to render at least 1 char
 	minInfoItemWidth = 4
+
+	rendererNameMax = 1000
 )
