@@ -103,9 +103,8 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// This is needed for blink, etc to work
 	panelCmd = m.updateComponentState(msg)
 
-	filePreviewCmd = m.fileModel.GetFilePreviewCmd(false)
-
 	m.updateModelStateAfterMsg()
+	filePreviewCmd = m.fileModel.GetFilePreviewCmd(false)
 
 	metadataCmd = m.getMetadataCmd()
 
@@ -225,9 +224,7 @@ func (m *model) setMainModelDimensions() tea.Cmd {
 		fileModelWidth -= common.Config.SidebarWidth + common.BorderPadding
 	}
 	m.sidebarModel.SetHeight(m.mainPanelHeight + common.BorderPadding)
-	return tea.Batch(
-		m.fileModel.SetWidth(fileModelWidth),
-		m.fileModel.SetHeight(m.mainPanelHeight+common.BorderPadding))
+	return m.fileModel.SetDimensions(fileModelWidth, m.mainPanelHeight+common.BorderPadding)
 }
 
 // Set help menu size

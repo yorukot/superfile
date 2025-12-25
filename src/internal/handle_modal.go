@@ -6,8 +6,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	tea "github.com/charmbracelet/bubbletea"
-
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 	"github.com/yorukot/superfile/src/internal/utils"
@@ -292,11 +290,6 @@ func (m *model) openHelpMenu() {
 func (m *model) quitHelpMenu() {
 	m.helpMenu.searchBar.Reset()
 	m.helpMenu.open = false
-}
-
-func (m *model) toggleFilePreviewPanel() tea.Cmd {
-	m.fileModel.FilePreview.ToggleOpen()
-	return m.fileModel.UpdateChildComponentWidth()
 }
 
 func (m *model) getFocusedFilePanel() *filepanel.Model {

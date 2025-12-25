@@ -5,8 +5,9 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/preview"
 )
 
-/* FILE WINDOWS TYPE START*/
-// Model for file windows
+// TODO: Make the fields unexported, as much as possible
+// some fields like `Width` should not be updated directly, only via
+// Set functions. Having them exported is dangerous
 type Model struct {
 	FilePanels           []filepanel.Model
 	SinglePanelWidth     int

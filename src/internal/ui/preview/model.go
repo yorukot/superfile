@@ -9,14 +9,15 @@ import (
 )
 
 type Model struct {
-	open   bool
-	width  int
-	height int
+	open bool
 
 	// Location denotes what is supposed to be in model.
 	// Might not be always in sync with content
-	location           string
-	content            string
+	location      string
+	content       string
+	contentWidth  int
+	contentHeight int
+
 	loading            bool
 	imagePreviewer     *filepreview.ImagePreviewer
 	batCmd             string

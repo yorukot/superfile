@@ -18,15 +18,18 @@ type ContentRenderer struct {
 
 	// We can add alignStyle if needed
 	truncateStyle TruncateStyle
+
+	name string
 }
 
-func NewContentRenderer(maxLines int, maxLineWidth int, truncateStyle TruncateStyle) ContentRenderer {
+func NewContentRenderer(maxLines int, maxLineWidth int, truncateStyle TruncateStyle, name string) ContentRenderer {
 	return ContentRenderer{
 		lines:           make([]string, 0),
 		maxLines:        maxLines,
 		maxLineWidth:    maxLineWidth,
 		truncateStyle:   truncateStyle,
 		sanitizeContent: true,
+		name:            name,
 	}
 }
 
@@ -52,7 +55,7 @@ func (r *ContentRenderer) AddLineWithCustomTruncate(lineStr string, truncateStyl
 	// We dont use strings.Lines() we need to allow adding empty strings "" as line.
 	for line := range strings.SplitSeq(lineStr, "\n") {
 		if len(r.lines) >= r.maxLines {
-			slog.Error("Max lines reached", "maxLines", r.maxLines)
+			slog.Debug("Max lines reached", "name", r.name, "maxLines", r.maxLines)
 			return
 		}
 		// Sanitazation should be done before truncate. Sanitization can increase width

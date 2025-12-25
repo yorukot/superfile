@@ -23,7 +23,7 @@ func (r *Renderer) AddSection() {
 
 	// Silently Fail if cannot add
 	if r.contentHeight <= r.actualContentHeight {
-		slog.Error("Cannot add any more sections", "actualHeight", r.actualContentHeight,
+		slog.Error("Cannot add any more sections", "name", r.name, "actualHeight", r.actualContentHeight,
 			"contentHeight", r.contentHeight)
 		return
 	}
@@ -39,7 +39,7 @@ func (r *Renderer) AddSection() {
 
 	remainingHeight := r.contentHeight - r.actualContentHeight
 	r.contentSections = append(r.contentSections,
-		NewContentRenderer(remainingHeight, r.contentWidth, r.defTruncateStyle))
+		NewContentRenderer(remainingHeight, r.contentWidth, r.defTruncateStyle, r.name))
 	// Adjust index
 	r.curSectionIdx++
 }
@@ -90,8 +90,19 @@ func (r *Renderer) Render() string {
 
 	lineCnt := strings.Count(res, "\n") + 1
 	if maxW > r.totalWidth || lineCnt > r.totalHeight {
-		slog.Error("Rendered output data inconsistency", "lineCnt", lineCnt, "totalHeight", r.totalHeight,
-			"totalWidth", r.totalWidth, "maxW", maxW)
+		slog.Error(
+			"Rendered output data inconsistency",
+			"name",
+			r.name,
+			"lineCnt",
+			lineCnt,
+			"totalHeight",
+			r.totalHeight,
+			"totalWidth",
+			r.totalWidth,
+			"maxW",
+			maxW,
+		)
 		// lipgloss Render() doesn't always respects the "height" value,
 		// so res can have more height than intended. In that case, we must truncate lines here.
 		newRes := strings.Builder{}

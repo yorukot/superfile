@@ -134,14 +134,15 @@ func (m *Model) Render(processBarFocused bool) string {
 			common.TruncateText(curProcess.Name, m.viewWidth()-processNameTruncatePadding, "...")+" ") +
 			curProcess.State.Icon())
 
-		// calculate progress percentage
-		// if the total is 0, that means the process only have directory
-		// so we can set the progress to 100%
+		// We add two lines here, and let the renderer take care of
+		// dropping the second line if it exceeds height
 		if curProcess.Total != 0 {
 			progressPercentage := float64(curProcess.Done) / float64(curProcess.Total)
 			r.AddLines(cursor+curProcess.Progress.ViewAs(progressPercentage), "")
 		} else {
-			r.AddLines(cursor + curProcess.Progress.ViewAs(1))
+			// if the total is 0, that means the process only have directory
+			// so we can set the progress to 100%
+			r.AddLines(cursor+curProcess.Progress.ViewAs(1), "")
 		}
 	}
 

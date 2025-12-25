@@ -74,8 +74,7 @@ func testWithConfig(t *testing.T, sidebarWidth int, previewWidth int, testPath s
 	common.Config.SidebarWidth = sidebarWidth
 	common.Config.FilePreviewWidth = previewWidth
 
-	m := defaultTestModel(testPath)
-	m.toggleFooter = true
+	m := defaultTestModelWithFooter(testPath)
 	p := NewTestTeaProgWithEventLoop(t, m)
 
 	resizeSizes := []struct {
@@ -268,7 +267,44 @@ func assertLayoutValidity(t *testing.T, m *model) {
 		return // Panels too narrow for valid layout
 	}
 
-	assert.NoError(t, m.validateLayout())
-	assert.NoError(t, m.validateComponentRender())
-	assert.NoError(t, m.validateFinalRender())
+	returnFirstError := func() error {
+		if err := m.validateLayout(); err != nil {
+			return err
+		}
+		if err := m.validateComponentRender(); err != nil {
+			return err
+		}
+		if err := m.validateFinalRender(); err != nil {
+			return err
+		}
+		return nil
+	}
+	err := returnFirstError()
+	// Not using assert to prevent `getLayoutInfoForDebug` getting called
+	// in happy case. This is hot-path for 906 tests
+	if err != nil {
+		t.Errorf("validations failed, error : %v, layout info : %v",
+			err, getLayoutInfoForDebug(m))
+	}
+}
+
+func getLayoutInfoForDebug(m *model) string {
+	firstPanel := m.fileModel.FilePanels[0]
+	lastPanel := m.fileModel.FilePanels[m.fileModel.PanelCount()-1]
+	location := m.getFocusedFilePanel().Location
+	width := fmt.Sprintf("width=%d[sidebar=%d,filemodel=%d"+
+		"[firstpanel=%d,lastpanel=%d,previewExp=%d,previewActual=%d]]"+
+		"[panelCount=%d,maxPanel=%d]"+
+		"[processbarWidth=%d,clipboardWidth=%d]",
+		m.fullWidth, common.Config.SidebarWidth, m.fileModel.Width,
+		firstPanel.GetWidth(), lastPanel.GetWidth(), m.fileModel.ExpectedPreviewWidth,
+		m.fileModel.FilePreview.GetContentWidth(),
+		m.fileModel.PanelCount(), m.fileModel.MaxFilePanel,
+		m.processBarModel.GetWidth(), m.clipboard.GetWidth())
+
+	height := fmt.Sprintf("height=%d[fileModel=%d[firstPanel=%d,previewActual=%d],footer=%d]",
+		m.fullHeight, m.fileModel.Height, firstPanel.GetHeight(),
+		m.fileModel.FilePreview.GetContentHeight(), m.footerHeight)
+
+	return fmt.Sprintf("%s %s location=%s", width, height, location)
 }

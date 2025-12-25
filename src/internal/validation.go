@@ -124,11 +124,19 @@ func (m *model) validateLayout() error { //nolint:gocognit // cumilation of vali
 	return nil
 }
 
-// validateRender validates rendered output dimensions and border
-//
-
 func validateRender(out string, height int, width int, border bool) error {
 	strippedOut := ansi.Strip(out)
+
+	// Empty content is not handled correctly
+	// strings.Split("", "\n") will return [""], not [].
+	// Hence we need this separate handling
+	if height == 0 {
+		// zero lines
+		if strippedOut != "" {
+			return fmt.Errorf("render height mismatch: expected empty string for 0 height, got '%v'", strippedOut)
+		}
+		return nil
+	}
 
 	lines := strings.Split(strippedOut, "\n")
 
@@ -153,6 +161,10 @@ func validateRender(out string, height int, width int, border bool) error {
 		return nil
 	}
 
+	return validateRenderBorderValidations(lines)
+}
+
+func validateRenderBorderValidations(lines []string) error {
 	if len(lines) < minLinesForBorder {
 		return fmt.Errorf("too few lines for border : %v", len(lines))
 	}
@@ -217,10 +229,8 @@ func (m *model) validateComponentRender() error {
 	}
 
 	p := &m.fileModel.FilePreview
-	if !p.IsEmpty() {
-		if err := validateRender(p.GetContent(), p.GetHeight(), p.GetWidth(), false); err != nil {
-			return fmt.Errorf("file preview render validation failed: %w", err)
-		}
+	if err := validateRender(p.GetContent(), p.GetContentHeight(), p.GetContentWidth(), false); err != nil {
+		return fmt.Errorf("file preview render validation failed: %w", err)
 	}
 
 	if err := validateRender(m.fileModel.Render(), m.fileModel.Height, m.fileModel.Width, false); err != nil {

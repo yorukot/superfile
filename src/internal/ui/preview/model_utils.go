@@ -6,12 +6,12 @@ func (m *Model) GetContent() string {
 	return m.content
 }
 
-func (m *Model) GetWidth() int {
-	return m.width
+func (m *Model) GetContentWidth() int {
+	return m.contentWidth
 }
 
-func (m *Model) GetHeight() int {
-	return m.height
+func (m *Model) GetContentHeight() int {
+	return m.contentHeight
 }
 
 func (m *Model) GetLocation() string {
@@ -30,15 +30,22 @@ func (m *Model) SetLoading() {
 	m.loading = true
 }
 
-func (m *Model) SetEmpty() {
-	m.content = ""
-}
-func (m *Model) IsLoading() bool {
-	return m.loading
+// All content change happen via this only, to ensure the sync between
+// content and width x height, and the loading variable reset
+func (m *Model) setContent(content string, width int, height int, location string) {
+	m.content = content
+	m.contentWidth = width
+	m.contentHeight = height
+	m.location = location
+	m.loading = false
 }
 
-func (m *Model) IsEmpty() bool {
-	return m.content == ""
+func (m *Model) SetEmptyWithDimensions(width int, height int) {
+	m.setContent(m.RenderTextWithDimension("", height, width), width, height, "")
+}
+
+func (m *Model) IsLoading() bool {
+	return m.loading
 }
 
 func (m *Model) ToggleOpen() {

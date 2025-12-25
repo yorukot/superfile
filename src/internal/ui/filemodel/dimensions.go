@@ -9,43 +9,42 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 )
 
+// Use SetDimensions if you want to update both
+// it will prevent duplicate file preview commands and hence, is efficient
+func (m *Model) SetDimensions(width int, height int) tea.Cmd {
+	m.Height = max(height, FileModelMinHeight)
+	m.Width = max(width, FileModelMinWidth)
+	m.updateChildComponentWidth()
+	m.updateChildComponentHeight()
+	return m.ensurePreviewDimensionsSync()
+}
 func (m *Model) SetHeight(height int) tea.Cmd {
-	if height < FileModelMinHeight {
-		height = FileModelMinHeight
-	}
-	m.Height = height
-	return m.UpdateChildComponentHeight()
+	m.Height = max(height, FileModelMinHeight)
+	m.updateChildComponentHeight()
+	return m.ensurePreviewDimensionsSync()
 }
 
 func (m *Model) SetWidth(width int) tea.Cmd {
-	if width < FileModelMinWidth {
-		width = FileModelMinWidth
-	}
-	m.Width = width
-	return m.UpdateChildComponentWidth()
+	m.Width = max(width, FileModelMinWidth)
+	m.updateChildComponentWidth()
+	return m.ensurePreviewDimensionsSync()
 }
 
 func (m *Model) PanelCount() int {
 	return len(m.FilePanels)
 }
 
-func (m *Model) UpdateChildComponentHeight() tea.Cmd {
+func (m *Model) updateChildComponentHeight() {
 	for i := range m.FilePanels {
 		m.FilePanels[i].SetHeight(m.Height)
 	}
-
-	if m.FilePreview.GetHeight() == m.Height {
-		return nil
-	}
-
-	return m.GetFilePreviewCmd(true)
 }
 
-func (m *Model) UpdateChildComponentWidth() tea.Cmd {
+func (m *Model) updateChildComponentWidth() {
 	// TODO: programatically ensure that this becomes impossible
 	if m.PanelCount() == 0 {
 		slog.Error("Unexpected error: fileModel with 0 panels")
-		return nil
+		return
 	}
 	panelCount := len(m.FilePanels)
 	widthForPanels := m.Width
@@ -78,9 +77,11 @@ func (m *Model) UpdateChildComponentWidth() tea.Cmd {
 	if m.MaxFilePanel > common.FilePanelMax {
 		m.MaxFilePanel = common.FilePanelMax
 	}
+}
 
-	// Whether needs to re-render preview?
-	if m.FilePreview.GetWidth() != m.ExpectedPreviewWidth {
+func (m *Model) ensurePreviewDimensionsSync() tea.Cmd {
+	if m.FilePreview.GetContentWidth() != m.ExpectedPreviewWidth ||
+		m.FilePreview.GetContentHeight() != m.Height {
 		return m.GetFilePreviewCmd(true)
 	}
 	return nil
