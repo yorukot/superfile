@@ -1,5 +1,7 @@
 package metadata
 
+import "time"
+
 // Spacing between Key and Value while rendering
 const keyValueSpacing = " "
 const keyValueSpacingLen = 1
@@ -18,6 +20,10 @@ const keyOwner = "Owner"
 const keyGroup = "Group"
 const keyPath = "Path"
 const borderSize = 2
+
+// Cache configuration
+const defaultCacheSize = 300
+const defaultCacheExpiration = 5 * time.Minute
 
 var sortPriority = map[string]int{ //nolint: gochecknoglobals // This is effectively const.
 	// Metadata field priority indices for display ordering

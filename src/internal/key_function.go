@@ -63,15 +63,19 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 		m.fileModel.PreviousFilePanel()
 
 	case slices.Contains(common.Hotkeys.CloseFilePanel, msg):
-		m.fileModel.CloseFilePanel()
-
+		cmd, err := m.fileModel.CloseFilePanel()
+		if err != nil {
+			slog.Error("error while closing panel", "error", err)
+		}
+		return cmd
 	case slices.Contains(common.Hotkeys.CreateNewFilePanel, msg):
-		err := m.fileModel.CreateNewFilePanel(variable.HomeDir)
+		cmd, err := m.fileModel.CreateNewFilePanel(variable.HomeDir)
 		if err != nil {
 			slog.Error("error while creating new panel", "error", err)
 		}
+		return cmd
 	case slices.Contains(common.Hotkeys.ToggleFilePreviewPanel, msg):
-		m.toggleFilePreviewPanel()
+		return m.toggleFilePreviewPanel()
 
 	case slices.Contains(common.Hotkeys.FocusOnSidebar, msg):
 		m.focusOnSideBar()

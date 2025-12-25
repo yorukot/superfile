@@ -23,7 +23,7 @@ func (s *Model) ListUp() {
 	// Otherwise dividers are sometimes skipped in render in case of
 	// large pinned directories
 	s.updateRenderIndex()
-	if s.directories[s.cursor].IsDivider() {
+	if s.directories[s.cursor].isDivider() {
 		// cause another listUp trigger to move up.
 		s.ListUp()
 	}
@@ -49,7 +49,7 @@ func (s *Model) ListDown() {
 	s.updateRenderIndex()
 
 	// Move below special divider directories
-	if s.directories[s.cursor].IsDivider() {
+	if s.directories[s.cursor].isDivider() {
 		// cause another listDown trigger to move down.
 		s.ListDown()
 	}
@@ -64,7 +64,7 @@ func (s *Model) lastRenderedIndex(startIndex int) int {
 	curHeight := sideBarInitialHeight
 	endIndex := startIndex - 1
 	for i := startIndex; i < len(s.directories); i++ {
-		curHeight += s.directories[i].RequiredHeight()
+		curHeight += s.directories[i].requiredHeight()
 		if curHeight > mainPanelHeight {
 			break
 		}
@@ -86,7 +86,7 @@ func (s *Model) firstRenderedIndex(endIndex int) int {
 	curHeight := sideBarInitialHeight
 	startIndex := endIndex + 1
 	for i := endIndex; i >= 0; i-- {
-		curHeight += s.directories[i].RequiredHeight()
+		curHeight += s.directories[i].requiredHeight()
 		if curHeight > mainPanelHeight {
 			break
 		}

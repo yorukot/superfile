@@ -82,6 +82,7 @@ func (r *Renderer) Render() string {
 	contentStr := strings.TrimSuffix(content.String(), "\n")
 	res := r.Style().Render(contentStr)
 	// Post rendering validations - Maybe we can return an error instead of logging
+	// TODO(perf): This can be disabled to improve performance
 	maxW := 0
 	for line := range strings.Lines(res) {
 		maxW = max(maxW, ansi.StringWidth(line))
@@ -89,7 +90,7 @@ func (r *Renderer) Render() string {
 
 	lineCnt := strings.Count(res, "\n") + 1
 	if maxW > r.totalWidth || lineCnt > r.totalHeight {
-		slog.Error("Rendered output data", "lineCnt", lineCnt, "totalHeight", r.totalHeight,
+		slog.Error("Rendered output data inconsistency", "lineCnt", lineCnt, "totalHeight", r.totalHeight,
 			"totalWidth", r.totalWidth, "maxW", maxW)
 		// lipgloss Render() doesn't always respects the "height" value,
 		// so res can have more height than intended. In that case, we must truncate lines here.

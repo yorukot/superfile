@@ -113,7 +113,7 @@ file_preview_width = 0
 
 #-- Sidebar Width
 # If you don't want to display the sidebar, you can input 0 directly.
-# Values recommended to be in 3–20.
+# Values recommended to be in 5–20.
 sidebar_width = 20
 
 #-- Border

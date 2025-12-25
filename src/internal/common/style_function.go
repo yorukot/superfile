@@ -12,7 +12,7 @@ import (
 )
 
 // Generate border style for file panel
-func FilePanelBorderStyle(height int, width int, filePanelFocussed bool, borderBottom string) lipgloss.Style {
+func FilePanelBorderStyle(height int, width int, filePanelFocused bool, borderBottom string) lipgloss.Style {
 	border := GenerateBorder()
 	border.Left = ""
 	border.Right = ""
@@ -29,7 +29,7 @@ func FilePanelBorderStyle(height int, width int, filePanelFocussed bool, borderB
 	border.Bottom = borderBottom
 	return lipgloss.NewStyle().
 		Border(border).
-		BorderForeground(FilePanelFocusColor(filePanelFocussed)).
+		BorderForeground(FilePanelFocusColor(filePanelFocused)).
 		BorderBackground(FilePanelBGColor).
 		Width(width).
 		Height(height).Background(FilePanelBGColor)
@@ -44,33 +44,15 @@ func FilePreviewBox(height int, width int) lipgloss.Style {
 		Foreground(FilePanelFGColor)
 }
 
-// Generate border style for sidebar
-func SideBarBorderStyle(height int, sidebarFocussed bool) lipgloss.Style {
-	border := GenerateBorder()
-	sidebarBorderStateColor := SidebarBorderColor
-	if sidebarFocussed {
-		sidebarBorderStateColor = SidebarBorderActiveColor
-	}
-
-	return lipgloss.NewStyle().
-		BorderStyle(border).
-		BorderForeground(sidebarBorderStateColor).
-		BorderBackground(SidebarBGColor).
-		Width(Config.SidebarWidth).
-		Height(height).
-		Background(SidebarBGColor).
-		Foreground(SidebarFGColor)
-}
-
 // Generate border style for process and can custom bottom border
-func ProcsssBarBorder(height int, width int, borderBottom string, processBarFocussed bool) lipgloss.Style {
+func ProcsssBarBorder(height int, width int, borderBottom string, processBarFocused bool) lipgloss.Style {
 	border := GenerateBorder()
 	border.Top = Config.BorderTop + Config.BorderMiddleRight + " Processes " +
 		Config.BorderMiddleLeft + strings.Repeat(Config.BorderTop, width)
 	border.Bottom = borderBottom
 
 	processBorderStateColor := FooterBorderColor
-	if processBarFocussed {
+	if processBarFocused {
 		processBorderStateColor = FooterBorderActiveColor
 	}
 
@@ -85,14 +67,14 @@ func ProcsssBarBorder(height int, width int, borderBottom string, processBarFocu
 }
 
 // Generate border style for metadata and can custom bottom border
-func MetadataBorder(height int, width int, borderBottom string, metadataFocussed bool) lipgloss.Style {
+func MetadataBorder(height int, width int, borderBottom string, metadataFocused bool) lipgloss.Style {
 	border := GenerateBorder()
 	border.Top = Config.BorderTop + Config.BorderMiddleRight + " Metadata " +
 		Config.BorderMiddleLeft + strings.Repeat(Config.BorderTop, width)
 	border.Bottom = borderBottom
 
 	metadataBorderStateColor := FooterBorderColor
-	if metadataFocussed {
+	if metadataFocused {
 		metadataBorderStateColor = FooterBorderActiveColor
 	}
 
@@ -183,15 +165,15 @@ func FullScreenStyle(height int, width int) lipgloss.Style {
 }
 
 // Generate file panel divider style
-func FilePanelDividerStyle(filePanelFocussed bool) lipgloss.Style {
+func FilePanelDividerStyle(filePanelFocused bool) lipgloss.Style {
 	return lipgloss.NewStyle().
-		Foreground(FilePanelFocusColor(filePanelFocussed)).
+		Foreground(FilePanelFocusColor(filePanelFocused)).
 		Background(FilePanelBGColor)
 }
 
 // Return border color based on file panel status
-func FilePanelFocusColor(filePanelFocussed bool) lipgloss.Color {
-	if filePanelFocussed {
+func FilePanelFocusColor(filePanelFocused bool) lipgloss.Color {
+	if filePanelFocused {
 		return FilePanelBorderActiveColor
 	}
 	return FilePanelBorderColor

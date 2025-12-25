@@ -57,7 +57,7 @@ func ValidateConfig(c *ConfigType) error {
 		return errors.New(LoadConfigError("file_preview_width"))
 	}
 
-	if c.SidebarWidth != 0 && (c.SidebarWidth < 3 || c.SidebarWidth > 20) {
+	if c.SidebarWidth != 0 && (c.SidebarWidth < 5 || c.SidebarWidth > 20) {
 		return errors.New(LoadConfigError("sidebar_width"))
 	}
 

@@ -90,8 +90,8 @@ func (m *Model) HasRunningProcesses() bool {
 	return false
 }
 
-func (m *Model) Render(processBarFocussed bool) string {
-	r := ui.ProcessBarRenderer(m.height, m.width, processBarFocussed)
+func (m *Model) Render(processBarFocused bool) string {
+	r := ui.ProcessBarRenderer(m.height, m.width, processBarFocused)
 	if !m.isValid() {
 		slog.Error("processBar in invalid state", "render", m.renderIndex,
 			"cursor", m.cursor, "Height", m.height)

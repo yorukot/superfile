@@ -47,3 +47,7 @@ func (m *Model) ElemCount() int {
 func (m *Model) Empty() bool {
 	return m.ElemCount() == 0
 }
+
+func (m *Model) EmptyOrInvalid() bool {
+	return m.Empty() || m.ValidateCursorAndRenderIndex() != nil
+}

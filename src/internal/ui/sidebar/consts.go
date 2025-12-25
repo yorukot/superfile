@@ -26,4 +26,5 @@ const (
 	dividerDirHeight = 3
 
 	minHeight = 5
+	minWidth  = 7
 )

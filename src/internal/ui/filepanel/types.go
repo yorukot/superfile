@@ -59,7 +59,6 @@ type Element struct {
 	Name      string
 	Location  string
 	Directory bool
-	MetaData  [][2]string
 	Info      os.FileInfo
 }
 

@@ -4,11 +4,17 @@ import (
 	"fmt"
 
 	"github.com/yorukot/superfile/src/internal/ui"
+	"github.com/yorukot/superfile/src/pkg/cache"
 )
 
 type Model struct {
-	// Data
-	metadata Metadata
+	metadata Metadata // current metadata
+	cache    *cache.Cache[Metadata]
+
+	// It tells what the metadata should have. Its used to prevent additional requests
+	// if one is already underway
+	expectedLocation string
+	expectedFocused  bool
 
 	// Render state
 	renderIndex int
@@ -19,7 +25,9 @@ type Model struct {
 }
 
 func New() Model {
-	return Model{}
+	return Model{
+		cache: cache.New[Metadata](defaultCacheSize, defaultCacheExpiration),
+	}
 }
 
 // Should be at least 2x2
@@ -35,13 +43,6 @@ func (m *Model) GetHeight() int {
 
 func (m *Model) GetWidth() int {
 	return m.width
-}
-
-func (m *Model) SetMetadata(metadata Metadata) {
-	m.metadata = metadata
-	// Note : Dont always reset render to 0
-	// We would have update requests coming in during user scrolling through metadata
-	m.ResetRenderIfInvalid()
 }
 
 func (m *Model) ResetRenderIfInvalid() {
@@ -93,8 +94,8 @@ func (m *Model) SetInfoMsg(msg string) {
 	m.metadata.infoMsg = msg
 }
 
-func (m *Model) Render(metadataFocussed bool) string {
-	r := ui.MetadataRenderer(m.height, m.width, metadataFocussed)
+func (m *Model) Render(metadataFocused bool) string {
+	r := ui.MetadataRenderer(m.height, m.width, metadataFocused)
 	if m.MetadataLen() == 0 {
 		r.AddLines("", " "+m.metadata.infoMsg)
 		return r.Render()

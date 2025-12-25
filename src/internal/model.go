@@ -15,13 +15,13 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
+	"github.com/yorukot/superfile/src/internal/ui/preview"
 	"github.com/yorukot/superfile/src/internal/utils"
 
 	"github.com/barasher/go-exiftool"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/x/ansi"
 
 	variable "github.com/yorukot/superfile/src/config"
 	zoxideui "github.com/yorukot/superfile/src/internal/ui/zoxide"
@@ -61,15 +61,14 @@ func (m *model) Init() tea.Cmd {
 // application
 func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	slog.Debug("model.Update() called", "msgType", reflect.TypeOf(msg))
+
 	var sidebarCmd, inputCmd, updateCmd, panelCmd,
-		metadataCmd, filePreviewCmd, resizeCmd tea.Cmd
-	gotModelUpdateMsg := false
+		metadataCmd, filePreviewCmd, helpMenuCmd, resizeCmd tea.Cmd
 
+	// These are above the key message handing to prevent issues with firstKeyInput
+	// if someone presses `/` to focus to searchBar, searchBar will otherwise
+	// get `/` input too.
 	sidebarCmd = m.sidebarModel.UpdateState(msg)
-
-	// this is similar to m.sidebarModel.UpdateState(msg) but since helpMenu is not a Model
-	// we call .Update() manually here
-	var helpMenuCmd tea.Cmd
 	if m.helpMenu.searchBar.Focused() {
 		m.helpMenu.searchBar, helpMenuCmd = m.helpMenu.searchBar.Update(msg)
 	}
@@ -87,11 +86,14 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// Cannot do it like processbar messages
 	case zoxideui.UpdateMsg:
 		slog.Debug("Got ModelUpdate message", "id", msg.GetReqID())
-		gotModelUpdateMsg = true
 		updateCmd = msg.Apply(&m.zoxideModal)
+
+	// Its a pain to interconvert commands like processBar
+	case preview.UpdateMsg:
+		slog.Debug("Got ModelUpdate message", "id", msg.GetReqID())
+		m.fileModel.UpdatePreviewPanel(msg)
 	case ModelUpdateMessage:
 		slog.Debug("Got ModelUpdate message", "id", msg.GetReqID())
-		gotModelUpdateMsg = true
 		updateCmd = msg.ApplyToModel(m)
 
 	default:
@@ -99,16 +101,13 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	// This is needed for blink, etc to work
-	panelCmd = m.updateFilePanelsState(msg)
+	panelCmd = m.updateComponentState(msg)
+
+	filePreviewCmd = m.fileModel.GetFilePreviewCmd(false)
 
 	m.updateModelStateAfterMsg()
 
-	// Temp fix till we add metadata cache, to prevent multiple metadata fetch spawns
-	// Ideally we might want to fetch only if the current file selected in filepanel changes
-	if !gotModelUpdateMsg {
-		metadataCmd = m.getMetadataCmd()
-		filePreviewCmd = m.getFilePreviewCmd(false)
-	}
+	metadataCmd = m.getMetadataCmd()
 
 	return m, tea.Batch(sidebarCmd, helpMenuCmd, inputCmd, updateCmd,
 		panelCmd, metadataCmd, filePreviewCmd, resizeCmd)
@@ -137,35 +136,6 @@ func (m *model) updateModelStateAfterMsg() {
 	}
 }
 
-func (m *model) getFilePreviewCmd(forcePreviewRender bool) tea.Cmd {
-	if !m.fileModel.FilePreview.IsOpen() {
-		return nil
-	}
-	if len(m.getFocusedFilePanel().Element) == 0 {
-		// Sync call because this will be fast
-		m.fileModel.FilePreview.SetContentWithRenderText("")
-		return nil
-	}
-	selectedItem := m.getFocusedFilePanel().GetSelectedItem()
-	if m.fileModel.FilePreview.GetLocation() == selectedItem.Location && !forcePreviewRender {
-		return nil
-	}
-
-	m.fileModel.FilePreview.SetLocation(selectedItem.Location)
-	m.fileModel.FilePreview.SetContentWithRenderText("Loading...")
-	reqCnt := m.ioReqCnt
-	m.ioReqCnt++
-	slog.Debug("Submitting file preview render request", "id", reqCnt, "path", selectedItem.Location)
-
-	// Copy to a local variable to be used in below closure.
-	fullModalWidth := m.fullWidth
-
-	return func() tea.Msg {
-		return NewFilePreviewUpdateMsg(selectedItem.Location,
-			m.fileModel.FilePreview.RenderWithPath(selectedItem.Location, fullModalWidth), reqCnt)
-	}
-}
-
 // Note : Maybe we should not trigger metadata fetch for updates
 // that dont change the currently selected file panel element
 // TODO : At least dont trigger metadata fetch when user is scrolling
@@ -174,27 +144,28 @@ func (m *model) getMetadataCmd() tea.Cmd {
 	if m.disableMetadata {
 		return nil
 	}
-	if len(m.getFocusedFilePanel().Element) == 0 {
+	if m.getFocusedFilePanel().EmptyOrInvalid() {
 		m.fileMetaData.SetBlank()
 		return nil
 	}
 	selectedItem := m.getFocusedFilePanel().GetSelectedItem()
-
-	// Note : This will cause metadata not being refreshed when you are not scrolling,
-	// or filepanel is not getting updated. Its not a big problem as we repeatedly refresh filepanel
-	// In case this is a significant issue, we would implement metadata caching.
-	// But need to implement it carefully if we do. Make sure cache is not unbounded
-	// Remove metadata from filepanel.elemets[] and have cache as source of truth.
-	// Have a TTL for expiry, or lister for file update events.
-	if len(selectedItem.MetaData) > 0 {
-		m.fileMetaData.SetMetadata(metadata.NewMetadata(selectedItem.MetaData,
-			selectedItem.Location, ""))
+	metadataFocused := m.focusPanel == metadataFocus
+	// Note : This will cause metadata not being refreshed there is any file update events.
+	// We can have a cache with TTL or watch filesystem changes to fix this
+	if selectedItem.Location == m.fileMetaData.GetMetadataLocation() &&
+		metadataFocused == m.fileMetaData.GetMetadataExpectedFocused() {
 		return nil
 	}
+	if m.fileMetaData.UpdateMetadataIfExistsInCache(selectedItem.Location, metadataFocused) {
+		return nil
+	}
+
+	m.fileMetaData.SetMetadataLocationAndFocused(selectedItem.Location, metadataFocused)
+
 	if m.fileMetaData.IsBlank() {
 		m.fileMetaData.SetInfoMsg(icon.InOperation + icon.Space + "Loading metadata...")
 	}
-	metadataFocussed := m.focusPanel == metadataFocus
+
 	reqCnt := m.ioReqCnt
 	m.ioReqCnt++
 	// If there are too many metadata fetches, we need to have a cache with path as a key
@@ -202,7 +173,7 @@ func (m *model) getMetadataCmd() tea.Cmd {
 	slog.Debug("Submitting metadata fetch request", "id", reqCnt, "path", selectedItem.Location)
 	return func() tea.Msg {
 		return NewMetadataMsg(
-			metadata.GetMetadata(selectedItem.Location, metadataFocussed, et), reqCnt)
+			metadata.GetMetadata(selectedItem.Location, metadataFocused, et), metadataFocused, reqCnt)
 	}
 }
 
@@ -237,7 +208,6 @@ func (m *model) setHeightValues() {
 }
 
 func (m *model) updateComponentDimensions() tea.Cmd {
-	m.setMainModelDimensions()
 	m.setHelpMenuSize()
 	m.setPromptModelSize()
 	m.setZoxideModelSize()
@@ -246,13 +216,18 @@ func (m *model) updateComponentDimensions() tea.Cmd {
 	// File preview panel requires explicit height update, unlike sidebar/file panels
 	// which receive height as render parameters and update automatically on each frame
 	// Force re-render of preview content with new dimensions
-	return m.getFilePreviewCmd(true)
+	return m.setMainModelDimensions()
 }
 
-func (m *model) setMainModelDimensions() {
-	m.fileModel.SetWidth(m.fullWidth - common.Config.SidebarWidth - common.BorderPadding)
-	m.fileModel.SetHeight(m.mainPanelHeight + common.BorderPadding)
+func (m *model) setMainModelDimensions() tea.Cmd {
+	fileModelWidth := m.fullWidth
+	if common.Config.SidebarWidth != 0 {
+		fileModelWidth -= common.Config.SidebarWidth + common.BorderPadding
+	}
 	m.sidebarModel.SetHeight(m.mainPanelHeight + common.BorderPadding)
+	return tea.Batch(
+		m.fileModel.SetWidth(fileModelWidth),
+		m.fileModel.SetHeight(m.mainPanelHeight+common.BorderPadding))
 }
 
 // Set help menu size
@@ -312,7 +287,7 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 		"notifyModel.open", m.notifyModel.IsOpen(),
 		"promptModal.open", m.promptModal.IsOpen(),
 		"fileModel.renaming", m.fileModel.Renaming,
-		"searchBar.focussed", m.getFocusedFilePanel().SearchBar.Focused(),
+		"searchBar.focused", m.getFocusedFilePanel().SearchBar.Focused(),
 		"helpMenu.open", m.helpMenu.open,
 		"firstTextInput", m.firstTextInput,
 		"focusPanel", m.focusPanel,
@@ -387,7 +362,7 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 
 // Update the file panel state. Change name of renamed files, filter out files
 // in search, update typingb bar, etc
-func (m *model) updateFilePanelsState(msg tea.Msg) tea.Cmd {
+func (m *model) updateComponentState(msg tea.Msg) tea.Cmd {
 	focusPanel := m.getFocusedFilePanel()
 	var cmd tea.Cmd
 	var action common.ModelAction
@@ -404,33 +379,27 @@ func (m *model) updateFilePanelsState(msg tea.Msg) tea.Cmd {
 		// TODO : Separate this to a utility
 		cwdLocation := m.getFocusedFilePanel().Location
 		action, cmd = m.promptModal.HandleUpdate(msg, cwdLocation)
-		m.applyPromptModalAction(action)
+		cmd = tea.Batch(cmd, m.applyPromptModalAction(action))
 	case m.zoxideModal.IsOpen():
 		action, cmd = m.zoxideModal.HandleUpdate(msg)
-		m.applyZoxideModalAction(action)
+		cmd = tea.Batch(cmd, m.applyZoxideModalAction(action))
 	}
-
-	// TODO : This is like duct taping a bigger problem
-	// The code should never reach this state.
-	if focusPanel.Cursor < 0 {
-		focusPanel.Cursor = 0
-	}
-
 	return cmd
 }
 
 // Apply the Action and notify the promptModal
-func (m *model) applyPromptModalAction(action common.ModelAction) {
-	successMsg, actionErr := m.logAndExecuteAction(action)
+func (m *model) applyPromptModalAction(action common.ModelAction) tea.Cmd {
+	successMsg, cmd, actionErr := m.logAndExecuteAction(action)
 	if actionErr != nil {
 		m.promptModal.HandleSPFActionResults(false, actionErr.Error())
 	} else if successMsg != "" {
 		m.promptModal.HandleSPFActionResults(true, successMsg)
 	}
+	return cmd
 }
 
 // Utility function to log and execute actions, reducing duplication
-func (m *model) logAndExecuteAction(action common.ModelAction) (string, error) {
+func (m *model) logAndExecuteAction(action common.ModelAction) (string, tea.Cmd, error) {
 	// Only log actions that aren't NoAction to reduce debug noise
 	if _, ok := action.(common.NoAction); !ok {
 		slog.Debug("Applying model action", "action", action)
@@ -438,25 +407,28 @@ func (m *model) logAndExecuteAction(action common.ModelAction) (string, error) {
 
 	switch action := action.(type) {
 	case common.NoAction:
-		return "", nil
+		return "", nil, nil
 	case common.ShellCommandAction:
 		// Shell commands are handled separately and don't return here
 		m.applyShellCommandAction(action.Command)
-		return "", nil
+		return "", nil, nil
 	case common.SplitPanelAction:
-		return "Panel successfully split", m.splitPanel()
+		cmd, err := m.splitPanel()
+		return "Panel successfully split", cmd, err
 	case common.CDCurrentPanelAction:
-		return "Panel directory changed", m.updateCurrentFilePanelDir(action.Location)
+		return "Panel directory changed", nil, m.updateCurrentFilePanelDir(action.Location)
 	case common.OpenPanelAction:
-		return "New panel opened", m.createNewFilePanelRelativeToCurrent(action.Location)
+		cmd, err := m.createNewFilePanelRelativeToCurrent(action.Location)
+		return "New panel opened", cmd, err
 	default:
-		return "", errors.New("unhandled action type")
+		return "", nil, errors.New("unhandled action type")
 	}
 }
 
 // Apply the Action for zoxide modal (no result notifications needed)
-func (m *model) applyZoxideModalAction(action common.ModelAction) {
-	_, _ = m.logAndExecuteAction(action)
+func (m *model) applyZoxideModalAction(action common.ModelAction) tea.Cmd {
+	_, cmd, _ := m.logAndExecuteAction(action)
+	return cmd
 }
 
 // TODO : Move them around to appropriate places
@@ -474,11 +446,11 @@ func (m *model) applyShellCommandAction(shellCommand string) {
 	}
 }
 
-func (m *model) splitPanel() error {
+func (m *model) splitPanel() (tea.Cmd, error) {
 	return m.fileModel.CreateNewFilePanel(m.getFocusedFilePanel().Location)
 }
 
-func (m *model) createNewFilePanelRelativeToCurrent(path string) error {
+func (m *model) createNewFilePanelRelativeToCurrent(path string) (tea.Cmd, error) {
 	currentDir := m.getFocusedFilePanel().Location
 	return m.fileModel.CreateNewFilePanel(utils.ResolveAbsPath(currentDir, path))
 }
@@ -537,45 +509,13 @@ func (m *model) View() string {
 		return m.terminalSizeWarnAfterFirstRender()
 	}
 
-	sidebar := m.sidebarRender()
-	fileModel := m.fileModel.Render()
-	mainPanel := lipgloss.JoinHorizontal(0, sidebar, fileModel)
-
-	var processBar, metaData, clipboardBar, footer string
-	if m.toggleFooter {
-		processBar = m.processBarRender()
-		metaData = m.fileMetaData.Render(m.focusPanel == metadataFocus)
-		clipboardBar = m.clipboard.Render()
-		footer = lipgloss.JoinHorizontal(0, processBar, metaData, clipboardBar)
+	// Do validations after min size check above. Validations will fail if user give
+	// too less size to the terminal program
+	if err := m.validateLayout(); err != nil {
+		slog.Error("Invalid layout", "error", err)
 	}
 
-	var finalRender string
-
-	if m.toggleFooter {
-		finalRender = lipgloss.JoinVertical(0, mainPanel, footer)
-	} else {
-		finalRender = mainPanel
-	}
-
-	finalRender = m.updateRenderForOverlay(finalRender)
-
-	// Only do all this validation in Debug Model.
-	// This will be a lot of computations, and may take time
-	if common.Config.Debug {
-		showRenderDebugStatsMain(sidebar, fileModel)
-		showRenderDebugStatsFooter(processBar, metaData, clipboardBar)
-		if err := m.validateLayout(); err != nil {
-			slog.Error("Invalid layout", "error", err)
-		}
-		if err := m.validateComponentRender(); err != nil {
-			slog.Error("Component render validation failed", "error", err)
-		}
-		if err := m.validateFinalRender(finalRender); err != nil {
-			slog.Error("Final render validation failed", "error", err)
-		}
-	}
-
-	return finalRender
+	return m.updateRenderForOverlay(m.mainComponentsRender())
 }
 
 func (m *model) updateRenderForOverlay(finalRender string) string {
@@ -633,30 +573,20 @@ func (m *model) updateRenderForOverlay(finalRender string) string {
 	return finalRender
 }
 
-func showRenderDebugStatsMain(sidebar, filePanel string) {
-	slog.Debug("Render stats for main panel",
-		"sidebarLineCnt", getLineCnt(sidebar), "sidebarMaxW", getMaxW(sidebar),
-		"filePanelLineCnt", getLineCnt(filePanel), "filePanelMaxW", getMaxW(filePanel))
-}
+func (m *model) mainComponentsRender() string {
+	sidebar := m.sidebarRender()
+	fileModel := m.fileModel.Render()
+	mainPanel := lipgloss.JoinHorizontal(0, sidebar, fileModel)
 
-func showRenderDebugStatsFooter(processBar, metaData, clipboardBar string) {
-	slog.Debug("Render stats for footer",
-		"processBarLineCnt", getLineCnt(processBar), "processBarMaxW", getMaxW(processBar),
-		"metaDataLineCnt", getLineCnt(metaData), "metaDataMaxW", getMaxW(metaData),
-		"clipboardBarLineCnt", getLineCnt(clipboardBar), "clipboardBarMaxW", getMaxW(clipboardBar),
-	)
-}
-
-func getLineCnt(s string) int {
-	return strings.Count(s, "\n") + 1
-}
-
-func getMaxW(s string) int {
-	maxW := 0
-	for line := range strings.Lines(s) {
-		maxW = max(maxW, ansi.StringWidth(line))
+	if !m.toggleFooter {
+		return mainPanel
 	}
-	return maxW
+
+	processBar := m.processBarRender()
+	metaData := m.fileMetaData.Render(m.focusPanel == metadataFocus)
+	clipboardBar := m.clipboard.Render()
+	footer := lipgloss.JoinHorizontal(0, processBar, metaData, clipboardBar)
+	return lipgloss.JoinVertical(0, mainPanel, footer)
 }
 
 // Render and update file panel items. Check for changes and updates in files and
