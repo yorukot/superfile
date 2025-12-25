@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/BourgeoisBear/rasterm"
+	"github.com/charmbracelet/lipgloss"
 )
 
 // isKittyCapable checks if the terminal supports Kitty graphics protocol
@@ -39,6 +40,8 @@ func isKittyCapable() bool {
 			}
 		}
 	}
+
+	slog.Debug("[TEMP] ", "kittyCapabale", isCapable)
 
 	return isCapable
 }
@@ -96,7 +99,7 @@ func generatePlacementID(path string) uint32 {
 // renderWithKittyUsingTermCap renders an image using Kitty graphics protocol with terminal capabilities
 func (p *ImagePreviewer) renderWithKittyUsingTermCap(img image.Image, path string,
 	originalWidth, originalHeight, maxWidth, maxHeight int, sideAreaWidth int,
-) (string, error) {
+	filePreviewStyle lipgloss.Style) (string, error) {
 	// Validate dimensions
 	if maxWidth <= 0 || maxHeight <= 0 {
 		return "", fmt.Errorf("dimensions must be positive (maxWidth=%d, maxHeight=%d)", maxWidth, maxHeight)
@@ -142,7 +145,7 @@ func (p *ImagePreviewer) renderWithKittyUsingTermCap(img image.Image, path strin
 
 	buf.WriteString("\x1b[1;" + strconv.Itoa(sideAreaWidth) + "H")
 
-	return buf.String(), nil
+	return filePreviewStyle.Render(buf.String()), nil
 }
 
 // IsKittyCapable checks if the terminal supports Kitty graphics protocol
