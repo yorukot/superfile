@@ -1,5 +1,7 @@
 package filepanel
 
+import "fmt"
+
 func (m *Model) scrollToCursor(cursor int) {
 	if cursor < 0 || cursor >= m.ElemCount() {
 		return
@@ -69,4 +71,16 @@ func (m *Model) applyTargetFileCursor() {
 		}
 	}
 	m.TargetFile = ""
+}
+
+func (m *Model) ValidateCursorAndRenderIndex() error {
+	if m.Cursor < 0 || m.ElemCount() <= m.Cursor {
+		return fmt.Errorf("invalid cursor : %d, element count : %d", m.Cursor, m.ElemCount())
+	}
+	renderCount := m.PanelElementHeight()
+	if (m.Cursor < m.RenderIndex) || (m.Cursor > m.RenderIndex+renderCount-1) {
+		return fmt.Errorf("invalid renderIndex : %d, cursor : %d, renderCount : %d",
+			m.RenderIndex, m.Cursor, renderCount)
+	}
+	return nil
 }

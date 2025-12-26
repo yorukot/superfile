@@ -14,8 +14,16 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
 )
 
-func (m *Model) Render(focussed bool) string {
-	r := ui.FilePanelRenderer(m.height, m.width, focussed)
+/*
+- TODO: Write File Panel Specific unit test
+  - Individual panel resizes
+  - Footer content of filepanel changes due to resizing
+  - i Only mode icons remains on smaller
+  - ii Other things that change too
+  - Other panels like clipboard and metadata's content changes too on resize
+*/
+func (m *Model) Render(focused bool) string {
+	r := ui.FilePanelRenderer(m.height, m.width, focused)
 
 	m.renderTopBar(r)
 	m.renderSearchBar(r)

@@ -121,12 +121,14 @@ func (msg ExtractOperationMsg) ApplyToModel(_ *model) tea.Cmd {
 type MetadataMsg struct {
 	BaseMessage
 
-	meta metadata.Metadata
+	meta            metadata.Metadata
+	metadataFocused bool
 }
 
-func NewMetadataMsg(meta metadata.Metadata, reqID int) MetadataMsg {
+func NewMetadataMsg(meta metadata.Metadata, metadataFocused bool, reqID int) MetadataMsg {
 	return MetadataMsg{
-		meta: meta,
+		meta:            meta,
+		metadataFocused: metadataFocused,
 		BaseMessage: BaseMessage{
 			reqID: reqID,
 		},
@@ -134,17 +136,23 @@ func NewMetadataMsg(meta metadata.Metadata, reqID int) MetadataMsg {
 }
 
 func (msg MetadataMsg) ApplyToModel(m *model) tea.Cmd {
+	m.fileMetaData.SetMetadataCache(msg.meta, msg.metadataFocused)
 	selectedItem := m.getFocusedFilePanel().GetSelectedItemPtr()
 	if selectedItem == nil {
 		slog.Debug("Panel empty or cursor invalid. Ignoring MetadataMsg")
 		return nil
 	}
 	if selectedItem.Location != msg.meta.GetPath() {
-		slog.Debug("MetadataMsg for older files. Ignoring")
+		slog.Debug("MetadataMsg for older files. Ignoring",
+			"currentItem", selectedItem.Location, "msgItem", msg.meta.GetPath())
 		return nil
 	}
-	m.fileMetaData.SetMetadata(msg.meta)
-	selectedItem.MetaData = msg.meta.GetData()
+	if (m.focusPanel == metadataFocus) != msg.metadataFocused {
+		slog.Debug("MetadataMsg for older state. Ignoring",
+			"actualFocus", m.focusPanel, "msgFocus", msg.metadataFocused)
+		return nil
+	}
+	m.fileMetaData.SetMetadata(msg.meta, msg.metadataFocused)
 	return nil
 }
 
@@ -165,36 +173,5 @@ func NewNotifyModalMsg(m notify.Model, reqID int) NotifyModalUpdateMsg {
 
 func (msg NotifyModalUpdateMsg) ApplyToModel(m *model) tea.Cmd {
 	m.notifyModel = msg.m
-	return nil
-}
-
-type FilePreviewUpdateMsg struct {
-	BaseMessage
-
-	location string
-	content  string
-}
-
-func NewFilePreviewUpdateMsg(location string, content string, reqID int) FilePreviewUpdateMsg {
-	return FilePreviewUpdateMsg{
-		location: location,
-		content:  content,
-		BaseMessage: BaseMessage{
-			reqID: reqID,
-		},
-	}
-}
-
-func (msg FilePreviewUpdateMsg) ApplyToModel(m *model) tea.Cmd {
-	selectedItem := m.getFocusedFilePanel().GetSelectedItemPtr()
-	if selectedItem == nil {
-		slog.Debug("Panel empty or cursor invalid. Ignoring FilePreviewUpdateMsg")
-		return nil
-	}
-	if selectedItem.Location != msg.location {
-		slog.Debug("FilePreviewUpdateMsg for older files. Ignoring")
-		return nil
-	}
-	m.fileModel.FilePreview.SetContent(msg.content)
 	return nil
 }

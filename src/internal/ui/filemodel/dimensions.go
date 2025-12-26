@@ -3,38 +3,44 @@ package filemodel
 import (
 	"log/slog"
 
+	tea "github.com/charmbracelet/bubbletea"
+
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 )
 
-func (m *Model) SetHeight(height int) {
-	if height < FileModelMinHeight {
-		height = FileModelMinHeight
-	}
-	m.Height = height
-	m.UpdateChildComponentHeight()
+// Use SetDimensions if you want to update both
+// it will prevent duplicate file preview commands and hence, is efficient
+func (m *Model) SetDimensions(width int, height int) tea.Cmd {
+	m.Height = max(height, FileModelMinHeight)
+	m.Width = max(width, FileModelMinWidth)
+	m.updateChildComponentWidth()
+	m.updateChildComponentHeight()
+	return m.ensurePreviewDimensionsSync()
+}
+func (m *Model) SetHeight(height int) tea.Cmd {
+	m.Height = max(height, FileModelMinHeight)
+	m.updateChildComponentHeight()
+	return m.ensurePreviewDimensionsSync()
 }
 
-func (m *Model) SetWidth(width int) {
-	if width < FileModelMinWidth {
-		width = FileModelMinWidth
-	}
-	m.Width = width
-	m.UpdateChildComponentWidth()
+func (m *Model) SetWidth(width int) tea.Cmd {
+	m.Width = max(width, FileModelMinWidth)
+	m.updateChildComponentWidth()
+	return m.ensurePreviewDimensionsSync()
 }
 
 func (m *Model) PanelCount() int {
 	return len(m.FilePanels)
 }
 
-func (m *Model) UpdateChildComponentHeight() {
+func (m *Model) updateChildComponentHeight() {
 	for i := range m.FilePanels {
 		m.FilePanels[i].SetHeight(m.Height)
 	}
-	m.FilePreview.SetHeight(m.Height)
 }
 
-func (m *Model) UpdateChildComponentWidth() {
+func (m *Model) updateChildComponentWidth() {
 	// TODO: programatically ensure that this becomes impossible
 	if m.PanelCount() == 0 {
 		slog.Error("Unexpected error: fileModel with 0 panels")
@@ -45,15 +51,13 @@ func (m *Model) UpdateChildComponentWidth() {
 
 	if m.FilePreview.IsOpen() {
 		// Need to give some width to preview
-		var previewWidth int
 		if common.Config.FilePreviewWidth == 0 {
 			// FileModel will be split among `panelCount+1`
-			previewWidth = m.Width / (panelCount + 1)
+			m.ExpectedPreviewWidth = m.Width / (panelCount + 1)
 		} else {
-			previewWidth = m.Width / common.Config.FilePreviewWidth
+			m.ExpectedPreviewWidth = m.Width / common.Config.FilePreviewWidth
 		}
-		m.FilePreview.SetWidth(previewWidth)
-		widthForPanels -= previewWidth
+		widthForPanels -= m.ExpectedPreviewWidth
 	}
 
 	panelWidth := widthForPanels / panelCount
@@ -69,4 +73,16 @@ func (m *Model) UpdateChildComponentWidth() {
 
 	m.SinglePanelWidth = panelWidth
 	m.MaxFilePanel = widthForPanels / filepanel.MinWidth
+	// Cap at the system maximum
+	if m.MaxFilePanel > common.FilePanelMax {
+		m.MaxFilePanel = common.FilePanelMax
+	}
+}
+
+func (m *Model) ensurePreviewDimensionsSync() tea.Cmd {
+	if m.FilePreview.GetContentWidth() != m.ExpectedPreviewWidth ||
+		m.FilePreview.GetContentHeight() != m.Height {
+		return m.GetFilePreviewCmd(true)
+	}
+	return nil
 }

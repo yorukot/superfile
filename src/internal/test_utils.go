@@ -34,6 +34,11 @@ func defaultTestModelWithZClient(zClient *zoxidelib.Client, dirs ...string) *mod
 	return setModelParamsForTest(m)
 }
 
+func defaultTestModelWithFooter(dirs ...string) *model {
+	m := defaultModelConfig(false, true, false, dirs, nil)
+	return setModelParamsForTest(m)
+}
+
 func setModelParamsForTest(m *model) *model {
 	m.disableMetadata = true
 	TeaUpdate(m, tea.WindowSizeMsg{Width: DefaultTestModelWidth, Height: DefaultTestModelHeight})

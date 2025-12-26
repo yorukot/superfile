@@ -5,8 +5,8 @@ import "time"
 // Image preview constants
 const (
 	// Cache configuration
-	defaultThumbnailCacheSize = 100 // Default number of thumbnails to cache
-	defaultCacheExpiration    = 5 * time.Minute
+	defaultImagePreviewCacheSize = 100
+	defaultCacheExpiration       = 5 * time.Minute
 
 	// Image processing
 	heightScaleFactor = 2  // Factor for height scaling in terminal display

@@ -1,6 +1,6 @@
 //go:build !windows
 
-package internal
+package preview
 
 import (
 	"path/filepath"
@@ -20,10 +20,7 @@ func TestFilePreviewWithInvalidMode(t *testing.T) {
 	err := syscall.Mkfifo(file, 0644)
 	require.NoError(t, err)
 
-	m := defaultTestModel(curTestDir)
-
-	m.fileModel.FilePreview.SetWidth(40)
-	m.fileModel.FilePreview.SetHeight(10)
-	res := m.fileModel.FilePreview.RenderWithPath(file, m.fullWidth)
+	m := New()
+	res := m.RenderWithPath(file, 20, 10, 20)
 	assert.Contains(t, res, common.FilePreviewUnsupportedFileMode)
 }

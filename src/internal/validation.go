@@ -47,10 +47,10 @@ func (m *model) validateLayout() error { //nolint:gocognit // cumilation of vali
 	}
 
 	// Check total width calculation consistency
-	if m.fullWidth != common.Config.SidebarWidth+common.BorderPadding+m.fileModel.Width {
+	if m.fullWidth != m.sidebarModel.GetWidth()+m.fileModel.Width {
 		return fmt.Errorf(
 			"width layout inconsistent: fullWidth=%v, sidebar=%v filemodel=%v",
-			m.fullWidth, common.Config.SidebarWidth, m.fileModel.Width)
+			m.fullWidth, m.sidebarModel.GetWidth(), m.fileModel.Width)
 	}
 
 	// Check file panels count
@@ -63,13 +63,13 @@ func (m *model) validateLayout() error { //nolint:gocognit // cumilation of vali
 	totalFileModelWidth := 0
 	// Check preview panel dimensions if open
 	if m.fileModel.FilePreview.IsOpen() {
-		if m.fileModel.FilePreview.GetWidth() <= 0 {
-			return fmt.Errorf("preview panel is open but width is %v", m.fileModel.FilePreview.GetWidth())
+		if m.fileModel.ExpectedPreviewWidth <= 0 {
+			return fmt.Errorf("preview panel is open but width is %v", m.fileModel.ExpectedPreviewWidth)
 		}
-		if m.fileModel.FilePreview.GetHeight() <= 0 {
-			return fmt.Errorf("preview panel is open but height is %v", m.fileModel.FilePreview.GetHeight())
+		if m.fileModel.Height <= 0 {
+			return fmt.Errorf("preview panel is open but height is %v", m.fileModel.Height)
 		}
-		totalFileModelWidth += m.fileModel.FilePreview.GetWidth()
+		totalFileModelWidth += m.fileModel.ExpectedPreviewWidth
 	}
 
 	// Check each file panel has correct dimensions set
@@ -79,6 +79,11 @@ func (m *model) validateLayout() error { //nolint:gocognit // cumilation of vali
 			return fmt.Errorf(
 				"file panel %v height mismatch: expected %v, got %v",
 				i, m.fileModel.Height, panel.GetHeight())
+		}
+
+		if err := panel.ValidateCursorAndRenderIndex(); err != nil {
+			return fmt.Errorf(
+				"file panel %v error : %w", i, err)
 		}
 
 		// Validate search bar width matches panel width minus padding
@@ -119,11 +124,19 @@ func (m *model) validateLayout() error { //nolint:gocognit // cumilation of vali
 	return nil
 }
 
-// validateRender validates rendered output dimensions and border
-//
-
 func validateRender(out string, height int, width int, border bool) error {
 	strippedOut := ansi.Strip(out)
+
+	// Empty content is not handled correctly
+	// strings.Split("", "\n") will return [""], not [].
+	// Hence we need this separate handling
+	if height == 0 {
+		// zero lines
+		if strippedOut != "" {
+			return fmt.Errorf("render height mismatch: expected empty string for 0 height, got '%v'", strippedOut)
+		}
+		return nil
+	}
 
 	lines := strings.Split(strippedOut, "\n")
 
@@ -135,7 +148,7 @@ func validateRender(out string, height int, width int, border bool) error {
 		lineWidth := ansi.StringWidth(line)
 		if lineWidth != width {
 			return fmt.Errorf(
-				"render line %v width mismatch: expected %v width, got %v(line - '%v')",
+				"render line %v, expected %v width, got %v(line - '%v')",
 				i,
 				width,
 				lineWidth,
@@ -148,6 +161,10 @@ func validateRender(out string, height int, width int, border bool) error {
 		return nil
 	}
 
+	return validateRenderBorderValidations(lines)
+}
+
+func validateRenderBorderValidations(lines []string) error {
 	if len(lines) < minLinesForBorder {
 		return fmt.Errorf("too few lines for border : %v", len(lines))
 	}
@@ -211,6 +228,11 @@ func (m *model) validateComponentRender() error {
 		}
 	}
 
+	p := &m.fileModel.FilePreview
+	if err := validateRender(p.GetContent(), p.GetContentHeight(), p.GetContentWidth(), false); err != nil {
+		return fmt.Errorf("file preview render validation failed: %w", err)
+	}
+
 	if err := validateRender(m.fileModel.Render(), m.fileModel.Height, m.fileModel.Width, false); err != nil {
 		return fmt.Errorf("file model render validation failed: %w", err)
 	}
@@ -231,21 +253,14 @@ func (m *model) validateComponentRender() error {
 	return nil
 }
 
-func (m *model) validateFinalRender(out string) error {
-	if err := validateRender(out, m.fullHeight, m.fullWidth, false); err != nil {
+func (m *model) validateFinalRender() error { //nolint:gocognit // cumilation of validations
+	mainRender := m.mainComponentsRender()
+	if err := validateRender(mainRender, m.fullHeight, m.fullWidth, false); err != nil {
 		return fmt.Errorf("model rendering failures : %w", err)
 	}
 
-	// Skip due to overlay model's being open
-	// TODO: Add validations for overlay models
-	// programatically ensure that only one of them is open at a time
-	// We may need some sort of overlay model management
-	if m.IsOverlayModelOpen() {
-		return nil
-	}
-	strippedOut := ansi.Strip(out)
+	strippedOut := ansi.Strip(mainRender)
 	lines := strings.Split(strippedOut, "\n")
-
 	if common.Config.SidebarWidth != 0 {
 		sidebarPos := compPosition{
 			stRow:  0,
@@ -282,7 +297,7 @@ func (m *model) validateFinalRender(out string) error {
 		previewPanelPos := compPosition{
 			stRow:  0,
 			endRow: m.mainPanelHeight + 1,
-			stCol:  m.fullWidth - m.fileModel.FilePreview.GetWidth(),
+			stCol:  m.fullWidth - m.fileModel.ExpectedPreviewWidth,
 			endCol: m.fullWidth - 1,
 		}
 		if err := m.validateComponentPlacement(lines, previewPanelPos, false); err != nil {
@@ -318,6 +333,17 @@ func (m *model) validateFinalRender(out string) error {
 		if err := m.validateComponentPlacement(lines, clipboardPos, true); err != nil {
 			return fmt.Errorf("clipboard position validation failed: %w", err)
 		}
+	}
+
+	// TODO: programatically ensure that only one of them is open at a time
+	// We may need some sort of overlay model management
+	if m.IsOverlayModelOpen() {
+		finalRender := m.updateRenderForOverlay(mainRender)
+		if err := validateRender(finalRender, m.fullHeight, m.fullWidth, false); err != nil {
+			return fmt.Errorf("model rendering failures : %w", err)
+		}
+
+		// TODO: Add validations for overlay models
 	}
 
 	return nil

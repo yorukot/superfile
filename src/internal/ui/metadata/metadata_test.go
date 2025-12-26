@@ -25,24 +25,24 @@ func TestGetMetadata(t *testing.T) {
 
 	require.True(t, ok)
 	testdata := []struct {
-		name             string
-		filepath         string
-		metadataFocussed bool
+		name            string
+		filepath        string
+		metadataFocused bool
 	}{
 		{
-			name:             "Basic Metadata fetching",
-			filepath:         filepath.Join(testdataDir, "file1.txt"),
-			metadataFocussed: true,
+			name:            "Basic Metadata fetching",
+			filepath:        filepath.Join(testdataDir, "file1.txt"),
+			metadataFocused: true,
 		},
 	}
 
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
-			m := GetMetadata(tt.filepath, tt.metadataFocussed, et)
-			assert.Empty(t, m.infoMsg)
-			assert.Equal(t, tt.filepath, m.filepath)
+			meta := GetMetadata(tt.filepath, tt.metadataFocused, et)
+			assert.Empty(t, meta.infoMsg)
+			assert.Equal(t, tt.filepath, meta.filepath)
 			for _, key := range defaultKeys {
-				_, err := m.GetValue(key)
+				_, err := meta.GetValue(key)
 				require.NoError(t, err)
 			}
 		})

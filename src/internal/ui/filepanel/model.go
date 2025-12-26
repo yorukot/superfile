@@ -11,7 +11,7 @@ import (
 func FilePanelSlice(paths []string) []Model {
 	res := make([]Model, len(paths))
 	for i := range paths {
-		// Making the first panel as the focussed
+		// Making the first panel as the focused
 		isFocus := i == 0
 		res[i] = defaultFilePanel(paths[i], isFocus)
 	}

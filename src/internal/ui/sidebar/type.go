@@ -17,4 +17,5 @@ type Model struct {
 	pinnedMgr   *PinnedManager
 	width       int
 	height      int
+	disabled    bool
 }

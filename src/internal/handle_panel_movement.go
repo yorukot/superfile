@@ -168,9 +168,9 @@ func (m *model) searchBarFocus() {
 
 func (m *model) sidebarSearchBarFocus() {
 	if m.sidebarModel.SearchBarFocused() {
-		// Ideally Code should never reach here. Once sidebar is focussed, we should
+		// Ideally Code should never reach here. Once sidebar is focused, we should
 		// not cause sidebarSearchBarFocus() event by pressing search key
-		slog.Error("sidebarSearchBarFocus() called on Focussed sidebar")
+		slog.Error("sidebarSearchBarFocus() called on Focused sidebar")
 		m.sidebarModel.SearchBarBlur()
 		return
 	}

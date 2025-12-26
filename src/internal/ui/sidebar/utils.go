@@ -2,11 +2,11 @@ package sidebar
 
 import "log/slog"
 
-func (d directory) IsDivider() bool {
+func (d directory) isDivider() bool {
 	return d == pinnedDividerDir || d == diskDividerDir
 }
-func (d directory) RequiredHeight() int {
-	if d.IsDivider() {
+func (d directory) requiredHeight() int {
+	if d.isDivider() {
 		return dividerDirHeight
 	}
 	return 1
@@ -18,7 +18,7 @@ func (d directory) RequiredHeight() int {
 // len(s.directories) <= 2 - More hacky and hardcoded-like, but faster
 func (s *Model) NoActualDir() bool {
 	for _, d := range s.directories {
-		if !d.IsDivider() {
+		if !d.isDivider() {
 			return false
 		}
 	}
@@ -26,14 +26,14 @@ func (s *Model) NoActualDir() bool {
 }
 
 func (s *Model) isCursorInvalid() bool {
-	return s.cursor < 0 || s.cursor >= len(s.directories) || s.directories[s.cursor].IsDivider()
+	return s.cursor < 0 || s.cursor >= len(s.directories) || s.directories[s.cursor].isDivider()
 }
 
 func (s *Model) resetCursor() {
 	s.cursor = 0
 	// Move to first non Divider dir
 	for i, d := range s.directories {
-		if !d.IsDivider() {
+		if !d.isDivider() {
 			s.cursor = i
 			return
 		}
@@ -107,4 +107,8 @@ func (m *Model) SetHeight(height int) {
 		return
 	}
 	m.height = height
+}
+
+func (m *Model) Disabled() bool {
+	return m.disabled
 }

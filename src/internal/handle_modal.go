@@ -292,11 +292,6 @@ func (m *model) quitHelpMenu() {
 	m.helpMenu.open = false
 }
 
-func (m *model) toggleFilePreviewPanel() {
-	m.fileModel.FilePreview.ToggleOpen()
-	m.fileModel.UpdateChildComponentWidth()
-}
-
 func (m *model) getFocusedFilePanel() *filepanel.Model {
 	return m.fileModel.GetFocusedFilePanel()
 }
