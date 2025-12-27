@@ -267,7 +267,10 @@ func TestPasteItem(t *testing.T) {
 			}
 			// Checking separately, as this is something independent of tt.shouldPreventPaste
 			if tt.shouldClipboardClear {
-				assert.Empty(t, p.m.clipboard.GetItems(), "Clipboard should be cleared after successful cut-paste")
+				// Wait for async paste operation to complete and clear clipboard
+				assert.Eventually(t, func() bool {
+					return len(p.m.clipboard.GetItems()) == 0
+				}, DefaultTestTimeout, DefaultTestTick, "Clipboard should be cleared after successful cut-paste")
 			} else {
 				assert.NotEmpty(t, p.m.clipboard.GetItems(), "Clipboard should remain after copy-paste")
 			}
