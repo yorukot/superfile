@@ -267,7 +267,10 @@ func TestPasteItem(t *testing.T) {
 			}
 			// Checking separately, as this is something independent of tt.shouldPreventPaste
 			if tt.shouldClipboardClear {
-				// Wait for async paste operation to complete and clear clipboard
+				// Wait for the Paste Model message to reach to Model via bubble tea event loop, that will clear clipboard
+				// TODO: There are two eventually here in this test. A bit inefficient.
+				// We have different async activities, create of files, completion of process message reaching processbar, model msg reaching model. Ideally we would like to have one final check, that is process completion message reaching model, and then check all conditions serially one be one.
+				// For that there, might be need to implement ioReqDone count in model message, or a count per process type, or even an full fledged async manager.
 				assert.Eventually(t, func() bool {
 					return len(p.m.clipboard.GetItems()) == 0
 				}, DefaultTestTimeout, DefaultTestTick, "Clipboard should be cleared after successful cut-paste")
