@@ -129,8 +129,9 @@ func TestZoxide(t *testing.T) {
 		}, DefaultTestTimeout, DefaultTestTick, "Multi-space directory should be found by zoxide")
 
 		// Reset textinput via Close-Open
-		p.getModel().zoxideModal.Close()
-		p.getModel().zoxideModal.Open()
+		p.SendKey(common.Hotkeys.Quit[0])
+		p.SendKey(common.Hotkeys.OpenZoxide[0])
+
 		p.SendKey("di r 1")
 		assert.Eventually(t, func() bool {
 			results := p.getModel().zoxideModal.GetResults()
