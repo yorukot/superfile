@@ -18,8 +18,7 @@ func ExecuteCommandInShell(timeLimit time.Duration, cmdDir string, shellCommand 
 
 	if runtime.GOOS == OsWindows {
 		baseCmd = "powershell.exe"
-		// Use -NoProfile and -NonInteractive to prevent hanging in CI environments
-		args = []string{"-NoProfile", "-NonInteractive", "-Command", shellCommand}
+		args[0] = "-Command"
 	}
 
 	return ExecuteCommand(timeLimit, cmdDir, baseCmd, args...)
