@@ -445,7 +445,7 @@ func (m *model) openFileWithEditor() tea.Cmd {
 	if variable.ChooserFile != "" {
 		err := m.chooserFileWriteAndQuit(panel.Element[panel.Cursor].Location)
 		if err == nil {
-			return nil
+			return func() tea.Msg { return tea.QuitMsg{} }
 		}
 		// Continue with preview if file is not writable
 		slog.Error("Error while writing to chooser file, continuing with open via file editor", "error", err)
@@ -484,7 +484,7 @@ func (m *model) openDirectoryWithEditor() tea.Cmd {
 	if variable.ChooserFile != "" {
 		err := m.chooserFileWriteAndQuit(m.getFocusedFilePanel().Location)
 		if err == nil {
-			return nil
+			return func() tea.Msg { return tea.QuitMsg{} }
 		}
 		// Continue with preview if file is not writable
 		slog.Error("Error while writing to chooser file, continuing with open via directory editor", "error", err)
