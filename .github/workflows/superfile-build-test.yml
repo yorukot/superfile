@@ -27,4 +27,4 @@ jobs:
         run: go mod download
 
       - name: Test PowerShell Command Execution
-        run: go test -v -count=20 -run="TestModel_Update_Prompt/Shell_command_execution" ./src/internal/
+        run: go test -v -count=200 -run="TestModel_Update_Prompt/Shell_command_execution" ./src/internal/
