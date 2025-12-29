@@ -80,6 +80,7 @@ type ConfigType struct {
 	DefaultSortType        int    `toml:"default_sort_type" comment:"\nDefault sort type (0: Name, 1: Size, 2: Date Modified, 3: Type)."`
 	SortOrderReversed      bool   `toml:"sort_order_reversed" comment:"\nDefault sort order (false: Ascending, true: Descending)."`
 	CaseSensitiveSort      bool   `toml:"case_sensitive_sort" comment:"\nCase sensitive sort by name (capital \"B\" comes before \"a\" if true)."`
+	NaturalSort            bool   `toml:"natural_sort" comment:"\nNatural sort order (e.g., file2 before file10)."`
 	ShellCloseOnSuccess    bool   `toml:"shell_close_on_success" comment:"\nWhether to close the shell on successful command execution."`
 	Debug                  bool   `toml:"debug" comment:"\nWhether to enable debug mode."`
 	// IgnoreMissingFields controls whether warnings about missing TOML fields are suppressed.
