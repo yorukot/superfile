@@ -1,0 +1,134 @@
+---
+title: Features List
+description: Complete list of all features available in Superfile
+---
+
+import { Tabs, TabItem, Card, CardGrid } from '@astrojs/starlight/components';
+
+## Core Features
+
+Superfile provides a comprehensive set of features for modern terminal file management.
+
+### File Navigation
+
+| Feature | Description |
+|---------|-------------|
+| **Basic navigation** | Navigate files using Vim-style keys or arrow keys |
+| **Parent directory** | Quickly navigate up one directory level |
+| **Jump to top/bottom** | Quick navigation to list ends |
+| **Page scrolling** | Configurable page size via `page_scroll_size` |
+| **Search/filter** | Real-time filtering within current directory |
+| **Zoxide integration** | Smart directory jumping (requires zoxide) |
+
+### File Operations
+
+| Feature | Description |
+|---------|-------------|
+| **Copy/Cut/Paste** | Full clipboard support with multiple selection |
+| **Delete to trash** | Safe deletion with platform-specific trash support |
+| **Permanent delete** | Bypass trash for immediate deletion |
+| **Create file/directory** | Create new items (append `/` for directories) |
+| **Rename** | In-place single file renaming |
+| **Copy path** | Copy absolute paths to system clipboard |
+| **Copy pwd** | Copy current directory path to clipboard |
+
+### File Preview
+
+| Feature | Description |
+|---------|-------------|
+| **Text preview** | Syntax highlighted text file preview |
+| **Image preview** | Display images in compatible terminals |
+| **PDF preview** | View PDF thumbnails (requires poppler) |
+| **Video thumbnails** | Preview video files (requires ffmpeg) |
+| **Toggle preview** | Show/hide the preview panel |
+
+### Selection & Archives
+
+| Feature | Description |
+|---------|-------------|
+| **Multi-select mode** | Select multiple files for batch operations |
+| **Select all** | Quickly select all items in current panel |
+| **Compress files** | Support for tar.gz, zip, 7z formats |
+| **Extract archives** | Auto-detect and extract various archive formats |
+
+### Panel Management
+
+| Feature | Description |
+|---------|-------------|
+| **Multiple panels** | Create up to 10 file panels |
+| **Panel navigation** | Switch focus between panels |
+| **Sidebar** | Quick access to pinned/recent directories |
+| **Footer components** | Process bar, metadata panel, clipboard viewer |
+
+### Customization
+
+| Feature | Description |
+|---------|-------------|
+| **Theme support** | Multiple built-in themes, custom TOML themes |
+| **Nerdfont icons** | Beautiful file icons (requires Nerdfont) |
+| **Hidden files toggle** | Show/hide dotfiles |
+| **Custom hotkeys** | Fully configurable keyboard shortcuts |
+| **Editor integration** | Configure custom editors by file type |
+
+## Platform Support
+
+<Tabs>
+  <TabItem label="Linux" icon="linux">
+    **Best Support**
+    - Full metadata display (permissions, owner, group)
+    - XDG trash specification support
+    - Trash folder in sidebar
+    - Uses `/bin/sh` for shell commands
+  </TabItem>
+  <TabItem label="macOS" icon="apple">
+    **Full Support**
+    - System trash (~/.Trash) integration
+    - Limited metadata (no owner/group info)
+    - Uses `/bin/sh` for shell commands
+  </TabItem>
+  <TabItem label="Windows" icon="seti:windows">
+    **Full Support**
+    - Recycle Bin integration via hymkor/trash-go
+    - Limited metadata (no owner/group info)
+    - Uses PowerShell for shell commands
+  </TabItem>
+</Tabs>
+
+## External Dependencies
+
+Some features require additional software to be installed:
+
+<CardGrid>
+  <Card title="PDF Preview" icon="document">
+    Requires `poppler` package (pdftoppm command)
+  </Card>
+  <Card title="Video Thumbnails" icon="youtube">
+    Requires `ffmpeg` for video preview generation
+  </Card>
+  <Card title="Smart Navigation" icon="rocket">
+    Requires `zoxide` for intelligent directory jumping
+  </Card>
+  <Card title="File Icons" icon="seti:font">
+    Requires a Nerd Font for beautiful file icons
+  </Card>
+  <Card title="Image Preview" icon="camera">
+    Requires a terminal with Kitty graphics protocol support (Kitty, WezTerm, iTerm2)
+  </Card>
+</CardGrid>
+
+## Feature Configuration
+
+Most features can be configured through the config files:
+
+- **Config location**: `~/.config/superfile/config.toml`
+- **Hotkeys**: `~/.config/superfile/hotkeys.toml`
+- **Themes**: `~/.config/superfile/theme/[theme-name].toml`
+
+See the [configuration guide](/configure/superfile-config/) for detailed information.
+
+## Terminal Requirements
+
+- **UTF-8 support**: Required for Unicode filenames
+- **256 color support**: Recommended for themes
+- **Kitty graphics protocol**: Optional, for image preview
+- **Responsive resize**: Automatic layout adjustment
