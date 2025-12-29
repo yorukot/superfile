@@ -2,10 +2,12 @@ package sidebar
 
 import (
 	"os"
+	"runtime"
 	"slices"
 
 	"github.com/adrg/xdg"
 
+	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/utils"
@@ -56,6 +58,14 @@ func getWellKnownDirectories() []directory {
 		{Location: xdg.UserDirs.Music, Name: icon.Music + icon.Space + "Music"},
 		{Location: xdg.UserDirs.Templates, Name: icon.Templates + icon.Space + "Templates"},
 		{Location: xdg.UserDirs.PublicShare, Name: icon.PublicShare + icon.Space + "PublicShare"},
+	}
+
+	// Add Trash directory for Linux only
+	if runtime.GOOS == utils.OsLinux {
+		wellKnownDirectories = append(wellKnownDirectories, directory{
+			Location: variable.LinuxTrashDirectory,
+			Name:     icon.Trash + icon.Space + "Trash",
+		})
 	}
 
 	return slices.DeleteFunc(wellKnownDirectories, func(d directory) bool {

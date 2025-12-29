@@ -19,6 +19,7 @@ var (
 	Music       = "♬"          // Printable Rune : "♬"
 	Templates   = "\U000f03e2" // Printable Rune : "󰏢"
 	PublicShare = "\uf0ac"     // Printable Rune : ""
+	Trash       = "\uf1f8"     // Printable Rune : ""
 
 	// file operations
 	CompressFile = "\U000f05c4" // Printable Rune : "󰗄"
