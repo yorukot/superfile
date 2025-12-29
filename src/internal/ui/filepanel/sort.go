@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	"unicode"
 
+	"github.com/fvbommel/sortorder"
 	"github.com/yorukot/superfile/src/internal/common"
 )
 
@@ -19,10 +19,6 @@ func getOrderingFunc(elements []Element, reversed bool, sortOption string) slice
 			// One of them is a directory, and other is not
 			if elements[i].Directory != elements[j].Directory {
 				return elements[i].Directory
-			}
-			if common.Config.NaturalSort {
-				cmp := naturalCompare(elements[i].Name, elements[j].Name, common.Config.CaseSensitiveSort)
-				return (cmp < 0) != reversed
 			}
 			if common.Config.CaseSensitiveSort {
 				return elements[i].Name < elements[j].Name != reversed
@@ -37,6 +33,20 @@ func getOrderingFunc(elements []Element, reversed bool, sortOption string) slice
 		}
 	case string(sortingFileType):
 		order = getTypeOrderingFunc(elements, reversed)
+	case string(sortingNatural):
+		order = func(i, j int) bool {
+			// One of them is a directory, and other is not
+			if elements[i].Directory != elements[j].Directory {
+				return elements[i].Directory
+			}
+			if common.Config.CaseSensitiveSort {
+				return sortorder.NaturalLess(elements[i].Name, elements[j].Name) != reversed
+			}
+			return sortorder.NaturalLess(
+				strings.ToLower(elements[i].Name),
+				strings.ToLower(elements[j].Name),
+			) != reversed
+		}
 	}
 	return order
 }
@@ -91,14 +101,9 @@ func getTypeOrderingFunc(elements []Element, reversed bool) sliceOrderFunc {
 		}
 
 		// If same type, fall back to name
-		if common.Config.NaturalSort {
-			cmp := naturalCompare(elements[i].Name, elements[j].Name, common.Config.CaseSensitiveSort)
-			return (cmp < 0) != reversed
-		}
 		if common.Config.CaseSensitiveSort {
 			return (elements[i].Name < elements[j].Name) != reversed
 		}
-
 		return (strings.ToLower(elements[i].Name) < strings.ToLower(elements[j].Name)) != reversed
 	}
 }
@@ -153,73 +158,4 @@ func (m *Model) getPageScrollSize() int {
 		scrollSize = m.PanelElementHeight()
 	}
 	return scrollSize
-}
-
-// naturalCompare compares two strings using natural sorting.
-// Returns negative if a < b, 0 if a == b, positive if a > b.
-// Natural sorting treats numeric sequences as numbers (e.g., "file2" < "file10").
-func naturalCompare(a, b string, caseSensitive bool) int {
-	if !caseSensitive {
-		a = strings.ToLower(a)
-		b = strings.ToLower(b)
-	}
-
-	i, j := 0, 0
-	for i < len(a) && j < len(b) {
-		aIsDigit := unicode.IsDigit(rune(a[i]))
-		bIsDigit := unicode.IsDigit(rune(b[j]))
-
-		if aIsDigit && bIsDigit {
-			// Extract numeric sequences
-			aNum, aEnd := extractNumber(a, i)
-			bNum, bEnd := extractNumber(b, j)
-
-			// Compare numeric values
-			if aNum != bNum {
-				if aNum < bNum {
-					return -1
-				}
-				return 1
-			}
-
-			// If numeric values are equal, move to next segment
-			i = aEnd
-			j = bEnd
-		} else {
-			// Compare characters lexicographically
-			if a[i] != b[j] {
-				if a[i] < b[j] {
-					return -1
-				}
-				return 1
-			}
-			i++
-			j++
-		}
-	}
-
-	// Handle remaining characters
-	if i < len(a) {
-		return 1
-	}
-	if j < len(b) {
-		return -1
-	}
-	return 0
-}
-
-// extractNumber extracts a numeric sequence from string s starting at position start.
-// Returns the numeric value and the position after the last digit.
-func extractNumber(s string, start int) (uint64, int) {
-	end := start
-	for end < len(s) && unicode.IsDigit(rune(s[end])) {
-		end++
-	}
-
-	// Parse the number (handle leading zeros by just parsing the value)
-	var num uint64
-	for i := start; i < end; i++ {
-		num = num*10 + uint64(s[i]-'0')
-	}
-	return num, end
 }
