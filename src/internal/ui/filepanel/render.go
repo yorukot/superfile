@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"slices"
 
 	"github.com/charmbracelet/lipgloss"
 
@@ -77,10 +76,13 @@ func (m *Model) renderFileEntries(r *rendering.Renderer) {
 
 	end := min(m.RenderIndex+m.PanelElementHeight(), len(m.Element))
 
+	selectedFiles := make(map[string]struct{}, len(m.Selected))
+	for _, selectedItem := range m.Selected {
+		selectedFiles[selectedItem] = struct{}{}
+	}
+
 	for i := m.RenderIndex; i < end; i++ {
-		// TODO : Fix this, this is O(n^2) complexity. Considered a file panel with 200 files, and 100 selected
-		// We will be doing a search in 100 item slice for all 200 files.
-		isSelected := slices.Contains(m.Selected, m.Element[i].Location)
+		_, isSelected := selectedFiles[m.Element[i].Location]
 
 		if m.Renaming && i == m.Cursor {
 			r.AddLines(m.Rename.View())
