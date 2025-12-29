@@ -8,14 +8,15 @@ const (
 	SortBySize
 	SortByDate
 	SortByType
+	SortByNatural
 )
 
 var SortOptionsStr = []string{ //nolint: gochecknoglobals // Effectively const
-	"Name", "Size", "Date Modified", "Type",
+	"Name", "Size", "Date Modified", "Type", "Natural",
 }
 
 var SortOptionsShortStr = []string{ //nolint: gochecknoglobals // Effectively const
-	"Name", "Size", "Date", "Type",
+	"Name", "Size", "Date", "Type", "Natural",
 }
 
 // Sort options
