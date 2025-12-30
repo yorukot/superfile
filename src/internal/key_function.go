@@ -212,7 +212,7 @@ func (m *model) typingModalOpenKey(msg string) {
 
 func (m *model) notifyModelOpenKey(msg string) tea.Cmd {
 	isCancel := slices.Contains(common.Hotkeys.CancelTyping, msg) || slices.Contains(common.Hotkeys.Quit, msg)
-	isConfirm := slices.Contains(common.Hotkeys.Confirm, msg)
+	isConfirm := slices.Contains(common.Hotkeys.ConfirmTyping, msg)
 
 	if !isCancel && !isConfirm {
 		slog.Warn("Invalid keypress in notifyModel", "msg", msg)
