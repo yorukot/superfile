@@ -23,11 +23,14 @@ func (m *Model) GetFocusedItemPtr() *Element {
 }
 
 func (m *Model) CheckSelected(location string) bool {
+	if m.selected == nil {
+		return false
+	}
 	_, isSelected := m.selected[location]
 	return isSelected
 }
 
-// Returns not ordered list selected locations
+// Returns an unordered list of selected locations
 func (m *Model) GetSelectedLocations() []string {
 	result := make([]string, 0, len(m.selected))
 	for k := range m.selected {
