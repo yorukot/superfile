@@ -198,11 +198,12 @@ func TestItemSelectUpDown(t *testing.T) {
 	testdata := []struct {
 		name             string
 		panel            Model
+		panelToSelect    []string
 		selectDown       bool
 		mainPanelHeight  int
 		expectedCursor   int
 		expectedRender   int
-		expectedSelected []string
+		expectedSelected map[string]int
 	}{
 		{
 			name: "Select and move down",
@@ -214,14 +215,14 @@ func TestItemSelectUpDown(t *testing.T) {
 				},
 				Cursor:      0,
 				RenderIndex: 0,
-				Selected:    []string{},
 				PanelMode:   SelectMode,
 			},
+			panelToSelect:    []string{},
 			selectDown:       true,
 			mainPanelHeight:  10,
 			expectedCursor:   1,
 			expectedRender:   0,
-			expectedSelected: []string{"/tmp/file1.txt"},
+			expectedSelected: map[string]int{"/tmp/file1.txt": 1},
 		},
 		{
 			name: "Select and move up",
@@ -233,14 +234,14 @@ func TestItemSelectUpDown(t *testing.T) {
 				},
 				Cursor:      2,
 				RenderIndex: 0,
-				Selected:    []string{},
 				PanelMode:   SelectMode,
 			},
+			panelToSelect:    []string{},
 			selectDown:       false,
 			mainPanelHeight:  10,
 			expectedCursor:   1,
 			expectedRender:   0,
-			expectedSelected: []string{"/tmp/file3.txt"},
+			expectedSelected: map[string]int{"/tmp/file3.txt": 1},
 		},
 		{
 			name: "Deselect already selected item",
@@ -251,14 +252,14 @@ func TestItemSelectUpDown(t *testing.T) {
 				},
 				Cursor:      0,
 				RenderIndex: 0,
-				Selected:    []string{"/tmp/file1.txt"},
 				PanelMode:   SelectMode,
 			},
+			panelToSelect:    []string{"/tmp/file1.txt"},
 			selectDown:       true,
 			mainPanelHeight:  10,
 			expectedCursor:   1,
 			expectedRender:   0,
-			expectedSelected: []string{},
+			expectedSelected: map[string]int{},
 		},
 		{
 			name: "Selection at boundary with wrap",
@@ -269,14 +270,14 @@ func TestItemSelectUpDown(t *testing.T) {
 				},
 				Cursor:      1,
 				RenderIndex: 0,
-				Selected:    []string{},
 				PanelMode:   SelectMode,
 			},
+			panelToSelect:    []string{},
 			selectDown:       true,
 			mainPanelHeight:  10,
 			expectedCursor:   0, // wraps to beginning
 			expectedRender:   0,
-			expectedSelected: []string{"/tmp/file2.txt"},
+			expectedSelected: map[string]int{"/tmp/file2.txt": 1},
 		},
 		{
 			name: "Selection persistence across moves",
@@ -288,14 +289,14 @@ func TestItemSelectUpDown(t *testing.T) {
 				},
 				Cursor:      1,
 				RenderIndex: 0,
-				Selected:    []string{"/tmp/file1.txt"},
 				PanelMode:   SelectMode,
 			},
+			panelToSelect:    []string{"/tmp/file1.txt"},
 			selectDown:       true,
 			mainPanelHeight:  10,
 			expectedCursor:   2,
 			expectedRender:   0,
-			expectedSelected: []string{"/tmp/file1.txt", "/tmp/file2.txt"},
+			expectedSelected: map[string]int{"/tmp/file1.txt": 1, "/tmp/file2.txt": 2},
 		},
 		{
 			name: "Empty panel selection",
@@ -303,19 +304,20 @@ func TestItemSelectUpDown(t *testing.T) {
 				Element:     []Element{},
 				Cursor:      0,
 				RenderIndex: 0,
-				Selected:    []string{},
 				PanelMode:   SelectMode,
 			},
+			panelToSelect:    []string{},
 			selectDown:       true,
 			mainPanelHeight:  10,
 			expectedCursor:   0,
 			expectedRender:   0,
-			expectedSelected: []string{},
+			expectedSelected: map[string]int{},
 		},
 	}
 
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
+			tt.panel.SetSelectedAll(tt.panelToSelect, true)
 			tt.panel.SetHeight(tt.mainPanelHeight + 2)
 
 			if tt.selectDown {
@@ -325,7 +327,7 @@ func TestItemSelectUpDown(t *testing.T) {
 			}
 			assert.Equal(t, tt.expectedCursor, tt.panel.Cursor)
 			assert.Equal(t, tt.expectedRender, tt.panel.RenderIndex)
-			assert.Equal(t, tt.expectedSelected, tt.panel.Selected)
+			assert.Equal(t, tt.expectedSelected, tt.panel.selected)
 		})
 	}
 }

@@ -26,7 +26,7 @@ func (m *Model) Render(focused bool) string {
 
 	m.renderTopBar(r)
 	m.renderSearchBar(r)
-	m.renderFooter(r, uint(len(m.Selected)))
+	m.renderFooter(r, m.SelectedCount())
 	m.renderFileEntries(r)
 
 	return r.Render()
@@ -76,13 +76,8 @@ func (m *Model) renderFileEntries(r *rendering.Renderer) {
 
 	end := min(m.RenderIndex+m.PanelElementHeight(), len(m.Element))
 
-	selectedFiles := make(map[string]struct{}, len(m.Selected))
-	for _, selectedItem := range m.Selected {
-		selectedFiles[selectedItem] = struct{}{}
-	}
-
 	for i := m.RenderIndex; i < end; i++ {
-		_, isSelected := selectedFiles[m.Element[i].Location]
+		isSelected := m.CheckSelected(m.Element[i].Location)
 
 		if m.Renaming && i == m.Cursor {
 			r.AddLines(m.Rename.View())

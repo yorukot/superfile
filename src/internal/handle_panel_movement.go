@@ -32,7 +32,7 @@ func (m *model) enterPanel() {
 	if len(panel.Element) == 0 {
 		return
 	}
-	selectedItem := panel.GetSelectedItem()
+	selectedItem := panel.GetFocusedItem()
 	if selectedItem.Directory {
 		targetPath := selectedItem.Location
 
@@ -127,7 +127,7 @@ func (m *model) sidebarSelectDirectory() {
 func (m *model) selectAllItem() {
 	panel := m.getFocusedFilePanel()
 	for _, item := range panel.Element {
-		panel.Selected = append(panel.Selected, item.Location)
+		panel.SetSelected(item.Location, true)
 	}
 }
 

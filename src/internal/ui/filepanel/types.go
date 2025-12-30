@@ -21,9 +21,11 @@ type Model struct {
 	height int // Total height including borders
 	// TODO: Every file panel doesn't needs sort options model
 	// They just need to store their current sort config.
-	SortOptions        sortOptionsModel
-	PanelMode          PanelMode
-	Selected           []string
+	SortOptions sortOptionsModel
+	PanelMode   PanelMode
+	// key is file location, value order of selection
+	selected           map[string]int
+	selectOrderCounter int
 	Element            []Element
 	DirectoryRecords   map[string]directoryRecord
 	Rename             textinput.Model

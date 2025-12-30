@@ -11,12 +11,38 @@ import (
 func (m *Model) ChangeFilePanelMode() {
 	switch m.PanelMode {
 	case SelectMode:
-		m.Selected = m.Selected[:0]
+		m.ResetSelected()
 		m.PanelMode = BrowserMode
 	case BrowserMode:
 		m.PanelMode = SelectMode
 	default:
 		slog.Error("Unexpected panelMode", "panelMode", m.PanelMode)
+	}
+}
+
+func (m *Model) SetSelected(location string, state bool) {
+	if m.selected == nil {
+		m.ResetSelected()
+	}
+	if state {
+		m.selectOrderCounter++
+		m.selected[location] = m.selectOrderCounter
+	} else {
+		delete(m.selected, location)
+	}
+}
+
+func (m *Model) SetSelectedAll(locations []string, state bool) {
+	if m.selected == nil {
+		m.ResetSelected()
+	}
+	for _, location := range locations {
+		if state {
+			m.selectOrderCounter++
+			m.selected[location] = m.selectOrderCounter
+		} else {
+			delete(m.selected, location)
+		}
 	}
 }
 

@@ -137,7 +137,7 @@ func NewMetadataMsg(meta metadata.Metadata, metadataFocused bool, reqID int) Met
 
 func (msg MetadataMsg) ApplyToModel(m *model) tea.Cmd {
 	m.fileMetaData.SetMetadataCache(msg.meta, msg.metadataFocused)
-	selectedItem := m.getFocusedFilePanel().GetSelectedItemPtr()
+	selectedItem := m.getFocusedFilePanel().GetFocusedItemPtr()
 	if selectedItem == nil {
 		slog.Debug("Panel empty or cursor invalid. Ignoring MetadataMsg")
 		return nil

@@ -59,7 +59,7 @@ func (m *Model) ToggleFilePreviewPanel() tea.Cmd {
 }
 
 func (m *Model) UpdatePreviewPanel(msg preview.UpdateMsg) {
-	selectedItem := m.GetFocusedFilePanel().GetSelectedItemPtr()
+	selectedItem := m.GetFocusedFilePanel().GetFocusedItemPtr()
 	if selectedItem == nil {
 		slog.Debug("Panel empty or cursor invalid. Ignoring FilePreviewUpdateMsg")
 		return
@@ -90,7 +90,7 @@ func (m *Model) GetFilePreviewCmd(forcePreviewRender bool) tea.Cmd {
 		m.FilePreview.SetEmptyWithDimensions(m.ExpectedPreviewWidth, m.Height)
 		return nil
 	}
-	selectedItem := panel.GetSelectedItem()
+	selectedItem := panel.GetFocusedItem()
 	if m.FilePreview.GetLocation() == selectedItem.Location && !forcePreviewRender {
 		return nil
 	}

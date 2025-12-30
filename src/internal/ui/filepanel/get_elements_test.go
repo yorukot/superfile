@@ -208,7 +208,8 @@ func TestSingleItemSelect(t *testing.T) {
 	testdata := []struct {
 		name             string
 		panel            Model
-		expectedSelected []string
+		panelToSelect    []string
+		expectedSelected map[string]int
 	}{
 		{
 			name: "Select unselected item",
@@ -217,10 +218,10 @@ func TestSingleItemSelect(t *testing.T) {
 					{Name: "file1.txt", Location: "/tmp/file1.txt"},
 					{Name: "file2.txt", Location: "/tmp/file2.txt"},
 				},
-				Cursor:   0,
-				Selected: []string{},
+				Cursor: 0,
 			},
-			expectedSelected: []string{"/tmp/file1.txt"},
+			panelToSelect:    []string{},
+			expectedSelected: map[string]int{"/tmp/file1.txt": 1},
 		},
 		{
 			name: "Deselect selected item",
@@ -229,10 +230,10 @@ func TestSingleItemSelect(t *testing.T) {
 					{Name: "file1.txt", Location: "/tmp/file1.txt"},
 					{Name: "file2.txt", Location: "/tmp/file2.txt"},
 				},
-				Cursor:   0,
-				Selected: []string{"/tmp/file1.txt"},
+				Cursor: 0,
 			},
-			expectedSelected: []string{},
+			panelToSelect:    []string{"/tmp/file1.txt"},
+			expectedSelected: map[string]int{},
 		},
 		{
 			name: "Out of bounds cursor negative",
@@ -240,10 +241,10 @@ func TestSingleItemSelect(t *testing.T) {
 				Element: []Element{
 					{Name: "file1.txt", Location: "/tmp/file1.txt"},
 				},
-				Cursor:   -1,
-				Selected: []string{},
+				Cursor: -1,
 			},
-			expectedSelected: []string{},
+			panelToSelect:    []string{},
+			expectedSelected: map[string]int{},
 		},
 		{
 			name: "Out of bounds cursor beyond count",
@@ -251,26 +252,27 @@ func TestSingleItemSelect(t *testing.T) {
 				Element: []Element{
 					{Name: "file1.txt", Location: "/tmp/file1.txt"},
 				},
-				Cursor:   5,
-				Selected: []string{},
+				Cursor: 5,
 			},
-			expectedSelected: []string{},
+			panelToSelect:    []string{},
+			expectedSelected: map[string]int{},
 		},
 		{
 			name: "Empty element list",
 			panel: Model{
-				Element:  []Element{},
-				Cursor:   0,
-				Selected: []string{},
+				Element: []Element{},
+				Cursor:  0,
 			},
-			expectedSelected: []string{},
+			panelToSelect:    []string{},
+			expectedSelected: map[string]int{},
 		},
 	}
 
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
+			tt.panel.SetSelectedAll(tt.panelToSelect, true)
 			tt.panel.SingleItemSelect()
-			assert.Equal(t, tt.expectedSelected, tt.panel.Selected)
+			assert.Equal(t, tt.expectedSelected, tt.panel.selected)
 		})
 	}
 }

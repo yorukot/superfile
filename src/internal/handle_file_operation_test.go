@@ -112,7 +112,7 @@ func TestCompressSelectedFiles(t *testing.T) {
 			require.Equal(t, filepanel.BrowserMode, m.getFocusedFilePanel().PanelMode)
 			if tt.selectMode {
 				m.getFocusedFilePanel().ChangeFilePanelMode()
-				m.getFocusedFilePanel().Selected = tt.selectedElem
+				m.getFocusedFilePanel().SetSelectedAll(tt.selectedElem, true)
 			}
 
 			p.SendKey(common.Hotkeys.CompressFile[0])
@@ -126,7 +126,7 @@ func TestCompressSelectedFiles(t *testing.T) {
 
 			setFilePanelSelectedItemByLocation(t, m.getFocusedFilePanel(), zipFile)
 
-			selectedItemLocation := m.getFocusedFilePanel().GetSelectedItem().Location
+			selectedItemLocation := m.getFocusedFilePanel().GetFocusedItem().Location
 			assert.Equal(t, zipFile, selectedItemLocation)
 			// Ensure we are extracting the zip file, not a directory
 			fileInfo, err := os.Stat(selectedItemLocation)

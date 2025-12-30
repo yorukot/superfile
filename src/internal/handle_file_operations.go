@@ -116,9 +116,9 @@ func (m *model) getDeleteCmd(permDelete bool) tea.Cmd {
 
 	var items []string
 	if panel.PanelMode == filepanel.SelectMode {
-		items = panel.Selected
+		items = panel.GetSelectedLocations()
 	} else {
-		items = []string{panel.GetSelectedItem().Location}
+		items = []string{panel.GetFocusedItem().Location}
 	}
 
 	useTrash := m.hasTrash && !isExternalDiskPath(panel.Location) && !permDelete
@@ -171,7 +171,7 @@ func deleteOperation(processBarModel *processbar.Model, items []string, useTrash
 
 func (m *model) getDeleteTriggerCmd(deletePermanent bool) tea.Cmd {
 	panel := m.getFocusedFilePanel()
-	if (panel.PanelMode == filepanel.SelectMode && len(panel.Selected) == 0) ||
+	if (panel.PanelMode == filepanel.SelectMode && panel.SelectedCount() == 0) ||
 		(panel.PanelMode == filepanel.BrowserMode && len(panel.Element) == 0) {
 		return nil
 	}
@@ -210,12 +210,12 @@ func (m *model) copySingleItem(cut bool) {
 func (m *model) copyMultipleItem(cut bool) {
 	panel := m.getFocusedFilePanel()
 	m.clipboard.Reset(cut)
-	if len(panel.Selected) == 0 {
+	if panel.SelectedCount() == 0 {
 		return
 	}
 	slog.Debug("handle_file_operations.copyMultipleItem", "cut", cut,
-		"panel selected files", panel.Selected)
-	m.clipboard.SetItems(panel.Selected)
+		"panel selected files", panel.GetSelectedLocations())
+	m.clipboard.SetItems(panel.GetSelectedLocations())
 }
 
 func (m *model) getPasteItemCmd() tea.Cmd {
@@ -352,7 +352,7 @@ func (m *model) getExtractFileCmd() tea.Cmd {
 		return nil
 	}
 
-	item := panel.GetSelectedItem().Location
+	item := panel.GetFocusedItem().Location
 
 	ext := strings.ToLower(filepath.Ext(item))
 	if !common.IsExtensionExtractable(ext) {
@@ -398,12 +398,12 @@ func (m *model) getCompressSelectedFilesCmd() tea.Cmd {
 	var filesToCompress []string
 	var firstFile string
 
-	if len(panel.Selected) == 0 {
+	if panel.SelectedCount() == 0 {
 		firstFile = panel.Element[panel.Cursor].Location
 		filesToCompress = append(filesToCompress, firstFile)
 	} else {
-		firstFile = panel.Selected[0]
-		filesToCompress = panel.Selected
+		firstFile = panel.GetFirstSelectedLocation()
+		filesToCompress = panel.GetSelectedLocations()
 	}
 
 	reqID := m.ioReqCnt
