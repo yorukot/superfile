@@ -27,6 +27,7 @@ func (m *Model) CheckSelected(location string) bool {
 	return isSelected
 }
 
+// Returns not ordered list selected locations
 func (m *Model) GetSelectedLocations() []string {
 	result := make([]string, 0, len(m.selected))
 	for k := range m.selected {
