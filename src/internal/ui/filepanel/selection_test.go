@@ -16,7 +16,6 @@ func TestPanelSelectionLifeCycle(t *testing.T) {
 	assert.Equal(t, uint(0), panel.SelectedCount())
 
 	// first added
-
 	panel.SetSelected("/tmp/file1.txt")
 	assert.Equal(t, uint(1), panel.SelectedCount())
 	assert.Equal(t, map[string]int{"/tmp/file1.txt": 1}, panel.selected)
@@ -29,7 +28,7 @@ func TestPanelSelectionLifeCycle(t *testing.T) {
 	assert.Equal(t, "/tmp/file1.txt", currentFirst)
 
 	// first removed
-	panel.SetSelected("/tmp/file1.txt")
+	panel.SetUnSelected("/tmp/file1.txt")
 	assert.Equal(t, uint(1), panel.SelectedCount())
 	assert.Equal(t, map[string]int{"/tmp/file2.txt": 2}, panel.selected)
 	currentFirst = panel.GetFirstSelectedLocation()
