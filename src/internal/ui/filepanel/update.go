@@ -72,3 +72,10 @@ func (m *Model) UpdateCurrentFilePanelDir(path string) error {
 func (m *Model) ParentDirectory() error {
 	return m.UpdateCurrentFilePanelDir("..")
 }
+
+// Select all item in the file panel (only work on select mode)
+func (m *Model) SelectAllItem() {
+	for _, item := range m.Element {
+		m.SetSelected(item.Location)
+	}
+}

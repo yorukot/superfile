@@ -169,7 +169,7 @@ func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
 		case slices.Contains(common.Hotkeys.CutItems, msg):
 			m.copyMultipleItem(true)
 		case slices.Contains(common.Hotkeys.FilePanelSelectAllItem, msg):
-			m.selectAllItem()
+			m.getFocusedFilePanel().SelectAllItem()
 		}
 		return nil
 	}
