@@ -31,12 +31,7 @@ func (m *Model) SetSelected(location string, state bool) {
 
 func (m *Model) SetSelectedAll(locations []string, state bool) {
 	for _, location := range locations {
-		if state {
-			m.selectOrderCounter++
-			m.selected[location] = m.selectOrderCounter
-		} else {
-			delete(m.selected, location)
-		}
+		m.SetSelected(location, state)
 	}
 }
 
