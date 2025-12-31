@@ -1,10 +1,8 @@
 package filepanel
 
-import (
-	"slices"
-)
+import "math"
 
-func (m *Model) GetSelectedItem() Element {
+func (m *Model) GetFocusedItem() Element {
 	if m.Cursor < 0 || len(m.Element) <= m.Cursor {
 		return Element{}
 	}
@@ -12,36 +10,89 @@ func (m *Model) GetSelectedItem() Element {
 }
 
 func (m *Model) ResetSelected() {
-	m.Selected = m.Selected[:0]
+	m.selectOrderCounter = 0
+	m.selected = make(map[string]int)
 }
 
 // For modification. Make sure to do a nil check
-func (m *Model) GetSelectedItemPtr() *Element {
+func (m *Model) GetFocusedItemPtr() *Element {
 	if m.Cursor < 0 || len(m.Element) <= m.Cursor {
 		return nil
 	}
 	return &m.Element[m.Cursor]
 }
 
+// Note : If this is called on an already selected element
+// it will make its order last. This is expected behaviour
+func (m *Model) SetSelected(location string) {
+	m.selectOrderCounter++
+	m.selected[location] = m.selectOrderCounter
+}
+
+func (m *Model) SetUnSelected(location string) {
+	if m.CheckSelected(location) {
+		delete(m.selected, location)
+	}
+}
+
+func (m *Model) ToggleSelected(location string) {
+	if m.CheckSelected(location) {
+		delete(m.selected, location)
+		return
+	}
+	m.SetSelected(location)
+}
+
+// Only used in tests, including tests outside this package
+func (m *Model) SetSelectedAll(locations []string) {
+	for _, location := range locations {
+		m.SetSelected(location)
+	}
+}
+
+func (m *Model) CheckSelected(location string) bool {
+	_, isSelected := m.selected[location]
+	return isSelected
+}
+
+// Returns an unordered list of selected locations
+func (m *Model) GetSelectedLocations() []string {
+	result := make([]string, 0, len(m.selected))
+	for k := range m.selected {
+		result = append(result, k)
+	}
+	return result
+}
+
+func (m *Model) GetFirstSelectedLocation() string {
+	if len(m.selected) == 0 {
+		return ""
+	}
+	result := ""
+	minOrder := math.MaxInt
+	for location, order := range m.selected {
+		if minOrder > order {
+			result = location
+			minOrder = order
+		}
+	}
+	return result
+}
+
 // Select the item where cursor located (only work on select mode)
 func (m *Model) SingleItemSelect() {
 	if len(m.Element) > 0 && m.Cursor >= 0 && m.Cursor < len(m.Element) {
 		elementLocation := m.Element[m.Cursor].Location
-
-		if slices.Contains(m.Selected, elementLocation) {
-			// This is inefficient. Once you select 1000 items,
-			// each select / deselect operation can take 1000 operations
-			// It can be easily made constant time.
-			// TODO : (performance)convert panel.selected to a set (map[string]struct{})
-			m.Selected = removeElementByValue(m.Selected, elementLocation)
-		} else {
-			m.Selected = append(m.Selected, elementLocation)
-		}
+		m.ToggleSelected(elementLocation)
 	}
 }
 
 func (m *Model) ElemCount() int {
 	return len(m.Element)
+}
+
+func (m *Model) SelectedCount() uint {
+	return uint(len(m.selected))
 }
 
 func (m *Model) Empty() bool {

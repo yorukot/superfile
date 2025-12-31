@@ -180,11 +180,10 @@ func TestReturnDirElement(t *testing.T) {
 				Selected: 0,
 				Reversed: tt.reversed,
 			}
-			panel := &Model{
-				Location: tt.location,
-				SortOptions: sortOptionsModel{
-					Data: data,
-				},
+			panel := testModel(0, 0, 0, BrowserMode, nil)
+			panel.Location = tt.location
+			panel.SortOptions = sortOptionsModel{
+				Data: data,
 			}
 			panel.SearchBar.SetValue(tt.searchString)
 			var res []Element
@@ -208,69 +207,56 @@ func TestSingleItemSelect(t *testing.T) {
 	testdata := []struct {
 		name             string
 		panel            Model
-		expectedSelected []string
+		panelToSelect    []string
+		expectedSelected map[string]int
 	}{
 		{
 			name: "Select unselected item",
-			panel: Model{
-				Element: []Element{
-					{Name: "file1.txt", Location: "/tmp/file1.txt"},
-					{Name: "file2.txt", Location: "/tmp/file2.txt"},
-				},
-				Cursor:   0,
-				Selected: []string{},
-			},
-			expectedSelected: []string{"/tmp/file1.txt"},
+			panel: testModel(0, 0, 12, SelectMode, []Element{
+				{Name: "file1.txt", Location: "/tmp/file1.txt"},
+				{Name: "file2.txt", Location: "/tmp/file2.txt"},
+			}),
+			panelToSelect:    []string{},
+			expectedSelected: map[string]int{"/tmp/file1.txt": 1},
 		},
 		{
 			name: "Deselect selected item",
-			panel: Model{
-				Element: []Element{
-					{Name: "file1.txt", Location: "/tmp/file1.txt"},
-					{Name: "file2.txt", Location: "/tmp/file2.txt"},
-				},
-				Cursor:   0,
-				Selected: []string{"/tmp/file1.txt"},
-			},
-			expectedSelected: []string{},
+			panel: testModel(0, 0, 12, SelectMode, []Element{
+				{Name: "file1.txt", Location: "/tmp/file1.txt"},
+				{Name: "file2.txt", Location: "/tmp/file2.txt"},
+			}),
+			panelToSelect:    []string{"/tmp/file1.txt"},
+			expectedSelected: map[string]int{},
 		},
 		{
 			name: "Out of bounds cursor negative",
-			panel: Model{
-				Element: []Element{
-					{Name: "file1.txt", Location: "/tmp/file1.txt"},
-				},
-				Cursor:   -1,
-				Selected: []string{},
-			},
-			expectedSelected: []string{},
+			panel: testModel(-1, 0, 12, SelectMode, []Element{
+				{Name: "file1.txt", Location: "/tmp/file1.txt"},
+			}),
+			panelToSelect:    []string{},
+			expectedSelected: map[string]int{},
 		},
 		{
 			name: "Out of bounds cursor beyond count",
-			panel: Model{
-				Element: []Element{
-					{Name: "file1.txt", Location: "/tmp/file1.txt"},
-				},
-				Cursor:   5,
-				Selected: []string{},
-			},
-			expectedSelected: []string{},
+			panel: testModel(5, 0, 12, SelectMode, []Element{
+				{Name: "file1.txt", Location: "/tmp/file1.txt"},
+			}),
+			panelToSelect:    []string{},
+			expectedSelected: map[string]int{},
 		},
 		{
-			name: "Empty element list",
-			panel: Model{
-				Element:  []Element{},
-				Cursor:   0,
-				Selected: []string{},
-			},
-			expectedSelected: []string{},
+			name:             "Empty element list",
+			panel:            testModel(0, 0, 12, SelectMode, []Element{}),
+			panelToSelect:    []string{},
+			expectedSelected: map[string]int{},
 		},
 	}
 
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
+			tt.panel.SetSelectedAll(tt.panelToSelect)
 			tt.panel.SingleItemSelect()
-			assert.Equal(t, tt.expectedSelected, tt.panel.Selected)
+			assert.Equal(t, tt.expectedSelected, tt.panel.selected)
 		})
 	}
 }

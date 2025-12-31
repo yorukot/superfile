@@ -127,16 +127,6 @@ func isSymlinkToDir(location string, info os.FileInfo, name string) bool {
 	return false
 }
 
-func removeElementByValue(slice []string, value string) []string {
-	newSlice := []string{}
-	for _, v := range slice {
-		if v != value {
-			newSlice = append(newSlice, v)
-		}
-	}
-	return newSlice
-}
-
 func (m *Model) getPageScrollSize() int {
 	scrollSize := common.Config.PageScrollSize
 	if scrollSize <= 0 {

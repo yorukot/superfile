@@ -8,12 +8,19 @@ import (
 	"github.com/yorukot/superfile/src/internal/common"
 )
 
-func testModel(cursor int, renderIndex int, height int, elemCount int) Model {
+func testModelWithElemCount(cursor int, renderIndex int, height int, elemCount int) Model {
+	return testModel(cursor, renderIndex, height, BrowserMode, make([]Element, elemCount))
+}
+
+func testModel(cursor int, renderIndex int, height int, mode PanelMode,
+	elements []Element) Model {
 	return Model{
-		Element:     make([]Element, elemCount),
+		Element:     elements,
 		Cursor:      cursor,
 		RenderIndex: renderIndex,
 		height:      height,
+		selected:    make(map[string]int),
+		PanelMode:   mode,
 	}
 }
 
@@ -27,56 +34,56 @@ func Test_filePanelUpDown(t *testing.T) {
 	}{
 		{
 			name:           "Down movement within renderable range",
-			panel:          testModel(0, 0, 12, 10),
+			panel:          testModelWithElemCount(0, 0, 12, 10),
 			listDown:       true,
 			expectedCursor: 1,
 			expectedRender: 0,
 		},
 		{
 			name:           "Down movement when cursor is at bottom",
-			panel:          testModel(6, 0, 12, 10),
+			panel:          testModelWithElemCount(6, 0, 12, 10),
 			listDown:       true,
 			expectedCursor: 7,
 			expectedRender: 1,
 		},
 		{
 			name:           "Down movement causing wrap to top",
-			panel:          testModel(9, 3, 12, 10),
+			panel:          testModelWithElemCount(9, 3, 12, 10),
 			listDown:       true,
 			expectedCursor: 0,
 			expectedRender: 0,
 		},
 		{
 			name:           "Up movement within renderable range",
-			panel:          testModel(2, 0, 12, 10),
+			panel:          testModelWithElemCount(2, 0, 12, 10),
 			listDown:       false,
 			expectedCursor: 1,
 			expectedRender: 0,
 		},
 		{
 			name:           "Up movement when cursor is at top",
-			panel:          testModel(3, 3, 12, 10),
+			panel:          testModelWithElemCount(3, 3, 12, 10),
 			listDown:       false,
 			expectedCursor: 2,
 			expectedRender: 2,
 		},
 		{
 			name:           "Up movement causing wrap to bottom",
-			panel:          testModel(0, 0, 12, 10),
+			panel:          testModelWithElemCount(0, 0, 12, 10),
 			listDown:       false,
 			expectedCursor: 9,
 			expectedRender: 3,
 		},
 		{
 			name:           "Down movement on empty panel",
-			panel:          testModel(0, 0, 12, 0),
+			panel:          testModelWithElemCount(0, 0, 12, 0),
 			listDown:       true,
 			expectedCursor: 0,
 			expectedRender: 0,
 		},
 		{
 			name:           "Up movement on empty panel",
-			panel:          testModel(0, 0, 12, 0),
+			panel:          testModelWithElemCount(0, 0, 12, 0),
 			listDown:       false,
 			expectedCursor: 0,
 			expectedRender: 0,
@@ -98,91 +105,58 @@ func Test_filePanelUpDown(t *testing.T) {
 
 func TestPgUpDown(t *testing.T) {
 	testdata := []struct {
-		name            string
-		panel           Model
-		pageDown        bool
-		mainPanelHeight int
-		expectedCursor  int
-		expectedRender  int
+		name           string
+		panel          Model
+		pageDown       bool
+		expectedCursor int
+		expectedRender int
 	}{
 		{
-			name: "Page down with full page of items",
-			panel: Model{
-				Element:     make([]Element, 20),
-				Cursor:      0,
-				RenderIndex: 0,
-			},
-			pageDown:        true,
-			mainPanelHeight: 10, // panelElementHeight = 10 - 3 = 7
-			expectedCursor:  7,
-			expectedRender:  1,
+			name:           "Page down with full page of items",
+			panel:          testModelWithElemCount(0, 0, 12, 20),
+			pageDown:       true,
+			expectedCursor: 7,
+			expectedRender: 1,
 		},
 		{
-			name: "Page down near end wraps to start",
-			panel: Model{
-				Element:     make([]Element, 20),
-				Cursor:      18,
-				RenderIndex: 12,
-			},
-			pageDown:        true,
-			mainPanelHeight: 10,
-			expectedCursor:  5, // (18 + 7) % 20 = 5
-			expectedRender:  5,
+			name:           "Page down near end wraps to start",
+			panel:          testModelWithElemCount(18, 12, 12, 20),
+			pageDown:       true,
+			expectedCursor: 5, // (18 + 7) % 20 = 5
+			expectedRender: 5,
 		},
 		{
-			name: "Page up from middle",
-			panel: Model{
-				Element:     make([]Element, 20),
-				Cursor:      10,
-				RenderIndex: 4,
-			},
-			pageDown:        false,
-			mainPanelHeight: 10,
-			expectedCursor:  3, // 10 - 7 = 3
-			expectedRender:  3,
+			name:           "Page up from middle",
+			panel:          testModelWithElemCount(10, 4, 12, 20),
+			pageDown:       false,
+			expectedCursor: 3, // 10 - 7 = 3
+			expectedRender: 3,
 		},
 		{
-			name: "Page up near beginning wraps to end",
-			panel: Model{
-				Element:     make([]Element, 20),
-				Cursor:      2,
-				RenderIndex: 0,
-			},
-			pageDown:        false,
-			mainPanelHeight: 10,
-			expectedCursor:  15, // (2 - 7 + 20) % 20 = 15
-			expectedRender:  9,
+			name:           "Page up near beginning wraps to end",
+			panel:          testModelWithElemCount(2, 0, 12, 20),
+			pageDown:       false,
+			expectedCursor: 15, // (2 - 7 + 20) % 20 = 15
+			expectedRender: 9,
 		},
 		{
-			name: "Page navigation with small element count",
-			panel: Model{
-				Element:     make([]Element, 5),
-				Cursor:      0,
-				RenderIndex: 0,
-			},
-			pageDown:        true,
-			mainPanelHeight: 10, // panelElementHeight = 7, but only 5 elements
-			expectedCursor:  2,  // (0 + 7) % 5 = 2
-			expectedRender:  0,
+			name:           "Page navigation with small element count",
+			panel:          testModelWithElemCount(0, 0, 12, 5),
+			pageDown:       true,
+			expectedCursor: 2, // (0 + 7) % 5 = 2
+			expectedRender: 0,
 		},
 		{
-			name: "Page down on empty panel",
-			panel: Model{
-				Element:     make([]Element, 0),
-				Cursor:      0,
-				RenderIndex: 0,
-			},
-			pageDown:        true,
-			mainPanelHeight: 10,
-			expectedCursor:  0,
-			expectedRender:  0,
+			name:           "Page down on empty panel",
+			panel:          testModelWithElemCount(0, 0, 12, 0),
+			pageDown:       true,
+			expectedCursor: 0,
+			expectedRender: 0,
 		},
 	}
 
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.panel.SetHeight(tt.mainPanelHeight + 2)
-
 			if tt.pageDown {
 				tt.panel.PgDown()
 			} else {
@@ -198,125 +172,89 @@ func TestItemSelectUpDown(t *testing.T) {
 	testdata := []struct {
 		name             string
 		panel            Model
+		panelToSelect    []string
 		selectDown       bool
-		mainPanelHeight  int
 		expectedCursor   int
 		expectedRender   int
-		expectedSelected []string
+		expectedSelected map[string]int
 	}{
 		{
 			name: "Select and move down",
-			panel: Model{
-				Element: []Element{
-					{Name: "file1.txt", Location: "/tmp/file1.txt"},
-					{Name: "file2.txt", Location: "/tmp/file2.txt"},
-					{Name: "file3.txt", Location: "/tmp/file3.txt"},
-				},
-				Cursor:      0,
-				RenderIndex: 0,
-				Selected:    []string{},
-				PanelMode:   SelectMode,
-			},
+			panel: testModel(0, 0, 12, SelectMode, []Element{
+				{Name: "file1.txt", Location: "/tmp/file1.txt"},
+				{Name: "file2.txt", Location: "/tmp/file2.txt"},
+				{Name: "file3.txt", Location: "/tmp/file3.txt"},
+			}),
+			panelToSelect:    []string{},
 			selectDown:       true,
-			mainPanelHeight:  10,
 			expectedCursor:   1,
 			expectedRender:   0,
-			expectedSelected: []string{"/tmp/file1.txt"},
+			expectedSelected: map[string]int{"/tmp/file1.txt": 1},
 		},
 		{
 			name: "Select and move up",
-			panel: Model{
-				Element: []Element{
-					{Name: "file1.txt", Location: "/tmp/file1.txt"},
-					{Name: "file2.txt", Location: "/tmp/file2.txt"},
-					{Name: "file3.txt", Location: "/tmp/file3.txt"},
-				},
-				Cursor:      2,
-				RenderIndex: 0,
-				Selected:    []string{},
-				PanelMode:   SelectMode,
-			},
+			panel: testModel(2, 0, 12, SelectMode, []Element{
+				{Name: "file1.txt", Location: "/tmp/file1.txt"},
+				{Name: "file2.txt", Location: "/tmp/file2.txt"},
+				{Name: "file3.txt", Location: "/tmp/file3.txt"},
+			}),
+			panelToSelect:    []string{},
 			selectDown:       false,
-			mainPanelHeight:  10,
 			expectedCursor:   1,
 			expectedRender:   0,
-			expectedSelected: []string{"/tmp/file3.txt"},
+			expectedSelected: map[string]int{"/tmp/file3.txt": 1},
 		},
 		{
 			name: "Deselect already selected item",
-			panel: Model{
-				Element: []Element{
-					{Name: "file1.txt", Location: "/tmp/file1.txt"},
-					{Name: "file2.txt", Location: "/tmp/file2.txt"},
-				},
-				Cursor:      0,
-				RenderIndex: 0,
-				Selected:    []string{"/tmp/file1.txt"},
-				PanelMode:   SelectMode,
-			},
+			panel: testModel(0, 0, 12, SelectMode, []Element{
+				{Name: "file1.txt", Location: "/tmp/file1.txt"},
+				{Name: "file2.txt", Location: "/tmp/file2.txt"},
+			}),
+			panelToSelect:    []string{"/tmp/file1.txt"},
 			selectDown:       true,
-			mainPanelHeight:  10,
 			expectedCursor:   1,
 			expectedRender:   0,
-			expectedSelected: []string{},
+			expectedSelected: map[string]int{},
 		},
 		{
 			name: "Selection at boundary with wrap",
-			panel: Model{
-				Element: []Element{
-					{Name: "file1.txt", Location: "/tmp/file1.txt"},
-					{Name: "file2.txt", Location: "/tmp/file2.txt"},
-				},
-				Cursor:      1,
-				RenderIndex: 0,
-				Selected:    []string{},
-				PanelMode:   SelectMode,
-			},
+			panel: testModel(1, 0, 12, SelectMode, []Element{
+				{Name: "file1.txt", Location: "/tmp/file1.txt"},
+				{Name: "file2.txt", Location: "/tmp/file2.txt"},
+			}),
+			panelToSelect:    []string{},
 			selectDown:       true,
-			mainPanelHeight:  10,
 			expectedCursor:   0, // wraps to beginning
 			expectedRender:   0,
-			expectedSelected: []string{"/tmp/file2.txt"},
+			expectedSelected: map[string]int{"/tmp/file2.txt": 1},
 		},
 		{
 			name: "Selection persistence across moves",
-			panel: Model{
-				Element: []Element{
-					{Name: "file1.txt", Location: "/tmp/file1.txt"},
-					{Name: "file2.txt", Location: "/tmp/file2.txt"},
-					{Name: "file3.txt", Location: "/tmp/file3.txt"},
-				},
-				Cursor:      1,
-				RenderIndex: 0,
-				Selected:    []string{"/tmp/file1.txt"},
-				PanelMode:   SelectMode,
-			},
+			panel: testModel(1, 0, 12, SelectMode, []Element{
+				{Name: "file1.txt", Location: "/tmp/file1.txt"},
+				{Name: "file2.txt", Location: "/tmp/file2.txt"},
+				{Name: "file3.txt", Location: "/tmp/file3.txt"},
+			}),
+			panelToSelect:    []string{"/tmp/file1.txt"},
 			selectDown:       true,
-			mainPanelHeight:  10,
 			expectedCursor:   2,
 			expectedRender:   0,
-			expectedSelected: []string{"/tmp/file1.txt", "/tmp/file2.txt"},
+			expectedSelected: map[string]int{"/tmp/file1.txt": 1, "/tmp/file2.txt": 2},
 		},
 		{
-			name: "Empty panel selection",
-			panel: Model{
-				Element:     []Element{},
-				Cursor:      0,
-				RenderIndex: 0,
-				Selected:    []string{},
-				PanelMode:   SelectMode,
-			},
+			name:             "Empty panel selection",
+			panel:            testModel(0, 0, 12, SelectMode, []Element{}),
+			panelToSelect:    []string{},
 			selectDown:       true,
-			mainPanelHeight:  10,
 			expectedCursor:   0,
 			expectedRender:   0,
-			expectedSelected: []string{},
+			expectedSelected: map[string]int{},
 		},
 	}
 
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.panel.SetHeight(tt.mainPanelHeight + 2)
+			tt.panel.SetSelectedAll(tt.panelToSelect)
 
 			if tt.selectDown {
 				tt.panel.ItemSelectDown()
@@ -325,97 +263,65 @@ func TestItemSelectUpDown(t *testing.T) {
 			}
 			assert.Equal(t, tt.expectedCursor, tt.panel.Cursor)
 			assert.Equal(t, tt.expectedRender, tt.panel.RenderIndex)
-			assert.Equal(t, tt.expectedSelected, tt.panel.Selected)
+			assert.Equal(t, tt.expectedSelected, tt.panel.selected)
 		})
 	}
 }
 
 func TestScrollToCursor(t *testing.T) {
 	testdata := []struct {
-		name            string
-		panel           Model
-		cursorPos       int
-		mainPanelHeight int
-		expectedCursor  int
-		expectedRender  int
+		name           string
+		panel          Model
+		cursorPos      int
+		expectedCursor int
+		expectedRender int
 	}{
 		{
-			name: "Jump to visible cursor no change",
-			panel: Model{
-				Element:     make([]Element, 20),
-				Cursor:      5,
-				RenderIndex: 3,
-			},
-			cursorPos:       4,
-			mainPanelHeight: 10, // visible range [3, 9]
-			expectedCursor:  4,
-			expectedRender:  3,
+			name:           "Jump to visible cursor no change",
+			panel:          testModelWithElemCount(5, 3, 12, 20),
+			cursorPos:      4,
+			expectedCursor: 4,
+			expectedRender: 3,
 		},
 		{
-			name: "Jump above view",
-			panel: Model{
-				Element:     make([]Element, 20),
-				Cursor:      10,
-				RenderIndex: 5,
-			},
-			cursorPos:       2,
-			mainPanelHeight: 10, // panelElementHeight = 7
-			expectedCursor:  2,
-			expectedRender:  2,
+			name:           "Jump above view",
+			panel:          testModelWithElemCount(10, 5, 12, 20),
+			cursorPos:      2,
+			expectedCursor: 2,
+			expectedRender: 2,
 		},
 		{
-			name: "Jump below view",
-			panel: Model{
-				Element:     make([]Element, 20),
-				Cursor:      5,
-				RenderIndex: 0,
-			},
-			cursorPos:       15,
-			mainPanelHeight: 10, // visible range [0, 6]
-			expectedCursor:  15,
-			expectedRender:  9, // 15 - 7 + 1
+			name:           "Jump below view",
+			panel:          testModelWithElemCount(5, 0, 12, 20),
+			cursorPos:      15,
+			expectedCursor: 15,
+			expectedRender: 9, // 15 - 7 + 1
 		},
 		{
-			name: "Jump above view with empty space",
-			panel: Model{
-				Element:     make([]Element, 20),
-				Cursor:      19,
-				RenderIndex: 18,
-			},
-			cursorPos:       17,
-			mainPanelHeight: 10, // visible range [0, 6]
-			expectedCursor:  17,
-			expectedRender:  17,
+			name:           "Jump above view with empty space",
+			panel:          testModelWithElemCount(19, 18, 12, 20),
+			cursorPos:      17,
+			expectedCursor: 17,
+			expectedRender: 17,
 		},
 		{
-			name: "Invalid cursor negative",
-			panel: Model{
-				Element:     make([]Element, 10),
-				Cursor:      5,
-				RenderIndex: 2,
-			},
-			cursorPos:       -1,
-			mainPanelHeight: 10,
-			expectedCursor:  5, // unchanged
-			expectedRender:  2, // unchanged
+			name:           "Invalid cursor negative",
+			panel:          testModelWithElemCount(5, 2, 12, 10),
+			cursorPos:      -1,
+			expectedCursor: 5, // unchanged
+			expectedRender: 2, // unchanged
 		},
 		{
-			name: "Invalid cursor beyond count",
-			panel: Model{
-				Element:     make([]Element, 10),
-				Cursor:      5,
-				RenderIndex: 2,
-			},
-			cursorPos:       15,
-			mainPanelHeight: 10,
-			expectedCursor:  5, // unchanged
-			expectedRender:  2, // unchanged
+			name:           "Invalid cursor beyond count",
+			panel:          testModelWithElemCount(5, 2, 12, 10),
+			cursorPos:      15,
+			expectedCursor: 5, // unchanged
+			expectedRender: 2, // unchanged
 		},
 	}
 
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.panel.SetHeight(tt.mainPanelHeight + 2)
 			tt.panel.scrollToCursor(tt.cursorPos)
 			assert.Equal(t, tt.expectedCursor, tt.panel.Cursor)
 			assert.Equal(t, tt.expectedRender, tt.panel.RenderIndex)
@@ -424,20 +330,16 @@ func TestScrollToCursor(t *testing.T) {
 }
 
 func TestApplyTargetFileCursor(t *testing.T) {
-	panel := Model{
-		Element: []Element{
-			{Name: "file1.txt", Location: "/tmp/file1.txt"},
-			{Name: "file2.txt", Location: "/tmp/file2.txt"},
-			{Name: "file3.txt", Location: "/tmp/file3.txt"},
-			{Name: "file4.txt", Location: "/tmp/file4.txt"},
-			{Name: "target.txt", Location: "/tmp/target.txt"},
-			{Name: "file6.txt", Location: "/tmp/file6.txt"},
-		},
-		Cursor:      0,
-		RenderIndex: 0,
-		TargetFile:  "target.txt",
-		height:      8,
-	}
+	panel := testModel(0, 0, 8, BrowserMode, []Element{
+		{Name: "file1.txt", Location: "/tmp/file1.txt"},
+		{Name: "file2.txt", Location: "/tmp/file2.txt"},
+		{Name: "file3.txt", Location: "/tmp/file3.txt"},
+		{Name: "file4.txt", Location: "/tmp/file4.txt"},
+		{Name: "target.txt", Location: "/tmp/target.txt"},
+		{Name: "file6.txt", Location: "/tmp/file6.txt"},
+	})
+	panel.TargetFile = "target.txt"
+
 	expCursor := 4
 	expRender := 2
 
@@ -507,7 +409,7 @@ func TestPageScrollSizeConfig(t *testing.T) {
 			common.Config.PageScrollSize = tt.pageScrollSize
 
 			// Create model with elements
-			m := testModel(tt.initialCursor, 0, tt.panelHeight+2, tt.totalElements)
+			m := testModelWithElemCount(tt.initialCursor, 0, tt.panelHeight+2, tt.totalElements)
 			if tt.pgUp {
 				m.PgUp()
 			} else {

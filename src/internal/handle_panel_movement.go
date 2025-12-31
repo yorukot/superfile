@@ -32,7 +32,7 @@ func (m *model) enterPanel() {
 	if len(panel.Element) == 0 {
 		return
 	}
-	selectedItem := panel.GetSelectedItem()
+	selectedItem := panel.GetFocusedItem()
 	if selectedItem.Directory {
 		targetPath := selectedItem.Location
 
@@ -121,14 +121,6 @@ func (m *model) sidebarSelectDirectory() {
 		slog.Error("Error switching to sidebar directory", "error", err)
 	}
 	panel.IsFocused = true
-}
-
-// Select all item in the file panel (only work on select mode)
-func (m *model) selectAllItem() {
-	panel := m.getFocusedFilePanel()
-	for _, item := range panel.Element {
-		panel.Selected = append(panel.Selected, item.Location)
-	}
 }
 
 // Toggle dotfile display or not
