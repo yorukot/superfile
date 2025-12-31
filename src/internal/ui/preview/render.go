@@ -60,26 +60,26 @@ func renderDirectoryPreview(r *rendering.Renderer, itemPath string, previewHeigh
 }
 
 func (m *Model) renderImagePreview(r *rendering.Renderer, itemPath string, previewWidth,
-	previewHeight int, sideAreaWidth int,
+	previewHeight int, sideAreaWidth int, clearCmd string,
 ) string {
 	if !m.open {
-		return r.AddLines("\n --- Preview panel is closed ---").Render()
+		return r.AddLines("\n --- Preview panel is closed ---").Render() + clearCmd
 	}
 
 	if !common.Config.ShowImagePreview {
-		return r.AddLines("\n --- Image preview is disabled ---").Render()
+		return r.AddLines("\n --- Image preview is disabled ---").Render() + clearCmd
 	}
 
 	// Use the new auto-detection function to choose the best renderer
 	imageRender, err := m.imagePreviewer.ImagePreview(itemPath, previewWidth, previewHeight,
 		common.Theme.FilePanelBG, sideAreaWidth)
 	if errors.Is(err, image.ErrFormat) {
-		return r.AddLines("\n --- " + icon.Error + " Unsupported image formats ---").Render()
+		return r.AddLines("\n --- "+icon.Error+" Unsupported image formats ---").Render() + clearCmd
 	}
 
 	if err != nil {
 		slog.Error("Error convert image to ansi", "error", err)
-		return r.AddLines("\n --- " + icon.Error + " Error convert image to ansi ---").Render()
+		return r.AddLines("\n --- "+icon.Error+" Error convert image to ansi ---").Render() + clearCmd
 	}
 
 	// Check if this looks like Kitty protocol output (starts with escape sequences)
@@ -92,7 +92,7 @@ func (m *Model) renderImagePreview(r *rendering.Renderer, itemPath string, previ
 	// For ANSI output, we can safely use vertical alignment
 	return r.AddStyleModifier(func(s lipgloss.Style) lipgloss.Style {
 		return s.AlignHorizontal(lipgloss.Center).AlignVertical(lipgloss.Center)
-	}).AddLines(imageRender).Render()
+	}).AddLines(imageRender).Render() + clearCmd
 }
 
 func (m *Model) renderTextPreview(r *rendering.Renderer, itemPath string,
@@ -197,11 +197,11 @@ func (m *Model) RenderWithPath(itemPath string, previewWidth int, previewHeight 
 		// Notes : If renderImagePreview fails, and return some error message
 		// render, then we dont apply clearCmd. This might cause issues.
 		// same for below usage of renderImagePreview
-		return m.renderImagePreview(r, thumbnailPath, previewWidth, previewHeight, fullModelWidth-previewWidth+1)
+		return m.renderImagePreview(r, thumbnailPath, previewWidth, previewHeight, fullModelWidth-previewWidth+1, clearCmd)
 	}
 
 	if isImageFile(itemPath) {
-		return m.renderImagePreview(r, itemPath, previewWidth, previewHeight, fullModelWidth-previewWidth+1)
+		return m.renderImagePreview(r, itemPath, previewWidth, previewHeight, fullModelWidth-previewWidth+1, clearCmd)
 	}
 
 	return m.renderTextPreview(r, itemPath, previewWidth, previewHeight) + clearCmd
