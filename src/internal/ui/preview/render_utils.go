@@ -19,17 +19,16 @@ func renderFileInfoError(r *rendering.Renderer, err error) string {
 	return r.Render()
 }
 
-func renderUnsupportedFormat(box lipgloss.Style) string {
-	return box.Render(common.FilePreviewUnsupportedFormatText)
+func renderUnsupportedFormat(r *rendering.Renderer) string {
+	return r.AddLines(common.FilePreviewUnsupportedFormatText).Render()
 }
 
 func renderUnsupportedFileMode(r *rendering.Renderer) string {
-	r.AddLines(common.FilePreviewUnsupportedFileMode)
-	return r.Render()
+	return r.AddLines(common.FilePreviewUnsupportedFileMode).Render()
 }
 
-func renderThumbnailGenerationError(box lipgloss.Style) string {
-	return box.Render(common.FilePreviewThumbnailGenerationErrorText)
+func renderThumbnailGenerationError(r *rendering.Renderer) string {
+	return r.AddLines(common.FilePreviewThumbnailGenerationErrorText).Render()
 }
 
 func getBatSyntaxHighlightedContent(

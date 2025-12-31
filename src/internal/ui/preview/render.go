@@ -59,41 +59,43 @@ func renderDirectoryPreview(r *rendering.Renderer, itemPath string, previewHeigh
 	return r.Render()
 }
 
-func (m *Model) renderImagePreview(box lipgloss.Style, itemPath string, previewWidth,
+func (m *Model) renderImagePreview(r *rendering.Renderer, itemPath string, previewWidth,
 	previewHeight int, sideAreaWidth int,
 ) string {
 	if !m.open {
-		return box.Render("\n --- Preview panel is closed ---")
+		return r.AddLines("\n --- Preview panel is closed ---").Render()
 	}
 
 	if !common.Config.ShowImagePreview {
-		return box.Render("\n --- Image preview is disabled ---")
+		return r.AddLines("\n --- Image preview is disabled ---").Render()
 	}
 
 	// Use the new auto-detection function to choose the best renderer
 	imageRender, err := m.imagePreviewer.ImagePreview(itemPath, previewWidth, previewHeight,
 		common.Theme.FilePanelBG, sideAreaWidth)
 	if errors.Is(err, image.ErrFormat) {
-		return box.Render("\n --- " + icon.Error + " Unsupported image formats ---")
+		return r.AddLines("\n --- " + icon.Error + " Unsupported image formats ---").Render()
 	}
 
 	if err != nil {
 		slog.Error("Error convert image to ansi", "error", err)
-		return box.Render("\n --- " + icon.Error + " Error convert image to ansi ---")
+		return r.AddLines("\n --- " + icon.Error + " Error convert image to ansi ---").Render()
 	}
 
 	// Check if this looks like Kitty protocol output (starts with escape sequences)
 	// For Kitty protocol, avoid using lipgloss alignment to prevent layout drift
 	if strings.HasPrefix(imageRender, "\x1b_G") {
-		rendered := common.FilePreviewBox(previewHeight, previewWidth).Render(imageRender)
-		return rendered
+		r.AddLines(imageRender)
+		return r.Render()
 	}
 
 	// For ANSI output, we can safely use vertical alignment
-	return box.AlignVertical(lipgloss.Center).AlignHorizontal(lipgloss.Center).Render(imageRender)
+	return r.AddStyleModifier(func(s lipgloss.Style) lipgloss.Style {
+		return s.AlignHorizontal(lipgloss.Center).AlignVertical(lipgloss.Center)
+	}).AddLines(imageRender).Render()
 }
 
-func (m *Model) renderTextPreview(r *rendering.Renderer, box lipgloss.Style, itemPath string,
+func (m *Model) renderTextPreview(r *rendering.Renderer, itemPath string,
 	previewWidth, previewHeight int,
 ) string {
 	format := lexers.Match(filepath.Base(itemPath))
@@ -101,20 +103,20 @@ func (m *Model) renderTextPreview(r *rendering.Renderer, box lipgloss.Style, ite
 		isText, err := common.IsTextFile(itemPath)
 		if err != nil {
 			slog.Error("Error while checking text file", "error", err)
-			return box.Render(common.FilePreviewError)
+			return r.AddLines(common.FilePreviewError).Render()
 		} else if !isText {
-			return box.Render(common.FilePreviewUnsupportedFormatText)
+			return r.AddLines(common.FilePreviewUnsupportedFormatText).Render()
 		}
 	}
 
 	fileContent, err := utils.ReadFileContent(itemPath, previewWidth, previewHeight)
 	if err != nil {
 		slog.Error("Error open file", "error", err)
-		return box.Render(common.FilePreviewError)
+		return r.AddLines(common.FilePreviewError).Render()
 	}
 
 	if fileContent == "" {
-		return box.Render(common.FilePreviewEmptyText)
+		return r.AddLines(common.FilePreviewEmptyText).Render()
 	}
 
 	if format != nil {
@@ -124,8 +126,9 @@ func (m *Model) renderTextPreview(r *rendering.Renderer, box lipgloss.Style, ite
 		}
 		if common.Config.CodePreviewer == "bat" {
 			if m.batCmd == "" {
-				return box.Render("\n --- " + icon.Error +
-					" 'bat' is not installed or not found. ---\n --- Cannot render file preview. ---")
+				return r.AddLines("",
+					" --- "+icon.Error+" 'bat' is not installed or not found. ---",
+					" --- Cannot render file preview. ---").Render()
 			}
 			fileContent, err = getBatSyntaxHighlightedContent(itemPath, previewHeight, background, m.batCmd)
 		} else {
@@ -134,7 +137,7 @@ func (m *Model) renderTextPreview(r *rendering.Renderer, box lipgloss.Style, ite
 		}
 		if err != nil {
 			slog.Error("Error render code highlight", "error", err)
-			return box.Render("\n" + common.FilePreviewError)
+			return r.AddLines("", common.FilePreviewError).Render()
 		}
 	}
 
@@ -160,7 +163,6 @@ func (m *Model) RenderTextWithDimension(text string, height int, width int) stri
 }
 
 func (m *Model) RenderWithPath(itemPath string, previewWidth int, previewHeight int, fullModelWidth int) string {
-	box := common.FilePreviewBox(previewHeight, previewWidth)
 	r := ui.FilePreviewPanelRenderer(previewHeight, previewWidth)
 	clearCmd := m.imagePreviewer.ClearKittyImages()
 
@@ -179,7 +181,7 @@ func (m *Model) RenderWithPath(itemPath string, previewWidth int, previewHeight 
 
 	ext := filepath.Ext(itemPath)
 	if slices.Contains(common.UnsupportedPreviewFormats, ext) {
-		return renderUnsupportedFormat(box) + clearCmd
+		return renderUnsupportedFormat(r) + clearCmd
 	}
 
 	if fileInfo.IsDir() {
@@ -190,17 +192,17 @@ func (m *Model) RenderWithPath(itemPath string, previewWidth int, previewHeight 
 		thumbnailPath, err := m.thumbnailGenerator.GetThumbnailOrGenerate(itemPath)
 		if err != nil {
 			slog.Error("Error generating thumbnail", "error", err)
-			return renderThumbnailGenerationError(box) + clearCmd
+			return renderThumbnailGenerationError(r) + clearCmd
 		}
 		// Notes : If renderImagePreview fails, and return some error message
 		// render, then we dont apply clearCmd. This might cause issues.
 		// same for below usage of renderImagePreview
-		return m.renderImagePreview(box, thumbnailPath, previewWidth, previewHeight, fullModelWidth-previewWidth+1)
+		return m.renderImagePreview(r, thumbnailPath, previewWidth, previewHeight, fullModelWidth-previewWidth+1)
 	}
 
 	if isImageFile(itemPath) {
-		return m.renderImagePreview(box, itemPath, previewWidth, previewHeight, fullModelWidth-previewWidth+1)
+		return m.renderImagePreview(r, itemPath, previewWidth, previewHeight, fullModelWidth-previewWidth+1)
 	}
 
-	return m.renderTextPreview(r, box, itemPath, previewWidth, previewHeight) + clearCmd
+	return m.renderTextPreview(r, itemPath, previewWidth, previewHeight) + clearCmd
 }
