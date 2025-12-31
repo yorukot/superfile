@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPanelSelectionLiveCycle(t *testing.T) {
+func TestPanelSelectionLifeCycle(t *testing.T) {
 	panel := testModel(0, 0, 0, BrowserMode, []Element{
 		{Name: "file1.txt", Location: "/tmp/file1.txt"},
 		{Name: "file2.txt", Location: "/tmp/file2.txt"},
