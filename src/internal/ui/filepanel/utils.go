@@ -23,9 +23,6 @@ func (m *Model) GetFocusedItemPtr() *Element {
 }
 
 func (m *Model) CheckSelected(location string) bool {
-	if m.selected == nil {
-		return false
-	}
 	_, isSelected := m.selected[location]
 	return isSelected
 }
@@ -68,9 +65,6 @@ func (m *Model) ElemCount() int {
 }
 
 func (m *Model) SelectedCount() uint {
-	if m.selected == nil {
-		return 0
-	}
 	return uint(len(m.selected))
 }
 

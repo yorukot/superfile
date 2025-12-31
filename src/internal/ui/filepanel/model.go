@@ -57,5 +57,6 @@ func New(location string, sortOptions sortOptionsModel, focused bool, targetFile
 		TargetFile:       targetFile,
 		width:            MinWidth,
 		height:           MinHeight,
+		selected:         make(map[string]int),
 	}
 }

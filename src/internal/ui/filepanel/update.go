@@ -21,9 +21,6 @@ func (m *Model) ChangeFilePanelMode() {
 }
 
 func (m *Model) SetSelected(location string, state bool) {
-	if m.selected == nil {
-		m.ResetSelected()
-	}
 	if state {
 		m.selectOrderCounter++
 		m.selected[location] = m.selectOrderCounter
@@ -33,9 +30,6 @@ func (m *Model) SetSelected(location string, state bool) {
 }
 
 func (m *Model) SetSelectedAll(locations []string, state bool) {
-	if m.selected == nil {
-		m.ResetSelected()
-	}
 	for _, location := range locations {
 		if state {
 			m.selectOrderCounter++

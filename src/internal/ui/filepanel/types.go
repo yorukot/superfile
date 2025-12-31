@@ -10,7 +10,8 @@ import (
 // TODO: Convert to integer enum
 type sortingKind string
 
-// Panel representing a file
+// Make sure to use New() to ensure that maps are initialized
+// zero value `Model{}` should not be used directly
 type Model struct {
 	Cursor      int
 	RenderIndex int
