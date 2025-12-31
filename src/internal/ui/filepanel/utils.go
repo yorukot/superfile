@@ -22,6 +22,34 @@ func (m *Model) GetFocusedItemPtr() *Element {
 	return &m.Element[m.Cursor]
 }
 
+// Note : If this is called on an already selected element
+// it will make its order last. This is expected behaviour
+func (m *Model) SetSelected(location string) {
+	m.selectOrderCounter++
+	m.selected[location] = m.selectOrderCounter
+}
+
+func (m *Model) SetUnSelected(location string) {
+	if m.CheckSelected(location) {
+		delete(m.selected, location)
+	}
+}
+
+func (m *Model) ToggleSelected(location string) {
+	if m.CheckSelected(location) {
+		delete(m.selected, location)
+		return
+	}
+	m.SetSelected(location)
+}
+
+// Only used in tests, including tests outside this package
+func (m *Model) SetSelectedAll(locations []string) {
+	for _, location := range locations {
+		m.SetSelected(location)
+	}
+}
+
 func (m *Model) CheckSelected(location string) bool {
 	_, isSelected := m.selected[location]
 	return isSelected
@@ -55,8 +83,7 @@ func (m *Model) GetFirstSelectedLocation() string {
 func (m *Model) SingleItemSelect() {
 	if len(m.Element) > 0 && m.Cursor >= 0 && m.Cursor < len(m.Element) {
 		elementLocation := m.Element[m.Cursor].Location
-
-		m.SetSelected(elementLocation, !m.CheckSelected(elementLocation))
+		m.ToggleSelected(elementLocation)
 	}
 }
 

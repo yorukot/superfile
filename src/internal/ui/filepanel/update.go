@@ -20,21 +20,6 @@ func (m *Model) ChangeFilePanelMode() {
 	}
 }
 
-func (m *Model) SetSelected(location string, state bool) {
-	if state {
-		m.selectOrderCounter++
-		m.selected[location] = m.selectOrderCounter
-	} else {
-		delete(m.selected, location)
-	}
-}
-
-func (m *Model) SetSelectedAll(locations []string, state bool) {
-	for _, location := range locations {
-		m.SetSelected(location, state)
-	}
-}
-
 // This should be the function that is always called whenever we are updating a directory.
 func (m *Model) UpdateCurrentFilePanelDir(path string) error {
 	slog.Debug("updateCurrentFilePanelDir", "panel.location", m.Location, "path", path)

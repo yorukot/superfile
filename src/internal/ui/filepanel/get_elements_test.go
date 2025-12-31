@@ -213,40 +213,40 @@ func TestSingleItemSelect(t *testing.T) {
 		{
 			name: "Select unselected item",
 			panel: testModel(0, 0, 12, SelectMode, []Element{
-					{Name: "file1.txt", Location: "/tmp/file1.txt"},
-					{Name: "file2.txt", Location: "/tmp/file2.txt"},
-				}),
+				{Name: "file1.txt", Location: "/tmp/file1.txt"},
+				{Name: "file2.txt", Location: "/tmp/file2.txt"},
+			}),
 			panelToSelect:    []string{},
 			expectedSelected: map[string]int{"/tmp/file1.txt": 1},
 		},
 		{
 			name: "Deselect selected item",
 			panel: testModel(0, 0, 12, SelectMode, []Element{
-					{Name: "file1.txt", Location: "/tmp/file1.txt"},
-					{Name: "file2.txt", Location: "/tmp/file2.txt"},
-				}),
+				{Name: "file1.txt", Location: "/tmp/file1.txt"},
+				{Name: "file2.txt", Location: "/tmp/file2.txt"},
+			}),
 			panelToSelect:    []string{"/tmp/file1.txt"},
 			expectedSelected: map[string]int{},
 		},
 		{
 			name: "Out of bounds cursor negative",
 			panel: testModel(-1, 0, 12, SelectMode, []Element{
-					{Name: "file1.txt", Location: "/tmp/file1.txt"},
-				}),
+				{Name: "file1.txt", Location: "/tmp/file1.txt"},
+			}),
 			panelToSelect:    []string{},
 			expectedSelected: map[string]int{},
 		},
 		{
 			name: "Out of bounds cursor beyond count",
 			panel: testModel(5, 0, 12, SelectMode, []Element{
-					{Name: "file1.txt", Location: "/tmp/file1.txt"},
-				}),
+				{Name: "file1.txt", Location: "/tmp/file1.txt"},
+			}),
 			panelToSelect:    []string{},
 			expectedSelected: map[string]int{},
 		},
 		{
-			name: "Empty element list",
-			panel: testModel(0, 0, 12, SelectMode, []Element{}),
+			name:             "Empty element list",
+			panel:            testModel(0, 0, 12, SelectMode, []Element{}),
 			panelToSelect:    []string{},
 			expectedSelected: map[string]int{},
 		},
@@ -254,7 +254,7 @@ func TestSingleItemSelect(t *testing.T) {
 
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.panel.SetSelectedAll(tt.panelToSelect, true)
+			tt.panel.SetSelectedAll(tt.panelToSelect)
 			tt.panel.SingleItemSelect()
 			assert.Equal(t, tt.expectedSelected, tt.panel.selected)
 		})

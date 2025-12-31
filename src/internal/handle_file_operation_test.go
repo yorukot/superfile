@@ -112,7 +112,7 @@ func TestCompressSelectedFiles(t *testing.T) {
 			require.Equal(t, filepanel.BrowserMode, m.getFocusedFilePanel().PanelMode)
 			if tt.selectMode {
 				m.getFocusedFilePanel().ChangeFilePanelMode()
-				m.getFocusedFilePanel().SetSelectedAll(tt.selectedElem, true)
+				m.getFocusedFilePanel().SetSelectedAll(tt.selectedElem)
 			}
 
 			p.SendKey(common.Hotkeys.CompressFile[0])

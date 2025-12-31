@@ -55,7 +55,7 @@ func setupPanelModeAndSelection(t *testing.T, m *model, useSelectMode bool, item
 		m.getFocusedFilePanel().ChangeFilePanelMode()
 		require.Equal(t, filepanel.SelectMode, panel.PanelMode)
 		for _, item := range selectedItems {
-			panel.SetSelected(item, true)
+			panel.SetSelected(item)
 		}
 	} else {
 		// Find the item in browser mode

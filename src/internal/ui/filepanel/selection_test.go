@@ -17,31 +17,32 @@ func TestPanelSelectionLifeCycle(t *testing.T) {
 
 	// first added
 
-	panel.SetSelected("/tmp/file1.txt", true)
+	panel.SetSelected("/tmp/file1.txt")
 	assert.Equal(t, uint(1), panel.SelectedCount())
 	assert.Equal(t, map[string]int{"/tmp/file1.txt": 1}, panel.selected)
 
 	// second added
-	panel.SetSelected("/tmp/file2.txt", true)
+	panel.SetSelected("/tmp/file2.txt")
 	assert.Equal(t, map[string]int{"/tmp/file1.txt": 1, "/tmp/file2.txt": 2}, panel.selected)
 	assert.Equal(t, uint(2), panel.SelectedCount())
 	currentFirst := panel.GetFirstSelectedLocation()
 	assert.Equal(t, "/tmp/file1.txt", currentFirst)
 
 	// first removed
-	panel.SetSelected("/tmp/file1.txt", false)
+	panel.SetSelected("/tmp/file1.txt")
 	assert.Equal(t, uint(1), panel.SelectedCount())
 	assert.Equal(t, map[string]int{"/tmp/file2.txt": 2}, panel.selected)
 	currentFirst = panel.GetFirstSelectedLocation()
 	assert.Equal(t, "/tmp/file2.txt", currentFirst)
 
 	// multi select
-	panel.SetSelectedAll([]string{"/tmp/file3.txt", "/tmp/file4.txt"}, true)
+	panel.SetSelectedAll([]string{"/tmp/file3.txt", "/tmp/file4.txt"})
 	assert.Equal(t, map[string]int{"/tmp/file2.txt": 2, "/tmp/file3.txt": 3, "/tmp/file4.txt": 4}, panel.selected)
 	assert.Equal(t, uint(3), panel.SelectedCount())
 
 	// multi unselect
-	panel.SetSelectedAll([]string{"/tmp/file2.txt", "/tmp/file4.txt"}, false)
+	panel.SetUnSelected("/tmp/file2.txt")
+	panel.SetUnSelected("/tmp/file4.txt")
 	assert.Equal(t, map[string]int{"/tmp/file3.txt": 3}, panel.selected)
 	assert.Equal(t, uint(1), panel.SelectedCount())
 	currentFirst = panel.GetFirstSelectedLocation()

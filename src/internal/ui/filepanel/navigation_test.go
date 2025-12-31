@@ -157,7 +157,6 @@ func TestPgUpDown(t *testing.T) {
 
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
-
 			if tt.pageDown {
 				tt.panel.PgDown()
 			} else {
@@ -255,7 +254,7 @@ func TestItemSelectUpDown(t *testing.T) {
 
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.panel.SetSelectedAll(tt.panelToSelect, true)
+			tt.panel.SetSelectedAll(tt.panelToSelect)
 
 			if tt.selectDown {
 				tt.panel.ItemSelectDown()

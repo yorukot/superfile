@@ -127,7 +127,7 @@ func (m *model) sidebarSelectDirectory() {
 func (m *model) selectAllItem() {
 	panel := m.getFocusedFilePanel()
 	for _, item := range panel.Element {
-		panel.SetSelected(item.Location, true)
+		panel.SetSelected(item.Location)
 	}
 }
 
