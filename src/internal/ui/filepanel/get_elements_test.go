@@ -180,11 +180,10 @@ func TestReturnDirElement(t *testing.T) {
 				Selected: 0,
 				Reversed: tt.reversed,
 			}
-			panel := &Model{
-				Location: tt.location,
-				SortOptions: sortOptionsModel{
-					Data: data,
-				},
+			panel := testModel(0, 0, 0, BrowserMode, nil)
+			panel.Location = tt.location
+			panel.SortOptions = sortOptionsModel{
+				Data: data,
 			}
 			panel.SearchBar.SetValue(tt.searchString)
 			var res []Element
@@ -213,56 +212,41 @@ func TestSingleItemSelect(t *testing.T) {
 	}{
 		{
 			name: "Select unselected item",
-			panel: Model{
-				Element: []Element{
+			panel: testModel(0, 0, 12, SelectMode, []Element{
 					{Name: "file1.txt", Location: "/tmp/file1.txt"},
 					{Name: "file2.txt", Location: "/tmp/file2.txt"},
-				},
-				Cursor: 0,
-			},
+				}),
 			panelToSelect:    []string{},
 			expectedSelected: map[string]int{"/tmp/file1.txt": 1},
 		},
 		{
 			name: "Deselect selected item",
-			panel: Model{
-				Element: []Element{
+			panel: testModel(0, 0, 12, SelectMode, []Element{
 					{Name: "file1.txt", Location: "/tmp/file1.txt"},
 					{Name: "file2.txt", Location: "/tmp/file2.txt"},
-				},
-				Cursor: 0,
-			},
+				}),
 			panelToSelect:    []string{"/tmp/file1.txt"},
 			expectedSelected: map[string]int{},
 		},
 		{
 			name: "Out of bounds cursor negative",
-			panel: Model{
-				Element: []Element{
+			panel: testModel(-1, 0, 12, SelectMode, []Element{
 					{Name: "file1.txt", Location: "/tmp/file1.txt"},
-				},
-				Cursor: -1,
-			},
+				}),
 			panelToSelect:    []string{},
 			expectedSelected: map[string]int{},
 		},
 		{
 			name: "Out of bounds cursor beyond count",
-			panel: Model{
-				Element: []Element{
+			panel: testModel(5, 0, 12, SelectMode, []Element{
 					{Name: "file1.txt", Location: "/tmp/file1.txt"},
-				},
-				Cursor: 5,
-			},
+				}),
 			panelToSelect:    []string{},
 			expectedSelected: map[string]int{},
 		},
 		{
 			name: "Empty element list",
-			panel: Model{
-				Element: []Element{},
-				Cursor:  0,
-			},
+			panel: testModel(0, 0, 12, SelectMode, []Element{}),
 			panelToSelect:    []string{},
 			expectedSelected: map[string]int{},
 		},

@@ -11,7 +11,8 @@ import (
 type sortingKind string
 
 // Make sure to use New() to ensure that maps are initialized
-// zero value `Model{}` should not be used directly
+// zero value `Model{}`, or direct initialization should be avoided
+// or used very carefully if needed
 type Model struct {
 	Cursor      int
 	RenderIndex int

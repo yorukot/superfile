@@ -7,16 +7,12 @@ import (
 )
 
 func TestPanelSelectionLiveCycle(t *testing.T) {
-	panel := Model{
-		Element: []Element{
-			{Name: "file1.txt", Location: "/tmp/file1.txt"},
-			{Name: "file2.txt", Location: "/tmp/file2.txt"},
-			{Name: "file3.txt", Location: "/tmp/file3.txt"},
-			{Name: "file4.txt", Location: "/tmp/file4.txt"},
-			{Name: "file5.txt", Location: "/tmp/file5.txt"},
-		},
-		Cursor: 0,
-	}
+	panel := testModel(0, 0, 0, BrowserMode, []Element{
+		{Name: "file1.txt", Location: "/tmp/file1.txt"},
+		{Name: "file2.txt", Location: "/tmp/file2.txt"},
+		{Name: "file3.txt", Location: "/tmp/file3.txt"},
+		{Name: "file4.txt", Location: "/tmp/file4.txt"},
+		{Name: "file5.txt", Location: "/tmp/file5.txt"}})
 	assert.Equal(t, uint(0), panel.SelectedCount())
 
 	// first added
