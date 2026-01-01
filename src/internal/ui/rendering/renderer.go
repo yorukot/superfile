@@ -9,6 +9,8 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+type StyleModifier func(lipgloss.Style) lipgloss.Style
+
 // For now we are not allowing to add/update/remove lines to previous sections
 // We may allow that later.
 // Also we could have functions about getting sections count, line count, adding updating a
@@ -39,6 +41,12 @@ type Renderer struct {
 	// Should this go in borderConfig ?
 	borderFGColor lipgloss.TerminalColor
 	borderBGColor lipgloss.TerminalColor
+
+	// Use this to add additional style modifications
+	// This is applied before any style update that are defined by other configurations,
+	// like border, height, width. Hence if conflicting styles are used, they can get
+	// overridden
+	styleModifiers []StyleModifier
 
 	// Maybe better rename these to maxHeight
 	// Final rendered string should have exactly this many lines, including borders

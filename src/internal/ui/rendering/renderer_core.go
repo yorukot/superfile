@@ -49,6 +49,11 @@ func (r *Renderer) AddLineWithCustomTruncate(line string, truncateStyle Truncate
 	r.contentSections[r.curSectionIdx].AddLineWithCustomTruncate(line, truncateStyle)
 }
 
+func (r *Renderer) AddStyleModifier(modifier StyleModifier) *Renderer {
+	r.styleModifiers = append(r.styleModifiers, modifier)
+	return r
+}
+
 func (r *Renderer) SetBorderTitle(title string) {
 	r.border.SetTitle(title)
 }
@@ -129,8 +134,13 @@ func (r *Renderer) Style() lipgloss.Style {
 	if r.truncateHeight {
 		contentHeight = r.actualContentHeight
 	}
-	s := lipgloss.NewStyle().
-		Width(r.contentWidth).
+	s := lipgloss.NewStyle()
+
+	for _, modifier := range r.styleModifiers {
+		s = modifier(s)
+	}
+
+	s = s.Width(r.contentWidth).
 		Height(contentHeight).
 		Background(r.contentBGColor).
 		Foreground(r.contentFGColor)

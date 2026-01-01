@@ -11,106 +11,8 @@ import (
 	"github.com/yorukot/superfile/src/config/icon"
 )
 
-// Generate border style for file panel
-func FilePanelBorderStyle(height int, width int, filePanelFocused bool, borderBottom string) lipgloss.Style {
-	border := GenerateBorder()
-	border.Left = ""
-	border.Right = ""
-
-	for i := range height {
-		if i == 1 {
-			border.Left += Config.BorderMiddleLeft
-			border.Right += Config.BorderMiddleRight
-		} else {
-			border.Left += Config.BorderLeft
-			border.Right += Config.BorderRight
-		}
-	}
-	border.Bottom = borderBottom
-	return lipgloss.NewStyle().
-		Border(border).
-		BorderForeground(FilePanelFocusColor(filePanelFocused)).
-		BorderBackground(FilePanelBGColor).
-		Width(width).
-		Height(height).Background(FilePanelBGColor)
-}
-
-// Generate filePreview Box
-func FilePreviewBox(height int, width int) lipgloss.Style {
-	return lipgloss.NewStyle().
-		Width(width).
-		Height(height).
-		Background(FilePanelBGColor).
-		Foreground(FilePanelFGColor)
-}
-
-// Generate border style for process and can custom bottom border
-func ProcsssBarBorder(height int, width int, borderBottom string, processBarFocused bool) lipgloss.Style {
-	border := GenerateBorder()
-	border.Top = Config.BorderTop + Config.BorderMiddleRight + " Processes " +
-		Config.BorderMiddleLeft + strings.Repeat(Config.BorderTop, width)
-	border.Bottom = borderBottom
-
-	processBorderStateColor := FooterBorderColor
-	if processBarFocused {
-		processBorderStateColor = FooterBorderActiveColor
-	}
-
-	return lipgloss.NewStyle().
-		Border(border).
-		BorderForeground(processBorderStateColor).
-		BorderBackground(FooterBGColor).
-		Width(width).
-		Height(height).
-		Background(FooterBGColor).
-		Foreground(FooterFGColor)
-}
-
-// Generate border style for metadata and can custom bottom border
-func MetadataBorder(height int, width int, borderBottom string, metadataFocused bool) lipgloss.Style {
-	border := GenerateBorder()
-	border.Top = Config.BorderTop + Config.BorderMiddleRight + " Metadata " +
-		Config.BorderMiddleLeft + strings.Repeat(Config.BorderTop, width)
-	border.Bottom = borderBottom
-
-	metadataBorderStateColor := FooterBorderColor
-	if metadataFocused {
-		metadataBorderStateColor = FooterBorderActiveColor
-	}
-
-	return lipgloss.NewStyle().
-		Border(border).
-		BorderForeground(metadataBorderStateColor).
-		BorderBackground(FooterBGColor).
-		Width(width).
-		Height(height).
-		Background(FooterBGColor).
-		Foreground(FooterFGColor)
-}
-
-// Generate border style for clipboard and can custom bottom border
-func ClipboardBorder(height int, width int, borderBottom string) lipgloss.Style {
-	border := GenerateBorder()
-	border.Top = Config.BorderTop + Config.BorderMiddleRight + " Clipboard " +
-		Config.BorderMiddleLeft + strings.Repeat(Config.BorderTop, width)
-	border.Bottom = borderBottom
-
-	return lipgloss.NewStyle().
-		Border(border).
-		BorderForeground(FooterBorderColor).
-		BorderBackground(FooterBGColor).
-		Width(width).
-		Height(height).
-		Background(FooterBGColor).
-		Foreground(FooterFGColor)
-}
-
 func ModalBorderStyle(height int, width int) lipgloss.Style {
 	return modalBorderStyleWithAlign(height, width, lipgloss.Center)
-}
-
-func ModalBorderStyleLeft(height int, width int) lipgloss.Style {
-	return modalBorderStyleWithAlign(height, width, lipgloss.Left)
 }
 
 // Generate modal (pop up widnwos) border style
@@ -162,21 +64,6 @@ func FullScreenStyle(height int, width int) lipgloss.Style {
 		Align(lipgloss.Center, lipgloss.Center).
 		Background(FullScreenBGColor).
 		Foreground(FullScreenFGColor)
-}
-
-// Generate file panel divider style
-func FilePanelDividerStyle(filePanelFocused bool) lipgloss.Style {
-	return lipgloss.NewStyle().
-		Foreground(FilePanelFocusColor(filePanelFocused)).
-		Background(FilePanelBGColor)
-}
-
-// Return border color based on file panel status
-func FilePanelFocusColor(filePanelFocused bool) lipgloss.Color {
-	if filePanelFocused {
-		return FilePanelBorderActiveColor
-	}
-	return FilePanelBorderColor
 }
 
 // Return only fg and bg color style
@@ -291,12 +178,6 @@ func GeneratePinnedRenameTextInput(cursorPos int, defaultValue string) textinput
 	ti.CharLimit = 156
 	ti.Width = Config.SidebarWidth - PanelPadding
 	return ti
-}
-
-func GenerateDefaultProgress() progress.Model {
-	prog := progress.New(GenerateGradientColor())
-	prog.PercentageStyle = FooterStyle
-	return prog
 }
 
 func GenerateGradientColor() progress.Option {
