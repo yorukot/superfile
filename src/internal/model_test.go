@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/x/ansi"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -281,4 +283,68 @@ func TestChooserFile(t *testing.T) {
 			}
 		})
 	}
+}
+
+func eventuallyEnsurePreviewContent(t *testing.T, m *model, content string, msgAndArgs ...any) {
+	contains := false
+	assert.Eventually(t, func() bool {
+		contains = strings.Contains(m.fileModel.FilePreview.GetContent(), content)
+		return contains
+	}, DefaultTestTimeout, DefaultTestTick, msgAndArgs...)
+	if !contains {
+		pContent := ansi.Strip(m.fileModel.FilePreview.GetContent())
+		pContent = pContent[:min(len(pContent), 20)]
+		t.Logf("%s was not found in '%s'", content, pContent)
+	}
+}
+
+func TestAsyncPreviewPanelSync(t *testing.T) {
+	curTestDir := t.TempDir()
+
+	originalPreviewWidth := common.Config.FilePreviewWidth
+	common.Config.FilePreviewWidth = 0
+	t.Cleanup(func() {
+		common.Config.FilePreviewWidth = originalPreviewWidth
+	})
+
+	file1, content1 := filepath.Join(curTestDir, "file1.txt"), "File 1 content"
+	file2, content2 := filepath.Join(curTestDir, "file2.txt"), "File 2 content"
+	utils.SetupFilesWithData(t, []byte(content1), file1)
+	utils.SetupFilesWithData(t, []byte(content2), file2)
+
+	m := defaultTestModel(curTestDir)
+	p := NewTestTeaProgWithEventLoop(t, m)
+
+	// We need to send message via event loop to ensure that preview load command
+	// is actually processed, also we want a size bigger than default
+	// to allow more number of panels
+	p.Send(tea.WindowSizeMsg{Width: 4 * DefaultTestModelWidth, Height: 4 * DefaultTestModelHeight})
+
+	eventuallyEnsurePreviewContent(t, m, content1, "file1 content should load initially")
+	pW := m.fileModel.FilePreview.GetContentWidth()
+
+	// Create two panels
+	splitPanelAsync(p)
+	splitPanelAsync(p)
+	eventuallyEnsurePreviewContent(t, m, content1, "file1 content should reload after new panel")
+
+	assert.NotEqual(t, pW, m.fileModel.FilePreview.GetContentWidth(),
+		"width should change on new panel creation")
+
+	p.Send(tea.KeyMsg{Type: tea.KeyDown})
+	t.Logf("Current element : %s", m.getFocusedFilePanel().GetFocusedItem().Location)
+	eventuallyEnsurePreviewContent(t, m, content2, "content should update to file2")
+
+	p.SendKey(common.Hotkeys.CloseFilePanel[0])
+	eventuallyEnsurePreviewContent(t, m, content1, "content should update to file1 after closing panel")
+
+	// Upscale
+	p.Send(tea.WindowSizeMsg{Width: 8 * DefaultTestModelWidth,
+		Height: 8 * DefaultTestModelWidth})
+	eventuallyEnsurePreviewContent(t, m, content1, "content should update to file1 after resize")
+
+	// Downscale
+	p.Send(tea.WindowSizeMsg{Width: 6 * DefaultTestModelWidth,
+		Height: 6 * DefaultTestModelWidth})
+	eventuallyEnsurePreviewContent(t, m, content1, "content should update to file1 after resize")
 }
