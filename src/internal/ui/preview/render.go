@@ -15,7 +15,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/yorukot/ansichroma"
 
-	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui"
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
@@ -63,23 +62,23 @@ func (m *Model) renderImagePreview(r *rendering.Renderer, itemPath string, previ
 	previewHeight int, sideAreaWidth int, clearCmd string,
 ) string {
 	if !m.open {
-		return r.AddLines("\n --- Preview panel is closed ---").Render() + clearCmd
+		return r.AddLines(common.FilePreviewPanelClosedText).Render() + clearCmd
 	}
 
 	if !common.Config.ShowImagePreview {
-		return r.AddLines("\n --- Image preview is disabled ---").Render() + clearCmd
+		return r.AddLines(common.FilePreviewImagePreviewDisabledText).Render() + clearCmd
 	}
 
 	// Use the new auto-detection function to choose the best renderer
 	imageRender, err := m.imagePreviewer.ImagePreview(itemPath, previewWidth, previewHeight,
 		common.Theme.FilePanelBG, sideAreaWidth)
 	if errors.Is(err, image.ErrFormat) {
-		return r.AddLines("\n --- "+icon.Error+" Unsupported image formats ---").Render() + clearCmd
+		return r.AddLines(common.FilePreviewUnsupportedImageFormatsText).Render() + clearCmd
 	}
 
 	if err != nil {
 		slog.Error("Error convert image to ansi", "error", err)
-		return r.AddLines("\n --- "+icon.Error+" Error convert image to ansi ---").Render() + clearCmd
+		return r.AddLines(common.FilePreviewImageConversionErrorText).Render() + clearCmd
 	}
 
 	// Check if this looks like Kitty protocol output (starts with escape sequences)
@@ -127,8 +126,8 @@ func (m *Model) renderTextPreview(r *rendering.Renderer, itemPath string,
 		if common.Config.CodePreviewer == "bat" {
 			if m.batCmd == "" {
 				return r.AddLines("",
-					" --- "+icon.Error+" 'bat' is not installed or not found. ---",
-					" --- Cannot render file preview. ---").Render()
+					common.FilePreviewBatNotInstalledText,
+					common.FilePreviewCannotRenderText).Render()
 			}
 			fileContent, err = getBatSyntaxHighlightedContent(itemPath, previewHeight, background, m.batCmd)
 		} else {
@@ -168,7 +167,8 @@ func (m *Model) RenderWithPath(itemPath string, previewWidth int, previewHeight 
 
 	fileInfo, infoErr := os.Stat(itemPath)
 	if infoErr != nil {
-		return renderFileInfoError(r, infoErr) + clearCmd
+		slog.Error("Error get file info", "error", infoErr)
+		return r.Render() + clearCmd
 	}
 	slog.Debug("Attempting to render preview", "itemPath", itemPath,
 		"mode", fileInfo.Mode().String(), "isRegular", fileInfo.Mode().IsRegular())
@@ -176,12 +176,12 @@ func (m *Model) RenderWithPath(itemPath string, previewWidth int, previewHeight 
 	// For non regular files which are not directories Dont try to read them
 	// See Issue #876
 	if !fileInfo.Mode().IsRegular() && (fileInfo.Mode()&fs.ModeDir) == 0 {
-		return renderUnsupportedFileMode(r) + clearCmd
+		return r.AddLines(common.FilePreviewUnsupportedFileMode).Render() + clearCmd
 	}
 
 	ext := filepath.Ext(itemPath)
 	if slices.Contains(common.UnsupportedPreviewFormats, ext) {
-		return renderUnsupportedFormat(r) + clearCmd
+		return r.AddLines(common.FilePreviewUnsupportedFormatText).Render() + clearCmd
 	}
 
 	if fileInfo.IsDir() {
@@ -192,16 +192,20 @@ func (m *Model) RenderWithPath(itemPath string, previewWidth int, previewHeight 
 		thumbnailPath, err := m.thumbnailGenerator.GetThumbnailOrGenerate(itemPath)
 		if err != nil {
 			slog.Error("Error generating thumbnail", "error", err)
-			return renderThumbnailGenerationError(r) + clearCmd
+			return r.AddLines(common.FilePreviewThumbnailGenerationErrorText).Render() + clearCmd
 		}
 		// Notes : If renderImagePreview fails, and return some error message
 		// render, then we dont apply clearCmd. This might cause issues.
 		// same for below usage of renderImagePreview
-		return m.renderImagePreview(r, thumbnailPath, previewWidth, previewHeight, fullModelWidth-previewWidth+1, clearCmd)
+		return m.renderImagePreview(
+			r, thumbnailPath, previewWidth, previewHeight,
+			fullModelWidth-previewWidth+1, clearCmd)
 	}
 
 	if isImageFile(itemPath) {
-		return m.renderImagePreview(r, itemPath, previewWidth, previewHeight, fullModelWidth-previewWidth+1, clearCmd)
+		return m.renderImagePreview(
+			r, itemPath, previewWidth, previewHeight,
+			fullModelWidth-previewWidth+1, clearCmd)
 	}
 
 	return m.renderTextPreview(r, itemPath, previewWidth, previewHeight) + clearCmd

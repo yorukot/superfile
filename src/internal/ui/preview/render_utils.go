@@ -11,25 +11,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	"github.com/yorukot/superfile/src/internal/common"
-	"github.com/yorukot/superfile/src/internal/ui/rendering"
 )
-
-func renderFileInfoError(r *rendering.Renderer, err error) string {
-	slog.Error("Error get file info", "error", err)
-	return r.Render()
-}
-
-func renderUnsupportedFormat(r *rendering.Renderer) string {
-	return r.AddLines(common.FilePreviewUnsupportedFormatText).Render()
-}
-
-func renderUnsupportedFileMode(r *rendering.Renderer) string {
-	return r.AddLines(common.FilePreviewUnsupportedFileMode).Render()
-}
-
-func renderThumbnailGenerationError(r *rendering.Renderer) string {
-	return r.AddLines(common.FilePreviewThumbnailGenerationErrorText).Render()
-}
 
 func getBatSyntaxHighlightedContent(
 	itemPath string,

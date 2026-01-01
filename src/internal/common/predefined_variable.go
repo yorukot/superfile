@@ -58,6 +58,14 @@ var (
 	FilePreviewEmptyText               string
 	FilePreviewError                   string
 
+	// Additional preview messages
+	FilePreviewPanelClosedText             string
+	FilePreviewImagePreviewDisabledText    string
+	FilePreviewUnsupportedImageFormatsText string
+	FilePreviewImageConversionErrorText    string
+	FilePreviewBatNotInstalledText         string
+	FilePreviewCannotRenderText            string
+
 	FilePreviewThumbnailGenerationErrorText string
 
 	CheckboxChecked        string
@@ -136,6 +144,14 @@ func LoadPrerenderedVariables() {
 	FilePreviewDirectoryUnreadableText = "\n--- " + icon.Error + icon.Space + "Cannot read directory" + icon.Space + "---"
 	FilePreviewError = "\n--- " + icon.Error + icon.Space + "Error" + icon.Space + "---"
 	FilePreviewEmptyText = "\n--- Empty ---"
+
+	// Additional preview messages
+	FilePreviewPanelClosedText = "\n --- Preview panel is closed ---"
+	FilePreviewImagePreviewDisabledText = "\n --- Image preview is disabled ---"
+	FilePreviewUnsupportedImageFormatsText = "\n --- " + icon.Error + " Unsupported image formats ---"
+	FilePreviewImageConversionErrorText = "\n --- " + icon.Error + " Error convert image to ansi ---"
+	FilePreviewBatNotInstalledText = " --- " + icon.Error + " 'bat' is not installed or not found. ---"
+	FilePreviewCannotRenderText = " --- Cannot render file preview. ---"
 
 	FilePreviewThumbnailGenerationErrorText = "\n--- " + icon.Error + icon.Space + "Thumbnail generation failed" + icon.Space + "---"
 
