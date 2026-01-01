@@ -180,12 +180,6 @@ func GeneratePinnedRenameTextInput(cursorPos int, defaultValue string) textinput
 	return ti
 }
 
-func GenerateDefaultProgress() progress.Model {
-	prog := progress.New(GenerateGradientColor())
-	prog.PercentageStyle = FooterStyle
-	return prog
-}
-
 func GenerateGradientColor() progress.Option {
 	return progress.WithScaledGradient(Theme.GradientColor[0], Theme.GradientColor[1])
 }
