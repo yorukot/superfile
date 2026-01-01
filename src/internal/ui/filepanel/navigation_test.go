@@ -421,3 +421,89 @@ func TestPageScrollSizeConfig(t *testing.T) {
 		})
 	}
 }
+
+func TestJumpToPrefix(t *testing.T) {
+	tests := []struct {
+		name           string
+		elements       []Element
+		chars          []string
+		expectedCursor int
+	}{
+		{
+			name: "Jump to first match with single char",
+			elements: []Element{
+				{Name: "apple.txt"},
+				{Name: "banana.txt"},
+				{Name: "cherry.txt"},
+			},
+			chars:          []string{"b"},
+			expectedCursor: 1,
+		},
+		{
+			name: "Jump with multiple chars",
+			elements: []Element{
+				{Name: "apple.txt"},
+				{Name: "banana.txt"},
+				{Name: "blueberry.txt"},
+			},
+			chars:          []string{"b", "l"},
+			expectedCursor: 2,
+		},
+		{
+			name: "Case insensitive match",
+			elements: []Element{
+				{Name: "Alpha"},
+				{Name: "BETA"},
+				{Name: "gamma"},
+			},
+			chars:          []string{"b"},
+			expectedCursor: 1,
+		},
+		{
+			name: "No match keeps cursor",
+			elements: []Element{
+				{Name: "file1.txt"},
+				{Name: "file2.txt"},
+			},
+			chars:          []string{"z"},
+			expectedCursor: 0,
+		},
+		{
+			name:           "Jump on empty panel",
+			elements:       []Element{},
+			chars:          []string{"a"},
+			expectedCursor: 0,
+		},
+		{
+			name: "Jump with digit",
+			elements: []Element{
+				{Name: "aaa.txt"},
+				{Name: "123.txt"},
+				{Name: "bbb.txt"},
+			},
+			chars:          []string{"1"},
+			expectedCursor: 1,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := testModel(0, 0, 12, BrowserMode, tt.elements)
+			for _, char := range tt.chars {
+				m.JumpToPrefix(char)
+			}
+			assert.Equal(t, tt.expectedCursor, m.Cursor)
+		})
+	}
+}
+
+func TestClearJumpBuffer(t *testing.T) {
+	m := testModel(0, 0, 12, BrowserMode, []Element{
+		{Name: "abc.txt"},
+		{Name: "def.txt"},
+	})
+	m.JumpToPrefix("a")
+	assert.NotEmpty(t, m.jumpBuffer)
+	m.ClearJumpBuffer()
+	assert.Empty(t, m.jumpBuffer)
+}

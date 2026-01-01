@@ -35,6 +35,10 @@ type Model struct {
 	SearchBar          textinput.Model
 	LastTimeGetElement time.Time
 	TargetFile         string // filename to position cursor on after load
+
+	// Jump-to-file by first characters (like Windows Explorer)
+	jumpBuffer     string    // accumulated typed characters
+	jumpBufferTime time.Time // time of last character typed
 }
 
 // Sort options

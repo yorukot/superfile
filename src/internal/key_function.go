@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log/slog"
 	"slices"
+	"unicode"
 
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/filemodel"
@@ -138,17 +139,9 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 }
 
 func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
-	// if not focus on the filepanel return
+	// if not focus on the filepanel, handle sidebar focus keys
 	if !m.getFocusedFilePanel().IsFocused {
-		if m.focusPanel == sidebarFocus && slices.Contains(common.Hotkeys.Confirm, msg) {
-			m.sidebarSelectDirectory()
-		}
-		if m.focusPanel == sidebarFocus && slices.Contains(common.Hotkeys.FilePanelItemRename, msg) {
-			m.sidebarModel.PinnedItemRename()
-		}
-		if m.focusPanel == sidebarFocus && slices.Contains(common.Hotkeys.SearchBar, msg) {
-			m.sidebarSearchBarFocus()
-		}
+		m.handleSidebarFocusKey(msg)
 		return nil
 	}
 	// Check if in the select mode and focusOn filepanel
@@ -195,8 +188,38 @@ func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
 		m.copyPath()
 	case slices.Contains(common.Hotkeys.CopyPWD, msg):
 		m.copyPWD()
+	default:
+		// Jump-to-file by first characters (like Windows Explorer)
+		if isPrintableChar(msg) {
+			m.getFocusedFilePanel().JumpToPrefix(msg)
+		}
 	}
 	return nil
+}
+
+// handleSidebarFocusKey handles key input when sidebar is focused
+func (m *model) handleSidebarFocusKey(msg string) {
+	if m.focusPanel != sidebarFocus {
+		return
+	}
+	switch {
+	case slices.Contains(common.Hotkeys.Confirm, msg):
+		m.sidebarSelectDirectory()
+	case slices.Contains(common.Hotkeys.FilePanelItemRename, msg):
+		m.sidebarModel.PinnedItemRename()
+	case slices.Contains(common.Hotkeys.SearchBar, msg):
+		m.sidebarSearchBarFocus()
+	}
+}
+
+// isPrintableChar checks if msg is a single printable character
+func isPrintableChar(msg string) bool {
+	runes := []rune(msg)
+	if len(runes) != 1 {
+		return false
+	}
+	r := runes[0]
+	return unicode.IsLetter(r) || unicode.IsDigit(r) || unicode.IsPunct(r) || unicode.IsSymbol(r)
 }
 
 // Check the hotkey to cancel operation or create file

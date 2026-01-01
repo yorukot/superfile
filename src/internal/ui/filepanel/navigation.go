@@ -1,6 +1,12 @@
 package filepanel
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+	"time"
+)
+
+const jumpBufferTimeout = 500 * time.Millisecond
 
 func (m *Model) scrollToCursor(cursor int) {
 	if cursor < 0 || cursor >= m.ElemCount() {
@@ -83,4 +89,38 @@ func (m *Model) ValidateCursorAndRenderIndex() error {
 			m.RenderIndex, m.Cursor, renderCount)
 	}
 	return nil
+}
+
+// JumpToPrefix handles jumping the cursor to the first file/folder matching
+// a typed prefix. Similar to Windows Explorer behavior.
+func (m *Model) JumpToPrefix(char string) {
+	if m.Empty() {
+		return
+	}
+
+	now := time.Now()
+
+	// Reset buffer if timeout elapsed
+	if now.Sub(m.jumpBufferTime) > jumpBufferTimeout {
+		m.jumpBuffer = ""
+	}
+
+	// Append character to buffer
+	m.jumpBuffer += char
+	m.jumpBufferTime = now
+
+	prefix := strings.ToLower(m.jumpBuffer)
+
+	// Search for first matching element (case-insensitive)
+	for idx, el := range m.Element {
+		if strings.HasPrefix(strings.ToLower(el.Name), prefix) {
+			m.scrollToCursor(idx)
+			return
+		}
+	}
+}
+
+// ClearJumpBuffer resets the jump-to search buffer
+func (m *Model) ClearJumpBuffer() {
+	m.jumpBuffer = ""
 }
