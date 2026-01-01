@@ -166,7 +166,7 @@ func (m *Model) RenderWithPath(itemPath string, previewWidth int, previewHeight 
 	fileInfo, infoErr := os.Stat(itemPath)
 	if infoErr != nil {
 		slog.Error("Error get file info", "error", infoErr)
-		return r.Render() + clearCmd
+		return r.AddLines(common.FilePreviewNoFileInfoText).Render() + clearCmd
 	}
 	slog.Debug("Attempting to render preview", "itemPath", itemPath,
 		"mode", fileInfo.Mode().String(), "isRegular", fileInfo.Mode().IsRegular())
