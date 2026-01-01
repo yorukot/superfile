@@ -66,21 +66,6 @@ func FullScreenStyle(height int, width int) lipgloss.Style {
 		Foreground(FullScreenFGColor)
 }
 
-// Generate file panel divider style
-func FilePanelDividerStyle(filePanelFocused bool) lipgloss.Style {
-	return lipgloss.NewStyle().
-		Foreground(FilePanelFocusColor(filePanelFocused)).
-		Background(FilePanelBGColor)
-}
-
-// Return border color based on file panel status
-func FilePanelFocusColor(filePanelFocused bool) lipgloss.Color {
-	if filePanelFocused {
-		return FilePanelBorderActiveColor
-	}
-	return FilePanelBorderColor
-}
-
 // Return only fg and bg color style
 func StringColorRender(fgColor lipgloss.Color, bgColor lipgloss.Color) lipgloss.Style {
 	return lipgloss.NewStyle().

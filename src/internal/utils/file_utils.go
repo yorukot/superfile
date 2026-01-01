@@ -20,7 +20,8 @@ import (
 )
 
 // Utility functions related to file operations
-
+// Note : This is not used anymore as we use os.WriteAt to
+// fix toml files now, but we will still keep it for later use.
 func WriteTomlData(filePath string, data interface{}) error {
 	tomlData, err := toml.Marshal(data)
 	if err != nil {
