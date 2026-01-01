@@ -50,22 +50,18 @@ var (
 	FilePanelTopDirectoryIcon string
 	FilePanelNoneText         string
 
-	FilePreviewNoContentText           string
-	FilePreviewNoFileInfoText          string
-	FilePreviewUnsupportedFormatText   string
-	FilePreviewUnsupportedFileMode     string
-	FilePreviewDirectoryUnreadableText string
-	FilePreviewEmptyText               string
-	FilePreviewError                   string
-
-	// Additional preview messages
-	FilePreviewPanelClosedText             string
-	FilePreviewImagePreviewDisabledText    string
-	FilePreviewUnsupportedImageFormatsText string
-	FilePreviewImageConversionErrorText    string
-	FilePreviewBatNotInstalledText         string
-	FilePreviewCannotRenderText            string
-
+	FilePreviewNoFileInfoText               string
+	FilePreviewNoContentText                string
+	FilePreviewUnsupportedFormatText        string
+	FilePreviewUnsupportedFileMode          string
+	FilePreviewDirectoryUnreadableText      string
+	FilePreviewEmptyText                    string
+	FilePreviewError                        string
+	FilePreviewPanelClosedText              string
+	FilePreviewImagePreviewDisabledText     string
+	FilePreviewUnsupportedImageFormatsText  string
+	FilePreviewImageConversionErrorText     string
+	FilePreviewBatNotInstalledText          string
 	FilePreviewThumbnailGenerationErrorText string
 
 	CheckboxChecked        string
@@ -114,6 +110,11 @@ func LoadInitialPrerenderedVariables() {
 		lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFEE")).Render(" ┃ ")
 }
 
+// This should be used only after InitIcon() has been called.
+func wrapFilePreviewErrorMsg(msg string) string {
+	return "\n--- " + icon.Error + icon.Space + msg + " ---"
+}
+
 // Dependecies - TODO We should programmatically guarantee these dependencies. And log error
 // if its not satisfied.
 // LoadThemeConfig() in style.go should be finished
@@ -136,24 +137,32 @@ func LoadPrerenderedVariables() {
 	FilePanelTopDirectoryIcon = FilePanelTopDirectoryIconStyle.Render(" " + icon.Directory + icon.Space)
 	FilePanelNoneText = FilePanelStyle.Render(" " + icon.Error + icon.Space + "No such file or directory")
 
-	// TODO : This "---" being appended before and after should be done via a function
-	FilePreviewNoContentText = "\n--- " + icon.Error + icon.Space + "No content to preview" + icon.Space + "---"
-	FilePreviewNoFileInfoText = "\n--- " + icon.Error + icon.Space + "Could not get file info" + icon.Space + "---"
-	FilePreviewUnsupportedFormatText = "\n--- " + icon.Error + icon.Space + "Unsupported formats" + icon.Space + "---"
-	FilePreviewUnsupportedFileMode = "\n--- " + icon.Error + icon.Space + "Unsupported File Mode" + icon.Space + "---"
-	FilePreviewDirectoryUnreadableText = "\n--- " + icon.Error + icon.Space + "Cannot read directory" + icon.Space + "---"
-	FilePreviewError = "\n--- " + icon.Error + icon.Space + "Error" + icon.Space + "---"
-	FilePreviewEmptyText = "\n--- Empty ---"
-
-	// Additional preview messages
-	FilePreviewPanelClosedText = "\n --- Preview panel is closed ---"
-	FilePreviewImagePreviewDisabledText = "\n --- Image preview is disabled ---"
-	FilePreviewUnsupportedImageFormatsText = "\n --- " + icon.Error + " Unsupported image formats ---"
-	FilePreviewImageConversionErrorText = "\n --- " + icon.Error + " Error convert image to ansi ---"
-	FilePreviewBatNotInstalledText = " --- " + icon.Error + " 'bat' is not installed or not found. ---"
-	FilePreviewCannotRenderText = " --- Cannot render file preview. ---"
-
-	FilePreviewThumbnailGenerationErrorText = "\n--- " + icon.Error + icon.Space + "Thumbnail generation failed" + icon.Space + "---"
+	FilePreviewNoContentText = wrapFilePreviewErrorMsg(
+		"No content to preview")
+	FilePreviewNoFileInfoText = wrapFilePreviewErrorMsg(
+		"Could not get file info")
+	FilePreviewUnsupportedFormatText = wrapFilePreviewErrorMsg(
+		"Unsupported formats")
+	FilePreviewUnsupportedFileMode = wrapFilePreviewErrorMsg(
+		"Unsupported File Mode")
+	FilePreviewDirectoryUnreadableText = wrapFilePreviewErrorMsg(
+		"Cannot read directory")
+	FilePreviewError = wrapFilePreviewErrorMsg(
+		"Error")
+	FilePreviewEmptyText = wrapFilePreviewErrorMsg(
+		"Empty")
+	FilePreviewPanelClosedText = wrapFilePreviewErrorMsg(
+		"Preview panel is closed")
+	FilePreviewImagePreviewDisabledText = wrapFilePreviewErrorMsg(
+		"Image preview is disabled")
+	FilePreviewUnsupportedImageFormatsText = wrapFilePreviewErrorMsg(
+		"Unsupported image formats")
+	FilePreviewImageConversionErrorText = wrapFilePreviewErrorMsg(
+		"Error convert image to ansi")
+	FilePreviewBatNotInstalledText = wrapFilePreviewErrorMsg(
+		"'bat' is not installed or not found")
+	FilePreviewThumbnailGenerationErrorText = wrapFilePreviewErrorMsg(
+		"Thumbnail generation failed")
 
 	CheckboxChecked = FilePanelSelectBoxStyle.
 		Foreground(FilePanelBorderColor).

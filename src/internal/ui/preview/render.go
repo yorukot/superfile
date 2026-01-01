@@ -125,9 +125,7 @@ func (m *Model) renderTextPreview(r *rendering.Renderer, itemPath string,
 		}
 		if common.Config.CodePreviewer == "bat" {
 			if m.batCmd == "" {
-				return r.AddLines("",
-					common.FilePreviewBatNotInstalledText,
-					common.FilePreviewCannotRenderText).Render()
+				return r.AddLines(common.FilePreviewBatNotInstalledText).Render()
 			}
 			fileContent, err = getBatSyntaxHighlightedContent(itemPath, previewHeight, background, m.batCmd)
 		} else {
@@ -136,7 +134,7 @@ func (m *Model) renderTextPreview(r *rendering.Renderer, itemPath string,
 		}
 		if err != nil {
 			slog.Error("Error render code highlight", "error", err)
-			return r.AddLines("", common.FilePreviewError).Render()
+			return r.AddLines(common.FilePreviewError).Render()
 		}
 	}
 
