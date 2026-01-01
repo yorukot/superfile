@@ -369,7 +369,7 @@ func (m *model) getExtractFileCmd() tea.Cmd {
 		outputDir, err := renameIfDuplicate(outputDir)
 		if err != nil {
 			slog.Error("Error while renaming for duplicates", "error", err)
-			return NewCompressOperationMsg(processbar.Failed, reqID)
+			return NewExtractOperationMsg(processbar.Failed, reqID)
 		}
 
 		err = os.MkdirAll(
@@ -378,14 +378,14 @@ func (m *model) getExtractFileCmd() tea.Cmd {
 		)
 		if err != nil {
 			slog.Error("Error while making directory for extracting files", "error", err)
-			return NewCompressOperationMsg(processbar.Failed, reqID)
+			return NewExtractOperationMsg(processbar.Failed, reqID)
 		}
 		err = extractCompressFile(item, outputDir, &m.processBarModel)
 		if err != nil {
 			slog.Error("Error extract file", "error", err)
-			return NewCompressOperationMsg(processbar.Failed, reqID)
+			return NewExtractOperationMsg(processbar.Failed, reqID)
 		}
-		return NewCompressOperationMsg(processbar.Successful, reqID)
+		return NewExtractOperationMsg(processbar.Successful, reqID)
 	}
 }
 
