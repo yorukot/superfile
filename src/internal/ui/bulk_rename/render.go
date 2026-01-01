@@ -8,6 +8,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui"
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
+	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
 )
 
 const (
@@ -40,7 +41,7 @@ func (m *Model) Render() string {
 		m.renderError(r)
 	}
 
-	return r.Render()
+	return r.Render() + filepreview.ClearKittyImages()
 }
 
 func (m *Model) renderTitle(r *rendering.Renderer) {
