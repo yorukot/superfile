@@ -1,6 +1,8 @@
 package filepanel
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func (m *Model) scrollToCursor(cursor int) {
 	if cursor < 0 || cursor >= m.ElemCount() {

@@ -243,3 +243,10 @@ func setFilePanelSelectedItemByName(t *testing.T, panel *filepanel.Model, fileNa
 	require.NotEqual(t, -1, idx, "%s should be found in panel", fileName)
 	panel.Cursor = idx
 }
+
+func splitPanelAsync(p *TeaProg) {
+	p.SendKey(common.Hotkeys.OpenSPFPrompt[0])
+	p.SendKey("split")
+	p.Send(tea.KeyMsg{Type: tea.KeyEnter})
+	p.Send(tea.KeyMsg{Type: tea.KeyEsc})
+}
