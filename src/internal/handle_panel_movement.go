@@ -6,9 +6,11 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 
+	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/utils"
 
 	variable "github.com/yorukot/superfile/src/config"
@@ -16,7 +18,7 @@ import (
 
 // Back to parent directory
 func (m *model) parentDirectory() {
-	err := m.getFocusedFilePanel().parentDirectory()
+	err := m.getFocusedFilePanel().ParentDirectory()
 	if err != nil {
 		slog.Error("Error while changing to parent directory", "error", err)
 	}
@@ -27,47 +29,35 @@ func (m *model) parentDirectory() {
 func (m *model) enterPanel() {
 	panel := m.getFocusedFilePanel()
 
-	if len(panel.element) == 0 {
+	if len(panel.Element) == 0 {
 		return
 	}
-	selectedItem := panel.getSelectedItem()
-	if selectedItem.directory {
-		// TODO : Propagate error out from this this function. Return here, instead of logging
-		err := m.updateCurrentFilePanelDir(selectedItem.location)
-		if err != nil {
-			slog.Error("Error while changing to directory", "error", err, "target", selectedItem.location)
-		}
-		return
-	}
-	fileInfo, err := os.Lstat(selectedItem.location)
-	if err != nil {
-		slog.Error("Error while getting file info", "error", err)
-		return
-	}
+	selectedItem := panel.GetFocusedItem()
+	if selectedItem.Directory {
+		targetPath := selectedItem.Location
 
-	if fileInfo.Mode()&os.ModeSymlink != 0 {
-		targetPath, symlinkErr := filepath.EvalSymlinks(selectedItem.location)
-		if symlinkErr != nil {
-			return
-		}
-
-		targetInfo, lstatErr := os.Lstat(targetPath)
-
-		if lstatErr != nil {
-			return
-		}
-
-		if targetInfo.IsDir() {
-			err = m.updateCurrentFilePanelDir(targetPath)
-			if err != nil {
-				slog.Error("Error while changing to directory", "error", err, "target", targetPath)
+		if selectedItem.Info.Mode()&os.ModeSymlink != 0 {
+			var symlinkErr error
+			targetPath, symlinkErr = filepath.EvalSymlinks(targetPath)
+			if symlinkErr != nil {
+				return
 			}
-			return
+
+			// targetPath shouldn't be a link now, so Stat and Lstat should be same
+			if targetInfo, lstatErr := os.Lstat(targetPath); lstatErr != nil || !targetInfo.IsDir() {
+				return
+			}
 		}
+		// TODO : Propagate error out from this this function. Return here, instead of logging
+		err := m.updateCurrentFilePanelDir(targetPath)
+		if err != nil {
+			slog.Error("Error while changing to directory", "error", err, "target", targetPath)
+		}
+		return
 	}
 
 	if variable.ChooserFile != "" {
-		chooserErr := m.chooserFileWriteAndQuit(panel.element[panel.cursor].location)
+		chooserErr := m.chooserFileWriteAndQuit(panel.Element[panel.Cursor].Location)
 		if chooserErr == nil {
 			return
 		}
@@ -79,6 +69,9 @@ func (m *model) enterPanel() {
 
 func (m *model) executeOpenCommand() {
 	panel := m.getFocusedFilePanel()
+
+	filePath := panel.Element[panel.Cursor].Location
+
 	openCommand := "xdg-open"
 	switch runtime.GOOS {
 	case utils.OsDarwin:
@@ -87,7 +80,7 @@ func (m *model) executeOpenCommand() {
 		dllpath := filepath.Join(os.Getenv("SYSTEMROOT"), "System32", "rundll32.exe")
 		dllfile := "url.dll,FileProtocolHandler"
 
-		cmd := exec.Command(dllpath, dllfile, panel.element[panel.cursor].location)
+		cmd := exec.Command(dllpath, dllfile, filePath)
 		err := cmd.Start()
 		if err != nil {
 			slog.Error("Error while open file with", "error", err)
@@ -96,10 +89,18 @@ func (m *model) executeOpenCommand() {
 		return
 	}
 
-	cmd := exec.Command(openCommand, panel.element[panel.cursor].location)
+	// For now open_with works only for mac and linux
+	// TODO: Make it in parity with windows.
+	ext := strings.ToLower(strings.TrimPrefix(filepath.Ext(filePath), "."))
+	if extEditor, ok := common.Config.OpenWith[ext]; ok {
+		openCommand = extEditor
+	}
+
+	cmd := exec.Command(openCommand, filePath)
 	utils.DetachFromTerminal(cmd)
 	err := cmd.Start()
 	if err != nil {
+		// TODO: This kind of errors should go to user facing pop ups
 		slog.Error("Error while open file with", "error", err)
 	}
 }
@@ -119,32 +120,7 @@ func (m *model) sidebarSelectDirectory() {
 	if err != nil {
 		slog.Error("Error switching to sidebar directory", "error", err)
 	}
-	panel.isFocused = true
-}
-
-// Select all item in the file panel (only work on select mode)
-func (m *model) selectAllItem() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-	for _, item := range panel.element {
-		panel.selected = append(panel.selected, item.location)
-	}
-}
-
-// Select the item where cursor located (only work on select mode)
-func (panel *filePanel) singleItemSelect() {
-	if len(panel.element) > 0 && panel.cursor >= 0 && panel.cursor < len(panel.element) {
-		elementLocation := panel.element[panel.cursor].location
-
-		if arrayContains(panel.selected, elementLocation) {
-			// This is inefficient. Once you select 1000 items,
-			// each select / deselect operation can take 1000 operations
-			// It can be easily made constant time.
-			// TODO : (performance)convert panel.selected to a set (map[string]struct{})
-			panel.selected = removeElementByValue(panel.selected, elementLocation)
-		} else {
-			panel.selected = append(panel.selected, elementLocation)
-		}
-	}
+	panel.IsFocused = true
 }
 
 // Toggle dotfile display or not
@@ -164,37 +140,29 @@ func (m *model) toggleFooterController() tea.Cmd {
 	if err != nil {
 		slog.Error("Error while updating toggleFooter data", "error", err)
 	}
-	// TODO : Revisit this. Is this really need here, is this correct ?
-	m.setHeightValues(m.fullHeight)
-	// File preview panel requires explicit height update, unlike sidebar/file panels
-	// which receive height as render parameters and update automatically on each frame
-	if m.fileModel.filePreview.IsOpen() {
-		m.setFilePreviewPanelSize()
-		// Force re-render of preview content with new dimensions
-		return m.getFilePreviewCmd(true)
-	}
-	return nil
+	m.setHeightValues()
+	return m.updateComponentDimensions()
 }
 
 // Focus on search bar
 func (m *model) searchBarFocus() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
-	if panel.searchBar.Focused() {
-		panel.searchBar.Blur()
+	panel := m.getFocusedFilePanel()
+	if panel.SearchBar.Focused() {
+		panel.SearchBar.Blur()
 	} else {
-		panel.searchBar.Focus()
+		panel.SearchBar.Focus()
 		m.firstTextInput = true
 	}
 
 	// config search bar width
-	panel.searchBar.Width = m.fileModel.width - 4
+	panel.SearchBar.Width = m.fileModel.SinglePanelWidth - common.InnerPadding
 }
 
 func (m *model) sidebarSearchBarFocus() {
 	if m.sidebarModel.SearchBarFocused() {
-		// Ideally Code should never reach here. Once sidebar is focussed, we should
+		// Ideally Code should never reach here. Once sidebar is focused, we should
 		// not cause sidebarSearchBarFocus() event by pressing search key
-		slog.Error("sidebarSearchBarFocus() called on Focussed sidebar")
+		slog.Error("sidebarSearchBarFocus() called on Focused sidebar")
 		m.sidebarModel.SearchBarBlur()
 		return
 	}

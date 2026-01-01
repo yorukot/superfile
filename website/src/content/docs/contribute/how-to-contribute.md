@@ -48,7 +48,7 @@ Before starting, make sure the theme you want to add doesn’t already exist.
 5. To ensure the theme looks consistent and functions properly, please include the following screenshots in your PR:
 - Full view of superfile (Including sidebar, file previewer, process panel, metadata panel, and clipboard panel )
     - Make sure that file previewer is non empty, process panel has at least one process, and clipboard has at least one entry
-- Add a screenshot of these individual panel being focussed (To make sure border focus color is good)
+- Add a screenshot of these individual panel being focused (To make sure border focus color is good)
     - Sidebar
     - Processbar
 - Add a screenshot of help menu (Press ?)

@@ -30,7 +30,7 @@ func setupProgAndOpenZoxide(t *testing.T, zClient *zoxidelib.Client, dir string)
 func updateCurrentFilePanelDirOfTestModel(t *testing.T, p *TeaProg, dir string) {
 	err := p.getModel().updateCurrentFilePanelDir(dir)
 	require.NoError(t, err, "Failed to navigate to %s", dir)
-	assert.Equal(t, dir, p.getModel().getFocusedFilePanel().location, "Should be in %s after navigation", dir)
+	assert.Equal(t, dir, p.getModel().getFocusedFilePanel().Location, "Should be in %s after navigation", dir)
 }
 
 func TestZoxide(t *testing.T) {
@@ -69,11 +69,13 @@ func TestZoxide(t *testing.T) {
 
 		// Press enter to navigate to dir2
 		p.SendKey(common.Hotkeys.ConfirmTyping[0])
+		// Wait for both modal to close AND location to change to avoid race condition
 		assert.Eventually(t, func() bool {
-			return !p.getModel().zoxideModal.IsOpen()
-		}, DefaultTestTimeout, DefaultTestTick, "Zoxide modal should close after navigation")
-		assert.Equal(t, dir2, p.getModel().getFocusedFilePanel().location,
-			"Should navigate back to dir2 after zoxide selection")
+			return !p.getModel().zoxideModal.IsOpen() &&
+				p.getModel().getFocusedFilePanel().Location == dir2
+		}, DefaultTestTimeout, DefaultTestTick,
+			"Zoxide modal should close and navigate to %s (current location: %s)",
+			dir2, p.getModel().getFocusedFilePanel().Location)
 	})
 
 	t.Run("Zoxide disabled shows no results", func(t *testing.T) {
@@ -127,8 +129,9 @@ func TestZoxide(t *testing.T) {
 		}, DefaultTestTimeout, DefaultTestTick, "Multi-space directory should be found by zoxide")
 
 		// Reset textinput via Close-Open
-		p.getModel().zoxideModal.Close()
-		p.getModel().zoxideModal.Open()
+		p.SendKey(common.Hotkeys.Quit[0])
+		p.SendKey(common.Hotkeys.OpenZoxide[0])
+
 		p.SendKey("di r 1")
 		assert.Eventually(t, func() bool {
 			results := p.getModel().zoxideModal.GetResults()

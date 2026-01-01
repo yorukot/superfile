@@ -3,6 +3,8 @@ package rendering
 import (
 	"errors"
 	"fmt"
+	"math/rand/v2"
+	"strconv"
 
 	"github.com/charmbracelet/lipgloss"
 )
@@ -51,6 +53,8 @@ type Renderer struct {
 	borderRequired bool
 
 	borderStrings lipgloss.Border
+	// for logging
+	name string
 }
 
 type RendererConfig struct {
@@ -67,7 +71,8 @@ type RendererConfig struct {
 	BorderFGColor lipgloss.TerminalColor
 	BorderBGColor lipgloss.TerminalColor
 
-	Border lipgloss.Border
+	Border       lipgloss.Border
+	RendererName string
 }
 
 func DefaultRendererConfig(totalHeight int, totalWidth int) RendererConfig {
@@ -81,6 +86,8 @@ func DefaultRendererConfig(totalHeight int, totalWidth int) RendererConfig {
 		ContentBGColor:   lipgloss.NoColor{},
 		BorderFGColor:    lipgloss.NoColor{},
 		BorderBGColor:    lipgloss.NoColor{},
+		//nolint: gosec // Not for security purpose, only for logging
+		RendererName: "R-" + strconv.Itoa(rand.IntN(rendererNameMax)),
 	}
 }
 
@@ -100,7 +107,9 @@ func NewRenderer(cfg RendererConfig) (*Renderer, error) {
 
 	return &Renderer{
 
-		contentSections:     []ContentRenderer{NewContentRenderer(contentHeight, contentWidth, cfg.DefTruncateStyle)},
+		contentSections: []ContentRenderer{
+			NewContentRenderer(contentHeight, contentWidth, cfg.DefTruncateStyle, cfg.RendererName),
+		},
 		sectionDividers:     nil,
 		curSectionIdx:       0,
 		actualContentHeight: 0,
@@ -121,6 +130,7 @@ func NewRenderer(cfg RendererConfig) (*Renderer, error) {
 
 		borderRequired: cfg.BorderRequired,
 		borderStrings:  cfg.Border,
+		name:           cfg.RendererName,
 	}, nil
 }
 

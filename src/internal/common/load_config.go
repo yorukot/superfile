@@ -39,7 +39,7 @@ func LoadConfigFile() {
 			toExit = loadError.IsFatal()
 		}
 		if toExit {
-			utils.PrintfAndExit("%s\n", userMsg)
+			utils.PrintfAndExitf("%s\n", userMsg)
 		} else {
 			fmt.Println(userMsg)
 		}
@@ -57,7 +57,7 @@ func ValidateConfig(c *ConfigType) error {
 		return errors.New(LoadConfigError("file_preview_width"))
 	}
 
-	if c.SidebarWidth != 0 && (c.SidebarWidth < 3 || c.SidebarWidth > 20) {
+	if c.SidebarWidth != 0 && (c.SidebarWidth < 5 || c.SidebarWidth > 20) {
 		return errors.New(LoadConfigError("sidebar_width"))
 	}
 
@@ -123,7 +123,7 @@ func LoadHotkeysFile(ignoreMissingFields bool) {
 			toExit = loadError.IsFatal()
 		}
 		if toExit {
-			utils.PrintfAndExit("%s\n", userMsg)
+			utils.PrintfAndExitf("%s\n", userMsg)
 		} else {
 			fmt.Println(userMsg)
 		}
@@ -167,7 +167,7 @@ func LoadThemeFile() {
 
 	err = toml.Unmarshal([]byte(DefaultThemeString), &Theme)
 	if err != nil {
-		utils.PrintfAndExit("Unexpected error while reading default theme file : %v. Exiting...", err)
+		utils.PrintfAndExitf("Unexpected error while reading default theme file : %v. Exiting...", err)
 	}
 }
 
@@ -199,12 +199,12 @@ func LoadAllDefaultConfig(content embed.FS) {
 	}
 
 	// Prevent failure for first time app run by making sure parent directories exists
-	if err = os.MkdirAll(filepath.Dir(variable.ThemeFileVersion), 0o755); err != nil {
+	if err = os.MkdirAll(filepath.Dir(variable.ThemeFileVersion), utils.ConfigDirPerm); err != nil {
 		slog.Error("Error creating theme file parent directory", "error", err)
 		return
 	}
 
-	err = os.WriteFile(variable.ThemeFileVersion, []byte(variable.CurrentVersion), 0o644)
+	err = os.WriteFile(variable.ThemeFileVersion, []byte(variable.CurrentVersion), utils.ConfigFilePerm)
 	if err != nil {
 		slog.Error("Error writing theme file version", "error", err)
 	}
@@ -235,7 +235,7 @@ func WriteThemeFiles(content embed.FS) error {
 	_, err := os.Stat(variable.ThemeFolder)
 
 	if os.IsNotExist(err) {
-		if err = os.MkdirAll(variable.ThemeFolder, 0o755); err != nil {
+		if err = os.MkdirAll(variable.ThemeFolder, utils.ConfigDirPerm); err != nil {
 			slog.Error("Error creating theme directory", "error", err)
 			return err
 		}

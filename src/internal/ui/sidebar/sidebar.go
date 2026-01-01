@@ -88,6 +88,9 @@ func (s *Model) HandleSearchBarKey(msg string) {
 // initialized the sidebar. We call the directory fetching logic many times
 // which is a disk heavy operation.
 func (s *Model) UpdateDirectories() {
+	if s.Disabled() {
+		return
+	}
 	if s.searchBar.Value() != "" {
 		s.directories = getFilteredDirectories(s.searchBar.Value(), s.pinnedMgr)
 	} else {
@@ -105,6 +108,11 @@ func (s *Model) TogglePinnedDirectory(dir string) error {
 
 // New creates a new sidebar model with the given parameters
 func New() Model {
+	if common.Config.SidebarWidth == 0 {
+		return Model{
+			disabled: true,
+		}
+	}
 	// pinnedMgr is created here, can be done higher up in the call chain
 	pinnedMgr := NewPinnedFileManager(variable.PinnedFile)
 	res := Model{
@@ -112,11 +120,12 @@ func New() Model {
 		directories: getDirectories(&pinnedMgr),
 		searchBar:   common.GenerateSearchBar(),
 		pinnedMgr:   &pinnedMgr,
+		width:       common.Config.SidebarWidth + common.BorderPadding,
+		height:      minHeight,
+		disabled:    false,
 	}
 
-	// Excluding borders(2), Searchbar Prompt(2), and one extra character than is appended
-	// by searchBar.View()
-	res.searchBar.Width = common.Config.SidebarWidth - 2 - 2 - 1
+	res.searchBar.Width = res.width - common.BorderPadding - searchBarPadding
 	res.searchBar.Placeholder = "(" + common.Hotkeys.SearchBar[0] + ")" + " Search"
 	return res
 }

@@ -16,6 +16,17 @@ import (
 	"github.com/charmbracelet/x/ansi"
 )
 
+// Size calculation constants
+const (
+	KilobyteSize      = 1000 // SI decimal unit
+	KibibyteSize      = 1024 // Binary unit
+	TabWidth          = 4    // Standard tab expansion width
+	DefaultBufferSize = 1024 // Default buffer size for string operations
+	NonBreakingSpace  = 0xa0 // Unicode non-breaking space
+	EscapeChar        = 0x1b // ANSI escape character
+	ASCIIMax          = 0x7f // Maximum ASCII character value
+)
+
 func TruncateText(text string, maxChars int, tails string) string {
 	truncatedText := ansi.Truncate(text, maxChars-len(tails), "")
 	if text != truncatedText {
@@ -51,6 +62,7 @@ func TruncateMiddleText(text string, maxChars int, tails string) string {
 		return text
 	}
 
+	//nolint:mnd // standard halving for center truncation
 	halfEllipsisLength := (maxChars - 3) / 2
 	// TODO : Use ansi.Substring to correctly handle ANSI escape codes
 	truncatedText := text[:halfEllipsisLength] + tails + text[utf8.RuneCountInString(text)-halfEllipsisLength:]
@@ -58,8 +70,8 @@ func TruncateMiddleText(text string, maxChars int, tails string) string {
 	return truncatedText
 }
 
-func PrettierName(name string, width int, isDir bool, isSelected bool, bgColor lipgloss.Color) string {
-	style := GetElementIcon(name, isDir, Config.Nerdfont)
+func PrettierName(name string, width int, isDir bool, isLink bool, isSelected bool, bgColor lipgloss.Color) string {
+	style := GetElementIcon(name, isDir, isLink, Config.Nerdfont)
 	if isSelected {
 		return StringColorRender(lipgloss.Color(style.Color), bgColor).
 			Background(bgColor).
@@ -73,16 +85,16 @@ func PrettierName(name string, width int, isDir bool, isSelected bool, bgColor l
 		FilePanelStyle.Render(TruncateText(name, width, "..."))
 }
 
-func PrettierDirectoryPreviewName(name string, isDir bool, bgColor lipgloss.Color) string {
-	style := GetElementIcon(name, isDir, Config.Nerdfont)
+func PrettierDirectoryPreviewName(name string, isDir bool, isLink bool, bgColor lipgloss.Color) string {
+	style := GetElementIcon(name, isDir, isLink, Config.Nerdfont)
 	return StringColorRender(lipgloss.Color(style.Color), bgColor).
 		Background(bgColor).
 		Render(style.Icon+" ") +
 		FilePanelStyle.Render(name)
 }
 
-func ClipboardPrettierName(name string, width int, isDir bool, isSelected bool) string {
-	style := GetElementIcon(filepath.Base(name), isDir, Config.Nerdfont)
+func ClipboardPrettierName(name string, width int, isDir bool, isLink bool, isSelected bool) string {
+	style := GetElementIcon(filepath.Base(name), isDir, isLink, Config.Nerdfont)
 	if isSelected {
 		return StringColorRender(lipgloss.Color(style.Color), FooterBGColor).
 			Background(FooterBGColor).
@@ -116,12 +128,12 @@ func FormatFileSize(size int64) string {
 
 	// TODO : Remove duplication here
 	if Config.FileSizeUseSI {
-		unitIndex := int(math.Floor(math.Log(float64(size)) / math.Log(1000)))
-		adjustedSize := float64(size) / math.Pow(1000, float64(unitIndex))
+		unitIndex := int(math.Floor(math.Log(float64(size)) / math.Log(KilobyteSize)))
+		adjustedSize := float64(size) / math.Pow(KilobyteSize, float64(unitIndex))
 		return fmt.Sprintf("%.2f %s", adjustedSize, unitsDec[unitIndex])
 	}
-	unitIndex := int(math.Floor(math.Log(float64(size)) / math.Log(1024)))
-	adjustedSize := float64(size) / math.Pow(1024, float64(unitIndex))
+	unitIndex := int(math.Floor(math.Log(float64(size)) / math.Log(KibibyteSize)))
+	adjustedSize := float64(size) / math.Pow(KibibyteSize, float64(unitIndex))
 	return fmt.Sprintf("%.2f %s", adjustedSize, unitsBin[unitIndex])
 }
 
@@ -132,7 +144,7 @@ func CheckAndTruncateLineLengths(text string, maxLength int) string {
 
 	for _, line := range lines {
 		// Replace tabs with spaces
-		expandedLine := strings.ReplaceAll(line, "\t", strings.Repeat(" ", 4))
+		expandedLine := strings.ReplaceAll(line, "\t", strings.Repeat(" ", TabWidth))
 		truncatedLine := ansi.Truncate(expandedLine, maxLength, "")
 		result.WriteString(truncatedLine + "\n")
 	}
@@ -180,7 +192,7 @@ func IsTextFile(filename string) (bool, error) {
 	defer file.Close()
 
 	reader := bufio.NewReader(file)
-	buffer := make([]byte, 1024)
+	buffer := make([]byte, DefaultBufferSize)
 	cnt, err := reader.Read(buffer)
 	if err != nil && !errors.Is(err, io.EOF) {
 		return false, err
@@ -204,7 +216,7 @@ func MakePrintableWithEscCheck(line string, allowEsc bool) string { //nolint: go
 		}
 		// It needs to be handled separately since considered a space,
 		// It is multi-byte in UTF-8, But it has zero display width
-		if r == 0xa0 {
+		if r == NonBreakingSpace {
 			sb.WriteRune(r)
 			continue
 		}
@@ -215,13 +227,13 @@ func MakePrintableWithEscCheck(line string, allowEsc bool) string { //nolint: go
 			sb.WriteString("    ")
 			continue
 		}
-		if r == 0x1b {
+		if r == EscapeChar {
 			if allowEsc {
 				sb.WriteRune(r)
 			}
 			continue
 		}
-		if r > 0x7f {
+		if r > ASCIIMax {
 			if unicode.IsSpace(r) && utf8.RuneLen(r) > 1 {
 				// See https://github.com/charmbracelet/x/issues/466
 				// Space chacters spanning more than one bytes are not handled well by

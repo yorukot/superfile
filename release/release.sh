@@ -1,10 +1,13 @@
 #!/usr/bin/env -S bash -euo pipefail
 
 projectName="superfile"
-version="v1.4.0"
+version="v1.4.1-rc"
 osList=("darwin" "linux" "windows")
 archList=("amd64" "arm64")
 mkdir dist
+
+# Prevent macOS from adding ._* files to archives
+export COPYFILE_DISABLE=1
 
 for os in "${osList[@]}"; do
     if [ "$os" = "windows" ]; then

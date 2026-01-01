@@ -2,9 +2,11 @@ package sidebar
 
 import (
 	"log/slog"
+
+	"github.com/yorukot/superfile/src/internal/common"
 )
 
-func (s *Model) ListUp(mainPanelHeight int) {
+func (s *Model) ListUp() {
 	slog.Debug("controlListUp called", "cursor", s.cursor,
 		"renderIndex", s.renderIndex, "directory count", len(s.directories))
 	if s.NoActualDir() {
@@ -20,14 +22,14 @@ func (s *Model) ListUp(mainPanelHeight int) {
 	// We should update even if cursor is at divider for now
 	// Otherwise dividers are sometimes skipped in render in case of
 	// large pinned directories
-	s.updateRenderIndex(mainPanelHeight)
-	if s.directories[s.cursor].IsDivider() {
+	s.updateRenderIndex()
+	if s.directories[s.cursor].isDivider() {
 		// cause another listUp trigger to move up.
-		s.ListUp(mainPanelHeight)
+		s.ListUp()
 	}
 }
 
-func (s *Model) ListDown(mainPanelHeight int) {
+func (s *Model) ListDown() {
 	slog.Debug("controlListDown called", "cursor", s.cursor,
 		"renderIndex", s.renderIndex, "directory count", len(s.directories))
 	if s.NoActualDir() {
@@ -44,12 +46,12 @@ func (s *Model) ListDown(mainPanelHeight int) {
 	// We should update even if cursor is at divider for now
 	// Otherwise dividers are sometimes skipped in render in case of
 	// large pinned directories
-	s.updateRenderIndex(mainPanelHeight)
+	s.updateRenderIndex()
 
 	// Move below special divider directories
-	if s.directories[s.cursor].IsDivider() {
+	if s.directories[s.cursor].isDivider() {
 		// cause another listDown trigger to move down.
-		s.ListDown(mainPanelHeight)
+		s.ListDown()
 	}
 }
 
@@ -57,11 +59,12 @@ func (s *Model) ListDown(mainPanelHeight int) {
 // if returned value is `startIndex - 1`, that means nothing can be rendered
 // This could be made constant time by keeping Indexes ot special directories saved,
 // but that too much.
-func (s *Model) lastRenderedIndex(mainPanelHeight int, startIndex int) int {
+func (s *Model) lastRenderedIndex(startIndex int) int {
+	mainPanelHeight := s.height - common.BorderPadding
 	curHeight := sideBarInitialHeight
 	endIndex := startIndex - 1
 	for i := startIndex; i < len(s.directories); i++ {
-		curHeight += s.directories[i].RequiredHeight()
+		curHeight += s.directories[i].requiredHeight()
 		if curHeight > mainPanelHeight {
 			break
 		}
@@ -72,7 +75,9 @@ func (s *Model) lastRenderedIndex(mainPanelHeight int, startIndex int) int {
 
 // Return what will be the startIndex, if we end at endIndex
 // if returned value is `endIndex + 1`, that means nothing can be rendered
-func (s *Model) firstRenderedIndex(mainPanelHeight int, endIndex int) int {
+func (s *Model) firstRenderedIndex(endIndex int) int {
+	mainPanelHeight := s.height - common.BorderPadding
+
 	// This should ideally never happen. Maybe we should panic ?
 	if endIndex >= len(s.directories) {
 		return endIndex + 1
@@ -81,7 +86,7 @@ func (s *Model) firstRenderedIndex(mainPanelHeight int, endIndex int) int {
 	curHeight := sideBarInitialHeight
 	startIndex := endIndex + 1
 	for i := endIndex; i >= 0; i-- {
-		curHeight += s.directories[i].RequiredHeight()
+		curHeight += s.directories[i].requiredHeight()
 		if curHeight > mainPanelHeight {
 			break
 		}
@@ -90,7 +95,7 @@ func (s *Model) firstRenderedIndex(mainPanelHeight int, endIndex int) int {
 	return startIndex
 }
 
-func (s *Model) updateRenderIndex(mainPanelHeight int) {
+func (s *Model) updateRenderIndex() {
 	// Case I : New cursor moved above current renderable range
 	if s.cursor < s.renderIndex {
 		// We will start rendering from there
@@ -98,7 +103,7 @@ func (s *Model) updateRenderIndex(mainPanelHeight int) {
 		return
 	}
 
-	curEndIndex := s.lastRenderedIndex(mainPanelHeight, s.renderIndex)
+	curEndIndex := s.lastRenderedIndex(s.renderIndex)
 
 	// Case II : new cursor also comes in range of rendered directories
 	// Taking this case later avoid extra lastRenderedIndex() call
@@ -109,7 +114,7 @@ func (s *Model) updateRenderIndex(mainPanelHeight int) {
 
 	// Case III : New cursor is too below
 	if curEndIndex < s.cursor {
-		s.renderIndex = s.firstRenderedIndex(mainPanelHeight, s.cursor)
+		s.renderIndex = s.firstRenderedIndex(s.cursor)
 		return
 	}
 

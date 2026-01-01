@@ -28,7 +28,7 @@ jobs:
           curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: 1.25.0
 
@@ -67,5 +67,5 @@ jobs:
         if: runner.os != 'Windows'
         uses: golangci/golangci-lint-action@v8
         with:
-          version: v2.4.0
+          version: v2.5.0
           args: --timeout 3m

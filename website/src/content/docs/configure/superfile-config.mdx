@@ -26,11 +26,11 @@ To see the path locations of your superfile files, use the command `spf pl`.
 
 - ###### editor
 
-The editor your files will be opened with (Leave blank to use the EDITOR environment variable. If EDITOR environment variable is not set, it will default to `nano` for MacOS/Linux, and `notepad` for Windows.
+The editor your files will be opened with (Leave blank to use the EDITOR environment variable. If EDITOR environment variable is not set, it will default to `nano` for macOS/Linux, and `notepad` for Windows.
 
 - ###### dir_editor
 
-The editor your directories will be opened with (Leave blank to use defaults : `vi` - Linux, `open` - MacOS, `explorer` - Windows).
+The editor your directories will be opened with (Leave blank to use defaults : `vi` - Linux, `open` - macOS, `explorer` - Windows).
 
 - ###### auto_check_update
 
@@ -46,7 +46,9 @@ The editor your directories will be opened with (Leave blank to use defaults : `
 
 After setting to `true`, you need to update your shell config file. Sample changes :
 
-##### MacOS/Linux (bash)
+##### macOS/Linux (bash or fish)
+
+###### Bash
 
 Open the file:
 
@@ -62,6 +64,26 @@ Save, exit, and reload your `.bashrc` file:
 
 ```bash
 source ~/.bashrc
+```
+
+###### Fish
+
+Open the file:
+
+```bash
+$EDITOR ~/.config/fish/config.fish
+```
+
+If you suspect your `config.fish` file is located somewhere else, read [the Fish shell documentation](https://fishshell.com/docs/current/language.html#configuration)
+
+Copy the following code into the file:
+
+<CodeBlock file="cd_on_quit/cd_on_quit.fish" />
+
+Save, exit, and reload `config.fish`:
+
+```bash
+source ~/.config/fish/config.fish
 ```
 
 ##### Windows (Powershell)
@@ -162,6 +184,14 @@ Controls whether warnings about missing fields in the config file are displayed.
 
 `false` => Warnings will be shown for any missing fields in the config file
 
+- ###### page_scroll_size
+
+Number of lines to scroll when using PgUp/PgDown keys.
+
+`0` => Full page scroll (default behavior)
+
+`n` (where n > 0) => Scroll exactly n lines
+
 ### Style
 
 - ###### code_previewer
@@ -209,10 +239,10 @@ This setting is an integer.
 
 `0` => The sidebar will not display.
 
-`X` => The width of the sidebar.
+`X` => The width of the sidebar(excluding borders).
 
 :::caution
-`X` must be from 3 to 20.
+`X` must be from 5 to 20.
 :::
 
 - ###### Border style
@@ -251,6 +281,21 @@ border_bottom_right = "╯"
 border_middle_left = "├"
 border_middle_right = "┤"
 #...
+```
+
+- ###### open_with
+
+Allows users to map file extensions to commands used to open them.
+The file path will be appended as the last argument.
+
+:::caution
+Must be at the very end of the file 
+:::
+
+```toml
+[open_with]
+xopp = "xournalpp"
+conf = "nvim"
 ```
 
 ### Default superfile config

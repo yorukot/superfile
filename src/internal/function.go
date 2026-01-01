@@ -3,13 +3,10 @@ package internal
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 	"os"
 	"path/filepath"
 	"regexp"
 	"runtime"
-	"slices"
-	"sort"
 	"strconv"
 	"strings"
 
@@ -17,15 +14,6 @@ import (
 
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/utils"
-
-	"github.com/yorukot/superfile/src/internal/common"
-)
-
-const (
-	sortingName         sortingKind = "Name"
-	sortingSize         sortingKind = "Size"
-	sortingDateModified sortingKind = "Date Modified"
-	sortingFileType     sortingKind = "Type"
 )
 
 var suffixRegexp = regexp.MustCompile(`^(.*)\((\d+)\)$`)
@@ -45,7 +33,7 @@ func isExternalDiskPath(path string) bool {
 		return false
 	}
 
-	// exclude timemachine on MacOS
+	// exclude timemachine on macOS
 	if strings.HasPrefix(path, "/Volumes/.timemachine") {
 		return false
 	}
@@ -55,205 +43,6 @@ func isExternalDiskPath(path string) bool {
 		strings.HasPrefix(path, "/media") ||
 		strings.HasPrefix(path, "/run/media") ||
 		strings.HasPrefix(path, "/Volumes")
-}
-
-func returnFocusType(focusPanel focusPanelType) bool {
-	return focusPanel == nonePanelFocus
-}
-
-// TODO : Take common.Config.CaseSensitiveSort as a function parameter
-// and also consider testing this caseSensitive with both true and false in
-// our unit_test TestReturnDirElement
-func returnDirElement(location string, displayDotFile bool, sortOptions sortOptionsModelData) []element {
-	dirEntries, err := os.ReadDir(location)
-	if err != nil {
-		slog.Error("Error while returning folder elements", "error", err)
-		return nil
-	}
-
-	dirEntries = slices.DeleteFunc(dirEntries, func(e os.DirEntry) bool {
-		// Entries not needed to be considered
-		_, err := e.Info()
-		return err != nil || (strings.HasPrefix(e.Name(), ".") && !displayDotFile)
-	})
-
-	// No files/directoes to process
-	if len(dirEntries) == 0 {
-		return nil
-	}
-	return sortFileElement(sortOptions, dirEntries, location)
-}
-
-func returnDirElementBySearchString(location string, displayDotFile bool, searchString string,
-	sortOptions sortOptionsModelData,
-) []element {
-	items, err := os.ReadDir(location)
-	if err != nil {
-		slog.Error("Error while return folder element function", "error", err)
-		return nil
-	}
-
-	if len(items) == 0 {
-		return nil
-	}
-
-	folderElementMap := map[string]os.DirEntry{}
-	fileAndDirectories := []string{}
-
-	for _, item := range items {
-		fileInfo, err := item.Info()
-		if err != nil {
-			continue
-		}
-		if !displayDotFile && strings.HasPrefix(fileInfo.Name(), ".") {
-			continue
-		}
-
-		fileAndDirectories = append(fileAndDirectories, item.Name())
-		folderElementMap[item.Name()] = item
-	}
-	// https://github.com/reinhrst/fzf-lib/blob/main/core.go#L43
-	// fzf returns matches ordered by score; we subsequently sort by the chosen sort option.
-	fzfResults := utils.FzfSearch(searchString, fileAndDirectories)
-	dirElements := make([]os.DirEntry, 0, len(fzfResults))
-	for _, item := range fzfResults {
-		resultItem := folderElementMap[item.Key]
-		dirElements = append(dirElements, resultItem)
-	}
-
-	return sortFileElement(sortOptions, dirElements, location)
-}
-
-func sortFileElement(sortOptions sortOptionsModelData, dirEntries []os.DirEntry, location string) []element {
-	// Sort files
-	sort.Slice(dirEntries, getOrderingFunc(location, dirEntries,
-		sortOptions.reversed, sortOptions.options[sortOptions.selected]))
-	// Preallocate for efficiency
-	directoryElement := make([]element, 0, len(dirEntries))
-	for _, item := range dirEntries {
-		directoryElement = append(directoryElement, element{
-			name:      item.Name(),
-			directory: item.IsDir(),
-			location:  filepath.Join(location, item.Name()),
-		})
-	}
-	return directoryElement
-}
-
-func getOrderingFunc(location string, dirEntries []os.DirEntry, reversed bool, sortOption string) sliceOrderFunc {
-	var order func(i, j int) bool
-	switch sortOption {
-	case string(sortingName):
-		order = func(i, j int) bool {
-			// One of them is a directory, and other is not
-			if dirEntries[i].IsDir() != dirEntries[j].IsDir() {
-				return dirEntries[i].IsDir()
-			}
-			if common.Config.CaseSensitiveSort {
-				return dirEntries[i].Name() < dirEntries[j].Name() != reversed
-			}
-			return strings.ToLower(dirEntries[i].Name()) < strings.ToLower(dirEntries[j].Name()) != reversed
-		}
-	case string(sortingSize):
-		order = getSizeOrderingFunc(dirEntries, reversed, location)
-	case string(sortingDateModified):
-		order = func(i, j int) bool {
-			// No need for err check, we already filtered out dirEntries with err != nil in Info() call
-			fileInfoI, _ := dirEntries[i].Info()
-			fileInfoJ, _ := dirEntries[j].Info()
-			// Note : If ModTime matches, the comparator returns false both ways; order becomes non-deterministic
-			// TODO: Fix this
-			return fileInfoI.ModTime().After(fileInfoJ.ModTime()) != reversed
-		}
-	case string(sortingFileType):
-		order = getTypeOrderingFunc(dirEntries, reversed)
-	}
-	return order
-}
-
-func getSizeOrderingFunc(dirEntries []os.DirEntry, reversed bool, location string) sliceOrderFunc {
-	return func(i, j int) bool {
-		// Directories at the top sorted by direct child count (not recursive)
-		// Files sorted by size
-
-		// One of them is a directory, and other is not
-		if dirEntries[i].IsDir() != dirEntries[j].IsDir() {
-			return dirEntries[i].IsDir()
-		}
-
-		// This needs to be improved, and we should sort by actual size only
-		// Repeated recursive read would be slow, so we could cache
-		if dirEntries[i].IsDir() && dirEntries[j].IsDir() {
-			filesI, err := os.ReadDir(filepath.Join(location, dirEntries[i].Name()))
-			// No need of early return, we only call len() on filesI, so nil would
-			// just result in 0
-			if err != nil {
-				slog.Error("Error when reading directory during sort", "error", err)
-			}
-			filesJ, err := os.ReadDir(filepath.Join(location, dirEntries[j].Name()))
-			if err != nil {
-				slog.Error("Error when reading directory during sort", "error", err)
-			}
-			return len(filesI) < len(filesJ) != reversed
-		}
-		// No need for err check, we already filtered out dirEntries with err != nil in Info() call
-		fileInfoI, _ := dirEntries[i].Info()
-		fileInfoJ, _ := dirEntries[j].Info()
-		return fileInfoI.Size() < fileInfoJ.Size() != reversed
-	}
-}
-
-func getTypeOrderingFunc(dirEntries []os.DirEntry, reversed bool) sliceOrderFunc {
-	return func(i, j int) bool {
-		// One of them is a directory, and the other is not
-		if dirEntries[i].IsDir() != dirEntries[j].IsDir() {
-			return dirEntries[i].IsDir()
-		}
-
-		var extI, extJ string
-		if !dirEntries[i].IsDir() {
-			extI = strings.ToLower(filepath.Ext(dirEntries[i].Name()))
-		}
-		if !dirEntries[j].IsDir() {
-			extJ = strings.ToLower(filepath.Ext(dirEntries[j].Name()))
-		}
-
-		// Compare by extension/type
-		if extI != extJ {
-			return (extI < extJ) != reversed
-		}
-
-		// If same type, fall back to name
-		if common.Config.CaseSensitiveSort {
-			return (dirEntries[i].Name() < dirEntries[j].Name()) != reversed
-		}
-
-		return (strings.ToLower(dirEntries[i].Name()) < strings.ToLower(dirEntries[j].Name())) != reversed
-	}
-}
-
-func panelElementHeight(mainPanelHeight int) int {
-	return mainPanelHeight - 3
-}
-
-// TODO : replace usage of this with slices.contains
-func arrayContains(s []string, str string) bool {
-	for _, v := range s {
-		if v == str {
-			return true
-		}
-	}
-	return false
-}
-
-func removeElementByValue(slice []string, value string) []string {
-	newSlice := []string{}
-	for _, v := range slice {
-		if v != value {
-			newSlice = append(newSlice, v)
-		}
-	}
-	return newSlice
 }
 
 func checkFileNameValidity(name string) error {
@@ -282,6 +71,7 @@ func renameIfDuplicate(destination string) (string, error) {
 
 	// Extract base name without existing suffix
 	counter := 1
+	//nolint:mnd // 3 = full match + 2 capture groups
 	if match := suffixRegexp.FindStringSubmatch(name); len(match) == 3 {
 		name = match[1] // base name without (N)
 		if num, err := strconv.Atoi(match[2]); err == nil {
@@ -299,12 +89,6 @@ func renameIfDuplicate(destination string) (string, error) {
 	}
 
 	return "", fmt.Errorf("could not find free name for %s after many attempts", destination)
-}
-
-// TODO : Replace all usage of "m.fileModel.filePanels[m.filePanelFocusIndex]" with this
-// There are many usage
-func (m *model) getFocusedFilePanel() *filePanel {
-	return &m.fileModel.filePanels[m.filePanelFocusIndex]
 }
 
 // Count how many file in the directory

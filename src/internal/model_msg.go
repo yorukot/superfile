@@ -39,8 +39,8 @@ func NewPasteOperationMsg(state processbar.ProcessState, reqID int) PasteOperati
 }
 
 func (msg PasteOperationMsg) ApplyToModel(m *model) tea.Cmd {
-	if (msg.state == processbar.Failed || msg.state == processbar.Successful) && m.copyItems.cut {
-		m.copyItems.reset(false)
+	if (msg.state == processbar.Failed || msg.state == processbar.Successful) && m.clipboard.IsCut() {
+		m.clipboard.Reset(false)
 	}
 	return nil
 }
@@ -62,7 +62,7 @@ func NewDeleteOperationMsg(state processbar.ProcessState, reqID int) DeleteOpera
 
 func (msg DeleteOperationMsg) ApplyToModel(m *model) tea.Cmd {
 	// Remove selection
-	m.getFocusedFilePanel().resetSelected()
+	m.getFocusedFilePanel().ResetSelected()
 	return nil
 }
 
@@ -121,12 +121,14 @@ func (msg ExtractOperationMsg) ApplyToModel(_ *model) tea.Cmd {
 type MetadataMsg struct {
 	BaseMessage
 
-	meta metadata.Metadata
+	meta            metadata.Metadata
+	metadataFocused bool
 }
 
-func NewMetadataMsg(meta metadata.Metadata, reqID int) MetadataMsg {
+func NewMetadataMsg(meta metadata.Metadata, metadataFocused bool, reqID int) MetadataMsg {
 	return MetadataMsg{
-		meta: meta,
+		meta:            meta,
+		metadataFocused: metadataFocused,
 		BaseMessage: BaseMessage{
 			reqID: reqID,
 		},
@@ -134,17 +136,23 @@ func NewMetadataMsg(meta metadata.Metadata, reqID int) MetadataMsg {
 }
 
 func (msg MetadataMsg) ApplyToModel(m *model) tea.Cmd {
-	selectedItem := m.getFocusedFilePanel().getSelectedItemPtr()
+	m.fileMetaData.SetMetadataCache(msg.meta, msg.metadataFocused)
+	selectedItem := m.getFocusedFilePanel().GetFocusedItemPtr()
 	if selectedItem == nil {
 		slog.Debug("Panel empty or cursor invalid. Ignoring MetadataMsg")
 		return nil
 	}
-	if selectedItem.location != msg.meta.GetPath() {
-		slog.Debug("MetadataMsg for older files. Ignoring")
+	if selectedItem.Location != msg.meta.GetPath() {
+		slog.Debug("MetadataMsg for older files. Ignoring",
+			"currentItem", selectedItem.Location, "msgItem", msg.meta.GetPath())
 		return nil
 	}
-	m.fileMetaData.SetMetadata(msg.meta)
-	selectedItem.metaData = msg.meta.GetData()
+	if (m.focusPanel == metadataFocus) != msg.metadataFocused {
+		slog.Debug("MetadataMsg for older state. Ignoring",
+			"actualFocus", m.focusPanel, "msgFocus", msg.metadataFocused)
+		return nil
+	}
+	m.fileMetaData.SetMetadata(msg.meta, msg.metadataFocused)
 	return nil
 }
 
@@ -165,36 +173,5 @@ func NewNotifyModalMsg(m notify.Model, reqID int) NotifyModalUpdateMsg {
 
 func (msg NotifyModalUpdateMsg) ApplyToModel(m *model) tea.Cmd {
 	m.notifyModel = msg.m
-	return nil
-}
-
-type FilePreviewUpdateMsg struct {
-	BaseMessage
-
-	location string
-	content  string
-}
-
-func NewFilePreviewUpdateMsg(location string, content string, reqID int) FilePreviewUpdateMsg {
-	return FilePreviewUpdateMsg{
-		location: location,
-		content:  content,
-		BaseMessage: BaseMessage{
-			reqID: reqID,
-		},
-	}
-}
-
-func (msg FilePreviewUpdateMsg) ApplyToModel(m *model) tea.Cmd {
-	selectedItem := m.getFocusedFilePanel().getSelectedItemPtr()
-	if selectedItem == nil {
-		slog.Debug("Panel empty or cursor invalid. Ignoring FilePreviewUpdateMsg")
-		return nil
-	}
-	if selectedItem.location != msg.location {
-		slog.Debug("FilePreviewUpdateMsg for older files. Ignoring")
-		return nil
-	}
-	m.fileModel.filePreview.SetContent(msg.content)
 	return nil
 }

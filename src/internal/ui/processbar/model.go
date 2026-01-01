@@ -90,8 +90,8 @@ func (m *Model) HasRunningProcesses() bool {
 	return false
 }
 
-func (m *Model) Render(processBarFocussed bool) string {
-	r := ui.ProcessBarRenderer(m.height, m.width, processBarFocussed)
+func (m *Model) Render(processBarFocused bool) string {
+	r := ui.ProcessBarRenderer(m.height, m.width, processBarFocused)
 	if !m.isValid() {
 		slog.Error("processBar in invalid state", "render", m.renderIndex,
 			"cursor", m.cursor, "Height", m.height)
@@ -119,7 +119,7 @@ func (m *Model) Render(processBarFocussed bool) string {
 		// TODO: We could, save pointer of process in map and update progressbar of each
 		// map on each SetWidth. This would be cleaner and more efficient.
 		curProcess := processes[i]
-		curProcess.Progress.Width = m.viewWidth() - 3
+		curProcess.Progress.Width = m.viewWidth() - progressBarRightPadding
 
 		// TODO : get them via a separate function.
 		var cursor string
@@ -131,17 +131,18 @@ func (m *Model) Render(processBarFocussed bool) string {
 		}
 
 		r.AddLines(cursor + common.FooterStyle.Render(
-			common.TruncateText(curProcess.Name, m.viewWidth()-7, "...")+" ") +
+			common.TruncateText(curProcess.Name, m.viewWidth()-processNameTruncatePadding, "...")+" ") +
 			curProcess.State.Icon())
 
-		// calculate progress percentage
-		// if the total is 0, that means the process only have directory
-		// so we can set the progress to 100%
+		// We add two lines here, and let the renderer take care of
+		// dropping the second line if it exceeds height
 		if curProcess.Total != 0 {
 			progressPercentage := float64(curProcess.Done) / float64(curProcess.Total)
 			r.AddLines(cursor+curProcess.Progress.ViewAs(progressPercentage), "")
 		} else {
-			r.AddLines(cursor + curProcess.Progress.ViewAs(1))
+			// if the total is 0, that means the process only have directory
+			// so we can set the progress to 100%
+			r.AddLines(cursor+curProcess.Progress.ViewAs(1), "")
 		}
 	}
 

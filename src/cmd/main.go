@@ -49,16 +49,25 @@ func Run(content embed.FS) {
 						fmt.Println(variable.LastDirFile)
 						return nil
 					}
-					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#66b2ff")).
-						Render("[Configuration file path]"), variable.ConfigFile)
-					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#ffcc66")).
-						Render("[Hotkeys file path]"), variable.HotkeysFile)
-					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#66ff66")).
-						Render("[Log file path]"), variable.LogFile)
-					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#ff9999")).
-						Render("[Configuration directory path]"), variable.SuperFileMainDir)
-					fmt.Printf("%-*s %s\n", 55, lipgloss.NewStyle().Foreground(lipgloss.Color("#ff66ff")).
-						Render("[Data directory path]"), variable.SuperFileDataDir)
+					fmt.Printf("%-*s %s\n",
+						common.HelpKeyColumnWidth,
+						lipgloss.NewStyle().Foreground(lipgloss.Color("#66b2ff")).Render("[Configuration file path]"),
+						variable.ConfigFile,
+					)
+					fmt.Printf("%-*s %s\n",
+						common.HelpKeyColumnWidth,
+						lipgloss.NewStyle().Foreground(lipgloss.Color("#ffcc66")).Render("[Hotkeys file path]"),
+						variable.HotkeysFile,
+					)
+					logStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#66ff66"))
+					configStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff9999"))
+					dataStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff66ff"))
+					fmt.Printf("%-*s %s\n", common.HelpKeyColumnWidth,
+						logStyle.Render("[Log file path]"), variable.LogFile)
+					fmt.Printf("%-*s %s\n", common.HelpKeyColumnWidth,
+						configStyle.Render("[Configuration directory path]"), variable.SuperFileMainDir)
+					fmt.Printf("%-*s %s\n", common.HelpKeyColumnWidth,
+						dataStyle.Render("[Data directory path]"), variable.SuperFileDataDir)
 					return nil
 				},
 				Flags: []cli.Flag{
@@ -120,9 +129,9 @@ func Run(content embed.FS) {
 
 func spfAppAction(_ context.Context, c *cli.Command) error {
 	// If no args are called along with "spf" use current dir
-	firstFilePanelDirs := []string{""}
+	firstPanelPaths := []string{""}
 	if c.Args().Present() {
-		firstFilePanelDirs = c.Args().Slice()
+		firstPanelPaths = c.Args().Slice()
 	}
 
 	variable.UpdateVarFromCliArgs(c)
@@ -131,10 +140,10 @@ func spfAppAction(_ context.Context, c *cli.Command) error {
 
 	firstUse := checkFirstUse()
 
-	p := tea.NewProgram(internal.InitialModel(firstFilePanelDirs, firstUse),
+	p := tea.NewProgram(internal.InitialModel(firstPanelPaths, firstUse),
 		tea.WithAltScreen(), tea.WithMouseCellMotion())
 	if _, err := p.Run(); err != nil {
-		utils.PrintfAndExit("Alas, there's been an error: %v", err)
+		utils.PrintfAndExitf("Alas, there's been an error: %v", err)
 	}
 
 	// This must be after calling internal.InitialModel()
@@ -194,8 +203,8 @@ func checkFirstUse() bool {
 	firstUse := false
 	if _, err := os.Stat(file); os.IsNotExist(err) {
 		firstUse = true
-		if err = os.WriteFile(file, nil, 0644); err != nil {
-			utils.PrintfAndExit("Failed to create file: %v", err)
+		if err = os.WriteFile(file, nil, utils.ConfigFilePerm); err != nil {
+			utils.PrintfAndExitf("Failed to create file: %v", err)
 		}
 	}
 	return firstUse
@@ -204,7 +213,7 @@ func checkFirstUse() bool {
 // Write data to the path file if it does not exists
 func writeConfigFile(path, data string) error {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		if err = os.WriteFile(path, []byte(data), 0644); err != nil {
+		if err = os.WriteFile(path, []byte(data), utils.ConfigFilePerm); err != nil {
 			return fmt.Errorf("failed to write config file %s: %w", path, err)
 		}
 	}
@@ -213,7 +222,7 @@ func writeConfigFile(path, data string) error {
 
 func initJSONFile(path string) error {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		if err = os.WriteFile(path, []byte("null"), 0644); err != nil {
+		if err = os.WriteFile(path, []byte("null"), utils.ConfigFilePerm); err != nil {
 			return fmt.Errorf("failed to initialize json file %s: %w", path, err)
 		}
 	}
@@ -221,7 +230,7 @@ func initJSONFile(path string) error {
 }
 
 func writeLastCheckTime(t time.Time) {
-	err := os.WriteFile(variable.LastCheckVersion, []byte(t.Format(time.RFC3339)), 0644)
+	err := os.WriteFile(variable.LastCheckVersion, []byte(t.Format(time.RFC3339)), utils.ConfigFilePerm)
 	if err != nil {
 		slog.Error("Error writing LastCheckVersion file", "error", err)
 	}
@@ -267,7 +276,7 @@ func shouldCheckForUpdate(now, last time.Time) bool {
 }
 
 func checkAndNotifyUpdate() {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), common.DefaultCLIContextTimeout)
 	defer cancel()
 
 	resp, err := fetchLatestRelease(ctx)

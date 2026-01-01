@@ -38,10 +38,10 @@ func TestCopy(t *testing.T) {
 		p := NewTestTeaProgWithEventLoop(t, defaultTestModel(dir1))
 
 		require.Equal(t, "file1.txt",
-			p.getModel().getFocusedFilePanel().element[0].name)
+			p.getModel().getFocusedFilePanel().Element[0].Name)
 		p.SendKeyDirectly(common.Hotkeys.CopyItems[0])
-		assert.False(t, p.getModel().copyItems.cut)
-		assert.Equal(t, file1, p.getModel().copyItems.items[0])
+		assert.False(t, p.getModel().clipboard.IsCut())
+		assert.Equal(t, file1, p.getModel().clipboard.GetFirstItem())
 
 		p.getModel().updateCurrentFilePanelDir("../dir2")
 		p.SendKey(common.Hotkeys.PasteItems[0])
@@ -51,8 +51,8 @@ func TestCopy(t *testing.T) {
 			return err == nil
 		}, DefaultTestTimeout, DefaultTestTick)
 
-		assert.False(t, p.getModel().copyItems.cut)
-		assert.Equal(t, file1, p.getModel().copyItems.items[0])
+		assert.False(t, p.getModel().clipboard.IsCut())
+		assert.Equal(t, file1, p.getModel().clipboard.GetFirstItem())
 
 		p.SendKey(common.Hotkeys.PasteItems[0])
 		assert.Eventually(t, func() bool {
@@ -144,15 +144,16 @@ func TestFileRename(t *testing.T) {
 			p := NewTestTeaProgWithEventLoop(t, m)
 			setFilePanelSelectedItemByLocation(t, m.getFocusedFilePanel(), file3)
 
-			p.SendKeyDirectly(common.Hotkeys.FilePanelItemRename[0])
-			m.getFocusedFilePanel().rename.SetValue("file2.txt")
+			p.SendKey(common.Hotkeys.FilePanelItemRename[0])
+			p.Send(tea.KeyMsg{Type: tea.KeyBackspace})
+			p.SendKey("2")
 			p.Send(tea.KeyMsg{Type: tea.KeyEnter})
 
-			// This will result in async
-			assert.Eventually(t, func() bool {
+			require.Eventually(t, func() bool {
 				return m.notifyModel.IsOpen()
-			}, DefaultTestTimeout, DefaultTestTick, "Notify modal never opened, filepanel items : %v",
-				m.getFocusedFilePanel().element)
+			}, DefaultTestTimeout, DefaultTestTick,
+				"Notify modal never opened, filepanel items : %v, renaming text : %v",
+				m.getFocusedFilePanel().Element, m.getFocusedFilePanel().Rename.Value())
 
 			assert.Equal(t, notify.New(true,
 				common.SameRenameWarnTitle,
@@ -178,7 +179,7 @@ func TestFileRename(t *testing.T) {
 				return err2 == nil && err3 == nil
 			}, DefaultTestTimeout, DefaultTestTick,
 				"Rename should be done/not done appropriately, file : %v",
-				m.getFocusedFilePanel().element)
+				m.getFocusedFilePanel().Element)
 		}
 
 		actualTest(false)

@@ -1,67 +1,76 @@
-# Catppuccin Frappe Flavor
-# Theme create by: https://github.com/GV14982
-# Update by(sort by time):
-#
-# Thanks for all contributor!!
+##############################################
+#                                            #
+#           Catppuccin Frappe Theme          #
+#                                            #
+##############################################
 
-# If you want to make sidebar border display just set it same as sidebar background color
+# This theme was created by: https://github.com/GV14982 ! Thank you <3
 
-# Code syntax highlight theme (you can go to https://github.com/alecthomas/chroma/blob/master/styles to find one you like)
+# This contains the theme config file for superfile! For more details see:
+# https://superfile.dev/configure/custom-theme/
+
+###############################################################################
+#                           Code Syntax Highlighting                          #
+###############################################################################
+
+# Find one you like at: https://github.com/alecthomas/chroma/blob/master/styles.
+
 code_syntax_highlight = "catppuccin-frappe"
 
-# ========= Border =========
-file_panel_border = "#737994" # Overlay0
-sidebar_border = "#303446"    # Base
-footer_border = "#737994"     # Overlay0
+###############################################################################
+#                                 Base Colors                                 #
+###############################################################################
 
-# ========= Border Active =========
-file_panel_border_active = "#babbf1" # Lavendar
-sidebar_border_active = "#e78284"    # Red
-footer_border_active = "#a6d189"     # Green
-modal_border_active = "#949cbb"      # Overlay2
+#-- Full Screen
+full_screen_fg = "#a5adce"
+full_screen_bg = "#303446"
 
-# ========= Background (bg) =========
-full_screen_bg = "#303446" # Base
-file_panel_bg = "#303446"  # Base
-sidebar_bg = "#303446"     # Base
-footer_bg = "#303446"      # Base
-modal_bg = "#303446"       # Base
+#-- Gradient
+# Note: This currently only supports two colors.
+gradient_color = ["#8caaee", "#ca9ee6"]
 
-# ========= Foreground (fg) =========
-full_screen_fg = "#a5adce" # Subtext0
-file_panel_fg = "#a5adce"  # Subtext0
-sidebar_fg = "#a5adce"     # Subtext0
-footer_fg = "#a5adce"      # Subtext0
-modal_fg = "#a5adce"       # Subtext0
+#-- File Panel
+file_panel_fg = "#a5adce"
+file_panel_bg = "#303446"
+file_panel_border = "#737994"
+file_panel_border_active = "#babbf1"
+file_panel_top_directory_icon = "#a6d189"
+file_panel_top_path = "#89b5fa"
+file_panel_item_selected_fg = "#99d1db"
+file_panel_item_selected_bg = "#303446"
 
-# ========= Special Color =========
-cursor = "#f2d5cf"  # Rosewater
-correct = "#a6d189" # Green
-error = "#e78284"   # Red
-hint = "#85c1dc"    # Sapphire
-cancel = "#ea999c"  # Maroon
-# Gradient color can only have two color!
-gradient_color = ["#8caaee", "#ca9ee6"] # [Blue, Mauve]
+#-- Footer
+footer_fg = "#a5adce"
+footer_bg = "#303446"
+footer_border = "#737994"
+footer_border_active = "#a6d189"
 
-# ========= File Panel Special Items =========
-file_panel_top_directory_icon = "#a6d189" # Green
-file_panel_top_path = "#89b5fa"           # Blue
-file_panel_item_selected_fg = "#99d1db"   # Sky
-file_panel_item_selected_bg = "#303446"   # Base
+#-- Sidebar
+sidebar_fg = "#a5adce"
+sidebar_bg = "#303446"
+sidebar_title = "#85c1dc"
+sidebar_border = "#303446"
+sidebar_border_active = "#e78284"
+sidebar_item_selected_fg = "#99d1db"
+sidebar_item_selected_bg = "#303446"
+sidebar_divider = "#949cbb"
 
-# ========= Sidebar Special Items =========
-sidebar_title = "#85c1dc"            # Sapphire
-sidebar_item_selected_fg = "#99d1db" # Sky
-sidebar_item_selected_bg = "#303446" # Base
-sidebar_divider = "#949cbb"          # Overlay2
+#-- Modals
+modal_fg = "#a5adce"
+modal_bg = "#303446"
+modal_border_active = "#949cbb"
+modal_cancel_fg = "#414559"
+modal_cancel_bg = "#ea999c"
+modal_confirm_fg = "#414559"
+modal_confirm_bg = "#99d1db"
 
-# ========= Modal Special Items =========
-modal_cancel_fg = "#414559" # Surface0
-modal_cancel_bg = "#ea999c" # Maroon
+#-- Help Menu
+help_menu_hotkey = "#99d1db"
+help_menu_title = "#ea999c"
 
-modal_confirm_fg = "#414559" # Surface0
-modal_confirm_bg = "#99d1db" # Sky
-
-# ========= Help Menu =========
-help_menu_hotkey = "#99d1db" # Sky
-help_menu_title = "#ea999c"  # Maroon
+#-- Special
+cursor = "#f2d5cf"
+correct = "#a6d189"
+error = "#e78284"
+hint = "#85c1dc"
+cancel = "#ea999c"

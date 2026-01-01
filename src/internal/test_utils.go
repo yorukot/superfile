@@ -11,6 +11,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/yorukot/superfile/src/internal/ui/filepanel"
+
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/utils"
 )
@@ -32,6 +34,11 @@ func defaultTestModelWithZClient(zClient *zoxidelib.Client, dirs ...string) *mod
 	return setModelParamsForTest(m)
 }
 
+func defaultTestModelWithFooter(dirs ...string) *model {
+	m := defaultModelConfig(false, true, false, dirs, nil)
+	return setModelParamsForTest(m)
+}
+
 func setModelParamsForTest(m *model) *model {
 	m.disableMetadata = true
 	TeaUpdate(m, tea.WindowSizeMsg{Width: DefaultTestModelWidth, Height: DefaultTestModelHeight})
@@ -45,9 +52,11 @@ func setupPanelModeAndSelection(t *testing.T, m *model, useSelectMode bool, item
 
 	if useSelectMode {
 		// Switch to select mode and set selected items
-		m.getFocusedFilePanel().changeFilePanelMode()
-		require.Equal(t, selectMode, panel.panelMode)
-		panel.selected = selectedItems
+		m.getFocusedFilePanel().ChangeFilePanelMode()
+		require.Equal(t, filepanel.SelectMode, panel.PanelMode)
+		for _, item := range selectedItems {
+			panel.SetSelected(item)
+		}
 	} else {
 		// Find the item in browser mode
 		setFilePanelSelectedItemByName(t, panel, itemName)
@@ -113,11 +122,11 @@ func performCopyOrCutOperation(t *testing.T, m *model, isCut bool) {
 // Helper function to verify clipboard state after copy/cut
 func verifyClipboardState(t *testing.T, m *model, isCut bool, useSelectMode bool, selectedItemsCount int) {
 	t.Helper()
-	assert.Equal(t, isCut, m.copyItems.cut, "Clipboard cut state should match operation")
+	assert.Equal(t, isCut, m.clipboard.IsCut(), "Clipboard cut state should match operation")
 	if useSelectMode {
-		assert.Len(t, m.copyItems.items, selectedItemsCount, "Clipboard should contain all selected items")
+		assert.Len(t, m.clipboard.GetItems(), selectedItemsCount, "Clipboard should contain all selected items")
 	} else {
-		assert.Len(t, m.copyItems.items, 1, "Clipboard should contain one item")
+		assert.Len(t, m.clipboard.GetItems(), 1, "Clipboard should contain one item")
 	}
 }
 
@@ -161,7 +170,7 @@ func verifyPreventedPasteResults(t *testing.T, m *model, originalPath string) {
 		verifyPathExists(t, originalPath, "Original file should still exist when paste is prevented")
 	}
 	// Clipboard should not be cleared when paste is prevented
-	assert.NotEmpty(t, m.copyItems.items, "Clipboard should not be cleared when paste is prevented")
+	assert.NotEmpty(t, m.clipboard.GetItems(), "Clipboard should not be cleared when paste is prevented")
 }
 
 // Helper function to verify successful paste results
@@ -184,9 +193,9 @@ func verifySuccessfulPasteResults(t *testing.T, targetDir string, expectedDestFi
 // -------------- Other utilities
 
 // Helper function to find item index in panel by name
-func findItemIndexInPanel(panel *filePanel, itemName string) int {
-	for i, elem := range panel.element {
-		if elem.name == itemName {
+func findItemIndexInPanel(panel *filepanel.Model, itemName string) int {
+	for i, elem := range panel.Element {
+		if elem.Name == itemName {
 			return i
 		}
 	}
@@ -194,9 +203,9 @@ func findItemIndexInPanel(panel *filePanel, itemName string) int {
 }
 
 // Helper function to find item index in panel by name
-func findItemIndexInPanelByLocation(panel *filePanel, itemLocation string) int {
-	for i, elem := range panel.element {
-		if elem.location == itemLocation {
+func findItemIndexInPanelByLocation(panel *filepanel.Model, itemLocation string) int {
+	for i, elem := range panel.Element {
+		if elem.Location == itemLocation {
 			return i
 		}
 	}
@@ -221,16 +230,16 @@ func getOriginalPath(useSelectMode bool, itemName, startDir string) string {
 	return ""
 }
 
-func setFilePanelSelectedItemByLocation(t *testing.T, panel *filePanel, filePath string) {
+func setFilePanelSelectedItemByLocation(t *testing.T, panel *filepanel.Model, filePath string) {
 	t.Helper()
 	idx := findItemIndexInPanelByLocation(panel, filePath)
 	require.NotEqual(t, -1, idx, "%s should be found in panel", filePath)
-	panel.cursor = idx
+	panel.Cursor = idx
 }
 
-func setFilePanelSelectedItemByName(t *testing.T, panel *filePanel, fileName string) {
+func setFilePanelSelectedItemByName(t *testing.T, panel *filepanel.Model, fileName string) {
 	t.Helper()
 	idx := findItemIndexInPanel(panel, fileName)
 	require.NotEqual(t, -1, idx, "%s should be found in panel", fileName)
-	panel.cursor = idx
+	panel.Cursor = idx
 }

@@ -1,76 +1,124 @@
-# More details are at https://superfile.dev/configure/superfile-config/
-#
-# change your theme
-theme = 'catppuccin'
-# 
-# The editor files will be opened with. (Leave blank to use the EDITOR environment variable).
+##############################################
+#                                            #
+#           Superfile Configuration          #
+#                                            #
+##############################################
+
+# This contains the root config file for superfile! More details can be found at
+# https://superfile.dev/configure/superfile-config/.
+
+###############################################################################
+#                                   Defaults                                  #
+###############################################################################
+
+#-- File Editor
+# Default: $EDITOR
 editor = ""
+
+#-- Directory Editor
 # 
-# The editor directories will be opened with. (Leave blank to use the default editors).
 dir_editor = ""
-#
-# Auto check for update
+
+#-- Auto check for update
 auto_check_update = true
-# 
-# Cd on quit (For more details, please check out https://superfile.dev/configure/superfile-config/#cd_on_quit)
+
+#-- cd on quit
+# Should we cd the shell to the last directory open in superfile when the
+# program exits? 
 cd_on_quit = false
-#
-# Whether to open file preview automatically every time superfile is opened.
+
+#-- File Preview
+# Should we open a file preview by default whenever selection-hovering over a
+# file?
 default_open_file_preview = true
-#
-# Whether to show image preview
+
+#-- Image Preview
+# Should we open an image preview by default whenever selection-hovering over an
+# image?
 show_image_preview = true
-# 
-#
-# Whether to hide additional footer info for file panel.
+
+#-- File Info Footer
+# Should we display a footer in the file panel that provides more file information?
 show_panel_footer_info = true
-#
-# The path of the first file panel when superfile is opened.
+
+#-- Default Directory
+# The initial path that the file panel should navigate to when superfile is
+# opened. This setting understands relative paths such as ".", "..", etc.
 default_directory = "."
-#
-# Display file sizes using powers of 1000 (kB, MB, GB) instead of powers of 1024 (KiB, MiB, GiB).
+
+#-- File Size Units
+# true: SI decimal units of 1000 (kB, MB, GB).
+# false: IEC binary units of 1024 (KiB, MiB, GiB).
 file_size_use_si = false
-#
-# Default sort type (0: Name, 1: Size, 2: Date Modified, 3: Type).
+
+#-- Default File Sort Type
+# (0: Name, 1: Size, 2: Date Modified, 3: Type).
 default_sort_type = 0
-#
-# Default sort order (false: Ascending, true: Descending).
+
+#-- Sort Order Reversing
+# true: Descending.
+# false: Ascending.
 sort_order_reversed = false
-#
-# Case sensitive sort by name (upper "B" comes before lower "a" if true).
+
+#-- Case-Sensitive Sorting (only for Name Sort)
+# An uppercase "B" comes before a lowercase "a" if true.
 case_sensitive_sort = false
-#
+
+#-- Exit Shell on Success
 # Whether to exit the shell on successful command execution.
 shell_close_on_success = false
-#
-# Whether to enable debug mode.
+
+#-- Page Scroll Size
+# Number of lines to scroll for PgUp/PgDown keys (0: full page, default behavior).
+page_scroll_size = 0
+
+#-- Debug Mode
 debug = false
-#
-# Whether to ignore warnings about missing fields in the config file.
+
+#-- Ignore Missing Config Fields
+# Whether to silence any warnings about missing config fields.
 ignore_missing_fields = false
-#
-# ================   Style =================
-#
+
+###############################################################################
+#                                   Styling                                   #
+###############################################################################
+
+#-- Theme
+# Put your theme's name here!
+theme = "catppuccin-mocha"
+
+#-- Code Previewer
 # Whether to use the builtin syntax highlighting with chroma or use bat. Values: "" for builtin chroma, "bat" for bat
-code_previewer = ''
-# 
-# If you don't have or don't want Nerdfont installed you can turn this off
+code_previewer = ""
+
+#-- Nerd Fonts Support
+# Whether to enable support for Nerd Fonts symbols.
+# Requires:  Font patched with the Nerd Fonts patch.
 nerdfont = true
-#
-# Show checkbox icons in select mode (requires nerdfont = true)
+
+#-- Show checkbox icons in select mode
+# Requires: nerdfont = true
 show_select_icons = true
-#
-# Set transparent background or not (this only work when your terminal background is transparent)
+
+#-- Transparent Background Support
+# Set to true to enable background transparency.
+# Requires: terminal support for colour transparency
 transparent_background = false
-# 
-# File preview width allow '0' (this mean same as file panel),'x' x must be from 2 to 10 (This means that the width of the file preview will be one xth of the total width.)
+
+#-- File Preview Panel Width
+# Width of the file preview panel will be 1/n of the total width.
+# Values recommended to be in 2–10.
+# Default (0): Use the same width as file picker panel.
 file_preview_width = 0
-#
-# The length of the sidebar. If you don't want to display the sidebar, you can input 0 directly. If you want to display the value, please place it in the range of 3-20.
+
+#-- Sidebar Width
+# If you don't want to display the sidebar, you can input 0 directly.
+# Values recommended to be in 5–20.
 sidebar_width = 20
-#
-# Border style
-# Make sure to add strings exactly one character wide. Use ' ' for borderless 
+
+#-- Border
+# Make sure to add strings that are exactly one character wide!
+# Use ' ' for borderless.
 border_top = '─'
 border_bottom = '─'
 border_left = '│'
@@ -81,15 +129,33 @@ border_bottom_left = '╰'
 border_bottom_right = '╯'
 border_middle_left = '├'
 border_middle_right = '┤'
-# 
-# ========== PLUGINS ========== #
-# Plugins means that you need to install some external dependencies to use them.
-# 
-# Show more detailed metadata, please install exiftool before enabling this plugin!
+
+###############################################################################
+#                                   Plugins                                   #
+###############################################################################
+
+# This section is for using plugins with superfile, external addons that extend
+# the default capabilities of the program! More info can be found at
+# https://superfile.dev/list/plugin-list/.
+
+#-- Detailed Metadata
+# Requires: exiftool
 metadata = false
-#
-# Enable MD5 checksum generation for files
+
+#-- MD5 Checksum Generation
+# Requires: md5sum
 enable_md5_checksum = false
 #
-# Zoxide support for the fast navigation
+#-- Zoxide Support - Smart directory navigation!
+# Requires: zoxide
 zoxide_support = false
+
+#-- File opening rules
+# Map file extensions to commands used to open them.
+# The file path will be appended as the last argument.
+# MUST BE IN THE VERY END OF THE FILE BECAUSE TOML CANNOT CLOSE TABLES
+# Example:
+#   png = "feh"
+#   pdf = "zathura"
+#   conf = "nvim"
+[open_with]

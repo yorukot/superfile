@@ -74,13 +74,27 @@ func sortMetadata(meta [][2]string) {
 	})
 }
 
-func GetMetadata(filePath string, metadataFocussed bool, et *exiftool.Exiftool) Metadata {
-	meta := getMetaDataUnsorted(filePath, metadataFocussed, et)
+func GetMetadata(filePath string, metadataFocused bool, et *exiftool.Exiftool) Metadata {
+	meta := getMetaDataUnsorted(filePath, metadataFocused, et)
 	sortMetadata(meta.data)
 	return meta
 }
 
-func getMetaDataUnsorted(filePath string, metadataFocussed bool, et *exiftool.Exiftool) Metadata {
+func getSymLinkMetaData(filePath string) Metadata {
+	res := Metadata{
+		filepath: filePath,
+	}
+	linkPath, symlinkErr := filepath.EvalSymlinks(filePath)
+	if symlinkErr != nil {
+		res.infoMsg = linkFileBrokenMsg
+	} else {
+		path := [2]string{keyPath, linkPath}
+		res.data = append(res.data, path)
+	}
+	return res
+}
+
+func getMetaDataUnsorted(filePath string, metadataFocused bool, et *exiftool.Exiftool) Metadata {
 	res := Metadata{
 		filepath: filePath,
 	}
@@ -91,13 +105,7 @@ func getMetaDataUnsorted(filePath string, metadataFocussed bool, et *exiftool.Ex
 		return res
 	}
 	if fileInfo.Mode()&os.ModeSymlink != 0 {
-		_, symlinkErr := filepath.EvalSymlinks(filePath)
-		if symlinkErr != nil {
-			res.infoMsg = linkFileBrokenMsg
-		} else {
-			res.infoMsg = linkFileMsg
-		}
-		return res
+		return getSymLinkMetaData(filePath)
 	}
 	// Add basic metadata information irrespective of what is fetched from exiftool
 	// Note : we prioritize these while sorting Metadata
@@ -109,10 +117,10 @@ func getMetaDataUnsorted(filePath string, metadataFocussed bool, et *exiftool.Ex
 	owner := [2]string{keyOwner, ownerVal}
 	group := [2]string{keyGroup, groupVal}
 
-	if fileInfo.IsDir() && metadataFocussed {
+	if fileInfo.IsDir() && metadataFocused {
 		// TODO : Calling dirSize() could be expensive for large directories, as it recursively
 		// walks the entire tree. For now we have async approach of loading metadata,
-		// and its only loaded when metadata panel is focussed.
+		// and its only loaded when metadata panel is focused.
 		size = [2]string{keySize, common.FormatFileSize(utils.DirSize(filePath))}
 	}
 	res.data = append(res.data, name, size, modifyDate, permissions, owner, group)

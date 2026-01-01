@@ -1,11 +1,13 @@
 package sidebar
 
-func (d directory) IsDivider() bool {
+import "log/slog"
+
+func (d directory) isDivider() bool {
 	return d == pinnedDividerDir || d == diskDividerDir
 }
-func (d directory) RequiredHeight() int {
-	if d.IsDivider() {
-		return 3
+func (d directory) requiredHeight() int {
+	if d.isDivider() {
+		return dividerDirHeight
 	}
 	return 1
 }
@@ -16,7 +18,7 @@ func (d directory) RequiredHeight() int {
 // len(s.directories) <= 2 - More hacky and hardcoded-like, but faster
 func (s *Model) NoActualDir() bool {
 	for _, d := range s.directories {
-		if !d.IsDivider() {
+		if !d.isDivider() {
 			return false
 		}
 	}
@@ -24,14 +26,14 @@ func (s *Model) NoActualDir() bool {
 }
 
 func (s *Model) isCursorInvalid() bool {
-	return s.cursor < 0 || s.cursor >= len(s.directories) || s.directories[s.cursor].IsDivider()
+	return s.cursor < 0 || s.cursor >= len(s.directories) || s.directories[s.cursor].isDivider()
 }
 
 func (s *Model) resetCursor() {
 	s.cursor = 0
 	// Move to first non Divider dir
 	for i, d := range s.directories {
-		if !d.IsDivider() {
+		if !d.isDivider() {
 			s.cursor = i
 			return
 		}
@@ -87,4 +89,26 @@ func (s *Model) pinnedIndexRange() (int, int) {
 		}
 	}
 	return pinnedDividerIdx + 1, diskDividerIdx - 1
+}
+
+// TODO: There are some utils like this that are common in all models
+// Come up with a way to prevent all this code duplication
+func (m *Model) GetWidth() int {
+	return m.width
+}
+
+func (m *Model) GetHeight() int {
+	return m.height
+}
+
+func (m *Model) SetHeight(height int) {
+	if height < minHeight {
+		slog.Error("Attempted to set too low height to sidebar", "height", height)
+		return
+	}
+	m.height = height
+}
+
+func (m *Model) Disabled() bool {
+	return m.disabled
 }

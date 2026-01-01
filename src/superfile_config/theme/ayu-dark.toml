@@ -1,67 +1,76 @@
-# Ayu Dark
-# Theme create by: https://github.com/rustnomicon
-# Update by(sort by time):
-#
-# Thanks for all contributor!!
+##############################################
+#                                            #
+#               Ayu Dark Theme               #
+#                                            #
+##############################################
 
-# If you want to make sidebar border display just set it same as sidebar background color
+# This theme was created by: https://github.com/rustnomicon ! Thank you <3
 
-# Code syntax highlight theme (you can go to https://github.com/alecthomas/chroma/blob/master/styles to find one you like)
+# This contains the theme config file for superfile! For more details see:
+# https://superfile.dev/configure/custom-theme/
+
+###############################################################################
+#                           Code Syntax Highlighting                          #
+###############################################################################
+
+# Find one you like at: https://github.com/alecthomas/chroma/blob/master/styles.
+
 code_syntax_highlight = "ayu-dark"
 
-# ========= Border =========
-file_panel_border = "#242936"
-sidebar_border = "#1f2430"
-footer_border = "#242936"
+###############################################################################
+#                                 Base Colors                                 #
+###############################################################################
 
-# ========= Border Active =========
-file_panel_border_active = "#ffcc66"
-sidebar_border_active = "#ff7733"
-footer_border_active = "#aad94c"
-modal_border_active = "#5c6773"
+#-- Full Screen
+full_screen_fg = "#b3b1ad"
+full_screen_bg = "#0f1419"
 
-# ========= Background (bg) =========
-full_screen_bg = "#0F1419"
-file_panel_bg = "#0F1419"
-sidebar_bg = "#0F1419"
-footer_bg = "#0F1419"
-modal_bg = "#0F1419"
-
-# ========= Foreground (fg) =========
-full_screen_fg = "#B3B1AD"
-file_panel_fg = "#B3B1AD"
-sidebar_fg = "#B3B1AD"
-footer_fg = "#B3B1AD"
-modal_fg = "#B3B1AD"
-
-# ========= Special Color =========
-cursor = "#FFCC66"
-correct = "#AAD94C"
-error = "#FF3333"
-hint = "#36A3D9"
-cancel = "#F07178"
-# Gradient color can only have two colors!
+#-- Gradient
+# Note: This currently only supports two colors.
 gradient_color = ["#FFB454", "#36A3D9"]
 
-# ========= File Panel Special Items =========
-file_panel_top_directory_icon = "#AAD94C"
-file_panel_top_path = "#FFCC66"
-file_panel_item_selected_fg = "#36A3D9"
-file_panel_item_selected_bg = "#1F2430"
+#-- File Panel
+file_panel_fg = "#b3b1ad"
+file_panel_bg = "#0f1419"
+file_panel_border = "#242936"
+file_panel_border_active = "#ffcc66"
+file_panel_top_directory_icon = "#aad94c"
+file_panel_top_path = "#ffcc66"
+file_panel_item_selected_fg = "#36a3d9"
+file_panel_item_selected_bg = "#1f2430"
 
-# ========= Sidebar Special Items =========
-sidebar_title = "#36A3D9"
-sidebar_item_selected_fg = "#36A3D9"
-sidebar_item_selected_bg = "#1F2430"
+#-- Footer
+footer_fg = "#b3b1ad"
+footer_bg = "#0f1419"
+footer_border = "#242936"
+footer_border_active = "#aad94c"
+
+#-- Sidebar
+sidebar_fg = "#b3b1ad"
+sidebar_bg = "#0f1419"
+sidebar_title = "#36a3d9"
+sidebar_border = "#1f2430"
+sidebar_border_active = "#ff7733"
+sidebar_item_selected_fg = "#36a3d9"
+sidebar_item_selected_bg = "#1f2430"
 sidebar_divider = "#242936"
 
-# ========= Modal Special Items =========
-modal_cancel_fg = "#0F1419"
-modal_cancel_bg = "#F07178"
+#-- Modals
+modal_fg = "#b3b1ad"
+modal_bg = "#0f1419"
+modal_border_active = "#5c6773"
+modal_cancel_fg = "#0f1419"
+modal_cancel_bg = "#f07178"
+modal_confirm_fg = "#0f1419"
+modal_confirm_bg = "#36a3d9"
 
-modal_confirm_fg = "#0F1419"
-modal_confirm_bg = "#36A3D9"
+#-- Help Menu
+help_menu_hotkey = "#36a3d9"
+help_menu_title = "#f07178"
 
-# ========= Help Menu =========
-help_menu_hotkey = "#36A3D9"
-help_menu_title = "#F07178"
+#-- Special
+cursor = "#ffcc66"
+correct = "#aad94c"
+error = "#ff3333"
+hint = "#36a3d9"
+cancel = "#f07178"

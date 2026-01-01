@@ -1,67 +1,76 @@
-# Gruvbox
-# Theme create by: https://github.com/yorukot
-# Update by(sort by time):
-# 
-# Thanks for all contributor!!
+##############################################
+#                                            #
+#                Gruvbox Theme               #
+#                                            #
+##############################################
 
-# If you want to make border display just set it same as sidebar background color
+# This theme was created by: https://github.com/yorukot ! Thank you <3
 
-# Code syntax highlight theme (you can go to https://github.com/alecthomas/chroma/blob/master/styles to find one you like)
+# This contains the theme config file for superfile! For more details see:
+# https://superfile.dev/configure/custom-theme/
+
+###############################################################################
+#                           Code Syntax Highlighting                          #
+###############################################################################
+
+# Find one you like at: https://github.com/alecthomas/chroma/blob/master/styles.
+
 code_syntax_highlight = "gruvbox"
 
-# ========= Border =========
-file_panel_border = "#868686"
-sidebar_border = "#282828"
-footer_border = "#868686"
+###############################################################################
+#                                 Base Colors                                 #
+###############################################################################
 
-# ========= Border Active =========
-file_panel_border_active = "#FFF1C5"
-sidebar_border_active = "#D79921"
-footer_border_active = "#D79921"
-modal_border_active = "#868686"
-
-# ========= Background (bg) =========
+#-- Full Screen
+full_screen_fg = "#ebdbb2"
 full_screen_bg = "#282828"
-file_panel_bg = "#282828"
-sidebar_bg = "#282828"
-footer_bg = "#282828"
-modal_bg = "#282828"
 
-# ========= Foreground (fg) =========
-full_screen_fg = "#EBDBB2"
-file_panel_fg = "#EBDBB2"
-sidebar_fg = "#EBDBB2"
-footer_fg = "#EBDBB2"
-modal_fg = "#EBDBB2"
-
-# ========= Special Color =========
-cursor = "#8EC07C"
-correct = "#8ec07c"
-error = "#FF6969"
-hint = "#468588"
-cancel = "#838383"
-# Gradient color can only have two color!
+#-- Gradient
+# Note: This currently only supports two colors.
 gradient_color = ["#689d6a", "#fb4934"]
 
-# ========= File Panel Special Items =========
-file_panel_top_directory_icon = "#8EC07C"
+#-- File Panel
+file_panel_fg = "#ebdbb2"
+file_panel_bg = "#282828"
+file_panel_border = "#868686"
+file_panel_border_active = "#fff1c5"
+file_panel_top_directory_icon = "#8ec07c"
 file_panel_top_path = "#458588"
-file_panel_item_selected_fg = "#D3869B"
+file_panel_item_selected_fg = "#d3869b"
 file_panel_item_selected_bg = "#282828"
 
-# ========= Sidebar Special Items =========
-sidebar_title = "#CC241D"
-sidebar_item_selected_fg = "#E8751A"
+#-- Footer
+footer_fg = "#ebdbb2"
+footer_bg = "#282828"
+footer_border = "#868686"
+footer_border_active = "#d79921"
+
+#-- Sidebar
+sidebar_fg = "#ebdbb2"
+sidebar_bg = "#282828"
+sidebar_title = "#cc241d"
+sidebar_border = "#282828"
+sidebar_border_active = "#d79921"
+sidebar_item_selected_fg = "#e8751a"
 sidebar_item_selected_bg = "#282828"
 sidebar_divider = "#868686"
 
-# ========= Modal Special Items =========
-modal_cancel_fg = "#EBDBB2"
-modal_cancel_bg = "#6D6D6D"
+#-- Modals
+modal_fg = "#ebdbb2"
+modal_bg = "#282828"
+modal_border_active = "#868686"
+modal_cancel_fg = "#ebdbb2"
+modal_cancel_bg = "#6d6d6d"
+modal_confirm_fg = "#ebdbb2"
+modal_confirm_bg = "#ff4d00"
 
-modal_confirm_fg = "#EBDBB2"
-modal_confirm_bg = "#FF4D00"
+#-- Help Menu
+help_menu_hotkey = "#8ec07c"
+help_menu_title = "#ff4d00"
 
-# ========= Help Menu =========
-help_menu_hotkey = "#8EC07C"
-help_menu_title = "#FF4D00"
+#-- Special
+cursor = "#8ec07c"
+correct = "#8ec07c"
+error = "#ff6969"
+hint = "#458588"
+cancel = "#838383"

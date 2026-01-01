@@ -9,6 +9,8 @@ import (
 
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 
+	"github.com/yorukot/superfile/src/internal/ui/filepanel"
+
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
 	"github.com/yorukot/superfile/src/internal/ui/sidebar"
@@ -25,16 +27,16 @@ import (
 // themes) setted up. Processes input directories and returns toggle states.
 
 // This is the only usecase of named returns, distinguish between multiple return values
-func initialConfig(firstFilePanelDirs []string) (toggleDotFile bool, //nolint: nonamedreturns // See above
+func initialConfig(firstPanelPaths []string) (toggleDotFile bool, //nolint: nonamedreturns // See above
 	toggleFooter bool, zClient *zoxidelib.Client) {
 	// Open log stream
-	file, err := os.OpenFile(variable.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	file, err := os.OpenFile(variable.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, utils.LogFilePerm)
 
 	// TODO : This could be improved if we want to make superfile more resilient to errors
 	// For example if the log file directories have access issues.
 	// we could pass a dummy object to log.SetOutput() and the app would still function.
 	if err != nil {
-		utils.PrintfAndExit("Error while opening superfile.log file : %v", err)
+		utils.PrintfAndExitf("Error while opening superfile.log file : %v", err)
 	}
 	common.LoadConfigFile()
 
@@ -80,9 +82,9 @@ func initialConfig(firstFilePanelDirs []string) (toggleDotFile bool, //nolint: n
 		}
 	}
 
-	updateFirstFilePanelDirs(firstFilePanelDirs, cwd, zClient)
+	updateFirstFilePanelPaths(firstPanelPaths, cwd, zClient)
 
-	slog.Debug("Directory configuration", "cwd", cwd, "start_directories", firstFilePanelDirs)
+	slog.Debug("Directory configuration", "cwd", cwd, "start_paths", firstPanelPaths)
 	printRuntimeInfo()
 
 	toggleDotFile = utils.ReadBoolFile(variable.ToggleDotFile, false)
@@ -91,27 +93,27 @@ func initialConfig(firstFilePanelDirs []string) (toggleDotFile bool, //nolint: n
 	return toggleDotFile, toggleFooter, zClient
 }
 
-func updateFirstFilePanelDirs(firstFilePanelDirs []string, cwd string, zClient *zoxidelib.Client) {
-	for i := range firstFilePanelDirs {
-		if firstFilePanelDirs[i] == "" {
-			firstFilePanelDirs[i] = common.Config.DefaultDirectory
+func updateFirstFilePanelPaths(firstPanelPaths []string, cwd string, zClient *zoxidelib.Client) {
+	for i := range firstPanelPaths {
+		if firstPanelPaths[i] == "" {
+			firstPanelPaths[i] = common.Config.DefaultDirectory
 		}
-		originalPath := firstFilePanelDirs[i]
-		firstFilePanelDirs[i] = utils.ResolveAbsPath(cwd, firstFilePanelDirs[i])
-		if _, err := os.Stat(firstFilePanelDirs[i]); err != nil {
-			slog.Error("cannot get stats for firstFilePanelDir", "error", err)
+		originalPath := firstPanelPaths[i]
+		firstPanelPaths[i] = utils.ResolveAbsPath(cwd, firstPanelPaths[i])
+		if _, err := os.Stat(firstPanelPaths[i]); err != nil {
+			slog.Error("cannot get stats", "path", firstPanelPaths[i], "error", err)
 			// In case the path provided did not exist, use zoxide query
 			// else, fallback to home dir
 			if common.Config.ZoxideSupport && zClient != nil {
 				path, err := attemptZoxideForInitPath(originalPath, zClient)
 				if err != nil {
 					slog.Error("Zoxide query error", "originalPath", originalPath, "error", err)
-					firstFilePanelDirs[i] = variable.HomeDir
+					firstPanelPaths[i] = variable.HomeDir
 				} else {
-					firstFilePanelDirs[i] = path
+					firstPanelPaths[i] = path
 				}
 			} else {
-				firstFilePanelDirs[i] = variable.HomeDir
+				firstPanelPaths[i] = variable.HomeDir
 			}
 		}
 	}
@@ -143,7 +145,7 @@ func printRuntimeInfo() {
 		"sys_bytes", memStats.Sys)
 	slog.Debug("Object sizes",
 		"model_size_bytes", reflect.TypeOf(model{}).Size(),
-		"filePanel_size_bytes", reflect.TypeOf(filePanel{}).Size(),
+		"filePanel_size_bytes", reflect.TypeOf(filepanel.Model{}).Size(),
 		"sidebarModel_size_bytes", reflect.TypeOf(sidebar.Model{}).Size(),
 		"renderer_size_bytes", reflect.TypeOf(rendering.Renderer{}).Size(),
 		"borderConfig_size_bytes", reflect.TypeOf(rendering.BorderConfig{}).Size(),

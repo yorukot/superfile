@@ -1,12 +1,13 @@
 package processbar
 
-import "log/slog"
+import (
+	"github.com/yorukot/superfile/src/internal/common"
+)
 
 // Control processbar panel list up
 // There is a shadowing happening here, but it will be removed
 // Once we make footerHeight part of model struct
-func (m *Model) ListUp(footerHeight int) {
-	slog.Debug("Model.ListUp()", "footerHeight", footerHeight)
+func (m *Model) ListUp() {
 	cntP := m.cntProcesses()
 	if cntP == 0 {
 		return
@@ -20,20 +21,19 @@ func (m *Model) ListUp(footerHeight int) {
 		m.cursor = cntP - 1
 		// Either start from beginning or
 		// from a process so that we could render last one
-		m.renderIndex = max(0, cntP-cntRenderableProcess(footerHeight))
+		m.renderIndex = max(0, cntP-m.cntRenderableProcess())
 	}
 }
 
 // Control processbar panel list down
-func (m *Model) ListDown(footerHeight int) {
-	slog.Debug("Model.ListDown()", "footerHeight", footerHeight)
+func (m *Model) ListDown() {
 	cntP := m.cntProcesses()
 	if cntP == 0 {
 		return
 	}
 	if m.cursor < cntP-1 {
 		m.cursor++
-		if m.cursor > m.renderIndex+cntRenderableProcess(footerHeight)-1 {
+		if m.cursor > m.renderIndex+m.cntRenderableProcess()-1 {
 			m.renderIndex++
 		}
 	} else {
@@ -42,9 +42,13 @@ func (m *Model) ListDown(footerHeight int) {
 	}
 }
 
-// Separate out this calculation for better documentation
+func (m *Model) cntRenderableProcess() int {
+	footerHeight := m.height - common.BorderPadding
+	return cntRenderableProcess(footerHeight)
+}
+
 func cntRenderableProcess(footerHeight int) int {
 	// We can render one process in three lines
 	// And last process in two or three lines ( with/without a line separtor)
-	return (footerHeight + 1) / 3
+	return (footerHeight + 1) / linesPerProcess
 }

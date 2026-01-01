@@ -12,10 +12,10 @@ import (
 )
 
 const (
-	CurrentVersion = "v1.4.0"
+	CurrentVersion = "v1.4.1"
 	// Allowing pre-releases with non production version
 	// Set this to "" for production releases
-	PreReleaseSuffix = ""
+	PreReleaseSuffix = "-rc"
 
 	// This gives most recent non-prerelease, non-draft release
 	LatestVersionURL    = "https://api.github.com/repos/yorukot/superfile/releases/latest"
@@ -26,7 +26,7 @@ const (
 	EmbedConfigFile          = EmbedConfigDir + "/config.toml"
 	EmbedHotkeysFile         = EmbedConfigDir + "/hotkeys.toml"
 	EmbedThemeDir            = EmbedConfigDir + "/theme"
-	EmbedThemeCatppuccinFile = EmbedThemeDir + "/catppuccin.toml"
+	EmbedThemeCatppuccinFile = EmbedThemeDir + "/catppuccin-mocha.toml"
 )
 
 var (
@@ -94,7 +94,7 @@ func UpdateVarFromCliArgs(c *cli.Command) {
 	// Validate the config file exists
 	if configFileArg != "" {
 		if _, err := os.Stat(configFileArg); err != nil {
-			utils.PrintfAndExit("Error: While reading config file '%s' from argument : %v", configFileArg, err)
+			utils.PrintfAndExitf("Error: While reading config file '%s' from argument : %v", configFileArg, err)
 		}
 		ConfigFile = configFileArg
 	}
@@ -103,7 +103,7 @@ func UpdateVarFromCliArgs(c *cli.Command) {
 
 	if hotkeyFileArg != "" {
 		if _, err := os.Stat(hotkeyFileArg); err != nil {
-			utils.PrintfAndExit("Error: While reading hotkey file '%s' from argument : %v", hotkeyFileArg, err)
+			utils.PrintfAndExitf("Error: While reading hotkey file '%s' from argument : %v", hotkeyFileArg, err)
 		}
 		HotkeysFile = hotkeyFileArg
 	}

@@ -15,7 +15,7 @@
 ### Pyautogui alternatives
 POC with pyautogui as a lot of issues, stated above.
 
-#### Linux / MacOS
+#### Linux / macOS
 
 - xdotool
   - Seems complicated. It wont be able to manage spf process that well

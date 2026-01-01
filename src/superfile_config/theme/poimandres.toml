@@ -1,67 +1,76 @@
-# Poimandres
-# Theme create by: https://github.com/Myles-J
-# Update by(sort by time):
-# - Update code_syntax_highlight(I couldn't find a matching theme so I'm using this one for now.) - github.com/yorukot
-# Thanks for all contributor!!
+##############################################
+#                                            #
+#              Poimandres Theme              #
+#                                            #
+##############################################
 
-# If you want to make border display just set it same as sidebar background color
+# This theme was created by: https://github.com/Myles-J ! Thank you <3
 
-# Code syntax highlight theme (you can go to https://github.com/alecthomas/chroma/blob/master/styles to find one you like)
+# This contains the theme config file for superfile! For more details see:
+# https://superfile.dev/configure/custom-theme/
+
+###############################################################################
+#                           Code Syntax Highlighting                          #
+###############################################################################
+
+# Find one you like at: https://github.com/alecthomas/chroma/blob/master/styles.
+
 code_syntax_highlight = "catppuccin-mocha"
 
-# ========= Border =========
-file_panel_border = "#6c7086"
-sidebar_border = "#2a303c"
-footer_border = "#6c7086"
+###############################################################################
+#                                 Base Colors                                 #
+###############################################################################
 
-# ========= Border Active =========
-file_panel_border_active = "#7fbbb3"
-sidebar_border_active = "#7fbbb3"
-footer_border_active = "#7fbbb3"
-modal_border_active = "#7fbbb3"
-
-# ========= Background (bg) =========
-full_screen_bg = "#1b1d24"
-file_panel_bg = "#1b1d24"
-sidebar_bg = "#1b1d24"
-footer_bg = "#1b1d24"
-modal_bg = "#1b1d24"
-
-# ========= Foreground (fg) =========
+#-- Full Screen
 full_screen_fg = "#cdd6f4"
-file_panel_fg = "#cdd6f4"
-sidebar_fg = "#cdd6f4"
-footer_fg = "#cdd6f4"
-modal_fg = "#cdd6f4"
+full_screen_bg = "#1b1d24"
 
-# ========= Special Color =========
-cursor = "#74c7ec"
-correct = "#a6e3a1"
-error = "#f38ba8"
-hint = "#89b4fa"
-cancel = "#6c7086"
-# Gradient color can only have two color!
+#-- Gradient
+# Note: This currently only supports two colors.
 gradient_color = ["#a6e3a1", "#f38ba8"]
 
-# ========= File Panel Special Items =========
+#-- File Panel
+file_panel_fg = "#cdd6f4"
+file_panel_bg = "#1b1d24"
+file_panel_border = "#6c7086"
+file_panel_border_active = "#7fbbb3"
 file_panel_top_directory_icon = "#a6e3a1"
 file_panel_top_path = "#89b4fa"
 file_panel_item_selected_fg = "#a6e3a1"
 file_panel_item_selected_bg = "#2a303c"
 
-# ========= Sidebar Special Items =========
+#-- Footer
+footer_fg = "#cdd6f4"
+footer_bg = "#1b1d24"
+footer_border = "#6c7086"
+footer_border_active = "#7fbbb3"
+
+#-- Sidebar
+sidebar_fg = "#cdd6f4"
+sidebar_bg = "#1b1d24"
 sidebar_title = "#cba6f7"
+sidebar_border = "#2a303c"
+sidebar_border_active = "#7fbbb3"
 sidebar_item_selected_fg = "#a6e3a1"
 sidebar_item_selected_bg = "#2a303c"
 sidebar_divider = "#6c7086"
 
-# ========= Modal Special Items =========
+#-- Modals
+modal_fg = "#cdd6f4"
+modal_bg = "#1b1d24"
+modal_border_active = "#7fbbb3"
 modal_cancel_fg = "#cdd6f4"
 modal_cancel_bg = "#6c7086"
-
 modal_confirm_fg = "#cdd6f4"
 modal_confirm_bg = "#4a4e69"
 
-# ========= Help Menu =========
+#-- Help Menu
 help_menu_hotkey = "#a6e3a1"
 help_menu_title = "#cba6f7"
+
+#-- Special
+cursor = "#74c7ec"
+correct = "#a6e3a1"
+error = "#f38ba8"
+hint = "#89b4fa"
+cancel = "#6c7086"

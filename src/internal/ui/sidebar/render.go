@@ -11,32 +11,32 @@ import (
 )
 
 // Render returns the rendered sidebar string
-func (s *Model) Render(mainPanelHeight int, sidebarFocussed bool, currentFilePanelLocation string) string {
-	if common.Config.SidebarWidth == 0 {
+func (s *Model) Render(sidebarFocused bool, currentFilePanelLocation string) string {
+	if s.Disabled() {
 		return ""
 	}
 	slog.Debug("Rendering sidebar.", "cursor", s.cursor,
 		"renderIndex", s.renderIndex, "dirs count", len(s.directories),
-		"sidebar focused", sidebarFocussed)
+		"sidebar focused", sidebarFocused)
 
-	r := ui.SidebarRenderer(mainPanelHeight+2, common.Config.SidebarWidth+2, sidebarFocussed)
+	r := ui.SidebarRenderer(s.height, s.width, sidebarFocused)
 
 	r.AddLines(common.SideBarSuperfileTitle, "")
 
-	if s.searchBar.Focused() || s.searchBar.Value() != "" || sidebarFocussed {
+	if s.searchBar.Focused() || s.searchBar.Value() != "" || sidebarFocused {
 		r.AddLines(s.searchBar.View())
 	}
 
 	if s.NoActualDir() {
 		r.AddLines(common.SideBarNoneText)
 	} else {
-		s.directoriesRender(mainPanelHeight, currentFilePanelLocation, sidebarFocussed, r)
+		s.directoriesRender(currentFilePanelLocation, sidebarFocused, r)
 	}
 	return r.Render()
 }
 
-func (s *Model) directoriesRender(mainPanelHeight int, curFilePanelFileLocation string,
-	sideBarFocussed bool, r *rendering.Renderer) {
+func (s *Model) directoriesRender(curFilePanelFileLocation string,
+	sideBarFocused bool, r *rendering.Renderer) {
 	// Cursor should always point to a valid directory at this point
 	if s.isCursorInvalid() {
 		slog.Error("Unexpected situation in sideBar Model. "+
@@ -47,12 +47,13 @@ func (s *Model) directoriesRender(mainPanelHeight int, curFilePanelFileLocation 
 	// TODO : This is not true when searchbar is not rendered(totalHeight is 2, not 3),
 	// so we end up underutilizing one line for our render. But it wont break anything.
 	totalHeight := sideBarInitialHeight
+	mainPanelHeight := s.height - common.BorderPadding
 	for i := s.renderIndex; i < len(s.directories); i++ {
-		if totalHeight+s.directories[i].RequiredHeight() > mainPanelHeight {
+		if totalHeight+s.directories[i].requiredHeight() > mainPanelHeight {
 			break
 		}
 
-		totalHeight += s.directories[i].RequiredHeight()
+		totalHeight += s.directories[i].requiredHeight()
 
 		switch s.directories[i] {
 		case pinnedDividerDir:
@@ -61,7 +62,7 @@ func (s *Model) directoriesRender(mainPanelHeight int, curFilePanelFileLocation 
 			r.AddLines("", common.SideBarDisksDivider, "")
 		default:
 			cursor := " "
-			if s.cursor == i && sideBarFocussed && !s.searchBar.Focused() {
+			if s.cursor == i && sideBarFocused && !s.searchBar.Focused() {
 				cursor = icon.Cursor
 			}
 			if s.renaming && s.cursor == i {

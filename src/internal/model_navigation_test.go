@@ -122,17 +122,16 @@ func TestFilePanelNavigation(t *testing.T) {
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
 			m := defaultTestModel(tt.startDir)
-			m.getFocusedFilePanel().cursor = tt.startCursor
-			m.getFocusedFilePanel().render = tt.startRender
-			m.getFocusedFilePanel().searchBar.SetValue("asdf")
+			m.getFocusedFilePanel().Cursor = tt.startCursor
+			m.getFocusedFilePanel().RenderIndex = tt.startRender
 			for _, s := range tt.keyInput {
 				TeaUpdate(m, utils.TeaRuneKeyMsg(s))
 			}
 
-			assert.Equal(t, tt.resultDir, m.getFocusedFilePanel().location)
+			assert.Equal(t, tt.resultDir, m.getFocusedFilePanel().Location)
 
 			if tt.searchBarClear {
-				assert.Empty(t, m.getFocusedFilePanel().searchBar.Value())
+				assert.Empty(t, m.getFocusedFilePanel().SearchBar.Value())
 			}
 
 			// Go back to original directory
@@ -142,8 +141,8 @@ func TestFilePanelNavigation(t *testing.T) {
 			TeaUpdate(m, tea.KeyMsg{Type: tea.KeyEnter})
 
 			// Make sure we have original curson and render
-			assert.Equal(t, tt.startCursor, m.getFocusedFilePanel().cursor)
-			assert.Equal(t, tt.startRender, m.getFocusedFilePanel().render)
+			assert.Equal(t, tt.startCursor, m.getFocusedFilePanel().Cursor)
+			assert.Equal(t, tt.startRender, m.getFocusedFilePanel().RenderIndex)
 		})
 	}
 }

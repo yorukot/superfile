@@ -1,10 +1,9 @@
-package internal
+package preview
 
 import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
 	"testing"
 
 	"github.com/charmbracelet/x/ansi"
@@ -14,7 +13,17 @@ import (
 	"github.com/yorukot/superfile/src/internal/utils"
 )
 
+/*
+- TODO Tests
+  - testdata with 10-15 small files(< 100 bytes each) with all kind of contents
+  - ascii control chars
+  - bin content
+  - video, pdf, image, corrupted files, files with bad perms?,
+  - symlinks, directories,
+*/
+
 func TestFilePreviewRenderWithDimensions(t *testing.T) {
+	testDir := t.TempDir()
 	// Test that
 	// 1 - we can truncate width and height
 	// 2 - We add extra whitespace to make up for width and height
@@ -141,40 +150,10 @@ func TestFilePreviewRenderWithDimensions(t *testing.T) {
 			err := os.WriteFile(filePath, []byte(tt.fileContent), 0o644)
 			require.NoError(t, err)
 
-			m := defaultTestModel(curDir)
-			m.fileModel.filePreview.SetWidth(tt.width)
-			m.fileModel.filePreview.SetHeight(tt.height)
-			res := ansi.Strip(m.fileModel.filePreview.RenderWithPath(filePath, m.fullWidth))
+			m := New()
+			res := ansi.Strip(m.RenderWithPath(filePath, tt.width, tt.height, tt.width))
 
 			assert.Equal(t, tt.expectedPreview, res, "filePath = %s", filePath)
 		})
 	}
-
-	// To prevent "normalizeOutput function unused" error.
-	_ = normalizeOutput("")
-}
-
-// normalizeOutput removes leading empty lines and normalizes line endings
-func normalizeOutput(output string) string {
-	// Split the output into lines
-	lines := strings.Split(output, "\n")
-
-	// Filter out empty lines at the beginning and end
-	var filteredLines []string
-	startFound := false
-	for _, line := range lines {
-		trimmedLine := strings.TrimSpace(line)
-		if trimmedLine != "" || startFound {
-			startFound = true
-			filteredLines = append(filteredLines, line)
-		}
-	}
-
-	// Remove trailing empty lines
-	for len(filteredLines) > 0 && strings.TrimSpace(filteredLines[len(filteredLines)-1]) == "" {
-		filteredLines = filteredLines[:len(filteredLines)-1]
-	}
-
-	// Join the lines back together
-	return strings.Join(filteredLines, "\n")
 }

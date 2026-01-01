@@ -14,3 +14,17 @@ var diskDividerDir = directory{ //nolint: gochecknoglobals // This is more like 
 
 // superfile logo + blank line + search bar
 const sideBarInitialHeight = 3
+
+// UI dimension constants for sidebar
+const (
+	// searchBarPadding is the total padding for search bar (borders + prompt + extra char)
+	searchBarPadding = 5 // 2 (borders) + 2 (prompt) + 1 (extra char)
+
+	directoryCapacityForDividers = 2
+
+	// dividerDirHeight is the default height when no height is available
+	dividerDirHeight = 3
+
+	minHeight = 5
+	minWidth  = 7
+)

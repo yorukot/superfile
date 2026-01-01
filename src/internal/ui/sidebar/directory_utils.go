@@ -2,11 +2,14 @@ package sidebar
 
 import (
 	"os"
+	"runtime"
 	"slices"
 
 	"github.com/adrg/xdg"
 
+	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/config/icon"
+	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/utils"
 )
 
@@ -38,7 +41,10 @@ func fuzzySearch(query string, dirs []directory) []directory {
 
 // Return all sidebar directories
 func getDirectories(pinnedMgr *PinnedManager) []directory {
-	return formDirctorySlice(getWellKnownDirectories(), pinnedMgr.Load(), getExternalMediaFolders())
+	return formDirctorySlice(
+		getWellKnownDirectories(),
+		getPinnedDirectoriesWithIcon(pinnedMgr),
+		getExternalMediaFolders())
 }
 
 // Return system default directory e.g. Home, Downloads, etc
@@ -54,17 +60,34 @@ func getWellKnownDirectories() []directory {
 		{Location: xdg.UserDirs.PublicShare, Name: icon.PublicShare + icon.Space + "PublicShare"},
 	}
 
+	// Add Trash directory for Linux only
+	if runtime.GOOS == utils.OsLinux {
+		wellKnownDirectories = append(wellKnownDirectories, directory{
+			Location: variable.LinuxTrashDirectory,
+			Name:     icon.Trash + icon.Space + "Trash",
+		})
+	}
+
 	return slices.DeleteFunc(wellKnownDirectories, func(d directory) bool {
 		_, err := os.Stat(d.Location)
 		return err != nil
 	})
 }
 
+func getPinnedDirectoriesWithIcon(pinnedMgr *PinnedManager) []directory {
+	dirs := pinnedMgr.Load()
+	for i := range dirs {
+		iconInfo := common.GetElementIcon(dirs[i].Name, true, false, common.Config.Nerdfont)
+		dirs[i].Name = iconInfo.Icon + icon.Space + dirs[i].Name
+	}
+	return dirs
+}
+
 // Get filtered directories using fuzzy search logic with three haystacks.
 func getFilteredDirectories(query string, pinnedMgr *PinnedManager) []directory {
 	return formDirctorySlice(
 		fuzzySearch(query, getWellKnownDirectories()),
-		fuzzySearch(query, pinnedMgr.Load()),
+		fuzzySearch(query, getPinnedDirectoriesWithIcon(pinnedMgr)),
 		fuzzySearch(query, getExternalMediaFolders()),
 	)
 }
@@ -72,7 +95,7 @@ func getFilteredDirectories(query string, pinnedMgr *PinnedManager) []directory 
 func formDirctorySlice(homeDirectories []directory, pinnedDirectories []directory,
 	diskDirectories []directory) []directory {
 	// Preallocation for efficiency
-	totalCapacity := len(homeDirectories) + len(pinnedDirectories) + len(diskDirectories) + 2
+	totalCapacity := len(homeDirectories) + len(pinnedDirectories) + len(diskDirectories) + directoryCapacityForDividers
 	directories := make([]directory, 0, totalCapacity)
 
 	directories = append(directories, homeDirectories...)

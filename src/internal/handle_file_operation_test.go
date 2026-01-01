@@ -8,7 +8,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/yorukot/superfile/src/internal/ui/filepanel"
+
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/utils"
 )
 
@@ -102,35 +105,28 @@ func TestCompressSelectedFiles(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			m := defaultTestModel(tt.startDir)
 			p := NewTestTeaProgWithEventLoop(t, m)
-			require.Greater(t, len(m.getFocusedFilePanel().element), tt.cursor)
+			require.Greater(t, len(m.getFocusedFilePanel().Element), tt.cursor)
 			// Update cursor
-			m.getFocusedFilePanel().cursor = tt.cursor
+			m.getFocusedFilePanel().Cursor = tt.cursor
 
-			require.Equal(t, browserMode, m.getFocusedFilePanel().panelMode)
+			require.Equal(t, filepanel.BrowserMode, m.getFocusedFilePanel().PanelMode)
 			if tt.selectMode {
-				m.getFocusedFilePanel().changeFilePanelMode()
-				m.getFocusedFilePanel().selected = tt.selectedElem
+				m.getFocusedFilePanel().ChangeFilePanelMode()
+				m.getFocusedFilePanel().SetSelectedAll(tt.selectedElem)
 			}
 
 			p.SendKey(common.Hotkeys.CompressFile[0])
+
+			// This is a bit of an indirect validation, but there aren't many ways.
+			// We many add a process type later, and ensure that a process of
+			// type compress was done
+			ensureOneProcessDone(t, m)
 			zipFile := filepath.Join(tt.startDir, tt.expectedZipName)
-			// Actual compress may take time, since its an os operations
-			assert.Eventually(t, func() bool {
-				_, err := os.Lstat(zipFile)
-				return err == nil
-			}, DefaultTestTimeout, DefaultTestTick)
-
-			// Assert zip file exists right after compression
 			require.FileExists(t, zipFile, "Expected zip file does not exist after compression")
-
-			// No-op update to get the filepanel updated
-			// TODO - This should not be needed. Only operation finish SPF should refresh
-			// on its own
-			p.SendDirectly(nil)
 
 			setFilePanelSelectedItemByLocation(t, m.getFocusedFilePanel(), zipFile)
 
-			selectedItemLocation := m.getFocusedFilePanel().getSelectedItem().location
+			selectedItemLocation := m.getFocusedFilePanel().GetFocusedItem().Location
 			assert.Equal(t, zipFile, selectedItemLocation)
 			// Ensure we are extracting the zip file, not a directory
 			fileInfo, err := os.Stat(selectedItemLocation)
@@ -271,9 +267,15 @@ func TestPasteItem(t *testing.T) {
 			}
 			// Checking separately, as this is something independent of tt.shouldPreventPaste
 			if tt.shouldClipboardClear {
-				assert.Empty(t, p.m.copyItems.items, "Clipboard should be cleared after successful cut-paste")
+				// Wait for the Paste Model message to reach to Model via bubble tea event loop, that will clear clipboard
+				// TODO: There are two eventually here in this test. A bit inefficient.
+				// We have different async activities, create of files, completion of process message reaching processbar, model msg reaching model. Ideally we would like to have one final check, that is process completion message reaching model, and then check all conditions serially one be one.
+				// For that there, might be need to implement ioReqDone count in model message, or a count per process type, or even an full fledged async manager.
+				assert.Eventually(t, func() bool {
+					return len(p.m.clipboard.GetItems()) == 0
+				}, DefaultTestTimeout, DefaultTestTick, "Clipboard should be cleared after successful cut-paste")
 			} else {
-				assert.NotEmpty(t, p.m.copyItems.items, "Clipboard should remain after copy-paste")
+				assert.NotEmpty(t, p.m.clipboard.GetItems(), "Clipboard should remain after copy-paste")
 			}
 		})
 	}
@@ -286,7 +288,7 @@ func TestPasteItem(t *testing.T) {
 		p := NewTestTeaProgWithEventLoop(t, m)
 
 		// Ensure clipboard is empty
-		m.copyItems.items = []string{}
+		m.clipboard.Reset(false)
 
 		// Get initial count
 		entriesBefore, err := os.ReadDir(emptyTestDir)
@@ -384,4 +386,14 @@ func setupModelAndPerformOperation(t *testing.T, startDir string, useSelectMode 
 	verifyClipboardState(t, m, isCut, useSelectMode, selectedItemsCount)
 
 	return m
+}
+
+func ensureOneProcessDone(t *testing.T, m *model) {
+	// Don't attempt to print
+	// m.processBarModel.GetProcessesSlice() in the failure message
+	// This will print values calculated at the beginning of the call
+	require.Eventually(t, func() bool {
+		processes := m.processBarModel.GetProcessesSlice()
+		return len(processes) == 1 && processes[0].State == processbar.Successful
+	}, DefaultTestTimeout, DefaultTestTick, "Compress process not done")
 }

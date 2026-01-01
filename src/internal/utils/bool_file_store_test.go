@@ -139,7 +139,7 @@ func TestWriteBoolFile(t *testing.T) {
 			if runtime.GOOS != OsWindows {
 				info, err := os.Stat(filePath)
 				require.NoError(t, err)
-				assert.Equal(t, os.FileMode(0644), info.Mode().Perm())
+				assert.Equal(t, os.FileMode(ConfigFilePerm), info.Mode().Perm())
 			}
 		})
 	}
@@ -159,17 +159,22 @@ func TestReadBoolFilePermissionDenied(t *testing.T) {
 		t.Skip("Skipping permission test on Windows")
 	}
 
+	// Skip when running as root since root can read files with 000 permissions
+	if os.Geteuid() == 0 {
+		t.Skip("Skipping permission test when running as root")
+	}
+
 	tempDir := t.TempDir()
 
 	// Create a file
 	filePath := filepath.Join(tempDir, "no_read_perm.txt")
-	err := os.WriteFile(filePath, []byte(TrueString), 0644)
+	err := os.WriteFile(filePath, []byte(TrueString), ConfigFilePerm)
 	require.NoError(t, err)
 
 	// Remove read permissions
 	err = os.Chmod(filePath, 0)
 	require.NoError(t, err)
-	defer os.Chmod(filePath, 0644) // Reset permissions for cleanup
+	defer os.Chmod(filePath, ConfigFilePerm) // Reset permissions for cleanup
 
 	// The function should return the default value when it can't read the file
 	result := ReadBoolFile(filePath, false)
@@ -183,6 +188,11 @@ func TestWriteBoolFilePermissionDenied(t *testing.T) {
 	// Skip on Windows as permission handling differs
 	if runtime.GOOS == OsWindows {
 		t.Skip("Skipping permission test on Windows")
+	}
+
+	// Skip when running as root since root can write to read-only directories
+	if os.Geteuid() == 0 {
+		t.Skip("Skipping permission test when running as root")
 	}
 
 	tempDir := t.TempDir()

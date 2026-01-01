@@ -5,7 +5,9 @@ import (
 
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 
-	bulkrename "github.com/yorukot/superfile/src/internal/ui/bulk_rename"
+	"github.com/yorukot/superfile/src/internal/ui/filemodel"
+
+	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/ui/sidebar"
@@ -21,17 +23,16 @@ import (
 // TODO: Move the configuration parameters to a ModelConfig struct.
 // Something like `RendererConfig` struct for `Renderer` struct in ui/renderer package
 func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool,
-	firstFilePanelDirs []string, zClient *zoxidelib.Client) *model {
+	firstPanelPaths []string, zClient *zoxidelib.Client) *model {
 	return &model{
-		filePanelFocusIndex: 0,
-		focusPanel:          nonePanelFocus,
-		processBarModel:     processbar.New(),
-		sidebarModel:        sidebar.New(),
-		fileMetaData:        metadata.New(),
-		fileModel: fileModel{
-			filePanels:  filePanelSlice(firstFilePanelDirs),
-			filePreview: preview.New(),
-			width:       10,
+		focusPanel:      nonePanelFocus,
+		processBarModel: processbar.New(),
+		sidebarModel:    sidebar.New(),
+		fileMetaData:    metadata.New(),
+		fileModel: filemodel.Model{
+			FilePanels:       filepanel.FilePanelSlice(firstPanelPaths),
+			FilePreview:      preview.New(),
+			SinglePanelWidth: common.DefaultFilePanelWidth,
 		},
 		helpMenu:        newHelpMenuModal(),
 		promptModal:     prompt.DefaultModel(prompt.PromptMinHeight, prompt.PromptMinWidth),
@@ -98,6 +99,21 @@ func getHelpMenuData() []helpMenuModalData { //nolint: funlen // This should be 
 		{
 			hotkey:         common.Hotkeys.OpenHelpMenu,
 			description:    "Open help menu (hotkeylist)",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey:         common.Hotkeys.OpenCommandLine,
+			description:    "Open command line",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey:         common.Hotkeys.OpenSPFPrompt,
+			description:    "Open SPF prompt",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey:         common.Hotkeys.OpenZoxide,
+			description:    "Open zoxide navigation",
 			hotkeyWorkType: globalType,
 		},
 		{
@@ -169,6 +185,16 @@ func getHelpMenuData() []helpMenuModalData { //nolint: funlen // This should be 
 		{
 			hotkey:         common.Hotkeys.ListDown,
 			description:    "Down",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey:         common.Hotkeys.PageUp,
+			description:    "Page up",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey:         common.Hotkeys.PageDown,
+			description:    "Page down",
 			hotkeyWorkType: globalType,
 		},
 		{
@@ -257,6 +283,11 @@ func getHelpMenuData() []helpMenuModalData { //nolint: funlen // This should be 
 		{
 			hotkey:         common.Hotkeys.CopyPath,
 			description:    "Copy current file or directory path",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey:         common.Hotkeys.CopyPWD,
+			description:    "Copy current working directory",
 			hotkeyWorkType: globalType,
 		},
 		{
