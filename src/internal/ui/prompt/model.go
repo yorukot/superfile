@@ -107,12 +107,13 @@ func (m *Model) handleNormalKeyInput(msg tea.KeyMsg) tea.Cmd {
 }
 
 // After action is performed, model will update the Model with results
-func (m *Model) HandleShellCommandResults(retCode int, _ string) {
+func (m *Model) HandleShellCommandResults(retCode int, output string) {
 	m.actionSuccess = retCode == 0
-	// Not allowing user to see output yet. This needs to be sanitized and
-	// need to be made sure that it doesn't breaks layout
-	// Hence we are ignoring output for now
 	m.resultMsg = fmt.Sprintf("Command exited with status %d", retCode)
+	output = strings.TrimSpace(output)
+	if output != "" {
+		m.resultMsg += "\n" + output
+	}
 	m.CloseOnSuccessIfNeeded()
 }
 

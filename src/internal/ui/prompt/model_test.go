@@ -199,6 +199,29 @@ func TestModel_HandleResults(t *testing.T) {
 		assert.True(t, m.IsOpen())
 	})
 
+	t.Run("Verify Shell command output is displayed", func(t *testing.T) {
+		m := defaultTestModel()
+		m.closeOnSuccess = false
+		m.Open(true)
+
+		// Test with single line output
+		m.HandleShellCommandResults(0, "hello world")
+		assert.Equal(t, "Command exited with status 0\nhello world", m.resultMsg)
+
+		// Test with multi-line output
+		m.HandleShellCommandResults(0, "line1\nline2\nline3")
+		assert.Equal(t, "Command exited with status 0\nline1\nline2\nline3", m.resultMsg)
+
+		// Test output is trimmed
+		m.HandleShellCommandResults(0, "  trimmed output  \n")
+		assert.Equal(t, "Command exited with status 0\ntrimmed output", m.resultMsg)
+
+		// Test with failed command and output
+		m.HandleShellCommandResults(1, "error message")
+		assert.False(t, m.LastActionSucceeded())
+		assert.Equal(t, "Command exited with status 1\nerror message", m.resultMsg)
+	})
+
 	t.Run("Verify SPF results update", func(t *testing.T) {
 		m := GenerateModel(spfPromptChar, shellPromptChar, false, defaultTestMaxHeight, defaultTestWidth)
 		m.Open(true)
