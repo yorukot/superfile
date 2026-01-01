@@ -163,6 +163,14 @@ func (m *Model) RenderWithPath(itemPath string, previewWidth int, previewHeight 
 	r := ui.FilePreviewPanelRenderer(previewHeight, previewWidth)
 	clearCmd := m.imagePreviewer.ClearKittyImages()
 
+	// Adjust dimensions if border is enabled
+	contentWidth := previewWidth
+	contentHeight := previewHeight
+	if common.Config.EnableFilePreviewBorder {
+		contentWidth = previewWidth - common.BorderThickness
+		contentHeight = previewHeight - common.BorderThickness
+	}
+
 	fileInfo, infoErr := os.Stat(itemPath)
 	if infoErr != nil {
 		slog.Error("Error get file info", "error", infoErr)
@@ -183,7 +191,7 @@ func (m *Model) RenderWithPath(itemPath string, previewWidth int, previewHeight 
 	}
 
 	if fileInfo.IsDir() {
-		return renderDirectoryPreview(r, itemPath, previewHeight) + clearCmd
+		return renderDirectoryPreview(r, itemPath, contentHeight) + clearCmd
 	}
 
 	if m.thumbnailGenerator != nil && m.thumbnailGenerator.SupportsExt(ext) {
@@ -195,16 +203,26 @@ func (m *Model) RenderWithPath(itemPath string, previewWidth int, previewHeight 
 		// Notes : If renderImagePreview fails, and return some error message
 		// render, then we dont apply clearCmd. This might cause issues.
 		// same for below usage of renderImagePreview
+		sideAreaWidth := fullModelWidth - previewWidth + 1
+		if common.Config.EnableFilePreviewBorder {
+			// Account for the border - images should start after the left border
+			sideAreaWidth = fullModelWidth - previewWidth + common.BorderThickness
+		}
 		return m.renderImagePreview(
-			r, thumbnailPath, previewWidth, previewHeight,
-			fullModelWidth-previewWidth+1, clearCmd)
+			r, thumbnailPath, contentWidth, contentHeight,
+			sideAreaWidth, clearCmd)
 	}
 
 	if isImageFile(itemPath) {
+		sideAreaWidth := fullModelWidth - previewWidth + 1
+		if common.Config.EnableFilePreviewBorder {
+			// Account for the border - images should start after the left border
+			sideAreaWidth = fullModelWidth - previewWidth + common.BorderThickness
+		}
 		return m.renderImagePreview(
-			r, itemPath, previewWidth, previewHeight,
-			fullModelWidth-previewWidth+1, clearCmd)
+			r, itemPath, contentWidth, contentHeight,
+			sideAreaWidth, clearCmd)
 	}
 
-	return m.renderTextPreview(r, itemPath, previewWidth, previewHeight) + clearCmd
+	return m.renderTextPreview(r, itemPath, contentWidth, contentHeight) + clearCmd
 }

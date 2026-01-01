@@ -59,7 +59,7 @@ func FilePreviewPanelRenderer(totalHeight int, totalWidth int) *rendering.Render
 	cfg := rendering.DefaultRendererConfig(totalHeight, totalWidth)
 	cfg.ContentFGColor = common.FilePanelFGColor
 	cfg.ContentBGColor = common.FilePanelBGColor
-	cfg.BorderRequired = false
+	cfg.BorderRequired = common.Config.EnableFilePreviewBorder
 	cfg.RendererName += "-preview"
 
 	r, err := rendering.NewRenderer(cfg)
