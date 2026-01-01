@@ -12,7 +12,6 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 
 	tea "github.com/charmbracelet/bubbletea"
-
 	variable "github.com/yorukot/superfile/src/config"
 )
 
@@ -168,34 +167,27 @@ func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
 			m.copyMultipleItem(false)
 		case slices.Contains(common.Hotkeys.CutItems, msg):
 			m.copyMultipleItem(true)
+		case slices.Contains(common.Hotkeys.BulkRename, msg):
+			m.panelBulkRename()
 		case slices.Contains(common.Hotkeys.FilePanelSelectAllItem, msg):
 			m.getFocusedFilePanel().SelectAllItem()
 		}
 		return nil
 	}
-
-	switch {
-	case slices.Contains(common.Hotkeys.Confirm, msg):
-		m.sidebarSelectDirectory()
-	case slices.Contains(common.Hotkeys.FilePanelItemRename, msg):
-		m.sidebarModel.PinnedItemRename()
-	case slices.Contains(common.Hotkeys.SearchBar, msg):
-		m.sidebarSearchBarFocus()
-	}
-	return nil
+	return m.handleBrowserModeKeys(msg)
 }
 
 func (m *model) handleSelectModeKeys(msg string) tea.Cmd {
 	if slices.Contains(common.Hotkeys.Confirm, msg) {
-		m.fileModel.filePanels[m.filePanelFocusIndex].singleItemSelect()
+		m.getFocusedFilePanel().SingleItemSelect()
 		return nil
 	}
 	if slices.Contains(common.Hotkeys.FilePanelSelectModeItemsSelectUp, msg) {
-		m.fileModel.filePanels[m.filePanelFocusIndex].itemSelectUp(m.mainPanelHeight)
+		m.getFocusedFilePanel().ItemSelectUp()
 		return nil
 	}
 	if slices.Contains(common.Hotkeys.FilePanelSelectModeItemsSelectDown, msg) {
-		m.fileModel.filePanels[m.filePanelFocusIndex].itemSelectDown(m.mainPanelHeight)
+		m.getFocusedFilePanel().ItemSelectDown()
 		return nil
 	}
 	if slices.Contains(common.Hotkeys.DeleteItems, msg) {
@@ -217,7 +209,7 @@ func (m *model) handleSelectModeFileOperations(msg string) tea.Cmd {
 	case slices.Contains(common.Hotkeys.BulkRename, msg):
 		m.panelBulkRename()
 	case slices.Contains(common.Hotkeys.FilePanelSelectAllItem, msg):
-		m.selectAllItem()
+		m.getFocusedFilePanel().SelectAllItem()
 	}
 	return nil
 }

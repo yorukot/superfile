@@ -3,6 +3,7 @@ package internal
 import (
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 
+	bulkrename "github.com/yorukot/superfile/src/internal/ui/bulk_rename"
 	"github.com/yorukot/superfile/src/internal/ui/clipboard"
 
 	"github.com/yorukot/superfile/src/internal/ui/filemodel"
@@ -128,3 +129,5 @@ type typingModal struct {
 }
 
 type editorFinishedMsg struct{ err error }
+
+type editorFinishedForBulkRenameMsg struct{ err error }

@@ -109,13 +109,13 @@ func (m *model) panelItemRename() {
 }
 
 func (m *model) panelBulkRename() {
-	panel := &m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := m.fileModel.FilePanels[m.fileModel.FocusedPanelIndex]
 
-	if panel.panelMode != selectMode || len(panel.selected) == 0 {
+	if panel.PanelMode != filepanel.SelectMode || panel.SelectedCount() == 0 {
 		return
 	}
 
-	m.bulkRenameModel.Open(panel.selected, panel.location)
+	m.bulkRenameModel.Open(panel.GetSelectedLocations(), panel.Location)
 	m.firstTextInput = true
 }
 

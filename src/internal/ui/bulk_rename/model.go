@@ -119,9 +119,9 @@ func (m *Model) HandleUpdate(msg tea.Msg) (common.ModelAction, tea.Cmd) {
 			m.Close()
 		case slices.Contains(common.Hotkeys.ConfirmTyping, msg.String()):
 			action = m.handleConfirm()
-		case slices.Contains(common.Hotkeys.ListUp, msg.String()):
+		case slices.Contains(common.Hotkeys.ListUp, msg.String()) && msg.String() != "j" && msg.String() != "k":
 			m.adjustValue(-1)
-		case slices.Contains(common.Hotkeys.ListDown, msg.String()):
+		case slices.Contains(common.Hotkeys.ListDown, msg.String()) && msg.String() != "j" && msg.String() != "k":
 			m.adjustValue(1)
 		case slices.Contains(common.Hotkeys.NavBulkRename, msg.String()):
 			m.nextType()

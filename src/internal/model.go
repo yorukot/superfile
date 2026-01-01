@@ -4,6 +4,8 @@ import (
 	"errors"
 	"log/slog"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"reflect"
 	"slices"
 	"strings"
@@ -12,6 +14,7 @@ import (
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
 
+	bulkrename "github.com/yorukot/superfile/src/internal/ui/bulk_rename"
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
@@ -83,7 +86,6 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case editorFinishedForBulkRenameMsg:
 		updateCmd = m.handleEditorFinishedForBulkRename(msg.err)
-
 	// Has to handle zoxide messages separately as they could be generated via
 	// zoxide update commands, or batched commands from textinput
 	// Cannot do it like processbar messages
@@ -296,10 +298,24 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 		m.firstUse = false
 		return nil
 	}
+	var cmd tea.Cmd
+	cdOnQuit := common.Config.CdOnQuit
+	switch {
+	case m.typingModal.open:
+		m.typingModalOpenKey(msg.String())
+	case m.promptModal.IsOpen():
+		// Ignore keypress. It will be handled in Update call via
+		// updateFilePanelState
+		// TODO: Convert that to async via tea.Cmd
+	case m.zoxideModal.IsOpen():
+		// Ignore keypress. It will be handled in Update call via
+		// updateFilePanelState
+	case m.bulkRenameModel.IsOpen():
+		return nil
 
-	cmd := m.handleModalOrDefaultKey(msg)
-	return m.handleQuitState(cmd, common.Config.CdOnQuit)
-}
+	// Handles all warn models except the warn model for confirming to quit
+	case m.notifyModel.IsOpen():
+		cmd = m.notifyModelOpenKey(msg.String())
 
 	// If renaming a object
 	case m.fileModel.Renaming:
@@ -321,6 +337,33 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 	case slices.Contains(common.Hotkeys.Quit, msg.String()):
 		m.modelQuitState = quitInitiated
 
+	case slices.Contains(common.Hotkeys.CdQuit, msg.String()):
+		m.modelQuitState = quitInitiated
+		cdOnQuit = true
+
+	default:
+		// Handles general kinds of inputs in the regular state of the application
+		cmd = m.mainKey(msg.String())
+	}
+
+	// If quiting input pressed, check if has any running process and displays a
+	// warn. Otherwise just quits application
+	if m.modelQuitState == quitInitiated {
+		if m.processBarModel.HasRunningProcesses() {
+			// Dont quit now, get a confirmation first.
+			m.modelQuitState = quitConfirmationInitiated
+			m.warnModalForQuit()
+			return cmd
+		}
+		m.modelQuitState = quitConfirmationReceived
+	}
+	if m.modelQuitState == quitConfirmationReceived {
+		m.quitSuperfile(cdOnQuit)
+		return tea.Quit
+	}
+	return cmd
+}
+
 func (m *model) routeModalInput(msg string) tea.Cmd {
 	if m.typingModal.open {
 		m.typingModalOpenKey(msg)
@@ -332,7 +375,7 @@ func (m *model) routeModalInput(msg string) tea.Cmd {
 	if m.notifyModel.IsOpen() {
 		return m.notifyModelOpenKey(msg)
 	}
-	if m.fileModel.renaming {
+	if m.fileModel.Renaming {
 		return m.renamingKey(msg)
 	}
 	if m.sidebarModel.IsRenaming() {
@@ -340,8 +383,8 @@ func (m *model) routeModalInput(msg string) tea.Cmd {
 		return nil
 	}
 
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
-	if panel.searchBar.Focused() {
+	panel := m.fileModel.FilePanels[m.fileModel.FocusedPanelIndex]
+	if panel.SearchBar.Focused() {
 		m.focusOnSearchbarKey(msg)
 		return nil
 	}
@@ -349,7 +392,7 @@ func (m *model) routeModalInput(msg string) tea.Cmd {
 		m.sidebarModel.HandleSearchBarKey(msg)
 		return nil
 	}
-	if panel.sortOptions.open {
+	if panel.SortOptions.Open {
 		m.sortOptionsKey(msg)
 		return nil
 	}
@@ -361,11 +404,11 @@ func (m *model) routeModalInput(msg string) tea.Cmd {
 }
 
 func (m *model) isAnyModalActive() bool {
-	panel := m.fileModel.filePanels[m.filePanelFocusIndex]
+	panel := m.fileModel.FilePanels[m.fileModel.FocusedPanelIndex]
 	return m.typingModal.open || m.promptModal.IsOpen() || m.zoxideModal.IsOpen() ||
-		m.notifyModel.IsOpen() || m.bulkRenameModel.IsOpen() || m.fileModel.renaming ||
-		m.sidebarModel.IsRenaming() || panel.searchBar.Focused() ||
-		m.sidebarModel.SearchBarFocused() || panel.sortOptions.open || m.helpMenu.open
+		m.notifyModel.IsOpen() || m.bulkRenameModel.IsOpen() || m.fileModel.Renaming ||
+		m.sidebarModel.IsRenaming() || panel.SearchBar.Focused() ||
+		m.sidebarModel.SearchBarFocused() || panel.SortOptions.Open || m.helpMenu.open
 }
 
 func (m *model) handleDefaultKey(msg string) tea.Cmd {
@@ -412,14 +455,14 @@ func (m *model) updateComponentState(msg tea.Msg) tea.Cmd {
 	cmd = m.handleInputUpdates(msg, focusPanel)
 
 	// The code should never reach this state.
-	if focusPanel.cursor < 0 {
-		focusPanel.cursor = 0
+	if focusPanel.Cursor < 0 {
+		focusPanel.Cursor = 0
 	}
 
 	return cmd
 }
 
-func (m *model) handleInputUpdates(msg tea.Msg, focusPanel *filePanel) tea.Cmd {
+func (m *model) handleInputUpdates(msg tea.Msg, focusPanel *filepanel.Model) tea.Cmd {
 	var cmd tea.Cmd
 	var action common.ModelAction
 
@@ -440,6 +483,9 @@ func (m *model) handleInputUpdates(msg tea.Msg, focusPanel *filePanel) tea.Cmd {
 	case m.zoxideModal.IsOpen():
 		action, cmd = m.zoxideModal.HandleUpdate(msg)
 		cmd = tea.Batch(cmd, m.applyZoxideModalAction(action))
+	case m.bulkRenameModel.IsOpen():
+		action, cmd = m.bulkRenameModel.HandleUpdate(msg)
+		cmd = tea.Batch(cmd, m.applyBulkRenameAction(action))
 	}
 	return cmd
 }
@@ -495,7 +541,7 @@ func (m *model) applyBulkRenameAction(action common.ModelAction) tea.Cmd {
 	if brAction, ok := action.(bulkrename.BulkRenameAction); ok {
 		return bulkrename.ExecuteBulkRename(&m.processBarModel, brAction.Previews)
 	}
-	_, _ = m.logAndExecuteAction(action)
+	_, _, _ = m.logAndExecuteAction(action)
 	return nil
 }
 

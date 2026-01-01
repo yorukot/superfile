@@ -6,6 +6,8 @@ import (
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 
 	"github.com/yorukot/superfile/src/internal/ui/filemodel"
+	bulkrename "github.com/yorukot/superfile/src/internal/ui/bulk_rename"
+
 
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
