@@ -99,6 +99,10 @@ func LoadTomlFile(filePath string, defaultData string, target interface{},
 		} else {
 			fieldName = field.Name
 		}
+		// Skip open_with field as it's an optional table
+		if fieldName == "open_with" {
+			continue
+		}
 		if _, exists := rawData[fieldName]; !exists {
 			missingFields = append(missingFields, fieldName)
 		}
