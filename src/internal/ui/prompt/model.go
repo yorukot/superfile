@@ -110,9 +110,12 @@ func (m *Model) handleNormalKeyInput(msg tea.KeyMsg) tea.Cmd {
 func (m *Model) HandleShellCommandResults(retCode int, output string) {
 	m.actionSuccess = retCode == 0
 	m.resultMsg = fmt.Sprintf("Command exited with status %d", retCode)
-	output = strings.TrimSpace(output)
+
+	output = strings.TrimSpace(common.MakePrintableWithEscCheck(output, false))
 	if output != "" {
-		m.resultMsg += "\n" + output
+		m.resultMsg += ", Output:\n" + output
+	} else {
+		m.resultMsg += " (No output)"
 	}
 	m.CloseOnSuccessIfNeeded()
 }
