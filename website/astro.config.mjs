@@ -165,6 +165,10 @@ export default defineConfig({
           label: "List",
           items: [
             {
+              label: "Features list",
+              link: "/list/features-list/",
+            },
+            {
               label: "Hotkey list",
               link: "/list/hotkey-list/",
             },
