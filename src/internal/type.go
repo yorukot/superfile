@@ -3,6 +3,7 @@ package internal
 import (
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 
+	bulkrename "github.com/yorukot/superfile/src/internal/ui/bulk_rename"
 	"github.com/yorukot/superfile/src/internal/ui/clipboard"
 
 	"github.com/yorukot/superfile/src/internal/ui/filemodel"
@@ -61,11 +62,12 @@ type model struct {
 	focusPanel      focusPanelType
 
 	// Modals
-	notifyModel notify.Model
-	typingModal typingModal
-	helpMenu    helpMenuModal
-	promptModal prompt.Model
-	zoxideModal zoxideui.Model
+	notifyModel     notify.Model
+	typingModal     typingModal
+	bulkRenameModel bulkrename.Model
+	helpMenu        helpMenuModal
+	promptModal     prompt.Model
+	zoxideModal     zoxideui.Model
 
 	// Zoxide client for directory tracking
 	zClient *zoxidelib.Client
@@ -79,6 +81,9 @@ type model struct {
 	toggleFooter         bool
 	firstLoadingComplete bool
 	firstUse             bool
+
+	// Pending editor action for bulk rename
+	pendingEditorAction *bulkrename.EditorModeAction
 
 	// This entirely disables metadata fetching. Used in test model
 	disableMetadata bool
@@ -124,3 +129,5 @@ type typingModal struct {
 }
 
 type editorFinishedMsg struct{ err error }
+
+type editorFinishedForBulkRenameMsg struct{ err error }
