@@ -30,5 +30,4 @@ const (
 
 	// UI positioning
 	CenterDivisor = 2 // divisor for centering UI elements
-
 )
