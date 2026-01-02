@@ -22,8 +22,6 @@ import (
 
 	"github.com/atotto/clipboard"
 	tea "github.com/charmbracelet/bubbletea"
-
-	"github.com/yorukot/superfile/src/config/icon"
 )
 
 // Create a file in the currently focus file panel
@@ -136,7 +134,7 @@ func deleteOperation(processBarModel *processbar.Model, items []string, useTrash
 	if len(items) == 0 {
 		return processbar.Cancelled
 	}
-	p, err := processBarModel.SendAddProcessMsg(icon.Delete+icon.Space+filepath.Base(items[0]), len(items), true)
+	p, err := processBarModel.SendAddProcessMsg(filepath.Base(items[0]), processbar.OpDelete, len(items), true)
 	if err != nil {
 		slog.Error("Cannot spawn a new process", "error", err)
 		return processbar.Failed
@@ -153,7 +151,7 @@ func deleteOperation(processBarModel *processbar.Model, items []string, useTrash
 			slog.Error("Error in delete operation", "item", item, "useTrash", useTrash, "error", err)
 			break
 		}
-		p.CurrentFile = icon.Delete + icon.Space + filepath.Base(item)
+		p.CurrentFile = filepath.Base(item)
 		p.Done++
 		processBarModel.TrySendingUpdateProcessMsg(p)
 	}
@@ -274,8 +272,16 @@ func executePasteOperation(processBarModel *processbar.Model,
 ) processbar.ProcessState {
 	slog.Debug("executePasteOperation", "items", copyItems, "cut", cut, "panel location", panelLocation)
 
+	var operation processbar.OperationType
+	if cut {
+		operation = processbar.OpCut
+	} else {
+		operation = processbar.OpCopy
+	}
+
 	p, err := processBarModel.SendAddProcessMsg(
-		icon.GetCopyOrCutIcon(cut)+icon.Space+filepath.Base(copyItems[0]),
+		filepath.Base(copyItems[0]),
+		operation,
 		getTotalFilesCnt(copyItems), true)
 	if err != nil {
 		slog.Error("Cannot spawn a new process", "error", err)
@@ -295,7 +301,7 @@ func executePasteOperation(processBarModel *processbar.Model,
 			}
 		}
 
-		p.CurrentFile = icon.GetCopyOrCutIcon(cut) + icon.Space + filepath.Base(filePath)
+		p.CurrentFile = filepath.Base(filePath)
 		if err != nil {
 			slog.Debug("model.pasteItem - paste failure", "error", err,
 				"current item", filePath, "errMessage", errMessage)

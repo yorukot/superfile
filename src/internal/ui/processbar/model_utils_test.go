@@ -15,8 +15,8 @@ func TestModelUtils(t *testing.T) {
 	assert.Equal(t, 2, m.newReqCnt())
 	assert.True(t, m.isValid())
 
-	p1 := NewProcess("1", "test", 10)
-	p2 := NewProcess("2", "test2", 11)
+	p1 := NewProcess("1", "test", OpCopy, 10)
+	p2 := NewProcess("2", "test2", OpCompress, 11)
 
 	_ = m.AddProcess(p1)
 	_ = m.AddProcess(p2)

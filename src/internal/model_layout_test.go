@@ -224,7 +224,7 @@ func testModelScrolling(t *testing.T, p *TeaProg) {
 	// Add dummy data to ProcessBar and Metadata
 	for i := range 10 {
 		p.m.processBarModel.AddProcess(
-			processbar.NewProcess(strconv.Itoa(i), "test", 1),
+			processbar.NewProcess(strconv.Itoa(i), "test", processbar.OpCopy, 1),
 		)
 	}
 	dummyData := [][2]string{

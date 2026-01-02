@@ -43,8 +43,8 @@ func TestMain(m *testing.M) {
 
 func TestModelProcessUtils(t *testing.T) {
 	m := New()
-	p1 := NewProcess("1", "test", 10)
-	p2 := NewProcess("2", "test2", 11)
+	p1 := NewProcess("1", "test", OpCopy, 10)
+	p2 := NewProcess("2", "test2", OpDelete, 11)
 
 	// ------- Testing AddProcess
 
@@ -58,7 +58,7 @@ func TestModelProcessUtils(t *testing.T) {
 	require.True(t, ok, "Should be able to get the process we just added")
 	assert.Equal(t, p1, pRes, "Should get the correct process value")
 
-	p2Dup := NewProcess("2", "test2_dup", 1)
+	p2Dup := NewProcess("2", "test2_dup", OpCopy, 1)
 	err = m.AddProcess(p2Dup)
 	var errExp *ProcessAlreadyExistsError
 	require.ErrorAs(t, err, &errExp, "Should get ProcessAlreadyExistsError")
@@ -70,7 +70,7 @@ func TestModelProcessUtils(t *testing.T) {
 	require.True(t, ok)
 	assert.Equal(t, p2Dup, pRes, "Should get the correct process value after update")
 
-	p3 := NewProcess("3", "test3", 1)
+	p3 := NewProcess("3", "test3", OpExtract, 1)
 
 	// ------ Testing UpdateExisting
 
