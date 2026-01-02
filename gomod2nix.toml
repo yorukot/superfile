@@ -35,8 +35,8 @@ schema = 3
     version = "v0.21.0"
     hash = "sha256-cfjUHgy9eq5SretTHuYuRaeeT6QmJYQBB9dsI8QSnW0="
   [mod."github.com/charmbracelet/bubbletea"]
-    version = "v1.3.5"
-    hash = "sha256-WEHBH1i/xmDDf3EwBIkTM8sU/gaUljpZb3PJxVtiUQs="
+    version = "v1.3.10"
+    hash = "sha256-7wr85TLszu1CHNEMv+o4w+r24Z0xdzCgecPv+ZtRX/A="
   [mod."github.com/charmbracelet/colorprofile"]
     version = "v0.2.3-0.20250311203215-f60798e515dc"
     hash = "sha256-D9E/bMOyLXAUVOHA1/6o3i+vVmLfwIMOWib6sU7A6+Q="
@@ -47,8 +47,8 @@ schema = 3
     version = "v1.1.0"
     hash = "sha256-RHsRT2EZ1nDOElxAK+6/DC9XAaGVjDTgPvRh3pyCfY4="
   [mod."github.com/charmbracelet/x/ansi"]
-    version = "v0.9.3"
-    hash = "sha256-Bzum17p7UQZeNxL155Pho/+GXj1DElB9Bp3O194CYf8="
+    version = "v0.10.1"
+    hash = "sha256-nY4zkUGnuD+Lczwt+NMXdQ38cAsy5mtxzXrFSJmR0E4="
   [mod."github.com/charmbracelet/x/cellbuf"]
     version = "v0.0.13-0.20250311204145-2c3ea96c31dd"
     hash = "sha256-XAhCOt8qJ2vR77lH1ez0IVU1/2CaLTq9jSmrHVg5HHU="
@@ -194,8 +194,8 @@ schema = 3
     version = "v0.17.0"
     hash = "sha256-M85lz4hK3/fzmcUViAp/CowHSxnr3BHSO7pjHp1O6i0="
   [mod."golang.org/x/sys"]
-    version = "v0.32.0"
-    hash = "sha256-c9RRnyKQy9Kl8hpbtcgkm1O5H7gOdk9Rv925F8fZS6E="
+    version = "v0.36.0"
+    hash = "sha256-9h4SHGnlJzmTENUp6226hC8fQ73QrQC3D85NNMxLuXg="
   [mod."golang.org/x/term"]
     version = "v0.18.0"
     hash = "sha256-lpze9arFZIhBV8Ht3VZyoiUwqPkeH2IwfXt8M3xljiM="
