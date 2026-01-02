@@ -120,26 +120,17 @@ func (op OperationType) GetPastVerb() string {
 
 // GetDisplayName returns the appropriate display name for the process
 func (p *Process) GetDisplayName() string {
-	// Get the operation icon
 	icon := p.Operation.GetIcon()
 	
-	// During operation, show current file with verb
 	if p.State == InOperation {
-		if p.Total > 1 {
-			// Multiple files: "Copying file.txt (3/10)"
-			return fmt.Sprintf("%s%s%s %s", icon, icon.Space, p.Operation.GetVerb(), p.CurrentFile)
-		}
-		// Single file: "Copying file.txt"
 		return fmt.Sprintf("%s%s%s %s", icon, icon.Space, p.Operation.GetVerb(), p.CurrentFile)
 	}
 	
-	// After completion, show summary for multi-files
 	if p.Total > 1 {
 		verb := p.Operation.GetPastVerb()
 		return fmt.Sprintf("%s%s%s %d files", icon, icon.Space, verb, p.Total)
 	}
 	
-	// Single file - show filename with verb
 	verb := p.Operation.GetPastVerb()
 	return fmt.Sprintf("%s%s%s %s", icon, icon.Space, verb, p.CurrentFile)
 }
@@ -160,9 +151,9 @@ import (
 
 Find SendAddProcessMsg method (around line 60-70) and update:
 ```go
-func (m *Model) SendAddProcessMsg(currentFile string, operation OperationType, totalOperations int, blocking bool) (Process, error) {
+func (m *Model) SendAddProcessMsg(currentFile string, operation OperationType, total int, blocking bool) (Process, error) {
 	// ... existing code ...
-	p := NewProcess(id, currentFile, operation, totalOperations)
+	p := NewProcess(id, currentFile, operation, total)
 	// ... rest of the method
 }
 ```
@@ -172,10 +163,7 @@ func (m *Model) SendAddProcessMsg(currentFile string, operation OperationType, t
 
 In the View() method (around line 120-150), find where process name is displayed and update:
 ```go
-// Replace p.Name or p.CurrentFile with p.GetDisplayName()
-// The exact line will be something like:
-// processName := truncateText(p.Name, nameWidth)  
-// Change to:
+// Find line with truncateText(p.Name, nameWidth) and change to:
 processName := truncateText(p.GetDisplayName(), nameWidth)
 ```
 
@@ -184,7 +172,6 @@ processName := truncateText(p.GetDisplayName(), nameWidth)
 
 Update executePasteOperation (line ~276-278):
 ```go
-// Determine operation type
 var opType processbar.OperationType
 if cut {
 	opType = processbar.OpCut
@@ -192,7 +179,6 @@ if cut {
 	opType = processbar.OpCopy
 }
 
-// Use first file name as initial current file
 currentFileName := filepath.Base(copyItems[0])
 if len(copyItems) > 1 {
 	currentFileName = fmt.Sprintf("%s (%d files)", currentFileName, len(copyItems))
@@ -207,7 +193,6 @@ p, err := processBarModel.SendAddProcessMsg(
 
 Update the loop (line ~296):
 ```go
-// Update current file being processed
 p.CurrentFile = filepath.Base(filePath)
 ```
 
@@ -216,7 +201,6 @@ p.CurrentFile = filepath.Base(filePath)
 
 Update deleteOperation function (line ~187):
 ```go
-// Use first file name as initial current file
 currentFileName := filepath.Base(items[0])
 if len(items) > 1 {
 	currentFileName = fmt.Sprintf("%s (%d files)", currentFileName, len(items))
@@ -238,22 +222,17 @@ p.CurrentFile = filepath.Base(item)
 **File**: `src/internal/handle_modal.go`
 
 Find compress operation (search for "NewCompressOperationMsg") and update:
-1. Pass only the archive filename to SendAddProcessMsg
-2. Update to use CurrentFile instead of Name
-3. Use processbar.OpCompress as operation type
-
-Example:
 ```go
 p, _ := m.processBarModel.SendAddProcessMsg(
-	archiveName,  // Just the archive name, no icons or text
+	archiveName,
 	processbar.OpCompress,
-	len(itemsToCompress),  // Total items being compressed
+	len(itemsToCompress),
 	true)
 ```
 
 When updating progress in the loop:
 ```go
-p.CurrentFile = filepath.Base(currentItem)  // Just the filename
+p.CurrentFile = filepath.Base(currentItem)
 ```
 
 ### Step 9: Update Extract Operation  
@@ -262,15 +241,15 @@ p.CurrentFile = filepath.Base(currentItem)  // Just the filename
 Find extract operation (search for "NewExtractOperationMsg") and update similarly:
 ```go
 p, _ := m.processBarModel.SendAddProcessMsg(
-	archiveName,  // Just the archive name
+	archiveName,
 	processbar.OpExtract,
-	totalFiles,  // Total files in the archive
+	totalFiles,
 	true)
 ```
 
 When updating progress:
 ```go
-p.CurrentFile = filepath.Base(currentExtractedFile)  // Just the filename
+p.CurrentFile = filepath.Base(currentExtractedFile)
 ```
 
 ### Step 10: Fix All References to p.Name or Process.Name
@@ -364,28 +343,6 @@ func TestGetDisplayName(t *testing.T) {
 		})
 	}
 }
-
-func TestOperationTypeHelpers(t *testing.T) {
-	t.Run("GetIcon", func(t *testing.T) {
-		assert.Equal(t, icon.Copy, OpCopy.GetIcon())
-		assert.Equal(t, icon.Cut, OpCut.GetIcon())
-		assert.Equal(t, icon.Delete, OpDelete.GetIcon())
-		assert.Equal(t, icon.Compress, OpCompress.GetIcon())
-		assert.Equal(t, icon.Extract, OpExtract.GetIcon())
-	})
-
-	t.Run("GetVerb", func(t *testing.T) {
-		assert.Equal(t, "Copying", OpCopy.GetVerb())
-		assert.Equal(t, "Moving", OpCut.GetVerb())
-		assert.Equal(t, "Deleting", OpDelete.GetVerb())
-	})
-
-	t.Run("GetPastVerb", func(t *testing.T) {
-		assert.Equal(t, "Copied", OpCopy.GetPastVerb())
-		assert.Equal(t, "Moved", OpCut.GetPastVerb())
-		assert.Equal(t, "Deleted", OpDelete.GetPastVerb())
-	})
-}
 ```
 
 ## Testing Checklist
@@ -424,5 +381,4 @@ go fmt ./...
 - **Icons**: Automatically fetched based on OperationType via GetIcon()
 - **Verbs**: Use GetVerb() for present tense, GetPastVerb() for past tense
 - **Total field**: Reuse existing field instead of adding new FileCount
-- **Function parameters**: Use descriptive names like `currentFile` instead of generic `name`
 - **No manual concatenation**: Never manually build display strings with icons - let GetDisplayName() handle it
