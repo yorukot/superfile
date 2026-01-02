@@ -15,6 +15,9 @@ type StyleModifier func(lipgloss.Style) lipgloss.Style
 // We may allow that later.
 // Also we could have functions about getting sections count, line count, adding updating a
 // specific line in a specific section, and adjusting section sizes. But not needed now.
+// TODO: zero value of Renderer - `Renderer{}` is unusable,
+// It will cause panic on AddLines(), completely eliminate usage of zero values
+// in the code.
 type Renderer struct {
 
 	// Current sectionization will not allow to predefine section
