@@ -66,8 +66,10 @@ func (p ProcessState) Icon() string {
 
 // GetDisplayName returns the appropriate display name for the process
 func (p *Process) GetDisplayName() string {
-	// If there's an error message, display it
+	return p.Operation.GetIcon() + icon.Space + p.displayNameWithoutIcon()
+}
 
+func (p *Process) displayNameWithoutIcon() string {
 	if p.State == Cancelled {
 		return p.Operation.GetVerb() + " cancelled : " + p.ErrorMsg
 	}
@@ -78,15 +80,13 @@ func (p *Process) GetDisplayName() string {
 		return "Unexpected failure: " + p.ErrorMsg
 	}
 
-	ic := p.Operation.GetIcon()
-
 	if p.State == InOperation {
-		return fmt.Sprintf("%s%s%s %s", ic, icon.Space, p.Operation.GetVerb(), p.CurrentFile)
+		return p.Operation.GetVerb() + " " + p.CurrentFile
 	}
 
 	// Process completed (successful, failed, or cancelled)
 	if p.Total > 1 {
-		return fmt.Sprintf("%s%s%s %d files", ic, icon.Space, p.Operation.GetPastVerb(), p.Total)
+		return fmt.Sprintf("%s %d files", p.Operation.GetPastVerb(), p.Total)
 	}
-	return fmt.Sprintf("%s%s%s %s", ic, icon.Space, p.Operation.GetPastVerb(), p.CurrentFile)
+	return p.Operation.GetPastVerb() + " " + p.CurrentFile
 }

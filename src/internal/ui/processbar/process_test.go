@@ -23,7 +23,7 @@ func TestGetDisplayName(t *testing.T) {
 				Total:       1,
 				State:       Cancelled,
 			},
-			expected: "Compressing cancelled : File already exists",
+			expected: icon.CompressFile + icon.Space + "Compressing cancelled : File already exists",
 		},
 		{
 			name: "Single file during operation",
