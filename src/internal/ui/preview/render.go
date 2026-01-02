@@ -167,8 +167,8 @@ func (m *Model) RenderWithPath(itemPath string, previewWidth int, previewHeight 
 	contentWidth := previewWidth
 	contentHeight := previewHeight
 	if common.Config.EnableFilePreviewBorder {
-		contentWidth = previewWidth - common.BorderThickness
-		contentHeight = previewHeight - common.BorderThickness
+		contentWidth = previewWidth - common.BorderPadding
+		contentHeight = previewHeight - common.BorderPadding
 	}
 
 	fileInfo, infoErr := os.Stat(itemPath)
@@ -203,25 +203,15 @@ func (m *Model) RenderWithPath(itemPath string, previewWidth int, previewHeight 
 		// Notes : If renderImagePreview fails, and return some error message
 		// render, then we dont apply clearCmd. This might cause issues.
 		// same for below usage of renderImagePreview
-		sideAreaWidth := fullModelWidth - previewWidth + 1
-		if common.Config.EnableFilePreviewBorder {
-			// Account for the border - images should start after the left border
-			sideAreaWidth = fullModelWidth - previewWidth + common.BorderThickness
-		}
 		return m.renderImagePreview(
 			r, thumbnailPath, contentWidth, contentHeight,
-			sideAreaWidth, clearCmd)
+			fullModelWidth-previewWidth, clearCmd)
 	}
 
 	if isImageFile(itemPath) {
-		sideAreaWidth := fullModelWidth - previewWidth + 1
-		if common.Config.EnableFilePreviewBorder {
-			// Account for the border - images should start after the left border
-			sideAreaWidth = fullModelWidth - previewWidth + common.BorderThickness
-		}
 		return m.renderImagePreview(
 			r, itemPath, contentWidth, contentHeight,
-			sideAreaWidth, clearCmd)
+			fullModelWidth-previewWidth, clearCmd)
 	}
 
 	return m.renderTextPreview(r, itemPath, contentWidth, contentHeight) + clearCmd

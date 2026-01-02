@@ -31,6 +31,4 @@ const (
 	// UI positioning
 	CenterDivisor = 2 // divisor for centering UI elements
 
-	// Border dimensions
-	BorderThickness = 2 // thickness of border (left+right or top+bottom)
 )

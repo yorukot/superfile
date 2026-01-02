@@ -62,6 +62,8 @@ func FilePreviewPanelRenderer(totalHeight int, totalWidth int) *rendering.Render
 	cfg.BorderRequired = common.Config.EnableFilePreviewBorder
 	cfg.RendererName += "-preview"
 
+	slog.Debug("[TEMP]", "cfg", cfg)
+
 	r, err := rendering.NewRenderer(cfg)
 	if err != nil {
 		slog.Error("Error in creating renderer. Falling back to default renderer", "error", err)
