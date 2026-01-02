@@ -2,6 +2,9 @@
 
 ## Issue #883: Fix process name display for multi-file operations
 
+
+!!! Do rename of p.Name first
+
 ### Problem Statement
 When processing multiple files (copy/cut/delete/compress/extract), only the last selected file name is shown in the process bar. Users should see:
 - During execution: Current file being processed (e.g., "Copying file123.txt")
@@ -32,11 +35,11 @@ Update Process struct (lines 13-21) to:
 ```go
 type Process struct {
 	ID           string
-	CurrentFile  string        // Renamed from Name - contains only filename, no icons
-	Operation    OperationType // NEW - type of operation being performed
+	CurrentFile  string        
+	Operation    OperationType 
 	Progress     progress.Model
 	State        ProcessState
-	Total        int          // Already exists - represents total files/items
+	Total        int          
 	Done         int
 	DoneTime     time.Time
 }
@@ -180,9 +183,6 @@ if cut {
 }
 
 currentFileName := filepath.Base(copyItems[0])
-if len(copyItems) > 1 {
-	currentFileName = fmt.Sprintf("%s (%d files)", currentFileName, len(copyItems))
-}
 
 p, err := processBarModel.SendAddProcessMsg(
 	currentFileName,
@@ -202,9 +202,6 @@ p.CurrentFile = filepath.Base(filePath)
 Update deleteOperation function (line ~187):
 ```go
 currentFileName := filepath.Base(items[0])
-if len(items) > 1 {
-	currentFileName = fmt.Sprintf("%s (%d files)", currentFileName, len(items))
-}
 
 p, err := processBarModel.SendAddProcessMsg(
 	currentFileName,
