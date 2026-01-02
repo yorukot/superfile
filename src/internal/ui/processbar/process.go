@@ -67,8 +67,15 @@ func (p ProcessState) Icon() string {
 // GetDisplayName returns the appropriate display name for the process
 func (p *Process) GetDisplayName() string {
 	// If there's an error message, display it
+
+	if p.State == Cancelled {
+		return p.Operation.GetVerb() + " cancelled : " + p.ErrorMsg
+	}
+	if p.State == Failed {
+		return p.Operation.GetVerb() + " failed : " + p.ErrorMsg
+	}
 	if p.ErrorMsg != "" {
-		return p.ErrorMsg
+		return "Unexpected failure: " + p.ErrorMsg
 	}
 
 	ic := p.Operation.GetIcon()

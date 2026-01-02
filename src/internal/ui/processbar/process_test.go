@@ -18,12 +18,12 @@ func TestGetDisplayName(t *testing.T) {
 			name: "Error message displayed",
 			process: Process{
 				CurrentFile: "file.txt",
-				ErrorMsg:    "File already exist",
+				ErrorMsg:    "File already exists",
 				Operation:   OpCompress,
 				Total:       1,
 				State:       Cancelled,
 			},
-			expected: "File already exist",
+			expected: "Compressing cancelled : File already exists",
 		},
 		{
 			name: "Single file during operation",
