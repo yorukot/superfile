@@ -33,7 +33,7 @@ func TestGetDisplayName(t *testing.T) {
 				Total:       1,
 				State:       InOperation,
 			},
-			expected: icon.Copy + " Copying file.txt",
+			expected: icon.Copy + icon.Space + "Copying file.txt",
 		},
 		{
 			name: "Multiple files during operation",
@@ -43,7 +43,7 @@ func TestGetDisplayName(t *testing.T) {
 				Total:       10,
 				State:       InOperation,
 			},
-			expected: icon.Delete + " Deleting file2.txt",
+			expected: icon.Delete + icon.Space + "Deleting file2.txt",
 		},
 		{
 			name: "Multiple files after completion",
@@ -53,7 +53,7 @@ func TestGetDisplayName(t *testing.T) {
 				Total:       5,
 				State:       Successful,
 			},
-			expected: icon.Copy + " Copied 5 files",
+			expected: icon.Copy + icon.Space + "Copied 5 files",
 		},
 		{
 			name: "Single file after completion",
@@ -63,7 +63,7 @@ func TestGetDisplayName(t *testing.T) {
 				Total:       1,
 				State:       Successful,
 			},
-			expected: icon.Delete + " Deleted file.txt",
+			expected: icon.Delete + icon.Space + "Deleted file.txt",
 		},
 	}
 

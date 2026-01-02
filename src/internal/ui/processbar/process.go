@@ -71,15 +71,15 @@ func (p *Process) GetDisplayName() string {
 		return p.ErrorMsg
 	}
 
-	icon := p.Operation.GetIcon()
+	ic := p.Operation.GetIcon()
 
 	if p.State == InOperation {
-		return fmt.Sprintf("%s %s %s", icon, p.Operation.GetVerb(), p.CurrentFile)
+		return fmt.Sprintf("%s%s%s %s", ic, icon.Space, p.Operation.GetVerb(), p.CurrentFile)
 	}
 
 	// Process completed (successful, failed, or cancelled)
 	if p.Total > 1 {
-		return fmt.Sprintf("%s %s %d files", icon, p.Operation.GetPastVerb(), p.Total)
+		return fmt.Sprintf("%s%s%s %d files", ic, icon.Space, p.Operation.GetPastVerb(), p.Total)
 	}
-	return fmt.Sprintf("%s %s %s", icon, p.Operation.GetPastVerb(), p.CurrentFile)
+	return fmt.Sprintf("%s%s%s %s", ic, icon.Space, p.Operation.GetPastVerb(), p.CurrentFile)
 }
