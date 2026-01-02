@@ -153,7 +153,7 @@ func deleteOperation(processBarModel *processbar.Model, items []string, useTrash
 			slog.Error("Error in delete operation", "item", item, "useTrash", useTrash, "error", err)
 			break
 		}
-		p.Name = icon.Delete + icon.Space + filepath.Base(item)
+		p.CurrentFile = icon.Delete + icon.Space + filepath.Base(item)
 		p.Done++
 		processBarModel.TrySendingUpdateProcessMsg(p)
 	}
@@ -295,7 +295,7 @@ func executePasteOperation(processBarModel *processbar.Model,
 			}
 		}
 
-		p.Name = icon.GetCopyOrCutIcon(cut) + icon.Space + filepath.Base(filePath)
+		p.CurrentFile = icon.GetCopyOrCutIcon(cut) + icon.Space + filepath.Base(filePath)
 		if err != nil {
 			slog.Debug("model.pasteItem - paste failure", "error", err,
 				"current item", filePath, "errMessage", errMessage)

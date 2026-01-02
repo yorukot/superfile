@@ -227,7 +227,7 @@ func actualPasteOperation(info os.FileInfo, path string, newPath string, cut boo
 	}
 
 	// File
-	p.Name = icon.GetCopyOrCutIcon(cut) + icon.Space + filepath.Base(path)
+	p.CurrentFile = icon.GetCopyOrCutIcon(cut) + icon.Space + filepath.Base(path)
 	if cut && sameDev {
 		err = os.Rename(path, newPath)
 	} else {

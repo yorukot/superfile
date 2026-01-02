@@ -3,8 +3,6 @@
 ## Issue #883: Fix process name display for multi-file operations
 
 
-!!! Do rename of p.Name first
-
 ### Problem Statement
 When processing multiple files (copy/cut/delete/compress/extract), only the last selected file name is shown in the process bar. Users should see:
 - During execution: Current file being processed (e.g., "Copying file123.txt")
@@ -52,7 +50,7 @@ func NewProcess(id string, currentFile string, operation OperationType, total in
 	prog.PercentageStyle = common.FooterStyle
 	return Process{
 		ID:          id,
-		CurrentFile: currentFile,  // Just the filename, no icons
+		CurrentFile: currentFile, 
 		Operation:   operation,
 		Progress:    prog,
 		State:       InOperation,
@@ -248,24 +246,6 @@ When updating progress:
 ```go
 p.CurrentFile = filepath.Base(currentExtractedFile)
 ```
-
-### Step 10: Fix All References to p.Name or Process.Name
-Search and replace all occurrences of `p.Name` with `p.CurrentFile` in:
-- `src/internal/handle_file_operations.go`
-- `src/internal/handle_modal.go`
-- Any other files that reference Process.Name
-
-Use command:
-```bash
-grep -r "p\.Name" src/ --include="*.go" | grep -v "_test.go"
-grep -r "Process.*Name" src/ --include="*.go" | grep -v "_test.go"
-```
-
-Also search for any direct assignments that include icons:
-```bash
-grep -r "icon\.[A-Z].*+.*icon\.Space" src/ --include="*.go" | grep "p\."
-```
-These should be changed to only assign the filename without icons.
 
 ### Step 11: Update Tests
 **File**: `src/internal/model_layout_test.go`
