@@ -6,7 +6,6 @@ import (
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/x/ansi"
 
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
@@ -117,7 +116,6 @@ func (m *Model) GetFilePreviewCmd(forcePreviewRender bool) tea.Cmd {
 
 	return func() tea.Msg {
 		content := m.FilePreview.RenderWithPath(selectedItem.Location, width, height, fullModalWidth)
-		slog.Debug("content", "c", ansi.Strip(content))
 		return preview.NewUpdateMsg(selectedItem.Location, content,
 			width, height, reqCnt)
 	}

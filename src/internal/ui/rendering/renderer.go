@@ -58,9 +58,12 @@ type Renderer struct {
 	contentHeight int
 	contentWidth  int
 
+	// Note: Must pass non empty borderStrings if borderRequired is set as true
+	// TODO: Have ansi.StringWidth checks in `ValidateConfig`
+	// If you silently pass empty border, rendering will be unexpectd and,
+	// it might take some time to RCA.
 	borderRequired bool
-
-	borderStrings lipgloss.Border
+	borderStrings  lipgloss.Border
 	// for logging
 	name string
 }

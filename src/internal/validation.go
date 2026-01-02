@@ -229,7 +229,7 @@ func (m *model) validateComponentRender() error {
 	}
 
 	p := &m.fileModel.FilePreview
-	if err := validateRender(p.GetContent(), p.GetContentHeight(), p.GetContentWidth(), false); err != nil {
+	if err := validateRender(p.GetContent(), p.GetContentHeight(), p.GetContentWidth(), common.Config.EnableFilePreviewBorder); err != nil {
 		return fmt.Errorf("file preview render validation failed: %w", err)
 	}
 
@@ -300,7 +300,7 @@ func (m *model) validateFinalRender() error { //nolint:gocognit // cumilation of
 			stCol:  m.fullWidth - m.fileModel.ExpectedPreviewWidth,
 			endCol: m.fullWidth - 1,
 		}
-		if err := m.validateComponentPlacement(lines, previewPanelPos, false); err != nil {
+		if err := m.validateComponentPlacement(lines, previewPanelPos, common.Config.EnableFilePreviewBorder); err != nil {
 			return fmt.Errorf("preview panel position validation failed: %w", err)
 		}
 	}
