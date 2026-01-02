@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
 	"github.com/yorukot/superfile/src/config/icon"
 )
 
@@ -13,6 +14,17 @@ func TestGetDisplayName(t *testing.T) {
 		process  Process
 		expected string
 	}{
+		{
+			name: "Error message displayed",
+			process: Process{
+				CurrentFile: "file.txt",
+				ErrorMsg:    "File already exist",
+				Operation:   OpCompress,
+				Total:       1,
+				State:       Cancelled,
+			},
+			expected: "File already exist",
+		},
 		{
 			name: "Single file during operation",
 			process: Process{

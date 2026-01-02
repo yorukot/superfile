@@ -34,7 +34,7 @@ func zipSources(sources []string, target string, processBar *processbar.Model) e
 	}
 	_, err = os.Stat(target)
 	if err == nil {
-		p.CurrentFile = "File already exist"
+		p.ErrorMsg = "File already exist"
 		p.State = processbar.Cancelled
 		p.DoneTime = time.Now()
 		pSendErr := processBar.SendUpdateProcessMsg(p, true)
