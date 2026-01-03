@@ -26,7 +26,7 @@ import (
 // which can be WithFooter(), WithXYZ()
 // Lots of improvements are waiting on it
 //   - Allow Sending thumnailGeneratorNeeded as false to preview.New()
-//     to prevent noise in test logs
+//     to prevent noise in test logs. Same with imagePreviewer
 func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool,
 	firstPanelPaths []string, zClient *zoxidelib.Client) *model {
 	return &model{
