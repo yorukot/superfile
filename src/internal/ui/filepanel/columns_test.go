@@ -9,6 +9,7 @@ import (
 )
 
 func TestFilePanelSize(t *testing.T) {
+	common.Hotkeys.SearchBar = []string{"test"}
 	testdata := []struct {
 		testName        string
 		location        string
@@ -39,7 +40,6 @@ func TestFilePanelSize(t *testing.T) {
 		},
 	}
 	for _, tt := range testdata {
-		common.Hotkeys.SearchBar = []string{"test"}
 		t.Run(tt.testName, func(t *testing.T) {
 			model := New(tt.location, sortOptionsModel{}, true, "test")
 			model.SetWidth(tt.panelSize)

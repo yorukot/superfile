@@ -49,5 +49,5 @@ func (m *Model) PanelElementHeight() int {
 		headerHeight = ColumnHeaderHeight
 	}
 
-	return m.GetMainPanelHeight() - contentPadding - headerHeight - headerHeight
+	return m.GetMainPanelHeight() - contentPadding - headerHeight
 }

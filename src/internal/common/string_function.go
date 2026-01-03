@@ -84,14 +84,14 @@ func PrettierFileName(name string, width int, isDir bool, isLink bool, isSelecte
 			Render(iconData) +
 			FilePanelItemSelectedStyle.
 				Width(filenameWidth).Align(lipgloss.Left).
-				Render(name)
+				Render(TruncateText(name, filenameWidth, "..."))
 	}
 	return StringColorRender(lipgloss.Color(style.Color), bgColor).
 		Background(bgColor).
 		Render(iconData) +
 		FilePanelStyle.
 			Width(filenameWidth).Align(lipgloss.Left).
-			Render(name)
+			Render(TruncateText(name, filenameWidth, "..."))
 }
 func PrettierFixedWidthItem(data string,
 	width int,
