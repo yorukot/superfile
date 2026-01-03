@@ -25,7 +25,7 @@ import (
 // Or even better API like varargs lambda function opts
 // which can be WithFooter(), WithXYZ()
 // Lots of improvements are waiting on it
-//   - Allow Sending thumnailGeneratorNeeded as false to preview.New()
+//   - Allow Sending thumbnailGeneratorNeeded as false to preview.New()
 //     to prevent noise in test logs. Same with imagePreviewer
 func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool,
 	firstPanelPaths []string, zClient *zoxidelib.Client) *model {

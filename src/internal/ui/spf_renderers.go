@@ -65,7 +65,7 @@ func FilePreviewPanelRenderer(totalHeight int, totalWidth int) *rendering.Render
 	// TODO: We should not have to initiliaize a renderer in case of zero sized
 	// panel
 	if common.Config.EnableFilePreviewBorder && totalWidth >= rendering.MinWidthForBorder &&
-		totalHeight > rendering.MinHeightForBorder {
+		totalHeight >= rendering.MinHeightForBorder {
 		cfg.BorderRequired = true
 		cfg.BorderBGColor = common.FilePanelBGColor
 		cfg.BorderFGColor = common.FilePanelBorderColor
