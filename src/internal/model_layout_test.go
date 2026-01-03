@@ -43,7 +43,7 @@ func TestLayout(t *testing.T) {
 	)
 
 	sidebarWidths := []int{0, 5, 12, 20}
-	previewWidths := []int{0, 2, 3, 5, 10}
+	previewWidths := []int{0, 2, 3, 10}
 	pWDef := common.Config.FilePreviewWidth
 	sWDef := common.Config.SidebarWidth
 
@@ -51,28 +51,37 @@ func TestLayout(t *testing.T) {
 	// config global variable. Later we might fix that and use parallelization
 	for _, w := range sidebarWidths {
 		t.Run(fmt.Sprintf("sW=%d;pW=%d", w, pWDef), func(t *testing.T) {
-			testWithConfig(t, w, pWDef, baseTestDir)
+			testWithConfig(t, w, pWDef, false, baseTestDir)
 		})
 	}
 	for _, w := range previewWidths {
 		t.Run(fmt.Sprintf("sW=%d;pW=%d", sWDef, w), func(t *testing.T) {
-			testWithConfig(t, sWDef, w, baseTestDir)
+			testWithConfig(t, sWDef, w, false, baseTestDir)
 		})
 	}
+
+	// One test for preview border enabled
+	t.Run("sW=10;pW=5;previewWithBorder", func(t *testing.T) {
+		testWithConfig(t, 10, 5, true, baseTestDir)
+	})
 }
 
-func testWithConfig(t *testing.T, sidebarWidth int, previewWidth int, testPath string) {
+func testWithConfig(t *testing.T, sidebarWidth int, previewWidth int,
+	previewBorderEnabled bool, testPath string) {
 	// Save original config values and restore them after test
 	origSidebarWidth := common.Config.SidebarWidth
 	origPreviewWidth := common.Config.FilePreviewWidth
+	origPreviewBorderEnabled := common.Config.EnableFilePreviewBorder
 	defer func() {
 		common.Config.SidebarWidth = origSidebarWidth
 		common.Config.FilePreviewWidth = origPreviewWidth
+		common.Config.EnableFilePreviewBorder = origPreviewBorderEnabled
 	}()
 
 	// Set test config
 	common.Config.SidebarWidth = sidebarWidth
 	common.Config.FilePreviewWidth = previewWidth
+	common.Config.EnableFilePreviewBorder = previewBorderEnabled
 
 	m := defaultTestModelWithFooter(testPath)
 	p := NewTestTeaProgWithEventLoop(t, m)
@@ -215,7 +224,7 @@ func testModelScrolling(t *testing.T, p *TeaProg) {
 	// Add dummy data to ProcessBar and Metadata
 	for i := range 10 {
 		p.m.processBarModel.AddProcess(
-			processbar.NewProcess(strconv.Itoa(i), "test", 1),
+			processbar.NewProcess(strconv.Itoa(i), "test", processbar.OpCopy, 1),
 		)
 	}
 	dummyData := [][2]string{

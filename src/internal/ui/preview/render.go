@@ -163,6 +163,14 @@ func (m *Model) RenderWithPath(itemPath string, previewWidth int, previewHeight 
 	r := ui.FilePreviewPanelRenderer(previewHeight, previewWidth)
 	clearCmd := m.imagePreviewer.ClearKittyImages()
 
+	// Adjust dimensions if border is enabled
+	contentWidth := previewWidth
+	contentHeight := previewHeight
+	if common.Config.EnableFilePreviewBorder {
+		contentWidth = previewWidth - common.BorderPadding
+		contentHeight = previewHeight - common.BorderPadding
+	}
+
 	fileInfo, infoErr := os.Stat(itemPath)
 	if infoErr != nil {
 		slog.Error("Error get file info", "error", infoErr)
@@ -183,7 +191,7 @@ func (m *Model) RenderWithPath(itemPath string, previewWidth int, previewHeight 
 	}
 
 	if fileInfo.IsDir() {
-		return renderDirectoryPreview(r, itemPath, previewHeight) + clearCmd
+		return renderDirectoryPreview(r, itemPath, contentHeight) + clearCmd
 	}
 
 	if m.thumbnailGenerator != nil && m.thumbnailGenerator.SupportsExt(ext) {
@@ -196,15 +204,15 @@ func (m *Model) RenderWithPath(itemPath string, previewWidth int, previewHeight 
 		// render, then we dont apply clearCmd. This might cause issues.
 		// same for below usage of renderImagePreview
 		return m.renderImagePreview(
-			r, thumbnailPath, previewWidth, previewHeight,
-			fullModelWidth-previewWidth+1, clearCmd)
+			r, thumbnailPath, contentWidth, contentHeight,
+			fullModelWidth-previewWidth, clearCmd)
 	}
 
 	if isImageFile(itemPath) {
 		return m.renderImagePreview(
-			r, itemPath, previewWidth, previewHeight,
-			fullModelWidth-previewWidth+1, clearCmd)
+			r, itemPath, contentWidth, contentHeight,
+			fullModelWidth-previewWidth, clearCmd)
 	}
 
-	return m.renderTextPreview(r, itemPath, previewWidth, previewHeight) + clearCmd
+	return m.renderTextPreview(r, itemPath, contentWidth, contentHeight) + clearCmd
 }

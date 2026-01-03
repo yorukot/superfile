@@ -86,12 +86,13 @@ type ConfigType struct {
 	IgnoreMissingFields bool `toml:"ignore_missing_fields" comment:"\nWhether to ignore warnings about missing fields in the config file."`
 	PageScrollSize      int  `toml:"page_scroll_size" comment:"\nNumber of lines to scroll for PgUp/PgDown keys (0: full page, default behavior)."`
 
-	Nerdfont              bool   `toml:"nerdfont" comment:"\n================   Style =================\n\n If you don't have or don't want Nerdfont installed you can turn this off"`
-	ShowSelectIcons       bool   `toml:"show_select_icons" comment:"\nShow checkbox icons in select mode (requires nerdfont)"`
-	TransparentBackground bool   `toml:"transparent_background" comment:"\nSet transparent background or not (this only work when your terminal background is transparent)"`
-	FilePreviewWidth      int    `toml:"file_preview_width" comment:"\nFile preview width allow '0' (this mean same as file panel),'x' x must be less than 10 and greater than 1 (This means that the width of the file preview will be one xth of the total width.)"`
-	CodePreviewer         string `toml:"code_previewer" comment:"\nWhether to use the builtin syntax highlighting with chroma or use bat. Values: \"\" for builtin chroma, \"bat\" for bat"`
-	SidebarWidth          int    `toml:"sidebar_width" comment:"\nThe length of the sidebar(excluding borders). If you don't want to display the sidebar, you can input 0 directly. If you want to display the value, please place it in the range of 5-20."`
+	Nerdfont                bool   `toml:"nerdfont" comment:"\n================   Style =================\n\n If you don't have or don't want Nerdfont installed you can turn this off"`
+	ShowSelectIcons         bool   `toml:"show_select_icons" comment:"\nShow checkbox icons in select mode (requires nerdfont)"`
+	TransparentBackground   bool   `toml:"transparent_background" comment:"\nSet transparent background or not (this only work when your terminal background is transparent)"`
+	FilePreviewWidth        int    `toml:"file_preview_width" comment:"\nFile preview width allow '0' (this mean same as file panel),'x' x must be less than 10 and greater than 1 (This means that the width of the file preview will be one xth of the total width.)"`
+	EnableFilePreviewBorder bool   `toml:"enable_file_preview_border" comment:"\nEnable border around the file preview panel (default: false)"`
+	CodePreviewer           string `toml:"code_previewer" comment:"\nWhether to use the builtin syntax highlighting with chroma or use bat. Values: \"\" for builtin chroma, \"bat\" for bat"`
+	SidebarWidth            int    `toml:"sidebar_width" comment:"\nThe length of the sidebar(excluding borders). If you don't want to display the sidebar, you can input 0 directly. If you want to display the value, please place it in the range of 5-20."`
 
 	BorderTop         string `toml:"border_top" comment:"\nBorder style"`
 	BorderBottom      string `toml:"border_bottom"`

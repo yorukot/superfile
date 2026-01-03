@@ -1,6 +1,7 @@
 package processbar
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/charmbracelet/bubbles/progress"
@@ -12,25 +13,31 @@ import (
 // Model for an individual process
 // Note : Its size is ~ 800 bytes
 type Process struct {
-	ID       string
-	Name     string
-	Progress progress.Model
-	State    ProcessState
-	Total    int
-	Done     int
-	DoneTime time.Time
+	ID          string
+	CurrentFile string
+	// TODO : We always want ErrorMsg to be set when State is
+	// moved to Cancelled or Failed. To ensure it, we need to only allow state
+	// change via helper functions and ask for the  errorMsg
+	ErrorMsg  string
+	Operation OperationType
+	Progress  progress.Model
+	State     ProcessState
+	Total     int
+	Done      int
+	DoneTime  time.Time
 }
 
-func NewProcess(id string, name string, total int) Process {
+func NewProcess(id string, currentFile string, operation OperationType, total int) Process {
 	prog := progress.New(common.GenerateGradientColor())
 	prog.PercentageStyle = common.FooterStyle
 	return Process{
-		ID:       id,
-		Name:     name,
-		Progress: prog,
-		State:    InOperation,
-		Total:    total,
-		Done:     0,
+		ID:          id,
+		CurrentFile: currentFile,
+		Operation:   operation,
+		Progress:    prog,
+		State:       InOperation,
+		Total:       total,
+		Done:        0,
 	}
 }
 
@@ -58,4 +65,27 @@ func (p ProcessState) Icon() string {
 	default:
 		return common.ProcessCancelStyle.Render(icon.Error)
 	}
+}
+
+// GetDisplayName returns the appropriate display name for the process
+func (p *Process) GetDisplayName() string {
+	return p.Operation.GetIcon() + icon.Space + p.displayNameWithoutIcon()
+}
+
+func (p *Process) displayNameWithoutIcon() string {
+	if p.State == Cancelled {
+		return p.Operation.GetVerb() + " cancelled : " + p.ErrorMsg
+	}
+	if p.State == Failed {
+		return p.Operation.GetVerb() + " failed : " + p.ErrorMsg
+	}
+
+	if p.State == InOperation {
+		return p.Operation.GetVerb() + " " + p.CurrentFile
+	}
+
+	if p.Total > 1 {
+		return fmt.Sprintf("%s %d files", p.Operation.GetPastVerb(), p.Total)
+	}
+	return p.Operation.GetPastVerb() + " " + p.CurrentFile
 }
