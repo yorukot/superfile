@@ -120,14 +120,14 @@ func NewThumbnailGenerator() (*ThumbnailGenerator, error) {
 
 	pdf, err := newPdfGenerator()
 	if err != nil {
-		slog.Error("Error while trying to create pdfGenerator", "error", err)
+		slog.Debug("Error while trying to create pdfGenerator", "error", err)
 	} else {
 		generators = append(generators, pdf)
 	}
 
 	video, err := newVideoGenerator()
 	if err != nil {
-		slog.Error("Error while trying to create videoGenerator", "error", err)
+		slog.Debug("Error while trying to create videoGenerator", "error", err)
 	} else {
 		generators = append(generators, video)
 	}
