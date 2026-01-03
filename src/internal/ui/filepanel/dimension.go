@@ -1,6 +1,8 @@
 package filepanel
 
-import "github.com/yorukot/superfile/src/internal/common"
+import (
+	"github.com/yorukot/superfile/src/internal/common"
+)
 
 func (m *Model) UpdateDimensions(width, height int) {
 	m.SetWidth(width)
@@ -42,5 +44,10 @@ func (m *Model) GetContentWidth() int {
 
 // PanelElementHeight calculates the number of visible elements in content area
 func (m *Model) PanelElementHeight() int {
-	return m.GetMainPanelHeight() - contentPadding
+	headerHeight := 0
+	if common.Config.FilePanelExtraColumns > 0 {
+		headerHeight = ColumnHeaderHeight
+	}
+
+	return m.GetMainPanelHeight() - contentPadding - headerHeight - headerHeight
 }

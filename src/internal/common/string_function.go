@@ -26,6 +26,7 @@ const (
 	EscapeChar        = 0x1b // ANSI escape character
 	ASCIIMax          = 0x7f // Maximum ASCII character value
 )
+const MinFileNameTextSize = 5
 
 func TruncateText(text string, maxChars int, tails string) string {
 	truncatedText := ansi.Truncate(text, maxChars-len(tails), "")
@@ -70,19 +71,39 @@ func TruncateMiddleText(text string, maxChars int, tails string) string {
 	return truncatedText
 }
 
-func PrettierName(name string, width int, isDir bool, isLink bool, isSelected bool, bgColor lipgloss.Color) string {
+func PrettierFileName(name string, width int, isDir bool, isLink bool, isSelected bool, bgColor lipgloss.Color) string {
 	style := GetElementIcon(name, isDir, isLink, Config.Nerdfont)
+	iconData := style.Icon + " "
+	filenameWidth := width - lipgloss.Width(iconData)
+	if width-lipgloss.Width(iconData) < MinFileNameTextSize {
+		panic(fmt.Sprintf("too small space=%d for render filename. column size=%d ", filenameWidth, width))
+	}
 	if isSelected {
 		return StringColorRender(lipgloss.Color(style.Color), bgColor).
 			Background(bgColor).
-			Render(style.Icon+" ") +
+			Render(iconData) +
 			FilePanelItemSelectedStyle.
-				Render(TruncateText(name, width, "..."))
+				Width(filenameWidth).Align(lipgloss.Left).
+				Render(name)
 	}
 	return StringColorRender(lipgloss.Color(style.Color), bgColor).
 		Background(bgColor).
-		Render(style.Icon+" ") +
-		FilePanelStyle.Render(TruncateText(name, width, "..."))
+		Render(iconData) +
+		FilePanelStyle.
+			Width(filenameWidth).Align(lipgloss.Left).
+			Render(name)
+}
+func PrettierFixedWidthItem(data string,
+	width int,
+	isSelected bool,
+	bgColor lipgloss.Color,
+	alignment lipgloss.Position) string {
+	outputData := ansi.Truncate(data, width, "")
+
+	if isSelected {
+		return FilePanelItemSelectedStyle.Render(outputData)
+	}
+	return FilePanelStyle.Width(width).Align(alignment).Render(outputData)
 }
 
 func ClipboardPrettierName(name string, width int, isDir bool, isLink bool, isSelected bool) string {

@@ -83,8 +83,9 @@ type ConfigType struct {
 	ShellCloseOnSuccess    bool   `toml:"shell_close_on_success" comment:"\nWhether to close the shell on successful command execution."`
 	Debug                  bool   `toml:"debug" comment:"\nWhether to enable debug mode."`
 	// IgnoreMissingFields controls whether warnings about missing TOML fields are suppressed.
-	IgnoreMissingFields bool `toml:"ignore_missing_fields" comment:"\nWhether to ignore warnings about missing fields in the config file."`
-	PageScrollSize      int  `toml:"page_scroll_size" comment:"\nNumber of lines to scroll for PgUp/PgDown keys (0: full page, default behavior)."`
+	IgnoreMissingFields   bool `toml:"ignore_missing_fields" comment:"\nWhether to ignore warnings about missing fields in the config file."`
+	PageScrollSize        int  `toml:"page_scroll_size" comment:"\nNumber of lines to scroll for PgUp/PgDown keys (0: full page, default behavior)."`
+	FilePanelExtraColumns int  `toml:"file_panel_extra_columns" comment:"\nCount of extra column in file panel in addition to file name. When option equal 0 then feature is disabled."`
 
 	Nerdfont                bool   `toml:"nerdfont" comment:"\n================   Style =================\n\n If you don't have or don't want Nerdfont installed you can turn this off"`
 	ShowSelectIcons         bool   `toml:"show_select_icons" comment:"\nShow checkbox icons in select mode (requires nerdfont)"`
