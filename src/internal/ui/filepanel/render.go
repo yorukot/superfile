@@ -7,46 +7,13 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/x/ansi"
 
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui"
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
 )
-
-func (m *Model) makeColumns(columnThreshold int) []columnDefinition {
-	extraColumns := []columnDefinition{
-		{Name: "Size", Generator: m.renderFileSize, Size: FileSizeColumnWidth},
-	}
-	maxColumns := len(extraColumns)
-	if columnThreshold < maxColumns {
-		maxColumns = columnThreshold
-	}
-
-	columns := []columnDefinition{
-		{Name: "Name", Generator: m.renderFileName, Size: m.GetContentWidth()},
-	}
-	// "-1" guards in a cases of rounding numbers.
-	extraColumnsThreshold := int(float64(m.GetContentWidth())*FileNameRatio - 1)
-	remainWidth := m.GetContentWidth()
-
-	for _, col := range extraColumns[0:maxColumns] {
-		widthExtraColumn := lipgloss.Width(ColumnDelimiter) + col.Size
-		if remainWidth-widthExtraColumn > extraColumnsThreshold {
-			delimiterCol := columnDefinition{
-				Name:      "",
-				Generator: m.renderDelimiter,
-				Size:      lipgloss.Width(ColumnDelimiter),
-			}
-			columns = append(columns, delimiterCol, col)
-			columns[0].Size -= widthExtraColumn
-			remainWidth -= widthExtraColumn
-		} else {
-			break
-		}
-	}
-	return columns
-}
 
 /*
 - TODO: Write File Panel Specific unit test
@@ -62,8 +29,7 @@ func (m *Model) Render(focused bool) string {
 	m.renderTopBar(r)
 	m.renderSearchBar(r)
 	m.renderFooter(r, m.SelectedCount())
-	columns := m.makeColumns(common.Config.FilePanelExtraColumns)
-	m.renderFileEntries(r, columns)
+	m.renderFileEntries(r)
 	return r.Render()
 }
 
@@ -117,7 +83,7 @@ func (m *Model) renderFileName(columnWidth int) fileElementRender {
 		selectBox := m.renderSelectBox(isSelected)
 
 		// Calculate the actual prefix width for proper alignment
-		prefixWidth := lipgloss.Width(cursor+" ") + lipgloss.Width(selectBox)
+		prefixWidth := ansi.StringWidth(cursor+" ") + ansi.StringWidth(selectBox)
 
 		isLink := m.Element[index].Info.Mode()&os.ModeSymlink != 0
 		renderedName := common.PrettierFilePanelItemName(
@@ -162,7 +128,7 @@ func (m *Model) renderFileSize(columnWidth int) fileElementRender {
 	}
 }
 
-func (m *Model) renderFileEntries(r *rendering.Renderer, columns []columnDefinition) {
+func (m *Model) renderFileEntries(r *rendering.Renderer) {
 	if len(m.Element) == 0 {
 		r.AddLines(common.FilePanelNoneText)
 		return
@@ -175,7 +141,7 @@ func (m *Model) renderFileEntries(r *rendering.Renderer, columns []columnDefinit
 			continue
 		}
 		var builder strings.Builder
-		for _, column := range columns {
+		for _, column := range m.columns {
 			colData := column.GetRenderer()(itemIndex, m.Element[itemIndex])
 			builder.WriteString(colData)
 		}

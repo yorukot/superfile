@@ -34,7 +34,8 @@ type Model struct {
 	Renaming           bool
 	SearchBar          textinput.Model
 	LastTimeGetElement time.Time
-	TargetFile         string // filename to position cursor on after load
+	TargetFile         string             // filename to position cursor on after load
+	columns            []columnDefinition // columns for rendering
 }
 
 // Sort options

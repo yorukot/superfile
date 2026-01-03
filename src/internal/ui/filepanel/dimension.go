@@ -1,6 +1,8 @@
 package filepanel
 
 import (
+	"github.com/charmbracelet/x/ansi"
+
 	"github.com/yorukot/superfile/src/internal/common"
 )
 
@@ -9,12 +11,47 @@ func (m *Model) UpdateDimensions(width, height int) {
 	m.SetHeight(height)
 }
 
+func (m *Model) makeColumns(columnThreshold int) []columnDefinition {
+	extraColumns := []columnDefinition{
+		{Name: "Size", Generator: m.renderFileSize, Size: FileSizeColumnWidth},
+	}
+	maxColumns := len(extraColumns)
+	if columnThreshold < maxColumns {
+		maxColumns = columnThreshold
+	}
+
+	columns := []columnDefinition{
+		{Name: "Name", Generator: m.renderFileName, Size: m.GetContentWidth()},
+	}
+	// "-1" guards in a cases of rounding numbers.
+	extraColumnsThreshold := int(float64(m.GetContentWidth())*FileNameRatio - 1)
+	remainWidth := m.GetContentWidth()
+
+	for _, col := range extraColumns[0:maxColumns] {
+		widthExtraColumn := ansi.StringWidth(ColumnDelimiter) + col.Size
+		if remainWidth-widthExtraColumn > extraColumnsThreshold {
+			delimiterCol := columnDefinition{
+				Name:      "",
+				Generator: m.renderDelimiter,
+				Size:      ansi.StringWidth(ColumnDelimiter),
+			}
+			columns = append(columns, delimiterCol, col)
+			columns[0].Size -= widthExtraColumn
+			remainWidth -= widthExtraColumn
+		} else {
+			break
+		}
+	}
+	return columns
+}
+
 func (m *Model) SetWidth(width int) {
 	if width < MinWidth {
 		width = MinWidth
 	}
 	m.width = width
 	m.SearchBar.Width = m.width - common.InnerPadding
+	m.columns = m.makeColumns(common.Config.FilePanelExtraColumns)
 }
 
 func (m *Model) SetHeight(height int) {

@@ -79,9 +79,10 @@ func PrettierFilePanelItemName(name string,
 	bgColor lipgloss.Color) string {
 	style := GetElementIcon(name, isDir, isLink, Config.Nerdfont)
 	iconData := style.Icon + " "
-	filenameWidth := width - lipgloss.Width(iconData)
-	if width-lipgloss.Width(iconData) < MinFileNameTextSize {
-		panic(fmt.Sprintf("too small space=%d for render filename. column size=%d ", filenameWidth, width))
+	filenameWidth := width - ansi.StringWidth(iconData)
+	if width-ansi.StringWidth(iconData) < MinFileNameTextSize {
+		// "too small space for render filename
+		return ""
 	}
 	if isSelected {
 		return StringColorRender(lipgloss.Color(style.Color), bgColor).
