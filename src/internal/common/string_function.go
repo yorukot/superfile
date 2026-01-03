@@ -71,7 +71,12 @@ func TruncateMiddleText(text string, maxChars int, tails string) string {
 	return truncatedText
 }
 
-func PrettierFileName(name string, width int, isDir bool, isLink bool, isSelected bool, bgColor lipgloss.Color) string {
+func PrettierFilePanelItemName(name string,
+	width int,
+	isDir bool,
+	isLink bool,
+	isSelected bool,
+	bgColor lipgloss.Color) string {
 	style := GetElementIcon(name, isDir, isLink, Config.Nerdfont)
 	iconData := style.Icon + " "
 	filenameWidth := width - lipgloss.Width(iconData)

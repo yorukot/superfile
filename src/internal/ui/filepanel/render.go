@@ -63,9 +63,6 @@ func (m *Model) Render(focused bool) string {
 	m.renderSearchBar(r)
 	m.renderFooter(r, m.SelectedCount())
 	columns := m.makeColumns(common.Config.FilePanelExtraColumns)
-	if common.Config.FilePanelExtraColumns > 0 {
-		m.renderColumnHeaders(r, columns)
-	}
 	m.renderFileEntries(r, columns)
 	return r.Render()
 }
@@ -75,14 +72,6 @@ func (m *Model) renderTopBar(r *rendering.Renderer) {
 	truncatedPath := common.TruncateTextBeginning(m.Location, m.GetContentWidth()-common.InnerPadding, "...")
 	r.AddLines(common.FilePanelTopDirectoryIcon + common.FilePanelTopPathStyle.Render(truncatedPath))
 	r.AddSection()
-}
-
-func (m *Model) renderColumnHeaders(r *rendering.Renderer, columns []columnDefinition) {
-	var builder strings.Builder
-	for _, column := range columns {
-		builder.WriteString(column.RenderHeader())
-	}
-	r.AddLines(builder.String())
 }
 
 func (m *Model) renderSearchBar(r *rendering.Renderer) {
@@ -131,7 +120,7 @@ func (m *Model) renderFileName(columnWidth int) fileElementRender {
 		prefixWidth := lipgloss.Width(cursor+" ") + lipgloss.Width(selectBox)
 
 		isLink := m.Element[index].Info.Mode()&os.ModeSymlink != 0
-		renderedName := common.PrettierFileName(
+		renderedName := common.PrettierFilePanelItemName(
 			m.Element[index].Name,
 			columnWidth-prefixWidth,
 			m.Element[index].Directory,

@@ -10,7 +10,6 @@ type fileElementRender func(index int, item Element) string
 type renderGenerator func(columnWidth int) fileElementRender
 
 const FileSizeColumnWidth = 15
-const ColumnHeaderHeight = 1
 
 // If the percentage column is smaller than this number, the additional columns will be hidden.
 const FileNameRatio = 0.65

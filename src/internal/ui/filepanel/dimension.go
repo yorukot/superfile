@@ -44,10 +44,5 @@ func (m *Model) GetContentWidth() int {
 
 // PanelElementHeight calculates the number of visible elements in content area
 func (m *Model) PanelElementHeight() int {
-	headerHeight := 0
-	if common.Config.FilePanelExtraColumns > 0 {
-		headerHeight = ColumnHeaderHeight
-	}
-
-	return m.GetMainPanelHeight() - contentPadding - headerHeight
+	return m.GetMainPanelHeight() - contentPadding
 }
