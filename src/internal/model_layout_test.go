@@ -21,6 +21,10 @@ const ScrollDownCount = 10
 const ScrollUpCount = 5
 
 func TestLayout(t *testing.T) {
+	// This runs 800+ tests can be skipped via go test ./... -short
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	// Uncomment this to debug locally.
 	// This is to prevent too many logs in CICD
 	utils.SetRootLoggerToDiscarded()
