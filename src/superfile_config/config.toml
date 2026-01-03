@@ -80,7 +80,7 @@ debug = false
 ignore_missing_fields = false
 
 #-- File Panel Extra Columns Count
-# Сount of extra column in file panel in addition to file name. When option equal 0 then feature is disabled.
+# Count of extra column in file panel in addition to file name. When option equal 0 then feature is disabled.
 file_panel_extra_columns = 0
 
 ###############################################################################

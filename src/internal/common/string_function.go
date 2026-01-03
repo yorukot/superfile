@@ -106,7 +106,7 @@ func PrettierFixedWidthItem(data string,
 	outputData := ansi.Truncate(data, width, "")
 
 	if isSelected {
-		return FilePanelItemSelectedStyle.Render(outputData)
+		return FilePanelItemSelectedStyle.Width(width).Render(outputData)
 	}
 	return FilePanelStyle.Width(width).Align(alignment).Render(outputData)
 }
