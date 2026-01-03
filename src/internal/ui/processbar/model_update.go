@@ -14,7 +14,6 @@ func (m *Model) ListenForChannelUpdates() {
 				slog.Debug("Channel closed, stopping listener")
 				return
 			}
-			slog.Debug("Received message", "id", msg.GetReqID())
 			if _, ok := msg.(stopListeningMsg); ok {
 				return
 			}
