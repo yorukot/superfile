@@ -15,7 +15,7 @@ func TestGetDisplayName(t *testing.T) {
 		expected string
 	}{
 		{
-			name: "Error message displayed",
+			name: "Cancelled",
 			process: Process{
 				CurrentFile: "file.txt",
 				ErrorMsg:    "File already exists",
@@ -24,6 +24,27 @@ func TestGetDisplayName(t *testing.T) {
 				State:       Cancelled,
 			},
 			expected: icon.CompressFile + icon.Space + "Compressing cancelled : File already exists",
+		},
+		{
+			name: "Failed without error Msg",
+			process: Process{
+				CurrentFile: "file.txt",
+				Operation:   OpCompress,
+				Total:       1,
+				State:       Failed,
+			},
+			expected: icon.CompressFile + icon.Space + "Compressing failed : ",
+		},
+		{
+			name: "Error message during operations",
+			process: Process{
+				CurrentFile: "file.txt",
+				ErrorMsg:    "File already exists",
+				Operation:   OpCompress,
+				Total:       1,
+				State:       InOperation,
+			},
+			expected: icon.CompressFile + icon.Space + "Unexpected failure: File already exists",
 		},
 		{
 			name: "Single file during operation",

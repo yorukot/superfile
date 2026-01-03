@@ -76,6 +76,8 @@ func (p *Process) displayNameWithoutIcon() string {
 	if p.State == Failed {
 		return p.Operation.GetVerb() + " failed : " + p.ErrorMsg
 	}
+	// Ideally this should not happen
+	// TODO: Ensure ErrorMsg is only set on failed states
 	if p.ErrorMsg != "" {
 		return "Unexpected failure: " + p.ErrorMsg
 	}
@@ -84,7 +86,6 @@ func (p *Process) displayNameWithoutIcon() string {
 		return p.Operation.GetVerb() + " " + p.CurrentFile
 	}
 
-	// Process completed (successful, failed, or cancelled)
 	if p.Total > 1 {
 		return fmt.Sprintf("%s %d files", p.Operation.GetPastVerb(), p.Total)
 	}
