@@ -87,7 +87,7 @@ func testWithConfig(t *testing.T, sidebarWidth int, previewWidth int,
 	common.Config.FilePreviewWidth = previewWidth
 	common.Config.EnableFilePreviewBorder = previewBorderEnabled
 
-	m := defaultTestModelWithFooter(testPath)
+	m := defaultTestModelWithFooterAndFilePreview(testPath)
 	p := NewTestTeaProgWithEventLoop(t, m)
 
 	resizeSizes := []struct {
