@@ -6,7 +6,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/common"
 )
 
-type fileElementRender func(index int, item Element) string
+type fileElementRender func(indexElement int) string
 type renderGenerator func(columnWidth int) fileElementRender
 
 const FileSizeColumnWidth = 15

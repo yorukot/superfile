@@ -73,10 +73,10 @@ func (m *Model) renderFooter(r *rendering.Renderer, selectedCount uint) {
 - The renderer for the mandatory first column in the file panel, with a name, a cursor, and a select option.
 */
 func (m *Model) renderFileName(columnWidth int) fileElementRender {
-	return func(index int, item Element) string {
-		isSelected := m.CheckSelected(m.Element[index].Location)
+	return func(indexElement int) string {
+		isSelected := m.CheckSelected(m.Element[indexElement].Location)
 		cursor := " "
-		if index == m.Cursor && !m.SearchBar.Focused() {
+		if indexElement == m.Cursor && !m.SearchBar.Focused() {
 			cursor = icon.Cursor
 		}
 
@@ -85,11 +85,11 @@ func (m *Model) renderFileName(columnWidth int) fileElementRender {
 		// Calculate the actual prefix width for proper alignment
 		prefixWidth := ansi.StringWidth(cursor+" ") + ansi.StringWidth(selectBox)
 
-		isLink := m.Element[index].Info.Mode()&os.ModeSymlink != 0
+		isLink := m.Element[indexElement].Info.Mode()&os.ModeSymlink != 0
 		renderedName := common.PrettierFilePanelItemName(
-			m.Element[index].Name,
+			m.Element[indexElement].Name,
 			columnWidth-prefixWidth,
-			m.Element[index].Directory,
+			m.Element[indexElement].Directory,
 			isLink,
 			isSelected,
 			common.FilePanelBGColor,
@@ -102,7 +102,7 @@ func (m *Model) renderFileName(columnWidth int) fileElementRender {
 - The renderer of delimiter spaces. It has a strict fixed size that depends only on the delimiter string.
 */
 func (m *Model) renderDelimiter(columnWidth int) fileElementRender {
-	return func(index int, item Element) string {
+	return func(_ int) string {
 		return common.PrettierFixedWidthItem(
 			ColumnDelimiter,
 			columnWidth,
@@ -117,9 +117,9 @@ func (m *Model) renderDelimiter(columnWidth int) fileElementRender {
 - The renderer of a file size column.
 */
 func (m *Model) renderFileSize(columnWidth int) fileElementRender {
-	return func(index int, item Element) string {
+	return func(indexElement int) string {
 		return common.PrettierFixedWidthItem(
-			common.FormatFileSize(item.Info.Size()),
+			common.FormatFileSize(m.Element[indexElement].Info.Size()),
 			columnWidth,
 			false,
 			common.FilePanelBGColor,
@@ -142,7 +142,7 @@ func (m *Model) renderFileEntries(r *rendering.Renderer) {
 		}
 		var builder strings.Builder
 		for _, column := range m.columns {
-			colData := column.GetRenderer()(itemIndex, m.Element[itemIndex])
+			colData := column.GetRenderer()(itemIndex)
 			builder.WriteString(colData)
 		}
 		r.AddLines(builder.String())
