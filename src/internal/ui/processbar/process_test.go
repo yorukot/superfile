@@ -44,7 +44,7 @@ func TestGetDisplayName(t *testing.T) {
 				Total:       1,
 				State:       InOperation,
 			},
-			expected: icon.CompressFile + icon.Space + "Unexpected failure: File already exists",
+			expected: icon.CompressFile + icon.Space + "Compressing file.txt",
 		},
 		{
 			name: "Single file during operation",

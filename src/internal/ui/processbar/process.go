@@ -15,13 +15,16 @@ import (
 type Process struct {
 	ID          string
 	CurrentFile string
-	ErrorMsg    string
-	Operation   OperationType
-	Progress    progress.Model
-	State       ProcessState
-	Total       int
-	Done        int
-	DoneTime    time.Time
+	// TODO : We always want ErrorMsg to be set when State is
+	// moved to Cancelled or Failed. To ensure it, we need to only allow state
+	// change via helper functions and ask for the  errorMsg
+	ErrorMsg  string
+	Operation OperationType
+	Progress  progress.Model
+	State     ProcessState
+	Total     int
+	Done      int
+	DoneTime  time.Time
 }
 
 func NewProcess(id string, currentFile string, operation OperationType, total int) Process {
@@ -75,11 +78,6 @@ func (p *Process) displayNameWithoutIcon() string {
 	}
 	if p.State == Failed {
 		return p.Operation.GetVerb() + " failed : " + p.ErrorMsg
-	}
-	// Ideally this should not happen
-	// TODO: Ensure ErrorMsg is only set on failed states
-	if p.ErrorMsg != "" {
-		return "Unexpected failure: " + p.ErrorMsg
 	}
 
 	if p.State == InOperation {
