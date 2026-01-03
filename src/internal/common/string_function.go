@@ -84,18 +84,12 @@ func PrettierFilePanelItemName(name string,
 		// "too small space for render filename
 		return ""
 	}
+	textStyle := FilePanelStyle
 	if isSelected {
-		return StringColorRender(lipgloss.Color(style.Color), bgColor).
-			Background(bgColor).
-			Render(iconData) +
-			FilePanelItemSelectedStyle.
-				Width(filenameWidth).Align(lipgloss.Left).
-				Render(TruncateText(name, filenameWidth, "..."))
+		textStyle = FilePanelItemSelectedStyle
 	}
-	return StringColorRender(lipgloss.Color(style.Color), bgColor).
-		Background(bgColor).
-		Render(iconData) +
-		FilePanelStyle.
+	return StringColorRender(lipgloss.Color(style.Color), bgColor).Background(bgColor).Render(iconData) +
+		textStyle.
 			Width(filenameWidth).Align(lipgloss.Left).
 			Render(TruncateText(name, filenameWidth, "..."))
 }
@@ -105,11 +99,11 @@ func PrettierFixedWidthItem(data string,
 	bgColor lipgloss.Color,
 	alignment lipgloss.Position) string {
 	outputData := ansi.Truncate(data, width, "")
-
+	style := FilePanelStyle
 	if isSelected {
-		return FilePanelItemSelectedStyle.Width(width).Render(outputData)
+		style = FilePanelItemSelectedStyle
 	}
-	return FilePanelStyle.Width(width).Align(alignment).Render(outputData)
+	return style.Width(width).Align(alignment).Render(outputData)
 }
 
 func ClipboardPrettierName(name string, width int, isDir bool, isLink bool, isSelected bool) string {
