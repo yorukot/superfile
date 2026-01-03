@@ -11,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 )
 
@@ -29,13 +28,13 @@ func zipSources(sources []string, target string, processBar *processbar.Model) e
 		}
 		totalFiles += count
 	}
-	p, err := processBar.SendAddProcessMsg("zip file", totalFiles, true)
+	p, err := processBar.SendAddProcessMsg(filepath.Base(target), processbar.OpCompress, totalFiles, true)
 	if err != nil {
 		return fmt.Errorf("cannot spawn process : %w", err)
 	}
 	_, err = os.Stat(target)
 	if err == nil {
-		p.Name = icon.CompressFile + icon.Space + "File already exist"
+		p.ErrorMsg = "File already exists"
 		p.State = processbar.Cancelled
 		p.DoneTime = time.Now()
 		pSendErr := processBar.SendUpdateProcessMsg(p, true)
@@ -73,7 +72,7 @@ func zipSourcesCore(sources []string, processBar *processbar.Model,
 	for _, src := range sources {
 		srcParentDir := filepath.Dir(src)
 		err := filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
-			p.Name = icon.CompressFile + icon.Space + filepath.Base(path)
+			p.CurrentFile = filepath.Base(path)
 			if err != nil {
 				return err
 			}

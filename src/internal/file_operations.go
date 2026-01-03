@@ -16,7 +16,6 @@ import (
 	"github.com/rkoesters/xdg/trash"
 
 	variable "github.com/yorukot/superfile/src/config"
-	"github.com/yorukot/superfile/src/config/icon"
 )
 
 // isSamePartition checks if two paths are on the same filesystem partition
@@ -227,7 +226,7 @@ func actualPasteOperation(info os.FileInfo, path string, newPath string, cut boo
 	}
 
 	// File
-	p.Name = icon.GetCopyOrCutIcon(cut) + icon.Space + filepath.Base(path)
+	p.CurrentFile = filepath.Base(path)
 	if cut && sameDev {
 		err = os.Rename(path, newPath)
 	} else {

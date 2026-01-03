@@ -3,17 +3,17 @@ package internal
 import (
 	"fmt"
 	"log/slog"
+	"path/filepath"
 	"time"
 
 	"golift.io/xtractr"
 
-	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/utils"
 )
 
 func extractCompressFile(src, dest string, processBar *processbar.Model) error {
-	p, err := processBar.SendAddProcessMsg(icon.ExtractFile+icon.Space+"unzip file", 1, true)
+	p, err := processBar.SendAddProcessMsg(filepath.Base(src), processbar.OpExtract, 1, true)
 	if err != nil {
 		return fmt.Errorf("cannot spawn process : %w", err)
 	}
