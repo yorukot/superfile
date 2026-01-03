@@ -190,10 +190,6 @@ func InitConfigFile() {
 	if err := writeConfigFile(variable.HotkeysFile, common.HotkeysTomlString); err != nil {
 		utils.PrintlnAndExit("Error writing config file:", err)
 	}
-
-	if err := initJSONFile(variable.PinnedFile); err != nil {
-		utils.PrintlnAndExit("Error initializing json file:", err)
-	}
 }
 
 // Check if is the first time initializing the app, if it is create
@@ -215,15 +211,6 @@ func writeConfigFile(path, data string) error {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		if err = os.WriteFile(path, []byte(data), utils.ConfigFilePerm); err != nil {
 			return fmt.Errorf("failed to write config file %s: %w", path, err)
-		}
-	}
-	return nil
-}
-
-func initJSONFile(path string) error {
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		if err = os.WriteFile(path, []byte("null"), utils.ConfigFilePerm); err != nil {
-			return fmt.Errorf("failed to initialize json file %s: %w", path, err)
 		}
 	}
 	return nil

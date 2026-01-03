@@ -19,6 +19,6 @@ const (
 
 	rendererNameMax = 1000
 
-	MinWidthForBorder = 2
+	MinWidthForBorder  = 2
 	MinHeightForBorder = 2
 )
