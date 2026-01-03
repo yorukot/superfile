@@ -141,6 +141,13 @@ func (p *ImagePreviewer) renderWithKittyUsingTermCap(img image.Image, path strin
 		return "", err
 	}
 
+	// TODO: using internal/common package in pkg package is against the standards
+	// We shouldn't use that here.
+	// Other usage of common in `file_preview` should be removed too.
+	// common.VideoExtensions should be moved to fixed_variables
+	// and internal/common/utils shoud move to pkg/utils so that it can
+	// be used by everyone
+
 	// TODO : Ideally we should not need the kitty previewer to be
 	// aware of full modal width and make decisions based on global config
 	// A better solutions than this is needed for it.

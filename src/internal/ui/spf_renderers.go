@@ -64,7 +64,8 @@ func FilePreviewPanelRenderer(totalHeight int, totalWidth int) *rendering.Render
 	// during model init, empty renderer can cause panic in AddLines()
 	// TODO: We should not have to initiliaize a renderer in case of zero sized
 	// panel
-	if common.Config.EnableFilePreviewBorder && totalWidth > 0 && totalHeight > 0 {
+	if common.Config.EnableFilePreviewBorder && totalWidth >= rendering.MinWidthForBorder &&
+		totalHeight >= rendering.MinHeightForBorder {
 		cfg.BorderRequired = true
 		cfg.BorderBGColor = common.FilePanelBGColor
 		cfg.BorderFGColor = common.FilePanelBorderColor

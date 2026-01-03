@@ -280,3 +280,12 @@ func ReadFileContent(filepath string, maxLineLength int, previewLine int) (strin
 	// returns the first non-EOF error that was encountered by the [Scanner]
 	return resultBuilder.String(), scanner.Err()
 }
+
+func InitJSONFile(path string) error {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		if err = os.WriteFile(path, []byte("null"), ConfigFilePerm); err != nil {
+			return fmt.Errorf("failed to initialize json file %s: %w", path, err)
+		}
+	}
+	return nil
+}

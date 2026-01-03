@@ -26,21 +26,33 @@ const DefaultTestModelHeight = 2 * common.MinimumHeight
 
 func defaultTestModel(dirs ...string) *model {
 	m := defaultModelConfig(false, false, false, dirs, nil)
-	return setModelParamsForTest(m)
+	return setModelParamsForTest(m, true)
 }
 
+// TODO: Change this to a better API. passing opts
+// WithZClient(), WithFooter()
 func defaultTestModelWithZClient(zClient *zoxidelib.Client, dirs ...string) *model {
 	m := defaultModelConfig(false, false, false, dirs, zClient)
-	return setModelParamsForTest(m)
+	return setModelParamsForTest(m, true)
 }
 
-func defaultTestModelWithFooter(dirs ...string) *model {
+func defaultTestModelWithFooterAndFilePreview(dirs ...string) *model {
 	m := defaultModelConfig(false, true, false, dirs, nil)
-	return setModelParamsForTest(m)
+	return setModelParamsForTest(m, false)
 }
 
-func setModelParamsForTest(m *model) *model {
+func defaultTestModelWithFilePreview(dirs ...string) *model {
+	m := defaultModelConfig(false, false, false, dirs, nil)
+	return setModelParamsForTest(m, false)
+}
+
+func setModelParamsForTest(m *model, disablePreview bool) *model {
 	m.disableMetadata = true
+	if disablePreview {
+		m.fileModel.FilePreview.Close()
+	}
+	// async size updates like preview panel content update
+	// will not be done
 	TeaUpdate(m, tea.WindowSizeMsg{Width: DefaultTestModelWidth, Height: DefaultTestModelHeight})
 	return m
 }
