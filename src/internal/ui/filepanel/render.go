@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/x/ansi"
 
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
@@ -27,8 +29,10 @@ func (m *Model) Render(focused bool) string {
 	m.renderTopBar(r)
 	m.renderSearchBar(r)
 	m.renderFooter(r, m.SelectedCount())
+	if m.NeedRenderHeaders() {
+		m.renderColumnHeaders(r)
+	}
 	m.renderFileEntries(r)
-
 	return r.Render()
 }
 
@@ -68,43 +72,91 @@ func (m *Model) renderFooter(r *rendering.Renderer, selectedCount uint) {
 	}
 }
 
-func (m *Model) renderFileEntries(r *rendering.Renderer) {
-	if len(m.Element) == 0 {
-		r.AddLines(common.FilePanelNoneText)
-		return
+func (m *Model) renderColumnHeaders(r *rendering.Renderer) {
+	var builder strings.Builder
+	for _, column := range m.columns {
+		builder.WriteString(column.RenderHeader())
 	}
+	r.AddLines(builder.String())
+}
 
-	end := min(m.RenderIndex+m.PanelElementHeight(), len(m.Element))
-
-	for i := m.RenderIndex; i < end; i++ {
-		isSelected := m.CheckSelected(m.Element[i].Location)
-
-		if m.Renaming && i == m.Cursor {
-			r.AddLines(m.Rename.View())
-			continue
-		}
-
+/*
+- The renderer for the mandatory first column in the file panel, with a name, a cursor, and a select option.
+*/
+func (m *Model) renderFileName(columnWidth int) fileElementRender {
+	return func(indexElement int) string {
+		isSelected := m.CheckSelected(m.Element[indexElement].Location)
 		cursor := " "
-		if i == m.Cursor && !m.SearchBar.Focused() {
+		if indexElement == m.Cursor && !m.SearchBar.Focused() {
 			cursor = icon.Cursor
 		}
 
 		selectBox := m.renderSelectBox(isSelected)
 
 		// Calculate the actual prefix width for proper alignment
-		prefixWidth := lipgloss.Width(cursor+" ") + lipgloss.Width(selectBox)
+		prefixWidth := ansi.StringWidth(cursor+" ") + ansi.StringWidth(selectBox)
 
-		isLink := m.Element[i].Info.Mode()&os.ModeSymlink != 0
-		renderedName := common.PrettierName(
-			m.Element[i].Name,
-			m.GetContentWidth()-prefixWidth,
-			m.Element[i].Directory,
+		isLink := m.Element[indexElement].Info.Mode()&os.ModeSymlink != 0
+		renderedName := common.PrettierFilePanelItemName(
+			m.Element[indexElement].Name,
+			columnWidth-prefixWidth,
+			m.Element[indexElement].Directory,
 			isLink,
 			isSelected,
 			common.FilePanelBGColor,
 		)
+		return common.FilePanelCursorStyle.Render(cursor+" ") + selectBox + renderedName
+	}
+}
 
-		r.AddLines(common.FilePanelCursorStyle.Render(cursor+" ") + selectBox + renderedName)
+/*
+- The renderer of delimiter spaces. It has a strict fixed size that depends only on the delimiter string.
+*/
+func (m *Model) renderDelimiter(columnWidth int) fileElementRender {
+	return func(_ int) string {
+		return common.PrettierFixedWidthItem(
+			ColumnDelimiter,
+			columnWidth,
+			false,
+			common.FilePanelBGColor,
+			lipgloss.Left,
+		)
+	}
+}
+
+/*
+- The renderer of a file size column.
+*/
+func (m *Model) renderFileSize(columnWidth int) fileElementRender {
+	return func(indexElement int) string {
+		return common.PrettierFixedWidthItem(
+			common.FormatFileSize(m.Element[indexElement].Info.Size()),
+			columnWidth,
+			false,
+			common.FilePanelBGColor,
+			lipgloss.Right,
+		)
+	}
+}
+
+func (m *Model) renderFileEntries(r *rendering.Renderer) {
+	if len(m.Element) == 0 {
+		r.AddLines(common.FilePanelNoneText)
+		return
+	}
+	end := min(m.RenderIndex+m.PanelElementHeight(), len(m.Element))
+
+	for itemIndex := m.RenderIndex; itemIndex < end; itemIndex++ {
+		if m.Renaming && itemIndex == m.Cursor {
+			r.AddLines(m.Rename.View())
+			continue
+		}
+		var builder strings.Builder
+		for _, column := range m.columns {
+			colData := column.GetRenderer()(itemIndex)
+			builder.WriteString(colData)
+		}
+		r.AddLines(builder.String())
 	}
 }
 
