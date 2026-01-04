@@ -8,14 +8,14 @@ import (
 	"os"
 	"strings"
 
-	"github.com/BourgeoisBear/rasterm"
+	"github.com/blacktop/go-termimg"
 
 	"github.com/yorukot/superfile/src/internal/common"
 )
 
 // isKittyCapable checks if the terminal supports Kitty graphics protocol
 func isKittyCapable() bool {
-	isCapable := rasterm.IsKittyCapable()
+	isCapable := termimg.KittySupported()
 
 	// Additional detection for terminals that might not be detected by rasterm
 	if !isCapable {
@@ -80,22 +80,8 @@ func generateKittyClearCommands() string {
 	return buf.String()
 }
 
-// generatePlacementID generates a unique placement ID based on file path
-func generatePlacementID(path string) uint32 {
-	if len(path) == 0 {
-		return kittyHashSeed // Default fallback
-	}
-
-	hash := 0
-	for _, c := range path {
-		hash = hash*kittyHashPrime + int(c)
-	}
-	return uint32(hash&kittyMaxID) + //nolint:gosec // Hash is bounded by kittyMaxID mask before conversion
-		kittyNonZeroOffset
-}
-
 // renderWithKittyUsingTermCap renders an image using Kitty graphics protocol with terminal capabilities
-func (p *ImagePreviewer) renderWithKittyUsingTermCap(img image.Image, path string,
+func (p *ImagePreviewer) renderWithKittyUsingTermCap(img image.Image,
 	originalWidth, originalHeight, maxWidth, maxHeight int, sideAreaWidth int,
 ) (string, error) {
 	// Validate dimensions
@@ -106,10 +92,8 @@ func (p *ImagePreviewer) renderWithKittyUsingTermCap(img image.Image, path strin
 	var buf bytes.Buffer
 
 	// Add clearing commands
-	buf.WriteString(generateKittyClearCommands())
-
-	opts := rasterm.KittyImgOpts{
-		PlacementId: generatePlacementID(path),
+	if err := termimg.ClearAll(); err != nil {
+		slog.Error("Failed to clear previous images", "error", err)
 	}
 
 	// Get terminal cell size from ImagePreviewer's terminal capabilities
@@ -124,22 +108,27 @@ func (p *ImagePreviewer) renderWithKittyUsingTermCap(img image.Image, path strin
 
 	slog.Debug("imgRatio", "imgRatio", imgRatio, "termRatio", termRatio)
 
+	widget := termimg.NewImageWidget(termimg.New(img))
+
 	if imgRatio > termRatio {
 		dstCols := maxWidth
 		dstRows := int(float64(dstCols*pixelsPerColumn) / imgRatio / float64(pixelsPerRow))
-		opts.DstCols = uint32(dstCols) //nolint:gosec // Terminal dimensions are bounded by maxWidth/maxHeight
-		opts.DstRows = uint32(dstRows) //nolint:gosec // Terminal dimensions are bounded by maxWidth/maxHeight
+
+		widget.SetPosition(dstCols, dstRows).SetSizeWithCorrection(dstCols, dstRows)
 	} else {
 		dstRows := maxHeight
 		dstCols := int(float64(dstRows*pixelsPerRow) * imgRatio / float64(pixelsPerColumn))
-		opts.DstRows = uint32(dstRows) //nolint:gosec // Terminal dimensions are bounded by maxWidth/maxHeight
-		opts.DstCols = uint32(dstCols) //nolint:gosec // Terminal dimensions are bounded by maxWidth/maxHeight
+
+		widget.SetPosition(dstRows, dstCols).SetSizeWithCorrection(dstCols, dstRows)
 	}
 
 	// Write image using Kitty protocol
-	if err := rasterm.KittyWriteImage(&buf, img, opts); err != nil {
-		return "", err
+	widget.SetProtocol(termimg.Kitty)
+	rendered, renderError := widget.Render()
+	if renderError != nil {
+		return "", renderError
 	}
+	buf.WriteString(rendered)
 
 	// TODO : Ideally we should not need the kitty previewer to be
 	// aware of full modal width and make decisions based on global config
