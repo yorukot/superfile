@@ -22,6 +22,11 @@ import (
 // Maybe we can replace slice of strings with var args - Should we ?
 // TODO: Move the configuration parameters to a ModelConfig struct.
 // Something like `RendererConfig` struct for `Renderer` struct in ui/renderer package
+// Or even better API like varargs lambda function opts
+// which can be WithFooter(), WithXYZ()
+// Lots of improvements are waiting on it
+//   - Allow Sending thumbnailGeneratorNeeded as false to preview.New()
+//     to prevent noise in test logs. Same with imagePreviewer
 func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool,
 	firstPanelPaths []string, zClient *zoxidelib.Client) *model {
 	return &model{

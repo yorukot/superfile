@@ -312,7 +312,7 @@ func TestAsyncPreviewPanelSync(t *testing.T) {
 	utils.SetupFilesWithData(t, []byte(content1), file1)
 	utils.SetupFilesWithData(t, []byte(content2), file2)
 
-	m := defaultTestModel(curTestDir)
+	m := defaultTestModelWithFilePreview(curTestDir)
 	p := NewTestTeaProgWithEventLoop(t, m)
 
 	// We need to send message via event loop to ensure that preview load command
