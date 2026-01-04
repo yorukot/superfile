@@ -29,6 +29,9 @@ func (m *Model) Render(focused bool) string {
 	m.renderTopBar(r)
 	m.renderSearchBar(r)
 	m.renderFooter(r, m.SelectedCount())
+	if m.NeedRenderHeaders() {
+		m.renderColumnHeaders(r)
+	}
 	m.renderFileEntries(r)
 	return r.Render()
 }
@@ -67,6 +70,14 @@ func (m *Model) renderFooter(r *rendering.Renderer, selectedCount uint) {
 	} else {
 		r.SetBorderInfoItems(cursorStr)
 	}
+}
+
+func (m *Model) renderColumnHeaders(r *rendering.Renderer) {
+	var builder strings.Builder
+	for _, column := range m.columns {
+		builder.WriteString(column.RenderHeader())
+	}
+	r.AddLines(builder.String())
 }
 
 /*
