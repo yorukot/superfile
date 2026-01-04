@@ -18,4 +18,7 @@ const (
 	minInfoItemWidth = 4
 
 	rendererNameMax = 1000
+
+	MinWidthForBorder  = 2
+	MinHeightForBorder = 2
 )

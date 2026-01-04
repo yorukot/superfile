@@ -153,7 +153,7 @@ func validate(cfg RendererConfig) error {
 		return fmt.Errorf("dimensions must be non-negative (h=%d, w=%d)", cfg.TotalHeight, cfg.TotalWidth)
 	}
 	if cfg.BorderRequired {
-		if cfg.TotalWidth < 2 || cfg.TotalHeight < 2 {
+		if cfg.TotalWidth < MinWidthForBorder || cfg.TotalHeight < MinHeightForBorder {
 			return errors.New("need at least 2 width and height for borders")
 		}
 	}

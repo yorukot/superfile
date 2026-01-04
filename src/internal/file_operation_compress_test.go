@@ -3,7 +3,6 @@ package internal
 import (
 	"archive/zip"
 	"io"
-	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -111,7 +110,6 @@ func validateZipExtraction(t *testing.T, zipReader *zip.ReadCloser, expectedFile
 
 	foundFiles := make(map[string]string)
 	for _, file := range zipReader.File {
-		slog.Debug("files : ", "files", file.Name)
 		foundFiles[file.Name] = ""
 		if !strings.HasSuffix(file.Name, "/") {
 			rc, err := file.Open()

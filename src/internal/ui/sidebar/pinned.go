@@ -15,6 +15,10 @@ type PinnedManager struct {
 }
 
 func NewPinnedFileManager(filePath string) PinnedManager {
+	if err := utils.InitJSONFile(filePath); err != nil {
+		slog.Error("Error initializing pinned JSON file", "error", err)
+	}
+
 	return PinnedManager{
 		filePath: filePath,
 	}
