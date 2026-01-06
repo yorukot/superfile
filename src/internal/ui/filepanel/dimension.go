@@ -12,8 +12,11 @@ func (m *Model) UpdateDimensions(width, height int) {
 }
 
 func (m *Model) makeColumns(columnThreshold int) []columnDefinition {
+	// TODO: make column set configurable
 	extraColumns := []columnDefinition{
 		{Name: "Size", Generator: m.renderFileSize, Size: FileSizeColumnWidth},
+		{Name: "Modify time", Generator: m.renderModifyTime, Size: ModifyTimeSizeColumnWidth},
+		{Name: "Permission", Generator: m.renderPermissions, Size: PermissionsColumnWidth},
 	}
 	maxColumns := len(extraColumns)
 	if columnThreshold < maxColumns {

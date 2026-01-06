@@ -139,6 +139,38 @@ func (m *Model) renderFileSize(columnWidth int) fileElementRender {
 	}
 }
 
+/*
+- The renderer of a file size column.
+TODO: make time template configurable
+*/
+func (m *Model) renderModifyTime(columnWidth int) fileElementRender {
+	return func(indexElement int) string {
+		modifyTime := m.Element[indexElement].Info.ModTime().Format("2006-01-02 15:04")
+		return common.PrettierFixedWidthItem(
+			modifyTime,
+			columnWidth,
+			false,
+			common.FilePanelBGColor,
+			lipgloss.Right,
+		)
+	}
+}
+
+/*
+- The renderer of a permission column.
+*/
+func (m *Model) renderPermissions(columnWidth int) fileElementRender {
+	return func(indexElement int) string {
+		return common.PrettierFixedWidthItem(
+			m.Element[indexElement].Info.Mode().Perm().String(),
+			columnWidth,
+			false,
+			common.FilePanelBGColor,
+			lipgloss.Right,
+		)
+	}
+}
+
 func (m *Model) renderFileEntries(r *rendering.Renderer) {
 	if len(m.Element) == 0 {
 		r.AddLines(common.FilePanelNoneText)

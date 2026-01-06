@@ -10,9 +10,12 @@ type fileElementRender func(indexElement int) string
 type renderGenerator func(columnWidth int) fileElementRender
 
 const FileSizeColumnWidth = 15
+const ModifyTimeSizeColumnWidth = 18
+const PermissionsColumnWidth = 12
 const ColumnHeaderHeight = 1
 
 // If the percentage column is smaller than this number, the additional columns will be hidden.
+// TODO: make this configurable
 const FileNameRatio = 0.65
 
 // Delimiter between columns in the file panel.
