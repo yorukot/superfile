@@ -108,20 +108,18 @@ func (b *BorderConfig) GetBorder(borderStrings lipgloss.Border) lipgloss.Border 
 		// Max available width for each item's actual content
 		// border.MiddleLeft <content> border.MiddleRight border.Bottom
 		availWidth := actualWidth/cnt - borderDividerWidth
-		infoText := ""
-		var infoTextSb112 strings.Builder
+		var infoText strings.Builder
 		for _, item := range b.infoItems {
 			item = ansi.Truncate(item, availWidth, "")
-			infoTextSb112.WriteString(
+			infoText.WriteString(
 				borderStrings.MiddleRight + item + borderStrings.MiddleLeft + borderStrings.Bottom,
 			)
 		}
-		infoText += infoTextSb112.String()
 
 		// Fill the rest with border char.
-		remainingWidth := actualWidth - ansi.StringWidth(infoText)
+		remainingWidth := actualWidth - ansi.StringWidth(infoText.String())
 
-		res.Bottom = strings.Repeat(borderStrings.Bottom, remainingWidth) + infoText
+		res.Bottom = strings.Repeat(borderStrings.Bottom, remainingWidth) + infoText.String()
 	}
 
 	if len(b.dividerIdx) > 0 {
