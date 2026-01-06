@@ -59,10 +59,14 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 		m.getFocusedFilePanel().ChangeFilePanelMode()
 
 	case slices.Contains(common.Hotkeys.NextFilePanel, msg):
-		m.fileModel.NextFilePanel()
+		if m.focusPanel != sidebarFocus && m.focusPanel != processBarFocus && m.focusPanel != metadataFocus {
+			m.fileModel.NextFilePanel()
+		}
 
 	case slices.Contains(common.Hotkeys.PreviousFilePanel, msg):
-		m.fileModel.PreviousFilePanel()
+		if m.focusPanel != sidebarFocus && m.focusPanel != processBarFocus && m.focusPanel != metadataFocus {
+			m.fileModel.PreviousFilePanel()
+		}
 
 	case slices.Contains(common.Hotkeys.CloseFilePanel, msg):
 		cmd, err := m.fileModel.CloseFilePanel()
