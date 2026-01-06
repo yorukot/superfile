@@ -140,7 +140,7 @@ func (m *Model) renderFileSize(columnWidth int) fileElementRender {
 }
 
 /*
-- The renderer of a file size column.
+- The renderer of a modify time column.
 TODO: make time template configurable
 */
 func (m *Model) renderModifyTime(columnWidth int) fileElementRender {
