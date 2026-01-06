@@ -114,12 +114,12 @@ func (p *ImagePreviewer) renderWithKittyUsingTermCap(img image.Image,
 		dstCols := maxWidth
 		dstRows := int(float64(dstCols*pixelsPerColumn) / imgRatio / float64(pixelsPerRow))
 
-		widget.SetPosition(dstCols, dstRows).SetSizeWithCorrection(dstCols, dstRows)
+		widget.SetSizeWithCorrection(dstCols, dstRows)
 	} else {
 		dstRows := maxHeight
 		dstCols := int(float64(dstRows*pixelsPerRow) * imgRatio / float64(pixelsPerColumn))
 
-		widget.SetPosition(dstCols, dstRows).SetSizeWithCorrection(dstCols, dstRows)
+		widget.SetSizeWithCorrection(dstCols, dstRows)
 	}
 
 	// Write image using Kitty protocol
