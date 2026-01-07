@@ -8,14 +8,14 @@ import (
 	"os"
 	"strings"
 
-	"github.com/BourgeoisBear/rasterm"
+	"github.com/blacktop/go-termimg"
 
 	"github.com/yorukot/superfile/src/internal/common"
 )
 
 // isKittyCapable checks if the terminal supports Kitty graphics protocol
 func isKittyCapable() bool {
-	isCapable := rasterm.IsKittyCapable()
+	isCapable := termimg.KittySupported()
 
 	// Additional detection for terminals that might not be detected by rasterm
 	if !isCapable {
@@ -80,22 +80,8 @@ func generateKittyClearCommands() string {
 	return buf.String()
 }
 
-// generatePlacementID generates a unique placement ID based on file path
-func generatePlacementID(path string) uint32 {
-	if len(path) == 0 {
-		return kittyHashSeed // Default fallback
-	}
-
-	hash := 0
-	for _, c := range path {
-		hash = hash*kittyHashPrime + int(c)
-	}
-	return uint32(hash&kittyMaxID) + //nolint:gosec // Hash is bounded by kittyMaxID mask before conversion
-		kittyNonZeroOffset
-}
-
 // renderWithKittyUsingTermCap renders an image using Kitty graphics protocol with terminal capabilities
-func (p *ImagePreviewer) renderWithKittyUsingTermCap(img image.Image, path string,
+func (p *ImagePreviewer) renderWithKittyUsingTermCap(img image.Image,
 	originalWidth, originalHeight, maxWidth, maxHeight int, sideAreaWidth int,
 ) (string, error) {
 	// Validate dimensions
@@ -106,11 +92,7 @@ func (p *ImagePreviewer) renderWithKittyUsingTermCap(img image.Image, path strin
 	var buf bytes.Buffer
 
 	// Add clearing commands
-	buf.WriteString(generateKittyClearCommands())
-
-	opts := rasterm.KittyImgOpts{
-		PlacementId: generatePlacementID(path),
-	}
+	buf.WriteString(p.ClearKittyImages())
 
 	// Get terminal cell size from ImagePreviewer's terminal capabilities
 	cellSize := p.terminalCap.GetTerminalCellSize()
@@ -124,21 +106,18 @@ func (p *ImagePreviewer) renderWithKittyUsingTermCap(img image.Image, path strin
 
 	slog.Debug("imgRatio", "imgRatio", imgRatio, "termRatio", termRatio)
 
+	widget := termimg.NewImageWidget(termimg.New(img))
+
 	if imgRatio > termRatio {
 		dstCols := maxWidth
 		dstRows := int(float64(dstCols*pixelsPerColumn) / imgRatio / float64(pixelsPerRow))
-		opts.DstCols = uint32(dstCols) //nolint:gosec // Terminal dimensions are bounded by maxWidth/maxHeight
-		opts.DstRows = uint32(dstRows) //nolint:gosec // Terminal dimensions are bounded by maxWidth/maxHeight
+
+		widget.SetSizeWithCorrection(dstCols, dstRows)
 	} else {
 		dstRows := maxHeight
 		dstCols := int(float64(dstRows*pixelsPerRow) * imgRatio / float64(pixelsPerColumn))
-		opts.DstRows = uint32(dstRows) //nolint:gosec // Terminal dimensions are bounded by maxWidth/maxHeight
-		opts.DstCols = uint32(dstCols) //nolint:gosec // Terminal dimensions are bounded by maxWidth/maxHeight
-	}
 
-	// Write image using Kitty protocol
-	if err := rasterm.KittyWriteImage(&buf, img, opts); err != nil {
-		return "", err
+		widget.SetSizeWithCorrection(dstCols, dstRows)
 	}
 
 	// TODO: using internal/common package in pkg package is against the standards
@@ -157,8 +136,19 @@ func (p *ImagePreviewer) renderWithKittyUsingTermCap(img image.Image, path strin
 		row++
 		col++
 	}
-	buf.WriteString(fmt.Sprintf("\x1b[%d;%dH", row, col))
 
+	widget.SetPosition(col-1, row-1)
+
+	// Write image using Kitty protocol
+	widget.SetProtocol(termimg.Kitty)
+	rendered, renderError := widget.Render()
+	if renderError != nil {
+		return "", renderError
+	}
+
+	buf.WriteString(rendered)
+
+	fmt.Fprintf(&buf, "\x1b[%d;%dH", row, col)
 	return buf.String(), nil
 }
 
