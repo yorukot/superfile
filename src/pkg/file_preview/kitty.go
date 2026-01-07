@@ -120,14 +120,6 @@ func (p *ImagePreviewer) renderWithKittyUsingTermCap(img image.Image,
 		widget.SetSizeWithCorrection(dstCols, dstRows)
 	}
 
-	// Write image using Kitty protocol
-	widget.SetProtocol(termimg.Kitty)
-	rendered, renderError := widget.Render()
-	if renderError != nil {
-		return "", renderError
-	}
-	buf.WriteString(rendered)
-
 	// TODO: using internal/common package in pkg package is against the standards
 	// We shouldn't use that here.
 	// Other usage of common in `file_preview` should be removed too.
@@ -146,8 +138,17 @@ func (p *ImagePreviewer) renderWithKittyUsingTermCap(img image.Image,
 	}
 
 	widget.SetPosition(col-1, row-1)
-	buf.WriteString(fmt.Sprintf("\x1b[%d;%dH", row, col))
 
+	// Write image using Kitty protocol
+	widget.SetProtocol(termimg.Kitty)
+	rendered, renderError := widget.Render()
+	if renderError != nil {
+		return "", renderError
+	}
+
+	buf.WriteString(rendered)
+
+	fmt.Fprintf(&buf, "\x1b[%d;%dH", row, col)
 	return buf.String(), nil
 }
 
