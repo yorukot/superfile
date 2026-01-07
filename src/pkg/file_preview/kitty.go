@@ -92,9 +92,7 @@ func (p *ImagePreviewer) renderWithKittyUsingTermCap(img image.Image,
 	var buf bytes.Buffer
 
 	// Add clearing commands
-	if err := termimg.ClearAll(); err != nil {
-		slog.Error("Failed to clear previous images", "error", err)
-	}
+	buf.WriteString(p.ClearKittyImages())
 
 	// Get terminal cell size from ImagePreviewer's terminal capabilities
 	cellSize := p.terminalCap.GetTerminalCellSize()
@@ -146,6 +144,8 @@ func (p *ImagePreviewer) renderWithKittyUsingTermCap(img image.Image,
 		row++
 		col++
 	}
+
+	widget.SetPosition(col-1, row-1)
 	buf.WriteString(fmt.Sprintf("\x1b[%d;%dH", row, col))
 
 	return buf.String(), nil
