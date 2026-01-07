@@ -52,7 +52,8 @@ default_directory = "."
 file_size_use_si = false
 
 #-- Default File Sort Type
-# (0: Name, 1: Size, 2: Date Modified, 3: Type).
+# (0: Name, 1: Size, 2: Date Modified, 3: Type, 4: Natural).
+# Natural sort treats numeric sequences as numbers (e.g., file2 before file10).
 default_sort_type = 0
 
 #-- Sort Order Reversing
@@ -60,7 +61,7 @@ default_sort_type = 0
 # false: Ascending.
 sort_order_reversed = false
 
-#-- Case-Sensitive Sorting (only for Name Sort)
+#-- Case-Sensitive Sorting
 # An uppercase "B" comes before a lowercase "a" if true.
 case_sensitive_sort = false
 

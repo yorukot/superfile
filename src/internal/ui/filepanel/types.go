@@ -82,4 +82,5 @@ const (
 	sortingSize         sortingKind = "Size"
 	sortingDateModified sortingKind = "Date Modified"
 	sortingFileType     sortingKind = "Type"
+	sortingNatural      sortingKind = "Natural"
 )
