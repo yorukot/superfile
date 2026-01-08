@@ -13,6 +13,7 @@ func (m *Model) UpdateDimensions(width, height int) {
 
 func (m *Model) makeColumns(columnThreshold int) []columnDefinition {
 	// TODO: make column set configurable
+	// Note: May use a predefined slice for efficiency. This content is static
 	extraColumns := []columnDefinition{
 		{Name: "Size", Generator: m.renderFileSize, Size: FileSizeColumnWidth},
 		{Name: "Modify time", Generator: m.renderModifyTime, Size: ModifyTimeSizeColumnWidth},

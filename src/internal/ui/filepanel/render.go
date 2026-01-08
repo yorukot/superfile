@@ -83,7 +83,7 @@ func (m *Model) renderColumnHeaders(r *rendering.Renderer) {
 /*
 - The renderer for the mandatory first column in the file panel, with a name, a cursor, and a select option.
 */
-func (m *Model) renderFileName(columnWidth int) fileElementRender {
+func (m *Model) renderFileName(columnWidth int) columnRenderer {
 	return func(indexElement int) string {
 		isSelected := m.CheckSelected(m.Element[indexElement].Location)
 		cursor := " "
@@ -112,7 +112,7 @@ func (m *Model) renderFileName(columnWidth int) fileElementRender {
 /*
 - The renderer of delimiter spaces. It has a strict fixed size that depends only on the delimiter string.
 */
-func (m *Model) renderDelimiter(columnWidth int) fileElementRender {
+func (m *Model) renderDelimiter(columnWidth int) columnRenderer {
 	return func(_ int) string {
 		return common.PrettierFixedWidthItem(
 			ColumnDelimiter,
@@ -127,7 +127,7 @@ func (m *Model) renderDelimiter(columnWidth int) fileElementRender {
 /*
 - The renderer of a file size column.
 */
-func (m *Model) renderFileSize(columnWidth int) fileElementRender {
+func (m *Model) renderFileSize(columnWidth int) columnRenderer {
 	return func(indexElement int) string {
 		return common.PrettierFixedWidthItem(
 			common.FormatFileSize(m.Element[indexElement].Info.Size()),
@@ -143,7 +143,7 @@ func (m *Model) renderFileSize(columnWidth int) fileElementRender {
 - The renderer of a modify time column.
 TODO: make time template configurable
 */
-func (m *Model) renderModifyTime(columnWidth int) fileElementRender {
+func (m *Model) renderModifyTime(columnWidth int) columnRenderer {
 	return func(indexElement int) string {
 		modifyTime := m.Element[indexElement].Info.ModTime().Format("2006-01-02 15:04")
 		return common.PrettierFixedWidthItem(
@@ -159,7 +159,7 @@ func (m *Model) renderModifyTime(columnWidth int) fileElementRender {
 /*
 - The renderer of a permission column.
 */
-func (m *Model) renderPermissions(columnWidth int) fileElementRender {
+func (m *Model) renderPermissions(columnWidth int) columnRenderer {
 	return func(indexElement int) string {
 		return common.PrettierFixedWidthItem(
 			m.Element[indexElement].Info.Mode().Perm().String(),
