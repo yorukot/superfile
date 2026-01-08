@@ -91,3 +91,38 @@ func (cd *columnDefinition) RenderHeader() string {
 		lipgloss.Center,
 	)
 }
+
+func (m *Model) makeColumns(columnThreshold int) []columnDefinition {
+	// TODO: make column set configurable
+	// Note: May use a predefined slice for efficiency. This content is static
+	extraColumns := []columnDefinition{
+		{Name: "Size", columnRender: m.renderFileSize, Size: FileSizeColumnWidth},
+		{Name: "Modify time", columnRender: m.renderModifyTime, Size: ModifyTimeSizeColumnWidth},
+		{Name: "Permission", columnRender: m.renderPermissions, Size: PermissionsColumnWidth},
+	}
+	maxColumns := min(columnThreshold, len(extraColumns))
+
+	columns := []columnDefinition{
+		{Name: "Name", columnRender: m.renderFileName, Size: m.GetContentWidth()},
+	}
+	// "-1" guards in a cases of rounding numbers.
+	extraColumnsThreshold := int(float64(m.GetContentWidth())*FileNameRatio - 1)
+
+	for _, col := range extraColumns[0:maxColumns] {
+		widthExtraColumn := ansi.StringWidth(ColumnDelimiter) + col.Size
+
+		// This condition checks that can we borrow some width from first column for additional columns?
+		if columns[0].Size-widthExtraColumn > extraColumnsThreshold {
+			delimiterCol := columnDefinition{
+				Name:         "",
+				columnRender: m.renderDelimiter,
+				Size:         ansi.StringWidth(ColumnDelimiter),
+			}
+			columns = append(columns, delimiterCol, col)
+			columns[0].Size -= widthExtraColumn
+		} else {
+			break
+		}
+	}
+	return columns
+}
