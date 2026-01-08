@@ -6,8 +6,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/common"
 )
 
-type columnRenderer func(indexElement int) string
-type renderGenerator func(columnWidth int) columnRenderer
+type columnRenderer func(indexElement int, columnWidth int) string
 
 const FileSizeColumnWidth = 15
 const ModifyTimeSizeColumnWidth = 18
@@ -22,13 +21,13 @@ const FileNameRatio = 0.65
 const ColumnDelimiter = "  "
 
 type columnDefinition struct {
-	Name      string
-	Size      int
-	Generator renderGenerator
+	Name         string
+	Size         int
+	columnRender columnRenderer
 }
 
-func (cd *columnDefinition) GetRenderer() columnRenderer {
-	return cd.Generator(cd.Size)
+func (cd *columnDefinition) Render(index int) string {
+	return cd.columnRender(index, cd.Size)
 }
 
 func (cd *columnDefinition) RenderHeader() string {

@@ -2,12 +2,8 @@ package filepanel
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
-
-	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/x/ansi"
 
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
@@ -80,97 +76,6 @@ func (m *Model) renderColumnHeaders(r *rendering.Renderer) {
 	r.AddLines(builder.String())
 }
 
-/*
-- The renderer for the mandatory first column in the file panel, with a name, a cursor, and a select option.
-*/
-func (m *Model) renderFileName(columnWidth int) columnRenderer {
-	return func(indexElement int) string {
-		isSelected := m.CheckSelected(m.Element[indexElement].Location)
-		cursor := " "
-		if indexElement == m.Cursor && !m.SearchBar.Focused() {
-			cursor = icon.Cursor
-		}
-
-		selectBox := m.renderSelectBox(isSelected)
-
-		// Calculate the actual prefix width for proper alignment
-		prefixWidth := ansi.StringWidth(cursor+" ") + ansi.StringWidth(selectBox)
-
-		isLink := m.Element[indexElement].Info.Mode()&os.ModeSymlink != 0
-		renderedName := common.PrettierFilePanelItemName(
-			m.Element[indexElement].Name,
-			columnWidth-prefixWidth,
-			m.Element[indexElement].Directory,
-			isLink,
-			isSelected,
-			common.FilePanelBGColor,
-		)
-		return common.FilePanelCursorStyle.Render(cursor+" ") + selectBox + renderedName
-	}
-}
-
-/*
-- The renderer of delimiter spaces. It has a strict fixed size that depends only on the delimiter string.
-*/
-func (m *Model) renderDelimiter(columnWidth int) columnRenderer {
-	return func(_ int) string {
-		return common.PrettierFixedWidthItem(
-			ColumnDelimiter,
-			columnWidth,
-			false,
-			common.FilePanelBGColor,
-			lipgloss.Left,
-		)
-	}
-}
-
-/*
-- The renderer of a file size column.
-*/
-func (m *Model) renderFileSize(columnWidth int) columnRenderer {
-	return func(indexElement int) string {
-		return common.PrettierFixedWidthItem(
-			common.FormatFileSize(m.Element[indexElement].Info.Size()),
-			columnWidth,
-			false,
-			common.FilePanelBGColor,
-			lipgloss.Right,
-		)
-	}
-}
-
-/*
-- The renderer of a modify time column.
-TODO: make time template configurable
-*/
-func (m *Model) renderModifyTime(columnWidth int) columnRenderer {
-	return func(indexElement int) string {
-		modifyTime := m.Element[indexElement].Info.ModTime().Format("2006-01-02 15:04")
-		return common.PrettierFixedWidthItem(
-			modifyTime,
-			columnWidth,
-			false,
-			common.FilePanelBGColor,
-			lipgloss.Right,
-		)
-	}
-}
-
-/*
-- The renderer of a permission column.
-*/
-func (m *Model) renderPermissions(columnWidth int) columnRenderer {
-	return func(indexElement int) string {
-		return common.PrettierFixedWidthItem(
-			m.Element[indexElement].Info.Mode().Perm().String(),
-			columnWidth,
-			false,
-			common.FilePanelBGColor,
-			lipgloss.Right,
-		)
-	}
-}
-
 func (m *Model) renderFileEntries(r *rendering.Renderer) {
 	if len(m.Element) == 0 {
 		r.AddLines(common.FilePanelNoneText)
@@ -185,7 +90,7 @@ func (m *Model) renderFileEntries(r *rendering.Renderer) {
 		}
 		var builder strings.Builder
 		for _, column := range m.columns {
-			colData := column.GetRenderer()(itemIndex)
+			colData := column.Render(itemIndex)
 			builder.WriteString(colData)
 		}
 		r.AddLines(builder.String())
