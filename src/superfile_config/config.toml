@@ -83,6 +83,11 @@ ignore_missing_fields = false
 # Count of extra column in file panel in addition to file name. When option equal 0 then feature is disabled.
 file_panel_extra_columns = 0
 
+#-- File name width in File Panel
+# If the percentage file name column is smaller than this number, the last additional column in list extra columns will be hidden.
+file_panel_name_percent = 50
+
+
 ###############################################################################
 #                                   Styling                                   #
 ###############################################################################

@@ -37,20 +37,26 @@ func (m *Model) renderFileName(indexElement int, columnWidth int) string {
 
 // The renderer of delimiter spaces. It has a strict fixed size that depends only on the delimiter string.
 func (m *Model) renderDelimiter(indexElement int, columnWidth int) string {
+	isSelected := m.CheckSelected(m.Element[indexElement].Location)
 	return common.PrettierFixedWidthItem(
 		ColumnDelimiter,
 		columnWidth,
-		false,
+		isSelected,
 		common.FilePanelBGColor,
 		lipgloss.Left,
 	)
 }
 
 func (m *Model) renderFileSize(indexElement int, columnWidth int) string {
+	isSelected := m.CheckSelected(m.Element[indexElement].Location)
+	sizeValue := common.FormatFileSize(m.Element[indexElement].Info.Size())
+	if m.Element[indexElement].Info.IsDir() {
+		sizeValue = ""
+	}
 	return common.PrettierFixedWidthItem(
-		common.FormatFileSize(m.Element[indexElement].Info.Size()),
+		sizeValue,
 		columnWidth,
-		false,
+		isSelected,
 		common.FilePanelBGColor,
 		lipgloss.Right,
 	)
@@ -58,21 +64,23 @@ func (m *Model) renderFileSize(indexElement int, columnWidth int) string {
 
 // TODO: make time template configurable
 func (m *Model) renderModifyTime(indexElement int, columnWidth int) string {
+	isSelected := m.CheckSelected(m.Element[indexElement].Location)
 	modifyTime := m.Element[indexElement].Info.ModTime().Format("2006-01-02 15:04")
 	return common.PrettierFixedWidthItem(
 		modifyTime,
 		columnWidth,
-		false,
+		isSelected,
 		common.FilePanelBGColor,
 		lipgloss.Right,
 	)
 }
 
 func (m *Model) renderPermissions(indexElement int, columnWidth int) string {
+	isSelected := m.CheckSelected(m.Element[indexElement].Location)
 	return common.PrettierFixedWidthItem(
 		m.Element[indexElement].Info.Mode().Perm().String(),
 		columnWidth,
-		false,
+		isSelected,
 		common.FilePanelBGColor,
 		lipgloss.Right,
 	)
@@ -92,7 +100,7 @@ func (cd *columnDefinition) RenderHeader() string {
 	)
 }
 
-func (m *Model) makeColumns(columnThreshold int) []columnDefinition {
+func (m *Model) makeColumns(columnThreshold int, filePanelNamePercent int) []columnDefinition {
 	// TODO: make column set configurable
 	// Note: May use a predefined slice for efficiency. This content is static
 	extraColumns := []columnDefinition{
@@ -105,8 +113,18 @@ func (m *Model) makeColumns(columnThreshold int) []columnDefinition {
 	columns := []columnDefinition{
 		{Name: "Name", columnRender: m.renderFileName, Size: m.GetContentWidth()},
 	}
+
+	fileNameRatio := FileNameRatioDefault
+	if filePanelNamePercent > FileNameRatioDefault &&
+		filePanelNamePercent <= FileNameRatioMax {
+		fileNameRatio = filePanelNamePercent
+	}
+
 	// "-1" guards in a cases of rounding numbers.
-	extraColumnsThreshold := int(float64(m.GetContentWidth())*FileNameRatio - 1)
+	extraColumnsThreshold := int(float64(m.GetContentWidth()*fileNameRatio/FileNameRatioMax) - 1)
+	if extraColumnsThreshold <= 0 {
+		extraColumnsThreshold = m.GetContentWidth()
+	}
 
 	for _, col := range extraColumns[0:maxColumns] {
 		widthExtraColumn := ansi.StringWidth(ColumnDelimiter) + col.Size

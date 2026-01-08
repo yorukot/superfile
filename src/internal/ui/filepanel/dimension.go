@@ -15,7 +15,7 @@ func (m *Model) SetWidth(width int) {
 	}
 	m.width = width
 	m.SearchBar.Width = m.width - common.InnerPadding
-	m.columns = m.makeColumns(common.Config.FilePanelExtraColumns)
+	m.columns = m.makeColumns(common.Config.FilePanelExtraColumns, common.Config.FilePanelNamePercent)
 }
 
 func (m *Model) SetHeight(height int) {
