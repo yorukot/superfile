@@ -18,10 +18,7 @@ func (m *Model) makeColumns(columnThreshold int) []columnDefinition {
 		{Name: "Modify time", Generator: m.renderModifyTime, Size: ModifyTimeSizeColumnWidth},
 		{Name: "Permission", Generator: m.renderPermissions, Size: PermissionsColumnWidth},
 	}
-	maxColumns := len(extraColumns)
-	if columnThreshold < maxColumns {
-		maxColumns = columnThreshold
-	}
+	maxColumns := min(columnThreshold, len(extraColumns))
 
 	columns := []columnDefinition{
 		{Name: "Name", Generator: m.renderFileName, Size: m.GetContentWidth()},
