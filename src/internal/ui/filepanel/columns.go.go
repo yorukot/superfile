@@ -10,9 +10,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/common"
 )
 
-/*
-- The renderer for the mandatory first column in the file panel, with a name, a cursor, and a select option.
-*/
+// The renderer for the mandatory first column in the file panel, with a name, a cursor, and a select option.
 func (m *Model) renderFileName(indexElement int, columnWidth int) string {
 	isSelected := m.CheckSelected(m.Element[indexElement].Location)
 	cursor := " "
@@ -37,9 +35,7 @@ func (m *Model) renderFileName(indexElement int, columnWidth int) string {
 	return common.FilePanelCursorStyle.Render(cursor+" ") + selectBox + renderedName
 }
 
-/*
-- The renderer of delimiter spaces. It has a strict fixed size that depends only on the delimiter string.
-*/
+// The renderer of delimiter spaces. It has a strict fixed size that depends only on the delimiter string.
 func (m *Model) renderDelimiter(indexElement int, columnWidth int) string {
 	return common.PrettierFixedWidthItem(
 		ColumnDelimiter,
@@ -50,9 +46,6 @@ func (m *Model) renderDelimiter(indexElement int, columnWidth int) string {
 	)
 }
 
-/*
-- The renderer of a file size column.
-*/
 func (m *Model) renderFileSize(indexElement int, columnWidth int) string {
 	return common.PrettierFixedWidthItem(
 		common.FormatFileSize(m.Element[indexElement].Info.Size()),
@@ -63,10 +56,7 @@ func (m *Model) renderFileSize(indexElement int, columnWidth int) string {
 	)
 }
 
-/*
-- The renderer of a modify time column.
-TODO: make time template configurable
-*/
+// TODO: make time template configurable
 func (m *Model) renderModifyTime(indexElement int, columnWidth int) string {
 	modifyTime := m.Element[indexElement].Info.ModTime().Format("2006-01-02 15:04")
 	return common.PrettierFixedWidthItem(
@@ -78,9 +68,6 @@ func (m *Model) renderModifyTime(indexElement int, columnWidth int) string {
 	)
 }
 
-/*
-- The renderer of a permission column.
-*/
 func (m *Model) renderPermissions(indexElement int, columnWidth int) string {
 	return common.PrettierFixedWidthItem(
 		m.Element[indexElement].Info.Mode().Perm().String(),
