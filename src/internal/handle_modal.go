@@ -82,6 +82,8 @@ func (m *model) confirmRename() {
 		slog.Error("Error while confirmRename during rename", "error", err)
 		// Dont return. We have to also reset the panel and model information
 	}
+
+	m.clipboard.UpdatePath(oldPath, newPath)
 	m.fileModel.Renaming = false
 	panel.Rename.Blur()
 	panel.Renaming = false

@@ -1,9 +1,11 @@
 package clipboard
 
 import (
-	"log/slog"
 	"os"
+	"path/filepath"
+	"slices"
 	"strconv"
+	"strings"
 
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui"
@@ -34,22 +36,20 @@ func (m *Model) Render() string {
 	if len(m.items.items) == 0 {
 		// TODO move this to a string
 		r.AddLines("", common.ClipboardNoneText)
-	} else {
-		for i := 0; i < len(m.items.items) && i < viewHeight; i++ {
-			if i == viewHeight-1 && i != len(m.items.items)-1 {
-				// Last Entry we can render, but there are more that one left
-				r.AddLines(strconv.Itoa(len(m.items.items)-i) + " items left....")
-			} else {
-				fileInfo, err := os.Lstat(m.items.items[i])
-				if err != nil {
-					slog.Error("Clipboard render function get item state ", "error", err)
-					continue
-				}
-				isLink := fileInfo.Mode()&os.ModeSymlink != 0
-				r.AddLines(common.ClipboardPrettierName(m.items.items[i],
-					viewWidth, fileInfo.IsDir(), isLink, false))
-			}
+		return r.Render()
+	}
+	for i := 0; i < len(m.items.items) && i < viewHeight; i++ {
+		if i == viewHeight-1 && i != len(m.items.items)-1 {
+			r.AddLines(strconv.Itoa(len(m.items.items)-i) + " items left...")
+			continue
 		}
+		r.AddLines(common.ClipboardPrettierName(
+			m.items.items[i],
+			viewWidth,
+			false,
+			false,
+			false,
+		))
 	}
 	return r.Render()
 }
@@ -74,9 +74,7 @@ func (m *Model) SetItems(items []string) {
 
 func (m *Model) GetItems() []string {
 	// return a copy to prevent external mutation
-	items := make([]string, len(m.items.items))
-	copy(items, m.items.items)
-	return items
+	return m.GetItemsWithExistCheck()
 }
 
 func (m *Model) Len() int {
@@ -96,4 +94,41 @@ func (m *Model) GetFirstItem() string {
 		return ""
 	}
 	return m.items.items[0]
+}
+
+func (m *Model) UpdatePath(oldpath string, newpath string) {
+	if len(m.items.items) == 0 {
+		return
+	}
+	oldpathClean := filepath.Clean(oldpath)
+	newpathClean := filepath.Clean(newpath)
+
+	for i, p := range m.items.items {
+		cur := filepath.Clean(p)
+		if cur == oldpathClean {
+			m.items.items[i] = newpathClean
+			continue
+		}
+		if strings.HasPrefix(cur, oldpathClean+string(filepath.Separator)) {
+			m.items.items[i] = filepath.Join(
+				newpathClean,
+				strings.TrimPrefix(cur, oldpathClean+string(filepath.Separator)),
+			)
+		}
+
+	}
+}
+
+func (m *Model) GetItemsWithExistCheck() []string {
+	if len(m.items.items) == 0 {
+		return nil
+	}
+
+	m.items.items = slices.DeleteFunc(m.items.items, func(p string) bool {
+		_, err := os.Stat(p)
+		return err != nil
+	})
+	out := make([]string, len(m.items.items))
+	copy(out, m.items.items)
+	return out
 }
