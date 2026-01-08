@@ -182,21 +182,47 @@ func TestModel_HandleResults(t *testing.T) {
 
 		// Validate close happens when closeOnSuccess is true
 		assert.True(t, m.LastActionSucceeded())
-		assert.Equal(t, "Command exited with status 0", m.resultMsg)
+		assert.Equal(t, "Command exited with status 0 (No output)", m.resultMsg)
 		assert.False(t, m.IsOpen())
 
 		m.Open(true)
 		m.HandleShellCommandResults(1, "")
 		assert.False(t, m.LastActionSucceeded())
-		assert.Equal(t, "Command exited with status 1", m.resultMsg)
+		assert.Equal(t, "Command exited with status 1 (No output)", m.resultMsg)
 		assert.True(t, m.IsOpen())
 
 		m.closeOnSuccess = false
 		m.HandleShellCommandResults(0, "")
 		// Validate that close does not happen when closeOnSuccess is true
 		assert.True(t, m.LastActionSucceeded())
-		assert.Equal(t, "Command exited with status 0", m.resultMsg)
+		assert.Equal(t, "Command exited with status 0 (No output)", m.resultMsg)
 		assert.True(t, m.IsOpen())
+	})
+
+	t.Run("Verify Shell command output is displayed", func(t *testing.T) {
+		m := defaultTestModel()
+		m.closeOnSuccess = false
+		m.Open(true)
+
+		// Test with single line output
+		m.HandleShellCommandResults(0, "hello world")
+		assert.Equal(t, "Command exited with status 0, Output:\nhello world", m.resultMsg)
+
+		// Test with multi-line output
+		m.HandleShellCommandResults(0, "line1\nline2\nline3")
+		assert.Equal(t, "Command exited with status 0, Output:\nline1\nline2\nline3", m.resultMsg)
+
+		// Test output is trimmed
+		m.HandleShellCommandResults(0, "  trimmed output  \n")
+		assert.Equal(t, "Command exited with status 0, Output:\ntrimmed output", m.resultMsg)
+
+		m.HandleShellCommandResults(0, "ESC SEQ\x1b[2;6H")
+		assert.Equal(t, "Command exited with status 0, Output:\nESC SEQ[2;6H", m.resultMsg)
+
+		// Test with failed command and output
+		m.HandleShellCommandResults(1, "error message")
+		assert.False(t, m.LastActionSucceeded())
+		assert.Equal(t, "Command exited with status 1, Output:\nerror message", m.resultMsg)
 	})
 
 	t.Run("Verify SPF results update", func(t *testing.T) {
@@ -300,7 +326,7 @@ func TestModel_Render(t *testing.T) {
 			"├────────────────────────────────────────────────┤\n" +
 			"│ '>' - Get into SPF mode                        │\n" +
 			"├────────────────────────────────────────────────┤\n" +
-			"│ Success : Command exited with status 0         │\n" +
+			"│ Success : Command exited with status 0 (No outp│\n" +
 			"╰────────────────────────────────────────────────╯"
 		assert.Equal(t, exp, res)
 		m.HandleShellCommandResults(1, "")
@@ -313,7 +339,7 @@ func TestModel_Render(t *testing.T) {
 			"├────────────────────────────────────────────────┤\n" +
 			"│ '>' - Get into SPF mode                        │\n" +
 			"├────────────────────────────────────────────────┤\n" +
-			"│ Error : Command exited with status 1           │\n" +
+			"│ Error : Command exited with status 1 (No output│\n" +
 			"╰────────────────────────────────────────────────╯"
 		assert.Equal(t, exp, res)
 	})

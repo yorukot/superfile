@@ -131,7 +131,7 @@ func (m *Model) Render(processBarFocused bool) string {
 		}
 
 		r.AddLines(cursor + common.FooterStyle.Render(
-			common.TruncateText(curProcess.Name, m.viewWidth()-processNameTruncatePadding, "...")+" ") +
+			common.TruncateText(curProcess.GetDisplayName(), m.viewWidth()-processNameTruncatePadding, "...")+" ") +
 			curProcess.State.Icon())
 
 		// We add two lines here, and let the renderer take care of

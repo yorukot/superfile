@@ -9,10 +9,15 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+type StyleModifier func(lipgloss.Style) lipgloss.Style
+
 // For now we are not allowing to add/update/remove lines to previous sections
 // We may allow that later.
 // Also we could have functions about getting sections count, line count, adding updating a
 // specific line in a specific section, and adjusting section sizes. But not needed now.
+// TODO: zero value of Renderer - `Renderer{}` is unusable,
+// It will cause panic on AddLines(), completely eliminate usage of zero values
+// in the code.
 type Renderer struct {
 
 	// Current sectionization will not allow to predefine section
@@ -40,6 +45,12 @@ type Renderer struct {
 	borderFGColor lipgloss.TerminalColor
 	borderBGColor lipgloss.TerminalColor
 
+	// Use this to add additional style modifications
+	// This is applied before any style update that are defined by other configurations,
+	// like border, height, width. Hence if conflicting styles are used, they can get
+	// overridden
+	styleModifiers []StyleModifier
+
 	// Maybe better rename these to maxHeight
 	// Final rendered string should have exactly this many lines, including borders
 	// But if truncateHeight is true, it maybe be <= totalHeight
@@ -50,9 +61,12 @@ type Renderer struct {
 	contentHeight int
 	contentWidth  int
 
+	// Note: Must pass non empty borderStrings if borderRequired is set as true
+	// TODO: Have ansi.StringWidth checks in `ValidateConfig`
+	// If you silently pass empty border, rendering will be unexpectd and,
+	// it might take some time to RCA.
 	borderRequired bool
-
-	borderStrings lipgloss.Border
+	borderStrings  lipgloss.Border
 	// for logging
 	name string
 }
@@ -139,7 +153,7 @@ func validate(cfg RendererConfig) error {
 		return fmt.Errorf("dimensions must be non-negative (h=%d, w=%d)", cfg.TotalHeight, cfg.TotalWidth)
 	}
 	if cfg.BorderRequired {
-		if cfg.TotalWidth < 2 || cfg.TotalHeight < 2 {
+		if cfg.TotalWidth < MinWidthForBorder || cfg.TotalHeight < MinHeightForBorder {
 			return errors.New("need at least 2 width and height for borders")
 		}
 	}

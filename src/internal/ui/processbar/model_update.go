@@ -14,7 +14,6 @@ func (m *Model) ListenForChannelUpdates() {
 				slog.Debug("Channel closed, stopping listener")
 				return
 			}
-			slog.Debug("Received message", "id", msg.GetReqID())
 			if _, ok := msg.(stopListeningMsg); ok {
 				return
 			}
@@ -57,9 +56,11 @@ func (m *Model) sendMsgToChannel(msg UpdateMsg, blocking bool) error {
 	return m.trySendMsgToChannel(msg)
 }
 
-func (m *Model) SendAddProcessMsg(name string, total int, blockingSend bool) (Process, error) {
+func (m *Model) SendAddProcessMsg(
+	currentFile string, operation OperationType, total int, blockingSend bool,
+) (Process, error) {
 	id := m.newUUIDForProcess()
-	p := NewProcess(id, name, total)
+	p := NewProcess(id, currentFile, operation, total)
 	msg := newProcessMsg{
 		NewProcess: p,
 		BaseMsg:    BaseMsg{reqID: m.newReqCnt()},

@@ -6,10 +6,11 @@ import (
 	"image"
 	"log/slog"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/BourgeoisBear/rasterm"
+
+	"github.com/yorukot/superfile/src/internal/common"
 )
 
 // isKittyCapable checks if the terminal supports Kitty graphics protocol
@@ -140,7 +141,23 @@ func (p *ImagePreviewer) renderWithKittyUsingTermCap(img image.Image, path strin
 		return "", err
 	}
 
-	buf.WriteString("\x1b[1;" + strconv.Itoa(sideAreaWidth) + "H")
+	// TODO: using internal/common package in pkg package is against the standards
+	// We shouldn't use that here.
+	// Other usage of common in `file_preview` should be removed too.
+	// common.VideoExtensions should be moved to fixed_variables
+	// and internal/common/utils shoud move to pkg/utils so that it can
+	// be used by everyone
+
+	// TODO : Ideally we should not need the kitty previewer to be
+	// aware of full modal width and make decisions based on global config
+	// A better solutions than this is needed for it.
+	row := 1
+	col := sideAreaWidth + 1
+	if common.Config.EnableFilePreviewBorder {
+		row++
+		col++
+	}
+	buf.WriteString(fmt.Sprintf("\x1b[%d;%dH", row, col))
 
 	return buf.String(), nil
 }

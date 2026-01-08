@@ -85,14 +85,6 @@ func PrettierName(name string, width int, isDir bool, isLink bool, isSelected bo
 		FilePanelStyle.Render(TruncateText(name, width, "..."))
 }
 
-func PrettierDirectoryPreviewName(name string, isDir bool, isLink bool, bgColor lipgloss.Color) string {
-	style := GetElementIcon(name, isDir, isLink, Config.Nerdfont)
-	return StringColorRender(lipgloss.Color(style.Color), bgColor).
-		Background(bgColor).
-		Render(style.Icon+" ") +
-		FilePanelStyle.Render(name)
-}
-
 func ClipboardPrettierName(name string, width int, isDir bool, isLink bool, isSelected bool) string {
 	style := GetElementIcon(filepath.Base(name), isDir, isLink, Config.Nerdfont)
 	if isSelected {
@@ -135,23 +127,6 @@ func FormatFileSize(size int64) string {
 	unitIndex := int(math.Floor(math.Log(float64(size)) / math.Log(KibibyteSize)))
 	adjustedSize := float64(size) / math.Pow(KibibyteSize, float64(unitIndex))
 	return fmt.Sprintf("%.2f %s", adjustedSize, unitsBin[unitIndex])
-}
-
-// Truncate line lengths and keep ANSI
-func CheckAndTruncateLineLengths(text string, maxLength int) string {
-	lines := strings.Split(text, "\n")
-	var result strings.Builder
-
-	for _, line := range lines {
-		// Replace tabs with spaces
-		expandedLine := strings.ReplaceAll(line, "\t", strings.Repeat(" ", TabWidth))
-		truncatedLine := ansi.Truncate(expandedLine, maxLength, "")
-		result.WriteString(truncatedLine + "\n")
-	}
-
-	finalResult := strings.TrimRight(result.String(), "\n")
-
-	return finalResult
 }
 
 // Separated this out out for easy testing

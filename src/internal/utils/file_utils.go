@@ -20,7 +20,8 @@ import (
 )
 
 // Utility functions related to file operations
-
+// Note : This is not used anymore as we use os.WriteAt to
+// fix toml files now, but we will still keep it for later use.
 func WriteTomlData(filePath string, data interface{}) error {
 	tomlData, err := toml.Marshal(data)
 	if err != nil {
@@ -97,6 +98,10 @@ func LoadTomlFile(filePath string, defaultData string, target interface{},
 			fieldName = strings.Split(tag, ",")[0]
 		} else {
 			fieldName = field.Name
+		}
+		// Skip open_with field as it's an optional table
+		if fieldName == "open_with" {
+			continue
 		}
 		if _, exists := rawData[fieldName]; !exists {
 			missingFields = append(missingFields, fieldName)
@@ -274,4 +279,13 @@ func ReadFileContent(filepath string, maxLineLength int, previewLine int) (strin
 	}
 	// returns the first non-EOF error that was encountered by the [Scanner]
 	return resultBuilder.String(), scanner.Err()
+}
+
+func InitJSONFile(path string) error {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		if err = os.WriteFile(path, []byte("null"), ConfigFilePerm); err != nil {
+			return fmt.Errorf("failed to initialize json file %s: %w", path, err)
+		}
+	}
+	return nil
 }

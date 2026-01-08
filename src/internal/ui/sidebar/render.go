@@ -15,9 +15,6 @@ func (s *Model) Render(sidebarFocused bool, currentFilePanelLocation string) str
 	if s.Disabled() {
 		return ""
 	}
-	slog.Debug("Rendering sidebar.", "cursor", s.cursor,
-		"renderIndex", s.renderIndex, "dirs count", len(s.directories),
-		"sidebar focused", sidebarFocused)
 
 	r := ui.SidebarRenderer(s.height, s.width, sidebarFocused)
 
