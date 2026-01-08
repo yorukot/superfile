@@ -28,11 +28,12 @@ func (m *Model) makeColumns(columnThreshold int) []columnDefinition {
 	}
 	// "-1" guards in a cases of rounding numbers.
 	extraColumnsThreshold := int(float64(m.GetContentWidth())*FileNameRatio - 1)
-	remainWidth := m.GetContentWidth()
 
 	for _, col := range extraColumns[0:maxColumns] {
 		widthExtraColumn := ansi.StringWidth(ColumnDelimiter) + col.Size
-		if remainWidth-widthExtraColumn > extraColumnsThreshold {
+
+		// This condition checks that can we borrow some width from first column for additional columns?
+		if columns[0].Size-widthExtraColumn > extraColumnsThreshold {
 			delimiterCol := columnDefinition{
 				Name:      "",
 				Generator: m.renderDelimiter,
@@ -40,7 +41,6 @@ func (m *Model) makeColumns(columnThreshold int) []columnDefinition {
 			}
 			columns = append(columns, delimiterCol, col)
 			columns[0].Size -= widthExtraColumn
-			remainWidth -= widthExtraColumn
 		} else {
 			break
 		}
