@@ -12,7 +12,6 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 
 	tea "github.com/charmbracelet/bubbletea"
-
 	variable "github.com/yorukot/superfile/src/config"
 )
 
@@ -172,12 +171,54 @@ func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
 			m.copyMultipleItem(false)
 		case slices.Contains(common.Hotkeys.CutItems, msg):
 			m.copyMultipleItem(true)
+		case slices.Contains(common.Hotkeys.BulkRename, msg):
+			m.panelBulkRename()
 		case slices.Contains(common.Hotkeys.FilePanelSelectAllItem, msg):
 			m.getFocusedFilePanel().SelectAllItem()
 		}
 		return nil
 	}
+	return m.handleBrowserModeKeys(msg)
+}
 
+func (m *model) handleSelectModeKeys(msg string) tea.Cmd {
+	if slices.Contains(common.Hotkeys.Confirm, msg) {
+		m.getFocusedFilePanel().SingleItemSelect()
+		return nil
+	}
+	if slices.Contains(common.Hotkeys.FilePanelSelectModeItemsSelectUp, msg) {
+		m.getFocusedFilePanel().ItemSelectUp()
+		return nil
+	}
+	if slices.Contains(common.Hotkeys.FilePanelSelectModeItemsSelectDown, msg) {
+		m.getFocusedFilePanel().ItemSelectDown()
+		return nil
+	}
+	if slices.Contains(common.Hotkeys.DeleteItems, msg) {
+		return m.getDeleteTriggerCmd(false)
+	}
+	if slices.Contains(common.Hotkeys.PermanentlyDeleteItems, msg) {
+		return m.getDeleteTriggerCmd(true)
+	}
+
+	return m.handleSelectModeFileOperations(msg)
+}
+
+func (m *model) handleSelectModeFileOperations(msg string) tea.Cmd {
+	switch {
+	case slices.Contains(common.Hotkeys.CopyItems, msg):
+		m.copyMultipleItem(false)
+	case slices.Contains(common.Hotkeys.CutItems, msg):
+		m.copyMultipleItem(true)
+	case slices.Contains(common.Hotkeys.BulkRename, msg):
+		m.panelBulkRename()
+	case slices.Contains(common.Hotkeys.FilePanelSelectAllItem, msg):
+		m.getFocusedFilePanel().SelectAllItem()
+	}
+	return nil
+}
+
+func (m *model) handleBrowserModeKeys(msg string) tea.Cmd {
 	switch {
 	case slices.Contains(common.Hotkeys.Confirm, msg):
 		m.enterPanel()
@@ -187,6 +228,14 @@ func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
 		return m.getDeleteTriggerCmd(false)
 	case slices.Contains(common.Hotkeys.PermanentlyDeleteItems, msg):
 		return m.getDeleteTriggerCmd(true)
+	default:
+		return m.handleBrowserModeFileOperations(msg)
+	}
+	return nil
+}
+
+func (m *model) handleBrowserModeFileOperations(msg string) tea.Cmd {
+	switch {
 	case slices.Contains(common.Hotkeys.CopyItems, msg):
 		m.copySingleItem(false)
 	case slices.Contains(common.Hotkeys.CutItems, msg):

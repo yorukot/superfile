@@ -64,6 +64,7 @@ Quit superfile and cd to current folder "cd_quit" require the same scripts as ["
 | ---------------------------------------------------- | ------------------ | -------------------------------------------------------------------------------------- |
 | Create file or folder(/ ends with creating a folder) | `ctrl+n`           | `file_panel_item_create`                                                               |
 | Rename file or folder                                | `ctrl+r`           | `file_panel_item_rename`                                                               |
+| Bulk rename files (select mode only)                | `B` (shift+b)      | `bulk_rename` (select mode)                                                            |
 | Copy file or folder (or both)                        | `ctrl+c`           | `copy_single_item` (normal mode) <br> `file_panel_select_mode_item_copy` (select mode) |
 | Cut file or folder (or both)                         | `ctrl+x`           | `file_panel_select_mode_item_cut`                                                      |
 | Paste all items in your clipboard                    | `ctrl+v`, `ctrl+w` | `paste_item`                                                                           |

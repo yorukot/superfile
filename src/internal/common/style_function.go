@@ -192,3 +192,18 @@ func GenerateFooterBorder(countString string, width int) string {
 	return strings.Repeat(Config.BorderBottom, repeatCount) + Config.BorderMiddleRight +
 		countString + Config.BorderMiddleLeft
 }
+
+func GenerateBulkRenameTextInput(placeholder string) textinput.Model {
+	ti := textinput.New()
+	ti.Cursor.Style = ModalStyle
+	ti.Cursor.TextStyle = ModalStyle
+	ti.PromptStyle = ModalStyle
+	ti.Prompt = ""
+	ti.TextStyle = ModalStyle
+	ti.Cursor.Blink = true
+	ti.Placeholder = placeholder
+	ti.PlaceholderStyle = ModalStyle
+	ti.CharLimit = 156
+	ti.Width = ModalWidth - 10
+	return ti
+}
