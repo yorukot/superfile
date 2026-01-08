@@ -78,9 +78,18 @@ const (
 
 type sliceOrderFunc func(i, j int) bool
 
+// Note: There are here, instead of consts.go as they are definitions of the enum `sortingKind`
 const (
 	sortingName         sortingKind = "Name"
 	sortingSize         sortingKind = "Size"
 	sortingDateModified sortingKind = "Date Modified"
 	sortingFileType     sortingKind = "Type"
 )
+
+type columnRenderer func(indexElement int, columnWidth int) string
+
+type columnDefinition struct {
+	Name         string
+	Size         int
+	columnRender columnRenderer
+}

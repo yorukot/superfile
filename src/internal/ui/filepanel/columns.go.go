@@ -90,3 +90,17 @@ func (m *Model) renderPermissions(indexElement int, columnWidth int) string {
 		lipgloss.Right,
 	)
 }
+
+func (cd *columnDefinition) Render(index int) string {
+	return cd.columnRender(index, cd.Size)
+}
+
+func (cd *columnDefinition) RenderHeader() string {
+	return common.PrettierFixedWidthItem(
+		cd.Name,
+		cd.Size,
+		false,
+		common.FilePanelBGColor,
+		lipgloss.Center,
+	)
+}

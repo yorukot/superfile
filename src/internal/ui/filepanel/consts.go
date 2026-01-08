@@ -9,4 +9,16 @@ const (
 
 	sortOptionsDefaultWidth  = 20
 	sortOptionsDefaultHeight = 4
+
+	FileSizeColumnWidth       = 15
+	ModifyTimeSizeColumnWidth = 18
+	PermissionsColumnWidth    = 12
+	ColumnHeaderHeight        = 1
+
+	// If the percentage column is smaller than this number, the additional columns will be hidden.
+	// TODO: make this configurable
+	FileNameRatio = 0.65
+
+	// Delimiter between columns in the file panel.
+	ColumnDelimiter = "  "
 )
