@@ -99,7 +99,6 @@ func TestRenderFileName(t *testing.T) {
 		renderedStr = panel.renderFileName(2, expectedWigth)
 		is.Equal(expectedWigth, ansi.StringWidth(renderedStr))
 		is.Equal("   file3verylong-long-filen...", renderedStr)
-
 	})
 	t.Run("File with cursor", func(t *testing.T) {
 		expectedWigth := 32
@@ -111,7 +110,6 @@ func TestRenderFileName(t *testing.T) {
 		renderedStr := panel.renderFileName(1, expectedWigth)
 		is.Equal(expectedWigth, ansi.StringWidth(renderedStr))
 		is.Equal("\uf054  file2.txt                    ", renderedStr)
-
 	})
 	t.Run("Selected file", func(t *testing.T) {
 		expected := "  F\uf15c file3.txt                "
@@ -122,13 +120,15 @@ func TestRenderFileName(t *testing.T) {
 		})
 		origShowSelectIcons := common.Config.ShowSelectIcons
 		origNerdfont := common.Config.Nerdfont
-		origCheckbox := common.CheckboxEmpty
+		origCheckbox := common.CheckboxChecked
 		common.Config.ShowSelectIcons = true
 		common.Config.Nerdfont = true
+		//nolint:reassign // made for test
 		common.CheckboxChecked = "F"
 		defer func() {
 			common.Config.ShowSelectIcons = origShowSelectIcons
 			common.Config.Nerdfont = origNerdfont
+			//nolint:reassign // rolled back test value
 			common.CheckboxChecked = origCheckbox
 		}()
 
@@ -143,9 +143,10 @@ func TestRenderFileSize(t *testing.T) {
 	is := assert.New(t)
 	t.Run("Regular file without cursor or selection", func(t *testing.T) {
 		panel := testModel(0, 0, 12, BrowserMode, []Element{
-			{Name: "file1.txt", Location: "/tmp/file1.txt", Info: NewFakeFileInfo("file1.txt", 1024, 0644, time.Now())},
-			{Name: "file2.txt", Location: "/tmp/file2.txt", Info: NewFakeFileInfo("file2.txt", 102400000, 0644, time.Now())},
-			{Name: "file3.txt", Location: "/tmp/file3.txt", Info: NewFakeFileInfo("file3.txt", 1024, 0644, time.Now())},
+			{Name: "file1.txt", Location: "/tmp/file1.txt",
+				Info: NewFakeFileInfo("file1.txt", 1024, 0644, time.Now())},
+			{Name: "file2.txt", Location: "/tmp/file2.txt",
+				Info: NewFakeFileInfo("file2.txt", 102400000, 0644, time.Now())},
 		})
 		renderedStr := panel.renderFileSize(0, FileSizeColumnWidth)
 		is.Equal(FileSizeColumnWidth, ansi.StringWidth(renderedStr))
