@@ -193,7 +193,7 @@ func (m *model) getRenderHotkeyLengthHelpMenuModal() int {
 
 		renderHotkeyLength = max(renderHotkeyLength, len(common.HelpMenuHotkeyStyle.Render(hotkey)))
 	}
-	return renderHotkeyLength
+	return renderHotkeyLength + 1
 }
 
 func (m *model) getHelpMenuContent(r *rendering.Renderer, renderHotkeyLength int, valueLength int) {
