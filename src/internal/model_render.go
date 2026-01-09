@@ -169,7 +169,7 @@ func (m *model) helpMenuRender() string {
 		}
 	}
 
-	renderHotkeyLength := m.getRenderHotkeyLengthHelpmenuModal()
+	renderHotkeyLength := m.getRenderHotkeyLengthHelpMenuModal()
 	m.getHelpMenuContent(r, renderHotkeyLength, valueLength)
 
 	current := m.helpMenu.cursor + 1 - cursorBeenTitleCount
@@ -182,21 +182,14 @@ func (m *model) helpMenuRender() string {
 	return r.Render()
 }
 
-func (m *model) getRenderHotkeyLengthHelpmenuModal() int {
+func (m *model) getRenderHotkeyLengthHelpMenuModal() int {
 	renderHotkeyLength := 0
 	for i := m.helpMenu.renderIndex; i < m.helpMenu.renderIndex+(m.helpMenu.height-common.InnerPadding) && i < len(m.helpMenu.filteredData); i++ {
-		hotkey := ""
-
 		if m.helpMenu.filteredData[i].subTitle != "" {
 			continue
 		}
 
-		for i, key := range m.helpMenu.filteredData[i].hotkey {
-			if i != 0 {
-				hotkey += " | "
-			}
-			hotkey += key
-		}
+		hotkey := common.GetHelpMenuHotkeyString(m.helpMenu.filteredData[i].hotkey)
 
 		renderHotkeyLength = max(renderHotkeyLength, len(common.HelpMenuHotkeyStyle.Render(hotkey)))
 	}
@@ -210,15 +203,8 @@ func (m *model) getHelpMenuContent(r *rendering.Renderer, renderHotkeyLength int
 			continue
 		}
 
-		hotkey := ""
+		hotkey := common.GetHelpMenuHotkeyString(m.helpMenu.filteredData[i].hotkey)
 		description := common.TruncateText(m.helpMenu.filteredData[i].description, valueLength, "...")
-
-		for i, key := range m.helpMenu.filteredData[i].hotkey {
-			if i != 0 {
-				hotkey += " | "
-			}
-			hotkey += key
-		}
 
 		cursor := "  "
 		if m.helpMenu.cursor == i {
