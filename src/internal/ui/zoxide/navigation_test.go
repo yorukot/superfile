@@ -14,41 +14,16 @@ func TestNavigation(t *testing.T) {
 		navigateUp     bool
 		expectedCursor int
 	}{
-		{
-			name:           "navigateUp at position 0 wraps to last position",
-			resultCnt:      5,
-			startCursor:    0,
-			navigateUp:     true,
-			expectedCursor: 4,
-		},
-		{
-			name:           "navigateDown at position 0 moves to next position",
-			resultCnt:      5,
-			startCursor:    0,
-			navigateUp:     false,
-			expectedCursor: 1,
-		},
-		{
-			name:           "navigateDown at last position wraps to first position",
-			resultCnt:      5,
-			startCursor:    4,
-			navigateUp:     false,
-			expectedCursor: 0,
-		},
-		{
-			name:           "navigateUp with empty results keeps cursor at 0",
-			resultCnt:      0,
-			startCursor:    0,
-			navigateUp:     true,
-			expectedCursor: 0,
-		},
-		{
-			name:           "navigateDown with empty results keeps cursor at 0",
-			resultCnt:      0,
-			startCursor:    0,
-			navigateUp:     false,
-			expectedCursor: 0,
-		},
+		// Existing good cases
+		{name: "navigateUp at 0 wraps to last", resultCnt: 5, startCursor: 0, navigateUp: true, expectedCursor: 4},
+		{name: "navigateDown at 0 moves to 1", resultCnt: 5, startCursor: 0, navigateUp: false, expectedCursor: 1},
+		{name: "navigateDown at last wraps to 0", resultCnt: 5, startCursor: 4, navigateUp: false, expectedCursor: 0},
+		// NEW: normal navigateUp decrement (fixes mistake #3)
+		{name: "navigateUp normal decrement 3→2", resultCnt: 5, startCursor: 3, navigateUp: true, expectedCursor: 2},
+		{name: "navigateUp normal decrement 1→0", resultCnt: 5, startCursor: 1, navigateUp: true, expectedCursor: 0},
+		// Edge cases
+		{name: "navigateUp empty results", resultCnt: 0, startCursor: 0, navigateUp: true, expectedCursor: 0},
+		{name: "navigateDown empty results", resultCnt: 0, startCursor: 0, navigateUp: false, expectedCursor: 0},
 	}
 
 	for _, td := range testdata {
@@ -59,6 +34,10 @@ func TestNavigation(t *testing.T) {
 			} else {
 				m = setupTestModelWithResults(td.resultCnt)
 			}
+			// Ensure deterministic visible count
+			m.width = 80
+			m.maxHeight = 24
+
 			m.cursor = td.startCursor
 
 			if td.navigateUp {
@@ -67,58 +46,28 @@ func TestNavigation(t *testing.T) {
 				m.navigateDown()
 			}
 
-			assert.Equal(t, td.expectedCursor, m.cursor)
+			assert.Equal(t, td.expectedCursor, m.cursor, "cursor position mismatch")
 		})
 	}
 }
 
 func TestUpdateRenderIndex(t *testing.T) {
+
 	testdata := []struct {
 		name                string
 		resultCnt           int
 		cursor              int
 		expectedRenderIndex int
 	}{
+		{name: "cursor 0 → renderIndex 0", resultCnt: 10, cursor: 0, expectedRenderIndex: 0},
+		{name: "cursor 5 → renderIndex 1 (at bottom of page)", resultCnt: 10, cursor: 5, expectedRenderIndex: 1},
+		{name: "cursor 9 → renderIndex 5 (last page)", resultCnt: 10, cursor: 9, expectedRenderIndex: 5},
+		{name: "few results → renderIndex always 0", resultCnt: 3, cursor: 2, expectedRenderIndex: 0},
+		// NEW: test that renderIndex decreases when moving cursor up (fixes mistake #1)
 		{
-			name:                "cursor at 0 has renderIndex 0",
+			name:                "moving cursor from 9 → 0 decreases renderIndex",
 			resultCnt:           10,
 			cursor:              0,
-			expectedRenderIndex: 0,
-		},
-		{
-			name:                "cursor at 5 has renderIndex 1 (visible at bottom)",
-			resultCnt:           10,
-			cursor:              5,
-			expectedRenderIndex: 1,
-		},
-		{
-			name:                "cursor at 9 has renderIndex 5 (last page)",
-			resultCnt:           10,
-			cursor:              9,
-			expectedRenderIndex: 5,
-		},
-		{
-			name:                "cursor back at 0 scrolls back up to renderIndex 0",
-			resultCnt:           10,
-			cursor:              0,
-			expectedRenderIndex: 0,
-		},
-		{
-			name:                "renderIndex stays 0 with 3 results, cursor at 0",
-			resultCnt:           3,
-			cursor:              0,
-			expectedRenderIndex: 0,
-		},
-		{
-			name:                "renderIndex stays 0 with 3 results, cursor at 1",
-			resultCnt:           3,
-			cursor:              1,
-			expectedRenderIndex: 0,
-		},
-		{
-			name:                "renderIndex stays 0 with 3 results, cursor at 2",
-			resultCnt:           3,
-			cursor:              2,
 			expectedRenderIndex: 0,
 		},
 	}
@@ -126,9 +75,13 @@ func TestUpdateRenderIndex(t *testing.T) {
 	for _, td := range testdata {
 		t.Run(td.name, func(t *testing.T) {
 			m := setupTestModelWithResults(td.resultCnt)
+			m.width = 80
+			m.maxHeight = 24
 			m.cursor = td.cursor
 			m.updateRenderIndex()
-			assert.Equal(t, td.expectedRenderIndex, m.renderIndex)
+
+			assert.Equal(t, td.expectedRenderIndex, m.renderIndex,
+				"renderIndex wrong for cursor=%d, results=%d", td.cursor, td.resultCnt)
 		})
 	}
 }
