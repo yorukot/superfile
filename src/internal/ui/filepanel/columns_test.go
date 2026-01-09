@@ -82,8 +82,8 @@ func TestFilePanelSize(t *testing.T) {
 }
 
 func TestRenderFileName(t *testing.T) {
-	is := assert.New(t)
 	t.Run("Regular file without cursor or selection", func(t *testing.T) {
+		is := assert.New(t)
 		expectedWigth := 30
 		panel := testModel(0, 0, 12, BrowserMode, []Element{
 			{Name: "file1.txt", Location: "/tmp/file1.txt", Info: NewFakeFileInfo("file1.txt", 1024, 0644, time.Now())},
@@ -101,6 +101,7 @@ func TestRenderFileName(t *testing.T) {
 		is.Equal("   file3verylong-long-filen...", renderedStr)
 	})
 	t.Run("File with cursor", func(t *testing.T) {
+		is := assert.New(t)
 		expectedWigth := 32
 		panel := testModel(1, 0, 12, BrowserMode, []Element{
 			{Name: "file1.txt", Location: "/tmp/file1.txt", Info: NewFakeFileInfo("file1.txt", 1024, 0644, time.Now())},
@@ -112,6 +113,7 @@ func TestRenderFileName(t *testing.T) {
 		is.Equal("\uf054  file2.txt                    ", renderedStr)
 	})
 	t.Run("Selected file", func(t *testing.T) {
+		is := assert.New(t)
 		expected := "  F\uf15c file3.txt                "
 		panel := testModel(1, 0, 12, SelectMode, []Element{
 			{Name: "file1.txt", Location: "/tmp/file1.txt", Info: NewFakeFileInfo("file1.txt", 1024, 0644, time.Now())},
