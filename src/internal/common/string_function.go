@@ -140,6 +140,9 @@ func GetHelpMenuHotkeyString(hotkeys []string) string {
 		if i != 0 {
 			hotkey += " | "
 		}
+		if key == " " {
+			key = "space"
+		}
 		hotkey += key
 	}
 

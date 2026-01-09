@@ -91,6 +91,11 @@ func TestHelpHotkeyString(t *testing.T) {
 			input:    []string{"a", "b", ""},
 			expected: "a | b",
 		},
+		{
+			name:     "Space key",
+			input:    []string{" "},
+			expected: "space",
+		},
 
 		// Starting with an empty key ("", "a") is not allowed by the file parser,
 		// so a test is not needed
