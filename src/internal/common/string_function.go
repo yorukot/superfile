@@ -103,7 +103,7 @@ func FilePanelItemRender(data string,
 	if isSelected {
 		style = FilePanelItemSelectedStyle
 	}
-	return style.Width(width).Align(alignment).Render(outputData)
+	return style.Background(bgColor).Width(width).Align(alignment).Render(outputData)
 }
 
 func ClipboardPrettierName(name string, width int, isDir bool, isLink bool, isSelected bool) string {
