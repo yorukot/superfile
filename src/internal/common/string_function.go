@@ -129,6 +129,26 @@ func FormatFileSize(size int64) string {
 	return fmt.Sprintf("%.2f %s", adjustedSize, unitsBin[unitIndex])
 }
 
+func GetHelpMenuHotkeyString(hotkeys []string) string {
+	hotkey := ""
+
+	for i, key := range hotkeys {
+		if key == "" {
+			continue
+		}
+
+		if i != 0 {
+			hotkey += " | "
+		}
+		if key == " " {
+			key = "space"
+		}
+		hotkey += key
+	}
+
+	return hotkey
+}
+
 // Separated this out out for easy testing
 func IsBufferPrintable(buffer []byte) bool {
 	for _, b := range buffer {

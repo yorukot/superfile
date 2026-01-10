@@ -60,6 +60,55 @@ func TestFilenameWithouText(t *testing.T) {
 	}
 }
 
+func TestHelpHotkeyString(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    []string
+		expected string
+	}{
+		{
+			name:     "Single key",
+			input:    []string{"a"},
+			expected: "a",
+		},
+		{
+			name:     "Multiple keys",
+			input:    []string{"a", "b", "c"},
+			expected: "a | b | c",
+		},
+		{
+			name:     "Empty key",
+			input:    []string{"a", "", "b"},
+			expected: "a | b",
+		},
+		{
+			name:     "Trailing empty",
+			input:    []string{"a", ""},
+			expected: "a",
+		},
+		{
+			name:     "Trailing empty with multiple keys",
+			input:    []string{"a", "b", ""},
+			expected: "a | b",
+		},
+		{
+			name:     "Space key",
+			input:    []string{" "},
+			expected: "space",
+		},
+
+		// Starting with an empty key ("", "a") is not allowed by the file parser,
+		// so a test is not needed
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := GetHelpMenuHotkeyString(tt.input)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
 func TestIsBufferPrintable(t *testing.T) {
 	var inputs = []struct {
 		input    string
