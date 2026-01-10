@@ -92,7 +92,7 @@ func FilePanelItemRender(data string,
 	bgColor lipgloss.Color,
 	alignment lipgloss.Position,
 ) string {
-	outputData := TruncateText(data, width, "...")
+	outputData := ansi.Truncate(data, width, "...")
 	style := FilePanelStyle
 	if isSelected {
 		style = FilePanelItemSelectedStyle
