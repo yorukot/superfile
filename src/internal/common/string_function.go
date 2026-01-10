@@ -26,7 +26,6 @@ const (
 	EscapeChar        = 0x1b // ANSI escape character
 	ASCIIMax          = 0x7f // Maximum ASCII character value
 )
-const MinFileNameTextSize = 5
 
 func TruncateText(text string, maxChars int, tails string) string {
 	truncatedText := ansi.Truncate(text, maxChars-len(tails), "")
@@ -80,17 +79,13 @@ func PrettierFilePanelItemName(name string,
 	style := GetElementIcon(name, isDir, isLink, Config.Nerdfont)
 	iconData := style.Icon + " "
 	filenameWidth := width - ansi.StringWidth(iconData)
-	if width-ansi.StringWidth(iconData) < MinFileNameTextSize {
-		// "too small space for render filename
-		return ""
-	}
 	textStyle := FilePanelStyle
 	if isSelected {
 		textStyle = FilePanelItemSelectedStyle
 	}
-	return StringColorRender(lipgloss.Color(style.Color), bgColor).Background(bgColor).Render(iconData) +
-		textStyle.
-			Width(filenameWidth).Align(lipgloss.Left).
+	return StringColorRender(lipgloss.Color(style.Color), bgColor).
+		Background(bgColor).Render(iconData) +
+		textStyle.Width(filenameWidth).Align(lipgloss.Left).
 			Render(TruncateText(name, filenameWidth, "..."))
 }
 func PrettierFixedWidthItem(data string,
