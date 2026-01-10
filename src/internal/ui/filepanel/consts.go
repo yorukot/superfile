@@ -15,11 +15,6 @@ const (
 	PermissionsColumnWidth    = 12
 	ColumnHeaderHeight        = 1
 
-	// If the percentage column is smaller than this number, the additional columns will be hidden.
-	FileNameRatioDefault = 25
-
-	FileNameRatioMax = 100
-
 	// Delimiter between columns in the file panel.
 	ColumnDelimiter = "  "
 )

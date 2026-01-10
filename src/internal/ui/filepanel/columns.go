@@ -100,7 +100,7 @@ func (cd *columnDefinition) RenderHeader() string {
 	)
 }
 
-func (m *Model) makeColumns(columnThreshold int, filePanelNamePercent int) []columnDefinition {
+func (m *Model) makeColumns(columnThreshold int, fileNameRatio int) []columnDefinition {
 	// TODO: make column set configurable
 	// Note: May use a predefined slice for efficiency. This content is static
 	extraColumns := []columnDefinition{
@@ -114,14 +114,8 @@ func (m *Model) makeColumns(columnThreshold int, filePanelNamePercent int) []col
 		{Name: "Name", columnRender: m.renderFileName, Size: m.GetContentWidth()},
 	}
 
-	fileNameRatio := FileNameRatioDefault
-	if filePanelNamePercent > FileNameRatioDefault &&
-		filePanelNamePercent <= FileNameRatioMax {
-		fileNameRatio = filePanelNamePercent
-	}
-
 	// "-1" guards in a cases of rounding numbers.
-	extraColumnsThreshold := int(float64(m.GetContentWidth()*fileNameRatio/FileNameRatioMax) - 1)
+	extraColumnsThreshold := int(float64(m.GetContentWidth()*fileNameRatio/common.FileNameRatioMax) - 1)
 	if extraColumnsThreshold <= 0 {
 		extraColumnsThreshold = m.GetContentWidth()
 	}
