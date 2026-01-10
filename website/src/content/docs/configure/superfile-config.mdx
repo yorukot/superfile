@@ -197,9 +197,14 @@ Number of lines to scroll when using PgUp/PgDown keys.
 Count of extra columns in file panel in addition to file name.
 
 `0` => Extra columns feature is disabled
-`1` => size
-`2` => modify date
-`3` => permission column
+`1` => Also show size column
+`2` => Also show modify date
+`3` => Also show permission column
+
+:::caution
+Even though the extra columns are enabled, they will be hidden if the size of the filepanel is small.
+Please either increase the size or adjust the file_panel_name_percent config if you don't see the columns.
+:::
 
 - ###### file_panel_name_percent
 
