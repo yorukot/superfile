@@ -4,7 +4,7 @@ go 1.25.5
 
 require (
 	github.com/adrg/xdg v0.5.3
-	github.com/alecthomas/chroma/v2 v2.16.0
+	github.com/alecthomas/chroma/v2 v2.21.1
 	github.com/atotto/clipboard v0.1.4
 	github.com/barasher/go-exiftool v1.10.0
 	github.com/charmbracelet/bubbles v0.21.0
