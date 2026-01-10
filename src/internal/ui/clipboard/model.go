@@ -50,7 +50,7 @@ func (m *Model) Render() string {
 	}
 	for i := 0; i < len(m.items.items) && i < viewHeight; i++ {
 		if i == viewHeight-1 && i != len(m.items.items)-1 {
-			r.AddLines(strconv.Itoa(len(m.items.items)-i) + " items left...")
+			r.AddLines(strconv.Itoa(len(m.items.items)-i) + " items left....")
 			continue
 		}
 
@@ -129,7 +129,6 @@ func (m *Model) UpdatePath(oldpath string, newpath string) {
 				strings.TrimPrefix(cur, oldpathClean+string(filepath.Separator)),
 			)
 		}
-
 	}
 }
 
