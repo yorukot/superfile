@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"math"
 	"os"
 	"path/filepath"
@@ -87,7 +88,11 @@ func FilePanelItemRenderWithIcon(
 	style := GetElementIcon(name, isDir, isLink, Config.Nerdfont)
 	iconData := style.Icon + " "
 	filenameWidth := width - ansi.StringWidth(iconData)
-
+	if filenameWidth <= 0 {
+		// This should never happen, unless there is extremely low size or programming bug
+		slog.Debug("Too low width for rendering file name", "width", width, "filenameWidth", filenameWidth)
+		return ""
+	}
 	return StringColorRender(lipgloss.Color(style.Color), bgColor).
 		Background(bgColor).Render(iconData) +
 		FilePanelItemRender(name, filenameWidth, isSelected, bgColor, lipgloss.Left)
