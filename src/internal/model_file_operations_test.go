@@ -105,7 +105,12 @@ func TestFileCreation(t *testing.T) {
 			assert.NotEmpty(t, m.typingModal.errorMesssage, "expected an error for input: %q", tt.fileName)
 		} else {
 			assert.Empty(t, m.typingModal.errorMesssage, "expected an error for input: %q", tt.fileName)
-			assert.FileExists(t, filepath.Join(testChildDir, tt.fileName), "expected file to be created: %q", tt.fileName)
+			assert.FileExists(
+				t,
+				filepath.Join(testChildDir, tt.fileName),
+				"expected file to be created: %q",
+				tt.fileName,
+			)
 		}
 	}
 }

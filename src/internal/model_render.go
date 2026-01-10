@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/yorukot/superfile/src/internal/ui"
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
@@ -231,17 +232,18 @@ func (m *model) getHelpMenuContent(r *rendering.Renderer, renderHotkeyLength int
 
 func (m *model) sortOptionsRender() string {
 	panel := m.getFocusedFilePanel()
-	sortOptionsContent := common.ModalTitleStyle.Render(" Sort Options") + "\n\n"
+	var sortOptionsContent strings.Builder
+	sortOptionsContent.WriteString(common.ModalTitleStyle.Render(" Sort Options") + "\n\n")
 	for i, option := range panel.SortOptions.Data.Options {
 		cursor := " "
 		if i == panel.SortOptions.Cursor {
 			cursor = common.FilePanelCursorStyle.Render(icon.Cursor)
 		}
-		sortOptionsContent += cursor + common.ModalStyle.Render(" "+option) + "\n"
+		sortOptionsContent.WriteString(cursor + common.ModalStyle.Render(" "+option) + "\n")
 	}
 	bottomBorder := common.GenerateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(panel.SortOptions.Cursor+1),
 		strconv.Itoa(len(panel.SortOptions.Data.Options))), panel.SortOptions.Width-common.BorderPadding)
 
 	return common.SortOptionsModalBorderStyle(panel.SortOptions.Height, panel.SortOptions.Width,
-		bottomBorder).Render(sortOptionsContent)
+		bottomBorder).Render(sortOptionsContent.String())
 }
