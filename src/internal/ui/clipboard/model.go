@@ -25,9 +25,9 @@ type copyItems struct {
 
 // clipboardItem stores the path plus cached metadata so render can avoid per-item stat calls.
 type clipboardItem struct {
-	path      string
-	isDir     bool
-	isLink    bool
+	path       string
+	isDir      bool
+	isLink     bool
 	isSelected bool
 }
 
@@ -167,9 +167,9 @@ func (m *Model) makeClipboardItem(path string) clipboardItem {
 	}
 	isLink := info.Mode()&os.ModeSymlink != 0
 	return clipboardItem{
-		path:      path,
-		isDir:     info.IsDir(),
-		isLink:    isLink,
+		path:       path,
+		isDir:      info.IsDir(),
+		isLink:     isLink,
 		isSelected: false,
 	}
 }
