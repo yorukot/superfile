@@ -27,6 +27,12 @@ const (
 	ASCIIMax          = 0x7f // Maximum ASCII character value
 )
 
+// TODO: This has a bug. Remove its usage. Remove all custom truncation
+// And audit and evaluate any problem
+// The logic truncates to maxChars - len(tails) first, then checks if truncation occurred. This means:
+// - "Hello" with maxChars=5 gets truncated to 2 chars (5-3=2), producing "He..."
+// - "Hello" with maxChars=6 gets truncated to 3 chars (6-3=3), producing "Hel..."
+// Both cases are wrong - "Hello" fits within 5 and 6 characters, so it shouldn't be truncated at all.
 func TruncateText(text string, maxChars int, tails string) string {
 	truncatedText := ansi.Truncate(text, maxChars-len(tails), "")
 	if text != truncatedText {
