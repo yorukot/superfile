@@ -114,17 +114,16 @@ func (m *Model) makeColumns(columnThreshold int, fileNameRatio int) []columnDefi
 		{Name: "Name", columnRender: m.renderFileName, Size: m.GetContentWidth()},
 	}
 
-	// "-1" guards in a cases of rounding numbers.
-	extraColumnsThreshold := int(float64(m.GetContentWidth()*fileNameRatio/common.FileNameRatioMax) - 1)
-	if extraColumnsThreshold <= 0 {
-		extraColumnsThreshold = m.GetContentWidth()
-	}
+	minWidthForNameColumn := int(float64(m.GetContentWidth() * fileNameRatio / common.FileNameRatioMax))
+	// Worst case (5 * 100 / 100) could evaluate to 5.0001
+	// Hence, we need this check. Our constraints on Width and ratio gurantee it to be > 0 though
+	minWidthForNameColumn = min(minWidthForNameColumn, m.GetContentWidth())
 
 	for _, col := range extraColumns[0:maxColumns] {
 		widthExtraColumn := ansi.StringWidth(ColumnDelimiter) + col.Size
 
 		// This condition checks that can we borrow some width from first column for additional columns?
-		if columns[0].Size-widthExtraColumn > extraColumnsThreshold {
+		if columns[0].Size-widthExtraColumn > minWidthForNameColumn {
 			delimiterCol := columnDefinition{
 				Name:         "",
 				columnRender: m.renderDelimiter,
