@@ -2,10 +2,8 @@ package filepanel
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
-
-	"github.com/charmbracelet/lipgloss"
+	"strings"
 
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
@@ -27,8 +25,10 @@ func (m *Model) Render(focused bool) string {
 	m.renderTopBar(r)
 	m.renderSearchBar(r)
 	m.renderFooter(r, m.SelectedCount())
+	if m.NeedRenderHeaders() {
+		m.renderColumnHeaders(r)
+	}
 	m.renderFileEntries(r)
-
 	return r.Render()
 }
 
@@ -68,43 +68,32 @@ func (m *Model) renderFooter(r *rendering.Renderer, selectedCount uint) {
 	}
 }
 
+func (m *Model) renderColumnHeaders(r *rendering.Renderer) {
+	var builder strings.Builder
+	for _, column := range m.columns {
+		builder.WriteString(column.RenderHeader())
+	}
+	r.AddLines(builder.String())
+}
+
 func (m *Model) renderFileEntries(r *rendering.Renderer) {
 	if len(m.Element) == 0 {
 		r.AddLines(common.FilePanelNoneText)
 		return
 	}
-
 	end := min(m.RenderIndex+m.PanelElementHeight(), len(m.Element))
 
-	for i := m.RenderIndex; i < end; i++ {
-		isSelected := m.CheckSelected(m.Element[i].Location)
-
-		if m.Renaming && i == m.Cursor {
+	for itemIndex := m.RenderIndex; itemIndex < end; itemIndex++ {
+		if m.Renaming && itemIndex == m.Cursor {
 			r.AddLines(m.Rename.View())
 			continue
 		}
-
-		cursor := " "
-		if i == m.Cursor && !m.SearchBar.Focused() {
-			cursor = icon.Cursor
+		var builder strings.Builder
+		for _, column := range m.columns {
+			colData := column.Render(itemIndex)
+			builder.WriteString(colData)
 		}
-
-		selectBox := m.renderSelectBox(isSelected)
-
-		// Calculate the actual prefix width for proper alignment
-		prefixWidth := lipgloss.Width(cursor+" ") + lipgloss.Width(selectBox)
-
-		isLink := m.Element[i].Info.Mode()&os.ModeSymlink != 0
-		renderedName := common.PrettierName(
-			m.Element[i].Name,
-			m.GetContentWidth()-prefixWidth,
-			m.Element[i].Directory,
-			isLink,
-			isSelected,
-			common.FilePanelBGColor,
-		)
-
-		r.AddLines(common.FilePanelCursorStyle.Render(cursor+" ") + selectBox + renderedName)
+		r.AddLines(builder.String())
 	}
 }
 

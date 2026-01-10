@@ -9,4 +9,12 @@ const (
 
 	sortOptionsDefaultWidth  = 20
 	sortOptionsDefaultHeight = 4
+
+	FileSizeColumnWidth       = 15
+	ModifyTimeSizeColumnWidth = 18
+	PermissionsColumnWidth    = 12
+	ColumnHeaderHeight        = 1
+
+	// Delimiter between columns in the file panel.
+	ColumnDelimiter = "  "
 )

@@ -26,6 +26,9 @@ const (
 	FilePanelWidthUnit    = 20                     // width unit used to calculate max file panels
 	DefaultPreviewTimeout = 500 * time.Millisecond // preview operation timeout
 
+	FileNameRatioMin = 25
+	FileNameRatioMax = 100
+
 	// File permissions
 
 	// UI positioning

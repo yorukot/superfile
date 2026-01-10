@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"math"
 	"os"
 	"path/filepath"
@@ -27,6 +28,12 @@ const (
 	ASCIIMax          = 0x7f // Maximum ASCII character value
 )
 
+// TODO: This has a bug. Remove its usage. Remove all custom truncation
+// And audit and evaluate any problem
+// The logic truncates to maxChars - len(tails) first, then checks if truncation occurred. This means:
+// - "Hello" with maxChars=5 gets truncated to 2 chars (5-3=2), producing "He..."
+// - "Hello" with maxChars=6 gets truncated to 3 chars (6-3=3), producing "Hel..."
+// Both cases are wrong - "Hello" fits within 5 and 6 characters, so it shouldn't be truncated at all.
 func TruncateText(text string, maxChars int, tails string) string {
 	truncatedText := ansi.Truncate(text, maxChars-len(tails), "")
 	if text != truncatedText {
@@ -70,19 +77,38 @@ func TruncateMiddleText(text string, maxChars int, tails string) string {
 	return truncatedText
 }
 
-func PrettierName(name string, width int, isDir bool, isLink bool, isSelected bool, bgColor lipgloss.Color) string {
+func FilePanelItemRenderWithIcon(
+	name string,
+	width int,
+	isDir bool,
+	isLink bool,
+	isSelected bool,
+	bgColor lipgloss.Color,
+) string {
 	style := GetElementIcon(name, isDir, isLink, Config.Nerdfont)
-	if isSelected {
-		return StringColorRender(lipgloss.Color(style.Color), bgColor).
-			Background(bgColor).
-			Render(style.Icon+" ") +
-			FilePanelItemSelectedStyle.
-				Render(TruncateText(name, width, "..."))
+	iconData := style.Icon + " "
+	filenameWidth := width - ansi.StringWidth(iconData)
+	if filenameWidth <= 0 {
+		// This should never happen, unless there is extremely low size or programming bug
+		slog.Debug("Too low width for rendering file name", "width", width, "filenameWidth", filenameWidth)
+		return ""
 	}
 	return StringColorRender(lipgloss.Color(style.Color), bgColor).
-		Background(bgColor).
-		Render(style.Icon+" ") +
-		FilePanelStyle.Render(TruncateText(name, width, "..."))
+		Background(bgColor).Render(iconData) +
+		FilePanelItemRender(name, filenameWidth, isSelected, bgColor, lipgloss.Left)
+}
+func FilePanelItemRender(data string,
+	width int,
+	isSelected bool,
+	bgColor lipgloss.Color,
+	alignment lipgloss.Position,
+) string {
+	outputData := ansi.Truncate(data, width, "...")
+	style := FilePanelStyle
+	if isSelected {
+		style = FilePanelItemSelectedStyle
+	}
+	return style.Background(bgColor).Width(width).Align(alignment).Render(outputData)
 }
 
 func ClipboardPrettierName(name string, width int, isDir bool, isLink bool, isSelected bool) string {
