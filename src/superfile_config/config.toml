@@ -84,7 +84,7 @@ ignore_missing_fields = false
 file_panel_extra_columns = 0
 
 #-- File name width in File Panel
-# If the percentage file name column is smaller than this number, the last additional column in list extra columns will be hidden.
+# Percentage of file panel width allocated to file names (25-100). Higher values give more space to names, less to extra columns.
 file_panel_name_percent = 50
 
 
