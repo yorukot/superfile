@@ -3,7 +3,6 @@ package clipboard
 import (
 	"os"
 	"path/filepath"
-	"slices"
 	"strconv"
 	"strings"
 
@@ -20,8 +19,16 @@ type Model struct {
 
 // Copied items
 type copyItems struct {
-	items []string
+	items []clipboardItem
 	cut   bool
+}
+
+// clipboardItem stores the path plus cached metadata so render can avoid per-item stat calls.
+type clipboardItem struct {
+	path      string
+	isDir     bool
+	isLink    bool
+	isSelected bool
 }
 
 func (m *Model) SetDimensions(width int, height int) {
@@ -30,6 +37,9 @@ func (m *Model) SetDimensions(width int, height int) {
 }
 
 func (m *Model) Render() string {
+	// Prune missing items before rendering so UI matches reality.
+	m.CleanupAndGetItems()
+
 	r := ui.ClipboardRenderer(m.height, m.width)
 	viewHeight := m.height - common.BorderPadding
 	viewWidth := m.width - common.InnerPadding
@@ -43,12 +53,14 @@ func (m *Model) Render() string {
 			r.AddLines(strconv.Itoa(len(m.items.items)-i) + " items left...")
 			continue
 		}
+
+		item := m.items.items[i]
 		r.AddLines(common.ClipboardPrettierName(
-			m.items.items[i],
+			item.path,
 			viewWidth,
-			false,
-			false,
-			false,
+			item.isDir,
+			item.isLink,
+			item.isSelected,
 		))
 	}
 	return r.Render()
@@ -64,17 +76,19 @@ func (m *Model) Reset(cut bool) {
 }
 
 func (m *Model) Add(location string) {
-	m.items.items = append(m.items.items, location)
+	m.items.items = append(m.items.items, m.makeClipboardItem(location))
 }
 
 func (m *Model) SetItems(items []string) {
-	m.items.items = make([]string, len(items))
-	copy(m.items.items, items)
+	m.items.items = make([]clipboardItem, 0, len(items))
+	for _, path := range items {
+		m.items.items = append(m.items.items, m.makeClipboardItem(path))
+	}
 }
 
 func (m *Model) GetItems() []string {
 	// return a copy to prevent external mutation
-	return m.GetItemsWithExistCheck()
+	return m.CleanupAndGetItems()
 }
 
 func (m *Model) Len() int {
@@ -93,7 +107,7 @@ func (m *Model) GetFirstItem() string {
 	if len(m.items.items) == 0 {
 		return ""
 	}
-	return m.items.items[0]
+	return m.items.items[0].path
 }
 
 func (m *Model) UpdatePath(oldpath string, newpath string) {
@@ -104,13 +118,13 @@ func (m *Model) UpdatePath(oldpath string, newpath string) {
 	newpathClean := filepath.Clean(newpath)
 
 	for i, p := range m.items.items {
-		cur := filepath.Clean(p)
+		cur := filepath.Clean(p.path)
 		if cur == oldpathClean {
-			m.items.items[i] = newpathClean
+			m.items.items[i].path = newpathClean
 			continue
 		}
 		if strings.HasPrefix(cur, oldpathClean+string(filepath.Separator)) {
-			m.items.items[i] = filepath.Join(
+			m.items.items[i].path = filepath.Join(
 				newpathClean,
 				strings.TrimPrefix(cur, oldpathClean+string(filepath.Separator)),
 			)
@@ -119,16 +133,43 @@ func (m *Model) UpdatePath(oldpath string, newpath string) {
 	}
 }
 
-func (m *Model) GetItemsWithExistCheck() []string {
+// CleanupAndGetItems removes entries whose paths no longer exist and returns the remaining paths.
+func (m *Model) CleanupAndGetItems() []string {
 	if len(m.items.items) == 0 {
 		return nil
 	}
 
-	m.items.items = slices.DeleteFunc(m.items.items, func(p string) bool {
-		_, err := os.Stat(p)
-		return err != nil
-	})
+	kept := m.items.items[:0]
+	for _, item := range m.items.items {
+		if _, err := os.Stat(item.path); err != nil {
+			continue
+		}
+		kept = append(kept, item)
+	}
+	m.items.items = kept
+
+	if len(m.items.items) == 0 {
+		return nil
+	}
+
 	out := make([]string, len(m.items.items))
-	copy(out, m.items.items)
+	for i, item := range m.items.items {
+		out[i] = item.path
+	}
 	return out
+}
+
+// makeClipboardItem builds a clipboardItem with cached metadata for render.
+func (m *Model) makeClipboardItem(path string) clipboardItem {
+	info, err := os.Lstat(path)
+	if err != nil {
+		return clipboardItem{path: path}
+	}
+	isLink := info.Mode()&os.ModeSymlink != 0
+	return clipboardItem{
+		path:      path,
+		isDir:     info.IsDir(),
+		isLink:    isLink,
+		isSelected: false,
+	}
 }
