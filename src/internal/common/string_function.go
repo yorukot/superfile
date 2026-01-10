@@ -70,30 +70,29 @@ func TruncateMiddleText(text string, maxChars int, tails string) string {
 	return truncatedText
 }
 
-func PrettierFilePanelItemName(name string,
+func FilePanelItemRenderWithIcon(
+	name string,
 	width int,
 	isDir bool,
 	isLink bool,
 	isSelected bool,
-	bgColor lipgloss.Color) string {
+	bgColor lipgloss.Color,
+) string {
 	style := GetElementIcon(name, isDir, isLink, Config.Nerdfont)
 	iconData := style.Icon + " "
 	filenameWidth := width - ansi.StringWidth(iconData)
-	textStyle := FilePanelStyle
-	if isSelected {
-		textStyle = FilePanelItemSelectedStyle
-	}
+
 	return StringColorRender(lipgloss.Color(style.Color), bgColor).
 		Background(bgColor).Render(iconData) +
-		textStyle.Width(filenameWidth).Align(lipgloss.Left).
-			Render(TruncateText(name, filenameWidth, "..."))
+		FilePanelItemRender(name, filenameWidth, isSelected, bgColor, lipgloss.Left)
 }
-func PrettierFixedWidthItem(data string,
+func FilePanelItemRender(data string,
 	width int,
 	isSelected bool,
 	bgColor lipgloss.Color,
-	alignment lipgloss.Position) string {
-	outputData := ansi.Truncate(data, width, "")
+	alignment lipgloss.Position,
+) string {
+	outputData := TruncateText(data, width, "...")
 	style := FilePanelStyle
 	if isSelected {
 		style = FilePanelItemSelectedStyle

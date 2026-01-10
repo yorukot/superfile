@@ -24,7 +24,7 @@ func (m *Model) renderFileName(indexElement int, columnWidth int) string {
 	prefixWidth := ansi.StringWidth(cursor+" ") + ansi.StringWidth(selectBox)
 
 	isLink := m.Element[indexElement].Info.Mode()&os.ModeSymlink != 0
-	renderedName := common.PrettierFilePanelItemName(
+	renderedName := common.FilePanelItemRenderWithIcon(
 		m.Element[indexElement].Name,
 		columnWidth-prefixWidth,
 		m.Element[indexElement].Directory,
@@ -38,7 +38,7 @@ func (m *Model) renderFileName(indexElement int, columnWidth int) string {
 // The renderer of delimiter spaces. It has a strict fixed size that depends only on the delimiter string.
 func (m *Model) renderDelimiter(indexElement int, columnWidth int) string {
 	isSelected := m.CheckSelected(m.Element[indexElement].Location)
-	return common.PrettierFixedWidthItem(
+	return common.FilePanelItemRender(
 		ColumnDelimiter,
 		columnWidth,
 		isSelected,
@@ -53,7 +53,7 @@ func (m *Model) renderFileSize(indexElement int, columnWidth int) string {
 	if m.Element[indexElement].Info.IsDir() {
 		sizeValue = ""
 	}
-	return common.PrettierFixedWidthItem(
+	return common.FilePanelItemRender(
 		sizeValue,
 		columnWidth,
 		isSelected,
@@ -66,7 +66,7 @@ func (m *Model) renderFileSize(indexElement int, columnWidth int) string {
 func (m *Model) renderModifyTime(indexElement int, columnWidth int) string {
 	isSelected := m.CheckSelected(m.Element[indexElement].Location)
 	modifyTime := m.Element[indexElement].Info.ModTime().Format("2006-01-02 15:04")
-	return common.PrettierFixedWidthItem(
+	return common.FilePanelItemRender(
 		modifyTime,
 		columnWidth,
 		isSelected,
@@ -77,7 +77,7 @@ func (m *Model) renderModifyTime(indexElement int, columnWidth int) string {
 
 func (m *Model) renderPermissions(indexElement int, columnWidth int) string {
 	isSelected := m.CheckSelected(m.Element[indexElement].Location)
-	return common.PrettierFixedWidthItem(
+	return common.FilePanelItemRender(
 		m.Element[indexElement].Info.Mode().Perm().String(),
 		columnWidth,
 		isSelected,
@@ -91,7 +91,7 @@ func (cd *columnDefinition) Render(index int) string {
 }
 
 func (cd *columnDefinition) RenderHeader() string {
-	return common.PrettierFixedWidthItem(
+	return common.FilePanelItemRender(
 		cd.Name,
 		cd.Size,
 		false,
