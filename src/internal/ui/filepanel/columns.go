@@ -116,7 +116,7 @@ func (m *Model) makeColumns(columnThreshold int, fileNameRatio int) []columnDefi
 
 	minWidthForNameColumn := int(float64(m.GetContentWidth() * fileNameRatio / common.FileNameRatioMax))
 	// Worst case (5 * 100 / 100) could evaluate to 5.0001
-	// Hence, we need this check. Our constraints on Width and ratio gurantee it to be > 0 though
+	// Hence, we need this check. Our constraints on Width and ratio guarantee it to be > 0 though
 	minWidthForNameColumn = min(minWidthForNameColumn, m.GetContentWidth())
 
 	for _, col := range extraColumns[0:maxColumns] {
