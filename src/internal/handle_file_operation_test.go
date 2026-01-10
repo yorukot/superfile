@@ -263,7 +263,13 @@ func TestPasteItem(t *testing.T) {
 			if tt.shouldPreventPaste {
 				verifyPreventedPasteResults(t, m, originalPath)
 			} else {
-				verifySuccessfulPasteResults(t, tt.targetDir, tt.expectedDestFiles, originalPath, tt.shouldOriginalExist)
+				verifySuccessfulPasteResults(
+					t,
+					tt.targetDir,
+					tt.expectedDestFiles,
+					originalPath,
+					tt.shouldOriginalExist,
+				)
 			}
 			// Checking separately, as this is something independent of tt.shouldPreventPaste
 			if tt.shouldClipboardClear {

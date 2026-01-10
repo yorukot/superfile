@@ -1,6 +1,6 @@
 module github.com/yorukot/superfile
 
-go 1.25.0
+go 1.25.5
 
 require (
 	github.com/adrg/xdg v0.5.3

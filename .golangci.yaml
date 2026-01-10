@@ -2,6 +2,9 @@
 # Version used - 
 # https://gist.githubusercontent.com/maratori/47a4d00457a92aa426dbd48a18776322/raw/933de4558de48c79322aee44b44a9619eeaba167/.golangci.yml
 
+# Note: Superfile doesn't ensure that this file's version is in sync with
+# the version we use in CI. It can be outdated.
+
 # Additional changes done for superfile
 # - govet shadow analyzer is set to "strict : false" settings.
 #   strict : true causes too much noise
