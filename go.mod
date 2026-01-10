@@ -63,7 +63,7 @@ require (
 )
 
 require (
-	github.com/BourgeoisBear/rasterm v1.1.1
+	github.com/BourgeoisBear/rasterm v1.1.2
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/charmbracelet/harmonica v0.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
