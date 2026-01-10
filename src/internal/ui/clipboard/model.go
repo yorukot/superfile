@@ -129,7 +129,6 @@ func (m *Model) UpdatePath(oldpath string, newpath string) {
 				strings.TrimPrefix(cur, oldpathClean+string(filepath.Separator)),
 			)
 		}
-
 	}
 }
 
