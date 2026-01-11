@@ -3,7 +3,7 @@ package filepanel
 import "math"
 
 func (m *Model) GetCursor() int {
-	return m.GetCursor()
+	return m.cursor
 }
 
 func (m *Model) GetRenderIndex() int {

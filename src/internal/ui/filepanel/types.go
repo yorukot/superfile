@@ -14,6 +14,10 @@ type sortingKind string
 // zero value `Model{}`, or direct initialization should be avoided
 // or used very carefully if needed
 type Model struct {
+
+	// Note: We have tried to minimize direct access to cursor,
+	// and read it via GetCursor() at most places, to make it easier
+	// to find and harder to cause bugs of invalid value getting set to cursor
 	cursor      int
 	renderIndex int
 	IsFocused   bool

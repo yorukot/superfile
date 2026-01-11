@@ -62,6 +62,11 @@ func (m *Model) UpdateCurrentFilePanelDir(path string) error {
 
 	slog.Debug("updateCurrentFilePanelDir : After update", "cursor", m.cursor, "render", m.renderIndex)
 
+	// Reset cursor if setting it from cache made it invalid
+	if m.ValidateCursorAndRenderIndex() != nil {
+		m.scrollToCursor(0)
+	}
+
 	// Reset the searchbar Value
 	// TODO(Refactoring) : Have a common searchBar type for sidebar and this search bar.
 	m.SearchBar.SetValue("")

@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
@@ -143,4 +144,59 @@ func TestFilePanelNavigation(t *testing.T) {
 			assert.Equal(t, originalRenderIndex, m.getFocusedFilePanel().GetRenderIndex())
 		})
 	}
+}
+
+func TestCursorOutOfBoundsAfterDirectorySwitch(t *testing.T) {
+	// Create two directories with different file counts
+	tempDir := t.TempDir()
+	dir1 := filepath.Join(tempDir, "dir1")
+	dir2 := filepath.Join(tempDir, "dir2")
+	utils.SetupDirectories(t, dir1, dir2)
+
+	var files1, files2 []string
+	for i := range 10 {
+		files1 = append(files1, filepath.Join(dir1, string('a'+rune(i))+".txt"))
+	}
+	for i := range 5 {
+		files2 = append(files2, filepath.Join(dir2, string('a'+rune(i))+".txt"))
+	}
+	utils.SetupFiles(t, files1...)
+	utils.SetupFiles(t, files2...)
+
+	// Start with dir1
+	m := defaultTestModel(dir1)
+	p := NewTestTeaProgWithEventLoop(t, m)
+
+	// It will immediately load as defaultTestModel does one sync TeaUpdate
+	assert.Equal(t, 10, m.getFocusedFilePanel().ElemCount(),
+		"Should load 10 files in dir1")
+
+	// Move cursor to position 8 (near end of list)
+	panel := m.getFocusedFilePanel()
+	for range 8 {
+		p.Send(tea.KeyMsg{Type: tea.KeyDown})
+	}
+
+	// Verify cursor is at position 8
+	assert.Eventually(t, func() bool {
+		return m.getFocusedFilePanel().GetCursor() == 8
+	}, DefaultTestTimeout, DefaultTestTick, "Cursor should be at position 8")
+	t.Logf("Cursor at position %d with %d elements", panel.GetCursor(), panel.ElemCount())
+
+	// Navigate to dir2 (this saves cursor=8 in directoryRecords)
+	navigateToTargetDir(t, m, dir1, dir2)
+
+	assert.Equal(t, dir2, m.getFocusedFilePanel().Location, "Should be in dir2")
+	assert.Equal(t, 5, m.getFocusedFilePanel().ElemCount())
+
+	for i := 4; i < 10; i++ {
+		err := os.Remove(files1[i])
+		require.NoError(t, err)
+	}
+	t.Log("Deleted 6 files from dir1 externally")
+
+	// Navigate back to dir1 (this restores cursor=8 from cache)
+	navigateToTargetDir(t, m, dir2, dir1)
+	assert.Equal(t, 0, panel.GetCursor(), "Cursor not restored as is from directoryRecords cache")
+	assert.NoError(t, panel.ValidateCursorAndRenderIndex(), "panel not valid")
 }
