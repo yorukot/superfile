@@ -105,9 +105,11 @@ func TestCompressSelectedFiles(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			m := defaultTestModel(tt.startDir)
 			p := NewTestTeaProgWithEventLoop(t, m)
-			require.Greater(t, len(m.getFocusedFilePanel().Element), tt.cursor)
+			require.Greater(t, m.getFocusedFilePanel().ElemCount(), tt.cursor)
 			// Update cursor
-			m.getFocusedFilePanel().Cursor = tt.cursor
+			for range tt.cursor {
+				m.getFocusedFilePanel().ListDown()
+			}
 
 			require.Equal(t, filepanel.BrowserMode, m.getFocusedFilePanel().PanelMode)
 			if tt.selectMode {
@@ -140,18 +142,8 @@ func TestCompressSelectedFiles(t *testing.T) {
 
 			// Setup cleanup to run even if test fails
 			t.Cleanup(func() {
-				cleanupWithRetry := func(path, label string) {
-					var lastErr error
-					ok := assert.Eventually(t, func() bool {
-						lastErr = os.RemoveAll(path)
-						return lastErr == nil
-					}, DefaultTestTimeout, DefaultTestTick)
-					if !ok {
-						t.Fatalf("Failed to remove %s %q: %v", label, path, lastErr)
-					}
-				}
-				cleanupWithRetry(extractedDir, "extracted directory")
-				cleanupWithRetry(zipFile, "zip file")
+				cleanupWithRetry(t, extractedDir, "extracted directory")
+				cleanupWithRetry(t, zipFile, "zip file")
 			})
 			assert.Eventually(t, func() bool {
 				for _, f := range tt.expectedFilesAfterExtract {
@@ -402,4 +394,16 @@ func ensureOneProcessDone(t *testing.T, m *model) {
 		processes := m.processBarModel.GetProcessesSlice()
 		return len(processes) == 1 && processes[0].State == processbar.Successful
 	}, DefaultTestTimeout, DefaultTestTick, "Compress process not done")
+}
+
+// Duct tape to have less flaky tests in windows
+func cleanupWithRetry(t *testing.T, path, label string) {
+	var lastErr error
+	ok := assert.Eventually(t, func() bool {
+		lastErr = os.RemoveAll(path)
+		return lastErr == nil
+	}, DefaultTestTimeout, DefaultTestTick)
+	if !ok {
+		t.Fatalf("Failed to remove %s %q: %v", label, path, lastErr)
+	}
 }
