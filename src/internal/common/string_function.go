@@ -156,23 +156,20 @@ func FormatFileSize(size int64) string {
 }
 
 func GetHelpMenuHotkeyString(hotkeys []string) string {
-	hotkey := ""
-
+	var hotkey strings.Builder
 	for i, key := range hotkeys {
 		if key == "" {
 			continue
 		}
-
 		if i != 0 {
-			hotkey += " | "
+			hotkey.WriteString(" | ")
 		}
 		if key == " " {
 			key = "space"
 		}
-		hotkey += key
+		hotkey.WriteString(key)
 	}
-
-	return hotkey
+	return hotkey.String()
 }
 
 // Separated this out out for easy testing
