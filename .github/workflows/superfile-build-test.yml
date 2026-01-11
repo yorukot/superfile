@@ -65,7 +65,7 @@ jobs:
 
       - name: golangci-lint (skip on Windows)
         if: runner.os != 'Windows'
-        uses: golangci/golangci-lint-action@v8
+        uses: golangci/golangci-lint-action@v9
         with:
           version: v2.8.0
           args: --timeout 3m
