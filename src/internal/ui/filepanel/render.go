@@ -77,14 +77,14 @@ func (m *Model) renderColumnHeaders(r *rendering.Renderer) {
 }
 
 func (m *Model) renderFileEntries(r *rendering.Renderer) {
-	if len(m.Element) == 0 {
+	if len(m.element) == 0 {
 		r.AddLines(common.FilePanelNoneText)
 		return
 	}
-	end := min(m.RenderIndex+m.PanelElementHeight(), len(m.Element))
+	end := min(m.renderIndex+m.PanelElementHeight(), len(m.element))
 
-	for itemIndex := m.RenderIndex; itemIndex < end; itemIndex++ {
-		if m.Renaming && itemIndex == m.Cursor {
+	for itemIndex := m.renderIndex; itemIndex < end; itemIndex++ {
+		if m.Renaming && itemIndex == m.cursor {
 			r.AddLines(m.Rename.View())
 			continue
 		}
@@ -125,11 +125,11 @@ func (m *Model) getPanelModeInfo(selectedCount uint) (string, string) {
 }
 
 func (m *Model) getCursorString() string {
-	cursor := m.Cursor
-	if len(m.Element) > 0 {
+	cursor := m.cursor
+	if len(m.element) > 0 {
 		cursor++ // Convert to 1-based
 	}
-	return fmt.Sprintf("%d/%d", cursor, len(m.Element))
+	return fmt.Sprintf("%d/%d", cursor, len(m.element))
 }
 
 func (m *Model) renderSelectBox(isSelected bool) string {
@@ -151,8 +151,8 @@ func (m *Model) renderSelectBox(isSelected bool) string {
 
 // Checks whether the focus panel directory changed and forces a re-render.
 func (m *Model) NeedsReRender() bool {
-	if len(m.Element) > 0 {
-		return filepath.Dir(m.Element[0].Location) != m.Location
+	if len(m.element) > 0 {
+		return filepath.Dir(m.element[0].Location) != m.Location
 	}
 	return true
 }

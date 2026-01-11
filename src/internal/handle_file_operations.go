@@ -40,13 +40,12 @@ func (m *model) panelCreateNewFile() {
 func (m *model) IsRenamingConflicting() bool {
 	// TODO : Replace this with m.getCurrentFilePanel() everywhere
 	panel := m.getFocusedFilePanel()
-
-	if len(panel.Element) == 0 {
+	if panel.ElemCount() == 0 {
 		slog.Error("IsRenamingConflicting() being called on empty panel")
 		return false
 	}
-
-	oldPath := panel.Element[panel.Cursor].Location
+	panel.GetFocusedItem()
+	oldPath := panel.GetFocusedItem().Location
 	newPath := filepath.Join(panel.Location, panel.Rename.Value())
 
 	if oldPath == newPath {
@@ -77,12 +76,12 @@ func (m *model) warnModalForRenaming() tea.Cmd {
 // Actual rename happens at confirmRename() in handle_modal.go
 func (m *model) panelItemRename() {
 	panel := m.getFocusedFilePanel()
-	if len(panel.Element) == 0 {
+	if panel.Empty() {
 		return
 	}
 
 	cursorPos := -1
-	nameRunes := []rune(panel.Element[panel.Cursor].Name)
+	nameRunes := []rune(panel.GetFocusedItem().Name)
 	nameLen := len(nameRunes)
 	for i := nameLen - 1; i >= 0; i-- {
 		if nameRunes[i] == '.' {
@@ -90,7 +89,7 @@ func (m *model) panelItemRename() {
 			break
 		}
 	}
-	if cursorPos == -1 || cursorPos == 0 && nameLen > 0 || panel.Element[panel.Cursor].Directory {
+	if cursorPos == -1 || cursorPos == 0 && nameLen > 0 || panel.GetFocusedItem().Directory {
 		cursorPos = nameLen
 	}
 
@@ -103,12 +102,12 @@ func (m *model) panelItemRename() {
 	panel.Rename = common.GenerateRenameTextInput(
 		m.fileModel.SinglePanelWidth-common.InnerPadding,
 		cursorPos,
-		panel.Element[panel.Cursor].Name)
+		panel.GetFocusedItem().Name)
 }
 
 func (m *model) getDeleteCmd(permDelete bool) tea.Cmd {
 	panel := m.getFocusedFilePanel()
-	if len(panel.Element) == 0 {
+	if panel.Empty() {
 		return nil
 	}
 
@@ -170,7 +169,7 @@ func deleteOperation(processBarModel *processbar.Model, items []string, useTrash
 func (m *model) getDeleteTriggerCmd(deletePermanent bool) tea.Cmd {
 	panel := m.getFocusedFilePanel()
 	if (panel.PanelMode == filepanel.SelectMode && panel.SelectedCount() == 0) ||
-		(panel.PanelMode == filepanel.BrowserMode && len(panel.Element) == 0) {
+		(panel.PanelMode == filepanel.BrowserMode && panel.Empty()) {
 		return nil
 	}
 
@@ -196,12 +195,12 @@ func (m *model) getDeleteTriggerCmd(deletePermanent bool) tea.Cmd {
 func (m *model) copySingleItem(cut bool) {
 	panel := m.getFocusedFilePanel()
 	m.clipboard.Reset(cut)
-	if len(panel.Element) == 0 {
+	if panel.Empty() {
 		return
 	}
 	slog.Debug("handle_file_operations.copySingleItem", "cut", cut,
-		"panel location", panel.Element[panel.Cursor].Location)
-	m.clipboard.Add(panel.Element[panel.Cursor].Location)
+		"panel location", panel.GetFocusedItem().Location)
+	m.clipboard.Add(panel.GetFocusedItem().Location)
 }
 
 // Copy all selected file or directory's paths to the clipboard
@@ -354,7 +353,7 @@ func getTotalFilesCnt(copyItems []string) int {
 // TODO : err should be returned and properly handled by the caller
 func (m *model) getExtractFileCmd() tea.Cmd {
 	panel := m.getFocusedFilePanel()
-	if len(panel.Element) == 0 {
+	if panel.Empty() {
 		return nil
 	}
 
@@ -398,14 +397,14 @@ func (m *model) getExtractFileCmd() tea.Cmd {
 func (m *model) getCompressSelectedFilesCmd() tea.Cmd {
 	panel := m.getFocusedFilePanel()
 
-	if len(panel.Element) == 0 {
+	if panel.Empty() {
 		return nil
 	}
 	var filesToCompress []string
 	var firstFile string
 
 	if panel.SelectedCount() == 0 {
-		firstFile = panel.Element[panel.Cursor].Location
+		firstFile = panel.GetFocusedItem().Location
 		filesToCompress = append(filesToCompress, firstFile)
 	} else {
 		firstFile = panel.GetFirstSelectedLocation()
@@ -444,12 +443,12 @@ func (m *model) chooserFileWriteAndQuit(path string) error {
 func (m *model) openFileWithEditor() tea.Cmd {
 	panel := m.getFocusedFilePanel()
 	// Check if panel is empty
-	if len(panel.Element) == 0 {
+	if panel.Empty() {
 		return nil
 	}
 
 	if variable.ChooserFile != "" {
-		err := m.chooserFileWriteAndQuit(panel.Element[panel.Cursor].Location)
+		err := m.chooserFileWriteAndQuit(panel.GetFocusedItem().Location)
 		if err == nil {
 			return nil
 		}
@@ -476,7 +475,7 @@ func (m *model) openFileWithEditor() tea.Cmd {
 	cmd := parts[0]
 
 	//nolint:gocritic // appendAssign: intentionally creating a new slice
-	args := append(parts[1:], panel.Element[panel.Cursor].Location)
+	args := append(parts[1:], panel.GetFocusedItem().Location)
 
 	c := exec.Command(cmd, args...)
 
@@ -526,11 +525,11 @@ func (m *model) openDirectoryWithEditor() tea.Cmd {
 func (m *model) copyPath() {
 	panel := m.getFocusedFilePanel()
 
-	if len(panel.Element) == 0 {
+	if panel.Empty() {
 		return
 	}
 
-	if err := clipboard.WriteAll(panel.Element[panel.Cursor].Location); err != nil {
+	if err := clipboard.WriteAll(panel.GetFocusedItem().Location); err != nil {
 		slog.Error("Error while copy path", "error", err)
 	}
 }

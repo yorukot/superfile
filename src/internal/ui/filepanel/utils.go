@@ -2,11 +2,19 @@ package filepanel
 
 import "math"
 
+func (m *Model) GetCursor() int {
+	return m.cursor
+}
+
+func (m *Model) GetRenderIndex() int {
+	return m.renderIndex
+}
+
 func (m *Model) GetFocusedItem() Element {
-	if m.Cursor < 0 || len(m.Element) <= m.Cursor {
+	if m.cursor < 0 || len(m.element) <= m.cursor {
 		return Element{}
 	}
-	return m.Element[m.Cursor]
+	return m.element[m.cursor]
 }
 
 func (m *Model) ResetSelected() {
@@ -16,10 +24,10 @@ func (m *Model) ResetSelected() {
 
 // For modification. Make sure to do a nil check
 func (m *Model) GetFocusedItemPtr() *Element {
-	if m.Cursor < 0 || len(m.Element) <= m.Cursor {
+	if m.cursor < 0 || len(m.element) <= m.cursor {
 		return nil
 	}
-	return &m.Element[m.Cursor]
+	return &m.element[m.cursor]
 }
 
 // Note : If this is called on an already selected element
@@ -81,14 +89,14 @@ func (m *Model) GetFirstSelectedLocation() string {
 
 // Select the item where cursor located (only work on select mode)
 func (m *Model) SingleItemSelect() {
-	if len(m.Element) > 0 && m.Cursor >= 0 && m.Cursor < len(m.Element) {
-		elementLocation := m.Element[m.Cursor].Location
+	if len(m.element) > 0 && m.cursor >= 0 && m.cursor < len(m.element) {
+		elementLocation := m.element[m.cursor].Location
 		m.ToggleSelected(elementLocation)
 	}
 }
 
 func (m *Model) ElemCount() int {
-	return len(m.Element)
+	return len(m.element)
 }
 
 func (m *Model) SelectedCount() uint {
@@ -101,4 +109,28 @@ func (m *Model) Empty() bool {
 
 func (m *Model) EmptyOrInvalid() bool {
 	return m.Empty() || m.ValidateCursorAndRenderIndex() != nil
+}
+
+// SetCursorPosition sets cursor and updates renderIndex accordingly.
+// Note: Intended for test utilities only!!!!!
+func (m *Model) SetCursorPosition(cursor int) {
+	m.scrollToCursor(cursor)
+}
+
+func (m *Model) FindElementIndexByName(name string) int {
+	for i, elem := range m.element {
+		if elem.Name == name {
+			return i
+		}
+	}
+	return -1
+}
+
+func (m *Model) FindElementIndexByLocation(location string) int {
+	for i, elem := range m.element {
+		if elem.Location == location {
+			return i
+		}
+	}
+	return -1
 }

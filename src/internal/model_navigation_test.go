@@ -7,6 +7,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/utils"
@@ -52,7 +53,6 @@ func TestFilePanelNavigation(t *testing.T) {
 		startDir       string
 		resultDir      string
 		startCursor    int
-		startRender    int
 		keyInput       []string
 		searchBarClear bool
 	}{
@@ -61,7 +61,6 @@ func TestFilePanelNavigation(t *testing.T) {
 			startDir:    dir1,
 			resultDir:   curTestDir,
 			startCursor: 1,
-			startRender: 0,
 			keyInput: []string{
 				common.Hotkeys.ParentDirectory[0],
 			},
@@ -72,7 +71,6 @@ func TestFilePanelNavigation(t *testing.T) {
 			startDir:    rootDir,
 			resultDir:   rootDir,
 			startCursor: 0,
-			startRender: 0,
 			keyInput: []string{
 				common.Hotkeys.ParentDirectory[0],
 			},
@@ -83,7 +81,6 @@ func TestFilePanelNavigation(t *testing.T) {
 			startDir:    curTestDir,
 			resultDir:   dir2,
 			startCursor: 1,
-			startRender: 0,
 			keyInput: []string{
 				common.Hotkeys.Confirm[0],
 			},
@@ -94,7 +91,6 @@ func TestFilePanelNavigation(t *testing.T) {
 			startDir:    curTestDir,
 			resultDir:   dir1,
 			startCursor: 2,
-			startRender: 0,
 			keyInput: []string{
 				common.Hotkeys.OpenSPFPrompt[0],
 				// TODO : Have it quoted, once cd command supports quoted paths
@@ -108,7 +104,6 @@ func TestFilePanelNavigation(t *testing.T) {
 			startDir:    curTestDir,
 			resultDir:   curTestDir,
 			startCursor: 2,
-			startRender: 0,
 			keyInput: []string{
 				common.Hotkeys.OpenSPFPrompt[0],
 				// TODO : Have it quoted, once cd command supports quoted paths
@@ -122,8 +117,11 @@ func TestFilePanelNavigation(t *testing.T) {
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
 			m := defaultTestModel(tt.startDir)
-			m.getFocusedFilePanel().Cursor = tt.startCursor
-			m.getFocusedFilePanel().RenderIndex = tt.startRender
+			for range tt.startCursor {
+				m.getFocusedFilePanel().ListDown()
+			}
+			require.Equal(t, tt.startCursor, m.getFocusedFilePanel().GetCursor())
+			originalRenderIndex := m.getFocusedFilePanel().GetRenderIndex()
 			for _, s := range tt.keyInput {
 				TeaUpdate(m, utils.TeaRuneKeyMsg(s))
 			}
@@ -140,9 +138,9 @@ func TestFilePanelNavigation(t *testing.T) {
 			TeaUpdate(m, utils.TeaRuneKeyMsg("cd "+tt.startDir))
 			TeaUpdate(m, tea.KeyMsg{Type: tea.KeyEnter})
 
-			// Make sure we have original curson and render
-			assert.Equal(t, tt.startCursor, m.getFocusedFilePanel().Cursor)
-			assert.Equal(t, tt.startRender, m.getFocusedFilePanel().RenderIndex)
+			// Make sure we have original cursor and render
+			assert.Equal(t, tt.startCursor, m.getFocusedFilePanel().GetCursor())
+			assert.Equal(t, originalRenderIndex, m.getFocusedFilePanel().GetRenderIndex())
 		})
 	}
 }

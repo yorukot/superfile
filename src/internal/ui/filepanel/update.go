@@ -34,8 +34,8 @@ func (m *Model) UpdateCurrentFilePanelDir(path string) error {
 	// NOTE: This could be a configurable feature
 	// Update the cursor and render status in case we switch back to this.
 	m.DirectoryRecords[m.Location] = directoryRecord{
-		directoryCursor: m.Cursor,
-		directoryRender: m.RenderIndex,
+		directoryCursor: m.cursor,
+		directoryRender: m.renderIndex,
 	}
 
 	if info, err := os.Stat(path); err != nil {
@@ -53,14 +53,14 @@ func (m *Model) UpdateCurrentFilePanelDir(path string) error {
 	// the cursor and render values.
 	curDirectoryRecord, hasRecord := m.DirectoryRecords[m.Location]
 	if hasRecord {
-		m.Cursor = curDirectoryRecord.directoryCursor
-		m.RenderIndex = curDirectoryRecord.directoryRender
+		m.cursor = curDirectoryRecord.directoryCursor
+		m.renderIndex = curDirectoryRecord.directoryRender
 	} else {
-		m.Cursor = 0
-		m.RenderIndex = 0
+		m.cursor = 0
+		m.renderIndex = 0
 	}
 
-	slog.Debug("updateCurrentFilePanelDir : After update", "cursor", m.Cursor, "render", m.RenderIndex)
+	slog.Debug("updateCurrentFilePanelDir : After update", "cursor", m.cursor, "render", m.renderIndex)
 
 	// Reset the searchbar Value
 	// TODO(Refactoring) : Have a common searchBar type for sidebar and this search bar.
@@ -75,7 +75,7 @@ func (m *Model) ParentDirectory() error {
 
 // Select all item in the file panel (only work on select mode)
 func (m *Model) SelectAllItem() {
-	for _, item := range m.Element {
+	for _, item := range m.element {
 		m.SetSelected(item.Location)
 	}
 }
