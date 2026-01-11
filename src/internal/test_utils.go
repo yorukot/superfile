@@ -203,27 +203,6 @@ func verifySuccessfulPasteResults(t *testing.T, targetDir string, expectedDestFi
 }
 
 // -------------- Other utilities
-
-// Helper function to find item index in panel by name
-func findItemIndexInPanel(panel *filepanel.Model, itemName string) int {
-	for i, elem := range panel.Element {
-		if elem.Name == itemName {
-			return i
-		}
-	}
-	return -1
-}
-
-// Helper function to find item index in panel by name
-func findItemIndexInPanelByLocation(panel *filepanel.Model, itemLocation string) int {
-	for i, elem := range panel.Element {
-		if elem.Location == itemLocation {
-			return i
-		}
-	}
-	return -1
-}
-
 // Helper function to navigate to target directory if different from start
 func navigateToTargetDir(t *testing.T, m *model, startDir, targetDir string) {
 	t.Helper()
@@ -244,16 +223,16 @@ func getOriginalPath(useSelectMode bool, itemName, startDir string) string {
 
 func setFilePanelSelectedItemByLocation(t *testing.T, panel *filepanel.Model, filePath string) {
 	t.Helper()
-	idx := findItemIndexInPanelByLocation(panel, filePath)
+	idx := panel.FindElementIndexByLocation(filePath)
 	require.NotEqual(t, -1, idx, "%s should be found in panel", filePath)
-	panel.Cursor = idx
+	panel.SetCursorPosition(idx)
 }
 
 func setFilePanelSelectedItemByName(t *testing.T, panel *filepanel.Model, fileName string) {
 	t.Helper()
-	idx := findItemIndexInPanel(panel, fileName)
+	idx := panel.FindElementIndexByName(fileName)
 	require.NotEqual(t, -1, idx, "%s should be found in panel", fileName)
-	panel.Cursor = idx
+	panel.SetCursorPosition(idx)
 }
 
 func splitPanelAsync(p *TeaProg) {
