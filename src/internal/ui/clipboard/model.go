@@ -1,9 +1,10 @@
 package clipboard
 
 import (
-	"log/slog"
 	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui"
@@ -18,8 +19,15 @@ type Model struct {
 
 // Copied items
 type copyItems struct {
-	items []string
+	items []clipboardItem
 	cut   bool
+}
+
+// clipboardItem stores the path plus cached metadata so render can avoid per-item stat calls.
+type clipboardItem struct {
+	path       string
+	isDir      bool
+	isLink     bool
 }
 
 func (m *Model) SetDimensions(width int, height int) {
@@ -28,28 +36,30 @@ func (m *Model) SetDimensions(width int, height int) {
 }
 
 func (m *Model) Render() string {
+	// Prune missing items before rendering so UI matches reality.
+	m.CleanupAndGetItems()
+
 	r := ui.ClipboardRenderer(m.height, m.width)
 	viewHeight := m.height - common.BorderPadding
 	viewWidth := m.width - common.InnerPadding
 	if len(m.items.items) == 0 {
 		// TODO move this to a string
 		r.AddLines("", common.ClipboardNoneText)
-	} else {
-		for i := 0; i < len(m.items.items) && i < viewHeight; i++ {
-			if i == viewHeight-1 && i != len(m.items.items)-1 {
-				// Last Entry we can render, but there are more that one left
-				r.AddLines(strconv.Itoa(len(m.items.items)-i) + " items left....")
-			} else {
-				fileInfo, err := os.Lstat(m.items.items[i])
-				if err != nil {
-					slog.Error("Clipboard render function get item state ", "error", err)
-					continue
-				}
-				isLink := fileInfo.Mode()&os.ModeSymlink != 0
-				r.AddLines(common.ClipboardPrettierName(m.items.items[i],
-					viewWidth, fileInfo.IsDir(), isLink, false))
-			}
+		return r.Render()
+	}
+	for i := 0; i < len(m.items.items) && i < viewHeight; i++ {
+		if i == viewHeight-1 && i != len(m.items.items)-1 {
+			r.AddLines(strconv.Itoa(len(m.items.items)-i) + " items left....")
+			continue
 		}
+
+		item := m.items.items[i]
+		r.AddLines(common.ClipboardPrettierName(
+			item.path,
+			viewWidth,
+			item.isDir,
+			item.isLink,
+		))
 	}
 	return r.Render()
 }
@@ -64,19 +74,19 @@ func (m *Model) Reset(cut bool) {
 }
 
 func (m *Model) Add(location string) {
-	m.items.items = append(m.items.items, location)
+	m.items.items = append(m.items.items, m.makeClipboardItem(location))
 }
 
 func (m *Model) SetItems(items []string) {
-	m.items.items = make([]string, len(items))
-	copy(m.items.items, items)
+	m.items.items = make([]clipboardItem, 0, len(items))
+	for _, path := range items {
+		m.items.items = append(m.items.items, m.makeClipboardItem(path))
+	}
 }
 
 func (m *Model) GetItems() []string {
 	// return a copy to prevent external mutation
-	items := make([]string, len(m.items.items))
-	copy(items, m.items.items)
-	return items
+	return m.CleanupAndGetItems()
 }
 
 func (m *Model) Len() int {
@@ -95,5 +105,67 @@ func (m *Model) GetFirstItem() string {
 	if len(m.items.items) == 0 {
 		return ""
 	}
-	return m.items.items[0]
+	return m.items.items[0].path
+}
+
+func (m *Model) UpdatePath(oldpath string, newpath string) {
+	if len(m.items.items) == 0 {
+		return
+	}
+	oldpathClean := filepath.Clean(oldpath)
+	newpathClean := filepath.Clean(newpath)
+
+	for i, p := range m.items.items {
+		cur := filepath.Clean(p.path)
+		if cur == oldpathClean {
+			m.items.items[i].path = newpathClean
+			continue
+		}
+		if strings.HasPrefix(cur, oldpathClean+string(filepath.Separator)) {
+			m.items.items[i].path = filepath.Join(
+				newpathClean,
+				strings.TrimPrefix(cur, oldpathClean+string(filepath.Separator)),
+			)
+		}
+	}
+}
+
+// CleanupAndGetItems removes entries whose paths no longer exist and returns the remaining paths.
+func (m *Model) CleanupAndGetItems() []string {
+	if len(m.items.items) == 0 {
+		return nil
+	}
+
+	kept := m.items.items[:0]
+	for _, item := range m.items.items {
+		if _, err := os.Stat(item.path); err != nil {
+			continue
+		}
+		kept = append(kept, item)
+	}
+	m.items.items = kept
+
+	if len(m.items.items) == 0 {
+		return nil
+	}
+
+	out := make([]string, len(m.items.items))
+	for i, item := range m.items.items {
+		out[i] = item.path
+	}
+	return out
+}
+
+// makeClipboardItem builds a clipboardItem with cached metadata for render.
+func (m *Model) makeClipboardItem(path string) clipboardItem {
+	info, err := os.Lstat(path)
+	if err != nil {
+		return clipboardItem{path: path}
+	}
+	isLink := info.Mode()&os.ModeSymlink != 0
+	return clipboardItem{
+		path:       path,
+		isDir:      info.IsDir(),
+		isLink:     isLink,
+	}
 }
