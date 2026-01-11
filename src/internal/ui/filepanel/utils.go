@@ -11,10 +11,18 @@ func (m *Model) GetRenderIndex() int {
 }
 
 func (m *Model) GetFocusedItem() Element {
-	if m.cursor < 0 || len(m.element) <= m.cursor {
+	return m.GetElementAtIdx(m.cursor)
+}
+
+func (m *Model) GetElementAtIdx(idx int) Element {
+	if idx < 0 || m.ElemCount() <= idx {
 		return Element{}
 	}
-	return m.element[m.cursor]
+	return m.element[idx]
+}
+
+func (m *Model) GetFirstElement() Element {
+	return m.GetElementAtIdx(0)
 }
 
 func (m *Model) ResetSelected() {
@@ -24,7 +32,7 @@ func (m *Model) ResetSelected() {
 
 // For modification. Make sure to do a nil check
 func (m *Model) GetFocusedItemPtr() *Element {
-	if m.cursor < 0 || len(m.element) <= m.cursor {
+	if m.cursor < 0 || m.ElemCount() <= m.cursor {
 		return nil
 	}
 	return &m.element[m.cursor]
@@ -89,9 +97,8 @@ func (m *Model) GetFirstSelectedLocation() string {
 
 // Select the item where cursor located (only work on select mode)
 func (m *Model) SingleItemSelect() {
-	if len(m.element) > 0 && m.cursor >= 0 && m.cursor < len(m.element) {
-		elementLocation := m.element[m.cursor].Location
-		m.ToggleSelected(elementLocation)
+	if !m.EmptyOrInvalid() {
+		m.ToggleSelected(m.GetFocusedItem().Location)
 	}
 }
 

@@ -66,11 +66,9 @@ func (m *Model) ItemSelectDown() {
 
 // Applies targetFile cursor positioning, if configured for the panel.
 func (m *Model) applyTargetFileCursor() {
-	for idx, el := range m.element {
-		if el.Name == m.TargetFile {
-			m.scrollToCursor(idx)
-			break
-		}
+	idx := m.FindElementIndexByName(m.TargetFile)
+	if idx != -1 {
+		m.scrollToCursor(idx)
 	}
 	m.TargetFile = ""
 }

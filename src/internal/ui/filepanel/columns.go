@@ -12,7 +12,8 @@ import (
 
 // The renderer for the mandatory first column in the file panel, with a name, a cursor, and a select option.
 func (m *Model) renderFileName(indexElement int, columnWidth int) string {
-	isSelected := m.CheckSelected(m.element[indexElement].Location)
+	elem := m.GetElementAtIdx(indexElement)
+	isSelected := m.CheckSelected(elem.Location)
 	cursor := " "
 	if indexElement == m.cursor && !m.SearchBar.Focused() {
 		cursor = icon.Cursor
@@ -23,11 +24,11 @@ func (m *Model) renderFileName(indexElement int, columnWidth int) string {
 	// Calculate the actual prefix width for proper alignment
 	prefixWidth := ansi.StringWidth(cursor+" ") + ansi.StringWidth(selectBox)
 
-	isLink := m.element[indexElement].Info.Mode()&os.ModeSymlink != 0
+	isLink := elem.Info.Mode()&os.ModeSymlink != 0
 	renderedName := common.FilePanelItemRenderWithIcon(
-		m.element[indexElement].Name,
+		elem.Name,
 		columnWidth-prefixWidth,
-		m.element[indexElement].Directory,
+		elem.Directory,
 		isLink,
 		isSelected,
 		common.FilePanelBGColor,
@@ -37,7 +38,7 @@ func (m *Model) renderFileName(indexElement int, columnWidth int) string {
 
 // The renderer of delimiter spaces. It has a strict fixed size that depends only on the delimiter string.
 func (m *Model) renderDelimiter(indexElement int, columnWidth int) string {
-	isSelected := m.CheckSelected(m.element[indexElement].Location)
+	isSelected := m.CheckSelected(m.GetElementAtIdx(indexElement).Location)
 	return common.FilePanelItemRender(
 		ColumnDelimiter,
 		columnWidth,
@@ -48,9 +49,10 @@ func (m *Model) renderDelimiter(indexElement int, columnWidth int) string {
 }
 
 func (m *Model) renderFileSize(indexElement int, columnWidth int) string {
-	isSelected := m.CheckSelected(m.element[indexElement].Location)
-	sizeValue := common.FormatFileSize(m.element[indexElement].Info.Size())
-	if m.element[indexElement].Info.IsDir() {
+	elem := m.GetElementAtIdx(indexElement)
+	isSelected := m.CheckSelected(elem.Location)
+	sizeValue := common.FormatFileSize(elem.Info.Size())
+	if elem.Info.IsDir() {
 		sizeValue = ""
 	}
 	return common.FilePanelItemRender(
@@ -64,8 +66,9 @@ func (m *Model) renderFileSize(indexElement int, columnWidth int) string {
 
 // TODO: make time template configurable
 func (m *Model) renderModifyTime(indexElement int, columnWidth int) string {
-	isSelected := m.CheckSelected(m.element[indexElement].Location)
-	modifyTime := m.element[indexElement].Info.ModTime().Format("2006-01-02 15:04")
+	elem := m.GetElementAtIdx(indexElement)
+	isSelected := m.CheckSelected(elem.Location)
+	modifyTime := elem.Info.ModTime().Format("2006-01-02 15:04")
 	return common.FilePanelItemRender(
 		modifyTime,
 		columnWidth,
@@ -76,9 +79,10 @@ func (m *Model) renderModifyTime(indexElement int, columnWidth int) string {
 }
 
 func (m *Model) renderPermissions(indexElement int, columnWidth int) string {
-	isSelected := m.CheckSelected(m.element[indexElement].Location)
+	elem := m.GetElementAtIdx(indexElement)
+	isSelected := m.CheckSelected(elem.Location)
 	return common.FilePanelItemRender(
-		m.element[indexElement].Info.Mode().Perm().String(),
+		elem.Info.Mode().Perm().String(),
 		columnWidth,
 		isSelected,
 		common.FilePanelBGColor,

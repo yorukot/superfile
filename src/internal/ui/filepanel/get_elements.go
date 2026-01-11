@@ -85,7 +85,7 @@ func (m *Model) shouldSkipPanelUpdate(focusPanelReRender bool,
 		}
 	}
 
-	reRenderTime := int(float64(len(m.element)) / common.ReRenderChunkDivisor)
+	reRenderTime := int(float64(m.ElemCount()) / common.ReRenderChunkDivisor)
 	if m.IsFocused && !focusPanelReRender &&
 		nowTime.Sub(m.LastTimeGetElement) < time.Duration(reRenderTime)*time.Second {
 		return true
