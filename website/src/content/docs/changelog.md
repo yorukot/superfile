@@ -10,6 +10,87 @@ head:
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC(YYYY-MM-DD).
 
+# [**v1.5.0**](https://github.com/yorukot/superfile/releases/tag/v1.5.0)
+
+> 2026-01-11
+
+#### Update
+- allow hover to file [`#1177`](https://github.com/yorukot/superfile/pull/1177)
+- show count selected items in select mode [`#1187`](https://github.com/yorukot/superfile/pull/1187)
+- Add icon alias for kts to kt [`#1153`](https://github.com/yorukot/superfile/pull/1153)
+- link icon and metadata [`#1171`](https://github.com/yorukot/superfile/pull/1171)
+- user configuration of editors by file extension [`#1197`](https://github.com/yorukot/superfile/pull/1197)
+- add video preview support [`#1178`](https://github.com/yorukot/superfile/pull/1178)
+- Add pdf preview support [`#1198`](https://github.com/yorukot/superfile/pull/1198)
+- Add icons in pinned directories [`#1215`](https://github.com/yorukot/superfile/pull/1215)
+- Enable fast configurable navigation [`#1220`](https://github.com/yorukot/superfile/pull/1220)
+- add Trash bin to default directories for Linux [`#1236`](https://github.com/yorukot/superfile/pull/1236)
+- add terminal stdout support for shell commands [`#1250`](https://github.com/yorukot/superfile/pull/1250)
+- More columns in file panel (MVP) [`#1268`](https://github.com/yorukot/superfile/pull/1268)
+
+#### Bug Fix
+- only calculate checksum on files [`#1119`](https://github.com/yorukot/superfile/pull/1119)
+- Linter issue with PrintfAndExit [`#1133`](https://github.com/yorukot/superfile/pull/1133)
+- Remove repeated os.ReadDir calls [`#1155`](https://github.com/yorukot/superfile/pull/1155)
+- Disable COPYFILE in macOS [`#1194`](https://github.com/yorukot/superfile/pull/1194)
+- add missing hotkeys to help menu [`#1192`](https://github.com/yorukot/superfile/pull/1192)
+- Fetch latest version automatically [`#1127`](https://github.com/yorukot/superfile/pull/1127)
+- Use async methods to prevent test race conditions [`#1201`](https://github.com/yorukot/superfile/pull/1201)
+- update metadata and process bar sizes when toggling footer [`#1218`](https://github.com/yorukot/superfile/pull/1218)
+- File panel dimension management [`#1222`](https://github.com/yorukot/superfile/pull/1222)
+- Layout fixes with full end-to-end tests [`#1227`](https://github.com/yorukot/superfile/pull/1227)
+- Fix flaky tests [`#1233`](https://github.com/yorukot/superfile/pull/1233)
+- modal confirmation bug with arrow keys [`#1243`](https://github.com/yorukot/superfile/pull/1243)
+- small file panel optimization [`#1241`](https://github.com/yorukot/superfile/pull/1241)
+- use ExtractOperationMsg for extraction [`#1248`](https://github.com/yorukot/superfile/pull/1248)
+- skip open_with from missing field validation [`#1251`](https://github.com/yorukot/superfile/pull/1251)
+- border height validation fixes [`#1267`](https://github.com/yorukot/superfile/pull/1267)
+- fix case with two active panes [`#1271`](https://github.com/yorukot/superfile/pull/1271)
+- help model formatting [`#1277`](https://github.com/yorukot/superfile/pull/1277)
+
+#### Optimization
+- simplify renameIfDuplicate logic [`#1100`](https://github.com/yorukot/superfile/pull/1100)
+- separate FilePanel into dedicated package [`#1195`](https://github.com/yorukot/superfile/pull/1195)
+- File model separation [`#1223`](https://github.com/yorukot/superfile/pull/1223)
+- Dimension validations [`#1224`](https://github.com/yorukot/superfile/pull/1224)
+- layout validation and sidebar dimension fixes [`#1228`](https://github.com/yorukot/superfile/pull/1228)
+- user rendering package and removal of unused preview code [`#1245`](https://github.com/yorukot/superfile/pull/1245)
+- user rendering package for file preview [`#1249`](https://github.com/yorukot/superfile/pull/1249)
+
+#### Documentation
+- update Fish shell setup docs [`#1142`](https://github.com/yorukot/superfile/pull/1142)
+- fix macOS typo [`#1212`](https://github.com/yorukot/superfile/pull/1212)
+- stylistic and linguistic cleanup of config documentation [`#1184`](https://github.com/yorukot/superfile/pull/1184)
+
+#### Dependencies
+- update astro monorepo [`#1010`](https://github.com/yorukot/superfile/pull/1010)
+- update starlight-giscus [`#1020`](https://github.com/yorukot/superfile/pull/1020)
+- bump astro versions [`#1138`](https://github.com/yorukot/superfile/pull/1138), [`#1157`](https://github.com/yorukot/superfile/pull/1157), [`#1158`](https://github.com/yorukot/superfile/pull/1158)
+- bump vite [`#1134`](https://github.com/yorukot/superfile/pull/1134)
+- update setup-go action [`#1038`](https://github.com/yorukot/superfile/pull/1038)
+- update expressive-code plugins [`#1189`](https://github.com/yorukot/superfile/pull/1189), [`#1246`](https://github.com/yorukot/superfile/pull/1246)
+- update sharp [`#1256`](https://github.com/yorukot/superfile/pull/1256)
+- update fontsource monorepo [`#1257`](https://github.com/yorukot/superfile/pull/1257)
+- update urfave/cli [`#1136`](https://github.com/yorukot/superfile/pull/1136), [`#1190`](https://github.com/yorukot/superfile/pull/1190)
+- update astro / starlight / ansi / toolchain deps [`#1275`](https://github.com/yorukot/superfile/pull/1275), [`#1278`](https://github.com/yorukot/superfile/pull/1278), [`#1280`](https://github.com/yorukot/superfile/pull/1280)
+- update python and go versions [`#1276`](https://github.com/yorukot/superfile/pull/1276), [`#1191`](https://github.com/yorukot/superfile/pull/1191)
+- update golangci-lint action [`#1286`](https://github.com/yorukot/superfile/pull/1286)
+
+#### Misc
+- update CI input names [`#1120`](https://github.com/yorukot/superfile/pull/1120)
+- Everforest Dark Hard theme [`#1114`](https://github.com/yorukot/superfile/pull/1114)
+- migrate tutorial demo assets to local [`#1140`](https://github.com/yorukot/superfile/pull/1140)
+- new logo asset [`#1145`](https://github.com/yorukot/superfile/pull/1145)
+- mirror repository to codeberg [`#1141`](https://github.com/yorukot/superfile/pull/1141)
+- sync package lock [`#1143`](https://github.com/yorukot/superfile/pull/1143)
+- bump golangci-lint version [`#1135`](https://github.com/yorukot/superfile/pull/1135)
+- add gosec linter [`#1185`](https://github.com/yorukot/superfile/pull/1185)
+- enable MND linter and clean magic numbers [`#1180`](https://github.com/yorukot/superfile/pull/1180)
+- skip permission tests when running as root [`#1186`](https://github.com/yorukot/superfile/pull/1186)
+- release v1.4.1-rc [`#1203`](https://github.com/yorukot/superfile/pull/1203)
+- 1.5.0-rc1 housekeeping changes [`#1264`](https://github.com/yorukot/superfile/pull/1264)
+
+
 # [**v1.4.0**](https://github.com/yorukot/superfile/releases/tag/v1.4.0)
 
 > 2025-10-10

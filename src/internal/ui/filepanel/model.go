@@ -46,8 +46,8 @@ func defaultFilePanel(path string, focused bool) Model {
 
 func New(location string, sortOptions sortOptionsModel, focused bool, targetFile string) Model {
 	return Model{
-		Cursor:           0,
-		RenderIndex:      0,
+		cursor:           0,
+		renderIndex:      0,
 		Location:         location,
 		SortOptions:      sortOptions,
 		PanelMode:        BrowserMode,

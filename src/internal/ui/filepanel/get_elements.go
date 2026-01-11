@@ -85,7 +85,7 @@ func (m *Model) shouldSkipPanelUpdate(focusPanelReRender bool,
 		}
 	}
 
-	reRenderTime := int(float64(len(m.Element)) / common.ReRenderChunkDivisor)
+	reRenderTime := int(float64(m.ElemCount()) / common.ReRenderChunkDivisor)
 	if m.IsFocused && !focusPanelReRender &&
 		nowTime.Sub(m.LastTimeGetElement) < time.Duration(reRenderTime)*time.Second {
 		return true
@@ -97,13 +97,18 @@ func (m *Model) UpdateElementsIfNeeded(focusPanelReRender bool, toggleDotFile bo
 	nowTime := time.Now()
 	if !m.shouldSkipPanelUpdate(focusPanelReRender, nowTime, updatedToggleDotFile) {
 		// Load elements for this panel (with/without search filter)
-		m.Element = m.getElements(toggleDotFile)
+		m.element = m.getElements(toggleDotFile)
 		// Update file panel list
 		m.LastTimeGetElement = nowTime
 
 		// For hover to file on first time loading
 		if m.TargetFile != "" {
 			m.applyTargetFileCursor()
+		}
+
+		// If cursor becomes invalid due to element update, reset
+		if m.ValidateCursorAndRenderIndex() != nil {
+			m.scrollToCursor(0)
 		}
 	}
 }
