@@ -44,7 +44,6 @@ func (m *model) IsRenamingConflicting() bool {
 		slog.Error("IsRenamingConflicting() being called on empty panel")
 		return false
 	}
-	panel.GetFocusedItem()
 	oldPath := panel.GetFocusedItem().Location
 	newPath := filepath.Join(panel.Location, panel.Rename.Value())
 
