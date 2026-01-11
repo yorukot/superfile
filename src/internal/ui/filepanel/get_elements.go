@@ -105,6 +105,11 @@ func (m *Model) UpdateElementsIfNeeded(focusPanelReRender bool, toggleDotFile bo
 		if m.TargetFile != "" {
 			m.applyTargetFileCursor()
 		}
+
+		// If cursor becomes invalid due to element update, reset
+		if m.ValidateCursorAndRenderIndex() != nil {
+			m.scrollToCursor(0)
+		}
 	}
 }
 

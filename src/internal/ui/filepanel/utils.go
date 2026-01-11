@@ -3,7 +3,7 @@ package filepanel
 import "math"
 
 func (m *Model) GetCursor() int {
-	return m.cursor
+	return m.GetCursor()
 }
 
 func (m *Model) GetRenderIndex() int {
@@ -11,7 +11,7 @@ func (m *Model) GetRenderIndex() int {
 }
 
 func (m *Model) GetFocusedItem() Element {
-	return m.GetElementAtIdx(m.cursor)
+	return m.GetElementAtIdx(m.GetCursor())
 }
 
 func (m *Model) GetElementAtIdx(idx int) Element {
@@ -32,10 +32,10 @@ func (m *Model) ResetSelected() {
 
 // For modification. Make sure to do a nil check
 func (m *Model) GetFocusedItemPtr() *Element {
-	if m.cursor < 0 || m.ElemCount() <= m.cursor {
+	if m.GetCursor() < 0 || m.ElemCount() <= m.GetCursor() {
 		return nil
 	}
-	return &m.element[m.cursor]
+	return &m.element[m.GetCursor()]
 }
 
 // Note : If this is called on an already selected element

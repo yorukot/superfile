@@ -84,7 +84,7 @@ func (m *Model) renderFileEntries(r *rendering.Renderer) {
 	end := min(m.renderIndex+m.PanelElementHeight(), m.ElemCount())
 
 	for itemIndex := m.renderIndex; itemIndex < end; itemIndex++ {
-		if m.Renaming && itemIndex == m.cursor {
+		if m.Renaming && itemIndex == m.GetCursor() {
 			r.AddLines(m.Rename.View())
 			continue
 		}
@@ -125,7 +125,7 @@ func (m *Model) getPanelModeInfo(selectedCount uint) (string, string) {
 }
 
 func (m *Model) getCursorString() string {
-	cursor := m.cursor
+	cursor := m.GetCursor()
 	if !m.Empty() {
 		cursor++ // Convert to 1-based
 	}

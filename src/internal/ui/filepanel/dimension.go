@@ -24,7 +24,7 @@ func (m *Model) SetHeight(height int) {
 	}
 	m.height = height
 	// Adjust scroll if needed
-	m.scrollToCursor(m.cursor)
+	m.scrollToCursor(m.GetCursor())
 }
 
 func (m *Model) GetWidth() int {
