@@ -141,7 +141,7 @@ func (m *Model) UpdatePath(oldpath string, newpath string) {
 	m.needsCleanup = true
 }
 // CleanupAndGetItems removes entries whose paths no longer exist and returns the remaining paths.
-func (m *Model) CleanupAndGetItems() [] string {
+func (m *Model) CleanupAndGetItems() []string {
 	if len(m.items.items) == 0 {
 		return nil
 	}
