@@ -1,12 +1,14 @@
 package internal
 
 import (
+	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/utils"
@@ -52,7 +54,6 @@ func TestFilePanelNavigation(t *testing.T) {
 		startDir       string
 		resultDir      string
 		startCursor    int
-		startRender    int
 		keyInput       []string
 		searchBarClear bool
 	}{
@@ -61,7 +62,6 @@ func TestFilePanelNavigation(t *testing.T) {
 			startDir:    dir1,
 			resultDir:   curTestDir,
 			startCursor: 1,
-			startRender: 0,
 			keyInput: []string{
 				common.Hotkeys.ParentDirectory[0],
 			},
@@ -72,7 +72,6 @@ func TestFilePanelNavigation(t *testing.T) {
 			startDir:    rootDir,
 			resultDir:   rootDir,
 			startCursor: 0,
-			startRender: 0,
 			keyInput: []string{
 				common.Hotkeys.ParentDirectory[0],
 			},
@@ -83,7 +82,6 @@ func TestFilePanelNavigation(t *testing.T) {
 			startDir:    curTestDir,
 			resultDir:   dir2,
 			startCursor: 1,
-			startRender: 0,
 			keyInput: []string{
 				common.Hotkeys.Confirm[0],
 			},
@@ -94,7 +92,6 @@ func TestFilePanelNavigation(t *testing.T) {
 			startDir:    curTestDir,
 			resultDir:   dir1,
 			startCursor: 2,
-			startRender: 0,
 			keyInput: []string{
 				common.Hotkeys.OpenSPFPrompt[0],
 				// TODO : Have it quoted, once cd command supports quoted paths
@@ -108,7 +105,6 @@ func TestFilePanelNavigation(t *testing.T) {
 			startDir:    curTestDir,
 			resultDir:   curTestDir,
 			startCursor: 2,
-			startRender: 0,
 			keyInput: []string{
 				common.Hotkeys.OpenSPFPrompt[0],
 				// TODO : Have it quoted, once cd command supports quoted paths
@@ -122,8 +118,11 @@ func TestFilePanelNavigation(t *testing.T) {
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
 			m := defaultTestModel(tt.startDir)
-			m.getFocusedFilePanel().Cursor = tt.startCursor
-			m.getFocusedFilePanel().RenderIndex = tt.startRender
+			for range tt.startCursor {
+				m.getFocusedFilePanel().ListDown()
+			}
+			require.Equal(t, tt.startCursor, m.getFocusedFilePanel().GetCursor())
+			originalRenderIndex := m.getFocusedFilePanel().GetRenderIndex()
 			for _, s := range tt.keyInput {
 				TeaUpdate(m, utils.TeaRuneKeyMsg(s))
 			}
@@ -140,9 +139,64 @@ func TestFilePanelNavigation(t *testing.T) {
 			TeaUpdate(m, utils.TeaRuneKeyMsg("cd "+tt.startDir))
 			TeaUpdate(m, tea.KeyMsg{Type: tea.KeyEnter})
 
-			// Make sure we have original curson and render
-			assert.Equal(t, tt.startCursor, m.getFocusedFilePanel().Cursor)
-			assert.Equal(t, tt.startRender, m.getFocusedFilePanel().RenderIndex)
+			// Make sure we have original cursor and render
+			assert.Equal(t, tt.startCursor, m.getFocusedFilePanel().GetCursor())
+			assert.Equal(t, originalRenderIndex, m.getFocusedFilePanel().GetRenderIndex())
 		})
 	}
+}
+
+func TestCursorOutOfBoundsAfterDirectorySwitch(t *testing.T) {
+	// Create two directories with different file counts
+	tempDir := t.TempDir()
+	dir1 := filepath.Join(tempDir, "dir1")
+	dir2 := filepath.Join(tempDir, "dir2")
+	utils.SetupDirectories(t, dir1, dir2)
+
+	var files1, files2 []string
+	for i := range 10 {
+		files1 = append(files1, filepath.Join(dir1, string('a'+rune(i))+".txt"))
+	}
+	for i := range 5 {
+		files2 = append(files2, filepath.Join(dir2, string('a'+rune(i))+".txt"))
+	}
+	utils.SetupFiles(t, files1...)
+	utils.SetupFiles(t, files2...)
+
+	// Start with dir1
+	m := defaultTestModel(dir1)
+	p := NewTestTeaProgWithEventLoop(t, m)
+
+	// It will immediately load as defaultTestModel does one sync TeaUpdate
+	assert.Equal(t, 10, m.getFocusedFilePanel().ElemCount(),
+		"Should load 10 files in dir1")
+
+	// Move cursor to position 8 (near end of list)
+	panel := m.getFocusedFilePanel()
+	for range 8 {
+		p.Send(tea.KeyMsg{Type: tea.KeyDown})
+	}
+
+	// Verify cursor is at position 8
+	assert.Eventually(t, func() bool {
+		return m.getFocusedFilePanel().GetCursor() == 8
+	}, DefaultTestTimeout, DefaultTestTick, "Cursor should be at position 8")
+	t.Logf("Cursor at position %d with %d elements", panel.GetCursor(), panel.ElemCount())
+
+	// Navigate to dir2 (this saves cursor=8 in directoryRecords)
+	navigateToTargetDir(t, m, dir1, dir2)
+
+	assert.Equal(t, dir2, m.getFocusedFilePanel().Location, "Should be in dir2")
+	assert.Equal(t, 5, m.getFocusedFilePanel().ElemCount())
+
+	for i := 4; i < 10; i++ {
+		err := os.Remove(files1[i])
+		require.NoError(t, err)
+	}
+	t.Log("Deleted 6 files from dir1 externally")
+
+	// Navigate back to dir1 (this restores cursor=8 from cache)
+	navigateToTargetDir(t, m, dir2, dir1)
+	assert.Equal(t, 0, panel.GetCursor(), "Cursor not restored as is from directoryRecords cache")
+	assert.NoError(t, panel.ValidateCursorAndRenderIndex(), "panel not valid")
 }

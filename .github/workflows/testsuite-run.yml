@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Install tmux
         run: sudo apt-get update && sudo apt-get install -y tmux
@@ -22,7 +22,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version: 1.25.0
+          go-version: '1.25.5'
       - name: Build superfile
         run: ./build.sh
 
@@ -34,9 +34,9 @@ jobs:
         run: sed -i 's/debug = false/debug = true/g' /home/runner/.config/superfile/config.toml
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
-          python-version: '3.13'
+          python-version: '3.14'
     
       - name: Install Dependencies
         run: pip install -r testsuite/requirements.txt

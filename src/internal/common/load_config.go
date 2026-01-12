@@ -65,6 +65,10 @@ func ValidateConfig(c *ConfigType) error {
 		return errors.New(LoadConfigError("default_sort_type"))
 	}
 
+	if c.FilePanelNamePercent < FileNameRatioMin || c.FilePanelNamePercent > FileNameRatioMax {
+		return errors.New(LoadConfigError("file_panel_name_percent"))
+	}
+
 	if ansi.StringWidth(c.BorderTop) != 1 {
 		return errors.New(LoadConfigError("border_top"))
 	}

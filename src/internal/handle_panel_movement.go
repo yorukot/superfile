@@ -29,7 +29,7 @@ func (m *model) parentDirectory() {
 func (m *model) enterPanel() {
 	panel := m.getFocusedFilePanel()
 
-	if len(panel.Element) == 0 {
+	if panel.Empty() {
 		return
 	}
 	selectedItem := panel.GetFocusedItem()
@@ -57,7 +57,7 @@ func (m *model) enterPanel() {
 	}
 
 	if variable.ChooserFile != "" {
-		chooserErr := m.chooserFileWriteAndQuit(panel.Element[panel.Cursor].Location)
+		chooserErr := m.chooserFileWriteAndQuit(panel.GetFocusedItem().Location)
 		if chooserErr == nil {
 			return
 		}
@@ -70,7 +70,7 @@ func (m *model) enterPanel() {
 func (m *model) executeOpenCommand() {
 	panel := m.getFocusedFilePanel()
 
-	filePath := panel.Element[panel.Cursor].Location
+	filePath := panel.GetFocusedItem().Location
 
 	openCommand := "xdg-open"
 	switch runtime.GOOS {

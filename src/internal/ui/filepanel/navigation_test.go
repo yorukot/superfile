@@ -15,9 +15,9 @@ func testModelWithElemCount(cursor int, renderIndex int, height int, elemCount i
 func testModel(cursor int, renderIndex int, height int, mode PanelMode,
 	elements []Element) Model {
 	return Model{
-		Element:     elements,
-		Cursor:      cursor,
-		RenderIndex: renderIndex,
+		element:     elements,
+		cursor:      cursor,
+		renderIndex: renderIndex,
 		height:      height,
 		selected:    make(map[string]int),
 		PanelMode:   mode,
@@ -97,8 +97,8 @@ func Test_filePanelUpDown(t *testing.T) {
 			} else {
 				tt.panel.ListUp()
 			}
-			assert.Equal(t, tt.expectedCursor, tt.panel.Cursor)
-			assert.Equal(t, tt.expectedRender, tt.panel.RenderIndex)
+			assert.Equal(t, tt.expectedCursor, tt.panel.GetCursor())
+			assert.Equal(t, tt.expectedRender, tt.panel.GetRenderIndex())
 		})
 	}
 }
@@ -162,8 +162,8 @@ func TestPgUpDown(t *testing.T) {
 			} else {
 				tt.panel.PgUp()
 			}
-			assert.Equal(t, tt.expectedCursor, tt.panel.Cursor)
-			assert.Equal(t, tt.expectedRender, tt.panel.RenderIndex)
+			assert.Equal(t, tt.expectedCursor, tt.panel.GetCursor())
+			assert.Equal(t, tt.expectedRender, tt.panel.GetRenderIndex())
 		})
 	}
 }
@@ -261,8 +261,8 @@ func TestItemSelectUpDown(t *testing.T) {
 			} else {
 				tt.panel.ItemSelectUp()
 			}
-			assert.Equal(t, tt.expectedCursor, tt.panel.Cursor)
-			assert.Equal(t, tt.expectedRender, tt.panel.RenderIndex)
+			assert.Equal(t, tt.expectedCursor, tt.panel.GetCursor())
+			assert.Equal(t, tt.expectedRender, tt.panel.GetRenderIndex())
 			assert.Equal(t, tt.expectedSelected, tt.panel.selected)
 		})
 	}
@@ -323,8 +323,8 @@ func TestScrollToCursor(t *testing.T) {
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.panel.scrollToCursor(tt.cursorPos)
-			assert.Equal(t, tt.expectedCursor, tt.panel.Cursor)
-			assert.Equal(t, tt.expectedRender, tt.panel.RenderIndex)
+			assert.Equal(t, tt.expectedCursor, tt.panel.GetCursor())
+			assert.Equal(t, tt.expectedRender, tt.panel.GetRenderIndex())
 		})
 	}
 }
@@ -344,14 +344,14 @@ func TestApplyTargetFileCursor(t *testing.T) {
 	expRender := 2
 
 	panel.applyTargetFileCursor()
-	assert.Equal(t, expCursor, panel.Cursor)
-	assert.Equal(t, expRender, panel.RenderIndex)
+	assert.Equal(t, expCursor, panel.GetCursor())
+	assert.Equal(t, expRender, panel.GetRenderIndex())
 	assert.Empty(t, panel.TargetFile)
 
 	// Shouldn't do anything
 	panel.applyTargetFileCursor()
-	assert.Equal(t, expCursor, panel.Cursor)
-	assert.Equal(t, expRender, panel.RenderIndex)
+	assert.Equal(t, expCursor, panel.GetCursor())
+	assert.Equal(t, expRender, panel.GetRenderIndex())
 }
 
 func TestPageScrollSizeConfig(t *testing.T) {
@@ -416,7 +416,7 @@ func TestPageScrollSizeConfig(t *testing.T) {
 				m.PgDown()
 			}
 
-			assert.Equal(t, tt.expectedCursor, m.Cursor,
+			assert.Equal(t, tt.expectedCursor, m.GetCursor(),
 				"Cursor position should match expected after PgUp/PgDown")
 		})
 	}

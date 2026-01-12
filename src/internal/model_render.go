@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/yorukot/superfile/src/internal/ui"
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
@@ -169,7 +170,7 @@ func (m *model) helpMenuRender() string {
 		}
 	}
 
-	renderHotkeyLength := m.getRenderHotkeyLengthHelpmenuModal()
+	renderHotkeyLength := m.getRenderHotkeyLengthHelpMenuModal()
 	m.getHelpMenuContent(r, renderHotkeyLength, valueLength)
 
 	current := m.helpMenu.cursor + 1 - cursorBeenTitleCount
@@ -182,25 +183,18 @@ func (m *model) helpMenuRender() string {
 	return r.Render()
 }
 
-func (m *model) getRenderHotkeyLengthHelpmenuModal() int {
+func (m *model) getRenderHotkeyLengthHelpMenuModal() int {
 	renderHotkeyLength := 0
 	for i := m.helpMenu.renderIndex; i < m.helpMenu.renderIndex+(m.helpMenu.height-common.InnerPadding) && i < len(m.helpMenu.filteredData); i++ {
-		hotkey := ""
-
 		if m.helpMenu.filteredData[i].subTitle != "" {
 			continue
 		}
 
-		for i, key := range m.helpMenu.filteredData[i].hotkey {
-			if i != 0 {
-				hotkey += " | "
-			}
-			hotkey += key
-		}
+		hotkey := common.GetHelpMenuHotkeyString(m.helpMenu.filteredData[i].hotkey)
 
 		renderHotkeyLength = max(renderHotkeyLength, len(common.HelpMenuHotkeyStyle.Render(hotkey)))
 	}
-	return renderHotkeyLength
+	return renderHotkeyLength + 1
 }
 
 func (m *model) getHelpMenuContent(r *rendering.Renderer, renderHotkeyLength int, valueLength int) {
@@ -210,15 +204,8 @@ func (m *model) getHelpMenuContent(r *rendering.Renderer, renderHotkeyLength int
 			continue
 		}
 
-		hotkey := ""
+		hotkey := common.GetHelpMenuHotkeyString(m.helpMenu.filteredData[i].hotkey)
 		description := common.TruncateText(m.helpMenu.filteredData[i].description, valueLength, "...")
-
-		for i, key := range m.helpMenu.filteredData[i].hotkey {
-			if i != 0 {
-				hotkey += " | "
-			}
-			hotkey += key
-		}
 
 		cursor := "  "
 		if m.helpMenu.cursor == i {
@@ -231,17 +218,18 @@ func (m *model) getHelpMenuContent(r *rendering.Renderer, renderHotkeyLength int
 
 func (m *model) sortOptionsRender() string {
 	panel := m.getFocusedFilePanel()
-	sortOptionsContent := common.ModalTitleStyle.Render(" Sort Options") + "\n\n"
+	var sortOptionsContent strings.Builder
+	sortOptionsContent.WriteString(common.ModalTitleStyle.Render(" Sort Options") + "\n\n")
 	for i, option := range panel.SortOptions.Data.Options {
 		cursor := " "
 		if i == panel.SortOptions.Cursor {
 			cursor = common.FilePanelCursorStyle.Render(icon.Cursor)
 		}
-		sortOptionsContent += cursor + common.ModalStyle.Render(" "+option) + "\n"
+		sortOptionsContent.WriteString(cursor + common.ModalStyle.Render(" "+option) + "\n")
 	}
 	bottomBorder := common.GenerateFooterBorder(fmt.Sprintf("%s/%s", strconv.Itoa(panel.SortOptions.Cursor+1),
 		strconv.Itoa(len(panel.SortOptions.Data.Options))), panel.SortOptions.Width-common.BorderPadding)
 
 	return common.SortOptionsModalBorderStyle(panel.SortOptions.Height, panel.SortOptions.Width,
-		bottomBorder).Render(sortOptionsContent)
+		bottomBorder).Render(sortOptionsContent.String())
 }
