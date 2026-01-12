@@ -60,6 +60,7 @@
   - [Support](#Support)
   - [Core maintainer](#core-maintainer)
   - [Contributors](#contributors)
+  - [Powered by](#powered-by)
   - [Star History](#star-history)
 
 ## Installation
