@@ -59,6 +59,7 @@ func (m *Model) Render() string {
 			viewWidth,
 			item.isDir,
 			item.isLink,
+			m.items.cut,
 		))
 	}
 	return r.Render()
