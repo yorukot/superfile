@@ -233,6 +233,12 @@ If you want to contribute please follow the [contribution guide](./CONTRIBUTING.
   <img src="https://contrib.rocks/image?repo=yorukot/superfile" />
 </a>
 
+### Powered by
+
+<a href="https://jb.gg/OpenSource"><img alt="JetBrains logo" align="right" width="200" src="https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.svg"></a>
+
+Thanks to JetBrains team for providing open-source licenses to support the maintenance of superfile.
+
 ### Star History
 
 **THANKS FOR All OF YOUR STARS!**
@@ -245,12 +251,6 @@ Your stars are my motivation to keep updating!
    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=yorukot/superfile&type=Timeline" />
  </picture>
 </a>
-
-### Powered by
-
-<a href="https://jb.gg/OpenSource"><img alt="JetBrains logo" align="right" width="200" src="https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.svg"></a>
-
-Thanks to JetBrains team for providing open-source licenses to support the maintenance of superfile.
 
 <div align="center">
 
