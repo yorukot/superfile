@@ -107,7 +107,6 @@ func (m *Model) GetFirstItem() string {
 	}
 	return m.items.items[0].path
 }
-
 func (m *Model) UpdatePath(oldpath string, newpath string) {
 	if len(m.items.items) == 0 {
 		return
@@ -118,14 +117,15 @@ func (m *Model) UpdatePath(oldpath string, newpath string) {
 	for i, p := range m.items.items {
 		cur := filepath.Clean(p.path)
 		if cur == oldpathClean {
-			m.items.items[i].path = newpathClean
+			m.items.items[i] = m.makeClipboardItem(newpathClean)
 			continue
 		}
 		if strings.HasPrefix(cur, oldpathClean+string(filepath.Separator)) {
-			m.items.items[i].path = filepath.Join(
+			newPath := filepath.Join(
 				newpathClean,
 				strings.TrimPrefix(cur, oldpathClean+string(filepath.Separator)),
 			)
+			m.items.items[i] = m.makeClipboardItem(newPath)
 		}
 	}
 }
