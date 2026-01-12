@@ -29,6 +29,7 @@ type clipboardItem struct {
 	path       string
 	isDir      bool
 	isLink     bool
+	isSelected bool
 }
 
 func (m *Model) SetDimensions(width int, height int) {
@@ -57,6 +58,7 @@ func (m *Model) Render() string {
 			viewWidth,
 			item.isDir,
 			item.isLink,
+			item.isSelected,
 		))
 	}
 	return r.Render()
@@ -176,5 +178,6 @@ func (m *Model) makeClipboardItem(path string) clipboardItem {
 		path:       path,
 		isDir:      info.IsDir(),
 		isLink:     isLink,
+		isSelected: false,
 	}
 }
