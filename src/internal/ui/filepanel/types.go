@@ -14,8 +14,12 @@ type sortingKind string
 // zero value `Model{}`, or direct initialization should be avoided
 // or used very carefully if needed
 type Model struct {
-	Cursor      int
-	RenderIndex int
+
+	// Note: We have tried to minimize direct access to cursor,
+	// and read it via GetCursor() at most places, to make it easier
+	// to find and harder to cause bugs of invalid value getting set to cursor
+	cursor      int
+	renderIndex int
 	IsFocused   bool
 	Location    string
 	// Dimension fields
@@ -28,7 +32,7 @@ type Model struct {
 	// key is file location, value order of selection
 	selected           map[string]int
 	selectOrderCounter int
-	Element            []Element
+	element            []Element
 	DirectoryRecords   map[string]directoryRecord
 	Rename             textinput.Model
 	Renaming           bool
