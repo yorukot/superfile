@@ -246,6 +246,11 @@ Your stars are my motivation to keep updating!
  </picture>
 </a>
 
+### Powered by
+
+<a href="https://jb.gg/OpenSource"><img alt="JetBrains logo" align="right" width="200" src="https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.svg"></a>
+
+Thanks to JetBrains team for providing open-source licenses to support the maintenance of superfile.
 
 <div align="center">
 
