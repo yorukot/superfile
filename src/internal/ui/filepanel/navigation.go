@@ -8,17 +8,17 @@ func (m *Model) scrollToCursor(cursor int) {
 	if cursor < 0 || cursor >= m.ElemCount() {
 		return
 	}
-	m.Cursor = cursor
+	m.cursor = cursor
 
 	// Modify renderIndex if needed
 	renderCount := m.PanelElementHeight()
-	if m.Cursor < m.RenderIndex {
+	if m.cursor < m.renderIndex {
 		// Due to size change, when last element is selected, we might have
-		// empty space (RenderIndex ... ElemCount()-1 spans less then renderCount)
-		// Even with >0 RenderIndex
-		m.RenderIndex = m.Cursor
-	} else if m.Cursor > m.RenderIndex+renderCount-1 {
-		m.RenderIndex = m.Cursor - renderCount + 1
+		// empty space (renderIndex ... ElemCount()-1 spans less then renderCount)
+		// Even with >0 renderIndex
+		m.renderIndex = m.cursor
+	} else if m.cursor > m.renderIndex+renderCount-1 {
+		m.renderIndex = m.cursor - renderCount + 1
 	}
 }
 
@@ -27,7 +27,7 @@ func (m *Model) moveCursorBy(delta int) {
 		return
 	}
 	// Wrap cursor
-	cursor := (m.Cursor + delta + m.ElemCount()) % m.ElemCount()
+	cursor := (m.cursor + delta + m.ElemCount()) % m.ElemCount()
 	m.scrollToCursor(cursor)
 }
 
@@ -66,23 +66,21 @@ func (m *Model) ItemSelectDown() {
 
 // Applies targetFile cursor positioning, if configured for the panel.
 func (m *Model) applyTargetFileCursor() {
-	for idx, el := range m.Element {
-		if el.Name == m.TargetFile {
-			m.scrollToCursor(idx)
-			break
-		}
+	idx := m.FindElementIndexByName(m.TargetFile)
+	if idx != -1 {
+		m.scrollToCursor(idx)
 	}
 	m.TargetFile = ""
 }
 
 func (m *Model) ValidateCursorAndRenderIndex() error {
-	if m.Cursor < 0 || m.ElemCount() <= m.Cursor {
-		return fmt.Errorf("invalid cursor : %d, element count : %d", m.Cursor, m.ElemCount())
+	if m.cursor < 0 || m.ElemCount() <= m.cursor {
+		return fmt.Errorf("invalid cursor : %d, element count : %d", m.cursor, m.ElemCount())
 	}
 	renderCount := m.PanelElementHeight()
-	if (m.Cursor < m.RenderIndex) || (m.Cursor > m.RenderIndex+renderCount-1) {
+	if (m.cursor < m.renderIndex) || (m.cursor > m.renderIndex+renderCount-1) {
 		return fmt.Errorf("invalid renderIndex : %d, cursor : %d, renderCount : %d",
-			m.RenderIndex, m.Cursor, renderCount)
+			m.renderIndex, m.cursor, renderCount)
 	}
 	return nil
 }

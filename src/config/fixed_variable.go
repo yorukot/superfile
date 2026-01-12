@@ -15,7 +15,7 @@ const (
 	CurrentVersion = "v1.5.0"
 	// Allowing pre-releases with non production version
 	// Set this to "" for production releases
-	PreReleaseSuffix = "-rc1"
+	PreReleaseSuffix = ""
 
 	// This gives most recent non-prerelease, non-draft release
 	LatestVersionURL    = "https://api.github.com/repos/yorukot/superfile/releases/latest"

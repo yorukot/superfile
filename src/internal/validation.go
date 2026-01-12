@@ -215,7 +215,12 @@ func (m *model) validateComponentRender() error {
 	// Validate sidebar render
 	if common.Config.SidebarWidth > 0 {
 		sidebarRender := m.sidebarRender()
-		if err := validateRender(sidebarRender, m.mainPanelHeight+common.BorderPadding, common.Config.SidebarWidth+common.BorderPadding, true); err != nil {
+		if err := validateRender(
+			sidebarRender,
+			m.mainPanelHeight+common.BorderPadding,
+			common.Config.SidebarWidth+common.BorderPadding,
+			true,
+		); err != nil {
 			return fmt.Errorf("sidebar render validation failed: %w", err)
 		}
 	}
@@ -229,7 +234,12 @@ func (m *model) validateComponentRender() error {
 	}
 
 	p := &m.fileModel.FilePreview
-	if err := validateRender(p.GetContent(), p.GetContentHeight(), p.GetContentWidth(), common.Config.EnableFilePreviewBorder); err != nil {
+	if err := validateRender(
+		p.GetContent(),
+		p.GetContentHeight(),
+		p.GetContentWidth(),
+		common.Config.EnableFilePreviewBorder,
+	); err != nil {
 		return fmt.Errorf("file preview render validation failed: %w", err)
 	}
 
@@ -239,13 +249,28 @@ func (m *model) validateComponentRender() error {
 
 	// Validate footer components if visible
 	if m.toggleFooter {
-		if err := validateRender(m.processBarRender(), m.processBarModel.GetHeight(), m.processBarModel.GetWidth(), true); err != nil {
+		if err := validateRender(
+			m.processBarRender(),
+			m.processBarModel.GetHeight(),
+			m.processBarModel.GetWidth(),
+			true,
+		); err != nil {
 			return fmt.Errorf("process bar render validation failed: %w", err)
 		}
-		if err := validateRender(m.fileMetaData.Render(true), m.fileMetaData.GetHeight(), m.fileMetaData.GetWidth(), true); err != nil {
+		if err := validateRender(
+			m.fileMetaData.Render(true),
+			m.fileMetaData.GetHeight(),
+			m.fileMetaData.GetWidth(),
+			true,
+		); err != nil {
 			return fmt.Errorf("metadata render validation failed: %w", err)
 		}
-		if err := validateRender(m.clipboard.Render(), m.clipboard.GetHeight(), m.clipboard.GetWidth(), true); err != nil {
+		if err := validateRender(
+			m.clipboard.Render(),
+			m.clipboard.GetHeight(),
+			m.clipboard.GetWidth(),
+			true,
+		); err != nil {
 			return fmt.Errorf("clipboard render validation failed: %w", err)
 		}
 	}
@@ -300,7 +325,11 @@ func (m *model) validateFinalRender() error { //nolint:gocognit // cumilation of
 			stCol:  m.fullWidth - m.fileModel.ExpectedPreviewWidth,
 			endCol: m.fullWidth - 1,
 		}
-		if err := m.validateComponentPlacement(lines, previewPanelPos, common.Config.EnableFilePreviewBorder); err != nil {
+		if err := m.validateComponentPlacement(
+			lines,
+			previewPanelPos,
+			common.Config.EnableFilePreviewBorder,
+		); err != nil {
 			return fmt.Errorf("preview panel position validation failed: %w", err)
 		}
 	}

@@ -68,12 +68,12 @@ func (m *model) confirmRename() {
 
 	// Although we dont expect this to happen based on our current flow
 	// Just adding it here to be safe
-	if len(panel.Element) == 0 {
+	if panel.Empty() {
 		slog.Error("confirmRename called on empty panel")
 		return
 	}
 
-	oldPath := panel.Element[panel.Cursor].Location
+	oldPath := panel.GetFocusedItem().Location
 	newPath := filepath.Join(panel.Location, panel.Rename.Value())
 
 	// Rename the file
