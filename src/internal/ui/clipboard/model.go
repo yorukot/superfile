@@ -12,9 +12,10 @@ import (
 
 // The fact that its visible in UI or not, is controlled by the main model
 type Model struct {
-	width  int
-	height int
-	items  copyItems
+	width        int
+	height       int
+	items        copyItems
+	needsCleanup bool
 }
 
 // Copied items
@@ -36,9 +37,6 @@ func (m *Model) SetDimensions(width int, height int) {
 }
 
 func (m *Model) Render() string {
-	// Prune missing items before rendering so UI matches reality.
-	m.CleanupAndGetItems()
-
 	r := ui.ClipboardRenderer(m.height, m.width)
 	viewHeight := m.height - common.BorderPadding
 	viewWidth := m.width - common.InnerPadding
@@ -71,10 +69,12 @@ func (m *Model) IsCut() bool {
 func (m *Model) Reset(cut bool) {
 	m.items.cut = cut
 	m.items.items = m.items.items[:0]
+	m.needsCleanup = false
 }
 
 func (m *Model) Add(location string) {
 	m.items.items = append(m.items.items, m.makeClipboardItem(location))
+	m.needsCleanup = true
 }
 
 func (m *Model) SetItems(items []string) {
@@ -82,11 +82,19 @@ func (m *Model) SetItems(items []string) {
 	for _, path := range items {
 		m.items.items = append(m.items.items, m.makeClipboardItem(path))
 	}
+	m.needsCleanup = true
 }
 
 func (m *Model) GetItems() []string {
+	if m.needsCleanup {
+		return m.CleanupAndGetItems()
+	}
 	// return a copy to prevent external mutation
-	return m.CleanupAndGetItems()
+	out := make([]string, len(m.items.items))
+	for i, item := range m.items.items {
+		out[i] = item.path
+	}
+	return out
 }
 
 func (m *Model) Len() int {
@@ -128,22 +136,23 @@ func (m *Model) UpdatePath(oldpath string, newpath string) {
 			)
 		}
 	}
+	m.needsCleanup = true
 }
-
 // CleanupAndGetItems removes entries whose paths no longer exist and returns the remaining paths.
-func (m *Model) CleanupAndGetItems() []string {
+func (m *Model) CleanupAndGetItems() [] string {
 	if len(m.items.items) == 0 {
 		return nil
 	}
 
 	kept := m.items.items[:0]
 	for _, item := range m.items.items {
-		if _, err := os.Stat(item.path); err != nil {
+		if _, err := os.Lstat(item.path); err != nil {
 			continue
 		}
 		kept = append(kept, item)
 	}
 	m.items.items = kept
+	m.needsCleanup = false
 
 	if len(m.items.items) == 0 {
 		return nil
