@@ -3,6 +3,7 @@ package clipboard
 import (
 	"log/slog"
 	"os"
+	"slices"
 	"strconv"
 
 	"github.com/yorukot/superfile/src/internal/common"
@@ -40,6 +41,9 @@ func (m *Model) Render() string {
 				// Last Entry we can render, but there are more that one left
 				r.AddLines(strconv.Itoa(len(m.items.items)-i) + " items left....")
 			} else {
+				// TODO: Avoid Lstat during render for performance
+				// Add IsDir/IsLink information in the item type or
+				// better use filepanel's Element strcut as-is
 				fileInfo, err := os.Lstat(m.items.items[i])
 				if err != nil {
 					slog.Error("Clipboard render function get item state ", "error", err)
@@ -72,11 +76,26 @@ func (m *Model) SetItems(items []string) {
 	copy(m.items.items, items)
 }
 
+func (m *Model) pruneInaccessibleItems() {
+	m.items.items = slices.DeleteFunc(m.items.items, func(item string) bool {
+		_, err := os.Lstat(item)
+		return err != nil
+	})
+}
+
 func (m *Model) GetItems() []string {
 	// return a copy to prevent external mutation
 	items := make([]string, len(m.items.items))
 	copy(items, m.items.items)
 	return items
+}
+
+// Use this to use a copy that is in sync with current state of filesystem
+func (m *Model) PruneInaccessibleItemsAndGet() []string {
+	// Clipboard items might becomes outdated with
+	// externally/interally triggered changes
+	m.pruneInaccessibleItems()
+	return m.GetItems()
 }
 
 func (m *Model) Len() int {
