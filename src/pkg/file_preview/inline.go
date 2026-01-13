@@ -2,10 +2,12 @@ package filepreview
 
 import (
 	"bytes"
+	"encoding/base64"
 	"fmt"
 	"image"
 	"log/slog"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -14,7 +16,7 @@ import (
 )
 
 // isInlineCapable checks if the terminal supports inline image protocol (iTerm2, WezTerm, etc.)
-func isInlineCapable() bool {
+func (p *ImagePreviewer) IsInlineCapable() bool {
 	isCapable := rasterm.IsItermCapable()
 
 	// Additional detection for terminals that might not be detected by rasterm
@@ -54,6 +56,16 @@ func (p *ImagePreviewer) ClearInlineImage() string {
 	return ""
 }
 
+func itermInlineSeq(name string, data []byte, width, height string) string {
+	nameEnc := base64.StdEncoding.EncodeToString([]byte(name))
+	dataB64 := base64.StdEncoding.EncodeToString(data)
+
+	return fmt.Sprintf(
+		"\033]1337;File=name=%s;inline=1;width=%s;height=%s;preserveAspectRatio=1:%s\a",
+		nameEnc, width, height, dataB64,
+	)
+}
+
 // renderWithInlineUsingTermCap renders an image using inline image protocol
 func (p *ImagePreviewer) renderWithInlineUsingTermCap(
 	img image.Image,
@@ -62,62 +74,97 @@ func (p *ImagePreviewer) renderWithInlineUsingTermCap(
 	sideAreaWidth int,
 	filePreviewStyle lipgloss.Style,
 ) (string, error) {
-	// Validate dimensions
 	if maxWidth <= 0 || maxHeight <= 0 {
 		return "", fmt.Errorf("dimensions must be positive (maxWidth=%d, maxHeight=%d)", maxWidth, maxHeight)
 	}
 
 	slog.Debug("inline renderer starting", "path", path, "maxWidth", maxWidth, "maxHeight", maxHeight)
 
-	// Calculate display dimensions in character cells
-	imgRatio := float64(originalWidth) / float64(originalHeight)
-	termRatio := float64(maxWidth) / float64(maxHeight)
+	w, h := originalWidth, originalHeight
+	if (w <= 0 || h <= 0) && img != nil {
+		b := img.Bounds()
+		w, h = b.Dx(), b.Dy()
+	}
+	if w <= 0 || h <= 0 {
+		return "", fmt.Errorf("invalid original dimensions (w=%d, h=%d)", w, h)
+	}
 
-	var displayWidthCells, displayHeightCells int
+	imgRatio := float64(w) / float64(h)
 
-	if imgRatio > termRatio {
-		// Image is wider, constrain by width
-		displayWidthCells = maxWidth
-		displayHeightCells = int(float64(maxWidth) / imgRatio)
+	cellSize := p.terminalCap.GetTerminalCellSize()
+	ppc := cellSize.PixelsPerColumn
+	ppr := cellSize.PixelsPerRow
+
+	usePixelRatio := ppc > 0 && ppr > 0
+
+	displayW, displayH := 1, 1
+
+	if usePixelRatio {
+		termRatio := float64(maxWidth*ppc) / float64(maxHeight*ppr)
+
+		if imgRatio > termRatio {
+			displayW = maxWidth
+			widthPx := float64(displayW * ppc)
+			heightPx := widthPx / imgRatio
+			displayH = int(heightPx / float64(ppr))
+		} else {
+			displayH = maxHeight
+			heightPx := float64(displayH * ppr)
+			widthPx := heightPx * imgRatio
+			displayW = int(widthPx / float64(ppc))
+		}
 	} else {
-		// Image is taller, constrain by height
-		displayHeightCells = maxHeight
-		displayWidthCells = int(float64(maxHeight) * imgRatio)
+		termRatio := float64(maxWidth) / float64(maxHeight)
+
+		if imgRatio > termRatio {
+			displayW = maxWidth
+			displayH = int(float64(maxWidth) / imgRatio)
+		} else {
+			displayH = maxHeight
+			displayW = int(float64(maxHeight) * imgRatio)
+		}
 	}
 
-	// Ensure minimum dimensions
-	if displayWidthCells < 1 {
-		displayWidthCells = 1
+	// clamp
+	if displayW < 1 {
+		displayW = 1
 	}
-	if displayHeightCells < 1 {
-		displayHeightCells = 1
+	if displayH < 1 {
+		displayH = 1
 	}
-
-	slog.Debug("inline display dimensions", "widthCells", displayWidthCells, "heightCells", displayHeightCells)
+	if displayW > maxWidth {
+		displayW = maxWidth
+	}
+	if displayH > maxHeight {
+		displayH = maxHeight
+	}
 
 	var buf bytes.Buffer
-	line := strings.Repeat("-", maxWidth)
+	line := strings.Repeat(" ", maxWidth)
 	block := strings.Repeat(line+"\n", maxHeight-1) + line
-	//block := strings.Repeat("------------------\n", 10)
 	buf.WriteString(filePreviewStyle.Render(block))
-	buf.WriteString("\x1b[s")
-	buf.WriteString("\x1b[1;" + strconv.Itoa(sideAreaWidth) + "H")
-	opts := rasterm.ItermImgOpts{
-		Width:             strconv.FormatInt(int64(displayWidthCells), 10),
-		Height:            strconv.FormatInt(int64(displayHeightCells), 10),
-		IgnoreAspectRatio: true,
-		DisplayInline:     true,
-	}
-	// Use rasterm to write the image using iTerm2/WezTerm protocol
-	if err := rasterm.ItermWriteImageWithOptions(&buf, img, opts); err != nil {
-		return "", fmt.Errorf("failed to write image using rasterm: %w", err)
-	}
-	buf.WriteString("\x1b[u")
-	slog.Debug("[TEMP]", "res", buf.String())
-	return buf.String(), nil
-}
 
-// IsInlineCapable checks if the terminal supports inline image protocol
-func (p *ImagePreviewer) IsInlineCapable() bool {
-	return isInlineCapable()
+	var data []byte
+	var name string
+
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return "", fmt.Errorf("read image file: %w", err)
+	}
+	data = b
+	name = filepath.Base(path)
+
+	seq := itermInlineSeq(
+		name,
+		data,
+		strconv.Itoa(displayW),
+		strconv.Itoa(displayH),
+	)
+
+	buf.WriteString("\x1b[s")
+	buf.WriteString(fmt.Sprintf("\x1b[1;%dH", sideAreaWidth))
+	buf.WriteString(seq)
+	buf.WriteString("\x1b[u")
+
+	return buf.String(), nil
 }
