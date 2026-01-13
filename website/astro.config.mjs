@@ -107,7 +107,7 @@ export default defineConfig({
           attrs: {
             defer: true,
             src: "https://umami.yorukot.me/script.js",
-            "data-website-id": "9286f04f-4bcd-43f3-8ab7-b479c249f2a7",
+            "data-website-id": "8792ee93-9a4a-47be-9e7f-2b1587c3a3d1",
           },
         },
       ],
