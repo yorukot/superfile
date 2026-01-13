@@ -200,10 +200,6 @@ export default defineConfig({
           link: "/troubleshooting",
         },
         {
-          label: "How to contribute",
-          link: "/contribute/how-to-contribute",
-        },
-        {
           label: "Changelog",
           link: "/changelog",
         },
