@@ -2,12 +2,14 @@ package clipboard
 
 import (
 	"flag"
+	"os"
 	"path/filepath"
 	"strconv"
 	"testing"
 
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
@@ -71,4 +73,16 @@ func TestClipboardRender_Empty(t *testing.T) {
 		}
 		assert.Contains(t, out, "2 items left....", "expected overflow indicator in render")
 	})
+}
+
+func TestPruneInaccessibleItemsAndGet(t *testing.T) {
+	dir := t.TempDir()
+	files := []string{filepath.Join(dir, "f1"), filepath.Join(dir, "f2")}
+	utils.SetupFiles(t, files...)
+
+	m := &Model{}
+	m.SetItems(files)
+	assert.Equal(t, files, m.PruneInaccessibleItemsAndGet())
+	require.NoError(t, os.Remove(files[1]))
+	assert.Equal(t, []string{files[0]}, m.PruneInaccessibleItemsAndGet())
 }
