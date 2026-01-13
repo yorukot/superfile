@@ -181,13 +181,13 @@ You can turn this off, by setting `auto_check_update` to false in superfile conf
 
 ### macOS and Linux
 
-On macOS and Linux, you can uninstall superfile by simply removing the binary. If you installed superfile with sudo, runw
+On macOS and Linux, you can uninstall superfile by simply removing the binary. If you installed superfile with sudo, run:
 
 ```bash
 sudo rm /usr/local/bin/spf
 ```
 
-If you installed superfile without sudo, run
+If you installed superfile without sudo, run:
 
 ```bash
 rm ~/.local/bin/spf
