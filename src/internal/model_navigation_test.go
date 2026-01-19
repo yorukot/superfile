@@ -200,3 +200,82 @@ func TestCursorOutOfBoundsAfterDirectorySwitch(t *testing.T) {
 	assert.Equal(t, 0, panel.GetCursor(), "Cursor not restored as is from directoryRecords cache")
 	assert.NoError(t, panel.ValidateCursorAndRenderIndex(), "panel not valid")
 }
+
+func TestCursorRemembersParentPosition(t *testing.T) {
+	/*
+		We want to test that the cursor remembers its position in the parent directory in 3 different cases
+		(1) jump back from child with more elements than parent and near top of list of parent
+		(2) jump back from child with less elements than parent and near end of list of parent
+		(3) jump back from child with no elements
+	*/
+
+	curTestDir := t.TempDir()
+	dir1 := filepath.Join(curTestDir, "dir1")
+	dir2 := filepath.Join(curTestDir, "dir2")
+	dir3 := filepath.Join(curTestDir, "dir3")
+	dir4 := filepath.Join(curTestDir, "dir4")
+	dir5 := filepath.Join(curTestDir, "dir5")
+	file1 := filepath.Join(dir2, "file1.txt")
+	file2 := filepath.Join(dir2, "file2.txt")
+	file3 := filepath.Join(dir2, "file3.txt")
+	file4 := filepath.Join(dir2, "file4.txt")
+	file5 := filepath.Join(dir2, "file5.txt")
+	file6 := filepath.Join(dir2, "file6.txt")
+	file7 := filepath.Join(dir2, "file7.txt")
+	file8 := filepath.Join(dir4, "file8.txt")
+	file9 := filepath.Join(dir4, "file9.txt")
+
+	utils.SetupDirectories(t, dir1, dir2, dir3, dir4, dir5)
+	utils.SetupFiles(t, file1, file2, file3, file4, file5, file6, file7, file8, file9)
+
+	cases := []struct {
+		name           string
+		moveDowns      int
+		childDir       string
+		expectedCursor int
+	}{
+		{"case1", 1, dir2, 1},
+		{"case2", 3, dir4, 3},
+		{"case3", 4, dir5, 4},
+	}
+
+	// if a case fails the next case(s) fail also
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			m := defaultTestModel(curTestDir)
+
+			for range tc.moveDowns {
+				m.getFocusedFilePanel().ListDown()
+			}
+
+			originalRenderIndex := m.getFocusedFilePanel().GetRenderIndex()
+
+			assert.Eventually(t, func() bool {
+				return m.getFocusedFilePanel().GetCursor() == tc.expectedCursor
+			}, DefaultTestTimeout, DefaultTestTick, "Cursor should be at correct position")
+
+			// Move into child directory
+			TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.Confirm[0]))
+
+			assert.Eventually(t, func() bool {
+				return m.getFocusedFilePanel().Location == tc.childDir
+			}, DefaultTestTimeout, DefaultTestTick, "Should have stepped into child directory")
+
+			// Go back to original directory
+			TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.ParentDirectory[0]))
+
+			assert.Eventually(t, func() bool {
+				return m.getFocusedFilePanel().Location == curTestDir
+			}, DefaultTestTimeout, DefaultTestTick, "Should have stepped into parent directory curTestDir")
+
+			// Make sure we have original cursor and render
+			assert.Equal(
+				t,
+				tc.expectedCursor,
+				m.getFocusedFilePanel().GetCursor(),
+				"Should have remembered cursor position in parent",
+			)
+			assert.Equal(t, originalRenderIndex, m.getFocusedFilePanel().GetRenderIndex())
+		})
+	}
+}
