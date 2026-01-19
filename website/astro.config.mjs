@@ -200,6 +200,10 @@ export default defineConfig({
           link: "/troubleshooting",
         },
         {
+          label: "Special thanks",
+          link: "/special-thanks",
+        },
+        {
           label: "Changelog",
           link: "/changelog",
         },
