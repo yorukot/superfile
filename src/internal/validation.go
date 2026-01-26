@@ -424,6 +424,6 @@ type compPosition struct {
 
 func (m *model) IsOverlayModelOpen() bool {
 	return m.zoxideModal.IsOpen() || m.helpMenu.open || m.promptModal.IsOpen() ||
-		m.getFocusedFilePanel().SortOptions.Open || m.firstUse || m.typingModal.open ||
+		m.sortModal.IsOpen() || m.firstUse || m.typingModal.open ||
 		m.notifyModel.IsOpen()
 }

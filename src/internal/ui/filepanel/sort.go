@@ -8,12 +8,13 @@ import (
 	"strings"
 
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/ui/sortmodel"
 )
 
-func getOrderingFunc(elements []Element, reversed bool, sortOption string) sliceOrderFunc {
+func getOrderingFunc(elements []Element, reversed bool, sortKind sortmodel.SortKind) sliceOrderFunc {
 	var order func(i, j int) bool
-	switch sortOption {
-	case string(sortingName):
+	switch sortKind {
+	case sortmodel.SortByName:
 		order = func(i, j int) bool {
 			// One of them is a directory, and other is not
 			if elements[i].Directory != elements[j].Directory {
@@ -24,13 +25,13 @@ func getOrderingFunc(elements []Element, reversed bool, sortOption string) slice
 			}
 			return strings.ToLower(elements[i].Name) < strings.ToLower(elements[j].Name) != reversed
 		}
-	case string(sortingSize):
+	case sortmodel.SortBySize:
 		order = getSizeOrderingFunc(elements, reversed)
-	case string(sortingDateModified):
+	case sortmodel.SortByDate:
 		order = func(i, j int) bool {
 			return elements[i].Info.ModTime().After(elements[j].Info.ModTime()) != reversed
 		}
-	case string(sortingFileType):
+	case sortmodel.SortByType:
 		order = getTypeOrderingFunc(elements, reversed)
 	}
 	return order
@@ -94,7 +95,7 @@ func getTypeOrderingFunc(elements []Element, reversed bool) sliceOrderFunc {
 	}
 }
 
-func sortFileElement(sortOptions sortOptionsModelData, dirEntries []os.DirEntry, location string) []Element {
+func sortFileElement(sortKind sortmodel.SortKind, reversed bool, dirEntries []os.DirEntry, location string) []Element {
 	elements := make([]Element, 0, len(dirEntries))
 	for _, item := range dirEntries {
 		info, err := item.Info()
@@ -112,8 +113,7 @@ func sortFileElement(sortOptions sortOptionsModelData, dirEntries []os.DirEntry,
 		})
 	}
 
-	sort.Slice(elements, getOrderingFunc(elements,
-		sortOptions.Reversed, sortOptions.Options[sortOptions.Selected]))
+	sort.Slice(elements, getOrderingFunc(elements, reversed, sortKind))
 
 	return elements
 }

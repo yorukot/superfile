@@ -123,10 +123,10 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 		m.openHelpMenu()
 
 	case slices.Contains(common.Hotkeys.OpenSortOptionsMenu, msg):
-		m.openSortOptionsMenu()
+		m.sortModal.Open(m.getFocusedFilePanel().SortKind)
 
 	case slices.Contains(common.Hotkeys.ToggleReverseSort, msg):
-		m.toggleReverseSort()
+		m.getFocusedFilePanel().ToggleReverseSort()
 
 	case slices.Contains(common.Hotkeys.OpenFileWithEditor, msg):
 		return m.openFileWithEditor()
@@ -266,15 +266,15 @@ func (m *model) handleNotifyModelConfirm(action notify.ConfirmActionType) tea.Cm
 func (m *model) sortOptionsKey(msg string) {
 	switch {
 	case slices.Contains(common.Hotkeys.OpenSortOptionsMenu, msg):
-		m.cancelSortOptions()
+		m.sortModal.Close()
 	case slices.Contains(common.Hotkeys.Quit, msg):
-		m.cancelSortOptions()
+		m.sortModal.Close()
 	case slices.Contains(common.Hotkeys.Confirm, msg):
 		m.confirmSortOptions()
 	case slices.Contains(common.Hotkeys.ListUp, msg):
-		m.sortOptionsListUp()
+		m.sortModal.ListUp()
 	case slices.Contains(common.Hotkeys.ListDown, msg):
-		m.sortOptionsListDown()
+		m.sortModal.ListDown()
 	}
 }
 

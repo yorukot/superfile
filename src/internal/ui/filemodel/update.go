@@ -22,7 +22,8 @@ func (m *Model) CreateNewFilePanel(location string) (tea.Cmd, error) {
 	}
 
 	m.FilePanels = append(m.FilePanels, filepanel.New(
-		location, m.GetFocusedFilePanel().SortOptions, false, ""))
+		location, false, "", m.GetFocusedFilePanel().SortKind,
+		m.GetFocusedFilePanel().SortReversed))
 
 	newPanelIndex := m.PanelCount() - 1
 

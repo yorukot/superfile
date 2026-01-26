@@ -321,7 +321,7 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 	// If sort options menu is open
 	case m.sidebarModel.SearchBarFocused():
 		m.sidebarModel.HandleSearchBarKey(msg.String())
-	case m.getFocusedFilePanel().SortOptions.Open:
+	case m.sortModal.IsOpen():
 		m.sortOptionsKey(msg.String())
 	// If help menu is open
 	case m.helpMenu.open:
@@ -538,12 +538,10 @@ func (m *model) updateRenderForOverlay(finalRender string) string {
 		return stringfunction.PlaceOverlay(overlayX, overlayY, zoxideModal, finalRender)
 	}
 
-	panel := m.getFocusedFilePanel()
-
-	if panel.SortOptions.Open {
-		sortOptions := m.sortOptionsRender()
-		overlayX := m.fullWidth/common.CenterDivisor - panel.SortOptions.Width/common.CenterDivisor
-		overlayY := m.fullHeight/common.CenterDivisor - panel.SortOptions.Height/common.CenterDivisor
+	if m.sortModal.IsOpen() {
+		sortOptions := m.sortModal.Render()
+		overlayX := m.fullWidth/common.CenterDivisor - m.sortModal.Width/common.CenterDivisor
+		overlayY := m.fullHeight/common.CenterDivisor - m.sortModal.Height/common.CenterDivisor
 		return stringfunction.PlaceOverlay(overlayX, overlayY, sortOptions, finalRender)
 	}
 

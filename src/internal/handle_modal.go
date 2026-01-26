@@ -87,46 +87,10 @@ func (m *model) confirmRename() {
 	panel.Renaming = false
 }
 
-func (m *model) openSortOptionsMenu() {
-	panel := m.getFocusedFilePanel()
-	panel.SortOptions.Open = true
-}
-
-func (m *model) cancelSortOptions() {
-	panel := m.getFocusedFilePanel()
-	panel.SortOptions.Cursor = panel.SortOptions.Data.Selected
-	panel.SortOptions.Open = false
-}
-
 func (m *model) confirmSortOptions() {
 	panel := m.getFocusedFilePanel()
-	panel.SortOptions.Data.Selected = panel.SortOptions.Cursor
-	panel.SortOptions.Open = false
-}
-
-// Move the cursor up in the sort options menu
-func (m *model) sortOptionsListUp() {
-	panel := m.getFocusedFilePanel()
-	if panel.SortOptions.Cursor > 0 {
-		panel.SortOptions.Cursor--
-	} else {
-		panel.SortOptions.Cursor = len(panel.SortOptions.Data.Options) - 1
-	}
-}
-
-// Move the cursor down in the sort options menu
-func (m *model) sortOptionsListDown() {
-	panel := m.getFocusedFilePanel()
-	if panel.SortOptions.Cursor < len(panel.SortOptions.Data.Options)-1 {
-		panel.SortOptions.Cursor++
-	} else {
-		panel.SortOptions.Cursor = 0
-	}
-}
-
-func (m *model) toggleReverseSort() {
-	panel := m.getFocusedFilePanel()
-	panel.SortOptions.Data.Reversed = !panel.SortOptions.Data.Reversed
+	panel.SortKind = m.sortModal.GetSelectedKind()
+	m.sortModal.Close()
 }
 
 // Cancel search, this will clear all searchbar input

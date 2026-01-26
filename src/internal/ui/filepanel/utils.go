@@ -118,6 +118,10 @@ func (m *Model) EmptyOrInvalid() bool {
 	return m.Empty() || m.ValidateCursorAndRenderIndex() != nil
 }
 
+func (m *Model) ToggleReverseSort() {
+	m.SortReversed = !m.SortReversed
+}
+
 // SetCursorPosition sets cursor and updates renderIndex accordingly.
 // Note: Intended for test utilities only!!!!!
 func (m *Model) SetCursorPosition(cursor int) {
