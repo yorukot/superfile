@@ -36,6 +36,7 @@ func defaultFilePanel(path string, focused bool) Model {
 			Options: []string{
 				string(sortingName), string(sortingSize),
 				string(sortingDateModified), string(sortingFileType),
+				string(sortingNatural),
 			},
 			Selected: common.Config.DefaultSortType,
 			Reversed: common.Config.SortOrderReversed,

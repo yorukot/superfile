@@ -88,6 +88,7 @@ const (
 	sortingSize         sortingKind = "Size"
 	sortingDateModified sortingKind = "Date Modified"
 	sortingFileType     sortingKind = "Type"
+	sortingNatural      sortingKind = "Natural"
 )
 
 type columnRenderer func(indexElement int, columnWidth int) string
