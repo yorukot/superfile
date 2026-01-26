@@ -74,8 +74,6 @@ type model struct {
 	ioReqCnt             int
 	modelQuitState       modelQuitStateType
 	firstTextInput       bool
-	toggleDotFile        bool
-	updatedToggleDotFile bool
 	toggleFooter         bool
 	firstLoadingComplete bool
 	firstUse             bool

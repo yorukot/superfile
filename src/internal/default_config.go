@@ -7,13 +7,11 @@ import (
 
 	"github.com/yorukot/superfile/src/internal/ui/filemodel"
 
-	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/ui/sidebar"
 
 	"github.com/yorukot/superfile/src/internal/common"
-	"github.com/yorukot/superfile/src/internal/ui/preview"
 	"github.com/yorukot/superfile/src/internal/ui/prompt"
 	zoxideui "github.com/yorukot/superfile/src/internal/ui/zoxide"
 )
@@ -34,20 +32,15 @@ func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool,
 		processBarModel: processbar.New(),
 		sidebarModel:    sidebar.New(),
 		fileMetaData:    metadata.New(),
-		fileModel: filemodel.Model{
-			FilePanels:       filepanel.FilePanelSlice(firstPanelPaths),
-			FilePreview:      preview.New(),
-			SinglePanelWidth: common.DefaultFilePanelWidth,
-		},
-		helpMenu:       newHelpMenuModal(),
-		promptModal:    prompt.DefaultModel(prompt.PromptMinHeight, prompt.PromptMinWidth),
-		zoxideModal:    zoxideui.DefaultModel(zoxideui.ZoxideMinHeight, zoxideui.ZoxideMinWidth, zClient),
-		zClient:        zClient,
-		modelQuitState: notQuitting,
-		toggleDotFile:  toggleDotFile,
-		toggleFooter:   toggleFooter,
-		firstUse:       firstUse,
-		hasTrash:       common.InitTrash(),
+		fileModel:       filemodel.New(firstPanelPaths, toggleDotFile),
+		helpMenu:        newHelpMenuModal(),
+		promptModal:     prompt.DefaultModel(prompt.PromptMinHeight, prompt.PromptMinWidth),
+		zoxideModal:     zoxideui.DefaultModel(zoxideui.ZoxideMinHeight, zoxideui.ZoxideMinWidth, zClient),
+		zClient:         zClient,
+		modelQuitState:  notQuitting,
+		toggleFooter:    toggleFooter,
+		firstUse:        firstUse,
+		hasTrash:        common.InitTrash(),
 	}
 }
 

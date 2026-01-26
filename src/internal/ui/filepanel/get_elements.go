@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/utils"
 )
 
@@ -15,7 +14,7 @@ import (
 // and also consider testing this caseSensitive with both true and false in
 // our unit_test TestReturnDirElement
 // getDirectoryElements returns the directory elements for the panel's current location
-func (m *Model) getDirectoryElements(displayDotFile bool) []Element {
+func (m *Model) getDirectoryElements(displayDotFiles bool) []Element {
 	dirEntries, err := os.ReadDir(m.Location)
 	if err != nil {
 		slog.Error("Error while returning folder elements", "error", err)
@@ -25,7 +24,7 @@ func (m *Model) getDirectoryElements(displayDotFile bool) []Element {
 	dirEntries = slices.DeleteFunc(dirEntries, func(e os.DirEntry) bool {
 		// Entries not needed to be considered
 		_, err := e.Info()
-		return err != nil || (strings.HasPrefix(e.Name(), ".") && !displayDotFile)
+		return err != nil || (strings.HasPrefix(e.Name(), ".") && !displayDotFiles)
 	})
 
 	// No files/directories to process
@@ -36,7 +35,7 @@ func (m *Model) getDirectoryElements(displayDotFile bool) []Element {
 }
 
 // getDirectoryElementsBySearch returns filtered directory elements based on search string
-func (m *Model) getDirectoryElementsBySearch(displayDotFile bool) []Element {
+func (m *Model) getDirectoryElementsBySearch(displayDotFiles bool) []Element {
 	searchString := m.SearchBar.Value()
 	items, err := os.ReadDir(m.Location)
 	if err != nil {
@@ -56,7 +55,7 @@ func (m *Model) getDirectoryElementsBySearch(displayDotFile bool) []Element {
 		if err != nil {
 			continue
 		}
-		if !displayDotFile && strings.HasPrefix(fileInfo.Name(), ".") {
+		if !displayDotFiles && strings.HasPrefix(fileInfo.Name(), ".") {
 			continue
 		}
 
@@ -76,28 +75,22 @@ func (m *Model) getDirectoryElementsBySearch(displayDotFile bool) []Element {
 }
 
 // Helper to decide whether to skip updating a panel this tick.
-func (m *Model) shouldSkipPanelUpdate(focusPanelReRender bool,
-	nowTime time.Time, updatedModelToggleDotFile bool) bool {
-	// Throttle non-focused panels unless dotfile toggle changed
-	if !m.IsFocused && nowTime.Sub(m.LastTimeGetElement) < 3*time.Second {
-		if !updatedModelToggleDotFile {
-			return true
-		}
+func (m *Model) shouldSkipPanelUpdate(nowTime time.Time) bool {
+	if !m.IsFocused {
+		return nowTime.Sub(m.LastTimeGetElement) < nonFocussedPanelReRenderTime
 	}
 
-	reRenderTime := int(float64(m.ElemCount()) / common.ReRenderChunkDivisor)
-	if m.IsFocused && !focusPanelReRender &&
-		nowTime.Sub(m.LastTimeGetElement) < time.Duration(reRenderTime)*time.Second {
-		return true
-	}
-	return false
+	reRenderTime := int(float64(m.ElemCount()) / ReRenderChunkDivisor)
+	reRenderTime = min(reRenderTime, ReRenderMaxDelay)
+	return !m.NeedsReRender() &&
+		nowTime.Sub(m.LastTimeGetElement) < time.Duration(reRenderTime)*time.Second
 }
 
-func (m *Model) UpdateElementsIfNeeded(focusPanelReRender bool, toggleDotFile bool, updatedToggleDotFile bool) {
+func (m *Model) UpdateElementsIfNeeded(force bool, displayDotFiles bool) {
 	nowTime := time.Now()
-	if !m.shouldSkipPanelUpdate(focusPanelReRender, nowTime, updatedToggleDotFile) {
+	if force || !m.shouldSkipPanelUpdate(nowTime) {
 		// Load elements for this panel (with/without search filter)
-		m.element = m.getElements(toggleDotFile)
+		m.element = m.getElements(displayDotFiles)
 		// Update file panel list
 		m.LastTimeGetElement = nowTime
 
@@ -114,9 +107,9 @@ func (m *Model) UpdateElementsIfNeeded(focusPanelReRender bool, toggleDotFile bo
 }
 
 // Retrieves elements for a panel based on search bar value and sort options.
-func (m *Model) getElements(toggleDotFile bool) []Element {
+func (m *Model) getElements(displayDotFiles bool) []Element {
 	if m.SearchBar.Value() != "" {
-		return m.getDirectoryElementsBySearch(toggleDotFile)
+		return m.getDirectoryElementsBySearch(displayDotFiles)
 	}
-	return m.getDirectoryElements(toggleDotFile)
+	return m.getDirectoryElements(displayDotFiles)
 }

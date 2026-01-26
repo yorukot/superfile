@@ -123,7 +123,7 @@ func (m *model) handleMouseMsg(msg tea.MouseMsg) {
 
 func (m *model) updateModelStateAfterMsg() {
 	m.sidebarModel.UpdateDirectories()
-	m.getFilePanelItems()
+	m.fileModel.UpdateFilePanelsIfNeeded(false)
 	// TODO: Move to utility
 	if m.focusPanel != metadataFocus {
 		m.fileMetaData.ResetRender()
@@ -584,19 +584,6 @@ func (m *model) mainComponentsRender() string {
 	clipboardBar := m.clipboard.Render()
 	footer := lipgloss.JoinHorizontal(0, processBar, metaData, clipboardBar)
 	return lipgloss.JoinVertical(0, mainPanel, footer)
-}
-
-// Render and update file panel items. Check for changes and updates in files and
-// folders in the current directory.
-func (m *model) getFilePanelItems() {
-	focusPanel := m.getFocusedFilePanel()
-	focusPanelReRender := focusPanel.NeedsReRender()
-	for i := range m.fileModel.FilePanels {
-		m.fileModel.FilePanels[i].UpdateElementsIfNeeded(focusPanelReRender, m.toggleDotFile,
-			m.updatedToggleDotFile)
-	}
-
-	m.updatedToggleDotFile = false
 }
 
 // Close superfile application. Cd into the current dir if CdOnQuit on and save

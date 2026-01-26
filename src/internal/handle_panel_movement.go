@@ -125,9 +125,8 @@ func (m *model) sidebarSelectDirectory() {
 
 // Toggle dotfile display or not
 func (m *model) toggleDotFileController() {
-	m.toggleDotFile = !m.toggleDotFile
-	m.updatedToggleDotFile = true
-	err := utils.WriteBoolFile(variable.ToggleDotFile, m.toggleDotFile)
+	m.fileModel.ToggleDotFile()
+	err := utils.WriteBoolFile(variable.ToggleDotFile, m.fileModel.DisplayDotFiles)
 	if err != nil {
 		slog.Error("Error while updating toggleDotFile data", "error", err)
 	}
