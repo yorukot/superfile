@@ -14,7 +14,7 @@ import (
 // and also consider testing this caseSensitive with both true and false in
 // our unit_test TestReturnDirElement
 // getDirectoryElements returns the directory elements for the panel's current location
-func (m *Model) getDirectoryElements(displayDotFiles bool) []Element {
+func (m *Model) getDirectoryElements(displayDotFile bool) []Element {
 	dirEntries, err := os.ReadDir(m.Location)
 	if err != nil {
 		slog.Error("Error while returning folder elements", "error", err)
@@ -24,7 +24,7 @@ func (m *Model) getDirectoryElements(displayDotFiles bool) []Element {
 	dirEntries = slices.DeleteFunc(dirEntries, func(e os.DirEntry) bool {
 		// Entries not needed to be considered
 		_, err := e.Info()
-		return err != nil || (strings.HasPrefix(e.Name(), ".") && !displayDotFiles)
+		return err != nil || (strings.HasPrefix(e.Name(), ".") && !displayDotFile)
 	})
 
 	// No files/directories to process
@@ -35,7 +35,7 @@ func (m *Model) getDirectoryElements(displayDotFiles bool) []Element {
 }
 
 // getDirectoryElementsBySearch returns filtered directory elements based on search string
-func (m *Model) getDirectoryElementsBySearch(displayDotFiles bool) []Element {
+func (m *Model) getDirectoryElementsBySearch(displayDotFile bool) []Element {
 	searchString := m.SearchBar.Value()
 	items, err := os.ReadDir(m.Location)
 	if err != nil {
@@ -55,7 +55,7 @@ func (m *Model) getDirectoryElementsBySearch(displayDotFiles bool) []Element {
 		if err != nil {
 			continue
 		}
-		if !displayDotFiles && strings.HasPrefix(fileInfo.Name(), ".") {
+		if !displayDotFile && strings.HasPrefix(fileInfo.Name(), ".") {
 			continue
 		}
 
@@ -86,11 +86,11 @@ func (m *Model) shouldSkipPanelUpdate(nowTime time.Time) bool {
 		nowTime.Sub(m.LastTimeGetElement) < time.Duration(reRenderTime)*time.Second
 }
 
-func (m *Model) UpdateElementsIfNeeded(force bool, displayDotFiles bool) {
+func (m *Model) UpdateElementsIfNeeded(force bool, displayDotFile bool) {
 	nowTime := time.Now()
 	if force || !m.shouldSkipPanelUpdate(nowTime) {
 		// Load elements for this panel (with/without search filter)
-		m.element = m.getElements(displayDotFiles)
+		m.element = m.getElements(displayDotFile)
 		// Update file panel list
 		m.LastTimeGetElement = nowTime
 
@@ -107,9 +107,9 @@ func (m *Model) UpdateElementsIfNeeded(force bool, displayDotFiles bool) {
 }
 
 // Retrieves elements for a panel based on search bar value and sort options.
-func (m *Model) getElements(displayDotFiles bool) []Element {
+func (m *Model) getElements(displayDotFile bool) []Element {
 	if m.SearchBar.Value() != "" {
-		return m.getDirectoryElementsBySearch(displayDotFiles)
+		return m.getDirectoryElementsBySearch(displayDotFile)
 	}
-	return m.getDirectoryElements(displayDotFiles)
+	return m.getDirectoryElements(displayDotFile)
 }
