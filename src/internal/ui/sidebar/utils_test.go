@@ -5,7 +5,15 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/yorukot/superfile/src/internal/common"
 )
+
+func init() {
+	common.Config.SidebarOrder = []string{"home", "pinned", "disks"}
+	common.Config.SidebarShowHomeDirs = true
+	common.Config.SidebarShowPinned = true
+	common.Config.SidebarShowDisks = true
+}
 
 func dirSlice(count int) []directory {
 	res := make([]directory, count)

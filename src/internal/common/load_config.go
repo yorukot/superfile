@@ -61,6 +61,12 @@ func ValidateConfig(c *ConfigType) error {
 		return errors.New(LoadConfigError("sidebar_width"))
 	}
 
+	for _, order := range c.SidebarOrder {
+		if order != "home" && order != "pinned" && order != "disks" {
+			return errors.New(LoadConfigError("sidebar_order"))
+		}
+	}
+
 	if c.DefaultSortType < 0 || c.DefaultSortType > 3 {
 		return errors.New(LoadConfigError("default_sort_type"))
 	}

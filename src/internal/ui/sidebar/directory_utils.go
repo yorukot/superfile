@@ -98,10 +98,27 @@ func formDirctorySlice(homeDirectories []directory, pinnedDirectories []director
 	totalCapacity := len(homeDirectories) + len(pinnedDirectories) + len(diskDirectories) + directoryCapacityForDividers
 	directories := make([]directory, 0, totalCapacity)
 
-	directories = append(directories, homeDirectories...)
-	directories = append(directories, pinnedDividerDir)
-	directories = append(directories, pinnedDirectories...)
-	directories = append(directories, diskDividerDir)
-	directories = append(directories, diskDirectories...)
+	for _, section := range common.Config.SidebarOrder {
+		switch section {
+		case "home":
+			if common.Config.SidebarShowHomeDirs {
+				if len(directories) > 0 {
+					directories = append(directories, homeDividerDir)
+				}
+				directories = append(directories, homeDirectories...)
+			}
+		case "pinned":
+			if common.Config.SidebarShowPinned {
+				directories = append(directories, pinnedDividerDir)
+				directories = append(directories, pinnedDirectories...)
+			}
+		case "disks":
+			if common.Config.SidebarShowDisks {
+				directories = append(directories, diskDividerDir)
+				directories = append(directories, diskDirectories...)
+			}
+		}
+	}
+
 	return directories
 }

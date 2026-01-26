@@ -53,6 +53,8 @@ func (s *Model) directoriesRender(curFilePanelFileLocation string,
 		totalHeight += s.directories[i].requiredHeight()
 
 		switch s.directories[i] {
+		case homeDividerDir:
+			r.AddLines("", common.SideBarHomeDivider, "")
 		case pinnedDividerDir:
 			r.AddLines("", common.SideBarPinnedDivider, "")
 		case diskDividerDir:

@@ -130,6 +130,17 @@ enable_file_preview_border = false
 # Values recommended to be in 5–20.
 sidebar_width = 20
 
+#-- Sidebar Section Visibility
+# Show or hide individual sidebar sections
+sidebar_show_home_dirs = true
+sidebar_show_pinned = true
+sidebar_show_disks = true
+
+#-- Sidebar Section Order
+# Order of sidebar sections (valid values: "home", "pinned", "disks")
+# Only enabled sections will be displayed
+sidebar_order = ["home", "pinned", "disks"]
+
 #-- Border
 # Make sure to add strings that are exactly one character wide!
 # Use ' ' for borderless.

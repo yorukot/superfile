@@ -2,6 +2,11 @@ package sidebar
 
 // These are effectively consts
 // Had to use `var` as go doesn't allows const structs
+var homeDividerDir = directory{ //nolint: gochecknoglobals // This is more like a const.
+	Name:     "",
+	Location: "Home+-*/=?",
+}
+
 var pinnedDividerDir = directory{ //nolint: gochecknoglobals // This is more like a const.
 	Name:     "",
 	Location: "Pinned+-*/=?",

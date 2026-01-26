@@ -3,7 +3,7 @@ package sidebar
 import "log/slog"
 
 func (d directory) isDivider() bool {
-	return d == pinnedDividerDir || d == diskDividerDir
+	return d == homeDividerDir || d == pinnedDividerDir || d == diskDividerDir
 }
 func (d directory) requiredHeight() int {
 	if d.isDivider() {
@@ -71,24 +71,27 @@ func (s *Model) GetCurrentDirectoryLocation() string {
 }
 
 func (s *Model) pinnedIndexRange() (int, int) {
-	// pinned directories start after well-known directories and the divider
-	// Can't use getPinnedDirectories() here, as if we are in search mode, we would be showing
-	// and having less directories in sideBar.directories slice
-
-	// TODO : This is inefficient to iterate each time for this.
-	// This information can be kept precomputed
 	pinnedDividerIdx := -1
-	diskDividerIdx := -1
 	for i, d := range s.directories {
 		if d == pinnedDividerDir {
 			pinnedDividerIdx = i
-		}
-		if d == diskDividerDir {
-			diskDividerIdx = i
 			break
 		}
 	}
-	return pinnedDividerIdx + 1, diskDividerIdx - 1
+
+	if pinnedDividerIdx == -1 {
+		return -1, -1
+	}
+
+	pinnedEndIdx := len(s.directories) - 1
+	for i := pinnedDividerIdx + 1; i < len(s.directories); i++ {
+		if s.directories[i].isDivider() {
+			pinnedEndIdx = i - 1
+			break
+		}
+	}
+
+	return pinnedDividerIdx + 1, pinnedEndIdx
 }
 
 // TODO: There are some utils like this that are common in all models
