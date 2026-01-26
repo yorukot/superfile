@@ -186,7 +186,6 @@ func TestReturnDirElement(t *testing.T) {
 				Data: data,
 			}
 			panel.SearchBar.SetValue(tt.searchString)
-
 			var res []Element
 			if tt.searchString == "" {
 				res = panel.getDirectoryElements(tt.dotFiles)
