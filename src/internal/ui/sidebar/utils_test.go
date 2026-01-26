@@ -5,10 +5,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
 	"github.com/yorukot/superfile/src/internal/common"
 )
 
-func init() {
+func setupTestConfig() {
 	common.Config.SidebarOrder = []string{"home", "pinned", "disks"}
 	common.Config.SidebarShowHomeDirs = true
 	common.Config.SidebarShowPinned = true
@@ -69,6 +70,7 @@ func Test_noActualDir(t *testing.T) {
 	}
 	for _, tt := range testcases {
 		t.Run(tt.name, func(t *testing.T) {
+			setupTestConfig()
 			assert.Equal(t, tt.expected, tt.sidebar.NoActualDir())
 		})
 	}
@@ -114,6 +116,7 @@ func Test_isCursorInvalid(t *testing.T) {
 
 	for _, tt := range testcases {
 		t.Run(tt.name, func(t *testing.T) {
+			setupTestConfig()
 			assert.Equal(t, tt.expected, tt.sidebar.isCursorInvalid())
 		})
 	}
@@ -157,6 +160,7 @@ func Test_resetCursor(t *testing.T) {
 
 	for _, tt := range data {
 		t.Run(tt.name, func(t *testing.T) {
+			setupTestConfig()
 			tt.curSideBar.resetCursor()
 			assert.Equal(t, tt.expectedCursorPos, tt.curSideBar.cursor)
 		})

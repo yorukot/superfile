@@ -9,6 +9,7 @@ import (
 )
 
 func Test_lastRenderIndex(t *testing.T) {
+	setupTestConfig()
 	// Setup test data
 	sidebarA := Model{
 		directories: formDirctorySlice(
@@ -91,6 +92,7 @@ func Test_lastRenderIndex(t *testing.T) {
 }
 
 func Test_firstRenderIndex(t *testing.T) {
+	setupTestConfig()
 	sidebarA := Model{
 		directories: fullDirSlice(10),
 	}
@@ -248,6 +250,7 @@ func Test_firstRenderIndex(t *testing.T) {
 }
 
 func Test_updateRenderIndex(t *testing.T) {
+	setupTestConfig()
 	testCases := []struct {
 		name                string
 		sidebar             Model
@@ -377,6 +380,7 @@ func Test_updateRenderIndex(t *testing.T) {
 }
 
 func Test_listUp(t *testing.T) {
+	setupTestConfig()
 	testCases := []struct {
 		name                string
 		sidebar             Model
@@ -480,6 +484,7 @@ func Test_listUp(t *testing.T) {
 }
 
 func Test_listDown(t *testing.T) {
+	setupTestConfig()
 	testCases := []struct {
 		name                string
 		sidebar             Model

@@ -78,6 +78,11 @@ func ValidateConfig(c *ConfigType) error {
 	if ansi.StringWidth(c.BorderTop) != 1 {
 		return errors.New(LoadConfigError("border_top"))
 	}
+
+	return validateBorders(c)
+}
+
+func validateBorders(c *ConfigType) error {
 	if ansi.StringWidth(c.BorderBottom) != 1 {
 		return errors.New(LoadConfigError("border_bottom"))
 	}
