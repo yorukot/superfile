@@ -22,4 +22,9 @@ const (
 	// Extracted file permissions (from archives)
 	ExtractedFileMode = 0644 // extracted files
 	ExtractedDirMode  = 0755 // extracted directories
+
+	// Sidebar sections
+	SidebarSectionHome   = "home"
+	SidebarSectionPinned = "pinned"
+	SidebarSectionDisks  = "disks"
 )

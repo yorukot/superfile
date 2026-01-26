@@ -61,6 +61,14 @@ func ValidateConfig(c *ConfigType) error {
 		return errors.New(LoadConfigError("sidebar_width"))
 	}
 
+	for _, order := range c.SidebarSections {
+		if order != utils.SidebarSectionHome &&
+			order != utils.SidebarSectionPinned &&
+			order != utils.SidebarSectionDisks {
+			return errors.New(LoadConfigError("sidebar_sections"))
+		}
+	}
+
 	if c.DefaultSortType < 0 || c.DefaultSortType > 3 {
 		return errors.New(LoadConfigError("default_sort_type"))
 	}
@@ -72,6 +80,11 @@ func ValidateConfig(c *ConfigType) error {
 	if ansi.StringWidth(c.BorderTop) != 1 {
 		return errors.New(LoadConfigError("border_top"))
 	}
+
+	return validateBorders(c)
+}
+
+func validateBorders(c *ConfigType) error {
 	if ansi.StringWidth(c.BorderBottom) != 1 {
 		return errors.New(LoadConfigError("border_bottom"))
 	}

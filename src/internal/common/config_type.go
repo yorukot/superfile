@@ -88,13 +88,14 @@ type ConfigType struct {
 	FilePanelExtraColumns int  `toml:"file_panel_extra_columns" comment:"\nCount of extra columns in file panel in addition to file name. When option equal 0 then feature is disabled."`
 	FilePanelNamePercent  int  `toml:"file_panel_name_percent" comment:"\nPercentage of file panel width allocated to file names (25-100). Higher values give more space to names, less to extra columns."`
 
-	Nerdfont                bool   `toml:"nerdfont" comment:"\n================   Style =================\n\n If you don't have or don't want Nerdfont installed you can turn this off"`
-	ShowSelectIcons         bool   `toml:"show_select_icons" comment:"\nShow checkbox icons in select mode (requires nerdfont)"`
-	TransparentBackground   bool   `toml:"transparent_background" comment:"\nSet transparent background or not (this only work when your terminal background is transparent)"`
-	FilePreviewWidth        int    `toml:"file_preview_width" comment:"\nFile preview width allow '0' (this mean same as file panel),'x' x must be less than 10 and greater than 1 (This means that the width of the file preview will be one xth of the total width.)"`
-	EnableFilePreviewBorder bool   `toml:"enable_file_preview_border" comment:"\nEnable border around the file preview panel (default: false)"`
-	CodePreviewer           string `toml:"code_previewer" comment:"\nWhether to use the builtin syntax highlighting with chroma or use bat. Values: \"\" for builtin chroma, \"bat\" for bat"`
-	SidebarWidth            int    `toml:"sidebar_width" comment:"\nThe length of the sidebar(excluding borders). If you don't want to display the sidebar, you can input 0 directly. If you want to display the value, please place it in the range of 5-20."`
+	Nerdfont                bool     `toml:"nerdfont" comment:"\n================   Style =================\n\n If you don't have or don't want Nerdfont installed you can turn this off"`
+	ShowSelectIcons         bool     `toml:"show_select_icons" comment:"\nShow checkbox icons in select mode (requires nerdfont)"`
+	TransparentBackground   bool     `toml:"transparent_background" comment:"\nSet transparent background or not (this only work when your terminal background is transparent)"`
+	FilePreviewWidth        int      `toml:"file_preview_width" comment:"\nFile preview width allow '0' (this mean same as file panel),'x' x must be less than 10 and greater than 1 (This means that the width of the file preview will be one xth of the total width.)"`
+	EnableFilePreviewBorder bool     `toml:"enable_file_preview_border" comment:"\nEnable border around the file preview panel (default: false)"`
+	CodePreviewer           string   `toml:"code_previewer" comment:"\nWhether to use the builtin syntax highlighting with chroma or use bat. Values: \"\" for builtin chroma, \"bat\" for bat"`
+	SidebarWidth            int      `toml:"sidebar_width" comment:"\nThe length of the sidebar(excluding borders). If you don't find to display the sidebar, you can input 0 directly. If you want to display the value, please place it in the range of 5-20."`
+	SidebarSections         []string `toml:"sidebar_sections" comment:"\nOrder of sidebar sections (valid values: \"home\", \"pinned\", \"disks\").\nOnly sections included in this list will be displayed."`
 
 	BorderTop         string `toml:"border_top" comment:"\nBorder style"`
 	BorderBottom      string `toml:"border_bottom"`

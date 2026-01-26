@@ -40,6 +40,7 @@ const (
 
 var (
 	SideBarSuperfileTitle string
+	SideBarHomeDivider    string
 	SideBarPinnedDivider  string
 	SideBarDisksDivider   string
 	SideBarNoneText       string
@@ -122,6 +123,8 @@ func wrapFilePreviewErrorMsg(msg string) string {
 // InitIcon() in config package in function.go should be finished
 func LoadPrerenderedVariables() {
 	SideBarSuperfileTitle = SidebarTitleStyle.Render(" " + icon.SuperfileIcon + icon.Space + "superfile")
+	SideBarHomeDivider = SidebarTitleStyle.Render(icon.Home+icon.Space+"Home") +
+		SidebarDividerStyle.Render(" ─────────────")
 
 	SideBarPinnedDivider = SidebarTitleStyle.Render(icon.Pinned+icon.Space+"Pinned") +
 		SidebarDividerStyle.Render(" ───────────")

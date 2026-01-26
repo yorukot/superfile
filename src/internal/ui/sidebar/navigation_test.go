@@ -10,16 +10,8 @@ import (
 
 func Test_lastRenderIndex(t *testing.T) {
 	// Setup test data
-	sidebarA := Model{
-		directories: formDirctorySlice(
-			dirSlice(10), dirSlice(10), dirSlice(10),
-		),
-	}
-	sidebarB := Model{
-		directories: formDirctorySlice(
-			dirSlice(1), nil, dirSlice(5),
-		),
-	}
+	sidebarA := defaultTestModel(0, 0, 0, 10, 10, 10)
+	sidebarB := defaultTestModel(0, 0, 0, 1, 0, 5)
 
 	testCases := []struct {
 		name              string
@@ -91,29 +83,13 @@ func Test_lastRenderIndex(t *testing.T) {
 }
 
 func Test_firstRenderIndex(t *testing.T) {
-	sidebarA := Model{
-		directories: fullDirSlice(10),
-	}
-	sidebarB := Model{
-		directories: formDirctorySlice(
-			dirSlice(1), nil, dirSlice(5),
-		),
-	}
-	sidebarC := Model{
-		directories: formDirctorySlice(
-			nil, dirSlice(5), dirSlice(5),
-		),
-	}
-	sidebarD := Model{
-		directories: formDirctorySlice(
-			nil, nil, dirSlice(3),
-		),
-	}
+	sidebarA := defaultTestModel(0, 0, 0, 10, 10, 10)
+	sidebarB := defaultTestModel(0, 0, 0, 1, 0, 5)
+	sidebarC := defaultTestModel(0, 0, 0, 0, 5, 5)
+	sidebarD := defaultTestModel(0, 0, 0, 0, 0, 3)
 
 	// Empty sidebar with only dividers
-	sidebarE := Model{
-		directories: fullDirSlice(0),
-	}
+	sidebarE := defaultTestModel(0, 0, 0, 0, 0, 0)
 
 	testCases := []struct {
 		name               string
@@ -258,102 +234,66 @@ func Test_updateRenderIndex(t *testing.T) {
 		explanation         string
 	}{
 		{
-			name: "Case I: Cursor moved above render range",
-			sidebar: Model{
-				directories: fullDirSlice(10),
-				renderIndex: 10, // Start rendering from pinned divider
-				cursor:      5,  // Cursor moved to home directory
-			},
+			name:                "Case I: Cursor moved above render range",
+			sidebar:             defaultTestModel(5, 10, 0, 10, 10, 10),
 			mainPanelHeight:     15,
 			expectedRenderIndex: 5,
 			explanation:         "When cursor moves above render range, renderIndex should be set to cursor",
 		},
 		{
-			name: "Case II: Cursor within render range",
-			sidebar: Model{
-				directories: fullDirSlice(10),
-				renderIndex: 5, // Start rendering from a home directory
-				cursor:      8, // Cursor within visible range
-			},
+			name:                "Case II: Cursor within render range",
+			sidebar:             defaultTestModel(8, 5, 0, 10, 10, 10),
 			mainPanelHeight:     15,
 			expectedRenderIndex: 5, // No change expected
 			explanation:         "When cursor is within render range, renderIndex should not change",
 		},
 		{
-			name: "Case III: Cursor moved below render range",
-			sidebar: Model{
-				directories: fullDirSlice(10),
-				renderIndex: 0,  // Start rendering from beginning
-				cursor:      20, // Cursor moved to a pinned directory outside visible range
-			},
+			name:                "Case III: Cursor moved below render range",
+			sidebar:             defaultTestModel(20, 0, 0, 10, 10, 10),
 			mainPanelHeight:     10,
 			expectedRenderIndex: 14, // Should adjust to make cursor visible
 			// 3(Initial height) + 7(14-20 pinned dirs)
 			explanation: "When cursor moves below render range, renderIndex should adjust to make cursor visible",
 		},
 		{
-			name: "Edge case: Small panel with cursor at end",
-			sidebar: Model{
-				directories: fullDirSlice(10),
-				renderIndex: 0,
-				cursor:      31, // Last disk directory
-			},
+			name:                "Edge case: Small panel with cursor at end",
+			sidebar:             defaultTestModel(31, 0, 0, 10, 10, 10),
 			mainPanelHeight:     5,
 			expectedRenderIndex: 30, // Should show only the last couple items
 			explanation:         "With small panel and cursor at end, should adjust renderIndex to show cursor",
 		},
 		{
-			name: "Edge case: Large panel showing everything",
-			sidebar: Model{
-				directories: formDirctorySlice(dirSlice(1), nil, dirSlice(5)),
-				renderIndex: 2,
-				cursor:      4,
-			},
+			name:                "Edge case: Large panel showing everything",
+			sidebar:             defaultTestModel(4, 2, 0, 1, 0, 5),
 			mainPanelHeight:     50, // Large enough to show all directories
 			expectedRenderIndex: 2,  // No change needed as everything is visible
 			explanation:         "With large panel showing all items, renderIndex should remain unchanged",
 		},
 		{
-			name: "Edge case: Empty sidebar",
-			sidebar: Model{
-				directories: fullDirSlice(0),
-				renderIndex: 0,
-				cursor:      1,
-			},
+			name:                "Edge case: Empty sidebar",
+			sidebar:             defaultTestModel(1, 0, 0, 0, 0, 0),
 			mainPanelHeight:     10,
 			expectedRenderIndex: 0, // No change needed for empty sidebar
 			explanation:         "With empty sidebar, renderIndex should remain at 0",
 		},
 		{
-			name: "Case I and III overlap: Cursor exactly at current renderIndex",
-			sidebar: Model{
-				directories: fullDirSlice(10),
-				renderIndex: 15,
-				cursor:      15,
-			},
+			name:                "Case I and III overlap: Cursor exactly at current renderIndex",
+			sidebar:             defaultTestModel(15, 15, 0, 10, 10, 10),
 			mainPanelHeight:     10,
 			expectedRenderIndex: 15, // No change needed, Case I takes precedence
 			explanation: "When cursor is exactly at renderIndex, " +
 				"Case I takes precedence and renderIndex remains unchanged",
 		},
 		{
-			name: "Boundary case: Cursor at edge of visible range",
-			sidebar: Model{
-				directories: fullDirSlice(10),
-				renderIndex: 5,
-				cursor:      9, // Just at the edge of what's visible
-			},
+			name:                "Boundary case: Cursor at edge of visible range",
+			sidebar:             defaultTestModel(9, 5, 0, 10, 10, 10),
 			mainPanelHeight:     8,
 			expectedRenderIndex: 5, // Still visible, no change needed
 			explanation:         "When cursor is at the edge of visible range, renderIndex should not change",
 		},
 		{
-			name: "Boundary case: Cursor just beyond visible range",
-			sidebar: Model{
-				directories: fullDirSlice(10),
-				renderIndex: 5,
-				cursor:      11, // Just beyond visible range
-			},
+			name:                "Boundary case: Cursor just beyond visible range",
+			sidebar:             defaultTestModel(11, 5, 0, 10, 10, 10),
 			mainPanelHeight:     10,
 			expectedRenderIndex: 7, // Adjust to make cursor visible
 			explanation:         "When cursor is just beyond visible range, renderIndex should adjust",
@@ -386,36 +326,24 @@ func Test_listUp(t *testing.T) {
 		explanation         string
 	}{
 		{
-			name: "Basic cursor movement from middle position",
-			sidebar: Model{
-				directories: fullDirSlice(10),
-				renderIndex: 5,
-				cursor:      5, // Starting from a home directory
-			},
+			name:                "Basic cursor movement from middle position",
+			sidebar:             defaultTestModel(5, 5, 0, 10, 10, 10),
 			mainPanelHeight:     15,
 			expectedCursor:      4, // Should move up one position
 			expectedRenderIndex: 4, // Render index should follow cursor
 			explanation:         "When cursor is in the middle, it should move up one position",
 		},
 		{
-			name: "Skip divider when moving up",
-			sidebar: Model{
-				directories: fullDirSlice(10),
-				renderIndex: 8,
-				cursor:      11, // Position just after pinned divider
-			},
+			name:                "Skip divider when moving up",
+			sidebar:             defaultTestModel(11, 8, 0, 10, 10, 10),
 			mainPanelHeight:     10,
 			expectedCursor:      9, // Should skip divider (10) and move to home dir (9)
 			expectedRenderIndex: 8,
 			explanation:         "When moving up to a divider, cursor should skip it and move to previous item",
 		},
 		{
-			name: "Wrap around from top to bottom",
-			sidebar: Model{
-				directories: fullDirSlice(10),
-				renderIndex: 0,
-				cursor:      0, // At the very top
-			},
+			name:                "Wrap around from top to bottom",
+			sidebar:             defaultTestModel(0, 0, 0, 10, 10, 10),
 			mainPanelHeight:     10,
 			expectedCursor:      31, // Should wrap to last directory (index 31)
 			expectedRenderIndex: 25, // Should adjust render to show cursor
@@ -423,37 +351,24 @@ func Test_listUp(t *testing.T) {
 			explanation: "When at the top, cursor should wrap to the bottom",
 		},
 		{
-			name: "Skip multiple consecutive dividers",
-			sidebar: Model{
-				// Create a sidebar with consecutive dividers for testing
-				directories: formDirctorySlice(dirSlice(5), nil, dirSlice(5)),
-				renderIndex: 5,
-				cursor:      7, // Position after consecutive dividers
-			},
+			name:                "Skip multiple consecutive dividers",
+			sidebar:             defaultTestModel(7, 5, 0, 5, 0, 5),
 			mainPanelHeight:     10,
 			expectedCursor:      4, // Should skip all dividers and move to item before dividers
 			expectedRenderIndex: 4, // Should adjust render index accordingly
 			explanation:         "When encountering multiple consecutive dividers, cursor should skip all of them",
 		},
 		{
-			name: "No actual directories case",
-			sidebar: Model{
-				directories: fullDirSlice(0), // Empty sidebar with just dividers
-				renderIndex: 0,
-				cursor:      0,
-			},
+			name:                "No actual directories case",
+			sidebar:             defaultTestModel(0, 0, 0, 0, 0, 0),
 			mainPanelHeight:     10,
 			expectedCursor:      0, // Should remain unchanged
 			expectedRenderIndex: 0, // Should remain unchanged
 			explanation:         "When there are no actual directories, cursor should not move",
 		},
 		{
-			name: "Large panel showing all directories",
-			sidebar: Model{
-				directories: formDirctorySlice(dirSlice(2), dirSlice(2), dirSlice(2)),
-				renderIndex: 0,
-				cursor:      3, // Some directory in the middle
-			},
+			name:                "Large panel showing all directories",
+			sidebar:             defaultTestModel(3, 0, 0, 2, 2, 2),
 			mainPanelHeight:     50, // Large enough to show all directories
 			expectedCursor:      1,  // Should move up one position
 			expectedRenderIndex: 0,  // No change needed as everything is visible
@@ -489,49 +404,32 @@ func Test_listDown(t *testing.T) {
 		explanation         string
 	}{
 		{
-			name: "Basic cursor movement from middle position",
-			sidebar: Model{
-				directories: fullDirSlice(10),
-				renderIndex: 5,
-				cursor:      5, // Starting from a home directory
-			},
+			name:                "Basic cursor movement from middle position",
+			sidebar:             defaultTestModel(5, 5, 0, 10, 10, 10),
 			mainPanelHeight:     15,
 			expectedCursor:      6, // Should move down one position
 			expectedRenderIndex: 5, // Render index should remain the same as cursor is still visible
 			explanation:         "When cursor is in the middle, it should move down one position",
 		},
 		{
-			name: "Skip divider when moving down",
-			sidebar: Model{
-				directories: fullDirSlice(10),
-				renderIndex: 8,
-				cursor:      9, // Position just before pinned divider
-			},
+			name:                "Skip divider when moving down",
+			sidebar:             defaultTestModel(9, 8, 0, 10, 10, 10),
 			mainPanelHeight:     10,
 			expectedCursor:      11, // Should skip divider (10) and move to pinned dir (11)
 			expectedRenderIndex: 8,  // Should adjust render index to keep cursor visible
 			explanation:         "When moving down to a divider, cursor should skip it and move to next item",
 		},
 		{
-			name: "Wrap around from bottom to top",
-			sidebar: Model{
-				directories: fullDirSlice(10),
-				renderIndex: 26,
-				cursor:      31, // At the very bottom
-			},
+			name:                "Wrap around from bottom to top",
+			sidebar:             defaultTestModel(31, 26, 0, 10, 10, 10),
 			mainPanelHeight:     10,
 			expectedCursor:      0, // Should wrap to first directory (index 0)
 			expectedRenderIndex: 0, // Should adjust render to show cursor
 			explanation:         "When at the bottom, cursor should wrap to the top",
 		},
 		{
-			name: "Skip multiple consecutive dividers",
-			sidebar: Model{
-				// Create a sidebar with consecutive dividers for testing
-				directories: formDirctorySlice(dirSlice(5), nil, dirSlice(5)),
-				renderIndex: 0,
-				cursor:      4, // Position before consecutive dividers
-			},
+			name:                "Skip multiple consecutive dividers",
+			sidebar:             defaultTestModel(4, 0, 0, 5, 0, 5),
 			mainPanelHeight:     10,
 			expectedCursor:      7, // Should skip all dividers and move to item after dividers
 			expectedRenderIndex: 5, // Should adjust render index accordingly
@@ -539,24 +437,16 @@ func Test_listDown(t *testing.T) {
 			explanation: "When encountering multiple consecutive dividers, cursor should skip all of them",
 		},
 		{
-			name: "No actual directories case",
-			sidebar: Model{
-				directories: fullDirSlice(0), // Empty sidebar with just dividers
-				renderIndex: 0,
-				cursor:      0,
-			},
+			name:                "No actual directories case",
+			sidebar:             defaultTestModel(0, 0, 0, 0, 0, 0),
 			mainPanelHeight:     10,
 			expectedCursor:      0, // Should remain unchanged
 			expectedRenderIndex: 0, // Should remain unchanged
 			explanation:         "When there are no actual directories, cursor should not move",
 		},
 		{
-			name: "Move down from home to pinned section",
-			sidebar: Model{
-				directories: fullDirSlice(10),
-				renderIndex: 6,
-				cursor:      9, // Last home directory
-			},
+			name:                "Move down from home to pinned section",
+			sidebar:             defaultTestModel(9, 6, 0, 10, 10, 10),
 			mainPanelHeight:     10,
 			expectedCursor:      11, // Should move to first pinned directory
 			expectedRenderIndex: 7,  // Should adjust render index to show cursor
@@ -564,24 +454,16 @@ func Test_listDown(t *testing.T) {
 				" cursor should skip divider and go to first pinned directory",
 		},
 		{
-			name: "Large panel showing all directories",
-			sidebar: Model{
-				directories: formDirctorySlice(dirSlice(2), dirSlice(2), dirSlice(2)),
-				renderIndex: 0,
-				cursor:      3, // Some directory in the middle
-			},
+			name:                "Large panel showing all directories",
+			sidebar:             defaultTestModel(3, 0, 0, 2, 2, 2),
 			mainPanelHeight:     50, // Large enough to show all directories
 			expectedCursor:      4,  // Should move down one position
 			expectedRenderIndex: 0,  // No change needed as everything is visible
 			explanation:         "With large panel showing all items, cursor should move down and renderIndex remain unchanged",
 		},
 		{
-			name: "Cursor at the end of visible range",
-			sidebar: Model{
-				directories: fullDirSlice(10),
-				renderIndex: 5,
-				cursor:      14, // At the end of visible range
-			},
+			name:                "Cursor at the end of visible range",
+			sidebar:             defaultTestModel(14, 5, 0, 10, 10, 10),
 			mainPanelHeight:     15,
 			expectedCursor:      15, // Should move down one position
 			expectedRenderIndex: 6,  // Should increase render index to keep cursor visible

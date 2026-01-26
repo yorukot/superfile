@@ -1,7 +1,14 @@
 package sidebar
 
+import "github.com/yorukot/superfile/src/internal/utils"
+
 // These are effectively consts
 // Had to use `var` as go doesn't allows const structs
+var homeDividerDir = directory{ //nolint: gochecknoglobals // This is more like a const.
+	Name:     "",
+	Location: "Home+-*/=?",
+}
+
 var pinnedDividerDir = directory{ //nolint: gochecknoglobals // This is more like a const.
 	Name:     "",
 	Location: "Pinned+-*/=?",
@@ -10,6 +17,10 @@ var pinnedDividerDir = directory{ //nolint: gochecknoglobals // This is more lik
 var diskDividerDir = directory{ //nolint: gochecknoglobals // This is more like a const.
 	Name:     "",
 	Location: "Disks+-*/=?",
+}
+
+var defaultSectionSlice = []string{ //nolint: gochecknoglobals // This is more like a const.
+	utils.SidebarSectionHome, utils.SidebarSectionPinned, utils.SidebarSectionDisks,
 }
 
 // superfile logo + blank line + search bar
