@@ -21,8 +21,6 @@ const (
 	HeightBreakC = 40
 	HeightBreakD = 45
 
-	ReRenderChunkDivisor = 100 // divisor for re-render throttling
-
 	FilePanelWidthUnit    = 20                     // width unit used to calculate max file panels
 	DefaultPreviewTimeout = 500 * time.Millisecond // preview operation timeout
 

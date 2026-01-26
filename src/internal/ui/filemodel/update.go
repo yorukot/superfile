@@ -120,3 +120,14 @@ func (m *Model) GetFilePreviewCmd(forcePreviewRender bool) tea.Cmd {
 			width, height, reqCnt)
 	}
 }
+
+func (m *Model) ToggleDotFile() {
+	m.DisplayDotFiles = !m.DisplayDotFiles
+	m.UpdateFilePanelsIfNeeded(true)
+}
+
+func (m *Model) UpdateFilePanelsIfNeeded(force bool) {
+	for i := range m.FilePanels {
+		m.FilePanels[i].UpdateElementsIfNeeded(force, m.DisplayDotFiles)
+	}
+}

@@ -1,6 +1,10 @@
 package filepanel
 
-import "github.com/yorukot/superfile/src/internal/common"
+import (
+	"time"
+
+	"github.com/yorukot/superfile/src/internal/common"
+)
 
 const (
 	contentPadding = 3 // Title + Searchbar + middle border line
@@ -16,5 +20,9 @@ const (
 	ColumnHeaderHeight        = 1
 
 	// Delimiter between columns in the file panel.
-	ColumnDelimiter = "  "
+	ColumnDelimiter      = "  "
+	ReRenderChunkDivisor = 100
+	ReRenderMaxDelay     = 3
+
+	nonFocussedPanelReRenderTime = 3 * time.Second
 )

@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/utils"
 )
 
@@ -76,28 +75,22 @@ func (m *Model) getDirectoryElementsBySearch(displayDotFile bool) []Element {
 }
 
 // Helper to decide whether to skip updating a panel this tick.
-func (m *Model) shouldSkipPanelUpdate(focusPanelReRender bool,
-	nowTime time.Time, updatedModelToggleDotFile bool) bool {
-	// Throttle non-focused panels unless dotfile toggle changed
-	if !m.IsFocused && nowTime.Sub(m.LastTimeGetElement) < 3*time.Second {
-		if !updatedModelToggleDotFile {
-			return true
-		}
+func (m *Model) shouldSkipPanelUpdate(nowTime time.Time) bool {
+	if !m.IsFocused {
+		return nowTime.Sub(m.LastTimeGetElement) < nonFocussedPanelReRenderTime
 	}
 
-	reRenderTime := int(float64(m.ElemCount()) / common.ReRenderChunkDivisor)
-	if m.IsFocused && !focusPanelReRender &&
-		nowTime.Sub(m.LastTimeGetElement) < time.Duration(reRenderTime)*time.Second {
-		return true
-	}
-	return false
+	reRenderTime := int(float64(m.ElemCount()) / ReRenderChunkDivisor)
+	reRenderTime = min(reRenderTime, ReRenderMaxDelay)
+	return !m.NeedsReRender() &&
+		nowTime.Sub(m.LastTimeGetElement) < time.Duration(reRenderTime)*time.Second
 }
 
-func (m *Model) UpdateElementsIfNeeded(focusPanelReRender bool, toggleDotFile bool, updatedToggleDotFile bool) {
+func (m *Model) UpdateElementsIfNeeded(force bool, displayDotFile bool) {
 	nowTime := time.Now()
-	if !m.shouldSkipPanelUpdate(focusPanelReRender, nowTime, updatedToggleDotFile) {
+	if force || !m.shouldSkipPanelUpdate(nowTime) {
 		// Load elements for this panel (with/without search filter)
-		m.element = m.getElements(toggleDotFile)
+		m.element = m.getElements(displayDotFile)
 		// Update file panel list
 		m.LastTimeGetElement = nowTime
 
@@ -114,9 +107,9 @@ func (m *Model) UpdateElementsIfNeeded(focusPanelReRender bool, toggleDotFile bo
 }
 
 // Retrieves elements for a panel based on search bar value and sort options.
-func (m *Model) getElements(toggleDotFile bool) []Element {
+func (m *Model) getElements(displayDotFile bool) []Element {
 	if m.SearchBar.Value() != "" {
-		return m.getDirectoryElementsBySearch(toggleDotFile)
+		return m.getDirectoryElementsBySearch(displayDotFile)
 	}
-	return m.getDirectoryElements(toggleDotFile)
+	return m.getDirectoryElements(displayDotFile)
 }
