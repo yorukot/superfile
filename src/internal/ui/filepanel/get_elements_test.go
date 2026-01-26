@@ -7,6 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"github.com/yorukot/superfile/src/internal/ui/sortmodel"
 	"github.com/yorukot/superfile/src/internal/utils"
 )
 
@@ -56,9 +57,8 @@ func TestReturnDirElement(t *testing.T) {
 		name              string
 		location          string
 		dotFiles          bool
-		sortOption        string
+		sortKind          sortmodel.SortKind
 		reversed          bool
-		sortOptions       sortOptionsModelData
 		searchString      string
 		expectedElemNames []string
 	}{
@@ -66,81 +66,81 @@ func TestReturnDirElement(t *testing.T) {
 			name:              "Empty Directory",
 			location:          dir2,
 			dotFiles:          false,
-			sortOption:        "Name",
+			sortKind:          sortmodel.SortByName,
 			reversed:          false,
 			expectedElemNames: []string{},
 		},
 		{
-			name:       "Sort by Name",
-			location:   curTestDir,
-			dotFiles:   false,
-			sortOption: "Name",
-			reversed:   false,
+			name:     "Sort by Name",
+			location: curTestDir,
+			dotFiles: false,
+			sortKind: sortmodel.SortByName,
+			reversed: false,
 			expectedElemNames: []string{"dir1", "dir2", "1.json", "abc", "aBcD", "file1.txt",
 				"file2.txt", "xyz.json"},
 		},
 		{
-			name:       "Sort by Name, with dotfiles",
-			location:   curTestDir,
-			dotFiles:   true,
-			sortOption: "Name",
-			reversed:   false,
+			name:     "Sort by Name, with dotfiles",
+			location: curTestDir,
+			dotFiles: true,
+			sortKind: sortmodel.SortByName,
+			reversed: false,
 			expectedElemNames: []string{"dir1", "dir2", ".xyz", "1.json", "abc", "aBcD",
 				"file1.txt", "file2.txt", "xyz.json"},
 		},
 		{
-			name:       "Sort by Name Reversed",
-			location:   curTestDir,
-			dotFiles:   false,
-			sortOption: "Name",
-			reversed:   true,
+			name:     "Sort by Name Reversed",
+			location: curTestDir,
+			dotFiles: false,
+			sortKind: sortmodel.SortByName,
+			reversed: true,
 			expectedElemNames: []string{"dir2", "dir1", "xyz.json", "file2.txt",
 				"file1.txt", "aBcD", "abc", "1.json"},
 		},
 		{
-			name:       "Sort by Size",
-			location:   curTestDir,
-			dotFiles:   false,
-			sortOption: "Size",
-			reversed:   false,
+			name:     "Sort by Size",
+			location: curTestDir,
+			dotFiles: false,
+			sortKind: sortmodel.SortBySize,
+			reversed: false,
 			expectedElemNames: []string{"dir2", "dir1", "1.json", "aBcD",
 				"file1.txt", "xyz.json", "abc", "file2.txt"},
 		},
 		{
-			name:       "Sort by Size Reversed",
-			location:   curTestDir,
-			dotFiles:   false,
-			sortOption: "Size",
-			reversed:   true,
+			name:     "Sort by Size Reversed",
+			location: curTestDir,
+			dotFiles: false,
+			sortKind: sortmodel.SortBySize,
+			reversed: true,
 			expectedElemNames: []string{"dir1", "dir2", "file2.txt", "abc", "xyz.json",
 				"file1.txt", "aBcD", "1.json"},
 		},
 		// This one could be flakey if files are created to quickly, or maybe created in
 		// parallel
 		{
-			name:       "Sort by Date",
-			location:   curTestDir,
-			dotFiles:   false,
-			sortOption: "Date Modified",
-			reversed:   false,
+			name:     "Sort by Date",
+			location: curTestDir,
+			dotFiles: false,
+			sortKind: sortmodel.SortByDate,
+			reversed: false,
 			expectedElemNames: []string{"1.json", "file2.txt", "abc",
 				"xyz.json", "file1.txt", "aBcD", "dir1", "dir2"},
 		},
 		{
-			name:       "Sort by Type",
-			location:   curTestDir,
-			dotFiles:   false,
-			sortOption: "Type",
-			reversed:   false,
+			name:     "Sort by Type",
+			location: curTestDir,
+			dotFiles: false,
+			sortKind: sortmodel.SortByType,
+			reversed: false,
 			expectedElemNames: []string{"dir1", "dir2", "abc", "aBcD", "1.json", "xyz.json",
 				"file1.txt", "file2.txt"},
 		},
 		{
-			name:       "Sort by Type Reversed and dotfiles",
-			location:   curTestDir,
-			dotFiles:   true,
-			sortOption: "Type",
-			reversed:   true,
+			name:     "Sort by Type Reversed and dotfiles",
+			location: curTestDir,
+			dotFiles: true,
+			sortKind: sortmodel.SortByType,
+			reversed: true,
 			expectedElemNames: []string{"dir2", "dir1", ".xyz", "file2.txt", "file1.txt",
 				"xyz.json", "1.json", "aBcD", "abc"},
 		},
@@ -148,7 +148,7 @@ func TestReturnDirElement(t *testing.T) {
 			name:              "Sort by Type Reversed and dotfiles with search",
 			location:          curTestDir,
 			dotFiles:          true,
-			sortOption:        "Type",
+			sortKind:          sortmodel.SortByType,
 			reversed:          true,
 			searchString:      "x",
 			expectedElemNames: []string{".xyz", "file2.txt", "file1.txt", "xyz.json"},
@@ -157,7 +157,7 @@ func TestReturnDirElement(t *testing.T) {
 			name:              "Sort by Size Reversed with search ftt",
 			location:          curTestDir,
 			dotFiles:          false,
-			sortOption:        "Size",
+			sortKind:          sortmodel.SortBySize,
 			reversed:          true,
 			searchString:      "ftt",
 			expectedElemNames: []string{"file2.txt", "file1.txt"},
@@ -166,7 +166,7 @@ func TestReturnDirElement(t *testing.T) {
 			name:              "Sort by Size Reversed with search d",
 			location:          curTestDir,
 			dotFiles:          false,
-			sortOption:        "Size",
+			sortKind:          sortmodel.SortBySize,
 			reversed:          true,
 			searchString:      "d",
 			expectedElemNames: []string{"dir1", "dir2", "aBcD"},
@@ -175,16 +175,10 @@ func TestReturnDirElement(t *testing.T) {
 
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
-			data := sortOptionsModelData{
-				Options:  []string{tt.sortOption},
-				Selected: 0,
-				Reversed: tt.reversed,
-			}
 			panel := testModel(0, 0, 0, BrowserMode, nil)
 			panel.Location = tt.location
-			panel.SortOptions = sortOptionsModel{
-				Data: data,
-			}
+			panel.SortKind = tt.sortKind
+			panel.SortReversed = tt.reversed
 			panel.SearchBar.SetValue(tt.searchString)
 			var res []Element
 			if tt.searchString == "" {

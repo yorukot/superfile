@@ -31,7 +31,7 @@ func (m *Model) getDirectoryElements(displayDotFile bool) []Element {
 	if len(dirEntries) == 0 {
 		return nil
 	}
-	return sortFileElement(m.SortOptions.Data, dirEntries, m.Location)
+	return sortFileElement(m.SortKind, m.SortReversed, dirEntries, m.Location)
 }
 
 // getDirectoryElementsBySearch returns filtered directory elements based on search string
@@ -71,7 +71,7 @@ func (m *Model) getDirectoryElementsBySearch(displayDotFile bool) []Element {
 		dirElements = append(dirElements, resultItem)
 	}
 
-	return sortFileElement(m.SortOptions.Data, dirElements, m.Location)
+	return sortFileElement(m.SortKind, m.SortReversed, dirElements, m.Location)
 }
 
 // Helper to decide whether to skip updating a panel this tick.

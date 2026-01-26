@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/ui/sortmodel"
 )
 
 // FilePanelSlice creates a slice of FilePanels from the given paths
@@ -27,29 +28,17 @@ func defaultFilePanel(path string, focused bool) Model {
 		targetFile = filepath.Base(panelPath)
 		panelPath = filepath.Dir(panelPath)
 	}
-	sortOptions := sortOptionsModel{
-		Width:  sortOptionsDefaultWidth,
-		Height: sortOptionsDefaultHeight,
-		Open:   false,
-		Cursor: common.Config.DefaultSortType,
-		Data: sortOptionsModelData{
-			Options: []string{
-				string(sortingName), string(sortingSize),
-				string(sortingDateModified), string(sortingFileType),
-			},
-			Selected: common.Config.DefaultSortType,
-			Reversed: common.Config.SortOrderReversed,
-		},
-	}
-	return New(panelPath, sortOptions, focused, targetFile)
+	return New(panelPath, focused, targetFile, sortmodel.SortKind(common.Config.DefaultSortType),
+		common.Config.SortOrderReversed)
 }
 
-func New(location string, sortOptions sortOptionsModel, focused bool, targetFile string) Model {
+func New(location string, focused bool, targetFile string, sortKind sortmodel.SortKind, sortReversed bool) Model {
 	return Model{
 		cursor:           0,
 		renderIndex:      0,
 		Location:         location,
-		SortOptions:      sortOptions,
+		SortKind:         sortKind,
+		SortReversed:     sortReversed,
 		PanelMode:        BrowserMode,
 		IsFocused:        focused,
 		DirectoryRecords: make(map[string]directoryRecord),

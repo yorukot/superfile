@@ -9,6 +9,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui"
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
+	"github.com/yorukot/superfile/src/internal/ui/sortmodel"
 )
 
 /*
@@ -98,19 +99,11 @@ func (m *Model) renderFileEntries(r *rendering.Renderer) {
 }
 
 func (m *Model) getSortInfo() (string, string) {
-	opts := m.SortOptions.Data
-	selected := opts.Options[opts.Selected]
-	label := selected
-	if selected == string(sortingDateModified) {
-		label = "Date"
-	}
-
 	iconStr := icon.SortAsc
-
-	if opts.Reversed {
+	if m.SortReversed {
 		iconStr = icon.SortDesc
 	}
-	return label, iconStr
+	return sortmodel.SortOptionsShortStr[m.SortKind], iconStr
 }
 
 func (m *Model) getPanelModeInfo(selectedCount uint) (string, string) {

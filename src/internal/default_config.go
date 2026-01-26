@@ -6,6 +6,7 @@ import (
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 
 	"github.com/yorukot/superfile/src/internal/ui/filemodel"
+	"github.com/yorukot/superfile/src/internal/ui/sortmodel"
 
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
@@ -36,6 +37,7 @@ func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool,
 		helpMenu:        newHelpMenuModal(),
 		promptModal:     prompt.DefaultModel(prompt.PromptMinHeight, prompt.PromptMinWidth),
 		zoxideModal:     zoxideui.DefaultModel(zoxideui.ZoxideMinHeight, zoxideui.ZoxideMinWidth, zClient),
+		sortModal:       sortmodel.New(),
 		zClient:         zClient,
 		modelQuitState:  notQuitting,
 		toggleFooter:    toggleFooter,

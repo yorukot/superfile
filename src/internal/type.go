@@ -4,6 +4,7 @@ import (
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 
 	"github.com/yorukot/superfile/src/internal/ui/clipboard"
+	"github.com/yorukot/superfile/src/internal/ui/sortmodel"
 
 	"github.com/yorukot/superfile/src/internal/ui/filemodel"
 
@@ -66,6 +67,7 @@ type model struct {
 	helpMenu    helpMenuModal
 	promptModal prompt.Model
 	zoxideModal zoxideui.Model
+	sortModal   sortmodel.Model
 
 	// Zoxide client for directory tracking
 	zClient *zoxidelib.Client

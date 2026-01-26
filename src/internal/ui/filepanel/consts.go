@@ -11,9 +11,6 @@ const (
 	MinHeight      = contentPadding + common.BorderPadding + 1
 	MinWidth       = 18 // minimal width for rename input to render
 
-	sortOptionsDefaultWidth  = 20
-	sortOptionsDefaultHeight = 4
-
 	FileSizeColumnWidth       = 15
 	ModifyTimeSizeColumnWidth = 18
 	PermissionsColumnWidth    = 12
