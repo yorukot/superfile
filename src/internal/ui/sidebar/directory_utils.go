@@ -39,12 +39,14 @@ func fuzzySearch(query string, dirs []directory) []directory {
 	return filteredDirs
 }
 
-// Return all sidebar directories
-func getDirectories(pinnedMgr *PinnedManager) []directory {
+// getDirectories returns the list of directories to display in the sidebar.
+func getDirectories(pinnedMgr *PinnedManager, sections []string) []directory {
 	return formDirctorySlice(
 		getWellKnownDirectories(),
 		getPinnedDirectoriesWithIcon(pinnedMgr),
-		getExternalMediaFolders())
+		getExternalMediaFolders(),
+		sections,
+	)
 }
 
 // Return system default directory e.g. Home, Downloads, etc
@@ -84,39 +86,34 @@ func getPinnedDirectoriesWithIcon(pinnedMgr *PinnedManager) []directory {
 }
 
 // Get filtered directories using fuzzy search logic with three haystacks.
-func getFilteredDirectories(query string, pinnedMgr *PinnedManager) []directory {
+func getFilteredDirectories(query string, pinnedMgr *PinnedManager, sections []string) []directory {
 	return formDirctorySlice(
 		fuzzySearch(query, getWellKnownDirectories()),
 		fuzzySearch(query, getPinnedDirectoriesWithIcon(pinnedMgr)),
 		fuzzySearch(query, getExternalMediaFolders()),
+		sections,
 	)
 }
 
 func formDirctorySlice(homeDirectories []directory, pinnedDirectories []directory,
-	diskDirectories []directory) []directory {
+	diskDirectories []directory, sections []string) []directory {
 	// Preallocation for efficiency
 	totalCapacity := len(homeDirectories) + len(pinnedDirectories) + len(diskDirectories) + directoryCapacityForDividers
 	directories := make([]directory, 0, totalCapacity)
 
-	for _, section := range common.Config.SidebarOrder {
+	for _, section := range sections {
 		switch section {
-		case "home":
-			if common.Config.SidebarShowHomeDirs {
-				if len(directories) > 0 {
-					directories = append(directories, homeDividerDir)
-				}
-				directories = append(directories, homeDirectories...)
+		case utils.SidebarSectionHome:
+			if len(directories) > 0 {
+				directories = append(directories, homeDividerDir)
 			}
-		case "pinned":
-			if common.Config.SidebarShowPinned {
-				directories = append(directories, pinnedDividerDir)
-				directories = append(directories, pinnedDirectories...)
-			}
-		case "disks":
-			if common.Config.SidebarShowDisks {
-				directories = append(directories, diskDividerDir)
-				directories = append(directories, diskDirectories...)
-			}
+			directories = append(directories, homeDirectories...)
+		case utils.SidebarSectionPinned:
+			directories = append(directories, pinnedDividerDir)
+			directories = append(directories, pinnedDirectories...)
+		case utils.SidebarSectionDisks:
+			directories = append(directories, diskDividerDir)
+			directories = append(directories, diskDirectories...)
 		}
 	}
 

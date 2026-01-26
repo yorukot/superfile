@@ -95,10 +95,7 @@ type ConfigType struct {
 	EnableFilePreviewBorder bool     `toml:"enable_file_preview_border" comment:"\nEnable border around the file preview panel (default: false)"`
 	CodePreviewer           string   `toml:"code_previewer" comment:"\nWhether to use the builtin syntax highlighting with chroma or use bat. Values: \"\" for builtin chroma, \"bat\" for bat"`
 	SidebarWidth            int      `toml:"sidebar_width" comment:"\nThe length of the sidebar(excluding borders). If you don't find to display the sidebar, you can input 0 directly. If you want to display the value, please place it in the range of 5-20."`
-	SidebarShowHomeDirs     bool     `toml:"sidebar_show_home_dirs" comment:"\nWhether to show the home directories in the sidebar."`
-	SidebarShowPinned       bool     `toml:"sidebar_show_pinned" comment:"\nWhether to show the pinned directories in the sidebar."`
-	SidebarShowDisks        bool     `toml:"sidebar_show_disks" comment:"\nWhether to show the disks in the sidebar."`
-	SidebarOrder            []string `toml:"sidebar_order" comment:"\nOrder of sidebar sections (valid values: \"home\", \"pinned\", \"disks\")"`
+	SidebarSections         []string `toml:"sidebar_sections" comment:"\nOrder of sidebar sections (valid values: \"home\", \"pinned\", \"disks\").\nOnly sections included in this list will be displayed."`
 
 	BorderTop         string `toml:"border_top" comment:"\nBorder style"`
 	BorderBottom      string `toml:"border_bottom"`

@@ -10,7 +10,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
 )
 
-// Render returns the rendered sidebar string
+// Render returns the rendered sidebar string.
 func (s *Model) Render(sidebarFocused bool, currentFilePanelLocation string) string {
 	if s.Disabled() {
 		return ""
@@ -32,6 +32,7 @@ func (s *Model) Render(sidebarFocused bool, currentFilePanelLocation string) str
 	return r.Render()
 }
 
+// directoriesRender handles the iterative rendering of directories within the sidebar model.
 func (s *Model) directoriesRender(curFilePanelFileLocation string,
 	sideBarFocused bool, r *rendering.Renderer) {
 	// Cursor should always point to a valid directory at this point

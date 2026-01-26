@@ -18,4 +18,5 @@ type Model struct {
 	width       int
 	height      int
 	disabled    bool
+	sections    []string
 }

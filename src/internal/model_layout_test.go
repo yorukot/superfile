@@ -1,5 +1,8 @@
 package internal
 
+// TODO add two new tests for sidebar, a - with only one section, and b - without any sections.
+// note - we should update `testWithConfig` to take a new object of `common.ConfigType`, so that any custom config can be provided.
+
 import (
 	"fmt"
 	"path/filepath"

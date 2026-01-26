@@ -6,7 +6,7 @@ head:
     content: superfile config | superfile
 ---
 
-import CodeBlock from '../../../components/code.astro';
+import CodeBlock from "../../../components/code.astro";
 
 You can edit your superfile config file with the following command:
 
@@ -34,7 +34,7 @@ The editor your directories will be opened with (Leave blank to use defaults : `
 
 - ###### auto_check_update
 
-`true`  => Checks whether updates are needed when you exit superfile (only checks once a day).
+`true` => Checks whether updates are needed when you exit superfile (only checks once a day).
 
 `false` => No checks performed.
 
@@ -108,7 +108,7 @@ Save, exit, and reload your profile.
 You need to make sure powershell is allowed to execute script. If you get error like `running
 scripts is disabled on this system`. You need to allow it.
 
-Example command to enable - `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned` 
+Example command to enable - `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned`
 :::
 
 - ###### default_open_file_preview
@@ -128,7 +128,6 @@ Example command to enable - `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned`
 `true` => Shows additional footer info for file panel like panel mode and sort type.
 
 `false` => Does not show additional footer info for file panel
-
 
 - ###### file_size_use_si
 
@@ -214,7 +213,7 @@ Percentage of file panel width allocated to file names (25-100). Higher values g
 
 - ###### code_previewer
 
-`''` => Use the builtin syntax highlighting for code files with *chroma*.
+`''` => Use the builtin syntax highlighting for code files with _chroma_.
 `'bat'` => Use syntax highlighting provided by the [`bat`](https://github.com/sharkdp/bat) command line tool.
 
 - ###### nerdfont
@@ -269,12 +268,20 @@ This setting is an integer.
 `X` must be from 5 to 20.
 :::
 
+- ###### sidebar_sections
+
+Order of sidebar sections.
+
+`["home", "pinned", "disks"]` => Default order.
+
+Only sections included in this list will be displayed. You can remove sections or change their order, for example: `["pinned", "home"]`.
+
 - ###### Border style
 
 Here are a few suggested styles, of course you can change them to your own:
 
 :::caution
-Make sure to add strings exactly one character wide. Use ' ' for borderless 
+Make sure to add strings exactly one character wide. Use ' ' for borderless
 :::
 
 ```toml
@@ -313,7 +320,7 @@ Allows users to map file extensions to commands used to open them.
 The file path will be appended as the last argument.
 
 :::caution
-Must be at the very end of the file 
+Must be at the very end of the file
 :::
 
 ```toml
@@ -325,4 +332,3 @@ conf = "nvim"
 ### Default superfile config
 
 <CodeBlock file="src/superfile_config/config.toml" />
-

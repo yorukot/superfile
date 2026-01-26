@@ -10,7 +10,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/common"
 )
 
-// Rename file where the cursor is located
+// PinnedItemRename initiates the rename process for the currently selected pinned directory.
 func (s *Model) PinnedItemRename() {
 	pinnedBegin, pinnedEnd := s.pinnedIndexRange()
 	// We have not selected a pinned directory, rename is not allowed
@@ -25,13 +25,13 @@ func (s *Model) PinnedItemRename() {
 	s.rename = common.GeneratePinnedRenameTextInput(cursorPos, s.directories[s.cursor].Name)
 }
 
-// Cancel rename pinned directory
+// CancelSidebarRename aborts the rename process for a pinned directory.
 func (s *Model) CancelSidebarRename() {
 	s.rename.Blur()
 	s.renaming = false
 }
 
-// Confirm rename pinned directory
+// ConfirmSidebarRename finalizes the rename process and saves changes to the pinned directories file.
 func (s *Model) ConfirmSidebarRename() {
 	itemLocation := s.directories[s.cursor].Location
 	newItemName := s.rename.Value()
@@ -56,7 +56,7 @@ func (s *Model) ConfirmSidebarRename() {
 	}
 }
 
-// UpdateState handles the sidebar's state updates
+// UpdateState handles the sidebar's state updates in response to Bubble Tea messages.
 func (s *Model) UpdateState(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	if s.renaming {
@@ -71,7 +71,7 @@ func (s *Model) UpdateState(msg tea.Msg) tea.Cmd {
 	return cmd
 }
 
-// HandleSearchBarKey handles key events for the sidebar search bar
+// HandleSearchBarKey processes key events specifically for the sidebar's search bar.
 func (s *Model) HandleSearchBarKey(msg string) {
 	switch {
 	case slices.Contains(common.Hotkeys.CancelTyping, msg):
@@ -83,18 +83,15 @@ func (s *Model) HandleSearchBarKey(msg string) {
 	}
 }
 
-// UpdateDirectories updates the directories list based on search value
-// This is a bit inefficient, as we already had the directories when we
-// initialized the sidebar. We call the directory fetching logic many times
-// which is a disk heavy operation.
+// UpdateDirectories refreshes the list of directories based on the search query or section configuration.
 func (s *Model) UpdateDirectories() {
 	if s.Disabled() {
 		return
 	}
 	if s.searchBar.Value() != "" {
-		s.directories = getFilteredDirectories(s.searchBar.Value(), s.pinnedMgr)
+		s.directories = getFilteredDirectories(s.searchBar.Value(), s.pinnedMgr, s.sections)
 	} else {
-		s.directories = getDirectories(s.pinnedMgr)
+		s.directories = getDirectories(s.pinnedMgr, s.sections)
 	}
 	// This is needed, as due to filtering, the cursor might be invalid
 	if s.isCursorInvalid() {
@@ -102,11 +99,12 @@ func (s *Model) UpdateDirectories() {
 	}
 }
 
+// TogglePinnedDirectory adds or removes a directory from the pinned list.
 func (s *Model) TogglePinnedDirectory(dir string) error {
 	return s.pinnedMgr.Toggle(dir)
 }
 
-// New creates a new sidebar model with the given parameters
+// New initializes and returns a new Model for the sidebar correctly set up with configuration.
 func New() Model {
 	if common.Config.SidebarWidth == 0 {
 		return Model{
@@ -115,17 +113,18 @@ func New() Model {
 	}
 	// pinnedMgr is created here, can be done higher up in the call chain
 	pinnedMgr := NewPinnedFileManager(variable.PinnedFile)
-	res := Model{
+	s := Model{
 		renderIndex: 0,
-		directories: getDirectories(&pinnedMgr),
 		searchBar:   common.GenerateSearchBar(),
 		pinnedMgr:   &pinnedMgr,
 		width:       common.Config.SidebarWidth + common.BorderPadding,
 		height:      minHeight,
 		disabled:    false,
+		sections:    common.Config.SidebarSections,
 	}
 
-	res.searchBar.Width = res.width - common.BorderPadding - searchBarPadding
-	res.searchBar.Placeholder = "(" + common.Hotkeys.SearchBar[0] + ")" + " Search"
-	return res
+	s.directories = getDirectories(&pinnedMgr, s.sections)
+	s.searchBar.Width = s.width - common.BorderPadding - searchBarPadding
+	s.searchBar.Placeholder = "(" + common.Hotkeys.SearchBar[0] + ")" + " Search"
+	return s
 }
