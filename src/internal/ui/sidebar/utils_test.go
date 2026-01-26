@@ -5,7 +5,15 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/yorukot/superfile/src/internal/utils"
 )
+
+func defaultTestModel(cursor int, renderIndex int, height int,
+	cntHome int, cntPinned int, cntDisk int) Model {
+	return testModel(cursor, renderIndex, height, defaultSectionSlice,
+		formDirctorySlice(dirSlice(cntHome), dirSlice(cntPinned), dirSlice(cntDisk), defaultSectionSlice))
+}
 
 func testModel(cursor int, renderIndex int, height int, sections []string,
 	directories []directory) Model {
@@ -26,11 +34,6 @@ func dirSlice(count int) []directory {
 	return res
 }
 
-func fullDirSlice(count int) []directory {
-	sections := []string{"home", "pinned", "disks"}
-	return formDirctorySlice(dirSlice(count), dirSlice(count), dirSlice(count), sections)
-}
-
 func Test_noActualDir(t *testing.T) {
 	testcases := []struct {
 		name     string
@@ -44,18 +47,17 @@ func Test_noActualDir(t *testing.T) {
 		},
 		{
 			"Empty sidebar should have no actual directories",
-			testModel(0, 0, 10, []string{"home", "pinned", "disks"}, fullDirSlice(0)),
+			defaultTestModel(0, 0, 10, 0, 0, 0),
 			true,
 		},
 		{
 			"Non-Empty Sidebar with only pinned directories",
-			testModel(0, 0, 10, []string{"home", "pinned", "disks"},
-				formDirctorySlice(nil, dirSlice(10), nil, []string{"home", "pinned", "disks"})),
+			defaultTestModel(0, 0, 10, 0, 10, 0),
 			false,
 		},
 		{
 			"Non-Empty Sidebar with all directories",
-			testModel(0, 0, 10, []string{"home", "pinned", "disks"}, fullDirSlice(10)),
+			defaultTestModel(0, 0, 10, 10, 10, 10),
 			false,
 		},
 	}
@@ -79,17 +81,17 @@ func Test_isCursorInvalid(t *testing.T) {
 		},
 		{
 			"Cursor after all directories",
-			testModel(32, 0, 10, []string{"home", "pinned", "disks"}, fullDirSlice(10)),
+			defaultTestModel(32, 0, 10, 10, 10, 10),
 			true,
 		},
 		{
 			"Curson points to pinned divider",
-			testModel(10, 0, 10, []string{"home", "pinned", "disks"}, fullDirSlice(10)),
+			defaultTestModel(10, 0, 10, 10, 10, 10),
 			true,
 		},
 		{
 			"Non-Empty Sidebar with all directories",
-			testModel(5, 0, 10, []string{"home", "pinned", "disks"}, fullDirSlice(10)),
+			defaultTestModel(5, 0, 10, 10, 10, 10),
 			false,
 		},
 	}
@@ -108,27 +110,23 @@ func Test_resetCursor(t *testing.T) {
 		expectedCursorPos int
 	}{
 		{
-			name: "Only Pinned directories",
-			curSideBar: testModel(0, 0, 10, []string{"home", "pinned", "disks"},
-				formDirctorySlice(nil, dirSlice(10), nil, []string{"home", "pinned", "disks"})),
+			name:              "Only Pinned directories",
+			curSideBar:        defaultTestModel(0, 0, 10, 0, 10, 0),
 			expectedCursorPos: 1, // After pinned divider
 		},
 		{
-			name: "All kind of directories",
-			curSideBar: testModel(0, 0, 10, []string{"home", "pinned", "disks"},
-				fullDirSlice(10)),
+			name:              "All kind of directories",
+			curSideBar:        defaultTestModel(0, 0, 10, 10, 10, 10),
 			expectedCursorPos: 0, // First home
 		},
 		{
-			name: "Only Disk",
-			curSideBar: testModel(0, 0, 10, []string{"home", "pinned", "disks"},
-				formDirctorySlice(nil, nil, dirSlice(10), []string{"home", "pinned", "disks"})),
+			name:              "Only Disk",
+			curSideBar:        defaultTestModel(0, 0, 10, 0, 0, 10),
 			expectedCursorPos: 2, // After pinned and dist divider
 		},
 		{
-			name: "Empty Sidebar",
-			curSideBar: testModel(0, 0, 10, []string{"home", "pinned", "disks"},
-				fullDirSlice(0)),
+			name:              "Empty Sidebar",
+			curSideBar:        defaultTestModel(0, 0, 10, 0, 0, 0),
 			expectedCursorPos: 0, // Empty sidebar, cursor should reset to 0
 		},
 	}
@@ -153,7 +151,7 @@ func TestSidebarSectionsVisibility(t *testing.T) {
 	}{
 		{
 			name:        "Only one section (pinned)",
-			sections:    []string{"pinned"},
+			sections:    []string{utils.SidebarSectionPinned},
 			pinnedDirs:  5,
 			expectedLen: 6, // divider + 5 dirs
 		},
@@ -164,7 +162,7 @@ func TestSidebarSectionsVisibility(t *testing.T) {
 		},
 		{
 			name:          "Reordered sections (pinned, home)",
-			sections:      []string{"pinned", "home"},
+			sections:      []string{utils.SidebarSectionPinned, utils.SidebarSectionHome},
 			homeDirs:      3,
 			pinnedDirs:    3,
 			expectedLen:   1 + 3 + 1 + 3, // pinned divider + 3 pinned + home divider + 3 home
