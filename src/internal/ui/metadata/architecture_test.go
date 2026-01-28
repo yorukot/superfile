@@ -1,7 +1,9 @@
 package metadata
 
 import (
+	"debug/elf"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -35,8 +37,9 @@ func TestGetBinaryArchitecture_CurrentBinary(t *testing.T) {
 	require.NoError(t, err)
 	assert.NotEmpty(t, arch)
 
-	hasValidPrefix := len(arch) >= 3 &&
-		(arch[:3] == "ELF" || arch[:2] == "PE" || arch[:6] == "Mach-O")
+	hasValidPrefix := strings.HasPrefix(arch, "ELF") ||
+		strings.HasPrefix(arch, "PE") ||
+		strings.HasPrefix(arch, "Mach-O")
 	assert.True(t, hasValidPrefix,
 		"Architecture should start with a known format prefix, got: %s", arch)
 }
@@ -53,6 +56,7 @@ func TestElfMachineToString(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, elfMachineToString(elf.Machine(tt.input)))
 		})
 	}
 }
