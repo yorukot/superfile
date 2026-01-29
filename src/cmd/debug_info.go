@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"strings"
 
@@ -105,7 +106,7 @@ func (dp *debugPrinter) printHeader(text string) {
 }
 
 func (dp *debugPrinter) printKeyValue(key, value string) {
-	if strings.HasPrefix(value, "/") {
+	if filepath.IsAbs(value) {
 		if _, err := os.Stat(value); os.IsNotExist(err) {
 			value = dp.warningColor.Sprint(value + " (Not Found)")
 		}

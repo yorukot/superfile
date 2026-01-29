@@ -134,6 +134,8 @@ func Run(content embed.FS) {
 }
 
 func spfAppAction(_ context.Context, c *cli.Command) error {
+	variable.UpdateVarFromCliArgs(c)
+
 	if c.Bool("debug-info") {
 		printDebugInfo()
 		return nil
@@ -143,8 +145,6 @@ func spfAppAction(_ context.Context, c *cli.Command) error {
 	if c.Args().Present() {
 		firstPanelPaths = c.Args().Slice()
 	}
-
-	variable.UpdateVarFromCliArgs(c)
 
 	InitConfigFile()
 
