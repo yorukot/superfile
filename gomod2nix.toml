@@ -8,8 +8,8 @@ schema = 3
     version = "v0.5.3"
     hash = "sha256-bo6tBgHS+3sl6f4oWpmdFrZjfV6eA/3xAlysSW0bIEs="
   [mod."github.com/alecthomas/chroma/v2"]
-    version = "v2.21.1"
-    hash = "sha256-N6ske1LCEJy7MZS1L/0DEaWXnWlVqGaoU6oCwrM5teQ="
+    version = "v2.23.1"
+    hash = "sha256-pDznsfPRcIw9BWmD+pwn7B5iJ7JHGnTRmia9skytQ3A="
   [mod."github.com/andybalholm/brotli"]
     version = "v1.0.5"
     hash = "sha256-/qS8wU8yZQJ+uTOg66rEl9s7spxq9VIXF5L1BcaEClc="
@@ -170,8 +170,8 @@ schema = 3
     version = "v1.11.1"
     hash = "sha256-sWfjkuKJyDllDEtnM8sb/pdLzPQmUYWYtmeWz/5suUc="
   [mod."github.com/ulikunitz/xz"]
-    version = "v0.5.14"
-    hash = "sha256-21oXcIVmFyw+ukGQtflly0wpqaqh1jE0C9hLDSFYR7E="
+    version = "v0.5.15"
+    hash = "sha256-L5KYLue5U14bxUuNyhZ6lIjbda6eCQsx1V6gToqfRdk="
   [mod."github.com/urfave/cli/v3"]
     version = "v3.6.1"
     hash = "sha256-q1WeKEvWoSyA0Wcan+Edjm71e0/vnPmqVvlfjUix7+8="
