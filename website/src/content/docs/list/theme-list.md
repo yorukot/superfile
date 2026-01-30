@@ -123,7 +123,7 @@ head:
 ## Kanagawa
 
 - Theme name: `kanagawa`
-- Ported by: https://github.com/huynhdung
+- Ported by: https://github.com/jellydn
 - Original Author: https://github.com/rebelot
 
 ![Kanagawa theme preview showing Japanese ink-wash inspired colors](../../../assets/git-assets/theme/kanagawa.png)
