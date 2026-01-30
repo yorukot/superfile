@@ -17,7 +17,7 @@
 
 # Find one you like at: https://github.com/alecthomas/chroma/blob/master/styles.
 
-code_syntax_highlight = "native"
+code_syntax_highlight = "kanagawa-wave"
 
 ###############################################################################
 #                                 Base Colors                                 #
