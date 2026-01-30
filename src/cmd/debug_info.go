@@ -11,18 +11,12 @@ import (
 	"github.com/fatih/color"
 
 	variable "github.com/yorukot/superfile/src/config"
+	"github.com/yorukot/superfile/src/internal/utils"
 )
 
 const (
 	keyWidth         = 20
 	maxVersionLength = 50
-)
-
-// Operating Systems
-const (
-	linuxOS   = "linux"
-	windowsOS = "windows"
-	darwinOS  = "darwin"
 )
 
 type debugPrinter struct {
@@ -66,12 +60,14 @@ func printDebugInfo() {
 
 	fmt.Println()
 	dp.printHeader("Environment")
-	if runtime.GOOS == windowsOS {
+	if runtime.GOOS == utils.OsWindows {
 		dp.printEnv("COMSPEC")
 		dp.printEnv("APPDATA")
 		dp.printEnv("LOCALAPPDATA")
 	} else {
 		dp.printEnv("TERM")
+		dp.printEnv("TERM_PROGRAM")
+		dp.printEnv("TERM_PROGRAM_VERSION")
 		dp.printEnv("SHELL")
 		dp.printEnv("EDITOR")
 		dp.printEnv("VISUAL")
@@ -88,12 +84,12 @@ func printDebugInfo() {
 	dp.checkDependency("bat", "--version")
 	dp.checkDependency("zoxide", "--version")
 	switch runtime.GOOS {
-	case darwinOS:
+	case utils.OsDarwin:
 		dp.checkDependency("open", "")
 		dp.checkDependency("pbcopy", "")
-	case windowsOS:
+	case utils.OsWindows:
 		dp.checkDependency("clip", "")
-	case linuxOS:
+	case utils.OsLinux:
 		dp.checkDependency("xdg-open", "--version")
 		dp.checkDependency("wl-copy", "--version")
 		dp.checkDependency("xclip", "-version")
@@ -160,7 +156,7 @@ func (dp *debugPrinter) checkDependency(name string, flag string) {
 }
 
 func getKernelVersion() (string, error) {
-	if runtime.GOOS == windowsOS {
+	if runtime.GOOS == utils.OsWindows {
 		cmd := exec.Command("cmd", "/c", "ver")
 		out, err := cmd.Output()
 		if err != nil {
