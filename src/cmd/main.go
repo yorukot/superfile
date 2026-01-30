@@ -82,6 +82,12 @@ func Run(content embed.FS) {
 		},
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
+				Name:    "debug-info",
+				Aliases: []string{"di"},
+				Usage:   "Print debug information",
+				Value:   false,
+			},
+			&cli.BoolFlag{
 				Name:    "fix-hotkeys",
 				Aliases: []string{"fh"},
 				Usage:   "Adds any missing hotkeys to the hotkey config file",
@@ -128,13 +134,17 @@ func Run(content embed.FS) {
 }
 
 func spfAppAction(_ context.Context, c *cli.Command) error {
+	variable.UpdateVarFromCliArgs(c)
+
+	if c.Bool("debug-info") {
+		printDebugInfo()
+		return nil
+	}
 	// If no args are called along with "spf" use current dir
 	firstPanelPaths := []string{""}
 	if c.Args().Present() {
 		firstPanelPaths = c.Args().Slice()
 	}
-
-	variable.UpdateVarFromCliArgs(c)
 
 	InitConfigFile()
 
