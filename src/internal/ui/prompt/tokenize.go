@@ -71,7 +71,7 @@ func updateResCommand(resCommand *strings.Builder, openChar rune, token string,
 		// Same comment for command substitution
 		resCommand.WriteString(value)
 	case '(':
-		retCode, output, err := utils.ExecuteCommandInShell(subCmdTimeout, cwdLocation, token)
+		retCode, output, err := utils.ExecuteCommandInShell(nil, subCmdTimeout, cwdLocation, token)
 
 		if retCode == -1 {
 			return fmt.Errorf("could not execute shell substitution command : %s : %w", token, err)
