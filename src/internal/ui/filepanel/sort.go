@@ -34,7 +34,7 @@ func getOrderingFunc(elements []Element, reversed bool, sortKind sortmodel.SortK
 		}
 	case sortmodel.SortByType:
 		order = getTypeOrderingFunc(elements, reversed)
-	case string(sortingNatural):
+	case sortmodel.SortByNatural:
 		order = func(i, j int) bool {
 			// One of them is a directory, and other is not
 			if elements[i].Directory != elements[j].Directory {
