@@ -36,7 +36,18 @@ func ioctl(f *os.File, cmd, ptr uintptr) error {
 
 func disableEchoOnSlave(slave *os.File) error {
 	var termios unix.Termios
-	termios.Lflag &^= unix.ECHO | unix.ECHONL
+	if _, _, errno := unix.Syscall6(
+		unix.SYS_IOCTL,
+		slave.Fd(),
+		uintptr(unix.TCGETS),
+		uintptr(unsafe.Pointer(&termios)),
+		0, 0, 0,
+	); errno != 0 {
+		return fmt.Errorf("can't get current termios: %w", errno)
+	}
+
+	termios.Lflag &^= unix.ECHO | unix.ECHONL // disable echo
+	termios.Oflag &^= unix.ONLCR              // disable \n → \r\n
 
 	if _, _, errno := unix.Syscall6(
 		unix.SYS_IOCTL,
@@ -177,6 +188,7 @@ func readInner(ptmx *os.File, cmd *exec.Cmd, output *bytes.Buffer, done chan err
 			}
 		case <-timer.C:
 			_ = cmd.Process.Kill()
+			_ = cmd.Wait()
 			done <- errors.New("interactive mode is not allowed")
 			return
 		}

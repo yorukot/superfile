@@ -27,7 +27,7 @@ func ExecuteCommandInShell(winSize *Winsize,
 	baseCmd := "/bin/sh"
 	args := []string{"-c", shellCommand}
 	var ws *unix.Winsize
-	if winSize == nil {
+	if winSize == nil || winSize.Row == 0 || winSize.Col == 0 {
 		ws = &unix.Winsize{Row: DefaultRows, Col: DefaultCols}
 	} else {
 		ws = &unix.Winsize{Row: winSize.Row, Col: winSize.Col, Xpixel: 0, Ypixel: 0}
@@ -51,6 +51,7 @@ func ExecuteCommand(winSize *unix.Winsize,
 	if err != nil {
 		return retCode, "", fmt.Errorf("unexpected Error in pty start command : %w", err)
 	}
+	defer func() { _ = ptmx.Close() }()
 	outputBytes, err := pty.Read(ptmx, cmd)
 	if errors.Is(ctx.Err(), context.DeadlineExceeded) {
 		slog.Error("User's command timed out", "outputBytes", outputBytes,
