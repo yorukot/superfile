@@ -101,8 +101,8 @@ func open() (*os.File, *os.File, error) {
 	}
 
 	if err = disableEchoOnSlave(slave); err != nil {
-		_ = unix.Close(int(master.Fd()))
-		_ = unix.Close(int(slave.Fd()))
+		_ = master.Close()
+		_ = slave.Close()
 		return nil, nil, err
 	}
 
