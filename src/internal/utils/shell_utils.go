@@ -14,7 +14,10 @@ import (
 )
 
 // Choose correct shell as per OS
-func ExecuteCommandInShell(_ *Winsize, timeLimit time.Duration, cmdDir string, shellCommand string) (int, string, error) {
+func ExecuteCommandInShell(_ *Winsize,
+	timeLimit time.Duration,
+	cmdDir string,
+	shellCommand string) (int, string, error) {
 	// Darwin
 	baseCmd := "/bin/sh"
 	args := []string{"-c", shellCommand}
