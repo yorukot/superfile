@@ -106,12 +106,12 @@ func (m *model) validateLayout() error { //nolint:gocognit // cumilation of vali
 	}
 
 	// Validate overlay panels have less width and height than total
-	if m.helpMenu.open {
-		if m.helpMenu.width >= m.fullWidth {
-			return fmt.Errorf("help menu width %v exceeds full width %v", m.helpMenu.width, m.fullWidth)
+	if m.helpMenu.IsOpen() {
+		if m.helpMenu.GetWidth() >= m.fullWidth {
+			return fmt.Errorf("help menu width %v exceeds full width %v", m.helpMenu.GetWidth(), m.fullWidth)
 		}
-		if m.helpMenu.height >= m.fullHeight {
-			return fmt.Errorf("help menu height %v exceeds full height %v", m.helpMenu.height, m.fullHeight)
+		if m.helpMenu.GetHeight() >= m.fullHeight {
+			return fmt.Errorf("help menu height %v exceeds full height %v", m.helpMenu.GetHeight(), m.fullHeight)
 		}
 	}
 
@@ -423,7 +423,7 @@ type compPosition struct {
 }
 
 func (m *model) IsOverlayModelOpen() bool {
-	return m.zoxideModal.IsOpen() || m.helpMenu.open || m.promptModal.IsOpen() ||
+	return m.zoxideModal.IsOpen() || m.helpMenu.IsOpen() || m.promptModal.IsOpen() ||
 		m.sortModal.IsOpen() || m.firstUse || m.typingModal.open ||
 		m.notifyModel.IsOpen()
 }

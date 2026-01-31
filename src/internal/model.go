@@ -69,9 +69,8 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// if someone presses `/` to focus to searchBar, searchBar will otherwise
 	// get `/` input too.
 	sidebarCmd = m.sidebarModel.UpdateState(msg)
-	if m.helpMenu.searchBar.Focused() {
-		m.helpMenu.searchBar, helpMenuCmd = m.helpMenu.searchBar.Update(msg)
-	}
+	// Necessary for blinking. Can't do this in HandleKey, as we only pass KeyMsg there
+	helpMenuCmd = m.helpMenu.HandleTeaMsg(msg)
 
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
@@ -229,19 +228,15 @@ func (m *model) setMainModelDimensions() tea.Cmd {
 
 // Set help menu size
 func (m *model) setHelpMenuSize() {
-	m.helpMenu.height = m.fullHeight - common.BorderPadding
-	m.helpMenu.width = m.fullWidth - common.BorderPadding
-
+	height := m.fullHeight - common.BorderPadding
+	width := m.fullWidth - common.BorderPadding
 	if m.fullHeight > common.HeightBreakB {
-		m.helpMenu.height = 30
+		height = 30
 	}
-
 	if m.fullWidth > common.ResponsiveWidthThreshold {
-		m.helpMenu.width = 90
+		width = 90
 	}
-	// 2 for border, 1 for left padding, 2 for placeholder icon of searchbar
-	// 1 for additional character that View() of search bar function mysteriously adds.
-	m.helpMenu.searchBar.Width = m.helpMenu.width - (common.InnerPadding + common.BorderPadding)
+	m.helpMenu.SetDimensions(width, height)
 }
 
 func (m *model) setPromptModelSize() {
@@ -285,7 +280,7 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 		"promptModal.open", m.promptModal.IsOpen(),
 		"fileModel.renaming", m.fileModel.Renaming,
 		"searchBar.focused", m.getFocusedFilePanel().SearchBar.Focused(),
-		"helpMenu.open", m.helpMenu.open,
+		"helpMenu.open", m.helpMenu.IsOpen(),
 		"firstTextInput", m.firstTextInput,
 		"focusPanel", m.focusPanel,
 	)
@@ -324,8 +319,8 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 	case m.sortModal.IsOpen():
 		m.sortOptionsKey(msg.String())
 	// If help menu is open
-	case m.helpMenu.open:
-		m.helpMenuKey(msg.String())
+	case m.helpMenu.IsOpen():
+		m.helpMenu.HandleKey(msg.String())
 
 	case slices.Contains(common.Hotkeys.Quit, msg.String()):
 		m.modelQuitState = quitInitiated
@@ -517,10 +512,10 @@ func (m *model) View() string {
 
 func (m *model) updateRenderForOverlay(finalRender string) string {
 	// check if need pop up modal
-	if m.helpMenu.open {
-		helpMenu := m.helpMenuRender()
-		overlayX := m.fullWidth/common.CenterDivisor - m.helpMenu.width/common.CenterDivisor
-		overlayY := m.fullHeight/common.CenterDivisor - m.helpMenu.height/common.CenterDivisor
+	if m.helpMenu.IsOpen() {
+		helpMenu := m.helpMenu.Render()
+		overlayX := m.fullWidth/common.CenterDivisor - m.helpMenu.GetWidth()/common.CenterDivisor
+		overlayY := m.fullHeight/common.CenterDivisor - m.helpMenu.GetHeight()/common.CenterDivisor
 		return stringfunction.PlaceOverlay(overlayX, overlayY, helpMenu, finalRender)
 	}
 
@@ -547,8 +542,8 @@ func (m *model) updateRenderForOverlay(finalRender string) string {
 
 	if m.firstUse {
 		introduceModal := m.introduceModalRender()
-		overlayX := m.fullWidth/common.CenterDivisor - m.helpMenu.width/common.CenterDivisor
-		overlayY := m.fullHeight/common.CenterDivisor - m.helpMenu.height/common.CenterDivisor
+		overlayX := m.fullWidth/common.CenterDivisor - m.helpMenu.GetWidth()/common.CenterDivisor
+		overlayY := m.fullHeight/common.CenterDivisor - m.helpMenu.GetHeight()/common.CenterDivisor
 		return stringfunction.PlaceOverlay(overlayX, overlayY, introduceModal, finalRender)
 	}
 

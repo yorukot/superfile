@@ -3,6 +3,8 @@ package internal
 import (
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 
+	"github.com/yorukot/superfile/src/internal/ui/helpmenu"
+
 	"github.com/yorukot/superfile/src/internal/ui/clipboard"
 	"github.com/yorukot/superfile/src/internal/ui/sortmodel"
 
@@ -22,15 +24,7 @@ import (
 // Type representing the type of focused panel
 type focusPanelType int
 
-type hotkeyType int
-
 type modelQuitStateType int
-
-const (
-	globalType hotkeyType = iota
-	normalType
-	selectType
-)
 
 // Constants for panel with no focus
 const (
@@ -64,7 +58,7 @@ type model struct {
 	// Modals
 	notifyModel notify.Model
 	typingModal typingModal
-	helpMenu    helpMenuModal
+	helpMenu    helpmenu.Model
 	promptModal prompt.Model
 	zoxideModal zoxideui.Model
 	sortModal   sortmodel.Model
@@ -95,25 +89,6 @@ type model struct {
 
 	// whether usable trash directory exists or not
 	hasTrash bool
-}
-
-// Modal
-type helpMenuModal struct {
-	height       int
-	width        int
-	open         bool
-	renderIndex  int
-	cursor       int
-	data         []helpMenuModalData
-	filteredData []helpMenuModalData
-	searchBar    textinput.Model
-}
-
-type helpMenuModalData struct {
-	hotkey         []string
-	description    string
-	hotkeyWorkType hotkeyType
-	subTitle       string
 }
 
 type typingModal struct {
