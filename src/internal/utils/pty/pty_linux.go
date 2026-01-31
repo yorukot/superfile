@@ -77,14 +77,14 @@ func unlockPt(f *os.File) error {
 
 func open() (*os.File, *os.File, error) {
 	master, err := os.OpenFile("/dev/ptmx", os.O_RDWR, 0)
+	if err != nil {
+		return nil, nil, err
+	}
 	defer func() {
 		if err != nil {
 			_ = master.Close()
 		}
 	}()
-	if err != nil {
-		return nil, nil, err
-	}
 
 	slaveName, err := ptsName(master)
 	if err != nil {
