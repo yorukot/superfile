@@ -15,7 +15,8 @@ func TestReturnDirElement(t *testing.T) {
 	curTestDir := t.TempDir()
 	dir1 := filepath.Join(curTestDir, "dir1")
 	dir2 := filepath.Join(curTestDir, "dir2")
-	utils.SetupDirectories(t, curTestDir, dir1, dir2)
+	dirNatural := filepath.Join(curTestDir, "dirNatural")
+	utils.SetupDirectories(t, curTestDir, dir1, dir2, dirNatural)
 
 	creationDelay := time.Millisecond * 5
 	// Cleanup is handled by TestMain
@@ -46,6 +47,10 @@ func TestReturnDirElement(t *testing.T) {
 		{filepath.Join(curTestDir, "abc"), []byte("012345678901234")},
 		{filepath.Join(curTestDir, "file2.txt"), []byte("01234567890123456789")},
 		{filepath.Join(curTestDir, "1.json"), []byte("0123456789")},
+		{filepath.Join(dirNatural, "file1.txt"), []byte("a")},
+		{filepath.Join(dirNatural, "file2.txt"), []byte("b")},
+		{filepath.Join(dirNatural, "file10.txt"), []byte("c")},
+		{filepath.Join(dirNatural, "file20.txt"), []byte("d")},
 	}
 
 	for _, f := range fileSetup {
@@ -76,7 +81,7 @@ func TestReturnDirElement(t *testing.T) {
 			dotFiles: false,
 			sortKind: sortmodel.SortByName,
 			reversed: false,
-			expectedElemNames: []string{"dir1", "dir2", "1.json", "abc", "aBcD", "file1.txt",
+			expectedElemNames: []string{"dir1", "dir2", "dirNatural", "1.json", "abc", "aBcD", "file1.txt",
 				"file2.txt", "xyz.json"},
 		},
 		{
@@ -85,7 +90,7 @@ func TestReturnDirElement(t *testing.T) {
 			dotFiles: true,
 			sortKind: sortmodel.SortByName,
 			reversed: false,
-			expectedElemNames: []string{"dir1", "dir2", ".xyz", "1.json", "abc", "aBcD",
+			expectedElemNames: []string{"dir1", "dir2", "dirNatural", ".xyz", "1.json", "abc", "aBcD",
 				"file1.txt", "file2.txt", "xyz.json"},
 		},
 		{
@@ -94,7 +99,7 @@ func TestReturnDirElement(t *testing.T) {
 			dotFiles: false,
 			sortKind: sortmodel.SortByName,
 			reversed: true,
-			expectedElemNames: []string{"dir2", "dir1", "xyz.json", "file2.txt",
+			expectedElemNames: []string{"dirNatural", "dir2", "dir1", "xyz.json", "file2.txt",
 				"file1.txt", "aBcD", "abc", "1.json"},
 		},
 		{
@@ -103,7 +108,7 @@ func TestReturnDirElement(t *testing.T) {
 			dotFiles: false,
 			sortKind: sortmodel.SortBySize,
 			reversed: false,
-			expectedElemNames: []string{"dir2", "dir1", "1.json", "aBcD",
+			expectedElemNames: []string{"dir2", "dir1", "dirNatural", "1.json", "aBcD",
 				"file1.txt", "xyz.json", "abc", "file2.txt"},
 		},
 		{
@@ -112,7 +117,7 @@ func TestReturnDirElement(t *testing.T) {
 			dotFiles: false,
 			sortKind: sortmodel.SortBySize,
 			reversed: true,
-			expectedElemNames: []string{"dir1", "dir2", "file2.txt", "abc", "xyz.json",
+			expectedElemNames: []string{"dirNatural", "dir1", "dir2", "file2.txt", "abc", "xyz.json",
 				"file1.txt", "aBcD", "1.json"},
 		},
 		// This one could be flakey if files are created to quickly, or maybe created in
@@ -123,7 +128,7 @@ func TestReturnDirElement(t *testing.T) {
 			dotFiles: false,
 			sortKind: sortmodel.SortByDate,
 			reversed: false,
-			expectedElemNames: []string{"1.json", "file2.txt", "abc",
+			expectedElemNames: []string{"dirNatural", "1.json", "file2.txt", "abc",
 				"xyz.json", "file1.txt", "aBcD", "dir1", "dir2"},
 		},
 		{
@@ -132,7 +137,7 @@ func TestReturnDirElement(t *testing.T) {
 			dotFiles: false,
 			sortKind: sortmodel.SortByType,
 			reversed: false,
-			expectedElemNames: []string{"dir1", "dir2", "abc", "aBcD", "1.json", "xyz.json",
+			expectedElemNames: []string{"dir1", "dir2", "dirNatural", "abc", "aBcD", "1.json", "xyz.json",
 				"file1.txt", "file2.txt"},
 		},
 		{
@@ -141,7 +146,7 @@ func TestReturnDirElement(t *testing.T) {
 			dotFiles: true,
 			sortKind: sortmodel.SortByType,
 			reversed: true,
-			expectedElemNames: []string{"dir2", "dir1", ".xyz", "file2.txt", "file1.txt",
+			expectedElemNames: []string{"dirNatural", "dir2", "dir1", ".xyz", "file2.txt", "file1.txt",
 				"xyz.json", "1.json", "aBcD", "abc"},
 		},
 		{
@@ -169,7 +174,23 @@ func TestReturnDirElement(t *testing.T) {
 			sortKind:          sortmodel.SortBySize,
 			reversed:          true,
 			searchString:      "d",
-			expectedElemNames: []string{"dir1", "dir2", "aBcD"},
+			expectedElemNames: []string{"dirNatural", "dir1", "dir2", "aBcD"},
+		},
+		{
+			name:              "Sort by Natural",
+			location:          dirNatural,
+			dotFiles:          false,
+			sortKind:          sortmodel.SortByNatural,
+			reversed:          false,
+			expectedElemNames: []string{"file1.txt", "file2.txt", "file10.txt", "file20.txt"},
+		},
+		{
+			name:              "Sort by Natural Reversed",
+			location:          dirNatural,
+			dotFiles:          false,
+			sortKind:          sortmodel.SortByNatural,
+			reversed:          true,
+			expectedElemNames: []string{"file20.txt", "file10.txt", "file2.txt", "file1.txt"},
 		},
 	}
 
