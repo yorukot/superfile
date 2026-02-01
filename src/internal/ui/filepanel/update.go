@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"path/filepath"
 
 	"github.com/yorukot/superfile/src/internal/utils"
 )
@@ -43,7 +44,7 @@ func (m *Model) UpdateCurrentFilePanelDir(path string) error {
 	} else if !info.IsDir() {
 		return fmt.Errorf("%s is not a directory", path)
 	}
-
+	m.TargetFile = filepath.Base(m.Location)
 	// Switch to "path"
 	m.Location = path
 

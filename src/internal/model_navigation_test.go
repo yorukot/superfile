@@ -88,14 +88,27 @@ func TestFilePanelNavigation(t *testing.T) {
 			searchBarClear: true,
 		},
 		{
-			name:        "Enter via cd command",
+			name:        "Enter via cd command first dir",
 			startDir:    curTestDir,
 			resultDir:   dir1,
-			startCursor: 2,
+			startCursor: 0,
 			keyInput: []string{
 				common.Hotkeys.OpenSPFPrompt[0],
 				// TODO : Have it quoted, once cd command supports quoted paths
 				"cd " + dir1,
+				common.Hotkeys.ConfirmTyping[0],
+			},
+			searchBarClear: true,
+		},
+		{
+			name:        "Enter via cd command second dir",
+			startDir:    curTestDir,
+			resultDir:   dir2,
+			startCursor: 1,
+			keyInput: []string{
+				common.Hotkeys.OpenSPFPrompt[0],
+				// TODO : Have it quoted, once cd command supports quoted paths
+				"cd " + dir2,
 				common.Hotkeys.ConfirmTyping[0],
 			},
 			searchBarClear: true,
