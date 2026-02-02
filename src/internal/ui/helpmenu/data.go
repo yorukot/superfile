@@ -1,67 +1,16 @@
-package internal
+package helpmenu
 
 import (
-	zoxidelib "github.com/lazysegtree/go-zoxide"
-
-	"github.com/yorukot/superfile/src/internal/ui/helpmenu"
-
-	"github.com/yorukot/superfile/src/internal/ui/filemodel"
-	"github.com/yorukot/superfile/src/internal/ui/sortmodel"
-
-	"github.com/yorukot/superfile/src/internal/ui/metadata"
-	"github.com/yorukot/superfile/src/internal/ui/processbar"
-	"github.com/yorukot/superfile/src/internal/ui/sidebar"
+	"path/filepath"
+	"strings"
 
 	"github.com/yorukot/superfile/src/internal/common"
-	"github.com/yorukot/superfile/src/internal/ui/prompt"
-	zoxideui "github.com/yorukot/superfile/src/internal/ui/zoxide"
+	"github.com/yorukot/superfile/src/internal/utils"
 )
 
-// Generate and return model containing default configurations for interface
-// Maybe we can replace slice of strings with var args - Should we ?
-// TODO: Move the configuration parameters to a ModelConfig struct.
-// Something like `RendererConfig` struct for `Renderer` struct in ui/renderer package
-// Or even better API like varargs lambda function opts
-// which can be WithFooter(), WithXYZ()
-// Lots of improvements are waiting on it
-//   - Allow Sending thumbnailGeneratorNeeded as false to preview.New()
-//     to prevent noise in test logs. Same with imagePreviewer
-func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool,
-	firstPanelPaths []string, zClient *zoxidelib.Client) *model {
-	return &model{
-		focusPanel:      nonePanelFocus,
-		processBarModel: processbar.New(),
-		sidebarModel:    sidebar.New(),
-		fileMetaData:    metadata.New(),
-		fileModel:       filemodel.New(firstPanelPaths, toggleDotFile),
-		helpMenu:        helpmenu.New(),
-		promptModal:     prompt.DefaultModel(prompt.PromptMinHeight, prompt.PromptMinWidth),
-		zoxideModal:     zoxideui.DefaultModel(zoxideui.ZoxideMinHeight, zoxideui.ZoxideMinWidth, zClient),
-		sortModal:       sortmodel.New(),
-		zClient:         zClient,
-		modelQuitState:  notQuitting,
-		toggleFooter:    toggleFooter,
-		firstUse:        firstUse,
-		hasTrash:        common.InitTrash(),
-	}
-}
-
-func newHelpMenuModal() helpMenuModal {
-	helpMenuData := getHelpMenuData()
-
-	return helpMenuModal{
-		renderIndex:  0,
-		cursor:       1,
-		data:         helpMenuData,
-		filteredData: helpMenuData,
-		open:         false,
-		searchBar:    common.GenerateSearchBar(),
-	}
-}
-
 // Return help menu for Hotkeys
-func getHelpMenuData() []helpMenuModalData { //nolint: funlen // This should be self contained
-	data := []helpMenuModalData{
+func getData() []hotkeydata { //nolint: funlen // This should be self contained
+	data := []hotkeydata{
 		{
 			subTitle: "General",
 		},
@@ -295,16 +244,6 @@ func getHelpMenuData() []helpMenuModalData { //nolint: funlen // This should be 
 			hotkeyWorkType: normalType,
 		},
 		{
-			hotkey:         common.Hotkeys.EncryptFile,
-			description:    "Encrypt file or folder with password",
-			hotkeyWorkType: normalType,
-		},
-		{
-			hotkey:         common.Hotkeys.DecryptFile,
-			description:    "Decrypt .age encrypted file with password",
-			hotkeyWorkType: normalType,
-		},
-		{
 			hotkey:         common.Hotkeys.OpenFileWithEditor,
 			description:    "Open file with your default editor",
 			hotkeyWorkType: normalType,
@@ -317,4 +256,73 @@ func getHelpMenuData() []helpMenuModalData { //nolint: funlen // This should be 
 	}
 
 	return data
+}
+
+func removeOrphanSections(items []hotkeydata) []hotkeydata {
+	var result []hotkeydata
+	// Since we can't know beforehand which section are we actually filtering
+	// we may end up in a scenario where there are two sections (General, Panel navigation)
+	// with no hotkeys between them, so we need to remove the section which its hotkeys was
+	// completely filtered out (Orphan sections)
+	for i := range items {
+		if items[i].subTitle != "" {
+			// Look ahead: is the next item a real hotkey?
+			if i+1 < len(items) && items[i+1].subTitle == "" {
+				result = append(result, items[i])
+			}
+			// Else: skip this subtitle because no children
+		} else {
+			result = append(result, items[i])
+		}
+	}
+	return result
+}
+
+func (m *Model) filter(query string) {
+	filtered := fuzzySearch(query, m.data)
+	filtered = removeOrphanSections(filtered)
+
+	m.filteredData = filtered
+	if len(filtered) == 0 {
+		m.cursor = 0
+	} else {
+		m.cursor = 1
+	}
+	m.renderIndex = 0
+}
+
+// Fuzzy search function for a list of helpMenuModalData.
+// inspired from: sidebar/directory_utils.go
+func fuzzySearch(query string, data []hotkeydata) []hotkeydata {
+	if len(data) == 0 {
+		return []hotkeydata{}
+	}
+
+	// Optimization - This haystack can be kept precomputed based on description
+	// instead of re computing it in each call
+	haystack := []string{}
+	idxMap := []int{}
+	for i, item := range data {
+		if item.subTitle != "" {
+			continue
+		}
+		searchText := strings.Join(item.hotkey, " ") + " " + item.description
+		haystack = append(haystack, searchText)
+		idxMap = append(idxMap, i)
+	}
+
+	matchedIdx := map[int]struct{}{}
+	for _, match := range utils.FzfSearch(query, haystack) {
+		matchedIdx[idxMap[match.HayIndex]] = struct{}{}
+	}
+
+	results := []hotkeydata{}
+	for i, d := range data {
+		_, isMatch := matchedIdx[i]
+		if d.subTitle != "" || isMatch {
+			results = append(results, d)
+		}
+	}
+
+	return results
 }

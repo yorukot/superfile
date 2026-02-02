@@ -170,8 +170,8 @@ schema = 3
     version = "v1.11.1"
     hash = "sha256-sWfjkuKJyDllDEtnM8sb/pdLzPQmUYWYtmeWz/5suUc="
   [mod."github.com/ulikunitz/xz"]
-    version = "v0.5.14"
-    hash = "sha256-21oXcIVmFyw+ukGQtflly0wpqaqh1jE0C9hLDSFYR7E="
+    version = "v0.5.15"
+    hash = "sha256-L5KYLue5U14bxUuNyhZ6lIjbda6eCQsx1V6gToqfRdk="
   [mod."github.com/urfave/cli/v3"]
     version = "v3.6.1"
     hash = "sha256-q1WeKEvWoSyA0Wcan+Edjm71e0/vnPmqVvlfjUix7+8="
