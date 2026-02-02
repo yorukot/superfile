@@ -295,6 +295,16 @@ func getHelpMenuData() []helpMenuModalData { //nolint: funlen // This should be 
 			hotkeyWorkType: normalType,
 		},
 		{
+			hotkey:         common.Hotkeys.EncryptFile,
+			description:    "Encrypt file or folder with password",
+			hotkeyWorkType: normalType,
+		},
+		{
+			hotkey:         common.Hotkeys.DecryptFile,
+			description:    "Decrypt .age encrypted file with password",
+			hotkeyWorkType: normalType,
+		},
+		{
 			hotkey:         common.Hotkeys.OpenFileWithEditor,
 			description:    "Open file with your default editor",
 			hotkeyWorkType: normalType,

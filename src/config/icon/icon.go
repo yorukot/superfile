@@ -27,6 +27,8 @@ var (
 	Copy         = "\U000f018f" // Printable Rune : "󰆏"
 	Cut          = "\U000f0190" // Printable Rune : "󰆐"
 	Delete       = "\U000f01b4" // Printable Rune : "󰆴"
+	Lock         = "\uf023"     // Printable Rune : "" (encryption)
+	Unlock       = "\uf09c"     // Printable Rune : "" (decryption)
 
 	// other
 	Cursor          = "\uf054"     // Printable Rune : ""

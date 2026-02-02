@@ -62,12 +62,13 @@ type model struct {
 	focusPanel      focusPanelType
 
 	// Modals
-	notifyModel notify.Model
-	typingModal typingModal
-	helpMenu    helpMenuModal
-	promptModal prompt.Model
-	zoxideModal zoxideui.Model
-	sortModal   sortmodel.Model
+	notifyModel   notify.Model
+	typingModal   typingModal
+	passwordModal passwordModal
+	helpMenu      helpMenuModal
+	promptModal   prompt.Model
+	zoxideModal   zoxideui.Model
+	sortModal     sortmodel.Model
 
 	// Zoxide client for directory tracking
 	zClient *zoxidelib.Client
@@ -121,6 +122,14 @@ type typingModal struct {
 	open          bool
 	textInput     textinput.Model
 	errorMesssage string
+}
+
+type passwordModal struct {
+	open          bool
+	textInput     textinput.Model
+	errorMessage  string
+	operationType string // "encrypt" or "decrypt"
+	itemPath      string // path to file/folder being encrypted/decrypted
 }
 
 type editorFinishedMsg struct{ err error }

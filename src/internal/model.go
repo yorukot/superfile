@@ -298,6 +298,8 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 	switch {
 	case m.typingModal.open:
 		m.typingModalOpenKey(msg.String())
+	case m.passwordModal.open:
+		m.passwordModalOpenKey(msg.String())
 	case m.promptModal.IsOpen():
 		// Ignore keypress. It will be handled in Update call via
 		// updateFilePanelState
@@ -372,6 +374,8 @@ func (m *model) updateComponentState(msg tea.Msg) tea.Cmd {
 		focusPanel.SearchBar, cmd = focusPanel.SearchBar.Update(msg)
 	case m.typingModal.open:
 		m.typingModal.textInput, cmd = m.typingModal.textInput.Update(msg)
+	case m.passwordModal.open:
+		m.passwordModal.textInput, cmd = m.passwordModal.textInput.Update(msg)
 	case m.promptModal.IsOpen():
 		// TODO : Separate this to a utility
 		cwdLocation := m.getFocusedFilePanel().Location
@@ -554,9 +558,16 @@ func (m *model) updateRenderForOverlay(finalRender string) string {
 
 	if m.typingModal.open {
 		typingModal := m.typineModalRender()
-		overlayX := m.fullWidth/common.CenterDivisor - common.ModalWidth/common.CenterDivisor
-		overlayY := m.fullHeight/common.CenterDivisor - common.ModalHeight/common.CenterDivisor
+		overlayX := (m.fullWidth - common.ModalWidth) / common.CenterDivisor
+		overlayY := (m.fullHeight - common.ModalHeight) / common.CenterDivisor
 		return stringfunction.PlaceOverlay(overlayX, overlayY, typingModal, finalRender)
+	}
+
+	if m.passwordModal.open {
+		passwordModal := m.passwordModalRender()
+		overlayX := (m.fullWidth - common.ModalWidth) / common.CenterDivisor
+		overlayY := (m.fullHeight - common.ModalHeight) / common.CenterDivisor
+		return stringfunction.PlaceOverlay(overlayX, overlayY, passwordModal, finalRender)
 	}
 
 	if m.notifyModel.IsOpen() {

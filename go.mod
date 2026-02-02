@@ -3,6 +3,7 @@ module github.com/yorukot/superfile
 go 1.25.5
 
 require (
+	filippo.io/age v1.3.1
 	github.com/adrg/xdg v0.5.3
 	github.com/alecthomas/chroma/v2 v2.21.1
 	github.com/atotto/clipboard v0.1.4
@@ -23,10 +24,12 @@ require (
 	github.com/urfave/cli/v3 v3.6.1
 	golang.org/x/image v0.34.0
 	golang.org/x/mod v0.30.0
+	golang.org/x/term v0.37.0
 	golift.io/xtractr v0.2.2
 )
 
 require (
+	filippo.io/hpke v0.4.0 // indirect
 	github.com/charmbracelet/colorprofile v0.2.3-0.20250311203215-f60798e515dc // indirect
 	github.com/charmbracelet/x/cellbuf v0.0.13-0.20250311204145-2c3ea96c31dd // indirect
 	github.com/charmbracelet/x/term v0.2.1 // indirect
@@ -36,8 +39,8 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
+	golang.org/x/crypto v0.45.0 // indirect
 	golang.org/x/exp v0.0.0-20231006140011-7918f672742d // indirect
-	golang.org/x/term v0.18.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 

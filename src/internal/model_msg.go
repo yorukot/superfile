@@ -118,6 +118,44 @@ func (msg ExtractOperationMsg) ApplyToModel(_ *model) tea.Cmd {
 	return nil
 }
 
+type EncryptOperationMsg struct {
+	BaseMessage
+
+	state processbar.ProcessState
+}
+
+func NewEncryptOperationMsg(state processbar.ProcessState, reqID int) EncryptOperationMsg {
+	return EncryptOperationMsg{
+		state: state,
+		BaseMessage: BaseMessage{
+			reqID: reqID,
+		},
+	}
+}
+
+func (msg EncryptOperationMsg) ApplyToModel(_ *model) tea.Cmd {
+	return nil
+}
+
+type DecryptOperationMsg struct {
+	BaseMessage
+
+	state processbar.ProcessState
+}
+
+func NewDecryptOperationMsg(state processbar.ProcessState, reqID int) DecryptOperationMsg {
+	return DecryptOperationMsg{
+		state: state,
+		BaseMessage: BaseMessage{
+			reqID: reqID,
+		},
+	}
+}
+
+func (msg DecryptOperationMsg) ApplyToModel(_ *model) tea.Cmd {
+	return nil
+}
+
 type MetadataMsg struct {
 	BaseMessage
 

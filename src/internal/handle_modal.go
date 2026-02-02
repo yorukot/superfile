@@ -8,6 +8,7 @@ import (
 
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
+	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/utils"
 )
 
@@ -254,6 +255,87 @@ func (m *model) openHelpMenu() {
 func (m *model) quitHelpMenu() {
 	m.helpMenu.searchBar.Reset()
 	m.helpMenu.open = false
+}
+
+// Execute password operation (encrypt or decrypt)
+func (m *model) executePasswordOperation() {
+	password := m.passwordModal.textInput.Value()
+
+	// Validate password
+	if len(password) == 0 {
+		m.passwordModal.errorMessage = "Password cannot be empty"
+		return
+	}
+
+	itemPath := m.passwordModal.itemPath
+	operationType := m.passwordModal.operationType
+
+	// Close modal
+	m.passwordModal.errorMessage = ""
+	m.passwordModal.open = false
+	m.passwordModal.textInput.Blur()
+	m.passwordModal.textInput.SetValue("")
+
+	// Get request ID for tracking
+	reqID := m.ioReqCnt
+	m.ioReqCnt++
+
+	// Execute operation based on type
+	switch operationType {
+	case "encrypt":
+		// Determine if it's a directory
+		info, err := os.Stat(itemPath)
+		if err != nil {
+			slog.Error("Error getting file info", "error", err, "path", itemPath)
+			return
+		}
+
+		slog.Debug("Submitting encrypt file request", "reqID", reqID, "item", itemPath, "isDir", info.IsDir())
+
+		// Execute encryption in background
+		go func() {
+			var encryptErr error
+			if info.IsDir() {
+				encryptErr = encryptFolderWithPassword(itemPath, password, &m.processBarModel)
+			} else {
+				encryptErr = encryptFileWithPassword(itemPath, password, &m.processBarModel)
+			}
+
+			var state processbar.ProcessState
+			if encryptErr != nil {
+				slog.Error("Error encrypting", "error", encryptErr)
+				state = processbar.Failed
+			} else {
+				state = processbar.Successful
+			}
+
+			// Will be handled by model Update()
+			slog.Debug("Encryption operation completed", "reqID", reqID, "state", state)
+		}()
+	case "decrypt":
+		slog.Debug("Submitting decrypt file request", "reqID", reqID, "item", itemPath)
+
+		// Execute decryption in background
+		go func() {
+			var decryptErr error
+			if strings.HasSuffix(strings.ToLower(itemPath), ".tar.age") {
+				decryptErr = decryptAndExtractTarWithPassword(itemPath, password, &m.processBarModel)
+			} else {
+				decryptErr = decryptFileWithPassword(itemPath, password, &m.processBarModel)
+			}
+
+			var state processbar.ProcessState
+			if decryptErr != nil {
+				slog.Error("Error decrypting", "error", decryptErr)
+				state = processbar.Failed
+			} else {
+				state = processbar.Successful
+			}
+
+			// Will be handled by model Update()
+			slog.Debug("Decryption operation completed", "reqID", reqID, "state", state)
+		}()
+	}
 }
 
 func (m *model) getFocusedFilePanel() *filepanel.Model {

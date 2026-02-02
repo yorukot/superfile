@@ -153,6 +153,9 @@ type HotkeysType struct {
 	ExtractFile  []string `toml:"extract_file" comment:"compress and extract"`
 	CompressFile []string `toml:"compress_file"`
 
+	EncryptFile []string `toml:"encrypt_file" comment:"encryption and decryption"`
+	DecryptFile []string `toml:"decrypt_file"`
+
 	OpenFileWithEditor             []string `toml:"open_file_with_editor" comment:"editor"`
 	OpenCurrentDirectoryWithEditor []string `toml:"open_current_directory_with_editor"`
 
