@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"path/filepath"
 
 	"github.com/yorukot/superfile/src/internal/utils"
 )
@@ -44,13 +45,19 @@ func (m *Model) UpdateCurrentFilePanelDir(path string) error {
 		return fmt.Errorf("%s is not a directory", path)
 	}
 
+	// In case of switching to parent, explicitly set focus.
+	// This is to handle when there isn't a DirectoryRecord, yet.
+	if filepath.Dir(m.Location) == path {
+		m.TargetFile = filepath.Base(m.Location)
+	}
 	// Switch to "path"
 	m.Location = path
 
-	// TODO(BUG) : We are fetching the cursor and render from cache, but this could become invalid
+	// NOTE: We are fetching the cursor and render from cache, but this could become invalid
 	// in case user deletes some items in the directory via another file manager and then switch back
-	// Basically this directoryRecords cache can be invalid. On each Update(), we must validate
-	// the cursor and render values.
+	// Basically this directoryRecords cache can be invalid. On each Update(), on dire change
+	// we do a element fetch and validate the cursor and render values. But the filepane could
+	// stay in invalid state till that and operations done before the update may fail
 	curDirectoryRecord, hasRecord := m.DirectoryRecords[m.Location]
 	if hasRecord {
 		m.cursor = curDirectoryRecord.directoryCursor
