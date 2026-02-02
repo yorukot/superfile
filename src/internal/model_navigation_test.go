@@ -101,19 +101,6 @@ func TestFilePanelNavigation(t *testing.T) {
 			searchBarClear: true,
 		},
 		{
-			name:        "Enter via cd command second dir",
-			startDir:    curTestDir,
-			resultDir:   dir2,
-			startCursor: 1,
-			keyInput: []string{
-				common.Hotkeys.OpenSPFPrompt[0],
-				// TODO : Have it quoted, once cd command supports quoted paths
-				"cd " + dir2,
-				common.Hotkeys.ConfirmTyping[0],
-			},
-			searchBarClear: true,
-		},
-		{
 			name:        "cd . should be ignored",
 			startDir:    curTestDir,
 			resultDir:   curTestDir,
@@ -157,6 +144,17 @@ func TestFilePanelNavigation(t *testing.T) {
 			assert.Equal(t, originalRenderIndex, m.getFocusedFilePanel().GetRenderIndex())
 		})
 	}
+
+	t.Run("Focus on current directory on navigation to parent directory", func(t *testing.T) {
+		m := defaultTestModel(dir2)
+		p := NewTestTeaProgWithEventLoop(t, m)
+		p.SendKey(common.Hotkeys.ParentDirectory[0])
+
+		assert.Eventually(t, func() bool {
+			return m.getFocusedFilePanel().GetFocusedItem().Location == dir2 &&
+				m.getFocusedFilePanel().GetCursor() == 1
+		}, DefaultTestTimeout, DefaultTestTick)
+	})
 }
 
 func TestCursorOutOfBoundsAfterDirectorySwitch(t *testing.T) {
