@@ -96,6 +96,36 @@ func (m *model) typineModalRender() string {
 		Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip + err)
 }
 
+func (m *model) passwordModalRender() string {
+	var title string
+	if m.passwordModal.operationType == "encrypt" {
+		title = common.FilePanelTopDirectoryIconStyle.Render(" "+icon.Lock+icon.Space) +
+			common.FilePanelTopPathStyle.Render("Encrypt File")
+	} else {
+		title = common.FilePanelTopDirectoryIconStyle.Render(" "+icon.Unlock+icon.Space) +
+			common.FilePanelTopPathStyle.Render("Decrypt File")
+	}
+
+	itemPath := common.ModalStyle.Render(
+		common.TruncateTextBeginning(m.passwordModal.itemPath, common.ModalWidth-common.InnerPadding, "..."),
+	) + "\n"
+
+	confirm := common.ModalConfirm.Render(" (" + common.Hotkeys.ConfirmTyping[0] + ") Confirm ")
+	cancel := common.ModalCancel.Render(" (" + common.Hotkeys.CancelTyping[0] + ") Cancel ")
+
+	tip := confirm +
+		lipgloss.NewStyle().Background(common.ModalBGColor).Render("           ") +
+		cancel
+
+	var err string
+	if m.passwordModal.errorMessage != "" {
+		err = "\n\n" + common.ModalErrorStyle.Render(m.passwordModal.errorMessage)
+	}
+
+	return common.ModalBorderStyle(common.ModalHeight, common.ModalWidth).
+		Render(title + "\n" + itemPath + "\n" + m.passwordModal.textInput.View() + "\n\n" + tip + err)
+}
+
 func (m *model) introduceModalRender() string {
 	title := common.SidebarTitleStyle.Render(" Thanks for using superfile!!") +
 		common.ModalStyle.Render("\n You can read the following information before starting to use it!")

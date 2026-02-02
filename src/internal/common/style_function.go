@@ -145,6 +145,24 @@ func GenerateNewFileTextInput() textinput.Model {
 	return t
 }
 
+// GeneratePasswordTextInput generates a password text input with masking
+func GeneratePasswordTextInput() textinput.Model {
+	t := textinput.New()
+	t.Cursor.Style = ModalCursorStyle
+	t.Cursor.TextStyle = ModalStyle
+	t.TextStyle = ModalStyle
+	t.Cursor.Blink = true
+	t.Placeholder = "Enter password"
+	t.PlaceholderStyle = ModalStyle
+	t.EchoMode = textinput.EchoPassword
+	t.EchoCharacter = '•'
+	t.Focus()
+	t.CharLimit = 256
+	//nolint:mnd // modal width minus padding
+	t.Width = ModalWidth - 10
+	return t
+}
+
 func GenerateRenameTextInput(width int, cursorPos int, defaultValue string) textinput.Model {
 	ti := textinput.New()
 	ti.Cursor.Style = FilePanelCursorStyle

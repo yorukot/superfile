@@ -112,6 +112,12 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 	case slices.Contains(common.Hotkeys.CompressFile, msg):
 		return m.getCompressSelectedFilesCmd()
 
+	case slices.Contains(common.Hotkeys.EncryptFile, msg):
+		return m.getEncryptFileCmd()
+
+	case slices.Contains(common.Hotkeys.DecryptFile, msg):
+		return m.getDecryptFileCmd()
+
 	case slices.Contains(common.Hotkeys.OpenCommandLine, msg):
 		m.promptModal.Open(true)
 	case slices.Contains(common.Hotkeys.OpenSPFPrompt, msg):
@@ -211,6 +217,19 @@ func (m *model) typingModalOpenKey(msg string) {
 		m.cancelTypingModal()
 	case slices.Contains(common.Hotkeys.ConfirmTyping, msg):
 		m.createItem()
+	}
+}
+
+func (m *model) passwordModalOpenKey(msg string) {
+	switch {
+	case slices.Contains(common.Hotkeys.CancelTyping, msg):
+		// Cancel password input
+		m.passwordModal.errorMessage = ""
+		m.passwordModal.open = false
+		m.passwordModal.textInput.Blur()
+	case slices.Contains(common.Hotkeys.ConfirmTyping, msg):
+		// Confirm and execute encryption/decryption
+		m.executePasswordOperation()
 	}
 }
 

@@ -54,6 +54,10 @@ permanently_delete_items = ['D', '']
 compress_file = ['ctrl+a', '']
 extract_file = ['ctrl+e', '']
 
+#-- Encryption
+encrypt_file = ['ctrl+y', '']
+decrypt_file = ['ctrl+u', '']
+
 #-- Editor Actions
 open_current_directory_with_editor = ['E', '']
 open_file_with_editor = ['e', '']

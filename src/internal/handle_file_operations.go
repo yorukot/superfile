@@ -540,3 +540,50 @@ func (m *model) copyPWD() {
 		slog.Error("Error while copy present working directory", "error", err)
 	}
 }
+
+// Encrypt file or folder with password
+func (m *model) getEncryptFileCmd() tea.Cmd {
+	panel := m.getFocusedFilePanel()
+	if panel.Empty() {
+		return nil
+	}
+
+	item := panel.GetFocusedItem()
+
+	// Open password modal
+	m.passwordModal.open = true
+	//nolint:goconst // Operation type strings are descriptive literals
+	m.passwordModal.operationType = "encrypt"
+	m.passwordModal.itemPath = item.Location
+	m.passwordModal.textInput = common.GeneratePasswordTextInput()
+	m.passwordModal.errorMessage = ""
+	m.firstTextInput = true
+
+	return nil
+}
+
+// Decrypt file with password
+func (m *model) getDecryptFileCmd() tea.Cmd {
+	panel := m.getFocusedFilePanel()
+	if panel.Empty() {
+		return nil
+	}
+
+	item := panel.GetFocusedItem().Location
+
+	// Check if file has .age extension
+	if !strings.HasSuffix(strings.ToLower(item), ".age") {
+		slog.Error("Selected file is not encrypted (no .age extension)", "item", item)
+		return nil
+	}
+
+	// Open password modal
+	m.passwordModal.open = true
+	m.passwordModal.operationType = "decrypt"
+	m.passwordModal.itemPath = item
+	m.passwordModal.textInput = common.GeneratePasswordTextInput()
+	m.passwordModal.errorMessage = ""
+	m.firstTextInput = true
+
+	return nil
+}
