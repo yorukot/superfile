@@ -35,11 +35,14 @@ func (m *Model) renderVisibleResults(r *rendering.Renderer, endIndex int) {
 	for i := m.renderIndex; i < endIndex; i++ {
 		dir := m.results[i]
 
-		availablePathWidth := m.width - columnWidth
-		name := common.TruncateTextBeginning(dir.Name, availablePathWidth/2, "...")
-		path := common.TruncateTextBeginning(dir.Location, availablePathWidth/2, "...")
+		availableWidth := m.width - columnWidth
+		nameWidth := availableWidth / 3
+		pathWidth := availableWidth - nameWidth
 
-		line := fmt.Sprintf(" %-15s | %s", name, path)
+		name := common.TruncateTextBeginning(dir.Name, nameWidth, "...")
+		path := common.TruncateTextBeginning(dir.Location, pathWidth, "...")
+
+		line := fmt.Sprintf(" %-*s | %s", nameWidth, name, path)
 
 		if i == m.cursor {
 			line = common.ModalCursorStyle.Render(line)

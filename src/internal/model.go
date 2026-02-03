@@ -263,8 +263,8 @@ func (m *model) setPinnedModalSize() {
 	// Scale pinned modal's maxHeight - 50% of total height to accommodate scroll indicators
 	m.pinnedModal.SetMaxHeight(m.fullHeight / 2) //nolint:mnd // modal uses half height for layout
 
-	// Scale pinned modal's width - 50% of total width
-	m.pinnedModal.SetWidth(m.fullWidth / 2) //nolint:mnd // modal uses half width for layout
+	// Scale pinned modal's width - 75% of total width
+	m.pinnedModal.SetWidth(m.fullWidth * 3 / 4) //nolint:mnd // modal uses 3/4 width for layout
 }
 
 func (m *model) setFooterComponentSize() {
