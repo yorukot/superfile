@@ -80,6 +80,12 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 			slog.Error("unexpected error while creating new panel", "error", err)
 		}
 		return cmd
+	case slices.Contains(common.Hotkeys.SplitPanel, msg):
+		cmd, err := m.splitPanel()
+		if err != nil && !errors.Is(err, filemodel.ErrMaximumPanelCount) {
+			slog.Error("unexpected error while splitting panel", "error", err)
+		}
+		return cmd
 	case slices.Contains(common.Hotkeys.ToggleFilePreviewPanel, msg):
 		return m.fileModel.ToggleFilePreviewPanel()
 

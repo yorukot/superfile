@@ -131,6 +131,7 @@ type HotkeysType struct {
 
 	CloseFilePanel         []string `toml:"close_file_panel" comment:"file panel control"`
 	CreateNewFilePanel     []string `toml:"create_new_file_panel"`
+	SplitPanel             []string `toml:"split_panel"`
 	NextFilePanel          []string `toml:"next_file_panel"`
 	PreviousFilePanel      []string `toml:"previous_file_panel"`
 	ToggleFilePreviewPanel []string `toml:"toggle_file_preview_panel"`
