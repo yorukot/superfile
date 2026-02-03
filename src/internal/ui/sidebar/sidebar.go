@@ -104,6 +104,14 @@ func (s *Model) TogglePinnedDirectory(dir string) error {
 	return s.pinnedMgr.Toggle(dir)
 }
 
+// GetPinnedDirectories returns the list of pinned directories.
+func (s *Model) GetPinnedDirectories() []directory {
+	if s.Disabled() || s.pinnedMgr == nil {
+		return []directory{}
+	}
+	return s.pinnedMgr.Load()
+}
+
 // New initializes and returns a new Model for the sidebar correctly set up with configuration.
 func New() Model {
 	if common.Config.SidebarWidth == 0 {
