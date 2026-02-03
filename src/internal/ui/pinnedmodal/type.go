@@ -19,6 +19,7 @@ type Model struct {
 	allDirs     []Directory
 	cursor      int
 	renderIndex int
+	reqCnt      int
 
 	width     int
 	maxHeight int
@@ -27,11 +28,13 @@ type Model struct {
 type UpdateMsg struct {
 	query   string
 	results []Directory
+	reqID   int
 }
 
-func NewUpdateMsg(query string, results []Directory) UpdateMsg {
+func NewUpdateMsg(query string, results []Directory, reqID int) UpdateMsg {
 	return UpdateMsg{
 		query:   query,
 		results: results,
+		reqID:   reqID,
 	}
 }

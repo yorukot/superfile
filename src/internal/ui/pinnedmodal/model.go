@@ -2,7 +2,6 @@ package pinnedmodal
 
 import (
 	"slices"
-	"unicode"
 
 	tea "github.com/charmbracelet/bubbletea"
 
@@ -41,12 +40,17 @@ func (m *Model) HandleUpdate(msg tea.Msg) (common.ModelAction, tea.Cmd) {
 		case slices.Contains(common.Hotkeys.ConfirmTyping, msg.String()):
 			action = m.handleConfirm()
 			m.Close()
-		case slices.Contains(common.Hotkeys.CancelTyping, msg.String()):
+		case slices.Contains(common.Hotkeys.CancelTyping, msg.String()),
+			slices.Contains(common.Hotkeys.Quit, msg.String()):
 			m.Close()
-		case slices.Contains(common.Hotkeys.ListUp, msg.String()) && !isKeyAlphaNum(msg):
+		case slices.Contains(common.Hotkeys.ListUp, msg.String()):
 			m.navigateUp()
-		case slices.Contains(common.Hotkeys.ListDown, msg.String()) && !isKeyAlphaNum(msg):
+		case slices.Contains(common.Hotkeys.ListDown, msg.String()):
 			m.navigateDown()
+		case slices.Contains(common.Hotkeys.PageUp, msg.String()):
+			m.navigatePageUp()
+		case slices.Contains(common.Hotkeys.PageDown, msg.String()):
+			m.navigatePageDown()
 		case slices.Contains(common.Hotkeys.GotoPinned, msg.String()) && m.justOpened:
 			m.justOpened = false
 		default:
@@ -71,17 +75,42 @@ func (m *Model) handleConfirm() common.ModelAction {
 func (m *Model) handleNormalKeyInput(msg tea.KeyMsg) tea.Cmd {
 	var cmd tea.Cmd
 	m.textInput, cmd = m.textInput.Update(msg)
-	m.FilterPinnedDirs(m.textInput.Value())
-	return cmd
+	return tea.Batch(cmd, m.GetQueryCmd(m.textInput.Value()))
 }
 
 func (m *Model) GetQueryCmd(query string) tea.Cmd {
+	reqID := m.reqCnt
+	m.reqCnt++
 	return func() tea.Msg {
-		// Work on a copy of the model to avoid mutating shared state
-		mCopy := *m
-		mCopy.FilterPinnedDirs(query)
-		return NewUpdateMsg(query, mCopy.results)
+		results := filterPinnedDirs(query, m.allDirs)
+		return NewUpdateMsg(query, results, reqID)
 	}
+}
+
+func filterPinnedDirs(query string, allDirs []Directory) []Directory {
+	if query == "" {
+		return allDirs
+	}
+
+	if len(allDirs) == 0 {
+		return []Directory{}
+	}
+
+	var filteredDirs []Directory
+
+	haystack := make([]string, len(allDirs))
+	for i, dir := range allDirs {
+		searchText := dir.Name + " " + dir.Location
+		haystack[i] = searchText
+	}
+
+	for _, match := range utils.FzfSearch(query, haystack) {
+		if match.HayIndex >= 0 && int(match.HayIndex) < len(allDirs) {
+			filteredDirs = append(filteredDirs, allDirs[match.HayIndex])
+		}
+	}
+
+	return filteredDirs
 }
 
 func (m *Model) LoadPinnedDirs(dirs []Directory) {
@@ -92,33 +121,7 @@ func (m *Model) LoadPinnedDirs(dirs []Directory) {
 }
 
 func (m *Model) FilterPinnedDirs(query string) {
-	if query == "" {
-		m.results = m.allDirs
-		m.cursor = 0
-		m.renderIndex = 0
-		return
-	}
-
-	if len(m.allDirs) == 0 {
-		m.results = []Directory{}
-		return
-	}
-
-	var filteredDirs []Directory
-
-	haystack := make([]string, len(m.allDirs))
-	for i, dir := range m.allDirs {
-		searchText := dir.Name + " " + dir.Location
-		haystack[i] = searchText
-	}
-
-	for _, match := range utils.FzfSearch(query, haystack) {
-		if match.HayIndex >= 0 && match.HayIndex < len(m.allDirs) {
-			filteredDirs = append(filteredDirs, m.allDirs[match.HayIndex])
-		}
-	}
-
-	m.results = filteredDirs
+	m.results = filterPinnedDirs(query, m.allDirs)
 	m.cursor = 0
 	m.renderIndex = 0
 }
@@ -134,12 +137,4 @@ func (msg UpdateMsg) Apply(m *Model) tea.Cmd {
 	m.renderIndex = 0
 
 	return nil
-}
-
-func isKeyAlphaNum(msg tea.KeyMsg) bool {
-	r := []rune(msg.String())
-	if len(r) != 1 {
-		return false
-	}
-	return unicode.IsLetter(r[0]) || unicode.IsNumber(r[0])
 }

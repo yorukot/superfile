@@ -41,7 +41,7 @@ func (m *Model) GetMaxHeight() int {
 
 func (m *Model) SetWidth(width int) {
 	if width < PinnedModalMinWidth {
-		slog.Warn("PinnedModal initialized with too less width", "width", width)
+		slog.Warn("PinnedModal initialized with width too small", "width", width)
 		width = PinnedModalMinWidth
 	}
 	m.width = width
@@ -50,7 +50,7 @@ func (m *Model) SetWidth(width int) {
 
 func (m *Model) SetMaxHeight(maxHeight int) {
 	if maxHeight < PinnedModalMinHeight {
-		slog.Warn("PinnedModal initialized with too less maxHeight", "maxHeight", maxHeight)
+		slog.Warn("PinnedModal initialized with maxHeight too small", "maxHeight", maxHeight)
 		maxHeight = PinnedModalMinHeight
 	}
 	m.maxHeight = maxHeight

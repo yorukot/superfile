@@ -56,6 +56,13 @@ func (m *Model) renderVisibleResults(r *rendering.Renderer, endIndex int) {
 		nameWidth := contentWidth / 3
 		pathWidth := contentWidth - nameWidth
 
+		if nameWidth < 0 {
+			nameWidth = 0
+		}
+		if pathWidth < 0 {
+			pathWidth = 0
+		}
+
 		name := common.TruncateTextBeginning(dir.Name, nameWidth, "...")
 		path := common.TruncateTextBeginning(dir.Location, pathWidth, "...")
 

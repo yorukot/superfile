@@ -24,6 +24,28 @@ func (m *Model) navigateDown() {
 	m.updateRenderIndex()
 }
 
+func (m *Model) navigatePageUp() {
+	if len(m.results) == 0 {
+		return
+	}
+	m.cursor -= maxVisibleResults
+	if m.cursor < 0 {
+		m.cursor = 0
+	}
+	m.updateRenderIndex()
+}
+
+func (m *Model) navigatePageDown() {
+	if len(m.results) == 0 {
+		return
+	}
+	m.cursor += maxVisibleResults
+	if m.cursor >= len(m.results) {
+		m.cursor = len(m.results) - 1
+	}
+	m.updateRenderIndex()
+}
+
 func (m *Model) updateRenderIndex() {
 	if len(m.results) == 0 {
 		m.renderIndex = 0
