@@ -31,7 +31,7 @@ next_file_panel = ['tab', 'L']
 open_sort_options_menu = ['o', '']
 pinned_directory = ['P', '']
 previous_file_panel = ['shift+left', 'H']
-split_panel = ['N', '']
+split_file_panel = ['N', '']
 toggle_file_preview_panel = ['f', '']
 toggle_reverse_sort = ['R', '']
 
