@@ -15,7 +15,7 @@ func (m *Model) Open() tea.Cmd {
 	m.results = m.allDirs
 	m.cursor = 0
 	m.renderIndex = 0
-	return nil
+	return m.GetQueryCmd("")
 }
 
 func (m *Model) Close() {
@@ -54,4 +54,14 @@ func (m *Model) SetMaxHeight(maxHeight int) {
 		maxHeight = PinnedModalMinHeight
 	}
 	m.maxHeight = maxHeight
+}
+
+func (m *Model) GetTextInputValue() string {
+	return m.textInput.Value()
+}
+
+func (m *Model) GetResults() []Directory {
+	out := make([]Directory, len(m.results))
+	copy(out, m.results)
+	return out
 }

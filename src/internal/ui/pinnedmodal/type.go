@@ -29,12 +29,18 @@ type UpdateMsg struct {
 	query   string
 	results []Directory
 	reqID   int
+	path    string
 }
 
-func NewUpdateMsg(query string, results []Directory, reqID int) UpdateMsg {
+func NewUpdateMsg(query string, results []Directory, reqID int, path string) UpdateMsg {
 	return UpdateMsg{
 		query:   query,
 		results: results,
 		reqID:   reqID,
+		path:    path,
 	}
+}
+
+func (msg UpdateMsg) GetReqID() int {
+	return msg.reqID
 }

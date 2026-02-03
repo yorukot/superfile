@@ -6,10 +6,15 @@ func (m *Model) navigateUp() {
 	}
 	if m.cursor > 0 {
 		m.cursor--
+		if m.cursor < m.renderIndex {
+			m.renderIndex = m.cursor
+		}
 	} else {
 		m.cursor = len(m.results) - 1
+		if m.cursor >= m.renderIndex+maxVisibleResults {
+			m.renderIndex = m.cursor - maxVisibleResults + 1
+		}
 	}
-	m.updateRenderIndex()
 }
 
 func (m *Model) navigateDown() {
@@ -18,56 +23,53 @@ func (m *Model) navigateDown() {
 	}
 	if m.cursor < len(m.results)-1 {
 		m.cursor++
+		if m.cursor >= m.renderIndex+maxVisibleResults {
+			m.renderIndex = m.cursor - maxVisibleResults + 1
+		}
 	} else {
 		m.cursor = 0
+		m.renderIndex = 0
 	}
-	m.updateRenderIndex()
 }
 
 func (m *Model) navigatePageUp() {
 	if len(m.results) == 0 {
 		return
 	}
-	m.cursor -= maxVisibleResults
-	if m.cursor < 0 {
-		m.cursor = 0
+	scrollAmount := maxVisibleResults - 1
+	if scrollAmount < 1 {
+		scrollAmount = 1
 	}
-	m.updateRenderIndex()
+
+	if m.cursor-scrollAmount >= 0 {
+		m.cursor -= scrollAmount
+		if m.cursor < m.renderIndex {
+			m.renderIndex = m.cursor
+		}
+	} else {
+		m.cursor = 0
+		m.renderIndex = 0
+	}
 }
 
 func (m *Model) navigatePageDown() {
 	if len(m.results) == 0 {
 		return
 	}
-	m.cursor += maxVisibleResults
-	if m.cursor >= len(m.results) {
+	scrollAmount := maxVisibleResults - 1
+	if scrollAmount < 1 {
+		scrollAmount = 1
+	}
+
+	if m.cursor+scrollAmount < len(m.results) {
+		m.cursor += scrollAmount
+		if m.cursor >= m.renderIndex+maxVisibleResults {
+			m.renderIndex = m.cursor - maxVisibleResults + 1
+		}
+	} else {
 		m.cursor = len(m.results) - 1
-	}
-	m.updateRenderIndex()
-}
-
-func (m *Model) updateRenderIndex() {
-	if len(m.results) == 0 {
-		m.renderIndex = 0
-		return
-	}
-
-	if m.cursor < m.renderIndex {
-		m.renderIndex = m.cursor
-	}
-
-	if m.cursor >= m.renderIndex+maxVisibleResults {
-		m.renderIndex = m.cursor - maxVisibleResults + 1
-	}
-
-	if m.renderIndex < 0 {
-		m.renderIndex = 0
-	}
-	maxRenderIndex := len(m.results) - maxVisibleResults
-	if maxRenderIndex < 0 {
-		maxRenderIndex = 0
-	}
-	if m.renderIndex > maxRenderIndex {
-		m.renderIndex = maxRenderIndex
+		if m.cursor >= m.renderIndex+maxVisibleResults {
+			m.renderIndex = m.cursor - maxVisibleResults + 1
+		}
 	}
 }

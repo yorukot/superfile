@@ -80,10 +80,11 @@ func (m *Model) handleNormalKeyInput(msg tea.KeyMsg) tea.Cmd {
 
 func (m *Model) GetQueryCmd(query string) tea.Cmd {
 	reqID := m.reqCnt
+	allDirs := m.allDirs
 	m.reqCnt++
 	return func() tea.Msg {
-		results := filterPinnedDirs(query, m.allDirs)
-		return NewUpdateMsg(query, results, reqID)
+		results := filterPinnedDirs(query, allDirs)
+		return NewUpdateMsg(query, results, reqID, "")
 	}
 }
 
