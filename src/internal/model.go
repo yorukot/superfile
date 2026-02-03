@@ -466,7 +466,17 @@ func (m *model) splitPanel() (tea.Cmd, error) {
 	return m.fileModel.CreateNewFilePanel(m.getFocusedFilePanel().Location)
 }
 
-func (m *model) openPinnedModal() tea.Cmd {
+func (m *model) openPinnedModal() (cmd tea.Cmd) {
+	// Protect against potential panics inside GetPinnedDirectories when the sidebar
+	// is disabled (e.g., underlying pinned manager is nil). In that case, fall back
+	// to opening the modal with an empty list instead of crashing.
+	defer func() {
+		if r := recover(); r != nil {
+			slog.Error("failed to load pinned directories from sidebar; opening empty pinned modal", "panic", r)
+			m.pinnedModal.LoadPinnedDirs(nil)
+			cmd = m.pinnedModal.Open()
+		}
+	}()
 	pinnedDirs := m.sidebarModel.GetPinnedDirectories()
 	convertedDirs := make([]pinnedmodal.Directory, 0, len(pinnedDirs))
 	for _, dir := range pinnedDirs {

@@ -77,8 +77,10 @@ func (m *Model) handleNormalKeyInput(msg tea.KeyMsg) tea.Cmd {
 
 func (m *Model) GetQueryCmd(query string) tea.Cmd {
 	return func() tea.Msg {
-		m.FilterPinnedDirs(query)
-		return NewUpdateMsg(query, m.results)
+		// Work on a copy of the model to avoid mutating shared state
+		mCopy := *m
+		mCopy.FilterPinnedDirs(query)
+		return NewUpdateMsg(query, mCopy.results)
 	}
 }
 
@@ -105,16 +107,14 @@ func (m *Model) FilterPinnedDirs(query string) {
 	var filteredDirs []Directory
 
 	haystack := make([]string, len(m.allDirs))
-	dirMap := make(map[string]Directory, len(m.allDirs))
 	for i, dir := range m.allDirs {
 		searchText := dir.Name + " " + dir.Location
 		haystack[i] = searchText
-		dirMap[dir.Location] = dir
 	}
 
 	for _, match := range utils.FzfSearch(query, haystack) {
-		if d, ok := dirMap[match.Key]; ok {
-			filteredDirs = append(filteredDirs, d)
+		if match.HayIndex >= 0 && match.HayIndex < len(m.allDirs) {
+			filteredDirs = append(filteredDirs, m.allDirs[match.HayIndex])
 		}
 	}
 

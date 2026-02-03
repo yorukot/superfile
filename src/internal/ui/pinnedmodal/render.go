@@ -35,14 +35,31 @@ func (m *Model) renderVisibleResults(r *rendering.Renderer, endIndex int) {
 	for i := m.renderIndex; i < endIndex; i++ {
 		dir := m.results[i]
 
-		availableWidth := m.width - columnWidth
-		nameWidth := availableWidth / 3
-		pathWidth := availableWidth - nameWidth
+		// Layout: " " + <name> + " | " + <path>
+		const paddingLeft = 1
+		const separator = " | "
+		const separatorWidth = len(separator)
+
+		minWidth := paddingLeft + separatorWidth + 2 // at least 1 char for each column
+		if m.width <= minWidth {
+			// Fallback for very narrow widths: just show the name truncated to fit.
+			name := common.TruncateTextBeginning(dir.Name, m.width-paddingLeft, "...")
+			line := " " + name
+			if i == m.cursor {
+				line = common.ModalCursorStyle.Render(line)
+			}
+			r.AddLines(line)
+			continue
+		}
+
+		contentWidth := m.width - paddingLeft - separatorWidth
+		nameWidth := contentWidth / 3
+		pathWidth := contentWidth - nameWidth
 
 		name := common.TruncateTextBeginning(dir.Name, nameWidth, "...")
 		path := common.TruncateTextBeginning(dir.Location, pathWidth, "...")
 
-		line := fmt.Sprintf(" %-*s | %s", nameWidth, name, path)
+		line := fmt.Sprintf(" %-*s%s%-*s", nameWidth, name, separator, pathWidth, path)
 
 		if i == m.cursor {
 			line = common.ModalCursorStyle.Render(line)

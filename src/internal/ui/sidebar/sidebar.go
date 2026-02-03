@@ -106,6 +106,9 @@ func (s *Model) TogglePinnedDirectory(dir string) error {
 
 // GetPinnedDirectories returns the list of pinned directories.
 func (s *Model) GetPinnedDirectories() []directory {
+	if s.Disabled() || s.pinnedMgr == nil {
+		return []directory{}
+	}
 	return s.pinnedMgr.Load()
 }
 
