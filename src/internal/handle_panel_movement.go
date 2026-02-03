@@ -168,3 +168,8 @@ func (m *model) sidebarSearchBarFocus() {
 	m.sidebarModel.SearchBarFocus()
 	m.firstTextInput = true
 }
+
+func (m *model) gotoModalOpen() tea.Cmd {
+	m.gotoModal.SetCurrentPath(m.getFocusedFilePanel().Location)
+	return m.gotoModal.Open()
+}

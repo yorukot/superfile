@@ -13,6 +13,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/sidebar"
 
 	"github.com/yorukot/superfile/src/internal/common"
+	gotoui "github.com/yorukot/superfile/src/internal/ui/gotointeractive"
 	"github.com/yorukot/superfile/src/internal/ui/prompt"
 	zoxideui "github.com/yorukot/superfile/src/internal/ui/zoxide"
 )
@@ -28,6 +29,10 @@ import (
 //     to prevent noise in test logs. Same with imagePreviewer
 func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool,
 	firstPanelPaths []string, zClient *zoxidelib.Client) *model {
+	initialPath := "/"
+	if len(firstPanelPaths) > 0 {
+		initialPath = firstPanelPaths[0]
+	}
 	return &model{
 		focusPanel:      nonePanelFocus,
 		processBarModel: processbar.New(),
@@ -37,6 +42,7 @@ func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool,
 		helpMenu:        helpmenu.New(),
 		promptModal:     prompt.DefaultModel(prompt.PromptMinHeight, prompt.PromptMinWidth),
 		zoxideModal:     zoxideui.DefaultModel(zoxideui.ZoxideMinHeight, zoxideui.ZoxideMinWidth, zClient),
+		gotoModal:       gotoui.DefaultModel(gotoui.GotoMinHeight, gotoui.GotoMinWidth*3, initialPath), //nolint:mnd // Triple width for better visibility
 		sortModal:       sortmodel.New(),
 		zClient:         zClient,
 		modelQuitState:  notQuitting,

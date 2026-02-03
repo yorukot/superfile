@@ -24,6 +24,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	variable "github.com/yorukot/superfile/src/config"
+	gotoui "github.com/yorukot/superfile/src/internal/ui/gotointeractive"
 	zoxideui "github.com/yorukot/superfile/src/internal/ui/zoxide"
 	stringfunction "github.com/yorukot/superfile/src/pkg/string_function"
 )
@@ -86,6 +87,11 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case zoxideui.UpdateMsg:
 		slog.Debug("Got ModelUpdate message", "id", msg.GetReqID())
 		updateCmd = msg.Apply(&m.zoxideModal)
+
+	// Handle goto interactive modal messages
+	case gotoui.UpdateMsg:
+		slog.Debug("Got goto UpdateMsg", "id", msg.GetReqID())
+		updateCmd = msg.Apply(&m.gotoModal)
 
 	// Its a pain to interconvert commands like processBar
 	case preview.UpdateMsg:
@@ -209,6 +215,7 @@ func (m *model) updateComponentDimensions() tea.Cmd {
 	m.setHelpMenuSize()
 	m.setPromptModelSize()
 	m.setZoxideModelSize()
+	m.setGotoModelSize()
 	m.setFooterComponentSize()
 
 	// File preview panel requires explicit height update, unlike sidebar/file panels
@@ -255,6 +262,14 @@ func (m *model) setZoxideModelSize() {
 	m.zoxideModal.SetWidth(m.fullWidth / 2) //nolint:mnd // modal uses half width for layout
 }
 
+func (m *model) setGotoModelSize() {
+	// Scale goto model's maxHeight - 50% of total height to accommodate scroll indicators
+	m.gotoModal.SetMaxHeight(m.fullHeight / 2) //nolint:mnd // modal uses half height for layout
+
+	// Scale goto model's width - 50% of total width
+	m.gotoModal.SetWidth(m.fullWidth / 2) //nolint:mnd // modal uses half width for layout
+}
+
 func (m *model) setFooterComponentSize() {
 	var width, clipBoardwidth, height int
 	height = m.footerHeight + common.BorderPadding
@@ -298,6 +313,9 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 		// updateFilePanelState
 		// TODO: Convert that to async via tea.Cmd
 	case m.zoxideModal.IsOpen():
+		// Ignore keypress. It will be handled in Update call via
+		// updateFilePanelState
+	case m.gotoModal.IsOpen():
 		// Ignore keypress. It will be handled in Update call via
 		// updateFilePanelState
 
@@ -375,6 +393,9 @@ func (m *model) updateComponentState(msg tea.Msg) tea.Cmd {
 	case m.zoxideModal.IsOpen():
 		action, cmd = m.zoxideModal.HandleUpdate(msg)
 		cmd = tea.Batch(cmd, m.applyZoxideModalAction(action))
+	case m.gotoModal.IsOpen():
+		action, cmd = m.gotoModal.HandleUpdate(msg)
+		cmd = tea.Batch(cmd, m.applyGotoModalAction(action))
 	}
 	return cmd
 }
@@ -419,6 +440,12 @@ func (m *model) logAndExecuteAction(action common.ModelAction) (string, tea.Cmd,
 
 // Apply the Action for zoxide modal (no result notifications needed)
 func (m *model) applyZoxideModalAction(action common.ModelAction) tea.Cmd {
+	_, cmd, _ := m.logAndExecuteAction(action)
+	return cmd
+}
+
+// Apply the Action for goto modal (no result notifications needed)
+func (m *model) applyGotoModalAction(action common.ModelAction) tea.Cmd {
 	_, cmd, _ := m.logAndExecuteAction(action)
 	return cmd
 }
@@ -531,6 +558,13 @@ func (m *model) updateRenderForOverlay(finalRender string) string {
 		overlayX := m.fullWidth/common.CenterDivisor - m.zoxideModal.GetWidth()/common.CenterDivisor
 		overlayY := m.fullHeight/common.CenterDivisor - m.zoxideModal.GetMaxHeight()/common.CenterDivisor
 		return stringfunction.PlaceOverlay(overlayX, overlayY, zoxideModal, finalRender)
+	}
+
+	if m.gotoModal.IsOpen() {
+		gotoModal := m.gotoModal.Render()
+		overlayX := m.fullWidth/common.CenterDivisor - m.gotoModal.GetWidth()/common.CenterDivisor
+		overlayY := m.fullHeight/common.CenterDivisor - m.gotoModal.GetMaxHeight()/common.CenterDivisor
+		return stringfunction.PlaceOverlay(overlayX, overlayY, gotoModal, finalRender)
 	}
 
 	if m.sortModal.IsOpen() {

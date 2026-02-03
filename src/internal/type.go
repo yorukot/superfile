@@ -17,6 +17,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/textinput"
 
+	gotoui "github.com/yorukot/superfile/src/internal/ui/gotointeractive"
 	"github.com/yorukot/superfile/src/internal/ui/prompt"
 	zoxideui "github.com/yorukot/superfile/src/internal/ui/zoxide"
 )
@@ -62,6 +63,7 @@ type model struct {
 	promptModal prompt.Model
 	zoxideModal zoxideui.Model
 	sortModal   sortmodel.Model
+	gotoModal   gotoui.Model
 
 	// Zoxide client for directory tracking
 	zClient *zoxidelib.Client
