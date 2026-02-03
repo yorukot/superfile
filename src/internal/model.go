@@ -9,19 +9,20 @@ import (
 	"strings"
 	"time"
 
+	"github.com/barasher/go-exiftool"
+	"github.com/charmbracelet/bubbles/textinput"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
+
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
 
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
+	"github.com/yorukot/superfile/src/internal/ui/pinnedmodal"
 	"github.com/yorukot/superfile/src/internal/ui/preview"
 	"github.com/yorukot/superfile/src/internal/utils"
-
-	"github.com/barasher/go-exiftool"
-	"github.com/charmbracelet/bubbles/textinput"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 
 	variable "github.com/yorukot/superfile/src/config"
 	zoxideui "github.com/yorukot/superfile/src/internal/ui/zoxide"
@@ -82,10 +83,12 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	// Has to handle zoxide messages separately as they could be generated via
 	// zoxide update commands, or batched commands from textinput
-	// Cannot do it like processbar messages
+	// Cannot do it like processBar messages
 	case zoxideui.UpdateMsg:
 		slog.Debug("Got ModelUpdate message", "id", msg.GetReqID())
 		updateCmd = msg.Apply(&m.zoxideModal)
+	case pinnedmodal.UpdateMsg:
+		updateCmd = msg.Apply(&m.pinnedModal)
 
 	// Its a pain to interconvert commands like processBar
 	case preview.UpdateMsg:
@@ -209,6 +212,7 @@ func (m *model) updateComponentDimensions() tea.Cmd {
 	m.setHelpMenuSize()
 	m.setPromptModelSize()
 	m.setZoxideModelSize()
+	m.setPinnedModalSize()
 	m.setFooterComponentSize()
 
 	// File preview panel requires explicit height update, unlike sidebar/file panels
@@ -255,6 +259,14 @@ func (m *model) setZoxideModelSize() {
 	m.zoxideModal.SetWidth(m.fullWidth / 2) //nolint:mnd // modal uses half width for layout
 }
 
+func (m *model) setPinnedModalSize() {
+	// Scale pinned modal's maxHeight - 50% of total height to accommodate scroll indicators
+	m.pinnedModal.SetMaxHeight(m.fullHeight / 2) //nolint:mnd // modal uses half height for layout
+
+	// Scale pinned modal's width - 50% of total width
+	m.pinnedModal.SetWidth(m.fullWidth / 2) //nolint:mnd // modal uses half width for layout
+}
+
 func (m *model) setFooterComponentSize() {
 	var width, clipBoardwidth, height int
 	height = m.footerHeight + common.BorderPadding
@@ -298,6 +310,9 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 		// updateFilePanelState
 		// TODO: Convert that to async via tea.Cmd
 	case m.zoxideModal.IsOpen():
+		// Ignore keypress. It will be handled in Update call via
+		// updateFilePanelState
+	case m.pinnedModal.IsOpen():
 		// Ignore keypress. It will be handled in Update call via
 		// updateFilePanelState
 
@@ -375,6 +390,9 @@ func (m *model) updateComponentState(msg tea.Msg) tea.Cmd {
 	case m.zoxideModal.IsOpen():
 		action, cmd = m.zoxideModal.HandleUpdate(msg)
 		cmd = tea.Batch(cmd, m.applyZoxideModalAction(action))
+	case m.pinnedModal.IsOpen():
+		action, cmd = m.pinnedModal.HandleUpdate(msg)
+		cmd = tea.Batch(cmd, m.applyPinnedModalAction(action))
 	}
 	return cmd
 }
@@ -423,6 +441,12 @@ func (m *model) applyZoxideModalAction(action common.ModelAction) tea.Cmd {
 	return cmd
 }
 
+// Apply the Action for pinned modal (no result notifications needed)
+func (m *model) applyPinnedModalAction(action common.ModelAction) tea.Cmd {
+	_, cmd, _ := m.logAndExecuteAction(action)
+	return cmd
+}
+
 // TODO : Move them around to appropriate places
 func (m *model) applyShellCommandAction(shellCommand string) {
 	focusPanelDir := m.getFocusedFilePanel().Location
@@ -440,6 +464,19 @@ func (m *model) applyShellCommandAction(shellCommand string) {
 
 func (m *model) splitPanel() (tea.Cmd, error) {
 	return m.fileModel.CreateNewFilePanel(m.getFocusedFilePanel().Location)
+}
+
+func (m *model) openPinnedModal() tea.Cmd {
+	pinnedDirs := m.sidebarModel.GetPinnedDirectories()
+	convertedDirs := make([]pinnedmodal.Directory, 0, len(pinnedDirs))
+	for _, dir := range pinnedDirs {
+		convertedDirs = append(convertedDirs, pinnedmodal.Directory{
+			Location: dir.Location,
+			Name:     dir.Name,
+		})
+	}
+	m.pinnedModal.LoadPinnedDirs(convertedDirs)
+	return m.pinnedModal.Open()
 }
 
 func (m *model) createNewFilePanelRelativeToCurrent(path string) (tea.Cmd, error) {
@@ -531,6 +568,13 @@ func (m *model) updateRenderForOverlay(finalRender string) string {
 		overlayX := m.fullWidth/common.CenterDivisor - m.zoxideModal.GetWidth()/common.CenterDivisor
 		overlayY := m.fullHeight/common.CenterDivisor - m.zoxideModal.GetMaxHeight()/common.CenterDivisor
 		return stringfunction.PlaceOverlay(overlayX, overlayY, zoxideModal, finalRender)
+	}
+
+	if m.pinnedModal.IsOpen() {
+		pinnedModal := m.pinnedModalRender()
+		overlayX := m.fullWidth/common.CenterDivisor - m.pinnedModal.GetWidth()/common.CenterDivisor
+		overlayY := m.fullHeight/common.CenterDivisor - m.pinnedModal.GetMaxHeight()/common.CenterDivisor
+		return stringfunction.PlaceOverlay(overlayX, overlayY, pinnedModal, finalRender)
 	}
 
 	if m.sortModal.IsOpen() {
