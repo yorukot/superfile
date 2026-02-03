@@ -60,9 +60,9 @@ func (m *Model) HandleUpdate(msg tea.Msg) (common.ModelAction, tea.Cmd) {
 			action = m.handleTabCompletion()
 		case msg.Type == tea.KeyBackspace && m.textInput.Value() == "":
 			m.handleGoUp()
-		case slices.Contains(common.Hotkeys.ListUp, msg.String()):
+		case slices.Contains(common.Hotkeys.ListUp, msg.String()) && msg.Type != tea.KeyRunes:
 			m.navigateUp()
-		case slices.Contains(common.Hotkeys.ListDown, msg.String()):
+		case slices.Contains(common.Hotkeys.ListDown, msg.String()) && msg.Type != tea.KeyRunes:
 			m.navigateDown()
 		case slices.Contains(common.Hotkeys.PageUp, msg.String()):
 			m.navigatePageUp()
