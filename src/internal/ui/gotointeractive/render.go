@@ -1,8 +1,7 @@
 package gotointeractive
 
 import (
-	"os"
-	"path/filepath"
+	"github.com/charmbracelet/lipgloss"
 
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
@@ -13,12 +12,15 @@ import (
 func (m *Model) Render() string {
 	r := ui.PromptRenderer(m.maxHeight, m.width)
 
-	availableWidth := m.width - len(m.headline) - 3 //nolint:mnd // Space for " - " separator
+	separator := " "
+	headlineWidth := lipgloss.Width(m.headline)
+	separatorWidth := lipgloss.Width(separator)
+	availableWidth := m.width - headlineWidth - separatorWidth
 	titlePath := m.currentPath
-	if len(titlePath) > availableWidth {
+	if lipgloss.Width(titlePath) > availableWidth {
 		titlePath = common.TruncateTextBeginning(titlePath, availableWidth, "...")
 	}
-	r.SetBorderTitle(m.headline + " " + titlePath)
+	r.SetBorderTitle(m.headline + separator + titlePath)
 
 	r.AddLines(" " + m.textInput.View())
 	r.AddSection()
@@ -44,21 +46,14 @@ func (m *Model) renderVisibleResults(r *rendering.Renderer, endIndex int) {
 	for i := m.renderIndex; i < endIndex; i++ {
 		result := m.results[i]
 
-		isDir := false
-		if result == ".." {
-			isDir = true
-		} else {
-			fullPath := filepath.Join(m.currentPath, result)
-			if info, err := os.Stat(fullPath); err == nil {
-				isDir = info.IsDir()
-			}
-		}
-
 		availablePathWidth := m.width - iconColumnWidth
-		displayName := common.TruncateTextBeginning(result, availablePathWidth, "...")
+		if availablePathWidth < 0 {
+			availablePathWidth = 0
+		}
+		displayName := common.TruncateTextBeginning(result.Name, availablePathWidth, "...")
 
 		var line string
-		if isDir {
+		if result.IsDir {
 			line = icon.Directory + icon.Space + displayName + "/"
 		} else {
 			line = icon.Icons["file"].Icon + icon.Space + displayName

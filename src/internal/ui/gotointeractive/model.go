@@ -12,6 +12,7 @@ import (
 
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/utils"
 )
 
 func DefaultModel(maxHeight int, width int, cwd string) Model {
@@ -22,7 +23,7 @@ func GenerateModel(cwd string, maxHeight int, width int) Model {
 	m := Model{
 		headline:    icon.Search + icon.Space + gotoHeadlineText,
 		open:        false,
-		results:     []string{},
+		results:     []Result{},
 		currentPath: cwd,
 	}
 	m.SetMaxHeight(maxHeight)
@@ -90,23 +91,20 @@ func (m *Model) handleConfirm() common.ModelAction {
 	if len(m.results) > 0 && m.cursor >= 0 && m.cursor < len(m.results) {
 		selectedResult := m.results[m.cursor]
 
-		if selectedResult == ".." {
+		if selectedResult.Name == ".." {
 			m.handleGoUp()
 			return common.NoAction{}
 		}
 
-		fullSelectedPath := filepath.Join(m.currentPath, selectedResult)
+		fullSelectedPath := filepath.Join(m.currentPath, selectedResult.Name)
 
-		fileInfo, err := os.Stat(fullSelectedPath)
-		if err == nil {
-			if fileInfo.IsDir() {
-				return common.CDCurrentPanelAction{
-					Location: fullSelectedPath,
-				}
-			}
-			return common.OpenPanelAction{
+		if selectedResult.IsDir {
+			return common.CDCurrentPanelAction{
 				Location: fullSelectedPath,
 			}
+		}
+		return common.OpenPanelAction{
+			Location: fullSelectedPath,
 		}
 	}
 
@@ -119,24 +117,21 @@ func (m *Model) handleTabCompletion() common.ModelAction { //nolint:unparam // R
 	if m.cursor >= 0 && m.cursor < len(m.results) {
 		selected := m.results[m.cursor]
 
-		if selected == ".." {
+		if selected.Name == ".." {
 			m.handleGoUp()
 			return common.NoAction{}
 		}
 
-		fullSelectedPath := filepath.Join(m.currentPath, selected)
+		fullSelectedPath := filepath.Join(m.currentPath, selected.Name)
 
-		fileInfo, err := os.Stat(fullSelectedPath)
-		if err == nil {
-			if fileInfo.IsDir() {
-				m.currentPath = fullSelectedPath
-				m.textInput.SetValue("")
-				m.updateResults()
-				return common.NoAction{}
-			}
-			m.textInput.SetValue(selected)
+		if selected.IsDir {
+			m.currentPath = fullSelectedPath
+			m.textInput.SetValue("")
+			m.updateResults()
 			return common.NoAction{}
 		}
+		m.textInput.SetValue(selected.Name)
+		return common.NoAction{}
 	}
 
 	if input == ".." {
@@ -148,21 +143,18 @@ func (m *Model) handleTabCompletion() common.ModelAction { //nolint:unparam // R
 		return common.NoAction{}
 	}
 
-	matched := m.filterResults(input)
+	matched := filterResults(input, m.currentPath)
 	if len(matched) == 1 {
 		selected := matched[0]
-		fullSelectedPath := filepath.Join(m.currentPath, selected)
+		fullSelectedPath := filepath.Join(m.currentPath, selected.Name)
 
-		fileInfo, err := os.Stat(fullSelectedPath)
-		if err == nil {
-			if fileInfo.IsDir() {
-				m.currentPath = fullSelectedPath
-				m.textInput.SetValue("")
-				m.updateResults()
-				return common.NoAction{}
-			}
-			m.textInput.SetValue(selected)
+		if selected.IsDir {
+			m.currentPath = fullSelectedPath
+			m.textInput.SetValue("")
+			m.updateResults()
+			return common.NoAction{}
 		}
+		m.textInput.SetValue(selected.Name)
 	}
 
 	return common.NoAction{}
@@ -185,23 +177,27 @@ func (m *Model) handleNormalKeyInput(msg tea.KeyMsg) tea.Cmd {
 
 func (m *Model) GetQueryCmd(query string) tea.Cmd {
 	reqID := m.reqCnt
+	path := m.currentPath
 	m.reqCnt++
 
-	slog.Debug("Submitting goto query request", "query", query, "id", reqID)
+	slog.Debug("Submitting goto query request", "query", query, "path", path, "id", reqID)
 
 	return func() tea.Msg {
-		results := m.filterResults(query)
-		return NewUpdateMsg(query, results, reqID)
+		results := filterResults(query, path)
+		return NewUpdateMsg(query, results, reqID, path)
 	}
 }
 
 func (msg UpdateMsg) Apply(m *Model) tea.Cmd {
 	currentQuery := m.textInput.Value()
-	if msg.query != currentQuery {
+	if msg.query != currentQuery || msg.path != m.currentPath {
 		slog.Debug("Ignoring stale goto query result",
 			"msgQuery", msg.query,
 			"currentQuery", currentQuery,
-			"id", msg.reqID)
+			"msgPath", msg.path,
+			"currentPath", m.currentPath,
+			"msgReqID", msg.reqID,
+			"currentReqID", m.reqCnt)
 		return nil
 	}
 
@@ -212,55 +208,95 @@ func (msg UpdateMsg) Apply(m *Model) tea.Cmd {
 	return nil
 }
 
-func (m *Model) filterResults(query string) []string {
-	parentDir := filepath.Dir(m.currentPath)
-	if parentDir != m.currentPath {
-		hasParent := true
-		if query != "" {
-			queryLower := strings.ToLower(query)
-			hasParent = strings.Contains(strings.ToLower(".."), queryLower)
-		}
+type entryInfo struct {
+	name  string
+	isDir bool
+}
 
-		entries, err := os.ReadDir(m.currentPath)
-		if err != nil {
-			if hasParent {
-				return []string{".."}
-			}
-			return []string{}
-		}
+func readDirEntries(path string) ([]entryInfo, error) {
+	entries, err := os.ReadDir(path)
+	if err != nil {
+		return nil, err
+	}
 
-		results := make([]string, 0, len(entries)+1)
-		if hasParent {
-			results = append(results, "..")
-		}
+	entryData := make([]entryInfo, len(entries))
+	for i, entry := range entries {
+		entryData[i].name = entry.Name()
+		entryData[i].isDir = entry.IsDir()
+	}
+	return entryData, nil
+}
 
-		for _, entry := range entries {
-			name := entry.Name()
-			if query == "" || strings.Contains(strings.ToLower(name), strings.ToLower(query)) {
-				results = append(results, name)
-			}
+func filterResults(query string, path string) []Result {
+	entryData, err := readDirEntries(path)
+	if err != nil {
+		return handleReadDirError(path)
+	}
+
+	if query == "" {
+		return buildAllResults(entryData, path)
+	}
+
+	return buildFilteredResults(query, entryData, path)
+}
+
+func handleReadDirError(path string) []Result {
+	parentDir := filepath.Dir(path)
+	if parentDir != path {
+		return []Result{{Name: "..", IsDir: true}}
+	}
+	return []Result{}
+}
+
+func buildAllResults(entryData []entryInfo, path string) []Result {
+	hasParent := filepath.Dir(path) != path
+
+	if hasParent {
+		results := make([]Result, 0, len(entryData)+1)
+		results = append(results, Result{Name: "..", IsDir: true})
+		for _, ed := range entryData {
+			results = append(results, Result{Name: ed.name, IsDir: ed.isDir})
 		}
 		return results
 	}
 
-	entries, err := os.ReadDir(m.currentPath)
-	if err != nil {
-		return []string{}
+	results := make([]Result, len(entryData))
+	for i, ed := range entryData {
+		results[i] = Result{Name: ed.name, IsDir: ed.isDir}
+	}
+	return results
+}
+
+func buildFilteredResults(query string, entryData []entryInfo, path string) []Result {
+	entryNames := make([]string, len(entryData))
+	for i, ed := range entryData {
+		entryNames[i] = ed.name
 	}
 
-	queryLower := strings.ToLower(query)
-	results := make([]string, 0, len(entries))
-	for _, entry := range entries {
-		name := entry.Name()
-		if strings.Contains(strings.ToLower(name), queryLower) {
-			results = append(results, name)
+	matches := utils.FzfSearch(query, entryNames)
+	results := make([]Result, 0, len(matches))
+
+	hasParent := filepath.Dir(path) != path
+	if hasParent {
+		queryLower := strings.ToLower(query)
+		if strings.Contains(strings.ToLower(".."), queryLower) {
+			results = append(results, Result{Name: "..", IsDir: true})
+		}
+	}
+
+	for _, match := range matches {
+		if match.HayIndex >= 0 && int(match.HayIndex) < len(entryData) {
+			results = append(results, Result{
+				Name:  entryData[match.HayIndex].name,
+				IsDir: entryData[match.HayIndex].isDir,
+			})
 		}
 	}
 	return results
 }
 
 func (m *Model) updateResults() {
-	m.results = m.filterResults(m.textInput.Value())
+	m.results = filterResults(m.textInput.Value(), m.currentPath)
 	m.cursor = 0
 	m.renderIndex = 0
 }

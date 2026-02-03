@@ -19,7 +19,7 @@ func (m *Model) Close() {
 	m.open = false
 	m.textInput.Blur()
 	m.textInput.SetValue("")
-	m.results = []string{}
+	m.results = []Result{}
 	m.cursor = 0
 	m.renderIndex = 0
 }
@@ -38,7 +38,7 @@ func (m *Model) GetMaxHeight() int {
 
 func (m *Model) SetWidth(width int) {
 	if width < GotoMinWidth {
-		slog.Warn("Goto initialized with too less width", "width", width)
+		slog.Warn("Goto initialized with width too small", "width", width)
 		width = GotoMinWidth
 	}
 	m.width = width
@@ -47,14 +47,14 @@ func (m *Model) SetWidth(width int) {
 
 func (m *Model) SetMaxHeight(maxHeight int) {
 	if maxHeight < GotoMinHeight {
-		slog.Warn("Goto initialized with too less maxHeight", "maxHeight", maxHeight)
+		slog.Warn("Goto initialized with maxHeight too small", "maxHeight", maxHeight)
 		maxHeight = GotoMinHeight
 	}
 	m.maxHeight = maxHeight
 }
 
-func (m *Model) GetResults() []string {
-	out := make([]string, len(m.results))
+func (m *Model) GetResults() []Result {
+	out := make([]Result, len(m.results))
 	copy(out, m.results)
 	return out
 }

@@ -4,11 +4,16 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 )
 
+type Result struct {
+	Name  string
+	IsDir bool
+}
+
 type Model struct {
 	headline    string
 	open        bool
 	textInput   textinput.Model
-	results     []string
+	results     []Result
 	cursor      int
 	renderIndex int
 	currentPath string
@@ -21,15 +26,17 @@ type Model struct {
 
 type UpdateMsg struct {
 	query   string
-	results []string
+	results []Result
 	reqID   int
+	path    string
 }
 
-func NewUpdateMsg(query string, results []string, reqID int) UpdateMsg {
+func NewUpdateMsg(query string, results []Result, reqID int, path string) UpdateMsg {
 	return UpdateMsg{
 		query:   query,
 		results: results,
 		reqID:   reqID,
+		path:    path,
 	}
 }
 
