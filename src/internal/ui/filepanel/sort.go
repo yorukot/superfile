@@ -7,6 +7,8 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/fvbommel/sortorder"
+
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/sortmodel"
 )
@@ -33,6 +35,20 @@ func getOrderingFunc(elements []Element, reversed bool, sortKind sortmodel.SortK
 		}
 	case sortmodel.SortByType:
 		order = getTypeOrderingFunc(elements, reversed)
+	case sortmodel.SortByNatural:
+		order = func(i, j int) bool {
+			// One of them is a directory, and other is not
+			if elements[i].Directory != elements[j].Directory {
+				return elements[i].Directory
+			}
+			if common.Config.CaseSensitiveSort {
+				return sortorder.NaturalLess(elements[i].Name, elements[j].Name) != reversed
+			}
+			return sortorder.NaturalLess(
+				strings.ToLower(elements[i].Name),
+				strings.ToLower(elements[j].Name),
+			) != reversed
+		}
 	}
 	return order
 }
@@ -90,7 +106,6 @@ func getTypeOrderingFunc(elements []Element, reversed bool) sliceOrderFunc {
 		if common.Config.CaseSensitiveSort {
 			return (elements[i].Name < elements[j].Name) != reversed
 		}
-
 		return (strings.ToLower(elements[i].Name) < strings.ToLower(elements[j].Name)) != reversed
 	}
 }
