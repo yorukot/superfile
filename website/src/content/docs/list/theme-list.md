@@ -120,6 +120,14 @@ head:
 
 ![Kaolin theme preview showing brown and orange earth tones](../../../assets/git-assets/theme/kaolin.png)
 
+## Kanagawa
+
+- Theme name: `kanagawa`
+- Ported by: https://github.com/jellydn
+- Original Author: https://github.com/rebelot
+
+![Kanagawa theme preview showing Japanese ink-wash inspired colors](../../../assets/git-assets/theme/kanagawa.png)
+
 ## Monokai
 
 - Theme name: `monokai`

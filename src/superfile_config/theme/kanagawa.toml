@@ -1,0 +1,78 @@
+##############################################
+#                                            #
+#               Kanagawa Theme               #
+#                                            #
+##############################################
+
+# Ported from: https://github.com/rebelot/kanagawa.nvim
+# Original Author: https://github.com/rebelot
+# Inspired by the famous painting by Katsushika Hokusai
+
+# This contains the theme config file for superfile! For more details see:
+# https://superfile.dev/configure/custom-theme/
+
+###############################################################################
+#                           Code Syntax Highlighting                          #
+###############################################################################
+
+# Find one you like at: https://github.com/alecthomas/chroma/blob/master/styles.
+
+code_syntax_highlight = "kanagawa-wave"
+
+###############################################################################
+#                                 Base Colors                                 #
+###############################################################################
+
+#-- Full Screen
+full_screen_fg = "#DCD7BA"    # fujiWhite
+full_screen_bg = "#1F1F28"    # sumiInk3
+
+#-- Gradient
+# Note: This currently only supports two colors.
+gradient_color = ["#7E9CD8", "#957FB8"]  # crystalBlue to oniViolet
+
+#-- File Panel
+file_panel_fg = "#DCD7BA"           # fujiWhite
+file_panel_bg = "#1F1F28"           # sumiInk3
+file_panel_border = "#2A2A37"       # sumiInk4
+file_panel_border_active = "#7E9CD8" # crystalBlue
+file_panel_top_directory_icon = "#7AA89F"  # waveAqua2
+file_panel_top_path = "#7FB4CA"     # springBlue
+file_panel_item_selected_fg = "#7FB4CA"  # springBlue
+file_panel_item_selected_bg = "#16161D"  # sumiInk0
+
+#-- Footer
+footer_fg = "#DCD7BA"           # fujiWhite
+footer_bg = "#1F1F28"           # sumiInk3
+footer_border = "#2A2A37"       # sumiInk4
+footer_border_active = "#98BB6C"  # springGreen
+
+#-- Sidebar
+sidebar_fg = "#DCD7BA"              # fujiWhite
+sidebar_bg = "#1F1F28"              # sumiInk3
+sidebar_title = "#7FB4CA"           # springBlue
+sidebar_border = "#16161D"          # sumiInk0
+sidebar_border_active = "#D27E99"   # sakuraPink
+sidebar_item_selected_fg = "#7E9CD8"  # crystalBlue
+sidebar_item_selected_bg = "#16161D"  # sumiInk0
+sidebar_divider = "#54546D"         # sumiInk6
+
+#-- Modals
+modal_fg = "#DCD7BA"              # fujiWhite
+modal_bg = "#1F1F28"              # sumiInk3
+modal_border_active = "#7AA89F"   # waveAqua2
+modal_cancel_fg = "#1F1F28"       # sumiInk3
+modal_cancel_bg = "#E46876"       # waveRed
+modal_confirm_fg = "#1F1F28"      # sumiInk3
+modal_confirm_bg = "#76946A"      # autumnGreen
+
+#-- Help Menu
+help_menu_hotkey = "#7E9CD8"      # crystalBlue
+help_menu_title = "#7FB4CA"       # springBlue
+
+#-- Special
+cursor = "#E6C384"     # carpYellow
+correct = "#76946A"    # autumnGreen
+error = "#E82424"      # samuraiRed
+hint = "#7E9CD8"       # crystalBlue
+cancel = "#E46876"     # waveRed
