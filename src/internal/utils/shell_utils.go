@@ -1,3 +1,6 @@
+//go:build !linux
+// +build !linux
+
 package utils
 
 import (
@@ -11,8 +14,11 @@ import (
 )
 
 // Choose correct shell as per OS
-func ExecuteCommandInShell(timeLimit time.Duration, cmdDir string, shellCommand string) (int, string, error) {
-	// Linux and Darwin
+func ExecuteCommandInShell(_ *Winsize,
+	timeLimit time.Duration,
+	cmdDir string,
+	shellCommand string) (int, string, error) {
+	// Darwin
 	baseCmd := "/bin/sh"
 	args := []string{"-c", shellCommand}
 
