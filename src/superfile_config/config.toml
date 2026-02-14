@@ -109,6 +109,10 @@ nerdfont = true
 # Requires: nerdfont = true
 show_select_icons = true
 
+#-- Space key selection
+# Enable space key to toggle selection of files/directories in file panel
+space_selects = true
+
 #-- Transparent Background Support
 # Set to true to enable background transparency.
 # Requires: terminal support for colour transparency
