@@ -31,11 +31,12 @@ type ThemeType struct {
 	ModalFG      string `toml:"modal_fg"`
 
 	// Special Color
-	Cursor             string   `toml:"cursor"`
-	Correct            string   `toml:"correct"`
-	Error              string   `toml:"error"`
-	Hint               string   `toml:"hint"`
-	Cancel             string   `toml:"cancel"`
+	Cursor  string `toml:"cursor"`
+	Correct string `toml:"correct"`
+	Error   string `toml:"error"`
+	Hint    string `toml:"hint"`
+	Cancel  string `toml:"cancel"`
+	// Note: this is linked with `RequiredGradientColorCount` constant
 	GradientColor      []string `toml:"gradient_color"`
 	DirectoryIconColor string   `toml:"directory_icon_color"`
 
