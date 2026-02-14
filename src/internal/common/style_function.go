@@ -87,16 +87,21 @@ func GenerateBorder() lipgloss.Border {
 	}
 }
 
-// Generate config error style
 func LoadConfigError(value string) string {
-	return lipgloss.NewStyle().Foreground(lipgloss.Color("#FF5555")).Render("■ ERROR: ") +
-		"Config file \"" + lipgloss.NewStyle().Foreground(lipgloss.Color("#00D9FF")).Render(value) + "\" invalidation"
+	return UserConfigInvalidationErrorString(value, "Config")
 }
 
-// Generate config error style
 func LoadHotkeysError(value string) string {
+	return UserConfigInvalidationErrorString(value, "Hotkey")
+}
+
+func LoadThemeError(value string) string {
+	return UserConfigInvalidationErrorString(value, "Theme")
+}
+
+func UserConfigInvalidationErrorString(value string, configType string) string {
 	return lipgloss.NewStyle().Foreground(lipgloss.Color("#FF5555")).Render("■ ERROR: ") +
-		"Hotkeys file \"" + lipgloss.NewStyle().Foreground(lipgloss.Color("#00D9FF")).Render(value) + "\" invalidation"
+		configType + " file \"" + lipgloss.NewStyle().Foreground(lipgloss.Color("#00D9FF")).Render(value) + "\" invalidation"
 }
 
 // TODO : Fix Code duplication in textInput.Model creation

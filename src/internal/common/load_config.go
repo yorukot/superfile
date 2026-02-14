@@ -186,6 +186,11 @@ func LoadThemeFile() {
 	if err != nil {
 		utils.PrintfAndExitf("Unexpected error while reading default theme file : %v. Exiting...", err)
 	}
+
+	if len(Theme.GradientColor) != 2 {
+		utils.PrintlnAndExit(LoadThemeError("gradient_color"))
+	}
+
 }
 
 // LoadAllDefaultConfig : Load all default configurations from embedded superfile_config folder into global
