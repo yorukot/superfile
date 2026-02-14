@@ -32,14 +32,14 @@ schema = 3
     version = "v1.0.1"
     hash = "sha256-GSpAGboli54A5wDMpDEdZDYh55o1Zs8dZzFIf7hYdMY="
   [mod."github.com/charmbracelet/bubbles"]
-    version = "v0.21.0"
-    hash = "sha256-cfjUHgy9eq5SretTHuYuRaeeT6QmJYQBB9dsI8QSnW0="
+    version = "v0.21.1"
+    hash = "sha256-xikAcL7fsQHAsFKYiWClSXJeGWmPOMEmR2zof87qU5s="
   [mod."github.com/charmbracelet/bubbletea"]
     version = "v1.3.10"
     hash = "sha256-7wr85TLszu1CHNEMv+o4w+r24Z0xdzCgecPv+ZtRX/A="
   [mod."github.com/charmbracelet/colorprofile"]
-    version = "v0.2.3-0.20250311203215-f60798e515dc"
-    hash = "sha256-D9E/bMOyLXAUVOHA1/6o3i+vVmLfwIMOWib6sU7A6+Q="
+    version = "v0.4.1"
+    hash = "sha256-d/NjM/ybG+bGRRRMMcjbPCFGFS5noZRMaL05Ix5r/II="
   [mod."github.com/charmbracelet/harmonica"]
     version = "v0.2.0"
     hash = "sha256-fi5N0IXhSbbYHdSZFngCfpT4kdiEaKedqj8YpnlvX0o="
@@ -47,20 +47,23 @@ schema = 3
     version = "v1.1.0"
     hash = "sha256-RHsRT2EZ1nDOElxAK+6/DC9XAaGVjDTgPvRh3pyCfY4="
   [mod."github.com/charmbracelet/x/ansi"]
-    version = "v0.10.1"
-    hash = "sha256-nY4zkUGnuD+Lczwt+NMXdQ38cAsy5mtxzXrFSJmR0E4="
+    version = "v0.11.5"
+    hash = "sha256-wN1s0rHnHWqQyw0HdJ46diMxaExifyGZNdAg5Wd1Gt4="
   [mod."github.com/charmbracelet/x/cellbuf"]
-    version = "v0.0.13-0.20250311204145-2c3ea96c31dd"
-    hash = "sha256-XAhCOt8qJ2vR77lH1ez0IVU1/2CaLTq9jSmrHVg5HHU="
+    version = "v0.0.15"
+    hash = "sha256-0S60XaWhKZG+TB3Kqe1oMn2Okwdq53nym8XayVSHHiM="
   [mod."github.com/charmbracelet/x/term"]
-    version = "v0.2.1"
-    hash = "sha256-VBkCZLI90PhMasftGw3403IqoV7d3E5WEGAIVrN5xQM="
+    version = "v0.2.2"
+    hash = "sha256-KF7IU1Luxl/sZP6XjomWB2e3lxSUS4/5AahhapGir/4="
+  [mod."github.com/clipperhouse/displaywidth"]
+    version = "v0.9.0"
+    hash = "sha256-9CNyTZPSncKQ7Y0my9DR4WYXDjtDHYNL512D691WDAM="
   [mod."github.com/clipperhouse/stringish"]
     version = "v0.1.1"
     hash = "sha256-Mp8M1CRbwr6dcJ4BD9tXD5I78ZgCFEm0GDxJv0GYReg="
   [mod."github.com/clipperhouse/uax29/v2"]
-    version = "v2.3.0"
-    hash = "sha256-dLL70mEOxrmYVoQjy2K7QvZiahAlJKOcFDz2mW/R/Do="
+    version = "v2.5.0"
+    hash = "sha256-Men4JLhiuEtAx8ZSzId5ciRWhud68o3k/B48ppwyxkM="
   [mod."github.com/connesc/cipherio"]
     version = "v0.2.1"
     hash = "sha256-PeuFnTak2WADesP8YTBqHP/XyvBue9bdKHYser2v6LU="
