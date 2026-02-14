@@ -170,26 +170,29 @@ func LoadHotkeysFile(ignoreMissingFields bool) {
 // set default values if we cant read user's theme file
 func LoadThemeFile() {
 	themeFile := filepath.Join(variable.ThemeFolder, Config.Theme+".toml")
-	data, err := os.ReadFile(themeFile)
-	if err == nil {
-		unmarshalErr := toml.Unmarshal(data, &Theme)
-		if unmarshalErr == nil {
-			return
+	if err := LoadUserTheme(themeFile, &Theme); err != nil {
+		slog.Error("Could not read user's theme file. Falling back to default theme", "error", err)
+		err = toml.Unmarshal([]byte(DefaultThemeString), &Theme)
+		if err != nil {
+			utils.PrintfAndExitf("Unexpected error while reading default theme file : %v. Exiting...", err)
 		}
-		slog.Error("Could not unmarshal theme file. Falling back to default theme",
-			"unmarshalErr", unmarshalErr)
-	} else {
-		slog.Error("Could not read user's theme file. Falling back to default theme", "path", themeFile, "error", err)
 	}
 
-	err = toml.Unmarshal([]byte(DefaultThemeString), &Theme)
-	if err != nil {
-		utils.PrintfAndExitf("Unexpected error while reading default theme file : %v. Exiting...", err)
-	}
-
+	// Validations
 	if len(Theme.GradientColor) != RequiredGradientColorCount {
 		utils.PrintlnAndExit(LoadThemeError("gradient_color"))
 	}
+}
+
+func LoadUserTheme(themeFile string, obj *ThemeType) error {
+	data, err := os.ReadFile(themeFile)
+	if err != nil {
+		return fmt.Errorf("could not read user's theme file(%s), err : %w", themeFile, err)
+	}
+	if err = toml.Unmarshal(data, obj); err != nil {
+		return fmt.Errorf("could not unmarshal user's theme file(%s) : %w", themeFile, err)
+	}
+	return nil
 }
 
 // LoadAllDefaultConfig : Load all default configurations from embedded superfile_config folder into global
