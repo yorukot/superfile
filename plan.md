@@ -74,6 +74,7 @@
 1. **Switch to persistent thumbnail cache**
    - Instead of `os.MkdirTemp`, write to `~/.cache/superfile/thumbnails` (or OS-appropriate cache dir).
    - Use a stable key (hash of full path + mtime/size, maybe inode) so thumbnails survive restarts.
+   - Must make sure that we don't fill up user's disk space. Keep the size limited to say 100 MB or a user configured value
 
 2. **Add scaling in `VideoGenerator` ffmpeg command**
    - Mimic yazi:
