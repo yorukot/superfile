@@ -1,8 +1,6 @@
 package ui
 
 import (
-	"log/slog"
-
 	"github.com/charmbracelet/lipgloss"
 
 	"github.com/yorukot/superfile/src/internal/common"
@@ -24,11 +22,8 @@ func SidebarRenderer(totalHeight int, totalWidth int, sidebarFocused bool) *rend
 	cfg.Border = DefaultLipglossBorder()
 	cfg.RendererName += "-sidebar"
 
-	r, err := rendering.NewRenderer(cfg)
-	if err != nil {
-		slog.Error("Error in creating renderer. Falling back to default renderer", "error", err)
-		r = &rendering.Renderer{}
-	}
+	r := rendering.NewRendererWithAutoFixConfig(cfg)
+
 	return r
 }
 
@@ -47,11 +42,7 @@ func FilePanelRenderer(totalHeight int, totalWidth int, filePanelFocused bool) *
 	cfg.Border = DefaultLipglossBorder()
 	cfg.RendererName += "-filepanel"
 
-	r, err := rendering.NewRenderer(cfg)
-	if err != nil {
-		slog.Error("Error in creating renderer. Falling back to default renderer", "error", err)
-		r = &rendering.Renderer{}
-	}
+	r := rendering.NewRendererWithAutoFixConfig(cfg)
 	return r
 }
 
@@ -60,12 +51,7 @@ func FilePreviewPanelRenderer(totalHeight int, totalWidth int) *rendering.Render
 	cfg.ContentFGColor = common.FilePanelFGColor
 	cfg.ContentBGColor = common.FilePanelBGColor
 
-	// We need height and width check to prevent errors in creating renderer
-	// during model init, empty renderer can cause panic in AddLines()
-	// TODO: We should not have to initiliaize a renderer in case of zero sized
-	// panel
-	if common.Config.EnableFilePreviewBorder && totalWidth >= rendering.MinWidthForBorder &&
-		totalHeight >= rendering.MinHeightForBorder {
+	if common.Config.EnableFilePreviewBorder {
 		cfg.BorderRequired = true
 		cfg.BorderBGColor = common.FilePanelBGColor
 		cfg.BorderFGColor = common.FilePanelBorderColor
@@ -73,11 +59,7 @@ func FilePreviewPanelRenderer(totalHeight int, totalWidth int) *rendering.Render
 	}
 	cfg.RendererName += "-preview"
 
-	r, err := rendering.NewRenderer(cfg)
-	if err != nil {
-		slog.Error("Error in creating renderer. Falling back to default renderer", "error", err)
-		r = &rendering.Renderer{}
-	}
+	r := rendering.NewRendererWithAutoFixConfig(cfg)
 	return r
 }
 
@@ -93,11 +75,7 @@ func PromptRenderer(totalHeight int, totalWidth int) *rendering.Renderer {
 
 	cfg.Border = DefaultLipglossBorder()
 
-	r, err := rendering.NewRenderer(cfg)
-	if err != nil {
-		slog.Error("Error in creating renderer. Falling back to default renderer", "error", err)
-		r = &rendering.Renderer{}
-	}
+	r := rendering.NewRendererWithAutoFixConfig(cfg)
 	return r
 }
 
@@ -116,11 +94,7 @@ func HelpMenuRenderer(totalHeight int, totalWidth int) *rendering.Renderer {
 
 	cfg.Border = DefaultLipglossBorder()
 
-	r, err := rendering.NewRenderer(cfg)
-	if err != nil {
-		slog.Error("Error in creating renderer. Falling back to default renderer", "error", err)
-		r = &rendering.Renderer{}
-	}
+	r := rendering.NewRendererWithAutoFixConfig(cfg)
 	return r
 }
 
@@ -139,11 +113,8 @@ func DefaultFooterRenderer(totalHeight int, totalWidth int, focused bool, name s
 	cfg.Border = DefaultLipglossBorder()
 	cfg.RendererName = name
 
-	r, err := rendering.NewRenderer(cfg)
-	if err != nil {
-		slog.Error("Error in creating renderer. Falling back to default renderer", "error", err)
-		r = &rendering.Renderer{}
-	}
+	r := rendering.NewRendererWithAutoFixConfig(cfg)
+
 	r.SetBorderTitle(name)
 	return r
 }

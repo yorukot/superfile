@@ -87,16 +87,22 @@ func GenerateBorder() lipgloss.Border {
 	}
 }
 
-// Generate config error style
-func LoadConfigError(value string) string {
-	return lipgloss.NewStyle().Foreground(lipgloss.Color("#FF5555")).Render("■ ERROR: ") +
-		"Config file \"" + lipgloss.NewStyle().Foreground(lipgloss.Color("#00D9FF")).Render(value) + "\" invalidation"
+func LoadConfigError(value string, msg string) string {
+	return UserConfigInvalidationErrorString(value, "Config", msg)
 }
 
-// Generate config error style
-func LoadHotkeysError(value string) string {
+func LoadHotkeysError(value string, msg string) string {
+	return UserConfigInvalidationErrorString(value, "Hotkey", msg)
+}
+
+func LoadThemeError(value string, msg string) string {
+	return UserConfigInvalidationErrorString(value, "Theme", msg)
+}
+
+func UserConfigInvalidationErrorString(value string, configType string, msg string) string {
 	return lipgloss.NewStyle().Foreground(lipgloss.Color("#FF5555")).Render("■ ERROR: ") +
-		"Hotkeys file \"" + lipgloss.NewStyle().Foreground(lipgloss.Color("#00D9FF")).Render(value) + "\" invalidation"
+		configType + " value for \"" + lipgloss.NewStyle().Foreground(lipgloss.Color("#00D9FF")).Render(value) +
+		"\" is invalid : " + msg
 }
 
 // TODO : Fix Code duplication in textInput.Model creation

@@ -54,31 +54,40 @@ func LoadConfigFile() {
 
 func ValidateConfig(c *ConfigType) error {
 	if (c.FilePreviewWidth > 10 || c.FilePreviewWidth < 2) && c.FilePreviewWidth != 0 {
-		return errors.New(LoadConfigError("file_preview_width"))
+		return errors.New(
+			LoadConfigError("file_preview_width", "File preview width must be 2–10, or 0 to disable preview."),
+		)
 	}
 
 	if c.SidebarWidth != 0 && (c.SidebarWidth < 5 || c.SidebarWidth > 20) {
-		return errors.New(LoadConfigError("sidebar_width"))
+		return errors.New(LoadConfigError("sidebar_width", "Sidebar width must be 5–20, or 0 to hide the sidebar."))
 	}
 
 	for _, order := range c.SidebarSections {
 		if order != utils.SidebarSectionHome &&
 			order != utils.SidebarSectionPinned &&
 			order != utils.SidebarSectionDisks {
-			return errors.New(LoadConfigError("sidebar_sections"))
+			return errors.New(
+				LoadConfigError(
+					"sidebar_sections",
+					"Sidebar sections contain an unsupported value. Allowed values are: home, pinned, disks.",
+				),
+			)
 		}
 	}
 
 	if c.DefaultSortType < 0 || c.DefaultSortType > 3 {
-		return errors.New(LoadConfigError("default_sort_type"))
+		return errors.New(LoadConfigError("default_sort_type", "Default sort type must be between 0 and 3."))
 	}
 
 	if c.FilePanelNamePercent < FileNameRatioMin || c.FilePanelNamePercent > FileNameRatioMax {
-		return errors.New(LoadConfigError("file_panel_name_percent"))
+		return errors.New(
+			LoadConfigError("file_panel_name_percent", "File panel name percent is outside the supported range."),
+		)
 	}
 
 	if ansi.StringWidth(c.BorderTop) != 1 {
-		return errors.New(LoadConfigError("border_top"))
+		return errors.New(LoadConfigError("border_top", "Border character must be exactly one cell wide."))
 	}
 
 	return validateBorders(c)
@@ -86,31 +95,31 @@ func ValidateConfig(c *ConfigType) error {
 
 func validateBorders(c *ConfigType) error {
 	if ansi.StringWidth(c.BorderBottom) != 1 {
-		return errors.New(LoadConfigError("border_bottom"))
+		return errors.New(LoadConfigError("border_bottom", "Border character must be exactly one cell wide."))
 	}
 	if ansi.StringWidth(c.BorderLeft) != 1 {
-		return errors.New(LoadConfigError("border_left"))
+		return errors.New(LoadConfigError("border_left", "Border character must be exactly one cell wide."))
 	}
 	if ansi.StringWidth(c.BorderRight) != 1 {
-		return errors.New(LoadConfigError("border_right"))
+		return errors.New(LoadConfigError("border_right", "Border character must be exactly one cell wide."))
 	}
 	if ansi.StringWidth(c.BorderBottomLeft) != 1 {
-		return errors.New(LoadConfigError("border_bottom_left"))
+		return errors.New(LoadConfigError("border_bottom_left", "Border character must be exactly one cell wide."))
 	}
 	if ansi.StringWidth(c.BorderBottomRight) != 1 {
-		return errors.New(LoadConfigError("border_bottom_right"))
+		return errors.New(LoadConfigError("border_bottom_right", "Border character must be exactly one cell wide."))
 	}
 	if ansi.StringWidth(c.BorderTopLeft) != 1 {
-		return errors.New(LoadConfigError("border_top_left"))
+		return errors.New(LoadConfigError("border_top_left", "Border character must be exactly one cell wide."))
 	}
 	if ansi.StringWidth(c.BorderTopRight) != 1 {
-		return errors.New(LoadConfigError("border_top_right"))
+		return errors.New(LoadConfigError("border_top_right", "Border character must be exactly one cell wide."))
 	}
 	if ansi.StringWidth(c.BorderMiddleLeft) != 1 {
-		return errors.New(LoadConfigError("border_middle_left"))
+		return errors.New(LoadConfigError("border_middle_left", "Border character must be exactly one cell wide."))
 	}
 	if ansi.StringWidth(c.BorderMiddleRight) != 1 {
-		return errors.New(LoadConfigError("border_middle_right"))
+		return errors.New(LoadConfigError("border_middle_right", "Border character must be exactly one cell wide."))
 	}
 
 	return nil
@@ -156,12 +165,22 @@ func LoadHotkeysFile(ignoreMissingFields bool) {
 		// This adds a layer against accidental struct modifications
 		// Makes sure its always be a string slice. It's somewhat like a unit test
 		if value.Kind() != reflect.Slice || value.Type().Elem().Kind() != reflect.String {
-			utils.PrintlnAndExit(LoadHotkeysError(field.Name))
+			utils.PrintlnAndExit(
+				LoadHotkeysError(
+					field.Name,
+					"Hotkey value must be a list of strings.",
+				),
+			)
 		}
 
 		hotkeysList, ok := value.Interface().([]string)
 		if !ok || len(hotkeysList) == 0 || hotkeysList[0] == "" {
-			utils.PrintlnAndExit(LoadHotkeysError(field.Name))
+			utils.PrintlnAndExit(
+				LoadHotkeysError(
+					field.Name,
+					"Hotkey list is empty; at least one key binding is required.",
+				),
+			)
 		}
 	}
 }
@@ -170,22 +189,34 @@ func LoadHotkeysFile(ignoreMissingFields bool) {
 // set default values if we cant read user's theme file
 func LoadThemeFile() {
 	themeFile := filepath.Join(variable.ThemeFolder, Config.Theme+".toml")
-	data, err := os.ReadFile(themeFile)
-	if err == nil {
-		unmarshalErr := toml.Unmarshal(data, &Theme)
-		if unmarshalErr == nil {
-			return
+	if err := LoadUserTheme(themeFile, &Theme); err != nil {
+		slog.Error("Could not read user's theme file. Falling back to default theme", "error", err)
+		err = toml.Unmarshal([]byte(DefaultThemeString), &Theme)
+		if err != nil {
+			utils.PrintfAndExitf("Unexpected error while reading default theme file : %v. Exiting...", err)
 		}
-		slog.Error("Could not unmarshal theme file. Falling back to default theme",
-			"unmarshalErr", unmarshalErr)
-	} else {
-		slog.Error("Could not read user's theme file. Falling back to default theme", "path", themeFile, "error", err)
 	}
 
-	err = toml.Unmarshal([]byte(DefaultThemeString), &Theme)
-	if err != nil {
-		utils.PrintfAndExitf("Unexpected error while reading default theme file : %v. Exiting...", err)
+	// Validations
+	if len(Theme.GradientColor) != RequiredGradientColorCount {
+		utils.PrintlnAndExit(
+			LoadThemeError(
+				"gradient_color",
+				"Gradient color must contain exactly two values.",
+			),
+		)
 	}
+}
+
+func LoadUserTheme(themeFile string, obj *ThemeType) error {
+	data, err := os.ReadFile(themeFile)
+	if err != nil {
+		return fmt.Errorf("could not read user's theme file(%s), err : %w", themeFile, err)
+	}
+	if err = toml.Unmarshal(data, obj); err != nil {
+		return fmt.Errorf("could not unmarshal user's theme file(%s) : %w", themeFile, err)
+	}
+	return nil
 }
 
 // LoadAllDefaultConfig : Load all default configurations from embedded superfile_config folder into global

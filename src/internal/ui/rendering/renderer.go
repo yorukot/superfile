@@ -3,6 +3,7 @@ package rendering
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"math/rand/v2"
 	"strconv"
 
@@ -15,9 +16,7 @@ type StyleModifier func(lipgloss.Style) lipgloss.Style
 // We may allow that later.
 // Also we could have functions about getting sections count, line count, adding updating a
 // specific line in a specific section, and adjusting section sizes. But not needed now.
-// TODO: zero value of Renderer - `Renderer{}` is unusable,
-// It will cause panic on AddLines(), completely eliminate usage of zero values
-// in the code.
+// NOTE: Renderer's zero value isn't safe to use, always use NewRenderer()
 type Renderer struct {
 
 	// Current sectionization will not allow to predefine section
@@ -109,7 +108,15 @@ func NewRenderer(cfg RendererConfig) (*Renderer, error) {
 	if err := validate(cfg); err != nil {
 		return nil, err
 	}
+	return createRendererWithValidatedConfig(cfg), nil
+}
 
+func NewRendererWithAutoFixConfig(cfg RendererConfig) *Renderer {
+	validateAndAutoFix(&cfg)
+	return createRendererWithValidatedConfig(cfg)
+}
+
+func createRendererWithValidatedConfig(cfg RendererConfig) *Renderer {
 	contentHeight := cfg.TotalHeight
 	if cfg.BorderRequired {
 		contentHeight -= 2
@@ -145,7 +152,24 @@ func NewRenderer(cfg RendererConfig) (*Renderer, error) {
 		borderRequired: cfg.BorderRequired,
 		borderStrings:  cfg.Border,
 		name:           cfg.RendererName,
-	}, nil
+	}
+}
+
+// There is code duplication with `validate` but, I can't think of any clean design pattern to fix that.
+// Note: Having a function validate(cfg,autoFix) error and ensure err is not nil via panic is not clean.
+func validateAndAutoFix(cfg *RendererConfig) {
+	if cfg.TotalHeight < 0 || cfg.TotalWidth < 0 {
+		slog.Debug("AutoFixConfig: clamping negative dimensions", "h", cfg.TotalHeight, "w", cfg.TotalWidth)
+		cfg.TotalHeight = max(0, cfg.TotalHeight)
+		cfg.TotalWidth = max(0, cfg.TotalWidth)
+	}
+	if cfg.BorderRequired {
+		if cfg.TotalWidth < MinWidthForBorder || cfg.TotalHeight < MinHeightForBorder {
+			slog.Debug("AutoFixConfig: disabling border due to insufficient dimensions",
+				"h", cfg.TotalHeight, "w", cfg.TotalWidth)
+			cfg.BorderRequired = false
+		}
+	}
 }
 
 func validate(cfg RendererConfig) error {

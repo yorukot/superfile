@@ -27,7 +27,7 @@ const (
 	FileNameRatioMin = 25
 	FileNameRatioMax = 100
 
-	// File permissions
+	RequiredGradientColorCount = 2
 
 	// UI positioning
 	CenterDivisor = 2 // divisor for centering UI elements

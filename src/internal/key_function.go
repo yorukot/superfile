@@ -120,7 +120,7 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 		return m.zoxideModal.Open()
 
 	case slices.Contains(common.Hotkeys.OpenHelpMenu, msg):
-		m.openHelpMenu()
+		m.helpMenu.Open()
 
 	case slices.Contains(common.Hotkeys.OpenSortOptionsMenu, msg):
 		m.sortModal.Open(m.getFocusedFilePanel().SortKind)
@@ -308,33 +308,5 @@ func (m *model) focusOnSearchbarKey(msg string) {
 		m.cancelSearch()
 	case slices.Contains(common.Hotkeys.ConfirmTyping, msg):
 		m.confirmSearch()
-	}
-}
-
-// Check hotkey input in help menu. Possible actions are moving up, down
-// and quiting the menu
-func (m *model) helpMenuKey(msg string) {
-	if m.helpMenu.searchBar.Focused() {
-		switch {
-		case slices.Contains(common.Hotkeys.ConfirmTyping, msg), slices.Contains(common.Hotkeys.CancelTyping, msg):
-			m.helpMenu.searchBar.Blur()
-		default:
-			m.filterHelpMenu(m.helpMenu.searchBar.Value())
-		}
-	} else {
-		m.handleHelpMenuNavKeys(msg)
-	}
-}
-
-func (m *model) handleHelpMenuNavKeys(msg string) {
-	switch {
-	case slices.Contains(common.Hotkeys.ListUp, msg):
-		m.helpMenuListUp()
-	case slices.Contains(common.Hotkeys.ListDown, msg):
-		m.helpMenuListDown()
-	case slices.Contains(common.Hotkeys.Quit, msg):
-		m.quitHelpMenu()
-	case slices.Contains(common.Hotkeys.SearchBar, msg):
-		m.helpMenu.searchBar.Focus()
 	}
 }
