@@ -3,6 +3,7 @@ package rendering
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"math/rand/v2"
 	"strconv"
 
@@ -154,6 +155,7 @@ func validate(cfg *RendererConfig) error {
 		if !cfg.AutoFixConfig {
 			return fmt.Errorf("dimensions must be non-negative (h=%d, w=%d)", cfg.TotalHeight, cfg.TotalWidth)
 		}
+		slog.Debug("AutoFixConfig: clamping negative dimensions", "h", cfg.TotalHeight, "w", cfg.TotalWidth)
 		cfg.TotalHeight = max(0, cfg.TotalHeight)
 		cfg.TotalWidth = max(0, cfg.TotalWidth)
 	}
@@ -162,6 +164,8 @@ func validate(cfg *RendererConfig) error {
 			if !cfg.AutoFixConfig {
 				return errors.New("need at least 2 width and height for borders")
 			}
+			slog.Debug("AutoFixConfig: disabling border due to insufficient dimensions",
+				"h", cfg.TotalHeight, "w", cfg.TotalWidth)
 			cfg.BorderRequired = false
 		}
 	}
