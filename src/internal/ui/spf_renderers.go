@@ -25,7 +25,7 @@ func SidebarRenderer(totalHeight int, totalWidth int, sidebarFocused bool) *rend
 
 	r, err := rendering.NewRenderer(cfg)
 	if err != nil {
-		panic("Unexpected error in creating renderer with AutoFixConfig: " + err.Error())
+		panic("SidebarRenderer: Unexpected error in creating renderer with AutoFixConfig: " + err.Error())
 	}
 
 	return r
@@ -49,7 +49,7 @@ func FilePanelRenderer(totalHeight int, totalWidth int, filePanelFocused bool) *
 
 	r, err := rendering.NewRenderer(cfg)
 	if err != nil {
-		panic("Unexpected error in creating renderer with AutoFixConfig: " + err.Error())
+		panic("FilePanelRenderer: Unexpected error in creating renderer with AutoFixConfig: " + err.Error())
 	}
 	return r
 }
@@ -75,7 +75,7 @@ func FilePreviewPanelRenderer(totalHeight int, totalWidth int) *rendering.Render
 
 	r, err := rendering.NewRenderer(cfg)
 	if err != nil {
-		panic("Unexpected error in creating renderer with AutoFixConfig: " + err.Error())
+		panic("FilePreviewPanelRenderer: Unexpected error in creating renderer with AutoFixConfig: " + err.Error())
 	}
 	return r
 }
@@ -95,7 +95,7 @@ func PromptRenderer(totalHeight int, totalWidth int) *rendering.Renderer {
 
 	r, err := rendering.NewRenderer(cfg)
 	if err != nil {
-		panic("Unexpected error in creating renderer with AutoFixConfig: " + err.Error())
+		panic("PromptRenderer: Unexpected error in creating renderer with AutoFixConfig: " + err.Error())
 	}
 	return r
 }
@@ -118,7 +118,7 @@ func HelpMenuRenderer(totalHeight int, totalWidth int) *rendering.Renderer {
 
 	r, err := rendering.NewRenderer(cfg)
 	if err != nil {
-		panic("Unexpected error in creating renderer with AutoFixConfig: " + err.Error())
+		panic("HelpMenuRenderer: Unexpected error in creating renderer with AutoFixConfig: " + err.Error())
 	}
 	return r
 }
@@ -141,7 +141,7 @@ func DefaultFooterRenderer(totalHeight int, totalWidth int, focused bool, name s
 
 	r, err := rendering.NewRenderer(cfg)
 	if err != nil {
-		panic("Unexpected error in creating renderer with AutoFixConfig: " + err.Error())
+		panic("DefaultFooterRenderer: Unexpected error in creating renderer with AutoFixConfig: " + err.Error())
 	}
 	r.SetBorderTitle(name)
 	return r
