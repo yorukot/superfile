@@ -3,6 +3,7 @@ package rendering
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"math/rand/v2"
 	"strconv"
 
@@ -15,9 +16,7 @@ type StyleModifier func(lipgloss.Style) lipgloss.Style
 // We may allow that later.
 // Also we could have functions about getting sections count, line count, adding updating a
 // specific line in a specific section, and adjusting section sizes. But not needed now.
-// TODO: zero value of Renderer - `Renderer{}` is unusable,
-// It will cause panic on AddLines(), completely eliminate usage of zero values
-// in the code.
+// NOTE: Renderer's zero value isn't safe to use, always use NewRenderer()
 type Renderer struct {
 
 	// Current sectionization will not allow to predefine section
@@ -87,10 +86,13 @@ type RendererConfig struct {
 
 	Border       lipgloss.Border
 	RendererName string
+
+	AutoFixConfig bool
 }
 
 func DefaultRendererConfig(totalHeight int, totalWidth int) RendererConfig {
 	return RendererConfig{
+		AutoFixConfig:    true,
 		TotalHeight:      totalHeight,
 		TotalWidth:       totalWidth,
 		TruncateHeight:   false,
@@ -106,7 +108,7 @@ func DefaultRendererConfig(totalHeight int, totalWidth int) RendererConfig {
 }
 
 func NewRenderer(cfg RendererConfig) (*Renderer, error) {
-	if err := validate(cfg); err != nil {
+	if err := validate(&cfg); err != nil {
 		return nil, err
 	}
 
@@ -148,13 +150,23 @@ func NewRenderer(cfg RendererConfig) (*Renderer, error) {
 	}, nil
 }
 
-func validate(cfg RendererConfig) error {
+func validate(cfg *RendererConfig) error {
 	if cfg.TotalHeight < 0 || cfg.TotalWidth < 0 {
-		return fmt.Errorf("dimensions must be non-negative (h=%d, w=%d)", cfg.TotalHeight, cfg.TotalWidth)
+		if !cfg.AutoFixConfig {
+			return fmt.Errorf("dimensions must be non-negative (h=%d, w=%d)", cfg.TotalHeight, cfg.TotalWidth)
+		}
+		slog.Debug("AutoFixConfig: clamping negative dimensions", "h", cfg.TotalHeight, "w", cfg.TotalWidth)
+		cfg.TotalHeight = max(0, cfg.TotalHeight)
+		cfg.TotalWidth = max(0, cfg.TotalWidth)
 	}
 	if cfg.BorderRequired {
 		if cfg.TotalWidth < MinWidthForBorder || cfg.TotalHeight < MinHeightForBorder {
-			return errors.New("need at least 2 width and height for borders")
+			if !cfg.AutoFixConfig {
+				return errors.New("need at least 2 width and height for borders")
+			}
+			slog.Debug("AutoFixConfig: disabling border due to insufficient dimensions",
+				"h", cfg.TotalHeight, "w", cfg.TotalWidth)
+			cfg.BorderRequired = false
 		}
 	}
 	return nil
