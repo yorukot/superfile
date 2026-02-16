@@ -162,8 +162,7 @@ func validate(cfg *RendererConfig) error {
 			if !cfg.AutoFixConfig {
 				return errors.New("need at least 2 width and height for borders")
 			}
-			cfg.TotalHeight = max(MinHeightForBorder, cfg.TotalHeight)
-			cfg.TotalWidth = max(MinWidthForBorder, cfg.TotalWidth)
+			cfg.BorderRequired = false
 		}
 	}
 	return nil
