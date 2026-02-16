@@ -76,8 +76,8 @@ func ValidateConfig(c *ConfigType) error {
 		}
 	}
 
-	if c.DefaultSortType < 0 || c.DefaultSortType > 3 {
-		return errors.New(LoadConfigError("default_sort_type", "Default sort type must be between 0 and 3."))
+	if c.DefaultSortType < 0 || c.DefaultSortType > 4 {
+		return errors.New(LoadConfigError("default_sort_type", "Default sort type must be between 0 and 4."))
 	}
 
 	if c.FilePanelNamePercent < FileNameRatioMin || c.FilePanelNamePercent > FileNameRatioMax {
