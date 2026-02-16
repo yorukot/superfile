@@ -86,13 +86,10 @@ type RendererConfig struct {
 
 	Border       lipgloss.Border
 	RendererName string
-
-	AutoFixConfig bool
 }
 
 func DefaultRendererConfig(totalHeight int, totalWidth int) RendererConfig {
 	return RendererConfig{
-		AutoFixConfig:    true,
 		TotalHeight:      totalHeight,
 		TotalWidth:       totalWidth,
 		TruncateHeight:   false,
@@ -108,10 +105,18 @@ func DefaultRendererConfig(totalHeight int, totalWidth int) RendererConfig {
 }
 
 func NewRenderer(cfg RendererConfig) (*Renderer, error) {
-	if err := validate(&cfg); err != nil {
+	if err := validate(cfg); err != nil {
 		return nil, err
 	}
+	return createRendererWithValidatedConfig(cfg), nil
+}
 
+func NewRendererWithAutoFixConfig(cfg RendererConfig) *Renderer {
+	validateAndAutoFix(&cfg)
+	return createRendererWithValidatedConfig(cfg)
+}
+
+func createRendererWithValidatedConfig(cfg RendererConfig) *Renderer {
 	contentHeight := cfg.TotalHeight
 	if cfg.BorderRequired {
 		contentHeight -= 2
@@ -147,26 +152,33 @@ func NewRenderer(cfg RendererConfig) (*Renderer, error) {
 		borderRequired: cfg.BorderRequired,
 		borderStrings:  cfg.Border,
 		name:           cfg.RendererName,
-	}, nil
+	}
 }
 
-func validate(cfg *RendererConfig) error {
+// There is code duplication with `validate` but, I can't think of any clean design pattern to fix that.
+// Note: Having a function validate(cfg,autoFix) error and ensure err is not nil via panic is not clean.
+func validateAndAutoFix(cfg *RendererConfig) {
 	if cfg.TotalHeight < 0 || cfg.TotalWidth < 0 {
-		if !cfg.AutoFixConfig {
-			return fmt.Errorf("dimensions must be non-negative (h=%d, w=%d)", cfg.TotalHeight, cfg.TotalWidth)
-		}
 		slog.Debug("AutoFixConfig: clamping negative dimensions", "h", cfg.TotalHeight, "w", cfg.TotalWidth)
 		cfg.TotalHeight = max(0, cfg.TotalHeight)
 		cfg.TotalWidth = max(0, cfg.TotalWidth)
 	}
 	if cfg.BorderRequired {
 		if cfg.TotalWidth < MinWidthForBorder || cfg.TotalHeight < MinHeightForBorder {
-			if !cfg.AutoFixConfig {
-				return errors.New("need at least 2 width and height for borders")
-			}
 			slog.Debug("AutoFixConfig: disabling border due to insufficient dimensions",
 				"h", cfg.TotalHeight, "w", cfg.TotalWidth)
 			cfg.BorderRequired = false
+		}
+	}
+}
+
+func validate(cfg RendererConfig) error {
+	if cfg.TotalHeight < 0 || cfg.TotalWidth < 0 {
+		return fmt.Errorf("dimensions must be non-negative (h=%d, w=%d)", cfg.TotalHeight, cfg.TotalWidth)
+	}
+	if cfg.BorderRequired {
+		if cfg.TotalWidth < MinWidthForBorder || cfg.TotalHeight < MinHeightForBorder {
+			return errors.New("need at least 2 width and height for borders")
 		}
 	}
 	return nil
