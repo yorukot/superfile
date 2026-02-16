@@ -105,7 +105,7 @@ func DefaultRendererConfig(totalHeight int, totalWidth int) RendererConfig {
 }
 
 func NewRenderer(cfg RendererConfig) (*Renderer, error) {
-	if err := validate(&cfg); err != nil {
+	if err := validate(cfg); err != nil {
 		return nil, err
 	}
 	return createRendererWithValidatedConfig(cfg), nil
@@ -155,7 +155,8 @@ func createRendererWithValidatedConfig(cfg RendererConfig) *Renderer {
 	}
 }
 
-// There is code duplication with `validate` but, I can't think of any design pattern to fix that.
+// There is code duplication with `validate` but, I can't think of any clean design pattern to fix that.
+// Note: Having a function validate(cfg,autoFix) error and ensure err is not nil via panic is not clean.
 func validateAndAutoFix(cfg *RendererConfig) {
 	if cfg.TotalHeight < 0 || cfg.TotalWidth < 0 {
 		slog.Debug("AutoFixConfig: clamping negative dimensions", "h", cfg.TotalHeight, "w", cfg.TotalWidth)
@@ -171,7 +172,7 @@ func validateAndAutoFix(cfg *RendererConfig) {
 	}
 }
 
-func validate(cfg *RendererConfig) error {
+func validate(cfg RendererConfig) error {
 	if cfg.TotalHeight < 0 || cfg.TotalWidth < 0 {
 		return fmt.Errorf("dimensions must be non-negative (h=%d, w=%d)", cfg.TotalHeight, cfg.TotalWidth)
 	}
