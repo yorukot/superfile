@@ -9,7 +9,6 @@ import (
 
 func SidebarRenderer(totalHeight int, totalWidth int, sidebarFocused bool) *rendering.Renderer {
 	cfg := rendering.DefaultRendererConfig(totalHeight, totalWidth)
-	cfg.AutoFixConfig = true
 
 	cfg.ContentFGColor = common.SidebarFGColor
 	cfg.ContentBGColor = common.SidebarBGColor
@@ -33,7 +32,6 @@ func SidebarRenderer(totalHeight int, totalWidth int, sidebarFocused bool) *rend
 
 func FilePanelRenderer(totalHeight int, totalWidth int, filePanelFocused bool) *rendering.Renderer {
 	cfg := rendering.DefaultRendererConfig(totalHeight, totalWidth)
-	cfg.AutoFixConfig = true
 
 	cfg.ContentFGColor = common.FilePanelFGColor
 	cfg.ContentBGColor = common.FilePanelBGColor
@@ -56,7 +54,6 @@ func FilePanelRenderer(totalHeight int, totalWidth int, filePanelFocused bool) *
 
 func FilePreviewPanelRenderer(totalHeight int, totalWidth int) *rendering.Renderer {
 	cfg := rendering.DefaultRendererConfig(totalHeight, totalWidth)
-	cfg.AutoFixConfig = true
 	cfg.ContentFGColor = common.FilePanelFGColor
 	cfg.ContentBGColor = common.FilePanelBGColor
 
@@ -82,7 +79,6 @@ func FilePreviewPanelRenderer(totalHeight int, totalWidth int) *rendering.Render
 
 func PromptRenderer(totalHeight int, totalWidth int) *rendering.Renderer {
 	cfg := rendering.DefaultRendererConfig(totalHeight, totalWidth)
-	cfg.AutoFixConfig = true
 	cfg.TruncateHeight = true
 	cfg.ContentFGColor = common.ModalFGColor
 	cfg.ContentBGColor = common.ModalBGColor
@@ -106,7 +102,6 @@ func ZoxideRenderer(totalHeight int, totalWidth int) *rendering.Renderer {
 
 func HelpMenuRenderer(totalHeight int, totalWidth int) *rendering.Renderer {
 	cfg := rendering.DefaultRendererConfig(totalHeight, totalWidth)
-	cfg.AutoFixConfig = true
 	cfg.ContentFGColor = common.ModalFGColor
 	cfg.ContentBGColor = common.ModalBGColor
 
@@ -125,7 +120,6 @@ func HelpMenuRenderer(totalHeight int, totalWidth int) *rendering.Renderer {
 
 func DefaultFooterRenderer(totalHeight int, totalWidth int, focused bool, name string) *rendering.Renderer {
 	cfg := rendering.DefaultRendererConfig(totalHeight, totalWidth)
-	cfg.AutoFixConfig = true
 
 	cfg.ContentFGColor = common.FooterFGColor
 	cfg.ContentBGColor = common.FooterBGColor
