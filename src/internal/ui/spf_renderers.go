@@ -51,12 +51,7 @@ func FilePreviewPanelRenderer(totalHeight int, totalWidth int) *rendering.Render
 	cfg.ContentFGColor = common.FilePanelFGColor
 	cfg.ContentBGColor = common.FilePanelBGColor
 
-	// We need height and width check to prevent errors in creating renderer
-	// during model init, empty renderer can cause panic in AddLines()
-	// TODO: We should not have to initiliaize a renderer in case of zero sized
-	// panel
-	if common.Config.EnableFilePreviewBorder && totalWidth >= rendering.MinWidthForBorder &&
-		totalHeight >= rendering.MinHeightForBorder {
+	if common.Config.EnableFilePreviewBorder {
 		cfg.BorderRequired = true
 		cfg.BorderBGColor = common.FilePanelBGColor
 		cfg.BorderFGColor = common.FilePanelBorderColor

@@ -108,15 +108,15 @@ func NewRenderer(cfg RendererConfig) (*Renderer, error) {
 	if err := validate(&cfg); err != nil {
 		return nil, err
 	}
-	return createRendererWithConfig(cfg), nil
+	return createRendererWithValidatedConfig(cfg), nil
 }
 
 func NewRendererWithAutoFixConfig(cfg RendererConfig) *Renderer {
 	validateAndAutoFix(&cfg)
-	return createRendererWithConfig(cfg)
+	return createRendererWithValidatedConfig(cfg)
 }
 
-func createRendererWithConfig(cfg RendererConfig) *Renderer {
+func createRendererWithValidatedConfig(cfg RendererConfig) *Renderer {
 	contentHeight := cfg.TotalHeight
 	if cfg.BorderRequired {
 		contentHeight -= 2
