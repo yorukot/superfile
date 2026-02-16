@@ -8,7 +8,7 @@ import (
 	"github.com/charmbracelet/x/ansi"
 )
 
-func (r *Renderer) assertInitialized()  {
+func (r *Renderer) assertInitialized() {
 	if r.contentSections == nil {
 		panic("Renderer not initialized (zero value). Use NewRenderer() to create a valid instance")
 	}

@@ -85,7 +85,7 @@ type RendererConfig struct {
 	Border       lipgloss.Border
 	RendererName string
 
-	AutoFixConfig	   bool
+	AutoFixConfig bool
 }
 
 func DefaultRendererConfig(totalHeight int, totalWidth int) RendererConfig {
@@ -104,7 +104,7 @@ func DefaultRendererConfig(totalHeight int, totalWidth int) RendererConfig {
 	}
 }
 
-func autoFix(cfg *RendererConfig)  {
+func autoFix(cfg *RendererConfig) {
 	if cfg.TotalHeight < 1 {
 		cfg.TotalHeight = 1
 	}
