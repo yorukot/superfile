@@ -15,9 +15,6 @@ type StyleModifier func(lipgloss.Style) lipgloss.Style
 // We may allow that later.
 // Also we could have functions about getting sections count, line count, adding updating a
 // specific line in a specific section, and adjusting section sizes. But not needed now.
-// TODO: zero value of Renderer - `Renderer{}` is unusable,
-// It will cause panic on AddLines(), completely eliminate usage of zero values
-// in the code.
 type Renderer struct {
 
 	// Current sectionization will not allow to predefine section
@@ -87,6 +84,8 @@ type RendererConfig struct {
 
 	Border       lipgloss.Border
 	RendererName string
+
+	AutoFixConfig	   bool
 }
 
 func DefaultRendererConfig(totalHeight int, totalWidth int) RendererConfig {
@@ -105,7 +104,25 @@ func DefaultRendererConfig(totalHeight int, totalWidth int) RendererConfig {
 	}
 }
 
+func autoFix(cfg *RendererConfig)  {
+	if cfg.TotalHeight < 1 {
+		cfg.TotalHeight = 1
+	}
+	if cfg.TotalWidth < 1 {
+		cfg.TotalWidth = 1
+	}
+	if cfg.BorderRequired {
+		if cfg.TotalWidth < MinWidthForBorder || cfg.TotalHeight < MinHeightForBorder {
+			cfg.BorderRequired = false
+		}
+	}
+}
+
 func NewRenderer(cfg RendererConfig) (*Renderer, error) {
+	if cfg.AutoFixConfig {
+		autoFix(&cfg)
+	}
+
 	if err := validate(cfg); err != nil {
 		return nil, err
 	}

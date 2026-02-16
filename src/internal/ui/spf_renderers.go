@@ -11,6 +11,7 @@ import (
 
 func SidebarRenderer(totalHeight int, totalWidth int, sidebarFocused bool) *rendering.Renderer {
 	cfg := rendering.DefaultRendererConfig(totalHeight, totalWidth)
+	cfg.AutoFixConfig = true
 
 	cfg.ContentFGColor = common.SidebarFGColor
 	cfg.ContentBGColor = common.SidebarBGColor
@@ -27,13 +28,13 @@ func SidebarRenderer(totalHeight int, totalWidth int, sidebarFocused bool) *rend
 	r, err := rendering.NewRenderer(cfg)
 	if err != nil {
 		slog.Error("Error in creating renderer. Falling back to default renderer", "error", err)
-		r = &rendering.Renderer{}
 	}
 	return r
 }
 
 func FilePanelRenderer(totalHeight int, totalWidth int, filePanelFocused bool) *rendering.Renderer {
 	cfg := rendering.DefaultRendererConfig(totalHeight, totalWidth)
+	cfg.AutoFixConfig = true
 
 	cfg.ContentFGColor = common.FilePanelFGColor
 	cfg.ContentBGColor = common.FilePanelBGColor
@@ -50,13 +51,13 @@ func FilePanelRenderer(totalHeight int, totalWidth int, filePanelFocused bool) *
 	r, err := rendering.NewRenderer(cfg)
 	if err != nil {
 		slog.Error("Error in creating renderer. Falling back to default renderer", "error", err)
-		r = &rendering.Renderer{}
 	}
 	return r
 }
 
 func FilePreviewPanelRenderer(totalHeight int, totalWidth int) *rendering.Renderer {
 	cfg := rendering.DefaultRendererConfig(totalHeight, totalWidth)
+	cfg.AutoFixConfig = true
 	cfg.ContentFGColor = common.FilePanelFGColor
 	cfg.ContentBGColor = common.FilePanelBGColor
 
@@ -76,13 +77,13 @@ func FilePreviewPanelRenderer(totalHeight int, totalWidth int) *rendering.Render
 	r, err := rendering.NewRenderer(cfg)
 	if err != nil {
 		slog.Error("Error in creating renderer. Falling back to default renderer", "error", err)
-		r = &rendering.Renderer{}
 	}
 	return r
 }
 
 func PromptRenderer(totalHeight int, totalWidth int) *rendering.Renderer {
 	cfg := rendering.DefaultRendererConfig(totalHeight, totalWidth)
+	cfg.AutoFixConfig = true
 	cfg.TruncateHeight = true
 	cfg.ContentFGColor = common.ModalFGColor
 	cfg.ContentBGColor = common.ModalBGColor
@@ -96,7 +97,6 @@ func PromptRenderer(totalHeight int, totalWidth int) *rendering.Renderer {
 	r, err := rendering.NewRenderer(cfg)
 	if err != nil {
 		slog.Error("Error in creating renderer. Falling back to default renderer", "error", err)
-		r = &rendering.Renderer{}
 	}
 	return r
 }
@@ -107,6 +107,7 @@ func ZoxideRenderer(totalHeight int, totalWidth int) *rendering.Renderer {
 
 func HelpMenuRenderer(totalHeight int, totalWidth int) *rendering.Renderer {
 	cfg := rendering.DefaultRendererConfig(totalHeight, totalWidth)
+	cfg.AutoFixConfig = true
 	cfg.ContentFGColor = common.ModalFGColor
 	cfg.ContentBGColor = common.ModalBGColor
 
@@ -119,13 +120,13 @@ func HelpMenuRenderer(totalHeight int, totalWidth int) *rendering.Renderer {
 	r, err := rendering.NewRenderer(cfg)
 	if err != nil {
 		slog.Error("Error in creating renderer. Falling back to default renderer", "error", err)
-		r = &rendering.Renderer{}
 	}
 	return r
 }
 
 func DefaultFooterRenderer(totalHeight int, totalWidth int, focused bool, name string) *rendering.Renderer {
 	cfg := rendering.DefaultRendererConfig(totalHeight, totalWidth)
+	cfg.AutoFixConfig = true
 
 	cfg.ContentFGColor = common.FooterFGColor
 	cfg.ContentBGColor = common.FooterBGColor
@@ -142,7 +143,6 @@ func DefaultFooterRenderer(totalHeight int, totalWidth int, focused bool, name s
 	r, err := rendering.NewRenderer(cfg)
 	if err != nil {
 		slog.Error("Error in creating renderer. Falling back to default renderer", "error", err)
-		r = &rendering.Renderer{}
 	}
 	r.SetBorderTitle(name)
 	return r
