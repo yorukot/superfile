@@ -8,18 +8,8 @@ import (
 	"github.com/charmbracelet/x/ansi"
 )
 
-func (r *Renderer) assertInitialized() {
-	if r == nil {
-		panic("Renderer is nil. NewRenderer() may have returned an error that was ignored")
-	}
-	if r.contentSections == nil {
-		panic("Renderer not initialized (zero value). Use NewRenderer() to create a valid instance")
-	}
-}
-
 // Add lines as much as the remaining capacity allows
 func (r *Renderer) AddLines(lines ...string) *Renderer {
-	r.assertInitialized()
 	r.contentSections[r.curSectionIdx].AddLines(lines...)
 	return r
 }
@@ -27,7 +17,6 @@ func (r *Renderer) AddLines(lines ...string) *Renderer {
 // Lines until now will belong to current section, and
 // Any new lines will belong to a new section
 func (r *Renderer) AddSection() {
-	r.assertInitialized()
 	// r.actualContentHeight before this point only includes sections
 	// before r.curSectionIdx
 	r.actualContentHeight += r.contentSections[r.curSectionIdx].CntLines()
@@ -57,7 +46,6 @@ func (r *Renderer) AddSection() {
 
 // Truncate would always preserve ansi codes.
 func (r *Renderer) AddLineWithCustomTruncate(line string, truncateStyle TruncateStyle) {
-	r.assertInitialized()
 	r.contentSections[r.curSectionIdx].AddLineWithCustomTruncate(line, truncateStyle)
 }
 
@@ -80,7 +68,6 @@ func (r *Renderer) AreInfoItemsTruncated() bool {
 
 // Should not do any updates on 'r'
 func (r *Renderer) Render() string {
-	r.assertInitialized()
 	content := strings.Builder{}
 	for i := range r.contentSections {
 		// After every iteration, current cursor will be on next newline
