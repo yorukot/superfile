@@ -82,7 +82,6 @@ func TestRendererBasic(t *testing.T) {
 
 	t.Run("Invalid config Renderer", func(t *testing.T) {
 		cfg := getDefaultTestRendererConfig(0, 0, true, false)
-		cfg.AutoFixConfig = false
 		r, err := NewRenderer(cfg)
 		assert.Nil(t, r)
 		require.Error(t, err)
