@@ -1,8 +1,6 @@
 package ui
 
 import (
-	"log/slog"
-
 	"github.com/charmbracelet/lipgloss"
 
 	"github.com/yorukot/superfile/src/internal/common"
@@ -27,8 +25,9 @@ func SidebarRenderer(totalHeight int, totalWidth int, sidebarFocused bool) *rend
 
 	r, err := rendering.NewRenderer(cfg)
 	if err != nil {
-		slog.Error("Error in creating renderer. Falling back to default renderer", "error", err)
+		panic("Unexpected error in creating renderer with AutoFixConfig: " + err.Error())
 	}
+
 	return r
 }
 
@@ -50,7 +49,7 @@ func FilePanelRenderer(totalHeight int, totalWidth int, filePanelFocused bool) *
 
 	r, err := rendering.NewRenderer(cfg)
 	if err != nil {
-		slog.Error("Error in creating renderer. Falling back to default renderer", "error", err)
+		panic("Unexpected error in creating renderer with AutoFixConfig: " + err.Error())
 	}
 	return r
 }
@@ -76,7 +75,7 @@ func FilePreviewPanelRenderer(totalHeight int, totalWidth int) *rendering.Render
 
 	r, err := rendering.NewRenderer(cfg)
 	if err != nil {
-		slog.Error("Error in creating renderer. Falling back to default renderer", "error", err)
+		panic("Unexpected error in creating renderer with AutoFixConfig: " + err.Error())
 	}
 	return r
 }
@@ -96,7 +95,7 @@ func PromptRenderer(totalHeight int, totalWidth int) *rendering.Renderer {
 
 	r, err := rendering.NewRenderer(cfg)
 	if err != nil {
-		slog.Error("Error in creating renderer. Falling back to default renderer", "error", err)
+		panic("Unexpected error in creating renderer with AutoFixConfig: " + err.Error())
 	}
 	return r
 }
@@ -119,7 +118,7 @@ func HelpMenuRenderer(totalHeight int, totalWidth int) *rendering.Renderer {
 
 	r, err := rendering.NewRenderer(cfg)
 	if err != nil {
-		slog.Error("Error in creating renderer. Falling back to default renderer", "error", err)
+		panic("Unexpected error in creating renderer with AutoFixConfig: " + err.Error())
 	}
 	return r
 }
@@ -142,7 +141,7 @@ func DefaultFooterRenderer(totalHeight int, totalWidth int, focused bool, name s
 
 	r, err := rendering.NewRenderer(cfg)
 	if err != nil {
-		slog.Error("Error in creating renderer. Falling back to default renderer", "error", err)
+		panic("Unexpected error in creating renderer with AutoFixConfig: " + err.Error())
 	}
 	r.SetBorderTitle(name)
 	return r

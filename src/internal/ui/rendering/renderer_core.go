@@ -9,6 +9,9 @@ import (
 )
 
 func (r *Renderer) assertInitialized() {
+	if r == nil {
+		panic("Renderer is nil. NewRenderer() may have returned an error that was ignored")
+	}
 	if r.contentSections == nil {
 		panic("Renderer not initialized (zero value). Use NewRenderer() to create a valid instance")
 	}
