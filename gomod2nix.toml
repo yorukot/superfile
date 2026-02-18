@@ -164,8 +164,8 @@ schema = 3
     version = "v0.0.0-20190401172101-9e8deecbddbd"
     hash = "sha256-AiY2T9hXj6jnfldYDoe4WNr3FldpVTxc3lScR++HOLc="
   [mod."github.com/shirou/gopsutil/v4"]
-    version = "v4.25.12"
-    hash = "sha256-gzk9GW4+tXUWmxAVD3by/k4D/+l++TvajRVTkQJvwmM="
+    version = "v4.26.1"
+    hash = "sha256-Q8Bn+szFu80k7pFrF+PnTZfPd20MBURJM89/IHSq3tQ="
   [mod."github.com/stretchr/testify"]
     version = "v1.11.1"
     hash = "sha256-sWfjkuKJyDllDEtnM8sb/pdLzPQmUYWYtmeWz/5suUc="
@@ -197,8 +197,8 @@ schema = 3
     version = "v0.30.0"
     hash = "sha256-tZJikWbjGgN5rCgB/dqj3dpn9BfAZUVyXmd3KavAgLE="
   [mod."golang.org/x/sys"]
-    version = "v0.38.0"
-    hash = "sha256-1+i5EaG3JwH3KMtefzJLG5R6jbOeJM4GK3/LHBVnSy0="
+    version = "v0.40.0"
+    hash = "sha256-KDe+wMr7dfMFwKMJEljzk+f82pQWFFPoFHivjD7qJGg="
   [mod."golang.org/x/term"]
     version = "v0.18.0"
     hash = "sha256-lpze9arFZIhBV8Ht3VZyoiUwqPkeH2IwfXt8M3xljiM="
