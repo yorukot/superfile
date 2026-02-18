@@ -157,13 +157,14 @@ type HotkeysType struct {
 	OpenFileWithEditor             []string `toml:"open_file_with_editor" comment:"editor"`
 	OpenCurrentDirectoryWithEditor []string `toml:"open_current_directory_with_editor"`
 
-	PinnedDirectory []string `toml:"pinned_directory" comment:"other"`
-	ToggleDotFile   []string `toml:"toggle_dot_file"`
-	ChangePanelMode []string `toml:"change_panel_mode"`
-	OpenHelpMenu    []string `toml:"open_help_menu"`
-	OpenCommandLine []string `toml:"open_command_line"`
-	OpenSPFPrompt   []string `toml:"open_spf_prompt"`
-	OpenZoxide      []string `toml:"open_zoxide"`
+	PinnedDirectory     []string `toml:"pinned_directory" comment:"other"`
+	ToggleDotFile       []string `toml:"toggle_dot_file"`
+	ChangePanelMode     []string `toml:"change_panel_mode"`
+	OpenHelpMenu        []string `toml:"open_help_menu"`
+	OpenCommandLine     []string `toml:"open_command_line"`
+	OpenSPFPrompt       []string `toml:"open_spf_prompt"`
+	OpenZoxide          []string `toml:"open_zoxide"`
+	OpenGotoInteractive []string `toml:"open_goto_interactive"`
 
 	CopyPath []string `toml:"copy_path"`
 	CopyPWD  []string `toml:"copy_present_working_directory"`
