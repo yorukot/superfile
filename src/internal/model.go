@@ -427,7 +427,8 @@ func (m *model) applyZoxideModalAction(action common.ModelAction) tea.Cmd {
 func (m *model) applyShellCommandAction(shellCommand string) {
 	focusPanelDir := m.getFocusedFilePanel().Location
 
-	retCode, output, err := utils.ExecuteCommandInShell(common.DefaultCommandTimeout, focusPanelDir, shellCommand)
+	ws := utils.NewWinSize(m.promptModal.GetMaxHeight(), m.promptModal.GetWidth())
+	retCode, output, err := utils.ExecuteCommandInShell(ws, common.DefaultCommandTimeout, focusPanelDir, shellCommand)
 
 	m.promptModal.HandleShellCommandResults(retCode, output)
 

@@ -81,6 +81,6 @@ require (
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rwcarlsen/goexif v0.0.0-20190401172101-9e8deecbddbd
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
-	golang.org/x/sys v0.38.0 // indirect
+	golang.org/x/sys v0.38.0
 	golang.org/x/text v0.32.0
 )
