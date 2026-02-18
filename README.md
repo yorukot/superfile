@@ -47,6 +47,7 @@
 ## Content
 
 - [Installation](#installation)
+- [Features](#features)
 - [Build](#build)
 - [Supported Systems](#supported-systems)
 - [Tutorial](#tutorial)
@@ -92,6 +93,21 @@ scoop install superfile
 
 ### More installation methods
 [Click me to check on how to install](https://superfile.dev/getting-started/installation/)
+
+## Features
+
+Superfile offers a comprehensive set of features for modern terminal file management:
+
+- **Multi-panel view** with up to 10 file panels
+- **File preview** supporting text, images, PDFs, and videos
+- **Vim-style navigation** and customizable hotkeys  
+- **Clipboard operations** with multi-file selection
+- **Archive support** for zip, tar.gz, and 7z
+- **Smart navigation** with Zoxide integration
+- **Theme customization** with multiple built-in themes
+- **Cross-platform** support for Linux, macOS, and Windows
+
+For a complete list of features, see the [Features Documentation](https://superfile.dev/list/features-list/).
 
 ## Build
 
