@@ -111,7 +111,7 @@ func (m *model) getDeleteCmd(permDelete bool) tea.Cmd {
 	}
 
 	var items []string
-	if panel.PanelMode == filepanel.SelectMode {
+	if panel.PanelMode == filepanel.SelectMode || panel.SelectedCount() > 0 {
 		items = panel.GetSelectedLocations()
 	} else {
 		items = []string{panel.GetFocusedItem().Location}
@@ -168,7 +168,7 @@ func deleteOperation(processBarModel *processbar.Model, items []string, useTrash
 func (m *model) getDeleteTriggerCmd(deletePermanent bool) tea.Cmd {
 	panel := m.getFocusedFilePanel()
 	if (panel.PanelMode == filepanel.SelectMode && panel.SelectedCount() == 0) ||
-		(panel.PanelMode == filepanel.BrowserMode && panel.Empty()) {
+		(panel.PanelMode == filepanel.BrowserMode && panel.SelectedCount() == 0 && panel.Empty()) {
 		return nil
 	}
 

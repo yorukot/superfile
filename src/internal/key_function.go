@@ -158,6 +158,8 @@ func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
 	// Check if in the select mode and focusOn filepanel
 	if m.getFocusedFilePanel().PanelMode == filepanel.SelectMode {
 		switch {
+		case common.Config.SpaceSelects && msg == " ":
+			m.getFocusedFilePanel().SingleItemSelect()
 		case slices.Contains(common.Hotkeys.Confirm, msg):
 			m.getFocusedFilePanel().SingleItemSelect()
 		case slices.Contains(common.Hotkeys.FilePanelSelectModeItemsSelectUp, msg):
@@ -178,7 +180,10 @@ func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
 		return nil
 	}
 
+	panel := m.getFocusedFilePanel()
 	switch {
+	case common.Config.SpaceSelects && msg == " ":
+		panel.SingleItemSelect()
 	case slices.Contains(common.Hotkeys.Confirm, msg):
 		m.enterPanel()
 	case slices.Contains(common.Hotkeys.ParentDirectory, msg):
@@ -188,9 +193,17 @@ func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
 	case slices.Contains(common.Hotkeys.PermanentlyDeleteItems, msg):
 		return m.getDeleteTriggerCmd(true)
 	case slices.Contains(common.Hotkeys.CopyItems, msg):
-		m.copySingleItem(false)
+		if panel.SelectedCount() > 0 {
+			m.copyMultipleItem(false)
+		} else {
+			m.copySingleItem(false)
+		}
 	case slices.Contains(common.Hotkeys.CutItems, msg):
-		m.copySingleItem(true)
+		if panel.SelectedCount() > 0 {
+			m.copyMultipleItem(true)
+		} else {
+			m.copySingleItem(true)
+		}
 	case slices.Contains(common.Hotkeys.FilePanelItemRename, msg):
 		m.panelItemRename()
 	case slices.Contains(common.Hotkeys.SearchBar, msg):
