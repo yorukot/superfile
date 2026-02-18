@@ -66,6 +66,7 @@ open_command_line = [':', '']
 open_help_menu = ['?', '']
 open_spf_prompt = ['>', '']
 open_zoxide = ['z', '']
+goto_pinned = ['b', '']
 toggle_dot_file = ['.', '']
 toggle_footer = ['F', '']
 

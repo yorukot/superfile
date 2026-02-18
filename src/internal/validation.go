@@ -423,7 +423,7 @@ type compPosition struct {
 }
 
 func (m *model) IsOverlayModelOpen() bool {
-	return m.zoxideModal.IsOpen() || m.helpMenu.IsOpen() || m.promptModal.IsOpen() ||
+	return m.zoxideModal.IsOpen() || m.pinnedModal.IsOpen() || m.helpMenu.IsOpen() || m.promptModal.IsOpen() ||
 		m.sortModal.IsOpen() || m.firstUse || m.typingModal.open ||
 		m.notifyModel.IsOpen()
 }

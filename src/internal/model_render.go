@@ -128,3 +128,7 @@ func (m *model) promptModalRender() string {
 func (m *model) zoxideModalRender() string {
 	return m.zoxideModal.Render()
 }
+
+func (m *model) pinnedModalRender() string {
+	return m.pinnedModal.Render()
+}

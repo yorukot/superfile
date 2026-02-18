@@ -1,0 +1,67 @@
+package pinnedmodal
+
+import (
+	"log/slog"
+
+	tea "github.com/charmbracelet/bubbletea"
+)
+
+func (m *Model) Open() tea.Cmd {
+	m.open = true
+	m.justOpened = true
+	m.textInput.SetValue("")
+	_ = m.textInput.Focus()
+
+	m.results = m.allDirs
+	m.cursor = 0
+	m.renderIndex = 0
+	return m.GetQueryCmd("")
+}
+
+func (m *Model) Close() {
+	m.open = false
+	m.textInput.Blur()
+	m.textInput.SetValue("")
+	m.results = []Directory{}
+	m.cursor = 0
+	m.renderIndex = 0
+}
+
+func (m *Model) IsOpen() bool {
+	return m.open
+}
+
+func (m *Model) GetWidth() int {
+	return m.width
+}
+
+func (m *Model) GetMaxHeight() int {
+	return m.maxHeight
+}
+
+func (m *Model) SetWidth(width int) {
+	if width < PinnedModalMinWidth {
+		slog.Warn("PinnedModal initialized with width too small", "width", width)
+		width = PinnedModalMinWidth
+	}
+	m.width = width
+	m.textInput.Width = width - 6
+}
+
+func (m *Model) SetMaxHeight(maxHeight int) {
+	if maxHeight < PinnedModalMinHeight {
+		slog.Warn("PinnedModal initialized with maxHeight too small", "maxHeight", maxHeight)
+		maxHeight = PinnedModalMinHeight
+	}
+	m.maxHeight = maxHeight
+}
+
+func (m *Model) GetTextInputValue() string {
+	return m.textInput.Value()
+}
+
+func (m *Model) GetResults() []Directory {
+	out := make([]Directory, len(m.results))
+	copy(out, m.results)
+	return out
+}
