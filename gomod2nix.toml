@@ -47,14 +47,17 @@ schema = 3
     version = "v1.1.0"
     hash = "sha256-RHsRT2EZ1nDOElxAK+6/DC9XAaGVjDTgPvRh3pyCfY4="
   [mod."github.com/charmbracelet/x/ansi"]
-    version = "v0.10.1"
-    hash = "sha256-nY4zkUGnuD+Lczwt+NMXdQ38cAsy5mtxzXrFSJmR0E4="
+    version = "v0.11.4"
+    hash = "sha256-Q1mZjt5M0/cJY7zZH70bK4bzzRoBbUZepX81Xta00+w="
   [mod."github.com/charmbracelet/x/cellbuf"]
     version = "v0.0.13-0.20250311204145-2c3ea96c31dd"
     hash = "sha256-XAhCOt8qJ2vR77lH1ez0IVU1/2CaLTq9jSmrHVg5HHU="
   [mod."github.com/charmbracelet/x/term"]
     version = "v0.2.1"
     hash = "sha256-VBkCZLI90PhMasftGw3403IqoV7d3E5WEGAIVrN5xQM="
+  [mod."github.com/clipperhouse/displaywidth"]
+    version = "v0.7.0"
+    hash = "sha256-bnsjBvPO3diMQaQY0+0Jh+zAcBjDfQ1ek5u9iLPPfgA="
   [mod."github.com/clipperhouse/stringish"]
     version = "v0.1.1"
     hash = "sha256-Mp8M1CRbwr6dcJ4BD9tXD5I78ZgCFEm0GDxJv0GYReg="
