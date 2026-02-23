@@ -2,6 +2,7 @@ package filepanel
 
 import (
 	"os"
+	"strings"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/x/ansi"
@@ -10,11 +11,13 @@ import (
 	"github.com/yorukot/superfile/src/internal/common"
 )
 
+const emptyCursor = " "
+
 // The renderer for the mandatory first column in the file panel, with a name, a cursor, and a select option.
 func (m *Model) renderFileName(indexElement int, columnWidth int) string {
 	elem := m.GetElementAtIdx(indexElement)
 	isSelected := m.CheckSelected(elem.Location)
-	cursor := " "
+	cursor := emptyCursor
 	if indexElement == m.GetCursor() && !m.SearchBar.Focused() {
 		cursor = icon.Cursor
 	}
@@ -128,10 +131,9 @@ func (m *Model) makeColumns(columnThreshold int, fileNameRatio int) []columnDefi
 		},
 	}
 	maxColumns := min(columnThreshold, len(extraColumns))
-
 	columns := []columnDefinition{
 		{
-			Name:         "  Name", // cursor space + space + Name
+			Name:         strings.Repeat(" ", ansi.StringWidth(emptyCursor+" ")) + "Name",
 			columnRender: m.renderFileName,
 			Size:         m.GetContentWidth(),
 			HeaderAlign:  lipgloss.Left,
