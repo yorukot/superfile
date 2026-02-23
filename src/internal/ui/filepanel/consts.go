@@ -22,4 +22,6 @@ const (
 	ReRenderMaxDelay     = 3
 
 	nonFocussedPanelReRenderTime = 3 * time.Second
+
+	emptyCursor = " "
 )

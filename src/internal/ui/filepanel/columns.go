@@ -11,8 +11,6 @@ import (
 	"github.com/yorukot/superfile/src/internal/common"
 )
 
-const emptyCursor = " "
-
 // The renderer for the mandatory first column in the file panel, with a name, a cursor, and a select option.
 func (m *Model) renderFileName(indexElement int, columnWidth int) string {
 	elem := m.GetElementAtIdx(indexElement)
