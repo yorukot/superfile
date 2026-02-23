@@ -100,7 +100,7 @@ func (cd *columnDefinition) RenderHeader() string {
 		cd.Size,
 		false,
 		common.FilePanelBGColor,
-		lipgloss.Center,
+		cd.HeaderAlign,
 	)
 }
 
@@ -108,14 +108,34 @@ func (m *Model) makeColumns(columnThreshold int, fileNameRatio int) []columnDefi
 	// TODO: make column set configurable
 	// Note: May use a predefined slice for efficiency. This content is static
 	extraColumns := []columnDefinition{
-		{Name: "Size", columnRender: m.renderFileSize, Size: FileSizeColumnWidth},
-		{Name: "Modify time", columnRender: m.renderModifyTime, Size: ModifyTimeSizeColumnWidth},
-		{Name: "Permission", columnRender: m.renderPermissions, Size: PermissionsColumnWidth},
+		{
+			Name:         "Size",
+			columnRender: m.renderFileSize,
+			Size:         FileSizeColumnWidth,
+			HeaderAlign:  lipgloss.Center,
+		},
+		{
+			Name:         "Modify time",
+			columnRender: m.renderModifyTime,
+			Size:         ModifyTimeSizeColumnWidth,
+			HeaderAlign:  lipgloss.Center,
+		},
+		{
+			Name:         "Permission",
+			columnRender: m.renderPermissions,
+			Size:         PermissionsColumnWidth,
+			HeaderAlign:  lipgloss.Center,
+		},
 	}
 	maxColumns := min(columnThreshold, len(extraColumns))
 
 	columns := []columnDefinition{
-		{Name: "Name", columnRender: m.renderFileName, Size: m.GetContentWidth()},
+		{
+			Name:         "  Name", // cursor space + space + Name
+			columnRender: m.renderFileName,
+			Size:         m.GetContentWidth(),
+			HeaderAlign:  lipgloss.Left,
+		},
 	}
 
 	minWidthForNameColumn := int(float64(m.GetContentWidth() * fileNameRatio / common.FileNameRatioMax))

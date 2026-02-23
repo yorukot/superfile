@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/bubbles/textinput"
+	"github.com/charmbracelet/lipgloss"
 
 	"github.com/yorukot/superfile/src/internal/ui/sortmodel"
 )
@@ -72,5 +73,6 @@ type columnRenderer func(indexElement int, columnWidth int) string
 type columnDefinition struct {
 	Name         string
 	Size         int
+	HeaderAlign  lipgloss.Position
 	columnRender columnRenderer
 }
