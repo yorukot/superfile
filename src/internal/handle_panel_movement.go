@@ -97,7 +97,7 @@ func (m *model) executeOpenCommand() {
 	}
 
 	cmd := exec.Command(openCommand, filePath)
-	utils.DetachFromTerminal(cmd, false)
+	utils.DetachFromTerminal(cmd)
 	err := cmd.Start()
 	if err != nil {
 		// TODO: This kind of errors should go to user facing pop ups
