@@ -27,6 +27,7 @@ func ExecuteCommandInShell(timeLimit time.Duration, cmdDir string, shellCommand 
 func ExecuteCommand(timeLimit time.Duration, cmdDir string, baseCmd string, args ...string) (int, string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeLimit)
 	defer cancel()
+
 	cmd := exec.CommandContext(ctx, baseCmd, args...)
 	cmd.Dir = cmdDir
 	DetachFromTerminal(cmd)
