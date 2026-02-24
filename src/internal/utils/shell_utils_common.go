@@ -7,7 +7,6 @@ import (
 	"log/slog"
 	"os/exec"
 	"runtime"
-	"syscall"
 	"time"
 )
 
@@ -29,15 +28,7 @@ func ExecuteCommand(timeLimit time.Duration, cmdDir string, baseCmd string, args
 	ctx, cancel := context.WithTimeout(context.Background(), timeLimit)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, baseCmd, args...)
-	cmd.Dir = cmdDir
-
-	// Set input to /dev/null to return EOF on 'read'
-	cmd.Stdin = nil
-	// Detach the process from the tty. So that programs like sudo cannot open and read/write to tty
-	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Setsid: true,
-	}
+	cmd := formCommand(cmdDir, ctx, baseCmd, args)
 	outputBytes, err := cmd.CombinedOutput()
 	retCode := -1
 
