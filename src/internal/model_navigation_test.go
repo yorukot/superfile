@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	utils2 "github.com/yorukot/superfile/src/pkg/utils"
+	"github.com/yorukot/superfile/src/pkg/utils"
 
 	"github.com/yorukot/superfile/src/internal/common"
 )
@@ -43,12 +43,12 @@ func TestFilePanelNavigation(t *testing.T) {
 
 	rootDir := "/"
 
-	if runtime.GOOS == utils2.OsWindows {
+	if runtime.GOOS == utils.OsWindows {
 		rootDir = "\\"
 	}
 
-	utils2.SetupDirectories(t, dir1, dir2)
-	utils2.SetupFiles(t, file1, file2, file3, file4, file5, file6)
+	utils.SetupDirectories(t, dir1, dir2)
+	utils.SetupFiles(t, file1, file2, file3, file4, file5, file6)
 
 	testdata := []struct {
 		name           string
@@ -125,7 +125,7 @@ func TestFilePanelNavigation(t *testing.T) {
 			require.Equal(t, tt.startCursor, m.getFocusedFilePanel().GetCursor())
 			originalRenderIndex := m.getFocusedFilePanel().GetRenderIndex()
 			for _, s := range tt.keyInput {
-				TeaUpdate(m, utils2.TeaRuneKeyMsg(s))
+				TeaUpdate(m, utils.TeaRuneKeyMsg(s))
 			}
 
 			assert.Equal(t, tt.resultDir, m.getFocusedFilePanel().Location)
@@ -136,8 +136,8 @@ func TestFilePanelNavigation(t *testing.T) {
 
 			// Go back to original directory
 
-			TeaUpdate(m, utils2.TeaRuneKeyMsg(common.Hotkeys.OpenSPFPrompt[0]))
-			TeaUpdate(m, utils2.TeaRuneKeyMsg("cd "+tt.startDir))
+			TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenSPFPrompt[0]))
+			TeaUpdate(m, utils.TeaRuneKeyMsg("cd "+tt.startDir))
 			TeaUpdate(m, tea.KeyMsg{Type: tea.KeyEnter})
 
 			// Make sure we have original cursor and render
@@ -163,7 +163,7 @@ func TestCursorOutOfBoundsAfterDirectorySwitch(t *testing.T) {
 	tempDir := t.TempDir()
 	dir1 := filepath.Join(tempDir, "dir1")
 	dir2 := filepath.Join(tempDir, "dir2")
-	utils2.SetupDirectories(t, dir1, dir2)
+	utils.SetupDirectories(t, dir1, dir2)
 
 	var files1, files2 []string
 	for i := range 10 {
@@ -172,8 +172,8 @@ func TestCursorOutOfBoundsAfterDirectorySwitch(t *testing.T) {
 	for i := range 5 {
 		files2 = append(files2, filepath.Join(dir2, string('a'+rune(i))+".txt"))
 	}
-	utils2.SetupFiles(t, files1...)
-	utils2.SetupFiles(t, files2...)
+	utils.SetupFiles(t, files1...)
+	utils.SetupFiles(t, files2...)
 
 	// Start with dir1
 	m := defaultTestModel(dir1)
@@ -237,8 +237,8 @@ func TestCursorRemembersParentPosition(t *testing.T) {
 	file8 := filepath.Join(dir4, "file8.txt")
 	file9 := filepath.Join(dir4, "file9.txt")
 
-	utils2.SetupDirectories(t, dir1, dir2, dir3, dir4, dir5)
-	utils2.SetupFiles(t, file1, file2, file3, file4, file5, file6, file7, file8, file9)
+	utils.SetupDirectories(t, dir1, dir2, dir3, dir4, dir5)
+	utils.SetupFiles(t, file1, file2, file3, file4, file5, file6, file7, file8, file9)
 
 	cases := []struct {
 		name           string
@@ -267,14 +267,14 @@ func TestCursorRemembersParentPosition(t *testing.T) {
 			}, DefaultTestTimeout, DefaultTestTick, "Cursor should be at correct position")
 
 			// Move into child directory
-			TeaUpdate(m, utils2.TeaRuneKeyMsg(common.Hotkeys.Confirm[0]))
+			TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.Confirm[0]))
 
 			assert.Eventually(t, func() bool {
 				return m.getFocusedFilePanel().Location == tc.childDir
 			}, DefaultTestTimeout, DefaultTestTick, "Should have stepped into child directory")
 
 			// Go back to original directory
-			TeaUpdate(m, utils2.TeaRuneKeyMsg(common.Hotkeys.ParentDirectory[0]))
+			TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.ParentDirectory[0]))
 
 			assert.Eventually(t, func() bool {
 				return m.getFocusedFilePanel().Location == curTestDir

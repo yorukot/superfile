@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	utils2 "github.com/yorukot/superfile/src/pkg/utils"
+	"github.com/yorukot/superfile/src/pkg/utils"
 
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
@@ -31,18 +31,18 @@ func TestLayout(t *testing.T) {
 	}
 	// Uncomment this to debug locally.
 	// This is to prevent too many logs in CICD
-	utils2.SetRootLoggerToDiscarded()
+	utils.SetRootLoggerToDiscarded()
 	t.Cleanup(func() {
 		if testing.Verbose() {
-			utils2.SetRootLoggerToStdout(true)
+			utils.SetRootLoggerToStdout(true)
 		}
 	})
 
 	baseTestDir := t.TempDir()
 	subDir := filepath.Join(baseTestDir, "subdir")
 	subDir2 := filepath.Join(baseTestDir, "subdir2")
-	utils2.SetupDirectories(t, baseTestDir, subDir, subDir2)
-	utils2.SetupFiles(t,
+	utils.SetupDirectories(t, baseTestDir, subDir, subDir2)
+	utils.SetupFiles(t,
 		filepath.Join(baseTestDir, "file1.txt"),
 		filepath.Join(baseTestDir, "file2.txt"),
 		filepath.Join(baseTestDir, "file3.txt"),
@@ -160,24 +160,24 @@ func updateModelDimensionsAndValidate(t *testing.T, p *TeaProg, width int, heigh
 		{
 			name: "FooterOffPreviewOff",
 			msg: []tea.Msg{
-				utils2.TeaRuneKeyMsg(common.Hotkeys.ToggleFooter[0]),
-				utils2.TeaRuneKeyMsg(common.Hotkeys.ToggleFilePreviewPanel[0]),
+				utils.TeaRuneKeyMsg(common.Hotkeys.ToggleFooter[0]),
+				utils.TeaRuneKeyMsg(common.Hotkeys.ToggleFilePreviewPanel[0]),
 			},
 		},
 		{
 			name: "ToggleFooterOn",
-			msg:  []tea.Msg{utils2.TeaRuneKeyMsg(common.Hotkeys.ToggleFooter[0])},
+			msg:  []tea.Msg{utils.TeaRuneKeyMsg(common.Hotkeys.ToggleFooter[0])},
 		},
 		{
 			name: "FooterOffPreviewOn",
 			msg: []tea.Msg{
-				utils2.TeaRuneKeyMsg(common.Hotkeys.ToggleFooter[0]),
-				utils2.TeaRuneKeyMsg(common.Hotkeys.ToggleFilePreviewPanel[0]),
+				utils.TeaRuneKeyMsg(common.Hotkeys.ToggleFooter[0]),
+				utils.TeaRuneKeyMsg(common.Hotkeys.ToggleFilePreviewPanel[0]),
 			},
 		},
 		{
 			name: "FooterOnAgain",
-			msg:  []tea.Msg{utils2.TeaRuneKeyMsg(common.Hotkeys.ToggleFooter[0])},
+			msg:  []tea.Msg{utils.TeaRuneKeyMsg(common.Hotkeys.ToggleFooter[0])},
 		},
 	}
 
@@ -194,7 +194,7 @@ func updateModelDimensionsAndValidate(t *testing.T, p *TeaProg, width int, heigh
 		for {
 			initialCount := p.m.fileModel.PanelCount()
 
-			p.SendDirectly(utils2.TeaRuneKeyMsg(common.Hotkeys.CloseFilePanel[0]))
+			p.SendDirectly(utils.TeaRuneKeyMsg(common.Hotkeys.CloseFilePanel[0]))
 			assertLayoutValidity(t, p.m)
 
 			if p.m.fileModel.PanelCount() == initialCount {
@@ -209,7 +209,7 @@ func updateModelDimensionsAndValidate(t *testing.T, p *TeaProg, width int, heigh
 	t.Run("FilePanelCreation", func(t *testing.T) {
 		for {
 			initialCount := p.m.fileModel.PanelCount()
-			p.SendDirectly(utils2.TeaRuneKeyMsg(common.Hotkeys.CreateNewFilePanel[0]))
+			p.SendDirectly(utils.TeaRuneKeyMsg(common.Hotkeys.CreateNewFilePanel[0]))
 
 			assertLayoutValidity(t, p.m)
 

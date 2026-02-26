@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/yorukot/superfile/src/internal/common"
-	utils2 "github.com/yorukot/superfile/src/pkg/utils"
+	"github.com/yorukot/superfile/src/pkg/utils"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -29,7 +29,7 @@ func Run(content embed.FS) {
 	cli.HelpPrinter = CustomHelpPrinter //nolint:reassign // Intentionally reassigning to customize help output
 
 	// Before we open log file, set all "non debug" logs to stdout
-	utils2.SetRootLoggerToStdout(false)
+	utils.SetRootLoggerToStdout(false)
 
 	common.LoadInitialPrerenderedVariables()
 	common.LoadAllDefaultConfig(content)
@@ -129,7 +129,7 @@ func Run(content embed.FS) {
 
 	err := app.Run(context.Background(), os.Args)
 	if err != nil {
-		utils2.PrintlnAndExit(err)
+		utils.PrintlnAndExit(err)
 	}
 }
 
@@ -153,7 +153,7 @@ func spfAppAction(_ context.Context, c *cli.Command) error {
 	p := tea.NewProgram(internal.InitialModel(firstPanelPaths, firstUse),
 		tea.WithAltScreen(), tea.WithMouseCellMotion())
 	if _, err := p.Run(); err != nil {
-		utils2.PrintfAndExitf("Alas, there's been an error: %v", err)
+		utils.PrintfAndExitf("Alas, there's been an error: %v", err)
 	}
 
 	// This must be after calling internal.InitialModel()
@@ -173,32 +173,32 @@ func spfAppAction(_ context.Context, c *cli.Command) error {
 // configurations to Config and Hotkeys toml
 func InitConfigFile() {
 	// Create directories
-	if err := utils2.CreateDirectories(
+	if err := utils.CreateDirectories(
 		variable.SuperFileMainDir,
 		variable.SuperFileDataDir,
 		variable.SuperFileStateDir,
 		variable.ThemeFolder,
 	); err != nil {
-		utils2.PrintlnAndExit("Error creating directories:", err)
+		utils.PrintlnAndExit("Error creating directories:", err)
 	}
 
 	// Create files
-	if err := utils2.CreateFiles(
+	if err := utils.CreateFiles(
 		variable.ToggleDotFile,
 		variable.LogFile,
 		variable.ThemeFileVersion,
 		variable.ToggleFooter,
 	); err != nil {
-		utils2.PrintlnAndExit("Error creating files:", err)
+		utils.PrintlnAndExit("Error creating files:", err)
 	}
 
 	// Write config file
 	if err := writeConfigFile(variable.ConfigFile, common.ConfigTomlString); err != nil {
-		utils2.PrintlnAndExit("Error writing config file:", err)
+		utils.PrintlnAndExit("Error writing config file:", err)
 	}
 
 	if err := writeConfigFile(variable.HotkeysFile, common.HotkeysTomlString); err != nil {
-		utils2.PrintlnAndExit("Error writing config file:", err)
+		utils.PrintlnAndExit("Error writing config file:", err)
 	}
 }
 
@@ -209,8 +209,8 @@ func checkFirstUse() bool {
 	firstUse := false
 	if _, err := os.Stat(file); os.IsNotExist(err) {
 		firstUse = true
-		if err = os.WriteFile(file, nil, utils2.ConfigFilePerm); err != nil {
-			utils2.PrintfAndExitf("Failed to create file: %v", err)
+		if err = os.WriteFile(file, nil, utils.ConfigFilePerm); err != nil {
+			utils.PrintfAndExitf("Failed to create file: %v", err)
 		}
 	}
 	return firstUse
@@ -219,7 +219,7 @@ func checkFirstUse() bool {
 // Write data to the path file if it does not exists
 func writeConfigFile(path, data string) error {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		if err = os.WriteFile(path, []byte(data), utils2.ConfigFilePerm); err != nil {
+		if err = os.WriteFile(path, []byte(data), utils.ConfigFilePerm); err != nil {
 			return fmt.Errorf("failed to write config file %s: %w", path, err)
 		}
 	}
@@ -227,7 +227,7 @@ func writeConfigFile(path, data string) error {
 }
 
 func writeLastCheckTime(t time.Time) {
-	err := os.WriteFile(variable.LastCheckVersion, []byte(t.Format(time.RFC3339)), utils2.ConfigFilePerm)
+	err := os.WriteFile(variable.LastCheckVersion, []byte(t.Format(time.RFC3339)), utils.ConfigFilePerm)
 	if err != nil {
 		slog.Error("Error writing LastCheckVersion file", "error", err)
 	}

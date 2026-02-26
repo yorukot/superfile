@@ -9,7 +9,7 @@ import (
 
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 
-	utils2 "github.com/yorukot/superfile/src/pkg/utils"
+	"github.com/yorukot/superfile/src/pkg/utils"
 
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 
@@ -31,13 +31,13 @@ import (
 func initialConfig(firstPanelPaths []string) (toggleDotFile bool, //nolint: nonamedreturns // See above
 	toggleFooter bool, zClient *zoxidelib.Client) {
 	// Open log stream
-	file, err := os.OpenFile(variable.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, utils2.LogFilePerm)
+	file, err := os.OpenFile(variable.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, utils.LogFilePerm)
 
 	// TODO : This could be improved if we want to make superfile more resilient to errors
 	// For example if the log file directories have access issues.
 	// we could pass a dummy object to log.SetOutput() and the app would still function.
 	if err != nil {
-		utils2.PrintfAndExitf("Error while opening superfile.log file : %v", err)
+		utils.PrintfAndExitf("Error while opening superfile.log file : %v", err)
 	}
 	common.LoadConfigFile()
 
@@ -88,8 +88,8 @@ func initialConfig(firstPanelPaths []string) (toggleDotFile bool, //nolint: nona
 	slog.Debug("Directory configuration", "cwd", cwd, "start_paths", firstPanelPaths)
 	printRuntimeInfo()
 
-	toggleDotFile = utils2.ReadBoolFile(variable.ToggleDotFile, false)
-	toggleFooter = utils2.ReadBoolFile(variable.ToggleFooter, true)
+	toggleDotFile = utils.ReadBoolFile(variable.ToggleDotFile, false)
+	toggleFooter = utils.ReadBoolFile(variable.ToggleFooter, true)
 
 	return toggleDotFile, toggleFooter, zClient
 }
@@ -100,7 +100,7 @@ func updateFirstFilePanelPaths(firstPanelPaths []string, cwd string, zClient *zo
 			firstPanelPaths[i] = common.Config.DefaultDirectory
 		}
 		originalPath := firstPanelPaths[i]
-		firstPanelPaths[i] = utils2.ResolveAbsPath(cwd, firstPanelPaths[i])
+		firstPanelPaths[i] = utils.ResolveAbsPath(cwd, firstPanelPaths[i])
 		if _, err := os.Stat(firstPanelPaths[i]); err != nil {
 			slog.Error("cannot get stats", "path", firstPanelPaths[i], "error", err)
 			// In case the path provided did not exist, use zoxide query

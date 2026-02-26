@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	utils2 "github.com/yorukot/superfile/src/pkg/utils"
+	"github.com/yorukot/superfile/src/pkg/utils"
 
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/internal/common"
@@ -30,8 +30,8 @@ func TestCopy(t *testing.T) {
 	dir2 := filepath.Join(curTestDir, "dir2")
 	file1 := filepath.Join(dir1, "file1.txt")
 	t.Run("Basic Copy", func(t *testing.T) {
-		utils2.SetupDirectories(t, curTestDir, dir1, dir2)
-		utils2.SetupFiles(t, file1)
+		utils.SetupDirectories(t, curTestDir, dir1, dir2)
+		utils.SetupFiles(t, file1)
 		t.Cleanup(func() {
 			os.RemoveAll(curTestDir)
 		})
@@ -71,7 +71,7 @@ func TestFileCreation(t *testing.T) {
 	testParentDir := filepath.Join(curTestDir, "parentDir")
 	testChildDir := filepath.Join(testParentDir, "childDir")
 
-	utils2.SetupDirectories(t, curTestDir, testParentDir, testChildDir)
+	utils.SetupDirectories(t, curTestDir, testParentDir, testChildDir)
 
 	t.Cleanup(func() {
 		os.RemoveAll(curTestDir)
@@ -94,13 +94,13 @@ func TestFileCreation(t *testing.T) {
 		m := defaultTestModel(testChildDir)
 
 		TeaUpdate(m, nil)
-		TeaUpdate(m, utils2.TeaRuneKeyMsg(common.Hotkeys.FilePanelItemCreate[0]))
+		TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.FilePanelItemCreate[0]))
 
 		assert.Empty(t, m.typingModal.errorMesssage)
 
 		m.typingModal.textInput.SetValue(tt.fileName)
 
-		TeaUpdate(m, utils2.TeaRuneKeyMsg(common.Hotkeys.ConfirmTyping[0]))
+		TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.ConfirmTyping[0]))
 
 		if tt.expectedError {
 			assert.NotEmpty(t, m.typingModal.errorMesssage, "expected an error for input: %q", tt.fileName)
@@ -122,9 +122,9 @@ func TestFileRename(t *testing.T) {
 	file2 := filepath.Join(curTestDir, "file2.txt")
 	file3 := filepath.Join(curTestDir, "file3.txt")
 
-	utils2.SetupFilesWithData(t, []byte("f1"), file1)
-	utils2.SetupFilesWithData(t, []byte("f2"), file2)
-	utils2.SetupFilesWithData(t, []byte("f3"), file3)
+	utils.SetupFilesWithData(t, []byte("f1"), file1)
+	utils.SetupFilesWithData(t, []byte("f2"), file2)
+	utils.SetupFilesWithData(t, []byte("f3"), file3)
 
 	file1New := filepath.Join(curTestDir, "file1_new.txt")
 
@@ -194,10 +194,10 @@ func TestFileRename(t *testing.T) {
 func isTrashed(fileAbsPath string) bool {
 	fileName := filepath.Base(fileAbsPath)
 	switch runtime.GOOS {
-	case utils2.OsDarwin:
+	case utils.OsDarwin:
 		_, err := os.Stat(filepath.Join(variable.DarwinTrashDirectory, fileName))
 		return err == nil
-	case utils2.OsLinux:
+	case utils.OsLinux:
 		_, err := trash.Stat(fileAbsPath)
 		return err == nil
 	default:
@@ -206,15 +206,15 @@ func isTrashed(fileAbsPath string) bool {
 }
 
 func TestFileDelete(t *testing.T) {
-	if runtime.GOOS == utils2.OsWindows {
+	if runtime.GOOS == utils.OsWindows {
 		t.Skip("Skipping for windows")
 	}
 	curTestDir := t.TempDir()
 	file1 := filepath.Join(curTestDir, "file1.txt")
 	file2 := filepath.Join(curTestDir, "file2.txt")
 
-	utils2.SetupFilesWithData(t, []byte("f1"), file1)
-	utils2.SetupFilesWithData(t, []byte("f2"), file2)
+	utils.SetupFilesWithData(t, []byte("f1"), file1)
+	utils.SetupFilesWithData(t, []byte("f2"), file2)
 
 	testdata := []struct {
 		name            string
@@ -264,7 +264,7 @@ func TestFileDelete(t *testing.T) {
 
 			// Window's trash is not flexible enough for the check.
 			// Sorry windows
-			if runtime.GOOS == utils2.OsDarwin || runtime.GOOS == utils2.OsLinux {
+			if runtime.GOOS == utils.OsDarwin || runtime.GOOS == utils.OsLinux {
 				assert.Equal(t, tt.permanentDelete, !isTrashed(filepath.Base(tt.filePath)),
 					"Existence in trash status should be expected only of not permanently deleted")
 			}

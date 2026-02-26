@@ -10,7 +10,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	utils2 "github.com/yorukot/superfile/src/pkg/utils"
+	"github.com/yorukot/superfile/src/pkg/utils"
 
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/internal/common"
@@ -74,9 +74,9 @@ func (m *model) executeOpenCommand() {
 
 	openCommand := "xdg-open"
 	switch runtime.GOOS {
-	case utils2.OsDarwin:
+	case utils.OsDarwin:
 		openCommand = "open"
-	case utils2.OsWindows:
+	case utils.OsWindows:
 		dllpath := filepath.Join(os.Getenv("SYSTEMROOT"), "System32", "rundll32.exe")
 		dllfile := "url.dll,FileProtocolHandler"
 
@@ -97,7 +97,7 @@ func (m *model) executeOpenCommand() {
 	}
 
 	cmd := exec.Command(openCommand, filePath)
-	utils2.DetachFromTerminal(cmd)
+	utils.DetachFromTerminal(cmd)
 	err := cmd.Start()
 	if err != nil {
 		// TODO: This kind of errors should go to user facing pop ups
@@ -126,7 +126,7 @@ func (m *model) sidebarSelectDirectory() {
 // Toggle dotfile display or not
 func (m *model) toggleDotFileController() {
 	m.fileModel.ToggleDotFile()
-	err := utils2.WriteBoolFile(variable.ToggleDotFile, m.fileModel.DisplayDotFiles)
+	err := utils.WriteBoolFile(variable.ToggleDotFile, m.fileModel.DisplayDotFiles)
 	if err != nil {
 		slog.Error("Error while updating toggleDotFile data", "error", err)
 	}
@@ -135,7 +135,7 @@ func (m *model) toggleDotFileController() {
 // Toggle dotfile display or not
 func (m *model) toggleFooterController() tea.Cmd {
 	m.toggleFooter = !m.toggleFooter
-	err := utils2.WriteBoolFile(variable.ToggleFooter, m.toggleFooter)
+	err := utils.WriteBoolFile(variable.ToggleFooter, m.toggleFooter)
 	if err != nil {
 		slog.Error("Error while updating toggleFooter data", "error", err)
 	}

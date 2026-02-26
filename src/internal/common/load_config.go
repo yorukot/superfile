@@ -13,7 +13,7 @@ import (
 	"github.com/charmbracelet/x/ansi"
 	"github.com/pelletier/go-toml/v2"
 
-	utils2 "github.com/yorukot/superfile/src/pkg/utils"
+	"github.com/yorukot/superfile/src/pkg/utils"
 
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/config/icon"
@@ -24,12 +24,12 @@ import (
 // if the FixConfigFile flag is on
 // TODO : Fix the code duplication with LoadHotkeysFile().
 func LoadConfigFile() {
-	err := utils2.LoadTomlFile(variable.ConfigFile, ConfigTomlString, &Config, variable.FixConfigFile, false)
+	err := utils.LoadTomlFile(variable.ConfigFile, ConfigTomlString, &Config, variable.FixConfigFile, false)
 	if err != nil {
 		userMsg := fmt.Sprintf("%s%s", LipglossError, err.Error())
 
 		toExit := true
-		var loadError *utils2.TomlLoadError
+		var loadError *utils.TomlLoadError
 		if errors.As(err, &loadError) && loadError != nil {
 			if loadError.MissingFields() && !variable.FixConfigFile {
 				// Had missing fields and we did not fix
@@ -39,7 +39,7 @@ func LoadConfigFile() {
 			toExit = loadError.IsFatal()
 		}
 		if toExit {
-			utils2.PrintfAndExitf("%s\n", userMsg)
+			utils.PrintfAndExitf("%s\n", userMsg)
 		} else {
 			fmt.Println(userMsg)
 		}
@@ -48,7 +48,7 @@ func LoadConfigFile() {
 	// Even if there is a missing field, we want to validate fields that are present
 	if err := ValidateConfig(&Config); err != nil {
 		// If config is incorrect we cannot continue. We need to exit
-		utils2.PrintlnAndExit(err.Error())
+		utils.PrintlnAndExit(err.Error())
 	}
 }
 
@@ -64,9 +64,9 @@ func ValidateConfig(c *ConfigType) error {
 	}
 
 	for _, order := range c.SidebarSections {
-		if order != utils2.SidebarSectionHome &&
-			order != utils2.SidebarSectionPinned &&
-			order != utils2.SidebarSectionDisks {
+		if order != utils.SidebarSectionHome &&
+			order != utils.SidebarSectionPinned &&
+			order != utils.SidebarSectionDisks {
 			return errors.New(
 				LoadConfigError(
 					"sidebar_sections",
@@ -128,7 +128,7 @@ func validateBorders(c *ConfigType) error {
 // Load keybinds from the hotkeys file. Compares the content
 // with the default values and modify the hotkeys if the FixHotkeys flag is on.
 func LoadHotkeysFile(ignoreMissingFields bool) {
-	err := utils2.LoadTomlFile(
+	err := utils.LoadTomlFile(
 		variable.HotkeysFile,
 		HotkeysTomlString,
 		&Hotkeys,
@@ -139,7 +139,7 @@ func LoadHotkeysFile(ignoreMissingFields bool) {
 		userMsg := fmt.Sprintf("%s%s", LipglossError, err.Error())
 
 		toExit := true
-		var loadError *utils2.TomlLoadError
+		var loadError *utils.TomlLoadError
 		if errors.As(err, &loadError) {
 			if loadError.MissingFields() && !variable.FixHotkeys {
 				// Had missing fields and we did not fix
@@ -149,7 +149,7 @@ func LoadHotkeysFile(ignoreMissingFields bool) {
 			toExit = loadError.IsFatal()
 		}
 		if toExit {
-			utils2.PrintfAndExitf("%s\n", userMsg)
+			utils.PrintfAndExitf("%s\n", userMsg)
 		} else {
 			fmt.Println(userMsg)
 		}
@@ -165,7 +165,7 @@ func LoadHotkeysFile(ignoreMissingFields bool) {
 		// This adds a layer against accidental struct modifications
 		// Makes sure its always be a string slice. It's somewhat like a unit test
 		if value.Kind() != reflect.Slice || value.Type().Elem().Kind() != reflect.String {
-			utils2.PrintlnAndExit(
+			utils.PrintlnAndExit(
 				LoadHotkeysError(
 					field.Name,
 					"Hotkey value must be a list of strings.",
@@ -175,7 +175,7 @@ func LoadHotkeysFile(ignoreMissingFields bool) {
 
 		hotkeysList, ok := value.Interface().([]string)
 		if !ok || len(hotkeysList) == 0 || hotkeysList[0] == "" {
-			utils2.PrintlnAndExit(
+			utils.PrintlnAndExit(
 				LoadHotkeysError(
 					field.Name,
 					"Hotkey list is empty; at least one key binding is required.",
@@ -193,13 +193,13 @@ func LoadThemeFile() {
 		slog.Error("Could not read user's theme file. Falling back to default theme", "error", err)
 		err = toml.Unmarshal([]byte(DefaultThemeString), &Theme)
 		if err != nil {
-			utils2.PrintfAndExitf("Unexpected error while reading default theme file : %v. Exiting...", err)
+			utils.PrintfAndExitf("Unexpected error while reading default theme file : %v. Exiting...", err)
 		}
 	}
 
 	// Validations
 	if len(Theme.GradientColor) != RequiredGradientColorCount {
-		utils2.PrintlnAndExit(
+		utils.PrintlnAndExit(
 			LoadThemeError(
 				"gradient_color",
 				"Gradient color must contain exactly two values.",
@@ -247,12 +247,12 @@ func LoadAllDefaultConfig(content embed.FS) {
 	}
 
 	// Prevent failure for first time app run by making sure parent directories exists
-	if err = os.MkdirAll(filepath.Dir(variable.ThemeFileVersion), utils2.ConfigDirPerm); err != nil {
+	if err = os.MkdirAll(filepath.Dir(variable.ThemeFileVersion), utils.ConfigDirPerm); err != nil {
 		slog.Error("Error creating theme file parent directory", "error", err)
 		return
 	}
 
-	err = os.WriteFile(variable.ThemeFileVersion, []byte(variable.CurrentVersion), utils2.ConfigFilePerm)
+	err = os.WriteFile(variable.ThemeFileVersion, []byte(variable.CurrentVersion), utils.ConfigFilePerm)
 	if err != nil {
 		slog.Error("Error writing theme file version", "error", err)
 	}
@@ -283,7 +283,7 @@ func WriteThemeFiles(content embed.FS) error {
 	_, err := os.Stat(variable.ThemeFolder)
 
 	if os.IsNotExist(err) {
-		if err = os.MkdirAll(variable.ThemeFolder, utils2.ConfigDirPerm); err != nil {
+		if err = os.MkdirAll(variable.ThemeFolder, utils.ConfigDirPerm); err != nil {
 			slog.Error("Error creating theme directory", "error", err)
 			return err
 		}
@@ -385,10 +385,10 @@ func PopulateThemeFromFile(themeFilePath string) error {
 
 func InitTrash() bool {
 	// Create trash directories
-	if runtime.GOOS != utils2.OsLinux {
+	if runtime.GOOS != utils.OsLinux {
 		return true
 	}
-	err := utils2.CreateDirectories(
+	err := utils.CreateDirectories(
 		variable.LinuxTrashDirectory,
 		variable.LinuxTrashDirectoryFiles,
 		variable.LinuxTrashDirectoryInfo,
