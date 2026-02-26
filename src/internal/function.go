@@ -12,8 +12,9 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
+	"github.com/yorukot/superfile/src/pkg/utils"
+
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
-	"github.com/yorukot/superfile/src/internal/utils"
 )
 
 var suffixRegexp = regexp.MustCompile(`^(.*)\((\d+)\)$`)

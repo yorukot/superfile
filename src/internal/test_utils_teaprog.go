@@ -7,7 +7,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/yorukot/superfile/src/internal/utils"
+	"github.com/yorukot/superfile/src/pkg/utils"
 )
 
 type IgnorerWriter struct{}

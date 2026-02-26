@@ -7,10 +7,11 @@ import (
 
 	"github.com/adrg/xdg"
 
+	utils2 "github.com/yorukot/superfile/src/pkg/utils"
+
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
-	"github.com/yorukot/superfile/src/internal/utils"
 )
 
 // Fuzzy search function for a list of directories.
@@ -30,7 +31,7 @@ func fuzzySearch(query string, dirs []directory) []directory {
 		dirMap[dir.Name] = dir
 	}
 
-	for _, match := range utils.FzfSearch(query, haystack) {
+	for _, match := range utils2.FzfSearch(query, haystack) {
 		if d, ok := dirMap[match.Key]; ok {
 			filteredDirs = append(filteredDirs, d)
 		}
@@ -63,7 +64,7 @@ func getWellKnownDirectories() []directory {
 	}
 
 	// Add Trash directory for Linux only
-	if runtime.GOOS == utils.OsLinux {
+	if runtime.GOOS == utils2.OsLinux {
 		wellKnownDirectories = append(wellKnownDirectories, directory{
 			Location: variable.LinuxTrashDirectory,
 			Name:     icon.Trash + icon.Space + "Trash",
@@ -103,15 +104,15 @@ func formDirctorySlice(homeDirectories []directory, pinnedDirectories []director
 
 	for _, section := range sections {
 		switch section {
-		case utils.SidebarSectionHome:
+		case utils2.SidebarSectionHome:
 			if len(directories) > 0 {
 				directories = append(directories, homeDividerDir)
 			}
 			directories = append(directories, homeDirectories...)
-		case utils.SidebarSectionPinned:
+		case utils2.SidebarSectionPinned:
 			directories = append(directories, pinnedDividerDir)
 			directories = append(directories, pinnedDirectories...)
-		case utils.SidebarSectionDisks:
+		case utils2.SidebarSectionDisks:
 			directories = append(directories, diskDividerDir)
 			directories = append(directories, diskDirectories...)
 		}

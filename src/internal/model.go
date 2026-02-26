@@ -11,17 +11,17 @@ import (
 
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
-
-	"github.com/yorukot/superfile/src/internal/ui/filepanel"
-	"github.com/yorukot/superfile/src/internal/ui/metadata"
-	"github.com/yorukot/superfile/src/internal/ui/notify"
-	"github.com/yorukot/superfile/src/internal/ui/preview"
-	"github.com/yorukot/superfile/src/internal/utils"
+	utils2 "github.com/yorukot/superfile/src/pkg/utils"
 
 	"github.com/barasher/go-exiftool"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+
+	"github.com/yorukot/superfile/src/internal/ui/filepanel"
+	"github.com/yorukot/superfile/src/internal/ui/metadata"
+	"github.com/yorukot/superfile/src/internal/ui/notify"
+	"github.com/yorukot/superfile/src/internal/ui/preview"
 
 	variable "github.com/yorukot/superfile/src/config"
 	zoxideui "github.com/yorukot/superfile/src/internal/ui/zoxide"
@@ -202,7 +202,7 @@ func (m *model) setHeightValues() {
 	// TODO : Calculate the value , instead of manually hard coding it.
 
 	// Main panel height = Total terminal height- 2(file panel border) - footer height
-	m.mainPanelHeight = m.fullHeight - common.BorderPadding - utils.FullFooterHeight(m.footerHeight, m.toggleFooter)
+	m.mainPanelHeight = m.fullHeight - common.BorderPadding - utils2.FullFooterHeight(m.footerHeight, m.toggleFooter)
 }
 
 func (m *model) updateComponentDimensions() tea.Cmd {
@@ -258,8 +258,8 @@ func (m *model) setZoxideModelSize() {
 func (m *model) setFooterComponentSize() {
 	var width, clipBoardwidth, height int
 	height = m.footerHeight + common.BorderPadding
-	width = m.fullWidth / utils.CntFooterPanels
-	clipBoardwidth = width + m.fullWidth%utils.CntFooterPanels
+	width = m.fullWidth / utils2.CntFooterPanels
+	clipBoardwidth = width + m.fullWidth%utils2.CntFooterPanels
 	m.fileMetaData.SetDimensions(width, height)
 	m.processBarModel.SetDimensions(width, height)
 	m.clipboard.SetDimensions(clipBoardwidth, height)
@@ -427,7 +427,7 @@ func (m *model) applyZoxideModalAction(action common.ModelAction) tea.Cmd {
 func (m *model) applyShellCommandAction(shellCommand string) {
 	focusPanelDir := m.getFocusedFilePanel().Location
 
-	retCode, output, err := utils.ExecuteCommandInShell(common.DefaultCommandTimeout, focusPanelDir, shellCommand)
+	retCode, output, err := utils2.ExecuteCommandInShell(common.DefaultCommandTimeout, focusPanelDir, shellCommand)
 
 	m.promptModal.HandleShellCommandResults(retCode, output)
 
@@ -444,7 +444,7 @@ func (m *model) splitPanel() (tea.Cmd, error) {
 
 func (m *model) createNewFilePanelRelativeToCurrent(path string) (tea.Cmd, error) {
 	currentDir := m.getFocusedFilePanel().Location
-	return m.fileModel.CreateNewFilePanel(utils.ResolveAbsPath(currentDir, path))
+	return m.fileModel.CreateNewFilePanel(utils2.ResolveAbsPath(currentDir, path))
 }
 
 // simulates a 'cd' action
@@ -595,7 +595,7 @@ func (m *model) quitSuperfile(cdOnQuit bool) {
 	if cdOnQuit {
 		// escape single quote
 		currentDir = strings.ReplaceAll(currentDir, "'", "'\\''")
-		err := os.WriteFile(variable.LastDirFile, []byte("cd '"+currentDir+"'"), utils.ConfigFilePerm)
+		err := os.WriteFile(variable.LastDirFile, []byte("cd '"+currentDir+"'"), utils2.ConfigFilePerm)
 		if err != nil {
 			slog.Error("Error during writing lastdir file", "error", err)
 		}

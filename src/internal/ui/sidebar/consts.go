@@ -1,6 +1,8 @@
 package sidebar
 
-import "github.com/yorukot/superfile/src/internal/utils"
+import (
+	"github.com/yorukot/superfile/src/pkg/utils"
+)
 
 // These are effectively consts
 // Had to use `var` as go doesn't allows const structs

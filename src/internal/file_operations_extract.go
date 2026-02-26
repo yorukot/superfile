@@ -8,8 +8,9 @@ import (
 
 	"golift.io/xtractr"
 
+	"github.com/yorukot/superfile/src/pkg/utils"
+
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
-	"github.com/yorukot/superfile/src/internal/utils"
 )
 
 func extractCompressFile(src, dest string, processBar *processbar.Model) error {

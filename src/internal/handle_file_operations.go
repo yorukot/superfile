@@ -13,12 +13,11 @@ import (
 
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
-
-	"github.com/yorukot/superfile/src/internal/ui/notify"
-	"github.com/yorukot/superfile/src/internal/ui/processbar"
-	"github.com/yorukot/superfile/src/internal/utils"
+	"github.com/yorukot/superfile/src/pkg/utils"
 
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/ui/notify"
+	"github.com/yorukot/superfile/src/internal/ui/processbar"
 
 	"github.com/atotto/clipboard"
 	tea "github.com/charmbracelet/bubbletea"

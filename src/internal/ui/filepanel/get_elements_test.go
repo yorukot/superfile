@@ -7,8 +7,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"github.com/yorukot/superfile/src/pkg/utils"
+
 	"github.com/yorukot/superfile/src/internal/ui/sortmodel"
-	"github.com/yorukot/superfile/src/internal/utils"
 )
 
 func TestReturnDirElement(t *testing.T) {

@@ -12,9 +12,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	utils2 "github.com/yorukot/superfile/src/pkg/utils"
+
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
-	"github.com/yorukot/superfile/src/internal/utils"
 )
 
 // Initialize the globals we need for testing
@@ -41,9 +42,9 @@ func TestMain(m *testing.M) {
 	}
 	flag.Parse()
 	if testing.Verbose() {
-		utils.SetRootLoggerToStdout(true)
+		utils2.SetRootLoggerToStdout(true)
 	} else {
-		utils.SetRootLoggerToDiscarded()
+		utils2.SetRootLoggerToDiscarded()
 	}
 
 	initGlobals()
@@ -58,7 +59,7 @@ func TestModel_HandleUpdate(t *testing.T) {
 	// We don't test getPromptAction here. It is a separate test
 	t.Run("Handle update called on closed Model", func(t *testing.T) {
 		m := defaultTestModel()
-		action, _ := m.HandleUpdate(utils.TeaRuneKeyMsg("x"), defaultTestCwd)
+		action, _ := m.HandleUpdate(utils2.TeaRuneKeyMsg("x"), defaultTestCwd)
 		assert.Empty(t, m.textInput.Value())
 		assert.True(t, m.validate())
 		assert.False(t, m.IsOpen())
@@ -87,13 +88,13 @@ func TestModel_HandleUpdate(t *testing.T) {
 		m := defaultTestModel()
 		m.Open(false)
 
-		action, _ := m.HandleUpdate(utils.TeaRuneKeyMsg(SplitCommand), defaultTestCwd)
+		action, _ := m.HandleUpdate(utils2.TeaRuneKeyMsg(SplitCommand), defaultTestCwd)
 		assert.Equal(t, common.NoAction{}, action)
 
 		action, _ = m.HandleUpdate(tea.KeyMsg{Type: tea.KeyEnter}, defaultTestCwd)
 		assert.Equal(t, common.SplitPanelAction{}, action)
 
-		_, _ = m.HandleUpdate(utils.TeaRuneKeyMsg("bad_command"), defaultTestCwd)
+		_, _ = m.HandleUpdate(utils2.TeaRuneKeyMsg("bad_command"), defaultTestCwd)
 		action, _ = m.HandleUpdate(tea.KeyMsg{Type: tea.KeyEnter}, defaultTestCwd)
 		assert.Equal(t, common.NoAction{}, action)
 		assert.False(t, m.LastActionSucceeded())
@@ -101,7 +102,7 @@ func TestModel_HandleUpdate(t *testing.T) {
 
 		m.setShellMode(true)
 		command := "abc def /xyz"
-		_, _ = m.HandleUpdate(utils.TeaRuneKeyMsg(command), defaultTestCwd)
+		_, _ = m.HandleUpdate(utils2.TeaRuneKeyMsg(command), defaultTestCwd)
 		action, _ = m.HandleUpdate(tea.KeyMsg{Type: tea.KeyEnter}, defaultTestCwd)
 		assert.Equal(t, common.ShellCommandAction{Command: command}, action)
 	})
@@ -111,7 +112,7 @@ func TestModel_HandleUpdate(t *testing.T) {
 
 		actualTest := func(closeKey tea.KeyMsg, shouldBeOpen bool) {
 			m.Open(true)
-			_, _ = m.HandleUpdate(utils.TeaRuneKeyMsg("xyz"), defaultTestCwd)
+			_, _ = m.HandleUpdate(utils2.TeaRuneKeyMsg("xyz"), defaultTestCwd)
 			action, _ := m.HandleUpdate(closeKey, defaultTestCwd)
 			assert.Equal(t, common.NoAction{}, action)
 			assert.Equal(t, shouldBeOpen, m.IsOpen())
@@ -129,19 +130,19 @@ func TestModel_HandleUpdate(t *testing.T) {
 			assert.True(t, m.IsShellMode())
 
 			// Shell to prompt
-			action, _ := m.HandleUpdate(utils.TeaRuneKeyMsg(promptChar), defaultTestCwd)
+			action, _ := m.HandleUpdate(utils2.TeaRuneKeyMsg(promptChar), defaultTestCwd)
 			assert.False(t, m.IsShellMode())
 			assert.True(t, m.LastActionSucceeded())
 			assert.Equal(t, common.NoAction{}, action)
 
 			// Prompt to shell
-			action, _ = m.HandleUpdate(utils.TeaRuneKeyMsg(shellChar), defaultTestCwd)
+			action, _ = m.HandleUpdate(utils2.TeaRuneKeyMsg(shellChar), defaultTestCwd)
 			assert.True(t, m.IsShellMode())
 			assert.True(t, m.LastActionSucceeded())
 			assert.Equal(t, common.NoAction{}, action)
 
 			// Pressing shellChar when you are already on shell shouldn't to anything
-			action, _ = m.HandleUpdate(utils.TeaRuneKeyMsg(shellChar), defaultTestCwd)
+			action, _ = m.HandleUpdate(utils2.TeaRuneKeyMsg(shellChar), defaultTestCwd)
 			assert.True(t, m.IsShellMode())
 			assert.True(t, m.LastActionSucceeded())
 			assert.Equal(t, common.NoAction{}, action)

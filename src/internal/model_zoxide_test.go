@@ -10,8 +10,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	utils2 "github.com/yorukot/superfile/src/pkg/utils"
+
 	"github.com/yorukot/superfile/src/internal/common"
-	"github.com/yorukot/superfile/src/internal/utils"
 )
 
 func setupProgAndOpenZoxide(t *testing.T, zClient *zoxidelib.Client, dir string) *TeaProg {
@@ -37,7 +38,7 @@ func TestZoxide(t *testing.T) {
 	zoxideDataDir := t.TempDir()
 	zClient, err := zoxidelib.New(zoxidelib.WithDataDir(zoxideDataDir))
 	if err != nil {
-		if runtime.GOOS != utils.OsLinux {
+		if runtime.GOOS != utils2.OsLinux {
 			t.Skipf("Skipping zoxide tests in non-Linux because zoxide client cannot be initialized")
 		} else {
 			t.Fatalf("zoxide initialization failed")
@@ -54,7 +55,7 @@ func TestZoxide(t *testing.T) {
 	dir2 := filepath.Join(curTestDir, "dir2")
 	dir3 := filepath.Join(curTestDir, "dir3")
 	multiSpaceDir := filepath.Join(curTestDir, "test  dir")
-	utils.SetupDirectories(t, curTestDir, dir1, dir2, dir3, multiSpaceDir)
+	utils2.SetupDirectories(t, curTestDir, dir1, dir2, dir3, multiSpaceDir)
 
 	t.Run("Zoxide tracking and navigation", func(t *testing.T) {
 		p := setupProgAndOpenZoxide(t, zClient, dir1)
@@ -82,7 +83,7 @@ func TestZoxide(t *testing.T) {
 		common.Config.ZoxideSupport = false
 		m := defaultTestModelWithZClient(zClient, dir1)
 
-		TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenZoxide[0]))
+		TeaUpdate(m, utils2.TeaRuneKeyMsg(common.Hotkeys.OpenZoxide[0]))
 		assert.True(t, m.zoxideModal.IsOpen(), "Zoxide modal should open even when ZoxideSupport is disabled")
 
 		results := m.zoxideModal.GetResults()

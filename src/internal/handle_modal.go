@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
-	"github.com/yorukot/superfile/src/internal/utils"
+	"github.com/yorukot/superfile/src/pkg/utils"
 )
 
 // Cancel typing modal e.g. create file or directory

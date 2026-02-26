@@ -8,7 +8,7 @@ import (
 
 	"github.com/shirou/gopsutil/v4/disk"
 
-	"github.com/yorukot/superfile/src/internal/utils"
+	"github.com/yorukot/superfile/src/pkg/utils"
 )
 
 // Get external media directories

@@ -11,9 +11,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	utils2 "github.com/yorukot/superfile/src/pkg/utils"
+
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
-	"github.com/yorukot/superfile/src/internal/utils"
 )
 
 func TestMain(m *testing.M) {
@@ -21,9 +22,9 @@ func TestMain(m *testing.M) {
 	common.ClipboardNoneText = " " + icon.Error + icon.Space + " No content in clipboard"
 	flag.Parse()
 	if testing.Verbose() {
-		utils.SetRootLoggerToStdout(true)
+		utils2.SetRootLoggerToStdout(true)
 	} else {
-		utils.SetRootLoggerToDiscarded()
+		utils2.SetRootLoggerToDiscarded()
 	}
 	m.Run()
 }
@@ -42,7 +43,7 @@ func TestClipboardRender_Empty(t *testing.T) {
 		assert.Contains(t, out, common.ClipboardNoneText)
 	})
 
-	utils.CreateFiles(items[0])
+	utils2.CreateFiles(items[0])
 	t.Run("Single Item", func(t *testing.T) {
 		m.SetItems([]string{items[0]})
 		out := ansi.Strip(m.Render())
@@ -51,7 +52,7 @@ func TestClipboardRender_Empty(t *testing.T) {
 		assert.NotContains(t, out, items[1])
 	})
 
-	utils.CreateFiles(items[1])
+	utils2.CreateFiles(items[1])
 	t.Run("Only two items exist, rest don't", func(t *testing.T) {
 		m.SetItems(items)
 		out := ansi.Strip(m.Render())
@@ -63,7 +64,7 @@ func TestClipboardRender_Empty(t *testing.T) {
 		}
 	})
 
-	utils.CreateFiles(items[2:]...)
+	utils2.CreateFiles(items[2:]...)
 	t.Run("Overflow", func(t *testing.T) {
 		m.SetItems(items)
 		out := ansi.Strip(m.Render())
@@ -78,7 +79,7 @@ func TestClipboardRender_Empty(t *testing.T) {
 func TestPruneInaccessibleItemsAndGet(t *testing.T) {
 	dir := t.TempDir()
 	files := []string{filepath.Join(dir, "f1"), filepath.Join(dir, "f2")}
-	utils.SetupFiles(t, files...)
+	utils2.SetupFiles(t, files...)
 
 	m := &Model{}
 	m.SetItems(files)

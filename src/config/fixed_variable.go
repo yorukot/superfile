@@ -6,7 +6,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"github.com/yorukot/superfile/src/internal/utils"
+	"github.com/yorukot/superfile/src/pkg/utils"
 
 	"github.com/adrg/xdg"
 )

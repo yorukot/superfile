@@ -9,7 +9,7 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/yorukot/superfile/src/internal/utils"
+	"github.com/yorukot/superfile/src/pkg/utils"
 )
 
 // split into tokens

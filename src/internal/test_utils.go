@@ -11,10 +11,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/yorukot/superfile/src/pkg/utils"
+
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 
 	"github.com/yorukot/superfile/src/internal/common"
-	"github.com/yorukot/superfile/src/internal/utils"
 )
 
 const DefaultTestTick = 10 * time.Millisecond

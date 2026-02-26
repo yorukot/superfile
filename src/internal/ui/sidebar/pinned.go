@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/yorukot/superfile/src/internal/utils"
+	utils2 "github.com/yorukot/superfile/src/pkg/utils"
 )
 
 type PinnedManager struct {
@@ -15,7 +15,7 @@ type PinnedManager struct {
 }
 
 func NewPinnedFileManager(filePath string) PinnedManager {
-	if err := utils.InitJSONFile(filePath); err != nil {
+	if err := utils2.InitJSONFile(filePath); err != nil {
 		slog.Error("Error initializing pinned JSON file", "error", err)
 	}
 
@@ -53,7 +53,7 @@ func (mgr *PinnedManager) Save(dirs []directory) error {
 		return fmt.Errorf("error marshaling pinned directories: %w", err)
 	}
 
-	if err := os.WriteFile(mgr.filePath, data, utils.ConfigFilePerm); err != nil {
+	if err := os.WriteFile(mgr.filePath, data, utils2.ConfigFilePerm); err != nil {
 		return fmt.Errorf("error writing pinned directories file: %w", err)
 	}
 

@@ -10,8 +10,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 
+	"github.com/yorukot/superfile/src/pkg/utils"
+
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
-	"github.com/yorukot/superfile/src/internal/utils"
 )
 
 func TestZipSources(t *testing.T) {

@@ -10,8 +10,9 @@ import (
 
 	"github.com/fatih/color"
 
+	"github.com/yorukot/superfile/src/pkg/utils"
+
 	variable "github.com/yorukot/superfile/src/config"
-	"github.com/yorukot/superfile/src/internal/utils"
 )
 
 const (

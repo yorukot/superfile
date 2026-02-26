@@ -6,7 +6,7 @@ import (
 
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 
-	"github.com/yorukot/superfile/src/internal/utils"
+	"github.com/yorukot/superfile/src/pkg/utils"
 )
 
 func setupTestModel() Model {

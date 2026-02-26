@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yorukot/superfile/src/internal/utils"
+	"github.com/yorukot/superfile/src/pkg/utils"
 )
 
 // TODO : Take common.Config.CaseSensitiveSort as a function parameter

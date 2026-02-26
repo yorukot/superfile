@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
-	"github.com/yorukot/superfile/src/internal/utils"
+	"github.com/yorukot/superfile/src/pkg/utils"
 
 	trash_win "github.com/hymkor/trash-go"
 	"github.com/rkoesters/xdg/trash"

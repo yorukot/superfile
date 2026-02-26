@@ -11,13 +11,14 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/x/ansi"
 
+	utils2 "github.com/yorukot/superfile/src/pkg/utils"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
-	"github.com/yorukot/superfile/src/internal/utils"
 )
 
 /*
@@ -63,9 +64,9 @@ func TestMain(m *testing.M) {
 
 	flag.Parse()
 	if testing.Verbose() {
-		utils.SetRootLoggerToStdout(true)
+		utils2.SetRootLoggerToStdout(true)
 	} else {
-		utils.SetRootLoggerToDiscarded()
+		utils2.SetRootLoggerToDiscarded()
 	}
 	m.Run()
 	// Maybe catch panic
@@ -78,8 +79,8 @@ func TestBasic(t *testing.T) {
 	file1 := filepath.Join(dir1, "file1.txt")
 
 	t.Run("Basic Checks", func(t *testing.T) {
-		utils.SetupDirectories(t, curTestDir, dir1, dir2)
-		utils.SetupFiles(t, file1)
+		utils2.SetupDirectories(t, curTestDir, dir1, dir2)
+		utils2.SetupFiles(t, file1)
 		t.Cleanup(func() {
 			os.RemoveAll(curTestDir)
 		})
@@ -103,13 +104,13 @@ func TestInitialFilePathPositionsCursorWindow(t *testing.T) {
 	curTestDir := t.TempDir()
 	dir1 := filepath.Join(curTestDir, "dir1")
 
-	utils.SetupDirectories(t, curTestDir, dir1)
+	utils2.SetupDirectories(t, curTestDir, dir1)
 
 	var file7 string
 	var file2 string
 	for i := range 10 {
 		f := filepath.Join(dir1, fmt.Sprintf("file%d.txt", i))
-		utils.SetupFiles(t, f)
+		utils2.SetupFiles(t, f)
 		if i == 7 {
 			file7 = f
 		}
@@ -145,7 +146,7 @@ func TestQuit(t *testing.T) {
 	t.Run("Normal Quit", func(t *testing.T) {
 		m := defaultTestModel(testDir)
 		assert.Equal(t, notQuitting, m.modelQuitState)
-		cmd := TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.Quit[0]))
+		cmd := TeaUpdate(m, utils2.TeaRuneKeyMsg(common.Hotkeys.Quit[0]))
 		assert.Equal(t, quitDone, m.modelQuitState)
 		assert.True(t, IsTeaQuit(cmd))
 	})
@@ -159,23 +160,23 @@ func TestQuit(t *testing.T) {
 		})
 
 		assert.Equal(t, notQuitting, m.modelQuitState)
-		cmd := TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.Quit[0]))
+		cmd := TeaUpdate(m, utils2.TeaRuneKeyMsg(common.Hotkeys.Quit[0]))
 		assert.Equal(t, quitConfirmationInitiated, m.modelQuitState)
 		assert.False(t, IsTeaQuit(cmd))
 
 		// Now we would be asked for confirmation.
 		// Cancel the quit
-		cmd = TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.CancelTyping[0]))
+		cmd = TeaUpdate(m, utils2.TeaRuneKeyMsg(common.Hotkeys.CancelTyping[0]))
 		assert.Equal(t, notQuitting, m.modelQuitState)
 		assert.False(t, IsTeaQuit(cmd))
 
 		// Again trigger quit
-		cmd = TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.Quit[0]))
+		cmd = TeaUpdate(m, utils2.TeaRuneKeyMsg(common.Hotkeys.Quit[0]))
 		assert.Equal(t, quitConfirmationInitiated, m.modelQuitState)
 		assert.False(t, IsTeaQuit(cmd))
 
 		// Confirm this time
-		cmd = TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.Confirm[0]))
+		cmd = TeaUpdate(m, utils2.TeaRuneKeyMsg(common.Hotkeys.Confirm[0]))
 		assert.Equal(t, quitDone, m.modelQuitState)
 		assert.True(t, IsTeaQuit(cmd))
 	})
@@ -187,7 +188,7 @@ func TestQuit(t *testing.T) {
 
 		assert.Equal(t, notQuitting, m.modelQuitState)
 
-		cmd := TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.CdQuit[0]))
+		cmd := TeaUpdate(m, utils2.TeaRuneKeyMsg(common.Hotkeys.CdQuit[0]))
 
 		assert.Equal(t, quitDone, m.modelQuitState)
 		assert.True(t, IsTeaQuit(cmd))
@@ -212,8 +213,8 @@ func TestChooserFile(t *testing.T) {
 	dir2 := filepath.Join(curTestDir, "dir2")
 	file1 := filepath.Join(dir1, "file1.txt")
 	testChooserFile := filepath.Join(dir2, "chooser_file.txt")
-	utils.SetupDirectories(t, curTestDir, dir1, dir2)
-	utils.SetupFiles(t, file1)
+	utils2.SetupDirectories(t, curTestDir, dir1, dir2)
+	utils2.SetupFiles(t, file1)
 
 	testdata := []struct {
 		name            string
@@ -268,7 +269,7 @@ func TestChooserFile(t *testing.T) {
 				require.NoError(t, err)
 			}
 			variable.SetChooserFile(tt.chooserFile)
-			cmd := TeaUpdate(m, utils.TeaRuneKeyMsg(tt.hotkey))
+			cmd := TeaUpdate(m, utils2.TeaRuneKeyMsg(tt.hotkey))
 
 			if tt.expectedQuit {
 				assert.Equal(t, quitDone, m.modelQuitState)
@@ -309,8 +310,8 @@ func TestAsyncPreviewPanelSync(t *testing.T) {
 
 	file1, content1 := filepath.Join(curTestDir, "file1.txt"), "File 1 content"
 	file2, content2 := filepath.Join(curTestDir, "file2.txt"), "File 2 content"
-	utils.SetupFilesWithData(t, []byte(content1), file1)
-	utils.SetupFilesWithData(t, []byte(content2), file2)
+	utils2.SetupFilesWithData(t, []byte(content1), file1)
+	utils2.SetupFilesWithData(t, []byte(content2), file2)
 
 	m := defaultTestModelWithFilePreview(curTestDir)
 	p := NewTestTeaProgWithEventLoop(t, m)
