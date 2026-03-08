@@ -136,23 +136,30 @@ func FileNameWithoutExtension(fileName string) string {
 	return fileName
 }
 
-func FormatFileSize(size int64) string {
+func unitsDec() []string {
+	return []string{"B", "kB", "MB", "GB", "TB", "PB", "EB"}
+}
+func unitsBin() []string {
+	return []string{"B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB"}
+}
+
+func formatSizeInternal(size int64, power int, unitlist []string) string {
 	if size == 0 {
-		return "0B"
+		return "0 B"
 	}
+	unitIndex := int(math.Floor(math.Log(float64(size)) / math.Log(float64(power))))
+	if unitIndex == 0 {
+		return fmt.Sprintf("%d %s", size, unitlist[unitIndex])
+	}
+	adjustedSize := float64(size) / math.Pow(float64(power), float64(unitIndex))
+	return fmt.Sprintf("%.2f %s", adjustedSize, unitlist[unitIndex])
+}
 
-	unitsDec := []string{"B", "kB", "MB", "GB", "TB", "PB", "EB"}
-	unitsBin := []string{"B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB"}
-
-	// TODO : Remove duplication here
+func FormatFileSize(size int64) string {
 	if Config.FileSizeUseSI {
-		unitIndex := int(math.Floor(math.Log(float64(size)) / math.Log(KilobyteSize)))
-		adjustedSize := float64(size) / math.Pow(KilobyteSize, float64(unitIndex))
-		return fmt.Sprintf("%.2f %s", adjustedSize, unitsDec[unitIndex])
+		return formatSizeInternal(size, KilobyteSize, unitsDec())
 	}
-	unitIndex := int(math.Floor(math.Log(float64(size)) / math.Log(KibibyteSize)))
-	adjustedSize := float64(size) / math.Pow(KibibyteSize, float64(unitIndex))
-	return fmt.Sprintf("%.2f %s", adjustedSize, unitsBin[unitIndex])
+	return formatSizeInternal(size, KibibyteSize, unitsBin())
 }
 
 func GetHelpMenuHotkeyString(hotkeys []string) string {
