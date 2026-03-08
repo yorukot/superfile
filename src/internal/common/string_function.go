@@ -136,14 +136,13 @@ func FileNameWithoutExtension(fileName string) string {
 	return fileName
 }
 
-func unitsDec() []string {
-	return []string{"B", "kB", "MB", "GB", "TB", "PB", "EB"}
-}
-func unitsBin() []string {
-	return []string{"B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB"}
-}
+//nolint:gochecknoglobals // it's just constant
+var unitsDec = [...]string{"B", "kB", "MB", "GB", "TB", "PB", "EB"}
 
-func formatSizeInternal(size int64, power int, unitlist []string) string {
+//nolint:gochecknoglobals // it's just constant
+var unitsBin = [...]string{"B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB"}
+
+func formatSizeInternal(size int64, power int, unitlist [7]string) string {
 	if size == 0 {
 		return "0 B"
 	}
@@ -157,9 +156,9 @@ func formatSizeInternal(size int64, power int, unitlist []string) string {
 
 func FormatFileSize(size int64) string {
 	if Config.FileSizeUseSI {
-		return formatSizeInternal(size, KilobyteSize, unitsDec())
+		return formatSizeInternal(size, KilobyteSize, unitsDec)
 	}
-	return formatSizeInternal(size, KibibyteSize, unitsBin())
+	return formatSizeInternal(size, KibibyteSize, unitsBin)
 }
 
 func GetHelpMenuHotkeyString(hotkeys []string) string {

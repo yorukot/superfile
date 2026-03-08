@@ -213,31 +213,31 @@ func TestMakePrintable(t *testing.T) {
 
 func TestFormatSizeInternal(t *testing.T) {
 	t.Run("max int size", func(t *testing.T) {
-		actual := formatSizeInternal(math.MaxInt64, KilobyteSize, unitsDec())
+		actual := formatSizeInternal(math.MaxInt64, KilobyteSize, unitsDec)
 		assert.Equal(t, "9.22 EB", actual)
 	})
 	t.Run("zero size", func(t *testing.T) {
-		actual := formatSizeInternal(0, KilobyteSize, unitsDec())
+		actual := formatSizeInternal(0, KilobyteSize, unitsDec)
 		assert.Equal(t, "0 B", actual)
 	})
 	t.Run("100 bytes size", func(t *testing.T) {
-		actual := formatSizeInternal(100, KilobyteSize, unitsDec())
+		actual := formatSizeInternal(100, KilobyteSize, unitsDec)
 		assert.Equal(t, "100 B", actual)
 	})
 	t.Run("1005 bytes size", func(t *testing.T) {
-		actual := formatSizeInternal(1005, KilobyteSize, unitsDec())
+		actual := formatSizeInternal(1005, KilobyteSize, unitsDec)
 		assert.Equal(t, "1.00 kB", actual)
 	})
 	t.Run("1005 bytes size kibi", func(t *testing.T) {
-		actual := formatSizeInternal(1005, KibibyteSize, unitsBin())
+		actual := formatSizeInternal(1005, KibibyteSize, unitsBin)
 		assert.Equal(t, "1005 B", actual)
 	})
 	t.Run("1025 bytes size kibi", func(t *testing.T) {
-		actual := formatSizeInternal(1025, KibibyteSize, unitsBin())
+		actual := formatSizeInternal(1025, KibibyteSize, unitsBin)
 		assert.Equal(t, "1.00 KiB", actual)
 	})
 	t.Run("1035 bytes size kibi", func(t *testing.T) {
-		actual := formatSizeInternal(1035, KibibyteSize, unitsBin())
+		actual := formatSizeInternal(1035, KibibyteSize, unitsBin)
 		assert.Equal(t, "1.01 KiB", actual)
 	})
 }
