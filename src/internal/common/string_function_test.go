@@ -176,7 +176,13 @@ func TestMakePrintable(t *testing.T) {
 		{"", ""},
 		{"hello", "hello"},
 		{"abcdABCD0123~!@#$%^&*()_+-={}|:\"<>?,./;'[]", "abcdABCD0123~!@#$%^&*()_+-={}|:\"<>?,./;'[]"},
-		{"Horizontal Tab and NewLine\t\t\n\n", "Horizontal Tab and NewLine        \n\n"},
+		{"Horizontal Tab and NewLine\t\t\n\n", "Horizontal Tab and NewLine      \n\n"},
+		// Tab expansion tests - tabs should expand to reach next tab stop (TabWidth=4)
+		{"a\tb", "a   b"},        // Position 1: need 3 spaces to reach position 4
+		{"ab\tc", "ab  c"},       // Position 2: need 2 spaces to reach position 4
+		{"abc\td", "abc d"},      // Position 3: need 1 space to reach position 4
+		{"abcd\te", "abcd    e"}, // Position 4: need 4 spaces to reach position 8
+		{"a\tb\tc", "a   b   c"}, // Position 1: 3 spaces, then position 4: 4 spaces to reach 8
 		{"(NBSP)\u00a0\u00a0\u00a0\u00a0;", "(NBSP)\u00a0\u00a0\u00a0\u00a0;"},
 		{"\x0b(Vertical Tab)", "(Vertical Tab)"},
 		{"\x0d(CR)", "(CR)"},

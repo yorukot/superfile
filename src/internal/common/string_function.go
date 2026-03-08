@@ -228,6 +228,8 @@ func IsTextFile(filename string) (bool, error) {
 // This function should better not be broken into multiple functions
 func MakePrintableWithEscCheck(line string, allowEsc bool) string { //nolint: gocognit // See above
 	var sb strings.Builder
+	// Track current display width for proper tab expansion
+	curWidth := 0
 	for _, r := range line {
 		if r == utf8.RuneError {
 			continue
@@ -236,13 +238,17 @@ func MakePrintableWithEscCheck(line string, allowEsc bool) string { //nolint: go
 		// It is multi-byte in UTF-8, But it has zero display width
 		if r == NonBreakingSpace {
 			sb.WriteRune(r)
+			curWidth++
 			continue
 		}
 		// It needs to be handled separately since considered a space,
 		// Since we are using ansi.StringWidth() for truncation, and \t is
 		// considered zero width
 		if r == '\t' {
-			sb.WriteString("    ")
+			// Expand tab to reach next tab stop based on current position
+			spacesNeeded := TabWidth - (curWidth % TabWidth)
+			sb.WriteString(strings.Repeat(" ", spacesNeeded))
+			curWidth += spacesNeeded
 			continue
 		}
 		if r == EscapeChar {
@@ -259,10 +265,17 @@ func MakePrintableWithEscCheck(line string, allowEsc bool) string { //nolint: go
 				r = ' '
 			}
 			sb.WriteRune(r)
+			curWidth += ansi.StringWidth(string(r))
 			continue
 		}
 		if unicode.IsGraphic(r) || r == rune('\n') {
 			sb.WriteRune(r)
+			if r != rune('\n') {
+				curWidth++
+			} else {
+				// Reset width on newline
+				curWidth = 0
+			}
 		}
 	}
 	return sb.String()
