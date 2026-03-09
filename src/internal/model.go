@@ -154,6 +154,11 @@ func (m *model) getMetadataCmd() tea.Cmd {
 		metadataFocused == m.fileMetaData.GetMetadataExpectedFocused() {
 		return nil
 	}
+
+	if metadataFocused {
+		m.fileMetaData.DropMetadataIfInCache(selectedItem.Location)
+	}
+
 	if m.fileMetaData.UpdateMetadataIfExistsInCache(selectedItem.Location, metadataFocused) {
 		return nil
 	}

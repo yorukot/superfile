@@ -38,3 +38,8 @@ func (m *Model) UpdateMetadataIfExistsInCache(filepath string, metadataFocused b
 	}
 	return false
 }
+
+func (m *Model) DropMetadataIfInCache(filepath string) {
+	m.cache.Remove(cacheKey(filepath, true))
+	m.cache.Remove(cacheKey(filepath, false))
+}
