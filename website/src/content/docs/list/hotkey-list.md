@@ -31,6 +31,7 @@ Quit superfile and cd to current folder "cd_quit" require the same scripts as ["
 | Function                         | Key                        | Variable name               |
 | -------------------------------- | -------------------------- | --------------------------- |
 | Create new file panel            | `n`                        | `create_new_file_panel`     |
+| Split focused file panel         | `N` (shift+n)              | `split_file_panel`          |
 | Close the focused file panel     | `w`                        | `close_file_panel`          |
 | Toggle file preview panel        | `f`                        | `toggle_file_preview_panel` |
 | Focus on the next file panel     | `tab`, `L`(shift+l)        | `next_file_panel`           |
