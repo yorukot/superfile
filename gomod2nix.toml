@@ -82,6 +82,9 @@ schema = 3
   [mod."github.com/fatih/color"]
     version = "v1.18.0"
     hash = "sha256-pP5y72FSbi4j/BjyVq/XbAOFjzNjMxZt2R/lFFxGWvY="
+  [mod."github.com/fvbommel/sortorder"]
+    version = "v1.1.0"
+    hash = "sha256-553Rg/amloO6nv67p0ARsKas9QNnTQucpi08vNLtjQU="
   [mod."github.com/go-ole/go-ole"]
     version = "v1.2.6"
     hash = "sha256-+oxitLeJxYF19Z6g+6CgmCHJ1Y5D8raMi2Cb3M6nXCs="
@@ -191,11 +194,11 @@ schema = 3
     version = "v0.0.0-20231006140011-7918f672742d"
     hash = "sha256-2SO1etTQ6UCUhADR5sgvDEDLHcj77pJKCIa/8mGDbAo="
   [mod."golang.org/x/image"]
-    version = "v0.35.0"
-    hash = "sha256-l9GP7N78XsAxe+LFUrBERp16SnerF7I5/WSTvHLGe2M="
+    version = "v0.37.0"
+    hash = "sha256-EIs07Dfmnvtf2OQg6XmCNImySAFwZqLpfmJsm+N/McM="
   [mod."golang.org/x/mod"]
-    version = "v0.31.0"
-    hash = "sha256-ZVNmaZADgM3+30q9rW8q4gP6ySkT7r1eb4vrHIlpCjM="
+    version = "v0.33.0"
+    hash = "sha256-NR+ZSeQKbfVP4Cu/SlNIivMa+c1OMyOSMxLSjX+LZJI="
   [mod."golang.org/x/sys"]
     version = "v0.38.0"
     hash = "sha256-1+i5EaG3JwH3KMtefzJLG5R6jbOeJM4GK3/LHBVnSy0="
@@ -203,8 +206,8 @@ schema = 3
     version = "v0.18.0"
     hash = "sha256-lpze9arFZIhBV8Ht3VZyoiUwqPkeH2IwfXt8M3xljiM="
   [mod."golang.org/x/text"]
-    version = "v0.33.0"
-    hash = "sha256-XdA6D39ESuJkaaM/SRBnqZzjKUwi6Gbt1Si1nvauTr4="
+    version = "v0.35.0"
+    hash = "sha256-MXhEl0aLAyS+4SjQZMipoYKgNEOWdIYnr8h7WtLdTdQ="
   [mod."golift.io/xtractr"]
     version = "v0.2.2"
     hash = "sha256-ihKdIrWG1DKADjQ4X1AW62EGZWGgYU+9dY3g260bNOY="
