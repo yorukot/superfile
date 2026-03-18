@@ -82,6 +82,19 @@ func TestLayout(t *testing.T) {
 		testWithConfig(t, cfg, baseTestDir)
 	})
 
+	t.Run("sidebar-one-section", func(t *testing.T) {
+		cfg := common.Config
+		cfg.SidebarWidth = sWDef
+		cfg.SidebarSections = []string{"pinned"}
+		testWithConfig(t, cfg, baseTestDir)
+	})
+
+	t.Run("sidebar-no-sections", func(t *testing.T) {
+		cfg := common.Config
+		cfg.SidebarWidth = sWDef
+		cfg.SidebarSections = []string{}
+		testWithConfig(t, cfg, baseTestDir)
+	})
 }
 
 func testWithConfig(t *testing.T, cfg common.ConfigType, testPath string) {
