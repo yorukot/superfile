@@ -1,8 +1,5 @@
 package internal
 
-// TODO add two new tests for sidebar, a - with only one section, and b - without any sections.
-// note - we should update `testWithConfig` to take a new object of `common.ConfigType`, so that any custom config can be provided.
-
 import (
 	"fmt"
 	"path/filepath"
@@ -59,37 +56,38 @@ func TestLayout(t *testing.T) {
 	// config global variable. Later we might fix that and use parallelization
 	for _, w := range sidebarWidths {
 		t.Run(fmt.Sprintf("sW=%d;pW=%d", w, pWDef), func(t *testing.T) {
-			testWithConfig(t, w, pWDef, false, baseTestDir)
+			cfg := common.Config
+			cfg.SidebarWidth = w
+			cfg.FilePreviewWidth = pWDef
+			cfg.EnableFilePreviewBorder = false
+			testWithConfig(t, cfg, baseTestDir)
 		})
 	}
 	for _, w := range previewWidths {
 		t.Run(fmt.Sprintf("sW=%d;pW=%d", sWDef, w), func(t *testing.T) {
-			testWithConfig(t, sWDef, w, false, baseTestDir)
+			cfg := common.Config
+			cfg.SidebarWidth = sWDef
+			cfg.FilePreviewWidth = w
+			cfg.EnableFilePreviewBorder = false
+			testWithConfig(t, cfg, baseTestDir)
 		})
 	}
 
 	// One test for preview border enabled
 	t.Run("sW=10;pW=5;previewWithBorder", func(t *testing.T) {
-		testWithConfig(t, 10, 5, true, baseTestDir)
+		cfg := common.Config
+		cfg.SidebarWidth = 10
+		cfg.FilePreviewWidth = 5
+		cfg.EnableFilePreviewBorder = true
+		testWithConfig(t, cfg, baseTestDir)
 	})
+
 }
 
-func testWithConfig(t *testing.T, sidebarWidth int, previewWidth int,
-	previewBorderEnabled bool, testPath string) {
-	// Save original config values and restore them after test
-	origSidebarWidth := common.Config.SidebarWidth
-	origPreviewWidth := common.Config.FilePreviewWidth
-	origPreviewBorderEnabled := common.Config.EnableFilePreviewBorder
-	defer func() {
-		common.Config.SidebarWidth = origSidebarWidth
-		common.Config.FilePreviewWidth = origPreviewWidth
-		common.Config.EnableFilePreviewBorder = origPreviewBorderEnabled
-	}()
-
-	// Set test config
-	common.Config.SidebarWidth = sidebarWidth
-	common.Config.FilePreviewWidth = previewWidth
-	common.Config.EnableFilePreviewBorder = previewBorderEnabled
+func testWithConfig(t *testing.T, cfg common.ConfigType, testPath string) {
+	origConfig := common.Config
+	defer common.SetConfig(origConfig)
+	common.SetConfig(cfg)
 
 	m := defaultTestModelWithFooterAndFilePreview(testPath)
 	p := NewTestTeaProgWithEventLoop(t, m)
