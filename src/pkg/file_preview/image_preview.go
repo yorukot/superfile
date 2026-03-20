@@ -136,7 +136,7 @@ func (p *ImagePreviewer) ImagePreviewWithRenderer(path string, maxWidth int, max
 
 	switch renderer {
 	case RendererKitty:
-		result, err := p.renderWithKittyUsingTermCap(img, path, originalWidth,
+		result, err := p.renderWithKittyUsingTermCap(img, originalWidth,
 			originalHeight, maxWidth, maxHeight, sideAreaWidth)
 		if err != nil {
 			// If kitty fails, fall back to ANSI renderer
