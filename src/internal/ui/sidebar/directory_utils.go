@@ -54,6 +54,7 @@ func getDirectories(pinnedMgr *PinnedManager, sections []string) []directory {
 func getWellKnownDirectories() []directory {
 	wellKnownDirectories := []directory{
 		{Location: xdg.Home, Name: icon.Home + icon.Space + "Home"},
+		{Location: xdg.UserDirs.Desktop, Name: icon.Desktop + icon.Space + "Desktop"},
 		{Location: xdg.UserDirs.Download, Name: icon.Download + icon.Space + "Downloads"},
 		{Location: xdg.UserDirs.Documents, Name: icon.Documents + icon.Space + "Documents"},
 		{Location: xdg.UserDirs.Pictures, Name: icon.Pictures + icon.Space + "Pictures"},
