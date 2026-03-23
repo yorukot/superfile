@@ -12,6 +12,7 @@ var (
 
 	// Well Known Directories
 	Home        = "\U000f02dc" // Printable Rune : "󰋜"
+	Desktop     = "\U000f01c4" // Printable Rune : "󰇄"
 	Download    = "\U000f03d4" // Printable Rune : "󰏔"
 	Documents   = "\U000f0219" // Printable Rune : "󰈙"
 	Pictures    = "\U000f02e9" // Printable Rune : "󰋩"
