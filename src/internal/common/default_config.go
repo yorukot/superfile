@@ -10,3 +10,7 @@ var (
 var Theme ThemeType
 var Config ConfigType
 var Hotkeys HotkeysType
+
+func SetConfig(cfg ConfigType) {
+	Config = cfg
+}
