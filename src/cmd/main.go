@@ -96,7 +96,7 @@ func Run(content embed.FS) {
 			&cli.BoolFlag{
 				Name:    "fix-config-file",
 				Aliases: []string{"fch"},
-				Usage:   "Adds any missing hotkeys to the hotkey config file",
+				Usage:   "Adds any missing fields to the config file",
 				Value:   false,
 			},
 			&cli.BoolFlag{
