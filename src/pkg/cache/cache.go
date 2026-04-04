@@ -80,6 +80,12 @@ func (c *Cache[T]) Set(key string, obj T) {
 	}
 }
 
+func (c *Cache[T]) Remove(key string) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	delete(c.cache, key)
+}
+
 // evictOldest removes the oldest entry from the cache
 func (c *Cache[T]) evictOldest() {
 	var oldestKey string
