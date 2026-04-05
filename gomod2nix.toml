@@ -234,8 +234,8 @@ schema = 3
     hash = 'sha256-L5KYLue5U14bxUuNyhZ6lIjbda6eCQsx1V6gToqfRdk='
 
   [mod.'github.com/urfave/cli/v3']
-    version = 'v3.6.1'
-    hash = 'sha256-q1WeKEvWoSyA0Wcan+Edjm71e0/vnPmqVvlfjUix7+8='
+    version = 'v3.8.0'
+    hash = 'sha256-mLBHZBcxBiuBcQg2A2nYHMrr8muLBuIQMAIZh6ZuJfw='
 
   [mod.'github.com/xo/terminfo']
     version = 'v0.0.0-20220910002029-abceb7e1c41e'
