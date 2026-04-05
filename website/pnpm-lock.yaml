@@ -36,8 +36,8 @@ importers:
         specifier: ^0.34.1
         version: 0.34.5
       starlight-giscus:
-        specifier: ^0.8.0
-        version: 0.8.1(@astrojs/starlight@0.37.7(astro@5.18.1(@types/node@24.12.2)(rollup@4.59.0)(typescript@5.8.3)))
+        specifier: ^0.9.0
+        version: 0.9.1(@astrojs/starlight@0.37.7(astro@5.18.1(@types/node@24.12.2)(rollup@4.59.0)(typescript@5.8.3)))
 
 packages:
 
@@ -1752,11 +1752,11 @@ packages:
   space-separated-tokens@2.0.2:
     resolution: {integrity: sha512-PEGlAwrG8yXGXRjW32fGbg66JAlOAwbObuqVoJpv/mRgoWDQfgH1wDPvtzWyUSNAXBGSk8h755YDbbcEy3SH2Q==}
 
-  starlight-giscus@0.8.1:
-    resolution: {integrity: sha512-etgWym6KpHeNSkbggEhpGEPNaLIwypWdvE7BxNFHGUkjiq6EYSJhr5zoMGZ9QfnMdkcj8PqKrJTM88YdCSEiDQ==}
-    engines: {node: ^18.20.8 || ^20.3.0 || >=22.0.0}
+  starlight-giscus@0.9.1:
+    resolution: {integrity: sha512-zqhgKhimVpo572yXYL4k3OLJtOpo+s7GUwq+bPMp+ZkIcnFmH88HB0ICnuaEw/vKRt4bWHRsjBMuqbSRvAI8cw==}
+    engines: {node: '>=20.0.0'}
     peerDependencies:
-      '@astrojs/starlight': '>=0.35.0'
+      '@astrojs/starlight': '>=0.37.0'
 
   stream-replace-string@2.0.0:
     resolution: {integrity: sha512-TlnjJ1C0QrmxRNrON00JvaFFlNh5TTG00APw23j74ET7gkQpTASi6/L2fuiav8pzK715HXtUeClpBTw2NPSn6w==}
@@ -4248,7 +4248,7 @@ snapshots:
 
   space-separated-tokens@2.0.2: {}
 
-  starlight-giscus@0.8.1(@astrojs/starlight@0.37.7(astro@5.18.1(@types/node@24.12.2)(rollup@4.59.0)(typescript@5.8.3))):
+  starlight-giscus@0.9.1(@astrojs/starlight@0.37.7(astro@5.18.1(@types/node@24.12.2)(rollup@4.59.0)(typescript@5.8.3))):
     dependencies:
       '@astrojs/starlight': 0.37.7(astro@5.18.1(@types/node@24.12.2)(rollup@4.59.0)(typescript@5.8.3))
 
