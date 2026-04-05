@@ -98,8 +98,8 @@ schema = 3
     hash = 'sha256-jN5+2ED+YbIoPIuyJ4Ou5pqJb2w1uNKzp5yTjKY6rEQ='
 
   [mod.'github.com/ebitengine/purego']
-    version = 'v0.9.1'
-    hash = 'sha256-iVfU8vaJ7IPa92dUeHeuW+yKvUbe59F/eV7GlDRIAcE='
+    version = 'v0.10.0'
+    hash = 'sha256-NPS88SNvsm4QEAx1zVmNGzMwtR1EBhdQYywQU1JdRqM='
 
   [mod.'github.com/erikgeiser/coninput']
     version = 'v0.0.0-20211004153227-1c3628e74d0f'
@@ -222,8 +222,8 @@ schema = 3
     hash = 'sha256-AiY2T9hXj6jnfldYDoe4WNr3FldpVTxc3lScR++HOLc='
 
   [mod.'github.com/shirou/gopsutil/v4']
-    version = 'v4.25.12'
-    hash = 'sha256-gzk9GW4+tXUWmxAVD3by/k4D/+l++TvajRVTkQJvwmM='
+    version = 'v4.26.3'
+    hash = 'sha256-JjO24Z1wvB8p/RU3wDRo1i20VJhrDd8yl4IXtnTUABw='
 
   [mod.'github.com/stretchr/testify']
     version = 'v1.11.1'
@@ -266,8 +266,8 @@ schema = 3
     hash = 'sha256-NR+ZSeQKbfVP4Cu/SlNIivMa+c1OMyOSMxLSjX+LZJI='
 
   [mod.'golang.org/x/sys']
-    version = 'v0.38.0'
-    hash = 'sha256-1+i5EaG3JwH3KMtefzJLG5R6jbOeJM4GK3/LHBVnSy0='
+    version = 'v0.41.0'
+    hash = 'sha256-owjs3/IzAKfFlIz1U1fiHSfl2+bTUhaXTyWEjL5SWHk='
 
   [mod.'golang.org/x/term']
     version = 'v0.18.0'
