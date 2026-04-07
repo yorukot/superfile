@@ -8,6 +8,11 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
 )
 
+const (
+	scrollUpIndicator   = " ↑ More results above"
+	scrollDownIndicator = " ↓ More results below"
+)
+
 func (m *Model) Render() string {
 	r := ui.ZoxideRenderer(m.maxHeight, m.width)
 	r.SetBorderTitle(m.headline)
@@ -31,9 +36,7 @@ func (m *Model) Render() string {
 func (m *Model) renderResultList(r *rendering.Renderer) {
 	// Calculate visible range
 	endIndex := m.renderIndex + maxVisibleResults
-	if endIndex > len(m.results) {
-		endIndex = len(m.results)
-	}
+	endIndex = min(endIndex, len(m.results))
 	// Show visible results
 	m.renderVisibleResults(r, endIndex)
 
@@ -71,12 +74,12 @@ func (m *Model) renderScrollIndicators(r *rendering.Renderer, endIndex int) {
 
 	if m.renderIndex > 0 {
 		r.AddSection()
-		r.AddLines(" ↑ More results above")
+		r.AddLines(scrollUpIndicator)
 	}
 	if endIndex < len(m.results) {
 		if m.renderIndex == 0 {
 			r.AddSection()
 		}
-		r.AddLines(" ↓ More results below")
+		r.AddLines(scrollDownIndicator)
 	}
 }

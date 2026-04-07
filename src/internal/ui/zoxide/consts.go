@@ -8,6 +8,10 @@ const (
 
 	maxVisibleResults = 5 // Maximum number of results visible at once
 
+	// renderOverhead is the number of lines needed for UI chrome
+	// (input line + separator + borders + scroll indicators + section)
+	renderOverhead = 7
+
 	// UI dimension constants for zoxide modal
 	// scoreColumnWidth is width reserved for score display (including padding and separator)
 	scoreColumnWidth = 13 // borders(2) + padding(2) + score(6) + separator(3)

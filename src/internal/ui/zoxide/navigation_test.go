@@ -21,6 +21,21 @@ func TestNavigation(t *testing.T) {
 			navigateUp:     true,
 			expectedCursor: 4,
 		},
+		// FIX #1: Added missing navigateUp normal decrement test (Issue #1130 Mistake #3)
+		{
+			name:           "navigateUp at position 3 decrements to 2",
+			resultCnt:      5,
+			startCursor:    3,
+			navigateUp:     true,
+			expectedCursor: 2,
+		},
+		{
+			name:           "navigateUp at position 1 decrements to 0",
+			resultCnt:      5,
+			startCursor:    1,
+			navigateUp:     true,
+			expectedCursor: 0,
+		},
 		{
 			name:           "navigateDown at position 0 moves to next position",
 			resultCnt:      5,
@@ -50,7 +65,6 @@ func TestNavigation(t *testing.T) {
 			expectedCursor: 0,
 		},
 	}
-
 	for _, td := range testdata {
 		t.Run(td.name, func(t *testing.T) {
 			var m Model
@@ -60,73 +74,91 @@ func TestNavigation(t *testing.T) {
 				m = setupTestModelWithResults(td.resultCnt)
 			}
 			m.cursor = td.startCursor
-
 			if td.navigateUp {
 				m.navigateUp()
 			} else {
 				m.navigateDown()
 			}
-
 			assert.Equal(t, td.expectedCursor, m.cursor)
 		})
 	}
 }
 
 func TestUpdateRenderIndex(t *testing.T) {
+	// FIX #2 & #4: Added initialRenderIndex field so we can test renderIndex
+	// decrease, and replaced magic numbers with maxVisibleResults expressions
+	// so tests don't silently break if the constant changes (Issue #1130 Mistakes #1 & #2)
 	testdata := []struct {
 		name                string
 		resultCnt           int
 		cursor              int
+		initialRenderIndex  int
 		expectedRenderIndex int
 	}{
 		{
 			name:                "cursor at 0 has renderIndex 0",
 			resultCnt:           10,
 			cursor:              0,
+			initialRenderIndex:  0,
 			expectedRenderIndex: 0,
 		},
 		{
-			name:                "cursor at 5 has renderIndex 1 (visible at bottom)",
+			name:                "cursor at last visible position has renderIndex 1",
 			resultCnt:           10,
-			cursor:              5,
+			cursor:              maxVisibleResults, // was hardcoded 5
+			initialRenderIndex:  0,
 			expectedRenderIndex: 1,
 		},
 		{
-			name:                "cursor at 9 has renderIndex 5 (last page)",
+			name:                "cursor at last result has renderIndex at last page",
 			resultCnt:           10,
 			cursor:              9,
-			expectedRenderIndex: 5,
+			initialRenderIndex:  0,
+			expectedRenderIndex: 10 - maxVisibleResults, // was hardcoded 5
+		},
+		// FIX #3: Added missing renderIndex decrease test (Issue #1130 Mistake #1)
+		// Tests the branch: if m.cursor < m.renderIndex { m.renderIndex = m.cursor }
+		{
+			name:                "cursor above renderIndex causes renderIndex to decrease",
+			resultCnt:           10,
+			cursor:              2,
+			initialRenderIndex:  5,
+			expectedRenderIndex: 2,
 		},
 		{
-			name:                "cursor back at 0 scrolls back up to renderIndex 0",
+			name:                "cursor at 0 with high renderIndex snaps renderIndex to 0",
 			resultCnt:           10,
 			cursor:              0,
+			initialRenderIndex:  4,
 			expectedRenderIndex: 0,
 		},
 		{
 			name:                "renderIndex stays 0 with 3 results, cursor at 0",
 			resultCnt:           3,
 			cursor:              0,
+			initialRenderIndex:  0,
 			expectedRenderIndex: 0,
 		},
 		{
 			name:                "renderIndex stays 0 with 3 results, cursor at 1",
 			resultCnt:           3,
 			cursor:              1,
+			initialRenderIndex:  0,
 			expectedRenderIndex: 0,
 		},
 		{
 			name:                "renderIndex stays 0 with 3 results, cursor at 2",
 			resultCnt:           3,
 			cursor:              2,
+			initialRenderIndex:  0,
 			expectedRenderIndex: 0,
 		},
 	}
-
 	for _, td := range testdata {
 		t.Run(td.name, func(t *testing.T) {
 			m := setupTestModelWithResults(td.resultCnt)
 			m.cursor = td.cursor
+			m.renderIndex = td.initialRenderIndex // FIX #2: pre-set renderIndex
 			m.updateRenderIndex()
 			assert.Equal(t, td.expectedRenderIndex, m.renderIndex)
 		})

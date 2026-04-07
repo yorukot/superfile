@@ -91,6 +91,8 @@ func TestRenderScrollIndicator(t *testing.T) {
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
 			m := setupTestModelWithClient(t)
+			m.width = 50
+			m.maxHeight = maxVisibleResults + renderOverhead
 			m.results = setupTestModelWithResults(tt.resultCnt).results
 			m.cursor = tt.cursor
 			m.updateRenderIndex()
@@ -98,15 +100,15 @@ func TestRenderScrollIndicator(t *testing.T) {
 			rendered := m.Render()
 
 			if tt.expectUp {
-				assert.Contains(t, rendered, "↑ More results above")
+				assert.Contains(t, rendered, scrollUpIndicator)
 			} else {
-				assert.NotContains(t, rendered, "↑ More results above")
+				assert.NotContains(t, rendered, scrollUpIndicator)
 			}
 
 			if tt.expectDown {
-				assert.Contains(t, rendered, "↓ More results below")
+				assert.Contains(t, rendered, scrollDownIndicator)
 			} else {
-				assert.NotContains(t, rendered, "↓ More results below")
+				assert.NotContains(t, rendered, scrollDownIndicator)
 			}
 		})
 	}
