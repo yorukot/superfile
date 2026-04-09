@@ -1,6 +1,3 @@
-changed-files-labels-limit: 5
-max-files-changed: 100
-
 documentation:
   - changed-files:
       - any-glob-to-any-file:
