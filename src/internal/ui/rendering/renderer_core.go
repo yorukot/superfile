@@ -19,14 +19,14 @@ func (r *Renderer) AddLines(lines ...string) *Renderer {
 func (r *Renderer) AddSection() {
 	// r.committedContentHeight before this point only includes sections
 	// before r.curSectionIdx
-	r.committedContentHeight += r.contentSections[r.curSectionIdx].CntLines()
 
 	// Silently Fail if cannot add
-	if r.contentHeight <= r.committedContentHeight {
+	if r.contentHeight <= r.committedContentHeight+r.contentSections[r.curSectionIdx].CntLines() {
 		slog.Error("Cannot add any more sections", "name", r.name, "committedHeight", r.committedContentHeight,
 			"contentHeight", r.contentHeight)
 		return
 	}
+	r.committedContentHeight += r.contentSections[r.curSectionIdx].CntLines()
 
 	// Add divider
 	r.border.AddDivider(r.committedContentHeight)
