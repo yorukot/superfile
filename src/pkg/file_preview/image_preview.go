@@ -81,8 +81,10 @@ func (p *ImagePreviewer) ImagePreview(path string, maxWidth int, maxHeight int,
 		rawKey := cacheKey + ":raw"
 
 		if preview, exists := p.cache.Get(cacheKey); exists {
-			rawTransmit, _ := p.cache.Get(rawKey)
-			return preview, rawTransmit, nil
+			if rawTransmit, rawExists := p.cache.Get(rawKey); rawExists && rawTransmit != "" {
+				return preview, rawTransmit, nil
+			}
+			// rawKey evicted or empty — treat as cache miss
 		}
 
 		render, rawTransmit, err := p.ImagePreviewWithRenderer(
@@ -93,10 +95,18 @@ func (p *ImagePreviewer) ImagePreview(path string, maxWidth int, maxHeight int,
 			RendererKitty,
 			sideAreaWidth,
 		)
-		if err == nil {
+		if err == nil && rawTransmit != "" {
+			// Only cache when Kitty actually produced a transmission.
+			// If rawTransmit is empty, it means ANSI fallback was used —
+			// don't pollute the Kitty cache with ANSI results.
 			p.cache.Set(cacheKey, render)
 			p.cache.Set(rawKey, rawTransmit)
 			return render, rawTransmit, nil
+		}
+		if err == nil {
+			// Kitty renderer fell back to ANSI — return directly,
+			// let the ANSI cache path below handle caching
+			return render, "", nil
 		}
 
 		// Fall through to ANSI if Kitty fails

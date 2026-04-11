@@ -205,13 +205,13 @@ func (m *Model) RenderWithPath(
 		}
 		return m.renderImagePreview(
 			r, thumbnailPath, contentWidth, contentHeight,
-			fullModelWidth-previewWidth, "")
+			fullModelWidth-previewWidth, kittyClear)
 	}
 
 	if isImageFile(itemPath) {
 		return m.renderImagePreview(
 			r, itemPath, contentWidth, contentHeight,
-			fullModelWidth-previewWidth, "")
+			fullModelWidth-previewWidth, kittyClear)
 	}
 
 	return m.renderTextPreview(r, itemPath, contentWidth, contentHeight), kittyClear
