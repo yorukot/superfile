@@ -112,7 +112,7 @@ func TestModel_HandleUpdate(t *testing.T) {
 	t.Run("Validate Cancel typing", func(t *testing.T) {
 		m := defaultTestModel()
 
-		actualTest := func(closeKey tea.KeyMsg, shouldBeOpen bool) {
+		actualTest := func(closeKey tea.KeyPressMsg, shouldBeOpen bool) {
 			m.Open(true)
 			_, _ = m.HandleUpdate(utils.TeaRuneKeyMsg("xyz"), defaultTestCwd)
 			action, _ := m.HandleUpdate(closeKey, defaultTestCwd)

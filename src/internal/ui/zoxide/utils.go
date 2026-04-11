@@ -68,7 +68,7 @@ func (m *Model) GetTextInputValue() string {
 	return m.textInput.Value()
 }
 
-func isKeyAlphaNum(msg tea.KeyMsg) bool {
+func isKeyAlphaNum(msg tea.KeyPressMsg) bool {
 	r := []rune(msg.String())
 	if len(r) != 1 {
 		return false

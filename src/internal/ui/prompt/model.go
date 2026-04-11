@@ -88,7 +88,7 @@ func (m *Model) handleConfirm(cwdLocation string) common.ModelAction {
 	return action
 }
 
-func (m *Model) handleNormalKeyInput(msg tea.KeyMsg) tea.Cmd {
+func (m *Model) handleNormalKeyInput(msg tea.KeyPressMsg) tea.Cmd {
 	var cmd tea.Cmd
 	switch {
 	case m.textInput.Value() == "" && msg.String() == m.spfPromptHotkey:

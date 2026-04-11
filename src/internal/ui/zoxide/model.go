@@ -45,7 +45,7 @@ func (m *Model) HandleUpdate(msg tea.Msg) (common.ModelAction, tea.Cmd) {
 	}
 
 	switch msg := msg.(type) {
-	case tea.KeyMsg:
+	case tea.KeyPressMsg:
 		// If zoxide is not available, only allow confirm/cancel to close modal
 		if m.zClient == nil {
 			switch {
@@ -100,7 +100,7 @@ func (m *Model) handleConfirm() common.ModelAction {
 	return common.NoAction{}
 }
 
-func (m *Model) handleNormalKeyInput(msg tea.KeyMsg) tea.Cmd {
+func (m *Model) handleNormalKeyInput(msg tea.KeyPressMsg) tea.Cmd {
 	var cmd tea.Cmd
 	m.textInput, cmd = m.textInput.Update(msg)
 	return tea.Batch(cmd, m.GetQueryCmd(m.textInput.Value()))
