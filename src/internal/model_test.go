@@ -332,7 +332,7 @@ func TestAsyncPreviewPanelSync(t *testing.T) {
 	assert.NotEqual(t, pW, m.fileModel.FilePreview.GetContentWidth(),
 		"width should change on new panel creation")
 
-	p.Send(tea.KeyMsg{Type: tea.KeyDown})
+	p.Send(tea.KeyPressMsg{Code: tea.KeyDown})
 	t.Logf("Current element : %s", m.getFocusedFilePanel().GetFocusedItem().Location)
 	eventuallyEnsurePreviewContent(t, m, content2, "content should update to file2")
 

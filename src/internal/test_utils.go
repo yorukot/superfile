@@ -239,6 +239,6 @@ func setFilePanelSelectedItemByName(t *testing.T, panel *filepanel.Model, fileNa
 func splitPanelAsync(p *TeaProg) {
 	p.SendKey(common.Hotkeys.OpenSPFPrompt[0])
 	p.SendKey("split")
-	p.Send(tea.KeyMsg{Type: tea.KeyEnter})
-	p.Send(tea.KeyMsg{Type: tea.KeyEsc})
+	p.Send(tea.KeyPressMsg{Code: tea.KeyEnter})
+	p.Send(tea.KeyPressMsg{Code: tea.KeyEsc})
 }

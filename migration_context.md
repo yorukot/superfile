@@ -240,7 +240,7 @@ This is legacy Bubble Tea key-shape code and will need to move to Bubble Tea v2 
 `src/pkg/utils/tea_utils.go:5-9`:
 
 - returns `tea.KeyMsg`
-- sets `Type: tea.KeyRunes`
+- returns a `tea.KeyPressMsg` with `Text` set to the typed string
 - sets `Runes: []rune(msg)`
 
 This helper is heavily reused throughout tests, so changing it is one of the cleanest leverage points in the migration.
@@ -249,14 +249,14 @@ This helper is heavily reused throughout tests, so changing it is one of the cle
 
 There are many direct literals such as:
 
-- `tea.KeyMsg{Type: tea.KeyEnter}`
-- `tea.KeyMsg{Type: tea.KeyDown}`
-- `tea.KeyMsg{Type: tea.KeyUp}`
-- `tea.KeyMsg{Type: tea.KeyBackspace}`
-- `tea.KeyMsg{Type: tea.KeyEsc}`
-- `tea.KeyMsg{Type: tea.KeyCtrlC}`
-- `tea.KeyMsg{Type: tea.KeyEscape}`
-- `tea.KeyMsg{Type: tea.KeyCtrlD}`
+- `tea.KeyPressMsg{Code: tea.KeyEnter}`
+- `tea.KeyPressMsg{Code: tea.KeyDown}`
+- `tea.KeyPressMsg{Code: tea.KeyUp}`
+- `tea.KeyPressMsg{Code: tea.KeyBackspace}`
+- `tea.KeyPressMsg{Code: tea.KeyEsc}`
+- `tea.KeyPressMsg{Code: tea.KeyEscape}`
+- `tea.KeyPressMsg{Code: 'c', Mod: tea.ModCtrl}`
+- `tea.KeyPressMsg{Code: 'd', Mod: tea.ModCtrl}`
 
 Representative locations:
 

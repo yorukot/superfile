@@ -152,7 +152,7 @@ func testWithConfig(t *testing.T, cfg common.ConfigType, testPath string) {
 func updateModelDimensionsAndValidate(t *testing.T, p *TeaProg, width int, height int) {
 	// Set Footer OFF, Preview OFF via model state changes
 	// if p.m.toggleFooter {
-	//	p.SendDirectly(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune(common.Hotkeys.ToggleFooter[0])[0:1]})
+	//	p.SendDirectly(utils.TeaRuneKeyMsg(common.Hotkeys.ToggleFooter[0]))
 	//}
 	// File preview toggle - just send the key, no need to check state
 	// Sending toggle key will turn it off if it's on
@@ -275,13 +275,13 @@ func testModelScrolling(t *testing.T, p *TeaProg) {
 
 func testModelScrollingCore(t *testing.T, p *TeaProg) {
 	for range ScrollDownCount {
-		p.SendDirectly(tea.KeyMsg{Type: tea.KeyDown})
+		p.SendDirectly(tea.KeyPressMsg{Code: tea.KeyDown})
 	}
 	assertLayoutValidity(t, p.m)
 
 	// Scroll up
 	for range ScrollUpCount {
-		p.SendDirectly(tea.KeyMsg{Type: tea.KeyUp})
+		p.SendDirectly(tea.KeyPressMsg{Code: tea.KeyUp})
 	}
 	assertLayoutValidity(t, p.m)
 }

@@ -62,7 +62,7 @@
   - `src/pkg/utils/tea_utils.go`
   - `src/internal/test_utils.go`
   - `src/internal/test_utils_teaprog.go`
-  - direct `tea.KeyMsg{Type: ...}` literals in tests
+  - direct `tea.KeyPressMsg{Code: ...}` literals in tests
 - Replace code that reads legacy key fields such as:
   - `msg.Type`
   - `msg.Runes`
