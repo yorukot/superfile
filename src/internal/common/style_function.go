@@ -105,7 +105,7 @@ func UserConfigInvalidationErrorString(value string, configType string, msg stri
 		"\" is invalid : " + msg
 }
 
-func setTextInputStyles(ti *textinput.Model, textStyle, placeholderStyle lipgloss.Style, blink bool) {
+func setTextInputStyles(ti *textinput.Model, textStyle, placeholderStyle lipgloss.Style) {
 	styles := ti.Styles()
 	styles.Focused.Prompt = lipgloss.NewStyle()
 	styles.Blurred.Prompt = lipgloss.NewStyle()
@@ -116,7 +116,7 @@ func setTextInputStyles(ti *textinput.Model, textStyle, placeholderStyle lipglos
 	styles.Focused.Suggestion = placeholderStyle
 	styles.Blurred.Suggestion = placeholderStyle
 	styles.Cursor.Color = cursorColor
-	styles.Cursor.Blink = blink
+	styles.Cursor.Blink = true
 	ti.SetStyles(styles)
 }
 
@@ -128,7 +128,7 @@ func GenerateSearchBar() textinput.Model {
 	ti := textinput.New()
 	ti.Prompt = FilePanelTopDirectoryIconStyle.Render(icon.Search + icon.Space)
 	ti.Placeholder = "(" + Hotkeys.SearchBar[0] + ") Type something"
-	setTextInputStyles(&ti, FilePanelStyle, FilePanelStyle, true)
+	setTextInputStyles(&ti, FilePanelStyle, FilePanelStyle)
 	ti.Blur()
 	ti.CharLimit = 156
 	return ti
@@ -139,7 +139,7 @@ func GeneratePromptTextInput() textinput.Model {
 	t.Prompt = ""
 	t.CharLimit = 156
 	t.SetValue("")
-	setTextInputStyles(&t, ModalStyle, ModalStyle, true)
+	setTextInputStyles(&t, ModalStyle, ModalStyle)
 
 	return t
 }
@@ -147,7 +147,7 @@ func GeneratePromptTextInput() textinput.Model {
 func GenerateNewFileTextInput() textinput.Model {
 	t := textinput.New()
 	t.Placeholder = "Add \"" + string(filepath.Separator) + "\" transcend folders"
-	setTextInputStyles(&t, ModalStyle, ModalStyle, true)
+	setTextInputStyles(&t, ModalStyle, ModalStyle)
 	t.Focus()
 	t.CharLimit = 156
 	//nolint:mnd // modal width minus padding
@@ -159,7 +159,7 @@ func GenerateRenameTextInput(width int, cursorPos int, defaultValue string) text
 	ti := textinput.New()
 	ti.Prompt = FilePanelCursorStyle.Render(icon.Cursor + " ")
 	ti.Placeholder = "New name"
-	setTextInputStyles(&ti, ModalStyle, ModalStyle, true)
+	setTextInputStyles(&ti, ModalStyle, ModalStyle)
 	ti.SetValue(defaultValue)
 	ti.SetCursor(cursorPos)
 	ti.Focus()
@@ -173,7 +173,7 @@ func GeneratePinnedRenameTextInput(cursorPos int, defaultValue string) textinput
 	ti := textinput.New()
 	ti.Prompt = FilePanelCursorStyle.Render(icon.Cursor + " ")
 	ti.Placeholder = "New name"
-	setTextInputStyles(&ti, ModalStyle, ModalStyle, true)
+	setTextInputStyles(&ti, ModalStyle, ModalStyle)
 	ti.SetValue(defaultValue)
 	ti.SetCursor(cursorPos)
 	ti.Focus()

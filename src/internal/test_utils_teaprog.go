@@ -33,7 +33,7 @@ func NewTestTeaProgWithEventLoop(t *testing.T, m *model) *TeaProg {
 	return p
 }
 
-func NewTestTeaProgWithEventLoop_WithWinSize(t *testing.T, m *model, width int, height int) *TeaProg {
+func NewTestTeaProgWithEventLoopWithWinSize(t *testing.T, m *model, width int, height int) *TeaProg {
 	p := &TeaProg{m: m, prog: tea.NewProgram(m,
 		tea.WithInput(nil), tea.WithOutput(IgnorerWriter{}),
 		tea.WithWindowSize(width, height))}

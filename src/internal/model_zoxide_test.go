@@ -54,7 +54,7 @@ func TestZoxide(t *testing.T) {
 	// (model → zoxide modal → go-zoxide Client) so that p.Close() cancels all
 	// in-flight subprocesses. Currently go-zoxide's execCmd creates its own
 	// context.Background(), so this requires an API change in go-zoxide.
-	zoxideDataDir, err := os.MkdirTemp("", "zoxide-test-*")
+	zoxideDataDir, err := os.MkdirTemp("", "zoxide-test-*") //nolint: usetesting // See Above
 	require.NoError(t, err)
 	defer os.RemoveAll(zoxideDataDir)
 

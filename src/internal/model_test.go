@@ -315,7 +315,7 @@ func TestAsyncPreviewPanelSync(t *testing.T) {
 
 	m := defaultTestModelWithFilePreview(curTestDir)
 	// we want a size bigger than default to allow more number of panels
-	p := NewTestTeaProgWithEventLoop_WithWinSize(t, m, 4*DefaultTestModelWidth, 4*DefaultTestModelHeight)
+	p := NewTestTeaProgWithEventLoopWithWinSize(t, m, 4*DefaultTestModelWidth, 4*DefaultTestModelHeight)
 
 	eventuallyEnsurePreviewContent(t, m, content1, "file1 content should load initially")
 	pW := m.fileModel.FilePreview.GetContentWidth()
