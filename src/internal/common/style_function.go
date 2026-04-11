@@ -182,7 +182,7 @@ func GeneratePinnedRenameTextInput(cursorPos int, defaultValue string) textinput
 	ti.SetCursor(cursorPos)
 	ti.Focus()
 	ti.CharLimit = 156
-	ti.Width = Config.SidebarWidth - PanelPadding
+	ti.SetWidth(Config.SidebarWidth - PanelPadding)
 	return ti
 }
 

@@ -119,7 +119,7 @@ func (m *Model) Render(processBarFocused bool) string {
 		// TODO: We could, save pointer of process in map and update progressbar of each
 		// map on each SetWidth. This would be cleaner and more efficient.
 		curProcess := processes[i]
-		curProcess.Progress.Width = m.viewWidth() - progressBarRightPadding
+		curProcess.Progress.SetWidth(m.viewWidth() - progressBarRightPadding)
 
 		// TODO : get them via a separate function.
 		var cursor string

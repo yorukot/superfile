@@ -124,7 +124,7 @@ func New() Model {
 	}
 
 	s.directories = getDirectories(&pinnedMgr, s.sections)
-	s.searchBar.Width = s.width - common.BorderPadding - searchBarPadding
+	s.searchBar.SetWidth(s.width - common.BorderPadding - searchBarPadding)
 	s.searchBar.Placeholder = "(" + common.Hotkeys.SearchBar[0] + ")" + " Search"
 	return s
 }
