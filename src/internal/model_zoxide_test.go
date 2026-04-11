@@ -15,17 +15,27 @@ import (
 	"github.com/yorukot/superfile/src/internal/common"
 )
 
+// This runs a zoxide query and doesn't waits for it.
+// Can cause race with zoxide add. See https://github.com/ajeetdsouza/zoxide/issues/1219
 func setupProgAndOpenZoxide(t *testing.T, zClient *zoxidelib.Client, dir string) *TeaProg {
+	p := setupProgWithZoxide(t, zClient, dir)
+	openZoxide(t, p)
+	return p;
+}
+
+func setupProgWithZoxide(t *testing.T, zClient *zoxidelib.Client, dir string) *TeaProg {
 	t.Helper()
 	common.Config.ZoxideSupport = true
 	m := defaultTestModelWithZClient(zClient, dir)
-	p := NewTestTeaProgWithEventLoop(t, m)
+	return NewTestTeaProgWithEventLoop(t, m)
+}
 
+func openZoxide(t *testing.T, p *TeaProg) {
 	p.SendKey(common.Hotkeys.OpenZoxide[0])
 	assert.Eventually(t, func() bool {
 		return p.getModel().zoxideModal.IsOpen()
 	}, DefaultTestTimeout, DefaultTestTick, "Zoxide modal should open")
-	return p
+	
 }
 
 func updateCurrentFilePanelDirOfTestModel(t *testing.T, p *TeaProg, dir string) {
@@ -58,9 +68,11 @@ func TestZoxide(t *testing.T) {
 	utils.SetupDirectories(t, curTestDir, dir1, dir2, dir3, multiSpaceDir)
 
 	t.Run("Zoxide tracking and navigation", func(t *testing.T) {
-		p := setupProgAndOpenZoxide(t, zClient, dir1)
+		p := setupProgWithZoxide(t, zClient, dir1)
 		updateCurrentFilePanelDirOfTestModel(t, p, dir2)
 		updateCurrentFilePanelDirOfTestModel(t, p, dir3)
+
+		openZoxide(t, p)
 
 		p.SendKey("dir2")
 		assert.Eventually(t, func() bool {
@@ -113,10 +125,12 @@ func TestZoxide(t *testing.T) {
 	})
 
 	t.Run("Multi-space directory name navigation", func(t *testing.T) {
-		p := setupProgAndOpenZoxide(t, zClient, dir1)
+		p := setupProgWithZoxide(t, zClient, dir1)
 
 		updateCurrentFilePanelDirOfTestModel(t, p, multiSpaceDir)
 		updateCurrentFilePanelDirOfTestModel(t, p, dir1)
+
+		openZoxide(t, p)
 
 		p.SendKey(filepath.Base(multiSpaceDir))
 		assert.Eventually(t, func() bool {
