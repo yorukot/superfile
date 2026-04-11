@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
@@ -45,7 +46,19 @@ func updateCurrentFilePanelDirOfTestModel(t *testing.T, p *TeaProg, dir string) 
 }
 
 func TestZoxide(t *testing.T) {
-	zoxideDataDir := t.TempDir()
+	// Cannot use t.TempDir() here. Bubble Tea intentionally leaks in-flight tea.Cmd
+	// goroutines on shutdown (bubbletea/v2 tea.go:697-700). A zoxide query subprocess
+	// may still be writing to the data dir after p.Close(), and t.TempDir() treats
+	// cleanup failure as a test failure ("directory not empty").
+	//
+	// Permanent fix: pass a parent context.Context through the program lifecycle
+	// (model → zoxide modal → go-zoxide Client) so that p.Close() cancels all
+	// in-flight subprocesses. Currently go-zoxide's execCmd creates its own
+	// context.Background(), so this requires an API change in go-zoxide.
+	zoxideDataDir, err := os.MkdirTemp("", "zoxide-test-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(zoxideDataDir)
+
 	zClient, err := zoxidelib.New(zoxidelib.WithDataDir(zoxideDataDir))
 	if err != nil {
 		if runtime.GOOS != utils.OsLinux {
