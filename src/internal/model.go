@@ -112,8 +112,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m *model) handleMouseMsg(msg tea.MouseMsg) {
 	msgStr := msg.String()
-	// TODO(v2): Check if this still works in v2 
-	if msgStr == "wheel up" || msgStr == "wheel down" {
+	if msgStr == "wheelup" || msgStr == "wheeldown" {
 		wheelMainAction(msgStr, m)
 	} else {
 		slog.Debug("Mouse event of type that is not handled", "msg", msgStr)
@@ -484,9 +483,10 @@ func (m *model) warnModalForQuit() {
 }
 
 // Implement View function for bubble tea model to handle visualization.
-// TODO: Use this in v2 migration to prevent regression  
-//  v.AltScreen = true
-//  v.MouseMode = tea.MouseModeCellMotion
+// TODO: Use this in v2 migration to prevent regression
+//
+//	v.AltScreen = true
+//	v.MouseMode = tea.MouseModeCellMotion
 func (m *model) View() tea.View {
 	slog.Debug("model.View() called", "mainPanelHeight", m.mainPanelHeight,
 		"footerHeight", m.footerHeight, "fullHeight", m.fullHeight,
@@ -499,10 +499,10 @@ func (m *model) View() tea.View {
 	v.AltScreen = true
 	v.MouseMode = tea.MouseModeCellMotion
 	v.WindowTitle = "superfile"
-	return v	
+	return v
 }
 
-func (m* model) viewContent() string {
+func (m *model) viewContent() string {
 	if !m.firstLoadingComplete {
 		return "Loading..."
 	}
