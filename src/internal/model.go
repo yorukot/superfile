@@ -77,7 +77,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		resizeCmd = m.handleWindowResize(msg)
 	case tea.MouseMsg:
 		m.handleMouseMsg(msg)
-	case tea.KeyMsg:
+	case tea.KeyPressMsg:
 		inputCmd = m.handleKeyInput(msg)
 
 	// Has to handle zoxide messages separately as they could be generated via
@@ -272,10 +272,9 @@ func (m *model) setFooterComponentSize() {
 
 // Identify the current state of the application m and properly handle the
 // msg keybind pressed
-func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
-	slog.Debug("model.handleKeyInput", "msg", msg, "typestr", msg.Type.String(),
-		"runes", msg.Runes, "type", int(msg.Type), "paste", msg.Paste,
-		"alt", msg.Alt)
+func (m *model) handleKeyInput(msg tea.KeyPressMsg) tea.Cmd {
+	slog.Debug("model.handleKeyInput", "msg", msg, "typestr", msg.String(),
+		"code", msg.Code, "text", msg.Text, "mod", msg.Mod)
 	slog.Debug("model.handleKeyInput. model info. ",
 		"fileModel.FocusedPanelIndex", m.fileModel.FocusedPanelIndex,
 		"filePanel.isFocused", m.getFocusedFilePanel().IsFocused,

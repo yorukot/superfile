@@ -186,6 +186,7 @@ func TestCursorOutOfBoundsAfterDirectorySwitch(t *testing.T) {
 	// Move cursor to position 8 (near end of list)
 	panel := m.getFocusedFilePanel()
 	for range 8 {
+		tea.KeyPressMsg{}
 		p.Send(tea.KeyMsg{Type: tea.KeyDown})
 	}
 
