@@ -36,16 +36,21 @@ func isKittyCapable() bool {
 	return false
 }
 
-// ClearKittyImages returns a Kitty graphics delete-all command.
+// ClearKittyImages is a no-op for view content. With virtual placeholders,
+// Kitty clear commands are APC sequences that get dropped by cell-based
+// renderers. Clearing is handled via tea.Raw() in the rawTransmit path.
 func ClearKittyImages() string {
-	if !isKittyCapable() {
-		return ""
-	}
-	return ansi.KittyGraphics(nil, "a=d")
+	return ""
 }
 
-// ClearKittyImages returns a Kitty graphics delete-all command.
+// ClearKittyImages is a no-op for view content. See package-level ClearKittyImages.
 func (p *ImagePreviewer) ClearKittyImages() string {
+	return ""
+}
+
+// GetKittyClearRaw returns the raw APC command to clear all Kitty images.
+// This must be sent via tea.Raw(), not embedded in view content.
+func (p *ImagePreviewer) GetKittyClearRaw() string {
 	if !p.IsKittyCapable() {
 		return ""
 	}

@@ -77,9 +77,12 @@ func (p *ImagePreviewer) ImagePreview(path string, maxWidth int, maxHeight int,
 
 	// Try Kitty first as it's more modern
 	if p.IsKittyCapable() {
-		// Check cache for Kitty renderer
-		if preview, exists := p.cache.Get(getPreviewObjKey(path, dimensions, RendererKitty)); exists {
-			return preview, "", nil
+		cacheKey := getPreviewObjKey(path, dimensions, RendererKitty)
+		rawKey := cacheKey + ":raw"
+
+		if preview, exists := p.cache.Get(cacheKey); exists {
+			rawTransmit, _ := p.cache.Get(rawKey)
+			return preview, rawTransmit, nil
 		}
 
 		render, rawTransmit, err := p.ImagePreviewWithRenderer(
@@ -91,8 +94,8 @@ func (p *ImagePreviewer) ImagePreview(path string, maxWidth int, maxHeight int,
 			sideAreaWidth,
 		)
 		if err == nil {
-			// Cache the placeholder content (not the raw transmit — it's one-shot)
-			p.cache.Set(getPreviewObjKey(path, dimensions, RendererKitty), render)
+			p.cache.Set(cacheKey, render)
+			p.cache.Set(rawKey, rawTransmit)
 			return render, rawTransmit, nil
 		}
 
