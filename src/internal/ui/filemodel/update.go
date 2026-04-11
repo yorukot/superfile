@@ -59,16 +59,16 @@ func (m *Model) ToggleFilePreviewPanel() tea.Cmd {
 	return m.ensurePreviewDimensionsSync()
 }
 
-func (m *Model) UpdatePreviewPanel(msg preview.UpdateMsg) {
+func (m *Model) UpdatePreviewPanel(msg preview.UpdateMsg) tea.Cmd {
 	selectedItem := m.GetFocusedFilePanel().GetFocusedItemPtr()
 	if selectedItem == nil {
 		slog.Debug("Panel empty or cursor invalid. Ignoring FilePreviewUpdateMsg")
-		return
+		return nil
 	}
 	if selectedItem.Location != msg.GetLocation() {
 		slog.Debug("FilePreviewUpdateMsg for older files. Ignoring",
 			"curLocation", selectedItem.Location, "msgLocation", msg.GetLocation())
-		return
+		return nil
 	}
 
 	if m.ExpectedPreviewWidth != msg.GetContentWidth() ||
@@ -76,9 +76,15 @@ func (m *Model) UpdatePreviewPanel(msg preview.UpdateMsg) {
 		slog.Debug("FilePreviewUpdateMsg for older dimensions. Ignoring",
 			"curW", m.ExpectedPreviewWidth, "curH", m.Height,
 			"msgW", msg.GetContentWidth(), "msgH", msg.GetContentHeight())
-		return
+		return nil
 	}
 	m.FilePreview.Apply(msg)
+
+	// For Kitty images, transmit image data directly to the terminal
+	if raw := msg.GetRawTransmit(); raw != "" {
+		return tea.Raw(raw)
+	}
+	return nil
 }
 
 func (m *Model) GetFilePreviewCmd(forcePreviewRender bool) tea.Cmd {
@@ -116,8 +122,8 @@ func (m *Model) GetFilePreviewCmd(forcePreviewRender bool) tea.Cmd {
 		"path", selectedItem.Location, "w", width, "h", height)
 
 	return func() tea.Msg {
-		content := m.FilePreview.RenderWithPath(selectedItem.Location, width, height, fullModalWidth)
-		return preview.NewUpdateMsg(selectedItem.Location, content,
+		content, rawTransmit := m.FilePreview.RenderWithPath(selectedItem.Location, width, height, fullModalWidth)
+		return preview.NewUpdateMsg(selectedItem.Location, content, rawTransmit,
 			width, height, reqCnt)
 	}
 }

@@ -21,7 +21,7 @@ import (
 func setupProgAndOpenZoxide(t *testing.T, zClient *zoxidelib.Client, dir string) *TeaProg {
 	p := setupProgWithZoxide(t, zClient, dir)
 	openZoxide(t, p)
-	return p;
+	return p
 }
 
 func setupProgWithZoxide(t *testing.T, zClient *zoxidelib.Client, dir string) *TeaProg {
@@ -36,7 +36,6 @@ func openZoxide(t *testing.T, p *TeaProg) {
 	assert.Eventually(t, func() bool {
 		return p.getModel().zoxideModal.IsOpen()
 	}, DefaultTestTimeout, DefaultTestTick, "Zoxide modal should open")
-	
 }
 
 func updateCurrentFilePanelDirOfTestModel(t *testing.T, p *TeaProg, dir string) {

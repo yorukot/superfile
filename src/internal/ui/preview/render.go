@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"slices"
 	"sort"
-	"strings"
 
 	"charm.land/lipgloss/v2"
 	"github.com/alecthomas/chroma/v2/lexers"
@@ -59,40 +58,34 @@ func renderDirectoryPreview(r *rendering.Renderer, itemPath string, previewHeigh
 	return r.Render()
 }
 
+// renderImagePreview returns (render, rawTransmit). rawTransmit is non-empty
+// only for Kitty protocol and must be sent via tea.Raw().
 func (m *Model) renderImagePreview(r *rendering.Renderer, itemPath string, previewWidth,
 	previewHeight int, sideAreaWidth int, clearCmd string,
-) string {
+) (string, string) {
 	if !m.open {
-		return r.AddLines(common.FilePreviewPanelClosedText).Render() + clearCmd
+		return r.AddLines(common.FilePreviewPanelClosedText).Render() + clearCmd, ""
 	}
 
 	if !common.Config.ShowImagePreview {
-		return r.AddLines(common.FilePreviewImagePreviewDisabledText).Render() + clearCmd
+		return r.AddLines(common.FilePreviewImagePreviewDisabledText).Render() + clearCmd, ""
 	}
 
-	// Use the new auto-detection function to choose the best renderer
-	imageRender, err := m.imagePreviewer.ImagePreview(itemPath, previewWidth, previewHeight,
+	imageRender, rawTransmit, err := m.imagePreviewer.ImagePreview(itemPath, previewWidth, previewHeight,
 		common.Theme.FilePanelBG, sideAreaWidth)
 	if errors.Is(err, image.ErrFormat) {
-		return r.AddLines(common.FilePreviewUnsupportedImageFormatsText).Render() + clearCmd
+		return r.AddLines(common.FilePreviewUnsupportedImageFormatsText).Render() + clearCmd, ""
 	}
 
 	if err != nil {
 		slog.Error("Error convert image to ansi", "error", err)
-		return r.AddLines(common.FilePreviewImageConversionErrorText).Render() + clearCmd
+		return r.AddLines(common.FilePreviewImageConversionErrorText).Render() + clearCmd, ""
 	}
 
-	// Check if this looks like Kitty protocol output (starts with escape sequences)
-	// For Kitty protocol, avoid using lipgloss alignment to prevent layout drift
-	if strings.HasPrefix(imageRender, "\x1b_G") {
-		r.AddLines(imageRender)
-		return r.Render()
-	}
-
-	// For ANSI output, we can safely use vertical alignment
+	// For Kitty placeholders or ANSI output, use vertical alignment
 	return r.AddStyleModifier(func(s lipgloss.Style) lipgloss.Style {
 		return s.AlignHorizontal(lipgloss.Center).AlignVertical(lipgloss.Center)
-	}).AddLines(imageRender).Render() + clearCmd
+	}).AddLines(imageRender).Render() + clearCmd, rawTransmit
 }
 
 func (m *Model) renderTextPreview(r *rendering.Renderer, itemPath string,
@@ -160,7 +153,14 @@ func (m *Model) RenderTextWithDimension(text string, height int, width int) stri
 		Render() + clearCmd
 }
 
-func (m *Model) RenderWithPath(itemPath string, previewWidth int, previewHeight int, fullModelWidth int) string {
+// RenderWithPath returns (render, rawTransmit). rawTransmit is non-empty only
+// for Kitty images and must be sent via tea.Raw().
+func (m *Model) RenderWithPath(
+	itemPath string,
+	previewWidth int,
+	previewHeight int,
+	fullModelWidth int,
+) (string, string) {
 	r := ui.FilePreviewPanelRenderer(previewHeight, previewWidth)
 	clearCmd := m.imagePreviewer.ClearKittyImages()
 
@@ -175,7 +175,7 @@ func (m *Model) RenderWithPath(itemPath string, previewWidth int, previewHeight 
 	fileInfo, infoErr := os.Stat(itemPath)
 	if infoErr != nil {
 		slog.Error("Error get file info", "error", infoErr)
-		return r.AddLines(common.FilePreviewNoFileInfoText).Render() + clearCmd
+		return r.AddLines(common.FilePreviewNoFileInfoText).Render() + clearCmd, ""
 	}
 	slog.Debug("Attempting to render preview", "itemPath", itemPath,
 		"mode", fileInfo.Mode().String(), "isRegular", fileInfo.Mode().IsRegular())
@@ -183,27 +183,24 @@ func (m *Model) RenderWithPath(itemPath string, previewWidth int, previewHeight 
 	// For non regular files which are not directories Dont try to read them
 	// See Issue #876
 	if !fileInfo.Mode().IsRegular() && (fileInfo.Mode()&fs.ModeDir) == 0 {
-		return r.AddLines(common.FilePreviewUnsupportedFileMode).Render() + clearCmd
+		return r.AddLines(common.FilePreviewUnsupportedFileMode).Render() + clearCmd, ""
 	}
 
 	ext := filepath.Ext(itemPath)
 	if slices.Contains(common.UnsupportedPreviewFormats, ext) {
-		return r.AddLines(common.FilePreviewUnsupportedFormatText).Render() + clearCmd
+		return r.AddLines(common.FilePreviewUnsupportedFormatText).Render() + clearCmd, ""
 	}
 
 	if fileInfo.IsDir() {
-		return renderDirectoryPreview(r, itemPath, contentHeight) + clearCmd
+		return renderDirectoryPreview(r, itemPath, contentHeight) + clearCmd, ""
 	}
 
 	if m.thumbnailGenerator != nil && m.thumbnailGenerator.SupportsExt(ext) {
 		thumbnailPath, err := m.thumbnailGenerator.GetThumbnailOrGenerate(itemPath)
 		if err != nil {
 			slog.Error("Error generating thumbnail", "error", err)
-			return r.AddLines(common.FilePreviewThumbnailGenerationErrorText).Render() + clearCmd
+			return r.AddLines(common.FilePreviewThumbnailGenerationErrorText).Render() + clearCmd, ""
 		}
-		// Notes : If renderImagePreview fails, and return some error message
-		// render, then we dont apply clearCmd. This might cause issues.
-		// same for below usage of renderImagePreview
 		return m.renderImagePreview(
 			r, thumbnailPath, contentWidth, contentHeight,
 			fullModelWidth-previewWidth, clearCmd)
@@ -215,5 +212,5 @@ func (m *Model) RenderWithPath(itemPath string, previewWidth int, previewHeight 
 			fullModelWidth-previewWidth, clearCmd)
 	}
 
-	return m.renderTextPreview(r, itemPath, contentWidth, contentHeight) + clearCmd
+	return m.renderTextPreview(r, itemPath, contentWidth, contentHeight) + clearCmd, ""
 }
