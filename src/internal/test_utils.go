@@ -53,7 +53,8 @@ func setModelParamsForTest(m *model, disablePreview bool) *model {
 		m.fileModel.FilePreview.Close()
 	}
 	// async size updates like preview panel content update
-	// will not be done
+	// will not be done. Note: This is only for direct usage of 'model'
+	// NewTestTeaProgWithEventLoop overwrites it.
 	TeaUpdate(m, tea.WindowSizeMsg{Width: DefaultTestModelWidth, Height: DefaultTestModelHeight})
 	return m
 }

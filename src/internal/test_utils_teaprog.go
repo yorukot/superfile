@@ -21,17 +21,23 @@ type TeaProg struct {
 	prog *tea.Program
 }
 
-// If you use this, make sure to handle cleanup
-func NewTeaProg(m *model, eventLoop bool) *TeaProg {
-	p := &TeaProg{m: m, prog: tea.NewProgram(m, tea.WithInput(nil), tea.WithOutput(IgnorerWriter{}))}
-	if eventLoop {
-		p.StartEventLoop()
-	}
+func NewTestTeaProgWithEventLoop(t *testing.T, m *model) *TeaProg {
+	p := &TeaProg{m: m, prog: tea.NewProgram(m,
+		tea.WithInput(nil), tea.WithOutput(IgnorerWriter{}),
+		tea.WithWindowSize(DefaultTestModelWidth, DefaultTestModelHeight))}
+	p.StartEventLoop()
+
+	t.Cleanup(func() {
+		p.Close()
+	})
 	return p
 }
 
-func NewTestTeaProgWithEventLoop(t *testing.T, m *model) *TeaProg {
-	p := NewTeaProg(m, true)
+func NewTestTeaProgWithEventLoop_WithWinSize(t *testing.T, m *model, width int, height int) *TeaProg {
+	p := &TeaProg{m: m, prog: tea.NewProgram(m,
+		tea.WithInput(nil), tea.WithOutput(IgnorerWriter{}),
+		tea.WithWindowSize(width, height))}
+	p.StartEventLoop()
 	t.Cleanup(func() {
 		p.Close()
 	})
