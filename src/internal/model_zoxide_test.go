@@ -19,6 +19,7 @@ import (
 // This runs a zoxide query and doesn't waits for it.
 // Can cause race with zoxide add. See https://github.com/ajeetdsouza/zoxide/issues/1219
 func setupProgAndOpenZoxide(t *testing.T, zClient *zoxidelib.Client, dir string) *TeaProg {
+	t.Helper()
 	p := setupProgWithZoxide(t, zClient, dir)
 	openZoxide(t, p)
 	return p
@@ -32,6 +33,7 @@ func setupProgWithZoxide(t *testing.T, zClient *zoxidelib.Client, dir string) *T
 }
 
 func openZoxide(t *testing.T, p *TeaProg) {
+	t.Helper()
 	p.SendKey(common.Hotkeys.OpenZoxide[0])
 	assert.Eventually(t, func() bool {
 		return p.getModel().zoxideModal.IsOpen()
@@ -39,6 +41,7 @@ func openZoxide(t *testing.T, p *TeaProg) {
 }
 
 func updateCurrentFilePanelDirOfTestModel(t *testing.T, p *TeaProg, dir string) {
+	t.Helper()
 	err := p.getModel().updateCurrentFilePanelDir(dir)
 	require.NoError(t, err, "Failed to navigate to %s", dir)
 	assert.Equal(t, dir, p.getModel().getFocusedFilePanel().Location, "Should be in %s after navigation", dir)
