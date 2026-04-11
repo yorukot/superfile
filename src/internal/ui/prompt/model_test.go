@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"charm.land/bubbles/v2/textinput"
 	tea "charm.land/bubbletea/v2"
@@ -155,12 +156,35 @@ func TestModel_HandleUpdate(t *testing.T) {
 	t.Run("Validate Cursor Blink update", func(t *testing.T) {
 		m := defaultTestModel()
 		m.Open(true)
-		for range 3 {
-			action, _ := m.HandleUpdate(textinput.Blink(), defaultTestCwd)
-			assert.Equal(t, common.NoAction{}, action)
-			assert.True(t, m.IsOpen())
-			assert.Empty(t, m.textInput.Value())
-		}
+		m.textInput.SetValue("abc")
+
+		styles := m.textInput.Styles()
+		styles.Cursor.Blink = true
+		styles.Cursor.BlinkSpeed = time.Nanosecond
+		m.textInput.SetStyles(styles)
+
+		initialRender := m.textInput.View()
+
+		action, cmd := m.HandleUpdate(textinput.Blink(), defaultTestCwd)
+		assert.Equal(t, common.NoAction{}, action)
+		assert.True(t, m.IsOpen())
+		assert.Equal(t, "abc", m.textInput.Value())
+		require.NotNil(t, cmd)
+		assert.Equal(t, initialRender, m.textInput.View())
+
+		action, cmd = m.HandleUpdate(cmd(), defaultTestCwd)
+		assert.Equal(t, common.NoAction{}, action)
+		assert.True(t, m.IsOpen())
+		assert.Equal(t, "abc", m.textInput.Value())
+		require.NotNil(t, cmd)
+
+		blinkedRender := m.textInput.View()
+		assert.NotEqual(t, initialRender, blinkedRender)
+		action, _ = m.HandleUpdate(cmd(), defaultTestCwd)
+		assert.Equal(t, common.NoAction{}, action)
+		assert.True(t, m.IsOpen())
+		assert.Equal(t, "abc", m.textInput.Value())
+		assert.Equal(t, initialRender, m.textInput.View())
 	})
 }
 

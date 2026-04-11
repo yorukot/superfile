@@ -51,7 +51,6 @@ func InitialModel(firstPanelPaths []string, firstUseCheck bool) tea.Model {
 // and its initialization isn't well separated.
 func (m *model) Init() tea.Cmd {
 	return tea.Batch(
-		tea.SetWindowTitle("superfile"),
 		textinput.Blink, // Assuming textinput.Blink is a valid command
 		processCmdToTeaCmd(m.processBarModel.GetListenCmd()),
 	)
@@ -113,6 +112,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m *model) handleMouseMsg(msg tea.MouseMsg) {
 	msgStr := msg.String()
+	// TODO(v2): Check if this still works in v2 
 	if msgStr == "wheel up" || msgStr == "wheel down" {
 		wheelMainAction(msgStr, m)
 	} else {
@@ -498,6 +498,7 @@ func (m *model) View() tea.View {
 	v := tea.NewView(m.viewContent())
 	v.AltScreen = true
 	v.MouseMode = tea.MouseModeCellMotion
+	v.WindowTitle = "superfile"
 	return v	
 }
 

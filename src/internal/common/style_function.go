@@ -4,7 +4,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"charm.land/bubbles/v2/progress"
 	"charm.land/bubbles/v2/textinput"
 	"charm.land/lipgloss/v2"
 
