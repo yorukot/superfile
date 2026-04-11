@@ -8,7 +8,7 @@ import (
 
 	"github.com/yorukot/superfile/src/internal/common"
 
-	"github.com/charmbracelet/lipgloss"
+	"charm.land/lipgloss/v2"
 
 	"github.com/yorukot/superfile/src/config/icon"
 )

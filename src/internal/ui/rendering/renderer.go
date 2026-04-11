@@ -7,7 +7,7 @@ import (
 	"math/rand/v2"
 	"strconv"
 
-	"github.com/charmbracelet/lipgloss"
+	"charm.land/lipgloss/v2"
 )
 
 type StyleModifier func(lipgloss.Style) lipgloss.Style
