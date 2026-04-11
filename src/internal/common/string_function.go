@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"image/color"
 	"io"
 	"log/slog"
 	"math"
@@ -83,7 +84,7 @@ func FilePanelItemRenderWithIcon(
 	isDir bool,
 	isLink bool,
 	isSelected bool,
-	bgColor lipgloss.Color,
+	bgColor color.Color,
 ) string {
 	style := GetElementIcon(name, isDir, isLink, Config.Nerdfont)
 	iconData := style.Icon + " "
@@ -100,7 +101,7 @@ func FilePanelItemRenderWithIcon(
 func FilePanelItemRender(data string,
 	width int,
 	isSelected bool,
-	bgColor lipgloss.Color,
+	bgColor color.Color,
 	alignment lipgloss.Position,
 ) string {
 	outputData := ansi.Truncate(data, width, "...")

@@ -1,6 +1,8 @@
 package common
 
 import (
+	"image/color"
+
 	"charm.land/lipgloss/v2"
 )
 
@@ -65,53 +67,53 @@ var (
 var TransparentBackgroundColor string
 
 var (
-	FilePanelBorderColor lipgloss.Color
-	SidebarBorderColor   lipgloss.Color
-	FooterBorderColor    lipgloss.Color
+	FilePanelBorderColor color.Color
+	SidebarBorderColor   color.Color
+	FooterBorderColor    color.Color
 
-	FilePanelBorderActiveColor lipgloss.Color
-	SidebarBorderActiveColor   lipgloss.Color
-	FooterBorderActiveColor    lipgloss.Color
-	ModalBorderActiveColor     lipgloss.Color
+	FilePanelBorderActiveColor color.Color
+	SidebarBorderActiveColor   color.Color
+	FooterBorderActiveColor    color.Color
+	ModalBorderActiveColor     color.Color
 
-	FullScreenBGColor lipgloss.Color
-	FilePanelBGColor  lipgloss.Color
-	SidebarBGColor    lipgloss.Color
-	FooterBGColor     lipgloss.Color
-	ModalBGColor      lipgloss.Color
+	FullScreenBGColor color.Color
+	FilePanelBGColor  color.Color
+	SidebarBGColor    color.Color
+	FooterBGColor     color.Color
+	ModalBGColor      color.Color
 
-	FullScreenFGColor lipgloss.Color
-	FilePanelFGColor  lipgloss.Color
-	SidebarFGColor    lipgloss.Color
-	FooterFGColor     lipgloss.Color
-	ModalFGColor      lipgloss.Color
+	FullScreenFGColor color.Color
+	FilePanelFGColor  color.Color
+	SidebarFGColor    color.Color
+	FooterFGColor     color.Color
+	ModalFGColor      color.Color
 
-	cursorColor  lipgloss.Color
-	correctColor lipgloss.Color
-	errorColor   lipgloss.Color
-	hintColor    lipgloss.Color
-	cancelColor  lipgloss.Color
+	cursorColor  color.Color
+	correctColor color.Color
+	errorColor   color.Color
+	hintColor    color.Color
+	cancelColor  color.Color
 
-	filePanelTopDirectoryIconColor lipgloss.Color
-	filePanelTopPathColor          lipgloss.Color
-	filePanelItemSelectedFGColor   lipgloss.Color
-	filePanelItemSelectedBGColor   lipgloss.Color
+	filePanelTopDirectoryIconColor color.Color
+	filePanelTopPathColor          color.Color
+	filePanelItemSelectedFGColor   color.Color
+	filePanelItemSelectedBGColor   color.Color
 
-	sidebarTitleColor          lipgloss.Color
-	sidebarItemSelectedFGColor lipgloss.Color
-	sidebarItemSelectedBGColor lipgloss.Color
-	sidebarDividerColor        lipgloss.Color
+	sidebarTitleColor          color.Color
+	sidebarItemSelectedFGColor color.Color
+	sidebarItemSelectedBGColor color.Color
+	sidebarDividerColor        color.Color
 
-	modalCancelFGColor  lipgloss.Color
-	modalCancelBGColor  lipgloss.Color
-	modalConfirmFGColor lipgloss.Color
-	modalConfirmBGColor lipgloss.Color
+	modalCancelFGColor  color.Color
+	modalCancelBGColor  color.Color
+	modalConfirmFGColor color.Color
+	modalConfirmBGColor color.Color
 
-	helpMenuHotkeyColor lipgloss.Color
-	helpMenuTitleColor  lipgloss.Color
+	helpMenuHotkeyColor color.Color
+	helpMenuTitleColor  color.Color
 
-	promptSuccessColor lipgloss.Color
-	promptFailureColor lipgloss.Color
+	promptSuccessColor color.Color
+	promptFailureColor color.Color
 )
 
 func LoadThemeConfig() { //nolint: funlen // Variable initialization

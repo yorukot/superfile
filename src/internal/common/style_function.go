@@ -1,6 +1,7 @@
 package common
 
 import (
+	"image/color"
 	"path/filepath"
 	"strings"
 
@@ -66,7 +67,7 @@ func FullScreenStyle(height int, width int) lipgloss.Style {
 }
 
 // Return only fg and bg color style
-func StringColorRender(fgColor lipgloss.Color, bgColor lipgloss.Color) lipgloss.Style {
+func StringColorRender(fgColor color.Color, bgColor color.Color) lipgloss.Style {
 	return lipgloss.NewStyle().
 		Foreground(fgColor).
 		Background(bgColor)

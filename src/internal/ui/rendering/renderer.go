@@ -3,6 +3,7 @@ package rendering
 import (
 	"errors"
 	"fmt"
+	"image/color"
 	"log/slog"
 	"math/rand/v2"
 	"strconv"
@@ -37,12 +38,12 @@ type Renderer struct {
 	border BorderConfig
 
 	// Should this go in contentRenderer - No . ContentRenderer is not for storing style configs
-	contentFGColor lipgloss.TerminalColor
-	contentBGColor lipgloss.TerminalColor
+	contentFGColor color.Color
+	contentBGColor color.Color
 
 	// Should this go in borderConfig ?
-	borderFGColor lipgloss.TerminalColor
-	borderBGColor lipgloss.TerminalColor
+	borderFGColor color.Color
+	borderBGColor color.Color
 
 	// Use this to add additional style modifications
 	// This is applied before any style update that are defined by other configurations,
@@ -78,11 +79,11 @@ type RendererConfig struct {
 	TruncateHeight   bool
 	BorderRequired   bool
 
-	ContentFGColor lipgloss.TerminalColor
-	ContentBGColor lipgloss.TerminalColor
+	ContentFGColor color.Color
+	ContentBGColor color.Color
 
-	BorderFGColor lipgloss.TerminalColor
-	BorderBGColor lipgloss.TerminalColor
+	BorderFGColor color.Color
+	BorderBGColor color.Color
 
 	Border       lipgloss.Border
 	RendererName string
