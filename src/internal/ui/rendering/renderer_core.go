@@ -17,27 +17,27 @@ func (r *Renderer) AddLines(lines ...string) *Renderer {
 // Lines until now will belong to current section, and
 // Any new lines will belong to a new section
 func (r *Renderer) AddSection() {
-	// r.actualContentHeight before this point only includes sections
+	// r.committedContentHeight before this point only includes sections
 	// before r.curSectionIdx
-	r.actualContentHeight += r.contentSections[r.curSectionIdx].CntLines()
+	r.committedContentHeight += r.contentSections[r.curSectionIdx].CntLines()
 
 	// Silently Fail if cannot add
-	if r.contentHeight <= r.actualContentHeight {
-		slog.Error("Cannot add any more sections", "name", r.name, "actualHeight", r.actualContentHeight,
+	if r.contentHeight <= r.committedContentHeight {
+		slog.Error("Cannot add any more sections", "name", r.name, "committedHeight", r.committedContentHeight,
 			"contentHeight", r.contentHeight)
 		return
 	}
 
 	// Add divider
-	r.border.AddDivider(r.actualContentHeight)
+	r.border.AddDivider(r.committedContentHeight)
 	// sectionDivider should be of borderstyle
 	r.sectionDividers = append(r.sectionDividers, lipgloss.NewStyle().
 		Foreground(r.borderFGColor).
 		Background(r.borderBGColor).
 		Render(strings.Repeat(r.borderStrings.Top, r.contentWidth)))
-	r.actualContentHeight++
+	r.committedContentHeight++
 
-	remainingHeight := r.contentHeight - r.actualContentHeight
+	remainingHeight := r.contentHeight - r.committedContentHeight
 	r.contentSections = append(r.contentSections,
 		NewContentRenderer(remainingHeight, r.contentWidth, r.defTruncateStyle, r.name))
 	// Adjust index
@@ -64,6 +64,10 @@ func (r *Renderer) SetBorderInfoItems(infoItems ...string) {
 
 func (r *Renderer) AreInfoItemsTruncated() bool {
 	return r.border.AreInfoItemsTruncated()
+}
+
+func (r *Renderer) actualContentHeight() int {
+	return r.committedContentHeight + r.contentSections[r.curSectionIdx].CntLines()
 }
 
 // Should not do any updates on 'r'
@@ -130,9 +134,12 @@ func (r *Renderer) Render() string {
 }
 
 func (r *Renderer) Style() lipgloss.Style {
-	contentHeight := r.contentHeight
+	height := r.totalHeight
 	if r.truncateHeight {
-		contentHeight = r.actualContentHeight
+		height = r.actualContentHeight()
+		if r.borderRequired {
+			height += 2
+		}
 	}
 	s := lipgloss.NewStyle()
 
@@ -140,8 +147,8 @@ func (r *Renderer) Style() lipgloss.Style {
 		s = modifier(s)
 	}
 
-	s = s.Width(r.contentWidth).
-		Height(contentHeight).
+	s = s.Width(r.totalWidth).
+		Height(height).
 		Background(r.contentBGColor).
 		Foreground(r.contentFGColor)
 

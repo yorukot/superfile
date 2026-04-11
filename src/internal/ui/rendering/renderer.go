@@ -28,9 +28,10 @@ type Renderer struct {
 	// Empty for last section . len(sectionDividers) should be equal to len(contentSections) - 1
 	sectionDividers []string
 	curSectionIdx   int
-	// Including Dividers - Count of actual lines that were added. It maybe <= totalHeight - 2
-	actualContentHeight int
-	defTruncateStyle    TruncateStyle
+	// Including dividers, this is the committed height before the current section.
+	// It excludes lines currently buffered in contentSections[curSectionIdx].
+	committedContentHeight int
+	defTruncateStyle       TruncateStyle
 
 	// Whether to reduce rendered height to fit number of lines
 	truncateHeight bool
@@ -132,11 +133,11 @@ func createRendererWithValidatedConfig(cfg RendererConfig) *Renderer {
 		contentSections: []ContentRenderer{
 			NewContentRenderer(contentHeight, contentWidth, cfg.DefTruncateStyle, cfg.RendererName),
 		},
-		sectionDividers:     nil,
-		curSectionIdx:       0,
-		actualContentHeight: 0,
-		defTruncateStyle:    cfg.DefTruncateStyle,
-		truncateHeight:      cfg.TruncateHeight,
+		sectionDividers:        nil,
+		curSectionIdx:          0,
+		committedContentHeight: 0,
+		defTruncateStyle:       cfg.DefTruncateStyle,
+		truncateHeight:         cfg.TruncateHeight,
 
 		border: NewBorderConfig(cfg.TotalHeight, cfg.TotalWidth),
 
