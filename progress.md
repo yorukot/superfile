@@ -22,11 +22,17 @@
   - replaced direct `progress.Width = ...` writes with `SetWidth(...)`
   - replaced `textinput.Width` reads with `Width()`
   - updated file panel, sidebar, help menu, prompt, zoxide, validation, and process bar call sites
+- Applied the official Bubbles v2 `textinput` and `progress` migration patterns:
+  - moved textinput styling to `Styles()` / `SetStyles(...)`
+  - replaced textinput cursor field access with v2 equivalents
+  - updated prompt tests to use `textinput.Blink()`
+  - replaced `progress.WithScaledGradient(...)` with `WithColors(...)` plus `WithScaled(true)`
 
 ## Verified
 
 - `rg -n "tea\\.KeyMsg\\{" .` returns no matches.
 - `rg -n "SearchBar\\.Width|Rename\\.Width|rename\\.Width|textInput\\.Width|Progress\\.Width|searchBar\\.Width" src` only returns `Width()` getter usage in validation, not direct field access.
+- `rg -n 'Cursor\\.Style|Cursor\\.TextStyle|Cursor\\.Blink|TextStyle|PlaceholderStyle|CompletionStyle|PromptStyle|BlinkCmd\\(|WithScaledGradient|textinput\\.DefaultKeyMap\\b' src` returns no remaining v1 `textinput`/`progress` API usage.
 - `src/pkg/utils` builds and tests with the updated `TeaRuneKeyMsg` helper.
 - Targeted package test runs for the width migration still stop in unrelated `lipgloss.Color` compile errors under `src/internal/common`.
 

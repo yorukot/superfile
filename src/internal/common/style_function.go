@@ -105,19 +105,30 @@ func UserConfigInvalidationErrorString(value string, configType string, msg stri
 		"\" is invalid : " + msg
 }
 
+func setTextInputStyles(ti *textinput.Model, textStyle, placeholderStyle lipgloss.Style, blink bool) {
+	styles := ti.Styles()
+	styles.Focused.Prompt = lipgloss.NewStyle()
+	styles.Blurred.Prompt = lipgloss.NewStyle()
+	styles.Focused.Text = textStyle
+	styles.Blurred.Text = textStyle
+	styles.Focused.Placeholder = placeholderStyle
+	styles.Blurred.Placeholder = placeholderStyle
+	styles.Focused.Suggestion = placeholderStyle
+	styles.Blurred.Suggestion = placeholderStyle
+	styles.Cursor.Color = cursorColor
+	styles.Cursor.Blink = blink
+	ti.SetStyles(styles)
+}
+
 // TODO : Fix Code duplication in textInput.Model creation
 // This eventually caused a bug, where we created new model for sidebar search, and
 // Didn't set `Width` in that. Take Width and other parameters as input in one function
 // Generate search bar for file panel
 func GenerateSearchBar() textinput.Model {
 	ti := textinput.New()
-	ti.Cursor.Style = FooterCursorStyle
-	ti.Cursor.TextStyle = FooterStyle
-	ti.TextStyle = FilePanelStyle
 	ti.Prompt = FilePanelTopDirectoryIconStyle.Render(icon.Search + icon.Space)
-	ti.Cursor.Blink = true
-	ti.PlaceholderStyle = FilePanelStyle
 	ti.Placeholder = "(" + Hotkeys.SearchBar[0] + ") Type something"
+	setTextInputStyles(&ti, FilePanelStyle, FilePanelStyle, true)
 	ti.Blur()
 	ti.CharLimit = 156
 	return ti
@@ -128,66 +139,47 @@ func GeneratePromptTextInput() textinput.Model {
 	t.Prompt = ""
 	t.CharLimit = 156
 	t.SetValue("")
-	t.Cursor.Style = ModalCursorStyle
-	t.Cursor.TextStyle = ModalStyle
-	t.TextStyle = ModalStyle
-	t.PlaceholderStyle = ModalStyle
+	setTextInputStyles(&t, ModalStyle, ModalStyle, true)
 
 	return t
 }
 
 func GenerateNewFileTextInput() textinput.Model {
 	t := textinput.New()
-	t.Cursor.Style = ModalCursorStyle
-	t.Cursor.TextStyle = ModalStyle
-	t.TextStyle = ModalStyle
-	t.Cursor.Blink = true
 	t.Placeholder = "Add \"" + string(filepath.Separator) + "\" transcend folders"
-	t.PlaceholderStyle = ModalStyle
+	setTextInputStyles(&t, ModalStyle, ModalStyle, true)
 	t.Focus()
 	t.CharLimit = 156
 	//nolint:mnd // modal width minus padding
-	t.Width = ModalWidth - 10
+	t.SetWidth(ModalWidth - 10)
 	return t
 }
 
 func GenerateRenameTextInput(width int, cursorPos int, defaultValue string) textinput.Model {
 	ti := textinput.New()
-	ti.Cursor.Style = FilePanelCursorStyle
-	ti.Cursor.TextStyle = FilePanelStyle
 	ti.Prompt = FilePanelCursorStyle.Render(icon.Cursor + " ")
-	ti.TextStyle = ModalStyle
-	ti.Cursor.Blink = true
 	ti.Placeholder = "New name"
-	ti.PlaceholderStyle = ModalStyle
+	setTextInputStyles(&ti, ModalStyle, ModalStyle, true)
 	ti.SetValue(defaultValue)
 	ti.SetCursor(cursorPos)
 	ti.Focus()
 	ti.CharLimit = 156
-	ti.Width = width
+	ti.SetWidth(width)
 
 	return ti
 }
 
 func GeneratePinnedRenameTextInput(cursorPos int, defaultValue string) textinput.Model {
 	ti := textinput.New()
-	ti.Cursor.Style = FilePanelCursorStyle
-	ti.Cursor.TextStyle = FilePanelStyle
 	ti.Prompt = FilePanelCursorStyle.Render(icon.Cursor + " ")
-	ti.TextStyle = ModalStyle
-	ti.Cursor.Blink = true
 	ti.Placeholder = "New name"
-	ti.PlaceholderStyle = ModalStyle
+	setTextInputStyles(&ti, ModalStyle, ModalStyle, true)
 	ti.SetValue(defaultValue)
 	ti.SetCursor(cursorPos)
 	ti.Focus()
 	ti.CharLimit = 156
 	ti.SetWidth(Config.SidebarWidth - PanelPadding)
 	return ti
-}
-
-func GenerateGradientColor() progress.Option {
-	return progress.WithScaledGradient(Theme.GradientColor[0], Theme.GradientColor[1])
 }
 
 func GenerateFooterBorder(countString string, width int) string {

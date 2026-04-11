@@ -35,7 +35,7 @@ func (m *Model) HandleUpdate(msg tea.Msg) (common.ModelAction, tea.Cmd) {
 	slog.Debug("zoxide.Model HandleUpdate()", "msg", msg,
 		"msgType", reflect.TypeOf(msg),
 		"textInput", m.textInput.Value(),
-		"cursorBlink", m.textInput.Cursor.Blink)
+		"cursorBlink", m.textInput.Styles().Cursor.Blink)
 	var action common.ModelAction
 	action = common.NoAction{}
 	var cmd tea.Cmd

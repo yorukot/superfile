@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"charm.land/bubbles/v2/textinput"
 	tea "charm.land/bubbletea/v2"
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/assert"
@@ -154,24 +155,12 @@ func TestModel_HandleUpdate(t *testing.T) {
 	t.Run("Validate Cursor Blink update", func(t *testing.T) {
 		m := defaultTestModel()
 		m.Open(true)
-		assert.False(t, m.textInput.Cursor.Blink)
-
-		blinkMsg := m.textInput.Cursor.BlinkCmd()()
-		action, _ := m.HandleUpdate(blinkMsg, defaultTestCwd)
-		assert.Equal(t, common.NoAction{}, action)
-		assert.True(t, m.textInput.Cursor.Blink)
-
-		blinkMsg = m.textInput.Cursor.BlinkCmd()()
-		action, _ = m.HandleUpdate(blinkMsg, defaultTestCwd)
-		assert.Equal(t, common.NoAction{}, action)
-		assert.False(t, m.textInput.Cursor.Blink)
-
-		blinkMsg = m.textInput.Cursor.BlinkCmd()()
-		action, _ = m.HandleUpdate(blinkMsg, defaultTestCwd)
-		assert.Equal(t, common.NoAction{}, action)
-		assert.True(t, m.textInput.Cursor.Blink)
-
-		// We could test BlinkCancelled and initialBlink as well, but that's too much for now
+		for range 3 {
+			action, _ := m.HandleUpdate(textinput.Blink(), defaultTestCwd)
+			assert.Equal(t, common.NoAction{}, action)
+			assert.True(t, m.IsOpen())
+			assert.Empty(t, m.textInput.Value())
+		}
 	})
 }
 
@@ -297,7 +286,9 @@ func TestModel_Render(t *testing.T) {
 			m := GenerateModel(spfPromptChar, shellPromptChar, true, 10, width)
 			m.Open(true)
 			m.textInput.SetValue(input)
-			m.textInput.Cursor.Blink = false
+			styles := m.textInput.Styles()
+			styles.Cursor.Blink = false
+			m.textInput.SetStyles(styles)
 			res := ansi.Strip(m.Render())
 			inputLine := strings.Split(res, "\n")[1]
 			require.Equal(t, width, ansi.StringWidth(inputLine))

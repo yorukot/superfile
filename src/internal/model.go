@@ -484,7 +484,10 @@ func (m *model) warnModalForQuit() {
 }
 
 // Implement View function for bubble tea model to handle visualization.
-func (m *model) View() string {
+// TODO: Use this in v2 migration to prevent regression  
+//  v.AltScreen = true
+//  v.MouseMode = tea.MouseModeCellMotion
+func (m *model) View() tea.View {
 	slog.Debug("model.View() called", "mainPanelHeight", m.mainPanelHeight,
 		"footerHeight", m.footerHeight, "fullHeight", m.fullHeight,
 		"fullWidth", m.fullWidth, "panelCount", m.fileModel.PanelCount(),
@@ -492,7 +495,13 @@ func (m *model) View() string {
 		"maxPanels", m.fileModel.MaxFilePanel,
 		"sideBarWidth", common.Config.SidebarWidth,
 		"firstFilePanelWidth", m.fileModel.FilePanels[0].GetWidth())
+	v := tea.NewView(m.viewContent())
+	v.AltScreen = true
+	v.MouseMode = tea.MouseModeCellMotion
+	return v	
+}
 
+func (m* model) viewContent() string {
 	if !m.firstLoadingComplete {
 		return "Loading..."
 	}
