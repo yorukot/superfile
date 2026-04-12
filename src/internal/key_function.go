@@ -270,10 +270,6 @@ func (m *model) handleNotifyModelConfirm(action notify.ConfirmActionType) tea.Cm
 }
 
 func (m *model) spfErrorModelOpenKey(msg string) tea.Cmd {
-	defer func() {
-		slog.Debug("Unlock mutex for modal error window")
-		m.mutexErrorModal.Unlock()
-	}()
 	isAbort := slices.Contains(spferror.KeyAbort(), msg)
 	isSkip := slices.Contains(spferror.KeySkip(), msg)
 
@@ -281,6 +277,10 @@ func (m *model) spfErrorModelOpenKey(msg string) tea.Cmd {
 		slog.Warn("Invalid keypress in spfErrorModel", "msg", msg)
 		return nil
 	}
+	defer func() {
+		slog.Debug("Unlock mutex for modal error window")
+		m.mutexErrorModal.Unlock()
+	}()
 	if isSkip {
 		state := m.spfError.Close()
 		if state == nil {
