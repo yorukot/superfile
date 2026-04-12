@@ -210,8 +210,8 @@ func TestFileDelete(t *testing.T) {
 		t.Skip("Skipping for windows")
 	}
 	curTestDir := t.TempDir()
-	file1 := filepath.Join(curTestDir, "file17.txt")
-	file2 := filepath.Join(curTestDir, "file27.txt")
+	file1 := filepath.Join(curTestDir, "file1.txt")
+	file2 := filepath.Join(curTestDir, "file2.txt")
 
 	utils.SetupFilesWithData(t, []byte("f1"), file1)
 	utils.SetupFilesWithData(t, []byte("f2"), file2)
