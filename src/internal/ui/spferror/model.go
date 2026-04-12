@@ -8,11 +8,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-/*
-type FileListProcessor func(items []string) (processbar.Process, []string)
-type ProcessFinalizer func(state processbar.ProcessState, reqID int) tea.Msg
-type ProcessRunner func(processor FileListProcessor, finalizer ProcessFinalizer, items []string, reqID int) tea.Msg
-*/
 type FileListErrorState struct {
 	fileList        []string
 	continuationFun processbar.FileListProcessor
