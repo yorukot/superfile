@@ -8,6 +8,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/filemodel"
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
+	"github.com/yorukot/superfile/src/internal/ui/spferror"
 
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 
@@ -265,6 +266,31 @@ func (m *model) handleNotifyModelConfirm(action notify.ConfirmActionType) tea.Cm
 	default:
 		slog.Error("Unknown type of action", "action", action)
 	}
+	return nil
+}
+
+func (m *model) spfErrorModelOpenKey(msg string) tea.Cmd {
+	defer func() {
+		slog.Debug("Unlock mutex for modal error window")
+		m.mutexErrorModal.Unlock()
+	}()
+	isAbort := slices.Contains(spferror.KeyAbort(), msg)
+	isSkip := slices.Contains(spferror.KeySkip(), msg)
+
+	if !isAbort && !isSkip {
+		slog.Warn("Invalid keypress in spfErrorModel", "msg", msg)
+		return nil
+	}
+	if isSkip {
+		state := m.spfError.Close()
+		if state == nil {
+			return nil
+		}
+		reqID := m.ioReqCnt
+		m.ioReqCnt++
+		return func() tea.Msg { return state.Skip(m.runFileProcessor, reqID) }
+	}
+	m.spfError.Close()
 	return nil
 }
 

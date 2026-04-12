@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/bubbles/progress"
+	tea "github.com/charmbracelet/bubbletea"
 
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
@@ -26,6 +27,10 @@ type Process struct {
 	Done      int
 	DoneTime  time.Time
 }
+
+type FileListProcessor func(items []string) (Process, []string)
+type ProcessFinalizer func(state ProcessState, reqID int) tea.Msg
+type ProcessRunner func(processor FileListProcessor, finalizer ProcessFinalizer, items []string, reqID int) tea.Msg
 
 func NewProcess(id string, currentFile string, operation OperationType, total int) Process {
 	prog := progress.New(common.GenerateGradientColor())

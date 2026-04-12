@@ -298,6 +298,8 @@ func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
 	switch {
 	case m.typingModal.open:
 		m.typingModalOpenKey(msg.String())
+	case m.spfError.IsOpen():
+		cmd = m.spfErrorModelOpenKey(msg.String())
 	case m.promptModal.IsOpen():
 		// Ignore keypress. It will be handled in Update call via
 		// updateFilePanelState
@@ -564,6 +566,12 @@ func (m *model) updateRenderForOverlay(finalRender string) string {
 		overlayX := m.fullWidth/common.CenterDivisor - common.ModalWidth/common.CenterDivisor
 		overlayY := m.fullHeight/common.CenterDivisor - common.ModalHeight/common.CenterDivisor
 		return stringfunction.PlaceOverlay(overlayX, overlayY, notifyModal, finalRender)
+	}
+	if m.spfError.IsOpen() {
+		errorModal := m.spfError.Render()
+		overlayX := m.fullWidth/common.CenterDivisor - common.ModalWidth/common.CenterDivisor
+		overlayY := m.fullHeight/common.CenterDivisor - common.ModalHeight/common.CenterDivisor
+		return stringfunction.PlaceOverlay(overlayX, overlayY, errorModal, finalRender)
 	}
 	return finalRender
 }
