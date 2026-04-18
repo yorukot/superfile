@@ -31,7 +31,11 @@ class ChooserFileMultiSelectTest(GenericTestImpl):
 
     def end_execution(self) -> None:
         self.logger.debug("Skipping esc key press for chooser file multiselect test")
-        time.sleep(self.close_wait_time)
+        deadline = time.time() + self.close_wait_time
+        while time.time() < deadline:
+            if not self.env.spf_mgr.is_spf_running():
+                break
+            time.sleep(0.1)
         self.logger.debug("Finished Execution")
 
     def validate(self) -> bool:
@@ -39,7 +43,7 @@ class ChooserFileMultiSelectTest(GenericTestImpl):
             return False
 
         try:
-            assert self.env.fs_mgr.check_exists(CHOOSER_FILE), f"File {CHOOSER_FILE} does not exists"
+            assert self.env.fs_mgr.check_exists(CHOOSER_FILE), f"File {CHOOSER_FILE} does not exist"
             chooser_file_content = self.env.fs_mgr.read_file(CHOOSER_FILE)
             expected = "\n".join([
                 str(self.env.fs_mgr.abspath(FILE1)),

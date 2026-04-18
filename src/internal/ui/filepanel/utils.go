@@ -1,6 +1,7 @@
 package filepanel
 
 import (
+	"cmp"
 	"math"
 	"path/filepath"
 	"slices"
@@ -99,7 +100,7 @@ func (m *Model) GetOrderedSelectedLocations() []string {
 	}
 
 	slices.SortFunc(ordered, func(a, b orderedSelection) int {
-		return a.order - b.order
+		return cmp.Compare(a.order, b.order)
 	})
 
 	result := make([]string, 0, len(ordered))
@@ -126,9 +127,16 @@ func (m *Model) GetFirstSelectedLocation() string {
 
 // Select the item where cursor located (only work on select mode)
 func (m *Model) SingleItemSelect() {
-	if !m.EmptyOrInvalid() {
-		m.ToggleSelected(m.GetFocusedItem().Location)
+	if m.EmptyOrInvalid() {
+		return
 	}
+
+	focused := m.GetFocusedItem()
+	if focused.SaveTarget {
+		return
+	}
+
+	m.ToggleSelected(focused.Location)
 }
 
 func (m *Model) ElemCount() int {
@@ -178,7 +186,8 @@ func (m *Model) FindElementIndexByLocation(location string) int {
 func (m *Model) EnableSaveMode(fileName string) {
 	m.SaveMode = true
 	m.SaveEntryName = fileName
-	m.scrollToCursor(0)
+	m.cursor = 0
+	m.renderIndex = 0
 }
 
 func (m *Model) DisableSaveMode() {

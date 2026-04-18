@@ -22,14 +22,10 @@ termcmd="${TERMCMD:-kitty --title 'termfilechooser'}"
 if [ "$save" = "1" ]; then
     # save a file
     set -- --save-file="$out" "$path"
-elif [ "$directory" = "1" ]; then
-    # upload files from a directory
-    set -- --chooser-file="$out" "$path"
-elif [ "$multiple" = "1" ]; then
-    # upload multiple files
-    set -- --chooser-file="$out" "$path"
 else
-    # upload only 1 file
+    # Open chooser requests currently use the same invocation for single-file,
+    # multi-file, and directory selection. TODO: split these branches if
+    # superfile ever needs different behavior for $multiple or $directory later.
     set -- --chooser-file="$out" "$path"
 fi
 

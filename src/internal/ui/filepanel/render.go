@@ -108,6 +108,9 @@ func (m *Model) getSortInfo() (string, string) {
 
 func (m *Model) getPanelModeInfo(selectedCount uint) (string, string) {
 	if m.SaveMode {
+		if m.PanelMode == SelectMode && selectedCount > 0 {
+			return "Save" + icon.Space + fmt.Sprintf("(%d)", selectedCount), icon.Select
+		}
 		return "Save", icon.Select
 	}
 	switch m.PanelMode {

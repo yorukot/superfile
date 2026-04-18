@@ -68,7 +68,7 @@ func (m *model) chooserWriteAndQuit(paths []string) error {
 		return nil
 	}
 
-	err := os.WriteFile(m.chooser.request.OutputFile, []byte(strings.Join(paths, "\n")), utils.ConfigFilePerm)
+	err := os.WriteFile(m.chooser.request.OutputFile, []byte(strings.Join(paths, "\n")), utils.UserFilePerm)
 	if err != nil {
 		return err
 	}
@@ -119,6 +119,7 @@ func (m *model) confirmSaveChooserPath(path string) {
 	switch {
 	case err == nil:
 		if info.IsDir() {
+			m.notifyModel = notify.New(true, "Cannot save to a directory", "Please choose a file name instead of a directory.", notify.NoAction)
 			return
 		}
 		if m.isPortalSavePlaceholder(path) {
@@ -142,9 +143,17 @@ func (m *model) confirmSaveChooserPath(path string) {
 		}
 
 		if writeErr := m.chooserWriteAndQuit([]string{path}); writeErr != nil {
-			slog.Error("Error while writing save chooser result", "error", writeErr)
+			removeErr := os.Remove(path)
+			if removeErr != nil {
+				slog.Error("Error while writing save chooser result and removing placeholder",
+					"writeError", writeErr, "removeError", removeErr, "path", path)
+				return
+			}
+			slog.Error("Error while writing save chooser result; removed placeholder",
+				"writeError", writeErr, "path", path)
 		}
 	default:
+		m.notifyModel = notify.New(true, "Cannot access target path", err.Error(), notify.NoAction)
 		slog.Error("Save chooser target stat failed", "path", path, "error", err)
 	}
 }
@@ -171,7 +180,7 @@ func (m *model) cancelSaveOverwrite() {
 }
 
 func createSaveChooserPlaceholder(path string) error {
-	return os.WriteFile(path, []byte{}, utils.ConfigFilePerm)
+	return os.WriteFile(path, []byte{}, utils.UserFilePerm)
 }
 
 func (m *model) isPortalSavePlaceholder(path string) bool {

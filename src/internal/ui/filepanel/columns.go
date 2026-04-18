@@ -44,7 +44,7 @@ func (m *Model) renderDelimiter(indexElement int, columnWidth int) string {
 func (m *Model) renderFileSize(indexElement int, columnWidth int) string {
 	elem := m.GetElementAtIdx(indexElement)
 	isSelected := m.CheckSelected(elem.Location)
-	if elem.SaveTarget {
+	if elem.SaveTarget || elem.Info == nil {
 		return common.FilePanelItemRender("", columnWidth, isSelected, common.FilePanelBGColor, lipgloss.Right)
 	}
 	sizeValue := common.FormatFileSize(elem.Info.Size())
@@ -64,7 +64,7 @@ func (m *Model) renderFileSize(indexElement int, columnWidth int) string {
 func (m *Model) renderModifyTime(indexElement int, columnWidth int) string {
 	elem := m.GetElementAtIdx(indexElement)
 	isSelected := m.CheckSelected(elem.Location)
-	if elem.SaveTarget {
+	if elem.SaveTarget || elem.Info == nil {
 		return common.FilePanelItemRender("", columnWidth, isSelected, common.FilePanelBGColor, lipgloss.Right)
 	}
 	modifyTime := elem.Info.ModTime().Format("2006-01-02 15:04")
@@ -80,7 +80,7 @@ func (m *Model) renderModifyTime(indexElement int, columnWidth int) string {
 func (m *Model) renderPermissions(indexElement int, columnWidth int) string {
 	elem := m.GetElementAtIdx(indexElement)
 	isSelected := m.CheckSelected(elem.Location)
-	if elem.SaveTarget {
+	if elem.SaveTarget || elem.Info == nil {
 		return common.FilePanelItemRender("", columnWidth, isSelected, common.FilePanelBGColor, lipgloss.Right)
 	}
 	return common.FilePanelItemRender(
@@ -102,9 +102,17 @@ func (m *Model) renderElementName(elem Element, width int, isSelected bool) stri
 		return common.FilePanelItemRender(label, width, isSelected, common.FilePanelBGColor, lipgloss.Left)
 	}
 
-	isLink := elem.Info.Mode()&os.ModeSymlink != 0
+	isLink := false
+	if elem.Info != nil {
+		isLink = elem.Info.Mode()&os.ModeSymlink != 0
+	}
+
+	displayName := elem.Name
+	if displayName == "" {
+		displayName = "[unknown]"
+	}
 	return common.FilePanelItemRenderWithIcon(
-		elem.Name,
+		displayName,
 		width,
 		elem.Directory,
 		isLink,

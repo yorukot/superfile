@@ -16,6 +16,9 @@ func TestBuildChooserRequest(t *testing.T) {
 	require.NoError(t, err)
 
 	tempDir := t.TempDir()
+	tempDir, err = filepath.EvalSymlinks(tempDir)
+	require.NoError(t, err)
+
 	require.NoError(t, os.Chdir(tempDir))
 	t.Cleanup(func() {
 		require.NoError(t, os.Chdir(originalWD))

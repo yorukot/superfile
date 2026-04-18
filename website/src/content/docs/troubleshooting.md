@@ -28,5 +28,5 @@ If you launch superfile through `xdg-desktop-portal-termfilechooser` or another 
 - Use `--chooser-file` for open-file selection output.
 - Use `--save-file` for save-target selection output.
 - `--chooser-file` now supports multi-select and writes newline-delimited absolute paths.
-- `--save-file` uses superfile's save flow, where `e` confirms the focused file or ghost and `E` confirms the current directory plus the ghost name.
+- `--save-file` uses superfile's save flow, where `ctrl+r` renames the ghost, `e` confirms the focused file or ghost, and `E` confirms the current directory plus the ghost name.
 - The `xdg-desktop-portal-termfilechooser` superfile wrapper must call `spf --save-file="$out" "$path"` for save requests. Older wrappers that always call `--chooser-file` will not enter save mode.

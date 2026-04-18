@@ -578,7 +578,7 @@ func getRenameCursorPos(name string, isDirectory bool) int {
 			break
 		}
 	}
-	if cursorPos == -1 || cursorPos == 0 && nameLen > 0 || isDirectory {
+	if cursorPos <= 0 || isDirectory {
 		cursorPos = nameLen
 	}
 	return cursorPos
