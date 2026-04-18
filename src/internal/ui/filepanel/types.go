@@ -40,6 +40,8 @@ type Model struct {
 	SearchBar          textinput.Model
 	LastTimeGetElement time.Time
 	TargetFile         string             // filename to position cursor on after load
+	SaveMode           bool               // when true, a synthetic save target entry is pinned to the panel
+	SaveEntryName      string             // current file name for the synthetic save target
 	columns            []columnDefinition // columns for rendering
 }
 
@@ -51,10 +53,11 @@ type directoryRecord struct {
 
 // Element within a file panel
 type Element struct {
-	Name      string
-	Location  string
-	Directory bool
-	Info      os.FileInfo
+	Name       string
+	Location   string
+	Directory  bool
+	Info       os.FileInfo
+	SaveTarget bool
 }
 
 // Type representing the mode of the panel

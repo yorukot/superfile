@@ -107,6 +107,9 @@ func (m *Model) getSortInfo() (string, string) {
 }
 
 func (m *Model) getPanelModeInfo(selectedCount uint) (string, string) {
+	if m.SaveMode {
+		return "Save", icon.Select
+	}
 	switch m.PanelMode {
 	case BrowserMode:
 		return "Browser", icon.Browser

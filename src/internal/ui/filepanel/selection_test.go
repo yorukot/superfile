@@ -53,3 +53,19 @@ func TestPanelSelectionLifeCycle(t *testing.T) {
 	assert.Equal(t, map[string]int{}, panel.selected)
 	assert.Equal(t, 0, panel.selectOrderCounter)
 }
+
+func TestGetOrderedSelectedLocations(t *testing.T) {
+	panel := testModel(0, 0, 0, BrowserMode, []Element{
+		{Name: "file1.txt", Location: "/tmp/file1.txt"},
+		{Name: "file2.txt", Location: "/tmp/file2.txt"},
+		{Name: "file3.txt", Location: "/tmp/file3.txt"},
+		{Name: "file4.txt", Location: "/tmp/file4.txt"},
+	})
+
+	panel.SetSelected("/tmp/file3.txt")
+	panel.SetSelected("/tmp/file1.txt")
+	panel.SetSelected("/tmp/file4.txt")
+	panel.SetUnSelected("/tmp/file1.txt")
+
+	assert.Equal(t, []string{"/tmp/file3.txt", "/tmp/file4.txt"}, panel.GetOrderedSelectedLocations())
+}

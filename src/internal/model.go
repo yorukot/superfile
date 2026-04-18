@@ -147,6 +147,10 @@ func (m *model) getMetadataCmd() tea.Cmd {
 		return nil
 	}
 	selectedItem := m.getFocusedFilePanel().GetFocusedItem()
+	if selectedItem.SaveTarget {
+		m.fileMetaData.SetBlank()
+		return nil
+	}
 	metadataFocused := m.focusPanel == metadataFocus
 	// Note : This will cause metadata not being refreshed there is any file update events.
 	// We can have a cache with TTL or watch filesystem changes to fix this

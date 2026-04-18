@@ -56,31 +56,49 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 		m.getFocusedFilePanel().PgDown()
 
 	case slices.Contains(common.Hotkeys.ChangePanelMode, msg):
+		if m.isSaveChooserMode() {
+			return nil
+		}
 		m.getFocusedFilePanel().ChangeFilePanelMode()
 
 	case slices.Contains(common.Hotkeys.NextFilePanel, msg):
+		if m.isSaveChooserMode() {
+			return nil
+		}
 		if m.focusPanel == nonePanelFocus {
 			m.fileModel.NextFilePanel()
 		}
 
 	case slices.Contains(common.Hotkeys.PreviousFilePanel, msg):
+		if m.isSaveChooserMode() {
+			return nil
+		}
 		if m.focusPanel == nonePanelFocus {
 			m.fileModel.PreviousFilePanel()
 		}
 
 	case slices.Contains(common.Hotkeys.CloseFilePanel, msg):
+		if m.isSaveChooserMode() {
+			return nil
+		}
 		cmd, err := m.fileModel.CloseFilePanel()
 		if err != nil && !errors.Is(err, filemodel.ErrMinimumPanelCount) {
 			slog.Error("unexpected error while closing new panel", "error", err)
 		}
 		return cmd
 	case slices.Contains(common.Hotkeys.CreateNewFilePanel, msg):
+		if m.isSaveChooserMode() {
+			return nil
+		}
 		cmd, err := m.fileModel.CreateNewFilePanel(variable.HomeDir)
 		if err != nil && !errors.Is(err, filemodel.ErrMaximumPanelCount) {
 			slog.Error("unexpected error while creating new panel", "error", err)
 		}
 		return cmd
 	case slices.Contains(common.Hotkeys.SplitFilePanel, msg):
+		if m.isSaveChooserMode() {
+			return nil
+		}
 		cmd, err := m.splitPanel()
 		if err != nil && !errors.Is(err, filemodel.ErrMaximumPanelCount) {
 			slog.Error("unexpected error while splitting panel", "error", err)
@@ -119,8 +137,14 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 		return m.getCompressSelectedFilesCmd()
 
 	case slices.Contains(common.Hotkeys.OpenCommandLine, msg):
+		if m.isSaveChooserMode() {
+			return nil
+		}
 		m.promptModal.Open(true)
 	case slices.Contains(common.Hotkeys.OpenSPFPrompt, msg):
+		if m.isSaveChooserMode() {
+			return nil
+		}
 		m.promptModal.Open(false)
 	case slices.Contains(common.Hotkeys.OpenZoxide, msg):
 		return m.zoxideModal.Open()
@@ -242,6 +266,8 @@ func (m *model) handleNotifyModelCancel(action notify.ConfirmActionType) tea.Cmd
 		m.cancelRename()
 	case notify.QuitAction:
 		m.modelQuitState = notQuitting
+	case notify.SaveOverwriteAction:
+		m.cancelSaveOverwrite()
 	case notify.DeleteAction, notify.NoAction, notify.PermanentDeleteAction:
 		// Do nothing
 	default:
@@ -260,6 +286,8 @@ func (m *model) handleNotifyModelConfirm(action notify.ConfirmActionType) tea.Cm
 		m.confirmRename()
 	case notify.QuitAction:
 		m.modelQuitState = quitConfirmationReceived
+	case notify.SaveOverwriteAction:
+		m.confirmSaveOverwrite()
 	case notify.NoAction:
 		// Ignore
 	default:

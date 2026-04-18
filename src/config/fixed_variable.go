@@ -11,6 +11,24 @@ import (
 	"github.com/adrg/xdg"
 )
 
+type ChooserMode uint8
+
+const (
+	ChooserModeNone ChooserMode = iota
+	ChooserModeOpen
+	ChooserModeSave
+)
+
+type ChooserRequest struct {
+	Mode          ChooserMode
+	OutputFile    string
+	SuggestedPath string
+}
+
+func (r ChooserRequest) Active() bool {
+	return r.Mode != ChooserModeNone && r.OutputFile != ""
+}
+
 const (
 	CurrentVersion = "v1.5.0"
 	// Allowing pre-releases with non production version
@@ -66,9 +84,7 @@ var (
 	ConfigFile  = filepath.Join(SuperFileMainDir, "config.toml")
 	HotkeysFile = filepath.Join(SuperFileMainDir, "hotkeys.toml")
 
-	// ChooserFile is the path where superfile will write the file's path, which is to be
-	// opened, before exiting
-	ChooserFile = ""
+	chooserRequest = ChooserRequest{}
 
 	// Other state variables
 	FixHotkeys    = false
@@ -83,8 +99,12 @@ func SetLastDir(path string) {
 	LastDir = path
 }
 
-func SetChooserFile(path string) {
-	ChooserFile = path
+func SetChooserRequest(req ChooserRequest) {
+	chooserRequest = req
+}
+
+func GetChooserRequest() ChooserRequest {
+	return chooserRequest
 }
 
 func UpdateVarFromCliArgs(c *cli.Command) {
@@ -107,9 +127,6 @@ func UpdateVarFromCliArgs(c *cli.Command) {
 		}
 		HotkeysFile = hotkeyFileArg
 	}
-
-	// It could be non existent. We are writing to the file. If file doesn't exists, we would attempt to create it.
-	SetChooserFile(c.String("chooser-file"))
 
 	FixHotkeys = c.Bool("fix-hotkeys")
 	FixConfigFile = c.Bool("fix-config-file")

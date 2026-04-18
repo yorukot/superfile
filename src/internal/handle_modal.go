@@ -72,6 +72,14 @@ func (m *model) confirmRename() {
 		return
 	}
 
+	if m.isSaveChooserMode() {
+		panel.SetSaveEntryName(panel.Rename.Value())
+		m.fileModel.Renaming = false
+		panel.Rename.Blur()
+		panel.Renaming = false
+		return
+	}
+
 	oldPath := panel.GetFocusedItem().Location
 	newPath := filepath.Join(panel.Location, panel.Rename.Value())
 

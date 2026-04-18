@@ -4,6 +4,7 @@ import (
 	"context"
 	"embed"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -120,8 +121,13 @@ func Run(content embed.FS) {
 			&cli.StringFlag{
 				Name:    "chooser-file",
 				Aliases: []string{"cf"},
-				Usage:   "On trying to open any file, superfile will write to its path to this file, and exit",
+				Usage:   "Write the chosen open-selection path or paths to this file, and exit",
 				Value:   "", // Default to the blank string indicating non-usage of flag
+			},
+			&cli.StringFlag{
+				Name:  "save-file",
+				Usage: "Open superfile in save mode, write the confirmed save path to this file, and exit",
+				Value: "", // Default to the blank string indicating non-usage of flag
 			},
 		},
 		Action: spfAppAction,
@@ -146,6 +152,12 @@ func spfAppAction(_ context.Context, c *cli.Command) error {
 		firstPanelPaths = c.Args().Slice()
 	}
 
+	req, err := buildChooserRequest(firstPanelPaths, c.String("chooser-file"), c.String("save-file"))
+	if err != nil {
+		return err
+	}
+	variable.SetChooserRequest(req)
+
 	InitConfigFile()
 
 	firstUse := checkFirstUse()
@@ -167,6 +179,40 @@ func spfAppAction(_ context.Context, c *cli.Command) error {
 	}
 
 	return nil
+}
+
+func buildChooserRequest(firstPanelPaths []string, chooserFile string, saveFile string) (variable.ChooserRequest, error) {
+	if chooserFile != "" && saveFile != "" {
+		return variable.ChooserRequest{}, errors.New("--chooser-file and --save-file cannot be used together")
+	}
+
+	if chooserFile == "" && saveFile == "" {
+		return variable.ChooserRequest{}, nil
+	}
+
+	if len(firstPanelPaths) > 1 {
+		return variable.ChooserRequest{}, errors.New("chooser/save mode accepts at most one startup path")
+	}
+
+	req := variable.ChooserRequest{}
+	switch {
+	case chooserFile != "":
+		req.Mode = variable.ChooserModeOpen
+		req.OutputFile = chooserFile
+	case saveFile != "":
+		req.Mode = variable.ChooserModeSave
+		req.OutputFile = saveFile
+	}
+
+	if len(firstPanelPaths) == 1 && firstPanelPaths[0] != "" {
+		cwd, err := os.Getwd()
+		if err != nil {
+			return variable.ChooserRequest{}, fmt.Errorf("get working directory: %w", err)
+		}
+		req.SuggestedPath = utils.ResolveAbsPath(cwd, firstPanelPaths[0])
+	}
+
+	return req, nil
 }
 
 // Create proper directories for storing configuration and write default

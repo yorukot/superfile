@@ -1,6 +1,10 @@
 package filepanel
 
-import "math"
+import (
+	"math"
+	"path/filepath"
+	"slices"
+)
 
 func (m *Model) GetCursor() int {
 	return m.cursor
@@ -80,6 +84,31 @@ func (m *Model) GetSelectedLocations() []string {
 	return result
 }
 
+func (m *Model) GetOrderedSelectedLocations() []string {
+	type orderedSelection struct {
+		location string
+		order    int
+	}
+
+	ordered := make([]orderedSelection, 0, len(m.selected))
+	for location, order := range m.selected {
+		ordered = append(ordered, orderedSelection{
+			location: location,
+			order:    order,
+		})
+	}
+
+	slices.SortFunc(ordered, func(a, b orderedSelection) int {
+		return a.order - b.order
+	})
+
+	result := make([]string, 0, len(ordered))
+	for _, item := range ordered {
+		result = append(result, item.location)
+	}
+	return result
+}
+
 func (m *Model) GetFirstSelectedLocation() string {
 	if len(m.selected) == 0 {
 		return ""
@@ -144,4 +173,38 @@ func (m *Model) FindElementIndexByLocation(location string) int {
 		}
 	}
 	return -1
+}
+
+func (m *Model) EnableSaveMode(fileName string) {
+	m.SaveMode = true
+	m.SaveEntryName = fileName
+	m.scrollToCursor(0)
+}
+
+func (m *Model) DisableSaveMode() {
+	m.SaveMode = false
+	m.SaveEntryName = ""
+}
+
+func (m *Model) HasSaveEntry() bool {
+	return m.SaveMode
+}
+
+func (m *Model) GetSaveEntryName() string {
+	return m.SaveEntryName
+}
+
+func (m *Model) SetSaveEntryName(name string) {
+	m.SaveEntryName = name
+}
+
+func (m *Model) GetSaveEntryLocation() string {
+	if m.SaveEntryName == "" {
+		return m.Location
+	}
+	return filepath.Join(m.Location, m.SaveEntryName)
+}
+
+func (m *Model) IsSaveEntryFocused() bool {
+	return m.SaveMode && m.GetCursor() == 0
 }
