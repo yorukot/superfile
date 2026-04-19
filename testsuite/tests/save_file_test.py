@@ -39,7 +39,7 @@ class SaveFileTest(GenericTestImpl):
             return False
 
         try:
-            assert self.env.fs_mgr.check_exists(SAVE_OUT), f"File {SAVE_OUT} does not exists"
+            assert self.env.fs_mgr.check_exists(SAVE_OUT), f"File {SAVE_OUT} does not exist"
             assert self.env.fs_mgr.check_exists(DIR1 / "download.txt"), "download placeholder was not created at target path"
             save_output = self.env.fs_mgr.read_file(SAVE_OUT)
             expected = str(self.env.fs_mgr.abspath(DIR1 / "download.txt"))

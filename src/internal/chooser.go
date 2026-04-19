@@ -22,9 +22,22 @@ func (m *model) initializeChooserState() {
 	}
 
 	panel := m.getFocusedFilePanel()
-	startDir, saveName := resolveSaveChooserStartPath(m.chooser.request.SuggestedPath, panel.Location)
+	fallbackDir := panel.Location
+	startDir, saveName := resolveSaveChooserStartPath(m.chooser.request.SuggestedPath, fallbackDir)
 	if err := panel.UpdateCurrentFilePanelDir(startDir); err != nil {
+		notifyErr := err
 		slog.Error("Failed to initialize save chooser directory", "path", startDir, "error", err)
+		if fallbackDir != startDir {
+			if fallbackErr := panel.UpdateCurrentFilePanelDir(fallbackDir); fallbackErr == nil {
+				panel.EnableSaveMode(saveName)
+				return
+			} else {
+				notifyErr = fallbackErr
+				slog.Error("Failed to initialize fallback save chooser directory", "path", fallbackDir, "error", fallbackErr)
+			}
+		}
+		m.notifyModel = notify.New(true, common.SaveInitErrorTitle, notifyErr.Error(), notify.NoAction)
+		return
 	}
 	panel.EnableSaveMode(saveName)
 }
@@ -119,7 +132,7 @@ func (m *model) confirmSaveChooserPath(path string) {
 	switch {
 	case err == nil:
 		if info.IsDir() {
-			m.notifyModel = notify.New(true, "Cannot save to a directory", "Please choose a file name instead of a directory.", notify.NoAction)
+			m.notifyModel = notify.New(true, common.SaveDirErrorTitle, common.SaveDirErrorContent, notify.NoAction)
 			return
 		}
 		if m.isPortalSavePlaceholder(path) {
@@ -153,7 +166,7 @@ func (m *model) confirmSaveChooserPath(path string) {
 				"writeError", writeErr, "path", path)
 		}
 	default:
-		m.notifyModel = notify.New(true, "Cannot access target path", err.Error(), notify.NoAction)
+		m.notifyModel = notify.New(true, common.SaveAccessErrorTitle, err.Error(), notify.NoAction)
 		slog.Error("Save chooser target stat failed", "path", path, "error", err)
 	}
 }

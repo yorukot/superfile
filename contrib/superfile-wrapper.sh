@@ -29,12 +29,4 @@ else
     set -- --chooser-file="$out" "$path"
 fi
 
-command="$termcmd $cmd"
-for arg in "$@"; do
-    # escape double quotes
-    escaped=$(printf "%s" "$arg" | sed 's/"/\\"/g')
-    # escape special
-    command="$command \"$escaped\""
-done
-
-sh -c "$command"
+exec env -S "$termcmd" "$cmd" "$@"
