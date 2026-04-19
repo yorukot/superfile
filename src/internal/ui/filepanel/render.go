@@ -51,8 +51,8 @@ func (m *Model) renderFooter(r *rendering.Renderer, selectedCount uint) {
 	cursorStr := m.getCursorString()
 
 	if common.Config.Nerdfont {
-		sortLabel = sortIcon + icon.Space + sortLabel
-		modeLabel = modeIcon + icon.Space + modeLabel
+		sortLabel = renderFooterInfoLabel(sortLabel, sortIcon)
+		modeLabel = renderFooterInfoLabel(modeLabel, modeIcon)
 	} else {
 		// TODO : Figure out if we can set icon.Space to " " if nerdfont is false
 		// That would simplify code
@@ -108,10 +108,16 @@ func (m *Model) getSortInfo() (string, string) {
 
 func (m *Model) getPanelModeInfo(selectedCount uint) (string, string) {
 	if m.SaveMode {
-		if m.PanelMode == SelectMode && selectedCount > 0 {
-			return "Save" + icon.Space + fmt.Sprintf("(%d)", selectedCount), icon.Select
+		if !common.Config.Nerdfont {
+			if m.PanelMode == SelectMode && selectedCount > 0 {
+				return "Save" + icon.Space + fmt.Sprintf("(%d)", selectedCount), icon.Select
+			}
+			return "Save", icon.Select
 		}
-		return "Save", icon.Select
+		if m.PanelMode == SelectMode && selectedCount > 0 {
+			return fmt.Sprintf("(%d)", selectedCount), icon.Download
+		}
+		return "", icon.Download
 	}
 	switch m.PanelMode {
 	case BrowserMode:
@@ -121,6 +127,13 @@ func (m *Model) getPanelModeInfo(selectedCount uint) (string, string) {
 	default:
 		return "", ""
 	}
+}
+
+func renderFooterInfoLabel(label string, iconValue string) string {
+	if label == "" {
+		return iconValue
+	}
+	return iconValue + icon.Space + label
 }
 
 func (m *Model) getCursorString() string {

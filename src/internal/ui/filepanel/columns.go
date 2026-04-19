@@ -99,7 +99,11 @@ func (m *Model) renderElementName(elem Element, width int, isSelected bool) stri
 			displayName = "[save target]"
 		}
 		label := "save " + displayName
-		return common.FilePanelItemRender(label, width, isSelected, common.FilePanelBGColor, lipgloss.Left)
+		if common.Config.Nerdfont {
+			label = icon.Download + icon.Space + displayName
+		}
+		return common.FilePanelSaveTargetStyle.Width(width).Align(lipgloss.Left).
+			Render(ansi.Truncate(label, width, "..."))
 	}
 
 	isLink := false
