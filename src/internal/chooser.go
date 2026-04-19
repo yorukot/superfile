@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"errors"
 	"io"
 	"log/slog"
 	"os"
@@ -33,7 +34,13 @@ func (m *model) initializeChooserState() {
 				return
 			} else {
 				notifyErr = fallbackErr
-				slog.Error("Failed to initialize fallback save chooser directory", "path", fallbackDir, "error", fallbackErr)
+				slog.Error(
+					"Failed to initialize fallback save chooser directory",
+					"path",
+					fallbackDir,
+					"error",
+					fallbackErr,
+				)
 			}
 		}
 		m.notifyModel = notify.New(true, common.SaveInitErrorTitle, notifyErr.Error(), notify.NoAction)
@@ -131,49 +138,80 @@ func (m *model) confirmSaveChooserPath(path string) {
 	info, err := os.Stat(path)
 	switch {
 	case err == nil:
-		if info.IsDir() {
-			m.notifyModel = notify.New(true, common.SaveDirErrorTitle, common.SaveDirErrorContent, notify.NoAction)
-			return
-		}
-		if m.isPortalSavePlaceholder(path) {
-			if writeErr := m.chooserWriteAndQuit([]string{path}); writeErr != nil {
-				slog.Error("Error while writing save chooser result", "error", writeErr)
-			}
-			return
-		}
-		m.warnModalForSaveOverwrite(path)
+		m.confirmExistingSaveChooserPath(path, info)
 	case os.IsNotExist(err):
-		parentDir := filepath.Dir(path)
-		parentInfo, statErr := os.Stat(parentDir)
-		if statErr != nil || !parentInfo.IsDir() {
-			slog.Error("Save chooser target parent is invalid", "path", path, "error", statErr)
-			return
-		}
-
-		if createErr := createSaveChooserPlaceholder(path); createErr != nil {
-			slog.Error("Error while creating save chooser placeholder", "path", path, "error", createErr)
-			return
-		}
-
-		if writeErr := m.chooserWriteAndQuit([]string{path}); writeErr != nil {
-			removeErr := os.Remove(path)
-			if removeErr != nil {
-				slog.Error("Error while writing save chooser result and removing placeholder",
-					"writeError", writeErr, "removeError", removeErr, "path", path)
-				return
-			}
-			slog.Error("Error while writing save chooser result; removed placeholder",
-				"writeError", writeErr, "path", path)
-		}
+		m.confirmNewSaveChooserPath(path)
 	default:
 		m.notifyModel = notify.New(true, common.SaveAccessErrorTitle, err.Error(), notify.NoAction)
 		slog.Error("Save chooser target stat failed", "path", path, "error", err)
 	}
 }
 
+func (m *model) confirmExistingSaveChooserPath(path string, info os.FileInfo) {
+	if info.IsDir() {
+		m.notifyModel = notify.New(true, common.SaveDirErrorTitle, common.SaveDirErrorContent, notify.NoAction)
+		return
+	}
+
+	if m.isPortalSavePlaceholder(path) {
+		if writeErr := m.chooserWriteAndQuit([]string{path}); writeErr != nil {
+			slog.Error("Error while writing save chooser result", "error", writeErr)
+		}
+		return
+	}
+
+	m.warnModalForSaveOverwrite(path)
+}
+
+func (m *model) confirmNewSaveChooserPath(path string) {
+	parentDir := filepath.Dir(path)
+	parentInfo, statErr := os.Stat(parentDir)
+	if statErr != nil || !parentInfo.IsDir() {
+		slog.Error("Save chooser target parent is invalid", "path", path, "error", statErr)
+		return
+	}
+
+	if createErr := createSaveChooserPlaceholder(path); createErr != nil {
+		if errors.Is(createErr, os.ErrExist) {
+			m.warnModalForSaveOverwrite(path)
+			return
+		}
+		slog.Error("Error while creating save chooser placeholder", "path", path, "error", createErr)
+		return
+	}
+
+	if writeErr := m.chooserWriteAndQuit([]string{path}); writeErr != nil {
+		removeErr := os.Remove(path)
+		if removeErr != nil {
+			slog.Error(
+				"Error while writing save chooser result and removing placeholder",
+				"writeError",
+				writeErr,
+				"removeError",
+				removeErr,
+				"path",
+				path,
+			)
+			return
+		}
+		slog.Error(
+			"Error while writing save chooser result; removed placeholder",
+			"writeError",
+			writeErr,
+			"path",
+			path,
+		)
+	}
+}
+
 func (m *model) warnModalForSaveOverwrite(path string) {
 	m.chooser.overwritePath = path
-	m.notifyModel = notify.New(true, common.SaveOverwriteWarnTitle, common.SaveOverwriteWarnContent, notify.SaveOverwriteAction)
+	m.notifyModel = notify.New(
+		true,
+		common.SaveOverwriteWarnTitle,
+		common.SaveOverwriteWarnContent,
+		notify.SaveOverwriteAction,
+	)
 }
 
 func (m *model) confirmSaveOverwrite() {
@@ -193,7 +231,11 @@ func (m *model) cancelSaveOverwrite() {
 }
 
 func createSaveChooserPlaceholder(path string) error {
-	return os.WriteFile(path, []byte{}, utils.UserFilePerm)
+	file, err := os.OpenFile(path, os.O_CREATE|os.O_EXCL|os.O_WRONLY, utils.UserFilePerm)
+	if err != nil {
+		return err
+	}
+	return file.Close()
 }
 
 func (m *model) isPortalSavePlaceholder(path string) bool {

@@ -25,7 +25,7 @@ import (
 )
 
 // Run superfile app
-func Run(content embed.FS) {
+func Run(content embed.FS) { //nolint:funlen // CLI wiring keeps command/flag registration in one place.
 	// Enable custom colored help output
 	cli.HelpPrinter = CustomHelpPrinter //nolint:reassign // Intentionally reassigning to customize help output
 
@@ -181,7 +181,11 @@ func spfAppAction(_ context.Context, c *cli.Command) error {
 	return nil
 }
 
-func buildChooserRequest(firstPanelPaths []string, chooserFile string, saveFile string) (variable.ChooserRequest, error) {
+func buildChooserRequest(
+	firstPanelPaths []string,
+	chooserFile string,
+	saveFile string,
+) (variable.ChooserRequest, error) {
 	if chooserFile != "" && saveFile != "" {
 		return variable.ChooserRequest{}, errors.New("--chooser-file and --save-file cannot be used together")
 	}

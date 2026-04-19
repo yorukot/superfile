@@ -435,7 +435,14 @@ func TestSaveChooserPortalPlaceholderDoesNotTriggerOverwrite(t *testing.T) {
 	saveOutput := filepath.Join(curTestDir, "save_output.txt")
 
 	utils.SetupDirectories(t, curTestDir, dir1)
-	require.NoError(t, os.WriteFile(placeholderFile, []byte("* xdg-desktop-portal-termfilechooser instructions *\nplaceholder"), 0o644))
+	require.NoError(
+		t,
+		os.WriteFile(
+			placeholderFile,
+			[]byte("* xdg-desktop-portal-termfilechooser instructions *\nplaceholder"),
+			0o644,
+		),
+	)
 
 	variable.SetChooserRequest(variable.ChooserRequest{
 		Mode:          variable.ChooserModeSave,

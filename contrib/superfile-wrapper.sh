@@ -10,6 +10,8 @@ path="$4"
 out="$5"
 debug="$6"
 
+: "$multiple" "$directory"
+
 set -e
 
 if [ "$debug" = 1 ]; then

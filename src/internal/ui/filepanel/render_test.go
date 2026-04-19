@@ -40,11 +40,11 @@ func TestGetPanelModeInfoForSaveModeUsesDownloadIcon(t *testing.T) {
 	panel.SaveMode = true
 
 	label, iconValue := panel.getPanelModeInfo(0)
-	assert.Equal(t, "", label)
+	assert.Equal(t, "Save", label)
 	assert.Equal(t, icon.Download, iconValue)
 
 	panel.PanelMode = SelectMode
 	label, iconValue = panel.getPanelModeInfo(2)
-	assert.Equal(t, "(2)", label)
+	assert.Equal(t, "Save (2)", label)
 	assert.Equal(t, icon.Download, iconValue)
 }

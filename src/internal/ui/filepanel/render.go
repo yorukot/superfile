@@ -115,9 +115,9 @@ func (m *Model) getPanelModeInfo(selectedCount uint) (string, string) {
 			return "Save", icon.Select
 		}
 		if m.PanelMode == SelectMode && selectedCount > 0 {
-			return fmt.Sprintf("(%d)", selectedCount), icon.Download
+			return "Save" + icon.Space + fmt.Sprintf("(%d)", selectedCount), icon.Download
 		}
-		return "", icon.Download
+		return "Save", icon.Download
 	}
 	switch m.PanelMode {
 	case BrowserMode:

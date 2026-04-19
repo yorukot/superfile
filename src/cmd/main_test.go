@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"os"
 	"path/filepath"
 	"testing"
 
@@ -12,17 +11,12 @@ import (
 )
 
 func TestBuildChooserRequest(t *testing.T) {
-	originalWD, err := os.Getwd()
-	require.NoError(t, err)
-
 	tempDir := t.TempDir()
+	var err error
 	tempDir, err = filepath.EvalSymlinks(tempDir)
 	require.NoError(t, err)
 
-	require.NoError(t, os.Chdir(tempDir))
-	t.Cleanup(func() {
-		require.NoError(t, os.Chdir(originalWD))
-	})
+	t.Chdir(tempDir)
 
 	testdata := []struct {
 		name           string
