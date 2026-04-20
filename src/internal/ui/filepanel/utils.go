@@ -15,6 +15,21 @@ func (m *Model) GetRenderIndex() int {
 	return m.renderIndex
 }
 
+func (m *Model) effectiveRenderIndex() int {
+	if m.SaveMode && m.ElemCount() > 1 {
+		return max(m.renderIndex, 1)
+	}
+	return m.renderIndex
+}
+
+func (m *Model) visibleScrollableElementCount() int {
+	count := m.PanelElementHeight()
+	if m.SaveMode && m.ElemCount() > 1 {
+		count--
+	}
+	return max(count, 1)
+}
+
 func (m *Model) GetFocusedItem() Element {
 	return m.GetElementAtIdx(m.GetCursor())
 }
@@ -163,6 +178,13 @@ func (m *Model) ToggleReverseSort() {
 // Note: Intended for test utilities only!!!!!
 func (m *Model) SetCursorPosition(cursor int) {
 	m.scrollToCursor(cursor)
+}
+
+func (m *Model) FocusSaveEntry() {
+	if !m.SaveMode || m.Empty() {
+		return
+	}
+	m.scrollToCursor(0)
 }
 
 func (m *Model) FindElementIndexByName(name string) int {

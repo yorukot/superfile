@@ -82,20 +82,39 @@ func (m *Model) renderFileEntries(r *rendering.Renderer) {
 		r.AddLines(common.FilePanelNoneText)
 		return
 	}
-	end := min(m.renderIndex+m.PanelElementHeight(), m.ElemCount())
 
-	for itemIndex := m.renderIndex; itemIndex < end; itemIndex++ {
-		if m.Renaming && itemIndex == m.GetCursor() {
-			r.AddLines(m.Rename.View())
-			continue
+	if m.SaveMode {
+		m.renderFileEntry(r, 0)
+		if m.ElemCount() == 1 {
+			return
 		}
-		var builder strings.Builder
-		for _, column := range m.columns {
-			colData := column.Render(itemIndex)
-			builder.WriteString(colData)
+
+		start := m.effectiveRenderIndex()
+		end := min(start+m.visibleScrollableElementCount(), m.ElemCount())
+		for itemIndex := start; itemIndex < end; itemIndex++ {
+			m.renderFileEntry(r, itemIndex)
 		}
-		r.AddLines(builder.String())
+		return
 	}
+
+	end := min(m.renderIndex+m.PanelElementHeight(), m.ElemCount())
+	for itemIndex := m.renderIndex; itemIndex < end; itemIndex++ {
+		m.renderFileEntry(r, itemIndex)
+	}
+}
+
+func (m *Model) renderFileEntry(r *rendering.Renderer, itemIndex int) {
+	if m.Renaming && itemIndex == m.GetCursor() {
+		r.AddLines(m.Rename.View())
+		return
+	}
+
+	var builder strings.Builder
+	for _, column := range m.columns {
+		colData := column.Render(itemIndex)
+		builder.WriteString(colData)
+	}
+	r.AddLines(builder.String())
 }
 
 func (m *Model) getSortInfo() (string, string) {

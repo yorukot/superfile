@@ -467,6 +467,40 @@ func TestSaveChooserPortalPlaceholderDoesNotTriggerOverwrite(t *testing.T) {
 	assert.Equal(t, placeholderFile, string(data))
 }
 
+func TestSaveChooserFocusTargetHotkeyMovesCursorToGhost(t *testing.T) {
+	curTestDir := filepath.Join(testDir, "TestSaveChooserFocusTargetHotkeyMovesCursorToGhost")
+	dir1 := filepath.Join(curTestDir, "dir1")
+	file1 := filepath.Join(dir1, "file1.txt")
+	file2 := filepath.Join(dir1, "file2.txt")
+	saveOutput := filepath.Join(curTestDir, "save_output.txt")
+	suggestedPath := filepath.Join(dir1, "download.txt")
+
+	utils.SetupDirectories(t, curTestDir, dir1)
+	utils.SetupFiles(t, file1, file2)
+
+	variable.SetChooserRequest(variable.ChooserRequest{
+		Mode:          variable.ChooserModeSave,
+		OutputFile:    saveOutput,
+		SuggestedPath: suggestedPath,
+	})
+	t.Cleanup(func() {
+		variable.SetChooserRequest(variable.ChooserRequest{})
+	})
+
+	m := defaultTestModel(curTestDir)
+	TeaUpdate(m, nil)
+
+	panel := m.getFocusedFilePanel()
+	panel.ListDown()
+	require.False(t, panel.GetFocusedItem().SaveTarget)
+
+	TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.SaveChooserFocusTarget[2]))
+
+	assert.True(t, panel.GetFocusedItem().SaveTarget)
+	assert.Equal(t, 0, panel.GetCursor())
+	assert.Equal(t, suggestedPath, panel.GetFocusedItem().Location)
+}
+
 func eventuallyEnsurePreviewContent(t *testing.T, m *model, content string, msgAndArgs ...any) {
 	contains := false
 	assert.Eventually(t, func() bool {

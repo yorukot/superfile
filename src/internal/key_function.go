@@ -23,6 +23,10 @@ import (
 // updates and fixes in key handling code
 func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocognit,gocyclo,cyclop,funlen // See above
 	switch {
+	case m.isSaveChooserMode() && slices.Contains(common.Hotkeys.SaveChooserFocusTarget, msg):
+		if m.focusPanel == nonePanelFocus {
+			m.getFocusedFilePanel().FocusSaveEntry()
+		}
 	// If move up Key is pressed, check the current state and executes
 	case slices.Contains(common.Hotkeys.ListUp, msg):
 		switch m.focusPanel {
