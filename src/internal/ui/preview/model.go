@@ -2,6 +2,7 @@ package preview
 
 import (
 	"log/slog"
+	"os"
 
 	"github.com/yorukot/superfile/src/internal/common"
 
@@ -44,5 +45,18 @@ func New() Model {
 		thumbnailGenerator: generator,
 		// TODO:  This is an IO operation, move to async ?
 		batCmd: checkBatCmd(),
+	}
+}
+
+// ClearKittyImages returns the escape sequence to clear kitty protocol
+// images from the terminal. Should be called before rendering any modal
+// overlay to prevent image pixels bleeding through.
+func (m *Model) ClearKittyImages() {
+	if m.imagePreviewer == nil {
+		return
+	}
+	cmd := m.imagePreviewer.ClearKittyImages()
+	if cmd != "" {
+		_, _ = os.Stdout.WriteString(cmd)
 	}
 }

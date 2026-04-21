@@ -119,13 +119,17 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 		return m.getCompressSelectedFilesCmd()
 
 	case slices.Contains(common.Hotkeys.OpenCommandLine, msg):
+		m.fileModel.FilePreview.ClearKittyImages()
 		m.promptModal.Open(true)
 	case slices.Contains(common.Hotkeys.OpenSPFPrompt, msg):
+		m.fileModel.FilePreview.ClearKittyImages()
 		m.promptModal.Open(false)
 	case slices.Contains(common.Hotkeys.OpenZoxide, msg):
+		m.fileModel.FilePreview.ClearKittyImages()
 		return m.zoxideModal.Open()
 
 	case slices.Contains(common.Hotkeys.OpenHelpMenu, msg):
+		m.fileModel.FilePreview.ClearKittyImages()
 		m.helpMenu.Open()
 
 	case slices.Contains(common.Hotkeys.OpenSortOptionsMenu, msg):
