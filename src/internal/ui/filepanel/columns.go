@@ -83,7 +83,7 @@ func (m *Model) renderPermissions(indexElement int, columnWidth int) string {
 	elem := m.GetElementAtIdx(indexElement)
 	isSelected := m.CheckSelected(elem.Location)
 	return common.FilePanelItemRender(
-		elem.Info.Mode().Perm().String(),
+		elem.Info.Mode().String(),
 		columnWidth,
 		isSelected,
 		common.FilePanelBGColor,
