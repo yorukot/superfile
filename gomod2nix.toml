@@ -62,8 +62,8 @@ schema = 3
     hash = 'sha256-RHsRT2EZ1nDOElxAK+6/DC9XAaGVjDTgPvRh3pyCfY4='
 
   [mod.'github.com/charmbracelet/x/ansi']
-    version = 'v0.10.1'
-    hash = 'sha256-nY4zkUGnuD+Lczwt+NMXdQ38cAsy5mtxzXrFSJmR0E4='
+    version = 'v0.11.6'
+    hash = 'sha256-UToZIkqXl9MEppcRgbeBqaaMeAzRkGa0w3lVUs6sxWI='
 
   [mod.'github.com/charmbracelet/x/cellbuf']
     version = 'v0.0.13-0.20250311204145-2c3ea96c31dd'
@@ -73,13 +73,17 @@ schema = 3
     version = 'v0.2.1'
     hash = 'sha256-VBkCZLI90PhMasftGw3403IqoV7d3E5WEGAIVrN5xQM='
 
+  [mod.'github.com/clipperhouse/displaywidth']
+    version = 'v0.9.0'
+    hash = 'sha256-9CNyTZPSncKQ7Y0my9DR4WYXDjtDHYNL512D691WDAM='
+
   [mod.'github.com/clipperhouse/stringish']
     version = 'v0.1.1'
     hash = 'sha256-Mp8M1CRbwr6dcJ4BD9tXD5I78ZgCFEm0GDxJv0GYReg='
 
   [mod.'github.com/clipperhouse/uax29/v2']
-    version = 'v2.3.0'
-    hash = 'sha256-dLL70mEOxrmYVoQjy2K7QvZiahAlJKOcFDz2mW/R/Do='
+    version = 'v2.5.0'
+    hash = 'sha256-Men4JLhiuEtAx8ZSzId5ciRWhud68o3k/B48ppwyxkM='
 
   [mod.'github.com/connesc/cipherio']
     version = 'v0.2.1'
