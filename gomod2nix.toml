@@ -106,8 +106,8 @@ schema = 3
     hash = 'sha256-OWSqN1+IoL73rWXWdbbcahZu8n2al90Y3eT5Z0vgHvU='
 
   [mod.'github.com/fatih/color']
-    version = 'v1.18.0'
-    hash = 'sha256-pP5y72FSbi4j/BjyVq/XbAOFjzNjMxZt2R/lFFxGWvY='
+    version = 'v1.19.0'
+    hash = 'sha256-YgMm1nid8yigNLG6aHfuMbsvMI1UYVf/Rkg44pp/NTU='
 
   [mod.'github.com/fvbommel/sortorder']
     version = 'v1.1.0'
@@ -154,8 +154,8 @@ schema = 3
     hash = 'sha256-6BKrJsfmxie+YFAWzTYVPQfrwjQEXRo+J8LY+50C1BU='
 
   [mod.'github.com/mattn/go-colorable']
-    version = 'v0.1.13'
-    hash = 'sha256-qb3Qbo0CELGRIzvw7NVM1g/aayaz4Tguppk9MD2/OI8='
+    version = 'v0.1.14'
+    hash = 'sha256-JC60PjKj7MvhZmUHTZ9p372FV72I9Mxvli3fivTbxuA='
 
   [mod.'github.com/mattn/go-isatty']
     version = 'v0.0.20'
@@ -266,8 +266,8 @@ schema = 3
     hash = 'sha256-NR+ZSeQKbfVP4Cu/SlNIivMa+c1OMyOSMxLSjX+LZJI='
 
   [mod.'golang.org/x/sys']
-    version = 'v0.38.0'
-    hash = 'sha256-1+i5EaG3JwH3KMtefzJLG5R6jbOeJM4GK3/LHBVnSy0='
+    version = 'v0.42.0'
+    hash = 'sha256-LhNedvUEJbPYyR6EoU91rfOr3DBBoauLOcMcyqghEos='
 
   [mod.'golang.org/x/term']
     version = 'v0.18.0'
