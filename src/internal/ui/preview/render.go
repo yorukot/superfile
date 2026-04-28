@@ -144,13 +144,12 @@ func (m *Model) RenderText(text string) string {
 func (m *Model) RenderTextWithDimension(text string, height int, width int) string {
 	// For zero size, don't need to render anything. Its kinda hack, but
 	// its to prevent error logs
-	clearCmd := m.imagePreviewer.ClearKittyImages()
 	if width == 0 && height == 0 {
-		return clearCmd
+		return ""
 	}
 	return ui.FilePreviewPanelRenderer(height, width).
 		AddLines(text).
-		Render() + clearCmd
+		Render()
 }
 
 // RenderWithPath returns (render, rawTransmit). rawTransmit is non-empty

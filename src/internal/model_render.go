@@ -4,8 +4,6 @@ import (
 	"path/filepath"
 	"strconv"
 
-	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
-
 	"github.com/yorukot/superfile/src/internal/common"
 
 	"charm.land/lipgloss/v2"
@@ -37,12 +35,12 @@ func (m *model) terminalSizeWarnRender() string {
 	fullWidthString = common.TerminalCorrectSize.Render(fullWidthString)
 
 	heightString := common.MainStyle.Render(" Height = ")
-	return common.FullScreenStyle(m.fullHeight, m.fullWidth).Render(`Terminal size too small:`+"\n"+
-		"Width = "+fullWidthString+
-		heightString+fullHeightString+"\n\n"+
-		"Needed for current config:"+"\n"+
-		"Width = "+common.TerminalCorrectSize.Render(minimumWidthString)+
-		heightString+common.TerminalCorrectSize.Render(minimumHeightString)) + filepreview.ClearKittyImages()
+	return common.FullScreenStyle(m.fullHeight, m.fullWidth).Render(`Terminal size too small:` + "\n" +
+		"Width = " + fullWidthString +
+		heightString + fullHeightString + "\n\n" +
+		"Needed for current config:" + "\n" +
+		"Width = " + common.TerminalCorrectSize.Render(minimumWidthString) +
+		heightString + common.TerminalCorrectSize.Render(minimumHeightString))
 }
 
 func (m *model) terminalSizeWarnAfterFirstRender() string {
@@ -64,12 +62,12 @@ func (m *model) terminalSizeWarnAfterFirstRender() string {
 	fullWidthString = common.TerminalCorrectSize.Render(fullWidthString)
 
 	heightString := common.MainStyle.Render(" Height = ")
-	return common.FullScreenStyle(m.fullHeight, m.fullWidth).Render(`You change your terminal size too small:`+"\n"+
-		"Width = "+fullWidthString+
-		heightString+fullHeightString+"\n\n"+
-		"Needed for current config:"+"\n"+
-		"Width = "+common.TerminalCorrectSize.Render(minimumWidthString)+
-		heightString+common.TerminalCorrectSize.Render(minimumHeightString)) + filepreview.ClearKittyImages()
+	return common.FullScreenStyle(m.fullHeight, m.fullWidth).Render(`You change your terminal size too small:` + "\n" +
+		"Width = " + fullWidthString +
+		heightString + fullHeightString + "\n\n" +
+		"Needed for current config:" + "\n" +
+		"Width = " + common.TerminalCorrectSize.Render(minimumWidthString) +
+		heightString + common.TerminalCorrectSize.Render(minimumHeightString))
 }
 
 func (m *model) typineModalRender() string {

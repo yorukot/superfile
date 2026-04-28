@@ -17,6 +17,8 @@ func isKittyCapable() bool {
 	termProgram := os.Getenv("TERM_PROGRAM")
 	term := os.Getenv("TERM")
 
+	// TODO: Replace this allowlist with a real Kitty graphics capability check.
+	// tmux masks the underlying terminal through TERM/TERM_PROGRAM.
 	knownTerminals := []string{
 		"ghostty",
 		"WezTerm",
@@ -34,18 +36,6 @@ func isKittyCapable() bool {
 	}
 
 	return false
-}
-
-// ClearKittyImages is a no-op for view content. With virtual placeholders,
-// Kitty clear commands are APC sequences that get dropped by cell-based
-// renderers. Clearing is handled via tea.Raw() in the rawTransmit path.
-func ClearKittyImages() string {
-	return ""
-}
-
-// ClearKittyImages is a no-op for view content. See package-level ClearKittyImages.
-func (p *ImagePreviewer) ClearKittyImages() string {
-	return ""
 }
 
 // GetKittyClearRaw returns the raw APC command to clear all Kitty images.
