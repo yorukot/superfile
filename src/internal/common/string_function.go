@@ -159,10 +159,12 @@ func formatSizeInternal(size int64, power int, unitlist [7]string) string {
 
 func FormatFileSize(size int64) string {
 	units := unitsBin()
+	power := KibibyteSize
 	if Config.FileSizeUseSI {
 		units = unitsDec()
+		power = KilobyteSize
 	}
-	return formatSizeInternal(size, KibibyteSize, units)
+	return formatSizeInternal(size, power, units)
 }
 
 func GetHelpMenuHotkeyString(hotkeys []string) string {
