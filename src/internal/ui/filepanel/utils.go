@@ -1,6 +1,11 @@
 package filepanel
 
-import "math"
+import (
+	"cmp"
+	"math"
+	"path/filepath"
+	"slices"
+)
 
 func (m *Model) GetCursor() int {
 	return m.cursor
@@ -8,6 +13,21 @@ func (m *Model) GetCursor() int {
 
 func (m *Model) GetRenderIndex() int {
 	return m.renderIndex
+}
+
+func (m *Model) effectiveRenderIndex() int {
+	if m.SaveMode && m.ElemCount() > 1 {
+		return max(m.renderIndex, 1)
+	}
+	return m.renderIndex
+}
+
+func (m *Model) visibleScrollableElementCount() int {
+	count := m.PanelElementHeight()
+	if m.SaveMode && m.ElemCount() > 1 {
+		count--
+	}
+	return max(count, 1)
 }
 
 func (m *Model) GetFocusedItem() Element {
@@ -80,6 +100,31 @@ func (m *Model) GetSelectedLocations() []string {
 	return result
 }
 
+func (m *Model) GetOrderedSelectedLocations() []string {
+	type orderedSelection struct {
+		location string
+		order    int
+	}
+
+	ordered := make([]orderedSelection, 0, len(m.selected))
+	for location, order := range m.selected {
+		ordered = append(ordered, orderedSelection{
+			location: location,
+			order:    order,
+		})
+	}
+
+	slices.SortFunc(ordered, func(a, b orderedSelection) int {
+		return cmp.Compare(a.order, b.order)
+	})
+
+	result := make([]string, 0, len(ordered))
+	for _, item := range ordered {
+		result = append(result, item.location)
+	}
+	return result
+}
+
 func (m *Model) GetFirstSelectedLocation() string {
 	if len(m.selected) == 0 {
 		return ""
@@ -97,9 +142,16 @@ func (m *Model) GetFirstSelectedLocation() string {
 
 // Select the item where cursor located (only work on select mode)
 func (m *Model) SingleItemSelect() {
-	if !m.EmptyOrInvalid() {
-		m.ToggleSelected(m.GetFocusedItem().Location)
+	if m.EmptyOrInvalid() {
+		return
 	}
+
+	focused := m.GetFocusedItem()
+	if focused.SaveTarget {
+		return
+	}
+
+	m.ToggleSelected(focused.Location)
 }
 
 func (m *Model) ElemCount() int {
@@ -128,6 +180,13 @@ func (m *Model) SetCursorPosition(cursor int) {
 	m.scrollToCursor(cursor)
 }
 
+func (m *Model) FocusSaveEntry() {
+	if !m.SaveMode || m.Empty() {
+		return
+	}
+	m.scrollToCursor(0)
+}
+
 func (m *Model) FindElementIndexByName(name string) int {
 	for i, elem := range m.element {
 		if elem.Name == name {
@@ -144,4 +203,39 @@ func (m *Model) FindElementIndexByLocation(location string) int {
 		}
 	}
 	return -1
+}
+
+func (m *Model) EnableSaveMode(fileName string) {
+	m.SaveMode = true
+	m.SaveEntryName = fileName
+	m.cursor = 0
+	m.renderIndex = 0
+}
+
+func (m *Model) DisableSaveMode() {
+	m.SaveMode = false
+	m.SaveEntryName = ""
+}
+
+func (m *Model) HasSaveEntry() bool {
+	return m.SaveMode
+}
+
+func (m *Model) GetSaveEntryName() string {
+	return m.SaveEntryName
+}
+
+func (m *Model) SetSaveEntryName(name string) {
+	m.SaveEntryName = name
+}
+
+func (m *Model) GetSaveEntryLocation() string {
+	if m.SaveEntryName == "" {
+		return m.Location
+	}
+	return filepath.Join(m.Location, m.SaveEntryName)
+}
+
+func (m *Model) IsSaveEntryFocused() bool {
+	return m.SaveMode && m.GetCursor() == 0
 }

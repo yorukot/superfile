@@ -51,8 +51,8 @@ func (m *Model) renderFooter(r *rendering.Renderer, selectedCount uint) {
 	cursorStr := m.getCursorString()
 
 	if common.Config.Nerdfont {
-		sortLabel = sortIcon + icon.Space + sortLabel
-		modeLabel = modeIcon + icon.Space + modeLabel
+		sortLabel = renderFooterInfoLabel(sortLabel, sortIcon)
+		modeLabel = renderFooterInfoLabel(modeLabel, modeIcon)
 	} else {
 		// TODO : Figure out if we can set icon.Space to " " if nerdfont is false
 		// That would simplify code
@@ -82,20 +82,39 @@ func (m *Model) renderFileEntries(r *rendering.Renderer) {
 		r.AddLines(common.FilePanelNoneText)
 		return
 	}
-	end := min(m.renderIndex+m.PanelElementHeight(), m.ElemCount())
 
-	for itemIndex := m.renderIndex; itemIndex < end; itemIndex++ {
-		if m.Renaming && itemIndex == m.GetCursor() {
-			r.AddLines(m.Rename.View())
-			continue
+	if m.SaveMode {
+		m.renderFileEntry(r, 0)
+		if m.ElemCount() == 1 {
+			return
 		}
-		var builder strings.Builder
-		for _, column := range m.columns {
-			colData := column.Render(itemIndex)
-			builder.WriteString(colData)
+
+		start := m.effectiveRenderIndex()
+		end := min(start+m.visibleScrollableElementCount(), m.ElemCount())
+		for itemIndex := start; itemIndex < end; itemIndex++ {
+			m.renderFileEntry(r, itemIndex)
 		}
-		r.AddLines(builder.String())
+		return
 	}
+
+	end := min(m.renderIndex+m.PanelElementHeight(), m.ElemCount())
+	for itemIndex := m.renderIndex; itemIndex < end; itemIndex++ {
+		m.renderFileEntry(r, itemIndex)
+	}
+}
+
+func (m *Model) renderFileEntry(r *rendering.Renderer, itemIndex int) {
+	if m.Renaming && itemIndex == m.GetCursor() {
+		r.AddLines(m.Rename.View())
+		return
+	}
+
+	var builder strings.Builder
+	for _, column := range m.columns {
+		colData := column.Render(itemIndex)
+		builder.WriteString(colData)
+	}
+	r.AddLines(builder.String())
 }
 
 func (m *Model) getSortInfo() (string, string) {
@@ -107,6 +126,18 @@ func (m *Model) getSortInfo() (string, string) {
 }
 
 func (m *Model) getPanelModeInfo(selectedCount uint) (string, string) {
+	if m.SaveMode {
+		if !common.Config.Nerdfont {
+			if m.PanelMode == SelectMode && selectedCount > 0 {
+				return "Save" + icon.Space + fmt.Sprintf("(%d)", selectedCount), icon.Select
+			}
+			return "Save", icon.Select
+		}
+		if m.PanelMode == SelectMode && selectedCount > 0 {
+			return "Save" + icon.Space + fmt.Sprintf("(%d)", selectedCount), icon.Download
+		}
+		return "Save", icon.Download
+	}
 	switch m.PanelMode {
 	case BrowserMode:
 		return "Browser", icon.Browser
@@ -115,6 +146,13 @@ func (m *Model) getPanelModeInfo(selectedCount uint) (string, string) {
 	default:
 		return "", ""
 	}
+}
+
+func renderFooterInfoLabel(label string, iconValue string) string {
+	if label == "" {
+		return iconValue
+	}
+	return iconValue + icon.Space + label
 }
 
 func (m *Model) getCursorString() string {

@@ -56,13 +56,17 @@ func (m *model) enterPanel() {
 		return
 	}
 
-	if variable.ChooserFile != "" {
+	if m.isSaveChooserMode() {
+		return
+	}
+
+	if m.isOpenChooserMode() {
 		chooserErr := m.chooserFileWriteAndQuit(panel.GetFocusedItem().Location)
 		if chooserErr == nil {
 			return
 		}
 		// Continue with preview if file is not writable
-		slog.Error("Error while writing to chooser file, continuing with file open", "error", chooserErr)
+		slog.Error("Error while writing chooser output, continuing with file open", "error", chooserErr)
 	}
 	m.executeOpenCommand()
 }

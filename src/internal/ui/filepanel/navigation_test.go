@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/yorukot/superfile/src/internal/common"
 )
@@ -327,6 +328,31 @@ func TestScrollToCursor(t *testing.T) {
 			assert.Equal(t, tt.expectedRender, tt.panel.GetRenderIndex())
 		})
 	}
+}
+
+func TestSaveModeScrollKeepsGhostPinned(t *testing.T) {
+	panel := testModel(0, 0, 12, BrowserMode, make([]Element, 20))
+	panel.SaveMode = true
+
+	panel.scrollToCursor(15)
+	assert.Equal(t, 15, panel.GetCursor())
+	assert.Equal(t, 10, panel.GetRenderIndex())
+
+	panel.scrollToCursor(0)
+	assert.Equal(t, 0, panel.GetCursor())
+	assert.Equal(t, 0, panel.GetRenderIndex())
+	require.NoError(t, panel.ValidateCursorAndRenderIndex())
+}
+
+func TestFocusSaveEntry(t *testing.T) {
+	panel := testModel(3, 2, 12, BrowserMode, make([]Element, 5))
+	panel.SaveMode = true
+
+	panel.FocusSaveEntry()
+
+	assert.Equal(t, 0, panel.GetCursor())
+	assert.Equal(t, 0, panel.GetRenderIndex())
+	require.NoError(t, panel.ValidateCursorAndRenderIndex())
 }
 
 func TestApplyTargetFileCursor(t *testing.T) {

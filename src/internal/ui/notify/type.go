@@ -8,4 +8,5 @@ const (
 	QuitAction
 	NoAction
 	PermanentDeleteAction
+	SaveOverwriteAction
 )

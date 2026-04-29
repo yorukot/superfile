@@ -11,13 +11,14 @@ func (m *Model) scrollToCursor(cursor int) {
 	m.cursor = cursor
 
 	// Modify renderIndex if needed
-	renderCount := m.PanelElementHeight()
-	if m.cursor < m.renderIndex {
+	renderCount := m.visibleScrollableElementCount()
+	renderIndex := m.effectiveRenderIndex()
+	if m.cursor < renderIndex {
 		// Due to size change, when last element is selected, we might have
 		// empty space (renderIndex ... ElemCount()-1 spans less then renderCount)
 		// Even with >0 renderIndex
 		m.renderIndex = m.cursor
-	} else if m.cursor > m.renderIndex+renderCount-1 {
+	} else if m.cursor > renderIndex+renderCount-1 {
 		m.renderIndex = m.cursor - renderCount + 1
 	}
 }
@@ -66,7 +67,13 @@ func (m *Model) ItemSelectDown() {
 
 // Applies targetFile cursor positioning, if configured for the panel.
 func (m *Model) applyTargetFileCursor() {
-	idx := m.FindElementIndexByName(m.TargetFile)
+	idx := -1
+	for i, elem := range m.element {
+		if elem.Name == m.TargetFile && !elem.SaveTarget {
+			idx = i
+			break
+		}
+	}
 	if idx != -1 {
 		m.scrollToCursor(idx)
 	}
@@ -77,10 +84,19 @@ func (m *Model) ValidateCursorAndRenderIndex() error {
 	if m.cursor < 0 || m.ElemCount() <= m.cursor {
 		return fmt.Errorf("invalid cursor : %d, element count : %d", m.cursor, m.ElemCount())
 	}
-	renderCount := m.PanelElementHeight()
-	if (m.cursor < m.renderIndex) || (m.cursor > m.renderIndex+renderCount-1) {
+
+	if m.SaveMode && m.ElemCount() > 1 && m.cursor == 0 {
+		if m.renderIndex < 0 || m.ElemCount() <= m.renderIndex {
+			return fmt.Errorf("invalid renderIndex : %d, element count : %d", m.renderIndex, m.ElemCount())
+		}
+		return nil
+	}
+
+	renderCount := m.visibleScrollableElementCount()
+	renderIndex := m.effectiveRenderIndex()
+	if (m.cursor < renderIndex) || (m.cursor > renderIndex+renderCount-1) {
 		return fmt.Errorf("invalid renderIndex : %d, cursor : %d, renderCount : %d",
-			m.renderIndex, m.cursor, renderCount)
+			renderIndex, m.cursor, renderCount)
 	}
 	return nil
 }
