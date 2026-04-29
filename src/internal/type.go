@@ -1,9 +1,12 @@
 package internal
 
 import (
+	"sync"
+
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 
 	"github.com/yorukot/superfile/src/internal/ui/helpmenu"
+	"github.com/yorukot/superfile/src/internal/ui/spferror"
 
 	"github.com/yorukot/superfile/src/internal/ui/clipboard"
 	"github.com/yorukot/superfile/src/internal/ui/sortmodel"
@@ -56,12 +59,14 @@ type model struct {
 	focusPanel      focusPanelType
 
 	// Modals
-	notifyModel notify.Model
-	typingModal typingModal
-	helpMenu    helpmenu.Model
-	promptModal prompt.Model
-	zoxideModal zoxideui.Model
-	sortModal   sortmodel.Model
+	notifyModel     notify.Model
+	typingModal     typingModal
+	helpMenu        helpmenu.Model
+	promptModal     prompt.Model
+	zoxideModal     zoxideui.Model
+	sortModal       sortmodel.Model
+	spfError        spferror.Model
+	mutexErrorModal sync.Mutex
 
 	// Zoxide client for directory tracking
 	zClient *zoxidelib.Client

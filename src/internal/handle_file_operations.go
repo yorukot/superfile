@@ -13,6 +13,7 @@ import (
 
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
+	"github.com/yorukot/superfile/src/internal/ui/spferror"
 	"github.com/yorukot/superfile/src/pkg/utils"
 
 	"github.com/yorukot/superfile/src/internal/common"
@@ -22,6 +23,43 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"github.com/atotto/clipboard"
 )
+
+// Processes any standard (f.e. deletion) operation with a list of files
+func (m *model) runFileProcessor(processor processbar.FileListProcessor,
+	finalizer processbar.ProcessFinalizer,
+	items []string,
+	reqID int,
+) tea.Msg {
+	slog.Debug("Lock mutex for modal error window")
+	m.mutexErrorModal.Lock()
+	result, toDo := processor(items)
+	if result.State == processbar.Failed && len(toDo) > 0 {
+		// we unlock mutexErrorModal on dispatch SpfErrorModalUpdateMsg
+		errorModel := spferror.New(true,
+			"Error",
+			result.ErrorMsg, spferror.NewFileListError(toDo, processor, finalizer))
+		return NewSpfErrorModalMsg(errorModel, reqID)
+	}
+	slog.Debug("Unlock mutex for modal error window")
+	m.mutexErrorModal.Unlock()
+	return finalizer(result.State, reqID)
+}
+
+func markProcessDone(process processbar.Process, processBarModel *processbar.Model) {
+	process.DoneTime = time.Now()
+	err := processBarModel.SendUpdateProcessMsg(process, true)
+	if err != nil {
+		slog.Error("Failed to send final delete operation update", "error", err)
+	}
+}
+
+func formatFileError(filePath string, err error) string {
+	var e *os.LinkError
+	if errors.As(err, &e) {
+		return fmt.Sprintf("Deleting %s: \n%s", filePath, e.Err.Error())
+	}
+	return err.Error()
+}
 
 // Create a file in the currently focus file panel
 // TODO: Fix it. It doesn't creates a new file. It just opens a file model,
@@ -122,46 +160,59 @@ func (m *model) getDeleteCmd(permDelete bool) tea.Cmd {
 	m.ioReqCnt++
 	slog.Debug("Submitting delete request", "id", reqID, "items cnt", len(items))
 	return func() tea.Msg {
-		state := deleteOperation(&m.processBarModel, items, useTrash)
-		return NewDeleteOperationMsg(state, reqID)
+		return m.deleteOperation(&m.processBarModel, items, useTrash, reqID)
 	}
 }
 
-func deleteOperation(processBarModel *processbar.Model, items []string, useTrash bool) processbar.ProcessState {
+func (m *model) deleteOperation(processBarModel *processbar.Model, items []string, useTrash bool, reqID int) tea.Msg {
 	if len(items) == 0 {
-		return processbar.Cancelled
+		return NewDeleteOperationMsg(processbar.Cancelled, reqID)
 	}
 	p, err := processBarModel.SendAddProcessMsg(filepath.Base(items[0]), processbar.OpDelete, len(items), true)
 	if err != nil {
 		slog.Error("Cannot spawn a new process", "error", err)
-		return processbar.Failed
+		return NewDeleteOperationMsg(processbar.Failed, reqID)
 	}
+	finalizer := func(state processbar.ProcessState, reqID int) tea.Msg { return NewDeleteOperationMsg(state, reqID) }
+	processor := makeDeleteProcessor(p, processBarModel, useTrash)
+	msg := m.runFileProcessor(processor, finalizer, items, reqID)
+	return msg
+}
 
-	deleteFunc := os.RemoveAll
-	if useTrash {
-		deleteFunc = moveToTrash
-	}
-	for _, item := range items {
-		err = deleteFunc(item)
-		if err != nil {
-			p.State = processbar.Failed
-			slog.Error("Error in delete operation", "item", item, "useTrash", useTrash, "error", err)
-			break
+func makeDeleteProcessor(process processbar.Process,
+	processBarModel *processbar.Model,
+	useTrash bool) processbar.FileListProcessor {
+	processorFunction := func(items []string) (processbar.Process, []string) {
+		notProcessed := make([]string, 0)
+		if len(items) == 0 {
+			markProcessDone(process, processBarModel)
+			return process, notProcessed
 		}
-		p.CurrentFile = filepath.Base(item)
-		p.Done++
-		processBarModel.TrySendingUpdateProcessMsg(p)
-	}
+		deleteFunc := os.RemoveAll
+		if useTrash {
+			deleteFunc = moveToTrash
+		}
+		for i, item := range items {
+			err := deleteFunc(item)
+			if err != nil {
+				process.State = processbar.Failed
+				slog.Error("Error in delete operation", "item", item, "useTrash", useTrash, "error", err)
+				process.ErrorMsg = formatFileError(item, err)
+				notProcessed = items[i:]
+				break
+			}
+			process.CurrentFile = filepath.Base(item)
+			process.Done++
+			processBarModel.TrySendingUpdateProcessMsg(process)
+		}
 
-	if p.State != processbar.Failed {
-		p.State = processbar.Successful
+		if process.State != processbar.Failed {
+			process.State = processbar.Successful
+			markProcessDone(process, processBarModel)
+		}
+		return process, notProcessed
 	}
-	p.DoneTime = time.Now()
-	err = processBarModel.SendUpdateProcessMsg(p, true)
-	if err != nil {
-		slog.Error("Failed to send final delete operation update", "error", err)
-	}
-	return p.State
+	return processorFunction
 }
 
 func (m *model) getDeleteTriggerCmd(deletePermanent bool) tea.Cmd {

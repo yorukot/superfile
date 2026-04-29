@@ -8,6 +8,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/filemodel"
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
+	"github.com/yorukot/superfile/src/internal/ui/spferror"
 
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 
@@ -266,6 +267,30 @@ func (m *model) handleNotifyModelConfirm(action notify.ConfirmActionType) tea.Cm
 		slog.Error("Unknown type of action", "action", action)
 	}
 	return nil
+}
+
+func (m *model) spfErrorModelOpenKey(msg string) tea.Cmd {
+	isAbort := slices.Contains(spferror.KeyAbort(), msg)
+	isSkip := slices.Contains(spferror.KeySkip(), msg)
+
+	if !isAbort && !isSkip {
+		slog.Warn("Invalid keypress in spfErrorModel", "msg", msg)
+		return nil
+	}
+	defer func() {
+		slog.Debug("Unlock mutex for modal error window")
+		m.mutexErrorModal.Unlock()
+	}()
+	state := m.spfError.Close()
+	if state == nil {
+		return nil
+	}
+	reqID := m.ioReqCnt
+	m.ioReqCnt++
+	if isSkip {
+		return func() tea.Msg { return state.Skip(m.runFileProcessor, reqID) }
+	}
+	return func() tea.Msg { return state.Abort(m.runFileProcessor, reqID) }
 }
 
 // Handles key inputs inside sort options menu

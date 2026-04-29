@@ -8,6 +8,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
+	"github.com/yorukot/superfile/src/internal/ui/spferror"
 )
 
 type ModelUpdateMessage interface {
@@ -173,5 +174,25 @@ func NewNotifyModalMsg(m notify.Model, reqID int) NotifyModalUpdateMsg {
 
 func (msg NotifyModalUpdateMsg) ApplyToModel(m *model) tea.Cmd {
 	m.notifyModel = msg.m
+	return nil
+}
+
+type SpfErrorModalUpdateMsg struct {
+	BaseMessage
+
+	m spferror.Model
+}
+
+func NewSpfErrorModalMsg(m spferror.Model, reqID int) SpfErrorModalUpdateMsg {
+	return SpfErrorModalUpdateMsg{
+		m: m,
+		BaseMessage: BaseMessage{
+			reqID: reqID,
+		},
+	}
+}
+
+func (msg SpfErrorModalUpdateMsg) ApplyToModel(m *model) tea.Cmd {
+	m.spfError = msg.m
 	return nil
 }
