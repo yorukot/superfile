@@ -1,6 +1,6 @@
 package filemodel
 
-import "github.com/charmbracelet/lipgloss"
+import "charm.land/lipgloss/v2"
 
 func (m *Model) Render() string {
 	f := make([]string, m.PanelCount()+1)

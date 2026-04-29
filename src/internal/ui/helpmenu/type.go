@@ -1,6 +1,6 @@
 package helpmenu
 
-import "github.com/charmbracelet/bubbles/textinput"
+import "charm.land/bubbles/v2/textinput"
 
 type hotkeyType int
 

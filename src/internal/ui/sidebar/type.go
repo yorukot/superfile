@@ -1,6 +1,6 @@
 package sidebar
 
-import "github.com/charmbracelet/bubbles/textinput"
+import "charm.land/bubbles/v2/textinput"
 
 type directory struct {
 	Location string `json:"location"`

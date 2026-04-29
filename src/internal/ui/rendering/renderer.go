@@ -3,11 +3,12 @@ package rendering
 import (
 	"errors"
 	"fmt"
+	"image/color"
 	"log/slog"
 	"math/rand/v2"
 	"strconv"
 
-	"github.com/charmbracelet/lipgloss"
+	"charm.land/lipgloss/v2"
 )
 
 type StyleModifier func(lipgloss.Style) lipgloss.Style
@@ -27,9 +28,10 @@ type Renderer struct {
 	// Empty for last section . len(sectionDividers) should be equal to len(contentSections) - 1
 	sectionDividers []string
 	curSectionIdx   int
-	// Including Dividers - Count of actual lines that were added. It maybe <= totalHeight - 2
-	actualContentHeight int
-	defTruncateStyle    TruncateStyle
+	// Including dividers, this is the committed height before the current section.
+	// It excludes lines currently buffered in contentSections[curSectionIdx].
+	committedContentHeight int
+	defTruncateStyle       TruncateStyle
 
 	// Whether to reduce rendered height to fit number of lines
 	truncateHeight bool
@@ -37,12 +39,12 @@ type Renderer struct {
 	border BorderConfig
 
 	// Should this go in contentRenderer - No . ContentRenderer is not for storing style configs
-	contentFGColor lipgloss.TerminalColor
-	contentBGColor lipgloss.TerminalColor
+	contentFGColor color.Color
+	contentBGColor color.Color
 
 	// Should this go in borderConfig ?
-	borderFGColor lipgloss.TerminalColor
-	borderBGColor lipgloss.TerminalColor
+	borderFGColor color.Color
+	borderBGColor color.Color
 
 	// Use this to add additional style modifications
 	// This is applied before any style update that are defined by other configurations,
@@ -78,11 +80,11 @@ type RendererConfig struct {
 	TruncateHeight   bool
 	BorderRequired   bool
 
-	ContentFGColor lipgloss.TerminalColor
-	ContentBGColor lipgloss.TerminalColor
+	ContentFGColor color.Color
+	ContentBGColor color.Color
 
-	BorderFGColor lipgloss.TerminalColor
-	BorderBGColor lipgloss.TerminalColor
+	BorderFGColor color.Color
+	BorderBGColor color.Color
 
 	Border       lipgloss.Border
 	RendererName string
@@ -131,11 +133,11 @@ func createRendererWithValidatedConfig(cfg RendererConfig) *Renderer {
 		contentSections: []ContentRenderer{
 			NewContentRenderer(contentHeight, contentWidth, cfg.DefTruncateStyle, cfg.RendererName),
 		},
-		sectionDividers:     nil,
-		curSectionIdx:       0,
-		actualContentHeight: 0,
-		defTruncateStyle:    cfg.DefTruncateStyle,
-		truncateHeight:      cfg.TruncateHeight,
+		sectionDividers:        nil,
+		curSectionIdx:          0,
+		committedContentHeight: 0,
+		defTruncateStyle:       cfg.DefTruncateStyle,
+		truncateHeight:         cfg.TruncateHeight,
 
 		border: NewBorderConfig(cfg.TotalHeight, cfg.TotalWidth),
 

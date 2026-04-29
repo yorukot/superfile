@@ -61,12 +61,15 @@ func NewImagePreviewerWithConfig(maxEntries int, expiration time.Duration) *Imag
 	return previewer
 }
 
-// ImagePreview generates a preview of an image file
+// ImagePreview generates a preview of an image file.
+// Returns (render, rawTransmit, error) where rawTransmit is non-empty only
+// for Kitty protocol and should be sent via tea.Raw() to transmit image data
+// directly to the terminal, bypassing the cell-based renderer.
 func (p *ImagePreviewer) ImagePreview(path string, maxWidth int, maxHeight int,
-	defaultBGColor string, sideAreaWidth int) (string, error) {
+	defaultBGColor string, sideAreaWidth int) (string, string, error) {
 	// Validate dimensions
 	if maxWidth <= 0 || maxHeight <= 0 {
-		return "", fmt.Errorf("dimensions must be positive (maxWidth=%d, maxHeight=%d)", maxWidth, maxHeight)
+		return "", "", fmt.Errorf("dimensions must be positive (maxWidth=%d, maxHeight=%d)", maxWidth, maxHeight)
 	}
 
 	// Create dimensions string for cache key
@@ -74,12 +77,17 @@ func (p *ImagePreviewer) ImagePreview(path string, maxWidth int, maxHeight int,
 
 	// Try Kitty first as it's more modern
 	if p.IsKittyCapable() {
-		// Check cache for Kitty renderer
-		if preview, exists := p.cache.Get(getPreviewObjKey(path, dimensions, RendererKitty)); exists {
-			return preview, nil
+		cacheKey := getPreviewObjKey(path, dimensions, RendererKitty)
+		rawKey := cacheKey + ":raw"
+
+		if preview, exists := p.cache.Get(cacheKey); exists {
+			if rawTransmit, rawExists := p.cache.Get(rawKey); rawExists && rawTransmit != "" {
+				return preview, rawTransmit, nil
+			}
+			// rawKey evicted or empty — treat as cache miss
 		}
 
-		preview, err := p.ImagePreviewWithRenderer(
+		render, rawTransmit, err := p.ImagePreviewWithRenderer(
 			path,
 			maxWidth,
 			maxHeight,
@@ -87,10 +95,18 @@ func (p *ImagePreviewer) ImagePreview(path string, maxWidth int, maxHeight int,
 			RendererKitty,
 			sideAreaWidth,
 		)
+		if err == nil && rawTransmit != "" {
+			// Only cache when Kitty actually produced a transmission.
+			// If rawTransmit is empty, it means ANSI fallback was used —
+			// don't pollute the Kitty cache with ANSI results.
+			p.cache.Set(cacheKey, render)
+			p.cache.Set(rawKey, rawTransmit)
+			return render, rawTransmit, nil
+		}
 		if err == nil {
-			// Cache the successful result
-			p.cache.Set(getPreviewObjKey(path, dimensions, RendererKitty), preview)
-			return preview, nil
+			// Kitty renderer fell back to ANSI — return directly,
+			// let the ANSI cache path below handle caching
+			return render, "", nil
 		}
 
 		// Fall through to ANSI if Kitty fails
@@ -99,39 +115,47 @@ func (p *ImagePreviewer) ImagePreview(path string, maxWidth int, maxHeight int,
 
 	// Check cache for ANSI renderer
 	if preview, found := p.cache.Get(getPreviewObjKey(path, dimensions, RendererANSI)); found {
-		return preview, nil
+		return preview, "", nil
 	}
 
 	// Fall back to ANSI
-	preview, err := p.ImagePreviewWithRenderer(path, maxWidth, maxHeight, defaultBGColor, RendererANSI, sideAreaWidth)
+	preview, _, err := p.ImagePreviewWithRenderer(
+		path,
+		maxWidth,
+		maxHeight,
+		defaultBGColor,
+		RendererANSI,
+		sideAreaWidth,
+	)
 	if err == nil {
 		// Cache the successful result
 		p.cache.Set(getPreviewObjKey(path, dimensions, RendererANSI), preview)
 	}
-	return preview, err
+	return preview, "", err
 }
 
-// ImagePreviewWithRenderer generates an image preview using the specified renderer
+// ImagePreviewWithRenderer generates an image preview using the specified renderer.
+// Returns (render, rawTransmit, error).
 func (p *ImagePreviewer) ImagePreviewWithRenderer(path string, maxWidth int, maxHeight int,
-	defaultBGColor string, renderer ImageRenderer, sideAreaWidth int) (string, error) {
+	defaultBGColor string, renderer ImageRenderer, sideAreaWidth int) (string, string, error) {
 	info, err := os.Stat(path)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	const maxFileSize = 100 * 1024 * 1024 // 100MB limit
 	if info.Size() > maxFileSize {
-		return "", fmt.Errorf("image file too large: %d bytes", info.Size())
+		return "", "", fmt.Errorf("image file too large: %d bytes", info.Size())
 	}
 
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	// Use the new image preparation pipeline
 	img, originalWidth, originalHeight, err := prepareImageForPreview(data)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	switch renderer {
@@ -139,15 +163,16 @@ func (p *ImagePreviewer) ImagePreviewWithRenderer(path string, maxWidth int, max
 		result, err := p.renderWithKittyUsingTermCap(img, path, originalWidth,
 			originalHeight, maxWidth, maxHeight, sideAreaWidth)
 		if err != nil {
-			// If kitty fails, fall back to ANSI renderer
 			slog.Error("Kitty renderer failed, falling back to ANSI", "error", err)
-			return p.ANSIRenderer(img, defaultBGColor, maxWidth, maxHeight)
+			render, ansiErr := p.ANSIRenderer(img, defaultBGColor, maxWidth, maxHeight)
+			return render, "", ansiErr
 		}
-		return result, nil
+		return result.Placeholders, result.RawTransmit, nil
 
 	case RendererANSI:
-		return p.ANSIRenderer(img, defaultBGColor, maxWidth, maxHeight)
+		render, err := p.ANSIRenderer(img, defaultBGColor, maxWidth, maxHeight)
+		return render, "", err
 	default:
-		return "", fmt.Errorf("invalid renderer : %v", renderer)
+		return "", "", fmt.Errorf("invalid renderer : %v", renderer)
 	}
 }

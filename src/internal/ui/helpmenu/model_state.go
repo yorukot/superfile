@@ -3,7 +3,7 @@ package helpmenu
 import (
 	"slices"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 
 	"github.com/yorukot/superfile/src/internal/common"
 )
@@ -81,5 +81,5 @@ func (m *Model) SetDimensions(width int, height int) {
 	m.height = height
 	// 2 for border, 1 for left padding, 2 for placeholder icon of searchbar
 	// 1 for additional character that View() of search bar function mysteriously adds.
-	m.searchBar.Width = m.width - (common.InnerPadding + common.BorderPadding)
+	m.searchBar.SetWidth(m.width - (common.InnerPadding + common.BorderPadding))
 }

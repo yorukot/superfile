@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"testing"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -103,7 +103,6 @@ func testWithConfig(t *testing.T, cfg common.ConfigType, testPath string) {
 	common.SetConfig(cfg)
 
 	m := defaultTestModelWithFooterAndFilePreview(testPath)
-	p := NewTestTeaProgWithEventLoop(t, m)
 
 	resizeSizes := []struct {
 		width, height int
@@ -121,7 +120,7 @@ func testWithConfig(t *testing.T, cfg common.ConfigType, testPath string) {
 	// Run resize tests
 	for _, size := range resizeSizes {
 		t.Run(fmt.Sprintf("w=%d;h=%d", size.width, size.height), func(t *testing.T) {
-			updateModelDimensionsAndValidate(t, p, size.width, size.height)
+			updateModelDimensionsAndValidate(t, m, size.width, size.height)
 		})
 	}
 
@@ -140,8 +139,8 @@ func testWithConfig(t *testing.T, cfg common.ConfigType, testPath string) {
 
 		for _, tc := range edgeCases {
 			t.Run(tc.name, func(t *testing.T) {
-				p.SendDirectly(tea.WindowSizeMsg{Width: tc.width, Height: tc.height})
-				assertLayoutValidity(t, p.m)
+				TeaUpdate(m, tea.WindowSizeMsg{Width: tc.width, Height: tc.height})
+				assertLayoutValidity(t, m)
 			})
 		}
 	})
@@ -149,16 +148,16 @@ func testWithConfig(t *testing.T, cfg common.ConfigType, testPath string) {
 
 // Note: this will create as many panels possible and leave the model in that state
 // This is to ensure that at time of resize operations, there are more panels
-func updateModelDimensionsAndValidate(t *testing.T, p *TeaProg, width int, height int) {
+func updateModelDimensionsAndValidate(t *testing.T, m *model, width int, height int) {
 	// Set Footer OFF, Preview OFF via model state changes
-	// if p.m.toggleFooter {
-	//	p.SendDirectly(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune(common.Hotkeys.ToggleFooter[0])[0:1]})
+	// if m.toggleFooter {
+	//	TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.ToggleFooter[0]))
 	//}
 	// File preview toggle - just send the key, no need to check state
 	// Sending toggle key will turn it off if it's on
 
-	require.True(t, p.m.toggleFooter)
-	require.True(t, p.m.fileModel.FilePreview.IsOpen())
+	require.True(t, m.toggleFooter)
+	require.True(t, m.fileModel.FilePreview.IsOpen())
 
 	testdata := []struct {
 		name string
@@ -195,54 +194,54 @@ func updateModelDimensionsAndValidate(t *testing.T, p *TeaProg, width int, heigh
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
 			for _, msg := range tt.msg {
-				p.SendDirectly(msg)
+				TeaUpdate(m, msg)
 			}
-			assertLayoutValidity(t, p.m)
+			assertLayoutValidity(t, m)
 		})
 	}
 
 	t.Run("FilePanelRemoval", func(t *testing.T) {
 		for {
-			initialCount := p.m.fileModel.PanelCount()
+			initialCount := m.fileModel.PanelCount()
 
-			p.SendDirectly(utils.TeaRuneKeyMsg(common.Hotkeys.CloseFilePanel[0]))
-			assertLayoutValidity(t, p.m)
+			TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.CloseFilePanel[0]))
+			assertLayoutValidity(t, m)
 
-			if p.m.fileModel.PanelCount() == initialCount {
+			if m.fileModel.PanelCount() == initialCount {
 				break // No panel was removed
 			}
-			require.Positive(t, p.m.fileModel.PanelCount())
+			require.Positive(t, m.fileModel.PanelCount())
 		}
 	})
 
-	testModelScrolling(t, p)
+	testModelScrolling(t, m)
 
 	t.Run("FilePanelCreation", func(t *testing.T) {
 		for {
-			initialCount := p.m.fileModel.PanelCount()
-			p.SendDirectly(utils.TeaRuneKeyMsg(common.Hotkeys.CreateNewFilePanel[0]))
+			initialCount := m.fileModel.PanelCount()
+			TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.CreateNewFilePanel[0]))
 
-			assertLayoutValidity(t, p.m)
+			assertLayoutValidity(t, m)
 
-			if p.m.fileModel.PanelCount() == initialCount {
+			if m.fileModel.PanelCount() == initialCount {
 				break // No new panel created
 			}
 
-			require.LessOrEqual(t, p.m.fileModel.PanelCount(), common.FilePanelMax,
+			require.LessOrEqual(t, m.fileModel.PanelCount(), common.FilePanelMax,
 				"Panel count should not exceed maximum")
 		}
 	})
 
-	assert.Equal(t, p.m.fileModel.MaxFilePanel, p.m.fileModel.PanelCount())
+	assert.Equal(t, m.fileModel.MaxFilePanel, m.fileModel.PanelCount())
 }
 
-func testModelScrolling(t *testing.T, p *TeaProg) {
+func testModelScrolling(t *testing.T, m *model) {
 	// We are at Filepanel now
-	testModelScrollingCore(t, p)
+	testModelScrollingCore(t, m)
 
 	// Add dummy data to ProcessBar and Metadata
 	for i := range 10 {
-		p.m.processBarModel.AddProcess(
+		m.processBarModel.AddProcess(
 			processbar.NewProcess(strconv.Itoa(i), "test", processbar.OpCopy, 1),
 		)
 	}
@@ -253,7 +252,7 @@ func testModelScrolling(t *testing.T, p *TeaProg) {
 		{"a", "b"},
 		{"a", "b"},
 	}
-	p.m.fileMetaData.SetMetadata(metadata.NewMetadata(dummyData, "", ""), true)
+	m.fileMetaData.SetMetadata(metadata.NewMetadata(dummyData, "", ""), true)
 
 	panels := []struct {
 		name     string
@@ -266,24 +265,24 @@ func testModelScrolling(t *testing.T, p *TeaProg) {
 
 	for _, panel := range panels {
 		t.Run(panel.name+"Scrolling", func(t *testing.T) {
-			p.SendKeyDirectly(panel.focusKey)
+			TeaUpdate(m, utils.TeaRuneKeyMsg(panel.focusKey))
 			// TODO: Add validation that we are actually at sidebar
-			testModelScrollingCore(t, p)
+			testModelScrollingCore(t, m)
 		})
 	}
 }
 
-func testModelScrollingCore(t *testing.T, p *TeaProg) {
+func testModelScrollingCore(t *testing.T, m *model) {
 	for range ScrollDownCount {
-		p.SendDirectly(tea.KeyMsg{Type: tea.KeyDown})
+		TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyDown})
 	}
-	assertLayoutValidity(t, p.m)
+	assertLayoutValidity(t, m)
 
 	// Scroll up
 	for range ScrollUpCount {
-		p.SendDirectly(tea.KeyMsg{Type: tea.KeyUp})
+		TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyUp})
 	}
-	assertLayoutValidity(t, p.m)
+	assertLayoutValidity(t, m)
 }
 
 func assertLayoutValidity(t *testing.T, m *model) {

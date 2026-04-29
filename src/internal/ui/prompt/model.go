@@ -8,7 +8,7 @@ import (
 
 	"github.com/yorukot/superfile/src/internal/ui"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
@@ -47,7 +47,7 @@ func (m *Model) HandleUpdate(msg tea.Msg, cwdLocation string) (common.ModelActio
 	}
 
 	switch msg := msg.(type) {
-	case tea.KeyMsg:
+	case tea.KeyPressMsg:
 		switch {
 		case slices.Contains(common.Hotkeys.ConfirmTyping, msg.String()):
 			action = m.handleConfirm(cwdLocation)
@@ -88,7 +88,7 @@ func (m *Model) handleConfirm(cwdLocation string) common.ModelAction {
 	return action
 }
 
-func (m *Model) handleNormalKeyInput(msg tea.KeyMsg) tea.Cmd {
+func (m *Model) handleNormalKeyInput(msg tea.KeyPressMsg) tea.Cmd {
 	var cmd tea.Cmd
 	switch {
 	case m.textInput.Value() == "" && msg.String() == m.spfPromptHotkey:
@@ -213,7 +213,7 @@ func (m *Model) SetWidth(width int) {
 	m.width = width
 	// Excluding borders(2), SpacePadding(1), Prompt(2), and one extra character that is appended
 	// by textInput.View()
-	m.textInput.Width = width - promptInputPadding
+	m.textInput.SetWidth(width - promptInputPadding)
 }
 
 func (m *Model) SetMaxHeight(maxHeight int) {

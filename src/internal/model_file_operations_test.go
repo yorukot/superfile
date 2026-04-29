@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"testing"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 	"github.com/rkoesters/xdg/trash"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -135,7 +135,7 @@ func TestFileRename(t *testing.T) {
 
 		p.SendKey(common.Hotkeys.FilePanelItemRename[0])
 		p.SendKey("_new")
-		p.Send(tea.KeyMsg{Type: tea.KeyEnter})
+		p.Send(tea.KeyPressMsg{Code: tea.KeyEnter})
 
 		assert.Eventually(t, func() bool {
 			_, err1 := os.Stat(file1)
@@ -151,9 +151,9 @@ func TestFileRename(t *testing.T) {
 			setFilePanelSelectedItemByLocation(t, m.getFocusedFilePanel(), file3)
 
 			p.SendKey(common.Hotkeys.FilePanelItemRename[0])
-			p.Send(tea.KeyMsg{Type: tea.KeyBackspace})
+			p.Send(tea.KeyPressMsg{Code: tea.KeyBackspace})
 			p.SendKey("2")
-			p.Send(tea.KeyMsg{Type: tea.KeyEnter})
+			p.Send(tea.KeyPressMsg{Code: tea.KeyEnter})
 
 			require.Eventually(t, func() bool {
 				return m.notifyModel.IsOpen()
@@ -166,7 +166,7 @@ func TestFileRename(t *testing.T) {
 				notify.RenameAction), m.notifyModel, "Notify model should be as expected")
 
 			if doRename {
-				p.Send(tea.KeyMsg{Type: tea.KeyEnter})
+				p.Send(tea.KeyPressMsg{Code: tea.KeyEnter})
 			} else {
 				p.SendKey(common.Hotkeys.CancelTyping[0])
 			}
@@ -255,7 +255,7 @@ func TestFileDelete(t *testing.T) {
 			assert.Equal(t, expectedTitle, m.notifyModel.GetTitle())
 			assert.Equal(t, expectedAction, m.notifyModel.GetConfirmAction())
 
-			p.Send(tea.KeyMsg{Type: tea.KeyEnter})
+			p.Send(tea.KeyPressMsg{Code: tea.KeyEnter})
 
 			assert.Eventually(t, func() bool {
 				_, err := os.Stat(tt.filePath)

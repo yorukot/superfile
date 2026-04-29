@@ -88,9 +88,9 @@ func (m *model) validateLayout() error { //nolint:gocognit // cumilation of vali
 		}
 
 		// Validate search bar width matches panel width minus padding
-		if panel.SearchBar.Width != panel.GetWidth()-common.InnerPadding {
+		if panel.SearchBar.Width() != panel.GetWidth()-common.InnerPadding {
 			return fmt.Errorf("file panel %v search bar width mismatch: expected %v, got %v",
-				i, panel.GetWidth()-common.InnerPadding, panel.SearchBar.Width)
+				i, panel.GetWidth()-common.InnerPadding, panel.SearchBar.Width())
 		}
 	}
 

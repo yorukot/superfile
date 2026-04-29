@@ -1,7 +1,7 @@
 package zoxide
 
 import (
-	"github.com/charmbracelet/bubbles/textinput"
+	"charm.land/bubbles/v2/textinput"
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 )
 

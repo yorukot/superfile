@@ -11,7 +11,7 @@ import (
 
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 
 	variable "github.com/yorukot/superfile/src/config"
 )

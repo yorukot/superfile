@@ -1,6 +1,6 @@
 package prompt
 
-import "github.com/charmbracelet/bubbles/textinput"
+import "charm.land/bubbles/v2/textinput"
 
 // No need to name it as PromptModel. It will me imported as prompt.Model
 type Model struct {

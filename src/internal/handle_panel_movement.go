@@ -8,7 +8,7 @@ import (
 	"runtime"
 	"strings"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 
 	"github.com/yorukot/superfile/src/pkg/utils"
 
@@ -154,7 +154,7 @@ func (m *model) searchBarFocus() {
 	}
 
 	// config search bar width
-	panel.SearchBar.Width = m.fileModel.SinglePanelWidth - common.InnerPadding
+	panel.SearchBar.SetWidth(m.fileModel.SinglePanelWidth - common.InnerPadding)
 }
 
 func (m *model) sidebarSearchBarFocus() {
