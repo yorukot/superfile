@@ -13,10 +13,10 @@ import (
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/pkg/utils"
 
+	"charm.land/bubbles/v2/textinput"
+	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 	"github.com/barasher/go-exiftool"
-	"github.com/charmbracelet/bubbles/textinput"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
@@ -51,7 +51,6 @@ func InitialModel(firstPanelPaths []string, firstUseCheck bool) tea.Model {
 // and its initialization isn't well separated.
 func (m *model) Init() tea.Cmd {
 	return tea.Batch(
-		tea.SetWindowTitle("superfile"),
 		textinput.Blink, // Assuming textinput.Blink is a valid command
 		processCmdToTeaCmd(m.processBarModel.GetListenCmd()),
 	)
@@ -77,7 +76,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		resizeCmd = m.handleWindowResize(msg)
 	case tea.MouseMsg:
 		m.handleMouseMsg(msg)
-	case tea.KeyMsg:
+	case tea.KeyPressMsg:
 		inputCmd = m.handleKeyInput(msg)
 
 	// Has to handle zoxide messages separately as they could be generated via
@@ -90,7 +89,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// Its a pain to interconvert commands like processBar
 	case preview.UpdateMsg:
 		slog.Debug("Got ModelUpdate message", "id", msg.GetReqID())
-		m.fileModel.UpdatePreviewPanel(msg)
+		updateCmd = m.fileModel.UpdatePreviewPanel(msg)
 	case ModelUpdateMessage:
 		slog.Debug("Got ModelUpdate message", "id", msg.GetReqID())
 		updateCmd = msg.ApplyToModel(m)
@@ -113,7 +112,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m *model) handleMouseMsg(msg tea.MouseMsg) {
 	msgStr := msg.String()
-	if msgStr == "wheel up" || msgStr == "wheel down" {
+	if msgStr == "wheelup" || msgStr == "wheeldown" {
 		wheelMainAction(msgStr, m)
 	} else {
 		slog.Debug("Mouse event of type that is not handled", "msg", msgStr)
@@ -272,10 +271,9 @@ func (m *model) setFooterComponentSize() {
 
 // Identify the current state of the application m and properly handle the
 // msg keybind pressed
-func (m *model) handleKeyInput(msg tea.KeyMsg) tea.Cmd {
-	slog.Debug("model.handleKeyInput", "msg", msg, "typestr", msg.Type.String(),
-		"runes", msg.Runes, "type", int(msg.Type), "paste", msg.Paste,
-		"alt", msg.Alt)
+func (m *model) handleKeyInput(msg tea.KeyPressMsg) tea.Cmd {
+	slog.Debug("model.handleKeyInput", "msg", msg, "typestr", msg.String(),
+		"code", msg.Code, "text", msg.Text, "mod", msg.Mod)
 	slog.Debug("model.handleKeyInput. model info. ",
 		"fileModel.FocusedPanelIndex", m.fileModel.FocusedPanelIndex,
 		"filePanel.isFocused", m.getFocusedFilePanel().IsFocused,
@@ -487,7 +485,7 @@ func (m *model) warnModalForQuit() {
 }
 
 // Implement View function for bubble tea model to handle visualization.
-func (m *model) View() string {
+func (m *model) View() tea.View {
 	slog.Debug("model.View() called", "mainPanelHeight", m.mainPanelHeight,
 		"footerHeight", m.footerHeight, "fullHeight", m.fullHeight,
 		"fullWidth", m.fullWidth, "panelCount", m.fileModel.PanelCount(),
@@ -495,7 +493,14 @@ func (m *model) View() string {
 		"maxPanels", m.fileModel.MaxFilePanel,
 		"sideBarWidth", common.Config.SidebarWidth,
 		"firstFilePanelWidth", m.fileModel.FilePanels[0].GetWidth())
+	v := tea.NewView(m.viewContent())
+	v.AltScreen = true
+	v.MouseMode = tea.MouseModeCellMotion
+	v.WindowTitle = "superfile"
+	return v
+}
 
+func (m *model) viewContent() string {
 	if !m.firstLoadingComplete {
 		return "Loading..."
 	}

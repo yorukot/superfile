@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 	"github.com/charmbracelet/x/ansi"
 
 	"github.com/yorukot/superfile/src/pkg/utils"
@@ -314,12 +314,8 @@ func TestAsyncPreviewPanelSync(t *testing.T) {
 	utils.SetupFilesWithData(t, []byte(content2), file2)
 
 	m := defaultTestModelWithFilePreview(curTestDir)
-	p := NewTestTeaProgWithEventLoop(t, m)
-
-	// We need to send message via event loop to ensure that preview load command
-	// is actually processed, also we want a size bigger than default
-	// to allow more number of panels
-	p.Send(tea.WindowSizeMsg{Width: 4 * DefaultTestModelWidth, Height: 4 * DefaultTestModelHeight})
+	// we want a size bigger than default to allow more number of panels
+	p := NewTestTeaProgWithEventLoopWithWinSize(t, m, 4*DefaultTestModelWidth, 4*DefaultTestModelHeight)
 
 	eventuallyEnsurePreviewContent(t, m, content1, "file1 content should load initially")
 	pW := m.fileModel.FilePreview.GetContentWidth()
@@ -332,7 +328,7 @@ func TestAsyncPreviewPanelSync(t *testing.T) {
 	assert.NotEqual(t, pW, m.fileModel.FilePreview.GetContentWidth(),
 		"width should change on new panel creation")
 
-	p.Send(tea.KeyMsg{Type: tea.KeyDown})
+	p.Send(tea.KeyPressMsg{Code: tea.KeyDown})
 	t.Logf("Current element : %s", m.getFocusedFilePanel().GetFocusedItem().Location)
 	eventuallyEnsurePreviewContent(t, m, content2, "content should update to file2")
 

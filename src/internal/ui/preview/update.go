@@ -14,12 +14,18 @@ type UpdateMsg struct {
 	contentWidth  int
 	contentHeight int
 	reqID         int
+
+	// rawTransmit is non-empty for Kitty protocol images. It contains
+	// APC escape sequences that must be sent directly to the terminal
+	// via tea.Raw(), bypassing the cell-based renderer.
+	rawTransmit string
 }
 
-func NewUpdateMsg(location string, content string, width int, height int, reqID int) UpdateMsg {
+func NewUpdateMsg(location string, content string, rawTransmit string, width int, height int, reqID int) UpdateMsg {
 	return UpdateMsg{
 		location:      location,
 		content:       content,
+		rawTransmit:   rawTransmit,
 		contentWidth:  width,
 		contentHeight: height,
 		reqID:         reqID,
@@ -44,4 +50,8 @@ func (msg UpdateMsg) GetContentWidth() int {
 
 func (msg UpdateMsg) GetContentHeight() int {
 	return msg.contentHeight
+}
+
+func (msg UpdateMsg) GetRawTransmit() string {
+	return msg.rawTransmit
 }

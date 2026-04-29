@@ -14,7 +14,7 @@ func (m *Model) SetWidth(width int) {
 		width = MinWidth
 	}
 	m.width = width
-	m.SearchBar.Width = m.width - common.InnerPadding
+	m.SearchBar.SetWidth(m.width - common.InnerPadding)
 	m.columns = m.makeColumns(common.Config.FilePanelExtraColumns, common.Config.FilePanelNamePercent)
 }
 

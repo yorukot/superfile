@@ -100,6 +100,46 @@ func (g *pdfGenerator) generateThumbnail(inputPath string, outputPathWithoutExt 
 	return outputPath, nil
 }
 
+type psGenerator struct{}
+
+func newPsGenerator() (*psGenerator, error) {
+	if !isGhostscriptInstalled() {
+		return nil, errors.New("ghostscript is not installed")
+	}
+
+	return &psGenerator{}, nil
+}
+
+func (g *psGenerator) supportsExt(ext string) bool {
+	extension := strings.ToLower(ext)
+	return extension == ".ps" || extension == ".eps"
+}
+
+func (g *psGenerator) generateThumbnail(inputPath string, outputPathWithoutExt string) (string, error) {
+	outputPath := outputPathWithoutExt + thumbOutputExt
+	ctx, cancel := context.WithTimeout(context.Background(), thumbGenerationTimeout)
+	defer cancel()
+
+	// gs -dSAFER -dBATCH -dNOPAUSE -sPageList=1 -sDEVICE=jpeg -r150 -sOutputFile=output.jpg input.ps
+	outputParam := "-sOutputFile=" + outputPath
+	gs := exec.CommandContext(ctx, "gs",
+		"-dSAFER", "-dBATCH", "-dNOPAUSE", // Standard GS operators
+		"-sPageList=1",  // Output only the first page
+		"-sDEVICE=jpeg", // Output format
+		"-r150",         // Resolution (the same as for pdf)
+		outputParam,     // Result (variable because of golangci-lint)
+		inputPath,       // Input file
+	)
+
+	err := gs.Run()
+	if err != nil {
+		return "", fmt.Errorf("error generating ps thumbnail, outputPath: %s : %w",
+			outputPath, err)
+	}
+
+	return outputPath, nil
+}
+
 type ThumbnailGenerator struct {
 	// This is a cache. Key -> Video file path, Value -> Thumbnail file path
 	// TODO: We can potentially make it persistent, preventing generation
@@ -123,6 +163,13 @@ func NewThumbnailGenerator() (*ThumbnailGenerator, error) {
 		slog.Debug("Error while trying to create pdfGenerator", "error", err)
 	} else {
 		generators = append(generators, pdf)
+	}
+
+	ps, err := newPsGenerator()
+	if err != nil {
+		slog.Debug("Error while trying to create psGenerator", "error", err)
+	} else {
+		generators = append(generators, ps)
 	}
 
 	video, err := newVideoGenerator()
@@ -210,6 +257,11 @@ func (g *ThumbnailGenerator) CleanUp() error {
 
 func isPopplerInstalled() bool {
 	_, err := exec.LookPath("pdftoppm")
+	return err == nil
+}
+
+func isGhostscriptInstalled() bool {
+	_, err := exec.LookPath("gs")
 	return err == nil
 }
 

@@ -4,8 +4,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/common"
 	processbar "github.com/yorukot/superfile/src/internal/ui/processbar"
 
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
+	tea "charm.land/bubbletea/v2"
 )
 
 type FileListErrorState struct {
@@ -87,9 +86,7 @@ func (m *Model) Render() string {
 	skip := common.ModalConfirm.Render(" (" + KeySkip()[0] + ") Skip ")
 	abort := common.ModalCancel.Render(" (" + KeyAbort()[0] + ") Abort ")
 
-	tip := skip +
-		lipgloss.NewStyle().Background(common.ModalBGColor).Render("           ") +
-		abort
+	tip := skip + common.ModalInputSpacingText + abort
 
 	var errHeader = common.ModalErrorStyle.Render("Error")
 	return common.ModalBorderStyle(common.ModalHeight, common.ModalWidth).

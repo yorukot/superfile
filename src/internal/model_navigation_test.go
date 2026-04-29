@@ -6,7 +6,7 @@ import (
 	"runtime"
 	"testing"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -138,7 +138,7 @@ func TestFilePanelNavigation(t *testing.T) {
 
 			TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenSPFPrompt[0]))
 			TeaUpdate(m, utils.TeaRuneKeyMsg("cd "+tt.startDir))
-			TeaUpdate(m, tea.KeyMsg{Type: tea.KeyEnter})
+			TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyEnter})
 
 			// Make sure we have original cursor and render
 			assert.Equal(t, tt.startCursor, m.getFocusedFilePanel().GetCursor())
@@ -186,7 +186,7 @@ func TestCursorOutOfBoundsAfterDirectorySwitch(t *testing.T) {
 	// Move cursor to position 8 (near end of list)
 	panel := m.getFocusedFilePanel()
 	for range 8 {
-		p.Send(tea.KeyMsg{Type: tea.KeyDown})
+		p.Send(tea.KeyPressMsg{Code: tea.KeyDown})
 	}
 
 	// Verify cursor is at position 8

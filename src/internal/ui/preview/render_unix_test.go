@@ -21,6 +21,6 @@ func TestFilePreviewWithInvalidMode(t *testing.T) {
 	require.NoError(t, err)
 
 	m := New()
-	res := m.RenderWithPath(file, 20, 10, 20)
+	res, _ := m.RenderWithPath(file, 20, 10, 20)
 	assert.Contains(t, res, common.FilePreviewUnsupportedFileMode)
 }

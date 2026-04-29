@@ -6,7 +6,7 @@ import (
 	"slices"
 	"strings"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 
 	"github.com/yorukot/superfile/src/config/icon"
@@ -35,7 +35,7 @@ func (m *Model) HandleUpdate(msg tea.Msg) (common.ModelAction, tea.Cmd) {
 	slog.Debug("zoxide.Model HandleUpdate()", "msg", msg,
 		"msgType", reflect.TypeOf(msg),
 		"textInput", m.textInput.Value(),
-		"cursorBlink", m.textInput.Cursor.Blink)
+		"cursorBlink", m.textInput.Styles().Cursor.Blink)
 	var action common.ModelAction
 	action = common.NoAction{}
 	var cmd tea.Cmd
@@ -45,7 +45,7 @@ func (m *Model) HandleUpdate(msg tea.Msg) (common.ModelAction, tea.Cmd) {
 	}
 
 	switch msg := msg.(type) {
-	case tea.KeyMsg:
+	case tea.KeyPressMsg:
 		// If zoxide is not available, only allow confirm/cancel to close modal
 		if m.zClient == nil {
 			switch {
@@ -100,7 +100,7 @@ func (m *Model) handleConfirm() common.ModelAction {
 	return common.NoAction{}
 }
 
-func (m *Model) handleNormalKeyInput(msg tea.KeyMsg) tea.Cmd {
+func (m *Model) handleNormalKeyInput(msg tea.KeyPressMsg) tea.Cmd {
 	var cmd tea.Cmd
 	m.textInput, cmd = m.textInput.Update(msg)
 	return tea.Batch(cmd, m.GetQueryCmd(m.textInput.Value()))

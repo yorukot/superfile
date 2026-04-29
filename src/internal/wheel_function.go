@@ -10,7 +10,7 @@ func wheelMainAction(msg string, m *model) {
 	slog.Debug("wheelMainAction called", "msg", msg, "focusPanel", m.focusPanel)
 	var action func()
 	switch msg {
-	case "wheel up":
+	case "wheelup":
 		switch m.focusPanel {
 		case sidebarFocus:
 			action = func() { m.sidebarModel.ListUp() }
@@ -22,7 +22,7 @@ func wheelMainAction(msg string, m *model) {
 			action = func() { m.getFocusedFilePanel().ListUp() }
 		}
 
-	case "wheel down":
+	case "wheeldown":
 		switch m.focusPanel {
 		case sidebarFocus:
 			action = func() { m.sidebarModel.ListDown() }

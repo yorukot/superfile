@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -53,7 +53,8 @@ func setModelParamsForTest(m *model, disablePreview bool) *model {
 		m.fileModel.FilePreview.Close()
 	}
 	// async size updates like preview panel content update
-	// will not be done
+	// will not be done. Note: This is only for direct usage of 'model'
+	// NewTestTeaProgWithEventLoop overwrites it.
 	TeaUpdate(m, tea.WindowSizeMsg{Width: DefaultTestModelWidth, Height: DefaultTestModelHeight})
 	return m
 }
@@ -239,6 +240,6 @@ func setFilePanelSelectedItemByName(t *testing.T, panel *filepanel.Model, fileNa
 func splitPanelAsync(p *TeaProg) {
 	p.SendKey(common.Hotkeys.OpenSPFPrompt[0])
 	p.SendKey("split")
-	p.Send(tea.KeyMsg{Type: tea.KeyEnter})
-	p.Send(tea.KeyMsg{Type: tea.KeyEsc})
+	p.Send(tea.KeyPressMsg{Code: tea.KeyEnter})
+	p.Send(tea.KeyPressMsg{Code: tea.KeyEsc})
 }

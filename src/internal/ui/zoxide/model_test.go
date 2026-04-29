@@ -3,7 +3,7 @@ package zoxide
 import (
 	"testing"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -83,7 +83,7 @@ func TestJKKeyHandling(t *testing.T) {
 	}
 	m.cursor = 0
 
-	action, cmd = m.HandleUpdate(tea.KeyMsg{Type: tea.KeyDown})
+	action, cmd = m.HandleUpdate(tea.KeyPressMsg{Code: tea.KeyDown})
 	assert.Nil(t, cmd, "HandleUpdate with down arrow should not return cmd")
 	_, isNoAction = action.(common.NoAction)
 	assert.True(t, isNoAction, "action should be NoAction for navigation")

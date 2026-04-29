@@ -1,11 +1,12 @@
 package internal
 
 import (
+	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -15,27 +16,51 @@ import (
 	"github.com/yorukot/superfile/src/internal/common"
 )
 
+// This runs a zoxide query and doesn't waits for it.
+// Can cause race with zoxide add. See https://github.com/ajeetdsouza/zoxide/issues/1219
 func setupProgAndOpenZoxide(t *testing.T, zClient *zoxidelib.Client, dir string) *TeaProg {
+	t.Helper()
+	p := setupProgWithZoxide(t, zClient, dir)
+	openZoxide(t, p)
+	return p
+}
+
+func setupProgWithZoxide(t *testing.T, zClient *zoxidelib.Client, dir string) *TeaProg {
 	t.Helper()
 	common.Config.ZoxideSupport = true
 	m := defaultTestModelWithZClient(zClient, dir)
-	p := NewTestTeaProgWithEventLoop(t, m)
+	return NewTestTeaProgWithEventLoop(t, m)
+}
 
+func openZoxide(t *testing.T, p *TeaProg) {
+	t.Helper()
 	p.SendKey(common.Hotkeys.OpenZoxide[0])
 	assert.Eventually(t, func() bool {
 		return p.getModel().zoxideModal.IsOpen()
 	}, DefaultTestTimeout, DefaultTestTick, "Zoxide modal should open")
-	return p
 }
 
 func updateCurrentFilePanelDirOfTestModel(t *testing.T, p *TeaProg, dir string) {
+	t.Helper()
 	err := p.getModel().updateCurrentFilePanelDir(dir)
 	require.NoError(t, err, "Failed to navigate to %s", dir)
 	assert.Equal(t, dir, p.getModel().getFocusedFilePanel().Location, "Should be in %s after navigation", dir)
 }
 
 func TestZoxide(t *testing.T) {
-	zoxideDataDir := t.TempDir()
+	// Cannot use t.TempDir() here. Bubble Tea intentionally leaks in-flight tea.Cmd
+	// goroutines on shutdown (bubbletea/v2 tea.go:697-700). A zoxide query subprocess
+	// may still be writing to the data dir after p.Close(), and t.TempDir() treats
+	// cleanup failure as a test failure ("directory not empty").
+	//
+	// Permanent fix: pass a parent context.Context through the program lifecycle
+	// (model → zoxide modal → go-zoxide Client) so that p.Close() cancels all
+	// in-flight subprocesses. Currently go-zoxide's execCmd creates its own
+	// context.Background(), so this requires an API change in go-zoxide.
+	zoxideDataDir, err := os.MkdirTemp("", "zoxide-test-*") //nolint: usetesting // See Above
+	require.NoError(t, err)
+	defer os.RemoveAll(zoxideDataDir)
+
 	zClient, err := zoxidelib.New(zoxidelib.WithDataDir(zoxideDataDir))
 	if err != nil {
 		if runtime.GOOS != utils.OsLinux {
@@ -58,9 +83,11 @@ func TestZoxide(t *testing.T) {
 	utils.SetupDirectories(t, curTestDir, dir1, dir2, dir3, multiSpaceDir)
 
 	t.Run("Zoxide tracking and navigation", func(t *testing.T) {
-		p := setupProgAndOpenZoxide(t, zClient, dir1)
+		p := setupProgWithZoxide(t, zClient, dir1)
 		updateCurrentFilePanelDirOfTestModel(t, p, dir2)
 		updateCurrentFilePanelDirOfTestModel(t, p, dir3)
+
+		openZoxide(t, p)
 
 		p.SendKey("dir2")
 		assert.Eventually(t, func() bool {
@@ -113,10 +140,12 @@ func TestZoxide(t *testing.T) {
 	})
 
 	t.Run("Multi-space directory name navigation", func(t *testing.T) {
-		p := setupProgAndOpenZoxide(t, zClient, dir1)
+		p := setupProgWithZoxide(t, zClient, dir1)
 
 		updateCurrentFilePanelDirOfTestModel(t, p, multiSpaceDir)
 		updateCurrentFilePanelDirOfTestModel(t, p, dir1)
+
+		openZoxide(t, p)
 
 		p.SendKey(filepath.Base(multiSpaceDir))
 		assert.Eventually(t, func() bool {

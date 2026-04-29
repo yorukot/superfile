@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"unicode"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 )
 
@@ -47,7 +47,7 @@ func (m *Model) SetWidth(width int) {
 	m.width = width
 	// Excluding borders(2), SpacePadding(1), Prompt(2), and one extra character that is appended
 	// by textInput.View()
-	m.textInput.Width = width - modalInputPadding
+	m.textInput.SetWidth(width - modalInputPadding)
 }
 
 func (m *Model) SetMaxHeight(maxHeight int) {
@@ -68,7 +68,7 @@ func (m *Model) GetTextInputValue() string {
 	return m.textInput.Value()
 }
 
-func isKeyAlphaNum(msg tea.KeyMsg) bool {
+func isKeyAlphaNum(msg tea.KeyPressMsg) bool {
 	r := []rune(msg.String())
 	if len(r) != 1 {
 		return false

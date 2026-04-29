@@ -4,7 +4,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/charmbracelet/lipgloss"
+	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 
 	"github.com/yorukot/superfile/src/config/icon"
@@ -83,7 +83,7 @@ func (m *Model) renderPermissions(indexElement int, columnWidth int) string {
 	elem := m.GetElementAtIdx(indexElement)
 	isSelected := m.CheckSelected(elem.Location)
 	return common.FilePanelItemRender(
-		elem.Info.Mode().Perm().String(),
+		elem.Info.Mode().String(),
 		columnWidth,
 		isSelected,
 		common.FilePanelBGColor,

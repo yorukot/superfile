@@ -3,20 +3,20 @@ package zoxide
 import (
 	"testing"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestIsKeyAlphaNum(t *testing.T) {
-	assert.True(t, isKeyAlphaNum(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'j'}}), "'j' should be alphanumeric")
-	assert.True(t, isKeyAlphaNum(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'k'}}), "'k' should be alphanumeric")
-	assert.True(t, isKeyAlphaNum(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'5'}}), "'5' should be alphanumeric")
-	assert.True(t, isKeyAlphaNum(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'A'}}), "'A' should be alphanumeric")
-	assert.False(t, isKeyAlphaNum(tea.KeyMsg{Type: tea.KeyUp}), "up arrow should not be alphanumeric")
-	assert.False(t, isKeyAlphaNum(tea.KeyMsg{Type: tea.KeyEnter}), "enter should not be alphanumeric")
+	assert.True(t, isKeyAlphaNum(tea.KeyPressMsg{Code: 'j', Text: "j"}), "'j' should be alphanumeric")
+	assert.True(t, isKeyAlphaNum(tea.KeyPressMsg{Code: 'k', Text: "k"}), "'k' should be alphanumeric")
+	assert.True(t, isKeyAlphaNum(tea.KeyPressMsg{Code: '5', Text: "5"}), "'5' should be alphanumeric")
+	assert.True(t, isKeyAlphaNum(tea.KeyPressMsg{Code: 'A', Text: "A"}), "'A' should be alphanumeric")
+	assert.False(t, isKeyAlphaNum(tea.KeyPressMsg{Code: tea.KeyUp}), "up arrow should not be alphanumeric")
+	assert.False(t, isKeyAlphaNum(tea.KeyPressMsg{Code: tea.KeyEnter}), "enter should not be alphanumeric")
 	assert.False(
 		t,
-		isKeyAlphaNum(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{' '}}),
+		isKeyAlphaNum(tea.KeyPressMsg{Code: ' ', Text: " "}),
 		"space should not be alphanumeric",
 	)
 }
