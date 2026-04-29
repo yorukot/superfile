@@ -22,9 +22,13 @@ func NewFileListError(fileList []string,
 
 func (fles *FileListErrorState) Skip(runner processbar.ProcessRunner, reqID int) tea.Msg {
 	if len(fles.fileList) <= 1 {
-		return runner(fles.continuationFun, fles.finalizer, []string{}, reqID)
+		return fles.Abort(runner, reqID)
 	}
 	return runner(fles.continuationFun, fles.finalizer, fles.fileList[1:], reqID)
+}
+
+func (fles *FileListErrorState) Abort(runner processbar.ProcessRunner, reqID int) tea.Msg {
+	return runner(fles.continuationFun, fles.finalizer, []string{}, reqID)
 }
 
 type Model struct {

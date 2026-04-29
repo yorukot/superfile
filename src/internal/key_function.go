@@ -281,17 +281,16 @@ func (m *model) spfErrorModelOpenKey(msg string) tea.Cmd {
 		slog.Debug("Unlock mutex for modal error window")
 		m.mutexErrorModal.Unlock()
 	}()
+	state := m.spfError.Close()
+	if state == nil {
+		return nil
+	}
+	reqID := m.ioReqCnt
+	m.ioReqCnt++
 	if isSkip {
-		state := m.spfError.Close()
-		if state == nil {
-			return nil
-		}
-		reqID := m.ioReqCnt
-		m.ioReqCnt++
 		return func() tea.Msg { return state.Skip(m.runFileProcessor, reqID) }
 	}
-	m.spfError.Close()
-	return nil
+	return func() tea.Msg { return state.Abort(m.runFileProcessor, reqID) }
 }
 
 // Handles key inputs inside sort options menu
