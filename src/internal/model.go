@@ -294,10 +294,10 @@ func (m *model) handleKeyInput(msg tea.KeyPressMsg) tea.Cmd {
 	var cmd tea.Cmd
 	cdOnQuit := common.Config.CdOnQuit
 	switch {
-	case m.typingModal.open:
-		m.typingModalOpenKey(msg.String())
 	case m.spfError.IsOpen():
 		cmd = m.spfErrorModelOpenKey(msg.String())
+	case m.typingModal.open:
+		m.typingModalOpenKey(msg.String())
 	case m.promptModal.IsOpen():
 		// Ignore keypress. It will be handled in Update call via
 		// updateFilePanelState
@@ -524,6 +524,13 @@ func (m *model) viewContent() string {
 
 func (m *model) updateRenderForOverlay(finalRender string) string {
 	// check if need pop up modal
+	if m.spfError.IsOpen() {
+		errorModal := m.spfError.Render()
+		overlayX := m.fullWidth/common.CenterDivisor - common.ModalWidth/common.CenterDivisor
+		overlayY := m.fullHeight/common.CenterDivisor - common.ModalHeight/common.CenterDivisor
+		return stringfunction.PlaceOverlay(overlayX, overlayY, errorModal, finalRender)
+	}
+
 	if m.helpMenu.IsOpen() {
 		helpMenu := m.helpMenu.Render()
 		overlayX := m.fullWidth/common.CenterDivisor - m.helpMenu.GetWidth()/common.CenterDivisor
@@ -572,12 +579,7 @@ func (m *model) updateRenderForOverlay(finalRender string) string {
 		overlayY := m.fullHeight/common.CenterDivisor - common.ModalHeight/common.CenterDivisor
 		return stringfunction.PlaceOverlay(overlayX, overlayY, notifyModal, finalRender)
 	}
-	if m.spfError.IsOpen() {
-		errorModal := m.spfError.Render()
-		overlayX := m.fullWidth/common.CenterDivisor - common.ModalWidth/common.CenterDivisor
-		overlayY := m.fullHeight/common.CenterDivisor - common.ModalHeight/common.CenterDivisor
-		return stringfunction.PlaceOverlay(overlayX, overlayY, errorModal, finalRender)
-	}
+
 	return finalRender
 }
 

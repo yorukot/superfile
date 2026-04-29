@@ -46,14 +46,6 @@ func New(open bool, title string, content string, state *FileListErrorState) Mod
 	}
 }
 
-func (m *Model) GetTitle() string {
-	return m.title
-}
-
-func (m *Model) GetContent() string {
-	return m.content
-}
-
 func (m *Model) IsOpen() bool {
 	return m.open
 }
