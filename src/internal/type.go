@@ -71,8 +71,11 @@ type model struct {
 	// Zoxide client for directory tracking
 	zClient *zoxidelib.Client
 
-	fileMetaData         metadata.Model
-	ioReqCnt             int
+	fileMetaData metadata.Model
+
+	// no use directly for increment, use nextIoReqCnt
+	ioReqCnt int32
+
 	modelQuitState       modelQuitStateType
 	firstTextInput       bool
 	toggleFooter         bool

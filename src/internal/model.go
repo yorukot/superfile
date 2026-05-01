@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"slices"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/yorukot/superfile/src/config/icon"
@@ -168,8 +169,7 @@ func (m *model) getMetadataCmd() tea.Cmd {
 		m.fileMetaData.SetInfoMsg(icon.InOperation + icon.Space + "Loading metadata...")
 	}
 
-	reqCnt := m.ioReqCnt
-	m.ioReqCnt++
+	reqCnt := m.nextIoReqCnt()
 	// If there are too many metadata fetches, we need to have a cache with path as a key
 	// and timeout based eviction
 	slog.Debug("Submitting metadata fetch request", "id", reqCnt, "path", selectedItem.Location)
@@ -622,4 +622,10 @@ func (m *model) quitSuperfile(cdOnQuit bool) {
 	}
 	m.modelQuitState = quitDone
 	slog.Debug("Quitting superfile", "current dir", currentDir)
+}
+
+// thread safe. returns current ioReqCnt and increments it.
+func (m *model) nextIoReqCnt() int {
+	var res = atomic.AddInt32(&m.ioReqCnt, 1)
+	return int(res)
 }

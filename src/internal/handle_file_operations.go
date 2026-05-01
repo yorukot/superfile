@@ -94,8 +94,7 @@ func (m *model) IsRenamingConflicting() bool {
 
 // TODO: Remove channel messaging and use tea.Cmd
 func (m *model) warnModalForRenaming() tea.Cmd {
-	reqID := m.ioReqCnt
-	m.ioReqCnt++
+	reqID := m.nextIoReqCnt()
 	slog.Debug("Submitting rename notify model request", "reqID", reqID)
 	res := func() tea.Msg {
 		notifyModel := notify.New(true,
@@ -156,8 +155,7 @@ func (m *model) getDeleteCmd(permDelete bool) tea.Cmd {
 
 	useTrash := m.hasTrash && !isExternalDiskPath(panel.Location) && !permDelete
 
-	reqID := m.ioReqCnt
-	m.ioReqCnt++
+	reqID := m.nextIoReqCnt()
 	slog.Debug("Submitting delete request", "id", reqID, "items cnt", len(items))
 	return func() tea.Msg {
 		return m.deleteOperation(&m.processBarModel, items, useTrash, reqID)
@@ -222,8 +220,7 @@ func (m *model) getDeleteTriggerCmd(deletePermanent bool) tea.Cmd {
 		return nil
 	}
 
-	reqID := m.ioReqCnt
-	m.ioReqCnt++
+	reqID := m.nextIoReqCnt()
 
 	return func() tea.Msg {
 		title := common.TrashWarnTitle
@@ -273,8 +270,7 @@ func (m *model) getPasteItemCmd() tea.Cmd {
 
 	// TODO: Do it via m.getNewReqID()
 	// TODO: Have an IO Req Management, collecting info about pending IO Req too
-	reqID := m.ioReqCnt
-	m.ioReqCnt++
+	reqID := m.nextIoReqCnt()
 	panelLocation := m.getFocusedFilePanel().Location
 
 	slog.Debug("Submitting pasteItems request", "id", reqID, "items cnt", len(copyItems), "dest", panelLocation)
@@ -413,8 +409,7 @@ func (m *model) getExtractFileCmd() tea.Cmd {
 		slog.Error("Error unexpected file", "extension type", ext, "item", item, "error", errors.ErrUnsupported)
 		return nil
 	}
-	reqID := m.ioReqCnt
-	m.ioReqCnt++
+	reqID := m.nextIoReqCnt()
 
 	slog.Debug("Submitting Extract file request", "reqID", reqID, "item", item)
 
@@ -460,8 +455,7 @@ func (m *model) getCompressSelectedFilesCmd() tea.Cmd {
 		filesToCompress = panel.GetSelectedLocations()
 	}
 
-	reqID := m.ioReqCnt
-	m.ioReqCnt++
+	reqID := m.nextIoReqCnt()
 
 	return func() tea.Msg {
 		zipName, err := getZipArchiveName(filepath.Base(firstFile))

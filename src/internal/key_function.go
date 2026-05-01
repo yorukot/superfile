@@ -285,8 +285,7 @@ func (m *model) spfErrorModelOpenKey(msg string) tea.Cmd {
 	if state == nil {
 		return nil
 	}
-	reqID := m.ioReqCnt
-	m.ioReqCnt++
+	reqID := m.nextIoReqCnt()
 	if isSkip {
 		return func() tea.Msg { return state.Skip(m.runFileProcessor, reqID) }
 	}
