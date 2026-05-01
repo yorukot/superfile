@@ -149,7 +149,7 @@ func (m *model) getDeleteCmd(permDelete bool) tea.Cmd {
 
 	var items []string
 	if panel.PanelMode == filepanel.SelectMode {
-		items = panel.GetSelectedLocations()
+		items = panel.GetSelectedLocationsSortedAsVisible()
 	} else {
 		items = []string{panel.GetFocusedItem().Location}
 	}
@@ -259,9 +259,10 @@ func (m *model) copyMultipleItem(cut bool) {
 	if panel.SelectedCount() == 0 {
 		return
 	}
+	items := panel.GetSelectedLocationsSortedAsVisible()
 	slog.Debug("handle_file_operations.copyMultipleItem", "cut", cut,
-		"panel selected files", panel.GetSelectedLocations())
-	m.clipboard.SetItems(panel.GetSelectedLocations())
+		"panel selected files", items)
+	m.clipboard.SetItems(items)
 }
 
 func (m *model) getPasteItemCmd() tea.Cmd {
@@ -457,7 +458,7 @@ func (m *model) getCompressSelectedFilesCmd() tea.Cmd {
 		filesToCompress = append(filesToCompress, firstFile)
 	} else {
 		firstFile = panel.GetFirstSelectedLocation()
-		filesToCompress = panel.GetSelectedLocations()
+		filesToCompress = panel.GetSelectedLocationsSortedAsVisible()
 	}
 
 	reqID := m.ioReqCnt

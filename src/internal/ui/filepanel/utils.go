@@ -80,6 +80,17 @@ func (m *Model) GetSelectedLocations() []string {
 	return result
 }
 
+// Returns an ordered list of selected locations. Order like user see in filepanel.
+func (m *Model) GetSelectedLocationsSortedAsVisible() []string {
+	result := make([]string, 0, len(m.selected))
+	for _, el := range m.element {
+		if _, ok := m.selected[el.Location]; ok {
+			result = append(result, el.Location)
+		}
+	}
+	return result
+}
+
 func (m *Model) GetFirstSelectedLocation() string {
 	if len(m.selected) == 0 {
 		return ""
