@@ -108,8 +108,23 @@ func (m *Model) UpdateElementsIfNeeded(force bool, displayDotFile bool) {
 
 // Retrieves elements for a panel based on search bar value and sort options.
 func (m *Model) getElements(displayDotFile bool) []Element {
+	var elements []Element
 	if m.SearchBar.Value() != "" {
-		return m.getDirectoryElementsBySearch(displayDotFile)
+		elements = m.getDirectoryElementsBySearch(displayDotFile)
+	} else {
+		elements = m.getDirectoryElements(displayDotFile)
 	}
-	return m.getDirectoryElements(displayDotFile)
+	if m.SaveMode {
+		elements = append([]Element{m.getSaveEntryElement()}, elements...)
+	}
+	return elements
+}
+
+func (m *Model) getSaveEntryElement() Element {
+	return Element{
+		Name:       m.SaveEntryName,
+		Location:   m.GetSaveEntryLocation(),
+		Directory:  false,
+		SaveTarget: true,
+	}
 }

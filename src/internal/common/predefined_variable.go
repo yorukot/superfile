@@ -25,6 +25,12 @@ const (
 	TrashWarnContent           = "This operation will move file or directory to trash can."
 	PermanentDeleteWarnTitle   = "Are you sure you want to completely delete"
 	PermanentDeleteWarnContent = "This operation cannot be undone and your data will be completely lost."
+	SaveOverwriteWarnTitle     = "The selected save target already exists"
+	SaveOverwriteWarnContent   = "This operation will return an existing file path and may overwrite that file."
+	SaveDirErrorTitle          = "Cannot save to a directory"
+	SaveDirErrorContent        = "Please choose a file name instead of a directory."
+	SaveAccessErrorTitle       = "Cannot access target path"
+	SaveInitErrorTitle         = "Cannot open save target directory"
 )
 
 const (

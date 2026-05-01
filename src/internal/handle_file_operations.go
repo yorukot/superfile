@@ -11,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 	"github.com/yorukot/superfile/src/internal/ui/spferror"
 	"github.com/yorukot/superfile/src/pkg/utils"
@@ -65,6 +64,10 @@ func formatFileError(filePath string, err error) string {
 // TODO: Fix it. It doesn't creates a new file. It just opens a file model,
 // that allows you to create a file. Actual creation happens here - createItem() in handle_modal.go
 func (m *model) panelCreateNewFile() {
+	if m.isSaveChooserMode() {
+		return
+	}
+
 	panel := m.getFocusedFilePanel()
 
 	m.typingModal.location = panel.Location
@@ -81,6 +84,11 @@ func (m *model) IsRenamingConflicting() bool {
 		slog.Error("IsRenamingConflicting() being called on empty panel")
 		return false
 	}
+
+	if m.isSaveChooserMode() {
+		return false
+	}
+
 	oldPath := panel.GetFocusedItem().Location
 	newPath := filepath.Join(panel.Location, panel.Rename.Value())
 
@@ -115,17 +123,9 @@ func (m *model) panelItemRename() {
 		return
 	}
 
-	cursorPos := -1
-	nameRunes := []rune(panel.GetFocusedItem().Name)
-	nameLen := len(nameRunes)
-	for i := nameLen - 1; i >= 0; i-- {
-		if nameRunes[i] == '.' {
-			cursorPos = i
-			break
-		}
-	}
-	if cursorPos == -1 || cursorPos == 0 && nameLen > 0 || panel.GetFocusedItem().Directory {
-		cursorPos = nameLen
+	focused := panel.GetFocusedItem()
+	if m.isSaveChooserMode() && !focused.SaveTarget {
+		return
 	}
 
 	m.fileModel.Renaming = true
@@ -136,11 +136,15 @@ func (m *model) panelItemRename() {
 	// Maintain its state, dimensions. Update its cursor and text when needed
 	panel.Rename = common.GenerateRenameTextInput(
 		m.fileModel.SinglePanelWidth-common.InnerPadding,
-		cursorPos,
-		panel.GetFocusedItem().Name)
+		getRenameCursorPos(focused.Name, focused.Directory),
+		focused.Name)
 }
 
 func (m *model) getDeleteCmd(permDelete bool) tea.Cmd {
+	if m.isSaveChooserMode() {
+		return nil
+	}
+
 	panel := m.getFocusedFilePanel()
 	if panel.Empty() {
 		return nil
@@ -214,6 +218,10 @@ func makeDeleteProcessor(process processbar.Process,
 }
 
 func (m *model) getDeleteTriggerCmd(deletePermanent bool) tea.Cmd {
+	if m.isSaveChooserMode() {
+		return nil
+	}
+
 	panel := m.getFocusedFilePanel()
 	if (panel.PanelMode == filepanel.SelectMode && panel.SelectedCount() == 0) ||
 		(panel.PanelMode == filepanel.BrowserMode && panel.Empty()) {
@@ -239,6 +247,10 @@ func (m *model) getDeleteTriggerCmd(deletePermanent bool) tea.Cmd {
 // Copy directory or file's path to superfile's clipboard
 // set cut to true/false accordingly
 func (m *model) copySingleItem(cut bool) {
+	if m.isSaveChooserMode() {
+		return
+	}
+
 	panel := m.getFocusedFilePanel()
 	m.clipboard.Reset(cut)
 	if panel.Empty() {
@@ -251,6 +263,10 @@ func (m *model) copySingleItem(cut bool) {
 
 // Copy all selected file or directory's paths to the clipboard
 func (m *model) copyMultipleItem(cut bool) {
+	if m.isSaveChooserMode() {
+		return
+	}
+
 	panel := m.getFocusedFilePanel()
 	m.clipboard.Reset(cut)
 	if panel.SelectedCount() == 0 {
@@ -262,6 +278,10 @@ func (m *model) copyMultipleItem(cut bool) {
 }
 
 func (m *model) getPasteItemCmd() tea.Cmd {
+	if m.isSaveChooserMode() {
+		return nil
+	}
+
 	copyItems := m.clipboard.PruneInaccessibleItemsAndGet()
 	cut := m.clipboard.IsCut()
 	if len(copyItems) == 0 {
@@ -473,13 +493,7 @@ func (m *model) getCompressSelectedFilesCmd() tea.Cmd {
 }
 
 func (m *model) chooserFileWriteAndQuit(path string) error {
-	// Attempt to write to the file
-	err := os.WriteFile(variable.ChooserFile, []byte(path), utils.ConfigFilePerm)
-	if err != nil {
-		return err
-	}
-	m.modelQuitState = quitInitiated
-	return nil
+	return m.chooserWriteAndQuit([]string{path})
 }
 
 // Open file with default editor
@@ -490,13 +504,16 @@ func (m *model) openFileWithEditor() tea.Cmd {
 		return nil
 	}
 
-	if variable.ChooserFile != "" {
-		err := m.chooserFileWriteAndQuit(panel.GetFocusedItem().Location)
+	switch {
+	case m.isSaveChooserMode():
+		m.saveChooserConfirmFocusedItem()
+		return nil
+	case m.isOpenChooserMode():
+		err := m.openChooserWriteSelectionAndQuit()
 		if err == nil {
 			return nil
 		}
-		// Continue with preview if file is not writable
-		slog.Error("Error while writing to chooser file, continuing with open via file editor", "error", err)
+		slog.Error("Error while writing chooser output, continuing with open via file editor", "error", err)
 	}
 
 	editor := common.Config.Editor
@@ -529,13 +546,16 @@ func (m *model) openFileWithEditor() tea.Cmd {
 
 // Open directory with default editor
 func (m *model) openDirectoryWithEditor() tea.Cmd {
-	if variable.ChooserFile != "" {
+	switch {
+	case m.isSaveChooserMode():
+		m.saveChooserConfirmCurrentDirectory()
+		return nil
+	case m.isOpenChooserMode():
 		err := m.chooserFileWriteAndQuit(m.getFocusedFilePanel().Location)
 		if err == nil {
 			return nil
 		}
-		// Continue with preview if file is not writable
-		slog.Error("Error while writing to chooser file, continuing with open via directory editor", "error", err)
+		slog.Error("Error while writing chooser output, continuing with open via directory editor", "error", err)
 	}
 
 	editor := common.Config.DirEditor
@@ -566,6 +586,10 @@ func (m *model) openDirectoryWithEditor() tea.Cmd {
 // Copy file path
 // TODO: This is also an IO operations, do it via tea.Cmd
 func (m *model) copyPath() {
+	if m.isSaveChooserMode() {
+		return
+	}
+
 	panel := m.getFocusedFilePanel()
 
 	if panel.Empty() {
@@ -579,8 +603,28 @@ func (m *model) copyPath() {
 
 // TODO: This is also an IO operations, do it via tea.Cmd
 func (m *model) copyPWD() {
+	if m.isSaveChooserMode() {
+		return
+	}
+
 	panel := m.getFocusedFilePanel()
 	if err := clipboard.WriteAll(panel.Location); err != nil {
 		slog.Error("Error while copy present working directory", "error", err)
 	}
+}
+
+func getRenameCursorPos(name string, isDirectory bool) int {
+	cursorPos := -1
+	nameRunes := []rune(name)
+	nameLen := len(nameRunes)
+	for i := nameLen - 1; i >= 0; i-- {
+		if nameRunes[i] == '.' {
+			cursorPos = i
+			break
+		}
+	}
+	if cursorPos <= 0 || isDirectory {
+		cursorPos = nameLen
+	}
+	return cursorPos
 }

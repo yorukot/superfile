@@ -12,6 +12,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/ui/sidebar"
 
+	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/prompt"
 	zoxideui "github.com/yorukot/superfile/src/internal/ui/zoxide"
@@ -28,7 +29,7 @@ import (
 //     to prevent noise in test logs. Same with imagePreviewer
 func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool,
 	firstPanelPaths []string, zClient *zoxidelib.Client) *model {
-	return &model{
+	m := &model{
 		focusPanel:      nonePanelFocus,
 		processBarModel: processbar.New(),
 		sidebarModel:    sidebar.New(),
@@ -43,5 +44,10 @@ func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool,
 		toggleFooter:    toggleFooter,
 		firstUse:        firstUse,
 		hasTrash:        common.InitTrash(),
+		chooser: chooserState{
+			request: variable.GetChooserRequest(),
+		},
 	}
+	m.initializeChooserState()
+	return m
 }

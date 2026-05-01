@@ -98,6 +98,10 @@ func (m *Model) GetFilePreviewCmd(forcePreviewRender bool) tea.Cmd {
 		return nil
 	}
 	selectedItem := panel.GetFocusedItem()
+	if selectedItem.SaveTarget {
+		m.FilePreview.SetEmptyWithDimensions(m.ExpectedPreviewWidth, m.Height)
+		return nil
+	}
 	if m.FilePreview.GetLocation() == selectedItem.Location && !forcePreviewRender {
 		return nil
 	}

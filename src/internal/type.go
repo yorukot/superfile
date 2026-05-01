@@ -22,6 +22,8 @@ import (
 
 	"github.com/yorukot/superfile/src/internal/ui/prompt"
 	zoxideui "github.com/yorukot/superfile/src/internal/ui/zoxide"
+
+	variable "github.com/yorukot/superfile/src/config"
 )
 
 // Type representing the type of focused panel
@@ -57,6 +59,7 @@ type model struct {
 	processBarModel processbar.Model
 	clipboard       clipboard.Model
 	focusPanel      focusPanelType
+	chooser         chooserState
 
 	// Modals
 	notifyModel     notify.Model
@@ -104,6 +107,11 @@ type typingModal struct {
 	open          bool
 	textInput     textinput.Model
 	errorMesssage string
+}
+
+type chooserState struct {
+	request       variable.ChooserRequest
+	overwritePath string
 }
 
 type editorFinishedMsg struct{ err error }

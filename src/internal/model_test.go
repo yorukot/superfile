@@ -260,15 +260,25 @@ func TestChooserFile(t *testing.T) {
 		},
 	}
 
-	// Must be sequential as we are using global variable chooserfile
+	// Must be sequential as we are using global chooser request state.
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
+			req := variable.ChooserRequest{}
+			if tt.chooserFile != "" {
+				req = variable.ChooserRequest{
+					Mode:       variable.ChooserModeOpen,
+					OutputFile: tt.chooserFile,
+				}
+			}
+			variable.SetChooserRequest(req)
+			t.Cleanup(func() {
+				variable.SetChooserRequest(variable.ChooserRequest{})
+			})
 			m := defaultTestModel(dir1)
 			if tt.expectedQuit {
 				err := os.WriteFile(tt.chooserFile, []byte{}, 0o644)
 				require.NoError(t, err)
 			}
-			variable.SetChooserFile(tt.chooserFile)
 			cmd := TeaUpdate(m, utils.TeaRuneKeyMsg(tt.hotkey))
 
 			if tt.expectedQuit {
@@ -284,6 +294,211 @@ func TestChooserFile(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestChooserFileMultiSelectWritesSelectionOrder(t *testing.T) {
+	curTestDir := filepath.Join(testDir, "TestChooserFileMultiSelectWritesSelectionOrder")
+	dir1 := filepath.Join(curTestDir, "dir1")
+	dir2 := filepath.Join(curTestDir, "dir2")
+	file1 := filepath.Join(dir1, "file1.txt")
+	file2 := filepath.Join(dir1, "file2.txt")
+	chooserOutput := filepath.Join(dir2, "chooser_file.txt")
+
+	utils.SetupDirectories(t, curTestDir, dir1, dir2)
+	utils.SetupFiles(t, file1, file2)
+
+	variable.SetChooserRequest(variable.ChooserRequest{
+		Mode:       variable.ChooserModeOpen,
+		OutputFile: chooserOutput,
+	})
+	t.Cleanup(func() {
+		variable.SetChooserRequest(variable.ChooserRequest{})
+	})
+
+	m := defaultTestModel(dir1)
+	panel := m.getFocusedFilePanel()
+	panel.ChangeFilePanelMode()
+	panel.SetSelected(file2)
+	panel.SetSelected(file1)
+
+	cmd := TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenFileWithEditor[0]))
+
+	assert.Equal(t, quitDone, m.modelQuitState)
+	assert.True(t, IsTeaQuit(cmd))
+
+	data, err := os.ReadFile(chooserOutput)
+	require.NoError(t, err)
+	assert.Equal(t, file2+"\n"+file1, string(data))
+}
+
+func TestSaveChooserInitializesGhostFromSuggestedPath(t *testing.T) {
+	curTestDir := filepath.Join(testDir, "TestSaveChooserInitializesGhostFromSuggestedPath")
+	dir1 := filepath.Join(curTestDir, "dir1")
+	utils.SetupDirectories(t, curTestDir, dir1)
+
+	saveOutput := filepath.Join(curTestDir, "save_output.txt")
+	suggestedPath := filepath.Join(dir1, "download.txt")
+
+	variable.SetChooserRequest(variable.ChooserRequest{
+		Mode:          variable.ChooserModeSave,
+		OutputFile:    saveOutput,
+		SuggestedPath: suggestedPath,
+	})
+	t.Cleanup(func() {
+		variable.SetChooserRequest(variable.ChooserRequest{})
+	})
+
+	m := defaultTestModel(curTestDir)
+	TeaUpdate(m, nil)
+
+	panel := m.getFocusedFilePanel()
+	require.True(t, panel.SaveMode)
+	assert.Equal(t, dir1, panel.Location)
+	assert.Equal(t, "download.txt", panel.GetSaveEntryName())
+	assert.True(t, panel.GetFocusedItem().SaveTarget)
+	assert.Equal(t, suggestedPath, panel.GetFocusedItem().Location)
+}
+
+func TestSaveChooserConfirmCurrentDirectoryWritesGhostPath(t *testing.T) {
+	curTestDir := filepath.Join(testDir, "TestSaveChooserConfirmCurrentDirectoryWritesGhostPath")
+	dir1 := filepath.Join(curTestDir, "dir1")
+	utils.SetupDirectories(t, curTestDir, dir1)
+
+	saveOutput := filepath.Join(curTestDir, "save_output.txt")
+	suggestedPath := filepath.Join(dir1, "download.txt")
+
+	variable.SetChooserRequest(variable.ChooserRequest{
+		Mode:          variable.ChooserModeSave,
+		OutputFile:    saveOutput,
+		SuggestedPath: suggestedPath,
+	})
+	t.Cleanup(func() {
+		variable.SetChooserRequest(variable.ChooserRequest{})
+	})
+
+	m := defaultTestModel(curTestDir)
+	TeaUpdate(m, nil)
+
+	cmd := TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenCurrentDirectoryWithEditor[0]))
+
+	assert.Equal(t, quitDone, m.modelQuitState)
+	assert.True(t, IsTeaQuit(cmd))
+
+	data, err := os.ReadFile(saveOutput)
+	require.NoError(t, err)
+	assert.Equal(t, suggestedPath, string(data))
+	assert.FileExists(t, suggestedPath)
+}
+
+func TestSaveChooserOverwriteRequiresConfirmation(t *testing.T) {
+	curTestDir := filepath.Join(testDir, "TestSaveChooserOverwriteRequiresConfirmation")
+	dir1 := filepath.Join(curTestDir, "dir1")
+	existingFile := filepath.Join(dir1, "file1.txt")
+	saveOutput := filepath.Join(curTestDir, "save_output.txt")
+
+	utils.SetupDirectories(t, curTestDir, dir1)
+	utils.SetupFiles(t, existingFile)
+
+	variable.SetChooserRequest(variable.ChooserRequest{
+		Mode:          variable.ChooserModeSave,
+		OutputFile:    saveOutput,
+		SuggestedPath: existingFile,
+	})
+	t.Cleanup(func() {
+		variable.SetChooserRequest(variable.ChooserRequest{})
+	})
+
+	m := defaultTestModel(curTestDir)
+	TeaUpdate(m, nil)
+
+	cmd := TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenCurrentDirectoryWithEditor[0]))
+
+	assert.Equal(t, notQuitting, m.modelQuitState)
+	assert.False(t, IsTeaQuit(cmd))
+	assert.True(t, m.notifyModel.IsOpen())
+	assert.Equal(t, existingFile, m.chooser.overwritePath)
+
+	cmd = TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.ConfirmTyping[0]))
+
+	assert.Equal(t, quitDone, m.modelQuitState)
+	assert.True(t, IsTeaQuit(cmd))
+
+	data, err := os.ReadFile(saveOutput)
+	require.NoError(t, err)
+	assert.Equal(t, existingFile, string(data))
+}
+
+func TestSaveChooserPortalPlaceholderDoesNotTriggerOverwrite(t *testing.T) {
+	curTestDir := filepath.Join(testDir, "TestSaveChooserPortalPlaceholderDoesNotTriggerOverwrite")
+	dir1 := filepath.Join(curTestDir, "dir1")
+	placeholderFile := filepath.Join(dir1, "download.txt")
+	saveOutput := filepath.Join(curTestDir, "save_output.txt")
+
+	utils.SetupDirectories(t, curTestDir, dir1)
+	require.NoError(
+		t,
+		os.WriteFile(
+			placeholderFile,
+			[]byte("* xdg-desktop-portal-termfilechooser instructions *\nplaceholder"),
+			0o644,
+		),
+	)
+
+	variable.SetChooserRequest(variable.ChooserRequest{
+		Mode:          variable.ChooserModeSave,
+		OutputFile:    saveOutput,
+		SuggestedPath: placeholderFile,
+	})
+	t.Cleanup(func() {
+		variable.SetChooserRequest(variable.ChooserRequest{})
+	})
+
+	m := defaultTestModel(curTestDir)
+	TeaUpdate(m, nil)
+
+	cmd := TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenCurrentDirectoryWithEditor[0]))
+
+	assert.Equal(t, quitDone, m.modelQuitState)
+	assert.True(t, IsTeaQuit(cmd))
+	assert.False(t, m.notifyModel.IsOpen())
+
+	data, err := os.ReadFile(saveOutput)
+	require.NoError(t, err)
+	assert.Equal(t, placeholderFile, string(data))
+}
+
+func TestSaveChooserFocusTargetHotkeyMovesCursorToGhost(t *testing.T) {
+	curTestDir := filepath.Join(testDir, "TestSaveChooserFocusTargetHotkeyMovesCursorToGhost")
+	dir1 := filepath.Join(curTestDir, "dir1")
+	file1 := filepath.Join(dir1, "file1.txt")
+	file2 := filepath.Join(dir1, "file2.txt")
+	saveOutput := filepath.Join(curTestDir, "save_output.txt")
+	suggestedPath := filepath.Join(dir1, "download.txt")
+
+	utils.SetupDirectories(t, curTestDir, dir1)
+	utils.SetupFiles(t, file1, file2)
+
+	variable.SetChooserRequest(variable.ChooserRequest{
+		Mode:          variable.ChooserModeSave,
+		OutputFile:    saveOutput,
+		SuggestedPath: suggestedPath,
+	})
+	t.Cleanup(func() {
+		variable.SetChooserRequest(variable.ChooserRequest{})
+	})
+
+	m := defaultTestModel(curTestDir)
+	TeaUpdate(m, nil)
+
+	panel := m.getFocusedFilePanel()
+	panel.ListDown()
+	require.False(t, panel.GetFocusedItem().SaveTarget)
+
+	TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.SaveChooserFocusTarget[2]))
+
+	assert.True(t, panel.GetFocusedItem().SaveTarget)
+	assert.Equal(t, 0, panel.GetCursor())
+	assert.Equal(t, suggestedPath, panel.GetFocusedItem().Location)
 }
 
 func eventuallyEnsurePreviewContent(t *testing.T, m *model, content string, msgAndArgs ...any) {

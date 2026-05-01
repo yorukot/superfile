@@ -83,6 +83,9 @@ func (m *Model) ParentDirectory() error {
 // Select all item in the file panel (only work on select mode)
 func (m *Model) SelectAllItem() {
 	for _, item := range m.element {
+		if item.SaveTarget {
+			continue
+		}
 		m.SetSelected(item.Location)
 	}
 }

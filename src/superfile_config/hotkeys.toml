@@ -89,6 +89,7 @@ cancel_typing = ['ctrl+c', 'esc']
 #-- Normal Mode Actions
 parent_directory = ['h', 'left', 'backspace']
 search_bar = ['/', '']
+save_chooser_focus_target = ['shift+up', 'shift+down', 'K', 'J']
 
 #-- Selection Mode Actions
 file_panel_select_mode_items_select_down = ['shift+down', 'J']

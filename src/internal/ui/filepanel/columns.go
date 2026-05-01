@@ -25,15 +25,7 @@ func (m *Model) renderFileName(indexElement int, columnWidth int) string {
 	// Calculate the actual prefix width for proper alignment
 	prefixWidth := ansi.StringWidth(cursor+" ") + ansi.StringWidth(selectBox)
 
-	isLink := elem.Info.Mode()&os.ModeSymlink != 0
-	renderedName := common.FilePanelItemRenderWithIcon(
-		elem.Name,
-		columnWidth-prefixWidth,
-		elem.Directory,
-		isLink,
-		isSelected,
-		common.FilePanelBGColor,
-	)
+	renderedName := m.renderElementName(elem, columnWidth-prefixWidth, isSelected)
 	return common.FilePanelCursorStyle.Render(cursor+" ") + selectBox + renderedName
 }
 
@@ -52,6 +44,9 @@ func (m *Model) renderDelimiter(indexElement int, columnWidth int) string {
 func (m *Model) renderFileSize(indexElement int, columnWidth int) string {
 	elem := m.GetElementAtIdx(indexElement)
 	isSelected := m.CheckSelected(elem.Location)
+	if elem.SaveTarget || elem.Info == nil {
+		return common.FilePanelItemRender("", columnWidth, isSelected, common.FilePanelBGColor, lipgloss.Right)
+	}
 	sizeValue := common.FormatFileSize(elem.Info.Size())
 	if elem.Info.IsDir() {
 		sizeValue = ""
@@ -69,6 +64,9 @@ func (m *Model) renderFileSize(indexElement int, columnWidth int) string {
 func (m *Model) renderModifyTime(indexElement int, columnWidth int) string {
 	elem := m.GetElementAtIdx(indexElement)
 	isSelected := m.CheckSelected(elem.Location)
+	if elem.SaveTarget || elem.Info == nil {
+		return common.FilePanelItemRender("", columnWidth, isSelected, common.FilePanelBGColor, lipgloss.Right)
+	}
 	modifyTime := elem.Info.ModTime().Format("2006-01-02 15:04")
 	return common.FilePanelItemRender(
 		modifyTime,
@@ -82,12 +80,48 @@ func (m *Model) renderModifyTime(indexElement int, columnWidth int) string {
 func (m *Model) renderPermissions(indexElement int, columnWidth int) string {
 	elem := m.GetElementAtIdx(indexElement)
 	isSelected := m.CheckSelected(elem.Location)
+	if elem.SaveTarget || elem.Info == nil {
+		return common.FilePanelItemRender("", columnWidth, isSelected, common.FilePanelBGColor, lipgloss.Right)
+	}
 	return common.FilePanelItemRender(
 		elem.Info.Mode().String(),
 		columnWidth,
 		isSelected,
 		common.FilePanelBGColor,
 		lipgloss.Right,
+	)
+}
+
+func (m *Model) renderElementName(elem Element, width int, isSelected bool) string {
+	if elem.SaveTarget {
+		displayName := elem.Name
+		if displayName == "" {
+			displayName = "[save target]"
+		}
+		label := "save " + displayName
+		if common.Config.Nerdfont {
+			label = icon.Download + icon.Space + displayName
+		}
+		return common.FilePanelSaveTargetStyle.Width(width).Align(lipgloss.Left).
+			Render(ansi.Truncate(label, width, "..."))
+	}
+
+	isLink := false
+	if elem.Info != nil {
+		isLink = elem.Info.Mode()&os.ModeSymlink != 0
+	}
+
+	displayName := elem.Name
+	if displayName == "" {
+		displayName = "[unknown]"
+	}
+	return common.FilePanelItemRenderWithIcon(
+		displayName,
+		width,
+		elem.Directory,
+		isLink,
+		isSelected,
+		common.FilePanelBGColor,
 	)
 }
 

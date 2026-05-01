@@ -38,6 +38,7 @@ var (
 	FilePanelTopDirectoryIconStyle lipgloss.Style
 	FilePanelTopPathStyle          lipgloss.Style
 	FilePanelItemSelectedStyle     lipgloss.Style
+	FilePanelSaveTargetStyle       lipgloss.Style
 	FilePanelSelectBoxStyle        lipgloss.Style
 )
 
@@ -194,6 +195,7 @@ func LoadThemeConfig() { //nolint: funlen // Variable initialization
 	FilePanelTopPathStyle = lipgloss.NewStyle().Foreground(filePanelTopPathColor).Background(FilePanelBGColor)
 	FilePanelItemSelectedStyle = lipgloss.NewStyle().Foreground(filePanelItemSelectedFGColor).
 		Background(filePanelItemSelectedBGColor)
+	FilePanelSaveTargetStyle = lipgloss.NewStyle().Foreground(cursorColor).Background(FilePanelBGColor)
 	FilePanelSelectBoxStyle = lipgloss.NewStyle().Background(FilePanelBGColor)
 
 	// Sidebar Special Style

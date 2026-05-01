@@ -144,6 +144,21 @@ Edit System Environment Variables and add superfile repo's `bin` directory to yo
 spf
 ```
 
+## Chooser and save mode
+
+superfile can be used as a terminal file chooser integration target:
+
+```bash
+spf --chooser-file /tmp/selected-paths.txt
+spf --save-file /tmp/save-target.txt /path/to/suggested-name.txt
+```
+
+- `--chooser-file` writes the selected open path or paths to the output file.
+- In select mode, `e` writes the selected paths in selection order as newline-delimited absolute paths.
+- `--save-file` opens a dedicated save flow with a pinned save target ghost. Use `ctrl+r` to rename the ghost, `e` to confirm the focused file or ghost, and `E` to confirm the current directory plus the ghost name.
+- `--chooser-file` and `--save-file` are mutually exclusive and accept at most one startup path.
+- If you use `xdg-desktop-portal-termfilechooser`, its superfile wrapper should be updated to call `spf --save-file="$out" "$path"` for save requests.
+
 ## Supported Systems
 
 - \[x\] Linux

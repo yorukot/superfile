@@ -56,9 +56,7 @@ func (m *model) createItem() {
 // Cancel rename file or directory
 func (m *model) cancelRename() {
 	panel := m.getFocusedFilePanel()
-	panel.Rename.Blur()
-	panel.Renaming = false
-	m.fileModel.Renaming = false
+	m.clearRenamingState(panel)
 }
 
 // Connfirm rename file or directory
@@ -72,6 +70,12 @@ func (m *model) confirmRename() {
 		return
 	}
 
+	if m.isSaveChooserMode() {
+		panel.SetSaveEntryName(panel.Rename.Value())
+		m.clearRenamingState(panel)
+		return
+	}
+
 	oldPath := panel.GetFocusedItem().Location
 	newPath := filepath.Join(panel.Location, panel.Rename.Value())
 
@@ -81,9 +85,7 @@ func (m *model) confirmRename() {
 		slog.Error("Error while confirmRename during rename", "error", err)
 		// Dont return. We have to also reset the panel and model information
 	}
-	m.fileModel.Renaming = false
-	panel.Rename.Blur()
-	panel.Renaming = false
+	m.clearRenamingState(panel)
 }
 
 func (m *model) confirmSortOptions() {
@@ -107,4 +109,10 @@ func (m *model) confirmSearch() {
 
 func (m *model) getFocusedFilePanel() *filepanel.Model {
 	return m.fileModel.GetFocusedFilePanel()
+}
+
+func (m *model) clearRenamingState(panel *filepanel.Model) {
+	m.fileModel.Renaming = false
+	panel.Rename.Blur()
+	panel.Renaming = false
 }
