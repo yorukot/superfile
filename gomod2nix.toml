@@ -13,10 +13,6 @@ schema = 3
     version = 'v2.0.2'
     hash = 'sha256-b9t+NjParxoubrUwHUqiFUrebsq4H7NDUptJ3Jmx+m0='
 
-  [mod.'github.com/BourgeoisBear/rasterm']
-    version = 'v1.1.2'
-    hash = 'sha256-fYV85hVcIAT01xriEpWn0f/YyGgsc7W+0SW6iz9K/+A='
-
   [mod.'github.com/adrg/xdg']
     version = 'v0.5.3'
     hash = 'sha256-bo6tBgHS+3sl6f4oWpmdFrZjfV6eA/3xAlysSW0bIEs='
@@ -190,8 +186,8 @@ schema = 3
     hash = 'sha256-X7Cg0kEygyy6Xw6sxRF9HirgefkH9tn9UPPelxRaAGg='
 
   [mod.'github.com/pelletier/go-toml/v2']
-    version = 'v2.3.0'
-    hash = 'sha256-3ftKBqSwUp5rs10NigReAJ8RxfnP4Aol45EkP0XRaa4='
+    version = 'v2.3.1'
+    hash = 'sha256-5H8+UOtPOs+Yc+8oVT/3bugCCdbq3jFMH6eOW8dadyg='
 
   [mod.'github.com/pierrec/lz4/v4']
     version = 'v4.1.17'
@@ -268,10 +264,6 @@ schema = 3
   [mod.'golang.org/x/sys']
     version = 'v0.42.0'
     hash = 'sha256-LhNedvUEJbPYyR6EoU91rfOr3DBBoauLOcMcyqghEos='
-
-  [mod.'golang.org/x/term']
-    version = 'v0.18.0'
-    hash = 'sha256-lpze9arFZIhBV8Ht3VZyoiUwqPkeH2IwfXt8M3xljiM='
 
   [mod.'golang.org/x/text']
     version = 'v0.35.0'
