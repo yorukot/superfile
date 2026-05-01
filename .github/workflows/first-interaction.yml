@@ -3,11 +3,10 @@ name: "Welcome First-Time Contributor"
 on:
   issues:
     types: [opened]
-  pull_request:
+  pull_request_target:
     types: [opened]
 
 permissions:
-  contents: read
   issues: write
   pull-requests: write
 
