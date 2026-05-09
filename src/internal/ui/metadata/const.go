@@ -18,6 +18,7 @@ const keyPermissions = "Permissions"
 const keyMd5Checksum = "MD5Checksum"
 const keyOwner = "Owner"
 const keyGroup = "Group"
+const keyAttributes = "Attributes"
 const keyPath = "Path"
 const keyArchitecture = "Architecture"
 const borderSize = 2
