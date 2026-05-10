@@ -4,7 +4,6 @@ package metadata
 
 import (
 	"os"
-	"strings"
 
 	"golang.org/x/sys/unix"
 )
@@ -69,6 +68,11 @@ const (
 	FS_CASEFOLD_FL = 0x40000000 /* Folder is case insensitive */
 )
 
+type attrEntry struct {
+	flag   uint32
+	letter byte
+}
+
 // returns file attributes
 //
 // Parameters:
@@ -92,82 +96,44 @@ func getFileAttributes(path string) (string, bool) {
 	return decodeChattr(flags), true
 }
 
-// list of letter and output order see in
-// lsattr sources https://github.com/tytso/e2fsprogs/blob/master/lib/e2p/pf.c
-//
-//nolint:gocognit // it's just mapping list of linux flags to lsattr letters
 func decodeChattr(flags uint32) string {
-	var attrs = make([]string, AttrsSupported)
+	// list of letter and output order see in
+	// lsattr sources https://github.com/tytso/e2fsprogs/blob/master/lib/e2p/pf.c
+	var attrOrder = [...]attrEntry{
+		{FS_SECRM_FL, 's'},        // Secure_Deletion
+		{FS_UNRM_FL, 'u'},         // Undelete
+		{FS_SYNC_FL, 'S'},         // Synchronous_Updates
+		{FS_DIRSYNC_FL, 'D'},      // Synchronous_Directory_Updates
+		{FS_IMMUTABLE_FL, 'i'},    // Immutable
+		{FS_APPEND_FL, 'a'},       // Append_Only
+		{FS_NODUMP_FL, 'd'},       // No_Dump
+		{FS_NOATIME_FL, 'A'},      // No_Atime
+		{FS_COMPR_FL, 'c'},        // Compression_Requested
+		{FS_ENCRYPT_FL, 'E'},      // Encrypted
+		{FS_JOURNAL_DATA_FL, 'j'}, // Journaled_Data
+		{FS_INDEX_FL, 'I'},        // Indexed_directory
+		{FS_NOTAIL_FL, 't'},       // No_Tailmerging
+		{FS_TOPDIR_FL, 'T'},       // Top_of_Directory_Hierarchies
+		{FS_EXTENT_FL, 'e'},       // Extents
+		{FS_NOCOW_FL, 'C'},        // No_COW
+		{FS_DAX_FL, 'x'},          // DAX
+		{FS_CASEFOLD_FL, 'F'},     // Casefold
+		{FS_INLINE_DATA_FL, 'N'},  // Inline_Data
+		{FS_PROJINHERIT_FL, 'P'},  // Project_Hierarchy
+		{FS_VERITY_FL, 'V'},       // Verity
+		{FS_NOCOMP_FL, 'm'},       // Dont_Compress
+	}
+
+	attrs := make([]byte, len(attrOrder))
 	for i := range attrs {
-		attrs[i] = "-"
+		attrs[i] = '-'
 	}
 
-	if flags&FS_SECRM_FL != 0 {
-		attrs[0] = "s" // Secure_Deletion
-	}
-	if flags&FS_UNRM_FL != 0 {
-		attrs[1] = "u" // Undelete
-	}
-	if flags&FS_SYNC_FL != 0 {
-		attrs[2] = "S" // Synchronous_Updates
-	}
-	if flags&FS_DIRSYNC_FL != 0 {
-		attrs[3] = "D" // Synchronous_Directory_Updates
-	}
-	if flags&FS_IMMUTABLE_FL != 0 {
-		attrs[4] = "i" // Immutable
-	}
-	if flags&FS_APPEND_FL != 0 {
-		attrs[5] = "a" // Append_Only
-	}
-	if flags&FS_NODUMP_FL != 0 {
-		attrs[6] = "d" // No_Dump
-	}
-	if flags&FS_NOATIME_FL != 0 {
-		attrs[7] = "A" // No_Atime
-	}
-	if flags&FS_COMPR_FL != 0 {
-		attrs[8] = "c" // Compression_Requested
-	}
-	if flags&FS_ENCRYPT_FL != 0 {
-		attrs[9] = "E" // Encrypted
-	}
-	if flags&FS_JOURNAL_DATA_FL != 0 {
-		attrs[10] = "j" // Journaled_Data
-	}
-	if flags&FS_INDEX_FL != 0 {
-		attrs[11] = "I" // Indexed_directory
-	}
-	if flags&FS_NOTAIL_FL != 0 {
-		attrs[12] = "t" // No_Tailmerging
-	}
-	if flags&FS_TOPDIR_FL != 0 {
-		attrs[13] = "T" // Top_of_Directory_Hierarchies
-	}
-	if flags&FS_EXTENT_FL != 0 {
-		attrs[14] = "e" // Extents
-	}
-	if flags&FS_NOCOW_FL != 0 {
-		attrs[15] = "C" // No_COW
-	}
-	if flags&FS_DAX_FL != 0 {
-		attrs[16] = "x" // DAX
-	}
-	if flags&FS_CASEFOLD_FL != 0 {
-		attrs[17] = "F" // Casefold
-	}
-	if flags&FS_INLINE_DATA_FL != 0 {
-		attrs[18] = "N" // Inline_Data
-	}
-	if flags&FS_PROJINHERIT_FL != 0 {
-		attrs[19] = "P" // Project_Hierarchy
-	}
-	if flags&FS_VERITY_FL != 0 {
-		attrs[20] = "V" // Verity
-	}
-	if flags&FS_NOCOMP_FL != 0 {
-		attrs[21] = "m" // Dont_Compress
+	for i, e := range attrOrder {
+		if flags&e.flag != 0 {
+			attrs[i] = e.letter
+		}
 	}
 
-	return strings.Join(attrs, "")
+	return string(attrs)
 }
