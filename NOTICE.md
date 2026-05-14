@@ -4,7 +4,7 @@
 ## charm.land/bubbles/v2
 
 - Version: v2.1.0
-- License: [MIT](Unknown)
+- License: [MIT](https://github.com/charmbracelet/bubbles/blob/v2.1.0/LICENSE)
 
 ```text
 MIT License
@@ -34,7 +34,7 @@ SOFTWARE.
 ## charm.land/bubbletea/v2
 
 - Version: v2.0.2
-- License: [MIT](Unknown)
+- License: [MIT](https://github.com/charmbracelet/bubbletea/blob/v2.0.2/LICENSE)
 
 ```text
 MIT License
@@ -64,7 +64,7 @@ SOFTWARE.
 ## charm.land/lipgloss/v2
 
 - Version: v2.0.2
-- License: [MIT](Unknown)
+- License: [MIT](https://github.com/charmbracelet/lipgloss/blob/v2.0.2/LICENSE)
 
 ```text
 MIT License
@@ -4373,7 +4373,7 @@ SOFTWARE.
 ## go4.org/readerutil
 
 - Version: v0.0.0-20230225012048-214862532bf5
-- License: [Apache-2.0](Unknown)
+- License: [Apache-2.0](https://github.com/go4org/go4/blob/214862532bf5/LICENSE)
 
 ```text
                                  Apache License
@@ -4584,7 +4584,7 @@ SOFTWARE.
 ## golang.org/x/image
 
 - Version: v0.38.0
-- License: [BSD-3-Clause](Unknown)
+- License: [BSD-3-Clause](https://cs.opensource.google/go/x/image/+/v0.38.0:LICENSE)
 
 ```text
 Copyright 2009 The Go Authors.
@@ -4620,7 +4620,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ## golang.org/x/mod/semver
 
 - Version: v0.33.0
-- License: [BSD-3-Clause](Unknown)
+- License: [BSD-3-Clause](https://cs.opensource.google/go/x/mod/+/v0.33.0:LICENSE)
 
 ```text
 Copyright 2009 The Go Authors.
@@ -4656,7 +4656,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ## golang.org/x/sync/errgroup
 
 - Version: v0.20.0
-- License: [BSD-3-Clause](Unknown)
+- License: [BSD-3-Clause](https://cs.opensource.google/go/x/sync/+/v0.20.0:LICENSE)
 
 ```text
 Copyright 2009 The Go Authors.
@@ -4692,7 +4692,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ## golang.org/x/sys/unix
 
 - Version: v0.42.0
-- License: [BSD-3-Clause](Unknown)
+- License: [BSD-3-Clause](https://cs.opensource.google/go/x/sys/+/v0.42.0:LICENSE)
 
 ```text
 Copyright 2009 The Go Authors.
@@ -4728,7 +4728,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ## golang.org/x/text
 
 - Version: v0.35.0
-- License: [BSD-3-Clause](Unknown)
+- License: [BSD-3-Clause](https://cs.opensource.google/go/x/text/+/v0.35.0:LICENSE)
 
 ```text
 Copyright 2009 The Go Authors.
@@ -4764,7 +4764,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ## golift.io/xtractr
 
 - Version: v0.2.2
-- License: [MIT](Unknown)
+- License: [MIT](https://github.com/golift/xtractr/blob/v0.2.2/LICENSE)
 
 ```text
 Copyright (c) 2020-2022 Go Lift
@@ -4793,7 +4793,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ## gopkg.in/yaml.v3
 
 - Version: v3.0.1
-- License: [MIT](Unknown)
+- License: [MIT](https://github.com/go-yaml/yaml/blob/v3.0.1/LICENSE)
 
 ```text
 
