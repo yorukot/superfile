@@ -15,7 +15,9 @@ interface Props {
 }
 
 const { entry, headings } = Astro.props;
-const { title, description } = entry.data;
+const h1Heading = headings.find(h => h.depth === 1);
+const title = entry.data.title ?? h1Heading?.text ?? "superfile";
+const { description } = entry.data;
 
 // Determine locale and base slug
 // Astro v5 glob loader: entry.id has no file extension

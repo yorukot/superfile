@@ -1,4 +1,4 @@
-.PHONY: all build test lint clean dev testsuite help
+.PHONY: all build test lint clean dev testsuite notice help
 
 # Default target
 all: dev
@@ -27,6 +27,10 @@ testsuite:
 clean:
 	@rm -rf ./bin/
 
+# Generate NOTICE file
+notice:
+	@go-licenses report ./ --template=notice.tmpl > NOTICE.md
+
 # Show help
 help:
 	@echo "Available targets:"
@@ -37,6 +41,7 @@ help:
 	@echo "  lint      - Run linter only"
 	@echo "  testsuite - Run full testsuite"
 	@echo "  clean     - Clean build artifacts"
+	@echo "  notice    - Generate NOTICE.md"
 	@echo "  help      - Show this help"
 	@echo ""
-	@echo "For more options, use: ./dev.sh --help" 
+	@echo "For more options, use: ./dev.sh --help"

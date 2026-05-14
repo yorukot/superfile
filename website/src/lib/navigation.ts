@@ -114,6 +114,7 @@ export const navigation: NavNode[] = [
 	},
 	{ label: "Troubleshooting", slug: "troubleshooting", zhLabel: "疑難排解" },
 	{ label: "Special Thanks", slug: "special-thanks", zhLabel: "特別感謝" },
+	{ label: "NOTICE", slug: "notice", zhLabel: "NOTICE" },
 	{ label: "Changelog", slug: "changelog", zhLabel: "更新紀錄" }
 ];
 
