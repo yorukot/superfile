@@ -9,6 +9,7 @@ on:
       - 'notice.tmpl'
       - 'NOTICE.md'
       - 'Makefile'
+      - 'scripts/generate_notice.go'
       - '.github/workflows/notice.yml'
   pull_request:
     branches: [main, develop]
@@ -18,6 +19,7 @@ on:
       - 'notice.tmpl'
       - 'NOTICE.md'
       - 'Makefile'
+      - 'scripts/generate_notice.go'
       - '.github/workflows/notice.yml'
 
 permissions:

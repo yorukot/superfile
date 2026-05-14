@@ -29,7 +29,7 @@ clean:
 
 # Generate NOTICE file
 notice:
-	@go-licenses report ./ --template=notice.tmpl > NOTICE.md
+	@go run ./scripts/generate_notice.go
 
 # Show help
 help:
