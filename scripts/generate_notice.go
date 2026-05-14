@@ -14,16 +14,15 @@ type target struct {
 	goarch string
 }
 
-var targets = []target{
-	{goos: "linux", goarch: "amd64"},
-	{goos: "linux", goarch: "arm64"},
-	{goos: "darwin", goarch: "amd64"},
-	{goos: "darwin", goarch: "arm64"},
-	{goos: "windows", goarch: "amd64"},
-	{goos: "windows", goarch: "arm64"},
-}
-
 func main() {
+	targets := []target{
+		{goos: "linux", goarch: "amd64"},
+		{goos: "linux", goarch: "arm64"},
+		{goos: "darwin", goarch: "amd64"},
+		{goos: "darwin", goarch: "arm64"},
+		{goos: "windows", goarch: "amd64"},
+		{goos: "windows", goarch: "arm64"},
+	}
 	sections := map[string]string{}
 
 	for _, target := range targets {
@@ -57,7 +56,7 @@ func main() {
 	}
 	output.WriteByte('\n')
 
-	if err := os.WriteFile("NOTICE.md", output.Bytes(), 0o644); err != nil {
+	if err := os.WriteFile("NOTICE.md", output.Bytes(), 0o600); err != nil {
 		fmt.Fprintf(os.Stderr, "write NOTICE.md: %v\n", err)
 		os.Exit(1)
 	}
