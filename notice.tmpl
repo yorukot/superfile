@@ -1,0 +1,12 @@
+# Notices
+
+{{ range . }}
+## {{ .Name }}
+
+- Version: {{ .Version }}
+- License: [{{ .LicenseName }}]({{ .LicenseURL }})
+
+```text
+{{ .LicenseText }}
+```
+{{ end }}
