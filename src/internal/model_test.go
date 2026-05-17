@@ -18,7 +18,13 @@ import (
 
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
+	"github.com/yorukot/superfile/src/internal/ui/prompt"
+	"github.com/yorukot/superfile/src/internal/ui/sidebar"
+	"github.com/yorukot/superfile/src/internal/ui/sortmodel"
+	"github.com/yorukot/superfile/src/internal/ui/spferror"
+	zoxideui "github.com/yorukot/superfile/src/internal/ui/zoxide"
 )
 
 /*
@@ -344,4 +350,84 @@ func TestAsyncPreviewPanelSync(t *testing.T) {
 	p.Send(tea.WindowSizeMsg{Width: 6 * DefaultTestModelWidth,
 		Height: 6 * DefaultTestModelHeight})
 	eventuallyEnsurePreviewContent(t, m, content1, "content should update to file1 after resize")
+}
+
+func prepareLockUnlockTest(t *testing.T) *model {
+	curTestDir := t.TempDir()
+
+	originalPreviewWidth := common.Config.FilePreviewWidth
+	common.Config.FilePreviewWidth = 0
+	t.Cleanup(func() {
+		common.Config.FilePreviewWidth = originalPreviewWidth
+	})
+
+	file1, content1 := filepath.Join(curTestDir, "file1.txt"), "File 1 content"
+	file2, content2 := filepath.Join(curTestDir, "file2.txt"), "File 2 content"
+	utils.SetupFilesWithData(t, []byte(content1), file1)
+	utils.SetupFilesWithData(t, []byte(content2), file2)
+
+	m := defaultTestModelWithFilePreview(curTestDir)
+	processor := func(items []string) (processbar.Process, []string) {
+		return processbar.NewProcess("1", "test", processbar.OpCopy, 10), []string{}
+	}
+	finalizer := func(state processbar.ProcessState, reqId int) tea.Msg { return NewPasteOperationMsg(state, reqId) }
+	m.spfError = spferror.New(true,
+		"error",
+		"ERROR TEST", spferror.NewFileListError([]string{file1}, processor, finalizer))
+	m.spfError.Open()
+	return m
+}
+
+func TestUnlockErrorModalMutex(t *testing.T) {
+	t.Run("after handling error mutex must be unlocked", func(t *testing.T) {
+		m := prepareLockUnlockTest(t)
+		m.mutexErrorModal.Lock()
+		assert.False(t, m.mutexErrorModal.TryLock())
+		m.handleKeyInput(tea.KeyPressMsg{Code: tea.KeyEnter})
+		assert.True(t, m.mutexErrorModal.TryLock())
+	})
+
+	t.Run("Error modal must be handled on top", func(t *testing.T) {
+		m := prepareLockUnlockTest(t)
+		m.mutexErrorModal.Lock()
+		m.typingModal = typingModal{open: true}
+		pModel := prompt.DefaultModel(10, 10)
+		pModel.Open(false)
+		m.promptModal = pModel
+		zModel := zoxideui.GenerateModel(nil, 50, 80)
+		zModel.Open()
+		m.zoxideModal = zModel
+		m.notifyModel = notify.New(true, "test", "test", notify.RenameAction)
+		m.sidebarModel = sidebar.New()
+		m.sidebarModel.PinnedItemRename()
+		m.getFocusedFilePanel().SearchBar.Focus()
+		m.sidebarModel.SearchBarFocus()
+		m.sortModal.Open(sortmodel.SortByName)
+		m.helpMenu.Open()
+
+		assert.False(t, m.mutexErrorModal.TryLock())
+		m.handleKeyInput(tea.KeyPressMsg{Code: tea.KeyEnter})
+		assert.True(t, m.mutexErrorModal.TryLock())
+	})
+	t.Run("Error modal must be rendered on top", func(t *testing.T) {
+		m := prepareLockUnlockTest(t)
+		m.mutexErrorModal.Lock()
+		m.typingModal = typingModal{open: true}
+		pModel := prompt.DefaultModel(10, 10)
+		pModel.Open(false)
+		m.promptModal = pModel
+		zModel := zoxideui.GenerateModel(nil, 50, 80)
+		zModel.Open()
+		m.zoxideModal = zModel
+		m.notifyModel = notify.New(true, "test", "test", notify.RenameAction)
+		m.sidebarModel = sidebar.New()
+		m.sidebarModel.PinnedItemRename()
+		m.getFocusedFilePanel().SearchBar.Focus()
+		m.sidebarModel.SearchBarFocus()
+		m.sortModal.Open(sortmodel.SortByName)
+		m.helpMenu.Open()
+
+		actual := m.updateRenderForOverlay("test render")
+		assert.Contains(t, actual, "ERROR TEST")
+	})
 }
