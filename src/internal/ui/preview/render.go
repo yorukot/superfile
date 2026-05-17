@@ -2,6 +2,7 @@ package preview
 
 import (
 	"errors"
+	"fmt"
 	"image"
 	"io/fs"
 	"log/slog"
@@ -88,6 +89,10 @@ func (m *Model) renderImagePreview(r *rendering.Renderer, itemPath string, previ
 	}).AddLines(imageRender).Render(), rawTransmit
 }
 
+func renderPreviewError(err error) string {
+	return common.FilePreviewError + fmt.Sprintf("\n%s", err)
+}
+
 func (m *Model) renderTextPreview(r *rendering.Renderer, itemPath string,
 	previewWidth, previewHeight int,
 ) string {
@@ -96,7 +101,7 @@ func (m *Model) renderTextPreview(r *rendering.Renderer, itemPath string,
 		isText, err := common.IsTextFile(itemPath)
 		if err != nil {
 			slog.Error("Error while checking text file", "error", err)
-			return r.AddLines(common.FilePreviewError).Render()
+			return r.AddLines(renderPreviewError(err)).Render()
 		} else if !isText {
 			return r.AddLines(common.FilePreviewUnsupportedFormatText).Render()
 		}
@@ -105,7 +110,7 @@ func (m *Model) renderTextPreview(r *rendering.Renderer, itemPath string,
 	fileContent, err := utils.ReadFileContent(itemPath, previewWidth, previewHeight)
 	if err != nil {
 		slog.Error("Error open file", "error", err)
-		return r.AddLines(common.FilePreviewError).Render()
+		return r.AddLines(renderPreviewError(err)).Render()
 	}
 
 	if fileContent == "" {
@@ -128,7 +133,7 @@ func (m *Model) renderTextPreview(r *rendering.Renderer, itemPath string,
 		}
 		if err != nil {
 			slog.Error("Error render code highlight", "error", err)
-			return r.AddLines(common.FilePreviewError).Render()
+			return r.AddLines(renderPreviewError(err)).Render()
 		}
 	}
 
