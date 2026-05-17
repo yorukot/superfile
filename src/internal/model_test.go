@@ -379,7 +379,7 @@ func prepareLockUnlockTest(t *testing.T) *model {
 }
 
 func TestUnlockErrorModalMutex(t *testing.T) {
-	t.Run("after handling error mutex must be unlocked", func(t *testing.T) {
+	t.Run("After handling error mutex must be unlocked", func(t *testing.T) {
 		m := prepareLockUnlockTest(t)
 		m.mutexErrorModal.Lock()
 		assert.False(t, m.mutexErrorModal.TryLock())

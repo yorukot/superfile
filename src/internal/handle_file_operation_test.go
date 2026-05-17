@@ -453,7 +453,7 @@ func TestRunFileProcessorMutex(t *testing.T) {
 			assert.False(t, m.mutexErrorModal.TryLock())
 		})
 
-	t.Run("The mutex mutexErrorModal must be locked after failed processing, when we haven't todo files",
+	t.Run("The mutex mutexErrorModal must be unlocked after failed processing, when we haven't todo files",
 		func(t *testing.T) {
 			m := prepareLockUnlockTest(t)
 			finalizer := func(state processbar.ProcessState, reqID int) tea.Msg { return NewDeleteOperationMsg(state, reqID) }
