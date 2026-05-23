@@ -112,17 +112,17 @@ func Test_resetCursor(t *testing.T) {
 		{
 			name:              "Only Pinned directories",
 			curSideBar:        defaultTestModel(0, 0, 10, 0, 10, 0),
-			expectedCursorPos: 1, // After pinned divider
+			expectedCursorPos: 0, // First pinned (no divider)
 		},
 		{
 			name:              "All kind of directories",
 			curSideBar:        defaultTestModel(0, 0, 10, 10, 10, 10),
-			expectedCursorPos: 0, // First home
+			expectedCursorPos: 0, // First home (no divider)
 		},
 		{
 			name:              "Only Disk",
 			curSideBar:        defaultTestModel(0, 0, 10, 0, 0, 10),
-			expectedCursorPos: 2, // After pinned and dist divider
+			expectedCursorPos: 0, // First disk (no divider)
 		},
 		{
 			name:              "Empty Sidebar",
@@ -153,7 +153,7 @@ func TestSidebarSectionsVisibility(t *testing.T) {
 			name:        "Only one section (pinned)",
 			sections:    []string{utils.SidebarSectionPinned},
 			pinnedDirs:  5,
-			expectedLen: 6, // divider + 5 dirs
+			expectedLen: 5, // no divider for first section
 		},
 		{
 			name:        "No sections",
@@ -161,11 +161,19 @@ func TestSidebarSectionsVisibility(t *testing.T) {
 			expectedLen: 0,
 		},
 		{
+			name:          "Home section as first item should NOT have divider",
+			sections:      []string{utils.SidebarSectionHome, utils.SidebarSectionPinned},
+			homeDirs:      1,
+			pinnedDirs:    1,
+			expectedLen:   3, // 1 home + pinned div + 1 pinned
+			expectHomeDiv: false,
+		},
+		{
 			name:          "Reordered sections (pinned, home)",
 			sections:      []string{utils.SidebarSectionPinned, utils.SidebarSectionHome},
 			homeDirs:      3,
 			pinnedDirs:    3,
-			expectedLen:   1 + 3 + 1 + 3, // pinned divider + 3 pinned + home divider + 3 home
+			expectedLen:   3 + 1 + 3, // 3 pinned + home divider + 3 home
 			expectHomeDiv: true,
 		},
 	}

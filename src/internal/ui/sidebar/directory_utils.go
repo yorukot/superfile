@@ -106,16 +106,26 @@ func formDirctorySlice(homeDirectories []directory, pinnedDirectories []director
 	for _, section := range sections {
 		switch section {
 		case utils.SidebarSectionHome:
-			if len(directories) > 0 {
-				directories = append(directories, homeDividerDir)
+			if len(homeDirectories) > 0 {
+				if len(directories) > 0 {
+					directories = append(directories, homeDividerDir)
+				}
+				directories = append(directories, homeDirectories...)
 			}
-			directories = append(directories, homeDirectories...)
 		case utils.SidebarSectionPinned:
-			directories = append(directories, pinnedDividerDir)
-			directories = append(directories, pinnedDirectories...)
+			if len(pinnedDirectories) > 0 {
+				if len(directories) > 0 {
+					directories = append(directories, pinnedDividerDir)
+				}
+				directories = append(directories, pinnedDirectories...)
+			}
 		case utils.SidebarSectionDisks:
-			directories = append(directories, diskDividerDir)
-			directories = append(directories, diskDirectories...)
+			if len(diskDirectories) > 0 {
+				if len(directories) > 0 {
+					directories = append(directories, diskDividerDir)
+				}
+				directories = append(directories, diskDirectories...)
+			}
 		}
 	}
 
