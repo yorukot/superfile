@@ -87,7 +87,7 @@ func getPinnedDirectoriesWithIcon(pinnedMgr *PinnedManager) []directory {
 	return dirs
 }
 
-// Get filtered directories using fuzzy search logic with three haystacks.
+// getFilteredDirectories returns a list of directories that match the fuzzy search query across all sections.
 func getFilteredDirectories(query string, pinnedMgr *PinnedManager, sections []string) []directory {
 	return formDirctorySlice(
 		fuzzySearch(query, getWellKnownDirectories()),
@@ -97,6 +97,8 @@ func getFilteredDirectories(query string, pinnedMgr *PinnedManager, sections []s
 	)
 }
 
+// formDirctorySlice assembles the final list of directories for the sidebar based on the configured sections.
+// It ensures that dividers are only added between non-empty sections.
 func formDirctorySlice(homeDirectories []directory, pinnedDirectories []directory,
 	diskDirectories []directory, sections []string) []directory {
 	// Preallocation for efficiency

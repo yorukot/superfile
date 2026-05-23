@@ -12,7 +12,7 @@ import (
 	"github.com/yorukot/superfile/src/pkg/utils"
 )
 
-// Get external media directories
+// getExternalMediaFolders retrieves a list of mounted physical drives and external media.
 func getExternalMediaFolders() []directory {
 	// only get physical drives
 	parts, err := disk.Partitions(false)
@@ -35,6 +35,7 @@ func getExternalMediaFolders() []directory {
 	return disks
 }
 
+// shouldListDisk determines whether a given mount point should be displayed in the sidebar's disks section.
 func shouldListDisk(mountPoint string) bool {
 	if runtime.GOOS == utils.OsWindows {
 		// We need to get C:, D: drive etc in the list
@@ -69,6 +70,7 @@ func shouldListDisk(mountPoint string) bool {
 		strings.HasPrefix(mountPoint, "/Volumes")
 }
 
+// diskName generates a display name for a disk based on its mount point and the operating system.
 func diskName(mountPoint string) string {
 	// In windows we dont want to use filepath.Base as it returns "\" for when
 	// mountPoint is any drive root "C:", "D:", etc. Hence causing same name
@@ -90,6 +92,7 @@ func diskName(mountPoint string) string {
 	return iconStr + icon.Space + name
 }
 
+// diskLocation returns the normalized path for a disk's mount point.
 func diskLocation(mountPoint string) string {
 	// In windows if you are in "C:\some\path", "cd C:" will not cd to root of C: drive
 	// but "cd C:\" will

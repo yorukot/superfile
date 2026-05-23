@@ -356,7 +356,7 @@ func Test_listUp(t *testing.T) {
 			mainPanelHeight:     10,
 			expectedCursor:      6, // Should skip all dividers and move to item before dividers
 			expectedRenderIndex: 5, // Should adjust render index accordingly
-			explanation:         "When encountering multiple consecutive dividers, cursor should skip all of them",
+			explanation:         "When moving up across a divider, cursor should skip it and land on the last home directory",
 		},
 		{
 			name:                "No actual directories case",
@@ -433,7 +433,7 @@ func Test_listDown(t *testing.T) {
 			mainPanelHeight:     10,
 			expectedCursor:      6, // Should skip all dividers and move to item after dividers
 			expectedRenderIndex: 2, // Should adjust render index accordingly
-			explanation:         "When encountering multiple consecutive dividers, cursor should skip all of them",
+			explanation:         "When moving down across a divider, cursor should skip it and land on the first disk directory",
 		},
 		{
 			name:                "No actual directories case",
