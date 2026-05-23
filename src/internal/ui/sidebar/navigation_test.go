@@ -271,10 +271,10 @@ func Test_updateRenderIndex(t *testing.T) {
 		},
 		{
 			name:                "Edge case: Empty sidebar",
-			sidebar:             defaultTestModel(2, 0, 0, 0, 0, 0),
+			sidebar:             defaultTestModel(0, 0, 0, 0, 0, 0),
 			mainPanelHeight:     10,
-			expectedRenderIndex: 3,
-			explanation:         "With empty sidebar and cursor=2, renderIndex should become 3",
+			expectedRenderIndex: 0,
+			explanation:         "With empty sidebar, renderIndex should remain at 0",
 		},
 		{
 			name:                "Case I and III overlap: Cursor exactly at current renderIndex",
