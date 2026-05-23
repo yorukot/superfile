@@ -67,7 +67,7 @@ func Test_lastRenderIndex(t *testing.T) {
 			mainPanelHeight:   12,
 			startIndex:        0,
 			expectedLastIndex: 6,
-			explanation:       "3(initialHeight) + 1 (0-homedir) + 3(1-diskdivider) + 5 (2-6 diskdirs, partial fit)",
+			explanation:       "3(initialHeight) + 1 (0-homedir) + 3(1-diskdivider) + 5 (2-6 diskdirs)",
 		},
 	}
 
@@ -167,9 +167,9 @@ func Test_firstRenderIndex(t *testing.T) {
 			name:               "Empty sidebar case",
 			sidebar:            sidebarE,
 			mainPanelHeight:    10,
-			endIndex:           2, // Last divider index
-			expectedFirstIndex: 3, //
-			explanation:        "Empty sidebar should show all dividers except first",
+			endIndex:           2,
+			expectedFirstIndex: 3,
+			explanation:        "An entirely empty sidebar produces no dividers (empty directories slice), so firstRenderedIndex(2) treats endIndex=2 as out of bounds and returns endIndex+1",
 		},
 		{
 			name:               "End index at the start",
@@ -271,10 +271,10 @@ func Test_updateRenderIndex(t *testing.T) {
 		},
 		{
 			name:                "Edge case: Empty sidebar",
-			sidebar:             defaultTestModel(0, 0, 0, 0, 0, 0),
+			sidebar:             defaultTestModel(2, 0, 0, 0, 0, 0),
 			mainPanelHeight:     10,
-			expectedRenderIndex: 1,
-			explanation:         "With empty sidebar, renderIndex should be 1 according to current logic",
+			expectedRenderIndex: 3,
+			explanation:         "With empty sidebar and cursor=2, renderIndex should become 3",
 		},
 		{
 			name:                "Case I and III overlap: Cursor exactly at current renderIndex",
@@ -351,12 +351,12 @@ func Test_listUp(t *testing.T) {
 			explanation: "When at the top, cursor should wrap to the bottom",
 		},
 		{
-			name:                "Skip multiple consecutive dividers",
+			name:                "Move up within disk section",
 			sidebar:             defaultTestModel(7, 5, 0, 5, 0, 5),
 			mainPanelHeight:     10,
 			expectedCursor:      6, // Should skip all dividers and move to item before dividers
 			expectedRenderIndex: 5, // Should adjust render index accordingly
-			explanation:         "When moving up from cursor 7 lands on the previous disk directory",
+			explanation:         "When moving up from cursor 7, lands on the previous disk directory (expectedCursor = 6)",
 		},
 		{
 			name:                "No actual directories case",
