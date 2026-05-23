@@ -8,6 +8,7 @@ import (
 
 	"github.com/shirou/gopsutil/v4/disk"
 
+	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/pkg/utils"
 )
 
@@ -72,14 +73,21 @@ func diskName(mountPoint string) string {
 	// In windows we dont want to use filepath.Base as it returns "\" for when
 	// mountPoint is any drive root "C:", "D:", etc. Hence causing same name
 	// for each drive
-	if runtime.GOOS == utils.OsWindows {
-		return mountPoint
+	name := mountPoint
+	iconStr := icon.Disk
+	if runtime.GOOS != utils.OsWindows {
+		if mountPoint == "/" {
+			name = "Root"
+			iconStr = icon.Terminal
+		} else {
+			// This might cause duplicate names in case you mount two devices in
+			// /mnt/usb and /mnt/dir2/usb . Full mountpoint is a more accurate way
+			// but that results in messy UI, hence we do this.
+			name = filepath.Base(mountPoint)
+		}
 	}
 
-	// This might cause duplicate names in case you mount two devices in
-	// /mnt/usb and /mnt/dir2/usb . Full mountpoint is a more accurate way
-	// but that results in messy UI, hence we do this.
-	return filepath.Base(mountPoint)
+	return iconStr + icon.Space + name
 }
 
 func diskLocation(mountPoint string) string {

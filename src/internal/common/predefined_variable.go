@@ -123,14 +123,9 @@ func wrapFilePreviewErrorMsg(msg string) string {
 // InitIcon() in config package in function.go should be finished
 func LoadPrerenderedVariables() {
 	SideBarSuperfileTitle = SidebarTitleStyle.Render(" " + icon.SuperfileIcon + icon.Space + "superfile")
-	SideBarHomeDivider = SidebarTitleStyle.Render(icon.Home+icon.Space+"Home") +
-		SidebarDividerStyle.Render(" ─────────────")
-
-	SideBarPinnedDivider = SidebarTitleStyle.Render(icon.Pinned+icon.Space+"Pinned") +
-		SidebarDividerStyle.Render(" ───────────")
-
-	SideBarDisksDivider = SidebarTitleStyle.Render(icon.Disk+icon.Space+"Disks") +
-		SidebarDividerStyle.Render(" ────────────")
+	SideBarHomeDivider = SidebarTitleStyle.Render(icon.Browser) + SidebarDividerStyle.Render(" ────────────────────")
+	SideBarPinnedDivider = SidebarTitleStyle.Render(icon.Pinned) + SidebarDividerStyle.Render(" ────────────────────")
+	SideBarDisksDivider = SidebarTitleStyle.Render(icon.Disk) + SidebarDividerStyle.Render(" ────────────────────")
 
 	SideBarNoneText = SidebarStyle.Render(" " + icon.Error + icon.Space + "None")
 
