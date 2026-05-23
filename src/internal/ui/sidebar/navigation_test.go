@@ -67,7 +67,7 @@ func Test_lastRenderIndex(t *testing.T) {
 			mainPanelHeight:   12,
 			startIndex:        0,
 			expectedLastIndex: 6,
-			explanation:       "3(initialHeight) + 1 (0-homedir) + 3(1-pinned divider) + 3 (2-diskdivider) + 4 (3-6 diskdirs)",
+			explanation:       "3(initialHeight) + 1 (0-homedir) + 3(1-diskdivider) + 3 (2-5 diskdirs, partial fit)",
 		},
 	}
 

@@ -187,15 +187,19 @@ func TestSidebarSectionsVisibility(t *testing.T) {
 				tt.sections,
 			)
 			assert.Len(t, dirs, tt.expectedLen)
-			if tt.expectHomeDiv {
-				foundHomeDiv := false
-				for _, d := range dirs {
-					if d == homeDividerDir {
-						foundHomeDiv = true
-						break
-					}
+
+			foundHomeDiv := false
+			for _, d := range dirs {
+				if d == homeDividerDir {
+					foundHomeDiv = true
+					break
 				}
+			}
+
+			if tt.expectHomeDiv {
 				assert.True(t, foundHomeDiv, "Expected home divider to be present")
+			} else {
+				assert.False(t, foundHomeDiv, "Expected home divider to be absent")
 			}
 		})
 	}
