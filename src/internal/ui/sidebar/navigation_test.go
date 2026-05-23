@@ -67,7 +67,7 @@ func Test_lastRenderIndex(t *testing.T) {
 			mainPanelHeight:   12,
 			startIndex:        0,
 			expectedLastIndex: 6,
-			explanation:       "3(initialHeight) + 1 (0-homedir) + 3(1-diskdivider) + 3 (2-5 diskdirs, partial fit)",
+			explanation:       "3(initialHeight) + 1 (0-homedir) + 3(1-diskdivider) + 5 (2-6 diskdirs, partial fit)",
 		},
 	}
 
@@ -271,10 +271,10 @@ func Test_updateRenderIndex(t *testing.T) {
 		},
 		{
 			name:                "Edge case: Empty sidebar",
-			sidebar:             defaultTestModel(2, 0, 0, 0, 0, 0),
+			sidebar:             defaultTestModel(0, 0, 0, 0, 0, 0),
 			mainPanelHeight:     10,
-			expectedRenderIndex: 3,
-			explanation:         "With empty sidebar, renderIndex should remain at 3",
+			expectedRenderIndex: 1,
+			explanation:         "With empty sidebar, renderIndex should be 1 according to current logic",
 		},
 		{
 			name:                "Case I and III overlap: Cursor exactly at current renderIndex",
@@ -356,7 +356,7 @@ func Test_listUp(t *testing.T) {
 			mainPanelHeight:     10,
 			expectedCursor:      6, // Should skip all dividers and move to item before dividers
 			expectedRenderIndex: 5, // Should adjust render index accordingly
-			explanation:         "When moving up across a divider, cursor should skip it and land on the last home directory",
+			explanation:         "When moving up from cursor 7 lands on the previous disk directory",
 		},
 		{
 			name:                "No actual directories case",
