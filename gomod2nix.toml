@@ -254,8 +254,8 @@ schema = 3
     hash = 'sha256-YxgdnBfazaQiopq2rlJsGR7BbuaQF1hpeoWZhER8v9E='
 
   [mod.'golang.org/x/mod']
-    version = 'v0.33.0'
-    hash = 'sha256-NR+ZSeQKbfVP4Cu/SlNIivMa+c1OMyOSMxLSjX+LZJI='
+    version = 'v0.35.0'
+    hash = 'sha256-ICEQxokHywOFInDPqoP+go9l1tZSz3roknF5SXPtNV4='
 
   [mod.'golang.org/x/sync']
     version = 'v0.20.0'
@@ -266,8 +266,8 @@ schema = 3
     hash = 'sha256-LhNedvUEJbPYyR6EoU91rfOr3DBBoauLOcMcyqghEos='
 
   [mod.'golang.org/x/text']
-    version = 'v0.35.0'
-    hash = 'sha256-MXhEl0aLAyS+4SjQZMipoYKgNEOWdIYnr8h7WtLdTdQ='
+    version = 'v0.37.0'
+    hash = 'sha256-8XDOnlPIybcDRy89fkjG5VqtIt5Ku+LmaqYhgKl7i1E='
 
   [mod.'golift.io/xtractr']
     version = 'v0.2.2'
