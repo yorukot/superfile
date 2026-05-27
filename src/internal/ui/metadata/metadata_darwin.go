@@ -1,14 +1,6 @@
-//go:build windows
+//go:build darwin
 
 package metadata
-
-import (
-	"os"
-)
-
-func getOwnerAndGroup(_ os.FileInfo) (string, string) {
-	return "", ""
-}
 
 // returns file attributes
 // TODO: need realisation

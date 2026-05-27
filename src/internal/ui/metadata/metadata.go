@@ -126,6 +126,11 @@ func getMetaDataUnsorted(filePath string, metadataFocused bool, et *exiftool.Exi
 	}
 	res.data = append(res.data, name, size, modifyDate, permissions, owner, group)
 
+	if attrVal, ok := getFileAttributes(filePath); ok {
+		attrs := [2]string{keyAttributes, attrVal}
+		res.data = append(res.data, attrs)
+	}
+
 	if fileInfo.Mode().IsRegular() {
 		if arch, err := GetBinaryArchitecture(filePath); err == nil {
 			archData := [2]string{keyArchitecture, arch}
