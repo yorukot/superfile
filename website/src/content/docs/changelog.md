@@ -10,6 +10,86 @@ head:
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC(YYYY-MM-DD).
 
+# [**v1.6.0-rc1**](https://github.com/yorukot/superfile/releases/tag/v1.6.0-rc1)
+
+> 2026-05-27
+
+#### Update
+
+- Add configuration options for sidebar section visibility and ordering [`#1323`](https://github.com/yorukot/superfile/pull/1323)
+- Add binary architecture detection for ELF, PE, and Mach-O [`#1328`](https://github.com/yorukot/superfile/pull/1328)
+- Add --debug-info flag [`#1332`](https://github.com/yorukot/superfile/pull/1332)
+- Focus on current directory on navigation to parent directory in a filepanel [`#1340`](https://github.com/yorukot/superfile/pull/1340)
+- Add split_file_panel key function [`#1344`](https://github.com/yorukot/superfile/pull/1344)
+- Refresh file metadata when focusing metadata panel [`#1372`](https://github.com/yorukot/superfile/pull/1372)
+- Add Desktop directory to well-known directories [`#1386`](https://github.com/yorukot/superfile/pull/1386)
+- Add support for Postscript files [`#1399`](https://github.com/yorukot/superfile/pull/1399)
+- Bubbletea v2 migration [`#1406`](https://github.com/yorukot/superfile/pull/1406)
+- Detailed information about delete operation errors for the user [`#1408`](https://github.com/yorukot/superfile/pull/1408)
+- Add file type byte to permissions column [`#1410`](https://github.com/yorukot/superfile/pull/1410)
+- New website & logo design [`#1423`](https://github.com/yorukot/superfile/pull/1423)
+- Add Linux attributes to metadata [`#1432`](https://github.com/yorukot/superfile/pull/1432)
+- More informative content of the error text for file text preview [`#1436`](https://github.com/yorukot/superfile/pull/1436)
+
+#### Bug Fix
+
+- Resolve Nix build failure [`#1298`](https://github.com/yorukot/superfile/pull/1298)
+- Prune Inaccessible Items from clipboard before pasting [`#1300`](https://github.com/yorukot/superfile/pull/1300)
+- Correct jump back to parent directories cursor position [`#1316`](https://github.com/yorukot/superfile/pull/1316)
+- Move toggleDot files to fileModel and force re render on toggle [`#1324`](https://github.com/yorukot/superfile/pull/1324)
+- Update xz to v0.5.15 to enable cross-compile again [`#1327`](https://github.com/yorukot/superfile/pull/1327)
+- Prevent crash due to invalid theme [`#1355`](https://github.com/yorukot/superfile/pull/1355)
+- Prevent panic from zero-value Renderer usage [`#1358`](https://github.com/yorukot/superfile/pull/1358)
+- Remove panic statements in production code [`#1359`](https://github.com/yorukot/superfile/pull/1359)
+- Allow natural_sort as sort option [`#1237`](https://github.com/yorukot/superfile/pull/1237)
+- Disable interactive commands in shell mode(darwin/linux) [`#1364`](https://github.com/yorukot/superfile/pull/1364)
+- Multy-column header misalignment [`#1362`](https://github.com/yorukot/superfile/pull/1362)
+- Remove showing two fractional digits of Byte for files with small size [`#1370`](https://github.com/yorukot/superfile/pull/1370)
+- Resolve Nix build failure [`#1373`](https://github.com/yorukot/superfile/pull/1373)
+- Disable broken Nix check phase [`#1374`](https://github.com/yorukot/superfile/pull/1374)
+- Reword --help for fch [`#1391`](https://github.com/yorukot/superfile/pull/1391)
+- Unable to select Natural sort [`#1413`](https://github.com/yorukot/superfile/pull/1413)
+- Change FormatFileSize to use configured units [`#1419`](https://github.com/yorukot/superfile/pull/1419)
+- Thread safe ioReqCnt [`#1420`](https://github.com/yorukot/superfile/pull/1420)
+- Files processed in deterministic order [`#1421`](https://github.com/yorukot/superfile/pull/1421)
+- Detailed information about paste operation errors for the user [`#1431`](https://github.com/yorukot/superfile/pull/1431)
+
+#### Optimization
+
+- Refactor sort Modal to seperate package [`#1325`](https://github.com/yorukot/superfile/pull/1325)
+- Refactor helpMenu Modal to seperate package [`#1335`](https://github.com/yorukot/superfile/pull/1335)
+- Refactor utils package to pkg [`#1365`](https://github.com/yorukot/superfile/pull/1365)
+
+#### Documentation
+
+- Add jetbrains logo [`#1292`](https://github.com/yorukot/superfile/pull/1292)
+- Grammar corrections in readme and removed a redundant link in site [`#1302`](https://github.com/yorukot/superfile/pull/1302)
+- Add special thanks page [`#1317`](https://github.com/yorukot/superfile/pull/1317)
+- Add missing fields to vim like superfile hotkeys [`#1318`](https://github.com/yorukot/superfile/pull/1318)
+- Add download badges to README [`#1404`](https://github.com/yorukot/superfile/pull/1404)
+- Fix `behviour` -> `behaviour` typo in tmux.md [`#1427`](https://github.com/yorukot/superfile/pull/1427)
+- Update core contributer [`#1429`](https://github.com/yorukot/superfile/pull/1429)
+- Add notice page and fix tutorial page discuss issue [`#1433`](https://github.com/yorukot/superfile/pull/1433)
+
+#### Dependencies
+
+- Update astro monorepo [`#1313`](https://github.com/yorukot/superfile/pull/1313), [`#1376`](https://github.com/yorukot/superfile/pull/1376)
+- Update Astro and Starlight dependencies [`#1294`](https://github.com/yorukot/superfile/pull/1294), [`#1308`](https://github.com/yorukot/superfile/pull/1308), [`#1319`](https://github.com/yorukot/superfile/pull/1319), [`#1338`](https://github.com/yorukot/superfile/pull/1338), [`#1383`](https://github.com/yorukot/superfile/pull/1383), [`#1394`](https://github.com/yorukot/superfile/pull/1394)
+- Update expressive-code plugins [`#1309`](https://github.com/yorukot/superfile/pull/1309), [`#1310`](https://github.com/yorukot/superfile/pull/1310), [`#1366`](https://github.com/yorukot/superfile/pull/1366), [`#1377`](https://github.com/yorukot/superfile/pull/1377)
+- Update website dependencies [`#1395`](https://github.com/yorukot/superfile/pull/1395), [`#1396`](https://github.com/yorukot/superfile/pull/1396)
+- Update Go module dependencies [`#1296`](https://github.com/yorukot/superfile/pull/1296), [`#1314`](https://github.com/yorukot/superfile/pull/1314), [`#1329`](https://github.com/yorukot/superfile/pull/1329), [`#1339`](https://github.com/yorukot/superfile/pull/1339), [`#1389`](https://github.com/yorukot/superfile/pull/1389), [`#1400`](https://github.com/yorukot/superfile/pull/1400), [`#1401`](https://github.com/yorukot/superfile/pull/1401), [`#1418`](https://github.com/yorukot/superfile/pull/1418), [`#1426`](https://github.com/yorukot/superfile/pull/1426), [`#1430`](https://github.com/yorukot/superfile/pull/1430), [`#1447`](https://github.com/yorukot/superfile/pull/1447), [`#1450`](https://github.com/yorukot/superfile/pull/1450)
+
+#### Misc
+
+- Update tracking code [`#1301`](https://github.com/yorukot/superfile/pull/1301)
+- Add sidebar section layout test [`#1384`](https://github.com/yorukot/superfile/pull/1384)
+- Fix incomplete test coverage in navigation_test.go [`#1387`](https://github.com/yorukot/superfile/pull/1387)
+- Add new workflow for PR auto labeling [`#1398`](https://github.com/yorukot/superfile/pull/1398)
+- Fix GitHub auto-labeling workflow [`#1405`](https://github.com/yorukot/superfile/pull/1405)
+- Update GitHub Actions workflow triggers and permissions [`#1424`](https://github.com/yorukot/superfile/pull/1424)
+- Some tests for modal error message [`#1435`](https://github.com/yorukot/superfile/pull/1435)
+- Update workflow configuration [`#1451`](https://github.com/yorukot/superfile/pull/1451)
+
 # [**v1.5.0**](https://github.com/yorukot/superfile/releases/tag/v1.5.0)
 
 > 2026-01-11
