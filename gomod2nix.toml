@@ -10,8 +10,8 @@ schema = 3
     hash = 'sha256-oWZTg8c3uM0oJfibwIGvh0PbBj6ikoxuk+/cZ4Jm924='
 
   [mod.'charm.land/lipgloss/v2']
-    version = 'v2.0.2'
-    hash = 'sha256-b9t+NjParxoubrUwHUqiFUrebsq4H7NDUptJ3Jmx+m0='
+    version = 'v2.0.3'
+    hash = 'sha256-/RFkSUscU3NwymzT+PfizGf3XyQIdVGQlX7vxktCUGk='
 
   [mod.'github.com/Unpackerr/iso9660']
     version = 'v0.0.3'
@@ -62,8 +62,8 @@ schema = 3
     hash = 'sha256-Bc6mY7OuBw9WF6YLBNU+fvQyTEMm9chpjSKtPN+OPVY='
 
   [mod.'github.com/charmbracelet/colorprofile']
-    version = 'v0.4.2'
-    hash = 'sha256-AMnmwWjpv/TMb2mbqVXB4RmMVWBsrTFlq1FL8A00olw='
+    version = 'v0.4.3'
+    hash = 'sha256-y+QDUxGOKhugEMQLRUTZYT2C+wKqYHnMLJ44jbh7+JA='
 
   [mod.'github.com/charmbracelet/harmonica']
     version = 'v0.2.0'
@@ -322,8 +322,8 @@ schema = 3
     hash = 'sha256-ybcjhCfK6lroUM0yswUvWooW8MOQZBXyiSqoxG6Uy0Y='
 
   [mod.'golang.org/x/sys']
-    version = 'v0.42.0'
-    hash = 'sha256-LhNedvUEJbPYyR6EoU91rfOr3DBBoauLOcMcyqghEos='
+    version = 'v0.43.0'
+    hash = 'sha256-aDQXqSTZES2l/132PBxhZN4ywldpPyfm7LByYCHzzwM='
 
   [mod.'golang.org/x/text']
     version = 'v0.37.0'
