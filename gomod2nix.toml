@@ -186,8 +186,8 @@ schema = 3
     hash = 'sha256-X7Cg0kEygyy6Xw6sxRF9HirgefkH9tn9UPPelxRaAGg='
 
   [mod.'github.com/pelletier/go-toml/v2']
-    version = 'v2.3.0'
-    hash = 'sha256-3ftKBqSwUp5rs10NigReAJ8RxfnP4Aol45EkP0XRaa4='
+    version = 'v2.3.1'
+    hash = 'sha256-5H8+UOtPOs+Yc+8oVT/3bugCCdbq3jFMH6eOW8dadyg='
 
   [mod.'github.com/pierrec/lz4/v4']
     version = 'v4.1.17'
