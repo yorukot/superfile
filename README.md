@@ -66,7 +66,7 @@
 - [Troubleshooting](#troubleshooting)
 - [Uninstalling](#uninstalling)
   - [macOS and Linux](#macos-and-linux-1)
-  - [Window](#window)
+  - [Windows](#windows)
 - [Contributing](#contributing)
 - [Thanks](#thanks)
   - [Support](#support)
@@ -188,7 +188,7 @@ After you install superfile, you can go [here](https://superfile.dev/getting-sta
 
 ## Notes
 
-We have an auto update functionality, that fetches superfile's latest released version from github (if last timestamp of last version check was less than 24 hours) and prints a prompt to user, if there is a newer version available.
+We have an auto update functionality, that fetches superfile's latest released version from GitHub (if last timestamp of last version check was less than 24 hours) and prints a prompt to user, if there is a newer version available.
 
 You can turn this off, by setting `auto_check_update` to false in superfile config. [**Click me to see the config wiki**](https://superfile.dev/configure/superfile-config/)
 
@@ -212,9 +212,9 @@ If you installed superfile without sudo, run:
 rm ~/.local/bin/spf
 ```
 
-If you don't rember, just try removing both.
+If you don't remember, just try removing both.
 
-### Window
+### Windows
 
 To uninstall superfile on Windows, use this powershell script.
 
