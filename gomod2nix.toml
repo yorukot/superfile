@@ -6,8 +6,8 @@ schema = 3
     hash = 'sha256-2OmqpBrl+taOJzAhVM6OReLmoYRxZOXx9JqFNjQjsPA='
 
   [mod.'charm.land/bubbletea/v2']
-    version = 'v2.0.2'
-    hash = 'sha256-oWZTg8c3uM0oJfibwIGvh0PbBj6ikoxuk+/cZ4Jm924='
+    version = 'v2.0.6'
+    hash = 'sha256-1jxXmcnI4peUE0Xs3HGe57pIhRONx235aAaeqm2r434='
 
   [mod.'charm.land/lipgloss/v2']
     version = 'v2.0.2'
@@ -62,8 +62,8 @@ schema = 3
     hash = 'sha256-Bc6mY7OuBw9WF6YLBNU+fvQyTEMm9chpjSKtPN+OPVY='
 
   [mod.'github.com/charmbracelet/colorprofile']
-    version = 'v0.4.2'
-    hash = 'sha256-AMnmwWjpv/TMb2mbqVXB4RmMVWBsrTFlq1FL8A00olw='
+    version = 'v0.4.3'
+    hash = 'sha256-y+QDUxGOKhugEMQLRUTZYT2C+wKqYHnMLJ44jbh7+JA='
 
   [mod.'github.com/charmbracelet/harmonica']
     version = 'v0.2.0'
@@ -74,8 +74,8 @@ schema = 3
     hash = 'sha256-JZD1iVeizYe0mp3qQcJbUZdYN6HP/DNC67ja79DTe6s='
 
   [mod.'github.com/charmbracelet/ultraviolet']
-    version = 'v0.0.0-20260205113103-524a6607adb8'
-    hash = 'sha256-zHe+nAS80nJPgZ4c3mU2HcHA9QL486b0BiyC4FNK3Nk='
+    version = 'v0.0.0-20260416155717-489999b90468'
+    hash = 'sha256-HAex/0iEd42Wk1t+AR0O8J+F2ZAYU2sTw9ea0EfmKEU='
 
   [mod.'github.com/charmbracelet/x/ansi']
     version = 'v0.11.7'
@@ -322,8 +322,8 @@ schema = 3
     hash = 'sha256-ybcjhCfK6lroUM0yswUvWooW8MOQZBXyiSqoxG6Uy0Y='
 
   [mod.'golang.org/x/sys']
-    version = 'v0.42.0'
-    hash = 'sha256-LhNedvUEJbPYyR6EoU91rfOr3DBBoauLOcMcyqghEos='
+    version = 'v0.43.0'
+    hash = 'sha256-aDQXqSTZES2l/132PBxhZN4ywldpPyfm7LByYCHzzwM='
 
   [mod.'golang.org/x/text']
     version = 'v0.37.0'
