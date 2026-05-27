@@ -66,8 +66,8 @@ schema = 3
     hash = 'sha256-zHe+nAS80nJPgZ4c3mU2HcHA9QL486b0BiyC4FNK3Nk='
 
   [mod.'github.com/charmbracelet/x/ansi']
-    version = 'v0.11.6'
-    hash = 'sha256-UToZIkqXl9MEppcRgbeBqaaMeAzRkGa0w3lVUs6sxWI='
+    version = 'v0.11.7'
+    hash = 'sha256-q8BZJq4K7NE5ETocN9/G/EoV0dUyD703ONSfHiUYzWQ='
 
   [mod.'github.com/charmbracelet/x/term']
     version = 'v0.2.2'
@@ -154,8 +154,8 @@ schema = 3
     hash = 'sha256-dD6ArCHGnpo84RBy6SI2kUjMqHS4IZU+K+DgAgmRakY='
 
   [mod.'github.com/lucasb-eyer/go-colorful']
-    version = 'v1.3.0'
-    hash = 'sha256-6BKrJsfmxie+YFAWzTYVPQfrwjQEXRo+J8LY+50C1BU='
+    version = 'v1.4.0'
+    hash = 'sha256-i/3GDHKEMLCy0kc3mtyk58UWYOPmKoUVaq6QCAWXKP0='
 
   [mod.'github.com/mattn/go-colorable']
     version = 'v0.1.13'
@@ -166,8 +166,8 @@ schema = 3
     hash = 'sha256-qhw9hWtU5wnyFyuMbKx+7RB8ckQaFQ8D+8GKPkN3HHQ='
 
   [mod.'github.com/mattn/go-runewidth']
-    version = 'v0.0.21'
-    hash = 'sha256-JU+ZijAu0o+5jzfLC8ytQzxIAKYr5ow3nCjFf0ehpiA='
+    version = 'v0.0.23'
+    hash = 'sha256-SmChZ2U1aR8pW3LPhdM7KcVF5TO6VcHgRzBtUXbBWJA='
 
   [mod.'github.com/muesli/cancelreader']
     version = 'v0.2.2'
