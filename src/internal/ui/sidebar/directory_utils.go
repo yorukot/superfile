@@ -101,35 +101,36 @@ func getFilteredDirectories(query string, pinnedMgr *PinnedManager, sections []s
 // It ensures that dividers are only added between non-empty sections.
 func formDirctorySlice(homeDirectories []directory, pinnedDirectories []directory,
 	diskDirectories []directory, sections []string) []directory {
-	// Preallocation for efficiency
 	totalCapacity := len(homeDirectories) + len(pinnedDirectories) + len(diskDirectories) + directoryCapacityForDividers
 	directories := make([]directory, 0, totalCapacity)
 
 	for _, section := range sections {
 		switch section {
 		case utils.SidebarSectionHome:
-			if len(homeDirectories) > 0 {
-				if len(directories) > 0 {
-					directories = append(directories, homeDividerDir)
-				}
-				directories = append(directories, homeDirectories...)
-			}
+			directories = appendSection(directories, utils.SidebarSectionHome, homeDividerDir, homeDirectories)
 		case utils.SidebarSectionPinned:
-			if len(pinnedDirectories) > 0 {
-				if len(directories) > 0 {
-					directories = append(directories, pinnedDividerDir)
-				}
-				directories = append(directories, pinnedDirectories...)
-			}
+			directories = appendSection(directories, utils.SidebarSectionPinned, pinnedDividerDir, pinnedDirectories)
 		case utils.SidebarSectionDisks:
-			if len(diskDirectories) > 0 {
-				if len(directories) > 0 {
-					directories = append(directories, diskDividerDir)
-				}
-				directories = append(directories, diskDirectories...)
-			}
+			directories = appendSection(directories, utils.SidebarSectionDisks, diskDividerDir, diskDirectories)
 		}
 	}
 
 	return directories
+}
+
+func appendSection(dirs []directory, sectionName string, divider directory, items []directory) []directory {
+	if len(items) == 0 {
+		return dirs
+	}
+
+	if len(dirs) > 0 {
+		dirs = append(dirs, divider)
+	}
+
+	for i := range items {
+		items[i].Section = sectionName
+		dirs = append(dirs, items[i])
+	}
+
+	return dirs
 }
