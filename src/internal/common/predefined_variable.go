@@ -129,9 +129,9 @@ func wrapFilePreviewErrorMsg(msg string) string {
 func LoadPrerenderedVariables() {
 	divider := " " + strings.Repeat("─", SidebarDividerLength)
 	SideBarSuperfileTitle = SidebarTitleStyle.Render(" " + icon.SuperfileIcon + icon.Space + "superfile")
-	SideBarHomeDivider = SidebarTitleStyle.Render(icon.Browser) + SidebarDividerStyle.Render(divider)
-	SideBarPinnedDivider = SidebarTitleStyle.Render(icon.Pinned) + SidebarDividerStyle.Render(divider)
-	SideBarDisksDivider = SidebarTitleStyle.Render(icon.Disk) + SidebarDividerStyle.Render(divider)
+	SideBarHomeDivider = SidebarTitleStyle.Render(icon.Home+icon.Space+"Home") + SidebarDividerStyle.Render(divider)
+	SideBarPinnedDivider = SidebarTitleStyle.Render(icon.Pinned+icon.Space+"Pinned") + SidebarDividerStyle.Render(divider)
+	SideBarDisksDivider = SidebarTitleStyle.Render(icon.Disk+icon.Space+"Disks") + SidebarDividerStyle.Render(divider)
 
 	SideBarNoneText = SidebarStyle.Render(" " + icon.Error + icon.Space + "None")
 
