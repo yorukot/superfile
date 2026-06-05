@@ -204,6 +204,8 @@ You can turn this off, by setting `auto_check_update` to false in superfile conf
 bash -c "$(curl -sLo- https://superfile.dev/uninstall.sh)"
 ```
 
+If you want to inspect the script, see : [uninstall.sh](./website/public/uninstall.sh)
+
 ### Window
 
 To uninstall superfile on Windows, use this powershell script.
