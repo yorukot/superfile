@@ -34,6 +34,11 @@ echo -e '
 found=0
 failed=0
 
+if [ -z "${HOME:-}" ] || [ "$HOME" = "/" ]; then
+    echo -e "${red}❌ Refusing to run uninstall with an unsafe HOME value.${nc}"
+    exit 1
+fi
+
 # Remove binary from /usr/local/bin
 if [ -f /usr/local/bin/spf ]; then
     found=1
