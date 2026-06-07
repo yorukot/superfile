@@ -10,9 +10,9 @@ head:
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC(YYYY-MM-DD).
 
-# [**v1.6.0-rc1**](https://github.com/yorukot/superfile/releases/tag/v1.6.0-rc1)
+# [**v1.6.0**](https://github.com/yorukot/superfile/releases/tag/v1.6.0)
 
-> 2026-05-27
+> 2026-06-08
 
 #### Update
 
@@ -70,6 +70,7 @@ All notable changes to this project will be documented in this file. Dates are d
 - Fix `behviour` -> `behaviour` typo in tmux.md [`#1427`](https://github.com/yorukot/superfile/pull/1427)
 - Update core contributer [`#1429`](https://github.com/yorukot/superfile/pull/1429)
 - Add notice page and fix tutorial page discuss issue [`#1433`](https://github.com/yorukot/superfile/pull/1433)
+- Fix broken demo GIF path [`#1465`](https://github.com/yorukot/superfile/pull/1465) by [`@NouemanKHAL`](https://github.com/NouemanKHAL)
 
 #### Dependencies
 
