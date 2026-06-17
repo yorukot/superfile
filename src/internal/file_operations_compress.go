@@ -128,7 +128,14 @@ func writeZipFile(path string, relPath string, info os.FileInfo, writer *zip.Wri
 }
 
 func getZipArchiveName(base string) (string, error) {
+	if len(base) == 0 {
+		return "", errors.New("empty filename to compress")
+	}
 	zipName := strings.TrimSuffix(base, filepath.Ext(base)) + ".zip"
+	runes := []rune(base)
+	if runes[0] == '.' && strings.Count(base, ".") == 1 {
+		zipName = base + ".zip"
+	}
 	zipName, err := renameIfDuplicate(zipName)
 	return zipName, err
 }
