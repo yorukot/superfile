@@ -10,8 +10,8 @@ schema = 3
     hash = 'sha256-oWZTg8c3uM0oJfibwIGvh0PbBj6ikoxuk+/cZ4Jm924='
 
   [mod.'charm.land/lipgloss/v2']
-    version = 'v2.0.3'
-    hash = 'sha256-/RFkSUscU3NwymzT+PfizGf3XyQIdVGQlX7vxktCUGk='
+    version = 'v2.0.4'
+    hash = 'sha256-KrO8Q1/yQZBTMwysp/cAi5Kdz2/ZODBOr3C5X04zG/M='
 
   [mod.'github.com/Unpackerr/iso9660']
     version = 'v0.0.3'
@@ -326,8 +326,8 @@ schema = 3
     hash = 'sha256-ybcjhCfK6lroUM0yswUvWooW8MOQZBXyiSqoxG6Uy0Y='
 
   [mod.'golang.org/x/sys']
-    version = 'v0.43.0'
-    hash = 'sha256-aDQXqSTZES2l/132PBxhZN4ywldpPyfm7LByYCHzzwM='
+    version = 'v0.45.0'
+    hash = 'sha256-hkBoNazrDA67ER6sWhb+EKxx9nJ24+nz3zGy+zT5Hvw='
 
   [mod.'golang.org/x/text']
     version = 'v0.37.0'
