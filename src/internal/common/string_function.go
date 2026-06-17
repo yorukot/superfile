@@ -127,14 +127,25 @@ func ClipboardPrettierName(name string, width int, isDir bool, isLink bool, isSe
 }
 
 func FileNameWithoutExtension(fileName string) string {
+	if fileName == "" {
+		return ""
+	}
+	dir := filepath.Dir(fileName)
+	if dir == "." { // file name don't contains any directory
+		dir = ""
+	}
+	fileNameOnly := filepath.Base(fileName)
 	for {
-		pos := strings.LastIndexByte(fileName, '.')
+		pos := strings.LastIndexByte(fileNameOnly, '.')
 		if pos <= 0 {
 			break
 		}
-		fileName = fileName[:pos]
+		fileNameOnly = fileNameOnly[:pos]
 	}
-	return fileName
+	if dir == "" {
+		return fileNameOnly
+	}
+	return dir + string(os.PathSeparator) + fileNameOnly
 }
 
 func unitsDec() [7]string {

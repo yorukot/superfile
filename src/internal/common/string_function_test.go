@@ -49,6 +49,11 @@ func TestFilenameWithouText(t *testing.T) {
 		{"hello.tar.gz", "hello"},
 		{".gitignore", ".gitignore"},
 		{"", ""},
+		{"/home/user/temp/.tmp/.dockerignore.zip", "/home/user/temp/.tmp/.dockerignore"},
+		{"/home/user/temp/.tmp/.dockerignore", "/home/user/temp/.tmp/.dockerignore"},
+		{"/tmp/aaa.bbb/file", "/tmp/aaa.bbb/file"},
+		{"/tmp/aaa.bbb/.file", "/tmp/aaa.bbb/.file"},
+		{"/tmp/aaa.bbb/.file.txt", "/tmp/aaa.bbb/.file"},
 	}
 
 	for _, tt := range inputs {
