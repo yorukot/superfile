@@ -145,7 +145,7 @@ func FileNameWithoutExtension(fileName string) string {
 	if dir == "" {
 		return fileNameOnly
 	}
-	return dir + string(os.PathSeparator) + fileNameOnly
+	return filepath.Join(dir, fileNameOnly)
 }
 
 func unitsDec() [7]string {
