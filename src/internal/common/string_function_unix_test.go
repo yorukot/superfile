@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestFilenameWithouTextUnix(t *testing.T) {
+func TestFileNameWithoutExtensionUnix(t *testing.T) {
 	var inputs = []struct {
 		input    string
 		expected string

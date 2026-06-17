@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestFilenameWithouTextWindows(t *testing.T) {
+func TestFileNameWithoutExtensionWindows(t *testing.T) {
 	var inputs = []struct {
 		input    string
 		expected string
