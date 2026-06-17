@@ -22,8 +22,8 @@ schema = 3
     hash = 'sha256-bo6tBgHS+3sl6f4oWpmdFrZjfV6eA/3xAlysSW0bIEs='
 
   [mod.'github.com/alecthomas/chroma/v2']
-    version = 'v2.26.0'
-    hash = 'sha256-iY5vB9N5lNQLubD/v0j5PsNo1890Un7b/HjhQBZBSkc='
+    version = 'v2.27.0'
+    hash = 'sha256-nL8pyVmx45wouhzd1WSYqRu2IuuyiiBqC9f+aScgZXA='
 
   [mod.'github.com/andybalholm/brotli']
     version = 'v1.2.0'
@@ -118,8 +118,8 @@ schema = 3
     hash = 'sha256-PVX2rDCkiG0vyA1CbDi3bzLeZ2T8hcqJv3pZ5YwGzMI='
 
   [mod.'github.com/dlclark/regexp2/v2']
-    version = 'v2.1.0'
-    hash = 'sha256-AUF+0kL+e2txpBo+a/woYnCd44En/2giuDgpH3Gq3sw='
+    version = 'v2.2.1'
+    hash = 'sha256-kd7GO+bExbWUNCZXtX/zwG4pn2ZYEYuEfIR2KfTHqMQ='
 
   [mod.'github.com/ebitengine/purego']
     version = 'v0.10.0'
