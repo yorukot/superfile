@@ -222,8 +222,8 @@ schema = 3
     hash = 'sha256-6PC/z/iDiuAq/UcA/EI0gV3gZiRBhoge9NKIU4hiiMQ='
 
   [mod.'github.com/pelletier/go-toml/v2']
-    version = 'v2.3.1'
-    hash = 'sha256-5H8+UOtPOs+Yc+8oVT/3bugCCdbq3jFMH6eOW8dadyg='
+    version = 'v2.4.0'
+    hash = 'sha256-RfZLQPFujCKUmT5f1VzkgpyK2E1gH5yUQbi4VRBEzxk='
 
   [mod.'github.com/peterebden/ar']
     version = 'v0.0.0-20241106141004-20dc11b778e8'
