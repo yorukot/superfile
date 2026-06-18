@@ -96,6 +96,10 @@ func (s *Model) firstRenderedIndex(endIndex int) int {
 }
 
 func (s *Model) updateRenderIndex() {
+	if len(s.directories) == 0 {
+		s.renderIndex = 0
+		return
+	}
 	// Case I : New cursor moved above current renderable range
 	if s.cursor < s.renderIndex {
 		// We will start rendering from there

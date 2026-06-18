@@ -10,9 +10,9 @@ head:
 
 此專案所有值得注意的變更都會記錄在此檔案中。日期以 UTC 顯示（YYYY-MM-DD）。
 
-# [**v1.6.0-rc1**](https://github.com/yorukot/superfile/releases/tag/v1.6.0-rc1)
+# [**v1.6.0**](https://github.com/yorukot/superfile/releases/tag/v1.6.0)
 
-> 2026-05-27
+> 2026-06-08
 
 #### 更新
 
@@ -70,6 +70,7 @@ head:
 - Fix `behviour` -> `behaviour` typo in tmux.md [`#1427`](https://github.com/yorukot/superfile/pull/1427)
 - Update core contributer [`#1429`](https://github.com/yorukot/superfile/pull/1429)
 - Add notice page and fix tutorial page discuss issue [`#1433`](https://github.com/yorukot/superfile/pull/1433)
+- Fix broken demo GIF path [`#1465`](https://github.com/yorukot/superfile/pull/1465) by [`@NouemanKHAL`](https://github.com/NouemanKHAL)
 
 #### 相依套件
 
