@@ -1,4 +1,4 @@
-//go:build darwin
+//go:build !freebsd && !linux && !windows
 
 package metadata
 
