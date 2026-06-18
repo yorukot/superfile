@@ -1,0 +1,56 @@
+name: Go Mod Tidy Check
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '*.go'
+      - '**/*.go'
+      - 'go.mod'
+      - 'go.sum'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - '*.go'
+      - '**/*.go'
+      - 'go.mod'
+      - 'go.sum'
+
+permissions:
+  contents: read
+
+jobs:
+  go-mod-tidy:
+    name: Check go mod tidy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+
+      - name: Cache Go modules
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.cache/go-build
+            ${{ runner.temp }}/gomodcache
+          key: ${{ runner.os }}-go-mod-tidy-${{ hashFiles('go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-mod-tidy-
+
+      - name: Run go mod tidy
+        run: go mod tidy
+        env:
+          GOMODCACHE: ${{ runner.temp }}/gomodcache
+
+      - name: Check module files
+        run: |
+          git diff --exit-code -- go.mod go.sum || {
+            echo "::error::go.mod or go.sum is out of date. Run 'go mod tidy' and commit the changes."
+            exit 1
+          }
