@@ -40,7 +40,7 @@
 
 | Perform common operations  |
 | -------------------------- |
-| ![](website/src/assets/demo.gif) |
+| ![](asset/readme/demo.gif) |
 
 ## Content
 

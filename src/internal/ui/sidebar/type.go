@@ -5,6 +5,7 @@ import "charm.land/bubbles/v2/textinput"
 type directory struct {
 	Location string `json:"location"`
 	Name     string `json:"name"`
+	Section  string `json:"-"`
 }
 
 type Model struct {

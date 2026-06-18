@@ -66,8 +66,8 @@ func Test_lastRenderIndex(t *testing.T) {
 			sidebar:           sidebarB,
 			mainPanelHeight:   12,
 			startIndex:        0,
-			expectedLastIndex: 4,
-			explanation:       "3(initialHeight) + 1 (0-homedir) + 3(1-pinned divider) + 3 (2-diskdivider) + 2 (3-4 diskdirs)",
+			expectedLastIndex: 6,
+			explanation:       "3(initialHeight) + 1 (0-homedir) + 3(1-diskdivider) + 5 (2-6 diskdirs)",
 		},
 	}
 
@@ -159,17 +159,17 @@ func Test_firstRenderIndex(t *testing.T) {
 			name:               "Only disk directories case",
 			sidebar:            sidebarD,
 			mainPanelHeight:    8,
-			endIndex:           4, // Last disk dir
-			expectedFirstIndex: 2, // Disk divider
-			explanation:        "3(InitialHeight) + 3(2-4 disk dirs)",
+			endIndex:           2, // Last disk dir
+			expectedFirstIndex: 0, // First disk dir
+			explanation:        "3(InitialHeight) + 3(0-2 disk dirs)",
 		},
 		{
 			name:               "Empty sidebar case",
 			sidebar:            sidebarE,
 			mainPanelHeight:    10,
-			endIndex:           1, // Disk divider
-			expectedFirstIndex: 0, // Pinned divider
-			explanation:        "Empty sidebar should show all dividers",
+			endIndex:           2,
+			expectedFirstIndex: 3,
+			explanation:        "An entirely empty sidebar produces no dividers (empty directories slice), so firstRenderedIndex(2) treats endIndex=2 as out of bounds and returns endIndex+1",
 		},
 		{
 			name:               "End index at the start",
@@ -271,9 +271,9 @@ func Test_updateRenderIndex(t *testing.T) {
 		},
 		{
 			name:                "Edge case: Empty sidebar",
-			sidebar:             defaultTestModel(1, 0, 0, 0, 0, 0),
+			sidebar:             defaultTestModel(0, 0, 0, 0, 0, 0),
 			mainPanelHeight:     10,
-			expectedRenderIndex: 0, // No change needed for empty sidebar
+			expectedRenderIndex: 0,
 			explanation:         "With empty sidebar, renderIndex should remain at 0",
 		},
 		{
@@ -351,12 +351,12 @@ func Test_listUp(t *testing.T) {
 			explanation: "When at the top, cursor should wrap to the bottom",
 		},
 		{
-			name:                "Skip multiple consecutive dividers",
+			name:                "Move up within disk section",
 			sidebar:             defaultTestModel(7, 5, 0, 5, 0, 5),
 			mainPanelHeight:     10,
-			expectedCursor:      4, // Should skip all dividers and move to item before dividers
-			expectedRenderIndex: 4, // Should adjust render index accordingly
-			explanation:         "When encountering multiple consecutive dividers, cursor should skip all of them",
+			expectedCursor:      6, // Should skip all dividers and move to item before dividers
+			expectedRenderIndex: 5, // Should adjust render index accordingly
+			explanation:         "When moving up from cursor 7, lands on the previous disk directory (expectedCursor = 6)",
 		},
 		{
 			name:                "No actual directories case",
@@ -431,10 +431,9 @@ func Test_listDown(t *testing.T) {
 			name:                "Skip multiple consecutive dividers",
 			sidebar:             defaultTestModel(4, 0, 0, 5, 0, 5),
 			mainPanelHeight:     10,
-			expectedCursor:      7, // Should skip all dividers and move to item after dividers
-			expectedRenderIndex: 5, // Should adjust render index accordingly
-			// 3 (Initial Height) 6(5,6 - pinned and disk divider), 1 (7-Disk dir)
-			explanation: "When encountering multiple consecutive dividers, cursor should skip all of them",
+			expectedCursor:      6, // Should skip all dividers and move to item after dividers
+			expectedRenderIndex: 2, // Should adjust render index accordingly
+			explanation:         "When moving down across a divider, cursor should skip it and land on the first disk directory",
 		},
 		{
 			name:                "No actual directories case",
