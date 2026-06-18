@@ -151,3 +151,25 @@ func TestZipSourcesInvalidTarget(t *testing.T) {
 	err = zipSources([]string{testFile}, invalidTarget, &processBar)
 	require.Error(t, err, "zipSources should return error for invalid target")
 }
+
+func TestGetZipArchiveName(t *testing.T) {
+	tests := []struct {
+		name string
+		base string
+		want string
+	}{
+		{name: "regular file", base: "test.txt", want: "test.zip"},
+		{name: "dotfile", base: ".test", want: ".test.zip"},
+		{name: "no extension", base: "test", want: "test.zip"},
+		{name: "dotfile with extension", base: ".test.txt", want: ".test.zip"},
+		{name: "dot-only path component", base: "..test", want: "..test.zip"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := getZipArchiveName(tt.base)
+			require.NoError(t, err)
+			require.Equal(t, tt.want, got)
+		})
+	}
+}
+

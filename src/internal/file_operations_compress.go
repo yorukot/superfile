@@ -128,7 +128,15 @@ func writeZipFile(path string, relPath string, info os.FileInfo, writer *zip.Wri
 }
 
 func getZipArchiveName(base string) (string, error) {
-	zipName := strings.TrimSuffix(base, filepath.Ext(base)) + ".zip"
+	// filepath.Ext treats dotfiles (e.g. ".test") as their entire name being
+	// the extension, so naively stripping it would produce ".zip" instead of
+	// ".test.zip". If stripping the extension leaves an empty or dot-only
+	// basename, fall back to the original name.
+	stripped := strings.TrimSuffix(base, filepath.Ext(base))
+	if stripped == "" || strings.Trim(stripped, ".") == "" {
+		stripped = base
+	}
+	zipName := stripped + ".zip"
 	zipName, err := renameIfDuplicate(zipName)
 	return zipName, err
 }
