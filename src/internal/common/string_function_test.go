@@ -39,7 +39,7 @@ func TestStringTruncate(t *testing.T) {
 	}
 }
 
-func TestFilenameWithouText(t *testing.T) {
+func TestFileNameWithoutExtensionText(t *testing.T) {
 	var inputs = []struct {
 		input    string
 		expected string
