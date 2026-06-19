@@ -151,3 +151,30 @@ func TestZipSourcesInvalidTarget(t *testing.T) {
 	err = zipSources([]string{testFile}, invalidTarget, &processBar)
 	require.Error(t, err, "zipSources should return error for invalid target")
 }
+
+func TestGetZipArchiveName(t *testing.T) {
+	t.Run("Ordinary file with extension", func(t *testing.T) {
+		actual, err := getZipArchiveName("test.doc")
+		require.NoError(t, err)
+		require.Equal(t, "test.zip", actual)
+	})
+	t.Run("Ordinary file without extension", func(t *testing.T) {
+		actual, err := getZipArchiveName("test")
+		require.NoError(t, err)
+		require.Equal(t, "test.zip", actual)
+	})
+	t.Run("Hidden file without extension", func(t *testing.T) {
+		actual, err := getZipArchiveName(".dockerignore")
+		require.NoError(t, err)
+		require.Equal(t, ".dockerignore.zip", actual)
+	})
+	t.Run("Hidden file with extension", func(t *testing.T) {
+		actual, err := getZipArchiveName(".dockerignore.old")
+		require.NoError(t, err)
+		require.Equal(t, ".dockerignore.zip", actual)
+	})
+	t.Run("empty filename", func(t *testing.T) {
+		_, err := getZipArchiveName("")
+		require.ErrorContains(t, err, "empty filename to compress")
+	})
+}
