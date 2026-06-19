@@ -302,20 +302,20 @@ schema = 3
     hash = 'sha256-YxgdnBfazaQiopq2rlJsGR7BbuaQF1hpeoWZhER8v9E='
 
   [mod.'golang.org/x/mod']
-    version = 'v0.35.0'
-    hash = 'sha256-ICEQxokHywOFInDPqoP+go9l1tZSz3roknF5SXPtNV4='
+    version = 'v0.36.0'
+    hash = 'sha256-ZhyOvy9ptbV+pna/CNyQFr5cKRn5O+B2QzkQAISKgco='
 
   [mod.'golang.org/x/sync']
-    version = 'v0.20.0'
-    hash = 'sha256-ybcjhCfK6lroUM0yswUvWooW8MOQZBXyiSqoxG6Uy0Y='
+    version = 'v0.21.0'
+    hash = 'sha256-2n7PVb1krz7UpnXYGVmCrxV0fZBnjQdVVt6eVudEPYY='
 
   [mod.'golang.org/x/sys']
     version = 'v0.43.0'
     hash = 'sha256-aDQXqSTZES2l/132PBxhZN4ywldpPyfm7LByYCHzzwM='
 
   [mod.'golang.org/x/text']
-    version = 'v0.37.0'
-    hash = 'sha256-8XDOnlPIybcDRy89fkjG5VqtIt5Ku+LmaqYhgKl7i1E='
+    version = 'v0.38.0'
+    hash = 'sha256-PzREcn7yzTAJ0WBvyYL/2/r+tfoeKTY/E5HVXi/CJsU='
 
   [mod.'golift.io/udf']
     version = 'v0.0.1'
