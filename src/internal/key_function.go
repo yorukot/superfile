@@ -196,6 +196,8 @@ func (m *model) filePanelSelectModeKey(msg string) tea.Cmd {
 		m.copyMultipleItem(false)
 	case slices.Contains(common.Hotkeys.CutItems, msg):
 		m.copyMultipleItem(true)
+	case slices.Contains(common.Hotkeys.CopyPath, msg):
+		m.copyPath()
 	case slices.Contains(common.Hotkeys.FilePanelSelectAllItem, msg):
 		panel.SelectAllItem()
 	}

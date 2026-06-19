@@ -158,8 +158,8 @@ SOFTWARE.
 
 ## charm.land/lipgloss/v2
 
-- Version: v2.0.2
-- License: [MIT](https://github.com/charmbracelet/lipgloss/blob/v2.0.2/LICENSE)
+- Version: v2.0.3
+- License: [MIT](https://github.com/charmbracelet/lipgloss/blob/v2.0.3/LICENSE)
 
 ```text
 MIT License
@@ -248,8 +248,8 @@ THE SOFTWARE.
 
 ## github.com/alecthomas/chroma/v2
 
-- Version: v2.24.1
-- License: [MIT](https://github.com/alecthomas/chroma/blob/v2.24.1/COPYING)
+- Version: v2.26.0
+- License: [MIT](https://github.com/alecthomas/chroma/blob/v2.26.0/COPYING)
 
 ```text
 Copyright (C) 2017 Alec Thomas
@@ -1338,8 +1338,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## github.com/charmbracelet/colorprofile
 
-- Version: v0.4.2
-- License: [MIT](https://github.com/charmbracelet/colorprofile/blob/v0.4.2/LICENSE)
+- Version: v0.4.3
+- License: [MIT](https://github.com/charmbracelet/colorprofile/blob/v0.4.3/LICENSE)
 
 ```text
 MIT License
@@ -1690,10 +1690,10 @@ SOFTWARE.
 
 ```
 
-## github.com/dlclark/regexp2
+## github.com/dlclark/regexp2/v2
 
-- Version: v1.12.0
-- License: [MIT](https://github.com/dlclark/regexp2/blob/v1.12.0/LICENSE)
+- Version: v2.1.0
+- License: [MIT](https://github.com/dlclark/regexp2/blob/v2.1.0/LICENSE)
 
 ```text
 The MIT License (MIT)
@@ -4510,8 +4510,8 @@ license of the derivative portions.
 
 ## github.com/shirou/gopsutil/v4
 
-- Version: v4.26.4
-- License: [BSD-3-Clause](https://github.com/shirou/gopsutil/blob/v4.26.4/LICENSE)
+- Version: v4.26.5
+- License: [BSD-3-Clause](https://github.com/shirou/gopsutil/blob/v4.26.5/LICENSE)
 
 ```text
 gopsutil is distributed under BSD license reproduced below.
@@ -4932,8 +4932,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## github.com/urfave/cli/v3
 
-- Version: v3.8.0
-- License: [MIT](https://github.com/urfave/cli/blob/v3.8.0/LICENSE)
+- Version: v3.9.0
+- License: [MIT](https://github.com/urfave/cli/blob/v3.9.0/LICENSE)
 
 ```text
 MIT License
@@ -5435,8 +5435,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## golang.org/x/sys/unix
 
-- Version: v0.42.0
-- License: [BSD-3-Clause](https://cs.opensource.google/go/x/sys/+/v0.42.0:LICENSE)
+- Version: v0.43.0
+- License: [BSD-3-Clause](https://cs.opensource.google/go/x/sys/+/v0.43.0:LICENSE)
 
 ```text
 Copyright 2009 The Go Authors.
@@ -5471,8 +5471,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## golang.org/x/sys/windows
 
-- Version: v0.42.0
-- License: [BSD-3-Clause](https://cs.opensource.google/go/x/sys/+/v0.42.0:LICENSE)
+- Version: v0.43.0
+- License: [BSD-3-Clause](https://cs.opensource.google/go/x/sys/+/v0.43.0:LICENSE)
 
 ```text
 Copyright 2009 The Go Authors.

@@ -14,14 +14,19 @@ type target struct {
 	goarch string
 }
 
+const (
+	goArchAMD64 = "amd64"
+	goArchARM64 = "arm64"
+)
+
 func main() {
 	targets := []target{
-		{goos: "linux", goarch: "amd64"},
-		{goos: "linux", goarch: "arm64"},
-		{goos: "darwin", goarch: "amd64"},
-		{goos: "darwin", goarch: "arm64"},
-		{goos: "windows", goarch: "amd64"},
-		{goos: "windows", goarch: "arm64"},
+		{goos: "linux", goarch: goArchAMD64},
+		{goos: "linux", goarch: goArchARM64},
+		{goos: "darwin", goarch: goArchAMD64},
+		{goos: "darwin", goarch: goArchARM64},
+		{goos: "windows", goarch: goArchAMD64},
+		{goos: "windows", goarch: goArchARM64},
 	}
 	sections := map[string]string{}
 

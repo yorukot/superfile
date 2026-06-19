@@ -104,6 +104,7 @@ func (dp *debugPrinter) printHeader(text string) {
 
 func (dp *debugPrinter) printKeyValue(key, value string) {
 	if filepath.IsAbs(value) {
+		//nolint:gosec // Debug output only checks whether an already absolute path exists.
 		if _, err := os.Stat(value); os.IsNotExist(err) {
 			value = dp.warningColor.Sprint(value + " (Not Found)")
 		}
