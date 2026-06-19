@@ -230,7 +230,7 @@ func getData() []hotkeydata { //nolint: funlen // This should be self contained
 		},
 		{
 			hotkey:         common.Hotkeys.CopyPath,
-			description:    "Copy current file or directory path",
+			description:    "Copy current or selected file/directory paths",
 			hotkeyWorkType: globalType,
 		},
 		{
