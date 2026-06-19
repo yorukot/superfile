@@ -151,40 +151,58 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
 	// if not focus on the filepanel return
 	if !m.getFocusedFilePanel().IsFocused {
-		if m.focusPanel == sidebarFocus && slices.Contains(common.Hotkeys.Confirm, msg) {
-			m.sidebarSelectDirectory()
-		}
-		if m.focusPanel == sidebarFocus && slices.Contains(common.Hotkeys.FilePanelItemRename, msg) {
-			m.sidebarModel.PinnedItemRename()
-		}
-		if m.focusPanel == sidebarFocus && slices.Contains(common.Hotkeys.SearchBar, msg) {
-			m.sidebarSearchBarFocus()
-		}
+		m.unfocusedFilePanelKey(msg)
 		return nil
 	}
 	// Check if in the select mode and focusOn filepanel
 	if m.getFocusedFilePanel().PanelMode == filepanel.SelectMode {
-		switch {
-		case slices.Contains(common.Hotkeys.Confirm, msg):
-			m.getFocusedFilePanel().SingleItemSelect()
-		case slices.Contains(common.Hotkeys.FilePanelSelectModeItemsSelectUp, msg):
-			m.getFocusedFilePanel().ItemSelectUp()
-		case slices.Contains(common.Hotkeys.FilePanelSelectModeItemsSelectDown, msg):
-			m.getFocusedFilePanel().ItemSelectDown()
-		case slices.Contains(common.Hotkeys.DeleteItems, msg):
-			return m.getDeleteTriggerCmd(false)
-		case slices.Contains(common.Hotkeys.PermanentlyDeleteItems, msg):
-			return m.getDeleteTriggerCmd(true)
-		case slices.Contains(common.Hotkeys.CopyItems, msg):
-			m.copyMultipleItem(false)
-		case slices.Contains(common.Hotkeys.CutItems, msg):
-			m.copyMultipleItem(true)
-		case slices.Contains(common.Hotkeys.FilePanelSelectAllItem, msg):
-			m.getFocusedFilePanel().SelectAllItem()
-		}
-		return nil
+		return m.filePanelSelectModeKey(msg)
 	}
 
+	return m.filePanelNormalModeKey(msg)
+}
+
+func (m *model) unfocusedFilePanelKey(msg string) {
+	if m.focusPanel != sidebarFocus {
+		return
+	}
+
+	if slices.Contains(common.Hotkeys.Confirm, msg) {
+		m.sidebarSelectDirectory()
+	}
+	if slices.Contains(common.Hotkeys.FilePanelItemRename, msg) {
+		m.sidebarModel.PinnedItemRename()
+	}
+	if slices.Contains(common.Hotkeys.SearchBar, msg) {
+		m.sidebarSearchBarFocus()
+	}
+}
+
+func (m *model) filePanelSelectModeKey(msg string) tea.Cmd {
+	panel := m.getFocusedFilePanel()
+
+	switch {
+	case slices.Contains(common.Hotkeys.Confirm, msg):
+		panel.SingleItemSelect()
+	case slices.Contains(common.Hotkeys.FilePanelSelectModeItemsSelectUp, msg):
+		panel.ItemSelectUp()
+	case slices.Contains(common.Hotkeys.FilePanelSelectModeItemsSelectDown, msg):
+		panel.ItemSelectDown()
+	case slices.Contains(common.Hotkeys.DeleteItems, msg):
+		return m.getDeleteTriggerCmd(false)
+	case slices.Contains(common.Hotkeys.PermanentlyDeleteItems, msg):
+		return m.getDeleteTriggerCmd(true)
+	case slices.Contains(common.Hotkeys.CopyItems, msg):
+		m.copyMultipleItem(false)
+	case slices.Contains(common.Hotkeys.CutItems, msg):
+		m.copyMultipleItem(true)
+	case slices.Contains(common.Hotkeys.FilePanelSelectAllItem, msg):
+		panel.SelectAllItem()
+	}
+	return nil
+}
+
+func (m *model) filePanelNormalModeKey(msg string) tea.Cmd {
 	switch {
 	case slices.Contains(common.Hotkeys.Confirm, msg):
 		m.enterPanel()
