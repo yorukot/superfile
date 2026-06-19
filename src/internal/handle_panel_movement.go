@@ -80,6 +80,7 @@ func (m *model) executeOpenCommand() {
 		dllpath := filepath.Join(os.Getenv("SYSTEMROOT"), "System32", "rundll32.exe")
 		dllfile := "url.dll,FileProtocolHandler"
 
+		//nolint:gosec // Uses Windows system handler to open the selected file.
 		cmd := exec.Command(dllpath, dllfile, filePath)
 		err := cmd.Start()
 		if err != nil {

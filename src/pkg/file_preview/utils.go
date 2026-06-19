@@ -153,9 +153,9 @@ func hexToColor(hex string) (color.RGBA, error) {
 		return color.RGBA{}, err
 	}
 	return color.RGBA{
-		R: uint8(values >> rgbShift16),            //nolint:gosec // RGB values are masked to 8-bit range
-		G: uint8((values >> rgbShift8) & rgbMask), //nolint:gosec // RGB values are masked to 8-bit range
-		B: uint8(values & rgbMask),                //nolint:gosec // RGB values are masked to 8-bit range
+		R: uint8(values >> rgbShift16), //nolint:gosec // RGB values are masked to 8-bit range
+		G: uint8((values >> rgbShift8) & rgbMask),
+		B: uint8(values & rgbMask),
 		A: alphaOpaque,
 	}, nil
 }
