@@ -3,6 +3,7 @@ package internal
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	tea "charm.land/bubbletea/v2"
@@ -16,6 +17,71 @@ import (
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 )
+
+func TestCopyPath(t *testing.T) {
+	curTestDir := t.TempDir()
+	dir1 := filepath.Join(curTestDir, "dir1")
+	file1 := filepath.Join(curTestDir, "file1.txt")
+	file2 := filepath.Join(curTestDir, "file2.txt")
+
+	utils.SetupDirectories(t, curTestDir, dir1)
+	utils.SetupFiles(t, file1, file2)
+
+	var copiedText string
+	originalWriteClipboard := writeClipboard
+	writeClipboard = func(text string) error {
+		copiedText = text
+		return nil
+	}
+	t.Cleanup(func() {
+		writeClipboard = originalWriteClipboard
+	})
+
+	t.Run("Browser Mode Copy Focused Item Path", func(t *testing.T) {
+		copiedText = ""
+		m := defaultTestModel(curTestDir)
+		setFilePanelSelectedItemByLocation(t, m.getFocusedFilePanel(), file1)
+
+		TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.CopyPath[0]))
+
+		assert.Equal(t, file1, copiedText)
+	})
+
+	t.Run("Select Mode Copy Selected Item Paths", func(t *testing.T) {
+		copiedText = ""
+		m := defaultTestModel(curTestDir)
+		panel := m.getFocusedFilePanel()
+		panel.ChangeFilePanelMode()
+		panel.SetSelected(file2)
+		panel.SetSelected(file1)
+		setFilePanelSelectedItemByLocation(t, panel, dir1)
+
+		TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.CopyPath[0]))
+
+		assert.Equal(t, strings.Join([]string{file1, file2}, "\n"), copiedText)
+	})
+
+	t.Run("Select Mode Without Selection Copies Focused Item Path", func(t *testing.T) {
+		copiedText = ""
+		m := defaultTestModel(curTestDir)
+		panel := m.getFocusedFilePanel()
+		panel.ChangeFilePanelMode()
+		setFilePanelSelectedItemByLocation(t, panel, file2)
+
+		TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.CopyPath[0]))
+
+		assert.Equal(t, file2, copiedText)
+	})
+
+	t.Run("Empty Panel Does Not Copy", func(t *testing.T) {
+		copiedText = ""
+		m := defaultTestModel(t.TempDir())
+
+		TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.CopyPath[0]))
+
+		assert.Empty(t, copiedText)
+	})
+}
 
 func TestCompressSelectedFiles(t *testing.T) {
 	curTestDir := t.TempDir()

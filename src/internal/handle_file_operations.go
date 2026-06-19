@@ -574,18 +574,33 @@ func (m *model) openDirectoryWithEditor() tea.Cmd {
 	})
 }
 
+var writeClipboard = clipboard.WriteAll
+
 // Copy file path
 // TODO: This is also an IO operations, do it via tea.Cmd
 func (m *model) copyPath() {
-	panel := m.getFocusedFilePanel()
-
-	if panel.Empty() {
+	pathText := m.copyPathText()
+	if pathText == "" {
 		return
 	}
 
-	if err := clipboard.WriteAll(panel.GetFocusedItem().Location); err != nil {
+	if err := writeClipboard(pathText); err != nil {
 		slog.Error("Error while copy path", "error", err)
 	}
+}
+
+func (m *model) copyPathText() string {
+	panel := m.getFocusedFilePanel()
+
+	if panel.Empty() {
+		return ""
+	}
+
+	if panel.PanelMode == filepanel.SelectMode && panel.SelectedCount() > 0 {
+		return strings.Join(panel.GetSelectedLocationsSortedAsVisible(), "\n")
+	}
+
+	return panel.GetFocusedItem().Location
 }
 
 // TODO: This is also an IO operations, do it via tea.Cmd
