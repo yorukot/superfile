@@ -574,8 +574,6 @@ func (m *model) openDirectoryWithEditor() tea.Cmd {
 	})
 }
 
-var writeClipboard = clipboard.WriteAll
-
 // Copy file path
 // TODO: This is also an IO operations, do it via tea.Cmd
 func (m *model) copyPath() {
@@ -584,7 +582,7 @@ func (m *model) copyPath() {
 		return
 	}
 
-	if err := writeClipboard(pathText); err != nil {
+	if err := m.writeClipboard(pathText); err != nil {
 		slog.Error("Error while copy path", "error", err)
 	}
 }
@@ -606,7 +604,15 @@ func (m *model) copyPathText() string {
 // TODO: This is also an IO operations, do it via tea.Cmd
 func (m *model) copyPWD() {
 	panel := m.getFocusedFilePanel()
-	if err := clipboard.WriteAll(panel.Location); err != nil {
+	if err := m.writeClipboard(panel.Location); err != nil {
 		slog.Error("Error while copy present working directory", "error", err)
 	}
+}
+
+func (m *model) writeClipboard(text string) error {
+	if m.clipboardWriter != nil {
+		return m.clipboardWriter(text)
+	}
+
+	return clipboard.WriteAll(text)
 }

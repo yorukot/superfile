@@ -28,18 +28,17 @@ func TestCopyPath(t *testing.T) {
 	utils.SetupFiles(t, file1, file2)
 
 	var copiedText string
-	originalWriteClipboard := writeClipboard
-	writeClipboard = func(text string) error {
-		copiedText = text
-		return nil
+	captureClipboard := func(m *model) {
+		m.clipboardWriter = func(text string) error {
+			copiedText = text
+			return nil
+		}
 	}
-	t.Cleanup(func() {
-		writeClipboard = originalWriteClipboard
-	})
 
 	t.Run("Browser Mode Copy Focused Item Path", func(t *testing.T) {
 		copiedText = ""
 		m := defaultTestModel(curTestDir)
+		captureClipboard(m)
 		setFilePanelSelectedItemByLocation(t, m.getFocusedFilePanel(), file1)
 
 		TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.CopyPath[0]))
@@ -50,6 +49,7 @@ func TestCopyPath(t *testing.T) {
 	t.Run("Select Mode Copy Selected Item Paths", func(t *testing.T) {
 		copiedText = ""
 		m := defaultTestModel(curTestDir)
+		captureClipboard(m)
 		panel := m.getFocusedFilePanel()
 		panel.ChangeFilePanelMode()
 		panel.SetSelected(file2)
@@ -64,6 +64,7 @@ func TestCopyPath(t *testing.T) {
 	t.Run("Select Mode Without Selection Copies Focused Item Path", func(t *testing.T) {
 		copiedText = ""
 		m := defaultTestModel(curTestDir)
+		captureClipboard(m)
 		panel := m.getFocusedFilePanel()
 		panel.ChangeFilePanelMode()
 		setFilePanelSelectedItemByLocation(t, panel, file2)
@@ -76,6 +77,7 @@ func TestCopyPath(t *testing.T) {
 	t.Run("Empty Panel Does Not Copy", func(t *testing.T) {
 		copiedText = ""
 		m := defaultTestModel(t.TempDir())
+		captureClipboard(m)
 
 		TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.CopyPath[0]))
 
