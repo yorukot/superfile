@@ -39,6 +39,12 @@ if [ -z "${HOME:-}" ] || [ "$HOME" = "/" ]; then
     exit 1
 fi
 
+# Resolve XDG dirs, falling back to spec-defined defaults
+XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
+XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+
 # Remove binary from /usr/local/bin
 if [ -f /usr/local/bin/spf ]; then
     found=1
@@ -63,39 +69,51 @@ if [ -f "$HOME/.local/bin/spf" ]; then
     fi
 fi
 
-# Remove config directory (Linux)
-if [ -d "$HOME/.config/superfile" ]; then
+# Remove config directory
+if [ -d "$XDG_CONFIG_HOME/superfile" ]; then
     found=1
-    echo -e "${bright_yellow}Removing ${cyan}~/.config/superfile${bright_yellow}...${nc}"
-    if ! rm -rf "$HOME/.config/superfile"; then
-        echo -e "${red}❌ Failed to remove ${white}~/.config/superfile${nc}"
+    echo -e "${bright_yellow}Removing ${cyan}$XDG_CONFIG_HOME/superfile${bright_yellow}...${nc}"
+    if ! rm -rf "$XDG_CONFIG_HOME/superfile"; then
+        echo -e "${red}❌ Failed to remove ${white}$XDG_CONFIG_HOME/superfile${nc}"
         failed=1
     else
-        echo -e "${bright_green}✔ Removed ${white}~/.config/superfile${nc}"
+        echo -e "${bright_green}✔ Removed ${white}$XDG_CONFIG_HOME/superfile${nc}"
     fi
 fi
 
-# Remove data directory (Linux)
-if [ -d "$HOME/.local/share/superfile" ]; then
+# Remove data directory
+if [ -d "$XDG_DATA_HOME/superfile" ]; then
     found=1
-    echo -e "${bright_yellow}Removing ${cyan}~/.local/share/superfile${bright_yellow}...${nc}"
-    if ! rm -rf "$HOME/.local/share/superfile"; then
-        echo -e "${red}❌ Failed to remove ${white}~/.local/share/superfile${nc}"
+    echo -e "${bright_yellow}Removing ${cyan}$XDG_DATA_HOME/superfile${bright_yellow}...${nc}"
+    if ! rm -rf "$XDG_DATA_HOME/superfile"; then
+        echo -e "${red}❌ Failed to remove ${white}$XDG_DATA_HOME/superfile${nc}"
         failed=1
     else
-        echo -e "${bright_green}✔ Removed ${white}~/.local/share/superfile${nc}"
+        echo -e "${bright_green}✔ Removed ${white}$XDG_DATA_HOME/superfile${nc}"
     fi
 fi
 
-# Remove cache directory (Linux)
-if [ -d "$HOME/.cache/superfile" ]; then
+# Remove cache directory
+if [ -d "$XDG_CACHE_HOME/superfile" ]; then
     found=1
-    echo -e "${bright_yellow}Removing ${cyan}~/.cache/superfile${bright_yellow}...${nc}"
-    if ! rm -rf "$HOME/.cache/superfile"; then
-        echo -e "${red}❌ Failed to remove ${white}~/.cache/superfile${nc}"
+    echo -e "${bright_yellow}Removing ${cyan}$XDG_CACHE_HOME/superfile${bright_yellow}...${nc}"
+    if ! rm -rf "$XDG_CACHE_HOME/superfile"; then
+        echo -e "${red}❌ Failed to remove ${white}$XDG_CACHE_HOME/superfile${nc}"
         failed=1
     else
-        echo -e "${bright_green}✔ Removed ${white}~/.cache/superfile${nc}"
+        echo -e "${bright_green}✔ Removed ${white}$XDG_CACHE_HOME/superfile${nc}"
+    fi
+fi
+
+# Remove state directory
+if [ -d "$XDG_STATE_HOME/superfile" ]; then
+    found=1
+    echo -e "${bright_yellow}Removing ${cyan}$XDG_STATE_HOME/superfile${bright_yellow}...${nc}"
+    if ! rm -rf "$XDG_STATE_HOME/superfile"; then
+        echo -e "${red}❌ Failed to remove ${white}$XDG_STATE_HOME/superfile${nc}"
+        failed=1
+    else
+        echo -e "${bright_green}✔ Removed ${white}$XDG_STATE_HOME/superfile${nc}"
     fi
 fi
 
@@ -127,6 +145,7 @@ if [ "$found" -eq 0 ]; then
     echo -e "${yellow}No superfile installation found. Nothing to remove.${nc}"
 elif [ "$failed" -eq 1 ]; then
     echo -e "\n${red}⚠ Uninstall completed with errors. Please review the messages above.${nc}"
+    exit 1
 else
     echo -e "\n👋 ${bright_green}superfile has been uninstalled.${nc}"
 fi
