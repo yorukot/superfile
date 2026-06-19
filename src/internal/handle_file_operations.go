@@ -531,7 +531,7 @@ func (m *model) openFileWithEditor() tea.Cmd {
 	//nolint:gocritic // appendAssign: intentionally creating a new slice
 	args := append(parts[1:], panel.GetFocusedItem().Location)
 
-	c := exec.Command(cmd, args...)
+	c := exec.Command(cmd, args...) //nolint:gosec // Editor command is intentionally user-configurable.
 
 	return tea.ExecProcess(c, func(err error) tea.Msg {
 		return editorFinishedMsg{err}

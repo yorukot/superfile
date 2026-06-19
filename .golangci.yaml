@@ -494,6 +494,7 @@ linters:
       - path: 'src/config/icon/icon.go'
         linters:
           - gochecknoglobals
+          - goconst
       # Stores prerendered styles
       - path: 'src/internal/common/style.go'
         linters:
