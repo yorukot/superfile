@@ -531,7 +531,7 @@ func (m *model) openFileWithEditor() tea.Cmd {
 	//nolint:gocritic // appendAssign: intentionally creating a new slice
 	args := append(parts[1:], panel.GetFocusedItem().Location)
 
-	c := exec.Command(cmd, args...)
+	c := exec.Command(cmd, args...) //nolint:gosec // Editor command is intentionally user-configurable.
 
 	return tea.ExecProcess(c, func(err error) tea.Msg {
 		return editorFinishedMsg{err}
@@ -577,21 +577,42 @@ func (m *model) openDirectoryWithEditor() tea.Cmd {
 // Copy file path
 // TODO: This is also an IO operations, do it via tea.Cmd
 func (m *model) copyPath() {
-	panel := m.getFocusedFilePanel()
-
-	if panel.Empty() {
+	pathText := m.copyPathText()
+	if pathText == "" {
 		return
 	}
 
-	if err := clipboard.WriteAll(panel.GetFocusedItem().Location); err != nil {
+	if err := m.writeClipboard(pathText); err != nil {
 		slog.Error("Error while copy path", "error", err)
 	}
+}
+
+func (m *model) copyPathText() string {
+	panel := m.getFocusedFilePanel()
+
+	if panel.Empty() {
+		return ""
+	}
+
+	if panel.PanelMode == filepanel.SelectMode && panel.SelectedCount() > 0 {
+		return strings.Join(panel.GetSelectedLocationsSortedAsVisible(), "\n")
+	}
+
+	return panel.GetFocusedItem().Location
 }
 
 // TODO: This is also an IO operations, do it via tea.Cmd
 func (m *model) copyPWD() {
 	panel := m.getFocusedFilePanel()
-	if err := clipboard.WriteAll(panel.Location); err != nil {
+	if err := m.writeClipboard(panel.Location); err != nil {
 		slog.Error("Error while copy present working directory", "error", err)
 	}
+}
+
+func (m *model) writeClipboard(text string) error {
+	if m.clipboardWriter != nil {
+		return m.clipboardWriter(text)
+	}
+
+	return clipboard.WriteAll(text)
 }
