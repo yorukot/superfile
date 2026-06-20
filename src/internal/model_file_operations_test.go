@@ -5,10 +5,10 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 
 	tea "charm.land/bubbletea/v2"
-	"github.com/rkoesters/xdg/trash"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -198,8 +198,28 @@ func isTrashed(fileAbsPath string) bool {
 		_, err := os.Stat(filepath.Join(variable.DarwinTrashDirectory, fileName))
 		return err == nil
 	case utils.OsLinux:
-		_, err := trash.Stat(fileAbsPath)
-		return err == nil
+		entries, err := os.ReadDir(variable.LinuxTrashDirectoryInfo)
+		if err != nil {
+			return false
+		}
+
+		for _, entry := range entries {
+			if entry.IsDir() {
+				continue
+			}
+
+			data, err := os.ReadFile(filepath.Join(variable.LinuxTrashDirectoryInfo, entry.Name()))
+			if err != nil {
+				continue
+			}
+
+			for _, line := range strings.Split(string(data), "\n") {
+				if line == "Path="+fileAbsPath {
+					return true
+				}
+			}
+		}
+		return false
 	default:
 		return false
 	}
@@ -265,7 +285,7 @@ func TestFileDelete(t *testing.T) {
 			// Window's trash is not flexible enough for the check.
 			// Sorry windows
 			if runtime.GOOS == utils.OsDarwin || runtime.GOOS == utils.OsLinux {
-				assert.Equal(t, tt.permanentDelete, !isTrashed(filepath.Base(tt.filePath)),
+				assert.Equal(t, tt.permanentDelete, !isTrashed(tt.filePath),
 					"Existence in trash status should be expected only of not permanently deleted")
 			}
 		})
