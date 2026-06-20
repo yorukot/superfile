@@ -12,7 +12,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/pkg/utils"
 
-	trash_win "github.com/hymkor/trash-go"
+	trash_lib "github.com/hymkor/trash-go"
 	"github.com/rkoesters/xdg/trash"
 
 	variable "github.com/yorukot/superfile/src/config"
@@ -150,8 +150,8 @@ func moveToTrash(src string) error {
 	switch runtime.GOOS {
 	case utils.OsDarwin:
 		err = moveElement(src, filepath.Join(variable.DarwinTrashDirectory, filepath.Base(src)))
-	case utils.OsWindows:
-		err = trash_win.Throw(src)
+	case utils.OsWindows, utils.OsLinux:
+		err = trash_lib.Throw(src)
 	default:
 		// TODO: We should consider moving away from this package. Its not well written.
 		// It uses package globals, It doesn't initializes trash directory, and we have to do it
