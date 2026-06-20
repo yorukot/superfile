@@ -172,6 +172,14 @@ File panel sorting case sensitivity (if `true`, uppercase letters come before lo
 
 `false` => Case insensitive ("a" comes before "B")
 
+- ###### shell_close_on_success
+
+Controls whether the shell prompt closes automatically after a command succeeds.
+
+`true` => Close the shell after successful command execution
+
+`false` => Keep the shell open after successful command execution
+
 - ###### debug
 
 Whether to enable debug mode. (if `true`, more verbose logs are written in log file).
@@ -323,6 +331,38 @@ border_middle_left = "├"
 border_middle_right = "┤"
 #...
 ```
+
+### Plugins
+
+- ###### metadata
+
+Shows more detailed metadata for files and directories.
+
+`true` => Enable detailed metadata. Requires [`exiftool`](https://exiftool.org).
+
+`false` => Use the built-in metadata only.
+
+- ###### enable_md5_checksum
+
+Adds an MD5 checksum entry to metadata for regular files.
+
+`true` => Calculate and show MD5 checksums in the metadata panel.
+
+`false` => Do not calculate MD5 checksums.
+
+:::caution
+
+Calculating checksums reads the selected file, so it may be slow for large files.
+
+:::
+
+- ###### zoxide_support
+
+Enables the zoxide navigation modal.
+
+`true` => Enable zoxide navigation. Requires [`zoxide`](https://github.com/ajeetdsouza/zoxide).
+
+`false` => Disable zoxide navigation.
 
 - ###### open_with
 
