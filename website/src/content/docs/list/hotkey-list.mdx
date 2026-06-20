@@ -14,18 +14,18 @@ These are the default hotkeys and you can [change](/configure/custom-hotkeys) th
 
 ## General
 
-| Function                                | Key                  | Variable name     |
-| --------------------------------------- | -------------------- | ----------------- |
-| Open superfile                          | `spf`                |                   |
-| Confirm selected item                   | `enter`, `right`, `l` | `confirm`         |
-| Quit typing, modal or superfile         | `q`, `esc`           | `quit`            |
-| Quit superfile and cd to current folder | `Q`                  | `cd_quit`         |
-| Confirm typing                          | `enter`              | `confirm_typing`  |
-| Cancel typing                           | `ctrl+c`, `esc`      | `cancel_typing`   |
-| Open help menu(hotkeylist)              | `?`                  | `open_help_menu`  |
-| Open prompt in shell mode               | `:`                  | `open_command_line` |
-| Open prompt in spf mode                 | `>`                  | `open_spf_prompt` |
-| Open zoxide navigation modal            | `z`                  | `open_zoxide`     |
+| Function                                | Key                   | Variable name       |
+| --------------------------------------- | --------------------- | ------------------- |
+| Open superfile                          | `spf`                 |                     |
+| Confirm selected item                   | `enter`, `right`, `l` | `confirm`           |
+| Quit typing, modal or superfile         | `q`, `esc`            | `quit`              |
+| Quit superfile and cd to current folder | `Q`                   | `cd_quit`           |
+| Confirm typing                          | `enter`               | `confirm_typing`    |
+| Cancel typing                           | `ctrl+c`, `esc`       | `cancel_typing`     |
+| Open help menu(hotkeylist)              | `?`                   | `open_help_menu`    |
+| Open prompt in shell mode               | `:`                   | `open_command_line` |
+| Open prompt in spf mode                 | `>`                   | `open_spf_prompt`   |
+| Open zoxide navigation modal            | `z`                   | `open_zoxide`       |
 
 :::note
 
@@ -52,35 +52,35 @@ Quit superfile and cd to current folder "cd_quit" require the same scripts as ["
 
 ## Panel movement
 
-| Function                                           | Key                         | Variable name                                                   |
-| -------------------------------------------------- | --------------------------- | --------------------------------------------------------------- |
-| Up                                                 | `up`, `k`                   | `list_up`                                                       |
-| Down                                               | `down`, `j`                 | `list_down`                                                     |
-| Page up                                            | `pgup`                      | `page_up`                                                       |
-| Page down                                          | `pgdown`                    | `page_down`                                                     |
-| Return to parent folder                            | `h`, `left`, `backspace`    | `parent_directory`                                              |
-| Select all items in focused file panel             | `A` (shift+a)               | `file_panel_select_all_items` (selection mode only)             |
-| Select up from your cursor                         | `shift+up`, `K` (shift+k)   | `file_panel_select_mode_items_select_up` (selection mode only)  |
+| Function                                           | Key                         | Variable name                                                    |
+| -------------------------------------------------- | --------------------------- | ---------------------------------------------------------------- |
+| Up                                                 | `up`, `k`                   | `list_up`                                                        |
+| Down                                               | `down`, `j`                 | `list_down`                                                      |
+| Page up                                            | `pgup`                      | `page_up`                                                        |
+| Page down                                          | `pgdown`                    | `page_down`                                                      |
+| Return to parent folder                            | `h`, `left`, `backspace`    | `parent_directory`                                               |
+| Select all items in focused file panel             | `A` (shift+a)               | `file_panel_select_all_items` (selection mode only)              |
+| Select up from your cursor                         | `shift+up`, `K` (shift+k)   | `file_panel_select_mode_items_select_up` (selection mode only)   |
 | Select down from your cursor                       | `shift+down`, `J` (shift+j) | `file_panel_select_mode_items_select_down` (selection mode only) |
-| Toggle dot file display                            | `.`                         | `toggle_dot_file`                                               |
-| Toggle active search bar                           | `/`                         | `search_bar`                                                    |
-| Change between selection mode or normal mode       | `v`                         | `change_panel_mode`                                             |
-| Pin or Unpin folder to sidebar (can be auto saved) | `P` (shift+p)               | `pinned_directory`                                              |
+| Toggle dot file display                            | `.`                         | `toggle_dot_file`                                                |
+| Toggle active search bar                           | `/`                         | `search_bar`                                                     |
+| Change between selection mode or normal mode       | `v`                         | `change_panel_mode`                                              |
+| Pin or Unpin folder to sidebar (can be auto saved) | `P` (shift+p)               | `pinned_directory`                                               |
 
 ## File operations
 
-| Function                                             | Key                | Variable name                         |
-| ---------------------------------------------------- | ------------------ | ------------------------------------- |
-| Create file or folder(/ ends with creating a folder) | `ctrl+n`           | `file_panel_item_create`              |
-| Rename file or folder                                | `ctrl+r`           | `file_panel_item_rename`              |
-| Copy selected items to the clipboard                 | `ctrl+c`           | `copy_items`                          |
-| Cut selected items to the clipboard                  | `ctrl+x`           | `cut_items`                           |
-| Paste clipboard items into the current file panel    | `ctrl+v`, `ctrl+w` | `paste_items`                         |
-| Delete selected items                                | `ctrl+d`, `delete` | `delete_items`                        |
-| Permanently delete selected items                    | `D` (shift+d)      | `permanently_delete_items`            |
-| Copy current or selected file/directory paths        | `ctrl+p`           | `copy_path`                           |
-| Copy current working directory                       | `c`                | `copy_present_working_directory`      |
-| Extract compressed file                              | `ctrl+e`           | `extract_file` (normal mode)          |
-| Zip file or folder to .zip file                      | `ctrl+a`           | `compress_file` (normal mode)         |
-| Open file with your default editor                   | `e`                | `open_file_with_editor` (normal mode) |
+| Function                                             | Key                | Variable name                                      |
+| ---------------------------------------------------- | ------------------ | -------------------------------------------------- |
+| Create file or folder(/ ends with creating a folder) | `ctrl+n`           | `file_panel_item_create`                           |
+| Rename file or folder                                | `ctrl+r`           | `file_panel_item_rename`                           |
+| Copy selected items to the clipboard                 | `ctrl+c`           | `copy_items`                                       |
+| Cut selected items to the clipboard                  | `ctrl+x`           | `cut_items`                                        |
+| Paste clipboard items into the current file panel    | `ctrl+v`, `ctrl+w` | `paste_items`                                      |
+| Delete selected items                                | `ctrl+d`, `delete` | `delete_items`                                     |
+| Permanently delete selected items                    | `D` (shift+d)      | `permanently_delete_items`                         |
+| Copy current or selected file/directory paths        | `ctrl+p`           | `copy_path`                                        |
+| Copy current working directory                       | `c`                | `copy_present_working_directory`                   |
+| Extract compressed file                              | `ctrl+e`           | `extract_file` (normal mode)                       |
+| Zip file or folder to .zip file                      | `ctrl+a`           | `compress_file` (normal mode)                      |
+| Open file with your default editor                   | `e`                | `open_file_with_editor` (normal mode)              |
 | Open current directory with default editor           | `E` (shift+e)      | `open_current_directory_with_editor` (normal mode) |

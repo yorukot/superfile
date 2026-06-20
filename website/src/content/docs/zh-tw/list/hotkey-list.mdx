@@ -14,18 +14,18 @@ head:
 
 ## 一般操作
 
-| 功能                              | 按鍵                 | 變數名稱            |
-| --------------------------------- | -------------------- | ------------------- |
-| 開啟 superfile                    | `spf`                |                     |
+| 功能                              | 按鍵                  | 變數名稱            |
+| --------------------------------- | --------------------- | ------------------- |
+| 開啟 superfile                    | `spf`                 |                     |
 | 確認選取項目                      | `enter`, `right`, `l` | `confirm`           |
-| 離開輸入、視窗或 superfile        | `q`, `esc`           | `quit`              |
-| 離開 superfile 並 cd 到目前資料夾 | `Q`                  | `cd_quit`           |
-| 確認輸入內容                      | `enter`              | `confirm_typing`    |
-| 取消輸入                          | `ctrl+c`, `esc`      | `cancel_typing`     |
-| 開啟說明選單（快捷鍵清單）        | `?`                  | `open_help_menu`    |
-| 以 shell 模式開啟提示列           | `:`                  | `open_command_line` |
-| 以 spf 模式開啟提示列             | `>`                  | `open_spf_prompt`   |
-| 開啟 zoxide 導覽視窗              | `z`                  | `open_zoxide`       |
+| 離開輸入、視窗或 superfile        | `q`, `esc`            | `quit`              |
+| 離開 superfile 並 cd 到目前資料夾 | `Q`                   | `cd_quit`           |
+| 確認輸入內容                      | `enter`               | `confirm_typing`    |
+| 取消輸入                          | `ctrl+c`, `esc`       | `cancel_typing`     |
+| 開啟說明選單（快捷鍵清單）        | `?`                   | `open_help_menu`    |
+| 以 shell 模式開啟提示列           | `:`                   | `open_command_line` |
+| 以 spf 模式開啟提示列             | `>`                   | `open_spf_prompt`   |
+| 開啟 zoxide 導覽視窗              | `z`                   | `open_zoxide`       |
 
 :::note
 
@@ -35,52 +35,52 @@ head:
 
 ## 面板導覽
 
-| 功能                    | 按鍵                       | 變數名稱                    |
-| ----------------------- | -------------------------- | --------------------------- |
-| 建立新的檔案面板        | `n`                        | `create_new_file_panel`     |
-| 分割目前聚焦的檔案面板  | `N` (shift+n)              | `split_file_panel`          |
-| 關閉目前聚焦的檔案面板  | `w`                        | `close_file_panel`          |
-| 切換檔案預覽面板        | `f`                        | `toggle_file_preview_panel` |
-| 開啟排序選項選單        | `o`                        | `open_sort_options_menu`    |
-| 切換反向排序            | `R` (shift+r)              | `toggle_reverse_sort`       |
-| 切換 footer 顯示        | `F` (shift+f)              | `toggle_footer`             |
-| 聚焦到下一個檔案面板    | `tab`, `L`(shift+l)        | `next_file_panel`           |
-| 聚焦到上一個檔案面板    | `shift+left`, `H`(shift+h) | `previous_file_panel`       |
-| 聚焦到 processbar 面板  | `p`                        | `focus_on_process_bar`      |
-| 聚焦到側邊欄            | `s`                        | `focus_on_sidebar`          |
-| 聚焦到 metadata 面板    | `m`                        | `focus_on_metadata`         |
+| 功能                   | 按鍵                       | 變數名稱                    |
+| ---------------------- | -------------------------- | --------------------------- |
+| 建立新的檔案面板       | `n`                        | `create_new_file_panel`     |
+| 分割目前聚焦的檔案面板 | `N` (shift+n)              | `split_file_panel`          |
+| 關閉目前聚焦的檔案面板 | `w`                        | `close_file_panel`          |
+| 切換檔案預覽面板       | `f`                        | `toggle_file_preview_panel` |
+| 開啟排序選項選單       | `o`                        | `open_sort_options_menu`    |
+| 切換反向排序           | `R` (shift+r)              | `toggle_reverse_sort`       |
+| 切換 footer 顯示       | `F` (shift+f)              | `toggle_footer`             |
+| 聚焦到下一個檔案面板   | `tab`, `L`(shift+l)        | `next_file_panel`           |
+| 聚焦到上一個檔案面板   | `shift+left`, `H`(shift+h) | `previous_file_panel`       |
+| 聚焦到 processbar 面板 | `p`                        | `focus_on_process_bar`      |
+| 聚焦到側邊欄           | `s`                        | `focus_on_sidebar`          |
+| 聚焦到 metadata 面板   | `m`                        | `focus_on_metadata`         |
 
 ## 面板移動
 
-| 功能                                         | 按鍵                        | 變數名稱                                                |
-| -------------------------------------------- | --------------------------- | ------------------------------------------------------- |
-| 向上                                         | `up`, `k`                   | `list_up`                                               |
-| 向下                                         | `down`, `j`                 | `list_down`                                             |
-| 向上翻頁                                     | `pgup`                      | `page_up`                                               |
-| 向下翻頁                                     | `pgdown`                    | `page_down`                                             |
-| 返回父資料夾                                 | `h`, `left`, `backspace`    | `parent_directory`                                      |
-| 選取目前檔案面板中的所有項目                 | `A` (shift+a)               | `file_panel_select_all_items`（僅選取模式）             |
-| 從游標向上選取                               | `shift+up`, `K` (shift+k)   | `file_panel_select_mode_items_select_up`（僅選取模式）  |
+| 功能                                         | 按鍵                        | 變數名稱                                                 |
+| -------------------------------------------- | --------------------------- | -------------------------------------------------------- |
+| 向上                                         | `up`, `k`                   | `list_up`                                                |
+| 向下                                         | `down`, `j`                 | `list_down`                                              |
+| 向上翻頁                                     | `pgup`                      | `page_up`                                                |
+| 向下翻頁                                     | `pgdown`                    | `page_down`                                              |
+| 返回父資料夾                                 | `h`, `left`, `backspace`    | `parent_directory`                                       |
+| 選取目前檔案面板中的所有項目                 | `A` (shift+a)               | `file_panel_select_all_items`（僅選取模式）              |
+| 從游標向上選取                               | `shift+up`, `K` (shift+k)   | `file_panel_select_mode_items_select_up`（僅選取模式）   |
 | 從游標向下選取                               | `shift+down`, `J` (shift+j) | `file_panel_select_mode_items_select_down`（僅選取模式） |
-| 切換顯示 dot file                            | `.`                         | `toggle_dot_file`                                       |
-| 切換啟用搜尋列                               | `/`                         | `search_bar`                                            |
-| 在選取模式與一般模式之間切換                 | `v`                         | `change_panel_mode`                                     |
-| 將資料夾釘選到側邊欄或取消釘選（可自動儲存） | `P` (shift+p)               | `pinned_directory`                                      |
+| 切換顯示 dot file                            | `.`                         | `toggle_dot_file`                                        |
+| 切換啟用搜尋列                               | `/`                         | `search_bar`                                             |
+| 在選取模式與一般模式之間切換                 | `v`                         | `change_panel_mode`                                      |
+| 將資料夾釘選到側邊欄或取消釘選（可自動儲存） | `P` (shift+p)               | `pinned_directory`                                       |
 
 ## 檔案操作
 
-| 功能                                        | 按鍵               | 變數名稱                                      |
-| ------------------------------------------- | ------------------ | --------------------------------------------- |
-| 建立檔案或資料夾（以 `/` 結尾會建立資料夾） | `ctrl+n`           | `file_panel_item_create`                      |
-| 重新命名檔案或資料夾                        | `ctrl+r`           | `file_panel_item_rename`                      |
-| 將選取項目複製到剪貼簿                      | `ctrl+c`           | `copy_items`                                  |
-| 將選取項目剪下到剪貼簿                      | `ctrl+x`           | `cut_items`                                   |
-| 將剪貼簿項目貼到目前檔案面板                | `ctrl+v`, `ctrl+w` | `paste_items`                                 |
-| 刪除選取項目                                | `ctrl+d`, `delete` | `delete_items`                                |
-| 永久刪除選取項目                            | `D` (shift+d)      | `permanently_delete_items`                    |
-| 複製目前或已選取檔案/目錄路徑               | `ctrl+p`           | `copy_path`                                   |
-| 複製目前工作目錄                            | `c`                | `copy_present_working_directory`              |
-| 解壓縮壓縮檔                                | `ctrl+e`           | `extract_file`（一般模式）                    |
-| 將檔案或資料夾壓縮成 .zip 檔案              | `ctrl+a`           | `compress_file`（一般模式）                   |
-| 使用預設編輯器開啟檔案                      | `e`                | `open_file_with_editor`（一般模式）           |
+| 功能                                        | 按鍵               | 變數名稱                                         |
+| ------------------------------------------- | ------------------ | ------------------------------------------------ |
+| 建立檔案或資料夾（以 `/` 結尾會建立資料夾） | `ctrl+n`           | `file_panel_item_create`                         |
+| 重新命名檔案或資料夾                        | `ctrl+r`           | `file_panel_item_rename`                         |
+| 將選取項目複製到剪貼簿                      | `ctrl+c`           | `copy_items`                                     |
+| 將選取項目剪下到剪貼簿                      | `ctrl+x`           | `cut_items`                                      |
+| 將剪貼簿項目貼到目前檔案面板                | `ctrl+v`, `ctrl+w` | `paste_items`                                    |
+| 刪除選取項目                                | `ctrl+d`, `delete` | `delete_items`                                   |
+| 永久刪除選取項目                            | `D` (shift+d)      | `permanently_delete_items`                       |
+| 複製目前或已選取檔案/目錄路徑               | `ctrl+p`           | `copy_path`                                      |
+| 複製目前工作目錄                            | `c`                | `copy_present_working_directory`                 |
+| 解壓縮壓縮檔                                | `ctrl+e`           | `extract_file`（一般模式）                       |
+| 將檔案或資料夾壓縮成 .zip 檔案              | `ctrl+a`           | `compress_file`（一般模式）                      |
+| 使用預設編輯器開啟檔案                      | `e`                | `open_file_with_editor`（一般模式）              |
 | 使用預設編輯器開啟目前目錄                  | `E` (shift+e)      | `open_current_directory_with_editor`（一般模式） |
