@@ -3,6 +3,8 @@
 package trash
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -15,6 +17,9 @@ import (
 )
 
 const trashInfoDateLayout = "2006-01-02T15:04:05"
+const trashInfoSuffix = ".trashinfo"
+const linuxMaxFilenameBytes = 255
+const maxTrashEntryNameBytes = linuxMaxFilenameBytes - len(trashInfoSuffix)
 
 type linuxTrashDir struct {
 	root     string
@@ -29,7 +34,14 @@ func Init() error {
 }
 
 func Available(path string) bool {
-	_, err := selectTrashDir(path, true)
+	pathAbs, err := filepath.Abs(path)
+	if err != nil {
+		return false
+	}
+	if isInsideKnownTrash(filepath.Clean(pathAbs)) {
+		return false
+	}
+	_, err = selectTrashDir(pathAbs, true)
 	return err == nil
 }
 
@@ -223,7 +235,7 @@ func reserveTrashInfo(td linuxTrashDir, srcAbs string) (string, string, string, 
 
 	for i := range 10_000 {
 		name := candidateTrashName(base, i)
-		infoPath := filepath.Join(td.info, name+".trashinfo")
+		infoPath := filepath.Join(td.info, name+trashInfoSuffix)
 		filesPath := filepath.Join(td.files, name)
 		if _, err := os.Lstat(filesPath); err == nil {
 			continue
@@ -253,10 +265,28 @@ func reserveTrashInfo(td linuxTrashDir, srcAbs string) (string, string, string, 
 }
 
 func candidateTrashName(base string, attempt int) string {
-	if attempt == 0 {
+	if attempt == 0 && len(base) <= maxTrashEntryNameBytes {
 		return base
 	}
-	return fmt.Sprintf("%s.%d.%d", base, time.Now().UnixNano(), attempt)
+
+	hash := trashNameHash(base)
+	suffix := "." + hash
+	if attempt > 0 {
+		suffix = fmt.Sprintf(".%s.%d", hash, attempt)
+	}
+	prefixLimit := maxTrashEntryNameBytes - len(suffix)
+	if prefixLimit <= 0 {
+		return suffix[len(suffix)-maxTrashEntryNameBytes:]
+	}
+	if len(base) > prefixLimit {
+		base = base[:prefixLimit]
+	}
+	return base + suffix
+}
+
+func trashNameHash(base string) string {
+	sum := sha256.Sum256([]byte(base))
+	return hex.EncodeToString(sum[:8])
 }
 
 func trashInfoPath(td linuxTrashDir, srcAbs string) (string, error) {
