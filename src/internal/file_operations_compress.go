@@ -19,11 +19,13 @@ func delEmptyZip(target string) error {
 	if err != nil {
 		return err
 	}
-	defer r.Close()
 	if len(r.File) == 0 {
+		if err := r.Close(); err != nil {
+			return err
+		}
 		return os.Remove(target)
 	}
-	return nil
+	return r.Close()
 }
 
 func zipSources(sources []string, target string, processBar *processbar.Model) error {
@@ -31,12 +33,16 @@ func zipSources(sources []string, target string, processBar *processbar.Model) e
 
 	totalFiles := 0
 	for _, src := range sources {
-		if _, err = os.Stat(src); os.IsNotExist(err) {
-			return fmt.Errorf("source path does not exist: %s", src)
+		if _, err = os.Stat(src); err != nil {
+			if os.IsNotExist(err) {
+				return fmt.Errorf("source path does not exist: %s", src)
+			}
+			if os.IsPermission(err) {
+				return fmt.Errorf("missing permissions: %s", src)
+			}
+			return fmt.Errorf("cannot access source path %s: %w", src, err)
 		}
-		if _, err = os.Stat(src); os.IsPermission(err) {
-			return fmt.Errorf("missing permissions: %s", src)
-		}
+
 		count, e := countFiles(src)
 		if e != nil {
 			slog.Error("Error while zip file count files ", "error", e)
