@@ -14,6 +14,18 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 )
 
+func delEmptyZip(target string) error {
+	r, err := zip.OpenReader(target)
+	if err != nil {
+		return err
+	}
+	defer r.Close()
+	if len(r.File) == 0 {
+		return os.Remove(target)
+	}
+	return nil
+}
+
 func zipSources(sources []string, target string, processBar *processbar.Model) error {
 	var err error
 
@@ -21,6 +33,9 @@ func zipSources(sources []string, target string, processBar *processbar.Model) e
 	for _, src := range sources {
 		if _, err = os.Stat(src); os.IsNotExist(err) {
 			return fmt.Errorf("source path does not exist: %s", src)
+		}
+		if _, err = os.Stat(src); os.IsPermission(err) {
+			return fmt.Errorf("missing permissions: %s", src)
 		}
 		count, e := countFiles(src)
 		if e != nil {
@@ -99,6 +114,12 @@ func zipSourcesCore(sources []string, processBar *processbar.Model,
 }
 
 func writeZipFile(path string, relPath string, info os.FileInfo, writer *zip.Writer) error {
+	file, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
 	header, err := zip.FileInfoHeader(info)
 	if err != nil {
 		return err
@@ -115,11 +136,7 @@ func writeZipFile(path string, relPath string, info os.FileInfo, writer *zip.Wri
 	if info.IsDir() {
 		return nil
 	}
-	file, err := os.Open(path)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
+
 	_, err = io.Copy(headerWriter, file)
 	if err != nil {
 		return err

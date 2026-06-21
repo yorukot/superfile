@@ -475,8 +475,12 @@ func (m *model) getCompressSelectedFilesCmd() tea.Cmd {
 			return NewCompressOperationMsg(processbar.Failed, reqID)
 		}
 		zipPath := filepath.Join(panel.Location, zipName)
-		if err := zipSources(filesToCompress, zipPath, &m.processBarModel); err != nil {
+		if err = zipSources(filesToCompress, zipPath, &m.processBarModel); err != nil {
 			slog.Error("Error in zipping files", "error", err)
+			return NewCompressOperationMsg(processbar.Failed, reqID)
+		}
+		if err = delEmptyZip(zipPath); err != nil {
+			slog.Error("Cann't check zip for empty", "error", err)
 			return NewCompressOperationMsg(processbar.Failed, reqID)
 		}
 		return NewCompressOperationMsg(processbar.Successful, reqID)
