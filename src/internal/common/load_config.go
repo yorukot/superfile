@@ -10,6 +10,7 @@ import (
 	"reflect"
 	"runtime"
 
+	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 	"github.com/pelletier/go-toml/v2"
 
@@ -207,7 +208,13 @@ func ResolveThemeName(theme, themeLight, themeDark string, hasDarkBG bool) strin
 // LoadThemeFile : Load configurations from theme file into &theme
 // set default values if we cant read user's theme file
 func LoadThemeFile() {
-	themeFile := filepath.Join(variable.ThemeFolder, Config.Theme+".toml")
+	themeName := Config.Theme
+	if themeName == "auto" {
+		hasDarkBG := lipgloss.HasDarkBackground(os.Stdin, os.Stdout)
+		themeName = ResolveThemeName(Config.Theme, Config.ThemeLight, Config.ThemeDark, hasDarkBG)
+	}
+
+	themeFile := filepath.Join(variable.ThemeFolder, themeName+".toml")
 	if err := LoadUserTheme(themeFile, &Theme); err != nil {
 		slog.Error("Could not read user's theme file. Falling back to default theme", "error", err)
 		err = toml.Unmarshal([]byte(DefaultThemeString), &Theme)
