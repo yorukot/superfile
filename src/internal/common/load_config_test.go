@@ -1,6 +1,8 @@
 package common
 
 import (
+	"errors"
+	"image/color"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -44,6 +46,54 @@ func TestResolveThemeName(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := ResolveThemeName(tt.theme, tt.themeLight, tt.themeDark, tt.hasDarkBG)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestShouldWarnAutoDetectFailed(t *testing.T) {
+	someColor := color.RGBA{R: 255, G: 255, B: 255, A: 255}
+
+	tests := []struct {
+		name     string
+		theme    string
+		bg       color.Color
+		err      error
+		expected bool
+	}{
+		{
+			name:     "Non-auto theme never warns, even if detection failed",
+			theme:    "catppuccin-mocha",
+			bg:       nil,
+			err:      errors.New("input/output is not a terminal"),
+			expected: false,
+		},
+		{
+			name:     "Auto theme with detection error warns",
+			theme:    "auto",
+			bg:       nil,
+			err:      errors.New("input/output is not a terminal"),
+			expected: true,
+		},
+		{
+			name:     "Auto theme with nil color and no error warns (inconclusive query)",
+			theme:    "auto",
+			bg:       nil,
+			err:      nil,
+			expected: true,
+		},
+		{
+			name:     "Auto theme with a resolved color does not warn",
+			theme:    "auto",
+			bg:       someColor,
+			err:      nil,
+			expected: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := ShouldWarnAutoDetectFailed(tt.theme, tt.bg, tt.err)
 			assert.Equal(t, tt.expected, result)
 		})
 	}

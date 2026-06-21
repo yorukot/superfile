@@ -4,6 +4,7 @@ import (
 	"embed"
 	"errors"
 	"fmt"
+	"image/color"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -205,11 +206,29 @@ func ResolveThemeName(theme, themeLight, themeDark string, hasDarkBG bool) strin
 	return themeLight
 }
 
+// ShouldWarnAutoDetectFailed reports whether the user should be warned that
+// theme = "auto" could not get a conclusive background color reading from
+// the terminal (bg == nil or err != nil), meaning the resolved theme fell
+// back to themeDark without ever knowing the terminal's actual background.
+// Multiplexers, remote-access bridges, and protocols that don't relay OSC 11
+// (e.g. Mosh, or proxies layered in front of SSH/Mosh) hit this path even
+// though the terminal itself is fine.
+func ShouldWarnAutoDetectFailed(theme string, bg color.Color, err error) bool {
+	return theme == "auto" && (err != nil || bg == nil)
+}
+
 // LoadThemeFile : Load configurations from theme file into &theme
 // set default values if we cant read user's theme file
 func LoadThemeFile() {
 	themeName := Config.Theme
 	if themeName == "auto" {
+		bg, err := lipgloss.BackgroundColor(os.Stdin, os.Stdout)
+		if ShouldWarnAutoDetectFailed(Config.Theme, bg, err) {
+			fmt.Fprintln(os.Stderr, "Warning: theme = \"auto\" could not detect your terminal's "+
+				"background color, so superfile is falling back to theme_dark. This can happen over "+
+				"Mosh or behind some SSH/remote-access bridges that don't relay the required terminal "+
+				"query. Set theme to theme_light or theme_dark explicitly to fix this.")
+		}
 		hasDarkBG := lipgloss.HasDarkBackground(os.Stdin, os.Stdout)
 		themeName = ResolveThemeName(Config.Theme, Config.ThemeLight, Config.ThemeDark, hasDarkBG)
 	}
