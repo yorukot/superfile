@@ -40,10 +40,12 @@ func Move(path string) (Result, error) {
 	}
 	srcAbs = filepath.Clean(srcAbs)
 	if srcAbs == string(filepath.Separator) {
-		return Result{OriginalPath: srcAbs, Backend: BackendFreeDesktop}, errors.New("refusing to trash filesystem root")
+		return Result{OriginalPath: srcAbs, Backend: BackendFreeDesktop},
+			errors.New("refusing to trash filesystem root")
 	}
 	if isInsideKnownTrash(srcAbs) {
-		return Result{OriginalPath: srcAbs, Backend: BackendFreeDesktop}, fmt.Errorf("%s is already inside a trash directory", srcAbs)
+		return Result{OriginalPath: srcAbs, Backend: BackendFreeDesktop},
+			fmt.Errorf("%s is already inside a trash directory", srcAbs)
 	}
 
 	td, err := selectTrashDir(srcAbs, true)
@@ -79,7 +81,8 @@ func selectTrashDir(path string, create bool) (linuxTrashDir, error) {
 
 	home := homeTrashDir()
 	if create {
-		if err := ensureTrashLayout(home); err != nil {
+		err = ensureTrashLayout(home)
+		if err != nil {
 			return linuxTrashDir{}, err
 		}
 	}
@@ -190,6 +193,7 @@ func ensureOwnedPrivateTrash(path string) error {
 		return fmt.Errorf("trash directory %s is not owned by current user", path)
 	}
 	if info.Mode().Perm()&0o077 != 0 {
+		//nolint:gosec // Directory execute bit is required; trash directories are restricted to the owner.
 		if err := os.Chmod(path, 0o700); err != nil {
 			return fmt.Errorf("failed to restrict trash directory %s: %w", path, err)
 		}
@@ -214,15 +218,16 @@ func reserveTrashInfo(td linuxTrashDir, srcAbs string) (string, string, string, 
 	if err != nil {
 		return "", "", "", err
 	}
-	content := "[Trash Info]\nPath=" + escapedPath + "\nDeletionDate=" + time.Now().Local().Format(trashInfoDateLayout) + "\n"
+	deletionDate := time.Now().Format(trashInfoDateLayout)
+	content := "[Trash Info]\nPath=" + escapedPath + "\nDeletionDate=" + deletionDate + "\n"
 
-	for i := 0; i < 10_000; i++ {
+	for i := range 10_000 {
 		name := candidateTrashName(base, i)
 		infoPath := filepath.Join(td.info, name+".trashinfo")
 		filesPath := filepath.Join(td.files, name)
 		if _, err := os.Lstat(filesPath); err == nil {
 			continue
-		} else if err != nil && !os.IsNotExist(err) {
+		} else if !os.IsNotExist(err) {
 			return "", "", "", err
 		}
 
@@ -271,7 +276,7 @@ func trashInfoPath(td linuxTrashDir, srcAbs string) (string, error) {
 func escapeTrashPath(path string) string {
 	const hex = "0123456789ABCDEF"
 	var b strings.Builder
-	for i := 0; i < len(path); i++ {
+	for i := range len(path) {
 		c := path[i]
 		if c == '/' || isRFC2396Unreserved(c) {
 			b.WriteByte(c)
@@ -325,7 +330,7 @@ func deviceID(path string) (uint64, error) {
 	if !ok {
 		return 0, fmt.Errorf("cannot inspect device for %s", path)
 	}
-	return uint64(stat.Dev), nil
+	return stat.Dev, nil
 }
 
 func filesystemTopDir(path string) (string, error) {
@@ -345,7 +350,10 @@ func filesystemTopDir(path string) (string, error) {
 			return current, nil
 		}
 		parentDev, err := deviceID(parent)
-		if err != nil || parentDev != dev {
+		if err != nil {
+			return "", err
+		}
+		if parentDev != dev {
 			return current, nil
 		}
 		current = parent
