@@ -4,6 +4,12 @@ projectName="superfile"
 version="v1.6.0"
 osList=("darwin" "linux" "windows")
 archList=("amd64" "arm64")
+
+if [ "$(go env GOHOSTOS)" != "darwin" ]; then
+    echo "release.sh must run on macOS because darwin release builds use CGO." >&2
+    exit 1
+fi
+
 mkdir dist
 
 # Prevent macOS from adding ._* files to archives

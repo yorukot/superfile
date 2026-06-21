@@ -54,8 +54,9 @@ const (
 	coinitApartmentThreaded = 0x2
 	clsctxInprocServer      = 0x1
 
-	sOK      = 0x00000000
-	ePointer = 0x80004003
+	sOK          = 0x00000000
+	eNoInterface = 0x80004002
+	ePointer     = 0x80004003
 
 	fofSilent         = 0x0004
 	fofNoConfirmation = 0x0010
@@ -77,9 +78,26 @@ var (
 	procCoCreateInstance            = ole32.NewProc("CoCreateInstance")
 	procSHCreateItemFromParsingName = shell32.NewProc("SHCreateItemFromParsingName")
 
-	clsidFileOperation = guid{0x3ad05575, 0x8857, 0x4850, [8]byte{0x92, 0x77, 0x11, 0xb8, 0x5b, 0xdb, 0x8e, 0x09}}
-	iidIFileOperation  = guid{0x947aab5f, 0x0a5c, 0x4c13, [8]byte{0xb4, 0xd6, 0x4b, 0xf7, 0x83, 0x6f, 0xc9, 0xf8}}
-	iidIShellItem      = guid{0x43826d1e, 0xe718, 0x42ee, [8]byte{0xbc, 0x55, 0xa1, 0xe2, 0x61, 0xc3, 0x7b, 0xfe}}
+	clsidFileOperation = guid{
+		0x3ad05575, 0x8857, 0x4850,
+		[8]byte{0x92, 0x77, 0x11, 0xb8, 0x5b, 0xdb, 0x8e, 0x09},
+	}
+	iidIUnknown = guid{
+		0x00000000, 0x0000, 0x0000,
+		[8]byte{0xc0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46},
+	}
+	iidIFileOperation = guid{
+		0x947aab5f, 0x0a5c, 0x4c13,
+		[8]byte{0xb4, 0xd6, 0x4b, 0xf7, 0x83, 0x6f, 0xc9, 0xf8},
+	}
+	iidIFileOperationProgressSink = guid{
+		0x04b0f1a7, 0x9490, 0x44bc,
+		[8]byte{0x96, 0xe1, 0x42, 0x96, 0xa3, 0x12, 0x52, 0xe2},
+	}
+	iidIShellItem = guid{
+		0x43826d1e, 0xe718, 0x42ee,
+		[8]byte{0xbc, 0x55, 0xa1, 0xe2, 0x61, 0xc3, 0x7b, 0xfe},
+	}
 
 	progressSinkVtbl = fileOperationProgressSinkVtbl{
 		queryInterface: syscall.NewCallback(progressSinkQueryInterface),
@@ -242,10 +260,20 @@ func progressSinkFromThis(this uintptr) *fileOperationProgressSink {
 	return (*fileOperationProgressSink)(unsafe.Pointer(this))
 }
 
-func progressSinkQueryInterface(this uintptr, _ uintptr, object uintptr) uintptr {
+func progressSinkQueryInterface(this uintptr, iid uintptr, object uintptr) uintptr {
 	if object == 0 {
 		return ePointer
 	}
+	*(*uintptr)(unsafe.Pointer(object)) = 0
+	if iid == 0 {
+		return ePointer
+	}
+
+	requested := *(*guid)(unsafe.Pointer(iid))
+	if requested != iidIUnknown && requested != iidIFileOperationProgressSink {
+		return eNoInterface
+	}
+
 	*(*uintptr)(unsafe.Pointer(object)) = this
 	_ = progressSinkAddRef(this)
 	return sOK
@@ -315,7 +343,16 @@ func progressSinkPreNewItem(_ uintptr, _ uintptr, _ uintptr, _ uintptr) uintptr 
 	return sOK
 }
 
-func progressSinkPostNewItem(_ uintptr, _ uintptr, _ uintptr, _ uintptr, _ uintptr, _ uintptr, _ uintptr, _ uintptr) uintptr {
+func progressSinkPostNewItem(
+	_ uintptr,
+	_ uintptr,
+	_ uintptr,
+	_ uintptr,
+	_ uintptr,
+	_ uintptr,
+	_ uintptr,
+	_ uintptr,
+) uintptr {
 	return sOK
 }
 

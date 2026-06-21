@@ -50,18 +50,20 @@ def run_tests(spf_path : Path, stop_on_fail : bool = True, only_run_tests : List
     """    
     # is this str conversion needed ?
 
-    fs_manager = TestFSManager()
-
-    spf_manager : BaseSPFManager = None
-    if platform.system() == "Windows" :
-        spf_manager = PyAutoGuiSPFManager(str(spf_path))
-    else:
-        spf_manager = TmuxSPFManager(str(spf_path))
-
-    test_env = Environment(spf_manager, fs_manager)
+    fs_manager = None
+    test_env = None
     cnt_passed : int = 0
     cnt_executed : int = 0
-    try:    
+    try:
+        fs_manager = TestFSManager()
+
+        spf_manager : BaseSPFManager = None
+        if platform.system() == "Windows" :
+            spf_manager = PyAutoGuiSPFManager(str(spf_path))
+        else:
+            spf_manager = TmuxSPFManager(str(spf_path))
+
+        test_env = Environment(spf_manager, fs_manager)
         testcases : List[BaseTest] = get_testcases(test_env, only_run_tests=only_run_tests)
         logger.info("Testcases : %s", testcases)
         for t in testcases:
@@ -82,10 +84,10 @@ def run_tests(spf_path : Path, stop_on_fail : bool = True, only_run_tests : List
         
         logger.info("Finished running %s test. %s passed", cnt_executed, cnt_passed)
     finally:
-        # Make sure of cleanup
-        # This is still not full proof, as if what happens when TestFSManager __init__ fails ?
-        test_env.cleanup()
+        if test_env is not None:
+            test_env.cleanup()
+        elif fs_manager is not None:
+            fs_manager.cleanup()
 
     return cnt_passed == cnt_executed
         
-
