@@ -86,6 +86,12 @@ func ValidateConfig(c *ConfigType) error {
 		)
 	}
 
+	if c.Theme == "auto" && (c.ThemeLight == "" || c.ThemeDark == "") {
+		return errors.New(
+			LoadConfigError("theme", "theme_light and theme_dark must both be set when theme is \"auto\"."),
+		)
+	}
+
 	if ansi.StringWidth(c.BorderTop) != 1 {
 		return errors.New(LoadConfigError("border_top", "Border character must be exactly one cell wide."))
 	}
