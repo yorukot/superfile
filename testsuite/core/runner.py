@@ -50,13 +50,13 @@ def run_tests(spf_path : Path, stop_on_fail : bool = True, only_run_tests : List
     """    
     # is this str conversion needed ?
 
-    spf_manager : BaseSPFManager = None 
+    fs_manager = TestFSManager()
+
+    spf_manager : BaseSPFManager = None
     if platform.system() == "Windows" :
         spf_manager = PyAutoGuiSPFManager(str(spf_path))
     else:
         spf_manager = TmuxSPFManager(str(spf_path))
-        
-    fs_manager = TestFSManager()
 
     test_env = Environment(spf_manager, fs_manager)
     cnt_passed : int = 0
@@ -88,5 +88,4 @@ def run_tests(spf_path : Path, stop_on_fail : bool = True, only_run_tests : List
 
     return cnt_passed == cnt_executed
         
-
 
