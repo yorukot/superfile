@@ -21,6 +21,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 
 	tea "charm.land/bubbletea/v2"
+
 	"github.com/atotto/clipboard"
 )
 
@@ -449,38 +450,13 @@ func (m *model) getExtractFileCmd() tea.Cmd {
 	}
 }
 
-func (m *model) getCompressSelectedFilesCmd() tea.Cmd {
-	panel := m.getFocusedFilePanel()
-
-	if panel.Empty() {
-		return nil
+func checkFileReadable(filename string) error {
+	file, err := os.Open(filename)
+	if err != nil {
+		return err
 	}
-	var filesToCompress []string
-	var firstFile string
-
-	if panel.SelectedCount() == 0 {
-		firstFile = panel.GetFocusedItem().Location
-		filesToCompress = append(filesToCompress, firstFile)
-	} else {
-		firstFile = panel.GetFirstSelectedLocation()
-		filesToCompress = panel.GetSelectedLocationsSortedAsVisible()
-	}
-
-	reqID := m.nextIoReqCnt()
-
-	return func() tea.Msg {
-		zipName, err := getZipArchiveName(filepath.Base(firstFile))
-		if err != nil {
-			slog.Error("Error in getZipArchiveName", "error", err)
-			return NewCompressOperationMsg(processbar.Failed, reqID)
-		}
-		zipPath := filepath.Join(panel.Location, zipName)
-		if err := zipSources(filesToCompress, zipPath, &m.processBarModel); err != nil {
-			slog.Error("Error in zipping files", "error", err)
-			return NewCompressOperationMsg(processbar.Failed, reqID)
-		}
-		return NewCompressOperationMsg(processbar.Successful, reqID)
-	}
+	defer file.Close()
+	return nil
 }
 
 func (m *model) chooserFileWriteAndQuit(path string) error {
