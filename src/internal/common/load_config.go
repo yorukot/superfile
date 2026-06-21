@@ -185,6 +185,19 @@ func LoadHotkeysFile(ignoreMissingFields bool) {
 	}
 }
 
+// ResolveThemeName returns the name of the theme file to load. If theme is
+// not "auto" it is returned unchanged. Otherwise themeDark or themeLight is
+// returned based on hasDarkBG.
+func ResolveThemeName(theme, themeLight, themeDark string, hasDarkBG bool) string {
+	if theme != "auto" {
+		return theme
+	}
+	if hasDarkBG {
+		return themeDark
+	}
+	return themeLight
+}
+
 // LoadThemeFile : Load configurations from theme file into &theme
 // set default values if we cant read user's theme file
 func LoadThemeFile() {
