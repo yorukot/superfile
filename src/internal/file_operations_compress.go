@@ -36,7 +36,7 @@ func validateCompressOperation(sources []string) (int, error) {
 		count, err := countFiles(src)
 		if err != nil {
 			slog.Error("Error while zip file count files ", "error", err)
-			return 0, fmt.Errorf("error while zip file count files : %s", src)
+			return 0, fmt.Errorf("error while counting files for %s: %s", src, err.Error())
 		}
 		totalFiles += count
 	}
