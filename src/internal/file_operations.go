@@ -11,11 +11,6 @@ import (
 
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/pkg/utils"
-
-	trash_lib "github.com/hymkor/trash-go"
-	"github.com/rkoesters/xdg/trash"
-
-	variable "github.com/yorukot/superfile/src/config"
 )
 
 // isSamePartition checks if two paths are on the same filesystem partition
@@ -143,26 +138,6 @@ func copyFile(src, dst string, srcInfo os.FileInfo) error {
 		return fmt.Errorf("failed to copy file contents: %w", err)
 	}
 	return nil
-}
-
-func moveToTrash(src string) error {
-	var err error
-	switch runtime.GOOS {
-	case utils.OsDarwin:
-		err = moveElement(src, filepath.Join(variable.DarwinTrashDirectory, filepath.Base(src)))
-	case utils.OsWindows, utils.OsLinux:
-		err = trash_lib.Throw(src)
-	default:
-		// TODO: We should consider moving away from this package. Its not well written.
-		// It uses package globals, It doesn't initializes trash directory, and we have to do it
-		// separately outside of the this package. There is not documentation about this
-		// It also uses deprecated libraries, and isn't well maintained.
-		err = trash.Trash(src)
-	}
-	if err != nil {
-		slog.Error("Error while deleting single item, in function to move file to trash can", "error", err)
-	}
-	return err
 }
 
 // pasteDir handles directory copying with progress tracking

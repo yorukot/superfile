@@ -54,8 +54,7 @@ var (
 	// Trash Directories
 	DarwinTrashDirectory = filepath.Join(HomeDir, ".Trash")
 
-	// These are used by github.com/rkoesters/xdg/trash package
-	// We need to make sure that these directories exist
+	// Linux home trash directory paths used for sidebar display and tests.
 	LinuxTrashDirectory      = filepath.Join(xdg.DataHome, "Trash")
 	LinuxTrashDirectoryFiles = filepath.Join(xdg.DataHome, "Trash", "files")
 	LinuxTrashDirectoryInfo  = filepath.Join(xdg.DataHome, "Trash", "info")
