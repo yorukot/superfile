@@ -93,7 +93,8 @@ func TestZipSources(t *testing.T) {
 
 			if tt.expectErrorValidate {
 				require.Error(t, err, "zipSources should return error")
-				return
+			} else {
+				require.NoError(t, err, "validateCompressOperation should not return error")
 			}
 
 			err = zipSources(sources, totalFiles, targetZip, &processBar)

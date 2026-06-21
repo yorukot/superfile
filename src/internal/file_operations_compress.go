@@ -24,6 +24,9 @@ func validateCompressOperation(sources []string) (int, error) {
 		if os.IsNotExist(err) {
 			return 0, fmt.Errorf("source path does not exist: %s", src)
 		}
+		if err != nil {
+			return 0, fmt.Errorf("cannot access source path %s: %w", src, err)
+		}
 		if !stat.IsDir() {
 			if err = checkFileReadable(src); err != nil {
 				slog.Error("the file is not readable", "error", err)
