@@ -160,6 +160,24 @@ func TestValidateConfig_AutoTheme(t *testing.T) {
 			},
 			expectErr: true,
 		},
+		{
+			name: "Auto theme with theme_light set to auto fails",
+			mutate: func(c *ConfigType) {
+				c.Theme = "auto"
+				c.ThemeLight = "auto"
+				c.ThemeDark = "catppuccin-mocha"
+			},
+			expectErr: true,
+		},
+		{
+			name: "Auto theme with theme_dark set to auto fails",
+			mutate: func(c *ConfigType) {
+				c.Theme = "auto"
+				c.ThemeLight = "catppuccin-latte"
+				c.ThemeDark = "auto"
+			},
+			expectErr: true,
+		},
 	}
 
 	for _, tt := range tests {
