@@ -12,6 +12,7 @@ import (
 	"time"
 
 	variable "github.com/yorukot/superfile/src/config"
+	"github.com/yorukot/superfile/src/internal/trash"
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 	"github.com/yorukot/superfile/src/internal/ui/spferror"
 	"github.com/yorukot/superfile/src/pkg/utils"
@@ -153,7 +154,7 @@ func (m *model) getDeleteCmd(permDelete bool) tea.Cmd {
 		items = []string{panel.GetFocusedItem().Location}
 	}
 
-	useTrash := m.hasTrash && !isExternalDiskPath(panel.Location) && !permDelete
+	useTrash := m.hasTrash && trash.Available(panel.Location) && !permDelete
 
 	reqID := m.nextIoReqCnt()
 	slog.Debug("Submitting delete request", "id", reqID, "items cnt", len(items))
@@ -188,7 +189,10 @@ func makeDeleteProcessor(process processbar.Process,
 		}
 		deleteFunc := os.RemoveAll
 		if useTrash {
-			deleteFunc = moveToTrash
+			deleteFunc = func(item string) error {
+				_, err := trash.Move(item)
+				return err
+			}
 		}
 		for i, item := range items {
 			err := deleteFunc(item)
@@ -227,7 +231,7 @@ func (m *model) getDeleteTriggerCmd(deletePermanent bool) tea.Cmd {
 		content := common.TrashWarnContent
 		action := notify.DeleteAction
 
-		if !m.hasTrash || isExternalDiskPath(panel.Location) || deletePermanent {
+		if !m.hasTrash || !trash.Available(panel.Location) || deletePermanent {
 			title = common.PermanentDeleteWarnTitle
 			content = common.PermanentDeleteWarnContent
 			action = notify.PermanentDeleteAction

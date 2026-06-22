@@ -295,7 +295,12 @@ fi
 
 # Step 6: Build the app
 print_step "Building spf binary..."
-if CGO_ENABLED=0 go build -o ./bin/spf; then
+if [ "$(go env GOOS)" = "darwin" ]; then
+    BUILD_CMD=(env CGO_ENABLED=1 go build -o ./bin/spf)
+else
+    BUILD_CMD=(env CGO_ENABLED=0 go build -o ./bin/spf)
+fi
+if "${BUILD_CMD[@]}"; then
     print_success "Build completed successfully"
 else
     print_error "Build failed"
