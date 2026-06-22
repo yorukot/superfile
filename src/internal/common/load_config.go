@@ -4,12 +4,14 @@ import (
 	"embed"
 	"errors"
 	"fmt"
+	"image/color"
 	"log/slog"
 	"os"
 	"path/filepath"
 	"reflect"
 	"runtime"
 
+	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 	"github.com/pelletier/go-toml/v2"
 
@@ -19,6 +21,10 @@ import (
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/trash"
 )
+
+// ThemeAuto is the special theme value that resolves to theme_light or
+// theme_dark based on the terminal's detected background color.
+const ThemeAuto = "auto"
 
 // Load configurations from the configuration file. Compares the content
 // with the default values and modify the config file to include default configs
@@ -87,11 +93,37 @@ func ValidateConfig(c *ConfigType) error {
 		)
 	}
 
+	if err := validateThemeAuto(c); err != nil {
+		return err
+	}
+
 	if ansi.StringWidth(c.BorderTop) != 1 {
 		return errors.New(LoadConfigError("border_top", "Border character must be exactly one cell wide."))
 	}
 
 	return validateBorders(c)
+}
+
+// validateThemeAuto checks the theme_light/theme_dark constraints that only
+// apply when theme is set to ThemeAuto.
+func validateThemeAuto(c *ConfigType) error {
+	if c.Theme != ThemeAuto {
+		return nil
+	}
+
+	if c.ThemeLight == "" || c.ThemeDark == "" {
+		return errors.New(
+			LoadConfigError("theme", "theme_light and theme_dark must both be set when theme is \"auto\"."),
+		)
+	}
+
+	if c.ThemeLight == ThemeAuto || c.ThemeDark == ThemeAuto {
+		return errors.New(
+			LoadConfigError("theme", "theme_light and theme_dark cannot be set to \"auto\"; use concrete theme names."),
+		)
+	}
+
+	return nil
 }
 
 func validateBorders(c *ConfigType) error {
@@ -186,10 +218,47 @@ func LoadHotkeysFile(ignoreMissingFields bool) {
 	}
 }
 
+// ResolveThemeName returns the name of the theme file to load. If theme is
+// not "auto" it is returned unchanged. Otherwise themeDark or themeLight is
+// returned based on hasDarkBG.
+func ResolveThemeName(theme, themeLight, themeDark string, hasDarkBG bool) string {
+	if theme != ThemeAuto {
+		return theme
+	}
+	if hasDarkBG {
+		return themeDark
+	}
+	return themeLight
+}
+
+// ShouldWarnAutoDetectFailed reports whether the user should be warned that
+// theme = "auto" could not get a conclusive background color reading from
+// the terminal (bg == nil or err != nil), meaning the resolved theme fell
+// back to themeDark without ever knowing the terminal's actual background.
+// Multiplexers, remote-access bridges, and protocols that don't relay OSC 11
+// (e.g. Mosh, or proxies layered in front of SSH/Mosh) hit this path even
+// though the terminal itself is fine.
+func ShouldWarnAutoDetectFailed(theme string, bg color.Color, err error) bool {
+	return theme == ThemeAuto && (err != nil || bg == nil)
+}
+
 // LoadThemeFile : Load configurations from theme file into &theme
 // set default values if we cant read user's theme file
 func LoadThemeFile() {
-	themeFile := filepath.Join(variable.ThemeFolder, Config.Theme+".toml")
+	themeName := Config.Theme
+	if themeName == ThemeAuto {
+		bg, err := lipgloss.BackgroundColor(os.Stdin, os.Stdout)
+		if ShouldWarnAutoDetectFailed(Config.Theme, bg, err) {
+			fmt.Fprintln(os.Stderr, "Warning: theme = \"auto\" could not detect your terminal's "+
+				"background color, so superfile is falling back to theme_dark. This can happen over "+
+				"Mosh or behind some SSH/remote-access bridges that don't relay the required terminal "+
+				"query. Set theme to theme_light or theme_dark explicitly to fix this.")
+		}
+		hasDarkBG := lipgloss.HasDarkBackground(os.Stdin, os.Stdout)
+		themeName = ResolveThemeName(Config.Theme, Config.ThemeLight, Config.ThemeDark, hasDarkBG)
+	}
+
+	themeFile := filepath.Join(variable.ThemeFolder, themeName+".toml")
 	if err := LoadUserTheme(themeFile, &Theme); err != nil {
 		slog.Error("Could not read user's theme file. Falling back to default theme", "error", err)
 		err = toml.Unmarshal([]byte(DefaultThemeString), &Theme)
