@@ -21,6 +21,10 @@ import (
 	"github.com/yorukot/superfile/src/config/icon"
 )
 
+// ThemeAuto is the special theme value that resolves to theme_light or
+// theme_dark based on the terminal's detected background color.
+const ThemeAuto = "auto"
+
 // Load configurations from the configuration file. Compares the content
 // with the default values and modify the config file to include default configs
 // if the FixConfigFile flag is on
@@ -88,16 +92,8 @@ func ValidateConfig(c *ConfigType) error {
 		)
 	}
 
-	if c.Theme == "auto" && (c.ThemeLight == "" || c.ThemeDark == "") {
-		return errors.New(
-			LoadConfigError("theme", "theme_light and theme_dark must both be set when theme is \"auto\"."),
-		)
-	}
-
-	if c.Theme == "auto" && (c.ThemeLight == "auto" || c.ThemeDark == "auto") {
-		return errors.New(
-			LoadConfigError("theme", "theme_light and theme_dark cannot be set to \"auto\"; use concrete theme names."),
-		)
+	if err := validateThemeAuto(c); err != nil {
+		return err
 	}
 
 	if ansi.StringWidth(c.BorderTop) != 1 {
@@ -105,6 +101,28 @@ func ValidateConfig(c *ConfigType) error {
 	}
 
 	return validateBorders(c)
+}
+
+// validateThemeAuto checks the theme_light/theme_dark constraints that only
+// apply when theme is set to ThemeAuto.
+func validateThemeAuto(c *ConfigType) error {
+	if c.Theme != ThemeAuto {
+		return nil
+	}
+
+	if c.ThemeLight == "" || c.ThemeDark == "" {
+		return errors.New(
+			LoadConfigError("theme", "theme_light and theme_dark must both be set when theme is \"auto\"."),
+		)
+	}
+
+	if c.ThemeLight == ThemeAuto || c.ThemeDark == ThemeAuto {
+		return errors.New(
+			LoadConfigError("theme", "theme_light and theme_dark cannot be set to \"auto\"; use concrete theme names."),
+		)
+	}
+
+	return nil
 }
 
 func validateBorders(c *ConfigType) error {
@@ -203,7 +221,7 @@ func LoadHotkeysFile(ignoreMissingFields bool) {
 // not "auto" it is returned unchanged. Otherwise themeDark or themeLight is
 // returned based on hasDarkBG.
 func ResolveThemeName(theme, themeLight, themeDark string, hasDarkBG bool) string {
-	if theme != "auto" {
+	if theme != ThemeAuto {
 		return theme
 	}
 	if hasDarkBG {
@@ -220,14 +238,14 @@ func ResolveThemeName(theme, themeLight, themeDark string, hasDarkBG bool) strin
 // (e.g. Mosh, or proxies layered in front of SSH/Mosh) hit this path even
 // though the terminal itself is fine.
 func ShouldWarnAutoDetectFailed(theme string, bg color.Color, err error) bool {
-	return theme == "auto" && (err != nil || bg == nil)
+	return theme == ThemeAuto && (err != nil || bg == nil)
 }
 
 // LoadThemeFile : Load configurations from theme file into &theme
 // set default values if we cant read user's theme file
 func LoadThemeFile() {
 	themeName := Config.Theme
-	if themeName == "auto" {
+	if themeName == ThemeAuto {
 		bg, err := lipgloss.BackgroundColor(os.Stdin, os.Stdout)
 		if ShouldWarnAutoDetectFailed(Config.Theme, bg, err) {
 			fmt.Fprintln(os.Stderr, "Warning: theme = \"auto\" could not detect your terminal's "+

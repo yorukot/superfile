@@ -27,7 +27,7 @@ func TestResolveThemeName(t *testing.T) {
 		},
 		{
 			name:       "Auto mode with dark background picks theme_dark",
-			theme:      "auto",
+			theme:      ThemeAuto,
 			themeLight: "catppuccin-latte",
 			themeDark:  "catppuccin-mocha",
 			hasDarkBG:  true,
@@ -35,7 +35,7 @@ func TestResolveThemeName(t *testing.T) {
 		},
 		{
 			name:       "Auto mode with light background picks theme_light",
-			theme:      "auto",
+			theme:      ThemeAuto,
 			themeLight: "catppuccin-latte",
 			themeDark:  "catppuccin-mocha",
 			hasDarkBG:  false,
@@ -70,21 +70,21 @@ func TestShouldWarnAutoDetectFailed(t *testing.T) {
 		},
 		{
 			name:     "Auto theme with detection error warns",
-			theme:    "auto",
+			theme:    ThemeAuto,
 			bg:       nil,
 			err:      errors.New("input/output is not a terminal"),
 			expected: true,
 		},
 		{
 			name:     "Auto theme with nil color and no error warns (inconclusive query)",
-			theme:    "auto",
+			theme:    ThemeAuto,
 			bg:       nil,
 			err:      nil,
 			expected: true,
 		},
 		{
 			name:     "Auto theme with a resolved color does not warn",
-			theme:    "auto",
+			theme:    ThemeAuto,
 			bg:       someColor,
 			err:      nil,
 			expected: false,
@@ -131,7 +131,7 @@ func TestValidateConfig_AutoTheme(t *testing.T) {
 		{
 			name: "Auto theme with both theme_light and theme_dark set passes",
 			mutate: func(c *ConfigType) {
-				c.Theme = "auto"
+				c.Theme = ThemeAuto
 				c.ThemeLight = "catppuccin-latte"
 				c.ThemeDark = "catppuccin-mocha"
 			},
@@ -140,7 +140,7 @@ func TestValidateConfig_AutoTheme(t *testing.T) {
 		{
 			name: "Auto theme with theme_light unset fails",
 			mutate: func(c *ConfigType) {
-				c.Theme = "auto"
+				c.Theme = ThemeAuto
 				c.ThemeDark = "catppuccin-mocha"
 			},
 			expectErr: true,
@@ -148,7 +148,7 @@ func TestValidateConfig_AutoTheme(t *testing.T) {
 		{
 			name: "Auto theme with theme_dark unset fails",
 			mutate: func(c *ConfigType) {
-				c.Theme = "auto"
+				c.Theme = ThemeAuto
 				c.ThemeLight = "catppuccin-latte"
 			},
 			expectErr: true,
@@ -156,15 +156,15 @@ func TestValidateConfig_AutoTheme(t *testing.T) {
 		{
 			name: "Auto theme with both theme_light and theme_dark unset fails",
 			mutate: func(c *ConfigType) {
-				c.Theme = "auto"
+				c.Theme = ThemeAuto
 			},
 			expectErr: true,
 		},
 		{
 			name: "Auto theme with theme_light set to auto fails",
 			mutate: func(c *ConfigType) {
-				c.Theme = "auto"
-				c.ThemeLight = "auto"
+				c.Theme = ThemeAuto
+				c.ThemeLight = ThemeAuto
 				c.ThemeDark = "catppuccin-mocha"
 			},
 			expectErr: true,
@@ -172,9 +172,9 @@ func TestValidateConfig_AutoTheme(t *testing.T) {
 		{
 			name: "Auto theme with theme_dark set to auto fails",
 			mutate: func(c *ConfigType) {
-				c.Theme = "auto"
+				c.Theme = ThemeAuto
 				c.ThemeLight = "catppuccin-latte"
-				c.ThemeDark = "auto"
+				c.ThemeDark = ThemeAuto
 			},
 			expectErr: true,
 		},
