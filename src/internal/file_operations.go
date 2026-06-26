@@ -125,6 +125,19 @@ func copyDir(src, dst string, srcInfo os.FileInfo) error {
 	return nil
 }
 
+// is an equivalent of "cp -P" command
+func copyLinkFile(src, dst string) error {
+	target, err := os.Readlink(src)
+	if err != nil {
+		return err
+	}
+	return os.Symlink(target, dst)
+}
+
+func isSymlink(info os.FileInfo) bool {
+	return info.Mode()&os.ModeSymlink != 0
+}
+
 // copyFile copies a single file
 func copyFile(src, dst string, srcInfo os.FileInfo) error {
 	srcFile, err := os.Open(src)
@@ -223,6 +236,9 @@ func actualPasteOperation(info os.FileInfo, path string, newPath string, cut boo
 		}
 		err = os.MkdirAll(newPath, info.Mode())
 		return err
+	}
+	if isSymlink(info) {
+		return copyLinkFile(path, newPath)
 	}
 
 	// File
