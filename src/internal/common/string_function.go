@@ -197,11 +197,19 @@ func GetHelpMenuHotkeyString(hotkeys []string) string {
 
 // Separated this out out for easy testing
 func IsBufferPrintable(buffer []byte) bool {
-	for _, b := range buffer {
-		// This will also handle b==0
-		if !unicode.IsPrint(rune(b)) && !unicode.IsSpace(rune(b)) {
+	i := 0
+	for i < len(buffer) {
+		if !utf8.FullRune(buffer[i:]) {
+			break
+		}
+		r, n := utf8.DecodeRune(buffer[i:])
+		if r == utf8.RuneError {
 			return false
 		}
+		if !unicode.IsPrint(r) && !unicode.IsSpace(r) {
+			return false
+		}
+		i += n
 	}
 	return true
 }
