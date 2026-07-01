@@ -3,9 +3,12 @@ package common
 import (
 	"fmt"
 	"math"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestStringTruncate(t *testing.T) {
@@ -119,7 +122,7 @@ func TestIsBufferPrintable(t *testing.T) {
 		{"hello", true},
 		{"abcdABCD0123~!@#$%^&*()_+-={}|:\"<>?,./;'[]", true},
 		{"Horizontal Tab and NewLine\t\t\n\n", true},
-		{"\xa0(NBSP)", true},
+		{"\xc2\xa0(UTF-8 NBSP)", true},
 		{"\x0b(Vertical Tab)", true},
 		{"\x0d(CR)", true},
 		{"ASCII control characters : \x00(NULL)", false},
@@ -127,6 +130,12 @@ func TestIsBufferPrintable(t *testing.T) {
 		{"\x0f(SI)", false},
 		{"\x1b(ESC)", false},
 		{"\x7f(DEL)", false},
+		{"plain ASCII log output", true},
+		{"status line \xe2\x9c\x93 example module", true},
+		{"box drawing \xe2\x94\x8c\xe2\x94\x80\xe2\x94\x90", true},
+		{"\xef\xbf\xbd(UTF-8 replacement character)", true},
+		{"\xff(invalid UTF-8 byte)", false},
+		{"\xe2\x9c", true}, // truncated UTF-8 at buffer end (fixed-size read)
 	}
 	for _, tt := range inputs {
 		t.Run(fmt.Sprintf("Testing if buffer %q is printable", tt.input), func(t *testing.T) {
@@ -136,6 +145,31 @@ func TestIsBufferPrintable(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestIsTextFile(t *testing.T) {
+	t.Run("UTF-8 log with Unicode early in file", func(t *testing.T) {
+		dir := t.TempDir()
+		path := filepath.Join(dir, "stderr.log")
+		content := "  Loading project at `/path/to/project`\n" +
+			"Building example module...\n" +
+			"    \xe2\x9c\x93 example module\n"
+		require.NoError(t, os.WriteFile(path, []byte(content), 0o644))
+
+		isText, err := IsTextFile(path)
+		require.NoError(t, err)
+		assert.True(t, isText)
+	})
+
+	t.Run("binary with NUL", func(t *testing.T) {
+		dir := t.TempDir()
+		path := filepath.Join(dir, "binary")
+		require.NoError(t, os.WriteFile(path, []byte("hello\x00world"), 0o644))
+
+		isText, err := IsTextFile(path)
+		require.NoError(t, err)
+		assert.False(t, isText)
+	})
 }
 
 func TestIsExtensionExtractable(t *testing.T) {
