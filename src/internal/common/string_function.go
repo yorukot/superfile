@@ -203,7 +203,7 @@ func IsBufferPrintable(buffer []byte) bool {
 			break
 		}
 		r, n := utf8.DecodeRune(buffer[i:])
-		if r == utf8.RuneError {
+		if r == utf8.RuneError && n == 1 {
 			return false
 		}
 		if !unicode.IsPrint(r) && !unicode.IsSpace(r) {

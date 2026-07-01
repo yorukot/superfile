@@ -133,6 +133,8 @@ func TestIsBufferPrintable(t *testing.T) {
 		{"plain ASCII log output", true},
 		{"status line \xe2\x9c\x93 example module", true},
 		{"box drawing \xe2\x94\x8c\xe2\x94\x80\xe2\x94\x90", true},
+		{"\xef\xbf\xbd(UTF-8 replacement character)", true},
+		{"\xff(invalid UTF-8 byte)", false},
 		{"\xe2\x9c", true}, // truncated UTF-8 at buffer end (fixed-size read)
 	}
 	for _, tt := range inputs {
