@@ -12,8 +12,6 @@ import (
 
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 
-	"github.com/yorukot/superfile/src/pkg/utils"
-
 	tea "charm.land/bubbletea/v2"
 
 	variable "github.com/yorukot/superfile/src/config"
@@ -164,18 +162,19 @@ func (m *model) tryPreviewScrollKey(msg tea.KeyPressMsg) (tea.Cmd, bool) {
 	if !m.previewScrollAllowed() {
 		return nil, false
 	}
+	key := msg.String()
 	switch {
-	case utils.HotkeyMatches(msg, common.Hotkeys.PreviewScrollTop):
+	case slices.Contains(common.Hotkeys.PreviewScrollTop, key):
 		return m.handlePreviewScrollTop(), true
-	case utils.HotkeyMatches(msg, common.Hotkeys.PreviewScrollBottom):
+	case slices.Contains(common.Hotkeys.PreviewScrollBottom, key):
 		return m.handlePreviewScrollBottom(), true
-	case utils.HotkeyMatches(msg, common.Hotkeys.PreviewScrollBulkUp):
+	case slices.Contains(common.Hotkeys.PreviewScrollBulkUp, key):
 		return m.handlePreviewScrollBulkUp(), true
-	case utils.HotkeyMatches(msg, common.Hotkeys.PreviewScrollBulkDown):
+	case slices.Contains(common.Hotkeys.PreviewScrollBulkDown, key):
 		return m.handlePreviewScrollBulkDown(), true
-	case utils.HotkeyMatches(msg, common.Hotkeys.PreviewScrollLineUp):
+	case slices.Contains(common.Hotkeys.PreviewScrollLineUp, key):
 		return m.handlePreviewScrollLineUp(), true
-	case utils.HotkeyMatches(msg, common.Hotkeys.PreviewScrollLineDown):
+	case slices.Contains(common.Hotkeys.PreviewScrollLineDown, key):
 		return m.handlePreviewScrollLineDown(), true
 	}
 	return nil, false
