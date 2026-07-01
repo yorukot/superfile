@@ -148,13 +148,5 @@ func (m *Model) getPageScrollSize() int {
 		// Use default full page behavior
 		scrollSize = m.PanelElementHeight()
 	}
-	// When all items fit on one screen, scroll half the list (matching legacy
-	// wrap behavior without jumping to the opposite end).
-	if m.ElemCount() <= m.PanelElementHeight() {
-		scrollSize = m.ElemCount() / 2
-		if scrollSize < 1 {
-			scrollSize = 1
-		}
-	}
 	return scrollSize
 }

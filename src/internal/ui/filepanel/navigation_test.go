@@ -143,7 +143,7 @@ func TestPgUpDown(t *testing.T) {
 			name:           "Page navigation with small element count",
 			panel:          testModelWithElemCount(0, 0, 12, 5),
 			pageDown:       true,
-			expectedCursor: 2, // half of 5 items, same as legacy wrap behavior
+			expectedCursor: 4, // full-page scroll clamps to last item
 			expectedRender: 0,
 		},
 		{

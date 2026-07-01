@@ -35,23 +35,13 @@ func (m *Model) pageScrollBy(delta int) {
 	if m.Empty() {
 		return
 	}
-	scrollSize := m.getPageScrollSize()
-	last := m.ElemCount() - 1
-
-	if delta < 0 {
-		if m.cursor < scrollSize {
-			m.scrollToCursor(0)
-			return
-		}
-		m.scrollToCursor(m.cursor - scrollSize)
-		return
+	cursor := m.cursor + delta
+	if cursor < 0 {
+		cursor = 0
+	} else if cursor >= m.ElemCount() {
+		cursor = m.ElemCount() - 1
 	}
-
-	if last-m.cursor < scrollSize {
-		m.scrollToCursor(last)
-		return
-	}
-	m.scrollToCursor(m.cursor + scrollSize)
+	m.scrollToCursor(cursor)
 }
 
 // Control file panel list up
