@@ -131,12 +131,12 @@ type HotkeysType struct {
 	PageUp   []string `toml:"page_up"`
 	PageDown []string `toml:"page_down"`
 
-	PreviewScrollLineUp     []string `toml:"preview_scroll_line_up"     comment:"file preview scroll by one line (browser mode only)"`
-	PreviewScrollLineDown   []string `toml:"preview_scroll_line_down"`
-	PreviewScrollBulkUp     []string `toml:"preview_scroll_bulk_up"     comment:"file preview bulk scroll (see preview_scroll_bulk in config.toml)"`
-	PreviewScrollBulkDown   []string `toml:"preview_scroll_bulk_down"`
-	PreviewScrollTop        []string `toml:"preview_scroll_top"         comment:"file preview scroll to top"`
-	PreviewScrollBottom     []string `toml:"preview_scroll_bottom"      comment:"file preview scroll to bottom"`
+	PreviewScrollLineUp   []string `toml:"preview_scroll_line_up"     comment:"file preview scroll by one line (browser mode only)"`
+	PreviewScrollLineDown []string `toml:"preview_scroll_line_down"`
+	PreviewScrollBulkUp   []string `toml:"preview_scroll_bulk_up"     comment:"file preview bulk scroll (see preview_scroll_bulk in config.toml)"`
+	PreviewScrollBulkDown []string `toml:"preview_scroll_bulk_down"`
+	PreviewScrollTop      []string `toml:"preview_scroll_top"         comment:"file preview scroll to top"`
+	PreviewScrollBottom   []string `toml:"preview_scroll_bottom"      comment:"file preview scroll to bottom"`
 
 	CloseFilePanel         []string `toml:"close_file_panel"          comment:"file panel control"`
 	CreateNewFilePanel     []string `toml:"create_new_file_panel"`

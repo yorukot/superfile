@@ -12,6 +12,7 @@ import (
 	"sort"
 
 	"charm.land/lipgloss/v2"
+	"github.com/alecthomas/chroma/v2"
 	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/yorukot/ansichroma"
 
@@ -106,56 +107,82 @@ func (m *Model) renderTextPreview(r *rendering.Renderer, itemPath string,
 ) string {
 	format := lexers.Match(filepath.Base(itemPath))
 	if format == nil {
-		isText, err := common.IsTextFile(itemPath)
-		if err != nil {
-			slog.Error("Error while checking text file", "error", err)
-			return r.AddLines(renderPreviewError(err)).Render()
-		} else if !isText {
-			m.setScrollState(false)
-			return r.AddLines(common.FilePreviewUnsupportedFormatText).Render()
+		if unsupported := m.renderUnsupportedTextPreview(r, itemPath); unsupported != "" {
+			return unsupported
 		}
 	}
 
-	background := ""
-	if format != nil && !common.Config.TransparentBackground {
-		background = common.Theme.FilePanelBG
-	}
-
+	background := m.textPreviewBackground(format)
 	if format != nil && common.Config.CodePreviewer == "bat" {
-		if m.batCmd == "" {
-			return r.AddLines(common.FilePreviewBatNotInstalledText).Render()
-		}
-		fileContent, hasMore, err := getBatSyntaxHighlightedContent(
-			itemPath, m.scrollOffset, previewHeight, background, m.batCmd)
-		if err != nil {
-			slog.Error("Error render code highlight", "error", err)
-			return r.AddLines(renderPreviewError(err)).Render()
-		}
-		m.setScrollState(hasMore)
-		if fileContent == "" {
-			if m.scrollOffset > 0 {
-				m.resetScroll()
-				return m.renderTextPreview(r, itemPath, previewWidth, previewHeight)
-			}
-			return r.AddLines(common.FilePreviewEmptyText).Render()
-		}
-		r.AddLines(fileContent)
-		return r.Render()
+		return m.renderBatTextPreview(r, itemPath, previewWidth, previewHeight, background)
 	}
 
+	return m.renderReadFileTextPreview(r, itemPath, previewWidth, previewHeight, format, background)
+}
+
+func (m *Model) renderUnsupportedTextPreview(r *rendering.Renderer, itemPath string) string {
+	isText, err := common.IsTextFile(itemPath)
+	if err != nil {
+		slog.Error("Error while checking text file", "error", err)
+		return r.AddLines(renderPreviewError(err)).Render()
+	}
+	if isText {
+		return ""
+	}
+
+	m.setScrollState(false)
+	return r.AddLines(common.FilePreviewUnsupportedFormatText).Render()
+}
+
+func (m *Model) textPreviewBackground(format chroma.Lexer) string {
+	if format == nil || common.Config.TransparentBackground {
+		return ""
+	}
+	return common.Theme.FilePanelBG
+}
+
+func (m *Model) renderBatTextPreview(
+	r *rendering.Renderer,
+	itemPath string,
+	previewWidth, previewHeight int,
+	background string,
+) string {
+	if m.batCmd == "" {
+		return r.AddLines(common.FilePreviewBatNotInstalledText).Render()
+	}
+
+	fileContent, hasMore, err := getBatSyntaxHighlightedContent(
+		itemPath, m.scrollOffset, previewHeight, background, m.batCmd)
+	if err != nil {
+		slog.Error("Error render code highlight", "error", err)
+		return r.AddLines(renderPreviewError(err)).Render()
+	}
+
+	m.setScrollState(hasMore)
+	if fileContent == "" {
+		return m.renderTextPreviewEmpty(r, itemPath, previewWidth, previewHeight)
+	}
+
+	r.AddLines(fileContent)
+	return r.Render()
+}
+
+func (m *Model) renderReadFileTextPreview(
+	r *rendering.Renderer,
+	itemPath string,
+	previewWidth, previewHeight int,
+	format chroma.Lexer,
+	background string,
+) string {
 	fileContent, hasMore, err := utils.ReadFileContent(itemPath, previewWidth, m.scrollOffset, previewHeight)
 	if err != nil {
 		slog.Error("Error open file", "error", err)
 		return r.AddLines(renderPreviewError(err)).Render()
 	}
-	m.setScrollState(hasMore)
 
+	m.setScrollState(hasMore)
 	if fileContent == "" {
-		if m.scrollOffset > 0 {
-			m.resetScroll()
-			return m.renderTextPreview(r, itemPath, previewWidth, previewHeight)
-		}
-		return r.AddLines(common.FilePreviewEmptyText).Render()
+		return m.renderTextPreviewEmpty(r, itemPath, previewWidth, previewHeight)
 	}
 
 	if format != nil {
@@ -169,6 +196,18 @@ func (m *Model) renderTextPreview(r *rendering.Renderer, itemPath string,
 
 	r.AddLines(fileContent)
 	return r.Render()
+}
+
+func (m *Model) renderTextPreviewEmpty(
+	r *rendering.Renderer,
+	itemPath string,
+	previewWidth, previewHeight int,
+) string {
+	if m.scrollOffset > 0 {
+		m.resetScroll()
+		return m.renderTextPreview(r, itemPath, previewWidth, previewHeight)
+	}
+	return r.AddLines(common.FilePreviewEmptyText).Render()
 }
 
 // Only use this when height and width are synced with filemodel's expectations

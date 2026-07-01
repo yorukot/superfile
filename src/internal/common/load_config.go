@@ -83,7 +83,10 @@ func ValidateConfig(c *ConfigType) error {
 
 	if c.PreviewScrollBulk < 1 || c.PreviewScrollBulk > 3 {
 		return errors.New(
-			LoadConfigError("preview_scroll_bulk", "Preview scroll bulk must be 1 (whole page), 2 (half page), or 3 (one third)."),
+			LoadConfigError(
+				"preview_scroll_bulk",
+				"Preview scroll bulk must be 1 (whole page), 2 (half page), or 3 (one third).",
+			),
 		)
 	}
 
