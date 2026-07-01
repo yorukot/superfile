@@ -31,17 +31,27 @@ func (m *Model) moveCursorBy(delta int) {
 	m.scrollToCursor(cursor)
 }
 
-func (m *Model) moveCursorByClamped(delta int) {
+func (m *Model) pageScrollBy(delta int) {
 	if m.Empty() {
 		return
 	}
-	cursor := m.cursor + delta
-	if cursor < 0 {
-		cursor = 0
-	} else if cursor >= m.ElemCount() {
-		cursor = m.ElemCount() - 1
+	scrollSize := m.getPageScrollSize()
+	last := m.ElemCount() - 1
+
+	if delta < 0 {
+		if m.cursor < scrollSize {
+			m.scrollToCursor(0)
+			return
+		}
+		m.scrollToCursor(m.cursor - scrollSize)
+		return
 	}
-	m.scrollToCursor(cursor)
+
+	if last-m.cursor < scrollSize {
+		m.scrollToCursor(last)
+		return
+	}
+	m.scrollToCursor(m.cursor + scrollSize)
 }
 
 // Control file panel list up
@@ -55,11 +65,11 @@ func (m *Model) ListDown() {
 }
 
 func (m *Model) PgUp() {
-	m.moveCursorByClamped(-m.getPageScrollSize())
+	m.pageScrollBy(-m.getPageScrollSize())
 }
 
 func (m *Model) PgDown() {
-	m.moveCursorByClamped(m.getPageScrollSize())
+	m.pageScrollBy(m.getPageScrollSize())
 }
 
 // Handles the action of selecting an item in the file panel upwards. (only work on select mode)

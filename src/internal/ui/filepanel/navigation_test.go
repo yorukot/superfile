@@ -143,7 +143,7 @@ func TestPgUpDown(t *testing.T) {
 			name:           "Page navigation with small element count",
 			panel:          testModelWithElemCount(0, 0, 12, 5),
 			pageDown:       true,
-			expectedCursor: 4,
+			expectedCursor: 2, // half of 5 items, same as legacy wrap behavior
 			expectedRender: 0,
 		},
 		{
@@ -166,6 +166,13 @@ func TestPgUpDown(t *testing.T) {
 			pageDown:       true,
 			expectedCursor: 19,
 			expectedRender: 13,
+		},
+		{
+			name:           "Short list page down near end snaps to last item",
+			panel:          testModelWithElemCount(3, 0, 12, 5),
+			pageDown:       true,
+			expectedCursor: 4,
+			expectedRender: 0,
 		},
 	}
 
