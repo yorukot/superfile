@@ -12,4 +12,4 @@ head:
 
 ## 預設設定檔如何與應用程式一起封裝
 
-我們使用 golangs 的 `embed.FS`，並將 `src/superfile_config/` 中的所有檔案嵌入到 spf binary。於 `src/internal/config_function.go` 中，`LoadAllDefaultConfig()` 函式會讀取這些嵌入檔案，並將它們寫入磁碟或記憶體中的設定變數。
+我們使用 Go 的 `embed.FS`，並將 `src/superfile_config/` 中的所有檔案嵌入到 spf binary。於 `src/internal/config_function.go` 中，`LoadAllDefaultConfig()` 函式會讀取這些嵌入檔案，並將它們寫入磁碟或記憶體中的設定變數。

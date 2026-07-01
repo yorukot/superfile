@@ -66,7 +66,7 @@
 - [Troubleshooting](#troubleshooting)
 - [Uninstalling](#uninstalling)
   - [macOS and Linux](#macos-and-linux-1)
-  - [Window](#window)
+  - [Windows](#windows)
 - [Contributing](#contributing)
 - [Thanks](#thanks)
   - [Support](#support)
@@ -206,7 +206,7 @@ bash -c "$(curl -sLo- https://superfile.dev/uninstall.sh)"
 
 If you want to inspect the script, see : [uninstall.sh](./website/public/uninstall.sh)
 
-### Window
+### Windows
 
 To uninstall superfile on Windows, use this powershell script.
 

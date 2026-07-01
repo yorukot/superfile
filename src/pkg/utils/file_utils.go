@@ -181,7 +181,7 @@ func fixTomlFile(resultErr *TomlLoadError, filePath string, target interface{}) 
 
 	// Fix done
 	// Inform user about backup location
-	resultErr.userMessage = "config file had issues. Its fixed successfully. Original backed up to : " + backupPath
+	resultErr.userMessage = "config file had issues. It's fixed successfully. Original backed up to : " + backupPath
 	resultErr.isFatal = false
 	// Do not remove backup; user may want to restore manually
 	needsBackupFileRemoval = false
