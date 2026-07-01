@@ -337,8 +337,10 @@ func TestReadFileContent(t *testing.T) {
 		name          string
 		content       []byte
 		maxLineLength int
+		startLine     int
 		previewLine   int
 		expected      string
+		expectHasMore bool
 	}{
 		{
 			name:          "regular UTF-8 file",
@@ -360,6 +362,15 @@ func TestReadFileContent(t *testing.T) {
 			maxLineLength: 100,
 			previewLine:   2,
 			expected:      "line1\nline2\n",
+			expectHasMore: true,
+		},
+		{
+			name:          "start line offset",
+			content:       []byte("line1\nline2\nline3\nline4"),
+			maxLineLength: 100,
+			startLine:     2,
+			previewLine:   2,
+			expected:      "line3\nline4\n",
 		},
 	}
 
@@ -368,9 +379,10 @@ func TestReadFileContent(t *testing.T) {
 			testFile := filepath.Join(curTestDir, fmt.Sprintf("test_file_%d.txt", i))
 			SetupFilesWithData(t, tt.content, testFile)
 
-			result, err := ReadFileContent(testFile, tt.maxLineLength, tt.previewLine)
+			result, hasMore, err := ReadFileContent(testFile, tt.maxLineLength, tt.startLine, tt.previewLine)
 			require.NoError(t, err)
 			assert.Equal(t, tt.expected, result)
+			assert.Equal(t, tt.expectHasMore, hasMore)
 		})
 	}
 }
@@ -385,7 +397,7 @@ func TestReadFileContentBOMHandling(t *testing.T) {
 	bomFile := filepath.Join(curTestDir, "bom_file.txt")
 	SetupFilesWithData(t, bomContent, bomFile)
 
-	result, err := ReadFileContent(bomFile, 100, 10)
+	result, _, err := ReadFileContent(bomFile, 100, 0, 10)
 	require.NoError(t, err)
 
 	// Verify BOM is removed and content is correct
