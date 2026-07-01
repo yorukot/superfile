@@ -151,6 +151,8 @@ func (m *Model) renderBatTextPreview(
 		return r.AddLines(common.FilePreviewBatNotInstalledText).Render()
 	}
 
+	m.normalizeScrollOffsetForText(itemPath, previewHeight)
+
 	fileContent, hasMore, err := getBatSyntaxHighlightedContent(
 		itemPath, m.scrollOffset, previewHeight, background, m.batCmd)
 	if err != nil {
@@ -174,6 +176,8 @@ func (m *Model) renderReadFileTextPreview(
 	format chroma.Lexer,
 	background string,
 ) string {
+	m.normalizeScrollOffsetForText(itemPath, previewHeight)
+
 	fileContent, hasMore, err := utils.ReadFileContent(itemPath, previewWidth, m.scrollOffset, previewHeight)
 	if err != nil {
 		slog.Error("Error open file", "error", err)

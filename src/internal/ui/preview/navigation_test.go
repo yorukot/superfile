@@ -134,3 +134,22 @@ func TestPreviewBulkScrollWholePage(t *testing.T) {
 	require.True(t, m.ScrollBulkDown(2))
 	assert.Equal(t, 2, m.scrollOffset)
 }
+
+func TestPreviewScrollBottom(t *testing.T) {
+	curTestDir := t.TempDir()
+	filePath := filepath.Join(curTestDir, "scroll.txt")
+	content := strings.Join([]string{"l1", "l2", "l3", "l4", "l5", "l6"}, "\n") + "\n"
+	require.NoError(t, os.WriteFile(filePath, []byte(content), 0o644))
+
+	m := New()
+	m.Open()
+	_, _ = m.RenderWithPath(filePath, 10, 1, 2)
+	require.True(t, m.CanScrollDown())
+
+	require.True(t, m.ScrollBottom())
+	assert.Equal(t, maxScrollOffsetSentinel, m.scrollOffset)
+
+	_, _ = m.RenderWithPath(filePath, 10, 1, 2)
+	assert.Equal(t, 5, m.scrollOffset)
+	assert.False(t, m.CanScrollDown())
+}

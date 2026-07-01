@@ -155,7 +155,8 @@ func (m *model) shouldHandlePreviewScrollKeys() bool {
 		!m.zoxideModal.IsOpen() &&
 		!m.notifyModel.IsOpen() &&
 		!m.fileModel.Renaming &&
-		!m.sidebarModel.IsRenaming()
+		!m.sidebarModel.IsRenaming() &&
+		!m.getFocusedFilePanel().SearchBar.Focused()
 }
 
 func (m *model) tryPreviewScrollKey(msg tea.KeyPressMsg) (tea.Cmd, bool) {
@@ -229,15 +230,10 @@ func (m *model) handlePreviewScrollBottom() tea.Cmd {
 	if !m.previewScrollAllowed() || !m.fileModel.FilePreview.CanScrollDown() {
 		return nil
 	}
-	viewportHeight := m.fileModel.PreviewViewportHeight()
-	var lastCmd tea.Cmd
-	for m.fileModel.FilePreview.CanScrollDown() {
-		if !m.fileModel.FilePreview.ScrollBulkDown(viewportHeight) {
-			break
-		}
-		lastCmd = m.fileModel.RefreshPreviewScroll()
+	if !m.fileModel.FilePreview.ScrollBottom() {
+		return nil
 	}
-	return lastCmd
+	return m.fileModel.RefreshPreviewScroll()
 }
 
 func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {

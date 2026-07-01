@@ -4,6 +4,8 @@ import (
 	"github.com/yorukot/superfile/src/internal/common"
 )
 
+const maxScrollOffsetSentinel = 1 << 30
+
 func bulkScrollSize(viewportHeight int) int {
 	pages := common.Config.PreviewScrollBulk
 	if pages <= 0 {
@@ -63,6 +65,14 @@ func (m *Model) CanScrollDown() bool {
 	return m.canScrollDown
 }
 
+func (m *Model) ScrollBottom() bool {
+	if !m.canScrollDown {
+		return false
+	}
+	m.scrollOffset = maxScrollOffsetSentinel
+	return true
+}
+
 func (m *Model) resetScroll() {
 	m.scrollOffset = 0
 	m.canScrollDown = false
@@ -79,4 +89,17 @@ func (m *Model) clampScrollOffset(maxOffset int) {
 	if m.scrollOffset > maxOffset {
 		m.scrollOffset = maxOffset
 	}
+}
+
+func (m *Model) normalizeScrollOffsetForText(itemPath string, previewHeight int) {
+	if m.scrollOffset < maxScrollOffsetSentinel {
+		return
+	}
+	lineCount, err := countFileLines(itemPath)
+	if err != nil {
+		m.resetScroll()
+		return
+	}
+	maxOffset := max(0, lineCount-previewHeight)
+	m.clampScrollOffset(maxOffset)
 }

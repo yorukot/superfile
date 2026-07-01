@@ -1,9 +1,11 @@
 package preview
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"log/slog"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -11,6 +13,8 @@ import (
 	"charm.land/lipgloss/v2"
 
 	"github.com/yorukot/superfile/src/internal/common"
+	"golang.org/x/text/encoding/unicode"
+	"golang.org/x/text/transform"
 )
 
 func getBatSyntaxHighlightedContent(
@@ -24,7 +28,7 @@ func getBatSyntaxHighlightedContent(
 	// --force-colorization: force colorization for non-interactive shell output
 	// --line-range m:n: only read from line m to line n (1-indexed)
 	firstLine := startLine + 1
-	lastLine := startLine + previewLine
+	lastLine := startLine + previewLine + 1
 	batArgs := []string{
 		itemPath,
 		"--plain",
@@ -49,12 +53,34 @@ func getBatSyntaxHighlightedContent(
 	if !common.Config.TransparentBackground {
 		fileContent = setBatBackground(fileContent, background)
 	}
-	lineCount := strings.Count(fileContent, "\n")
-	if fileContent != "" && !strings.HasSuffix(fileContent, "\n") {
+	lines := strings.Split(strings.TrimSuffix(fileContent, "\n"), "\n")
+	if fileContent == "" {
+		return "", false, nil
+	}
+	hasMore := previewLine > 0 && len(lines) > previewLine
+	if hasMore {
+		fileContent = strings.Join(lines[:previewLine], "\n") + "\n"
+	}
+	return fileContent, hasMore, nil
+}
+
+func countFileLines(itemPath string) (int, error) {
+	file, err := os.Open(itemPath)
+	if err != nil {
+		return 0, err
+	}
+	defer file.Close()
+
+	reader := transform.NewReader(file, unicode.BOMOverride(unicode.UTF8.NewDecoder()))
+	scanner := bufio.NewScanner(reader)
+	lineCount := 0
+	for scanner.Scan() {
 		lineCount++
 	}
-	hasMore := previewLine > 0 && lineCount >= previewLine
-	return fileContent, hasMore, nil
+	if err := scanner.Err(); err != nil {
+		return 0, err
+	}
+	return lineCount, nil
 }
 
 func setBatBackground(input string, background string) string {

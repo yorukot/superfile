@@ -36,6 +36,9 @@ func (m *Model) SetLoading() {
 // All content change happen via this only, to ensure the sync between
 // content and width x height, and the loading variable reset
 func (m *Model) setContent(content string, width int, height int, location string) {
+	if m.location != location {
+		m.resetScroll()
+	}
 	m.content = content
 	m.contentWidth = width
 	m.contentHeight = height
