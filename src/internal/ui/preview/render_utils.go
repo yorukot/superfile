@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"charm.land/lipgloss/v2"
 
@@ -64,10 +65,17 @@ func getBatSyntaxHighlightedContent(
 	return fileContent, hasMore, nil
 }
 
-func countFileLines(itemPath string) (int, error) {
+// countFileLines counts newline-delimited lines in itemPath. Scanning stops when
+// common.DefaultPreviewTimeout elapses; the second return value is false when
+// the count may be incomplete.
+func countFileLines(itemPath string) (int, bool, error) {
+	return countFileLinesBefore(itemPath, time.Now().Add(common.DefaultPreviewTimeout))
+}
+
+func countFileLinesBefore(itemPath string, deadline time.Time) (int, bool, error) {
 	file, err := os.Open(itemPath)
 	if err != nil {
-		return 0, err
+		return 0, false, err
 	}
 	defer file.Close()
 
@@ -76,11 +84,14 @@ func countFileLines(itemPath string) (int, error) {
 	lineCount := 0
 	for scanner.Scan() {
 		lineCount++
+		if time.Now().After(deadline) {
+			return lineCount, false, nil
+		}
 	}
 	if err := scanner.Err(); err != nil {
-		return 0, err
+		return 0, false, err
 	}
-	return lineCount, nil
+	return lineCount, true, nil
 }
 
 func setBatBackground(input string, background string) string {

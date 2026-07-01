@@ -95,7 +95,7 @@ func (m *Model) normalizeScrollOffsetForText(itemPath string, previewHeight int)
 	if m.scrollOffset < maxScrollOffsetSentinel {
 		return
 	}
-	lineCount, err := countFileLines(itemPath)
+	lineCount, _, err := countFileLines(itemPath)
 	if err != nil {
 		m.resetScroll()
 		return
