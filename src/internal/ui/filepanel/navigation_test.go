@@ -119,11 +119,11 @@ func TestPgUpDown(t *testing.T) {
 			expectedRender: 1,
 		},
 		{
-			name:           "Page down near end wraps to start",
+			name:           "Page down near end clamps to last item",
 			panel:          testModelWithElemCount(18, 12, 12, 20),
 			pageDown:       true,
-			expectedCursor: 5, // (18 + 7) % 20 = 5
-			expectedRender: 5,
+			expectedCursor: 19,
+			expectedRender: 13,
 		},
 		{
 			name:           "Page up from middle",
@@ -133,17 +133,17 @@ func TestPgUpDown(t *testing.T) {
 			expectedRender: 3,
 		},
 		{
-			name:           "Page up near beginning wraps to end",
+			name:           "Page up near beginning clamps to first item",
 			panel:          testModelWithElemCount(2, 0, 12, 20),
 			pageDown:       false,
-			expectedCursor: 15, // (2 - 7 + 20) % 20 = 15
-			expectedRender: 9,
+			expectedCursor: 0,
+			expectedRender: 0,
 		},
 		{
 			name:           "Page navigation with small element count",
 			panel:          testModelWithElemCount(0, 0, 12, 5),
 			pageDown:       true,
-			expectedCursor: 2, // (0 + 7) % 5 = 2
+			expectedCursor: 4,
 			expectedRender: 0,
 		},
 		{
@@ -152,6 +152,20 @@ func TestPgUpDown(t *testing.T) {
 			pageDown:       true,
 			expectedCursor: 0,
 			expectedRender: 0,
+		},
+		{
+			name:           "Page up at top stays at top",
+			panel:          testModelWithElemCount(0, 0, 12, 20),
+			pageDown:       false,
+			expectedCursor: 0,
+			expectedRender: 0,
+		},
+		{
+			name:           "Page down at bottom stays at bottom",
+			panel:          testModelWithElemCount(19, 13, 12, 20),
+			pageDown:       true,
+			expectedCursor: 19,
+			expectedRender: 13,
 		},
 	}
 
