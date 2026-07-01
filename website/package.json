@@ -16,7 +16,7 @@
 		"astro": "^6.1.10",
 		"gsap": "^3.15.0",
 		"remark-directive": "^4.0.0",
-		"sharp": "^0.34.1",
+		"sharp": "^0.35.0",
 		"unist-util-visit": "^5.1.0"
 	},
 	"devDependencies": {
