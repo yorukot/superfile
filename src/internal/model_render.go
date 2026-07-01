@@ -62,7 +62,7 @@ func (m *model) terminalSizeWarnAfterFirstRender() string {
 	fullWidthString = common.TerminalCorrectSize.Render(fullWidthString)
 
 	heightString := common.MainStyle.Render(" Height = ")
-	return common.FullScreenStyle(m.fullHeight, m.fullWidth).Render(`You change your terminal size too small:` + "\n" +
+	return common.FullScreenStyle(m.fullHeight, m.fullWidth).Render(`Your terminal size is too small:` + "\n" +
 		"Width = " + fullWidthString +
 		heightString + fullHeightString + "\n\n" +
 		"Needed for current config:" + "\n" +

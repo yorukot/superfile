@@ -51,7 +51,7 @@ Press `:` to open command execution bar.
 
 To return focus back onto the file panel, press the same hotkey again.
 
-> For command execution bar you need press `esc` or `ctrl+c`
+> For command execution bar you need to press `esc` or `ctrl+c`
 
 You can also press `f` to show or hide the preview window.
 
@@ -79,7 +79,7 @@ superfile provides multiple hotkeys to move through directories. The angle brack
 
 While focused on the file panel, move the cursor up with `up` or `k` and down with `down` or `j`.
 
-After navigating to the your file/folder, press `enter` or `l` to confirm your selection. Files are opened with your default application (if none set, there will be no response) and folders are opened for viewing. Press `h` or `backspace` to return to the parent directory.
+After navigating to your file/folder, press `enter` or `l` to confirm your selection. Files are opened with your default application (if none set, there will be no response) and folders are opened for viewing. Press `h` or `backspace` to return to the parent directory.
 
 ![panel-movement-demo](../../../assets/demo/panel-movement-demo.gif)
 
@@ -169,7 +169,7 @@ To open a file with an editor, press `e`.
 
 To open the current directory with an editor, press `E` (shift+e).
 
-To change the default file editor, you can set the `EDITOR` environment variable in your terminal or you can use the `editor` config option (take priority over `EDITOR` environment variable). To change the default directory editor, you can use the `dir_editor` config option. For example:
+To change the default file editor, you can set the `EDITOR` environment variable in your terminal or you can use the `editor` config option (takes priority over `EDITOR` environment variable). To change the default directory editor, you can use the `dir_editor` config option. For example:
 
 ```bash
 EDITOR=nvim
@@ -210,11 +210,11 @@ Press `>` to open the prompt in SPF mode. ![Prompt-SPF-Mode](../../../assets/tut
 
 In this mode, you can execute these spf commands :
 
-- `split` - Open a new panel at a current file panel's path.
+- `split` - Open a new panel at the current file panel's path.
 - `open <PATH>` - Open a new panel at a specified path.
 - `cd <PATH>` - Change directory of current panel.
 
-In this mode, You can substitute shell environment variables via `${}`, shell commands via `$()` and prefix path with `~` to get substituted to home directory For example
+In this mode, you can substitute shell environment variables via `${}`, shell commands via `$()` and prefix path with `~` to get substituted to home directory. For example
 
 - `cd ${HOME}` or `cd ~/xyz`
 - `open $(dirname $(which bash))`

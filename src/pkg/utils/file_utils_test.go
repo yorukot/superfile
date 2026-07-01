@@ -304,7 +304,7 @@ func TestLoadTomlFileIgnorer(t *testing.T) {
 			assert.True(t, tomlErr.missingFields)
 			assert.Equal(t, expectedVal, tomlVal)
 
-			pref := "config file had issues. Its fixed successfully. Original backed up to : "
+			pref := "config file had issues. It's fixed successfully. Original backed up to : "
 
 			assert.True(t, strings.HasPrefix(tomlErr.userMessage, pref), "Unexpectd error : "+tomlErr.Error())
 
