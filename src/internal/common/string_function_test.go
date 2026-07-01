@@ -130,8 +130,8 @@ func TestIsBufferPrintable(t *testing.T) {
 		{"\x0f(SI)", false},
 		{"\x1b(ESC)", false},
 		{"\x7f(DEL)", false},
-		{"pure ASCII slurm output", true},
-		{"Julia precompile \xe2\x9c\x93 DRL_Sphere", true},
+		{"plain ASCII log output", true},
+		{"status line \xe2\x9c\x93 example module", true},
 		{"box drawing \xe2\x94\x8c\xe2\x94\x80\xe2\x94\x90", true},
 		{"\xe2\x9c", true}, // truncated UTF-8 at buffer end (fixed-size read)
 	}
@@ -146,12 +146,12 @@ func TestIsBufferPrintable(t *testing.T) {
 }
 
 func TestIsTextFile(t *testing.T) {
-	t.Run("UTF-8 Slurm err log content", func(t *testing.T) {
+	t.Run("UTF-8 log with Unicode early in file", func(t *testing.T) {
 		dir := t.TempDir()
-		path := filepath.Join(dir, "18813962_err")
-		content := "  Activating project at `/path/to/project`\n" +
-			"Precompiling DRL_Sphere...\n" +
-			"    \xe2\x9c\x93 DRL_Sphere\n"
+		path := filepath.Join(dir, "stderr.log")
+		content := "  Loading project at `/path/to/project`\n" +
+			"Building example module...\n" +
+			"    \xe2\x9c\x93 example module\n"
 		require.NoError(t, os.WriteFile(path, []byte(content), 0o644))
 
 		isText, err := IsTextFile(path)
