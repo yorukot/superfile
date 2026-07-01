@@ -81,6 +81,12 @@ func ValidateConfig(c *ConfigType) error {
 		return errors.New(LoadConfigError("default_sort_type", "Default sort type must be between 0 and 4."))
 	}
 
+	if c.PreviewScrollBulk < 1 || c.PreviewScrollBulk > 3 {
+		return errors.New(
+			LoadConfigError("preview_scroll_bulk", "Preview scroll bulk must be 1 (whole page), 2 (half page), or 3 (one third)."),
+		)
+	}
+
 	if c.FilePanelNamePercent < FileNameRatioMin || c.FilePanelNamePercent > FileNameRatioMax {
 		return errors.New(
 			LoadConfigError("file_panel_name_percent", "File panel name percent is outside the supported range."),

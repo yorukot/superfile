@@ -86,6 +86,7 @@ type ConfigType struct {
 	// IgnoreMissingFields controls whether warnings about missing TOML fields are suppressed.
 	IgnoreMissingFields   bool `toml:"ignore_missing_fields"    comment:"\nWhether to ignore warnings about missing fields in the config file."`
 	PageScrollSize        int  `toml:"page_scroll_size"         comment:"\nNumber of lines to scroll for PgUp/PgDown keys (0: full page, default behavior)."`
+	PreviewScrollBulk     int  `toml:"preview_scroll_bulk"      comment:"\nFile preview bulk scroll size as a fraction of the preview height: 1 = whole page, 2 = half page, 3 = one third."`
 	FilePanelExtraColumns int  `toml:"file_panel_extra_columns" comment:"\nCount of extra columns in file panel in addition to file name. When option equal 0 then feature is disabled."`
 	FilePanelNamePercent  int  `toml:"file_panel_name_percent"  comment:"\nPercentage of file panel width allocated to file names (25-100). Higher values give more space to names, less to extra columns."`
 
@@ -129,6 +130,13 @@ type HotkeysType struct {
 	ListDown []string `toml:"list_down"`
 	PageUp   []string `toml:"page_up"`
 	PageDown []string `toml:"page_down"`
+
+	PreviewScrollLineUp     []string `toml:"preview_scroll_line_up"     comment:"file preview scroll by one line (browser mode only)"`
+	PreviewScrollLineDown   []string `toml:"preview_scroll_line_down"`
+	PreviewScrollBulkUp     []string `toml:"preview_scroll_bulk_up"     comment:"file preview bulk scroll (see preview_scroll_bulk in config.toml)"`
+	PreviewScrollBulkDown   []string `toml:"preview_scroll_bulk_down"`
+	PreviewScrollTop        []string `toml:"preview_scroll_top"         comment:"file preview scroll to top"`
+	PreviewScrollBottom     []string `toml:"preview_scroll_bottom"      comment:"file preview scroll to bottom"`
 
 	CloseFilePanel         []string `toml:"close_file_panel"          comment:"file panel control"`
 	CreateNewFilePanel     []string `toml:"create_new_file_panel"`

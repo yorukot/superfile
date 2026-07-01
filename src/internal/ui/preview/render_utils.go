@@ -15,14 +15,23 @@ import (
 
 func getBatSyntaxHighlightedContent(
 	itemPath string,
+	startLine int,
 	previewLine int,
 	background string,
 	batCmd string,
-) (string, error) {
+) (string, bool, error) {
 	// --plain: use the plain style without line numbers and decorations
 	// --force-colorization: force colorization for non-interactive shell output
-	// --line-range <:m>: only read from line 1 to line "m"
-	batArgs := []string{itemPath, "--plain", "--force-colorization", "--line-range", fmt.Sprintf(":%d", previewLine)}
+	// --line-range m:n: only read from line m to line n (1-indexed)
+	firstLine := startLine + 1
+	lastLine := startLine + previewLine
+	batArgs := []string{
+		itemPath,
+		"--plain",
+		"--force-colorization",
+		"--line-range",
+		fmt.Sprintf("%d:%d", firstLine, lastLine),
+	}
 
 	// set timeout for the external command execution to 500ms max
 	ctx, cancel := context.WithTimeout(context.Background(), common.DefaultPreviewTimeout)
@@ -33,14 +42,19 @@ func getBatSyntaxHighlightedContent(
 	fileContentBytes, err := cmd.Output()
 	if err != nil {
 		slog.Error("Error render code highlight", "error", err)
-		return "", err
+		return "", false, err
 	}
 
 	fileContent := string(fileContentBytes)
 	if !common.Config.TransparentBackground {
 		fileContent = setBatBackground(fileContent, background)
 	}
-	return fileContent, nil
+	lineCount := strings.Count(fileContent, "\n")
+	if fileContent != "" && !strings.HasSuffix(fileContent, "\n") {
+		lineCount++
+	}
+	hasMore := previewLine > 0 && lineCount >= previewLine
+	return fileContent, hasMore, nil
 }
 
 func setBatBackground(input string, background string) string {
