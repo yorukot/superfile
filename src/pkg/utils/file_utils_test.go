@@ -361,6 +361,21 @@ func TestReadFileContent(t *testing.T) {
 			previewLine:   2,
 			expected:      "line1\nline2\n",
 		},
+		{
+			// tabs line up to tab stops so "0123" starts at the same column
+			name:          "tabs expand to tab stops",
+			content:       []byte("abc\t0123\na\t0123\nabcd\tX"),
+			maxLineLength: 100,
+			previewLine:   5,
+			expected:      "abc 0123\na   0123\nabcd    X\n",
+		},
+		{
+			name:          "tab expanded then truncated",
+			content:       []byte("a\t0123"),
+			maxLineLength: 6,
+			previewLine:   5,
+			expected:      "a   01\n",
+		},
 	}
 
 	for i, tt := range testdata {
