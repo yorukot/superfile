@@ -133,8 +133,13 @@ func (m *Model) ToggleDotFile() {
 	m.UpdateFilePanelsIfNeeded(true)
 }
 
+func (m *Model) ToggleDirsOnly() {
+	m.DisplayDirsOnly = !m.DisplayDirsOnly
+	m.UpdateFilePanelsIfNeeded(true)
+}
+
 func (m *Model) UpdateFilePanelsIfNeeded(force bool) {
 	for i := range m.FilePanels {
-		m.FilePanels[i].UpdateElementsIfNeeded(force, m.DisplayDotFiles)
+		m.FilePanels[i].UpdateElementsIfNeeded(force, m.DisplayDotFiles, m.DisplayDirsOnly)
 	}
 }

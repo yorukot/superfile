@@ -110,6 +110,9 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 	case slices.Contains(common.Hotkeys.ToggleDotFile, msg):
 		m.toggleDotFileController()
 
+	case slices.Contains(common.Hotkeys.ToggleDirsOnly, msg):
+		m.toggleDirsOnlyController()
+
 	case slices.Contains(common.Hotkeys.ToggleFooter, msg):
 		return m.toggleFooterController()
 

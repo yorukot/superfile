@@ -1,6 +1,7 @@
 package filepanel
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 	"time"
@@ -59,10 +60,22 @@ func TestReturnDirElement(t *testing.T) {
 		time.Sleep(creationDelay)
 	}
 
+	// Isolated directory for the dirsOnly + symlink case, kept separate from curTestDir
+	// so it doesn't affect the exact-listing assertions used by the other test cases above.
+	symlinkTestDir := t.TempDir()
+	realDir := filepath.Join(symlinkTestDir, "realDir")
+	utils.SetupDirectories(t, realDir)
+	utils.SetupFilesWithData(t, []byte("0123456789"), filepath.Join(symlinkTestDir, "file.txt"))
+	linkToRealDir := filepath.Join(symlinkTestDir, "linkToRealDir")
+	if err := os.Symlink(realDir, linkToRealDir); err != nil {
+		t.Fatalf("failed to create symlink to directory: %v", err)
+	}
+
 	testdata := []struct {
 		name              string
 		location          string
 		dotFiles          bool
+		dirsOnly          bool
 		sortKind          sortmodel.SortKind
 		reversed          bool
 		searchString      string
@@ -193,6 +206,42 @@ func TestReturnDirElement(t *testing.T) {
 			reversed:          true,
 			expectedElemNames: []string{"file20.txt", "file10.txt", "file2.txt", "file1.txt"},
 		},
+		{
+			name:              "Directories only",
+			location:          curTestDir,
+			dotFiles:          false,
+			dirsOnly:          true,
+			sortKind:          sortmodel.SortByName,
+			reversed:          false,
+			expectedElemNames: []string{"dir1", "dir2", "dirNatural"},
+		},
+		{
+			name:              "Directories only with dotfiles enabled",
+			location:          curTestDir,
+			dotFiles:          true,
+			dirsOnly:          true,
+			sortKind:          sortmodel.SortByName,
+			reversed:          false,
+			expectedElemNames: []string{"dir1", "dir2", "dirNatural"},
+		},
+		{
+			name:              "Directories only with search",
+			location:          curTestDir,
+			dotFiles:          false,
+			dirsOnly:          true,
+			sortKind:          sortmodel.SortByName,
+			searchString:      "dir",
+			expectedElemNames: []string{"dir1", "dir2", "dirNatural"},
+		},
+		{
+			name:              "Directories only excludes symlinks to directories",
+			location:          symlinkTestDir,
+			dotFiles:          false,
+			dirsOnly:          true,
+			sortKind:          sortmodel.SortByName,
+			reversed:          false,
+			expectedElemNames: []string{"realDir"},
+		},
 	}
 
 	for _, tt := range testdata {
@@ -204,9 +253,9 @@ func TestReturnDirElement(t *testing.T) {
 			panel.SearchBar.SetValue(tt.searchString)
 			var res []Element
 			if tt.searchString == "" {
-				res = panel.getDirectoryElements(tt.dotFiles)
+				res = panel.getDirectoryElements(tt.dotFiles, tt.dirsOnly)
 			} else {
-				res = panel.getDirectoryElementsBySearch(tt.dotFiles)
+				res = panel.getDirectoryElementsBySearch(tt.dotFiles, tt.dirsOnly)
 			}
 
 			assert.Len(t, res, len(tt.expectedElemNames))
