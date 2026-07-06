@@ -21,7 +21,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	github.com/urfave/cli/v3 v3.9.0
 	golang.org/x/image v0.38.0
-	golang.org/x/mod v0.36.0
+	golang.org/x/mod v0.37.0
 	golift.io/xtractr v0.3.1
 )
 
@@ -92,5 +92,5 @@ require (
 	github.com/rwcarlsen/goexif v0.0.0-20190401172101-9e8deecbddbd
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	golang.org/x/sys v0.43.0
-	golang.org/x/text v0.38.0
+	golang.org/x/text v0.39.0
 )
