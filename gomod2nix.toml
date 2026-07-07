@@ -290,8 +290,8 @@ schema = 3
     hash = 'sha256-uBIGGSGmWWklRxX6XTOqUECzz165UFY9Y99Ka3pLKAw='
 
   [mod.'golang.org/x/image']
-    version = 'v0.38.0'
-    hash = 'sha256-YxgdnBfazaQiopq2rlJsGR7BbuaQF1hpeoWZhER8v9E='
+    version = 'v0.41.0'
+    hash = 'sha256-kAqfrX6aS2f+j7fyEsk8YZt2b/VG/m3zGWRNbXnlUzA='
 
   [mod.'golang.org/x/mod']
     version = 'v0.36.0'
