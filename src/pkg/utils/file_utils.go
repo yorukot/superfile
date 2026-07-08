@@ -284,8 +284,6 @@ func ReadFileContent(filepath string, maxLineLength int, previewLine int) (strin
 	return resultBuilder.String(), scanner.Err()
 }
 
-const tabWidth = 4
-
 // expandTabs replaces tabs with spaces up to the next tab stop. line should be a
 // single line without newlines.
 func expandTabs(line string) string {
@@ -293,10 +291,12 @@ func expandTabs(line string) string {
 		return line
 	}
 	var sb strings.Builder
+	lastSegmentStart := 0
 	for _, r := range line {
 		if r == '\t' {
-			col := ansi.StringWidth(sb.String())
-			sb.WriteString(strings.Repeat(" ", tabWidth-col%tabWidth))
+			newSegmentSize := ansi.StringWidth(sb.String()[lastSegmentStart:])
+			sb.WriteString(strings.Repeat(" ", TabWidth-newSegmentSize%TabWidth))
+			lastSegmentStart = sb.Len()
 			continue
 		}
 		sb.WriteRune(r)
