@@ -390,6 +390,31 @@ func TestReadFileContent(t *testing.T) {
 	}
 }
 
+func TestExpandTabs(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{
+			name:     "multi-tab grapheme cluster",
+			input:    "a👩‍💻\tX\tY",
+			expected: "a👩‍💻 X   Y",
+		},
+		{
+			name:     "multi-tab ANSI sequence",
+			input:    "\x1b[1ma\tX\tY\x1b[0m",
+			expected: "\x1b[1ma   X   Y\x1b[0m",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, expandTabs(tt.input))
+		})
+	}
+}
+
 func TestReadFileContentBOMHandling(t *testing.T) {
 	testDir := t.TempDir()
 	curTestDir := filepath.Join(testDir, "TestBOMHandling")

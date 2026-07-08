@@ -183,6 +183,8 @@ func TestMakePrintable(t *testing.T) {
 		{"ab\tX", "ab  X"},
 		{"abcd\tX", "abcd    X"},
 		{"a\tb\tc", "a   b   c"},
+		{"a👩‍💻\tX\tY", "a👩‍💻 X   Y"},
+		{"\x1b[1ma\tX\tY\x1b[0m", "\x1b[1ma   X   Y\x1b[0m"},
 		{"abc\n\tX", "abc\n    X"}, // column resets on newline
 		{"(NBSP)\u00a0\u00a0\u00a0\u00a0;", "(NBSP)\u00a0\u00a0\u00a0\u00a0;"},
 		{"\x0b(Vertical Tab)", "(Vertical Tab)"},
