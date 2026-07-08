@@ -361,6 +361,21 @@ func TestReadFileContent(t *testing.T) {
 			previewLine:   2,
 			expected:      "line1\nline2\n",
 		},
+		{
+			// tabs line up to tab stops so "0123" starts at the same column
+			name:          "tabs expand to tab stops",
+			content:       []byte("abc\t0123\na\t0123\nabcd\tX"),
+			maxLineLength: 100,
+			previewLine:   5,
+			expected:      "abc 0123\na   0123\nabcd    X\n",
+		},
+		{
+			name:          "tab expanded then truncated",
+			content:       []byte("a\t0123"),
+			maxLineLength: 6,
+			previewLine:   5,
+			expected:      "a   01\n",
+		},
 	}
 
 	for i, tt := range testdata {
@@ -371,6 +386,31 @@ func TestReadFileContent(t *testing.T) {
 			result, err := ReadFileContent(testFile, tt.maxLineLength, tt.previewLine)
 			require.NoError(t, err)
 			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestExpandTabs(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{
+			name:     "multi-tab grapheme cluster",
+			input:    "a👩‍💻\tX\tY",
+			expected: "a👩‍💻 X   Y",
+		},
+		{
+			name:     "multi-tab ANSI sequence",
+			input:    "\x1b[1ma\tX\tY\x1b[0m",
+			expected: "\x1b[1ma   X   Y\x1b[0m",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, expandTabs(tt.input))
 		})
 	}
 }
