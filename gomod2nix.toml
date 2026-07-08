@@ -318,8 +318,8 @@ schema = 3
     hash = 'sha256-VWIQAU1BJljMdZvz+3WSGRD1bHqZRSCpQHE2WWg5a3M='
 
   [mod.'golift.io/xtractr']
-    version = 'v0.3.2'
-    hash = 'sha256-UjwlN0m62dw+qupT1GSlsB0Z7OpV5HOtfjyPnS8nyFI='
+    version = 'v0.4.0'
+    hash = 'sha256-6851sqnPHuL3Zl822zf1VkPHXwIjZqvbVG1IS3YrY2w='
 
   [mod.'gopkg.in/yaml.v3']
     version = 'v3.0.1'
