@@ -22,7 +22,7 @@ require (
 	github.com/urfave/cli/v3 v3.9.0
 	golang.org/x/image v0.41.0
 	golang.org/x/mod v0.37.0
-	golift.io/xtractr v0.3.2
+	golift.io/xtractr v0.4.0
 )
 
 require github.com/charmbracelet/lipgloss v0.10.0 // indirect
