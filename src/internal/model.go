@@ -443,13 +443,25 @@ func (m *model) applyShellCommandAction(shellCommand string) {
 	}
 }
 
+// Create a new file panel and move focus onto it. All panel-creation goes
+// through here, otherwise the sidebar (or processbar/metadata) can stay focused
+// next to the new panel and both react to keys. See #1497.
+func (m *model) createNewFilePanel(location string) (tea.Cmd, error) {
+	cmd, err := m.fileModel.CreateNewFilePanel(location)
+	if err != nil {
+		return cmd, err
+	}
+	m.focusPanel = nonePanelFocus
+	return cmd, nil
+}
+
 func (m *model) splitPanel() (tea.Cmd, error) {
-	return m.fileModel.CreateNewFilePanel(m.getFocusedFilePanel().Location)
+	return m.createNewFilePanel(m.getFocusedFilePanel().Location)
 }
 
 func (m *model) createNewFilePanelRelativeToCurrent(path string) (tea.Cmd, error) {
 	currentDir := m.getFocusedFilePanel().Location
-	return m.fileModel.CreateNewFilePanel(utils.ResolveAbsPath(currentDir, path))
+	return m.createNewFilePanel(utils.ResolveAbsPath(currentDir, path))
 }
 
 // simulates a 'cd' action
