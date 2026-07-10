@@ -45,10 +45,6 @@
   <content_rating type="oars-1.1" />
 
   <screenshots>
-    <screenshot>
-      <image>https://superfile.dev/og.png</image>
-      <caption>superfile branding</caption>
-    </screenshot>
     <screenshot type="default">
       <image>https://raw.githubusercontent.com/yorukot/superfile/main/website/src/assets/demo.png</image>
       <caption>superfile terminal file manager</caption>
