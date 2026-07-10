@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.yorukot.superfile</id>
+
+  <name>superfile</name>
+  <summary>Pretty fancy and modern terminal file manager</summary>
+
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+
+  <description>
+    <p>
+      superfile is a fancy, modern terminal file manager built with Go and Bubble Tea.
+      It combines a polished, multi-panel interface with the speed and power of terminal tools,
+      making it easy to browse, preview, and manage files without leaving the command line.
+    </p>
+  </description>
+
+  <url type="homepage">https://superfile.dev/</url>
+  <url type="bugtracker">https://github.com/yorukot/superfile/issues</url>
+  <url type="vcs-browser">https://github.com/yorukot/superfile</url>
+
+  <developer id="io.github.yorukot">
+    <name>yorukot</name>
+  </developer>
+
+  <launchable type="desktop-id">spf.desktop</launchable>
+
+  <provides>
+    <binary>spf</binary>
+  </provides>
+
+  <categories>
+    <category>System</category>
+    <category>FileManager</category>
+  </categories>
+
+  <keywords>
+    <keyword>file</keyword>
+    <keyword>manager</keyword>
+    <keyword>terminal</keyword>
+    <keyword>explorer</keyword>
+  </keywords>
+
+  <content_rating type="oars-1.1" />
+
+  <screenshots>
+    <screenshot>
+      <image>https://superfile.dev/og.png</image>
+      <caption>superfile branding</caption>
+    </screenshot>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/yorukot/superfile/main/website/src/assets/demo.png</image>
+      <caption>superfile terminal file manager</caption>
+    </screenshot>
+  </screenshots>
+</component>
