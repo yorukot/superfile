@@ -63,7 +63,7 @@ func (m *model) getCreateCmd() tea.Cmd {
 	items := []string{m.typingModal.textInput.Value()}
 
 	reqID := m.nextIoReqCnt()
-	slog.Debug("Submitting delete request", "id", reqID, "items cnt", len(items))
+	slog.Debug("Submitting create request", "id", reqID, "items cnt", len(items))
 	return func() tea.Msg {
 		return m.createOperation(&m.processBarModel, items, reqID)
 	}
@@ -76,7 +76,7 @@ func (m *model) createOperation(processBarModel *processbar.Model, items []strin
 	p, err := processBarModel.SendAddProcessMsg(filepath.Base(items[0]), processbar.OpCreate, len(items), true)
 	if err != nil {
 		slog.Error("Cannot spawn a new process", "error", err)
-		return NewDeleteOperationMsg(processbar.Failed, reqID)
+		return NewCreateOperationMsg(processbar.Failed, reqID)
 	}
 	finalizer := func(state processbar.ProcessState, reqID int) tea.Msg {
 		return NewCreateOperationMsg(state, reqID)
