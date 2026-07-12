@@ -21,7 +21,6 @@ func (m *model) cancelTypingModal() {
 func (m *model) closeTypingModal(process processbar.Process,
 	processBarModel *processbar.Model) {
 	m.typingModal.errorMesssage = ""
-	m.cancelTypingModal()
 	markProcessDone(process, processBarModel)
 }
 
@@ -64,6 +63,7 @@ func (m *model) getCreateCmd() tea.Cmd {
 
 	reqID := m.nextIoReqCnt()
 	slog.Debug("Submitting create request", "id", reqID, "items cnt", len(items))
+	m.cancelTypingModal()
 	return func() tea.Msg {
 		return m.createOperation(&m.processBarModel, items, reqID)
 	}
