@@ -297,7 +297,7 @@ func (m *model) handleKeyInput(msg tea.KeyPressMsg) tea.Cmd {
 	case m.spfError.IsOpen():
 		cmd = m.spfErrorModelOpenKey(msg.String())
 	case m.typingModal.open:
-		m.typingModalOpenKey(msg.String())
+		cmd = m.typingModalOpenKey(msg.String())
 	case m.promptModal.IsOpen():
 		// Ignore keypress. It will be handled in Update call via
 		// updateFilePanelState

@@ -100,7 +100,12 @@ func TestFileCreation(t *testing.T) {
 
 		m.typingModal.textInput.SetValue(tt.fileName)
 
-		TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.ConfirmTyping[0]))
+		cmd := TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.ConfirmTyping[0]))
+		if v, ok := cmd().(tea.BatchMsg); ok {
+			for _, cmdExec := range v {
+				cmdExec()
+			}
+		}
 
 		if tt.expectedError {
 			assert.NotEmpty(t, m.typingModal.errorMesssage, "expected an error for input: %q", tt.fileName)
