@@ -13,9 +13,11 @@ require (
 	github.com/charmbracelet/x/ansi v0.11.7
 	github.com/fatih/color v1.19.0
 	github.com/fvbommel/sortorder v1.1.0
+	github.com/kevinburke/ssh_config v1.6.0
 	github.com/lazysegtree/go-zoxide v0.1.0
 	github.com/lithammer/shortuuid v3.0.0+incompatible
 	github.com/muesli/termenv v0.16.0
+	github.com/pkg/sftp v1.13.10
 	github.com/reinhrst/fzf-lib v0.9.0
 	github.com/shirou/gopsutil/v4 v4.26.5
 	github.com/stretchr/testify v1.11.1
