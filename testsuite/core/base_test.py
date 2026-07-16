@@ -17,6 +17,12 @@ class BaseTest(ABC):
         self.env = test_env
         self.logger = logging.getLogger()
 
+    CASES: List[str] = []
+
+    @classmethod
+    def requires_spf_manager(cls) -> bool:
+        return True
+
     @abstractmethod
     def setup(self) -> None:
         """Set up the required things for test
@@ -153,4 +159,3 @@ class GenericTestImpl(BaseTest):
     
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}"
-

@@ -39,6 +39,8 @@ def main():
                         help='Override the default spf executable path(../bin/spf) under test')
     parser.add_argument('-t', '--tests', nargs='+',
                         help='Specify one or more than one space separated testcases to be run')
+    parser.add_argument('--case', nargs='+',
+                        help='Run one or more named testsuite cases such as ssh_quick_connect')
     # Parse arguments
     args = parser.parse_args()
     if args.close_wait_time is not None:
@@ -55,7 +57,7 @@ def main():
     # Resolve any symlinks, and make it absolute
     spf_path = spf_path.resolve()
 
-    success = run_tests(spf_path, only_run_tests=args.tests)
+    success = run_tests(spf_path, only_run_tests=args.tests, only_run_cases=args.case)
     if success:
         sys.exit(0)
     else:
