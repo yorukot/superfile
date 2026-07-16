@@ -46,6 +46,10 @@ func LoadConfigFile() {
 		}
 	}
 
+	if _, err := SanitizeSSHProfileSecrets(variable.ConfigFile, &Config); err != nil {
+		utils.PrintlnAndExit(err.Error())
+	}
+
 	// Even if there is a missing field, we want to validate fields that are present
 	if err := ValidateConfig(&Config); err != nil {
 		// If config is incorrect we cannot continue. We need to exit
@@ -91,7 +95,11 @@ func ValidateConfig(c *ConfigType) error {
 		return errors.New(LoadConfigError("border_top", "Border character must be exactly one cell wide."))
 	}
 
-	return validateBorders(c)
+	if err := validateBorders(c); err != nil {
+		return err
+	}
+
+	return validateSSHConfigSection(c.SSH)
 }
 
 func validateBorders(c *ConfigType) error {
@@ -360,7 +368,7 @@ func PopulateGlobalConfigs() error {
 }
 
 // No validation required
-func populateFromFile(filePath string, target interface{}) error {
+func populateFromFile(filePath string, target any) error {
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return err
