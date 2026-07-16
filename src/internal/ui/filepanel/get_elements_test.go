@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/yorukot/superfile/src/pkg/utils"
 
@@ -203,11 +204,13 @@ func TestReturnDirElement(t *testing.T) {
 			panel.SortReversed = tt.reversed
 			panel.SearchBar.SetValue(tt.searchString)
 			var res []Element
+			var err error
 			if tt.searchString == "" {
-				res = panel.getDirectoryElements(tt.dotFiles)
+				res, err = panel.getDirectoryElements(tt.dotFiles)
 			} else {
-				res = panel.getDirectoryElementsBySearch(tt.dotFiles)
+				res, err = panel.getDirectoryElementsBySearch(tt.dotFiles)
 			}
+			require.NoError(t, err)
 
 			assert.Len(t, res, len(tt.expectedElemNames))
 			actualNames := []string{}

@@ -6,6 +6,7 @@ import (
 	"slices"
 
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/filesystem"
 	"github.com/yorukot/superfile/src/internal/ui/filemodel"
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 	"github.com/yorukot/superfile/src/internal/ui/spferror"
@@ -108,7 +109,7 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 		m.pinnedDirectory()
 
 	case slices.Contains(common.Hotkeys.ToggleDotFile, msg):
-		m.toggleDotFileController()
+		return m.toggleDotFileController()
 
 	case slices.Contains(common.Hotkeys.ToggleFooter, msg):
 		return m.toggleFooterController()
@@ -120,11 +121,27 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 		return m.getCompressSelectedFilesCmd()
 
 	case slices.Contains(common.Hotkeys.OpenCommandLine, msg):
+		if m.getFocusedFilePanel().CurrentLocation().Provider != filesystem.ProviderLocal {
+			return m.unsupportedRemoteOperationCmd(
+				m.getFocusedFilePanel().CurrentLocation(),
+				filesystem.OperationRemoteShell,
+			)
+		}
 		m.promptModal.Open(true)
 	case slices.Contains(common.Hotkeys.OpenSPFPrompt, msg):
 		m.promptModal.Open(false)
 	case slices.Contains(common.Hotkeys.OpenZoxide, msg):
+		if m.getFocusedFilePanel().CurrentLocation().Provider != filesystem.ProviderLocal {
+			return m.unsupportedRemoteOperationCmd(
+				m.getFocusedFilePanel().CurrentLocation(),
+				filesystem.OperationZoxide,
+			)
+		}
 		return m.zoxideModal.Open()
+	case slices.Contains(common.Hotkeys.OpenQuickConnect, msg):
+		if err := m.quickConnect.Open(&common.Config); err != nil {
+			slog.Error("failed to open SSH/SFTP quick-connect", "error", err)
+		}
 
 	case slices.Contains(common.Hotkeys.OpenHelpMenu, msg):
 		m.helpMenu.Open()
@@ -207,9 +224,9 @@ func (m *model) filePanelSelectModeKey(msg string) tea.Cmd {
 func (m *model) filePanelNormalModeKey(msg string) tea.Cmd {
 	switch {
 	case slices.Contains(common.Hotkeys.Confirm, msg):
-		m.enterPanel()
+		return m.enterPanel()
 	case slices.Contains(common.Hotkeys.ParentDirectory, msg):
-		m.parentDirectory()
+		return m.parentDirectory()
 	case slices.Contains(common.Hotkeys.DeleteItems, msg):
 		return m.getDeleteTriggerCmd(false)
 	case slices.Contains(common.Hotkeys.PermanentlyDeleteItems, msg):

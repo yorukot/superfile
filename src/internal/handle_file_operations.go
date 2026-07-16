@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -12,6 +13,7 @@ import (
 	"time"
 
 	variable "github.com/yorukot/superfile/src/config"
+	"github.com/yorukot/superfile/src/internal/filesystem"
 	"github.com/yorukot/superfile/src/internal/trash"
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 	"github.com/yorukot/superfile/src/internal/ui/spferror"
@@ -69,6 +71,7 @@ func (m *model) panelCreateNewFile() {
 	panel := m.getFocusedFilePanel()
 
 	m.typingModal.location = panel.Location
+	m.typingModal.paneLocation = panel.CurrentLocation()
 	m.typingModal.open = true
 	m.typingModal.textInput = common.GenerateNewFileTextInput()
 	m.firstTextInput = true
@@ -82,15 +85,26 @@ func (m *model) IsRenamingConflicting() bool {
 		slog.Error("IsRenamingConflicting() being called on empty panel")
 		return false
 	}
-	oldPath := panel.GetFocusedItem().Location
-	newPath := filepath.Join(panel.Location, panel.Rename.Value())
+	location := panel.CurrentLocation()
+	itemLocation := elementLocation(location, panel.GetFocusedItem())
+	newPath := pathJoinRaw(location.Path, panel.Rename.Value())
 
-	if oldPath == newPath {
+	if itemLocation.Path.String() == newPath.String() {
 		return false
 	}
 
-	_, err := os.Stat(newPath)
-	return err == nil
+	session, err := m.ResolveSession(context.Background(), location)
+	if err != nil {
+		slog.Error("IsRenamingConflicting session resolution failed", "error", err)
+		return false
+	}
+	defer session.Close()
+	conflicts, err := sessionPathExists(context.Background(), session, newPath)
+	if err != nil {
+		slog.Error("IsRenamingConflicting stat failed", "error", err)
+		return false
+	}
+	return conflicts
 }
 
 // TODO: Remove channel messaging and use tea.Cmd
@@ -146,20 +160,25 @@ func (m *model) getDeleteCmd(permDelete bool) tea.Cmd {
 	if panel.Empty() {
 		return nil
 	}
-
-	var items []string
-	if panel.PanelMode == filepanel.SelectMode {
-		items = panel.GetSelectedLocationsSortedAsVisible()
-	} else {
-		items = []string{panel.GetFocusedItem().Location}
-	}
-
-	useTrash := m.hasTrash && trash.Available(panel.Location) && !permDelete
+	items := focusedItemLocations(panel)
+	useTrash := panel.CurrentLocation().Provider == filesystem.ProviderLocal &&
+		m.hasTrash && trash.Available(panel.Location) &&
+		!permDelete
 
 	reqID := m.nextIoReqCnt()
 	slog.Debug("Submitting delete request", "id", reqID, "items cnt", len(items))
 	return func() tea.Msg {
-		return m.deleteOperation(&m.processBarModel, items, useTrash, reqID)
+		if len(items) == 0 {
+			return NewDeleteOperationMsg(processbar.Cancelled, reqID)
+		}
+		if items[0].Provider == filesystem.ProviderLocal {
+			paths := make([]string, len(items))
+			for i, item := range items {
+				paths[i] = item.Path.String()
+			}
+			return m.deleteOperation(&m.processBarModel, paths, useTrash, reqID)
+		}
+		return m.deleteProviderOperation(&m.processBarModel, items, reqID)
 	}
 }
 
@@ -178,6 +197,48 @@ func (m *model) deleteOperation(processBarModel *processbar.Model, items []strin
 	return msg
 }
 
+func (m *model) deleteProviderOperation(
+	processBarModel *processbar.Model,
+	items []filesystem.Location,
+	reqID int,
+) tea.Msg {
+	if len(items) == 0 {
+		return NewDeleteOperationMsg(processbar.Cancelled, reqID)
+	}
+	p, err := processBarModel.SendAddProcessMsg(pathBase(items[0].Path), processbar.OpDelete, len(items), true)
+	if err != nil {
+		slog.Error("Cannot spawn a new remote delete process", "error", err)
+		return NewDeleteOperationMsg(processbar.Failed, reqID)
+	}
+	session, err := m.ResolveSession(context.Background(), items[0])
+	if err != nil {
+		p.State = processbar.Failed
+		p.ErrorMsg = err.Error()
+		markProcessDone(p, processBarModel)
+		return NewDeleteOperationMsg(processbar.Failed, reqID)
+	}
+	defer session.Close()
+	for _, item := range items {
+		if err := session.Delete(
+			context.Background(),
+			item.Path,
+			filesystem.DeleteOptions{Recursive: true},
+		); err != nil {
+			p.State = processbar.Failed
+			p.ErrorMsg = formatFileError(item.Path.String(), err)
+			p.DoneTime = time.Now()
+			_ = processBarModel.SendUpdateProcessMsg(p, true)
+			return NewDeleteOperationMsg(processbar.Failed, reqID)
+		}
+		p.CurrentFile = pathBase(item.Path)
+		p.Done++
+		processBarModel.TrySendingUpdateProcessMsg(p)
+	}
+	p.State = processbar.Successful
+	markProcessDone(p, processBarModel)
+	return NewDeleteOperationMsg(processbar.Successful, reqID)
+}
+
 func makeDeleteProcessor(process processbar.Process,
 	processBarModel *processbar.Model,
 	useTrash bool) processbar.FileListProcessor {
@@ -187,7 +248,7 @@ func makeDeleteProcessor(process processbar.Process,
 			markProcessDone(process, processBarModel)
 			return process, notProcessed
 		}
-		deleteFunc := os.RemoveAll
+		deleteFunc := deleteElement
 		if useTrash {
 			deleteFunc = func(item string) error {
 				_, err := trash.Move(item)
@@ -231,7 +292,8 @@ func (m *model) getDeleteTriggerCmd(deletePermanent bool) tea.Cmd {
 		content := common.TrashWarnContent
 		action := notify.DeleteAction
 
-		if !m.hasTrash || !trash.Available(panel.Location) || deletePermanent {
+		if panel.CurrentLocation().Provider != filesystem.ProviderLocal ||
+			!m.hasTrash || !trash.Available(panel.Location) || deletePermanent {
 			title = common.PermanentDeleteWarnTitle
 			content = common.PermanentDeleteWarnContent
 			action = notify.PermanentDeleteAction
@@ -248,9 +310,10 @@ func (m *model) copySingleItem(cut bool) {
 	if panel.Empty() {
 		return
 	}
+	itemLocation := elementLocation(panel.CurrentLocation(), panel.GetFocusedItem())
 	slog.Debug("handle_file_operations.copySingleItem", "cut", cut,
-		"panel location", panel.GetFocusedItem().Location)
-	m.clipboard.Add(panel.GetFocusedItem().Location)
+		"panel location", itemLocation.Path.String())
+	m.clipboard.AddLocation(itemLocation)
 }
 
 // Copy all selected file or directory's paths to the clipboard
@@ -260,47 +323,71 @@ func (m *model) copyMultipleItem(cut bool) {
 	if panel.SelectedCount() == 0 {
 		return
 	}
-	items := panel.GetSelectedLocationsSortedAsVisible()
+	items := focusedItemLocations(panel)
 	slog.Debug("handle_file_operations.copyMultipleItem", "cut", cut,
 		"panel selected files", items)
-	m.clipboard.SetItems(items)
+	m.clipboard.SetLocations(items)
 }
 
 func (m *model) getPasteItemCmd() tea.Cmd {
-	copyItems := m.clipboard.PruneInaccessibleItemsAndGet()
+	copyItems := m.clipboard.PruneInaccessibleLocationsAndGet()
 	cut := m.clipboard.IsCut()
 	if len(copyItems) == 0 {
 		return nil
 	}
 
 	reqID := m.nextIoReqCnt()
-	panelLocation := m.getFocusedFilePanel().Location
+	panelLocation := m.getFocusedFilePanel().CurrentLocation()
 
-	slog.Debug("Submitting pasteItems request", "id", reqID, "items cnt", len(copyItems), "dest", panelLocation)
+	slog.Debug(
+		"Submitting pasteItems request",
+		"id",
+		reqID,
+		"items cnt",
+		len(copyItems),
+		"dest",
+		panelLocation.Path.String(),
+	)
 	return func() tea.Msg {
 		err := validatePasteOperation(panelLocation, copyItems, cut)
 		if err != nil {
-			return NewNotifyModalMsg(notify.New(true, "Invalid paste location", err.Error(), notify.NoAction),
-				reqID)
+			title := "Invalid paste location"
+			if errors.Is(err, filesystem.ErrUnsupported) {
+				title = "Unsupported remote operation"
+			}
+			return NewNotifyModalMsg(notify.New(true, title, err.Error(), notify.NoAction), reqID)
 		}
-		return m.executePasteOperation(&m.processBarModel, panelLocation, copyItems, cut, reqID)
+		allLocal := panelLocation.Provider == filesystem.ProviderLocal
+		paths := make([]string, len(copyItems))
+		for i, item := range copyItems {
+			paths[i] = item.Path.String()
+			allLocal = allLocal && item.Provider == filesystem.ProviderLocal
+		}
+		if allLocal {
+			return m.executePasteOperation(&m.processBarModel, panelLocation.Path.String(), paths, cut, reqID)
+		}
+		return m.executeProviderPasteOperation(&m.processBarModel, panelLocation, copyItems, cut, reqID)
 	}
 }
 
-func validatePasteOperation(panelLocation string, copyItems []string, cut bool) error {
-	// Check if trying to paste into source or subdirectory for both cut and copy operations
-	for _, srcPath := range copyItems {
-		// Check if trying to cut and paste into the same directory - this would be a no-op
-		// and could potentially cause issues, so we prevent it
-		if filepath.Dir(srcPath) == panelLocation && cut {
-			return fmt.Errorf("cannot paste into parent directory of source, srcPath : %v, panelLocation : %v",
-				srcPath, panelLocation)
+func validatePasteOperation(destination filesystem.Location, copyItems []filesystem.Location, cut bool) error {
+	for _, source := range copyItems {
+		if err := filesystem.ValidateTransferTopology(source, destination); err != nil {
+			if errors.Is(err, filesystem.ErrUnsupported) && source.Provider != filesystem.ProviderLocal {
+				return errors.New(
+					remoteUnsupportedOperationText(source.Provider, filesystem.OperationRemoteCrossSessionMove),
+				)
+			}
+			return err
 		}
-		if cut && srcPath == panelLocation {
+		if cut && sameParentDirectory(source, destination) {
+			return fmt.Errorf("cannot paste into parent directory of source, srcPath : %v, panelLocation : %v",
+				source.Path.String(), destination.Path.String())
+		}
+		if cut && source.Path.String() == destination.Path.String() {
 			return errors.New("cannot paste a directory into itself")
 		}
-
-		if isAncestor(srcPath, panelLocation) {
+		if isAncestorLocation(source, destination) {
 			return fmt.Errorf("cannot %s and paste a directory into itself or its subdirectory",
 				getCopyOrCutOperationName(cut))
 		}
@@ -384,6 +471,52 @@ func (m *model) executePasteOperation(processBarModel *processbar.Model,
 	return msg
 }
 
+func (m *model) executeProviderPasteOperation(processBarModel *processbar.Model,
+	destination filesystem.Location, items []filesystem.Location, cut bool, reqID int,
+) tea.Msg {
+	if len(items) == 0 {
+		return NewPasteOperationMsg(processbar.Cancelled, reqID)
+	}
+	engine := filesystem.NewTransferEngine(m)
+	operation := filesystem.OperationCopy
+	if cut {
+		operation = filesystem.OperationCutMove
+	}
+	for _, source := range items {
+		targetSession, err := m.ResolveSession(context.Background(), destination)
+		if err != nil {
+			slog.Error("Cannot resolve destination session for provider paste", "error", err)
+			return NewPasteOperationMsg(processbar.Failed, reqID)
+		}
+		target := locationWithPath(destination, pathJoin(destination.Path, pathBase(source.Path)))
+		target, err = renameLocationIfDuplicate(context.Background(), targetSession, target)
+		_ = targetSession.Close()
+		if err != nil {
+			slog.Error("Cannot resolve duplicate destination for provider paste", "error", err)
+			return NewPasteOperationMsg(processbar.Failed, reqID)
+		}
+		transfer, err := engine.Start(context.Background(), filesystem.TransferRequest{
+			Operation:   operation,
+			Source:      source,
+			Destination: target,
+		})
+		if err != nil {
+			slog.Error("Cannot start provider paste transfer", "error", err)
+			return NewPasteOperationMsg(processbar.Failed, reqID)
+		}
+		if _, err = filesystem.TrackTransferProcess(context.Background(), processBarModel, transfer); err != nil {
+			slog.Error("Cannot track provider paste transfer", "error", err)
+			_ = transfer.Cancel(context.Background())
+			return NewPasteOperationMsg(processbar.Failed, reqID)
+		}
+		if err = transfer.Wait(context.Background()); err != nil {
+			slog.Error("Provider paste transfer failed", "error", err)
+			return NewPasteOperationMsg(processbar.Failed, reqID)
+		}
+	}
+	return NewPasteOperationMsg(processbar.Successful, reqID)
+}
+
 func getTotalFilesCnt(copyItems []string) int {
 	totalFiles := 0
 	for _, folderPath := range copyItems {
@@ -415,6 +548,9 @@ func (m *model) getExtractFileCmd() tea.Cmd {
 	panel := m.getFocusedFilePanel()
 	if panel.Empty() {
 		return nil
+	}
+	if panel.CurrentLocation().Provider != filesystem.ProviderLocal {
+		return m.unsupportedRemoteOperationCmd(panel.CurrentLocation(), filesystem.OperationExtract)
 	}
 
 	item := panel.GetFocusedItem().Location
@@ -458,6 +594,9 @@ func (m *model) getCompressSelectedFilesCmd() tea.Cmd {
 
 	if panel.Empty() {
 		return nil
+	}
+	if panel.CurrentLocation().Provider != filesystem.ProviderLocal {
+		return m.unsupportedRemoteOperationCmd(panel.CurrentLocation(), filesystem.OperationCompress)
 	}
 	var filesToCompress []string
 	var firstFile string
@@ -504,6 +643,9 @@ func (m *model) openFileWithEditor() tea.Cmd {
 	if panel.Empty() {
 		return nil
 	}
+	if panel.CurrentLocation().Provider != filesystem.ProviderLocal {
+		return m.unsupportedRemoteOperationCmd(panel.CurrentLocation(), filesystem.OperationOpenWith)
+	}
 
 	if variable.ChooserFile != "" {
 		err := m.chooserFileWriteAndQuit(panel.GetFocusedItem().Location)
@@ -544,6 +686,9 @@ func (m *model) openFileWithEditor() tea.Cmd {
 
 // Open directory with default editor
 func (m *model) openDirectoryWithEditor() tea.Cmd {
+	if m.getFocusedFilePanel().CurrentLocation().Provider != filesystem.ProviderLocal {
+		return m.unsupportedRemoteOperationCmd(m.getFocusedFilePanel().CurrentLocation(), filesystem.OperationOpenWith)
+	}
 	if variable.ChooserFile != "" {
 		err := m.chooserFileWriteAndQuit(m.getFocusedFilePanel().Location)
 		if err == nil {

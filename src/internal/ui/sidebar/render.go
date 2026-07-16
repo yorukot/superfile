@@ -2,6 +2,7 @@ package sidebar
 
 import (
 	"log/slog"
+	"strings"
 
 	"github.com/yorukot/superfile/src/internal/ui"
 
@@ -11,7 +12,7 @@ import (
 )
 
 // Render returns the rendered sidebar string.
-func (s *Model) Render(sidebarFocused bool, currentFilePanelLocation string) string {
+func (s *Model) Render(sidebarFocused bool, currentFilePanelLocation string, currentRemoteStatus string) string {
 	if s.Disabled() {
 		return ""
 	}
@@ -19,6 +20,14 @@ func (s *Model) Render(sidebarFocused bool, currentFilePanelLocation string) str
 	r := ui.SidebarRenderer(s.height, s.width, sidebarFocused)
 
 	r.AddLines(common.SideBarSuperfileTitle, "")
+	if currentRemoteStatus != "" {
+		statusParts := strings.Fields(currentRemoteStatus)
+		r.AddLines(common.SidebarTitleStyle.Render(" Remote"))
+		for _, statusPart := range statusParts {
+			r.AddLines(common.SidebarStyle.Render(" " + statusPart))
+		}
+		r.AddLines("")
+	}
 
 	if s.searchBar.Focused() || s.searchBar.Value() != "" || sidebarFocused {
 		r.AddLines(s.searchBar.View())

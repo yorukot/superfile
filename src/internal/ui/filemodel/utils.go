@@ -11,10 +11,13 @@ func (m *Model) GetFocusedFilePanel() *filepanel.Model {
 }
 
 func New(firstPanelPaths []string, toggleDotFile bool) Model {
-	return Model{
+	model := Model{
 		FilePanels:       filepanel.FilePanelSlice(firstPanelPaths),
 		FilePreview:      preview.New(),
 		SinglePanelWidth: common.DefaultFilePanelWidth,
 		DisplayDotFiles:  toggleDotFile,
+		Sessions:         NewSessionRegistry(),
 	}
+	model.SyncPaneSessionLocations()
+	return model
 }

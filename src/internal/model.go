@@ -12,6 +12,7 @@ import (
 
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/filesystem"
 	"github.com/yorukot/superfile/src/pkg/utils"
 
 	"charm.land/bubbles/v2/textinput"
@@ -19,10 +20,12 @@ import (
 	"charm.land/lipgloss/v2"
 	"github.com/barasher/go-exiftool"
 
+	"github.com/yorukot/superfile/src/internal/ui/filemodel"
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/ui/preview"
+	"github.com/yorukot/superfile/src/internal/ui/quickconnect"
 
 	variable "github.com/yorukot/superfile/src/config"
 	zoxideui "github.com/yorukot/superfile/src/internal/ui/zoxide"
@@ -63,7 +66,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	slog.Debug("model.Update() called", "msgType", reflect.TypeOf(msg))
 
 	var sidebarCmd, inputCmd, updateCmd, panelCmd,
-		metadataCmd, filePreviewCmd, helpMenuCmd, resizeCmd tea.Cmd
+		metadataCmd, filePreviewCmd, helpMenuCmd, resizeCmd, panelRefreshCmd tea.Cmd
 
 	// These are above the key message handing to prevent issues with firstKeyInput
 	// if someone presses `/` to focus to searchBar, searchBar will otherwise
@@ -91,6 +94,8 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case preview.UpdateMsg:
 		slog.Debug("Got ModelUpdate message", "id", msg.GetReqID())
 		updateCmd = m.fileModel.UpdatePreviewPanel(msg)
+	case filemodel.PanelUpdateMsg:
+		m.fileModel.ApplyPanelUpdate(msg)
 	case ModelUpdateMessage:
 		slog.Debug("Got ModelUpdate message", "id", msg.GetReqID())
 		updateCmd = msg.ApplyToModel(m)
@@ -102,13 +107,13 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// This is needed for blink, etc to work
 	panelCmd = m.updateComponentState(msg)
 
-	m.updateModelStateAfterMsg()
+	panelRefreshCmd = m.updateModelStateAfterMsg()
 	filePreviewCmd = m.fileModel.GetFilePreviewCmd(false)
 
 	metadataCmd = m.getMetadataCmd()
 
 	return m, tea.Batch(sidebarCmd, helpMenuCmd, inputCmd, updateCmd,
-		panelCmd, metadataCmd, filePreviewCmd, resizeCmd)
+		panelCmd, metadataCmd, filePreviewCmd, resizeCmd, panelRefreshCmd)
 }
 
 func (m *model) handleMouseMsg(msg tea.MouseMsg) {
@@ -120,9 +125,12 @@ func (m *model) handleMouseMsg(msg tea.MouseMsg) {
 	}
 }
 
-func (m *model) updateModelStateAfterMsg() {
+func (m *model) updateModelStateAfterMsg() tea.Cmd {
 	m.sidebarModel.UpdateDirectories()
-	m.fileModel.UpdateFilePanelsIfNeeded(false)
+	m.fileModel.UpdateLocalFilePanelsIfNeeded(false)
+	remotePanelCmd := m.fileModel.GetRemoteFilePanelUpdateCmd(false)
+	m.fileModel.SyncPaneSessionLocations()
+	m.sessionRegistry = m.fileModel.Sessions
 	// TODO: Move to utility
 	if m.focusPanel != metadataFocus {
 		m.fileMetaData.ResetRender()
@@ -132,6 +140,7 @@ func (m *model) updateModelStateAfterMsg() {
 	if !m.firstLoadingComplete {
 		m.firstLoadingComplete = true
 	}
+	return remotePanelCmd
 }
 
 // Note : Maybe we should not trigger metadata fetch for updates
@@ -147,6 +156,16 @@ func (m *model) getMetadataCmd() tea.Cmd {
 		return nil
 	}
 	selectedItem := m.getFocusedFilePanel().GetFocusedItem()
+	if m.getFocusedFilePanel().CurrentLocation().Provider != filesystem.ProviderLocal {
+		m.fileMetaData.SetMetadataLocationAndFocused(selectedItem.Location, m.focusPanel == metadataFocus)
+		m.fileMetaData.SetInfoMsg(
+			remoteUnsupportedOperationText(
+				m.getFocusedFilePanel().CurrentLocation().Provider,
+				filesystem.OperationMetadata,
+			),
+		)
+		return nil
+	}
 	metadataFocused := m.focusPanel == metadataFocus
 	// Note : This will cause metadata not being refreshed there is any file update events.
 	// We can have a cache with TTL or watch filesystem changes to fix this
@@ -213,6 +232,7 @@ func (m *model) updateComponentDimensions() tea.Cmd {
 	m.setHelpMenuSize()
 	m.setPromptModelSize()
 	m.setZoxideModelSize()
+	m.setQuickConnectModelSize()
 	m.setFooterComponentSize()
 
 	// File preview panel requires explicit height update, unlike sidebar/file panels
@@ -257,6 +277,10 @@ func (m *model) setZoxideModelSize() {
 
 	// Scale zoxide model's width - 50% of total width
 	m.zoxideModal.SetWidth(m.fullWidth / 2) //nolint:mnd // modal uses half width for layout
+}
+
+func (m *model) setQuickConnectModelSize() {
+	m.quickConnect.SetDimensions(m.fullWidth/common.CenterDivisor, m.fullHeight/common.CenterDivisor)
 }
 
 func (m *model) setFooterComponentSize() {
@@ -305,6 +329,8 @@ func (m *model) handleKeyInput(msg tea.KeyPressMsg) tea.Cmd {
 	case m.zoxideModal.IsOpen():
 		// Ignore keypress. It will be handled in Update call via
 		// updateFilePanelState
+	case m.quickConnect.IsOpen():
+		cmd = nil
 
 	// Handles all warn models except the warn model for confirming to quit
 	case m.notifyModel.IsOpen():
@@ -380,8 +406,42 @@ func (m *model) updateComponentState(msg tea.Msg) tea.Cmd {
 	case m.zoxideModal.IsOpen():
 		action, cmd = m.zoxideModal.HandleUpdate(msg)
 		cmd = tea.Batch(cmd, m.applyZoxideModalAction(action))
+	case m.quickConnect.IsOpen():
+		quickAction, quickCmd := m.quickConnect.HandleUpdate(msg)
+		cmd = tea.Batch(quickCmd, m.applyQuickConnectAction(quickAction))
 	}
 	return cmd
+}
+
+func (m *model) applyQuickConnectAction(action quickconnect.Action) tea.Cmd {
+	switch action.Type {
+	case quickconnect.ActionConnected:
+		if previous, ok := m.fileModel.Sessions[action.Location.SessionID]; ok && previous.Browser != nil {
+			_ = previous.Browser.Close()
+		}
+		m.fileModel.RegisterSession(filemodel.SessionState{
+			ID:          action.Location.SessionID,
+			Provider:    action.Location.Provider,
+			Label:       action.Location.Label,
+			CurrentPath: action.Location.Path,
+			Status:      filemodel.SessionConnected,
+			Browser:     action.Session,
+			Reconnect:   action.Reconnect,
+		})
+		if err := m.fileModel.SetPaneLocation(m.fileModel.FocusedPanelIndex, action.Location); err != nil {
+			_ = action.Session.Close()
+			slog.Error("failed to set quick-connect pane location", "error", err)
+			return nil
+		}
+		return m.fileModel.GetRemoteFilePanelUpdateCmd(true)
+	case quickconnect.ActionError:
+		if action.Error != nil {
+			slog.Warn("quick-connect action failed", "error", action.Error)
+		}
+	case quickconnect.ActionNone:
+		// No state transition is required.
+	}
+	return nil
 }
 
 // Apply the Action and notify the promptModal
@@ -430,6 +490,16 @@ func (m *model) applyZoxideModalAction(action common.ModelAction) tea.Cmd {
 
 // TODO : Move them around to appropriate places
 func (m *model) applyShellCommandAction(shellCommand string) {
+	if m.getFocusedFilePanel().CurrentLocation().Provider != filesystem.ProviderLocal {
+		m.promptModal.HandleSPFActionResults(
+			false,
+			remoteUnsupportedOperationText(
+				m.getFocusedFilePanel().CurrentLocation().Provider,
+				filesystem.OperationRemoteShell,
+			),
+		)
+		return
+	}
 	focusPanelDir := m.getFocusedFilePanel().Location
 
 	retCode, output, err := utils.ExecuteCommandInShell(common.DefaultCommandTimeout, focusPanelDir, shellCommand)
@@ -466,6 +536,9 @@ func (m *model) updateCurrentFilePanelDir(path string) error {
 // trackDirectoryWithZoxide adds the directory to zoxide database if zoxide is available and enabled
 func (m *model) trackDirectoryWithZoxide(path string) {
 	if !common.Config.ZoxideSupport || m.zClient == nil {
+		return
+	}
+	if m.getFocusedFilePanel().CurrentLocation().Provider != filesystem.ProviderLocal {
 		return
 	}
 
@@ -552,6 +625,13 @@ func (m *model) updateRenderForOverlay(finalRender string) string {
 		return stringfunction.PlaceOverlay(overlayX, overlayY, zoxideModal, finalRender)
 	}
 
+	if m.quickConnect.IsOpen() {
+		quickConnect := m.quickConnect.Render()
+		overlayX := m.fullWidth/common.CenterDivisor - m.fullWidth/(common.CenterDivisor*common.CenterDivisor)
+		overlayY := m.fullHeight/common.CenterDivisor - m.fullHeight/(common.CenterDivisor*common.CenterDivisor)
+		return stringfunction.PlaceOverlay(overlayX, overlayY, quickConnect, finalRender)
+	}
+
 	if m.sortModal.IsOpen() {
 		sortOptions := m.sortModal.Render()
 		overlayX := m.fullWidth/common.CenterDivisor - m.sortModal.Width/common.CenterDivisor
@@ -607,6 +687,9 @@ func (m *model) quitSuperfile(cdOnQuit bool) {
 		_ = et.Close()
 	}
 	m.fileModel.FilePreview.CleanUp()
+	if err := m.fileModel.CloseSessions(); err != nil {
+		slog.Warn("failed to close remote filesystem sessions", "error", err)
+	}
 
 	// cd on quit
 	currentDir := m.getFocusedFilePanel().Location
