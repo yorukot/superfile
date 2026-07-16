@@ -2,7 +2,6 @@ package filepanel
 
 import (
 	"fmt"
-	"path/filepath"
 	"strings"
 
 	"github.com/yorukot/superfile/src/config/icon"
@@ -35,7 +34,11 @@ func (m *Model) Render(focused bool) string {
 
 func (m *Model) renderTopBar(r *rendering.Renderer) {
 	// TODO - Add ansitruncate left in renderer and remove truncation here
-	truncatedPath := common.TruncateTextBeginning(m.Location, m.GetContentWidth()-common.InnerPadding, "...")
+	truncatedPath := common.TruncateTextBeginning(
+		m.DisplayLocationWithStatus(),
+		m.GetContentWidth()-common.InnerPadding,
+		"...",
+	)
 	r.AddLines(common.FilePanelTopDirectoryIcon + common.FilePanelTopPathStyle.Render(truncatedPath))
 	r.AddSection()
 }
@@ -145,7 +148,8 @@ func (m *Model) renderSelectBox(isSelected bool) string {
 // Checks whether a panel needs re-render due to being invalid or due to directory change
 func (m *Model) NeedsReRender() bool {
 	if !m.EmptyOrInvalid() {
-		return filepath.Dir(m.GetFirstElement().Location) != m.Location
+		currentLocation := m.CurrentLocation()
+		return parentPath(elementPath(m.GetFirstElement(), currentLocation)).String() != currentLocation.Path.String()
 	}
 	return true
 }

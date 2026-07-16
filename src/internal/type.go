@@ -5,7 +5,9 @@ import (
 
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 
+	"github.com/yorukot/superfile/src/internal/filesystem"
 	"github.com/yorukot/superfile/src/internal/ui/helpmenu"
+	"github.com/yorukot/superfile/src/internal/ui/quickconnect"
 	"github.com/yorukot/superfile/src/internal/ui/spferror"
 
 	"github.com/yorukot/superfile/src/internal/ui/clipboard"
@@ -53,6 +55,7 @@ const (
 type model struct {
 	// Main Panels
 	fileModel       filemodel.Model
+	sessionRegistry filemodel.SessionRegistry
 	sidebarModel    sidebar.Model
 	processBarModel processbar.Model
 	clipboard       clipboard.Model
@@ -65,6 +68,7 @@ type model struct {
 	helpMenu        helpmenu.Model
 	promptModal     prompt.Model
 	zoxideModal     zoxideui.Model
+	quickConnect    quickconnect.Model
 	sortModal       sortmodel.Model
 	spfError        spferror.Model
 	mutexErrorModal sync.Mutex
@@ -101,9 +105,11 @@ type model struct {
 }
 
 type typingModal struct {
-	location  string
-	open      bool
-	textInput textinput.Model
+	location      string
+	paneLocation  filesystem.Location
+	open          bool
+	textInput     textinput.Model
+	errorMesssage string
 }
 
 type editorFinishedMsg struct{ err error }
