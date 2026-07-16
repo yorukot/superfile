@@ -5,6 +5,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/yorukot/superfile/src/internal/filesystem"
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
@@ -18,6 +19,51 @@ type ModelUpdateMessage interface {
 
 type BaseMessage struct {
 	reqID int
+}
+
+type RemoteNavigationMsg struct {
+	BaseMessage
+
+	panelIndex int
+	source     filesystem.Location
+	target     filesystem.Path
+	err        error
+}
+
+func NewRemoteNavigationMsg(
+	panelIndex int,
+	source filesystem.Location,
+	target filesystem.Path,
+	err error,
+	reqID int,
+) RemoteNavigationMsg {
+	return RemoteNavigationMsg{
+		BaseMessage: BaseMessage{reqID: reqID},
+		panelIndex:  panelIndex,
+		source:      source,
+		target:      target,
+		err:         err,
+	}
+}
+
+func (msg RemoteNavigationMsg) ApplyToModel(m *model) tea.Cmd {
+	if msg.panelIndex < 0 || msg.panelIndex >= len(m.fileModel.FilePanels) {
+		return nil
+	}
+	panel := &m.fileModel.FilePanels[msg.panelIndex]
+	if panel.CurrentLocation() != msg.source {
+		return nil
+	}
+	if msg.err != nil {
+		m.notifyModel = notify.New(true, "Remote navigation failed", msg.err.Error(), notify.NoAction)
+		return nil
+	}
+	if err := panel.ApplyCurrentFilePanelDir(msg.target.String()); err != nil {
+		m.notifyModel = notify.New(true, "Remote navigation failed", err.Error(), notify.NoAction)
+		return nil
+	}
+	m.fileModel.SyncPaneSessionLocations()
+	return m.fileModel.GetRemoteFilePanelUpdateCmd(true)
 }
 
 func (msg BaseMessage) GetReqID() int {

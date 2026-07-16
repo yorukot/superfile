@@ -157,6 +157,14 @@ func (m *Model) RenderTextWithDimension(text string, height int, width int) stri
 		Render()
 }
 
+func (m *Model) RenderTextPreviewWithDimension(text string, height int, width int) (string, string) {
+	rawTransmit := ""
+	if m.imagePreviewer != nil {
+		rawTransmit = m.imagePreviewer.GetKittyClearRaw()
+	}
+	return m.RenderTextWithDimension(text, height, width), rawTransmit
+}
+
 // RenderWithPath returns (render, rawTransmit). rawTransmit is non-empty
 // for Kitty images (transmit data) or when clearing Kitty images (delete-all).
 // It must be sent via tea.Raw().
