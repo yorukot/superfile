@@ -13,6 +13,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/yorukot/superfile/src/internal/filesystem"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 )
@@ -48,6 +49,9 @@ func (m *model) getCompressSelectedFilesCmd() tea.Cmd {
 
 	if panel.Empty() {
 		return nil
+	}
+	if panel.CurrentLocation().Provider != filesystem.ProviderLocal {
+		return m.unsupportedRemoteOperationCmd(panel.CurrentLocation(), filesystem.OperationCompress)
 	}
 	var filesToCompress []string
 	var firstFile string

@@ -15,6 +15,7 @@ import (
 
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/filesystem"
 )
 
 func TestMain(m *testing.M) {
@@ -86,4 +87,32 @@ func TestPruneInaccessibleItemsAndGet(t *testing.T) {
 	assert.Equal(t, files, m.PruneInaccessibleItemsAndGet())
 	require.NoError(t, os.Remove(files[1]))
 	assert.Equal(t, []string{files[0]}, m.PruneInaccessibleItemsAndGet())
+}
+
+func TestPruneInaccessibleLocationsAndGetKeepsRemoteItems(t *testing.T) {
+	dir := t.TempDir()
+	localFile := filepath.Join(dir, "local.txt")
+	utils.SetupFiles(t, localFile)
+
+	m := &Model{}
+	m.SetLocations([]filesystem.Location{
+		{
+			Provider:  filesystem.ProviderLocal,
+			SessionID: "local",
+			Path:      filesystem.NewLocalPath(localFile),
+			Label:     "local",
+		},
+		{
+			Provider:  filesystem.ProviderSFTP,
+			SessionID: "sf-e2e",
+			Path:      filesystem.NewRemotePath("/remote.txt"),
+			Label:     "ssh://e2e",
+		},
+	})
+
+	require.NoError(t, os.Remove(localFile))
+	locations := m.PruneInaccessibleLocationsAndGet()
+	require.Len(t, locations, 1)
+	assert.Equal(t, filesystem.ProviderSFTP, locations[0].Provider)
+	assert.Equal(t, "/remote.txt", locations[0].Path.String())
 }

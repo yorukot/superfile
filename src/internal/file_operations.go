@@ -1,17 +1,20 @@
 package internal
 
 import (
+	"context"
 	"fmt"
-	"io"
 	"log/slog"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 
+	"github.com/yorukot/superfile/src/internal/filesystem"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/pkg/utils"
 )
+
+var localProvider = filesystem.NewLocalProvider() //nolint:gochecknoglobals // Shared stateless local provider.
 
 // isSamePartition checks if two paths are on the same filesystem partition
 func isSamePartition(path1, path2 string) (bool, error) {
@@ -46,81 +49,25 @@ func getDriveLetter(path string) string {
 
 // moveElement moves a file or directory efficiently
 func moveElement(src, dst string) error {
-	// Check if source and destination are on the same partition
-	sameDev, err := isSamePartition(src, dst)
-	if err != nil {
-		return fmt.Errorf("failed to check partitions: %w", err)
-	}
-
-	// If on the same partition, attempt to rename (which will use the same inode)
-	if sameDev {
-		if err = os.Rename(src, dst); err == nil {
-			return nil
-		}
-		// If rename fails, fall back to copy+delete
-	}
-
-	// If on different partitions or rename failed, fall back to copy+delete
-	err = copyElement(src, dst)
-	if err != nil {
-		return fmt.Errorf("failed to copy: %w", err)
-	}
-
-	err = os.RemoveAll(src)
-	if err != nil {
-		return fmt.Errorf("failed to remove source after copy: %w", err)
-	}
-
-	return nil
+	return withLocalSession(src, func(ctx context.Context, session filesystem.Session) error {
+		return session.Move(ctx,
+			filesystem.NewLocalPath(src),
+			filesystem.NewLocalPath(dst),
+			filesystem.MoveOptions{Overwrite: true, Recursive: true},
+		)
+	})
 }
 
-// copyElement handles copying of both files and directories
-func copyElement(src, dst string) error {
-	srcInfo, err := os.Stat(src)
-	if err != nil {
-		return fmt.Errorf("failed to stat source: %w", err)
-	}
-
-	if srcInfo.IsDir() {
-		return copyDir(src, dst, srcInfo)
-	}
-	return copyFile(src, dst, srcInfo)
+func deleteElement(src string) error {
+	return withLocalSession(src, func(ctx context.Context, session filesystem.Session) error {
+		return session.Delete(ctx,
+			filesystem.NewLocalPath(src),
+			filesystem.DeleteOptions{Recursive: true},
+		)
+	})
 }
 
-// copyDir recursively copies a directory
-func copyDir(src, dst string, srcInfo os.FileInfo) error {
-	err := os.MkdirAll(dst, srcInfo.Mode())
-	if err != nil {
-		return fmt.Errorf("failed to create destination directory: %w", err)
-	}
-
-	entries, err := os.ReadDir(src)
-	if err != nil {
-		return fmt.Errorf("failed to read source directory: %w", err)
-	}
-
-	for _, entry := range entries {
-		srcPath := filepath.Join(src, entry.Name())
-		dstPath := filepath.Join(dst, entry.Name())
-
-		entryInfo, err := entry.Info()
-		if err != nil {
-			return fmt.Errorf("failed to get entry info: %w", err)
-		}
-
-		if entryInfo.IsDir() {
-			err = copyDir(srcPath, dstPath, entryInfo)
-		} else {
-			err = copyFile(srcPath, dstPath, entryInfo)
-		}
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// is an equivalent of "cp -P" command
+// copyLinkFile is equivalent to cp -P for a symbolic link.
 func copyLinkFile(src, dst string) error {
 	target, err := os.Readlink(src)
 	if err != nil {
@@ -131,26 +78,6 @@ func copyLinkFile(src, dst string) error {
 
 func isSymlink(info os.FileInfo) bool {
 	return info.Mode()&os.ModeSymlink != 0
-}
-
-// copyFile copies a single file
-func copyFile(src, dst string, srcInfo os.FileInfo) error {
-	srcFile, err := os.Open(src)
-	if err != nil {
-		return fmt.Errorf("failed to open source file: %w", err)
-	}
-	defer srcFile.Close()
-
-	dstFile, err := os.OpenFile(dst, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, srcInfo.Mode())
-	if err != nil {
-		return fmt.Errorf("failed to create destination file: %w", err)
-	}
-	defer dstFile.Close()
-
-	if _, err := io.Copy(dstFile, srcFile); err != nil {
-		return fmt.Errorf("failed to copy file contents: %w", err)
-	}
-	return nil
 }
 
 // pasteDir handles directory copying with progress tracking
@@ -171,6 +98,12 @@ func pasteDir(src, dst string, p *processbar.Process, cut bool, processBarModel 
 		// If rename fails, fall back to manual copy
 	}
 
+	session, err := openLocalSession(src)
+	if err != nil {
+		return err
+	}
+	defer session.Close()
+
 	err = filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -181,7 +114,7 @@ func pasteDir(src, dst string, p *processbar.Process, cut bool, processBarModel 
 			return err
 		}
 		newPath := filepath.Join(dst, relPath)
-		return actualPasteOperation(info, path, newPath, cut, sameDev, p, processBarModel)
+		return actualPasteOperation(session, info, path, newPath, cut, sameDev, p, processBarModel)
 	})
 
 	if err != nil {
@@ -190,7 +123,7 @@ func pasteDir(src, dst string, p *processbar.Process, cut bool, processBarModel 
 
 	// If this was a cut operation and we had to do a manual copy, remove the source
 	if cut && !sameDev {
-		err = os.RemoveAll(src)
+		err = deleteElement(src)
 		if err != nil {
 			return fmt.Errorf("failed to remove source after move: %w", err)
 		}
@@ -199,8 +132,16 @@ func pasteDir(src, dst string, p *processbar.Process, cut bool, processBarModel 
 	return nil
 }
 
-func actualPasteOperation(info os.FileInfo, path string, newPath string, cut bool, sameDev bool,
-	p *processbar.Process, processBarModel *processbar.Model) error {
+func actualPasteOperation(
+	session filesystem.Session,
+	info os.FileInfo,
+	path string,
+	newPath string,
+	cut bool,
+	sameDev bool,
+	p *processbar.Process,
+	processBarModel *processbar.Model,
+) error {
 	var err error
 	if info.IsDir() {
 		// TODO - this is likely not needed because we did
@@ -209,7 +150,10 @@ func actualPasteOperation(info os.FileInfo, path string, newPath string, cut boo
 		if err != nil {
 			return err
 		}
-		err = os.MkdirAll(newPath, info.Mode())
+		err = session.Mkdir(context.Background(), filesystem.NewLocalPath(newPath), filesystem.MkdirOptions{
+			Mode:    info.Mode(),
+			Parents: true,
+		})
 		return err
 	}
 	if isSymlink(info) {
@@ -219,9 +163,17 @@ func actualPasteOperation(info os.FileInfo, path string, newPath string, cut boo
 	// File
 	p.CurrentFile = filepath.Base(path)
 	if cut && sameDev {
-		err = os.Rename(path, newPath)
+		err = session.Move(context.Background(),
+			filesystem.NewLocalPath(path),
+			filesystem.NewLocalPath(newPath),
+			filesystem.MoveOptions{Overwrite: true},
+		)
 	} else {
-		err = copyFile(path, newPath, info)
+		err = session.Copy(context.Background(),
+			filesystem.NewLocalPath(path),
+			filesystem.NewLocalPath(newPath),
+			filesystem.CopyOptions{Overwrite: true},
+		)
 	}
 
 	if err != nil {
@@ -236,6 +188,24 @@ func actualPasteOperation(info os.FileInfo, path string, newPath string, cut boo
 	p.Done++
 	processBarModel.TrySendingUpdateProcessMsg(*p)
 	return nil
+}
+
+func openLocalSession(root string) (filesystem.Session, error) {
+	return localProvider.Open(context.Background(), filesystem.Location{
+		Provider: filesystem.ProviderLocal,
+		Path:     filesystem.NewLocalPath(root),
+		Label:    "local",
+	})
+}
+
+func withLocalSession(root string, action func(context.Context, filesystem.Session) error) error {
+	session, err := openLocalSession(root)
+	if err != nil {
+		return err
+	}
+	defer session.Close()
+
+	return action(context.Background(), session)
 }
 
 // isAncestor checks if dst is the same as src or a subdirectory of src.
