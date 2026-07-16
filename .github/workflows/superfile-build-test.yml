@@ -51,6 +51,11 @@ jobs:
         env:
           GOMODCACHE: ${{ runner.temp }}/gomodcache
 
+      - name: SSH/SFTP fixture integration cases
+        run: go test -v ./src/internal -run '^TestSSH(QuickConnect|ManualConnect|FailureModes)Case$' -count=1
+        env:
+          GOMODCACHE: ${{ runner.temp }}/gomodcache
+
       - name: Test
         run: go test -v ./...
         env:
