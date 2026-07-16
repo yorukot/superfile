@@ -3,6 +3,8 @@ package processbar
 import (
 	"fmt"
 	"log/slog"
+	"sync"
+	"sync/atomic"
 
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui"
@@ -20,9 +22,10 @@ type Model struct {
 	// TODO: Fix this. No mechanism to remove completed processes from memory
 	// processes map grows indefinitely
 	// Maybe, TTL or cleanup mechanism for successful/failed processes
-	processes map[string]Process
-	msgChan   chan UpdateMsg
-	reqCnt    int
+	processes   map[string]Process
+	processesMu sync.RWMutex
+	msgChan     chan UpdateMsg
+	reqCnt      atomic.Int64
 }
 
 func New() Model {
@@ -37,7 +40,6 @@ func NewModelWithOptions(width int, height int) Model {
 		cursor:      0,
 		processes:   make(map[string]Process),
 		msgChan:     make(chan UpdateMsg, msgChannelSize),
-		reqCnt:      0,
 	}
 	m.SetDimensions(width, height)
 	return m
@@ -57,6 +59,8 @@ func (m *Model) SetDimensions(width int, height int) {
 }
 
 func (m *Model) AddProcess(p Process) error {
+	m.processesMu.Lock()
+	defer m.processesMu.Unlock()
 	if _, ok := m.processes[p.ID]; ok {
 		return &ProcessAlreadyExistsError{id: p.ID}
 	}
@@ -65,10 +69,14 @@ func (m *Model) AddProcess(p Process) error {
 }
 
 func (m *Model) AddOrUpdateProcess(p Process) {
+	m.processesMu.Lock()
+	defer m.processesMu.Unlock()
 	m.processes[p.ID] = p
 }
 
 func (m *Model) UpdateExistingProcess(p Process) error {
+	m.processesMu.Lock()
+	defer m.processesMu.Unlock()
 	if _, ok := m.processes[p.ID]; !ok {
 		return &NoProcessFoundError{id: p.ID}
 	}
@@ -77,11 +85,15 @@ func (m *Model) UpdateExistingProcess(p Process) error {
 }
 
 func (m *Model) GetByID(id string) (Process, bool) {
+	m.processesMu.RLock()
+	defer m.processesMu.RUnlock()
 	p, ok := m.processes[id]
 	return p, ok
 }
 
 func (m *Model) HasRunningProcesses() bool {
+	m.processesMu.RLock()
+	defer m.processesMu.RUnlock()
 	for _, data := range m.processes {
 		if data.State == InOperation && data.Done != data.Total {
 			return true
