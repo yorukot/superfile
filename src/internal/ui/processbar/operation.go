@@ -10,6 +10,7 @@ const (
 	OpDelete
 	OpCompress
 	OpExtract
+	OpCreate
 )
 
 // GetIcon returns the appropriate icon for the operation type
@@ -25,6 +26,8 @@ func (op OperationType) GetIcon() string {
 		return icon.CompressFile
 	case OpExtract:
 		return icon.ExtractFile
+	case OpCreate:
+		return icon.InOperation
 	default:
 		return icon.InOperation
 	}
@@ -43,6 +46,8 @@ func (op OperationType) GetVerb() string {
 		return "Compressing"
 	case OpExtract:
 		return "Extracting"
+	case OpCreate:
+		return "Creating"
 	default:
 		return "Processing"
 	}
@@ -61,6 +66,8 @@ func (op OperationType) GetPastVerb() string {
 		return "Compressed"
 	case OpExtract:
 		return "Extracted"
+	case OpCreate:
+		return "Created"
 	default:
 		return "Processed"
 	}

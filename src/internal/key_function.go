@@ -231,14 +231,14 @@ func (m *model) filePanelNormalModeKey(msg string) tea.Cmd {
 }
 
 // Check the hotkey to cancel operation or create file
-func (m *model) typingModalOpenKey(msg string) {
+func (m *model) typingModalOpenKey(msg string) tea.Cmd {
 	switch {
 	case slices.Contains(common.Hotkeys.CancelTyping, msg):
-		m.typingModal.errorMesssage = ""
 		m.cancelTypingModal()
 	case slices.Contains(common.Hotkeys.ConfirmTyping, msg):
-		m.createItem()
+		return m.getCreateCmd()
 	}
+	return nil
 }
 
 func (m *model) notifyModelOpenKey(msg string) tea.Cmd {
