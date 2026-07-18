@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -78,13 +79,10 @@ func (m *model) resolveRemoteSession(
 func (m *model) remoteSessionState(location filesystem.Location) (filemodel.SessionState, error) {
 	registry := m.fileModel.Sessions
 	if registry == nil {
-		registry = m.sessionRegistry
-	}
-	if registry == nil {
 		return filemodel.SessionState{}, unavailableSessionError(location)
 	}
 
-	sessionState, ok := registry[location.SessionID]
+	sessionState, ok := registry.Get(location.SessionID)
 	if !ok {
 		return filemodel.SessionState{}, unavailableSessionError(location)
 	}
@@ -102,6 +100,27 @@ func disconnectedSessionError(location filesystem.Location, lastErr error) error
 		message = lastErr.Error()
 	}
 	return filesystem.NewDisconnectedError(location.Provider, filesystem.OperationNavigate, location.Path, message)
+}
+
+func (m *model) handleRemoteSessionError(location filesystem.Location, err error) {
+	m.handleRemoteSessionErrorIfCurrent(location, 0, err)
+}
+
+func (m *model) handleRemoteSessionErrorIfCurrent(
+	location filesystem.Location,
+	generation uint64,
+	err error,
+) {
+	if location.Provider == filesystem.ProviderLocal || !errors.Is(err, filesystem.ErrDisconnected) {
+		return
+	}
+	if markErr := m.fileModel.MarkSessionDisconnectedIfCurrent(location.SessionID, generation, err); markErr != nil {
+		slog.Error(
+			"failed to transition remote session to disconnected",
+			"session", location.SessionID,
+			"error", markErr,
+		)
+	}
 }
 
 func ensureLocationLabel(location filesystem.Location) filesystem.Location {

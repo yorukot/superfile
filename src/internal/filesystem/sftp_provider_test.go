@@ -7,7 +7,9 @@ import (
 	"io"
 	"sort"
 	"strings"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -17,6 +19,24 @@ import (
 	"github.com/yorukot/superfile/src/internal/ssh/sshtest"
 	"github.com/yorukot/superfile/src/pkg/utils"
 )
+
+type blockingReadCloser struct {
+	unblocked chan struct{}
+	started   chan struct{}
+	once      sync.Once
+	startOnce sync.Once
+}
+
+func (r *blockingReadCloser) Read(_ []byte) (int, error) {
+	r.startOnce.Do(func() { close(r.started) })
+	<-r.unblocked
+	return 0, io.EOF
+}
+
+func (r *blockingReadCloser) Close() error {
+	r.once.Do(func() { close(r.unblocked) })
+	return nil
+}
 
 func TestSFTPProviderContract(t *testing.T) {
 	t.Run("list", func(t *testing.T) {
@@ -246,6 +266,36 @@ func TestSFTPProviderErrorMappingAndCapabilities(t *testing.T) {
 		_, err = reader.Read(make([]byte, 1))
 		require.ErrorIs(t, err, ErrCanceled)
 		require.NoError(t, reader.Close())
+	})
+
+	t.Run("cancel interrupts an in-flight remote read and invalidates the session", func(t *testing.T) {
+		ctx, cancel := context.WithCancel(context.Background())
+		blockingReader := &blockingReadCloser{
+			unblocked: make(chan struct{}),
+			started:   make(chan struct{}),
+		}
+		reader := contextReadCloser{
+			ctx:       ctx,
+			path:      NewRemotePath("/blocked"),
+			operation: OperationPreviewRead,
+			reader:    blockingReader,
+			cancel:    blockingReader.Close,
+		}
+		result := make(chan error, 1)
+		go func() {
+			_, readErr := reader.Read(make([]byte, 1))
+			result <- readErr
+		}()
+
+		<-blockingReader.started
+		cancel()
+		select {
+		case err := <-result:
+			require.ErrorIs(t, err, ErrCanceled)
+			require.ErrorIs(t, err, ErrDisconnected)
+		case <-time.After(time.Second):
+			t.Fatal("canceled read did not return")
+		}
 	})
 
 	t.Run("unsupported remote operations carry operation metadata", func(t *testing.T) {

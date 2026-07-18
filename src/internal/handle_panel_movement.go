@@ -100,7 +100,7 @@ func (m *model) remoteNavigationCmd(target filesystem.Path) tea.Cmd {
 			)
 		}
 		return func() tea.Msg {
-			return NewRemoteNavigationMsg(panelIndex, source, target, err, reqID)
+			return NewRemoteNavigationMsg(panelIndex, source, target, 0, err, reqID)
 		}
 	}
 	browser := sessionState.Browser
@@ -108,7 +108,7 @@ func (m *model) remoteNavigationCmd(target filesystem.Path) tea.Cmd {
 		ctx, cancel := context.WithTimeout(context.Background(), remoteNavigationTimeout)
 		defer cancel()
 		_, listErr := browser.List(ctx, target)
-		return NewRemoteNavigationMsg(panelIndex, source, target, listErr, reqID)
+		return NewRemoteNavigationMsg(panelIndex, source, target, sessionState.Generation, listErr, reqID)
 	}
 }
 

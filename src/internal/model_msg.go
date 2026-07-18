@@ -5,6 +5,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/filesystem"
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
@@ -21,12 +22,82 @@ type BaseMessage struct {
 	reqID int
 }
 
+type FileMutationKind string
+
+const (
+	FileMutationCreate FileMutationKind = "create"
+	FileMutationRename FileMutationKind = "rename"
+)
+
+type FileMutationMsg struct {
+	BaseMessage
+
+	kind       FileMutationKind
+	location   filesystem.Location
+	panelIndex int
+	conflict   bool
+	err        error
+}
+
+func NewFileMutationMsg(
+	kind FileMutationKind,
+	location filesystem.Location,
+	panelIndex int,
+	conflict bool,
+	err error,
+	reqID int,
+) FileMutationMsg {
+	return FileMutationMsg{
+		BaseMessage: BaseMessage{reqID: reqID},
+		kind:        kind,
+		location:    location,
+		panelIndex:  panelIndex,
+		conflict:    conflict,
+		err:         err,
+	}
+}
+
+func (msg FileMutationMsg) ApplyToModel(m *model) tea.Cmd {
+	if msg.err != nil {
+		m.handleRemoteSessionError(msg.location, msg.err)
+	}
+
+	switch msg.kind {
+	case FileMutationCreate:
+		if msg.err != nil {
+			m.notifyModel = notify.New(true, "Create failed", msg.err.Error(), notify.NoAction)
+		}
+	case FileMutationRename:
+		m.renameOperationPending = false
+		if msg.conflict && msg.err == nil {
+			m.notifyModel = notify.New(
+				true,
+				common.SameRenameWarnTitle,
+				common.SameRenameWarnContent,
+				notify.RenameAction,
+			)
+			return nil
+		}
+		m.resetRenameState(msg.panelIndex)
+		if msg.err != nil {
+			m.notifyModel = notify.New(true, "Rename failed", msg.err.Error(), notify.NoAction)
+		}
+	}
+
+	if msg.location.Provider == filesystem.ProviderLocal {
+		m.fileModel.UpdateLocalFilePanelsIfNeeded(true)
+		return nil
+	}
+	return m.fileModel.GetRemoteFilePanelUpdateCmd(true)
+}
+
 type RemoteNavigationMsg struct {
 	BaseMessage
 
 	panelIndex int
 	source     filesystem.Location
 	target     filesystem.Path
+	generation uint64
 	err        error
 }
 
@@ -34,6 +105,7 @@ func NewRemoteNavigationMsg(
 	panelIndex int,
 	source filesystem.Location,
 	target filesystem.Path,
+	generation uint64,
 	err error,
 	reqID int,
 ) RemoteNavigationMsg {
@@ -42,6 +114,7 @@ func NewRemoteNavigationMsg(
 		panelIndex:  panelIndex,
 		source:      source,
 		target:      target,
+		generation:  generation,
 		err:         err,
 	}
 }
@@ -55,6 +128,7 @@ func (msg RemoteNavigationMsg) ApplyToModel(m *model) tea.Cmd {
 		return nil
 	}
 	if msg.err != nil {
+		m.handleRemoteSessionErrorIfCurrent(msg.source, msg.generation, msg.err)
 		m.notifyModel = notify.New(true, "Remote navigation failed", msg.err.Error(), notify.NoAction)
 		return nil
 	}
@@ -73,7 +147,23 @@ func (msg BaseMessage) GetReqID() int {
 type PasteOperationMsg struct {
 	BaseMessage
 
-	state processbar.ProcessState
+	state            processbar.ProcessState
+	failureLocations []filesystem.Location
+	err              error
+}
+
+func NewProviderPasteOperationMsg(
+	state processbar.ProcessState,
+	locations []filesystem.Location,
+	err error,
+	reqID int,
+) PasteOperationMsg {
+	return PasteOperationMsg{
+		state:            state,
+		failureLocations: append([]filesystem.Location(nil), locations...),
+		err:              err,
+		BaseMessage:      BaseMessage{reqID: reqID},
+	}
 }
 
 func NewPasteOperationMsg(state processbar.ProcessState, reqID int) PasteOperationMsg {
@@ -86,8 +176,16 @@ func NewPasteOperationMsg(state processbar.ProcessState, reqID int) PasteOperati
 }
 
 func (msg PasteOperationMsg) ApplyToModel(m *model) tea.Cmd {
+	refreshRemote := false
+	for _, location := range msg.failureLocations {
+		m.handleRemoteSessionError(location, msg.err)
+		refreshRemote = refreshRemote || location.Provider != filesystem.ProviderLocal
+	}
 	if (msg.state == processbar.Failed || msg.state == processbar.Successful) && m.clipboard.IsCut() {
 		m.clipboard.Reset(false)
+	}
+	if refreshRemote {
+		return m.fileModel.GetRemoteFilePanelUpdateCmd(true)
 	}
 	return nil
 }
@@ -95,7 +193,20 @@ func (msg PasteOperationMsg) ApplyToModel(m *model) tea.Cmd {
 type CreateOperationMsg struct {
 	BaseMessage
 
-	state processbar.ProcessState
+	state    processbar.ProcessState
+	location filesystem.Location
+}
+
+func NewProviderCreateOperationMsg(
+	state processbar.ProcessState,
+	location filesystem.Location,
+	reqID int,
+) CreateOperationMsg {
+	return CreateOperationMsg{
+		state:       state,
+		location:    location,
+		BaseMessage: BaseMessage{reqID: reqID},
+	}
 }
 
 func NewCreateOperationMsg(state processbar.ProcessState, reqID int) CreateOperationMsg {
@@ -108,13 +219,36 @@ func NewCreateOperationMsg(state processbar.ProcessState, reqID int) CreateOpera
 }
 
 func (msg CreateOperationMsg) ApplyToModel(m *model) tea.Cmd {
+	if msg.location.Provider == filesystem.ProviderLocal {
+		m.fileModel.UpdateLocalFilePanelsIfNeeded(true)
+		return nil
+	}
+	if msg.location.Provider != "" {
+		return m.fileModel.GetRemoteFilePanelUpdateCmd(true)
+	}
 	return nil
 }
 
 type DeleteOperationMsg struct {
 	BaseMessage
 
-	state processbar.ProcessState
+	state    processbar.ProcessState
+	location filesystem.Location
+	err      error
+}
+
+func NewProviderDeleteOperationMsg(
+	state processbar.ProcessState,
+	location filesystem.Location,
+	err error,
+	reqID int,
+) DeleteOperationMsg {
+	return DeleteOperationMsg{
+		state:       state,
+		location:    location,
+		err:         err,
+		BaseMessage: BaseMessage{reqID: reqID},
+	}
 }
 
 func NewDeleteOperationMsg(state processbar.ProcessState, reqID int) DeleteOperationMsg {
@@ -127,8 +261,12 @@ func NewDeleteOperationMsg(state processbar.ProcessState, reqID int) DeleteOpera
 }
 
 func (msg DeleteOperationMsg) ApplyToModel(m *model) tea.Cmd {
+	m.handleRemoteSessionError(msg.location, msg.err)
 	// Remove selection
 	m.getFocusedFilePanel().ResetSelected()
+	if msg.location.Provider != "" && msg.location.Provider != filesystem.ProviderLocal {
+		return m.fileModel.GetRemoteFilePanelUpdateCmd(true)
+	}
 	return nil
 }
 

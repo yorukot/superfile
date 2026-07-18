@@ -22,6 +22,7 @@ require (
 	github.com/shirou/gopsutil/v4 v4.26.5
 	github.com/stretchr/testify v1.11.1
 	github.com/urfave/cli/v3 v3.9.0
+	golang.org/x/crypto v0.53.0
 	golang.org/x/image v0.41.0
 	golang.org/x/mod v0.37.0
 	golift.io/xtractr v0.3.2
@@ -44,6 +45,7 @@ require (
 	github.com/ebitengine/purego v0.10.0 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/icza/bitio v1.1.0 // indirect
+	github.com/kr/fs v0.1.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mewkiz/flac v1.0.13 // indirect
@@ -58,7 +60,6 @@ require (
 	github.com/stangelandcl/ppmd v0.1.1 // indirect
 	github.com/therootcompany/xz v1.0.1 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
-	golang.org/x/crypto v0.53.0 // indirect
 	golang.org/x/sync v0.21.0 // indirect
 	golift.io/udf v0.0.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

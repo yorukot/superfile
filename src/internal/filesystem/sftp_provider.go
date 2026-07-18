@@ -189,7 +189,13 @@ func (s *SFTPSession) Read(ctx context.Context, path Path) (io.ReadCloser, error
 	if err != nil {
 		return nil, mapSFTPError(OperationPreviewRead, path, err)
 	}
-	return contextReadCloser{ctx: ctx, path: path, operation: OperationPreviewRead, reader: file}, nil
+	return contextReadCloser{
+		ctx:       ctx,
+		path:      path,
+		operation: OperationPreviewRead,
+		reader:    file,
+		cancel:    s.Close,
+	}, nil
 }
 
 func (s *SFTPSession) Create(ctx context.Context, path Path, reader io.Reader, options CreateOptions) error {
@@ -201,28 +207,32 @@ func (s *SFTPSession) Create(ctx context.Context, path Path, reader io.Reader, o
 		return mapSFTPError(OperationCreateFile, path, contextErr)
 	}
 
-	flags := os.O_WRONLY | os.O_CREATE | os.O_TRUNC
-	if !options.Overwrite {
-		flags |= os.O_EXCL
-	}
-	file, err := s.client.OpenFile(remotePath, flags)
-	if err != nil {
-		return mapSFTPCreateError(OperationCreateFile, path, err)
-	}
-	defer file.Close()
+	err = runSFTPErrorOperation(ctx, s.Close, func() error {
+		flags := os.O_WRONLY | os.O_CREATE | os.O_TRUNC
+		if !options.Overwrite {
+			flags |= os.O_EXCL
+		}
+		file, openErr := s.client.OpenFile(remotePath, flags)
+		if openErr != nil {
+			return mapSFTPCreateError(OperationCreateFile, path, openErr)
+		}
+		defer file.Close()
 
-	mode := options.Mode
-	if mode == 0 {
-		mode = utils.UserFilePerm
-	}
-	if chmodErr := s.client.Chmod(remotePath, mode); chmodErr != nil {
-		return mapSFTPError(OperationCreateFile, path, chmodErr)
-	}
-
-	if reader == nil {
-		return nil
-	}
-	_, err = file.ReadFrom(contextReader{ctx: ctx, path: path, operation: OperationCreateFile, reader: reader})
+		mode := options.Mode
+		if mode == 0 {
+			mode = utils.UserFilePerm
+		}
+		if chmodErr := s.client.Chmod(remotePath, mode); chmodErr != nil {
+			return mapSFTPError(OperationCreateFile, path, chmodErr)
+		}
+		if reader == nil {
+			return nil
+		}
+		_, copyErr := file.ReadFrom(
+			contextReader{ctx: ctx, path: path, operation: OperationCreateFile, reader: reader},
+		)
+		return mapSFTPError(OperationCreateFile, path, copyErr)
+	})
 	return mapSFTPError(OperationCreateFile, path, err)
 }
 
@@ -235,20 +245,24 @@ func (s *SFTPSession) Mkdir(ctx context.Context, path Path, options MkdirOptions
 		return mapSFTPError(OperationMkdir, path, contextErr)
 	}
 
-	if options.Parents {
-		err = s.client.MkdirAll(remotePath)
-	} else {
-		err = s.client.Mkdir(remotePath)
-	}
-	if err != nil {
-		return mapSFTPCreateError(OperationMkdir, path, err)
-	}
+	err = runSFTPErrorOperation(ctx, s.Close, func() error {
+		var mkdirErr error
+		if options.Parents {
+			mkdirErr = s.client.MkdirAll(remotePath)
+		} else {
+			mkdirErr = s.client.Mkdir(remotePath)
+		}
+		if mkdirErr != nil {
+			return mapSFTPCreateError(OperationMkdir, path, mkdirErr)
+		}
 
-	mode := options.Mode
-	if mode == 0 {
-		mode = utils.UserDirPerm
-	}
-	return mapSFTPError(OperationMkdir, path, s.client.Chmod(remotePath, mode))
+		mode := options.Mode
+		if mode == 0 {
+			mode = utils.UserDirPerm
+		}
+		return mapSFTPError(OperationMkdir, path, s.client.Chmod(remotePath, mode))
+	})
+	return mapSFTPError(OperationMkdir, path, err)
 }
 
 func (s *SFTPSession) Rename(ctx context.Context, source Path, destination Path, options RenameOptions) error {
@@ -264,22 +278,26 @@ func (s *SFTPSession) Rename(ctx context.Context, source Path, destination Path,
 		return mapSFTPError(OperationRename, source, contextErr)
 	}
 
-	if !options.Overwrite {
-		if exists, existsErr := s.exists(destination); existsErr != nil {
-			return existsErr
-		} else if exists {
-			return NewConflictError(ProviderSFTP, OperationRename, destination, "destination already exists")
+	err = runSFTPErrorOperation(ctx, s.Close, func() error {
+		if !options.Overwrite {
+			if exists, existsErr := s.exists(destination); existsErr != nil {
+				return existsErr
+			} else if exists {
+				return NewConflictError(ProviderSFTP, OperationRename, destination, "destination already exists")
+			}
+			return mapSFTPError(OperationRename, source, s.client.Rename(sourcePath, destinationPath))
 		}
-		return mapSFTPError(OperationRename, source, s.client.Rename(sourcePath, destinationPath))
-	}
 
-	if err = s.client.PosixRename(sourcePath, destinationPath); err == nil {
-		return nil
-	}
-	if isSFTPOpUnsupported(err) {
-		return NewUnsupportedError(ProviderSFTP, OperationRename, destination,
-			"sftp server does not support atomic overwrite rename")
-	}
+		renameErr := s.client.PosixRename(sourcePath, destinationPath)
+		if renameErr == nil {
+			return nil
+		}
+		if isSFTPOpUnsupported(renameErr) {
+			return NewUnsupportedError(ProviderSFTP, OperationRename, destination,
+				"sftp server does not support atomic overwrite rename")
+		}
+		return mapSFTPError(OperationRename, source, renameErr)
+	})
 	return mapSFTPError(OperationRename, source, err)
 }
 
@@ -298,17 +316,31 @@ func (s *SFTPSession) Delete(ctx context.Context, path Path, options DeleteOptio
 	}
 	if stat.IsDir && !stat.IsSymlink {
 		if !options.Recursive {
-			return mapSFTPError(OperationDeleteDir, path, s.client.RemoveDirectory(path.String()))
+			err = runSFTPErrorOperation(ctx, s.Close, func() error {
+				return s.client.RemoveDirectory(path.String())
+			})
+			return mapSFTPError(OperationDeleteDir, path, err)
 		}
 		return s.deleteDir(ctx, path)
 	}
-	return mapSFTPError(OperationDeleteFile, path, s.client.Remove(path.String()))
+	err = runSFTPErrorOperation(ctx, s.Close, func() error { return s.client.Remove(path.String()) })
+	return mapSFTPError(OperationDeleteFile, path, err)
 }
 
 func (s *SFTPSession) Copy(ctx context.Context, source Path, destination Path, options CopyOptions) error {
 	if err := ctx.Err(); err != nil {
 		return mapSFTPError(OperationCopy, source, err)
 	}
+	copyErr := runSFTPErrorOperation(ctx, s.Close, func() error {
+		return s.copy(ctx, source, destination, options)
+	})
+	if errors.Is(copyErr, errSFTPSessionInvalidated) {
+		return mapSFTPError(OperationCopy, source, copyErr)
+	}
+	return copyErr
+}
+
+func (s *SFTPSession) copy(ctx context.Context, source Path, destination Path, options CopyOptions) error {
 	sourcePath, err := s.requireRemotePath(OperationCopy, source)
 	if err != nil {
 		return err
@@ -383,6 +415,8 @@ type sftpOperationResult[T any] struct {
 	err   error
 }
 
+var errSFTPSessionInvalidated = errors.New("sftp session invalidated by cancellation")
+
 func runSFTPOperation[T any](ctx context.Context, cancel func() error, operation func() (T, error)) (T, error) {
 	result := make(chan sftpOperationResult[T], 1)
 	go func() {
@@ -395,8 +429,15 @@ func runSFTPOperation[T any](ctx context.Context, cancel func() error, operation
 	case <-ctx.Done():
 		_ = cancel()
 		var zero T
-		return zero, ctx.Err()
+		return zero, errors.Join(ctx.Err(), errSFTPSessionInvalidated)
 	}
+}
+
+func runSFTPErrorOperation(ctx context.Context, cancel func() error, operation func() error) error {
+	_, err := runSFTPOperation(ctx, cancel, func() (struct{}, error) {
+		return struct{}{}, operation()
+	})
+	return err
 }
 
 func (s *SFTPSession) requireRemotePath(operation Operation, path Path) (string, error) {
@@ -411,9 +452,9 @@ func (s *SFTPSession) requireRemotePath(operation Operation, path Path) (string,
 }
 
 func (s *SFTPSession) deleteDir(ctx context.Context, directory Path) error {
-	entries, err := s.List(ctx, directory)
-	if err != nil {
-		return err
+	entries, listErr := s.List(ctx, directory)
+	if listErr != nil {
+		return listErr
 	}
 	for _, entry := range entries {
 		if err := ctx.Err(); err != nil {
@@ -423,11 +464,19 @@ func (s *SFTPSession) deleteDir(ctx context.Context, directory Path) error {
 			if err := s.deleteDir(ctx, entry.Path); err != nil {
 				return err
 			}
-		} else if err := s.client.Remove(entry.Path.String()); err != nil {
-			return mapSFTPError(OperationDeleteFile, entry.Path, err)
+		} else {
+			removeErr := runSFTPErrorOperation(ctx, s.Close, func() error {
+				return s.client.Remove(entry.Path.String())
+			})
+			if removeErr != nil {
+				return mapSFTPError(OperationDeleteFile, entry.Path, removeErr)
+			}
 		}
 	}
-	return mapSFTPError(OperationDeleteDir, directory, s.client.RemoveDirectory(directory.String()))
+	removeErr := runSFTPErrorOperation(ctx, s.Close, func() error {
+		return s.client.RemoveDirectory(directory.String())
+	})
+	return mapSFTPError(OperationDeleteDir, directory, removeErr)
 }
 
 func (s *SFTPSession) copyDir(
@@ -590,13 +639,16 @@ type contextReadCloser struct {
 	path      Path
 	operation Operation
 	reader    io.ReadCloser
+	cancel    func() error
 }
 
 func (r contextReadCloser) Read(p []byte) (int, error) {
 	if err := r.ctx.Err(); err != nil {
 		return 0, mapSFTPError(r.operation, r.path, err)
 	}
-	n, err := r.reader.Read(p)
+	n, err := runSFTPOperation(r.ctx, r.cancel, func() (int, error) {
+		return r.reader.Read(p)
+	})
 	if err != nil {
 		return n, mapSFTPError(r.operation, r.path, err)
 	}
@@ -620,6 +672,12 @@ func mapSFTPCreateError(operation Operation, path Path, err error) error {
 func mapSFTPError(operation Operation, path Path, err error) error {
 	if err == nil {
 		return nil
+	}
+	if errors.Is(err, errSFTPSessionInvalidated) {
+		return errors.Join(
+			NewCanceledError(ProviderSFTP, operation, path, err.Error()),
+			NewDisconnectedError(ProviderSFTP, operation, path, "session closed to cancel an in-flight operation"),
+		)
 	}
 	if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
 		return NewCanceledError(ProviderSFTP, operation, path, err.Error())

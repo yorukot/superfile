@@ -5,14 +5,18 @@ import (
 	"log/slog"
 	"path/filepath"
 	"strings"
+	"time"
 
 	tea "charm.land/bubbletea/v2"
 
 	"github.com/yorukot/superfile/src/internal/filesystem"
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
+	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/pkg/utils"
 )
+
+const remoteMutationTimeout = 30 * time.Second
 
 // Cancel typing modal e.g. create file or directory
 func (m *model) cancelTypingModal() {
@@ -52,15 +56,15 @@ func (m *model) createOperation(
 	reqID int,
 ) tea.Msg {
 	if len(items) == 0 {
-		return NewCreateOperationMsg(processbar.Cancelled, reqID)
+		return NewProviderCreateOperationMsg(processbar.Cancelled, location, reqID)
 	}
 	p, err := processBarModel.SendAddProcessMsg(filepath.Base(items[0]), processbar.OpCreate, len(items), true)
 	if err != nil {
 		slog.Error("Cannot spawn a new process", "error", err)
-		return NewCreateOperationMsg(processbar.Failed, reqID)
+		return NewProviderCreateOperationMsg(processbar.Failed, location, reqID)
 	}
 	finalizer := func(state processbar.ProcessState, reqID int) tea.Msg {
-		return NewCreateOperationMsg(state, reqID)
+		return NewProviderCreateOperationMsg(state, location, reqID)
 	}
 	processor := m.makeCreateProcessor(location, p, processBarModel)
 	return m.runFileProcessor(processor, finalizer, items, reqID)
@@ -105,7 +109,8 @@ func (m *model) createItemAt(location filesystem.Location, name string) error {
 		return err
 	}
 
-	ctx := context.Background()
+	ctx, cancel := mutationContext(location)
+	defer cancel()
 	session, err := m.ResolveFreshSession(ctx, location)
 	if err != nil {
 		return err
@@ -139,40 +144,76 @@ func (m *model) cancelRename() {
 	panel.Rename.Blur()
 	panel.Renaming = false
 	m.fileModel.Renaming = false
+	m.renameOperationPending = false
 }
 
 // Confirm rename file or directory.
-func (m *model) confirmRename() {
+func (m *model) confirmRename(overwrite bool) tea.Cmd {
+	if m.renameOperationPending {
+		return nil
+	}
 	panel := m.getFocusedFilePanel()
 
 	// Although we dont expect this to happen based on our current flow
 	// Just adding it here to be safe
 	if panel.Empty() {
 		slog.Error("confirmRename called on empty panel")
-		return
+		return nil
+	}
+	if err := checkFileNameValidity(panel.Rename.Value()); err != nil {
+		m.notifyModel = notify.New(true, "Rename failed", err.Error(), notify.NoAction)
+		return nil
 	}
 
+	panelIndex := m.fileModel.FocusedPanelIndex
 	location := panel.CurrentLocation()
 	itemLocation := elementLocation(location, panel.GetFocusedItem())
 	newPath := pathJoinRaw(location.Path, panel.Rename.Value())
-	overwrite := m.IsRenamingConflicting()
-	session, err := m.ResolveSession(context.Background(), location)
-	if err != nil {
-		slog.Error("Error while confirmRename during session resolution", "error", err)
-	} else {
-		defer session.Close()
-		if err = session.Rename(
-			context.Background(),
-			itemLocation.Path,
-			newPath,
-			filesystem.RenameOptions{Overwrite: overwrite},
-		); err != nil {
-			slog.Error("Error while confirmRename during rename", "error", err)
-			// Dont return. We have to also reset the panel and model information
-		}
+	if itemLocation.Path.String() == newPath.String() {
+		m.resetRenameState(panelIndex)
+		return nil
 	}
+	m.renameOperationPending = true
+	panel.Rename.Blur()
+	reqID := m.nextIoReqCnt()
 
+	return func() tea.Msg {
+		ctx, cancel := mutationContext(location)
+		defer cancel()
+		session, err := m.ResolveFreshSession(ctx, location)
+		conflict := false
+		if err == nil {
+			defer session.Close()
+			if !overwrite {
+				conflict, err = sessionPathExists(ctx, session, newPath)
+			}
+			if err == nil && !conflict {
+				err = session.Rename(
+					ctx,
+					itemLocation.Path,
+					newPath,
+					filesystem.RenameOptions{Overwrite: overwrite},
+				)
+			}
+		}
+		return NewFileMutationMsg(FileMutationRename, location, panelIndex, conflict, err, reqID)
+	}
+}
+
+func mutationContext(location filesystem.Location) (context.Context, context.CancelFunc) {
+	if location.Provider != filesystem.ProviderLocal {
+		return context.WithTimeout(context.Background(), remoteMutationTimeout)
+	}
+	return context.WithCancel(context.Background())
+}
+
+func (m *model) resetRenameState(panelIndex int) {
+	m.renameOperationPending = false
 	m.fileModel.Renaming = false
+	if panelIndex < 0 || panelIndex >= len(m.fileModel.FilePanels) {
+		return
+	}
+	panel := &m.fileModel.FilePanels[panelIndex]
 	panel.Rename.Blur()
 	panel.Renaming = false
 }

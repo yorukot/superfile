@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	tea "charm.land/bubbletea/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -75,24 +74,19 @@ func TestSSHQuickConnectCase(t *testing.T) {
 	setFilePanelSelectedItemByLocation(t, m.getFocusedFilePanel(), fixture.BetaPath)
 	m.panelItemRename()
 	m.getFocusedFilePanel().Rename.SetValue("beta-renamed.txt")
-	m.confirmRename()
+	applyTeaCmd(t, m, m.confirmRename(false))
 	assert.NoFileExists(t, remoteFixturePath(fixture, fixture.BetaPath))
 	assert.FileExists(t, remoteFixturePath(fixture, "/beta-renamed.txt"))
 
-	p := NewTestTeaProgWithEventLoop(t, m)
-	setFocusedPanel(p.getModel(), 1)
-	setFilePanelSelectedItemByLocation(t, p.getModel().getFocusedFilePanel(), fixture.AlphaPath)
-	p.SendKey(common.Hotkeys.DeleteItems[0])
-	assert.Eventually(t, p.getModel().notifyModel.IsOpen, DefaultTestTimeout, DefaultTestTick)
-	assert.Equal(t, common.PermanentDeleteWarnTitle, p.getModel().notifyModel.GetTitle())
-	assert.Equal(t, notify.PermanentDeleteAction, p.getModel().notifyModel.GetConfirmAction())
-	p.Send(tea.KeyPressMsg{Code: tea.KeyEnter})
-	assert.Eventually(t, func() bool {
-		_, err := os.Stat(remoteFixturePath(fixture, fixture.AlphaPath))
-		return os.IsNotExist(err)
-	}, DefaultTestTimeout, DefaultTestTick)
+	setFocusedPanel(m, 1)
+	setFilePanelSelectedItemByLocation(t, m.getFocusedFilePanel(), fixture.AlphaPath)
+	applyTeaCmd(t, m, TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.DeleteItems[0])))
+	assert.True(t, m.notifyModel.IsOpen())
+	assert.Equal(t, common.PermanentDeleteWarnTitle, m.notifyModel.GetTitle())
+	assert.Equal(t, notify.PermanentDeleteAction, m.notifyModel.GetConfirmAction())
+	applyTeaCmd(t, m, TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.Confirm[0])))
+	assert.NoFileExists(t, remoteFixturePath(fixture, fixture.AlphaPath))
 
-	m = p.getModel()
 	setFocusedPanel(m, 0)
 	require.NoError(t, m.updateCurrentFilePanelDir(localDir))
 	m.fileModel.UpdateFilePanelsIfNeeded(true)
@@ -316,7 +310,6 @@ func registerConnectedSessionPanel(
 	})
 	require.NoError(t, m.fileModel.SetPaneLocation(panelIndex, location))
 	m.fileModel.UpdateFilePanelsIfNeeded(true)
-	m.sessionRegistry = m.fileModel.Sessions
 }
 
 func setFocusedPanel(m *model, panelIndex int) {
