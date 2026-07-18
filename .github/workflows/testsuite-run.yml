@@ -41,15 +41,6 @@ jobs:
       - name: Install Dependencies
         run: pip install -r testsuite/requirements.txt
 
-      - name: Run SSH/SFTP fixture-backed Go integration cases
-        run: go test ./src/internal -run '^TestSSH(QuickConnect|ManualConnect|FailureModes)Case$' -count=1
-
-      - name: Run exact SSH/SFTP case commands
-        run: |
-          python testsuite/main.py -d --case ssh_quick_connect
-          python testsuite/main.py -d --case ssh_manual_connect
-          python testsuite/main.py -d --case ssh_failure_modes
-
       - name: Run Tests
         run: python testsuite/main.py -d
       

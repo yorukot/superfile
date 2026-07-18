@@ -77,50 +77,6 @@ func (m *model) panelCreateNewFile() {
 	m.firstTextInput = true
 }
 
-// TODO : This function does not needs the entire model. Only pass the panel object
-func (m *model) IsRenamingConflicting() bool {
-	// TODO : Replace this with m.getCurrentFilePanel() everywhere
-	panel := m.getFocusedFilePanel()
-	if panel.ElemCount() == 0 {
-		slog.Error("IsRenamingConflicting() being called on empty panel")
-		return false
-	}
-	location := panel.CurrentLocation()
-	itemLocation := elementLocation(location, panel.GetFocusedItem())
-	newPath := pathJoinRaw(location.Path, panel.Rename.Value())
-
-	if itemLocation.Path.String() == newPath.String() {
-		return false
-	}
-
-	session, err := m.ResolveSession(context.Background(), location)
-	if err != nil {
-		slog.Error("IsRenamingConflicting session resolution failed", "error", err)
-		return false
-	}
-	defer session.Close()
-	conflicts, err := sessionPathExists(context.Background(), session, newPath)
-	if err != nil {
-		slog.Error("IsRenamingConflicting stat failed", "error", err)
-		return false
-	}
-	return conflicts
-}
-
-// TODO: Remove channel messaging and use tea.Cmd
-func (m *model) warnModalForRenaming() tea.Cmd {
-	reqID := m.nextIoReqCnt()
-	slog.Debug("Submitting rename notify model request", "reqID", reqID)
-	res := func() tea.Msg {
-		notifyModel := notify.New(true,
-			common.SameRenameWarnTitle,
-			common.SameRenameWarnContent,
-			notify.RenameAction)
-		return NewNotifyModalMsg(notifyModel, reqID)
-	}
-	return res
-}
-
 // Rename file where the cusror is located
 // TODO: Fix this. It doesn't do any rename, just opens the rename text input
 // Actual rename happens at confirmRename() in handle_modal.go
@@ -208,19 +164,21 @@ func (m *model) deleteProviderOperation(
 	p, err := processBarModel.SendAddProcessMsg(pathBase(items[0].Path), processbar.OpDelete, len(items), true)
 	if err != nil {
 		slog.Error("Cannot spawn a new remote delete process", "error", err)
-		return NewDeleteOperationMsg(processbar.Failed, reqID)
+		return NewProviderDeleteOperationMsg(processbar.Failed, items[0], err, reqID)
 	}
-	session, err := m.ResolveSession(context.Background(), items[0])
+	ctx, cancel := mutationContext(items[0])
+	defer cancel()
+	session, err := m.ResolveFreshSession(ctx, items[0])
 	if err != nil {
 		p.State = processbar.Failed
 		p.ErrorMsg = err.Error()
 		markProcessDone(p, processBarModel)
-		return NewDeleteOperationMsg(processbar.Failed, reqID)
+		return NewProviderDeleteOperationMsg(processbar.Failed, items[0], err, reqID)
 	}
 	defer session.Close()
 	for _, item := range items {
 		if err := session.Delete(
-			context.Background(),
+			ctx,
 			item.Path,
 			filesystem.DeleteOptions{Recursive: true},
 		); err != nil {
@@ -228,7 +186,7 @@ func (m *model) deleteProviderOperation(
 			p.ErrorMsg = formatFileError(item.Path.String(), err)
 			p.DoneTime = time.Now()
 			_ = processBarModel.SendUpdateProcessMsg(p, true)
-			return NewDeleteOperationMsg(processbar.Failed, reqID)
+			return NewProviderDeleteOperationMsg(processbar.Failed, item, err, reqID)
 		}
 		p.CurrentFile = pathBase(item.Path)
 		p.Done++
@@ -236,7 +194,7 @@ func (m *model) deleteProviderOperation(
 	}
 	p.State = processbar.Successful
 	markProcessDone(p, processBarModel)
-	return NewDeleteOperationMsg(processbar.Successful, reqID)
+	return NewProviderDeleteOperationMsg(processbar.Successful, items[0], nil, reqID)
 }
 
 func makeDeleteProcessor(process processbar.Process,
@@ -483,17 +441,20 @@ func (m *model) executeProviderPasteOperation(processBarModel *processbar.Model,
 		operation = filesystem.OperationCutMove
 	}
 	for _, source := range items {
-		targetSession, err := m.ResolveSession(context.Background(), destination)
+		resolveCtx, cancelResolve := mutationContext(destination)
+		targetSession, err := m.ResolveFreshSession(resolveCtx, destination)
 		if err != nil {
+			cancelResolve()
 			slog.Error("Cannot resolve destination session for provider paste", "error", err)
-			return NewPasteOperationMsg(processbar.Failed, reqID)
+			return NewProviderPasteOperationMsg(processbar.Failed, []filesystem.Location{destination}, err, reqID)
 		}
 		target := locationWithPath(destination, pathJoin(destination.Path, pathBase(source.Path)))
-		target, err = renameLocationIfDuplicate(context.Background(), targetSession, target)
+		target, err = renameLocationIfDuplicate(resolveCtx, targetSession, target)
 		_ = targetSession.Close()
+		cancelResolve()
 		if err != nil {
 			slog.Error("Cannot resolve duplicate destination for provider paste", "error", err)
-			return NewPasteOperationMsg(processbar.Failed, reqID)
+			return NewProviderPasteOperationMsg(processbar.Failed, []filesystem.Location{destination}, err, reqID)
 		}
 		transfer, err := engine.Start(context.Background(), filesystem.TransferRequest{
 			Operation:   operation,
@@ -502,19 +463,35 @@ func (m *model) executeProviderPasteOperation(processBarModel *processbar.Model,
 		})
 		if err != nil {
 			slog.Error("Cannot start provider paste transfer", "error", err)
-			return NewPasteOperationMsg(processbar.Failed, reqID)
+			return NewProviderPasteOperationMsg(
+				processbar.Failed,
+				[]filesystem.Location{source, destination},
+				err,
+				reqID,
+			)
 		}
 		if _, err = filesystem.TrackTransferProcess(context.Background(), processBarModel, transfer); err != nil {
 			slog.Error("Cannot track provider paste transfer", "error", err)
 			_ = transfer.Cancel(context.Background())
-			return NewPasteOperationMsg(processbar.Failed, reqID)
+			return NewProviderPasteOperationMsg(
+				processbar.Failed,
+				[]filesystem.Location{source, destination},
+				err,
+				reqID,
+			)
 		}
 		if err = transfer.Wait(context.Background()); err != nil {
 			slog.Error("Provider paste transfer failed", "error", err)
-			return NewPasteOperationMsg(processbar.Failed, reqID)
+			return NewProviderPasteOperationMsg(
+				processbar.Failed,
+				[]filesystem.Location{source, destination},
+				err,
+				reqID,
+			)
 		}
 	}
-	return NewPasteOperationMsg(processbar.Successful, reqID)
+	touchedLocations := append(append([]filesystem.Location(nil), items...), destination)
+	return NewProviderPasteOperationMsg(processbar.Successful, touchedLocations, nil, reqID)
 }
 
 func getTotalFilesCnt(copyItems []string) int {

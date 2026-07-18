@@ -81,7 +81,7 @@ func TestQuickConnectBadStartPathKeepsExistingPaneState(t *testing.T) {
 	assert.Equal(t, originalLocation, m.getFocusedFilePanel().CurrentLocation())
 	assert.Equal(t, originalDisplay, m.getFocusedFilePanel().DisplayLocation())
 	assert.Equal(t, originalNames, panelElementNames(m.getFocusedFilePanel()))
-	_, ok := m.fileModel.Sessions[filesystem.SessionID(profile.Name)]
+	_, ok := m.fileModel.Sessions.Get(filesystem.SessionID(profile.Name))
 	assert.False(t, ok)
 	assert.Contains(t, m.quickConnect.Warning(), "missing-start-path")
 }

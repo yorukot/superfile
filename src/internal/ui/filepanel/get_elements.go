@@ -136,14 +136,54 @@ func (m *Model) UpdateElementsIfNeeded(force bool, displayDotFile bool) {
 }
 
 func (m *Model) ShouldUpdateElements(force bool, now time.Time) bool {
-	return force || !m.shouldSkipPanelUpdate(now)
+	if m.elementsLoading {
+		if force {
+			m.elementsRefreshPending = true
+		}
+		return false
+	}
+	if force {
+		return true
+	}
+	if m.CurrentLocation().Provider != filesystem.ProviderLocal {
+		refreshInterval := remoteFocusedPanelRefreshTime
+		if !m.IsFocused {
+			refreshInterval = nonFocussedPanelReRenderTime
+		}
+		return m.LastTimeGetElement.IsZero() || now.Sub(m.LastTimeGetElement) >= refreshInterval
+	}
+	return !m.shouldSkipPanelUpdate(now)
 }
 
-func (m *Model) MarkElementsLoading(now time.Time) {
+func (m *Model) BeginElementsLoading(force bool, now time.Time) (uint64, bool) {
+	if !m.ShouldUpdateElements(force, now) {
+		return 0, false
+	}
+	m.elementsRequestID++
+	m.elementsLoading = true
+	m.elementsRefreshPending = false
 	m.LastTimeGetElement = now
+	return m.elementsRequestID, true
 }
 
-func (m Model) LoadElements(displayDotFile bool) ([]Element, error) {
+func (m *Model) FinishElementsLoading(requestID uint64) (bool, bool) {
+	if !m.elementsLoading || requestID != m.elementsRequestID {
+		return false, false
+	}
+	m.elementsLoading = false
+	pending := m.elementsRefreshPending
+	m.elementsRefreshPending = false
+	return true, pending
+}
+
+func (m *Model) InvalidateElementsLoading() {
+	m.LastTimeGetElement = time.Time{}
+	m.elementsLoading = false
+	m.elementsRefreshPending = false
+	m.elementsRequestID++
+}
+
+func (m *Model) LoadElements(displayDotFile bool) ([]Element, error) {
 	return m.getElements(displayDotFile)
 }
 

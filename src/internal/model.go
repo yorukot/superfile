@@ -95,7 +95,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		slog.Debug("Got ModelUpdate message", "id", msg.GetReqID())
 		updateCmd = m.fileModel.UpdatePreviewPanel(msg)
 	case filemodel.PanelUpdateMsg:
-		m.fileModel.ApplyPanelUpdate(msg)
+		updateCmd = m.fileModel.ApplyPanelUpdate(msg)
 	case ModelUpdateMessage:
 		slog.Debug("Got ModelUpdate message", "id", msg.GetReqID())
 		updateCmd = msg.ApplyToModel(m)
@@ -130,7 +130,6 @@ func (m *model) updateModelStateAfterMsg() tea.Cmd {
 	m.fileModel.UpdateLocalFilePanelsIfNeeded(false)
 	remotePanelCmd := m.fileModel.GetRemoteFilePanelUpdateCmd(false)
 	m.fileModel.SyncPaneSessionLocations()
-	m.sessionRegistry = m.fileModel.Sessions
 	// TODO: Move to utility
 	if m.focusPanel != metadataFocus {
 		m.fileMetaData.ResetRender()
@@ -416,9 +415,6 @@ func (m *model) updateComponentState(msg tea.Msg) tea.Cmd {
 func (m *model) applyQuickConnectAction(action quickconnect.Action) tea.Cmd {
 	switch action.Type {
 	case quickconnect.ActionConnected:
-		if previous, ok := m.fileModel.Sessions[action.Location.SessionID]; ok && previous.Browser != nil {
-			_ = previous.Browser.Close()
-		}
 		m.fileModel.RegisterSession(filemodel.SessionState{
 			ID:          action.Location.SessionID,
 			Provider:    action.Location.Provider,
