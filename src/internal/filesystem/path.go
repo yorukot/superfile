@@ -1,6 +1,9 @@
 package filesystem
 
-import "strings"
+import (
+	"path/filepath"
+	"strings"
+)
 
 type PathKind string
 
@@ -43,8 +46,8 @@ func (p Path) IsLocal() bool {
 }
 
 func (p Path) Base() string {
-	if p.kind != PathKindRemote {
-		return p.value
+	if p.kind == PathKindLocal {
+		return filepath.Base(p.value)
 	}
 	trimmed := strings.TrimRight(p.value, "/")
 	if trimmed == "" {
@@ -58,8 +61,8 @@ func (p Path) Base() string {
 }
 
 func (p Path) Dir() Path {
-	if p.kind != PathKindRemote {
-		return p
+	if p.kind == PathKindLocal {
+		return NewLocalPath(filepath.Dir(p.value))
 	}
 	trimmed := strings.TrimRight(p.value, "/")
 	if trimmed == "" || trimmed == "/" {
@@ -73,8 +76,9 @@ func (p Path) Dir() Path {
 }
 
 func (p Path) Join(parts ...string) Path {
-	if p.kind != PathKindRemote {
-		return p
+	if p.kind == PathKindLocal {
+		segments := append([]string{p.value}, parts...)
+		return NewLocalPath(filepath.Join(segments...))
 	}
 	segments := append([]string{p.value}, parts...)
 	return NewRemotePath(strings.Join(segments, "/"))
@@ -84,7 +88,6 @@ func cleanRemotePath(value string) string {
 	if value == "" {
 		return "/"
 	}
-	value = strings.ReplaceAll(value, "\\", "/")
 	absolute := strings.HasPrefix(value, "/")
 	parts := strings.Split(value, "/")
 	stack := make([]string, 0, len(parts))

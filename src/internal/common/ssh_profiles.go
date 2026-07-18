@@ -13,6 +13,7 @@ import (
 
 	"github.com/kevinburke/ssh_config"
 	"github.com/pelletier/go-toml/v2"
+	"github.com/pelletier/go-toml/v2/unstable"
 )
 
 const (
@@ -20,6 +21,8 @@ const (
 	SSHAuthMethodPassword            = "password"
 	SSHAuthMethodKeyboardInteractive = "keyboard-interactive"
 	defaultSSHPort                   = 22
+	maxSSHConfigIncludeDepth         = 5
+	sshProfilePassphraseKey          = "passphrase"
 )
 
 type SSHQuickConnectSource string
@@ -91,11 +94,11 @@ func DiscoverSSHQuickConnectProfiles(
 		resolvedOpts.SystemConfigPath = defaults.SystemConfigPath
 	}
 
-	userSource, userNotices, err := loadSSHConfigSource(resolvedOpts.UserConfigPath)
+	userSource, userNotices, err := loadSSHConfigSource(resolvedOpts.UserConfigPath, false)
 	if err != nil {
 		return nil, userNotices, err
 	}
-	systemSource, systemNotices, err := loadSSHConfigSource(resolvedOpts.SystemConfigPath)
+	systemSource, systemNotices, err := loadSSHConfigSource(resolvedOpts.SystemConfigPath, true)
 	if err != nil {
 		return nil, append(userNotices, systemNotices...), err
 	}
@@ -149,15 +152,18 @@ func SanitizeSSHProfileSecrets(filePath string, cfg *ConfigType) (bool, error) {
 	}
 
 	var rawData map[string]any
-	if err := toml.Unmarshal(data, &rawData); err != nil {
-		return false, fmt.Errorf("failed to decode config file for SSH profile sanitization: %w", err)
+	if decodeErr := toml.Unmarshal(data, &rawData); decodeErr != nil {
+		return false, fmt.Errorf("failed to decode config file for SSH profile sanitization: %w", decodeErr)
 	}
 
 	if !rawSSHProfilesContainSecrets(rawData) {
 		return false, nil
 	}
 
-	sanitizedData := stripSSHProfileSecretLines(data)
+	sanitizedData, err := stripSSHProfileSecretLines(data)
+	if err != nil {
+		return false, fmt.Errorf("failed to locate SSH profile secrets for sanitization: %w", err)
+	}
 	if err := writeFileAtomically(filePath, sanitizedData); err != nil {
 		return false, fmt.Errorf("failed to persist sanitized SSH profiles: %w", err)
 	}
@@ -197,7 +203,7 @@ func validateSSHConfigSection(section SSHConfigSection) error {
 	return nil
 }
 
-func loadSSHConfigSource(path string) (*discoveredSSHConfigSource, []SSHConfigNotice, error) {
+func loadSSHConfigSource(path string, system bool) (*discoveredSSHConfigSource, []SSHConfigNotice, error) {
 	if path == "" {
 		return nil, nil, nil
 	}
@@ -211,12 +217,26 @@ func loadSSHConfigSource(path string) (*discoveredSSHConfigSource, []SSHConfigNo
 	}
 
 	filteredData, notices := scanUnsupportedSSHConfigDirectives(path, data)
+	relativeIncludeDir := ""
+	if system {
+		relativeIncludeDir = filepath.Dir(path)
+		filteredData, err = expandSystemSSHConfigIncludes(
+			path,
+			[]byte(filteredData),
+			relativeIncludeDir,
+			make(map[string]struct{}),
+			0,
+		)
+		if err != nil {
+			return nil, notices, fmt.Errorf("expand system SSH config %q: %w", path, err)
+		}
+	}
 	config, err := ssh_config.Decode(strings.NewReader(filteredData))
 	if err != nil {
 		return nil, notices, fmt.Errorf("failed to parse SSH config %q: %w", path, err)
 	}
 
-	aliases, aliasErr := discoverSSHConfigAliases(path, []byte(filteredData), nil)
+	aliases, aliasErr := discoverSSHConfigAliases(path, []byte(filteredData), nil, relativeIncludeDir)
 	if aliasErr != nil {
 		return nil, notices, aliasErr
 	}
@@ -278,6 +298,9 @@ func resolveSSHConfigProfile(
 	identityFiles, err := resolveSSHConfigValues(alias, "IdentityFile", userSource, systemSource)
 	if err != nil {
 		return SSHQuickConnectProfile{}, err
+	}
+	if len(identityFiles) == 0 {
+		identityFiles = defaultOpenSSHIdentityFiles()
 	}
 
 	identitiesOnly, err := resolveSSHConfigBoolean(alias, "IdentitiesOnly", userSource, systemSource)
@@ -359,19 +382,29 @@ func resolveSSHConfigValues(
 	key string,
 	userSource, systemSource *discoveredSSHConfigSource,
 ) ([]string, error) {
+	values := make([]string, 0)
 	for _, source := range []*discoveredSSHConfigSource{userSource, systemSource} {
 		if source == nil || source.config == nil {
 			continue
 		}
-		values, err := source.config.GetAll(alias, key)
+		sourceValues, err := source.config.GetAll(alias, key)
 		if err != nil {
 			return nil, err
 		}
-		if values != nil {
-			return values, nil
+		if len(sourceValues) > 0 {
+			values = append(values, sourceValues...)
 		}
 	}
-	return nil, nil
+	return values, nil
+}
+
+func defaultOpenSSHIdentityFiles() []string {
+	return []string{
+		"~/.ssh/id_dsa",
+		"~/.ssh/id_ecdsa",
+		"~/.ssh/id_ed25519",
+		"~/.ssh/id_rsa",
+	}
 }
 
 func defaultSSHUser() string {
@@ -457,7 +490,12 @@ func extractSSHConfigAliases(config *ssh_config.Config) []string {
 }
 
 //nolint:gocognit // Recursive Include expansion requires cycle, glob, and alias de-duplication handling.
-func discoverSSHConfigAliases(path string, data []byte, visited map[string]struct{}) ([]string, error) {
+func discoverSSHConfigAliases(
+	path string,
+	data []byte,
+	visited map[string]struct{},
+	relativeIncludeDir string,
+) ([]string, error) {
 	if visited == nil {
 		visited = make(map[string]struct{})
 	}
@@ -493,7 +531,7 @@ func discoverSSHConfigAliases(path string, data []byte, visited map[string]struc
 				appendAlias(alias)
 			}
 		case strings.EqualFold(directive, "Include"):
-			includePaths, err := expandSSHIncludePaths(cleanPath, value)
+			includePaths, err := expandSSHIncludePaths(cleanPath, value, relativeIncludeDir)
 			if err != nil {
 				return nil, fmt.Errorf("expand SSH config include in %q: %w", cleanPath, err)
 			}
@@ -505,7 +543,12 @@ func discoverSSHConfigAliases(path string, data []byte, visited map[string]struc
 				if err != nil {
 					return nil, fmt.Errorf("read SSH config include %q: %w", includePath, err)
 				}
-				includedAliases, err := discoverSSHConfigAliases(includePath, includedData, visited)
+				includedAliases, err := discoverSSHConfigAliases(
+					includePath,
+					includedData,
+					visited,
+					relativeIncludeDir,
+				)
 				if err != nil {
 					return nil, err
 				}
@@ -521,7 +564,7 @@ func discoverSSHConfigAliases(path string, data []byte, visited map[string]struc
 	return aliases, nil
 }
 
-func expandSSHIncludePaths(sourcePath string, value string) ([]string, error) {
+func expandSSHIncludePaths(sourcePath string, value string, relativeIncludeDir string) ([]string, error) {
 	homeDir, homeErr := os.UserHomeDir()
 	patterns := strings.Fields(value)
 	paths := make([]string, 0)
@@ -529,6 +572,8 @@ func expandSSHIncludePaths(sourcePath string, value string) ([]string, error) {
 		pattern = strings.Trim(pattern, "\"'")
 		switch {
 		case filepath.IsAbs(pattern):
+		case relativeIncludeDir != "":
+			pattern = filepath.Join(relativeIncludeDir, pattern)
 		case strings.HasPrefix(pattern, "~/") || strings.HasPrefix(pattern, "~\\"):
 			if homeErr != nil {
 				return nil, homeErr
@@ -550,6 +595,62 @@ func expandSSHIncludePaths(sourcePath string, value string) ([]string, error) {
 		paths = append(paths, matches...)
 	}
 	return paths, nil
+}
+
+func expandSystemSSHConfigIncludes(
+	sourcePath string,
+	data []byte,
+	relativeIncludeDir string,
+	active map[string]struct{},
+	depth int,
+) (string, error) {
+	if depth > maxSSHConfigIncludeDepth {
+		return "", ssh_config.ErrDepthExceeded
+	}
+	cleanPath := filepath.Clean(sourcePath)
+	if _, ok := active[cleanPath]; ok {
+		return "", ssh_config.ErrDepthExceeded
+	}
+	active[cleanPath] = struct{}{}
+	defer delete(active, cleanPath)
+
+	var builder strings.Builder
+	scanner := bufio.NewScanner(strings.NewReader(string(data)))
+	for scanner.Scan() {
+		line := scanner.Text()
+		directive, value, ok := parseSSHDirective(line)
+		if !ok || !strings.EqualFold(directive, "Include") {
+			builder.WriteString(line)
+			builder.WriteByte('\n')
+			continue
+		}
+		includePaths, err := expandSSHIncludePaths(cleanPath, value, relativeIncludeDir)
+		if err != nil {
+			return "", err
+		}
+		for _, includePath := range includePaths {
+			//nolint:gosec // Paths intentionally come from the system SSH configuration.
+			includedData, readErr := os.ReadFile(includePath)
+			if readErr != nil {
+				return "", readErr
+			}
+			expanded, expandErr := expandSystemSSHConfigIncludes(
+				includePath,
+				includedData,
+				relativeIncludeDir,
+				active,
+				depth+1,
+			)
+			if expandErr != nil {
+				return "", expandErr
+			}
+			builder.WriteString(expanded)
+		}
+	}
+	if err := scanner.Err(); err != nil {
+		return "", err
+	}
+	return builder.String(), nil
 }
 
 func firstSSHConfigBlockHeader(rendered string) string {
@@ -826,53 +927,137 @@ func rawSSHProfilesContainSecrets(rawData map[string]any) bool {
 		return false
 	}
 
-	rawProfiles, ok := sshSection["profile"].([]any)
-	if !ok {
-		return false
-	}
-
-	for _, rawProfile := range rawProfiles {
-		profileMap, ok := rawProfile.(map[string]any)
-		if !ok {
-			continue
-		}
+	containsSecret := func(profileMap map[string]any) bool {
 		if _, ok := profileMap["password"]; ok {
 			return true
 		}
 		if _, ok := profileMap["passphrase"]; ok {
 			return true
 		}
+		return false
+	}
+
+	switch rawProfiles := sshSection["profile"].(type) {
+	case []any:
+		for _, rawProfile := range rawProfiles {
+			if profileMap, ok := rawProfile.(map[string]any); ok && containsSecret(profileMap) {
+				return true
+			}
+		}
+	case map[string]any:
+		return containsSecret(rawProfiles)
 	}
 
 	return false
 }
 
-func stripSSHProfileSecretLines(data []byte) []byte {
-	lines := strings.SplitAfter(string(data), "\n")
-	var builder strings.Builder
-	builder.Grow(len(data))
-	inSSHProfile := false
-	for _, line := range lines {
-		trimmed := strings.TrimSpace(strings.TrimSuffix(line, "\n"))
-		if strings.HasPrefix(trimmed, "[") {
-			header := strings.ToLower(strings.ReplaceAll(strings.ReplaceAll(trimmed, " ", ""), "\t", ""))
-			inSSHProfile = header == "[[ssh.profile]]"
-		}
-		if inSSHProfile && isSSHProfileSecretAssignment(trimmed) {
-			continue
-		}
-		builder.WriteString(line)
-	}
-	return []byte(builder.String())
+type tomlEditSpan struct {
+	start int
+	end   int
 }
 
-func isSSHProfileSecretAssignment(line string) bool {
-	assignment, _, ok := strings.Cut(line, "=")
-	if !ok {
-		return false
+func stripSSHProfileSecretLines(data []byte) ([]byte, error) {
+	parser := unstable.Parser{}
+	parser.Reset(data)
+	currentTable := []string(nil)
+	edits := make([]tomlEditSpan, 0)
+	for parser.NextExpression() {
+		expression := parser.Expression()
+		switch expression.Kind { //nolint:exhaustive // Only table declarations and assignments affect TOML paths.
+		case unstable.Table, unstable.ArrayTable:
+			currentTable = tomlNodeKey(expression)
+		case unstable.KeyValue:
+			path := append(slices.Clone(currentTable), tomlNodeKey(expression)...)
+			collectSSHProfileSecretEdits(expression, path, nil, &edits)
+		default:
+		}
 	}
-	key := strings.Trim(strings.TrimSpace(assignment), "\"'")
-	return strings.EqualFold(key, "password") || strings.EqualFold(key, "passphrase")
+	if err := parser.Error(); err != nil {
+		return nil, err
+	}
+
+	slices.SortFunc(edits, func(a, b tomlEditSpan) int { return b.start - a.start })
+	sanitized := slices.Clone(data)
+	for _, edit := range edits {
+		if edit.start < 0 || edit.end < edit.start || edit.end > len(sanitized) {
+			return nil, errors.New("invalid TOML sanitization span")
+		}
+		sanitized = append(sanitized[:edit.start], sanitized[edit.end:]...)
+	}
+	return sanitized, nil
+}
+
+func collectSSHProfileSecretEdits(
+	keyValue *unstable.Node,
+	path []string,
+	siblings []*unstable.Node,
+	edits *[]tomlEditSpan,
+) {
+	if isSSHProfileSecretPath(path) {
+		*edits = append(*edits, tomlKeyValueEditSpan(keyValue, siblings))
+		return
+	}
+	collectSSHProfileSecretValueEdits(keyValue.Value(), path, edits)
+}
+
+func collectSSHProfileSecretValueEdits(value *unstable.Node, path []string, edits *[]tomlEditSpan) {
+	switch value.Kind { //nolint:exhaustive // Scalar values cannot contain nested secret assignments.
+	case unstable.Array:
+		children := tomlNodeChildren(value)
+		for _, child := range children {
+			collectSSHProfileSecretValueEdits(child, path, edits)
+		}
+	case unstable.InlineTable:
+		children := tomlNodeChildren(value)
+		for _, child := range children {
+			childPath := append(slices.Clone(path), tomlNodeKey(child)...)
+			collectSSHProfileSecretEdits(child, childPath, children, edits)
+		}
+	default:
+	}
+}
+
+func tomlNodeKey(node *unstable.Node) []string {
+	key := node.Key()
+	parts := make([]string, 0)
+	for key.Next() {
+		parts = append(parts, string(key.Node().Data))
+	}
+	return parts
+}
+
+func tomlNodeChildren(node *unstable.Node) []*unstable.Node {
+	children := make([]*unstable.Node, 0)
+	iterator := node.Children()
+	for iterator.Next() {
+		children = append(children, iterator.Node())
+	}
+	return children
+}
+
+func isSSHProfileSecretPath(path []string) bool {
+	return len(path) == 3 && path[0] == "ssh" && path[1] == "profile" &&
+		(path[2] == SSHAuthMethodPassword || path[2] == sshProfilePassphraseKey)
+}
+
+func tomlKeyValueEditSpan(node *unstable.Node, siblings []*unstable.Node) tomlEditSpan {
+	start := int(node.Raw.Offset)
+	end := start + int(node.Raw.Length)
+	if len(siblings) == 0 {
+		return tomlEditSpan{start: start, end: end}
+	}
+	for i, sibling := range siblings {
+		if sibling != node {
+			continue
+		}
+		if i+1 < len(siblings) {
+			end = int(siblings[i+1].Raw.Offset)
+		} else if i > 0 {
+			start = int(siblings[i-1].Raw.Offset + siblings[i-1].Raw.Length)
+		}
+		break
+	}
+	return tomlEditSpan{start: start, end: end}
 }
 
 func writeFileAtomically(path string, data []byte) error {

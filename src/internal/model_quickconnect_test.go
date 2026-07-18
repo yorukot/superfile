@@ -29,6 +29,36 @@ func TestQuickConnectHotkeyOpensModal(t *testing.T) {
 	assert.True(t, m.IsOverlayModelOpen())
 }
 
+func TestQuickConnectOpenFailureShowsNotification(t *testing.T) {
+	dir := t.TempDir()
+	m := defaultTestModel(dir)
+	m.quickConnect.SetDiscoveryOptions(common.SSHConfigDiscoveryOptions{
+		UserConfigPath:   dir,
+		SystemConfigPath: filepath.Join(t.TempDir(), "missing-system-config"),
+	})
+
+	m.openQuickConnect()
+
+	assert.True(t, m.notifyModel.IsOpen())
+	assert.Equal(t, "SSH quick-connect failed", m.notifyModel.GetTitle())
+}
+
+func TestQuickConnectPaneAssignmentFailureUnregistersSession(t *testing.T) {
+	m := defaultTestModel(t.TempDir())
+	session := newMovementRemoteSession()
+	location := session.Root()
+	m.fileModel.FocusedPanelIndex = len(m.fileModel.FilePanels)
+
+	m.applyQuickConnectAction(quickconnect.Action{
+		Type:     quickconnect.ActionConnected,
+		Session:  session,
+		Location: location,
+	})
+
+	_, registered := m.fileModel.Sessions.Get(location.SessionID)
+	assert.False(t, registered)
+}
+
 func TestRemoteStatusRendersInPanelHeaderAndSidebar(t *testing.T) {
 	dir := filepath.Join(testDir, "TestRemoteStatusRendersInPanelHeaderAndSidebar")
 	utils.SetupDirectories(t, dir)
@@ -51,8 +81,8 @@ func TestRemoteStatusRendersInPanelHeaderAndSidebar(t *testing.T) {
 	panelRender := m.getFocusedFilePanel().Render(true)
 	sidebarRender := m.sidebarRender()
 
-	assert.Contains(t, panelRender, "sf-e2e:/tmp/sf-remote connected")
-	assert.Contains(t, sidebarRender, "sf-e2e")
+	assert.Contains(t, panelRender, "ssh://e2e@127.0.0.1:/tmp/sf-remote connected")
+	assert.Contains(t, sidebarRender, "ssh://e2e@127.0.0.1")
 	assert.Contains(t, sidebarRender, "connected")
 }
 

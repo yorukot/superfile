@@ -67,6 +67,49 @@ func TestTransferEngineLocalToRemoteUploadChecksumsAndProcessbar(t *testing.T) {
 	}
 }
 
+func TestValidateTransferTopologyRejectsSameAndNestedPaths(t *testing.T) {
+	tests := []struct {
+		name        string
+		source      Location
+		destination Location
+	}{
+		{
+			name:        "same local path",
+			source:      localLocation(filepath.Join("tmp", "same")),
+			destination: localLocation(filepath.Join("tmp", "same")),
+		},
+		{
+			name:        "nested local path",
+			source:      localLocation(filepath.Join("tmp", "source")),
+			destination: localLocation(filepath.Join("tmp", "source", "nested")),
+		},
+		{
+			name:        "nested same-session remote path",
+			source:      remoteLocation("session", "/source"),
+			destination: remoteLocation("session", "/source/nested"),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			require.ErrorIs(t, ValidateTransferTopology(tt.source, tt.destination), ErrUnsupported)
+		})
+	}
+}
+
+func TestChecksumSessionPathHonorsCancellationBetweenReads(t *testing.T) {
+	filePath := filepath.Join(t.TempDir(), "large.bin")
+	require.NoError(t, os.WriteFile(filePath, bytes.Repeat([]byte("x"), 2*1024*1024), 0o600))
+	baseSession := newLocalTestSession(t, filepath.Dir(filePath))
+	session := &slowReadSession{Session: baseSession, delay: 5 * time.Millisecond, chunkSize: 1024}
+	ctx, cancel := context.WithCancel(context.Background())
+	time.AfterFunc(15*time.Millisecond, cancel)
+
+	started := time.Now()
+	_, err := checksumSessionPath(ctx, session, NewLocalPath(filePath), OperationCopy)
+	require.ErrorIs(t, err, ErrCanceled)
+	assert.Less(t, time.Since(started), time.Second)
+}
+
 func TestTransferEngineRemoteToLocalDownloadChecksumsAndProcessbar(t *testing.T) {
 	fixture := sshtest.Start(t)
 	resolver := newTransferTestResolver(fixture)

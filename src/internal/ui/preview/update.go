@@ -29,6 +29,7 @@ type UpdateMsg struct {
 func NewRemoteUpdateMsg(
 	location string,
 	content string,
+	rawTransmit string,
 	width int,
 	height int,
 	reqID int,
@@ -39,6 +40,7 @@ func NewRemoteUpdateMsg(
 	return UpdateMsg{
 		location:          location,
 		content:           content,
+		rawTransmit:       rawTransmit,
 		contentWidth:      width,
 		contentHeight:     height,
 		reqID:             reqID,
