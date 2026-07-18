@@ -425,6 +425,7 @@ func (m *model) applyQuickConnectAction(action quickconnect.Action) tea.Cmd {
 			Reconnect:   action.Reconnect,
 		})
 		if err := m.fileModel.SetPaneLocation(m.fileModel.FocusedPanelIndex, action.Location); err != nil {
+			m.fileModel.Sessions.Remove(action.Location.SessionID)
 			_ = action.Session.Close()
 			slog.Error("failed to set quick-connect pane location", "error", err)
 			return nil
@@ -688,10 +689,13 @@ func (m *model) quitSuperfile(cdOnQuit bool) {
 	}
 
 	// cd on quit
-	currentDir := m.getFocusedFilePanel().Location
-	variable.SetLastDir(currentDir)
+	panel := m.getFocusedFilePanel()
+	currentDir := panel.Location
+	if panel.CurrentLocation().Provider == filesystem.ProviderLocal {
+		variable.SetLastDir(currentDir)
+	}
 
-	if cdOnQuit {
+	if cdOnQuit && panel.CurrentLocation().Provider == filesystem.ProviderLocal {
 		// escape single quote
 		currentDir = strings.ReplaceAll(currentDir, "'", "'\\''")
 		err := os.WriteFile(variable.LastDirFile, []byte("cd '"+currentDir+"'"), utils.ConfigFilePerm)

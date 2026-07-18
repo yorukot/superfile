@@ -249,6 +249,7 @@ func TestChangingPanelLocationInvalidatesInflightRefresh(t *testing.T) {
 	panel := newRemoteTestPanel(t)
 	requestID, started := panel.BeginElementsLoading(false, time.Now())
 	require.True(t, started)
+	requestContext := panel.elementsContext
 
 	location := panel.CurrentLocation()
 	location.Path = filesystem.NewRemotePath("/tmp/sf-remote/nested")
@@ -257,6 +258,11 @@ func TestChangingPanelLocationInvalidatesInflightRefresh(t *testing.T) {
 	accepted, _ := panel.FinishElementsLoading(requestID)
 	assert.False(t, accepted)
 	assert.True(t, panel.LastTimeGetElement.IsZero())
+	select {
+	case <-requestContext.Done():
+	default:
+		t.Fatal("invalidating an in-flight refresh did not cancel its context")
+	}
 }
 
 func TestSingleItemSelect(t *testing.T) {

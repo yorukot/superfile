@@ -87,7 +87,8 @@ func (m *model) enterPanel() tea.Cmd {
 
 func (m *model) remoteNavigationCmd(target filesystem.Path) tea.Cmd {
 	panelIndex := m.fileModel.FocusedPanelIndex
-	source := m.getFocusedFilePanel().CurrentLocation()
+	panel := m.getFocusedFilePanel()
+	source := panel.CurrentLocation()
 	sessionState, err := m.fileModel.PaneSession(panelIndex)
 	reqID := m.nextIoReqCnt()
 	if err != nil || sessionState.Browser == nil {
@@ -100,15 +101,33 @@ func (m *model) remoteNavigationCmd(target filesystem.Path) tea.Cmd {
 			)
 		}
 		return func() tea.Msg {
-			return NewRemoteNavigationMsg(panelIndex, source, target, 0, err, reqID)
+			return NewRemoteNavigationMsg(panelIndex, source, target, 0, nil, time.Time{}, err, reqID)
 		}
 	}
 	browser := sessionState.Browser
+	panelCopy := *panel
+	displayDotFiles := m.fileModel.DisplayDotFiles
 	return func() tea.Msg {
 		ctx, cancel := context.WithTimeout(context.Background(), remoteNavigationTimeout)
 		defer cancel()
-		_, listErr := browser.List(ctx, target)
-		return NewRemoteNavigationMsg(panelIndex, source, target, sessionState.Generation, listErr, reqID)
+		entries, listErr := browser.List(ctx, target)
+		var elements []filepanel.Element
+		if listErr == nil {
+			listErr = panelCopy.ApplyCurrentFilePanelDir(target.String())
+		}
+		if listErr == nil {
+			elements, listErr = panelCopy.ElementsFromDirectoryEntries(ctx, entries, displayDotFiles)
+		}
+		return NewRemoteNavigationMsg(
+			panelIndex,
+			source,
+			target,
+			sessionState.Generation,
+			elements,
+			time.Now(),
+			listErr,
+			reqID,
+		)
 	}
 }
 

@@ -34,14 +34,15 @@ type SessionState struct {
 }
 
 type SessionRegistry struct {
-	mu       sync.RWMutex
-	sessions map[filesystem.SessionID]SessionState
+	mu             sync.RWMutex
+	sessions       map[filesystem.SessionID]SessionState
+	nextGeneration uint64
 }
 
 func NewSessionRegistry() *SessionRegistry {
 	registry := &SessionRegistry{sessions: make(map[filesystem.SessionID]SessionState)}
 	localSession, _ := localSessionProvider.Open(context.Background(), filepanel.NewLocalLocation(""))
-	_, _ = registry.Register(SessionState{
+	_, _, _ = registry.Register(SessionState{
 		ID:          filepanel.LocalSessionID,
 		Provider:    filesystem.ProviderLocal,
 		Label:       "local",
@@ -65,17 +66,15 @@ func normalizeSessionState(session SessionState) SessionState {
 	return session
 }
 
-func (r *SessionRegistry) Register(session SessionState) (SessionState, bool) {
+func (r *SessionRegistry) Register(session SessionState) (SessionState, SessionState, bool) {
 	session = normalizeSessionState(session)
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	previous, replaced := r.sessions[session.ID]
-	session.Generation = 1
-	if replaced {
-		session.Generation = previous.Generation + 1
-	}
+	r.nextGeneration++
+	session.Generation = r.nextGeneration
 	r.sessions[session.ID] = session
-	return previous, replaced
+	return session, previous, replaced
 }
 
 func (r *SessionRegistry) Get(id filesystem.SessionID) (SessionState, bool) {
@@ -181,17 +180,26 @@ func (m *Model) RegisterSession(session SessionState) {
 	if m.Sessions == nil {
 		m.Sessions = NewSessionRegistry()
 	}
-	previous, replaced := m.Sessions.Register(session)
-	if replaced && previous.Browser != nil && previous.Browser != session.Browser {
+	registered, previous, replaced := m.Sessions.Register(session)
+	if replaced && previous.Browser != nil && previous.Browser != registered.Browser {
 		if err := previous.Browser.Close(); err != nil {
-			slog.Warn("failed to close replaced filesystem session", "session", session.ID, "error", err)
+			slog.Warn("failed to close replaced filesystem session", "session", registered.ID, "error", err)
 		}
 	}
 	for i := range m.FilePanels {
-		if m.FilePanels[i].CurrentLocation().SessionID == session.ID {
+		panelLocation := m.FilePanels[i].CurrentLocation()
+		panelSessionID := panelLocation.SessionID
+		if panelSessionID == "" {
+			panelSessionID = filesystem.SessionID(panelLocation.Label)
+		}
+		if panelSessionID == registered.ID {
+			if panelLocation.SessionID == "" {
+				panelLocation.SessionID = registered.ID
+				m.FilePanels[i].SetPaneLocation(panelLocation)
+			}
 			m.FilePanels[i].InvalidateElementsLoading()
-			m.FilePanels[i].SetPaneSession(session.Browser)
-			m.FilePanels[i].SetPaneConnectionStatus(string(session.Status))
+			m.FilePanels[i].SetPaneSession(registered.Browser)
+			m.FilePanels[i].SetPaneConnectionStatus(string(registered.Status))
 		}
 	}
 }

@@ -33,7 +33,9 @@ func (m *Model) UpdateCurrentFilePanelDir(path string) error {
 	if err != nil {
 		return err
 	}
-	info, err := session.Stat(context.Background(), targetPath)
+	ctx, cancel := context.WithTimeout(context.Background(), panelIOTimeout)
+	defer cancel()
+	info, err := session.Stat(ctx, targetPath)
 	if err != nil {
 		return err
 	}

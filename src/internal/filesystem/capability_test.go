@@ -65,3 +65,13 @@ func TestCapabilityMatrixSupportsRemotePathOperations(t *testing.T) {
 		}
 	}
 }
+
+func TestCapabilityMatrixTreatsLocalOnlyAsLocalSupport(t *testing.T) {
+	matrix := V1CapabilityMatrix()
+	if !matrix.SupportsLocal(OperationChmod) {
+		t.Fatal("local-only chmod should be locally supported")
+	}
+	if err := matrix.RequireLocal(ProviderLocal, OperationChmod, NewLocalPath("file")); err != nil {
+		t.Fatalf("RequireLocal(chmod) returned %v", err)
+	}
+}

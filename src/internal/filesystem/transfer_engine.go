@@ -8,17 +8,20 @@ import (
 	"fmt"
 	"io"
 	"os"
+	posixpath "path"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
 )
 
 const (
-	transferProgressChunkBytes int64 = 256 * 1024
-	transferProgressBuffer           = 64
-	transferCleanupTimeout           = 5 * time.Second
+	transferProgressChunkBytes  int64 = 256 * 1024
+	transferProgressBuffer            = 64
+	transferCleanupTimeout            = 5 * time.Second
+	transferChecksumBufferBytes       = 32 * 1024
 )
 
 var nextTransferID atomic.Uint64 //nolint:gochecknoglobals // Atomic process-wide transfer ID sequence.
@@ -41,7 +44,72 @@ func ValidateTransferTopology(source, destination Location) error {
 			"cross-session remote to remote transfer is deferred for v1",
 		)
 	}
+	if locationsShareFilesystem(source, destination) && pathsOverlap(source.Path, destination.Path, true) {
+		return NewUnsupportedError(
+			source.Provider,
+			OperationCopy,
+			destination.Path,
+			"source and destination must not be the same path or nested within the source",
+		)
+	}
 	return nil
+}
+
+func locationsShareFilesystem(source, destination Location) bool {
+	if source.Provider == ProviderLocal && destination.Provider == ProviderLocal {
+		return true
+	}
+	return source.Provider == destination.Provider && source.SessionID == destination.SessionID
+}
+
+func pathsOverlap(source, destination Path, rejectDescendant bool) bool {
+	if source.Kind() != destination.Kind() {
+		return false
+	}
+	if source.IsLocal() {
+		sourcePath, sourceErr := canonicalLocalPath(source.String())
+		destinationPath, destinationErr := canonicalLocalPath(destination.String())
+		if sourceErr != nil || destinationErr != nil {
+			return filepath.Clean(source.String()) == filepath.Clean(destination.String())
+		}
+		relative, err := filepath.Rel(sourcePath, destinationPath)
+		return err == nil && (relative == "." || rejectDescendant && relative != ".." &&
+			!strings.HasPrefix(relative, ".."+string(filepath.Separator)))
+	}
+
+	sourcePath := posixpath.Clean(source.String())
+	destinationPath := posixpath.Clean(destination.String())
+	if sourcePath == destinationPath {
+		return true
+	}
+	return rejectDescendant && sourcePath != "/" && strings.HasPrefix(destinationPath, sourcePath+"/") ||
+		rejectDescendant && sourcePath == "/" && strings.HasPrefix(destinationPath, "/")
+}
+
+func canonicalLocalPath(value string) (string, error) {
+	absolute, err := filepath.Abs(value)
+	if err != nil {
+		return "", err
+	}
+	candidate := absolute
+	suffix := make([]string, 0)
+	for {
+		resolved, resolveErr := filepath.EvalSymlinks(candidate)
+		if resolveErr == nil {
+			segments := make([]string, 1, len(suffix)+1)
+			segments[0] = resolved
+			for i := len(suffix) - 1; i >= 0; i-- {
+				segments = append(segments, suffix[i])
+			}
+			return filepath.Join(segments...), nil
+		}
+		parent := filepath.Dir(candidate)
+		if parent == candidate {
+			return filepath.Clean(absolute), nil
+		}
+		suffix = append(suffix, filepath.Base(candidate))
+		candidate = parent
+	}
 }
 
 func InferTransferDirection(source, destination Location) TransferDirection {
@@ -538,8 +606,22 @@ func checksumSessionPath(ctx context.Context, session Session, path Path, operat
 	defer reader.Close()
 
 	hasher := sha256.New()
-	if _, err = io.Copy(hasher, reader); err != nil {
-		return "", normalizeTransferError(session.Provider(), operation, path, err)
+	buffer := make([]byte, transferChecksumBufferBytes)
+	for {
+		if err = ctx.Err(); err != nil {
+			return "", normalizeTransferError(session.Provider(), operation, path, err)
+		}
+		var read int
+		read, err = reader.Read(buffer)
+		if read > 0 {
+			_, _ = hasher.Write(buffer[:read])
+		}
+		if errors.Is(err, io.EOF) {
+			break
+		}
+		if err != nil {
+			return "", normalizeTransferError(session.Provider(), operation, path, err)
+		}
 	}
 	return hex.EncodeToString(hasher.Sum(nil)), nil
 }

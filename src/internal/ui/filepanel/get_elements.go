@@ -36,7 +36,15 @@ func (m *Model) getDirectoryElementsWithContext(ctx context.Context, displayDotF
 	if err != nil {
 		return nil, err
 	}
+	return m.ElementsFromDirectoryEntries(ctx, dirEntries, displayDotFile)
+}
 
+func (m *Model) ElementsFromDirectoryEntries(
+	ctx context.Context,
+	dirEntries []filesystem.Entry,
+	displayDotFile bool,
+) ([]Element, error) {
+	dirEntries = slices.Clone(dirEntries)
 	dirEntries = slices.DeleteFunc(dirEntries, func(e filesystem.Entry) bool {
 		// Entries not needed to be considered
 		return strings.HasPrefix(e.Name, ".") && !displayDotFile
@@ -162,6 +170,7 @@ func (m *Model) BeginElementsLoading(force bool, now time.Time) (uint64, bool) {
 	m.elementsRequestID++
 	m.elementsLoading = true
 	m.elementsRefreshPending = false
+	m.elementsContext, m.elementsCancel = context.WithTimeout(context.Background(), panelIOTimeout)
 	m.LastTimeGetElement = now
 	return m.elementsRequestID, true
 }
@@ -170,6 +179,11 @@ func (m *Model) FinishElementsLoading(requestID uint64) (bool, bool) {
 	if !m.elementsLoading || requestID != m.elementsRequestID {
 		return false, false
 	}
+	if m.elementsCancel != nil {
+		m.elementsCancel()
+	}
+	m.elementsContext = nil
+	m.elementsCancel = nil
 	m.elementsLoading = false
 	pending := m.elementsRefreshPending
 	m.elementsRefreshPending = false
@@ -177,6 +191,11 @@ func (m *Model) FinishElementsLoading(requestID uint64) (bool, bool) {
 }
 
 func (m *Model) InvalidateElementsLoading() {
+	if m.elementsCancel != nil {
+		m.elementsCancel()
+	}
+	m.elementsContext = nil
+	m.elementsCancel = nil
 	m.LastTimeGetElement = time.Time{}
 	m.elementsLoading = false
 	m.elementsRefreshPending = false
@@ -184,6 +203,9 @@ func (m *Model) InvalidateElementsLoading() {
 }
 
 func (m *Model) LoadElements(displayDotFile bool) ([]Element, error) {
+	if m.elementsContext != nil {
+		return m.getElementsWithContext(m.elementsContext, displayDotFile)
+	}
 	return m.getElements(displayDotFile)
 }
 
@@ -202,6 +224,10 @@ func (m *Model) ApplyLoadedElements(elements []Element, loadedAt time.Time) {
 func (m *Model) getElements(displayDotFile bool) ([]Element, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), panelIOTimeout)
 	defer cancel()
+	return m.getElementsWithContext(ctx, displayDotFile)
+}
+
+func (m *Model) getElementsWithContext(ctx context.Context, displayDotFile bool) ([]Element, error) {
 	if m.SearchBar.Value() != "" {
 		return m.getDirectoryElementsBySearchWithContext(ctx, displayDotFile)
 	}

@@ -156,6 +156,107 @@ passphrase = "secret-passphrase"
 	assert.NotContains(t, rawProfile, "passphrase")
 }
 
+func TestSanitizeSSHProfileSecretsHandlesInlineTablesAndMultilineValues(t *testing.T) {
+	tests := []struct {
+		name   string
+		config string
+	}{
+		{
+			name: "inline profile array",
+			config: `ssh.profile = [
+  { name = "inline-one", host = "one.example", password = "inline-password", port = 22 },
+  { name = "inline-two", host = "two.example", passphrase = "inline-passphrase", port = 22 },
+]
+
+[unrelated]
+password = "keep-this"
+`,
+		},
+		{
+			name: "multiline profile secrets",
+			config: `[[ssh.profile]]
+name = "multiline"
+host = "example.com"
+password = """first secret line
+second secret line
+"""
+passphrase = '''another
+multiline secret
+'''
+port = 22
+`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			configPath := filepath.Join(t.TempDir(), "config.toml")
+			require.NoError(t, os.WriteFile(configPath, []byte(tt.config), utils.ConfigFilePerm))
+
+			removed, err := SanitizeSSHProfileSecrets(configPath, &ConfigType{})
+			require.NoError(t, err)
+			assert.True(t, removed)
+
+			sanitized, err := os.ReadFile(configPath)
+			require.NoError(t, err)
+			assert.NotContains(t, string(sanitized), "inline-password")
+			assert.NotContains(t, string(sanitized), "inline-passphrase")
+			assert.NotContains(t, string(sanitized), "first secret line")
+			assert.NotContains(t, string(sanitized), "another\nmultiline secret")
+			if strings.Contains(tt.config, "keep-this") {
+				assert.Contains(t, string(sanitized), `password = "keep-this"`)
+			}
+
+			var rawData map[string]any
+			require.NoError(t, toml.Unmarshal(sanitized, &rawData))
+			assert.False(t, rawSSHProfilesContainSecrets(rawData))
+		})
+	}
+}
+
+func TestDiscoverSSHQuickConnectProfilesResolvesSystemRelativeIncludes(t *testing.T) {
+	systemDir := t.TempDir()
+	require.NoError(t, os.MkdirAll(filepath.Join(systemDir, "conf.d"), 0o700))
+	require.NoError(t, os.WriteFile(
+		filepath.Join(systemDir, "conf.d", "included.conf"),
+		[]byte("Host system-relative\n  HostName 192.0.2.40\n"),
+		0o600,
+	))
+	systemPath := filepath.Join(systemDir, "ssh_config")
+	require.NoError(t, os.WriteFile(systemPath, []byte("Include conf.d/*.conf\n"), 0o600))
+
+	profiles, _, err := DiscoverSSHQuickConnectProfiles(&ConfigType{}, SSHConfigDiscoveryOptions{
+		UserConfigPath:   filepath.Join(t.TempDir(), "missing-user-config"),
+		SystemConfigPath: systemPath,
+	})
+	require.NoError(t, err)
+	require.Len(t, profiles, 1)
+	assert.Equal(t, "system-relative", profiles[0].Name)
+	assert.Equal(t, "192.0.2.40", profiles[0].Host)
+}
+
+func TestDiscoverSSHQuickConnectProfilesCombinesUserAndSystemIdentities(t *testing.T) {
+	dir := t.TempDir()
+	userIdentity := filepath.Join(dir, "id_user")
+	systemIdentity := filepath.Join(dir, "id_system")
+	userPath := filepath.Join(dir, "user_config")
+	systemPath := filepath.Join(dir, "system_config")
+	require.NoError(t, os.WriteFile(userPath, []byte(
+		"Host combined\n  HostName 192.0.2.50\n  IdentityFile "+userIdentity+"\n",
+	), 0o600))
+	require.NoError(t, os.WriteFile(systemPath, []byte(
+		"Host combined\n  IdentityFile "+systemIdentity+"\n",
+	), 0o600))
+
+	profiles, _, err := DiscoverSSHQuickConnectProfiles(&ConfigType{}, SSHConfigDiscoveryOptions{
+		UserConfigPath:   userPath,
+		SystemConfigPath: systemPath,
+	})
+	require.NoError(t, err)
+	require.Len(t, profiles, 1)
+	assert.Equal(t, []string{userIdentity, systemIdentity}, profiles[0].IdentityFiles)
+}
+
 func TestDiscoverSSHQuickConnectProfilesIncludesAliasesAndOpenSSHDefaults(t *testing.T) {
 	homeDir := t.TempDir()
 	t.Setenv("HOME", homeDir)
@@ -181,8 +282,8 @@ func TestDiscoverSSHQuickConnectProfilesIncludesAliasesAndOpenSSHDefaults(t *tes
 	assert.Equal(t, "192.0.2.10", profile.Host)
 	assert.NotEmpty(t, profile.User)
 	assert.Equal(t, 22, profile.Port)
-	assert.Empty(t, profile.IdentityFile)
-	assert.Empty(t, profile.IdentityFiles)
+	assert.Equal(t, "~/.ssh/id_dsa", profile.IdentityFile)
+	assert.Equal(t, defaultOpenSSHIdentityFiles(), profile.IdentityFiles)
 	assert.Equal(t, "pinned-work", profile.HostKeyAlias)
 }
 

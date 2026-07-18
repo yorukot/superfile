@@ -39,7 +39,7 @@ func (m *Model) DisplayLocation() string {
 	if location.Provider == filesystem.ProviderLocal {
 		return location.Path.String()
 	}
-	return fmt.Sprintf("%s:%s", location.SessionID, location.Path.String())
+	return fmt.Sprintf("%s:%s", locationDisplayLabel(location), location.Path.String())
 }
 
 func (m *Model) SetPaneConnectionStatus(status string) {
@@ -67,7 +67,14 @@ func (m *Model) RemoteSidebarStatusText() string {
 	if status == "" {
 		status = "connected"
 	}
-	return fmt.Sprintf("%s %s", location.SessionID, status)
+	return fmt.Sprintf("%s %s", locationDisplayLabel(location), status)
+}
+
+func locationDisplayLabel(location filesystem.Location) string {
+	if strings.TrimSpace(location.Label) != "" {
+		return location.Label
+	}
+	return string(location.SessionID)
 }
 
 func (m *Model) DisplayLocationWithStatus() string {

@@ -165,10 +165,11 @@ func (m *Model) GetFilePreviewCmd(forcePreviewRender bool) tea.Cmd {
 			ctx, cancel := context.WithTimeout(context.Background(), remotePreviewTimeout)
 			defer cancel()
 			text, previewErr := remotePreviewText(ctx, browser, selectedItem.Path, selectedItem.Directory)
-			content, _ := m.FilePreview.RenderTextPreviewWithDimension(text, height, width)
+			content, rawTransmit := m.FilePreview.RenderTextPreviewWithDimension(text, height, width)
 			return preview.NewRemoteUpdateMsg(
 				selectedItem.Location,
 				content,
+				rawTransmit,
 				width,
 				height,
 				reqCnt,
@@ -221,13 +222,20 @@ func remotePreviewText(
 		return "Remote preview error: " + err.Error(), err
 	}
 	if len(data) > remotePreviewLimit {
-		data = data[:remotePreviewLimit]
-		data = append(data, []byte("\n\n[preview truncated at 1 MiB]")...)
+		data = truncateRemotePreviewData(data)
 	}
 	if !utf8.Valid(data) || bytes.IndexByte(data, 0) >= 0 {
 		return "Binary remote file preview is not supported.", nil
 	}
 	return string(data), nil
+}
+
+func truncateRemotePreviewData(data []byte) []byte {
+	data = data[:remotePreviewLimit]
+	for removed := 0; removed < utf8.UTFMax-1 && !utf8.Valid(data); removed++ {
+		data = data[:len(data)-1]
+	}
+	return append(data, []byte("\n\n[preview truncated at 1 MiB]")...)
 }
 
 func (m *Model) ToggleDotFile() tea.Cmd {

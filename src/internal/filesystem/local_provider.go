@@ -94,7 +94,7 @@ func (s *LocalSession) List(ctx context.Context, path Path) ([]Entry, error) {
 
 	entries, err := os.ReadDir(localPath)
 	if err != nil {
-		return nil, err
+		return nil, mapLocalError(OperationList, path, err)
 	}
 
 	result := make([]Entry, 0, len(entries))
@@ -102,7 +102,7 @@ func (s *LocalSession) List(ctx context.Context, path Path) ([]Entry, error) {
 		entryPath := filepath.Join(localPath, entry.Name())
 		info, infoErr := os.Lstat(entryPath)
 		if infoErr != nil {
-			return nil, infoErr
+			return nil, mapLocalError(OperationList, NewLocalPath(entryPath), infoErr)
 		}
 		result = append(result, Entry{
 			Name: entry.Name(),
@@ -126,7 +126,7 @@ func (s *LocalSession) Stat(ctx context.Context, path Path) (Stat, error) {
 
 	info, err := os.Lstat(localPath)
 	if err != nil {
-		return Stat{}, err
+		return Stat{}, mapLocalError(OperationStat, path, err)
 	}
 
 	return newLocalStat(localPath, info), nil
@@ -142,7 +142,11 @@ func (s *LocalSession) Read(ctx context.Context, path Path) (io.ReadCloser, erro
 		return nil, err
 	}
 
-	return os.Open(localPath)
+	file, err := os.Open(localPath)
+	if err != nil {
+		return nil, mapLocalError(OperationPreviewRead, path, err)
+	}
+	return file, nil
 }
 
 func (s *LocalSession) Create(ctx context.Context, path Path, reader io.Reader, options CreateOptions) error {
@@ -172,14 +176,11 @@ func (s *LocalSession) Create(ctx context.Context, path Path, reader io.Reader, 
 		}
 		return err
 	}
-	defer file.Close()
-
-	if reader == nil {
-		return nil
+	var writeErr error
+	if reader != nil {
+		_, writeErr = io.Copy(file, reader)
 	}
-
-	_, err = io.Copy(file, reader)
-	return err
+	return errors.Join(writeErr, file.Close())
 }
 
 func (s *LocalSession) Mkdir(ctx context.Context, path Path, options MkdirOptions) error {
@@ -198,10 +199,10 @@ func (s *LocalSession) Mkdir(ctx context.Context, path Path, options MkdirOption
 	}
 
 	if options.Parents {
-		return os.MkdirAll(localPath, mode)
+		return mapLocalError(OperationMkdir, path, os.MkdirAll(localPath, mode))
 	}
 
-	return os.Mkdir(localPath, mode)
+	return mapLocalError(OperationMkdir, path, os.Mkdir(localPath, mode))
 }
 
 func (s *LocalSession) Rename(ctx context.Context, source Path, destination Path, options RenameOptions) error {
@@ -219,14 +220,18 @@ func (s *LocalSession) Rename(ctx context.Context, source Path, destination Path
 	}
 
 	if !options.Overwrite {
-		if _, statErr := os.Stat(destinationPath); statErr == nil {
+		renameErr := renameNoReplace(sourcePath, destinationPath)
+		if errors.Is(renameErr, os.ErrExist) {
 			return NewConflictError(ProviderLocal, OperationRename, destination, "destination already exists")
-		} else if !errors.Is(statErr, os.ErrNotExist) {
-			return statErr
 		}
+		if errors.Is(renameErr, errNoReplaceUnsupported) {
+			return NewUnsupportedError(ProviderLocal, OperationRename, destination,
+				"atomic no-replace rename is not supported on this platform")
+		}
+		return mapLocalError(OperationRename, source, renameErr)
 	}
 
-	return os.Rename(sourcePath, destinationPath)
+	return mapLocalError(OperationRename, source, os.Rename(sourcePath, destinationPath))
 }
 
 func (s *LocalSession) Delete(ctx context.Context, path Path, options DeleteOptions) error {
@@ -240,14 +245,14 @@ func (s *LocalSession) Delete(ctx context.Context, path Path, options DeleteOpti
 	}
 
 	if options.UseTrash {
-		return s.moveToTrash(localPath)
+		return mapLocalError(OperationDeleteFile, path, s.moveToTrash(localPath))
 	}
 
 	if options.Recursive {
-		return os.RemoveAll(localPath)
+		return mapLocalError(OperationDeleteDir, path, os.RemoveAll(localPath))
 	}
 
-	return os.Remove(localPath)
+	return mapLocalError(OperationDeleteFile, path, os.Remove(localPath))
 }
 
 func (s *LocalSession) Copy(ctx context.Context, source Path, destination Path, options CopyOptions) error {
@@ -322,7 +327,7 @@ func (s *LocalSession) Chmod(ctx context.Context, path Path, mode os.FileMode) e
 		return err
 	}
 
-	return os.Chmod(localPath, mode)
+	return mapLocalError(OperationChmod, path, os.Chmod(localPath, mode))
 }
 
 func (s *LocalSession) Transfer(_ context.Context, request TransferRequest) (Transfer, error) {
@@ -362,6 +367,10 @@ func (s *LocalSession) copyPath(
 	sourceInfo, err := os.Stat(sourcePath)
 	if err != nil {
 		return fmt.Errorf("failed to stat source: %w", err)
+	}
+	if pathsOverlap(source, destination, sourceInfo.IsDir()) {
+		return NewUnsupportedError(ProviderLocal, OperationCopy, destination,
+			"source and destination must not be the same path or nested within the source")
 	}
 
 	if sourceInfo.IsDir() {
@@ -469,6 +478,32 @@ func (s *LocalSession) copyFile(
 
 func (s *LocalSession) moveToTrash(localPath string) error {
 	_, err := internaltrash.Move(localPath)
+	return err
+}
+
+func mapLocalError(operation Operation, path Path, err error) error {
+	if err == nil {
+		return nil
+	}
+	if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+		return NewCanceledError(ProviderLocal, operation, path, err.Error())
+	}
+	if errors.Is(err, os.ErrPermission) {
+		return NewPermissionError(ProviderLocal, operation, path, err.Error())
+	}
+	if errors.Is(err, os.ErrNotExist) {
+		return NewNotFoundError(ProviderLocal, operation, path, err.Error())
+	}
+	var pathErr *os.PathError
+	if errors.As(err, &pathErr) {
+		return &OperationError{
+			Kind:      pathErr.Err,
+			Provider:  ProviderLocal,
+			Operation: operation,
+			Path:      path,
+			Message:   err.Error(),
+		}
+	}
 	return err
 }
 

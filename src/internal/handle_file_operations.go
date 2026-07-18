@@ -73,6 +73,7 @@ func (m *model) panelCreateNewFile() {
 	m.typingModal.location = panel.Location
 	m.typingModal.paneLocation = panel.CurrentLocation()
 	m.typingModal.open = true
+	m.typingModal.submitting = false
 	m.typingModal.textInput = common.GenerateNewFileTextInput()
 	m.firstTextInput = true
 }
@@ -166,9 +167,9 @@ func (m *model) deleteProviderOperation(
 		slog.Error("Cannot spawn a new remote delete process", "error", err)
 		return NewProviderDeleteOperationMsg(processbar.Failed, items[0], err, reqID)
 	}
-	ctx, cancel := mutationContext(items[0])
-	defer cancel()
-	session, err := m.ResolveFreshSession(ctx, items[0])
+	resolveCtx, cancelResolve := mutationContext(items[0])
+	session, err := m.ResolveFreshSession(resolveCtx, items[0])
+	cancelResolve()
 	if err != nil {
 		p.State = processbar.Failed
 		p.ErrorMsg = err.Error()
@@ -177,16 +178,19 @@ func (m *model) deleteProviderOperation(
 	}
 	defer session.Close()
 	for _, item := range items {
-		if err := session.Delete(
-			ctx,
+		deleteCtx, cancelDelete := mutationContext(item)
+		deleteErr := session.Delete(
+			deleteCtx,
 			item.Path,
 			filesystem.DeleteOptions{Recursive: true},
-		); err != nil {
+		)
+		cancelDelete()
+		if deleteErr != nil {
 			p.State = processbar.Failed
-			p.ErrorMsg = formatFileError(item.Path.String(), err)
+			p.ErrorMsg = formatFileError(item.Path.String(), deleteErr)
 			p.DoneTime = time.Now()
 			_ = processBarModel.SendUpdateProcessMsg(p, true)
-			return NewProviderDeleteOperationMsg(processbar.Failed, item, err, reqID)
+			return NewProviderDeleteOperationMsg(processbar.Failed, item, deleteErr, reqID)
 		}
 		p.CurrentFile = pathBase(item.Path)
 		p.Done++
@@ -440,13 +444,17 @@ func (m *model) executeProviderPasteOperation(processBarModel *processbar.Model,
 	if cut {
 		operation = filesystem.OperationCutMove
 	}
-	for _, source := range items {
+	refreshLocations := append(append([]filesystem.Location(nil), items...), destination)
+	for i, source := range items {
+		remainingSources := items[i:]
 		resolveCtx, cancelResolve := mutationContext(destination)
 		targetSession, err := m.ResolveFreshSession(resolveCtx, destination)
 		if err != nil {
 			cancelResolve()
 			slog.Error("Cannot resolve destination session for provider paste", "error", err)
-			return NewProviderPasteOperationMsg(processbar.Failed, []filesystem.Location{destination}, err, reqID)
+			return NewProviderPasteOperationMsg(
+				processbar.Failed, destination, refreshLocations, remainingSources, err, reqID,
+			)
 		}
 		target := locationWithPath(destination, pathJoin(destination.Path, pathBase(source.Path)))
 		target, err = renameLocationIfDuplicate(resolveCtx, targetSession, target)
@@ -454,7 +462,9 @@ func (m *model) executeProviderPasteOperation(processBarModel *processbar.Model,
 		cancelResolve()
 		if err != nil {
 			slog.Error("Cannot resolve duplicate destination for provider paste", "error", err)
-			return NewProviderPasteOperationMsg(processbar.Failed, []filesystem.Location{destination}, err, reqID)
+			return NewProviderPasteOperationMsg(
+				processbar.Failed, destination, refreshLocations, remainingSources, err, reqID,
+			)
 		}
 		transfer, err := engine.Start(context.Background(), filesystem.TransferRequest{
 			Operation:   operation,
@@ -465,7 +475,9 @@ func (m *model) executeProviderPasteOperation(processBarModel *processbar.Model,
 			slog.Error("Cannot start provider paste transfer", "error", err)
 			return NewProviderPasteOperationMsg(
 				processbar.Failed,
-				[]filesystem.Location{source, destination},
+				transferFailureLocation(err, source, target),
+				refreshLocations,
+				remainingSources,
 				err,
 				reqID,
 			)
@@ -475,7 +487,9 @@ func (m *model) executeProviderPasteOperation(processBarModel *processbar.Model,
 			_ = transfer.Cancel(context.Background())
 			return NewProviderPasteOperationMsg(
 				processbar.Failed,
-				[]filesystem.Location{source, destination},
+				transferFailureLocation(err, source, target),
+				refreshLocations,
+				remainingSources,
 				err,
 				reqID,
 			)
@@ -484,14 +498,42 @@ func (m *model) executeProviderPasteOperation(processBarModel *processbar.Model,
 			slog.Error("Provider paste transfer failed", "error", err)
 			return NewProviderPasteOperationMsg(
 				processbar.Failed,
-				[]filesystem.Location{source, destination},
+				transferFailureLocation(err, source, target),
+				refreshLocations,
+				remainingSources,
 				err,
 				reqID,
 			)
 		}
 	}
-	touchedLocations := append(append([]filesystem.Location(nil), items...), destination)
-	return NewProviderPasteOperationMsg(processbar.Successful, touchedLocations, nil, reqID)
+	return NewProviderPasteOperationMsg(
+		processbar.Successful, filesystem.Location{}, refreshLocations, nil, nil, reqID,
+	)
+}
+
+func transferFailureLocation(
+	err error,
+	source filesystem.Location,
+	destination filesystem.Location,
+) filesystem.Location {
+	var operationErr *filesystem.OperationError
+	if errors.As(err, &operationErr) {
+		if operationErr.Path == destination.Path {
+			return destination
+		}
+		if operationErr.Path == source.Path {
+			return source
+		}
+		if source.Provider != destination.Provider {
+			if operationErr.Provider == destination.Provider {
+				return destination
+			}
+			if operationErr.Provider == source.Provider {
+				return source
+			}
+		}
+	}
+	return source
 }
 
 func getTotalFilesCnt(copyItems []string) int {

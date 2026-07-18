@@ -171,6 +171,7 @@ func (m *model) openZoxide() tea.Cmd {
 func (m *model) openQuickConnect() {
 	if err := m.quickConnect.Open(&common.Config); err != nil {
 		slog.Error("failed to open SSH/SFTP quick-connect", "error", err)
+		m.notifyModel = notify.New(true, "SSH quick-connect failed", err.Error(), notify.NoAction)
 	}
 }
 

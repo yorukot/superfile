@@ -107,6 +107,16 @@ func TestSFTPProviderContract(t *testing.T) {
 		assert.True(t, stat.IsDir)
 	})
 
+	t.Run("mkdir without parents fails when parent is missing", func(t *testing.T) {
+		_, session := newSFTPTestSession(t)
+		err := session.Mkdir(
+			context.Background(),
+			NewRemotePath("/missing-parent/child"),
+			MkdirOptions{Parents: false},
+		)
+		require.Error(t, err)
+	})
+
 	t.Run("rename", func(t *testing.T) {
 		fixture, session := newSFTPTestSession(t)
 
@@ -124,6 +134,24 @@ func TestSFTPProviderContract(t *testing.T) {
 		require.ErrorIs(t, err, ErrNotFound)
 		_, err = session.Stat(context.Background(), NewRemotePath("/alpha-renamed.txt"))
 		assert.NoError(t, err)
+	})
+
+	t.Run("rename without overwrite preserves destination", func(t *testing.T) {
+		fixture, session := newSFTPTestSession(t)
+		err := session.Rename(
+			context.Background(),
+			NewRemotePath(fixture.AlphaPath),
+			NewRemotePath(fixture.BetaPath),
+			RenameOptions{Overwrite: false},
+		)
+		require.ErrorIs(t, err, ErrConflict)
+
+		reader, readErr := session.Read(context.Background(), NewRemotePath(fixture.BetaPath))
+		require.NoError(t, readErr)
+		defer reader.Close()
+		data, readErr := io.ReadAll(reader)
+		require.NoError(t, readErr)
+		assert.Equal(t, "beta\n", string(data))
 	})
 
 	t.Run("delete", func(t *testing.T) {
@@ -167,6 +195,19 @@ func TestSFTPProviderContract(t *testing.T) {
 		data, err := io.ReadAll(reader)
 		require.NoError(t, err)
 		assert.Equal(t, "nested gamma\n", string(data))
+	})
+
+	t.Run("copy rejects nested destination before recursion", func(t *testing.T) {
+		_, session := newSFTPTestSession(t)
+		err := session.Copy(
+			context.Background(),
+			NewRemotePath("/nested"),
+			NewRemotePath("/nested/copy"),
+			CopyOptions{Overwrite: true, Recursive: true},
+		)
+		require.ErrorIs(t, err, ErrUnsupported)
+		_, statErr := session.Stat(context.Background(), NewRemotePath("/nested/copy"))
+		require.ErrorIs(t, statErr, ErrNotFound)
 	})
 
 	t.Run("move", func(t *testing.T) {
