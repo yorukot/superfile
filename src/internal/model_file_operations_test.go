@@ -107,7 +107,6 @@ func TestFileCreation(t *testing.T) {
 			assert.Eventually(t, func() bool {
 				return m.typingModal.errorMesssage != ""
 			}, DefaultTestTimeout, DefaultTestTick, "expected an error for input: %q", tt.fileName)
-
 		} else {
 			targetFile := filepath.Join(testChildDir, tt.fileName)
 			assert.Eventually(t, func() bool {
