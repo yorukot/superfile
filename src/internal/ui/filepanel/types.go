@@ -37,16 +37,19 @@ type Model struct {
 
 	PanelMode PanelMode
 	// key is file location, value order of selection
-	selected           map[string]int
-	selectOrderCounter int
-	element            []Element
-	DirectoryRecords   map[string]directoryRecord
-	Rename             textinput.Model
-	Renaming           bool
-	SearchBar          textinput.Model
-	LastTimeGetElement time.Time
-	TargetFile         string             // filename to position cursor on after load
-	columns            []columnDefinition // columns for rendering
+	selected               map[string]int
+	selectOrderCounter     int
+	element                []Element
+	DirectoryRecords       map[string]directoryRecord
+	Rename                 textinput.Model
+	Renaming               bool
+	SearchBar              textinput.Model
+	LastTimeGetElement     time.Time
+	elementsLoading        bool
+	elementsRefreshPending bool
+	elementsRequestID      uint64
+	TargetFile             string             // filename to position cursor on after load
+	columns                []columnDefinition // columns for rendering
 }
 
 // Record for directory navigation

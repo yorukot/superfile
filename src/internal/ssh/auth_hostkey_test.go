@@ -456,6 +456,32 @@ func startEmptyAgent(t *testing.T) string {
 	return socketPath
 }
 
+func startTrackedEmptyAgent(t *testing.T) (string, <-chan struct{}) {
+	t.Helper()
+	keyring := agent.NewKeyring()
+	//nolint:usetesting // Short /tmp path avoids Unix socket length limits.
+	socketDir, err := os.MkdirTemp("/tmp", "sf-agent-tracked-empty-")
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = os.RemoveAll(socketDir) })
+	socketPath := filepath.Join(socketDir, "a.sock")
+	listener, err := net.Listen("unix", socketPath)
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = listener.Close() })
+
+	closed := make(chan struct{})
+	go func() {
+		conn, acceptErr := listener.Accept()
+		if acceptErr != nil {
+			close(closed)
+			return
+		}
+		_ = agent.ServeAgent(keyring, conn)
+		_ = conn.Close()
+		close(closed)
+	}()
+	return socketPath, closed
+}
+
 func fixtureLogSize(t *testing.T, path string) int64 {
 	t.Helper()
 	info, err := os.Stat(path)
@@ -529,6 +555,55 @@ func TestBuildClientConfigSkipsMissingIdentityAndStaleAgent(t *testing.T) {
 	require.NoError(t, err)
 	t.Cleanup(func() { _ = bundle.Close() })
 	assert.Len(t, bundle.Config.Auth, 1)
+}
+
+func TestBuildClientConfigClosesAgentConnectionOnBuildFailure(t *testing.T) {
+	tests := []struct {
+		name         string
+		identityFile func(*testing.T) string
+		errorText    string
+	}{
+		{
+			name:      "no usable authentication methods",
+			errorText: "no usable authentication method",
+		},
+		{
+			name: "identity parsing failure",
+			identityFile: func(t *testing.T) string {
+				path := filepath.Join(t.TempDir(), "invalid-key")
+				require.NoError(t, os.WriteFile(path, []byte("not a private key"), 0o600))
+				return path
+			},
+			errorText: "parse ssh identity file",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			socketPath, agentClosed := startTrackedEmptyAgent(t)
+			profile := common.SSHQuickConnectProfile{
+				Host:      "example.com",
+				User:      "user",
+				AuthOrder: []string{common.SSHAuthMethodPublicKey},
+			}
+			if tt.identityFile != nil {
+				profile.IdentityFiles = []string{tt.identityFile(t)}
+			}
+			_, err := BuildClientConfig(ClientConfigRequest{
+				Profile:        profile,
+				KnownHostsPath: filepath.Join(t.TempDir(), "known_hosts"),
+				AgentSocket:    socketPath,
+			})
+			require.Error(t, err)
+			assert.Contains(t, err.Error(), tt.errorText)
+
+			select {
+			case <-agentClosed:
+			case <-time.After(time.Second):
+				t.Fatal("SSH agent connection remained open after client-config failure")
+			}
+		})
+	}
 }
 
 func TestBuildClientConfigRejectsMissingRequiredProfileFields(t *testing.T) {

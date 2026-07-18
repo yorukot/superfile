@@ -1,14 +1,80 @@
 package filemodel
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
+	"strings"
+	"sync"
 	"testing"
 
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/filesystem"
+	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 )
+
+type closeTrackingSession struct {
+	filesystem.Session
+
+	mu         sync.Mutex
+	closeCount int
+}
+
+type listCountingSession struct {
+	closeTrackingSession
+
+	listCount int
+}
+
+func (s *listCountingSession) List(_ context.Context, _ filesystem.Path) ([]filesystem.Entry, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.listCount++
+	return nil, nil
+}
+
+func (s *listCountingSession) ID() filesystem.SessionID {
+	return "refresh-once"
+}
+
+func (s *listCountingSession) Provider() filesystem.ProviderKind {
+	return filesystem.ProviderSFTP
+}
+
+func (s *listCountingSession) Root() filesystem.Location {
+	return filesystem.Location{
+		Provider:  filesystem.ProviderSFTP,
+		SessionID: s.ID(),
+		Path:      filesystem.RootRemotePath(),
+	}
+}
+
+func (s *listCountingSession) Capabilities() filesystem.CapabilitySet {
+	return filesystem.V1CapabilityMatrix()
+}
+
+func (s *listCountingSession) lists() int {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.listCount
+}
+
+func (s *closeTrackingSession) Close() error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.closeCount++
+	return nil
+}
+
+func (s *closeTrackingSession) closes() int {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.closeCount
+}
+
+var _ filesystem.Session = (*closeTrackingSession)(nil)
+var _ filesystem.Session = (*listCountingSession)(nil)
 
 func TestMain(m *testing.M) {
 	if err := common.PopulateGlobalConfigs(); err != nil {
@@ -156,5 +222,203 @@ func TestSameSessionRemoteTransferAllowedByTopology(t *testing.T) {
 
 	if err := ValidateV1Transfer(source, destination); err != nil {
 		t.Fatalf("same-session transfer topology error: %v", err)
+	}
+}
+
+func TestSessionRegistrySupportsConcurrentReadersAndWriters(t *testing.T) {
+	registry := NewSessionRegistry()
+	location := filesystem.Location{
+		Provider:  filesystem.ProviderSFTP,
+		SessionID: "concurrent",
+		Path:      filesystem.RootRemotePath(),
+		Label:     "concurrent",
+	}
+
+	var wg sync.WaitGroup
+	for worker := range 8 {
+		wg.Add(1)
+		go func(worker int) {
+			defer wg.Done()
+			workerLocation := location
+			for iteration := range 500 {
+				workerLocation.Path = filesystem.NewRemotePath(fmt.Sprintf("/%d/%d", worker, iteration))
+				registry.UpsertLocation(workerLocation)
+				_, _ = registry.Get(workerLocation.SessionID)
+			}
+		}(worker)
+	}
+	wg.Wait()
+
+	_, ok := registry.Get(location.SessionID)
+	if !ok {
+		t.Fatal("concurrent session was not registered")
+	}
+}
+
+func TestUnusedRemoteSessionClosesWhenLastPaneStopsUsingIt(t *testing.T) {
+	model := New([]string{"/tmp/sf-one", "/tmp/sf-two"}, false)
+	remote := filesystem.Location{
+		Provider:  filesystem.ProviderSFTP,
+		SessionID: "shared",
+		Path:      filesystem.RootRemotePath(),
+		Label:     "shared",
+	}
+	browser := &closeTrackingSession{}
+	model.RegisterSession(SessionState{
+		ID:       remote.SessionID,
+		Provider: remote.Provider,
+		Status:   SessionConnected,
+		Browser:  browser,
+	})
+
+	if err := model.SetPaneLocation(0, remote); err != nil {
+		t.Fatalf("set first remote pane: %v", err)
+	}
+	if err := model.SetPaneLocation(1, remote); err != nil {
+		t.Fatalf("set second remote pane: %v", err)
+	}
+
+	if err := model.SetPaneLocation(0, filepanel.NewLocalLocation("/tmp/sf-one")); err != nil {
+		t.Fatalf("switch first pane local: %v", err)
+	}
+	if got := browser.closes(); got != 0 {
+		t.Fatalf("session close count with one remaining pane = %d, want 0", got)
+	}
+	if err := model.SetPaneLocation(1, filepanel.NewLocalLocation("/tmp/sf-two")); err != nil {
+		t.Fatalf("switch second pane local: %v", err)
+	}
+	if got := browser.closes(); got != 1 {
+		t.Fatalf("session close count after last pane = %d, want 1", got)
+	}
+	if _, ok := model.Sessions.Get(remote.SessionID); ok {
+		t.Fatal("unused session remained registered")
+	}
+}
+
+func TestMarkSessionDisconnectedClosesBrowserAndUpdatesPane(t *testing.T) {
+	model := New([]string{"/tmp/sf-local"}, false)
+	remote := filesystem.Location{
+		Provider:  filesystem.ProviderSFTP,
+		SessionID: "disconnect-me",
+		Path:      filesystem.RootRemotePath(),
+		Label:     "disconnect-me",
+	}
+	browser := &closeTrackingSession{}
+	model.RegisterSession(SessionState{
+		ID:       remote.SessionID,
+		Provider: remote.Provider,
+		Status:   SessionConnected,
+		Browser:  browser,
+	})
+	if err := model.SetPaneLocation(0, remote); err != nil {
+		t.Fatalf("set remote pane: %v", err)
+	}
+
+	disconnectErr := errors.New("network closed")
+	if err := model.MarkSessionDisconnected(remote.SessionID, disconnectErr); err != nil {
+		t.Fatalf("mark session disconnected: %v", err)
+	}
+	session, ok := model.Sessions.Get(remote.SessionID)
+	if !ok {
+		t.Fatal("disconnected session was removed")
+	}
+	if session.Browser != nil {
+		t.Fatal("disconnected session retained its browser")
+	}
+	if session.Status != SessionDisconnected {
+		t.Fatalf("status = %q, want %q", session.Status, SessionDisconnected)
+	}
+	if got := browser.closes(); got != 1 {
+		t.Fatalf("browser close count = %d, want 1", got)
+	}
+	if got := model.FilePanels[0].RemoteStatusText(); !strings.Contains(got, string(SessionDisconnected)) {
+		t.Fatalf("remote status %q does not show disconnected", got)
+	}
+}
+
+func TestStaleDisconnectDoesNotCloseReplacementSession(t *testing.T) {
+	model := New([]string{"/tmp/sf-local"}, false)
+	remote := filesystem.Location{
+		Provider:  filesystem.ProviderSFTP,
+		SessionID: "replace-session",
+	}
+	oldBrowser := &closeTrackingSession{}
+	model.RegisterSession(SessionState{
+		ID:       remote.SessionID,
+		Provider: remote.Provider,
+		Status:   SessionConnected,
+		Browser:  oldBrowser,
+	})
+	oldState, ok := model.Sessions.Get(remote.SessionID)
+	if !ok {
+		t.Fatal("old session was not registered")
+	}
+
+	newBrowser := &closeTrackingSession{}
+	model.RegisterSession(SessionState{
+		ID:       remote.SessionID,
+		Provider: remote.Provider,
+		Status:   SessionConnected,
+		Browser:  newBrowser,
+	})
+	if err := model.MarkSessionDisconnectedIfCurrent(
+		remote.SessionID,
+		oldState.Generation,
+		errors.New("stale disconnect"),
+	); err != nil {
+		t.Fatalf("mark stale session disconnected: %v", err)
+	}
+
+	current, ok := model.Sessions.Get(remote.SessionID)
+	if !ok {
+		t.Fatal("replacement session was removed")
+	}
+	if current.Browser != newBrowser || current.Status != SessionConnected {
+		t.Fatalf("replacement session changed after stale disconnect: %#v", current)
+	}
+	if got := oldBrowser.closes(); got != 1 {
+		t.Fatalf("old browser close count = %d, want 1", got)
+	}
+	if got := newBrowser.closes(); got != 0 {
+		t.Fatalf("replacement browser close count = %d, want 0", got)
+	}
+}
+
+func TestRemotePanelCompletionDoesNotImmediatelyScheduleAnotherList(t *testing.T) {
+	model := New([]string{"/tmp/sf-local"}, false)
+	remote := filesystem.Location{
+		Provider:  filesystem.ProviderSFTP,
+		SessionID: "refresh-once",
+		Path:      filesystem.RootRemotePath(),
+		Label:     "refresh-once",
+	}
+	browser := &listCountingSession{}
+	model.RegisterSession(SessionState{
+		ID:       remote.SessionID,
+		Provider: remote.Provider,
+		Status:   SessionConnected,
+		Browser:  browser,
+	})
+	if err := model.SetPaneLocation(0, remote); err != nil {
+		t.Fatalf("set remote pane: %v", err)
+	}
+
+	cmd := model.GetRemoteFilePanelUpdateCmd(false)
+	if cmd == nil {
+		t.Fatal("initial remote refresh command is nil")
+	}
+	rawMsg := cmd()
+	msg, ok := rawMsg.(PanelUpdateMsg)
+	if !ok {
+		t.Fatalf("refresh command returned %T, want PanelUpdateMsg", rawMsg)
+	}
+	if next := model.ApplyPanelUpdate(msg); next != nil {
+		t.Fatal("completed empty listing immediately scheduled another refresh")
+	}
+	if next := model.GetRemoteFilePanelUpdateCmd(false); next != nil {
+		t.Fatal("remote panel refreshed again before the minimum interval")
+	}
+	if got := browser.lists(); got != 1 {
+		t.Fatalf("remote list count = %d, want 1", got)
 	}
 }

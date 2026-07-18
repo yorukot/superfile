@@ -20,6 +20,9 @@ func (m *Model) SetPaneLocation(location filesystem.Location) {
 	if location.Label == "" {
 		location.Label = string(location.SessionID)
 	}
+	if m.PaneLocation != location {
+		m.InvalidateElementsLoading()
+	}
 	m.PaneLocation = location
 	m.Location = location.Path.String()
 }

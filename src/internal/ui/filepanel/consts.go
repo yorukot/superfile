@@ -21,7 +21,8 @@ const (
 	ReRenderChunkDivisor = 100
 	ReRenderMaxDelay     = 3
 
-	nonFocussedPanelReRenderTime = 3 * time.Second
+	nonFocussedPanelReRenderTime  = 3 * time.Second
+	remoteFocusedPanelRefreshTime = time.Second
 
 	emptyCursor = " "
 )

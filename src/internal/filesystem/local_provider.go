@@ -10,10 +10,7 @@ import (
 	"runtime"
 	"strings"
 
-	trashWin "github.com/hymkor/trash-go"
-	"github.com/rkoesters/xdg/trash"
-
-	variable "github.com/yorukot/superfile/src/config"
+	internaltrash "github.com/yorukot/superfile/src/internal/trash"
 	"github.com/yorukot/superfile/src/pkg/utils"
 )
 
@@ -243,7 +240,7 @@ func (s *LocalSession) Delete(ctx context.Context, path Path, options DeleteOpti
 	}
 
 	if options.UseTrash {
-		return s.moveToTrash(localPath, path)
+		return s.moveToTrash(localPath)
 	}
 
 	if options.Recursive {
@@ -470,17 +467,9 @@ func (s *LocalSession) copyFile(
 	return nil
 }
 
-func (s *LocalSession) moveToTrash(localPath string, path Path) error {
-	switch runtime.GOOS {
-	case utils.OsDarwin:
-		return s.Move(context.Background(), path,
-			NewLocalPath(filepath.Join(variable.DarwinTrashDirectory, filepath.Base(localPath))),
-			MoveOptions{Overwrite: true, Recursive: true})
-	case utils.OsWindows:
-		return trashWin.Throw(localPath)
-	default:
-		return trash.Trash(localPath)
-	}
+func (s *LocalSession) moveToTrash(localPath string) error {
+	_, err := internaltrash.Move(localPath)
+	return err
 }
 
 func newLocalStat(path string, info os.FileInfo) Stat {

@@ -35,17 +35,18 @@ func New() Model {
 // Note: We should considering our internal models, they
 // should be returning pointer object, and implement tea.Model
 func NewModelWithOptions(width int, height int) Model {
-	m := Model{
+	width, height = normalizeDimensions(width, height)
+	return Model{
 		renderIndex: 0,
 		cursor:      0,
+		width:       width,
+		height:      height,
 		processes:   make(map[string]Process),
 		msgChan:     make(chan UpdateMsg, msgChannelSize),
 	}
-	m.SetDimensions(width, height)
-	return m
 }
 
-func (m *Model) SetDimensions(width int, height int) {
+func normalizeDimensions(width int, height int) (int, int) {
 	if width < minWidth {
 		slog.Warn("Invalid width, using minimum", "provided", width, "minimum", minWidth)
 		width = minWidth
@@ -54,6 +55,11 @@ func (m *Model) SetDimensions(width int, height int) {
 		slog.Warn("Invalid height, using minimum", "provided", height, "minimum", minHeight)
 		height = minHeight
 	}
+	return width, height
+}
+
+func (m *Model) SetDimensions(width int, height int) {
+	width, height = normalizeDimensions(width, height)
 	m.width = width
 	m.height = height
 }
