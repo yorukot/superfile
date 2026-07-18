@@ -234,7 +234,6 @@ func (m *model) filePanelNormalModeKey(msg string) tea.Cmd {
 func (m *model) typingModalOpenKey(msg string) tea.Cmd {
 	switch {
 	case slices.Contains(common.Hotkeys.CancelTyping, msg):
-		m.typingModal.errorMesssage = ""
 		m.cancelTypingModal()
 	case slices.Contains(common.Hotkeys.ConfirmTyping, msg):
 		return m.getCreateCmd()

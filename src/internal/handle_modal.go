@@ -18,20 +18,14 @@ func (m *model) cancelTypingModal() {
 	m.typingModal.textInput.Blur()
 	m.typingModal.open = false
 }
-func (m *model) closeTypingModal(process processbar.Process,
-	processBarModel *processbar.Model) {
-	m.typingModal.errorMesssage = ""
-	markProcessDone(process, processBarModel)
-}
 
 // Confirm to create file or directory
-func (m *model) createItem(item string) error {
+func createItem(location, item string) error {
 	if err := checkFileNameValidity(item); err != nil {
-		m.typingModal.errorMesssage = err.Error()
 		slog.Error("Errow while createItem during item creation", "error", err)
 		return err
 	}
-	path := filepath.Join(m.typingModal.location, item)
+	path := filepath.Join(location, item)
 	if !strings.HasSuffix(item, string(filepath.Separator)) {
 		path, _ = renameIfDuplicate(path)
 		if err := os.MkdirAll(filepath.Dir(path), utils.UserDirPerm); err != nil {
@@ -60,16 +54,22 @@ func (m *model) getCreateCmd() tea.Cmd {
 	}
 
 	items := []string{m.typingModal.textInput.Value()}
+	location := m.typingModal.location
 
 	reqID := m.nextIoReqCnt()
 	slog.Debug("Submitting create request", "id", reqID, "items cnt", len(items))
 	m.cancelTypingModal()
 	return func() tea.Msg {
-		return m.createOperation(&m.processBarModel, items, reqID)
+		return m.createOperation(&m.processBarModel, location, items, reqID)
 	}
 }
 
-func (m *model) createOperation(processBarModel *processbar.Model, items []string, reqID int) tea.Msg {
+func (m *model) createOperation(
+	processBarModel *processbar.Model,
+	location string,
+	items []string,
+	reqID int,
+) tea.Msg {
 	if len(items) == 0 {
 		return NewCreateOperationMsg(processbar.Cancelled, reqID)
 	}
@@ -81,23 +81,23 @@ func (m *model) createOperation(processBarModel *processbar.Model, items []strin
 	finalizer := func(state processbar.ProcessState, reqID int) tea.Msg {
 		return NewCreateOperationMsg(state, reqID)
 	}
-	processor := makeCreateProcessor(m, p, processBarModel)
+	processor := makeCreateProcessor(location, p, processBarModel)
 	msg := m.runFileProcessor(processor, finalizer, items, reqID)
 	return msg
 }
 
-func makeCreateProcessor(model *model,
+func makeCreateProcessor(location string,
 	process processbar.Process,
 	processBarModel *processbar.Model) processbar.FileListProcessor {
 	processorFunction := func(items []string) (processbar.Process, []string) {
 		notProcessed := make([]string, 0)
 		if len(items) == 0 {
-			model.closeTypingModal(process, processBarModel)
+			markProcessDone(process, processBarModel)
 			return process, notProcessed
 		}
 
 		for i, item := range items {
-			err := model.createItem(item)
+			err := createItem(location, item)
 			if err != nil {
 				process.State = processbar.Failed
 				slog.Error("Error in create operation", "item", item, "error", err)
@@ -112,7 +112,7 @@ func makeCreateProcessor(model *model,
 
 		if process.State != processbar.Failed {
 			process.State = processbar.Successful
-			model.closeTypingModal(process, processBarModel)
+			markProcessDone(process, processBarModel)
 		}
 		return process, notProcessed
 	}

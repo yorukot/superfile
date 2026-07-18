@@ -91,31 +91,63 @@ func TestFileCreation(t *testing.T) {
 	}
 
 	for _, tt := range testdata {
-		m := defaultTestModel(testChildDir)
-		p := NewTestTeaProgWithEventLoop(t, m)
-		TeaUpdate(m, nil)
-		p.SendKey(common.Hotkeys.FilePanelItemCreate[0])
+		t.Run(tt.name, func(t *testing.T) {
+			m := defaultTestModel(testChildDir)
+			p := NewTestTeaProgWithEventLoop(t, m)
+			p.SendKey(common.Hotkeys.FilePanelItemCreate[0])
 
-		require.Eventually(t, func() bool {
-			return m.typingModal.open
-		}, DefaultTestTimeout, DefaultTestTick, "Typing modal never opened")
+			require.Eventually(t, func() bool {
+				return m.typingModal.open
+			}, DefaultTestTimeout, DefaultTestTick, "Typing modal never opened")
 
-		p.SendKey(tt.fileName)
-		p.SendKey(common.Hotkeys.ConfirmTyping[0])
+			p.SendKey(tt.fileName)
+			p.SendKey(common.Hotkeys.ConfirmTyping[0])
 
-		if tt.expectedError {
-			assert.Eventually(t, func() bool {
-				return m.typingModal.errorMesssage != ""
-			}, DefaultTestTimeout, DefaultTestTick, "expected an error for input: %q", tt.fileName)
-		} else {
+			require.Eventually(t, func() bool {
+				return !m.typingModal.open
+			}, DefaultTestTimeout, DefaultTestTick, "Typing modal never closed")
+
+			if tt.expectedError {
+				require.Eventually(t, func() bool {
+					return m.spfError.IsOpen()
+				}, DefaultTestTimeout, DefaultTestTick, "SPF error modal never opened for input: %q", tt.fileName)
+
+				p.SendKey(common.Hotkeys.Quit[0])
+				require.Eventually(t, func() bool {
+					return !m.spfError.IsOpen()
+				}, DefaultTestTimeout, DefaultTestTick, "SPF error modal never closed")
+				return
+			}
+
 			targetFile := filepath.Join(testChildDir, tt.fileName)
 			assert.Eventually(t, func() bool {
 				_, err := os.Lstat(targetFile)
 				return err == nil
 			}, DefaultTestTimeout, DefaultTestTick, "Target file did not get created : %q", targetFile)
-			assert.Empty(t, m.typingModal.errorMesssage, "Empty error expected for input: %q", tt.fileName)
-		}
+			assert.False(t, m.spfError.IsOpen(), "Unexpected SPF error for input: %q", tt.fileName)
+		})
 	}
+
+	// This is to verify that even if m.typingModal.location is changed while the command is being executed
+	// the create still works for older location set in typingModal
+	t.Run("create request snapshots destination", func(t *testing.T) {
+		originalLocation := t.TempDir()
+		changedLocation := t.TempDir()
+		m := defaultTestModel(originalLocation)
+		m.panelCreateNewFile()
+		m.typingModal.textInput.SetValue("captured.txt")
+
+		cmd := m.getCreateCmd()
+		require.NotNil(t, cmd)
+		assert.False(t, m.typingModal.open)
+
+		m.typingModal.location = changedLocation
+		msg := cmd()
+		require.IsType(t, CreateOperationMsg{}, msg)
+
+		assert.FileExists(t, filepath.Join(originalLocation, "captured.txt"))
+		assert.NoFileExists(t, filepath.Join(changedLocation, "captured.txt"))
+	})
 }
 
 func TestFileRename(t *testing.T) {
