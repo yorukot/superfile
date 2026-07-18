@@ -146,6 +146,70 @@ func TestLoadTomlFile(t *testing.T) {
 	}
 }
 
+func TestLoadTomlFileFixOverwritesStaleTail(t *testing.T) {
+	// The defaults are what LoadTomlFile should use to fill any fields missing
+	// from the user's TOML file.
+	defaultData := strings.Join([]string{
+		"sample_bool = true",
+		"sample_int = 2",
+		"sample_str = \"hello\"",
+		"sample_slice = ['a', 'b']",
+		"",
+	}, "\n")
+
+	// The user file below overrides three fields and omits sample_str. After
+	// fixing, those custom values should remain and only sample_str should come
+	// from the defaults.
+	expectedVal := TestTOMLType{
+		SampleBool:  false,
+		SampleInt:   -1,
+		SampleStr:   "hello",
+		SampleSlice: []string{"custom"},
+	}
+	// The fixed file should be exactly the marshaled target. If old bytes remain
+	// after the write, this equality check will fail.
+	fixedToml, err := toml.Marshal(expectedVal)
+	require.NoError(t, err)
+
+	// Put stale padding after the meaningful TOML so it represents the old file
+	// tail. Before the overwrite/truncate fix, WriteAt would write the shorter
+	// fixed TOML at byte 0 and leave bytes from this tail behind.
+	userToml := strings.Join([]string{
+		"sample_bool = false",
+		"sample_int = -1",
+		"sample_slice = ['custom']",
+		"",
+	}, "\n")
+	originalContent := userToml + strings.Repeat("# stale tail padding\n", 50)
+
+	// Write the intentionally incomplete user TOML to a temp file so the fixer
+	// can safely modify it.
+	testFile := filepath.Join(t.TempDir(), "missing-field.toml")
+	require.NoError(t, os.WriteFile(testFile, []byte(originalContent), ConfigFilePerm))
+
+	// Run the repair path. LoadTomlFile returns a non-fatal TomlLoadError when
+	// it fixes missing fields, so the test expects that error shape.
+	var tomlVal TestTOMLType
+	err = LoadTomlFile(testFile, defaultData, &tomlVal, true, false)
+	var tomlErr *TomlLoadError
+	require.ErrorAs(t, err, &tomlErr)
+	require.True(t, tomlErr.missingFields)
+	require.Equal(t, expectedVal, tomlVal)
+
+	// Confirm the repaired file was fully replaced. If the old tail survived
+	// after writing the shorter TOML, this marker would still be present after
+	// the repaired TOML content.
+	repairedContent, err := os.ReadFile(testFile)
+	require.NoError(t, err)
+	assert.Equal(t, fixedToml, repairedContent)
+	assert.NotContains(t, string(repairedContent), "stale tail padding")
+
+	// Finally, reload the repaired file without fixing.
+	err = LoadTomlFile(testFile, defaultData, &tomlVal, false, false)
+	require.NoError(t, err)
+	assert.Equal(t, expectedVal, tomlVal)
+}
+
 func TestLoadTomlFileIgnorer(t *testing.T) {
 	_, curFilename, _, ok := runtime.Caller(0)
 	require.True(t, ok)

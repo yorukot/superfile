@@ -173,6 +173,13 @@ func fixTomlFile(resultErr *TomlLoadError, filePath string, target interface{}) 
 		resultErr.UpdateMessageAndError("failed to marshal config to TOML", err)
 		return resultErr
 	}
+
+	// Truncate the file
+	if err = origFile.Truncate(0); err != nil {
+		resultErr.UpdateMessageAndError("failed to truncate TOML file", err)
+		return resultErr
+	}
+	// Write updated TOML to file
 	_, err = origFile.WriteAt(tomlData, 0)
 	if err != nil {
 		resultErr.UpdateMessageAndError("failed to write TOML data to original file", err)
