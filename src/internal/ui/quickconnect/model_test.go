@@ -24,6 +24,63 @@ import (
 
 var quickConnectTestConfigOnce sync.Once //nolint:gochecknoglobals // Package test setup must run once.
 
+func TestSetDimensionsClampsSmallPositiveWidth(t *testing.T) {
+	model := New()
+	model.SetDimensions(1, 0)
+	assert.Equal(t, common.InnerPadding, model.width)
+
+	model.SetDimensions(0, 0)
+	assert.Equal(t, common.InnerPadding, model.width)
+}
+
+func TestCancelingConnectionFlowsClearsRuntimeState(t *testing.T) {
+	populateQuickConnectTestConfig(t)
+	tests := []struct {
+		name   string
+		mode   Mode
+		cancel func(*Model)
+	}{
+		{
+			name: "manual",
+			mode: ModeManual,
+			cancel: func(model *Model) {
+				model.handleManualUpdateKey(tea.KeyPressMsg{Code: tea.KeyEscape})
+			},
+		},
+		{
+			name: "credentials",
+			mode: ModeCredentials,
+			cancel: func(model *Model) {
+				model.handleCredentialKey(tea.KeyPressMsg{Code: tea.KeyEscape})
+			},
+		},
+		{
+			name: "host key",
+			mode: ModeHostKeyConfirmation,
+			cancel: func(model *Model) {
+				model.handleHostKeyKey(tea.KeyPressMsg{Code: tea.KeyEscape}.String())
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			model := New()
+			model.mode = tt.mode
+			model.pendingProfile = common.SSHQuickConnectProfile{Name: "old-profile"}
+			model.secrets = RuntimeSecrets{Password: "old-password", IdentityPassphrase: "old-passphrase"}
+			model.lastConnectErr = assert.AnError
+
+			tt.cancel(&model)
+
+			assert.Equal(t, ModeList, model.mode)
+			assert.Empty(t, model.pendingProfile)
+			assert.Empty(t, model.secrets)
+			assert.NoError(t, model.lastConnectErr)
+		})
+	}
+}
+
 func TestOpenListsDiscoveredAliasAndSavedManualProfile(t *testing.T) {
 	populateQuickConnectTestConfig(t)
 	fixture := sshtest.Start(t)
@@ -216,6 +273,32 @@ func TestUnknownHostConfirmationShowsFingerprintAndWritesOnlyAfterAccept(t *test
 	afterAccept, err := os.ReadFile(knownHostsPath)
 	require.NoError(t, err)
 	assert.Contains(t, string(afterAccept), sshtest.AliasKey)
+}
+
+func TestUnnamedProfilesReceiveUniqueSessionIDs(t *testing.T) {
+	t.Setenv("SSH_AUTH_SOCK", "")
+	populateQuickConnectTestConfig(t)
+	fixture := sshtest.Start(t)
+	profile := profileForAlias(fixture, sshtest.AliasKey)
+	profile.Name = ""
+
+	model := New()
+	model.SetKnownHostsPath(fixture.KnownHostsPath)
+	model.SetTimeout(3 * time.Second)
+	model.OpenWithProfiles([]common.SSHQuickConnectProfile{profile})
+	first := model.ConnectSelected(context.Background())
+	require.Equal(t, ActionConnected, first.Type)
+	require.NotNil(t, first.Session)
+	require.NoError(t, first.Session.Close())
+	require.NotEmpty(t, first.Location.SessionID)
+
+	model.OpenWithProfiles([]common.SSHQuickConnectProfile{profile})
+	second := model.ConnectSelected(context.Background())
+	require.Equal(t, ActionConnected, second.Type)
+	require.NotNil(t, second.Session)
+	require.NoError(t, second.Session.Close())
+	require.NotEmpty(t, second.Location.SessionID)
+	assert.NotEqual(t, first.Location.SessionID, second.Location.SessionID)
 }
 
 func TestChangedHostKeyShowsBlockingWarningAndDoesNotOpenSession(t *testing.T) {

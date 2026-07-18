@@ -21,22 +21,42 @@ import (
 func TestBuildClientConfigAuthMethods(t *testing.T) {
 	t.Setenv("SSH_AUTH_SOCK", "")
 	fixture := sshtest.Start(t)
+	agentProfile := profileForAlias(fixture, sshtest.AliasKey)
+	agentProfile.IdentityFile = fixture.EncryptedClientKeyPath
+	agentProfile.IdentityFiles = []string{fixture.EncryptedClientKeyPath}
+	passwordProfile := profileForAlias(fixture, sshtest.AliasPassword)
+	passwordProfile.IdentityFile = fixture.ClientKeyPath
+	passwordProfile.IdentityFiles = []string{fixture.ClientKeyPath}
+	keyboardProfile := profileForAlias(fixture, sshtest.AliasKeyboard)
+	keyboardProfile.IdentityFile = fixture.ClientKeyPath
+	keyboardProfile.IdentityFiles = []string{fixture.ClientKeyPath}
+	configuredSigner, err := publicKeySigner(fixture.EncryptedClientKeyPath, fixture.KeyPassphrase)
+	require.NoError(t, err)
+	agentSigner, err := publicKeySigner(fixture.ClientKeyPath, "")
+	require.NoError(t, err)
 
 	tests := []struct {
-		name         string
-		request      ClientConfigRequest
-		wantAuth     string
-		wantBuildErr string
-		wantDialErr  string
+		name                string
+		request             ClientConfigRequest
+		wantAuth            string
+		wantAuthSequence    []string
+		wantKeyFingerprint  string
+		rejectedFingerprint string
+		wantBuildErr        string
+		wantDialErr         string
 	}{
 		{
 			name: "agent auth precedes configured identity files",
 			request: ClientConfigRequest{
-				Profile:        profileForAlias(fixture, sshtest.AliasKey),
-				AgentSocket:    startAgent(t, fixture.ClientKeyPath, ""),
-				KnownHostsPath: fixture.KnownHostsPath,
+				Profile:                  agentProfile,
+				AgentSocket:              startAgent(t, fixture.ClientKeyPath, ""),
+				KnownHostsPath:           fixture.KnownHostsPath,
+				ManualIdentityPassphrase: fixture.KeyPassphrase,
 			},
-			wantAuth: "publickey",
+			wantAuth:            "publickey",
+			wantAuthSequence:    []string{"publickey"},
+			wantKeyFingerprint:  cryptossh.FingerprintSHA256(agentSigner.PublicKey()),
+			rejectedFingerprint: cryptossh.FingerprintSHA256(configuredSigner.PublicKey()),
 		},
 		{
 			name: "configured identity file still works when agent is empty",
@@ -67,22 +87,25 @@ func TestBuildClientConfigAuthMethods(t *testing.T) {
 		{
 			name: "password auth after public key methods",
 			request: ClientConfigRequest{
-				Profile:        profileForAlias(fixture, sshtest.AliasPassword),
+				Profile:        passwordProfile,
 				KnownHostsPath: fixture.KnownHostsPath,
 				Password:       fixture.Password,
 			},
-			wantAuth: "password",
+			wantAuth:         "password",
+			wantAuthSequence: []string{"publickey", "password"},
 		},
 		{
 			name: "keyboard interactive auth last",
 			request: ClientConfigRequest{
-				Profile:        profileForAlias(fixture, sshtest.AliasKeyboard),
+				Profile:        keyboardProfile,
 				KnownHostsPath: fixture.KnownHostsPath,
+				Password:       fixture.Password,
 				KeyboardInteractive: func(_ string, _ string, questions []string, _ []bool) ([]string, error) {
 					return []string{fixture.KeyboardAnswer}, nil
 				},
 			},
-			wantAuth: "keyboard-interactive",
+			wantAuth:         "keyboard-interactive",
+			wantAuthSequence: []string{"publickey", "password", "keyboard-interactive"},
 		},
 		{
 			name: "wrong passphrase",
@@ -137,9 +160,34 @@ func TestBuildClientConfigAuthMethods(t *testing.T) {
 
 			logText := fixtureLogSince(t, fixture.LogPath, beforeOffset)
 			assert.Contains(t, logText, "auth="+tt.wantAuth)
+			if len(tt.wantAuthSequence) > 0 {
+				assert.Equal(t, tt.wantAuthSequence, authAttemptSequence(logText))
+			}
+			if tt.wantKeyFingerprint != "" {
+				assert.Contains(t, logText, "fingerprint="+tt.wantKeyFingerprint)
+			}
+			if tt.rejectedFingerprint != "" {
+				assert.NotContains(t, logText, "fingerprint="+tt.rejectedFingerprint)
+			}
 			assertNoSecretLeak(t, logText)
 		})
 	}
+}
+
+func authAttemptSequence(logText string) []string {
+	sequence := make([]string, 0)
+	for _, line := range strings.Split(logText, "\n") {
+		const marker = "event=auth method="
+		markerIndex := strings.Index(line, marker)
+		if markerIndex < 0 || strings.Contains(line, " result=") {
+			continue
+		}
+		method := strings.Fields(line[markerIndex+len(marker):])[0]
+		if len(sequence) == 0 || sequence[len(sequence)-1] != method {
+			sequence = append(sequence, method)
+		}
+	}
+	return sequence
 }
 
 func TestBuildClientConfigHonorsProfileAuthOrder(t *testing.T) {

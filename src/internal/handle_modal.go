@@ -31,7 +31,7 @@ func (m *model) createItem() tea.Cmd {
 }
 
 func (m *model) getCreateCmd() tea.Cmd {
-	if !m.typingModal.open {
+	if !m.typingModal.open || m.typingModal.submitting {
 		return nil
 	}
 
@@ -43,6 +43,7 @@ func (m *model) getCreateCmd() tea.Cmd {
 
 	reqID := m.nextIoReqCnt()
 	slog.Debug("Submitting create request", "id", reqID, "items cnt", len(items))
+	m.typingModal.submitting = true
 	m.cancelTypingModal()
 	return func() tea.Msg {
 		return m.createOperation(&m.processBarModel, location, items, reqID)
@@ -118,16 +119,16 @@ func (m *model) createItemAt(location filesystem.Location, name string) error {
 	defer session.Close()
 
 	path := pathJoinRaw(location.Path, name)
-	isDirectory := strings.HasSuffix(name, string(filepath.Separator)) || strings.HasSuffix(name, "/")
-	if isDirectory {
-		return session.Mkdir(ctx, path, filesystem.MkdirOptions{Mode: utils.UserDirPerm, Parents: true})
-	}
-
 	target := locationWithPath(location, path)
 	target, err = renameLocationIfDuplicate(ctx, session, target)
 	if err != nil {
 		return err
 	}
+	isDirectory := strings.HasSuffix(name, string(filepath.Separator)) || strings.HasSuffix(name, "/")
+	if isDirectory {
+		return session.Mkdir(ctx, target.Path, filesystem.MkdirOptions{Mode: utils.UserDirPerm, Parents: true})
+	}
+
 	if err := session.Mkdir(
 		ctx,
 		pathDir(target.Path),

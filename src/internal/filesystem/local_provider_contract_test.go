@@ -116,6 +116,40 @@ func TestLocalProviderContract(t *testing.T) {
 		assert.FileExists(t, destinationPath)
 	})
 
+	t.Run("rename without overwrite preserves destination", func(t *testing.T) {
+		root := t.TempDir()
+		sourcePath := filepath.Join(root, "source.txt")
+		destinationPath := filepath.Join(root, "destination.txt")
+		require.NoError(t, os.WriteFile(sourcePath, []byte("source"), 0o600))
+		require.NoError(t, os.WriteFile(destinationPath, []byte("destination"), 0o600))
+
+		session := newLocalTestSession(t, root)
+		err := session.Rename(
+			context.Background(),
+			NewLocalPath(sourcePath),
+			NewLocalPath(destinationPath),
+			RenameOptions{Overwrite: false},
+		)
+		require.ErrorIs(t, err, ErrConflict)
+		assert.FileExists(t, sourcePath)
+		data, readErr := os.ReadFile(destinationPath)
+		require.NoError(t, readErr)
+		assert.Equal(t, "destination", string(data))
+	})
+
+	t.Run("operation errors are mapped", func(t *testing.T) {
+		root := t.TempDir()
+		missing := NewLocalPath(filepath.Join(root, "missing"))
+		session := newLocalTestSession(t, root)
+
+		_, err := session.Stat(context.Background(), missing)
+		require.ErrorIs(t, err, ErrNotFound)
+		var operationErr *OperationError
+		require.ErrorAs(t, err, &operationErr)
+		assert.Equal(t, OperationStat, operationErr.Operation)
+		assert.Equal(t, missing, operationErr.Path)
+	})
+
 	t.Run("delete", func(t *testing.T) {
 		t.Run("file", func(t *testing.T) {
 			root := t.TempDir()
@@ -174,6 +208,24 @@ func TestLocalProviderContract(t *testing.T) {
 		copiedData, err := os.ReadFile(filepath.Join(destinationDir, "nested", "file.txt"))
 		require.NoError(t, err)
 		assert.Equal(t, "copy", string(copiedData))
+	})
+
+	t.Run("copy rejects source overlap before creating destination", func(t *testing.T) {
+		root := t.TempDir()
+		sourceDir := filepath.Join(root, "copy-src")
+		destinationDir := filepath.Join(sourceDir, "nested-copy")
+		require.NoError(t, os.MkdirAll(sourceDir, 0o700))
+		require.NoError(t, os.WriteFile(filepath.Join(sourceDir, "file.txt"), []byte("copy"), 0o600))
+
+		session := newLocalTestSession(t, root)
+		err := session.Copy(
+			context.Background(),
+			NewLocalPath(sourceDir),
+			NewLocalPath(destinationDir),
+			CopyOptions{Overwrite: true, Recursive: true},
+		)
+		require.ErrorIs(t, err, ErrUnsupported)
+		assert.NoDirExists(t, destinationDir)
 	})
 
 	t.Run("move", func(t *testing.T) {

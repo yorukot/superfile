@@ -108,6 +108,7 @@ type typingModal struct {
 	location     string
 	paneLocation filesystem.Location
 	open         bool
+	submitting   bool
 	textInput    textinput.Model
 }
 

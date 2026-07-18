@@ -145,6 +145,7 @@ func sortFileElement(
 		files, err := session.List(ctx, elementPath(element, location))
 		if err != nil {
 			slog.Error("Error when reading directory during sort", "error", err, "path", element.Location)
+			directoryCounts[element.Location] = 0
 			return 0
 		}
 		directoryCounts[element.Location] = len(files)

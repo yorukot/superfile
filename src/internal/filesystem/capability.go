@@ -30,7 +30,7 @@ func (set CapabilitySet) SupportsRemote(operation Operation) bool {
 
 func (set CapabilitySet) SupportsLocal(operation Operation) bool {
 	capability, ok := set[operation]
-	return ok && capability.Local == CapabilitySupported
+	return ok && supportsLocal(capability.Local)
 }
 
 func (set CapabilitySet) RequireRemote(provider ProviderKind, operation Operation, path Path) error {
@@ -47,7 +47,7 @@ func (set CapabilitySet) RequireRemote(provider ProviderKind, operation Operatio
 
 func (set CapabilitySet) RequireLocal(provider ProviderKind, operation Operation, path Path) error {
 	capability, ok := set[operation]
-	if ok && capability.Local == CapabilitySupported {
+	if ok && supportsLocal(capability.Local) {
 		return nil
 	}
 	message := "local operation is not supported"
@@ -55,6 +55,10 @@ func (set CapabilitySet) RequireLocal(provider ProviderKind, operation Operation
 		message = capability.Notes
 	}
 	return NewUnsupportedError(provider, operation, path, message)
+}
+
+func supportsLocal(support CapabilitySupport) bool {
+	return support == CapabilitySupported || support == CapabilityLocalOnly
 }
 
 func V1CapabilityMatrix() CapabilitySet { //nolint:funlen // Declarative operation matrix is clearer in one literal.

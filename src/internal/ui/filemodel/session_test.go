@@ -121,8 +121,8 @@ func TestPaneLocationsCanHoldLocalAndFakeRemotePaths(t *testing.T) {
 	if got := remoteLocation.Path.String(); got != "/tmp/sf-remote" {
 		t.Fatalf("remote path = %q, want /tmp/sf-remote", got)
 	}
-	if got := model.FilePanels[1].DisplayLocation(); got != "sf-e2e:/tmp/sf-remote" {
-		t.Fatalf("remote display location = %q, want sf-e2e:/tmp/sf-remote", got)
+	if got := model.FilePanels[1].DisplayLocation(); got != "ssh://user@sf-e2e:/tmp/sf-remote" {
+		t.Fatalf("remote display location = %q, want ssh://user@sf-e2e:/tmp/sf-remote", got)
 	}
 
 	model.NextFilePanel()
@@ -381,6 +381,47 @@ func TestStaleDisconnectDoesNotCloseReplacementSession(t *testing.T) {
 	}
 	if got := newBrowser.closes(); got != 0 {
 		t.Fatalf("replacement browser close count = %d, want 0", got)
+	}
+}
+
+func TestSessionRegistryGenerationsRemainMonotonicAfterRemoval(t *testing.T) {
+	registry := NewSessionRegistry()
+	first, _, _ := registry.Register(SessionState{ID: "first", Label: "first"})
+	registry.Remove(first.ID)
+	second, _, _ := registry.Register(SessionState{ID: "second", Label: "second"})
+	if second.Generation <= first.Generation {
+		t.Fatalf("generation after removal = %d, want greater than %d", second.Generation, first.Generation)
+	}
+}
+
+func TestRegisterSessionUsesNormalizedIDWhenAttachingPanel(t *testing.T) {
+	model := New([]string{"/tmp/sf-local"}, false)
+	location := filesystem.Location{
+		Provider: filesystem.ProviderSFTP,
+		Label:    "normalized-session",
+		Path:     filesystem.RootRemotePath(),
+	}
+	if err := model.SetPaneLocation(0, location); err != nil {
+		t.Fatalf("set pane location: %v", err)
+	}
+	browser := &closeTrackingSession{}
+	model.RegisterSession(SessionState{
+		Provider: filesystem.ProviderSFTP,
+		Label:    location.Label,
+		Status:   SessionConnected,
+		Browser:  browser,
+	})
+
+	panelLocation := model.FilePanels[0].CurrentLocation()
+	if panelLocation.SessionID != filesystem.SessionID(location.Label) {
+		t.Fatalf("panel session ID = %q, want %q", panelLocation.SessionID, location.Label)
+	}
+	state, err := model.PaneSession(0)
+	if err != nil {
+		t.Fatalf("get normalized pane session: %v", err)
+	}
+	if state.Browser != browser {
+		t.Fatal("normalized session browser was not attached to panel")
 	}
 }
 

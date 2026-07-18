@@ -2,11 +2,13 @@ package internal
 
 import (
 	"log/slog"
+	"time"
 
 	tea "charm.land/bubbletea/v2"
 
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/filesystem"
+	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
@@ -98,6 +100,8 @@ type RemoteNavigationMsg struct {
 	source     filesystem.Location
 	target     filesystem.Path
 	generation uint64
+	elements   []filepanel.Element
+	loadedAt   time.Time
 	err        error
 }
 
@@ -106,6 +110,8 @@ func NewRemoteNavigationMsg(
 	source filesystem.Location,
 	target filesystem.Path,
 	generation uint64,
+	elements []filepanel.Element,
+	loadedAt time.Time,
 	err error,
 	reqID int,
 ) RemoteNavigationMsg {
@@ -115,6 +121,8 @@ func NewRemoteNavigationMsg(
 		source:      source,
 		target:      target,
 		generation:  generation,
+		elements:    elements,
+		loadedAt:    loadedAt,
 		err:         err,
 	}
 }
@@ -136,8 +144,9 @@ func (msg RemoteNavigationMsg) ApplyToModel(m *model) tea.Cmd {
 		m.notifyModel = notify.New(true, "Remote navigation failed", err.Error(), notify.NoAction)
 		return nil
 	}
+	panel.ApplyLoadedElements(msg.elements, msg.loadedAt)
 	m.fileModel.SyncPaneSessionLocations()
-	return m.fileModel.GetRemoteFilePanelUpdateCmd(true)
+	return nil
 }
 
 func (msg BaseMessage) GetReqID() int {
@@ -148,19 +157,25 @@ type PasteOperationMsg struct {
 	BaseMessage
 
 	state            processbar.ProcessState
-	failureLocations []filesystem.Location
+	failureLocation  filesystem.Location
+	refreshLocations []filesystem.Location
+	remainingSources []filesystem.Location
 	err              error
 }
 
 func NewProviderPasteOperationMsg(
 	state processbar.ProcessState,
-	locations []filesystem.Location,
+	failureLocation filesystem.Location,
+	refreshLocations []filesystem.Location,
+	remainingSources []filesystem.Location,
 	err error,
 	reqID int,
 ) PasteOperationMsg {
 	return PasteOperationMsg{
 		state:            state,
-		failureLocations: append([]filesystem.Location(nil), locations...),
+		failureLocation:  failureLocation,
+		refreshLocations: append([]filesystem.Location(nil), refreshLocations...),
+		remainingSources: append([]filesystem.Location(nil), remainingSources...),
 		err:              err,
 		BaseMessage:      BaseMessage{reqID: reqID},
 	}
@@ -177,11 +192,15 @@ func NewPasteOperationMsg(state processbar.ProcessState, reqID int) PasteOperati
 
 func (msg PasteOperationMsg) ApplyToModel(m *model) tea.Cmd {
 	refreshRemote := false
-	for _, location := range msg.failureLocations {
-		m.handleRemoteSessionError(location, msg.err)
+	if msg.err != nil && msg.failureLocation.Provider != "" {
+		m.handleRemoteSessionError(msg.failureLocation, msg.err)
+	}
+	for _, location := range msg.refreshLocations {
 		refreshRemote = refreshRemote || location.Provider != filesystem.ProviderLocal
 	}
-	if (msg.state == processbar.Failed || msg.state == processbar.Successful) && m.clipboard.IsCut() {
+	if m.clipboard.IsCut() && len(msg.remainingSources) > 0 {
+		m.clipboard.SetLocations(msg.remainingSources)
+	} else if msg.state == processbar.Successful && m.clipboard.IsCut() {
 		m.clipboard.Reset(false)
 	}
 	if refreshRemote {
@@ -219,6 +238,7 @@ func NewCreateOperationMsg(state processbar.ProcessState, reqID int) CreateOpera
 }
 
 func (msg CreateOperationMsg) ApplyToModel(m *model) tea.Cmd {
+	m.typingModal.submitting = false
 	if msg.location.Provider == filesystem.ProviderLocal {
 		m.fileModel.UpdateLocalFilePanelsIfNeeded(true)
 		return nil
@@ -396,6 +416,7 @@ func NewSpfErrorModalMsg(m spferror.Model, reqID int) SpfErrorModalUpdateMsg {
 }
 
 func (msg SpfErrorModalUpdateMsg) ApplyToModel(m *model) tea.Cmd {
+	m.typingModal.submitting = false
 	m.spfError = msg.m
 	return nil
 }
