@@ -153,7 +153,7 @@ func TestSSHManualConnectCase(t *testing.T) {
 	t.Cleanup(func() {
 		require.NoError(t, action.Session.Close())
 	})
-	assert.Equal(t, filesystem.SessionID("manual-localhost"), action.Location.SessionID)
+	assert.NotEmpty(t, action.Location.SessionID)
 	knownHostsBytes, err := os.ReadFile(knownHostsPath)
 	require.NoError(t, err)
 	assert.Contains(t, string(knownHostsBytes), fixture.Host)
@@ -176,7 +176,9 @@ func TestSSHManualConnectCase(t *testing.T) {
 	)
 	engine := filesystem.NewTransferEngine(resolver)
 
-	transfer, err := engine.Start(context.Background(), filesystem.TransferRequest{
+	transferCtx, cancelTransfer := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancelTransfer()
+	transfer, err := engine.Start(transferCtx, filesystem.TransferRequest{
 		Operation: filesystem.OperationTransferLocalToRemote,
 		Source:    filesystem.Location{Provider: filesystem.ProviderLocal, Path: filesystem.NewLocalPath(sourcePath)},
 		Destination: filesystem.Location{
@@ -188,7 +190,7 @@ func TestSSHManualConnectCase(t *testing.T) {
 		Overwrite: false,
 	})
 	require.NoError(t, err)
-	err = transfer.Wait(context.Background())
+	err = transfer.Wait(transferCtx)
 	require.Error(t, err)
 	require.ErrorIs(t, err, filesystem.ErrConflict)
 	assert.Equal(t, "alpha\n", string(mustReadFile(t, remoteFixturePath(fixture, fixture.AlphaPath))))

@@ -122,7 +122,7 @@ func pasteDir(src, dst string, p *processbar.Process, cut bool, processBarModel 
 	}
 
 	// If this was a cut operation and we had to do a manual copy, remove the source
-	if cut && !sameDev {
+	if cut {
 		err = deleteElement(src)
 		if err != nil {
 			return fmt.Errorf("failed to remove source after move: %w", err)

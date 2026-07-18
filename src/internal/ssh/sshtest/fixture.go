@@ -722,11 +722,18 @@ func (h *filesystemHandler) Filecmd(req *sftp.Request) error {
 		if failureErr := h.injectedFailure(strings.ToLower(req.Method), req.Target); failureErr != nil {
 			return failureErr
 		}
+		if req.Method == "Rename" {
+			if _, statErr := os.Lstat(targetPath); statErr == nil {
+				return os.ErrExist
+			} else if !errors.Is(statErr, os.ErrNotExist) {
+				return statErr
+			}
+		}
 		return os.Rename(localPath, targetPath)
 	case "Rmdir":
 		return os.Remove(localPath)
 	case "Mkdir":
-		return os.MkdirAll(localPath, 0o755) //nolint:gosec // SFTP fixture models normal directory permissions.
+		return os.Mkdir(localPath, 0o755) //nolint:gosec // SFTP fixture models normal directory permissions.
 	case "Remove":
 		return os.Remove(localPath)
 	case "Symlink":
@@ -983,7 +990,7 @@ func (w *disconnectingWriterAt) WriteAt(p []byte, off int64) (int, error) {
 	if w.fired {
 		return 0, &sftp.StatusError{Code: uint32(sftp.ErrSSHFxConnectionLost)}
 	}
-	if w.remaining <= 0 || int64(len(p)) <= w.remaining {
+	if w.remaining > 0 && int64(len(p)) < w.remaining {
 		n, err := w.file.WriteAt(p, off)
 		w.remaining -= int64(n)
 		return n, err

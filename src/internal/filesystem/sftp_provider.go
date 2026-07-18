@@ -216,22 +216,20 @@ func (s *SFTPSession) Create(ctx context.Context, path Path, reader io.Reader, o
 		if openErr != nil {
 			return mapSFTPCreateError(OperationCreateFile, path, openErr)
 		}
-		defer file.Close()
-
 		mode := options.Mode
 		if mode == 0 {
 			mode = utils.UserFilePerm
 		}
+		var writeErr error
 		if chmodErr := s.client.Chmod(remotePath, mode); chmodErr != nil {
-			return mapSFTPError(OperationCreateFile, path, chmodErr)
+			writeErr = mapSFTPError(OperationCreateFile, path, chmodErr)
+		} else if reader != nil {
+			_, copyErr := file.ReadFrom(
+				contextReader{ctx: ctx, path: path, operation: OperationCreateFile, reader: reader},
+			)
+			writeErr = mapSFTPError(OperationCreateFile, path, copyErr)
 		}
-		if reader == nil {
-			return nil
-		}
-		_, copyErr := file.ReadFrom(
-			contextReader{ctx: ctx, path: path, operation: OperationCreateFile, reader: reader},
-		)
-		return mapSFTPError(OperationCreateFile, path, copyErr)
+		return errors.Join(writeErr, mapSFTPError(OperationCreateFile, path, file.Close()))
 	})
 	return mapSFTPError(OperationCreateFile, path, err)
 }
@@ -280,12 +278,11 @@ func (s *SFTPSession) Rename(ctx context.Context, source Path, destination Path,
 
 	err = runSFTPErrorOperation(ctx, s.Close, func() error {
 		if !options.Overwrite {
-			if exists, existsErr := s.exists(destination); existsErr != nil {
-				return existsErr
-			} else if exists {
+			renameErr := s.client.Rename(sourcePath, destinationPath)
+			if isSFTPConflict(renameErr) {
 				return NewConflictError(ProviderSFTP, OperationRename, destination, "destination already exists")
 			}
-			return mapSFTPError(OperationRename, source, s.client.Rename(sourcePath, destinationPath))
+			return mapSFTPError(OperationRename, source, renameErr)
 		}
 
 		renameErr := s.client.PosixRename(sourcePath, destinationPath)
@@ -352,6 +349,10 @@ func (s *SFTPSession) copy(ctx context.Context, source Path, destination Path, o
 	info, err := s.client.Lstat(sourcePath)
 	if err != nil {
 		return mapSFTPError(OperationCopy, source, err)
+	}
+	if pathsOverlap(source, destination, info.IsDir() && info.Mode()&os.ModeSymlink == 0) {
+		return NewUnsupportedError(ProviderSFTP, OperationCopy, destination,
+			"source and destination must not be the same path or nested within the source")
 	}
 	if info.IsDir() && info.Mode()&os.ModeSymlink == 0 {
 		if !options.Recursive {
@@ -539,13 +540,13 @@ func (s *SFTPSession) copyFile(
 	if err != nil {
 		return mapSFTPCreateError(OperationCopy, destination, err)
 	}
-	defer destinationFile.Close()
-
 	_, err = destinationFile.ReadFrom(
 		contextReader{ctx: ctx, path: source, operation: OperationCopy, reader: sourceFile},
 	)
-	if err != nil {
-		return mapSFTPError(OperationCopy, source, err)
+	writeErr := mapSFTPError(OperationCopy, source, err)
+	closeErr := mapSFTPError(OperationCopy, destination, destinationFile.Close())
+	if writeErr != nil || closeErr != nil {
+		return errors.Join(writeErr, closeErr)
 	}
 	return mapSFTPError(OperationCopy, destination, s.client.Chmod(destination.String(), sourceInfo.Mode()))
 }

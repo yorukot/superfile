@@ -1,6 +1,7 @@
 package filepanel
 
 import (
+	"context"
 	"os"
 	"time"
 
@@ -48,6 +49,8 @@ type Model struct {
 	elementsLoading        bool
 	elementsRefreshPending bool
 	elementsRequestID      uint64
+	elementsContext        context.Context
+	elementsCancel         context.CancelFunc
 	TargetFile             string             // filename to position cursor on after load
 	columns                []columnDefinition // columns for rendering
 }

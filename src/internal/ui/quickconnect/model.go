@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	tea "charm.land/bubbletea/v2"
@@ -30,6 +31,8 @@ const (
 	ModeHostKeyConfirmation
 	ModeBlockingWarning
 )
+
+var nextQuickConnectSessionID atomic.Uint64 //nolint:gochecknoglobals // Process-wide session IDs must not be reused.
 
 type ActionType int
 
@@ -142,7 +145,7 @@ func New() Model {
 
 func (m *Model) SetDimensions(width, maxHeight int) {
 	if width > 0 {
-		m.width = width
+		m.width = max(width, common.InnerPadding)
 	}
 	if maxHeight > 0 {
 		m.maxHeight = maxHeight
@@ -195,9 +198,7 @@ func (m *Model) Open(cfg *common.ConfigType) error {
 	m.profiles = profiles
 	m.notices = notices
 	m.cursor = clampCursor(m.cursor, len(m.profiles))
-	m.mode = ModeList
-	m.warning = ""
-	m.lastConnectErr = nil
+	m.abandonConnectionFlow()
 	m.open = true
 	return nil
 }
@@ -205,19 +206,24 @@ func (m *Model) Open(cfg *common.ConfigType) error {
 func (m *Model) OpenWithProfiles(profiles []common.SSHQuickConnectProfile) {
 	m.profiles = append([]common.SSHQuickConnectProfile(nil), profiles...)
 	m.cursor = clampCursor(m.cursor, len(m.profiles))
-	m.mode = ModeList
+	m.abandonConnectionFlow()
 	m.open = true
 }
 
 func (m *Model) Close() {
 	m.open = false
-	m.mode = ModeList
-	m.lastConnectErr = nil
-	m.warning = ""
-	m.secrets = RuntimeSecrets{}
+	m.abandonConnectionFlow()
 	m.manual.Password = ""
 	m.manual.IdentityPassphrase = ""
 	m.manual.KeyboardInteractiveAnswers = nil
+}
+
+func (m *Model) abandonConnectionFlow() {
+	m.mode = ModeList
+	m.lastConnectErr = nil
+	m.pendingProfile = common.SSHQuickConnectProfile{}
+	m.warning = ""
+	m.secrets = RuntimeSecrets{}
 }
 
 func (m *Model) IsOpen() bool { return m.open }
@@ -290,7 +296,7 @@ func (m *Model) SaveManualProfile(filePath string, cfg *common.ConfigType) (comm
 		m.warning = err.Error()
 		return profile, err
 	}
-	m.mode = ModeList
+	m.abandonConnectionFlow()
 	return profile, nil
 }
 
@@ -379,7 +385,7 @@ func (m *Model) handleManualUpdateKey(key tea.KeyPressMsg) (Action, tea.Cmd) {
 	case len(key.Text) > 0:
 		m.appendActiveManualField(key.Text)
 	case isCancelKey(keyString):
-		m.mode = ModeList
+		m.abandonConnectionFlow()
 	case isConfirmKey(keyString):
 		m.copyManualSecrets()
 		profile := savedSSHProfileToQuickConnect(manualFieldsToSavedProfile(m.manual))
@@ -400,7 +406,7 @@ func (m *Model) handleManualKey(key tea.KeyPressMsg) Action {
 	case len(key.Text) > 0:
 		m.appendActiveManualField(key.Text)
 	case isCancelKey(keyString):
-		m.mode = ModeList
+		m.abandonConnectionFlow()
 	case isConfirmKey(keyString):
 		m.copyManualSecrets()
 		profile := savedSSHProfileToQuickConnect(manualFieldsToSavedProfile(m.manual))
@@ -416,8 +422,7 @@ func (m *Model) handleManualKey(key tea.KeyPressMsg) Action {
 func (m *Model) handleHostKeyKey(key string) (Action, tea.Cmd) {
 	switch {
 	case isCancelKey(key):
-		m.mode = ModeList
-		m.lastConnectErr = nil
+		m.abandonConnectionFlow()
 	case isConfirmKey(key):
 		if m.lastConnectErr == nil {
 			m.mode = ModeBlockingWarning
@@ -467,8 +472,8 @@ func attemptConnection(
 	provider := filesystem.NewSFTPProvider(request)
 	location := filesystem.Location{
 		Provider:  filesystem.ProviderSFTP,
-		SessionID: filesystem.SessionID(profile.Name),
-		Label:     profileLabel(profile),
+		SessionID: filesystem.SessionID(fmt.Sprintf("ssh-%d", nextQuickConnectSessionID.Add(1))),
+		Label:     profileDisplayLabel(profile),
 		Path:      filesystem.NewRemotePath(profileStartPath(profile)),
 	}
 	session, err := provider.Open(ctx, location)
@@ -875,8 +880,7 @@ func (m *Model) handleCredentialKey(key tea.KeyPressMsg) (Action, tea.Cmd) {
 	case len(key.Text) > 0:
 		m.appendActiveCredentialField(key.Text)
 	case isCancelKey(keyString):
-		m.mode = ModeList
-		m.warning = ""
+		m.abandonConnectionFlow()
 	case isConfirmKey(keyString):
 		return Action{}, m.connectProfileCmd(m.pendingProfile)
 	case isListUpKey(keyString):
@@ -962,6 +966,13 @@ func profileLabel(profile common.SSHQuickConnectProfile) string {
 		return profile.Name
 	}
 	return profile.Host
+}
+
+func profileDisplayLabel(profile common.SSHQuickConnectProfile) string {
+	if strings.TrimSpace(profile.Name) != "" {
+		return profile.Name
+	}
+	return profileLabel(profile)
 }
 
 func defaultAuthPreference() string {

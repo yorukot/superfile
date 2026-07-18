@@ -194,7 +194,7 @@ func publicKeyAuthMethods(req ClientConfigRequest) ([]ssh.AuthMethod, func() err
 	signers := make([]ssh.Signer, 0, len(req.Profile.IdentityFiles)+defaultSignerBuffer)
 	var closeFn func() error
 	if !req.Profile.IdentitiesOnly {
-		agentSigners, agentCloseFn := agentAuthSigners(req.AgentSocket)
+		agentSigners, agentCloseFn := agentAuthSigners(req.AgentSocket, effectiveSSHTimeout(req.Timeout))
 		closeFn = agentCloseFn
 		if len(agentSigners) > 0 {
 			signers = append(signers, agentSigners...)
@@ -269,15 +269,21 @@ func authOrder(methods []string) []string {
 	return ordered
 }
 
-func agentAuthSigners(socketPath string) ([]ssh.Signer, func() error) {
+func agentAuthSigners(socketPath string, timeout time.Duration) ([]ssh.Signer, func() error) {
 	if socketPath == "" {
 		socketPath = os.Getenv("SSH_AUTH_SOCK")
 	}
 	if socketPath == "" {
 		return nil, nil
 	}
-	conn, err := (&net.Dialer{}).DialContext(context.Background(), "unix", socketPath)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+	conn, err := (&net.Dialer{Timeout: timeout}).DialContext(ctx, "unix", socketPath)
 	if err != nil {
+		return nil, nil
+	}
+	if err = conn.SetDeadline(time.Now().Add(timeout)); err != nil {
+		_ = conn.Close()
 		return nil, nil
 	}
 	agentClient := agent.NewClient(conn)
@@ -287,6 +293,13 @@ func agentAuthSigners(socketPath string) ([]ssh.Signer, func() error) {
 		return nil, nil
 	}
 	return signers, conn.Close
+}
+
+func effectiveSSHTimeout(timeout time.Duration) time.Duration {
+	if timeout <= 0 {
+		return defaultSSHTimeout
+	}
+	return timeout
 }
 
 func publicKeySigner(identityFile string, passphrase string) (ssh.Signer, error) {

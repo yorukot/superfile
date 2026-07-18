@@ -51,7 +51,7 @@ func TestRemoteEnterPanelAndParentDirectoryUsePaneSession(t *testing.T) {
 	m.fileModel.UpdateFilePanelsIfNeeded(true)
 	assert.Equal(t, "/tmp/sf-remote", m.getFocusedFilePanel().Location)
 	assert.Equal(t, "nested", m.getFocusedFilePanel().GetFocusedItem().Name)
-	assert.Equal(t, "sf-e2e:/tmp/sf-remote", m.getFocusedFilePanel().DisplayLocation())
+	assert.Equal(t, "ssh://user@sf-e2e:/tmp/sf-remote", m.getFocusedFilePanel().DisplayLocation())
 }
 
 func applyModelUpdateCommand(t *testing.T, m *model, cmd tea.Cmd) {
