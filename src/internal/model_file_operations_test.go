@@ -92,31 +92,29 @@ func TestFileCreation(t *testing.T) {
 
 	for _, tt := range testdata {
 		m := defaultTestModel(testChildDir)
-
+		p := NewTestTeaProgWithEventLoop(t, m)
 		TeaUpdate(m, nil)
-		TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.FilePanelItemCreate[0]))
+		p.SendKey(common.Hotkeys.FilePanelItemCreate[0])
 
-		assert.Empty(t, m.typingModal.errorMesssage)
+		require.Eventually(t, func() bool {
+			return m.typingModal.open
+		}, DefaultTestTimeout, DefaultTestTick, "Typing modal never opened")
 
-		m.typingModal.textInput.SetValue(tt.fileName)
-
-		cmd := TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.ConfirmTyping[0]))
-		if v, ok := cmd().(tea.BatchMsg); ok {
-			for _, cmdExec := range v {
-				cmdExec()
-			}
-		}
+		p.SendKey(tt.fileName)
+		p.SendKey(common.Hotkeys.ConfirmTyping[0])
 
 		if tt.expectedError {
-			assert.NotEmpty(t, m.typingModal.errorMesssage, "expected an error for input: %q", tt.fileName)
+			assert.Eventually(t, func() bool {
+				return m.typingModal.errorMesssage != ""
+			}, DefaultTestTimeout, DefaultTestTick, "expected an error for input: %q", tt.fileName)
+
 		} else {
-			assert.Empty(t, m.typingModal.errorMesssage, "expected an error for input: %q", tt.fileName)
-			assert.FileExists(
-				t,
-				filepath.Join(testChildDir, tt.fileName),
-				"expected file to be created: %q",
-				tt.fileName,
-			)
+			targetFile := filepath.Join(testChildDir, tt.fileName)
+			assert.Eventually(t, func() bool {
+				_, err := os.Lstat(targetFile)
+				return err == nil
+			}, DefaultTestTimeout, DefaultTestTick, "Target file did not get created : %q", targetFile)
+			assert.Empty(t, m.typingModal.errorMesssage, "Empty error expected for input: %q", tt.fileName)
 		}
 	}
 }
