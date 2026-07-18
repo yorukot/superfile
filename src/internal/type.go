@@ -55,7 +55,6 @@ const (
 type model struct {
 	// Main Panels
 	fileModel       filemodel.Model
-	sessionRegistry filemodel.SessionRegistry
 	sidebarModel    sidebar.Model
 	processBarModel processbar.Model
 	clipboard       clipboard.Model
@@ -81,11 +80,12 @@ type model struct {
 	// no use directly for increment, use nextIoReqCnt
 	ioReqCnt int32
 
-	modelQuitState       modelQuitStateType
-	firstTextInput       bool
-	toggleFooter         bool
-	firstLoadingComplete bool
-	firstUse             bool
+	modelQuitState         modelQuitStateType
+	renameOperationPending bool
+	firstTextInput         bool
+	toggleFooter           bool
+	firstLoadingComplete   bool
+	firstUse               bool
 
 	// This entirely disables metadata fetching. Used in test model
 	disableMetadata bool
@@ -105,11 +105,10 @@ type model struct {
 }
 
 type typingModal struct {
-	location      string
-	paneLocation  filesystem.Location
-	open          bool
-	textInput     textinput.Model
-	errorMesssage string
+	location     string
+	paneLocation filesystem.Location
+	open         bool
+	textInput    textinput.Model
 }
 
 type editorFinishedMsg struct{ err error }

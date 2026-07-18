@@ -20,5 +20,5 @@ type Model struct {
 	FocusedPanelIndex    int
 	ioReqCnt             int
 	DisplayDotFiles      bool
-	Sessions             SessionRegistry
+	Sessions             *SessionRegistry
 }

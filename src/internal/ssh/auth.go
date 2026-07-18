@@ -72,10 +72,13 @@ func BuildClientConfig(req ClientConfigRequest) (*ClientConfigBundle, error) {
 
 	authMethods, closeAgentConn, err := buildAuthMethods(req)
 	if err != nil {
-		return nil, err
+		return nil, closeAuthResources(err, closeAgentConn)
 	}
 	if len(authMethods) == 0 {
-		return nil, errors.New("ssh auth configuration has no usable authentication method")
+		return nil, closeAuthResources(
+			errors.New("ssh auth configuration has no usable authentication method"),
+			closeAgentConn,
+		)
 	}
 
 	timeout := req.Timeout
@@ -102,6 +105,13 @@ func BuildClientConfig(req ClientConfigRequest) (*ClientConfigBundle, error) {
 		KnownHostsPath: knownHostsPath,
 		closeAgentConn: closeAgentConn,
 	}, nil
+}
+
+func closeAuthResources(err error, closeFn func() error) error {
+	if closeFn == nil {
+		return err
+	}
+	return errors.Join(err, closeFn())
 }
 
 func (b *ClientConfigBundle) Close() error {
@@ -159,11 +169,11 @@ func buildAuthMethods(req ClientConfigRequest) ([]ssh.AuthMethod, func() error, 
 		switch authFamily {
 		case common.SSHAuthMethodPublicKey:
 			publicKeyMethods, closeFn, err := publicKeyAuthMethods(req)
-			if err != nil {
-				return nil, closeAgentConn, err
-			}
 			if closeFn != nil {
 				closeAgentConn = closeFn
+			}
+			if err != nil {
+				return nil, closeAgentConn, err
 			}
 			methods = append(methods, publicKeyMethods...)
 		case common.SSHAuthMethodPassword:

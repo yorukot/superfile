@@ -17,12 +17,6 @@ class BaseTest(ABC):
         self.env = test_env
         self.logger = logging.getLogger()
 
-    CASES: List[str] = []
-
-    @classmethod
-    def requires_spf_manager(cls) -> bool:
-        return True
-
     @abstractmethod
     def setup(self) -> None:
         """Set up the required things for test

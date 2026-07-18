@@ -28,18 +28,18 @@ func TestRemoteCreateMkdirAndRenameUseProviders(t *testing.T) {
 
 	m.panelCreateNewFile()
 	m.typingModal.textInput.SetValue("created.txt")
-	m.createItem()
+	applyTeaCmd(t, m, m.createItem())
 	assert.FileExists(t, remoteFixturePath(fixture, "/created.txt"))
 
 	m.panelCreateNewFile()
 	m.typingModal.textInput.SetValue("created-dir/")
-	m.createItem()
+	applyTeaCmd(t, m, m.createItem())
 	assert.DirExists(t, remoteFixturePath(fixture, "/created-dir"))
 
 	setFilePanelSelectedItemByLocation(t, m.getFocusedFilePanel(), fixture.AlphaPath)
 	m.panelItemRename()
 	m.getFocusedFilePanel().Rename.SetValue("alpha-renamed.txt")
-	m.confirmRename()
+	applyTeaCmd(t, m, m.confirmRename(false))
 
 	assert.NoFileExists(t, remoteFixturePath(fixture, fixture.AlphaPath))
 	assert.FileExists(t, remoteFixturePath(fixture, "/alpha-renamed.txt"))
@@ -261,7 +261,6 @@ func registerRemoteOperationPanel(t *testing.T, m *model, fixture *sshtest.Fixtu
 	})
 	require.NoError(t, m.fileModel.SetPaneLocation(panelIndex, location))
 	m.fileModel.UpdateFilePanelsIfNeeded(true)
-	m.sessionRegistry = m.fileModel.Sessions
 }
 
 func remoteOperationProfileForAlias(fixture *sshtest.Fixture, aliasName string) common.SSHQuickConnectProfile {
