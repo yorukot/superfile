@@ -33,7 +33,7 @@ func validateCompressOperation(sources []string) (int, error) {
 				return 0, fmt.Errorf("the file is not readable: %s", err.Error())
 			}
 		}
-		count, err := countFiles(src)
+		count, err := countReadableFiles(src)
 		if err != nil {
 			slog.Error("Error while zip file count files ", "error", err)
 			return 0, fmt.Errorf("error while counting files for %s: %s", src, err.Error())
