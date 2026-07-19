@@ -148,6 +148,94 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 	return nil
 }
 
+func (m *model) shouldHandlePreviewScrollKeys() bool {
+	return !m.spfError.IsOpen() &&
+		!m.typingModal.open &&
+		!m.promptModal.IsOpen() &&
+		!m.zoxideModal.IsOpen() &&
+		!m.notifyModel.IsOpen() &&
+		!m.fileModel.Renaming &&
+		!m.sidebarModel.IsRenaming() &&
+		!m.getFocusedFilePanel().SearchBar.Focused()
+}
+
+func (m *model) tryPreviewScrollKey(msg tea.KeyPressMsg) (tea.Cmd, bool) {
+	if !m.previewScrollAllowed() {
+		return nil, false
+	}
+	key := msg.String()
+	switch {
+	case slices.Contains(common.Hotkeys.PreviewScrollTop, key):
+		return m.handlePreviewScrollTop(), true
+	case slices.Contains(common.Hotkeys.PreviewScrollBottom, key):
+		return m.handlePreviewScrollBottom(), true
+	case slices.Contains(common.Hotkeys.PreviewScrollBulkUp, key):
+		return m.handlePreviewScrollBulkUp(), true
+	case slices.Contains(common.Hotkeys.PreviewScrollBulkDown, key):
+		return m.handlePreviewScrollBulkDown(), true
+	case slices.Contains(common.Hotkeys.PreviewScrollLineUp, key):
+		return m.handlePreviewScrollLineUp(), true
+	case slices.Contains(common.Hotkeys.PreviewScrollLineDown, key):
+		return m.handlePreviewScrollLineDown(), true
+	}
+	return nil, false
+}
+
+func (m *model) previewScrollAllowed() bool {
+	panel := m.getFocusedFilePanel()
+	return m.fileModel.FilePreview.IsOpen() &&
+		m.focusPanel == nonePanelFocus &&
+		panel.IsFocused &&
+		panel.PanelMode == filepanel.BrowserMode
+}
+
+func (m *model) handlePreviewScrollLineUp() tea.Cmd {
+	if !m.previewScrollAllowed() || !m.fileModel.FilePreview.ScrollLineUp() {
+		return nil
+	}
+	return m.fileModel.RefreshPreviewScroll()
+}
+
+func (m *model) handlePreviewScrollLineDown() tea.Cmd {
+	if !m.previewScrollAllowed() || !m.fileModel.FilePreview.ScrollLineDown() {
+		return nil
+	}
+	return m.fileModel.RefreshPreviewScroll()
+}
+
+func (m *model) handlePreviewScrollBulkUp() tea.Cmd {
+	if !m.previewScrollAllowed() ||
+		!m.fileModel.FilePreview.ScrollBulkUp(m.fileModel.PreviewViewportHeight()) {
+		return nil
+	}
+	return m.fileModel.RefreshPreviewScroll()
+}
+
+func (m *model) handlePreviewScrollBulkDown() tea.Cmd {
+	if !m.previewScrollAllowed() ||
+		!m.fileModel.FilePreview.ScrollBulkDown(m.fileModel.PreviewViewportHeight()) {
+		return nil
+	}
+	return m.fileModel.RefreshPreviewScroll()
+}
+
+func (m *model) handlePreviewScrollTop() tea.Cmd {
+	if !m.previewScrollAllowed() || !m.fileModel.FilePreview.ScrollTop() {
+		return nil
+	}
+	return m.fileModel.RefreshPreviewScroll()
+}
+
+func (m *model) handlePreviewScrollBottom() tea.Cmd {
+	if !m.previewScrollAllowed() || !m.fileModel.FilePreview.CanScrollDown() {
+		return nil
+	}
+	if !m.fileModel.FilePreview.ScrollBottom() {
+		return nil
+	}
+	return m.fileModel.RefreshPreviewScroll()
+}
+
 func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
 	// if not focus on the filepanel return
 	if !m.getFocusedFilePanel().IsFocused {
