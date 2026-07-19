@@ -11,11 +11,6 @@ import (
 
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/pkg/utils"
-
-	trash_win "github.com/hymkor/trash-go"
-	"github.com/rkoesters/xdg/trash"
-
-	variable "github.com/yorukot/superfile/src/config"
 )
 
 // isSamePartition checks if two paths are on the same filesystem partition
@@ -125,6 +120,19 @@ func copyDir(src, dst string, srcInfo os.FileInfo) error {
 	return nil
 }
 
+// is an equivalent of "cp -P" command
+func copyLinkFile(src, dst string) error {
+	target, err := os.Readlink(src)
+	if err != nil {
+		return err
+	}
+	return os.Symlink(target, dst)
+}
+
+func isSymlink(info os.FileInfo) bool {
+	return info.Mode()&os.ModeSymlink != 0
+}
+
 // copyFile copies a single file
 func copyFile(src, dst string, srcInfo os.FileInfo) error {
 	srcFile, err := os.Open(src)
@@ -143,26 +151,6 @@ func copyFile(src, dst string, srcInfo os.FileInfo) error {
 		return fmt.Errorf("failed to copy file contents: %w", err)
 	}
 	return nil
-}
-
-func moveToTrash(src string) error {
-	var err error
-	switch runtime.GOOS {
-	case utils.OsDarwin:
-		err = moveElement(src, filepath.Join(variable.DarwinTrashDirectory, filepath.Base(src)))
-	case utils.OsWindows:
-		err = trash_win.Throw(src)
-	default:
-		// TODO: We should consider moving away from this package. Its not well written.
-		// It uses package globals, It doesn't initializes trash directory, and we have to do it
-		// separately outside of the this package. There is not documentation about this
-		// It also uses deprecated libraries, and isn't well maintained.
-		err = trash.Trash(src)
-	}
-	if err != nil {
-		slog.Error("Error while deleting single item, in function to move file to trash can", "error", err)
-	}
-	return err
 }
 
 // pasteDir handles directory copying with progress tracking
@@ -223,6 +211,9 @@ func actualPasteOperation(info os.FileInfo, path string, newPath string, cut boo
 		}
 		err = os.MkdirAll(newPath, info.Mode())
 		return err
+	}
+	if isSymlink(info) {
+		return copyLinkFile(path, newPath)
 	}
 
 	// File

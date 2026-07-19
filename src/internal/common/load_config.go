@@ -17,6 +17,7 @@ import (
 
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/config/icon"
+	"github.com/yorukot/superfile/src/internal/trash"
 )
 
 // Load configurations from the configuration file. Compares the content
@@ -384,18 +385,9 @@ func PopulateThemeFromFile(themeFilePath string) error {
 }
 
 func InitTrash() bool {
-	// Create trash directories
-	if runtime.GOOS != utils.OsLinux {
-		return true
-	}
-	err := utils.CreateDirectories(
-		variable.LinuxTrashDirectory,
-		variable.LinuxTrashDirectoryFiles,
-		variable.LinuxTrashDirectoryInfo,
-	)
+	err := trash.Init()
 	if err != nil {
-		slog.Warn("Failed to initialize XDG trash; falling back to permanent delete",
-			"error", err, "trashDir", variable.LinuxTrashDirectory)
+		slog.Warn("Failed to initialize trash; falling back to permanent delete", "error", err)
 		return false
 	}
 	return true

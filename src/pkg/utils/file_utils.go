@@ -173,6 +173,13 @@ func fixTomlFile(resultErr *TomlLoadError, filePath string, target interface{}) 
 		resultErr.UpdateMessageAndError("failed to marshal config to TOML", err)
 		return resultErr
 	}
+
+	// Truncate the file
+	if err = origFile.Truncate(0); err != nil {
+		resultErr.UpdateMessageAndError("failed to truncate TOML file", err)
+		return resultErr
+	}
+	// Write updated TOML to file
 	_, err = origFile.WriteAt(tomlData, 0)
 	if err != nil {
 		resultErr.UpdateMessageAndError("failed to write TOML data to original file", err)
@@ -269,6 +276,9 @@ func ReadFileContent(filepath string, maxLineLength int, previewLine int) (strin
 	lineCount := 0
 	for scanner.Scan() {
 		line := scanner.Text()
+		// do this before truncating, otherwise the highlighter turns tabs into a fixed
+		// number of spaces and columns don't line up
+		line = expandTabs(line)
 		line = ansi.Truncate(line, maxLineLength, "")
 		resultBuilder.WriteString(line)
 		resultBuilder.WriteRune('\n')
@@ -279,6 +289,26 @@ func ReadFileContent(filepath string, maxLineLength int, previewLine int) (strin
 	}
 	// returns the first non-EOF error that was encountered by the [Scanner]
 	return resultBuilder.String(), scanner.Err()
+}
+
+// expandTabs replaces tabs with spaces up to the next tab stop. line should be a
+// single line without newlines.
+func expandTabs(line string) string {
+	if !strings.Contains(line, "\t") {
+		return line
+	}
+	var sb strings.Builder
+	lastSegmentStart := 0
+	for _, r := range line {
+		if r == '\t' {
+			newSegmentSize := ansi.StringWidth(sb.String()[lastSegmentStart:])
+			sb.WriteString(strings.Repeat(" ", TabWidth-newSegmentSize%TabWidth))
+			lastSegmentStart = sb.Len()
+			continue
+		}
+		sb.WriteRune(r)
+	}
+	return sb.String()
 }
 
 func InitJSONFile(path string) error {

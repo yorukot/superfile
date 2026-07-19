@@ -11,6 +11,8 @@ export default defineConfig({
 	integrations: [mdx(), sitemap()],
 
 	markdown: {
+		// Required for GFM tables in MDX content; undefined is treated as false by @astrojs/mdx.
+		gfm: true,
 		shikiConfig: {
 			theme: "catppuccin-mocha",
 			wrap: false

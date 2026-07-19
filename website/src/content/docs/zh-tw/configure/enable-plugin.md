@@ -31,10 +31,9 @@ $EDITOR CONFIG_PATH
 
 ### 步驟 3：啟用外掛
 
-在設定檔中找到 plugin 區段，並將其值從 `false` 改為 `true`：
+在設定檔中找到 plugin 設定，並將其值從 `false` 改為 `true`：
 
 ```diff
-[plugins]
 - metadata = false
 + metadata = true
 ```
@@ -54,8 +53,8 @@ $EDITOR CONFIG_PATH
 ## 設定格式
 
 ```toml
-[plugins]
 metadata = false
+enable_md5_checksum = false
 zoxide_support = false
 ```
 

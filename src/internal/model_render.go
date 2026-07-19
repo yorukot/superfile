@@ -85,13 +85,9 @@ func (m *model) typineModalRender() string {
 		lipgloss.NewStyle().Background(common.ModalBGColor).Render("           ") +
 		cancel
 
-	var err string
-	if m.typingModal.errorMesssage != "" {
-		err = "\n\n" + common.ModalErrorStyle.Render(m.typingModal.errorMesssage)
-	}
 	// TODO : Move this all to rendering package to avoid specifying newlines manually
 	return common.ModalBorderStyle(common.ModalHeight, common.ModalWidth).
-		Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip + err)
+		Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip)
 }
 
 func (m *model) introduceModalRender() string {
