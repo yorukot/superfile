@@ -2,6 +2,8 @@ package internal
 
 import (
 	"errors"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -53,6 +55,27 @@ func TestProviderPasteSuccessfulCutClearsClipboard(t *testing.T) {
 
 	assert.False(t, m.clipboard.IsCut())
 	assert.Empty(t, m.clipboard.GetLocations())
+}
+
+func TestProviderPasteRefreshesLocalPanels(t *testing.T) {
+	dir := t.TempDir()
+	m := defaultTestModel(dir)
+	const fileName = "pasted.txt"
+	require.Equal(t, -1, m.fileModel.FilePanels[0].FindElementIndexByName(fileName))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, fileName), []byte("pasted"), 0o600))
+
+	msg := NewProviderPasteOperationMsg(
+		processbar.Successful,
+		filesystem.Location{},
+		[]filesystem.Location{{Provider: filesystem.ProviderLocal, Path: filesystem.NewLocalPath(dir)}},
+		nil,
+		nil,
+		1,
+	)
+	cmd := msg.ApplyToModel(m)
+
+	assert.Nil(t, cmd)
+	assert.NotEqual(t, -1, m.fileModel.FilePanels[0].FindElementIndexByName(fileName))
 }
 
 func TestCreateSubmissionGuardClearsOnCompletion(t *testing.T) {
