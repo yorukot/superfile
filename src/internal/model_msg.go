@@ -191,12 +191,17 @@ func NewPasteOperationMsg(state processbar.ProcessState, reqID int) PasteOperati
 }
 
 func (msg PasteOperationMsg) ApplyToModel(m *model) tea.Cmd {
+	refreshLocal := false
 	refreshRemote := false
 	if msg.err != nil && msg.failureLocation.Provider != "" {
 		m.handleRemoteSessionError(msg.failureLocation, msg.err)
 	}
 	for _, location := range msg.refreshLocations {
+		refreshLocal = refreshLocal || location.Provider == filesystem.ProviderLocal
 		refreshRemote = refreshRemote || location.Provider != filesystem.ProviderLocal
+	}
+	if refreshLocal {
+		m.fileModel.UpdateLocalFilePanelsIfNeeded(true)
 	}
 	if m.clipboard.IsCut() && len(msg.remainingSources) > 0 {
 		m.clipboard.SetLocations(msg.remainingSources)
