@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"sort"
 	"strings"
 	"sync"
@@ -25,6 +26,17 @@ type blockingReadCloser struct {
 	started   chan struct{}
 	once      sync.Once
 	startOnce sync.Once
+}
+
+type callbackReader struct {
+	reader io.Reader
+	onRead func()
+	once   sync.Once
+}
+
+func (r *callbackReader) Read(p []byte) (int, error) {
+	r.once.Do(r.onRead)
+	return r.reader.Read(p)
 }
 
 func (r *blockingReadCloser) Read(_ []byte) (int, error) {
@@ -91,6 +103,37 @@ func TestSFTPProviderContract(t *testing.T) {
 		data, err := io.ReadAll(reader)
 		require.NoError(t, err)
 		assert.Equal(t, "writer", string(data))
+	})
+
+	t.Run("chmod failure does not prevent write", func(t *testing.T) {
+		fixture, session := newSFTPTestSession(t)
+		path := NewRemotePath("/chmod-fails.txt")
+		reader := &callbackReader{
+			reader: bytes.NewReader([]byte("written first")),
+			onRead: func() {
+				stat, statErr := session.Stat(context.Background(), path)
+				if assert.NoError(t, statErr) {
+					assert.Equal(t, os.FileMode(0o600), stat.Mode.Perm())
+				}
+				fixture.FailOperationOnce("setstat", path.String(), os.ErrPermission)
+			},
+		}
+
+		err := session.Create(context.Background(), path, reader, CreateOptions{
+			Mode:      utils.UserFilePerm,
+			Overwrite: true,
+		})
+		require.ErrorIs(t, err, ErrPermission)
+
+		readback, readErr := session.Read(context.Background(), path)
+		require.NoError(t, readErr)
+		defer readback.Close()
+		data, readErr := io.ReadAll(readback)
+		require.NoError(t, readErr)
+		assert.Equal(t, "written first", string(data))
+		stat, statErr := session.Stat(context.Background(), path)
+		require.NoError(t, statErr)
+		assert.Equal(t, os.FileMode(0o600), stat.Mode.Perm())
 	})
 
 	t.Run("mkdir", func(t *testing.T) {
@@ -232,6 +275,36 @@ func TestSFTPProviderContract(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, "beta\n", string(data))
 	})
+}
+
+func TestSFTPProviderCreateAppliesRestrictiveModeBeforeFirstRead(t *testing.T) {
+	_, session := newSFTPTestSession(t)
+	path := NewRemotePath("/mode-during-read.txt")
+	requestedMode := os.FileMode(0o640)
+	var observedMode os.FileMode
+	var observedModeErr error
+	reader := &callbackReader{
+		reader: bytes.NewReader([]byte("mode checked")),
+		onRead: func() {
+			stat, statErr := session.Stat(context.Background(), path)
+			observedModeErr = statErr
+			if statErr == nil {
+				observedMode = stat.Mode.Perm()
+			}
+		},
+	}
+
+	err := session.Create(context.Background(), path, reader, CreateOptions{
+		Mode:      requestedMode,
+		Overwrite: true,
+	})
+	require.NoError(t, err)
+	require.NoError(t, observedModeErr)
+	assert.Equal(t, os.FileMode(0o600), observedMode)
+
+	stat, statErr := session.Stat(context.Background(), path)
+	require.NoError(t, statErr)
+	assert.Equal(t, requestedMode, stat.Mode.Perm())
 }
 
 func TestSFTPProviderErrorMappingAndCapabilities(t *testing.T) {
