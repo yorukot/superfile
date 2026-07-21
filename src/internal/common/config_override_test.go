@@ -71,10 +71,35 @@ func TestApplyConfigOverrides(t *testing.T) {
 			},
 		},
 		{
-			name:      "key and value are trimmed",
+			name:      "key is trimmed and bool value parses despite surrounding whitespace",
 			overrides: []string{" debug = true "},
 			check: func(t *testing.T, c *ConfigType) {
 				assert.True(t, c.Debug)
+			},
+		},
+		{
+			name:      "int value parses despite surrounding whitespace",
+			overrides: []string{"sidebar_width= 12 "},
+			check: func(t *testing.T, c *ConfigType) {
+				assert.Equal(t, 12, c.SidebarWidth)
+			},
+		},
+		{
+			// config.toml documents "Use ' ' for borderless", so a single space
+			// is a valid intended string value. The key must still be trimmed,
+			// but the raw string value must be preserved verbatim (not trimmed to
+			// empty) so CLI overrides can express the same values as config.toml.
+			name:      "string value with intended single space is preserved",
+			overrides: []string{" border_top = "},
+			check: func(t *testing.T, c *ConfigType) {
+				assert.Equal(t, " ", c.BorderTop)
+			},
+		},
+		{
+			name:      "string value surrounding whitespace is preserved verbatim",
+			overrides: []string{"border_bottom=  x  "},
+			check: func(t *testing.T, c *ConfigType) {
+				assert.Equal(t, "  x  ", c.BorderBottom)
 			},
 		},
 		{

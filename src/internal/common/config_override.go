@@ -31,8 +31,12 @@ func ApplyConfigOverrides(c *ConfigType, overrides []string) error {
 		if !found {
 			return fmt.Errorf("invalid config override %q: expected format 'key=value'", override)
 		}
+		// Trim only the key so overrides line up with config.toml keys. The raw
+		// value is passed through verbatim: for string fields whitespace can be
+		// the intended value (e.g. border_top = ' ' for a borderless layout, as
+		// documented in config.toml), so it must survive exactly as written.
+		// Numeric and bool fields trim internally where needed for parsing.
 		key = strings.TrimSpace(key)
-		rawValue = strings.TrimSpace(rawValue)
 
 		fieldIdx, ok := fieldByTomlKey[key]
 		if !ok {
@@ -76,15 +80,18 @@ func setFieldFromString(field reflect.Value, raw string) error {
 	//exhaustive:ignore
 	switch field.Kind() {
 	case reflect.String:
+		// Assign the raw value verbatim. Whitespace can be the intended value
+		// for a string field (e.g. a single space for a borderless border), so
+		// it must be preserved exactly as it would be in config.toml.
 		field.SetString(raw)
 	case reflect.Bool:
-		b, err := strconv.ParseBool(raw)
+		b, err := strconv.ParseBool(strings.TrimSpace(raw))
 		if err != nil {
 			return fmt.Errorf("expected a boolean (true/false), got %q", raw)
 		}
 		field.SetBool(b)
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		n, err := strconv.ParseInt(raw, 10, 64)
+		n, err := strconv.ParseInt(strings.TrimSpace(raw), 10, 64)
 		if err != nil {
 			return fmt.Errorf("expected an integer, got %q", raw)
 		}
@@ -94,10 +101,11 @@ func setFieldFromString(field reflect.Value, raw string) error {
 			return fmt.Errorf("unsupported slice element type %s", field.Type().Elem().Kind())
 		}
 		// Comma separated list, mirroring how TOML arrays of strings are written
-		// inline. An empty string yields an empty slice rather than [""].
+		// inline. An empty (or whitespace-only) string yields an empty slice
+		// rather than [""], and each element is trimmed.
 		var parts []string
-		if raw != "" {
-			parts = strings.Split(raw, ",")
+		if trimmed := strings.TrimSpace(raw); trimmed != "" {
+			parts = strings.Split(trimmed, ",")
 			for i := range parts {
 				parts[i] = strings.TrimSpace(parts[i])
 			}
