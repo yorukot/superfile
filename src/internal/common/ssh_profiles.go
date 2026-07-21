@@ -220,13 +220,15 @@ func loadSSHConfigSource(path string, system bool) (*discoveredSSHConfigSource, 
 	relativeIncludeDir := ""
 	if system {
 		relativeIncludeDir = filepath.Dir(path)
-		filteredData, err = expandSystemSSHConfigIncludes(
+		var includeNotices []SSHConfigNotice
+		filteredData, includeNotices, err = expandSystemSSHConfigIncludes(
 			path,
 			[]byte(filteredData),
 			relativeIncludeDir,
 			make(map[string]struct{}),
 			0,
 		)
+		notices = append(notices, includeNotices...)
 		if err != nil {
 			return nil, notices, fmt.Errorf("expand system SSH config %q: %w", path, err)
 		}
@@ -603,18 +605,19 @@ func expandSystemSSHConfigIncludes(
 	relativeIncludeDir string,
 	active map[string]struct{},
 	depth int,
-) (string, error) {
+) (string, []SSHConfigNotice, error) {
 	if depth > maxSSHConfigIncludeDepth {
-		return "", ssh_config.ErrDepthExceeded
+		return "", nil, ssh_config.ErrDepthExceeded
 	}
 	cleanPath := filepath.Clean(sourcePath)
 	if _, ok := active[cleanPath]; ok {
-		return "", ssh_config.ErrDepthExceeded
+		return "", nil, ssh_config.ErrDepthExceeded
 	}
 	active[cleanPath] = struct{}{}
 	defer delete(active, cleanPath)
 
 	var builder strings.Builder
+	notices := make([]SSHConfigNotice, 0)
 	scanner := bufio.NewScanner(strings.NewReader(string(data)))
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -626,31 +629,33 @@ func expandSystemSSHConfigIncludes(
 		}
 		includePaths, err := expandSSHIncludePaths(cleanPath, value, relativeIncludeDir)
 		if err != nil {
-			return "", err
+			return "", notices, err
 		}
 		for _, includePath := range includePaths {
-			//nolint:gosec // Paths intentionally come from the system SSH configuration.
 			includedData, readErr := os.ReadFile(includePath)
 			if readErr != nil {
-				return "", readErr
+				return "", notices, readErr
 			}
-			expanded, expandErr := expandSystemSSHConfigIncludes(
+			filteredData, includedNotices := scanUnsupportedSSHConfigDirectives(includePath, includedData)
+			notices = append(notices, includedNotices...)
+			expanded, nestedNotices, expandErr := expandSystemSSHConfigIncludes(
 				includePath,
-				includedData,
+				[]byte(filteredData),
 				relativeIncludeDir,
 				active,
 				depth+1,
 			)
+			notices = append(notices, nestedNotices...)
 			if expandErr != nil {
-				return "", expandErr
+				return "", notices, expandErr
 			}
 			builder.WriteString(expanded)
 		}
 	}
 	if err := scanner.Err(); err != nil {
-		return "", err
+		return "", notices, err
 	}
-	return builder.String(), nil
+	return builder.String(), notices, nil
 }
 
 func firstSSHConfigBlockHeader(rendered string) string {
