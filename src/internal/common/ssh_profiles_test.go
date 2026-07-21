@@ -235,6 +235,36 @@ func TestDiscoverSSHQuickConnectProfilesResolvesSystemRelativeIncludes(t *testin
 	assert.Equal(t, "192.0.2.40", profiles[0].Host)
 }
 
+func TestDiscoverSSHQuickConnectProfilesReportsUnsupportedDirectivesInSystemIncludes(t *testing.T) {
+	systemDir := t.TempDir()
+	includeDir := filepath.Join(systemDir, "conf.d")
+	require.NoError(t, os.MkdirAll(includeDir, 0o700))
+	firstIncludePath := filepath.Join(includeDir, "first.conf")
+	nestedIncludePath := filepath.Join(includeDir, "nested.conf")
+	require.NoError(t, os.WriteFile(firstIncludePath, []byte(
+		"Include conf.d/nested.conf\nHost first\n  HostName 192.0.2.41\n  ProxyJump jump-host\n",
+	), 0o600))
+	require.NoError(t, os.WriteFile(nestedIncludePath, []byte(
+		"Host nested\n  HostName 192.0.2.42\n  ProxyCommand ssh proxy nc %h %p\nMatch exec true\n  User ignored\n",
+	), 0o600))
+	systemPath := filepath.Join(systemDir, "ssh_config")
+	require.NoError(t, os.WriteFile(systemPath, []byte("Include conf.d/first.conf\n"), 0o600))
+
+	_, notices, err := DiscoverSSHQuickConnectProfiles(&ConfigType{}, SSHConfigDiscoveryOptions{
+		UserConfigPath:   filepath.Join(t.TempDir(), "missing-user-config"),
+		SystemConfigPath: systemPath,
+	})
+	require.NoError(t, err)
+
+	directiveSources := make(map[string]string, len(notices))
+	for _, notice := range notices {
+		directiveSources[notice.Directive] = notice.SourcePath
+	}
+	assert.Equal(t, firstIncludePath, directiveSources["ProxyJump"])
+	assert.Equal(t, nestedIncludePath, directiveSources["ProxyCommand"])
+	assert.Equal(t, nestedIncludePath, directiveSources["Match"])
+}
+
 func TestDiscoverSSHQuickConnectProfilesCombinesUserAndSystemIdentities(t *testing.T) {
 	dir := t.TempDir()
 	userIdentity := filepath.Join(dir, "id_user")
