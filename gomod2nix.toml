@@ -6,8 +6,8 @@ schema = 3
     hash = 'sha256-2OmqpBrl+taOJzAhVM6OReLmoYRxZOXx9JqFNjQjsPA='
 
   [mod.'charm.land/bubbletea/v2']
-    version = 'v2.0.7'
-    hash = 'sha256-YOkvKUahFMMytHXr3AAABDifBtHt29930obiu/kx1vA='
+    version = 'v2.0.8'
+    hash = 'sha256-ZWcqUjUSKcT8uovaljKp4V8IQ7kIJtoAOGZ2VbpF3hs='
 
   [mod.'charm.land/lipgloss/v2']
     version = 'v2.0.3'
@@ -74,8 +74,8 @@ schema = 3
     hash = 'sha256-JZD1iVeizYe0mp3qQcJbUZdYN6HP/DNC67ja79DTe6s='
 
   [mod.'github.com/charmbracelet/ultraviolet']
-    version = 'v0.0.0-20260525132238-948f4557a654'
-    hash = 'sha256-V0e1U50upnr+gWvao41MTiLHAbd5wAlt4GD8hiAVZ38='
+    version = 'v0.0.0-20260703014108-f5a850f9c2b7'
+    hash = 'sha256-cWqmxeaaHGrESdwZVtCv8mDw1Ta4xFpXidWDeIZfuHA='
 
   [mod.'github.com/charmbracelet/x/ansi']
     version = 'v0.11.7'
