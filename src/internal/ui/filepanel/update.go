@@ -45,6 +45,9 @@ func (m *Model) UpdateCurrentFilePanelDir(path string) error {
 		return fmt.Errorf("%s is not a directory", path)
 	}
 
+	// Updates working directory to properly pass cwd to newly spawned processes (terminals,editors, programs)
+	_ = os.Chdir(path)
+
 	// In case of switching to parent, explicitly set focus.
 	// This is to handle when there isn't a DirectoryRecord, yet.
 	if filepath.Dir(m.Location) == path {
@@ -52,7 +55,6 @@ func (m *Model) UpdateCurrentFilePanelDir(path string) error {
 	}
 	// Switch to "path"
 	m.Location = path
-
 	// NOTE: We are fetching the cursor and render from cache, but this could become invalid
 	// in case user deletes some items in the directory via another file manager and then switch back
 	// Basically this directoryRecords cache can be invalid. On each Update(), on dire change
