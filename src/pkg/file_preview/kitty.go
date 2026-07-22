@@ -12,13 +12,19 @@ import (
 	"github.com/charmbracelet/x/ansi/kitty"
 )
 
-// isKittyCapable checks if the terminal supports Kitty graphics protocol
-func isKittyCapable() bool {
-	termProgram := os.Getenv("TERM_PROGRAM")
-	term := os.Getenv("TERM")
+// IsKittyCapable reports whether the terminal supports the Kitty graphics
+// protocol. The result is cached because detection inside tmux has to query
+// the tmux server.
+func (tc *TerminalCapabilities) IsKittyCapable() bool {
+	tc.kittyInit.Do(func() {
+		tc.kittyCapable = detectKittyCapable()
+	})
+	return tc.kittyCapable
+}
 
+// detectKittyCapable performs the actual Kitty graphics capability detection.
+func detectKittyCapable() bool {
 	// TODO: Replace this allowlist with a real Kitty graphics capability check.
-	// tmux masks the underlying terminal through TERM/TERM_PROGRAM.
 	knownTerminals := []string{
 		"ghostty",
 		"WezTerm",
@@ -29,9 +35,24 @@ func isKittyCapable() bool {
 		"WarpTerminal",
 	}
 
-	for _, knownTerm := range knownTerminals {
-		if strings.EqualFold(termProgram, knownTerm) || strings.EqualFold(term, knownTerm) {
-			return true
+	candidates := []string{os.Getenv("TERM_PROGRAM"), os.Getenv("TERM")}
+	if insideTmux() {
+		// tmux masks the underlying terminal through TERM/TERM_PROGRAM, and
+		// discards the image data unless passthrough is enabled.
+		if !tmuxAllowsPassthrough() {
+			return false
+		}
+		candidates = tmuxOuterTerminals()
+	}
+
+	for _, candidate := range candidates {
+		for _, knownTerm := range knownTerminals {
+			// Substring match so terminfo names ("xterm-ghostty") and version
+			// strings ("ghostty 1.3.1") are recognised as well.
+			if candidate != "" &&
+				strings.Contains(strings.ToLower(candidate), strings.ToLower(knownTerm)) {
+				return true
+			}
 		}
 	}
 
@@ -44,7 +65,7 @@ func (p *ImagePreviewer) GetKittyClearRaw() string {
 	if !p.IsKittyCapable() {
 		return ""
 	}
-	return ansi.KittyGraphics(nil, "a=d")
+	return rawForTerminal(ansi.KittyGraphics(nil, "a=d"))
 }
 
 // generatePlacementID generates a unique placement ID based on file path
@@ -134,7 +155,7 @@ func (p *ImagePreviewer) renderWithKittyUsingTermCap(img image.Image, path strin
 
 	return &KittyImageResult{
 		Placeholders: placeholders,
-		RawTransmit:  transmitBuf.String(),
+		RawTransmit:  rawForTerminal(transmitBuf.String()),
 	}, nil
 }
 
@@ -175,5 +196,5 @@ func buildKittyPlaceholders(imgID int, cols, rows int) string {
 
 // IsKittyCapable checks if the terminal supports Kitty graphics protocol
 func (p *ImagePreviewer) IsKittyCapable() bool {
-	return isKittyCapable()
+	return p.terminalCap.IsKittyCapable()
 }
