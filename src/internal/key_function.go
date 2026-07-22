@@ -76,7 +76,7 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 		}
 		return cmd
 	case slices.Contains(common.Hotkeys.CreateNewFilePanel, msg):
-		cmd, err := m.fileModel.CreateNewFilePanel(variable.HomeDir)
+		cmd, err := m.createNewFilePanel(variable.HomeDir)
 		if err != nil && !errors.Is(err, filemodel.ErrMaximumPanelCount) {
 			slog.Error("unexpected error while creating new panel", "error", err)
 		}
