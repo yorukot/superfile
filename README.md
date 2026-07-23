@@ -1,22 +1,11 @@
 <div align="center">
 
-<p>
-  <h4>
-    <a href="https://ko-fi.com/yorukot">superfile is supported by the community.</a>
-  </h4>
-<div align="center" markdown="1">
-   <sup>Special thanks to:</sup>
-   <br>
-   <br>
-   <a href="https://www.warp.dev/?utm_source=github&utm_medium=referral&utm_campaign=superfile">
-      <img alt="Warp sponsorship" width="300" src="asset/readme/warp.png">
-   </a>
+<h4>superfile is supported by the community.</h4>
 
-### [Warp, the AI terminal for developers](https://www.warp.dev/?utm_source=github&utm_medium=referral&utm_campaign=superfile)
+<a href="https://ko-fi.com/yorukot">
+  <img alt="Donate to superfile on Ko-fi" src="https://ko-fi.com/img/githubbutton_sm.svg">
+</a>
 
-[Available for macOS, Linux, & Windows](https://www.warp.dev/?utm_source=github&utm_medium=referral&utm_campaign=superfile)<br>
-
-</div>
 <hr>
 
 </div>
