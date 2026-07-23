@@ -33,10 +33,9 @@ func defaultFilePanel(path string, focused bool) Model {
 }
 
 func New(location string, focused bool, targetFile string, sortKind sortmodel.SortKind, sortReversed bool) Model {
-	return Model{
+	panel := Model{
 		cursor:           0,
 		renderIndex:      0,
-		Location:         location,
 		SortKind:         sortKind,
 		SortReversed:     sortReversed,
 		PanelMode:        BrowserMode,
@@ -48,4 +47,6 @@ func New(location string, focused bool, targetFile string, sortKind sortmodel.So
 		height:           MinHeight,
 		selected:         make(map[string]int),
 	}
+	panel.SetPaneLocation(NewLocalLocation(location))
+	return panel
 }

@@ -170,6 +170,31 @@ enable_md5_checksum = false
 # Requires: zoxide
 zoxide_support = false
 
+###############################################################################
+#                              SSH / SFTP Profiles                            #
+###############################################################################
+
+[ssh]
+
+# Saved quick-connect profiles.
+# Only non-secret fields are persisted here. Passwords and passphrases are
+# ignored and stripped from the config file.
+# Superfile still uses strict known_hosts verification for both discovered SSH
+# aliases and saved manual profiles: unknown hosts require explicit acceptance,
+# and changed host keys stay blocked.
+# Open the SSH/SFTP quick-connect modal with the hotkeys.toml
+# `open_quick_connect` binding (default: 'S').
+#
+# [[ssh.profile]]
+# name = "manual-localhost"
+# host = "127.0.0.1"
+# port = 22
+# user = "alice"
+# start_path = "/tmp/sf-remote"
+# identity_file = "~/.ssh/id_ed25519"
+# identities_only = false
+# auth_order = ["publickey", "password", "keyboard-interactive"]
+
 #-- File opening rules
 # Map file extensions to commands used to open them.
 # The file path will be appended as the last argument.

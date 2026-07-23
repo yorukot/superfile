@@ -6,6 +6,7 @@ import (
 	"slices"
 
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/filesystem"
 	"github.com/yorukot/superfile/src/internal/ui/filemodel"
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 	"github.com/yorukot/superfile/src/internal/ui/spferror"
@@ -108,7 +109,7 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 		m.pinnedDirectory()
 
 	case slices.Contains(common.Hotkeys.ToggleDotFile, msg):
-		m.toggleDotFileController()
+		return m.toggleDotFileController()
 
 	case slices.Contains(common.Hotkeys.ToggleFooter, msg):
 		return m.toggleFooterController()
@@ -120,11 +121,13 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 		return m.getCompressSelectedFilesCmd()
 
 	case slices.Contains(common.Hotkeys.OpenCommandLine, msg):
-		m.promptModal.Open(true)
+		return m.openCommandLine()
 	case slices.Contains(common.Hotkeys.OpenSPFPrompt, msg):
 		m.promptModal.Open(false)
 	case slices.Contains(common.Hotkeys.OpenZoxide, msg):
-		return m.zoxideModal.Open()
+		return m.openZoxide()
+	case slices.Contains(common.Hotkeys.OpenQuickConnect, msg):
+		m.openQuickConnect()
 
 	case slices.Contains(common.Hotkeys.OpenHelpMenu, msg):
 		m.helpMenu.Open()
@@ -146,6 +149,30 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 	}
 
 	return nil
+}
+
+func (m *model) openCommandLine() tea.Cmd {
+	location := m.getFocusedFilePanel().CurrentLocation()
+	if location.Provider != filesystem.ProviderLocal {
+		return m.unsupportedRemoteOperationCmd(location, filesystem.OperationRemoteShell)
+	}
+	m.promptModal.Open(true)
+	return nil
+}
+
+func (m *model) openZoxide() tea.Cmd {
+	location := m.getFocusedFilePanel().CurrentLocation()
+	if location.Provider != filesystem.ProviderLocal {
+		return m.unsupportedRemoteOperationCmd(location, filesystem.OperationZoxide)
+	}
+	return m.zoxideModal.Open()
+}
+
+func (m *model) openQuickConnect() {
+	if err := m.quickConnect.Open(&common.Config); err != nil {
+		slog.Error("failed to open SSH/SFTP quick-connect", "error", err)
+		m.notifyModel = notify.New(true, "SSH quick-connect failed", err.Error(), notify.NoAction)
+	}
 }
 
 func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
@@ -207,9 +234,9 @@ func (m *model) filePanelSelectModeKey(msg string) tea.Cmd {
 func (m *model) filePanelNormalModeKey(msg string) tea.Cmd {
 	switch {
 	case slices.Contains(common.Hotkeys.Confirm, msg):
-		m.enterPanel()
+		return m.enterPanel()
 	case slices.Contains(common.Hotkeys.ParentDirectory, msg):
-		m.parentDirectory()
+		return m.parentDirectory()
 	case slices.Contains(common.Hotkeys.DeleteItems, msg):
 		return m.getDeleteTriggerCmd(false)
 	case slices.Contains(common.Hotkeys.PermanentlyDeleteItems, msg):
@@ -278,7 +305,7 @@ func (m *model) handleNotifyModelConfirm(action notify.ConfirmActionType) tea.Cm
 	case notify.PermanentDeleteAction:
 		return m.getDeleteCmd(true)
 	case notify.RenameAction:
-		m.confirmRename()
+		return m.confirmRename(true)
 	case notify.QuitAction:
 		m.modelQuitState = quitConfirmationReceived
 	case notify.NoAction:
@@ -329,14 +356,14 @@ func (m *model) sortOptionsKey(msg string) {
 }
 
 func (m *model) renamingKey(msg string) tea.Cmd {
+	if m.renameOperationPending {
+		return nil
+	}
 	switch {
 	case slices.Contains(common.Hotkeys.CancelTyping, msg):
 		m.cancelRename()
 	case slices.Contains(common.Hotkeys.ConfirmTyping, msg):
-		if m.IsRenamingConflicting() {
-			return m.warnModalForRenaming()
-		}
-		m.confirmRename()
+		return m.confirmRename(false)
 	}
 
 	return nil

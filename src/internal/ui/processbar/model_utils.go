@@ -7,6 +7,8 @@ import (
 )
 
 func (m *Model) cntProcesses() int {
+	m.processesMu.RLock()
+	defer m.processesMu.RUnlock()
 	return len(m.processes)
 }
 
@@ -69,8 +71,7 @@ func (m *Model) getSortedProcesses() []Process {
 }
 
 func (m *Model) newReqCnt() int {
-	m.reqCnt++
-	return m.reqCnt
+	return int(m.reqCnt.Add(1))
 }
 
 // TODO: Maybe make sure that there isn't any existing process with this UUID
@@ -80,6 +81,8 @@ func (m *Model) newUUIDForProcess() string {
 
 // Copy of the current processes for read only purpose
 func (m *Model) GetProcessesSlice() []Process {
+	m.processesMu.RLock()
+	defer m.processesMu.RUnlock()
 	var processes []Process
 	for _, p := range m.processes {
 		processes = append(processes, p)

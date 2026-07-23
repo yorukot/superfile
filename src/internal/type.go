@@ -5,7 +5,9 @@ import (
 
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 
+	"github.com/yorukot/superfile/src/internal/filesystem"
 	"github.com/yorukot/superfile/src/internal/ui/helpmenu"
+	"github.com/yorukot/superfile/src/internal/ui/quickconnect"
 	"github.com/yorukot/superfile/src/internal/ui/spferror"
 
 	"github.com/yorukot/superfile/src/internal/ui/clipboard"
@@ -65,6 +67,7 @@ type model struct {
 	helpMenu        helpmenu.Model
 	promptModal     prompt.Model
 	zoxideModal     zoxideui.Model
+	quickConnect    quickconnect.Model
 	sortModal       sortmodel.Model
 	spfError        spferror.Model
 	mutexErrorModal sync.Mutex
@@ -77,11 +80,12 @@ type model struct {
 	// no use directly for increment, use nextIoReqCnt
 	ioReqCnt int32
 
-	modelQuitState       modelQuitStateType
-	firstTextInput       bool
-	toggleFooter         bool
-	firstLoadingComplete bool
-	firstUse             bool
+	modelQuitState         modelQuitStateType
+	renameOperationPending bool
+	firstTextInput         bool
+	toggleFooter           bool
+	firstLoadingComplete   bool
+	firstUse               bool
 
 	// This entirely disables metadata fetching. Used in test model
 	disableMetadata bool
@@ -101,9 +105,11 @@ type model struct {
 }
 
 type typingModal struct {
-	location  string
-	open      bool
-	textInput textinput.Model
+	location     string
+	paneLocation filesystem.Location
+	open         bool
+	submitting   bool
+	textInput    textinput.Model
 }
 
 type editorFinishedMsg struct{ err error }

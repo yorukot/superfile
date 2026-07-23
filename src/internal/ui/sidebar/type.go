@@ -9,15 +9,16 @@ type directory struct {
 }
 
 type Model struct {
-	directories []directory
-	renderIndex int
-	cursor      int
-	rename      textinput.Model
-	renaming    bool
-	searchBar   textinput.Model
-	pinnedMgr   *PinnedManager
-	width       int
-	height      int
-	disabled    bool
-	sections    []string
+	directories  []directory
+	renderIndex  int
+	cursor       int
+	rename       textinput.Model
+	renaming     bool
+	searchBar    textinput.Model
+	pinnedMgr    *PinnedManager
+	width        int
+	height       int
+	statusHeight int
+	disabled     bool
+	sections     []string
 }

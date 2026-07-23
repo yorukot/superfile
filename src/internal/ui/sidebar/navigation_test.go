@@ -82,6 +82,15 @@ func Test_lastRenderIndex(t *testing.T) {
 	}
 }
 
+func TestRemoteStatusHeightReducesDirectoryViewport(t *testing.T) {
+	sidebar := defaultTestModel(0, 0, 0, 10, 0, 0)
+	sidebar.SetHeight(10 + common.BorderPadding)
+	withoutStatus := sidebar.lastRenderedIndex(0)
+	sidebar.statusHeight = 4
+	withStatus := sidebar.lastRenderedIndex(0)
+	assert.Less(t, withStatus, withoutStatus)
+}
+
 func Test_firstRenderIndex(t *testing.T) {
 	sidebarA := defaultTestModel(0, 0, 0, 10, 10, 10)
 	sidebarB := defaultTestModel(0, 0, 0, 1, 0, 5)
