@@ -18,9 +18,8 @@ import (
 )
 
 const (
-	sftpProviderName                   = "SFTP remote filesystem"
-	defaultSFTPOpenTimeout             = 10 * time.Second
-	temporarySFTPFileMode  os.FileMode = 0o600
+	sftpProviderName       = "SFTP remote filesystem"
+	defaultSFTPOpenTimeout = 10 * time.Second
 )
 
 type SFTPProvider struct {
@@ -220,10 +219,6 @@ func (s *SFTPSession) Create(ctx context.Context, path Path, reader io.Reader, o
 		mode := options.Mode
 		if mode == 0 {
 			mode = utils.UserFilePerm
-		}
-		preChmodErr := mapSFTPError(OperationCreateFile, path, file.Chmod(temporarySFTPFileMode))
-		if preChmodErr != nil {
-			return errors.Join(preChmodErr, mapSFTPError(OperationCreateFile, path, file.Close()))
 		}
 		var writeErr error
 		if reader != nil {
