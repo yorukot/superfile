@@ -1,6 +1,7 @@
 package filepanel
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 	"time"
@@ -11,6 +12,36 @@ import (
 
 	"github.com/yorukot/superfile/src/internal/ui/sortmodel"
 )
+
+// setupSymlinkTestDir creates an isolated directory containing a real directory,
+// a file, and a symlink pointing at the real directory. It returns the directory
+// and any error encountered while creating the symlink, since some CI
+// environments (notably Windows without elevated privileges) cannot create
+// symlinks.
+func setupSymlinkTestDir(t *testing.T) (string, error) {
+	t.Helper()
+	symlinkTestDir := t.TempDir()
+	realDir := filepath.Join(symlinkTestDir, "realDir")
+	utils.SetupDirectories(t, realDir)
+	utils.SetupFilesWithData(t, []byte("0123456789"), filepath.Join(symlinkTestDir, "file.txt"))
+	linkToRealDir := filepath.Join(symlinkTestDir, "linkToRealDir")
+	err := os.Symlink(realDir, linkToRealDir)
+	return symlinkTestDir, err
+}
+
+// setupHiddenDirTestDir creates an isolated directory containing a hidden
+// directory, a visible directory, and a file, for exercising the dirsOnly +
+// dotfiles filter combination without recomputing expected order for the
+// shared curTestDir fixture.
+func setupHiddenDirTestDir(t *testing.T) string {
+	t.Helper()
+	hiddenDirTestDir := t.TempDir()
+	hiddenDir := filepath.Join(hiddenDirTestDir, ".hiddenDir")
+	visibleDir := filepath.Join(hiddenDirTestDir, "visibleDir")
+	utils.SetupDirectories(t, hiddenDir, visibleDir)
+	utils.SetupFilesWithData(t, []byte("0123456789"), filepath.Join(hiddenDirTestDir, "file.txt"))
+	return hiddenDirTestDir
+}
 
 func TestReturnDirElement(t *testing.T) {
 	curTestDir := t.TempDir()
@@ -59,10 +90,19 @@ func TestReturnDirElement(t *testing.T) {
 		time.Sleep(creationDelay)
 	}
 
+	// Isolated directory for the dirsOnly + symlink case, kept separate from curTestDir
+	// so it doesn't affect the exact-listing assertions used by the other test cases above.
+	symlinkTestDir, symlinkErr := setupSymlinkTestDir(t)
+
+	// Isolated directory for the dirsOnly + hidden-directory case, so it doesn't
+	// require recomputing expected order for the shared curTestDir fixture.
+	hiddenDirTestDir := setupHiddenDirTestDir(t)
+
 	testdata := []struct {
 		name              string
 		location          string
 		dotFiles          bool
+		dirsOnly          bool
 		sortKind          sortmodel.SortKind
 		reversed          bool
 		searchString      string
@@ -193,20 +233,60 @@ func TestReturnDirElement(t *testing.T) {
 			reversed:          true,
 			expectedElemNames: []string{"file20.txt", "file10.txt", "file2.txt", "file1.txt"},
 		},
+		{
+			name:              "Directories only",
+			location:          curTestDir,
+			dotFiles:          false,
+			dirsOnly:          true,
+			sortKind:          sortmodel.SortByName,
+			reversed:          false,
+			expectedElemNames: []string{"dir1", "dir2", "dirNatural"},
+		},
+		{
+			name:              "Directories only with dotfiles enabled",
+			location:          hiddenDirTestDir,
+			dotFiles:          true,
+			dirsOnly:          true,
+			sortKind:          sortmodel.SortByName,
+			reversed:          false,
+			expectedElemNames: []string{".hiddenDir", "visibleDir"},
+		},
+		{
+			name:              "Directories only with search",
+			location:          curTestDir,
+			dotFiles:          false,
+			dirsOnly:          true,
+			sortKind:          sortmodel.SortByName,
+			searchString:      "dir",
+			expectedElemNames: []string{"dir1", "dir2", "dirNatural"},
+		},
+		{
+			name:              "Directories only excludes symlinks to directories",
+			location:          symlinkTestDir,
+			dotFiles:          false,
+			dirsOnly:          true,
+			sortKind:          sortmodel.SortByName,
+			reversed:          false,
+			expectedElemNames: []string{"realDir"},
+		},
 	}
 
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
+			if tt.name == "Directories only excludes symlinks to directories" && symlinkErr != nil {
+				t.Skipf("skipping: unable to create symlink to directory: %v", symlinkErr)
+			}
 			panel := testModel(0, 0, 0, BrowserMode, nil)
 			panel.Location = tt.location
 			panel.SortKind = tt.sortKind
 			panel.SortReversed = tt.reversed
 			panel.SearchBar.SetValue(tt.searchString)
 			var res []Element
+			opts := FilterOptions{DisplayDotFile: tt.dotFiles, DirsOnly: tt.dirsOnly}
 			if tt.searchString == "" {
-				res = panel.getDirectoryElements(tt.dotFiles)
+				res = panel.getDirectoryElements(opts)
 			} else {
-				res = panel.getDirectoryElementsBySearch(tt.dotFiles)
+				res = panel.getDirectoryElementsBySearch(opts)
 			}
 
 			assert.Len(t, res, len(tt.expectedElemNames))

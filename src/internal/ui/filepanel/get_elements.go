@@ -10,11 +10,28 @@ import (
 	"github.com/yorukot/superfile/src/pkg/utils"
 )
 
+// FilterOptions controls which directory entries are included when listing a panel.
+type FilterOptions struct {
+	DisplayDotFile bool
+	DirsOnly       bool
+}
+
+// shouldIncludeEntry reports whether an entry should be included given the active filters.
+func shouldIncludeEntry(name string, isDir bool, opts FilterOptions) bool {
+	if strings.HasPrefix(name, ".") && !opts.DisplayDotFile {
+		return false
+	}
+	if opts.DirsOnly && !isDir {
+		return false
+	}
+	return true
+}
+
 // TODO : Take common.Config.CaseSensitiveSort as a function parameter
 // and also consider testing this caseSensitive with both true and false in
 // our unit_test TestReturnDirElement
 // getDirectoryElements returns the directory elements for the panel's current location
-func (m *Model) getDirectoryElements(displayDotFile bool) []Element {
+func (m *Model) getDirectoryElements(opts FilterOptions) []Element {
 	dirEntries, err := os.ReadDir(m.Location)
 	if err != nil {
 		slog.Error("Error while returning folder elements", "error", err)
@@ -24,7 +41,7 @@ func (m *Model) getDirectoryElements(displayDotFile bool) []Element {
 	dirEntries = slices.DeleteFunc(dirEntries, func(e os.DirEntry) bool {
 		// Entries not needed to be considered
 		_, err := e.Info()
-		return err != nil || (strings.HasPrefix(e.Name(), ".") && !displayDotFile)
+		return err != nil || !shouldIncludeEntry(e.Name(), e.IsDir(), opts)
 	})
 
 	// No files/directories to process
@@ -35,7 +52,7 @@ func (m *Model) getDirectoryElements(displayDotFile bool) []Element {
 }
 
 // getDirectoryElementsBySearch returns filtered directory elements based on search string
-func (m *Model) getDirectoryElementsBySearch(displayDotFile bool) []Element {
+func (m *Model) getDirectoryElementsBySearch(opts FilterOptions) []Element {
 	searchString := m.SearchBar.Value()
 	items, err := os.ReadDir(m.Location)
 	if err != nil {
@@ -55,7 +72,7 @@ func (m *Model) getDirectoryElementsBySearch(displayDotFile bool) []Element {
 		if err != nil {
 			continue
 		}
-		if !displayDotFile && strings.HasPrefix(fileInfo.Name(), ".") {
+		if !shouldIncludeEntry(fileInfo.Name(), item.IsDir(), opts) {
 			continue
 		}
 
@@ -86,11 +103,11 @@ func (m *Model) shouldSkipPanelUpdate(nowTime time.Time) bool {
 		nowTime.Sub(m.LastTimeGetElement) < time.Duration(reRenderTime)*time.Second
 }
 
-func (m *Model) UpdateElementsIfNeeded(force bool, displayDotFile bool) {
+func (m *Model) UpdateElementsIfNeeded(force bool, opts FilterOptions) {
 	nowTime := time.Now()
 	if force || !m.shouldSkipPanelUpdate(nowTime) {
 		// Load elements for this panel (with/without search filter)
-		m.element = m.getElements(displayDotFile)
+		m.element = m.getElements(opts)
 		// Update file panel list
 		m.LastTimeGetElement = nowTime
 
@@ -107,9 +124,9 @@ func (m *Model) UpdateElementsIfNeeded(force bool, displayDotFile bool) {
 }
 
 // Retrieves elements for a panel based on search bar value and sort options.
-func (m *Model) getElements(displayDotFile bool) []Element {
+func (m *Model) getElements(opts FilterOptions) []Element {
 	if m.SearchBar.Value() != "" {
-		return m.getDirectoryElementsBySearch(displayDotFile)
+		return m.getDirectoryElementsBySearch(opts)
 	}
-	return m.getDirectoryElements(displayDotFile)
+	return m.getDirectoryElements(opts)
 }
