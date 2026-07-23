@@ -73,7 +73,11 @@ func GetElementIcon(file string, isDir bool, isLink bool, nerdFont bool) icon.St
 	return getFileIcon(file, isLink)
 }
 
-func GetDirectoryIcon(path string, name string) string {
+func GetDirectoryIcon(path string, name string, nerdFont bool) string {
+	if !nerdFont {
+		return ""
+	}
+
 	switch path {
 	case xdg.Home:
 		return icon.Home

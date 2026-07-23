@@ -83,7 +83,7 @@ func getWellKnownDirectories() []directory {
 func getPinnedDirectoriesWithIcon(pinnedMgr *PinnedManager) []directory {
 	dirs := pinnedMgr.Load()
 	for i := range dirs {
-		dirs[i].Icon = common.GetDirectoryIcon(dirs[i].Location, dirs[i].Name)
+		dirs[i].Icon = common.GetDirectoryIcon(dirs[i].Location, dirs[i].Name, common.Config.Nerdfont)
 	}
 	return dirs
 }
