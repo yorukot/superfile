@@ -1,8 +1,10 @@
 <div align="center">
 
-<h4>
-  <a href="https://ko-fi.com/yorukot">superfile is supported by the community.</a>
-</h4>
+<h4>superfile is supported by the community.</h4>
+
+<a href="https://ko-fi.com/yorukot">
+  <img alt="Donate to superfile on Ko-fi" src="https://ko-fi.com/img/githubbutton_sm.svg">
+</a>
 
 <hr>
 
