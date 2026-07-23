@@ -54,23 +54,26 @@ func TestConfirmSidebarRenameDoesNotPersistVisualIcon(t *testing.T) {
 	visualIcon := sidebar.directories[0].Icon
 	require.NotEmpty(t, visualIcon)
 
+	const replacementName = "renamed-project"
+
 	sidebar.PinnedItemRename()
+	sidebar.rename.SetValue(replacementName)
 	sidebar.ConfirmSidebarRename()
 
 	pinnedDirs := pinnedMgr.Load()
 	require.Len(t, pinnedDirs, 1)
-	assert.Equal(t, "project", pinnedDirs[0].Name)
+	assert.Equal(t, replacementName, pinnedDirs[0].Name)
 	assert.NotContains(t, pinnedDirs[0].Name, visualIcon)
-	assert.NotContains(t, pinnedDirs[0].Name, icon.Space+"project")
+	assert.NotContains(t, pinnedDirs[0].Name, icon.Space+replacementName)
 }
 
 func sidebarWithPinnedDir(t *testing.T) (PinnedManager, Model) {
 	t.Helper()
 
-	originalConfig := common.Config
+	originalNerdfont := common.Config.Nerdfont
 	common.Config.Nerdfont = true
 	t.Cleanup(func() {
-		common.Config = originalConfig
+		common.Config.Nerdfont = originalNerdfont
 	})
 
 	tempDir := t.TempDir()
