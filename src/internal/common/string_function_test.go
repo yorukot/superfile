@@ -1,6 +1,7 @@
 package common
 
 import (
+	"bytes"
 	"fmt"
 	"math"
 	"os"
@@ -116,30 +117,36 @@ func TestHelpHotkeyString(t *testing.T) {
 func TestIsBufferPrintable(t *testing.T) {
 	var inputs = []struct {
 		input    string
+		atEOF    bool
 		expected bool
 	}{
-		{"", true},
-		{"hello", true},
-		{"abcdABCD0123~!@#$%^&*()_+-={}|:\"<>?,./;'[]", true},
-		{"Horizontal Tab and NewLine\t\t\n\n", true},
-		{"\xc2\xa0(UTF-8 NBSP)", true},
-		{"\x0b(Vertical Tab)", true},
-		{"\x0d(CR)", true},
-		{"ASCII control characters : \x00(NULL)", false},
-		{"\x05(ENQ)", false},
-		{"\x0f(SI)", false},
-		{"\x1b(ESC)", false},
-		{"\x7f(DEL)", false},
-		{"plain ASCII log output", true},
-		{"status line \xe2\x9c\x93 example module", true},
-		{"box drawing \xe2\x94\x8c\xe2\x94\x80\xe2\x94\x90", true},
-		{"\xef\xbf\xbd(UTF-8 replacement character)", true},
-		{"\xff(invalid UTF-8 byte)", false},
-		{"\xe2\x9c", true}, // truncated UTF-8 at buffer end (fixed-size read)
+		{"", true, true},
+		{"hello", true, true},
+		{"abcdABCD0123~!@#$%^&*()_+-={}|:\"<>?,./;'[]", true, true},
+		{"Horizontal Tab and NewLine\t\t\n\n", true, true},
+		{"\xc2\xa0(UTF-8 NBSP)", true, true},
+		{"\x0b(Vertical Tab)", true, true},
+		{"\x0d(CR)", true, true},
+		{"ASCII control characters : \x00(NULL)", true, false},
+		{"\x05(ENQ)", true, false},
+		{"\x0f(SI)", true, false},
+		{"\x1b(ESC)", true, false},
+		{"\x7f(DEL)", true, false},
+		{"plain ASCII log output", true, true},
+		{"status line \xe2\x9c\x93 example module", true, true},
+		{"box drawing \xe2\x94\x8c\xe2\x94\x80\xe2\x94\x90", true, true},
+		{"\xef\xbf\xbd(UTF-8 replacement character)", true, true},
+		{"\xff(invalid UTF-8 byte)", true, false},
+		{"\xef\xbb\xbfBOM-prefixed text", true, true},
+		{"\xef\xbb\xbf", true, true},
+		{"\xe2\x9c", false, true}, // truncated UTF-8 mid-file (fixed-size read)
+		{"\xe2\x9c", true, false}, // incomplete UTF-8 at true EOF
+		{"hello\xe2\x9c", true, false},
+		{"hello\xe2\x9c", false, true},
 	}
 	for _, tt := range inputs {
-		t.Run(fmt.Sprintf("Testing if buffer %q is printable", tt.input), func(t *testing.T) {
-			result := IsBufferPrintable([]byte(tt.input))
+		t.Run(fmt.Sprintf("Testing if buffer %q atEOF=%v is printable", tt.input, tt.atEOF), func(t *testing.T) {
+			result := IsBufferPrintable([]byte(tt.input), tt.atEOF)
 			if result != tt.expected {
 				t.Errorf("Expected %v, got %v", tt.expected, result)
 			}
@@ -169,6 +176,39 @@ func TestIsTextFile(t *testing.T) {
 		isText, err := IsTextFile(path)
 		require.NoError(t, err)
 		assert.False(t, isText)
+	})
+
+	t.Run("BOM-prefixed UTF-8 text", func(t *testing.T) {
+		dir := t.TempDir()
+		path := filepath.Join(dir, "bom.txt")
+		require.NoError(t, os.WriteFile(path, []byte("\xef\xbb\xbfhello\n"), 0o644))
+
+		isText, err := IsTextFile(path)
+		require.NoError(t, err)
+		assert.True(t, isText)
+	})
+
+	t.Run("incomplete UTF-8 at EOF", func(t *testing.T) {
+		dir := t.TempDir()
+		path := filepath.Join(dir, "truncated.log")
+		require.NoError(t, os.WriteFile(path, []byte("hello\xe2\x9c"), 0o644))
+
+		isText, err := IsTextFile(path)
+		require.NoError(t, err)
+		assert.False(t, isText)
+	})
+
+	t.Run("incomplete UTF-8 only at fixed buffer boundary", func(t *testing.T) {
+		dir := t.TempDir()
+		path := filepath.Join(dir, "long.log")
+		// Fill DefaultBufferSize-2 bytes, then start a 3-byte rune so the
+		// first read ends mid-sequence, with more valid UTF-8 after.
+		content := append(bytes.Repeat([]byte("a"), DefaultBufferSize-2), []byte("\xe2\x9c\x93more")...)
+		require.NoError(t, os.WriteFile(path, content, 0o644))
+
+		isText, err := IsTextFile(path)
+		require.NoError(t, err)
+		assert.True(t, isText)
 	})
 }
 

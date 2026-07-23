@@ -1,7 +1,6 @@
 package common
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
 	"image/color"
@@ -195,18 +194,22 @@ func GetHelpMenuHotkeyString(hotkeys []string) string {
 	return hotkey.String()
 }
 
-// Separated this out out for easy testing
-func IsBufferPrintable(buffer []byte) bool {
+// Separated this out out for easy testing.
+// atEOF indicates whether buffer is a complete trailing slice of the input
+// (true EOF). Incomplete UTF-8 at the end is allowed when atEOF is false
+// (fixed-size reads may truncate a multi-byte rune), but rejected at EOF.
+func IsBufferPrintable(buffer []byte, atEOF bool) bool {
 	i := 0
 	for i < len(buffer) {
 		if !utf8.FullRune(buffer[i:]) {
-			break
+			return !atEOF
 		}
 		r, n := utf8.DecodeRune(buffer[i:])
 		if r == utf8.RuneError && n == 1 {
 			return false
 		}
-		if !unicode.IsPrint(r) && !unicode.IsSpace(r) {
+		// Allow UTF-8 BOM (U+FEFF); unicode.IsPrint/IsSpace reject it.
+		if r != '\uFEFF' && !unicode.IsPrint(r) && !unicode.IsSpace(r) {
 			return false
 		}
 		i += n
@@ -240,13 +243,23 @@ func IsTextFile(filename string) (bool, error) {
 	}
 	defer file.Close()
 
-	reader := bufio.NewReader(file)
 	buffer := make([]byte, DefaultBufferSize)
-	cnt, err := reader.Read(buffer)
-	if err != nil && !errors.Is(err, io.EOF) {
+	cnt, err := io.ReadFull(file, buffer)
+	switch {
+	case err == nil:
+		// Full buffer filled; peek one byte to distinguish exact-size EOF
+		// from a mid-file truncation of a multi-byte UTF-8 sequence.
+		var extra [1]byte
+		n, err2 := file.Read(extra[:])
+		if err2 != nil && !errors.Is(err2, io.EOF) {
+			return false, err2
+		}
+		return IsBufferPrintable(buffer, n == 0), nil
+	case errors.Is(err, io.EOF), errors.Is(err, io.ErrUnexpectedEOF):
+		return IsBufferPrintable(buffer[:cnt], true), nil
+	default:
 		return false, err
 	}
-	return IsBufferPrintable(buffer[:cnt]), nil
 }
 
 // Although some characters like `\x0b`(vertical tab) are printable,
