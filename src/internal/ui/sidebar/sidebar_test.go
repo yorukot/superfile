@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/yorukot/superfile/src/config/icon"
+	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/pkg/utils"
 )
 
@@ -65,6 +66,12 @@ func TestConfirmSidebarRenameDoesNotPersistVisualIcon(t *testing.T) {
 
 func sidebarWithPinnedDir(t *testing.T) (PinnedManager, Model) {
 	t.Helper()
+
+	originalConfig := common.Config
+	common.Config.Nerdfont = true
+	t.Cleanup(func() {
+		common.Config = originalConfig
+	})
 
 	tempDir := t.TempDir()
 	pinnedDir := filepath.Join(tempDir, "project")
