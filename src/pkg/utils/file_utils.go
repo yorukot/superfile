@@ -216,25 +216,36 @@ func ResolveAbsPath(currentDir string, path string) string {
 
 // Get directory total size
 // TODO: Uni test this
-func DirSize(path string) int64 {
-	var size int64
+type DirStats struct {
+	Size      int64
+	FileCount int64
+}
+
+func GetDirStats(path string) DirStats {
+	var stats DirStats
 	// Its named walkErr to prevent shadowing
 	walkErr := filepath.WalkDir(path, func(_ string, entry os.DirEntry, err error) error {
 		if err != nil {
 			slog.Error("Dir size function error", "error", err)
+			return err
 		}
 		if !entry.IsDir() {
 			info, infoErr := entry.Info()
 			if infoErr == nil {
-				size += info.Size()
+				stats.Size += info.Size()
+				stats.FileCount++
 			}
 		}
-		return err
+		return nil
 	})
 	if walkErr != nil {
 		slog.Error("errors during WalkDir", "error", walkErr)
 	}
-	return size
+	return stats
+}
+
+func DirSize(path string) int64 {
+	return GetDirStats(path).Size
 }
 
 // Helper functions
