@@ -4,6 +4,7 @@
 		"title": "superfile - Terminal File Manager",
 		"description": "A fancy, modern terminal file manager. Complete your file operations with style.",
 		"nav": {
+			"videos": "Videos",
 			"docs": "Docs",
 			"github": "GitHub",
 			"discord": "Discord",
@@ -87,6 +88,14 @@
 				{ "gifLabel": "selection-mode", "title": "Selection Mode" }
 			]
 		},
+		"videos": {
+			"aria": "Community videos",
+			"heading": "See superfile in the wild.",
+			"play": "Play",
+			"dialogTitle": "superfile community video",
+			"close": "Close video",
+			"openOn": "watch on"
+		},
 		"community": {
 			"aria": "Community",
 			"label": "// join the community",
@@ -111,6 +120,7 @@
 			"separator": "·",
 			"aria": "Footer",
 			"docs": "Docs",
+			"videos": "Videos",
 			"github": "GitHub",
 			"discord": "Discord",
 			"branding": "Branding",
@@ -124,6 +134,7 @@
 		"title": "superfile - 終端機檔案管理器",
 		"description": "精緻現代的終端機檔案管理器。優雅的完成你的檔案操作。",
 		"nav": {
+			"videos": "影片",
 			"docs": "文件",
 			"github": "GitHub",
 			"discord": "Discord",
@@ -207,6 +218,14 @@
 				{ "gifLabel": "selection-mode", "title": "選取模式" }
 			]
 		},
+		"videos": {
+			"aria": "社群影片",
+			"heading": "看看創作者怎麼使用 superfile。",
+			"play": "播放",
+			"dialogTitle": "superfile 社群影片",
+			"close": "關閉影片",
+			"openOn": "前往"
+		},
 		"community": {
 			"aria": "社群",
 			"label": "// 加入社群",
@@ -231,6 +250,7 @@
 			"separator": "·",
 			"aria": "頁尾",
 			"docs": "文件",
+			"videos": "影片",
 			"github": "GitHub",
 			"discord": "Discord",
 			"branding": "品牌",
