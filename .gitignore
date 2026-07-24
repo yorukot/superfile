@@ -2,7 +2,6 @@
 bin/
 dist/
 .idea/
-superfile
 
 # generated types
 .astro/

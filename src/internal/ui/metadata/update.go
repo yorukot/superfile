@@ -1,6 +1,9 @@
 package metadata
 
-import "strconv"
+import (
+	"strconv"
+	"time"
+)
 
 func (m *Model) SetMetadataCache(metadata Metadata, metadataFocused bool) {
 	m.cache.Set(cacheKey(metadata.filepath, metadataFocused), metadata)
@@ -25,6 +28,11 @@ func (m *Model) GetMetadataExpectedFocused() bool {
 func (m *Model) SetMetadataLocationAndFocused(filepath string, metadataFocused bool) {
 	m.expectedLocation = filepath
 	m.expectedFocused = metadataFocused
+	m.lastUpdated = time.Now()
+}
+
+func (m *Model) IsFresh(ttl time.Duration) bool {
+	return !m.lastUpdated.IsZero() && time.Since(m.lastUpdated) < ttl
 }
 
 func cacheKey(filePath string, metadataFocused bool) string {

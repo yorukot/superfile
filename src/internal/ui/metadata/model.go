@@ -2,6 +2,7 @@ package metadata
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/yorukot/superfile/src/internal/ui"
 	"github.com/yorukot/superfile/src/pkg/cache"
@@ -15,6 +16,7 @@ type Model struct {
 	// if one is already underway
 	expectedLocation string
 	expectedFocused  bool
+	lastUpdated      time.Time
 
 	// Render state
 	renderIndex int

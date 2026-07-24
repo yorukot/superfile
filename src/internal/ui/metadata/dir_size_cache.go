@@ -40,6 +40,9 @@ func getDirectorySize(path string) int64 {
 	currentModTime := info.ModTime()
 
 	// Fast cache lookup
+	// Note: We check top-level directory ModTime as an instant freshness check.
+	// Recursive changes inside subdirectories (or overwriting files without top-level mtime updates)
+	// rely on directorySizeCache's defaultCacheExpiration TTL to bound staleness without expensive full-tree walks.
 	directorySizeMutex.RLock()
 	cached, ok := directorySizeCache.Get(path)
 	directorySizeMutex.RUnlock()
@@ -54,7 +57,8 @@ func getDirectorySize(path string) int64 {
 		return cached.size
 	}
 
-	result, err, _ := directorySizeGroup.Do(path, func() (any, error) {
+	singleflightKey := path + ":" + currentModTime.Format(time.RFC3339Nano)
+	result, err, _ := directorySizeGroup.Do(singleflightKey, func() (any, error) {
 
 		// Check again after singleflight wait
 		directorySizeMutex.RLock()
@@ -70,7 +74,15 @@ func getDirectorySize(path string) int64 {
 			"path", path,
 		)
 
-		stats := utils.GetDirStats(path)
+		stats, err := utils.GetDirStats(path)
+		if err != nil {
+			slog.Error(
+				"directory size calculation failed",
+				"path", path,
+				"error", err,
+			)
+			return int64(0), err
+		}
 
 		directorySizeMutex.Lock()
 

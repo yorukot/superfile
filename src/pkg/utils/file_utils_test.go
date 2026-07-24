@@ -515,7 +515,10 @@ func TestGetDirStats(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	stats := GetDirStats(tmp)
+	stats, err := GetDirStats(tmp)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	expectedSize := int64(5 + 8)
 

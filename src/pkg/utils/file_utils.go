@@ -220,7 +220,7 @@ type DirStats struct {
 	Size int64
 }
 
-func GetDirStats(path string) DirStats {
+func GetDirStats(path string) (DirStats, error) {
 	var stats DirStats
 	// Its named walkErr to prevent shadowing
 	walkErr := filepath.WalkDir(path, func(_ string, entry os.DirEntry, err error) error {
@@ -238,12 +238,17 @@ func GetDirStats(path string) DirStats {
 	})
 	if walkErr != nil {
 		slog.Error("errors during WalkDir", "error", walkErr)
+		return stats, walkErr
 	}
-	return stats
+	return stats, nil
 }
 
 func DirSize(path string) int64 {
-	return GetDirStats(path).Size
+	stats, err := GetDirStats(path)
+	if err != nil {
+		return 0
+	}
+	return stats.Size
 }
 
 // Helper functions
