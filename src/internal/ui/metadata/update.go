@@ -25,6 +25,26 @@ func (m *Model) GetMetadataExpectedFocused() bool {
 	return m.expectedFocused
 }
 
+func (m *Model) SetPendingRequest(filepath string, metadataFocused bool, reqID int) {
+	m.pendingLocation = filepath
+	m.pendingFocused = metadataFocused
+	m.pendingReqID = reqID
+}
+
+func (m *Model) IsPending(filepath string, metadataFocused bool) bool {
+	return m.pendingLocation == filepath && m.pendingFocused == metadataFocused
+}
+
+func (m *Model) MatchPendingRequest(filepath string, metadataFocused bool, reqID int) bool {
+	return m.pendingLocation == filepath && m.pendingFocused == metadataFocused && m.pendingReqID == reqID
+}
+
+func (m *Model) ClearPendingRequest() {
+	m.pendingLocation = ""
+	m.pendingFocused = false
+	m.pendingReqID = 0
+}
+
 func (m *Model) SetMetadataLocationAndFocused(filepath string, metadataFocused bool) {
 	m.expectedLocation = filepath
 	m.expectedFocused = metadataFocused
