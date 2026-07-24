@@ -13,9 +13,10 @@ import (
 
 	"charm.land/lipgloss/v2"
 
-	"github.com/yorukot/superfile/src/internal/common"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
+
+	"github.com/yorukot/superfile/src/internal/common"
 )
 
 func getBatSyntaxHighlightedContent(
