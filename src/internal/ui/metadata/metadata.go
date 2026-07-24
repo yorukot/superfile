@@ -118,7 +118,7 @@ func getMetaDataUnsorted(filePath string, metadataFocused bool, et *exiftool.Exi
 	owner := [2]string{keyOwner, ownerVal}
 	group := [2]string{keyGroup, groupVal}
 
-	if fileInfo.IsDir(){
+	if fileInfo.IsDir() {
 		// TODO : Calling dirSize() could be expensive for large directories, as it recursively
 		// walks the entire tree. For now we have async approach of loading metadata,
 		// and its only loaded when metadata panel is focused.

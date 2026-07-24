@@ -215,10 +215,9 @@ func ResolveAbsPath(currentDir string, path string) string {
 }
 
 // Get directory total size
-// TODO: Uni test this
+// TODO: Unit test this
 type DirStats struct {
-	Size      int64
-	FileCount int64
+	Size int64
 }
 
 func GetDirStats(path string) DirStats {
@@ -233,7 +232,6 @@ func GetDirStats(path string) DirStats {
 			info, infoErr := entry.Info()
 			if infoErr == nil {
 				stats.Size += info.Size()
-				stats.FileCount++
 			}
 		}
 		return nil

@@ -517,10 +517,6 @@ func TestGetDirStats(t *testing.T) {
 
 	stats := GetDirStats(tmp)
 
-	if stats.FileCount != 2 {
-		t.Errorf("expected 2 files, got %d", stats.FileCount)
-	}
-
 	expectedSize := int64(5 + 8)
 
 	if stats.Size != expectedSize {
