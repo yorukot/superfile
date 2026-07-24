@@ -9,7 +9,7 @@ import (
 
 	"github.com/barasher/go-exiftool"
 
-	"github.com/yorukot/superfile/src/pkg/utils"
+	// "github.com/yorukot/superfile/src/pkg/utils"
 
 	"github.com/yorukot/superfile/src/internal/common"
 )
@@ -118,11 +118,11 @@ func getMetaDataUnsorted(filePath string, metadataFocused bool, et *exiftool.Exi
 	owner := [2]string{keyOwner, ownerVal}
 	group := [2]string{keyGroup, groupVal}
 
-	if fileInfo.IsDir() && metadataFocused {
+	if fileInfo.IsDir() {
 		// TODO : Calling dirSize() could be expensive for large directories, as it recursively
 		// walks the entire tree. For now we have async approach of loading metadata,
 		// and its only loaded when metadata panel is focused.
-		size = [2]string{keySize, common.FormatFileSize(utils.DirSize(filePath))}
+		size = [2]string{keySize, common.FormatFileSize(getDirectorySize(filePath))}
 	}
 	res.data = append(res.data, name, size, modifyDate, permissions, owner, group)
 

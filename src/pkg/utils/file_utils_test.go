@@ -498,3 +498,47 @@ func TestReadFileContentBOMHandling(t *testing.T) {
 	assert.NotContains(t, result, "\uFEFF",
 		"BOM character should be removed from output: %q", result)
 }
+
+func TestGetDirStats(t *testing.T) {
+	tmp := t.TempDir()
+
+	file1 := filepath.Join(tmp, "a.txt")
+	file2 := filepath.Join(tmp, "b.txt")
+
+	err := os.WriteFile(file1, []byte("hello"), 0644)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = os.WriteFile(file2, []byte("world!!!"), 0644)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	stats := GetDirStats(tmp)
+
+	expectedSize := int64(5 + 8)
+
+	if stats.Size != expectedSize {
+		t.Errorf("expected size %d, got %d", expectedSize, stats.Size)
+	}
+}
+
+func TestDirSize(t *testing.T) {
+	tmp := t.TempDir()
+
+	err := os.WriteFile(
+		filepath.Join(tmp, "test.txt"),
+		[]byte("superfile"),
+		0644,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	size := DirSize(tmp)
+
+	if size != 9 {
+		t.Errorf("expected 9 bytes, got %d", size)
+	}
+}
