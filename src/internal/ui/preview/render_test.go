@@ -61,6 +61,21 @@ func TestFilePreviewRenderWithDimensions(t *testing.T) {
 				"1234",
 		},
 		{
+			// #1290: highlighted files should expand tabs to tab stops too
+			name: "Tab expansion through syntax highlighting",
+			fileContent: "" +
+				"abc\t0123\n" +
+				"a\t0123\n" +
+				"abcd\tX",
+			fileName: "tabs.txt",
+			height:   3,
+			width:    9,
+			expectedPreview: "" +
+				"abc 0123 \n" +
+				"a   0123 \n" +
+				"abcd    X",
+		},
+		{
 			name: "Width and height truncation",
 			fileContent: "" +
 				"abcd\n" +

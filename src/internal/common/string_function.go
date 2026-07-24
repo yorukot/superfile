@@ -16,13 +16,14 @@ import (
 
 	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
+
+	"github.com/yorukot/superfile/src/pkg/utils"
 )
 
 // Size calculation constants
 const (
 	KilobyteSize      = 1000 // SI decimal unit
 	KibibyteSize      = 1024 // Binary unit
-	TabWidth          = 4    // Standard tab expansion width
 	DefaultBufferSize = 1024 // Default buffer size for string operations
 	NonBreakingSpace  = 0xa0 // Unicode non-breaking space
 	EscapeChar        = 0x1b // ANSI escape character
@@ -251,6 +252,10 @@ func IsTextFile(filename string) (bool, error) {
 // This function should better not be broken into multiple functions
 func MakePrintableWithEscCheck(line string, allowEsc bool) string { //nolint: gocognit // See above
 	var sb strings.Builder
+	// where the current line starts in sb, so we can measure the column for tabs
+
+	lastSegmentStart := 0
+
 	for _, r := range line {
 		if r == utf8.RuneError {
 			continue
@@ -261,11 +266,11 @@ func MakePrintableWithEscCheck(line string, allowEsc bool) string { //nolint: go
 			sb.WriteRune(r)
 			continue
 		}
-		// It needs to be handled separately since considered a space,
-		// Since we are using ansi.StringWidth() for truncation, and \t is
-		// considered zero width
+		// \t is zero-width, expand it to the next tab stop based on current column
 		if r == '\t' {
-			sb.WriteString("    ")
+			newSegmentSize := ansi.StringWidth(sb.String()[lastSegmentStart:])
+			sb.WriteString(strings.Repeat(" ", utils.TabWidth-newSegmentSize%utils.TabWidth))
+			lastSegmentStart = sb.Len()
 			continue
 		}
 		if r == EscapeChar {
@@ -284,7 +289,11 @@ func MakePrintableWithEscCheck(line string, allowEsc bool) string { //nolint: go
 			sb.WriteRune(r)
 			continue
 		}
-		if unicode.IsGraphic(r) || r == rune('\n') {
+		if r == rune('\n') {
+			sb.WriteRune(r)
+			lastSegmentStart = sb.Len()
+		}
+		if unicode.IsGraphic(r) {
 			sb.WriteRune(r)
 		}
 	}

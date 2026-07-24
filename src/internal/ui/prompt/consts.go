@@ -69,7 +69,7 @@ func defaultCommandSlice() []promptCommand {
 		{
 			command:     SplitCommand,
 			usage:       SplitCommand,
-			description: "Open a new panel at a current file panel's path",
+			description: "Open a new panel at the current file panel's path",
 		},
 		{
 			command:     CdCommand,

@@ -42,7 +42,7 @@ Before starting, make sure the theme you want to add doesn’t already exist.
     - Make sure that file previewer is non empty, process panel has at least one process, and clipboard has at least one entry
 - Add a screenshot of these individual panel being focused (To make sure border focus color is good)
     - Sidebar
-    - Processbar
+    - Process panel
 - Add a screenshot of help menu (Press ?)
 - Add a screenshot of popup that opens when you create a new file (Ctrl+n)
 - Add a screenshot of image being preview using your theme.
@@ -59,11 +59,11 @@ Before starting, make sure the theme you want to add doesn’t already exist.
 - Add a screenshot of these individual panels being focused (To make sure border focus color is good)
 
   - Sidebar
-  - Processbar
+  - Process panel
 
   ![Sidebar focused](website/src/assets/contributing/theme-example/2.png)
 
-  ![Processbar focused](website/src/assets/contributing/theme-example/3.png)
+  ![Process panel focused](website/src/assets/contributing/theme-example/3.png)
 
 - Add a screenshot of help menu (Press `?`)
 

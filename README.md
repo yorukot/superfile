@@ -1,22 +1,11 @@
 <div align="center">
 
-<p>
-  <h4>
-    <a href="https://ko-fi.com/yorukot">superfile is supported by the community.</a>
-  </h4>
-<div align="center" markdown="1">
-   <sup>Special thanks to:</sup>
-   <br>
-   <br>
-   <a href="https://www.warp.dev/?utm_source=github&utm_medium=referral&utm_campaign=superfile">
-      <img alt="Warp sponsorship" width="300" src="asset/readme/warp.png">
-   </a>
+<h4>superfile is supported by the community.</h4>
 
-### [Warp, the AI terminal for developers](https://www.warp.dev/?utm_source=github&utm_medium=referral&utm_campaign=superfile)
+<a href="https://ko-fi.com/yorukot">
+  <img alt="Donate to superfile on Ko-fi" src="https://ko-fi.com/img/githubbutton_sm.svg">
+</a>
 
-[Available for macOS, Linux, & Windows](https://www.warp.dev/?utm_source=github&utm_medium=referral&utm_campaign=superfile)<br>
-
-</div>
 <hr>
 
 </div>
@@ -30,7 +19,7 @@
 </picture>
 <br><br>
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/yorukot/superfile)](https://goreportcard.com/report/github.com/yorukot/superfile) [![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/yorukot/superfile/refs/heads/main/LICENSE) [![Discord Link](https://img.shields.io/discord/1338415256875307110?label=discord&logo=discord&logoColor=white)](https://discord.gg/YYtJ23Du7B) [![Release](https://img.shields.io/github/v/release/yorukot/superfile.svg?style=flat-square)](https://github.com/yorukot/superfile/releases/latest) ![Homebrew downloads](https://img.shields.io/homebrew/installs/dy/superfile?label=Homebrew) ![GitHub downloads](https://img.shields.io/github/downloads/yorukot/superfile/total?label=GitHub%20downloads%20assets%2Freleases) [![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/yorukot/superfile?utm_source=oss&utm_medium=github&utm_campaign=yorukot%2Fsuperfile&labelColor=171717&color=FF570A&&label=CodeRabbit+Reviews)](https://www.coderabbit.ai/)
+[![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/yorukot/superfile/refs/heads/main/LICENSE) [![Discord Link](https://img.shields.io/discord/1338415256875307110?label=discord&logo=discord&logoColor=white)](https://discord.gg/YYtJ23Du7B) [![Release](https://img.shields.io/github/v/release/yorukot/superfile.svg?style=flat-square)](https://github.com/yorukot/superfile/releases/latest) ![Homebrew downloads](https://img.shields.io/homebrew/installs/dy/superfile?label=Homebrew) ![GitHub downloads](https://img.shields.io/github/downloads/yorukot/superfile/total?label=GitHub%20downloads%20assets%2Freleases) [![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/yorukot/superfile?utm_source=oss&utm_medium=github&utm_campaign=yorukot%2Fsuperfile&labelColor=171717&color=FF570A&&label=CodeRabbit+Reviews)](https://www.coderabbit.ai/)
 
 ![](website/src/assets/demo.png)
 
@@ -66,7 +55,7 @@
 - [Troubleshooting](#troubleshooting)
 - [Uninstalling](#uninstalling)
   - [macOS and Linux](#macos-and-linux-1)
-  - [Window](#window)
+  - [Windows](#windows)
 - [Contributing](#contributing)
 - [Thanks](#thanks)
   - [Support](#support)
@@ -206,7 +195,7 @@ bash -c "$(curl -sLo- https://superfile.dev/uninstall.sh)"
 
 If you want to inspect the script, see : [uninstall.sh](./website/public/uninstall.sh)
 
-### Window
+### Windows
 
 To uninstall superfile on Windows, use this powershell script.
 

@@ -10,6 +10,7 @@ interface Props {
 	/** Slug used to compute the lang-toggle target, empty for homepage */
 	baseSlug?: string;
 	labels?: {
+		videos?: string;
 		docs?: string;
 		github?: string;
 		discord?: string;
@@ -24,6 +25,7 @@ const homeHref = isZhTw ? "/zh-tw/" : "/";
 const docsHref = `${localePrefix}/overview`;
 const installHref = `${localePrefix}/getting-started/installation`;
 const navLabels = {
+	videos: labels.videos ?? "Videos",
 	docs: labels.docs ?? "Docs",
 	github: labels.github ?? "GitHub",
 	discord: labels.discord ?? "Discord",
@@ -56,6 +58,13 @@ const langLabel = isZhTw ? "English" : "繁體中文";
 		</a>
 
 		<nav class="site-nav-links" role="navigation" aria-label="Main">
+			{
+				!isDocs && (
+					<a href="#videos" class="site-nav-link">
+						{navLabels.videos}
+					</a>
+				)
+			}
 			<a href={docsHref} class="site-nav-link">{navLabels.docs}</a>
 			<a href="https://github.com/yorukot/superfile" class="site-nav-link" target="_blank" rel="noopener noreferrer">{navLabels.github}</a>
 			<a href="https://discord.gg/YYtJ23Du7B" class="site-nav-link" target="_blank" rel="noopener noreferrer">{navLabels.discord}</a>

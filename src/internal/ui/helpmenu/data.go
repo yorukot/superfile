@@ -21,7 +21,7 @@ func getData() []hotkeydata { //nolint: funlen // This should be self contained
 		},
 		{
 			hotkey:         common.Hotkeys.Confirm,
-			description:    "Confirm your select or typing",
+			description:    "Confirm your selection or typing",
 			hotkeyWorkType: globalType,
 		},
 		{
@@ -46,7 +46,7 @@ func getData() []hotkeydata { //nolint: funlen // This should be self contained
 		},
 		{
 			hotkey:         common.Hotkeys.OpenHelpMenu,
-			description:    "Open help menu (hotkeylist)",
+			description:    "Open help menu (hotkey list)",
 			hotkeyWorkType: globalType,
 		},
 		{
@@ -195,12 +195,12 @@ func getData() []hotkeydata { //nolint: funlen // This should be self contained
 		},
 		{
 			hotkey:         common.Hotkeys.FilePanelSelectModeItemsSelectUp,
-			description:    "In select mode: toggle selection on current item and move up",
+			description:    "Select up from your cursor",
 			hotkeyWorkType: globalType,
 		},
 		{
 			hotkey:         common.Hotkeys.FilePanelSelectModeItemsSelectDown,
-			description:    "In select mode: toggle selection on current item and move down",
+			description:    "Select down from your cursor",
 			hotkeyWorkType: globalType,
 		},
 		{
@@ -228,7 +228,7 @@ func getData() []hotkeydata { //nolint: funlen // This should be self contained
 		},
 		{
 			hotkey:         common.Hotkeys.FilePanelItemCreate,
-			description:    "Create file or folder(end with " + string(filepath.Separator) + " to create a folder)",
+			description:    "Create file or folder (end with " + string(filepath.Separator) + " to create a folder)",
 			hotkeyWorkType: globalType,
 		},
 		{

@@ -43,6 +43,90 @@ const demos = [
 	{ gif: gifSelection, ...t.demos.items[5] }
 ];
 
+const videos = [
+	{
+		id: "pDIMXiKyvA4",
+		provider: "YouTube",
+		title: "Superfile is AWESOME",
+		creator: "TechHut",
+		duration: "12:38",
+		url: "https://www.youtube.com/watch?v=pDIMXiKyvA4",
+		thumbnail: "https://i.ytimg.com/vi/pDIMXiKyvA4/maxresdefault.jpg"
+	},
+	{
+		id: "3LEctgQWG10",
+		provider: "YouTube",
+		title: "Superfile - AMAZING Terminal File Manager Created by a High School Kid",
+		creator: "Better Stack",
+		duration: "4:45",
+		url: "https://www.youtube.com/watch?v=3LEctgQWG10",
+		thumbnail: "https://i.ytimg.com/vi/3LEctgQWG10/maxresdefault.jpg"
+	},
+	{
+		id: "tYRlUQIPboU",
+		provider: "YouTube",
+		title: "This Terminal File Manager is Actually Insane",
+		creator: "Seth Phaeno",
+		duration: "8:10",
+		url: "https://www.youtube.com/watch?v=tYRlUQIPboU",
+		thumbnail: "https://i.ytimg.com/vi/tYRlUQIPboU/maxresdefault.jpg"
+	},
+	{
+		id: "bCibCIpq5ko",
+		provider: "YouTube",
+		title: "I wish I knew about this package sooner",
+		creator: "Melkey",
+		duration: "12:56",
+		url: "https://www.youtube.com/watch?v=bCibCIpq5ko",
+		thumbnail: "https://i.ytimg.com/vi/bCibCIpq5ko/maxresdefault.jpg"
+	},
+	{
+		id: "IGnbTs5HWvY",
+		provider: "YouTube",
+		title: "Warp + Neovim + Superfile: This Terminal Setup CHANGED How I Code",
+		creator: "Better Stack",
+		duration: "4:31",
+		url: "https://www.youtube.com/watch?v=IGnbTs5HWvY",
+		thumbnail: "https://i.ytimg.com/vi/IGnbTs5HWvY/maxresdefault.jpg"
+	},
+	{
+		id: "LGipyvaecIU",
+		provider: "YouTube",
+		title: "Este gestor de archivos es una auténtica LOCURA",
+		creator: "atareao",
+		duration: "24:42",
+		url: "https://www.youtube.com/watch?v=LGipyvaecIU",
+		thumbnail: "https://i.ytimg.com/vi/LGipyvaecIU/maxresdefault.jpg"
+	},
+	{
+		id: "cq4ndzcDsI4",
+		provider: "YouTube",
+		title: "Superfile: Gerencie Arquivos pelo Terminal Facilmente!",
+		creator: "Domynix Tech",
+		duration: "13:59",
+		url: "https://www.youtube.com/watch?v=cq4ndzcDsI4",
+		thumbnail: "https://i.ytimg.com/vi/cq4ndzcDsI4/maxresdefault.jpg"
+	},
+	{
+		id: "DTbnVSapFEA",
+		provider: "YouTube",
+		title: "Un FILE MANAGER sul TERMINALE...? - Superfile",
+		creator: "YoungTech",
+		duration: "7:00",
+		url: "https://www.youtube.com/watch?v=DTbnVSapFEA",
+		thumbnail: "https://i.ytimg.com/vi/DTbnVSapFEA/maxresdefault.jpg"
+	},
+	{
+		id: "7xtxeLjTS4Q",
+		provider: "YouTube",
+		title: "Superfile: The Modern, Lightweight Linux Terminal File Manager",
+		creator: "CodingBite",
+		duration: "2:37",
+		url: "https://www.youtube.com/watch?v=7xtxeLjTS4Q",
+		thumbnail: "https://i.ytimg.com/vi/7xtxeLjTS4Q/maxresdefault.jpg"
+	}
+];
+
 const features = t.features;
 
 const installCommands = [
@@ -319,6 +403,77 @@ const installCommands = [
 			</div>
 		</section>
 
+		<!-- ─── VIDEOS ────────────────────────────────────────────────────── -->
+		<section class="videos section" id="videos" aria-label={t.videos.aria}>
+			<div class="section-inner">
+				<div class="videos-intro">
+					<h2 class="videos-heading">{t.videos.heading}</h2>
+				</div>
+
+				<div class="videos-grid">
+					{
+						videos.map(video => (
+							<a
+								href={video.url}
+								class="video-card"
+								target="_blank"
+								rel="noopener noreferrer"
+								data-video-id={video.id}
+								data-video-provider={video.provider}
+								data-video-title={video.title}
+								aria-label={`${t.videos.play} ${video.title}`}
+							>
+								<span class="video-card-visual">
+									<img src={video.thumbnail} alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
+									<span class="video-play" aria-hidden="true">
+										<svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
+											<path d="M8 5.14v13.72a1 1 0 0 0 1.52.86l10.28-6.86a1 1 0 0 0 0-1.72L9.52 4.28A1 1 0 0 0 8 5.14Z" />
+										</svg>
+									</span>
+									<span class="video-duration">{video.duration}</span>
+								</span>
+
+								<span class="video-card-content">
+									<span class="video-card-title">{video.title}</span>
+									<span class="video-card-footer">{video.creator}</span>
+								</span>
+							</a>
+						))
+					}
+				</div>
+			</div>
+
+			<dialog class="video-dialog" id="video-dialog" aria-labelledby="video-dialog-title" data-open-label={t.videos.openOn}>
+				<div class="video-dialog-bar">
+					<div class="terminal-dots terminal-dots--sm" aria-hidden="true">
+						<span class="terminal-dot terminal-dot--red"></span>
+						<span class="terminal-dot terminal-dot--yellow"></span>
+						<span class="terminal-dot terminal-dot--green"></span>
+					</div>
+					<span class="video-dialog-title" id="video-dialog-title">{t.videos.dialogTitle}</span>
+					<button class="video-dialog-close" type="button" aria-label={t.videos.close}>
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+							<path d="M18 6 6 18M6 6l12 12"></path>
+						</svg>
+					</button>
+				</div>
+				<div class="video-dialog-frame">
+					<iframe
+						id="video-dialog-iframe"
+						src="about:blank"
+						title={t.videos.dialogTitle}
+						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+						allowfullscreen
+						referrerpolicy="strict-origin-when-cross-origin"
+					>
+					</iframe>
+				</div>
+				<div class="video-dialog-footer">
+					<a class="video-dialog-external text-link" id="video-dialog-external" href="#" target="_blank" rel="noopener noreferrer">{t.videos.openOn}</a>
+				</div>
+			</dialog>
+		</section>
+
 		<!-- ─── COMMUNITY ─────────────────────────────────────────────────── -->
 		<section class="community section" id="community" aria-label={t.community.aria}>
 			<div class="section-inner">
@@ -387,6 +542,7 @@ const installCommands = [
 				<a href={docsPath} class="footer-link">{t.footer.docs}</a>
 				<a href={brandingPath} class="footer-link">{t.footer.branding}</a>
 				<a href={contributorsPath} class="footer-link">{t.footer.contributors}</a>
+				<a href="#videos" class="footer-link">{t.footer.videos}</a>
 				<a href="https://github.com/yorukot/superfile" class="footer-link" target="_blank" rel="noopener noreferrer">{t.footer.github}</a>
 				<a href="https://discord.gg/YYtJ23Du7B" class="footer-link" target="_blank" rel="noopener noreferrer">{t.footer.discord}</a>
 				<a href={changelogPath} class="footer-link">{t.footer.changelog}</a>
@@ -405,6 +561,7 @@ const installCommands = [
 	// Kill all ScrollTrigger instances before every SPA swap so we start clean
 	document.addEventListener("astro:before-swap", () => {
 		ScrollTrigger.getAll().forEach(t => t.kill());
+		document.documentElement.classList.remove("has-video-dialog");
 	});
 
 	document.addEventListener("astro:page-load", () => {
@@ -466,6 +623,18 @@ const installCommands = [
 			ease: "power3.out"
 		});
 
+		gsap.from(".video-card", {
+			scrollTrigger: {
+				trigger: ".videos-grid",
+				start: "top 82%"
+			},
+			y: 24,
+			opacity: 0,
+			duration: 0.55,
+			stagger: 0.06,
+			ease: "power3.out"
+		});
+
 		gsap.from(".community-box", {
 			scrollTrigger: { trigger: "#community", start: "top 75%" },
 			y: 24,
@@ -514,6 +683,45 @@ const installCommands = [
 					/* fallback – select text manually */
 				}
 			});
+		});
+
+		// ── Lightweight video dialog ─────────────────────────────────────────────
+		const videoDialog = document.querySelector<HTMLDialogElement>("#video-dialog");
+		const videoIframe = document.querySelector<HTMLIFrameElement>("#video-dialog-iframe");
+		const videoDialogTitle = document.querySelector<HTMLElement>("#video-dialog-title");
+		const videoExternalLink = document.querySelector<HTMLAnchorElement>("#video-dialog-external");
+		const videoDialogClose = document.querySelector<HTMLButtonElement>(".video-dialog-close");
+
+		const stopVideo = () => {
+			if (videoIframe) videoIframe.src = "about:blank";
+			document.documentElement.classList.remove("has-video-dialog");
+		};
+
+		document.querySelectorAll<HTMLAnchorElement>("[data-video-id]").forEach(card => {
+			card.addEventListener("click", event => {
+				if (!videoDialog || !videoIframe || !videoDialogTitle || !videoExternalLink) return;
+
+				event.preventDefault();
+				const id = card.dataset.videoId;
+				const provider = card.dataset.videoProvider ?? "";
+				const title = card.dataset.videoTitle ?? "";
+				if (!id) return;
+
+				videoIframe.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}?autoplay=1&rel=0`;
+				videoIframe.title = title;
+				videoDialogTitle.textContent = title;
+				videoExternalLink.href = card.href;
+				videoExternalLink.textContent = `${videoDialog.dataset.openLabel ?? ""} ${provider} ↗`;
+
+				document.documentElement.classList.add("has-video-dialog");
+				if (!videoDialog.open) videoDialog.showModal();
+			});
+		});
+
+		videoDialogClose?.addEventListener("click", () => videoDialog?.close());
+		videoDialog?.addEventListener("close", stopVideo);
+		videoDialog?.addEventListener("click", event => {
+			if (event.target === videoDialog) videoDialog.close();
 		});
 	});
 </script>

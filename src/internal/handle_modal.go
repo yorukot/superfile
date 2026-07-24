@@ -6,7 +6,10 @@ import (
 	"path/filepath"
 	"strings"
 
+	tea "charm.land/bubbletea/v2"
+
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
+	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/pkg/utils"
 )
 
@@ -17,40 +20,103 @@ func (m *model) cancelTypingModal() {
 }
 
 // Confirm to create file or directory
-func (m *model) createItem() {
-	if err := checkFileNameValidity(m.typingModal.textInput.Value()); err != nil {
-		m.typingModal.errorMesssage = err.Error()
+func createItem(location, item string) error {
+	if err := checkFileNameValidity(item); err != nil {
 		slog.Error("Errow while createItem during item creation", "error", err)
-
-		return
+		return err
 	}
-
-	defer func() {
-		m.typingModal.errorMesssage = ""
-		m.typingModal.open = false
-		m.typingModal.textInput.Blur()
-	}()
-
-	path := filepath.Join(m.typingModal.location, m.typingModal.textInput.Value())
-	if !strings.HasSuffix(m.typingModal.textInput.Value(), string(filepath.Separator)) {
+	path := filepath.Join(location, item)
+	if !strings.HasSuffix(item, string(filepath.Separator)) {
 		path, _ = renameIfDuplicate(path)
 		if err := os.MkdirAll(filepath.Dir(path), utils.UserDirPerm); err != nil {
 			slog.Error("Error while createItem during directory creation", "error", err)
-			return
+			return err
 		}
 		f, err := os.Create(path)
 		if err != nil {
 			slog.Error("Error while createItem during file creation", "error", err)
-			return
+			return err
 		}
 		defer f.Close()
 	} else {
 		err := os.MkdirAll(path, utils.UserDirPerm)
 		if err != nil {
 			slog.Error("Error while createItem during directory creation", "error", err)
-			return
+			return err
 		}
 	}
+	return nil
+}
+
+func (m *model) getCreateCmd() tea.Cmd {
+	if !m.typingModal.open {
+		return nil
+	}
+
+	items := []string{m.typingModal.textInput.Value()}
+	location := m.typingModal.location
+
+	reqID := m.nextIoReqCnt()
+	slog.Debug("Submitting create request", "id", reqID, "items cnt", len(items))
+	m.cancelTypingModal()
+	return func() tea.Msg {
+		return m.createOperation(&m.processBarModel, location, items, reqID)
+	}
+}
+
+func (m *model) createOperation(
+	processBarModel *processbar.Model,
+	location string,
+	items []string,
+	reqID int,
+) tea.Msg {
+	if len(items) == 0 {
+		return NewCreateOperationMsg(processbar.Cancelled, reqID)
+	}
+	p, err := processBarModel.SendAddProcessMsg(filepath.Base(items[0]), processbar.OpCreate, len(items), true)
+	if err != nil {
+		slog.Error("Cannot spawn a new process", "error", err)
+		return NewCreateOperationMsg(processbar.Failed, reqID)
+	}
+	finalizer := func(state processbar.ProcessState, reqID int) tea.Msg {
+		return NewCreateOperationMsg(state, reqID)
+	}
+	processor := makeCreateProcessor(location, p, processBarModel)
+	msg := m.runFileProcessor(processor, finalizer, items, reqID)
+	return msg
+}
+
+func makeCreateProcessor(location string,
+	process processbar.Process,
+	processBarModel *processbar.Model) processbar.FileListProcessor {
+	processorFunction := func(items []string) (processbar.Process, []string) {
+		notProcessed := make([]string, 0)
+		if len(items) == 0 {
+			markProcessDone(process, processBarModel)
+			return process, notProcessed
+		}
+
+		for i, item := range items {
+			err := createItem(location, item)
+			if err != nil {
+				process.State = processbar.Failed
+				slog.Error("Error in create operation", "item", item, "error", err)
+				process.ErrorMsg = formatFileError(item, err)
+				notProcessed = items[i:]
+				break
+			}
+			process.CurrentFile = filepath.Base(item)
+			process.Done++
+			processBarModel.TrySendingUpdateProcessMsg(process)
+		}
+
+		if process.State != processbar.Failed {
+			process.State = processbar.Successful
+			markProcessDone(process, processBarModel)
+		}
+		return process, notProcessed
+	}
+	return processorFunction
 }
 
 // Cancel rename file or directory
