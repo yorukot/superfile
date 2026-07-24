@@ -22,6 +22,7 @@ require (
 	github.com/urfave/cli/v3 v3.9.0
 	golang.org/x/image v0.41.0
 	golang.org/x/mod v0.37.0
+	golang.org/x/sync v0.22.0
 	golift.io/xtractr v0.3.2
 )
 
@@ -57,7 +58,6 @@ require (
 	github.com/therootcompany/xz v1.0.1 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	golang.org/x/crypto v0.53.0 // indirect
-	golang.org/x/sync v0.22.0 // indirect
 	golift.io/udf v0.0.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

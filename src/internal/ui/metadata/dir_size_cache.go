@@ -1,7 +1,6 @@
 package metadata
 
 import (
-	"fmt"
 	"log/slog"
 	"os"
 	"sync"
@@ -14,9 +13,8 @@ import (
 )
 
 type dirSizeEntry struct {
-	size      int64
-	modTime   time.Time
-	fileCount int64
+	size    int64
+	modTime time.Time
 }
 
 var directorySizeMutex sync.RWMutex
@@ -29,7 +27,6 @@ var directorySizeCache = cache.New[dirSizeEntry](
 var directorySizeGroup singleflight.Group
 
 func getDirectorySize(path string) int64 {
-	fmt.Fprintln(os.Stderr, "GET DIR SIZE CALLED:", path)
 	info, err := os.Stat(path)
 	if err != nil {
 		slog.Error(
@@ -48,11 +45,10 @@ func getDirectorySize(path string) int64 {
 	directorySizeMutex.RUnlock()
 
 	if ok && cached.modTime.Equal(currentModTime) {
-		slog.Info(
+		slog.Debug(
 			"directory size cache hit",
 			"path", path,
 			"size", cached.size,
-			"files", cached.fileCount,
 		)
 
 		return cached.size
@@ -69,7 +65,7 @@ func getDirectorySize(path string) int64 {
 			return cached.size, nil
 		}
 
-		slog.Info(
+		slog.Debug(
 			"directory size calculating",
 			"path", path,
 		)
@@ -79,18 +75,16 @@ func getDirectorySize(path string) int64 {
 		directorySizeMutex.Lock()
 
 		directorySizeCache.Set(path, dirSizeEntry{
-			size:      stats.Size,
-			modTime:   currentModTime,
-			fileCount: stats.FileCount,
+			size:    stats.Size,
+			modTime: currentModTime,
 		})
 
 		directorySizeMutex.Unlock()
 
-		slog.Info(
+		slog.Debug(
 			"directory size calculated",
 			"path", path,
 			"size", stats.Size,
-			"files", stats.FileCount,
 		)
 
 		return stats.Size, nil
