@@ -230,9 +230,11 @@ func GetDirStats(path string) (DirStats, error) {
 		}
 		if !entry.IsDir() {
 			info, infoErr := entry.Info()
-			if infoErr == nil {
-				stats.Size += info.Size()
+			if infoErr != nil {
+				slog.Error("Dir size entry info error", "error", infoErr)
+				return infoErr
 			}
+			stats.Size += info.Size()
 		}
 		return nil
 	})
