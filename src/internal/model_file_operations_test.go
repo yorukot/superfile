@@ -263,7 +263,11 @@ func TestFileDelete(t *testing.T) {
 	if runtime.GOOS == utils.OsWindows {
 		t.Skip("Skipping for windows")
 	}
-	curTestDir := t.TempDir()
+	curTestDir, err := os.MkdirTemp(".", "TestFileDelete")
+	require.NoError(t, err)
+	curTestDir, err = filepath.Abs(curTestDir)
+	require.NoError(t, err)
+	defer os.RemoveAll(curTestDir)
 	file1 := filepath.Join(curTestDir, "file1.txt")
 	file2 := filepath.Join(curTestDir, "file2.txt")
 
