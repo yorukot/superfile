@@ -535,7 +535,7 @@ func (m *model) openFileWithEditor() tea.Cmd {
 		slog.Error("Failed to parse editor command", "editor", editor, "error", parseErr)
 		return nil
 	}
-	if len(parts) == 0 {
+	if len(parts) == 0 || parts[0] == "" {
 		slog.Error("Editor command produced no executable", "editor", editor)
 		return nil
 	}
@@ -581,7 +581,7 @@ func (m *model) openDirectoryWithEditor() tea.Cmd {
 		slog.Error("Failed to parse directory editor command", "editor", editor, "error", parseErr)
 		return nil
 	}
-	if len(parts) == 0 {
+	if len(parts) == 0 || parts[0] == "" {
 		slog.Error("Directory editor command produced no executable", "editor", editor)
 		return nil
 	}
