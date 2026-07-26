@@ -138,35 +138,59 @@ func (msg ExtractOperationMsg) ApplyToModel(_ *model) tea.Cmd {
 	return nil
 }
 
+type MetadataType int
+
+const (
+	FileMetadata MetadataType = iota
+	DriveMetadata
+)
+
 type MetadataMsg struct {
 	BaseMessage
 
 	meta            metadata.Metadata
 	metadataFocused bool
+	metadataType    MetadataType
 }
 
-func NewMetadataMsg(meta metadata.Metadata, metadataFocused bool, reqID int) MetadataMsg {
+func NewMetadataMsg(meta metadata.Metadata, metadataFocused bool, reqID int, metadataType MetadataType) MetadataMsg {
 	return MetadataMsg{
 		meta:            meta,
 		metadataFocused: metadataFocused,
 		BaseMessage: BaseMessage{
 			reqID: reqID,
 		},
+		metadataType: metadataType,
 	}
 }
 
 func (msg MetadataMsg) ApplyToModel(m *model) tea.Cmd {
 	m.fileMetaData.SetMetadataCache(msg.meta, msg.metadataFocused)
-	selectedItem := m.getFocusedFilePanel().GetFocusedItemPtr()
-	if selectedItem == nil {
-		slog.Debug("Panel empty or cursor invalid. Ignoring MetadataMsg")
+	switch msg.metadataType {
+	case DriveMetadata:
+		selectedItem := m.sidebarModel.GetFocusedItem()
+		if selectedItem.Location != msg.meta.GetPath() {
+			slog.Debug("MetadataMsg for older drives. Ignoring",
+				"currentItem", selectedItem.Location, "msgItem", msg.meta.GetPath())
+			return nil
+		}
+	case FileMetadata:
+		selectedItem := m.getFocusedFilePanel().GetFocusedItemPtr()
+		if selectedItem == nil {
+			slog.Debug("Panel empty or cursor invalid. Ignoring MetadataMsg")
+			return nil
+		}
+		if selectedItem.Location != msg.meta.GetPath() {
+			slog.Debug("MetadataMsg for older files. Ignoring",
+				"currentItem", selectedItem.Location, "msgItem", msg.meta.GetPath())
+			return nil
+		}
+	default:
+		slog.Debug("Invalid meta type. Ignoring",
+			"currentItem", msg.metadataType)
 		return nil
 	}
-	if selectedItem.Location != msg.meta.GetPath() {
-		slog.Debug("MetadataMsg for older files. Ignoring",
-			"currentItem", selectedItem.Location, "msgItem", msg.meta.GetPath())
-		return nil
-	}
+
 	if (m.focusPanel == metadataFocus) != msg.metadataFocused {
 		slog.Debug("MetadataMsg for older state. Ignoring",
 			"actualFocus", m.focusPanel, "msgFocus", msg.metadataFocused)

@@ -99,6 +99,11 @@ func (s *Model) UpdateDirectories() {
 	}
 }
 
+func (s *Model) GetFocusedItem() SideBarItem {
+	item := s.directories[s.cursor]
+	return SideBarItem{Location: item.Location, Name: item.Name, Type: item.Section}
+}
+
 // TogglePinnedDirectory adds or removes a directory from the pinned list.
 func (s *Model) TogglePinnedDirectory(dir string) error {
 	return s.pinnedMgr.Toggle(dir)
