@@ -4,11 +4,14 @@ import (
 	"errors"
 	"log/slog"
 	"os"
+	"path/filepath"
 	"reflect"
 	"slices"
 	"strings"
 	"sync/atomic"
 	"time"
+
+	"github.com/fsnotify/fsnotify"
 
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
@@ -54,6 +57,7 @@ func (m *model) Init() tea.Cmd {
 	return tea.Batch(
 		textinput.Blink, // Assuming textinput.Blink is a valid command
 		processCmdToTeaCmd(m.processBarModel.GetListenCmd()),
+		m.watchFileSystem(),
 	)
 }
 
@@ -63,7 +67,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	slog.Debug("model.Update() called", "msgType", reflect.TypeOf(msg))
 
 	var sidebarCmd, inputCmd, updateCmd, panelCmd,
-		metadataCmd, filePreviewCmd, helpMenuCmd, resizeCmd tea.Cmd
+		metadataCmd, filePreviewCmd, helpMenuCmd, resizeCmd, watcherCmd tea.Cmd
 
 	// These are above the key message handing to prevent issues with firstKeyInput
 	// if someone presses `/` to focus to searchBar, searchBar will otherwise
@@ -95,6 +99,14 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		slog.Debug("Got ModelUpdate message", "id", msg.GetReqID())
 		updateCmd = msg.ApplyToModel(m)
 
+	case watcherMsg:
+		slog.Debug("File system event", "event", msg.event)
+		updateCmd = m.handleFileSystemEvent(msg.event)
+		watcherCmd = m.watchFileSystem()
+	case watcherErrMsg:
+		slog.Error("File system watcher error", "error", msg.err)
+		watcherCmd = m.watchFileSystem()
+
 	default:
 		slog.Debug("Message of type that is not explicitly handled")
 	}
@@ -108,7 +120,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	metadataCmd = m.getMetadataCmd()
 
 	return m, tea.Batch(sidebarCmd, helpMenuCmd, inputCmd, updateCmd,
-		panelCmd, metadataCmd, filePreviewCmd, resizeCmd)
+		panelCmd, metadataCmd, filePreviewCmd, resizeCmd, watcherCmd)
 }
 
 func (m *model) handleMouseMsg(msg tea.MouseMsg) {
@@ -123,6 +135,7 @@ func (m *model) handleMouseMsg(msg tea.MouseMsg) {
 func (m *model) updateModelStateAfterMsg() {
 	m.sidebarModel.UpdateDirectories()
 	m.fileModel.UpdateFilePanelsIfNeeded(false)
+	m.updateWatchedDirectories()
 	// TODO: Move to utility
 	if m.focusPanel != metadataFocus {
 		m.fileMetaData.ResetRender()
@@ -606,6 +619,9 @@ func (m *model) quitSuperfile(cdOnQuit bool) {
 	if common.Config.Metadata && et != nil {
 		_ = et.Close()
 	}
+	if m.fsWatcher != nil {
+		_ = m.fsWatcher.Close()
+	}
 	m.fileModel.FilePreview.CleanUp()
 
 	// cd on quit
@@ -628,4 +644,115 @@ func (m *model) quitSuperfile(cdOnQuit bool) {
 func (m *model) nextIoReqCnt() int {
 	var res = atomic.AddInt32(&m.ioReqCnt, 1)
 	return int(res)
+}
+
+// watcherMsg represents a filesystem event captured by the fsnotify watcher.
+type watcherMsg struct {
+	event fsnotify.Event
+}
+
+// watcherErrMsg represents an error encountered by the fsnotify watcher.
+type watcherErrMsg struct {
+	err error
+}
+
+// watchFileSystem starts a Bubble Tea command that listens for filesystem events.
+func (m *model) watchFileSystem() tea.Cmd {
+	if m.fsWatcher == nil {
+		return nil
+	}
+	return func() tea.Msg {
+		select {
+		case event, ok := <-m.fsWatcher.Events:
+			if !ok {
+				return nil
+			}
+			return watcherMsg{event}
+		case err, ok := <-m.fsWatcher.Errors:
+			if !ok {
+				return nil
+			}
+			return watcherErrMsg{err}
+		}
+	}
+}
+
+// updateWatchedDirectories synchronizes the fsnotify watcher with the active file panels.
+func (m *model) updateWatchedDirectories() {
+	if m.fsWatcher == nil {
+		return
+	}
+	// Collect directories currently open in all file panels.
+	currentDirs := make(map[string]bool)
+	for _, panel := range m.fileModel.FilePanels {
+		if panel.Location != "" {
+			currentDirs[panel.Location] = true
+		}
+	}
+
+	// Remove directories that are no longer open from the watcher.
+	var newWatched []string
+	for _, dir := range m.watchedDirs {
+		if !currentDirs[dir] {
+			_ = m.fsWatcher.Remove(dir)
+		} else {
+			newWatched = append(newWatched, dir)
+		}
+	}
+
+	// Add newly opened directories to the watcher.
+	for dir := range currentDirs {
+		if !slices.Contains(newWatched, dir) {
+			err := m.fsWatcher.Add(dir)
+			if err == nil {
+				newWatched = append(newWatched, dir)
+			} else {
+				slog.Error("Failed to watch directory", "dir", dir, "error", err)
+			}
+		}
+	}
+	m.watchedDirs = newWatched
+}
+
+// handleFileSystemEvent processes a filesystem event and triggers a reload for affected panels.
+func (m *model) handleFileSystemEvent(event fsnotify.Event) tea.Cmd {
+	// Determine the directory containing the file associated with the event.
+	dir := filepath.Dir(event.Name)
+	
+	var cmds []tea.Cmd
+	for i, panel := range m.fileModel.FilePanels {
+		// Identify panels actively viewing the affected directory.
+		if panel.Location == dir || panel.Location == event.Name {
+			cmds = append(cmds, m.reloadPanelCmd(i, panel.Location))
+		}
+	}
+	return tea.Batch(cmds...)
+}
+
+// genericUpdateMsg is a general-purpose message wrapper for executing model updates.
+type genericUpdateMsg struct {
+	BaseMessage
+	apply func(m *model) tea.Cmd
+}
+
+// ApplyToModel executes the underlying update logic on the provided model.
+func (msg genericUpdateMsg) ApplyToModel(m *model) tea.Cmd {
+	return msg.apply(m)
+}
+
+// reloadPanelCmd generates a command to forcefully reload a specific file panel.
+func (m *model) reloadPanelCmd(index int, location string) tea.Cmd {
+	return func() tea.Msg {
+		// Dispatch an update message to reload the specific panel's directory.
+		return genericUpdateMsg{
+			BaseMessage: BaseMessage{reqID: m.nextIoReqCnt()},
+			apply: func(m *model) tea.Cmd {
+				err := m.fileModel.FilePanels[index].UpdateCurrentFilePanelDir(location)
+				if err != nil {
+					slog.Error("Failed to reload panel after fs event", "error", err)
+				}
+				return nil
+			},
+		}
+	}
 }
