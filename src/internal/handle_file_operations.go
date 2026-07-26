@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/shlex"
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/internal/trash"
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
@@ -528,8 +529,16 @@ func (m *model) openFileWithEditor() tea.Cmd {
 		}
 	}
 
-	// Split the editor command into command and arguments
-	parts := strings.Fields(editor)
+	// Split the editor command into command and arguments using quote-aware parser
+	parts, parseErr := shlex.Split(editor)
+	if parseErr != nil {
+		slog.Error("Failed to parse editor command", "editor", editor, "error", parseErr)
+		return nil
+	}
+	if len(parts) == 0 {
+		slog.Error("Editor command produced no executable", "editor", editor)
+		return nil
+	}
 	cmd := parts[0]
 
 	//nolint:gocritic // appendAssign: intentionally creating a new slice
@@ -566,8 +575,16 @@ func (m *model) openDirectoryWithEditor() tea.Cmd {
 		}
 	}
 
-	// Split the editor command into command and arguments
-	parts := strings.Fields(editor)
+	// Split the editor command into command and arguments using quote-aware parser
+	parts, parseErr := shlex.Split(editor)
+	if parseErr != nil {
+		slog.Error("Failed to parse directory editor command", "editor", editor, "error", parseErr)
+		return nil
+	}
+	if len(parts) == 0 {
+		slog.Error("Directory editor command produced no executable", "editor", editor)
+		return nil
+	}
 	cmd := parts[0]
 	//nolint:gocritic // appendAssign: intentionally creating a new slice
 	args := append(parts[1:], m.getFocusedFilePanel().Location)
