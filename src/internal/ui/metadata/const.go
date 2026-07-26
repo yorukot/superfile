@@ -10,6 +10,7 @@ const fileStatErrorMsg = "Cannot load file stats"
 const linkFileBrokenMsg = "Link file is broken!"
 const etFetchErrorMsg = "Errors while fetching metadata via exiftool"
 
+// File metadata
 const keyName = "Name"
 const keySize = "Size"
 const keyDataModified = "Date Modified"
@@ -22,6 +23,10 @@ const keyAttributes = "Attributes"
 const keyPath = "Path"
 const keyArchitecture = "Architecture"
 const borderSize = 2
+
+// Drive metadata
+const keyDriveAvailable = "Free"
+const keyDriveTotal = "Total"
 
 // Cache configuration
 const defaultCacheSize = 300

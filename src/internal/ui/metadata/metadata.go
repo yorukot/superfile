@@ -3,6 +3,7 @@ package metadata
 import (
 	"fmt"
 	"log/slog"
+	"math"
 	"os"
 	"path/filepath"
 	"sort"
@@ -78,6 +79,25 @@ func sortMetadata(meta [][2]string) {
 func GetMetadata(filePath string, metadataFocused bool, et *exiftool.Exiftool) Metadata {
 	meta := getMetaDataUnsorted(filePath, metadataFocused, et)
 	sortMetadata(meta.data)
+	return meta
+}
+
+func driveSizeRule(size uint64) int64 {
+	if size > math.MaxInt64 {
+		return math.MaxInt64
+	}
+	return int64(size)
+}
+
+func GetDriveMetadata(location string) Metadata {
+	meta := Metadata{
+		filepath: location,
+	}
+	if space, err := getFreeSpace(location); err == nil {
+		freeSize := [2]string{keyDriveAvailable, common.FormatFileSize(driveSizeRule(space.Free))}
+		totalSize := [2]string{keyDriveTotal, common.FormatFileSize(driveSizeRule(space.Total))}
+		meta.data = append(meta.data, freeSize, totalSize)
+	}
 	return meta
 }
 

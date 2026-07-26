@@ -134,14 +134,24 @@ func (m *model) updateModelStateAfterMsg() {
 	}
 }
 
-// Note : Maybe we should not trigger metadata fetch for updates
-// that dont change the currently selected file panel element
-// TODO : At least dont trigger metadata fetch when user is scrolling
-// through the metadata panel
-func (m *model) getMetadataCmd() tea.Cmd {
-	if m.disableMetadata {
+func (m *model) getSideBarMetaData() tea.Cmd {
+	focusedItem := m.sidebarModel.GetFocusedItem()
+	if focusedItem.Location == m.fileMetaData.GetMetadataLocation() {
 		return nil
 	}
+	switch focusedItem.Type {
+	case utils.SidebarSectionDisks:
+		reqCnt := m.nextIoReqCnt()
+		m.fileMetaData.SetMetadataLocationAndFocused(focusedItem.Location, false)
+		return func() tea.Msg {
+			return NewMetadataMsg(metadata.GetDriveMetadata(focusedItem.Location), false, reqCnt, DriveMetadata)
+		}
+	default:
+		return nil
+	}
+}
+
+func (m *model) getFileMetaData() tea.Cmd {
 	if m.getFocusedFilePanel().EmptyOrInvalid() {
 		m.fileMetaData.SetBlank()
 		return nil
@@ -175,8 +185,22 @@ func (m *model) getMetadataCmd() tea.Cmd {
 	slog.Debug("Submitting metadata fetch request", "id", reqCnt, "path", selectedItem.Location)
 	return func() tea.Msg {
 		return NewMetadataMsg(
-			metadata.GetMetadata(selectedItem.Location, metadataFocused, et), metadataFocused, reqCnt)
+			metadata.GetMetadata(selectedItem.Location, metadataFocused, et), metadataFocused, reqCnt, FileMetadata)
 	}
+}
+
+// Note : Maybe we should not trigger metadata fetch for updates
+// that dont change the currently selected file panel element
+// TODO : At least dont trigger metadata fetch when user is scrolling
+// through the metadata panel
+func (m *model) getMetadataCmd() tea.Cmd {
+	if m.disableMetadata {
+		return nil
+	}
+	if m.focusPanel == sidebarFocus {
+		return m.getSideBarMetaData()
+	}
+	return m.getFileMetaData()
 }
 
 // Adjust window size based on msg information
