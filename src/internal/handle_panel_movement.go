@@ -82,6 +82,7 @@ func (m *model) executeOpenCommand() tea.Cmd {
 		// Use configured/environment editor - block TUI while editor runs (like 'e' key)
 		parts := strings.Fields(editor)
 		cmd := parts[0]
+		//nolint:gocritic // appendAssign: intentionally creating a new slice
 		args := append(parts[1:], filePath)
 
 		c := exec.Command(cmd, args...) //nolint:gosec // Editor command is intentionally user-configurable.
