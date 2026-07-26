@@ -43,6 +43,8 @@ const (
 	authKeyboard        = "keyboard-interactive"
 	fixtureFileMode     = 0o644
 	fixtureReadOnlyMode = 0o444
+	logWaitTimeout      = 2 * time.Second
+	logPollInterval     = 10 * time.Millisecond
 )
 
 type Alias struct {
@@ -672,6 +674,63 @@ func (f *Fixture) logf(format string, args ...any) {
 	f.logMu.Lock()
 	defer f.logMu.Unlock()
 	_, _ = fmt.Fprintf(f.logFile, "%s %s\n", time.Now().UTC().Format(time.RFC3339Nano), fmt.Sprintf(format, args...))
+}
+
+// WaitForLogSince waits for marker in the fixture log after offset.
+func (f *Fixture) WaitForLogSince(tb testing.TB, offset int64, marker string) string {
+	tb.Helper()
+	if offset < 0 {
+		tb.Fatalf("wait for fixture log: negative offset %d", offset)
+		return ""
+	}
+
+	readSnapshot := func() string {
+		f.logMu.Lock()
+		defer f.logMu.Unlock()
+
+		data, err := os.ReadFile(f.LogPath)
+		if err != nil {
+			tb.Fatalf("read fixture log path=%q offset=%d: %v", f.LogPath, offset, err)
+			return ""
+		}
+		if offset >= int64(len(data)) {
+			return ""
+		}
+		return string(data[offset:])
+	}
+
+	snapshot := readSnapshot()
+	if strings.Contains(snapshot, marker) {
+		return snapshot
+	}
+
+	timer := time.NewTimer(logWaitTimeout)
+	defer timer.Stop()
+	ticker := time.NewTicker(logPollInterval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			snapshot = readSnapshot()
+			if strings.Contains(snapshot, marker) {
+				return snapshot
+			}
+		case <-timer.C:
+			snapshot = readSnapshot()
+			if strings.Contains(snapshot, marker) {
+				return snapshot
+			}
+			tb.Fatalf(
+				"timed out waiting for marker %q in fixture log path=%q offset=%d; latest snapshot=%q",
+				marker,
+				f.LogPath,
+				offset,
+				snapshot,
+			)
+			return snapshot
+		}
+	}
 }
 
 type filesystemHandler struct {
