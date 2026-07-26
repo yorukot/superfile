@@ -158,7 +158,7 @@ func TestBuildClientConfigAuthMethods(t *testing.T) {
 			require.NoError(t, err)
 			require.NoError(t, client.Close())
 
-			logText := fixtureLogSince(t, fixture.LogPath, beforeOffset)
+			logText := fixture.WaitForLogSince(t, beforeOffset, "auth="+tt.wantAuth)
 			assert.Contains(t, logText, "auth="+tt.wantAuth)
 			if len(tt.wantAuthSequence) > 0 {
 				assert.Equal(t, tt.wantAuthSequence, authAttemptSequence(logText))
@@ -214,7 +214,7 @@ func TestBuildClientConfigHonorsProfileAuthOrder(t *testing.T) {
 		require.NoError(t, err)
 		require.NoError(t, client.Close())
 
-		logText := fixtureLogSince(t, fixture.LogPath, beforeOffset)
+		logText := fixture.WaitForLogSince(t, beforeOffset, "auth=password")
 		assert.Contains(t, logText, "event=auth method=password")
 		assert.NotContains(t, logText, "event=auth method=keyboard-interactive")
 		assert.Contains(t, logText, "auth=password")
@@ -268,7 +268,7 @@ func TestBuildClientConfigHonorsProfileAuthOrder(t *testing.T) {
 		require.NoError(t, err)
 		require.NoError(t, client.Close())
 
-		logText := fixtureLogSince(t, fixture.LogPath, beforeOffset)
+		logText := fixture.WaitForLogSince(t, beforeOffset, "auth=keyboard-interactive")
 		assert.Contains(t, logText, "event=auth method=keyboard-interactive")
 		assert.NotContains(t, logText, "event=auth method=password")
 		assert.NotContains(t, logText, "event=auth method=publickey")
