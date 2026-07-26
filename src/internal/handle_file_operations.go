@@ -11,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/shlex"
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/internal/trash"
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
@@ -24,6 +23,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 	"github.com/atotto/clipboard"
+	"github.com/google/shlex"
 )
 
 // Processes any standard (f.e. deletion) operation with a list of files

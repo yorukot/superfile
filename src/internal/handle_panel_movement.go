@@ -8,8 +8,8 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/google/shlex"
 	tea "charm.land/bubbletea/v2"
+	"github.com/google/shlex"
 
 	"github.com/yorukot/superfile/src/pkg/utils"
 
@@ -91,7 +91,8 @@ func (m *model) executeOpenCommand() tea.Cmd {
 		// Use configured/environment editor - block TUI while editor runs (like 'e' key)
 		parts, parseErr := shlex.Split(editor)
 		if parseErr != nil {
-			slog.Error("Failed to parse editor command, falling back to system default", "editor", editor, "error", parseErr)
+			slog.Error("Failed to parse editor command, falling back to system default",
+				"editor", editor, "error", parseErr)
 			goto systemDefault
 		}
 		if len(parts) == 0 {
@@ -122,9 +123,8 @@ systemDefault:
 
 		//nolint:gosec // Uses Windows system handler to open the selected file.
 		cmd := exec.Command(dllpath, dllfile, filePath)
-		err := cmd.Start()
-		if err != nil {
-			slog.Error("Error while open file with", "error", err)
+		if startErr := cmd.Start(); startErr != nil {
+			slog.Error("Error while open file with", "error", startErr)
 		}
 		return nil
 	}
