@@ -13,5 +13,5 @@ func getFreeSpace(path string) (*DriveSize, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &DriveSize{Total: totalBytes, Available: freeBytes}, nil
+	return &DriveSize{Total: totalBytes, Free: freeBytes}, nil
 }
