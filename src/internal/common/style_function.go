@@ -155,6 +155,17 @@ func GenerateNewFileTextInput() textinput.Model {
 	return t
 }
 
+func GenerateMaskTextInput() textinput.Model {
+	t := textinput.New()
+	t.Placeholder = "e.g. *.txt or report*.pdf *.md"
+	setTextInputStyles(&t, ModalStyle, ModalStyle)
+	t.Focus()
+	t.CharLimit = 156
+	//nolint:mnd // modal width minus padding
+	t.SetWidth(ModalWidth - 10)
+	return t
+}
+
 func GenerateRenameTextInput(width int, cursorPos int, defaultValue string) textinput.Model {
 	ti := textinput.New()
 	ti.Prompt = FilePanelCursorStyle.Render(icon.Cursor + " ")

@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"errors"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -8,6 +9,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/pkg/utils"
@@ -17,6 +19,53 @@ import (
 func (m *model) cancelTypingModal() {
 	m.typingModal.textInput.Blur()
 	m.typingModal.open = false
+}
+
+// Open the modal that selects or unselects file panel items by a mask
+func (m *model) openMaskModal(selecting bool) {
+	m.maskModal.open = true
+	m.maskModal.selecting = selecting
+	m.maskModal.errorMsg = ""
+	m.maskModal.textInput = common.GenerateMaskTextInput()
+	m.firstTextInput = true
+}
+
+func (m *model) closeMaskModal() {
+	m.maskModal.textInput.Blur()
+	m.maskModal.open = false
+	m.maskModal.errorMsg = ""
+}
+
+// Apply the typed mask to the focused file panel. Selecting by mask always
+// leaves the panel in select mode, so that the matched items are visible as
+// selected and file operations act on them.
+func (m *model) confirmMaskModal() {
+	panel := m.getFocusedFilePanel()
+	mask := m.maskModal.textInput.Value()
+
+	matched, err := panel.SelectByMask(mask, m.maskModal.selecting)
+	switch {
+	// Confirming an empty mask closes the modal, same as the spf prompt does
+	case errors.Is(err, filepanel.ErrEmptyMask):
+		m.closeMaskModal()
+		return
+	case err != nil:
+		slog.Debug("Could not apply selection mask", "mask", mask, "error", err)
+		m.maskModal.errorMsg = err.Error()
+		return
+	// Keep the modal open so that a mask matching nothing can be corrected,
+	// instead of silently looking like it worked
+	case matched == 0:
+		m.maskModal.errorMsg = common.MaskNoMatchText
+		return
+	}
+
+	if m.maskModal.selecting {
+		panel.EnterSelectMode()
+	}
+	slog.Debug("Applied selection mask", "mask", mask,
+		"selecting", m.maskModal.selecting, "matched", matched)
+	m.closeMaskModal()
 }
 
 // Confirm to create file or directory

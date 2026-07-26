@@ -200,6 +200,10 @@ func (m *model) filePanelSelectModeKey(msg string) tea.Cmd {
 		m.copyPath()
 	case slices.Contains(common.Hotkeys.FilePanelSelectAllItem, msg):
 		panel.SelectAllItem()
+	case slices.Contains(common.Hotkeys.FilePanelSelectItemsByMask, msg):
+		m.openMaskModal(true)
+	case slices.Contains(common.Hotkeys.FilePanelUnselectItemsByMask, msg):
+		m.openMaskModal(false)
 	}
 	return nil
 }
@@ -226,6 +230,10 @@ func (m *model) filePanelNormalModeKey(msg string) tea.Cmd {
 		m.copyPath()
 	case slices.Contains(common.Hotkeys.CopyPWD, msg):
 		m.copyPWD()
+	// Selecting by mask switches the panel to select mode, so it is allowed
+	// from browser mode as well. Unselecting is select mode only
+	case slices.Contains(common.Hotkeys.FilePanelSelectItemsByMask, msg):
+		m.openMaskModal(true)
 	}
 	return nil
 }
@@ -239,6 +247,20 @@ func (m *model) typingModalOpenKey(msg string) tea.Cmd {
 		return m.getCreateCmd()
 	}
 	return nil
+}
+
+// Check the hotkey to cancel or apply the mask that selects file panel items
+func (m *model) maskModalOpenKey(msg string) {
+	switch {
+	case slices.Contains(common.Hotkeys.CancelTyping, msg):
+		m.closeMaskModal()
+	case slices.Contains(common.Hotkeys.ConfirmTyping, msg):
+		m.confirmMaskModal()
+	default:
+		// The keypress goes to the mask input, which makes a previous
+		// failure message stale
+		m.maskModal.errorMsg = ""
+	}
 }
 
 func (m *model) notifyModelOpenKey(msg string) tea.Cmd {

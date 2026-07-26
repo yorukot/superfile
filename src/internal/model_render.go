@@ -90,6 +90,32 @@ func (m *model) typineModalRender() string {
 		Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip)
 }
 
+func (m *model) maskModalRender() string {
+	title := common.MaskSelectTitle
+	confirmLabel := " (" + common.Hotkeys.ConfirmTyping[0] + ") Select "
+	if !m.maskModal.selecting {
+		title = common.MaskUnselectTitle
+		confirmLabel = " (" + common.Hotkeys.ConfirmTyping[0] + ") Unselect "
+	}
+
+	// Modals are a fixed five lines high. The line below the title stays empty
+	// unless the mask could not be applied, so that showing an error never
+	// resizes the modal
+	errorLine := ""
+	if m.maskModal.errorMsg != "" {
+		errorLine = common.ModalErrorStyle.Render(
+			common.TruncateText(m.maskModal.errorMsg, common.ModalWidth-common.InnerPadding, "..."))
+	}
+
+	tip := common.ModalConfirm.Render(confirmLabel) +
+		common.ModalInputSpacingText +
+		common.ModalCancel.Render(" ("+common.Hotkeys.CancelTyping[0]+") Cancel ")
+
+	return common.ModalBorderStyle(common.ModalHeight, common.ModalWidth).
+		Render(common.ModalTitleStyle.Render(title) + "\n" + errorLine + "\n" +
+			m.maskModal.textInput.View() + "\n\n" + tip)
+}
+
 func (m *model) introduceModalRender() string {
 	title := common.SidebarTitleStyle.Render(" Thanks for using superfile!!") +
 		common.ModalStyle.Render("\n You can read the following information before starting to use it!")
