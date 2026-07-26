@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/pkg/sftp"
 	"github.com/stretchr/testify/assert"
@@ -27,4 +28,20 @@ func TestDisconnectingWriterAtDisconnectsAtExactThreshold(t *testing.T) {
 	assert.Equal(t, sftp.ErrSSHFxConnectionLost, status.FxCode())
 	assert.Zero(t, writer.remaining)
 	assert.True(t, writer.fired)
+}
+
+func TestWaitForLogSinceIncludesDelayedMarker(t *testing.T) {
+	fixture := Start(t)
+	logInfo, err := os.Stat(fixture.LogPath)
+	require.NoError(t, err)
+	offset := logInfo.Size()
+	marker := "fixture-wait-marker-" + t.Name()
+
+	go func() {
+		time.Sleep(10 * time.Millisecond)
+		fixture.logf("marker=%s", marker)
+	}()
+
+	logText := fixture.WaitForLogSince(t, offset, marker)
+	assert.Contains(t, logText, marker)
 }
