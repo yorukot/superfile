@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/google/shlex"
 	tea "charm.land/bubbletea/v2"
 
 	"github.com/yorukot/superfile/src/pkg/utils"
@@ -72,15 +73,31 @@ func (m *model) executeOpenCommand() tea.Cmd {
 
 	filePath := panel.GetFocusedItem().Location
 
-	// Use configured editor if set, otherwise use system defaults
+	// Check if file is a text file before using editor
+	isText, err := common.IsTextFile(filePath)
+	if err != nil {
+		// On error, fall back to system default
+		slog.Debug("Could not determine file type, using system default", "file", filePath, "error", err)
+		isText = false
+	}
+
+	// Use configured editor only for text files
 	editor := common.Config.Editor
 	if editor == "" {
 		editor = os.Getenv("EDITOR")
 	}
 
-	if editor != "" {
+	if editor != "" && isText {
 		// Use configured/environment editor - block TUI while editor runs (like 'e' key)
-		parts := strings.Fields(editor)
+		parts, parseErr := shlex.Split(editor)
+		if parseErr != nil {
+			slog.Error("Failed to parse editor command, falling back to system default", "editor", editor, "error", parseErr)
+			goto systemDefault
+		}
+		if len(parts) == 0 {
+			slog.Error("Editor command produced no executable, falling back to system default", "editor", editor)
+			goto systemDefault
+		}
 		cmd := parts[0]
 		//nolint:gocritic // appendAssign: intentionally creating a new slice
 		args := append(parts[1:], filePath)
@@ -91,7 +108,10 @@ func (m *model) executeOpenCommand() tea.Cmd {
 		})
 	}
 
-	// Fall back to system default opener (non-blocking for xdg-open/open)
+systemDefault:
+
+	// Fall back to system default opener (non-blocking for xdg-open/open) for
+	// non-text files (images, PDFs, binaries, etc.) or when no editor is configured
 	openCommand := "xdg-open"
 	switch runtime.GOOS {
 	case utils.OsDarwin:
@@ -118,7 +138,7 @@ func (m *model) executeOpenCommand() tea.Cmd {
 
 	cmd := exec.Command(openCommand, filePath)
 	utils.DetachFromTerminal(cmd)
-	err := cmd.Start()
+	err = cmd.Start()
 	if err != nil {
 		// TODO: This kind of errors should go to user facing pop ups
 		slog.Error("Error while open file with", "error", err)
