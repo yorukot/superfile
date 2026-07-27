@@ -1,7 +1,6 @@
 package ssh
 
 import (
-	"errors"
 	"net"
 	"os"
 	"path/filepath"
@@ -97,9 +96,10 @@ func TestBuildClientConfigAuthMethods(t *testing.T) {
 		{
 			name: "keyboard interactive auth last",
 			request: ClientConfigRequest{
-				Profile:        keyboardProfile,
-				KnownHostsPath: fixture.KnownHostsPath,
-				Password:       fixture.Password,
+				Profile:                    keyboardProfile,
+				KnownHostsPath:             fixture.KnownHostsPath,
+				Password:                   fixture.Password,
+				AdditionalRedactionSecrets: []string{fixture.KeyboardAnswer},
 				KeyboardInteractive: func(_ string, _ string, questions []string, _ []bool) ([]string, error) {
 					return []string{fixture.KeyboardAnswer}, nil
 				},
@@ -200,9 +200,10 @@ func TestBuildClientConfigHonorsProfileAuthOrder(t *testing.T) {
 		beforeOffset := fixtureLogSize(t, fixture.LogPath)
 
 		bundle, err := BuildClientConfig(ClientConfigRequest{
-			Profile:        profile,
-			KnownHostsPath: fixture.KnownHostsPath,
-			Password:       fixture.Password,
+			Profile:                    profile,
+			KnownHostsPath:             fixture.KnownHostsPath,
+			Password:                   fixture.Password,
+			AdditionalRedactionSecrets: []string{fixture.KeyboardAnswer},
 			KeyboardInteractive: func(_ string, _ string, _ []string, _ []bool) ([]string, error) {
 				return []string{fixture.KeyboardAnswer}, nil
 			},
@@ -227,9 +228,10 @@ func TestBuildClientConfigHonorsProfileAuthOrder(t *testing.T) {
 		beforeOffset := fixtureLogSize(t, fixture.LogPath)
 
 		bundle, err := BuildClientConfig(ClientConfigRequest{
-			Profile:        profile,
-			KnownHostsPath: fixture.KnownHostsPath,
-			Password:       fixture.Password,
+			Profile:                    profile,
+			KnownHostsPath:             fixture.KnownHostsPath,
+			Password:                   fixture.Password,
+			AdditionalRedactionSecrets: []string{fixture.KeyboardAnswer},
 			KeyboardInteractive: func(_ string, _ string, _ []string, _ []bool) ([]string, error) {
 				return []string{fixture.KeyboardAnswer}, nil
 			},
@@ -254,9 +256,10 @@ func TestBuildClientConfigHonorsProfileAuthOrder(t *testing.T) {
 		beforeOffset := fixtureLogSize(t, fixture.LogPath)
 
 		bundle, err := BuildClientConfig(ClientConfigRequest{
-			Profile:        profile,
-			KnownHostsPath: fixture.KnownHostsPath,
-			Password:       fixture.Password,
+			Profile:                    profile,
+			KnownHostsPath:             fixture.KnownHostsPath,
+			Password:                   fixture.Password,
+			AdditionalRedactionSecrets: []string{fixture.KeyboardAnswer},
 			KeyboardInteractive: func(_ string, _ string, _ []string, _ []bool) ([]string, error) {
 				return []string{fixture.KeyboardAnswer}, nil
 			},
@@ -390,14 +393,6 @@ func TestAcceptUnknownHostKeyUsesDefaultKnownHostsWhenNotInjected(t *testing.T) 
 	assert.Contains(t, string(knownHostsBytes), sshtest.AliasKey)
 }
 
-func TestRedactionHelpersRemoveSecretsAndPrivateKeys(t *testing.T) {
-	message := "secret-password secret-passphrase -----BEGIN OPENSSH PRIVATE KEY-----"
-	redactedMessage := RedactString(message)
-	assert.NotContains(t, redactedMessage, "secret-password")
-	assert.NotContains(t, redactedMessage, "secret-passphrase")
-	assert.NotContains(t, redactedMessage, "-----BEGIN OPENSSH PRIVATE KEY-----")
-}
-
 func profileForAlias(fixture *sshtest.Fixture, aliasName string) common.SSHQuickConnectProfile {
 	alias := fixture.Aliases[aliasName]
 	profile := common.SSHQuickConnectProfile{
@@ -451,11 +446,13 @@ func startAgent(t *testing.T, identityPath string, passphrase string) string {
 
 	keyring := agent.NewKeyring()
 	require.NoError(t, keyring.Add(agent.AddedKey{PrivateKey: privateKey}))
+	return startPersistentAgent(t, keyring, "sf-agent-")
+}
+
+func startPersistentAgent(t *testing.T, keyring agent.Agent, tempPrefix string) string {
+	t.Helper()
 	//nolint:usetesting // Short /tmp path avoids Unix socket length limits.
-	socketDir, err := os.MkdirTemp(
-		"/tmp",
-		"sf-agent-",
-	)
+	socketDir, err := os.MkdirTemp("/tmp", tempPrefix)
 	require.NoError(t, err)
 	t.Cleanup(func() { _ = os.RemoveAll(socketDir) })
 	socketPath := filepath.Join(socketDir, "a.sock")
@@ -479,29 +476,7 @@ func startAgent(t *testing.T, identityPath string, passphrase string) string {
 func startEmptyAgent(t *testing.T) string {
 	t.Helper()
 	keyring := agent.NewKeyring()
-	//nolint:usetesting // Short /tmp path avoids Unix socket length limits.
-	socketDir, err := os.MkdirTemp(
-		"/tmp",
-		"sf-agent-empty-",
-	)
-	require.NoError(t, err)
-	t.Cleanup(func() { _ = os.RemoveAll(socketDir) })
-	socketPath := filepath.Join(socketDir, "a.sock")
-	listener, err := net.Listen("unix", socketPath)
-	require.NoError(t, err)
-	t.Cleanup(func() { _ = listener.Close() })
-
-	go func() {
-		for {
-			conn, acceptErr := listener.Accept()
-			if acceptErr != nil {
-				return
-			}
-			go func() { _ = agent.ServeAgent(keyring, conn) }()
-		}
-	}()
-
-	return socketPath
+	return startPersistentAgent(t, keyring, "sf-agent-empty-")
 }
 
 func startTrackedEmptyAgent(t *testing.T) (string, <-chan struct{}) {
@@ -539,11 +514,7 @@ func fixtureLogSize(t *testing.T, path string) int64 {
 
 func fixtureLogSince(t *testing.T, path string, offset int64) string {
 	t.Helper()
-	file, err := os.Open(path)
-	require.NoError(t, err)
-	defer file.Close()
-	_, err = file.Seek(offset, 0)
-	require.NoError(t, err)
+	require.GreaterOrEqual(t, offset, int64(0))
 	bytes, err := os.ReadFile(path)
 	require.NoError(t, err)
 	if offset >= int64(len(bytes)) {
@@ -563,6 +534,7 @@ func assertNoSecretLeak(t *testing.T, text string) {
 	t.Helper()
 	assert.NotContains(t, text, sshtest.TestPassword)
 	assert.NotContains(t, text, sshtest.TestKeyPassphrase)
+	assert.NotContains(t, text, sshtest.TestKeyboardAnswer)
 	assert.NotContains(t, text, "PRIVATE KEY")
 }
 
@@ -664,10 +636,66 @@ func TestBuildClientConfigRejectsMissingRequiredProfileFields(t *testing.T) {
 	assert.Contains(t, err.Error(), "user is required")
 }
 
-func TestWrongPasswordErrorIsRedacted(t *testing.T) {
-	err := RedactError(errors.New("auth failed for secret-password"))
+func TestBuildClientConfigRedactsRuntimeSecretsFromBuildError(t *testing.T) {
+	password := "arbitrarybuildpassword"
+	passphrase := "arbitrarybuildpassphrase"
+	keyboardAnswer := "arbitrarybuildkeyboardanswer"
+	identityPath := filepath.Join(t.TempDir(), strings.Join([]string{
+		password,
+		passphrase,
+		keyboardAnswer,
+	}, "--"))
+	require.NoError(t, os.WriteFile(identityPath, []byte("not a private key"), 0o600))
+
+	_, err := BuildClientConfig(ClientConfigRequest{
+		Profile: common.SSHQuickConnectProfile{
+			Host:           "example.com",
+			User:           "user",
+			IdentitiesOnly: true,
+			AuthOrder:      []string{common.SSHAuthMethodPublicKey},
+		},
+		KnownHostsPath:             filepath.Join(t.TempDir(), "known_hosts"),
+		ManualIdentityFile:         identityPath,
+		ManualIdentityPassphrase:   passphrase,
+		Password:                   password,
+		AdditionalRedactionSecrets: []string{keyboardAnswer},
+	})
+
 	require.Error(t, err)
-	assert.NotContains(t, err.Error(), sshtest.TestPassword)
+	assert.Contains(t, err.Error(), "parse encrypted ssh identity file")
+	assert.NotContains(t, err.Error(), password)
+	assert.NotContains(t, err.Error(), passphrase)
+	assert.NotContains(t, err.Error(), keyboardAnswer)
+}
+
+func TestClientConfigBundleRedactsDialErrorsWithClonedRuntimeSecrets(t *testing.T) {
+	password := "arbitrarydialpassword"
+	passphrase := "arbitrarydialpassphrase"
+	keyboardAnswer := "arbitrarydialkeyboardanswer"
+	additionalSecrets := []string{keyboardAnswer}
+	bundle, err := BuildClientConfig(ClientConfigRequest{
+		Profile: common.SSHQuickConnectProfile{
+			Host:      "127.0.0.1",
+			User:      "user",
+			AuthOrder: []string{common.SSHAuthMethodPassword},
+		},
+		KnownHostsPath:             filepath.Join(t.TempDir(), "known_hosts"),
+		ManualIdentityPassphrase:   passphrase,
+		Password:                   password,
+		AdditionalRedactionSecrets: additionalSecrets,
+	})
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = bundle.Close() })
+
+	additionalSecrets[0] = "mutated-after-build"
+	assert.Equal(t, []string{keyboardAnswer}, bundle.redactionSecrets.AdditionalSecrets)
+	bundle.Address = strings.Join([]string{password, passphrase, keyboardAnswer}, "--")
+
+	_, err = bundle.Dial()
+	require.Error(t, err)
+	assert.NotContains(t, err.Error(), password)
+	assert.NotContains(t, err.Error(), passphrase)
+	assert.NotContains(t, err.Error(), keyboardAnswer)
 }
 
 func TestBuildClientConfigTimeoutDefault(t *testing.T) {
