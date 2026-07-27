@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -97,6 +98,7 @@ func TestSSHQuickConnectCase(t *testing.T) {
 	applyTeaCmd(t, m, m.getPasteItemCmd())
 	assert.FileExists(t, remoteFixturePath(fixture, "/alpha.txt"))
 	assert.Equal(t, string(localAlphaContent), string(mustReadFile(t, remoteFixturePath(fixture, "/alpha.txt"))))
+	m.fileModel.UpdateFilePanelsIfNeeded(true)
 	assert.Contains(t, stripANSI(m.getFocusedFilePanel().Render(true)), "beta-renamed.txt")
 }
 
@@ -150,8 +152,13 @@ func TestSSHManualConnectCase(t *testing.T) {
 	action = connectModel.ConfirmHostKey(context.Background())
 	require.Equal(t, quickconnect.ActionConnected, action.Type)
 	require.NotNil(t, action.Session)
+	establishedSession := action.Session
+	establishedLocation := action.Location
+	cleanupSession := establishedSession
 	t.Cleanup(func() {
-		require.NoError(t, action.Session.Close())
+		if cleanupSession != nil {
+			require.NoError(t, cleanupSession.Close())
+		}
 	})
 	assert.NotEmpty(t, action.Location.SessionID)
 	knownHostsBytes, err := os.ReadFile(knownHostsPath)
@@ -166,12 +173,26 @@ func TestSSHManualConnectCase(t *testing.T) {
 			if location.Provider == filesystem.ProviderLocal {
 				return filesystem.NewLocalProvider().Open(ctx, location)
 			}
-			provider := filesystem.NewSFTPProvider(internalssh.ClientConfigRequest{
-				Profile:        profile,
-				KnownHostsPath: knownHostsPath,
-				HostKeyAlias:   profile.HostKeyAlias,
-			})
-			return provider.Open(ctx, location)
+			if location.Provider != establishedLocation.Provider ||
+				location.SessionID != establishedLocation.SessionID {
+				return nil, fmt.Errorf(
+					"unexpected transfer session: got provider %q session %q, want provider %q session %q",
+					location.Provider,
+					location.SessionID,
+					establishedLocation.Provider,
+					establishedLocation.SessionID,
+				)
+			}
+			if establishedSession.Provider() != location.Provider || establishedSession.ID() != location.SessionID {
+				return nil, fmt.Errorf(
+					"established session identity mismatch: got provider %q session %q, want provider %q session %q",
+					establishedSession.Provider(),
+					establishedSession.ID(),
+					location.Provider,
+					location.SessionID,
+				)
+			}
+			return establishedSession, nil
 		},
 	)
 	engine := filesystem.NewTransferEngine(resolver)
@@ -189,6 +210,9 @@ func TestSSHManualConnectCase(t *testing.T) {
 		},
 		Overwrite: false,
 	})
+	if err == nil {
+		cleanupSession = nil
+	}
 	require.NoError(t, err)
 	err = transfer.Wait(transferCtx)
 	require.Error(t, err)
@@ -206,7 +230,9 @@ func TestSSHFailureModesCase(t *testing.T) {
 	connectModel := quickconnect.New()
 	connectModel.SetKnownHostsPath(fixture.ChangedHostKnownHostsPath)
 	connectModel.SetTimeout(3 * time.Second)
-	connectModel.OpenWithProfiles([]common.SSHQuickConnectProfile{sshCaseProfileForAlias(fixture, sshtest.AliasBadKey)})
+	connectModel.OpenWithProfiles([]common.SSHQuickConnectProfile{
+		sshCaseProfileForAlias(t, fixture, sshtest.AliasBadKey),
+	})
 
 	action := connectModel.ConnectSelected(context.Background())
 	assert.Equal(t, quickconnect.ActionError, action.Type)
@@ -219,7 +245,7 @@ func TestSSHFailureModesCase(t *testing.T) {
 	assert.Equal(t, string(beforeBytes), string(afterBytes))
 
 	provider := filesystem.NewSFTPProvider(internalssh.ClientConfigRequest{
-		Profile:        sshCaseProfileForAlias(fixture, sshtest.AliasE2E),
+		Profile:        sshCaseProfileForAlias(t, fixture, sshtest.AliasE2E),
 		KnownHostsPath: fixture.KnownHostsPath,
 		HostKeyAlias:   sshtest.AliasE2E,
 	})
@@ -275,8 +301,17 @@ func quickConnectProfileByName(
 	return common.SSHQuickConnectProfile{}
 }
 
-func sshCaseProfileForAlias(fixture *sshtest.Fixture, aliasName string) common.SSHQuickConnectProfile {
-	alias := fixture.Aliases[aliasName]
+func sshCaseProfileForAlias(
+	t *testing.T,
+	fixture *sshtest.Fixture,
+	aliasName string,
+) common.SSHQuickConnectProfile {
+	t.Helper()
+	alias, ok := fixture.Aliases[aliasName]
+	if !ok {
+		t.Fatalf("SSH alias %q not found", aliasName)
+		return common.SSHQuickConnectProfile{}
+	}
 	profile := common.SSHQuickConnectProfile{
 		Name:           alias.Name,
 		Host:           alias.Host,
