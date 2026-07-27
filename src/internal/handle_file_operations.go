@@ -134,9 +134,9 @@ func (m *model) getDeleteCmd(permDelete bool) tea.Cmd {
 			for i, item := range items {
 				paths[i] = item.Path.String()
 			}
-			return m.deleteOperation(&m.processBarModel, paths, useTrash, reqID)
+			return m.deleteOperation(m.processBarModel, paths, useTrash, reqID)
 		}
-		return m.deleteProviderOperation(&m.processBarModel, items, reqID)
+		return m.deleteProviderOperation(m.processBarModel, items, reqID)
 	}
 }
 
@@ -327,9 +327,9 @@ func (m *model) getPasteItemCmd() tea.Cmd {
 			allLocal = allLocal && item.Provider == filesystem.ProviderLocal
 		}
 		if allLocal {
-			return m.executePasteOperation(&m.processBarModel, panelLocation.Path.String(), paths, cut, reqID)
+			return m.executePasteOperation(m.processBarModel, panelLocation.Path.String(), paths, cut, reqID)
 		}
-		return m.executeProviderPasteOperation(&m.processBarModel, panelLocation, copyItems, cut, reqID)
+		return m.executeProviderPasteOperation(m.processBarModel, panelLocation, copyItems, cut, reqID)
 	}
 }
 
@@ -600,7 +600,7 @@ func (m *model) getExtractFileCmd() tea.Cmd {
 			slog.Error("Error while making directory for extracting files", "error", err)
 			return NewExtractOperationMsg(processbar.Failed, reqID)
 		}
-		err = extractCompressFile(item, outputDir, &m.processBarModel)
+		err = extractCompressFile(item, outputDir, m.processBarModel)
 		if err != nil {
 			slog.Error("Error extract file", "error", err)
 			return NewExtractOperationMsg(processbar.Failed, reqID)
