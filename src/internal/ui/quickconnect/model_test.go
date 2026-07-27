@@ -81,6 +81,30 @@ func TestCancelingConnectionFlowsClearsRuntimeState(t *testing.T) {
 	}
 }
 
+func TestClientConfigRequestIncludesClonedRuntimeRedactionSecrets(t *testing.T) {
+	answers := []string{"arbitrary-answer-one", "arbitrary-answer-two"}
+	model := New()
+	model.secrets = RuntimeSecrets{
+		Password:                   "arbitrary-password",
+		IdentityPassphrase:         "arbitrary-passphrase",
+		KeyboardInteractiveAnswers: answers,
+	}
+
+	request := model.clientConfigRequest(common.SSHQuickConnectProfile{Host: "example.com", User: "user"})
+
+	assert.Equal(t, model.secrets.Password, request.Password)
+	assert.Equal(t, model.secrets.IdentityPassphrase, request.ManualIdentityPassphrase)
+	assert.Equal(t, answers, request.AdditionalRedactionSecrets)
+	require.NotNil(t, request.KeyboardInteractive)
+	answers[0] = "mutated-after-request"
+	assert.Equal(t, "arbitrary-answer-one", request.AdditionalRedactionSecrets[0])
+	responses, err := request.KeyboardInteractive("", "", []string{"first", "second"}, []bool{false, false})
+	require.NoError(t, err)
+	assert.Equal(t, []string{"arbitrary-answer-one", "arbitrary-answer-two"}, responses)
+	request.AdditionalRedactionSecrets[1] = "mutated-request"
+	assert.Equal(t, "arbitrary-answer-two", model.secrets.KeyboardInteractiveAnswers[1])
+}
+
 func TestOpenListsDiscoveredAliasAndSavedManualProfile(t *testing.T) {
 	populateQuickConnectTestConfig(t)
 	fixture := sshtest.Start(t)
