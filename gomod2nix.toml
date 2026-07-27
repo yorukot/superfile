@@ -2,16 +2,16 @@ schema = 3
 
 [mod]
   [mod.'charm.land/bubbles/v2']
-    version = 'v2.1.0'
-    hash = 'sha256-2OmqpBrl+taOJzAhVM6OReLmoYRxZOXx9JqFNjQjsPA='
+    version = 'v2.1.1'
+    hash = 'sha256-y0GRfSVvlxNzOX40GjcYxZdo92RjmHwU43T3ix9+IcU='
 
   [mod.'charm.land/bubbletea/v2']
     version = 'v2.0.7'
     hash = 'sha256-YOkvKUahFMMytHXr3AAABDifBtHt29930obiu/kx1vA='
 
   [mod.'charm.land/lipgloss/v2']
-    version = 'v2.0.3'
-    hash = 'sha256-/RFkSUscU3NwymzT+PfizGf3XyQIdVGQlX7vxktCUGk='
+    version = 'v2.0.4'
+    hash = 'sha256-KrO8Q1/yQZBTMwysp/cAi5Kdz2/ZODBOr3C5X04zG/M='
 
   [mod.'github.com/Unpackerr/iso9660']
     version = 'v0.0.3'
@@ -174,8 +174,8 @@ schema = 3
     hash = 'sha256-qhw9hWtU5wnyFyuMbKx+7RB8ckQaFQ8D+8GKPkN3HHQ='
 
   [mod.'github.com/mattn/go-runewidth']
-    version = 'v0.0.23'
-    hash = 'sha256-SmChZ2U1aR8pW3LPhdM7KcVF5TO6VcHgRzBtUXbBWJA='
+    version = 'v0.0.24'
+    hash = 'sha256-t2uvZkmlTXQCj76p4poI9y82iziJX2lF44UhkLgLN40='
 
   [mod.'github.com/mewkiz/flac']
     version = 'v1.0.13'
