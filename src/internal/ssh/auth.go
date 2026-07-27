@@ -32,28 +32,31 @@ type ClientConfigRequest struct {
 	HostKeyAlias   string
 	AgentSocket    string
 
-	ManualIdentityFile       string
-	ManualIdentityPassphrase string
-	Password                 string
-	KeyboardInteractive      ssh.KeyboardInteractiveChallenge
-	Timeout                  time.Duration
+	ManualIdentityFile         string
+	ManualIdentityPassphrase   string
+	Password                   string
+	KeyboardInteractive        ssh.KeyboardInteractiveChallenge
+	AdditionalRedactionSecrets []string
+	Timeout                    time.Duration
 }
 
 type ClientConfigBundle struct {
-	Config         *ssh.ClientConfig
-	Address        string
-	HostKeyAddress string
-	KnownHostsPath string
-	closeAgentConn func() error
+	Config           *ssh.ClientConfig
+	Address          string
+	HostKeyAddress   string
+	KnownHostsPath   string
+	closeAgentConn   func() error
+	redactionSecrets RedactionSecrets
 }
 
 func BuildClientConfig(req ClientConfigRequest) (*ClientConfigBundle, error) {
+	redactionSecrets := req.redactionSecrets()
 	profile := req.Profile
 	if profile.Host == "" {
-		return nil, errors.New("ssh profile host is required")
+		return nil, RedactError(errors.New("ssh profile host is required"), redactionSecrets)
 	}
 	if profile.User == "" {
-		return nil, errors.New("ssh profile user is required")
+		return nil, RedactError(errors.New("ssh profile user is required"), redactionSecrets)
 	}
 
 	port := profile.Port
@@ -63,22 +66,22 @@ func BuildClientConfig(req ClientConfigRequest) (*ClientConfigBundle, error) {
 
 	knownHostsPath, err := resolveKnownHostsPath(req.KnownHostsPath)
 	if err != nil {
-		return nil, err
+		return nil, RedactError(err, redactionSecrets)
 	}
 	hostKeyCallback, err := StrictHostKeyCallback(knownHostsPath)
 	if err != nil {
-		return nil, err
+		return nil, RedactError(err, redactionSecrets)
 	}
 
 	authMethods, closeAgentConn, err := buildAuthMethods(req)
 	if err != nil {
-		return nil, closeAuthResources(err, closeAgentConn)
+		return nil, RedactError(closeAuthResources(err, closeAgentConn), redactionSecrets)
 	}
 	if len(authMethods) == 0 {
-		return nil, closeAuthResources(
+		return nil, RedactError(closeAuthResources(
 			errors.New("ssh auth configuration has no usable authentication method"),
 			closeAgentConn,
-		)
+		), redactionSecrets)
 	}
 
 	timeout := req.Timeout
@@ -100,11 +103,20 @@ func BuildClientConfig(req ClientConfigRequest) (*ClientConfigBundle, error) {
 			HostKeyCallback: hostKeyCallback,
 			Timeout:         timeout,
 		},
-		Address:        address,
-		HostKeyAddress: hostKeyAddress,
-		KnownHostsPath: knownHostsPath,
-		closeAgentConn: closeAgentConn,
+		Address:          address,
+		HostKeyAddress:   hostKeyAddress,
+		KnownHostsPath:   knownHostsPath,
+		closeAgentConn:   closeAgentConn,
+		redactionSecrets: redactionSecrets,
 	}, nil
+}
+
+func (r ClientConfigRequest) redactionSecrets() RedactionSecrets {
+	return RedactionSecrets{
+		Password:           r.Password,
+		IdentityPassphrase: r.ManualIdentityPassphrase,
+		AdditionalSecrets:  slices.Clone(r.AdditionalRedactionSecrets),
+	}
 }
 
 func closeAuthResources(err error, closeFn func() error) error {
@@ -132,7 +144,7 @@ func (b *ClientConfigBundle) DialContext(ctx context.Context) (*ssh.Client, erro
 	dialer := net.Dialer{Timeout: b.Config.Timeout}
 	netConn, err := dialer.DialContext(ctx, "tcp", b.Address)
 	if err != nil {
-		return nil, RedactError(err)
+		return nil, RedactError(err, b.redactionSecrets)
 	}
 	deadline := time.Now().Add(b.Config.Timeout)
 	if contextDeadline, ok := ctx.Deadline(); ok && contextDeadline.Before(deadline) {
@@ -140,7 +152,7 @@ func (b *ClientConfigBundle) DialContext(ctx context.Context) (*ssh.Client, erro
 	}
 	if deadlineErr := netConn.SetDeadline(deadline); deadlineErr != nil {
 		_ = netConn.Close()
-		return nil, RedactError(deadlineErr)
+		return nil, RedactError(deadlineErr, b.redactionSecrets)
 	}
 	stopCancellation := context.AfterFunc(ctx, func() {
 		_ = netConn.Close()
@@ -152,11 +164,11 @@ func (b *ClientConfigBundle) DialContext(ctx context.Context) (*ssh.Client, erro
 		if ctxErr := ctx.Err(); ctxErr != nil {
 			return nil, ctxErr
 		}
-		return nil, RedactError(err)
+		return nil, RedactError(err, b.redactionSecrets)
 	}
 	if err := netConn.SetDeadline(time.Time{}); err != nil {
 		_ = conn.Close()
-		return nil, RedactError(err)
+		return nil, RedactError(err, b.redactionSecrets)
 	}
 	return ssh.NewClient(conn, chans, reqs), nil
 }
@@ -312,17 +324,29 @@ func publicKeySigner(identityFile string, passphrase string) (ssh.Signer, error)
 	}
 	keyBytes, err := os.ReadFile(normalizedIdentityFile)
 	if err != nil {
-		return nil, fmt.Errorf("read ssh identity file %q: %w", normalizedIdentityFile, RedactError(err))
+		return nil, fmt.Errorf(
+			"read ssh identity file %q: %w",
+			normalizedIdentityFile,
+			RedactError(err, RedactionSecrets{IdentityPassphrase: passphrase}),
+		)
 	}
 
 	signer, err := ssh.ParsePrivateKey(keyBytes)
 	if err != nil {
 		if passphrase == "" {
-			return nil, fmt.Errorf("parse ssh identity file %q: %w", normalizedIdentityFile, RedactError(err))
+			return nil, fmt.Errorf(
+				"parse ssh identity file %q: %w",
+				normalizedIdentityFile,
+				RedactError(err, RedactionSecrets{}),
+			)
 		}
 		signer, err = ssh.ParsePrivateKeyWithPassphrase(keyBytes, []byte(passphrase))
 		if err != nil {
-			return nil, fmt.Errorf("parse encrypted ssh identity file %q: %w", normalizedIdentityFile, RedactError(err))
+			return nil, fmt.Errorf(
+				"parse encrypted ssh identity file %q: %w",
+				normalizedIdentityFile,
+				RedactError(err, RedactionSecrets{IdentityPassphrase: passphrase}),
+			)
 		}
 	}
 
@@ -370,14 +394,22 @@ func normalizeIdentityFilePath(identityFile string) (string, error) {
 	if trimmed == "~" {
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
-			return "", fmt.Errorf("resolve ssh identity file %q: %w", identityFile, RedactError(err))
+			return "", fmt.Errorf(
+				"resolve ssh identity file %q: %w",
+				identityFile,
+				RedactError(err, RedactionSecrets{}),
+			)
 		}
 		return homeDir, nil
 	}
 	if strings.HasPrefix(trimmed, "~/") || strings.HasPrefix(trimmed, "~\\") {
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
-			return "", fmt.Errorf("resolve ssh identity file %q: %w", identityFile, RedactError(err))
+			return "", fmt.Errorf(
+				"resolve ssh identity file %q: %w",
+				identityFile,
+				RedactError(err, RedactionSecrets{}),
+			)
 		}
 		relativePath := strings.TrimPrefix(strings.TrimPrefix(trimmed, "~/"), "~\\")
 		return filepath.Clean(

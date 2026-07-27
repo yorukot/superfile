@@ -527,7 +527,11 @@ func (m *Model) clientConfigRequest(profile common.SSHQuickConnectProfile) inter
 		ManualIdentityPassphrase: m.secrets.IdentityPassphrase,
 		Password:                 m.secrets.Password,
 		KeyboardInteractive:      m.keyboardInteractiveChallenge(),
-		Timeout:                  m.timeout,
+		AdditionalRedactionSecrets: append(
+			[]string(nil),
+			m.secrets.KeyboardInteractiveAnswers...,
+		),
+		Timeout: m.timeout,
 	}
 }
 

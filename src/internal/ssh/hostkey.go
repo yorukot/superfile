@@ -42,7 +42,7 @@ func StrictHostKeyCallback(knownHostsPath string) (ssh.HostKeyCallback, error) {
 	}
 	callback, err := knownhosts.New(resolvedPath)
 	if err != nil {
-		return nil, fmt.Errorf("load ssh known_hosts %q: %w", resolvedPath, RedactError(err))
+		return nil, fmt.Errorf("load ssh known_hosts %q: %w", resolvedPath, RedactError(err, RedactionSecrets{}))
 	}
 
 	return func(hostname string, remote net.Addr, key ssh.PublicKey) error {
@@ -71,7 +71,7 @@ func StrictHostKeyCallback(knownHostsPath string) (ssh.HostKeyCallback, error) {
 			}
 		}
 
-		return RedactError(err)
+		return RedactError(err, RedactionSecrets{})
 	}, nil
 }
 
@@ -92,7 +92,7 @@ func AcceptUnknownHostKey(err error) error {
 	}
 	file, openErr := os.OpenFile(unknownHost.KnownHostsPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
 	if openErr != nil {
-		return fmt.Errorf("open known_hosts for append: %w", RedactError(openErr))
+		return fmt.Errorf("open known_hosts for append: %w", RedactError(openErr, RedactionSecrets{}))
 	}
 	defer file.Close()
 
@@ -105,7 +105,7 @@ func AcceptUnknownHostKey(err error) error {
 	}
 	line := knownhosts.Line([]string{knownhosts.Normalize(hostPattern)}, unknownHost.Key) + "\n"
 	if _, err := file.WriteString(line); err != nil {
-		return fmt.Errorf("append known_hosts entry: %w", RedactError(err))
+		return fmt.Errorf("append known_hosts entry: %w", RedactError(err, RedactionSecrets{}))
 	}
 	return file.Close()
 }
@@ -113,14 +113,14 @@ func AcceptUnknownHostKey(err error) error {
 func ensureKnownHostsFile(path string) error {
 	directory := filepath.Dir(path)
 	if err := os.MkdirAll(directory, 0o700); err != nil {
-		return fmt.Errorf("create known_hosts directory: %w", RedactError(err))
+		return fmt.Errorf("create known_hosts directory: %w", RedactError(err, RedactionSecrets{}))
 	}
 	file, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY, 0o600)
 	if err != nil {
-		return fmt.Errorf("create known_hosts file: %w", RedactError(err))
+		return fmt.Errorf("create known_hosts file: %w", RedactError(err, RedactionSecrets{}))
 	}
 	if err := file.Close(); err != nil {
-		return fmt.Errorf("close known_hosts file: %w", RedactError(err))
+		return fmt.Errorf("close known_hosts file: %w", RedactError(err, RedactionSecrets{}))
 	}
 	return nil
 }
@@ -131,7 +131,7 @@ func resolveKnownHostsPath(path string) (string, error) {
 	}
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		return "", fmt.Errorf("resolve home directory for known_hosts: %w", RedactError(err))
+		return "", fmt.Errorf("resolve home directory for known_hosts: %w", RedactError(err, RedactionSecrets{}))
 	}
 	return filepath.Join(homeDir, ".ssh", "known_hosts"), nil
 }
