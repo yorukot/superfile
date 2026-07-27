@@ -105,6 +105,9 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		watcherCmd = m.watchFileSystem()
 	case watcherErrMsg:
 		slog.Error("File system watcher error", "error", msg.err)
+		if errors.Is(msg.err, fsnotify.ErrEventOverflow) {
+			updateCmd = m.reloadAllWatchedPanels()
+		}
 		watcherCmd = m.watchFileSystem()
 
 	default:
@@ -738,6 +741,16 @@ type genericUpdateMsg struct {
 // ApplyToModel executes the underlying update logic on the provided model.
 func (msg genericUpdateMsg) ApplyToModel(m *model) tea.Cmd {
 	return msg.apply(m)
+}
+
+func (m *model) reloadAllWatchedPanels() tea.Cmd {
+	var cmds []tea.Cmd
+	for i, panel := range m.fileModel.FilePanels {
+		if panel.Location != "" {
+			cmds = append(cmds, m.reloadPanelCmd(i, panel.Location))
+		}
+	}
+	return tea.Batch(cmds...)
 }
 
 // reloadPanelCmd generates a command to forcefully reload a specific file panel.
