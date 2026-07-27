@@ -27,6 +27,7 @@ func getExternalMediaFolders() []directory {
 		// We can ideally reduce it to one check only.
 		if shouldListDisk(disk.Mountpoint) {
 			disks = append(disks, directory{
+				Icon:     diskIcon(disk.Mountpoint),
 				Name:     diskName(disk.Mountpoint),
 				Location: diskLocation(disk.Mountpoint),
 			})
@@ -70,17 +71,23 @@ func shouldListDisk(mountPoint string) bool {
 		strings.HasPrefix(mountPoint, "/Volumes")
 }
 
+func diskIcon(mountPoint string) string {
+	if runtime.GOOS != utils.OsWindows && mountPoint == "/" {
+		return icon.Terminal
+	}
+
+	return icon.Disk
+}
+
 // diskName generates a display name for a disk based on its mount point and the operating system.
 func diskName(mountPoint string) string {
 	// In windows we dont want to use filepath.Base as it returns "\" for when
 	// mountPoint is any drive root "C:", "D:", etc. Hence causing same name
 	// for each drive
 	name := mountPoint
-	iconStr := icon.Disk
 	if runtime.GOOS != utils.OsWindows {
 		if mountPoint == "/" {
 			name = "Root"
-			iconStr = icon.Terminal
 		} else {
 			// This might cause duplicate names in case you mount two devices in
 			// /mnt/usb and /mnt/dir2/usb . Full mountpoint is a more accurate way
@@ -89,7 +96,7 @@ func diskName(mountPoint string) string {
 		}
 	}
 
-	return iconStr + icon.Space + name
+	return name
 }
 
 // diskLocation returns the normalized path for a disk's mount point.

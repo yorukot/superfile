@@ -72,7 +72,9 @@ func (s *Model) directoriesRender(curFilePanelFileLocation string,
 				if s.directories[i].Location == curFilePanelFileLocation {
 					renderStyle = common.SidebarSelectedStyle
 				}
-				line := common.FilePanelCursorStyle.Render(cursor+" ") + renderStyle.Render(s.directories[i].Name)
+				line := common.FilePanelCursorStyle.Render(cursor+" ") +
+					renderStyle.Render(s.directories[i].Icon+" ") +
+					renderStyle.Render(s.directories[i].Name)
 				r.AddLineWithCustomTruncate(line, rendering.TailsTruncateRight)
 			}
 		}
