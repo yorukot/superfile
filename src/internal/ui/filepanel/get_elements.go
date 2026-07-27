@@ -125,6 +125,7 @@ func (m *Model) UpdateElementsIfNeeded(force bool, displayDotFile bool) {
 	nowTime := time.Now()
 	if force || !m.shouldSkipPanelUpdate(nowTime) {
 		// Load elements for this panel (with/without search filter)
+		m.LastTimeGetElement = nowTime
 		elements, err := m.getElements(displayDotFile)
 		if err != nil {
 			slog.Error("Error while loading folder elements", "error", err, "location", m.DisplayLocation())
@@ -132,7 +133,6 @@ func (m *Model) UpdateElementsIfNeeded(force bool, displayDotFile bool) {
 		}
 		m.element = elements
 		// Update file panel list
-		m.LastTimeGetElement = nowTime
 
 		// For hover to file on first time loading
 		if m.TargetFile != "" {

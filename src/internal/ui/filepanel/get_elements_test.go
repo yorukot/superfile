@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/filesystem"
 	"github.com/yorukot/superfile/src/pkg/utils"
 
@@ -253,6 +254,22 @@ func TestRemotePanelRefreshHasSingleInflightRequestAndMinimumInterval(t *testing
 
 	assert.False(t, panel.ShouldUpdateElements(false, now.Add(500*time.Millisecond)))
 	assert.True(t, panel.ShouldUpdateElements(false, now.Add(remoteFocusedPanelRefreshTime)))
+}
+
+func TestUpdateElementsIfNeededAdvancesTimestampWhenLoadingFails(t *testing.T) {
+	filepanelTestConfigOnce.Do(func() {
+		require.NoError(t, common.PopulateGlobalConfigs())
+	})
+	panel := New(filepath.Join(t.TempDir(), "missing"), true, "", sortmodel.SortByName, false)
+	previousElements := []Element{{Name: "existing.txt", Location: "/tmp/existing.txt"}}
+	panel.element = previousElements
+	previousTimestamp := time.Now().Add(-time.Hour)
+	panel.LastTimeGetElement = previousTimestamp
+
+	panel.UpdateElementsIfNeeded(true, false)
+
+	assert.True(t, panel.LastTimeGetElement.After(previousTimestamp))
+	assert.Equal(t, previousElements, panel.element)
 }
 
 func TestChangingPanelLocationInvalidatesInflightRefresh(t *testing.T) {
