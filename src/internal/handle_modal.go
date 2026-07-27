@@ -46,7 +46,7 @@ func (m *model) getCreateCmd() tea.Cmd {
 	m.typingModal.submitting = true
 	m.cancelTypingModal()
 	return func() tea.Msg {
-		return m.createOperation(&m.processBarModel, location, items, reqID)
+		return m.createOperation(m.processBarModel, location, items, reqID)
 	}
 }
 

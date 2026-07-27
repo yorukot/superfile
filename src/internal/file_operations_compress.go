@@ -79,7 +79,7 @@ func (m *model) getCompressSelectedFilesCmd() tea.Cmd {
 			return NewNotifyModalMsg(notify.New(true, "Invalid file/dir to compress", err.Error(), notify.NoAction),
 				reqID)
 		}
-		if err := zipSources(filesToCompress, totalFiles, zipPath, &m.processBarModel); err != nil {
+		if err := zipSources(filesToCompress, totalFiles, zipPath, m.processBarModel); err != nil {
 			slog.Error("Error in zipping files", "error", err)
 			return NewCompressOperationMsg(processbar.Failed, reqID)
 		}

@@ -216,7 +216,7 @@ func TestTransferEngineUnsupportedAtomicReplacementPreservesOriginal(t *testing.
 func TestTransferEngineDisconnectCleanupAndProcessbarFailure(t *testing.T) {
 	fixture := sshtest.Start(t)
 	resolver := newTransferTestResolver(fixture)
-	resolver.(*transferTestResolver).slowLocalReads = true
+	resolver.slowLocalReads = true
 	engine := NewTransferEngine(resolver)
 	bar := newTransferProcessBar(t)
 
@@ -315,7 +315,7 @@ type transferTestResolver struct {
 	slowLocalReads bool
 }
 
-func newTransferTestResolver(fixture *sshtest.Fixture) SessionResolver {
+func newTransferTestResolver(fixture *sshtest.Fixture) *transferTestResolver {
 	resolver := &transferTestResolver{localProvider: NewLocalProvider()}
 	if fixture != nil {
 		resolver.remoteFactory = func(ctx context.Context, location Location) (Session, error) {
@@ -471,7 +471,7 @@ func newTransferProcessBar(t *testing.T) *processbar.Model {
 	t.Cleanup(func() {
 		model.SendStopListeningMsgBlocking()
 	})
-	return &model
+	return model
 }
 
 func waitForProcessState(t *testing.T, model *processbar.Model, id string, want processbar.ProcessState) {

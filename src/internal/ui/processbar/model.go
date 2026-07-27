@@ -28,15 +28,13 @@ type Model struct {
 	reqCnt      atomic.Int64
 }
 
-func New() Model {
+func New() *Model {
 	return NewModelWithOptions(minWidth, minHeight)
 }
 
-// Note: We should considering our internal models, they
-// should be returning pointer object, and implement tea.Model
-func NewModelWithOptions(width int, height int) Model {
+func NewModelWithOptions(width int, height int) *Model {
 	width, height = normalizeDimensions(width, height)
-	return Model{
+	return &Model{
 		renderIndex: 0,
 		cursor:      0,
 		width:       width,

@@ -93,11 +93,12 @@ func TestZipSources(t *testing.T) {
 
 			if tt.expectErrorValidate {
 				require.Error(t, err, "zipSources should return error")
+				return
 			} else {
 				require.NoError(t, err, "validateCompressOperation should not return error")
 			}
 
-			err = zipSources(sources, totalFiles, targetZip, &processBar)
+			err = zipSources(sources, totalFiles, targetZip, processBar)
 
 			require.NoError(t, err, "zipSources should not return error")
 
@@ -153,7 +154,7 @@ func TestZipSourcesInvalidTarget(t *testing.T) {
 	invalidTarget := "/invalid/path/test.zip"
 	totalFiles, err := validateCompressOperation([]string{testFile})
 	require.NoError(t, err, "valid source generates error on validation")
-	err = zipSources([]string{testFile}, totalFiles, invalidTarget, &processBar)
+	err = zipSources([]string{testFile}, totalFiles, invalidTarget, processBar)
 	require.Error(t, err, "zipSources should return error for invalid target")
 }
 
