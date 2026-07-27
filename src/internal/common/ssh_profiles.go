@@ -22,6 +22,7 @@ const (
 	SSHAuthMethodKeyboardInteractive = "keyboard-interactive"
 	defaultSSHPort                   = 22
 	maxSSHConfigIncludeDepth         = 5
+	sshProfilePasswordKey            = "password"
 	sshProfilePassphraseKey          = "passphrase"
 )
 
@@ -574,13 +575,13 @@ func expandSSHIncludePaths(sourcePath string, value string, relativeIncludeDir s
 		pattern = strings.Trim(pattern, "\"'")
 		switch {
 		case filepath.IsAbs(pattern):
-		case relativeIncludeDir != "":
-			pattern = filepath.Join(relativeIncludeDir, pattern)
 		case strings.HasPrefix(pattern, "~/") || strings.HasPrefix(pattern, "~\\"):
 			if homeErr != nil {
 				return nil, homeErr
 			}
 			pattern = filepath.Join(homeDir, strings.TrimPrefix(strings.TrimPrefix(pattern, "~/"), "~\\"))
+		case relativeIncludeDir != "":
+			pattern = filepath.Join(relativeIncludeDir, pattern)
 		case strings.HasPrefix(filepath.Clean(sourcePath), filepath.Join(string(filepath.Separator), "etc", "ssh")+string(filepath.Separator)):
 			pattern = filepath.Join(string(filepath.Separator), "etc", "ssh", pattern)
 		default:
@@ -933,10 +934,10 @@ func rawSSHProfilesContainSecrets(rawData map[string]any) bool {
 	}
 
 	containsSecret := func(profileMap map[string]any) bool {
-		if _, ok := profileMap["password"]; ok {
+		if _, ok := profileMap[sshProfilePasswordKey]; ok {
 			return true
 		}
-		if _, ok := profileMap["passphrase"]; ok {
+		if _, ok := profileMap[sshProfilePassphraseKey]; ok {
 			return true
 		}
 		return false
@@ -1042,7 +1043,7 @@ func tomlNodeChildren(node *unstable.Node) []*unstable.Node {
 
 func isSSHProfileSecretPath(path []string) bool {
 	return len(path) == 3 && path[0] == "ssh" && path[1] == "profile" &&
-		(path[2] == SSHAuthMethodPassword || path[2] == sshProfilePassphraseKey)
+		(path[2] == sshProfilePasswordKey || path[2] == sshProfilePassphraseKey)
 }
 
 func tomlKeyValueEditSpan(node *unstable.Node, siblings []*unstable.Node) tomlEditSpan {
