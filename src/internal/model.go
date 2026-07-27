@@ -747,6 +747,11 @@ func (m *model) reloadPanelCmd(index int, location string) tea.Cmd {
 		return genericUpdateMsg{
 			BaseMessage: BaseMessage{reqID: m.nextIoReqCnt()},
 			apply: func(m *model) tea.Cmd {
+				if index < 0 || index >= len(m.fileModel.FilePanels) ||
+					m.fileModel.FilePanels[index].Location != location {
+					return nil
+				}
+
 				err := m.fileModel.FilePanels[index].UpdateCurrentFilePanelDir(location)
 				if err != nil {
 					slog.Error("Failed to reload panel after fs event", "error", err)
