@@ -175,9 +175,8 @@ func (msg MetadataMsg) ApplyToModel(m *model) tea.Cmd {
 
 	if m.fileMetaData.MatchPendingRequest(msg.meta.GetPath(), msg.metadataFocused, msg.GetReqID()) {
 		m.fileMetaData.ClearPendingRequest()
+		m.fileMetaData.SetMetadata(msg.meta, msg.metadataFocused)
 	}
-
-	m.fileMetaData.SetMetadata(msg.meta, msg.metadataFocused)
 	return nil
 }
 
