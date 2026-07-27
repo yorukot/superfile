@@ -47,27 +47,23 @@ func (m *Model) SetPaneConnectionStatus(status string) {
 }
 
 func (m *Model) RemoteStatusText() string {
-	location := m.CurrentLocation()
-	if location.Provider == filesystem.ProviderLocal {
-		return ""
-	}
-	status := m.connectionStatus
-	if status == "" {
-		status = "connected"
-	}
-	return fmt.Sprintf("%s %s", m.DisplayLocation(), status)
+	return m.remoteStatus(m.DisplayLocation())
 }
 
 func (m *Model) RemoteSidebarStatusText() string {
 	location := m.CurrentLocation()
-	if location.Provider == filesystem.ProviderLocal {
+	return m.remoteStatus(locationDisplayLabel(location))
+}
+
+func (m *Model) remoteStatus(locationText string) string {
+	if m.CurrentLocation().Provider == filesystem.ProviderLocal {
 		return ""
 	}
 	status := m.connectionStatus
 	if status == "" {
 		status = "connected"
 	}
-	return fmt.Sprintf("%s %s", locationDisplayLabel(location), status)
+	return fmt.Sprintf("%s %s", locationText, status)
 }
 
 func locationDisplayLabel(location filesystem.Location) string {
