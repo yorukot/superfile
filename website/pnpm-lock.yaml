@@ -16,7 +16,7 @@ importers:
         version: 3.7.3
       '@lucide/astro':
         specifier: ^1.14.0
-        version: 1.20.0(astro@6.4.4(@types/node@24.12.4)(rollup@4.61.0))
+        version: 1.27.0(astro@6.4.4(@types/node@24.12.4)(rollup@4.61.0))
       astro:
         specifier: ^6.1.10
         version: 6.4.4(@types/node@24.12.4)(rollup@4.61.0)
@@ -595,10 +595,10 @@ packages:
   '@jridgewell/sourcemap-codec@1.5.5':
     resolution: {integrity: sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og==}
 
-  '@lucide/astro@1.20.0':
-    resolution: {integrity: sha512-1M4J/zWunMbvrPgfe285LWPg7B6ql+nb5oncfvX0tO2RE0slTNof6HgJzq0Wlnwjed49jR4Lu/6xwZrKBvZOng==}
+  '@lucide/astro@1.27.0':
+    resolution: {integrity: sha512-+fhvqNEKqKCPb3qPGDd5xZCMN1o0dtYmNB5tIjtal2FvXQ0X+mXG3pZwefbEPVL7pMA3PkiABnDoIZsM5dOW8Q==}
     peerDependencies:
-      astro: ^4 || ^5 || ^6
+      astro: ^4 || ^5 || ^6 || ^7
 
   '@mdx-js/mdx@3.1.1':
     resolution: {integrity: sha512-f6ZO2ifpwAQIpzGWaBQT2TXxPv6z3RBzQKpVftEWN78Vl/YweF1uwussDx8ECAXVtr3Rs89fKyG9YlzUs9DyGQ==}
@@ -2376,7 +2376,7 @@ snapshots:
 
   '@jridgewell/sourcemap-codec@1.5.5': {}
 
-  '@lucide/astro@1.20.0(astro@6.4.4(@types/node@24.12.4)(rollup@4.61.0))':
+  '@lucide/astro@1.27.0(astro@6.4.4(@types/node@24.12.4)(rollup@4.61.0))':
     dependencies:
       astro: 6.4.4(@types/node@24.12.4)(rollup@4.61.0)
 
