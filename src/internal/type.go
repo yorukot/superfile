@@ -56,7 +56,7 @@ type model struct {
 	// Main Panels
 	fileModel       filemodel.Model
 	sidebarModel    sidebar.Model
-	processBarModel processbar.Model
+	processBarModel *processbar.Model
 	clipboard       clipboard.Model
 	clipboardWriter func(string) error
 	focusPanel      focusPanelType

@@ -302,7 +302,7 @@ type ProcessBarUpdateMsg struct {
 }
 
 func (msg ProcessBarUpdateMsg) ApplyToModel(m *model) tea.Cmd {
-	cmd, err := msg.pMsg.Apply(&m.processBarModel)
+	cmd, err := msg.pMsg.Apply(m.processBarModel)
 	if err != nil {
 		slog.Error("Error applying processbar update", "error", err)
 	}
