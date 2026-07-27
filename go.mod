@@ -3,9 +3,9 @@ module github.com/yorukot/superfile
 go 1.26
 
 require (
-	charm.land/bubbles/v2 v2.1.0
+	charm.land/bubbles/v2 v2.1.1
 	charm.land/bubbletea/v2 v2.0.7
-	charm.land/lipgloss/v2 v2.0.3
+	charm.land/lipgloss/v2 v2.0.4
 	github.com/adrg/xdg v0.5.3
 	github.com/alecthomas/chroma/v2 v2.26.0
 	github.com/atotto/clipboard v0.1.4
@@ -84,7 +84,7 @@ require (
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/lucasb-eyer/go-colorful v1.4.0 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/mattn/go-runewidth v0.0.23 // indirect
+	github.com/mattn/go-runewidth v0.0.24 // indirect
 	github.com/muesli/cancelreader v0.2.2 // indirect
 	github.com/muesli/reflow v0.3.0
 	github.com/pelletier/go-toml/v2 v2.3.1
