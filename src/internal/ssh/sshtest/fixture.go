@@ -1035,6 +1035,7 @@ func (f *Fixture) activeConn(connID uint64) net.Conn {
 }
 
 type disconnectingWriterAt struct {
+	mu        sync.Mutex
 	file      *os.File
 	conn      net.Conn
 	remaining int64
@@ -1046,6 +1047,9 @@ func (w *disconnectingWriterAt) ReadAt(p []byte, off int64) (int, error) {
 }
 
 func (w *disconnectingWriterAt) WriteAt(p []byte, off int64) (int, error) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+
 	if w.fired {
 		return 0, &sftp.StatusError{Code: uint32(sftp.ErrSSHFxConnectionLost)}
 	}
