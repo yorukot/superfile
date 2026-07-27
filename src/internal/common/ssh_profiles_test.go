@@ -235,6 +235,40 @@ func TestDiscoverSSHQuickConnectProfilesResolvesSystemRelativeIncludes(t *testin
 	assert.Equal(t, "192.0.2.40", profiles[0].Host)
 }
 
+func TestDiscoverSSHQuickConnectProfilesResolvesSystemTildeIncludesThroughHome(t *testing.T) {
+	includePatterns := []string{"~/.ssh/conf.d/*.conf"}
+	if filepath.Separator == '\\' {
+		includePatterns = append(includePatterns, `~\.ssh\conf.d\*.conf`)
+	}
+
+	for _, includePattern := range includePatterns {
+		t.Run(strings.ReplaceAll(includePattern, string(filepath.Separator), "-"), func(t *testing.T) {
+			homeDir := t.TempDir()
+			t.Setenv("HOME", homeDir)
+			t.Setenv("USERPROFILE", homeDir)
+			includeDir := filepath.Join(homeDir, ".ssh", "conf.d")
+			require.NoError(t, os.MkdirAll(includeDir, 0o700))
+			require.NoError(t, os.WriteFile(
+				filepath.Join(includeDir, "included.conf"),
+				[]byte("Host system-tilde\n  HostName 192.0.2.43\n"),
+				0o600,
+			))
+
+			systemPath := filepath.Join(t.TempDir(), "ssh_config")
+			require.NoError(t, os.WriteFile(systemPath, []byte("Include "+includePattern+"\n"), 0o600))
+
+			profiles, _, err := DiscoverSSHQuickConnectProfiles(&ConfigType{}, SSHConfigDiscoveryOptions{
+				UserConfigPath:   filepath.Join(t.TempDir(), "missing-user-config"),
+				SystemConfigPath: systemPath,
+			})
+			require.NoError(t, err)
+			require.Len(t, profiles, 1)
+			assert.Equal(t, "system-tilde", profiles[0].Name)
+			assert.Equal(t, "192.0.2.43", profiles[0].Host)
+		})
+	}
+}
+
 func TestDiscoverSSHQuickConnectProfilesReportsUnsupportedDirectivesInSystemIncludes(t *testing.T) {
 	systemDir := t.TempDir()
 	includeDir := filepath.Join(systemDir, "conf.d")
