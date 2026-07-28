@@ -81,12 +81,15 @@ func ValidateConfig(c *ConfigType) error {
 		return errors.New(LoadConfigError("default_sort_type", "Default sort type must be between 0 and 4."))
 	}
 
+	if c.WheelScrollSpeed < 0 || c.WheelScrollSpeed > 20 {
+		return errors.New(LoadConfigError("wheel_scroll_speed", "Wheel scroll speed must be 0–20 (0 to disable)."))
+	}
+
 	if c.FilePanelNamePercent < FileNameRatioMin || c.FilePanelNamePercent > FileNameRatioMax {
 		return errors.New(
 			LoadConfigError("file_panel_name_percent", "File panel name percent is outside the supported range."),
 		)
 	}
-
 	if ansi.StringWidth(c.BorderTop) != 1 {
 		return errors.New(LoadConfigError("border_top", "Border character must be exactly one cell wide."))
 	}

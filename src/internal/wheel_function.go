@@ -18,6 +18,8 @@ func wheelMainAction(msg string, m *model) {
 			action = func() { m.processBarModel.ListUp() }
 		case metadataFocus:
 			action = func() { m.fileMetaData.ListUp() }
+		case previewFocus:
+			action = func() { m.fileModel.FilePreview.ScrollUp() }
 		case nonePanelFocus:
 			action = func() { m.getFocusedFilePanel().ListUp() }
 		}
@@ -30,6 +32,8 @@ func wheelMainAction(msg string, m *model) {
 			action = func() { m.processBarModel.ListDown() }
 		case metadataFocus:
 			action = func() { m.fileMetaData.ListDown() }
+		case previewFocus:
+			action = func() { m.fileModel.FilePreview.ScrollDown() }
 		case nonePanelFocus:
 			action = func() { m.getFocusedFilePanel().ListDown() }
 		}
@@ -38,7 +42,11 @@ func wheelMainAction(msg string, m *model) {
 		return
 	}
 
-	for range common.WheelRunTime {
+	scrollLines := common.Config.WheelScrollSpeed
+	if scrollLines <= 0 {
+		return
+	}
+	for range scrollLines {
 		action()
 	}
 }

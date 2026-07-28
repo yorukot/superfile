@@ -33,6 +33,8 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen,go
 			m.processBarModel.ListUp()
 		case metadataFocus:
 			m.fileMetaData.ListUp()
+		case previewFocus:
+			m.fileModel.FilePreview.ScrollUp()
 		case nonePanelFocus:
 			m.getFocusedFilePanel().ListUp()
 		}
@@ -46,6 +48,8 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen,go
 			m.processBarModel.ListDown()
 		case metadataFocus:
 			m.fileMetaData.ListDown()
+		case previewFocus:
+			m.fileModel.FilePreview.ScrollDown()
 		case nonePanelFocus:
 			m.getFocusedFilePanel().ListDown()
 		}
@@ -54,6 +58,8 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen,go
 		switch m.focusPanel {
 		case metadataFocus:
 			m.fileMetaData.PgUp()
+		case previewFocus:
+			m.fileModel.FilePreview.PgUp()
 		case nonePanelFocus:
 			m.getFocusedFilePanel().PgUp()
 		case processBarFocus, sidebarFocus:
@@ -64,6 +70,8 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen,go
 		switch m.focusPanel {
 		case metadataFocus:
 			m.fileMetaData.PgDown()
+		case previewFocus:
+			m.fileModel.FilePreview.PgDown()
 		case nonePanelFocus:
 			m.getFocusedFilePanel().PgDown()
 		case processBarFocus, sidebarFocus:
@@ -112,6 +120,8 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen,go
 
 	case slices.Contains(common.Hotkeys.FocusOnMetaData, msg):
 		m.focusOnMetadata()
+	case slices.Contains(common.Hotkeys.FocusOnPreview, msg):
+		m.focusOnPreview()
 
 	case slices.Contains(common.Hotkeys.PasteItems, msg):
 		return m.getPasteItemCmd()
