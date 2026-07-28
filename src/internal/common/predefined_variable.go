@@ -119,7 +119,7 @@ func wrapFilePreviewErrorMsg(msg string) string {
 	return "\n--- " + icon.Error + icon.Space + msg + " ---"
 }
 
-// Dependecies - TODO We should programmatically guarantee these dependencies. And log error
+// Dependencies - TODO We should programmatically guarantee these dependencies. And log error
 // if its not satisfied.
 // LoadThemeConfig() in style.go should be finished
 // loadConfigFile() in config_types.go should be finished

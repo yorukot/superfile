@@ -24,6 +24,15 @@ func TestStringTruncate(t *testing.T) {
 		{TruncateText, "TruncateText", "Hello world", 4, "...", "H..."},
 		{TruncateText, "TruncateText", "Hello world", 6, "...", "Hel..."},
 		{TruncateText, "TruncateText", "Hello", 100, "...", "Hello"},
+		// Proof-of-bug cases: strings that fit within maxChars must NOT be truncated.
+		// The old implementation would truncate "Hello" (5 chars) with maxChars=5
+		// to "He..." because it subtracted len("...") before checking if truncation
+		// was needed: Truncate("Hello", 5-3=2, "") → "He" ≠ "Hello" → "He..."
+		{TruncateText, "TruncateText", "Hello", 5, "...", "Hello"},
+		{TruncateText, "TruncateText", "Hello", 6, "...", "Hello"},
+		// Edge case: tail ("...") is wider than maxChars — result must not exceed maxChars.
+		{TruncateText, "TruncateText", "Hello world", 2, "...", ".."},
+		{TruncateText, "TruncateText", "Hello world", 1, "...", "."},
 		{TruncateTextBeginning, "TruncateTextBeginning", "Hello world", 4, "...", "...d"},
 		{TruncateTextBeginning, "TruncateTextBeginning", "Hello world", 6, "...", "...rld"},
 		{TruncateTextBeginning, "TruncateTextBeginning", "Hello", 100, "...", "Hello"},

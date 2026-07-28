@@ -158,28 +158,31 @@ func TestZipSourcesInvalidTarget(t *testing.T) {
 }
 
 func TestGetZipArchiveName(t *testing.T) {
+	// Use a temp directory so that renameIfDuplicate checks the right location.
+	tmpDir := t.TempDir()
+
 	t.Run("Ordinary file with extension", func(t *testing.T) {
-		actual, err := getZipArchiveName("test.doc")
+		actual, err := getZipArchiveName("test.doc", tmpDir)
 		require.NoError(t, err)
-		require.Equal(t, "test.zip", actual)
+		require.Equal(t, filepath.Join(tmpDir, "test.zip"), actual)
 	})
 	t.Run("Ordinary file without extension", func(t *testing.T) {
-		actual, err := getZipArchiveName("test")
+		actual, err := getZipArchiveName("test", tmpDir)
 		require.NoError(t, err)
-		require.Equal(t, "test.zip", actual)
+		require.Equal(t, filepath.Join(tmpDir, "test.zip"), actual)
 	})
 	t.Run("Hidden file without extension", func(t *testing.T) {
-		actual, err := getZipArchiveName(".dockerignore")
+		actual, err := getZipArchiveName(".dockerignore", tmpDir)
 		require.NoError(t, err)
-		require.Equal(t, ".dockerignore.zip", actual)
+		require.Equal(t, filepath.Join(tmpDir, ".dockerignore.zip"), actual)
 	})
 	t.Run("Hidden file with extension", func(t *testing.T) {
-		actual, err := getZipArchiveName(".dockerignore.old")
+		actual, err := getZipArchiveName(".dockerignore.old", tmpDir)
 		require.NoError(t, err)
-		require.Equal(t, ".dockerignore.zip", actual)
+		require.Equal(t, filepath.Join(tmpDir, ".dockerignore.zip"), actual)
 	})
 	t.Run("empty filename", func(t *testing.T) {
-		_, err := getZipArchiveName("")
+		_, err := getZipArchiveName("", tmpDir)
 		require.ErrorContains(t, err, "empty filename to compress")
 	})
 }

@@ -29,19 +29,22 @@ const (
 	ASCIIMax          = 0x7f // Maximum ASCII character value
 )
 
-// TODO: This has a bug. Remove its usage. Remove all custom truncation
-// And audit and evaluate any problem
-// The logic truncates to maxChars - len(tails) first, then checks if truncation occurred. This means:
-// - "Hello" with maxChars=5 gets truncated to 2 chars (5-3=2), producing "He..."
-// - "Hello" with maxChars=6 gets truncated to 3 chars (6-3=3), producing "Hel..."
-// Both cases are wrong - "Hello" fits within 5 and 6 characters, so it shouldn't be truncated at all.
+// TruncateText truncates text to maxChars display width, appending tails
+// (e.g. "...") if truncation was needed. Returns the original text unmodified
+// if it already fits within maxChars.
 func TruncateText(text string, maxChars int, tails string) string {
-	truncatedText := ansi.Truncate(text, maxChars-len(tails), "")
-	if text != truncatedText {
-		return truncatedText + tails
+	// Check if the text already fits — no truncation needed.
+	if ansi.StringWidth(text) <= maxChars {
+		return text
 	}
-
-	return text
+	// If the tail itself is wider than maxChars, truncate the tail to fit.
+	tailWidth := ansi.StringWidth(tails)
+	if tailWidth >= maxChars {
+		return ansi.Truncate(tails, maxChars, "")
+	}
+	// Text doesn't fit: truncate to (maxChars - tail width) and append the tail.
+	truncatedText := ansi.Truncate(text, maxChars-tailWidth, "")
+	return truncatedText + tails
 }
 
 func TruncateTextBeginning(text string, maxChars int, tails string) string {

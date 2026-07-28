@@ -13,7 +13,14 @@ import (
 	"github.com/yorukot/superfile/src/pkg/utils"
 )
 
-// isSamePartition checks if two paths are on the same filesystem partition
+// isSamePartition checks if two paths are on the same filesystem partition.
+// On Windows, it compares drive letters. On Unix-like systems, it compares
+// device IDs from os.Stat to correctly detect cross-device boundaries
+// (e.g., /home vs /mnt/usb).
+//
+// Note: filepath.VolumeName() was previously used for Unix, but it always
+// returns an empty string on non-Windows systems, making the comparison
+// always return true — even for paths on different partitions.
 func isSamePartition(path1, path2 string) (bool, error) {
 	// Get the absolute path to handle relative paths
 	absPath1, err := filepath.Abs(path1)
@@ -33,8 +40,13 @@ func isSamePartition(path1, path2 string) (bool, error) {
 		return drive1 == drive2, nil
 	}
 
-	// For Unix-like systems, we use the same path to check the root partition
-	return filepath.VolumeName(absPath1) == filepath.VolumeName(absPath2), nil
+	// For Unix-like systems, compare device IDs from stat.
+	// This detects cross-device boundaries such as separate physical
+	// partitions and external drives. Note: bind mounts of the same
+	// filesystem share the same device ID, so rename() may still fail
+	// with EXDEV across mount points — moveElement handles this by
+	// falling back to copy+delete.
+	return sameDeviceID(absPath1, absPath2)
 }
 
 // getDriveLetter extracts the drive letter from a Windows path
