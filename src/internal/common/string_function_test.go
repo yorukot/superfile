@@ -30,6 +30,9 @@ func TestStringTruncate(t *testing.T) {
 		// was needed: Truncate("Hello", 5-3=2, "") → "He" ≠ "Hello" → "He..."
 		{TruncateText, "TruncateText", "Hello", 5, "...", "Hello"},
 		{TruncateText, "TruncateText", "Hello", 6, "...", "Hello"},
+		// Edge case: tail ("...") is wider than maxChars — result must not exceed maxChars.
+		{TruncateText, "TruncateText", "Hello world", 2, "...", ".."},
+		{TruncateText, "TruncateText", "Hello world", 1, "...", "."},
 		{TruncateTextBeginning, "TruncateTextBeginning", "Hello world", 4, "...", "...d"},
 		{TruncateTextBeginning, "TruncateTextBeginning", "Hello world", 6, "...", "...rld"},
 		{TruncateTextBeginning, "TruncateTextBeginning", "Hello", 100, "...", "Hello"},

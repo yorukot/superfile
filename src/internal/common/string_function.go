@@ -37,8 +37,13 @@ func TruncateText(text string, maxChars int, tails string) string {
 	if ansi.StringWidth(text) <= maxChars {
 		return text
 	}
+	// If the tail itself is wider than maxChars, truncate the tail to fit.
+	tailWidth := ansi.StringWidth(tails)
+	if tailWidth >= maxChars {
+		return ansi.Truncate(tails, maxChars, "")
+	}
 	// Text doesn't fit: truncate to (maxChars - tail width) and append the tail.
-	truncatedText := ansi.Truncate(text, maxChars-ansi.StringWidth(tails), "")
+	truncatedText := ansi.Truncate(text, maxChars-tailWidth, "")
 	return truncatedText + tails
 }
 

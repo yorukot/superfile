@@ -317,19 +317,23 @@ func WriteThemeFiles(content embed.FS) error {
 // writeThemeFile writes src to the file at path. Extracted from WriteThemeFiles
 // so that defer Close() runs at the end of each file write rather than
 // accumulating open handles until the outer function returns.
-func writeThemeFile(path string, src []byte) error {
+func writeThemeFile(path string, src []byte) (err error) {
 	f, err := os.Create(path)
 	if err != nil {
 		slog.Error("Error creating theme file from embed", "error", err)
 		return err
 	}
-	defer f.Close()
+	defer func() {
+		if closeErr := f.Close(); err == nil {
+			err = closeErr
+		}
+	}()
 	_, err = f.Write(src)
 	if err != nil {
 		slog.Error("Error writing theme file from embed", "error", err)
 		return err
 	}
-	return nil
+	return err
 }
 
 // Used only in unit tests

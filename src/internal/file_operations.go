@@ -41,8 +41,11 @@ func isSamePartition(path1, path2 string) (bool, error) {
 	}
 
 	// For Unix-like systems, compare device IDs from stat.
-	// This correctly detects cross-device boundaries such as separate
-	// mount points, external drives, bind mounts, etc.
+	// This detects cross-device boundaries such as separate physical
+	// partitions and external drives. Note: bind mounts of the same
+	// filesystem share the same device ID, so rename() may still fail
+	// with EXDEV across mount points — moveElement handles this by
+	// falling back to copy+delete.
 	return sameDeviceID(absPath1, absPath2)
 }
 
