@@ -29,7 +29,7 @@ import (
 	stringfunction "github.com/yorukot/superfile/src/pkg/string_function"
 )
 
-// These represent model's state information, its not a global preperty
+// These represent model's state information, its not a global property
 var (
 	LastTimeCursorMove = [2]int{int(time.Now().UnixMicro()), 0} //nolint: gochecknoglobals // TODO: Move to model struct
 	et                 *exiftool.Exiftool                       //nolint: gochecknoglobals // TODO: Move to model struct
@@ -46,7 +46,7 @@ func InitialModel(firstPanelPaths []string, firstUseCheck bool) tea.Model {
 }
 
 // Init function to be called by Bubble tea framework, sets windows title,
-// cursos blinking and starts message streamming channel
+// cursor blinking and starts message streaming channel
 // Note : What init should do, for example read file panel data, read sidebar directories, and
 // disk, is being done in at the creation of model of object. Right now creation of model object
 // and its initialization isn't well separated.
@@ -358,7 +358,7 @@ func (m *model) handleKeyInput(msg tea.KeyPressMsg) tea.Cmd {
 }
 
 // Update the file panel state. Change name of renamed files, filter out files
-// in search, update typingb bar, etc
+// in search, update typing bar, etc
 func (m *model) updateComponentState(msg tea.Msg) tea.Cmd {
 	focusPanel := m.getFocusedFilePanel()
 	var cmd tea.Cmd

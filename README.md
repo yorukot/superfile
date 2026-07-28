@@ -55,7 +55,7 @@
 - [Troubleshooting](#troubleshooting)
 - [Uninstalling](#uninstalling)
   - [macOS and Linux](#macos-and-linux-1)
-  - [Windows](#windows)
+  - [Windows](#windows-1)
 - [Contributing](#contributing)
 - [Thanks](#thanks)
   - [Support](#support)

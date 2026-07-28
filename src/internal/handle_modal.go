@@ -127,7 +127,7 @@ func (m *model) cancelRename() {
 	m.fileModel.Renaming = false
 }
 
-// Connfirm rename file or directory
+// Confirm rename file or directory
 func (m *model) confirmRename() {
 	panel := m.getFocusedFilePanel()
 

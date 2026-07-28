@@ -63,13 +63,12 @@ func (m *model) getCompressSelectedFilesCmd() tea.Cmd {
 	reqID := m.nextIoReqCnt()
 
 	return func() tea.Msg {
-		zipName, err := getZipArchiveName(filepath.Base(firstFile))
+		zipPath, err := getZipArchiveName(filepath.Base(firstFile), panel.Location)
 		if err != nil {
 			slog.Error("Error in getZipArchiveName", "error", err)
 			return NewNotifyModalMsg(notify.New(true, "Invalid zip target name", err.Error(), notify.NoAction),
 				reqID)
 		}
-		zipPath := filepath.Join(panel.Location, zipName)
 		totalFiles, err := validateCompressOperation(filesToCompress)
 		if err != nil {
 			return NewNotifyModalMsg(notify.New(true, "Invalid file/dir to compress", err.Error(), notify.NoAction),
@@ -185,7 +184,10 @@ func writeZipFile(path string, relPath string, info os.FileInfo, writer *zip.Wri
 	return nil
 }
 
-func getZipArchiveName(base string) (string, error) {
+// getZipArchiveName generates a unique zip archive path under targetDir.
+// It checks for duplicates using the full path (targetDir + zipName) so that
+// the dedup check operates in the correct directory, not the process CWD.
+func getZipArchiveName(base string, targetDir string) (string, error) {
 	if len(base) == 0 {
 		return "", errors.New("empty filename to compress")
 	}
@@ -194,6 +196,9 @@ func getZipArchiveName(base string) (string, error) {
 	if runes[0] == '.' && strings.Count(base, ".") == 1 {
 		zipName = base + ".zip"
 	}
-	zipName, err := renameIfDuplicate(zipName)
-	return zipName, err
+	// Use full path for duplicate check so it looks in the target directory,
+	// not the process's current working directory.
+	fullPath := filepath.Join(targetDir, zipName)
+	fullPath, err := renameIfDuplicate(fullPath)
+	return fullPath, err
 }
