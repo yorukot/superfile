@@ -164,8 +164,9 @@ func LoadHotkeysFile(ignoreMissingFields bool) {
 
 		// Handle custom hotkeys separately
 		if field.Name == "CustomHotkeys" {
-			// Validate only the keybindings defined by the user
+			seenKeys := make(map[string]string) // map of keybinding -> commandName
 			for keyName, keys := range Hotkeys.CustomHotkeys {
+				// 1. Ensure the custom hotkey list is not empty
 				if len(keys) == 0 || keys[0] == "" {
 					utils.PrintlnAndExit(
 						LoadHotkeysError(
@@ -173,6 +174,29 @@ func LoadHotkeysFile(ignoreMissingFields bool) {
 							"Hotkey list is empty; at least one key binding is required.",
 						),
 					)
+				}
+
+				// 2. Ensure the custom hotkey references an existing custom command
+				if _, exists := Config.CustomCommands[keyName]; !exists {
+					utils.PrintlnAndExit(
+						LoadHotkeysError(
+							"CustomHotkeys."+keyName,
+							"No matching custom command found in config.toml.",
+						),
+					)
+				}
+
+				// 3. Prevent duplicate keybindings across custom hotkeys
+				for _, key := range keys {
+					if existingCmd, duplicate := seenKeys[key]; duplicate {
+						utils.PrintlnAndExit(
+							LoadHotkeysError(
+								"CustomHotkeys."+keyName,
+								"Duplicate keybinding '"+key+"' is already assigned to custom command '"+existingCmd+"'.",
+							),
+						)
+					}
+					seenKeys[key] = keyName
 				}
 			}
 			continue // Skip the standard slice validation for this map field

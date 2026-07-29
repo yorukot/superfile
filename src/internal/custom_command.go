@@ -11,7 +11,6 @@ import (
 )
 
 // executeCustomCommand executes a custom command defined in CustomCommands.
-// The first element of the array must be either "foreground" or "background".
 func (m *model) executeCustomCommand(cmdName string) tea.Cmd {
 	rawArgs, ok := common.Config.CustomCommands[cmdName]
 	if !ok || len(rawArgs) < 2 {
@@ -28,15 +27,30 @@ func (m *model) executeCustomCommand(cmdName string) tea.Cmd {
 			return m.warnModalForCustomCommand("Execution Error", "Failed to resolve selected file path for '"+cmdName+"'.")
 		}
 
-		err := c.Start()
-		if err != nil {
-			return m.warnModalForCustomCommand("Execution Error", "Failed to start command '"+cmdPayload[0]+"': "+err.Error())
-		}
+		// Return an asynchronous command to run the process and monitor exit status
+		return func() tea.Msg {
+			err := c.Start()
+			if err != nil {
+				reqID := m.nextIoReqCnt()
+				notifyModel := notify.New(true,
+					"Execution Error",
+					"Failed to start command '"+cmdPayload[0]+"': "+err.Error(),
+					notify.NoAction)
+				return NewNotifyModalMsg(notifyModel, reqID)
+			}
 
-		go func() {
-			_ = c.Wait()
-		}()
-		return nil
+			// Wait for completion in background to catch any exit errors safely
+			err = c.Wait()
+			if err != nil {
+				reqID := m.nextIoReqCnt()
+				notifyModel := notify.New(true,
+					"Execution Error",
+					"Command '"+cmdPayload[0]+"' exited with error: "+err.Error(),
+					notify.NoAction)
+				return NewNotifyModalMsg(notifyModel, reqID)
+			}
+			return nil
+		}
 
 	case "foreground":
 		c := m.prepareCommand(cmdPayload)
@@ -55,9 +69,11 @@ func (m *model) executeCustomCommand(cmdName string) tea.Cmd {
 			}
 			return nil
 		})
-	}
 
-	return nil
+	default:
+		// Explicitly handle unsupported execution modes instead of falling through silently
+		return m.warnModalForCustomCommand("Configuration Error", "Invalid mode '"+mode+"' for command '"+cmdName+"'. Must be 'foreground' or 'background'.")
+	}
 }
 
 // prepareCommand builds the exec.Cmd structure and replaces templates with file details.
@@ -72,11 +88,26 @@ func (m *model) prepareCommand(rawArgs []string) *exec.Cmd {
 	fileName := filepath.Base(selectedFile)
 	selectedDir := panel.Location
 
+	// Shell injection prevention: escape arguments if explicitly invoking a POSIX shell
+	binary := rawArgs[0]
+	isShell := binary == "sh" || binary == "bash" || binary == "zsh" || binary == "dash"
+
 	processedArgs := make([]string, len(rawArgs))
 	for i, arg := range rawArgs {
-		arg = strings.ReplaceAll(arg, "{filepath}", selectedFile)
-		arg = strings.ReplaceAll(arg, "{filename}", fileName)
-		arg = strings.ReplaceAll(arg, "{dir}", selectedDir)
+		fileVal := selectedFile
+		nameVal := fileName
+		dirVal := selectedDir
+
+		// If running via shell, wrap placeholders in single quotes and escape existing single quotes
+		if isShell {
+			fileVal = "'" + strings.ReplaceAll(selectedFile, "'", "'\\''") + "'"
+			nameVal = "'" + strings.ReplaceAll(fileName, "'", "'\\''") + "'"
+			dirVal = "'" + strings.ReplaceAll(selectedDir, "'", "'\\''") + "'"
+		}
+
+		arg = strings.ReplaceAll(arg, "{filepath}", fileVal)
+		arg = strings.ReplaceAll(arg, "{filename}", nameVal)
+		arg = strings.ReplaceAll(arg, "{dir}", dirVal)
 		processedArgs[i] = arg
 	}
 

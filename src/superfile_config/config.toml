@@ -219,5 +219,3 @@ zoxide_support = false
 #   4. Run an interactive command in classic Command Prompt (CMD):
 #      cmd_echo = ["foreground", "cmd.exe", "/C", "echo Selected: {filepath} && pause"]
 [custom_commands]
-# zellij_edit = ["zellij-editor", "{filepath}"]
-# run_script = ["bash", "./someshell.sh", "{filepath}"]
