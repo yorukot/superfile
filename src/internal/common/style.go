@@ -201,8 +201,10 @@ func LoadThemeConfig() { //nolint: funlen // Variable initialization
 	FilePanelTopPathStyle = lipgloss.NewStyle().Foreground(filePanelTopPathColor).Background(FilePanelBGColor)
 	FilePanelItemSelectedStyle = lipgloss.NewStyle().Foreground(filePanelItemSelectedFGColor).
 		Background(filePanelItemSelectedBGColor)
-	FilePanelItemActiveStyle = lipgloss.NewStyle().Foreground(filePanelItemActiveFGColor).Background(filePanelItemActiveBGColor)
-	FilePanelItemSelectedActiveStyle = lipgloss.NewStyle().Foreground(filePanelItemSelectedFGColor).Background(filePanelItemActiveBGColor)
+	FilePanelItemActiveStyle = lipgloss.NewStyle().Foreground(filePanelItemActiveFGColor).
+		Background(filePanelItemActiveBGColor)
+	FilePanelItemSelectedActiveStyle = lipgloss.NewStyle().Foreground(filePanelItemSelectedFGColor).
+		Background(filePanelItemActiveBGColor)
 	FilePanelSelectBoxStyle = lipgloss.NewStyle().Background(FilePanelBGColor)
 
 	// Sidebar Special Style
