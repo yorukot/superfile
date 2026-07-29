@@ -61,35 +61,41 @@ func (s *Model) directoriesRender(curFilePanelFileLocation string,
 		case diskDividerDir:
 			r.AddLines("", common.SideBarDisksDivider, "")
 		default:
-			cursor := " "
-			renderStyle := common.SidebarStyle
-			isActive := s.cursor == i && sideBarFocused && !s.searchBar.Focused()
-			isSelected := s.directories[i].Location == curFilePanelFileLocation
+			s.directoryRenderLine(i, curFilePanelFileLocation, sideBarFocused, r)
+		}
+	}
+}
 
+// renders a single directory line in the sidebar.
+func (s *Model) directoryRenderLine(i int, curFilePanelFileLocation string,
+	sideBarFocused bool, r *rendering.Renderer) {
+	cursor := " "
+	renderStyle := common.SidebarStyle
+	isActive := s.cursor == i && sideBarFocused && !s.searchBar.Focused()
+	isSelected := s.directories[i].Location == curFilePanelFileLocation
+
+	if isSelected {
+		renderStyle = common.SidebarSelectedStyle
+	}
+
+	if isActive {
+		if common.Config.CursorStyle == "arrow" {
+			cursor = icon.Cursor
+		} else { // Highlight
 			if isSelected {
-				renderStyle = common.SidebarSelectedStyle
-			}
-
-			if isActive {
-				if common.Config.CursorStyle == "arrow" {
-					cursor = icon.Cursor
-				} else { // Highlight
-					if isSelected {
-						renderStyle = common.SidebarSelectedActiveStyle
-					} else {
-						renderStyle = common.FilePanelItemActiveStyle
-					}
-				}
-			}
-
-			if s.renaming && s.cursor == i {
-				r.AddLines(s.rename.View())
+				renderStyle = common.SidebarSelectedActiveStyle
 			} else {
-				line := common.FilePanelCursorStyle.Render(cursor+" ") +
-					renderStyle.Render(s.directories[i].Icon+" ") +
-					renderStyle.Render(s.directories[i].Name)
-				r.AddLineWithCustomTruncate(line, rendering.TailsTruncateRight)
+				renderStyle = common.FilePanelItemActiveStyle
 			}
 		}
+	}
+
+	if s.renaming && s.cursor == i {
+		r.AddLines(s.rename.View())
+	} else {
+		line := common.FilePanelCursorStyle.Render(cursor+" ") +
+			renderStyle.Render(s.directories[i].Icon+" ") +
+			renderStyle.Render(s.directories[i].Name)
+		r.AddLineWithCustomTruncate(line, rendering.TailsTruncateRight)
 	}
 }
