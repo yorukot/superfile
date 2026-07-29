@@ -35,10 +35,12 @@ var (
 )
 
 var (
-	FilePanelTopDirectoryIconStyle lipgloss.Style
-	FilePanelTopPathStyle          lipgloss.Style
-	FilePanelItemSelectedStyle     lipgloss.Style
-	FilePanelSelectBoxStyle        lipgloss.Style
+	FilePanelTopDirectoryIconStyle   lipgloss.Style
+	FilePanelTopPathStyle            lipgloss.Style
+	FilePanelItemSelectedStyle       lipgloss.Style
+	FilePanelItemActiveStyle         lipgloss.Style
+	FilePanelItemSelectedActiveStyle lipgloss.Style
+	FilePanelSelectBoxStyle          lipgloss.Style
 )
 
 var (
@@ -98,6 +100,8 @@ var (
 	filePanelTopPathColor          color.Color
 	filePanelItemSelectedFGColor   color.Color
 	filePanelItemSelectedBGColor   color.Color
+	filePanelItemActiveFGColor     color.Color
+	filePanelItemActiveBGColor     color.Color
 
 	sidebarTitleColor          color.Color
 	sidebarItemSelectedFGColor color.Color
@@ -150,6 +154,8 @@ func LoadThemeConfig() { //nolint: funlen // Variable initialization
 	filePanelTopPathColor = lipgloss.Color(Theme.FilePanelTopPath)
 	filePanelItemSelectedFGColor = lipgloss.Color(Theme.FilePanelItemSelectedFG)
 	filePanelItemSelectedBGColor = lipgloss.Color(Theme.FilePanelItemSelectedBG)
+	filePanelItemActiveFGColor = lipgloss.Color(Theme.FilePanelItemActiveFG)
+	filePanelItemActiveBGColor = lipgloss.Color(Theme.FilePanelItemActiveBG)
 
 	sidebarTitleColor = lipgloss.Color(Theme.SidebarTitle)
 	sidebarItemSelectedFGColor = lipgloss.Color(Theme.SidebarItemSelectedFG)
@@ -194,6 +200,8 @@ func LoadThemeConfig() { //nolint: funlen // Variable initialization
 	FilePanelTopPathStyle = lipgloss.NewStyle().Foreground(filePanelTopPathColor).Background(FilePanelBGColor)
 	FilePanelItemSelectedStyle = lipgloss.NewStyle().Foreground(filePanelItemSelectedFGColor).
 		Background(filePanelItemSelectedBGColor)
+	FilePanelItemActiveStyle = lipgloss.NewStyle().Foreground(filePanelItemActiveFGColor).Background(filePanelItemActiveBGColor)
+	FilePanelItemSelectedActiveStyle = lipgloss.NewStyle().Foreground(filePanelItemSelectedFGColor).Background(filePanelItemActiveBGColor)
 	FilePanelSelectBoxStyle = lipgloss.NewStyle().Background(FilePanelBGColor)
 
 	// Sidebar Special Style

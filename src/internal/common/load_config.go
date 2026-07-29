@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"reflect"
 	"runtime"
+	"slices"
+	"strings"
 
 	"github.com/charmbracelet/x/ansi"
 	"github.com/pelletier/go-toml/v2"
@@ -85,6 +87,14 @@ func ValidateConfig(c *ConfigType) error {
 		return errors.New(
 			LoadConfigError("file_panel_name_percent", "File panel name percent is outside the supported range."),
 		)
+	}
+
+	cursorOptions := []string{"arrow", "highlight"}
+	if !slices.Contains(cursorOptions, c.CursorStyle) {
+		return errors.New(LoadConfigError(
+			"cursor_style",
+			fmt.Sprintf("Invalid cursor style. Supported values: %s.", strings.Join(cursorOptions, ", ")),
+		))
 	}
 
 	if ansi.StringWidth(c.BorderTop) != 1 {
