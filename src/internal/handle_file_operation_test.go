@@ -437,9 +437,11 @@ func TestPasteItem(t *testing.T) {
 	t.Run("Cut Duplicate File Handling", func(t *testing.T) {
 		source := filepath.Join(sourceDir, "cut-duplicate.txt")
 		destination := filepath.Join(destDir, "cut-duplicate.txt")
-		duplicate := filepath.Join(destDir, "cut-duplicate(1).txt")
+		firstDuplicate := filepath.Join(destDir, "cut-duplicate(1).txt")
+		secondDuplicate := filepath.Join(destDir, "cut-duplicate(2).txt")
 		require.NoError(t, os.WriteFile(source, []byte("source"), 0o644))
 		require.NoError(t, os.WriteFile(destination, []byte("destination"), 0o644))
+		require.NoError(t, os.WriteFile(firstDuplicate, []byte("first duplicate"), 0o644))
 
 		m := setupModelAndPerformOperation(t, sourceDir, false, "cut-duplicate.txt", nil, true)
 		p := NewTestTeaProgWithEventLoop(t, m)
@@ -448,10 +450,11 @@ func TestPasteItem(t *testing.T) {
 
 		assert.Eventually(t, func() bool {
 			existing, existingErr := os.ReadFile(destination)
-			moved, movedErr := os.ReadFile(duplicate)
+			first, firstErr := os.ReadFile(firstDuplicate)
+			moved, movedErr := os.ReadFile(secondDuplicate)
 			_, sourceErr := os.Stat(source)
-			return existingErr == nil && movedErr == nil && os.IsNotExist(sourceErr) &&
-				string(existing) == "destination" && string(moved) == "source"
+			return existingErr == nil && firstErr == nil && movedErr == nil && os.IsNotExist(sourceErr) &&
+				string(existing) == "destination" && string(first) == "first duplicate" && string(moved) == "source"
 		}, DefaultTestTimeout, DefaultTestTick)
 	})
 }
