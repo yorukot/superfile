@@ -62,16 +62,29 @@ func (s *Model) directoriesRender(curFilePanelFileLocation string,
 			r.AddLines("", common.SideBarDisksDivider, "")
 		default:
 			cursor := " "
-			if s.cursor == i && sideBarFocused && !s.searchBar.Focused() {
-				cursor = icon.Cursor
+			renderStyle := common.SidebarStyle
+			isActive := s.cursor == i && sideBarFocused && !s.searchBar.Focused()
+			isSelected := s.directories[i].Location == curFilePanelFileLocation
+
+			if isSelected {
+				renderStyle = common.SidebarSelectedStyle
 			}
+
+			if isActive {
+				if common.Config.CursorStyle == "arrow" {
+					cursor = icon.Cursor
+				} else { // Highlight
+					if isSelected {
+						renderStyle = common.SidebarSelectedActiveStyle
+					} else {
+						renderStyle = common.FilePanelItemActiveStyle
+					}
+				}
+			}
+
 			if s.renaming && s.cursor == i {
 				r.AddLines(s.rename.View())
 			} else {
-				renderStyle := common.SidebarStyle
-				if s.directories[i].Location == curFilePanelFileLocation {
-					renderStyle = common.SidebarSelectedStyle
-				}
 				line := common.FilePanelCursorStyle.Render(cursor+" ") +
 					renderStyle.Render(s.directories[i].Icon+" ") +
 					renderStyle.Render(s.directories[i].Name)

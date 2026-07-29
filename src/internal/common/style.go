@@ -23,9 +23,10 @@ var (
 )
 
 var (
-	SidebarDividerStyle  lipgloss.Style
-	SidebarTitleStyle    lipgloss.Style
-	SidebarSelectedStyle lipgloss.Style
+	SidebarDividerStyle        lipgloss.Style
+	SidebarTitleStyle          lipgloss.Style
+	SidebarSelectedStyle       lipgloss.Style
+	SidebarSelectedActiveStyle lipgloss.Style
 )
 
 var (
@@ -209,6 +210,8 @@ func LoadThemeConfig() { //nolint: funlen // Variable initialization
 	SidebarTitleStyle = lipgloss.NewStyle().Foreground(sidebarTitleColor).Background(SidebarBGColor)
 	SidebarSelectedStyle = lipgloss.NewStyle().Foreground(sidebarItemSelectedFGColor).
 		Background(sidebarItemSelectedBGColor)
+	SidebarSelectedActiveStyle = lipgloss.NewStyle().Foreground(sidebarItemSelectedFGColor).
+		Background(filePanelItemActiveBGColor)
 
 	// Footer Special Style
 	ProcessErrorStyle = lipgloss.NewStyle().Foreground(errorColor).Background(FooterBGColor)
@@ -221,6 +224,7 @@ func LoadThemeConfig() { //nolint: funlen // Variable initialization
 	ModalConfirm = lipgloss.NewStyle().Foreground(modalConfirmFGColor).Background(modalConfirmBGColor)
 	ModalTitleStyle = lipgloss.NewStyle().Foreground(hintColor).Background(ModalBGColor)
 	ModalErrorStyle = lipgloss.NewStyle().Foreground(errorColor).Background(ModalBGColor)
+
 	// Help Menu Style
 	HelpMenuHotkeyStyle = lipgloss.NewStyle().Foreground(helpMenuHotkeyColor).Background(ModalBGColor)
 	HelpMenuTitleStyle = lipgloss.NewStyle().Foreground(helpMenuTitleColor).Background(ModalBGColor)
