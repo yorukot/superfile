@@ -23,6 +23,9 @@ func typeMask(m *model, mask string) {
 	}
 }
 
+// Drives mask selection through the model update loop, the way a keypress
+// reaches it, covering both panel modes, cancelling, the masks that cannot be
+// applied, and that the outcome is actually visible in the rendered panel.
 func TestModel_Update_SelectByMask(t *testing.T) {
 	curTestDir := filepath.Join(testDir, "TestSelectByMask")
 	dir1 := filepath.Join(curTestDir, "dir1")

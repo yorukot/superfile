@@ -30,6 +30,8 @@ func (m *model) openMaskModal(selecting bool) {
 	m.firstTextInput = true
 }
 
+// closeMaskModal hides the mask modal and drops the message of a mask that
+// could not be applied. Used for both cancelling and a mask that went through.
 func (m *model) closeMaskModal() {
 	m.maskModal.textInput.Blur()
 	m.maskModal.open = false

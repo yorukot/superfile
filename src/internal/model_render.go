@@ -90,6 +90,9 @@ func (m *model) typineModalRender() string {
 		Render(fileLocation + "\n" + m.typingModal.textInput.View() + "\n\n" + tip)
 }
 
+// maskModalRender draws the dialog that takes a mask to select or unselect file
+// panel items with. Its title and confirm button follow the direction the modal
+// was opened in.
 func (m *model) maskModalRender() string {
 	title := common.MaskSelectTitle
 	confirmLabel := " (" + common.Hotkeys.ConfirmTyping[0] + ") Select "

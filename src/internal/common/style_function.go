@@ -155,6 +155,7 @@ func GenerateNewFileTextInput() textinput.Model {
 	return t
 }
 
+// Generate the text input of the modal that selects file panel items by mask
 func GenerateMaskTextInput() textinput.Model {
 	t := textinput.New()
 	t.Placeholder = "e.g. *.txt or report*.pdf *.md"

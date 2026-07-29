@@ -7,6 +7,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// maskTestPanel builds a panel holding a mix of extensions, casings, a name
+// without an extension and a directory, so that one fixture exercises every
+// masking rule.
 func maskTestPanel() Model {
 	return testModel(0, 0, 12, SelectMode, []Element{
 		{Name: "notes.txt", Location: "/tmp/notes.txt"},
@@ -18,6 +21,8 @@ func maskTestPanel() Model {
 	})
 }
 
+// Covers splitting a mask into patterns, the Norton Commander "*.*" translation
+// and lowercasing, along with the two ways a mask can be rejected.
 func TestParseMask(t *testing.T) {
 	testdata := []struct {
 		name             string
@@ -83,6 +88,8 @@ func TestParseMask(t *testing.T) {
 	}
 }
 
+// Covers the mask syntax a user is expected to type, from a plain extension to
+// character classes and several patterns in one mask.
 func TestSelectByMask(t *testing.T) {
 	testdata := []struct {
 		name             string
@@ -147,6 +154,8 @@ func TestSelectByMask(t *testing.T) {
 	}
 }
 
+// Unselecting by mask has to drop exactly the matched items and leave the rest
+// of the selection alone, including when nothing of what it matches was selected.
 func TestSelectByMaskUnselects(t *testing.T) {
 	panel := maskTestPanel()
 
@@ -169,6 +178,8 @@ func TestSelectByMaskUnselects(t *testing.T) {
 	assert.Equal(t, uint(4), panel.SelectedCount())
 }
 
+// A mask that cannot be applied must leave the existing selection untouched and
+// name the offending pattern, since that message is what the modal shows.
 func TestSelectByMaskInvalidMaskKeepsSelection(t *testing.T) {
 	panel := maskTestPanel()
 	panel.SetSelected("/tmp/notes.txt")
