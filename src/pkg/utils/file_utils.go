@@ -140,9 +140,11 @@ func fixTomlFile(resultErr *TomlLoadError, filePath string, target interface{}) 
 	backupPath := backupFile.Name()
 	needsBackupFileRemoval := true
 	defer func() {
-		if closeErr := backupFile.Close(); closeErr != nil {
-			if resultErr.wrappedError == nil {
-				resultErr.UpdateMessageAndError("failed to close backup file", closeErr)
+		if backupFile != nil {
+			if closeErr := backupFile.Close(); closeErr != nil {
+				if resultErr.wrappedError == nil {
+					resultErr.UpdateMessageAndError("failed to close backup file", closeErr)
+				}
 			}
 		}
 		// Remove backup in case of unsuccessful write
@@ -153,20 +155,39 @@ func fixTomlFile(resultErr *TomlLoadError, filePath string, target interface{}) 
 			}
 		}
 	}()
-	// Copy the original file to the backup
-	// Open it in read write mode
-	origFile, err := os.OpenFile(filePath, os.O_RDWR, ConfigFilePerm)
+	// Copy the original file to the backup.
+	origFile, err := os.Open(filePath)
 	if err != nil {
 		resultErr.UpdateMessageAndError("failed to open original file for backup", err)
 		return resultErr
 	}
-	defer origFile.Close()
+	originalInfo, err := origFile.Stat()
+	if err != nil {
+		_ = origFile.Close()
+		resultErr.UpdateMessageAndError("failed to read original file permissions", err)
+		return resultErr
+	}
 
 	_, err = io.Copy(backupFile, origFile)
 	if err != nil {
+		_ = origFile.Close()
 		resultErr.UpdateMessageAndError("failed to copy original file to backup", err)
 		return resultErr
 	}
+	if err = origFile.Close(); err != nil {
+		resultErr.UpdateMessageAndError("failed to close original file after backup", err)
+		return resultErr
+	}
+	if err = backupFile.Sync(); err != nil {
+		resultErr.UpdateMessageAndError("failed to sync backup file", err)
+		return resultErr
+	}
+	if err = backupFile.Close(); err != nil {
+		backupFile = nil
+		resultErr.UpdateMessageAndError("failed to close backup file", err)
+		return resultErr
+	}
+	backupFile = nil
 
 	tomlData, err := toml.Marshal(target)
 	if err != nil {
@@ -174,15 +195,8 @@ func fixTomlFile(resultErr *TomlLoadError, filePath string, target interface{}) 
 		return resultErr
 	}
 
-	// Truncate the file
-	if err = origFile.Truncate(0); err != nil {
-		resultErr.UpdateMessageAndError("failed to truncate TOML file", err)
-		return resultErr
-	}
-	// Write updated TOML to file
-	_, err = origFile.WriteAt(tomlData, 0)
-	if err != nil {
-		resultErr.UpdateMessageAndError("failed to write TOML data to original file", err)
+	if err = writeFileAtomically(filePath, tomlData, originalInfo.Mode().Perm()); err != nil {
+		resultErr.UpdateMessageAndError("failed to atomically replace TOML file", err)
 		return resultErr
 	}
 
