@@ -433,6 +433,27 @@ func TestPasteItem(t *testing.T) {
 		// Verify duplicate file with different name
 		verifyDestinationFiles(t, destDir, []string{"duplicate(1).txt"})
 	})
+
+	t.Run("Cut Duplicate File Handling", func(t *testing.T) {
+		source := filepath.Join(sourceDir, "cut-duplicate.txt")
+		destination := filepath.Join(destDir, "cut-duplicate.txt")
+		duplicate := filepath.Join(destDir, "cut-duplicate(1).txt")
+		require.NoError(t, os.WriteFile(source, []byte("source"), 0o644))
+		require.NoError(t, os.WriteFile(destination, []byte("destination"), 0o644))
+
+		m := setupModelAndPerformOperation(t, sourceDir, false, "cut-duplicate.txt", nil, true)
+		p := NewTestTeaProgWithEventLoop(t, m)
+		navigateToTargetDir(t, m, sourceDir, destDir)
+		p.SendKey(common.Hotkeys.PasteItems[0])
+
+		assert.Eventually(t, func() bool {
+			existing, existingErr := os.ReadFile(destination)
+			moved, movedErr := os.ReadFile(duplicate)
+			_, sourceErr := os.Stat(source)
+			return existingErr == nil && movedErr == nil && os.IsNotExist(sourceErr) &&
+				string(existing) == "destination" && string(moved) == "source"
+		}, DefaultTestTimeout, DefaultTestTick)
+	})
 }
 
 // ------  Very specific utilities that are required for this test case file only
