@@ -162,6 +162,22 @@ func LoadHotkeysFile(ignoreMissingFields bool) {
 		field := val.Type().Field(i)
 		value := val.Field(i)
 
+		// Handle custom hotkeys separately
+		if field.Name == "CustomHotkeys" {
+			// Validate only the keybindings defined by the user
+			for keyName, keys := range Hotkeys.CustomHotkeys {
+				if len(keys) == 0 || keys[0] == "" {
+					utils.PrintlnAndExit(
+						LoadHotkeysError(
+							"CustomHotkeys."+keyName,
+							"Hotkey list is empty; at least one key binding is required.",
+						),
+					)
+				}
+			}
+			continue // Skip the standard slice validation for this map field
+		}
+
 		// Although this is redundant as Hotkey is always a slice
 		// This adds a layer against accidental struct modifications
 		// Makes sure its always be a string slice. It's somewhat like a unit test
