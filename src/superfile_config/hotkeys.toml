@@ -64,6 +64,7 @@ open_file_with_editor = ['e', '']
 content_panel_edit = ['i', '']
 content_panel_save = ['ctrl+s', '']
 content_panel_exit_edit = ['esc', '']
+content_panel_open_nvim = ['E', '']
 
 #-- Other Actions
 change_panel_mode = ['v', '']

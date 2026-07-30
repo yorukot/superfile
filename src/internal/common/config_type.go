@@ -162,9 +162,10 @@ type HotkeysType struct {
 	OpenFileWithEditor             []string `toml:"open_file_with_editor"              comment:"editor"`
 	OpenCurrentDirectoryWithEditor []string `toml:"open_current_directory_with_editor"`
 
-	ContentPanelEdit     []string `toml:"content_panel_edit"     comment:"content panel editing"`
+	ContentPanelEdit     []string `toml:"content_panel_edit"      comment:"content panel editing"`
 	ContentPanelSave     []string `toml:"content_panel_save"`
 	ContentPanelExitEdit []string `toml:"content_panel_exit_edit"`
+	ContentPanelOpenNvim []string `toml:"content_panel_open_nvim"`
 
 	PinnedDirectory []string `toml:"pinned_directory"  comment:"other"`
 	ToggleDotFile   []string `toml:"toggle_dot_file"`

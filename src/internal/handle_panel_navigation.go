@@ -95,17 +95,23 @@ func (m *model) contentPanelEnterEdit() tea.Cmd {
 	}
 	path := panel.GetFocusedItem().Location
 
-	// For code files, launch nvim full-screen
-	if contentpanel.IsCodeFile(path, common.Config.ContentPanelCodeExtensions) {
-		return m.launchNvimForContentPanel(path)
-	}
-
+	// Always use built-in textarea for editing in the content panel
 	ok, reason := m.fileModel.FilePreview.EnterEditMode(path)
 	if !ok {
 		slog.Debug("Cannot enter edit mode", "path", path, "reason", reason)
 		return nil
 	}
 	return nil
+}
+
+// contentPanelOpenNvim opens the current file in full-screen nvim.
+func (m *model) contentPanelOpenNvim() tea.Cmd {
+	panel := m.getFocusedFilePanel()
+	if panel.EmptyOrInvalid() {
+		return nil
+	}
+	path := panel.GetFocusedItem().Location
+	return m.launchNvimForContentPanel(path)
 }
 
 // launchNvimForContentPanel opens nvim full-screen via tea.ExecProcess, then
