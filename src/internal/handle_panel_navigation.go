@@ -66,6 +66,7 @@ func (m *model) focusOnMetadata() {
 
 // toggleContentPanelFocus cycles focus into/out of the content (preview) panel.
 func (m *model) toggleContentPanelFocus() {
+	slog.Debug("toggleContentPanelFocus called", "currentFocus", m.focusPanel)
 	if m.focusPanel == contentPanelFocus {
 		m.focusPanel = nonePanelFocus
 		m.getFocusedFilePanel().IsFocused = true
