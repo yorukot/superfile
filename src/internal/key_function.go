@@ -2,7 +2,9 @@ package internal
 
 import (
 	"errors"
+	"fmt"
 	"log/slog"
+	"os"
 	"slices"
 
 	"github.com/yorukot/superfile/src/internal/common"
@@ -23,9 +25,8 @@ import (
 // TODO: This function has grown too big. It needs to be fixed, via major
 // updates and fixes in key handling code
 func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen,gocognit // See above
-	if msg == "b" {
-		slog.Debug("mainKey received b", "focusPanel", m.focusPanel)
-	}
+	fmt.Fprintf(os.Stderr, "KEY: %q focus=%d
+", msg, m.focusPanel)
 	switch {
 	// If move up Key is pressed, check the current state and executes
 	case slices.Contains(common.Hotkeys.ListUp, msg):
@@ -124,7 +125,7 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen,go
 	case slices.Contains(common.Hotkeys.FocusOnMetaData, msg):
 		m.focusOnMetadata()
 	case slices.Contains(common.Hotkeys.FocusOnContentPanel, msg) || msg == "b":
-		slog.Debug("FocusOnContentPanel triggered", "msg", msg)
+		fmt.Fprintf(os.Stderr, "FOCUS: toggling content panel focus\n")
 		m.toggleContentPanelFocus()
 
 	case slices.Contains(common.Hotkeys.PasteItems, msg):
