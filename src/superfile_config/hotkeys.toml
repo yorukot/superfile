@@ -60,6 +60,11 @@ extract_file = ['ctrl+e', '']
 open_current_directory_with_editor = ['E', '']
 open_file_with_editor = ['e', '']
 
+#-- Content Panel Editing
+content_panel_edit = ['i', '']
+content_panel_save = ['ctrl+s', '']
+content_panel_exit_edit = ['esc', '']
+
 #-- Other Actions
 change_panel_mode = ['v', '']
 copy_path = ['ctrl+p', '']

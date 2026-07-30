@@ -331,6 +331,10 @@ func (m *model) handleKeyInput(msg tea.KeyPressMsg) tea.Cmd {
 	case m.helpMenu.IsOpen():
 		m.helpMenu.HandleKey(msg.String())
 
+	// Content panel edit mode — forward all keys to textarea
+	case m.focusPanel == contentPanelFocus && m.fileModel.FilePreview.IsEditing():
+		cmd = m.contentPanelHandleEditKey(msg)
+
 	case slices.Contains(common.Hotkeys.Quit, msg.String()):
 		m.modelQuitState = quitInitiated
 

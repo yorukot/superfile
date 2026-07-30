@@ -88,7 +88,7 @@ func (m *Model) UpdatePreviewPanel(msg contentpanel.UpdateMsg) tea.Cmd {
 }
 
 func (m *Model) GetFilePreviewCmd(forcePreviewRender bool) tea.Cmd {
-	if !m.FilePreview.IsOpen() {
+	if !m.FilePreview.IsOpen() || m.FilePreview.IsAutoRefreshPaused() {
 		return nil
 	}
 	panel := m.GetFocusedFilePanel()

@@ -15,6 +15,10 @@ func (m *Model) GetFilePreviewRender() string {
 	if !m.FilePreview.IsOpen() {
 		return ""
 	}
+	// In edit mode, render the textarea
+	if m.FilePreview.IsEditing() {
+		return m.FilePreview.RenderEditMode()
+	}
 	// Check if width and height have been synced yet
 	if m.FilePreview.GetContentHeight() == m.Height &&
 		m.FilePreview.GetContentWidth() == m.ExpectedPreviewWidth {

@@ -165,6 +165,20 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen,go
 	case slices.Contains(common.Hotkeys.OpenCurrentDirectoryWithEditor, msg):
 		return m.openDirectoryWithEditor()
 
+	// Content panel edit mode keys (only when content panel is focused)
+	case slices.Contains(common.Hotkeys.ContentPanelEdit, msg):
+		if m.focusPanel == contentPanelFocus {
+			return m.contentPanelEnterEdit()
+		}
+	case slices.Contains(common.Hotkeys.ContentPanelSave, msg):
+		if m.focusPanel == contentPanelFocus && m.fileModel.FilePreview.IsEditing() {
+			return m.contentPanelSaveEdit()
+		}
+	case slices.Contains(common.Hotkeys.ContentPanelExitEdit, msg):
+		if m.focusPanel == contentPanelFocus && m.fileModel.FilePreview.IsEditing() {
+			m.contentPanelExitEdit()
+		}
+
 	default:
 		return m.normalAndBrowserModeKey(msg)
 	}

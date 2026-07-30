@@ -3,6 +3,8 @@ package internal
 import (
 	"log/slog"
 
+	tea "charm.land/bubbletea/v2"
+
 	"github.com/yorukot/superfile/src/internal/common"
 )
 
@@ -70,4 +72,36 @@ func (m *model) toggleContentPanelFocus() {
 		m.getFocusedFilePanel().IsFocused = false
 		m.fileModel.FilePreview.SetFocused(true)
 	}
+}
+
+func (m *model) contentPanelEnterEdit() tea.Cmd {
+	panel := m.getFocusedFilePanel()
+	if panel.EmptyOrInvalid() {
+		return nil
+	}
+	path := panel.GetFocusedItem().Location
+	ok, reason := m.fileModel.FilePreview.EnterEditMode(path)
+	if !ok {
+		slog.Debug("Cannot enter edit mode", "path", path, "reason", reason)
+		return nil
+	}
+	return nil
+}
+
+func (m *model) contentPanelSaveEdit() tea.Cmd {
+	err := m.fileModel.FilePreview.SaveEdit()
+	if err != nil {
+		slog.Error("Error saving file in content panel", "error", err)
+	}
+	return nil
+}
+
+func (m *model) contentPanelExitEdit() {
+	m.fileModel.FilePreview.ExitEditMode()
+}
+
+// contentPanelHandleEditKey forwards a key message to the content panel's
+// textarea when in edit mode.
+func (m *model) contentPanelHandleEditKey(msg tea.KeyPressMsg) tea.Cmd {
+	return m.fileModel.FilePreview.HandleEditKey(msg)
 }

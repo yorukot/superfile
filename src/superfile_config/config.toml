@@ -27,10 +27,16 @@ auto_check_update = true
 # program exits? 
 cd_on_quit = false
 
-#-- File Preview
+#-- File Preview / Content Panel
 # Should we open a file preview by default whenever selection-hovering over a
 # file?
 default_open_file_preview = true
+
+# Maximum file size in bytes for editing in the content panel (5 MB)
+content_panel_max_edit_size = 5242880
+
+# Embed nvim inside the content panel (experimental, default: false)
+content_panel_embed_nvim = false
 
 #-- Image Preview
 # Should we open an image preview by default whenever selection-hovering over an

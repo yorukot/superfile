@@ -2,6 +2,9 @@ package contentpanel
 
 import (
 	"log/slog"
+	"os"
+
+	"charm.land/bubbles/v2/textarea"
 
 	"github.com/yorukot/superfile/src/internal/common"
 
@@ -16,6 +19,14 @@ type Model struct {
 
 	// Scroll offset for keyboard navigation when focused
 	scrollOffset int
+
+	// Edit mode state
+	editMode          bool
+	textarea          textarea.Model
+	editableReason    string   // why not editable (empty = editable)
+	originalPerm      os.FileMode
+	originalPath      string   // path being edited
+	autoRefreshPaused bool
 
 	// Location denotes what is supposed to be in model.
 	// Might not be always in sync with content

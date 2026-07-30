@@ -159,6 +159,15 @@ func (m *Model) RenderTextWithDimension(text string, height int, width int) stri
 	return r.AddLines(text).Render()
 }
 
+// RenderEditMode returns the rendered textarea for edit mode.
+func (m *Model) RenderEditMode() string {
+	if !m.editMode {
+		return ""
+	}
+	r := ui.ContentPanelRendererFocused(m.contentHeight, m.contentWidth)
+	return r.AddLines(m.textarea.View()).Render()
+}
+
 // RenderWithPath returns (render, rawTransmit). rawTransmit is non-empty
 // for Kitty images (transmit data) or when clearing Kitty images (delete-all).
 // It must be sent via tea.Raw().
