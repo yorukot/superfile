@@ -166,8 +166,22 @@ func (m *Model) RenderEditMode() string {
 	if !m.editMode {
 		return ""
 	}
+	// If embedded nvim is running, show its output
+	if m.IsNvimRunning() {
+		return m.renderNvimOutput()
+	}
 	r := ui.ContentPanelRendererFocused(m.contentHeight, m.contentWidth)
 	return r.AddLines(m.textarea.View()).Render()
+}
+
+// renderNvimOutput renders the embedded nvim PTY output.
+func (m *Model) renderNvimOutput() string {
+	r := ui.ContentPanelRendererFocused(m.contentHeight, m.contentWidth)
+	output := m.GetNvimOutput()
+	if output == "" {
+		output = " nvim starting..."
+	}
+	return r.AddLines(output).Render()
 }
 
 // RenderShellOutput renders the last shell command result.

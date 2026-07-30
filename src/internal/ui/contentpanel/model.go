@@ -33,6 +33,9 @@ type Model struct {
 	shellCommand string // the command that produced it
 	shellExit    int    // exit code
 
+	// Embedded nvim state (behind embed_nvim config)
+	nvim *NvimState
+
 	// Location denotes what is supposed to be in model.
 	// Might not be always in sync with content
 	location      string

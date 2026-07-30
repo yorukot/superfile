@@ -85,7 +85,16 @@ func (m *model) contentPanelEnterEdit() tea.Cmd {
 	}
 	path := panel.GetFocusedItem().Location
 
-	// For code files, use nvim full-screen (if not embed mode)
+	// For code files with embed_nvim=true, start embedded nvim
+	if contentpanel.IsCodeFile(path, common.Config.ContentPanelCodeExtensions) && common.Config.ContentPanelEmbedNvim {
+		err := m.fileModel.FilePreview.EnterNvimMode(path)
+		if err != nil {
+			slog.Error("Failed to start embedded nvim", "error", err)
+		}
+		return nil
+	}
+
+	// For code files without embed, launch nvim full-screen
 	if contentpanel.IsCodeFile(path, common.Config.ContentPanelCodeExtensions) && !common.Config.ContentPanelEmbedNvim {
 		return m.launchNvimForContentPanel(path)
 	}
@@ -115,6 +124,11 @@ func (m *model) launchNvimForContentPanel(path string) tea.Cmd {
 }
 
 func (m *model) contentPanelSaveEdit() tea.Cmd {
+	// In nvim mode, save via ":w" escape sequence
+	if m.fileModel.FilePreview.IsNvimRunning() {
+		m.fileModel.FilePreview.WriteNvimKey([]byte("\x1b:w\r"))
+		return nil
+	}
 	err := m.fileModel.FilePreview.SaveEdit()
 	if err != nil {
 		slog.Error("Error saving file in content panel", "error", err)
@@ -123,11 +137,82 @@ func (m *model) contentPanelSaveEdit() tea.Cmd {
 }
 
 func (m *model) contentPanelExitEdit() {
+	// In nvim mode, quit via ":q" (esc to normal mode first)
+	if m.fileModel.FilePreview.IsNvimRunning() {
+		m.fileModel.FilePreview.StopNvim()
+		return
+	}
 	m.fileModel.FilePreview.ExitEditMode()
 }
 
 // contentPanelHandleEditKey forwards a key message to the content panel's
-// textarea when in edit mode.
+// textarea when in edit mode, or to nvim PTY when embedded nvim is running.
 func (m *model) contentPanelHandleEditKey(msg tea.KeyPressMsg) tea.Cmd {
+	// If embedded nvim is running, send key to PTY
+	if m.fileModel.FilePreview.IsNvimRunning() {
+		m.fileModel.FilePreview.WriteNvimKey(nvimKeyBytes(msg))
+		return nil
+	}
 	return m.fileModel.FilePreview.HandleEditKey(msg)
+}
+
+// nvimKeyBytes converts a Bubble Tea key message to bytes suitable for
+// sending to nvim's PTY stdin.
+func nvimKeyBytes(msg tea.KeyPressMsg) []byte {
+	s := msg.String()
+	switch {
+	case s == "enter":
+		return []byte("\r")
+	case s == "esc":
+		return []byte("\x1b")
+	case s == "tab":
+		return []byte("\t")
+	case s == "backspace":
+		return []byte("\x7f")
+	case s == "ctrl+c":
+		return []byte("\x03")
+	case s == "ctrl+d":
+		return []byte("\x04")
+	case s == "ctrl+z":
+		return []byte("\x1a")
+	case s == "ctrl+u":
+		return []byte("\x15")
+	case s == "ctrl+w":
+		return []byte("\x17")
+	case len(s) == 1:
+		return []byte(s)
+	default:
+		// For arrow keys and other special keys, send the escape sequence
+		return nvimSpecialKey(s)
+	}
+}
+
+func nvimSpecialKey(key string) []byte {
+	switch key {
+	case "up":
+		return []byte("\x1b[A")
+	case "down":
+		return []byte("\x1b[B")
+	case "right":
+		return []byte("\x1b[C")
+	case "left":
+		return []byte("\x1b[D")
+	case "home":
+		return []byte("\x1b[H")
+	case "end":
+		return []byte("\x1b[F")
+	case "pgup":
+		return []byte("\x1b[5~")
+	case "pgdown":
+		return []byte("\x1b[6~")
+	case "delete":
+		return []byte("\x1b[3~")
+	case "insert":
+		return []byte("\x1b[2~")
+	case "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10", "f11", "f12":
+		// Not supporting function keys for now
+		return nil
+	default:
+		return nil
+	}
 }

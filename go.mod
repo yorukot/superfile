@@ -11,6 +11,7 @@ require (
 	github.com/atotto/clipboard v0.1.4
 	github.com/barasher/go-exiftool v1.10.0
 	github.com/charmbracelet/x/ansi v0.11.7
+	github.com/creack/pty v1.1.9
 	github.com/fatih/color v1.19.0
 	github.com/fvbommel/sortorder v1.1.0
 	github.com/lazysegtree/go-zoxide v0.1.0
