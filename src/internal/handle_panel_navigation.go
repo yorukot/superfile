@@ -1,7 +1,9 @@
 package internal
 
 import (
+	"fmt"
 	"log/slog"
+	"os"
 	"os/exec"
 	"strings"
 
@@ -66,7 +68,15 @@ func (m *model) focusOnMetadata() {
 
 // toggleContentPanelFocus cycles focus into/out of the content (preview) panel.
 func (m *model) toggleContentPanelFocus() {
-	slog.Debug("toggleContentPanelFocus called", "currentFocus", m.focusPanel)
+	// Write to a temp file so we can confirm this function is called
+	os.WriteFile("/tmp/spf_focus.log", []byte(fmt.Sprintf("toggleContentPanelFocus: focusPanel=%d -> %d\n",
+		m.focusPanel, func() focusPanelType {
+			if m.focusPanel == contentPanelFocus {
+				return nonePanelFocus
+			}
+			return contentPanelFocus
+		}())), 0644)
+
 	if m.focusPanel == contentPanelFocus {
 		m.focusPanel = nonePanelFocus
 		m.getFocusedFilePanel().IsFocused = true

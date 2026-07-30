@@ -308,8 +308,8 @@ func (m *model) handleKeyInput(msg tea.KeyPressMsg) tea.Cmd {
 	var cmd tea.Cmd
 	cdOnQuit := common.Config.CdOnQuit
 
-	// Hardcoded: b toggles content panel focus
-	if msg.String() == "b" && !m.promptModal.IsOpen() && !m.zoxideModal.IsOpen() && !m.helpMenu.IsOpen() && !m.sortModal.IsOpen() && !m.typingModal.open && !m.fileModel.Renaming && !m.spfError.IsOpen() && !m.notifyModel.IsOpen() {
+	// Hardcoded: b toggles content panel focus (check both string and rune)
+	if (msg.String() == "b" || msg.Text == "b") && !m.promptModal.IsOpen() && !m.zoxideModal.IsOpen() && !m.helpMenu.IsOpen() && !m.sortModal.IsOpen() && !m.typingModal.open && !m.fileModel.Renaming && !m.spfError.IsOpen() && !m.notifyModel.IsOpen() {
 		m.toggleContentPanelFocus()
 		return nil
 	}
