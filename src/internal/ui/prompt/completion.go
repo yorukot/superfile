@@ -45,7 +45,7 @@ func getShellCompletions(prefix string, cwd string) []string {
 	escaped := shellEscape(prefix)
 	// -c: commands, -f: files, combined gives both
 	cmd := exec.CommandContext(ctx, "bash", "-c",
-		fmt.Sprintf("compgen -cf -- %s 2>/dev/null", escaped))
+		fmt.Sprintf("shopt -s nocaseglob 2>/dev/null; compgen -cf -- %s 2>/dev/null", escaped))
 	cmd.Dir = cwd
 	output, err := cmd.Output()
 	if err == nil {
@@ -55,8 +55,9 @@ func getShellCompletions(prefix string, cwd string) []string {
 			seen := make(map[string]bool, len(lines))
 			uniq := lines[:0]
 			for _, l := range lines {
-				if !seen[l] {
-					seen[l] = true
+				key := strings.ToLower(l)
+				if !seen[key] {
+					seen[key] = true
 					uniq = append(uniq, l)
 				}
 			}
@@ -79,7 +80,7 @@ func manualCompletions(prefix string, cwd string) []string {
 	if err == nil {
 		for _, e := range entries {
 			name := e.Name()
-			if strings.HasPrefix(name, prefix) {
+			if strings.HasPrefix(strings.ToLower(name), strings.ToLower(prefix)) {
 				// Skip hidden files unless prefix starts with '.'
 				if !strings.HasPrefix(prefix, ".") && strings.HasPrefix(name, ".") {
 					continue
@@ -101,7 +102,7 @@ func manualCompletions(prefix string, cwd string) []string {
 		}
 		for _, e := range entries {
 			name := e.Name()
-			if !strings.HasPrefix(name, prefix) || seen[name] {
+			if !strings.HasPrefix(strings.ToLower(name), strings.ToLower(prefix)) || seen[name] {
 				continue
 			}
 			seen[name] = true
