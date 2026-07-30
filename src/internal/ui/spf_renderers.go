@@ -51,12 +51,11 @@ func FilePreviewPanelRenderer(totalHeight int, totalWidth int) *rendering.Render
 	cfg.ContentFGColor = common.FilePanelFGColor
 	cfg.ContentBGColor = common.FilePanelBGColor
 
-	if common.Config.EnableFilePreviewBorder {
-		cfg.BorderRequired = true
-		cfg.BorderBGColor = common.FilePanelBGColor
-		cfg.BorderFGColor = common.FilePanelBorderColor
-		cfg.Border = DefaultLipglossBorder()
-	}
+	// Always show border for consistency with other panels
+	cfg.BorderRequired = true
+	cfg.BorderBGColor = common.FilePanelBGColor
+	cfg.BorderFGColor = common.FilePanelBorderColor
+	cfg.Border = DefaultLipglossBorder()
 	cfg.RendererName += "-preview"
 
 	r := rendering.NewRendererWithAutoFixConfig(cfg)
@@ -64,13 +63,12 @@ func FilePreviewPanelRenderer(totalHeight int, totalWidth int) *rendering.Render
 }
 
 // ContentPanelRendererFocused returns a renderer for the content panel
-// when it has keyboard focus (via Shift+Tab).
+// when it has keyboard focus (via Shift+Tab). Uses active border color.
 func ContentPanelRendererFocused(totalHeight int, totalWidth int) *rendering.Renderer {
 	cfg := rendering.DefaultRendererConfig(totalHeight, totalWidth)
 	cfg.ContentFGColor = common.FilePanelFGColor
 	cfg.ContentBGColor = common.FilePanelBGColor
 
-	// Always show border when focused
 	cfg.BorderRequired = true
 	cfg.BorderBGColor = common.FilePanelBGColor
 	cfg.BorderFGColor = common.FilePanelBorderActiveColor

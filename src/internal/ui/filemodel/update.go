@@ -103,6 +103,8 @@ func (m *Model) GetFilePreviewCmd(forcePreviewRender bool) tea.Cmd {
 		return nil
 	}
 
+	// Resume preview when navigating to a new file
+	m.FilePreview.ClearShellOutput()
 	m.FilePreview.SetLocation(selectedItem.Location)
 	m.FilePreview.ResetScroll()
 	m.FilePreview.SetLoading()
