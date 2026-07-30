@@ -11,6 +11,12 @@ import (
 type Model struct {
 	open bool
 
+	// Whether this panel currently has keyboard focus (via Shift+Tab)
+	focused bool
+
+	// Scroll offset for keyboard navigation when focused
+	scrollOffset int
+
 	// Location denotes what is supposed to be in model.
 	// Might not be always in sync with content
 	location      string

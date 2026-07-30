@@ -72,3 +72,33 @@ func (m *Model) Open() {
 func (m *Model) Close() {
 	m.open = false
 }
+
+func (m *Model) SetFocused(focused bool) {
+	m.focused = focused
+}
+
+func (m *Model) IsFocused() bool {
+	return m.focused
+}
+
+func (m *Model) ScrollUp() {
+	if m.scrollOffset > 0 {
+		m.scrollOffset--
+	}
+}
+
+func (m *Model) ScrollDown() {
+	m.scrollOffset++
+}
+
+func (m *Model) ScrollPageUp(pageSize int) {
+	m.scrollOffset = max(0, m.scrollOffset-pageSize)
+}
+
+func (m *Model) ScrollPageDown(pageSize int) {
+	m.scrollOffset += pageSize
+}
+
+func (m *Model) ResetScroll() {
+	m.scrollOffset = 0
+}

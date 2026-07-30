@@ -95,6 +95,7 @@ func (m *Model) GetFilePreviewCmd(forcePreviewRender bool) tea.Cmd {
 	if panel.EmptyOrInvalid() {
 		// Sync call because this will be fast
 		m.FilePreview.SetEmptyWithDimensions(m.ExpectedPreviewWidth, m.Height)
+		m.FilePreview.ResetScroll()
 		return nil
 	}
 	selectedItem := panel.GetFocusedItem()
@@ -103,6 +104,7 @@ func (m *Model) GetFilePreviewCmd(forcePreviewRender bool) tea.Cmd {
 	}
 
 	m.FilePreview.SetLocation(selectedItem.Location)
+	m.FilePreview.ResetScroll()
 	m.FilePreview.SetLoading()
 
 	// HACK!!!. fileModel must not be aware of other dimensions. but...

@@ -139,9 +139,10 @@ type HotkeysType struct {
 	OpenSortOptionsMenu    []string `toml:"open_sort_options_menu"`
 	ToggleReverseSort      []string `toml:"toggle_reverse_sort"`
 
-	FocusOnProcessBar []string `toml:"focus_on_process_bar" comment:"change focus"`
-	FocusOnSidebar    []string `toml:"focus_on_sidebar"`
-	FocusOnMetaData   []string `toml:"focus_on_metadata"`
+	FocusOnProcessBar  []string `toml:"focus_on_process_bar"  comment:"change focus"`
+	FocusOnSidebar     []string `toml:"focus_on_sidebar"`
+	FocusOnMetaData    []string `toml:"focus_on_metadata"`
+	FocusOnContentPanel []string `toml:"focus_on_content_panel"`
 
 	FilePanelItemCreate []string `toml:"file_panel_item_create" comment:"create file/directory and rename "`
 	FilePanelItemRename []string `toml:"file_panel_item_rename"`

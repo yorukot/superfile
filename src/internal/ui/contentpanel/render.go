@@ -152,9 +152,11 @@ func (m *Model) RenderTextWithDimension(text string, height int, width int) stri
 	if width == 0 && height == 0 {
 		return ""
 	}
-	return ui.FilePreviewPanelRenderer(height, width).
-		AddLines(text).
-		Render()
+	r := ui.FilePreviewPanelRenderer(height, width)
+	if m.focused {
+		r = ui.ContentPanelRendererFocused(height, width)
+	}
+	return r.AddLines(text).Render()
 }
 
 // RenderWithPath returns (render, rawTransmit). rawTransmit is non-empty
@@ -167,6 +169,9 @@ func (m *Model) RenderWithPath(
 	fullModelWidth int,
 ) (string, string) {
 	r := ui.FilePreviewPanelRenderer(previewHeight, previewWidth)
+	if m.focused {
+		r = ui.ContentPanelRendererFocused(previewHeight, previewWidth)
+	}
 	// Raw command to clear any previous Kitty images when showing non-image content
 	kittyClear := m.imagePreviewer.GetKittyClearRaw()
 

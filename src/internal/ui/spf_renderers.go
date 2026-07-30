@@ -63,6 +63,24 @@ func FilePreviewPanelRenderer(totalHeight int, totalWidth int) *rendering.Render
 	return r
 }
 
+// ContentPanelRendererFocused returns a renderer for the content panel
+// when it has keyboard focus (via Shift+Tab).
+func ContentPanelRendererFocused(totalHeight int, totalWidth int) *rendering.Renderer {
+	cfg := rendering.DefaultRendererConfig(totalHeight, totalWidth)
+	cfg.ContentFGColor = common.FilePanelFGColor
+	cfg.ContentBGColor = common.FilePanelBGColor
+
+	// Always show border when focused
+	cfg.BorderRequired = true
+	cfg.BorderBGColor = common.FilePanelBGColor
+	cfg.BorderFGColor = common.FilePanelBorderActiveColor
+	cfg.Border = DefaultLipglossBorder()
+	cfg.RendererName += "-preview-focused"
+
+	r := rendering.NewRendererWithAutoFixConfig(cfg)
+	return r
+}
+
 func PromptRenderer(totalHeight int, totalWidth int) *rendering.Renderer {
 	cfg := rendering.DefaultRendererConfig(totalHeight, totalWidth)
 	cfg.TruncateHeight = true

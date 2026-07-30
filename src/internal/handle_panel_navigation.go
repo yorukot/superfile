@@ -58,3 +58,16 @@ func (m *model) focusOnMetadata() {
 		m.getFocusedFilePanel().IsFocused = false
 	}
 }
+
+// toggleContentPanelFocus cycles focus into/out of the content (preview) panel.
+func (m *model) toggleContentPanelFocus() {
+	if m.focusPanel == contentPanelFocus {
+		m.focusPanel = nonePanelFocus
+		m.getFocusedFilePanel().IsFocused = true
+		m.fileModel.FilePreview.SetFocused(false)
+	} else {
+		m.focusPanel = contentPanelFocus
+		m.getFocusedFilePanel().IsFocused = false
+		m.fileModel.FilePreview.SetFocused(true)
+	}
+}
