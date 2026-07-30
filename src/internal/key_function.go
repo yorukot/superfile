@@ -26,6 +26,7 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen,go
 	switch {
 	// If move up Key is pressed, check the current state and executes
 	case slices.Contains(common.Hotkeys.ListUp, msg):
+		m.fileModel.FilePreview.ClearShellOutput()
 		switch m.focusPanel {
 		case sidebarFocus:
 			m.sidebarModel.ListUp()
@@ -41,6 +42,7 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen,go
 
 		// If move down Key is pressed, check the current state and executes
 	case slices.Contains(common.Hotkeys.ListDown, msg):
+		m.fileModel.FilePreview.ClearShellOutput()
 		switch m.focusPanel {
 		case sidebarFocus:
 			m.sidebarModel.ListDown()
