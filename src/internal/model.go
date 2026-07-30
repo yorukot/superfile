@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log/slog"
 	"os"
+	"os"
 	"os/exec"
 	"reflect"
 	"runtime"
@@ -80,6 +81,12 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.MouseMsg:
 		m.handleMouseMsg(msg)
 	case tea.KeyPressMsg:
+		// Direct b-key check for content panel focus
+		if msg.String() == "b" || msg.Text == "b" {
+			os.WriteFile("/tmp/spf_update.log", []byte("Update got b key\n"), 0644)
+			m.toggleContentPanelFocus()
+			break
+		}
 		inputCmd = m.handleKeyInput(msg)
 
 	// Has to handle zoxide messages separately as they could be generated via
