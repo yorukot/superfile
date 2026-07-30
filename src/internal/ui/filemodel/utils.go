@@ -3,7 +3,7 @@ package filemodel
 import (
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
-	"github.com/yorukot/superfile/src/internal/ui/preview"
+	"github.com/yorukot/superfile/src/internal/ui/contentpanel"
 )
 
 func (m *Model) GetFocusedFilePanel() *filepanel.Model {
@@ -13,7 +13,7 @@ func (m *Model) GetFocusedFilePanel() *filepanel.Model {
 func New(firstPanelPaths []string, toggleDotFile bool) Model {
 	return Model{
 		FilePanels:       filepanel.FilePanelSlice(firstPanelPaths),
-		FilePreview:      preview.New(),
+		FilePreview:      contentpanel.New(),
 		SinglePanelWidth: common.DefaultFilePanelWidth,
 		DisplayDotFiles:  toggleDotFile,
 	}

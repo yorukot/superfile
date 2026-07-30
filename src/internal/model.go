@@ -4,7 +4,9 @@ import (
 	"errors"
 	"log/slog"
 	"os"
+	"os/exec"
 	"reflect"
+	"runtime"
 	"slices"
 	"strings"
 	"sync/atomic"
@@ -22,7 +24,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
-	"github.com/yorukot/superfile/src/internal/ui/preview"
+	"github.com/yorukot/superfile/src/internal/ui/contentpanel"
 
 	variable "github.com/yorukot/superfile/src/config"
 	zoxideui "github.com/yorukot/superfile/src/internal/ui/zoxide"
@@ -88,12 +90,14 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		updateCmd = msg.Apply(&m.zoxideModal)
 
 	// Its a pain to interconvert commands like processBar
-	case preview.UpdateMsg:
+	case contentpanel.UpdateMsg:
 		slog.Debug("Got ModelUpdate message", "id", msg.GetReqID())
 		updateCmd = m.fileModel.UpdatePreviewPanel(msg)
 	case ModelUpdateMessage:
 		slog.Debug("Got ModelUpdate message", "id", msg.GetReqID())
 		updateCmd = msg.ApplyToModel(m)
+	case shellCommandFinishedMsg:
+		m.promptModal.HandleShellCommandResults(msg.exitCode, msg.output)
 
 	default:
 		slog.Debug("Message of type that is not explicitly handled")
@@ -406,9 +410,8 @@ func (m *model) logAndExecuteAction(action common.ModelAction) (string, tea.Cmd,
 	case common.NoAction:
 		return "", nil, nil
 	case common.ShellCommandAction:
-		// Shell commands are handled separately and don't return here
-		m.applyShellCommandAction(action.Command)
-		return "", nil, nil
+		cmd := m.applyShellCommandAction(action.Command, action.Interactive)
+		return "", cmd, nil
 	case common.SplitPanelAction:
 		cmd, err := m.splitPanel()
 		return "Panel successfully split", cmd, err
@@ -428,19 +431,60 @@ func (m *model) applyZoxideModalAction(action common.ModelAction) tea.Cmd {
 	return cmd
 }
 
-// TODO : Move them around to appropriate places
-func (m *model) applyShellCommandAction(shellCommand string) {
+// applyShellCommandAction runs a shell command. In interactive mode (prefix "!"),
+// it uses tea.ExecProcess to give the child full terminal access (ssh, vim, etc.).
+// In quick mode, output is captured and shown in the prompt modal.
+func (m *model) applyShellCommandAction(shellCommand string, interactive bool) tea.Cmd {
 	focusPanelDir := m.getFocusedFilePanel().Location
 
-	retCode, output, err := utils.ExecuteCommandInShell(common.DefaultCommandTimeout, focusPanelDir, shellCommand)
-
-	m.promptModal.HandleShellCommandResults(retCode, output)
-
-	if err != nil {
-		slog.Error("Command execution failed", "retCode", retCode,
-			"error", err, "output", output)
-		return
+	if interactive {
+		return m.applyInteractiveShellCommand(shellCommand, focusPanelDir)
 	}
+	return m.applyQuickShellCommand(shellCommand, focusPanelDir)
+}
+
+// applyInteractiveShellCommand uses tea.ExecProcess to suspend the TUI and give
+// the child process full terminal I/O. Use for ssh, vim, htop, etc.
+func (m *model) applyInteractiveShellCommand(shellCommand string, focusPanelDir string) tea.Cmd {
+	// Close the prompt before suspending so the TUI exits cleanly
+	m.promptModal.Close()
+
+	baseCmd, args := buildShellCmd(shellCommand)
+	c := exec.Command(baseCmd, args...)
+	c.Dir = focusPanelDir
+
+	return tea.ExecProcess(c, func(err error) tea.Msg {
+		exitCode := 0
+		if err != nil {
+			if exitErr, ok := err.(*exec.ExitError); ok { //nolint: errorlint
+				exitCode = exitErr.ExitCode()
+			} else {
+				exitCode = -1
+			}
+		}
+		return shellCommandFinishedMsg{exitCode: exitCode}
+	})
+}
+
+// applyQuickShellCommand captures output and displays it in the prompt modal.
+// Uses a 30-second timeout and keeps stdin connected for password prompts.
+func (m *model) applyQuickShellCommand(shellCommand string, focusPanelDir string) tea.Cmd {
+	return func() tea.Msg {
+		retCode, output, err := utils.ExecuteCommandInShellKeepStdin(
+			common.DefaultCommandTimeout, focusPanelDir, shellCommand)
+		if err != nil {
+			slog.Error("Shell command failed", "retCode", retCode, "error", err)
+		}
+		return shellCommandFinishedMsg{exitCode: retCode, output: output}
+	}
+}
+
+// buildShellCmd returns the OS-appropriate shell command and arguments.
+func buildShellCmd(shellCommand string) (string, []string) {
+	if runtime.GOOS == utils.OsWindows {
+		return "powershell.exe", []string{"-Command", shellCommand}
+	}
+	return "/bin/sh", []string{"-c", shellCommand}
 }
 
 // Create a new file panel and move focus onto it. All panel-creation goes

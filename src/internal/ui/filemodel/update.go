@@ -9,7 +9,7 @@ import (
 
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
-	"github.com/yorukot/superfile/src/internal/ui/preview"
+	"github.com/yorukot/superfile/src/internal/ui/contentpanel"
 )
 
 func (m *Model) CreateNewFilePanel(location string) (tea.Cmd, error) {
@@ -59,7 +59,7 @@ func (m *Model) ToggleFilePreviewPanel() tea.Cmd {
 	return m.ensurePreviewDimensionsSync()
 }
 
-func (m *Model) UpdatePreviewPanel(msg preview.UpdateMsg) tea.Cmd {
+func (m *Model) UpdatePreviewPanel(msg contentpanel.UpdateMsg) tea.Cmd {
 	selectedItem := m.GetFocusedFilePanel().GetFocusedItemPtr()
 	if selectedItem == nil {
 		slog.Debug("Panel empty or cursor invalid. Ignoring FilePreviewUpdateMsg")
@@ -123,7 +123,7 @@ func (m *Model) GetFilePreviewCmd(forcePreviewRender bool) tea.Cmd {
 
 	return func() tea.Msg {
 		content, rawTransmit := m.FilePreview.RenderWithPath(selectedItem.Location, width, height, fullModalWidth)
-		return preview.NewUpdateMsg(selectedItem.Location, content, rawTransmit,
+		return contentpanel.NewUpdateMsg(selectedItem.Location, content, rawTransmit,
 			width, height, reqCnt)
 	}
 }
