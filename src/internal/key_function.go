@@ -122,7 +122,6 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen,go
 	case slices.Contains(common.Hotkeys.FocusOnMetaData, msg):
 		m.focusOnMetadata()
 	case slices.Contains(common.Hotkeys.FocusOnContentPanel, msg) || msg == "b":
-		logKeys("FOCUS: toggling content panel focus")
 		m.toggleContentPanelFocus()
 
 	case slices.Contains(common.Hotkeys.PasteItems, msg):
@@ -401,18 +400,3 @@ func (m *model) focusOnSearchbarKey(msg string) {
 	}
 }
 
-var keyLogFile *os.File
-
-func init() {
-	f, err := os.Create("/tmp/spf_keys.log")
-	if err == nil {
-		keyLogFile = f
-	}
-}
-
-func logKeys(format string, args ...interface{}) {
-	if keyLogFile != nil {
-		fmt.Fprintf(keyLogFile, format+"\n", args...)
-		keyLogFile.Sync()
-	}
-}
