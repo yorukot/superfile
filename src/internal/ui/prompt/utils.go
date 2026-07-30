@@ -13,8 +13,16 @@ func getPromptAction(shellMode bool, value string, cwdLocation string) (common.M
 		return noAction, nil
 	}
 	if shellMode {
+		interactive := false
+		command := value
+		// "!" prefix triggers full terminal mode (tea.ExecProcess)
+		if strings.HasPrefix(value, "!") {
+			interactive = true
+			command = strings.TrimPrefix(value, "!")
+		}
 		return common.ShellCommandAction{
-			Command: value,
+			Command:     command,
+			Interactive: interactive,
 		}, nil
 	}
 

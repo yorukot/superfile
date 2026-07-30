@@ -21,8 +21,6 @@ func (m *Model) GetFilePreviewRender() string {
 	}
 	// In edit mode, render the textarea or nvim output
 	if m.FilePreview.IsEditing() {
-		// Keep nvim PTY size in sync with panel dimensions
-		m.FilePreview.ResizeNvim(m.ExpectedPreviewWidth, m.Height)
 		return m.FilePreview.RenderEditMode()
 	}
 	// Check if width and height have been synced yet
