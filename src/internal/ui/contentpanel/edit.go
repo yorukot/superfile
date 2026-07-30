@@ -3,6 +3,8 @@ package contentpanel
 import (
 	"io/fs"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/yorukot/superfile/src/internal/common"
 )
@@ -73,4 +75,23 @@ func readFileContent(path string, maxSize int64) (string, error) {
 		return "", err
 	}
 	return string(data), nil
+}
+
+// IsCodeFile checks whether the file's name or extension matches the
+// configurable code-extensions list (e.g. .go, .py, *_test.go).
+func IsCodeFile(path string, codeExts []string) bool {
+	base := filepath.Base(path)
+	ext := filepath.Ext(path)
+	for _, pattern := range codeExts {
+		// Support "*_test.go" style patterns
+		if strings.Contains(pattern, "*") {
+			matched, err := filepath.Match(pattern, base)
+			if err == nil && matched {
+				return true
+			}
+		} else if ext == pattern || strings.HasSuffix(base, pattern) {
+			return true
+		}
+	}
+	return false
 }

@@ -2,10 +2,13 @@ package internal
 
 import (
 	"log/slog"
+	"os/exec"
+	"strings"
 
 	tea "charm.land/bubbletea/v2"
 
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/ui/contentpanel"
 )
 
 // Pinned directory
@@ -80,12 +83,34 @@ func (m *model) contentPanelEnterEdit() tea.Cmd {
 		return nil
 	}
 	path := panel.GetFocusedItem().Location
+
+	// For code files, use nvim full-screen (if not embed mode)
+	if contentpanel.IsCodeFile(path, common.Config.ContentPanelCodeExtensions) && !common.Config.ContentPanelEmbedNvim {
+		return m.launchNvimForContentPanel(path)
+	}
+
 	ok, reason := m.fileModel.FilePreview.EnterEditMode(path)
 	if !ok {
 		slog.Debug("Cannot enter edit mode", "path", path, "reason", reason)
 		return nil
 	}
 	return nil
+}
+
+// launchNvimForContentPanel opens nvim full-screen via tea.ExecProcess, then
+// refreshes the content panel with the saved file.
+func (m *model) launchNvimForContentPanel(path string) tea.Cmd {
+	nvimCmd := common.Config.ContentPanelNvimCmd
+	if nvimCmd == "" {
+		nvimCmd = "nvim"
+	}
+	parts := strings.Fields(nvimCmd)
+	args := append(parts[1:], path)
+	c := exec.Command(parts[0], args...)
+
+	return tea.ExecProcess(c, func(err error) tea.Msg {
+		return contentPanelNvimFinishedMsg{path: path, err: err}
+	})
 }
 
 func (m *model) contentPanelSaveEdit() tea.Cmd {

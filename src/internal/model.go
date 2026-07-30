@@ -101,6 +101,13 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.output != "" || msg.exitCode != 0 {
 			m.fileModel.FilePreview.SetShellOutput("", msg.exitCode, msg.output)
 		}
+	case contentPanelNvimFinishedMsg:
+		if msg.err != nil {
+			slog.Error("Nvim exited with error", "path", msg.path, "error", msg.err)
+		}
+		m.fileModel.FilePreview.ClearShellOutput()
+		// Force re-render of preview with possibly-updated file content
+		return m.fileModel.GetFilePreviewCmd(true)
 
 	default:
 		slog.Debug("Message of type that is not explicitly handled")
