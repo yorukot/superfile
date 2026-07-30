@@ -107,7 +107,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		m.fileModel.FilePreview.ClearShellOutput()
 		// Force re-render of preview with possibly-updated file content
-		return m.fileModel.GetFilePreviewCmd(true)
+		updateCmd = m.fileModel.GetFilePreviewCmd(true)
 
 	default:
 		slog.Debug("Message of type that is not explicitly handled")
