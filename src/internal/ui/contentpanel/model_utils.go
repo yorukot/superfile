@@ -189,3 +189,23 @@ func (m *Model) HandleEditKey(msg tea.KeyPressMsg) tea.Cmd {
 	m.textarea, cmd = m.textarea.Update(msg)
 	return cmd
 }
+
+// SetShellOutput stores shell command results for display.
+func (m *Model) SetShellOutput(command string, exitCode int, output string) {
+	m.shellCommand = command
+	m.shellExit = exitCode
+	m.shellOutput = output
+	m.autoRefreshPaused = true // keep output visible
+}
+
+// ClearShellOutput resets the shell output display so the preview can resume.
+func (m *Model) ClearShellOutput() {
+	m.shellOutput = ""
+	m.shellCommand = ""
+	m.autoRefreshPaused = false
+}
+
+// HasShellOutput returns true when shell results are being displayed.
+func (m *Model) HasShellOutput() bool {
+	return m.shellOutput != "" || m.shellCommand != ""
+}

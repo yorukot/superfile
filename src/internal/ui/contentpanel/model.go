@@ -28,6 +28,11 @@ type Model struct {
 	originalPath      string   // path being edited
 	autoRefreshPaused bool
 
+	// Shell output state
+	shellOutput  string // last shell command output
+	shellCommand string // the command that produced it
+	shellExit    int    // exit code
+
 	// Location denotes what is supposed to be in model.
 	// Might not be always in sync with content
 	location      string

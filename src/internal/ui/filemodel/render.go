@@ -15,6 +15,10 @@ func (m *Model) GetFilePreviewRender() string {
 	if !m.FilePreview.IsOpen() {
 		return ""
 	}
+	// Shell output takes priority over preview
+	if m.FilePreview.HasShellOutput() {
+		return m.FilePreview.RenderShellOutput()
+	}
 	// In edit mode, render the textarea
 	if m.FilePreview.IsEditing() {
 		return m.FilePreview.RenderEditMode()

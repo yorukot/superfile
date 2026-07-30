@@ -22,6 +22,8 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
 )
 
+// Note: fmt imported above, used by RenderShellOutput
+
 func renderDirectoryPreview(r *rendering.Renderer, itemPath string, previewHeight int) string {
 	files, err := os.ReadDir(itemPath)
 	if err != nil {
@@ -166,6 +168,27 @@ func (m *Model) RenderEditMode() string {
 	}
 	r := ui.ContentPanelRendererFocused(m.contentHeight, m.contentWidth)
 	return r.AddLines(m.textarea.View()).Render()
+}
+
+// RenderShellOutput renders the last shell command result.
+func (m *Model) RenderShellOutput() string {
+	if !m.HasShellOutput() {
+		return ""
+	}
+	r := ui.FilePreviewPanelRenderer(m.contentHeight, m.contentWidth)
+	if m.shellCommand != "" {
+		r.AddLines(" $ " + m.shellCommand)
+	}
+	exitStyle := common.PromptSuccessStyle
+	if m.shellExit != 0 {
+		exitStyle = common.PromptFailureStyle
+	}
+	r.AddLines(exitStyle.Render(fmt.Sprintf(" Exit code: %d", m.shellExit)))
+	if m.shellOutput != "" {
+		r.AddSection()
+		r.AddLines(m.shellOutput)
+	}
+	return r.Render()
 }
 
 // RenderWithPath returns (render, rawTransmit). rawTransmit is non-empty

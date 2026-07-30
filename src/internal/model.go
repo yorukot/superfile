@@ -98,6 +98,9 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		updateCmd = msg.ApplyToModel(m)
 	case shellCommandFinishedMsg:
 		m.promptModal.HandleShellCommandResults(msg.exitCode, msg.output)
+		if msg.output != "" || msg.exitCode != 0 {
+			m.fileModel.FilePreview.SetShellOutput("", msg.exitCode, msg.output)
+		}
 
 	default:
 		slog.Debug("Message of type that is not explicitly handled")
