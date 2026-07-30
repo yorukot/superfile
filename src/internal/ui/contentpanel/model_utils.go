@@ -82,7 +82,11 @@ func (m *Model) Close() {
 }
 
 func (m *Model) SetFocused(focused bool) {
-	m.focused = focused
+	if m.focused != focused {
+		m.focused = focused
+		// Invalidate cached content so border is re-rendered
+		m.location = ""
+	}
 }
 
 func (m *Model) IsFocused() bool {
