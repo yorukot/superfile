@@ -86,10 +86,10 @@ func (m *Model) getContent(r *rendering.Renderer, renderHotkeyLength int, valueL
 
 		cursor := "  "
 		style := common.ModalStyle
-		if m.cursor == i && common.Config.CursorStyle == "arrow" {
+		if m.cursor == i && common.Config.CursorStyle == common.CursorStyleArrow {
 			cursor = common.FilePanelCursorStyle.Render(icon.Cursor + " ")
 		}
-		if m.cursor == i && common.Config.CursorStyle == "highlight" {
+		if m.cursor == i && common.Config.CursorStyle == common.CursorStyleHighlight {
 			style = common.FilePanelItemActiveStyle
 		}
 		r.AddLines(cursor + common.ModalStyle.Render(fmt.Sprintf("%*s%s", renderHotkeyLength,

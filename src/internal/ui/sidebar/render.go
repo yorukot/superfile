@@ -79,7 +79,7 @@ func (s *Model) directoryRenderLine(i int, curFilePanelFileLocation string,
 	}
 
 	if isActive {
-		if common.Config.CursorStyle == "arrow" {
+		if common.Config.CursorStyle == common.CursorStyleArrow {
 			cursor = icon.Cursor
 		} else { // Highlight
 			if isSelected {

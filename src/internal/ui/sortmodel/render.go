@@ -15,10 +15,10 @@ func (m *Model) Render() string {
 	for i, option := range SortOptionsStr {
 		cursor := " "
 		style := common.ModalStyle
-		if i == m.Cursor && common.Config.CursorStyle == "arrow" {
+		if i == m.Cursor && common.Config.CursorStyle == common.CursorStyleArrow {
 			cursor = common.FilePanelCursorStyle.Render(icon.Cursor)
 		}
-		if i == m.Cursor && common.Config.CursorStyle == "highlight" {
+		if i == m.Cursor && common.Config.CursorStyle == common.CursorStyleHighlight {
 			style = common.FilePanelItemActiveStyle
 		}
 		sortOptionsContent.WriteString(cursor + " " + style.Render(option) + "\n")

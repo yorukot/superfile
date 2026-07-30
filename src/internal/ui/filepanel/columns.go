@@ -17,7 +17,7 @@ func (m *Model) renderFileName(indexElement int, columnWidth int) string {
 	isSelected := m.CheckSelected(elem.Location)
 	isActive := indexElement == m.GetCursor() && !m.SearchBar.Focused()
 	cursor := emptyCursor
-	if isActive && common.Config.CursorStyle == "arrow" {
+	if isActive && common.Config.CursorStyle == common.CursorStyleArrow {
 		cursor = icon.Cursor
 	}
 

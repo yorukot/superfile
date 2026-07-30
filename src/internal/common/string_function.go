@@ -107,7 +107,7 @@ func FilePanelItemRender(data string,
 	alignment lipgloss.Position,
 ) string {
 	outputData := ansi.Truncate(data, width, "...")
-	isActive = isActive && Config.CursorStyle == "highlight"
+	isActive = isActive && Config.CursorStyle == CursorStyleHighlight
 	style := FilePanelStyle
 	switch {
 	case isSelected && isActive:

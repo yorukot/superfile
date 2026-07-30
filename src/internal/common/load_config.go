@@ -89,7 +89,7 @@ func ValidateConfig(c *ConfigType) error {
 		)
 	}
 
-	cursorOptions := []string{"arrow", "highlight"}
+	cursorOptions := []string{CursorStyleArrow, CursorStyleHighlight}
 	if !slices.Contains(cursorOptions, c.CursorStyle) {
 		return errors.New(LoadConfigError(
 			"cursor_style",
