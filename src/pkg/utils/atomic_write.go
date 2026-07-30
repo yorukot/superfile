@@ -12,7 +12,13 @@ func writeFileAtomically(
 	filePath string,
 	data []byte,
 	mode os.FileMode,
-) (resultErr error) { //nolint:nonamedreturns // Deferred close and cleanup failures must reach the caller.
+) (resultErr error) {
+	resolvedPath, err := filepath.EvalSymlinks(filePath)
+	if err != nil {
+		return fmt.Errorf("resolve replacement path: %w", err)
+	}
+	filePath = resolvedPath
+
 	tempFile, err := os.CreateTemp(filepath.Dir(filePath), "."+filepath.Base(filePath)+".tmp-")
 	if err != nil {
 		return fmt.Errorf("create replacement file: %w", err)

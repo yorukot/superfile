@@ -125,10 +125,10 @@ func LoadTomlFile(filePath string, defaultData string, target interface{},
 	}
 
 	// Start fixing
-	return fixTomlFile(resultErr, filePath, target)
+	return fixTomlFile(resultErr, filePath, data, target)
 }
 
-func fixTomlFile(resultErr *TomlLoadError, filePath string, target interface{}) error {
+func fixTomlFile(resultErr *TomlLoadError, filePath string, originalData []byte, target interface{}) error {
 	resultErr.isFatal = true
 	// Create a unique backup of the current config file
 	backupFile, err := os.CreateTemp(filepath.Dir(filePath), filepath.Base(filePath)+".bak-")
@@ -140,42 +140,21 @@ func fixTomlFile(resultErr *TomlLoadError, filePath string, target interface{}) 
 	backupPath := backupFile.Name()
 	needsBackupFileRemoval := true
 	defer func() {
-		if backupFile != nil {
-			if closeErr := backupFile.Close(); closeErr != nil {
-				if resultErr.wrappedError == nil {
-					resultErr.UpdateMessageAndError("failed to close backup file", closeErr)
-				}
-			}
-		}
-		// Remove backup in case of unsuccessful write
-		if needsBackupFileRemoval {
-			if errRem := os.Remove(backupPath); errRem != nil {
-				// Modify result Error
-				resultErr.AddMessageAndError("warning: failed to remove backup file, backupPath : "+backupPath, errRem)
-			}
-		}
+		cleanupTomlBackup(resultErr, backupFile, backupPath, needsBackupFileRemoval)
 	}()
-	// Copy the original file to the backup.
-	origFile, err := os.Open(filePath)
+	originalInfo, err := os.Stat(filePath)
 	if err != nil {
-		resultErr.UpdateMessageAndError("failed to open original file for backup", err)
-		return resultErr
-	}
-	originalInfo, err := origFile.Stat()
-	if err != nil {
-		_ = origFile.Close()
 		resultErr.UpdateMessageAndError("failed to read original file permissions", err)
 		return resultErr
 	}
 
-	_, err = io.Copy(backupFile, origFile)
+	writtenBytes, err := backupFile.Write(originalData)
 	if err != nil {
-		_ = origFile.Close()
 		resultErr.UpdateMessageAndError("failed to copy original file to backup", err)
 		return resultErr
 	}
-	if err = origFile.Close(); err != nil {
-		resultErr.UpdateMessageAndError("failed to close original file after backup", err)
+	if writtenBytes != len(originalData) {
+		resultErr.UpdateMessageAndError("failed to copy original file to backup", io.ErrShortWrite)
 		return resultErr
 	}
 	if err = backupFile.Sync(); err != nil {
@@ -208,6 +187,24 @@ func fixTomlFile(resultErr *TomlLoadError, filePath string, target interface{}) 
 	needsBackupFileRemoval = false
 
 	return resultErr
+}
+
+func cleanupTomlBackup(
+	resultErr *TomlLoadError,
+	backupFile *os.File,
+	backupPath string,
+	needsRemoval bool,
+) {
+	if backupFile != nil {
+		if closeErr := backupFile.Close(); closeErr != nil && resultErr.wrappedError == nil {
+			resultErr.UpdateMessageAndError("failed to close backup file", closeErr)
+		}
+	}
+	if needsRemoval {
+		if removeErr := os.Remove(backupPath); removeErr != nil {
+			resultErr.AddMessageAndError("warning: failed to remove backup file, backupPath : "+backupPath, removeErr)
+		}
+	}
 }
 
 // If path is not absolute, then append to currentDir and get absolute path
