@@ -27,7 +27,7 @@ import (
 )
 
 // Configures a ProcessRunner
-// actions - is list of button which user can press. THe order of actions is matter.
+// actions - is list of button which user can press. The order of actions is matter.
 func (m *model) setupFileProcessorRunner(actions []*spferror.UserAction) processbar.ProcessRunner {
 	// Processes any standard (f.e. deletion) operation with a list of files
 	return func(processor processbar.FileListProcessor,
