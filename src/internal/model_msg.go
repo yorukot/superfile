@@ -5,6 +5,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
@@ -178,6 +179,31 @@ func (msg MetadataMsg) ApplyToModel(m *model) tea.Cmd {
 		return nil
 	}
 	m.fileMetaData.SetMetadata(msg.meta, msg.metadataFocused)
+	return nil
+}
+
+// ElementsRefreshMsg carries the result of a directory listing read off the
+// event loop.
+type ElementsRefreshMsg struct {
+	BaseMessage
+
+	req      filepanel.ElementsRequest
+	elements []filepanel.Element
+}
+
+func NewElementsRefreshMsg(req filepanel.ElementsRequest, elements []filepanel.Element,
+	reqID int) ElementsRefreshMsg {
+	return ElementsRefreshMsg{
+		req:      req,
+		elements: elements,
+		BaseMessage: BaseMessage{
+			reqID: reqID,
+		},
+	}
+}
+
+func (msg ElementsRefreshMsg) ApplyToModel(m *model) tea.Cmd {
+	m.fileModel.ApplyElementsRefresh(msg.req, msg.elements)
 	return nil
 }
 

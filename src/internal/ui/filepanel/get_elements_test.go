@@ -294,10 +294,47 @@ func TestUpdateElementsIfNeededThrottlesRereads(t *testing.T) {
 	panel.UpdateElementsIfNeeded(false, false)
 	assert.Equal(t, 1, panel.ElemCount(), "must not re-read the directory on every update")
 
-	// Past the interval, outside changes get picked up
+	// Past the interval, the read is handed back to be run off the event loop
 	panel.lastTimeGetElement = time.Now().Add(-2 * focussedPanelReRenderTime)
-	panel.UpdateElementsIfNeeded(false, false)
+	req := panel.UpdateElementsIfNeeded(false, false)
+	require.NotNil(t, req)
+	assert.Equal(t, 1, panel.ElemCount(), "the periodic refresh must not read inline")
+
+	// While one is in flight, no duplicate is dispatched
+	panel.lastTimeGetElement = time.Now().Add(-2 * focussedPanelReRenderTime)
+	assert.Nil(t, panel.UpdateElementsIfNeeded(false, false))
+
+	panel.ApplyElements(*req, req.Read(), false)
 	assert.Equal(t, 2, panel.ElemCount())
+}
+
+// A result that arrives after the panel has moved on must not be installed, and
+// must not leave the panel unable to refresh again.
+func TestApplyElementsDropsStaleResults(t *testing.T) {
+	curTestDir := t.TempDir()
+	otherDir := filepath.Join(curTestDir, "other")
+	utils.SetupDirectories(t, otherDir)
+	utils.SetupFiles(t, filepath.Join(curTestDir, "file1.txt"))
+
+	panel := testModel(0, 0, 12, BrowserMode, nil)
+	panel.Location = curTestDir
+	panel.IsFocused = true
+	require.Nil(t, panel.UpdateElementsIfNeeded(false, false))
+	require.Equal(t, 2, panel.ElemCount())
+
+	panel.lastTimeGetElement = time.Now().Add(-2 * focussedPanelReRenderTime)
+	req := panel.UpdateElementsIfNeeded(false, false)
+	require.NotNil(t, req)
+
+	panel.Location = otherDir
+	require.Nil(t, panel.UpdateElementsIfNeeded(false, false))
+	require.Equal(t, 0, panel.ElemCount())
+
+	panel.ApplyElements(*req, req.Read(), false)
+	assert.Equal(t, 0, panel.ElemCount(), "a listing for the previous directory must be dropped")
+
+	panel.lastTimeGetElement = time.Now().Add(-2 * focussedPanelReRenderTime)
+	assert.NotNil(t, panel.UpdateElementsIfNeeded(false, false))
 }
 
 // A changed request is something the panel cannot render without, so it must be
@@ -312,18 +349,18 @@ func TestUpdateElementsIfNeededReadsChangedRequestAtOnce(t *testing.T) {
 	panel := testModel(0, 0, 12, BrowserMode, nil)
 	panel.Location = curTestDir
 	panel.IsFocused = true
-	panel.UpdateElementsIfNeeded(false, false)
+	require.Nil(t, panel.UpdateElementsIfNeeded(false, false))
 	require.Equal(t, 2, panel.ElemCount())
 
 	// Directory change, well within the refresh interval
 	panel.Location = otherDir
-	panel.UpdateElementsIfNeeded(false, false)
+	require.Nil(t, panel.UpdateElementsIfNeeded(false, false))
 	assert.Equal(t, 2, panel.ElemCount())
 	assert.Equal(t, "a.txt", panel.GetElementAtIdx(0).Name)
 
 	// Search text change, also within the interval
 	panel.SearchBar.SetValue("b")
-	panel.UpdateElementsIfNeeded(false, false)
+	require.Nil(t, panel.UpdateElementsIfNeeded(false, false))
 	assert.Equal(t, 1, panel.ElemCount())
 	assert.Equal(t, "b.txt", panel.GetElementAtIdx(0).Name)
 }
@@ -342,6 +379,41 @@ func TestMarkStaleForcesReread(t *testing.T) {
 	utils.SetupFiles(t, filepath.Join(curTestDir, "file2.txt"))
 	panel.MarkStale()
 
-	panel.UpdateElementsIfNeeded(false, false)
+	assert.Nil(t, panel.UpdateElementsIfNeeded(false, false))
 	assert.Equal(t, 2, panel.ElemCount())
+}
+
+// A read that started before superfile changed the directory must not land
+// afterwards and replace the listing read after the change - otherwise a file
+// superfile just created briefly disappears again.
+func TestMarkStaleInvalidatesInFlightRead(t *testing.T) {
+	curTestDir := t.TempDir()
+	utils.SetupFiles(t, filepath.Join(curTestDir, "file1.txt"))
+
+	panel := testModel(0, 0, 12, BrowserMode, nil)
+	panel.Location = curTestDir
+	panel.IsFocused = true
+	require.Nil(t, panel.UpdateElementsIfNeeded(false, false))
+	require.Equal(t, 1, panel.ElemCount())
+
+	// A background refresh is dispatched and reads the pre-operation state
+	panel.lastTimeGetElement = time.Now().Add(-2 * focussedPanelReRenderTime)
+	req := panel.UpdateElementsIfNeeded(false, false)
+	require.NotNil(t, req)
+	staleElements := req.Read()
+
+	// superfile itself adds a file, e.g. a compress finishing
+	utils.SetupFiles(t, filepath.Join(curTestDir, "made.zip"))
+	panel.MarkStale()
+	require.Nil(t, panel.UpdateElementsIfNeeded(false, false))
+	require.Equal(t, 2, panel.ElemCount(), "the read after MarkStale must see both files")
+
+	// The older background read now lands and must be ignored
+	panel.ApplyElements(*req, staleElements, false)
+	assert.Equal(t, 2, panel.ElemCount(),
+		"a read from before the change must not replace the listing read after it")
+
+	// and the panel must still be able to refresh afterwards
+	panel.lastTimeGetElement = time.Now().Add(-2 * focussedPanelReRenderTime)
+	assert.NotNil(t, panel.UpdateElementsIfNeeded(false, false))
 }

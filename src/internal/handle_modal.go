@@ -150,7 +150,9 @@ func (m *model) confirmRename() {
 	m.fileModel.Renaming = false
 	panel.Rename.Blur()
 	panel.Renaming = false
-	panel.MarkStale()
+	// Every panel, not just this one: another panel showing the same directory
+	// would otherwise be free to install a read that predates the rename.
+	m.fileModel.MarkPanelsStale()
 }
 
 func (m *model) confirmSortOptions() {

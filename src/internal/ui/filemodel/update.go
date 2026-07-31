@@ -133,15 +133,29 @@ func (m *Model) ToggleDotFile() {
 	m.UpdateFilePanelsIfNeeded(true)
 }
 
-func (m *Model) UpdateFilePanelsIfNeeded(force bool) {
+// UpdateFilePanelsIfNeeded returns the listings that panels want re-read but that
+// they can keep rendering without, for the caller to read off the event loop.
+func (m *Model) UpdateFilePanelsIfNeeded(force bool) []filepanel.ElementsRequest {
+	var reqs []filepanel.ElementsRequest
 	for i := range m.FilePanels {
-		m.FilePanels[i].UpdateElementsIfNeeded(force, m.DisplayDotFiles)
+		if req := m.FilePanels[i].UpdateElementsIfNeeded(force, m.DisplayDotFiles); req != nil {
+			reqs = append(reqs, *req)
+		}
 	}
+	return reqs
 }
 
 // MarkPanelsStale forces every panel to re-read its listing on the next update.
 func (m *Model) MarkPanelsStale() {
 	for i := range m.FilePanels {
 		m.FilePanels[i].MarkStale()
+	}
+}
+
+// ApplyElementsRefresh offers a completed listing to every panel. Panels that did
+// not ask for it, or have moved on since, ignore it.
+func (m *Model) ApplyElementsRefresh(req filepanel.ElementsRequest, elements []filepanel.Element) {
+	for i := range m.FilePanels {
+		m.FilePanels[i].ApplyElements(req, elements, m.DisplayDotFiles)
 	}
 }
