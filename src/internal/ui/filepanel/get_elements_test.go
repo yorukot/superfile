@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/yorukot/superfile/src/pkg/utils"
 
@@ -202,12 +203,7 @@ func TestReturnDirElement(t *testing.T) {
 			panel.SortKind = tt.sortKind
 			panel.SortReversed = tt.reversed
 			panel.SearchBar.SetValue(tt.searchString)
-			var res []Element
-			if tt.searchString == "" {
-				res = panel.getDirectoryElements(tt.dotFiles)
-			} else {
-				res = panel.getDirectoryElementsBySearch(tt.dotFiles)
-			}
+			res := panel.elementsRequest(tt.dotFiles).Read()
 
 			assert.Len(t, res, len(tt.expectedElemNames))
 			actualNames := []string{}
@@ -275,4 +271,77 @@ func TestSingleItemSelect(t *testing.T) {
 			assert.Equal(t, tt.expectedSelected, tt.panel.selected)
 		})
 	}
+}
+
+// Cursor movement must not touch the filesystem. Re-reading on every message
+// made each keystroke wait on IO, which desynced the cursor from held keys on
+// network mounts.
+func TestUpdateElementsIfNeededThrottlesRereads(t *testing.T) {
+	curTestDir := t.TempDir()
+	utils.SetupFiles(t, filepath.Join(curTestDir, "file1.txt"))
+
+	panel := testModel(0, 0, 12, BrowserMode, nil)
+	panel.Location = curTestDir
+	panel.IsFocused = true
+
+	// First load has nothing to render without, so it reads right away
+	panel.UpdateElementsIfNeeded(false, false)
+	require.Equal(t, 1, panel.ElemCount())
+
+	utils.SetupFiles(t, filepath.Join(curTestDir, "file2.txt"))
+
+	// Within the interval, no re-read at all
+	panel.UpdateElementsIfNeeded(false, false)
+	assert.Equal(t, 1, panel.ElemCount(), "must not re-read the directory on every update")
+
+	// Past the interval, outside changes get picked up
+	panel.lastTimeGetElement = time.Now().Add(-2 * focussedPanelReRenderTime)
+	panel.UpdateElementsIfNeeded(false, false)
+	assert.Equal(t, 2, panel.ElemCount())
+}
+
+// A changed request is something the panel cannot render without, so it must be
+// read immediately rather than waiting for the interval.
+func TestUpdateElementsIfNeededReadsChangedRequestAtOnce(t *testing.T) {
+	curTestDir := t.TempDir()
+	otherDir := filepath.Join(curTestDir, "other")
+	utils.SetupDirectories(t, otherDir)
+	utils.SetupFiles(t, filepath.Join(curTestDir, "file1.txt"),
+		filepath.Join(otherDir, "a.txt"), filepath.Join(otherDir, "b.txt"))
+
+	panel := testModel(0, 0, 12, BrowserMode, nil)
+	panel.Location = curTestDir
+	panel.IsFocused = true
+	panel.UpdateElementsIfNeeded(false, false)
+	require.Equal(t, 2, panel.ElemCount())
+
+	// Directory change, well within the refresh interval
+	panel.Location = otherDir
+	panel.UpdateElementsIfNeeded(false, false)
+	assert.Equal(t, 2, panel.ElemCount())
+	assert.Equal(t, "a.txt", panel.GetElementAtIdx(0).Name)
+
+	// Search text change, also within the interval
+	panel.SearchBar.SetValue("b")
+	panel.UpdateElementsIfNeeded(false, false)
+	assert.Equal(t, 1, panel.ElemCount())
+	assert.Equal(t, "b.txt", panel.GetElementAtIdx(0).Name)
+}
+
+// Changes superfile makes itself have to show up at once, not at the next refresh.
+func TestMarkStaleForcesReread(t *testing.T) {
+	curTestDir := t.TempDir()
+	utils.SetupFiles(t, filepath.Join(curTestDir, "file1.txt"))
+
+	panel := testModel(0, 0, 12, BrowserMode, nil)
+	panel.Location = curTestDir
+	panel.IsFocused = true
+	panel.UpdateElementsIfNeeded(false, false)
+	require.Equal(t, 1, panel.ElemCount())
+
+	utils.SetupFiles(t, filepath.Join(curTestDir, "file2.txt"))
+	panel.MarkStale()
+
+	panel.UpdateElementsIfNeeded(false, false)
+	assert.Equal(t, 2, panel.ElemCount())
 }

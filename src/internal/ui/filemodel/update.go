@@ -138,3 +138,10 @@ func (m *Model) UpdateFilePanelsIfNeeded(force bool) {
 		m.FilePanels[i].UpdateElementsIfNeeded(force, m.DisplayDotFiles)
 	}
 }
+
+// MarkPanelsStale forces every panel to re-read its listing on the next update.
+func (m *Model) MarkPanelsStale() {
+	for i := range m.FilePanels {
+		m.FilePanels[i].MarkStale()
+	}
+}

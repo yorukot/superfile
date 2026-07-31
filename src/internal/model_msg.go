@@ -40,6 +40,7 @@ func NewPasteOperationMsg(state processbar.ProcessState, reqID int) PasteOperati
 }
 
 func (msg PasteOperationMsg) ApplyToModel(m *model) tea.Cmd {
+	m.fileModel.MarkPanelsStale()
 	if (msg.state == processbar.Failed || msg.state == processbar.Successful) && m.clipboard.IsCut() {
 		m.clipboard.Reset(false)
 	}
@@ -62,6 +63,7 @@ func NewCreateOperationMsg(state processbar.ProcessState, reqID int) CreateOpera
 }
 
 func (msg CreateOperationMsg) ApplyToModel(m *model) tea.Cmd {
+	m.fileModel.MarkPanelsStale()
 	return nil
 }
 
@@ -81,6 +83,7 @@ func NewDeleteOperationMsg(state processbar.ProcessState, reqID int) DeleteOpera
 }
 
 func (msg DeleteOperationMsg) ApplyToModel(m *model) tea.Cmd {
+	m.fileModel.MarkPanelsStale()
 	// Remove selection
 	m.getFocusedFilePanel().ResetSelected()
 	return nil
@@ -115,7 +118,8 @@ func NewCompressOperationMsg(state processbar.ProcessState, reqID int) CompressO
 	}
 }
 
-func (msg CompressOperationMsg) ApplyToModel(_ *model) tea.Cmd {
+func (msg CompressOperationMsg) ApplyToModel(m *model) tea.Cmd {
+	m.fileModel.MarkPanelsStale()
 	return nil
 }
 
@@ -134,7 +138,8 @@ func NewExtractOperationMsg(state processbar.ProcessState, reqID int) ExtractOpe
 	}
 }
 
-func (msg ExtractOperationMsg) ApplyToModel(_ *model) tea.Cmd {
+func (msg ExtractOperationMsg) ApplyToModel(m *model) tea.Cmd {
+	m.fileModel.MarkPanelsStale()
 	return nil
 }
 

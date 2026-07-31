@@ -150,6 +150,7 @@ func (m *model) confirmRename() {
 	m.fileModel.Renaming = false
 	panel.Rename.Blur()
 	panel.Renaming = false
+	panel.MarkStale()
 }
 
 func (m *model) confirmSortOptions() {
