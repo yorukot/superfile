@@ -26,25 +26,30 @@ import (
 	"github.com/atotto/clipboard"
 )
 
-// Processes any standard (f.e. deletion) operation with a list of files
-func (m *model) runFileProcessor(processor processbar.FileListProcessor,
-	finalizer processbar.ProcessFinalizer,
-	items []string,
-	reqID int,
-) tea.Msg {
-	slog.Debug("Lock mutex for modal error window")
-	m.mutexErrorModal.Lock()
-	result, toDo := processor(items)
-	if result.State == processbar.Failed && len(toDo) > 0 {
-		// we unlock mutexErrorModal on dispatch SpfErrorModalUpdateMsg
-		errorModel := spferror.New(true,
-			"Error",
-			result.ErrorMsg, spferror.NewFileListError(toDo, processor, finalizer))
-		return NewSpfErrorModalMsg(errorModel, reqID)
+// Configures a ProcessRunner
+// actions - is list of button which user can press. THe order of actions is matter.
+func (m *model) setupFileProcessorRunner(actions []*spferror.UserAction) processbar.ProcessRunner {
+	// Processes any standard (f.e. deletion) operation with a list of files
+	return func(processor processbar.FileListProcessor,
+		finalizer processbar.ProcessFinalizer,
+		items []string,
+		reqID int,
+	) tea.Msg {
+		slog.Debug("Lock mutex for modal error window")
+		m.mutexErrorModal.Lock()
+		result, toDo := processor(items)
+		if result.State == processbar.Failed && len(toDo) > 0 {
+			// we unlock mutexErrorModal on dispatch SpfErrorModalUpdateMsg
+			errorModel := spferror.New(true,
+				"Error",
+				result.ErrorMsg, spferror.NewFileListError(toDo, processor, finalizer),
+				actions)
+			return NewSpfErrorModalMsg(errorModel, reqID)
+		}
+		slog.Debug("Unlock mutex for modal error window")
+		m.mutexErrorModal.Unlock()
+		return finalizer(result.State, reqID)
 	}
-	slog.Debug("Unlock mutex for modal error window")
-	m.mutexErrorModal.Unlock()
-	return finalizer(result.State, reqID)
 }
 
 func markProcessDone(process processbar.Process, processBarModel *processbar.Model) {
@@ -175,7 +180,8 @@ func (m *model) deleteOperation(processBarModel *processbar.Model, items []strin
 	}
 	finalizer := func(state processbar.ProcessState, reqID int) tea.Msg { return NewDeleteOperationMsg(state, reqID) }
 	processor := makeDeleteProcessor(p, processBarModel, useTrash)
-	msg := m.runFileProcessor(processor, finalizer, items, reqID)
+	runner := m.setupFileProcessorRunner([]*spferror.UserAction{spferror.SkipAction(), spferror.AbortAction()})
+	msg := runner(processor, finalizer, items, reqID)
 	return msg
 }
 
@@ -381,7 +387,8 @@ func (m *model) executePasteOperation(processBarModel *processbar.Model,
 	}
 	finalizer := func(state processbar.ProcessState, reqId int) tea.Msg { return NewPasteOperationMsg(state, reqId) }
 	processor := makePasteProcessor(p, processBarModel, panelLocation, cut)
-	msg := m.runFileProcessor(processor, finalizer, items, reqID)
+	runner := m.setupFileProcessorRunner([]*spferror.UserAction{spferror.SkipAction(), spferror.AbortAction()})
+	msg := runner(processor, finalizer, items, reqID)
 	return msg
 }
 
