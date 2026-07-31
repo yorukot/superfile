@@ -1,11 +1,14 @@
 package ssh
 
 import (
+	"crypto/ed25519"
+	"crypto/rand"
 	"errors"
 	"fmt"
 	"net"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"golang.org/x/crypto/ssh"
@@ -73,6 +76,67 @@ func StrictHostKeyCallback(knownHostsPath string) (ssh.HostKeyCallback, error) {
 
 		return RedactError(err, RedactionSecrets{})
 	}, nil
+}
+
+// KnownHostKeyAlgorithms returns the host key algorithms to negotiate for
+// address, listing algorithms whose key types are already recorded in
+// known_hosts first, the way OpenSSH orders its proposal. Without this
+// ordering, a server holding several host key types can present a type that
+// known_hosts does not record, which misreports a known host as changed.
+// A host with no recorded keys returns nil so the default preference applies
+// and the unknown-host confirmation flow is preserved.
+func KnownHostKeyAlgorithms(callback ssh.HostKeyCallback, address string) []string {
+	if callback == nil {
+		return nil
+	}
+	_, probePrivateKey, err := ed25519.GenerateKey(rand.Reader)
+	if err != nil {
+		return nil
+	}
+	probeSigner, err := ssh.NewSignerFromKey(probePrivateKey)
+	if err != nil {
+		return nil
+	}
+
+	port := 22
+	if _, portText, splitErr := net.SplitHostPort(address); splitErr == nil {
+		if parsedPort, parseErr := strconv.Atoi(portText); parseErr == nil {
+			port = parsedPort
+		}
+	}
+	probeRemote := &net.TCPAddr{IP: net.IPv4zero, Port: port}
+
+	// The freshly generated probe key can never match a recorded entry, so a
+	// known host always yields a KeyError listing every key recorded for it.
+	probeErr := callback(address, probeRemote, probeSigner.PublicKey())
+	var keyErr *knownhosts.KeyError
+	if !errors.As(probeErr, &keyErr) || len(keyErr.Want) == 0 {
+		return nil
+	}
+
+	recorded := make([]string, 0, len(keyErr.Want))
+	for _, knownKey := range keyErr.Want {
+		switch knownKey.Key.Type() {
+		case ssh.KeyAlgoRSA:
+			// known_hosts stores RSA keys as ssh-rsa, but servers negotiate
+			// their RSA host key under the rsa-sha2 signature algorithms too.
+			recorded = append(recorded, ssh.KeyAlgoRSASHA512, ssh.KeyAlgoRSASHA256, ssh.KeyAlgoRSA)
+		default:
+			recorded = append(recorded, knownKey.Key.Type())
+		}
+	}
+
+	supported := ssh.SupportedAlgorithms().HostKeys
+	algorithms := make([]string, 0, len(recorded)+len(supported))
+	seen := make(map[string]struct{}, len(recorded)+len(supported))
+	for _, algorithm := range append(recorded, supported...) {
+		if _, duplicate := seen[algorithm]; duplicate {
+			continue
+		}
+		seen[algorithm] = struct{}{}
+		algorithms = append(algorithms, algorithm)
+	}
+	return algorithms
 }
 
 func AcceptUnknownHostKey(err error) error {
