@@ -121,7 +121,7 @@ func (m *model) handleMouseMsg(msg tea.MouseMsg) {
 }
 
 func (m *model) updateModelStateAfterMsg() tea.Cmd {
-	m.sidebarModel.UpdateDirectories()
+	m.sidebarModel.UpdateDirectoriesIfNeeded(false)
 	refreshCmd := m.filePanelsRefreshCmd()
 	// TODO: Move to utility
 	if m.focusPanel != metadataFocus {

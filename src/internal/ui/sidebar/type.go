@@ -1,6 +1,10 @@
 package sidebar
 
-import "charm.land/bubbles/v2/textinput"
+import (
+	"time"
+
+	"charm.land/bubbles/v2/textinput"
+)
 
 type directory struct {
 	Location string `json:"location"`
@@ -21,4 +25,8 @@ type Model struct {
 	height      int
 	disabled    bool
 	sections    []string
+
+	// loadedQuery is the search query `directories` was built for
+	loadedQuery string
+	lastRefresh time.Time
 }
