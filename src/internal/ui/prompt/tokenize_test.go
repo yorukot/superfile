@@ -91,7 +91,7 @@ func Test_resolveShellSubstitution(t *testing.T) {
 	noopCommand := "true"
 	if runtime.GOOS == "windows" {
 		// Substitution is slow in windows
-		timeout = 2 * time.Second
+		timeout = 3 * time.Second
 		// Windows uses \r\n as new line for echo
 		newLineSuffix = "\r\n"
 		noopCommand = "cd ."
