@@ -242,30 +242,22 @@ func ShouldWarnAutoDetectFailed(theme string, bg color.Color, err error) bool {
 	return theme == ThemeAuto && (err != nil || bg == nil)
 }
 
-// isDarkColor returns whether c is dark, based on the luminance portion of
-// the color as interpreted as HSL. Mirrors lipgloss's own unexported
-// isDarkColor, which HasDarkBackground uses after it queries the terminal.
-func isDarkColor(c color.Color) bool {
-	col, ok := colorful.MakeColor(c)
+// isDarkColor reports whether bg should be treated as a dark background,
+// given the (bg, err) pair already returned by lipgloss.BackgroundColor.
+// This mirrors lipgloss.HasDarkBackground's own logic (defaulting to dark on
+// a failed or inconclusive query) without re-querying the terminal, since
+// that second query is what caused the delay and inconsistent fallback
+// behavior the reuse-bg-and-err review comment flagged.
+func isDarkColor(bg color.Color, err error) bool {
+	if err != nil || bg == nil {
+		return true
+	}
+	col, ok := colorful.MakeColor(bg)
 	if !ok {
 		return true
 	}
 	_, _, l := col.Hsl()
 	return l < 0.5
-}
-
-// hasDarkBackground reports whether bg should be treated as a dark
-// background, given the (bg, err) pair already returned by
-// lipgloss.BackgroundColor. This mirrors lipgloss.HasDarkBackground's own
-// logic (defaulting to dark on a failed or inconclusive query) without
-// re-querying the terminal, since that second query is what caused the
-// delay and inconsistent fallback behavior the reuse-bg-and-err review
-// comment flagged.
-func hasDarkBackground(bg color.Color, err error) bool {
-	if err != nil || bg == nil {
-		return true
-	}
-	return isDarkColor(bg)
 }
 
 // LoadThemeFile : Load configurations from theme file into &theme
@@ -280,7 +272,7 @@ func LoadThemeFile() {
 				"Mosh or behind some SSH/remote-access bridges that don't relay the required terminal "+
 				"query. Set theme to theme_light or theme_dark explicitly to fix this.")
 		}
-		themeName = ResolveThemeName(Config.Theme, Config.ThemeLight, Config.ThemeDark, hasDarkBackground(bg, err))
+		themeName = ResolveThemeName(Config.Theme, Config.ThemeLight, Config.ThemeDark, isDarkColor(bg, err))
 	}
 
 	themeFile := filepath.Join(variable.ThemeFolder, themeName+".toml")

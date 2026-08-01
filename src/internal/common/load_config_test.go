@@ -103,14 +103,6 @@ func TestIsDarkColor(t *testing.T) {
 	white := color.RGBA{R: 255, G: 255, B: 255, A: 255}
 	black := color.RGBA{R: 0, G: 0, B: 0, A: 255}
 
-	assert.True(t, isDarkColor(black))
-	assert.False(t, isDarkColor(white))
-}
-
-func TestHasDarkBackground(t *testing.T) {
-	white := color.RGBA{R: 255, G: 255, B: 255, A: 255}
-	black := color.RGBA{R: 0, G: 0, B: 0, A: 255}
-
 	tests := []struct {
 		name     string
 		bg       color.Color
@@ -145,7 +137,7 @@ func TestHasDarkBackground(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := hasDarkBackground(tt.bg, tt.err)
+			result := isDarkColor(tt.bg, tt.err)
 			assert.Equal(t, tt.expected, result)
 		})
 	}
