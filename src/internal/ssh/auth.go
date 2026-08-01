@@ -98,10 +98,11 @@ func BuildClientConfig(req ClientConfigRequest) (*ClientConfigBundle, error) {
 
 	return &ClientConfigBundle{
 		Config: &ssh.ClientConfig{
-			User:            profile.User,
-			Auth:            authMethods,
-			HostKeyCallback: hostKeyCallback,
-			Timeout:         timeout,
+			User:              profile.User,
+			Auth:              authMethods,
+			HostKeyCallback:   hostKeyCallback,
+			HostKeyAlgorithms: KnownHostKeyAlgorithms(hostKeyCallback, hostKeyAddress),
+			Timeout:           timeout,
 		},
 		Address:          address,
 		HostKeyAddress:   hostKeyAddress,
