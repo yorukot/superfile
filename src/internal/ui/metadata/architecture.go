@@ -85,12 +85,22 @@ func isCOFFMachine(m uint16) bool {
 	}
 }
 
+// Byte-swapped forms of the Mach-O magics, produced when the file was written
+// for the opposite byte order to the reader. Apple's headers call these the
+// CIGAM values ("magic" reversed); the standard library only names the native
+// forms, so they are spelled out here rather than left as bare literals.
+const (
+	machoCigam32  uint32 = 0xcefaedfe // macho.Magic32, bytes reversed
+	machoCigam64  uint32 = 0xcffaedfe // macho.Magic64, bytes reversed
+	machoCigamFat uint32 = 0xbebafeca // macho.MagicFat, bytes reversed
+)
+
 // isMachOMagic reports whether m is a Mach-O (thin or universal) magic number,
 // in either byte order.
 func isMachOMagic(m uint32) bool {
 	switch m {
 	case macho.Magic32, macho.Magic64, macho.MagicFat,
-		0xcefaedfe, 0xcffaedfe, 0xbebafeca: // byte-swapped variants
+		machoCigam32, machoCigam64, machoCigamFat:
 		return true
 	default:
 		return false
