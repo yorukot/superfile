@@ -1,9 +1,15 @@
 package ssh
 
 import (
+	"crypto/ecdsa"
+	"crypto/ed25519"
+	"crypto/elliptic"
+	"crypto/rand"
+	"errors"
 	"net"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -12,6 +18,7 @@ import (
 	"github.com/stretchr/testify/require"
 	cryptossh "golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
+	"golang.org/x/crypto/ssh/knownhosts"
 
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ssh/sshtest"
@@ -757,4 +764,102 @@ func TestIdentityFileTildePathExpandsToUserHome(t *testing.T) {
 	require.NoError(t, client.Close())
 
 	assert.Equal(t, []string{identityPath}, identityFiles(profile))
+}
+
+func TestDialPrefersHostKeyAlgorithmsRecordedInKnownHosts(t *testing.T) {
+	t.Setenv("SSH_AUTH_SOCK", "")
+
+	knownSigner, address := startMultiHostKeyServer(t)
+
+	host, portText, err := net.SplitHostPort(address)
+	require.NoError(t, err)
+	port, err := strconv.Atoi(portText)
+	require.NoError(t, err)
+
+	knownHostsPath := filepath.Join(t.TempDir(), "known_hosts")
+	knownHostsLine := knownhosts.Line(
+		[]string{knownhosts.Normalize(address)},
+		knownSigner.PublicKey(),
+	) + "\n"
+	require.NoError(t, os.WriteFile(knownHostsPath, []byte(knownHostsLine), 0o600))
+
+	bundle, err := BuildClientConfig(ClientConfigRequest{
+		Profile: common.SSHQuickConnectProfile{
+			Host:      host,
+			Port:      port,
+			User:      "multikey",
+			AuthOrder: []string{common.SSHAuthMethodPassword},
+		},
+		Password:       "multikey-pass",
+		KnownHostsPath: knownHostsPath,
+	})
+	require.NoError(t, err)
+	defer bundle.Close()
+
+	client, err := bundle.Dial()
+	require.NoError(
+		t,
+		err,
+		"dial must trust the recorded ed25519 host key even though the server prefers to present ECDSA",
+	)
+	require.NoError(t, client.Close())
+}
+
+// startMultiHostKeyServer starts an SSH server holding both an ECDSA and an
+// Ed25519 host key, like stock OpenSSH servers that generate several host key
+// types. It returns the Ed25519 signer (the key recorded in known_hosts) and
+// the listen address.
+func startMultiHostKeyServer(t *testing.T) (cryptossh.Signer, string) {
+	t.Helper()
+
+	_, ed25519Key, err := ed25519.GenerateKey(rand.Reader)
+	require.NoError(t, err)
+	ed25519Signer, err := cryptossh.NewSignerFromKey(ed25519Key)
+	require.NoError(t, err)
+
+	ecdsaKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	require.NoError(t, err)
+	ecdsaSigner, err := cryptossh.NewSignerFromKey(ecdsaKey)
+	require.NoError(t, err)
+
+	serverConfig := &cryptossh.ServerConfig{
+		PasswordCallback: func(
+			conn cryptossh.ConnMetadata,
+			password []byte,
+		) (*cryptossh.Permissions, error) {
+			if conn.User() == "multikey" && string(password) == "multikey-pass" {
+				return &cryptossh.Permissions{}, nil
+			}
+			return nil, errors.New("access denied")
+		},
+	}
+	serverConfig.AddHostKey(ecdsaSigner)
+	serverConfig.AddHostKey(ed25519Signer)
+
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = listener.Close() })
+
+	go func() {
+		for {
+			netConn, acceptErr := listener.Accept()
+			if acceptErr != nil {
+				return
+			}
+			go func(conn net.Conn) {
+				serverConn, channels, requests, handshakeErr := cryptossh.NewServerConn(conn, serverConfig)
+				if handshakeErr != nil {
+					_ = conn.Close()
+					return
+				}
+				go cryptossh.DiscardRequests(requests)
+				for newChannel := range channels {
+					_ = newChannel.Reject(cryptossh.Prohibited, "test server accepts no channels")
+				}
+				_ = serverConn.Close()
+			}(netConn)
+		}
+	}()
+
+	return ed25519Signer, listener.Addr().String()
 }
