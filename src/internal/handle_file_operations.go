@@ -12,6 +12,7 @@ import (
 	"time"
 
 	variable "github.com/yorukot/superfile/src/config"
+	"github.com/yorukot/superfile/src/internal/systemclipboard"
 	"github.com/yorukot/superfile/src/internal/trash"
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 	"github.com/yorukot/superfile/src/internal/ui/spferror"
@@ -265,6 +266,91 @@ func (m *model) copyMultipleItem(cut bool) {
 	slog.Debug("handle_file_operations.copyMultipleItem", "cut", cut,
 		"panel selected files", items)
 	m.clipboard.SetItems(items)
+}
+
+// systemClipboardSourcePaths returns the paths that a "copy to system
+// clipboard" action should act on: the selected items in select mode, otherwise
+// the focused item.
+func (m *model) systemClipboardSourcePaths() []string {
+	panel := m.getFocusedFilePanel()
+	if panel.Empty() {
+		return nil
+	}
+	if panel.PanelMode == filepanel.SelectMode && panel.SelectedCount() > 0 {
+		return panel.GetSelectedLocationsSortedAsVisible()
+	}
+	return []string{panel.GetFocusedItem().Location}
+}
+
+// getCopyToSystemClipboardCmd writes the current selection/focused item to the
+// OS clipboard as real file references, so they can be pasted into the native
+// file manager. Paths are gathered on the update loop; the (blocking) clipboard
+// write happens inside the returned command.
+func (m *model) getCopyToSystemClipboardCmd() tea.Cmd {
+	reqID := m.nextIoReqCnt()
+	if !m.hasSystemClipboard {
+		return func() tea.Msg {
+			return NewNotifyModalMsg(notify.New(true, "System clipboard unavailable",
+				systemClipboardUnavailableHint(), notify.NoAction), reqID)
+		}
+	}
+	paths := m.systemClipboardSourcePaths()
+	if len(paths) == 0 {
+		return nil
+	}
+	slog.Debug("getCopyToSystemClipboardCmd", "items cnt", len(paths))
+	return func() tea.Msg {
+		if err := systemclipboard.CopyFiles(paths, false); err != nil {
+			slog.Error("Error copying to system clipboard", "error", err)
+			return NewNotifyModalMsg(notify.New(true, "System clipboard copy failed",
+				err.Error(), notify.NoAction), reqID)
+		}
+		return nil
+	}
+}
+
+// getPasteFromSystemClipboardCmd reads file references from the OS clipboard and
+// pastes them into the focused panel, reusing the normal paste pipeline.
+func (m *model) getPasteFromSystemClipboardCmd() tea.Cmd {
+	reqID := m.nextIoReqCnt()
+	if !m.hasSystemClipboard {
+		return func() tea.Msg {
+			return NewNotifyModalMsg(notify.New(true, "System clipboard unavailable",
+				systemClipboardUnavailableHint(), notify.NoAction), reqID)
+		}
+	}
+	panelLocation := m.getFocusedFilePanel().Location
+	return func() tea.Msg {
+		paths, cut, err := systemclipboard.PasteFiles()
+		if err != nil {
+			slog.Error("Error pasting from system clipboard", "error", err)
+			return NewNotifyModalMsg(notify.New(true, "System clipboard paste failed",
+				err.Error(), notify.NoAction), reqID)
+		}
+		// Keep only items that still exist on disk.
+		existing := make([]string, 0, len(paths))
+		for _, p := range paths {
+			if _, statErr := os.Lstat(p); statErr == nil {
+				existing = append(existing, p)
+			}
+		}
+		if len(existing) == 0 {
+			return NewNotifyModalMsg(notify.New(true, "System clipboard paste failed",
+				systemclipboard.ErrNoFiles.Error(), notify.NoAction), reqID)
+		}
+		if vErr := validatePasteOperation(panelLocation, existing, cut); vErr != nil {
+			return NewNotifyModalMsg(notify.New(true, "Invalid paste location", vErr.Error(), notify.NoAction),
+				reqID)
+		}
+		return m.executePasteOperation(&m.processBarModel, panelLocation, existing, cut, reqID)
+	}
+}
+
+func systemClipboardUnavailableHint() string {
+	if runtime.GOOS == "linux" {
+		return "Install wl-clipboard (Wayland) or xclip (X11) to copy/paste files to and from the system file manager."
+	}
+	return "System clipboard file transfer is not supported in this environment."
 }
 
 func (m *model) getPasteItemCmd() tea.Cmd {
