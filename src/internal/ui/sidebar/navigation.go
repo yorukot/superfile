@@ -126,3 +126,14 @@ func (s *Model) updateRenderIndex() {
 	slog.Error("Unexpected situation in updateRenderIndex", "cursor", s.cursor,
 		"renderIndex", s.renderIndex, "directory count", len(s.directories))
 }
+
+func (s *Model) SetCursor(idx int) {
+	if idx >= 0 && idx < len(s.directories) {
+		s.cursor = idx
+		s.updateRenderIndex()
+		if s.directories[s.cursor].isDivider() {
+			s.ListDown()
+		}
+	}
+}
+
