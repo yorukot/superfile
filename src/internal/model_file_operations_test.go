@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"syscall"
 	"testing"
 
 	tea "charm.land/bubbletea/v2"
@@ -229,7 +230,7 @@ func TestFileRename(t *testing.T) {
 func isTrashed(fileAbsPath string) bool {
 	fileAbsPath, err := filepath.Abs(fileAbsPath)
 	if err != nil {
-		return false
+		fmt.Println("isTrashed false"); return false
 	}
 	fileAbsPath = filepath.Clean(fileAbsPath)
 
@@ -248,9 +249,8 @@ func isTrashed(fileAbsPath string) bool {
 		if err != nil {
 			return false
 		}
-
 		for _, entry := range entries {
-			if entry.IsDir() {
+			if !strings.HasSuffix(entry.Name(), ".trashinfo") {
 				continue
 			}
 
@@ -258,22 +258,32 @@ func isTrashed(fileAbsPath string) bool {
 			if err != nil {
 				continue
 			}
-
-			for _, line := range strings.Split(string(data), "\n") {
-				if line == "Path="+fileAbsPath {
+			
+			if strings.Contains(string(data), fileAbsPath) {
+				return true
+			}
+			
+			topDir, err := filesystemTopDir(fileAbsPath)
+			if err == nil {
+				rel, relErr := filepath.Rel(topDir, fileAbsPath)
+				if relErr == nil && strings.Contains(string(data), rel) {
 					return true
 				}
 			}
 		}
 		return false
+
 	default:
-		return false
+		fmt.Println("isTrashed false"); return false
 	}
 }
 
 func linuxTrashInfoDirForPath(fileAbsPath string) (string, error) {
 	homeTrash := filepath.Join(xdgDataHome(), "Trash")
-	if isPathWithin(fileAbsPath, homeTrash) {
+	
+	dev1, err1 := deviceID(existingDevicePath(fileAbsPath))
+	dev2, err2 := deviceID(existingDevicePath(homeTrash))
+	if err1 == nil && err2 == nil && dev1 == dev2 {
 		return filepath.Join(homeTrash, "info"), nil
 	}
 
