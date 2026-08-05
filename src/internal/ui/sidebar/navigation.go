@@ -55,6 +55,28 @@ func (s *Model) ListDown() {
 	}
 }
 
+func (s *Model) ListTop() {
+	if s.NoActualDir() {
+		return
+	}
+	s.cursor = 0
+	s.updateRenderIndex()
+	if s.directories[s.cursor].isDivider() {
+		s.ListDown()
+	}
+}
+
+func (s *Model) ListBottom() {
+	if s.NoActualDir() {
+		return
+	}
+	s.cursor = len(s.directories) - 1
+	s.updateRenderIndex()
+	if s.directories[s.cursor].isDivider() {
+		s.ListUp()
+	}
+}
+
 // Return till what indexes we will render, if we start from startIndex
 // if returned value is `startIndex - 1`, that means nothing can be rendered
 // This could be made constant time by keeping Indexes ot special directories saved,
