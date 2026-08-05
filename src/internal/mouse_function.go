@@ -91,8 +91,9 @@ func (m *model) handleSidebarClick(y int) {
 	}
 	targetIndex := y - headerLines
 	if targetIndex >= 0 {
-		m.sidebarModel.SetCursor(targetIndex)
-		m.sidebarSelectDirectory()
+		if m.sidebarModel.SetCursor(targetIndex) {
+			m.sidebarSelectDirectory()
+		}
 	}
 }
 

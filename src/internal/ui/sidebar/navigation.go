@@ -127,13 +127,15 @@ func (s *Model) updateRenderIndex() {
 		"renderIndex", s.renderIndex, "directory count", len(s.directories))
 }
 
-func (s *Model) SetCursor(idx int) {
+func (s *Model) SetCursor(idx int) bool {
 	if idx >= 0 && idx < len(s.directories) {
 		s.cursor = idx
 		s.updateRenderIndex()
 		if s.directories[s.cursor].isDivider() {
 			s.ListDown()
 		}
+		return true
 	}
+	return false
 }
 
