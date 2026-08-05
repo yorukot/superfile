@@ -64,6 +64,11 @@ func (m *model) enterPanel() {
 		// Continue with preview if file is not writable
 		slog.Error("Error while writing to chooser file, continuing with file open", "error", chooserErr)
 	}
+	if !common.Config.OpenFileWithDefaultApp {
+		// User disabled launching external programs on confirm. The file is
+		// just selected; preview panel still shows its content.
+		return
+	}
 	m.executeOpenCommand()
 }
 
