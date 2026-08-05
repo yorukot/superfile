@@ -102,6 +102,23 @@ func (m *Model) PgDown() {
 	m.moveRenderIndexBy(m.getPageScrollSize())
 }
 
+// Home jumps the metadata panel scroll to the first row.
+func (m *Model) Home() {
+	if m.MetadataLen() == 0 {
+		return
+	}
+	m.renderIndex = 0
+}
+
+// End jumps the metadata panel scroll to the last row.
+func (m *Model) End() {
+	l := m.MetadataLen()
+	if l == 0 {
+		return
+	}
+	m.renderIndex = l - 1
+}
+
 func (m *Model) SetBlank() {
 	m.metadata.filepath = ""
 	m.metadata.data = m.metadata.data[:0]
