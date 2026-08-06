@@ -84,9 +84,11 @@ func (m *model) prepareCommand(rawArgs []string) *exec.Cmd {
 	}
 
 	selectedItem := panel.GetFocusedItem()
-	selectedFile := selectedItem.Location
+
+	// use filepath.ToSlash to convert '\' into '/' for Windows.
+	selectedFile := filepath.ToSlash(selectedItem.Location)
 	fileName := filepath.Base(selectedFile)
-	selectedDir := panel.Location
+	selectedDir := filepath.ToSlash(panel.Location)
 
 	// Shell injection prevention: escape arguments if explicitly invoking a POSIX shell
 	binary := rawArgs[0]
