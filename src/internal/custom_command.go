@@ -94,17 +94,30 @@ func (m *model) prepareCommand(rawArgs []string) *exec.Cmd {
 	fileName := filepath.Base(selectedFile)
 	selectedDir := filepath.ToSlash(panel.Location)
 
-	// Shell injection prevention: escape arguments if explicitly invoking a POSIX shell
+	// Shell injection prevention: identify if invoking a POSIX shell
 	binary := rawArgs[0]
 	isShell := binary == "sh" || binary == "bash" || binary == "zsh" || binary == "dash"
 
+	// Find the shell command string index right after "-c" flag if present
+	shellCmdIdx := -1
+	if isShell {
+		for i, arg := range rawArgs {
+			if arg == "-c" && i+1 < len(rawArgs) {
+				shellCmdIdx = i + 1
+				break
+			}
+		}
+	}
+
 	processedArgs := make([]string, len(rawArgs))
 	for i, arg := range rawArgs {
-		if isShell {
+		if isShell && i == shellCmdIdx {
+			// Apply contextual shell quoting ONLY to the command string argument after -c
 			arg = replaceShellPlaceholder(arg, "{filepath}", selectedFile)
 			arg = replaceShellPlaceholder(arg, "{filename}", fileName)
 			arg = replaceShellPlaceholder(arg, "{dir}", selectedDir)
 		} else {
+			// Direct substitution for binary name, flags, script paths, and positional arguments
 			arg = strings.ReplaceAll(arg, "{filepath}", selectedFile)
 			arg = strings.ReplaceAll(arg, "{filename}", fileName)
 			arg = strings.ReplaceAll(arg, "{dir}", selectedDir)
