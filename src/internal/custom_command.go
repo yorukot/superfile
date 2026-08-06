@@ -78,6 +78,10 @@ func (m *model) executeCustomCommand(cmdName string) tea.Cmd {
 
 // prepareCommand builds the exec.Cmd structure and replaces templates with file details.
 func (m *model) prepareCommand(rawArgs []string) *exec.Cmd {
+	if len(rawArgs) == 0 {
+		return nil
+	}
+
 	panel := m.fileModel.GetFocusedFilePanel()
 	if panel.EmptyOrInvalid() {
 		return nil
@@ -96,24 +100,46 @@ func (m *model) prepareCommand(rawArgs []string) *exec.Cmd {
 
 	processedArgs := make([]string, len(rawArgs))
 	for i, arg := range rawArgs {
-		fileVal := selectedFile
-		nameVal := fileName
-		dirVal := selectedDir
-
-		// If running via shell, wrap placeholders in single quotes and escape existing single quotes
 		if isShell {
-			fileVal = "'" + strings.ReplaceAll(selectedFile, "'", "'\\''") + "'"
-			nameVal = "'" + strings.ReplaceAll(fileName, "'", "'\\''") + "'"
-			dirVal = "'" + strings.ReplaceAll(selectedDir, "'", "'\\''") + "'"
+			arg = replaceShellPlaceholder(arg, "{filepath}", selectedFile)
+			arg = replaceShellPlaceholder(arg, "{filename}", fileName)
+			arg = replaceShellPlaceholder(arg, "{dir}", selectedDir)
+		} else {
+			arg = strings.ReplaceAll(arg, "{filepath}", selectedFile)
+			arg = strings.ReplaceAll(arg, "{filename}", fileName)
+			arg = strings.ReplaceAll(arg, "{dir}", selectedDir)
 		}
-
-		arg = strings.ReplaceAll(arg, "{filepath}", fileVal)
-		arg = strings.ReplaceAll(arg, "{filename}", nameVal)
-		arg = strings.ReplaceAll(arg, "{dir}", dirVal)
 		processedArgs[i] = arg
 	}
 
 	return exec.Command(processedArgs[0], processedArgs[1:]...)
+}
+
+// replaceShellPlaceholder replaces a template placeholder in a shell command argument,
+// taking into account surrounding single or double quotes for proper escaping.
+func replaceShellPlaceholder(arg, placeholder, val string) string {
+	singleQuoted := "'" + placeholder + "'"
+	doubleQuoted := `"` + placeholder + `"`
+
+	if strings.Contains(arg, singleQuoted) {
+		// Surrounded by single quotes in arg: escape single quotes inside val, no extra outer quotes
+		escapedVal := strings.ReplaceAll(val, "'", "'\\''")
+		return strings.ReplaceAll(arg, singleQuoted, "'"+escapedVal+"'")
+	}
+
+	if strings.Contains(arg, doubleQuoted) {
+		// Surrounded by double quotes in arg: escape special double-quote characters (\, ", $, `)
+		escapedVal := val
+		escapedVal = strings.ReplaceAll(escapedVal, `\`, `\\`)
+		escapedVal = strings.ReplaceAll(escapedVal, `"`, `\"`)
+		escapedVal = strings.ReplaceAll(escapedVal, `$`, `\$`)
+		escapedVal = strings.ReplaceAll(escapedVal, "`", "\\`")
+		return strings.ReplaceAll(arg, doubleQuoted, `"`+escapedVal+`"`)
+	}
+
+	// Unquoted placeholder: wrap in single quotes and escape internal single quotes
+	escapedVal := "'" + strings.ReplaceAll(val, "'", "'\\''") + "'"
+	return strings.ReplaceAll(arg, placeholder, escapedVal)
 }
 
 // warnModalForCustomCommand creates a tea.Cmd that displays a standard superfile warning modal.
