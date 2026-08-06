@@ -27,7 +27,6 @@ func (m *model) executeCustomCommand(cmdName string) tea.Cmd {
 			return m.warnModalForCustomCommand("Execution Error", "Failed to resolve selected file path for '"+cmdName+"'.")
 		}
 
-		// Return an asynchronous command to run the process and monitor exit status
 		return func() tea.Msg {
 			err := c.Start()
 			if err != nil {
@@ -39,7 +38,6 @@ func (m *model) executeCustomCommand(cmdName string) tea.Cmd {
 				return NewNotifyModalMsg(notifyModel, reqID)
 			}
 
-			// Wait for completion in background to catch any exit errors safely
 			err = c.Wait()
 			if err != nil {
 				reqID := m.nextIoReqCnt()
@@ -71,7 +69,6 @@ func (m *model) executeCustomCommand(cmdName string) tea.Cmd {
 		})
 
 	default:
-		// Explicitly handle unsupported execution modes instead of falling through silently
 		return m.warnModalForCustomCommand("Configuration Error", "Invalid mode '"+mode+"' for command '"+cmdName+"'. Must be 'foreground' or 'background'.")
 	}
 }
@@ -88,21 +85,19 @@ func (m *model) prepareCommand(rawArgs []string) *exec.Cmd {
 	}
 
 	selectedItem := panel.GetFocusedItem()
-
-	// use filepath.ToSlash to convert '\' into '/' for Windows.
 	selectedFile := filepath.ToSlash(selectedItem.Location)
 	fileName := filepath.Base(selectedFile)
 	selectedDir := filepath.ToSlash(panel.Location)
 
-	// Shell injection prevention: identify if invoking a POSIX shell
-	binary := rawArgs[0]
-	isShell := binary == "sh" || binary == "bash" || binary == "zsh" || binary == "dash"
+	binary := strings.ToLower(rawArgs[0])
+	isShell := binary == "sh" || binary == "bash" || binary == "zsh" || binary == "dash" || binary == "powershell" || binary == "pwsh"
 
-	// Find the shell command string index right after "-c" flag if present
+	// Find the shell command string index right after "-c" or "-command"
 	shellCmdIdx := -1
 	if isShell {
 		for i, arg := range rawArgs {
-			if arg == "-c" && i+1 < len(rawArgs) {
+			lowerArg := strings.ToLower(arg)
+			if (lowerArg == "-c" || lowerArg == "-command") && i+1 < len(rawArgs) {
 				shellCmdIdx = i + 1
 				break
 			}
@@ -112,12 +107,10 @@ func (m *model) prepareCommand(rawArgs []string) *exec.Cmd {
 	processedArgs := make([]string, len(rawArgs))
 	for i, arg := range rawArgs {
 		if isShell && i == shellCmdIdx {
-			// Apply contextual shell quoting ONLY to the command string argument after -c
 			arg = replaceShellPlaceholder(arg, "{filepath}", selectedFile)
 			arg = replaceShellPlaceholder(arg, "{filename}", fileName)
 			arg = replaceShellPlaceholder(arg, "{dir}", selectedDir)
 		} else {
-			// Direct substitution for binary name, flags, script paths, and positional arguments
 			arg = strings.ReplaceAll(arg, "{filepath}", selectedFile)
 			arg = strings.ReplaceAll(arg, "{filename}", fileName)
 			arg = strings.ReplaceAll(arg, "{dir}", selectedDir)
@@ -128,29 +121,18 @@ func (m *model) prepareCommand(rawArgs []string) *exec.Cmd {
 	return exec.Command(processedArgs[0], processedArgs[1:]...)
 }
 
-// replaceShellPlaceholder replaces a template placeholder in a shell command argument,
-// taking into account surrounding single or double quotes for proper escaping.
+// replaceShellPlaceholder safely substitutes placeholders in shell arguments.
 func replaceShellPlaceholder(arg, placeholder, val string) string {
-	singleQuoted := "'" + placeholder + "'"
-	doubleQuoted := `"` + placeholder + `"`
-
-	if strings.Contains(arg, singleQuoted) {
-		// Surrounded by single quotes in arg: escape single quotes inside val, no extra outer quotes
-		escapedVal := strings.ReplaceAll(val, "'", "'\\''")
-		return strings.ReplaceAll(arg, singleQuoted, "'"+escapedVal+"'")
+	if !strings.Contains(arg, placeholder) {
+		return arg
 	}
 
-	if strings.Contains(arg, doubleQuoted) {
-		// Surrounded by double quotes in arg: escape special double-quote characters (\, ", $, `)
-		escapedVal := val
-		escapedVal = strings.ReplaceAll(escapedVal, `\`, `\\`)
-		escapedVal = strings.ReplaceAll(escapedVal, `"`, `\"`)
-		escapedVal = strings.ReplaceAll(escapedVal, `$`, `\$`)
-		escapedVal = strings.ReplaceAll(escapedVal, "`", "\\`")
-		return strings.ReplaceAll(arg, doubleQuoted, `"`+escapedVal+`"`)
+	// If placeholder is already enclosed in quotes, substitute directly without adding extra quotes
+	if strings.Contains(arg, `"`+placeholder+`"`) || strings.Contains(arg, `'`+placeholder+`'`) {
+		return strings.ReplaceAll(arg, placeholder, val)
 	}
 
-	// Unquoted placeholder: wrap in single quotes and escape internal single quotes
+	// Unquoted placeholder: safely wrap value in single quotes
 	escapedVal := "'" + strings.ReplaceAll(val, "'", "'\\''") + "'"
 	return strings.ReplaceAll(arg, placeholder, escapedVal)
 }
