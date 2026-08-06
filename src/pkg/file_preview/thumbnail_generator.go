@@ -58,7 +58,8 @@ func getVideoDuration(ctx context.Context, inputPath string) (float64, error) {
 	}
 
 	var metadata videoMetadata
-	if err := json.Unmarshal(output, &metadata); err != nil {
+	err = json.Unmarshal(output, &metadata)
+	if err != nil {
 		return 0, fmt.Errorf("error parsing ffprobe output: %w", err)
 	}
 
