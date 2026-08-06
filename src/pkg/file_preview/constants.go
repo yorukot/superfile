@@ -29,4 +29,10 @@ const (
 	maxVideoFileSizeForThumb = "104857600" // 100MB limit
 	thumbOutputExt           = ".jpg"
 	thumbGenerationTimeout   = 30 * time.Second
+
+	videoThumbSeekRatio           = 0.05
+	videoThumbFallbackSeekSeconds = 5
+	videoThumbMaxWidth            = 600
+	videoThumbMaxHeight           = 900
+	videoThumbQuality             = 9
 )
