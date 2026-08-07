@@ -365,6 +365,7 @@ func isFFmpegInstalled() bool {
 	return err == nil
 }
 
+// ffprobe is packaged with ffmpeg but still checking in case
 func isFFprobeInstalled() bool {
 	_, err := exec.LookPath("ffprobe")
 	return err == nil
