@@ -45,7 +45,10 @@ type videoMetadata struct {
 }
 
 func getVideoDuration(ctx context.Context, inputPath string) (float64, error) {
-	ffprobe := exec.CommandContext(ctx, "ffprobe",
+	probeCtx, cancel := context.WithTimeout(ctx, videoProbeTimeout)
+	defer cancel()
+
+	ffprobe := exec.CommandContext(probeCtx, "ffprobe",
 		"-v", "quiet",
 		"-show_entries", "format=duration",
 		"-of", "json=c=1",
@@ -71,6 +74,7 @@ func getVideoDuration(ctx context.Context, inputPath string) (float64, error) {
 	if err != nil {
 		return 0, fmt.Errorf("error parsing video duration %q: %w", metadata.Format.Duration, err)
 	}
+
 	if duration <= 0 {
 		return 0, fmt.Errorf("invalid video duration: %f", duration)
 	}
@@ -78,8 +82,8 @@ func getVideoDuration(ctx context.Context, inputPath string) (float64, error) {
 	return duration, nil
 }
 
-func videoThumbnailSeekSeconds(duration float64) int {
-	return int(duration * videoThumbSeekRatio)
+func formatVideoThumbnailSeekSeconds(seekSeconds float64) string {
+	return strconv.FormatFloat(seekSeconds, 'f', videoThumbSeekTimestampPrecision, 64)
 }
 
 func videoThumbnailScaleFilter() string {
@@ -90,20 +94,7 @@ func videoThumbnailScaleFilter() string {
 	)
 }
 
-func (g *VideoGenerator) generateThumbnail(inputPath string, outputPathWithoutExt string) (string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), thumbGenerationTimeout)
-	defer cancel()
-	outputPath := outputPathWithoutExt + thumbOutputExt
-
-	seekSeconds := videoThumbFallbackSeekSeconds
-	if g.ffprobeAvailable {
-		if duration, err := getVideoDuration(ctx, inputPath); err == nil {
-			seekSeconds = videoThumbnailSeekSeconds(duration)
-		} else {
-			slog.Debug("Error probing video duration, using fallback seek", "error", err)
-		}
-	}
-
+func runVideoThumbnailFFmpeg(ctx context.Context, inputPath string, outputPath string, seekSeconds float64) error {
 	ffmpegArgs := []string{
 		"-v", "warning", // set log level to warning
 		"-hwaccel", "auto", // Use Hardware Acceleration if available
@@ -112,9 +103,11 @@ func (g *VideoGenerator) generateThumbnail(inputPath string, outputPathWithoutEx
 		"-sn", // disable Subtitle stream
 		"-dn", // disable data stream
 	}
+
 	if seekSeconds > 0 {
-		ffmpegArgs = append(ffmpegArgs, "-ss", strconv.Itoa(seekSeconds))
+		ffmpegArgs = append(ffmpegArgs, "-ss", formatVideoThumbnailSeekSeconds(seekSeconds))
 	}
+
 	ffmpegArgs = append(ffmpegArgs,
 		"-skip_frame", "nokey", // skip non-key frames
 		"-i", inputPath, // set input file
@@ -127,8 +120,38 @@ func (g *VideoGenerator) generateThumbnail(inputPath string, outputPathWithoutEx
 	)
 
 	ffmpeg := exec.CommandContext(ctx, "ffmpeg", ffmpegArgs...)
+	if err := ffmpeg.Run(); err != nil {
+		return err
+	}
 
-	err := ffmpeg.Run()
+	info, err := os.Stat(outputPath)
+	if err != nil {
+		return fmt.Errorf("generated thumbnail is missing: %w", err)
+	}
+
+	if info.Size() == 0 {
+		return errors.New("generated thumbnail is empty")
+	}
+
+	return nil
+}
+
+func (g *VideoGenerator) generateThumbnail(inputPath string, outputPathWithoutExt string) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), thumbGenerationTimeout)
+	defer cancel()
+	outputPath := outputPathWithoutExt + thumbOutputExt
+
+	seekSeconds := 0.0
+
+	if g.ffprobeAvailable {
+		videoDuration, err := getVideoDuration(ctx, inputPath)
+		if err != nil {
+			slog.Debug("Error probing video duration, thumbnail generation starts at beginning of video", "error", err)
+		}
+		seekSeconds = videoDuration * videoThumbSeekRatio
+	}
+
+	err := runVideoThumbnailFFmpeg(ctx, inputPath, outputPath, seekSeconds)
 	if err != nil {
 		return "", fmt.Errorf("error generating video thumbnail, outputPath: %s : %w", outputPath, err)
 	}
