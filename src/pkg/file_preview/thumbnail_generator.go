@@ -2,12 +2,14 @@ package filepreview
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -20,18 +22,118 @@ type thumbnailGeneratorInterface interface {
 	generateThumbnail(inputPath string, outputPathWithoutExt string) (string, error)
 }
 
-type VideoGenerator struct{}
+type VideoGenerator struct {
+	ffprobeAvailable bool
+}
 
 func newVideoGenerator() (*VideoGenerator, error) {
 	if !isFFmpegInstalled() {
 		return nil, errors.New("ffmpeg is not installed")
 	}
 
-	return &VideoGenerator{}, nil
+	return &VideoGenerator{ffprobeAvailable: isFFprobeInstalled()}, nil
 }
 
 func (g *VideoGenerator) supportsExt(ext string) bool {
 	return common.VideoExtensions[strings.ToLower(ext)]
+}
+
+type videoMetadata struct {
+	Format struct {
+		Duration string `json:"duration"`
+	} `json:"format"`
+}
+
+func getVideoDuration(ctx context.Context, inputPath string) (float64, error) {
+	probeCtx, cancel := context.WithTimeout(ctx, videoProbeTimeout)
+	defer cancel()
+
+	ffprobe := exec.CommandContext(probeCtx, "ffprobe",
+		"-v", "quiet",
+		"-show_entries", "format=duration",
+		"-of", "json=c=1",
+		inputPath,
+	)
+
+	output, err := ffprobe.Output()
+	if err != nil {
+		return 0, fmt.Errorf("error probing video duration: %w", err)
+	}
+
+	var metadata videoMetadata
+	err = json.Unmarshal(output, &metadata)
+	if err != nil {
+		return 0, fmt.Errorf("error parsing ffprobe output: %w", err)
+	}
+
+	if metadata.Format.Duration == "" {
+		return 0, errors.New("ffprobe output missing duration")
+	}
+
+	duration, err := strconv.ParseFloat(metadata.Format.Duration, 64)
+	if err != nil {
+		return 0, fmt.Errorf("error parsing video duration %q: %w", metadata.Format.Duration, err)
+	}
+
+	if duration <= 0 {
+		return 0, fmt.Errorf("invalid video duration: %f", duration)
+	}
+
+	return duration, nil
+}
+
+func formatVideoThumbnailSeekSeconds(seekSeconds float64) string {
+	return strconv.FormatFloat(seekSeconds, 'f', videoThumbSeekTimestampPrecision, 64)
+}
+
+func videoThumbnailScaleFilter() string {
+	return fmt.Sprintf(
+		"scale='min(%d,iw)':'min(%d,ih)':force_original_aspect_ratio=decrease:flags=fast_bilinear",
+		videoThumbMaxWidth,
+		videoThumbMaxHeight,
+	)
+}
+
+func runVideoThumbnailFFmpeg(ctx context.Context, inputPath string, outputPath string, seekSeconds float64) error {
+	ffmpegArgs := []string{
+		"-v", "warning", // set log level to warning
+		"-hwaccel", "auto", // Use Hardware Acceleration if available
+		"-threads", "1", // limit CPU spikes from video decoding
+		"-an", // disable Audio stream
+		"-sn", // disable Subtitle stream
+		"-dn", // disable data stream
+	}
+
+	if seekSeconds > 0 {
+		ffmpegArgs = append(ffmpegArgs, "-ss", formatVideoThumbnailSeekSeconds(seekSeconds))
+	}
+
+	ffmpegArgs = append(ffmpegArgs,
+		"-skip_frame", "nokey", // skip non-key frames
+		"-i", inputPath, // set input file
+		"-vframes", "1", // output only one frame (one image)
+		"-q:v", strconv.Itoa(videoThumbQuality), // set JPEG quality
+		"-vf", videoThumbnailScaleFilter(), // scale down for terminal preview
+		"-f", "image2", // set format to image2
+		"-fs", maxVideoFileSizeForThumb, // limit the max file size to match image previewer limit
+		"-y", outputPath, // set the outputFile and overwrite it without confirmation if already exists
+	)
+
+	ffmpeg := exec.CommandContext(ctx, "ffmpeg", ffmpegArgs...)
+	if err := ffmpeg.Run(); err != nil {
+		return err
+	}
+
+	info, err := os.Stat(outputPath)
+	if err != nil {
+		return fmt.Errorf("generated thumbnail is missing: %w", err)
+	}
+
+	if info.Size() == 0 {
+		return errors.New("generated thumbnail is empty")
+	}
+
+	return nil
 }
 
 func (g *VideoGenerator) generateThumbnail(inputPath string, outputPathWithoutExt string) (string, error) {
@@ -39,24 +141,17 @@ func (g *VideoGenerator) generateThumbnail(inputPath string, outputPathWithoutEx
 	defer cancel()
 	outputPath := outputPathWithoutExt + thumbOutputExt
 
-	// ffmpeg -v warning -t 60 -hwaccel auto -an -sn -dn -skip_frame nokey -i input.mkv -vf scale='min(1024,iw)':'min(720,ih)':force_original_aspect_ratio=decrease:flags=fast_bilinear -vf "thumbnail" -frames:v 1 -y thumb.jpg
-	ffmpeg := exec.CommandContext(ctx, "ffmpeg",
-		"-v", "warning", // set log level to warning
-		"-an",       // disable Audio stream
-		"-sn",       // disable Subtitle stream
-		"-dn",       // disable data stream
-		"-t", "180", // process maximum 180s of the video (the first 3 min)
-		"-hwaccel", "auto", // Use Hardware Acceleration if available
-		"-skip_frame", "nokey", // skip non-key frames
-		"-i", inputPath, // set input file
-		"-vf", "thumbnail", // use ffmpeg default thumbnail filter
-		"-frames:v", "1", // output only one frame (one image)
-		"-f", "image2", // set format to image2
-		"-fs", maxVideoFileSizeForThumb, // limit the max file size to match image previewer limit
-		"-y", outputPath, // set the outputFile and overwrite it without confirmation if already exists
-	)
+	seekSeconds := 0.0
 
-	err := ffmpeg.Run()
+	if g.ffprobeAvailable {
+		videoDuration, err := getVideoDuration(ctx, inputPath)
+		if err != nil {
+			slog.Debug("Error probing video duration, thumbnail generation starts at beginning of video", "error", err)
+		}
+		seekSeconds = videoDuration * videoThumbSeekRatio
+	}
+
+	err := runVideoThumbnailFFmpeg(ctx, inputPath, outputPath, seekSeconds)
 	if err != nil {
 		return "", fmt.Errorf("error generating video thumbnail, outputPath: %s : %w", outputPath, err)
 	}
@@ -267,5 +362,11 @@ func isGhostscriptInstalled() bool {
 
 func isFFmpegInstalled() bool {
 	_, err := exec.LookPath("ffmpeg")
+	return err == nil
+}
+
+// ffprobe is packaged with ffmpeg but still checking in case
+func isFFprobeInstalled() bool {
+	_, err := exec.LookPath("ffprobe")
 	return err == nil
 }

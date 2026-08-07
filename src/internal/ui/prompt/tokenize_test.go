@@ -83,15 +83,18 @@ func Test_tokenizePromptCommand(t *testing.T) {
 	}
 }
 
-// Note : resolving shell subsitution is flaky in windows.
-// It usually times out, and environment variables sometimes dont work.
+// Note: shell startup is slower on Windows, especially on hosted CI runners.
+// Keep regular substitution tests above the production timeout so the tests
+// validate substitution behavior rather than runner startup latency.
+// Timeout behavior is covered separately with a short timeout below.
 func Test_resolveShellSubstitution(t *testing.T) {
 	timeout := shellSubTimeoutInTests
+	timeoutTestTimeout := shellSubTimeoutInTests
 	newLineSuffix := "\n"
 	noopCommand := "true"
 	if runtime.GOOS == "windows" {
-		// Substitution is slow in windows
-		timeout = 2 * time.Second
+		timeout = 5 * time.Second
+		timeoutTestTimeout = 500 * time.Millisecond
 		// Windows uses \r\n as new line for echo
 		newLineSuffix = "\r\n"
 		noopCommand = "cd ."
@@ -195,7 +198,7 @@ func Test_resolveShellSubstitution(t *testing.T) {
 	}
 
 	t.Run("Testing shell substitution timeout", func(t *testing.T) {
-		result, err := resolveShellSubstitution(timeout, "$(sleep 2)", defaultTestCwd)
+		result, err := resolveShellSubstitution(timeoutTestTimeout, "$(sleep 2)", defaultTestCwd)
 		assert.Empty(t, result)
 		require.Error(t, err)
 		require.ErrorIs(t, err, context.DeadlineExceeded)
