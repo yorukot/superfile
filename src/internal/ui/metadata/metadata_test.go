@@ -59,10 +59,19 @@ func TestDirectorySize(t *testing.T) {
 	filePath := filepath.Join(dirPath, "file1.txt")
 	require.NoError(t, os.WriteFile(filePath, fileContent, 0644))
 
+	// a file one level down, so the expected total below is only reachable by
+	// walking the tree, not by stat-ing the directory or its direct children
+	nestedContent := make([]byte, 3000)
+	nestedDir := filepath.Join(dirPath, "sub")
+	require.NoError(t, os.Mkdir(nestedDir, 0755))
+	require.NoError(t, os.WriteFile(filepath.Join(nestedDir, "file2.txt"), nestedContent, 0644))
+
 	dirInfo, err := os.Lstat(dirPath)
 	require.NoError(t, err)
 	statSize := common.FormatFileSize(dirInfo.Size())
-	recursiveSize := common.FormatFileSize(utils.DirSize(dirPath))
+	// computed from the known file sizes rather than from DirSize, which is the
+	// function under test
+	recursiveSize := common.FormatFileSize(int64(len(fileContent) + len(nestedContent)))
 	fileSize := common.FormatFileSize(int64(len(fileContent)))
 
 	unfocusedDir, err := GetMetadata(dirPath, false, nil).GetValue(keySize)
