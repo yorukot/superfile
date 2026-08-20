@@ -35,3 +35,10 @@ testsuite/.venv/
 
 # Agent configs
 CLAUDE.md
+
+# Compiled files
+spf.exe
+spf
+superfile.lnk
+spf.exe~
+spf~
