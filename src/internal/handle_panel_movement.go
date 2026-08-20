@@ -133,6 +133,12 @@ func (m *model) toggleDotFileController() {
 	}
 }
 
+// Toggle directories-only display or not. Intentionally not persisted across
+// sessions (unlike ToggleDotFile) — this is meant as a transient navigation filter.
+func (m *model) toggleDirsOnlyController() {
+	m.fileModel.ToggleDirsOnly()
+}
+
 // Toggle dotfile display or not
 func (m *model) toggleFooterController() tea.Cmd {
 	m.toggleFooter = !m.toggleFooter
