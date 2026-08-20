@@ -80,9 +80,13 @@ func (m *Model) ParentDirectory() error {
 	return m.UpdateCurrentFilePanelDir("..")
 }
 
-// Select all item in the file panel (only work on select mode)
+// Select all or deselect all items in the file panel (only work on select mode)
 func (m *Model) SelectAllItem() {
-	for _, item := range m.element {
-		m.SetSelected(item.Location)
+	if m.SelectedCount() == uint(len(m.element)) {
+		m.ResetSelected()
+	} else {
+		for _, item := range m.element {
+			m.SetSelected(item.Location)
+		}
 	}
 }
