@@ -111,7 +111,11 @@ func getMetaDataUnsorted(filePath string, metadataFocused bool, et *exiftool.Exi
 	// Add basic metadata information irrespective of what is fetched from exiftool
 	// Note : we prioritize these while sorting Metadata
 	name := [2]string{keyName, fileInfo.Name()}
+	// stat size of a directory inode is not the size of its contents
 	size := [2]string{keySize, common.FormatFileSize(fileInfo.Size())}
+	if fileInfo.IsDir() {
+		size = [2]string{keySize, dirSizeUnfocusedMsg}
+	}
 	modifyDate := [2]string{keyDataModified, fileInfo.ModTime().String()}
 	permissions := [2]string{keyPermissions, fileInfo.Mode().String()}
 	ownerVal, groupVal := getOwnerAndGroup(fileInfo)
