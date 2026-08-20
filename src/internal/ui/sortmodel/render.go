@@ -14,10 +14,14 @@ func (m *Model) Render() string {
 	sortOptionsContent.WriteString(common.ModalTitleStyle.Render(" Sort Options") + "\n\n")
 	for i, option := range SortOptionsStr {
 		cursor := " "
-		if i == m.Cursor {
+		style := common.ModalStyle
+		if i == m.Cursor && common.Config.CursorStyle == common.CursorStyleArrow {
 			cursor = common.FilePanelCursorStyle.Render(icon.Cursor)
 		}
-		sortOptionsContent.WriteString(cursor + common.ModalStyle.Render(" "+option) + "\n")
+		if i == m.Cursor && common.Config.CursorStyle == common.CursorStyleHighlight {
+			style = common.FilePanelItemActiveStyle
+		}
+		sortOptionsContent.WriteString(cursor + " " + style.Render(option) + "\n")
 	}
 	bottomBorder := common.GenerateFooterBorder(
 		fmt.Sprintf("%s/%s", strconv.Itoa(m.Cursor+1),

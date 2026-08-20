@@ -61,22 +61,41 @@ func (s *Model) directoriesRender(curFilePanelFileLocation string,
 		case diskDividerDir:
 			r.AddLines("", common.SideBarDisksDivider, "")
 		default:
-			cursor := " "
-			if s.cursor == i && sideBarFocused && !s.searchBar.Focused() {
-				cursor = icon.Cursor
-			}
-			if s.renaming && s.cursor == i {
-				r.AddLines(s.rename.View())
+			s.directoryRenderLine(i, curFilePanelFileLocation, sideBarFocused, r)
+		}
+	}
+}
+
+// renders a single directory line in the sidebar.
+func (s *Model) directoryRenderLine(i int, curFilePanelFileLocation string,
+	sideBarFocused bool, r *rendering.Renderer) {
+	cursor := " "
+	renderStyle := common.SidebarStyle
+	isActive := s.cursor == i && sideBarFocused && !s.searchBar.Focused()
+	isSelected := s.directories[i].Location == curFilePanelFileLocation
+
+	if isSelected {
+		renderStyle = common.SidebarSelectedStyle
+	}
+
+	if isActive {
+		if common.Config.CursorStyle == common.CursorStyleArrow {
+			cursor = icon.Cursor
+		} else { // Highlight
+			if isSelected {
+				renderStyle = common.SidebarSelectedActiveStyle
 			} else {
-				renderStyle := common.SidebarStyle
-				if s.directories[i].Location == curFilePanelFileLocation {
-					renderStyle = common.SidebarSelectedStyle
-				}
-				line := common.FilePanelCursorStyle.Render(cursor+" ") +
-					renderStyle.Render(s.directories[i].Icon+" ") +
-					renderStyle.Render(s.directories[i].Name)
-				r.AddLineWithCustomTruncate(line, rendering.TailsTruncateRight)
+				renderStyle = common.FilePanelItemActiveStyle
 			}
 		}
+	}
+
+	if s.renaming && s.cursor == i {
+		r.AddLines(s.rename.View())
+	} else {
+		line := common.FilePanelCursorStyle.Render(cursor+" ") +
+			renderStyle.Render(s.directories[i].Icon+" ") +
+			renderStyle.Render(s.directories[i].Name)
+		r.AddLineWithCustomTruncate(line, rendering.TailsTruncateRight)
 	}
 }

@@ -16,7 +16,7 @@
 editor = ""
 
 #-- Directory Editor
-# 
+#
 dir_editor = ""
 
 #-- Auto check for update
@@ -24,7 +24,7 @@ auto_check_update = true
 
 #-- cd on quit
 # Should we cd the shell to the last directory open in superfile when the
-# program exits? 
+# program exits?
 cd_on_quit = false
 
 #-- File Preview
@@ -114,6 +114,10 @@ show_select_icons = true
 # Set to true to enable background transparency.
 # Requires: terminal support for colour transparency
 transparent_background = false
+
+#-- Cursor Style
+# Set the cursor style. Valid values: "arrow", "highlight"
+cursor_style = "arrow"
 
 #-- File Preview Panel Width
 # Width of the file preview panel will be 1/n of the total width.

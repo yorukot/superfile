@@ -27,7 +27,7 @@ full_screen_bg = "#0f1419"
 
 #-- Gradient
 # Note: This currently only supports two colors.
-gradient_color = ["#FFB454", "#36A3D9"]
+gradient_color = ["#ffb454", "#36a3d9"]
 directory_icon_color = ""
 
 #-- File Panel
@@ -39,6 +39,8 @@ file_panel_top_directory_icon = "#aad94c"
 file_panel_top_path = "#ffcc66"
 file_panel_item_selected_fg = "#36a3d9"
 file_panel_item_selected_bg = "#1f2430"
+file_panel_item_active_fg = "#b3b1ad"
+file_panel_item_active_bg = "#ffcc66"
 
 #-- Footer
 footer_fg = "#b3b1ad"

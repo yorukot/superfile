@@ -15,8 +15,9 @@ import (
 func (m *Model) renderFileName(indexElement int, columnWidth int) string {
 	elem := m.GetElementAtIdx(indexElement)
 	isSelected := m.CheckSelected(elem.Location)
+	isActive := indexElement == m.GetCursor() && !m.SearchBar.Focused()
 	cursor := emptyCursor
-	if indexElement == m.GetCursor() && !m.SearchBar.Focused() {
+	if isActive && common.Config.CursorStyle == common.CursorStyleArrow {
 		cursor = icon.Cursor
 	}
 
@@ -28,12 +29,14 @@ func (m *Model) renderFileName(indexElement int, columnWidth int) string {
 	if elem.Info != nil {
 		isLink = elem.Info.Mode()&os.ModeSymlink != 0
 	}
+
 	renderedName := common.FilePanelItemRenderWithIcon(
 		elem.Name,
 		columnWidth-prefixWidth,
 		elem.Directory,
 		isLink,
 		isSelected,
+		isActive,
 		common.FilePanelBGColor,
 	)
 	return common.FilePanelCursorStyle.Render(cursor+" ") + selectBox + renderedName
@@ -42,11 +45,12 @@ func (m *Model) renderFileName(indexElement int, columnWidth int) string {
 // The renderer of delimiter spaces. It has a strict fixed size that depends only on the delimiter string.
 func (m *Model) renderDelimiter(indexElement int, columnWidth int) string {
 	isSelected := m.CheckSelected(m.GetElementAtIdx(indexElement).Location)
+	isActive := indexElement == m.GetCursor() && !m.SearchBar.Focused()
 	return common.FilePanelItemRender(
 		ColumnDelimiter,
 		columnWidth,
 		isSelected,
-		common.FilePanelBGColor,
+		isActive,
 		lipgloss.Left,
 	)
 }
@@ -54,6 +58,7 @@ func (m *Model) renderDelimiter(indexElement int, columnWidth int) string {
 func (m *Model) renderFileSize(indexElement int, columnWidth int) string {
 	elem := m.GetElementAtIdx(indexElement)
 	isSelected := m.CheckSelected(elem.Location)
+	isActive := indexElement == m.GetCursor() && !m.SearchBar.Focused()
 	sizeValue := common.FormatFileSize(elem.Info.Size())
 	if elem.Info.IsDir() {
 		sizeValue = ""
@@ -62,7 +67,7 @@ func (m *Model) renderFileSize(indexElement int, columnWidth int) string {
 		sizeValue,
 		columnWidth,
 		isSelected,
-		common.FilePanelBGColor,
+		isActive,
 		lipgloss.Right,
 	)
 }
@@ -71,12 +76,13 @@ func (m *Model) renderFileSize(indexElement int, columnWidth int) string {
 func (m *Model) renderModifyTime(indexElement int, columnWidth int) string {
 	elem := m.GetElementAtIdx(indexElement)
 	isSelected := m.CheckSelected(elem.Location)
+	isActive := indexElement == m.GetCursor() && !m.SearchBar.Focused()
 	modifyTime := elem.Info.ModTime().Format("2006-01-02 15:04")
 	return common.FilePanelItemRender(
 		modifyTime,
 		columnWidth,
 		isSelected,
-		common.FilePanelBGColor,
+		isActive,
 		lipgloss.Right,
 	)
 }
@@ -84,11 +90,12 @@ func (m *Model) renderModifyTime(indexElement int, columnWidth int) string {
 func (m *Model) renderPermissions(indexElement int, columnWidth int) string {
 	elem := m.GetElementAtIdx(indexElement)
 	isSelected := m.CheckSelected(elem.Location)
+	isActive := indexElement == m.GetCursor() && !m.SearchBar.Focused()
 	return common.FilePanelItemRender(
 		elem.Info.Mode().String(),
 		columnWidth,
 		isSelected,
-		common.FilePanelBGColor,
+		isActive,
 		lipgloss.Right,
 	)
 }
@@ -102,7 +109,7 @@ func (cd *columnDefinition) RenderHeader() string {
 		cd.Name,
 		cd.Size,
 		false,
-		common.FilePanelBGColor,
+		false,
 		cd.HeaderAlign,
 	)
 }
