@@ -147,6 +147,10 @@ func (m *Model) SetCursorPosition(cursor int) {
 	m.scrollToCursor(cursor)
 }
 
+func (m *Model) RenderIndex() int {
+	return m.renderIndex
+}
+
 func (m *Model) FindElementIndexByName(name string) int {
 	for i, elem := range m.element {
 		if elem.Name == name {
