@@ -1,0 +1,865 @@
+package ssh
+
+import (
+	"crypto/ecdsa"
+	"crypto/ed25519"
+	"crypto/elliptic"
+	"crypto/rand"
+	"errors"
+	"net"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	cryptossh "golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh/agent"
+	"golang.org/x/crypto/ssh/knownhosts"
+
+	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/ssh/sshtest"
+)
+
+func TestBuildClientConfigAuthMethods(t *testing.T) {
+	t.Setenv("SSH_AUTH_SOCK", "")
+	fixture := sshtest.Start(t)
+	agentProfile := profileForAlias(fixture, sshtest.AliasKey)
+	agentProfile.IdentityFile = fixture.EncryptedClientKeyPath
+	agentProfile.IdentityFiles = []string{fixture.EncryptedClientKeyPath}
+	passwordProfile := profileForAlias(fixture, sshtest.AliasPassword)
+	passwordProfile.IdentityFile = fixture.ClientKeyPath
+	passwordProfile.IdentityFiles = []string{fixture.ClientKeyPath}
+	keyboardProfile := profileForAlias(fixture, sshtest.AliasKeyboard)
+	keyboardProfile.IdentityFile = fixture.ClientKeyPath
+	keyboardProfile.IdentityFiles = []string{fixture.ClientKeyPath}
+	configuredSigner, err := publicKeySigner(fixture.EncryptedClientKeyPath, fixture.KeyPassphrase)
+	require.NoError(t, err)
+	agentSigner, err := publicKeySigner(fixture.ClientKeyPath, "")
+	require.NoError(t, err)
+
+	tests := []struct {
+		name                string
+		request             ClientConfigRequest
+		wantAuth            string
+		wantAuthSequence    []string
+		wantKeyFingerprint  string
+		rejectedFingerprint string
+		wantBuildErr        string
+		wantDialErr         string
+	}{
+		{
+			name: "agent auth precedes configured identity files",
+			request: ClientConfigRequest{
+				Profile:                  agentProfile,
+				AgentSocket:              startAgent(t, fixture.ClientKeyPath, ""),
+				KnownHostsPath:           fixture.KnownHostsPath,
+				ManualIdentityPassphrase: fixture.KeyPassphrase,
+			},
+			wantAuth:            "publickey",
+			wantAuthSequence:    []string{"publickey"},
+			wantKeyFingerprint:  cryptossh.FingerprintSHA256(agentSigner.PublicKey()),
+			rejectedFingerprint: cryptossh.FingerprintSHA256(configuredSigner.PublicKey()),
+		},
+		{
+			name: "configured identity file still works when agent is empty",
+			request: ClientConfigRequest{
+				Profile:        profileForAlias(fixture, sshtest.AliasKey),
+				AgentSocket:    startEmptyAgent(t),
+				KnownHostsPath: fixture.KnownHostsPath,
+			},
+			wantAuth: "publickey",
+		},
+		{
+			name: "unencrypted configured identity file",
+			request: ClientConfigRequest{
+				Profile:        profileForAlias(fixture, sshtest.AliasKey),
+				KnownHostsPath: fixture.KnownHostsPath,
+			},
+			wantAuth: "publickey",
+		},
+		{
+			name: "encrypted configured identity file with passphrase",
+			request: ClientConfigRequest{
+				Profile:                  profileForAlias(fixture, sshtest.AliasEncryptedKey),
+				KnownHostsPath:           fixture.KnownHostsPath,
+				ManualIdentityPassphrase: fixture.KeyPassphrase,
+			},
+			wantAuth: "publickey",
+		},
+		{
+			name: "password auth after public key methods",
+			request: ClientConfigRequest{
+				Profile:        passwordProfile,
+				KnownHostsPath: fixture.KnownHostsPath,
+				Password:       fixture.Password,
+			},
+			wantAuth:         "password",
+			wantAuthSequence: []string{"publickey", "password"},
+		},
+		{
+			name: "keyboard interactive auth last",
+			request: ClientConfigRequest{
+				Profile:                    keyboardProfile,
+				KnownHostsPath:             fixture.KnownHostsPath,
+				Password:                   fixture.Password,
+				AdditionalRedactionSecrets: []string{fixture.KeyboardAnswer},
+				KeyboardInteractive: func(_ string, _ string, questions []string, _ []bool) ([]string, error) {
+					return []string{fixture.KeyboardAnswer}, nil
+				},
+			},
+			wantAuth:         "keyboard-interactive",
+			wantAuthSequence: []string{"publickey", "password", "keyboard-interactive"},
+		},
+		{
+			name: "wrong passphrase",
+			request: ClientConfigRequest{
+				Profile:                  profileForAlias(fixture, sshtest.AliasEncryptedKey),
+				KnownHostsPath:           fixture.KnownHostsPath,
+				ManualIdentityPassphrase: "wrong-passphrase",
+			},
+			wantBuildErr: "parse encrypted ssh identity file",
+		},
+		{
+			name: "wrong password",
+			request: ClientConfigRequest{
+				Profile:        profileForAlias(fixture, sshtest.AliasPassword),
+				KnownHostsPath: fixture.KnownHostsPath,
+				Password:       "wrong-password",
+			},
+			wantDialErr: "unable to authenticate",
+		},
+		{
+			name: "no usable auth method",
+			request: ClientConfigRequest{
+				Profile:        withoutIdentity(profileForAlias(fixture, sshtest.AliasPassword)),
+				KnownHostsPath: fixture.KnownHostsPath,
+			},
+			wantBuildErr: "no usable authentication method",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			beforeOffset := fixtureLogSize(t, fixture.LogPath)
+			bundle, err := BuildClientConfig(tt.request)
+			if tt.wantBuildErr != "" {
+				require.Error(t, err)
+				assert.Contains(t, err.Error(), tt.wantBuildErr)
+				assertNoSecretLeak(t, err.Error())
+				return
+			}
+			require.NoError(t, err)
+			defer bundle.Close()
+
+			client, err := bundle.Dial()
+			if tt.wantDialErr != "" {
+				require.Error(t, err)
+				assert.Contains(t, err.Error(), tt.wantDialErr)
+				assertNoSecretLeak(t, err.Error())
+				return
+			}
+			require.NoError(t, err)
+			require.NoError(t, client.Close())
+
+			logText := fixture.WaitForLogSince(t, beforeOffset, "auth="+tt.wantAuth)
+			assert.Contains(t, logText, "auth="+tt.wantAuth)
+			if len(tt.wantAuthSequence) > 0 {
+				assert.Equal(t, tt.wantAuthSequence, authAttemptSequence(logText))
+			}
+			if tt.wantKeyFingerprint != "" {
+				assert.Contains(t, logText, "fingerprint="+tt.wantKeyFingerprint)
+			}
+			if tt.rejectedFingerprint != "" {
+				assert.NotContains(t, logText, "fingerprint="+tt.rejectedFingerprint)
+			}
+			assertNoSecretLeak(t, logText)
+		})
+	}
+}
+
+func authAttemptSequence(logText string) []string {
+	sequence := make([]string, 0)
+	for _, line := range strings.Split(logText, "\n") {
+		const marker = "event=auth method="
+		markerIndex := strings.Index(line, marker)
+		if markerIndex < 0 || strings.Contains(line, " result=") {
+			continue
+		}
+		method := strings.Fields(line[markerIndex+len(marker):])[0]
+		if len(sequence) == 0 || sequence[len(sequence)-1] != method {
+			sequence = append(sequence, method)
+		}
+	}
+	return sequence
+}
+
+func TestBuildClientConfigHonorsProfileAuthOrder(t *testing.T) {
+	t.Setenv("SSH_AUTH_SOCK", "")
+	fixture := sshtest.Start(t)
+
+	t.Run("password before keyboard interactive skips later keyboard prompt after success", func(t *testing.T) {
+		profile := withoutIdentity(profileForAlias(fixture, sshtest.AliasPassword))
+		profile.AuthOrder = []string{common.SSHAuthMethodPassword, common.SSHAuthMethodKeyboardInteractive}
+		beforeOffset := fixtureLogSize(t, fixture.LogPath)
+
+		bundle, err := BuildClientConfig(ClientConfigRequest{
+			Profile:                    profile,
+			KnownHostsPath:             fixture.KnownHostsPath,
+			Password:                   fixture.Password,
+			AdditionalRedactionSecrets: []string{fixture.KeyboardAnswer},
+			KeyboardInteractive: func(_ string, _ string, _ []string, _ []bool) ([]string, error) {
+				return []string{fixture.KeyboardAnswer}, nil
+			},
+		})
+		require.NoError(t, err)
+		defer bundle.Close()
+
+		client, err := bundle.Dial()
+		require.NoError(t, err)
+		require.NoError(t, client.Close())
+
+		logText := fixture.WaitForLogSince(t, beforeOffset, "auth=password")
+		assert.Contains(t, logText, "event=auth method=password")
+		assert.NotContains(t, logText, "event=auth method=keyboard-interactive")
+		assert.Contains(t, logText, "auth=password")
+		assertNoSecretLeak(t, logText)
+	})
+
+	t.Run("excluding password omits supplied password auth", func(t *testing.T) {
+		profile := withoutIdentity(profileForAlias(fixture, sshtest.AliasPassword))
+		profile.AuthOrder = []string{common.SSHAuthMethodKeyboardInteractive}
+		beforeOffset := fixtureLogSize(t, fixture.LogPath)
+
+		bundle, err := BuildClientConfig(ClientConfigRequest{
+			Profile:                    profile,
+			KnownHostsPath:             fixture.KnownHostsPath,
+			Password:                   fixture.Password,
+			AdditionalRedactionSecrets: []string{fixture.KeyboardAnswer},
+			KeyboardInteractive: func(_ string, _ string, _ []string, _ []bool) ([]string, error) {
+				return []string{fixture.KeyboardAnswer}, nil
+			},
+		})
+		require.NoError(t, err)
+		defer bundle.Close()
+
+		_, err = bundle.Dial()
+		require.Error(t, err)
+		logText := fixtureLogSince(t, fixture.LogPath, beforeOffset)
+		assert.Contains(t, logText, "event=auth method=keyboard-interactive")
+		assert.NotContains(t, logText, "event=auth method=password")
+		assert.NotContains(t, logText, "event=auth method=publickey")
+		assertNoSecretLeak(t, logText)
+	})
+
+	t.Run("keyboard interactive only excludes password and publickey", func(t *testing.T) {
+		profile := profileForAlias(fixture, sshtest.AliasKeyboard)
+		profile.IdentityFile = fixture.ClientKeyPath
+		profile.IdentityFiles = []string{fixture.ClientKeyPath}
+		profile.AuthOrder = []string{common.SSHAuthMethodKeyboardInteractive}
+		beforeOffset := fixtureLogSize(t, fixture.LogPath)
+
+		bundle, err := BuildClientConfig(ClientConfigRequest{
+			Profile:                    profile,
+			KnownHostsPath:             fixture.KnownHostsPath,
+			Password:                   fixture.Password,
+			AdditionalRedactionSecrets: []string{fixture.KeyboardAnswer},
+			KeyboardInteractive: func(_ string, _ string, _ []string, _ []bool) ([]string, error) {
+				return []string{fixture.KeyboardAnswer}, nil
+			},
+		})
+		require.NoError(t, err)
+		defer bundle.Close()
+
+		client, err := bundle.Dial()
+		require.NoError(t, err)
+		require.NoError(t, client.Close())
+
+		logText := fixture.WaitForLogSince(t, beforeOffset, "auth=keyboard-interactive")
+		assert.Contains(t, logText, "event=auth method=keyboard-interactive")
+		assert.NotContains(t, logText, "event=auth method=password")
+		assert.NotContains(t, logText, "event=auth method=publickey")
+		assert.Contains(t, logText, "auth=keyboard-interactive")
+		assertNoSecretLeak(t, logText)
+	})
+}
+
+func TestHostKeyUnknownRejectAcceptAndChangedReject(t *testing.T) {
+	t.Setenv("SSH_AUTH_SOCK", "")
+	fixture := sshtest.Start(t)
+
+	t.Run("unknown host reject returns typed confirmation request without write", func(t *testing.T) {
+		knownHostsPath := filepath.Join(t.TempDir(), "known_hosts")
+		require.NoError(t, os.WriteFile(knownHostsPath, nil, 0o600))
+		bundle := buildHostKeyTestBundle(t, fixture, sshtest.AliasKey, knownHostsPath)
+		defer bundle.Close()
+
+		client, err := bundle.Dial()
+		require.Error(t, err)
+		assert.Nil(t, client)
+		var unknownHost *UnknownHostKeyError
+		require.ErrorAs(t, err, &unknownHost, "got %T %v", err, err)
+		assert.Equal(t, sshtest.AliasKey, unknownHost.Host)
+		assert.NotEmpty(t, unknownHost.Address)
+		assert.NotEmpty(t, unknownHost.KeyType)
+		assert.True(t, strings.HasPrefix(unknownHost.Fingerprint, "SHA256:"))
+		assert.Equal(t, knownHostsPath, unknownHost.KnownHostsPath)
+		knownHostsBytes, readErr := os.ReadFile(knownHostsPath)
+		require.NoError(t, readErr)
+		assert.Empty(t, knownHostsBytes)
+	})
+
+	t.Run("unknown host accept persists to injected known hosts", func(t *testing.T) {
+		knownHostsPath := filepath.Join(t.TempDir(), "known_hosts")
+		require.NoError(t, os.WriteFile(knownHostsPath, nil, 0o600))
+		bundle := buildHostKeyTestBundle(t, fixture, sshtest.AliasKey, knownHostsPath)
+		defer bundle.Close()
+
+		_, err := bundle.Dial()
+		require.Error(t, err)
+		require.NoError(t, AcceptUnknownHostKey(err))
+		knownHostsBytes, readErr := os.ReadFile(knownHostsPath)
+		require.NoError(t, readErr)
+		assert.Contains(t, string(knownHostsBytes), sshtest.AliasKey)
+
+		acceptedBundle := buildHostKeyTestBundle(t, fixture, sshtest.AliasKey, knownHostsPath)
+		defer acceptedBundle.Close()
+		client, dialErr := acceptedBundle.Dial()
+		require.NoError(t, dialErr)
+		require.NoError(t, client.Close())
+	})
+
+	t.Run("changed host key rejects without write", func(t *testing.T) {
+		beforeBytes, err := os.ReadFile(fixture.ChangedHostKnownHostsPath)
+		require.NoError(t, err)
+		bundle := buildHostKeyTestBundle(t, fixture, sshtest.AliasBadKey, fixture.ChangedHostKnownHostsPath)
+		defer bundle.Close()
+
+		client, dialErr := bundle.Dial()
+		require.Error(t, dialErr)
+		assert.Nil(t, client)
+		var unknownHost *UnknownHostKeyError
+		assert.NotErrorAs(t, dialErr, &unknownHost, "changed host must not become an accept prompt")
+		afterBytes, readErr := os.ReadFile(fixture.ChangedHostKnownHostsPath)
+		require.NoError(t, readErr)
+		assert.Equal(t, string(beforeBytes), string(afterBytes))
+	})
+}
+
+func TestInjectedKnownHostsPathDoesNotUseDefaultKnownHosts(t *testing.T) {
+	t.Setenv("SSH_AUTH_SOCK", "")
+	fixture := sshtest.Start(t)
+	fakeHome := t.TempDir()
+	defaultKnownHostsPath := filepath.Join(fakeHome, ".ssh", "known_hosts")
+	require.NoError(t, os.MkdirAll(filepath.Dir(defaultKnownHostsPath), 0o700))
+	defaultContents := []byte("poison default known hosts must stay untouched\n")
+	require.NoError(t, os.WriteFile(defaultKnownHostsPath, defaultContents, 0o600))
+	t.Setenv("HOME", fakeHome)
+	t.Setenv("USERPROFILE", fakeHome)
+
+	injectedKnownHostsPath := filepath.Join(t.TempDir(), "injected_known_hosts")
+	copyFile(t, fixture.KnownHostsPath, injectedKnownHostsPath)
+
+	bundle := buildHostKeyTestBundle(t, fixture, sshtest.AliasE2E, injectedKnownHostsPath)
+	defer bundle.Close()
+	client, err := bundle.Dial()
+	require.NoError(t, err)
+	require.NoError(t, client.Close())
+
+	afterDefault, err := os.ReadFile(defaultKnownHostsPath)
+	require.NoError(t, err)
+	assert.Equal(t, string(defaultContents), string(afterDefault))
+}
+
+func TestAcceptUnknownHostKeyUsesDefaultKnownHostsWhenNotInjected(t *testing.T) {
+	t.Setenv("SSH_AUTH_SOCK", "")
+	fixture := sshtest.Start(t)
+	fakeHome := t.TempDir()
+	t.Setenv("HOME", fakeHome)
+	t.Setenv("USERPROFILE", fakeHome)
+	defaultKnownHostsPath := filepath.Join(fakeHome, ".ssh", "known_hosts")
+	require.NoError(t, os.MkdirAll(filepath.Dir(defaultKnownHostsPath), 0o700))
+	require.NoError(t, os.WriteFile(defaultKnownHostsPath, nil, 0o600))
+
+	request := ClientConfigRequest{
+		Profile:      profileForAlias(fixture, sshtest.AliasKey),
+		HostKeyAlias: sshtest.AliasKey,
+	}
+	bundle, err := BuildClientConfig(request)
+	require.NoError(t, err)
+	defer bundle.Close()
+
+	_, err = bundle.Dial()
+	require.Error(t, err)
+	require.NoError(t, AcceptUnknownHostKey(err))
+	knownHostsBytes, readErr := os.ReadFile(defaultKnownHostsPath)
+	require.NoError(t, readErr)
+	assert.Contains(t, string(knownHostsBytes), sshtest.AliasKey)
+}
+
+func profileForAlias(fixture *sshtest.Fixture, aliasName string) common.SSHQuickConnectProfile {
+	alias := fixture.Aliases[aliasName]
+	profile := common.SSHQuickConnectProfile{
+		Name:          alias.Name,
+		Host:          alias.Host,
+		Port:          alias.Port,
+		User:          alias.User,
+		IdentityFile:  alias.IdentityFilePath,
+		IdentityFiles: nil,
+	}
+	if alias.IdentityFilePath != "" {
+		profile.IdentityFiles = []string{alias.IdentityFilePath}
+	}
+	return profile
+}
+
+func withoutIdentity(profile common.SSHQuickConnectProfile) common.SSHQuickConnectProfile {
+	profile.IdentityFile = ""
+	profile.IdentityFiles = nil
+	return profile
+}
+
+func buildHostKeyTestBundle(
+	t *testing.T,
+	fixture *sshtest.Fixture,
+	aliasName string,
+	knownHostsPath string,
+) *ClientConfigBundle {
+	t.Helper()
+	req := ClientConfigRequest{
+		Profile:        profileForAlias(fixture, aliasName),
+		HostKeyAlias:   aliasName,
+		KnownHostsPath: knownHostsPath,
+	}
+	bundle, err := BuildClientConfig(req)
+	require.NoError(t, err)
+	return bundle
+}
+
+func startAgent(t *testing.T, identityPath string, passphrase string) string {
+	t.Helper()
+	keyBytes, err := os.ReadFile(identityPath)
+	require.NoError(t, err)
+	var privateKey any
+	if passphrase == "" {
+		privateKey, err = cryptossh.ParseRawPrivateKey(keyBytes)
+	} else {
+		privateKey, err = cryptossh.ParseRawPrivateKeyWithPassphrase(keyBytes, []byte(passphrase))
+	}
+	require.NoError(t, err)
+
+	keyring := agent.NewKeyring()
+	require.NoError(t, keyring.Add(agent.AddedKey{PrivateKey: privateKey}))
+	return startPersistentAgent(t, keyring, "sf-agent-")
+}
+
+func startPersistentAgent(t *testing.T, keyring agent.Agent, tempPrefix string) string {
+	t.Helper()
+	//nolint:usetesting // Short /tmp path avoids Unix socket length limits.
+	socketDir, err := os.MkdirTemp("/tmp", tempPrefix)
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = os.RemoveAll(socketDir) })
+	socketPath := filepath.Join(socketDir, "a.sock")
+	listener, err := net.Listen("unix", socketPath)
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = listener.Close() })
+
+	go func() {
+		for {
+			conn, acceptErr := listener.Accept()
+			if acceptErr != nil {
+				return
+			}
+			go func() { _ = agent.ServeAgent(keyring, conn) }()
+		}
+	}()
+
+	return socketPath
+}
+
+func startEmptyAgent(t *testing.T) string {
+	t.Helper()
+	keyring := agent.NewKeyring()
+	return startPersistentAgent(t, keyring, "sf-agent-empty-")
+}
+
+func startTrackedEmptyAgent(t *testing.T) (string, <-chan struct{}) {
+	t.Helper()
+	keyring := agent.NewKeyring()
+	//nolint:usetesting // Short /tmp path avoids Unix socket length limits.
+	socketDir, err := os.MkdirTemp("/tmp", "sf-agent-tracked-empty-")
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = os.RemoveAll(socketDir) })
+	socketPath := filepath.Join(socketDir, "a.sock")
+	listener, err := net.Listen("unix", socketPath)
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = listener.Close() })
+
+	closed := make(chan struct{})
+	go func() {
+		conn, acceptErr := listener.Accept()
+		if acceptErr != nil {
+			close(closed)
+			return
+		}
+		_ = agent.ServeAgent(keyring, conn)
+		_ = conn.Close()
+		close(closed)
+	}()
+	return socketPath, closed
+}
+
+func fixtureLogSize(t *testing.T, path string) int64 {
+	t.Helper()
+	info, err := os.Stat(path)
+	require.NoError(t, err)
+	return info.Size()
+}
+
+func fixtureLogSince(t *testing.T, path string, offset int64) string {
+	t.Helper()
+	require.GreaterOrEqual(t, offset, int64(0))
+	bytes, err := os.ReadFile(path)
+	require.NoError(t, err)
+	if offset >= int64(len(bytes)) {
+		return ""
+	}
+	return string(bytes[offset:])
+}
+
+func copyFile(t *testing.T, source string, destination string) {
+	t.Helper()
+	bytes, err := os.ReadFile(source)
+	require.NoError(t, err)
+	require.NoError(t, os.WriteFile(destination, bytes, 0o600))
+}
+
+func assertNoSecretLeak(t *testing.T, text string) {
+	t.Helper()
+	assert.NotContains(t, text, sshtest.TestPassword)
+	assert.NotContains(t, text, sshtest.TestKeyPassphrase)
+	assert.NotContains(t, text, sshtest.TestKeyboardAnswer)
+	assert.NotContains(t, text, "PRIVATE KEY")
+}
+
+func TestClientConfigBundleDialRejectsNilBundle(t *testing.T) {
+	var bundle *ClientConfigBundle
+	_, err := bundle.Dial()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "not initialized")
+}
+
+func TestStrictHostKeyCallbackCreatesMissingKnownHostsSecurely(t *testing.T) {
+	knownHostsPath := filepath.Join(t.TempDir(), ".ssh", "known_hosts")
+	_, err := StrictHostKeyCallback(knownHostsPath)
+	require.NoError(t, err)
+
+	info, err := os.Stat(knownHostsPath)
+	require.NoError(t, err)
+	assert.Equal(t, os.FileMode(0o600), info.Mode().Perm())
+	directoryInfo, err := os.Stat(filepath.Dir(knownHostsPath))
+	require.NoError(t, err)
+	assert.Equal(t, os.FileMode(0o700), directoryInfo.Mode().Perm())
+}
+
+func TestBuildClientConfigSkipsMissingIdentityAndStaleAgent(t *testing.T) {
+	knownHostsPath := filepath.Join(t.TempDir(), "known_hosts")
+	profile := common.SSHQuickConnectProfile{
+		Host:          "example.com",
+		User:          "user",
+		IdentityFiles: []string{filepath.Join(t.TempDir(), "missing-key")},
+		AuthOrder:     []string{common.SSHAuthMethodPublicKey, common.SSHAuthMethodPassword},
+	}
+	bundle, err := BuildClientConfig(ClientConfigRequest{
+		Profile:        profile,
+		KnownHostsPath: knownHostsPath,
+		AgentSocket:    filepath.Join(t.TempDir(), "stale-agent.sock"),
+		Password:       "runtime-password",
+	})
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = bundle.Close() })
+	assert.Len(t, bundle.Config.Auth, 1)
+}
+
+func TestBuildClientConfigClosesAgentConnectionOnBuildFailure(t *testing.T) {
+	tests := []struct {
+		name         string
+		identityFile func(*testing.T) string
+		errorText    string
+	}{
+		{
+			name:      "no usable authentication methods",
+			errorText: "no usable authentication method",
+		},
+		{
+			name: "identity parsing failure",
+			identityFile: func(t *testing.T) string {
+				path := filepath.Join(t.TempDir(), "invalid-key")
+				require.NoError(t, os.WriteFile(path, []byte("not a private key"), 0o600))
+				return path
+			},
+			errorText: "parse ssh identity file",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			socketPath, agentClosed := startTrackedEmptyAgent(t)
+			profile := common.SSHQuickConnectProfile{
+				Host:      "example.com",
+				User:      "user",
+				AuthOrder: []string{common.SSHAuthMethodPublicKey},
+			}
+			if tt.identityFile != nil {
+				profile.IdentityFiles = []string{tt.identityFile(t)}
+			}
+			_, err := BuildClientConfig(ClientConfigRequest{
+				Profile:        profile,
+				KnownHostsPath: filepath.Join(t.TempDir(), "known_hosts"),
+				AgentSocket:    socketPath,
+			})
+			require.Error(t, err)
+			assert.Contains(t, err.Error(), tt.errorText)
+
+			select {
+			case <-agentClosed:
+			case <-time.After(time.Second):
+				t.Fatal("SSH agent connection remained open after client-config failure")
+			}
+		})
+	}
+}
+
+func TestBuildClientConfigRejectsMissingRequiredProfileFields(t *testing.T) {
+	_, err := BuildClientConfig(ClientConfigRequest{Profile: common.SSHQuickConnectProfile{User: "u"}})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "host is required")
+
+	_, err = BuildClientConfig(ClientConfigRequest{Profile: common.SSHQuickConnectProfile{Host: "h"}})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "user is required")
+}
+
+func TestBuildClientConfigRedactsRuntimeSecretsFromBuildError(t *testing.T) {
+	password := "arbitrarybuildpassword"
+	passphrase := "arbitrarybuildpassphrase"
+	keyboardAnswer := "arbitrarybuildkeyboardanswer"
+	identityPath := filepath.Join(t.TempDir(), strings.Join([]string{
+		password,
+		passphrase,
+		keyboardAnswer,
+	}, "--"))
+	require.NoError(t, os.WriteFile(identityPath, []byte("not a private key"), 0o600))
+
+	_, err := BuildClientConfig(ClientConfigRequest{
+		Profile: common.SSHQuickConnectProfile{
+			Host:           "example.com",
+			User:           "user",
+			IdentitiesOnly: true,
+			AuthOrder:      []string{common.SSHAuthMethodPublicKey},
+		},
+		KnownHostsPath:             filepath.Join(t.TempDir(), "known_hosts"),
+		ManualIdentityFile:         identityPath,
+		ManualIdentityPassphrase:   passphrase,
+		Password:                   password,
+		AdditionalRedactionSecrets: []string{keyboardAnswer},
+	})
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "parse encrypted ssh identity file")
+	assert.NotContains(t, err.Error(), password)
+	assert.NotContains(t, err.Error(), passphrase)
+	assert.NotContains(t, err.Error(), keyboardAnswer)
+}
+
+func TestClientConfigBundleRedactsDialErrorsWithClonedRuntimeSecrets(t *testing.T) {
+	password := "arbitrarydialpassword"
+	passphrase := "arbitrarydialpassphrase"
+	keyboardAnswer := "arbitrarydialkeyboardanswer"
+	additionalSecrets := []string{keyboardAnswer}
+	bundle, err := BuildClientConfig(ClientConfigRequest{
+		Profile: common.SSHQuickConnectProfile{
+			Host:      "127.0.0.1",
+			User:      "user",
+			AuthOrder: []string{common.SSHAuthMethodPassword},
+		},
+		KnownHostsPath:             filepath.Join(t.TempDir(), "known_hosts"),
+		ManualIdentityPassphrase:   passphrase,
+		Password:                   password,
+		AdditionalRedactionSecrets: additionalSecrets,
+	})
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = bundle.Close() })
+
+	additionalSecrets[0] = "mutated-after-build"
+	assert.Equal(t, []string{keyboardAnswer}, bundle.redactionSecrets.AdditionalSecrets)
+	bundle.Address = strings.Join([]string{password, passphrase, keyboardAnswer}, "--")
+
+	_, err = bundle.Dial()
+	require.Error(t, err)
+	assert.NotContains(t, err.Error(), password)
+	assert.NotContains(t, err.Error(), passphrase)
+	assert.NotContains(t, err.Error(), keyboardAnswer)
+}
+
+func TestBuildClientConfigTimeoutDefault(t *testing.T) {
+	fixture := sshtest.Start(t)
+	bundle, err := BuildClientConfig(ClientConfigRequest{
+		Profile:        profileForAlias(fixture, sshtest.AliasKey),
+		KnownHostsPath: fixture.KnownHostsPath,
+	})
+	require.NoError(t, err)
+	defer bundle.Close()
+	assert.Equal(t, defaultSSHTimeout, bundle.Config.Timeout)
+
+	customTimeout := 250 * time.Millisecond
+	bundle, err = BuildClientConfig(ClientConfigRequest{
+		Profile:        profileForAlias(fixture, sshtest.AliasKey),
+		KnownHostsPath: fixture.KnownHostsPath,
+		Timeout:        customTimeout,
+	})
+	require.NoError(t, err)
+	defer bundle.Close()
+	assert.Equal(t, customTimeout, bundle.Config.Timeout)
+}
+
+func TestIdentityFileTildePathExpandsToUserHome(t *testing.T) {
+	t.Setenv("SSH_AUTH_SOCK", "")
+	fixture := sshtest.Start(t)
+	homeDir := t.TempDir()
+	t.Setenv("HOME", homeDir)
+	t.Setenv("USERPROFILE", homeDir)
+
+	sshDir := filepath.Join(homeDir, ".ssh")
+	require.NoError(t, os.MkdirAll(sshDir, 0o700))
+	identityPath := filepath.Join(sshDir, "id_ed25519")
+	keyBytes, err := os.ReadFile(fixture.ClientKeyPath)
+	require.NoError(t, err)
+	require.NoError(t, os.WriteFile(identityPath, keyBytes, 0o600))
+
+	profile := common.SSHQuickConnectProfile{
+		Name:           sshtest.AliasKey,
+		Host:           fixture.Host,
+		Port:           fixture.Port,
+		User:           "key",
+		IdentityFile:   "~/.ssh/id_ed25519",
+		IdentityFiles:  []string{"~/.ssh/id_ed25519"},
+		IdentitiesOnly: true,
+		AuthOrder:      []string{common.SSHAuthMethodPublicKey},
+	}
+
+	bundle, err := BuildClientConfig(ClientConfigRequest{
+		Profile:        profile,
+		KnownHostsPath: fixture.KnownHostsPath,
+		HostKeyAlias:   sshtest.AliasKey,
+	})
+	require.NoError(t, err)
+	defer bundle.Close()
+
+	client, err := bundle.Dial()
+	require.NoError(t, err)
+	require.NoError(t, client.Close())
+
+	assert.Equal(t, []string{identityPath}, identityFiles(profile))
+}
+
+func TestDialPrefersHostKeyAlgorithmsRecordedInKnownHosts(t *testing.T) {
+	t.Setenv("SSH_AUTH_SOCK", "")
+
+	knownSigner, address := startMultiHostKeyServer(t)
+
+	host, portText, err := net.SplitHostPort(address)
+	require.NoError(t, err)
+	port, err := strconv.Atoi(portText)
+	require.NoError(t, err)
+
+	knownHostsPath := filepath.Join(t.TempDir(), "known_hosts")
+	knownHostsLine := knownhosts.Line(
+		[]string{knownhosts.Normalize(address)},
+		knownSigner.PublicKey(),
+	) + "\n"
+	require.NoError(t, os.WriteFile(knownHostsPath, []byte(knownHostsLine), 0o600))
+
+	bundle, err := BuildClientConfig(ClientConfigRequest{
+		Profile: common.SSHQuickConnectProfile{
+			Host:      host,
+			Port:      port,
+			User:      "multikey",
+			AuthOrder: []string{common.SSHAuthMethodPassword},
+		},
+		Password:       "multikey-pass",
+		KnownHostsPath: knownHostsPath,
+	})
+	require.NoError(t, err)
+	defer bundle.Close()
+
+	client, err := bundle.Dial()
+	require.NoError(
+		t,
+		err,
+		"dial must trust the recorded ed25519 host key even though the server prefers to present ECDSA",
+	)
+	require.NoError(t, client.Close())
+}
+
+// startMultiHostKeyServer starts an SSH server holding both an ECDSA and an
+// Ed25519 host key, like stock OpenSSH servers that generate several host key
+// types. It returns the Ed25519 signer (the key recorded in known_hosts) and
+// the listen address.
+func startMultiHostKeyServer(t *testing.T) (cryptossh.Signer, string) {
+	t.Helper()
+
+	_, ed25519Key, err := ed25519.GenerateKey(rand.Reader)
+	require.NoError(t, err)
+	ed25519Signer, err := cryptossh.NewSignerFromKey(ed25519Key)
+	require.NoError(t, err)
+
+	ecdsaKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	require.NoError(t, err)
+	ecdsaSigner, err := cryptossh.NewSignerFromKey(ecdsaKey)
+	require.NoError(t, err)
+
+	serverConfig := &cryptossh.ServerConfig{
+		PasswordCallback: func(
+			conn cryptossh.ConnMetadata,
+			password []byte,
+		) (*cryptossh.Permissions, error) {
+			if conn.User() == "multikey" && string(password) == "multikey-pass" {
+				return &cryptossh.Permissions{}, nil
+			}
+			return nil, errors.New("access denied")
+		},
+	}
+	serverConfig.AddHostKey(ecdsaSigner)
+	serverConfig.AddHostKey(ed25519Signer)
+
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = listener.Close() })
+
+	go func() {
+		for {
+			netConn, acceptErr := listener.Accept()
+			if acceptErr != nil {
+				return
+			}
+			go func(conn net.Conn) {
+				serverConn, channels, requests, handshakeErr := cryptossh.NewServerConn(conn, serverConfig)
+				if handshakeErr != nil {
+					_ = conn.Close()
+					return
+				}
+				go cryptossh.DiscardRequests(requests)
+				for newChannel := range channels {
+					_ = newChannel.Reject(cryptossh.Prohibited, "test server accepts no channels")
+				}
+				_ = serverConn.Close()
+			}(netConn)
+		}
+	}()
+
+	return ed25519Signer, listener.Addr().String()
+}

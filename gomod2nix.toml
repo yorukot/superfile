@@ -145,9 +145,17 @@ schema = 3
     version = 'v1.1.0'
     hash = 'sha256-CtV/dr1L46cZ65EnK9DrBduZCaMnTGf4N2MnElCymtM='
 
+  [mod.'github.com/kevinburke/ssh_config']
+    version = 'v1.6.0'
+    hash = 'sha256-i/EYNJx0+HbAGFVoiKV4QF/zqb4fWewh+bpBKUkXDCc='
+
   [mod.'github.com/klauspost/compress']
     version = 'v1.18.6'
     hash = 'sha256-gULc+A2Clg2HnwR9UNXSIHVGdFY/aGqhf0zlvMxqaSY='
+
+  [mod.'github.com/kr/fs']
+    version = 'v0.1.0'
+    hash = 'sha256-+Cjz0rGmdNIV1QL4z8h7JAjHATa5pKndwSnD1M0J74c='
 
   [mod.'github.com/kr/text']
     version = 'v0.2.0'
@@ -216,6 +224,10 @@ schema = 3
   [mod.'github.com/pierrec/lz4/v4']
     version = 'v4.1.27'
     hash = 'sha256-XcdFN0MceCyxaAPuS0RPBojWSdFDtvkmv6B0xk/Bb5g='
+
+  [mod.'github.com/pkg/sftp']
+    version = 'v1.13.10'
+    hash = 'sha256-YKjTWim2Qa6z3FA1dUFaKXSRxB4fsHDAG0GL17ZDE4U='
 
   [mod.'github.com/pmezard/go-difflib']
     version = 'v1.0.1-0.20181226105442-5d4384ee4fb2'

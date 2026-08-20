@@ -16,6 +16,7 @@ import (
 
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/prompt"
+	"github.com/yorukot/superfile/src/internal/ui/quickconnect"
 	zoxideui "github.com/yorukot/superfile/src/internal/ui/zoxide"
 )
 
@@ -30,16 +31,18 @@ import (
 //     to prevent noise in test logs. Same with imagePreviewer
 func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool,
 	firstPanelPaths []string, zClient *zoxidelib.Client) *model {
+	fileModel := filemodel.New(firstPanelPaths, toggleDotFile)
 	return &model{
 		focusPanel:      nonePanelFocus,
 		processBarModel: processbar.New(),
 		clipboardWriter: clipboard.WriteAll,
 		sidebarModel:    sidebar.New(),
 		fileMetaData:    metadata.New(),
-		fileModel:       filemodel.New(firstPanelPaths, toggleDotFile),
+		fileModel:       fileModel,
 		helpMenu:        helpmenu.New(),
 		promptModal:     prompt.DefaultModel(prompt.PromptMinHeight, prompt.PromptMinWidth),
 		zoxideModal:     zoxideui.DefaultModel(zoxideui.ZoxideMinHeight, zoxideui.ZoxideMinWidth, zClient),
+		quickConnect:    quickconnect.New(),
 		sortModal:       sortmodel.New(),
 		zClient:         zClient,
 		modelQuitState:  notQuitting,

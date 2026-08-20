@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"path/filepath"
 	"strconv"
 
 	"github.com/yorukot/superfile/src/internal/common"
@@ -13,7 +12,7 @@ import (
 
 func (m *model) sidebarRender() string {
 	return m.sidebarModel.Render(m.focusPanel == sidebarFocus,
-		m.getFocusedFilePanel().Location)
+		m.getFocusedFilePanel().DisplayLocation(), m.getFocusedFilePanel().RemoteSidebarStatusText())
 }
 
 func (m *model) processBarRender() string {
@@ -71,7 +70,10 @@ func (m *model) terminalSizeWarnAfterFirstRender() string {
 }
 
 func (m *model) typineModalRender() string {
-	previewPath := filepath.Join(m.typingModal.location, m.typingModal.textInput.Value())
+	previewPath := m.typingModal.location
+	if m.typingModal.paneLocation.Path.String() != "" {
+		previewPath = pathJoinRaw(m.typingModal.paneLocation.Path, m.typingModal.textInput.Value()).String()
+	}
 
 	fileLocation := common.FilePanelTopDirectoryIconStyle.Render(" "+icon.Directory+icon.Space) +
 		common.FilePanelTopPathStyle.Render(

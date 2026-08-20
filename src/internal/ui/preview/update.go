@@ -1,5 +1,7 @@
 package preview
 
+import "github.com/yorukot/superfile/src/internal/filesystem"
+
 // UpdateMsg represents an async query result
 
 type UpdateMsg struct {
@@ -18,7 +20,34 @@ type UpdateMsg struct {
 	// rawTransmit is non-empty for Kitty protocol images. It contains
 	// APC escape sequences that must be sent directly to the terminal
 	// via tea.Raw(), bypassing the cell-based renderer.
-	rawTransmit string
+	rawTransmit       string
+	sessionID         filesystem.SessionID
+	sessionGeneration uint64
+	err               error
+}
+
+func NewRemoteUpdateMsg(
+	location string,
+	content string,
+	rawTransmit string,
+	width int,
+	height int,
+	reqID int,
+	sessionID filesystem.SessionID,
+	sessionGeneration uint64,
+	err error,
+) UpdateMsg {
+	return UpdateMsg{
+		location:          location,
+		content:           content,
+		rawTransmit:       rawTransmit,
+		contentWidth:      width,
+		contentHeight:     height,
+		reqID:             reqID,
+		sessionID:         sessionID,
+		sessionGeneration: sessionGeneration,
+		err:               err,
+	}
 }
 
 func NewUpdateMsg(location string, content string, rawTransmit string, width int, height int, reqID int) UpdateMsg {
@@ -54,4 +83,16 @@ func (msg UpdateMsg) GetContentHeight() int {
 
 func (msg UpdateMsg) GetRawTransmit() string {
 	return msg.rawTransmit
+}
+
+func (msg UpdateMsg) GetSessionID() filesystem.SessionID {
+	return msg.sessionID
+}
+
+func (msg UpdateMsg) GetSessionGeneration() uint64 {
+	return msg.sessionGeneration
+}
+
+func (msg UpdateMsg) GetError() error {
+	return msg.err
 }

@@ -1,0 +1,23 @@
+Host *
+  PreferredAuthentications publickey,password,keyboard-interactive
+
+Host wildcard-*
+  User wildcard
+
+Host sf-e2e
+  HostName 127.0.0.1
+  User sfuser
+  Port 2222
+  IdentityFile {{IDENTITY_FILE}}
+  IdentitiesOnly yes
+
+Host sf-proxy
+  HostName 127.0.0.2
+  ProxyJump jumpbox
+  ProxyCommand ssh -W %h:%p jumpbox
+
+Match User deploy
+  Port 2200
+
+Match Host *.corp.internal
+  User corp
