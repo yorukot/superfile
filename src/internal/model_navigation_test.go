@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -290,4 +291,53 @@ func TestCursorRemembersParentPosition(t *testing.T) {
 			assert.Equal(t, originalRenderIndex, m.getFocusedFilePanel().GetRenderIndex())
 		})
 	}
+}
+
+// Home/End keys must be context aware. When a non-file panel (e.g. metadata)
+// is focused, they must not move the file browser panel.
+func TestHomeEndKeysAreContextAware(t *testing.T) {
+	dir := t.TempDir()
+	files := make([]string, 10)
+	for i := range files {
+		files[i] = filepath.Join(dir, fmt.Sprintf("file%02d.txt", i))
+	}
+	utils.SetupFiles(t, files...)
+
+	endKey := common.Hotkeys.ListEnd[0]
+	homeKey := common.Hotkeys.ListHome[0]
+
+	t.Run("jumps to end of the file panel when a file panel is focused", func(t *testing.T) {
+		m := defaultTestModel(dir)
+		require.Equal(t, nonePanelFocus, m.focusPanel)
+		require.Equal(t, 0, m.getFocusedFilePanel().GetCursor())
+
+		m.mainKey(endKey)
+
+		assert.Equal(t, 9, m.getFocusedFilePanel().GetCursor(),
+			"file panel should jump to last item when it is focused")
+	})
+
+	t.Run("jumps to home of the file panel when a file panel is focused", func(t *testing.T) {
+		m := defaultTestModel(dir)
+		require.Equal(t, nonePanelFocus, m.focusPanel)
+		m.getFocusedFilePanel().End()
+		require.Equal(t, 9, m.getFocusedFilePanel().GetCursor())
+
+		m.mainKey(homeKey)
+
+		assert.Equal(t, 0, m.getFocusedFilePanel().GetCursor(),
+			"file panel should jump to first item when it is focused")
+	})
+
+	t.Run("does not move the file panel when metadata is focused", func(t *testing.T) {
+		m := defaultTestModel(dir)
+		m.focusPanel = metadataFocus
+		m.getFocusedFilePanel().IsFocused = false
+		require.Equal(t, 0, m.getFocusedFilePanel().GetCursor())
+
+		m.mainKey(endKey)
+
+		assert.Equal(t, 0, m.getFocusedFilePanel().GetCursor(),
+			"file panel must not move when the metadata panel is focused")
+	})
 }
