@@ -12,6 +12,7 @@ Try these things below:
 
 - Make sure you have already installed [nerdfont](https://www.nerdfonts.com/font-downloads) (You can choose whatever font you like!)
 - Apply this font to your terminal. This may require different settings depending on the terminal. You can check how to set it up!
+- **WSL users:** installing the font inside the Linux filesystem (e.g. `~/.fonts` + `fc-cache`) has no effect. The terminal is rendered by the Windows host app, so you need to install the Nerd Font on Windows and set it in your terminal's settings (Windows Terminal, VS Code, etc.).
 
 ## Help! My superfile's rendering is all messed up!
 
