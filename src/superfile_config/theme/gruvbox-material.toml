@@ -1,0 +1,77 @@
+##############################################
+#                                            #
+#          Gruvbox Material Theme            #
+#                                            #
+##############################################
+
+# This theme was created by: https://github.com/adyshev ! Thank you <3
+
+# This contains the theme config file for superfile! For more details see:
+# https://superfile.dev/configure/custom-theme/
+
+###############################################################################
+#                           Code Syntax Highlighting                          #
+###############################################################################
+
+# Find one you like at: https://github.com/alecthomas/chroma/blob/master/styles.
+
+code_syntax_highlight = "gruvbox"
+
+###############################################################################
+#                                 Base Colors                                 #
+###############################################################################
+
+#-- Full Screen
+full_screen_fg = "#ddc7a1"
+full_screen_bg = "#282828"
+
+#-- Gradient
+# Note: This currently only supports two colors.
+gradient_color = ["#ea6962", "#a9b665"]
+directory_icon_color = "#a9b665"
+
+#-- File Panel
+file_panel_fg = "#ddc7a1"
+file_panel_bg = "#282828"
+file_panel_border = "#504945"
+file_panel_border_active = "#a9b665"
+file_panel_top_directory_icon = "#a9b665"
+file_panel_top_path = "#7daea3"
+file_panel_item_selected_fg = "#e78a4e"
+file_panel_item_selected_bg = "#32302f"
+
+#-- Footer
+footer_fg = "#ddc7a1"
+footer_bg = "#282828"
+footer_border = "#504945"
+footer_border_active = "#d8a657"
+
+#-- Sidebar
+sidebar_fg = "#ddc7a1"
+sidebar_bg = "#282828"
+sidebar_title = "#d3869b"
+sidebar_border = "#504945"
+sidebar_border_active = "#d8a657"
+sidebar_item_selected_fg = "#e78a4e"
+sidebar_item_selected_bg = "#32302f"
+sidebar_divider = "#504945"
+
+#-- Modals
+modal_fg = "#ddc7a1"
+modal_bg = "#282828"
+modal_border_active = "#a9b665"
+modal_cancel_fg = "#ea6962"
+modal_cancel_bg = "#4c3432"
+modal_confirm_fg = "#a9b665"
+modal_confirm_bg = "#3b4439"
+
+#-- Help Menu
+help_menu_hotkey = "#a9b665"
+help_menu_title = "#e78a4e"
+
+#-- Special
+cursor = "#a9b665"
+correct = "#a9b665"
+error = "#ea6962"
+hint = "#7daea3"
+cancel = "#928374"
