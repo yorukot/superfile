@@ -5,6 +5,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
@@ -40,6 +41,7 @@ func NewPasteOperationMsg(state processbar.ProcessState, reqID int) PasteOperati
 }
 
 func (msg PasteOperationMsg) ApplyToModel(m *model) tea.Cmd {
+	m.fileModel.MarkPanelsStale()
 	if (msg.state == processbar.Failed || msg.state == processbar.Successful) && m.clipboard.IsCut() {
 		m.clipboard.Reset(false)
 	}
@@ -62,6 +64,7 @@ func NewCreateOperationMsg(state processbar.ProcessState, reqID int) CreateOpera
 }
 
 func (msg CreateOperationMsg) ApplyToModel(m *model) tea.Cmd {
+	m.fileModel.MarkPanelsStale()
 	return nil
 }
 
@@ -81,6 +84,7 @@ func NewDeleteOperationMsg(state processbar.ProcessState, reqID int) DeleteOpera
 }
 
 func (msg DeleteOperationMsg) ApplyToModel(m *model) tea.Cmd {
+	m.fileModel.MarkPanelsStale()
 	// Remove selection
 	m.getFocusedFilePanel().ResetSelected()
 	return nil
@@ -115,7 +119,8 @@ func NewCompressOperationMsg(state processbar.ProcessState, reqID int) CompressO
 	}
 }
 
-func (msg CompressOperationMsg) ApplyToModel(_ *model) tea.Cmd {
+func (msg CompressOperationMsg) ApplyToModel(m *model) tea.Cmd {
+	m.fileModel.MarkPanelsStale()
 	return nil
 }
 
@@ -134,7 +139,8 @@ func NewExtractOperationMsg(state processbar.ProcessState, reqID int) ExtractOpe
 	}
 }
 
-func (msg ExtractOperationMsg) ApplyToModel(_ *model) tea.Cmd {
+func (msg ExtractOperationMsg) ApplyToModel(m *model) tea.Cmd {
+	m.fileModel.MarkPanelsStale()
 	return nil
 }
 
@@ -173,6 +179,31 @@ func (msg MetadataMsg) ApplyToModel(m *model) tea.Cmd {
 		return nil
 	}
 	m.fileMetaData.SetMetadata(msg.meta, msg.metadataFocused)
+	return nil
+}
+
+// ElementsRefreshMsg carries the result of a directory listing read off the
+// event loop.
+type ElementsRefreshMsg struct {
+	BaseMessage
+
+	req      filepanel.ElementsRequest
+	elements []filepanel.Element
+}
+
+func NewElementsRefreshMsg(req filepanel.ElementsRequest, elements []filepanel.Element,
+	reqID int) ElementsRefreshMsg {
+	return ElementsRefreshMsg{
+		req:      req,
+		elements: elements,
+		BaseMessage: BaseMessage{
+			reqID: reqID,
+		},
+	}
+}
+
+func (msg ElementsRefreshMsg) ApplyToModel(m *model) tea.Cmd {
+	m.fileModel.ApplyElementsRefresh(msg.req, msg.elements)
 	return nil
 }
 

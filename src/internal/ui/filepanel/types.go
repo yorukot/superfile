@@ -38,9 +38,17 @@ type Model struct {
 	Rename             textinput.Model
 	Renaming           bool
 	SearchBar          textinput.Model
-	LastTimeGetElement time.Time
 	TargetFile         string             // filename to position cursor on after load
 	columns            []columnDefinition // columns for rendering
+
+	// loaded is the request that produced `element`. A mismatch with what the
+	// panel currently wants means the listing has to be re-read before rendering.
+	loaded             ElementsRequest
+	lastTimeGetElement time.Time
+	// refreshPending is set while an off-loop re-read of `loaded` is in flight.
+	refreshPending bool
+	// generation is bumped by MarkStale to invalidate in-flight reads.
+	generation int
 }
 
 // Record for directory navigation

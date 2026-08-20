@@ -102,13 +102,13 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// This is needed for blink, etc to work
 	panelCmd = m.updateComponentState(msg)
 
-	m.updateModelStateAfterMsg()
+	refreshCmd := m.updateModelStateAfterMsg()
 	filePreviewCmd = m.fileModel.GetFilePreviewCmd(false)
 
 	metadataCmd = m.getMetadataCmd()
 
 	return m, tea.Batch(sidebarCmd, helpMenuCmd, inputCmd, updateCmd,
-		panelCmd, metadataCmd, filePreviewCmd, resizeCmd)
+		panelCmd, metadataCmd, filePreviewCmd, resizeCmd, refreshCmd)
 }
 
 func (m *model) handleMouseMsg(msg tea.MouseMsg) {
@@ -120,9 +120,9 @@ func (m *model) handleMouseMsg(msg tea.MouseMsg) {
 	}
 }
 
-func (m *model) updateModelStateAfterMsg() {
-	m.sidebarModel.UpdateDirectories()
-	m.fileModel.UpdateFilePanelsIfNeeded(false)
+func (m *model) updateModelStateAfterMsg() tea.Cmd {
+	m.sidebarModel.UpdateDirectoriesIfNeeded(false)
+	refreshCmd := m.filePanelsRefreshCmd()
 	// TODO: Move to utility
 	if m.focusPanel != metadataFocus {
 		m.fileMetaData.ResetRender()
@@ -132,6 +132,25 @@ func (m *model) updateModelStateAfterMsg() {
 	if !m.firstLoadingComplete {
 		m.firstLoadingComplete = true
 	}
+	return refreshCmd
+}
+
+// Re-read the file panels' directories off the event loop. Reads that a panel
+// cannot render without are still done inline by UpdateFilePanelsIfNeeded.
+func (m *model) filePanelsRefreshCmd() tea.Cmd {
+	reqs := m.fileModel.UpdateFilePanelsIfNeeded(false)
+	if len(reqs) == 0 {
+		return nil
+	}
+	cmds := make([]tea.Cmd, 0, len(reqs))
+	for _, req := range reqs {
+		reqCnt := m.nextIoReqCnt()
+		slog.Debug("Submitting file panel refresh request", "id", reqCnt, "path", req.Location)
+		cmds = append(cmds, func() tea.Msg {
+			return NewElementsRefreshMsg(req, req.Read(), reqCnt)
+		})
+	}
+	return tea.Batch(cmds...)
 }
 
 // Note : Maybe we should not trigger metadata fetch for updates
