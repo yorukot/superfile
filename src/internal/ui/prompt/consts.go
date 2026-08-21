@@ -26,7 +26,17 @@ const (
 	splitCommandArgError = "split command should not be given arguments"
 
 	// Timeout for command executed for shell substitution
-	shellSubTimeout        = 1000 * time.Millisecond
+	shellSubTimeout = 1000 * time.Millisecond
+
+	// Budget for substitutions that tests expect to succeed. Those commands
+	// return immediately, so the budget only has to cover spawning a shell.
+	// Being generous costs nothing on a healthy run, and keeps a CI runner
+	// that is slow to spawn one from being reported as a substitution failure.
+	shellSubSuccessTimeoutInTests = 30 * time.Second
+
+	// Budget for the substitution that tests expect to expire. It is paired
+	// with a command that runs for far longer, so a slow spawn can never look
+	// like a command that finished in time.
 	shellSubTimeoutInTests = 100 * time.Millisecond
 
 	defaultTestCwd = "/"
