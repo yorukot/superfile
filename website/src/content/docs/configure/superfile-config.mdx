@@ -24,7 +24,15 @@ To see the path locations of your superfile files, use the command `spf pl`.
 
 - ###### theme
 
-[Click here](/configure/custom-theme) for instructions to edit the theme.
+[Click here](/configure/custom-theme) for instructions to edit the theme. Set this to `"auto"` to automatically switch between `theme_light` and `theme_dark` based on your terminal's background color, detected once at startup.
+
+- ###### theme_light
+
+The theme to use when `theme` is `"auto"` and your terminal has a light background. Ignored otherwise.
+
+- ###### theme_dark
+
+The theme to use when `theme` is `"auto"` and your terminal has a dark background. Ignored otherwise. This is also the fallback theme if superfile can't detect your terminal's background color.
 
 - ###### editor
 

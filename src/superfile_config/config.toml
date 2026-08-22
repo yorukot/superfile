@@ -94,8 +94,17 @@ file_panel_name_percent = 50
 ###############################################################################
 
 #-- Theme
-# Put your theme's name here!
+# Put your theme's name here! Or set this to "auto" to automatically pick
+# theme_light or theme_dark below based on your terminal's background color.
 theme = "catppuccin-mocha"
+
+#-- Theme (light) -- only used when theme = "auto"
+theme_light = ""
+
+#-- Theme (dark) -- only used when theme = "auto"
+# If your terminal's background color can't be detected, this is the theme
+# superfile falls back to.
+theme_dark = ""
 
 #-- Code Previewer
 # Whether to use the builtin syntax highlighting with chroma or use bat. Values: "" for builtin chroma, "bat" for bat
