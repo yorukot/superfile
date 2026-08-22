@@ -51,10 +51,13 @@ func (m *Model) updateChildComponentWidth() {
 
 	if m.FilePreview.IsOpen() {
 		// Need to give some width to preview
-		if common.Config.FilePreviewWidth == 0 {
+		switch {
+		case common.Config.FilePreviewWidthPercent != 0:
+			m.ExpectedPreviewWidth = m.Width * common.Config.FilePreviewWidthPercent / PercentDivisor
+		case common.Config.FilePreviewWidth == 0:
 			// FileModel will be split among `panelCount+1`
 			m.ExpectedPreviewWidth = m.Width / (panelCount + 1)
-		} else {
+		default:
 			m.ExpectedPreviewWidth = m.Width / common.Config.FilePreviewWidth
 		}
 		widthForPanels -= m.ExpectedPreviewWidth
