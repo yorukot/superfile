@@ -27,6 +27,14 @@ list_down = ['j', '']
 page_up = ['pgup','']
 page_down = ['pgdown','']
 
+#-- File Preview Scroll (browser mode only, when preview panel is open)
+preview_scroll_line_up = ['K', 'shift+up']
+preview_scroll_line_down = ['J', 'shift+down']
+preview_scroll_bulk_up = ['ctrl+k', '']
+preview_scroll_bulk_down = ['ctrl+j', '']
+preview_scroll_top = ['alt+k', '']
+preview_scroll_bottom = ['alt+j', '']
+
 #-- File Panel Controls
 create_new_file_panel = ['n', '']
 close_file_panel = ['q', '']

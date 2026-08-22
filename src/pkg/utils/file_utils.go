@@ -263,18 +263,28 @@ func CreateFiles(files ...string) error {
 	return nil
 }
 
-func ReadFileContent(filepath string, maxLineLength int, previewLine int) (string, error) {
+func ReadFileContent(filepath string, maxLineLength int, startLine int, previewLine int) (string, bool, error) {
 	var resultBuilder strings.Builder
 	file, err := os.Open(filepath)
 	if err != nil {
-		return resultBuilder.String(), err
+		return resultBuilder.String(), false, err
 	}
 	defer file.Close()
 
 	reader := transform.NewReader(file, unicode.BOMOverride(unicode.UTF8.NewDecoder()))
 	scanner := bufio.NewScanner(reader)
+	fileLine := 0
 	lineCount := 0
+	hasMore := false
 	for scanner.Scan() {
+		if fileLine < startLine {
+			fileLine++
+			continue
+		}
+		if previewLine > 0 && lineCount >= previewLine {
+			hasMore = true
+			break
+		}
 		line := scanner.Text()
 		// do this before truncating, otherwise the highlighter turns tabs into a fixed
 		// number of spaces and columns don't line up
@@ -283,12 +293,9 @@ func ReadFileContent(filepath string, maxLineLength int, previewLine int) (strin
 		resultBuilder.WriteString(line)
 		resultBuilder.WriteRune('\n')
 		lineCount++
-		if previewLine > 0 && lineCount >= previewLine {
-			break
-		}
 	}
 	// returns the first non-EOF error that was encountered by the [Scanner]
-	return resultBuilder.String(), scanner.Err()
+	return resultBuilder.String(), hasMore, scanner.Err()
 }
 
 // expandTabs replaces tabs with spaces up to the next tab stop. line should be a
