@@ -2,6 +2,7 @@ package metadata
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui"
@@ -12,10 +13,15 @@ type Model struct {
 	metadata Metadata // current metadata
 	cache    *cache.Cache[Metadata]
 
-	// It tells what the metadata should have. Its used to prevent additional requests
-	// if one is already underway
+	// In-flight request tracking
+	pendingLocation string
+	pendingFocused  bool
+	pendingReqID    int
+
+	// Returned/loaded metadata state
 	expectedLocation string
 	expectedFocused  bool
+	lastUpdated      time.Time
 
 	// Render state
 	renderIndex int

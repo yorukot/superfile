@@ -1,0 +1,130 @@
+[33mcommit 07a06366857f4495243d1a05f873aea96e8b15ef[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: ashvin-to <mrsinghashvin@gmail.com>
+Date:   Mon Jul 27 15:27:00 2026 +0530
+
+    test(metadata): add request-tracking coverage; fix stale-response race
+    
+    - Add unit tests for metadata.Model's request-tracking primitives
+      (IsPending, MatchPendingRequest, ClearPendingRequest, IsFresh,
+      SetMetadataLocationAndFocused)
+    - Add integration tests over the top-level model covering
+      getMetadataCmd's pending short-circuit and rejection of a
+      MetadataMsg for an abandoned path
+    - Fix: gate SetMetadata on MatchPendingRequest in
+      MetadataMsg.ApplyToModel — previously a stale response for the
+      same path could overwrite a newer one if delivered out of order
+
+[33mcommit 02fc57b844e3a74a146e46d2fb5750c2ba218830[m
+Author: ashvin-to <mrsinghashvin@gmail.com>
+Date:   Fri Jul 24 21:50:52 2026 +0530
+
+    feat(metadata): implement request tracking for metadata fetching
+
+[33mcommit 95ff82ecf108be37c36b075a7d31d7125f74d79c[m
+Author: ashvin-to <mrsinghashvin@gmail.com>
+Date:   Fri Jul 24 21:30:28 2026 +0530
+
+    fix(utils): return entry.Info error in GetDirStats to prevent partial size caching
+
+[33mcommit f34e6a66c818d29eac8cb2b49460d85e03c8d0e4[m
+Author: ashvin-to <mrsinghashvin@gmail.com>
+Date:   Fri Jul 24 18:21:56 2026 +0530
+
+    fix(metadata): address CodeRabbit review findings
+
+[33mcommit 5ca5b97000c4f157a6a0b11a1977c44164cf2dbd[m
+Author: ashvin-to <mrsinghashvin@gmail.com>
+Date:   Fri Jul 24 09:32:39 2026 +0530
+
+    fix: remove debug print, dead fileCount field, and expand dir size cache tests
+
+[33mcommit d894215df0da2c6e9e559b7ca1fc9cb7f8959cb2[m
+Author: ashvin-to <mrsinghashvin@gmail.com>
+Date:   Fri Jul 24 00:39:43 2026 +0530
+
+    feat: Implement directory size caching and related utilities
+
+[33mcommit 5f15ff9c70e3eaeedae7ba2121447d295cebd248[m[33m ([m[1;31mupstream/main[m[33m, [m[1;31mupstream/HEAD[m[33m)[m
+Author: Yorukot <hi@yorukot.me>
+Date:   Fri Jul 24 15:30:34 2026 +0800
+
+    docs: add community videos section (#1543)
+    
+    <!-- This is an auto-generated comment: release notes by coderabbit.ai
+    -->
+    
+    ## Summary by CodeRabbit
+    
+    * **New Features**
+    * Added a Videos section to the landing page with localized navigation
+    and footer links.
+    * Added video cards displaying thumbnails, titles, creators, and
+    durations.
+    * Added in-page video playback with YouTube embeds, accessible dialog
+    controls, and external viewing links.
+    * Added responsive layouts, hover states, focus indicators, and
+    reduced-motion support.
+    
+    
+    <!-- end of auto-generated comment: release notes by coderabbit.ai -->
+
+[33mcommit d378ddf84b09f478d7d74b64270c2f14362df180[m
+Author: Yorukot <hi@yorukot.me>
+Date:   Fri Jul 24 02:05:56 2026 +0800
+
+    docs: remove Warp sponsorship (#1542)
+    
+    Remove Warp sponsorship since Warp no longer sponsor superfile.
+    
+    <!-- This is an auto-generated comment: release notes by coderabbit.ai
+    -->
+    ## Summary by CodeRabbit
+    
+    * **Documentation**
+    * Simplified the README’s community support call-to-action for a
+    cleaner, more focused layout.
+    * Updated sponsor acknowledgments in the special-thanks documentation
+    (English): removed the Warp entry and added a Ko-fi supporter thanks
+    while keeping JetBrains recognition.
+    * Updated sponsor acknowledgments in the special-thanks documentation
+    (Traditional Chinese) to match the same removal/addition.
+    <!-- end of auto-generated comment: release notes by coderabbit.ai -->
+
+[33mcommit df46a7cf93e9678cad243125f27ac454a64de076[m
+Author: Kristian Holme <31501940+KristianHolme@users.noreply.github.com>
+Date:   Wed Jul 22 08:45:43 2026 +0200
+
+    docs: Fix cursor/course typos and other documentation errors (#1505)
+    
+    Correct 'course' to 'cursor' in help menu descriptions and align wording
+    with the hotkey list docs. Also fix assorted typos in docs, README, and
+    user-facing UI strings (grammar, broken links, missing punctuation).
+    
+    <!-- This is an auto-generated comment: release notes by coderabbit.ai
+    -->
+    ## Summary by CodeRabbit
+    
+    * **Documentation**
+    * Updated README Windows section anchors/headings and corrected wording
+    across installation, tutorial, troubleshooting, hotkey lists, and custom
+    theme guides (including TOML guidance and corrected link paths), plus
+    language/formatting fixes.
+    * **Bug Fixes**
+    * Refined user-facing text for the terminal-size warning,
+    preview-related ANSI conversion error messaging, config-repair success
+    output, and several help/prompt hotkey and command descriptions.
+    * **Tests**
+    * Updated a render-output expectation to match the latest displayed
+    suggestion text.
+    <!-- end of auto-generated comment: release notes by coderabbit.ai -->
+    
+    ---------
+    
+    Co-authored-by: Cursor Agent <cursoragent@cursor.com>
+    Co-authored-by: Kristian Holme <KristianHolme@users.noreply.github.com>
+
+[33mcommit 17aed003a6a9f2e292a4404d1935eb774680860d[m
+Author: Nitin Kumar <59679977+lazysegtree@users.noreply.github.com>
+Date:   Mon Jul 20 10:37:46 2026 +0530
+
+    fix: Remove go reportcard since its retired (#1532)
