@@ -101,6 +101,11 @@ theme = "catppuccin-mocha"
 # Whether to use the builtin syntax highlighting with chroma or use bat. Values: "" for builtin chroma, "bat" for bat
 code_previewer = ""
 
+#-- Bat Previewer Flags
+# Command-line flags passed to bat when it is used as the code previewer.
+# Customize these if they conflict with options in your bat configuration file.
+bat_flags = ["--plain", "--force-colorization"]
+
 #-- Nerd Fonts Support
 # Whether to enable support for Nerd Fonts symbols.
 # Requires:  Font patched with the Nerd Fonts patch.
