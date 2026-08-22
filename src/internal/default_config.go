@@ -1,6 +1,9 @@
 package internal
 
 import (
+	"log/slog"
+
+	"github.com/fsnotify/fsnotify"
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 
 	"github.com/atotto/clipboard"
@@ -46,5 +49,16 @@ func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool,
 		toggleFooter:    toggleFooter,
 		firstUse:        firstUse,
 		hasTrash:        common.InitTrash(),
+		fsWatcher:       initWatcher(),
 	}
+}
+
+// initWatcher initializes and returns a new fsnotify file system watcher.
+func initWatcher() *fsnotify.Watcher {
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		slog.Error("Failed to initialize fsnotify watcher", "error", err)
+		return nil
+	}
+	return watcher
 }

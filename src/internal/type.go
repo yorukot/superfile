@@ -3,6 +3,7 @@ package internal
 import (
 	"sync"
 
+	"github.com/fsnotify/fsnotify"
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 
 	"github.com/yorukot/superfile/src/internal/ui/helpmenu"
@@ -98,6 +99,10 @@ type model struct {
 
 	// whether usable trash directory exists or not
 	hasTrash bool
+
+	// file system watcher
+	fsWatcher   *fsnotify.Watcher
+	watchedDirs []string
 }
 
 type typingModal struct {
