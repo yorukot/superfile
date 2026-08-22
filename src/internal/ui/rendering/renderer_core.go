@@ -70,6 +70,17 @@ func (r *Renderer) actualContentHeight() int {
 	return r.committedContentHeight + r.contentSections[r.curSectionIdx].CntLines()
 }
 
+// A render with no visible characters occupies no lines. An empty render still carries the
+// ANSI style codes of its colors, so counting newlines would report it as one line and
+// wrongly flag renderers with zero height as inconsistent.
+// maxWidth is the widest visible line of res.
+func renderedLineCount(res string, maxWidth int) int {
+	if maxWidth == 0 && !strings.Contains(res, "\n") {
+		return 0
+	}
+	return strings.Count(res, "\n") + 1
+}
+
 // Should not do any updates on 'r'
 func (r *Renderer) Render() string {
 	content := strings.Builder{}
@@ -97,7 +108,7 @@ func (r *Renderer) Render() string {
 		maxW = max(maxW, ansi.StringWidth(line))
 	}
 
-	lineCnt := strings.Count(res, "\n") + 1
+	lineCnt := renderedLineCount(res, maxW)
 	if maxW > r.totalWidth || lineCnt > r.totalHeight {
 		slog.Error(
 			"Rendered output data inconsistency",
