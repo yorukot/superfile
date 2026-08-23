@@ -209,6 +209,22 @@ func LoadThemeFile() {
 	}
 }
 
+// ReloadThemeFile : Re-read the configured theme file into &Theme on a running
+// instance. Unlike LoadThemeFile, a broken theme never exits the program: the
+// previous theme is kept and the error is returned to the caller.
+func ReloadThemeFile() error {
+	themeFile := filepath.Join(variable.ThemeFolder, Config.Theme+".toml")
+	var newTheme ThemeType
+	if err := LoadUserTheme(themeFile, &newTheme); err != nil {
+		return err
+	}
+	if len(newTheme.GradientColor) != RequiredGradientColorCount {
+		return fmt.Errorf("invalid theme file(%s) : gradient_color must contain exactly two values", themeFile)
+	}
+	Theme = newTheme
+	return nil
+}
+
 func LoadUserTheme(themeFile string, obj *ThemeType) error {
 	data, err := os.ReadFile(themeFile)
 	if err != nil {
