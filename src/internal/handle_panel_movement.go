@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	tea "charm.land/bubbletea/v2"
+	"github.com/google/shlex"
 
 	"github.com/yorukot/superfile/src/pkg/utils"
 
@@ -26,11 +27,11 @@ func (m *model) parentDirectory() {
 
 // Enter directory or open file with default application
 // TODO: Unit test this
-func (m *model) enterPanel() {
+func (m *model) enterPanel() tea.Cmd {
 	panel := m.getFocusedFilePanel()
 
 	if panel.Empty() {
-		return
+		return nil
 	}
 	selectedItem := panel.GetFocusedItem()
 	if selectedItem.Directory {
@@ -40,12 +41,12 @@ func (m *model) enterPanel() {
 			var symlinkErr error
 			targetPath, symlinkErr = filepath.EvalSymlinks(targetPath)
 			if symlinkErr != nil {
-				return
+				return nil
 			}
 
 			// targetPath shouldn't be a link now, so Stat and Lstat should be same
 			if targetInfo, lstatErr := os.Lstat(targetPath); lstatErr != nil || !targetInfo.IsDir() {
-				return
+				return nil
 			}
 		}
 		// TODO : Propagate error out from this this function. Return here, instead of logging
@@ -53,25 +54,65 @@ func (m *model) enterPanel() {
 		if err != nil {
 			slog.Error("Error while changing to directory", "error", err, "target", targetPath)
 		}
-		return
+		return nil
 	}
 
 	if variable.ChooserFile != "" {
 		chooserErr := m.chooserFileWriteAndQuit(panel.GetFocusedItem().Location)
 		if chooserErr == nil {
-			return
+			return nil
 		}
 		// Continue with preview if file is not writable
 		slog.Error("Error while writing to chooser file, continuing with file open", "error", chooserErr)
 	}
-	m.executeOpenCommand()
+	return m.executeOpenCommand()
 }
 
-func (m *model) executeOpenCommand() {
+func (m *model) executeOpenCommand() tea.Cmd {
 	panel := m.getFocusedFilePanel()
 
 	filePath := panel.GetFocusedItem().Location
 
+	// Check if file is a text file before using editor
+	isText, err := common.IsTextFile(filePath)
+	if err != nil {
+		// On error, fall back to system default
+		slog.Debug("Could not determine file type, using system default", "file", filePath, "error", err)
+		isText = false
+	}
+
+	// Use configured editor only for text files
+	editor := common.Config.Editor
+	if editor == "" {
+		editor = os.Getenv("EDITOR")
+	}
+
+	if editor != "" && isText {
+		// Use configured/environment editor - block TUI while editor runs (like 'e' key)
+		parts, parseErr := shlex.Split(editor)
+		if parseErr != nil {
+			slog.Error("Failed to parse editor command, falling back to system default",
+				"editor", editor, "error", parseErr)
+			goto systemDefault
+		}
+		if len(parts) == 0 {
+			slog.Error("Editor command produced no executable, falling back to system default", "editor", editor)
+			goto systemDefault
+		}
+		cmd := parts[0]
+		//nolint:gocritic // appendAssign: intentionally creating a new slice
+		args := append(parts[1:], filePath)
+
+		c := exec.Command(cmd, args...) //nolint:gosec // Editor command is intentionally user-configurable.
+		return tea.ExecProcess(c, func(err error) tea.Msg {
+			return editorFinishedMsg{err}
+		})
+	}
+
+systemDefault:
+
+	// Fall back to system default opener (non-blocking for xdg-open/open) for
+	// non-text files (images, PDFs, binaries, etc.) or when no editor is configured
 	openCommand := "xdg-open"
 	switch runtime.GOOS {
 	case utils.OsDarwin:
@@ -82,12 +123,10 @@ func (m *model) executeOpenCommand() {
 
 		//nolint:gosec // Uses Windows system handler to open the selected file.
 		cmd := exec.Command(dllpath, dllfile, filePath)
-		err := cmd.Start()
-		if err != nil {
-			slog.Error("Error while open file with", "error", err)
+		if startErr := cmd.Start(); startErr != nil {
+			slog.Error("Error while open file with", "error", startErr)
 		}
-
-		return
+		return nil
 	}
 
 	// For now open_with works only for mac and linux
@@ -99,11 +138,12 @@ func (m *model) executeOpenCommand() {
 
 	cmd := exec.Command(openCommand, filePath)
 	utils.DetachFromTerminal(cmd)
-	err := cmd.Start()
+	err = cmd.Start()
 	if err != nil {
 		// TODO: This kind of errors should go to user facing pop ups
 		slog.Error("Error while open file with", "error", err)
 	}
+	return nil
 }
 
 // Switch to the directory where the sidebar cursor is located

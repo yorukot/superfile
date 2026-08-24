@@ -221,7 +221,7 @@ func (m *model) filePanelSelectModeKey(msg string) tea.Cmd {
 func (m *model) filePanelNormalModeKey(msg string) tea.Cmd {
 	switch {
 	case slices.Contains(common.Hotkeys.Confirm, msg):
-		m.enterPanel()
+		return m.enterPanel()
 	case slices.Contains(common.Hotkeys.ParentDirectory, msg):
 		m.parentDirectory()
 	case slices.Contains(common.Hotkeys.DeleteItems, msg):
