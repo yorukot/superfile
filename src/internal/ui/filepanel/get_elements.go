@@ -43,10 +43,6 @@ func (m *Model) getDirectoryElementsBySearch(displayDotFile bool) []Element {
 		return nil
 	}
 
-	if len(items) == 0 {
-		return nil
-	}
-
 	folderElementMap := map[string]os.DirEntry{}
 	fileAndDirectories := []string{}
 
@@ -61,6 +57,9 @@ func (m *Model) getDirectoryElementsBySearch(displayDotFile bool) []Element {
 
 		fileAndDirectories = append(fileAndDirectories, item.Name())
 		folderElementMap[item.Name()] = item
+	}
+	if len(fileAndDirectories) == 0 {
+		return nil
 	}
 	// https://github.com/reinhrst/fzf-lib/blob/main/core.go#L43
 	// fzf returns matches ordered by score; we subsequently sort by the chosen sort option.
