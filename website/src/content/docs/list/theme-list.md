@@ -11,8 +11,8 @@ head:
 ## 0x96f
 
 - Theme name: `0x96f`
-- Ported by: https://github.com/filipjanevski
-- Original Author: https://github.com/filipjanevski/
+- Ported by: https://github.com/0x96f
+- Original Author: https://github.com/0x96f/
 
 ![0x96f theme preview showing dark color scheme with blue accents](../../../assets/theme/0x96f.png)
 
