@@ -325,10 +325,7 @@ func makePasteProcessor(process processbar.Process,
 			errMessage := "cut item error"
 			destination := filepath.Join(panelLocation, filepath.Base(filePath))
 			if cut && !isExternalDiskPath(filePath) {
-				destination, err = renameIfDuplicate(destination)
-				if err == nil {
-					err = moveElement(filePath, destination)
-				}
+				err = moveElementToAvailableName(filePath, destination)
 			} else {
 				// TODO : These error cases are hard to test. We have to somehow make the paste operations fail,
 				// which is time consuming and manual. We should test these with automated testcases
@@ -360,6 +357,20 @@ func makePasteProcessor(process processbar.Process,
 		return process, notProcessed
 	}
 	return processorFunction
+}
+
+func moveElementToAvailableName(source, destination string) error {
+	for range 10_000 {
+		availableDestination, err := renameIfDuplicate(destination)
+		if err != nil {
+			return err
+		}
+		if err = moveElement(source, availableDestination); !errors.Is(err, os.ErrExist) {
+			return err
+		}
+	}
+
+	return fmt.Errorf("could not move %s without replacing an existing destination", source)
 }
 
 func (m *model) executePasteOperation(processBarModel *processbar.Model,
