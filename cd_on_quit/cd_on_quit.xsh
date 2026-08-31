@@ -1,12 +1,14 @@
-import subprocess
-from pathlib import Path
-
 @aliases.register('spf')
 @aliases.uncapturable
 @aliases.unthreadable
 def _spf(args, stdin=None, stdout=None, stderr=None):
-    os = $(uname -s)
-    if os == "Linux":
+    import os
+    import shlex
+    import subprocess
+    from pathlib import Path
+
+    os_name = $(uname -s)
+    if os_name == "Linux":
         spf_last_dir = Path(f'{$HOME}/.local/state/superfile/lastdir')
     else:
         spf_last_dir = Path(f'{$HOME}/Library/Application Support/superfile/lastdir')
@@ -22,7 +24,8 @@ def _spf(args, stdin=None, stdout=None, stderr=None):
         with spf_last_dir.open() as f:
             content = f.read()
             if content:
-                evalx(content)
+                _, path = shlex.split(content)
+                os.chdir(path)
         spf_last_dir.unlink()
 
     return status_code
