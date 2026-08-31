@@ -5,13 +5,19 @@ from pathlib import Path
 @aliases.uncapturable
 @aliases.unthreadable
 def _spf(args, stdin=None, stdout=None, stderr=None):
-    spf_last_dir = Path(f'{$HOME}/.local/state/superfile/lastdir')
+    os = $(uname -s)
+    if os == "Linux":
+        spf_last_dir = Path(f'{$HOME}/.local/state/superfile/lastdir')
+    else:
+        spf_last_dir = Path(f'{$HOME}/Library/Application Support/superfile/lastdir')
+
     status_code = subprocess.call(
         ('spf',) + tuple(args), # 'superfile' on nixos
         stdin=stdin,
         stderr=stderr,
         stdout=stdout,
     )
+
     if status_code == 0 and spf_last_dir.is_file():
         with spf_last_dir.open() as f:
             content = f.read()
