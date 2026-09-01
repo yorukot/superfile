@@ -4,14 +4,14 @@
 def _spf(args, stdin=None, stdout=None, stderr=None):
     import os
     import shlex
+    import platform
     import subprocess
     from pathlib import Path
 
-    os_name = $(uname -s)
-    if os_name == "Linux":
-        spf_last_dir = Path(f'{$HOME}/.local/state/superfile/lastdir')
-    else:
+    if platform.system() == 'Darwin':
         spf_last_dir = Path(f'{$HOME}/Library/Application Support/superfile/lastdir')
+    else:
+        spf_last_dir = Path(f'{$HOME}/.local/state/superfile/lastdir')
 
     status_code = subprocess.call(
         ('spf',) + tuple(args), # 'superfile' on nixos
