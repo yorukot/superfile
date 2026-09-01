@@ -2,10 +2,7 @@
 @aliases.uncapturable
 @aliases.unthreadable
 def _spf(args, stdin=None, stdout=None, stderr=None):
-    import os
-    import shlex
-    import platform
-    import subprocess
+    import os, shlex, platform, subprocess
     from pathlib import Path
 
     if platform.system() == 'Darwin':
