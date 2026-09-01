@@ -10,6 +10,8 @@ def _spf(args, stdin=None, stdout=None, stderr=None):
 
     if platform.system() == 'Darwin':
         spf_last_dir = Path(f'{$HOME}/Library/Application Support/superfile/lastdir')
+    elif 'XDG_STATE_HOME' in @.env:
+        spf_last_dir = Path(f'{$XDG_STATE_HOME}/superfile/lastdir')
     else:
         spf_last_dir = Path(f'{$HOME}/.local/state/superfile/lastdir')
 
