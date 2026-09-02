@@ -2,6 +2,7 @@ package filepanel
 
 import (
 	"os"
+	"strconv"
 	"strings"
 
 	"charm.land/lipgloss/v2"
@@ -56,7 +57,9 @@ func (m *Model) renderFileSize(indexElement int, columnWidth int) string {
 	isSelected := m.CheckSelected(elem.Location)
 	sizeValue := common.FormatFileSize(elem.Info.Size())
 	if elem.Info.IsDir() {
-		sizeValue = ""
+		// TODO: If dotfiles are being shown, include them in the count.
+		// GetChildCount already works with dotfiles.
+		sizeValue = strconv.Itoa(elem.GetChildCount(false)) + " items"
 	}
 	return common.FilePanelItemRender(
 		sizeValue,

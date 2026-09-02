@@ -1,9 +1,12 @@
 package filepanel
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/yorukot/superfile/src/internal/ui/sortmodel"
 )
@@ -65,6 +68,97 @@ func TestGetSelectedLocationsSortedAsVisible(t *testing.T) {
 			tt.panel.SortKind = sortmodel.SortByName
 			tt.panel.SetSelectedAll(tt.toSelect)
 			assert.Equal(t, tt.expectedSelected, tt.panel.GetSelectedLocationsSortedAsVisible())
+		})
+	}
+}
+
+func TestGetChildCount(t *testing.T) {
+	tests := []struct {
+		name            string
+		entries         []string
+		includeDotFiles bool
+		expectedCount   int
+		isDir           bool
+	}{
+		{
+			name:            "Empty dir",
+			entries:         []string{},
+			includeDotFiles: false,
+			expectedCount:   0,
+			isDir:           true,
+		},
+		{
+			name:            "Dir with 3 files",
+			entries:         []string{"file1.txt", "file2.txt", "file3.txt"},
+			includeDotFiles: false,
+			expectedCount:   3,
+			isDir:           true,
+		},
+		{
+			name:            "Dir with 2 non-dot files and 1 dot file, includeDotFiles false",
+			entries:         []string{"file1.txt", "file2.txt", ".file3.txt"},
+			includeDotFiles: false,
+			expectedCount:   2,
+			isDir:           true,
+		},
+		{
+			name:            "Dir with 2 non-dot files and 1 dot file, includeDotFiles true",
+			entries:         []string{"file1.txt", "file2.txt", ".file3.txt"},
+			includeDotFiles: true,
+			expectedCount:   3,
+			isDir:           true,
+		},
+		{
+			name:            "Dir with 3 dot files, includeDotFiles false",
+			entries:         []string{".file1.txt", ".file2.txt", ".file3.txt"},
+			includeDotFiles: false,
+			expectedCount:   0,
+			isDir:           true,
+		},
+		{
+			name:            "Dir with 3 dot files, includeDotFiles true",
+			entries:         []string{".file1.txt", ".file2.txt", ".file3.txt"},
+			includeDotFiles: true,
+			expectedCount:   3,
+			isDir:           true,
+		},
+		{
+			name:            "Non-dir returns 0",
+			entries:         []string{},
+			includeDotFiles: true,
+			expectedCount:   0,
+			isDir:           false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dir := t.TempDir()
+
+			for _, name := range tt.entries {
+				path := filepath.Join(dir, name)
+				require.NoError(t, os.WriteFile(path, []byte{}, 0644))
+			}
+
+			location := dir
+			if !tt.isDir {
+				location = filepath.Join(dir, "file.txt")
+				require.NoError(t, os.WriteFile(location, []byte{}, 0644))
+			}
+
+			info, err := os.Stat(location)
+			require.NoError(t, err)
+
+			element := Element{
+				Location: location,
+				Info:     info,
+			}
+
+			assert.Equal(
+				t,
+				tt.expectedCount,
+				element.GetChildCount(tt.includeDotFiles),
+			)
 		})
 	}
 }
