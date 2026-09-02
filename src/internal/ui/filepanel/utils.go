@@ -1,6 +1,10 @@
 package filepanel
 
-import "math"
+import (
+	"math"
+	"os"
+	"strings"
+)
 
 func (m *Model) GetCursor() int {
 	return m.cursor
@@ -163,4 +167,28 @@ func (m *Model) FindElementIndexByLocation(location string) int {
 		}
 	}
 	return -1
+}
+
+// Get the number of non-recursive files in the directory.
+// Only count dotfiles if includeDotFiles is true.
+// If the element is not a directory, return 0.
+func (e *Element) GetChildCount(includeDotFiles bool) int {
+	if e.Info == nil || !e.Info.IsDir() {
+		return 0
+	}
+
+	count := 0
+	entries, err := os.ReadDir(e.Location)
+	if err != nil {
+		return 0
+	}
+
+	for _, entry := range entries {
+		if !includeDotFiles && strings.HasPrefix(entry.Name(), ".") {
+			continue
+		}
+		count++
+	}
+
+	return count
 }
