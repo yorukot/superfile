@@ -98,6 +98,9 @@ type model struct {
 
 	// whether usable trash directory exists or not
 	hasTrash bool
+
+	// whether the OS clipboard can transfer real files/directories
+	hasSystemClipboard bool
 }
 
 type typingModal struct {
