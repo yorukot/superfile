@@ -220,7 +220,7 @@ func getData() []hotkeydata { //nolint: funlen // This should be self contained
 		},
 		{
 			hotkey:         common.Hotkeys.CopyToSystemClipboard,
-			description:    "Copy selected items to the system clipboard (for the OS file manager)",
+			description:    "Copy focused or selected items to the system clipboard (for the OS file manager)",
 			hotkeyWorkType: globalType,
 		},
 		{

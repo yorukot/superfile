@@ -3,11 +3,64 @@
 package systemclipboard
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func TestRunCopyReturnsWhileChildKeepsStderrOpen(t *testing.T) {
+	for _, exitCode := range []string{"0", "7"} {
+		t.Run("exit_"+exitCode, func(t *testing.T) {
+			dir := t.TempDir()
+			input := filepath.Join(dir, "input")
+			release := filepath.Join(dir, "release")
+			finished := filepath.Join(dir, "finished")
+			t.Cleanup(func() {
+				require.NoError(t, os.WriteFile(release, nil, 0o600))
+				require.Eventually(t, func() bool {
+					_, err := os.Stat(finished)
+					return err == nil
+				}, 3*time.Second, 10*time.Millisecond)
+			})
+			tool := linuxTool{
+				name: "test-helper",
+				copyArgs: func(string) []string {
+					return []string{"sh", "-c", `
+cat > "$1"
+(while [ ! -f "$2" ]; do sleep 0.05; done; touch "$3") < /dev/null &
+echo "helper diagnostic" >&2
+exit "$4"
+`, "test-helper", input, release, finished, exitCode}
+				},
+			}
+			done := make(chan error, 1)
+			go func() {
+				done <- runCopy(tool, gnomeCopiedFilesMime, []byte("copy\nfile:///tmp/example"))
+			}()
+
+			var err error
+			select {
+			case err = <-done:
+			case <-time.After(3 * time.Second):
+				t.Error("runCopy waited for the background child to close stderr")
+				require.NoError(t, os.WriteFile(release, nil, 0o600))
+				err = <-done
+			}
+			if exitCode == "0" {
+				require.NoError(t, err)
+			} else {
+				require.ErrorContains(t, err, "test-helper copy failed: exit status 7: helper diagnostic")
+			}
+			payload, readErr := os.ReadFile(input)
+			require.NoError(t, readErr)
+			assert.Equal(t, "copy\nfile:///tmp/example", string(payload))
+		})
+	}
+}
 
 func TestPathURIRoundTrip(t *testing.T) {
 	cases := []string{

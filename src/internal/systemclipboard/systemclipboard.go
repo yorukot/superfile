@@ -12,6 +12,10 @@
 //   - systemclipboard_linux.go         shells out to wl-clipboard / xclip
 //   - systemclipboard_unsupported.go   every other platform
 //
+// On Linux, CopyFiles currently publishes only x-special/gnome-copied-files;
+// it does not advertise text/uri-list. Multi-target clipboard support is deferred
+// because the available clipboard tools replace the selection per invocation.
+//
 // Each platform file implements the same three functions:
 //
 //	func Available() bool

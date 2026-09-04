@@ -135,14 +135,23 @@ func PasteFiles() ([]string, bool, error) {
 }
 
 func runCopy(tool linuxTool, mime string, payload []byte) error {
+	// A buffer would make os/exec wait for EOF on a pipe inherited by the
+	// background clipboard owner. A file lets Run return when the parent exits.
+	stderr, err := os.CreateTemp("", "superfile-clipboard-stderr-*")
+	if err != nil {
+		return fmt.Errorf("%s copy failed: %w", tool.name, err)
+	}
+	defer os.Remove(stderr.Name())
+	defer stderr.Close()
+
 	args := tool.copyArgs(mime)
 	// #nosec G204 -- args come from a fixed allow-list, only the payload is dynamic.
 	cmd := exec.Command(args[0], args[1:]...)
 	cmd.Stdin = bytes.NewReader(payload)
-	var stderr bytes.Buffer
-	cmd.Stderr = &stderr
+	cmd.Stderr = stderr
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("%s copy failed: %w: %s", tool.name, err, strings.TrimSpace(stderr.String()))
+		diagnostic, _ := os.ReadFile(stderr.Name())
+		return fmt.Errorf("%s copy failed: %w: %s", tool.name, err, strings.TrimSpace(string(diagnostic)))
 	}
 	return nil
 }

@@ -31,10 +31,11 @@ var (
 	procSetClipboardData         = user32.NewProc("SetClipboardData")
 	procRegisterClipboardFormatW = user32.NewProc("RegisterClipboardFormatW")
 
-	procGlobalAlloc  = kernel32.NewProc("GlobalAlloc")
-	procGlobalFree   = kernel32.NewProc("GlobalFree")
-	procGlobalLock   = kernel32.NewProc("GlobalLock")
-	procGlobalUnlock = kernel32.NewProc("GlobalUnlock")
+	procGlobalAlloc      = kernel32.NewProc("GlobalAlloc")
+	procGlobalFree       = kernel32.NewProc("GlobalFree")
+	procGlobalLock       = kernel32.NewProc("GlobalLock")
+	procGlobalUnlock     = kernel32.NewProc("GlobalUnlock")
+	procGetConsoleWindow = kernel32.NewProc("GetConsoleWindow")
 
 	procDragQueryFileW = shell32.NewProc("DragQueryFileW")
 )
@@ -78,7 +79,11 @@ func CopyFiles(paths []string, cut bool) error {
 }
 
 func copyFiles(abs []string, cut bool) error {
-	if r, _, err := procOpenClipboard.Call(0); r == 0 {
+	hwnd, _, _ := procGetConsoleWindow.Call()
+	if hwnd == 0 {
+		return fmt.Errorf("GetConsoleWindow failed: no console window")
+	}
+	if r, _, err := procOpenClipboard.Call(hwnd); r == 0 {
 		return fmt.Errorf("OpenClipboard failed: %w", err)
 	}
 	defer procCloseClipboard.Call()
@@ -107,6 +112,7 @@ func copyFiles(abs []string, cut bool) error {
 	}
 	if r, _, e := procSetClipboardData.Call(uintptr(cfEffect), hEffect); r == 0 {
 		procGlobalFree.Call(hEffect)
+		procEmptyClipboard.Call()
 		return fmt.Errorf("SetClipboardData(Preferred DropEffect) failed: %w", e)
 	}
 	return nil
@@ -118,8 +124,8 @@ func copyFiles(abs []string, cut bool) error {
 func buildHDropBytes(paths []string) []byte {
 	var chars []uint16
 	for _, p := range paths {
-		// UTF16FromString errors only on embedded NULs, which absolute file
-		// paths cannot contain; ignore and fall back to a best-effort encode.
+		// UTF16FromString errors only on embedded NULs; skip the current path
+		// if it cannot be encoded.
 		u16, err := syscall.UTF16FromString(p)
 		if err != nil {
 			continue
@@ -204,9 +210,13 @@ func pasteFiles() ([]string, bool, error) {
 	}
 
 	var paths []string
-	buf := make([]uint16, syscall.MAX_PATH)
 	for i := uintptr(0); i < count; i++ {
-		n, _, _ := procDragQueryFileW.Call(
+		n, _, _ := procDragQueryFileW.Call(hDrop, i, 0, 0)
+		if n == 0 {
+			continue
+		}
+		buf := make([]uint16, n+1) // include the terminating NUL
+		n, _, _ = procDragQueryFileW.Call(
 			hDrop, i,
 			uintptr(unsafe.Pointer(&buf[0])),
 			uintptr(len(buf)),
