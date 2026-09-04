@@ -50,6 +50,7 @@ type dropfiles struct {
 	fWide  int32 // 1 -> the file list is UTF-16
 }
 
+// Available reports that this build includes the native Windows clipboard backend.
 func Available() bool { return true }
 
 // CopyFiles places the given paths on the clipboard as a CF_HDROP payload and
@@ -78,6 +79,8 @@ func CopyFiles(paths []string, cut bool) error {
 	return <-errCh
 }
 
+// copyFiles publishes absolute paths and their preferred drop effect through
+// Win32. The caller must remain on one OS thread for the entire operation.
 func copyFiles(abs []string, cut bool) error {
 	hwnd, _, _ := procGetConsoleWindow.Call()
 	if hwnd == 0 {
@@ -145,6 +148,7 @@ func buildHDropBytes(paths []string) []byte {
 	return buf
 }
 
+// buildDropEffectBytes encodes the copy or move effect as a Win32 DWORD payload.
 func buildDropEffectBytes(cut bool) []byte {
 	effect := uint32(dropEffectCopy)
 	if cut {
@@ -193,6 +197,8 @@ func PasteFiles() ([]string, bool, error) {
 	return r.paths, r.cut, r.err
 }
 
+// pasteFiles reads dropped paths and their preferred move flag through Win32,
+// returning ErrNoFiles when none are available. The caller must pin its OS thread.
 func pasteFiles() ([]string, bool, error) {
 	if r, _, err := procOpenClipboard.Call(0); r == 0 {
 		return nil, false, fmt.Errorf("OpenClipboard failed: %w", err)
@@ -233,6 +239,8 @@ func pasteFiles() ([]string, bool, error) {
 	return paths, readDropEffectCut(), nil
 }
 
+// readDropEffectCut reports whether the open clipboard requests a move, defaulting
+// to copy semantics if the preferred drop effect cannot be read.
 func readDropEffectCut() bool {
 	cfEffect, err := registerFormat("Preferred DropEffect")
 	if err != nil {
@@ -252,6 +260,8 @@ func readDropEffectCut() bool {
 	return effect&dropEffectMove != 0
 }
 
+// registerFormat obtains the Win32 clipboard format identifier for name,
+// registering the format if it does not already exist.
 func registerFormat(name string) (uint32, error) {
 	u16, err := syscall.UTF16PtrFromString(name)
 	if err != nil {

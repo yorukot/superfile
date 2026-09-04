@@ -346,6 +346,8 @@ func (m *model) getPasteFromSystemClipboardCmd() tea.Cmd {
 	}
 }
 
+// systemClipboardUnavailableHint explains how to enable file clipboard support
+// on Linux or reports that the current environment does not support it.
 func systemClipboardUnavailableHint() string {
 	if runtime.GOOS == "linux" {
 		return "Install wl-clipboard (Wayland) or xclip (X11) to copy/paste files to and from the system file manager."

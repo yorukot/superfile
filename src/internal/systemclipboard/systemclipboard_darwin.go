@@ -24,6 +24,7 @@ import (
 	"unsafe"
 )
 
+// Available reports that this build includes the native macOS pasteboard backend.
 func Available() bool { return true }
 
 // CopyFiles writes the given paths to the macOS general pasteboard as file URLs.

@@ -195,6 +195,8 @@ func (m *model) unfocusedFilePanelKey(msg string) {
 	}
 }
 
+// filePanelSelectModeKey handles selection changes and file actions in select
+// mode, returning a command when the action requires asynchronous work.
 func (m *model) filePanelSelectModeKey(msg string) tea.Cmd {
 	panel := m.getFocusedFilePanel()
 
@@ -223,6 +225,8 @@ func (m *model) filePanelSelectModeKey(msg string) tea.Cmd {
 	return nil
 }
 
+// filePanelNormalModeKey handles navigation and focused-item actions in normal
+// mode, returning a command when the action requires asynchronous work.
 func (m *model) filePanelNormalModeKey(msg string) tea.Cmd {
 	switch {
 	case slices.Contains(common.Hotkeys.Confirm, msg):

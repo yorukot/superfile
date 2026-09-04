@@ -33,6 +33,7 @@ type linuxTool struct {
 	pasteArgs func(mime string) []string
 }
 
+// waylandTool configures wl-copy and wl-paste to exchange a specified MIME type.
 func waylandTool() linuxTool {
 	return linuxTool{
 		name: "wl-clipboard",
@@ -45,6 +46,7 @@ func waylandTool() linuxTool {
 	}
 }
 
+// xclipTool configures xclip to exchange a specified target on the X11 clipboard.
 func xclipTool() linuxTool {
 	return linuxTool{
 		name: "xclip",
@@ -80,6 +82,7 @@ func detectTool() (linuxTool, error) {
 		ErrUnsupported)
 }
 
+// hasBinary reports whether an executable can be resolved through PATH.
 func hasBinary(name string) bool {
 	_, err := exec.LookPath(name)
 	return err == nil
@@ -134,6 +137,8 @@ func PasteFiles() ([]string, bool, error) {
 	return nil, false, ErrNoFiles
 }
 
+// runCopy publishes payload using the helper's background clipboard owner and
+// returns after its parent exits, including stderr diagnostics on failure.
 func runCopy(tool linuxTool, mime string, payload []byte) error {
 	// A buffer would make os/exec wait for EOF on a pipe inherited by the
 	// background clipboard owner. A file lets Run return when the parent exits.
@@ -156,6 +161,7 @@ func runCopy(tool linuxTool, mime string, payload []byte) error {
 	return nil
 }
 
+// runPaste reads the requested MIME type from the helper's standard output.
 func runPaste(tool linuxTool, mime string) ([]byte, error) {
 	args := tool.pasteArgs(mime)
 	// #nosec G204 -- args come from a fixed allow-list.
@@ -170,6 +176,8 @@ func runPaste(tool linuxTool, mime string) ([]byte, error) {
 
 // --- payload formatting helpers (pure functions, unit tested) ---
 
+// absPaths resolves each path against the working directory, preserving order
+// and returning an error if any path cannot be resolved.
 func absPaths(paths []string) ([]string, error) {
 	out := make([]string, 0, len(paths))
 	for _, p := range paths {
@@ -206,6 +214,7 @@ func uriToPath(uri string) string {
 	return u.Path
 }
 
+// buildGnomeCopiedFiles encodes paths as file URIs preceded by a copy or cut marker.
 func buildGnomeCopiedFiles(paths []string, cut bool) string {
 	op := "copy"
 	if cut {
@@ -219,6 +228,8 @@ func buildGnomeCopiedFiles(paths []string, cut bool) string {
 	return strings.Join(lines, "\n")
 }
 
+// parseGnomeCopiedFiles decodes the operation marker and file references, reporting
+// success only when the marker is valid and at least one path is present.
 func parseGnomeCopiedFiles(data []byte) (paths []string, cut bool, ok bool) {
 	text := strings.TrimRight(string(data), "\x00\r\n")
 	if text == "" {
@@ -242,6 +253,8 @@ func parseGnomeCopiedFiles(data []byte) (paths []string, cut bool, ok bool) {
 	return paths, cut, len(paths) > 0
 }
 
+// parseURIList extracts file paths, ignoring blank lines, comments, and non-file
+// URIs while accepting bare paths for compatibility.
 func parseURIList(data []byte) []string {
 	var paths []string
 	for _, line := range strings.Split(string(data), "\n") {

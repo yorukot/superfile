@@ -12,6 +12,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// TestRunCopyReturnsWhileChildKeepsStderrOpen guards against inherited stderr
+// blocking helper completion and verifies that failure diagnostics are retained.
 func TestRunCopyReturnsWhileChildKeepsStderrOpen(t *testing.T) {
 	for _, exitCode := range []string{"0", "7"} {
 		t.Run("exit_"+exitCode, func(t *testing.T) {
@@ -62,6 +64,7 @@ exit "$4"
 	}
 }
 
+// TestPathURIRoundTrip checks that spaces, URI delimiters, and Unicode survive conversion.
 func TestPathURIRoundTrip(t *testing.T) {
 	cases := []string{
 		"/home/user/file.txt",
@@ -75,11 +78,13 @@ func TestPathURIRoundTrip(t *testing.T) {
 	}
 }
 
+// TestPathToURIEncoding checks percent-encoding without altering plain paths.
 func TestPathToURIEncoding(t *testing.T) {
 	assert.Equal(t, "file:///home/user/a%20b.txt", pathToURI("/home/user/a b.txt"))
 	assert.Equal(t, "file:///plain/path", pathToURI("/plain/path"))
 }
 
+// TestBuildGnomeCopiedFiles checks copy and cut markers and escaped file URIs.
 func TestBuildGnomeCopiedFiles(t *testing.T) {
 	payload := buildGnomeCopiedFiles([]string{"/a/b", "/c d"}, true)
 	assert.Equal(t, "cut\nfile:///a/b\nfile:///c%20d", payload)
@@ -88,6 +93,8 @@ func TestBuildGnomeCopiedFiles(t *testing.T) {
 	assert.Equal(t, "copy\nfile:///a", payload)
 }
 
+// TestParseGnomeCopiedFiles checks operation flags, trailing NULs, and rejection
+// of empty payloads or invalid operation markers.
 func TestParseGnomeCopiedFiles(t *testing.T) {
 	paths, cut, ok := parseGnomeCopiedFiles([]byte("cut\nfile:///a/b\nfile:///c%20d"))
 	require.True(t, ok)
@@ -108,6 +115,7 @@ func TestParseGnomeCopiedFiles(t *testing.T) {
 	assert.False(t, ok)
 }
 
+// TestParseURIList checks CRLF handling, comment removal, and bare-path compatibility.
 func TestParseURIList(t *testing.T) {
 	data := []byte("# comment\r\nfile:///a/b\r\nfile:///c%20d\r\n\r\n")
 	assert.Equal(t, []string{"/a/b", "/c d"}, parseURIList(data))
@@ -116,6 +124,7 @@ func TestParseURIList(t *testing.T) {
 	assert.Equal(t, []string{"/plain/path"}, parseURIList([]byte("/plain/path")))
 }
 
+// TestParseGnomeCopiedFilesSkipsNonFileURIs prevents remote URLs from becoming file paths.
 func TestParseGnomeCopiedFilesSkipsNonFileURIs(t *testing.T) {
 	paths, _, ok := parseGnomeCopiedFiles([]byte("copy\nhttp://example.com\nfile:///real"))
 	require.True(t, ok)

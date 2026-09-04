@@ -10,6 +10,8 @@ typedef struct {
 	char *errorMessage;
 } SPFClipResult;
 
+// spf_path_from_cstr decodes a filesystem path using macOS conventions, returning
+// nil for a NULL pointer or a path that cannot be represented as an NSString.
 static NSString *spf_path_from_cstr(const char *path) {
 	if (path == NULL) {
 		return nil;
@@ -69,6 +71,8 @@ SPFClipResult spf_clipboard_paste_files(void) {
 	}
 }
 
+// spf_clip_free_string releases a string returned by the clipboard bridge;
+// passing NULL is safe.
 void spf_clip_free_string(char *value) {
 	if (value != NULL) {
 		free(value);
