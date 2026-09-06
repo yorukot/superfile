@@ -169,26 +169,29 @@ func (m *Model) FindElementIndexByLocation(location string) int {
 	return -1
 }
 
-// Get the number of non-recursive files in the directory.
-// Only count dotfiles if includeDotFiles is true.
-// If the element is not a directory, return 0.
-func (e *Element) GetChildCount(includeDotFiles bool) int {
-	if e.Info == nil || !e.Info.IsDir() {
-		return 0
+func getChildCount(location string, includeDotFiles bool) (int, error) {
+	directory, err := os.Open(location)
+	if err != nil {
+		return 0, err
 	}
+	defer directory.Close()
+
+	entryNames, err := directory.Readdirnames(-1)
+	if err != nil {
+		return 0, err
+	}
+	if includeDotFiles {
+		return len(entryNames), nil
+	}
+
 
 	count := 0
-	entries, err := os.ReadDir(e.Location)
-	if err != nil {
-		return 0
-	}
-
-	for _, entry := range entries {
-		if !includeDotFiles && strings.HasPrefix(entry.Name(), ".") {
+	for _, entryName := range entryNames {
+		if strings.HasPrefix(entryName, ".") {
 			continue
 		}
 		count++
 	}
 
-	return count
+	return count, nil
 }

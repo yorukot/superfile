@@ -56,10 +56,16 @@ func (m *Model) renderFileSize(indexElement int, columnWidth int) string {
 	elem := m.GetElementAtIdx(indexElement)
 	isSelected := m.CheckSelected(elem.Location)
 	sizeValue := common.FormatFileSize(elem.Info.Size())
-	if elem.Info.IsDir() {
-		// TODO: If dotfiles are being shown, include them in the count.
-		// GetChildCount already works with dotfiles.
-		sizeValue = strconv.Itoa(elem.GetChildCount(false)) + " items"
+	if elem.Directory {
+		if elem.ChildCountErr != nil {
+			sizeValue = "(Error)"
+		} else {
+			itemLabel := " items"
+			if elem.ChildCount == 1 {
+				itemLabel = " item"
+			}
+			sizeValue = strconv.Itoa(elem.ChildCount) + itemLabel
+		}
 	}
 	return common.FilePanelItemRender(
 		sizeValue,

@@ -64,19 +64,8 @@ func getSizeOrderingFunc(elements []Element, reversed bool) sliceOrderFunc {
 		}
 
 		// This needs to be improved, and we should sort by actual size only
-		// Repeated recursive read would be slow, so we could cache
 		if elements[i].Directory && elements[j].Directory {
-			filesI, err := os.ReadDir(elements[i].Location)
-			// No need of early return, we only call len() on filesI, so nil would
-			// just result in 0
-			if err != nil {
-				slog.Error("Error when reading directory during sort", "error", err)
-			}
-			filesJ, err := os.ReadDir(elements[j].Location)
-			if err != nil {
-				slog.Error("Error when reading directory during sort", "error", err)
-			}
-			return len(filesI) < len(filesJ) != reversed
+			return elements[i].ChildCount < elements[j].ChildCount != reversed
 		}
 		return elements[i].Info.Size() < elements[j].Info.Size() != reversed
 	}
@@ -110,25 +99,33 @@ func getTypeOrderingFunc(elements []Element, reversed bool) sliceOrderFunc {
 	}
 }
 
-func sortFileElement(sortKind sortmodel.SortKind, reversed bool, dirEntries []os.DirEntry, location string) []Element {
+func (m *Model) sortFileElements(dirEntries []os.DirEntry, includeDotFiles bool) []Element {
 	elements := make([]Element, 0, len(dirEntries))
 	for _, item := range dirEntries {
 		info, err := item.Info()
 		if err != nil {
 			slog.Error("Error while retrieving file info during sort",
-				"error", err, "path", filepath.Join(location, item.Name()))
+				"error", err, "path", filepath.Join(m.Location, item.Name()))
 			continue
 		}
 
-		elements = append(elements, Element{
+		element := Element{
 			Name:      item.Name(),
-			Directory: item.IsDir() || isSymlinkToDir(location, info, item.Name()),
-			Location:  filepath.Join(location, item.Name()),
+			Directory: item.IsDir() || isSymlinkToDir(m.Location, info, item.Name()),
+			Location:  filepath.Join(m.Location, item.Name()),
 			Info:      info,
-		})
+		}
+		if element.Directory {
+			element.ChildCount, element.ChildCountErr = getChildCount(element.Location, includeDotFiles)
+			if element.ChildCountErr != nil {
+				slog.Error("Error when counting directory children",
+					"error", element.ChildCountErr, "path", element.Location)
+			}
+		}
+		elements = append(elements, element)
 	}
 
-	sort.Slice(elements, getOrderingFunc(elements, reversed, sortKind))
+	sort.Slice(elements, getOrderingFunc(elements, m.SortReversed, m.SortKind))
 
 	return elements
 }
