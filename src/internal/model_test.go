@@ -106,6 +106,17 @@ func TestBasic(t *testing.T) {
 	})
 }
 
+func TestProcessBarModelPointerIdentityAcrossRootUpdate(t *testing.T) {
+	m := defaultTestModel(t.TempDir())
+	processBarModel := m.processBarModel
+
+	updated, _ := m.Update(nil)
+	updatedModel, ok := updated.(*model)
+
+	require.True(t, ok)
+	require.Same(t, processBarModel, updatedModel.processBarModel)
+}
+
 func TestInitialFilePathPositionsCursorWindow(t *testing.T) {
 	curTestDir := t.TempDir()
 	dir1 := filepath.Join(curTestDir, "dir1")

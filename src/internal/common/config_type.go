@@ -112,11 +112,28 @@ type ConfigType struct {
 	Metadata          bool `toml:"metadata"            comment:"\n==========PLUGINS========== #\nPlugins means that you need to install some external dependencies to use them.\n\nShow more detailed metadata, please install exiftool before enabling this plugin!"`
 	EnableMD5Checksum bool `toml:"enable_md5_checksum" comment:"Enable MD5 checksum generation for files"`
 	ZoxideSupport     bool `toml:"zoxide_support"      comment:"Zoxide support for the fast navigation"`
+
+	SSH SSHConfigSection `toml:"ssh" comment:"\n==========SSH/SFTP==========\nSaved quick-connect profiles. Only non-secret fields are persisted here."`
 }
 
 // GetIgnoreMissingFields reports whether warnings about missing TOML fields should be ignored.
 func (c *ConfigType) GetIgnoreMissingFields() bool {
 	return c.IgnoreMissingFields
+}
+
+type SSHConfigSection struct {
+	Profiles []SSHProfileType `toml:"profile"`
+}
+
+type SSHProfileType struct {
+	Name           string   `toml:"name"`
+	Host           string   `toml:"host"`
+	Port           int      `toml:"port"`
+	User           string   `toml:"user"`
+	StartPath      string   `toml:"start_path"`
+	IdentityFile   string   `toml:"identity_file"`
+	IdentitiesOnly bool     `toml:"identities_only"`
+	AuthOrder      []string `toml:"auth_order"`
 }
 
 type HotkeysType struct {
@@ -158,13 +175,14 @@ type HotkeysType struct {
 	OpenFileWithEditor             []string `toml:"open_file_with_editor"              comment:"editor"`
 	OpenCurrentDirectoryWithEditor []string `toml:"open_current_directory_with_editor"`
 
-	PinnedDirectory []string `toml:"pinned_directory"  comment:"other"`
-	ToggleDotFile   []string `toml:"toggle_dot_file"`
-	ChangePanelMode []string `toml:"change_panel_mode"`
-	OpenHelpMenu    []string `toml:"open_help_menu"`
-	OpenCommandLine []string `toml:"open_command_line"`
-	OpenSPFPrompt   []string `toml:"open_spf_prompt"`
-	OpenZoxide      []string `toml:"open_zoxide"`
+	PinnedDirectory  []string `toml:"pinned_directory"   comment:"other"`
+	ToggleDotFile    []string `toml:"toggle_dot_file"`
+	ChangePanelMode  []string `toml:"change_panel_mode"`
+	OpenHelpMenu     []string `toml:"open_help_menu"`
+	OpenCommandLine  []string `toml:"open_command_line"`
+	OpenSPFPrompt    []string `toml:"open_spf_prompt"`
+	OpenZoxide       []string `toml:"open_zoxide"`
+	OpenQuickConnect []string `toml:"open_quick_connect"`
 
 	CopyPath []string `toml:"copy_path"`
 	CopyPWD  []string `toml:"copy_present_working_directory"`

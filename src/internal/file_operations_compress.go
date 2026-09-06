@@ -13,6 +13,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/yorukot/superfile/src/internal/filesystem"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 )
@@ -49,6 +50,9 @@ func (m *model) getCompressSelectedFilesCmd() tea.Cmd {
 	if panel.Empty() {
 		return nil
 	}
+	if panel.CurrentLocation().Provider != filesystem.ProviderLocal {
+		return m.unsupportedRemoteOperationCmd(panel.CurrentLocation(), filesystem.OperationCompress)
+	}
 	var filesToCompress []string
 	var firstFile string
 
@@ -75,7 +79,7 @@ func (m *model) getCompressSelectedFilesCmd() tea.Cmd {
 			return NewNotifyModalMsg(notify.New(true, "Invalid file/dir to compress", err.Error(), notify.NoAction),
 				reqID)
 		}
-		if err := zipSources(filesToCompress, totalFiles, zipPath, &m.processBarModel); err != nil {
+		if err := zipSources(filesToCompress, totalFiles, zipPath, m.processBarModel); err != nil {
 			slog.Error("Error in zipping files", "error", err)
 			return NewCompressOperationMsg(processbar.Failed, reqID)
 		}

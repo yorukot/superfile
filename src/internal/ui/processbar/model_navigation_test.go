@@ -18,7 +18,7 @@ func Test_cntRenderableProcess(t *testing.T) {
 	assert.Equal(t, 4, cntRenderableProcess(11))
 }
 
-func genProcessBarModel(count int, cursor int, render int, viewHeight int) Model {
+func genProcessBarModel(count int, cursor int, render int, viewHeight int) *Model {
 	pMap := map[string]Process{}
 	for i := range count {
 		pID := strconv.Itoa(i)
@@ -27,7 +27,7 @@ func genProcessBarModel(count int, cursor int, render int, viewHeight int) Model
 			CurrentFile: pID,
 		}
 	}
-	return Model{
+	return &Model{
 		processes:   pMap,
 		cursor:      cursor,
 		renderIndex: render,

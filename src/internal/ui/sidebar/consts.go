@@ -28,6 +28,8 @@ var defaultSectionSlice = []string{ //nolint: gochecknoglobals // This is more l
 // superfile logo + blank line + search bar
 const sideBarInitialHeight = 3
 
+const remoteStatusReservedRows = 2
+
 // UI dimension constants for sidebar
 const (
 	// searchBarPadding is the total padding for search bar (borders + prompt + extra char)

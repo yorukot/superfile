@@ -61,7 +61,7 @@ func (s *Model) ListDown() {
 // but that too much.
 func (s *Model) lastRenderedIndex(startIndex int) int {
 	mainPanelHeight := s.height - common.BorderPadding
-	curHeight := sideBarInitialHeight
+	curHeight := sideBarInitialHeight + s.statusHeight
 	endIndex := startIndex - 1
 	for i := startIndex; i < len(s.directories); i++ {
 		curHeight += s.directories[i].requiredHeight()
@@ -83,7 +83,7 @@ func (s *Model) firstRenderedIndex(endIndex int) int {
 		return endIndex + 1
 	}
 
-	curHeight := sideBarInitialHeight
+	curHeight := sideBarInitialHeight + s.statusHeight
 	startIndex := endIndex + 1
 	for i := endIndex; i >= 0; i-- {
 		curHeight += s.directories[i].requiredHeight()

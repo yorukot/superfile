@@ -2,6 +2,7 @@ package sidebar
 
 import (
 	"log/slog"
+	"strings"
 
 	"github.com/yorukot/superfile/src/internal/ui"
 
@@ -11,7 +12,7 @@ import (
 )
 
 // Render returns the rendered sidebar string.
-func (s *Model) Render(sidebarFocused bool, currentFilePanelLocation string) string {
+func (s *Model) Render(sidebarFocused bool, currentFilePanelLocation string, currentRemoteStatus string) string {
 	if s.Disabled() {
 		return ""
 	}
@@ -19,6 +20,20 @@ func (s *Model) Render(sidebarFocused bool, currentFilePanelLocation string) str
 	r := ui.SidebarRenderer(s.height, s.width, sidebarFocused)
 
 	r.AddLines(common.SideBarSuperfileTitle, "")
+	statusHeight := 0
+	if currentRemoteStatus != "" {
+		statusParts := strings.Fields(currentRemoteStatus)
+		statusHeight = len(statusParts) + remoteStatusReservedRows
+		r.AddLines(common.SidebarTitleStyle.Render(" Remote"))
+		for _, statusPart := range statusParts {
+			r.AddLines(common.SidebarStyle.Render(" " + statusPart))
+		}
+		r.AddLines("")
+	}
+	if s.statusHeight != statusHeight {
+		s.statusHeight = statusHeight
+		s.updateRenderIndex()
+	}
 
 	if s.searchBar.Focused() || s.searchBar.Value() != "" || sidebarFocused {
 		r.AddLines(s.searchBar.View())
@@ -44,7 +59,7 @@ func (s *Model) directoriesRender(curFilePanelFileLocation string,
 
 	// TODO : This is not true when searchbar is not rendered(totalHeight is 2, not 3),
 	// so we end up underutilizing one line for our render. But it wont break anything.
-	totalHeight := sideBarInitialHeight
+	totalHeight := sideBarInitialHeight + s.statusHeight
 	mainPanelHeight := s.height - common.BorderPadding
 	for i := s.renderIndex; i < len(s.directories); i++ {
 		if totalHeight+s.directories[i].requiredHeight() > mainPanelHeight {
