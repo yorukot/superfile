@@ -116,7 +116,11 @@ func (m *Model) sortFileElements(dirEntries []os.DirEntry, includeDotFiles bool)
 			Info:      info,
 		}
 		if element.Directory {
-			element.ChildCount, element.ChildCountErr = getChildCount(element.Location, includeDotFiles)
+			element.ChildCount, element.ChildCountErr = getChildCount(
+				element.Location,
+				includeDotFiles,
+				dirMaxChildrenToCount,
+			)
 			if element.ChildCountErr != nil {
 				slog.Error("Error when counting directory children",
 					"error", element.ChildCountErr, "path", element.Location)

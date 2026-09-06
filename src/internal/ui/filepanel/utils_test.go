@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -128,7 +129,7 @@ func TestGetChildCount(t *testing.T) {
 			}
 			utils.SetupFiles(t, files...)
 
-			count, err := getChildCount(dir, tt.includeDotFiles)
+			count, err := getChildCount(dir, tt.includeDotFiles, -1)
 			require.NoError(t, err)
 			assert.Equal(t, tt.expectedCount, count)
 		})
@@ -136,7 +137,7 @@ func TestGetChildCount(t *testing.T) {
 }
 
 func TestGetChildCountReturnsReadError(t *testing.T) {
-	count, err := getChildCount(filepath.Join(t.TempDir(), "missing"), true)
+	count, err := getChildCount(filepath.Join(t.TempDir(), "missing"), true, -1)
 
 	assert.Zero(t, count)
 	require.Error(t, err)
@@ -180,6 +181,55 @@ func TestDirectorySymlinkChildCount(t *testing.T) {
 	}
 }
 
+func TestGetChildCountWithMaxCount(t *testing.T) {
+	tests := []struct {
+		name          string
+		entries       []string
+		maxCount      int
+		expectedCount int
+	}{
+		{
+			name:          "Fewer than maxCount",
+			entries:       []string{"file1.txt", "file2.txt"},
+			maxCount:      3,
+			expectedCount: 2,
+		},
+		{
+			name:          "Equal to maxCount",
+			entries:       []string{"file1.txt", "file2.txt", "file3.txt"},
+			maxCount:      3,
+			expectedCount: 3,
+		},
+		{
+			name:          "More than maxCount",
+			entries:       []string{"file1.txt", "file2.txt", "file3.txt", "file4.txt"},
+			maxCount:      3,
+			expectedCount: -1,
+		},
+		{
+			name:          "-1 maxCount reads all",
+			entries:       []string{"file1.txt", "file2.txt", "file3.txt", "file4.txt"},
+			maxCount:      -1,
+			expectedCount: 4,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dir := t.TempDir()
+			files := make([]string, 0, len(tt.entries))
+			for _, name := range tt.entries {
+				files = append(files, filepath.Join(dir, name))
+			}
+			utils.SetupFiles(t, files...)
+
+			count, err := getChildCount(dir, false, tt.maxCount)
+			require.NoError(t, err)
+			assert.Equal(t, tt.expectedCount, count)
+		})
+	}
+}
+
 func TestRenderFileSizeUsesPopulatedDirectoryCount(t *testing.T) {
 	dir := t.TempDir()
 	info, err := os.Stat(dir)
@@ -216,6 +266,15 @@ func TestRenderFileSizeUsesPopulatedDirectoryCount(t *testing.T) {
 				ChildCountErr: errors.New("read failed"),
 			},
 			expected: "(Error)",
+		},
+		{
+			name: "More than maxCount",
+			element: Element{
+				Directory:  true,
+				Info:       info,
+				ChildCount: -1,
+			},
+			expected: ">" + strconv.Itoa(dirMaxChildrenToCount) + " items",
 		},
 	}
 
