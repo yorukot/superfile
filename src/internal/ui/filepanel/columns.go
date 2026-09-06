@@ -58,11 +58,12 @@ func (m *Model) renderFileSize(indexElement int, columnWidth int) string {
 	sizeValue := common.FormatFileSize(elem.Info.Size())
 	if elem.Directory {
 		itemLabel := " items"
-		if elem.ChildCountErr != nil {
+		switch {
+		case elem.ChildCountErr != nil:
 			sizeValue = "(Error)"
-		} else if elem.ChildCount == -1 {
+		case elem.ChildCount == -1:
 			sizeValue = ">" + strconv.Itoa(dirMaxChildrenToCount) + itemLabel
-		} else {
+		default:
 			if elem.ChildCount == 1 {
 				itemLabel = " item"
 			}
