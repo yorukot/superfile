@@ -184,7 +184,6 @@ func getChildCount(location string, includeDotFiles bool) (int, error) {
 		return len(entryNames), nil
 	}
 
-
 	count := 0
 	for _, entryName := range entryNames {
 		if strings.HasPrefix(entryName, ".") {
