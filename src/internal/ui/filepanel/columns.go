@@ -2,6 +2,7 @@ package filepanel
 
 import (
 	"os"
+	"strconv"
 	"strings"
 
 	"charm.land/lipgloss/v2"
@@ -55,8 +56,19 @@ func (m *Model) renderFileSize(indexElement int, columnWidth int) string {
 	elem := m.GetElementAtIdx(indexElement)
 	isSelected := m.CheckSelected(elem.Location)
 	sizeValue := common.FormatFileSize(elem.Info.Size())
-	if elem.Info.IsDir() {
-		sizeValue = ""
+	if elem.Directory {
+		itemLabel := " items"
+		switch {
+		case elem.ChildCountErr != nil:
+			sizeValue = "(Error)"
+		case elem.ChildCount == -1:
+			sizeValue = ">" + strconv.Itoa(dirMaxChildrenToCount) + itemLabel
+		default:
+			if elem.ChildCount == 1 {
+				itemLabel = " item"
+			}
+			sizeValue = strconv.Itoa(elem.ChildCount) + itemLabel
+		}
 	}
 	return common.FilePanelItemRender(
 		sizeValue,
