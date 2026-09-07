@@ -442,3 +442,36 @@ func TestPageScrollSizeConfig(t *testing.T) {
 		})
 	}
 }
+
+func TestListTopBottom(t *testing.T) {
+	m := testModelWithElemCount(5, 2, 12, 20)
+
+	m.ListTop()
+	assert.Equal(t, 0, m.GetCursor())
+	assert.Equal(t, 0, m.GetRenderIndex())
+
+	m.ListBottom()
+	assert.Equal(t, 19, m.GetCursor())
+
+	// Test empty model
+	emptyModel := testModelWithElemCount(0, 0, 12, 0)
+	emptyModel.ListTop()
+	assert.Equal(t, 0, emptyModel.GetCursor())
+	emptyModel.ListBottom()
+	assert.Equal(t, 0, emptyModel.GetCursor())
+}
+
+func TestSelectAllItemToggle(t *testing.T) {
+	m := testModel(0, 0, 12, SelectMode, []Element{
+		{Name: "file1.txt", Location: "/tmp/file1.txt"},
+		{Name: "file2.txt", Location: "/tmp/file2.txt"},
+	})
+
+	// Select all
+	m.SelectAllItem()
+	assert.Equal(t, uint(2), m.SelectedCount())
+
+	// Calling SelectAllItem when all are selected should deselect all
+	m.SelectAllItem()
+	assert.Equal(t, uint(0), m.SelectedCount())
+}
