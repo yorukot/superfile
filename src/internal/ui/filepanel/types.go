@@ -7,6 +7,7 @@ import (
 	"charm.land/bubbles/v2/textinput"
 	"charm.land/lipgloss/v2"
 
+	"github.com/yorukot/superfile/src/internal/search"
 	"github.com/yorukot/superfile/src/internal/ui/sortmodel"
 )
 
@@ -38,6 +39,7 @@ type Model struct {
 	Rename             textinput.Model
 	Renaming           bool
 	SearchBar          textinput.Model
+	Search             searchState
 	LastTimeGetElement time.Time
 	TargetFile         string             // filename to position cursor on after load
 	columns            []columnDefinition // columns for rendering
@@ -47,6 +49,19 @@ type Model struct {
 type directoryRecord struct {
 	directoryCursor int
 	directoryRender int
+}
+
+// searchState holds a panel's search session: the fixed search root, the
+// streamed result set, and the cursor over it.
+type searchState struct {
+	Active         bool
+	Root           string
+	Results        []search.Result
+	MatchCount     int64
+	UnreadableDirs int
+	Done           bool
+	Cursor         int
+	RenderIndex    int
 }
 
 // Element within a file panel

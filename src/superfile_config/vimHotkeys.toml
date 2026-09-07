@@ -92,6 +92,7 @@ cancel_typing = ['esc', '']
 #-- Normal Mode Actions
 parent_directory = ['-', '']
 search_bar = ['/', '']
+search_mode = ['Z', '']
 
 #-- Selection Mode Actions
 file_panel_select_mode_items_select_down = ['J', '']

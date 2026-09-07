@@ -87,6 +87,12 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		slog.Debug("Got ModelUpdate message", "id", msg.GetReqID())
 		updateCmd = msg.Apply(&m.zoxideModal)
 
+	// Search session progress; handled separately because it carries its own
+	// streaming pump command
+	case SearchProgressMsg:
+		slog.Debug("Got SearchProgress message", "id", msg.GetReqID())
+		updateCmd = m.applySearchProgress(msg)
+
 	// Its a pain to interconvert commands like processBar
 	case preview.UpdateMsg:
 		slog.Debug("Got ModelUpdate message", "id", msg.GetReqID())
@@ -310,6 +316,12 @@ func (m *model) handleKeyInput(msg tea.KeyPressMsg) tea.Cmd {
 	case m.notifyModel.IsOpen():
 		cmd = m.notifyModelOpenKey(msg.String())
 
+	// If a search session is active in the focused panel, route keys to the
+	// search mode handler before the searchbar's own handler so navigation
+	// and confirm/cancel work against the result set
+	case m.fileModel.SearchModeActive() && m.focusPanel == nonePanelFocus:
+		m.searchModeKey(msg.String())
+
 	// If renaming a object
 	case m.fileModel.Renaming:
 		cmd = m.renamingKey(msg.String())
@@ -368,6 +380,12 @@ func (m *model) updateComponentState(msg tea.Msg) tea.Cmd {
 		m.firstTextInput = false
 	case m.fileModel.Renaming:
 		focusPanel.Rename, cmd = focusPanel.Rename.Update(msg)
+	case focusPanel.Search.Active:
+		previousValue := focusPanel.SearchBar.Value()
+		focusPanel.SearchBar, cmd = focusPanel.SearchBar.Update(msg)
+		if focusPanel.SearchBar.Value() != previousValue {
+			cmd = tea.Batch(cmd, m.restartSearchCmd())
+		}
 	case focusPanel.SearchBar.Focused():
 		focusPanel.SearchBar, cmd = focusPanel.SearchBar.Update(msg)
 	case m.typingModal.open:

@@ -1,0 +1,190 @@
+package internal
+
+import (
+	"context"
+	"log/slog"
+	"path/filepath"
+	"slices"
+	"time"
+
+	tea "charm.land/bubbletea/v2"
+
+	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/search"
+
+	variable "github.com/yorukot/superfile/src/config"
+)
+
+// searchDebounceDelay is the quiet period after the last query change before
+// the walk for the new query starts.
+const searchDebounceDelay = 120 * time.Millisecond
+
+// searchChannelSize bounds the progress snapshots buffered between the walk
+// goroutine and the pump command.
+const searchChannelSize = 4
+
+// searchModeEnter starts a search session in the focused panel.
+func (m *model) searchModeEnter() tea.Cmd {
+	panel := m.getFocusedFilePanel()
+	panel.EnterSearchMode()
+	panel.SearchBar.SetWidth(m.fileModel.SinglePanelWidth - common.InnerPadding)
+	// Consume the key that opened the session so it does not become the
+	// first character of the query.
+	m.firstTextInput = true
+	return m.restartSearchCmd()
+}
+
+// searchModeExit ends the search session in the focused panel and cancels
+// any running search.
+func (m *model) searchModeExit() {
+	if m.searchCancel != nil {
+		m.searchCancel()
+		m.searchCancel = nil
+	}
+	m.searchReqID = m.nextIoReqCnt()
+	m.getFocusedFilePanel().ExitSearchMode()
+	m.fileModel.UpdateFilePanelsIfNeeded(true)
+}
+
+// searchModeConfirm opens the result under the search cursor and leaves
+// search mode. Opening a directory makes it the new focused directory;
+// opening a file navigates to its containing directory and focuses it.
+func (m *model) searchModeConfirm() {
+	panel := m.getFocusedFilePanel()
+	if panel.SearchBar.Value() == "" {
+		m.searchModeExit()
+		return
+	}
+	root := panel.Search.Root
+	result := panel.GetSearchCursorResult()
+	m.searchModeExit()
+	if result == nil {
+		return
+	}
+	targetPath := filepath.Join(root, result.Path)
+
+	if !result.Dir && variable.ChooserFile != "" {
+		if err := m.chooserFileWriteAndQuit(targetPath); err == nil {
+			return
+		} else {
+			// Continue with navigation if the chooser file is not writable
+			slog.Error("Error while writing to chooser file, continuing with navigation", "error", err)
+		}
+	}
+
+	if result.Dir {
+		err := m.updateCurrentFilePanelDir(targetPath)
+		if err != nil {
+			slog.Error("Error while opening search result directory", "error", err)
+		}
+		return
+	}
+
+	err := m.updateCurrentFilePanelDir(filepath.Dir(targetPath))
+	if err != nil {
+		slog.Error("Error while opening search result file", "error", err)
+		return
+	}
+	m.getFocusedFilePanel().TargetFile = filepath.Base(targetPath)
+}
+
+// searchModeKey handles keys while a search session is active. Navigation
+// uses the raw arrow/page key names so that letter keys always reach the
+// query input (the hotkey lists alias j/k to navigation, which would steal
+// characters from the query).
+func (m *model) searchModeKey(msg string) {
+	panel := m.getFocusedFilePanel()
+	switch {
+	case slices.Contains(common.Hotkeys.CancelTyping, msg):
+		m.searchModeExit()
+	case slices.Contains(common.Hotkeys.ConfirmTyping, msg):
+		m.searchModeConfirm()
+	case msg == "up":
+		panel.SearchListUp()
+	case msg == "down":
+		panel.SearchListDown()
+	case msg == "pgup":
+		panel.SearchPgUp()
+	case msg == "pgdown":
+		panel.SearchPgDown()
+	}
+}
+
+// restartSearchCmd cancels the running search (if any) and starts a new one
+// for the current query. It is called on every query change and on session
+// entry. The walk itself is delayed by searchDebounceDelay so that fast
+// typing does not restart it per keystroke.
+func (m *model) restartSearchCmd() tea.Cmd {
+	panel := m.getFocusedFilePanel()
+	if !panel.Search.Active {
+		return nil
+	}
+	if m.searchCancel != nil {
+		m.searchCancel()
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	m.searchCancel = cancel
+	reqID := m.nextIoReqCnt()
+	m.searchReqID = reqID
+
+	ch := make(chan search.Progress, searchChannelSize)
+	m.searchChan = ch
+
+	root := panel.Search.Root
+	query := panel.SearchBar.Value()
+	includeHidden := m.fileModel.DisplayDotFiles
+
+	panel.Search.Done = false
+	go func() {
+		defer close(ch)
+		select {
+		case <-time.After(searchDebounceDelay):
+		case <-ctx.Done():
+			return
+		}
+		search.Run(ctx, root, query, includeHidden, func(p search.Progress) {
+			select {
+			case ch <- p:
+			case <-ctx.Done():
+			}
+		})
+	}()
+
+	return m.searchPumpCmd(ch, reqID)
+}
+
+// searchPumpCmd forwards the next progress snapshot from a search channel as
+// a message. It returns no message when the channel closes, e.g. because the
+// search was cancelled by a restart.
+func (m *model) searchPumpCmd(ch <-chan search.Progress, reqID int) tea.Cmd {
+	return func() tea.Msg {
+		p, ok := <-ch
+		if !ok {
+			return nil
+		}
+		return NewSearchProgressMsg(p, reqID)
+	}
+}
+
+// applySearchProgress merges a progress snapshot into the focused panel and
+// keeps the pump alive until the search completes. Stale messages from
+// cancelled sessions are dropped.
+func (m *model) applySearchProgress(msg SearchProgressMsg) tea.Cmd {
+	if msg.GetReqID() != m.searchReqID {
+		return nil
+	}
+	panel := m.getFocusedFilePanel()
+	if !panel.Search.Active {
+		return nil
+	}
+	panel.ApplySearchProgress(msg.progress)
+	if msg.progress.Done {
+		if m.searchCancel != nil {
+			m.searchCancel()
+			m.searchCancel = nil
+		}
+		return nil
+	}
+	return m.searchPumpCmd(m.searchChan, msg.GetReqID())
+}

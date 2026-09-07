@@ -1,10 +1,12 @@
 package internal
 
 import (
+	"context"
 	"sync"
 
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 
+	"github.com/yorukot/superfile/src/internal/search"
 	"github.com/yorukot/superfile/src/internal/ui/helpmenu"
 	"github.com/yorukot/superfile/src/internal/ui/spferror"
 
@@ -76,6 +78,12 @@ type model struct {
 
 	// no use directly for increment, use nextIoReqCnt
 	ioReqCnt int32
+
+	// Search session state: cancellation handle and message stream of the
+	// currently running recursive search.
+	searchCancel context.CancelFunc
+	searchReqID  int
+	searchChan   chan search.Progress
 
 	modelQuitState       modelQuitStateType
 	firstTextInput       bool

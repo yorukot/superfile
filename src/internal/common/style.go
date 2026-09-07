@@ -39,6 +39,7 @@ var (
 	FilePanelTopPathStyle          lipgloss.Style
 	FilePanelItemSelectedStyle     lipgloss.Style
 	FilePanelSelectBoxStyle        lipgloss.Style
+	SearchModeHighlightStyle       lipgloss.Style
 )
 
 var (
@@ -98,6 +99,7 @@ var (
 	filePanelTopPathColor          color.Color
 	filePanelItemSelectedFGColor   color.Color
 	filePanelItemSelectedBGColor   color.Color
+	searchModeHighlightColor       color.Color
 
 	sidebarTitleColor          color.Color
 	sidebarItemSelectedFGColor color.Color
@@ -151,6 +153,13 @@ func LoadThemeConfig() { //nolint: funlen // Variable initialization
 	filePanelItemSelectedFGColor = lipgloss.Color(Theme.FilePanelItemSelectedFG)
 	filePanelItemSelectedBGColor = lipgloss.Color(Theme.FilePanelItemSelectedBG)
 
+	// Fall back to the cursor color when a theme does not define the search
+	// highlight color yet.
+	searchModeHighlightColor = cursorColor
+	if Theme.SearchModeHighlight != "" {
+		searchModeHighlightColor = lipgloss.Color(Theme.SearchModeHighlight)
+	}
+
 	sidebarTitleColor = lipgloss.Color(Theme.SidebarTitle)
 	sidebarItemSelectedFGColor = lipgloss.Color(Theme.SidebarItemSelectedFG)
 	sidebarItemSelectedBGColor = lipgloss.Color(Theme.SidebarItemSelectedBG)
@@ -195,6 +204,8 @@ func LoadThemeConfig() { //nolint: funlen // Variable initialization
 	FilePanelItemSelectedStyle = lipgloss.NewStyle().Foreground(filePanelItemSelectedFGColor).
 		Background(filePanelItemSelectedBGColor)
 	FilePanelSelectBoxStyle = lipgloss.NewStyle().Background(FilePanelBGColor)
+	SearchModeHighlightStyle = lipgloss.NewStyle().Foreground(searchModeHighlightColor).
+		Background(FilePanelBGColor)
 
 	// Sidebar Special Style
 	SidebarDividerStyle = lipgloss.NewStyle().Foreground(sidebarDividerColor).Background(SidebarBGColor)

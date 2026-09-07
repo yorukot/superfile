@@ -5,6 +5,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/yorukot/superfile/src/internal/search"
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
@@ -136,6 +137,21 @@ func NewExtractOperationMsg(state processbar.ProcessState, reqID int) ExtractOpe
 
 func (msg ExtractOperationMsg) ApplyToModel(_ *model) tea.Cmd {
 	return nil
+}
+
+type SearchProgressMsg struct {
+	BaseMessage
+
+	progress search.Progress
+}
+
+func NewSearchProgressMsg(progress search.Progress, reqID int) SearchProgressMsg {
+	return SearchProgressMsg{
+		progress: progress,
+		BaseMessage: BaseMessage{
+			reqID: reqID,
+		},
+	}
 }
 
 type MetadataMsg struct {
