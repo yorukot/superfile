@@ -51,9 +51,11 @@ func InitialModel(firstPanelPaths []string, firstUseCheck bool) tea.Model {
 // disk, is being done in at the creation of model of object. Right now creation of model object
 // and its initialization isn't well separated.
 func (m *model) Init() tea.Cmd {
+	m.themeReloadSignals = newThemeReloadSignals()
 	return tea.Batch(
 		textinput.Blink, // Assuming textinput.Blink is a valid command
 		processCmdToTeaCmd(m.processBarModel.GetListenCmd()),
+		listenForThemeReload(m.themeReloadSignals),
 	)
 }
 
@@ -94,6 +96,8 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case ModelUpdateMessage:
 		slog.Debug("Got ModelUpdate message", "id", msg.GetReqID())
 		updateCmd = msg.ApplyToModel(m)
+	case ThemeReloadMsg:
+		updateCmd = m.handleThemeReload()
 
 	default:
 		slog.Debug("Message of type that is not explicitly handled")

@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"os"
 	"sync"
 
 	zoxidelib "github.com/lazysegtree/go-zoxide"
@@ -76,6 +77,10 @@ type model struct {
 
 	// no use directly for increment, use nextIoReqCnt
 	ioReqCnt int32
+
+	// Receives SIGUSR1 (unix only) so an external theme switcher can ask a
+	// running instance to re-read its theme file.
+	themeReloadSignals chan os.Signal
 
 	modelQuitState       modelQuitStateType
 	firstTextInput       bool
