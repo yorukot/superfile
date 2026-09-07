@@ -167,6 +167,30 @@ func TestSearchModeConfirmDir(t *testing.T) {
 	assert.Equal(t, filepath.Join(root, "src", "deep"), panel.Location)
 }
 
+func TestSearchModeConfirmDuringDebounce(t *testing.T) {
+	root := searchTestDir(t)
+	m := defaultTestModel(root)
+	TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.SearchMode[0]))
+	cmd := typeSearchQuery(t, m, "deep")
+	drainSearchResults(t, m, cmd)
+
+	panel := m.getFocusedFilePanel()
+	require.NotEmpty(t, panel.Search.Results, "deep should match before editing")
+	require.True(t, panel.Search.Results[0].Dir)
+
+	// Editing the query clears stale results immediately, before the
+	// debounced walk for the new query runs. "deepz" matches nothing, so
+	// any retained result would be stale.
+	TeaUpdate(m, utils.TeaRuneKeyMsg("z"))
+	require.Empty(t, panel.Search.Results, "stale results must be cleared on query change")
+	require.False(t, panel.Search.Done)
+
+	// Confirming during the debounce must not open the stale result.
+	TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyEnter})
+	assert.False(t, panel.Search.Active)
+	assert.Equal(t, root, panel.Location, "must not navigate to the stale directory result")
+}
+
 func TestSearchModeConfirmEmptyQuery(t *testing.T) {
 	root := searchTestDir(t)
 	m := defaultTestModel(root)

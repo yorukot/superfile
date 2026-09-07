@@ -2,6 +2,7 @@ package search
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -96,6 +97,36 @@ func TestRunMatchPositions(t *testing.T) {
 	t.Error("match for src/main.go not found")
 }
 
+func TestMatchBatchPositionsAreByteOffsets(t *testing.T) {
+	// é is two bytes in UTF-8, so the 'a' in "éa.txt" sits at byte offset
+	// 2 but rune index 1. fzf-lib reports rune indexes; the boundary must
+	// convert them for the byte-offset consumers (highlight, truncation).
+	matches := matchBatch("a", []Result{{Path: "éa.txt"}})
+	if len(matches) != 1 {
+		t.Fatalf("matched %d results, want 1: %v", len(matches), matches)
+	}
+	if len(matches[0].Positions) != 1 || matches[0].Positions[0] != 2 {
+		t.Errorf("positions = %v, want [2]", matches[0].Positions)
+	}
+}
+
+func TestMatchBatchPositionsStayByteOffsetsForASCII(t *testing.T) {
+	matches := matchBatch("main", []Result{{Path: "src/main.go"}})
+	if len(matches) != 1 {
+		t.Fatalf("matched %d results, want 1: %v", len(matches), matches)
+	}
+	want := map[int]bool{4: true, 5: true, 6: true, 7: true}
+	if len(matches[0].Positions) != len(want) {
+		t.Fatalf("positions = %v, want 4 offsets", matches[0].Positions)
+	}
+	for _, pos := range matches[0].Positions {
+		if !want[pos] {
+			t.Errorf("position %d not a byte offset of %q", pos, "src/main.go")
+		}
+		delete(want, pos)
+	}
+}
+
 func TestRunExactPrefixSyntax(t *testing.T) {
 	root := buildSearchTree(t)
 	// '^src/' is fzf's prefix operator: only paths starting with "src/".
@@ -151,36 +182,46 @@ func TestRunCountsUnreadableDirs(t *testing.T) {
 }
 
 func TestRunStopsOnCancellation(t *testing.T) {
-	root := buildSearchTree(t)
-	for i := range 100 {
-		dir := filepath.Join(root, "d"+string(rune('a'+i%26)))
-		if err := os.MkdirAll(dir, 0o755); err != nil {
+	// More than one matcher batch in a single directory, so cancelling on
+	// the first progress snapshot leaves work unvisited.
+	root := t.TempDir()
+	sub := filepath.Join(root, "sub")
+	if err := os.MkdirAll(sub, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	for i := range matchBatchSize + 100 {
+		path := filepath.Join(sub, fmt.Sprintf("file%05d.txt", i))
+		if err := os.WriteFile(path, nil, 0o644); err != nil {
 			t.Fatal(err)
-		}
-		for j := range 20 {
-			if err := os.WriteFile(filepath.Join(dir, "f"+string(rune('0'+j))+".txt"), nil, 0o644); err != nil {
-				t.Fatal(err)
-			}
 		}
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
-	done := make(chan int, 1)
+	done := make(chan []Progress, 1)
 	go func() {
-		emits := 0
-		Run(ctx, root, "f", false, func(p Progress) {
-			emits++
-			if emits == 2 {
+		var snapshots []Progress
+		Run(ctx, root, "file", false, func(p Progress) {
+			snapshots = append(snapshots, p)
+			if len(snapshots) == 1 {
 				cancel()
 			}
 		})
-		done <- emits
+		done <- snapshots
 	}()
 
+	var snapshots []Progress
 	select {
-	case <-done:
+	case snapshots = <-done:
 	case <-time.After(10 * time.Second):
 		t.Fatal("Run did not return after cancellation")
+	}
+	if len(snapshots) == 0 {
+		t.Fatal("expected at least one progress snapshot before cancellation")
+	}
+	for _, s := range snapshots {
+		if s.Done {
+			t.Errorf("cancelled run emitted a completion it must not have: %+v", s)
+		}
 	}
 }
 

@@ -163,6 +163,38 @@ func TestWalkSymlinkCycleTerminates(t *testing.T) {
 	}
 }
 
+func TestWalkDoesNotRevisitNestedSelfLink(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("symlinks require privileges on windows")
+	}
+	root := t.TempDir()
+	sub := filepath.Join(root, "sub")
+	if err := os.MkdirAll(sub, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(sub, "file.txt"), nil, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	// self points back at its own directory: the link itself is an entry,
+	// but the subtree must not be emitted a second time under it.
+	if err := os.Symlink(".", filepath.Join(sub, "self")); err != nil {
+		t.Fatal(err)
+	}
+
+	counts := map[string]int{}
+	walk(context.Background(), root, false, new(int), func(rel string, _ bool) {
+		counts[rel]++
+	})
+	if counts["sub/file.txt"] != 1 {
+		t.Errorf("sub/file.txt visited %d times, want 1: %v", counts["sub/file.txt"], counts)
+	}
+	for rel := range counts {
+		if hasPrefixPath(rel, "sub/self/") {
+			t.Errorf("revisited subtree through self-link: %q", rel)
+		}
+	}
+}
+
 func TestWalkCountsUnreadableDirs(t *testing.T) {
 	if runtime.GOOS == "windows" || os.Geteuid() == 0 {
 		t.Skip("permission-based test requires a non-windows, non-root environment")

@@ -135,7 +135,15 @@ func (m *model) restartSearchCmd() tea.Cmd {
 	query := panel.SearchBar.Value()
 	includeHidden := m.fileModel.DisplayDotFiles
 
+	// Clear the previous session's results immediately: the new walk is
+	// debounced, and confirming during the quiet period must not open a
+	// result from the old query.
 	panel.Search.Done = false
+	panel.Search.Results = nil
+	panel.Search.MatchCount = 0
+	panel.Search.UnreadableDirs = 0
+	panel.Search.Cursor = 0
+	panel.Search.RenderIndex = 0
 	go func() {
 		defer close(ch)
 		select {

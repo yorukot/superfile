@@ -2,6 +2,7 @@ package search
 
 import (
 	"context"
+	"unicode/utf8"
 
 	"github.com/reinhrst/fzf-lib"
 )
@@ -51,6 +52,12 @@ func Run(ctx context.Context, root, query string, includeHidden bool, emit func(
 			flush()
 		}
 	})
+	if ctx.Err() != nil {
+		// Cancelled mid-walk: the session is over, so don't flush a
+		// trailing batch or emit a completion the UI would mistake for
+		// final results.
+		return
+	}
 	flush()
 	emit(snapshot(true))
 }
@@ -77,8 +84,40 @@ func matchBatch(query string, candidates []Result) []Result {
 			Path:      candidates[idx].Path,
 			Dir:       candidates[idx].Dir,
 			Score:     match.Score,
-			Positions: match.Positions,
+			Positions: runePositionsToByteOffsets(candidates[idx].Path, match.Positions),
 		})
 	}
 	return matches
+}
+
+// runePositionsToByteOffsets converts fzf-lib rune indexes to UTF-8 byte
+// offsets, which is what Result.Positions consumers (highlighting,
+// truncation) expect. ASCII paths pass through unchanged.
+func runePositionsToByteOffsets(path string, positions []int) []int {
+	if len(positions) == 0 {
+		return positions
+	}
+	ascii := true
+	for i := range len(path) {
+		if path[i] >= utf8.RuneSelf {
+			ascii = false
+			break
+		}
+	}
+	if ascii {
+		return positions
+	}
+	posSet := make(map[int]struct{}, len(positions))
+	for _, p := range positions {
+		posSet[p] = struct{}{}
+	}
+	out := make([]int, 0, len(positions))
+	runeIdx := 0
+	for byteOff := range path {
+		if _, ok := posSet[runeIdx]; ok {
+			out = append(out, byteOff)
+		}
+		runeIdx++
+	}
+	return out
 }

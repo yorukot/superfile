@@ -5,7 +5,7 @@ type Result struct {
 	Path      string // path relative to the search root
 	Dir       bool   // whether the matched entry is a directory
 	Score     int    // fzf match score
-	Positions []int  // byte offsets of matched characters in Path
+	Positions []int  // UTF-8 byte offsets of matched characters in Path
 }
 
 // Progress is a snapshot of a running search session.

@@ -11,7 +11,8 @@ import (
 // walk traverses root and visits every visible entry with its path relative
 // to root. It descends into symlinked directories but never follows a link
 // whose target is already on the current ancestor chain, so symlink cycles
-// cannot cause infinite recursion. unreadable receives the count of
+// cannot cause infinite recursion. It checks ctx as it goes, so cancellation
+// stops the traversal promptly. unreadable receives the count of
 // directories that could not be read (permission denied and the like);
 // unreadable entries are skipped, not treated as errors.
 func walk(ctx context.Context, root string, includeHidden bool, unreadable *int,
@@ -34,6 +35,9 @@ func walk(ctx context.Context, root string, includeHidden bool, unreadable *int,
 			return
 		}
 		for _, entry := range entries {
+			if ctx.Err() != nil {
+				return
+			}
 			if !includeHidden && strings.HasPrefix(entry.Name(), ".") {
 				continue
 			}
@@ -58,7 +62,7 @@ func visitEntry(abs, rel, name string, info os.FileInfo, ancestors []os.FileInfo
 	switch {
 	case info.IsDir():
 		visit(entryRel, true)
-		walkDir(entryAbs, entryRel, ancestors)
+		walkDir(entryAbs, entryRel, append(ancestors, info))
 	case info.Mode()&fs.ModeSymlink != 0:
 		// Resolve the link; broken links are reported as files.
 		target, err := os.Stat(entryAbs)
