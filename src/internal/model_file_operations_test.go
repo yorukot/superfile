@@ -16,6 +16,7 @@ import (
 
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 )
 
@@ -223,6 +224,52 @@ func TestFileRename(t *testing.T) {
 		actualTest(false)
 		actualTest(true)
 	})
+}
+
+// Regression test for #818. The panel's re-render timer is
+// min(elemCount/100, ReRenderMaxDelay) seconds, so this directory is sized to
+// pin the timer at its 3s maximum. The panel is then polled for only
+// DefaultTestTimeout (1s): refreshing on the rename itself lands well inside
+// that, while waiting out the timer cannot.
+func TestFileRenameRefreshesPanel(t *testing.T) {
+	curTestDir := t.TempDir()
+	for i := range filepanel.ReRenderChunkDivisor * filepanel.ReRenderMaxDelay {
+		utils.SetupFilesWithData(t, []byte("x"),
+			filepath.Join(curTestDir, fmt.Sprintf("file%03d.txt", i)))
+	}
+	oldName := "file000.txt"
+	newName := "file000_new.txt"
+
+	m := defaultTestModel(curTestDir)
+	p := NewTestTeaProgWithEventLoop(t, m)
+	setFilePanelSelectedItemByLocation(t, m.getFocusedFilePanel(),
+		filepath.Join(curTestDir, oldName))
+
+	p.SendKey(common.Hotkeys.FilePanelItemRename[0])
+	p.SendKey("_new")
+	p.Send(tea.KeyPressMsg{Code: tea.KeyEnter})
+
+	require.Eventually(t, func() bool {
+		_, err := os.Stat(filepath.Join(curTestDir, newName))
+		return err == nil
+	}, DefaultTestTimeout, DefaultTestTick, "File never got renamed")
+
+	// No further input is sent after the rename.
+	assert.Eventually(t, func() bool {
+		return panelContainsName(m.getFocusedFilePanel(), newName)
+	}, DefaultTestTimeout, DefaultTestTick,
+		"panel should show the renamed file without further input")
+	assert.False(t, panelContainsName(m.getFocusedFilePanel(), oldName),
+		"panel should no longer show the old name")
+}
+
+func panelContainsName(panel *filepanel.Model, name string) bool {
+	for i := range panel.ElemCount() {
+		if panel.GetElementAtIdx(i).Name == name {
+			return true
+		}
+	}
+	return false
 }
 
 func isTrashed(fileAbsPath string) bool {
