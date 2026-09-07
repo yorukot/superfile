@@ -150,16 +150,20 @@ func splitHighlight(path string, positions []int) []highlightSegment {
 
 // renderSearchStatusLine renders the search session status: live match count,
 // scanning state, skipped unreadable directories and result cap notice.
+// The "found" count is the total matches seen, which can exceed the capped
+// number of rendered results.
 func (m *Model) renderSearchStatusLine() string {
 	var status strings.Builder
-	fmt.Fprintf(&status, " %d found", len(m.Search.Results))
+	shown := len(m.Search.Results)
+	found := max(m.Search.MatchCount, int64(shown))
+	fmt.Fprintf(&status, " %d found", found)
 	if !m.Search.Done {
 		status.WriteString(" | scanning...")
 	} else if m.Search.UnreadableDirs > 0 {
 		fmt.Fprintf(&status, " | %d unreadable dir(s) skipped", m.Search.UnreadableDirs)
 	}
-	if m.Search.MatchCount > int64(len(m.Search.Results)) {
-		fmt.Fprintf(&status, " | showing first %d of %d", len(m.Search.Results), m.Search.MatchCount)
+	if m.Search.MatchCount > int64(shown) {
+		fmt.Fprintf(&status, " | showing first %d", shown)
 	}
 	return common.FilePanelStyle.Render(status.String())
 }
