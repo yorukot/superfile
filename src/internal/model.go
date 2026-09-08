@@ -383,9 +383,9 @@ func (m *model) updateComponentState(msg tea.Msg) tea.Cmd {
 	case focusPanel.Search.Active:
 		// Keys consumed by the search mode handler (currently the hidden
 		// toggle) must not reach the query input: some terminals report
-		// ctrl+. with Text=".", which textinput would otherwise insert.
-		// The handler above already issued the restart command.
-		if keyMsg, ok := msg.(tea.KeyPressMsg); ok && searchToggleHiddenMatched(keyMsg) {
+		// modifier combos with Text set, which textinput would insert.
+		// The handler above already issued the command for them.
+		if keyMsg, ok := msg.(tea.KeyPressMsg); ok && searchKeyMatchesAction(keyMsg, common.Hotkeys.SearchToggleHidden) {
 			return nil
 		}
 		previousValue := focusPanel.SearchBar.Value()

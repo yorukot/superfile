@@ -4,8 +4,8 @@ import (
 	"context"
 	"log/slog"
 	"path/filepath"
-	"slices"
 	"time"
+	"unicode"
 
 	tea "charm.land/bubbletea/v2"
 
@@ -88,44 +88,58 @@ func (m *model) searchModeConfirm() {
 	m.getFocusedFilePanel().TargetFile = filepath.Base(targetPath)
 }
 
-// searchModeKey handles keys while a search session is active. Navigation
-// uses the raw arrow/page key names so that letter keys always reach the
-// query input (the hotkey lists alias j/k to navigation, which would steal
-// characters from the query). The hidden-files toggle is matched
-// structurally (Mod+Code, ignoring Text) so terminals that report ctrl+.
-// with Text="." still toggle instead of typing a dot.
+// searchModeKey handles keys while a search session is active. Letter keys
+// always reach the query input: navigation reuses the list_up/list_down/
+// page_up/page_down bindings, but only when they cannot be query text (see
+// isSearchTypingKey), so aliases like j/k keep typing instead of moving.
 func (m *model) searchModeKey(msg tea.KeyPressMsg) tea.Cmd {
 	panel := m.getFocusedFilePanel()
-	msgStr := msg.String()
 	switch {
-	case slices.Contains(common.Hotkeys.CancelTyping, msgStr):
+	case searchKeyMatchesAction(msg, common.Hotkeys.CancelTyping):
 		m.searchModeExit()
 		return nil
-	case slices.Contains(common.Hotkeys.ConfirmTyping, msgStr):
+	case searchKeyMatchesAction(msg, common.Hotkeys.ConfirmTyping):
 		m.searchModeConfirm()
 		return nil
-	case searchToggleHiddenMatched(msg):
+	case searchKeyMatchesAction(msg, common.Hotkeys.SearchToggleHidden):
 		return m.toggleDotFileController()
-	case msgStr == "up":
+	case searchKeyMatchesAction(msg, common.Hotkeys.ListUp):
 		panel.SearchListUp()
-	case msgStr == "down":
+	case searchKeyMatchesAction(msg, common.Hotkeys.ListDown):
 		panel.SearchListDown()
-	case msgStr == "pgup":
+	case searchKeyMatchesAction(msg, common.Hotkeys.PageUp):
 		panel.SearchPgUp()
-	case msgStr == "pgdown":
+	case searchKeyMatchesAction(msg, common.Hotkeys.PageDown):
 		panel.SearchPgDown()
 	}
 	return nil
 }
 
-// searchToggleHiddenMatched reports whether msg matches a configured
-// search_toggle_hidden binding. Empty "" padding slots are skipped.
-// Comparison is two-fold: the verbatim String() form covers properly
-// encoded keys, while the Text-less keystroke form covers terminals that
-// report modifier combos with Text set (e.g. ctrl+. with Text=".", whose
-// String() is just "." and would otherwise leak into the query).
-func searchToggleHiddenMatched(msg tea.KeyPressMsg) bool {
-	for _, binding := range common.Hotkeys.SearchToggleHidden {
+// isSearchTypingKey reports whether msg is query input rather than an
+// action: a single printable rune with no modifier beyond shift/caps-lock
+// (e.g. "k", "K"). Such keys must type even when they appear in a hotkey
+// list; actions in search mode require a real modifier, a multi-rune key,
+// or a non-printable key.
+func isSearchTypingKey(msg tea.KeyPressMsg) bool {
+	r := []rune(msg.Text)
+	if len(r) != 1 || !unicode.IsPrint(r[0]) {
+		return false
+	}
+	mods := msg.Mod &^ (tea.ModShift | tea.ModCapsLock)
+	return mods == 0
+}
+
+// searchKeyMatchesAction reports whether msg triggers one of bindings while
+// a search session is active. Typing keys (isSearchTypingKey) never match,
+// so bare letters stay in the query. Empty "" padding slots are skipped.
+// Besides the verbatim String() form, the Text-less keystroke form is
+// compared so terminals that report modifier combos with Text set (e.g.
+// ctrl+. with Text=".") still match.
+func searchKeyMatchesAction(msg tea.KeyPressMsg, bindings []string) bool {
+	if isSearchTypingKey(msg) {
+		return false
+	}
+	for _, binding := range bindings {
 		if binding == "" {
 			continue
 		}

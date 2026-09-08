@@ -205,6 +205,48 @@ func TestSearchModeConfirmEmptyQuery(t *testing.T) {
 	assert.Equal(t, root, panel.Location)
 }
 
+func TestSearchModeConfigurableNav(t *testing.T) {
+	root := searchTestDir(t)
+
+	// Point the shared navigation bindings at vim-style modifiers for the
+	// duration of the test; bare letters must keep typing regardless.
+	oldListUp, oldListDown := common.Hotkeys.ListUp, common.Hotkeys.ListDown
+	common.Hotkeys.ListUp = []string{"up", "k", "ctrl+p"}
+	common.Hotkeys.ListDown = []string{"down", "j", "ctrl+n"}
+	t.Cleanup(func() {
+		common.Hotkeys.ListUp, common.Hotkeys.ListDown = oldListUp, oldListDown
+	})
+
+	m := defaultTestModel(root)
+	TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.SearchMode[0]))
+	cmd := typeSearchQuery(t, m, "main")
+	drainSearchResults(t, m, cmd)
+
+	panel := m.getFocusedFilePanel()
+	require.Len(t, panel.Search.Results, 2)
+	require.Equal(t, 0, panel.Search.Cursor)
+
+	// Modifier variants navigate without touching the query.
+	TeaUpdate(m, tea.KeyPressMsg{Code: 'n', Mod: tea.ModCtrl})
+	assert.Equal(t, 1, panel.Search.Cursor)
+	assert.Equal(t, "main", panel.SearchBar.Value())
+	TeaUpdate(m, tea.KeyPressMsg{Code: 'p', Mod: tea.ModCtrl})
+	assert.Equal(t, 0, panel.Search.Cursor)
+	assert.Equal(t, "main", panel.SearchBar.Value())
+
+	// Defaults still work.
+	TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyDown})
+	assert.Equal(t, 1, panel.Search.Cursor)
+	TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyUp})
+	assert.Equal(t, 0, panel.Search.Cursor)
+
+	// Bare j/k are in the nav lists but must type, not move. (Last: the
+	// keystroke restarts the search, clearing results.)
+	TeaUpdate(m, utils.TeaRuneKeyMsg("j"))
+	assert.Equal(t, "mainj", panel.SearchBar.Value(), "bare j must type, not move")
+	require.True(t, panel.Search.Active)
+}
+
 func TestSearchToggleHiddenHotkeyConfigured(t *testing.T) {
 	require.NotEmpty(t, common.Hotkeys.SearchToggleHidden,
 		"search_toggle_hidden must have a default binding")
