@@ -160,7 +160,7 @@ func (m *Model) renderSearchStatusLine() string {
 		fmt.Fprintf(&status, " | showing first %d", shown)
 	}
 	if label := searchToggleHiddenLabel(); label != "" {
-		fmt.Fprintf(&status, " | %s hidden", label)
+		fmt.Fprintf(&status, " | toggle dotfiles: %s", label)
 	}
 	return common.FilePanelStyle.Render(status.String())
 }
