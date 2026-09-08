@@ -29,6 +29,7 @@
             pname = "superfile";
             version = "1.6.0";
             src = ./.;
+            go = pkgs.go_1_26;
             modules = ./gomod2nix.toml;
 
             # Temporary workaround: zoxide-related tests fail in the Nix sandbox.
