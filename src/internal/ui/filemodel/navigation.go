@@ -19,3 +19,11 @@ func (m *Model) MoveFocusedPanelBy(delta int) {
 	m.FocusedPanelIndex = (m.FocusedPanelIndex + delta + m.PanelCount()) % m.PanelCount()
 	m.FilePanels[m.FocusedPanelIndex].IsFocused = true
 }
+
+func (m *Model) SetFocusedPanelIndex(index int) {
+	if index >= 0 && index < m.PanelCount() {
+		m.GetFocusedFilePanel().IsFocused = false
+		m.FocusedPanelIndex = index
+		m.FilePanels[m.FocusedPanelIndex].IsFocused = true
+	}
+}
