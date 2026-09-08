@@ -26,6 +26,8 @@ list_up = ['k', '']
 list_down = ['j', '']
 page_up = ['pgup','']
 page_down = ['pgdown','']
+list_home = ['home','g']
+list_end = ['end','G']
 
 #-- File Panel Controls
 create_new_file_panel = ['n', '']

@@ -62,6 +62,20 @@ func (m *Model) PgDown() {
 	m.pageScrollBy(m.getPageScrollSize())
 }
 
+// Home jumps the cursor to the first item in the file panel.
+func (m *Model) Home() {
+	if !m.Empty() {
+		m.scrollToCursor(0)
+	}
+}
+
+// End jumps the cursor to the last item in the file panel.
+func (m *Model) End() {
+	if !m.Empty() {
+		m.scrollToCursor(m.ElemCount() - 1)
+	}
+}
+
 // Handles the action of selecting an item in the file panel upwards. (only work on select mode)
 // This basically just toggles the "selected" status of element that is pointed by the cursor
 // and then moves the cursor up

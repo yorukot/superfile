@@ -189,6 +189,78 @@ func TestPgUpDown(t *testing.T) {
 	}
 }
 
+func TestHomeEnd(t *testing.T) {
+	testdata := []struct {
+		name           string
+		panel          Model
+		toEnd          bool
+		expectedCursor int
+		expectedRender int
+	}{
+		{
+			name:           "Home from middle jumps to first item",
+			panel:          testModelWithElemCount(10, 4, 12, 20),
+			toEnd:          false,
+			expectedCursor: 0,
+			expectedRender: 0,
+		},
+		{
+			name:           "End from middle jumps to last item",
+			panel:          testModelWithElemCount(5, 0, 12, 20),
+			toEnd:          true,
+			expectedCursor: 19,
+			expectedRender: 13, // 19 - 7 + 1
+		},
+		{
+			name:           "Home at top stays at top",
+			panel:          testModelWithElemCount(0, 0, 12, 20),
+			toEnd:          false,
+			expectedCursor: 0,
+			expectedRender: 0,
+		},
+		{
+			name:           "End at bottom stays at bottom",
+			panel:          testModelWithElemCount(19, 13, 12, 20),
+			toEnd:          true,
+			expectedCursor: 19,
+			expectedRender: 13,
+		},
+		{
+			name:           "Home on empty panel",
+			panel:          testModelWithElemCount(0, 0, 12, 0),
+			toEnd:          false,
+			expectedCursor: 0,
+			expectedRender: 0,
+		},
+		{
+			name:           "End on empty panel",
+			panel:          testModelWithElemCount(0, 0, 12, 0),
+			toEnd:          true,
+			expectedCursor: 0,
+			expectedRender: 0,
+		},
+		{
+			name:           "End on short list that fits in view",
+			panel:          testModelWithElemCount(1, 0, 12, 5),
+			toEnd:          true,
+			expectedCursor: 4,
+			expectedRender: 0,
+		},
+	}
+
+	for _, tt := range testdata {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.toEnd {
+				tt.panel.End()
+			} else {
+				tt.panel.Home()
+			}
+			assert.Equal(t, tt.expectedCursor, tt.panel.GetCursor())
+			assert.Equal(t, tt.expectedRender, tt.panel.GetRenderIndex())
+		})
+	}
+}
+
 func TestItemSelectUpDown(t *testing.T) {
 	testdata := []struct {
 		name             string

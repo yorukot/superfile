@@ -78,3 +78,63 @@ func TestPgUpDown(t *testing.T) {
 		})
 	}
 }
+
+func TestHomeEnd(t *testing.T) {
+	tenItems := Metadata{
+		data: make([][2]string, 10),
+	}
+	testdata := []struct {
+		name                string
+		m                   Model
+		toEnd               bool
+		expectedRenderIndex int
+	}{
+		{
+			name:                "Home from middle jumps to first row",
+			m:                   Model{metadata: tenItems, renderIndex: 5},
+			toEnd:               false,
+			expectedRenderIndex: 0,
+		},
+		{
+			name:                "End from middle jumps to last row",
+			m:                   Model{metadata: tenItems, renderIndex: 3},
+			toEnd:               true,
+			expectedRenderIndex: 9,
+		},
+		{
+			name:                "Home at top stays at top",
+			m:                   Model{metadata: tenItems, renderIndex: 0},
+			toEnd:               false,
+			expectedRenderIndex: 0,
+		},
+		{
+			name:                "End at bottom stays at bottom",
+			m:                   Model{metadata: tenItems, renderIndex: 9},
+			toEnd:               true,
+			expectedRenderIndex: 9,
+		},
+		{
+			name:                "Home on empty panel stays put",
+			m:                   Model{metadata: Metadata{data: nil}, renderIndex: 0},
+			toEnd:               false,
+			expectedRenderIndex: 0,
+		},
+		{
+			name:                "End on empty panel stays put",
+			m:                   Model{metadata: Metadata{data: nil}, renderIndex: 0},
+			toEnd:               true,
+			expectedRenderIndex: 0,
+		},
+	}
+
+	for _, tt := range testdata {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.toEnd {
+				tt.m.End()
+			} else {
+				tt.m.Home()
+			}
+			assert.Equal(t, tt.expectedRenderIndex, tt.m.renderIndex)
+		})
+	}
+}

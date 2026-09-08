@@ -129,6 +129,8 @@ type HotkeysType struct {
 	ListDown []string `toml:"list_down"`
 	PageUp   []string `toml:"page_up"`
 	PageDown []string `toml:"page_down"`
+	ListHome []string `toml:"list_home"`
+	ListEnd  []string `toml:"list_end"`
 
 	CloseFilePanel         []string `toml:"close_file_panel"          comment:"file panel control"`
 	CreateNewFilePanel     []string `toml:"create_new_file_panel"`
