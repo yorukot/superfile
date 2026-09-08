@@ -38,7 +38,9 @@ file_panel_border_active = "#98971a"
 file_panel_top_directory_icon = "#689d6a"
 file_panel_top_path = "#458588"
 file_panel_item_selected_fg = "#d65d0e"
-file_panel_item_selected_bg = ""
+file_panel_item_selected_bg = "#928374"
+file_panel_item_active_fg = "#fbf1c7"
+file_panel_item_active_bg = "#689d6a"
 
 #-- Footer
 footer_fg = "#fbf1c7"
@@ -53,7 +55,7 @@ sidebar_title = "#b16286"
 sidebar_border = "#928374"
 sidebar_border_active = "#b16286"
 sidebar_item_selected_fg = "#d65d0e"
-sidebar_item_selected_bg = ""
+sidebar_item_selected_bg = "#928374"
 sidebar_divider = "#928374"
 
 #-- Modals
@@ -61,9 +63,9 @@ modal_fg = "#fbf1c7"
 modal_bg = "#1d2021"
 modal_border_active = "#689d6a"
 modal_cancel_fg = "#fb4934"
-modal_cancel_bg = ""
+modal_cancel_bg = "#928374"
 modal_confirm_fg = "#b8bb26"
-modal_confirm_bg = ""
+modal_confirm_bg = "#d65d0e"
 
 #-- Help Menu
 help_menu_hotkey = "#689d6a"
