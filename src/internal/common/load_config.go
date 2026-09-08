@@ -183,6 +183,20 @@ func LoadHotkeysFile(ignoreMissingFields bool) {
 				),
 			)
 		}
+
+		// search_toggle_hidden is consumed inside the recursive search prompt,
+		// where bare printables must keep typing into the query.
+		if field.Name == "SearchToggleHidden" {
+			if bad := ValidateSearchToggleHidden(hotkeysList); bad != "" {
+				utils.PrintlnAndExit(
+					LoadHotkeysError(
+						field.Name,
+						"\""+bad+"\" is invalid : search_toggle_hidden must use a modifier combo "+
+							"(e.g. ctrl+.) so it does not steal characters from the recursive search query.",
+					),
+				)
+			}
+		}
 	}
 }
 
