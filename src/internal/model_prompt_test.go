@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+	"time"
 
 	tea "charm.land/bubbletea/v2"
 	"github.com/adrg/xdg"
@@ -103,14 +104,32 @@ func testBasicPromptFunctionality(t *testing.T, dir1 string) {
 		TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenCommandLine[0]))
 		// Prefer cross platform command
 		TeaUpdate(m, utils.TeaRuneKeyMsg("mkdir test_dir"))
-		TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyEnter})
+		// Shell commands are now async via tea.ExecProcess — execute the
+		// returned command to actually run it.
+		enterCmd := TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyEnter})
+		if enterCmd != nil {
+			msg := ExecuteTeaCmdWithTimeout(enterCmd, 5*time.Second)
+			if finishedMsg, ok := msg.(shellCommandFinishedMsg); ok {
+				m.promptModal.HandleShellCommandResults(finishedMsg.exitCode, finishedMsg.output)
+			}
+		}
 		assert.True(t, m.promptModal.LastActionSucceeded())
 		assert.DirExists(t, filepath.Join(dir1, "test_dir"))
 
+		// Re-open prompt (it was closed by applyShellCommandAction)
+		TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenCommandLine[0]))
 		// Invalid command shouldn't cause issues.
 		TeaUpdate(m, utils.TeaRuneKeyMsg("xyz_non_exisiting_command"))
-		TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyEnter})
+		enterCmd = TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyEnter})
+		if enterCmd != nil {
+			msg := ExecuteTeaCmdWithTimeout(enterCmd, 5*time.Second)
+			if finishedMsg, ok := msg.(shellCommandFinishedMsg); ok {
+				m.promptModal.HandleShellCommandResults(finishedMsg.exitCode, finishedMsg.output)
+			}
+		}
 		assert.False(t, m.promptModal.LastActionSucceeded())
+		// Re-open so prompt is available for subsequent tests
+		TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenCommandLine[0]))
 		assert.True(t, m.promptModal.IsOpen())
 	})
 
@@ -134,7 +153,17 @@ func testPanelOperations(t *testing.T, dir1, dir2, curTestDir string) {
 		for len(m.fileModel.FilePanels) < m.fileModel.MaxFilePanel {
 			prevCnt := len(m.fileModel.FilePanels)
 			TeaUpdate(m, utils.TeaRuneKeyMsg(prompt.SplitCommand))
-			TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyEnter})
+			enterCmd := TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyEnter})
+			if enterCmd != nil {
+				msg := ExecuteTeaCmdWithTimeout(enterCmd, 5*time.Second)
+				if batch, ok := msg.(tea.BatchMsg); ok {
+					for _, mmm := range batch {
+						if finishedMsg, ok := mmm.(shellCommandFinishedMsg); ok {
+							m.promptModal.HandleShellCommandResults(finishedMsg.exitCode, finishedMsg.output)
+						}
+					}
+				}
+			}
 			require.Len(t, m.fileModel.FilePanels, prevCnt+1)
 			assert.Equal(t, dir1, m.fileModel.FilePanels[prevCnt].Location)
 			assert.True(t, m.promptModal.LastActionSucceeded())
@@ -239,7 +268,17 @@ func testPanelOperations(t *testing.T, dir1, dir2, curTestDir string) {
 
 		for len(m.fileModel.FilePanels) < m.fileModel.MaxFilePanel {
 			TeaUpdate(m, utils.TeaRuneKeyMsg(prompt.OpenCommand+" ."))
-			TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyEnter})
+			enterCmd := TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyEnter})
+			if enterCmd != nil {
+				msg := ExecuteTeaCmdWithTimeout(enterCmd, 5*time.Second)
+				if batch, ok := msg.(tea.BatchMsg); ok {
+					for _, mmm := range batch {
+						if finishedMsg, ok := mmm.(shellCommandFinishedMsg); ok {
+							m.promptModal.HandleShellCommandResults(finishedMsg.exitCode, finishedMsg.output)
+						}
+					}
+				}
+			}
 			assert.True(t, m.promptModal.LastActionSucceeded())
 		}
 
@@ -300,7 +339,17 @@ func testDirectoryHandlingWithQuotes(t *testing.T, curTestDir, dir1 string) {
 			TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenSPFPrompt[0]))
 
 			TeaUpdate(m, utils.TeaRuneKeyMsg(prompt.CdCommand+` "`+dirWithQuotes+`"`))
-			TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyEnter})
+			enterCmd := TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyEnter})
+			if enterCmd != nil {
+				msg := ExecuteTeaCmdWithTimeout(enterCmd, 5*time.Second)
+				if batch, ok := msg.(tea.BatchMsg); ok {
+					for _, mmm := range batch {
+						if finishedMsg, ok := mmm.(shellCommandFinishedMsg); ok {
+							m.promptModal.HandleShellCommandResults(finishedMsg.exitCode, finishedMsg.output)
+						}
+					}
+				}
+			}
 			assert.True(t, m.promptModal.LastActionSucceeded(), "cd with single quotes in path should work")
 			assert.Equal(t, dirWithQuotes, m.getFocusedFilePanel().Location)
 		})
@@ -310,7 +359,17 @@ func testDirectoryHandlingWithQuotes(t *testing.T, curTestDir, dir1 string) {
 			TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenSPFPrompt[0]))
 
 			TeaUpdate(m, utils.TeaRuneKeyMsg(prompt.CdCommand+` '`+dirWithSpecialChars+`'`))
-			TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyEnter})
+			enterCmd := TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyEnter})
+			if enterCmd != nil {
+				msg := ExecuteTeaCmdWithTimeout(enterCmd, 5*time.Second)
+				if batch, ok := msg.(tea.BatchMsg); ok {
+					for _, mmm := range batch {
+						if finishedMsg, ok := mmm.(shellCommandFinishedMsg); ok {
+							m.promptModal.HandleShellCommandResults(finishedMsg.exitCode, finishedMsg.output)
+						}
+					}
+				}
+			}
 			assert.True(t, m.promptModal.LastActionSucceeded(), "cd with double quotes in path should work")
 			assert.Equal(t, dirWithSpecialChars, m.getFocusedFilePanel().Location)
 		})
@@ -323,7 +382,17 @@ func testDirectoryHandlingWithQuotes(t *testing.T, curTestDir, dir1 string) {
 				m,
 				utils.TeaRuneKeyMsg(prompt.CdCommand+` `+strings.ReplaceAll(dirWithSpaces, " ", `\ `)),
 			)
-			TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyEnter})
+			enterCmd := TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyEnter})
+			if enterCmd != nil {
+				msg := ExecuteTeaCmdWithTimeout(enterCmd, 5*time.Second)
+				if batch, ok := msg.(tea.BatchMsg); ok {
+					for _, mmm := range batch {
+						if finishedMsg, ok := mmm.(shellCommandFinishedMsg); ok {
+							m.promptModal.HandleShellCommandResults(finishedMsg.exitCode, finishedMsg.output)
+						}
+					}
+				}
+			}
 			assert.True(t, m.promptModal.LastActionSucceeded(), "cd with escaped spaces should work")
 			assert.Equal(t, dirWithSpaces, m.getFocusedFilePanel().Location)
 		})
@@ -333,7 +402,17 @@ func testDirectoryHandlingWithQuotes(t *testing.T, curTestDir, dir1 string) {
 			TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenSPFPrompt[0]))
 
 			TeaUpdate(m, utils.TeaRuneKeyMsg(prompt.OpenCommand+` "`+dirWithSpaces+`"`))
-			TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyEnter})
+			enterCmd := TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyEnter})
+			if enterCmd != nil {
+				msg := ExecuteTeaCmdWithTimeout(enterCmd, 5*time.Second)
+				if batch, ok := msg.(tea.BatchMsg); ok {
+					for _, mmm := range batch {
+						if finishedMsg, ok := mmm.(shellCommandFinishedMsg); ok {
+							m.promptModal.HandleShellCommandResults(finishedMsg.exitCode, finishedMsg.output)
+						}
+					}
+				}
+			}
 			assert.True(t, m.promptModal.LastActionSucceeded(), "open with double quotes should work")
 			assert.Equal(t, dirWithSpaces, m.getFocusedFilePanel().Location)
 
@@ -350,7 +429,17 @@ func testDirectoryHandlingWithQuotes(t *testing.T, curTestDir, dir1 string) {
 			}
 
 			TeaUpdate(m, utils.TeaRuneKeyMsg(prompt.CdCommand+` "${`+userHomeEnv+`}"`))
-			TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyEnter})
+			enterCmd := TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyEnter})
+			if enterCmd != nil {
+				msg := ExecuteTeaCmdWithTimeout(enterCmd, 5*time.Second)
+				if batch, ok := msg.(tea.BatchMsg); ok {
+					for _, mmm := range batch {
+						if finishedMsg, ok := mmm.(shellCommandFinishedMsg); ok {
+							m.promptModal.HandleShellCommandResults(finishedMsg.exitCode, finishedMsg.output)
+						}
+					}
+				}
+			}
 			assert.True(t, m.promptModal.LastActionSucceeded(), "cd with quoted env var should work")
 			assert.Equal(t, xdg.Home, m.getFocusedFilePanel().Location)
 		})
@@ -365,7 +454,17 @@ func testDirectoryHandlingWithQuotes(t *testing.T, curTestDir, dir1 string) {
 			}
 
 			TeaUpdate(m, utils.TeaRuneKeyMsg(prompt.CdCommand+` '${`+userHomeEnv+`}'`))
-			TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyEnter})
+			enterCmd := TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyEnter})
+			if enterCmd != nil {
+				msg := ExecuteTeaCmdWithTimeout(enterCmd, 5*time.Second)
+				if batch, ok := msg.(tea.BatchMsg); ok {
+					for _, mmm := range batch {
+						if finishedMsg, ok := mmm.(shellCommandFinishedMsg); ok {
+							m.promptModal.HandleShellCommandResults(finishedMsg.exitCode, finishedMsg.output)
+						}
+					}
+				}
+			}
 			assert.True(
 				t,
 				m.promptModal.LastActionSucceeded(),
@@ -387,7 +486,17 @@ func testShellCommandsWithQuotes(t *testing.T, curTestDir, dir1 string) {
 			TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenCommandLine[0]))
 
 			TeaUpdate(m, utils.TeaRuneKeyMsg(`mkdir "`+filepath.Join(dir1, "new dir with spaces")+`"`))
-			TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyEnter})
+			enterCmd := TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyEnter})
+			if enterCmd != nil {
+				msg := ExecuteTeaCmdWithTimeout(enterCmd, 5*time.Second)
+				if batch, ok := msg.(tea.BatchMsg); ok {
+					for _, mmm := range batch {
+						if finishedMsg, ok := mmm.(shellCommandFinishedMsg); ok {
+							m.promptModal.HandleShellCommandResults(finishedMsg.exitCode, finishedMsg.output)
+						}
+					}
+				}
+			}
 			assert.True(t, m.promptModal.LastActionSucceeded(), "shell command with quotes should work")
 			assert.DirExists(t, filepath.Join(dir1, "new dir with spaces"))
 		})
@@ -397,7 +506,17 @@ func testShellCommandsWithQuotes(t *testing.T, curTestDir, dir1 string) {
 			TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.OpenCommandLine[0]))
 
 			TeaUpdate(m, utils.TeaRuneKeyMsg(`mkdir '`+filepath.Join(dir1, "another dir with spaces")+`'`))
-			TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyEnter})
+			enterCmd := TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyEnter})
+			if enterCmd != nil {
+				msg := ExecuteTeaCmdWithTimeout(enterCmd, 5*time.Second)
+				if batch, ok := msg.(tea.BatchMsg); ok {
+					for _, mmm := range batch {
+						if finishedMsg, ok := mmm.(shellCommandFinishedMsg); ok {
+							m.promptModal.HandleShellCommandResults(finishedMsg.exitCode, finishedMsg.output)
+						}
+					}
+				}
+			}
 			assert.True(t, m.promptModal.LastActionSucceeded(), "shell command with single quotes should work")
 			assert.DirExists(t, filepath.Join(dir1, "another dir with spaces"))
 		})

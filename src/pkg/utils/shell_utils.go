@@ -24,6 +24,48 @@ func ExecuteCommandInShell(timeLimit time.Duration, cmdDir string, shellCommand 
 	return ExecuteCommand(timeLimit, cmdDir, baseCmd, args...)
 }
 
+// ExecuteCommandInShellKeepStdin runs a shell command with stdin connected to the
+// terminal. Useful for commands that need password prompts (sudo, etc.) but still
+// want output capture. Does NOT call DetachFromTerminal.
+func ExecuteCommandInShellKeepStdin(timeLimit time.Duration, cmdDir string, shellCommand string) (int, string, error) {
+	baseCmd := "/bin/sh"
+	args := []string{"-c", shellCommand}
+
+	if runtime.GOOS == OsWindows {
+		baseCmd = "powershell.exe"
+		args = []string{"-Command", shellCommand}
+	}
+
+	return executeCommandKeepStdin(timeLimit, cmdDir, baseCmd, args...)
+}
+
+func executeCommandKeepStdin(timeLimit time.Duration, cmdDir string, baseCmd string, args ...string) (int, string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), timeLimit)
+	defer cancel()
+
+	cmd := exec.CommandContext(ctx, baseCmd, args...)
+	cmd.Dir = cmdDir
+	PrepareForShellCommand(cmd)
+	outputBytes, err := cmd.CombinedOutput()
+	retCode := -1
+
+	if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+		slog.Error("User's command timed out", "outputBytes", outputBytes,
+			"cmd error", err, "ctx error", ctx.Err())
+		return retCode, string(outputBytes), ctx.Err()
+	}
+
+	if err == nil {
+		retCode = 0
+	} else if exitErr, ok := err.(*exec.ExitError); ok { //nolint: errorlint // We dont expect error to be Wrapped here
+		retCode = exitErr.ExitCode()
+	} else {
+		err = fmt.Errorf("unexpected Error in command execution : %w", err)
+	}
+
+	return retCode, string(outputBytes), err
+}
+
 func ExecuteCommand(timeLimit time.Duration, cmdDir string, baseCmd string, args ...string) (int, string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeLimit)
 	defer cancel()
