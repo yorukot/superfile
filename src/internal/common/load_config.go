@@ -46,6 +46,13 @@ func LoadConfigFile() {
 		}
 	}
 
+	// Apply CLI overrides on top of the loaded config file, before validation,
+	// so overridden values are validated together with the rest of the config.
+	if err := ApplyConfigOverrides(&Config, variable.ConfigOverrides); err != nil {
+		userMsg := fmt.Sprintf("%s%s", LipglossError, err.Error())
+		utils.PrintfAndExitf("%s\n", userMsg)
+	}
+
 	// Even if there is a missing field, we want to validate fields that are present
 	if err := ValidateConfig(&Config); err != nil {
 		// If config is incorrect we cannot continue. We need to exit

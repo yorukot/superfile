@@ -80,56 +80,66 @@ func Run(content embed.FS) {
 				},
 			},
 		},
-		Flags: []cli.Flag{
-			&cli.BoolFlag{
-				Name:    "debug-info",
-				Aliases: []string{"di"},
-				Usage:   "Print debug information",
-				Value:   false,
-			},
-			&cli.BoolFlag{
-				Name:    "fix-hotkeys",
-				Aliases: []string{"fh"},
-				Usage:   "Adds any missing hotkeys to the hotkey config file",
-				Value:   false,
-			},
-			&cli.BoolFlag{
-				Name:    "fix-config-file",
-				Aliases: []string{"fch"},
-				Usage:   "Adds any missing fields to the config file",
-				Value:   false,
-			},
-			&cli.BoolFlag{
-				Name:    "print-last-dir",
-				Aliases: []string{"pld"},
-				Usage:   "Print the last dir to stdout on exit (to use for cd)",
-				Value:   false,
-			},
-			&cli.StringFlag{
-				Name:    "config-file",
-				Aliases: []string{"c"},
-				Usage:   "Specify the path to a different config file",
-				Value:   "", // Default to the blank string indicating non-usage of flag
-			},
-			&cli.StringFlag{
-				Name:    "hotkey-file",
-				Aliases: []string{"hf"},
-				Usage:   "Specify the path to a different hotkey file",
-				Value:   "", // Default to the blank string indicating non-usage of flag
-			},
-			&cli.StringFlag{
-				Name:    "chooser-file",
-				Aliases: []string{"cf"},
-				Usage:   "On trying to open any file, superfile will write to its path to this file, and exit",
-				Value:   "", // Default to the blank string indicating non-usage of flag
-			},
-		},
+		Flags:  appFlags(),
 		Action: spfAppAction,
 	}
 
 	err := app.Run(context.Background(), os.Args)
 	if err != nil {
 		utils.PrintlnAndExit(err)
+	}
+}
+
+// appFlags returns the top-level CLI flags for the superfile command.
+func appFlags() []cli.Flag {
+	return []cli.Flag{
+		&cli.BoolFlag{
+			Name:    "debug-info",
+			Aliases: []string{"di"},
+			Usage:   "Print debug information",
+			Value:   false,
+		},
+		&cli.BoolFlag{
+			Name:    "fix-hotkeys",
+			Aliases: []string{"fh"},
+			Usage:   "Adds any missing hotkeys to the hotkey config file",
+			Value:   false,
+		},
+		&cli.BoolFlag{
+			Name:    "fix-config-file",
+			Aliases: []string{"fch"},
+			Usage:   "Adds any missing fields to the config file",
+			Value:   false,
+		},
+		&cli.BoolFlag{
+			Name:    "print-last-dir",
+			Aliases: []string{"pld"},
+			Usage:   "Print the last dir to stdout on exit (to use for cd)",
+			Value:   false,
+		},
+		&cli.StringFlag{
+			Name:    "config-file",
+			Aliases: []string{"c"},
+			Usage:   "Specify the path to a different config file",
+			Value:   "", // Default to the blank string indicating non-usage of flag
+		},
+		&cli.StringFlag{
+			Name:    "hotkey-file",
+			Aliases: []string{"hf"},
+			Usage:   "Specify the path to a different hotkey file",
+			Value:   "", // Default to the blank string indicating non-usage of flag
+		},
+		&cli.StringFlag{
+			Name:    "chooser-file",
+			Aliases: []string{"cf"},
+			Usage:   "On trying to open any file, superfile will write to its path to this file, and exit",
+			Value:   "", // Default to the blank string indicating non-usage of flag
+		},
+		&cli.StringSliceFlag{
+			Name:    "with-config-override",
+			Aliases: []string{"wco"},
+			Usage:   "Override a config value using 'key=value' (e.g. 'debug=true'). Repeatable; key is the config.toml field name",
+		},
 	}
 }
 
