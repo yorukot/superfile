@@ -18,6 +18,11 @@ type Model struct {
 	contentWidth  int
 	contentHeight int
 
+	// Scroll state for text previews. lines is nil for non-text
+	// (image/directory) previews where scrolling doesn't apply.
+	renderIndex int
+	lines       []string
+
 	loading            bool
 	imagePreviewer     *filepreview.ImagePreviewer
 	batCmd             string

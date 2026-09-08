@@ -21,7 +21,7 @@ func (m *Model) GetFilePreviewRender() string {
 		if m.FilePreview.IsLoading() {
 			return m.FilePreview.RenderText(FilePreviewLoadingText)
 		}
-		return m.FilePreview.GetContent()
+		return m.FilePreview.GetScrollRender()
 	}
 
 	// Placeholder resizing text till they get synced
