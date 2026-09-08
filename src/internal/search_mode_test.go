@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -8,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/pkg/utils"
 )
@@ -201,4 +203,65 @@ func TestSearchModeConfirmEmptyQuery(t *testing.T) {
 	panel := m.getFocusedFilePanel()
 	assert.False(t, panel.Search.Active)
 	assert.Equal(t, root, panel.Location)
+}
+
+func TestSearchToggleHiddenHotkeyConfigured(t *testing.T) {
+	require.NotEmpty(t, common.Hotkeys.SearchToggleHidden,
+		"search_toggle_hidden must have a default binding")
+	assert.Equal(t, "ctrl+.", common.Hotkeys.SearchToggleHidden[0])
+}
+
+func TestSearchModeToggleHidden(t *testing.T) {
+	root := t.TempDir()
+	utils.SetupFiles(t,
+		filepath.Join(root, "main.go"),
+		filepath.Join(root, ".hidden_main.go"),
+	)
+
+	// Keep the persisted dotfile toggle out of the real data dir.
+	oldToggleFile := variable.ToggleDotFile
+	variable.ToggleDotFile = filepath.Join(t.TempDir(), "toggleDotFile")
+	t.Cleanup(func() { variable.ToggleDotFile = oldToggleFile })
+
+	m := defaultTestModel(root)
+	require.False(t, m.fileModel.DisplayDotFiles)
+
+	TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.SearchMode[0]))
+	panel := m.getFocusedFilePanel()
+	require.True(t, panel.Search.Active)
+
+	cmd := typeSearchQuery(t, m, "main")
+	drainSearchResults(t, m, cmd)
+	require.True(t, panel.Search.Done)
+	assert.Equal(t, int64(1), panel.Search.MatchCount)
+	require.Len(t, panel.Search.Results, 1)
+	assert.Equal(t, "main.go", panel.Search.Results[0].Path)
+
+	// Toggle hidden files without leaving search. Query must be preserved
+	// and the search must rewalk with the new visibility.
+	toggleCmd := TeaUpdate(m, tea.KeyPressMsg{Code: '.', Mod: tea.ModCtrl})
+	require.True(t, panel.Search.Active, "toggle must not exit search")
+	assert.Equal(t, "main", panel.SearchBar.Value(), "query must be preserved")
+	assert.True(t, m.fileModel.DisplayDotFiles)
+	drainSearchResults(t, m, toggleCmd)
+	require.True(t, panel.Search.Done)
+	assert.Equal(t, int64(2), panel.Search.MatchCount)
+	assert.Len(t, panel.Search.Results, 2)
+
+	// Typing "." must still edit the query, not toggle visibility.
+	TeaUpdate(m, utils.TeaRuneKeyMsg("."))
+	assert.Equal(t, "main.", panel.SearchBar.Value())
+	assert.True(t, m.fileModel.DisplayDotFiles, "typing . must not toggle")
+
+	// Toggle back to hidden.
+	panel.SearchBar.SetValue("main")
+	backCmd := TeaUpdate(m, tea.KeyPressMsg{Code: '.', Mod: tea.ModCtrl})
+	assert.False(t, m.fileModel.DisplayDotFiles)
+	drainSearchResults(t, m, backCmd)
+	require.True(t, panel.Search.Done)
+	assert.Equal(t, int64(1), panel.Search.MatchCount)
+	require.Len(t, panel.Search.Results, 1)
+	assert.Equal(t, "main.go", panel.Search.Results[0].Path)
+
+	_ = os.Remove(variable.ToggleDotFile)
 }

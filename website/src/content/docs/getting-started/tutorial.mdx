@@ -95,7 +95,7 @@ Press `enter` to confirm your sort option. Press `esc`, `o`, or `ctrl`+`c` to ca
 
 Press `/` to bring up the search bar. Type the name (you may need to first delete the `/` if it auto-populates). superfile searches in the current directory and dynamically displays the results. To exit the search bar, press `ctrl`+`c` or `esc`.
 
-Press `Z` (shift+z) to start recursive search mode. The focused panel switches to a live, fuzzy match over the whole tree below the current directory, ranked by relevance. Type to refine the query (fzf extended syntax is supported, e.g. `^main`, `\.go$`, `!test`). Use `up`/`down`/`pgup`/`pgdown` to move through the result set. Press `enter` on a file result to open it, or on a directory result to make it the new current directory. Press `esc` or `ctrl`+`c` to cancel and return to the directory listing.
+Press `Z` (shift+z) to start recursive search mode. The focused panel switches to a live, fuzzy match over the whole tree below the current directory, ranked by relevance. Type to refine the query (fzf extended syntax is supported, e.g. `^main`, `\.go$`, `!test`). Use `up`/`down`/`pgup`/`pgdown` to move through the result set. Press `ctrl`+`.` to toggle hidden files without leaving search (your query is preserved; the search rewalks with the new visibility). Press `enter` on a file result to open it, or on a directory result to make it the new current directory. Press `esc` or `ctrl`+`c` to cancel and return to the directory listing.
 
 Press `.` to show or hide dotfiles.
 

@@ -186,6 +186,11 @@ func getData() []hotkeydata { //nolint: funlen // This should be self contained
 			hotkeyWorkType: globalType,
 		},
 		{
+			hotkey:         common.Hotkeys.SearchToggleHidden,
+			description:    "Toggle hidden files while in recursive search mode (must be a modifier combo)",
+			hotkeyWorkType: globalType,
+		},
+		{
 			hotkey:         common.Hotkeys.ChangePanelMode,
 			description:    "Change between selection mode or normal mode",
 			hotkeyWorkType: globalType,

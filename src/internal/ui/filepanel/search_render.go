@@ -165,5 +165,20 @@ func (m *Model) renderSearchStatusLine() string {
 	if m.Search.MatchCount > int64(shown) {
 		fmt.Fprintf(&status, " | showing first %d", shown)
 	}
+	if label := searchToggleHiddenLabel(); label != "" {
+		fmt.Fprintf(&status, " | %s hidden", label)
+	}
 	return common.FilePanelStyle.Render(status.String())
+}
+
+// searchToggleHiddenLabel returns the first configured binding for toggling
+// hidden files in search mode, or "" when none is configured (e.g. unit
+// tests without loaded hotkeys).
+func searchToggleHiddenLabel() string {
+	for _, key := range common.Hotkeys.SearchToggleHidden {
+		if key != "" {
+			return key
+		}
+	}
+	return ""
 }

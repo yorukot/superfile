@@ -320,7 +320,7 @@ func (m *model) handleKeyInput(msg tea.KeyPressMsg) tea.Cmd {
 	// search mode handler before the searchbar's own handler so navigation
 	// and confirm/cancel work against the result set
 	case m.fileModel.SearchModeActive() && m.focusPanel == nonePanelFocus:
-		m.searchModeKey(msg.String())
+		cmd = m.searchModeKey(msg.String())
 
 	// If renaming a object
 	case m.fileModel.Renaming:

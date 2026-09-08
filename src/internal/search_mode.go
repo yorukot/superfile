@@ -92,13 +92,17 @@ func (m *model) searchModeConfirm() {
 // uses the raw arrow/page key names so that letter keys always reach the
 // query input (the hotkey lists alias j/k to navigation, which would steal
 // characters from the query).
-func (m *model) searchModeKey(msg string) {
+func (m *model) searchModeKey(msg string) tea.Cmd {
 	panel := m.getFocusedFilePanel()
 	switch {
 	case slices.Contains(common.Hotkeys.CancelTyping, msg):
 		m.searchModeExit()
+		return nil
 	case slices.Contains(common.Hotkeys.ConfirmTyping, msg):
 		m.searchModeConfirm()
+		return nil
+	case slices.Contains(common.Hotkeys.SearchToggleHidden, msg):
+		return m.toggleDotFileController()
 	case msg == "up":
 		panel.SearchListUp()
 	case msg == "down":
@@ -108,6 +112,7 @@ func (m *model) searchModeKey(msg string) {
 	case msg == "pgdown":
 		panel.SearchPgDown()
 	}
+	return nil
 }
 
 // restartSearchCmd cancels the running search (if any) and starts a new one
