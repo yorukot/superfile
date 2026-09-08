@@ -373,7 +373,10 @@ func prepareLockUnlockTest(t *testing.T) *model {
 	finalizer := func(state processbar.ProcessState, reqId int) tea.Msg { return NewPasteOperationMsg(state, reqId) }
 	m.spfError = spferror.New(true,
 		"error",
-		"ERROR TEST", spferror.NewFileListError([]string{file1}, processor, finalizer))
+		"ERROR TEST",
+		spferror.NewFileListError([]string{file1}, processor, finalizer),
+		[]*spferror.UserAction{spferror.OkAction()},
+	)
 	m.spfError.Open()
 	return m
 }
