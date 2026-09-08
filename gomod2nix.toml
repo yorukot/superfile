@@ -118,8 +118,8 @@ schema = 3
     hash = 'sha256-AUF+0kL+e2txpBo+a/woYnCd44En/2giuDgpH3Gq3sw='
 
   [mod.'github.com/ebitengine/purego']
-    version = 'v0.10.0'
-    hash = 'sha256-NPS88SNvsm4QEAx1zVmNGzMwtR1EBhdQYywQU1JdRqM='
+    version = 'v0.10.2'
+    hash = 'sha256-p2g0NoOOM3kEIaXQ48tgtn1gB5o0YlWoO8FTUD5w+lE='
 
   [mod.'github.com/fatih/color']
     version = 'v1.19.0'
@@ -242,8 +242,8 @@ schema = 3
     hash = 'sha256-JXlHMCbXB8iRQ9wQBGCeTjDSfgaBwUVOpvcjj0iVn5A='
 
   [mod.'github.com/shirou/gopsutil/v4']
-    version = 'v4.26.5'
-    hash = 'sha256-ODPWgxRHQqlARId7n9Crvpgiv54YFr96PnqZg+IAWpI='
+    version = 'v4.26.7'
+    hash = 'sha256-sKPHHNxG5lbJdMtrauQ35Vw5vB8VdQqGDfjn/hxsQzE='
 
   [mod.'github.com/spf13/afero']
     version = 'v1.15.0'
