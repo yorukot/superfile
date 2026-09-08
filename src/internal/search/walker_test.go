@@ -69,11 +69,8 @@ func TestWalkVisitsAllVisibleEntries(t *testing.T) {
 		"broken":               true,
 	}
 	if runtime.GOOS != "windows" {
-		// The symlink target of cycle is the root itself, an ancestor, so it
-		// is listed but not descended into.
+		// Walk lists cycle but never descends. It walks link_to_sub.
 		want["cycle"] = true
-		// link_to_sub points at a sibling subtree: it is not a cycle, so its
-		// contents are walked under the link path as well.
 		want["link_to_sub"] = true
 		want["link_to_sub/nested.txt"] = true
 		want["link_to_sub/deeper"] = true
@@ -175,8 +172,7 @@ func TestWalkDoesNotRevisitNestedSelfLink(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(sub, "file.txt"), nil, 0o644); err != nil {
 		t.Fatal(err)
 	}
-	// self points back at its own directory: the link itself is an entry,
-	// but the subtree must not be emitted a second time under it.
+	// self links its own dir. It stays an entry, no second walk.
 	if err := os.Symlink(".", filepath.Join(sub, "self")); err != nil {
 		t.Fatal(err)
 	}
@@ -219,14 +215,12 @@ func TestWalkCountsUnreadableDirs(t *testing.T) {
 	if unreadable != 1 {
 		t.Errorf("unreadable dirs = %d, want 1", unreadable)
 	}
-	// ok.txt and the locked dir itself are both visible entries.
 	if visited != 2 {
 		t.Errorf("visited %d entries, want 2 (ok.txt and locked)", visited)
 	}
 }
 
-// hasPrefixPath reports whether path starts with the dir prefix at a path
-// segment boundary.
+// Reports whether path starts with dir prefix.
 func hasPrefixPath(path, prefix string) bool {
 	return len(path) >= len(prefix) && path[:len(prefix)] == prefix
 }

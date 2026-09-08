@@ -79,8 +79,7 @@ type model struct {
 	// no use directly for increment, use nextIoReqCnt
 	ioReqCnt int32
 
-	// Search session state: cancellation handle and message stream of the
-	// currently running recursive search.
+	// Active recursive search state.
 	searchCancel context.CancelFunc
 	searchReqID  int
 	searchChan   chan search.Progress

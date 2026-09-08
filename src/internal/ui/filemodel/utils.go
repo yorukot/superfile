@@ -10,7 +10,6 @@ func (m *Model) GetFocusedFilePanel() *filepanel.Model {
 	return &m.FilePanels[m.FocusedPanelIndex]
 }
 
-// SearchModeActive reports whether the focused file panel is in search mode.
 func (m *Model) SearchModeActive() bool {
 	return m.GetFocusedFilePanel().Search.Active
 }

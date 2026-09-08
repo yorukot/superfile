@@ -8,13 +8,9 @@ import (
 	"strings"
 )
 
-// walk traverses root and visits every visible entry with its path relative
-// to root. It descends into symlinked directories but never follows a link
-// whose target is already on the current ancestor chain, so symlink cycles
-// cannot cause infinite recursion. It checks ctx as it goes, so cancellation
-// stops the traversal promptly. unreadable receives the count of
-// directories that could not be read (permission denied and the like);
-// unreadable entries are skipped, not treated as errors.
+// walk visits entries under root relative to root. It follows symlinked dirs
+// unless the target is an ancestor. It counts and skips unreadable dirs.
+// It stops when ctx cancels.
 func walk(ctx context.Context, root string, includeHidden bool, unreadable *int,
 	visit func(relPath string, isDir bool)) {
 	rootInfo, err := os.Stat(root)
@@ -52,9 +48,7 @@ func walk(ctx context.Context, root string, includeHidden bool, unreadable *int,
 	walkDir(root, "", chain)
 }
 
-// visitEntry reports one directory entry to visit and recurses into
-// directories (following symlinks to directories, provided the target is not
-// an ancestor, which would loop forever).
+// visitEntry reports one entry and recurses into dirs, following non-ancestor symlink targets.
 func visitEntry(abs, rel, name string, info os.FileInfo, ancestors []os.FileInfo,
 	visit func(relPath string, isDir bool), walkDir func(abs, rel string, ancestors []os.FileInfo)) {
 	entryAbs := filepath.Join(abs, name)
@@ -64,7 +58,7 @@ func visitEntry(abs, rel, name string, info os.FileInfo, ancestors []os.FileInfo
 		visit(entryRel, true)
 		walkDir(entryAbs, entryRel, append(ancestors, info))
 	case info.Mode()&fs.ModeSymlink != 0:
-		// Resolve the link; broken links are reported as files.
+		// Broken links report as files.
 		target, err := os.Stat(entryAbs)
 		if err != nil {
 			visit(entryRel, false)

@@ -86,9 +86,7 @@ func (m *Model) shouldSkipPanelUpdate(nowTime time.Time) bool {
 }
 
 func (m *Model) UpdateElementsIfNeeded(force bool, displayDotFile bool) {
-	// During a search session the panel shows the streaming result set, not
-	// the directory listing; refreshing elements here would both waste work
-	// and run the blocking searchbar filter.
+	// Search shows streamed results. Skip directory refresh.
 	if m.Search.Active {
 		return
 	}

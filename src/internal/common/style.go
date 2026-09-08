@@ -153,8 +153,7 @@ func LoadThemeConfig() { //nolint: funlen // Variable initialization
 	filePanelItemSelectedFGColor = lipgloss.Color(Theme.FilePanelItemSelectedFG)
 	filePanelItemSelectedBGColor = lipgloss.Color(Theme.FilePanelItemSelectedBG)
 
-	// Fall back to the cursor color when a theme does not define the search
-	// highlight color yet.
+	// Fallback for older themes.
 	searchModeHighlightColor = cursorColor
 	if Theme.SearchModeHighlight != "" {
 		searchModeHighlightColor = lipgloss.Color(Theme.SearchModeHighlight)

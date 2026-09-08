@@ -175,14 +175,10 @@ type HotkeysType struct {
 	ConfirmTyping []string `toml:"confirm_typing" comment:"=================================================================================================\nTyping hotkeys (can conflict with all hotkeys)"`
 	CancelTyping  []string `toml:"cancel_typing"`
 
-	ParentDirectory []string `toml:"parent_directory" comment:"=================================================================================================\nNormal mode hotkeys (can conflict with other modes, cannot conflict with global hotkeys)"`
-	SearchBar       []string `toml:"search_bar"`
-	SearchMode      []string `toml:"search_mode" comment:"\nRecursive search mode (default Z)"`
-	// SearchToggleHidden must stay a modifier combo (e.g. alt+.) so it does
-	// not steal printable characters from the recursive search query.
-	// Note: ctrl+punctuation combos (e.g. ctrl+.) are rejected at load:
-	// most terminals cannot deliver them and they type into the query.
-	SearchToggleHidden []string `toml:"search_toggle_hidden" comment:"\nToggle hidden files while in recursive search mode (must be a modifier combo; ctrl+punctuation is not deliverable, use alt+<key>)"`
+	ParentDirectory    []string `toml:"parent_directory" comment:"=================================================================================================\nNormal mode hotkeys (can conflict with other modes, cannot conflict with global hotkeys)"`
+	SearchBar          []string `toml:"search_bar"`
+	SearchMode         []string `toml:"search_mode" comment:"\nRecursive search mode (default Z)"`
+	SearchToggleHidden []string `toml:"search_toggle_hidden" comment:"\nToggle hidden files in recursive search, e.g. alt+. combo"`
 
 	FilePanelSelectModeItemsSelectDown []string `toml:"file_panel_select_mode_items_select_down" comment:"=================================================================================================\nSelect mode hotkeys (can conflict with other modes, cannot conflict with global hotkeys)"`
 	FilePanelSelectModeItemsSelectUp   []string `toml:"file_panel_select_mode_items_select_up"`

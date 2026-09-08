@@ -8,8 +8,6 @@ import (
 	"testing"
 )
 
-// benchmarkPaths generates count synthetic relative paths with a mix of
-// directory depths and name shapes.
 func benchmarkPaths(count int) []Result {
 	paths := make([]Result, 0, count)
 	for i := range count {
@@ -33,9 +31,7 @@ func BenchmarkMatchBatch100k(b *testing.B) {
 }
 
 func BenchmarkRunPipeline100k(b *testing.B) {
-	// Walk over a real tree dominates cost; use a tree big enough to be
-	// meaningful without creating 100k files on disk. 10k files keep the
-	// benchmark itself fast while exercising the full walk+match pipeline.
+	// 10k files cover walk+match and save 100k disk writes.
 	root := b.TempDir()
 	for i := range 10_000 {
 		dir := filepath.Join(root, "d"+string(rune('a'+i%26)))

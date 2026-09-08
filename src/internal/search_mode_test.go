@@ -14,8 +14,7 @@ import (
 	"github.com/yorukot/superfile/src/pkg/utils"
 )
 
-// drainSearchResults pumps search progress messages into the model until the
-// search completes. It unwraps batch commands produced by tea.Batch.
+// Pumps progress until done, unwrapping batches.
 func drainSearchResults(t *testing.T, m *model, cmd tea.Cmd) {
 	t.Helper()
 	cmds := []tea.Cmd{cmd}
@@ -73,7 +72,6 @@ func TestSearchModeEnterExit(t *testing.T) {
 	require.True(t, panel.SearchBar.Focused())
 	require.Empty(t, panel.SearchBar.Value())
 
-	// Esc cancels the session and restores the panel listing
 	TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyEsc})
 	require.False(t, panel.Search.Active)
 	require.Empty(t, panel.SearchBar.Value())
@@ -140,8 +138,6 @@ func TestSearchModeConfirmFile(t *testing.T) {
 
 	TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyEnter})
 
-	// Opening a file result navigates to its containing directory and
-	// focuses the file.
 	assert.False(t, panel.Search.Active, "search mode should end on confirm")
 	assert.Equal(t, root, panel.Location)
 	idx := panel.FindElementIndexByName("main.go")
@@ -164,7 +160,6 @@ func TestSearchModeConfirmDir(t *testing.T) {
 
 	TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyEnter})
 
-	// Opening a directory result makes it the new focused directory.
 	assert.False(t, panel.Search.Active)
 	assert.Equal(t, filepath.Join(root, "src", "deep"), panel.Location)
 }
@@ -180,14 +175,12 @@ func TestSearchModeConfirmDuringDebounce(t *testing.T) {
 	require.NotEmpty(t, panel.Search.Results, "deep should match before editing")
 	require.True(t, panel.Search.Results[0].Dir)
 
-	// Editing the query clears stale results immediately, before the
-	// debounced walk for the new query runs. "deepz" matches nothing, so
-	// any retained result would be stale.
+	// Query change clears stale results before debounced walk.
 	TeaUpdate(m, utils.TeaRuneKeyMsg("z"))
 	require.Empty(t, panel.Search.Results, "stale results must be cleared on query change")
 	require.False(t, panel.Search.Done)
 
-	// Confirming during the debounce must not open the stale result.
+	// Confirm during debounce must not open stale result.
 	TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyEnter})
 	assert.False(t, panel.Search.Active)
 	assert.Equal(t, root, panel.Location, "must not navigate to the stale directory result")
@@ -198,7 +191,6 @@ func TestSearchModeConfirmEmptyQuery(t *testing.T) {
 	m := defaultTestModel(root)
 	TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.SearchMode[0]))
 
-	// Confirming with an empty query just cancels the session.
 	TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyEnter})
 	panel := m.getFocusedFilePanel()
 	assert.False(t, panel.Search.Active)
@@ -208,8 +200,7 @@ func TestSearchModeConfirmEmptyQuery(t *testing.T) {
 func TestSearchModeConfigurableNav(t *testing.T) {
 	root := searchTestDir(t)
 
-	// Point the shared navigation bindings at vim-style modifiers for the
-	// duration of the test; bare letters must keep typing regardless.
+	// Vim-style modifiers for test. Bare letters type.
 	oldListUp, oldListDown := common.Hotkeys.ListUp, common.Hotkeys.ListDown
 	common.Hotkeys.ListUp = []string{"up", "k", "ctrl+p"}
 	common.Hotkeys.ListDown = []string{"down", "j", "ctrl+n"}
@@ -226,7 +217,6 @@ func TestSearchModeConfigurableNav(t *testing.T) {
 	require.Len(t, panel.Search.Results, 2)
 	require.Equal(t, 0, panel.Search.Cursor)
 
-	// Modifier variants navigate without touching the query.
 	TeaUpdate(m, tea.KeyPressMsg{Code: 'n', Mod: tea.ModCtrl})
 	assert.Equal(t, 1, panel.Search.Cursor)
 	assert.Equal(t, "main", panel.SearchBar.Value())
@@ -234,14 +224,12 @@ func TestSearchModeConfigurableNav(t *testing.T) {
 	assert.Equal(t, 0, panel.Search.Cursor)
 	assert.Equal(t, "main", panel.SearchBar.Value())
 
-	// Defaults still work.
 	TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyDown})
 	assert.Equal(t, 1, panel.Search.Cursor)
 	TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyUp})
 	assert.Equal(t, 0, panel.Search.Cursor)
 
-	// Bare j/k are in the nav lists but must type, not move. (Last: the
-	// keystroke restarts the search, clearing results.)
+	// Bare j/k must type, not move.
 	TeaUpdate(m, utils.TeaRuneKeyMsg("j"))
 	assert.Equal(t, "mainj", panel.SearchBar.Value(), "bare j must type, not move")
 	require.True(t, panel.Search.Active)
@@ -262,7 +250,7 @@ func TestSearchModeToggleHidden(t *testing.T) {
 		filepath.Join(root, ".hidden_main.go"),
 	)
 
-	// Keep the persisted dotfile toggle out of the real data dir.
+	// Isolate persisted toggle.
 	oldToggleFile := variable.ToggleDotFile
 	variable.ToggleDotFile = filepath.Join(t.TempDir(), "toggleDotFile")
 	t.Cleanup(func() { variable.ToggleDotFile = oldToggleFile })
@@ -281,8 +269,7 @@ func TestSearchModeToggleHidden(t *testing.T) {
 	require.Len(t, panel.Search.Results, 1)
 	assert.Equal(t, "main.go", panel.Search.Results[0].Path)
 
-	// Toggle hidden files without leaving search. Query must be preserved
-	// and the search must rewalk with the new visibility.
+	// Toggle preserves query and rewalks.
 	toggleCmd := TeaUpdate(m, tea.KeyPressMsg{Code: '.', Mod: tea.ModAlt})
 	require.True(t, panel.Search.Active, "toggle must not exit search")
 	assert.Equal(t, "main", panel.SearchBar.Value(), "query must be preserved")
@@ -292,13 +279,10 @@ func TestSearchModeToggleHidden(t *testing.T) {
 	assert.Equal(t, int64(2), panel.Search.MatchCount)
 	assert.Len(t, panel.Search.Results, 2)
 
-	// Typing "." must still edit the query, not toggle visibility.
 	TeaUpdate(m, utils.TeaRuneKeyMsg("."))
 	assert.Equal(t, "main.", panel.SearchBar.Value())
 	assert.True(t, m.fileModel.DisplayDotFiles, "typing . must not toggle")
 
-	// Toggle back via alt+. (ctrl+. is unsupported: most terminals report
-	// it with Text set or as a bare ".", so it would type into the query).
 	panel.SearchBar.SetValue("main")
 	backCmd := TeaUpdate(m, tea.KeyPressMsg{Code: '.', Mod: tea.ModAlt})
 	require.True(t, panel.Search.Active, "toggle must not exit search")
@@ -310,10 +294,7 @@ func TestSearchModeToggleHidden(t *testing.T) {
 	require.Len(t, panel.Search.Results, 1)
 	assert.Equal(t, "main.go", panel.Search.Results[0].Path)
 
-	// A ctrl+. reported with Text set (how most terminals deliver it
-	// without Kitty keyboard protocol) matches no configured binding: it
-	// degrades to typing instead of toggling. This is why ctrl+. is
-	// rejected at load.
+	// ctrl+. with Text degrades to typing.
 	TeaUpdate(m, tea.KeyPressMsg{Code: '.', Mod: tea.ModCtrl, Text: "."})
 	assert.Equal(t, "main.", panel.SearchBar.Value())
 	assert.False(t, m.fileModel.DisplayDotFiles, "must not toggle")

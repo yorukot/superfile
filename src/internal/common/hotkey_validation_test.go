@@ -49,8 +49,6 @@ func TestValidateSearchToggleHidden(t *testing.T) {
 	assert.Equal(t, ".", ValidateSearchToggleHidden([]string{"alt+.", "."}))
 	assert.Equal(t, "f1", ValidateSearchToggleHidden([]string{"f1", ""}))
 	assert.Equal(t, "ctrl+alt+", ValidateSearchToggleHidden([]string{"ctrl+alt+", ""}))
-	// ctrl+punctuation has no control-code equivalent: most terminals
-	// deliver the bare key, so it would type into the query.
 	assert.Equal(t, "ctrl+.", ValidateSearchToggleHidden([]string{"ctrl+.", ""}))
 	assert.Equal(t, "ctrl+alt+.", ValidateSearchToggleHidden([]string{"ctrl+alt+.", ""}))
 	assert.Equal(t, "ctrl+1", ValidateSearchToggleHidden([]string{"ctrl+1", ""}))

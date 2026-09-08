@@ -87,8 +87,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		slog.Debug("Got ModelUpdate message", "id", msg.GetReqID())
 		updateCmd = msg.Apply(&m.zoxideModal)
 
-	// Search session progress; handled separately because it carries its own
-	// streaming pump command
+	// Search progress carries its own pump.
 	case SearchProgressMsg:
 		slog.Debug("Got SearchProgress message", "id", msg.GetReqID())
 		updateCmd = m.applySearchProgress(msg)
@@ -316,9 +315,7 @@ func (m *model) handleKeyInput(msg tea.KeyPressMsg) tea.Cmd {
 	case m.notifyModel.IsOpen():
 		cmd = m.notifyModelOpenKey(msg.String())
 
-	// If a search session is active in the focused panel, route keys to the
-	// search mode handler before the searchbar's own handler so navigation
-	// and confirm/cancel work against the result set
+	// Search keys precede searchbar handling for result navigation.
 	case m.fileModel.SearchModeActive() && m.focusPanel == nonePanelFocus:
 		cmd = m.searchModeKey(msg)
 
@@ -381,10 +378,7 @@ func (m *model) updateComponentState(msg tea.Msg) tea.Cmd {
 	case m.fileModel.Renaming:
 		focusPanel.Rename, cmd = focusPanel.Rename.Update(msg)
 	case focusPanel.Search.Active:
-		// Keys consumed by the search mode handler (currently the hidden
-		// toggle) must not reach the query input: some terminals report
-		// modifier combos with Text set, which textinput would insert.
-		// The handler above already issued the command for them.
+		// Drop handled toggle keys. Terminals may report them with Text set.
 		if keyMsg, ok := msg.(tea.KeyPressMsg); ok && searchKeyMatchesAction(keyMsg, common.Hotkeys.SearchToggleHidden) {
 			return nil
 		}

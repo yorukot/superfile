@@ -131,8 +131,7 @@ func (m *model) toggleDotFileController() tea.Cmd {
 	if err != nil {
 		slog.Error("Error while updating toggleDotFile data", "error", err)
 	}
-	// During a search session the dotfile toggle restarts the search with
-	// the new visibility.
+	// Restarts active search with new visibility.
 	if m.getFocusedFilePanel().Search.Active {
 		return m.restartSearchCmd()
 	}

@@ -1,6 +1,5 @@
 package search
 
-// Result is a single match of a search session.
 type Result struct {
 	Path      string // path relative to the search root
 	Dir       bool   // whether the matched entry is a directory
@@ -8,10 +7,9 @@ type Result struct {
 	Positions []int  // UTF-8 byte offsets of matched characters in Path
 }
 
-// Progress is a snapshot of a running search session.
 type Progress struct {
 	Results        []Result
-	MatchCount     int64 // total matches seen so far, including those beyond the result limit
+	MatchCount     int64 // total matches, including those beyond the result limit
 	UnreadableDirs int
 	Done           bool
 }

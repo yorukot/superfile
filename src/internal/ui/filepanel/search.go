@@ -2,8 +2,7 @@ package filepanel
 
 import "github.com/yorukot/superfile/src/internal/search"
 
-// resetSearchState clears the streamed result set and cursor. Enter and Exit
-// set Active, Root and the searchbar themselves since those differ.
+// Clears results and cursor. Enter and Exit own Active and Root.
 func (m *Model) resetSearchState() {
 	m.Search.Results = nil
 	m.Search.MatchCount = 0
@@ -13,8 +12,7 @@ func (m *Model) resetSearchState() {
 	m.Search.RenderIndex = 0
 }
 
-// EnterSearchMode starts a search session rooted at the panel's current
-// location. The searchbar becomes the live query input.
+// Starts a session rooted at current location.
 func (m *Model) EnterSearchMode() {
 	m.Search.Active = true
 	m.Search.Root = m.Location
@@ -23,7 +21,6 @@ func (m *Model) EnterSearchMode() {
 	m.SearchBar.Focus()
 }
 
-// ExitSearchMode ends the search session and restores the panel listing.
 func (m *Model) ExitSearchMode() {
 	m.Search.Active = false
 	m.Search.Root = ""
@@ -32,8 +29,6 @@ func (m *Model) ExitSearchMode() {
 	m.SearchBar.SetValue("")
 }
 
-// ApplySearchProgress merges a progress snapshot from the search pipeline
-// into the panel state.
 func (m *Model) ApplySearchProgress(p search.Progress) {
 	m.Search.Results = p.Results
 	m.Search.MatchCount = p.MatchCount
@@ -46,8 +41,6 @@ func (m *Model) ApplySearchProgress(p search.Progress) {
 	}
 }
 
-// GetSearchCursorResult returns the result under the search cursor, or nil
-// when there are no results.
 func (m *Model) GetSearchCursorResult() *search.Result {
 	if len(m.Search.Results) == 0 {
 		return nil
@@ -73,27 +66,22 @@ func (m *Model) searchMoveCursorBy(delta int) {
 	if len(m.Search.Results) == 0 {
 		return
 	}
-	// Wrap cursor
 	cursor := (m.Search.Cursor + delta + len(m.Search.Results)) % len(m.Search.Results)
 	m.searchScrollToCursor(cursor)
 }
 
-// SearchListUp moves the search cursor one result up.
 func (m *Model) SearchListUp() {
 	m.searchMoveCursorBy(-1)
 }
 
-// SearchListDown moves the search cursor one result down.
 func (m *Model) SearchListDown() {
 	m.searchMoveCursorBy(1)
 }
 
-// SearchPgUp moves the search cursor one page up.
 func (m *Model) SearchPgUp() {
 	m.searchPageScroll(-m.getPageScrollSize())
 }
 
-// SearchPgDown moves the search cursor one page down.
 func (m *Model) SearchPgDown() {
 	m.searchPageScroll(m.getPageScrollSize())
 }

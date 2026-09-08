@@ -2,7 +2,7 @@ package search
 
 import "sort"
 
-// ResultLimit bounds how many matches a search session keeps and renders.
+// Caps kept and rendered matches.
 const ResultLimit = 5000
 
 type rankedResult struct {
@@ -10,11 +10,10 @@ type rankedResult struct {
 	order  int64
 }
 
-// topN keeps the highest-scoring results seen so far, breaking score ties by
-// arrival (walk) order. Not safe for concurrent use.
+// Keeps best results. Ties break by arrival. Use from one goroutine.
 type topN struct {
 	limit int
-	items []rankedResult // min-heap: the worst kept result is at the front
+	items []rankedResult // min-heap, worst kept result at front
 	order int64
 }
 
@@ -37,8 +36,6 @@ func (t *topN) add(r Result) {
 	t.siftDown(0)
 }
 
-// outranks reports whether a sorts ahead of b: a higher score wins, and an
-// earlier arrival breaks ties.
 func outranks(a, b rankedResult) bool {
 	if a.result.Score != b.result.Score {
 		return a.result.Score > b.result.Score
@@ -46,7 +43,6 @@ func outranks(a, b rankedResult) bool {
 	return a.order < b.order
 }
 
-// sorted returns the top results, best first.
 func (t *topN) sorted() []Result {
 	items := make([]rankedResult, len(t.items))
 	copy(items, t.items)

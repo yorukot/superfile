@@ -7,14 +7,11 @@ import (
 	"github.com/reinhrst/fzf-lib"
 )
 
-// matchBatchSize is the number of entries scored in one matcher run. Between
-// batches the pipeline checks for cancellation and reports progress.
+// Matcher scores entries per run and checks cancellation between batches.
 const matchBatchSize = 2000
 
-// Run performs one search session: it walks the tree under root, matches
-// entry paths against query with fzf semantics (fuzzy by default, extended
-// syntax available), and reports progress through emit. emit is called from
-// the calling goroutine, so Run is safe to run inside a tea.Cmd.
+// Run walks root, matches paths with fzf semantics, and reports via emit.
+// Run calls emit on the same goroutine, so it stays safe in a tea.Cmd.
 func Run(ctx context.Context, root, query string, includeHidden bool, emit func(Progress)) {
 	if query == "" {
 		emit(Progress{Done: true})
@@ -53,17 +50,13 @@ func Run(ctx context.Context, root, query string, includeHidden bool, emit func(
 		}
 	})
 	if ctx.Err() != nil {
-		// Cancelled mid-walk: the session is over, so don't flush a
-		// trailing batch or emit a completion the UI would mistake for
-		// final results.
+		// Cancelled. Emits nothing.
 		return
 	}
 	flush()
 	emit(snapshot(true))
 }
 
-// matchBatch scores one batch of candidate paths against the query and
-// returns the matches best first.
 func matchBatch(query string, candidates []Result) []Result {
 	if len(candidates) == 0 {
 		return nil
@@ -90,9 +83,7 @@ func matchBatch(query string, candidates []Result) []Result {
 	return matches
 }
 
-// runePositionsToByteOffsets converts fzf-lib rune indexes to UTF-8 byte
-// offsets, which is what Result.Positions consumers (highlighting,
-// truncation) expect. ASCII paths pass through unchanged.
+// Converts fzf rune indexes to byte offsets for Result.Positions.
 func runePositionsToByteOffsets(path string, positions []int) []int {
 	if len(positions) == 0 {
 		return positions

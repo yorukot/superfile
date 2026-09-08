@@ -51,8 +51,7 @@ type directoryRecord struct {
 	directoryRender int
 }
 
-// searchState holds a panel's search session: the fixed search root, the
-// streamed result set, and the cursor over it.
+// Panel's active search session.
 type searchState struct {
 	Active         bool
 	Root           string

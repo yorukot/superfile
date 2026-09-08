@@ -35,16 +35,14 @@ class SearchModeTest(GenericTestImpl):
         )
 
     def search_and_wait(self, query: str) -> None:
-        # Z opens search mode; the query types into the searchbar. Wait for
-        # debounce + walk + streaming before interacting with the results.
+        # Z opens search. Wait for debounce and walk before using results.
         self.env.spf_mgr.send_text_input("Z")
         time.sleep(tconst.KEY_DELAY)
         self.env.spf_mgr.send_text_input(query)
         time.sleep(1.0)
 
     def create_file(self, name: str) -> None:
-        # ctrl+n opens the create prompt. The first keypress is consumed by
-        # the model, so send a backspace no-op before the file name.
+        # Prompt eats the first keypress. Backspace absorbs it.
         self.env.spf_mgr.send_special_input(keys.KEY_CTRL_N)
         time.sleep(tconst.KEY_DELAY)
         self.env.spf_mgr.send_special_input(keys.KEY_BACKSPACE)
@@ -58,13 +56,10 @@ class SearchModeTest(GenericTestImpl):
     def test_execute(self) -> None:
         self.start_spf()
         time.sleep(tconst.OPERATION_DELAY)
-        # No-op keypress: the first keypress after startup is not registered
         self.env.spf_mgr.send_text_input("a")
         time.sleep(tconst.KEY_DELAY)
 
-        # Opening a file result navigates to its containing directory and
-        # focuses the file: copy+paste of the focused main.go yields a
-        # suffixed copy inside dir1.
+        # File result opens containing dir and focuses the file.
         self.search_and_wait("main")
         self.env.spf_mgr.send_special_input(keys.KEY_ENTER)
         time.sleep(tconst.KEY_DELAY)
@@ -74,8 +69,7 @@ class SearchModeTest(GenericTestImpl):
         time.sleep(tconst.OPERATION_DELAY)
         assert self.env.fs_mgr.check_exists(DIR1 / "main(1).go"), "copied main.go should be in dir1"
 
-        # Opening a directory result makes it the new focused directory: a
-        # file created afterwards lands inside it.
+        # Dir result becomes focused dir.
         self.env.spf_mgr.send_text_input("h")  # Back to the search root
         time.sleep(tconst.KEY_DELAY)
         self.search_and_wait("deep")
@@ -84,8 +78,7 @@ class SearchModeTest(GenericTestImpl):
         self.create_file("created_deep.txt")
         assert self.env.fs_mgr.check_exists(NESTED / "created_deep.txt"), "file should be created in the opened directory"
 
-        # Cancelling with Esc leaves the panel on the search root: a file
-        # created afterwards lands at the root.
+        # Esc cancel keeps panel on search root.
         self.env.spf_mgr.send_text_input("h")
         time.sleep(tconst.KEY_DELAY)
         self.env.spf_mgr.send_text_input("h")

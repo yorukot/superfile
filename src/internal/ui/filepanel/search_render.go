@@ -13,8 +13,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
 )
 
-// renderSearchResults renders the flat result list of an active search
-// session, reserving the last content row for the status line.
+// Renders result list. Last row is the status line.
 func (m *Model) renderSearchResults(r *rendering.Renderer) {
 	if m.SearchBar.Value() == "" {
 		root := common.TruncateTextBeginning(m.Search.Root, m.GetContentWidth(), "...")
@@ -62,8 +61,7 @@ func (m *Model) renderSearchRow(itemIndex int) string {
 	return prefix + renderedIcon + renderHighlightedPath(path, positions, pathWidth)
 }
 
-// renderHighlightedPath renders path with the matched ranges styled as the
-// search mode highlight and pads the row to maxWidth.
+// Renders path with highlight, padded to maxWidth.
 func renderHighlightedPath(path string, positions []int, maxWidth int) string {
 	var builder strings.Builder
 	for _, segment := range splitHighlight(path, positions) {
@@ -81,8 +79,7 @@ func renderHighlightedPath(path string, positions []int, maxWidth int) string {
 	return rendered
 }
 
-// truncateSearchPath truncates path from the beginning so it fits maxWidth
-// and adjusts positions to stay valid for the truncated string.
+// Truncates from start to fit. Adjusts positions.
 func truncateSearchPath(path string, positions []int, maxWidth int) (string, []int) {
 	if ansi.StringWidth(path) <= maxWidth {
 		return path, positions
@@ -115,8 +112,7 @@ type highlightSegment struct {
 	matched bool
 }
 
-// splitHighlight splits path into matched and unmatched segments, using byte
-// offsets into the original path.
+// Splits path by byte-offset matches.
 func splitHighlight(path string, positions []int) []highlightSegment {
 	if len(positions) == 0 {
 		return []highlightSegment{{text: path}}
@@ -148,10 +144,8 @@ func splitHighlight(path string, positions []int) []highlightSegment {
 	return segments
 }
 
-// renderSearchStatusLine renders the search session status: live match count,
-// scanning state, skipped unreadable directories and result cap notice.
-// The "found" count is the total matches seen, which can exceed the capped
-// number of rendered results.
+// Status shows match count, scanning state, cap and hidden binding.
+// Found can exceed shown.
 func (m *Model) renderSearchStatusLine() string {
 	var status strings.Builder
 	shown := len(m.Search.Results)
@@ -171,9 +165,7 @@ func (m *Model) renderSearchStatusLine() string {
 	return common.FilePanelStyle.Render(status.String())
 }
 
-// searchToggleHiddenLabel returns the first configured binding for toggling
-// hidden files in search mode, or "" when none is configured (e.g. unit
-// tests without loaded hotkeys).
+// First configured hidden-toggle binding, or "" when none.
 func searchToggleHiddenLabel() string {
 	for _, key := range common.Hotkeys.SearchToggleHidden {
 		if key != "" {

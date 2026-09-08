@@ -83,7 +83,6 @@ func TestRunMatchPositions(t *testing.T) {
 		if r.Path != "src/main.go" {
 			continue
 		}
-		// "main" is the subsequence matched in "src/main.go".
 		if len(r.Positions) != 4 {
 			t.Errorf("positions = %v, want 4 byte offsets", r.Positions)
 		}
@@ -98,9 +97,7 @@ func TestRunMatchPositions(t *testing.T) {
 }
 
 func TestMatchBatchPositionsAreByteOffsets(t *testing.T) {
-	// é is two bytes in UTF-8, so the 'a' in "éa.txt" sits at byte offset
-	// 2 but rune index 1. fzf-lib reports rune indexes; the boundary must
-	// convert them for the byte-offset consumers (highlight, truncation).
+	// é is 2 bytes. 'a' is byte 2, rune 1.
 	matches := matchBatch("a", []Result{{Path: "éa.txt"}})
 	if len(matches) != 1 {
 		t.Fatalf("matched %d results, want 1: %v", len(matches), matches)
@@ -129,7 +126,6 @@ func TestMatchBatchPositionsStayByteOffsetsForASCII(t *testing.T) {
 
 func TestRunExactPrefixSyntax(t *testing.T) {
 	root := buildSearchTree(t)
-	// '^src/' is fzf's prefix operator: only paths starting with "src/".
 	snapshots := runCollect(t, context.Background(), root, "^src/", false)
 	last := snapshots[len(snapshots)-1]
 
@@ -182,8 +178,7 @@ func TestRunCountsUnreadableDirs(t *testing.T) {
 }
 
 func TestRunStopsOnCancellation(t *testing.T) {
-	// More than one matcher batch in a single directory, so cancelling on
-	// the first progress snapshot leaves work unvisited.
+	// Exceeds one matcher batch, so cancelling on first snapshot leaves work unvisited.
 	root := t.TempDir()
 	sub := filepath.Join(root, "sub")
 	if err := os.MkdirAll(sub, 0o755); err != nil {
@@ -220,7 +215,7 @@ func TestRunStopsOnCancellation(t *testing.T) {
 	}
 	for _, s := range snapshots {
 		if s.Done {
-			t.Errorf("cancelled run emitted a completion it must not have: %+v", s)
+			t.Errorf("cancelled run must not emit completion: %+v", s)
 		}
 	}
 }

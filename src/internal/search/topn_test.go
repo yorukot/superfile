@@ -47,7 +47,6 @@ func TestTopNRespectsLimit(t *testing.T) {
 	if len(got) != 5 {
 		t.Fatalf("got %d results, want 5", len(got))
 	}
-	// Best scores win.
 	for i, item := range got {
 		if want := 99 - i; item.Score != want {
 			t.Errorf("result %d score = %d, want %d", i, item.Score, want)
