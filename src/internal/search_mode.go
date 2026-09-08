@@ -91,28 +91,52 @@ func (m *model) searchModeConfirm() {
 // searchModeKey handles keys while a search session is active. Navigation
 // uses the raw arrow/page key names so that letter keys always reach the
 // query input (the hotkey lists alias j/k to navigation, which would steal
-// characters from the query).
-func (m *model) searchModeKey(msg string) tea.Cmd {
+// characters from the query). The hidden-files toggle is matched
+// structurally (Mod+Code, ignoring Text) so terminals that report ctrl+.
+// with Text="." still toggle instead of typing a dot.
+func (m *model) searchModeKey(msg tea.KeyPressMsg) tea.Cmd {
 	panel := m.getFocusedFilePanel()
+	msgStr := msg.String()
 	switch {
-	case slices.Contains(common.Hotkeys.CancelTyping, msg):
+	case slices.Contains(common.Hotkeys.CancelTyping, msgStr):
 		m.searchModeExit()
 		return nil
-	case slices.Contains(common.Hotkeys.ConfirmTyping, msg):
+	case slices.Contains(common.Hotkeys.ConfirmTyping, msgStr):
 		m.searchModeConfirm()
 		return nil
-	case slices.Contains(common.Hotkeys.SearchToggleHidden, msg):
+	case searchToggleHiddenMatched(msg):
 		return m.toggleDotFileController()
-	case msg == "up":
+	case msgStr == "up":
 		panel.SearchListUp()
-	case msg == "down":
+	case msgStr == "down":
 		panel.SearchListDown()
-	case msg == "pgup":
+	case msgStr == "pgup":
 		panel.SearchPgUp()
-	case msg == "pgdown":
+	case msgStr == "pgdown":
 		panel.SearchPgDown()
 	}
 	return nil
+}
+
+// searchToggleHiddenMatched reports whether msg matches a configured
+// search_toggle_hidden binding. Empty "" padding slots are skipped.
+// Comparison is two-fold: the verbatim String() form covers properly
+// encoded keys, while the Text-less keystroke form covers terminals that
+// report modifier combos with Text set (e.g. ctrl+. with Text=".", whose
+// String() is just "." and would otherwise leak into the query).
+func searchToggleHiddenMatched(msg tea.KeyPressMsg) bool {
+	for _, binding := range common.Hotkeys.SearchToggleHidden {
+		if binding == "" {
+			continue
+		}
+		if msg.String() == binding {
+			return true
+		}
+		if (tea.KeyPressMsg{Code: msg.Code, Mod: msg.Mod}).String() == binding {
+			return true
+		}
+	}
+	return false
 }
 
 // restartSearchCmd cancels the running search (if any) and starts a new one

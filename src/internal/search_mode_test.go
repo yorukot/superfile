@@ -208,7 +208,8 @@ func TestSearchModeConfirmEmptyQuery(t *testing.T) {
 func TestSearchToggleHiddenHotkeyConfigured(t *testing.T) {
 	require.NotEmpty(t, common.Hotkeys.SearchToggleHidden,
 		"search_toggle_hidden must have a default binding")
-	assert.Equal(t, "ctrl+.", common.Hotkeys.SearchToggleHidden[0])
+	assert.Equal(t, "alt+.", common.Hotkeys.SearchToggleHidden[0])
+	assert.Contains(t, common.Hotkeys.SearchToggleHidden, "ctrl+.")
 }
 
 func TestSearchModeToggleHidden(t *testing.T) {
@@ -239,7 +240,7 @@ func TestSearchModeToggleHidden(t *testing.T) {
 
 	// Toggle hidden files without leaving search. Query must be preserved
 	// and the search must rewalk with the new visibility.
-	toggleCmd := TeaUpdate(m, tea.KeyPressMsg{Code: '.', Mod: tea.ModCtrl})
+	toggleCmd := TeaUpdate(m, tea.KeyPressMsg{Code: '.', Mod: tea.ModAlt})
 	require.True(t, panel.Search.Active, "toggle must not exit search")
 	assert.Equal(t, "main", panel.SearchBar.Value(), "query must be preserved")
 	assert.True(t, m.fileModel.DisplayDotFiles)
@@ -253,9 +254,13 @@ func TestSearchModeToggleHidden(t *testing.T) {
 	assert.Equal(t, "main.", panel.SearchBar.Value())
 	assert.True(t, m.fileModel.DisplayDotFiles, "typing . must not toggle")
 
-	// Toggle back to hidden.
+	// Toggle back via ctrl+., including the leaky terminal variant that
+	// reports Text="." alongside the modifier. The dot must not pollute
+	// the query: the key is consumed by the search mode handler.
 	panel.SearchBar.SetValue("main")
-	backCmd := TeaUpdate(m, tea.KeyPressMsg{Code: '.', Mod: tea.ModCtrl})
+	backCmd := TeaUpdate(m, tea.KeyPressMsg{Code: '.', Mod: tea.ModCtrl, Text: "."})
+	require.True(t, panel.Search.Active, "toggle must not exit search")
+	assert.Equal(t, "main", panel.SearchBar.Value(), "leaky ctrl+. must not type")
 	assert.False(t, m.fileModel.DisplayDotFiles)
 	drainSearchResults(t, m, backCmd)
 	require.True(t, panel.Search.Done)

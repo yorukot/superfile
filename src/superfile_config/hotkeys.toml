@@ -90,7 +90,7 @@ cancel_typing = ['ctrl+c', 'esc']
 parent_directory = ['h', 'left', 'backspace']
 search_bar = ['/', '']
 search_mode = ['Z', '']
-search_toggle_hidden = ['ctrl+.', '']
+search_toggle_hidden = ['alt+.', 'ctrl+.']
 
 #-- Selection Mode Actions
 file_panel_select_mode_items_select_down = ['shift+down', 'J']

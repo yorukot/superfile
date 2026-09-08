@@ -93,7 +93,7 @@ cancel_typing = ['esc', '']
 parent_directory = ['-', '']
 search_bar = ['/', '']
 search_mode = ['Z', '']
-search_toggle_hidden = ['ctrl+.', '']
+search_toggle_hidden = ['alt+.', 'ctrl+.']
 
 #-- Selection Mode Actions
 file_panel_select_mode_items_select_down = ['J', '']

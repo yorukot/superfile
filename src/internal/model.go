@@ -320,7 +320,7 @@ func (m *model) handleKeyInput(msg tea.KeyPressMsg) tea.Cmd {
 	// search mode handler before the searchbar's own handler so navigation
 	// and confirm/cancel work against the result set
 	case m.fileModel.SearchModeActive() && m.focusPanel == nonePanelFocus:
-		cmd = m.searchModeKey(msg.String())
+		cmd = m.searchModeKey(msg)
 
 	// If renaming a object
 	case m.fileModel.Renaming:
@@ -381,6 +381,13 @@ func (m *model) updateComponentState(msg tea.Msg) tea.Cmd {
 	case m.fileModel.Renaming:
 		focusPanel.Rename, cmd = focusPanel.Rename.Update(msg)
 	case focusPanel.Search.Active:
+		// Keys consumed by the search mode handler (currently the hidden
+		// toggle) must not reach the query input: some terminals report
+		// ctrl+. with Text=".", which textinput would otherwise insert.
+		// The handler above already issued the restart command.
+		if keyMsg, ok := msg.(tea.KeyPressMsg); ok && searchToggleHiddenMatched(keyMsg) {
+			return nil
+		}
 		previousValue := focusPanel.SearchBar.Value()
 		focusPanel.SearchBar, cmd = focusPanel.SearchBar.Update(msg)
 		if focusPanel.SearchBar.Value() != previousValue {
