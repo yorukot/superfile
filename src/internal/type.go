@@ -62,6 +62,7 @@ type model struct {
 	// Modals
 	notifyModel     notify.Model
 	typingModal     typingModal
+	maskModal       maskModal
 	helpMenu        helpmenu.Model
 	promptModal     prompt.Model
 	zoxideModal     zoxideui.Model
@@ -104,6 +105,16 @@ type typingModal struct {
 	location  string
 	open      bool
 	textInput textinput.Model
+}
+
+// Modal to select or unselect file panel items via a mask like '*.txt'
+type maskModal struct {
+	open bool
+	// Whether a matching item gets selected or unselected
+	selecting bool
+	textInput textinput.Model
+	// Message of the last mask that could not be applied. Cleared on each keypress
+	errorMsg string
 }
 
 type editorFinishedMsg struct{ err error }
