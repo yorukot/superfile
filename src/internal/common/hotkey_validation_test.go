@@ -20,6 +20,7 @@ func TestIsModifierHotkey(t *testing.T) {
 		{"meta combo", "meta+x", true},
 		{"hyper combo", "hyper+x", true},
 		{"uppercase prefix", "CTRL+.", true},
+		{"dual modifier combo", "ctrl+alt+.", true},
 		{"bare letter", "a", false},
 		{"bare dot", ".", false},
 		{"bare word", "enter", false},
@@ -28,6 +29,8 @@ func TestIsModifierHotkey(t *testing.T) {
 		{"bare arrow", "up", false},
 		{"empty", "", false},
 		{"modifier only no key", "ctrl+", false},
+		{"modifier chain trailing plus", "ctrl+alt+", false},
+		{"modifier-only chain", "ctrl+alt", false},
 	}
 
 	for _, tt := range testdata {
@@ -40,8 +43,10 @@ func TestIsModifierHotkey(t *testing.T) {
 func TestValidateSearchToggleHidden(t *testing.T) {
 	assert.Empty(t, ValidateSearchToggleHidden([]string{"ctrl+.", ""}))
 	assert.Empty(t, ValidateSearchToggleHidden([]string{"ctrl+.", "alt+."}))
+	assert.Empty(t, ValidateSearchToggleHidden([]string{"ctrl+alt+.", ""}))
 	assert.Equal(t, "a", ValidateSearchToggleHidden([]string{"a", ""}))
 	assert.Equal(t, ".", ValidateSearchToggleHidden([]string{"ctrl+.", "."}))
 	assert.Equal(t, "f1", ValidateSearchToggleHidden([]string{"f1", ""}))
+	assert.Equal(t, "ctrl+alt+", ValidateSearchToggleHidden([]string{"ctrl+alt+", ""}))
 	assert.Empty(t, ValidateSearchToggleHidden([]string{"", ""}))
 }

@@ -9,11 +9,32 @@ var searchToggleHiddenModifiers = []string{"ctrl", "alt", "shift", "super", "met
 
 // IsModifierHotkey reports whether s is a modifier combo (e.g. "ctrl+.").
 // Matching is case-insensitive. Empty strings return false; callers skip
-// "" padding slots before calling.
+// "" padding slots before calling. Strings ending with "+" (e.g. "ctrl+",
+// "ctrl+alt+") and modifier-only chains (e.g. "ctrl+alt") are rejected:
+// every "+"-separated segment except the last must be a known modifier and
+// the last segment must be a non-empty, non-modifier key.
 func IsModifierHotkey(s string) bool {
 	lower := strings.ToLower(strings.TrimSpace(s))
+	parts := strings.Split(lower, "+")
+	if len(parts) < 2 {
+		return false
+	}
+	for _, part := range parts {
+		if part == "" {
+			return false
+		}
+	}
+	for _, part := range parts[:len(parts)-1] {
+		if !isHotkeyModifier(part) {
+			return false
+		}
+	}
+	return !isHotkeyModifier(parts[len(parts)-1])
+}
+
+func isHotkeyModifier(s string) bool {
 	for _, mod := range searchToggleHiddenModifiers {
-		if strings.HasPrefix(lower, mod+"+") && len(lower) > len(mod)+1 {
+		if s == mod {
 			return true
 		}
 	}
