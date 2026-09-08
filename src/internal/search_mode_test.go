@@ -209,7 +209,8 @@ func TestSearchToggleHiddenHotkeyConfigured(t *testing.T) {
 	require.NotEmpty(t, common.Hotkeys.SearchToggleHidden,
 		"search_toggle_hidden must have a default binding")
 	assert.Equal(t, "alt+.", common.Hotkeys.SearchToggleHidden[0])
-	assert.Contains(t, common.Hotkeys.SearchToggleHidden, "ctrl+.")
+	assert.NotContains(t, common.Hotkeys.SearchToggleHidden, "ctrl+.",
+		"ctrl+. is not deliverable by most terminals")
 }
 
 func TestSearchModeToggleHidden(t *testing.T) {
@@ -254,19 +255,26 @@ func TestSearchModeToggleHidden(t *testing.T) {
 	assert.Equal(t, "main.", panel.SearchBar.Value())
 	assert.True(t, m.fileModel.DisplayDotFiles, "typing . must not toggle")
 
-	// Toggle back via ctrl+., including the leaky terminal variant that
-	// reports Text="." alongside the modifier. The dot must not pollute
-	// the query: the key is consumed by the search mode handler.
+	// Toggle back via alt+. (ctrl+. is unsupported: most terminals report
+	// it with Text set or as a bare ".", so it would type into the query).
 	panel.SearchBar.SetValue("main")
-	backCmd := TeaUpdate(m, tea.KeyPressMsg{Code: '.', Mod: tea.ModCtrl, Text: "."})
+	backCmd := TeaUpdate(m, tea.KeyPressMsg{Code: '.', Mod: tea.ModAlt})
 	require.True(t, panel.Search.Active, "toggle must not exit search")
-	assert.Equal(t, "main", panel.SearchBar.Value(), "leaky ctrl+. must not type")
+	assert.Equal(t, "main", panel.SearchBar.Value(), "query must be preserved")
 	assert.False(t, m.fileModel.DisplayDotFiles)
 	drainSearchResults(t, m, backCmd)
 	require.True(t, panel.Search.Done)
 	assert.Equal(t, int64(1), panel.Search.MatchCount)
 	require.Len(t, panel.Search.Results, 1)
 	assert.Equal(t, "main.go", panel.Search.Results[0].Path)
+
+	// A ctrl+. reported with Text set (how most terminals deliver it
+	// without Kitty keyboard protocol) matches no configured binding: it
+	// degrades to typing instead of toggling. This is why ctrl+. is
+	// rejected at load.
+	TeaUpdate(m, tea.KeyPressMsg{Code: '.', Mod: tea.ModCtrl, Text: "."})
+	assert.Equal(t, "main.", panel.SearchBar.Value())
+	assert.False(t, m.fileModel.DisplayDotFiles, "must not toggle")
 
 	_ = os.Remove(variable.ToggleDotFile)
 }
