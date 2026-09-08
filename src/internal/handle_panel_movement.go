@@ -68,6 +68,11 @@ func (m *model) enterPanel() {
 }
 
 func (m *model) executeOpenCommand() {
+	if !common.Config.OpenFileWithDefaultApp {
+		// User disabled launching external programs. The file is just
+		// selected; preview panel still shows its content.
+		return
+	}
 	panel := m.getFocusedFilePanel()
 
 	filePath := panel.GetFocusedItem().Location
