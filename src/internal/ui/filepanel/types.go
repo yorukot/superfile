@@ -61,6 +61,10 @@ type searchState struct {
 	Done           bool
 	Cursor         int
 	RenderIndex    int
+	// Restores the selection across rewalks (e.g. hidden toggle).
+	restorePath    string
+	restoreCursor  int
+	restorePending bool
 }
 
 // Element within a file panel

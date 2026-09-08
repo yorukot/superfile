@@ -3,7 +3,7 @@ package filepanel
 import "github.com/yorukot/superfile/src/internal/search"
 
 // Clears results and cursor. Enter and Exit own Active and Root.
-func (m *Model) resetSearchState() {
+func (m *Model) ResetSearchState() {
 	m.Search.Results = nil
 	m.Search.MatchCount = 0
 	m.Search.UnreadableDirs = 0
@@ -12,11 +12,24 @@ func (m *Model) resetSearchState() {
 	m.Search.RenderIndex = 0
 }
 
+// Clears results but remembers the selection for the next walk.
+// ApplySearchProgress reselects the path when still present,
+// otherwise it falls back to the clamped cursor once done.
+func (m *Model) ResetSearchStateKeepingSelection() {
+	m.Search.restorePath = ""
+	m.Search.restoreCursor = m.Search.Cursor
+	m.Search.restorePending = true
+	if i := m.Search.Cursor; i >= 0 && i < len(m.Search.Results) {
+		m.Search.restorePath = m.Search.Results[i].Path
+	}
+	m.ResetSearchState()
+}
+
 // Starts a session rooted at current location.
 func (m *Model) EnterSearchMode() {
 	m.Search.Active = true
 	m.Search.Root = m.Location
-	m.resetSearchState()
+	m.ResetSearchState()
 	m.SearchBar.SetValue("")
 	m.SearchBar.Focus()
 }
@@ -24,7 +37,7 @@ func (m *Model) EnterSearchMode() {
 func (m *Model) ExitSearchMode() {
 	m.Search.Active = false
 	m.Search.Root = ""
-	m.resetSearchState()
+	m.ResetSearchState()
 	m.SearchBar.Blur()
 	m.SearchBar.SetValue("")
 }
@@ -38,6 +51,26 @@ func (m *Model) ApplySearchProgress(p search.Progress) {
 	if len(m.Search.Results) == 0 {
 		m.Search.Cursor = 0
 		m.Search.RenderIndex = 0
+	}
+	m.restoreSearchSelection()
+}
+
+// Reselects the pre-rewalk selection. Same path wins; once done it
+// falls back to the clamped cursor. While streaming it keeps waiting.
+func (m *Model) restoreSearchSelection() {
+	if !m.Search.restorePending {
+		return
+	}
+	for i, r := range m.Search.Results {
+		if r.Path == m.Search.restorePath && m.Search.restorePath != "" {
+			m.searchScrollToCursor(i)
+			m.Search.restorePending = false
+			return
+		}
+	}
+	if m.Search.Done {
+		m.searchScrollToCursor(min(m.Search.restoreCursor, max(0, len(m.Search.Results)-1)))
+		m.Search.restorePending = false
 	}
 }
 

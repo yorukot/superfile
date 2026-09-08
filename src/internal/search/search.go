@@ -2,13 +2,15 @@ package search
 
 import (
 	"context"
+	"strings"
 	"unicode/utf8"
 
 	"github.com/reinhrst/fzf-lib"
 )
 
 // Matcher scores entries per run and checks cancellation between batches.
-const matchBatchSize = 2000
+// Batches stay small so big trees stream live instead of going quiet.
+const matchBatchSize = 100
 
 // Run walks root, matches paths with fzf semantics, and reports via emit.
 // Run calls emit on the same goroutine, so it stays safe in a tea.Cmd.
@@ -61,12 +63,22 @@ func matchBatch(query string, candidates []Result) []Result {
 	if len(candidates) == 0 {
 		return nil
 	}
+	// "*" is a glob wildcard, not an fzf operator. Dropping it keeps
+	// "*.go" working as users from #275 expect; fzf handles the rest.
+	stripped := strings.ReplaceAll(query, "*", "")
+	if stripped == "" {
+		out := make([]Result, len(candidates))
+		for i, candidate := range candidates {
+			out[i] = Result{Path: candidate.Path, Dir: candidate.Dir}
+		}
+		return out
+	}
 	items := make([]string, len(candidates))
 	for i, candidate := range candidates {
 		items[i] = candidate.Path
 	}
 	searcher := fzf.New(items, fzf.DefaultOptions())
-	searcher.Search(query)
+	searcher.Search(stripped)
 	searchResult := <-searcher.GetResultChannel()
 	searcher.End()
 

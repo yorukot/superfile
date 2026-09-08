@@ -103,6 +103,15 @@ func (m *model) searchModeKey(msg tea.KeyPressMsg) tea.Cmd {
 	return nil
 }
 
+// Reports navigation keys so model.go can keep them out of the query input.
+// Typing keys never match: searchKeyMatchesAction excludes them.
+func searchNavKey(msg tea.KeyPressMsg) bool {
+	return searchKeyMatchesAction(msg, common.Hotkeys.ListUp) ||
+		searchKeyMatchesAction(msg, common.Hotkeys.ListDown) ||
+		searchKeyMatchesAction(msg, common.Hotkeys.PageUp) ||
+		searchKeyMatchesAction(msg, common.Hotkeys.PageDown)
+}
+
 // isSearchTypingKey reports query text. Single printable with no real modifier.
 func isSearchTypingKey(msg tea.KeyPressMsg) bool {
 	r := []rune(msg.Text)
@@ -155,13 +164,8 @@ func (m *model) restartSearchCmd() tea.Cmd {
 	query := panel.SearchBar.Value()
 	includeHidden := m.fileModel.DisplayDotFiles
 
-	// Clear stale results before the next walk.
-	panel.Search.Done = false
-	panel.Search.Results = nil
-	panel.Search.MatchCount = 0
-	panel.Search.UnreadableDirs = 0
-	panel.Search.Cursor = 0
-	panel.Search.RenderIndex = 0
+	// Clear stale results before the next walk, keeping the selection.
+	panel.ResetSearchStateKeepingSelection()
 	go func() {
 		defer close(ch)
 		select {

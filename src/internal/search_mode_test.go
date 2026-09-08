@@ -301,3 +301,60 @@ func TestSearchModeToggleHidden(t *testing.T) {
 
 	_ = os.Remove(variable.ToggleDotFile)
 }
+
+func TestSearchModeToggleHiddenPreservesCursor(t *testing.T) {
+	root := t.TempDir()
+	utils.SetupFiles(t,
+		filepath.Join(root, "main.go"),
+		filepath.Join(root, "main_test.go"),
+		filepath.Join(root, ".hidden_main.go"),
+	)
+
+	// Isolate persisted toggle.
+	oldToggleFile := variable.ToggleDotFile
+	variable.ToggleDotFile = filepath.Join(t.TempDir(), "toggleDotFile")
+	t.Cleanup(func() { variable.ToggleDotFile = oldToggleFile })
+
+	m := defaultTestModel(root)
+	require.False(t, m.fileModel.DisplayDotFiles)
+
+	TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.SearchMode[0]))
+	panel := m.getFocusedFilePanel()
+	cmd := typeSearchQuery(t, m, "main")
+	drainSearchResults(t, m, cmd)
+	require.True(t, panel.Search.Done)
+	require.Len(t, panel.Search.Results, 2)
+
+	TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyDown})
+	require.Equal(t, 1, panel.Search.Cursor)
+	selected := panel.Search.Results[1].Path
+
+	// Toggle rewalks; the selected path is still present and stays selected.
+	toggleCmd := TeaUpdate(m, tea.KeyPressMsg{Code: '.', Mod: tea.ModAlt})
+	assert.Equal(t, "main", panel.SearchBar.Value(), "query must be preserved")
+	drainSearchResults(t, m, toggleCmd)
+	require.True(t, panel.Search.Done)
+	require.NotNil(t, panel.GetSearchCursorResult())
+	assert.Equal(t, selected, panel.GetSearchCursorResult().Path, "cursor must follow selection")
+
+	_ = os.Remove(variable.ToggleDotFile)
+}
+
+func TestSearchModeNavKeysKeepQuery(t *testing.T) {
+	root := searchTestDir(t)
+	m := defaultTestModel(root)
+	TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.SearchMode[0]))
+	cmd := typeSearchQuery(t, m, "main")
+	drainSearchResults(t, m, cmd)
+
+	panel := m.getFocusedFilePanel()
+	require.Len(t, panel.Search.Results, 2)
+
+	TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyDown})
+	assert.Equal(t, "main", panel.SearchBar.Value(), "nav must not edit query")
+	assert.Equal(t, 1, panel.Search.Cursor)
+
+	TeaUpdate(m, tea.KeyPressMsg{Code: tea.KeyUp})
+	assert.Equal(t, "main", panel.SearchBar.Value(), "nav must not edit query")
+	assert.Equal(t, 0, panel.Search.Cursor)
+}

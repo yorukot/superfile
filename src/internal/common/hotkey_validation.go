@@ -1,6 +1,7 @@
 package common
 
 import (
+	"slices"
 	"strings"
 	"unicode"
 )
@@ -9,6 +10,8 @@ import (
 var searchToggleHiddenModifiers = []string{"ctrl", "alt", "shift", "super", "meta", "hyper"} //nolint:gochecknoglobals // static allowlist
 
 // Single-rune ctrl bases with ASCII control codes. Letters handled separately.
+// These symbols (e.g. ctrl+@ is NUL, ctrl+? is DEL) are real control codes
+// terminals can deliver, unlike ctrl+punctuation such as ctrl+..
 const ctrlBaseExceptions = "@[\\]^_?" //nolint:gochecknoglobals // fixed control-code symbol set
 
 // IsModifierHotkey reports whether s is a modifier combo like "alt+.".
@@ -69,25 +72,16 @@ func ValidateSearchToggleHidden(bindings []string) string {
 		if !ok {
 			return binding
 		}
-		if slicesContain(mods, "ctrl") && !isCtrlDeliverableBase(base) {
+		if slices.Contains(mods, "ctrl") && !isCtrlDeliverableBase(base) {
 			return binding
 		}
 	}
 	return ""
 }
 
-func slicesContain(list []string, s string) bool {
-	for _, item := range list {
-		if item == s {
-			return true
-		}
-	}
-	return false
-}
-
 func SearchToggleHiddenErrorMessage(offender string) string {
 	if mods, base, ok := parseModifierHotkey(offender); ok &&
-		slicesContain(mods, "ctrl") && !isCtrlDeliverableBase(base) {
+		slices.Contains(mods, "ctrl") && !isCtrlDeliverableBase(base) {
 		return "\"" + offender + "\" is invalid : " +
 			"ctrl+" + base + " is not delivered by most terminals without Kitty keyboard " +
 			"protocol (it types \"" + base + "\" into the search query instead of toggling); " +

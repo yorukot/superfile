@@ -237,3 +237,30 @@ func TestRunResultCap(t *testing.T) {
 		t.Errorf("match count = %d, want more than the result limit", last.MatchCount)
 	}
 }
+
+func TestMatchBatchWildcardSuffix(t *testing.T) {
+	matches := matchBatch("*.go", []Result{{Path: "src/main.go"}, {Path: "alpha.txt"}})
+	if len(matches) != 1 || matches[0].Path != "src/main.go" {
+		t.Errorf("wildcard matched %v, want [src/main.go]", matches)
+	}
+}
+
+func TestMatchBatchOnlyWildcardMatchesAll(t *testing.T) {
+	candidates := []Result{{Path: "a.txt"}, {Path: "b.go"}}
+	matches := matchBatch("*", candidates)
+	if len(matches) != len(candidates) {
+		t.Errorf("bare wildcard matched %d, want %d", len(matches), len(candidates))
+	}
+}
+
+func TestRunWildcardQuery(t *testing.T) {
+	root := buildSearchTree(t)
+	snapshots := runCollect(t, context.Background(), root, "*.go", false)
+	last := snapshots[len(snapshots)-1]
+	if !last.Done {
+		t.Fatal("final progress is not marked done")
+	}
+	if len(last.Results) != 2 {
+		t.Errorf("wildcard run matched %v, want 2 go files", last.Results)
+	}
+}

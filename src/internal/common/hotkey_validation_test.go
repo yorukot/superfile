@@ -52,6 +52,8 @@ func TestValidateSearchToggleHidden(t *testing.T) {
 	assert.Equal(t, "ctrl+.", ValidateSearchToggleHidden([]string{"ctrl+.", ""}))
 	assert.Equal(t, "ctrl+alt+.", ValidateSearchToggleHidden([]string{"ctrl+alt+.", ""}))
 	assert.Equal(t, "ctrl+1", ValidateSearchToggleHidden([]string{"ctrl+1", ""}))
+	assert.Empty(t, ValidateSearchToggleHidden([]string{"ctrl+@", ""}), "ctrl+@ is NUL, deliverable")
+	assert.Empty(t, ValidateSearchToggleHidden([]string{"ctrl+?", ""}), "ctrl+? is DEL, deliverable")
 	assert.Empty(t, ValidateSearchToggleHidden([]string{"", ""}))
 }
 

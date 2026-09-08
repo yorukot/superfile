@@ -382,6 +382,10 @@ func (m *model) updateComponentState(msg tea.Msg) tea.Cmd {
 		if keyMsg, ok := msg.(tea.KeyPressMsg); ok && searchKeyMatchesAction(keyMsg, common.Hotkeys.SearchToggleHidden) {
 			return nil
 		}
+		// Drop handled nav keys so result navigation never moves the query cursor.
+		if keyMsg, ok := msg.(tea.KeyPressMsg); ok && searchNavKey(keyMsg) {
+			return nil
+		}
 		previousValue := focusPanel.SearchBar.Value()
 		focusPanel.SearchBar, cmd = focusPanel.SearchBar.Update(msg)
 		if focusPanel.SearchBar.Value() != previousValue {
