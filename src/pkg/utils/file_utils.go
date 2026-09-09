@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"strings"
 
 	"github.com/adrg/xdg"
@@ -203,10 +204,10 @@ func ResolveAbsPath(currentDir string, path string) string {
 	if !filepath.IsAbs(currentDir) {
 		slog.Warn("currentDir is not absolute", "currentDir", currentDir)
 	}
-	if strings.HasPrefix(path, "~") {
-		// We dont use variable.HomeDir here, as the util package cannot have dependency
-		// on variable package
-		path = strings.Replace(path, "~", xdg.Home, 1)
+	if path == "~" {
+		path = xdg.Home
+	} else if strings.HasPrefix(path, "~/") || (runtime.GOOS == OsWindows && strings.HasPrefix(path, `~\`)) {
+		path = filepath.Join(xdg.Home, path[2:])
 	}
 	if !filepath.IsAbs(path) {
 		path = filepath.Join(currentDir, path)
