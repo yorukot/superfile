@@ -218,14 +218,17 @@ func TestChooserFile(t *testing.T) {
 	dir1 := filepath.Join(curTestDir, "dir1")
 	dir2 := filepath.Join(curTestDir, "dir2")
 	file1 := filepath.Join(dir1, "file1.txt")
+	file2 := filepath.Join(dir1, "file2.txt")
 	testChooserFile := filepath.Join(dir2, "chooser_file.txt")
 	utils.SetupDirectories(t, curTestDir, dir1, dir2)
-	utils.SetupFiles(t, file1)
+	utils.SetupFiles(t, file1, file2)
 
 	testdata := []struct {
 		name            string
 		chooserFile     string
 		hotkey          string
+		selectMode      bool
+		selectedFiles   []string
 		expectedQuit    bool
 		expectedContent string
 	}{
@@ -240,6 +243,23 @@ func TestChooserFile(t *testing.T) {
 			name:            "Open with file editor with valid chooser file",
 			chooserFile:     testChooserFile,
 			hotkey:          common.Hotkeys.OpenFileWithEditor[0],
+			expectedQuit:    true,
+			expectedContent: file1,
+		},
+		{
+			name:            "Open with file editor with multiple selected files",
+			chooserFile:     testChooserFile,
+			hotkey:          common.Hotkeys.OpenFileWithEditor[0],
+			selectMode:      true,
+			selectedFiles:   []string{file1, file2},
+			expectedQuit:    true,
+			expectedContent: file1 + "\n" + file2,
+		},
+		{
+			name:            "Open with file editor in select mode with no selection falls back to focused item",
+			chooserFile:     testChooserFile,
+			hotkey:          common.Hotkeys.OpenFileWithEditor[0],
+			selectMode:      true,
 			expectedQuit:    true,
 			expectedContent: file1,
 		},
@@ -270,6 +290,12 @@ func TestChooserFile(t *testing.T) {
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
 			m := defaultTestModel(dir1)
+			if tt.selectMode {
+				m.getFocusedFilePanel().ChangeFilePanelMode()
+			}
+			if len(tt.selectedFiles) > 0 {
+				m.getFocusedFilePanel().SetSelectedAll(tt.selectedFiles)
+			}
 			if tt.expectedQuit {
 				err := os.WriteFile(tt.chooserFile, []byte{}, 0o644)
 				require.NoError(t, err)

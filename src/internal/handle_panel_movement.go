@@ -57,7 +57,7 @@ func (m *model) enterPanel() {
 	}
 
 	if variable.ChooserFile != "" {
-		chooserErr := m.chooserFileWriteAndQuit(panel.GetFocusedItem().Location)
+		chooserErr := m.chooserFileWriteAndQuit(m.getSelectedOrFocusedPaths(panel))
 		if chooserErr == nil {
 			return
 		}

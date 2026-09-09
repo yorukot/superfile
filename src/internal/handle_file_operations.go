@@ -463,6 +463,13 @@ func checkFileReadable(filename string) error {
 	return nil
 }
 
+func (m *model) getSelectedOrFocusedPaths(panel *filepanel.Model) string {
+	if panel.SelectedCount() > 0 {
+		return strings.Join(panel.GetSelectedLocationsSortedAsVisible(), "\n")
+	}
+	return panel.GetFocusedItem().Location
+}
+
 func (m *model) chooserFileWriteAndQuit(path string) error {
 	// Attempt to write to the file
 	err := os.WriteFile(variable.ChooserFile, []byte(path), utils.ConfigFilePerm)
@@ -482,7 +489,7 @@ func (m *model) openFileWithEditor() tea.Cmd {
 	}
 
 	if variable.ChooserFile != "" {
-		err := m.chooserFileWriteAndQuit(panel.GetFocusedItem().Location)
+		err := m.chooserFileWriteAndQuit(m.getSelectedOrFocusedPaths(panel))
 		if err == nil {
 			return nil
 		}
@@ -574,11 +581,7 @@ func (m *model) copyPathText() string {
 		return ""
 	}
 
-	if panel.PanelMode == filepanel.SelectMode && panel.SelectedCount() > 0 {
-		return strings.Join(panel.GetSelectedLocationsSortedAsVisible(), "\n")
-	}
-
-	return panel.GetFocusedItem().Location
+	return m.getSelectedOrFocusedPaths(panel)
 }
 
 // TODO: This is also an IO operations, do it via tea.Cmd
