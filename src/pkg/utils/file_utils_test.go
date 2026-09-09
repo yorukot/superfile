@@ -67,6 +67,57 @@ func TestResolveAbsPath(t *testing.T) {
 			path:        filepath.Join(dir2, "~"),
 			expectedRes: filepath.Join(dir1, dir2, "~"),
 		},
+		{
+			name:        "Relative path starting with ~ followed by word",
+			cwd:         filepath.Join(root, dir1),
+			path:        "~backup",
+			expectedRes: filepath.Join(root, dir1, "~backup"),
+		},
+		{
+			name:        "Relative path starting with ~$ (office lock file)",
+			cwd:         filepath.Join(root, dir1),
+			path:        "~$document.docx",
+			expectedRes: filepath.Join(root, dir1, "~$document.docx"),
+		},
+		{
+			name:        "Path starting with ~/",
+			cwd:         filepath.Join(root, dir1),
+			path:        "~/documents",
+			expectedRes: filepath.Join(xdg.Home, "documents"),
+		},
+		{
+			name:        "Just ~/",
+			cwd:         filepath.Join(root, dir1),
+			path:        "~/",
+			expectedRes: xdg.Home,
+		},
+	}
+
+	if runtime.GOOS == "windows" {
+		testdata = append(testdata,
+			struct {
+				name        string
+				cwd         string
+				path        string
+				expectedRes string
+			}{
+				name:        "Path starting with ~\\ on Windows",
+				cwd:         filepath.Join(root, dir1),
+				path:        `~\documents`,
+				expectedRes: filepath.Join(xdg.Home, "documents"),
+			},
+			struct {
+				name        string
+				cwd         string
+				path        string
+				expectedRes string
+			}{
+				name:        "Just ~\\ on Windows",
+				cwd:         filepath.Join(root, dir1),
+				path:        `~\`,
+				expectedRes: xdg.Home,
+			},
+		)
 	}
 
 	for _, tt := range testdata {
