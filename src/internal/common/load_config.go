@@ -183,6 +183,18 @@ func LoadHotkeysFile(ignoreMissingFields bool) {
 				),
 			)
 		}
+
+		// search_toggle_hidden runs inside search where bare keys type.
+		if field.Name == "SearchToggleHidden" {
+			if bad := ValidateSearchToggleHidden(hotkeysList); bad != "" {
+				utils.PrintlnAndExit(
+					LoadHotkeysError(
+						field.Name,
+						SearchToggleHiddenErrorMessage(bad),
+					),
+				)
+			}
+		}
 	}
 }
 

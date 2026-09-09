@@ -87,6 +87,11 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		slog.Debug("Got ModelUpdate message", "id", msg.GetReqID())
 		updateCmd = msg.Apply(&m.zoxideModal)
 
+	// Search progress carries its own pump.
+	case SearchProgressMsg:
+		slog.Debug("Got SearchProgress message", "id", msg.GetReqID())
+		updateCmd = m.applySearchProgress(msg)
+
 	// Its a pain to interconvert commands like processBar
 	case preview.UpdateMsg:
 		slog.Debug("Got ModelUpdate message", "id", msg.GetReqID())
@@ -310,6 +315,10 @@ func (m *model) handleKeyInput(msg tea.KeyPressMsg) tea.Cmd {
 	case m.notifyModel.IsOpen():
 		cmd = m.notifyModelOpenKey(msg.String())
 
+	// Search keys precede searchbar handling for result navigation.
+	case m.fileModel.SearchModeActive() && m.focusPanel == nonePanelFocus:
+		cmd = m.searchModeKey(msg)
+
 	// If renaming a object
 	case m.fileModel.Renaming:
 		cmd = m.renamingKey(msg.String())
@@ -368,6 +377,20 @@ func (m *model) updateComponentState(msg tea.Msg) tea.Cmd {
 		m.firstTextInput = false
 	case m.fileModel.Renaming:
 		focusPanel.Rename, cmd = focusPanel.Rename.Update(msg)
+	case focusPanel.Search.Active:
+		// Drop handled toggle keys. Terminals may report them with Text set.
+		if keyMsg, ok := msg.(tea.KeyPressMsg); ok && searchKeyMatchesAction(keyMsg, common.Hotkeys.SearchToggleHidden) {
+			return nil
+		}
+		// Drop handled nav keys so result navigation never moves the query cursor.
+		if keyMsg, ok := msg.(tea.KeyPressMsg); ok && searchNavKey(keyMsg) {
+			return nil
+		}
+		previousValue := focusPanel.SearchBar.Value()
+		focusPanel.SearchBar, cmd = focusPanel.SearchBar.Update(msg)
+		if focusPanel.SearchBar.Value() != previousValue {
+			cmd = tea.Batch(cmd, m.restartSearchCmd())
+		}
 	case focusPanel.SearchBar.Focused():
 		focusPanel.SearchBar, cmd = focusPanel.SearchBar.Update(msg)
 	case m.typingModal.open:
