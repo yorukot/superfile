@@ -78,6 +78,7 @@ func visitEntry(abs, rel, name string, info os.FileInfo, ancestors []os.FileInfo
 	}
 }
 
+// Reports whether the symlink target is one of the directories above it.
 func containsSameFile(target os.FileInfo, ancestors []os.FileInfo) bool {
 	for _, ancestor := range ancestors {
 		if os.SameFile(target, ancestor) {

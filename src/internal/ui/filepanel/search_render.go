@@ -39,6 +39,7 @@ func (m *Model) renderSearchResults(r *rendering.Renderer) {
 	r.AddLines(m.renderSearchStatusLine())
 }
 
+// Renders one result row with the matched characters highlighted.
 func (m *Model) renderSearchRow(itemIndex int) string {
 	result := m.Search.Results[itemIndex]
 

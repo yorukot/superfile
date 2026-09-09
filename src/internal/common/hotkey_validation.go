@@ -21,6 +21,8 @@ func IsModifierHotkey(s string) bool {
 	return ok
 }
 
+// Splits a binding like "alt+." into its modifiers and final key.
+// Reports false when the shape is wrong.
 func parseModifierHotkey(s string) (mods []string, base string, ok bool) {
 	lower := strings.ToLower(strings.TrimSpace(s))
 	parts := strings.Split(lower, "+")
@@ -44,6 +46,7 @@ func parseModifierHotkey(s string) (mods []string, base string, ok bool) {
 	return parts[:len(parts)-1], base, true
 }
 
+// Reports whether the segment names a modifier key.
 func isHotkeyModifier(s string) bool {
 	for _, mod := range searchToggleHiddenModifiers {
 		if s == mod {
@@ -79,6 +82,7 @@ func ValidateSearchToggleHidden(bindings []string) string {
 	return ""
 }
 
+// Explains why a search_toggle_hidden binding failed validation.
 func SearchToggleHiddenErrorMessage(offender string) string {
 	if mods, base, ok := parseModifierHotkey(offender); ok &&
 		slices.Contains(mods, "ctrl") && !isCtrlDeliverableBase(base) {

@@ -17,10 +17,12 @@ type topN struct {
 	order int64
 }
 
+// Makes an empty ranking that keeps at most limit results.
 func newTopN(limit int) *topN {
 	return &topN{limit: limit}
 }
 
+// Keeps the result when it beats the worst one held so far.
 func (t *topN) add(r Result) {
 	item := rankedResult{result: r, order: t.order}
 	t.order++
@@ -36,6 +38,7 @@ func (t *topN) add(r Result) {
 	t.siftDown(0)
 }
 
+// Reports whether a sorts ahead of b: higher score first, earlier arrival on ties.
 func outranks(a, b rankedResult) bool {
 	if a.result.Score != b.result.Score {
 		return a.result.Score > b.result.Score
@@ -43,6 +46,7 @@ func outranks(a, b rankedResult) bool {
 	return a.order < b.order
 }
 
+// Returns the kept results ordered best first.
 func (t *topN) sorted() []Result {
 	items := make([]rankedResult, len(t.items))
 	copy(items, t.items)
@@ -56,6 +60,7 @@ func (t *topN) sorted() []Result {
 	return out
 }
 
+// Restores the heap order after appending at index i.
 func (t *topN) siftUp(i int) {
 	for i > 0 {
 		parent := (i - 1) / 2 //nolint:mnd // binary heap parent index
@@ -67,6 +72,7 @@ func (t *topN) siftUp(i int) {
 	}
 }
 
+// Restores the heap order after replacing the front at index i.
 func (t *topN) siftDown(i int) {
 	n := len(t.items)
 	for {

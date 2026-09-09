@@ -34,6 +34,7 @@ func (m *Model) EnterSearchMode() {
 	m.SearchBar.Focus()
 }
 
+// Leaves search mode and clears the session.
 func (m *Model) ExitSearchMode() {
 	m.Search.Active = false
 	m.Search.Root = ""
@@ -42,6 +43,7 @@ func (m *Model) ExitSearchMode() {
 	m.SearchBar.SetValue("")
 }
 
+// Merges a background progress snapshot into the session, keeping the cursor valid.
 func (m *Model) ApplySearchProgress(p search.Progress) {
 	m.Search.Results = p.Results
 	m.Search.MatchCount = p.MatchCount
@@ -74,6 +76,7 @@ func (m *Model) restoreSearchSelection() {
 	}
 }
 
+// Returns the result under the cursor, or nil when there are no results.
 func (m *Model) GetSearchCursorResult() *search.Result {
 	if len(m.Search.Results) == 0 {
 		return nil
@@ -81,6 +84,7 @@ func (m *Model) GetSearchCursorResult() *search.Result {
 	return &m.Search.Results[m.Search.Cursor]
 }
 
+// Moves the cursor and scrolls the view so the cursor stays visible.
 func (m *Model) searchScrollToCursor(cursor int) {
 	if cursor < 0 || cursor >= len(m.Search.Results) {
 		return
@@ -95,6 +99,7 @@ func (m *Model) searchScrollToCursor(cursor int) {
 	}
 }
 
+// Moves the cursor by delta, wrapping around the result list.
 func (m *Model) searchMoveCursorBy(delta int) {
 	if len(m.Search.Results) == 0 {
 		return
@@ -103,22 +108,27 @@ func (m *Model) searchMoveCursorBy(delta int) {
 	m.searchScrollToCursor(cursor)
 }
 
+// Moves the search cursor up one result.
 func (m *Model) SearchListUp() {
 	m.searchMoveCursorBy(-1)
 }
 
+// Moves the search cursor down one result.
 func (m *Model) SearchListDown() {
 	m.searchMoveCursorBy(1)
 }
 
+// Moves the search cursor up one page.
 func (m *Model) SearchPgUp() {
 	m.searchPageScroll(-m.getPageScrollSize())
 }
 
+// Moves the search cursor down one page.
 func (m *Model) SearchPgDown() {
 	m.searchPageScroll(m.getPageScrollSize())
 }
 
+// Moves the cursor by delta without wrapping, clamped to the list.
 func (m *Model) searchPageScroll(delta int) {
 	if len(m.Search.Results) == 0 {
 		return

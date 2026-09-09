@@ -59,6 +59,8 @@ func Run(ctx context.Context, root, query string, includeHidden bool, emit func(
 	emit(snapshot(true))
 }
 
+// Scores one batch of walked paths against the query.
+// Drops "*" first since fzf reads it literally.
 func matchBatch(query string, candidates []Result) []Result {
 	if len(candidates) == 0 {
 		return nil

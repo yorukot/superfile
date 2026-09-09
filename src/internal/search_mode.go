@@ -21,6 +21,7 @@ const searchDebounceDelay = 120 * time.Millisecond
 // Buffers progress snapshots between walk and pump.
 const searchChannelSize = 4
 
+// Opens recursive search on the focused panel and starts the first walk.
 func (m *model) searchModeEnter() tea.Cmd {
 	panel := m.getFocusedFilePanel()
 	panel.EnterSearchMode()
@@ -30,6 +31,7 @@ func (m *model) searchModeEnter() tea.Cmd {
 	return m.restartSearchCmd()
 }
 
+// Closes recursive search and restores the panel listing.
 func (m *model) searchModeExit() {
 	if m.searchCancel != nil {
 		m.searchCancel()

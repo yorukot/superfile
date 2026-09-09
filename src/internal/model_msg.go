@@ -139,12 +139,14 @@ func (msg ExtractOperationMsg) ApplyToModel(_ *model) tea.Cmd {
 	return nil
 }
 
+// Carries one search progress snapshot from the background walk to the model.
 type SearchProgressMsg struct {
 	BaseMessage
 
 	progress search.Progress
 }
 
+// Builds a search progress message tagged with its request ID.
 func NewSearchProgressMsg(progress search.Progress, reqID int) SearchProgressMsg {
 	return SearchProgressMsg{
 		progress: progress,
