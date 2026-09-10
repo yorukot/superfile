@@ -47,7 +47,8 @@ type Model struct {
 	lastTimeGetElement time.Time
 	// refreshPending is set while an off-loop re-read of `loaded` is in flight.
 	refreshPending bool
-	// generation is bumped by MarkStale to invalidate in-flight reads.
+	// generation is bumped by a synchronous read and by MarkStale, to invalidate
+	// reads already in flight.
 	generation int
 }
 

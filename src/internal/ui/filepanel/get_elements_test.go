@@ -417,3 +417,72 @@ func TestMarkStaleInvalidatesInFlightRead(t *testing.T) {
 	panel.lastTimeGetElement = time.Now().Add(-2 * focussedPanelReRenderTime)
 	assert.NotNil(t, panel.UpdateElementsIfNeeded(false, false))
 }
+
+// A panel can return to a request it has already been on - leaving a directory
+// and coming back, or clearing search text. The read it does on returning is
+// newer than anything dispatched before, so those must not land afterwards and
+// replace it, even though their request matches again.
+func TestApplyElementsDropsResultFromSupersededRead(t *testing.T) {
+	testdata := []struct {
+		name string
+		// leaveAndReturn moves the panel off its current request and back again,
+		// with each move read synchronously.
+		leaveAndReturn func(t *testing.T, panel *Model, otherDir string)
+	}{
+		{
+			name: "directory left and re-entered",
+			leaveAndReturn: func(t *testing.T, panel *Model, otherDir string) {
+				t.Helper()
+				location := panel.Location
+				panel.Location = otherDir
+				require.Nil(t, panel.UpdateElementsIfNeeded(false, false))
+				panel.Location = location
+			},
+		},
+		{
+			name: "search text typed and cleared",
+			leaveAndReturn: func(t *testing.T, panel *Model, _ string) {
+				t.Helper()
+				panel.SearchBar.SetValue("file1")
+				require.Nil(t, panel.UpdateElementsIfNeeded(false, false))
+				panel.SearchBar.SetValue("")
+			},
+		},
+	}
+
+	for _, tt := range testdata {
+		t.Run(tt.name, func(t *testing.T) {
+			curTestDir := t.TempDir()
+			otherDir := filepath.Join(curTestDir, "other")
+			utils.SetupDirectories(t, otherDir)
+			utils.SetupFiles(t, filepath.Join(curTestDir, "file1.txt"))
+
+			panel := testModel(0, 0, 12, BrowserMode, nil)
+			panel.Location = curTestDir
+			panel.IsFocused = true
+			require.Nil(t, panel.UpdateElementsIfNeeded(false, false))
+			require.Equal(t, 2, panel.ElemCount())
+
+			// A background refresh is dispatched and reads the directory as it is now
+			panel.lastTimeGetElement = time.Now().Add(-2 * focussedPanelReRenderTime)
+			req := panel.UpdateElementsIfNeeded(false, false)
+			require.NotNil(t, req)
+			supersededElements := req.Read()
+
+			// The panel moves off that request, the directory changes, and it returns
+			tt.leaveAndReturn(t, &panel, otherDir)
+			utils.SetupFiles(t, filepath.Join(curTestDir, "file2.txt"))
+			require.Nil(t, panel.UpdateElementsIfNeeded(false, false))
+			require.Equal(t, 3, panel.ElemCount(), "returning must read the directory again")
+
+			// The earlier read now lands and must be ignored
+			panel.ApplyElements(*req, supersededElements, false)
+			assert.Equal(t, 3, panel.ElemCount(),
+				"a superseded read must not replace the listing read after it")
+
+			// and the panel must still be able to refresh afterwards
+			panel.lastTimeGetElement = time.Now().Add(-2 * focussedPanelReRenderTime)
+			assert.NotNil(t, panel.UpdateElementsIfNeeded(false, false))
+		})
+	}
+}

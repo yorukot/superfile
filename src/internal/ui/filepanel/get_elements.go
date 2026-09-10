@@ -21,9 +21,9 @@ type ElementsRequest struct {
 	SortReversed   bool
 	DisplayDotFile bool
 
-	// generation is bumped by MarkStale. Without it a read that started before
-	// superfile changed the directory would carry an identical request, and could
-	// land afterwards and replace the listing read after the change.
+	// generation is bumped whenever a synchronous read supersedes what is in
+	// flight. Without it such a read would carry an identical request, and could
+	// land afterwards and replace the newer listing.
 	generation int
 }
 
@@ -130,6 +130,12 @@ func (m *Model) refreshInterval() time.Duration {
 func (m *Model) UpdateElementsIfNeeded(force bool, displayDotFile bool) *ElementsRequest {
 	req := m.elementsRequest(displayDotFile)
 	if force || m.loaded != req {
+		// This read supersedes anything already in flight. Those carry an older
+		// generation, and would otherwise match again whenever the panel returns to
+		// a request it has been on before - leaving a directory and coming back, or
+		// clearing search text - and replace this newer listing.
+		m.generation++
+		req.generation = m.generation
 		m.ApplyElements(req, req.Read(), displayDotFile)
 		return nil
 	}
@@ -146,14 +152,14 @@ func (m *Model) UpdateElementsIfNeeded(force bool, displayDotFile bool) *Element
 // instead of at the next poll.
 func (m *Model) MarkStale() {
 	// Bumping the generation makes `loaded` differ from what the panel now wants,
-	// which takes the synchronous path below, and makes a read dispatched before
+	// which takes the synchronous path above, and makes a read dispatched before
 	// this point fail the check in ApplyElements.
 	m.generation++
 }
 
 // ApplyElements installs a listing, ignoring a result for a request the panel has
 // since moved on from - a different directory, search or sort, or a generation
-// bumped by MarkStale while the read was in flight.
+// left behind by a synchronous read while this one was in flight.
 func (m *Model) ApplyElements(req ElementsRequest, elements []Element, displayDotFile bool) {
 	if req != m.elementsRequest(displayDotFile) {
 		slog.Debug("Ignoring elements of a stale request", "reqLocation", req.Location,
