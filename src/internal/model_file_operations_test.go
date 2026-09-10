@@ -178,6 +178,38 @@ func TestFileRename(t *testing.T) {
 		}, DefaultTestTimeout, DefaultTestTick, "File never got renamed")
 	})
 
+	t.Run("Rename is visible in a second panel on the same directory", func(t *testing.T) {
+		// A rename has to invalidate every panel, not only the focused one.
+		// Otherwise a background re-read dispatched before the rename can land
+		// afterwards and leave the other panel showing the old name.
+		renamed := filepath.Join(curTestDir, "file2_renamed.txt")
+		t.Cleanup(func() { _ = os.Rename(renamed, file2) })
+
+		m := defaultTestModel(curTestDir)
+		TeaUpdate(m, nil)
+		_, err := m.splitPanel()
+		require.NoError(t, err)
+		TeaUpdate(m, nil)
+		require.Equal(t, 2, m.fileModel.PanelCount())
+		for i := range m.fileModel.FilePanels {
+			require.NotEqual(t, -1, m.fileModel.FilePanels[i].FindElementIndexByLocation(file2),
+				"both panels should list file2 before the rename")
+		}
+
+		setFilePanelSelectedItemByName(t, m.getFocusedFilePanel(), filepath.Base(file2))
+		m.panelItemRename()
+		m.getFocusedFilePanel().Rename.SetValue(filepath.Base(renamed))
+		m.confirmRename()
+		TeaUpdate(m, nil)
+
+		for i := range m.fileModel.FilePanels {
+			assert.NotEqual(t, -1, m.fileModel.FilePanels[i].FindElementIndexByLocation(renamed),
+				"panel %d should show the renamed file", i)
+			assert.Equal(t, -1, m.fileModel.FilePanels[i].FindElementIndexByLocation(file2),
+				"panel %d should no longer show the old name", i)
+		}
+	})
+
 	t.Run("Rename confirmation for same name", func(t *testing.T) {
 		actualTest := func(doRename bool) {
 			m := defaultTestModel(curTestDir)

@@ -3,6 +3,7 @@ package sidebar
 import (
 	"log/slog"
 	"slices"
+	"time"
 
 	tea "charm.land/bubbletea/v2"
 
@@ -83,7 +84,31 @@ func (s *Model) HandleSearchBarKey(msg string) {
 	}
 }
 
+// UpdateDirectoriesIfNeeded refreshes the sidebar, at most once every
+// sidebarRefreshInterval. A changed search query, or an explicit force after
+// pinning or renaming, is reflected at once - the rest is only polling for pins
+// and mounts changed outside superfile, and doing that on every message made
+// every keystroke wait on the filesystem.
+func (s *Model) UpdateDirectoriesIfNeeded(force bool) {
+	if s.Disabled() {
+		return
+	}
+	query := s.searchBar.Value()
+	if !force && query == s.loadedQuery && time.Since(s.lastRefresh) < sidebarRefreshInterval {
+		return
+	}
+	s.loadedQuery = query
+	s.UpdateDirectories()
+	// Stamped after the read, not before: a read that takes as long as the
+	// interval would otherwise leave the stamp already expired on return, and the
+	// next message would start another one straight away.
+	s.lastRefresh = time.Now()
+}
+
 // UpdateDirectories refreshes the list of directories based on the search query or section configuration.
+// ponytail: still synchronous. Move it to a tea.Cmd if a stat of a pinned
+// directory on a hung mount starts blocking the UI - that needs Load() to stop
+// saving the cleaned list back, otherwise it races Toggle() over the same file.
 func (s *Model) UpdateDirectories() {
 	if s.Disabled() {
 		return
