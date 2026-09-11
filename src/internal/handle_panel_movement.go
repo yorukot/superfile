@@ -24,8 +24,8 @@ func (m *model) parentDirectory() {
 	}
 }
 
-// Enter directory or open file with default application
-// TODO: Unit test this
+// enterPanel enters a directory, opens a file with default application, or writes
+// selected/focused paths to the chooser file and exits if --chooser-file mode is enabled.
 func (m *model) enterPanel() {
 	panel := m.getFocusedFilePanel()
 

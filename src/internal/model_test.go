@@ -240,6 +240,21 @@ func TestChooserFile(t *testing.T) {
 			expectedContent: file1,
 		},
 		{
+			name:            "Open with default app with multiple selected files",
+			chooserFile:     testChooserFile,
+			hotkey:          common.Hotkeys.Confirm[0],
+			selectedFiles:   []string{file1, file2},
+			expectedQuit:    true,
+			expectedContent: file1 + "\n" + file2,
+		},
+		{
+			name:            "Open with default app with no selection falls back to focused item",
+			chooserFile:     testChooserFile,
+			hotkey:          common.Hotkeys.Confirm[0],
+			expectedQuit:    true,
+			expectedContent: file1,
+		},
+		{
 			name:            "Open with file editor with valid chooser file",
 			chooserFile:     testChooserFile,
 			hotkey:          common.Hotkeys.OpenFileWithEditor[0],
