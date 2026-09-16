@@ -7,12 +7,17 @@ import (
 )
 
 // Accepted modifier prefixes for search_toggle_hidden.
-var searchToggleHiddenModifiers = []string{"ctrl", "alt", "shift", "super", "meta", "hyper"} //nolint:gochecknoglobals // static allowlist
+var searchToggleHiddenModifiers = []string{ //nolint:gochecknoglobals // static allowlist
+	"ctrl", "alt", "shift", "super", "meta", "hyper",
+}
 
 // Single-rune ctrl bases with ASCII control codes. Letters handled separately.
 // These symbols (e.g. ctrl+@ is NUL, ctrl+? is DEL) are real control codes
 // terminals can deliver, unlike ctrl+punctuation such as ctrl+..
-const ctrlBaseExceptions = "@[\\]^_?" //nolint:gochecknoglobals // fixed control-code symbol set
+const ctrlBaseExceptions = "@[\\]^_?"
+
+// Minimum parts in a modifier combo: at least one modifier plus a final key.
+const minModifierHotkeyParts = 2
 
 // IsModifierHotkey reports whether s is a modifier combo like "alt+.".
 // Shape only. See ValidateSearchToggleHidden for terminal deliverability.
@@ -23,10 +28,10 @@ func IsModifierHotkey(s string) bool {
 
 // Splits a binding like "alt+." into its modifiers and final key.
 // Reports false when the shape is wrong.
-func parseModifierHotkey(s string) (mods []string, base string, ok bool) {
+func parseModifierHotkey(s string) ([]string, string, bool) {
 	lower := strings.ToLower(strings.TrimSpace(s))
 	parts := strings.Split(lower, "+")
-	if len(parts) < 2 {
+	if len(parts) < minModifierHotkeyParts {
 		return nil, "", false
 	}
 	for _, part := range parts {
@@ -39,7 +44,7 @@ func parseModifierHotkey(s string) (mods []string, base string, ok bool) {
 			return nil, "", false
 		}
 	}
-	base = parts[len(parts)-1]
+	base := parts[len(parts)-1]
 	if isHotkeyModifier(base) {
 		return nil, "", false
 	}

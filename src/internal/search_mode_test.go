@@ -252,7 +252,9 @@ func TestSearchModeToggleHidden(t *testing.T) {
 
 	// Isolate persisted toggle.
 	oldToggleFile := variable.ToggleDotFile
+	//nolint:reassign // isolate persisted toggle for test
 	variable.ToggleDotFile = filepath.Join(t.TempDir(), "toggleDotFile")
+	//nolint:reassign // restore persisted toggle after test
 	t.Cleanup(func() { variable.ToggleDotFile = oldToggleFile })
 
 	m := defaultTestModel(root)
@@ -312,7 +314,9 @@ func TestSearchModeToggleHiddenPreservesCursor(t *testing.T) {
 
 	// Isolate persisted toggle.
 	oldToggleFile := variable.ToggleDotFile
+	//nolint:reassign // isolate persisted toggle for test
 	variable.ToggleDotFile = filepath.Join(t.TempDir(), "toggleDotFile")
+	//nolint:reassign // restore persisted toggle after test
 	t.Cleanup(func() { variable.ToggleDotFile = oldToggleFile })
 
 	m := defaultTestModel(root)

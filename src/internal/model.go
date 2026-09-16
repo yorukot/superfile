@@ -379,7 +379,8 @@ func (m *model) updateComponentState(msg tea.Msg) tea.Cmd {
 		focusPanel.Rename, cmd = focusPanel.Rename.Update(msg)
 	case focusPanel.Search.Active:
 		// Drop handled toggle keys. Terminals may report them with Text set.
-		if keyMsg, ok := msg.(tea.KeyPressMsg); ok && searchKeyMatchesAction(keyMsg, common.Hotkeys.SearchToggleHidden) {
+		if keyMsg, ok := msg.(tea.KeyPressMsg); ok &&
+			searchKeyMatchesAction(keyMsg, common.Hotkeys.SearchToggleHidden) {
 			return nil
 		}
 		// Drop handled nav keys so result navigation never moves the query cursor.
