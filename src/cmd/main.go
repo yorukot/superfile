@@ -28,8 +28,9 @@ func Run(content embed.FS) {
 	// Enable custom colored help output
 	cli.HelpPrinter = CustomHelpPrinter //nolint:reassign // Intentionally reassigning to customize help output
 
-	// Before we open log file, set all "non debug" logs to stdout
-	utils.SetRootLoggerToStdout(false)
+	// Before we open log file, send all "non debug" logs to stderr, so they
+	// never corrupt the stdout of commands like `path-list`
+	utils.SetRootLoggerToStderr(false)
 
 	common.LoadInitialPrerenderedVariables()
 	common.LoadAllDefaultConfig(content)
