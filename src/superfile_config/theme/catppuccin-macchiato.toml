@@ -75,3 +75,6 @@ correct = "#a6da95"
 error = "#ed8796"
 hint = "#7dc4e4"
 cancel = "#ee99a0"
+
+#-- Search Mode
+search_mode_highlight = "#7dc4e4"

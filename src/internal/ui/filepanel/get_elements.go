@@ -86,6 +86,10 @@ func (m *Model) shouldSkipPanelUpdate(nowTime time.Time) bool {
 }
 
 func (m *Model) UpdateElementsIfNeeded(force bool, displayDotFile bool) {
+	// Search shows streamed results. Skip directory refresh.
+	if m.Search.Active {
+		return
+	}
 	nowTime := time.Now()
 	if force || !m.shouldSkipPanelUpdate(nowTime) {
 		// Load elements for this panel (with/without search filter)
