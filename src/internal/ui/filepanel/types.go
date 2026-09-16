@@ -1,14 +1,18 @@
 package filepanel
 
 import (
+	"context"
 	"os"
 	"time"
 
 	"charm.land/bubbles/v2/textinput"
 	"charm.land/lipgloss/v2"
 
+	"github.com/yorukot/superfile/src/internal/filesystem"
 	"github.com/yorukot/superfile/src/internal/ui/sortmodel"
 )
+
+const LocalSessionID filesystem.SessionID = "local"
 
 // Make sure to use New() to ensure that maps are initialized
 // zero value `Model{}`, or direct initialization should be avoided
@@ -18,10 +22,13 @@ type Model struct {
 	// Note: We have tried to minimize direct access to cursor,
 	// and read it via GetCursor() at most places, to make it easier
 	// to find and harder to cause bugs of invalid value getting set to cursor
-	cursor      int
-	renderIndex int
-	IsFocused   bool
-	Location    string
+	cursor           int
+	renderIndex      int
+	IsFocused        bool
+	Location         string
+	PaneLocation     filesystem.Location
+	session          filesystem.Session
+	connectionStatus string
 	// Dimension fields
 	width  int // Total width including borders
 	height int // Total height including borders
@@ -31,16 +38,21 @@ type Model struct {
 
 	PanelMode PanelMode
 	// key is file location, value order of selection
-	selected           map[string]int
-	selectOrderCounter int
-	element            []Element
-	DirectoryRecords   map[string]directoryRecord
-	Rename             textinput.Model
-	Renaming           bool
-	SearchBar          textinput.Model
-	LastTimeGetElement time.Time
-	TargetFile         string             // filename to position cursor on after load
-	columns            []columnDefinition // columns for rendering
+	selected               map[string]int
+	selectOrderCounter     int
+	element                []Element
+	DirectoryRecords       map[string]directoryRecord
+	Rename                 textinput.Model
+	Renaming               bool
+	SearchBar              textinput.Model
+	LastTimeGetElement     time.Time
+	elementsLoading        bool
+	elementsRefreshPending bool
+	elementsRequestID      uint64
+	elementsContext        context.Context
+	elementsCancel         context.CancelFunc
+	TargetFile             string             // filename to position cursor on after load
+	columns                []columnDefinition // columns for rendering
 }
 
 // Record for directory navigation
@@ -53,6 +65,7 @@ type directoryRecord struct {
 type Element struct {
 	Name      string
 	Location  string
+	Path      filesystem.Path
 	Directory bool
 	Info      os.FileInfo
 }

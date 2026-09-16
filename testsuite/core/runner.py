@@ -47,7 +47,7 @@ def run_tests(spf_path : Path, stop_on_fail : bool = True, only_run_tests : List
 
     Returns:
         bool: Whether run was successful
-    """    
+    """
     # is this str conversion needed ?
 
     fs_manager = None
@@ -81,7 +81,7 @@ def run_tests(spf_path : Path, stop_on_fail : bool = True, only_run_tests : List
                 logger.error("Failed test %s", t)
                 if stop_on_fail:
                     break
-        
+
         logger.info("Finished running %s test. %s passed", cnt_executed, cnt_passed)
     finally:
         if test_env is not None:
@@ -90,4 +90,3 @@ def run_tests(spf_path : Path, stop_on_fail : bool = True, only_run_tests : List
             fs_manager.cleanup()
 
     return cnt_passed == cnt_executed
-        
