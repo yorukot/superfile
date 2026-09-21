@@ -54,15 +54,15 @@ func getDirectories(pinnedMgr *PinnedManager, sections []string) []directory {
 // Return system default directory e.g. Home, Downloads, etc
 func getWellKnownDirectories() []directory {
 	wellKnownDirectories := []directory{
-		{Location: xdg.Home, Icon: icon.Home, Name: "Home"},
-		{Location: xdg.UserDirs.Desktop, Icon: icon.Desktop, Name: "Desktop"},
-		{Location: xdg.UserDirs.Download, Icon: icon.Download, Name: "Downloads"},
-		{Location: xdg.UserDirs.Documents, Icon: icon.Documents, Name: "Documents"},
-		{Location: xdg.UserDirs.Pictures, Icon: icon.Pictures, Name: "Pictures"},
-		{Location: xdg.UserDirs.Videos, Icon: icon.Videos, Name: "Videos"},
-		{Location: xdg.UserDirs.Music, Icon: icon.Music, Name: "Music"},
-		{Location: xdg.UserDirs.Templates, Icon: icon.Templates, Name: "Templates"},
-		{Location: xdg.UserDirs.PublicShare, Icon: icon.PublicShare, Name: "PublicShare"},
+		{Location: xdg.Home, Icon: icon.Home, Name: common.FolderHome},
+		{Location: xdg.UserDirs.Desktop, Icon: icon.Desktop, Name: common.FolderDesktop},
+		{Location: xdg.UserDirs.Download, Icon: icon.Download, Name: common.FolderDownloads},
+		{Location: xdg.UserDirs.Documents, Icon: icon.Documents, Name: common.FolderDocuments},
+		{Location: xdg.UserDirs.Pictures, Icon: icon.Pictures, Name: common.FolderPictures},
+		{Location: xdg.UserDirs.Videos, Icon: icon.Videos, Name: common.FolderVideos},
+		{Location: xdg.UserDirs.Music, Icon: icon.Music, Name: common.FolderMusic},
+		{Location: xdg.UserDirs.Templates, Icon: icon.Templates, Name: common.FolderTemplates},
+		{Location: xdg.UserDirs.PublicShare, Icon: icon.PublicShare, Name: common.FolderPublicShare},
 	}
 
 	// Add Trash directory for Linux only
@@ -70,7 +70,7 @@ func getWellKnownDirectories() []directory {
 		wellKnownDirectories = append(wellKnownDirectories, directory{
 			Location: variable.LinuxTrashDirectory,
 			Icon:     icon.Trash,
-			Name:     "Trash",
+			Name:     common.FolderTrash,
 		})
 	}
 
