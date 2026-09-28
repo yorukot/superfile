@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"os"
 	"strings"
+	"sync/atomic"
 
 	"github.com/charmbracelet/x/ansi"
 	"github.com/charmbracelet/x/ansi/kitty"
@@ -17,8 +18,9 @@ func isKittyCapable() bool {
 	termProgram := os.Getenv("TERM_PROGRAM")
 	term := os.Getenv("TERM")
 
-	// TODO: Replace this allowlist with a real Kitty graphics capability check.
-	// tmux masks the underlying terminal through TERM/TERM_PROGRAM.
+	// This allowlist is only a provisional guess, used until the terminal
+	// answers KittyGraphicsQuery(). It cannot see through tmux, which masks
+	// both variables with its own values.
 	knownTerminals := []string{
 		"ghostty",
 		"WezTerm",
@@ -38,13 +40,87 @@ func isKittyCapable() bool {
 	return false
 }
 
+// Kitty graphics support, as reported by the terminal itself.
+const (
+	kittyCapUnknown int32 = iota
+	kittyCapSupported
+	kittyCapUnsupported
+)
+
+// kittyCapability holds the terminal's answer to KittyGraphicsQuery(). It stays
+// at kittyCapUnknown until a reply arrives, during which isKittyCapable()'s
+// allowlist serves as a provisional guess.
+var kittyCapability atomic.Int32
+
+// KittyGraphicsQuery returns the escape sequences that ask the terminal whether
+// it supports the kitty graphics protocol. Send it once at startup via
+// tea.Raw(); the replies arrive as messages (see MarkKittySupported and
+// MarkKittyUnsupportedIfUnknown).
+//
+// It transmits a 1x1 RGB image with a=q, which asks the terminal to report
+// support without displaying anything, followed by a primary device attributes
+// request. Every terminal answers DA1, so a DA1 reply arriving without a
+// graphics reply means the protocol is unsupported.
+//
+// Both are wrapped in a single tmux passthrough so that the host terminal, not
+// tmux, answers both — otherwise tmux would answer DA1 itself and the fence
+// could beat the host's graphics reply back.
+func KittyGraphicsQuery() string {
+	query := ansi.KittyGraphics([]byte("AAAA"), "i=31", "s=1", "v=1", "a=q", "t=d", "f=24")
+	return tmuxPassthrough(query + ansi.RequestPrimaryDeviceAttributes)
+}
+
+// MarkKittySupported records a graphics reply from the terminal. It reports
+// whether this changed the known capability, i.e. whether previews rendered
+// before now need redrawing.
+func MarkKittySupported() bool {
+	return kittyCapability.Swap(kittyCapSupported) != kittyCapSupported
+}
+
+// MarkKittyUnsupportedIfUnknown records the DA1 fence arriving with no graphics
+// reply before it. A positive reply always wins, so this only downgrades a
+// still-unknown capability. It reports whether it changed anything.
+func MarkKittyUnsupportedIfUnknown() bool {
+	return kittyCapability.CompareAndSwap(kittyCapUnknown, kittyCapUnsupported)
+}
+
+// tmuxPassthrough wraps each escape sequence in s in tmux's DCS passthrough,
+// so tmux forwards it to the host terminal instead of discarding it as an
+// unrecognised sequence. Requires "set -g allow-passthrough on" in tmux.
+//
+// Each APC is wrapped individually rather than wrapping the whole buffer in one
+// DCS: image data is chunked into many sequences and a single multi-megabyte DCS
+// risks hitting tmux's buffer limits.
+func tmuxPassthrough(s string) string {
+	if os.Getenv("TMUX") == "" || s == "" {
+		return s
+	}
+
+	var b strings.Builder
+	for len(s) > 0 {
+		seq := s
+		// Sequences are terminated by ST (ESC \); keep the terminator with its
+		// sequence. A trailing fragment without ST is passed through as-is.
+		if i := strings.Index(s, "\x1b\\"); i >= 0 {
+			seq, s = s[:i+2], s[i+2:]
+		} else {
+			s = ""
+		}
+		b.WriteString("\x1bPtmux;")
+		// tmux strips one level of escaping, so every ESC must be doubled.
+		b.WriteString(strings.ReplaceAll(seq, "\x1b", "\x1b\x1b"))
+		b.WriteString("\x1b\\")
+	}
+	return b.String()
+}
+
 // GetKittyClearRaw returns the raw APC command to clear all Kitty images.
 // This must be sent via tea.Raw(), not embedded in view content.
 func (p *ImagePreviewer) GetKittyClearRaw() string {
 	if !p.IsKittyCapable() {
 		return ""
 	}
-	return ansi.KittyGraphics(nil, "a=d")
+	return tmuxPassthrough(ansi.KittyGraphics(nil, "a=d"))
 }
 
 // generatePlacementID generates a unique placement ID based on file path
@@ -134,7 +210,7 @@ func (p *ImagePreviewer) renderWithKittyUsingTermCap(img image.Image, path strin
 
 	return &KittyImageResult{
 		Placeholders: placeholders,
-		RawTransmit:  transmitBuf.String(),
+		RawTransmit:  tmuxPassthrough(transmitBuf.String()),
 	}, nil
 }
 
@@ -173,7 +249,16 @@ func buildKittyPlaceholders(imgID int, cols, rows int) string {
 	return buf.String()
 }
 
-// IsKittyCapable checks if the terminal supports Kitty graphics protocol
+// IsKittyCapable reports whether the terminal supports the Kitty graphics
+// protocol, preferring the terminal's own answer to KittyGraphicsQuery() and
+// falling back to the $TERM/$TERM_PROGRAM allowlist until that answer arrives.
 func (p *ImagePreviewer) IsKittyCapable() bool {
-	return isKittyCapable()
+	switch kittyCapability.Load() {
+	case kittyCapSupported:
+		return true
+	case kittyCapUnsupported:
+		return false
+	default:
+		return isKittyCapable()
+	}
 }

@@ -18,6 +18,9 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 	"github.com/barasher/go-exiftool"
+	uv "github.com/charmbracelet/ultraviolet"
+
+	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
 
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
@@ -54,6 +57,9 @@ func (m *model) Init() tea.Cmd {
 	return tea.Batch(
 		textinput.Blink, // Assuming textinput.Blink is a valid command
 		processCmdToTeaCmd(m.processBarModel.GetListenCmd()),
+		// Ask the terminal whether it speaks the Kitty graphics protocol. The
+		// reply is handled in Update() as a KittyGraphicsEvent.
+		tea.Raw(filepreview.KittyGraphicsQuery()),
 	)
 }
 
@@ -64,6 +70,10 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	var sidebarCmd, inputCmd, updateCmd, panelCmd,
 		metadataCmd, filePreviewCmd, helpMenuCmd, resizeCmd tea.Cmd
+
+	// Set when the terminal's graphics capability becomes known, so that any
+	// preview already rendered with the wrong renderer is redrawn.
+	forceFilePreviewRender := false
 
 	// These are above the key message handing to prevent issues with firstKeyInput
 	// if someone presses `/` to focus to searchBar, searchBar will otherwise
@@ -95,6 +105,20 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		slog.Debug("Got ModelUpdate message", "id", msg.GetReqID())
 		updateCmd = msg.ApplyToModel(m)
 
+	// Replies to the graphics query sent in Init(). A graphics reply means the
+	// protocol is supported; DA1 is the fence — every terminal answers it, so
+	// DA1 arriving first means no graphics support.
+	case uv.KittyGraphicsEvent:
+		if filepreview.MarkKittySupported() {
+			slog.Debug("Terminal reported Kitty graphics support")
+			forceFilePreviewRender = true
+		}
+	case uv.PrimaryDeviceAttributesEvent:
+		if filepreview.MarkKittyUnsupportedIfUnknown() {
+			slog.Debug("No Kitty graphics reply before DA1, using ANSI fallback")
+			forceFilePreviewRender = true
+		}
+
 	default:
 		slog.Debug("Message of type that is not explicitly handled")
 	}
@@ -103,7 +127,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	panelCmd = m.updateComponentState(msg)
 
 	m.updateModelStateAfterMsg()
-	filePreviewCmd = m.fileModel.GetFilePreviewCmd(false)
+	filePreviewCmd = m.fileModel.GetFilePreviewCmd(forceFilePreviewRender)
 
 	metadataCmd = m.getMetadataCmd()
 
