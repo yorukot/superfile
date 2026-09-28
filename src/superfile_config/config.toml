@@ -136,6 +136,11 @@ sidebar_width = 20
 # Only enabled sections will be displayed
 sidebar_sections = ["home", "pinned", "disks"]
 
+# Show folder shortcut hints while Alt is held. Always shown on terminals without
+# modifier press/release support. Set false to hide hints without disabling shortcuts.
+show_folder_hotkey_hints = true
+
+
 #-- Border
 # Make sure to add strings that are exactly one character wide!
 # Use ' ' for borderless.

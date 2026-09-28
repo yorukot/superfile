@@ -59,6 +59,11 @@ type model struct {
 	clipboardWriter func(string) error
 	focusPanel      focusPanelType
 
+	// Terminal keyboard reporting for sidebar hints.
+	folderHintKeyboard bool
+	folderHintAltHeld  bool
+	folderHintBlurred  bool
+
 	// Modals
 	notifyModel     notify.Model
 	typingModal     typingModal
