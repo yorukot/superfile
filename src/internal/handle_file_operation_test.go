@@ -29,6 +29,7 @@ func TestCopyPath(t *testing.T) {
 
 	var copiedText string
 	captureClipboard := func(m *model) {
+		m.osc52Clipboard = false
 		m.clipboardWriter = func(text string) error {
 			copiedText = text
 			return nil
@@ -83,6 +84,46 @@ func TestCopyPath(t *testing.T) {
 
 		assert.Empty(t, copiedText)
 	})
+
+	t.Run("OSC 52 Copies Path Through The Terminal", func(t *testing.T) {
+		copiedText = ""
+		m := defaultTestModel(curTestDir)
+		captureClipboard(m)
+		m.osc52Clipboard = true
+		setFilePanelSelectedItemByLocation(t, m.getFocusedFilePanel(), file1)
+
+		cmd := TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.CopyPath[0]))
+
+		require.NotNil(t, cmd)
+		assert.Equal(t, tea.SetClipboard(file1)(), cmd())
+		assert.Equal(t, file1, copiedText, "clipboard tools still run, for ssh -X")
+	})
+
+	t.Run("OSC 52 Copies PWD Through The Terminal", func(t *testing.T) {
+		copiedText = ""
+		m := defaultTestModel(curTestDir)
+		captureClipboard(m)
+		m.osc52Clipboard = true
+
+		cmd := TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.CopyPWD[0]))
+
+		require.NotNil(t, cmd)
+		assert.Equal(t, tea.SetClipboard(curTestDir)(), cmd())
+		assert.Equal(t, curTestDir, copiedText, "clipboard tools still run, for ssh -X")
+	})
+}
+
+func TestInSSHSession(t *testing.T) {
+	t.Setenv("SSH_TTY", "")
+	t.Setenv("SSH_CONNECTION", "")
+	assert.False(t, inSSHSession())
+
+	t.Setenv("SSH_CONNECTION", "10.0.0.1 51000 10.0.0.2 22")
+	assert.True(t, inSSHSession())
+
+	t.Setenv("SSH_CONNECTION", "")
+	t.Setenv("SSH_TTY", "/dev/pts/0")
+	assert.True(t, inSSHSession())
 }
 
 func TestCompressSelectedFiles(t *testing.T) {

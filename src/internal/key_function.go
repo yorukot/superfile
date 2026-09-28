@@ -211,7 +211,7 @@ func (m *model) filePanelSelectModeKey(msg string) tea.Cmd {
 	case slices.Contains(common.Hotkeys.CutItems, msg):
 		m.copyMultipleItem(true)
 	case slices.Contains(common.Hotkeys.CopyPath, msg):
-		m.copyPath()
+		return m.copyPath()
 	case slices.Contains(common.Hotkeys.FilePanelSelectAllItem, msg):
 		panel.SelectAllItem()
 	}
@@ -237,9 +237,9 @@ func (m *model) filePanelNormalModeKey(msg string) tea.Cmd {
 	case slices.Contains(common.Hotkeys.SearchBar, msg):
 		m.searchBarFocus()
 	case slices.Contains(common.Hotkeys.CopyPath, msg):
-		m.copyPath()
+		return m.copyPath()
 	case slices.Contains(common.Hotkeys.CopyPWD, msg):
-		m.copyPWD()
+		return m.copyPWD()
 	}
 	return nil
 }
