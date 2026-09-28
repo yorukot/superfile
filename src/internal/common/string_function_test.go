@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"unicode/utf8"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -30,6 +31,10 @@ func TestStringTruncate(t *testing.T) {
 		{TruncateMiddleText, "TruncateMiddleText", "Hello world", 5, "...", "H...d"},
 		{TruncateMiddleText, "TruncateMiddleText", "Hello world", 7, "...", "He...ld"},
 		{TruncateMiddleText, "TruncateMiddleText", "Hello", 100, "...", "Hello"},
+		// multibyte UTF-8 must not be sliced mid-rune (regression for byte-vs-rune bug)
+		{TruncateMiddleText, "TruncateMiddleText", "éééééé", 5, "...", "é...é"},
+		{TruncateMiddleText, "TruncateMiddleText", "日本語のファイル", 7, "...", "日本...イル"},
+		{TruncateMiddleText, "TruncateMiddleText", "😀😁😂😃😄😅", 5, "...", "😀...😅"}, // 4-byte runes
 	}
 
 	for _, tt := range inputs {
@@ -41,6 +46,26 @@ func TestStringTruncate(t *testing.T) {
 			}
 		})
 	}
+
+	// Regression guard: even if an expected literal above is mis-edited,
+	// multibyte inputs must never yield invalid UTF-8. The original bug
+	// indexed multi-byte runes by byte offset, slicing them in half.
+	t.Run("TruncateMiddleText multibyte produces valid UTF-8", func(t *testing.T) {
+		multibyte := []struct {
+			text     string
+			maxChars int
+		}{
+			{"éééééé", 5},
+			{"日本語のファイル", 7},
+			{"😀😁😂😃😄😅", 5}, // 4-byte runes
+		}
+		for _, c := range multibyte {
+			result := TruncateMiddleText(c.text, c.maxChars, "...")
+			if !utf8.ValidString(result) {
+				t.Errorf("TruncateMiddleText(%q, %d) produced invalid UTF-8: %q", c.text, c.maxChars, result)
+			}
+		}
+	})
 }
 
 func TestFileNameWithoutExtensionText(t *testing.T) {
