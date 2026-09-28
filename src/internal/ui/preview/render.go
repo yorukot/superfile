@@ -202,6 +202,11 @@ func (m *Model) RenderWithPath(
 	}
 
 	if m.thumbnailGenerator != nil && m.thumbnailGenerator.SupportsExt(ext) {
+		// Skip the ffmpeg/pdftoppm/gs subprocess when image preview is disabled —
+		// renderImagePreview would discard the thumbnail anyway. See #1620.
+		if !common.Config.ShowImagePreview {
+			return r.AddLines(common.FilePreviewImagePreviewDisabledText).Render(), kittyClear
+		}
 		thumbnailPath, err := m.thumbnailGenerator.GetThumbnailOrGenerate(itemPath)
 		if err != nil {
 			slog.Error("Error generating thumbnail", "error", err)
