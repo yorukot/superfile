@@ -151,6 +151,39 @@ func getData() []hotkeydata { //nolint: funlen // This should be self contained
 			hotkeyWorkType: globalType,
 		},
 		{
+			subTitle: "File preview",
+		},
+		{
+			hotkey:         common.Hotkeys.PreviewScrollLineUp,
+			description:    "Scroll file preview up one line (browser mode only)",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey:         common.Hotkeys.PreviewScrollLineDown,
+			description:    "Scroll file preview down one line (browser mode only)",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey:         common.Hotkeys.PreviewScrollBulkUp,
+			description:    "Scroll file preview up by preview_scroll_bulk (browser mode only)",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey:         common.Hotkeys.PreviewScrollBulkDown,
+			description:    "Scroll file preview down by preview_scroll_bulk (browser mode only)",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey:         common.Hotkeys.PreviewScrollTop,
+			description:    "Scroll file preview to top (browser mode only)",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey:         common.Hotkeys.PreviewScrollBottom,
+			description:    "Scroll file preview to bottom (browser mode only)",
+			hotkeyWorkType: globalType,
+		},
+		{
 			hotkey:         common.Hotkeys.ParentDirectory,
 			description:    "Return to parent folder",
 			hotkeyWorkType: globalType,

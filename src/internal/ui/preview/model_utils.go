@@ -23,6 +23,9 @@ func (m *Model) SetOpen(open bool) {
 }
 
 func (m *Model) SetLocation(location string) {
+	if m.location != location {
+		m.resetScroll()
+	}
 	m.location = location
 }
 
@@ -33,11 +36,18 @@ func (m *Model) SetLoading() {
 // All content change happen via this only, to ensure the sync between
 // content and width x height, and the loading variable reset
 func (m *Model) setContent(content string, width int, height int, location string) {
+	if m.location != location {
+		m.resetScroll()
+	}
 	m.content = content
 	m.contentWidth = width
 	m.contentHeight = height
 	m.location = location
 	m.loading = false
+}
+
+func (m *Model) UpdateRenderedContent(content string, width int, height int, location string) {
+	m.setContent(content, width, height, location)
 }
 
 func (m *Model) SetEmptyWithDimensions(width int, height int) {

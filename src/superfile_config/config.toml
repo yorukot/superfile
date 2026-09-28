@@ -73,6 +73,10 @@ shell_close_on_success = false
 # Number of lines to scroll for PgUp/PgDown keys (0: full page, default behavior).
 page_scroll_size = 0
 
+#-- File Preview Scroll
+# Bulk scroll step as a fraction of the preview height: 1 = whole page, 2 = half page, 3 = one third.
+preview_scroll_bulk = 2
+
 #-- Debug Mode
 debug = false
 
