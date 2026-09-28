@@ -258,8 +258,8 @@ schema = 3
     hash = 'sha256-9eoFqbF8hYHlA7zN6+v0GzsEUai9yLLvjQ2e4j3OeEg='
 
   [mod.'github.com/stretchr/testify']
-    version = 'v1.11.1'
-    hash = 'sha256-sWfjkuKJyDllDEtnM8sb/pdLzPQmUYWYtmeWz/5suUc='
+    version = 'v1.12.1'
+    hash = 'sha256-9MTDdVjZMh1MJ5EH3HmAFrm24YqZayeMBgKwtaURZCc='
 
   [mod.'github.com/therootcompany/xz']
     version = 'v1.0.1'
@@ -270,8 +270,8 @@ schema = 3
     hash = 'sha256-L5KYLue5U14bxUuNyhZ6lIjbda6eCQsx1V6gToqfRdk='
 
   [mod.'github.com/urfave/cli/v3']
-    version = 'v3.10.1'
-    hash = 'sha256-NohRjwIBB2paQw28R9/BDU3mVtb6GS9MHaTM49eNJSs='
+    version = 'v3.13.0'
+    hash = 'sha256-tUQ+nFQ2J7BfD0oDRJBb0cBJqJDabbA1lhgqFhOlm3g='
 
   [mod.'github.com/xo/terminfo']
     version = 'v0.0.0-20220910002029-abceb7e1c41e'
@@ -284,6 +284,10 @@ schema = 3
   [mod.'github.com/yusufpapurcu/wmi']
     version = 'v1.2.4'
     hash = 'sha256-N+YDBjOW59YOsZ2lRBVtFsEEi48KhNQRb63/0ZSU3bA='
+
+  [mod.'go.yaml.in/yaml/v3']
+    version = 'v3.0.5'
+    hash = 'sha256-ygho+GU5kE7vPMx+dZYyNfCaeMjNxj66XmrcVf3afFE='
 
   [mod.'go4.org']
     version = 'v0.0.0-20260112195520-a5071408f32f'
