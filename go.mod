@@ -19,7 +19,7 @@ require (
 	github.com/reinhrst/fzf-lib v0.9.0
 	github.com/shirou/gopsutil/v4 v4.26.5
 	github.com/stretchr/testify v1.11.1
-	github.com/urfave/cli/v3 v3.9.0
+	github.com/urfave/cli/v3 v3.10.1
 	golang.org/x/image v0.41.0
 	golang.org/x/mod v0.37.0
 	golift.io/xtractr v0.3.2
