@@ -121,6 +121,11 @@ transparent_background = false
 # Default (0): Use the same width as file picker panel.
 file_preview_width = 0
 
+#-- File Preview Panel Width (percent)
+# Direct percentage (10-90) of total width for the file preview panel.
+# Overrides file_preview_width when non-zero.
+file_preview_width_percent = 0
+
 #-- File Preview Border
 # Enable border around the file preview panel for better visual separation.
 # Default: false (no border)
