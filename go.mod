@@ -13,6 +13,7 @@ require (
 	github.com/charmbracelet/x/ansi v0.11.7
 	github.com/fatih/color v1.19.0
 	github.com/fvbommel/sortorder v1.1.0
+	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/lazysegtree/go-zoxide v0.1.0
 	github.com/lithammer/shortuuid v3.0.0+incompatible
 	github.com/muesli/termenv v0.16.0
