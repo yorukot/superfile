@@ -117,6 +117,29 @@ This may become tedious when you have a large number of items. Instead, you can 
 
 You can also press `A` (shift+a) to select everything in the current directory.
 
+##### Selecting by mask
+
+Press `+` to select every item whose name matches a mask, for example `*.txt`. Press `-` to unselect items by mask instead. Press `enter` to apply the mask, `esc` or `ctrl`+`c` to cancel.
+
+Masks support the usual wildcards:
+
+| Mask            | Matches                                       |
+| --------------- | --------------------------------------------- |
+| `*.txt`         | every item ending in `.txt`                    |
+| `report*`       | every item whose name starts with `report`     |
+| `file?.log`     | `file1.log`, `file2.log`, but not `file10.log` |
+| `report[0-9].*` | `report1.pdf`, `report2.txt`, ...              |
+| `*.png *.jpg`   | both masks, separated by a space               |
+| `*.*` or `*`    | everything                                     |
+
+:::tip
+
+Masks are case insensitive, so `*.png` also matches `PHOTO.PNG`. They match directories as well as files, and only apply to what the panel currently shows, so an active search filter or hidden dotfiles narrow down what gets selected.
+
+Pressing `+` while in browser mode switches the panel to selection mode for you.
+
+:::
+
 ![selection-mode-demo](../../../assets/demo/selection-mode-demo.gif)
 
 ### File operations

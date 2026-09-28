@@ -24,6 +24,12 @@ const (
 )
 
 const (
+	MaskSelectTitle   = "Select items by mask"
+	MaskUnselectTitle = "Unselect items by mask"
+	MaskNoMatchText   = "No item matches this mask"
+)
+
+const (
 	TrashWarnTitle             = "Are you sure you want to move this to trash can"
 	TrashWarnContent           = "This operation will move file or directory to trash can."
 	PermanentDeleteWarnTitle   = "Are you sure you want to completely delete"
