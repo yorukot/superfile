@@ -463,6 +463,16 @@ func checkFileReadable(filename string) error {
 	return nil
 }
 
+// getSelectedOrFocusedPaths returns the newline-separated locations of all selected items in the panel,
+// or the focused item's location if no items are selected.
+func (m *model) getSelectedOrFocusedPaths(panel *filepanel.Model) string {
+	if panel.SelectedCount() > 0 {
+		return strings.Join(panel.GetSelectedLocationsSortedAsVisible(), "\n")
+	}
+	return panel.GetFocusedItem().Location
+}
+
+// chooserFileWriteAndQuit writes the given path string to variable.ChooserFile and initiates quitting the model.
 func (m *model) chooserFileWriteAndQuit(path string) error {
 	// Attempt to write to the file
 	err := os.WriteFile(variable.ChooserFile, []byte(path), utils.ConfigFilePerm)
@@ -473,7 +483,8 @@ func (m *model) chooserFileWriteAndQuit(path string) error {
 	return nil
 }
 
-// Open file with default editor
+// openFileWithEditor opens the selected or focused file with the default editor, or writes
+// paths to the chooser file and exits if --chooser-file mode is enabled.
 func (m *model) openFileWithEditor() tea.Cmd {
 	panel := m.getFocusedFilePanel()
 	// Check if panel is empty
@@ -482,7 +493,7 @@ func (m *model) openFileWithEditor() tea.Cmd {
 	}
 
 	if variable.ChooserFile != "" {
-		err := m.chooserFileWriteAndQuit(panel.GetFocusedItem().Location)
+		err := m.chooserFileWriteAndQuit(m.getSelectedOrFocusedPaths(panel))
 		if err == nil {
 			return nil
 		}
@@ -567,6 +578,7 @@ func (m *model) copyPath() {
 	}
 }
 
+// copyPathText returns the path text to copy, containing all selected paths or the focused path.
 func (m *model) copyPathText() string {
 	panel := m.getFocusedFilePanel()
 
@@ -574,11 +586,7 @@ func (m *model) copyPathText() string {
 		return ""
 	}
 
-	if panel.PanelMode == filepanel.SelectMode && panel.SelectedCount() > 0 {
-		return strings.Join(panel.GetSelectedLocationsSortedAsVisible(), "\n")
-	}
-
-	return panel.GetFocusedItem().Location
+	return m.getSelectedOrFocusedPaths(panel)
 }
 
 // TODO: This is also an IO operations, do it via tea.Cmd
