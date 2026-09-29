@@ -112,7 +112,7 @@ func TestFileCreation(t *testing.T) {
 					return m.spfError.IsOpen()
 				}, DefaultTestTimeout, DefaultTestTick, "SPF error modal never opened for input: %q", tt.fileName)
 
-				p.SendKey(common.Hotkeys.Quit[0])
+				p.SendKey(common.Hotkeys.ConfirmTyping[0])
 				require.Eventually(t, func() bool {
 					return !m.spfError.IsOpen()
 				}, DefaultTestTimeout, DefaultTestTick, "SPF error modal never closed")
