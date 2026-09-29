@@ -2,7 +2,6 @@ package filepanel
 
 import (
 	"fmt"
-	"path/filepath"
 	"strings"
 
 	"github.com/yorukot/superfile/src/config/icon"
@@ -140,12 +139,4 @@ func (m *Model) renderSelectBox(isSelected bool) string {
 		return common.CheckboxChecked
 	}
 	return common.CheckboxEmpty
-}
-
-// Checks whether a panel needs re-render due to being invalid or due to directory change
-func (m *Model) NeedsReRender() bool {
-	if !m.EmptyOrInvalid() {
-		return filepath.Dir(m.GetFirstElement().Location) != m.Location
-	}
-	return true
 }

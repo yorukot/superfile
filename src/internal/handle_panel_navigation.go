@@ -13,6 +13,7 @@ func (m *model) pinnedDirectory() {
 	if err != nil {
 		slog.Error("Error while toggling pinned directory", "error", err)
 	}
+	m.sidebarModel.UpdateDirectoriesIfNeeded(true)
 }
 
 // Focus on sidebar

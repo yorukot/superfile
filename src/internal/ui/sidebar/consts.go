@@ -1,8 +1,14 @@
 package sidebar
 
 import (
+	"time"
+
 	"github.com/yorukot/superfile/src/pkg/utils"
 )
+
+// How often the sidebar re-reads the pinned file, stats the well known
+// directories and enumerates mounts.
+const sidebarRefreshInterval = 2 * time.Second
 
 // These are effectively consts
 // Had to use `var` as go doesn't allows const structs
