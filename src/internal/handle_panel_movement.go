@@ -125,12 +125,17 @@ func (m *model) sidebarSelectDirectory() {
 }
 
 // Toggle dotfile display or not
-func (m *model) toggleDotFileController() {
+func (m *model) toggleDotFileController() tea.Cmd {
 	m.fileModel.ToggleDotFile()
 	err := utils.WriteBoolFile(variable.ToggleDotFile, m.fileModel.DisplayDotFiles)
 	if err != nil {
 		slog.Error("Error while updating toggleDotFile data", "error", err)
 	}
+	// Restarts active search with new visibility.
+	if m.getFocusedFilePanel().Search.Active {
+		return m.restartSearchCmd()
+	}
+	return nil
 }
 
 // Toggle dotfile display or not

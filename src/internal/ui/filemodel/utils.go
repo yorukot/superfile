@@ -10,6 +10,11 @@ func (m *Model) GetFocusedFilePanel() *filepanel.Model {
 	return &m.FilePanels[m.FocusedPanelIndex]
 }
 
+// Reports whether the focused panel is in recursive search mode.
+func (m *Model) SearchModeActive() bool {
+	return m.GetFocusedFilePanel().Search.Active
+}
+
 func New(firstPanelPaths []string, toggleDotFile bool) Model {
 	return Model{
 		FilePanels:       filepanel.FilePanelSlice(firstPanelPaths),
