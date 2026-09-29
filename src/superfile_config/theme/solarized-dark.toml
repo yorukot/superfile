@@ -1,0 +1,77 @@
+##############################################
+#                                            #
+#            Solarized Dark Theme            #
+#                                            #
+##############################################
+
+# This theme was created by: https://github.com/forsoothcodes ! Thank you <3
+
+# This contains the theme config file for superfile! For more details see:
+# https://superfile.dev/configure/custom-theme/
+
+###############################################################################
+#                           Code Syntax Highlighting                          #
+###############################################################################
+
+# Find one you like at: https://github.com/alecthomas/chroma/blob/master/styles.
+
+code_syntax_highlight = "solarized-dark"
+
+###############################################################################
+#                                 Base Colors                                 #
+###############################################################################
+
+#-- Full Screen
+full_screen_fg = "#839496"
+full_screen_bg = "#002b36"
+
+#-- Gradient
+# Note: This currently only supports two colors.
+gradient_color = ["#268bd2", "#2aa198"]
+
+#-- File Panel
+file_panel_fg = "#839496"
+file_panel_bg = "#002b36"
+file_panel_border = "#839496"
+file_panel_border_active = "#268bd2"
+file_panel_top_directory_icon = "#2aa198"
+file_panel_top_path = "#859900"
+file_panel_item_selected_fg = "#268bd2"
+file_panel_item_selected_bg = "#002b36"
+
+#-- Footer
+footer_fg = "#839496"
+footer_bg = "#002b36"
+footer_border = "#b58900"
+footer_border_active = "#cb4b16"
+
+#-- Sidebar
+sidebar_fg = "#839496"
+sidebar_bg = "#002b36"
+sidebar_title = "#d33682"
+sidebar_border = "#6c71c4"
+sidebar_border_active = "#d33682"
+sidebar_item_selected_fg = "#002b36"
+sidebar_item_selected_bg = "#839496"
+sidebar_divider = "#93a1a1"
+
+#-- Modals
+modal_fg = "#839496"
+modal_bg = "#002b36"
+modal_border_active = "#859900"
+modal_cancel_fg = "#dc322f"
+modal_cancel_bg = "#002b36"
+modal_confirm_fg = "#859900"
+modal_confirm_bg = "#002b36"
+
+#-- Help Menu
+help_menu_hotkey = "#2aa198"
+help_menu_title = "#268bd2"
+
+#-- Special
+cursor = "#93a1a1"
+correct = "#268bd2"
+error = "#dc322f"
+hint = "#268bd2"
+cancel = "#b58900"
+directory_icon_color = "#2aa198"
