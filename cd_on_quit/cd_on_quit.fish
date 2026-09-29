@@ -1,13 +1,7 @@
 function spf
-    set os $(uname -s)
-
-    if test "$os" = "Linux"
-        set spf_last_dir "$HOME/.local/state/superfile/lastdir"
-    end
-
-    if test "$os" = "Darwin"
-        set spf_last_dir "$HOME/Library/Application Support/superfile/lastdir"
-    end
+    # Ask the binary where it writes the lastdir file, so this works for every
+    # installation method (Homebrew, package managers, manual install, ...)
+    set spf_last_dir (command spf path-list --lastdir-file)
 
     command spf $argv
 
