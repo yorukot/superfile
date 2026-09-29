@@ -85,10 +85,14 @@ func (m *Model) getContent(r *rendering.Renderer, renderHotkeyLength int, valueL
 		description := common.TruncateText(m.filteredData[i].description, valueLength, "...")
 
 		cursor := "  "
-		if m.cursor == i {
+		style := common.ModalStyle
+		if m.cursor == i && common.Config.CursorStyle == common.CursorStyleArrow {
 			cursor = common.FilePanelCursorStyle.Render(icon.Cursor + " ")
 		}
+		if m.cursor == i && common.Config.CursorStyle == common.CursorStyleHighlight {
+			style = common.FilePanelItemActiveStyle
+		}
 		r.AddLines(cursor + common.ModalStyle.Render(fmt.Sprintf("%*s%s", renderHotkeyLength,
-			common.HelpMenuHotkeyStyle.Render(hotkey+" "), common.ModalStyle.Render(description))))
+			common.HelpMenuHotkeyStyle.Render(hotkey+" "), style.Render(description))))
 	}
 }

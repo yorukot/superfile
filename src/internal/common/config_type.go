@@ -45,6 +45,8 @@ type ThemeType struct {
 	FilePanelTopPath          string `toml:"file_panel_top_path"`
 	FilePanelItemSelectedFG   string `toml:"file_panel_item_selected_fg"`
 	FilePanelItemSelectedBG   string `toml:"file_panel_item_selected_bg"`
+	FilePanelItemActiveFG     string `toml:"file_panel_item_active_fg"`
+	FilePanelItemActiveBG     string `toml:"file_panel_item_active_bg"`
 
 	// Sidebar Special Items
 	SidebarTitle          string `toml:"sidebar_title"`
@@ -92,6 +94,7 @@ type ConfigType struct {
 	Nerdfont                bool     `toml:"nerdfont"                   comment:"\n================   Style =================\n\n If you don't have or don't want Nerdfont installed you can turn this off"`
 	ShowSelectIcons         bool     `toml:"show_select_icons"          comment:"\nShow checkbox icons in select mode (requires nerdfont)"`
 	TransparentBackground   bool     `toml:"transparent_background"     comment:"\nSet transparent background or not (this only work when your terminal background is transparent)"`
+	CursorStyle             string   `toml:"cursor_style"               comment:"\nSet the cursor style. Valid values: \"arrow\", \"highlight\""`
 	FilePreviewWidth        int      `toml:"file_preview_width"         comment:"\nFile preview width allow '0' (this mean same as file panel),'x' x must be less than 10 and greater than 1 (This means that the width of the file preview will be one xth of the total width.)"`
 	EnableFilePreviewBorder bool     `toml:"enable_file_preview_border" comment:"\nEnable border around the file preview panel (default: false)"`
 	CodePreviewer           string   `toml:"code_previewer"             comment:"\nWhether to use the builtin syntax highlighting with chroma or use bat. Values: \"\" for builtin chroma, \"bat\" for bat"`
