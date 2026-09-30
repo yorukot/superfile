@@ -92,6 +92,21 @@ func (m *Model) ListDown() {
 	m.moveRenderIndexBy(1)
 }
 
+func (m *Model) ListTop() {
+	if m.MetadataLen() == 0 {
+		return
+	}
+	m.renderIndex = 0
+}
+
+func (m *Model) ListBottom() {
+	l := m.MetadataLen()
+	if l == 0 {
+		return
+	}
+	m.renderIndex = l - 1
+}
+
 // Control metadata panel page up
 func (m *Model) PgUp() {
 	m.moveRenderIndexBy(-m.getPageScrollSize())
