@@ -10,64 +10,19 @@ import (
 	"strings"
 
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
-	"github.com/yorukot/superfile/src/pkg/utils"
 )
-
-// isSamePartition checks if two paths are on the same filesystem partition
-func isSamePartition(path1, path2 string) (bool, error) {
-	// Get the absolute path to handle relative paths
-	absPath1, err := filepath.Abs(path1)
-	if err != nil {
-		return false, fmt.Errorf("failed to get absolute path of the first path: %w", err)
-	}
-
-	absPath2, err := filepath.Abs(path2)
-	if err != nil {
-		return false, fmt.Errorf("failed to get absolute path of the second path: %w", err)
-	}
-
-	if runtime.GOOS == utils.OsWindows {
-		// On Windows, we can check if both paths are on the same drive (same letter)
-		drive1 := getDriveLetter(absPath1)
-		drive2 := getDriveLetter(absPath2)
-		return drive1 == drive2, nil
-	}
-
-	// For Unix-like systems, we use the same path to check the root partition
-	return filepath.VolumeName(absPath1) == filepath.VolumeName(absPath2), nil
-}
-
-// getDriveLetter extracts the drive letter from a Windows path
-func getDriveLetter(path string) string {
-	// Windows paths are usually like "C:\path\to\file"
-	// So we need to extract the drive letter (e.g., "C")
-	return strings.ToUpper(string(path[0]))
-}
 
 // moveElement moves a file or directory efficiently
 func moveElement(src, dst string) error {
-	// Check if source and destination are on the same partition
-	sameDev, err := isSamePartition(src, dst)
-	if err != nil {
-		return fmt.Errorf("failed to check partitions: %w", err)
+	if err := os.Rename(src, dst); err == nil {
+		return nil
 	}
 
-	// If on the same partition, attempt to rename (which will use the same inode)
-	if sameDev {
-		if err = os.Rename(src, dst); err == nil {
-			return nil
-		}
-		// If rename fails, fall back to copy+delete
-	}
-
-	// If on different partitions or rename failed, fall back to copy+delete
-	err = copyElement(src, dst)
-	if err != nil {
+	if err := copyElement(src, dst); err != nil {
 		return fmt.Errorf("failed to copy: %w", err)
 	}
 
-	err = os.RemoveAll(src)
-	if err != nil {
+	if err := os.RemoveAll(src); err != nil {
 		return fmt.Errorf("failed to remove source after copy: %w", err)
 	}
 
@@ -160,15 +115,10 @@ func pasteDir(src, dst string, p *processbar.Process, cut bool, processBarModel 
 		return err
 	}
 
-	// Check if we can do a fast move within the same partition
-	sameDev, err := isSamePartition(src, dst)
-	if err == nil && sameDev && cut {
-		// For cut operations on same partition, try fast rename first
-		err = os.Rename(src, dst)
-		if err == nil {
+	if cut {
+		if renameErr := os.Rename(src, dst); renameErr == nil {
 			return nil
 		}
-		// If rename fails, fall back to manual copy
 	}
 
 	err = filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
@@ -181,17 +131,15 @@ func pasteDir(src, dst string, p *processbar.Process, cut bool, processBarModel 
 			return err
 		}
 		newPath := filepath.Join(dst, relPath)
-		return actualPasteOperation(info, path, newPath, cut, sameDev, p, processBarModel)
+		return actualPasteOperation(info, path, newPath, p, processBarModel)
 	})
 
 	if err != nil {
 		return err
 	}
 
-	// If this was a cut operation and we had to do a manual copy, remove the source
-	if cut && !sameDev {
-		err = os.RemoveAll(src)
-		if err != nil {
+	if cut {
+		if err := os.RemoveAll(src); err != nil {
 			return fmt.Errorf("failed to remove source after move: %w", err)
 		}
 	}
@@ -199,7 +147,7 @@ func pasteDir(src, dst string, p *processbar.Process, cut bool, processBarModel 
 	return nil
 }
 
-func actualPasteOperation(info os.FileInfo, path string, newPath string, cut bool, sameDev bool,
+func actualPasteOperation(info os.FileInfo, path string, newPath string,
 	p *processbar.Process, processBarModel *processbar.Model) error {
 	var err error
 	if info.IsDir() {
@@ -218,11 +166,7 @@ func actualPasteOperation(info os.FileInfo, path string, newPath string, cut boo
 
 	// File
 	p.CurrentFile = filepath.Base(path)
-	if cut && sameDev {
-		err = os.Rename(path, newPath)
-	} else {
-		err = copyFile(path, newPath, info)
-	}
+	err = copyFile(path, newPath, info)
 
 	if err != nil {
 		p.State = processbar.Failed
