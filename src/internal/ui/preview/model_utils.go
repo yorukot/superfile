@@ -1,6 +1,9 @@
 package preview
 
-import "log/slog"
+import (
+	"log/slog"
+	"strings"
+)
 
 func (m *Model) GetContent() string {
 	return m.content
@@ -24,6 +27,8 @@ func (m *Model) SetOpen(open bool) {
 
 func (m *Model) SetLocation(location string) {
 	m.location = location
+	m.lines = nil
+	m.renderIndex = 0
 }
 
 func (m *Model) SetLoading() {
@@ -38,6 +43,7 @@ func (m *Model) setContent(content string, width int, height int, location strin
 	m.contentHeight = height
 	m.location = location
 	m.loading = false
+	m.resetScroll()
 }
 
 func (m *Model) SetEmptyWithDimensions(width int, height int) {
@@ -71,4 +77,70 @@ func (m *Model) Open() {
 
 func (m *Model) Close() {
 	m.open = false
+}
+func (m *Model) IsTextPreview() bool {
+	return m.lines != nil
+}
+
+func (m *Model) ScrollUp() {
+	if m.lines == nil || m.renderIndex <= 0 {
+		return
+	}
+	m.renderIndex--
+}
+
+func (m *Model) ScrollDown() {
+	if m.lines == nil {
+		return
+	}
+	maxIndex := len(m.lines) - m.contentHeight
+	if maxIndex < 0 {
+		maxIndex = 0
+	}
+	if m.renderIndex < maxIndex {
+		m.renderIndex++
+	}
+}
+
+func (m *Model) PgUp() {
+	if m.lines == nil {
+		return
+	}
+	m.renderIndex -= m.contentHeight
+	if m.renderIndex < 0 {
+		m.renderIndex = 0
+	}
+}
+
+func (m *Model) PgDown() {
+	if m.lines == nil {
+		return
+	}
+	maxIndex := len(m.lines) - m.contentHeight
+	if maxIndex < 0 {
+		maxIndex = 0
+	}
+	m.renderIndex += m.contentHeight
+	if m.renderIndex > maxIndex {
+		m.renderIndex = maxIndex
+	}
+}
+
+func (m *Model) resetScroll() {
+	m.renderIndex = 0
+}
+
+// GetScrollRender returns the currently visible window of a scrolled text preview.
+// For non-text previews it falls back to the pre-rendered content.
+func (m *Model) GetScrollRender() string {
+	if m.lines == nil {
+		return m.content
+	}
+	start := m.renderIndex
+	end := start + m.contentHeight
+	if end > len(m.lines) {
+		end = len(m.lines)
+	}
+	window := strings.Join(m.lines[start:end], "\n")
+	return m.RenderTextWithDimension(window, m.contentHeight, m.contentWidth)
 }

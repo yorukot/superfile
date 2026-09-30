@@ -128,6 +128,11 @@ func getData() []hotkeydata { //nolint: funlen // This should be self contained
 			hotkeyWorkType: globalType,
 		},
 		{
+			hotkey:         common.Hotkeys.FocusOnPreview,
+			description:    "Focus on the file preview panel to scroll content",
+			hotkeyWorkType: globalType,
+		},
+		{
 			subTitle: "Panel movement",
 		},
 		{
