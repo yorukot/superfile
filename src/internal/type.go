@@ -80,6 +80,7 @@ type model struct {
 	modelQuitState       modelQuitStateType
 	firstTextInput       bool
 	toggleFooter         bool
+	toggleSidebar        bool
 	firstLoadingComplete bool
 	firstUse             bool
 

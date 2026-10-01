@@ -69,6 +69,7 @@ open_spf_prompt = ['>', '']
 open_zoxide = ['z', '']
 toggle_dot_file = ['.', '']
 toggle_footer = ['F', '']
+toggle_sidebar = ['S', '']
 
 ###############################################################################
 #                                Typing hotkeys                               #

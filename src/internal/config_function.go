@@ -29,7 +29,7 @@ import (
 
 // This is the only usecase of named returns, distinguish between multiple return values
 func initialConfig(firstPanelPaths []string) (toggleDotFile bool, //nolint: nonamedreturns // See above
-	toggleFooter bool, zClient *zoxidelib.Client) {
+	toggleFooter bool, toggleSidebar bool, zClient *zoxidelib.Client) {
 	// Open log stream
 	file, err := os.OpenFile(variable.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, utils.LogFilePerm)
 
@@ -90,8 +90,9 @@ func initialConfig(firstPanelPaths []string) (toggleDotFile bool, //nolint: nona
 
 	toggleDotFile = utils.ReadBoolFile(variable.ToggleDotFile, false)
 	toggleFooter = utils.ReadBoolFile(variable.ToggleFooter, true)
+	toggleSidebar = utils.ReadBoolFile(variable.ToggleSidebar, true)
 
-	return toggleDotFile, toggleFooter, zClient
+	return toggleDotFile, toggleFooter, toggleSidebar, zClient
 }
 
 func updateFirstFilePanelPaths(firstPanelPaths []string, cwd string, zClient *zoxidelib.Client) {
