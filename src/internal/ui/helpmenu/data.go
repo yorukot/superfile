@@ -103,6 +103,11 @@ func getData() []hotkeydata { //nolint: funlen // This should be self contained
 			hotkeyWorkType: globalType,
 		},
 		{
+			hotkey:         common.Hotkeys.ToggleSidebar,
+			description:    "Toggle sidebar",
+			hotkeyWorkType: globalType,
+		},
+		{
 			hotkey:         common.Hotkeys.NextFilePanel,
 			description:    "Focus on the next file panel",
 			hotkeyWorkType: globalType,

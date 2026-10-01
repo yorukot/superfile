@@ -94,6 +94,9 @@ func (s *Model) pinnedIndexRange() (int, int) {
 
 // GetWidth returns the current width of the sidebar.
 func (m *Model) GetWidth() int {
+	if m.Disabled() {
+		return 0
+	}
 	return m.width
 }
 
@@ -111,7 +114,14 @@ func (m *Model) SetHeight(height int) {
 	m.height = height
 }
 
-// Disabled returns true if the sidebar is currently disabled.
+// Disabled returns true if the sidebar is not shown, either because it is
+// disabled in the config (sidebar_width = 0) or because the user hid it.
 func (m *Model) Disabled() bool {
-	return m.disabled
+	return m.disabled || m.hidden
+}
+
+// SetHidden shows or hides the sidebar at runtime.
+// It has no effect when the sidebar is disabled in the config.
+func (m *Model) SetHidden(hidden bool) {
+	m.hidden = hidden
 }

@@ -171,6 +171,8 @@ type HotkeysType struct {
 
 	ToggleFooter []string `toml:"toggle_footer"`
 
+	ToggleSidebar []string `toml:"toggle_sidebar"`
+
 	ConfirmTyping []string `toml:"confirm_typing" comment:"=================================================================================================\nTyping hotkeys (can conflict with all hotkeys)"`
 	CancelTyping  []string `toml:"cancel_typing"`
 
