@@ -23,6 +23,15 @@ import (
 // TODO: This function has grown too big. It needs to be fixed, via major
 // updates and fixes in key handling code
 func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen,gocognit // See above
+	// Custom hotkeys support
+	for cmdName, keys := range common.Hotkeys.CustomHotkeys {
+		for _, key := range keys {
+			if msg == key {
+				return m.executeCustomCommand(cmdName)
+			}
+		}
+	}
+
 	switch {
 	// If move up Key is pressed, check the current state and executes
 	case slices.Contains(common.Hotkeys.ListUp, msg):
