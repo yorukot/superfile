@@ -72,6 +72,7 @@ open_zoxide = ['z', '']
 copy_path = ['Y', '']
 copy_present_working_directory = ['c', '']
 toggle_footer = ['ctrl+f', '']
+toggle_sidebar = ['ctrl+b', '']
 
 ###############################################################################
 #                                Typing hotkeys                               #

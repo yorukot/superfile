@@ -188,6 +188,7 @@ func InitConfigFile() {
 		variable.LogFile,
 		variable.ThemeFileVersion,
 		variable.ToggleFooter,
+		variable.ToggleSidebar,
 	); err != nil {
 		utils.PrintlnAndExit("Error creating files:", err)
 	}

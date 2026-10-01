@@ -46,6 +46,7 @@ var (
 	PinnedFile       = filepath.Join(SuperFileDataDir, "pinned.json")
 	ToggleDotFile    = filepath.Join(SuperFileDataDir, "toggleDotFile")
 	ToggleFooter     = filepath.Join(SuperFileDataDir, "toggleFooter")
+	ToggleSidebar    = filepath.Join(SuperFileDataDir, "toggleSidebar")
 
 	// StateDir files
 	LogFile     = filepath.Join(SuperFileStateDir, "superfile.log")
