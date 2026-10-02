@@ -79,7 +79,9 @@ func (m *Model) renderColumnHeaders(r *rendering.Renderer) {
 
 func (m *Model) renderFileEntries(r *rendering.Renderer) {
 	if m.Empty() {
-		r.AddLines(common.FilePanelNoneText)
+		if m.elementError != nil {
+			r.AddLines(common.FilePanelNoneText)
+		}
 		return
 	}
 	end := min(m.renderIndex+m.PanelElementHeight(), m.ElemCount())

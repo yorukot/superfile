@@ -34,6 +34,7 @@ type Model struct {
 	selected           map[string]int
 	selectOrderCounter int
 	element            []Element
+	elementError       error
 	DirectoryRecords   map[string]directoryRecord
 	Rename             textinput.Model
 	Renaming           bool
