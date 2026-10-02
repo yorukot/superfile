@@ -56,6 +56,7 @@ $EDITOR CONFIG_PATH
 metadata = false
 enable_md5_checksum = false
 zoxide_support = false
+find_file_support = false
 ```
 
 將任何外掛設為 `true` 即可啟用，或設為 `false` 來停用。
