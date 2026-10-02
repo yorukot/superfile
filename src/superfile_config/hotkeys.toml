@@ -51,6 +51,10 @@ delete_items = ['ctrl+d', 'delete', '']
 paste_items = ['ctrl+v', 'ctrl+w', '']
 permanently_delete_items = ['D', '']
 
+#-- System Clipboard (interop with the OS file manager)
+copy_to_system_clipboard = ['C', '']
+paste_from_system_clipboard = ['V', '']
+
 #-- Archive Manipulation
 compress_file = ['ctrl+a', '']
 extract_file = ['ctrl+e', '']
