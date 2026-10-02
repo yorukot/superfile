@@ -44,4 +44,4 @@ Superfile supports various plugins to extend its functionality. Below is a compl
 
 - **Config name:** `find_file_support`
 
-- **Usage:** Press `ctrl+f` to open the find modal. Start typing to filter results (empty query lists all files and folders), use arrow keys to navigate results, and press Enter to move to the selected file or folder.
+- **Usage:** Press `ctrl+f` (default) or `F` (vim hotkeys) to open the find modal. Start typing to filter results (empty query lists all files and folders), use arrow keys to navigate results, and press Enter to move to the selected file or folder.
