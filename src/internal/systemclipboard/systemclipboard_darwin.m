@@ -7,6 +7,7 @@
 
 typedef struct {
 	char *data;
+	size_t length;
 	char *errorMessage;
 } SPFClipResult;
 
@@ -46,8 +47,10 @@ char *spf_clipboard_copy_files(const char **paths, int count) {
 }
 
 // spf_clipboard_paste_files returns the file paths currently on the general
-// pasteboard, newline-separated. The result is empty (but non-NULL) when the
-// pasteboard holds no file URLs. Caller frees both fields.
+// pasteboard in their filesystem representation, each terminated by a NUL byte.
+// NUL cannot occur in a macOS path, so this framing is lossless even for names
+// containing newlines or trailing whitespace. data is NULL and length is 0 when
+// the pasteboard holds no file URLs. Caller frees data and errorMessage.
 SPFClipResult spf_clipboard_paste_files(void) {
 	SPFClipResult result = {0};
 	@autoreleasepool {
@@ -56,17 +59,29 @@ SPFClipResult spf_clipboard_paste_files(void) {
 		NSArray *classes = @[ [NSURL class] ];
 		NSArray<NSURL *> *urls = [pb readObjectsForClasses:classes options:options];
 
-		NSMutableString *joined = [NSMutableString string];
+		NSMutableData *buf = [NSMutableData data];
 		for (NSURL *url in urls) {
 			if (![url isFileURL]) {
 				continue;
 			}
-			if ([joined length] > 0) {
-				[joined appendString:@"\n"];
+			const char *fsPath = [url fileSystemRepresentation];
+			if (fsPath == NULL) {
+				continue;
 			}
-			[joined appendString:[url path]];
+			// Include the terminating NUL as the record separator.
+			[buf appendBytes:fsPath length:strlen(fsPath) + 1];
 		}
-		result.data = strdup([joined UTF8String]);
+
+		if ([buf length] == 0) {
+			return result;
+		}
+		result.data = malloc([buf length]);
+		if (result.data == NULL) {
+			result.errorMessage = strdup("out of memory reading pasteboard");
+			return result;
+		}
+		memcpy(result.data, [buf bytes], [buf length]);
+		result.length = [buf length];
 		return result;
 	}
 }

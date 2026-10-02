@@ -8,6 +8,7 @@ package systemclipboard
 
 typedef struct {
 	char *data;
+	size_t length;
 	char *errorMessage;
 } SPFClipResult;
 
@@ -18,9 +19,9 @@ void spf_clip_free_string(char *value);
 import "C"
 
 import (
+	"bytes"
 	"errors"
 	"path/filepath"
-	"strings"
 	"unsafe"
 )
 
@@ -77,23 +78,26 @@ func PasteFiles() ([]string, bool, error) {
 		return nil, false, errors.New(C.GoString(result.errorMessage))
 	}
 
-	var joined string
-	if result.data != nil {
-		joined = C.GoString(result.data)
-	}
-	joined = strings.TrimSpace(joined)
-	if joined == "" {
+	if result.data == nil || result.length == 0 {
 		return nil, false, ErrNoFiles
 	}
-
-	var paths []string
-	for _, line := range strings.Split(joined, "\n") {
-		if line = strings.TrimSpace(line); line != "" {
-			paths = append(paths, line)
-		}
-	}
+	raw := C.GoBytes(unsafe.Pointer(result.data), C.int(result.length))
+	paths := splitNULTerminated(raw)
 	if len(paths) == 0 {
 		return nil, false, ErrNoFiles
 	}
 	return paths, false, nil
+}
+
+// splitNULTerminated decodes a sequence of NUL-terminated paths. Paths are
+// returned byte-for-byte: no trimming, so names with newlines or surrounding
+// whitespace survive intact. Empty records are skipped.
+func splitNULTerminated(raw []byte) []string {
+	var paths []string
+	for _, part := range bytes.Split(raw, []byte{0}) {
+		if len(part) > 0 {
+			paths = append(paths, string(part))
+		}
+	}
+	return paths
 }

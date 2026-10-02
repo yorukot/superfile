@@ -23,6 +23,13 @@ const (
 	uriListMime          = "text/uri-list"
 )
 
+// Clipboard helper executables, resolved through PATH.
+const (
+	wlCopyBin  = "wl-copy"
+	wlPasteBin = "wl-paste"
+	xclipBin   = "xclip"
+)
+
 // linuxTool describes how to drive an external clipboard helper. On Linux the
 // clipboard is served by the owning process, so a short-lived TUI cannot hold a
 // selection itself. Both wl-copy and xclip fork into the background and keep
@@ -38,10 +45,10 @@ func waylandTool() linuxTool {
 	return linuxTool{
 		name: "wl-clipboard",
 		copyArgs: func(mime string) []string {
-			return []string{"wl-copy", "--type", mime}
+			return []string{wlCopyBin, "--type", mime}
 		},
 		pasteArgs: func(mime string) []string {
-			return []string{"wl-paste", "--no-newline", "--type", mime}
+			return []string{wlPasteBin, "--no-newline", "--type", mime}
 		},
 	}
 }
@@ -49,26 +56,26 @@ func waylandTool() linuxTool {
 // xclipTool configures xclip to exchange a specified target on the X11 clipboard.
 func xclipTool() linuxTool {
 	return linuxTool{
-		name: "xclip",
+		name: xclipBin,
 		copyArgs: func(mime string) []string {
-			return []string{"xclip", "-selection", "clipboard", "-target", mime, "-in"}
+			return []string{xclipBin, "-selection", "clipboard", "-target", mime, "-in"}
 		},
 		pasteArgs: func(mime string) []string {
-			return []string{"xclip", "-selection", "clipboard", "-target", mime, "-out"}
+			return []string{xclipBin, "-selection", "clipboard", "-target", mime, "-out"}
 		},
 	}
 }
 
 // detectTool picks the best available clipboard helper for the current session.
 func detectTool() (linuxTool, error) {
-	waylandReady := hasBinary("wl-copy") && hasBinary("wl-paste")
+	waylandReady := hasBinary(wlCopyBin) && hasBinary(wlPasteBin)
 
 	// Prefer Wayland tooling when we are in a Wayland session.
 	if os.Getenv("WAYLAND_DISPLAY") != "" && waylandReady {
 		return waylandTool(), nil
 	}
 
-	if hasBinary("xclip") {
+	if hasBinary(xclipBin) {
 		return xclipTool(), nil
 	}
 
@@ -230,14 +237,14 @@ func buildGnomeCopiedFiles(paths []string, cut bool) string {
 
 // parseGnomeCopiedFiles decodes the operation marker and file references, reporting
 // success only when the marker is valid and at least one path is present.
-func parseGnomeCopiedFiles(data []byte) (paths []string, cut bool, ok bool) {
+func parseGnomeCopiedFiles(data []byte) ([]string, bool, bool) {
 	text := strings.TrimRight(string(data), "\x00\r\n")
 	if text == "" {
 		return nil, false, false
 	}
 	lines := strings.Split(text, "\n")
-	op := strings.TrimSpace(lines[0])
-	switch op {
+	var cut bool
+	switch strings.TrimSpace(lines[0]) {
 	case "cut":
 		cut = true
 	case "copy":
@@ -245,6 +252,7 @@ func parseGnomeCopiedFiles(data []byte) (paths []string, cut bool, ok bool) {
 	default:
 		return nil, false, false
 	}
+	var paths []string
 	for _, line := range lines[1:] {
 		if p := uriToPath(line); p != "" {
 			paths = append(paths, p)
