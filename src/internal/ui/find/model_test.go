@@ -513,3 +513,61 @@ func TestUpdateRenderIndex(t *testing.T) {
 		})
 	}
 }
+
+func TestGetQueryCmdDashPrefixedQuery(t *testing.T) {
+	if _, err := exec.LookPath("fd"); err != nil {
+		t.Skip("fd is not installed")
+	}
+
+	m := setupTestModel()
+	m.fdFound = true
+	m.searchDir = t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(m.searchDir, "-h.txt"), []byte("x"), 0o644))
+	require.NoError(t, os.WriteFile(filepath.Join(m.searchDir, "normal.txt"), []byte("x"), 0o644))
+
+	// Without the `--` terminator, fd would parse `-h` as a flag and print
+	// its help text, which the parser would mistake for match results
+	msg := m.GetQueryCmd("-h")()
+	update, ok := msg.(UpdateMsg)
+	require.True(t, ok)
+
+	assert.Empty(t, update.errMsg)
+	assert.Len(t, update.results, 1)
+	assert.Equal(t, "-h.txt", filepath.Base(update.results[0].Path))
+}
+
+func TestApplyDropsPreviousSessionResults(t *testing.T) {
+	m := setupTestModel()
+	m.open = true
+	m.textInput.SetValue("abc")
+	m.openReqID = 5
+
+	stale := []FindResult{{Path: "/old/root/a.txt"}}
+	cmd := NewUpdateMsg("abc", stale, "", 3).Apply(&m)
+	assert.Nil(t, cmd)
+	assert.Empty(t, m.results, "completion from a previous session must be dropped")
+
+	fresh := []FindResult{{Path: "/new/root/b.txt"}}
+	cmd = NewUpdateMsg("abc", fresh, "", 5).Apply(&m)
+	assert.Nil(t, cmd)
+	assert.Equal(t, fresh, m.results, "completion from the current session must apply")
+}
+
+func TestOpenStartsFreshSession(t *testing.T) {
+	m := setupTestModel()
+	m.results = []FindResult{{Path: "/stale/x.txt"}}
+	m.errMsg = "old error"
+	m.cursor = 2
+	m.renderIndex = 3
+
+	m.Open("/tmp")
+
+	assert.True(t, m.IsOpen())
+	assert.Empty(t, m.results, "opening a new session should clear stale results")
+	assert.Empty(t, m.errMsg, "opening a new session should clear the stale error")
+	assert.Equal(t, 0, m.cursor)
+	assert.Equal(t, 0, m.renderIndex)
+	if m.isAvailable() {
+		assert.Equal(t, m.reqCnt-1, m.openReqID, "initial query must carry the session's starting id")
+	}
+}

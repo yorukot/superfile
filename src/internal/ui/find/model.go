@@ -123,8 +123,12 @@ func (m *Model) GetQueryCmd(query string) tea.Cmd {
 
 	slog.Debug("Submitting find query request", "query", query, "id", reqID)
 
+	// Snapshot the search root at submit time so late completions can never
+	// run against, or report results for, a different session's directory
+	searchDir := m.searchDir
+
 	return func() tea.Msg {
-		retCode, output, err := m.runFindQuery(query)
+		retCode, output, err := m.runFindQuery(searchDir, query)
 		if err != nil {
 			slog.Debug("Find query failed", "query", query, "error", err, "id", reqID)
 			return NewUpdateMsg(query, nil, err.Error(), reqID)
@@ -132,17 +136,19 @@ func (m *Model) GetQueryCmd(query string) tea.Cmd {
 		if errMsg := fdErrorMessage(retCode, output); errMsg != "" {
 			return NewUpdateMsg(query, nil, errMsg, reqID)
 		}
-		return NewUpdateMsg(query, parseFindResults(m.searchDir, output), "", reqID)
+		return NewUpdateMsg(query, parseFindResults(searchDir, output), "", reqID)
 	}
 }
 
-func (m *Model) runFindQuery(query string) (int, string, error) {
+func (m *Model) runFindQuery(searchDir, query string) (int, string, error) {
 	if query == "" {
-		return utils.ExecuteCommand(common.DefaultCommandTimeout, m.searchDir,
+		return utils.ExecuteCommand(common.DefaultCommandTimeout, searchDir,
 			"fd", "--max-results", strconv.Itoa(maxResults))
 	}
-	return utils.ExecuteCommand(common.DefaultCommandTimeout, m.searchDir,
-		"fd", "--max-results", strconv.Itoa(maxResults), query)
+	// `--` ends fd's option parsing, so dash-prefixed query text is always
+	// treated as a pattern and can never become an fd flag (e.g. `--exec`)
+	return utils.ExecuteCommand(common.DefaultCommandTimeout, searchDir,
+		"fd", "--max-results", strconv.Itoa(maxResults), "--", query)
 }
 
 func fdErrorMessage(retCode int, output string) string {
@@ -178,6 +184,15 @@ func parseFindResults(searchDir string, output string) []FindResult {
 
 // Apply updates the find modal with query results
 func (msg UpdateMsg) Apply(m *Model) tea.Cmd {
+	// Ignore completions from previous sessions (before the current Open)
+	if msg.reqID < m.openReqID {
+		slog.Debug("Ignoring find query result from a previous session",
+			"msgQuery", msg.query,
+			"msgID", msg.reqID,
+			"sessionID", m.openReqID)
+		return nil
+	}
+
 	// Ignore stale results - only apply if query matches current input
 	currentQuery := m.textInput.Value()
 	if msg.query != currentQuery {

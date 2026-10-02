@@ -14,8 +14,14 @@ func (m *Model) Open(searchDir string) tea.Cmd {
 	m.fdFound = lookupErr == nil
 	m.open = true
 	m.justOpened = true
+	m.openReqID = m.reqCnt
 	m.textInput.SetValue("")
 	_ = m.textInput.Focus()
+	// Start a fresh session - drop any results left over from a previous one
+	m.results = []FindResult{}
+	m.errMsg = ""
+	m.cursor = 0
+	m.renderIndex = 0
 
 	// Return async command for initial query instead of blocking
 	return m.GetQueryCmd("")

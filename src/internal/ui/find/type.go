@@ -32,7 +32,8 @@ type Model struct {
 	maxHeight int
 
 	// Request tracking for async queries
-	reqCnt int
+	reqCnt    int
+	openReqID int // First request id of the current session
 }
 
 // UpdateMsg represents an async query result
