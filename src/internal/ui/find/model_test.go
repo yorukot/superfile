@@ -541,6 +541,7 @@ func TestApplyDropsPreviousSessionResults(t *testing.T) {
 	m.open = true
 	m.textInput.SetValue("abc")
 	m.openReqID = 5
+	m.reqCnt = 6
 
 	stale := []FindResult{{Path: "/old/root/a.txt"}}
 	cmd := NewUpdateMsg("abc", stale, "", 3).Apply(&m)
@@ -551,6 +552,26 @@ func TestApplyDropsPreviousSessionResults(t *testing.T) {
 	cmd = NewUpdateMsg("abc", fresh, "", 5).Apply(&m)
 	assert.Nil(t, cmd)
 	assert.Equal(t, fresh, m.results, "completion from the current session must apply")
+}
+
+func TestApplyDropsOlderRequestResult(t *testing.T) {
+	m := setupTestModel()
+	m.open = true
+	m.textInput.SetValue("a")
+	// The a -> ab -> a typing sequence submitted requests 0, 1, 2;
+	// the latest submitted request is 2
+	m.openReqID = 0
+	m.reqCnt = 3
+
+	// The older completion for the same query text must not overwrite
+	// the latest results or reset the selection
+	cmd := NewUpdateMsg("a", []FindResult{{Path: "/old"}}, "", 0).Apply(&m)
+	assert.Nil(t, cmd)
+	assert.Empty(t, m.results, "older request completion must be dropped even when the query matches")
+
+	cmd = NewUpdateMsg("a", []FindResult{{Path: "/latest"}}, "", 2).Apply(&m)
+	assert.Nil(t, cmd)
+	assert.Equal(t, []FindResult{{Path: "/latest"}}, m.results, "latest request completion must apply")
 }
 
 func TestOpenStartsFreshSession(t *testing.T) {

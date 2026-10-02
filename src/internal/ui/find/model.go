@@ -193,6 +193,16 @@ func (msg UpdateMsg) Apply(m *Model) tea.Cmd {
 		return nil
 	}
 
+	// Only the latest submitted request may apply its results - an older
+	// completion (even for the same query text) would overwrite them
+	if msg.reqID < m.reqCnt-1 {
+		slog.Debug("Ignoring older find query result",
+			"msgQuery", msg.query,
+			"msgID", msg.reqID,
+			"latestID", m.reqCnt-1)
+		return nil
+	}
+
 	// Ignore stale results - only apply if query matches current input
 	currentQuery := m.textInput.Value()
 	if msg.query != currentQuery {
