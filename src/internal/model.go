@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log/slog"
 	"os"
+	"path/filepath"
 	"reflect"
 	"slices"
 	"strings"
@@ -25,6 +26,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/preview"
 
 	variable "github.com/yorukot/superfile/src/config"
+	findui "github.com/yorukot/superfile/src/internal/ui/find"
 	zoxideui "github.com/yorukot/superfile/src/internal/ui/zoxide"
 	stringfunction "github.com/yorukot/superfile/src/pkg/string_function"
 )
@@ -86,6 +88,9 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case zoxideui.UpdateMsg:
 		slog.Debug("Got ModelUpdate message", "id", msg.GetReqID())
 		updateCmd = msg.Apply(&m.zoxideModal)
+	case findui.UpdateMsg:
+		slog.Debug("Got ModelUpdate message", "id", msg.GetReqID())
+		updateCmd = msg.Apply(&m.findModal)
 
 	// Its a pain to interconvert commands like processBar
 	case preview.UpdateMsg:
@@ -213,6 +218,7 @@ func (m *model) updateComponentDimensions() tea.Cmd {
 	m.setHelpMenuSize()
 	m.setPromptModelSize()
 	m.setZoxideModelSize()
+	m.setFindModelSize()
 	m.setFooterComponentSize()
 
 	// File preview panel requires explicit height update, unlike sidebar/file panels
@@ -259,6 +265,14 @@ func (m *model) setZoxideModelSize() {
 	m.zoxideModal.SetWidth(m.fullWidth / 2) //nolint:mnd // modal uses half width for layout
 }
 
+func (m *model) setFindModelSize() {
+	// Scale find model's maxHeight - 50% of total height to accommodate scroll indicators
+	m.findModal.SetMaxHeight(m.fullHeight / 2) //nolint:mnd // modal uses half height for layout
+
+	// Scale find model's width - 50% of total width
+	m.findModal.SetWidth(m.fullWidth / 2) //nolint:mnd // modal uses half width for layout
+}
+
 func (m *model) setFooterComponentSize() {
 	var width, clipBoardwidth, height int
 	height = m.footerHeight + common.BorderPadding
@@ -303,6 +317,9 @@ func (m *model) handleKeyInput(msg tea.KeyPressMsg) tea.Cmd {
 		// updateFilePanelState
 		// TODO: Convert that to async via tea.Cmd
 	case m.zoxideModal.IsOpen():
+		// Ignore keypress. It will be handled in Update call via
+		// updateFilePanelState
+	case m.findModal.IsOpen():
 		// Ignore keypress. It will be handled in Update call via
 		// updateFilePanelState
 
@@ -380,6 +397,9 @@ func (m *model) updateComponentState(msg tea.Msg) tea.Cmd {
 	case m.zoxideModal.IsOpen():
 		action, cmd = m.zoxideModal.HandleUpdate(msg)
 		cmd = tea.Batch(cmd, m.applyZoxideModalAction(action))
+	case m.findModal.IsOpen():
+		action, cmd = m.findModal.HandleUpdate(msg)
+		cmd = tea.Batch(cmd, m.applyFindModalAction(action))
 	}
 	return cmd
 }
@@ -417,6 +437,8 @@ func (m *model) logAndExecuteAction(action common.ModelAction) (string, tea.Cmd,
 	case common.OpenPanelAction:
 		cmd, err := m.createNewFilePanelRelativeToCurrent(action.Location)
 		return "New panel opened", cmd, err
+	case common.GoToPathAction:
+		return "Navigated to found path", nil, m.goToPathAction(action)
 	default:
 		return "", nil, errors.New("unhandled action type")
 	}
@@ -425,6 +447,15 @@ func (m *model) logAndExecuteAction(action common.ModelAction) (string, tea.Cmd,
 // Apply the Action for zoxide modal (no result notifications needed)
 func (m *model) applyZoxideModalAction(action common.ModelAction) tea.Cmd {
 	_, cmd, _ := m.logAndExecuteAction(action)
+	return cmd
+}
+
+// Apply the Action for find modal
+func (m *model) applyFindModalAction(action common.ModelAction) tea.Cmd {
+	_, cmd, actionErr := m.logAndExecuteAction(action)
+	if actionErr != nil {
+		m.notifyModel = notify.New(true, "Find file/folder", actionErr.Error(), notify.NoAction)
+	}
 	return cmd
 }
 
@@ -473,6 +504,24 @@ func (m *model) updateCurrentFilePanelDir(path string) error {
 		m.trackDirectoryWithZoxide(panel.Location)
 	}
 	return err
+}
+
+func (m *model) goToPathAction(action common.GoToPathAction) error {
+	panel := m.getFocusedFilePanel()
+	if action.IsDir {
+		return m.updateCurrentFilePanelDir(action.Path)
+	}
+	dir := filepath.Dir(action.Path)
+	if err := panel.UpdateCurrentFilePanelDir(dir); err != nil {
+		return err
+	}
+	m.trackDirectoryWithZoxide(panel.Location)
+	// An active search filter could exclude the target file from the
+	// refreshed element list, leaving the cursor unmoved
+	panel.SearchBar.SetValue("")
+	panel.TargetFile = filepath.Base(action.Path)
+	m.fileModel.UpdateFilePanelsIfNeeded(true)
+	return nil
 }
 
 // trackDirectoryWithZoxide adds the directory to zoxide database if zoxide is available and enabled
@@ -562,6 +611,13 @@ func (m *model) updateRenderForOverlay(finalRender string) string {
 		overlayX := m.fullWidth/common.CenterDivisor - m.zoxideModal.GetWidth()/common.CenterDivisor
 		overlayY := m.fullHeight/common.CenterDivisor - m.zoxideModal.GetMaxHeight()/common.CenterDivisor
 		return stringfunction.PlaceOverlay(overlayX, overlayY, zoxideModal, finalRender)
+	}
+
+	if m.findModal.IsOpen() {
+		findModal := m.findModalRender()
+		overlayX := m.fullWidth/common.CenterDivisor - m.findModal.GetWidth()/common.CenterDivisor
+		overlayY := m.fullHeight/common.CenterDivisor - m.findModal.GetMaxHeight()/common.CenterDivisor
+		return stringfunction.PlaceOverlay(overlayX, overlayY, findModal, finalRender)
 	}
 
 	if m.sortModal.IsOpen() {

@@ -15,6 +15,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/sidebar"
 
 	"github.com/yorukot/superfile/src/internal/common"
+	findui "github.com/yorukot/superfile/src/internal/ui/find"
 	"github.com/yorukot/superfile/src/internal/ui/prompt"
 	zoxideui "github.com/yorukot/superfile/src/internal/ui/zoxide"
 )
@@ -40,6 +41,7 @@ func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool,
 		helpMenu:        helpmenu.New(),
 		promptModal:     prompt.DefaultModel(prompt.PromptMinHeight, prompt.PromptMinWidth),
 		zoxideModal:     zoxideui.DefaultModel(zoxideui.ZoxideMinHeight, zoxideui.ZoxideMinWidth, zClient),
+		findModal:       findui.DefaultModel(findui.FindMinHeight, findui.FindMinWidth),
 		sortModal:       sortmodel.New(),
 		zClient:         zClient,
 		modelQuitState:  notQuitting,
