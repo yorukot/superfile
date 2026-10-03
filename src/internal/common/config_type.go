@@ -97,6 +97,8 @@ type ConfigType struct {
 	CodePreviewer           string   `toml:"code_previewer"             comment:"\nWhether to use the builtin syntax highlighting with chroma or use bat. Values: \"\" for builtin chroma, \"bat\" for bat"`
 	SidebarWidth            int      `toml:"sidebar_width"              comment:"\nThe length of the sidebar(excluding borders). If you don't find to display the sidebar, you can input 0 directly. If you want to display the value, please place it in the range of 5-20."`
 	SidebarSections         []string `toml:"sidebar_sections"           comment:"\nOrder of sidebar sections (valid values: \"home\", \"pinned\", \"disks\").\nOnly sections included in this list will be displayed."`
+	DiskMounts              []string `toml:"disk_mounts"                comment:"\nMountpoint prefixes shown in the disks section. A mount is listed only if its\nmountpoint starts with one of these prefixes. Use an empty list ([]) to list\nevery mount, i.e. all filesystem types including network/FUSE mounts (sshfs, nfs).\nThe root mount \"/\" (and all drives on Windows) is always shown."`
+	ExcludedDiskMounts      []string `toml:"excluded_disk_mounts"       comment:"\nMountpoint prefixes always hidden from the disks section, even if they match a\ndisk_mounts prefix above."`
 
 	BorderTop         string `toml:"border_top"          comment:"\nBorder style"`
 	BorderBottom      string `toml:"border_bottom"`
