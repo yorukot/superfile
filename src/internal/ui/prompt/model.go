@@ -46,12 +46,21 @@ func (m *Model) HandleUpdate(msg tea.Msg, cwdLocation string) (common.ModelActio
 		return action, cmd
 	}
 
+	// Keep cwd updated for tab completion
+	m.cwd = cwdLocation
+
 	switch msg := msg.(type) {
+	case completionsReadyMsg:
+		m.handleCompletionsReady(msg)
 	case tea.KeyPressMsg:
 		switch {
 		case slices.Contains(common.Hotkeys.ConfirmTyping, msg.String()):
+			m.completions = nil
+			m.completionDone = false
 			action = m.handleConfirm(cwdLocation)
 		case slices.Contains(common.Hotkeys.CancelTyping, msg.String()):
+			m.completions = nil
+			m.completionDone = false
 			m.Close()
 		default:
 			cmd = m.handleNormalKeyInput(msg)
@@ -95,12 +104,91 @@ func (m *Model) handleNormalKeyInput(msg tea.KeyPressMsg) tea.Cmd {
 		m.setShellMode(false)
 	case m.textInput.Value() == "" && msg.String() == m.shellPromptHotkey:
 		m.setShellMode(true)
+	case msg.String() == "tab":
+		cmd = m.handleTabCompletion()
+	case msg.String() == "shift+tab":
+		m.handleReverseTabCompletion()
 	default:
+		// Any non-Tab key clears completions
+		m.completions = nil
+		m.completionDone = false
 		m.textInput, cmd = m.textInput.Update(msg)
 	}
 	m.resultMsg = ""
 	m.actionSuccess = true
 	return cmd
+}
+
+// handleTabCompletion fires when the user presses Tab. If we already have
+// completions, cycle forward. Otherwise fetch new completions from the shell.
+func (m *Model) handleTabCompletion() tea.Cmd {
+	if m.completionDone {
+		// User pressed Tab after previously completing — fetch fresh completions
+		m.completions = nil
+		m.completionDone = false
+	}
+	if len(m.completions) > 0 {
+		// Cycle to next completion
+		m.completionIdx = (m.completionIdx + 1) % len(m.completions)
+		completion := m.completions[m.completionIdx]
+		m.textInput.SetValue(applyCompletion(m.textInput.Value(), completion))
+		m.textInput.SetCursor(len(m.textInput.Value()))
+		return nil
+	}
+	// First Tab — fetch completions (async)
+	m.completionIdx = 0
+	return fetchCompletions(m.textInput.Value(), m.cwd)
+}
+
+// handleReverseTabCompletion cycles backward through completions on Shift+Tab.
+func (m *Model) handleReverseTabCompletion() {
+	if len(m.completions) == 0 {
+		return
+	}
+	m.completionIdx--
+	if m.completionIdx < 0 {
+		m.completionIdx = len(m.completions) - 1
+	}
+	completion := m.completions[m.completionIdx]
+	m.textInput.SetValue(applyCompletion(m.textInput.Value(), completion))
+		m.textInput.SetCursor(len(m.textInput.Value()))
+}
+
+// handleCompletionsReady applies the first completion result and populates
+// the dropdown list. If there is only one match, it auto-applies immediately.
+func (m *Model) handleCompletionsReady(msg completionsReadyMsg) {
+	if len(msg.completions) == 0 {
+		m.completions = nil
+		return
+	}
+	m.completions = msg.completions
+	m.completionIdx = 0
+
+	// Check if the current input already changed while we were fetching
+	currentPrefix, _ := getLastToken(m.textInput.Value())
+	if currentPrefix != msg.prefix {
+		// Input changed — completions are stale
+		m.completions = nil
+		return
+	}
+
+	if len(msg.completions) == 1 {
+		// Single match — apply immediately, mark done
+		m.textInput.SetValue(applyCompletion(m.textInput.Value(), msg.completions[0]))
+		m.textInput.SetCursor(len(m.textInput.Value()))
+		m.completions = nil
+		m.completionDone = true
+		return
+	}
+
+	// Multiple matches — find common prefix and extend input
+	prefix := commonPrefix(msg.completions)
+	if prefix != msg.prefix {
+		m.textInput.SetValue(applyCompletion(m.textInput.Value(), prefix))
+		m.textInput.SetCursor(len(m.textInput.Value()))
+		// Re-fetch with the extended prefix for a more precise list
+		m.completions = nil
+	}
 }
 
 // After action is performed, model will update the Model with results
@@ -130,6 +218,18 @@ func (m *Model) Render() string {
 	r.SetBorderTitle(m.headline + " " + modeString(m.shellMode))
 	r.AddLines(" " + m.textInput.View())
 
+	// Show completion dropdown if we have candidates
+	if len(m.completions) > 0 {
+		r.AddSection()
+		for i, c := range m.completions {
+			line := " " + c
+			if i == m.completionIdx {
+				line = common.PromptSuccessStyle.Render(" >" + c)
+			}
+			r.AddLines(line)
+		}
+	}
+
 	if !m.shellMode {
 		// To make sure its added one time only per render call
 		hintSectionAdded := false
@@ -153,6 +253,7 @@ func (m *Model) Render() string {
 	} else if m.textInput.Value() == "" {
 		r.AddSection()
 		r.AddLines(" '" + m.spfPromptHotkey + "' - Get into SPF mode")
+		r.AddLines(" '!' prefix - Full terminal mode (for ssh, vim, etc.)")
 	}
 
 	if m.resultMsg != "" {

@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	"log/slog"
 
 	tea "charm.land/bubbletea/v2"
@@ -10,6 +11,25 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/ui/spferror"
 )
+
+// shellCommandFinishedMsg is sent when a shell command completes.
+// For quick mode, output carries the captured stdout/stderr.
+// For interactive mode, output is empty.
+type shellCommandFinishedMsg struct {
+	exitCode int
+	output   string
+}
+
+func (msg shellCommandFinishedMsg) String() string {
+	return fmt.Sprintf("shellCommandFinishedMsg{exitCode=%d}", msg.exitCode)
+}
+
+// contentPanelNvimFinishedMsg is sent when nvim (launched from the content
+// panel) exits. We refresh the preview to show the saved file content.
+type contentPanelNvimFinishedMsg struct {
+	path string
+	err  error
+}
 
 type ModelUpdateMessage interface {
 	ApplyToModel(m *model) tea.Cmd

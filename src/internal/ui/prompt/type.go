@@ -20,6 +20,12 @@ type Model struct {
 	textInput textinput.Model
 	resultMsg string
 
+	// Tab completion state
+	completions     []string // current completion candidates
+	completionIdx   int      // index into completions for cycling
+	completionDone  bool     // set when user has confirmed a completion
+	cwd             string   // current working directory for completions
+
 	// Whether the user intended action was successful
 	actionSuccess bool
 

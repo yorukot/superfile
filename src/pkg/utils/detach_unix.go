@@ -16,3 +16,10 @@ func DetachFromTerminal(cmd *exec.Cmd) {
 	cmd.Stdout = nil
 	cmd.Stderr = nil
 }
+
+// PrepareForShellCommand sets up the command for non-interactive shell execution.
+// Unlike DetachFromTerminal, stdin remains connected so password prompts (sudo, etc.) work.
+// Stdout/stderr will be captured by CombinedOutput.
+func PrepareForShellCommand(cmd *exec.Cmd) {
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
+}
