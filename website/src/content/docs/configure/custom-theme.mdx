@@ -37,6 +37,16 @@ Don't forget to change the `theme` variable in `config.toml` to your theme name.
 
 [If you are satisfied with your theme, you might as well put it into the default theme list!](/contribute/how-to-contribute)
 
+### Reload the theme without restarting
+
+On Linux, macOS and other Unix-like systems, a running superfile re-reads its theme file when it receives `SIGUSR1`. This lets system theme switchers update superfile in place, the same way they already do for tools like btop:
+
+```bash
+pkill -USR1 spf
+```
+
+If the theme file cannot be loaded, superfile keeps the current theme and logs the error. Windows has no `SIGUSR1`, so this is not available there.
+
 ### Theme settings
 
 The default theme below shows all supported theme keys. `directory_icon_color` controls the fallback directory icon color used for normal folders. Leave it empty to use the built-in fallback.
