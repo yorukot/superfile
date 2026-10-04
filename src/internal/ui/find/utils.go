@@ -74,6 +74,14 @@ func (m *Model) GetResults() []FindResult {
 	return out
 }
 
+// GetCursorPath returns the path of the currently selected result, or an empty string when the modal is closed, has no results, or the cursor is out of range.
+func (m *Model) GetCursorPath() string {
+	if !m.IsOpen() || m.cursor < 0 || m.cursor >= len(m.results) {
+		return ""
+	}
+	return m.results[m.cursor].Path
+}
+
 func (m *Model) GetTextInputValue() string {
 	return m.textInput.Value()
 }
