@@ -169,6 +169,10 @@ enable_md5_checksum = false
 #-- Zoxide Support - Smart directory navigation!
 # Requires: zoxide
 zoxide_support = false
+#
+#-- Find File/Folder - Recursive search with fd!
+# Requires: fd
+find_file_support = false
 
 #-- File opening rules
 # Map file extensions to commands used to open them.
