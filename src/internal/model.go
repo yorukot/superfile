@@ -108,7 +108,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	panelCmd = m.updateComponentState(msg)
 
 	m.updateModelStateAfterMsg()
-	filePreviewCmd = m.fileModel.GetFilePreviewCmd(false)
+	filePreviewCmd = m.updateFilePreview()
 
 	metadataCmd = m.getMetadataCmd()
 
@@ -182,6 +182,24 @@ func (m *model) getMetadataCmd() tea.Cmd {
 		return NewMetadataMsg(
 			metadata.GetMetadata(selectedItem.Location, metadataFocused, et), metadataFocused, reqCnt)
 	}
+}
+
+// Decide the file preview pane's render command. While the find modal is
+// open, the pane follows the cursor of the found results, so browsing the
+// results previews each match without touching the focused panel's
+// selection. When the cursor is empty (no results) or the modal is closed,
+// a leftover override is cleared and the pane falls back to the focused
+// panel's selection.
+func (m *model) updateFilePreview() tea.Cmd {
+	if m.findModal.IsOpen() {
+		if cursorPath := m.findModal.GetCursorPath(); cursorPath != "" {
+			return m.fileModel.SetPreviewPathCmd(cursorPath)
+		}
+	}
+	if m.fileModel.HasPreviewOverride() {
+		return m.fileModel.ClearPreviewOverride()
+	}
+	return m.fileModel.GetFilePreviewCmd(false)
 }
 
 // Adjust window size based on msg information
@@ -615,7 +633,13 @@ func (m *model) updateRenderForOverlay(finalRender string) string {
 
 	if m.findModal.IsOpen() {
 		findModal := m.findModalRender()
-		overlayX := m.fullWidth/common.CenterDivisor - m.findModal.GetWidth()/common.CenterDivisor
+		// Keep the modal clear of the file preview pane, which shows the
+		// found item under the cursor while find is open
+		previewWidth := 0
+		if m.fileModel.FilePreview.IsOpen() {
+			previewWidth = m.fileModel.ExpectedPreviewWidth
+		}
+		overlayX := (m.fullWidth-previewWidth)/common.CenterDivisor - m.findModal.GetWidth()/common.CenterDivisor
 		overlayY := m.fullHeight/common.CenterDivisor - m.findModal.GetMaxHeight()/common.CenterDivisor
 		return stringfunction.PlaceOverlay(overlayX, overlayY, findModal, finalRender)
 	}

@@ -38,7 +38,7 @@ Superfile supports various plugins to extend its functionality. Below is a compl
 
 ### Find file/folder
 
-- **Description:** Recursive file and folder search using fd. Search from a modal, then jump to a match — selecting a file moves to its parent directory and places the cursor on it; selecting a folder moves into it.
+- **Description:** Recursive file and folder search using fd. Search from a modal, then jump to a match — selecting a file moves to its parent directory and places the cursor on it; selecting a folder moves into it. While the modal is open, the file preview pane previews the result under the cursor, and the modal is placed clear of the pane.
 
 - **Requirements:** [`fd`](https://github.com/sharkdp/fd)
 
