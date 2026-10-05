@@ -87,6 +87,33 @@ func ValidateConfig(c *ConfigType) error {
 		)
 	}
 
+	if c.ZoxideMaxVisibleResults < MinZoxideMaxVisibleResults || c.ZoxideMaxVisibleResults > MaxZoxideMaxVisibleResults {
+		return errors.New(
+			LoadConfigError(
+				"zoxide_max_visible_results",
+				"Zoxide max visible results must be between 1 and 100.",
+			),
+		)
+	}
+
+	if c.ZoxideModalWidth < MinZoxideModalWidthPercent || c.ZoxideModalWidth > MaxZoxideModalWidthPercent {
+		return errors.New(
+			LoadConfigError(
+				"zoxide_modal_width",
+				"Zoxide modal width percentage must be between 10 and 100.",
+			),
+		)
+	}
+
+	if c.ZoxideModalHeight < MinZoxideModalHeightPercent || c.ZoxideModalHeight > MaxZoxideModalHeightPercent {
+		return errors.New(
+			LoadConfigError(
+				"zoxide_modal_height",
+				"Zoxide modal height percentage must be between 10 and 100.",
+			),
+		)
+	}
+
 	if ansi.StringWidth(c.BorderTop) != 1 {
 		return errors.New(LoadConfigError("border_top", "Border character must be exactly one cell wide."))
 	}

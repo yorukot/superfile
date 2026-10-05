@@ -34,8 +34,9 @@ func (m *Model) Render() string {
 }
 
 func (m *Model) renderResultList(r *rendering.Renderer) {
+	visibleCount := m.GetMaxVisibleResults()
 	// Calculate visible range
-	endIndex := m.renderIndex + maxVisibleResults
+	endIndex := m.renderIndex + visibleCount
 	endIndex = min(endIndex, len(m.results))
 	// Show visible results
 	m.renderVisibleResults(r, endIndex)
@@ -68,7 +69,8 @@ func (m *Model) renderVisibleResults(r *rendering.Renderer, endIndex int) {
 }
 
 func (m *Model) renderScrollIndicators(r *rendering.Renderer, endIndex int) {
-	if len(m.results) <= maxVisibleResults {
+	visibleCount := m.GetMaxVisibleResults()
+	if len(m.results) <= visibleCount {
 		return
 	}
 
