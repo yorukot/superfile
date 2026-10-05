@@ -6,7 +6,18 @@ const (
 	ZoxideMinWidth  = 15
 	ZoxideMinHeight = 3
 
-	maxVisibleResults = 5 // Maximum number of results visible at once
+	DefaultMaxVisibleResults = 5 // Maximum number of results visible at once
+	maxVisibleResults        = DefaultMaxVisibleResults
+
+	DefaultModalWidthPercent  = 50
+	DefaultModalHeightPercent = 50
+	MinModalWidthPercent      = 10
+	MaxModalWidthPercent      = 100
+	MinModalHeightPercent     = 10
+	MaxModalHeightPercent     = 100
+	MinMaxVisibleResults      = 1
+	MaxMaxVisibleResults      = 100
+	PercentDivisor            = 100
 
 	// renderOverhead is the number of lines needed for UI chrome
 	// (input line + separator + borders + scroll indicators + section)

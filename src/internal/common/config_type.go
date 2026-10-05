@@ -109,9 +109,12 @@ type ConfigType struct {
 	BorderMiddleLeft  string `toml:"border_middle_left"`
 	BorderMiddleRight string `toml:"border_middle_right"`
 
-	Metadata          bool `toml:"metadata"            comment:"\n==========PLUGINS========== #\nPlugins means that you need to install some external dependencies to use them.\n\nShow more detailed metadata, please install exiftool before enabling this plugin!"`
-	EnableMD5Checksum bool `toml:"enable_md5_checksum" comment:"Enable MD5 checksum generation for files"`
-	ZoxideSupport     bool `toml:"zoxide_support"      comment:"Zoxide support for the fast navigation"`
+	Metadata                bool `toml:"metadata"                   comment:"\n==========PLUGINS========== #\nPlugins means that you need to install some external dependencies to use them.\n\nShow more detailed metadata, please install exiftool before enabling this plugin!"`
+	EnableMD5Checksum       bool `toml:"enable_md5_checksum"        comment:"Enable MD5 checksum generation for files"`
+	ZoxideSupport           bool `toml:"zoxide_support"             comment:"Zoxide support for the fast navigation"`
+	ZoxideMaxVisibleResults int  `toml:"zoxide_max_visible_results" comment:"Maximum number of results visible at once in the zoxide modal"`
+	ZoxideModalWidth        int  `toml:"zoxide_modal_width"         comment:"Width of the zoxide modal as percentage of the terminal"`
+	ZoxideModalHeight       int  `toml:"zoxide_modal_height"        comment:"Height of the zoxide modal as percentage of the terminal"`
 }
 
 // GetIgnoreMissingFields reports whether warnings about missing TOML fields should be ignored.
