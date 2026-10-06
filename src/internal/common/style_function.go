@@ -56,6 +56,21 @@ func SortOptionsModalBorderStyle(height int, width int, borderBottom string) lip
 		Foreground(ModalFGColor)
 }
 
+// Generate context menu style
+func ContextMenuBorderStyle(height int, width int, borderBottom string) lipgloss.Style {
+	border := GenerateBorder()
+	border.Bottom = borderBottom
+
+	return lipgloss.NewStyle().
+		Border(border).
+		BorderForeground(ModalBorderActiveColor).
+		BorderBackground(ModalBGColor).
+		Width(width).
+		Height(height).
+		Background(ModalBGColor).
+		Foreground(ModalFGColor)
+}
+
 // Generate full screen style for terminal size too small etc
 func FullScreenStyle(height int, width int) lipgloss.Style {
 	return lipgloss.NewStyle().

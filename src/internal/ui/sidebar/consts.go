@@ -28,6 +28,17 @@ var defaultSectionSlice = []string{ //nolint: gochecknoglobals // This is more l
 // superfile logo + blank line + search bar
 const sideBarInitialHeight = 3
 
+// Lines of the sidebar that sit above the directory list, counted within the
+// sidebar's content area and therefore excluding its border.
+const (
+	// directoryHeaderLines covers the superfile logo line and the blank line
+	// that follows it.
+	directoryHeaderLines = 2
+	// searchBarHeight is the single row taken by the search bar, but only while
+	// the search bar is actually being drawn.
+	searchBarHeight = 1
+)
+
 // UI dimension constants for sidebar
 const (
 	// searchBarPadding is the total padding for search bar (borders + prompt + extra char)

@@ -71,6 +71,7 @@ func (m *model) panelCreateNewFile() {
 
 	m.typingModal.location = panel.Location
 	m.typingModal.open = true
+	m.typingModal.directory = false
 	m.typingModal.textInput = common.GenerateNewFileTextInput()
 	m.firstTextInput = true
 }
