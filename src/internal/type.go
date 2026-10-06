@@ -11,6 +11,8 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/clipboard"
 	"github.com/yorukot/superfile/src/internal/ui/sortmodel"
 
+	"github.com/yorukot/superfile/src/internal/mouse"
+
 	"github.com/yorukot/superfile/src/internal/ui/filemodel"
 
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
@@ -98,6 +100,11 @@ type model struct {
 
 	// whether usable trash directory exists or not
 	hasTrash bool
+
+	// mouseRegions maps terminal coordinates onto the widget drawn there. It is
+	// rebuilt on every render pass, so it always describes the frame currently
+	// on screen rather than the layout as it will be after the next update.
+	mouseRegions mouse.Registry
 }
 
 type typingModal struct {
