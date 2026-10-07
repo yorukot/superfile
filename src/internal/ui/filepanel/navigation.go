@@ -2,6 +2,8 @@ package filepanel
 
 import (
 	"fmt"
+
+	"github.com/yorukot/superfile/src/internal/common"
 )
 
 func (m *Model) scrollToCursor(cursor int) {
@@ -24,6 +26,11 @@ func (m *Model) scrollToCursor(cursor int) {
 
 func (m *Model) moveCursorBy(delta int) {
 	if m.Empty() {
+		return
+	}
+	if !common.Config.FilePanelCursorWrap {
+		// Stop at the first/last item, like PgUp/PgDown
+		m.pageScrollBy(delta)
 		return
 	}
 	// Wrap cursor
