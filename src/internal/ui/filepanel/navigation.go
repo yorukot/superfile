@@ -24,6 +24,8 @@ func (m *Model) scrollToCursor(cursor int) {
 	}
 }
 
+// Moves the cursor by delta items. Wraps around the list edges when
+// file_panel_cursor_wrap is enabled, otherwise stops at the first/last item.
 func (m *Model) moveCursorBy(delta int) {
 	if m.Empty() {
 		return
