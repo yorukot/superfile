@@ -195,6 +195,8 @@ bash -c "$(curl -sLo- https://superfile.dev/uninstall.sh)"
 
 If you want to inspect the script, see : [uninstall.sh](./website/public/uninstall.sh)
 
+Besides the `spf` binary in `/usr/local/bin` or `~/.local/bin`, the script also deletes your config and data folders: `~/.config/superfile`, `~/.local/share/superfile` and `~/.local/state/superfile` on Linux (or the `$XDG_*_HOME` locations if you set them), and `~/Library/Application Support/superfile` on macOS.
+
 ### Windows
 
 To uninstall superfile on Windows, use this powershell script.
@@ -202,6 +204,12 @@ To uninstall superfile on Windows, use this powershell script.
 ```powershell
 powershell -ExecutionPolicy Bypass -Command "Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://superfile.dev/uninstall.ps1'))"
 ```
+
+This script does not remove your config and data folder. Delete `%LOCALAPPDATA%\superfile` manually if you want it gone.
+
+### Other install methods
+
+If you installed superfile another way (for example with a package manager), run `spf pl` before uninstalling to see where your config and data folders are, then delete them yourself. See [config file path](https://superfile.dev/configure/config-file-path/) for all locations.
 
 ## Contributing
 
