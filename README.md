@@ -195,7 +195,7 @@ bash -c "$(curl -sLo- https://superfile.dev/uninstall.sh)"
 
 If you want to inspect the script, see : [uninstall.sh](./website/public/uninstall.sh)
 
-Besides the `spf` binary in `/usr/local/bin` or `~/.local/bin`, the script also deletes your config and data folders: `~/.config/superfile`, `~/.local/share/superfile` and `~/.local/state/superfile` on Linux (or the `$XDG_*_HOME` locations if you set them), and `~/Library/Application Support/superfile` on macOS.
+Besides the `spf` binary in `/usr/local/bin` or `~/.local/bin`, the script also deletes your config and data folders: `~/.config/superfile`, `~/.local/share/superfile` and `~/.local/state/superfile` (or the `$XDG_*_HOME` locations if you set them, on Linux or macOS), and `~/Library/Application Support/superfile` on macOS.
 
 ### Windows
 
