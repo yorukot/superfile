@@ -252,11 +252,15 @@ func (m *model) setPromptModelSize() {
 }
 
 func (m *model) setZoxideModelSize() {
-	// Scale zoxide model's maxHeight - 50% of total height to accommodate scroll indicators
-	m.zoxideModal.SetMaxHeight(m.fullHeight / 2) //nolint:mnd // modal uses half height for layout
-
-	// Scale zoxide model's width - 50% of total width
-	m.zoxideModal.SetWidth(m.fullWidth / 2) //nolint:mnd // modal uses half width for layout
+	width, maxHeight := zoxideui.CalculateModalDimensions(
+		m.fullWidth,
+		m.fullHeight,
+		common.Config.ZoxideModalWidth,
+		common.Config.ZoxideModalHeight,
+	)
+	m.zoxideModal.SetMaxHeight(maxHeight)
+	m.zoxideModal.SetWidth(width)
+	m.zoxideModal.SetMaxVisibleResults(common.Config.ZoxideMaxVisibleResults)
 }
 
 func (m *model) setFooterComponentSize() {
