@@ -78,7 +78,20 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.MouseMsg:
 		m.handleMouseMsg(msg)
 	case tea.KeyPressMsg:
-		inputCmd = m.handleKeyInput(msg)
+		m.updateFolderHintKey(msg.Key())
+		if msg.Code != tea.KeyLeftAlt && msg.Code != tea.KeyRightAlt {
+			inputCmd = m.handleKeyInput(msg)
+		}
+	case tea.KeyReleaseMsg:
+		m.updateFolderHintKey(msg.Key())
+	case tea.KeyboardEnhancementsMsg:
+		m.folderHintKeyboard = msg.SupportsEventTypes() && msg.SupportsAllKeysAsEscapeCodes()
+		m.folderHintAltHeld = false
+	case tea.BlurMsg:
+		m.folderHintAltHeld = false
+		m.folderHintBlurred = true
+	case tea.FocusMsg:
+		m.folderHintBlurred = false
 
 	// Has to handle zoxide messages separately as they could be generated via
 	// zoxide update commands, or batched commands from textinput
@@ -509,6 +522,12 @@ func (m *model) View() tea.View {
 	v.AltScreen = true
 	v.MouseMode = tea.MouseModeCellMotion
 	v.WindowTitle = "superfile"
+	if common.Config.ShowFolderHotkeyHints {
+		v.ReportFocus = true
+		v.KeyboardEnhancements.ReportEventTypes = true
+		v.KeyboardEnhancements.ReportAllKeysAsEscapeCodes = true
+		v.KeyboardEnhancements.ReportAssociatedText = true
+	}
 	return v
 }
 

@@ -44,3 +44,20 @@ superfile 預設快捷鍵的設計概念：
 ### 類 Vim 的 superfile 快捷鍵
 
 <CodeBlock file="src/superfile_config/vimHotkeys.toml" />
+
+### 資料夾導覽快捷鍵
+
+在 `hotkeys.toml` 中重新設定固定資料夾及九個釘選位置的快捷鍵：
+
+```toml
+go_to_home = ["alt+h"]
+go_to_downloads = ["alt+d", "ctrl+g"]
+go_to_pin_1 = ["alt+1"]
+go_to_trash = [] # 停用此動作
+```
+
+只有新的 `go_to_*` 動作支援以 `[]` 停用。省略設定時使用預設值；啟動不會改寫現有設定檔。使用 `--fix-hotkeys` 可將缺少的設定加入檔案。若快捷鍵衝突，既有動作優先；新的資料夾動作依快捷鍵列表的順序決定優先權。
+
+釘選編號會隨側邊欄搜尋結果改變。按 Enter 結束搜尋輸入後即可使用快捷鍵。側邊欄或釘選區段隱藏時仍可導覽；此時依相同搜尋條件篩選釘選清單。
+
+按住 Alt 會在資料夾名稱右側顯示第一個可用的 Alt 快捷鍵，並省略 `alt+`。若終端機或多工器不支援修飾鍵的按下／放開事件，提示會持續顯示。設定檔中的 `show_folder_hotkey_hints = false` 可隱藏提示，不影響快捷鍵。沒有 Alt 綁定或已停用的動作不會顯示提示。

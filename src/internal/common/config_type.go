@@ -98,6 +98,8 @@ type ConfigType struct {
 	SidebarWidth            int      `toml:"sidebar_width"              comment:"\nThe length of the sidebar(excluding borders). If you don't find to display the sidebar, you can input 0 directly. If you want to display the value, please place it in the range of 5-20."`
 	SidebarSections         []string `toml:"sidebar_sections"           comment:"\nOrder of sidebar sections (valid values: \"home\", \"pinned\", \"disks\").\nOnly sections included in this list will be displayed."`
 
+	ShowFolderHotkeyHints bool `toml:"show_folder_hotkey_hints" comment:"\nShow folder shortcuts in the sidebar while Alt is held, or always if the terminal cannot report modifier events."`
+
 	BorderTop         string `toml:"border_top"          comment:"\nBorder style"`
 	BorderBottom      string `toml:"border_bottom"`
 	BorderLeft        string `toml:"border_left"`
@@ -170,6 +172,27 @@ type HotkeysType struct {
 	CopyPWD  []string `toml:"copy_present_working_directory"`
 
 	ToggleFooter []string `toml:"toggle_footer"`
+
+	// Folder navigation; an empty list disables an action.
+	GoToHome        []string `toml:"go_to_home"`
+	GoToDownloads   []string `toml:"go_to_downloads"`
+	GoToDesktop     []string `toml:"go_to_desktop"`
+	GoToDocuments   []string `toml:"go_to_documents"`
+	GoToPictures    []string `toml:"go_to_pictures"`
+	GoToMusic       []string `toml:"go_to_music"`
+	GoToVideos      []string `toml:"go_to_videos"`
+	GoToTemplates   []string `toml:"go_to_templates"`
+	GoToPublicShare []string `toml:"go_to_public_share"`
+	GoToTrash       []string `toml:"go_to_trash"`
+	GoToPin1        []string `toml:"go_to_pin_1"`
+	GoToPin2        []string `toml:"go_to_pin_2"`
+	GoToPin3        []string `toml:"go_to_pin_3"`
+	GoToPin4        []string `toml:"go_to_pin_4"`
+	GoToPin5        []string `toml:"go_to_pin_5"`
+	GoToPin6        []string `toml:"go_to_pin_6"`
+	GoToPin7        []string `toml:"go_to_pin_7"`
+	GoToPin8        []string `toml:"go_to_pin_8"`
+	GoToPin9        []string `toml:"go_to_pin_9"`
 
 	ConfirmTyping []string `toml:"confirm_typing" comment:"=================================================================================================\nTyping hotkeys (can conflict with all hotkeys)"`
 	CancelTyping  []string `toml:"cancel_typing"`

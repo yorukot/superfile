@@ -383,3 +383,11 @@ conf = "nvim"
 ### Default superfile config
 
 <CodeBlock file="src/superfile_config/config.toml" />
+
+- ###### show_folder_hotkey_hints
+
+`true` (default) => Show right-aligned folder shortcut hints while Alt is held. Terminals without modifier press/release support show hints permanently.
+
+`false` => Hide hints while keeping folder navigation shortcuts enabled.
+
+Hints are always hidden in prompts, searches, rename fields, and dialogs.
