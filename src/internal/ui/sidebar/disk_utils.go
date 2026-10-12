@@ -21,15 +21,33 @@ func getExternalMediaFolders() []directory {
 		slog.Error("Error while getting external media: ", "error", err)
 		return nil
 	}
+
 	var disks []directory
-	for _, disk := range parts {
+	if runtime.GOOS != utils.OsWindows {
+		// The root filesystem, Thunar-style: a "File System" row that always
+		// sits beside the drives. It is listed first and independent of the
+		// partition scan because on systems where the root volume is a btrfs
+		// subvolume, Partitions(false) reads it as a bind mount and skips it —
+		// so without this row the main disk would never appear in the Disks
+		// section at all.
+		disks = append(disks, directory{
+			Icon:     icon.Disk,
+			Name:     "File System",
+			Location: "/",
+		})
+	}
+	for _, part := range parts {
+		// The root is already listed above.
+		if part.Mountpoint == "/" {
+			continue
+		}
 		// ShouldListDisk, DiskName, and DiskLocation, each has runtime.GOOS checks
 		// We can ideally reduce it to one check only.
-		if shouldListDisk(disk.Mountpoint) {
+		if shouldListDisk(part.Mountpoint) {
 			disks = append(disks, directory{
-				Icon:     diskIcon(disk.Mountpoint),
-				Name:     diskName(disk.Mountpoint),
-				Location: diskLocation(disk.Mountpoint),
+				Icon:     diskIcon(part.Mountpoint),
+				Name:     diskName(part.Mountpoint),
+				Location: diskLocation(part.Mountpoint),
 			})
 		}
 	}

@@ -33,6 +33,13 @@ type Model struct {
 	// key is file location, value order of selection
 	selected           map[string]int
 	selectOrderCounter int
+	// selectionAnchor is the location a later range selection extends from. An
+	// empty value means no anchor has been set yet.
+	selectionAnchor string
+	// dropTarget is the element index a drag would be dropped on, or
+	// NoDropTarget when no row is marked. It is separate from the cursor because
+	// a cancelled drag has to leave the cursor where it was.
+	dropTarget         int
 	element            []Element
 	DirectoryRecords   map[string]directoryRecord
 	Rename             textinput.Model

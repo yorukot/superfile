@@ -37,6 +37,11 @@ default_open_file_preview = true
 # image?
 show_image_preview = true
 
+#-- Cliamp Preview
+# Show a cliamp now-playing panel with a live spectrum for audio files, and open
+# audio files in cliamp.
+cliamp_preview = true
+
 #-- File Info Footer
 # Should we display a footer in the file panel that provides more file information?
 show_panel_footer_info = true

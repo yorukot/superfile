@@ -31,6 +31,11 @@ const (
 )
 
 const (
+	DragMoveWarnTitle   = "Are you sure you want to move this?"
+	DragMoveWarnContent = "This operation will move the file or directory into the destination."
+)
+
+const (
 	MinimumHeight = 24
 	MinimumWidth  = 60
 
