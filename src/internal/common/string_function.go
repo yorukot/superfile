@@ -165,6 +165,15 @@ func formatSizeInternal(size int64, power int, unitlist [7]string) string {
 		return fmt.Sprintf("%d %s", size, unitlist[unitIndex])
 	}
 	adjustedSize := float64(size) / math.Pow(float64(power), float64(unitIndex))
+	// %.2f can round adjustedSize up to or past the next unit boundary (e.g.
+	// 1023.999 KiB formats as "1024.00 KiB"). When that happens, advance to the
+	// next unit and re-divide so the value is shown in the larger unit
+	// ("1.00 MiB") instead. math.Round matches the rounding direction of %.2f
+	// here, so the bump fires exactly when the formatted value would reach power.
+	if unitIndex < len(unitlist)-1 && math.Round(adjustedSize*100)/100 >= float64(power) {
+		unitIndex++
+		adjustedSize = float64(size) / math.Pow(float64(power), float64(unitIndex))
+	}
 	return fmt.Sprintf("%.2f %s", adjustedSize, unitlist[unitIndex])
 }
 
