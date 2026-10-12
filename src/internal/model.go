@@ -41,8 +41,8 @@ var (
 // Either way type 'model' is not exported, so there is not way main package can
 // be aware of it, and use it directly
 func InitialModel(firstPanelPaths []string, firstUseCheck bool) tea.Model {
-	toggleDotFile, toggleFooter, zClient := initialConfig(firstPanelPaths)
-	return defaultModelConfig(toggleDotFile, toggleFooter, firstUseCheck, firstPanelPaths, zClient)
+	toggleDotFile, toggleFooter, toggleSidebar, zClient := initialConfig(firstPanelPaths)
+	return defaultModelConfig(toggleDotFile, toggleFooter, toggleSidebar, firstUseCheck, firstPanelPaths, zClient)
 }
 
 // Init function to be called by Bubble tea framework, sets windows title,
@@ -222,11 +222,9 @@ func (m *model) updateComponentDimensions() tea.Cmd {
 }
 
 func (m *model) setMainModelDimensions() tea.Cmd {
-	fileModelWidth := m.fullWidth
-	if common.Config.SidebarWidth != 0 {
-		fileModelWidth -= common.Config.SidebarWidth + common.BorderPadding
-	}
+	fileModelWidth := m.fullWidth - m.sidebarModel.GetWidth()
 	m.sidebarModel.SetHeight(m.mainPanelHeight + common.BorderPadding)
+	m.fileModel.SidebarWidth = m.sidebarModel.GetWidth()
 	return m.fileModel.SetDimensions(fileModelWidth, m.mainPanelHeight+common.BorderPadding)
 }
 
@@ -503,7 +501,7 @@ func (m *model) View() tea.View {
 		"fullWidth", m.fullWidth, "panelCount", m.fileModel.PanelCount(),
 		"singlePanelWidth", m.fileModel.SinglePanelWidth,
 		"maxPanels", m.fileModel.MaxFilePanel,
-		"sideBarWidth", common.Config.SidebarWidth,
+		"sideBarWidth", m.sidebarModel.GetWidth(),
 		"firstFilePanelWidth", m.fileModel.FilePanels[0].GetWidth())
 	v := tea.NewView(m.viewContent())
 	v.AltScreen = true

@@ -144,6 +144,36 @@ func (m *model) toggleFooterController() tea.Cmd {
 	return m.updateComponentDimensions()
 }
 
+// Toggle sidebar display or not
+func (m *model) toggleSidebarController() tea.Cmd {
+	// The sidebar is disabled in the config. Do not touch the persisted state either
+	if common.Config.SidebarWidth == 0 {
+		return nil
+	}
+	m.toggleSidebar = !m.toggleSidebar
+	err := utils.WriteBoolFile(variable.ToggleSidebar, m.toggleSidebar)
+	if err != nil {
+		slog.Error("Error while updating toggleSidebar data", "error", err)
+	}
+	m.sidebarModel.SetHidden(!m.toggleSidebar)
+	if m.toggleSidebar {
+		// Pinned directories and disks may have changed while the sidebar was hidden
+		m.sidebarModel.UpdateDirectories()
+	} else if m.focusPanel == sidebarFocus {
+		m.focusPanel = nonePanelFocus
+		m.getFocusedFilePanel().IsFocused = true
+	}
+	return m.updateComponentDimensions()
+}
+
+// sidebarContentWidth is the configured sidebar width, or 0 when the sidebar is hidden or disabled
+func (m *model) sidebarContentWidth() int {
+	if m.sidebarModel.Disabled() {
+		return 0
+	}
+	return common.Config.SidebarWidth
+}
+
 // Focus on search bar
 func (m *model) searchBarFocus() {
 	panel := m.getFocusedFilePanel()

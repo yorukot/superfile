@@ -19,6 +19,8 @@ type Model struct {
 	pinnedMgr   *PinnedManager
 	width       int
 	height      int
-	disabled    bool
-	sections    []string
+	// disabled is permanent, set when sidebar_width = 0. hidden is the runtime toggle.
+	disabled bool
+	hidden   bool
+	sections []string
 }

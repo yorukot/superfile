@@ -44,7 +44,7 @@ func (m *model) terminalSizeWarnRender() string {
 }
 
 func (m *model) terminalSizeWarnAfterFirstRender() string {
-	minimumWidthInt := common.Config.SidebarWidth + common.FilePanelWidthUnit*len(
+	minimumWidthInt := m.sidebarContentWidth() + common.FilePanelWidthUnit*len(
 		m.fileModel.FilePanels,
 	) + common.FilePanelWidthUnit - 1
 	minimumWidthString := strconv.Itoa(minimumWidthInt)
