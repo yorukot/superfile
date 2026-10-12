@@ -1,7 +1,9 @@
 package filepanel
 
 import (
+	"errors"
 	"fmt"
+	"io/fs"
 	"path/filepath"
 	"strings"
 
@@ -79,7 +81,13 @@ func (m *Model) renderColumnHeaders(r *rendering.Renderer) {
 
 func (m *Model) renderFileEntries(r *rendering.Renderer) {
 	if m.Empty() {
-		r.AddLines(common.FilePanelNoneText)
+		if m.elementError != nil {
+			if errors.Is(m.elementError, fs.ErrNotExist) {
+				r.AddLines(common.FilePanelNoneText)
+			} else {
+				r.AddLines(common.FilePanelStyle.Render(" " + icon.Error + icon.Space + m.elementError.Error()))
+			}
+		}
 		return
 	}
 	end := min(m.renderIndex+m.PanelElementHeight(), m.ElemCount())
