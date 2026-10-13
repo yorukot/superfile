@@ -20,6 +20,7 @@ import (
 
 	"charm.land/bubbles/v2/textinput"
 
+	findui "github.com/yorukot/superfile/src/internal/ui/find"
 	"github.com/yorukot/superfile/src/internal/ui/prompt"
 	zoxideui "github.com/yorukot/superfile/src/internal/ui/zoxide"
 )
@@ -65,6 +66,7 @@ type model struct {
 	helpMenu        helpmenu.Model
 	promptModal     prompt.Model
 	zoxideModal     zoxideui.Model
+	findModal       findui.Model
 	sortModal       sortmodel.Model
 	spfError        spferror.Model
 	mutexErrorModal sync.Mutex

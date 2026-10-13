@@ -139,6 +139,8 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen,go
 		m.promptModal.Open(false)
 	case slices.Contains(common.Hotkeys.OpenZoxide, msg):
 		return m.zoxideModal.Open()
+	case slices.Contains(common.Hotkeys.FindFile, msg):
+		return m.findModal.Open(m.getFocusedFilePanel().Location)
 
 	case slices.Contains(common.Hotkeys.OpenHelpMenu, msg):
 		m.helpMenu.Open()

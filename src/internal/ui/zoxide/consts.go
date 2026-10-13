@@ -6,10 +6,13 @@ const (
 	ZoxideMinWidth  = 15
 	ZoxideMinHeight = 3
 
-	maxVisibleResults = 5 // Maximum number of results visible at once
-
-	// renderOverhead is the number of lines needed for UI chrome
-	// (input line + separator + borders + scroll indicators + section)
+	// renderOverhead is the number of non-result lines the modal box always
+	// renders: top and bottom borders (2), the query input line (1), the
+	// section divider below it (1), and the worst-case scroll indicators
+	// (divider + 2 indicator lines). The visible results window is derived
+	// from the modal's max height minus this overhead, so the modal fills
+	// its allotted height on tall terminals instead of showing a fixed
+	// handful of results.
 	renderOverhead = 7
 
 	// UI dimension constants for zoxide modal
