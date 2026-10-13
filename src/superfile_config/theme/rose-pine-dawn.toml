@@ -1,0 +1,77 @@
+##############################################
+#                                            #
+#            Rose Pine Dawn Theme            #
+#                                            #
+##############################################
+
+# This theme was created by: https://github.com/MJLiiii ! Thank you <3
+
+# This contains the theme config file for superfile! For more details see:
+# https://superfile.dev/configure/custom-theme/
+
+###############################################################################
+#                           Code Syntax Highlighting                          #
+###############################################################################
+
+# Find one you like at: https://github.com/alecthomas/chroma/blob/master/styles.
+
+code_syntax_highlight = "rose-pine-dawn"
+
+###############################################################################
+#                                 Base Colors                                 #
+###############################################################################
+
+#-- Full Screen
+full_screen_fg = "#575279"
+full_screen_bg = "#faf4ed"
+
+#-- Gradient
+# Note: This currently only supports two colors.
+gradient_color = ["#286983", "#b4637a"]
+directory_icon_color = ""
+
+#-- File Panel
+file_panel_fg = "#575279"
+file_panel_bg = "#faf4ed"
+file_panel_border = "#cecacd"
+file_panel_border_active = "#9893a5"
+file_panel_top_directory_icon = "#56949f"
+file_panel_top_path = "#d7827e"
+file_panel_item_selected_fg = "#907aa9"
+file_panel_item_selected_bg = "#faf4ed"
+
+#-- Footer
+footer_fg = "#575279"
+footer_bg = "#faf4ed"
+footer_border = "#cecacd"
+footer_border_active = "#ea9d34"
+
+#-- Sidebar
+sidebar_fg = "#575279"
+sidebar_bg = "#faf4ed"
+sidebar_title = "#9893a5"
+sidebar_border = "#faf4ed"
+sidebar_border_active = "#907aa9"
+sidebar_item_selected_fg = "#ea9d34"
+sidebar_item_selected_bg = "#faf4ed"
+sidebar_divider = "#797593"
+
+#-- Modals
+modal_fg = "#575279"
+modal_bg = "#faf4ed"
+modal_border_active = "#797593"
+modal_cancel_fg = "#575279"
+modal_cancel_bg = "#cecacd"
+modal_confirm_fg = "#faf4ed"
+modal_confirm_bg = "#b4637a"
+
+#-- Help Menu
+help_menu_hotkey = "#ea9d34"
+help_menu_title = "#56949f"
+
+#-- Special
+cursor = "#56949f"
+correct = "#286983"
+error = "#b4637a"
+hint = "#56949f"
+cancel = "#797593"
