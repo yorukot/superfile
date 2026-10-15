@@ -141,6 +141,67 @@ func (m *Model) ToggleReverseSort() {
 	m.SortReversed = !m.SortReversed
 }
 
+// SetSelectionAnchor records the element that a later range selection extends
+// from. The element is remembered by location rather than by index, so an anchor
+// that no longer exists is detected instead of silently pointing at a different
+// file after the listing changes.
+func (m *Model) SetSelectionAnchor(index int) {
+	if index < 0 || index >= len(m.element) {
+		return
+	}
+	m.selectionAnchor = m.element[index].Location
+}
+
+// SelectRangeToIndex selects every element between the recorded anchor and the
+// given index, inclusive. The anchor is left where it was, so repeated range
+// selections keep measuring from the same starting point and can be shrunk as
+// well as grown.
+//
+// Entries that are already selected stay selected, so a range never silently
+// drops something that was picked earlier; a modifier click on a single entry is
+// how one is removed. It reports whether a range was selected, which is false
+// when there is no usable anchor.
+func (m *Model) SelectRangeToIndex(index int) bool {
+	if m.selectionAnchor == "" || index < 0 || index >= len(m.element) {
+		return false
+	}
+
+	anchorIndex := m.FindElementIndexByLocation(m.selectionAnchor)
+	if anchorIndex == -1 {
+		return false
+	}
+
+	if anchorIndex > index {
+		anchorIndex, index = index, anchorIndex
+	}
+	for i := anchorIndex; i <= index; i++ {
+		m.SetSelected(m.element[i].Location)
+	}
+	return true
+}
+
+// SetPanelMode sets the panel mode directly.
+//
+// ChangeFilePanelMode is for the keyboard toggle and clears the selection when
+// leaving SelectMode, which is not wanted when a pointer gesture has just built
+// a selection and the panel still has to be in SelectMode for that selection to
+// be used.
+func (m *Model) SetPanelMode(mode PanelMode) {
+	m.PanelMode = mode
+}
+
+// SetCursorToIndex moves the cursor to an absolute element index, scrolling the
+// rendered range when the index is off screen. It reports whether the index was
+// within range, letting callers distinguish a rejected request from an accepted
+// one that happened to be a no-op.
+func (m *Model) SetCursorToIndex(index int) bool {
+	if index < 0 || index >= m.ElemCount() {
+		return false
+	}
+	m.scrollToCursor(index)
+	return true
+}
+
 // SetCursorPosition sets cursor and updates renderIndex accordingly.
 // Note: Intended for test utilities only!!!!!
 func (m *Model) SetCursorPosition(cursor int) {
