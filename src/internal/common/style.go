@@ -39,6 +39,7 @@ var (
 	FilePanelTopPathStyle          lipgloss.Style
 	FilePanelItemSelectedStyle     lipgloss.Style
 	FilePanelSelectBoxStyle        lipgloss.Style
+	FilePanelDropTargetStyle       lipgloss.Style
 )
 
 var (
@@ -195,6 +196,13 @@ func LoadThemeConfig() { //nolint: funlen // Variable initialization
 	FilePanelItemSelectedStyle = lipgloss.NewStyle().Foreground(filePanelItemSelectedFGColor).
 		Background(filePanelItemSelectedBGColor)
 	FilePanelSelectBoxStyle = lipgloss.NewStyle().Background(FilePanelBGColor)
+	// FilePanelDropTargetStyle marks the row a drag would be dropped on.
+	//
+	// It borrows the per theme cursor colour rather than introducing a colour of
+	// its own, so every theme gets a drop target that stands out from both the
+	// panel background and a selected row without any theme having to define it.
+	FilePanelDropTargetStyle = lipgloss.NewStyle().Foreground(FilePanelBGColor).
+		Background(cursorColor)
 
 	// Sidebar Special Style
 	SidebarDividerStyle = lipgloss.NewStyle().Foreground(sidebarDividerColor).Background(SidebarBGColor)

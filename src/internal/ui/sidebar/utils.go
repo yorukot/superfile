@@ -68,6 +68,11 @@ func (s *Model) IsRenaming() bool {
 	return s.renaming
 }
 
+// GetCursor returns the index of the directory the cursor is on
+func (s *Model) GetCursor() int {
+	return s.cursor
+}
+
 // GetCurrentDirectoryLocation returns the location of the currently selected directory
 func (s *Model) GetCurrentDirectoryLocation() string {
 	if s.isCursorInvalid() || s.NoActualDir() {
@@ -114,4 +119,19 @@ func (m *Model) SetHeight(height int) {
 // Disabled returns true if the sidebar is currently disabled.
 func (m *Model) Disabled() bool {
 	return m.disabled
+}
+
+// GetDirectoryLocation returns the path of the directory at an index, without
+// moving the cursor to it.
+//
+// A drag needs to know which directory the pointer is over, and that must not
+// change what the cursor was pointing at.
+func (s *Model) GetDirectoryLocation(index int) string {
+	if index < 0 || index >= len(s.directories) {
+		return ""
+	}
+	if s.directories[index].isDivider() {
+		return ""
+	}
+	return s.directories[index].Location
 }

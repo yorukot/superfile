@@ -7,6 +7,7 @@ import (
 
 	"github.com/yorukot/superfile/src/internal/ui/helpmenu"
 
+	"github.com/yorukot/superfile/src/internal/ui/contextmenu"
 	"github.com/yorukot/superfile/src/internal/ui/filemodel"
 	"github.com/yorukot/superfile/src/internal/ui/sortmodel"
 
@@ -41,6 +42,7 @@ func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool,
 		promptModal:     prompt.DefaultModel(prompt.PromptMinHeight, prompt.PromptMinWidth),
 		zoxideModal:     zoxideui.DefaultModel(zoxideui.ZoxideMinHeight, zoxideui.ZoxideMinWidth, zClient),
 		sortModal:       sortmodel.New(),
+		contextMenu:     contextmenu.Model{},
 		zClient:         zClient,
 		modelQuitState:  notQuitting,
 		toggleFooter:    toggleFooter,
