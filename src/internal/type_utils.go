@@ -16,6 +16,8 @@ func (f focusPanelType) String() string {
 		return "sidebarFocus"
 	case metadataFocus:
 		return "metadataFocus"
+	case previewFocus:
+		return "previewFocus"
 	default:
 		return common.InvalidTypeString
 	}
