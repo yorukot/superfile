@@ -30,6 +30,8 @@ type TerminalCapabilities struct {
 	cellSize       TerminalCellSize
 	cellSizeInit   sync.Once
 	detectionMutex sync.Mutex
+	kittyCapable   bool
+	kittyInit      sync.Once
 }
 
 // NewTerminalCapabilities creates a new TerminalCapabilities instance
