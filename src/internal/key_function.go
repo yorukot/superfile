@@ -114,10 +114,14 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen,go
 		m.focusOnMetadata()
 
 	case slices.Contains(common.Hotkeys.PasteItems, msg):
-		return m.getPasteItemCmd()
+		if m.focusPanel == nonePanelFocus {
+			return m.getPasteItemCmd()
+		}
 
 	case slices.Contains(common.Hotkeys.FilePanelItemCreate, msg):
-		m.panelCreateNewFile()
+		if m.focusPanel == nonePanelFocus {
+			m.panelCreateNewFile()
+		}
 	case slices.Contains(common.Hotkeys.PinnedDirectory, msg):
 		m.pinnedDirectory()
 
@@ -128,10 +132,14 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen,go
 		return m.toggleFooterController()
 
 	case slices.Contains(common.Hotkeys.ExtractFile, msg):
-		return m.getExtractFileCmd()
+		if m.focusPanel == nonePanelFocus {
+			return m.getExtractFileCmd()
+		}
 
 	case slices.Contains(common.Hotkeys.CompressFile, msg):
-		return m.getCompressSelectedFilesCmd()
+		if m.focusPanel == nonePanelFocus {
+			return m.getCompressSelectedFilesCmd()
+		}
 
 	case slices.Contains(common.Hotkeys.OpenCommandLine, msg):
 		m.promptModal.Open(true)
