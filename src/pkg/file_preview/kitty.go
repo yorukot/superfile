@@ -17,8 +17,14 @@ func isKittyCapable() bool {
 	termProgram := os.Getenv("TERM_PROGRAM")
 	term := os.Getenv("TERM")
 
+	// Inside tmux, TERM/TERM_PROGRAM describe tmux itself, so the host terminal
+	// is unknowable from the environment. Require an explicit opt-in instead,
+	// and rely on tmux passthrough (see tmuxPassthrough) to reach the host.
+	if os.Getenv("TMUX") != "" {
+		return os.Getenv("SUPERFILE_KITTY") == "1"
+	}
+
 	// TODO: Replace this allowlist with a real Kitty graphics capability check.
-	// tmux masks the underlying terminal through TERM/TERM_PROGRAM.
 	knownTerminals := []string{
 		"ghostty",
 		"WezTerm",
@@ -38,13 +44,43 @@ func isKittyCapable() bool {
 	return false
 }
 
+// tmuxPassthrough wraps each escape sequence in s in tmux's DCS passthrough,
+// so tmux forwards it to the host terminal instead of discarding it as an
+// unrecognised sequence. Requires "set -g allow-passthrough on" in tmux.
+//
+// Each APC is wrapped individually rather than wrapping the whole buffer in one
+// DCS: image data is chunked into many sequences and a single multi-megabyte DCS
+// risks hitting tmux's buffer limits.
+func tmuxPassthrough(s string) string {
+	if os.Getenv("TMUX") == "" || s == "" {
+		return s
+	}
+
+	var b strings.Builder
+	for len(s) > 0 {
+		seq := s
+		// Sequences are terminated by ST (ESC \); keep the terminator with its
+		// sequence. A trailing fragment without ST is passed through as-is.
+		if i := strings.Index(s, "\x1b\\"); i >= 0 {
+			seq, s = s[:i+2], s[i+2:]
+		} else {
+			s = ""
+		}
+		b.WriteString("\x1bPtmux;")
+		// tmux strips one level of escaping, so every ESC must be doubled.
+		b.WriteString(strings.ReplaceAll(seq, "\x1b", "\x1b\x1b"))
+		b.WriteString("\x1b\\")
+	}
+	return b.String()
+}
+
 // GetKittyClearRaw returns the raw APC command to clear all Kitty images.
 // This must be sent via tea.Raw(), not embedded in view content.
 func (p *ImagePreviewer) GetKittyClearRaw() string {
 	if !p.IsKittyCapable() {
 		return ""
 	}
-	return ansi.KittyGraphics(nil, "a=d")
+	return tmuxPassthrough(ansi.KittyGraphics(nil, "a=d"))
 }
 
 // generatePlacementID generates a unique placement ID based on file path
@@ -134,7 +170,7 @@ func (p *ImagePreviewer) renderWithKittyUsingTermCap(img image.Image, path strin
 
 	return &KittyImageResult{
 		Placeholders: placeholders,
-		RawTransmit:  transmitBuf.String(),
+		RawTransmit:  tmuxPassthrough(transmitBuf.String()),
 	}, nil
 }
 
