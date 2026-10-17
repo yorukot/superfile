@@ -5,7 +5,9 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
+	"syscall"
 	"testing"
 
 	tea "charm.land/bubbletea/v2"
@@ -226,37 +228,153 @@ func TestFileRename(t *testing.T) {
 }
 
 func isTrashed(fileAbsPath string) bool {
-	fileName := filepath.Base(fileAbsPath)
+	fileAbsPath, err := filepath.Abs(fileAbsPath)
+	if err != nil {
+		fmt.Println("isTrashed false"); return false
+	}
+	fileAbsPath = filepath.Clean(fileAbsPath)
+
 	switch runtime.GOOS {
 	case utils.OsDarwin:
+		fileName := filepath.Base(fileAbsPath)
 		_, err := os.Stat(filepath.Join(variable.DarwinTrashDirectory, fileName))
 		return err == nil
 	case utils.OsLinux:
-		entries, err := os.ReadDir(variable.LinuxTrashDirectoryInfo)
+		infoDir, err := linuxTrashInfoDirForPath(fileAbsPath)
 		if err != nil {
 			return false
 		}
 
+		entries, err := os.ReadDir(infoDir)
+		if err != nil {
+			return false
+		}
 		for _, entry := range entries {
-			if entry.IsDir() {
+			if !strings.HasSuffix(entry.Name(), ".trashinfo") {
 				continue
 			}
 
-			data, err := os.ReadFile(filepath.Join(variable.LinuxTrashDirectoryInfo, entry.Name()))
+			data, err := os.ReadFile(filepath.Join(infoDir, entry.Name()))
 			if err != nil {
 				continue
 			}
-
-			for _, line := range strings.Split(string(data), "\n") {
-				if line == "Path="+fileAbsPath {
+			
+			if strings.Contains(string(data), fileAbsPath) {
+				return true
+			}
+			
+			topDir, err := filesystemTopDir(fileAbsPath)
+			if err == nil {
+				rel, relErr := filepath.Rel(topDir, fileAbsPath)
+				if relErr == nil && strings.Contains(string(data), rel) {
 					return true
 				}
 			}
 		}
 		return false
+
 	default:
-		return false
+		fmt.Println("isTrashed false"); return false
 	}
+}
+
+func linuxTrashInfoDirForPath(fileAbsPath string) (string, error) {
+	homeTrash := filepath.Join(xdgDataHome(), "Trash")
+	
+	dev1, err1 := deviceID(existingDevicePath(fileAbsPath))
+	dev2, err2 := deviceID(existingDevicePath(homeTrash))
+	if err1 == nil && err2 == nil && dev1 == dev2 {
+		return filepath.Join(homeTrash, "info"), nil
+	}
+
+	topDir, err := filesystemTopDir(fileAbsPath)
+	if err != nil {
+		return "", err
+	}
+
+	uid := strconv.Itoa(os.Getuid())
+	sharedTrash := filepath.Join(topDir, ".Trash", uid)
+	if dirExists(filepath.Join(sharedTrash, "info")) {
+		return filepath.Join(sharedTrash, "info"), nil
+	}
+
+	fallbackTrash := filepath.Join(topDir, ".Trash-"+uid)
+	return filepath.Join(fallbackTrash, "info"), nil
+}
+
+func xdgDataHome() string {
+	if dataHome := os.Getenv("XDG_DATA_HOME"); filepath.IsAbs(dataHome) {
+		return dataHome
+	}
+	home, err := os.UserHomeDir()
+	if err != nil || home == "" {
+		return filepath.Join(os.TempDir(), ".local", "share")
+	}
+	return filepath.Join(home, ".local", "share")
+}
+
+func filesystemTopDir(path string) (string, error) {
+	start := path
+	if info, err := os.Lstat(start); err == nil && !info.IsDir() {
+		start = filepath.Dir(start)
+	}
+	start = existingDevicePath(start)
+
+	dev, err := deviceID(start)
+	if err != nil {
+		return "", err
+	}
+
+	current := start
+	for {
+		parent := filepath.Dir(current)
+		if parent == current {
+			return current, nil
+		}
+		parentDev, err := deviceID(parent)
+		if err != nil {
+			return "", err
+		}
+		if parentDev != dev {
+			return current, nil
+		}
+		current = parent
+	}
+}
+
+func existingDevicePath(path string) string {
+	for {
+		if _, err := os.Lstat(path); err == nil {
+			return path
+		}
+		parent := filepath.Dir(path)
+		if parent == path {
+			return path
+		}
+		path = parent
+	}
+}
+
+func deviceID(path string) (uint64, error) {
+	info, err := os.Lstat(path)
+	if err != nil {
+		return 0, err
+	}
+	stat, ok := info.Sys().(*syscall.Stat_t)
+	if !ok {
+		return 0, fmt.Errorf("cannot inspect device for %s", path)
+	}
+	return stat.Dev, nil
+}
+
+func dirExists(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && info.IsDir()
+}
+
+func isPathWithin(path, root string) bool {
+	rel, err := filepath.Rel(root, path)
+	return err == nil && (rel == "." || (rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator))))
 }
 
 func TestFileDelete(t *testing.T) {
