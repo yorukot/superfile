@@ -112,6 +112,8 @@ type ConfigType struct {
 	Metadata          bool `toml:"metadata"            comment:"\n==========PLUGINS========== #\nPlugins means that you need to install some external dependencies to use them.\n\nShow more detailed metadata, please install exiftool before enabling this plugin!"`
 	EnableMD5Checksum bool `toml:"enable_md5_checksum" comment:"Enable MD5 checksum generation for files"`
 	ZoxideSupport     bool `toml:"zoxide_support"      comment:"Zoxide support for the fast navigation"`
+
+	CustomCommands map[string][]string `toml:"custom_commands"`
 }
 
 // GetIgnoreMissingFields reports whether warnings about missing TOML fields should be ignored.
@@ -180,4 +182,6 @@ type HotkeysType struct {
 	FilePanelSelectModeItemsSelectDown []string `toml:"file_panel_select_mode_items_select_down" comment:"=================================================================================================\nSelect mode hotkeys (can conflict with other modes, cannot conflict with global hotkeys)"`
 	FilePanelSelectModeItemsSelectUp   []string `toml:"file_panel_select_mode_items_select_up"`
 	FilePanelSelectAllItem             []string `toml:"file_panel_select_all_items"`
+
+	CustomHotkeys map[string][]string `toml:"custom_hotkeys"`
 }
