@@ -60,6 +60,7 @@ var Icons = map[string]Style{
 	"apple":        {Icon: "\ue711", Color: "#78909c"},     // Printable Rune : ""
 	"asm":          {Icon: "\U000f061a", Color: "#ff7844"}, // Printable Rune : "󰘚"
 	"audio":        {Icon: "\uf001", Color: "#ee524f"},     // Printable Rune : ""
+	"audiobook":    {Icon: "\uf025", Color: "#e67e22"},     // Printable Rune : ""
 	"binary":       {Icon: "\uf471", Color: "#ff7844"},     // Printable Rune : ""
 	"c":            {Icon: "\ue649", Color: "#0188d2"},     // Printable Rune : ""
 	"cfg":          {Icon: "\ue615", Color: "#8B8B8B"},     // Printable Rune : ""
@@ -183,6 +184,7 @@ var Aliases = map[string]string{
 	"alac":             "audio",
 	"flac":             "audio",
 	"m4a":              "audio",
+	"m4b":              "audiobook",
 	"mka":              "audio",
 	"mp3":              "audio",
 	"ogg":              "audio",
