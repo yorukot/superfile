@@ -152,6 +152,9 @@ type HotkeysType struct {
 	DeleteItems            []string `toml:"delete_items"`
 	PermanentlyDeleteItems []string `toml:"permanently_delete_items"`
 
+	CopyToSystemClipboard    []string `toml:"copy_to_system_clipboard"`
+	PasteFromSystemClipboard []string `toml:"paste_from_system_clipboard"`
+
 	ExtractFile  []string `toml:"extract_file"  comment:"compress and extract"`
 	CompressFile []string `toml:"compress_file"`
 
