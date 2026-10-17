@@ -68,6 +68,7 @@ open_help_menu = ['?', '']
 open_spf_prompt = ['>', '']
 open_zoxide = ['z', '']
 toggle_dot_file = ['.', '']
+toggle_dirs_only = ['alt+d', '']
 toggle_footer = ['F', '']
 
 ###############################################################################

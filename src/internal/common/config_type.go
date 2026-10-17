@@ -160,6 +160,7 @@ type HotkeysType struct {
 
 	PinnedDirectory []string `toml:"pinned_directory"  comment:"other"`
 	ToggleDotFile   []string `toml:"toggle_dot_file"`
+	ToggleDirsOnly  []string `toml:"toggle_dirs_only"`
 	ChangePanelMode []string `toml:"change_panel_mode"`
 	OpenHelpMenu    []string `toml:"open_help_menu"`
 	OpenCommandLine []string `toml:"open_command_line"`
