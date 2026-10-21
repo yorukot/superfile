@@ -76,7 +76,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		resizeCmd = m.handleWindowResize(msg)
 	case tea.MouseMsg:
-		m.handleMouseMsg(msg)
+		inputCmd = m.handleMouseMsg(msg)
 	case tea.KeyPressMsg:
 		inputCmd = m.handleKeyInput(msg)
 
@@ -109,15 +109,6 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	return m, tea.Batch(sidebarCmd, helpMenuCmd, inputCmd, updateCmd,
 		panelCmd, metadataCmd, filePreviewCmd, resizeCmd)
-}
-
-func (m *model) handleMouseMsg(msg tea.MouseMsg) {
-	msgStr := msg.String()
-	if msgStr == "wheelup" || msgStr == "wheeldown" {
-		wheelMainAction(msgStr, m)
-	} else {
-		slog.Debug("Mouse event of type that is not handled", "msg", msgStr)
-	}
 }
 
 func (m *model) updateModelStateAfterMsg() {

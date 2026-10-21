@@ -50,6 +50,30 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen,go
 			m.getFocusedFilePanel().ListDown()
 		}
 
+	case slices.Contains(common.Hotkeys.ListTop, msg):
+		switch m.focusPanel {
+		case sidebarFocus:
+			m.sidebarModel.ListTop()
+		case processBarFocus:
+			m.processBarModel.ListTop()
+		case metadataFocus:
+			m.fileMetaData.ListTop()
+		case nonePanelFocus:
+			m.getFocusedFilePanel().ListTop()
+		}
+
+	case slices.Contains(common.Hotkeys.ListBottom, msg):
+		switch m.focusPanel {
+		case sidebarFocus:
+			m.sidebarModel.ListBottom()
+		case processBarFocus:
+			m.processBarModel.ListBottom()
+		case metadataFocus:
+			m.fileMetaData.ListBottom()
+		case nonePanelFocus:
+			m.getFocusedFilePanel().ListBottom()
+		}
+
 	case slices.Contains(common.Hotkeys.PageUp, msg):
 		switch m.focusPanel {
 		case metadataFocus:

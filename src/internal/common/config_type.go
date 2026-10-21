@@ -125,10 +125,12 @@ type HotkeysType struct {
 	CdQuit  []string `toml:"cd_quit"`
 
 	// movement
-	ListUp   []string `toml:"list_up"   comment:"movement"`
-	ListDown []string `toml:"list_down"`
-	PageUp   []string `toml:"page_up"`
-	PageDown []string `toml:"page_down"`
+	ListUp     []string `toml:"list_up"   comment:"movement"`
+	ListDown   []string `toml:"list_down"`
+	ListTop    []string `toml:"list_top"`
+	ListBottom []string `toml:"list_bottom"`
+	PageUp     []string `toml:"page_up"`
+	PageDown   []string `toml:"page_down"`
 
 	CloseFilePanel         []string `toml:"close_file_panel"          comment:"file panel control"`
 	CreateNewFilePanel     []string `toml:"create_new_file_panel"`
