@@ -1,0 +1,241 @@
+package internal
+
+import (
+	"time"
+
+	tea "charm.land/bubbletea/v2"
+
+	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/mouse"
+	"github.com/yorukot/superfile/src/internal/ui/filepanel"
+	"github.com/yorukot/superfile/src/pkg/utils"
+)
+
+// doubleClickWindow is the maximum gap between two clicks on the same widget for
+// them to count as a double click.
+const doubleClickWindow = 400 * time.Millisecond
+
+// Actions reported by the wheel. The wheel is dispatched on the button rather
+// than on the message type, because terminals keep sending motion events with
+// the wheel button held while the user keeps scrolling.
+const (
+	wheelUpAction   = "wheelup"
+	wheelDownAction = "wheeldown"
+)
+
+// leftClick records the most recent left click so that a quick second click on
+// the same widget can be recognised as a double click.
+//
+// This lives on the model rather than in a package level variable so that it
+// cannot leak between two models or survive into an unrelated test.
+type leftClick struct {
+	// target is the widget the click landed on.
+	target mouse.Target
+	// at is when the click happened.
+	at time.Time
+}
+
+// handleMouseMsg resolves a mouse event against the hit-test regions published
+// by the last render.
+func (m *model) handleMouseMsg(msg tea.MouseMsg) tea.Cmd {
+	event := msg.Mouse()
+
+	if event.Button == tea.MouseWheelUp {
+		wheelMainAction(wheelUpAction, m)
+		return nil
+	}
+	if event.Button == tea.MouseWheelDown {
+		wheelMainAction(wheelDownAction, m)
+		return nil
+	}
+
+	click, isClick := msg.(tea.MouseClickMsg)
+	if !isClick {
+		// Motion and release carry no action of their own. Drag and drop reads
+		// the release.
+		return nil
+	}
+	return m.handleMouseClick(click.Mouse())
+}
+
+// isSelectionMod reports whether the modifiers turn a click into a selection
+// gesture rather than a plain pointer move.
+func isSelectionMod(mod tea.KeyMod) bool {
+	return mod.Contains(tea.ModCtrl) || mod.Contains(tea.ModShift)
+}
+
+// handleMouseClick acts on a completed button press.
+func (m *model) handleMouseClick(event tea.Mouse) tea.Cmd {
+	if event.Button != tea.MouseLeft {
+		// Right click drives the context menu, which is handled separately.
+		return nil
+	}
+
+	target := m.mouseTargetAt(event.X, event.Y)
+
+	// A click carrying a selection modifier is part of building a selection
+	// rather than pointing at something, so it never counts as a double click
+	// and it clears any pending pair. Without this, ctrl clicking a row twice to
+	// deselect it would read as a double click and open the file instead.
+	var isDoubleClick bool
+	if isSelectionMod(event.Mod) {
+		m.lastLeftClick = leftClick{}
+	} else {
+		isDoubleClick = m.noteLeftClick(target)
+	}
+
+	switch target.Kind {
+	case mouse.TargetFilePanelItem:
+		return m.handleFilePanelClick(target, event.Mod, isDoubleClick)
+	case mouse.TargetSidebarDirectory:
+		m.handleSidebarDirectoryClick(target.ItemIndex)
+	case mouse.TargetUnknown:
+		m.handleBackgroundClick(event.X, event.Y)
+	case mouse.TargetProcessBarItem, mouse.TargetMetadataItem, mouse.TargetContextMenuItem:
+		// These have no published regions yet, so a click landing on one of
+		// them resolves as the background instead.
+	}
+	return nil
+}
+
+// noteLeftClick records a left click and reports whether it completes a double
+// click on the same widget.
+//
+// A recognised pair is consumed so that a third click starts a fresh one rather
+// than immediately entering whatever sits under the pointer.
+func (m *model) noteLeftClick(target mouse.Target) bool {
+	now := time.Now()
+	if m.lastLeftClick.at.IsZero() {
+		m.lastLeftClick = leftClick{target: target, at: now}
+		return false
+	}
+
+	if target != m.lastLeftClick.target || now.Sub(m.lastLeftClick.at) >= doubleClickWindow {
+		m.lastLeftClick = leftClick{target: target, at: now}
+		return false
+	}
+
+	m.lastLeftClick = leftClick{}
+	return true
+}
+
+// handleFilePanelClick acts on a click that landed on a file entry.
+func (m *model) handleFilePanelClick(target mouse.Target, mod tea.KeyMod, isDoubleClick bool) tea.Cmd {
+	m.focusFilePanelOnMouse(target.PanelIndex)
+	panel := m.getFocusedFilePanel()
+
+	if isDoubleClick {
+		// A double click is what enters a directory or opens a file, matching
+		// the keyboard where the cursor is moved first and entered after.
+		m.enterPanel()
+		return nil
+	}
+
+	if !panel.SetCursorToIndex(target.ItemIndex) {
+		return nil
+	}
+
+	if !m.applyClickSelection(panel, target.ItemIndex, mod) {
+		return nil
+	}
+
+	// Copy, paste and delete only read the selection while the panel is in
+	// SelectMode, so a selection built with the pointer has to put the panel in
+	// that mode or it would be ignored by every one of those actions.
+	if panel.SelectedCount() > 0 {
+		panel.SetPanelMode(filepanel.SelectMode)
+	}
+	return nil
+}
+
+// applyClickSelection acts on the modifiers of a click that landed on a file
+// entry. It reports whether the click changed the selection.
+func (m *model) applyClickSelection(panel *filepanel.Model, itemIndex int, mod tea.KeyMod) bool {
+	switch {
+	case mod.Contains(tea.ModCtrl):
+		// Ctrl click adds the entry to the selection, or removes it when it is
+		// already selected, and it becomes the anchor for a later range.
+		panel.SetSelectionAnchor(itemIndex)
+		panel.ToggleSelected(panel.GetElementAtIdx(itemIndex).Location)
+		return true
+	case mod.Contains(tea.ModShift):
+		// Shift click selects everything between the anchor and this entry. The
+		// anchor stays put so that a second shift click can shrink the range.
+		if panel.SelectRangeToIndex(itemIndex) {
+			return true
+		}
+		// Without a usable anchor there is no range to extend, so the click
+		// points at the entry and becomes the anchor for the next one.
+		panel.SetSelectionAnchor(itemIndex)
+		return false
+	default:
+		// An unmodified click only points at the entry, but it still sets the
+		// anchor so that a following shift click has a starting point.
+		panel.SetSelectionAnchor(itemIndex)
+		return false
+	}
+}
+
+// handleSidebarDirectoryClick moves the sidebar cursor and navigates to the
+// chosen directory, which is what the keyboard does when a sidebar entry is
+// used.
+func (m *model) handleSidebarDirectoryClick(itemIndex int) {
+	m.focusSidebarOnMouse()
+	if !m.sidebarModel.SetCursor(itemIndex) {
+		return
+	}
+	m.sidebarSelectDirectory()
+}
+
+// handleBackgroundClick focuses whichever non item region was clicked, so that
+// the sidebar and the footer panels can be reached with the pointer even though
+// they publish no item regions yet.
+func (m *model) handleBackgroundClick(x, y int) {
+	// The footer occupies an exact band of rows, and the row below it is the
+	// bottom border, so the band is matched rather than treated as "anything
+	// past the main panel".
+	footerEnd := m.mainPanelHeight + utils.FullFooterHeight(m.footerHeight, m.toggleFooter)
+	if m.toggleFooter && y >= m.mainPanelHeight && y < footerEnd {
+		m.focusFooterOnMouse(x)
+		return
+	}
+	if common.Config.SidebarWidth != 0 && x < common.Config.SidebarWidth+common.BorderPadding {
+		m.focusSidebarOnMouse()
+	}
+}
+
+// focusFilePanelOnMouse moves focus to a file panel.
+//
+// This does not toggle the way the keyboard focus helpers do: clicking a panel
+// that already has focus must leave it focused rather than handing focus back.
+func (m *model) focusFilePanelOnMouse(panelIndex int) {
+	m.focusPanel = nonePanelFocus
+	m.fileModel.SetFocusedPanelIndex(panelIndex)
+	// SetFocusedPanelIndex leaves an already focused panel untouched, so make
+	// sure the panel really carries focus when focus is coming back from the
+	// sidebar or a footer panel.
+	m.getFocusedFilePanel().IsFocused = true
+}
+
+// focusSidebarOnMouse focuses the sidebar without toggling.
+func (m *model) focusSidebarOnMouse() {
+	if common.Config.SidebarWidth == 0 {
+		return
+	}
+	m.focusPanel = sidebarFocus
+	m.getFocusedFilePanel().IsFocused = false
+}
+
+// focusFooterOnMouse focuses the footer panel under the given column. The
+// process bar sits leftmost in the footer, and the metadata panel follows it.
+func (m *model) focusFooterOnMouse(x int) {
+	if !m.toggleFooter {
+		return
+	}
+	if x < m.processBarModel.GetWidth() {
+		m.focusPanel = processBarFocus
+	} else {
+		m.focusPanel = metadataFocus
+	}
+	m.getFocusedFilePanel().IsFocused = false
+}
