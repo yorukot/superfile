@@ -18,6 +18,9 @@ type Model struct {
 	contentWidth  int
 	contentHeight int
 
+	scrollOffset  int
+	canScrollDown bool
+
 	loading            bool
 	imagePreviewer     *filepreview.ImagePreviewer
 	batCmd             string
