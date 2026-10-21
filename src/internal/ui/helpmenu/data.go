@@ -161,6 +161,16 @@ func getData() []hotkeydata { //nolint: funlen // This should be self contained
 			hotkeyWorkType: globalType,
 		},
 		{
+			hotkey:         common.Hotkeys.FilePanelSelectItemsByMask,
+			description:    "Select items matching a mask, e.g. *.txt",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey:         common.Hotkeys.FilePanelUnselectItemsByMask,
+			description:    "Unselect items matching a mask (selection mode only)",
+			hotkeyWorkType: globalType,
+		},
+		{
 			hotkey:         common.Hotkeys.FilePanelSelectModeItemsSelectUp,
 			description:    "Select up from your cursor",
 			hotkeyWorkType: globalType,

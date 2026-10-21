@@ -279,6 +279,7 @@ func (m *model) handleKeyInput(msg tea.KeyPressMsg) tea.Cmd {
 		"filePanel.isFocused", m.getFocusedFilePanel().IsFocused,
 		"filePanel.panelMode", m.getFocusedFilePanel().PanelMode,
 		"typingModal.open", m.typingModal.open,
+		"maskModal.open", m.maskModal.open,
 		"notifyModel.open", m.notifyModel.IsOpen(),
 		"promptModal.open", m.promptModal.IsOpen(),
 		"fileModel.renaming", m.fileModel.Renaming,
@@ -298,6 +299,8 @@ func (m *model) handleKeyInput(msg tea.KeyPressMsg) tea.Cmd {
 		cmd = m.spfErrorModelOpenKey(msg.String())
 	case m.typingModal.open:
 		cmd = m.typingModalOpenKey(msg.String())
+	case m.maskModal.open:
+		m.maskModalOpenKey(msg.String())
 	case m.promptModal.IsOpen():
 		// Ignore keypress. It will be handled in Update call via
 		// updateFilePanelState
@@ -372,6 +375,8 @@ func (m *model) updateComponentState(msg tea.Msg) tea.Cmd {
 		focusPanel.SearchBar, cmd = focusPanel.SearchBar.Update(msg)
 	case m.typingModal.open:
 		m.typingModal.textInput, cmd = m.typingModal.textInput.Update(msg)
+	case m.maskModal.open:
+		m.maskModal.textInput, cmd = m.maskModal.textInput.Update(msg)
 	case m.promptModal.IsOpen():
 		// TODO : Separate this to a utility
 		cwdLocation := m.getFocusedFilePanel().Location
@@ -583,6 +588,13 @@ func (m *model) updateRenderForOverlay(finalRender string) string {
 		overlayX := m.fullWidth/common.CenterDivisor - common.ModalWidth/common.CenterDivisor
 		overlayY := m.fullHeight/common.CenterDivisor - common.ModalHeight/common.CenterDivisor
 		return stringfunction.PlaceOverlay(overlayX, overlayY, typingModal, finalRender)
+	}
+
+	if m.maskModal.open {
+		maskModal := m.maskModalRender()
+		overlayX := m.fullWidth/common.CenterDivisor - common.ModalWidth/common.CenterDivisor
+		overlayY := m.fullHeight/common.CenterDivisor - common.ModalHeight/common.CenterDivisor
+		return stringfunction.PlaceOverlay(overlayX, overlayY, maskModal, finalRender)
 	}
 
 	if m.notifyModel.IsOpen() {
