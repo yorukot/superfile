@@ -12,6 +12,7 @@ import (
 
 	"github.com/yorukot/superfile/src/config/icon"
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/disks"
 	"github.com/yorukot/superfile/src/pkg/utils"
 
 	"charm.land/bubbles/v2/textinput"
@@ -40,9 +41,9 @@ var (
 // is passed to tea.NewProgram() which accepts tea.Model
 // Either way type 'model' is not exported, so there is not way main package can
 // be aware of it, and use it directly
-func InitialModel(firstPanelPaths []string, firstUseCheck bool) tea.Model {
+func InitialModel(firstPanelPaths []string, firstUseCheck bool, diskManager disks.Manager) tea.Model {
 	toggleDotFile, toggleFooter, zClient := initialConfig(firstPanelPaths)
-	return defaultModelConfig(toggleDotFile, toggleFooter, firstUseCheck, firstPanelPaths, zClient)
+	return defaultModelConfig(toggleDotFile, toggleFooter, firstUseCheck, firstPanelPaths, zClient, diskManager)
 }
 
 // Init function to be called by Bubble tea framework, sets windows title,

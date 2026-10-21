@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/disks"
 	"github.com/yorukot/superfile/src/pkg/utils"
 
 	tea "charm.land/bubbletea/v2"
@@ -150,7 +151,13 @@ func spfAppAction(_ context.Context, c *cli.Command) error {
 
 	firstUse := checkFirstUse()
 
-	p := tea.NewProgram(internal.InitialModel(firstPanelPaths, firstUse))
+	diskManager, err := disks.New()
+	if err != nil {
+		return err
+	}
+	defer diskManager.Close()
+
+	p := tea.NewProgram(internal.InitialModel(firstPanelPaths, firstUse, diskManager))
 	if _, err := p.Run(); err != nil {
 		utils.PrintfAndExitf("Alas, there's been an error: %v", err)
 	}

@@ -5,6 +5,8 @@ import (
 
 	"github.com/atotto/clipboard"
 
+	"github.com/yorukot/superfile/src/internal/disks"
+
 	"github.com/yorukot/superfile/src/internal/ui/helpmenu"
 
 	"github.com/yorukot/superfile/src/internal/ui/filemodel"
@@ -29,12 +31,13 @@ import (
 //   - Allow Sending thumbnailGeneratorNeeded as false to preview.New()
 //     to prevent noise in test logs. Same with imagePreviewer
 func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool,
-	firstPanelPaths []string, zClient *zoxidelib.Client) *model {
+	firstPanelPaths []string, zClient *zoxidelib.Client, diskManager disks.Manager,
+) *model {
 	return &model{
 		focusPanel:      nonePanelFocus,
 		processBarModel: processbar.New(),
 		clipboardWriter: clipboard.WriteAll,
-		sidebarModel:    sidebar.New(),
+		sidebarModel:    sidebar.New(diskManager),
 		fileMetaData:    metadata.New(),
 		fileModel:       filemodel.New(firstPanelPaths, toggleDotFile),
 		helpMenu:        helpmenu.New(),
