@@ -36,6 +36,7 @@ func New(location string, focused bool, targetFile string, sortKind sortmodel.So
 	return Model{
 		cursor:           0,
 		renderIndex:      0,
+		dropTarget:       NoDropTarget,
 		Location:         location,
 		SortKind:         sortKind,
 		SortReversed:     sortReversed,
