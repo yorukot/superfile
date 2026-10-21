@@ -63,12 +63,17 @@ func (m *Model) updateChildComponentWidth() {
 	panelWidth := widthForPanels / panelCount
 	lastPanelWidth := widthForPanels - (panelCount-1)*panelWidth
 
+	m.panelOriginsX = make([]int, 0, panelCount)
+	originX := 0
 	for i := range panelCount {
+		m.panelOriginsX = append(m.panelOriginsX, originX)
+
+		panelWidthForPanel := panelWidth
 		if i == panelCount-1 {
-			m.FilePanels[i].SetWidth(lastPanelWidth)
-		} else {
-			m.FilePanels[i].SetWidth(panelWidth)
+			panelWidthForPanel = lastPanelWidth
 		}
+		m.FilePanels[i].SetWidth(panelWidthForPanel)
+		originX += panelWidthForPanel
 	}
 
 	m.SinglePanelWidth = panelWidth
