@@ -18,8 +18,10 @@ func (m *Model) getDirectoryElements(displayDotFile bool) []Element {
 	dirEntries, err := os.ReadDir(m.Location)
 	if err != nil {
 		slog.Error("Error while returning folder elements", "error", err)
+		m.elementError = err
 		return nil
 	}
+	m.elementError = nil
 
 	dirEntries = slices.DeleteFunc(dirEntries, func(e os.DirEntry) bool {
 		// Entries not needed to be considered
@@ -40,8 +42,10 @@ func (m *Model) getDirectoryElementsBySearch(displayDotFile bool) []Element {
 	items, err := os.ReadDir(m.Location)
 	if err != nil {
 		slog.Error("Error while return folder element function", "error", err)
+		m.elementError = err
 		return nil
 	}
+	m.elementError = nil
 
 	folderElementMap := map[string]os.DirEntry{}
 	fileAndDirectories := []string{}
