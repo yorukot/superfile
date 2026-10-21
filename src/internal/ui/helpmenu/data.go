@@ -219,6 +219,16 @@ func getData() []hotkeydata { //nolint: funlen // This should be self contained
 			hotkeyWorkType: globalType,
 		},
 		{
+			hotkey:         common.Hotkeys.CopyToSystemClipboard,
+			description:    "Copy focused or selected items to the system clipboard (for the OS file manager)",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey:         common.Hotkeys.PasteFromSystemClipboard,
+			description:    "Paste files from the system clipboard into the current file panel",
+			hotkeyWorkType: globalType,
+		},
+		{
 			hotkey:         common.Hotkeys.DeleteItems,
 			description:    "Delete selected items",
 			hotkeyWorkType: globalType,
