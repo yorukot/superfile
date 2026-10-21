@@ -260,6 +260,16 @@ func getData() []hotkeydata { //nolint: funlen // This should be self contained
 		},
 	}
 
+	data = append(data, hotkeydata{subTitle: "Folder navigation"})
+	for _, shortcut := range common.Hotkeys.FolderShortcuts() {
+		if len(shortcut.Keys) > 0 {
+			data = append(data, hotkeydata{
+				hotkey:         shortcut.Keys,
+				description:    "Open " + shortcut.Name,
+				hotkeyWorkType: globalType,
+			})
+		}
+	}
 	return data
 }
 
