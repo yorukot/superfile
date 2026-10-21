@@ -60,6 +60,12 @@ func ValidateConfig(c *ConfigType) error {
 		)
 	}
 
+	if c.FilePreviewWidthPercent != 0 && (c.FilePreviewWidthPercent < 10 || c.FilePreviewWidthPercent > 90) {
+		return errors.New(
+			LoadConfigError("file_preview_width_percent", "File preview width percent must be 10-90, or 0 to disable."),
+		)
+	}
+
 	if c.SidebarWidth != 0 && (c.SidebarWidth < 5 || c.SidebarWidth > 20) {
 		return errors.New(LoadConfigError("sidebar_width", "Sidebar width must be 5–20, or 0 to hide the sidebar."))
 	}
