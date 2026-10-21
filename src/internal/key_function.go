@@ -304,26 +304,36 @@ func (m *model) handleNotifyModelConfirm(action notify.ConfirmActionType) tea.Cm
 }
 
 func (m *model) spfErrorModelOpenKey(msg string) tea.Cmd {
-	isAbort := slices.Contains(spferror.KeyAbort(), msg)
-	isSkip := slices.Contains(spferror.KeySkip(), msg)
+	var keyHandler spferror.Action
+	for _, action := range m.spfError.GetActions() {
+		if action.KeyChecker(msg) {
+			keyHandler = action.Run
+			slog.Debug("Found action for error modal window", "msg", msg, "action", action.Title)
+			break
+		}
+	}
 
-	if !isAbort && !isSkip {
+	if keyHandler == nil {
 		slog.Warn("Invalid keypress in spfErrorModel", "msg", msg)
 		return nil
 	}
 	defer func() {
+		if m.spfError.State() != nil {
+			panic("error state must be cleaned before unlock mutex!")
+		}
+		if m.spfError.GetActions() != nil {
+			panic("error action list must be cleaned before unlock mutex!")
+		}
 		slog.Debug("Unlock mutex for modal error window")
 		m.mutexErrorModal.Unlock()
 	}()
-	state := m.spfError.Close()
+	state, actions := m.spfError.Close()
 	if state == nil {
 		return nil
 	}
 	reqID := m.nextIoReqCnt()
-	if isSkip {
-		return func() tea.Msg { return state.Skip(m.runFileProcessor, reqID) }
-	}
-	return func() tea.Msg { return state.Abort(m.runFileProcessor, reqID) }
+	runner := m.setupFileProcessorRunner(actions)
+	return func() tea.Msg { return keyHandler(state, runner, reqID) }
 }
 
 // Handles key inputs inside sort options menu

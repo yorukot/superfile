@@ -13,6 +13,7 @@ import (
 	"github.com/yorukot/superfile/src/pkg/utils"
 
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
+	"github.com/yorukot/superfile/src/internal/ui/spferror"
 
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
@@ -486,7 +487,8 @@ func TestRunFileProcessorMutex(t *testing.T) {
 			assert.False(t, m.mutexErrorModal.TryLock())
 			return processbar.NewProcess("1", "test", processbar.OpCopy, 10), []string{}
 		}
-		_ = m.runFileProcessor(processor, finalizer, []string{"file1", "file2"}, 1)
+		runner := m.setupFileProcessorRunner([]*spferror.UserAction{spferror.SkipAction(), spferror.AbortAction()})
+		_ = runner(processor, finalizer, []string{"file1", "file2"}, 1)
 	})
 
 	t.Run("The mutex mutexErrorModal must be unlocked after successful processing. We can see new Error modal window",
@@ -499,7 +501,8 @@ func TestRunFileProcessorMutex(t *testing.T) {
 				process.State = processbar.Successful
 				return process, []string{}
 			}
-			result := m.runFileProcessor(processor, finalizer, []string{"file1", "file2"}, 1)
+			runner := m.setupFileProcessorRunner([]*spferror.UserAction{spferror.SkipAction(), spferror.AbortAction()})
+			result := runner(processor, finalizer, []string{"file1", "file2"}, 1)
 			_, ok := result.(DeleteOperationMsg)
 			assert.True(t, ok)
 			assert.True(t, m.mutexErrorModal.TryLock())
@@ -515,7 +518,8 @@ func TestRunFileProcessorMutex(t *testing.T) {
 				process.State = processbar.Failed
 				return process, []string{"test1"}
 			}
-			result := m.runFileProcessor(processor, finalizer, []string{"file1", "file2"}, 1)
+			runner := m.setupFileProcessorRunner([]*spferror.UserAction{spferror.SkipAction(), spferror.AbortAction()})
+			result := runner(processor, finalizer, []string{"file1", "file2"}, 1)
 			_, ok := result.(SpfErrorModalUpdateMsg)
 			assert.True(t, ok)
 			assert.False(t, m.mutexErrorModal.TryLock())
@@ -531,7 +535,8 @@ func TestRunFileProcessorMutex(t *testing.T) {
 				process.State = processbar.Failed
 				return process, []string{}
 			}
-			result := m.runFileProcessor(processor, finalizer, []string{"file1", "file2"}, 1)
+			runner := m.setupFileProcessorRunner([]*spferror.UserAction{spferror.SkipAction(), spferror.AbortAction()})
+			result := runner(processor, finalizer, []string{"file1", "file2"}, 1)
 			_, ok := result.(DeleteOperationMsg)
 			assert.True(t, ok)
 			assert.True(t, m.mutexErrorModal.TryLock())
