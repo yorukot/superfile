@@ -60,14 +60,20 @@ func (m *Model) ToggleFilePreviewPanel() tea.Cmd {
 }
 
 func (m *Model) UpdatePreviewPanel(msg preview.UpdateMsg) tea.Cmd {
-	selectedItem := m.GetFocusedFilePanel().GetFocusedItemPtr()
-	if selectedItem == nil {
-		slog.Debug("Panel empty or cursor invalid. Ignoring FilePreviewUpdateMsg")
-		return nil
+	var target string
+	if m.previewOverride != "" {
+		target = m.previewOverride
+	} else {
+		selectedItem := m.GetFocusedFilePanel().GetFocusedItemPtr()
+		if selectedItem == nil {
+			slog.Debug("Panel empty or cursor invalid. Ignoring FilePreviewUpdateMsg")
+			return nil
+		}
+		target = selectedItem.Location
 	}
-	if selectedItem.Location != msg.GetLocation() {
+	if target != msg.GetLocation() {
 		slog.Debug("FilePreviewUpdateMsg for older files. Ignoring",
-			"curLocation", selectedItem.Location, "msgLocation", msg.GetLocation())
+			"curLocation", target, "msgLocation", msg.GetLocation())
 		return nil
 	}
 
@@ -91,6 +97,15 @@ func (m *Model) GetFilePreviewCmd(forcePreviewRender bool) tea.Cmd {
 	if !m.FilePreview.IsOpen() {
 		return nil
 	}
+	if m.previewOverride != "" {
+		// While an override is active, the pane belongs to the caller
+		// (e.g. the find modal). Only an explicit re-render (force)
+		// touches the pane.
+		if !forcePreviewRender {
+			return nil
+		}
+		return m.submitPreviewRender(m.previewOverride)
+	}
 	panel := m.GetFocusedFilePanel()
 	if panel.EmptyOrInvalid() {
 		// Sync call because this will be fast
@@ -101,8 +116,13 @@ func (m *Model) GetFilePreviewCmd(forcePreviewRender bool) tea.Cmd {
 	if m.FilePreview.GetLocation() == selectedItem.Location && !forcePreviewRender {
 		return nil
 	}
+	return m.submitPreviewRender(selectedItem.Location)
+}
 
-	m.FilePreview.SetLocation(selectedItem.Location)
+// submitPreviewRender marks the pane as loading path and returns a
+// command that renders it asynchronously.
+func (m *Model) submitPreviewRender(path string) tea.Cmd {
+	m.FilePreview.SetLocation(path)
 	m.FilePreview.SetLoading()
 
 	// HACK!!!. fileModel must not be aware of other dimensions. but...
@@ -119,13 +139,58 @@ func (m *Model) GetFilePreviewCmd(forcePreviewRender bool) tea.Cmd {
 	reqCnt := m.ioReqCnt
 	m.ioReqCnt++
 	slog.Debug("Submitting file preview render request", "id", reqCnt,
-		"path", selectedItem.Location, "w", width, "h", height)
+		"path", path, "w", width, "h", height)
 
 	return func() tea.Msg {
-		content, rawTransmit := m.FilePreview.RenderWithPath(selectedItem.Location, width, height, fullModalWidth)
-		return preview.NewUpdateMsg(selectedItem.Location, content, rawTransmit,
+		content, rawTransmit := m.FilePreview.RenderWithPath(path, width, height, fullModalWidth)
+		return preview.NewUpdateMsg(path, content, rawTransmit,
 			width, height, reqCnt)
 	}
+}
+
+// SetPreviewPathCmd overrides the focused panel's selection and makes
+// the preview pane render path. The override is remembered even while
+// the pane is closed.
+func (m *Model) SetPreviewPathCmd(path string) tea.Cmd {
+	if path == "" || m.previewOverride == path {
+		return nil
+	}
+	m.previewOverride = path
+	if !m.FilePreview.IsOpen() {
+		return nil
+	}
+	if m.FilePreview.GetLocation() == path {
+		return nil
+	}
+	return m.submitPreviewRender(path)
+}
+
+// ClearPreviewOverride removes the preview override and restores the
+// pane to the focused panel's selection, unless the pane already shows
+// it.
+func (m *Model) ClearPreviewOverride() tea.Cmd {
+	if m.previewOverride == "" {
+		return nil
+	}
+	m.previewOverride = ""
+	if !m.FilePreview.IsOpen() {
+		return nil
+	}
+	panel := m.GetFocusedFilePanel()
+	if panel.EmptyOrInvalid() {
+		// Sync call because this will be fast
+		m.FilePreview.SetEmptyWithDimensions(m.ExpectedPreviewWidth, m.Height)
+		return nil
+	}
+	if m.FilePreview.GetLocation() == panel.GetFocusedItem().Location {
+		return nil
+	}
+	return m.GetFilePreviewCmd(true)
+}
+
+// HasPreviewOverride reports whether a preview override is active.
+func (m *Model) HasPreviewOverride() bool {
+	return m.previewOverride != ""
 }
 
 func (m *Model) ToggleDotFile() {

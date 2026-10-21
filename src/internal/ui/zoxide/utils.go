@@ -58,6 +58,18 @@ func (m *Model) SetMaxHeight(maxHeight int) {
 	m.maxHeight = maxHeight
 }
 
+// visibleResults returns how many results the modal shows at once. The
+// window grows with the modal's max height, reserving renderOverhead
+// lines for borders, the input line, the divider, and scroll indicators,
+// so the rendered box always fits within the allotted height.
+func (m *Model) visibleResults() int {
+	n := m.maxHeight - renderOverhead
+	if n < 1 {
+		return 1
+	}
+	return n
+}
+
 func (m *Model) GetResults() []zoxidelib.Result {
 	out := make([]zoxidelib.Result, len(m.results))
 	copy(out, m.results)
