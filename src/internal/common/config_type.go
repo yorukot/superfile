@@ -64,7 +64,9 @@ type ThemeType struct {
 
 // Configuration settings
 type ConfigType struct {
-	Theme string `toml:"theme" comment:"More details are at https://superfile.dev/configure/superfile-config/\nchange your theme"`
+	Theme      string `toml:"theme"       comment:"More details are at https://superfile.dev/configure/superfile-config/\nchange your theme, or set to \"auto\" to pick theme_light/theme_dark based on terminal background"`
+	ThemeLight string `toml:"theme_light" comment:"\nTheme to use when theme is \"auto\" and the terminal background is light."`
+	ThemeDark  string `toml:"theme_dark"  comment:"\nTheme to use when theme is \"auto\" and the terminal background is dark (also the fallback if detection fails)."`
 
 	Editor    string `toml:"editor"     comment:"\nThe editor files will be opened with. (Leave blank to use the EDITOR environment variable)."`
 	DirEditor string `toml:"dir_editor" comment:"\nThe editor directories will be opened with. (Leave blank to use the default editors)."`
