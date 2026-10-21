@@ -43,15 +43,26 @@ func (m *Model) GetContentWidth() int {
 	return m.width - common.BorderPadding
 }
 
+// NeedRenderHeaders returns whether column headers take a line above the entries.
 func (m *Model) NeedRenderHeaders() bool {
 	return common.Config.FilePanelExtraColumns > 0 && len(m.columns) > 1
 }
 
+// ItemAreaTop returns the terminal row, counted from the top of the panel and
+// including its top border, on which the first file entry is drawn.
+//
+// Rendering and mouse hit-testing both derive their row offsets from here, so
+// the two cannot disagree about where the entries begin.
+func (m *Model) ItemAreaTop() int {
+	top := common.BorderTopHeight + contentPadding
+	if m.NeedRenderHeaders() {
+		top += ColumnHeaderHeight
+	}
+	return top
+}
+
 // PanelElementHeight calculates the number of visible elements in content area
 func (m *Model) PanelElementHeight() int {
-	headerHeight := 0
-	if m.NeedRenderHeaders() {
-		headerHeight = ColumnHeaderHeight
-	}
-	return m.GetMainPanelHeight() - contentPadding - headerHeight
+	// Everything below the item area is taken up by the bottom border.
+	return m.GetHeight() - m.ItemAreaTop() - common.BorderBottomHeight
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"time"
 
 	tea "charm.land/bubbletea/v2"
 
@@ -80,14 +81,32 @@ func (m *Model) UpdatePreviewPanel(msg preview.UpdateMsg) tea.Cmd {
 	}
 	m.FilePreview.Apply(msg)
 
+	var cmds []tea.Cmd
 	// For Kitty images, transmit image data directly to the terminal
 	if raw := msg.GetRawTransmit(); raw != "" {
-		return tea.Raw(raw)
+		cmds = append(cmds, tea.Raw(raw))
 	}
-	return nil
+	// Keep the cliamp spectrum animating while an audio file is highlighted.
+	if m.FilePreview.ShouldAnimateCliamp(msg.GetLocation()) {
+		cmds = append(cmds, tea.Tick(preview.CliampTickInterval, func(time.Time) tea.Msg {
+			return preview.CliampTickMsg{}
+		}))
+	}
+	return tea.Batch(cmds...)
 }
 
 func (m *Model) GetFilePreviewCmd(forcePreviewRender bool) tea.Cmd {
+	return m.getFilePreviewCmd(forcePreviewRender, true)
+}
+
+// GetFilePreviewAnimCmd re-renders the currently displayed file without
+// flipping the panel into its loading state. Used by animated previews (like
+// the cliamp spectrum) so they don't flicker between loading and content.
+func (m *Model) GetFilePreviewAnimCmd() tea.Cmd {
+	return m.getFilePreviewCmd(true, false)
+}
+
+func (m *Model) getFilePreviewCmd(forcePreviewRender bool, setLoading bool) tea.Cmd {
 	if !m.FilePreview.IsOpen() {
 		return nil
 	}
@@ -103,7 +122,9 @@ func (m *Model) GetFilePreviewCmd(forcePreviewRender bool) tea.Cmd {
 	}
 
 	m.FilePreview.SetLocation(selectedItem.Location)
-	m.FilePreview.SetLoading()
+	if setLoading {
+		m.FilePreview.SetLoading()
+	}
 
 	// HACK!!!. fileModel must not be aware of other dimensions. but...
 	// Unfortunately, previewPanel isn't completely 'under' fileModel

@@ -14,6 +14,8 @@ import (
 
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/ui/preview"
+	"github.com/yorukot/superfile/src/pkg/cliamp"
 )
 
 // Back to parent directory
@@ -72,6 +74,13 @@ func (m *model) executeOpenCommand() {
 
 	filePath := panel.GetFocusedItem().Location
 
+	// Audio files are handed to cliamp instead of the OS handler, so the
+	// preview panel can show what is playing.
+	if common.Config.CliampPreview && preview.IsAudioFile(filePath) {
+		m.playWithCliamp(filePath)
+		return
+	}
+
 	openCommand := "xdg-open"
 	switch runtime.GOOS {
 	case utils.OsDarwin:
@@ -104,6 +113,21 @@ func (m *model) executeOpenCommand() {
 		// TODO: This kind of errors should go to user facing pop ups
 		slog.Error("Error while open file with", "error", err)
 	}
+}
+
+// playWithCliamp asks the cliamp daemon to play filePath, starting the daemon
+// first if needed. It runs in the background so the UI never blocks on it.
+func (m *model) playWithCliamp(filePath string) {
+	go func() {
+		client := cliamp.New()
+		if err := client.EnsureDaemon(); err != nil {
+			slog.Error("Failed to start cliamp daemon", "error", err)
+			return
+		}
+		if err := client.Play(filePath); err != nil {
+			slog.Error("Failed to play file with cliamp", "error", err, "path", filePath)
+		}
+	}()
 }
 
 // Switch to the directory where the sidebar cursor is located

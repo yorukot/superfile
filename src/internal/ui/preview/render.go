@@ -218,5 +218,9 @@ func (m *Model) RenderWithPath(
 			fullModelWidth-previewWidth, kittyClear)
 	}
 
+	if common.Config.CliampPreview && IsAudioFile(itemPath) {
+		return m.renderCliampPreview(r, itemPath, contentWidth, contentHeight), kittyClear
+	}
+
 	return m.renderTextPreview(r, itemPath, contentWidth, contentHeight), kittyClear
 }

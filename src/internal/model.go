@@ -2,6 +2,7 @@ package internal
 
 import (
 	"errors"
+	"fmt"
 	"log/slog"
 	"os"
 	"reflect"
@@ -62,8 +63,8 @@ func (m *model) Init() tea.Cmd {
 func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	slog.Debug("model.Update() called", "msgType", reflect.TypeOf(msg))
 
-	var sidebarCmd, inputCmd, updateCmd, panelCmd,
-		metadataCmd, filePreviewCmd, helpMenuCmd, resizeCmd tea.Cmd
+	var sidebarCmd, inputCmd, updateCmd, panelCmd, mouseCmd,
+		metadataCmd, filePreviewCmd, helpMenuCmd, resizeCmd, pasteCmd tea.Cmd
 
 	// These are above the key message handing to prevent issues with firstKeyInput
 	// if someone presses `/` to focus to searchBar, searchBar will otherwise
@@ -76,9 +77,13 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		resizeCmd = m.handleWindowResize(msg)
 	case tea.MouseMsg:
-		m.handleMouseMsg(msg)
+		mouseCmd = m.handleMouseMsg(msg)
 	case tea.KeyPressMsg:
 		inputCmd = m.handleKeyInput(msg)
+	case tea.PasteMsg:
+		// A file manager dropping files onto the terminal arrives as pasted
+		// paths. Anything that has the keyboard already gets it below instead.
+		pasteCmd = m.handlePasteMsg(msg)
 
 	// Has to handle zoxide messages separately as they could be generated via
 	// zoxide update commands, or batched commands from textinput
@@ -91,6 +96,10 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case preview.UpdateMsg:
 		slog.Debug("Got ModelUpdate message", "id", msg.GetReqID())
 		updateCmd = m.fileModel.UpdatePreviewPanel(msg)
+	case preview.CliampTickMsg:
+		// Re-render the highlighted audio file so its cliamp spectrum keeps
+		// animating. UpdatePreviewPanel schedules the next tick.
+		filePreviewCmd = m.fileModel.GetFilePreviewAnimCmd()
 	case ModelUpdateMessage:
 		slog.Debug("Got ModelUpdate message", "id", msg.GetReqID())
 		updateCmd = msg.ApplyToModel(m)
@@ -103,21 +112,14 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	panelCmd = m.updateComponentState(msg)
 
 	m.updateModelStateAfterMsg()
-	filePreviewCmd = m.fileModel.GetFilePreviewCmd(false)
+	if filePreviewCmd == nil {
+		filePreviewCmd = m.fileModel.GetFilePreviewCmd(false)
+	}
 
 	metadataCmd = m.getMetadataCmd()
 
 	return m, tea.Batch(sidebarCmd, helpMenuCmd, inputCmd, updateCmd,
-		panelCmd, metadataCmd, filePreviewCmd, resizeCmd)
-}
-
-func (m *model) handleMouseMsg(msg tea.MouseMsg) {
-	msgStr := msg.String()
-	if msgStr == "wheelup" || msgStr == "wheeldown" {
-		wheelMainAction(msgStr, m)
-	} else {
-		slog.Debug("Mouse event of type that is not handled", "msg", msgStr)
-	}
+		panelCmd, mouseCmd, pasteCmd, metadataCmd, filePreviewCmd, resizeCmd)
 }
 
 func (m *model) updateModelStateAfterMsg() {
@@ -310,6 +312,15 @@ func (m *model) handleKeyInput(msg tea.KeyPressMsg) tea.Cmd {
 	case m.notifyModel.IsOpen():
 		cmd = m.notifyModelOpenKey(msg.String())
 
+	// A drag in progress is abandoned rather than dropped, because the pointer
+	// has to be where the drop belongs and there is no pointer involved here.
+	case m.handleDragKeyInput(msg.String()):
+
+	// The context menu captures input while it is open, so that keys move the
+	// menu rather than the panels underneath it.
+	case m.contextMenu.IsOpen():
+		cmd = m.contextMenuKey(msg.String())
+
 	// If renaming a object
 	case m.fileModel.Renaming:
 		cmd = m.renamingKey(msg.String())
@@ -459,6 +470,17 @@ func (m *model) splitPanel() (tea.Cmd, error) {
 	return m.createNewFilePanel(m.getFocusedFilePanel().Location)
 }
 
+// maxFilePanelReached tells the user why no panel was opened. Without this the
+// key press looks broken - nothing at all happens on screen.
+func (m *model) maxFilePanelReached() tea.Cmd {
+	msg := NewNotifyModalMsg(notify.New(true, "Cannot open another panel",
+		fmt.Sprintf("Terminal is too narrow for more panels (limit %d).", m.fileModel.MaxFilePanel),
+		notify.NoAction), m.nextIoReqCnt())
+	return func() tea.Msg {
+		return msg
+	}
+}
+
 func (m *model) createNewFilePanelRelativeToCurrent(path string) (tea.Cmd, error) {
 	currentDir := m.getFocusedFilePanel().Location
 	return m.createNewFilePanel(utils.ResolveAbsPath(currentDir, path))
@@ -531,6 +553,10 @@ func (m *model) viewContent() string {
 		slog.Error("Invalid layout", "error", err)
 	}
 
+	// Publish the hit-test regions for the frame about to be drawn, so that
+	// mouse events resolve against what the user actually sees.
+	m.updateMouseRegions()
+
 	return m.updateRenderForOverlay(m.mainComponentsRender())
 }
 
@@ -541,6 +567,14 @@ func (m *model) updateRenderForOverlay(finalRender string) string {
 		overlayX := m.fullWidth/common.CenterDivisor - common.ModalWidth/common.CenterDivisor
 		overlayY := m.fullHeight/common.CenterDivisor - common.ModalHeight/common.CenterDivisor
 		return stringfunction.PlaceOverlay(overlayX, overlayY, errorModal, finalRender)
+	}
+
+	// The context menu is an overlay anchored to the pointer, so it is placed at
+	// the position it was opened at rather than centred. It sits above the panels
+	// but below the error modal, which must always be readable.
+	if m.contextMenu.IsOpen() {
+		return stringfunction.PlaceOverlay(m.contextMenu.OriginX(), m.contextMenu.OriginY(),
+			m.contextMenu.Render(), finalRender)
 	}
 
 	if m.helpMenu.IsOpen() {

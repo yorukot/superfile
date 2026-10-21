@@ -91,13 +91,19 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen,go
 		return cmd
 	case slices.Contains(common.Hotkeys.CreateNewFilePanel, msg):
 		cmd, err := m.createNewFilePanel(variable.HomeDir)
-		if err != nil && !errors.Is(err, filemodel.ErrMaximumPanelCount) {
+		if err != nil {
+			if errors.Is(err, filemodel.ErrMaximumPanelCount) {
+				return m.maxFilePanelReached()
+			}
 			slog.Error("unexpected error while creating new panel", "error", err)
 		}
 		return cmd
 	case slices.Contains(common.Hotkeys.SplitFilePanel, msg):
 		cmd, err := m.splitPanel()
-		if err != nil && !errors.Is(err, filemodel.ErrMaximumPanelCount) {
+		if err != nil {
+			if errors.Is(err, filemodel.ErrMaximumPanelCount) {
+				return m.maxFilePanelReached()
+			}
 			slog.Error("unexpected error while splitting panel", "error", err)
 		}
 		return cmd
@@ -277,6 +283,8 @@ func (m *model) handleNotifyModelCancel(action notify.ConfirmActionType) tea.Cmd
 		m.cancelRename()
 	case notify.QuitAction:
 		m.modelQuitState = notQuitting
+	case notify.MoveAction:
+		m.cancelPendingMove()
 	case notify.DeleteAction, notify.NoAction, notify.PermanentDeleteAction:
 		// Do nothing
 	default:
@@ -291,6 +299,8 @@ func (m *model) handleNotifyModelConfirm(action notify.ConfirmActionType) tea.Cm
 		return m.getDeleteCmd(false)
 	case notify.PermanentDeleteAction:
 		return m.getDeleteCmd(true)
+	case notify.MoveAction:
+		return m.confirmDragMoveCmd()
 	case notify.RenameAction:
 		m.confirmRename()
 	case notify.QuitAction:
