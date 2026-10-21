@@ -362,6 +362,7 @@ func (m *model) sidebarRenamingKey(msg string) {
 		m.sidebarModel.CancelSidebarRename()
 	case slices.Contains(common.Hotkeys.ConfirmTyping, msg):
 		m.sidebarModel.ConfirmSidebarRename()
+		m.sidebarModel.UpdateDirectoriesIfNeeded(true)
 	}
 }
 

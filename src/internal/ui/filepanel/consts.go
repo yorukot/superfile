@@ -22,6 +22,10 @@ const (
 	ReRenderMaxDelay     = 3
 
 	nonFocussedPanelReRenderTime = 3 * time.Second
+	// Floor for how often a focused panel re-reads its directory. Without it the
+	// ReRenderChunkDivisor scaling truncates to zero for anything under
+	// ReRenderChunkDivisor entries, which meant a re-read on every message.
+	focussedPanelReRenderTime = 1 * time.Second
 
 	emptyCursor = " "
 )
