@@ -146,6 +146,11 @@ func (m *model) confirmRename() {
 	if err != nil {
 		slog.Error("Error while confirmRename during rename", "error", err)
 		// Dont return. We have to also reset the panel and model information
+	} else {
+		// The keypress that confirmed the rename already drives an update, but
+		// the panel's re-render timer would skip re-reading the directory and
+		// leave the old name on screen. See #818.
+		panel.InvalidateElements()
 	}
 	m.fileModel.Renaming = false
 	panel.Rename.Blur()
