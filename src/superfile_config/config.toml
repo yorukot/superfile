@@ -73,6 +73,13 @@ shell_close_on_success = false
 # Number of lines to scroll for PgUp/PgDown keys (0: full page, default behavior).
 page_scroll_size = 0
 
+#-- File Panel Cursor Wrap
+# Whether moving the cursor past the last (or first) item of the file panel
+# wraps it around to the other end of the list.
+# true: wrap around (default behavior).
+# false: stop at the first and last items.
+file_panel_cursor_wrap = true
+
 #-- Debug Mode
 debug = false
 
