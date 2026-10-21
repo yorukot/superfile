@@ -27,10 +27,19 @@ auto_check_update = true
 # program exits? 
 cd_on_quit = false
 
-#-- File Preview
+#-- File Preview / Content Panel
 # Should we open a file preview by default whenever selection-hovering over a
 # file?
 default_open_file_preview = true
+
+# Maximum file size in bytes for editing in the content panel (5 MB)
+content_panel_max_edit_size = 5242880
+
+# Command to launch nvim for code file editing
+content_panel_nvim_cmd = "nvim"
+
+# File extensions that use nvim instead of the built-in textarea
+content_panel_code_extensions = [".go", ".c", ".cpp", ".h", ".hpp", ".py", ".rs", ".js", ".ts", ".java", ".lua", ".sh", ".rb", ".zig", ".swift", ".kt", "_test.go"]
 
 #-- Image Preview
 # Should we open an image preview by default whenever selection-hovering over an

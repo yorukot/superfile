@@ -26,6 +26,7 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen,go
 	switch {
 	// If move up Key is pressed, check the current state and executes
 	case slices.Contains(common.Hotkeys.ListUp, msg):
+		m.fileModel.FilePreview.ClearShellOutput()
 		switch m.focusPanel {
 		case sidebarFocus:
 			m.sidebarModel.ListUp()
@@ -33,12 +34,15 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen,go
 			m.processBarModel.ListUp()
 		case metadataFocus:
 			m.fileMetaData.ListUp()
+		case contentPanelFocus:
+			m.fileModel.FilePreview.ScrollUp()
 		case nonePanelFocus:
 			m.getFocusedFilePanel().ListUp()
 		}
 
 		// If move down Key is pressed, check the current state and executes
 	case slices.Contains(common.Hotkeys.ListDown, msg):
+		m.fileModel.FilePreview.ClearShellOutput()
 		switch m.focusPanel {
 		case sidebarFocus:
 			m.sidebarModel.ListDown()
@@ -46,6 +50,8 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen,go
 			m.processBarModel.ListDown()
 		case metadataFocus:
 			m.fileMetaData.ListDown()
+		case contentPanelFocus:
+			m.fileModel.FilePreview.ScrollDown()
 		case nonePanelFocus:
 			m.getFocusedFilePanel().ListDown()
 		}
@@ -54,6 +60,8 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen,go
 		switch m.focusPanel {
 		case metadataFocus:
 			m.fileMetaData.PgUp()
+		case contentPanelFocus:
+			m.fileModel.FilePreview.ScrollPageUp(m.mainPanelHeight)
 		case nonePanelFocus:
 			m.getFocusedFilePanel().PgUp()
 		case processBarFocus, sidebarFocus:
@@ -64,6 +72,8 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen,go
 		switch m.focusPanel {
 		case metadataFocus:
 			m.fileMetaData.PgDown()
+		case contentPanelFocus:
+			m.fileModel.FilePreview.ScrollPageDown(m.mainPanelHeight)
 		case nonePanelFocus:
 			m.getFocusedFilePanel().PgDown()
 		case processBarFocus, sidebarFocus:
@@ -112,6 +122,8 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen,go
 
 	case slices.Contains(common.Hotkeys.FocusOnMetaData, msg):
 		m.focusOnMetadata()
+	case slices.Contains(common.Hotkeys.FocusOnContentPanel, msg) || msg == "b":
+		m.toggleContentPanelFocus()
 
 	case slices.Contains(common.Hotkeys.PasteItems, msg):
 		return m.getPasteItemCmd()
@@ -154,6 +166,24 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen,go
 
 	case slices.Contains(common.Hotkeys.OpenCurrentDirectoryWithEditor, msg):
 		return m.openDirectoryWithEditor()
+
+	// Content panel edit mode keys (only when content panel is focused)
+	case slices.Contains(common.Hotkeys.ContentPanelEdit, msg):
+		if m.focusPanel == contentPanelFocus && !m.fileModel.FilePreview.IsEditing() {
+			return m.contentPanelEnterEdit()
+		}
+	case slices.Contains(common.Hotkeys.ContentPanelSave, msg):
+		if m.focusPanel == contentPanelFocus && m.fileModel.FilePreview.IsEditing() {
+			return m.contentPanelSaveEdit()
+		}
+	case slices.Contains(common.Hotkeys.ContentPanelExitEdit, msg):
+		if m.focusPanel == contentPanelFocus && m.fileModel.FilePreview.IsEditing() {
+			m.contentPanelExitEdit()
+		}
+	case slices.Contains(common.Hotkeys.ContentPanelOpenNvim, msg):
+		if m.focusPanel == contentPanelFocus {
+			return m.contentPanelOpenNvim()
+		}
 
 	default:
 		return m.normalAndBrowserModeKey(msg)
@@ -374,3 +404,4 @@ func (m *model) focusOnSearchbarKey(msg string) {
 		m.confirmSearch()
 	}
 }
+

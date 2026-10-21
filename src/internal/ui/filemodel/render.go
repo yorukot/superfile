@@ -15,6 +15,14 @@ func (m *Model) GetFilePreviewRender() string {
 	if !m.FilePreview.IsOpen() {
 		return ""
 	}
+	// Shell output takes priority over preview
+	if m.FilePreview.HasShellOutput() {
+		return m.FilePreview.RenderShellOutput()
+	}
+	// In edit mode, render the textarea or nvim output
+	if m.FilePreview.IsEditing() {
+		return m.FilePreview.RenderEditMode()
+	}
 	// Check if width and height have been synced yet
 	if m.FilePreview.GetContentHeight() == m.Height &&
 		m.FilePreview.GetContentWidth() == m.ExpectedPreviewWidth {

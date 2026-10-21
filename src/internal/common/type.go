@@ -1,5 +1,7 @@
 package common
 
+import "fmt"
+
 // Placeholder inteface for now, might later move 'model' type to commons and have
 // and add an execute(model) function to this
 type ModelAction interface {
@@ -14,11 +16,16 @@ func (n NoAction) String() string {
 }
 
 type ShellCommandAction struct {
-	Command string
+	Command     string
+	Interactive bool // if true, use tea.ExecProcess for full terminal access
 }
 
 func (s ShellCommandAction) String() string {
-	return "ShellCommandAction for command " + s.Command
+	mode := "quick"
+	if s.Interactive {
+		mode = "interactive"
+	}
+	return fmt.Sprintf("ShellCommandAction[%s] for command %s", mode, s.Command)
 }
 
 // We could later move 'model' type to commons and have
