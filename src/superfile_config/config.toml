@@ -136,6 +136,18 @@ sidebar_width = 20
 # Only enabled sections will be displayed
 sidebar_sections = ["home", "pinned", "disks"]
 
+#-- Disks Section: Included Mountpoint Prefixes
+# A mount is shown in the disks section only if its mountpoint starts with one of
+# these prefixes. Use an empty list ([]) to list every mount, i.e. all filesystem
+# types including network/FUSE mounts such as sshfs and nfs.
+# The root mount "/" (and all drives on Windows) is always shown.
+disk_mounts = ["/mnt", "/media", "/run/media", "/Volumes"]
+
+#-- Disks Section: Excluded Mountpoint Prefixes
+# A mount whose mountpoint starts with one of these prefixes is always hidden,
+# even if it matches a disk_mounts prefix above.
+excluded_disk_mounts = ["/Volumes/.timemachine"]
+
 #-- Border
 # Make sure to add strings that are exactly one character wide!
 # Use ' ' for borderless.
