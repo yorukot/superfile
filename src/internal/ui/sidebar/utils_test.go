@@ -204,3 +204,17 @@ func TestSidebarSectionsVisibility(t *testing.T) {
 		})
 	}
 }
+
+func TestConfiguredDiskDirectories(t *testing.T) {
+	disks := dirSlice(1)
+	loads := 0
+	load := func() []directory {
+		loads++
+		return disks
+	}
+
+	assert.Empty(t, getConfiguredDiskDirectories([]string{utils.SidebarSectionHome}, load))
+	assert.Equal(t, 0, loads, "hidden disks must not trigger a mount scan")
+	assert.Equal(t, disks, getConfiguredDiskDirectories([]string{utils.SidebarSectionDisks}, load))
+	assert.Equal(t, 1, loads)
+}
