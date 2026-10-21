@@ -26,10 +26,14 @@ func (m *Model) Render(focused bool) string {
 	m.renderTopBar(r)
 	m.renderSearchBar(r)
 	m.renderFooter(r, m.SelectedCount())
-	if m.NeedRenderHeaders() {
-		m.renderColumnHeaders(r)
+	if m.Search.Active {
+		m.renderSearchResults(r)
+	} else {
+		if m.NeedRenderHeaders() {
+			m.renderColumnHeaders(r)
+		}
+		m.renderFileEntries(r)
 	}
-	m.renderFileEntries(r)
 	return r.Render()
 }
 
@@ -46,6 +50,15 @@ func (m *Model) renderSearchBar(r *rendering.Renderer) {
 
 // TODO : Unit test this
 func (m *Model) renderFooter(r *rendering.Renderer, selectedCount uint) {
+	if m.Search.Active {
+		cursorStr := fmt.Sprintf("%d/%d", m.Search.Cursor+1, len(m.Search.Results))
+		if len(m.Search.Results) == 0 {
+			cursorStr = "0/0"
+		}
+		r.SetBorderInfoItems("Search", "", cursorStr)
+		return
+	}
+
 	sortLabel, sortIcon := m.getSortInfo()
 	modeLabel, modeIcon := m.getPanelModeInfo(selectedCount)
 	cursorStr := m.getCursorString()
