@@ -59,13 +59,20 @@ func GetElementIcon(file string, isDir bool, isLink bool, nerdFont bool) icon.St
 	}
 
 	if isDir {
+		var resultIcon icon.Style
 		if isLink {
-			return icon.Folders["link_folder"]
+			resultIcon = icon.Folders["link_folder"]
+		} else {
+			resultIcon = icon.Folders["folder"]
+			if betterIcon, ok := icon.Folders[file]; ok {
+				resultIcon = betterIcon
+			}
 		}
-		resultIcon := icon.Folders["folder"]
-		betterIcon, hasBetterIcon := icon.Folders[file]
-		if hasBetterIcon {
-			resultIcon = betterIcon
+		if resultIcon.Color == "NONE" || resultIcon.Color == "" {
+			resultIcon.Color = Theme.DirectoryIconColor
+			if resultIcon.Color == "" {
+				resultIcon.Color = Theme.FilePanelFG
+			}
 		}
 		return resultIcon
 	}
