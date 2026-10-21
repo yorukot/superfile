@@ -57,6 +57,7 @@ type model struct {
 	processBarModel processbar.Model
 	clipboard       clipboard.Model
 	clipboardWriter func(string) error
+	osc52Clipboard  bool // also copy through the terminal (OSC 52), for SSH sessions
 	focusPanel      focusPanelType
 
 	// Modals
