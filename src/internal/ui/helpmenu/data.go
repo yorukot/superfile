@@ -176,6 +176,11 @@ func getData() []hotkeydata { //nolint: funlen // This should be self contained
 			hotkeyWorkType: globalType,
 		},
 		{
+			hotkey:         common.Hotkeys.ToggleDirsOnly,
+			description:    "Toggle directories only display",
+			hotkeyWorkType: globalType,
+		},
+		{
 			hotkey:         common.Hotkeys.SearchBar,
 			description:    "Toggle active search bar",
 			hotkeyWorkType: globalType,

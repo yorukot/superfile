@@ -20,4 +20,5 @@ type Model struct {
 	FocusedPanelIndex    int
 	ioReqCnt             int
 	DisplayDotFiles      bool
+	DisplayDirsOnly      bool
 }
