@@ -2,8 +2,6 @@ package internal
 
 import (
 	"log/slog"
-
-	"github.com/yorukot/superfile/src/internal/common"
 )
 
 // Pinned directory
@@ -17,7 +15,7 @@ func (m *model) pinnedDirectory() {
 
 // Focus on sidebar
 func (m *model) focusOnSideBar() {
-	if common.Config.SidebarWidth == 0 {
+	if m.sidebarModel.Disabled() {
 		return
 	}
 	if m.focusPanel == sidebarFocus {
