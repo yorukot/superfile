@@ -13,11 +13,11 @@ require (
 	github.com/charmbracelet/x/ansi v0.11.7
 	github.com/fatih/color v1.19.0
 	github.com/fvbommel/sortorder v1.1.0
+	github.com/godbus/dbus/v5 v5.2.4
 	github.com/lazysegtree/go-zoxide v0.1.0
 	github.com/lithammer/shortuuid v3.0.0+incompatible
 	github.com/muesli/termenv v0.16.0
 	github.com/reinhrst/fzf-lib v0.9.0
-	github.com/shirou/gopsutil/v4 v4.26.5
 	github.com/stretchr/testify v1.11.1
 	github.com/urfave/cli/v3 v3.10.1
 	golang.org/x/image v0.41.0
@@ -39,7 +39,6 @@ require (
 	github.com/clipperhouse/displaywidth v0.11.0 // indirect
 	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
 	github.com/dlclark/regexp2/v2 v2.1.0 // indirect
-	github.com/ebitengine/purego v0.10.0 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/icza/bitio v1.1.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
@@ -49,7 +48,6 @@ require (
 	github.com/mewpkg/term v0.0.0-20241026122259-37a80af23985 // indirect
 	github.com/nwaples/rardecode/v2 v2.2.5 // indirect
 	github.com/peterebden/ar v0.0.0-20241106141004-20dc11b778e8 // indirect
-	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d // indirect
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/sshaman1101/dcompress v0.0.0-20200109162717-50436a6332de // indirect
@@ -81,7 +79,6 @@ require (
 	github.com/charmbracelet/harmonica v0.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/disintegration/imaging v1.6.2
-	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/lucasb-eyer/go-colorful v1.4.0 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.23 // indirect
@@ -91,7 +88,6 @@ require (
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rwcarlsen/goexif v0.0.0-20190401172101-9e8deecbddbd
-	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	golang.org/x/sys v0.46.0
 	golang.org/x/text v0.39.0
 )
