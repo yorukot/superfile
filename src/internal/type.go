@@ -35,6 +35,7 @@ const (
 	processBarFocus
 	sidebarFocus
 	metadataFocus
+	previewFocus
 )
 
 const (

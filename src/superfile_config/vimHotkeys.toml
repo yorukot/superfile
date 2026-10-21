@@ -41,6 +41,7 @@ toggle_reverse_sort = ['R', '']
 focus_on_process_bar = ['ctrl+p', '']
 focus_on_sidebar = ['ctrl+s', '']
 focus_on_metadata = ['ctrl+d', '']
+focus_on_preview = ['F', '']
 
 #-- File/Dir Creation/Renaming
 file_panel_item_create = ['a', '']
