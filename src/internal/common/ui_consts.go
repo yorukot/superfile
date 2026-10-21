@@ -31,4 +31,17 @@ const (
 
 	// UI positioning
 	CenterDivisor = 2 // divisor for centering UI elements
+
+	// Zoxide modal configuration limits and defaults
+	DefaultZoxideMaxVisibleResults = 5
+	MinZoxideMaxVisibleResults     = 1
+	MaxZoxideMaxVisibleResults     = 100
+
+	DefaultZoxideModalWidthPercent  = 50
+	MinZoxideModalWidthPercent      = 10
+	MaxZoxideModalWidthPercent      = 100
+
+	DefaultZoxideModalHeightPercent = 50
+	MinZoxideModalHeightPercent     = 10
+	MaxZoxideModalHeightPercent     = 100
 )
