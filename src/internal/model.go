@@ -148,9 +148,8 @@ func (m *model) getMetadataCmd() tea.Cmd {
 	}
 	selectedItem := m.getFocusedFilePanel().GetFocusedItem()
 	metadataFocused := m.focusPanel == metadataFocus
-	// Note : This will cause metadata not being refreshed there is any file update events.
-	// We can have a cache with TTL or watch filesystem changes to fix this
-	if selectedItem.Location == m.fileMetaData.GetMetadataLocation() &&
+	if (m.fileMetaData.IsPending(selectedItem.Location, metadataFocused) || m.fileMetaData.IsFresh(5*time.Second)) &&
+		selectedItem.Location == m.fileMetaData.GetMetadataLocation() &&
 		metadataFocused == m.fileMetaData.GetMetadataExpectedFocused() {
 		return nil
 	}
@@ -163,15 +162,13 @@ func (m *model) getMetadataCmd() tea.Cmd {
 		return nil
 	}
 
-	m.fileMetaData.SetMetadataLocationAndFocused(selectedItem.Location, metadataFocused)
-
 	if m.fileMetaData.IsBlank() {
 		m.fileMetaData.SetInfoMsg(icon.InOperation + icon.Space + "Loading metadata...")
 	}
 
 	reqCnt := m.nextIoReqCnt()
-	// If there are too many metadata fetches, we need to have a cache with path as a key
-	// and timeout based eviction
+	m.fileMetaData.SetPendingRequest(selectedItem.Location, metadataFocused, reqCnt)
+
 	slog.Debug("Submitting metadata fetch request", "id", reqCnt, "path", selectedItem.Location)
 	return func() tea.Msg {
 		return NewMetadataMsg(
