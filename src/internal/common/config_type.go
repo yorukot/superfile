@@ -68,8 +68,9 @@ type ConfigType struct {
 
 	Editor    string `toml:"editor"     comment:"\nThe editor files will be opened with. (Leave blank to use the EDITOR environment variable)."`
 	DirEditor string `toml:"dir_editor" comment:"\nThe editor directories will be opened with. (Leave blank to use the default editors)."`
-	// The table (map) for editor by file extension
-	OpenWith map[string]string `toml:"open_with" comment:"\nCustom open commands by file extension."`
+	// The table (map) for applications by file extension. Values are normalized
+	// by ResolveOpenWith so legacy strings and application lists can coexist.
+	OpenWith map[string]any `toml:"open_with" comment:"\nCustom open commands by file extension."`
 
 	AutoCheckUpdate        bool   `toml:"auto_check_update"         comment:"\nAuto check for update"`
 	CdOnQuit               bool   `toml:"cd_on_quit"                comment:"\nCd on quit (For more details, please check out https://superfile.dev/configure/superfile-config/#cd_on_quit)"`

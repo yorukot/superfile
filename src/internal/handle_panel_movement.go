@@ -73,6 +73,7 @@ func (m *model) executeOpenCommand() {
 	filePath := panel.GetFocusedItem().Location
 
 	openCommand := "xdg-open"
+	var openArgs []string
 	switch runtime.GOOS {
 	case utils.OsDarwin:
 		openCommand = "open"
@@ -93,13 +94,18 @@ func (m *model) executeOpenCommand() {
 	// For now open_with works only for mac and linux
 	// TODO: Make it in parity with windows.
 	ext := strings.ToLower(strings.TrimPrefix(filepath.Ext(filePath), "."))
-	if extEditor, ok := common.Config.OpenWith[ext]; ok {
-		openCommand = extEditor
+	applications, err := common.ResolveOpenWith(common.Config.OpenWith, filePath)
+	if err != nil {
+		slog.Error("Error while resolving open_with command", "error", err, "extension", ext)
+	} else if len(applications) > 0 {
+		openCommand = applications[0].Command
+		openArgs = append(openArgs, applications[0].Args...)
 	}
 
-	cmd := exec.Command(openCommand, filePath)
+	openArgs = append(openArgs, filePath)
+	cmd := exec.Command(openCommand, openArgs...)
 	utils.DetachFromTerminal(cmd)
-	err := cmd.Start()
+	err = cmd.Start()
 	if err != nil {
 		// TODO: This kind of errors should go to user facing pop ups
 		slog.Error("Error while open file with", "error", err)
