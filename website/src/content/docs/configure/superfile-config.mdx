@@ -366,7 +366,9 @@ Enables the zoxide navigation modal.
 
 - ###### open_with
 
-Allows users to map file extensions to commands used to open them. The file path will be appended as the last argument.
+Allows users to map file extensions to one or more applications. The file path is passed directly as the last argument.
+Legacy string values remain supported. For multiple choices, use inline tables with a display `name`, executable
+`command`, optional `args`, and `terminal = true` when the application needs control of the terminal.
 
 :::caution
 
@@ -377,8 +379,16 @@ Must be at the very end of the file
 ```toml
 [open_with]
 xopp = "xournalpp"
-conf = "nvim"
+pdf = [
+  { name = "Zathura", command = "zathura" },
+  { name = "MuPDF", command = "mupdf" }
+]
+conf = [
+  { name = "Neovim", command = "nvim", args = ["--clean"], terminal = true }
+]
 ```
+
+Press the configurable `open_with_menu` hotkey to choose from the applications for the highlighted file.
 
 ### Default superfile config
 
