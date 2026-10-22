@@ -93,6 +93,11 @@ func getData() []hotkeydata { //nolint: funlen // This should be self contained
 			hotkeyWorkType: globalType,
 		},
 		{
+			hotkey:         common.Hotkeys.OpenWithMenu,
+			description:    "Open highlighted file with an application",
+			hotkeyWorkType: globalType,
+		},
+		{
 			hotkey:         common.Hotkeys.ToggleReverseSort,
 			description:    "Toggle reverse sort",
 			hotkeyWorkType: globalType,
