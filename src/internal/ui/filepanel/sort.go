@@ -122,7 +122,7 @@ func sortFileElement(sortKind sortmodel.SortKind, reversed bool, dirEntries []os
 
 		elements = append(elements, Element{
 			Name:      item.Name(),
-			Directory: item.IsDir() || isSymlinkToDir(location, info, item.Name()),
+			Directory: item.IsDir() || isLinkedDirectory(location, info, item.Name()),
 			Location:  filepath.Join(location, item.Name()),
 			Info:      info,
 		})
@@ -133,9 +133,10 @@ func sortFileElement(sortKind sortmodel.SortKind, reversed bool, dirEntries []os
 	return elements
 }
 
-// Symlinks to directories are to be identified as directories
-func isSymlinkToDir(location string, info os.FileInfo, name string) bool {
-	if info.Mode()&os.ModeSymlink != 0 {
+// Symlinks and Windows junctions to directories are displayed as directories.
+// Junctions have ModeIrregular rather than ModeSymlink on Windows.
+func isLinkedDirectory(location string, info os.FileInfo, name string) bool {
+	if info.Mode()&(os.ModeSymlink|os.ModeIrregular) != 0 {
 		targetInfo, errStat := os.Stat(filepath.Join(location, name))
 		return errStat == nil && targetInfo.IsDir()
 	}

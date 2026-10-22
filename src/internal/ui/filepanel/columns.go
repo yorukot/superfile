@@ -55,7 +55,7 @@ func (m *Model) renderFileSize(indexElement int, columnWidth int) string {
 	elem := m.GetElementAtIdx(indexElement)
 	isSelected := m.CheckSelected(elem.Location)
 	sizeValue := common.FormatFileSize(elem.Info.Size())
-	if elem.Info.IsDir() {
+	if elem.Directory {
 		sizeValue = ""
 	}
 	return common.FilePanelItemRender(
