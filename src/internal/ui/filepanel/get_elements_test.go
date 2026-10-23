@@ -6,7 +6,10 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
+	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/filesystem"
 	"github.com/yorukot/superfile/src/pkg/utils"
 
 	"github.com/yorukot/superfile/src/internal/ui/sortmodel"
@@ -213,11 +216,13 @@ func TestReturnDirElement(t *testing.T) {
 			panel.SortReversed = tt.reversed
 			panel.SearchBar.SetValue(tt.searchString)
 			var res []Element
+			var err error
 			if tt.searchString == "" {
-				res = panel.getDirectoryElements(tt.dotFiles)
+				res, err = panel.getDirectoryElements(tt.dotFiles)
 			} else {
-				res = panel.getDirectoryElementsBySearch(tt.dotFiles)
+				res, err = panel.getDirectoryElementsBySearch(tt.dotFiles)
 			}
+			require.NoError(t, err)
 
 			assert.Len(t, res, len(tt.expectedElemNames))
 			actualNames := []string{}
@@ -226,6 +231,64 @@ func TestReturnDirElement(t *testing.T) {
 			}
 			assert.Equal(t, tt.expectedElemNames, actualNames)
 		})
+	}
+}
+
+func TestRemotePanelRefreshHasSingleInflightRequestAndMinimumInterval(t *testing.T) {
+	panel := newRemoteTestPanel(t)
+	now := time.Now()
+
+	requestID, started := panel.BeginElementsLoading(false, now)
+	require.True(t, started)
+	require.NotZero(t, requestID)
+
+	_, started = panel.BeginElementsLoading(false, now.Add(time.Millisecond))
+	assert.False(t, started)
+	_, started = panel.BeginElementsLoading(true, now.Add(time.Millisecond))
+	assert.False(t, started)
+
+	accepted, refreshPending := panel.FinishElementsLoading(requestID)
+	assert.True(t, accepted)
+	assert.True(t, refreshPending)
+	panel.ApplyLoadedElements(nil, now)
+
+	assert.False(t, panel.ShouldUpdateElements(false, now.Add(500*time.Millisecond)))
+	assert.True(t, panel.ShouldUpdateElements(false, now.Add(remoteFocusedPanelRefreshTime)))
+}
+
+func TestUpdateElementsIfNeededAdvancesTimestampWhenLoadingFails(t *testing.T) {
+	filepanelTestConfigOnce.Do(func() {
+		require.NoError(t, common.PopulateGlobalConfigs())
+	})
+	panel := New(filepath.Join(t.TempDir(), "missing"), true, "", sortmodel.SortByName, false)
+	previousElements := []Element{{Name: "existing.txt", Location: "/tmp/existing.txt"}}
+	panel.element = previousElements
+	previousTimestamp := time.Now().Add(-time.Hour)
+	panel.LastTimeGetElement = previousTimestamp
+
+	panel.UpdateElementsIfNeeded(true, false)
+
+	assert.True(t, panel.LastTimeGetElement.After(previousTimestamp))
+	assert.Equal(t, previousElements, panel.element)
+}
+
+func TestChangingPanelLocationInvalidatesInflightRefresh(t *testing.T) {
+	panel := newRemoteTestPanel(t)
+	requestID, started := panel.BeginElementsLoading(false, time.Now())
+	require.True(t, started)
+	requestContext := panel.elementsContext
+
+	location := panel.CurrentLocation()
+	location.Path = filesystem.NewRemotePath("/tmp/sf-remote/nested")
+	panel.SetPaneLocation(location)
+
+	accepted, _ := panel.FinishElementsLoading(requestID)
+	assert.False(t, accepted)
+	assert.True(t, panel.LastTimeGetElement.IsZero())
+	select {
+	case <-requestContext.Done():
+	default:
+		t.Fatal("invalidating an in-flight refresh did not cancel its context")
 	}
 }
 

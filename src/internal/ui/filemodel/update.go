@@ -1,15 +1,28 @@
 package filemodel
 
 import (
+	"bytes"
+	"context"
+	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"os"
+	"strings"
+	"time"
+	"unicode/utf8"
 
 	tea "charm.land/bubbletea/v2"
 
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/filesystem"
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 	"github.com/yorukot/superfile/src/internal/ui/preview"
+)
+
+const (
+	remotePreviewTimeout = 10 * time.Second
+	remotePreviewLimit   = 1024 * 1024
 )
 
 func (m *Model) CreateNewFilePanel(location string) (tea.Cmd, error) {
@@ -40,6 +53,7 @@ func (m *Model) CloseFilePanel() (tea.Cmd, error) {
 	if m.PanelCount() <= 1 {
 		return nil, ErrMinimumPanelCount
 	}
+	closedSessionID := m.FilePanels[m.FocusedPanelIndex].CurrentLocation().SessionID
 
 	m.FilePanels = append(m.FilePanels[:m.FocusedPanelIndex],
 		m.FilePanels[m.FocusedPanelIndex+1:]...)
@@ -49,6 +63,9 @@ func (m *Model) CloseFilePanel() (tea.Cmd, error) {
 	}
 	m.FilePanels[m.FocusedPanelIndex].IsFocused = true
 	m.updateChildComponentWidth()
+	if err := m.closeSessionIfUnused(closedSessionID); err != nil {
+		return m.ensurePreviewDimensionsSync(), fmt.Errorf("close unused panel session: %w", err)
+	}
 
 	return m.ensurePreviewDimensionsSync(), nil
 }
@@ -60,6 +77,15 @@ func (m *Model) ToggleFilePreviewPanel() tea.Cmd {
 }
 
 func (m *Model) UpdatePreviewPanel(msg preview.UpdateMsg) tea.Cmd {
+	if errors.Is(msg.GetError(), filesystem.ErrDisconnected) && msg.GetSessionID() != "" {
+		if err := m.MarkSessionDisconnectedIfCurrent(
+			msg.GetSessionID(),
+			msg.GetSessionGeneration(),
+			msg.GetError(),
+		); err != nil {
+			slog.Error("failed to mark remote preview session disconnected", "error", err)
+		}
+	}
 	selectedItem := m.GetFocusedFilePanel().GetFocusedItemPtr()
 	if selectedItem == nil {
 		slog.Debug("Panel empty or cursor invalid. Ignoring FilePreviewUpdateMsg")
@@ -121,6 +147,39 @@ func (m *Model) GetFilePreviewCmd(forcePreviewRender bool) tea.Cmd {
 	slog.Debug("Submitting file preview render request", "id", reqCnt,
 		"path", selectedItem.Location, "w", width, "h", height)
 
+	if panel.CurrentLocation().Provider != filesystem.ProviderLocal {
+		sessionState, ok := m.Sessions.Get(panel.CurrentLocation().SessionID)
+		if !ok || sessionState.Browser == nil {
+			content, rawTransmit := m.FilePreview.RenderTextPreviewWithDimension(
+				"Remote preview unavailable: session is disconnected.",
+				height,
+				width,
+			)
+			return func() tea.Msg {
+				return preview.NewUpdateMsg(selectedItem.Location, content, rawTransmit, width, height, reqCnt)
+			}
+		}
+		browser := sessionState.Browser
+		sessionID := panel.CurrentLocation().SessionID
+		return func() tea.Msg {
+			ctx, cancel := context.WithTimeout(context.Background(), remotePreviewTimeout)
+			defer cancel()
+			text, previewErr := remotePreviewText(ctx, browser, selectedItem.Path, selectedItem.Directory)
+			content, rawTransmit := m.FilePreview.RenderTextPreviewWithDimension(text, height, width)
+			return preview.NewRemoteUpdateMsg(
+				selectedItem.Location,
+				content,
+				rawTransmit,
+				width,
+				height,
+				reqCnt,
+				sessionID,
+				sessionState.Generation,
+				previewErr,
+			)
+		}
+	}
+
 	return func() tea.Msg {
 		content, rawTransmit := m.FilePreview.RenderWithPath(selectedItem.Location, width, height, fullModalWidth)
 		return preview.NewUpdateMsg(selectedItem.Location, content, rawTransmit,
@@ -128,13 +187,149 @@ func (m *Model) GetFilePreviewCmd(forcePreviewRender bool) tea.Cmd {
 	}
 }
 
-func (m *Model) ToggleDotFile() {
+func remotePreviewText(
+	ctx context.Context,
+	session filesystem.Session,
+	path filesystem.Path,
+	directory bool,
+) (string, error) {
+	if directory {
+		entries, err := session.List(ctx, path)
+		if err != nil {
+			return "Remote preview error: " + err.Error(), err
+		}
+		lines := make([]string, 0, len(entries))
+		for _, entry := range entries {
+			name := entry.Name
+			if entry.Stat.IsDir {
+				name += "/"
+			}
+			lines = append(lines, name)
+		}
+		if len(lines) == 0 {
+			return "Empty remote directory", nil
+		}
+		return strings.Join(lines, "\n"), nil
+	}
+
+	reader, err := session.Read(ctx, path)
+	if err != nil {
+		return "Remote preview error: " + err.Error(), err
+	}
+	defer reader.Close()
+	data, err := io.ReadAll(io.LimitReader(reader, remotePreviewLimit+1))
+	if err != nil {
+		return "Remote preview error: " + err.Error(), err
+	}
+	if len(data) > remotePreviewLimit {
+		data = truncateRemotePreviewData(data)
+	}
+	if !utf8.Valid(data) || bytes.IndexByte(data, 0) >= 0 {
+		return "Binary remote file preview is not supported.", nil
+	}
+	return string(data), nil
+}
+
+func truncateRemotePreviewData(data []byte) []byte {
+	data = data[:remotePreviewLimit]
+	for removed := 0; removed < utf8.UTFMax-1 && !utf8.Valid(data); removed++ {
+		data = data[:len(data)-1]
+	}
+	return append(data, []byte("\n\n[preview truncated at 1 MiB]")...)
+}
+
+func (m *Model) ToggleDotFile() tea.Cmd {
 	m.DisplayDotFiles = !m.DisplayDotFiles
-	m.UpdateFilePanelsIfNeeded(true)
+	m.UpdateLocalFilePanelsIfNeeded(true)
+	return m.GetRemoteFilePanelUpdateCmd(true)
 }
 
 func (m *Model) UpdateFilePanelsIfNeeded(force bool) {
 	for i := range m.FilePanels {
 		m.FilePanels[i].UpdateElementsIfNeeded(force, m.DisplayDotFiles)
 	}
+}
+
+type PanelUpdateMsg struct {
+	panelIndex int
+	requestID  uint64
+	location   filesystem.Location
+	elements   []filepanel.Element
+	loadedAt   time.Time
+	err        error
+}
+
+func (m *Model) UpdateLocalFilePanelsIfNeeded(force bool) {
+	for i := range m.FilePanels {
+		if m.FilePanels[i].CurrentLocation().Provider == filesystem.ProviderLocal {
+			m.FilePanels[i].UpdateElementsIfNeeded(force, m.DisplayDotFiles)
+		}
+	}
+}
+
+func (m *Model) GetRemoteFilePanelUpdateCmd(force bool) tea.Cmd {
+	now := time.Now()
+	commands := make([]tea.Cmd, 0, len(m.FilePanels))
+	for i := range m.FilePanels {
+		panel := &m.FilePanels[i]
+		location := panel.CurrentLocation()
+		if location.Provider == filesystem.ProviderLocal {
+			continue
+		}
+		session, ok := m.Sessions.Get(location.SessionID)
+		if !ok || session.Status != SessionConnected || session.Browser == nil {
+			continue
+		}
+		requestID, started := panel.BeginElementsLoading(force, now)
+		if !started {
+			continue
+		}
+		panelCopy := *panel
+		panelIndex := i
+		displayDotFiles := m.DisplayDotFiles
+		commands = append(commands, func() tea.Msg {
+			elements, err := panelCopy.LoadElements(displayDotFiles)
+			return PanelUpdateMsg{
+				panelIndex: panelIndex,
+				requestID:  requestID,
+				location:   location,
+				elements:   elements,
+				loadedAt:   time.Now(),
+				err:        err,
+			}
+		})
+	}
+	return tea.Batch(commands...)
+}
+
+func (m *Model) ApplyPanelUpdate(msg PanelUpdateMsg) tea.Cmd {
+	if msg.panelIndex < 0 || msg.panelIndex >= len(m.FilePanels) {
+		return nil
+	}
+	panel := &m.FilePanels[msg.panelIndex]
+	accepted, refreshPending := panel.FinishElementsLoading(msg.requestID)
+	if !accepted {
+		return nil
+	}
+	if panel.CurrentLocation() != msg.location {
+		return nil
+	}
+	if msg.err != nil {
+		slog.Error("Error while loading remote folder elements", "error", msg.err, "location", panel.DisplayLocation())
+		if errors.Is(msg.err, filesystem.ErrDisconnected) {
+			if err := m.MarkSessionDisconnected(msg.location.SessionID, msg.err); err != nil {
+				slog.Error("failed to mark remote panel session disconnected", "error", err)
+			}
+			return nil
+		}
+		if refreshPending {
+			return m.GetRemoteFilePanelUpdateCmd(true)
+		}
+		return nil
+	}
+	panel.ApplyLoadedElements(msg.elements, msg.loadedAt)
+	if refreshPending {
+		return m.GetRemoteFilePanelUpdateCmd(true)
+	}
+	return nil
 }
