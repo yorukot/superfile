@@ -8,7 +8,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/disks"
 )
 
-// getExternalMediaFolders retrieves a list of mounted physical drives and external media.
+// getExternalMediaFolders retrieves a list of mounted and unmounted physical drives and external media.
 func getExternalMediaFolders(diskManager disks.Manager) []directory {
 	disks, err := diskManager.List(context.Background())
 	if err != nil {

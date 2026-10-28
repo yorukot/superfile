@@ -34,7 +34,7 @@ func (m *manager) List(ctx context.Context) ([]Disk, error) {
 
 	var disks []Disk
 	for path, ifaces := range objs {
-		if disk, ok := linuxDiskFromObject(path, ifaces); ok {
+		if disk, ok := diskFromObject(path, ifaces); ok {
 			disks = append(disks, disk)
 		}
 	}

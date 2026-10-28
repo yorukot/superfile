@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestLinuxDiskFromObject(t *testing.T) {
+func TestDiskFromObject(t *testing.T) {
 	tests := []struct {
 		name     string
 		path     dbus.ObjectPath
@@ -193,14 +193,14 @@ func TestLinuxDiskFromObject(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			gotDisk, gotBool := linuxDiskFromObject(tc.path, tc.ifaces)
+			gotDisk, gotBool := diskFromObject(tc.path, tc.ifaces)
 			assert.Equal(t, tc.wantDisk, gotDisk, "disks mismatch")
 			assert.Equal(t, tc.wantBool, gotBool)
 		})
 	}
 }
 
-func TestLinuxDiskName(t *testing.T) {
+func TestDiskName(t *testing.T) {
 	tests := []struct {
 		name    string
 		idLabel string
@@ -226,13 +226,13 @@ func TestLinuxDiskName(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got := linuxDiskName(tc.idLabel, tc.size)
+			got := diskName(tc.idLabel, tc.size)
 			assert.Equal(t, tc.want, got, "wrong name")
 		})
 	}
 }
 
-func TestLinuxDiskMountPoint(t *testing.T) {
+func TestDiskMountPoint(t *testing.T) {
 	tests := []struct {
 		name        string
 		mountPoints [][]byte
@@ -267,7 +267,7 @@ func TestLinuxDiskMountPoint(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got := linuxDiskMountPoint(tc.mountPoints)
+			got := diskMountPoint(tc.mountPoints)
 			assert.Equal(t, tc.want, got, "invalid mount point")
 		})
 	}
