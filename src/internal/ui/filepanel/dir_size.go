@@ -2,6 +2,8 @@ package filepanel
 
 import (
 	"context"
+	"os"
+	"time"
 
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/pkg/utils"
@@ -10,11 +12,16 @@ import (
 // StartDirSizeCalc marks the focused directory as being calculated and returns a
 // function that computes its size. The returned function does filesystem IO and
 // must be run asynchronously, e.g. via a tea.Cmd.
-// It returns nil if the focused item is not a directory, or is already being calculated.
+// It returns nil if the focused item is not a directory, is a symlink, or is already being calculated.
 // Pressing it again on a calculated directory recalculates it.
 func (m *Model) StartDirSizeCalc(reqID int) func() DirSizeResult {
 	elem := m.GetFocusedItemPtr()
 	if elem == nil || !elem.Directory || elem.Info == nil {
+		return nil
+	}
+	// Symlinks to directories are skipped. Their size column shows the link itself,
+	// and the link's Info cannot tell us when the target directory changes.
+	if elem.Info.Mode()&os.ModeSymlink != 0 {
 		return nil
 	}
 	if entry, ok := m.dirSizes[elem.Location]; ok && entry.calculating {
@@ -29,7 +36,7 @@ func (m *Model) StartDirSizeCalc(reqID int) func() DirSizeResult {
 		calculating: true,
 		reqID:       reqID,
 		cancel:      cancel,
-		modTime:     elem.Info.ModTime(),
+		startTime:   time.Now(),
 	}
 	location := elem.Location
 	return func() DirSizeResult {
@@ -84,7 +91,7 @@ func (m *Model) dirSizeText(elem Element) string {
 		return dirSizeCalculatingText
 	}
 	// Directory changed since calculation. Result is stale
-	if elem.Info == nil || !entry.modTime.Equal(elem.Info.ModTime()) {
+	if elem.Info == nil || elem.Info.ModTime().After(entry.startTime) {
 		return ""
 	}
 	sizeText := common.FormatFileSize(entry.size)
