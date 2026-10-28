@@ -59,6 +59,18 @@ func TestDirSizeCalculation(t *testing.T) {
 		assert.Nil(t, panel.StartDirSizeCalc(1))
 	})
 
+	t.Run("Not started for symlinks to directories", func(t *testing.T) {
+		panel, dir := setupDirSizePanel(t)
+		link := filepath.Join(filepath.Dir(dir), "link")
+		if err := os.Symlink(dir, link); err != nil {
+			t.Skipf("Cannot create symlink: %v", err)
+		}
+		linkInfo, err := os.Lstat(link)
+		require.NoError(t, err)
+		panel.element[0] = Element{Name: "link", Location: link, Directory: true, Info: linkInfo}
+		assert.Nil(t, panel.StartDirSizeCalc(1))
+	})
+
 	t.Run("Not started twice while calculating", func(t *testing.T) {
 		panel, _ := setupDirSizePanel(t)
 		require.NotNil(t, panel.StartDirSizeCalc(1))
@@ -95,7 +107,19 @@ func TestDirSizeCaching(t *testing.T) {
 		assert.Equal(t, common.FormatFileSize(20), panel.dirSizeText(panel.element[0]))
 	})
 
-	t.Run("Stale result is hidden when directory mtime changes", func(t *testing.T) {
+	t.Run("Result is kept when listed mtime is updated to a time before calculation", func(t *testing.T) {
+		panel, dir := setupDirSizePanel(t)
+		require.True(t, panel.ApplyDirSizeResult(panel.StartDirSizeCalc(1)()))
+
+		oldTime := time.Now().Add(-time.Minute)
+		require.NoError(t, os.Chtimes(dir, oldTime, oldTime))
+		info, err := os.Stat(dir)
+		require.NoError(t, err)
+		panel.element[0].Info = info
+		assert.Equal(t, common.FormatFileSize(10), panel.dirSizeText(panel.element[0]))
+	})
+
+	t.Run("Stale result is hidden when directory is modified after calculation", func(t *testing.T) {
 		panel, dir := setupDirSizePanel(t)
 		require.True(t, panel.ApplyDirSizeResult(panel.StartDirSizeCalc(1)()))
 

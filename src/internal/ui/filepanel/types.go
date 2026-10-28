@@ -51,11 +51,13 @@ type dirSizeEntry struct {
 	calculating bool
 	reqID       int
 	cancel      context.CancelFunc
-	// Directory modification time when the calculation started.
-	// The result is not shown anymore if it changes.
-	modTime time.Time
-	size    int64
-	partial bool
+	// Time when the calculation started. The result is not shown anymore
+	// if the directory is modified after it.
+	// Note: Comparing with the exact modification time is not reliable, as on Windows,
+	// the modification time of a directory in its parent's listing can be updated late.
+	startTime time.Time
+	size      int64
+	partial   bool
 }
 
 // DirSizeResult is the outcome of a directory size calculation
