@@ -119,6 +119,18 @@ func TestDirSizeCaching(t *testing.T) {
 		assert.Equal(t, common.FormatFileSize(10), panel.dirSizeText(panel.element[0]))
 	})
 
+	t.Run("Result is shown for directory with a future mtime", func(t *testing.T) {
+		panel, dir := setupDirSizePanel(t)
+		futureTime := time.Now().Add(time.Hour)
+		require.NoError(t, os.Chtimes(dir, futureTime, futureTime))
+		info, err := os.Stat(dir)
+		require.NoError(t, err)
+		panel.element[0].Info = info
+
+		require.True(t, panel.ApplyDirSizeResult(panel.StartDirSizeCalc(1)()))
+		assert.Equal(t, common.FormatFileSize(10), panel.dirSizeText(panel.element[0]))
+	})
+
 	t.Run("Stale result is hidden when directory is modified after calculation", func(t *testing.T) {
 		panel, dir := setupDirSizePanel(t)
 		require.True(t, panel.ApplyDirSizeResult(panel.StartDirSizeCalc(1)()))
