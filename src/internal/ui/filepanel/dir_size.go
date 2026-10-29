@@ -36,6 +36,7 @@ func (m *Model) StartDirSizeCalc(reqID int) func() DirSizeResult {
 		calculating: true,
 		reqID:       reqID,
 		cancel:      cancel,
+		modTime:     elem.Info.ModTime(),
 		startTime:   time.Now(),
 	}
 	location := elem.Location
@@ -91,7 +92,10 @@ func (m *Model) dirSizeText(elem Element) string {
 		return dirSizeCalculatingText
 	}
 	// Directory changed since calculation. Result is stale
-	if elem.Info == nil || elem.Info.ModTime().After(entry.startTime) {
+	if elem.Info == nil {
+		return ""
+	}
+	if modTime := elem.Info.ModTime(); !modTime.Equal(entry.modTime) && modTime.After(entry.startTime) {
 		return ""
 	}
 	sizeText := common.FormatFileSize(entry.size)
