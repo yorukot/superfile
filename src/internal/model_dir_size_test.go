@@ -49,6 +49,7 @@ func TestCalculateDirSize(t *testing.T) {
 		m := defaultTestModel(curTestDir)
 		TeaUpdate(m, tea.WindowSizeMsg{Width: 200, Height: 40})
 		setFilePanelSelectedItemByLocation(t, m.getFocusedFilePanel(), dir1)
+		assert.Contains(t, m.getFocusedFilePanel().Render(true), "2 items")
 
 		msg, ok := findDirSizeMsg(TeaUpdate(m, spaceKey))
 		require.True(t, ok, "Expected a DirSizeMsg")
@@ -56,6 +57,7 @@ func TestCalculateDirSize(t *testing.T) {
 
 		TeaUpdate(m, msg)
 		assert.Contains(t, m.getFocusedFilePanel().Render(true), common.FormatFileSize(10))
+		assert.NotContains(t, m.getFocusedFilePanel().Render(true), "2 items")
 		assert.False(t, m.notifyModel.IsOpen())
 	})
 

@@ -19,8 +19,8 @@ func (m *Model) StartDirSizeCalc(reqID int) func() DirSizeResult {
 	if elem == nil || !elem.Directory || elem.Info == nil {
 		return nil
 	}
-	// Symlinks to directories are skipped. Their size column shows the link itself,
-	// and the link's Info cannot tell us when the target directory changes.
+	// Symlinks to directories are skipped, as the link's Info cannot tell us
+	// when the target directory changes.
 	if elem.Info.Mode()&os.ModeSymlink != 0 {
 		return nil
 	}
