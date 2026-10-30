@@ -24,4 +24,6 @@ const (
 	nonFocussedPanelReRenderTime = 3 * time.Second
 
 	emptyCursor = " "
+
+	dirMaxChildrenToCount = 1000
 )
