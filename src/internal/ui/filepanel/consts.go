@@ -26,4 +26,8 @@ const (
 	emptyCursor = " "
 
 	dirMaxChildrenToCount = 1000
+
+	dirSizeCalculatingText = "???"
+	// Prefix for directory size when some entries inside it could not be read
+	dirSizePartialPrefix = "? "
 )

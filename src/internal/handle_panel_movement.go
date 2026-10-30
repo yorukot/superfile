@@ -124,6 +124,19 @@ func (m *model) sidebarSelectDirectory() {
 	panel.IsFocused = true
 }
 
+// Start calculating the size of the focused directory in the background
+func (m *model) getCalculateDirSizeCmd() tea.Cmd {
+	reqID := m.nextIoReqCnt()
+	calc := m.getFocusedFilePanel().StartDirSizeCalc(reqID)
+	if calc == nil {
+		return nil
+	}
+	slog.Debug("Submitting directory size calculation", "id", reqID)
+	return func() tea.Msg {
+		return NewDirSizeMsg(calc(), reqID)
+	}
+}
+
 // Toggle dotfile display or not
 func (m *model) toggleDotFileController() {
 	m.fileModel.ToggleDotFile()

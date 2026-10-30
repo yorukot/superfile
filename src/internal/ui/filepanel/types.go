@@ -1,6 +1,7 @@
 package filepanel
 
 import (
+	"context"
 	"os"
 	"time"
 
@@ -41,6 +42,35 @@ type Model struct {
 	LastTimeGetElement time.Time
 	TargetFile         string             // filename to position cursor on after load
 	columns            []columnDefinition // columns for rendering
+	// key is directory location
+	dirSizes map[string]dirSizeEntry
+}
+
+// State of a directory size calculation started by the user
+type dirSizeEntry struct {
+	calculating bool
+	reqID       int
+	cancel      context.CancelFunc
+	// The result is not shown anymore if the directory's modification time
+	// changes from modTime to a time after startTime.
+	// Note: Only checking for a change is not enough, as on Windows, the modification
+	// time of a directory in its parent's listing can be updated late, to an earlier time.
+	// Only checking startTime is not enough either, as the directory may have a
+	// modification time in the future.
+	modTime   time.Time
+	startTime time.Time
+	size      int64
+	partial   bool
+}
+
+// DirSizeResult is the outcome of a directory size calculation
+type DirSizeResult struct {
+	Location string
+	ReqID    int
+	Size     int64
+	// Some entries inside the directory could not be read
+	Partial bool
+	Err     error
 }
 
 // Record for directory navigation

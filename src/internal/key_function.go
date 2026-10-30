@@ -240,6 +240,8 @@ func (m *model) filePanelNormalModeKey(msg string) tea.Cmd {
 		m.copyPath()
 	case slices.Contains(common.Hotkeys.CopyPWD, msg):
 		m.copyPWD()
+	case slices.Contains(common.Hotkeys.CalculateDirSize, msg):
+		return m.getCalculateDirSizeCmd()
 	}
 	return nil
 }
