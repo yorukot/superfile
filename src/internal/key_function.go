@@ -145,6 +145,8 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen,go
 
 	case slices.Contains(common.Hotkeys.OpenSortOptionsMenu, msg):
 		m.sortModal.Open(m.getFocusedFilePanel().SortKind)
+	case slices.Contains(common.Hotkeys.OpenWithMenu, msg):
+		m.openWithMenu()
 
 	case slices.Contains(common.Hotkeys.ToggleReverseSort, msg):
 		m.getFocusedFilePanel().ToggleReverseSort()
@@ -221,7 +223,7 @@ func (m *model) filePanelSelectModeKey(msg string) tea.Cmd {
 func (m *model) filePanelNormalModeKey(msg string) tea.Cmd {
 	switch {
 	case slices.Contains(common.Hotkeys.Confirm, msg):
-		m.enterPanel()
+		return m.enterPanel()
 	case slices.Contains(common.Hotkeys.ParentDirectory, msg):
 		m.parentDirectory()
 	case slices.Contains(common.Hotkeys.DeleteItems, msg):
@@ -340,6 +342,21 @@ func (m *model) sortOptionsKey(msg string) {
 	case slices.Contains(common.Hotkeys.ListDown, msg):
 		m.sortModal.ListDown()
 	}
+}
+
+// Handles key inputs inside the Open With menu.
+func (m *model) openWithOptionsKey(msg string) tea.Cmd {
+	switch {
+	case slices.Contains(common.Hotkeys.OpenWithMenu, msg), slices.Contains(common.Hotkeys.Quit, msg):
+		m.openWithModal.Close()
+	case slices.Contains(common.Hotkeys.Confirm, msg):
+		return m.confirmOpenWith()
+	case slices.Contains(common.Hotkeys.ListUp, msg):
+		m.openWithModal.ListUp()
+	case slices.Contains(common.Hotkeys.ListDown, msg):
+		m.openWithModal.ListDown()
+	}
+	return nil
 }
 
 func (m *model) renamingKey(msg string) tea.Cmd {

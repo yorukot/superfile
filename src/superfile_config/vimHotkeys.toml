@@ -35,6 +35,7 @@ previous_file_panel = ['shift+tab', '']
 split_file_panel = ['N', '']
 toggle_file_preview_panel = ['f', '']
 open_sort_options_menu = ['o', '']
+open_with_menu = ['O', '']
 toggle_reverse_sort = ['R', '']
 
 #-- Focus Manipulation
