@@ -122,3 +122,7 @@ func (m *model) promptModalRender() string {
 func (m *model) zoxideModalRender() string {
 	return m.zoxideModal.Render()
 }
+
+func (m *model) findModalRender() string {
+	return m.findModal.Render()
+}

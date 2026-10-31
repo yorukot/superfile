@@ -35,13 +35,14 @@ func (m *Model) Render() string {
 
 func (m *Model) renderResultList(r *rendering.Renderer) {
 	// Calculate visible range
-	endIndex := m.renderIndex + maxVisibleResults
+	visible := m.visibleResults()
+	endIndex := m.renderIndex + visible
 	endIndex = min(endIndex, len(m.results))
 	// Show visible results
 	m.renderVisibleResults(r, endIndex)
 
 	// Show scroll indicators if needed
-	m.renderScrollIndicators(r, endIndex)
+	m.renderScrollIndicators(r, endIndex, visible)
 }
 
 func (m *Model) renderVisibleResults(r *rendering.Renderer, endIndex int) {
@@ -67,8 +68,8 @@ func (m *Model) renderVisibleResults(r *rendering.Renderer, endIndex int) {
 	}
 }
 
-func (m *Model) renderScrollIndicators(r *rendering.Renderer, endIndex int) {
-	if len(m.results) <= maxVisibleResults {
+func (m *Model) renderScrollIndicators(r *rendering.Renderer, endIndex int, visible int) {
+	if len(m.results) <= visible {
 		return
 	}
 
