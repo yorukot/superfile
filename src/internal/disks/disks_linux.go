@@ -51,8 +51,5 @@ func (m *manager) List(ctx context.Context) ([]Disk, error) {
 }
 
 func (m *manager) Close() error {
-	if err := m.conn.Close(); err != nil {
-		return err
-	}
-	return nil
+	return m.conn.Close()
 }
