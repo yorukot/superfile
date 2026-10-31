@@ -214,7 +214,7 @@ func validateRenderBorderValidations(lines []string) error {
 // validateComponentRender validates render output of all components
 func (m *model) validateComponentRender() error {
 	// Validate sidebar render
-	if common.Config.SidebarWidth > 0 {
+	if !m.sidebarModel.Disabled() {
 		sidebarRender := m.sidebarRender()
 		if err := validateRender(
 			sidebarRender,
@@ -279,7 +279,7 @@ func (m *model) validateComponentRender() error {
 	return nil
 }
 
-func (m *model) validateFinalRender() error { //nolint:gocognit // cumilation of validations
+func (m *model) validateFinalRender() error {
 	mainRender := m.mainComponentsRender()
 	if err := validateRender(mainRender, m.fullHeight, m.fullWidth, false); err != nil {
 		return fmt.Errorf("model rendering failures : %w", err)
@@ -287,7 +287,7 @@ func (m *model) validateFinalRender() error { //nolint:gocognit // cumilation of
 
 	strippedOut := ansi.Strip(mainRender)
 	lines := strings.Split(strippedOut, "\n")
-	if common.Config.SidebarWidth != 0 {
+	if !m.sidebarModel.Disabled() {
 		sidebarPos := compPosition{
 			stRow:  0,
 			stCol:  0,
@@ -300,10 +300,7 @@ func (m *model) validateFinalRender() error { //nolint:gocognit // cumilation of
 		}
 	}
 
-	filePanelColStart := 0
-	if common.Config.SidebarWidth != 0 {
-		filePanelColStart += common.BorderPadding + common.Config.SidebarWidth
-	}
+	filePanelColStart := m.sidebarModel.GetWidth()
 	for i := range m.fileModel.FilePanels {
 		panel := &m.fileModel.FilePanels[i]
 		panelPos := compPosition{
