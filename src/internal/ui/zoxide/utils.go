@@ -6,6 +6,8 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 	zoxidelib "github.com/lazysegtree/go-zoxide"
+
+	"github.com/yorukot/superfile/src/internal/common"
 )
 
 func (m *Model) Open() tea.Cmd {
@@ -13,6 +15,11 @@ func (m *Model) Open() tea.Cmd {
 	m.justOpened = true
 	m.textInput.SetValue("")
 	_ = m.textInput.Focus()
+	if common.Config.ZoxideMaxVisibleResults > 0 {
+		m.maxVisibleResults = common.Config.ZoxideMaxVisibleResults
+	} else if m.maxVisibleResults <= 0 {
+		m.maxVisibleResults = DefaultMaxVisibleResults
+	}
 
 	// Return async command for initial query instead of blocking
 	return m.GetQueryCmd("")
@@ -56,6 +63,38 @@ func (m *Model) SetMaxHeight(maxHeight int) {
 		maxHeight = ZoxideMinHeight
 	}
 	m.maxHeight = maxHeight
+}
+
+// SetMaxVisibleResults updates the maximum visible results count.
+func (m *Model) SetMaxVisibleResults(count int) {
+	if count <= 0 {
+		count = DefaultMaxVisibleResults
+	}
+	m.maxVisibleResults = count
+}
+
+// GetConfiguredMaxVisibleResults returns the configured maximum visible results.
+func (m *Model) GetConfiguredMaxVisibleResults() int {
+	if m.maxVisibleResults > 0 {
+		return m.maxVisibleResults
+	}
+	if common.Config.ZoxideMaxVisibleResults > 0 {
+		return common.Config.ZoxideMaxVisibleResults
+	}
+	return DefaultMaxVisibleResults
+}
+
+// GetMaxVisibleResults returns the effective maximum visible results count,
+// taking into account the available height if maxHeight is constrained.
+func (m *Model) GetMaxVisibleResults() int {
+	configured := m.GetConfiguredMaxVisibleResults()
+	if m.maxHeight > renderOverhead {
+		available := m.maxHeight - renderOverhead
+		if available > 0 && configured > available {
+			return available
+		}
+	}
+	return configured
 }
 
 func (m *Model) GetResults() []zoxidelib.Result {
