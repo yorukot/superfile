@@ -95,7 +95,12 @@ func TestCopyPath(t *testing.T) {
 		cmd := TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.CopyPath[0]))
 
 		require.NotNil(t, cmd)
-		assert.Equal(t, tea.SetClipboard(file1)(), cmd())
+		batch, ok := cmd().(tea.BatchMsg)
+		require.True(t, ok)
+		require.Len(t, batch, 2)
+		assert.Equal(t, tea.SetClipboard(file1)(), batch[0]())
+		assert.Empty(t, copiedText, "clipboard tools run in their own command")
+		batch[1]()
 		assert.Equal(t, file1, copiedText, "clipboard tools still run, for ssh -X")
 	})
 
@@ -108,7 +113,12 @@ func TestCopyPath(t *testing.T) {
 		cmd := TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.CopyPWD[0]))
 
 		require.NotNil(t, cmd)
-		assert.Equal(t, tea.SetClipboard(curTestDir)(), cmd())
+		batch, ok := cmd().(tea.BatchMsg)
+		require.True(t, ok)
+		require.Len(t, batch, 2)
+		assert.Equal(t, tea.SetClipboard(curTestDir)(), batch[0]())
+		assert.Empty(t, copiedText, "clipboard tools run in their own command")
+		batch[1]()
 		assert.Equal(t, curTestDir, copiedText, "clipboard tools still run, for ssh -X")
 	})
 }

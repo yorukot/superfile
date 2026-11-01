@@ -561,15 +561,7 @@ func (m *model) copyPath() tea.Cmd {
 	if pathText == "" {
 		return nil
 	}
-	err := m.writeClipboard(pathText)
-	if m.osc52Clipboard {
-		// The clipboard tools can still work over ssh -X, so their error is expected here
-		return tea.SetClipboard(pathText)
-	}
-	if err != nil {
-		slog.Error("Error while copy path", "error", err)
-	}
-	return nil
+	return m.copyToClipboard(pathText, "Error while copy path")
 }
 
 func (m *model) copyPathText() string {
@@ -589,13 +581,20 @@ func (m *model) copyPathText() string {
 // TODO: This is also an IO operations, do it via tea.Cmd
 func (m *model) copyPWD() tea.Cmd {
 	panel := m.getFocusedFilePanel()
-	err := m.writeClipboard(panel.Location)
+	return m.copyToClipboard(panel.Location, "Error while copy present working directory")
+}
+
+func (m *model) copyToClipboard(text string, errMsg string) tea.Cmd {
 	if m.osc52Clipboard {
-		// The clipboard tools can still work over ssh -X, so their error is expected here
-		return tea.SetClipboard(panel.Location)
+		// The clipboard tools can still work over ssh -X, so their error is expected here.
+		// They run in their own command so a slow or hung tool can't hold back OSC 52.
+		return tea.Batch(tea.SetClipboard(text), func() tea.Msg {
+			_ = m.writeClipboard(text)
+			return nil
+		})
 	}
-	if err != nil {
-		slog.Error("Error while copy present working directory", "error", err)
+	if err := m.writeClipboard(text); err != nil {
+		slog.Error(errMsg, "error", err)
 	}
 	return nil
 }
