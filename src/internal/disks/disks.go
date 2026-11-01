@@ -1,8 +1,6 @@
 package disks
 
-import (
-	"context"
-)
+import "context"
 
 type Disk struct {
 	Name       string

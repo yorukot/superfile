@@ -5,6 +5,7 @@ import (
 	"context"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/godbus/dbus/v5"
 )
@@ -22,12 +23,13 @@ func New() (Manager, error) {
 }
 
 func (m *manager) List(ctx context.Context) ([]Disk, error) {
+	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
+	defer cancel()
+
 	var objs map[dbus.ObjectPath]map[string]map[string]dbus.Variant
 
 	obj := m.conn.Object("org.freedesktop.UDisks2", "/org/freedesktop/UDisks2")
-	err := obj.CallWithContext(
-		ctx, "org.freedesktop.DBus.ObjectManager.GetManagedObjects", 0,
-	).Store(&objs)
+	err := obj.CallWithContext(ctx, "org.freedesktop.DBus.ObjectManager.GetManagedObjects", 0).Store(&objs)
 	if err != nil {
 		return nil, err
 	}
