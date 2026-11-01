@@ -137,18 +137,7 @@ func LoadHotkeysFile(ignoreMissingFields bool) {
 		ignoreMissingFields,
 	)
 	if err != nil {
-		userMsg := fmt.Sprintf("%s%s", LipglossError, err.Error())
-
-		toExit := true
-		var loadError *utils.TomlLoadError
-		if errors.As(err, &loadError) {
-			if loadError.MissingFields() && !variable.FixHotkeys {
-				// Had missing fields and we did not fix
-				userMsg += "\nTo add missing fields to hotkeys file automatically run superfile " +
-					"with the --fix-hotkeys flag `spf --fix-hotkeys`"
-			}
-			toExit = loadError.IsFatal()
-		}
+		userMsg, toExit := formatHotkeysLoadError(err)
 		if toExit {
 			utils.PrintfAndExitf("%s\n", userMsg)
 		} else {
@@ -184,6 +173,30 @@ func LoadHotkeysFile(ignoreMissingFields bool) {
 			)
 		}
 	}
+}
+
+func formatHotkeysLoadError(err error) (string, bool) {
+	userMsg := err.Error()
+	toExit := true
+	repairSucceeded := false
+
+	var loadError *utils.TomlLoadError
+	if errors.As(err, &loadError) {
+		if loadError.MissingFields() && !variable.FixHotkeys {
+			// Had missing fields and we did not fix
+			userMsg += "\nTo add missing fields to hotkeys file automatically run superfile " +
+				"with the --fix-hotkeys flag `spf --fix-hotkeys`"
+		}
+		toExit = loadError.IsFatal()
+		repairSucceeded = loadError.MissingFields() && variable.FixHotkeys && !toExit
+	}
+
+	// Keep the error prefix for failures and unresolved missing fields.
+	if !repairSucceeded {
+		userMsg = fmt.Sprintf("%s%s", LipglossError, userMsg)
+	}
+
+	return userMsg, toExit
 }
 
 // LoadThemeFile : Load configurations from theme file into &theme
