@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"io"
 	"log/slog"
 	"os"
 )
@@ -24,12 +25,22 @@ func PrintfAndExitf(format string, args ...any) {
 
 // Used in unit test
 func SetRootLoggerToStdout(debug bool) {
+	setRootLoggerTo(os.Stdout, debug)
+}
+
+// Used before the log file is open, so that diagnostics never mix into the
+// stdout of commands whose output is consumed by scripts
+func SetRootLoggerToStderr(debug bool) {
+	setRootLoggerTo(os.Stderr, debug)
+}
+
+func setRootLoggerTo(w io.Writer, debug bool) {
 	level := slog.LevelInfo
 	if debug {
 		level = slog.LevelDebug
 	}
 	slog.SetDefault(slog.New(slog.NewTextHandler(
-		os.Stdout, &slog.HandlerOptions{Level: level})))
+		w, &slog.HandlerOptions{Level: level})))
 }
 
 // Used in unit test

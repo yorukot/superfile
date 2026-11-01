@@ -1,14 +1,12 @@
 spf() {
-    os=$(uname -s)
-
-    # Linux
-    if [[ "$os" == "Linux" ]]; then
-        export SPF_LAST_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/superfile/lastdir"
-    fi
-
-    # macOS
-    if [[ "$os" == "Darwin" ]]; then
-        export SPF_LAST_DIR="$HOME/Library/Application Support/superfile/lastdir"
+    # Ask the binary where it writes the lastdir file, so this works for every
+    # installation method (Homebrew, package managers, manual install, ...)
+    # assigned inside `if`: `export VAR="$(...)"` always reports success, so a
+    # failed lookup would go unnoticed (SC2155)
+    if SPF_LAST_DIR="$(command spf path-list --lastdir-file)"; then
+        export SPF_LAST_DIR
+    else
+        SPF_LAST_DIR=''
     fi
 
     command spf "$@"
