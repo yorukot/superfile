@@ -54,6 +54,20 @@ func (m *Model) ListDown() {
 	m.moveCursorBy(1)
 }
 
+func (m *Model) ListTop() {
+	if m.Empty() {
+		return
+	}
+	m.scrollToCursor(0)
+}
+
+func (m *Model) ListBottom() {
+	if m.Empty() {
+		return
+	}
+	m.scrollToCursor(m.ElemCount() - 1)
+}
+
 func (m *Model) PgUp() {
 	m.pageScrollBy(-m.getPageScrollSize())
 }
