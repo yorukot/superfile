@@ -20,4 +20,10 @@ type Model struct {
 	FocusedPanelIndex    int
 	ioReqCnt             int
 	DisplayDotFiles      bool
+
+	// panelOriginsX holds the column at which each file panel starts, relative
+	// to the file model area. It is filled by updateChildComponentWidth
+	// alongside the panel widths, so mouse hit-testing and rendering can never
+	// disagree about where a panel sits.
+	panelOriginsX []int
 }

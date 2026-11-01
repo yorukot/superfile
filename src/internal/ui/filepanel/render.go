@@ -82,9 +82,9 @@ func (m *Model) renderFileEntries(r *rendering.Renderer) {
 		r.AddLines(common.FilePanelNoneText)
 		return
 	}
-	end := min(m.renderIndex+m.PanelElementHeight(), m.ElemCount())
+	start, end := m.RenderedItemRange()
 
-	for itemIndex := m.renderIndex; itemIndex < end; itemIndex++ {
+	for itemIndex := start; itemIndex < end; itemIndex++ {
 		if m.Renaming && itemIndex == m.GetCursor() {
 			r.AddLines(m.Rename.View())
 			continue
