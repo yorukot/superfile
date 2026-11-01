@@ -1,7 +1,13 @@
 package internal
 
 import (
+	"fmt"
 	"log/slog"
+	"os"
+	"os/exec"
+	"strings"
+
+	tea "charm.land/bubbletea/v2"
 
 	"github.com/yorukot/superfile/src/internal/common"
 )
@@ -57,4 +63,86 @@ func (m *model) focusOnMetadata() {
 		m.focusPanel = metadataFocus
 		m.getFocusedFilePanel().IsFocused = false
 	}
+}
+
+// toggleContentPanelFocus cycles focus into/out of the content (preview) panel.
+func (m *model) toggleContentPanelFocus() {
+	// Write to a temp file so we can confirm this function is called
+	os.WriteFile("/tmp/spf_focus.log", []byte(fmt.Sprintf("toggleContentPanelFocus: focusPanel=%d -> %d\n",
+		m.focusPanel, func() focusPanelType {
+			if m.focusPanel == contentPanelFocus {
+				return nonePanelFocus
+			}
+			return contentPanelFocus
+		}())), 0644)
+
+	if m.focusPanel == contentPanelFocus {
+		m.focusPanel = nonePanelFocus
+		m.getFocusedFilePanel().IsFocused = true
+		m.fileModel.FilePreview.SetFocused(false)
+	} else {
+		m.focusPanel = contentPanelFocus
+		m.getFocusedFilePanel().IsFocused = false
+		m.fileModel.FilePreview.SetFocused(true)
+	}
+}
+
+func (m *model) contentPanelEnterEdit() tea.Cmd {
+	panel := m.getFocusedFilePanel()
+	if panel.EmptyOrInvalid() {
+		return nil
+	}
+	path := panel.GetFocusedItem().Location
+
+	// Always use built-in textarea for editing in the content panel
+	ok, reason := m.fileModel.FilePreview.EnterEditMode(path)
+	if !ok {
+		slog.Debug("Cannot enter edit mode", "path", path, "reason", reason)
+		return nil
+	}
+	return nil
+}
+
+// contentPanelOpenNvim opens the current file in full-screen nvim.
+func (m *model) contentPanelOpenNvim() tea.Cmd {
+	panel := m.getFocusedFilePanel()
+	if panel.EmptyOrInvalid() {
+		return nil
+	}
+	path := panel.GetFocusedItem().Location
+	return m.launchNvimForContentPanel(path)
+}
+
+// launchNvimForContentPanel opens nvim full-screen via tea.ExecProcess, then
+// refreshes the content panel with the saved file.
+func (m *model) launchNvimForContentPanel(path string) tea.Cmd {
+	nvimCmd := common.Config.ContentPanelNvimCmd
+	if nvimCmd == "" {
+		nvimCmd = "nvim"
+	}
+	parts := strings.Fields(nvimCmd)
+	args := append(parts[1:], path)
+	c := exec.Command(parts[0], args...)
+
+	return tea.ExecProcess(c, func(err error) tea.Msg {
+		return contentPanelNvimFinishedMsg{path: path, err: err}
+	})
+}
+
+func (m *model) contentPanelSaveEdit() tea.Cmd {
+	err := m.fileModel.FilePreview.SaveEdit()
+	if err != nil {
+		slog.Error("Error saving file in content panel", "error", err)
+	}
+	return nil
+}
+
+func (m *model) contentPanelExitEdit() {
+	m.fileModel.FilePreview.ExitEditMode()
+}
+
+// contentPanelHandleEditKey forwards a key message to the content panel's
+// textarea when in edit mode, or to nvim PTY when embedded nvim is running.
+func (m *model) contentPanelHandleEditKey(msg tea.KeyPressMsg) tea.Cmd {
+	return m.fileModel.FilePreview.HandleEditKey(msg)
 }

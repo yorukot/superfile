@@ -2,7 +2,7 @@ package filemodel
 
 import (
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
-	"github.com/yorukot/superfile/src/internal/ui/preview"
+	"github.com/yorukot/superfile/src/internal/ui/contentpanel"
 )
 
 // TODO: Make the fields unexported, as much as possible
@@ -16,7 +16,7 @@ type Model struct {
 	Height               int
 	Renaming             bool
 	MaxFilePanel         int
-	FilePreview          preview.Model
+	FilePreview          contentpanel.Model
 	FocusedPanelIndex    int
 	ioReqCnt             int
 	DisplayDotFiles      bool
