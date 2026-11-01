@@ -9,13 +9,18 @@ import (
 	"github.com/shirou/gopsutil/v4/disk"
 
 	"github.com/yorukot/superfile/src/config/icon"
+	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/pkg/utils"
 )
 
-// getExternalMediaFolders retrieves a list of mounted physical drives and external media.
+// getExternalMediaFolders retrieves the list of mounted drives to display in the
+// disks section, filtered according to the user's disk_mounts / excluded_disk_mounts
+// configuration.
 func getExternalMediaFolders() []directory {
-	// only get physical drives
-	parts, err := disk.Partitions(false)
+	// List every mount (all=true) so that non-physical filesystems such as FUSE
+	// (sshfs) and network mounts are available. Filtering to what the user wants
+	// is then handled entirely by shouldListDisk.
+	parts, err := disk.Partitions(true)
 
 	if err != nil {
 		slog.Error("Error while getting external media: ", "error", err)
@@ -36,8 +41,23 @@ func getExternalMediaFolders() []directory {
 	return disks
 }
 
-// shouldListDisk determines whether a given mount point should be displayed in the sidebar's disks section.
+// shouldListDisk determines whether a given mount point should be displayed in the
+// sidebar's disks section, based on the configured include/exclude mountpoint prefixes.
 func shouldListDisk(mountPoint string) bool {
+	return shouldListDiskWithConfig(mountPoint, common.Config.DiskMounts, common.Config.ExcludedDiskMounts)
+}
+
+// shouldListDiskWithConfig contains the mountpoint filtering logic, taking the
+// include/exclude prefix lists explicitly so it can be unit tested without touching
+// global config.
+//
+// Rules, in order:
+//  1. Windows: always list (drives are enumerated; the POSIX prefixes don't apply).
+//  2. The root mount "/" is always listed.
+//  3. A mountpoint matching any excludePrefixes entry is hidden (blacklist wins).
+//  4. An empty includePrefixes list lists every mountpoint (all filesystem types).
+//  5. Otherwise the mountpoint is listed only if it matches an includePrefixes entry.
+func shouldListDiskWithConfig(mountPoint string, includePrefixes, excludePrefixes []string) bool {
 	if runtime.GOOS == utils.OsWindows {
 		// We need to get C:, D: drive etc in the list
 		return true
@@ -48,27 +68,28 @@ func shouldListDisk(mountPoint string) bool {
 		return true
 	}
 
-	// TODO : make a configurable field in config.yaml
-	// excluded_disk_mounts = ["/Volumes/.timemachine"]
-	// Mountpoints that are in subdirectory of disk_mounts
-	// but still are to be excluded in disk section of sidebar
-	if strings.HasPrefix(mountPoint, "/Volumes/.timemachine") {
+	// Blacklist takes precedence over the include list.
+	if hasAnyPrefix(mountPoint, excludePrefixes) {
 		return false
 	}
 
-	// We avoid listing all mounted partitions (Otherwise listed disk could get huge)
-	// but only a few partitions that usually corresponds to external physical devices
-	// For example : mounts like /boot, /var/ will get skipped
-	// This can be inaccurate based on your system setup if you mount any external devices
-	// on other directories, or if you have some extra mounts on these directories
-	// TODO : make a configurable field in config.yaml
-	// disk_mounts = ["/mnt", "/media", "/run/media", "/Volumes"]
-	// Only block devicies that are mounted on these or any subdirectory of these Mountpoints
-	// Will be shown in disk sidebar
-	return strings.HasPrefix(mountPoint, "/mnt") ||
-		strings.HasPrefix(mountPoint, "/media") ||
-		strings.HasPrefix(mountPoint, "/run/media") ||
-		strings.HasPrefix(mountPoint, "/Volumes")
+	// An empty include list means "list everything" (all filesystem types).
+	if len(includePrefixes) == 0 {
+		return true
+	}
+
+	// Otherwise only list mounts under one of the included prefixes.
+	return hasAnyPrefix(mountPoint, includePrefixes)
+}
+
+// hasAnyPrefix reports whether s starts with any of the given prefixes.
+func hasAnyPrefix(s string, prefixes []string) bool {
+	for _, prefix := range prefixes {
+		if strings.HasPrefix(s, prefix) {
+			return true
+		}
+	}
+	return false
 }
 
 func diskIcon(mountPoint string) string {
