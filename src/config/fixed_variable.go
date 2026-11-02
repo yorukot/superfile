@@ -74,6 +74,10 @@ var (
 	FixConfigFile = false
 	LastDir       = ""
 	PrintLastDir  = false
+
+	// ConfigOverrides holds `key=value` pairs passed via --with-config-override.
+	// They are applied on top of the loaded config file before validation.
+	ConfigOverrides []string
 )
 
 // Still we are preventing other packages to directly modify them via reassign linter
@@ -113,4 +117,5 @@ func UpdateVarFromCliArgs(c *cli.Command) {
 	FixHotkeys = c.Bool("fix-hotkeys")
 	FixConfigFile = c.Bool("fix-config-file")
 	PrintLastDir = c.Bool("print-last-dir")
+	ConfigOverrides = c.StringSlice("with-config-override")
 }
