@@ -40,7 +40,7 @@ func getVolumes(svc *storage.Service, disks *[]Disk) error {
 	if err != nil {
 		return err
 	}
-	defer v.Close()
+	defer p.Close()
 
 	for i := range v.Volumes {
 		volume := &v.Volumes[i]
