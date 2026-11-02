@@ -176,7 +176,7 @@ func TestDiskFromObject(t *testing.T) {
 					"Size":       dbus.MakeVariant(uint64(2000_000_000_000)),
 					"IdLabel":    dbus.MakeVariant("work"),
 					"HintSystem": dbus.MakeVariant(true),
-					"HintIgnore": dbus.MakeVariant(true),
+					"HintIgnore": dbus.MakeVariant(false),
 				},
 				"org.freedesktop.UDisks2.Filesystem": {
 					"MountPoints": dbus.MakeVariant([][]byte{
