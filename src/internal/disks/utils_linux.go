@@ -13,7 +13,7 @@ const (
 	bytesPerMB = 1_000_000
 )
 
-// linuxDiskFromObject builds a Disk from one udisks2 block device object.
+// diskFromObject builds a Disk from one udisks2 block device object.
 // The bool is false when the object should not be shown (not a mountable
 // block device, hidden, no media, malformed, or an in-use internal partition).
 func diskFromObject(path dbus.ObjectPath,
