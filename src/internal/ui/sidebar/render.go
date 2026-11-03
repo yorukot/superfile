@@ -11,7 +11,7 @@ import (
 )
 
 // Render returns the rendered sidebar string.
-func (s *Model) Render(sidebarFocused bool, currentFilePanelLocation string) string {
+func (s *Model) Render(sidebarFocused bool, currentFilePanelLocation string, showHints bool) string {
 	if s.Disabled() {
 		return ""
 	}
@@ -27,14 +27,18 @@ func (s *Model) Render(sidebarFocused bool, currentFilePanelLocation string) str
 	if s.NoActualDir() {
 		r.AddLines(common.SideBarNoneText)
 	} else {
-		s.directoriesRender(currentFilePanelLocation, sidebarFocused, r)
+		hints := map[int]string{}
+		if showHints {
+			hints = s.folderHints()
+		}
+		s.directoriesRender(currentFilePanelLocation, sidebarFocused, r, hints)
 	}
 	return r.Render()
 }
 
 // directoriesRender handles the iterative rendering of directories within the sidebar model.
 func (s *Model) directoriesRender(curFilePanelFileLocation string,
-	sideBarFocused bool, r *rendering.Renderer) {
+	sideBarFocused bool, r *rendering.Renderer, hints map[int]string) {
 	// Cursor should always point to a valid directory at this point
 	if s.isCursorInvalid() {
 		slog.Error("Unexpected situation in sideBar Model. "+
@@ -75,6 +79,7 @@ func (s *Model) directoriesRender(curFilePanelFileLocation string,
 				line := common.FilePanelCursorStyle.Render(cursor+" ") +
 					renderStyle.Render(s.directories[i].Icon+" ") +
 					renderStyle.Render(s.directories[i].Name)
+				line = appendFolderHint(line, hints[i], s.width-common.BorderPadding)
 				r.AddLineWithCustomTruncate(line, rendering.TailsTruncateRight)
 			}
 		}

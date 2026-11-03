@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"runtime"
+	"strings"
 
 	"github.com/charmbracelet/x/ansi"
 	"github.com/pelletier/go-toml/v2"
@@ -175,6 +176,9 @@ func LoadHotkeysFile(ignoreMissingFields bool) {
 		}
 
 		hotkeysList, ok := value.Interface().([]string)
+		if ok && len(hotkeysList) == 0 && strings.HasPrefix(field.Tag.Get("toml"), "go_to_") {
+			continue
+		}
 		if !ok || len(hotkeysList) == 0 || hotkeysList[0] == "" {
 			utils.PrintlnAndExit(
 				LoadHotkeysError(

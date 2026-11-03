@@ -23,6 +23,9 @@ import (
 // TODO: This function has grown too big. It needs to be fixed, via major
 // updates and fixes in key handling code
 func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen,gocognit // See above
+	if m.handleFolderShortcut(msg) {
+		return nil
+	}
 	switch {
 	// If move up Key is pressed, check the current state and executes
 	case slices.Contains(common.Hotkeys.ListUp, msg):

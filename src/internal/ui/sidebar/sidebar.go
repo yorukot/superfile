@@ -106,13 +106,16 @@ func (s *Model) TogglePinnedDirectory(dir string) error {
 
 // New initializes and returns a new Model for the sidebar correctly set up with configuration.
 func New() Model {
-	if common.Config.SidebarWidth == 0 {
-		return Model{
-			disabled: true,
-		}
-	}
 	// pinnedMgr is created here, can be done higher up in the call chain
 	pinnedMgr := NewPinnedFileManager(variable.PinnedFile)
+	if common.Config.SidebarWidth == 0 {
+		return Model{
+			disabled:  true,
+			pinnedMgr: &pinnedMgr,
+			searchBar: common.GenerateSearchBar(),
+			sections:  common.Config.SidebarSections,
+		}
+	}
 	s := Model{
 		renderIndex: 0,
 		searchBar:   common.GenerateSearchBar(),
