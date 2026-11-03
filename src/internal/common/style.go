@@ -23,9 +23,10 @@ var (
 )
 
 var (
-	SidebarDividerStyle  lipgloss.Style
-	SidebarTitleStyle    lipgloss.Style
-	SidebarSelectedStyle lipgloss.Style
+	SidebarDividerStyle        lipgloss.Style
+	SidebarTitleStyle          lipgloss.Style
+	SidebarSelectedStyle       lipgloss.Style
+	SidebarSelectedActiveStyle lipgloss.Style
 )
 
 var (
@@ -35,10 +36,12 @@ var (
 )
 
 var (
-	FilePanelTopDirectoryIconStyle lipgloss.Style
-	FilePanelTopPathStyle          lipgloss.Style
-	FilePanelItemSelectedStyle     lipgloss.Style
-	FilePanelSelectBoxStyle        lipgloss.Style
+	FilePanelTopDirectoryIconStyle   lipgloss.Style
+	FilePanelTopPathStyle            lipgloss.Style
+	FilePanelItemSelectedStyle       lipgloss.Style
+	FilePanelItemActiveStyle         lipgloss.Style
+	FilePanelItemSelectedActiveStyle lipgloss.Style
+	FilePanelSelectBoxStyle          lipgloss.Style
 )
 
 var (
@@ -98,6 +101,8 @@ var (
 	filePanelTopPathColor          color.Color
 	filePanelItemSelectedFGColor   color.Color
 	filePanelItemSelectedBGColor   color.Color
+	filePanelItemActiveFGColor     color.Color
+	filePanelItemActiveBGColor     color.Color
 
 	sidebarTitleColor          color.Color
 	sidebarItemSelectedFGColor color.Color
@@ -150,6 +155,8 @@ func LoadThemeConfig() { //nolint: funlen // Variable initialization
 	filePanelTopPathColor = lipgloss.Color(Theme.FilePanelTopPath)
 	filePanelItemSelectedFGColor = lipgloss.Color(Theme.FilePanelItemSelectedFG)
 	filePanelItemSelectedBGColor = lipgloss.Color(Theme.FilePanelItemSelectedBG)
+	filePanelItemActiveFGColor = lipgloss.Color(Theme.FilePanelItemActiveFG)
+	filePanelItemActiveBGColor = lipgloss.Color(Theme.FilePanelItemActiveBG)
 
 	sidebarTitleColor = lipgloss.Color(Theme.SidebarTitle)
 	sidebarItemSelectedFGColor = lipgloss.Color(Theme.SidebarItemSelectedFG)
@@ -194,6 +201,10 @@ func LoadThemeConfig() { //nolint: funlen // Variable initialization
 	FilePanelTopPathStyle = lipgloss.NewStyle().Foreground(filePanelTopPathColor).Background(FilePanelBGColor)
 	FilePanelItemSelectedStyle = lipgloss.NewStyle().Foreground(filePanelItemSelectedFGColor).
 		Background(filePanelItemSelectedBGColor)
+	FilePanelItemActiveStyle = lipgloss.NewStyle().Foreground(filePanelItemActiveFGColor).
+		Background(filePanelItemActiveBGColor)
+	FilePanelItemSelectedActiveStyle = lipgloss.NewStyle().Foreground(filePanelItemSelectedFGColor).
+		Background(filePanelItemActiveBGColor)
 	FilePanelSelectBoxStyle = lipgloss.NewStyle().Background(FilePanelBGColor)
 
 	// Sidebar Special Style
@@ -201,6 +212,8 @@ func LoadThemeConfig() { //nolint: funlen // Variable initialization
 	SidebarTitleStyle = lipgloss.NewStyle().Foreground(sidebarTitleColor).Background(SidebarBGColor)
 	SidebarSelectedStyle = lipgloss.NewStyle().Foreground(sidebarItemSelectedFGColor).
 		Background(sidebarItemSelectedBGColor)
+	SidebarSelectedActiveStyle = lipgloss.NewStyle().Foreground(sidebarItemSelectedFGColor).
+		Background(filePanelItemActiveBGColor)
 
 	// Footer Special Style
 	ProcessErrorStyle = lipgloss.NewStyle().Foreground(errorColor).Background(FooterBGColor)
@@ -213,6 +226,7 @@ func LoadThemeConfig() { //nolint: funlen // Variable initialization
 	ModalConfirm = lipgloss.NewStyle().Foreground(modalConfirmFGColor).Background(modalConfirmBGColor)
 	ModalTitleStyle = lipgloss.NewStyle().Foreground(hintColor).Background(ModalBGColor)
 	ModalErrorStyle = lipgloss.NewStyle().Foreground(errorColor).Background(ModalBGColor)
+
 	// Help Menu Style
 	HelpMenuHotkeyStyle = lipgloss.NewStyle().Foreground(helpMenuHotkeyColor).Background(ModalBGColor)
 	HelpMenuTitleStyle = lipgloss.NewStyle().Foreground(helpMenuTitleColor).Background(ModalBGColor)
