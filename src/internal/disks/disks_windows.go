@@ -34,7 +34,7 @@ func (m *manager) List(ctx context.Context) ([]Disk, error) {
 	}
 
 	if errV := getVolumes(m.Service, &disks); errV != nil {
-		return nil, errV
+		return disks, errV
 	}
 
 	return disks, nil
