@@ -210,6 +210,42 @@ func TestLoadTomlFileFixOverwritesStaleTail(t *testing.T) {
 	assert.Equal(t, expectedVal, tomlVal)
 }
 
+func TestLoadTomlFileFixReplacesOriginalFile(t *testing.T) {
+	defaultData := strings.Join([]string{
+		"sample_bool = true",
+		"sample_int = 2",
+		"sample_str = \"default\"",
+		"sample_slice = ['a', 'b']",
+		"",
+	}, "\n")
+	originalContent := strings.Join([]string{
+		"sample_bool = false",
+		"sample_int = -1",
+		"sample_slice = ['custom']",
+		"",
+	}, "\n")
+
+	testFile := filepath.Join(t.TempDir(), "missing-field.toml")
+	require.NoError(t, os.WriteFile(testFile, []byte(originalContent), 0o640))
+
+	originalInfo, err := os.Stat(testFile)
+	require.NoError(t, err)
+
+	var tomlVal TestTOMLType
+	err = LoadTomlFile(testFile, defaultData, &tomlVal, true, false)
+	var tomlErr *TomlLoadError
+	require.ErrorAs(t, err, &tomlErr)
+	require.False(t, tomlErr.IsFatal())
+
+	repairedInfo, err := os.Stat(testFile)
+	require.NoError(t, err)
+
+	assert.False(t, os.SameFile(originalInfo, repairedInfo),
+		"repair must publish a replacement file instead of modifying the original in place")
+	assert.Equal(t, originalInfo.Mode().Perm(), repairedInfo.Mode().Perm(),
+		"repair must preserve the original file permissions")
+}
+
 func TestLoadTomlFileIgnorer(t *testing.T) {
 	_, curFilename, _, ok := runtime.Caller(0)
 	require.True(t, ok)
