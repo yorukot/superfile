@@ -226,6 +226,10 @@ File panel 中除檔名外的額外欄位數量。
 
 `''` => 使用內建的 _chroma_ 語法醒目提示來預覽程式碼檔案。 `'bat'` => 使用 [`bat`](https://github.com/sharkdp/bat) 命令列工具提供的語法醒目提示。
 
+- ###### bat_flags
+
+當 `code_previewer = 'bat'` 時傳遞給 `bat` 的命令列參數。預設值為 `['--plain', '--force-colorization']`。如果這些參數與你的 `bat` 設定檔衝突，可以自訂此清單。
+
 - ###### nerdfont
 
 `true` => 對目錄和檔案圖示使用 nerdfont。
