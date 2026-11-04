@@ -22,7 +22,7 @@ import (
 // check the state of model m and handle properly.
 // TODO: This function has grown too big. It needs to be fixed, via major
 // updates and fixes in key handling code
-func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen,gocognit // See above
+func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen,gocognit,maintidx // See above
 	switch {
 	// If move up Key is pressed, check the current state and executes
 	case slices.Contains(common.Hotkeys.ListUp, msg):
@@ -68,6 +68,26 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen,go
 			m.getFocusedFilePanel().PgDown()
 		case processBarFocus, sidebarFocus:
 			// These panels have no page scrolling, so page keys do nothing.
+		}
+
+	case slices.Contains(common.Hotkeys.ListHome, msg):
+		switch m.focusPanel {
+		case metadataFocus:
+			m.fileMetaData.Home()
+		case nonePanelFocus:
+			m.getFocusedFilePanel().Home()
+		case processBarFocus, sidebarFocus:
+			// These panels have no home/end scrolling, so home/end keys do nothing.
+		}
+
+	case slices.Contains(common.Hotkeys.ListEnd, msg):
+		switch m.focusPanel {
+		case metadataFocus:
+			m.fileMetaData.End()
+		case nonePanelFocus:
+			m.getFocusedFilePanel().End()
+		case processBarFocus, sidebarFocus:
+			// These panels have no home/end scrolling, so home/end keys do nothing.
 		}
 
 	case slices.Contains(common.Hotkeys.ChangePanelMode, msg):
