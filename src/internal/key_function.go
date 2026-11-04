@@ -141,10 +141,22 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen,go
 		return m.zoxideModal.Open()
 
 	case slices.Contains(common.Hotkeys.OpenHelpMenu, msg):
+		// Clear Kitty graphics images before opening help menu to prevent
+		// z-index obstruction (image preview shows through help menu overlay)
+		helpMenuClearCmd := m.fileModel.FilePreview.ClearKittyImages()
 		m.helpMenu.Open()
+		if helpMenuClearCmd != nil {
+			return helpMenuClearCmd
+		}
 
 	case slices.Contains(common.Hotkeys.OpenSortOptionsMenu, msg):
+		// Clear Kitty graphics images before opening sort menu to prevent
+		// z-index obstruction (image preview shows through overlay)
+		sortClearCmd := m.fileModel.FilePreview.ClearKittyImages()
 		m.sortModal.Open(m.getFocusedFilePanel().SortKind)
+		if sortClearCmd != nil {
+			return sortClearCmd
+		}
 
 	case slices.Contains(common.Hotkeys.ToggleReverseSort, msg):
 		m.getFocusedFilePanel().ToggleReverseSort()
