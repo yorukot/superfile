@@ -62,7 +62,7 @@ func (m *model) Init() tea.Cmd {
 func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	slog.Debug("model.Update() called", "msgType", reflect.TypeOf(msg))
 
-	var sidebarCmd, inputCmd, updateCmd, panelCmd,
+	var sidebarCmd, inputCmd, updateCmd, panelCmd, mouseCmd,
 		metadataCmd, filePreviewCmd, helpMenuCmd, resizeCmd tea.Cmd
 
 	// These are above the key message handing to prevent issues with firstKeyInput
@@ -76,7 +76,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		resizeCmd = m.handleWindowResize(msg)
 	case tea.MouseMsg:
-		m.handleMouseMsg(msg)
+		mouseCmd = m.handleMouseMsg(msg)
 	case tea.KeyPressMsg:
 		inputCmd = m.handleKeyInput(msg)
 
@@ -108,16 +108,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	metadataCmd = m.getMetadataCmd()
 
 	return m, tea.Batch(sidebarCmd, helpMenuCmd, inputCmd, updateCmd,
-		panelCmd, metadataCmd, filePreviewCmd, resizeCmd)
-}
-
-func (m *model) handleMouseMsg(msg tea.MouseMsg) {
-	msgStr := msg.String()
-	if msgStr == "wheelup" || msgStr == "wheeldown" {
-		wheelMainAction(msgStr, m)
-	} else {
-		slog.Debug("Mouse event of type that is not handled", "msg", msgStr)
-	}
+		panelCmd, mouseCmd, metadataCmd, filePreviewCmd, resizeCmd)
 }
 
 func (m *model) updateModelStateAfterMsg() {
@@ -530,6 +521,10 @@ func (m *model) viewContent() string {
 	if err := m.validateLayout(); err != nil {
 		slog.Error("Invalid layout", "error", err)
 	}
+
+	// Publish the hit-test regions for the frame about to be drawn, so that
+	// mouse events resolve against what the user actually sees.
+	m.updateMouseRegions()
 
 	return m.updateRenderForOverlay(m.mainComponentsRender())
 }
