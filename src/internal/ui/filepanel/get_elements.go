@@ -85,6 +85,15 @@ func (m *Model) shouldSkipPanelUpdate(nowTime time.Time) bool {
 		nowTime.Sub(m.LastTimeGetElement) < time.Duration(reRenderTime)*time.Second
 }
 
+// InvalidateElements makes the next UpdateElementsIfNeeded re-read the
+// directory instead of waiting out the re-render timer. Call it after changing
+// this panel's directory from inside superfile, where the timer would other-
+// wise keep stale entries on screen until an unrelated message happens to
+// arrive late enough.
+func (m *Model) InvalidateElements() {
+	m.LastTimeGetElement = time.Time{}
+}
+
 func (m *Model) UpdateElementsIfNeeded(force bool, displayDotFile bool) {
 	nowTime := time.Now()
 	if force || !m.shouldSkipPanelUpdate(nowTime) {
