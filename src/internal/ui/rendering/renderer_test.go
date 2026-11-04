@@ -88,6 +88,27 @@ func TestRendererBasic(t *testing.T) {
 	})
 }
 
+func TestRenderedLineCount(t *testing.T) {
+	testdata := []struct {
+		name     string
+		res      string
+		maxWidth int
+		expected int
+	}{
+		{"Empty render occupies no lines", "", 0, 0},
+		{"Style codes without visible text", "\x1b[38;2;255;255;255;48;2;0;0;0m\x1b[m", 0, 0},
+		{"Single line", "L1", 2, 1},
+		{"Single empty line", "\n", 0, 2},
+		{"Multiple lines", "L1\nL2\nL3", 2, 3},
+		{"Trailing newline", "L1\n", 2, 2},
+	}
+	for _, tt := range testdata {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, renderedLineCount(tt.res, tt.maxWidth))
+		})
+	}
+}
+
 func TestSections(t *testing.T) {
 	sectionTests := []struct {
 		name           string
