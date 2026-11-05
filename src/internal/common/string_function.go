@@ -66,16 +66,21 @@ func TruncateTextBeginning(text string, maxChars int, tails string) string {
 }
 
 func TruncateMiddleText(text string, maxChars int, tails string) string {
-	if utf8.RuneCountInString(text) <= maxChars {
+	// Slice by rune, not by byte: text[:n] indexes bytes, which splits
+	// multi-byte UTF-8 runes in half and emits invalid UTF-8. See
+	// TruncateTextBeginning in this file for the same []rune pattern.
+	runes := []rune(text)
+	if len(runes) <= maxChars {
 		return text
 	}
 
-	//nolint:mnd // standard halving for center truncation
-	halfEllipsisLength := (maxChars - 3) / 2
+	//nolint:mnd // standard halving for center truncation (subtract tails rune count)
+	halfEllipsisLength := (maxChars - utf8.RuneCountInString(tails)) / 2
+	if halfEllipsisLength < 0 {
+		halfEllipsisLength = 0
+	}
 	// TODO : Use ansi.Substring to correctly handle ANSI escape codes
-	truncatedText := text[:halfEllipsisLength] + tails + text[utf8.RuneCountInString(text)-halfEllipsisLength:]
-
-	return truncatedText
+	return string(runes[:halfEllipsisLength]) + tails + string(runes[len(runes)-halfEllipsisLength:])
 }
 
 func FilePanelItemRenderWithIcon(
