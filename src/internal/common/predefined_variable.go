@@ -12,7 +12,6 @@ import (
 const (
 	// SidebarDividerLength defines the number of characters used for the horizontal divider in the sidebar.
 	SidebarDividerLength  = 20
-	WheelRunTime          = 5
 	DefaultCommandTimeout = 5000 * time.Millisecond
 	DateModifiedOption    = "Date Modified"
 	InvalidTypeString     = "InvalidType"

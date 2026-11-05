@@ -58,3 +58,18 @@ func (m *model) focusOnMetadata() {
 		m.getFocusedFilePanel().IsFocused = false
 	}
 }
+
+// focus on preview panel
+func (m *model) focusOnPreview() {
+	if !m.fileModel.FilePreview.IsOpen() {
+		// If preview is not open, open it first
+		m.fileModel.ToggleFilePreviewPanel()
+	}
+	if m.focusPanel == previewFocus {
+		m.focusPanel = nonePanelFocus
+		m.getFocusedFilePanel().IsFocused = true
+	} else {
+		m.focusPanel = previewFocus
+		m.getFocusedFilePanel().IsFocused = false
+	}
+}
