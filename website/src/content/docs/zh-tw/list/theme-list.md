@@ -11,8 +11,8 @@ head:
 ## 0x96f
 
 - 主題名稱：`0x96f`
-- 移植者：https://github.com/filipjanevski
-- 原作者：https://github.com/filipjanevski/
+- 移植者：https://github.com/0x96f
+- 原作者：https://github.com/0x96f/
 
 ![0x96f 主題預覽，顯示帶有藍色點綴的深色配色](../../../../assets/theme/0x96f.png)
 

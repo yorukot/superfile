@@ -1,6 +1,12 @@
 package filepanel
 
-import "math"
+import (
+	"errors"
+	"io"
+	"math"
+	"os"
+	"strings"
+)
 
 func (m *Model) GetCursor() int {
 	return m.cursor
@@ -163,4 +169,42 @@ func (m *Model) FindElementIndexByLocation(location string) int {
 		}
 	}
 	return -1
+}
+
+func getChildCount(location string, includeDotFiles bool, maxCount int) (int, error) {
+	directory, err := os.Open(location)
+	if err != nil {
+		return 0, err
+	}
+	defer directory.Close()
+
+	// If maxCount <= 0, read all entries.
+	// Otherwise, read maxCount + 1 to check if there are more entries than maxCount.
+	toRead := maxCount
+	if maxCount > 0 {
+		toRead = maxCount + 1
+	}
+
+	entryNames, err := directory.Readdirnames(toRead)
+	if err != nil && !errors.Is(err, io.EOF) {
+		return 0, err
+	}
+
+	if maxCount > 0 && len(entryNames) > maxCount {
+		return -1, nil
+	}
+
+	if includeDotFiles {
+		return len(entryNames), nil
+	}
+
+	count := 0
+	for _, entryName := range entryNames {
+		if strings.HasPrefix(entryName, ".") {
+			continue
+		}
+		count++
+	}
+
+	return count, nil
 }
