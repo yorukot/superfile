@@ -169,6 +169,12 @@ enable_md5_checksum = false
 #-- Zoxide Support - Smart directory navigation!
 # Requires: zoxide
 zoxide_support = false
+# Maximum number of results visible at once in the zoxide modal (default: 5)
+zoxide_max_visible_results = 5
+# Width/height of the zoxide modal as percentage of the terminal (default: 50)
+zoxide_modal_width = 50
+zoxide_modal_height = 50
+
 
 #-- File opening rules
 # Map file extensions to commands used to open them.
