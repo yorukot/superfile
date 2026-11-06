@@ -567,15 +567,12 @@ func (m *model) openDirectoryWithEditor() tea.Cmd {
 
 // Copy file path
 // TODO: This is also an IO operations, do it via tea.Cmd
-func (m *model) copyPath() {
+func (m *model) copyPath() tea.Cmd {
 	pathText := m.copyPathText()
 	if pathText == "" {
-		return
+		return nil
 	}
-
-	if err := m.writeClipboard(pathText); err != nil {
-		slog.Error("Error while copy path", "error", err)
-	}
+	return m.copyToClipboard(pathText, "Error while copy path")
 }
 
 // copyPathText returns the path text to copy, containing all selected paths or the focused path.
@@ -590,11 +587,30 @@ func (m *model) copyPathText() string {
 }
 
 // TODO: This is also an IO operations, do it via tea.Cmd
-func (m *model) copyPWD() {
+func (m *model) copyPWD() tea.Cmd {
 	panel := m.getFocusedFilePanel()
-	if err := m.writeClipboard(panel.Location); err != nil {
-		slog.Error("Error while copy present working directory", "error", err)
+	return m.copyToClipboard(panel.Location, "Error while copy present working directory")
+}
+
+func (m *model) copyToClipboard(text string, errMsg string) tea.Cmd {
+	if m.osc52Clipboard {
+		// The clipboard tools can still work over ssh -X, so their error is expected here.
+		// They run in their own command so a slow or hung tool can't hold back OSC 52.
+		return tea.Batch(tea.SetClipboard(text), func() tea.Msg {
+			_ = m.writeClipboard(text)
+			return nil
+		})
 	}
+	if err := m.writeClipboard(text); err != nil {
+		slog.Error(errMsg, "error", err)
+	}
+	return nil
+}
+
+// Over SSH, the clipboard tools on this host write to the remote clipboard (or are missing),
+// so copies also go to the local terminal's clipboard via OSC 52.
+func inSSHSession() bool {
+	return os.Getenv("SSH_TTY") != "" || os.Getenv("SSH_CONNECTION") != ""
 }
 
 func (m *model) writeClipboard(text string) error {
