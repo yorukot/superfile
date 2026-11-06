@@ -1,6 +1,10 @@
 package sidebar
 
-import "charm.land/bubbles/v2/textinput"
+import (
+	"charm.land/bubbles/v2/textinput"
+
+	"github.com/yorukot/superfile/src/internal/disks"
+)
 
 type directory struct {
 	Location string `json:"location"`
@@ -10,6 +14,7 @@ type directory struct {
 }
 
 type Model struct {
+	diskManager disks.Manager
 	directories []directory
 	renderIndex int
 	cursor      int
