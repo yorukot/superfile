@@ -1,83 +1,85 @@
 # Notices
 
+
 ## OVERVIEW
 
 dcompress is a go (1.4.2 currently) package to decompress .Z files.
 
 This is a <strike>conversion</strike> literal translation of (n)compress42.c into go.
 The original program was a Unix utility to compress/dcompress files. Files
-compressed with this utility have a .Z extension. It's relatively rare as of
-2015 since better compression utilities are available now.
+compressed with this utility have a .Z extension.  It's relatively rare as of
+2015 since better compression utilities are available now. 
 
 ### WHY?
 
 I converted this utility to go so I could use it with a program I wrote to look
 inside tar and zip archives and gather data on the files therein. Some of the files in my
-tars are in .Z format and are themselves tars (ie tarofsomedir.tar.Z. I could
+tars are in .Z format and are themselves tars (ie tarofsomedir.tar.Z.  I could
 of course have uncompressed them manually, but that's not what programmers do.
 
 ### Installation
 
 If you have a working go installation on a Unix-like OS:
 
-> `go get github.com/hotei/dcompress`
+> ```go get github.com/hotei/dcompress```
 
 Will copy github.com/hotei/program to the first entry of your $GOPATH
 
 or if go is not installed yet :
 
-> `cd DestinationDirectory`
+> ```cd DestinationDirectory```
 
-> `git clone https://github.com/hotei/dcompress.git`
+> ```git clone https://github.com/hotei/dcompress.git```
 
 ### Features
 
-- Designed to decompress files with .Z extension ('compress' output)
-- Same interface as the other packages in the go stdlib compress directory (flate,bzip2 etc)
+* Designed to decompress files with .Z extension ('compress' output)
+* Same interface as the other packages in the go stdlib compress directory (flate,bzip2 etc)
 
 ### Limitations
 
-- package is read only, there is no plan modify it to write .Z files (gz and bz2 are
-  much better)
+* package is read only, there is no plan modify it to write .Z files (gz and bz2 are
+much better)
 
 Comments can be sent to <hotei1352@gmail.com> or registered at github.com/hotei/dcompress
 
+
 ### Things to be aware of
 
-- Passes test suite with input of 9 KB, 500 KB and 22 MB in 0.75 seconds (4Ghz AMD64).
-- It will not work with .z extension (that would be the output from _pack_ , not _compress_)
-- Has not been tested on 32bit hardware due to lack of time/need/availability.
-- The software uses LZW.
-- LZW aka the [Lempel-Ziv-Welch algorithm][1] was patented.
-  That patent (US Patent 4,558,302) has expired in the US.
-- I have no plans for a function to create compressed files (with ext.Z). If you
-  are interested in one, see http://golang.org/pkg/compress/lzw/ for an LZW reader/writer.
-- It is my impression from reading the documentation that the
-  package compress/lzw only decodes up to 12 bit codes (const maxWidth=12). The Unix _compress_
-  utility uses up to 16 bit codes according to the documentation.
+*	Passes test suite with input of 9 KB, 500 KB and 22 MB in 0.75 seconds (4Ghz AMD64).
+*	It will not work with .z extension (that would be the output from _pack_ , not _compress_)
+*	Has not been tested on 32bit hardware due to lack of time/need/availability.
+*	The software uses LZW.
+*	LZW aka the [Lempel-Ziv-Welch algorithm][1] was patented.
+That patent (US Patent 4,558,302) has expired in the US.
+*	I have no plans for a function to create compressed files (with ext.Z). If you
+are interested in one, see http://golang.org/pkg/compress/lzw/ for an LZW reader/writer.  
+   *   It is my impression from reading the documentation that the
+package compress/lzw only decodes up to 12 bit codes (const maxWidth=12). The Unix _compress_
+utility uses up to 16 bit codes according to the documentation.
 
 Typical usage to read a compressed file can be found in the example directory.
 
+
 [1]: http://en.wikipedia.org/wiki/Lempel%E2%80%93Ziv%E2%80%93Welch "LZW at Wiki"
-[2]: http://google.com/ "Google"
+[2]: http://google.com/        "Google"
 
 License
 -------
-
 The 'dcompress' go package is distributed under the Simplified BSD License:
 
 > Copyright (c) 2015 David Rook. All rights reserved.
->
+> 
 > Redistribution and use in source and binary forms, with or without modification, are
 > permitted provided that the following conditions are met:
->
-> 1.  Redistributions of source code must retain the above copyright notice, this list of
->     conditions and the following disclaimer.
->
-> 2.  Redistributions in binary form must reproduce the above copyright notice, this list
->     of conditions and the following disclaimer in the documentation and/or other materials
->     provided with the distribution.
->
+> 
+>    1. Redistributions of source code must retain the above copyright notice, this list of
+>       conditions and the following disclaimer.
+> 
+>    2. Redistributions in binary form must reproduce the above copyright notice, this list
+>       of conditions and the following disclaimer in the documentation and/or other materials
+>       provided with the distribution.
+> 
 > THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER ``AS IS'' AND ANY EXPRESS OR IMPLIED
 > WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
 > FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> OR
@@ -88,11 +90,11 @@ The 'dcompress' go package is distributed under the Simplified BSD License:
 > NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 > ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-Documentation (c) 2015 David Rook
+Documentation (c) 2015 David Rook 
 
-// EOF README-dcompress.md (this is a markdown document and tested OK with blackfriday)
+// EOF README-dcompress.md  (this is a markdown document and tested OK with blackfriday)
 
-````
+```
 
 ## charm.land/bubbles/v2
 
@@ -122,7 +124,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-````
+```
 
 ## charm.land/bubbletea/v2
 
@@ -1670,30 +1672,6 @@ SOFTWARE.
 
 ```
 
-## github.com/davecgh/go-spew/spew
-
-- Version: v1.1.2-0.20180830191138-d8f796af33cc
-- License: [ISC](https://github.com/davecgh/go-spew/blob/d8f796af33cc/LICENSE)
-
-```text
-ISC License
-
-Copyright (c) 2012-2016 Dave Collins <dave@davec.name>
-
-Permission to use, copy, modify, and/or distribute this software for any
-purpose with or without fee is hereby granted, provided that the above
-copyright notice and this permission notice appear in all copies.
-
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
-ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
-ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
-OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-
-```
-
 ## github.com/disintegration/imaging
 
 - Version: v1.6.2
@@ -1756,8 +1734,8 @@ SOFTWARE.
 
 ## github.com/ebitengine/purego
 
-- Version: v0.10.0
-- License: [Apache-2.0](https://github.com/ebitengine/purego/blob/v0.10.0/LICENSE)
+- Version: v0.11.1
+- License: [Apache-2.0](https://github.com/ebitengine/purego/blob/v0.11.1/LICENSE)
 
 ```text
                                  Apache License
@@ -2019,10 +1997,40 @@ SOFTWARE.
 
 ```
 
-## github.com/godbus/dbus
+## github.com/go-ole/go-ole
+
+- Version: v1.3.0
+- License: [MIT](https://github.com/go-ole/go-ole/blob/v1.3.0/LICENSE)
+
+```text
+The MIT License (MIT)
+
+Copyright © 2013-2017 Yasuhiro Matsumoto, <mattn.jp@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the “Software”), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+## github.com/godbus/dbus/v5
 
 - Version: v5.2.4
-- License: [BSD-2-Clause](https://github.com/godbus/dbus/blob/master/LICENSE)
+- License: [BSD-2-Clause](https://github.com/godbus/dbus/blob/v5.2.4/LICENSE)
 
 ```text
 Copyright (c) 2013, Georg Reinke (<guelfey at gmail dot com>), Google
@@ -2056,9 +2064,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ## github.com/google/deck
 
 - Version: v1.1.0
-- License: [Apache-2.0](https://github.com/google/deck/blob/master/LICENSE)
+- License: [Apache-2.0](https://github.com/google/deck/blob/v1.1.0/LICENSE)
 
 ```text
+
                                  Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -2263,42 +2272,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ```
 
-## github.com/go-ole/go-ole
+## github.com/google/glazier/go/storage
 
-- Version: v1.2.6
-- License: [MIT](https://github.com/go-ole/go-ole/blob/v1.2.6/LICENSE)
-
-```text
-The MIT License (MIT)
-
-Copyright © 2013-2017 Yasuhiro Matsumoto, <mattn.jp@gmail.com>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the “Software”), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-```
-
-## github.com/google/glazier
-
-- Version: v2.2.0
-- License: [Apache-2.0](https://github.com/google/glazier/blob/master/LICENSE)
+- Version: v0.0.0-20261020220029-84e3134632ea
+- License: [Apache-2.0](https://github.com/google/glazier/blob/84e3134632ea/LICENSE)
 
 ```text
+
                                  Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -4738,42 +4718,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ```
 
-## github.com/pmezard/go-difflib/difflib
-
-- Version: v1.0.1-0.20181226105442-5d4384ee4fb2
-- License: [BSD-3-Clause](https://github.com/pmezard/go-difflib/blob/5d4384ee4fb2/LICENSE)
-
-```text
-Copyright (c) 2013, Patrick Mezard
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-    Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-    Redistributions in binary form must reproduce the above copyright
-notice, this list of conditions and the following disclaimer in the
-documentation and/or other materials provided with the distribution.
-    The names of its contributors may not be used to endorse or promote
-products derived from this software without specific prior written
-permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
-IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
-TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
-TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-```
-
 ## github.com/reinhrst/fzf-lib
 
 - Version: v0.9.0
@@ -4929,10 +4873,40 @@ license of the derivative portions.
 
 ```
 
+## github.com/scjalliance/comshim
+
+- Version: v0.0.0-20251021001035-b69f3cdad6f3
+- License: [MIT](https://github.com/scjalliance/comshim/blob/b69f3cdad6f3/LICENSE)
+
+```text
+The MIT License (MIT)
+
+Copyright (c) 2025 SCJ Alliance
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
 ## github.com/shirou/gopsutil/v4
 
-- Version: v4.26.5
-- License: [BSD-3-Clause](https://github.com/shirou/gopsutil/blob/v4.26.5/LICENSE)
+- Version: v4.26.9
+- License: [BSD-3-Clause](https://github.com/shirou/gopsutil/blob/v4.26.9/LICENSE)
 
 ```text
 gopsutil is distributed under BSD license reproduced below.
@@ -5186,7 +5160,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 - Version: v0.0.0-20200109162717-50436a6332de
 - License: [BSD-2-Clause-NetBSD](https://github.com/sshaman1101/dcompress/blob/50436a6332de/README-dcompress.md)
 
-````text
+```text
 <center>
 # dcompress
 </center>
@@ -5219,12 +5193,12 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
-````
+```
 
 ## github.com/stretchr/testify
 
-- Version: v1.11.1
-- License: [MIT](https://github.com/stretchr/testify/blob/v1.11.1/LICENSE)
+- Version: v1.12.1
+- License: [MIT](https://github.com/stretchr/testify/blob/v1.12.1/LICENSE)
 
 ```text
 MIT License
@@ -5248,6 +5222,65 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+```
+
+## github.com/stretchr/testify/internal/difflib
+
+- Version: v1.12.1
+- License: [BSD-3-Clause](https://github.com/stretchr/testify/blob/v1.12.1/internal/difflib/LICENSE)
+
+```text
+Copyright (c) 2013, Patrick Mezard
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+    Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+    Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the
+documentation and/or other materials provided with the distribution.
+    The names of its contributors may not be used to endorse or promote
+products derived from this software without specific prior written
+permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+```
+
+## github.com/stretchr/testify/internal/spew
+
+- Version: v1.12.1
+- License: [ISC](https://github.com/stretchr/testify/blob/v1.12.1/internal/spew/LICENSE)
+
+```text
+ISC License
+
+Copyright (c) 2012-2016 Dave Collins <dave@davec.name>
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ```
 
@@ -5293,7 +5326,7 @@ and publicly distribute the Work under its terms, with knowledge of his or her
 Copyright and Related Rights in the Work and the meaning and intended legal
 effect of CC0 on those rights.
 
-1. Copyright and Related Rights. A Work made available under CC0 may be protected by copyright and related or neighboring rights ("Copyright and Related Rights"). Copyright and Related Rights include, but are not limited to, the following:
+1. Copyright and Related Rights. A Work made available under CC0 may be protected by copyright and related or neighboring rights ("Copyright and Related Rights"). Copyright and Related Rights include, but are not limited to, the following: 
 
 i. the right to reproduce, adapt, distribute, perform, display, communicate,
 and translate a Work;
@@ -5317,11 +5350,11 @@ including any amended or successor version of such directive); and
 vii. other similar, equivalent or corresponding rights throughout the world
 based on applicable law or treaty, and any national implementations thereof.
 
-2. Waiver. To the greatest extent permitted by, but not in contravention of, applicable law, Affirmer hereby overtly, fully, permanently, irrevocably and unconditionally waives, abandons, and surrenders all of Affirmer&apos;s Copyright and Related Rights and associated claims and causes of action, whether now known or unknown (including existing as well as future claims and causes of action), in the Work (i) in all territories worldwide, (ii) for the maximum duration provided by applicable law or treaty (including future time extensions), (iii) in any current or future medium and for any number of copies, and (iv) for any purpose whatsoever, including without limitation commercial, advertising or promotional purposes (the "Waiver"). Affirmer makes the Waiver for the benefit of each member of the public at large and to the detriment of Affirmer&apos;s heirs and successors, fully intending that such Waiver shall not be subject to revocation, rescission, cancellation, termination, or any other legal or equitable action to disrupt the quiet enjoyment of the Work by the public as contemplated by Affirmer&apos;s express Statement of Purpose.
+2. Waiver. To the greatest extent permitted by, but not in contravention of, applicable law, Affirmer hereby overtly, fully, permanently, irrevocably and unconditionally waives, abandons, and surrenders all of Affirmer&apos;s Copyright and Related Rights and associated claims and causes of action, whether now known or unknown (including existing as well as future claims and causes of action), in the Work (i) in all territories worldwide, (ii) for the maximum duration provided by applicable law or treaty (including future time extensions), (iii) in any current or future medium and for any number of copies, and (iv) for any purpose whatsoever, including without limitation commercial, advertising or promotional purposes (the "Waiver"). Affirmer makes the Waiver for the benefit of each member of the public at large and to the detriment of Affirmer&apos;s heirs and successors, fully intending that such Waiver shall not be subject to revocation, rescission, cancellation, termination, or any other legal or equitable action to disrupt the quiet enjoyment of the Work by the public as contemplated by Affirmer&apos;s express Statement of Purpose. 
 
-3. Public License Fallback. Should any part of the Waiver for any reason be judged legally invalid or ineffective under applicable law, then the Waiver shall be preserved to the maximum extent permitted taking into account Affirmer&apos;s express Statement of Purpose. In addition, to the extent the Waiver is so judged Affirmer hereby grants to each affected person a royalty-free, non transferable, non sublicensable, non exclusive, irrevocable and unconditional license to exercise Affirmer&apos;s Copyright and Related Rights in the Work (i) in all territories worldwide, (ii) for the maximum duration provided by applicable law or treaty (including future time extensions), (iii) in any current or future medium and for any number of copies, and (iv) for any purpose whatsoever, including without limitation commercial, advertising or promotional purposes (the "License"). The License shall be deemed effective as of the date CC0 was applied by Affirmer to the Work. Should any part of the License for any reason be judged legally invalid or ineffective under applicable law, such partial invalidity or ineffectiveness shall not invalidate the remainder of the License, and in such case Affirmer hereby affirms that he or she will not (i) exercise any of his or her remaining Copyright and Related Rights in the Work or (ii) assert any associated claims and causes of action with respect to the Work, in either case contrary to Affirmer&apos;s express Statement of Purpose.
+3. Public License Fallback. Should any part of the Waiver for any reason be judged legally invalid or ineffective under applicable law, then the Waiver shall be preserved to the maximum extent permitted taking into account Affirmer&apos;s express Statement of Purpose. In addition, to the extent the Waiver is so judged Affirmer hereby grants to each affected person a royalty-free, non transferable, non sublicensable, non exclusive, irrevocable and unconditional license to exercise Affirmer&apos;s Copyright and Related Rights in the Work (i) in all territories worldwide, (ii) for the maximum duration provided by applicable law or treaty (including future time extensions), (iii) in any current or future medium and for any number of copies, and (iv) for any purpose whatsoever, including without limitation commercial, advertising or promotional purposes (the "License"). The License shall be deemed effective as of the date CC0 was applied by Affirmer to the Work. Should any part of the License for any reason be judged legally invalid or ineffective under applicable law, such partial invalidity or ineffectiveness shall not invalidate the remainder of the License, and in such case Affirmer hereby affirms that he or she will not (i) exercise any of his or her remaining Copyright and Related Rights in the Work or (ii) assert any associated claims and causes of action with respect to the Work, in either case contrary to Affirmer&apos;s express Statement of Purpose. 
 
-4. Limitations and Disclaimers.
+4. Limitations and Disclaimers. 
 
 a. No trademark or patent rights held by Affirmer are waived, abandoned,
 surrendered, licensed or otherwise affected by this document.
@@ -5500,32 +5533,62 @@ SOFTWARE.
 
 ```
 
-## github.com/yusufpapurcu/wmi
+## go.yaml.in/yaml/v3
 
-- Version: v1.2.4
-- License: [MIT](https://github.com/yusufpapurcu/wmi/blob/v1.2.4/LICENSE)
+- Version: v3.0.5
+- License: [MIT](https://github.com/yaml/go-yaml/blob/v3.0.5/LICENSE)
 
 ```text
-The MIT License (MIT)
 
-Copyright (c) 2013 Stack Exchange
+This project is covered by two different licenses: MIT and Apache.
+
+#### MIT License ####
+
+The following files were ported to Go from C files of libyaml, and thus
+are still covered by their original MIT license, with the additional
+copyright staring in 2011 when the project was ported over:
+
+    apic.go emitterc.go parserc.go readerc.go scannerc.go
+    writerc.go yamlh.go yamlprivateh.go
+
+Copyright (c) 2006-2010 Kirill Simonov
+Copyright (c) 2006-2011 Kirill Simonov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-the Software, and to permit persons to whom the Software is furnished to do so,
-subject to the following conditions:
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+### Apache License ###
+
+All the remaining project files are covered by the Apache license:
+
+Copyright (c) 2011-2019 Canonical Ltd
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 
 ```
 
@@ -5778,8 +5841,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## golang.org/x/image
 
-- Version: v0.41.0
-- License: [BSD-3-Clause](https://cs.opensource.google/go/x/image/+/v0.41.0:LICENSE)
+- Version: v0.45.0
+- License: [BSD-3-Clause](https://cs.opensource.google/go/x/image/+/v0.45.0:LICENSE)
 
 ```text
 Copyright 2009 The Go Authors.
@@ -5814,8 +5877,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## golang.org/x/mod/semver
 
-- Version: v0.37.0
-- License: [BSD-3-Clause](https://cs.opensource.google/go/x/mod/+/v0.37.0:LICENSE)
+- Version: v0.38.0
+- License: [BSD-3-Clause](https://cs.opensource.google/go/x/mod/+/v0.38.0:LICENSE)
 
 ```text
 Copyright 2009 The Go Authors.
@@ -5850,8 +5913,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## golang.org/x/sync/errgroup
 
-- Version: v0.21.0
-- License: [BSD-3-Clause](https://cs.opensource.google/go/x/sync/+/v0.21.0:LICENSE)
+- Version: v0.22.0
+- License: [BSD-3-Clause](https://cs.opensource.google/go/x/sync/+/v0.22.0:LICENSE)
 
 ```text
 Copyright 2009 The Go Authors.
@@ -5886,8 +5949,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## golang.org/x/sys/unix
 
-- Version: v0.46.0
-- License: [BSD-3-Clause](https://cs.opensource.google/go/x/sys/+/v0.46.0:LICENSE)
+- Version: v0.48.0
+- License: [BSD-3-Clause](https://cs.opensource.google/go/x/sys/+/v0.48.0:LICENSE)
 
 ```text
 Copyright 2009 The Go Authors.
@@ -5922,8 +5985,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## golang.org/x/sys/windows
 
-- Version: v0.46.0
-- License: [BSD-3-Clause](https://cs.opensource.google/go/x/sys/+/v0.46.0:LICENSE)
+- Version: v0.48.0
+- License: [BSD-3-Clause](https://cs.opensource.google/go/x/sys/+/v0.48.0:LICENSE)
 
 ```text
 Copyright 2009 The Go Authors.
@@ -5958,8 +6021,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## golang.org/x/text
 
-- Version: v0.39.0
-- License: [BSD-3-Clause](https://cs.opensource.google/go/x/text/+/v0.39.0:LICENSE)
+- Version: v0.41.0
+- License: [BSD-3-Clause](https://cs.opensource.google/go/x/text/+/v0.41.0:LICENSE)
 
 ```text
 Copyright 2009 The Go Authors.
@@ -6056,64 +6119,5 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
 ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
 CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-```
-
-## gopkg.in/yaml.v3
-
-- Version: v3.0.1
-- License: [MIT](https://github.com/go-yaml/yaml/blob/v3.0.1/LICENSE)
-
-```text
-
-This project is covered by two different licenses: MIT and Apache.
-
-#### MIT License ####
-
-The following files were ported to Go from C files of libyaml, and thus
-are still covered by their original MIT license, with the additional
-copyright staring in 2011 when the project was ported over:
-
-    apic.go emitterc.go parserc.go readerc.go scannerc.go
-    writerc.go yamlh.go yamlprivateh.go
-
-Copyright (c) 2006-2010 Kirill Simonov
-Copyright (c) 2006-2011 Kirill Simonov
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-### Apache License ###
-
-All the remaining project files are covered by the Apache license:
-
-Copyright (c) 2011-2019 Canonical Ltd
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
 
 ```
