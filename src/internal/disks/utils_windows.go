@@ -100,7 +100,7 @@ func shouldHideVolume(partitions []storage.Partition, volume storage.Volume) boo
 		if len(p.AccessPaths) == 0 {
 			continue
 		}
-		if slices.Contains(p.AccessPaths, volume.Path) && p.IsHidden == true {
+		if slices.Contains(p.AccessPaths, volume.Path) && p.IsHidden {
 			return true
 		}
 	}
