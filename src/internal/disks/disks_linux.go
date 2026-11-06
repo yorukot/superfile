@@ -10,6 +10,8 @@ import (
 	"github.com/godbus/dbus/v5"
 )
 
+const dbusCallTimeout = 2 * time.Second
+
 type manager struct {
 	conn *dbus.Conn
 }
@@ -23,7 +25,7 @@ func New() (Manager, error) {
 }
 
 func (m *manager) List(ctx context.Context) ([]Disk, error) {
-	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, dbusCallTimeout)
 	defer cancel()
 
 	var objs map[dbus.ObjectPath]map[string]map[string]dbus.Variant
