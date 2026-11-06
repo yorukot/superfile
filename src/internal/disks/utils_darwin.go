@@ -27,15 +27,12 @@ func shouldListDisk(mountPoint string) bool {
 }
 
 func diskName(mountPoint string) string {
-	name := mountPoint
 	if mountPoint == "/" {
-		name = "Root"
-	} else {
-		// This might cause duplicate names in case you mount two devices in
-		// /mnt/usb and /mnt/dir2/usb . Full mountpoint is a more accurate way
-		// but that results in messy UI, hence we do this.
-		name = filepath.Base(mountPoint)
+		return "Root"
 	}
 
-	return name
+	// This might cause duplicate names in case you mount two devices in
+	// /mnt/usb and /mnt/dir2/usb . Full mountpoint is a more accurate way
+	// but that results in messy UI, hence we do this.
+	return filepath.Base(mountPoint)
 }
