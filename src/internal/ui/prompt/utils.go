@@ -26,6 +26,10 @@ func getPromptAction(shellMode bool, value string, cwdLocation string) (common.M
 		}
 	}
 
+	if len(promptArgs) == 0 {
+		return noAction, nil
+	}
+
 	switch promptArgs[0] {
 	case "split":
 		if len(promptArgs) != 1 {
