@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	variable "github.com/yorukot/superfile/src/config"
+	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/pkg/utils"
 )
 
@@ -76,4 +77,47 @@ func TestNewPanelClearsNonFilePanelFocus(t *testing.T) {
 		assert.True(t, m.getFocusedFilePanel().IsFocused,
 			"the newly created file panel must be focused")
 	})
+}
+
+// #998: ctrl+v with the sidebar focused used to paste into the file panel.
+func TestFileOperationKeysNeedFilePanelFocus(t *testing.T) {
+	curTestDir := t.TempDir()
+	srcFile := filepath.Join(t.TempDir(), "src.txt")
+	utils.SetupFiles(t, filepath.Join(curTestDir, "archive.zip"), srcFile)
+
+	keys := []struct {
+		name string
+		key  string
+	}{
+		{"paste", common.Hotkeys.PasteItems[0]},
+		{"create", common.Hotkeys.FilePanelItemCreate[0]},
+		{"extract", common.Hotkeys.ExtractFile[0]},
+		{"compress", common.Hotkeys.CompressFile[0]},
+	}
+	otherFocuses := []struct {
+		name  string
+		focus focusPanelType
+	}{
+		{"sidebar", sidebarFocus},
+		{"process bar", processBarFocus},
+		{"metadata", metadataFocus},
+	}
+
+	acted := func(focus focusPanelType, key string) bool {
+		m := defaultTestModel(curTestDir)
+		m.clipboard.SetItems([]string{srcFile})
+		m.focusPanel = focus
+		m.getFocusedFilePanel().IsFocused = focus == nonePanelFocus
+		cmd := m.mainKey(key)
+		return cmd != nil || m.typingModal.open
+	}
+
+	for _, k := range keys {
+		t.Run(k.name, func(t *testing.T) {
+			require.True(t, acted(nonePanelFocus, k.key), "must act when the file panel is focused")
+			for _, f := range otherFocuses {
+				assert.False(t, acted(f.focus, k.key), "must do nothing when the %s is focused", f.name)
+			}
+		})
+	}
 }
