@@ -181,6 +181,11 @@ func getData() []hotkeydata { //nolint: funlen // This should be self contained
 			hotkeyWorkType: globalType,
 		},
 		{
+			hotkey:         common.Hotkeys.CalculateDirSize,
+			description:    "Calculate size of focused directory",
+			hotkeyWorkType: normalType,
+		},
+		{
 			hotkey:         common.Hotkeys.ChangePanelMode,
 			description:    "Change between selection mode or normal mode",
 			hotkeyWorkType: globalType,
