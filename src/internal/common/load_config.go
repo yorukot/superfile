@@ -54,6 +54,10 @@ func LoadConfigFile() {
 }
 
 func ValidateConfig(c *ConfigType) error {
+	if err := ValidateOpenWith(c.OpenWith); err != nil {
+		return errors.New(LoadConfigError("open_with", err.Error()))
+	}
+
 	if (c.FilePreviewWidth > 10 || c.FilePreviewWidth < 2) && c.FilePreviewWidth != 0 {
 		return errors.New(
 			LoadConfigError("file_preview_width", "File preview width must be 2–10, or 0 to disable preview."),
