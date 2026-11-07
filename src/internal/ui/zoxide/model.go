@@ -19,11 +19,15 @@ func DefaultModel(maxHeight int, width int, zClient *zoxidelib.Client) Model {
 
 func GenerateModel(zClient *zoxidelib.Client, maxHeight int, width int) Model {
 	m := Model{
-		headline:  icon.Search + icon.Space + zoxideHeadlineText,
-		open:      false,
-		textInput: common.GeneratePromptTextInput(),
-		zClient:   zClient,
-		results:   []zoxidelib.Result{},
+		headline:          icon.Search + icon.Space + zoxideHeadlineText,
+		open:              false,
+		textInput:         common.GeneratePromptTextInput(),
+		zClient:           zClient,
+		results:           []zoxidelib.Result{},
+		maxVisibleResults: common.Config.ZoxideMaxVisibleResults,
+	}
+	if m.maxVisibleResults <= 0 {
+		m.maxVisibleResults = DefaultMaxVisibleResults
 	}
 	m.SetMaxHeight(maxHeight)
 	m.SetWidth(width)
