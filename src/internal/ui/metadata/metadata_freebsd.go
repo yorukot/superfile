@@ -20,6 +20,7 @@ const (
 	UF_REPARSE   = 0x00000400
 	UF_ARCHIVE   = 0x00000800
 	UF_READONLY  = 0x00001000
+	UF_NOCACHE   = 0x00002000
 	UF_HIDDEN    = 0x00008000
 
 	SF_ARCHIVED  = 0x00010000
@@ -53,6 +54,7 @@ var mapping = []struct {
 	{UF_REPARSE, "reparse"},
 	{UF_SPARSE, "sparse"},
 	{UF_SYSTEM, "system"},
+	{UF_NOCACHE, "nocache"},
 }
 
 func getFileAttributes(path string) (string, bool) {
