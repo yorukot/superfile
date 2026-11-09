@@ -41,6 +41,7 @@ func (m *Model) CloseFilePanel() (tea.Cmd, error) {
 		return nil, ErrMinimumPanelCount
 	}
 
+	m.FilePanels[m.FocusedPanelIndex].CancelDirSizeCalcs()
 	m.FilePanels = append(m.FilePanels[:m.FocusedPanelIndex],
 		m.FilePanels[m.FocusedPanelIndex+1:]...)
 

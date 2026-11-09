@@ -47,5 +47,6 @@ func New(location string, focused bool, targetFile string, sortKind sortmodel.So
 		width:            MinWidth,
 		height:           MinHeight,
 		selected:         make(map[string]int),
+		dirSizes:         make(map[string]dirSizeEntry),
 	}
 }
