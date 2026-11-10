@@ -323,3 +323,110 @@ func TestFormatSizeInternal(t *testing.T) {
 		assert.Equal(t, "1.01 KiB", actual)
 	})
 }
+
+// TestFormatSizeInternalBoundaryRounding covers the rounding-across-unit-boundary
+// bug: when %.2f would round the value up to the next unit (e.g. 1023.999 KiB
+// formats as "1024.00 KiB"), the result must instead advance to the larger unit
+// ("1.00 MiB"). It also pins the largest values that must NOT bump.
+func TestFormatSizeInternalBoundaryRounding(t *testing.T) {
+	tests := []struct {
+		name  string
+		size  int64
+		power int
+		units [7]string
+		want  string
+	}{
+		// Binary (1024) units.
+		{
+			name: "1023 bytes stays as integer bytes",
+			size: 1023, power: KibibyteSize, units: unitsBin(), want: "1023 B",
+		},
+		{
+			name: "1 KiB exact",
+			size: 1024, power: KibibyteSize, units: unitsBin(), want: "1.00 KiB",
+		},
+		{
+			name: "1023.00 KiB does not bump to MiB",
+			size: 1047552, power: KibibyteSize, units: unitsBin(), want: "1023.00 KiB",
+		},
+		{
+			name: "largest KiB value that stays under the boundary (1023.99 KiB)",
+			size: 1048570, power: KibibyteSize, units: unitsBin(), want: "1023.99 KiB",
+		},
+		{
+			name: "smallest KiB value that bumps to MiB",
+			size: 1048571, power: KibibyteSize, units: unitsBin(), want: "1.00 MiB",
+		},
+		{
+			name: "mid rounding window bumps to MiB",
+			size: 1048574, power: KibibyteSize, units: unitsBin(), want: "1.00 MiB",
+		},
+		{
+			name: "reported bug: 1 MiB minus one byte bumps instead of 1024.00 KiB",
+			size: 1048575, power: KibibyteSize, units: unitsBin(), want: "1.00 MiB",
+		},
+		{
+			name: "1 MiB exact",
+			size: 1048576, power: KibibyteSize, units: unitsBin(), want: "1.00 MiB",
+		},
+		{
+			name: "1 GiB minus one byte bumps instead of 1024.00 MiB",
+			size: 1073741823, power: KibibyteSize, units: unitsBin(), want: "1.00 GiB",
+		},
+		{
+			name: "largest MiB value that stays under the boundary (1023.99 MiB)",
+			size: 1073736581, power: KibibyteSize, units: unitsBin(), want: "1023.99 MiB",
+		},
+		{
+			name: "1 PiB minus one byte bumps instead of 1024.00 TiB",
+			size: 1125899906842623, power: KibibyteSize, units: unitsBin(), want: "1.00 PiB",
+		},
+		{
+			name: "max int64 stays in the top binary unit without overflowing",
+			size: math.MaxInt64, power: KibibyteSize, units: unitsBin(), want: "8.00 EiB",
+		},
+		// Decimal / SI (1000) units.
+		{
+			name: "999 bytes stays as integer bytes",
+			size: 999, power: KilobyteSize, units: unitsDec(), want: "999 B",
+		},
+		{
+			name: "1 kB exact",
+			size: 1000, power: KilobyteSize, units: unitsDec(), want: "1.00 kB",
+		},
+		{
+			name: "largest kB value that stays under the boundary (999.99 kB)",
+			size: 999994, power: KilobyteSize, units: unitsDec(), want: "999.99 kB",
+		},
+		{
+			name: "smallest kB value that bumps to MB",
+			size: 999995, power: KilobyteSize, units: unitsDec(), want: "1.00 MB",
+		},
+		{
+			name: "1 MB minus one byte bumps instead of 1000.00 kB",
+			size: 999999, power: KilobyteSize, units: unitsDec(), want: "1.00 MB",
+		},
+		{
+			name: "1 MB exact",
+			size: 1000000, power: KilobyteSize, units: unitsDec(), want: "1.00 MB",
+		},
+		{
+			name: "1 GB minus one byte bumps instead of 1000.00 MB",
+			size: 999999999, power: KilobyteSize, units: unitsDec(), want: "1.00 GB",
+		},
+		{
+			name: "largest MB value that stays under the boundary (999.99 MB)",
+			size: 999994999, power: KilobyteSize, units: unitsDec(), want: "999.99 MB",
+		},
+		{
+			name: "1 PB minus one byte bumps instead of 1000.00 TB",
+			size: 999999999999999, power: KilobyteSize, units: unitsDec(), want: "1.00 PB",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			actual := formatSizeInternal(tt.size, tt.power, tt.units)
+			assert.Equal(t, tt.want, actual)
+		})
+	}
+}
