@@ -1,6 +1,8 @@
 package preview
 
 import (
+	"bytes"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -10,6 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/yorukot/superfile/src/internal/common"
+	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
 	"github.com/yorukot/superfile/src/pkg/utils"
 )
 
@@ -172,4 +176,54 @@ func TestFilePreviewRenderWithDimensions(t *testing.T) {
 			assert.Equal(t, tt.expectedPreview, res, "filePath = %s", filePath)
 		})
 	}
+}
+
+// TestRenderWithPathDoesNotGenerateThumbnailWhenImagePreviewDisabled is a
+// regression test for #1620: with show_image_preview = false, RenderWithPath
+// must short-circuit before the thumbnail-generation block, so no
+// ffmpeg/pdftoppm/gs subprocess is spawned for video/PDF/PS files.
+//
+// We cannot assert on the "Image preview is disabled" placeholder text directly
+// because those display strings are populated by LoadPrerenderedVariables(),
+// which only runs at app startup (and reassigning the package var from this
+// package is rejected by the repo's "reassign" linter). Instead we capture the
+// default slog logger and assert that the "Error generating thumbnail" log —
+// emitted only when the generator subprocess actually runs — never appears.
+func TestRenderWithPathDoesNotGenerateThumbnailWhenImagePreviewDisabled(t *testing.T) {
+	gen, err := filepreview.NewThumbnailGenerator()
+	require.NoError(t, err)
+	if !gen.SupportsExt(".mp4") {
+		t.Skip("ffmpeg not available; video thumbnail generator not registered")
+	}
+
+	dir := t.TempDir()
+	mp4 := filepath.Join(dir, "clip.mp4")
+	require.NoError(t, os.WriteFile(mp4, []byte("not a real video"), 0o644))
+
+	m := Model{
+		open:               true,
+		imagePreviewer:     filepreview.NewImagePreviewer(),
+		thumbnailGenerator: gen,
+	}
+
+	// Capture the default slog logger so we can observe whether the thumbnail
+	// generator (ffmpeg/pdftoppm/gs) was invoked during the render.
+	var buf bytes.Buffer
+	prevLogger := slog.Default()
+	slog.SetDefault(slog.New(slog.NewTextHandler(&buf, &slog.HandlerOptions{Level: slog.LevelDebug})))
+	t.Cleanup(func() { slog.SetDefault(prevLogger) })
+
+	prev := common.Config.ShowImagePreview
+	common.Config.ShowImagePreview = false
+	t.Cleanup(func() { common.Config.ShowImagePreview = prev })
+
+	m.RenderWithPath(mp4, 40, 20, 40)
+
+	// Positive control: RenderWithPath ran far enough to log its entry point,
+	// so an empty buffer can't silently pass the assertion below.
+	assert.Contains(t, buf.String(), "Attempting to render preview")
+	// The fix: with image preview disabled, the generator must not run, so the
+	// thumbnail-generation failure log (render.go's "Error generating thumbnail",
+	// reached only via GetThumbnailOrGenerate) must be absent.
+	assert.NotContains(t, buf.String(), "generating thumbnail")
 }
