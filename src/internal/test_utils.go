@@ -26,24 +26,24 @@ const DefaultTestModelHeight = 2 * common.MinimumHeight
 // -------------------- Model setup utils
 
 func defaultTestModel(dirs ...string) *model {
-	m := defaultModelConfig(false, false, false, dirs, nil)
+	m := defaultModelConfig(false, false, true, false, dirs, nil)
 	return setModelParamsForTest(m, true)
 }
 
 // TODO: Change this to a better API. passing opts
 // WithZClient(), WithFooter()
 func defaultTestModelWithZClient(zClient *zoxidelib.Client, dirs ...string) *model {
-	m := defaultModelConfig(false, false, false, dirs, zClient)
+	m := defaultModelConfig(false, false, true, false, dirs, zClient)
 	return setModelParamsForTest(m, true)
 }
 
 func defaultTestModelWithFooterAndFilePreview(dirs ...string) *model {
-	m := defaultModelConfig(false, true, false, dirs, nil)
+	m := defaultModelConfig(false, true, true, false, dirs, nil)
 	return setModelParamsForTest(m, false)
 }
 
 func defaultTestModelWithFilePreview(dirs ...string) *model {
-	m := defaultModelConfig(false, false, false, dirs, nil)
+	m := defaultModelConfig(false, false, true, false, dirs, nil)
 	return setModelParamsForTest(m, false)
 }
 
