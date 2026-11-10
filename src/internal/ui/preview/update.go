@@ -32,6 +32,12 @@ func NewUpdateMsg(location string, content string, rawTransmit string, width int
 	}
 }
 
+// WithoutRawTransmit returns a copy of msg whose raw data has already been sent.
+func (msg UpdateMsg) WithoutRawTransmit() UpdateMsg {
+	msg.rawTransmit = ""
+	return msg
+}
+
 func (msg UpdateMsg) GetReqID() int {
 	return msg.reqID
 }
