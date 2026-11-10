@@ -78,12 +78,15 @@ func (m *Model) UpdatePreviewPanel(msg preview.UpdateMsg) tea.Cmd {
 			"msgW", msg.GetContentWidth(), "msgH", msg.GetContentHeight())
 		return nil
 	}
-	m.FilePreview.Apply(msg)
-
-	// For Kitty images, transmit image data directly to the terminal
+	// Kitty placeholder cells stay blank if the terminal gets them before the
+	// image data, and the renderer won't redraw them once the data arrives.
+	// So send the data first, then apply the content in a follow-up message.
 	if raw := msg.GetRawTransmit(); raw != "" {
-		return tea.Raw(raw)
+		return tea.Sequence(tea.Raw(raw), func() tea.Msg {
+			return msg.WithoutRawTransmit()
+		})
 	}
+	m.FilePreview.Apply(msg)
 	return nil
 }
 
