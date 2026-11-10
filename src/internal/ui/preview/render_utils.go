@@ -19,10 +19,7 @@ func getBatSyntaxHighlightedContent(
 	background string,
 	batCmd string,
 ) (string, error) {
-	// --plain: use the plain style without line numbers and decorations
-	// --force-colorization: force colorization for non-interactive shell output
-	// --line-range <:m>: only read from line 1 to line "m"
-	batArgs := []string{itemPath, "--plain", "--force-colorization", "--line-range", fmt.Sprintf(":%d", previewLine)}
+	batArgs := buildBatArgs(itemPath, previewLine, common.Config.BatFlags)
 
 	// set timeout for the external command execution to 500ms max
 	ctx, cancel := context.WithTimeout(context.Background(), common.DefaultPreviewTimeout)
@@ -41,6 +38,14 @@ func getBatSyntaxHighlightedContent(
 		fileContent = setBatBackground(fileContent, background)
 	}
 	return fileContent, nil
+}
+
+func buildBatArgs(itemPath string, previewLine int, batFlags []string) []string {
+	batArgs := make([]string, 0, len(batFlags)+3)
+	batArgs = append(batArgs, itemPath)
+	batArgs = append(batArgs, batFlags...)
+	// --line-range <:m>: only read from line 1 to line "m"
+	return append(batArgs, "--line-range", fmt.Sprintf(":%d", previewLine))
 }
 
 func setBatBackground(input string, background string) string {
