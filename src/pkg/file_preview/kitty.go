@@ -74,7 +74,7 @@ type KittyImageResult struct {
 // renderWithKittyUsingTermCap renders an image using Kitty graphics protocol
 // with Unicode virtual placeholders (compatible with cell-based renderers).
 func (p *ImagePreviewer) renderWithKittyUsingTermCap(img image.Image, path string,
-	originalWidth, originalHeight, maxWidth, maxHeight int, _ int,
+	maxWidth, maxHeight int, _ int,
 ) (*KittyImageResult, error) {
 	if maxWidth <= 0 || maxHeight <= 0 {
 		return nil, fmt.Errorf("dimensions must be positive (maxWidth=%d, maxHeight=%d)", maxWidth, maxHeight)
@@ -86,7 +86,8 @@ func (p *ImagePreviewer) renderWithKittyUsingTermCap(img image.Image, path strin
 
 	slog.Debug("pixelsPerColumn", "pixelsPerColumn", pixelsPerColumn, "pixelsPerRow", pixelsPerRow)
 
-	imgRatio := float64(originalWidth) / float64(originalHeight)
+	imgArea := img.Bounds()
+	imgRatio := float64(imgArea.Dx()) / float64(imgArea.Dy())
 	termRatio := float64(maxWidth*pixelsPerColumn) / float64(maxHeight*pixelsPerRow)
 
 	var dstCols, dstRows int
@@ -105,7 +106,6 @@ func (p *ImagePreviewer) renderWithKittyUsingTermCap(img image.Image, path strin
 	}
 
 	imgID := generatePlacementID(path)
-	imgArea := img.Bounds()
 
 	// Encode image data for transmission via tea.Raw()
 	var transmitBuf bytes.Buffer
