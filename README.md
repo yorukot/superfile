@@ -69,6 +69,8 @@
 
 ### macOS and Linux
 
+- Linux: [udisks2](https://github.com/storaged-project/udisks) is **required**. Install it with your package manager (the package is named `udisks2` on most distros) before running superfile.
+
 ```bash
 bash -c "$(curl -sLo- https://superfile.dev/install.sh)"
 ```
