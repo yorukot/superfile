@@ -1,6 +1,9 @@
 package metadata
 
-import "strconv"
+import (
+	"strconv"
+	"time"
+)
 
 func (m *Model) SetMetadataCache(metadata Metadata, metadataFocused bool) {
 	m.cache.Set(cacheKey(metadata.filepath, metadataFocused), metadata)
@@ -22,9 +25,34 @@ func (m *Model) GetMetadataExpectedFocused() bool {
 	return m.expectedFocused
 }
 
+func (m *Model) SetPendingRequest(filepath string, metadataFocused bool, reqID int) {
+	m.pendingLocation = filepath
+	m.pendingFocused = metadataFocused
+	m.pendingReqID = reqID
+}
+
+func (m *Model) IsPending(filepath string, metadataFocused bool) bool {
+	return m.pendingLocation == filepath && m.pendingFocused == metadataFocused
+}
+
+func (m *Model) MatchPendingRequest(filepath string, metadataFocused bool, reqID int) bool {
+	return m.pendingLocation == filepath && m.pendingFocused == metadataFocused && m.pendingReqID == reqID
+}
+
+func (m *Model) ClearPendingRequest() {
+	m.pendingLocation = ""
+	m.pendingFocused = false
+	m.pendingReqID = 0
+}
+
 func (m *Model) SetMetadataLocationAndFocused(filepath string, metadataFocused bool) {
 	m.expectedLocation = filepath
 	m.expectedFocused = metadataFocused
+	m.lastUpdated = time.Now()
+}
+
+func (m *Model) IsFresh(ttl time.Duration) bool {
+	return !m.lastUpdated.IsZero() && time.Since(m.lastUpdated) < ttl
 }
 
 func cacheKey(filePath string, metadataFocused bool) string {
