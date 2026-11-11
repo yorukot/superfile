@@ -21,7 +21,7 @@ func New() (Manager, error) {
 	conn, err := dbus.SystemBus()
 	if err != nil {
 		slog.Warn("System D-Bus unavailable, disks will not be listed", "error", err)
-		return NewNoop(), err
+		return NewNoop(), nil
 	}
 	return &manager{conn: conn}, nil
 }
