@@ -155,6 +155,7 @@ func spfAppAction(_ context.Context, c *cli.Command) error {
 	if err != nil {
 		return err
 	}
+	diskManager = disks.NewCache(diskManager)
 	defer diskManager.Close()
 
 	p := tea.NewProgram(internal.InitialModel(firstPanelPaths, firstUse, diskManager))
