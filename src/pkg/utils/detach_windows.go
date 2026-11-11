@@ -8,3 +8,6 @@ func DetachFromTerminal(cmd *exec.Cmd) {
 	// No-op: current Windows path uses rundll32 and returns immediately.
 	// If needed later, set CreationFlags/HideWindow via syscall.SysProcAttr.
 }
+
+// PrepareForShellCommand is a no-op on Windows.
+func PrepareForShellCommand(cmd *exec.Cmd) {}

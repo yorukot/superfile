@@ -35,3 +35,4 @@ testsuite/.venv/
 
 # Agent configs
 CLAUDE.md
+go1.26.0.linux-amd64.tar.gz
