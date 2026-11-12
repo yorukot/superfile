@@ -16,6 +16,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
+	"github.com/charmbracelet/x/term"
 	"github.com/urfave/cli/v3"
 	"golang.org/x/mod/semver"
 
@@ -150,7 +151,15 @@ func spfAppAction(_ context.Context, c *cli.Command) error {
 
 	firstUse := checkFirstUse()
 
-	p := tea.NewProgram(internal.InitialModel(firstPanelPaths, firstUse))
+	var opts []tea.ProgramOption
+	// When stdout is piped or redirected (e.g. `spf --pld | ...`), draw the
+	// UI on the terminal instead, so that stdout only gets what we print.
+	if tty := openTTYIfStdoutRedirected(); tty != nil {
+		defer tty.Close()
+		opts = append(opts, tea.WithOutput(tty))
+	}
+
+	p := tea.NewProgram(internal.InitialModel(firstPanelPaths, firstUse), opts...)
 	if _, err := p.Run(); err != nil {
 		utils.PrintfAndExitf("Alas, there's been an error: %v", err)
 	}
@@ -213,6 +222,29 @@ func checkFirstUse() bool {
 		}
 	}
 	return firstUse
+}
+
+// openTTYIfStdoutRedirected returns the terminal, opened for writing, when
+// stdout is not a terminal. It returns nil if stdout is a terminal or if the
+// terminal cannot be opened.
+func openTTYIfStdoutRedirected() *os.File {
+	return ttyForRedirectedStdout(term.IsTerminal(os.Stdout.Fd()), tea.OpenTTY)
+}
+
+func ttyForRedirectedStdout(stdoutIsTerminal bool, openTTY func() (*os.File, *os.File, error)) *os.File {
+	if stdoutIsTerminal {
+		return nil
+	}
+	in, out, err := openTTY()
+	if err != nil {
+		slog.Debug("stdout is not a terminal and the terminal could not be opened", "error", err)
+		return nil
+	}
+	// On Unix both are the same file, on Windows they are separate handles.
+	if in != out {
+		_ = in.Close()
+	}
+	return out
 }
 
 // Write data to the path file if it does not exists
