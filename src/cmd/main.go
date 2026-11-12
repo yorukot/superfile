@@ -151,10 +151,12 @@ func spfAppAction(_ context.Context, c *cli.Command) error {
 
 	firstUse := checkFirstUse()
 
+	stdoutIsTerminal := term.IsTerminal(os.Stdout.Fd())
 	var opts []tea.ProgramOption
 	// When stdout is piped or redirected (e.g. `spf --pld | ...`), draw the
 	// UI on the terminal instead, so that stdout only gets what we print.
-	if tty := openTTYIfStdoutRedirected(); tty != nil {
+	tty := ttyForRedirectedStdout(stdoutIsTerminal, tea.OpenTTY)
+	if tty != nil {
 		defer tty.Close()
 		opts = append(opts, tea.WithOutput(tty))
 	}
@@ -168,7 +170,7 @@ func spfAppAction(_ context.Context, c *cli.Command) error {
 	// so that we know `common.Config` is loaded
 	// Should not be a goroutine, Otherwise the main
 	// goroutine will exit first, and this will not be able to finish
-	CheckForUpdates()
+	CheckForUpdates(noticeWriter(stdoutIsTerminal, tty))
 
 	if variable.PrintLastDir {
 		fmt.Println(variable.LastDir)
@@ -224,13 +226,9 @@ func checkFirstUse() bool {
 	return firstUse
 }
 
-// openTTYIfStdoutRedirected returns the terminal, opened for writing, when
+// ttyForRedirectedStdout returns the terminal, opened for writing, when
 // stdout is not a terminal. It returns nil if stdout is a terminal or if the
 // terminal cannot be opened.
-func openTTYIfStdoutRedirected() *os.File {
-	return ttyForRedirectedStdout(term.IsTerminal(os.Stdout.Fd()), tea.OpenTTY)
-}
-
 func ttyForRedirectedStdout(stdoutIsTerminal bool, openTTY func() (*os.File, *os.File, error)) *os.File {
 	if stdoutIsTerminal {
 		return nil
@@ -245,6 +243,20 @@ func ttyForRedirectedStdout(stdoutIsTerminal bool, openTTY func() (*os.File, *os
 		_ = in.Close()
 	}
 	return out
+}
+
+// noticeWriter returns where messages for the user, like the update notice,
+// are written. If stdout is redirected they go to the terminal (or stderr),
+// so that stdout only gets the output of --print-last-dir.
+func noticeWriter(stdoutIsTerminal bool, tty *os.File) io.Writer {
+	switch {
+	case stdoutIsTerminal:
+		return os.Stdout
+	case tty != nil:
+		return tty
+	default:
+		return os.Stderr
+	}
 }
 
 // Write data to the path file if it does not exists
@@ -267,7 +279,7 @@ func writeLastCheckTime(t time.Time) {
 // Check for the need of updates if AutoCheckUpdate is on, if its the first time
 // that version is checked or if has more than 24h since the last version check,
 // look into the repo if  there's any more recent version
-func CheckForUpdates() {
+func CheckForUpdates(w io.Writer) {
 	if !common.Config.AutoCheckUpdate {
 		return
 	}
@@ -280,7 +292,7 @@ func CheckForUpdates() {
 	}
 
 	defer writeLastCheckTime(currentTime)
-	checkAndNotifyUpdate()
+	checkAndNotifyUpdate(w)
 }
 
 // Default to zero time if file doesn't exist, is empty, or has errors
@@ -303,7 +315,7 @@ func shouldCheckForUpdate(now, last time.Time) bool {
 	return last.IsZero() || now.Sub(last) >= 24*time.Hour
 }
 
-func checkAndNotifyUpdate() {
+func checkAndNotifyUpdate(w io.Writer) {
 	ctx, cancel := context.WithTimeout(context.Background(), common.DefaultCLIContextTimeout)
 	defer cancel()
 
@@ -331,7 +343,7 @@ func checkAndNotifyUpdate() {
 	}
 
 	if semver.Compare(release.TagName, variable.CurrentVersion) > 0 {
-		notifyUpdateAvailable(release.TagName)
+		notifyUpdateAvailable(w, release.TagName)
 	}
 }
 
@@ -343,16 +355,16 @@ func fetchLatestRelease(ctx context.Context) (*http.Response, error) {
 	return (&http.Client{}).Do(req)
 }
 
-func notifyUpdateAvailable(latest string) {
-	fmt.Println(
-		lipgloss.NewStyle().Foreground(lipgloss.Color("#FF69E1")).Render("┃ ") +
-			lipgloss.NewStyle().Foreground(lipgloss.Color("#FFBA52")).Bold(true).Render("A new version ") +
-			lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFF2")).Bold(true).Italic(true).Render(latest) +
+func notifyUpdateAvailable(w io.Writer, latest string) {
+	fmt.Fprintln(w,
+		lipgloss.NewStyle().Foreground(lipgloss.Color("#FF69E1")).Render("┃ ")+
+			lipgloss.NewStyle().Foreground(lipgloss.Color("#FFBA52")).Bold(true).Render("A new version ")+
+			lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFF2")).Bold(true).Italic(true).Render(latest)+
 			lipgloss.NewStyle().Foreground(lipgloss.Color("#FFBA52")).Bold(true).Render(" is available."),
 	)
-	fmt.Printf(
+	fmt.Fprintf(w,
 		lipgloss.NewStyle().Foreground(lipgloss.Color("#FF69E1")).Render("┃ ")+"Please update.\n┏\n\n      => %s\n\n",
 		variable.LatestVersionGithub,
 	)
-	fmt.Println("                                                               ┛")
+	fmt.Fprintln(w, "                                                               ┛")
 }

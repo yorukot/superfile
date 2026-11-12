@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bytes"
 	"errors"
 	"os"
 	"path/filepath"
@@ -58,4 +59,21 @@ func TestTTYForRedirectedStdout(t *testing.T) {
 		})
 		assert.Nil(t, tty)
 	})
+}
+
+func TestNoticeWriter(t *testing.T) {
+	tty, err := os.Create(filepath.Join(t.TempDir(), "tty"))
+	require.NoError(t, err)
+	t.Cleanup(func() { tty.Close() })
+
+	assert.Same(t, os.Stdout, noticeWriter(true, nil))
+	assert.Same(t, tty, noticeWriter(false, tty))
+	assert.Same(t, os.Stderr, noticeWriter(false, nil))
+}
+
+func TestNotifyUpdateAvailableWritesToGivenWriter(t *testing.T) {
+	var buf bytes.Buffer
+	notifyUpdateAvailable(&buf, "v99.0.0")
+	assert.Contains(t, buf.String(), "v99.0.0")
+	assert.Contains(t, buf.String(), "Please update.")
 }
