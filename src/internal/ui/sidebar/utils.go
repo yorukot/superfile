@@ -68,6 +68,11 @@ func (s *Model) IsRenaming() bool {
 	return s.renaming
 }
 
+// GetCursor returns the index of the directory the cursor is on
+func (s *Model) GetCursor() int {
+	return s.cursor
+}
+
 // GetCurrentDirectoryLocation returns the location of the currently selected directory
 func (s *Model) GetCurrentDirectoryLocation() string {
 	if s.isCursorInvalid() || s.NoActualDir() {

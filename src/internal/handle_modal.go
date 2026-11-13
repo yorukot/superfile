@@ -53,7 +53,13 @@ func (m *model) getCreateCmd() tea.Cmd {
 		return nil
 	}
 
-	items := []string{m.typingModal.textInput.Value()}
+	name := m.typingModal.textInput.Value()
+	if m.typingModal.directory && !strings.HasSuffix(name, string(filepath.Separator)) {
+		// createItem decides between a file and a directory purely on the
+		// trailing separator, so add it here rather than making the user type it.
+		name += string(filepath.Separator)
+	}
+	items := []string{name}
 	location := m.typingModal.location
 
 	reqID := m.nextIoReqCnt()

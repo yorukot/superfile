@@ -62,7 +62,7 @@ func (m *model) Init() tea.Cmd {
 func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	slog.Debug("model.Update() called", "msgType", reflect.TypeOf(msg))
 
-	var sidebarCmd, inputCmd, updateCmd, panelCmd,
+	var sidebarCmd, inputCmd, updateCmd, panelCmd, mouseCmd,
 		metadataCmd, filePreviewCmd, helpMenuCmd, resizeCmd tea.Cmd
 
 	// These are above the key message handing to prevent issues with firstKeyInput
@@ -76,7 +76,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		resizeCmd = m.handleWindowResize(msg)
 	case tea.MouseMsg:
-		m.handleMouseMsg(msg)
+		mouseCmd = m.handleMouseMsg(msg)
 	case tea.KeyPressMsg:
 		inputCmd = m.handleKeyInput(msg)
 
@@ -108,16 +108,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	metadataCmd = m.getMetadataCmd()
 
 	return m, tea.Batch(sidebarCmd, helpMenuCmd, inputCmd, updateCmd,
-		panelCmd, metadataCmd, filePreviewCmd, resizeCmd)
-}
-
-func (m *model) handleMouseMsg(msg tea.MouseMsg) {
-	msgStr := msg.String()
-	if msgStr == "wheelup" || msgStr == "wheeldown" {
-		wheelMainAction(msgStr, m)
-	} else {
-		slog.Debug("Mouse event of type that is not handled", "msg", msgStr)
-	}
+		panelCmd, mouseCmd, metadataCmd, filePreviewCmd, resizeCmd)
 }
 
 func (m *model) updateModelStateAfterMsg() {
@@ -309,6 +300,11 @@ func (m *model) handleKeyInput(msg tea.KeyPressMsg) tea.Cmd {
 	// Handles all warn models except the warn model for confirming to quit
 	case m.notifyModel.IsOpen():
 		cmd = m.notifyModelOpenKey(msg.String())
+
+	// The context menu captures input while it is open, so that keys move the
+	// menu rather than the panels underneath it.
+	case m.contextMenu.IsOpen():
+		cmd = m.contextMenuKey(msg.String())
 
 	// If renaming a object
 	case m.fileModel.Renaming:
@@ -531,6 +527,10 @@ func (m *model) viewContent() string {
 		slog.Error("Invalid layout", "error", err)
 	}
 
+	// Publish the hit-test regions for the frame about to be drawn, so that
+	// mouse events resolve against what the user actually sees.
+	m.updateMouseRegions()
+
 	return m.updateRenderForOverlay(m.mainComponentsRender())
 }
 
@@ -541,6 +541,14 @@ func (m *model) updateRenderForOverlay(finalRender string) string {
 		overlayX := m.fullWidth/common.CenterDivisor - common.ModalWidth/common.CenterDivisor
 		overlayY := m.fullHeight/common.CenterDivisor - common.ModalHeight/common.CenterDivisor
 		return stringfunction.PlaceOverlay(overlayX, overlayY, errorModal, finalRender)
+	}
+
+	// The context menu is an overlay anchored to the pointer, so it is placed at
+	// the position it was opened at rather than centred. It sits above the panels
+	// but below the error modal, which must always be readable.
+	if m.contextMenu.IsOpen() {
+		return stringfunction.PlaceOverlay(m.contextMenu.OriginX(), m.contextMenu.OriginY(),
+			m.contextMenu.Render(), finalRender)
 	}
 
 	if m.helpMenu.IsOpen() {
