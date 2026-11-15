@@ -31,6 +31,16 @@ func (m *Model) GetWidth() int {
 	return m.width
 }
 
+// processCompletion returns the completion ratio of an unfinished process in
+// [0, 1]. A process with Total == 0 (a directory-only operation) is complete,
+// matching how Render() displays it; this also avoids a 0/0 NaN.
+func processCompletion(p Process) float64 {
+	if p.Total <= 0 {
+		return 1
+	}
+	return float64(p.Done) / float64(p.Total)
+}
+
 func (m *Model) getSortedProcesses() []Process {
 	// save process in the array and sort the process by finished or not,
 	// completion percetage, or finish time
@@ -56,9 +66,10 @@ func (m *Model) getSortedProcesses() []Process {
 
 		// if both not done
 		if !doneI {
-			completionI := float64(processes[i].Done) / float64(processes[i].Total)
-			completionJ := float64(processes[j].Done) / float64(processes[j].Total)
-			return completionI < completionJ // Those who finish first will be ranked later.
+			// A directory-only operation has Total == 0; Render() shows it at
+			// 100%, so rank it as fully complete here too. Dividing by zero
+			// would otherwise yield NaN and make the ordering non-deterministic.
+			return processCompletion(processes[i]) < processCompletion(processes[j]) // Those who finish first will be ranked later.
 		}
 
 		// if both done sort by the doneTime
