@@ -42,8 +42,8 @@ func getPreviewObjKey(path string, dim string, renderer ImageRenderer) string {
 
 // ImagePreviewer encapsulates image preview functionality with caching
 type ImagePreviewer struct {
-	cache       *cache.Cache[string]
-	terminalCap *TerminalCapabilities
+	cache        *cache.Cache[string]
+	terminalCap  *TerminalCapabilities
 	rendererPref string
 }
 
@@ -55,8 +55,8 @@ func NewImagePreviewer() *ImagePreviewer {
 // NewImagePreviewerWithConfig creates a new ImagePreviewer with custom cache configuration
 func NewImagePreviewerWithConfig(maxEntries int, expiration time.Duration) *ImagePreviewer {
 	previewer := &ImagePreviewer{
-		cache:       cache.New[string](maxEntries, expiration),
-		terminalCap: NewTerminalCapabilities(),
+		cache:        cache.New[string](maxEntries, expiration),
+		terminalCap:  NewTerminalCapabilities(),
 		rendererPref: rendererAuto,
 	}
 
