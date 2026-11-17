@@ -7,8 +7,11 @@ import (
 	_ "image/png"  // Register PNG decoder
 	"log/slog"
 	"os"
+	"strings"
 	"time"
 
+	_ "golang.org/x/image/bmp"  // Register BMP decoder
+	_ "golang.org/x/image/tiff" // Register TIFF decoder
 	_ "golang.org/x/image/webp" // Register WebP decoder
 
 	"github.com/yorukot/superfile/src/internal/common"
@@ -41,6 +44,7 @@ func getPreviewObjKey(path string, dim string, renderer ImageRenderer) string {
 type ImagePreviewer struct {
 	cache       *cache.Cache[string]
 	terminalCap *TerminalCapabilities
+	rendererPref string
 }
 
 // NewImagePreviewer creates a new ImagePreviewer with default cache settings
@@ -53,12 +57,25 @@ func NewImagePreviewerWithConfig(maxEntries int, expiration time.Duration) *Imag
 	previewer := &ImagePreviewer{
 		cache:       cache.New[string](maxEntries, expiration),
 		terminalCap: NewTerminalCapabilities(),
+		rendererPref: rendererAuto,
 	}
 
 	// Initialize terminal capabilities
 	previewer.terminalCap.InitTerminalCapabilities()
 
 	return previewer
+}
+
+// NewImagePreviewerWithRenderer creates a new ImagePreviewer with renderer preference.
+// renderer must be "auto", "kitty", or "ansi" (invalid values fallback to auto).
+// SUPERFILE_IMAGE_RENDERER env var overrides the provided renderer when set.
+func NewImagePreviewerWithRenderer(renderer string) *ImagePreviewer {
+	p := NewImagePreviewer()
+	if env := strings.TrimSpace(os.Getenv("SUPERFILE_IMAGE_RENDERER")); env != "" {
+		renderer = env
+	}
+	p.rendererPref = normalizeImagePreviewRenderer(renderer)
+	return p
 }
 
 // ImagePreview generates a preview of an image file.
@@ -75,8 +92,8 @@ func (p *ImagePreviewer) ImagePreview(path string, maxWidth int, maxHeight int,
 	// Create dimensions string for cache key
 	dimensions := fmt.Sprintf("%d,%d,%s,%d", maxWidth, maxHeight, defaultBGColor, sideAreaWidth)
 
-	// Try Kitty first as it's more modern
-	if p.IsKittyCapable() {
+	// Try Kitty when enabled/capable
+	if p.ShouldUseKitty() {
 		cacheKey := getPreviewObjKey(path, dimensions, RendererKitty)
 		rawKey := cacheKey + ":raw"
 
@@ -109,7 +126,7 @@ func (p *ImagePreviewer) ImagePreview(path string, maxWidth int, maxHeight int,
 			return render, "", nil
 		}
 
-		// Fall through to ANSI if Kitty fails
+		// Fall through to ANSI if Kitty fails (unless forced kitty? keep graceful fallback)
 		slog.Error("Kitty renderer failed, falling back to ANSI", "error", err)
 	}
 

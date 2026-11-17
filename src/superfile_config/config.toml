@@ -37,6 +37,11 @@ default_open_file_preview = true
 # image?
 show_image_preview = true
 
+#-- Image Preview Renderer
+# Image preview renderer: "auto", "kitty", or "ansi".
+# Use "kitty" to force Kitty protocol (useful inside tmux when auto-detection fails).
+image_preview_renderer = "auto"
+
 #-- File Info Footer
 # Should we display a footer in the file panel that provides more file information?
 show_panel_footer_info = true
