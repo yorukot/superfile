@@ -91,7 +91,10 @@ func ValidateConfig(c *ConfigType) error {
 	case "", "auto", "kitty", "ansi":
 	default:
 		return errors.New(
-			LoadConfigError("image_preview_renderer", "Image preview renderer must be \"auto\", \"kitty\", or \"ansi\"."),
+			LoadConfigError(
+				"image_preview_renderer",
+				"Image preview renderer must be \"auto\", \"kitty\", or \"ansi\".",
+			),
 		)
 	}
 

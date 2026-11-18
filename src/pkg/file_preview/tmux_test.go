@@ -1,7 +1,6 @@
 package filepreview
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 )
@@ -33,21 +32,24 @@ func TestParseTmuxVersion(t *testing.T) {
 }
 
 func TestParseTmuxVersionPassthroughSupport(t *testing.T) {
-	supports := []string{"tmux 3.3", "tmux 3.3a", "tmux 3.7c", "tmux 4.0"}
+	supportsList := []string{"tmux 3.3", "tmux 3.3a", "tmux 3.7c", "tmux 4.0"}
 	unsupported := []string{"tmux 2.9a", "tmux 3.2", "tmux 3.2a"}
 
-	for _, out := range supports {
+	supports := func(major, minor int) bool {
+		return major > tmuxMinMajorVersion ||
+			(major == tmuxMinMajorVersion && minor >= tmuxMinMinorVersion)
+	}
+
+	for _, out := range supportsList {
 		major, minor, ok := parseTmuxVersion(out)
-		if !ok || !(major > tmuxMinMajorVersion ||
-			(major == tmuxMinMajorVersion && minor >= tmuxMinMinorVersion)) {
+		if !ok || !supports(major, minor) {
 			t.Errorf("%q should support passthrough, got (%d, %d, %v)", out, major, minor, ok)
 		}
 	}
 
 	for _, out := range unsupported {
 		major, minor, ok := parseTmuxVersion(out)
-		if !ok || (major > tmuxMinMajorVersion ||
-			(major == tmuxMinMajorVersion && minor >= tmuxMinMinorVersion)) {
+		if !ok || supports(major, minor) {
 			t.Errorf("%q should NOT support passthrough, got (%d, %d, %v)", out, major, minor, ok)
 		}
 	}
@@ -70,8 +72,7 @@ func TestTmuxPassthroughWrap(t *testing.T) {
 		},
 		{
 			name: "chunked APC sequences with leading delete",
-			raw: fmt.Sprintf(
-				"\x1b_Ga=d,d=i,i=1\x1b\\\x1b_Gf=32,s=4,v=2,m=1;q=2;AAAA\x1b\\\x1b_Gm=0;BBBB\x1b\\"),
+			raw:  "\x1b_Ga=d,d=i,i=1\x1b\\\x1b_Gf=32,s=4,v=2,m=1;q=2;AAAA\x1b\\\x1b_Gm=0;BBBB\x1b\\",
 			want: tmuxPassthroughStart + wrap("\x1b_Ga=d,d=i,i=1\x1b\\") + tmuxPassthroughEnd +
 				tmuxPassthroughStart + wrap("\x1b_Gf=32,s=4,v=2,m=1;q=2;AAAA\x1b\\") + tmuxPassthroughEnd +
 				tmuxPassthroughStart + wrap("\x1b_Gm=0;BBBB\x1b\\") + tmuxPassthroughEnd,

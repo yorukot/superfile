@@ -7,7 +7,7 @@ func IsASCIIDigit(b byte) bool {
 
 // LeadingASCIIDigits returns the leading ASCII digit prefix of s.
 func LeadingASCIIDigits(s string) string {
-	for i := 0; i < len(s); i++ {
+	for i := range len(s) {
 		if !IsASCIIDigit(s[i]) {
 			return s[:i]
 		}

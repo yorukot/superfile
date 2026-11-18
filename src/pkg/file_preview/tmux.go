@@ -14,16 +14,17 @@ import (
 const (
 	apcStart             = "\x1b_"
 	apcEnd               = "\x1b\\"
-	tmuxPassthroughStart = "\x1bPtmux;\x1b\x1b"
+	tmuxPassthroughStart = "\x1bPtmux;\x1b\x1b" //nolint:gosec // tmux passthrough prefix, not a credential.
 	tmuxPassthroughEnd   = "\x1b\\"
 	tmuxMinMajorVersion  = 3
 	tmuxMinMinorVersion  = 3
+	tmuxInputBufferSize  = 104857600
 )
 
-// inTmux reports whether the process is running inside a tmux pane.
+// tmuxPassthroughOnce/tmuxPassthroughOK cache the result of the one-time tmux setup.
 var (
-	tmuxPassthroughOnce sync.Once
-	tmuxPassthroughOK   bool
+	tmuxPassthroughOnce sync.Once //nolint:gochecknoglobals // Process-wide one-time tmux setup.
+	tmuxPassthroughOK   bool      //nolint:gochecknoglobals // Process-wide one-time tmux setup.
 )
 
 func ensureTmuxPassthrough() bool {
@@ -31,15 +32,16 @@ func ensureTmuxPassthrough() bool {
 		if !inTmux() || !tmuxVersionSupportsPassthrough() {
 			return
 		}
+		//nolint:gosec // tmux command and arguments are fixed constants.
 		cmd := exec.Command("tmux", "set", "-p", "allow-passthrough", "all",
-			";", "set", "-s", "input-buffer-size", "104857600")
+			";", "set", "-s", "input-buffer-size", strconv.Itoa(tmuxInputBufferSize))
 		if err := cmd.Run(); err != nil {
 			slog.Error("Failed to enable tmux passthrough options", "error", err)
 			return
 		}
 		tmuxPassthroughOK = true
 		slog.Debug("tmux passthrough enabled", "allow-passthrough", "all",
-			"input-buffer-size", 104857600)
+			"input-buffer-size", tmuxInputBufferSize)
 	})
 	return tmuxPassthroughOK
 }
