@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/yorukot/superfile/src/pkg/utils"
 )
 
 const (
@@ -19,13 +21,6 @@ const (
 )
 
 // inTmux reports whether the process is running inside a tmux pane.
-func inTmux() bool {
-	return os.Getenv("TMUX") != "" ||
-		strings.EqualFold(os.Getenv("TERM_PROGRAM"), "tmux") ||
-		strings.HasPrefix(os.Getenv("TERM"), "tmux") ||
-		strings.HasPrefix(os.Getenv("TERM"), "screen")
-}
-
 var (
 	tmuxPassthroughOnce sync.Once
 	tmuxPassthroughOK   bool
@@ -49,6 +44,13 @@ func ensureTmuxPassthrough() bool {
 	return tmuxPassthroughOK
 }
 
+func inTmux() bool {
+	return os.Getenv("TMUX") != "" ||
+		strings.EqualFold(os.Getenv("TERM_PROGRAM"), "tmux") ||
+		strings.HasPrefix(os.Getenv("TERM"), "tmux") ||
+		strings.HasPrefix(os.Getenv("TERM"), "screen")
+}
+
 func tmuxVersionSupportsPassthrough() bool {
 	out, err := exec.Command("tmux", "-V").Output()
 	if err != nil {
@@ -67,22 +69,25 @@ func parseTmuxVersion(output string) (int, int, bool) {
 		if idx := strings.LastIndex(field, "-"); idx >= 0 && idx+1 < len(field) {
 			field = field[idx+1:]
 		}
-		if len(field) == 0 || field[0] < '0' || field[0] > '9' {
+		if field == "" || !utils.IsASCIIDigit(field[0]) {
 			continue
 		}
+
 		majorStr, minorRest, _ := strings.Cut(field, ".")
 		major, err := strconv.Atoi(majorStr)
 		if err != nil {
 			continue
 		}
-		digits := minorRest
-		for len(digits) > 0 && digits[0] >= '0' && digits[0] <= '9' {
-			digits = digits[1:]
+
+		minorDigits := utils.LeadingASCIIDigits(minorRest)
+		if minorDigits == "" {
+			continue
 		}
-		minor, err := strconv.Atoi(strings.TrimSuffix(minorRest, digits))
+		minor, err := strconv.Atoi(minorDigits)
 		if err != nil {
 			continue
 		}
+
 		return major, minor, true
 	}
 	return 0, 0, false

@@ -23,7 +23,7 @@ func TestNormalizeImagePreviewRenderer(t *testing.T) {
 	}
 }
 
-// clearKittyEnv unsets every env var consulted by isKittyCapable so each
+// clearKittyEnv unsets every env var consulted by detectKittySupport so each
 // test case starts from a clean slate (tests may run in any order and the
 // real environment may be inside a terminal).
 func clearKittyEnv(t *testing.T) {
@@ -82,8 +82,8 @@ func TestIsKittyCapable(t *testing.T) {
 			for key, val := range tt.env {
 				t.Setenv(key, val)
 			}
-			if got := isKittyCapable(); got != tt.want {
-				t.Errorf("isKittyCapable() = %v, want %v (env: %v)", got, tt.want, tt.env)
+			if got := detectKittySupport(); got != tt.want {
+				t.Errorf("detectKittySupport() = %v, want %v (env: %v)", got, tt.want, tt.env)
 			}
 		})
 	}

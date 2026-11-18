@@ -93,7 +93,7 @@ func (p *ImagePreviewer) ImagePreview(path string, maxWidth int, maxHeight int,
 	dimensions := fmt.Sprintf("%d,%d,%s,%d", maxWidth, maxHeight, defaultBGColor, sideAreaWidth)
 
 	// Try Kitty when enabled/capable
-	if p.ShouldUseKitty() {
+	if p.IsKittyCapable() {
 		cacheKey := getPreviewObjKey(path, dimensions, RendererKitty)
 		rawKey := cacheKey + ":raw"
 
@@ -126,7 +126,7 @@ func (p *ImagePreviewer) ImagePreview(path string, maxWidth int, maxHeight int,
 			return render, "", nil
 		}
 
-		// Fall through to ANSI if Kitty fails (unless forced kitty? keep graceful fallback)
+		// Fall through to ANSI if Kitty fails
 		slog.Error("Kitty renderer failed, falling back to ANSI", "error", err)
 	}
 
