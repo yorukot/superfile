@@ -31,7 +31,6 @@ func normalizeImagePreviewRenderer(renderer string) string {
 	}
 }
 
-
 // TODO: Replace this allowlist with a real Kitty graphics capability check.
 // tmux masks the underlying terminal through TERM/TERM_PROGRAM.
 var knownKittyTerminals = []string{
@@ -55,7 +54,6 @@ var kittyEnvHints = []string{
 	"ITERM_SESSION_ID",
 	"WARP_IS_LOCAL_SHELL_SESSION",
 }
-
 
 // reports whether the terminal environment indicates support for the Kitty graphics protocol.
 func detectKittySupport() bool {
