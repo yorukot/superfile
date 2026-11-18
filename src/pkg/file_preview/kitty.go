@@ -36,7 +36,7 @@ func normalizeImagePreviewRenderer(renderer string) string {
 // tmux masks the underlying terminal through TERM/TERM_PROGRAM.
 var knownKittyTerminals = []string{
 	"ghostty",
-	"wezterm",
+	//"wezterm",
 	"iterm2",
 	"xterm-kitty",
 	"kitty",
@@ -50,8 +50,8 @@ var kittyEnvHints = []string{
 	"KITTY_WINDOW_ID",
 	"GHOSTTY_RESOURCES_DIR",
 	"GHOSTTY_BIN_DIR",
-	"WEZTERM_PANE",
-	"WEZTERM_EXECUTABLE",
+	//"WEZTERM_PANE",
+	//"WEZTERM_EXECUTABLE",
 	"ITERM_SESSION_ID",
 	"WARP_IS_LOCAL_SHELL_SESSION",
 }
