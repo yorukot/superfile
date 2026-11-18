@@ -32,9 +32,10 @@ func normalizeImagePreviewRenderer(renderer string) string {
 }
 
 // isKittyCapable checks if the terminal supports Kitty graphics protocol
-// tmuxKittyEnvHints are environment variables leaked into the pane by
-// kitty-capable terminals (tmux does not mask custom variables).
-var tmuxKittyEnvHints = []string{
+// KittyEnvHints are environment variables set by kitty-capable terminals
+// They are inherited into tmux panes (tmux does not mask custom variables)
+// and are also present when not running inside tmux, so they are checked in both cases.
+var kittyEnvHints = []string{
 	"KITTY_WINDOW_ID",
 	"GHOSTTY_RESOURCES_DIR",
 	"GHOSTTY_BIN_DIR",
@@ -49,7 +50,7 @@ var tmuxKittyEnvHints = []string{
 // inherited from the outer terminal, which is how the outer terminal's
 // graphics capability can be inferred.
 func outerKittyCapableEnv() bool {
-	for _, key := range tmuxKittyEnvHints {
+	for _, key := range kittyEnvHints {
 		if os.Getenv(key) != "" {
 			return true
 		}
@@ -79,17 +80,19 @@ func isKittyCapable() bool {
 		}
 	}
 
-	// tmux/screen often mask TERM/TERM_PROGRAM; infer outer terminal from env hints.
+	// Even when the outer terminal supports Kitty graphics, tmux consumes
+	// the APC sequences itself unless passthrough is enabled.
+	if inTmux() && !ensureTmuxPassthrough() {
+		return false
+	}
+
+	// Terminal-specific env vars (e.g. KITTY_WINDOW_ID) are checked with or without tmux
+	if outerKittyCapableEnv() {
+		return true
+	}
+
+	// Some tmux setups preserve original TERM_PROGRAM in environment.
 	if inTmux() {
-		// Even when the outer terminal supports Kitty graphics, tmux consumes
-		// the APC sequences itself unless passthrough is enabled.
-		if !ensureTmuxPassthrough() {
-			return false
-		}
-		if outerKittyCapableEnv() {
-			return true
-		}
-		// Some tmux setups preserve original TERM_PROGRAM in environment.
 		for _, envKey := range []string{"ORIG_TERM_PROGRAM", "LC_TERMINAL"} {
 			val := os.Getenv(envKey)
 			for _, knownTerm := range knownTerminals {
