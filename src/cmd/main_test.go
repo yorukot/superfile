@@ -47,9 +47,10 @@ func TestTTYForRedirectedStdout(t *testing.T) {
 			return in, out, nil
 		})
 		assert.Same(t, out, tty)
-		_, err := in.Stat()
-		require.ErrorIs(t, err, os.ErrClosed)
-		_, err = out.Stat()
+		// A second Close reports ErrClosed on every platform. Stat on a closed
+		// file does not: Windows reports an invalid handle instead.
+		require.ErrorIs(t, in.Close(), os.ErrClosed, "the input handle should be closed")
+		_, err := out.Stat()
 		assert.NoError(t, err)
 	})
 
