@@ -183,6 +183,24 @@ func LoadHotkeysFile(ignoreMissingFields bool) {
 				),
 			)
 		}
+
+		validateSearchToggleHidden(field.Name, hotkeysList)
+	}
+}
+
+// validateSearchToggleHidden rejects bindings that would steal query input.
+// search_toggle_hidden runs inside search where bare keys type.
+func validateSearchToggleHidden(fieldName string, hotkeysList []string) {
+	if fieldName != "SearchToggleHidden" {
+		return
+	}
+	if bad := ValidateSearchToggleHidden(hotkeysList); bad != "" {
+		utils.PrintlnAndExit(
+			LoadHotkeysError(
+				fieldName,
+				SearchToggleHiddenErrorMessage(bad),
+			),
+		)
 	}
 }
 

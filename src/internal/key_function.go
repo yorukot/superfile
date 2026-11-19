@@ -126,7 +126,7 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen,go
 		m.pinnedDirectory()
 
 	case slices.Contains(common.Hotkeys.ToggleDotFile, msg):
-		m.toggleDotFileController()
+		return m.toggleDotFileController()
 
 	case slices.Contains(common.Hotkeys.ToggleFooter, msg):
 		return m.toggleFooterController()
@@ -244,6 +244,8 @@ func (m *model) filePanelNormalModeKey(msg string) tea.Cmd {
 		m.panelItemRename()
 	case slices.Contains(common.Hotkeys.SearchBar, msg):
 		m.searchBarFocus()
+	case slices.Contains(common.Hotkeys.SearchMode, msg):
+		return m.searchModeEnter()
 	case slices.Contains(common.Hotkeys.CopyPath, msg):
 		m.copyPath()
 	case slices.Contains(common.Hotkeys.CopyPWD, msg):
