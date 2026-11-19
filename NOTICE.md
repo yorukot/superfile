@@ -2710,8 +2710,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## github.com/klauspost/compress
 
-- Version: v1.18.6
-- License: [Apache-2.0](https://github.com/klauspost/compress/blob/v1.18.6/LICENSE)
+- Version: v1.18.7
+- License: [Apache-2.0](https://github.com/klauspost/compress/blob/v1.18.7/LICENSE)
 
 ```text
 Copyright (c) 2012 The Go Authors. All rights reserved.
@@ -3023,8 +3023,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ## github.com/klauspost/compress/internal/snapref
 
-- Version: v1.18.6
-- License: [BSD-3-Clause](https://github.com/klauspost/compress/blob/v1.18.6/internal/snapref/LICENSE)
+- Version: v1.18.7
+- License: [BSD-3-Clause](https://github.com/klauspost/compress/blob/v1.18.7/internal/snapref/LICENSE)
 
 ```text
 Copyright (c) 2011 The Snappy-Go Authors. All rights reserved.
@@ -3059,8 +3059,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## github.com/klauspost/compress/s2
 
-- Version: v1.18.6
-- License: [BSD-3-Clause](https://github.com/klauspost/compress/blob/v1.18.6/s2/LICENSE)
+- Version: v1.18.7
+- License: [BSD-3-Clause](https://github.com/klauspost/compress/blob/v1.18.7/s2/LICENSE)
 
 ```text
 Copyright (c) 2011 The Snappy-Go Authors. All rights reserved.
@@ -3096,8 +3096,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## github.com/klauspost/compress/snappy
 
-- Version: v1.18.6
-- License: [BSD-3-Clause](https://github.com/klauspost/compress/blob/v1.18.6/snappy/LICENSE)
+- Version: v1.18.7
+- License: [BSD-3-Clause](https://github.com/klauspost/compress/blob/v1.18.7/snappy/LICENSE)
 
 ```text
 Copyright (c) 2011 The Snappy-Go Authors. All rights reserved.
@@ -3132,8 +3132,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## github.com/klauspost/compress/zstd/internal/xxhash
 
-- Version: v1.18.6
-- License: [MIT](https://github.com/klauspost/compress/blob/v1.18.6/zstd/internal/xxhash/LICENSE.txt)
+- Version: v1.18.7
+- License: [MIT](https://github.com/klauspost/compress/blob/v1.18.7/zstd/internal/xxhash/LICENSE.txt)
 
 ```text
 Copyright (c) 2016 Caleb Spare
@@ -4931,8 +4931,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## github.com/urfave/cli/v3
 
-- Version: v3.9.0
-- License: [MIT](https://github.com/urfave/cli/blob/v3.9.0/LICENSE)
+- Version: v3.10.1
+- License: [MIT](https://github.com/urfave/cli/blob/v3.10.1/LICENSE)
 
 ```text
 MIT License
