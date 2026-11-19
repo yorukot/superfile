@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -34,6 +35,49 @@ func TestExtractCompressFile(t *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, want, string(content))
 			}
+		})
+	}
+}
+
+func TestExtractCompressFilePreservesTarPermissions(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("Unix execute permissions are not supported on Windows")
+	}
+	for _, test := range []struct {
+		name string
+		mode os.FileMode
+	}{
+		{name: "executable", mode: 0o755},
+		{name: "regular", mode: 0o644},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			root := t.TempDir()
+			content := []byte("archive member\n")
+			// A reference file applies the current umask without changing process-wide state.
+			reference := filepath.Join(root, "reference")
+			require.NoError(t, os.WriteFile(reference, content, test.mode))
+			want, err := os.Stat(reference)
+			require.NoError(t, err)
+
+			var data bytes.Buffer
+			writer := tar.NewWriter(&data)
+			require.NoError(t, writer.WriteHeader(&tar.Header{
+				Name: "member",
+				Mode: int64(test.mode),
+				Size: int64(len(content)),
+			}))
+			_, err = writer.Write(content)
+			require.NoError(t, err)
+			require.NoError(t, writer.Close())
+			archive := filepath.Join(root, "archive.tar")
+			require.NoError(t, os.WriteFile(archive, data.Bytes(), utils.ExtractedFileMode))
+
+			dest := filepath.Join(root, "output")
+			require.NoError(t, extractCompressFile(archive, dest, extractionProcessBar(t)))
+			got, err := os.Stat(filepath.Join(dest, "member"))
+			require.NoError(t, err)
+			require.Equal(t, want.Mode().Perm(), got.Mode().Perm(),
+				"archive=%04o expected=%04o got=%04o", test.mode, want.Mode().Perm(), got.Mode().Perm())
 		})
 	}
 }
