@@ -42,6 +42,23 @@ func (m *Model) ListDown() {
 	}
 }
 
+func (m *Model) ListTop() {
+	if m.cntProcesses() == 0 {
+		return
+	}
+	m.cursor = 0
+	m.renderIndex = 0
+}
+
+func (m *Model) ListBottom() {
+	cntP := m.cntProcesses()
+	if cntP == 0 {
+		return
+	}
+	m.cursor = cntP - 1
+	m.renderIndex = max(0, cntP-m.cntRenderableProcess())
+}
+
 func (m *Model) cntRenderableProcess() int {
 	footerHeight := m.height - common.BorderPadding
 	return cntRenderableProcess(footerHeight)

@@ -21,6 +21,8 @@ quit = ['q', 'esc']
 #-- Navigation
 list_down = ['down', 'j']
 list_up = ['up', 'k']
+list_top = ['g', 'home']
+list_bottom = ['G', 'end']
 page_down = ['pgdown','']
 page_up = ['pgup','']
 
