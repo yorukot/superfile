@@ -55,6 +55,53 @@ func TestParseTmuxVersionPassthroughSupport(t *testing.T) {
 	}
 }
 
+func TestTmuxAllowPassthroughValue(t *testing.T) {
+	tests := []struct {
+		version string
+		want    string
+	}{
+		{"tmux 3.3", "on"},
+		{"tmux 3.3a", "on"},
+		{"tmux 3.4", "all"},
+		{"tmux 3.6", "all"},
+		{"tmux 4.0", "all"},
+	}
+
+	for _, tt := range tests {
+		major, minor, ok := parseTmuxVersion(tt.version)
+		if !ok {
+			t.Errorf("parseTmuxVersion(%q) failed", tt.version)
+			continue
+		}
+		if got := tmuxAllowPassthroughValue(major, minor); got != tt.want {
+			t.Errorf("tmuxAllowPassthroughValue(%q) = %q, want %q", tt.version, got, tt.want)
+		}
+	}
+}
+
+func TestTmuxSupportsInputBufferSize(t *testing.T) {
+	tests := []struct {
+		version string
+		want    bool
+	}{
+		{"tmux 3.3", false},
+		{"tmux 3.5a", false},
+		{"tmux 3.6", true},
+		{"tmux 4.0", true},
+	}
+
+	for _, tt := range tests {
+		major, minor, ok := parseTmuxVersion(tt.version)
+		if !ok {
+			t.Errorf("parseTmuxVersion(%q) failed", tt.version)
+			continue
+		}
+		if got := tmuxSupportsInputBufferSize(major, minor); got != tt.want {
+			t.Errorf("tmuxSupportsInputBufferSize(%q) = %v, want %v", tt.version, got, tt.want)
+		}
+	}
+}
+
 func TestTmuxPassthroughWrap(t *testing.T) {
 	wrap := func(raw string) string {
 		return strings.ReplaceAll(raw[1:], "\x1b", "\x1b\x1b")
@@ -106,5 +153,25 @@ func TestTmuxPassthroughWrap(t *testing.T) {
 func TestTmuxPassthroughWrapEmpty(t *testing.T) {
 	if got := tmuxWrap(""); got != "" {
 		t.Errorf("tmuxWrap(\"\") = %q, want \"\"", got)
+	}
+
+	got, err := tmuxPassthroughWrap("")
+	if err != nil || got != "" {
+		t.Errorf("tmuxPassthroughWrap(\"\") = (%q, %v), want (\"\", nil)", got, err)
+	}
+}
+
+func TestTmuxPassthroughWrapOutsideTmux(t *testing.T) {
+	t.Setenv("TMUX", "")
+	t.Setenv("TERM_PROGRAM", "")
+	t.Setenv("TERM", "")
+
+	raw := "\x1b_Ga=d\x1b\\"
+	got, err := tmuxPassthroughWrap(raw)
+	if err != nil {
+		t.Fatalf("tmuxPassthroughWrap() error = %v", err)
+	}
+	if got != raw {
+		t.Errorf("tmuxPassthroughWrap() = %q, want %q", got, raw)
 	}
 }
