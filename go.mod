@@ -1,6 +1,6 @@
 module github.com/yorukot/superfile
 
-go 1.26
+go 1.26.0
 
 require (
 	charm.land/bubbles/v2 v2.1.0
@@ -20,8 +20,8 @@ require (
 	github.com/shirou/gopsutil/v4 v4.26.5
 	github.com/stretchr/testify v1.11.1
 	github.com/urfave/cli/v3 v3.10.1
-	golang.org/x/image v0.41.0
-	golang.org/x/mod v0.37.0
+	golang.org/x/image v0.48.0
+	golang.org/x/mod v0.42.0
 	golift.io/xtractr v0.3.2
 )
 
@@ -57,7 +57,7 @@ require (
 	github.com/therootcompany/xz v1.0.1 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	golang.org/x/crypto v0.53.0 // indirect
-	golang.org/x/sync v0.21.0 // indirect
+	golang.org/x/sync v0.25.0 // indirect
 	golift.io/udf v0.0.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
@@ -92,6 +92,6 @@ require (
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rwcarlsen/goexif v0.0.0-20190401172101-9e8deecbddbd
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
-	golang.org/x/sys v0.46.0
-	golang.org/x/text v0.39.0
+	golang.org/x/sys v0.50.0
+	golang.org/x/text v0.44.0
 )
