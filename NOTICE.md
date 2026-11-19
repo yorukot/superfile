@@ -5384,8 +5384,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## golang.org/x/image
 
-- Version: v0.41.0
-- License: [BSD-3-Clause](https://cs.opensource.google/go/x/image/+/v0.41.0:LICENSE)
+- Version: v0.48.0
+- License: [BSD-3-Clause](https://cs.opensource.google/go/x/image/+/v0.48.0:LICENSE)
 
 ```text
 Copyright 2009 The Go Authors.
@@ -5420,8 +5420,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## golang.org/x/mod/semver
 
-- Version: v0.37.0
-- License: [BSD-3-Clause](https://cs.opensource.google/go/x/mod/+/v0.37.0:LICENSE)
+- Version: v0.42.0
+- License: [BSD-3-Clause](https://cs.opensource.google/go/x/mod/+/v0.42.0:LICENSE)
 
 ```text
 Copyright 2009 The Go Authors.
@@ -5456,8 +5456,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## golang.org/x/sync/errgroup
 
-- Version: v0.21.0
-- License: [BSD-3-Clause](https://cs.opensource.google/go/x/sync/+/v0.21.0:LICENSE)
+- Version: v0.25.0
+- License: [BSD-3-Clause](https://cs.opensource.google/go/x/sync/+/v0.25.0:LICENSE)
 
 ```text
 Copyright 2009 The Go Authors.
@@ -5492,8 +5492,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## golang.org/x/sys/unix
 
-- Version: v0.48.0
-- License: [BSD-3-Clause](https://cs.opensource.google/go/x/sys/+/v0.48.0:LICENSE)
+- Version: v0.50.0
+- License: [BSD-3-Clause](https://cs.opensource.google/go/x/sys/+/v0.50.0:LICENSE)
 
 ```text
 Copyright 2009 The Go Authors.
@@ -5528,8 +5528,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## golang.org/x/sys/windows
 
-- Version: v0.48.0
-- License: [BSD-3-Clause](https://cs.opensource.google/go/x/sys/+/v0.48.0:LICENSE)
+- Version: v0.50.0
+- License: [BSD-3-Clause](https://cs.opensource.google/go/x/sys/+/v0.50.0:LICENSE)
 
 ```text
 Copyright 2009 The Go Authors.
@@ -5564,8 +5564,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## golang.org/x/text
 
-- Version: v0.39.0
-- License: [BSD-3-Clause](https://cs.opensource.google/go/x/text/+/v0.39.0:LICENSE)
+- Version: v0.44.0
+- License: [BSD-3-Clause](https://cs.opensource.google/go/x/text/+/v0.44.0:LICENSE)
 
 ```text
 Copyright 2009 The Go Authors.

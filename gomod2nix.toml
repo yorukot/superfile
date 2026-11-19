@@ -286,24 +286,24 @@ schema = 3
     hash = 'sha256-TWcccM4d5t0ZbDyHXEm4elxKk5uzlo29i85lVHSZcNw='
 
   [mod.'golang.org/x/image']
-    version = 'v0.41.0'
-    hash = 'sha256-kAqfrX6aS2f+j7fyEsk8YZt2b/VG/m3zGWRNbXnlUzA='
+    version = 'v0.48.0'
+    hash = 'sha256-yiHl7lHqOh/6BcHTqnkSJgfvS1NKkmB1l7/XhDreGtw='
 
   [mod.'golang.org/x/mod']
-    version = 'v0.37.0'
-    hash = 'sha256-dspScRv3KO4nytvjavhNO2b03P4UtiJQyWVGuEy9OUk='
+    version = 'v0.42.0'
+    hash = 'sha256-jgjKlIzteE99u8/TbuZTk4cLAwDOVZePXaRwqEpYvPk='
 
   [mod.'golang.org/x/sync']
-    version = 'v0.21.0'
-    hash = 'sha256-2n7PVb1krz7UpnXYGVmCrxV0fZBnjQdVVt6eVudEPYY='
+    version = 'v0.25.0'
+    hash = 'sha256-exsN7AZ9kxJ+V5TK5XewgUVKAu3L0FqmNe95mlPMMSI='
 
   [mod.'golang.org/x/sys']
-    version = 'v0.48.0'
-    hash = 'sha256-u+LwI76YIeg1asQKZItD2mnL4Yvx8veLhBuL8wv60Ls='
+    version = 'v0.50.0'
+    hash = 'sha256-3T1I5T5pgbQBxRhN9Q2Ajvsy1kJW9WM/uddR9cOUVNA='
 
   [mod.'golang.org/x/text']
-    version = 'v0.39.0'
-    hash = 'sha256-jQR8eNeC6HIFxRdEbF3EAUcoCOvpSJ/latXSqt5w0YA='
+    version = 'v0.44.0'
+    hash = 'sha256-dTeEJZSwSLJ5jumnR+JjT4gSpXW6E22IxT0aCrcf2vQ='
 
   [mod.'golift.io/udf']
     version = 'v0.0.1'
