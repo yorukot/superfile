@@ -1009,7 +1009,7 @@ body {
 }
 
 /* Style giscus iframe container */
-.comments :global(.giscus) {
+.comments .giscus {
 	color-scheme: dark;
 }
 

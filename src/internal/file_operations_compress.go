@@ -189,11 +189,16 @@ func getZipArchiveName(base string) (string, error) {
 	if len(base) == 0 {
 		return "", errors.New("empty filename to compress")
 	}
-	zipName := strings.TrimSuffix(base, filepath.Ext(base)) + ".zip"
-	runes := []rune(base)
-	if runes[0] == '.' && strings.Count(base, ".") == 1 {
-		zipName = base + ".zip"
+
+	// filepath.Ext treats dotfiles (e.g. ".test") as their entire name being
+	// the extension, so naively stripping it would produce ".zip" instead of
+	// ".test.zip". If stripping the extension leaves an empty or dot-only
+	// basename, fall back to the original name.
+	stripped := strings.TrimSuffix(base, filepath.Ext(base))
+	if strings.Trim(stripped, ".") == "" {
+		stripped = base
 	}
+	zipName := stripped + ".zip"
 	zipName, err := renameIfDuplicate(zipName)
 	return zipName, err
 }

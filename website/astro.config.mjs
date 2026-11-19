@@ -1,3 +1,4 @@
+import { unified } from "@astrojs/markdown-remark";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
 import { defineConfig } from "astro/config";
@@ -8,16 +9,18 @@ const site = "https://superfile.dev/";
 
 export default defineConfig({
 	site,
+	compressHTML: true,
 	integrations: [mdx(), sitemap()],
 
 	markdown: {
-		// Required for GFM tables in MDX content; undefined is treated as false by @astrojs/mdx.
-		gfm: true,
+		processor: unified({
+			gfm: true,
+			remarkPlugins: [remarkDirective, remarkDirectivesHandler]
+		}),
 		shikiConfig: {
 			theme: "catppuccin-mocha",
 			wrap: false
-		},
-		remarkPlugins: [remarkDirective, remarkDirectivesHandler]
+		}
 	},
 
 	image: {

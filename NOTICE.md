@@ -1672,30 +1672,6 @@ SOFTWARE.
 
 ```
 
-## github.com/davecgh/go-spew/spew
-
-- Version: v1.1.2-0.20180830191138-d8f796af33cc
-- License: [ISC](https://github.com/davecgh/go-spew/blob/d8f796af33cc/LICENSE)
-
-```text
-ISC License
-
-Copyright (c) 2012-2016 Dave Collins <dave@davec.name>
-
-Permission to use, copy, modify, and/or distribute this software for any
-purpose with or without fee is hereby granted, provided that the above
-copyright notice and this permission notice appear in all copies.
-
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
-ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
-ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
-OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-
-```
-
 ## github.com/disintegration/imaging
 
 - Version: v1.6.2
@@ -1758,8 +1734,8 @@ SOFTWARE.
 
 ## github.com/ebitengine/purego
 
-- Version: v0.10.0
-- License: [Apache-2.0](https://github.com/ebitengine/purego/blob/v0.10.0/LICENSE)
+- Version: v0.11.2
+- License: [Apache-2.0](https://github.com/ebitengine/purego/blob/v0.11.2/LICENSE)
 
 ```text
                                  Apache License
@@ -2710,8 +2686,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## github.com/klauspost/compress
 
-- Version: v1.18.6
-- License: [Apache-2.0](https://github.com/klauspost/compress/blob/v1.18.6/LICENSE)
+- Version: v1.18.7
+- License: [Apache-2.0](https://github.com/klauspost/compress/blob/v1.18.7/LICENSE)
 
 ```text
 Copyright (c) 2012 The Go Authors. All rights reserved.
@@ -3023,8 +2999,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ## github.com/klauspost/compress/internal/snapref
 
-- Version: v1.18.6
-- License: [BSD-3-Clause](https://github.com/klauspost/compress/blob/v1.18.6/internal/snapref/LICENSE)
+- Version: v1.18.7
+- License: [BSD-3-Clause](https://github.com/klauspost/compress/blob/v1.18.7/internal/snapref/LICENSE)
 
 ```text
 Copyright (c) 2011 The Snappy-Go Authors. All rights reserved.
@@ -3059,8 +3035,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## github.com/klauspost/compress/s2
 
-- Version: v1.18.6
-- License: [BSD-3-Clause](https://github.com/klauspost/compress/blob/v1.18.6/s2/LICENSE)
+- Version: v1.18.7
+- License: [BSD-3-Clause](https://github.com/klauspost/compress/blob/v1.18.7/s2/LICENSE)
 
 ```text
 Copyright (c) 2011 The Snappy-Go Authors. All rights reserved.
@@ -3096,8 +3072,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## github.com/klauspost/compress/snappy
 
-- Version: v1.18.6
-- License: [BSD-3-Clause](https://github.com/klauspost/compress/blob/v1.18.6/snappy/LICENSE)
+- Version: v1.18.7
+- License: [BSD-3-Clause](https://github.com/klauspost/compress/blob/v1.18.7/snappy/LICENSE)
 
 ```text
 Copyright (c) 2011 The Snappy-Go Authors. All rights reserved.
@@ -3132,8 +3108,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## github.com/klauspost/compress/zstd/internal/xxhash
 
-- Version: v1.18.6
-- License: [MIT](https://github.com/klauspost/compress/blob/v1.18.6/zstd/internal/xxhash/LICENSE.txt)
+- Version: v1.18.7
+- License: [MIT](https://github.com/klauspost/compress/blob/v1.18.7/zstd/internal/xxhash/LICENSE.txt)
 
 ```text
 Copyright (c) 2016 Caleb Spare
@@ -4286,42 +4262,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ```
 
-## github.com/pmezard/go-difflib/difflib
-
-- Version: v1.0.1-0.20181226105442-5d4384ee4fb2
-- License: [BSD-3-Clause](https://github.com/pmezard/go-difflib/blob/5d4384ee4fb2/LICENSE)
-
-```text
-Copyright (c) 2013, Patrick Mezard
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-    Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-    Redistributions in binary form must reproduce the above copyright
-notice, this list of conditions and the following disclaimer in the
-documentation and/or other materials provided with the distribution.
-    The names of its contributors may not be used to endorse or promote
-products derived from this software without specific prior written
-permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
-IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
-TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
-TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-```
-
 ## github.com/reinhrst/fzf-lib
 
 - Version: v0.9.0
@@ -4479,8 +4419,8 @@ license of the derivative portions.
 
 ## github.com/shirou/gopsutil/v4
 
-- Version: v4.26.5
-- License: [BSD-3-Clause](https://github.com/shirou/gopsutil/blob/v4.26.5/LICENSE)
+- Version: v4.26.10
+- License: [BSD-3-Clause](https://github.com/shirou/gopsutil/blob/v4.26.10/LICENSE)
 
 ```text
 gopsutil is distributed under BSD license reproduced below.
@@ -4771,8 +4711,8 @@ THE SOFTWARE.
 
 ## github.com/stretchr/testify
 
-- Version: v1.11.1
-- License: [MIT](https://github.com/stretchr/testify/blob/v1.11.1/LICENSE)
+- Version: v1.12.1
+- License: [MIT](https://github.com/stretchr/testify/blob/v1.12.1/LICENSE)
 
 ```text
 MIT License
@@ -4796,6 +4736,65 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+```
+
+## github.com/stretchr/testify/internal/difflib
+
+- Version: v1.12.1
+- License: [BSD-3-Clause](https://github.com/stretchr/testify/blob/v1.12.1/internal/difflib/LICENSE)
+
+```text
+Copyright (c) 2013, Patrick Mezard
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+    Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+    Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the
+documentation and/or other materials provided with the distribution.
+    The names of its contributors may not be used to endorse or promote
+products derived from this software without specific prior written
+permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+```
+
+## github.com/stretchr/testify/internal/spew
+
+- Version: v1.12.1
+- License: [ISC](https://github.com/stretchr/testify/blob/v1.12.1/internal/spew/LICENSE)
+
+```text
+ISC License
+
+Copyright (c) 2012-2016 Dave Collins <dave@davec.name>
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ```
 
@@ -4931,8 +4930,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## github.com/urfave/cli/v3
 
-- Version: v3.10.1
-- License: [MIT](https://github.com/urfave/cli/blob/v3.10.1/LICENSE)
+- Version: v3.13.0
+- License: [MIT](https://github.com/urfave/cli/blob/v3.13.0/LICENSE)
 
 ```text
 MIT License
@@ -5074,6 +5073,65 @@ FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+```
+
+## go.yaml.in/yaml/v3
+
+- Version: v3.0.5
+- License: [MIT](https://github.com/yaml/go-yaml/blob/v3.0.5/LICENSE)
+
+```text
+
+This project is covered by two different licenses: MIT and Apache.
+
+#### MIT License ####
+
+The following files were ported to Go from C files of libyaml, and thus
+are still covered by their original MIT license, with the additional
+copyright staring in 2011 when the project was ported over:
+
+    apic.go emitterc.go parserc.go readerc.go scannerc.go
+    writerc.go yamlh.go yamlprivateh.go
+
+Copyright (c) 2006-2010 Kirill Simonov
+Copyright (c) 2006-2011 Kirill Simonov
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+### Apache License ###
+
+All the remaining project files are covered by the Apache license:
+
+Copyright (c) 2011-2019 Canonical Ltd
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 
 ```
 
@@ -5326,8 +5384,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## golang.org/x/image
 
-- Version: v0.41.0
-- License: [BSD-3-Clause](https://cs.opensource.google/go/x/image/+/v0.41.0:LICENSE)
+- Version: v0.48.0
+- License: [BSD-3-Clause](https://cs.opensource.google/go/x/image/+/v0.48.0:LICENSE)
 
 ```text
 Copyright 2009 The Go Authors.
@@ -5362,8 +5420,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## golang.org/x/mod/semver
 
-- Version: v0.37.0
-- License: [BSD-3-Clause](https://cs.opensource.google/go/x/mod/+/v0.37.0:LICENSE)
+- Version: v0.42.0
+- License: [BSD-3-Clause](https://cs.opensource.google/go/x/mod/+/v0.42.0:LICENSE)
 
 ```text
 Copyright 2009 The Go Authors.
@@ -5398,8 +5456,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## golang.org/x/sync/errgroup
 
-- Version: v0.21.0
-- License: [BSD-3-Clause](https://cs.opensource.google/go/x/sync/+/v0.21.0:LICENSE)
+- Version: v0.25.0
+- License: [BSD-3-Clause](https://cs.opensource.google/go/x/sync/+/v0.25.0:LICENSE)
 
 ```text
 Copyright 2009 The Go Authors.
@@ -5434,8 +5492,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## golang.org/x/sys/unix
 
-- Version: v0.46.0
-- License: [BSD-3-Clause](https://cs.opensource.google/go/x/sys/+/v0.46.0:LICENSE)
+- Version: v0.50.0
+- License: [BSD-3-Clause](https://cs.opensource.google/go/x/sys/+/v0.50.0:LICENSE)
 
 ```text
 Copyright 2009 The Go Authors.
@@ -5470,8 +5528,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## golang.org/x/sys/windows
 
-- Version: v0.46.0
-- License: [BSD-3-Clause](https://cs.opensource.google/go/x/sys/+/v0.46.0:LICENSE)
+- Version: v0.50.0
+- License: [BSD-3-Clause](https://cs.opensource.google/go/x/sys/+/v0.50.0:LICENSE)
 
 ```text
 Copyright 2009 The Go Authors.
@@ -5506,8 +5564,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## golang.org/x/text
 
-- Version: v0.39.0
-- License: [BSD-3-Clause](https://cs.opensource.google/go/x/text/+/v0.39.0:LICENSE)
+- Version: v0.44.0
+- License: [BSD-3-Clause](https://cs.opensource.google/go/x/text/+/v0.44.0:LICENSE)
 
 ```text
 Copyright 2009 The Go Authors.
@@ -5604,64 +5662,5 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
 ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
 CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-```
-
-## gopkg.in/yaml.v3
-
-- Version: v3.0.1
-- License: [MIT](https://github.com/go-yaml/yaml/blob/v3.0.1/LICENSE)
-
-```text
-
-This project is covered by two different licenses: MIT and Apache.
-
-#### MIT License ####
-
-The following files were ported to Go from C files of libyaml, and thus
-are still covered by their original MIT license, with the additional
-copyright staring in 2011 when the project was ported over:
-
-    apic.go emitterc.go parserc.go readerc.go scannerc.go
-    writerc.go yamlh.go yamlprivateh.go
-
-Copyright (c) 2006-2010 Kirill Simonov
-Copyright (c) 2006-2011 Kirill Simonov
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-### Apache License ###
-
-All the remaining project files are covered by the Apache license:
-
-Copyright (c) 2011-2019 Canonical Ltd
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
 
 ```
