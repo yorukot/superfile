@@ -20,10 +20,11 @@ func extractCompressFile(src, dest string, processBar *processbar.Model) error {
 	}
 
 	x := &xtractr.XFile{
-		FilePath:  src,
-		OutputDir: dest,
-		FileMode:  utils.ExtractedFileMode,
-		DirMode:   utils.ExtractedDirMode,
+		FilePath:     src,
+		OutputDir:    dest,
+		FileMode:     utils.ExtractedFileMode,
+		DirMode:      utils.ExtractedDirMode,
+		PreserveExec: true,
 	}
 
 	_, _, _, err = xtractr.ExtractFile(x)

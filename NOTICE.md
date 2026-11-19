@@ -375,8 +375,8 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 
 ## github.com/andybalholm/brotli
 
-- Version: v1.2.1
-- License: [MIT](https://github.com/andybalholm/brotli/blob/v1.2.1/LICENSE)
+- Version: v1.3.0
+- License: [MIT](https://github.com/andybalholm/brotli/blob/v1.3.0/LICENSE)
 
 ```text
 Copyright (c) 2009, 2010, 2013-2016 by the Brotli Authors.
@@ -398,42 +398,6 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
-
-```
-
-## github.com/andybalholm/brotli/flate
-
-- Version: v1.2.1
-- License: [BSD-3-Clause](https://github.com/andybalholm/brotli/blob/v1.2.1/flate/LICENSE)
-
-```text
-Copyright (c) 2009 The Go Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ```
 
@@ -1227,8 +1191,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## github.com/bodgit/sevenzip
 
-- Version: v1.6.4
-- License: [BSD-3-Clause](https://github.com/bodgit/sevenzip/blob/v1.6.4/LICENSE)
+- Version: v1.6.5
+- License: [BSD-3-Clause](https://github.com/bodgit/sevenzip/blob/v1.6.5/LICENSE)
 
 ```text
 BSD 3-Clause License
@@ -2686,8 +2650,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## github.com/klauspost/compress
 
-- Version: v1.18.7
-- License: [Apache-2.0](https://github.com/klauspost/compress/blob/v1.18.7/LICENSE)
+- Version: v1.20.4
+- License: [Apache-2.0](https://github.com/klauspost/compress/blob/v1.20.4/LICENSE)
 
 ```text
 Copyright (c) 2012 The Go Authors. All rights reserved.
@@ -2999,8 +2963,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ## github.com/klauspost/compress/internal/snapref
 
-- Version: v1.18.7
-- License: [BSD-3-Clause](https://github.com/klauspost/compress/blob/v1.18.7/internal/snapref/LICENSE)
+- Version: v1.20.4
+- License: [BSD-3-Clause](https://github.com/klauspost/compress/blob/v1.20.4/internal/snapref/LICENSE)
 
 ```text
 Copyright (c) 2011 The Snappy-Go Authors. All rights reserved.
@@ -3035,8 +2999,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## github.com/klauspost/compress/s2
 
-- Version: v1.18.7
-- License: [BSD-3-Clause](https://github.com/klauspost/compress/blob/v1.18.7/s2/LICENSE)
+- Version: v1.20.4
+- License: [BSD-3-Clause](https://github.com/klauspost/compress/blob/v1.20.4/s2/LICENSE)
 
 ```text
 Copyright (c) 2011 The Snappy-Go Authors. All rights reserved.
@@ -3072,8 +3036,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## github.com/klauspost/compress/snappy
 
-- Version: v1.18.7
-- License: [BSD-3-Clause](https://github.com/klauspost/compress/blob/v1.18.7/snappy/LICENSE)
+- Version: v1.20.4
+- License: [BSD-3-Clause](https://github.com/klauspost/compress/blob/v1.20.4/snappy/LICENSE)
 
 ```text
 Copyright (c) 2011 The Snappy-Go Authors. All rights reserved.
@@ -3108,8 +3072,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## github.com/klauspost/compress/zstd/internal/xxhash
 
-- Version: v1.18.7
-- License: [MIT](https://github.com/klauspost/compress/blob/v1.18.7/zstd/internal/xxhash/LICENSE.txt)
+- Version: v1.20.4
+- License: [MIT](https://github.com/klauspost/compress/blob/v1.20.4/zstd/internal/xxhash/LICENSE.txt)
 
 ```text
 Copyright (c) 2016 Caleb Spare
@@ -3946,8 +3910,8 @@ SOFTWARE.
 
 ## github.com/mewkiz/flac
 
-- Version: v1.0.13
-- License: [Unlicense](https://github.com/mewkiz/flac/blob/v1.0.13/LICENSE)
+- Version: v1.0.14
+- License: [Unlicense](https://github.com/mewkiz/flac/blob/v1.0.14/LICENSE)
 
 ```text
 This is free and unencumbered software released into the public domain.
@@ -3979,8 +3943,8 @@ For more information, please refer to <http://unlicense.org/>
 
 ## github.com/mewkiz/pkg/errutil
 
-- Version: v0.0.0-20260331151047-10214ccde7de
-- License: [Unlicense](https://github.com/mewkiz/pkg/blob/10214ccde7de/UNLICENSE)
+- Version: v0.0.0-20260703220044-4fb89b18cc87
+- License: [Unlicense](https://github.com/mewkiz/pkg/blob/4fb89b18cc87/UNLICENSE)
 
 ```text
 This is free and unencumbered software released into the public domain.
@@ -4135,8 +4099,8 @@ SOFTWARE.
 
 ## github.com/nwaples/rardecode/v2
 
-- Version: v2.2.5
-- License: [BSD-2-Clause](https://github.com/nwaples/rardecode/blob/v2.2.5/LICENSE)
+- Version: v2.4.6
+- License: [BSD-2-Clause](https://github.com/nwaples/rardecode/blob/v2.4.6/LICENSE)
 
 ```text
 Copyright (c) 2015, Nicholas Waples
@@ -4227,8 +4191,8 @@ THE SOFTWARE.
 
 ## github.com/pierrec/lz4/v4
 
-- Version: v4.1.27
-- License: [BSD-3-Clause](https://github.com/pierrec/lz4/blob/v4.1.27/LICENSE)
+- Version: v4.1.33
+- License: [BSD-3-Clause](https://github.com/pierrec/lz4/blob/v4.1.33/LICENSE)
 
 ```text
 Copyright (c) 2015, Pierre Curto
@@ -4895,8 +4859,8 @@ of the Work.
 
 ## github.com/ulikunitz/xz
 
-- Version: v0.5.15
-- License: [BSD-3-Clause](https://github.com/ulikunitz/xz/blob/v0.5.15/LICENSE)
+- Version: v0.5.17
+- License: [BSD-3-Clause](https://github.com/ulikunitz/xz/blob/v0.5.17/LICENSE)
 
 ```text
 Copyright (c) 2014-2022  Ulrich Kunitz
@@ -5348,8 +5312,8 @@ limitations under the License.
 
 ## golang.org/x/crypto
 
-- Version: v0.53.0
-- License: [BSD-3-Clause](https://cs.opensource.google/go/x/crypto/+/v0.53.0:LICENSE)
+- Version: v0.55.0
+- License: [BSD-3-Clause](https://cs.opensource.google/go/x/crypto/+/v0.55.0:LICENSE)
 
 ```text
 Copyright 2009 The Go Authors.
@@ -5598,10 +5562,64 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ```
 
+## golift.io/ape
+
+- Version: v0.2.0
+- License: [BSD-3-Clause](https://github.com/golift/ape/blob/v0.2.0/LICENSE)
+
+```text
+Copyright (c) 2026 Go Lift Technologies, LLC
+Copyright (c) 2000-2026 Matthew T. Ashland
+
+The range-model tables in range_table.go are Copyright (c) 2000-2026
+Matthew T. Ashland. Those numbers are copied from the Monkey's Audio SDK 13.26
+(BitArray.cpp and UnBitArrayBase.h). The remainder of this software is
+Copyright (c) 2026 Go Lift Technologies, LLC. Both are licensed under the terms below.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+1) Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+2) Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+3) Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+```
+
+## golift.io/asar
+
+- Version: v0.1.0
+- License: [MIT](https://github.com/golift/asar/blob/v0.1.0/LICENSE)
+
+```text
+MIT License
+
+Copyright (c) 2026 Go Lift - Building Strong Go Tools
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
 ## golift.io/udf
 
-- Version: v0.0.1
-- License: [BSD-3-Clause](https://github.com/golift/udf/blob/v0.0.1/LICENSE)
+- Version: v0.2.0
+- License: [BSD-3-Clause](https://github.com/golift/udf/blob/v0.2.0/LICENSE)
 
 ```text
 BSD 3-Clause License
@@ -5638,8 +5656,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## golift.io/xtractr
 
-- Version: v0.3.2
-- License: [MIT](https://github.com/golift/xtractr/blob/v0.3.2/LICENSE)
+- Version: v0.9.0
+- License: [MIT](https://github.com/golift/xtractr/blob/v0.9.0/LICENSE)
 
 ```text
 Copyright (c) 2020-2026 Go Lift
