@@ -19,7 +19,7 @@ importers:
         version: 3.7.6
       '@lucide/astro':
         specifier: ^1.14.0
-        version: 1.27.0(astro@7.4.13(@astrojs/markdown-remark@7.3.10)(@types/node@26.6.6)(esbuild@0.27.7)(yaml@2.9.1))
+        version: 1.76.0(astro@7.4.13(@astrojs/markdown-remark@7.3.10)(@types/node@26.6.6)(esbuild@0.27.7)(yaml@2.9.1))
       astro:
         specifier: ^7.0.0
         version: 7.4.13(@astrojs/markdown-remark@7.3.10)(@types/node@26.6.6)(esbuild@0.27.7)(yaml@2.9.1)
@@ -603,8 +603,8 @@ packages:
   '@jridgewell/sourcemap-codec@1.6.0':
     resolution: {integrity: sha512-T7jf+5zgsZHwNJ4lvQ7/aezbyk0nNX+zJVWpmHA7VYsEx7a7qr5Rg5IbtJFqkgze5Y2sruq1RUY8Q837Od7iFw==}
 
-  '@lucide/astro@1.27.0':
-    resolution: {integrity: sha512-+fhvqNEKqKCPb3qPGDd5xZCMN1o0dtYmNB5tIjtal2FvXQ0X+mXG3pZwefbEPVL7pMA3PkiABnDoIZsM5dOW8Q==}
+  '@lucide/astro@1.76.0':
+    resolution: {integrity: sha512-+jgka4XCCdzb5LOLN2tDRH5Y1lut84T1BaWkZzzt49c0ZaXfCeDF2nqxl5vrnI+L4kByPlQOz+yu9jeqjZhwjw==}
     peerDependencies:
       astro: ^4 || ^5 || ^6 || ^7
 
@@ -2569,7 +2569,7 @@ snapshots:
 
   '@jridgewell/sourcemap-codec@1.6.0': {}
 
-  '@lucide/astro@1.27.0(astro@7.4.13(@astrojs/markdown-remark@7.3.10)(@types/node@26.6.6)(esbuild@0.27.7)(yaml@2.9.1))':
+  '@lucide/astro@1.76.0(astro@7.4.13(@astrojs/markdown-remark@7.3.10)(@types/node@26.6.6)(esbuild@0.27.7)(yaml@2.9.1))':
     dependencies:
       astro: 7.4.13(@astrojs/markdown-remark@7.3.10)(@types/node@26.6.6)(esbuild@0.27.7)(yaml@2.9.1)
 
