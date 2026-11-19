@@ -179,3 +179,43 @@ zoxide_support = false
 #   pdf = "zathura"
 #   conf = "nvim"
 [open_with]
+
+#-- Custom commands
+# Define custom command templates that can be triggered by hotkeys.
+#
+# Format: An array of strings where:
+#   - The first element MUST be either "foreground" or "background"
+#   - The second element is the executable/shell
+#   - The remaining elements are the arguments
+#
+# Execution Modes:
+#   "foreground" - Suspends superfile and runs the command interactively.
+#   "background" - Runs the command in the background without interrupting superfile.
+#
+# Available placeholders:
+#   {filepath} - Full path to the selected item (e.g., /home/user/docs/file.txt)
+#   {filename} - Name of the selected item only (e.g., file.txt)
+#   {dir}      - Path to the current active directory (e.g., /home/user/docs)
+#
+# MUST BE IN THE VERY END OF THE FILE BECAUSE TOML CANNOT CLOSE TABLES
+#
+# Examples for Linux & macOS:
+#   1. Run a script in background (extremely fast, no flickering):
+#      zellij_edit = ["background", "zellij-editor", "{filepath}"]
+#   2. Open file in an interactive terminal editor (Helix):
+#      helix_edit = ["foreground", "hx", "{filepath}"]
+#   3. Execute a local bash script in background:
+#      run_bash = ["background", "bash", "./my-script.sh", "{filepath}"]
+#   4. Run complex shell commands using sh (interactive):
+#      show_info = ["foreground", "sh", "-c", "echo 'Selected: {filename} in {dir}' && read -p 'Press Enter to close...'"]
+#
+# Examples for Windows:
+#   1. Launch a GUI application in background (e.g., VS Code):
+#      vscode = ["background", "code", "{filepath}"]
+#   2. Run an interactive terminal editor (Neovim):
+#      nvim_edit = ["foreground", "nvim", "{filepath}"]
+#   3. Run a command in PowerShell in background:
+#      ps_echo = ["background", "powershell.exe", "-NoProfile", "-Command", "Write-Host 'Processing {filename}...'; Start-Sleep -Seconds 2"]
+#   4. Run an interactive command in classic Command Prompt (CMD):
+#      cmd_echo = ["foreground", "cmd.exe", "/C", "echo Selected: {filepath} && pause"]
+[custom_commands]
