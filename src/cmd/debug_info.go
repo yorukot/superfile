@@ -137,15 +137,13 @@ func (dp *debugPrinter) checkDependency(name string, flag string) {
 			cmd := exec.Command(name, strings.Split(flag, " ")...)
 			out, err := cmd.CombinedOutput()
 			if err == nil {
-				lines := strings.Split(string(out), "\n")
-				if len(lines) > 0 {
-					v := strings.TrimSpace(lines[0])
-					if len(v) > maxVersionLength {
-						v = v[:maxVersionLength] + "..."
-					}
-					if v != "" {
-						version = v
-					}
+				firstLine, _, _ := strings.Cut(string(out), "\n")
+				v := strings.TrimSpace(firstLine)
+				if len(v) > maxVersionLength {
+					v = v[:maxVersionLength] + "..."
+				}
+				if v != "" {
+					version = v
 				}
 			}
 		}
