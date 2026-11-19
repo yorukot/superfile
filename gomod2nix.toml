@@ -101,10 +101,6 @@ schema = 3
     version = 'v2.7.0'
     hash = 'sha256-GO3az7WiGcwU0OvmocwdfR5ohGRL8NbjscIaMyhAdxE='
 
-  [mod.'github.com/davecgh/go-spew']
-    version = 'v1.1.2-0.20180830191138-d8f796af33cc'
-    hash = 'sha256-fV9oI51xjHdOmEx6+dlq7Ku2Ag+m/bmbzPo6A4Y74qc='
-
   [mod.'github.com/disintegration/imaging']
     version = 'v1.6.2'
     hash = 'sha256-pSeMTPvSkxlthh65LjNYYhPLvCZDkBgVgAGYWW0Aguo='
@@ -148,10 +144,6 @@ schema = 3
   [mod.'github.com/klauspost/compress']
     version = 'v1.18.7'
     hash = 'sha256-W7VJ7+Ybm8u3LCYNKlTFY6FNp5qK4ipS2+W5sZ/OCbU='
-
-  [mod.'github.com/kr/text']
-    version = 'v0.2.0'
-    hash = 'sha256-fadcWxZOORv44oak3jTxm6YcITcFxdGt4bpn869HxUE='
 
   [mod.'github.com/lazysegtree/go-zoxide']
     version = 'v0.1.0'
@@ -217,10 +209,6 @@ schema = 3
     version = 'v4.1.27'
     hash = 'sha256-XcdFN0MceCyxaAPuS0RPBojWSdFDtvkmv6B0xk/Bb5g='
 
-  [mod.'github.com/pmezard/go-difflib']
-    version = 'v1.0.1-0.20181226105442-5d4384ee4fb2'
-    hash = 'sha256-XA4Oj1gdmdV/F/+8kMI+DBxKPthZ768hbKsO3d9Gx90='
-
   [mod.'github.com/power-devops/perfstat']
     version = 'v0.0.0-20240221224432-82ca36839d55'
     hash = 'sha256-ujzuJ1ttQgjHQJEij4O/2+I8DZaUVZQCQgA4ysfqulI='
@@ -258,8 +246,8 @@ schema = 3
     hash = 'sha256-9eoFqbF8hYHlA7zN6+v0GzsEUai9yLLvjQ2e4j3OeEg='
 
   [mod.'github.com/stretchr/testify']
-    version = 'v1.11.1'
-    hash = 'sha256-sWfjkuKJyDllDEtnM8sb/pdLzPQmUYWYtmeWz/5suUc='
+    version = 'v1.12.1'
+    hash = 'sha256-9MTDdVjZMh1MJ5EH3HmAFrm24YqZayeMBgKwtaURZCc='
 
   [mod.'github.com/therootcompany/xz']
     version = 'v1.0.1'
@@ -270,8 +258,8 @@ schema = 3
     hash = 'sha256-L5KYLue5U14bxUuNyhZ6lIjbda6eCQsx1V6gToqfRdk='
 
   [mod.'github.com/urfave/cli/v3']
-    version = 'v3.10.1'
-    hash = 'sha256-NohRjwIBB2paQw28R9/BDU3mVtb6GS9MHaTM49eNJSs='
+    version = 'v3.13.0'
+    hash = 'sha256-tUQ+nFQ2J7BfD0oDRJBb0cBJqJDabbA1lhgqFhOlm3g='
 
   [mod.'github.com/xo/terminfo']
     version = 'v0.0.0-20220910002029-abceb7e1c41e'
@@ -284,6 +272,10 @@ schema = 3
   [mod.'github.com/yusufpapurcu/wmi']
     version = 'v1.2.4'
     hash = 'sha256-N+YDBjOW59YOsZ2lRBVtFsEEi48KhNQRb63/0ZSU3bA='
+
+  [mod.'go.yaml.in/yaml/v3']
+    version = 'v3.0.5'
+    hash = 'sha256-ygho+GU5kE7vPMx+dZYyNfCaeMjNxj66XmrcVf3afFE='
 
   [mod.'go4.org']
     version = 'v0.0.0-20260112195520-a5071408f32f'
@@ -320,7 +312,3 @@ schema = 3
   [mod.'golift.io/xtractr']
     version = 'v0.3.2'
     hash = 'sha256-UjwlN0m62dw+qupT1GSlsB0Z7OpV5HOtfjyPnS8nyFI='
-
-  [mod.'gopkg.in/yaml.v3']
-    version = 'v3.0.1'
-    hash = 'sha256-FqL9TKYJ0XkNwJFnq9j0VvJ5ZUU1RvH/52h/f5bkYAU='
