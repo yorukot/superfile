@@ -146,8 +146,8 @@ schema = 3
     hash = 'sha256-CtV/dr1L46cZ65EnK9DrBduZCaMnTGf4N2MnElCymtM='
 
   [mod.'github.com/klauspost/compress']
-    version = 'v1.18.6'
-    hash = 'sha256-gULc+A2Clg2HnwR9UNXSIHVGdFY/aGqhf0zlvMxqaSY='
+    version = 'v1.18.7'
+    hash = 'sha256-W7VJ7+Ybm8u3LCYNKlTFY6FNp5qK4ipS2+W5sZ/OCbU='
 
   [mod.'github.com/kr/text']
     version = 'v0.2.0'
