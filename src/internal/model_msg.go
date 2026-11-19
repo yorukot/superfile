@@ -172,7 +172,11 @@ func (msg MetadataMsg) ApplyToModel(m *model) tea.Cmd {
 			"actualFocus", m.focusPanel, "msgFocus", msg.metadataFocused)
 		return nil
 	}
-	m.fileMetaData.SetMetadata(msg.meta, msg.metadataFocused)
+
+	if m.fileMetaData.MatchPendingRequest(msg.meta.GetPath(), msg.metadataFocused, msg.GetReqID()) {
+		m.fileMetaData.ClearPendingRequest()
+		m.fileMetaData.SetMetadata(msg.meta, msg.metadataFocused)
+	}
 	return nil
 }
 
