@@ -28,13 +28,15 @@ import (
 // Lots of improvements are waiting on it
 //   - Allow Sending thumbnailGeneratorNeeded as false to preview.New()
 //     to prevent noise in test logs. Same with imagePreviewer
-func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool,
+func defaultModelConfig(toggleDotFile, toggleFooter, toggleSidebar, firstUse bool,
 	firstPanelPaths []string, zClient *zoxidelib.Client) *model {
+	sidebarModel := sidebar.New()
+	sidebarModel.SetHidden(!toggleSidebar)
 	return &model{
 		focusPanel:      nonePanelFocus,
 		processBarModel: processbar.New(),
 		clipboardWriter: clipboard.WriteAll,
-		sidebarModel:    sidebar.New(),
+		sidebarModel:    sidebarModel,
 		fileMetaData:    metadata.New(),
 		fileModel:       filemodel.New(firstPanelPaths, toggleDotFile),
 		helpMenu:        helpmenu.New(),
@@ -44,6 +46,7 @@ func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool,
 		zClient:         zClient,
 		modelQuitState:  notQuitting,
 		toggleFooter:    toggleFooter,
+		toggleSidebar:   toggleSidebar,
 		firstUse:        firstUse,
 		hasTrash:        common.InitTrash(),
 	}

@@ -20,4 +20,6 @@ type Model struct {
 	FocusedPanelIndex    int
 	ioReqCnt             int
 	DisplayDotFiles      bool
+	// Total width of the sidebar next to this model, including borders. 0 when hidden.
+	SidebarWidth int
 }

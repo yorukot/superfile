@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/pkg/utils"
 
 	"github.com/yorukot/superfile/src/internal/common"
@@ -33,6 +34,15 @@ func TestLayout(t *testing.T) {
 		if testing.Verbose() {
 			utils.SetRootLoggerToStdout(true)
 		}
+	})
+
+	// The sidebar toggle persists its state, keep it away from the real data dir
+	oldToggleSidebar := variable.ToggleSidebar
+	//nolint:reassign // Needed to tests
+	variable.ToggleSidebar = filepath.Join(t.TempDir(), "toggleSidebar")
+	t.Cleanup(func() {
+		//nolint:reassign // Needed to tests
+		variable.ToggleSidebar = oldToggleSidebar
 	})
 
 	baseTestDir := t.TempDir()
@@ -189,6 +199,33 @@ func updateModelDimensionsAndValidate(t *testing.T, m *model, width int, height 
 			name: "FooterOnAgain",
 			msg:  []tea.Msg{utils.TeaRuneKeyMsg(common.Hotkeys.ToggleFooter[0])},
 		},
+		{
+			name: "SidebarOff",
+			msg:  []tea.Msg{utils.TeaRuneKeyMsg(common.Hotkeys.ToggleSidebar[0])},
+		},
+		{
+			name: "SidebarOffFooterOffPreviewOff",
+			msg: []tea.Msg{
+				utils.TeaRuneKeyMsg(common.Hotkeys.ToggleFooter[0]),
+				utils.TeaRuneKeyMsg(common.Hotkeys.ToggleFilePreviewPanel[0]),
+			},
+		},
+		{
+			name: "SidebarOnFooterOffPreviewOff",
+			msg:  []tea.Msg{utils.TeaRuneKeyMsg(common.Hotkeys.ToggleSidebar[0])},
+		},
+		{
+			name: "SidebarOffFooterOnPreviewOn",
+			msg: []tea.Msg{
+				utils.TeaRuneKeyMsg(common.Hotkeys.ToggleSidebar[0]),
+				utils.TeaRuneKeyMsg(common.Hotkeys.ToggleFooter[0]),
+				utils.TeaRuneKeyMsg(common.Hotkeys.ToggleFilePreviewPanel[0]),
+			},
+		},
+		{
+			name: "SidebarOnAgain",
+			msg:  []tea.Msg{utils.TeaRuneKeyMsg(common.Hotkeys.ToggleSidebar[0])},
+		},
 	}
 
 	for _, tt := range testdata {
@@ -323,7 +360,7 @@ func getLayoutInfoForDebug(m *model) string {
 		"[firstpanel=%d,lastpanel=%d,previewExp=%d,previewActual=%d]]"+
 		"[panelCount=%d,maxPanel=%d]"+
 		"[processbarWidth=%d,clipboardWidth=%d]",
-		m.fullWidth, common.Config.SidebarWidth, m.fileModel.Width,
+		m.fullWidth, m.sidebarModel.GetWidth(), m.fileModel.Width,
 		firstPanel.GetWidth(), lastPanel.GetWidth(), m.fileModel.ExpectedPreviewWidth,
 		m.fileModel.FilePreview.GetContentWidth(),
 		m.fileModel.PanelCount(), m.fileModel.MaxFilePanel,

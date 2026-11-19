@@ -7,7 +7,6 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
-	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 	"github.com/yorukot/superfile/src/internal/ui/preview"
 )
@@ -109,10 +108,7 @@ func (m *Model) GetFilePreviewCmd(forcePreviewRender bool) tea.Cmd {
 	// Unfortunately, previewPanel isn't completely 'under' fileModel
 	// Note: Must save the dimensions for the closure of the Cmd to avoid
 	// problems
-	fullModalWidth := m.Width + common.Config.SidebarWidth
-	if common.Config.SidebarWidth != 0 {
-		fullModalWidth += common.BorderPadding
-	}
+	fullModalWidth := m.Width + m.SidebarWidth
 	width := m.ExpectedPreviewWidth
 	height := m.Height
 
