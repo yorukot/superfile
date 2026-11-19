@@ -118,6 +118,9 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen,go
 			return m.getPasteItemCmd()
 		}
 
+	case slices.Contains(common.Hotkeys.PasteFromSystemClipboard, msg):
+		return m.getPasteFromSystemClipboardCmd()
+
 	case slices.Contains(common.Hotkeys.FilePanelItemCreate, msg):
 		if m.focusPanel == nonePanelFocus {
 			m.panelCreateNewFile()
@@ -200,6 +203,8 @@ func (m *model) unfocusedFilePanelKey(msg string) {
 	}
 }
 
+// filePanelSelectModeKey handles selection changes and file actions in select
+// mode, returning a command when the action requires asynchronous work.
 func (m *model) filePanelSelectModeKey(msg string) tea.Cmd {
 	panel := m.getFocusedFilePanel()
 
@@ -218,6 +223,8 @@ func (m *model) filePanelSelectModeKey(msg string) tea.Cmd {
 		m.copyMultipleItem(false)
 	case slices.Contains(common.Hotkeys.CutItems, msg):
 		m.copyMultipleItem(true)
+	case slices.Contains(common.Hotkeys.CopyToSystemClipboard, msg):
+		return m.getCopyToSystemClipboardCmd()
 	case slices.Contains(common.Hotkeys.CopyPath, msg):
 		m.copyPath()
 	case slices.Contains(common.Hotkeys.FilePanelSelectAllItem, msg):
@@ -226,6 +233,8 @@ func (m *model) filePanelSelectModeKey(msg string) tea.Cmd {
 	return nil
 }
 
+// filePanelNormalModeKey handles navigation and focused-item actions in normal
+// mode, returning a command when the action requires asynchronous work.
 func (m *model) filePanelNormalModeKey(msg string) tea.Cmd {
 	switch {
 	case slices.Contains(common.Hotkeys.Confirm, msg):
@@ -240,6 +249,8 @@ func (m *model) filePanelNormalModeKey(msg string) tea.Cmd {
 		m.copySingleItem(false)
 	case slices.Contains(common.Hotkeys.CutItems, msg):
 		m.copySingleItem(true)
+	case slices.Contains(common.Hotkeys.CopyToSystemClipboard, msg):
+		return m.getCopyToSystemClipboardCmd()
 	case slices.Contains(common.Hotkeys.FilePanelItemRename, msg):
 		m.panelItemRename()
 	case slices.Contains(common.Hotkeys.SearchBar, msg):
