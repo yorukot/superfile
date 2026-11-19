@@ -10,7 +10,7 @@ require (
 	github.com/alecthomas/chroma/v2 v2.26.0
 	github.com/atotto/clipboard v0.1.4
 	github.com/barasher/go-exiftool v1.10.0
-	github.com/charmbracelet/x/ansi v0.11.7
+	github.com/charmbracelet/x/ansi v0.11.10
 	github.com/fatih/color v1.19.0
 	github.com/fvbommel/sortorder v1.1.0
 	github.com/lazysegtree/go-zoxide v0.1.0
@@ -82,9 +82,9 @@ require (
 	github.com/charmbracelet/harmonica v0.2.0 // indirect
 	github.com/disintegration/imaging v1.6.2
 	github.com/go-ole/go-ole v1.2.6 // indirect
-	github.com/lucasb-eyer/go-colorful v1.4.0 // indirect
+	github.com/lucasb-eyer/go-colorful v1.4.1 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/mattn/go-runewidth v0.0.23 // indirect
+	github.com/mattn/go-runewidth v0.0.27 // indirect
 	github.com/muesli/cancelreader v0.2.2 // indirect
 	github.com/muesli/reflow v0.3.0
 	github.com/pelletier/go-toml/v2 v2.3.1

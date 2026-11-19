@@ -1458,8 +1458,8 @@ SOFTWARE.
 
 ## github.com/charmbracelet/x/ansi
 
-- Version: v0.11.7
-- License: [MIT](https://github.com/charmbracelet/x/blob/ansi/v0.11.7/ansi/LICENSE)
+- Version: v0.11.10
+- License: [MIT](https://github.com/charmbracelet/x/blob/ansi/v0.11.10/ansi/LICENSE)
 
 ```text
 MIT License
@@ -3816,8 +3816,8 @@ SOFTWARE.
 
 ## github.com/lucasb-eyer/go-colorful
 
-- Version: v1.4.0
-- License: [MIT](https://github.com/lucasb-eyer/go-colorful/blob/v1.4.0/LICENSE)
+- Version: v1.4.1
+- License: [MIT](https://github.com/lucasb-eyer/go-colorful/blob/v1.4.1/LICENSE)
 
 ```text
 Copyright (c) 2013 Lucas Beyer
@@ -3880,8 +3880,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ## github.com/mattn/go-runewidth
 
-- Version: v0.0.23
-- License: [MIT](https://github.com/mattn/go-runewidth/blob/v0.0.23/LICENSE)
+- Version: v0.0.27
+- License: [MIT](https://github.com/mattn/go-runewidth/blob/v0.0.27/LICENSE)
 
 ```text
 The MIT License (MIT)
