@@ -112,6 +112,7 @@ type ConfigType struct {
 	Metadata          bool `toml:"metadata"            comment:"\n==========PLUGINS========== #\nPlugins means that you need to install some external dependencies to use them.\n\nShow more detailed metadata, please install exiftool before enabling this plugin!"`
 	EnableMD5Checksum bool `toml:"enable_md5_checksum" comment:"Enable MD5 checksum generation for files"`
 	ZoxideSupport     bool `toml:"zoxide_support"      comment:"Zoxide support for the fast navigation"`
+	FindFileSupport   bool `toml:"find_file_support"   comment:"Find file/folder support for the recursive search using fd"`
 }
 
 // GetIgnoreMissingFields reports whether warnings about missing TOML fields should be ignored.
@@ -165,6 +166,7 @@ type HotkeysType struct {
 	OpenCommandLine []string `toml:"open_command_line"`
 	OpenSPFPrompt   []string `toml:"open_spf_prompt"`
 	OpenZoxide      []string `toml:"open_zoxide"`
+	FindFile        []string `toml:"find_file"`
 
 	CopyPath []string `toml:"copy_path"`
 	CopyPWD  []string `toml:"copy_present_working_directory"`

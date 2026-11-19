@@ -44,3 +44,12 @@ type OpenPanelAction struct {
 func (o OpenPanelAction) String() string {
 	return "OpenPanelAction at " + o.Location
 }
+
+type GoToPathAction struct {
+	Path  string
+	IsDir bool
+}
+
+func (g GoToPathAction) String() string {
+	return "GoToPathAction to " + g.Path
+}

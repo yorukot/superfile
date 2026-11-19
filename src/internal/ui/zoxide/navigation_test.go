@@ -85,9 +85,14 @@ func TestNavigation(t *testing.T) {
 }
 
 func TestUpdateRenderIndex(t *testing.T) {
-	// FIX #2 & #4: Added initialRenderIndex field so we can test renderIndex
-	// decrease, and replaced magic numbers with maxVisibleResults expressions
-	// so tests don't silently break if the constant changes (Issue #1130 Mistakes #1 & #2)
+	// FIX #2 & #4: initialRenderIndex is pre-set per case so renderIndex
+	// decrease is testable (Issue #1130 Mistakes #1 & #2).
+	//
+	// The helper model has a 50-row max height (a 43-row visible window).
+	// Shrink it to the height that yields a 5-row window so the
+	// cursor/renderIndex math these cases target is unchanged.
+	const testWindow = 5
+
 	testdata := []struct {
 		name                string
 		resultCnt           int
@@ -105,7 +110,7 @@ func TestUpdateRenderIndex(t *testing.T) {
 		{
 			name:                "cursor at last visible position has renderIndex 1",
 			resultCnt:           10,
-			cursor:              maxVisibleResults, // was hardcoded 5
+			cursor:              testWindow,
 			initialRenderIndex:  0,
 			expectedRenderIndex: 1,
 		},
@@ -114,7 +119,7 @@ func TestUpdateRenderIndex(t *testing.T) {
 			resultCnt:           10,
 			cursor:              9,
 			initialRenderIndex:  0,
-			expectedRenderIndex: 10 - maxVisibleResults, // was hardcoded 5
+			expectedRenderIndex: 10 - testWindow,
 		},
 		// FIX #3: Added missing renderIndex decrease test (Issue #1130 Mistake #1)
 		// Tests the branch: if m.cursor < m.renderIndex { m.renderIndex = m.cursor }
@@ -157,6 +162,7 @@ func TestUpdateRenderIndex(t *testing.T) {
 	for _, td := range testdata {
 		t.Run(td.name, func(t *testing.T) {
 			m := setupTestModelWithResults(td.resultCnt)
+			m.maxHeight = testWindow + renderOverhead
 			m.cursor = td.cursor
 			m.renderIndex = td.initialRenderIndex // FIX #2: pre-set renderIndex
 			m.updateRenderIndex()

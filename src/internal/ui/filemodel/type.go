@@ -20,4 +20,7 @@ type Model struct {
 	FocusedPanelIndex    int
 	ioReqCnt             int
 	DisplayDotFiles      bool
+	// previewOverride: when non-empty,
+	// the preview pane shows this path instead of the focused panel's selection (set while the find modal is open)
+	previewOverride string
 }

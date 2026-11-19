@@ -56,6 +56,7 @@ Find the plugin setting in your config and change its value from `false` to `tru
 metadata = false
 enable_md5_checksum = false
 zoxide_support = false
+find_file_support = false
 ```
 
 Set any plugin to `true` to enable it, or `false` to disable it.

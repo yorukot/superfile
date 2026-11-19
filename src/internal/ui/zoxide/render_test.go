@@ -51,6 +51,10 @@ func TestRenderWithTextInput(t *testing.T) {
 }
 
 func TestRenderScrollIndicator(t *testing.T) {
+	// The helper model has a 50-row max height (a 43-row visible window).
+	// Shrink it to the height that yields a 5-row window so the 10 results
+	// overflow it and the scroll indicators render.
+	const testWindow = 5
 	testdata := []struct {
 		name       string
 		resultCnt  int
@@ -92,7 +96,7 @@ func TestRenderScrollIndicator(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			m := setupTestModelWithClient(t)
 			m.width = 50
-			m.maxHeight = maxVisibleResults + renderOverhead
+			m.maxHeight = testWindow + renderOverhead
 			m.results = setupTestModelWithResults(tt.resultCnt).results
 			m.cursor = tt.cursor
 			m.updateRenderIndex()
