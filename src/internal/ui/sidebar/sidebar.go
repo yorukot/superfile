@@ -8,6 +8,7 @@ import (
 
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/disks"
 )
 
 // PinnedItemRename initiates the rename process for the currently selected pinned directory.
@@ -89,9 +90,9 @@ func (s *Model) UpdateDirectories() {
 		return
 	}
 	if s.searchBar.Value() != "" {
-		s.directories = getFilteredDirectories(s.searchBar.Value(), s.pinnedMgr, s.sections)
+		s.directories = getFilteredDirectories(s.searchBar.Value(), s.pinnedMgr, s.sections, s.diskManager)
 	} else {
-		s.directories = getDirectories(s.pinnedMgr, s.sections)
+		s.directories = getDirectories(s.pinnedMgr, s.sections, s.diskManager)
 	}
 	// This is needed, as due to filtering, the cursor might be invalid
 	if s.isCursorInvalid() {
@@ -105,7 +106,7 @@ func (s *Model) TogglePinnedDirectory(dir string) error {
 }
 
 // New initializes and returns a new Model for the sidebar correctly set up with configuration.
-func New() Model {
+func New(diskManager disks.Manager) Model {
 	if common.Config.SidebarWidth == 0 {
 		return Model{
 			disabled: true,
@@ -114,6 +115,7 @@ func New() Model {
 	// pinnedMgr is created here, can be done higher up in the call chain
 	pinnedMgr := NewPinnedFileManager(variable.PinnedFile)
 	s := Model{
+		diskManager: diskManager,
 		renderIndex: 0,
 		searchBar:   common.GenerateSearchBar(),
 		pinnedMgr:   &pinnedMgr,
@@ -123,7 +125,7 @@ func New() Model {
 		sections:    common.Config.SidebarSections,
 	}
 
-	s.directories = getDirectories(&pinnedMgr, s.sections)
+	s.directories = getDirectories(&pinnedMgr, s.sections, diskManager)
 	s.searchBar.SetWidth(s.width - common.BorderPadding - searchBarPadding)
 	s.searchBar.Placeholder = "(" + common.Hotkeys.SearchBar[0] + ")" + " Search"
 	return s

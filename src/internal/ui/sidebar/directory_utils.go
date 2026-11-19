@@ -8,6 +8,7 @@ import (
 	"github.com/adrg/xdg"
 
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/disks"
 
 	"github.com/yorukot/superfile/src/pkg/utils"
 
@@ -42,11 +43,11 @@ func fuzzySearch(query string, dirs []directory) []directory {
 }
 
 // getDirectories returns the list of directories to display in the sidebar.
-func getDirectories(pinnedMgr *PinnedManager, sections []string) []directory {
+func getDirectories(pinnedMgr *PinnedManager, sections []string, diskManager disks.Manager) []directory {
 	return formDirctorySlice(
 		getWellKnownDirectories(),
 		getPinnedDirectoriesWithIcon(pinnedMgr),
-		getExternalMediaFolders(),
+		getExternalMediaFolders(diskManager),
 		sections,
 	)
 }
@@ -89,11 +90,13 @@ func getPinnedDirectoriesWithIcon(pinnedMgr *PinnedManager) []directory {
 }
 
 // getFilteredDirectories returns a list of directories that match the fuzzy search query across all sections.
-func getFilteredDirectories(query string, pinnedMgr *PinnedManager, sections []string) []directory {
+func getFilteredDirectories(query string, pinnedMgr *PinnedManager, sections []string,
+	diskManager disks.Manager,
+) []directory {
 	return formDirctorySlice(
 		fuzzySearch(query, getWellKnownDirectories()),
 		fuzzySearch(query, getPinnedDirectoriesWithIcon(pinnedMgr)),
-		fuzzySearch(query, getExternalMediaFolders()),
+		fuzzySearch(query, getExternalMediaFolders(diskManager)),
 		sections,
 	)
 }
@@ -101,7 +104,8 @@ func getFilteredDirectories(query string, pinnedMgr *PinnedManager, sections []s
 // formDirctorySlice assembles the final list of directories for the sidebar based on the configured sections.
 // It ensures that dividers are only added between non-empty sections.
 func formDirctorySlice(homeDirectories []directory, pinnedDirectories []directory,
-	diskDirectories []directory, sections []string) []directory {
+	diskDirectories []directory, sections []string,
+) []directory {
 	totalCapacity := len(homeDirectories) + len(pinnedDirectories) + len(diskDirectories) + directoryCapacityForDividers
 	directories := make([]directory, 0, totalCapacity)
 

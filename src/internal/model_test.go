@@ -18,6 +18,7 @@ import (
 
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/internal/common"
+	"github.com/yorukot/superfile/src/internal/disks"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 	"github.com/yorukot/superfile/src/internal/ui/prompt"
@@ -383,13 +384,17 @@ func TestAsyncPreviewPanelSync(t *testing.T) {
 	eventuallyEnsurePreviewContent(t, m, content1, "content should update to file1 after closing panel")
 
 	// Upscale
-	p.Send(tea.WindowSizeMsg{Width: 8 * DefaultTestModelWidth,
-		Height: 8 * DefaultTestModelHeight})
+	p.Send(tea.WindowSizeMsg{
+		Width:  8 * DefaultTestModelWidth,
+		Height: 8 * DefaultTestModelHeight,
+	})
 	eventuallyEnsurePreviewContent(t, m, content1, "content should update to file1 after resize")
 
 	// Downscale
-	p.Send(tea.WindowSizeMsg{Width: 6 * DefaultTestModelWidth,
-		Height: 6 * DefaultTestModelHeight})
+	p.Send(tea.WindowSizeMsg{
+		Width:  6 * DefaultTestModelWidth,
+		Height: 6 * DefaultTestModelHeight,
+	})
 	eventuallyEnsurePreviewContent(t, m, content1, "content should update to file1 after resize")
 }
 
@@ -439,7 +444,7 @@ func TestUnlockErrorModalMutex(t *testing.T) {
 		zModel.Open()
 		m.zoxideModal = zModel
 		m.notifyModel = notify.New(true, "test", "test", notify.RenameAction)
-		m.sidebarModel = sidebar.New()
+		m.sidebarModel = sidebar.New(disks.NewNoop())
 		m.sidebarModel.PinnedItemRename()
 		m.getFocusedFilePanel().SearchBar.Focus()
 		m.sidebarModel.SearchBarFocus()
@@ -461,7 +466,7 @@ func TestUnlockErrorModalMutex(t *testing.T) {
 		zModel.Open()
 		m.zoxideModal = zModel
 		m.notifyModel = notify.New(true, "test", "test", notify.RenameAction)
-		m.sidebarModel = sidebar.New()
+		m.sidebarModel = sidebar.New(disks.NewNoop())
 		m.sidebarModel.PinnedItemRename()
 		m.getFocusedFilePanel().SearchBar.Focus()
 		m.sidebarModel.SearchBarFocus()
