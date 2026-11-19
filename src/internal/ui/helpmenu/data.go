@@ -151,6 +151,16 @@ func getData() []hotkeydata { //nolint: funlen // This should be self contained
 			hotkeyWorkType: globalType,
 		},
 		{
+			hotkey:         common.Hotkeys.ListHome,
+			description:    "Home",
+			hotkeyWorkType: globalType,
+		},
+		{
+			hotkey:         common.Hotkeys.ListEnd,
+			description:    "End",
+			hotkeyWorkType: globalType,
+		},
+		{
 			hotkey:         common.Hotkeys.ParentDirectory,
 			description:    "Return to parent folder",
 			hotkeyWorkType: globalType,
