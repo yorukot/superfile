@@ -21,6 +21,14 @@ func (m *Model) ChangeFilePanelMode() {
 	}
 }
 
+// EnterSelectMode switches the panel to select mode, so that selected items are
+// visible and file operations act on the selection. It is a no-op if the panel
+// already is in select mode, unlike ChangeFilePanelMode it never drops the
+// current selection.
+func (m *Model) EnterSelectMode() {
+	m.PanelMode = SelectMode
+}
+
 // This should be the function that is always called whenever we are updating a directory.
 func (m *Model) UpdateCurrentFilePanelDir(path string) error {
 	slog.Debug("updateCurrentFilePanelDir", "panel.location", m.Location, "path", path)

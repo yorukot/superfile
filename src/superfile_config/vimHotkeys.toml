@@ -97,3 +97,7 @@ search_bar = ['/', '']
 file_panel_select_mode_items_select_down = ['J', '']
 file_panel_select_mode_items_select_up = ['K', '']
 file_panel_select_all_items = ['A', '']
+file_panel_select_items_by_mask = ['+', '']
+# Note: '-' is parent_directory in normal mode, unselecting by mask only
+# happens in selection mode, so the two never collide.
+file_panel_unselect_items_by_mask = ['-', '']
