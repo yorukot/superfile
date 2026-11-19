@@ -9,6 +9,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/spferror"
 
 	"github.com/yorukot/superfile/src/internal/ui/clipboard"
+	"github.com/yorukot/superfile/src/internal/ui/openwithmodel"
 	"github.com/yorukot/superfile/src/internal/ui/sortmodel"
 
 	"github.com/yorukot/superfile/src/internal/ui/filemodel"
@@ -66,6 +67,7 @@ type model struct {
 	promptModal     prompt.Model
 	zoxideModal     zoxideui.Model
 	sortModal       sortmodel.Model
+	openWithModal   openwithmodel.Model
 	spfError        spferror.Model
 	mutexErrorModal sync.Mutex
 

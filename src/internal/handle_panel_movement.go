@@ -26,11 +26,11 @@ func (m *model) parentDirectory() {
 
 // enterPanel enters a directory, opens a file with default application, or writes
 // selected/focused paths to the chooser file and exits if --chooser-file mode is enabled.
-func (m *model) enterPanel() {
+func (m *model) enterPanel() tea.Cmd {
 	panel := m.getFocusedFilePanel()
 
 	if panel.Empty() {
-		return
+		return nil
 	}
 	selectedItem := panel.GetFocusedItem()
 	if selectedItem.Directory {
@@ -40,12 +40,12 @@ func (m *model) enterPanel() {
 			var symlinkErr error
 			targetPath, symlinkErr = filepath.EvalSymlinks(targetPath)
 			if symlinkErr != nil {
-				return
+				return nil
 			}
 
 			// targetPath shouldn't be a link now, so Stat and Lstat should be same
 			if targetInfo, lstatErr := os.Lstat(targetPath); lstatErr != nil || !targetInfo.IsDir() {
-				return
+				return nil
 			}
 		}
 		// TODO : Propagate error out from this this function. Return here, instead of logging
@@ -53,26 +53,27 @@ func (m *model) enterPanel() {
 		if err != nil {
 			slog.Error("Error while changing to directory", "error", err, "target", targetPath)
 		}
-		return
+		return nil
 	}
 
 	if variable.ChooserFile != "" {
 		chooserErr := m.chooserFileWriteAndQuit(m.getSelectedOrFocusedPaths(panel))
 		if chooserErr == nil {
-			return
+			return nil
 		}
 		// Continue with preview if file is not writable
 		slog.Error("Error while writing to chooser file, continuing with file open", "error", chooserErr)
 	}
-	m.executeOpenCommand()
+	return m.executeOpenCommand()
 }
 
-func (m *model) executeOpenCommand() {
+func (m *model) executeOpenCommand() tea.Cmd {
 	panel := m.getFocusedFilePanel()
 
 	filePath := panel.GetFocusedItem().Location
 
 	openCommand := "xdg-open"
+	var openArgs []string
 	switch runtime.GOOS {
 	case utils.OsDarwin:
 		openCommand = "open"
@@ -87,23 +88,44 @@ func (m *model) executeOpenCommand() {
 			slog.Error("Error while open file with", "error", err)
 		}
 
-		return
+		return nil
 	}
 
 	// For now open_with works only for mac and linux
 	// TODO: Make it in parity with windows.
 	ext := strings.ToLower(strings.TrimPrefix(filepath.Ext(filePath), "."))
-	if extEditor, ok := common.Config.OpenWith[ext]; ok {
-		openCommand = extEditor
+	applications, err := common.ResolveOpenWith(common.Config.OpenWith, filePath)
+	if err != nil {
+		slog.Error("Error while resolving open_with command", "error", err, "extension", ext)
+	} else if len(applications) > 0 {
+		application := applications[0]
+		cmd, commandErr := newOpenWithCommand(application, filePath)
+		if commandErr != nil {
+			slog.Error("Could not create Open With command", "error", commandErr, "path", filePath)
+			return nil
+		}
+		if application.Terminal {
+			return tea.ExecProcess(cmd, func(err error) tea.Msg {
+				return editorFinishedMsg{err}
+			})
+		}
+
+		utils.DetachFromTerminal(cmd)
+		if commandErr := cmd.Start(); commandErr != nil {
+			slog.Error("Error while open file with", "error", commandErr)
+		}
+		return nil
 	}
 
-	cmd := exec.Command(openCommand, filePath)
+	openArgs = append(openArgs, filePath)
+	cmd := exec.Command(openCommand, openArgs...)
 	utils.DetachFromTerminal(cmd)
-	err := cmd.Start()
+	err = cmd.Start()
 	if err != nil {
 		// TODO: This kind of errors should go to user facing pop ups
 		slog.Error("Error while open file with", "error", err)
 	}
+	return nil
 }
 
 // Switch to the directory where the sidebar cursor is located

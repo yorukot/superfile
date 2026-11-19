@@ -171,11 +171,13 @@ enable_md5_checksum = false
 zoxide_support = false
 
 #-- File opening rules
-# Map file extensions to commands used to open them.
-# The file path will be appended as the last argument.
+# Map file extensions to one or more applications.
+# Legacy string entries remain supported. Use an array of inline tables for a
+# menu with multiple applications. The file path is always passed as the last
+# argument. Set terminal = true for applications that need control of the TTY.
 # MUST BE IN THE VERY END OF THE FILE BECAUSE TOML CANNOT CLOSE TABLES
 # Example:
 #   png = "feh"
-#   pdf = "zathura"
-#   conf = "nvim"
+#   pdf = [{ name = "Zathura", command = "zathura" }, { name = "MuPDF", command = "mupdf" }]
+#   conf = [{ name = "Neovim", command = "nvim", args = ["--clean"], terminal = true }]
 [open_with]
