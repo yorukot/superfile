@@ -596,7 +596,7 @@ NOTE: This release is a hotfix to resolve an unusual issue on Windows.
 - Redesign hotkeys [`#116`](https://github.com/yorukot/superfile/issues/116)
 - Create file or folder using same hotkey [`#116`](https://github.com/yorukot/superfile/issues/116)
 - More dynamic footer height adaptive [`66a3fb4`](https://github.com/yorukot/superfile/commit/66a3fb4feba31ead2224938b1a18a431a55ac9cc)
-- Confirm delete files [``]()
+- Confirm delete files [``](<>)
 - Support windows for get well known directories [`d4db820`](https://github.com/yorukot/superfile/commit/d4db820ba839603df209dcce05468902739f301f)
 - Support text file preview [`#26`](https://github.com/yorukot/superfile/issues/26)
 - Support directory preview [`#26`](https://github.com/yorukot/superfile/issues/26)

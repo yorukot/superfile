@@ -56,6 +56,7 @@ head:
 - 新增建立新檔案時開啟的 popup 截圖（Ctrl+n）
 - 新增使用您的主題預覽圖片時的截圖。
 - 新增 shell command 成功與失敗時的截圖。
+
 <details>
 <summary>範例：</summary>
 

@@ -56,6 +56,7 @@ Before starting, make sure the theme you want to add doesn’t already exist.
 - Add a screenshot of popup that opens when you create a new file (Ctrl+n)
 - Add a screenshot of image being previewed using your theme.
 - Add a screenshot of successful and unsuccessful shell command.
+
 <details>
 <summary>Example:</summary>
 

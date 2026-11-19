@@ -158,26 +158,32 @@ func TestZipSourcesInvalidTarget(t *testing.T) {
 }
 
 func TestGetZipArchiveName(t *testing.T) {
-	t.Run("Ordinary file with extension", func(t *testing.T) {
-		actual, err := getZipArchiveName("test.doc")
-		require.NoError(t, err)
-		require.Equal(t, "test.zip", actual)
-	})
-	t.Run("Ordinary file without extension", func(t *testing.T) {
-		actual, err := getZipArchiveName("test")
-		require.NoError(t, err)
-		require.Equal(t, "test.zip", actual)
-	})
-	t.Run("Hidden file without extension", func(t *testing.T) {
-		actual, err := getZipArchiveName(".dockerignore")
-		require.NoError(t, err)
-		require.Equal(t, ".dockerignore.zip", actual)
-	})
-	t.Run("Hidden file with extension", func(t *testing.T) {
-		actual, err := getZipArchiveName(".dockerignore.old")
-		require.NoError(t, err)
-		require.Equal(t, ".dockerignore.zip", actual)
-	})
+	t.Chdir(t.TempDir())
+
+	tests := []struct {
+		name string
+		base string
+		want string
+	}{
+		{name: "regular file", base: "test.txt", want: "test.zip"},
+		{name: "document file", base: "test.doc", want: "test.zip"},
+		{name: "dotfile", base: ".test", want: ".test.zip"},
+		{name: "no extension", base: "test", want: "test.zip"},
+		{name: "dotfile with extension", base: ".test.txt", want: ".test.zip"},
+		{name: "dockerignore file", base: ".dockerignore", want: ".dockerignore.zip"},
+		{name: "dockerignore with extension", base: ".dockerignore.old", want: ".dockerignore.zip"},
+		{name: "two leading dots", base: "..test", want: "..test.zip"},
+		{name: "three leading dots", base: "...test", want: "...test.zip"},
+		{name: "multiple leading dots with extension", base: "..test.txt", want: "..test.zip"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := getZipArchiveName(tt.base)
+			require.NoError(t, err)
+			require.Equal(t, tt.want, got)
+		})
+	}
+
 	t.Run("empty filename", func(t *testing.T) {
 		_, err := getZipArchiveName("")
 		require.ErrorContains(t, err, "empty filename to compress")
