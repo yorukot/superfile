@@ -66,13 +66,13 @@ func TestIsKittyCapable(t *testing.T) {
 		},
 		{
 			name: "TERM_PROGRAM from allowlist",
-			env:  map[string]string{"TERM_PROGRAM": "WezTerm", "TERM": "xterm-256color"},
+			env:  map[string]string{"TERM_PROGRAM": "Ghostty", "TERM": "xterm-256color"},
 			want: true,
 		},
 		{
-			name: "wezterm alone via env hint",
+			name: "wezterm env hint is not treated as kitty-capable",
 			env:  map[string]string{"WEZTERM_EXECUTABLE": "/opt/wezterm", "TERM": "xterm-256color"},
-			want: true,
+			want: false,
 		},
 	}
 

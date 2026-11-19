@@ -1,6 +1,7 @@
 package filepreview
 
 import (
+	"errors"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -12,13 +13,17 @@ import (
 )
 
 const (
-	apcStart             = "\x1b_"
-	apcEnd               = "\x1b\\"
-	tmuxPassthroughStart = "\x1bPtmux;\x1b\x1b" //nolint:gosec // tmux passthrough prefix, not a credential.
-	tmuxPassthroughEnd   = "\x1b\\"
-	tmuxMinMajorVersion  = 3
-	tmuxMinMinorVersion  = 3
-	tmuxInputBufferSize  = 104857600
+	apcStart                    = "\x1b_"
+	apcEnd                      = "\x1b\\"
+	tmuxPassthroughStart        = "\x1bPtmux;\x1b\x1b" //nolint:gosec // tmux passthrough prefix, not a credential.
+	tmuxPassthroughEnd          = "\x1b\\"
+	tmuxMinMajorVersion         = 3
+	tmuxMinMinorVersion         = 3
+	tmuxAllMajorVersion         = 3
+	tmuxAllMinorVersion         = 4
+	tmuxInputBufferMajorVersion = 3
+	tmuxInputBufferMinorVersion = 6
+	tmuxInputBufferSize         = 104857600
 )
 
 // tmuxPassthroughOnce/tmuxPassthroughOK cache the result of the one-time tmux setup.
@@ -29,19 +34,27 @@ var (
 
 func ensureTmuxPassthrough() bool {
 	tmuxPassthroughOnce.Do(func() {
-		if !inTmux() || !tmuxVersionSupportsPassthrough() {
+		if !inTmux() {
 			return
 		}
-		//nolint:gosec // tmux command and arguments are fixed constants.
-		cmd := exec.Command("tmux", "set", "-p", "allow-passthrough", "all",
-			";", "set", "-s", "input-buffer-size", strconv.Itoa(tmuxInputBufferSize))
+		major, minor, ok := tmuxVersion()
+		if !ok || !tmuxVersionAtLeast(major, minor, tmuxMinMajorVersion, tmuxMinMinorVersion) {
+			return
+		}
+
+		passthroughValue := tmuxAllowPassthroughValue(major, minor)
+		args := []string{"set", "-p", "allow-passthrough", passthroughValue}
+		if tmuxSupportsInputBufferSize(major, minor) {
+			args = append(args, ";", "set", "-s", "input-buffer-size", strconv.Itoa(tmuxInputBufferSize))
+		}
+
+		cmd := exec.Command("tmux", args...)
 		if err := cmd.Run(); err != nil {
 			slog.Error("Failed to enable tmux passthrough options", "error", err)
 			return
 		}
 		tmuxPassthroughOK = true
-		slog.Debug("tmux passthrough enabled", "allow-passthrough", "all",
-			"input-buffer-size", tmuxInputBufferSize)
+		slog.Debug("tmux passthrough enabled", "allow-passthrough", passthroughValue)
 	})
 	return tmuxPassthroughOK
 }
@@ -53,17 +66,29 @@ func inTmux() bool {
 		strings.HasPrefix(os.Getenv("TERM"), "screen")
 }
 
-func tmuxVersionSupportsPassthrough() bool {
+func tmuxVersion() (int, int, bool) {
 	out, err := exec.Command("tmux", "-V").Output()
 	if err != nil {
-		return false
+		return 0, 0, false
 	}
-	major, minor, ok := parseTmuxVersion(string(out))
-	if !ok {
-		return false
+	return parseTmuxVersion(string(out))
+}
+
+func tmuxVersionAtLeast(major, minor, wantMajor, wantMinor int) bool {
+	return major > wantMajor || (major == wantMajor && minor >= wantMinor)
+}
+
+// tmuxSupportsInputBufferSize reports whether tmux supports input-buffer-size (3.6+).
+func tmuxSupportsInputBufferSize(major, minor int) bool {
+	return tmuxVersionAtLeast(major, minor, tmuxInputBufferMajorVersion, tmuxInputBufferMinorVersion)
+}
+
+// tmuxAllowPassthroughValue returns "all" on tmux 3.4+, otherwise "on".
+func tmuxAllowPassthroughValue(major, minor int) string {
+	if tmuxVersionAtLeast(major, minor, tmuxAllMajorVersion, tmuxAllMinorVersion) {
+		return "all"
 	}
-	return major > tmuxMinMajorVersion ||
-		(major == tmuxMinMajorVersion && minor >= tmuxMinMinorVersion)
+	return "on"
 }
 
 func parseTmuxVersion(output string) (int, int, bool) {
@@ -95,11 +120,19 @@ func parseTmuxVersion(output string) (int, int, bool) {
 	return 0, 0, false
 }
 
-func tmuxPassthroughWrap(raw string) string {
-	if raw == "" || !ensureTmuxPassthrough() {
-		return raw
+// tmuxPassthroughWrap wraps APC data. Outside tmux it returns raw unchanged;
+// inside tmux a failed setup returns an error so callers can fall back.
+func tmuxPassthroughWrap(raw string) (string, error) {
+	if raw == "" {
+		return "", nil
 	}
-	return tmuxWrap(raw)
+	if !inTmux() {
+		return raw, nil
+	}
+	if !ensureTmuxPassthrough() {
+		return "", errors.New("tmux passthrough setup failed")
+	}
+	return tmuxWrap(raw), nil
 }
 
 // tmuxWrap performs the actual passthrough wrapping.
