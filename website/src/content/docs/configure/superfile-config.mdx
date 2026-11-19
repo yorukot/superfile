@@ -226,6 +226,10 @@ Percentage of file panel width allocated to file names (25-100). Higher values g
 
 `''` => Use the builtin syntax highlighting for code files with _chroma_. `'bat'` => Use syntax highlighting provided by the [`bat`](https://github.com/sharkdp/bat) command line tool.
 
+- ###### bat_flags
+
+Command-line flags passed to `bat` when `code_previewer = 'bat'`. The default is `['--plain', '--force-colorization']`. Customize this list if those flags conflict with options in your `bat` configuration file.
+
 - ###### nerdfont
 
 `true` => Use nerdfont for directories and file icons.
