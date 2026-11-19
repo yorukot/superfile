@@ -1698,8 +1698,8 @@ SOFTWARE.
 
 ## github.com/ebitengine/purego
 
-- Version: v0.10.0
-- License: [Apache-2.0](https://github.com/ebitengine/purego/blob/v0.10.0/LICENSE)
+- Version: v0.11.2
+- License: [Apache-2.0](https://github.com/ebitengine/purego/blob/v0.11.2/LICENSE)
 
 ```text
                                  Apache License
@@ -4383,8 +4383,8 @@ license of the derivative portions.
 
 ## github.com/shirou/gopsutil/v4
 
-- Version: v4.26.5
-- License: [BSD-3-Clause](https://github.com/shirou/gopsutil/blob/v4.26.5/LICENSE)
+- Version: v4.26.10
+- License: [BSD-3-Clause](https://github.com/shirou/gopsutil/blob/v4.26.10/LICENSE)
 
 ```text
 gopsutil is distributed under BSD license reproduced below.
@@ -5348,8 +5348,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## golang.org/x/image
 
-- Version: v0.41.0
-- License: [BSD-3-Clause](https://cs.opensource.google/go/x/image/+/v0.41.0:LICENSE)
+- Version: v0.48.0
+- License: [BSD-3-Clause](https://cs.opensource.google/go/x/image/+/v0.48.0:LICENSE)
 
 ```text
 Copyright 2009 The Go Authors.
@@ -5456,8 +5456,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## golang.org/x/sys/unix
 
-- Version: v0.47.0
-- License: [BSD-3-Clause](https://cs.opensource.google/go/x/sys/+/v0.47.0:LICENSE)
+- Version: v0.50.0
+- License: [BSD-3-Clause](https://cs.opensource.google/go/x/sys/+/v0.50.0:LICENSE)
 
 ```text
 Copyright 2009 The Go Authors.
@@ -5492,8 +5492,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## golang.org/x/sys/windows
 
-- Version: v0.47.0
-- License: [BSD-3-Clause](https://cs.opensource.google/go/x/sys/+/v0.47.0:LICENSE)
+- Version: v0.50.0
+- License: [BSD-3-Clause](https://cs.opensource.google/go/x/sys/+/v0.50.0:LICENSE)
 
 ```text
 Copyright 2009 The Go Authors.
