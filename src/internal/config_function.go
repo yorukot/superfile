@@ -27,8 +27,8 @@ import (
 // initialConfig load and handle all configuration files (spf config,Hotkeys
 // themes) setted up. Processes input directories and returns toggle states.
 
-// This is the only usecase of named returns, distinguish between multiple return values
-func initialConfig(firstPanelPaths []string) (toggleDotFile bool, //nolint: nonamedreturns // See above
+//nolint:nonamedreturns // Named results distinguish the two boolean toggle states.
+func initialConfig(firstPanelPaths []string) (toggleDotFile bool,
 	toggleFooter bool, zClient *zoxidelib.Client) {
 	// Open log stream
 	file, err := os.OpenFile(variable.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, utils.LogFilePerm)
