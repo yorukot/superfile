@@ -10,7 +10,8 @@
 		"start": "astro dev"
 	},
 	"dependencies": {
-		"@astrojs/mdx": "^5.0.4",
+		"@astrojs/markdown-remark": "^7.3.10",
+		"@astrojs/mdx": "^8.1.6",
 		"@astrojs/sitemap": "^3.4.1",
 		"@lucide/astro": "^1.14.0",
 		"astro": "^7.0.0",
