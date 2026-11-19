@@ -31,10 +31,9 @@ $EDITOR CONFIG_PATH
 
 ### Step 3: Enable the Plugin
 
-Find the plugin section in your config and change its value from `false` to `true`:
+Find the plugin setting in your config and change its value from `false` to `true`:
 
 ```diff
-[plugins]
 - metadata = false
 + metadata = true
 ```
@@ -55,6 +54,7 @@ Find the plugin section in your config and change its value from `false` to `tru
 
 ```toml
 metadata = false
+enable_md5_checksum = false
 zoxide_support = false
 ```
 

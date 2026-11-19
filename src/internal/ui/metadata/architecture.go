@@ -4,8 +4,11 @@ import (
 	"debug/elf"
 	"debug/macho"
 	"debug/pe"
+	"encoding/binary"
 	"errors"
 	"fmt"
+	"io"
+	"os"
 	"strings"
 )
 
@@ -24,17 +27,101 @@ const (
 
 var errNotBinary = errors.New("not a recognized binary format")
 
+// binaryFormat is a cheap classification based on a file's leading magic bytes.
+type binaryFormat int
+
+const (
+	formatUnknown binaryFormat = iota
+	formatELF
+	formatPE
+	formatMachO
+)
+
+// detectBinaryFormat reads at most the first 4 bytes of the file and decides
+// which (if any) binary parser is worth invoking.
+//
+// This gate matters: debug/pe accepts files WITHOUT an "MZ" header as raw COFF
+// objects, so calling pe.Open on an arbitrary file (e.g. a large video)
+// misinterprets its leading bytes as section/symbol counts and can read and
+// allocate memory proportional to the file's size before failing (issue #1550).
+// The debug/* parsers are documented as unsuitable for adversarial/arbitrary
+// inputs, so only hand them files whose magic bytes plausibly match.
+func detectBinaryFormat(filePath string) binaryFormat {
+	f, err := os.Open(filePath)
+	if err != nil {
+		return formatUnknown
+	}
+	defer f.Close()
+
+	var magic [4]byte
+	if _, err := io.ReadFull(f, magic[:]); err != nil {
+		return formatUnknown
+	}
+
+	switch {
+	case magic == [4]byte{0x7f, 'E', 'L', 'F'}:
+		return formatELF
+	case magic[0] == 'M' && magic[1] == 'Z':
+		return formatPE
+	case isCOFFMachine(binary.LittleEndian.Uint16(magic[:2])):
+		// Raw COFF objects (no MZ stub) begin directly with a known machine type.
+		return formatPE
+	case isMachOMagic(binary.BigEndian.Uint32(magic[:])):
+		return formatMachO
+	default:
+		return formatUnknown
+	}
+}
+
+// isCOFFMachine reports whether m is a COFF machine type superfile can display.
+func isCOFFMachine(m uint16) bool {
+	switch m {
+	case pe.IMAGE_FILE_MACHINE_I386, pe.IMAGE_FILE_MACHINE_AMD64,
+		pe.IMAGE_FILE_MACHINE_ARM, pe.IMAGE_FILE_MACHINE_ARMNT, pe.IMAGE_FILE_MACHINE_ARM64,
+		pe.IMAGE_FILE_MACHINE_RISCV32, pe.IMAGE_FILE_MACHINE_RISCV64, pe.IMAGE_FILE_MACHINE_RISCV128:
+		return true
+	default:
+		return false
+	}
+}
+
+// Byte-swapped forms of the Mach-O magics, produced when the file was written
+// for the opposite byte order to the reader. Apple's headers call these the
+// CIGAM values ("magic" reversed); the standard library only names the native
+// forms, so they are spelled out here rather than left as bare literals.
+const (
+	machoCigam32  uint32 = 0xcefaedfe // macho.Magic32, bytes reversed
+	machoCigam64  uint32 = 0xcffaedfe // macho.Magic64, bytes reversed
+	machoCigamFat uint32 = 0xbebafeca // macho.MagicFat, bytes reversed
+)
+
+// isMachOMagic reports whether m is a Mach-O (thin or universal) magic number,
+// in either byte order.
+func isMachOMagic(m uint32) bool {
+	switch m {
+	case macho.Magic32, macho.Magic64, macho.MagicFat,
+		machoCigam32, machoCigam64, machoCigamFat:
+		return true
+	default:
+		return false
+	}
+}
+
 func GetBinaryArchitecture(filePath string) (string, error) {
-	if arch, err := getELFArchitecture(filePath); err == nil {
-		return arch, nil
-	}
-
-	if arch, err := getPEArchitecture(filePath); err == nil {
-		return arch, nil
-	}
-
-	if arch, err := getMachOArchitecture(filePath); err == nil {
-		return arch, nil
+	switch detectBinaryFormat(filePath) {
+	case formatELF:
+		if arch, err := getELFArchitecture(filePath); err == nil {
+			return arch, nil
+		}
+	case formatPE:
+		if arch, err := getPEArchitecture(filePath); err == nil {
+			return arch, nil
+		}
+	case formatMachO:
+		if arch, err := getMachOArchitecture(filePath); err == nil {
+			return arch, nil
+		}
+	case formatUnknown:
 	}
 
 	return "", errNotBinary

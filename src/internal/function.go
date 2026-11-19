@@ -3,6 +3,7 @@ package internal
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -101,6 +102,26 @@ func countFiles(dirPath string) (int, error) {
 			return err
 		}
 		if !info.IsDir() {
+			count++
+		}
+		return nil
+	})
+
+	return count, err
+}
+
+func countReadableFiles(dirPath string) (int, error) {
+	count := 0
+
+	err := filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			if err = checkFileReadable(path); err != nil {
+				slog.Error("the file is not readable", "error", err)
+				return fmt.Errorf("the file is not readable: %s", err.Error())
+			}
 			count++
 		}
 		return nil

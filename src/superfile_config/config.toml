@@ -163,7 +163,7 @@ border_middle_right = '┤'
 metadata = false
 
 #-- MD5 Checksum Generation
-# Requires: md5sum
+# No external dependency required
 enable_md5_checksum = false
 #
 #-- Zoxide Support - Smart directory navigation!

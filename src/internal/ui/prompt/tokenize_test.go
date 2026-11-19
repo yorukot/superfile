@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"runtime"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -83,15 +82,10 @@ func Test_tokenizePromptCommand(t *testing.T) {
 	}
 }
 
-// Note : resolving shell subsitution is flaky in windows.
-// It usually times out, and environment variables sometimes dont work.
 func Test_resolveShellSubstitution(t *testing.T) {
-	timeout := shellSubTimeoutInTests
 	newLineSuffix := "\n"
 	noopCommand := "true"
 	if runtime.GOOS == "windows" {
-		// Substitution is slow in windows
-		timeout = 2 * time.Second
 		// Windows uses \r\n as new line for echo
 		newLineSuffix = "\r\n"
 		noopCommand = "cd ."
@@ -182,7 +176,7 @@ func Test_resolveShellSubstitution(t *testing.T) {
 
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := resolveShellSubstitution(timeout, tt.command, defaultTestCwd)
+			result, err := resolveShellSubstitution(shellSubSuccessTimeoutInTests, tt.command, defaultTestCwd)
 
 			assert.Equal(t, tt.expectedResult, result)
 			if err != nil {
@@ -195,7 +189,9 @@ func Test_resolveShellSubstitution(t *testing.T) {
 	}
 
 	t.Run("Testing shell substitution timeout", func(t *testing.T) {
-		result, err := resolveShellSubstitution(timeout, "$(sleep 2)", defaultTestCwd)
+		// sleep runs for 20x the budget, so the deadline is what ends this, not
+		// a slow shell. sleep is a Start-Sleep alias in powershell.
+		result, err := resolveShellSubstitution(shellSubTimeoutInTests, "$(sleep 2)", defaultTestCwd)
 		assert.Empty(t, result)
 		require.Error(t, err)
 		require.ErrorIs(t, err, context.DeadlineExceeded)

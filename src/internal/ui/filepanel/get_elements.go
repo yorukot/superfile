@@ -31,7 +31,7 @@ func (m *Model) getDirectoryElements(displayDotFile bool) []Element {
 	if len(dirEntries) == 0 {
 		return nil
 	}
-	return sortFileElement(m.SortKind, m.SortReversed, dirEntries, m.Location)
+	return m.sortFileElements(dirEntries, displayDotFile)
 }
 
 // getDirectoryElementsBySearch returns filtered directory elements based on search string
@@ -40,10 +40,6 @@ func (m *Model) getDirectoryElementsBySearch(displayDotFile bool) []Element {
 	items, err := os.ReadDir(m.Location)
 	if err != nil {
 		slog.Error("Error while return folder element function", "error", err)
-		return nil
-	}
-
-	if len(items) == 0 {
 		return nil
 	}
 
@@ -62,6 +58,9 @@ func (m *Model) getDirectoryElementsBySearch(displayDotFile bool) []Element {
 		fileAndDirectories = append(fileAndDirectories, item.Name())
 		folderElementMap[item.Name()] = item
 	}
+	if len(fileAndDirectories) == 0 {
+		return nil
+	}
 	// https://github.com/reinhrst/fzf-lib/blob/main/core.go#L43
 	// fzf returns matches ordered by score; we subsequently sort by the chosen sort option.
 	fzfResults := utils.FzfSearch(searchString, fileAndDirectories)
@@ -71,7 +70,7 @@ func (m *Model) getDirectoryElementsBySearch(displayDotFile bool) []Element {
 		dirElements = append(dirElements, resultItem)
 	}
 
-	return sortFileElement(m.SortKind, m.SortReversed, dirElements, m.Location)
+	return m.sortFileElements(dirElements, displayDotFile)
 }
 
 // Helper to decide whether to skip updating a panel this tick.

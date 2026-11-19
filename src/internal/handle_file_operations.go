@@ -12,6 +12,7 @@ import (
 	"time"
 
 	variable "github.com/yorukot/superfile/src/config"
+	"github.com/yorukot/superfile/src/internal/trash"
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 	"github.com/yorukot/superfile/src/internal/ui/spferror"
 	"github.com/yorukot/superfile/src/pkg/utils"
@@ -21,6 +22,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
 
 	tea "charm.land/bubbletea/v2"
+
 	"github.com/atotto/clipboard"
 )
 
@@ -153,7 +155,7 @@ func (m *model) getDeleteCmd(permDelete bool) tea.Cmd {
 		items = []string{panel.GetFocusedItem().Location}
 	}
 
-	useTrash := m.hasTrash && !isExternalDiskPath(panel.Location) && !permDelete
+	useTrash := m.hasTrash && trash.Available(panel.Location) && !permDelete
 
 	reqID := m.nextIoReqCnt()
 	slog.Debug("Submitting delete request", "id", reqID, "items cnt", len(items))
@@ -188,7 +190,10 @@ func makeDeleteProcessor(process processbar.Process,
 		}
 		deleteFunc := os.RemoveAll
 		if useTrash {
-			deleteFunc = moveToTrash
+			deleteFunc = func(item string) error {
+				_, err := trash.Move(item)
+				return err
+			}
 		}
 		for i, item := range items {
 			err := deleteFunc(item)
@@ -227,7 +232,7 @@ func (m *model) getDeleteTriggerCmd(deletePermanent bool) tea.Cmd {
 		content := common.TrashWarnContent
 		action := notify.DeleteAction
 
-		if !m.hasTrash || isExternalDiskPath(panel.Location) || deletePermanent {
+		if !m.hasTrash || !trash.Available(panel.Location) || deletePermanent {
 			title = common.PermanentDeleteWarnTitle
 			content = common.PermanentDeleteWarnContent
 			action = notify.PermanentDeleteAction
@@ -449,40 +454,25 @@ func (m *model) getExtractFileCmd() tea.Cmd {
 	}
 }
 
-func (m *model) getCompressSelectedFilesCmd() tea.Cmd {
-	panel := m.getFocusedFilePanel()
-
-	if panel.Empty() {
-		return nil
+func checkFileReadable(filename string) error {
+	file, err := os.Open(filename)
+	if err != nil {
+		return err
 	}
-	var filesToCompress []string
-	var firstFile string
-
-	if panel.SelectedCount() == 0 {
-		firstFile = panel.GetFocusedItem().Location
-		filesToCompress = append(filesToCompress, firstFile)
-	} else {
-		firstFile = panel.GetFirstSelectedLocation()
-		filesToCompress = panel.GetSelectedLocationsSortedAsVisible()
-	}
-
-	reqID := m.nextIoReqCnt()
-
-	return func() tea.Msg {
-		zipName, err := getZipArchiveName(filepath.Base(firstFile))
-		if err != nil {
-			slog.Error("Error in getZipArchiveName", "error", err)
-			return NewCompressOperationMsg(processbar.Failed, reqID)
-		}
-		zipPath := filepath.Join(panel.Location, zipName)
-		if err := zipSources(filesToCompress, zipPath, &m.processBarModel); err != nil {
-			slog.Error("Error in zipping files", "error", err)
-			return NewCompressOperationMsg(processbar.Failed, reqID)
-		}
-		return NewCompressOperationMsg(processbar.Successful, reqID)
-	}
+	defer file.Close()
+	return nil
 }
 
+// getSelectedOrFocusedPaths returns the newline-separated locations of all selected items in the panel,
+// or the focused item's location if no items are selected.
+func (m *model) getSelectedOrFocusedPaths(panel *filepanel.Model) string {
+	if panel.SelectedCount() > 0 {
+		return strings.Join(panel.GetSelectedLocationsSortedAsVisible(), "\n")
+	}
+	return panel.GetFocusedItem().Location
+}
+
+// chooserFileWriteAndQuit writes the given path string to variable.ChooserFile and initiates quitting the model.
 func (m *model) chooserFileWriteAndQuit(path string) error {
 	// Attempt to write to the file
 	err := os.WriteFile(variable.ChooserFile, []byte(path), utils.ConfigFilePerm)
@@ -493,7 +483,8 @@ func (m *model) chooserFileWriteAndQuit(path string) error {
 	return nil
 }
 
-// Open file with default editor
+// openFileWithEditor opens the selected or focused file with the default editor, or writes
+// paths to the chooser file and exits if --chooser-file mode is enabled.
 func (m *model) openFileWithEditor() tea.Cmd {
 	panel := m.getFocusedFilePanel()
 	// Check if panel is empty
@@ -502,7 +493,7 @@ func (m *model) openFileWithEditor() tea.Cmd {
 	}
 
 	if variable.ChooserFile != "" {
-		err := m.chooserFileWriteAndQuit(panel.GetFocusedItem().Location)
+		err := m.chooserFileWriteAndQuit(m.getSelectedOrFocusedPaths(panel))
 		if err == nil {
 			return nil
 		}
@@ -531,7 +522,7 @@ func (m *model) openFileWithEditor() tea.Cmd {
 	//nolint:gocritic // appendAssign: intentionally creating a new slice
 	args := append(parts[1:], panel.GetFocusedItem().Location)
 
-	c := exec.Command(cmd, args...)
+	c := exec.Command(cmd, args...) //nolint:gosec // Editor command is intentionally user-configurable.
 
 	return tea.ExecProcess(c, func(err error) tea.Msg {
 		return editorFinishedMsg{err}
@@ -577,21 +568,39 @@ func (m *model) openDirectoryWithEditor() tea.Cmd {
 // Copy file path
 // TODO: This is also an IO operations, do it via tea.Cmd
 func (m *model) copyPath() {
-	panel := m.getFocusedFilePanel()
-
-	if panel.Empty() {
+	pathText := m.copyPathText()
+	if pathText == "" {
 		return
 	}
 
-	if err := clipboard.WriteAll(panel.GetFocusedItem().Location); err != nil {
+	if err := m.writeClipboard(pathText); err != nil {
 		slog.Error("Error while copy path", "error", err)
 	}
+}
+
+// copyPathText returns the path text to copy, containing all selected paths or the focused path.
+func (m *model) copyPathText() string {
+	panel := m.getFocusedFilePanel()
+
+	if panel.Empty() {
+		return ""
+	}
+
+	return m.getSelectedOrFocusedPaths(panel)
 }
 
 // TODO: This is also an IO operations, do it via tea.Cmd
 func (m *model) copyPWD() {
 	panel := m.getFocusedFilePanel()
-	if err := clipboard.WriteAll(panel.Location); err != nil {
+	if err := m.writeClipboard(panel.Location); err != nil {
 		slog.Error("Error while copy present working directory", "error", err)
 	}
+}
+
+func (m *model) writeClipboard(text string) error {
+	if m.clipboardWriter != nil {
+		return m.clipboardWriter(text)
+	}
+
+	return clipboard.WriteAll(text)
 }

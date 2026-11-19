@@ -2,6 +2,7 @@ import logging
 from  tempfile import TemporaryDirectory
 from pathlib import Path
 import os
+import platform
 from io import StringIO
 
 class TestFSManager:
@@ -12,6 +13,11 @@ class TestFSManager:
         self.logger.debug("Initialized %s", self.__class__.__name__) 
         self.temp_dir_obj = TemporaryDirectory()
         self.temp_dir = Path(self.temp_dir_obj.name)
+        self.old_xdg_data_home = os.environ.get("XDG_DATA_HOME")
+        if platform.system() == "Linux":
+            xdg_data_home = self.temp_dir / "xdg_data_home"
+            xdg_data_home.mkdir(parents=True, exist_ok=True)
+            os.environ["XDG_DATA_HOME"] = str(xdg_data_home)
     
     def abspath(self, relative_path : Path) -> Path:
         return self.temp_dir / relative_path
@@ -61,6 +67,11 @@ class TestFSManager:
         """Cleaup the temporary directory
         Its okay to forget it though, it will be cleaned on program exit then.
         """
+        if platform.system() == "Linux":
+            if self.old_xdg_data_home is None:
+                os.environ.pop("XDG_DATA_HOME", None)
+            else:
+                os.environ["XDG_DATA_HOME"] = self.old_xdg_data_home
         self.temp_dir_obj.cleanup()
 
     def __repr__(self) -> str:

@@ -79,7 +79,7 @@ func (m *Model) renderImagePreview(r *rendering.Renderer, itemPath string, previ
 	}
 
 	if err != nil {
-		slog.Error("Error convert image to ansi", "error", err)
+		slog.Error("Error converting image to ANSI", "error", err)
 		return r.AddLines(common.FilePreviewImageConversionErrorText).Render(), kittyClear
 	}
 

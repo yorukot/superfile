@@ -5,10 +5,10 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 
 	tea "charm.land/bubbletea/v2"
-	"github.com/rkoesters/xdg/trash"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -91,29 +91,63 @@ func TestFileCreation(t *testing.T) {
 	}
 
 	for _, tt := range testdata {
-		m := defaultTestModel(testChildDir)
+		t.Run(tt.name, func(t *testing.T) {
+			m := defaultTestModel(testChildDir)
+			p := NewTestTeaProgWithEventLoop(t, m)
+			p.SendKey(common.Hotkeys.FilePanelItemCreate[0])
 
-		TeaUpdate(m, nil)
-		TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.FilePanelItemCreate[0]))
+			require.Eventually(t, func() bool {
+				return m.typingModal.open
+			}, DefaultTestTimeout, DefaultTestTick, "Typing modal never opened")
 
-		assert.Empty(t, m.typingModal.errorMesssage)
+			p.SendKey(tt.fileName)
+			p.SendKey(common.Hotkeys.ConfirmTyping[0])
 
-		m.typingModal.textInput.SetValue(tt.fileName)
+			require.Eventually(t, func() bool {
+				return !m.typingModal.open
+			}, DefaultTestTimeout, DefaultTestTick, "Typing modal never closed")
 
-		TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.ConfirmTyping[0]))
+			if tt.expectedError {
+				require.Eventually(t, func() bool {
+					return m.spfError.IsOpen()
+				}, DefaultTestTimeout, DefaultTestTick, "SPF error modal never opened for input: %q", tt.fileName)
 
-		if tt.expectedError {
-			assert.NotEmpty(t, m.typingModal.errorMesssage, "expected an error for input: %q", tt.fileName)
-		} else {
-			assert.Empty(t, m.typingModal.errorMesssage, "expected an error for input: %q", tt.fileName)
-			assert.FileExists(
-				t,
-				filepath.Join(testChildDir, tt.fileName),
-				"expected file to be created: %q",
-				tt.fileName,
-			)
-		}
+				p.SendKey(common.Hotkeys.Quit[0])
+				require.Eventually(t, func() bool {
+					return !m.spfError.IsOpen()
+				}, DefaultTestTimeout, DefaultTestTick, "SPF error modal never closed")
+				return
+			}
+
+			targetFile := filepath.Join(testChildDir, tt.fileName)
+			assert.Eventually(t, func() bool {
+				_, err := os.Lstat(targetFile)
+				return err == nil
+			}, DefaultTestTimeout, DefaultTestTick, "Target file did not get created : %q", targetFile)
+			assert.False(t, m.spfError.IsOpen(), "Unexpected SPF error for input: %q", tt.fileName)
+		})
 	}
+
+	// This is to verify that even if m.typingModal.location is changed while the command is being executed
+	// the create still works for older location set in typingModal
+	t.Run("create request snapshots destination", func(t *testing.T) {
+		originalLocation := t.TempDir()
+		changedLocation := t.TempDir()
+		m := defaultTestModel(originalLocation)
+		m.panelCreateNewFile()
+		m.typingModal.textInput.SetValue("captured.txt")
+
+		cmd := m.getCreateCmd()
+		require.NotNil(t, cmd)
+		assert.False(t, m.typingModal.open)
+
+		m.typingModal.location = changedLocation
+		msg := cmd()
+		require.IsType(t, CreateOperationMsg{}, msg)
+
+		assert.FileExists(t, filepath.Join(originalLocation, "captured.txt"))
+		assert.NoFileExists(t, filepath.Join(changedLocation, "captured.txt"))
+	})
 }
 
 func TestFileRename(t *testing.T) {
@@ -198,8 +232,28 @@ func isTrashed(fileAbsPath string) bool {
 		_, err := os.Stat(filepath.Join(variable.DarwinTrashDirectory, fileName))
 		return err == nil
 	case utils.OsLinux:
-		_, err := trash.Stat(fileAbsPath)
-		return err == nil
+		entries, err := os.ReadDir(variable.LinuxTrashDirectoryInfo)
+		if err != nil {
+			return false
+		}
+
+		for _, entry := range entries {
+			if entry.IsDir() {
+				continue
+			}
+
+			data, err := os.ReadFile(filepath.Join(variable.LinuxTrashDirectoryInfo, entry.Name()))
+			if err != nil {
+				continue
+			}
+
+			for _, line := range strings.Split(string(data), "\n") {
+				if line == "Path="+fileAbsPath {
+					return true
+				}
+			}
+		}
+		return false
 	default:
 		return false
 	}
@@ -265,7 +319,7 @@ func TestFileDelete(t *testing.T) {
 			// Window's trash is not flexible enough for the check.
 			// Sorry windows
 			if runtime.GOOS == utils.OsDarwin || runtime.GOOS == utils.OsLinux {
-				assert.Equal(t, tt.permanentDelete, !isTrashed(filepath.Base(tt.filePath)),
+				assert.Equal(t, tt.permanentDelete, !isTrashed(tt.filePath),
 					"Existence in trash status should be expected only of not permanently deleted")
 			}
 		})

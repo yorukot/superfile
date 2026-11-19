@@ -4,6 +4,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/adrg/xdg"
+
 	"github.com/yorukot/superfile/src/config/icon"
 )
 
@@ -69,4 +71,38 @@ func GetElementIcon(file string, isDir bool, isLink bool, nerdFont bool) icon.St
 	}
 
 	return getFileIcon(file, isLink)
+}
+
+func GetDirectoryIcon(path string, name string, nerdFont bool) string {
+	if !nerdFont {
+		return ""
+	}
+
+	switch path {
+	case xdg.Home:
+		return icon.Home
+	case xdg.UserDirs.Desktop:
+		return icon.Desktop
+	case xdg.UserDirs.Download:
+		return icon.Download
+	case xdg.UserDirs.Documents:
+		return icon.Documents
+	case xdg.UserDirs.Pictures:
+		return icon.Pictures
+	case xdg.UserDirs.Videos:
+		return icon.Videos
+	case xdg.UserDirs.Music:
+		return icon.Music
+	case xdg.UserDirs.Templates:
+		return icon.Templates
+	case xdg.UserDirs.PublicShare:
+		return icon.PublicShare
+	default:
+		result, exists := icon.Folders[name]
+		if !exists {
+			return icon.Directory
+		}
+
+		return result.Icon
+	}
 }

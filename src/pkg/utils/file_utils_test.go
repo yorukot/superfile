@@ -67,6 +67,57 @@ func TestResolveAbsPath(t *testing.T) {
 			path:        filepath.Join(dir2, "~"),
 			expectedRes: filepath.Join(dir1, dir2, "~"),
 		},
+		{
+			name:        "Relative path starting with ~ followed by word",
+			cwd:         filepath.Join(root, dir1),
+			path:        "~backup",
+			expectedRes: filepath.Join(root, dir1, "~backup"),
+		},
+		{
+			name:        "Relative path starting with ~$ (office lock file)",
+			cwd:         filepath.Join(root, dir1),
+			path:        "~$document.docx",
+			expectedRes: filepath.Join(root, dir1, "~$document.docx"),
+		},
+		{
+			name:        "Path starting with ~/",
+			cwd:         filepath.Join(root, dir1),
+			path:        "~/documents",
+			expectedRes: filepath.Join(xdg.Home, "documents"),
+		},
+		{
+			name:        "Just ~/",
+			cwd:         filepath.Join(root, dir1),
+			path:        "~/",
+			expectedRes: xdg.Home,
+		},
+	}
+
+	if runtime.GOOS == "windows" {
+		testdata = append(testdata,
+			struct {
+				name        string
+				cwd         string
+				path        string
+				expectedRes string
+			}{
+				name:        "Path starting with ~\\ on Windows",
+				cwd:         filepath.Join(root, dir1),
+				path:        `~\documents`,
+				expectedRes: filepath.Join(xdg.Home, "documents"),
+			},
+			struct {
+				name        string
+				cwd         string
+				path        string
+				expectedRes string
+			}{
+				name:        "Just ~\\ on Windows",
+				cwd:         filepath.Join(root, dir1),
+				path:        `~\`,
+				expectedRes: xdg.Home,
+			},
+		)
 	}
 
 	for _, tt := range testdata {
@@ -144,6 +195,70 @@ func TestLoadTomlFile(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestLoadTomlFileFixOverwritesStaleTail(t *testing.T) {
+	// The defaults are what LoadTomlFile should use to fill any fields missing
+	// from the user's TOML file.
+	defaultData := strings.Join([]string{
+		"sample_bool = true",
+		"sample_int = 2",
+		"sample_str = \"hello\"",
+		"sample_slice = ['a', 'b']",
+		"",
+	}, "\n")
+
+	// The user file below overrides three fields and omits sample_str. After
+	// fixing, those custom values should remain and only sample_str should come
+	// from the defaults.
+	expectedVal := TestTOMLType{
+		SampleBool:  false,
+		SampleInt:   -1,
+		SampleStr:   "hello",
+		SampleSlice: []string{"custom"},
+	}
+	// The fixed file should be exactly the marshaled target. If old bytes remain
+	// after the write, this equality check will fail.
+	fixedToml, err := toml.Marshal(expectedVal)
+	require.NoError(t, err)
+
+	// Put stale padding after the meaningful TOML so it represents the old file
+	// tail. Before the overwrite/truncate fix, WriteAt would write the shorter
+	// fixed TOML at byte 0 and leave bytes from this tail behind.
+	userToml := strings.Join([]string{
+		"sample_bool = false",
+		"sample_int = -1",
+		"sample_slice = ['custom']",
+		"",
+	}, "\n")
+	originalContent := userToml + strings.Repeat("# stale tail padding\n", 50)
+
+	// Write the intentionally incomplete user TOML to a temp file so the fixer
+	// can safely modify it.
+	testFile := filepath.Join(t.TempDir(), "missing-field.toml")
+	require.NoError(t, os.WriteFile(testFile, []byte(originalContent), ConfigFilePerm))
+
+	// Run the repair path. LoadTomlFile returns a non-fatal TomlLoadError when
+	// it fixes missing fields, so the test expects that error shape.
+	var tomlVal TestTOMLType
+	err = LoadTomlFile(testFile, defaultData, &tomlVal, true, false)
+	var tomlErr *TomlLoadError
+	require.ErrorAs(t, err, &tomlErr)
+	require.True(t, tomlErr.missingFields)
+	require.Equal(t, expectedVal, tomlVal)
+
+	// Confirm the repaired file was fully replaced. If the old tail survived
+	// after writing the shorter TOML, this marker would still be present after
+	// the repaired TOML content.
+	repairedContent, err := os.ReadFile(testFile)
+	require.NoError(t, err)
+	assert.Equal(t, fixedToml, repairedContent)
+	assert.NotContains(t, string(repairedContent), "stale tail padding")
+
+	// Finally, reload the repaired file without fixing.
+	err = LoadTomlFile(testFile, defaultData, &tomlVal, false, false)
+	require.NoError(t, err)
+	assert.Equal(t, expectedVal, tomlVal)
 }
 
 func TestLoadTomlFileIgnorer(t *testing.T) {
@@ -304,7 +419,7 @@ func TestLoadTomlFileIgnorer(t *testing.T) {
 			assert.True(t, tomlErr.missingFields)
 			assert.Equal(t, expectedVal, tomlVal)
 
-			pref := "config file had issues. Its fixed successfully. Original backed up to : "
+			pref := "config file had issues. It's fixed successfully. Original backed up to : "
 
 			assert.True(t, strings.HasPrefix(tomlErr.userMessage, pref), "Unexpectd error : "+tomlErr.Error())
 
@@ -361,6 +476,21 @@ func TestReadFileContent(t *testing.T) {
 			previewLine:   2,
 			expected:      "line1\nline2\n",
 		},
+		{
+			// tabs line up to tab stops so "0123" starts at the same column
+			name:          "tabs expand to tab stops",
+			content:       []byte("abc\t0123\na\t0123\nabcd\tX"),
+			maxLineLength: 100,
+			previewLine:   5,
+			expected:      "abc 0123\na   0123\nabcd    X\n",
+		},
+		{
+			name:          "tab expanded then truncated",
+			content:       []byte("a\t0123"),
+			maxLineLength: 6,
+			previewLine:   5,
+			expected:      "a   01\n",
+		},
 	}
 
 	for i, tt := range testdata {
@@ -371,6 +501,31 @@ func TestReadFileContent(t *testing.T) {
 			result, err := ReadFileContent(testFile, tt.maxLineLength, tt.previewLine)
 			require.NoError(t, err)
 			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestExpandTabs(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{
+			name:     "multi-tab grapheme cluster",
+			input:    "a👩‍💻\tX\tY",
+			expected: "a👩‍💻 X   Y",
+		},
+		{
+			name:     "multi-tab ANSI sequence",
+			input:    "\x1b[1ma\tX\tY\x1b[0m",
+			expected: "\x1b[1ma   X   Y\x1b[0m",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, expandTabs(tt.input))
 		})
 	}
 }

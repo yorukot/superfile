@@ -16,6 +16,16 @@ Superfile supports various plugins to extend its functionality. Below is a compl
 
 - **Config name:** `metadata`
 
+### MD5 Checksum
+
+- **Description:** Show MD5 checksums for regular files in the metadata panel
+
+- **Requirements:** None
+
+- **Config name:** `enable_md5_checksum`
+
+- **Note:** Calculating checksums reads the selected file, so it may be slow for large files.
+
 ### Zoxide
 
 - **Description:** Smart directory jumping integration with zoxide. Navigate to frequently used directories quickly with a searchable modal interface.

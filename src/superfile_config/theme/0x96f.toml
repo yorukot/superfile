@@ -4,7 +4,7 @@
 #                                            #
 ##############################################
 
-# This theme was created by: https://github.com/filipjanevski ! Thank you <3
+# This theme was created by: https://github.com/0x96f ! Thank you <3
 
 # This contains the theme config file for superfile! For more details see:
 # https://superfile.dev/configure/custom-theme/
@@ -28,6 +28,7 @@ full_screen_bg = "#262427"
 #-- Gradient
 # Note: This currently only supports two colors.
 gradient_color = ["#ff7272", "#bcdf59"]
+directory_icon_color = ""
 
 #-- File Panel
 file_panel_fg = "#fcfcfc"

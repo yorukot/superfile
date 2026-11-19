@@ -166,7 +166,7 @@ func LoadPrerenderedVariables() {
 	FilePreviewUnsupportedImageFormatsText = wrapFilePreviewErrorMsg(
 		"Unsupported image formats")
 	FilePreviewImageConversionErrorText = wrapFilePreviewErrorMsg(
-		"Error convert image to ansi")
+		"Error converting image to ANSI")
 	FilePreviewBatNotInstalledText = wrapFilePreviewErrorMsg(
 		"'bat' is not installed or not found")
 	FilePreviewThumbnailGenerationErrorText = wrapFilePreviewErrorMsg(

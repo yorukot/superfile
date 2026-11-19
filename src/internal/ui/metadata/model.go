@@ -3,6 +3,7 @@ package metadata
 import (
 	"fmt"
 
+	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui"
 	"github.com/yorukot/superfile/src/pkg/cache"
 )
@@ -59,25 +60,46 @@ func (m *Model) MetadataLen() int {
 	return len(m.metadata.data)
 }
 
-// Control metadata panel up
-func (m *Model) ListUp() {
-	if m.MetadataLen() == 0 {
+// Move renderIndex by delta rows, wrapping at both ends.
+func (m *Model) moveRenderIndexBy(delta int) {
+	l := m.MetadataLen()
+	if l == 0 {
 		return
 	}
-	if m.renderIndex > 0 {
-		m.renderIndex--
-	} else {
-		m.renderIndex = m.MetadataLen() - 1
+	m.renderIndex = ((m.renderIndex+delta)%l + l) % l
+}
+
+func (m *Model) getPageScrollSize() int {
+	scrollSize := common.Config.PageScrollSize
+	if scrollSize <= 0 {
+		// Use default full page behavior
+		scrollSize = m.height - borderSize
 	}
+	// height can be tiny on small terminals, so keep moving at least one row
+	if scrollSize < 1 {
+		scrollSize = 1
+	}
+	return scrollSize
+}
+
+// Control metadata panel up
+func (m *Model) ListUp() {
+	m.moveRenderIndexBy(-1)
 }
 
 // Control metadata panel down
 func (m *Model) ListDown() {
-	if m.renderIndex < m.MetadataLen()-1 {
-		m.renderIndex++
-	} else {
-		m.renderIndex = 0
-	}
+	m.moveRenderIndexBy(1)
+}
+
+// Control metadata panel page up
+func (m *Model) PgUp() {
+	m.moveRenderIndexBy(-m.getPageScrollSize())
+}
+
+// Control metadata panel page down
+func (m *Model) PgDown() {
+	m.moveRenderIndexBy(m.getPageScrollSize())
 }
 
 func (m *Model) SetBlank() {

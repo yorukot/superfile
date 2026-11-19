@@ -17,6 +17,7 @@ func TestReturnDirElement(t *testing.T) {
 	dir1 := filepath.Join(curTestDir, "dir1")
 	dir2 := filepath.Join(curTestDir, "dir2")
 	dirNatural := filepath.Join(curTestDir, "dirNatural")
+	hiddenOnlyDir := t.TempDir()
 	utils.SetupDirectories(t, curTestDir, dir1, dir2, dirNatural)
 
 	creationDelay := time.Millisecond * 5
@@ -52,6 +53,7 @@ func TestReturnDirElement(t *testing.T) {
 		{filepath.Join(dirNatural, "file2.txt"), []byte("b")},
 		{filepath.Join(dirNatural, "file10.txt"), []byte("c")},
 		{filepath.Join(dirNatural, "file20.txt"), []byte("d")},
+		{filepath.Join(hiddenOnlyDir, ".hidden"), []byte("hidden")},
 	}
 
 	for _, f := range fileSetup {
@@ -74,6 +76,14 @@ func TestReturnDirElement(t *testing.T) {
 			dotFiles:          false,
 			sortKind:          sortmodel.SortByName,
 			reversed:          false,
+			expectedElemNames: []string{},
+		},
+		{
+			name:              "Search in directory with only hidden files",
+			location:          hiddenOnlyDir,
+			dotFiles:          false,
+			sortKind:          sortmodel.SortByName,
+			searchString:      "/",
 			expectedElemNames: []string{},
 		},
 		{

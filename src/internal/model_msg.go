@@ -46,6 +46,25 @@ func (msg PasteOperationMsg) ApplyToModel(m *model) tea.Cmd {
 	return nil
 }
 
+type CreateOperationMsg struct {
+	BaseMessage
+
+	state processbar.ProcessState
+}
+
+func NewCreateOperationMsg(state processbar.ProcessState, reqID int) CreateOperationMsg {
+	return CreateOperationMsg{
+		state: state,
+		BaseMessage: BaseMessage{
+			reqID: reqID,
+		},
+	}
+}
+
+func (msg CreateOperationMsg) ApplyToModel(m *model) tea.Cmd {
+	return nil
+}
+
 type DeleteOperationMsg struct {
 	BaseMessage
 

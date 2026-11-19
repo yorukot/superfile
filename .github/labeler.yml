@@ -59,5 +59,7 @@ packaging:
           - gomod2nix.toml
           - release/**
           - asset/spf.desktop
+          - asset/spf.svg
+          - asset/*.metainfo.xml
           - .github/workflows/update-gomod2nix.yml
           - .github/workflows/winget.yml

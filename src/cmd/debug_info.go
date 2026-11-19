@@ -104,6 +104,7 @@ func (dp *debugPrinter) printHeader(text string) {
 
 func (dp *debugPrinter) printKeyValue(key, value string) {
 	if filepath.IsAbs(value) {
+		//nolint:gosec // Debug output only checks whether an already absolute path exists.
 		if _, err := os.Stat(value); os.IsNotExist(err) {
 			value = dp.warningColor.Sprint(value + " (Not Found)")
 		}
@@ -136,15 +137,13 @@ func (dp *debugPrinter) checkDependency(name string, flag string) {
 			cmd := exec.Command(name, strings.Split(flag, " ")...)
 			out, err := cmd.CombinedOutput()
 			if err == nil {
-				lines := strings.Split(string(out), "\n")
-				if len(lines) > 0 {
-					v := strings.TrimSpace(lines[0])
-					if len(v) > maxVersionLength {
-						v = v[:maxVersionLength] + "..."
-					}
-					if v != "" {
-						version = v
-					}
+				firstLine, _, _ := strings.Cut(string(out), "\n")
+				v := strings.TrimSpace(firstLine)
+				if len(v) > maxVersionLength {
+					v = v[:maxVersionLength] + "..."
+				}
+				if v != "" {
+					version = v
 				}
 			}
 		}

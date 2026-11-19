@@ -297,7 +297,7 @@ func TestModel_Render(t *testing.T) {
 			"├──────────────────────────────────────┤\n" +
 			"│ ':' - Get into Shell mode            │\n" +
 			"│ 'open <PATH>' - Open a new panel at a│\n" +
-			"│ 'split' - Open a new panel at a curre│\n" +
+			"│ 'split' - Open a new panel at the cur│\n" +
 			"│ 'cd <PATH>' - Change directory of cur│\n" +
 			"╰──────────────────────────────────────╯"
 		assert.Equal(t, exp, res)

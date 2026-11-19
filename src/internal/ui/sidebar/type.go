@@ -6,6 +6,7 @@ type directory struct {
 	Location string `json:"location"`
 	Name     string `json:"name"`
 	Section  string `json:"-"`
+	Icon     string `json:"-"`
 }
 
 type Model struct {

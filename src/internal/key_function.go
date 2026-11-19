@@ -22,7 +22,7 @@ import (
 // check the state of model m and handle properly.
 // TODO: This function has grown too big. It needs to be fixed, via major
 // updates and fixes in key handling code
-func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen // See above
+func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen,gocognit // See above
 	switch {
 	// If move up Key is pressed, check the current state and executes
 	case slices.Contains(common.Hotkeys.ListUp, msg):
@@ -51,10 +51,24 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 		}
 
 	case slices.Contains(common.Hotkeys.PageUp, msg):
-		m.getFocusedFilePanel().PgUp()
+		switch m.focusPanel {
+		case metadataFocus:
+			m.fileMetaData.PgUp()
+		case nonePanelFocus:
+			m.getFocusedFilePanel().PgUp()
+		case processBarFocus, sidebarFocus:
+			// These panels have no page scrolling, so page keys do nothing.
+		}
 
 	case slices.Contains(common.Hotkeys.PageDown, msg):
-		m.getFocusedFilePanel().PgDown()
+		switch m.focusPanel {
+		case metadataFocus:
+			m.fileMetaData.PgDown()
+		case nonePanelFocus:
+			m.getFocusedFilePanel().PgDown()
+		case processBarFocus, sidebarFocus:
+			// These panels have no page scrolling, so page keys do nothing.
+		}
 
 	case slices.Contains(common.Hotkeys.ChangePanelMode, msg):
 		m.getFocusedFilePanel().ChangeFilePanelMode()
@@ -76,7 +90,7 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 		}
 		return cmd
 	case slices.Contains(common.Hotkeys.CreateNewFilePanel, msg):
-		cmd, err := m.fileModel.CreateNewFilePanel(variable.HomeDir)
+		cmd, err := m.createNewFilePanel(variable.HomeDir)
 		if err != nil && !errors.Is(err, filemodel.ErrMaximumPanelCount) {
 			slog.Error("unexpected error while creating new panel", "error", err)
 		}
@@ -100,10 +114,14 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 		m.focusOnMetadata()
 
 	case slices.Contains(common.Hotkeys.PasteItems, msg):
-		return m.getPasteItemCmd()
+		if m.focusPanel == nonePanelFocus {
+			return m.getPasteItemCmd()
+		}
 
 	case slices.Contains(common.Hotkeys.FilePanelItemCreate, msg):
-		m.panelCreateNewFile()
+		if m.focusPanel == nonePanelFocus {
+			m.panelCreateNewFile()
+		}
 	case slices.Contains(common.Hotkeys.PinnedDirectory, msg):
 		m.pinnedDirectory()
 
@@ -114,10 +132,14 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 		return m.toggleFooterController()
 
 	case slices.Contains(common.Hotkeys.ExtractFile, msg):
-		return m.getExtractFileCmd()
+		if m.focusPanel == nonePanelFocus {
+			return m.getExtractFileCmd()
+		}
 
 	case slices.Contains(common.Hotkeys.CompressFile, msg):
-		return m.getCompressSelectedFilesCmd()
+		if m.focusPanel == nonePanelFocus {
+			return m.getCompressSelectedFilesCmd()
+		}
 
 	case slices.Contains(common.Hotkeys.OpenCommandLine, msg):
 		m.promptModal.Open(true)
@@ -151,40 +173,60 @@ func (m *model) mainKey(msg string) tea.Cmd { //nolint: gocyclo,cyclop,funlen //
 func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
 	// if not focus on the filepanel return
 	if !m.getFocusedFilePanel().IsFocused {
-		if m.focusPanel == sidebarFocus && slices.Contains(common.Hotkeys.Confirm, msg) {
-			m.sidebarSelectDirectory()
-		}
-		if m.focusPanel == sidebarFocus && slices.Contains(common.Hotkeys.FilePanelItemRename, msg) {
-			m.sidebarModel.PinnedItemRename()
-		}
-		if m.focusPanel == sidebarFocus && slices.Contains(common.Hotkeys.SearchBar, msg) {
-			m.sidebarSearchBarFocus()
-		}
+		m.unfocusedFilePanelKey(msg)
 		return nil
 	}
 	// Check if in the select mode and focusOn filepanel
 	if m.getFocusedFilePanel().PanelMode == filepanel.SelectMode {
-		switch {
-		case slices.Contains(common.Hotkeys.Confirm, msg):
-			m.getFocusedFilePanel().SingleItemSelect()
-		case slices.Contains(common.Hotkeys.FilePanelSelectModeItemsSelectUp, msg):
-			m.getFocusedFilePanel().ItemSelectUp()
-		case slices.Contains(common.Hotkeys.FilePanelSelectModeItemsSelectDown, msg):
-			m.getFocusedFilePanel().ItemSelectDown()
-		case slices.Contains(common.Hotkeys.DeleteItems, msg):
-			return m.getDeleteTriggerCmd(false)
-		case slices.Contains(common.Hotkeys.PermanentlyDeleteItems, msg):
-			return m.getDeleteTriggerCmd(true)
-		case slices.Contains(common.Hotkeys.CopyItems, msg):
-			m.copyMultipleItem(false)
-		case slices.Contains(common.Hotkeys.CutItems, msg):
-			m.copyMultipleItem(true)
-		case slices.Contains(common.Hotkeys.FilePanelSelectAllItem, msg):
-			m.getFocusedFilePanel().SelectAllItem()
-		}
-		return nil
+		return m.filePanelSelectModeKey(msg)
 	}
 
+	return m.filePanelNormalModeKey(msg)
+}
+
+func (m *model) unfocusedFilePanelKey(msg string) {
+	if m.focusPanel != sidebarFocus {
+		return
+	}
+
+	if slices.Contains(common.Hotkeys.Confirm, msg) {
+		m.sidebarSelectDirectory()
+	}
+	if slices.Contains(common.Hotkeys.FilePanelItemRename, msg) {
+		m.sidebarModel.PinnedItemRename()
+	}
+	if slices.Contains(common.Hotkeys.SearchBar, msg) {
+		m.sidebarSearchBarFocus()
+	}
+}
+
+func (m *model) filePanelSelectModeKey(msg string) tea.Cmd {
+	panel := m.getFocusedFilePanel()
+
+	switch {
+	case slices.Contains(common.Hotkeys.Confirm, msg):
+		panel.SingleItemSelect()
+	case slices.Contains(common.Hotkeys.FilePanelSelectModeItemsSelectUp, msg):
+		panel.ItemSelectUp()
+	case slices.Contains(common.Hotkeys.FilePanelSelectModeItemsSelectDown, msg):
+		panel.ItemSelectDown()
+	case slices.Contains(common.Hotkeys.DeleteItems, msg):
+		return m.getDeleteTriggerCmd(false)
+	case slices.Contains(common.Hotkeys.PermanentlyDeleteItems, msg):
+		return m.getDeleteTriggerCmd(true)
+	case slices.Contains(common.Hotkeys.CopyItems, msg):
+		m.copyMultipleItem(false)
+	case slices.Contains(common.Hotkeys.CutItems, msg):
+		m.copyMultipleItem(true)
+	case slices.Contains(common.Hotkeys.CopyPath, msg):
+		m.copyPath()
+	case slices.Contains(common.Hotkeys.FilePanelSelectAllItem, msg):
+		panel.SelectAllItem()
+	}
+	return nil
+}
+
+func (m *model) filePanelNormalModeKey(msg string) tea.Cmd {
 	switch {
 	case slices.Contains(common.Hotkeys.Confirm, msg):
 		m.enterPanel()
@@ -211,14 +253,14 @@ func (m *model) normalAndBrowserModeKey(msg string) tea.Cmd {
 }
 
 // Check the hotkey to cancel operation or create file
-func (m *model) typingModalOpenKey(msg string) {
+func (m *model) typingModalOpenKey(msg string) tea.Cmd {
 	switch {
 	case slices.Contains(common.Hotkeys.CancelTyping, msg):
-		m.typingModal.errorMesssage = ""
 		m.cancelTypingModal()
 	case slices.Contains(common.Hotkeys.ConfirmTyping, msg):
-		m.createItem()
+		return m.getCreateCmd()
 	}
+	return nil
 }
 
 func (m *model) notifyModelOpenKey(msg string) tea.Cmd {

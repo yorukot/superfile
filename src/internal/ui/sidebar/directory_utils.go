@@ -7,11 +7,12 @@ import (
 
 	"github.com/adrg/xdg"
 
+	"github.com/yorukot/superfile/src/internal/common"
+
 	"github.com/yorukot/superfile/src/pkg/utils"
 
 	variable "github.com/yorukot/superfile/src/config"
 	"github.com/yorukot/superfile/src/config/icon"
-	"github.com/yorukot/superfile/src/internal/common"
 )
 
 // Fuzzy search function for a list of directories.
@@ -53,22 +54,23 @@ func getDirectories(pinnedMgr *PinnedManager, sections []string) []directory {
 // Return system default directory e.g. Home, Downloads, etc
 func getWellKnownDirectories() []directory {
 	wellKnownDirectories := []directory{
-		{Location: xdg.Home, Name: icon.Home + icon.Space + "Home"},
-		{Location: xdg.UserDirs.Desktop, Name: icon.Desktop + icon.Space + "Desktop"},
-		{Location: xdg.UserDirs.Download, Name: icon.Download + icon.Space + "Downloads"},
-		{Location: xdg.UserDirs.Documents, Name: icon.Documents + icon.Space + "Documents"},
-		{Location: xdg.UserDirs.Pictures, Name: icon.Pictures + icon.Space + "Pictures"},
-		{Location: xdg.UserDirs.Videos, Name: icon.Videos + icon.Space + "Videos"},
-		{Location: xdg.UserDirs.Music, Name: icon.Music + icon.Space + "Music"},
-		{Location: xdg.UserDirs.Templates, Name: icon.Templates + icon.Space + "Templates"},
-		{Location: xdg.UserDirs.PublicShare, Name: icon.PublicShare + icon.Space + "PublicShare"},
+		{Location: xdg.Home, Icon: icon.Home, Name: "Home"},
+		{Location: xdg.UserDirs.Desktop, Icon: icon.Desktop, Name: "Desktop"},
+		{Location: xdg.UserDirs.Download, Icon: icon.Download, Name: "Downloads"},
+		{Location: xdg.UserDirs.Documents, Icon: icon.Documents, Name: "Documents"},
+		{Location: xdg.UserDirs.Pictures, Icon: icon.Pictures, Name: "Pictures"},
+		{Location: xdg.UserDirs.Videos, Icon: icon.Videos, Name: "Videos"},
+		{Location: xdg.UserDirs.Music, Icon: icon.Music, Name: "Music"},
+		{Location: xdg.UserDirs.Templates, Icon: icon.Templates, Name: "Templates"},
+		{Location: xdg.UserDirs.PublicShare, Icon: icon.PublicShare, Name: "PublicShare"},
 	}
 
 	// Add Trash directory for Linux only
 	if runtime.GOOS == utils.OsLinux {
 		wellKnownDirectories = append(wellKnownDirectories, directory{
 			Location: variable.LinuxTrashDirectory,
-			Name:     icon.Trash + icon.Space + "Trash",
+			Icon:     icon.Trash,
+			Name:     "Trash",
 		})
 	}
 
@@ -81,8 +83,7 @@ func getWellKnownDirectories() []directory {
 func getPinnedDirectoriesWithIcon(pinnedMgr *PinnedManager) []directory {
 	dirs := pinnedMgr.Load()
 	for i := range dirs {
-		iconInfo := common.GetElementIcon(dirs[i].Name, true, false, common.Config.Nerdfont)
-		dirs[i].Name = iconInfo.Icon + icon.Space + dirs[i].Name
+		dirs[i].Icon = common.GetDirectoryIcon(dirs[i].Location, dirs[i].Name, common.Config.Nerdfont)
 	}
 	return dirs
 }

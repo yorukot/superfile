@@ -71,7 +71,7 @@ This sequence queries the terminal for the size of each **cell in pixels**. supe
 - Avoid distortions in previews
 - Adapt to terminal resizes
 
-If your terminal does not support `\x1b[16t`, we fallback to default assumptions like `10×20 px per cell`.
+If your terminal does not support `\x1b[16t`, we fall back to default assumptions like `10×20 px per cell`.
 
 ## Graceful Fallback to ANSI
 

@@ -3,6 +3,8 @@ package internal
 import (
 	zoxidelib "github.com/lazysegtree/go-zoxide"
 
+	"github.com/atotto/clipboard"
+
 	"github.com/yorukot/superfile/src/internal/ui/helpmenu"
 
 	"github.com/yorukot/superfile/src/internal/ui/filemodel"
@@ -31,6 +33,7 @@ func defaultModelConfig(toggleDotFile, toggleFooter, firstUse bool,
 	return &model{
 		focusPanel:      nonePanelFocus,
 		processBarModel: processbar.New(),
+		clipboardWriter: clipboard.WriteAll,
 		sidebarModel:    sidebar.New(),
 		fileMetaData:    metadata.New(),
 		fileModel:       filemodel.New(firstPanelPaths, toggleDotFile),

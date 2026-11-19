@@ -28,7 +28,7 @@ To see the path locations of your superfile files, use the command `spf pl`.
 
 - ###### editor
 
-The editor your files will be opened with (Leave blank to use the EDITOR environment variable. If EDITOR environment variable is not set, it will default to `nano` for macOS/Linux, and `notepad` for Windows.
+The editor your files will be opened with (Leave blank to use the EDITOR environment variable. If EDITOR environment variable is not set, it will default to `nano` for macOS/Linux, and `notepad` for Windows).
 
 - ###### dir_editor
 
@@ -172,6 +172,14 @@ File panel sorting case sensitivity (if `true`, uppercase letters come before lo
 
 `false` => Case insensitive ("a" comes before "B")
 
+- ###### shell_close_on_success
+
+Controls whether the shell prompt closes automatically after a command succeeds.
+
+`true` => Close the shell after successful command execution
+
+`false` => Keep the shell open after successful command execution
+
 - ###### debug
 
 Whether to enable debug mode. (if `true`, more verbose logs are written in log file).
@@ -222,7 +230,7 @@ Percentage of file panel width allocated to file names (25-100). Higher values g
 
 `true` => Use nerdfont for directories and file icons.
 
-`false` => Dont use nerdfont. If you don't have or don't want Nerdfont installed you can turn this off
+`false` => Don't use nerdfont. If you don't have or don't want Nerdfont installed you can turn this off
 
 - ###### show_select_icons
 
@@ -323,6 +331,38 @@ border_middle_left = "├"
 border_middle_right = "┤"
 #...
 ```
+
+### Plugins
+
+- ###### metadata
+
+Shows more detailed metadata for files and directories.
+
+`true` => Enable detailed metadata. Requires [`exiftool`](https://exiftool.org).
+
+`false` => Use the built-in metadata only.
+
+- ###### enable_md5_checksum
+
+Adds an MD5 checksum entry to metadata for regular files.
+
+`true` => Calculate and show MD5 checksums in the metadata panel.
+
+`false` => Do not calculate MD5 checksums.
+
+:::caution
+
+Calculating checksums reads the selected file, so it may be slow for large files.
+
+:::
+
+- ###### zoxide_support
+
+Enables the zoxide navigation modal.
+
+`true` => Enable zoxide navigation. Requires [`zoxide`](https://github.com/ajeetdsouza/zoxide).
+
+`false` => Disable zoxide navigation.
 
 - ###### open_with
 

@@ -1,6 +1,6 @@
 ---
 title: Overview
-description: An overview of why we built this starter, including its features, the libraries used, and more.
+description: An overview of why we built superfile, including its features, the libraries used, and more.
 head:
   - tag: title
     content: Overview | superfile

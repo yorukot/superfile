@@ -27,4 +27,6 @@ const (
 	SidebarSectionHome   = "home"
 	SidebarSectionPinned = "pinned"
 	SidebarSectionDisks  = "disks"
+
+	TabWidth = 4 // Standard tab expansion width
 )

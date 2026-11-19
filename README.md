@@ -1,22 +1,11 @@
 <div align="center">
 
-<p>
-  <h4>
-    <a href="https://ko-fi.com/yorukot">superfile is supported by the community.</a>
-  </h4>
-<div align="center" markdown="1">
-   <sup>Special thanks to:</sup>
-   <br>
-   <br>
-   <a href="https://www.warp.dev/?utm_source=github&utm_medium=referral&utm_campaign=superfile">
-      <img alt="Warp sponsorship" width="300" src="asset/readme/warp.png">
-   </a>
+<h4>superfile is supported by the community.</h4>
 
-### [Warp, the AI terminal for developers](https://www.warp.dev/?utm_source=github&utm_medium=referral&utm_campaign=superfile)
+<a href="https://ko-fi.com/yorukot">
+  <img alt="Donate to superfile on Ko-fi" src="https://ko-fi.com/img/githubbutton_sm.svg">
+</a>
 
-[Available for macOS, Linux, & Windows](https://www.warp.dev/?utm_source=github&utm_medium=referral&utm_campaign=superfile)<br>
-
-</div>
 <hr>
 
 </div>
@@ -30,7 +19,7 @@
 </picture>
 <br><br>
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/yorukot/superfile)](https://goreportcard.com/report/github.com/yorukot/superfile) [![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/yorukot/superfile/refs/heads/main/LICENSE) [![Discord Link](https://img.shields.io/discord/1338415256875307110?label=discord&logo=discord&logoColor=white)](https://discord.gg/YYtJ23Du7B) [![Release](https://img.shields.io/github/v/release/yorukot/superfile.svg?style=flat-square)](https://github.com/yorukot/superfile/releases/latest) ![Homebrew downloads](https://img.shields.io/homebrew/installs/dy/superfile?label=Homebrew) ![GitHub downloads](https://img.shields.io/github/downloads/yorukot/superfile/total?label=GitHub%20downloads%20assets%2Freleases) [![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/yorukot/superfile?utm_source=oss&utm_medium=github&utm_campaign=yorukot%2Fsuperfile&labelColor=171717&color=FF570A&&label=CodeRabbit+Reviews)](https://www.coderabbit.ai/)
+[![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/yorukot/superfile/refs/heads/main/LICENSE) [![Discord Link](https://img.shields.io/discord/1338415256875307110?label=discord&logo=discord&logoColor=white)](https://discord.gg/YYtJ23Du7B) [![Release](https://img.shields.io/github/v/release/yorukot/superfile.svg?style=flat-square)](https://github.com/yorukot/superfile/releases/latest) ![Homebrew downloads](https://img.shields.io/homebrew/installs/dy/superfile?label=Homebrew) ![GitHub downloads](https://img.shields.io/github/downloads/yorukot/superfile/total?label=GitHub%20downloads%20assets%2Freleases) [![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/yorukot/superfile?utm_source=oss&utm_medium=github&utm_campaign=yorukot%2Fsuperfile&labelColor=171717&color=FF570A&&label=CodeRabbit+Reviews)](https://www.coderabbit.ai/)
 
 ![](website/src/assets/demo.png)
 
@@ -66,7 +55,7 @@
 - [Troubleshooting](#troubleshooting)
 - [Uninstalling](#uninstalling)
   - [macOS and Linux](#macos-and-linux-1)
-  - [Window](#window)
+  - [Windows](#windows)
 - [Contributing](#contributing)
 - [Thanks](#thanks)
   - [Support](#support)
@@ -200,27 +189,27 @@ You can turn this off, by setting `auto_check_update` to false in superfile conf
 
 ### macOS and Linux
 
-On macOS and Linux, you can uninstall superfile by simply removing the binary. If you installed superfile with sudo, run:
-
 ```bash
-sudo rm /usr/local/bin/spf
+bash -c "$(curl -sLo- https://superfile.dev/uninstall.sh)"
 ```
 
-If you installed superfile without sudo, run:
+If you want to inspect the script, see : [uninstall.sh](./website/public/uninstall.sh)
 
-```bash
-rm ~/.local/bin/spf
-```
+Besides the `spf` binary in `/usr/local/bin` or `~/.local/bin`, the script also deletes your config and data folders: `~/.config/superfile`, `~/.local/share/superfile` and `~/.local/state/superfile` (or the `$XDG_*_HOME` locations if you set them, on Linux or macOS), and `~/Library/Application Support/superfile` on macOS.
 
-If you don't rember, just try removing both.
-
-### Window
+### Windows
 
 To uninstall superfile on Windows, use this powershell script.
 
 ```powershell
 powershell -ExecutionPolicy Bypass -Command "Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://superfile.dev/uninstall.ps1'))"
 ```
+
+This script does not remove your config and data folder. Delete `%LOCALAPPDATA%\superfile` manually if you want it gone.
+
+### Other install methods
+
+If you installed superfile another way (for example with a package manager), run `spf pl` before uninstalling to see where your config and data folders are, then delete them yourself. See [config file path](https://superfile.dev/configure/config-file-path/) for all locations.
 
 ## Contributing
 
@@ -262,11 +251,11 @@ Thanks to JetBrains team for providing open-source licenses to support the maint
 
 **THANKS FOR All OF YOUR STARS!** Your stars are my motivation to keep updating!
 
-<a href="https://star-history.com/#yorukot/superfile&Timeline">
+<a href="https://www.star-history.com/?repos=yorukot%2Fsuperfile&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=yorukot/superfile&type=Timeline&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=yorukot/superfile&type=Timeline" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=yorukot/superfile&type=Timeline" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=yorukot/superfile&type=date&theme=dark&legend=top-left&sealed_token=nEoMOYsfp1zwZ7rT-Fm6VR2yTa6cwW35VR0BwVxTuE8Dt17vRcRIQUFXeWdh6lZixlAl5e_fIVFs2Xe4cRdvAnexR5Q6JqlGVZK05Iu0mko8gYLjTdjq0g" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=yorukot/superfile&type=date&legend=top-left&sealed_token=nEoMOYsfp1zwZ7rT-Fm6VR2yTa6cwW35VR0BwVxTuE8Dt17vRcRIQUFXeWdh6lZixlAl5e_fIVFs2Xe4cRdvAnexR5Q6JqlGVZK05Iu0mko8gYLjTdjq0g" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=yorukot/superfile&type=date&legend=top-left&sealed_token=nEoMOYsfp1zwZ7rT-Fm6VR2yTa6cwW35VR0BwVxTuE8Dt17vRcRIQUFXeWdh6lZixlAl5e_fIVFs2Xe4cRdvAnexR5Q6JqlGVZK05Iu0mko8gYLjTdjq0g" />
  </picture>
 </a>
 

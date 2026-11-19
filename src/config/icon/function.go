@@ -1,5 +1,7 @@
 package icon
 
+const noIconColor = "NONE"
+
 // InitIcon initializes the icon configuration for the application.
 // It sets up different icons based on whether nerd fonts are enabled and configures directory icon colors.
 //
@@ -61,7 +63,7 @@ func InitIcon(nerdfont bool, directoryIconColor string) {
 	}
 
 	if directoryIconColor == "" {
-		directoryIconColor = "NONE" // Dark yellowish
+		directoryIconColor = noIconColor // Dark yellowish
 	}
 	Folders["folder"] = Style{
 		Icon:  "\uf07b", // Printable Rune : ""
