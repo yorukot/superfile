@@ -13,7 +13,7 @@ import (
 
 func (m *model) sidebarRender() string {
 	return m.sidebarModel.Render(m.focusPanel == sidebarFocus,
-		m.getFocusedFilePanel().Location)
+		m.getFocusedFilePanel().Location, m.showFolderHotkeyHints())
 }
 
 func (m *model) processBarRender() string {

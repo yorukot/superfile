@@ -44,3 +44,20 @@ superfile default hotkeys design concept:
 ### Vim like superfile hotkeys
 
 <CodeBlock file="src/superfile_config/vimHotkeys.toml" />
+
+### Folder navigation shortcuts
+
+Rebind the standard folders and nine pin slots in `hotkeys.toml`:
+
+```toml
+go_to_home = ["alt+h"]
+go_to_downloads = ["alt+d", "ctrl+g"]
+go_to_pin_1 = ["alt+1"]
+go_to_trash = [] # Disable this action
+```
+
+Only the new `go_to_*` actions accept `[]` to disable them. Omitted settings inherit defaults; startup does not rewrite existing configuration. Use `--fix-hotkeys` to add missing settings to the file. Existing actions take precedence over conflicting folder shortcuts. Conflicts between new actions follow the order in the hotkey list.
+
+Pin numbers change with sidebar search results. Press Enter to finish typing the search before using shortcuts. Navigation also works when the sidebar or pinned section is hidden, using the same filtered pin list.
+
+Holding Alt shows the first usable Alt binding right-aligned beside each folder, with `alt+` omitted. Terminals or multiplexers without modifier press/release support show hints permanently. Set `show_folder_hotkey_hints = false` in `config.toml` to hide hints without disabling shortcuts. Disabled actions and actions without an Alt binding have no hint.
