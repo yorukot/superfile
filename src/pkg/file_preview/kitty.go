@@ -49,10 +49,16 @@ var kittyEnvHints = []string{ //nolint:gochecknoglobals // Static env hint allow
 	"KITTY_WINDOW_ID",
 	"GHOSTTY_RESOURCES_DIR",
 	"GHOSTTY_BIN_DIR",
+	// NOTE: Out of my scope.
+	// Wezterm: freezes (didn't work, only with ascii),
+	// iTerm2: sometimes is slow, iTerm2 sometimes freezes and slow (works but poor performance on MacOS)
+	// konsole terminal: image position is no right also break the tui (even with tmux) (works but bad position)
+	//
 	// "WEZTERM_PANE",
 	// "WEZTERM_EXECUTABLE",
-	"ITERM_SESSION_ID",
-	"WARP_IS_LOCAL_SHELL_SESSION",
+	// "ITERM_SESSION_ID",
+	// "KONSOLE_VERSION",
+	//"WARP_IS_LOCAL_SHELL_SESSION",
 }
 
 // reports whether the terminal environment indicates support for the Kitty graphics protocol.
