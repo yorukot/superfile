@@ -11,6 +11,9 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/clipboard"
 	"github.com/yorukot/superfile/src/internal/ui/sortmodel"
 
+	"github.com/yorukot/superfile/src/internal/mouse"
+
+	"github.com/yorukot/superfile/src/internal/ui/contextmenu"
 	"github.com/yorukot/superfile/src/internal/ui/filemodel"
 
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
@@ -60,13 +63,16 @@ type model struct {
 	focusPanel      focusPanelType
 
 	// Modals
-	notifyModel     notify.Model
-	typingModal     typingModal
-	helpMenu        helpmenu.Model
-	promptModal     prompt.Model
-	zoxideModal     zoxideui.Model
-	sortModal       sortmodel.Model
-	spfError        spferror.Model
+	notifyModel notify.Model
+	typingModal typingModal
+	helpMenu    helpmenu.Model
+	promptModal prompt.Model
+	zoxideModal zoxideui.Model
+	sortModal   sortmodel.Model
+	spfError    spferror.Model
+	// contextMenu is the right click menu. It is an overlay anchored to the
+	// pointer rather than a centred modal.
+	contextMenu     contextmenu.Model
 	mutexErrorModal sync.Mutex
 
 	// Zoxide client for directory tracking
@@ -98,11 +104,23 @@ type model struct {
 
 	// whether usable trash directory exists or not
 	hasTrash bool
+
+	// lastLeftClick is the previous left click, used to recognise double clicks.
+	lastLeftClick leftClick
+
+	// mouseRegions maps terminal coordinates onto the widget drawn there. It is
+	// rebuilt on every render pass, so it always describes the frame currently
+	// on screen rather than the layout as it will be after the next update.
+	mouseRegions mouse.Registry
 }
 
 type typingModal struct {
-	location  string
-	open      bool
+	location string
+	open     bool
+	// directory makes the next typed name create a directory instead of a file,
+	// so that a caller can ask for a directory without the user having to know
+	// that a trailing path separator is what selects one.
+	directory bool
 	textInput textinput.Model
 }
 

@@ -7,10 +7,18 @@ const (
 	HelpKeyColumnWidth       = 55              // width of help key column in CLI help
 	DefaultCLIContextTimeout = 5 * time.Second // default CLI context timeout for CLI ops
 
-	PanelPadding    = 3 // rows reserved around file list (borders/header/footer)
-	BorderPadding   = 2 // rows/cols for outer border frame
-	InnerPadding    = 4 // cols for inner content padding (truncate widths)
-	FooterGroupCols = 3 // columns per group in footer layout math
+	PanelPadding  = 3 // rows reserved around file list (borders/header/footer)
+	BorderPadding = 2 // rows/cols for outer border frame
+	// BorderTopHeight and BorderBottomHeight split BorderPadding per edge.
+	// A bordered panel reserves one row above its content and one below it, so
+	// the top and bottom offsets are not interchangeable: deriving a content
+	// offset from BorderPadding instead of BorderTopHeight lands one row too
+	// low, which is exactly the kind of error that silently shifts hit-testing
+	// away from the rendered output.
+	BorderTopHeight    = 1
+	BorderBottomHeight = 1
+	InnerPadding       = 4 // cols for inner content padding (truncate widths)
+	FooterGroupCols    = 3 // columns per group in footer layout math
 
 	DefaultFilePanelWidth    = 10 // default width for file panels
 	FilePanelMax             = 10 // max number of file panels supported

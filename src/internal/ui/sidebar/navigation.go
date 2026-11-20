@@ -6,6 +6,25 @@ import (
 	"github.com/yorukot/superfile/src/internal/common"
 )
 
+// SetCursor moves the sidebar cursor to the given directory index and reports
+// whether that index was accepted.
+//
+// Section dividers are rendered but are not selectable, so an index pointing at
+// one is rejected rather than silently moving the cursor somewhere the user
+// cannot see selected.
+func (s *Model) SetCursor(index int) bool {
+	if index < 0 || index >= len(s.directories) {
+		return false
+	}
+	if s.directories[index].isDivider() {
+		return false
+	}
+
+	s.cursor = index
+	s.updateRenderIndex()
+	return true
+}
+
 func (s *Model) ListUp() {
 	slog.Debug("controlListUp called", "cursor", s.cursor,
 		"renderIndex", s.renderIndex, "directory count", len(s.directories))
