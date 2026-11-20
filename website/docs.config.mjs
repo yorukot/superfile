@@ -18,19 +18,20 @@ export const LATEST = "latest";
 
 /** Reads a tag such as "v1.4.0", "v1.4.1-rc", "v1.6.0-rc1" or "v1.2.0.0". Returns null for anything else. */
 export function parseTag(tag) {
-	const match = /^v(\d+)\.(\d+)\.(\d+)(?:\.(\d+))?(?:-(rc\d*))?$/.exec(tag);
+	const match = /^v(\d+)\.(\d+)\.(\d+)(?:\.(\d+))?(-rc(\d*))?$/.exec(tag);
 	if (!match) return null;
-	const [major, minor, patch, build] = match.slice(1, 5).map(part => Number(part ?? 0));
-	return { major, minor, patch, build, pre: match[5] ?? "", minorKey: `v${major}.${minor}` };
+	const [major, minor, patch, build, , candidate] = match.slice(1).map(part => Number(part ?? 0));
+	// `candidate` is the number of a release candidate: 0 for a plain "-rc".
+	return { major, minor, patch, build, isCandidate: match[5] !== undefined, candidate, minorKey: `v${major}.${minor}` };
 }
 
-const isRelease = tag => !parseTag(tag)?.pre;
+const isRelease = tag => !parseTag(tag)?.isCandidate;
 
 /** Orders tags newest first. A release candidate comes after the release it led to. */
 export function compareTags(a, b) {
 	const [x, y] = [parseTag(a), parseTag(b)];
 	if (!x || !y) return a < b ? 1 : -1;
-	return y.major - x.major || y.minor - x.minor || y.patch - x.patch || y.build - x.build || (x.pre ? 1 : 0) - (y.pre ? 1 : 0) || (x.pre < y.pre ? 1 : -1);
+	return y.major - x.major || y.minor - x.minor || y.patch - x.patch || y.build - x.build || Number(x.isCandidate) - Number(y.isCandidate) || y.candidate - x.candidate;
 }
 
 /**

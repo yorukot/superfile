@@ -38,7 +38,7 @@ const icons = {
 export function remarkCallouts() {
 	return tree => {
 		visit(tree, ["containerDirective", "leafDirective"], node => {
-			const kind = node.name in icons ? node.name : "note";
+			const kind = Object.hasOwn(icons, node.name) ? node.name : "note";
 			const title = {
 				type: "paragraph",
 				children: [],

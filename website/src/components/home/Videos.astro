@@ -108,7 +108,8 @@ interface Props {
 	}
 
 	.player {
-		width: min(960px, calc(100vw - 32px));
+		/* Also narrow enough for the whole dialog to fit a short window: 170px is its head and foot. */
+		width: min(960px, calc(100vw - 32px), calc((92vh - 170px) * 16 / 9));
 		max-height: none;
 		margin-top: 8vh;
 	}

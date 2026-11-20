@@ -35,6 +35,12 @@ const { groups, current, base } = Astro.props;
 </nav>
 
 <style>
+	/* The site menu takes over on small screens. */
+	nav {
+		@media (max-width: 900px) {
+			display: none;
+		}
+	}
 	details {
 		margin-bottom: 28px;
 

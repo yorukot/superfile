@@ -16,15 +16,15 @@ const previewFiles = [{ name: "dotfiles", isDir: true }, { name: "projects", isD
 <Section id={Astro.props.id} label="ls themes/" prompt="$" title="Pick a theme.">
 	<p class="sf-lede">superfile ships with {themeCount} themes. The preview is painted with the colours from each theme file.</p>
 	<div class="themes" data-themes>
-		<FileList role="listbox" aria-label="Themes">
+		<FileList aria-label="Themes">
 			{
 				featuredThemes.map(theme => (
-					<li role="presentation">
-						<FileRow name={`${theme.name}.toml`} role="option" aria-selected={theme === firstTheme ? "true" : "false"} data-theme-name={theme.name} data-theme-style={theme.style} />
+					<li>
+						<FileRow name={`${theme.name}.toml`} aria-current={theme === firstTheme ? "true" : undefined} data-theme-name={theme.name} data-theme-style={theme.style} />
 					</li>
 				))
 			}
-			<li role="presentation">
+			<li>
 				<FileRow name={`all ${themeCount} themes`} isDir href="/list/theme-list" />
 			</li>
 		</FileList>
@@ -174,12 +174,12 @@ const previewFiles = [{ name: "dotfiles", isDir: true }, { name: "projects", isD
 	const label = themes.querySelector("[data-theme-label]")!;
 
 	function pickTheme(event: Event) {
-		const option = (event.target as Element).closest<HTMLElement>("[role=option]");
-		if (!option || option.ariaSelected === "true") return;
-		themes.querySelector("[aria-selected=true]")!.ariaSelected = "false";
-		option.ariaSelected = "true";
-		preview.style.cssText = option.dataset.themeStyle!;
-		label.textContent = option.dataset.themeName!;
+		const theme = (event.target as Element).closest<HTMLElement>("[data-theme-name]");
+		if (!theme || theme.ariaCurrent) return;
+		themes.querySelector("[aria-current]")!.ariaCurrent = null;
+		theme.ariaCurrent = "true";
+		preview.style.cssText = theme.dataset.themeStyle!;
+		label.textContent = theme.dataset.themeName!;
 	}
 
 	for (const type of ["click", "pointerover", "focusin"]) themes.addEventListener(type, pickTheme);

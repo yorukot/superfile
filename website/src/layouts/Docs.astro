@@ -134,9 +134,12 @@ const toc = headings.filter((heading, index) => heading.depth <= 3 && !(index ==
 	.side {
 		padding-bottom: var(--space-5);
 
-		/* The site menu lists the docs on small screens. */
+		/* On small screens the site menu lists the docs; only the version switcher stays, above the page. */
 		@media (max-width: 900px) {
-			display: none;
+			position: static;
+			max-height: none;
+			padding-bottom: 0;
+			overflow: visible;
 		}
 	}
 	.toc {

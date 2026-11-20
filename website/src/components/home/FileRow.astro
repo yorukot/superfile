@@ -3,7 +3,7 @@ import { File, Folder } from "@lucide/astro";
 import type { HTMLAttributes } from "astro/types";
 
 // A row of a FileList: a link when it has an href, a button otherwise.
-// The cursor is on the row marked aria-current or aria-selected="true".
+// The cursor is on the row marked aria-current.
 type Props = { name: string; isDir?: boolean } & (HTMLAttributes<"a"> | HTMLAttributes<"button">);
 
 const { name, isDir = false, ...attrs } = Astro.props;
@@ -46,7 +46,7 @@ const Icon = isDir ? Folder : File;
 			color: var(--teal-text);
 		}
 
-		&:is(:hover, [aria-current], [aria-selected="true"]) {
+		&:is(:hover, [aria-current]) {
 			background: var(--ink);
 			color: var(--bg);
 

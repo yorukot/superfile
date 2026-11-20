@@ -49,8 +49,20 @@ const { term, number } = Astro.props;
 	});
 	thread.append(client);
 
-	document.addEventListener("spf:theme", () => {
+	const applyTheme = () => {
+		// The client reads this when it starts, in case it has not started yet.
+		client.dataset.theme = themeFor();
 		const frame = document.querySelector<HTMLIFrameElement>("iframe.giscus-frame");
 		frame?.contentWindow?.postMessage({ giscus: { setConfig: { theme: themeFor() } } }, "https://giscus.app");
+	};
+	document.addEventListener("spf:theme", applyTheme);
+
+	// The thread loads lazily and cannot hear a theme change before then. Its first message
+	// (its height) says it is listening, so a theme chosen in the meantime is sent again.
+	const firstTheme = themeFor();
+	addEventListener("message", function onThreadReady(event) {
+		if (event.origin !== "https://giscus.app") return;
+		removeEventListener("message", onThreadReady);
+		if (themeFor() !== firstTheme) applyTheme();
 	});
 </script>

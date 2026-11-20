@@ -60,13 +60,19 @@ const top = Math.min(...headings.map(heading => heading.depth));
 </style>
 
 <script>
-	const links = document.querySelectorAll<HTMLAnchorElement>("[data-toc]");
-	// The entry for the heading nearest the top of the screen is marked as the current one.
+	const links = [...document.querySelectorAll<HTMLAnchorElement>("[data-toc]")];
+	// The headings in a band near the top of the screen. The observer only reports the ones that changed.
+	const inBand = new Set<string>();
 	const observer = new IntersectionObserver(
 		entries => {
-			const entered = entries.find(entry => entry.isIntersecting);
-			if (!entered) return;
-			for (const link of links) link.ariaCurrent = link.dataset.toc === entered.target.id ? "location" : null;
+			for (const entry of entries) {
+				if (entry.isIntersecting) inBand.add(entry.target.id);
+				else inBand.delete(entry.target.id);
+			}
+			// The first of them is the current one. With none in the band, the last one stays.
+			const current = links.find(link => inBand.has(link.dataset.toc!));
+			if (!current) return;
+			for (const link of links) link.ariaCurrent = link === current ? "location" : null;
 		},
 		{ rootMargin: "-15% 0% -70% 0%" }
 	);

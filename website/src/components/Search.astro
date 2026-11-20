@@ -7,10 +7,22 @@ import { Search as SearchIcon } from "@lucide/astro";
 	<div class="inner">
 		<div class="head">
 			<span class="prompt" aria-hidden="true">/</span>
-			<input type="search" placeholder="type to search" aria-label="Search the docs" autocomplete="off" autocapitalize="off" spellcheck="false" />
+			<input
+				type="text"
+				role="combobox"
+				aria-label="Search the docs"
+				aria-controls="search-results"
+				aria-expanded="false"
+				aria-autocomplete="list"
+				placeholder="type to search"
+				enterkeyhint="search"
+				autocomplete="off"
+				autocapitalize="off"
+				spellcheck="false"
+			/>
 			<SearchIcon aria-hidden="true" width="18" height="18" />
 		</div>
-		<div class="results" role="listbox" aria-label="Results" data-search-results></div>
+		<div class="results" id="search-results" role="listbox" aria-label="Results"></div>
 		<div class="foot">
 			<span><span class="sf-keys"><kbd class="sf-kbd">↑</kbd><kbd class="sf-kbd">↓</kbd></span>move</span>
 			<span><kbd class="sf-kbd">enter</kbd>open</span>
@@ -52,9 +64,6 @@ import { Search as SearchIcon } from "@lucide/astro";
 
 		&::placeholder {
 			color: var(--ink-muted);
-		}
-		&::-webkit-search-cancel-button {
-			display: none;
 		}
 	}
 	.results {
@@ -134,7 +143,7 @@ import { Search as SearchIcon } from "@lucide/astro";
 
 	const dialog = document.querySelector<HTMLDialogElement>("[data-search]")!;
 	const input = dialog.querySelector("input")!;
-	const results = dialog.querySelector<HTMLElement>("[data-search-results]")!;
+	const results = document.getElementById("search-results")!;
 	const hitTemplate = dialog.querySelector<HTMLTemplateElement>("[data-search-hit]")!;
 
 	// The index is written by `pagefind` after the build, so it does not exist in `astro dev`.
@@ -146,11 +155,28 @@ import { Search as SearchIcon } from "@lucide/astro";
 			() => null
 		));
 
-	const message = (text: string) => results.replaceChildren(Object.assign(document.createElement("p"), { textContent: text }));
+	/** Marks one result as the one Enter opens. Focus stays in the input, so the input points a screen reader at it. */
+	function select(hit: Element) {
+		results.querySelector("[aria-selected='true']")?.setAttribute("aria-selected", "false");
+		hit.ariaSelected = "true";
+		input.setAttribute("aria-activedescendant", hit.id);
+		hit.scrollIntoView({ block: "nearest" });
+	}
+
+	/** Puts results, a message or nothing in the list, with the first result selected. */
+	function show(...content: Element[]) {
+		results.replaceChildren(...content);
+		const first = results.querySelector("[role='option']");
+		input.ariaExpanded = String(!!first);
+		if (first) select(first);
+		else input.removeAttribute("aria-activedescendant");
+	}
+
+	const message = (text: string) => show(Object.assign(document.createElement("p"), { textContent: text }));
 
 	async function search() {
 		const query = input.value.trim();
-		if (!query) return results.replaceChildren();
+		if (!query) return show();
 		const engine = await loadPagefind();
 		if (!engine) return message("The search index is built with the site. Run a build first.");
 		const found = await engine.debouncedSearch(query, {}, 140);
@@ -158,11 +184,11 @@ import { Search as SearchIcon } from "@lucide/astro";
 		const hits = await Promise.all(found.results.slice(0, 8).map(result => result.data()));
 		if (input.value.trim() !== query) return;
 		if (!hits.length) return message(`Nothing found for "${query}".`);
-		results.replaceChildren(
+		show(
 			...hits.map((hit, index) => {
 				const link = (hitTemplate.content.cloneNode(true) as DocumentFragment).querySelector("a")!;
+				link.id = `search-hit-${index}`;
 				link.href = hit.url;
-				link.ariaSelected = String(index === 0);
 				link.querySelector("b")!.textContent = hit.meta.title ?? hit.url;
 				link.querySelector("span")!.innerHTML = hit.excerpt;
 				return link;
@@ -171,11 +197,9 @@ import { Search as SearchIcon } from "@lucide/astro";
 	}
 
 	function moveSelection(step: number) {
-		const hits = [...results.querySelectorAll<HTMLElement>("[role='option']")];
-		if (!hits.length) return;
-		const next = Math.max(0, Math.min(hits.length - 1, hits.findIndex(hit => hit.ariaSelected === "true") + step));
-		hits.forEach((hit, index) => (hit.ariaSelected = String(index === next)));
-		hits[next].scrollIntoView({ block: "nearest" });
+		const hits = [...results.querySelectorAll("[role='option']")];
+		const next = hits[Math.max(0, Math.min(hits.length - 1, hits.findIndex(hit => hit.ariaSelected === "true") + step))];
+		if (next) select(next);
 	}
 
 	function open() {
@@ -197,15 +221,13 @@ import { Search as SearchIcon } from "@lucide/astro";
 	input.addEventListener("input", search);
 
 	dialog.addEventListener("keydown", event => {
+		// An input method uses these keys to pick a candidate. 229 marks its keys where `isComposing` does not.
+		if (event.isComposing || event.keyCode === 229) return;
 		if (event.key === "ArrowDown" || event.key === "ArrowUp") {
 			event.preventDefault();
 			moveSelection(event.key === "ArrowDown" ? 1 : -1);
 		} else if (event.key === "Enter") {
 			results.querySelector<HTMLElement>("[aria-selected='true']")?.click();
-		} else if (event.key === "Escape") {
-			// Without this, the first Escape only empties the search field.
-			event.preventDefault();
-			dialog.close();
 		}
 	});
 	// A click on the dialog element itself is a click on its backdrop.
@@ -214,7 +236,7 @@ import { Search as SearchIcon } from "@lucide/astro";
 	});
 	dialog.addEventListener("close", () => {
 		input.value = "";
-		results.replaceChildren();
+		show();
 	});
 
 	document.addEventListener("click", event => {
