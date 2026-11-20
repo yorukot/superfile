@@ -87,6 +87,17 @@ func ValidateConfig(c *ConfigType) error {
 		)
 	}
 
+	switch c.ImagePreviewRenderer {
+	case "", "auto", "kitty", "ansi":
+	default:
+		return errors.New(
+			LoadConfigError(
+				"image_preview_renderer",
+				"Image preview renderer must be \"auto\", \"kitty\", or \"ansi\".",
+			),
+		)
+	}
+
 	if ansi.StringWidth(c.BorderTop) != 1 {
 		return errors.New(LoadConfigError("border_top", "Border character must be exactly one cell wide."))
 	}
