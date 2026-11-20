@@ -17,13 +17,7 @@ Your shell moves to the folder you were browsing when superfile quits.
 
 Press `Q` to quit and cd once, even when `cd_on_quit` is `false`.
 
-On quit, superfile writes a `cd` command to the lastdir file, and the shell function runs it. Run `spf pl --lastdir-file` to print where that file is.
-
-:::caution
-
-The fish function reads a fixed path: `~/.local/state/superfile/lastdir` on Linux and `~/Library/Application Support/superfile/lastdir` on macOS. If you set `XDG_STATE_HOME`, change the path for your system in the function.
-
-:::
+On quit, superfile writes a `cd` command to the lastdir file, and the shell function runs it. The Bash, zsh, fish and PowerShell functions ask `spf path-list --lastdir-file` for its location. If you copied a function from an earlier release, replace it with the current one and reload your shell.
 
 `spf --print-last-dir` prints the last folder on exit. It doesn't work in `$(...)`, because superfile draws its interface on standard output too.
 
@@ -43,6 +37,6 @@ cat "$chosen"
 | `e`               | The selected items, or the item under the cursor (also folders) |
 | `E`               | The current folder                                              |
 
-To pick several files, press `v`, select them, then press `e`.
+To pick several files, press `v`, mark each item with `enter`, then press `e`. The paths appear in the same order as the items in the panel.
 
 The file holds full paths, one per line, with no trailing newline. Quitting with `q` writes nothing.

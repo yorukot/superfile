@@ -34,11 +34,13 @@ A cut doesn't rename on a name clash. A moved file replaces the existing file, a
 
 `ctrl+d` moves items to the trash. `D` deletes them permanently. Both ask you to confirm.
 
-| System  | Trash                                                                                       |
-| ------- | ------------------------------------------------------------------------------------------- |
-| Linux   | `~/.local/share/Trash`. Items on other drives go to `.Trash-<uid>` at the top of the drive. |
-| macOS   | The system Trash                                                                            |
-| Windows | The Recycle Bin                                                                             |
+| System  | Trash                 |
+| ------- | --------------------- |
+| Linux   | The FreeDesktop trash |
+| macOS   | The system Trash      |
+| Windows | The Recycle Bin       |
+
+On Linux, the home trash is `$XDG_DATA_HOME/Trash` (usually `~/.local/share/Trash`). On other filesystems, superfile uses `.Trash/<uid>` in a shared trash directory when available, or `.Trash-<uid>` at the root of the mount.
 
 When no trash is available, superfile deletes permanently, and the confirmation says "completely delete". This happens inside a trash folder, on a drive superfile can't write to, and on systems other than the three above.
 
@@ -46,7 +48,7 @@ superfile can't restore items from the trash.
 
 ## Compress and extract
 
-`ctrl+a` compresses into a `.zip` file in the current folder. In selection mode, all selected items go into one archive. `photo.jpg` becomes `photo.zip`.
+`ctrl+a` compresses into a `.zip` file in the current folder. In selection mode, all selected items go into one archive. `photo.jpg` becomes `photo.zip`, and `.env` becomes `.env.zip`.
 
 `ctrl+e` extracts the archive under the cursor into a new folder next to it. `photos.tar.gz` extracts into `photos/`.
 
