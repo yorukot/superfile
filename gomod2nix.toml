@@ -10,8 +10,8 @@ schema = 3
     hash = 'sha256-YOkvKUahFMMytHXr3AAABDifBtHt29930obiu/kx1vA='
 
   [mod.'charm.land/lipgloss/v2']
-    version = 'v2.0.3'
-    hash = 'sha256-/RFkSUscU3NwymzT+PfizGf3XyQIdVGQlX7vxktCUGk='
+    version = 'v2.1.1'
+    hash = 'sha256-ppnSfXTbOLfQhP5Awri/JIW4xH92AvDazdKnQWaEkk4='
 
   [mod.'github.com/Unpackerr/iso9660']
     version = 'v0.0.3'
@@ -74,8 +74,8 @@ schema = 3
     hash = 'sha256-JZD1iVeizYe0mp3qQcJbUZdYN6HP/DNC67ja79DTe6s='
 
   [mod.'github.com/charmbracelet/ultraviolet']
-    version = 'v0.0.0-20260525132238-948f4557a654'
-    hash = 'sha256-V0e1U50upnr+gWvao41MTiLHAbd5wAlt4GD8hiAVZ38='
+    version = 'v0.0.0-20260811164956-006e29f97886'
+    hash = 'sha256-yCXV58PFdrl5jeCS8jyWF5X+5Ndye8W5hxux9981O6E='
 
   [mod.'github.com/charmbracelet/x/ansi']
     version = 'v0.11.10'
