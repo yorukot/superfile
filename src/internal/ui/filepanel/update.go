@@ -50,6 +50,8 @@ func (m *Model) UpdateCurrentFilePanelDir(path string) error {
 	if filepath.Dir(m.Location) == path {
 		m.TargetFile = filepath.Base(m.Location)
 	}
+	// Calculations for the directory we are leaving are not needed anymore
+	m.CancelDirSizeCalcs()
 	// Switch to "path"
 	m.Location = path
 

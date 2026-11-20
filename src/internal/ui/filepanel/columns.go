@@ -69,6 +69,10 @@ func (m *Model) renderFileSize(indexElement int, columnWidth int) string {
 			}
 			sizeValue = strconv.Itoa(elem.ChildCount) + itemLabel
 		}
+		// A calculated size takes priority over the item count
+		if dirSize := m.dirSizeText(elem); dirSize != "" {
+			sizeValue = dirSize
+		}
 	}
 	return common.FilePanelItemRender(
 		sizeValue,
