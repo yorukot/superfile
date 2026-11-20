@@ -32,6 +32,12 @@ If you want to get the set path you can try `spf pl` which will print out the fi
 | :------------------------: | :----------------------------------------: | :------------------------: |
 | `~/.local/share/superfile` | `~/Library/Application Support/superfile/` | `%LOCALAPPDATA%/superfile` |
 
+:::note
+
+On every system, `XDG_CONFIG_HOME`, `XDG_DATA_HOME` and `XDG_STATE_HOME` override the config, data and log directories.
+
+:::
+
 ### Changing Config File Path
 
 You can use the `-c` or `--config-file` flag to specify a different path for the `config.toml` file:
@@ -40,10 +46,10 @@ You can use the `-c` or `--config-file` flag to specify a different path for the
 spf -c /path/to/your/config.toml
 ```
 
-You can use the `--hotkey-file` flag to specify a different path for the `hotkey.toml` file:
+You can use the `-hf` or `--hotkey-file` flag to specify a different path for the `hotkeys.toml` file:
 
 ```bash
-spf --hotkey-file /path/to/your/hotkey.toml
+spf --hotkey-file /path/to/your/hotkeys.toml
 ```
 
 #### Log directory
@@ -73,3 +79,7 @@ spf --hotkey-file /path/to/your/hotkey.toml
 |                  Linux                   |                          macOS                          |                 Windows                  |
 | :--------------------------------------: | :-----------------------------------------------------: | :--------------------------------------: |
 | `~/.local/state/superfile/superfile.log` | `~/Library/Application Support/superfile/superfile.log` | `%LOCALAPPDATA%/superfile/superfile.log` |
+
+#### Other files
+
+The data directory also holds `pinned.json` (your [pinned folders](/guides/sidebar)) and a few state files. The log directory holds `lastdir`, used by [cd on quit](/guides/shell-integration).

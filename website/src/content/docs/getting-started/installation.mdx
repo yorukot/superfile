@@ -42,6 +42,20 @@ Use `SPF_INSTALL_VERSION` to specify a version :
 SPF_INSTALL_VERSION=1.2.1 bash -c "$(curl -sLo- https://superfile.dev/install.sh)"
 ```
 
+The script supports x86-64 and ARM64. It installs `spf` to `/usr/local/bin`, or to `~/.local/bin` if it can't use sudo.
+
+:::note
+
+To uninstall, run:
+
+```bash
+bash -c "$(curl -sLo- https://superfile.dev/uninstall.sh)"
+```
+
+This also removes your config and data folders.
+
+:::
+
 ### Windows
 
 With `powershell`:
@@ -154,6 +168,18 @@ pixi global install superfile
 ```sh
 x env use superfile
 ```
+
+## Build from source
+
+Install [Go](https://go.dev/doc/install), then run:
+
+```bash
+git clone https://github.com/yorukot/superfile.git --depth=1
+cd superfile
+./build.sh            # on Windows: go build -o bin/spf.exe
+```
+
+The binary is written to `bin/`. Move it to a folder in your `PATH`, such as `/usr/local/bin`.
 
 ## Start superfile
 
