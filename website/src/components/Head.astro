@@ -11,6 +11,15 @@ const ogImage = new URL("/og.png?v=2", Astro.site);
 
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<!-- Moving between pages cross-fades. The rule is inline and first: Chrome drops the transition (with an error)
+     when a page computes its styles once without it, which happens if it sits in a stylesheet that loads late. -->
+<style is:inline>
+	@media (prefers-reduced-motion: no-preference) {
+		@view-transition {
+			navigation: auto;
+		}
+	}
+</style>
 <title>{title}</title>
 {description && <meta name="description" content={description} />}
 <link rel="canonical" href={canonicalUrl} />

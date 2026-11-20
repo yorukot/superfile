@@ -40,13 +40,6 @@ button {
 	font: inherit;
 }
 
-/* Moving between pages cross-fades instead of flashing. */
-@media (prefers-reduced-motion: no-preference) {
-	@view-transition {
-		navigation: auto;
-	}
-}
-
 /* The content column. */
 .sf-wrap {
 	max-width: var(--content-max);
