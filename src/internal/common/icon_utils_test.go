@@ -32,7 +32,7 @@ func TestGetElementIcon(t *testing.T) {
 			isDir:    true,
 			isLink:   false,
 			nerdFont: true,
-			expected: icon.Folders["folder"],
+			expected: icon.Style{Icon: icon.Folders["folder"].Icon, Color: Theme.FilePanelFG},
 		},
 		{
 			name:     "File with known extension",
@@ -100,7 +100,7 @@ func TestGetElementIcon(t *testing.T) {
 			isDir:    true,
 			isLink:   true,
 			nerdFont: true,
-			expected: icon.Folders["link_folder"],
+			expected: icon.Style{Icon: icon.Folders["link_folder"].Icon, Color: Theme.FilePanelFG},
 		},
 		{
 			name:     "Link to File",
@@ -119,5 +119,39 @@ func TestGetElementIcon(t *testing.T) {
 				t.Errorf("GetElementIcon() = %v, want %v", result, tt.expected)
 			}
 		})
+	}
+}
+
+func TestDirectoryIconColorFallback(t *testing.T) {
+	previousTheme := Theme
+	Theme.DirectoryIconColor = "#50fa7b"
+	Theme.FilePanelFG = "#ffffff"
+	t.Cleanup(func() { Theme = previousTheme })
+
+	for _, tt := range []struct {
+		name   string
+		file   string
+		isLink bool
+	}{
+		{name: "generic folder", file: "folder"},
+		{name: "linked folder", file: "folder", isLink: true},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			got := GetElementIcon(tt.file, true, tt.isLink, true)
+			if got.Color != Theme.DirectoryIconColor {
+				t.Errorf("directory icon color = %q, want %q", got.Color, Theme.DirectoryIconColor)
+			}
+		})
+	}
+
+	Theme.DirectoryIconColor = ""
+	got := GetElementIcon("folder", true, true, true)
+	if got.Color != Theme.FilePanelFG {
+		t.Errorf("directory icon fallback color = %q, want %q", got.Color, Theme.FilePanelFG)
+	}
+
+	got = GetElementIcon(".git", true, false, true)
+	if got.Color != icon.Folders[".git"].Color {
+		t.Errorf("named folder color = %q, want %q", got.Color, icon.Folders[".git"].Color)
 	}
 }
