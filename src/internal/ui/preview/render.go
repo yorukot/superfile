@@ -1,15 +1,18 @@
 package preview
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"image"
 	"io/fs"
 	"log/slog"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"slices"
 	"sort"
+	"strings"
 
 	"charm.land/lipgloss/v2"
 	"github.com/alecthomas/chroma/v2/lexers"
@@ -101,19 +104,24 @@ func (m *Model) renderTextPreview(r *rendering.Renderer, itemPath string,
 		isText, err := common.IsTextFile(itemPath)
 		if err != nil {
 			slog.Error("Error while checking text file", "error", err)
+			m.lines = nil
 			return r.AddLines(renderPreviewError(err)).Render()
 		} else if !isText {
+			m.lines = nil
 			return r.AddLines(common.FilePreviewUnsupportedFormatText).Render()
 		}
 	}
 
-	fileContent, err := utils.ReadFileContent(itemPath, previewWidth, previewHeight)
+	// Read full file content (0 means no line limit).
+	fileContent, err := utils.ReadFileContent(itemPath, previewWidth, 0)
 	if err != nil {
 		slog.Error("Error open file", "error", err)
+		m.lines = nil
 		return r.AddLines(renderPreviewError(err)).Render()
 	}
 
 	if fileContent == "" {
+		m.lines = nil
 		return r.AddLines(common.FilePreviewEmptyText).Render()
 	}
 
@@ -124,21 +132,27 @@ func (m *Model) renderTextPreview(r *rendering.Renderer, itemPath string,
 		}
 		if common.Config.CodePreviewer == "bat" {
 			if m.batCmd == "" {
+				m.lines = nil
 				return r.AddLines(common.FilePreviewBatNotInstalledText).Render()
 			}
-			fileContent, err = getBatSyntaxHighlightedContent(itemPath, previewHeight, background, m.batCmd)
+			fileContent, err = getBatSyntaxHighlightedContentFull(itemPath, background, m.batCmd)
 		} else {
 			fileContent, err = ansichroma.HightlightString(fileContent, format.Config().Name,
 				common.Theme.CodeSyntaxHighlightTheme, background)
 		}
 		if err != nil {
 			slog.Error("Error render code highlight", "error", err)
+			m.lines = nil
 			return r.AddLines(renderPreviewError(err)).Render()
 		}
 	}
 
-	r.AddLines(fileContent)
-	return r.Render()
+	// Store all highlighted lines for scrolling
+	m.lines = strings.Split(fileContent, "\n")
+	m.renderIndex = 0
+
+	// Render the first window
+	return m.renderTextWindow(r, previewHeight)
 }
 
 // Only use this when height and width are synced with filemodel's expectations
@@ -219,4 +233,46 @@ func (m *Model) RenderWithPath(
 	}
 
 	return m.renderTextPreview(r, itemPath, contentWidth, contentHeight), kittyClear
+}
+
+// renderTextWindow renders the visible window of stored lines for a text preview.
+func (m *Model) renderTextWindow(r *rendering.Renderer, previewHeight int) string {
+	if m.lines == nil {
+		return ""
+	}
+	start := m.renderIndex
+	end := start + previewHeight
+	if end > len(m.lines) {
+		end = len(m.lines)
+	}
+	r.AddLines(strings.Join(m.lines[start:end], "\n"))
+	return r.Render()
+}
+
+// getBatSyntaxHighlightedContentFull runs bat without a line limit to get full
+// syntax-highlighted output for scrollable preview.
+func getBatSyntaxHighlightedContentFull(
+	itemPath string,
+	background string,
+	batCmd string,
+) (string, error) {
+	// --plain: no line numbers / decorations
+	// --force-colorization: force color for non-interactive output
+	batArgs := []string{itemPath, "--plain", "--force-colorization"}
+
+	ctx, cancel := context.WithTimeout(context.Background(), common.DefaultPreviewTimeout)
+	defer cancel()
+
+	cmd := exec.CommandContext(ctx, batCmd, batArgs...)
+	fileContentBytes, err := cmd.Output()
+	if err != nil {
+		slog.Error("Error render code highlight with bat (full)", "error", err)
+		return "", err
+	}
+
+	fileContent := string(fileContentBytes)
+	if !common.Config.TransparentBackground {
+		fileContent = setBatBackground(fileContent, background)
+	}
+	return fileContent, nil
 }

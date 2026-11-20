@@ -73,6 +73,11 @@ shell_close_on_success = false
 # Number of lines to scroll for PgUp/PgDown keys (0: full page, default behavior).
 page_scroll_size = 0
 
+#-- Wheel Scroll Speed
+# Lines to scroll per mouse wheel tick. Set to 0 to disable mouse wheel scrolling.
+# Recommended range: 1–20 (default: 5).
+wheel_scroll_speed = 5
+
 #-- Debug Mode
 debug = false
 
