@@ -9,6 +9,7 @@ on:
       - "src/superfile_config/**"
       - "cd_on_quit/**"
       - "NOTICE.md"
+      - "SECURITY.md"
   pull_request:
     paths:
       - "website/**"
@@ -17,6 +18,7 @@ on:
       - "src/superfile_config/**"
       - "cd_on_quit/**"
       - "NOTICE.md"
+      - "SECURITY.md"
 
 permissions:
   contents: read

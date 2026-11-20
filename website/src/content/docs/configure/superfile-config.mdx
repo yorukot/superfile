@@ -98,7 +98,7 @@ source ~/.config/fish/config.fish
 
 :::note
 
-The fish function reads the last folder from `~/.local/state/superfile/lastdir` on Linux and from `~/Library/Application Support/superfile/lastdir` on macOS. If you set `XDG_STATE_HOME`, change the path for your system in the function to `$XDG_STATE_HOME/superfile/lastdir`.
+If your shell config contains an older copy of the function, replace it and reload your shell. The current functions use `spf path-list --lastdir-file` to find the file, including when you set `XDG_STATE_HOME`.
 
 :::
 
@@ -224,7 +224,7 @@ Count of extra columns in file panel in addition to file name.
 
 `0` => Extra columns feature is disabled `1` => Also show size column `2` => Also show modify date `3` => Also show permission column
 
-For folders, the size column shows the number of items inside.
+For folders, the size column counts the items directly inside. Toggle hidden files with `.` to include or exclude dotfiles. Folders with more than 1,000 entries show `>1000 items`. For the total size in bytes, see [folder size in the metadata panel](/guides/metadata#folder-size).
 
 :::caution
 

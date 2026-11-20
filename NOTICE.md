@@ -1937,8 +1937,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ## github.com/fvbommel/sortorder
 
-- Version: v1.1.0
-- License: [MIT](https://github.com/fvbommel/sortorder/blob/v1.1.0/LICENSE)
+- Version: v1.2.1
+- License: [MIT](https://github.com/fvbommel/sortorder/blob/v1.2.1/LICENSE)
 
 ```text
 The MIT License (MIT)
