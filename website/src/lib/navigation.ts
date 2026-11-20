@@ -56,6 +56,7 @@ export const navigation: NavGroup[] = [
 		label: "contribute",
 		items: [
 			{ label: "how to contribute", slug: "contribute/how-to-contribute" },
+			{ label: "ai policy", slug: "contribute/ai-policy" },
 			{ label: "file structure", slug: "contribute/file-struct" },
 			{ label: "implementation info", slug: "contribute/implementation-info" }
 		]
@@ -64,6 +65,7 @@ export const navigation: NavGroup[] = [
 		label: "project",
 		items: [
 			{ label: "special thanks", slug: "special-thanks" },
+			{ label: "security policy", slug: "security" },
 			{ label: "notice", slug: "notice" }
 		]
 	}
