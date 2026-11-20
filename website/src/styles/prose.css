@@ -1,0 +1,174 @@
+/* The typography of rendered Markdown: everything inside .sf-prose. */
+.sf-prose {
+	font-size: 18px;
+	line-height: 1.65;
+	overflow-wrap: break-word;
+
+	@media (max-width: 640px) {
+		font-size: 17px;
+	}
+
+	& > :first-child {
+		margin-top: 0;
+	}
+	/* The layout prints the title, so an opening h1 that repeats it is left out. */
+	&.sf-prose--titled > h1:first-child {
+		display: none;
+
+		& + * {
+			margin-top: 0;
+		}
+	}
+
+	& :is(h1, h2, h3, h4, h5, h6) {
+		font-family: var(--font-mono);
+		font-weight: 600;
+		color: var(--ink);
+		letter-spacing: -0.02em;
+		text-wrap: balance;
+		scroll-margin-top: calc(var(--nav-h) + var(--space-5));
+
+		& a {
+			margin: 0;
+			padding: 0;
+			color: inherit;
+			text-decoration: none;
+
+			&:hover {
+				color: var(--signal-text);
+			}
+		}
+	}
+	& :is(h1, h2) {
+		margin: var(--space-8) 0 var(--space-4);
+		padding-top: var(--space-6);
+		border-top: 1px solid var(--box);
+		font-size: 28px;
+		line-height: 1.25;
+
+		@media (max-width: 640px) {
+			margin-top: var(--space-7);
+			font-size: 24px;
+		}
+	}
+	& h3 {
+		margin: var(--space-7) 0 var(--space-3);
+		font-size: 22px;
+		line-height: 1.3;
+	}
+	& h4 {
+		margin: var(--space-6) 0 var(--space-3);
+		font-size: 19px;
+		line-height: 1.4;
+	}
+	& :is(h5, h6) {
+		margin: var(--space-5) 0 var(--space-2);
+		font-size: 16px;
+		line-height: 1.5;
+		letter-spacing: 0;
+	}
+	& h6 {
+		color: var(--ink-muted);
+		font-weight: 500;
+	}
+
+	& :is(p, ul, ol, blockquote, .sf-table-wrap) {
+		margin-top: 0;
+		margin-bottom: var(--space-5);
+	}
+	& :is(ul, ol) {
+		padding-left: 1.4em;
+	}
+	& li {
+		margin: 6px 0;
+	}
+	& ul > li::marker {
+		color: var(--signal-text);
+	}
+	& ol > li::marker {
+		font-family: var(--font-mono);
+		color: var(--ink-muted);
+	}
+	& strong {
+		font-weight: 600;
+	}
+	& hr {
+		margin: var(--space-7) 0;
+		border: 0;
+		border-top: 1px solid var(--box);
+	}
+	& blockquote {
+		margin-inline: 0;
+		padding-left: var(--space-5);
+		font-family: var(--font-mono);
+		font-size: 16px;
+		color: var(--ink-muted);
+
+		& > :last-child {
+			margin-bottom: 0;
+		}
+	}
+
+	/* Links look like .sf-link, which Markdown cannot put on them. */
+	& a {
+		margin: 0 -0.12em;
+		padding: 0 0.12em;
+		border-radius: 3px;
+		color: var(--teal-text);
+		text-decoration: underline;
+		text-decoration-thickness: 1px;
+		text-underline-offset: 0.2em;
+
+		&:hover {
+			background: var(--ink);
+			color: var(--bg);
+			text-decoration: none;
+		}
+		&:has(> img) {
+			margin: 0;
+			padding: 0;
+		}
+	}
+	/* Inline code looks like .sf-icode, but may wrap. */
+	& :not(pre) > code {
+		padding: 0.06em 0.36em;
+		border: 1px solid var(--box);
+		border-radius: 5px;
+		font-family: var(--font-mono);
+		font-size: 0.88em;
+		overflow-wrap: anywhere;
+	}
+	& a:hover > code {
+		border-color: currentColor;
+	}
+	& img {
+		display: block;
+		border-radius: var(--radius-sm);
+	}
+	& p > img {
+		margin: var(--space-5) 0;
+	}
+
+	& .sf-pane {
+		margin-block: var(--space-6);
+	}
+	& .sf-pane__body {
+		& > :first-child {
+			margin-top: 0;
+		}
+		& > :last-child {
+			margin-bottom: 0;
+		}
+	}
+	& .sf-table :is(td, th) {
+		padding: 14px 18px;
+	}
+	& .sf-code {
+		margin: var(--space-5) 0;
+
+		/* A long block scrolls inside itself. */
+		&:has(pre > code > .line:nth-child(40)) pre {
+			max-height: 560px;
+		}
+	}
+}

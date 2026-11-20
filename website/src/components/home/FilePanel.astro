@@ -1,0 +1,94 @@
+---
+import FileList from "./FileList.astro";
+import FileRow from "./FileRow.astro";
+
+interface Props {
+	/** One per section of the page, in page order; `id` is the section's id. */
+	files: { id: string; name: string; isDir?: boolean }[];
+}
+
+const { files } = Astro.props;
+---
+
+<aside class="panel" aria-label="On this page">
+	<nav class="sf-pane is-active" data-file-panel>
+		<span class="sf-pane__title">~/superfile</span>
+		<FileList hoverMovesCursor>
+			{
+				files.map((file, index) => (
+					<li>
+						<FileRow name={file.name} isDir={file.isDir} href={`#${file.id}`} aria-current={index === 0 ? "location" : undefined} />
+					</li>
+				))
+			}
+		</FileList>
+	</nav>
+	<p class="keys" aria-hidden="true">
+		<span class="sf-keys"><kbd class="sf-kbd">j</kbd><kbd class="sf-kbd">k</kbd></span> move
+		<kbd class="sf-kbd">/</kbd> search
+	</p>
+</aside>
+
+<style>
+	.panel {
+		position: sticky;
+		top: calc(var(--nav-h) + var(--space-4));
+
+		@media (max-width: 960px) {
+			display: none;
+		}
+	}
+	.keys {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 8px;
+		margin: var(--space-4) 0 0;
+		padding: 0 10px;
+		font: 500 15px/1 var(--font-mono);
+		color: var(--ink-muted);
+
+		> .sf-kbd {
+			margin-left: 10px;
+		}
+		@media (hover: none) {
+			display: none;
+		}
+	}
+</style>
+
+<script>
+	import { isTyping } from "../../scripts/keyboard";
+
+	const links = [...document.querySelectorAll<HTMLAnchorElement>("[data-file-panel] a")];
+	const sections = links.map(link => document.querySelector<HTMLElement>(link.hash)!);
+	let cursor = 0;
+
+	function setCursor(index: number) {
+		links[cursor].ariaCurrent = null;
+		links[index].ariaCurrent = "location";
+		cursor = index;
+	}
+
+	// The cursor follows the section being read: the last one to have passed a line a third of the way down.
+	function followScroll() {
+		// At the very bottom the last section is the one being read, however short it is.
+		const atBottom = innerHeight + scrollY >= document.documentElement.scrollHeight - 2;
+		const reading = atBottom ? sections.length - 1 : sections.findLastIndex(section => section.getBoundingClientRect().top <= innerHeight * 0.35);
+		setCursor(Math.max(reading, 0));
+	}
+
+	addEventListener("scroll", followScroll, { passive: true });
+	followScroll();
+
+	// j / k walk the page the way they walk a folder.
+	document.addEventListener("keydown", event => {
+		if (event.ctrlKey || isTyping(event)) return;
+		const step = event.key === "j" ? 1 : event.key === "k" ? -1 : 0;
+		const next = cursor + step;
+		if (!step || !sections[next]) return;
+		event.preventDefault();
+		sections[next].scrollIntoView();
+		setCursor(next);
+	});
+</script>

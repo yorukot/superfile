@@ -1,423 +1,258 @@
 ---
-interface Props {
-	isZhTw?: boolean;
-}
-const { isZhTw = false } = Astro.props;
-const placeholder = isZhTw ? "搜尋文件…" : "Search docs…";
-const label = isZhTw ? "搜尋" : "Search";
+import { Search as SearchIcon } from "@lucide/astro";
 ---
 
-<!-- ── Search trigger button ─────────────────────────────────────────────── -->
-<button class="search-trigger" id="search-trigger" aria-label={label} aria-haspopup="dialog">
-	<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-		<circle cx="11" cy="11" r="8"></circle>
-		<line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-	</svg>
-	<span class="search-trigger-label">{label}</span>
-	<span class="search-trigger-shortcut" aria-hidden="true">
-		<kbd class="search-trigger-mod">⌘</kbd><kbd>K</kbd>
-	</span>
-</button>
-
-<!-- ── Search overlay + dialog ───────────────────────────────────────────── -->
-<div class="search-overlay" id="search-overlay" aria-hidden="true">
-	<div class="search-dialog" id="search-dialog" role="dialog" aria-modal="true" aria-label={label}>
-		<div class="search-header">
-			<svg class="search-header-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-				<circle cx="11" cy="11" r="8"></circle>
-				<line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-			</svg>
-			<input type="search" class="search-input" id="search-input" placeholder={placeholder} autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
-			<button class="search-esc-btn" id="search-close-btn" aria-label="Close search">
-				<kbd>ESC</kbd>
-			</button>
+<dialog class="sf-dialog" aria-label="Search the docs" data-search data-pagefind-ignore>
+	<span class="sf-dialog__title" aria-hidden="true">search docs</span>
+	<div class="inner">
+		<div class="head">
+			<span class="prompt" aria-hidden="true">/</span>
+			<input
+				type="text"
+				role="combobox"
+				aria-label="Search the docs"
+				aria-controls="search-results"
+				aria-expanded="false"
+				aria-autocomplete="list"
+				placeholder="type to search"
+				enterkeyhint="search"
+				autocomplete="off"
+				autocapitalize="off"
+				spellcheck="false"
+			/>
+			<SearchIcon aria-hidden="true" width="18" height="18" />
 		</div>
-		<div class="search-results" id="search-results" role="listbox"></div>
-		<div class="search-footer">
-			<span class="search-footer-hint"><kbd>↑</kbd><kbd>↓</kbd> navigate</span>
-			<span class="search-footer-hint"><kbd>↵</kbd> open</span>
-			<span class="search-footer-hint"><kbd>Esc</kbd> close</span>
+		<div class="results" id="search-results" role="listbox" aria-label="Results"></div>
+		<div class="foot">
+			<span><span class="sf-keys"><kbd class="sf-kbd">↑</kbd><kbd class="sf-kbd">↓</kbd></span>move</span>
+			<span><kbd class="sf-kbd">enter</kbd>open</span>
+			<span><kbd class="sf-kbd">esc</kbd>close</span>
 		</div>
 	</div>
-</div>
+	<template data-search-hit>
+		<a class="hit" role="option"><b></b><span></span></a>
+	</template>
+</dialog>
 
-<style is:global>
-	/* ── Trigger button ─────────────────────────────────────────────────────── */
-	.search-trigger {
-		display: flex;
-		align-items: center;
-		gap: 0.375rem;
-		padding: 0.25rem 0.625rem;
-		font-size: 0.78rem;
-		color: var(--text-3);
-		background: none;
-		border: 1px solid var(--border-1);
-		border-radius: 0.3125rem;
-		cursor: pointer;
-		white-space: nowrap;
-		transition:
-			color 0.15s,
-			border-color 0.15s,
-			background 0.15s;
-	}
-	.search-trigger:hover {
-		color: var(--text-1);
-		border-color: var(--border-2);
-		background: rgba(205, 214, 244, 0.05);
-	}
-	.search-trigger-shortcut {
-		display: flex;
-		align-items: center;
-	}
-	.search-trigger-shortcut kbd {
-		font-family: var(--font-mono);
-		font-size: 0.6875rem;
-		color: var(--text-4);
-		background: rgba(205, 214, 244, 0.06);
-		border: 1px solid rgba(205, 214, 244, 0.1);
-		border-radius: 0.25rem;
-		padding: 0.0625rem 0.25rem;
-		line-height: 1.4;
-	}
-	.search-trigger-shortcut .search-trigger-mod {
-		border-right: none;
-		border-radius: 0.25rem 0 0 0.25rem;
-		padding-right: 0.125rem;
-	}
-	.search-trigger-shortcut kbd:last-child:not(.search-trigger-mod) {
-		border-radius: 0 0.25rem 0.25rem 0;
-		padding-left: 0.125rem;
-	}
-
-	/* ── Overlay ────────────────────────────────────────────────────────────── */
-	.search-overlay {
-		position: fixed;
-		inset: 0;
-		z-index: 500;
-		display: flex;
-		align-items: flex-start;
-		justify-content: center;
-		padding-top: clamp(3rem, 8vh, 6rem);
-		background: rgba(17, 17, 27, 0.72);
-		backdrop-filter: blur(4px);
-		-webkit-backdrop-filter: blur(4px);
-		opacity: 0;
-		pointer-events: none;
-		transition: opacity 0.15s;
-	}
-	.search-overlay[aria-hidden="false"] {
-		opacity: 1;
-		pointer-events: auto;
-	}
-
-	/* ── Dialog ─────────────────────────────────────────────────────────────── */
-	.search-dialog {
-		width: min(42rem, calc(100vw - 2rem));
-		max-height: min(30rem, calc(100vh - 8rem));
-		background: var(--bg-1);
-		border: 1px solid var(--border-2);
-		border-radius: 0.625rem;
-		box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
+<style>
+	.inner {
 		display: flex;
 		flex-direction: column;
-		overflow: hidden;
-		transform: translateY(-0.375rem);
-		transition: transform 0.15s;
+		max-height: inherit;
 	}
-	.search-overlay[aria-hidden="false"] .search-dialog {
-		transform: translateY(0);
-	}
-
-	/* ── Header / input row ─────────────────────────────────────────────────── */
-	.search-header {
+	.head {
 		display: flex;
 		align-items: center;
-		gap: 0.625rem;
-		padding: 0.75rem 1rem;
-		border-bottom: 1px solid var(--border-1);
-		flex-shrink: 0;
+		gap: 12px;
+		padding: 22px 18px 14px 26px;
 	}
-	.search-header-icon {
-		color: var(--text-3);
-		flex-shrink: 0;
+	.prompt {
+		color: var(--signal-text);
+		font-family: var(--font-mono);
+		font-weight: 600;
 	}
-	.search-input {
+	input {
 		flex: 1;
 		min-width: 0;
-		background: none;
-		border: none;
-		outline: none;
-		font-family: var(--font-body);
-		font-size: 0.9375rem;
-		color: var(--text);
-		caret-color: var(--green);
-	}
-	.search-input::placeholder {
-		color: var(--text-4);
-	}
-	.search-input::-webkit-search-cancel-button {
-		display: none;
-	}
-	.search-esc-btn {
-		background: none;
-		border: none;
-		cursor: pointer;
+		height: 44px;
 		padding: 0;
-		flex-shrink: 0;
-	}
-	.search-esc-btn kbd {
-		font-family: var(--font-mono);
-		font-size: 0.6875rem;
-		color: var(--text-4);
-		background: rgba(205, 214, 244, 0.06);
-		border: 1px solid var(--border-1);
-		border-radius: 0.25rem;
-		padding: 0.125rem 0.375rem;
-		transition:
-			color 0.1s,
-			border-color 0.1s;
-	}
-	.search-esc-btn:hover kbd {
-		color: var(--text-2);
-		border-color: var(--border-2);
-	}
-
-	/* ── Results ────────────────────────────────────────────────────────────── */
-	.search-results {
-		overflow-y: auto;
-		flex: 1;
-		padding: 0.375rem;
-		min-height: 0;
-	}
-	.search-result {
-		border-radius: 0.375rem;
-	}
-	.search-result-link {
-		display: flex;
-		flex-direction: column;
-		gap: 0.1875rem;
-		padding: 0.625rem 0.75rem;
-		text-decoration: none;
-		border-radius: 0.375rem;
-		transition: background 0.1s;
-	}
-	.search-result:hover .search-result-link,
-	.search-result--selected .search-result-link {
-		background: rgba(205, 214, 244, 0.07);
-	}
-	.search-result-title {
-		font-size: 0.875rem;
-		font-weight: 500;
-		color: var(--text);
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
-	.search-result-excerpt {
-		font-size: 0.8125rem;
-		color: var(--text-3);
-		line-height: 1.5;
-		display: -webkit-box;
-		-webkit-line-clamp: 2;
-		-webkit-box-orient: vertical;
-		overflow: hidden;
-	}
-	.search-result-excerpt mark {
+		border: 0;
+		outline: 0;
 		background: transparent;
-		color: var(--green);
-		font-weight: 500;
-	}
-	.search-no-results {
-		padding: 2rem 1rem;
-		text-align: center;
-		color: var(--text-3);
-		font-size: 0.875rem;
-	}
+		color: var(--ink);
+		font: 400 18px/1 var(--font-mono);
 
-	/* ── Footer ─────────────────────────────────────────────────────────────── */
-	.search-footer {
-		display: flex;
-		gap: 1rem;
-		align-items: center;
-		padding: 0.5rem 1rem;
-		border-top: 1px solid var(--border);
-		flex-shrink: 0;
-	}
-	.search-footer-hint {
-		display: flex;
-		align-items: center;
-		gap: 0.25rem;
-		font-size: 0.75rem;
-		color: var(--text-4);
-	}
-	.search-footer-hint kbd {
-		font-family: var(--font-mono);
-		font-size: 0.625rem;
-		color: var(--text-3);
-		background: rgba(205, 214, 244, 0.06);
-		border: 1px solid var(--border-1);
-		border-radius: 0.25rem;
-		padding: 0.0625rem 0.25rem;
-	}
-
-	/* ── Responsive ─────────────────────────────────────────────────────────── */
-	@media (max-width: 53.75rem) {
-		.search-trigger-label {
-			display: none;
-		}
-		.search-trigger-shortcut {
-			display: none;
+		&::placeholder {
+			color: var(--ink-muted);
 		}
 	}
-	@media (max-width: 30rem) {
-		.search-footer {
+	.results {
+		overflow-y: auto;
+		padding: 0 8px;
+
+		&:empty {
 			display: none;
+		}
+		/* The "nothing found" line, written by the script. */
+		& :global(p) {
+			margin: 0;
+			padding: 12px 18px;
+			font: 400 16px/1.5 var(--font-mono);
+			color: var(--ink-muted);
+		}
+	}
+	.hit {
+		display: block;
+		padding: 12px 18px;
+		border-radius: var(--radius-xs);
+		color: var(--ink);
+		text-decoration: none;
+
+		& b {
+			display: block;
+			font: 600 16px/1.4 var(--font-mono);
+		}
+		& span {
+			display: block;
+			font-size: 16px;
+			line-height: 1.5;
+			color: var(--ink-muted);
+		}
+		/* Pagefind marks the words that matched. */
+		& :global(mark) {
+			background: none;
+			color: var(--signal-text);
+			font-weight: 600;
+		}
+		&:is(:hover, [aria-selected="true"]) {
+			background: var(--ink);
+			color: var(--bg);
+
+			& span {
+				color: inherit;
+			}
+			& :global(mark) {
+				color: var(--signal);
+			}
+		}
+	}
+	.foot {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px 22px;
+		padding: 14px 26px 18px;
+		font: 500 15px/1 var(--font-mono);
+		color: var(--ink-muted);
+
+		& span {
+			display: inline-flex;
+			align-items: center;
+			gap: 8px;
 		}
 	}
 </style>
 
-<script is:inline>
-	// Module-level state persists across SPA navigations (attached to window)
-	window.__pagefind = window.__pagefind ?? null;
+<script>
+	import { isTyping } from "../scripts/keyboard";
 
-	async function loadPagefind() {
-		if (window.__pagefind) return window.__pagefind;
-		try {
-			const pf = await import("/pagefind/pagefind.js");
-			await pf.init();
-			window.__pagefind = pf;
-		} catch {
-			window.__pagefind = null;
-		}
-		return window.__pagefind;
+	interface Pagefind {
+		init(): Promise<void>;
+		/** Resolves to null when a newer search has started in the meantime. */
+		debouncedSearch(query: string, options: object, debounceMs: number): Promise<{ results: { data(): Promise<{ url: string; excerpt: string; meta: { title?: string } }> }[] } | null>;
 	}
 
-	function escapeHtml(str) {
-		return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+	const dialog = document.querySelector<HTMLDialogElement>("[data-search]")!;
+	const input = dialog.querySelector("input")!;
+	const results = document.getElementById("search-results")!;
+	const hitTemplate = dialog.querySelector<HTMLTemplateElement>("[data-search-hit]")!;
+
+	// The index is written by `pagefind` after the build, so it does not exist in `astro dev`.
+	const indexUrl = "/pagefind/pagefind.js";
+	const unavailable = import.meta.env.DEV ? "The search index is built with the site. Run a build first." : "Search is not available right now. Try again in a moment.";
+	let pagefind: Promise<Pagefind | null> | undefined;
+	let failures = 0;
+	// A load that failed is forgotten, so the next search tries again. The browser remembers that a
+	// module failed to load, so a retry has to ask for it under another address.
+	const loadPagefind = () =>
+		(pagefind ??= import(/* @vite-ignore */ failures ? `${indexUrl}?retry=${failures}` : indexUrl)
+			.then(async (module: Pagefind) => (await module.init(), module))
+			.catch(() => {
+				pagefind = undefined;
+				failures++;
+				return null;
+			}));
+
+	/** Marks one result as the one Enter opens. Focus stays in the input, so the input points a screen reader at it. */
+	function select(hit: Element) {
+		results.querySelector("[aria-selected='true']")?.setAttribute("aria-selected", "false");
+		hit.ariaSelected = "true";
+		input.setAttribute("aria-activedescendant", hit.id);
+		hit.scrollIntoView({ block: "nearest" });
 	}
 
-	function initSearch() {
-		const trigger = document.getElementById("search-trigger");
-		const overlay = document.getElementById("search-overlay");
-		const input = document.getElementById("search-input");
-		const resultsEl = document.getElementById("search-results");
-		const closeBtn = document.getElementById("search-close-btn");
-
-		if (!trigger || !overlay || !input || !resultsEl) return;
-
-		// Teleport overlay to <body> so it escapes SiteNav's backdrop-filter
-		// stacking context (which is z-index: 100). Without this, the overlay's
-		// own z-index: 500 is scoped inside SiteNav and images outside it paint
-		// on top of the backdrop.
-		if (overlay.parentElement !== document.body) {
-			document.body.appendChild(overlay);
-		}
-
-		let selectedIndex = -1;
-		let searchTimeout = null;
-
-		function open() {
-			overlay.setAttribute("aria-hidden", "false");
-			document.body.style.overflow = "hidden";
-			requestAnimationFrame(() => input.focus());
-			loadPagefind(); // preload index eagerly
-		}
-
-		function close() {
-			overlay.setAttribute("aria-hidden", "true");
-			document.body.style.overflow = "";
-			input.value = "";
-			resultsEl.innerHTML = "";
-			selectedIndex = -1;
-		}
-
-		trigger.addEventListener("click", open);
-		closeBtn?.addEventListener("click", close);
-
-		overlay.addEventListener("click", e => {
-			if (e.target === overlay) close();
-		});
-
-		function handleKey(e) {
-			if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-				e.preventDefault();
-				overlay.getAttribute("aria-hidden") === "false" ? close() : open();
-				return;
-			}
-			if (overlay.getAttribute("aria-hidden") !== "false") return;
-			if (e.key === "Escape") {
-				close();
-				return;
-			}
-			const items = resultsEl.querySelectorAll(".search-result");
-			if (!items.length) return;
-			if (e.key === "ArrowDown") {
-				e.preventDefault();
-				selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
-				updateSelection(items);
-			} else if (e.key === "ArrowUp") {
-				e.preventDefault();
-				selectedIndex = Math.max(selectedIndex - 1, 0);
-				updateSelection(items);
-			} else if (e.key === "Enter" && selectedIndex >= 0) {
-				const link = items[selectedIndex]?.querySelector("a");
-				if (link) {
-					close();
-					link.click();
-				}
-			}
-		}
-
-		document.addEventListener("keydown", handleKey);
-		document.addEventListener("astro:before-swap", () => document.removeEventListener("keydown", handleKey), { once: true });
-
-		function updateSelection(items) {
-			items.forEach((item, i) => {
-				item.classList.toggle("search-result--selected", i === selectedIndex);
-				item.setAttribute("aria-selected", i === selectedIndex ? "true" : "false");
-				if (i === selectedIndex) item.scrollIntoView({ block: "nearest" });
-			});
-		}
-
-		input.addEventListener("input", () => {
-			selectedIndex = -1;
-			const query = input.value.trim();
-			if (searchTimeout) clearTimeout(searchTimeout);
-			if (!query) {
-				resultsEl.innerHTML = "";
-				return;
-			}
-			searchTimeout = setTimeout(() => doSearch(query), 150);
-		});
-
-		async function doSearch(query) {
-			const pf = await loadPagefind();
-			if (!pf) {
-				resultsEl.innerHTML = `<div class="search-no-results">Search index not available — run a build first.</div>`;
-				return;
-			}
-			const search = await pf.search(query);
-			if (!search.results.length) {
-				resultsEl.innerHTML = `<div class="search-no-results">No results found.</div>`;
-				return;
-			}
-			const data = await Promise.all(search.results.slice(0, 8).map(r => r.data()));
-			resultsEl.innerHTML = data
-				.map(
-					r => `
-				<div class="search-result" role="option" aria-selected="false">
-					<a href="${r.url}" class="search-result-link">
-						<span class="search-result-title">${escapeHtml(r.meta?.title ?? "")}</span>
-						<span class="search-result-excerpt">${r.excerpt}</span>
-					</a>
-				</div>`
-				)
-				.join("");
-			resultsEl.querySelectorAll(".search-result-link").forEach(link => {
-				link.addEventListener("click", close);
-			});
-		}
+	/** Puts results, a message or nothing in the list, with the first result selected. */
+	function show(...content: Element[]) {
+		results.replaceChildren(...content);
+		const first = results.querySelector("[role='option']");
+		input.ariaExpanded = String(!!first);
+		if (first) select(first);
+		else input.removeAttribute("aria-activedescendant");
 	}
 
-	document.addEventListener("astro:page-load", initSearch);
+	const message = (text: string) => show(Object.assign(document.createElement("p"), { textContent: text }));
+
+	async function search() {
+		const query = input.value.trim();
+		if (!query) return show();
+		const engine = await loadPagefind();
+		if (!engine) return message(unavailable);
+		const found = await engine.debouncedSearch(query, {}, 140);
+		if (!found) return;
+		const hits = await Promise.all(found.results.slice(0, 8).map(result => result.data()));
+		if (input.value.trim() !== query) return;
+		if (!hits.length) return message(`Nothing found for "${query}".`);
+		show(
+			...hits.map((hit, index) => {
+				const link = (hitTemplate.content.cloneNode(true) as DocumentFragment).querySelector("a")!;
+				link.id = `search-hit-${index}`;
+				link.href = hit.url;
+				link.querySelector("b")!.textContent = hit.meta.title ?? hit.url;
+				link.querySelector("span")!.innerHTML = hit.excerpt;
+				return link;
+			})
+		);
+	}
+
+	function moveSelection(step: number) {
+		const hits = [...results.querySelectorAll("[role='option']")];
+		const next = hits[Math.max(0, Math.min(hits.length - 1, hits.findIndex(hit => hit.ariaSelected === "true") + step))];
+		if (next) select(next);
+	}
+
+	function open() {
+		if (dialog.open) return;
+		dialog.showModal();
+		void loadPagefind();
+	}
+
+	/**
+	 * True for the `/` key. With an input method on (Zhuyin, Pinyin, kana…) the browser reports the
+	 * key as "Process" or as the character the layout would type, so the physical key counts too.
+	 */
+	function isSlash(event: KeyboardEvent): boolean {
+		if (event.key === "/") return true;
+		if (event.code !== "Slash" || event.shiftKey) return false;
+		return event.isComposing || event.key === "Process" || event.key === "Unidentified" || event.key.charCodeAt(0) > 127;
+	}
+
+	input.addEventListener("input", search);
+
+	dialog.addEventListener("keydown", event => {
+		// An input method uses these keys to pick a candidate. 229 marks its keys where `isComposing` does not.
+		if (event.isComposing || event.keyCode === 229) return;
+		if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+			event.preventDefault();
+			moveSelection(event.key === "ArrowDown" ? 1 : -1);
+		} else if (event.key === "Enter") {
+			results.querySelector<HTMLElement>("[aria-selected='true']")?.click();
+		}
+	});
+	// A click on the dialog element itself is a click on its backdrop.
+	dialog.addEventListener("click", event => {
+		if (event.target === dialog) dialog.close();
+	});
+	dialog.addEventListener("close", () => {
+		input.value = "";
+		show();
+	});
+
+	document.addEventListener("click", event => {
+		if ((event.target as Element).closest("[data-search-open]")) open();
+	});
+	document.addEventListener("keydown", event => {
+		const shortcut = (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k";
+		if (!shortcut && (!isSlash(event) || event.ctrlKey || isTyping(event))) return;
+		event.preventDefault();
+		open();
+	});
 </script>

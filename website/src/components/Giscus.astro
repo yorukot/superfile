@@ -1,37 +1,68 @@
 ---
+import { REPO } from "../lib/site";
+
 interface Props {
+	/** The discussion title giscus looks for, and creates on the first comment. */
 	term: string;
-	lang: string;
+	/** The page's discussion number, when it is known. It takes precedence over the title. */
+	number?: number;
 }
 
-const { term, lang } = Astro.props;
-
-function escapeAttribute(value: string) {
-	return value.replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
-}
-
-const attributes: Record<string, string | boolean> = {
-	src: "https://giscus.app/client.js",
-	"data-repo": "yorukot/superfile",
-	"data-repo-id": "R_kgDOLil1MA",
-	"data-category": "Docs Comments",
-	"data-category-id": "DIC_kwDOLil1MM4CfbH7",
-	"data-mapping": "specific",
-	"data-term": term,
-	"data-strict": "0",
-	"data-reactions-enabled": "1",
-	"data-emit-metadata": "0",
-	"data-input-position": "top",
-	"data-theme": "catppuccin_mocha",
-	"data-lang": lang,
-	"data-loading": "lazy",
-	crossorigin: "anonymous",
-	async: true
-};
-
-const attributeString = Object.entries(attributes)
-	.map(([name, value]) => (value === true ? name : `${name}="${escapeAttribute(value)}"`))
-	.join(" ");
+const { term, number } = Astro.props;
 ---
 
-<Fragment set:html={`<script ${attributeString}></script>`} />
+<div class="thread" data-giscus data-repo={REPO} data-term={term} data-number={number}></div>
+
+<style>
+	.thread {
+		min-height: 120px;
+	}
+</style>
+
+<script>
+	// The site's own comment themes live in public/giscus-*.css. giscus loads them from inside its
+	// https frame, so they only work when this site is served over https; a local preview falls
+	// back to the closest stock theme.
+	const themeFor = () => {
+		const dark = document.documentElement.dataset.theme === "dark";
+		if (location.protocol === "https:") return `${location.origin}/giscus-${dark ? "dark" : "light"}.css`;
+		return dark ? "noborder_dark" : "noborder_light";
+	};
+
+	const thread = document.querySelector<HTMLElement>("[data-giscus]")!;
+	const { repo, term, number } = thread.dataset;
+	const client = Object.assign(document.createElement("script"), { src: "https://giscus.app/client.js", async: true, crossOrigin: "anonymous" });
+	Object.assign(client.dataset, {
+		repo,
+		repoId: "R_kgDOLil1MA",
+		category: "Docs Comments",
+		categoryId: "DIC_kwDOLil1MM4CfbH7",
+		mapping: number ? "number" : "specific",
+		term: number ?? term,
+		strict: "0",
+		reactionsEnabled: "1",
+		emitMetadata: "0",
+		inputPosition: "top",
+		theme: themeFor(),
+		lang: "en",
+		loading: "lazy"
+	});
+	thread.append(client);
+
+	const applyTheme = () => {
+		// The client reads this when it starts, in case it has not started yet.
+		client.dataset.theme = themeFor();
+		const frame = document.querySelector<HTMLIFrameElement>("iframe.giscus-frame");
+		frame?.contentWindow?.postMessage({ giscus: { setConfig: { theme: themeFor() } } }, "https://giscus.app");
+	};
+	document.addEventListener("spf:theme", applyTheme);
+
+	// The thread loads lazily and cannot hear a theme change before then. Its first message
+	// (its height) says it is listening, so a theme chosen in the meantime is sent again.
+	const firstTheme = themeFor();
+	addEventListener("message", function onThreadReady(event) {
+		if (event.origin !== "https://giscus.app") return;
+		removeEventListener("message", onThreadReady);
+		if (themeFor() !== firstTheme) applyTheme();
+	});
+</script>

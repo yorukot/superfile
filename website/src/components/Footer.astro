@@ -1,0 +1,196 @@
+---
+import logo from "../assets/superfile-night.svg";
+import { DISCORD_URL, GITHUB_URL, TAGLINE } from "../lib/site";
+
+const LICENSE_URL = `${GITHUB_URL}/blob/main/LICENSE`;
+
+const groups = [
+	{
+		title: "project",
+		links: [
+			{ label: "install", href: "/getting-started/installation" },
+			{ label: "changelog", href: "/changelog" },
+			{ label: "brand assets", href: "/branding" },
+			{ label: "license", href: LICENSE_URL }
+		]
+	},
+	{
+		title: "docs",
+		links: [
+			{ label: "get started", href: "/overview" },
+			{ label: "hotkeys", href: "/list/hotkey-list" },
+			{ label: "themes", href: "/list/theme-list" },
+			{ label: "plugins", href: "/list/plugin-list" }
+		]
+	},
+	{
+		title: "community",
+		links: [
+			{ label: "github", href: GITHUB_URL },
+			{ label: "discord", href: DISCORD_URL },
+			{ label: "contributors", href: "/special-thanks" },
+			{ label: "sponsor", href: "https://ko-fi.com/yorukot" }
+		]
+	}
+];
+---
+
+<!-- The footer is the site's last screen: charcoal in both themes. -->
+<footer data-pagefind-ignore>
+	<!-- Behind everything: the name on a dot-matrix board as wide as the page. -->
+	<canvas aria-hidden="true"></canvas>
+	<div class="sf-wrap">
+		<div class="grid">
+			<div class="about">
+				<img src={logo.src} alt="superfile" width="187" height="36" />
+				<p>{TAGLINE}</p>
+			</div>
+			{
+				groups.map(group => (
+					<nav aria-label={group.title}>
+						<h4>{group.title}</h4>
+						<ul>
+							{group.links.map(link => (
+								<li>
+									<a href={link.href}>{link.label}</a>
+								</li>
+							))}
+						</ul>
+					</nav>
+				))
+			}
+		</div>
+		<p class="base">
+			<span>
+				<a href={LICENSE_URL}>MIT License</a> · by <a href="https://github.com/yorukot">yorukot</a> and <a href="/special-thanks">contributors</a>
+			</span>
+			<span>made for people who live in the terminal</span>
+		</p>
+	</div>
+</footer>
+
+<style>
+	footer {
+		/* The lettering on the board is as wide as the content column: 96 cells across, 22 rows tall. */
+		--board-h: calc((min(var(--content-max), 100vw) - 2 * clamp(16px, 4vw, 32px)) * 22 / 96);
+		position: relative;
+		overflow: hidden;
+		background: var(--term-bg);
+		color: var(--term-ink);
+
+		/* A dark veil over the top of the board, where the links are. It is gone before the lettering starts. */
+		&::before {
+			content: "";
+			position: absolute;
+			inset: 0 0 auto;
+			height: calc(100% - var(--board-h));
+			background: linear-gradient(to bottom, rgb(29 34 39 / 0.9), rgb(29 34 39 / 0.6) 55%, rgb(29 34 39 / 0));
+			pointer-events: none;
+		}
+		& :focus-visible {
+			outline-color: var(--term-teal);
+		}
+		& a {
+			margin: 0 -4px;
+			padding: 1px 4px;
+			border-radius: 3px;
+
+			&:hover {
+				background: var(--term-ink);
+				color: var(--term-bg);
+				text-decoration: none;
+			}
+		}
+	}
+	canvas {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+	}
+	.sf-wrap {
+		position: relative;
+		padding-top: var(--space-8);
+		/* Room for the lettering on the board behind. */
+		padding-bottom: calc(var(--board-h) + var(--space-5));
+
+		@media (max-width: 560px) {
+			padding-top: var(--space-7);
+		}
+	}
+	.grid {
+		display: grid;
+		grid-template-columns: 1.6fr repeat(3, 1fr);
+		gap: var(--space-6);
+
+		@media (max-width: 860px) {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
+		@media (max-width: 560px) {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+	.about {
+		@media (max-width: 860px) {
+			grid-column: 1 / -1;
+		}
+		& img {
+			display: block;
+			width: auto;
+			height: 36px;
+		}
+		& p {
+			max-width: 30ch;
+			margin: var(--space-4) 0 0;
+			font-size: 16px;
+			color: var(--term-muted);
+		}
+	}
+	nav {
+		& h4 {
+			margin: 0 0 14px;
+			font: 600 16px/1.3 var(--font-mono);
+
+			&::after {
+				content: "/";
+				color: var(--term-teal);
+			}
+		}
+		& ul {
+			display: grid;
+			gap: 10px;
+			margin: 0;
+			padding: 0;
+			list-style: none;
+		}
+		& a {
+			color: var(--term-muted);
+			font: 400 15px/1.5 var(--font-mono);
+			text-decoration: none;
+		}
+	}
+	.base {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		gap: 8px 24px;
+		margin: var(--space-7) 0 0;
+		padding-top: var(--space-5);
+		border-top: 1px solid var(--term-line);
+		font: 400 15px/1.5 var(--font-mono);
+		color: var(--term-muted);
+
+		& a {
+			color: inherit;
+			text-decoration: underline;
+			text-decoration-thickness: 1px;
+			text-underline-offset: 0.2em;
+		}
+	}
+</style>
+
+<script>
+	import { mountBoard } from "../scripts/board";
+
+	mountBoard(document.querySelector<HTMLCanvasElement>("footer canvas")!);
+</script>

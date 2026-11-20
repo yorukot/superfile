@@ -10,6 +10,113 @@ head:
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC(YYYY-MM-DD).
 
+# [**v1.6.1**](https://github.com/yorukot/superfile/releases/tag/v1.6.1)
+
+> 2026-11-20
+
+#### Update
+
+- Use the system trash on Linux, macOS, and Windows [`#1495`](https://github.com/yorukot/superfile/pull/1495)
+- Write all selected paths to `--chooser-file` in panel order [`#1653`](https://github.com/yorukot/superfile/pull/1653)
+- Show folder item counts in the size column [`#1648`](https://github.com/yorukot/superfile/pull/1648)
+- Add the Rosé Pine Dawn and Rosé Pine Moon themes [`#1664`](https://github.com/yorukot/superfile/pull/1664)
+- Redesign the website and add a documentation version switcher [`#1729`](https://github.com/yorukot/superfile/pull/1729)
+- Show Windows file attributes in the metadata panel [`#1464`](https://github.com/yorukot/superfile/pull/1464)
+- Show FreeBSD file flags in the metadata panel [`#1472`](https://github.com/yorukot/superfile/pull/1472)
+- Recognize the FreeBSD `NO_UCACHE` flag [`#1644`](https://github.com/yorukot/superfile/pull/1644)
+- Add an uninstall script for Linux and macOS [`#1467`](https://github.com/yorukot/superfile/pull/1467)
+- Add an application icon and AppStream metadata for the desktop entry [`#1523`](https://github.com/yorukot/superfile/pull/1523)
+- Report permission errors when compressing files [`#1498`](https://github.com/yorukot/superfile/pull/1498)
+
+#### Bug Fix
+
+- Fix trashing files on Linux partitions mounted outside the root filesystem [`#1490`](https://github.com/yorukot/superfile/pull/1490)
+- Preserve symbolic links when copying files [`#1501`](https://github.com/yorukot/superfile/pull/1501)
+- Copy the paths of all selected items to the system clipboard [`#1486`](https://github.com/yorukot/superfile/pull/1486)
+- Keep the leading dot in ZIP names for hidden files and folders [`#1475`](https://github.com/yorukot/superfile/pull/1475)
+- Preserve dotfile names when stripping an extension would leave only dots or an empty name [`#1485`](https://github.com/yorukot/superfile/pull/1485)
+- Preserve dots in parent directory names when extracting archives [`#1476`](https://github.com/yorukot/superfile/pull/1476)
+- Show the underlying error when creating a file or directory fails [`#1524`](https://github.com/yorukot/superfile/pull/1524)
+- Apply create, paste, compress, and extract shortcuts only when a file panel has focus [`#1685`](https://github.com/yorukot/superfile/pull/1685)
+- Stop Page Up and Page Down at the ends of the list [`#1504`](https://github.com/yorukot/superfile/pull/1504)
+- Scroll the focused panel with Page Up and Page Down [`#1519`](https://github.com/yorukot/superfile/pull/1519)
+- Keep keyboard focus on a newly opened file panel [`#1518`](https://github.com/yorukot/superfile/pull/1518)
+- Respect the configured sidebar sections and their order [`#1442`](https://github.com/yorukot/superfile/pull/1442)
+- Keep the icon out of a pinned directory’s name when renaming it [`#1540`](https://github.com/yorukot/superfile/pull/1540)
+- Skip fuzzy search when filtering leaves no candidate filenames [`#1609`](https://github.com/yorukot/superfile/pull/1609)
+- Recognize printable UTF-8 text in file previews [`#1507`](https://github.com/yorukot/superfile/pull/1507)
+- Expand tabs to the next tab stop in text previews [`#1509`](https://github.com/yorukot/superfile/pull/1509)
+- Prompt users to focus the metadata panel to calculate folder size [`#1630`](https://github.com/yorukot/superfile/pull/1630)
+- Handle unreadable entries while calculating directory size [`#1627`](https://github.com/yorukot/superfile/pull/1627)
+- Handle empty input in the superfile prompt [`#1701`](https://github.com/yorukot/superfile/pull/1701)
+- Preserve literal filenames such as `~notes` when expanding paths [`#1652`](https://github.com/yorukot/superfile/pull/1652)
+- Remove stale trailing bytes when repairing a TOML file [`#1529`](https://github.com/yorukot/superfile/pull/1529)
+- Ask the installed binary for the `lastdir` path in cd-on-quit shell functions [`#1629`](https://github.com/yorukot/superfile/pull/1629)
+- Use Go 1.26 for the Nix package to fix builds on Apple Silicon [`#1635`](https://github.com/yorukot/superfile/pull/1635)
+
+#### Optimization
+
+- Check the file signature before detecting a binary’s architecture [`#1552`](https://github.com/yorukot/superfile/pull/1552)
+- Skip mount scans when the sidebar’s disks section is hidden [`#1674`](https://github.com/yorukot/superfile/pull/1674)
+- Split keyboard handling by panel focus and selection mode [`#1487`](https://github.com/yorukot/superfile/pull/1487)
+
+#### Documentation
+
+- Document AI contributions and publish the security policy on the website [`#1735`](https://github.com/yorukot/superfile/pull/1735)
+- Document directory icons and plugin configuration [`#1491`](https://github.com/yorukot/superfile/pull/1491)
+- Render GitHub-flavored Markdown tables on MDX pages [`#1503`](https://github.com/yorukot/superfile/pull/1503)
+- Clarify selection shortcuts in the tutorial [`#1528`](https://github.com/yorukot/superfile/pull/1528)
+- Update font troubleshooting instructions [`#1603`](https://github.com/yorukot/superfile/pull/1603)
+- Clarify what happens to the config folder during uninstall [`#1684`](https://github.com/yorukot/superfile/pull/1684)
+- Add community videos to the website [`#1543`](https://github.com/yorukot/superfile/pull/1543)
+- Correct typos in the documentation [`#1505`](https://github.com/yorukot/superfile/pull/1505)
+- Correct the author credit for the 0x96f theme [`#1641`](https://github.com/yorukot/superfile/pull/1641)
+- Remove the retired Go Report Card badge [`#1532`](https://github.com/yorukot/superfile/pull/1532)
+- Remove the Warp sponsorship mention [`#1542`](https://github.com/yorukot/superfile/pull/1542)
+- Update the star history chart in the README [`#1571`](https://github.com/yorukot/superfile/pull/1571)
+
+#### Dependencies
+
+- Update the Astro packages [`#1449`](https://github.com/yorukot/superfile/pull/1449)
+- Update `pnpm` to v10.34.1 [`#1452`](https://github.com/yorukot/superfile/pull/1452)
+- Update `charm.land/lipgloss/v2` to v2.0.3 [`#1455`](https://github.com/yorukot/superfile/pull/1455)
+- Update the Lucide packages to v1.20.0 [`#1456`](https://github.com/yorukot/superfile/pull/1456)
+- Update `github.com/urfave/cli/v3` to v3.9.0 [`#1458`](https://github.com/yorukot/superfile/pull/1458)
+- Update `github.com/alecthomas/chroma/v2` to v2.26.0 [`#1459`](https://github.com/yorukot/superfile/pull/1459)
+- Update `github.com/shirou/gopsutil/v4` to v4.26.5 [`#1461`](https://github.com/yorukot/superfile/pull/1461)
+- Update `pnpm` to v10.34.4 [`#1483`](https://github.com/yorukot/superfile/pull/1483)
+- Update `golang.org/x/text` to v0.38.0 [`#1469`](https://github.com/yorukot/superfile/pull/1469)
+- Update Go module dependencies [`#1514`](https://github.com/yorukot/superfile/pull/1514)
+- Update `sharp` to ^0.35.0 (security update) [`#1555`](https://github.com/yorukot/superfile/pull/1555)
+- Update `@lucide/astro` to v1.27.0 [`#1488`](https://github.com/yorukot/superfile/pull/1488)
+- Update `pnpm` to v10.34.5 [`#1526`](https://github.com/yorukot/superfile/pull/1526)
+- Update `github.com/urfave/cli/v3` to v3.10.1 [`#1576`](https://github.com/yorukot/superfile/pull/1576)
+- Update `sharp` to v0.35.5 (security update) [`#1656`](https://github.com/yorukot/superfile/pull/1656)
+- Update `github.com/klauspost/compress` to v1.18.7 [`#1689`](https://github.com/yorukot/superfile/pull/1689)
+- Update `github.com/urfave/cli/v3` to v3.13.0 [`#1663`](https://github.com/yorukot/superfile/pull/1663)
+- Update `golangci/golangci-lint` to v2.15.0 [`#1638`](https://github.com/yorukot/superfile/pull/1638)
+- Update `prettier` to v3.10.1 [`#1480`](https://github.com/yorukot/superfile/pull/1480)
+- Update Astro to v7 (security update) [`#1477`](https://github.com/yorukot/superfile/pull/1477)
+- Update `@astrojs/sitemap` to v3.7.6 [`#1718`](https://github.com/yorukot/superfile/pull/1718)
+- Update `github.com/shirou/gopsutil/v4` to v4.26.10 [`#1716`](https://github.com/yorukot/superfile/pull/1716)
+- Update `golang.org/x/image` to v0.48.0 [`#1717`](https://github.com/yorukot/superfile/pull/1717)
+- Update `xtractr` to v0.9.0 [`#1719`](https://github.com/yorukot/superfile/pull/1719)
+- Update `gsap` to v3.15.1 [`#1720`](https://github.com/yorukot/superfile/pull/1720)
+- Update `pnpm` to v10.34.9 [`#1721`](https://github.com/yorukot/superfile/pull/1721)
+- Update `github.com/charmbracelet/x/ansi` to v0.11.10 [`#1722`](https://github.com/yorukot/superfile/pull/1722)
+- Update `@lucide/astro` to v1.76.0 [`#1723`](https://github.com/yorukot/superfile/pull/1723)
+- Update Python to 3.15 [`#1726`](https://github.com/yorukot/superfile/pull/1726)
+- Update `charm.land/bubbletea/v2` to v2.1.2 [`#1731`](https://github.com/yorukot/superfile/pull/1731)
+
+#### Misc
+
+- Tidy `go.mod` [`#1481`](https://github.com/yorukot/superfile/pull/1481)
+- Tidy `go.sum` [`#1494`](https://github.com/yorukot/superfile/pull/1494)
+- Remove stale Go module checksums [`#1698`](https://github.com/yorukot/superfile/pull/1698)
+- Check `go mod tidy` in CI [`#1482`](https://github.com/yorukot/superfile/pull/1482)
+- Update the Go linter used in CI [`#1484`](https://github.com/yorukot/superfile/pull/1484)
+- Separate shell substitution timeouts to avoid a flaky Windows test [`#1600`](https://github.com/yorukot/superfile/pull/1600)
+
 # [**v1.6.0**](https://github.com/yorukot/superfile/releases/tag/v1.6.0)
 
 > 2026-06-08

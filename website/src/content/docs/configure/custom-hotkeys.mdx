@@ -16,6 +16,16 @@ You can enter the following command to set it up;
 $EDITOR HOTKEYS_PATH
 ```
 
+### How to write hotkeys
+
+Each hotkey is a list of keys. Write printable characters as they are (`a`, `A`, `?`), and other keys by name (`enter`, `esc`, `tab`, `space`, `pgup`, `f1`). Modifiers go in the order `ctrl`, `alt`, `shift`, for example `ctrl+shift+left`.
+
+```toml
+copy_items = ['ctrl+c', 'y']
+```
+
+The first key can't be empty. `''` is only a placeholder.
+
 :::caution
 
 Please do not use hotkeys with ascii codes conflicting with keys used to control superfile:
@@ -25,6 +35,14 @@ Please do not use hotkeys with ascii codes conflicting with keys used to control
 - `Ctrl+?`, `Ctrl+[` - conflicts with `Delete` and `Backspace` Key
 
 :::
+
+:::note
+
+superfile doesn't check for conflicts. If a key is bound to two actions, only one of them runs, so avoid reusing keys.
+
+:::
+
+Missing hotkeys use their default keys. Run `spf --fix-hotkeys` to add them to your file (comments are lost; a backup is kept).
 
 ### Default superfile hotkeys
 
@@ -36,11 +54,13 @@ If you are a vim user, the default hotkeys may make you hate superfile.
 
 superfile default hotkeys design concept:
 
-- All hotkeys that will change to files use `ctrl+key` (As long as you don't press ctrl your files will always be safe).
+- All hotkeys that will change to files use `ctrl+key` (As long as you don't press ctrl your files will always be safe). The exceptions are `delete` and `D` (shift+d), which ask you to confirm before deleting.
 - Non-control file classes use the first letters of words as hotkeys.
 
 <CodeBlock file="src/superfile_config/hotkeys.toml" />
 
 ### Vim like superfile hotkeys
+
+Copy this preset into your hotkey file to use it. With this preset, `quit` is only `ctrl+c`, `esc` only cancels typing, and `h`/`l` do nothing (`-` goes to the parent directory).
 
 <CodeBlock file="src/superfile_config/vimHotkeys.toml" />

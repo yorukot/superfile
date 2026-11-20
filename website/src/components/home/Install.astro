@@ -1,0 +1,158 @@
+---
+import { Lightbulb } from "@lucide/astro";
+import { installMethods } from "../../lib/install-methods";
+import BrandIcon from "../BrandIcon.astro";
+import Command from "../Command.astro";
+import Section from "./Section.astro";
+
+interface Props {
+	id: string;
+}
+---
+
+<Section id={Astro.props.id} label="./install.sh" prompt="$" title="Install it.">
+	<p class="sf-lede">Pick the line for your system and paste it into a terminal.</p>
+	<ul class="methods">
+		{
+			installMethods.map(method => (
+				<li class="method" data-os={method.os.join(" ")}>
+					<span class="method__name">
+						<BrandIcon name={method.icon} />
+						<span>{method.label}</span>
+						<span class="method__yours" hidden>
+							your system
+						</span>
+					</span>
+					<Command cmd={method.cmd} prompt={method.prompt} />
+				</li>
+			))
+		}
+	</ul>
+	<p class="all"><a class="sf-link" href="/getting-started/installation">See all installation methods</a></p>
+	<div class="next">
+		<div class="sf-pane">
+			<span class="sf-pane__title">then</span>
+			<ol class="then">
+				<li>
+					<span>Run it in any folder.</span>
+					<kbd class="sf-kbd">spf</kbd>
+				</li>
+				<li>
+					<span>See every hotkey.</span>
+					<kbd class="sf-kbd">?</kbd>
+				</li>
+				<li>
+					<span>Quit.</span>
+					<kbd class="sf-kbd">q</kbd>
+				</li>
+			</ol>
+		</div>
+		<div class="sf-pane sf-pane--tip">
+			<span class="sf-pane__title sf-pane__title--icon"><Lightbulb aria-hidden="true" />tip</span>
+			<p class="sf-pane__body">
+				The icons need a <a class="sf-link" href="https://www.nerdfonts.com/font-downloads">Nerd Font</a> in your terminal. Without one, turn the <a class="sf-link" href="/configure/superfile-config">
+					nerdfont
+				</a>
+				option off so nothing looks broken.
+			</p>
+		</div>
+	</div>
+</Section>
+
+<style>
+	/* Every method at once, the visitor's own first. */
+	.methods {
+		display: grid;
+		gap: var(--space-3);
+		margin: var(--space-7) 0 0;
+		padding: 0;
+		list-style: none;
+	}
+	.method {
+		display: grid;
+		grid-template-columns: 200px minmax(0, 1fr);
+		align-items: center;
+		gap: var(--space-4);
+
+		&.is-yours {
+			order: -1;
+		}
+		@media (max-width: 760px) {
+			grid-template-columns: minmax(0, 1fr);
+			gap: var(--space-2);
+		}
+	}
+	.method__name {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 4px 12px;
+		font: 600 16px/1.3 var(--font-mono);
+		color: var(--ink);
+
+		:global(svg) {
+			flex: none;
+			width: 22px;
+			height: 22px;
+		}
+	}
+	/* On its own line, under the label rather than the icon. */
+	.method__yours {
+		flex-basis: 100%;
+		padding-left: 34px;
+		font-weight: 500;
+		font-size: 15px;
+		color: var(--signal-text);
+
+		@media (max-width: 760px) {
+			flex-basis: auto;
+			padding-left: 0;
+		}
+	}
+	.all {
+		margin: var(--space-5) 0 0;
+		color: var(--ink-muted);
+	}
+	.next {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: var(--space-6) var(--space-5);
+		margin-top: var(--space-7);
+
+		@media (max-width: 760px) {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+	.then {
+		display: grid;
+		gap: var(--space-3);
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		font-size: 17px;
+		color: var(--ink-muted);
+
+		li {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: var(--space-4);
+		}
+		/* Undo the nudge that lines a key up with running text. */
+		.sf-kbd {
+			position: static;
+		}
+	}
+</style>
+
+<script>
+	import { detectOS } from "../../lib/install-methods";
+
+	const os = detectOS();
+	if (os) {
+		for (const method of document.querySelectorAll(`.method[data-os~="${os}"]`)) {
+			method.classList.add("is-yours");
+			method.querySelector<HTMLElement>(".method__yours")!.hidden = false;
+		}
+	}
+</script>

@@ -1,0 +1,42 @@
+---
+interface Props {
+	href: string;
+	/** Set on the row of the page, or of the version, being shown. */
+	current?: "page" | "true";
+}
+
+const { href, current } = Astro.props;
+---
+
+<a href={href} aria-current={current}><slot /></a>
+
+<style>
+	/* A row of the sidebar. The font weight is left to the list it is in. */
+	a {
+		display: grid;
+		grid-template-columns: 1ch 1fr;
+		gap: 10px;
+		padding: 8px 12px;
+		border-radius: var(--radius-xs);
+		font-family: var(--font-mono);
+		font-size: 16px;
+		line-height: 1.35;
+		color: var(--ink);
+		text-decoration: none;
+
+		/* The first column is kept for the mark of the current row. */
+		&::before {
+			content: "";
+			color: var(--signal);
+			font-weight: 600;
+		}
+		&:hover,
+		&[aria-current] {
+			background: var(--ink);
+			color: var(--bg);
+		}
+		&[aria-current]::before {
+			content: "\203A";
+		}
+	}
+</style>

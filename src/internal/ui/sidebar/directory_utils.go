@@ -46,9 +46,18 @@ func getDirectories(pinnedMgr *PinnedManager, sections []string) []directory {
 	return formDirctorySlice(
 		getWellKnownDirectories(),
 		getPinnedDirectoriesWithIcon(pinnedMgr),
-		getExternalMediaFolders(),
+		getConfiguredDiskDirectories(sections, getExternalMediaFolders),
 		sections,
 	)
+}
+
+// Avoid querying mounted disks when the disks section is hidden. On macOS,
+// enumerating mounts can block while a network volume responds to statfs.
+func getConfiguredDiskDirectories(sections []string, load func() []directory) []directory {
+	if !slices.Contains(sections, utils.SidebarSectionDisks) {
+		return nil
+	}
+	return load()
 }
 
 // Return system default directory e.g. Home, Downloads, etc
@@ -93,7 +102,7 @@ func getFilteredDirectories(query string, pinnedMgr *PinnedManager, sections []s
 	return formDirctorySlice(
 		fuzzySearch(query, getWellKnownDirectories()),
 		fuzzySearch(query, getPinnedDirectoriesWithIcon(pinnedMgr)),
-		fuzzySearch(query, getExternalMediaFolders()),
+		fuzzySearch(query, getConfiguredDiskDirectories(sections, getExternalMediaFolders)),
 		sections,
 	)
 }

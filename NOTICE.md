@@ -128,8 +128,8 @@ SOFTWARE.
 
 ## charm.land/bubbletea/v2
 
-- Version: v2.0.7
-- License: [MIT](https://github.com/charmbracelet/bubbletea/blob/v2.0.7/LICENSE)
+- Version: v2.1.2
+- License: [MIT](https://github.com/charmbracelet/bubbletea/blob/v2.1.2/LICENSE)
 
 ```text
 MIT License
@@ -248,8 +248,8 @@ THE SOFTWARE.
 
 ## github.com/alecthomas/chroma/v2
 
-- Version: v2.26.0
-- License: [MIT](https://github.com/alecthomas/chroma/blob/v2.26.0/COPYING)
+- Version: v2.27.0
+- License: [MIT](https://github.com/alecthomas/chroma/blob/v2.27.0/COPYING)
 
 ```text
 Copyright (C) 2017 Alec Thomas
@@ -1428,8 +1428,8 @@ SOFTWARE.
 
 ## github.com/charmbracelet/ultraviolet
 
-- Version: v0.0.0-20260525132238-948f4557a654
-- License: [MIT](https://github.com/charmbracelet/ultraviolet/blob/948f4557a654/LICENSE)
+- Version: v0.0.0-20261008173134-6b8d4baf91b4
+- License: [MIT](https://github.com/charmbracelet/ultraviolet/blob/6b8d4baf91b4/LICENSE)
 
 ```text
 MIT License
@@ -1668,8 +1668,8 @@ SOFTWARE.
 
 ## github.com/dlclark/regexp2/v2
 
-- Version: v2.1.0
-- License: [MIT](https://github.com/dlclark/regexp2/blob/v2.1.0/LICENSE)
+- Version: v2.2.1
+- License: [MIT](https://github.com/dlclark/regexp2/blob/v2.2.1/LICENSE)
 
 ```text
 The MIT License (MIT)
@@ -3880,8 +3880,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ## github.com/mattn/go-runewidth
 
-- Version: v0.0.27
-- License: [MIT](https://github.com/mattn/go-runewidth/blob/v0.0.27/LICENSE)
+- Version: v0.0.30
+- License: [MIT](https://github.com/mattn/go-runewidth/blob/v0.0.30/LICENSE)
 
 ```text
 The MIT License (MIT)
@@ -4924,8 +4924,8 @@ SOFTWARE.
 
 ## github.com/xo/terminfo
 
-- Version: v0.0.0-20220910002029-abceb7e1c41e
-- License: [MIT](https://github.com/xo/terminfo/blob/abceb7e1c41e/LICENSE)
+- Version: v1.0.0
+- License: [MIT](https://github.com/xo/terminfo/blob/v1.0.0/LICENSE)
 
 ```text
 The MIT License (MIT)

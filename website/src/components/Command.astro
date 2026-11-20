@@ -1,0 +1,17 @@
+---
+import CopyButton from "./CopyButton.astro";
+
+interface Props {
+	cmd: string;
+	prompt?: string;
+	id?: string;
+}
+
+const { cmd, prompt = "$", id } = Astro.props;
+---
+
+<div class="sf-cmd" id={id}>
+	<span class="sf-cmd__prompt" data-cmd-prompt>{prompt}</span>
+	<span class="sf-cmd__text" data-cmd-text tabindex="0">{cmd}</span>
+	<CopyButton label="Copy command" />
+</div>

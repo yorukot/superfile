@@ -1,0 +1,65 @@
+---
+import type { NavLeaf } from "../../lib/navigation";
+
+interface Props {
+	prev?: NavLeaf;
+	next?: NavLeaf;
+	/** The URL prefix of the set of docs being shown: "" or "/v1.5.0". */
+	base: string;
+}
+
+const { prev, next, base } = Astro.props;
+---
+
+<nav aria-label="Pagination" data-pagefind-ignore>
+	{
+		prev && (
+			<a class="sf-pane" href={`${base}/${prev.slug}`}>
+				<span class="sf-pane__title">← previous</span>
+				<p>{prev.label}</p>
+			</a>
+		)
+	}
+	{
+		next && (
+			<a class="sf-pane next" href={`${base}/${next.slug}`}>
+				<span class="sf-pane__title">next →</span>
+				<p>{next.label}</p>
+			</a>
+		)
+	}
+</nav>
+
+<style>
+	nav {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: var(--space-5);
+		margin-top: var(--space-8);
+
+		/* A page with one neighbour only keeps it on the right. */
+		& > :only-child {
+			grid-column: 2;
+		}
+		@media (max-width: 640px) {
+			grid-template-columns: minmax(0, 1fr);
+
+			& > :only-child {
+				grid-column: 1;
+			}
+		}
+	}
+	p {
+		margin: 0;
+		font: 600 20px/1.3 var(--font-mono);
+		color: var(--ink);
+	}
+	.next {
+		text-align: right;
+
+		& .sf-pane__title {
+			right: 18px;
+			left: auto;
+		}
+	}
+</style>
