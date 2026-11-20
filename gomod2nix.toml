@@ -198,8 +198,8 @@ schema = 3
     hash = 'sha256-pYTMp5siPTcXpkvAju8qWbzyVbbjJ4rK0nNot+zzu8o='
 
   [mod.'github.com/pelletier/go-toml/v2']
-    version = 'v2.3.1'
-    hash = 'sha256-5H8+UOtPOs+Yc+8oVT/3bugCCdbq3jFMH6eOW8dadyg='
+    version = 'v2.4.3'
+    hash = 'sha256-CyCjKBN+zUciGhQiaFpq54qv+NDITcuh5U2HmjArow4='
 
   [mod.'github.com/peterebden/ar']
     version = 'v0.0.0-20241106141004-20dc11b778e8'
