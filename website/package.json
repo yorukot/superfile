@@ -2,12 +2,10 @@
 	"name": "superfile-website",
 	"type": "module",
 	"scripts": {
-		"astro": "astro",
-		"build": "astro build && pagefind --site dist",
-		"dev": "astro dev",
+		"build": "node scripts/sync-versions.mjs && astro build && pagefind --site dist",
+		"dev": "node scripts/sync-versions.mjs && astro dev",
 		"format": "prettier --write .",
-		"preview": "astro preview",
-		"start": "astro dev"
+		"preview": "astro preview"
 	},
 	"dependencies": {
 		"@astrojs/markdown-remark": "^7.3.10",
@@ -15,7 +13,6 @@
 		"@astrojs/sitemap": "^3.4.1",
 		"@lucide/astro": "^1.14.0",
 		"astro": "^7.0.0",
-		"gsap": "^3.15.0",
 		"remark-directive": "^4.0.0",
 		"sharp": "^0.35.0",
 		"unist-util-visit": "^5.1.0"

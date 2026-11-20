@@ -1,272 +1,161 @@
 ---
-import type { CollectionEntry } from "astro:content";
-import { getEntry } from "astro:content";
 import type { MarkdownHeading } from "astro";
+import { resolveDocs } from "../../docs.config.mjs";
 import Giscus from "../components/Giscus.astro";
-import SharedHead from "../components/SharedHead.astro";
-import SiteNav from "../components/SiteNav.astro";
-import "../styles/global.css";
-import "../styles/docs.css";
-import { navigation, isGroup, getPrevNext, type NavLeaf } from "../lib/navigation";
+import Pager from "../components/docs/Pager.astro";
+import SidebarNav from "../components/docs/SidebarNav.astro";
+import TableOfContents from "../components/docs/TableOfContents.astro";
+import VersionNotice from "../components/docs/VersionNotice.astro";
+import VersionSwitcher from "../components/docs/VersionSwitcher.astro";
+import { discussionNumbers } from "../lib/comments";
+import { getPrevNext, sidebarFor } from "../lib/navigation";
+import "../styles/prose.css";
+import Base from "./Base.astro";
 
 interface Props {
-	entry: CollectionEntry<"docs">;
+	title?: string;
+	description?: string;
+	/** The page's path inside its set of docs: "getting-started/tutorial". */
+	slug: string;
 	headings: MarkdownHeading[];
+	/** The set of docs this page belongs to: "latest", or a release tag such as "v1.5.0". */
+	version: string;
+	/** Every release tag that has docs. */
+	tags: string[];
+	/** The pages each set of docs has, keyed like `version`. */
+	pages: Record<string, string[]>;
 }
 
-const { entry, headings } = Astro.props;
-const h1Heading = headings.find(h => h.depth === 1);
-const title = entry.data.title ?? h1Heading?.text ?? "superfile";
-const { description } = entry.data;
+const { slug, headings, version, tags, pages, description } = Astro.props;
+const title = Astro.props.title ?? headings.find(heading => heading.depth === 1)?.text ?? "superfile";
+const docs = resolveDocs(tags);
+const base = docs.prefix(version);
+// The docs at the site root are the ones search engines, the site search and the comments belong to.
+const isRoot = version === docs.root;
 
-// Determine locale and base slug
-// Astro v5 glob loader: entry.id has no file extension
-const isZhTw = entry.id.startsWith("zh-tw/");
-const baseSlug = isZhTw ? entry.id.replace(/^zh-tw\//, "") : entry.id;
-const locale = isZhTw ? "zh-tw" : "";
-const localePrefix = isZhTw ? "/zh-tw" : "";
-const enEntry = isZhTw ? await getEntry("docs", baseSlug) : entry;
-const giscusTerm = `${enEntry?.data.title ?? title} | superfile`;
+const sidebar = sidebarFor(pages[version]);
+const group = sidebar.find(group => group.items.some(item => item.slug === slug));
+const { prev, next } = getPrevNext(sidebar, slug);
 
-// Current path for active detection
-const currentPath = Astro.url.pathname.replace(/\/$/, "");
+// Switching version keeps the reader on the same page when the other version has it.
+const hrefIn = (other: string) => {
+	const has = pages[other];
+	return `${docs.prefix(other)}/${has.includes(slug) ? slug : has.includes("overview") ? "overview" : has[0]}`;
+};
 
-function isActive(slug: string) {
-	const path = `${localePrefix}/${slug}`;
-	return currentPath === path || currentPath === path + "/";
-}
+// Links between docs pages are written as "/configure/…". Inside a set of docs that is not at the
+// root they must stay in that set, so the rendered page gets its prefix put in front of them.
+let body = await Astro.slots.render("default");
+if (base) body = body.replace(/href="\/([^"#]*)(#[^"]*)?"/g, (whole, to, hash = "") => (pages[version].includes(to.replace(/\/$/, "")) ? `href="${base}/${to}${hash}"` : whole));
 
-// Prev / next
-const { prev, next } = getPrevNext(baseSlug);
-
-// TOC: only h2 and h3
-const tocHeadings = headings.filter(h => h.depth === 2 || h.depth === 3);
-
-// If the content body already opens with an h1, skip rendering the layout h1
-const hasContentH1 = headings.length > 0 && headings[0].depth === 1;
-
-// Language toggle target
-function langTogglePath(slug: string) {
-	if (isZhTw) return `/${slug}`;
-	return `/zh-tw/${slug}`;
-}
-
-const siteUrl = "https://superfile.dev";
-const canonicalUrl = new URL(Astro.url.pathname, siteUrl).href;
+// Some pages open with an h1 that repeats the title; the layout already prints the title.
+const repeatsTitle = headings[0]?.depth === 1 && headings[0].text.trim().toLowerCase() === title.trim().toLowerCase();
+const toc = headings.filter((heading, index) => heading.depth <= 3 && !(index === 0 && repeatsTitle));
 ---
 
-<!doctype html>
-<html lang={isZhTw ? "zh-TW" : "en"}>
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<title>{title} | superfile</title>
-		{description && <meta name="description" content={description} />}
-		<link rel="canonical" href={canonicalUrl} />
-		<meta property="og:title" content={`${title} | superfile`} />
-		{description && <meta property="og:description" content={description} />}
-		<meta property="og:image" content={`${siteUrl}/og.png?v=1`} />
-		<meta name="twitter:card" content="summary_large_image" />
+<Base title={`${title}${isRoot ? "" : ` (${version})`} | superfile`} description={description} docs={{ sidebar, base }}>
+	{/* Only the docs at the root are for search engines. */}
+	{!isRoot && <meta slot="head" name="robots" content="noindex" />}
+	<div class="docs sf-wrap">
+		<aside class="side">
+			{tags.length > 0 && <VersionSwitcher version={version} groups={docs.groups} hrefFor={hrefIn} />}
+			<SidebarNav groups={sidebar} current={slug} base={base} />
+		</aside>
 
-		<SharedHead />
-	</head>
-
-	<body>
-		<SiteNav isDocs={true} isZhTw={isZhTw} baseSlug={baseSlug} />
-
-		<!-- ── Overlay (mobile) ──────────────────────────────────────────────── -->
-		<div class="docs-overlay" id="docs-overlay"></div>
-
-		<!-- ── Shell ─────────────────────────────────────────────────────────── -->
-		<div class="docs-shell">
-			<!-- Sidebar -->
-			<aside class="docs-sidebar" id="docs-sidebar">
-				<nav class="docs-nav" aria-label="Docs navigation">
+		<main id="main">
+			{/* Only the docs at the root are searchable, so a search never lands on another version. */}
+			<article data-pagefind-body={isRoot ? "" : undefined} data-pagefind-meta={isRoot ? `title:${title}` : undefined}>
+				<header>
 					{
-						navigation.map(node => {
-							if (isGroup(node)) {
-								const label = isZhTw && node.zhLabel ? node.zhLabel : node.label;
-								const hasActive = node.items.some(item => isActive(item.slug));
-								return (
-									<details class="docs-nav-section" open={hasActive || undefined}>
-										<summary>
-											<svg class="docs-nav-section-arrow" viewBox="0 0 12 12" fill="none">
-												<path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-											</svg>
-											{label}
-										</summary>
-										<ul class="docs-nav-items">
-											{node.items.map(item => {
-												const itemLabel = isZhTw && item.zhLabel ? item.zhLabel : item.label;
-												const href = `${localePrefix}/${item.slug}`;
-												return (
-													<li class={`docs-nav-item${isActive(item.slug) ? " docs-nav-item--active" : ""}`}>
-														<a href={href}>{itemLabel}</a>
-													</li>
-												);
-											})}
-										</ul>
-									</details>
-								);
-							} else {
-								const label = isZhTw && node.zhLabel ? node.zhLabel : node.label;
-								const href = `${localePrefix}/${node.slug}`;
-								return (
-									<a href={href} class={`docs-nav-leaf${isActive(node.slug) ? " docs-nav-leaf--active" : ""}`}>
-										{label}
-									</a>
-								);
-							}
-						})
-					}
-				</nav>
-			</aside>
-
-			<!-- Body: centered content + TOC -->
-			<div class="docs-body">
-				<div class="docs-body-inner">
-					<!-- Main -->
-					<main class="docs-main">
-						<article class="docs-content" data-pagefind-body data-pagefind-meta={`title:${title}`}>
-							{
-								!hasContentH1 && (
-									<div class="docs-page-header">
-										<h1>{title}</h1>
-										{description && <p class="docs-description">{description}</p>}
-									</div>
-								)
-							}
-							<slot />
-						</article>
-
-						<!-- Prev / Next -->
-						{
-							(prev || next) && (
-								<nav class="docs-page-nav" aria-label="Page navigation">
-									{prev ? (
-										<a href={`${localePrefix}/${prev.slug}`} class="docs-page-nav-link docs-page-nav-link--prev">
-											<span class="docs-page-nav-label">← Previous</span>
-											<span class="docs-page-nav-title">{isZhTw && prev.zhLabel ? prev.zhLabel : prev.label}</span>
-										</a>
-									) : (
-										<div />
-									)}
-									{next ? (
-										<a href={`${localePrefix}/${next.slug}`} class="docs-page-nav-link docs-page-nav-link--next">
-											<span class="docs-page-nav-label">Next →</span>
-											<span class="docs-page-nav-title">{isZhTw && next.zhLabel ? next.zhLabel : next.label}</span>
-										</a>
-									) : (
-										<div />
-									)}
-								</nav>
-							)
-						}
-
-						<!-- Giscus comments -->
-						<div class="docs-giscus">
-							<Giscus term={giscusTerm} lang={isZhTw ? "zh-TW" : "en"} />
-						</div>
-					</main>
-
-					<!-- TOC -->
-					{
-						tocHeadings.length > 0 && (
-							<aside class="docs-toc" aria-label="Table of contents">
-								<p class="docs-toc-title">On this page</p>
-								<ul class="docs-toc-list" id="docs-toc-list">
-									{tocHeadings.map(h => (
-										<li class={`docs-toc-item docs-toc-item--h${h.depth}`} data-heading={h.slug}>
-											<a href={`#${h.slug}`}>{h.text}</a>
-										</li>
-									))}
-								</ul>
-							</aside>
+						group && (
+							<p class="sf-label">
+								<b>//</b> {group.label}
+							</p>
 						)
 					}
-				</div><!-- /.docs-body-inner -->
-			</div><!-- /.docs-body -->
-		</div><!-- /.docs-shell -->
+					<h1 class="sf-title">{title}</h1>
+					{description && <p class="sf-lede">{description}</p>}
+				</header>
+				{docs.newest && version !== docs.newest && <VersionNotice version={version} newest={docs.newest} href={hrefIn(docs.newest)} />}
+				<div class:list={["sf-prose", { "sf-prose--titled": repeatsTitle }]}>
+					<Fragment set:html={body} />
+				</div>
+			</article>
 
-		<script>
-			// ── Module-scoped state (persists across SPA navigations) ─────────────
-			let _tocObserver: IntersectionObserver | null = null;
+			{(prev || next) && <Pager prev={prev} next={next} base={base} />}
 
-			// Restore body scroll on every navigation (sidebar may have locked it)
-			document.addEventListener("astro:before-swap", () => {
-				document.body.style.overflow = "";
-			});
+			{
+				isRoot && (
+					<section class="comments" aria-label="Comments" data-pagefind-ignore>
+						<p class="sf-label">
+							<b>//</b> comments
+						</p>
+						<Giscus term={`${title} | superfile`} number={discussionNumbers[slug]} />
+					</section>
+				)
+			}
+		</main>
 
-			// Re-initialise all docs interactivity after every page load
-			document.addEventListener("astro:page-load", () => {
-				// ── Mobile sidebar toggle ───────────────────────────────────────────
-				const menuBtn = document.getElementById("docs-menu-btn");
-				const sidebar = document.getElementById("docs-sidebar");
-				const overlay = document.getElementById("docs-overlay");
+		{
+			toc.length > 1 && (
+				<aside class="toc" aria-label="On this page" data-pagefind-ignore>
+					<TableOfContents headings={toc} />
+				</aside>
+			)
+		}
+	</div>
+</Base>
 
-				function openSidebar() {
-					sidebar?.classList.add("docs-sidebar--open");
-					overlay?.classList.add("docs-overlay--visible");
-					document.body.style.overflow = "hidden";
-				}
+<style>
+	/* The sidebar on the left, the page in the middle, "on this page" on the right. */
+	.docs {
+		display: grid;
+		grid-template-columns: var(--sidebar-w) minmax(0, 1fr) 200px;
+		column-gap: var(--space-7);
+		align-items: start;
+		padding-block: var(--space-5) var(--space-8);
 
-				function closeSidebar() {
-					sidebar?.classList.remove("docs-sidebar--open");
-					overlay?.classList.remove("docs-overlay--visible");
-					document.body.style.overflow = "";
-				}
+		@media (max-width: 1180px) {
+			grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+		}
+		@media (max-width: 900px) {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+	.side,
+	.toc {
+		position: sticky;
+		top: calc(var(--nav-h) + var(--space-4));
+		max-height: calc(100vh - var(--nav-h) - var(--space-5));
+		overflow-y: auto;
+		scrollbar-width: thin;
+		scrollbar-color: var(--box) transparent;
+	}
+	.side {
+		padding-bottom: var(--space-5);
 
-				menuBtn?.addEventListener("click", () => {
-					sidebar?.classList.contains("docs-sidebar--open") ? closeSidebar() : openSidebar();
-				});
-
-				overlay?.addEventListener("click", closeSidebar);
-
-				// ── Copy buttons ────────────────────────────────────────────────────
-				document.querySelectorAll("pre").forEach(pre => {
-					// Avoid double-adding on re-renders
-					if (pre.querySelector(".docs-copy-btn")) return;
-					const btn = document.createElement("button");
-					btn.className = "docs-copy-btn";
-					btn.textContent = "copy";
-					btn.addEventListener("click", () => {
-						const code = pre.querySelector("code");
-						if (!code) return;
-						navigator.clipboard.writeText(code.innerText).then(() => {
-							btn.textContent = "copied!";
-							setTimeout(() => (btn.textContent = "copy"), 2000);
-						});
-					});
-					pre.appendChild(btn);
-				});
-
-				// ── TOC active state (IntersectionObserver) ─────────────────────────
-				_tocObserver?.disconnect();
-				_tocObserver = null;
-
-				const tocItems = document.querySelectorAll<HTMLElement>("[data-heading]");
-				if (tocItems.length) {
-					const headingEls = Array.from(tocItems)
-						.map(item => document.getElementById(item.dataset.heading!))
-						.filter(Boolean) as HTMLElement[];
-
-					_tocObserver = new IntersectionObserver(
-						entries => {
-							entries.forEach(entry => {
-								const id = entry.target.id;
-								const tocItem = document.querySelector(`[data-heading="${id}"]`);
-								if (entry.isIntersecting) {
-									document.querySelectorAll(".docs-toc-item--active").forEach(el => el.classList.remove("docs-toc-item--active"));
-									tocItem?.classList.add("docs-toc-item--active");
-								}
-							});
-						},
-						{ rootMargin: "-20% 0% -60% 0%" }
-					);
-
-					headingEls.forEach(el => _tocObserver!.observe(el));
-				}
-			});
-		</script>
-	</body>
-</html>
+		/* The site menu lists the docs on small screens. */
+		@media (max-width: 900px) {
+			display: none;
+		}
+	}
+	.toc {
+		@media (max-width: 1180px) {
+			display: none;
+		}
+	}
+	main {
+		justify-self: center;
+		width: 100%;
+		min-width: 0;
+		max-width: 760px;
+	}
+	header {
+		margin-bottom: var(--space-7);
+	}
+	.comments {
+		margin-top: var(--space-8);
+		padding-top: var(--space-7);
+		border-top: 1px solid var(--box);
+	}
+</style>

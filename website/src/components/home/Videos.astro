@@ -1,0 +1,177 @@
+---
+import { X } from "@lucide/astro";
+import { videos, videoThumbnail, videoUrl } from "../../lib/videos";
+import Section from "./Section.astro";
+
+interface Props {
+	id: string;
+}
+---
+
+<Section id={Astro.props.id} label="ls videos/" prompt="$" title="See it in the wild.">
+	<p class="sf-lede">Videos other people have made about superfile. They play here, or you can open them on YouTube.</p>
+	<div class="videos" data-videos>
+		{
+			videos.map(video => (
+				<a class="video" href={videoUrl(video.id)} data-video-id={video.id} data-video-title={video.title} aria-label={`Play "${video.title}" by ${video.creator}, ${video.duration}`}>
+					<span class="thumb">
+						<img src={videoThumbnail(video.id)} alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="1280" height="720" />
+					</span>
+					<span class="title">{video.title}</span>
+					<span class="by">
+						{video.creator} · {video.duration}
+					</span>
+				</a>
+			))
+		}
+	</div>
+
+	<dialog class="sf-dialog player" aria-labelledby="video-title" data-video-player>
+		<span class="sf-dialog__title" aria-hidden="true">now playing</span>
+		<div class="player__head">
+			<span id="video-title"></span>
+			<button class="sf-btn sf-btn--sm" type="button" aria-label="Close video" data-video-close><X aria-hidden="true" /></button>
+		</div>
+		<div class="player__frame">
+			<iframe
+				src="about:blank"
+				title="superfile video"
+				allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+				allowfullscreen
+				referrerpolicy="strict-origin-when-cross-origin"
+			>
+			</iframe>
+		</div>
+		<!-- The href is set when a video opens, too late for the script that marks external links. -->
+		<p class="player__foot"><a class="sf-link" href="#" target="_blank" rel="noopener noreferrer">watch on youtube ↗</a></p>
+	</dialog>
+</Section>
+
+<style>
+	.videos {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: var(--space-6) var(--space-5);
+		margin-top: var(--space-7);
+
+		@media (max-width: 1180px) {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+		@media (max-width: 640px) {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+	/* A video is its thumbnail: no box around it, the picture does the talking. */
+	.video {
+		display: flex;
+		flex-direction: column;
+		color: var(--ink);
+		text-decoration: none;
+		border-radius: var(--radius-sm);
+
+		&:hover .thumb {
+			outline-color: var(--signal);
+		}
+		&:hover .title {
+			color: var(--signal-text);
+		}
+	}
+	.thumb {
+		display: block;
+		aspect-ratio: 16 / 9;
+		border-radius: var(--radius-sm);
+		overflow: hidden;
+		background: var(--term-bg);
+		outline: 2px solid transparent;
+		outline-offset: 3px;
+
+		img {
+			display: block;
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+	}
+	.title {
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		overflow: hidden;
+		margin-top: var(--space-3);
+		font: 600 16px/1.4 var(--font-mono);
+		letter-spacing: -0.01em;
+	}
+	.by {
+		margin-top: 4px;
+		font: 400 15px/1.4 var(--font-mono);
+		color: var(--ink-muted);
+	}
+
+	.player {
+		width: min(960px, calc(100vw - 32px));
+		max-height: none;
+		margin-top: 8vh;
+	}
+	.player__head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-4);
+		padding: 22px 16px 14px 26px;
+		font: 600 16px/1.4 var(--font-mono);
+
+		.sf-btn {
+			flex: none;
+			width: 42px;
+			padding: 0;
+		}
+	}
+	.player__frame {
+		aspect-ratio: 16 / 9;
+		margin: 0 16px;
+		border-radius: var(--radius-xs);
+		overflow: hidden;
+		background: var(--term-bg);
+
+		iframe {
+			display: block;
+			width: 100%;
+			height: 100%;
+			border: 0;
+		}
+	}
+	.player__foot {
+		margin: 0;
+		padding: 14px 26px 18px;
+		font: 400 15px/1.5 var(--font-mono);
+	}
+</style>
+
+<script>
+	// Videos play in a dialog; without JavaScript the cards are plain links.
+	const player = document.querySelector<HTMLDialogElement>("[data-video-player]")!;
+	const frame = player.querySelector("iframe")!;
+	const heading = player.querySelector("#video-title")!;
+	const youtubeLink = player.querySelector("a")!;
+
+	document.querySelector("[data-videos]")!.addEventListener("click", event => {
+		const card = (event.target as Element).closest<HTMLAnchorElement>("[data-video-id]");
+		// A modified click opens the card's own link, on YouTube.
+		if (!card || event.metaKey || event.ctrlKey || event.shiftKey) return;
+		event.preventDefault();
+		const { videoId, videoTitle = "" } = card.dataset;
+		frame.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0`;
+		frame.title = videoTitle;
+		heading.textContent = videoTitle;
+		youtubeLink.href = card.href;
+		player.showModal();
+	});
+
+	// The close button, or the backdrop: a click there lands on the dialog itself.
+	player.addEventListener("click", event => {
+		const target = event.target as Element;
+		if (target === player || target.closest("[data-video-close]")) player.close();
+	});
+	// Emptying the frame is what stops the sound.
+	player.addEventListener("close", () => (frame.src = "about:blank"));
+</script>

@@ -23,9 +23,6 @@ importers:
       astro:
         specifier: ^7.0.0
         version: 7.4.13(@astrojs/markdown-remark@7.3.10)(@types/node@24.12.4)(esbuild@0.27.7)(yaml@2.9.1)
-      gsap:
-        specifier: ^3.15.0
-        version: 3.15.0
       remark-directive:
         specifier: ^4.0.0
         version: 4.0.0
@@ -1231,9 +1228,6 @@ packages:
 
   github-slugger@2.0.0:
     resolution: {integrity: sha512-IaOQ9puYtjrkq7Y0Ygl9KDZnrf/aiUJYUpVf89y8kyaxbRG7Y1SrX/jaumrv81vc61+kiMempujsM3Yw7w5qcw==}
-
-  gsap@3.15.0:
-    resolution: {integrity: sha512-dMW4CWBTUK1AEEDeZc1g4xpPGIrSf9fJF960qbTZmN/QwZIWY5wgliS6JWl9/25fpTGJrMRtSjGtOmPnfjZB+A==}
 
   h3@1.15.11:
     resolution: {integrity: sha512-L3THSe2MPeBwgIZVSH5zLdBBU90TOxarvhK9d04IDY2AmVS8j2Jz2LIWtwsGOU3lu2I5jCN7FNvVfY2+XyF+mg==}
@@ -3210,8 +3204,6 @@ snapshots:
   git-hooks-list@4.2.1: {}
 
   github-slugger@2.0.0: {}
-
-  gsap@3.15.0: {}
 
   h3@1.15.11:
     dependencies:

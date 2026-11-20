@@ -1,0 +1,46 @@
+---
+interface Props {
+	title: string;
+	description?: string;
+}
+
+const { title, description } = Astro.props;
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL("/og.png?v=2", Astro.site);
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{title}</title>
+{description && <meta name="description" content={description} />}
+<link rel="canonical" href={canonicalUrl} />
+<link rel="icon" href="/logo.svg" type="image/svg+xml" />
+<meta name="theme-color" content="#EFE8DD" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#1D2227" media="(prefers-color-scheme: dark)" />
+
+<meta property="og:title" content={title} />
+{description && <meta property="og:description" content={description} />}
+<meta property="og:image" content={ogImage} />
+<meta property="og:url" content={canonicalUrl} />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content={ogImage} />
+
+<!-- The theme is the visitor's choice, else the OS setting. Inline, so it is set before the first paint. -->
+<script is:inline>
+	document.documentElement.dataset.theme = localStorage.getItem("spf-theme") ?? (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+	rel="stylesheet"
+	href="https://fonts.googleapis.com/css2?family=Doto:wght@400..900&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap"
+/>
+
+<!-- Analytics, on the real site only. -->
+<script is:inline>
+	if (["superfile.dev", "www.superfile.dev"].includes(location.hostname)) window.minimalAnalytics = { trackingId: "G-WFLBCRZ7MC", autoTrack: true };
+</script>
+{import.meta.env.PROD && <script is:inline async src="https://cdn.jsdelivr.net/npm/@minimal-analytics/ga4/dist/index.js" />}
+{import.meta.env.PROD && <script is:inline defer src="https://umami.yorukot.me/script.js" data-website-id="8792ee93-9a4a-47be-9e7f-2b1587c3a3d1" data-domains="superfile.dev,www.superfile.dev" />}

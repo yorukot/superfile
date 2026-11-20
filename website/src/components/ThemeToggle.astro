@@ -1,0 +1,68 @@
+---
+import { Moon, Sun } from "@lucide/astro";
+
+const options = [
+	{ theme: "light", label: "Light theme", Icon: Sun },
+	{ theme: "dark", label: "Dark theme", Icon: Moon }
+];
+---
+
+<div class="toggle" role="group" aria-label="Theme">
+	{
+		options.map(({ theme, label, Icon }) => (
+			<button type="button" aria-label={label} aria-pressed="false" data-theme-set={theme}>
+				<Icon aria-hidden="true" />
+			</button>
+		))
+	}
+</div>
+
+<style>
+	.toggle {
+		display: inline-flex;
+		gap: 2px;
+		padding: 3px;
+		border: 1px solid var(--box);
+		border-radius: var(--radius-pill);
+	}
+	button {
+		display: inline-grid;
+		place-items: center;
+		width: 34px;
+		height: 34px;
+		border: 0;
+		border-radius: var(--radius-pill);
+		background: transparent;
+		color: var(--ink-muted);
+		cursor: pointer;
+
+		&:hover {
+			color: var(--ink);
+		}
+		&[aria-pressed="true"] {
+			background: var(--ink);
+			color: var(--bg);
+		}
+		& :global(svg) {
+			width: 17px;
+			height: 17px;
+		}
+	}
+</style>
+
+<script>
+	const root = document.documentElement;
+	const buttons = document.querySelectorAll<HTMLElement>("[data-theme-set]");
+	const sync = () => buttons.forEach(button => (button.ariaPressed = String(button.dataset.themeSet === root.dataset.theme)));
+
+	buttons.forEach(button =>
+		button.addEventListener("click", () => {
+			const theme = button.dataset.themeSet!;
+			root.dataset.theme = theme;
+			sync();
+			document.dispatchEvent(new CustomEvent("spf:theme", { detail: theme }));
+			localStorage.setItem("spf-theme", theme);
+		})
+	);
+	sync();
+</script>

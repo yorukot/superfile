@@ -1,0 +1,402 @@
+/* The design system's shared components. Two kinds of container, never mixed:
+     box     a 1px `box` border and no fill (panes, keys, buttons, tables)
+     screen  the `term-bg` fill and no border (commands, code)
+   A fill on the page means "active". No text is smaller than 14px. */
+
+/* ── Type ──────────────────────────────────────────────────────────────── */
+.sf-label {
+	margin: 0 0 var(--space-4);
+	font: 500 15px/1.4 var(--font-mono);
+	color: var(--ink-muted);
+
+	& b {
+		color: var(--signal-text);
+		font-weight: 600;
+	}
+}
+.sf-title {
+	margin: 0;
+	font: 600 clamp(30px, 4.4vw, 44px) / 1.12 var(--font-mono);
+	letter-spacing: -0.03em;
+	color: var(--ink);
+	text-wrap: balance;
+}
+.sf-lede {
+	margin: var(--space-4) 0 0;
+	max-width: 36em;
+	font-size: 20px;
+	line-height: 1.6;
+	color: var(--ink-muted);
+	text-wrap: pretty;
+
+	@media (max-width: 640px) {
+		font-size: 18px;
+	}
+}
+/* One dot-matrix number. */
+.sf-readout {
+	font: 900 120px/0.9 var(--font-dot);
+	letter-spacing: -0.02em;
+	color: var(--ink);
+}
+
+/* ── Link: reverse video on hover ──────────────────────────────────────── */
+.sf-link {
+	margin: 0 -0.12em;
+	padding: 0 0.12em;
+	border-radius: 3px;
+	color: var(--teal-text);
+	text-decoration: underline;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 0.2em;
+	-webkit-box-decoration-break: clone;
+	box-decoration-break: clone;
+
+	&:hover {
+		background: var(--ink);
+		color: var(--bg);
+		text-decoration: none;
+	}
+}
+
+/* ── Keycap ────────────────────────────────────────────────────────────── */
+.sf-kbd {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 30px;
+	height: 30px;
+	padding: 0 9px;
+	border: 1px solid var(--box);
+	border-radius: var(--radius-xs);
+	font: 500 14px/1 var(--font-mono);
+	color: var(--ink);
+	white-space: nowrap;
+
+	/* A key inside running text sits on the text's middle line, whatever the line height. */
+	:is(p, li) & {
+		position: relative;
+		top: -1px;
+		vertical-align: middle;
+	}
+	p & {
+		min-width: 27px;
+		height: 27px;
+		padding: 0 7px;
+	}
+}
+.sf-keys {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+/* ── Button ────────────────────────────────────────────────────────────── */
+.sf-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	height: 52px;
+	padding: 0 24px;
+	border: 1px solid var(--box);
+	border-radius: var(--radius-sm);
+	background: transparent;
+	color: var(--ink);
+	font: 500 16px/1 var(--font-mono);
+	text-decoration: none;
+	white-space: nowrap;
+	cursor: pointer;
+	transition: 80ms steps(1);
+	transition-property: background-color, color, border-color;
+
+	& svg {
+		flex: none;
+		width: 18px;
+		height: 18px;
+	}
+	&:hover {
+		background: var(--ink);
+		color: var(--bg);
+		border-color: var(--ink);
+	}
+}
+.sf-btn--sm {
+	height: 42px;
+	padding: 0 16px;
+	font-size: 15px;
+}
+
+/* ── Pane: a box with its title in the border ──────────────────────────── */
+.sf-pane {
+	position: relative;
+	margin-top: 12px;
+	padding: 30px 26px 26px;
+	border: 1px solid var(--box);
+	border-radius: var(--radius-md);
+
+	@media (max-width: 640px) {
+		padding: 28px 18px 20px;
+	}
+	&:is(a) {
+		display: block;
+		color: inherit;
+		text-decoration: none;
+	}
+	&:is(a:hover, .is-active) {
+		border-color: var(--signal);
+
+		& .sf-pane__title {
+			color: var(--signal-text);
+		}
+	}
+}
+.sf-pane__title,
+.sf-pane__key {
+	position: absolute;
+	top: 0;
+	translate: 0 -50%;
+	padding: 0 10px;
+	background: var(--bg);
+	white-space: nowrap;
+}
+.sf-pane__title {
+	left: 18px;
+	margin: 0;
+	font: 600 16px/24px var(--font-mono);
+	color: var(--ink);
+
+	.sf-pane--tip & {
+		color: var(--teal-text);
+	}
+	.sf-pane--caution & {
+		color: var(--amber-text);
+	}
+	.sf-pane--danger & {
+		color: var(--danger-text);
+	}
+}
+/* A pane title with an icon in front. */
+.sf-pane__title--icon {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+
+	& svg {
+		flex: none;
+		width: 18px;
+		height: 18px;
+	}
+}
+.sf-pane__key {
+	right: 18px;
+	font: 500 15px/24px var(--font-mono);
+	color: var(--ink-muted);
+}
+.sf-pane__body {
+	margin: 0;
+	font-size: 17px;
+	line-height: 1.65;
+	color: var(--ink-muted);
+
+	& > :first-child {
+		margin-top: 0;
+	}
+	& > :last-child {
+		margin-bottom: 0;
+	}
+}
+.sf-panes {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+	gap: var(--space-6) var(--space-5);
+}
+
+/* ── Table ─────────────────────────────────────────────────────────────── */
+.sf-table-wrap {
+	overflow-x: auto;
+	border: 1px solid var(--box);
+	border-radius: var(--radius-md);
+}
+.sf-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 17px;
+	line-height: 1.5;
+
+	& :is(th, td) {
+		padding: 16px 20px;
+
+		@media (max-width: 640px) {
+			padding: 14px;
+		}
+	}
+	& th {
+		border-bottom: 1px solid var(--box);
+		font: 500 15px/1.3 var(--font-mono);
+		color: var(--ink-muted);
+		text-align: left;
+	}
+	& td {
+		border-bottom: 1px solid var(--line);
+		vertical-align: middle;
+	}
+	& tr:last-child td {
+		border-bottom: 0;
+	}
+}
+.sf-table__mono {
+	font-family: var(--font-mono);
+	font-size: 15px;
+	color: var(--ink-muted);
+}
+
+/* ── Inline code ───────────────────────────────────────────────────────── */
+.sf-icode {
+	padding: 0.06em 0.36em;
+	border: 1px solid var(--box);
+	border-radius: 5px;
+	font-family: var(--font-mono);
+	font-size: 0.88em;
+	white-space: nowrap;
+}
+
+/* ── Screen: one command ───────────────────────────────────────────────── */
+.sf-cmd {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	height: 56px;
+	padding: 0 8px 0 20px;
+	border-radius: var(--radius-sm);
+	background: var(--term-bg);
+	color: var(--term-ink);
+	font: 400 16px/1 var(--font-mono);
+
+	@media (max-width: 640px) {
+		gap: 10px;
+		padding-left: 16px;
+	}
+}
+.sf-cmd__prompt {
+	flex: none;
+	color: var(--term-signal);
+	font-weight: 600;
+	user-select: none;
+}
+.sf-cmd__text {
+	flex: 1;
+	min-width: 0;
+	overflow-x: auto;
+	white-space: nowrap;
+	scrollbar-width: none;
+}
+
+/* ── Screen: a block of code ───────────────────────────────────────────── */
+.sf-code {
+	margin: var(--space-5) 0;
+	overflow: hidden;
+	border-radius: var(--radius-md);
+	background: var(--term-bg);
+	color: var(--term-ink);
+
+	& pre {
+		margin: 0;
+		padding: 14px 22px 22px;
+		overflow-x: auto;
+		/* Shiki writes its own background inline. */
+		background: transparent !important;
+		font: 400 15px/1.75 var(--font-mono);
+		scrollbar-width: thin;
+		scrollbar-color: var(--term-line) transparent;
+
+		&:focus-visible {
+			outline: 2px solid var(--term-teal);
+			outline-offset: -2px;
+		}
+	}
+	& code {
+		font: inherit;
+	}
+}
+.sf-code__head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 12px 10px 0 22px;
+	font: 500 15px/1.4 var(--font-mono);
+	color: var(--term-muted);
+}
+
+/* ── Copy button, on a screen ──────────────────────────────────────────── */
+.sf-copy {
+	flex: none;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	height: 40px;
+	padding: 0 14px;
+	border: 1px solid var(--term-line);
+	border-radius: var(--radius-xs);
+	background: transparent;
+	color: var(--term-muted);
+	font: 500 15px/1 var(--font-mono);
+	cursor: pointer;
+
+	& svg {
+		width: 16px;
+		height: 16px;
+	}
+	&:hover {
+		background: var(--term-ink);
+		color: var(--term-bg);
+		border-color: var(--term-ink);
+	}
+	&:focus-visible {
+		outline-color: var(--term-teal);
+	}
+	/* Just copied: it stays teal, even with the pointer still on it. */
+	&.is-copied {
+		background: transparent;
+		color: var(--term-teal);
+		border-color: var(--term-teal);
+	}
+	/* On small screens it keeps its icon and drops its word, so more of the command shows. */
+	@media (max-width: 640px) {
+		width: 40px;
+		padding: 0;
+
+		& [data-copy-label] {
+			display: none;
+		}
+	}
+}
+
+/* ── Dialog: a box on the page ground, its title in the border ─────────── */
+.sf-dialog {
+	width: min(680px, calc(100vw - 32px));
+	max-height: min(560px, calc(100vh - 96px));
+	margin: 12vh auto 0;
+	padding: 0;
+	overflow: visible;
+	border: 1px solid var(--signal);
+	border-radius: var(--radius-md);
+	background: var(--bg);
+	color: var(--ink);
+
+	&::backdrop {
+		background: color-mix(in srgb, var(--bg) 88%, transparent);
+	}
+}
+.sf-dialog__title {
+	position: absolute;
+	top: 0;
+	left: 18px;
+	translate: 0 -50%;
+	padding: 0 10px;
+	background: var(--bg);
+	font: 600 16px/24px var(--font-mono);
+	color: var(--signal-text);
+}

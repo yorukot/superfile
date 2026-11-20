@@ -1,0 +1,55 @@
+/* Reset and page ground. */
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+html {
+	scroll-padding-top: calc(var(--nav-h) + var(--space-5));
+	-webkit-text-size-adjust: 100%;
+}
+body {
+	margin: 0;
+	background: var(--bg);
+	color: var(--ink);
+	font: 400 18px/1.65 var(--font-sans);
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+
+	/* Docs pages are wider than the rest of the site; the nav and footer follow. */
+	&.is-docs {
+		--content-max: 1320px;
+	}
+}
+::selection {
+	background: var(--selection);
+	color: var(--ink);
+}
+:where(a, button, [tabindex], input, summary):focus-visible {
+	outline: 2px solid var(--focus);
+	outline-offset: 3px;
+}
+img,
+svg {
+	max-width: 100%;
+}
+img {
+	height: auto;
+}
+button {
+	font: inherit;
+}
+
+/* Moving between pages cross-fades instead of flashing. */
+@media (prefers-reduced-motion: no-preference) {
+	@view-transition {
+		navigation: auto;
+	}
+}
+
+/* The content column. */
+.sf-wrap {
+	max-width: var(--content-max);
+	margin-inline: auto;
+	padding-inline: clamp(16px, 4vw, 32px);
+}

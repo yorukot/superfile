@@ -1,0 +1,6 @@
+# giscus loads the comment themes from inside its own frame, so they must allow other origins
+
+/giscus-dark.css
+  Access-Control-Allow-Origin: *
+/giscus-light.css
+  Access-Control-Allow-Origin: *

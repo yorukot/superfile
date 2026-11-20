@@ -1,21 +1,29 @@
 ---
 import { getCollection, render } from "astro:content";
-import Callout from "../components/Callout.astro";
+import { LATEST, resolveDocs } from "../../docs.config.mjs";
 import Docs from "../layouts/Docs.astro";
 
 export async function getStaticPaths() {
-	const docs = await getCollection("docs");
-	return docs.map(entry => ({
-		// Astro v5 glob loader: entry.id has no file extension
-		params: { slug: entry.id },
-		props: { entry }
-	}));
+	const latest = (await getCollection("docs")).map(entry => ({ entry, version: LATEST, slug: entry.id }));
+	const released = (await getCollection("versions")).map(entry => {
+		const [version, ...slug] = entry.id.split("/");
+		return { entry, version, slug: slug.join("/") };
+	});
+	const all = [...latest, ...released];
+
+	// Which pages each set of docs has: "latest" for this branch, a tag for each release.
+	const pages: Record<string, string[]> = {};
+	for (const { version, slug } of all) (pages[version] ??= []).push(slug);
+	const tags = Object.keys(pages).filter(version => version !== LATEST);
+	const docs = resolveDocs(tags);
+
+	return all.map(page => ({ params: { slug: `${docs.prefix(page.version)}/${page.slug}`.slice(1) }, props: { ...page, tags, pages } }));
 }
 
-const { entry } = Astro.props;
+const { entry, slug, version, tags, pages } = Astro.props;
 const { Content, headings } = await render(entry);
 ---
 
-<Docs entry={entry} headings={headings}>
-	<Content components={{ Callout }} />
+<Docs title={entry.data.title} description={entry.data.description} slug={slug} headings={headings} version={version} tags={tags} pages={pages}>
+	<Content />
 </Docs>

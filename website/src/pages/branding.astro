@@ -1,231 +1,150 @@
 ---
+import { Download } from "@lucide/astro";
 import logoDay from "../assets/superfile-day.svg";
 import logoNight from "../assets/superfile-night.svg";
-import SiteNav from "../components/SiteNav.astro";
-import Landing from "../layouts/Landing.astro";
-import "../styles/branding.css";
+import Base from "../layouts/Base.astro";
 
-type Locale = "en" | "zh-tw";
-
-interface Props {
-	locale?: Locale;
-}
-
-const locale = Astro.props.locale ?? "en";
-const isZhTw = locale === "zh-tw";
-const prefix = isZhTw ? "/zh-tw" : "";
-const homeHref = isZhTw ? "/zh-tw/" : "/";
-
-const copy = {
-	en: {
-		title: "superfile branding",
-		description: "Download the superfile logo and wordmark, plus quick naming guidance for references to the project.",
-		nav: {
-			docs: "Docs",
-			github: "GitHub",
-			discord: "Discord",
-			getStarted: "get started",
-			homeAria: "superfile home"
-		},
-		label: "// brand assets",
-		headline: "Download the superfile logo",
-		intro: "Use these assets when writing about superfile, showing the app in a project list, or linking to the community.",
-		nameRule: "Write the project name as superfile, all lower case.",
-		nameNote: "Avoid Superfile, SuperFile, or SUPERFILE unless you are quoting a source that already wrote it that way.",
-		assetsTitle: "Logo downloads",
-		assets: [
-			{
-				title: "App icon",
-				description: "Standalone folder icon for avatars, lists, badges, and compact placements.",
-				href: "/logo.svg",
-				download: "superfile-logo.svg",
-				preview: "/logo.svg",
-				modifier: "brand-asset-preview--icon"
-			},
-			{
-				title: "Wordmark for dark backgrounds",
-				description: "Full superfile wordmark with light lettering for dark layouts.",
-				href: logoNight.src,
-				download: "superfile-wordmark-dark.svg",
-				preview: logoNight.src,
-				modifier: "brand-asset-preview--dark"
-			},
-			{
-				title: "Wordmark for light backgrounds",
-				description: "Full superfile wordmark with dark lettering for light layouts.",
-				href: logoDay.src,
-				download: "superfile-wordmark-light.svg",
-				preview: logoDay.src,
-				modifier: "brand-asset-preview--light"
-			}
-		],
-		download: "Download SVG",
-		usageTitle: "Usage notes",
-		usage: [
-			"Keep the logo proportions intact.",
-			"Leave clear space around the mark so it does not touch nearby text or borders.",
-			"Do not recolor, stretch, rotate, or add effects to the logo.",
-			"Pair the logo with the lowercase name: superfile."
-		],
-		footer: {
-			license: "MIT License",
-			byPrefix: "by",
-			byConnector: " & ",
-			contributorsText: "contributors",
-			bySuffixEnd: "",
-			docs: "Docs",
-			branding: "Branding",
-			github: "GitHub",
-			discord: "Discord",
-			changelog: "Changelog",
-			install: "Install",
-			contributors: "Contributors"
-		}
+const assets = [
+	{
+		title: "mark",
+		description: "The folder on its own, for avatars, lists, badges and other small places.",
+		href: "/logo.svg",
+		download: "superfile-logo.svg",
+		ground: "paper"
 	},
-	"zh-tw": {
-		title: "superfile 品牌資源",
-		description: "下載 superfile 標誌與字標，並查看專案名稱的基本使用規範。",
-		nav: {
-			docs: "文件",
-			github: "GitHub",
-			discord: "Discord",
-			getStarted: "開始使用",
-			homeAria: "superfile 首頁"
-		},
-		label: "// 品牌資源",
-		headline: "下載 superfile 標誌",
-		intro: "撰寫 superfile 相關內容、整理專案清單，或連結到社群時，可以使用這些品牌資源。",
-		nameRule: "專案名稱請寫成 superfile，全部使用小寫。",
-		nameNote: "除非是在引用原文，否則請避免寫成 Superfile、SuperFile 或 SUPERFILE。",
-		assetsTitle: "標誌下載",
-		assets: [
-			{
-				title: "App 圖示",
-				description: "獨立資料夾圖示，適合頭像、列表、徽章與小尺寸位置。",
-				href: "/logo.svg",
-				download: "superfile-logo.svg",
-				preview: "/logo.svg",
-				modifier: "brand-asset-preview--icon"
-			},
-			{
-				title: "深色背景字標",
-				description: "搭配淺色文字的完整 superfile 字標，適合深色版面。",
-				href: logoNight.src,
-				download: "superfile-wordmark-dark.svg",
-				preview: logoNight.src,
-				modifier: "brand-asset-preview--dark"
-			},
-			{
-				title: "淺色背景字標",
-				description: "搭配深色文字的完整 superfile 字標，適合淺色版面。",
-				href: logoDay.src,
-				download: "superfile-wordmark-light.svg",
-				preview: logoDay.src,
-				modifier: "brand-asset-preview--light"
-			}
-		],
-		download: "下載 SVG",
-		usageTitle: "使用提醒",
-		usage: ["請維持標誌原本的比例。", "標誌周圍保留足夠留白，避免緊貼文字或邊框。", "請勿重新上色、拉伸、旋轉，或替標誌加上特效。", "搭配文字時，請使用全小寫名稱：superfile。"],
-		footer: {
-			license: "MIT 授權",
-			byPrefix: "由",
-			byConnector: " 與",
-			contributorsText: "貢獻者",
-			bySuffixEnd: "共同維護",
-			docs: "文件",
-			branding: "品牌",
-			github: "GitHub",
-			discord: "Discord",
-			changelog: "更新紀錄",
-			install: "安裝",
-			contributors: "貢獻者"
-		}
+	{
+		title: "wordmark, light ground",
+		description: "The mark with dark lettering, for light pages.",
+		href: logoDay.src,
+		download: "superfile-wordmark-light.svg",
+		ground: "paper"
+	},
+	{
+		title: "wordmark, dark ground",
+		description: "The mark with light lettering, for dark pages.",
+		href: logoNight.src,
+		download: "superfile-wordmark-dark.svg",
+		ground: "night"
 	}
-}[locale];
+];
+
+const usage = [
+	"Keep the logo's proportions.",
+	"Leave clear space around it so it does not touch nearby text or borders.",
+	"Do not recolor, stretch, rotate or add effects to it.",
+	"Pair it with the lowercase name: superfile."
+];
 ---
 
-<Landing title={copy.title} description={copy.description} lang={isZhTw ? "zh-TW" : "en"} canonicalPath={`${prefix}/branding`}>
-	<SiteNav isZhTw={isZhTw} baseSlug="branding" labels={copy.nav} />
+<Base title="Brand assets | superfile" description="Download the superfile logo and wordmark, and see how to write the project's name.">
+	<main class="sf-wrap" id="main">
+		<p class="sf-label"><b>//</b> brand assets</p>
+		<h1 class="sf-title">Download the superfile logo.</h1>
+		<p class="sf-lede">Use these when you write about superfile, list it next to other projects, or link to the community.</p>
 
-	<main class="branding-page">
-		<section class="branding-hero" aria-labelledby="branding-title">
-			<div class="branding-hero-copy">
-				<span class="branding-label">{copy.label}</span>
-				<h1 id="branding-title">{copy.headline}</h1>
-				<p>{copy.intro}</p>
+		<section class="section" aria-labelledby="brand-name">
+			<p class="sf-label"><b>//</b> the name</p>
+			<h2 class="sf-title" id="brand-name">Always lowercase.</h2>
+			<div class="sf-panes block">
+				<div class="sf-pane">
+					<span class="sf-pane__title">write</span>
+					<p class="name">superfile</p>
+					<p class="sf-pane__body">One word, all lowercase, even at the start of a sentence. The command is <code class="sf-icode">spf</code>.</p>
+				</div>
+				<div class="sf-pane sf-pane--caution">
+					<span class="sf-pane__title">avoid</span>
+					<p class="sf-pane__body">Superfile, SuperFile or SUPERFILE, unless you are quoting a source that already wrote it that way.</p>
+				</div>
 			</div>
-
-			<aside class="brand-name-card" aria-label={copy.nameRule}>
-				<p class="brand-name-card-kicker">naming</p>
-				<p class="brand-name-card-name">superfile</p>
-				<p class="brand-name-card-rule">{copy.nameRule}</p>
-				<p class="brand-name-card-note">{copy.nameNote}</p>
-			</aside>
 		</section>
 
-		<section class="brand-section" aria-labelledby="assets-title">
-			<div class="brand-section-heading">
-				<h2 id="assets-title">{copy.assetsTitle}</h2>
-			</div>
-
-			<div class="brand-assets-grid">
+		<section class="section" aria-labelledby="brand-files">
+			<p class="sf-label"><b>$</b> ls logos/</p>
+			<h2 class="sf-title" id="brand-files">The files.</h2>
+			<div class="sf-panes block">
 				{
-					copy.assets.map(asset => (
-						<article class="brand-asset-card">
-							<div class={`brand-asset-preview ${asset.modifier}`}>
-								<img src={asset.preview} alt={asset.title} loading="lazy" decoding="async" />
+					assets.map(asset => (
+						<div class="sf-pane">
+							<span class="sf-pane__title">{asset.title}</span>
+							<div class={`preview preview--${asset.ground}`}>
+								<img src={asset.href} alt="" />
 							</div>
-							<div class="brand-asset-body">
-								<h3>{asset.title}</h3>
-								<p>{asset.description}</p>
-								<a class="brand-download-link" href={asset.href} download={asset.download}>
-									{copy.download}
-								</a>
-							</div>
-						</article>
+							<p class="sf-pane__body">{asset.description}</p>
+							<a class="sf-btn sf-btn--sm" href={asset.href} download={asset.download}>
+								<Download aria-hidden="true" />
+								download svg
+							</a>
+						</div>
 					))
 				}
 			</div>
 		</section>
 
-		<section class="brand-section brand-usage" aria-labelledby="usage-title">
-			<div class="brand-section-heading">
-				<h2 id="usage-title">{copy.usageTitle}</h2>
-			</div>
-
-			<ul>
-				{copy.usage.map(item => <li>{item}</li>)}
+		<section class="section" aria-labelledby="brand-usage">
+			<p class="sf-label"><b>//</b> usage</p>
+			<h2 class="sf-title" id="brand-usage">A few rules.</h2>
+			<ul class="rules">
+				{usage.map(item => <li>{item}</li>)}
 			</ul>
 		</section>
 	</main>
+</Base>
 
-	<footer class="branding-footer">
-		<div class="branding-footer-inner">
-			<div class="branding-footer-left">
-				<a href={homeHref} class="branding-footer-brand">superfile</a>
-				<span class="branding-footer-sep" aria-hidden="true">·</span>
-				<span>{copy.footer.license}</span>
-				<span class="branding-footer-sep" aria-hidden="true">·</span>
-				<span>
-					{copy.footer.byPrefix}
-					<a href="https://github.com/yorukot" class="branding-text-link" target="_blank" rel="noopener noreferrer">yorukot</a>{copy.footer.byConnector}<a
-						href={`${prefix}/special-thanks`}
-						class="branding-text-link"
-					>
-						{copy.footer.contributorsText}
-					</a>{copy.footer.bySuffixEnd}
-				</span>
-			</div>
-			<nav class="branding-footer-links" aria-label="Footer">
-				<a href={`${prefix}/overview`}>{copy.footer.docs}</a>
-				<a href={`${prefix}/branding`}>{copy.footer.branding}</a>
-				<a href={`${prefix}/special-thanks`}>{copy.footer.contributors}</a>
-				<a href="https://github.com/yorukot/superfile" target="_blank" rel="noopener noreferrer">{copy.footer.github}</a>
-				<a href="https://discord.gg/YYtJ23Du7B" target="_blank" rel="noopener noreferrer">{copy.footer.discord}</a>
-				<a href={`${prefix}/changelog`}>{copy.footer.changelog}</a>
-				<a href={`${prefix}/getting-started/installation`}>{copy.footer.install}</a>
-			</nav>
-		</div>
-	</footer>
-</Landing>
+<style>
+	main {
+		padding-block: var(--space-7) var(--space-8);
+	}
+	.section {
+		margin-top: var(--space-8);
+		padding-top: var(--space-8);
+		border-top: 1px solid var(--box);
+	}
+	.block {
+		margin-top: var(--space-7);
+	}
+	.name {
+		margin: 0 0 var(--space-3);
+		font: 600 clamp(40px, 7vw, 56px) / 1.05 var(--font-mono);
+		letter-spacing: -0.045em;
+		color: var(--ink);
+	}
+	/* Each logo is shown on the ground it was drawn for. When that is the site's own ground, an outline stands in for the fill. */
+	.preview {
+		display: grid;
+		place-items: center;
+		height: 180px;
+		margin-bottom: var(--space-5);
+		padding: var(--space-5);
+		border-radius: var(--radius-sm);
+
+		& img {
+			width: auto;
+			max-height: 72px;
+		}
+	}
+	.preview--paper {
+		background: light-dark(transparent, #efe8dd);
+		box-shadow: inset 0 0 0 1px light-dark(var(--line), transparent);
+	}
+	.preview--night {
+		background: light-dark(#303841, transparent);
+		box-shadow: inset 0 0 0 1px light-dark(transparent, var(--line));
+	}
+	.sf-pane .sf-btn {
+		margin-top: var(--space-5);
+	}
+	.rules {
+		max-width: 40em;
+		margin: 0;
+		padding-left: 1.2em;
+		color: var(--ink-muted);
+
+		& li {
+			margin: 0 0 10px;
+
+			&::marker {
+				color: var(--signal-text);
+			}
+		}
+	}
+</style>

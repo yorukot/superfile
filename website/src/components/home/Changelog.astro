@@ -1,0 +1,81 @@
+---
+import { releases } from "../../lib/releases";
+import Section from "./Section.astro";
+
+interface Props {
+	id: string;
+}
+
+const [latest, ...earlier] = releases.slice(0, 4);
+---
+
+<Section id={Astro.props.id} label="CHANGELOG.md" title="What changed lately.">
+	<div class="log">
+		<div class="sf-pane">
+			<span class="sf-pane__title">{latest.version}</span>
+			<span class="sf-pane__key">{latest.date}</span>
+			<ul class="highlights">
+				{latest.highlights.slice(0, 6).map(highlight => <li>{highlight}</li>)}
+			</ul>
+			<p class="sf-pane__body">
+				<a class="sf-link" href="/changelog">Everything in {latest.version}</a>
+			</p>
+		</div>
+		<div class="sf-table-wrap earlier">
+			<table class="sf-table">
+				<thead>
+					<tr><th scope="col">earlier</th><th scope="col">released</th></tr>
+				</thead>
+				<tbody>
+					{
+						earlier.map(release => (
+							<tr>
+								<td>
+									<a class="sf-link" href={release.url}>
+										{release.version}
+									</a>
+								</td>
+								<td class="sf-table__mono">{release.date}</td>
+							</tr>
+						))
+					}
+				</tbody>
+			</table>
+		</div>
+	</div>
+</Section>
+
+<style>
+	.log {
+		display: grid;
+		grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+		gap: var(--space-5);
+		align-items: start;
+		margin-top: var(--space-7);
+
+		@media (max-width: 960px) {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+	/* Level with the pane beside it, which keeps room above for its title. */
+	.earlier {
+		margin-top: 12px;
+	}
+	.highlights {
+		margin: 0 0 var(--space-4);
+		padding-left: 1.2em;
+		font-size: 17px;
+		line-height: 1.6;
+		color: var(--ink-muted);
+
+		li {
+			margin: 0 0 6px;
+
+			&::marker {
+				content: "+";
+				font-family: var(--font-mono);
+				color: var(--signal-text);
+			}
+		}
+	}
+</style>

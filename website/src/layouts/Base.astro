@@ -1,0 +1,64 @@
+---
+import type { ComponentProps } from "astro/types";
+import Footer from "../components/Footer.astro";
+import Head from "../components/Head.astro";
+import Search from "../components/Search.astro";
+import SiteNav from "../components/SiteNav.astro";
+import "../styles/tokens.css";
+import "../styles/base.css";
+import "../styles/components.css";
+
+interface Props {
+	title: string;
+	description?: string;
+	/** Set on docs pages: see SiteNav. */
+	docs?: ComponentProps<typeof SiteNav>["docs"];
+}
+
+const { title, description, docs } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<Head title={title} description={description} />
+		<slot name="head" />
+	</head>
+	<body class:list={{ "is-docs": docs }}>
+		<a class="skip" href="#main">skip to content</a>
+		<SiteNav docs={docs} />
+		<slot />
+		<Footer />
+		<Search />
+	</body>
+</html>
+
+<style>
+	.skip {
+		position: absolute;
+		top: -100px;
+		left: 16px;
+		z-index: 100;
+		padding: 12px 16px;
+		border-radius: var(--radius-xs);
+		background: var(--ink);
+		color: var(--bg);
+		font: 500 16px/1 var(--font-mono);
+
+		&:focus {
+			top: 16px;
+		}
+	}
+</style>
+
+<script>
+	import "../scripts/copy";
+
+	// A link that leaves the site opens a new tab.
+	for (const link of document.querySelectorAll<HTMLAnchorElement>("a[href]")) {
+		if (link.protocol.startsWith("http") && link.host !== location.host && !link.download) {
+			link.target = "_blank";
+			link.rel = "noopener noreferrer";
+		}
+	}
+</script>

@@ -1,0 +1,186 @@
+---
+import { File, Folder } from "@lucide/astro";
+import { featuredThemes, themeCount } from "../../lib/themes";
+import FileList from "./FileList.astro";
+import FileRow from "./FileRow.astro";
+import Section from "./Section.astro";
+
+interface Props {
+	id: string;
+}
+
+const [firstTheme] = featuredThemes;
+const previewFiles = [{ name: "dotfiles", isDir: true }, { name: "projects", isDir: true }, { name: "notes.md", isCursor: true }, { name: "invoice.pdf" }, { name: "photos.tar.gz" }];
+---
+
+<Section id={Astro.props.id} label="ls themes/" prompt="$" title="Pick a theme.">
+	<p class="sf-lede">superfile ships with {themeCount} themes. The preview is painted with the colours from each theme file.</p>
+	<div class="themes" data-themes>
+		<FileList role="listbox" aria-label="Themes">
+			{
+				featuredThemes.map(theme => (
+					<li role="presentation">
+						<FileRow name={`${theme.name}.toml`} role="option" aria-selected={theme === firstTheme ? "true" : "false"} data-theme-name={theme.name} data-theme-style={theme.style} />
+					</li>
+				))
+			}
+			<li role="presentation">
+				<FileRow name={`all ${themeCount} themes`} isDir href="/list/theme-list" />
+			</li>
+		</FileList>
+		<div>
+			<div class="preview" style={firstTheme.style} aria-hidden="true" data-theme-preview>
+				<div class="pane pane--focus">
+					<span class="pane__title">~/Downloads</span>
+					{
+						previewFiles.map(file => (
+							<div class:list={["row", file.isDir && "row--dir", file.isCursor && "row--cursor"]}>
+								{file.isDir ? <Folder aria-hidden="true" /> : <File aria-hidden="true" />}
+								<span class="row__name">{file.name}</span>
+							</div>
+						))
+					}
+				</div>
+				<div class="pane">
+					<span class="pane__title">notes.md</span>
+					<pre class="note"><span class="note__heading"># notes</span>
+
+- back up the photos
+- tidy ~/Downloads
+- try superfile</pre>
+				</div>
+			</div>
+			<figure class="sf-code config">
+				<figcaption class="sf-code__head"><span>~/.config/superfile/config.toml</span></figcaption>
+				<pre><code><span class="config__key">theme</span> = <span class="config__string">"<span data-theme-label>{firstTheme.name}</span>"</span></code></pre>
+			</figure>
+		</div>
+	</div>
+	<p class="own">None of them quite right? <a class="sf-link" href="/configure/custom-theme">Write your own</a>: a theme is one TOML file of colours.</p>
+</Section>
+
+<style>
+	.themes {
+		display: grid;
+		grid-template-columns: 300px minmax(0, 1fr);
+		gap: var(--space-5);
+		align-items: start;
+		margin-top: var(--space-7);
+
+		@media (max-width: 960px) {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+
+	/* A superfile screen with two panes, painted with the --term-* colours of the theme in its style attribute. */
+	.preview {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 10px;
+		padding: 26px 20px 20px;
+		border-radius: var(--radius-md);
+		background: var(--term-bg);
+		color: var(--term-ink);
+		font: 400 14px/1.6 var(--font-mono);
+	}
+	.pane {
+		position: relative;
+		min-width: 0;
+		padding: 18px 8px 10px;
+		border: 1px solid var(--term-line);
+		border-radius: 8px;
+	}
+	.pane__title {
+		position: absolute;
+		top: 0;
+		left: 10px;
+		translate: 0 -50%;
+		max-width: calc(100% - 20px);
+		padding: 0 8px;
+		overflow: hidden;
+		background: var(--term-bg);
+		font: 600 14px/20px var(--font-mono);
+		color: var(--term-muted);
+		white-space: nowrap;
+		text-overflow: ellipsis;
+	}
+	.pane--focus {
+		border-color: var(--signal);
+
+		.pane__title {
+			color: var(--term-signal);
+		}
+	}
+	.row {
+		display: flex;
+		align-items: center;
+		gap: 9px;
+		padding: 2px 8px;
+		border-radius: 4px;
+		white-space: nowrap;
+
+		:global(svg) {
+			flex: none;
+			width: 15px;
+			height: 15px;
+			color: var(--term-muted);
+		}
+	}
+	.row__name {
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.row--dir {
+		:is(.row__name, :global(svg)) {
+			color: var(--term-teal);
+		}
+	}
+	.row--cursor {
+		background: var(--theme-cursor, var(--term-ink));
+
+		:is(.row__name, :global(svg)) {
+			color: var(--term-bg);
+		}
+	}
+	.note {
+		margin: 0;
+		padding: 2px 8px;
+		font: inherit;
+		white-space: pre-wrap;
+	}
+	.note__heading {
+		color: var(--term-amber);
+	}
+
+	.config {
+		margin: var(--space-4) 0 0;
+	}
+	.config__key {
+		color: var(--term-signal);
+	}
+	.config__string {
+		color: var(--term-teal);
+	}
+	.own {
+		margin: var(--space-5) 0 0;
+		color: var(--ink-muted);
+	}
+</style>
+
+<script>
+	// The theme under the pointer or the focus repaints the preview.
+	const themes = document.querySelector<HTMLElement>("[data-themes]")!;
+	const preview = themes.querySelector<HTMLElement>("[data-theme-preview]")!;
+	const label = themes.querySelector("[data-theme-label]")!;
+
+	function pickTheme(event: Event) {
+		const option = (event.target as Element).closest<HTMLElement>("[role=option]");
+		if (!option || option.ariaSelected === "true") return;
+		themes.querySelector("[aria-selected=true]")!.ariaSelected = "false";
+		option.ariaSelected = "true";
+		preview.style.cssText = option.dataset.themeStyle!;
+		label.textContent = option.dataset.themeName!;
+	}
+
+	for (const type of ["click", "pointerover", "focusin"]) themes.addEventListener(type, pickTheme);
+</script>
