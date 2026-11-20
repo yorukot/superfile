@@ -1,80 +1,54 @@
 ---
-title: Image Preview
-description: Learn how image preview works in superfile and how terminal compatibility is determined.
+title: File preview
+description: What superfile can preview, the tools each type needs, and how images are drawn.
 head:
   - tag: title
-    content: Image Preview | superfile
+    content: File preview | superfile
 ---
 
-This tutorial will teach you how to use superfile’s image preview feature step by step.
+The preview panel shows the item under the cursor. Press `f` to show or hide it.
 
-## What is Image Preview?
+## Supported files
 
-superfile supports image previews directly in your terminal using several display protocols. When supported, images can be shown inline without any external viewer.
+| File                                                 | Preview                  | Needs              |
+| ---------------------------------------------------- | ------------------------ | ------------------ |
+| Text and code                                        | First lines, highlighted | Nothing            |
+| `.jpg` `.png` `.gif` `.webp` `.bmp` `.tiff`          | The image                | Nothing            |
+| `.pdf`                                               | First page               | `pdftoppm`         |
+| `.ps` `.eps`                                         | First page               | `gs` (Ghostscript) |
+| `.mp4` `.mkv` `.mov` `.webm` `.avi` and other videos | A frame                  | `ffmpeg`           |
+| Folders                                              | The folder's contents    | Nothing            |
 
----
+superfile can't preview SVG or ICO files yet. A GIF shows its first frame only. See [Dependencies](/reference/dependencies) to install the tools.
 
-## Terminal Compatibility
+[`show_image_preview`](/configure/superfile-config#show_image_preview) turns off images, PDFs and videos together.
 
-superfile automatically detects your terminal using the `$TERM` and `$TERM_PROGRAM` environment variables. We support rendering on the following terminals:
+## Image rendering
 
-| Terminal      | Protocol       | Image Preview Support |
-| ------------- | -------------- | --------------------- |
-| **kitty**     | Kitty protocol | ✅                    |
-| **WezTerm**   | Kitty protocol | ✅                    |
-| **Ghostty**   | Kitty protocol | ✅                    |
-| **iTerm2**    | Inline images  | ❌                    |
-| **Konsole**   | Inline images  | ❌                    |
-| **VSCode**    | Inline images  | ❌                    |
-| **Tabby**     | Inline images  | ❌                    |
-| **Hyper**     | Inline images  | ❌                    |
-| **Mintty**    | Inline images  | ❌                    |
-| **foot**      | Sixel graphics | ❌                    |
-| **Black Box** | Sixel graphics | ❌                    |
-
-> ✅ means full support for inline image preview using Kitty protocol  
-> ❌ means image preview is currently not supported
-
----
-
-## Supported Protocols
-
-superfile supports the following rendering protocols and will automatically choose the best one based on your terminal:
-
-| Protocol Name      | Description                                                                   | Status       |
-| ------------------ | ----------------------------------------------------------------------------- | ------------ |
-| **Kitty protocol** | Most capable, pixel-accurate rendering with transparency and scaling support. | ✅ Preferred |
-| **Sixel**          | Old standard used in DEC terminals and some modern ones like foot.            | ❌           |
-| **iTerm2 inline**  | iTerm2’s proprietary image format, used in Tabby, Hyper, etc.                 | ❌           |
-| **ANSI**           | Fallback text rendering using ANSI blocks or metadata only.                   | ✅ Always    |
-
----
-
-## Terminal Detection and Pixel Size
-
-superfile detects terminal capabilities by inspecting:
-
-- `$TERM`
-- `$TERM_PROGRAM`
-
-These variables help us decide whether advanced rendering might be possible. However, real support is confirmed at runtime using terminal queries.
-
-To scale images correctly, superfile sends the following escape code:
+superfile uses the Kitty graphics protocol when `TERM` or `TERM_PROGRAM` is one of these:
 
 ```
-\x1b[16t
+kitty  xterm-kitty  ghostty  WezTerm  iTerm2  Konsole  WarpTerminal
 ```
 
-This sequence queries the terminal for the size of each **cell in pixels**. superfile uses the result to:
+Everywhere else, including inside tmux, images are drawn with colored half-block characters. Sixel is not supported.
 
-- Maintain correct image aspect ratio
-- Avoid distortions in previews
-- Adapt to terminal resizes
+:::note
 
-If your terminal does not support `\x1b[16t`, we fall back to default assumptions like `10×20 px per cell`.
+Half-block images need your theme's `file_panel_bg` to be a full hex color such as `#1e1e2e`. Otherwise you see "Error converting image to ANSI".
 
-## Graceful Fallback to ANSI
+:::
 
-When advanced image preview isn't supported (for example, when the terminal doesn't support the Kitty protocol), superfile gracefully falls back to an ANSI-based preview using color-coded blocks.
+## Code highlighting
 
-This ensures a consistent and reliable experience across all terminal environments.
+Code is highlighted by file name, with the style set by `code_syntax_highlight` in your [theme](/configure/custom-theme#theme-settings).
+
+To use [bat](https://github.com/sharkdp/bat) instead, set [`code_previewer = "bat"`](/configure/superfile-config#code_previewer). superfile also finds it as `batcat`. If bat is missing, code files show an error.
+
+Files that aren't UTF-8 text, such as binaries, show "Unsupported formats".
+
+## Refreshing
+
+The preview doesn't watch for changes. For text, code and folders, move the cursor away and back to see the latest content.
+
+Images are cached. A changed image can keep showing its old version for several minutes. Resize the terminal or restart superfile to load the new one. A changed PDF, PostScript or video file shows its old thumbnail until you restart superfile.

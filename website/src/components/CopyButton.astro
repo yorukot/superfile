@@ -1,0 +1,15 @@
+---
+import { Copy } from "@lucide/astro";
+
+interface Props {
+	/** What is copied, for screen readers: "Copy command". */
+	label?: string;
+}
+
+const { label = "Copy" } = Astro.props;
+---
+
+<button class="sf-copy" type="button" aria-label={label} data-copy>
+	<Copy aria-hidden="true" />
+	<span data-copy-label>copy</span>
+</button>

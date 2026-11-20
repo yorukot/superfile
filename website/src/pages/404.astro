@@ -1,0 +1,33 @@
+---
+import Base from "../layouts/Base.astro";
+---
+
+<Base title="Page not found | superfile" description="This page does not exist.">
+	<main class="sf-wrap" id="main">
+		<p class="sf-label"><b>$</b> cd {"<that page>"}</p>
+		<p class="sf-readout" aria-hidden="true">404</p>
+		<h1 class="sf-title">No such file or directory.</h1>
+		<p class="sf-lede">The page may have moved, or the link was mistyped. The docs search usually finds it.</p>
+		<p class="actions">
+			<a class="sf-btn" href="/">home</a>
+			<a class="sf-btn" href="/overview">docs</a>
+			<button class="sf-btn" type="button" data-search-open>search docs</button>
+		</p>
+	</main>
+</Base>
+
+<style>
+	main {
+		padding-block: var(--space-7) var(--space-8);
+	}
+	.sf-readout {
+		margin: var(--space-5) 0 var(--space-6);
+		font-size: clamp(120px, 28vw, 280px);
+	}
+	.actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-3);
+		margin: var(--space-6) 0 0;
+	}
+</style>

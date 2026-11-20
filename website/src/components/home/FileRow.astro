@@ -1,0 +1,62 @@
+---
+import { File, Folder } from "@lucide/astro";
+import type { HTMLAttributes } from "astro/types";
+
+// A row of a FileList: a link when it has an href, a button otherwise.
+// The cursor is on the row marked aria-current.
+type Props = { name: string; isDir?: boolean } & (HTMLAttributes<"a"> | HTMLAttributes<"button">);
+
+const { name, isDir = false, ...attrs } = Astro.props;
+const Row = "href" in attrs ? "a" : "button";
+const Icon = isDir ? Folder : File;
+---
+
+<Row class="file" type={Row === "button" ? "button" : undefined} {...attrs}>
+	<Icon aria-hidden="true" />
+	<span>{name}{isDir && <span class="slash">/</span>}</span>
+</Row>
+
+<style>
+	.file {
+		display: grid;
+		grid-template-columns: 12px 20px minmax(0, 1fr);
+		align-items: center;
+		column-gap: 10px;
+		width: 100%;
+		padding: 10px;
+		border: 0;
+		border-radius: var(--radius-xs);
+		background: transparent;
+		color: var(--ink);
+		font: 500 16px/1.3 var(--font-mono);
+		text-align: left;
+		text-decoration: none;
+		cursor: pointer;
+
+		&::before {
+			content: "";
+			font-weight: 600;
+		}
+		:global(svg) {
+			width: 18px;
+			height: 18px;
+			color: var(--ink-muted);
+		}
+		.slash {
+			color: var(--teal-text);
+		}
+
+		&:is(:hover, [aria-current]) {
+			background: var(--ink);
+			color: var(--bg);
+
+			&::before {
+				content: "\203A";
+				color: var(--signal);
+			}
+			:is(.slash, :global(svg)) {
+				color: inherit;
+			}
+		}
+	}
+</style>

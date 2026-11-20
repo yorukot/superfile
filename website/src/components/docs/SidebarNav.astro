@@ -1,0 +1,89 @@
+---
+import type { NavGroup } from "../../lib/navigation";
+import NavLink from "./NavLink.astro";
+
+interface Props {
+	groups: NavGroup[];
+	/** The slug of the page being shown. */
+	current: string;
+	/** The URL prefix of the set of docs being shown: "" or "/v1.5.0". */
+	base: string;
+}
+
+const { groups, current, base } = Astro.props;
+---
+
+<nav aria-label="Docs">
+	{
+		groups.map(group => (
+			<details name="docs-nav" open={group.items.some(item => item.slug === current)}>
+				<summary class="sf-label">
+					<b>//</b> {group.label}
+				</summary>
+				<ul>
+					{group.items.map(item => (
+						<li>
+							<NavLink href={`${base}/${item.slug}`} current={item.slug === current ? "page" : undefined}>
+								{item.label}
+							</NavLink>
+						</li>
+					))}
+				</ul>
+			</details>
+		))
+	}
+</nav>
+
+<style>
+	/* The site menu takes over on small screens. */
+	nav {
+		@media (max-width: 900px) {
+			display: none;
+		}
+	}
+	details {
+		margin-bottom: 28px;
+
+		&[open] {
+			margin-bottom: var(--space-5);
+		}
+	}
+	/* Groups fold: the heading is the handle. They share a name, so opening one closes the others. */
+	summary {
+		display: flex;
+		align-items: center;
+		gap: 0.6ch;
+		margin: 0 0 4px;
+		padding: 8px 12px;
+		border-radius: var(--radius-xs);
+		list-style: none;
+		cursor: pointer;
+		user-select: none;
+
+		&::-webkit-details-marker {
+			display: none;
+		}
+		&::after {
+			content: "[+]";
+			margin-left: auto;
+		}
+		[open] > &::after {
+			content: "[-]";
+		}
+		&:hover {
+			background: var(--ink);
+			color: var(--bg);
+
+			& b {
+				color: inherit;
+			}
+		}
+	}
+	ul {
+		display: grid;
+		gap: 2px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+</style>

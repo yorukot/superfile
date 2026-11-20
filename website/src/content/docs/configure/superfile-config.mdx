@@ -16,7 +16,13 @@ $EDITOR config_path
 
 :::tip
 
-To see the path locations of your superfile files, use the command `spf pl`.
+To see the path locations of your superfile files, use the command `spf pl`. To use a config file at another path, start superfile with `spf -c /path/to/config.toml`.
+
+:::
+
+:::note
+
+Missing settings use their default values. Run `spf --fix-config-file` to add them to your file (comments are lost; a backup is kept). An invalid value makes superfile exit with an error.
 
 :::
 
@@ -24,15 +30,17 @@ To see the path locations of your superfile files, use the command `spf pl`.
 
 - ###### theme
 
-[Click here](/configure/custom-theme) for instructions to edit the theme.
+[Click here](/configure/custom-theme) for instructions to edit the theme. If superfile can't find the theme, it uses `catppuccin-mocha`.
 
 - ###### editor
 
 The editor your files will be opened with (Leave blank to use the EDITOR environment variable. If EDITOR environment variable is not set, it will default to `nano` for macOS/Linux, and `notepad` for Windows).
 
+You can add arguments, for example `editor = "code --wait"`.
+
 - ###### dir_editor
 
-The editor your directories will be opened with (Leave blank to use defaults : `vi` - Linux, `open` - macOS, `explorer` - Windows).
+The editor your directories will be opened with (Leave blank to use defaults : `vi` - Linux, `open` - macOS, `explorer` - Windows). It does not use the EDITOR environment variable.
 
 - ###### auto_check_update
 
@@ -48,24 +56,24 @@ The editor your directories will be opened with (Leave blank to use defaults : `
 
 After setting to `true`, you need to update your shell config file. Sample changes :
 
-##### macOS/Linux (bash or fish)
+##### macOS/Linux (bash, zsh or fish)
 
-###### Bash
+###### Bash and zsh
 
 Open the file:
 
 ```bash
-$EDITOR ~/.bashrc
+$EDITOR ~/.bashrc   # or ~/.zshrc for zsh
 ```
 
 Copy the following code into the file:
 
 <CodeBlock file="cd_on_quit/cd_on_quit.sh" />
 
-Save, exit, and reload your `.bashrc` file:
+Save, exit, and reload the file:
 
 ```bash
-source ~/.bashrc
+source ~/.bashrc   # or ~/.zshrc
 ```
 
 ###### Fish
@@ -87,6 +95,12 @@ Save, exit, and reload `config.fish`:
 ```bash
 source ~/.config/fish/config.fish
 ```
+
+:::note
+
+The fish function reads the last folder from `~/.local/state/superfile/lastdir` on Linux and from `~/Library/Application Support/superfile/lastdir` on macOS. If you set `XDG_STATE_HOME`, change the path for your system in the function to `$XDG_STATE_HOME/superfile/lastdir`.
+
+:::
 
 ##### Windows (Powershell)
 
@@ -122,7 +136,7 @@ Example command to enable - `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned`
 
 - ###### show_image_preview
 
-`true` => Shows the image preview in file preview panel when an image file is selected.
+`true` => Shows the image preview in file preview panel when an image file is selected. This also covers the thumbnails of PDF, PostScript and video files.
 
 `false` => Does not show the image preview.
 
@@ -144,7 +158,7 @@ The default location every time superfile is opened. Supports `~` and `.`
 
 - ###### default_sort_type
 
-File panel sorting type. Directories will always be displayed at the top.
+File panel sorting type. Directories will always be displayed at the top, except when sorting by date modified.
 
 `0` => Name
 
@@ -160,9 +174,9 @@ File panel sorting type. Directories will always be displayed at the top.
 
 File panel sorting order.
 
-`false` => Ascending (a-z)
+`false` => Ascending (a-z). When sorting by date modified, newest first.
 
-`true` => Descending (z-a)
+`true` => Descending (z-a). When sorting by date modified, oldest first.
 
 - ###### case_sensitive_sort
 
@@ -174,9 +188,9 @@ File panel sorting case sensitivity (if `true`, uppercase letters come before lo
 
 - ###### shell_close_on_success
 
-Controls whether the shell prompt closes automatically after a command succeeds.
+Controls whether the shell prompt closes automatically after a command succeeds. This also applies to SPF mode.
 
-`true` => Close the shell after successful command execution
+`true` => Close the shell after successful command execution (you won't see the command's output)
 
 `false` => Keep the shell open after successful command execution
 
@@ -190,7 +204,7 @@ Whether to enable debug mode. (if `true`, more verbose logs are written in log f
 
 - ###### ignore_missing_fields
 
-Controls whether warnings about missing fields in the config file are displayed.
+Controls whether warnings about missing fields in the config file and the hotkeys file are displayed.
 
 `true` => No warnings will be shown when fields are missing from the config file
 
@@ -210,6 +224,8 @@ Count of extra columns in file panel in addition to file name.
 
 `0` => Extra columns feature is disabled `1` => Also show size column `2` => Also show modify date `3` => Also show permission column
 
+For folders, the size column shows the number of items inside.
+
 :::caution
 
 Even though the extra columns are enabled, they will be hidden if the size of the filepanel is small. Please either increase the size or adjust the file_panel_name_percent config if you don't see the columns.
@@ -225,6 +241,8 @@ Percentage of file panel width allocated to file names (25-100). Higher values g
 - ###### code_previewer
 
 `''` => Use the builtin syntax highlighting for code files with _chroma_. `'bat'` => Use syntax highlighting provided by the [`bat`](https://github.com/sharkdp/bat) command line tool.
+
+superfile also finds bat as `batcat`. If bat isn't installed, code files show an error.
 
 - ###### nerdfont
 
@@ -338,7 +356,7 @@ border_middle_right = "┤"
 
 Shows more detailed metadata for files and directories.
 
-`true` => Enable detailed metadata. Requires [`exiftool`](https://exiftool.org).
+`true` => Enable detailed metadata. Requires [`exiftool`](https://exiftool.org). If it isn't installed, only the built-in metadata is shown.
 
 `false` => Use the built-in metadata only.
 
@@ -368,6 +386,11 @@ Enables the zoxide navigation modal.
 
 Allows users to map file extensions to commands used to open them. The file path will be appended as the last argument.
 
+- Write the extension in lowercase, without the dot.
+- Use a program name only, without arguments.
+- Use GUI programs. The program runs outside the terminal, so terminal editors like `nvim` don't work here; use `e` for those.
+- Only works on Linux and macOS.
+
 :::caution
 
 Must be at the very end of the file
@@ -377,7 +400,8 @@ Must be at the very end of the file
 ```toml
 [open_with]
 xopp = "xournalpp"
-conf = "nvim"
+pdf = "zathura"
+png = "feh"
 ```
 
 ### Default superfile config

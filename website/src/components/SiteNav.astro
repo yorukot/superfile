@@ -1,322 +1,411 @@
 ---
-import logoNight from "../assets/superfile-night.svg";
-import Search from "./Search.astro";
+import { Menu, Search as SearchIcon, X } from "@lucide/astro";
+import type { NavGroup } from "../lib/navigation";
+import { DISCORD_URL, GITHUB_URL } from "../lib/site";
+import BrandIcon from "./BrandIcon.astro";
+import ThemeToggle from "./ThemeToggle.astro";
 
 interface Props {
-	/** Show mobile hamburger button (docs pages only) */
-	isDocs?: boolean;
-	/** True when currently on a zh-tw page */
-	isZhTw?: boolean;
-	/** Slug used to compute the lang-toggle target, empty for homepage */
-	baseSlug?: string;
-	labels?: {
-		videos?: string;
-		docs?: string;
-		github?: string;
-		discord?: string;
-		getStarted?: string;
-		homeAria?: string;
-	};
+	/** On docs pages the small-screen menu also lists the docs being shown: their sidebar, and the URL prefix of that set of docs. */
+	docs?: { sidebar: NavGroup[]; base: string };
 }
 
-const { isDocs = false, isZhTw = false, baseSlug = "", labels = {} } = Astro.props;
-const localePrefix = isZhTw ? "/zh-tw" : "";
-const homeHref = isZhTw ? "/zh-tw/" : "/";
-const docsHref = `${localePrefix}/overview`;
-const installHref = `${localePrefix}/getting-started/installation`;
-const navLabels = {
-	videos: labels.videos ?? "Videos",
-	docs: labels.docs ?? "Docs",
-	github: labels.github ?? "GitHub",
-	discord: labels.discord ?? "Discord",
-	getStarted: labels.getStarted ?? "get started",
-	homeAria: labels.homeAria ?? "superfile home"
-};
+const { docs } = Astro.props;
+const path = Astro.url.pathname.replace(/\/$/, "") || "/";
+const current = (href: string) => (path === href ? "page" : undefined);
 
-// Homepage: EN / -> /zh-tw/      ZH /zh-tw/ -> /
-// Pages:    EN /slug -> /zh-tw/slug   ZH /zh-tw/slug -> /slug
-const langHref = isZhTw ? `/${baseSlug}` : `/zh-tw/${baseSlug}`;
-const langLabel = isZhTw ? "English" : "繁體中文";
+const links = [
+	{ label: "docs", href: "/overview" },
+	{ label: "install", href: "/getting-started/installation" },
+	{ label: "hotkeys", href: "/list/hotkey-list" },
+	{ label: "changelog", href: "/changelog" }
+];
+
+// The small-screen menu: the same links, plus the two places people talk.
+const menuLinks = [{ label: "home", href: "/" }, ...links, { label: "github", href: GITHUB_URL }, { label: "discord", href: DISCORD_URL }];
 ---
 
-<header class="site-nav" id="site-nav">
-	<div class="site-nav-inner">
+<div class="bar">
+	<header class="nav sf-wrap">
+		<a class="brand" href="/" aria-label="superfile home">
+			<img src="/logo.svg" alt="" width="32" height="26" />
+			<span>superfile</span>
+		</a>
+		<nav class="links" aria-label="Main">
+			{
+				links.map(link => (
+					<a href={link.href} aria-current={current(link.href)}>
+						{link.label}
+					</a>
+				))
+			}
+		</nav>
+		<div class="tools">
+			<button class="sf-btn sf-btn--sm search" type="button" aria-label="Search the docs" aria-haspopup="dialog" data-search-open>
+				<SearchIcon aria-hidden="true" />
+				<span>search docs</span>
+				<kbd class="sf-kbd">/</kbd>
+			</button>
+			<div class="wide-only"><ThemeToggle /></div>
+			<a class="sf-btn sf-btn--sm wide-only" href={GITHUB_URL} aria-label="superfile on GitHub" data-stars>
+				<BrandIcon name="github" />
+				<span>github</span>
+			</a>
+			<button class="sf-btn sf-btn--sm menu-toggle" type="button" aria-label="Menu" popovertarget="site-menu">
+				<Menu aria-hidden="true" />
+				<X aria-hidden="true" />
+			</button>
+		</div>
+	</header>
+</div>
+
+<!-- Small screens: the menu comes down over the page like a curtain, one terminal row at a time. -->
+<div class="menu" id="site-menu" popover data-pagefind-ignore>
+	<div class="menu__inner sf-wrap">
+		<p class="menu__label"><b>$</b> ls ~/superfile</p>
+		<nav aria-label="Menu">
+			<ul>
+				{
+					menuLinks.map((link, index) => (
+						<li style={`--i:${index}`}>
+							<a class="menu__link" href={link.href} aria-current={current(link.href)}>
+								<span>{String(index).padStart(2, "0")}</span>
+								{link.label}
+							</a>
+						</li>
+					))
+				}
+			</ul>
+		</nav>
 		{
-			isDocs && (
-				<button class="site-nav-menu-btn" id="docs-menu-btn" aria-label="Toggle menu">
-					<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-						<rect x="1" y="3" width="14" height="1.5" rx="0.75" fill="currentColor" />
-						<rect x="1" y="7.25" width="14" height="1.5" rx="0.75" fill="currentColor" />
-						<rect x="1" y="11.5" width="14" height="1.5" rx="0.75" fill="currentColor" />
-					</svg>
-				</button>
+			docs && (
+				<nav class="menu__docs" aria-label="Docs" style={`--i:${menuLinks.length}`}>
+					{docs.sidebar.map(group => (
+						<div>
+							<p class="menu__label">
+								<b>//</b> {group.label}
+							</p>
+							<ul>
+								{group.items.map(item => (
+									<li>
+										<a class="menu__sublink" href={`${docs.base}/${item.slug}`} aria-current={current(`${docs.base}/${item.slug}`)}>
+											{item.label}
+										</a>
+									</li>
+								))}
+							</ul>
+						</div>
+					))}
+				</nav>
 			)
 		}
-
-		<a href={homeHref} class="site-nav-logo" aria-label={navLabels.homeAria}>
-			<img src={logoNight.src} alt="superfile" width="120" height="24" />
-		</a>
-
-		<nav class="site-nav-links" role="navigation" aria-label="Main">
-			{
-				!isDocs && (
-					<a href="#videos" class="site-nav-link">
-						{navLabels.videos}
-					</a>
-				)
-			}
-			<a href={docsHref} class="site-nav-link">{navLabels.docs}</a>
-			<a href="https://github.com/yorukot/superfile" class="site-nav-link" target="_blank" rel="noopener noreferrer">{navLabels.github}</a>
-			<a href="https://discord.gg/YYtJ23Du7B" class="site-nav-link" target="_blank" rel="noopener noreferrer">{navLabels.discord}</a>
-		</nav>
-
-		<div class="site-nav-right">
-			<Search isZhTw={isZhTw} />
-
-			<a href="https://github.com/yorukot/superfile" class="site-nav-stars" id="nav-stars" target="_blank" rel="noopener noreferrer" aria-label="GitHub stars">
-				<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-					<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
-				</svg>
-				<span id="star-count">—</span>
-			</a>
-
-			<a href={langHref} class="site-nav-lang">
-				<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-					<circle cx="12" cy="12" r="10"></circle>
-					<path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-				</svg>
-				<span>{langLabel}</span>
-			</a>
-
-			{
-				!isDocs && (
-					<a href={installHref} class="site-nav-cta">
-						{navLabels.getStarted}
-					</a>
-				)
-			}
+		<div class="menu__foot" style={`--i:${menuLinks.length + 1}`}>
+			<span>theme</span>
+			<ThemeToggle />
 		</div>
 	</div>
-</header>
+</div>
 
-<style is:global>
-	/* ─── Site-wide navigation ──────────────────────────────────────────────────── */
-	.site-nav {
-		position: fixed;
+<style>
+	.bar {
+		position: sticky;
 		top: 0;
-		left: 0;
-		right: 0;
-		height: 3.5rem;
-		z-index: 100;
-		background: rgba(30, 30, 46, 0.85);
-		backdrop-filter: blur(16px) saturate(150%);
-		-webkit-backdrop-filter: blur(16px) saturate(150%);
-		border-bottom: 1px solid rgba(205, 214, 244, 0.07);
-	}
+		z-index: 50;
+		border-bottom: 1px solid transparent;
+		background: var(--bg);
 
-	.site-nav-inner {
-		margin-inline: auto;
-		padding-inline: clamp(1rem, 4vw, 3rem);
-		height: 100%;
+		/* A rule appears under the nav once the page has scrolled. */
+		&[data-scrolled] {
+			border-bottom-color: var(--line);
+		}
+	}
+	.nav {
 		display: flex;
 		align-items: center;
+		gap: var(--space-5);
+		height: var(--nav-h);
 	}
+	.brand {
+		display: inline-flex;
+		align-items: center;
+		gap: 12px;
+		color: var(--ink);
+		font: 600 20px/1 var(--font-mono);
+		letter-spacing: -0.02em;
+		text-decoration: none;
+	}
+	.links {
+		display: flex;
+		gap: 6px;
 
-	/* ── Hamburger (docs mobile only) ─── */
-	.site-nav-menu-btn {
+		& a {
+			padding: 8px 10px;
+			border-radius: 4px;
+			color: var(--ink-muted);
+			font: 500 16px/1 var(--font-mono);
+			text-decoration: none;
+
+			&[aria-current] {
+				color: var(--ink);
+			}
+			&:hover {
+				background: var(--ink);
+				color: var(--bg);
+			}
+		}
+	}
+	.tools {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		margin-inline-start: auto;
+	}
+	.wide-only {
+		display: inline-flex;
+	}
+	.search {
+		justify-content: flex-start;
+		width: 260px;
+		padding: 0 8px 0 14px;
+		color: var(--ink-muted);
+
+		& span {
+			flex: 1;
+			text-align: left;
+		}
+		& .sf-kbd {
+			min-width: 26px;
+			height: 26px;
+			padding: 0 6px;
+			color: inherit;
+		}
+		&:hover .sf-kbd {
+			border-color: currentColor;
+		}
+	}
+	[data-stars] span {
+		min-width: 3ch;
+	}
+	.menu-toggle {
 		display: none;
-		align-items: center;
-		justify-content: center;
-		width: 2.125rem;
-		height: 2.125rem;
-		margin-right: 0.75rem;
-		flex-shrink: 0;
-		background: none;
-		border: 1px solid var(--border-1);
-		border-radius: 0.3125rem;
-		color: var(--text-3);
-		cursor: pointer;
-		transition:
-			color 0.15s,
-			border-color 0.15s;
-	}
-	.site-nav-menu-btn:hover {
-		color: var(--green);
-		border-color: var(--d-green-border, rgba(166, 227, 161, 0.35));
+		width: 42px;
+		padding: 0;
+
+		/* It shows the menu icon, and the close icon while the menu is open. */
+		& :global(.lucide-x),
+		.bar:has(+ .menu:popover-open) & :global(.lucide-menu) {
+			display: none;
+		}
+		.bar:has(+ .menu:popover-open) & {
+			background: var(--ink);
+			color: var(--bg);
+			border-color: var(--ink);
+
+			& :global(.lucide-x) {
+				display: block;
+			}
+		}
 	}
 
-	/* ── Logo ─── */
-	.site-nav-logo {
-		flex-shrink: 0;
-		display: flex;
-		align-items: center;
-		opacity: 0.9;
-		transition: opacity 0.15s;
-		text-decoration: none;
+	@media (max-width: 1180px) {
+		.search {
+			width: 200px;
+		}
 	}
-	.site-nav-logo:hover {
-		opacity: 1;
+	@media (max-width: 1040px) {
+		.search {
+			justify-content: center;
+			width: 42px;
+			padding: 0;
+
+			& span,
+			& .sf-kbd {
+				display: none;
+			}
+		}
 	}
-	.site-nav-logo img {
-		height: 1.25rem;
+	@media (max-width: 900px) {
+		.nav {
+			gap: var(--space-3);
+		}
+		.tools {
+			gap: 8px;
+		}
+		.links,
+		.wide-only {
+			display: none;
+		}
+		.menu-toggle {
+			display: inline-flex;
+		}
+		/* The page behind the open menu does not scroll. */
+		:global(html:has(#site-menu:popover-open)) {
+			overflow: hidden;
+		}
+	}
+	@media (max-width: 620px) {
+		.brand {
+			gap: 10px;
+			font-size: 18px;
+		}
+	}
+
+	/* The menu is a charcoal screen that comes down from under the nav in steps, the way a terminal
+	   draws line by line; then its rows print one after another. */
+	.menu {
+		position: fixed;
+		inset: var(--nav-h) 0 0;
 		width: auto;
+		height: auto;
+		margin: 0;
+		padding: 0;
+		overflow-y: auto;
+		overscroll-behavior: contain;
+		border: 0;
+		background: var(--term-bg);
+		color: var(--term-ink);
+		clip-path: inset(0 0 100% 0);
+		transition: 280ms steps(12, end) allow-discrete;
+		transition-property: clip-path, display, overlay;
+
+		&:popover-open {
+			clip-path: inset(0);
+			transition-duration: 420ms;
+			transition-timing-function: steps(14, end);
+
+			@starting-style {
+				clip-path: inset(0 0 100% 0);
+			}
+		}
+		/* The curtain's leading edge: one orange row, like the cursor line that draws it. */
+		&::after {
+			content: "";
+			position: sticky;
+			bottom: 0;
+			display: block;
+			height: 4px;
+			background: var(--signal);
+		}
+		& :focus-visible {
+			outline-color: var(--term-teal);
+		}
+		& ul {
+			margin: 0;
+			padding: 0;
+			list-style: none;
+		}
+		@media (prefers-reduced-motion: reduce) {
+			transition: none;
+		}
+		@media (min-width: 901px) {
+			display: none;
+		}
+	}
+	.menu__inner {
+		min-height: calc(100% - 4px);
+		padding-top: var(--space-6);
+		padding-bottom: var(--space-7);
+	}
+	.menu__label {
+		margin: 0 0 var(--space-4);
+		font: 500 15px/1.4 var(--font-mono);
+		color: var(--term-muted);
+
+		& b {
+			color: var(--term-signal);
+			font-weight: 600;
+		}
+		.menu__docs & {
+			margin-bottom: var(--space-2);
+		}
+	}
+	.menu__link,
+	.menu__sublink {
+		border-radius: var(--radius-xs);
+		color: var(--term-ink);
+		text-decoration: none;
+
+		&:is(:hover, :active, [aria-current]) {
+			background: var(--term-ink);
+			color: var(--term-bg);
+		}
+	}
+	.menu__link {
+		display: flex;
+		align-items: baseline;
+		gap: 16px;
+		margin-inline: -12px;
+		padding: 10px 12px;
+		font: 600 clamp(28px, 8vw, 40px) / 1.15 var(--font-mono);
+		letter-spacing: -0.03em;
+
+		/* Its number in the list. */
+		& span {
+			font: 500 15px/1 var(--font-mono);
+			letter-spacing: 0;
+			color: var(--term-muted);
+		}
+		&:is(:hover, :active, [aria-current]) span {
+			color: var(--signal-text);
+		}
+	}
+	.menu__sublink {
 		display: block;
+		margin-inline: -10px;
+		padding: 7px 10px;
+		font: 400 16px/1.35 var(--font-mono);
 	}
-
-	/* ── Center links ─── */
-	.site-nav-links {
+	.menu__docs {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: var(--space-6) var(--space-5);
+		margin-top: var(--space-7);
+		padding-top: var(--space-6);
+		border-top: 1px solid var(--term-line);
+	}
+	.menu__foot {
 		display: flex;
 		align-items: center;
-		gap: 0.125rem;
-		flex: 1;
-		margin-left: 1.5rem;
-	}
+		justify-content: space-between;
+		margin-top: var(--space-7);
+		padding-top: var(--space-5);
+		border-top: 1px solid var(--term-line);
+		font: 500 15px/1 var(--font-mono);
+		color: var(--term-muted);
 
-	.site-nav-link {
-		padding: 0.3125rem 0.625rem;
-		font-size: 0.8125rem;
-		color: var(--text-3);
-		border-radius: 0.3125rem;
-		text-decoration: none;
-		transition:
-			color 0.15s,
-			background 0.15s;
+		/* The theme toggle sits on a screen here, so it takes the screen's colours. */
+		--box: var(--term-line);
+		--ink-muted: var(--term-muted);
+		--ink: var(--term-ink);
+		--bg: var(--term-bg);
 	}
-	.site-nav-link:hover {
-		color: var(--text);
-		background: rgba(205, 214, 244, 0.05);
-	}
-
-	/* ── Right cluster ─── */
-	.site-nav-right {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		flex-shrink: 0;
-	}
-
-	/* Stars badge */
-	.site-nav-stars {
-		display: flex;
-		align-items: center;
-		gap: 0.3125rem;
-		padding: 0.25rem 0.625rem;
-		font-size: 0.75rem;
-		color: var(--amber);
-		border: 1px solid rgba(249, 226, 175, 0.2);
-		border-radius: 999px;
-		text-decoration: none;
-		transition:
-			border-color 0.15s,
-			background 0.15s;
-	}
-	.site-nav-stars:hover {
-		border-color: var(--amber);
-		background: var(--amber-dim);
-	}
-
-	/* Language toggle */
-	.site-nav-lang {
-		display: flex;
-		align-items: center;
-		gap: 0.3125rem;
-		padding: 0.25rem 0.625rem;
-		font-size: 0.78rem;
-		color: var(--text-3);
-		border: 1px solid var(--border-1);
-		border-radius: 0.3125rem;
-		text-decoration: none;
-		transition:
-			color 0.15s,
-			border-color 0.15s,
-			background 0.15s;
-	}
-	.site-nav-lang:hover {
-		color: var(--green);
-		border-color: rgba(166, 227, 161, 0.35);
-		background: rgba(166, 227, 161, 0.06);
-	}
-
-	/* Get started CTA */
-	.site-nav-cta {
-		padding: 0.375rem 0.875rem;
-		font-size: 0.8125rem;
-		font-weight: 500;
-		color: #11111b;
-		background: var(--green);
-		border-radius: 0.3125rem;
-		text-decoration: none;
-		transition:
-			background 0.15s,
-			box-shadow 0.15s;
-	}
-	.site-nav-cta:hover {
-		background: #b5e8b0;
-		box-shadow: 0 0 1rem rgba(166, 227, 161, 0.4);
-	}
-
-	/* ── Responsive ─── */
-	@media (max-width: 53.75rem) {
-		.site-nav-menu-btn {
-			display: flex;
+	/* Rows print one after another once the curtain is down. */
+	@media (prefers-reduced-motion: no-preference) {
+		.menu:popover-open :is(.menu__inner > .menu__label, li[style], .menu__docs, .menu__foot) {
+			animation: print 1ms steps(1, end) both;
+			animation-delay: calc(160ms + var(--i, 0) * 55ms);
 		}
 	}
-
-	@media (max-width: 40rem) {
-		.site-nav-links {
-			display: none;
-		}
-		.site-nav-stars {
-			display: none;
-		}
-	}
-
-	@media (max-width: 30rem) {
-		.site-nav-lang span {
-			display: none;
+	@keyframes print {
+		from {
+			opacity: 0;
 		}
 	}
 </style>
 
 <script>
-	// ── GitHub stars (cookie-cached 5 min) ───────────────────────────────────
-	async function loadStars() {
-		try {
-			let count: number;
-			let tag: string;
+	import { getStars } from "../scripts/github-stats";
 
-			const cookieEntry = document.cookie.split("; ").find(c => c.startsWith("spf_stars="));
+	const bar = document.querySelector(".bar")!;
+	const markScrolled = () => bar.toggleAttribute("data-scrolled", scrollY > 8);
+	addEventListener("scroll", markScrolled, { passive: true });
+	markScrolled();
 
-			if (cookieEntry) {
-				const val = JSON.parse(decodeURIComponent(cookieEntry.slice("spf_stars=".length)));
-				count = val.n;
-				tag = val.t ?? "";
-			} else {
-				const res = await fetch("https://api.github.com/repos/yorukot/superfile");
-				const data = await res.json();
-				count = data.stargazers_count;
-				tag = data.tag_name ?? data.default_branch ?? "";
-				document.cookie = `spf_stars=${encodeURIComponent(JSON.stringify({ n: count, t: tag }))}` + `; max-age=300; path=/; SameSite=Lax`;
-			}
-
-			const formatted = count >= 1000 ? `${(count / 1000).toFixed(1)}k` : String(count);
-
-			// Nav badge — present on every page
-			const starCount = document.getElementById("star-count");
-			if (starCount) starCount.textContent = formatted;
-
-			// Homepage-only elements (no-ops on docs pages)
-			document.querySelectorAll<HTMLElement>("#stats-stars").forEach(el => (el.textContent = formatted));
-
-			const community = document.getElementById("community-stars");
-			if (community) community.textContent = `★ ${formatted}+`;
-
-			const ver = document.getElementById("stats-version");
-			if (ver && tag) ver.textContent = tag;
-		} catch {
-			/* silent */
-		}
+	const count = await getStars();
+	const link = document.querySelector<HTMLElement>("[data-stars]");
+	if (link && count !== null) {
+		const stars = count >= 1000 ? `${(count / 1000).toFixed(1).replace(/\.0$/, "")}k` : String(count);
+		link.querySelector("span")!.textContent = stars;
+		link.ariaLabel = `superfile on GitHub, ${stars} stars`;
 	}
-	// Run on every page (initial load + SPA navigations)
-	document.addEventListener("astro:page-load", loadStars);
 </script>

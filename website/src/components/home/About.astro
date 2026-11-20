@@ -1,0 +1,70 @@
+---
+import { ArrowUpRight, Check, Package } from "@lucide/astro";
+import Section from "./Section.astro";
+
+interface Props {
+	id: string;
+}
+---
+
+<Section id={Astro.props.id} label="about.md" title="Why it exists.">
+	<blockquote class="quote">
+		<p>
+			Before creating superfile, I tried a lot of terminal file managers, but I was often disappointed by their UI design. So, I built superfile with a primary focus on delivering a refined,
+			user-friendly interface.
+		</p>
+		<footer>yorukot, in the <a class="sf-link" href="/overview">overview</a></footer>
+	</blockquote>
+	<div class="sf-panes panes">
+		<div class="sf-pane">
+			<span class="sf-pane__title sf-pane__title--icon"><Package aria-hidden="true" />what's in it</span>
+			<p class="sf-pane__body">Several file panels, a preview for text, code and images, a process list, a clipboard, search, sorting, themes, hotkeys you can remap, and a few plugins.</p>
+		</div>
+		<div class="sf-pane">
+			<span class="sf-pane__title sf-pane__title--icon"><Check aria-hidden="true" />a good fit if</span>
+			<p class="sf-pane__body">You do everyday file work in a terminal and want to see what you are doing while you do it, without reading a manual first.</p>
+		</div>
+		<div class="sf-pane">
+			<span class="sf-pane__title sf-pane__title--icon"><ArrowUpRight aria-hidden="true" />look elsewhere if</span>
+			<p class="sf-pane__body">
+				You want the most features. superfile is not the most feature-packed file manager out there. <a class="sf-link" href="https://github.com/sxyazi/yazi">Yazi</a> is a good one that is.
+			</p>
+		</div>
+	</div>
+</Section>
+
+<style>
+	.quote {
+		margin: var(--space-6) 0 0;
+		max-width: 36em;
+
+		p {
+			margin: 0;
+			font-size: 22px;
+			line-height: 1.55;
+			color: var(--ink);
+			text-wrap: pretty;
+
+			@media (max-width: 640px) {
+				font-size: 19px;
+			}
+		}
+		footer {
+			margin-top: var(--space-4);
+			font: 400 15px/1.5 var(--font-mono);
+			color: var(--ink-muted);
+		}
+	}
+	/* What's in it across the top, then the two "is it for me" panes side by side. */
+	.panes {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		margin-top: var(--space-7);
+
+		> :first-child {
+			grid-column: 1 / -1;
+		}
+		@media (max-width: 640px) {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+</style>

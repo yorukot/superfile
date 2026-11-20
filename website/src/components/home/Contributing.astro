@@ -1,0 +1,64 @@
+---
+import { Bug, GitPullRequest, MessageCircle, Palette } from "@lucide/astro";
+import { DISCORD_URL, GITHUB_URL } from "../../lib/site";
+import Section from "./Section.astro";
+
+interface Props {
+	id: string;
+}
+
+const waysToHelp = [
+	{ title: "report a bug", Icon: Bug, body: "Something broke or looks wrong? Open an issue with your OS, terminal and superfile version.", href: `${GITHUB_URL}/issues/new/choose` },
+	{ title: "send a pull request", Icon: GitPullRequest, body: "The contributing guide covers building from source, the tests and the commit style.", href: "/contribute/how-to-contribute" },
+	{ title: "share a theme", Icon: Palette, body: "A theme is one TOML file of colours. Write yours, then add it to the list.", href: "/configure/custom-theme" },
+	{ title: "ask a question", Icon: MessageCircle, body: "Stuck, or just want to talk about it? The Discord server is where people hang out.", href: DISCORD_URL }
+];
+---
+
+<Section id={Astro.props.id} label="CONTRIBUTING.md" title="Built in the open.">
+	<p class="sf-lede">superfile is MIT licensed and made by the people below. Issues, pull requests, themes and questions are all welcome.</p>
+	<a class="people" href={`${GITHUB_URL}/graphs/contributors`}>
+		<img src="https://gthanks.yorukot.me/image?target=yorukot%2Fsuperfile&padding=12" alt="Avatars of people who have contributed to superfile" loading="lazy" />
+	</a>
+	<p class="everyone">That is only the first few rows. <a class="sf-link" href="/special-thanks">See everyone</a>.</p>
+	<div class="sf-panes ways">
+		{
+			waysToHelp.map(({ title, Icon, body, href }) => (
+				<a class="sf-pane" href={href}>
+					<span class="sf-pane__title sf-pane__title--icon">
+						<Icon aria-hidden="true" />
+						{title}
+					</span>
+					<p class="sf-pane__body">{body}</p>
+				</a>
+			))
+		}
+	</div>
+</Section>
+
+<style>
+	/* Only the first few rows of avatars show. */
+	.people {
+		display: block;
+		max-height: 272px;
+		margin-top: var(--space-6);
+		overflow: hidden;
+		border-radius: var(--radius-xs);
+
+		img {
+			display: block;
+		}
+	}
+	.everyone {
+		margin: var(--space-4) 0 0;
+		color: var(--ink-muted);
+	}
+	.ways {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		margin-top: var(--space-7);
+
+		@media (max-width: 640px) {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+</style>

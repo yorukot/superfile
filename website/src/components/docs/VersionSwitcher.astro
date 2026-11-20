@@ -1,0 +1,149 @@
+---
+import { LATEST, type resolveDocs } from "../../../docs.config.mjs";
+import NavLink from "./NavLink.astro";
+
+interface Props {
+	/** The set of docs being shown: "latest" or a release tag. */
+	version: string;
+	/** The releases by minor version, newest first. */
+	groups: ReturnType<typeof resolveDocs>["groups"];
+	/** Where a set of docs is read from this page. */
+	hrefFor: (version: string) => string;
+}
+
+const { version, groups, hrefFor } = Astro.props;
+const current = (tag: string) => (tag === version ? "true" : undefined);
+---
+
+<details class="switcher">
+	<summary>
+		<span>version</span>
+		<b>{version}</b>
+	</summary>
+	<ul>
+		<li><NavLink href={hrefFor(LATEST)} current={current(LATEST)}>{LATEST}</NavLink></li>
+		{
+			groups.map(group => (
+				<li>
+					{group.rest.length === 0 ? (
+						<NavLink href={hrefFor(group.head)} current={current(group.head)}>
+							{group.head}
+						</NavLink>
+					) : (
+						<details class="more" open={group.rest.includes(version)}>
+							<summary>
+								<NavLink href={hrefFor(group.head)} current={current(group.head)}>
+									{group.head}
+								</NavLink>
+								<span class="count" aria-label={`${group.rest.length} more ${group.key} versions`} />
+							</summary>
+							<ul>
+								{group.rest.map(tag => (
+									<li>
+										<NavLink href={hrefFor(tag)} current={current(tag)}>
+											{tag}
+										</NavLink>
+									</li>
+								))}
+							</ul>
+						</details>
+					)}
+				</li>
+			))
+		}
+	</ul>
+</details>
+
+<style>
+	/* A box at the top of the sidebar that opens into the list of releases. */
+	.switcher {
+		margin-bottom: var(--space-5);
+		border: 1px solid var(--box);
+		border-radius: var(--radius-sm);
+
+		& > summary {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			height: 44px;
+			padding: 0 14px;
+			border-radius: calc(var(--radius-sm) - 1px);
+
+			& b {
+				color: var(--ink);
+				font-weight: 600;
+			}
+			&::after {
+				content: "[+]";
+				margin-left: auto;
+			}
+			&:hover {
+				background: var(--ink);
+				color: var(--bg);
+
+				& b {
+					color: inherit;
+				}
+			}
+		}
+		&[open] > summary::after {
+			content: "[-]";
+		}
+		& > ul {
+			max-height: min(60vh, 520px);
+			padding: 6px;
+			overflow-y: auto;
+			border-top: 1px solid var(--box);
+			scrollbar-width: thin;
+			scrollbar-color: var(--box) transparent;
+		}
+	}
+	summary {
+		list-style: none;
+		font: 500 15px/1 var(--font-mono);
+		color: var(--ink-muted);
+		cursor: pointer;
+		user-select: none;
+
+		&::-webkit-details-marker {
+			display: none;
+		}
+	}
+	ul {
+		display: grid;
+		gap: 2px;
+		margin: 0;
+		list-style: none;
+	}
+
+	/* A minor version with older patch releases: the line is the newest one, and the [+] at its
+	   end unfolds the rest. */
+	.more {
+		& > summary {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) auto;
+			align-items: center;
+			gap: 4px;
+			border-radius: var(--radius-xs);
+		}
+		& > ul {
+			padding: 2px 0 6px 18px;
+		}
+	}
+	.count {
+		padding: 8px 10px;
+		border-radius: var(--radius-xs);
+		line-height: 1.35;
+
+		&::before {
+			content: "[+]";
+		}
+		.more[open] > summary > &::before {
+			content: "[-]";
+		}
+		summary:hover > & {
+			background: var(--ink);
+			color: var(--bg);
+		}
+	}
+</style>

@@ -2,24 +2,25 @@
 import { Code } from "astro:components";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { superfileShikiTheme } from "../lib/shiki-theme.mjs";
+import CopyButton from "./CopyButton.astro";
 
 interface Props {
+	/** A file of the repository, by its path from the repository root. */
 	file: string;
 	language?: string;
-	meta?: string;
+	/** The folder `file` is read from, relative to website/. The docs of a released version pass their own copy of the repository. */
+	root?: string;
 }
 
-const { file, language } = Astro.props;
-const repoRoot = process.env.GITHUB_WORKSPACE ?? path.resolve(process.cwd(), "..");
-const filePath = path.resolve(repoRoot, file);
-const fileExtension = file.split(".").pop() ?? "toml";
-const code = await fs.readFile(filePath, "utf-8");
-const lang = language ?? fileExtension;
+const { file, language = path.extname(file).slice(1), root = process.env.GITHUB_WORKSPACE ?? ".." } = Astro.props;
+const code = await fs.readFile(path.resolve(root, file), "utf-8");
 ---
 
-<figure class="code-file">
-	<div class="code-file-header">
-		<span class="code-file-name">{file}</span>
-	</div>
-	<Code code={code} lang={lang} theme="catppuccin-mocha" />
+<figure class="sf-code">
+	<figcaption class="sf-code__head" data-pagefind-ignore>
+		<span>{file}</span>
+		<CopyButton label="Copy code" />
+	</figcaption>
+	<Code code={code} lang={language} theme={superfileShikiTheme} />
 </figure>
