@@ -183,8 +183,9 @@ export function mountBoard(canvas: HTMLCanvasElement) {
 
 	document.addEventListener("visibilitychange", run);
 	new ResizeObserver(resize).observe(canvas);
-	new IntersectionObserver(([entry]) => {
-		visible = entry.isIntersecting;
+	// Several observations can arrive at once; the last one is the current state.
+	new IntersectionObserver(entries => {
+		visible = entries.at(-1)!.isIntersecting;
 		run();
 	}).observe(canvas);
 }

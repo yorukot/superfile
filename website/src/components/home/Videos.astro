@@ -154,6 +154,8 @@ interface Props {
 	const frame = player.querySelector("iframe")!;
 	const heading = player.querySelector("#video-title")!;
 	const youtubeLink = player.querySelector("a")!;
+	// Setting `src` would add an entry to the tab's history each time, and Back would replay it.
+	const show = (url: string) => frame.contentWindow!.location.replace(url);
 
 	document.querySelector("[data-videos]")!.addEventListener("click", event => {
 		const card = (event.target as Element).closest<HTMLAnchorElement>("[data-video-id]");
@@ -161,7 +163,7 @@ interface Props {
 		if (!card || event.metaKey || event.ctrlKey || event.shiftKey) return;
 		event.preventDefault();
 		const { videoId, videoTitle = "" } = card.dataset;
-		frame.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0`;
+		show(`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0`);
 		frame.title = videoTitle;
 		heading.textContent = videoTitle;
 		youtubeLink.href = card.href;
@@ -174,5 +176,5 @@ interface Props {
 		if (target === player || target.closest("[data-video-close]")) player.close();
 	});
 	// Emptying the frame is what stops the sound.
-	player.addEventListener("close", () => (frame.src = "about:blank"));
+	player.addEventListener("close", () => show("about:blank"));
 </script>

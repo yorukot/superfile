@@ -11,7 +11,7 @@ export interface Release {
 
 function parseChangelog(source: string): Release[] {
 	const releases: Release[] = [];
-	const heading = /^# \[\*\*(v[^*]+)\*\*\]\(([^)]+)\)/;
+	const heading = /^# \[\*\*([^*]+)\*\*\]\(([^)]+)\)/;
 	let release: Release | undefined;
 	let section = "";
 

@@ -5,8 +5,8 @@
 // writes website/.versions/<tag>/ with the Markdown, the images it uses and the repository files
 // it embeds, all read from that tag. Nothing here is committed: the folder is rebuilt from git.
 //
-// It never fails the build. Without git, or without tags (a shallow clone), it warns and the site
-// is built with the current docs only.
+// On your machine it never fails the build: without git, or without tags, it warns and the site is
+// built with the current docs only. On a build service (CI is set) no tags at all is an error.
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
@@ -19,7 +19,7 @@ const DOCS = "website/src/content/docs";
 // The component that embeds a repository file. Pages import it by a relative path, which differs in a copy.
 const codeComponent = path.join(websiteDir, "src/components/code.astro");
 // Raise this when the way a version is written out changes, so existing copies are rebuilt.
-const FORMAT = 4;
+const FORMAT = 5;
 
 // Paths given to git below are relative to the repository root, so git runs from there.
 let gitDir = websiteDir;
@@ -85,17 +85,20 @@ function syncVersion(tag) {
 	let written = 0;
 
 	for (const page of pages) {
-		let text = gitText(["show", `${tag}:${DOCS}/${page}`]);
+		// A page can be a symlink in the tag (notice.md is one), so it is read the way that follows them.
+		let text = readFromTag(tag, `${DOCS}/${page}`)?.toString("utf-8");
 		// Pages built from components this site no longer has cannot be rendered.
-		if (/from\s+["']@astrojs\/starlight/.test(text)) continue;
+		if (!text || /from\s+["']@astrojs\/starlight/.test(text)) continue;
 		const target = path.join(versionDir, "src/content/docs", page);
 
 		// Images: copy the ones the page uses to the same relative place; drop the ones the tag lacks.
 		text = text.replace(/!\[([^\]]*)\]\((\.{1,2}\/[^)\s]+)\)/g, (whole, alt, relative) => {
 			const inRepo = path.posix.normalize(path.posix.join(path.posix.dirname(`${DOCS}/${page}`), relative));
 			const image = readFromTag(tag, inRepo);
-			if (!image) return "";
-			write(path.resolve(path.dirname(target), relative), image);
+			const copy = path.resolve(path.dirname(target), relative);
+			// A path that climbs out of the copy's own folder would write over something else.
+			if (!image || !copy.startsWith(versionDir + path.sep)) return "";
+			write(copy, image);
 			return whole;
 		});
 
@@ -125,15 +128,11 @@ function main() {
 		return;
 	}
 	gitDir = root.trim();
-	let tags = releaseTags();
-	if (!tags.length && tryGit(["rev-parse", "--is-shallow-repository"])?.trim() === "true") {
-		// A shallow clone (most build services) has no tags. One commit per tag is all that is needed.
-		// This is only ever done to a clone that is already shallow.
-		tryGit(["fetch", "--depth=1", "--tags", "--quiet", "origin"]);
-		tags = releaseTags();
-	}
+	// A shallow clone (most build services) lacks tags. One commit per tag is all that is needed.
+	// This is only ever done to a clone that is already shallow.
+	if (tryGit(["rev-parse", "--is-shallow-repository"])?.trim() === "true") tryGit(["fetch", "--depth=1", "--tags", "--quiet", "origin"]);
 	const kept = [];
-	for (const tag of tags) {
+	for (const tag of releaseTags()) {
 		if (!tryGit(["ls-tree", "-d", tag, "--", DOCS])) continue;
 		try {
 			console.log(`[versions] ${tag}: ${syncVersion(tag)}`);
@@ -146,7 +145,13 @@ function main() {
 	for (const existing of fs.existsSync(outDir) ? fs.readdirSync(outDir) : []) {
 		if (!kept.includes(existing)) fs.rmSync(path.join(outDir, existing), { recursive: true, force: true });
 	}
-	if (!kept.length) console.warn("[versions] no release tags found: building the current docs only");
+	if (kept.length) return;
+	// A site deployed without its versions breaks every /v… link, so a build service stops here.
+	if (process.env.CI && !process.env.DOCS_WITHOUT_VERSIONS) {
+		console.error("[versions] no release tags found. Clone with the tags, or set DOCS_WITHOUT_VERSIONS=1 to build the current docs only.");
+		process.exit(1);
+	}
+	console.warn("[versions] no release tags found: building the current docs only");
 }
 
 main();

@@ -1,6 +1,6 @@
 # redirect all /docs requests to the root domain
 
-/docs/\* /:splat 301
+/docs/* /:splat 301
 
 # the zh-tw translation was removed; send old links to the English page
 

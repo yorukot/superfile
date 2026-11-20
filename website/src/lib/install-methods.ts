@@ -35,6 +35,7 @@ export function detectOS(): OS | null {
 	const platform = `${navigator.platform} ${navigator.userAgent}`.toLowerCase();
 	if (/android|iphone|ipad/.test(platform)) return null;
 	if (platform.includes("win")) return "windows";
-	if (platform.includes("mac")) return "macos";
+	// An iPad calls itself a Mac. Only it has a touch screen.
+	if (platform.includes("mac")) return navigator.maxTouchPoints > 1 ? null : "macos";
 	return /linux|x11|bsd/.test(platform) ? "linux" : null;
 }

@@ -357,11 +357,14 @@
 	&:focus-visible {
 		outline-color: var(--term-teal);
 	}
-	/* Just copied: it stays teal, even with the pointer still on it. */
-	&.is-copied {
+	/* Just copied, or refused: it keeps that colour, even with the pointer still on it. */
+	&:is(.is-copied, .is-failed) {
 		background: transparent;
 		color: var(--term-teal);
-		border-color: var(--term-teal);
+		border-color: currentColor;
+	}
+	&.is-failed {
+		color: var(--term-amber);
 	}
 	/* On small screens it keeps its icon and drops its word, so more of the command shows. */
 	@media (max-width: 640px) {

@@ -148,12 +148,19 @@ import { Search as SearchIcon } from "@lucide/astro";
 
 	// The index is written by `pagefind` after the build, so it does not exist in `astro dev`.
 	const indexUrl = "/pagefind/pagefind.js";
+	const unavailable = import.meta.env.DEV ? "The search index is built with the site. Run a build first." : "Search is not available right now. Try again in a moment.";
 	let pagefind: Promise<Pagefind | null> | undefined;
+	let failures = 0;
+	// A load that failed is forgotten, so the next search tries again. The browser remembers that a
+	// module failed to load, so a retry has to ask for it under another address.
 	const loadPagefind = () =>
-		(pagefind ??= import(/* @vite-ignore */ indexUrl).then(
-			async (module: Pagefind) => (await module.init(), module),
-			() => null
-		));
+		(pagefind ??= import(/* @vite-ignore */ failures ? `${indexUrl}?retry=${failures}` : indexUrl)
+			.then(async (module: Pagefind) => (await module.init(), module))
+			.catch(() => {
+				pagefind = undefined;
+				failures++;
+				return null;
+			}));
 
 	/** Marks one result as the one Enter opens. Focus stays in the input, so the input points a screen reader at it. */
 	function select(hit: Element) {
@@ -178,7 +185,7 @@ import { Search as SearchIcon } from "@lucide/astro";
 		const query = input.value.trim();
 		if (!query) return show();
 		const engine = await loadPagefind();
-		if (!engine) return message("The search index is built with the site. Run a build first.");
+		if (!engine) return message(unavailable);
 		const found = await engine.debouncedSearch(query, {}, 140);
 		if (!found) return;
 		const hits = await Promise.all(found.results.slice(0, 8).map(result => result.data()));
