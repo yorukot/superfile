@@ -248,8 +248,8 @@ THE SOFTWARE.
 
 ## github.com/alecthomas/chroma/v2
 
-- Version: v2.26.0
-- License: [MIT](https://github.com/alecthomas/chroma/blob/v2.26.0/COPYING)
+- Version: v2.27.0
+- License: [MIT](https://github.com/alecthomas/chroma/blob/v2.27.0/COPYING)
 
 ```text
 Copyright (C) 2017 Alec Thomas
@@ -1668,8 +1668,8 @@ SOFTWARE.
 
 ## github.com/dlclark/regexp2/v2
 
-- Version: v2.1.0
-- License: [MIT](https://github.com/dlclark/regexp2/blob/v2.1.0/LICENSE)
+- Version: v2.2.1
+- License: [MIT](https://github.com/dlclark/regexp2/blob/v2.2.1/LICENSE)
 
 ```text
 The MIT License (MIT)
