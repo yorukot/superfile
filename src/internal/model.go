@@ -293,6 +293,11 @@ func (m *model) handleKeyInput(msg tea.KeyPressMsg) tea.Cmd {
 	}
 	var cmd tea.Cmd
 	cdOnQuit := common.Config.CdOnQuit
+	if m.shouldHandlePreviewScrollKeys() {
+		if previewCmd, handled := m.tryPreviewScrollKey(msg); handled {
+			return previewCmd
+		}
+	}
 	switch {
 	case m.spfError.IsOpen():
 		cmd = m.spfErrorModelOpenKey(msg.String())
@@ -369,6 +374,11 @@ func (m *model) updateComponentState(msg tea.Msg) tea.Cmd {
 	case m.fileModel.Renaming:
 		focusPanel.Rename, cmd = focusPanel.Rename.Update(msg)
 	case focusPanel.SearchBar.Focused():
+		if keyMsg, ok := msg.(tea.KeyPressMsg); ok && m.shouldHandlePreviewScrollKeys() {
+			if _, handled := m.tryPreviewScrollKey(keyMsg); handled {
+				return nil
+			}
+		}
 		focusPanel.SearchBar, cmd = focusPanel.SearchBar.Update(msg)
 	case m.typingModal.open:
 		m.typingModal.textInput, cmd = m.typingModal.textInput.Update(msg)

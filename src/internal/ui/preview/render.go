@@ -12,6 +12,7 @@ import (
 	"sort"
 
 	"charm.land/lipgloss/v2"
+	"github.com/alecthomas/chroma/v2"
 	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/yorukot/ansichroma"
 
@@ -22,16 +23,18 @@ import (
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
 )
 
-func renderDirectoryPreview(r *rendering.Renderer, itemPath string, previewHeight int) string {
+func (m *Model) renderDirectoryPreview(r *rendering.Renderer, itemPath string, previewHeight int) string {
 	files, err := os.ReadDir(itemPath)
 	if err != nil {
 		slog.Error("Error render directory preview", "error", err)
 		r.AddLines(common.FilePreviewDirectoryUnreadableText)
+		m.setScrollState(false)
 		return r.Render()
 	}
 
 	if len(files) == 0 {
 		r.AddLines(common.FilePreviewEmptyText)
+		m.setScrollState(false)
 		return r.Render()
 	}
 
@@ -45,7 +48,11 @@ func renderDirectoryPreview(r *rendering.Renderer, itemPath string, previewHeigh
 		return files[i].Name() < files[j].Name()
 	})
 
-	for i := 0; i < previewHeight && i < len(files); i++ {
+	maxOffset := max(0, len(files)-previewHeight)
+	m.clampScrollOffset(maxOffset)
+	m.setScrollState(m.scrollOffset+previewHeight < len(files))
+
+	for i := m.scrollOffset; i < m.scrollOffset+previewHeight && i < len(files); i++ {
 		file := files[i]
 		isLink := false
 		if info, err := file.Info(); err == nil {
@@ -67,6 +74,8 @@ func (m *Model) renderImagePreview(r *rendering.Renderer, itemPath string, previ
 	if !m.open {
 		return r.AddLines(common.FilePreviewPanelClosedText).Render(), kittyClear
 	}
+
+	m.setScrollState(false)
 
 	if !common.Config.ShowImagePreview {
 		return r.AddLines(common.FilePreviewImagePreviewDisabledText).Render(), kittyClear
@@ -98,39 +107,91 @@ func (m *Model) renderTextPreview(r *rendering.Renderer, itemPath string,
 ) string {
 	format := lexers.Match(filepath.Base(itemPath))
 	if format == nil {
-		isText, err := common.IsTextFile(itemPath)
-		if err != nil {
-			slog.Error("Error while checking text file", "error", err)
-			return r.AddLines(renderPreviewError(err)).Render()
-		} else if !isText {
-			return r.AddLines(common.FilePreviewUnsupportedFormatText).Render()
+		if unsupported := m.renderUnsupportedTextPreview(r, itemPath); unsupported != "" {
+			return unsupported
 		}
 	}
 
-	fileContent, err := utils.ReadFileContent(itemPath, previewWidth, previewHeight)
+	background := m.textPreviewBackground(format)
+	if format != nil && common.Config.CodePreviewer == "bat" {
+		return m.renderBatTextPreview(r, itemPath, previewWidth, previewHeight, background)
+	}
+
+	return m.renderReadFileTextPreview(r, itemPath, previewWidth, previewHeight, format, background)
+}
+
+func (m *Model) renderUnsupportedTextPreview(r *rendering.Renderer, itemPath string) string {
+	isText, err := common.IsTextFile(itemPath)
+	if err != nil {
+		slog.Error("Error while checking text file", "error", err)
+		return r.AddLines(renderPreviewError(err)).Render()
+	}
+	if isText {
+		return ""
+	}
+
+	m.setScrollState(false)
+	return r.AddLines(common.FilePreviewUnsupportedFormatText).Render()
+}
+
+func (m *Model) textPreviewBackground(format chroma.Lexer) string {
+	if format == nil || common.Config.TransparentBackground {
+		return ""
+	}
+	return common.Theme.FilePanelBG
+}
+
+func (m *Model) renderBatTextPreview(
+	r *rendering.Renderer,
+	itemPath string,
+	previewWidth, previewHeight int,
+	background string,
+) string {
+	if m.batCmd == "" {
+		return r.AddLines(common.FilePreviewBatNotInstalledText).Render()
+	}
+
+	m.normalizeScrollOffsetForText(itemPath, previewHeight)
+
+	fileContent, hasMore, err := getBatSyntaxHighlightedContent(
+		itemPath, m.scrollOffset, previewHeight, background, m.batCmd)
+	if err != nil {
+		slog.Error("Error render code highlight", "error", err)
+		return r.AddLines(renderPreviewError(err)).Render()
+	}
+
+	m.setScrollState(hasMore)
+	if fileContent == "" {
+		return m.renderTextPreviewEmpty(r, itemPath, previewWidth, previewHeight)
+	}
+
+	r.AddLines(fileContent)
+	return r.Render()
+}
+
+func (m *Model) renderReadFileTextPreview(
+	r *rendering.Renderer,
+	itemPath string,
+	previewWidth, previewHeight int,
+	format chroma.Lexer,
+	background string,
+) string {
+	m.normalizeScrollOffsetForText(itemPath, previewHeight)
+
+	fileContent, hasMore, err := utils.ReadFileContent(itemPath, previewWidth, m.scrollOffset, previewHeight)
 	if err != nil {
 		slog.Error("Error open file", "error", err)
 		return r.AddLines(renderPreviewError(err)).Render()
 	}
 
+	m.setScrollState(hasMore)
 	if fileContent == "" {
-		return r.AddLines(common.FilePreviewEmptyText).Render()
+		return m.renderTextPreviewEmpty(r, itemPath, previewWidth, previewHeight)
 	}
 
 	if format != nil {
-		background := ""
-		if !common.Config.TransparentBackground {
-			background = common.Theme.FilePanelBG
-		}
-		if common.Config.CodePreviewer == "bat" {
-			if m.batCmd == "" {
-				return r.AddLines(common.FilePreviewBatNotInstalledText).Render()
-			}
-			fileContent, err = getBatSyntaxHighlightedContent(itemPath, previewHeight, background, m.batCmd)
-		} else {
-			fileContent, err = ansichroma.HightlightString(fileContent, format.Config().Name,
-				common.Theme.CodeSyntaxHighlightTheme, background)
-		}
+		fileContent, err = ansichroma.HightlightString(fileContent, format.Config().Name,
+			common.Theme.CodeSyntaxHighlightTheme, background)
 		if err != nil {
 			slog.Error("Error render code highlight", "error", err)
 			return r.AddLines(renderPreviewError(err)).Render()
@@ -139,6 +200,18 @@ func (m *Model) renderTextPreview(r *rendering.Renderer, itemPath string,
 
 	r.AddLines(fileContent)
 	return r.Render()
+}
+
+func (m *Model) renderTextPreviewEmpty(
+	r *rendering.Renderer,
+	itemPath string,
+	previewWidth, previewHeight int,
+) string {
+	if m.scrollOffset > 0 {
+		m.resetScroll()
+		return m.renderTextPreview(r, itemPath, previewWidth, previewHeight)
+	}
+	return r.AddLines(common.FilePreviewEmptyText).Render()
 }
 
 // Only use this when height and width are synced with filemodel's expectations
@@ -181,6 +254,7 @@ func (m *Model) RenderWithPath(
 	fileInfo, infoErr := os.Stat(itemPath)
 	if infoErr != nil {
 		slog.Error("Error get file info", "error", infoErr)
+		m.setScrollState(false)
 		return r.AddLines(common.FilePreviewNoFileInfoText).Render(), kittyClear
 	}
 	slog.Debug("Attempting to render preview", "itemPath", itemPath,
@@ -189,16 +263,18 @@ func (m *Model) RenderWithPath(
 	// For non regular files which are not directories Dont try to read them
 	// See Issue #876
 	if !fileInfo.Mode().IsRegular() && (fileInfo.Mode()&fs.ModeDir) == 0 {
+		m.setScrollState(false)
 		return r.AddLines(common.FilePreviewUnsupportedFileMode).Render(), kittyClear
 	}
 
 	ext := filepath.Ext(itemPath)
 	if slices.Contains(common.UnsupportedPreviewFormats, ext) {
+		m.setScrollState(false)
 		return r.AddLines(common.FilePreviewUnsupportedFormatText).Render(), kittyClear
 	}
 
 	if fileInfo.IsDir() {
-		return renderDirectoryPreview(r, itemPath, contentHeight), kittyClear
+		return m.renderDirectoryPreview(r, itemPath, contentHeight), kittyClear
 	}
 
 	if m.thumbnailGenerator != nil && m.thumbnailGenerator.SupportsExt(ext) {
