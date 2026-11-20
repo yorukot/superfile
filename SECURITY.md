@@ -22,14 +22,3 @@ Include as much of this as you can:
 - Steps to reproduce it, such as a sample file, archive or config.
 
 We will reply to your report, keep you updated while we work on a fix, and credit you in the advisory unless you ask us not to.
-
-## Scope
-
-Examples of what we treat as a security problem:
-
-- Extracting an archive writes files outside the destination folder.
-- Previewing or selecting a file runs code or commands you didn't ask for.
-- A file operation changes or deletes files other than the ones you chose.
-- The install scripts on superfile.dev can be made to run something unexpected.
-
-Commands you run yourself in the prompt, and programs you set in your config (such as `editor` or `open_with`), are not security problems: superfile runs them on purpose.
