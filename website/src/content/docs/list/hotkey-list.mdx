@@ -18,7 +18,7 @@ These are the default hotkeys and you can [change](/configure/custom-hotkeys) th
 | --------------------------------------- | --------------------- | ------------------- |
 | Open superfile                          | `spf`                 |                     |
 | Confirm selected item                   | `enter`, `right`, `l` | `confirm`           |
-| Quit typing, modal or superfile         | `q`, `esc`            | `quit`              |
+| Quit modal or superfile                 | `q`, `esc`            | `quit`              |
 | Quit superfile and cd to current folder | `Q`                   | `cd_quit`           |
 | Confirm typing                          | `enter`               | `confirm_typing`    |
 | Cancel typing                           | `ctrl+c`, `esc`       | `cancel_typing`     |
@@ -37,7 +37,7 @@ Quit superfile and cd to current folder "cd_quit" requires the same setup as ["c
 
 | Function                         | Key                        | Variable name               |
 | -------------------------------- | -------------------------- | --------------------------- |
-| Create new file panel            | `n`                        | `create_new_file_panel`     |
+| Create new file panel (at home)  | `n`                        | `create_new_file_panel`     |
 | Split focused file panel         | `N` (shift+n)              | `split_file_panel`          |
 | Close the focused file panel     | `w`                        | `close_file_panel`          |
 | Toggle file preview panel        | `f`                        | `toggle_file_preview_panel` |
@@ -52,35 +52,42 @@ Quit superfile and cd to current folder "cd_quit" requires the same setup as ["c
 
 ## Panel movement
 
-| Function                                           | Key                         | Variable name                                                    |
-| -------------------------------------------------- | --------------------------- | ---------------------------------------------------------------- |
-| Up                                                 | `up`, `k`                   | `list_up`                                                        |
-| Down                                               | `down`, `j`                 | `list_down`                                                      |
-| Page up                                            | `pgup`                      | `page_up`                                                        |
-| Page down                                          | `pgdown`                    | `page_down`                                                      |
-| Return to parent folder                            | `h`, `left`, `backspace`    | `parent_directory`                                               |
-| Select all items in focused file panel             | `A` (shift+a)               | `file_panel_select_all_items` (selection mode only)              |
-| Select up from your cursor                         | `shift+up`, `K` (shift+k)   | `file_panel_select_mode_items_select_up` (selection mode only)   |
-| Select down from your cursor                       | `shift+down`, `J` (shift+j) | `file_panel_select_mode_items_select_down` (selection mode only) |
-| Toggle dot file display                            | `.`                         | `toggle_dot_file`                                                |
-| Toggle active search bar                           | `/`                         | `search_bar`                                                     |
-| Change between selection mode or normal mode       | `v`                         | `change_panel_mode`                                              |
-| Pin or Unpin folder to sidebar (can be auto saved) | `P` (shift+p)               | `pinned_directory`                                               |
+| Function                                     | Key                         | Variable name                                                    |
+| -------------------------------------------- | --------------------------- | ---------------------------------------------------------------- |
+| Up                                           | `up`, `k`                   | `list_up`                                                        |
+| Down                                         | `down`, `j`                 | `list_down`                                                      |
+| Page up                                      | `pgup`                      | `page_up`                                                        |
+| Page down                                    | `pgdown`                    | `page_down`                                                      |
+| Return to parent folder                      | `h`, `left`, `backspace`    | `parent_directory`                                               |
+| Select or deselect the item under the cursor | `enter`, `right`, `l`       | `confirm` (selection mode only)                                  |
+| Select all items in focused file panel       | `A` (shift+a)               | `file_panel_select_all_items` (selection mode only)              |
+| Select up from your cursor                   | `shift+up`, `K` (shift+k)   | `file_panel_select_mode_items_select_up` (selection mode only)   |
+| Select down from your cursor                 | `shift+down`, `J` (shift+j) | `file_panel_select_mode_items_select_down` (selection mode only) |
+| Toggle dot file display                      | `.`                         | `toggle_dot_file`                                                |
+| Toggle active search bar                     | `/`                         | `search_bar`                                                     |
+| Change between selection mode or normal mode | `v`                         | `change_panel_mode`                                              |
+| Pin or Unpin current folder to sidebar       | `P` (shift+p)               | `pinned_directory`                                               |
 
 ## File operations
 
-| Function                                              | Key                | Variable name                                      |
-| ----------------------------------------------------- | ------------------ | -------------------------------------------------- |
-| Create file or folder (end with / to create a folder) | `ctrl+n`           | `file_panel_item_create`                           |
-| Rename file or folder                                 | `ctrl+r`           | `file_panel_item_rename`                           |
-| Copy selected items to the clipboard                  | `ctrl+c`           | `copy_items`                                       |
-| Cut selected items to the clipboard                   | `ctrl+x`           | `cut_items`                                        |
-| Paste clipboard items into the current file panel     | `ctrl+v`, `ctrl+w` | `paste_items`                                      |
-| Delete selected items                                 | `ctrl+d`, `delete` | `delete_items`                                     |
-| Permanently delete selected items                     | `D` (shift+d)      | `permanently_delete_items`                         |
-| Copy current or selected file/directory paths         | `ctrl+p`           | `copy_path`                                        |
-| Copy current working directory                        | `c`                | `copy_present_working_directory`                   |
-| Extract compressed file                               | `ctrl+e`           | `extract_file` (normal mode)                       |
-| Zip file or folder to .zip file                       | `ctrl+a`           | `compress_file` (normal mode)                      |
-| Open file with your default editor                    | `e`                | `open_file_with_editor` (normal mode)              |
-| Open current directory with default editor            | `E` (shift+e)      | `open_current_directory_with_editor` (normal mode) |
+| Function                                              | Key                | Variable name                        |
+| ----------------------------------------------------- | ------------------ | ------------------------------------ |
+| Create file or folder (end with / to create a folder) | `ctrl+n`           | `file_panel_item_create`             |
+| Rename file or folder                                 | `ctrl+r`           | `file_panel_item_rename`             |
+| Copy selected items to the clipboard                  | `ctrl+c`           | `copy_items`                         |
+| Cut selected items to the clipboard                   | `ctrl+x`           | `cut_items`                          |
+| Paste clipboard items into the current file panel     | `ctrl+v`, `ctrl+w` | `paste_items`                        |
+| Delete selected items                                 | `ctrl+d`, `delete` | `delete_items`                       |
+| Permanently delete selected items                     | `D` (shift+d)      | `permanently_delete_items`           |
+| Copy current or selected file/directory paths         | `ctrl+p`           | `copy_path`                          |
+| Copy current working directory                        | `c`                | `copy_present_working_directory`     |
+| Extract compressed file                               | `ctrl+e`           | `extract_file`                       |
+| Zip file or folder to .zip file                       | `ctrl+a`           | `compress_file`                      |
+| Open file with your default editor                    | `e`                | `open_file_with_editor`              |
+| Open current directory with default editor            | `E` (shift+e)      | `open_current_directory_with_editor` |
+
+## Which keys work in which mode
+
+In selection mode, `confirm` selects items instead of opening them, and `copy_items`, `cut_items`, `delete_items`, `permanently_delete_items`, `compress_file` and `copy_path` act on the selected items.
+
+`parent_directory`, `search_bar`, `file_panel_item_rename` and `copy_present_working_directory` only work in normal mode.

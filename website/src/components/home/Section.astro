@@ -1,0 +1,45 @@
+---
+interface Props {
+	id: string;
+	/** The file or command the section stands for, after the prompt. */
+	label: string;
+	prompt?: "//" | "$";
+	title?: string;
+}
+
+const { id, label, prompt = "//", title } = Astro.props;
+---
+
+<section class="section" id={id}>
+	<p class="sf-label"><b>{prompt}</b> {label}</p>
+	{title && <h2 class="sf-title">{title}</h2>}
+	<slot />
+</section>
+
+<style>
+	.section {
+		padding-block: var(--space-8);
+		border-top: 1px solid var(--box);
+
+		/* The README opens the page: no rule above it, and it sits closer to what follows.
+		   Sections are counted by type because a component's script is rendered right after it. */
+		&:first-of-type {
+			padding-block: var(--space-5) var(--space-7);
+			border-top: 0;
+		}
+		&:nth-of-type(2) {
+			padding-top: var(--space-7);
+		}
+		&:last-of-type {
+			padding-bottom: 0;
+		}
+
+		@media (max-width: 960px) {
+			padding-block: var(--space-7);
+
+			&:first-of-type {
+				padding-top: var(--space-6);
+			}
+		}
+	}
+</style>

@@ -30,7 +30,7 @@ To exit, press `q` or `esc`.
 
 ### Panel navigation
 
-Once superfile is running, it displays five panels:
+Once superfile is running, it displays six panels:
 
 - sidebar
 - file
@@ -67,7 +67,7 @@ For more detailed metadata, [click here](/configure/enable-plugin) to install th
 
 :::
 
-To create more file panels, press `n`. Press `w` to close the focused file panel.
+To create more file panels, press `n` (opens in your home directory) or `N` (shift+n) (opens in the current directory). Press `w` to close the focused file panel.
 
 To move through multiple file panels, press `tab` or `L` (shift+l). To move to the previous panel, press `shift`+`left` or `H` (shift+h).
 
@@ -90,12 +90,16 @@ Press `o` to bring up the sort options menu. You can sort by:
 - `Name`
 - `Size`
 - `Date Modified`
+- `Type`
+- `Natural`
 
-Press `enter` to confirm your sort option. Press `esc`, `o`, or `ctrl`+`c` to cancel. To reverse the order of the sort, press `R` (shift+r).
+Press `enter` to confirm your sort option. Press `esc` or `o` to cancel. To reverse the order of the sort, press `R` (shift+r).
 
-Press `/` to bring up the search bar. Type the name (you may need to first delete the `/` if it auto-populates). superfile searches in the current directory and dynamically displays the results. To exit the search bar, press `ctrl`+`c` or `esc`.
+Press `/` to bring up the search bar. Type the name. superfile searches in the current directory and dynamically displays the results. To exit the search bar, press `ctrl`+`c` or `esc`.
 
 Press `.` to show or hide dotfiles.
+
+For more about panels, sorting and search, see [Navigation and search](/guides/navigation).
 
 #### Selection mode
 
@@ -103,7 +107,7 @@ Use selection mode for bulk operations. If you are familiar with Vim, selection 
 
 Press `v` to toggle between selection mode and normal (browser) mode.
 
-Once in selection mode, you can perform [file operations](#file-operations) on all selected files/folders. [Panel movement](#panel-movement) hotkeys also work in selection mode.
+Once in selection mode, you can perform [file operations](#file-operations) on all selected files/folders. The up and down hotkeys also work in selection mode, but you can't open folders or return to the parent directory until you switch back to normal mode.
 
 :::tip
 
@@ -111,7 +115,7 @@ The following operations can only be performed while in selection mode. Your cur
 
 :::
 
-To make selections, navigate to your file/folder and press `enter` or `L` (shift+l). Press the same key again to deselect.
+To make selections, navigate to your file/folder and press `enter` or `l`. Press the same key again to deselect.
 
 This may become tedious when you have a large number of items. Instead, you can repeatedly press `shift`+`up` or `K` (shift+k) to select items while moving the cursor upward, or `shift`+`down` or `J` (shift+j) to select items while moving the cursor downward.
 
@@ -123,13 +127,13 @@ You can also press `A` (shift+a) to select everything in the current directory.
 
 :::note
 
-Only copy, cut and delete can be used in selection mode.
+In selection mode, copy, cut, delete and compress work on all selected items. Rename only works in normal mode.
 
 :::
 
 Now let's learn how to perform file operations.
 
-Create a new file with `ctrl`+`n`. Type your new file's name and press `enter`. To create a new folder, add `/` to the end of the name.
+Create a new file with `ctrl`+`n`. Type your new file's name and press `enter`. To create a new folder, add `/` to the end of the name (`\` on Windows).
 
 :::tip
 
@@ -159,7 +163,7 @@ To delete, you can press `ctrl`+`d`
 
 :::note
 
-The deletion here is not direct deletion, but will be placed in the trash can. However, when you use an external hard drive, it will be deleted directly.
+The deletion here is not direct deletion, but will be placed in the trash can. If superfile can't use a trash can for that location, the confirmation dialog tells you that the files will be deleted permanently.
 
 :::
 
@@ -192,6 +196,8 @@ If your directory editor does not support opening the current directory with an 
 
 ![file-operations-demo](../../../assets/demo/file-operations-demo.gif)
 
+For more details, such as how name conflicts are handled and which archive formats can be extracted, see [File operations](/guides/file-operations).
+
 ### SPF Prompt
 
 #### Shell Mode
@@ -200,7 +206,7 @@ Press `:` to open the prompt in shell mode, and execute any shell command in the
 
 :::note
 
-You won't receive any stdout outputs. For now, this is meant for executing more complex file manipulations via the shell, rather than handling interactive outputs. You will be able to see the exit code of the command.
+You will be able to see the exit code and the output of the command. This is meant for executing more complex file manipulations via the shell, so interactive commands (for example, `sudo` asking for a password) don't work.
 
 :::
 
@@ -220,3 +226,5 @@ In this mode, you can substitute shell environment variables via `${}`, shell co
 - `open $(dirname $(which bash))`
 
 Press `esc` or `ctrl`+`c` to exit Prompt.
+
+For more details, see [Prompt](/guides/prompt).

@@ -23,23 +23,41 @@ You can first go to the [theme list](/list/theme-list) to find a theme you like 
 Once you find one you like, copy it and paste it into the theme in the config_path file.
 
 ```diff
-- theme = 'catppuccin'
+- theme = 'catppuccin-mocha'
 + theme = 'theme_name_you_like'
 ```
 
+:::note
+
+If superfile can't read the theme file, it uses `catppuccin-mocha` without an error. Check the [log file](/configure/config-file-path#log-file) if your theme doesn't apply.
+
+:::
+
 ### Create your own theme
 
-[Click me to know where is THEME_DIRECTORY](/configure/config-file-path#config)
+[Click me to know where is THEME_DIRECTORY](/configure/config-file-path#theme-directory)
 
 If you want to customize your own theme, you can go to `THEME_DIRECTORY/YOUR_THEME_NAME.toml` and copy the existing theme's TOML to your own theme file
 
 Don't forget to change the `theme` variable in `config.toml` to your theme name.
+
+:::caution
+
+Don't edit the built-in theme files. superfile overwrites them on every update.
+
+:::
 
 [If you are satisfied with your theme, you might as well put it into the default theme list!](/contribute/how-to-contribute)
 
 ### Theme settings
 
 The default theme below shows all supported theme keys. `directory_icon_color` controls the fallback directory icon color used for normal folders. Leave it empty to use the built-in fallback.
+
+Some other keys need more explanation:
+
+- `gradient_color` must have exactly two colors.
+- `code_syntax_highlight` is a [Chroma style](https://xyproto.github.io/splash/docs/) name, such as `dracula`. It is ignored with [`code_previewer = "bat"`](/configure/superfile-config#code_previewer).
+- `file_panel_bg` should be a full `#RRGGBB` color, because image previews use it.
 
 ### Default theme
 

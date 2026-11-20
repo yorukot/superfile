@@ -6,12 +6,12 @@ schema = 3
     hash = 'sha256-0PFf3lMornz1C2eR7WRZ1iTEu59AD+1fdwPS6j+AQ2c='
 
   [mod.'charm.land/bubbletea/v2']
-    version = 'v2.0.8'
-    hash = 'sha256-ZWcqUjUSKcT8uovaljKp4V8IQ7kIJtoAOGZ2VbpF3hs='
+    version = 'v2.1.2'
+    hash = 'sha256-OTyyRPYTVMVUVp+OeLTWhAYwfYBiBUBmrZAXAWeBj1E='
 
   [mod.'charm.land/lipgloss/v2']
-    version = 'v2.0.5'
-    hash = 'sha256-EZCcXcyT9XS93UcZvIF42WUXnPlPYe4YLdhdFwCZ5NI='
+    version = 'v2.1.1'
+    hash = 'sha256-ppnSfXTbOLfQhP5Awri/JIW4xH92AvDazdKnQWaEkk4='
 
   [mod.'github.com/Unpackerr/iso9660']
     version = 'v0.0.3'
@@ -74,8 +74,8 @@ schema = 3
     hash = 'sha256-JZD1iVeizYe0mp3qQcJbUZdYN6HP/DNC67ja79DTe6s='
 
   [mod.'github.com/charmbracelet/ultraviolet']
-    version = 'v0.0.0-20260703014108-f5a850f9c2b7'
-    hash = 'sha256-cWqmxeaaHGrESdwZVtCv8mDw1Ta4xFpXidWDeIZfuHA='
+    version = 'v0.0.0-20261008173134-6b8d4baf91b4'
+    hash = 'sha256-1r9yJFWHGBJnT0SZEgrXqNdh8ggzCX6Us/Ui5n53hGI='
 
   [mod.'github.com/charmbracelet/x/ansi']
     version = 'v0.11.10'
@@ -166,8 +166,8 @@ schema = 3
     hash = 'sha256-qhw9hWtU5wnyFyuMbKx+7RB8ckQaFQ8D+8GKPkN3HHQ='
 
   [mod.'github.com/mattn/go-runewidth']
-    version = 'v0.0.27'
-    hash = 'sha256-TQd0ek+jjvxgN9YA6N/ctOyrADIAg9bBcClJCDltIWc='
+    version = 'v0.0.30'
+    hash = 'sha256-2idyB8BVjqiwBOmBteKMTM9uBfr96g29k8hqJWjlndE='
 
   [mod.'github.com/mewkiz/flac']
     version = 'v1.0.14'
@@ -262,8 +262,8 @@ schema = 3
     hash = 'sha256-tUQ+nFQ2J7BfD0oDRJBb0cBJqJDabbA1lhgqFhOlm3g='
 
   [mod.'github.com/xo/terminfo']
-    version = 'v0.0.0-20220910002029-abceb7e1c41e'
-    hash = 'sha256-GyCDxxMQhXA3Pi/TsWXpA8cX5akEoZV7CFx4RO3rARU='
+    version = 'v1.0.0'
+    hash = 'sha256-WRD2MrAHjXy2/DWPmUew1ojVQzamOJM3EEWmZedpYKs='
 
   [mod.'github.com/yorukot/ansichroma']
     version = 'v0.1.0'

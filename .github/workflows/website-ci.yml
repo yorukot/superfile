@@ -5,10 +5,20 @@ on:
     paths:
       - "website/**"
       - ".github/workflows/website-ci.yml"
+      # files outside website/ that the site reads at build time
+      - "src/superfile_config/**"
+      - "cd_on_quit/**"
+      - "NOTICE.md"
+      - "SECURITY.md"
   pull_request:
     paths:
       - "website/**"
       - ".github/workflows/website-ci.yml"
+      # files outside website/ that the site reads at build time
+      - "src/superfile_config/**"
+      - "cd_on_quit/**"
+      - "NOTICE.md"
+      - "SECURITY.md"
 
 permissions:
   contents: read
@@ -24,6 +34,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          # the build reads the docs of released versions from their tags
+          fetch-depth: 0
 
       - name: Set up pnpm
         uses: pnpm/action-setup@v4

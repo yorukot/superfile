@@ -1,0 +1,28 @@
+---
+import { LATEST } from "../../../docs.config.mjs";
+
+interface Props {
+	/** The set of docs being shown, which is not the newest release. */
+	version: string;
+	/** The newest release, and where its docs for this page are. */
+	newest: string;
+	href: string;
+}
+
+const { version, newest, href } = Astro.props;
+const isLatest = version === LATEST;
+---
+
+<aside class:list={["sf-pane", isLatest ? "sf-pane--tip" : "sf-pane--caution"]}>
+	<span class="sf-pane__title">{version}</span>
+	<p class="sf-pane__body">
+		{isLatest ? "This page follows the development branch, so it may describe things that are not released yet." : `This page describes superfile ${version}, which is not the newest release.`}{" "}
+		<a class="sf-link" href={href}>Read the docs for {newest}</a>.
+	</p>
+</aside>
+
+<style>
+	aside {
+		margin-bottom: var(--space-7);
+	}
+</style>

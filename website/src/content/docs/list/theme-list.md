@@ -160,6 +160,22 @@ head:
 
 ![Rosé Pine theme preview showing soft pink and purple colors](../../../assets/theme/rose-pine.png)
 
+## Rosé Pine Dawn
+
+- Theme name: `rose-pine-dawn`
+- Ported by: https://github.com/MJLiiii
+- Original Author: https://github.com/rose-pine
+
+![Rosé Pine Dawn with a cream background and rose and teal accents](../../../assets/theme/rose-pine-dawn.png)
+
+## Rosé Pine Moon
+
+- Theme name: `rose-pine-moon`
+- Ported by: https://github.com/MJLiiii
+- Original Author: https://github.com/rose-pine
+
+![Rosé Pine Moon with a dark purple background and pink and blue accents](../../../assets/theme/rose-pine-moon.png)
+
 ## Sugarplum
 
 - Theme name: `sugarplum`

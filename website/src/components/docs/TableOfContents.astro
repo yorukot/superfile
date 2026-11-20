@@ -1,0 +1,80 @@
+---
+import type { MarkdownHeading } from "astro";
+
+interface Props {
+	headings: MarkdownHeading[];
+}
+
+const { headings } = Astro.props;
+const top = Math.min(...headings.map(heading => heading.depth));
+---
+
+<p class="sf-label">
+	<b>//</b> on this page
+</p>
+<ul>
+	{
+		headings.map(heading => (
+			<li>
+				<a class:list={{ sub: heading.depth > top }} href={`#${heading.slug}`} data-toc={heading.slug}>
+					{heading.text}
+				</a>
+			</li>
+		))
+	}
+</ul>
+
+<style>
+	p {
+		margin: 0 0 var(--space-2);
+		padding: 0 12px;
+	}
+	ul {
+		display: grid;
+		gap: 2px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	a {
+		display: block;
+		padding: 6px 12px;
+		border-radius: var(--radius-xs);
+		font: 400 15px/1.4 var(--font-mono);
+		color: var(--ink-muted);
+		text-decoration: none;
+		overflow-wrap: anywhere;
+
+		&.sub {
+			padding-left: 28px;
+		}
+		&:hover {
+			background: var(--ink);
+			color: var(--bg);
+		}
+		&[aria-current]:not(:hover) {
+			color: var(--ink);
+			font-weight: 600;
+		}
+	}
+</style>
+
+<script>
+	const links = [...document.querySelectorAll<HTMLAnchorElement>("[data-toc]")];
+	// The headings in a band near the top of the screen. The observer only reports the ones that changed.
+	const inBand = new Set<string>();
+	const observer = new IntersectionObserver(
+		entries => {
+			for (const entry of entries) {
+				if (entry.isIntersecting) inBand.add(entry.target.id);
+				else inBand.delete(entry.target.id);
+			}
+			// The first of them is the current one. With none in the band, the last one stays.
+			const current = links.find(link => inBand.has(link.dataset.toc!));
+			if (!current) return;
+			for (const link of links) link.ariaCurrent = link === current ? "location" : null;
+		},
+		{ rootMargin: "-15% 0% -70% 0%" }
+	);
+	for (const link of links) observer.observe(document.getElementById(link.dataset.toc!)!);
+</script>

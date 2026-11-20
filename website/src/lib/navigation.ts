@@ -1,146 +1,91 @@
 export interface NavLeaf {
 	label: string;
 	slug: string;
-	zhLabel?: string;
 }
 
 export interface NavGroup {
 	label: string;
-	zhLabel?: string;
 	items: NavLeaf[];
 }
 
-export type NavNode = NavLeaf | NavGroup;
-
-export function isGroup(node: NavNode): node is NavGroup {
-	return "items" in node;
-}
-
-export const navigation: NavNode[] = [
-	{ label: "Overview", slug: "overview", zhLabel: "概述" },
+/** The docs sidebar. Group labels are rendered as `// label`. */
+export const navigation: NavGroup[] = [
 	{
-		label: "Start Here",
-		zhLabel: "開始使用",
+		label: "get started",
 		items: [
-			{
-				label: "Installation",
-				slug: "getting-started/installation",
-				zhLabel: "安裝"
-			},
-			{
-				label: "Tutorial",
-				slug: "getting-started/tutorial",
-				zhLabel: "教學"
-			},
-			{
-				label: "Image Preview",
-				slug: "getting-started/image-preview",
-				zhLabel: "圖片預覽"
-			}
+			{ label: "overview", slug: "overview" },
+			{ label: "install", slug: "getting-started/installation" },
+			{ label: "tutorial", slug: "getting-started/tutorial" }
 		]
 	},
 	{
-		label: "Configure",
-		zhLabel: "設定",
+		label: "guides",
 		items: [
-			{
-				label: "Config File Path",
-				slug: "configure/config-file-path",
-				zhLabel: "設定檔路徑"
-			},
-			{
-				label: "superfile config",
-				slug: "configure/superfile-config",
-				zhLabel: "superfile 設定"
-			},
-			{
-				label: "Custom Hotkeys",
-				slug: "configure/custom-hotkeys",
-				zhLabel: "自訂快捷鍵"
-			},
-			{
-				label: "Custom Theme",
-				slug: "configure/custom-theme",
-				zhLabel: "自訂主題"
-			},
-			{
-				label: "Enable Plugin",
-				slug: "configure/enable-plugin",
-				zhLabel: "啟用插件"
-			}
+			{ label: "navigation and search", slug: "guides/navigation" },
+			{ label: "file operations", slug: "guides/file-operations" },
+			{ label: "file preview", slug: "getting-started/image-preview" },
+			{ label: "metadata", slug: "guides/metadata" },
+			{ label: "sidebar", slug: "guides/sidebar" },
+			{ label: "prompt", slug: "guides/prompt" },
+			{ label: "shell integration", slug: "guides/shell-integration" }
 		]
 	},
 	{
-		label: "List",
-		zhLabel: "清單",
+		label: "customize",
 		items: [
-			{
-				label: "Hotkey List",
-				slug: "list/hotkey-list",
-				zhLabel: "快捷鍵清單"
-			},
-			{
-				label: "Theme List",
-				slug: "list/theme-list",
-				zhLabel: "主題清單"
-			},
-			{
-				label: "Plugin List",
-				slug: "list/plugin-list",
-				zhLabel: "插件清單"
-			}
+			{ label: "config file path", slug: "configure/config-file-path" },
+			{ label: "config", slug: "configure/superfile-config" },
+			{ label: "hotkeys", slug: "configure/custom-hotkeys" },
+			{ label: "themes", slug: "configure/custom-theme" },
+			{ label: "plugins", slug: "configure/enable-plugin" }
 		]
 	},
 	{
-		label: "Contribute",
-		zhLabel: "貢獻",
+		label: "reference",
 		items: [
-			{
-				label: "How to Contribute",
-				slug: "contribute/how-to-contribute",
-				zhLabel: "如何貢獻"
-			},
-			{
-				label: "File Structure",
-				slug: "contribute/file-struct",
-				zhLabel: "檔案結構"
-			},
-			{
-				label: "Implementation Info",
-				slug: "contribute/implementation-info",
-				zhLabel: "實作資訊"
-			}
+			{ label: "command line", slug: "reference/cli" },
+			{ label: "dependencies", slug: "reference/dependencies" },
+			{ label: "hotkey list", slug: "list/hotkey-list" },
+			{ label: "theme list", slug: "list/theme-list" },
+			{ label: "plugin list", slug: "list/plugin-list" },
+			{ label: "troubleshooting", slug: "troubleshooting" },
+			{ label: "changelog", slug: "changelog" }
 		]
 	},
-	{ label: "Troubleshooting", slug: "troubleshooting", zhLabel: "疑難排解" },
-	{ label: "Special Thanks", slug: "special-thanks", zhLabel: "特別感謝" },
-	{ label: "NOTICE", slug: "notice", zhLabel: "NOTICE" },
-	{ label: "Changelog", slug: "changelog", zhLabel: "更新紀錄" }
+	{
+		label: "contribute",
+		items: [
+			{ label: "how to contribute", slug: "contribute/how-to-contribute" },
+			{ label: "ai policy", slug: "contribute/ai-policy" },
+			{ label: "file structure", slug: "contribute/file-struct" },
+			{ label: "implementation info", slug: "contribute/implementation-info" }
+		]
+	},
+	{
+		label: "project",
+		items: [
+			{ label: "special thanks", slug: "special-thanks" },
+			{ label: "security policy", slug: "security" },
+			{ label: "notice", slug: "notice" }
+		]
+	}
 ];
 
-/** Flatten nav tree to ordered list for prev/next. */
-export function flattenNav(): NavLeaf[] {
-	const result: NavLeaf[] = [];
-	for (const node of navigation) {
-		if (isGroup(node)) {
-			result.push(...node.items);
-		} else {
-			result.push(node);
-		}
-	}
-	return result;
+/**
+ * The sidebar of one set of docs: only the pages that set has. Pages it has that today's sidebar
+ * does not know (they were renamed or removed since) go into a last group, named after their file.
+ */
+export function sidebarFor(pages: string[]): NavGroup[] {
+	const known = new Set(navigation.flatMap(group => group.items.map(item => item.slug)));
+	const groups = navigation.map(group => ({ ...group, items: group.items.filter(item => pages.includes(item.slug)) })).filter(group => group.items.length);
+	const others = pages.filter(page => !known.has(page)).sort();
+	if (others.length) groups.push({ label: "more", items: others.map(page => ({ slug: page, label: page.split("/").pop()!.replaceAll("-", " ") })) });
+	return groups;
 }
 
-/** Get prev/next entries for a given base slug (no locale prefix). */
-export function getPrevNext(slug: string): {
-	prev?: NavLeaf;
-	next?: NavLeaf;
-} {
-	const flat = flattenNav();
-	const index = flat.findIndex(e => e.slug === slug);
-	if (index === -1) return {};
-	return {
-		prev: flat[index - 1],
-		next: flat[index + 1]
-	};
+/** The entries before and after a page, in the order of its sidebar. */
+export function getPrevNext(sidebar: NavGroup[], slug: string): { prev?: NavLeaf; next?: NavLeaf } {
+	const flat = sidebar.flatMap(group => group.items);
+	const index = flat.findIndex(item => item.slug === slug);
+	return { prev: flat[index - 1], next: flat[index + 1] };
 }
