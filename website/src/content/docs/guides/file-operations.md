@@ -6,7 +6,7 @@ head:
     content: File operations | superfile
 ---
 
-In normal mode, an operation acts on the item under the cursor. In selection mode, it acts on the selected items. See [which keys work in which mode](/list/hotkey-list#which-keys-work-in-which-mode).
+In normal mode, an operation acts on the item under the cursor. In selection mode, copy, cut, delete, compress and copy path act on the selected items. Extract (`ctrl+e`) and open in editor (`e`) still use the item under the cursor. See [which keys work in which mode](/list/hotkey-list#which-keys-work-in-which-mode).
 
 ## Create and rename
 

@@ -21,7 +21,7 @@ On quit, superfile writes a `cd` command to the lastdir file, and the shell func
 
 :::caution
 
-The fish function always reads `~/.local/state/superfile/lastdir`. If you set `XDG_STATE_HOME`, change the path in the function.
+The fish function reads a fixed path: `~/.local/state/superfile/lastdir` on Linux and `~/Library/Application Support/superfile/lastdir` on macOS. If you set `XDG_STATE_HOME`, change the path for your system in the function.
 
 :::
 

@@ -49,4 +49,6 @@ Files that aren't UTF-8 text, such as binaries, show "Unsupported formats".
 
 ## Refreshing
 
-The preview doesn't watch for changes. Move the cursor away and back to see the latest content.
+The preview doesn't watch for changes. For text, code and folders, move the cursor away and back to see the latest content.
+
+Images are cached. A changed image can keep showing its old version for several minutes. Resize the terminal or restart superfile to load the new one. A changed PDF, PostScript or video file shows its old thumbnail until you restart superfile.

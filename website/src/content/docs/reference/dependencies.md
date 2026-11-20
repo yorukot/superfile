@@ -6,7 +6,7 @@ head:
     content: Dependencies | superfile
 ---
 
-superfile runs without any of these tools. Each one adds a feature. Run `spf --debug-info` to see which ones superfile can find.
+superfile runs without any of these tools. Each one adds a feature. Run `spf --debug-info` to see which ones superfile can find. It doesn't check Ghostscript: run `gs --version` for that.
 
 | Tool                                              | Adds                                                                                          |
 | ------------------------------------------------- | --------------------------------------------------------------------------------------------- |

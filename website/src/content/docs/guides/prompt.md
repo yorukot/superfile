@@ -32,7 +32,7 @@ Runs the command in the focused panel's directory and shows the exit status and 
 
 :::caution
 
-- Commands stop after 5 seconds, and superfile waits until they finish.
+- superfile waits until a command finishes. It stops the shell after 5 seconds, but programs the shell started can keep running, and superfile waits for them too.
 - Commands get no input, so interactive programs like `sudo` do not work.
 - Long output is cut off. Redirect it to a file instead.
 
@@ -56,7 +56,7 @@ open $(dirname $(which bash))
 - Relative paths start from the focused panel's directory.
 - Quote paths with spaces, or escape them with `\`.
 - `${VAR}` inserts an environment variable. `$VAR` is not expanded.
-- `$(cmd)` inserts command output. It has 1 second to finish.
+- `$(cmd)` inserts command output. Its shell is stopped after 1 second, but programs it started can make superfile wait longer.
 
 :::note
 
