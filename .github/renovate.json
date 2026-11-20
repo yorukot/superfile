@@ -1,15 +1,12 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended", ":dependencyDashboard", "default:automergeDigest"],
+  "extends": ["config:recommended"],
+  "platformAutomerge": false,
+  "postUpdateOptions": ["gomodTidy"],
   "packageRules": [
     {
-      "matchDatasources": ["go", "github-releases", "github-tags"],
-      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
-      "automerge": true,
-      "paths": ["/"],
-      "ignorePaths": [
-        "website/"
-      ]
+      "matchUpdateTypes": ["minor", "patch", "pin", "pinDigest", "digest"],
+      "automerge": true
     }
   ]
 }
