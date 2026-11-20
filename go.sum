@@ -1,5 +1,5 @@
-charm.land/bubbles/v2 v2.2.1 h1:Fq1+qm5hV6GkvzLQDhCBpXXE5tLgvh1PRriCLwSvIQU=
-charm.land/bubbles/v2 v2.2.1/go.mod h1:wdMgn+sje1KNXdwFizIWjbf328fIUBxqEmJ/vYPo8yc=
+charm.land/bubbles/v2 v2.2.2 h1:lXTAX9eRzW4t92r+pG4qTzkV1vU6rIO6TaIoETFf7v4=
+charm.land/bubbles/v2 v2.2.2/go.mod h1:fuhrxpXZGQ6D+Yl2cr+/72Vyp/JNhpZFqsuIEmUiyLk=
 charm.land/bubbletea/v2 v2.1.2 h1:vB3XAcHhLB2gR3HOHpwO3lHB3nbvaowIgL3e5x/DUZo=
 charm.land/bubbletea/v2 v2.1.2/go.mod h1:xWHeyxIX9/wiFU2kgPW04ojOZyTzrWf+8lGjUCaftiU=
 charm.land/lipgloss/v2 v2.1.1 h1:F+vKWis9Kz3MFRsbICSDFtT1ZwVL+8f+36Dtg+OpKwc=
@@ -46,8 +46,8 @@ github.com/charmbracelet/ultraviolet v0.0.0-20261008173134-6b8d4baf91b4 h1:hISLz
 github.com/charmbracelet/ultraviolet v0.0.0-20261008173134-6b8d4baf91b4/go.mod h1:aJDVk+WOVM1K04rdc/71PMPoUGfjxjhvXfP3Pjz1Zio=
 github.com/charmbracelet/x/ansi v0.11.10 h1:GjcX3+rAk+8wDX/jY0XwrZstxkjRcLkYU3TvwzZWiRA=
 github.com/charmbracelet/x/ansi v0.11.10/go.mod h1:DG/hpOnaI2QJ/KMMqLL2h0KVhluuJLazf8973P+Vy5w=
-github.com/charmbracelet/x/exp/golden v0.0.0-20250806222409-83e3a29d542f h1:pk6gmGpCE7F3FcjaOEKYriCvpmIN4+6OS/RD0vm4uIA=
-github.com/charmbracelet/x/exp/golden v0.0.0-20250806222409-83e3a29d542f/go.mod h1:IfZAMTHB6XkZSeXUqriemErjAWCCzT0LwjKFYCZyw0I=
+github.com/charmbracelet/x/exp/golden v0.1.0 h1:qgUxGaHX4I8Fg077vD+54+qFmDWrgO19lTCQLblHWko=
+github.com/charmbracelet/x/exp/golden v0.1.0/go.mod h1:6fMpcW6iwN/kX+xJ52eqVWsDiBTe0UJD24JLoHFe+P0=
 github.com/charmbracelet/x/term v0.2.2 h1:xVRT/S2ZcKdhhOuSP4t5cLi5o+JxklsoEObBSgfgZRk=
 github.com/charmbracelet/x/term v0.2.2/go.mod h1:kF8CY5RddLWrsgVwpw4kAa6TESp6EB5y3uxGLeCqzAI=
 github.com/charmbracelet/x/termios v0.1.1 h1:o3Q2bT8eqzGnGPOYheoYS8eEleT5ZVNYNy8JawjaNZY=
@@ -99,8 +99,8 @@ github.com/mattn/go-colorable v0.1.14/go.mod h1:6LmQG8QLFO4G5z1gPvYEzlUgJ2wF+stg
 github.com/mattn/go-isatty v0.0.20 h1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWEY=
 github.com/mattn/go-isatty v0.0.20/go.mod h1:W+V8PltTTMOvKvAeJH7IuucS94S2C6jfK/D7dTCTo3Y=
 github.com/mattn/go-runewidth v0.0.12/go.mod h1:RAqKPSqVFrSLVXbA8x7dzmKdmGzieGRCM46jaSJTDAk=
-github.com/mattn/go-runewidth v0.0.30 h1:+KUuiDA4fF0R1p5FeueHefjDm+GIM+kWfFnDjybOPgk=
-github.com/mattn/go-runewidth v0.0.30/go.mod h1:3qAiGCV4Koz/yuveO58qUefmUTRm8r0IGEXZ9jeHp/8=
+github.com/mattn/go-runewidth v0.0.31 h1:1oCV4ReTlosDBc6rYRw5cL8S/4y8iv5oRl4SJ5IBgwo=
+github.com/mattn/go-runewidth v0.0.31/go.mod h1:3qAiGCV4Koz/yuveO58qUefmUTRm8r0IGEXZ9jeHp/8=
 github.com/mewkiz/flac v1.0.14 h1:hyRGAM8NCKznoPmIi9zz2jyO+nfmxY2ErqBnHZ+gxh4=
 github.com/mewkiz/flac v1.0.14/go.mod h1:HfPYDA+oxjyuqMu2V+cyKcxF51KM6incpw5eZXmfA6k=
 github.com/mewkiz/pkg v0.0.0-20260703220044-4fb89b18cc87 h1:fpWNLIg7nX2f+D+6ZveQ5hfkTjq5WgMBtYbz5Nb1w0Y=
@@ -128,8 +128,8 @@ github.com/reinhrst/fzf-lib v0.9.0 h1:P57AkpmDOmRhuBTDclvasclcOY7kNVWJUVVEBEB9kC
 github.com/reinhrst/fzf-lib v0.9.0/go.mod h1:06+ssO8WzlXxOUT7RtLo2gXf9tSR7HU8fbBgFX1VP6k=
 github.com/rivo/uniseg v0.1.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
 github.com/rivo/uniseg v0.2.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
-github.com/rivo/uniseg v0.4.7 h1:WUdvkW8uEhrYfLC4ZzdpI2ztxP1I582+49Oc5Mq64VQ=
-github.com/rivo/uniseg v0.4.7/go.mod h1:FN3SvrM+Zdj16jyLfmOkMNblXMcoc8DfTHruCPUcx88=
+github.com/rivo/uniseg v0.4.8-0.20261110175422-3a370411ca06 h1:e3d0GqpC//2tTV8c43tVSNmUS/NaR0JUXyqigUuc6Co=
+github.com/rivo/uniseg v0.4.8-0.20261110175422-3a370411ca06/go.mod h1:f2N4/YqLrDrVp5TT4AefKt4trMkR5vN6+yaqpJBUerQ=
 github.com/rwcarlsen/goexif v0.0.0-20190401172101-9e8deecbddbd h1:CmH9+J6ZSsIjUK3dcGsnCnO41eRBOnY12zwkn5qVwgc=
 github.com/rwcarlsen/goexif v0.0.0-20190401172101-9e8deecbddbd/go.mod h1:hPqNNc0+uJM6H+SuU8sEs5K5IQeKccPqeSjfgcKGgPk=
 github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d h1:hrujxIzL1woJ7AwssoOcM/tq5JjjG2yYOc8odClEiXA=
