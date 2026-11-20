@@ -12,30 +12,50 @@ import (
 	"github.com/charmbracelet/x/ansi/kitty"
 )
 
-// isKittyCapable checks if the terminal supports Kitty graphics protocol
-func isKittyCapable() bool {
-	termProgram := os.Getenv("TERM_PROGRAM")
-	term := os.Getenv("TERM")
+// kittyGraphicsTerminals lists terminals known to accept Kitty graphics
+// protocol transmissions.
+// TODO: Replace this allowlist with a real Kitty graphics capability check.
+// tmux masks the underlying terminal through TERM/TERM_PROGRAM.
+var kittyGraphicsTerminals = []string{
+	"ghostty",
+	"WezTerm",
+	"iTerm2",
+	"xterm-kitty",
+	"kitty",
+	"Konsole",
+	"WarpTerminal",
+}
 
-	// TODO: Replace this allowlist with a real Kitty graphics capability check.
-	// tmux masks the underlying terminal through TERM/TERM_PROGRAM.
-	knownTerminals := []string{
-		"ghostty",
-		"WezTerm",
-		"iTerm2",
-		"xterm-kitty",
-		"kitty",
-		"Konsole",
-		"WarpTerminal",
-	}
+// terminalsWithoutUnicodePlaceholders lists terminals that accept Kitty
+// graphics transmissions but do not implement the Unicode placeholder cells
+// (U+10EEEE plus combining diacritics) that renderWithKittyUsingTermCap emits
+// for every image cell. Without placeholder support the cells are drawn as
+// literal placeholder glyphs, so image and PDF previews render as a block of
+// tofu. WezTerm reports this as "Font problem: No fonts contain glyphs for
+// these codepoints: U+10EEEE".
+var terminalsWithoutUnicodePlaceholders = []string{
+	"WezTerm",
+}
 
+func matchesTerminal(termProgram, term string, knownTerminals []string) bool {
 	for _, knownTerm := range knownTerminals {
 		if strings.EqualFold(termProgram, knownTerm) || strings.EqualFold(term, knownTerm) {
 			return true
 		}
 	}
-
 	return false
+}
+
+// isKittyCapable checks whether the terminal can render an image through the
+// Kitty path used here, which requires both Kitty graphics support and
+// Unicode placeholder cell support. Terminals missing the latter must fall
+// back to the ANSI renderer instead of drawing unresolved placeholder cells.
+func isKittyCapable() bool {
+	termProgram := os.Getenv("TERM_PROGRAM")
+	term := os.Getenv("TERM")
+
+	return matchesTerminal(termProgram, term, kittyGraphicsTerminals) &&
+		!matchesTerminal(termProgram, term, terminalsWithoutUnicodePlaceholders)
 }
 
 // GetKittyClearRaw returns the raw APC command to clear all Kitty images.
