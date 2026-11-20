@@ -6,11 +6,11 @@
 //   v1.6.0…  the docs of every release and release candidate, read from its git tag.
 export const docsConfig = {
 	// Which docs open at the site root (/overview, /getting-started/…):
-	//   "newest"  the newest release (the default: readers see the docs of what they can install)
-	//   "latest"  the docs in this branch
+	//   "latest"  the docs in this branch: a fix or a new page shows as soon as it is merged
+	//   "newest"  the newest release: readers see the docs of what they can install
 	//   a tag     one particular release, for example "v1.6.0"
 	// Everything else is reachable under its own name: /latest/…, /v1.5.0/…
-	root: "newest"
+	root: "latest"
 };
 
 /** The name the docs in this branch go by, in URLs and in the version switcher. */
