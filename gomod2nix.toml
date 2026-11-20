@@ -10,8 +10,8 @@ schema = 3
     hash = 'sha256-OTyyRPYTVMVUVp+OeLTWhAYwfYBiBUBmrZAXAWeBj1E='
 
   [mod.'charm.land/lipgloss/v2']
-    version = 'v2.0.3'
-    hash = 'sha256-/RFkSUscU3NwymzT+PfizGf3XyQIdVGQlX7vxktCUGk='
+    version = 'v2.1.1'
+    hash = 'sha256-ppnSfXTbOLfQhP5Awri/JIW4xH92AvDazdKnQWaEkk4='
 
   [mod.'github.com/Unpackerr/iso9660']
     version = 'v0.0.3'

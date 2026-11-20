@@ -158,8 +158,8 @@ SOFTWARE.
 
 ## charm.land/lipgloss/v2
 
-- Version: v2.0.3
-- License: [MIT](https://github.com/charmbracelet/lipgloss/blob/v2.0.3/LICENSE)
+- Version: v2.1.1
+- License: [MIT](https://github.com/charmbracelet/lipgloss/blob/v2.1.1/LICENSE)
 
 ```text
 MIT License
