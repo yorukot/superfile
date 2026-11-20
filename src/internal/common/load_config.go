@@ -307,13 +307,9 @@ func WriteThemeFiles(content embed.FS) error {
 			return err
 		}
 
-		curThemeFile, err := os.Create(filepath.Join(variable.ThemeFolder, file.Name()))
-		if err != nil {
-			slog.Error("Error creating theme file from embed", "error", err)
-			return err
-		}
-		defer curThemeFile.Close()
-		_, err = curThemeFile.Write(src)
+		// os.WriteFile closes each file before the next one is written. A
+		// deferred Close here kept every theme file open until return.
+		err = os.WriteFile(filepath.Join(variable.ThemeFolder, file.Name()), src, utils.ConfigFilePerm)
 		if err != nil {
 			slog.Error("Error writing theme file from embed", "error", err)
 			return err
