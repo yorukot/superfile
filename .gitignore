@@ -35,3 +35,6 @@ testsuite/.venv/
 
 # Agent configs
 CLAUDE.md
+
+# docs of released versions, copied out of git tags when the website is built
+website/.versions/

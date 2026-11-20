@@ -1,0 +1,57 @@
+/* Design tokens. Colours are written light-dark(light theme, dark theme); <html data-theme> picks one. */
+:root {
+	color-scheme: light dark;
+
+	--bg: light-dark(#efe8dd, #1d2227);
+	--line: light-dark(#dcd2c3, #323a42);
+	--box: light-dark(#8c8275, #66707a);
+	--ink: light-dark(#303841, #efe8dd);
+	--ink-muted: light-dark(#59626b, #b3aca1);
+	--signal: #ff5722;
+	--signal-text: light-dark(#a9360e, #ff7a4f);
+	--teal-text: light-dark(#2c6569, #8fc2c5);
+	--amber-text: light-dark(#85550f, #f2bd74);
+	--danger-text: light-dark(#b0281f, #ff8a7e);
+	--focus: light-dark(#2c6569, #76abae);
+	--selection: light-dark(#c6dcda, #2e4a4d);
+
+	/* A "screen" (terminal content) is charcoal in both themes. */
+	--term-bg: #303841;
+	--term-line: #4e5863;
+	--term-ink: #efe8dd;
+	--term-muted: #a3abb2;
+	--term-signal: #ff7a4f;
+	--term-teal: #8fc2c5;
+	--term-amber: #f7c078;
+
+	--space-2: 8px;
+	--space-3: 12px;
+	--space-4: 16px;
+	--space-5: 24px;
+	--space-6: 32px;
+	--space-7: 48px;
+	--space-8: 80px;
+
+	--radius-xs: 6px;
+	--radius-sm: 10px;
+	--radius-md: 14px;
+	--radius-pill: 999px;
+
+	--nav-h: 80px;
+	--content-max: 1200px;
+	--sidebar-w: 260px;
+
+	--font-sans: "IBM Plex Sans", system-ui, sans-serif;
+	--font-mono: "IBM Plex Mono", ui-monospace, monospace;
+	--font-dot: "Doto", "IBM Plex Mono", monospace;
+
+	@media (max-width: 620px) {
+		--nav-h: 64px;
+	}
+}
+:root[data-theme="light"] {
+	color-scheme: light;
+}
+:root[data-theme="dark"] {
+	color-scheme: dark;
+}

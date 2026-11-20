@@ -1,0 +1,190 @@
+---
+import { Image } from "astro:assets";
+import demo from "../../assets/demo.png";
+import { defaultInstallMethod } from "../../lib/install-methods";
+import { releases } from "../../lib/releases";
+import { GITHUB_URL } from "../../lib/site";
+import Command from "../Command.astro";
+import Section from "./Section.astro";
+
+interface Props {
+	id: string;
+}
+---
+
+<Section id={Astro.props.id} label="README.md">
+	<h1 class="name">superfile<span class="cursor" aria-hidden="true"></span></h1>
+	<p class="what">A fancy, modern file manager that lives in your terminal.</p>
+	<p class="sf-lede lede">
+		See several folders side by side, preview the file under your cursor, and copy, move, rename or extract with keys you can guess. It is open source, written in Go, and built by
+		<a class="sf-link" href="https://github.com/yorukot">yorukot</a> and <a class="sf-link" href="/special-thanks">contributors</a>.
+	</p>
+	<div class="get">
+		<Command id="hero-cmd" cmd={defaultInstallMethod.cmd} prompt={defaultInstallMethod.prompt} />
+		<p class="facts">
+			<span data-os-note hidden>
+				<span data-os-name></span>
+				<span aria-hidden="true">·</span>
+			</span>
+			<a class="sf-link" href="#changelog">{releases[0].version}</a>
+			<span aria-hidden="true">·</span>
+			<span>MIT license</span>
+			<span aria-hidden="true">·</span>
+			<span>Linux, macOS, Windows</span>
+			<span aria-hidden="true">·</span>
+			<a class="sf-link" href="#install">other ways to install</a>
+		</p>
+	</div>
+	<dl class="stats">
+		<div>
+			<dd class="sf-readout stat" data-stat="downloads">—</dd>
+			<dt><a class="sf-link" href={`${GITHUB_URL}/releases`}>downloads</a></dt>
+		</div>
+		<div>
+			<dd class="sf-readout stat" data-stat="stars">—</dd>
+			<dt><a class="sf-link" href={GITHUB_URL}>stars</a></dt>
+		</div>
+		<div>
+			<dd class="sf-readout stat stat--quiet" data-stat="contributors">—</dd>
+			<dt><a class="sf-link" href="/special-thanks">contributors</a></dt>
+		</div>
+		<div>
+			<dd class="sf-readout stat stat--quiet">{releases.length}</dd>
+			<dt><a class="sf-link" href="/changelog">releases</a></dt>
+		</div>
+	</dl>
+	<Image
+		class="shot"
+		src={demo}
+		alt="superfile in a terminal: a sidebar, three file panels side by side, and the process, metadata and clipboard panels underneath"
+		widths={[720, 1080, 1780]}
+		sizes="(max-width: 960px) 100vw, 890px"
+		loading="eager"
+	/>
+</Section>
+
+<style>
+	.name {
+		margin: 0;
+		font: 600 clamp(48px, 9vw, 72px) / 1.05 var(--font-mono);
+		letter-spacing: -0.045em;
+		color: var(--ink);
+	}
+	.cursor {
+		display: inline-block;
+		width: 0.55em;
+		height: 1em;
+		margin-left: 0.08em;
+		vertical-align: -0.12em;
+		background: var(--signal);
+		border-radius: 2px;
+		animation: cursor-blink 1.1s steps(1, end) infinite;
+
+		@media (prefers-reduced-motion: reduce) {
+			animation: none;
+		}
+	}
+	@keyframes cursor-blink {
+		56%,
+		100% {
+			opacity: 0;
+		}
+	}
+	.what {
+		margin: var(--space-5) 0 0;
+		font: 500 clamp(22px, 3vw, 28px) / 1.35 var(--font-sans);
+		color: var(--ink);
+		text-wrap: balance;
+	}
+	/* Every block runs the full width of the column, so the left and right edges line up. */
+	.lede {
+		max-width: none;
+	}
+	.get {
+		margin-top: var(--space-6);
+	}
+	.facts {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px 12px;
+		margin: var(--space-4) 0 0;
+		font: 400 15px/1.6 var(--font-mono);
+		color: var(--ink-muted);
+	}
+	/* The project in four dot-matrix numbers, on one line: downloads and stars heavy, the rest lighter. */
+	.stats {
+		display: grid;
+		grid-template-columns: repeat(4, auto);
+		justify-content: space-between;
+		align-items: end;
+		gap: var(--space-6) var(--space-5);
+		margin: var(--space-7) 0 0;
+
+		> div {
+			display: flex;
+			flex-direction: column;
+			gap: var(--space-3);
+		}
+		dd {
+			margin: 0;
+		}
+		dt {
+			font: 400 15px/1.4 var(--font-mono);
+			color: var(--ink-muted);
+			white-space: nowrap;
+		}
+
+		@media (min-width: 721px) {
+			> div:last-child {
+				align-items: flex-end;
+			}
+		}
+		@media (max-width: 720px) {
+			grid-template-columns: repeat(2, auto);
+			justify-content: start;
+			column-gap: var(--space-7);
+		}
+	}
+	.stat {
+		font-size: clamp(48px, 5.6vw, 72px);
+		white-space: nowrap;
+	}
+	.stat--quiet {
+		font-weight: 600;
+		color: var(--ink-muted);
+	}
+	.shot {
+		display: block;
+		width: 100%;
+		height: auto;
+		margin-top: var(--space-7);
+		border-radius: var(--radius-md);
+	}
+</style>
+
+<script>
+	import { detectOS, installMethods, osNames } from "../../lib/install-methods";
+	import { getContributors, getDownloads, getStars } from "../../scripts/github-stats";
+
+	// The one-liner becomes the first install method for the visitor's system.
+	const os = detectOS();
+	const method = installMethods.find(method => os && method.os.includes(os));
+	if (os && method) {
+		document.querySelector("#hero-cmd [data-cmd-text]")!.textContent = method.cmd;
+		document.querySelector("#hero-cmd [data-cmd-prompt]")!.textContent = method.prompt;
+		document.querySelector("[data-os-name]")!.textContent = `for ${osNames[os]}`;
+		document.querySelector<HTMLElement>("[data-os-note]")!.hidden = false;
+	}
+
+	const abbreviate = (count: number) => (count >= 1_000_000 ? `${Math.floor(count / 100_000) / 10}m+` : count >= 1000 ? `${Math.floor(count / 1000)}k+` : String(count));
+
+	// A readout keeps its dash when GitHub cannot be reached.
+	async function fillStat(name: string, count: Promise<number | null>, format: (count: number) => string = String) {
+		const value = await count;
+		if (value !== null) document.querySelector(`[data-stat="${name}"]`)!.textContent = format(value);
+	}
+
+	fillStat("downloads", getDownloads(), abbreviate);
+	fillStat("stars", getStars(), abbreviate);
+	fillStat("contributors", getContributors());
+</script>

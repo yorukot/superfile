@@ -1,0 +1,76 @@
+---
+import Section from "./Section.astro";
+
+interface Props {
+	id: string;
+}
+
+const hotkeys: { task: string; chords: string[][] }[] = [
+	{ task: "Move up and down", chords: [["k"], ["j"]] },
+	{ task: "Open a folder or file, go back", chords: [["l"], ["h"]] },
+	{
+		task: "Copy, cut, paste",
+		chords: [
+			["ctrl", "c"],
+			["ctrl", "x"],
+			["ctrl", "v"]
+		]
+	},
+	{ task: "Rename", chords: [["ctrl", "r"]] },
+	{ task: "Delete", chords: [["ctrl", "d"]] },
+	{ task: "Open, switch and close panels", chords: [["n"], ["tab"], ["w"]] },
+	{ task: "Search the current folder", chords: [["/"]] },
+	{
+		task: "Compress, extract",
+		chords: [
+			["ctrl", "a"],
+			["ctrl", "e"]
+		]
+	},
+	{ task: "Show every hotkey", chords: [["?"]] }
+];
+---
+
+<Section id={Astro.props.id} label="hotkeys.toml" title="The keys for your first day.">
+	<p class="sf-lede">
+		These are the defaults. The <a class="sf-link" href="/list/hotkey-list">hotkey list</a> has all of them, and you can <a class="sf-link" href="/configure/custom-hotkeys">remap every one</a>.
+	</p>
+	<div class="sf-table-wrap hotkeys">
+		<table class="sf-table">
+			<thead>
+				<tr><th scope="col">to</th><th scope="col">press</th></tr>
+			</thead>
+			<tbody>
+				{
+					hotkeys.map(hotkey => (
+						<tr>
+							<td>{hotkey.task}</td>
+							<td>
+								<span class="chords">
+									{hotkey.chords.map(chord => (
+										<span class="sf-keys">
+											{chord.map(key => (
+												<kbd class="sf-kbd">{key}</kbd>
+											))}
+										</span>
+									))}
+								</span>
+							</td>
+						</tr>
+					))
+				}
+			</tbody>
+		</table>
+	</div>
+</Section>
+
+<style>
+	.hotkeys {
+		margin-top: var(--space-7);
+	}
+	.chords {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px 14px;
+	}
+</style>

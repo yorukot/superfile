@@ -1,0 +1,9 @@
+---
+import { brandIcons, type BrandIconName } from "../lib/brand-icons";
+
+interface Props {
+	name: BrandIconName;
+}
+---
+
+<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d={brandIcons[Astro.props.name]}></path></svg>

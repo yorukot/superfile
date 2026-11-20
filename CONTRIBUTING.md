@@ -12,11 +12,13 @@ There are many ways to contribute:
 
 ---
 
-## 🐞 Issues
+## Issues
 
 ### Found a bug?
 
-Check if there's already an open or closed issue for it. If not, open a new one and describe the problem clearly.
+For a security vulnerability, follow the [security policy](SECURITY.md) to report it privately.
+
+For other bugs, check if there's already an open or closed issue for it. If not, open a new one and describe the problem clearly.
 
 ### Want to fix an issue?
 
@@ -29,7 +31,7 @@ Maintainers may request changes before merging.
 
 ---
 
-## 🎨 Adding a Theme
+## Adding a Theme
 
 Before starting, make sure the theme you want to add doesn’t already exist.
 
@@ -88,7 +90,7 @@ Before starting, make sure the theme you want to add doesn’t already exist.
 
 ---
 
-## 💡 Sharing Ideas
+## Sharing Ideas
 
 Got a new idea? Awesome!
 
@@ -98,7 +100,7 @@ Got a new idea? Awesome!
 
 ---
 
-## 🧩 Don’t Know Where to Start?
+## Don't Know Where to Start?
 
 Check out GitHub’s official guide:
 [https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-a-project](https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-a-project)
@@ -107,16 +109,33 @@ Still unsure? Open a discussion — we’re happy to help.
 
 ---
 
-## ✅ Pull Request Checklist
+## AI policy
 
-Please make sure your PR follows these steps:
+Feel free to use AI for the website, documentation, and other work outside the core file manager. The usual [PR checklist](#pull-request-checklist) applies.
 
-* [ ] I have run `go fmt ./...` to format the code
-* [ ] I have run `golangci-lint run` and fixed any reported issues
-* [ ] I have tested my changes and verified they work as expected
-* [ ] I have reviewed the diff to make sure I’m not committing any debug logs or TODOs
-* [ ] I have filled out the PR template with description, context, and screenshots if needed
-- [ ] I have checked that the PR title follows the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) format
+If you use AI to change the core file manager, read the relevant Go code first. Before requesting review, read every line the AI changed and test the behavior yourself. Be ready to explain how the change works.
+
+## Pull request checklist
+
+Use the [pull request template](.github/PULL_REQUEST_TEMPLATE/pull_request_template.md) to answer these questions. Add extra headings if they help explain your change.
+
+- **Summary** — What will change for someone using or working on superfile? Keep it under 100 words.
+- **Why** — What problem does this solve? Link the issue if there is one.
+- **How** — How did you solve the problem, and how did you check that the change works?
+- **Other details** — Is there anything else a reviewer should see, such as screenshots or a new dependency? You can leave this section empty.
+
+Before requesting review, check your PR against this list.
+
+- [ ] I have read the [AI policy](#ai-policy).
+- [ ] I tested the change and described the result under **How**.
+- [ ] I read the full diff and removed leftover debug logs and TODOs.
+- [ ] I filled out the template and included any screenshots needed to review the change.
+- [ ] My PR title follows [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
+
+If you changed Go code, also run these checks.
+
+- [ ] I formatted the code with `go fmt ./...`.
+- [ ] I ran `golangci-lint run` and fixed the issues it reported.
 
 ---
 
