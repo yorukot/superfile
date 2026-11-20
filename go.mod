@@ -12,7 +12,7 @@ require (
 	github.com/barasher/go-exiftool v1.10.0
 	github.com/charmbracelet/x/ansi v0.11.10
 	github.com/fatih/color v1.19.0
-	github.com/fvbommel/sortorder v1.1.0
+	github.com/fvbommel/sortorder v1.2.1
 	github.com/lazysegtree/go-zoxide v0.1.0
 	github.com/lithammer/shortuuid v3.0.0+incompatible
 	github.com/muesli/termenv v0.16.0
