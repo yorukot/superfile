@@ -123,7 +123,7 @@ func (p *ImagePreviewer) renderWithKittyUsingTermCap(img image.Image, path strin
 		Columns:          dstCols,
 		Rows:             dstRows,
 		VirtualPlacement: true,
-		Quite:            kittyQuietAll,
+		Quiet:            kittyQuietAll,
 		Chunk:            true,
 	}); err != nil {
 		return nil, fmt.Errorf("failed to encode kitty graphics: %w", err)
