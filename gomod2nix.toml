@@ -122,8 +122,8 @@ schema = 3
     hash = 'sha256-YgMm1nid8yigNLG6aHfuMbsvMI1UYVf/Rkg44pp/NTU='
 
   [mod.'github.com/fvbommel/sortorder']
-    version = 'v1.1.0'
-    hash = 'sha256-553Rg/amloO6nv67p0ARsKas9QNnTQucpi08vNLtjQU='
+    version = 'v1.2.1'
+    hash = 'sha256-dhleDOluHRXaWgFaVd0nVRIzN6v5XnkUq3NBPRPUAog='
 
   [mod.'github.com/go-ole/go-ole']
     version = 'v1.2.6'
