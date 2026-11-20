@@ -70,10 +70,11 @@ var (
 	ChooserFile = ""
 
 	// Other state variables
-	FixHotkeys    = false
-	FixConfigFile = false
-	LastDir       = ""
-	PrintLastDir  = false
+	FixHotkeys      = false
+	FixConfigFile   = false
+	LastDir         = ""
+	PrintLastDir    = false
+	ConfigOverrides = []string{}
 )
 
 // Still we are preventing other packages to directly modify them via reassign linter
@@ -113,4 +114,7 @@ func UpdateVarFromCliArgs(c *cli.Command) {
 	FixHotkeys = c.Bool("fix-hotkeys")
 	FixConfigFile = c.Bool("fix-config-file")
 	PrintLastDir = c.Bool("print-last-dir")
+
+	// Values that override the loaded config for this run only
+	ConfigOverrides = c.StringSlice("with-config-override")
 }
