@@ -2,8 +2,8 @@ schema = 3
 
 [mod]
   [mod.'charm.land/bubbles/v2']
-    version = 'v2.2.1'
-    hash = 'sha256-0PFf3lMornz1C2eR7WRZ1iTEu59AD+1fdwPS6j+AQ2c='
+    version = 'v2.2.2'
+    hash = 'sha256-g4qxsmhG7xnFOFB9Xc2CsENWyG/NNTxW9ixbAZPdNFY='
 
   [mod.'charm.land/bubbletea/v2']
     version = 'v2.1.2'
@@ -166,8 +166,8 @@ schema = 3
     hash = 'sha256-qhw9hWtU5wnyFyuMbKx+7RB8ckQaFQ8D+8GKPkN3HHQ='
 
   [mod.'github.com/mattn/go-runewidth']
-    version = 'v0.0.30'
-    hash = 'sha256-2idyB8BVjqiwBOmBteKMTM9uBfr96g29k8hqJWjlndE='
+    version = 'v0.0.31'
+    hash = 'sha256-0R1i3gS3Ya0JYUfNdpJ7B1ynWGqRaP0Mxvv6mEz0qSI='
 
   [mod.'github.com/mewkiz/flac']
     version = 'v1.0.14'
@@ -218,8 +218,8 @@ schema = 3
     hash = 'sha256-UUe5g+oXopDj+JjvzAguqJ70/a4pqZhn7pdJiFE97yI='
 
   [mod.'github.com/rivo/uniseg']
-    version = 'v0.4.7'
-    hash = 'sha256-rDcdNYH6ZD8KouyyiZCUEy8JrjOQoAkxHBhugrfHjFo='
+    version = 'v0.4.8-0.20261110175422-3a370411ca06'
+    hash = 'sha256-H7MRaWZIKRY7mjDf+1JvkXLMZoveh/TwvTtqcXdudHA='
 
   [mod.'github.com/rwcarlsen/goexif']
     version = 'v0.0.0-20190401172101-9e8deecbddbd'
