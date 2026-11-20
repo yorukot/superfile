@@ -33,8 +33,11 @@ const INK = [239, 232, 221]; // term-ink
 const DIM = [78, 88, 99]; // term-line
 const HOT = [255, 87, 34]; // signal
 const RADIUS = [0.09, 0.2, 0.31, 0.4]; // dot radius per coverage level, in cells
+const DENSITY = 1.5; // canvas pixels per CSS pixel, at most: the board costs its area again on every update
 const SPARK_EVERY = 110; // a new lettering dot lights up this often, in milliseconds
 const FADE_TAKES = 1400; // and takes this long to go back to paper
+const STEP = 60; // the fade is slow: it moves this often, in milliseconds, not on every frame
+const POINTER_STEP = 30; // and this often while the pointer is drawing on the board
 const POINTER_REACH = 4.5; // how far the pointer's glow spreads, in cells
 
 const mix = (from: number[], to: number[], t: number) => `rgb(${from.map((value, i) => Math.round(value + (to[i] - value) * t)).join(",")})`;
@@ -46,6 +49,7 @@ export function mountBoard(canvas: HTMLCanvasElement) {
 
 	// The lettering is exactly as wide as the footer's content column and sits at the bottom, in the
 	// space the footer leaves free under its links. The faint dots carry on to both edges of the page.
+	let ratio = 1; // canvas pixels per CSS pixel
 	let cell = 1; // one cell, in CSS pixels
 	let originX = 0; // where column 0 starts; it may be off the left edge
 	let colCount = 0;
@@ -53,9 +57,11 @@ export function mountBoard(canvas: HTMLCanvasElement) {
 	let coverage: number[] = []; // per cell, 0 to 3
 	let lettering: number[] = []; // the cells that belong to the lettering
 	let glow = new Float32Array(0); // per cell, the energy left
+	const lit = new Set<number>(); // the cells with energy left: the only ones a step repaints
 
-	let visible = false;
-	let frame = 0;
+	let visible = false; // the footer is on screen
+	let moved = false; // the pointer lit cells since the last step
+	let timer = 0;
 	let last = 0;
 	let nextSpark = 0;
 
@@ -77,60 +83,83 @@ export function mountBoard(canvas: HTMLCanvasElement) {
 		}
 		lettering = coverage.flatMap((value, index) => (value >= 2 ? [index] : []));
 		glow = new Float32Array(coverage.length);
+		lit.clear();
 	}
 
-	function draw() {
-		const ratio = canvas.width / canvas.clientWidth;
+	// Nothing runs while the footer is off screen or the tab is in the background.
+	const showing = () => visible && !document.hidden;
+
+	const radius = (index: number) => RADIUS[coverage[index]] + glow[index] * (coverage[index] ? 0.06 : 0.14); // in cells
+
+	function dot(index: number) {
 		const size = cell * ratio;
-		context.clearRect(0, 0, canvas.width, canvas.height);
-		for (let row = 0; row < rowCount; row++) {
-			for (let col = 0; col < colCount; col++) {
-				const index = row * colCount + col;
-				const lit = coverage[index];
-				const energy = glow[index];
-				context.fillStyle = mix(lit ? INK : DIM, HOT, energy);
-				context.globalAlpha = lit ? 1 : 0.4 + energy * 0.6;
-				context.beginPath();
-				context.arc(originX * ratio + (col + 0.5) * size, (row + 0.5) * size, (RADIUS[lit] + energy * (lit ? 0.06 : 0.14)) * size, 0, Math.PI * 2);
-				context.fill();
+		const col = index % colCount;
+		const level = coverage[index];
+		const energy = glow[index];
+		context.fillStyle = mix(level ? INK : DIM, HOT, energy);
+		context.globalAlpha = level ? 1 : 0.4 + energy * 0.6;
+		context.beginPath();
+		context.arc(originX * ratio + (col + 0.5) * size, ((index - col) / colCount + 0.5) * size, radius(index) * size, 0, Math.PI * 2);
+		context.fill();
+	}
+
+	// Paints one cell again. The soft edge of a dot reaches up to a pixel past its cell, so the square
+	// that is cleared is a pixel larger all round, and the dots that reach into it are drawn again too.
+	function repaint(index: number) {
+		const size = cell * ratio;
+		const col = index % colCount;
+		const row = (index - col) / colCount;
+		const x = Math.floor(originX * ratio + col * size) - 1;
+		const y = Math.floor(row * size) - 1;
+		const width = Math.ceil(originX * ratio + (col + 1) * size) + 1 - x;
+		const height = Math.ceil((row + 1) * size) + 1 - y;
+		context.save();
+		context.beginPath();
+		context.rect(x, y, width, height);
+		context.clip();
+		context.clearRect(x, y, width, height);
+		for (let r = Math.max(0, row - 1); r <= Math.min(rowCount - 1, row + 1); r++) {
+			for (let c = Math.max(0, col - 1); c <= Math.min(colCount - 1, col + 1); c++) {
+				const other = r * colCount + c;
+				if (other === index || radius(other) > 0.5 - 3.5 / size) dot(other);
 			}
 		}
-		context.globalAlpha = 1;
+		context.restore();
 	}
 
 	function resize() {
-		const ratio = Math.min(window.devicePixelRatio, 2);
-		canvas.width = Math.round(canvas.clientWidth * ratio);
-		canvas.height = Math.round(canvas.clientHeight * ratio);
+		const density = Math.min(window.devicePixelRatio, DENSITY);
+		canvas.width = Math.round(canvas.clientWidth * density);
+		canvas.height = Math.round(canvas.clientHeight * density);
+		ratio = canvas.width / canvas.clientWidth;
 		layout();
-		draw();
+		for (let index = 0; index < coverage.length; index++) dot(index);
 	}
 
-	function tick(now: number) {
-		frame = 0;
-		const elapsed = Math.min(64, now - last);
+	function step() {
+		const now = performance.now();
+		const elapsed = Math.min(STEP, now - last);
 		last = now;
-		let glowing = false;
-		for (let i = 0; i < glow.length; i++) {
-			if (glow[i] > 0) {
-				glow[i] = Math.max(0, glow[i] - elapsed / FADE_TAKES);
-				glowing ||= glow[i] > 0;
-			}
-		}
+		for (const index of lit) glow[index] = Math.max(0, glow[index] - elapsed / FADE_TAKES);
 		if (!calm.matches && now >= nextSpark && lettering.length) {
-			glow[lettering[Math.floor(Math.random() * lettering.length)]] = 1;
-			nextSpark = now + SPARK_EVERY * (0.5 + Math.random());
-			glowing = true;
+			const index = lettering[Math.floor(Math.random() * lettering.length)];
+			glow[index] = 1;
+			lit.add(index);
+			// Counted from when it was due, so that the rhythm does not depend on the step.
+			nextSpark = Math.max(nextSpark, now - STEP) + SPARK_EVERY * (0.5 + Math.random());
 		}
-		draw();
+		for (const index of lit) {
+			repaint(index);
+			if (!glow[index]) lit.delete(index);
+		}
 		// With motion allowed there is always another spark coming; otherwise stop once the glow is gone.
-		if (glowing || !calm.matches) run();
+		timer = showing() && (lit.size || !calm.matches) ? window.setTimeout(step, moved ? POINTER_STEP : STEP) : 0;
+		moved = false;
 	}
 
 	function run() {
-		if (frame || !visible) return;
-		last = performance.now();
-		frame = requestAnimationFrame(tick);
+		if (timer || !showing()) return;
+		timer = window.setTimeout(step);
 	}
 
 	// The canvas is behind the footer's content, so the footer itself reports the pointer.
@@ -142,12 +171,17 @@ export function mountBoard(canvas: HTMLCanvasElement) {
 			for (let col = Math.max(0, Math.floor(x - POINTER_REACH)); col <= Math.min(colCount - 1, Math.ceil(x + POINTER_REACH)); col++) {
 				const near = 1 - Math.hypot(col + 0.5 - x, row + 0.5 - y) / POINTER_REACH;
 				const index = row * colCount + col;
-				if (near > glow[index]) glow[index] = near;
+				if (near > glow[index]) {
+					glow[index] = near;
+					lit.add(index);
+					moved = true;
+				}
 			}
 		}
 		run();
 	});
 
+	document.addEventListener("visibilitychange", run);
 	new ResizeObserver(resize).observe(canvas);
 	new IntersectionObserver(([entry]) => {
 		visible = entry.isIntersecting;
