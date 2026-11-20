@@ -13,6 +13,10 @@ const (
 	rgbShift16        = 16 // Bit shift for red channel in RGB operations
 	rgbShift8         = 8  // Bit shift for green channel in RGB operations
 
+	// EXIF orientations 5 to 8 swap width and height
+	exifOrientationTranspose = 5
+	exifOrientationRotate90  = 8
+
 	// Kitty protocol
 	kittyHashSeed      = 42     // Seed for kitty image ID hashing
 	kittyHashPrime     = 31     // Prime multiplier for hash calculation
