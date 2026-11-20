@@ -2,8 +2,8 @@ schema = 3
 
 [mod]
   [mod.'charm.land/bubbles/v2']
-    version = 'v2.1.0'
-    hash = 'sha256-2OmqpBrl+taOJzAhVM6OReLmoYRxZOXx9JqFNjQjsPA='
+    version = 'v2.2.1'
+    hash = 'sha256-0PFf3lMornz1C2eR7WRZ1iTEu59AD+1fdwPS6j+AQ2c='
 
   [mod.'charm.land/bubbletea/v2']
     version = 'v2.1.2'

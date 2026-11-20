@@ -98,8 +98,8 @@ Documentation (c) 2015 David Rook
 
 ## charm.land/bubbles/v2
 
-- Version: v2.1.0
-- License: [MIT](https://github.com/charmbracelet/bubbles/blob/v2.1.0/LICENSE)
+- Version: v2.2.1
+- License: [MIT](https://github.com/charmbracelet/bubbles/blob/v2.2.1/LICENSE)
 
 ```text
 MIT License
