@@ -4131,8 +4131,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## github.com/pelletier/go-toml/v2
 
-- Version: v2.3.1
-- License: [MIT](https://github.com/pelletier/go-toml/blob/v2.3.1/LICENSE)
+- Version: v2.4.3
+- License: [MIT](https://github.com/pelletier/go-toml/blob/v2.4.3/LICENSE)
 
 ```text
 The MIT License (MIT)
