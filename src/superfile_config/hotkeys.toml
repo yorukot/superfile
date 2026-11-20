@@ -39,6 +39,7 @@ toggle_reverse_sort = ['R', '']
 focus_on_metadata = ['m', '']
 focus_on_process_bar = ['p', '']
 focus_on_sidebar = ['s', '']
+focus_on_content_panel = ['b', '']
 
 #-- File/Dir Creation/Renaming
 file_panel_item_create = ['ctrl+n', '']
@@ -58,6 +59,12 @@ extract_file = ['ctrl+e', '']
 #-- Editor Actions
 open_current_directory_with_editor = ['E', '']
 open_file_with_editor = ['e', '']
+
+#-- Content Panel Editing
+content_panel_edit = ['i', '']
+content_panel_save = ['ctrl+s', '']
+content_panel_exit_edit = ['esc', '']
+content_panel_open_nvim = ['E', '']
 
 #-- Other Actions
 change_panel_mode = ['v', '']

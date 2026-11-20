@@ -95,6 +95,9 @@ type ConfigType struct {
 	FilePreviewWidth        int      `toml:"file_preview_width"         comment:"\nFile preview width allow '0' (this mean same as file panel),'x' x must be less than 10 and greater than 1 (This means that the width of the file preview will be one xth of the total width.)"`
 	EnableFilePreviewBorder bool     `toml:"enable_file_preview_border" comment:"\nEnable border around the file preview panel (default: false)"`
 	CodePreviewer           string   `toml:"code_previewer"             comment:"\nWhether to use the builtin syntax highlighting with chroma or use bat. Values: \"\" for builtin chroma, \"bat\" for bat"`
+	ContentPanelMaxEditSize    int64    `toml:"content_panel_max_edit_size"    comment:"\nMaximum file size in bytes for editing in the content panel (default: 5242880 = 5MB)."`
+	ContentPanelNvimCmd       string   `toml:"content_panel_nvim_cmd"         comment:"\nCommand to launch nvim for code file editing (default: 'nvim')."`
+	ContentPanelCodeExtensions []string `toml:"content_panel_code_extensions" comment:"\nFile extensions that trigger nvim-based editing instead of the built-in textarea."`
 	SidebarWidth            int      `toml:"sidebar_width"              comment:"\nThe length of the sidebar(excluding borders). If you don't find to display the sidebar, you can input 0 directly. If you want to display the value, please place it in the range of 5-20."`
 	SidebarSections         []string `toml:"sidebar_sections"           comment:"\nOrder of sidebar sections (valid values: \"home\", \"pinned\", \"disks\").\nOnly sections included in this list will be displayed."`
 
@@ -139,9 +142,10 @@ type HotkeysType struct {
 	OpenSortOptionsMenu    []string `toml:"open_sort_options_menu"`
 	ToggleReverseSort      []string `toml:"toggle_reverse_sort"`
 
-	FocusOnProcessBar []string `toml:"focus_on_process_bar" comment:"change focus"`
-	FocusOnSidebar    []string `toml:"focus_on_sidebar"`
-	FocusOnMetaData   []string `toml:"focus_on_metadata"`
+	FocusOnProcessBar  []string `toml:"focus_on_process_bar"  comment:"change focus"`
+	FocusOnSidebar     []string `toml:"focus_on_sidebar"`
+	FocusOnMetaData    []string `toml:"focus_on_metadata"`
+	FocusOnContentPanel []string `toml:"focus_on_content_panel"`
 
 	FilePanelItemCreate []string `toml:"file_panel_item_create" comment:"create file/directory and rename "`
 	FilePanelItemRename []string `toml:"file_panel_item_rename"`
@@ -157,6 +161,11 @@ type HotkeysType struct {
 
 	OpenFileWithEditor             []string `toml:"open_file_with_editor"              comment:"editor"`
 	OpenCurrentDirectoryWithEditor []string `toml:"open_current_directory_with_editor"`
+
+	ContentPanelEdit     []string `toml:"content_panel_edit"      comment:"content panel editing"`
+	ContentPanelSave     []string `toml:"content_panel_save"`
+	ContentPanelExitEdit []string `toml:"content_panel_exit_edit"`
+	ContentPanelOpenNvim []string `toml:"content_panel_open_nvim"`
 
 	PinnedDirectory []string `toml:"pinned_directory"  comment:"other"`
 	ToggleDotFile   []string `toml:"toggle_dot_file"`

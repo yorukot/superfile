@@ -80,6 +80,8 @@ func (m *Model) updateChildComponentWidth() {
 }
 
 func (m *Model) ensurePreviewDimensionsSync() tea.Cmd {
+	// Clear any shell output pause so preview re-renders at new size
+	m.FilePreview.ClearShellOutput()
 	if m.FilePreview.GetContentWidth() != m.ExpectedPreviewWidth ||
 		m.FilePreview.GetContentHeight() != m.Height {
 		return m.GetFilePreviewCmd(true)
