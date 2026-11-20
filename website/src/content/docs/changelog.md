@@ -10,6 +10,45 @@ head:
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC(YYYY-MM-DD).
 
+# [**v1.6.1**](https://github.com/yorukot/superfile/releases/tag/v1.6.1)
+
+> 2026-11-20
+
+#### Update
+
+- Move items to the system Trash on macOS, the Recycle Bin on Windows and the FreeDesktop trash on Linux, including other mounted filesystems. [`#1495`](https://github.com/yorukot/superfile/pull/1495), [`#1490`](https://github.com/yorukot/superfile/pull/1490)
+- Write every selected path to the chooser file in panel order. Press `e` to finish a multi-file selection. [`#1653`](https://github.com/yorukot/superfile/pull/1653)
+- Show the number of items in a folder in the file panel’s size column. [`#1648`](https://github.com/yorukot/superfile/pull/1648)
+- Show Windows file attributes and FreeBSD file flags in the metadata panel, including the FreeBSD NO_UCACHE flag. [`#1464`](https://github.com/yorukot/superfile/pull/1464), [`#1472`](https://github.com/yorukot/superfile/pull/1472), [`#1644`](https://github.com/yorukot/superfile/pull/1644)
+- Add the Rosé Pine Dawn and Rosé Pine Moon themes. [`#1664`](https://github.com/yorukot/superfile/pull/1664)
+- Browse documentation by release in the redesigned website. [`#1729`](https://github.com/yorukot/superfile/pull/1729)
+- Add an uninstall script for Linux and macOS, plus an application icon and AppStream metadata for Linux packagers. [`#1467`](https://github.com/yorukot/superfile/pull/1467), [`#1523`](https://github.com/yorukot/superfile/pull/1523)
+
+#### Bug Fix
+
+- Have the cd-on-quit shell functions ask the installed binary for its state file. Replace older copies in your shell config to pick up the fix. [`#1629`](https://github.com/yorukot/superfile/pull/1629)
+- Apply create, paste, compress and extract shortcuts only in a focused file panel. Page Up and Page Down now act on the focused panel and stop at the ends. [`#1685`](https://github.com/yorukot/superfile/pull/1685), [`#1519`](https://github.com/yorukot/superfile/pull/1519), [`#1504`](https://github.com/yorukot/superfile/pull/1504)
+- Keep focus on newly opened panels, respect the configured sidebar sections, skip mount scans when disks are hidden and keep icons out of renamed pin labels. [`#1518`](https://github.com/yorukot/superfile/pull/1518), [`#1442`](https://github.com/yorukot/superfile/pull/1442), [`#1674`](https://github.com/yorukot/superfile/pull/1674), [`#1540`](https://github.com/yorukot/superfile/pull/1540)
+- Preserve symbolic links when copying and include all selected paths when copying to the system clipboard. [`#1501`](https://github.com/yorukot/superfile/pull/1501), [`#1486`](https://github.com/yorukot/superfile/pull/1486)
+- Keep dotfile names when creating ZIP archives and preserve dotted parent directory names during extraction. [`#1475`](https://github.com/yorukot/superfile/pull/1475), [`#1485`](https://github.com/yorukot/superfile/pull/1485), [`#1476`](https://github.com/yorukot/superfile/pull/1476)
+- Report why creation or compression failed, including permission errors. [`#1524`](https://github.com/yorukot/superfile/pull/1524), [`#1498`](https://github.com/yorukot/superfile/pull/1498)
+- Recognize printable UTF-8 text in previews and expand tabs to the next tab stop. [`#1507`](https://github.com/yorukot/superfile/pull/1507), [`#1509`](https://github.com/yorukot/superfile/pull/1509)
+- Read the binary architecture only for recognized executable formats. Show folder size on demand and handle errors while walking a directory. [`#1552`](https://github.com/yorukot/superfile/pull/1552), [`#1630`](https://github.com/yorukot/superfile/pull/1630), [`#1627`](https://github.com/yorukot/superfile/pull/1627)
+- Handle empty input in the SPF prompt, skip fuzzy search when there are no candidates, and preserve literal names such as `~notes`. [`#1701`](https://github.com/yorukot/superfile/pull/1701), [`#1609`](https://github.com/yorukot/superfile/pull/1609), [`#1652`](https://github.com/yorukot/superfile/pull/1652)
+- Truncate repaired TOML files so old trailing content is removed. [`#1529`](https://github.com/yorukot/superfile/pull/1529)
+- Use Go 1.26 for Nix builds to fix the build on Apple Silicon. [`#1635`](https://github.com/yorukot/superfile/pull/1635)
+
+#### Documentation
+
+- Add AI contribution guidelines and a security policy page with private vulnerability reporting instructions. [`#1735`](https://github.com/yorukot/superfile/pull/1735)
+- Document plugin settings and directory icons, clarify selection shortcuts, and add guidance for font setup and removing configuration files. [`#1491`](https://github.com/yorukot/superfile/pull/1491), [`#1528`](https://github.com/yorukot/superfile/pull/1528), [`#1603`](https://github.com/yorukot/superfile/pull/1603), [`#1684`](https://github.com/yorukot/superfile/pull/1684)
+- Add community videos, fix table rendering in MDX and correct the 0x96f theme credit. [`#1543`](https://github.com/yorukot/superfile/pull/1543), [`#1503`](https://github.com/yorukot/superfile/pull/1503), [`#1641`](https://github.com/yorukot/superfile/pull/1641)
+
+#### Dependencies
+
+- Update Bubble Tea, the ANSI library, archive extraction, image handling, system metadata and the CLI library. [`#1731`](https://github.com/yorukot/superfile/pull/1731), [`#1722`](https://github.com/yorukot/superfile/pull/1722), [`#1719`](https://github.com/yorukot/superfile/pull/1719), [`#1717`](https://github.com/yorukot/superfile/pull/1717), [`#1716`](https://github.com/yorukot/superfile/pull/1716), [`#1663`](https://github.com/yorukot/superfile/pull/1663)
+- Update the website to Astro 7 and refresh its image processing and build dependencies. [`#1477`](https://github.com/yorukot/superfile/pull/1477), [`#1656`](https://github.com/yorukot/superfile/pull/1656), [`#1718`](https://github.com/yorukot/superfile/pull/1718), [`#1721`](https://github.com/yorukot/superfile/pull/1721)
+
 # [**v1.6.0**](https://github.com/yorukot/superfile/releases/tag/v1.6.0)
 
 > 2026-06-08
