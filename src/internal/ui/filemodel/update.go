@@ -32,6 +32,9 @@ func (m *Model) CreateNewFilePanel(location string) (tea.Cmd, error) {
 	m.FilePanels[newPanelIndex].SetHeight(m.Height)
 	m.FocusedPanelIndex = newPanelIndex
 
+	// Updates working directory to properly pass cwd to newly spawned processes (terminals,editors, programs)
+	_ = os.Chdir(m.GetFocusedFilePanel().Location)
+
 	m.updateChildComponentWidth()
 	return m.ensurePreviewDimensionsSync(), nil
 }
@@ -48,6 +51,10 @@ func (m *Model) CloseFilePanel() (tea.Cmd, error) {
 		m.FocusedPanelIndex--
 	}
 	m.FilePanels[m.FocusedPanelIndex].IsFocused = true
+
+	// Updates working directory to properly pass cwd to newly spawned processes (terminals,editors, programs)
+	_ = os.Chdir(m.GetFocusedFilePanel().Location)
+
 	m.updateChildComponentWidth()
 
 	return m.ensurePreviewDimensionsSync(), nil
