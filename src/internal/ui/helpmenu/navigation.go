@@ -6,11 +6,11 @@ import "github.com/yorukot/superfile/src/internal/common"
 func (m *Model) ListUp() {
 	if m.cursor > 1 {
 		m.cursor--
-		if m.cursor < m.renderIndex {
-			m.renderIndex = m.cursor
-		}
 		if m.filteredData[m.cursor].subTitle != "" {
 			m.cursor--
+		}
+		if m.cursor < m.renderIndex {
+			m.renderIndex = m.cursor
 		}
 	} else {
 		// Set the cursor to the last item in the list.
@@ -48,7 +48,7 @@ func (m *Model) ListDown() {
 
 		// Scroll down if cursor moved past the viewport.
 		if m.cursor > m.renderIndex+m.height-5 {
-			m.renderIndex++
+			m.renderIndex = m.cursor - (m.height - common.InnerPadding) + 1
 		}
 		// Clamp renderIndex to bottom.
 		bottom := len(m.filteredData) - (m.height - common.InnerPadding)
