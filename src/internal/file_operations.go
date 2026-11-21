@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -54,14 +55,16 @@ func moveElement(src, dst string) error {
 
 	// If on the same partition, attempt to rename (which will use the same inode)
 	if sameDev {
-		if err = os.Rename(src, dst); err == nil {
+		if err = renameNoReplace(src, dst); err == nil {
 			return nil
 		}
-		// If rename fails, fall back to copy+delete
+		if errors.Is(err, os.ErrExist) {
+			return err
+		}
 	}
 
-	// If on different partitions or rename failed, fall back to copy+delete
-	err = copyElement(src, dst)
+	// If on different partitions, fall back to an exclusive copy+delete.
+	err = copyElementNoReplace(src, dst)
 	if err != nil {
 		return fmt.Errorf("failed to copy: %w", err)
 	}
@@ -71,6 +74,25 @@ func moveElement(src, dst string) error {
 		return fmt.Errorf("failed to remove source after copy: %w", err)
 	}
 
+	return nil
+}
+
+func copyElementNoReplace(src, dst string) (err error) {
+	stagingDir, err := os.MkdirTemp(filepath.Dir(dst), ".superfile-move-")
+	if err != nil {
+		return fmt.Errorf("failed to create staging directory: %w", err)
+	}
+	defer func() {
+		err = errors.Join(err, os.RemoveAll(stagingDir))
+	}()
+
+	stagedDestination := filepath.Join(stagingDir, filepath.Base(dst))
+	if err = copyElement(src, stagedDestination); err != nil {
+		return fmt.Errorf("failed to stage copy: %w", err)
+	}
+	if err = renameNoReplace(stagedDestination, dst); err != nil {
+		return fmt.Errorf("failed to publish staged copy: %w", err)
+	}
 	return nil
 }
 
