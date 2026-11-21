@@ -141,6 +141,12 @@ func appFlags() []cli.Flag {
 			Aliases: []string{"wco"},
 			Usage:   "Override a config value using TOML 'key=value' syntax (e.g. 'debug=true'). Repeatable",
 		},
+		&cli.StringFlag{
+			Name:    "cwd-file",
+			Aliases: []string{"cwf"},
+			Usage:   "On quit with cd on quit, write only the last directory path to this file",
+			Value:   "", // Default to the blank string indicating non-usage of flag
+		},
 	}
 }
 
