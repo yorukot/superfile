@@ -69,6 +69,10 @@ var (
 	// opened, before exiting
 	ChooserFile = ""
 
+	// CwdFile is the path where superfile will write the last directory, as plain text,
+	// when it quits with cd on quit (cd_on_quit config, or the cd_quit hotkey)
+	CwdFile = ""
+
 	// Other state variables
 	FixHotkeys    = false
 	FixConfigFile = false
@@ -84,6 +88,10 @@ func SetLastDir(path string) {
 
 func SetChooserFile(path string) {
 	ChooserFile = path
+}
+
+func SetCwdFile(path string) {
+	CwdFile = path
 }
 
 func UpdateVarFromCliArgs(c *cli.Command) {
@@ -109,6 +117,8 @@ func UpdateVarFromCliArgs(c *cli.Command) {
 
 	// It could be non existent. We are writing to the file. If file doesn't exists, we would attempt to create it.
 	SetChooserFile(c.String("chooser-file"))
+	// Same as above, it could be non existent.
+	SetCwdFile(c.String("cwd-file"))
 
 	FixHotkeys = c.Bool("fix-hotkeys")
 	FixConfigFile = c.Bool("fix-config-file")
