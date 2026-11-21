@@ -29,6 +29,7 @@ Without a path, superfile opens [`default_directory`](/configure/superfile-confi
 | `--hotkey-file <path>`  | `--hf`  | Use another hotkey file                                                                              |
 | `--chooser-file <path>` | `--cf`  | Write the chosen file paths here and quit. See [file picker](/guides/shell-integration#file-picker). |
 | `--print-last-dir`      | `--pld` | Print the last folder on exit                                                                        |
+| `--cwd-file <path>`     | `--cwf` | Write the last folder here on a cd on quit. See [cd on quit](/guides/shell-integration#cd-on-quit).  |
 | `--fix-config-file`     | `--fch` | Add missing settings to the config file                                                              |
 | `--fix-hotkeys`         | `--fh`  | Add missing hotkeys to the hotkey file                                                               |
 | `--debug-info`          | `--di`  | Print versions, paths and installed tools, for bug reports                                           |

@@ -17,7 +17,7 @@ Your shell moves to the folder you were browsing when superfile quits.
 
 Press `Q` to quit and cd once, even when `cd_on_quit` is `false`.
 
-On quit, superfile writes a `cd` command to the lastdir file, and the shell function runs it. The Bash, zsh, fish and PowerShell functions ask `spf path-list --lastdir-file` for its location. If you copied a function from an earlier release, replace it with the current one and reload your shell.
+On quit, the shell function reads the last folder from a temporary file it passes with `--cwd-file`, so each shell session has its own file, and runs `cd` to it. `--cwd-file <path>` writes only the folder path, and only when superfile quits with cd on quit. Superfile still writes the older `cd` command to the lastdir file, which `spf path-list --lastdir-file` prints, so a function from an earlier release keeps working. To use the new behavior, replace it with the current one from the [config page](/configure/superfile-config#cd_on_quit) and reload your shell.
 
 `spf --print-last-dir` prints the last folder on exit. It doesn't work in `$(...)`, because superfile draws its interface on standard output too.
 
