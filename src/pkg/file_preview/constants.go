@@ -26,6 +26,9 @@ const (
 	// Kitty quiet mode: suppress both OK and error responses
 	kittyQuietAll = 2
 
+	// Divisor for centering an image inside the preview area
+	centerDivisor = 2
+
 	maxVideoFileSizeForThumb = "104857600" // 100MB limit
 	thumbOutputExt           = ".jpg"
 	thumbGenerationTimeout   = 30 * time.Second

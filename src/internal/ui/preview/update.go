@@ -1,5 +1,7 @@
 package preview
 
+import filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
+
 // UpdateMsg represents an async query result
 
 type UpdateMsg struct {
@@ -19,13 +21,18 @@ type UpdateMsg struct {
 	// APC escape sequences that must be sent directly to the terminal
 	// via tea.Raw(), bypassing the cell-based renderer.
 	rawTransmit string
+
+	// sixel is set for Sixel images. It must be drawn after the frame
+	// containing content. See filemodel.Model.SyncSixel.
+	sixel *filepreview.SixelImage
 }
 
-func NewUpdateMsg(location string, content string, rawTransmit string, width int, height int, reqID int) UpdateMsg {
+func NewUpdateMsg(location string, result RenderResult, width int, height int, reqID int) UpdateMsg {
 	return UpdateMsg{
 		location:      location,
-		content:       content,
-		rawTransmit:   rawTransmit,
+		content:       result.Content,
+		rawTransmit:   result.RawTransmit,
+		sixel:         result.Sixel,
 		contentWidth:  width,
 		contentHeight: height,
 		reqID:         reqID,
@@ -38,6 +45,9 @@ func (msg UpdateMsg) GetReqID() int {
 
 func (m *Model) Apply(msg UpdateMsg) {
 	m.setContent(msg.content, msg.contentWidth, msg.contentHeight, msg.location)
+	if msg.sixel != nil {
+		m.setSixel(msg.sixel)
+	}
 }
 
 func (msg UpdateMsg) GetLocation() string {

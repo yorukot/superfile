@@ -20,6 +20,7 @@ import (
 	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui"
 	"github.com/yorukot/superfile/src/internal/ui/rendering"
+	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
 )
 
 func renderDirectoryPreview(r *rendering.Renderer, itemPath string, previewHeight int) string {
@@ -59,34 +60,51 @@ func renderDirectoryPreview(r *rendering.Renderer, itemPath string, previewHeigh
 	return r.Render()
 }
 
-// renderImagePreview returns (render, rawTransmit). rawTransmit is non-empty
-// only for Kitty protocol and must be sent via tea.Raw().
+// RenderResult is a rendered preview.
+type RenderResult struct {
+	// Content is the preview panel's content.
+	Content string
+	// RawTransmit is Kitty graphics data, or a command clearing Kitty images.
+	// It must be sent via tea.Raw().
+	RawTransmit string
+	// Sixel is set when Content shows a Sixel image. The image must be drawn
+	// after the frame containing Content. See filemodel.Model.SyncSixel.
+	Sixel *filepreview.SixelImage
+}
+
+func textResult(content string, kittyClear string) RenderResult {
+	return RenderResult{Content: content, RawTransmit: kittyClear}
+}
+
 func (m *Model) renderImagePreview(r *rendering.Renderer, itemPath string, previewWidth,
 	previewHeight int, sideAreaWidth int, kittyClear string,
-) (string, string) {
+) RenderResult {
 	if !m.open {
-		return r.AddLines(common.FilePreviewPanelClosedText).Render(), kittyClear
+		return textResult(r.AddLines(common.FilePreviewPanelClosedText).Render(), kittyClear)
 	}
 
 	if !common.Config.ShowImagePreview {
-		return r.AddLines(common.FilePreviewImagePreviewDisabledText).Render(), kittyClear
+		return textResult(r.AddLines(common.FilePreviewImagePreviewDisabledText).Render(), kittyClear)
 	}
 
-	imageRender, rawTransmit, err := m.imagePreviewer.ImagePreview(itemPath, previewWidth, previewHeight,
+	result, err := m.imagePreviewer.ImagePreview(itemPath, previewWidth, previewHeight,
 		common.Theme.FilePanelBG, sideAreaWidth)
 	if errors.Is(err, image.ErrFormat) {
-		return r.AddLines(common.FilePreviewUnsupportedImageFormatsText).Render(), kittyClear
+		return textResult(r.AddLines(common.FilePreviewUnsupportedImageFormatsText).Render(), kittyClear)
 	}
 
 	if err != nil {
 		slog.Error("Error converting image to ANSI", "error", err)
-		return r.AddLines(common.FilePreviewImageConversionErrorText).Render(), kittyClear
+		return textResult(r.AddLines(common.FilePreviewImageConversionErrorText).Render(), kittyClear)
 	}
 
-	// For Kitty placeholders or ANSI output, use vertical alignment
-	return r.AddStyleModifier(func(s lipgloss.Style) lipgloss.Style {
+	// Center Kitty placeholders or ANSI output. A Sixel block already fills
+	// the content area, with the image centered in it.
+	content := r.AddStyleModifier(func(s lipgloss.Style) lipgloss.Style {
 		return s.AlignHorizontal(lipgloss.Center).AlignVertical(lipgloss.Center)
-	}).AddLines(imageRender).Render(), rawTransmit
+	}).AddLines(result.Render).Render()
+
+	return RenderResult{Content: content, RawTransmit: result.RawTransmit, Sixel: result.Sixel}
 }
 
 func renderPreviewError(err error) string {
@@ -157,15 +175,14 @@ func (m *Model) RenderTextWithDimension(text string, height int, width int) stri
 		Render()
 }
 
-// RenderWithPath returns (render, rawTransmit). rawTransmit is non-empty
-// for Kitty images (transmit data) or when clearing Kitty images (delete-all).
-// It must be sent via tea.Raw().
+// RenderWithPath renders the preview of itemPath. See RenderResult for how
+// to send the raw parts to the terminal.
 func (m *Model) RenderWithPath(
 	itemPath string,
 	previewWidth int,
 	previewHeight int,
 	fullModelWidth int,
-) (string, string) {
+) RenderResult {
 	r := ui.FilePreviewPanelRenderer(previewHeight, previewWidth)
 	// Raw command to clear any previous Kitty images when showing non-image content
 	kittyClear := m.imagePreviewer.GetKittyClearRaw()
@@ -181,7 +198,7 @@ func (m *Model) RenderWithPath(
 	fileInfo, infoErr := os.Stat(itemPath)
 	if infoErr != nil {
 		slog.Error("Error get file info", "error", infoErr)
-		return r.AddLines(common.FilePreviewNoFileInfoText).Render(), kittyClear
+		return textResult(r.AddLines(common.FilePreviewNoFileInfoText).Render(), kittyClear)
 	}
 	slog.Debug("Attempting to render preview", "itemPath", itemPath,
 		"mode", fileInfo.Mode().String(), "isRegular", fileInfo.Mode().IsRegular())
@@ -189,23 +206,23 @@ func (m *Model) RenderWithPath(
 	// For non regular files which are not directories Dont try to read them
 	// See Issue #876
 	if !fileInfo.Mode().IsRegular() && (fileInfo.Mode()&fs.ModeDir) == 0 {
-		return r.AddLines(common.FilePreviewUnsupportedFileMode).Render(), kittyClear
+		return textResult(r.AddLines(common.FilePreviewUnsupportedFileMode).Render(), kittyClear)
 	}
 
 	ext := filepath.Ext(itemPath)
 	if slices.Contains(common.UnsupportedPreviewFormats, ext) {
-		return r.AddLines(common.FilePreviewUnsupportedFormatText).Render(), kittyClear
+		return textResult(r.AddLines(common.FilePreviewUnsupportedFormatText).Render(), kittyClear)
 	}
 
 	if fileInfo.IsDir() {
-		return renderDirectoryPreview(r, itemPath, contentHeight), kittyClear
+		return textResult(renderDirectoryPreview(r, itemPath, contentHeight), kittyClear)
 	}
 
 	if m.thumbnailGenerator != nil && m.thumbnailGenerator.SupportsExt(ext) {
 		thumbnailPath, err := m.thumbnailGenerator.GetThumbnailOrGenerate(itemPath)
 		if err != nil {
 			slog.Error("Error generating thumbnail", "error", err)
-			return r.AddLines(common.FilePreviewThumbnailGenerationErrorText).Render(), kittyClear
+			return textResult(r.AddLines(common.FilePreviewThumbnailGenerationErrorText).Render(), kittyClear)
 		}
 		return m.renderImagePreview(
 			r, thumbnailPath, contentWidth, contentHeight,
@@ -218,5 +235,5 @@ func (m *Model) RenderWithPath(
 			fullModelWidth-previewWidth, kittyClear)
 	}
 
-	return m.renderTextPreview(r, itemPath, contentWidth, contentHeight), kittyClear
+	return textResult(m.renderTextPreview(r, itemPath, contentWidth, contentHeight), kittyClear)
 }

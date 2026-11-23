@@ -41,7 +41,7 @@ func isKittyCapable() bool {
 // GetKittyClearRaw returns the raw APC command to clear all Kitty images.
 // This must be sent via tea.Raw(), not embedded in view content.
 func (p *ImagePreviewer) GetKittyClearRaw() string {
-	if !p.IsKittyCapable() {
+	if p.SelectedRenderer() != RendererKitty {
 		return ""
 	}
 	return ansi.KittyGraphics(nil, "a=d")
@@ -81,28 +81,10 @@ func (p *ImagePreviewer) renderWithKittyUsingTermCap(img image.Image, path strin
 	}
 
 	cellSize := p.terminalCap.GetTerminalCellSize()
-	pixelsPerColumn := cellSize.PixelsPerColumn
-	pixelsPerRow := cellSize.PixelsPerRow
+	slog.Debug("pixelsPerColumn", "pixelsPerColumn", cellSize.PixelsPerColumn,
+		"pixelsPerRow", cellSize.PixelsPerRow)
 
-	slog.Debug("pixelsPerColumn", "pixelsPerColumn", pixelsPerColumn, "pixelsPerRow", pixelsPerRow)
-
-	imgRatio := float64(originalWidth) / float64(originalHeight)
-	termRatio := float64(maxWidth*pixelsPerColumn) / float64(maxHeight*pixelsPerRow)
-
-	var dstCols, dstRows int
-	if imgRatio > termRatio {
-		dstCols = maxWidth
-		dstRows = int(float64(dstCols*pixelsPerColumn) / imgRatio / float64(pixelsPerRow))
-	} else {
-		dstRows = maxHeight
-		dstCols = int(float64(dstRows*pixelsPerRow) * imgRatio / float64(pixelsPerColumn))
-	}
-	if dstCols <= 0 {
-		dstCols = 1
-	}
-	if dstRows <= 0 {
-		dstRows = 1
-	}
+	dstCols, dstRows := fitImageInCells(originalWidth, originalHeight, maxWidth, maxHeight, cellSize)
 
 	imgID := generatePlacementID(path)
 	imgArea := img.Bounds()
