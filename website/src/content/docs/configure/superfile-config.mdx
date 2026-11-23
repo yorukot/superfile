@@ -140,6 +140,14 @@ Example command to enable - `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned`
 
 `false` => Does not show the image preview.
 
+- ###### image_renderer
+
+How images are drawn. See [Image rendering](/getting-started/image-preview#image-rendering).
+
+`"auto"` => Uses the best method your terminal supports: Kitty graphics, then Sixel, then colored half-blocks.
+
+`"kitty"`, `"sixel"` or `"ansi"` => Always uses that method. `"ansi"` means colored half-blocks, which work in every terminal.
+
 - ###### show_panel_footer_info
 
 `true` => Shows additional footer info for file panel like panel mode and sort type.
