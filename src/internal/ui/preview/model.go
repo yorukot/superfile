@@ -40,7 +40,7 @@ func New() Model {
 		// have code with good defensive programming
 		// Some of these processes are IO operations so maybe it should
 		// be done via an Init() function
-		imagePreviewer:     filepreview.NewImagePreviewer(),
+		imagePreviewer:     filepreview.NewImagePreviewerWithRenderer(common.Config.ImagePreviewRenderer),
 		thumbnailGenerator: generator,
 		// TODO:  This is an IO operation, move to async ?
 		batCmd: checkBatCmd(),

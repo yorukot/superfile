@@ -12,29 +12,106 @@ import (
 	"github.com/charmbracelet/x/ansi/kitty"
 )
 
-// isKittyCapable checks if the terminal supports Kitty graphics protocol
-func isKittyCapable() bool {
-	termProgram := os.Getenv("TERM_PROGRAM")
-	term := os.Getenv("TERM")
+const (
+	rendererAuto  = "auto"
+	rendererKitty = "kitty"
+	rendererANSI  = "ansi"
+)
 
-	// TODO: Replace this allowlist with a real Kitty graphics capability check.
-	// tmux masks the underlying terminal through TERM/TERM_PROGRAM.
-	knownTerminals := []string{
-		"ghostty",
-		"WezTerm",
-		"iTerm2",
-		"xterm-kitty",
-		"kitty",
-		"Konsole",
-		"WarpTerminal",
+func normalizeImagePreviewRenderer(renderer string) string {
+	switch strings.ToLower(strings.TrimSpace(renderer)) {
+	case "", rendererAuto:
+		return rendererAuto
+	case rendererKitty:
+		return rendererKitty
+	case rendererANSI:
+		return rendererANSI
+	default:
+		return rendererAuto
+	}
+}
+
+// TODO: Replace this allowlist with a real Kitty graphics capability check.
+// tmux masks the underlying terminal through TERM/TERM_PROGRAM.
+var knownKittyTerminals = []string{ //nolint:gochecknoglobals // Static terminal allowlist, effectively const.
+	"ghostty",
+	// "wezterm",
+	"iterm2",
+	"xterm-kitty",
+	"kitty",
+	"konsole",
+	"warpterminal",
+}
+
+// kittyEnvHints are environment variables set by kitty-capable terminals.
+// They are inherited into tmux panes and are checked with or without tmux.
+var kittyEnvHints = []string{ //nolint:gochecknoglobals // Static env hint allowlist, effectively const.
+	"KITTY_WINDOW_ID",
+	"GHOSTTY_RESOURCES_DIR",
+	"GHOSTTY_BIN_DIR",
+	// NOTE: Out of my scope.
+	// Wezterm: freezes (didn't work, only with ascii),
+	// iTerm2: sometimes is slow, iTerm2 sometimes freezes and slow (works but poor performance on MacOS)
+	// konsole terminal: image position is no right also break the tui (even with tmux) (works but bad position)
+	//
+	// "WEZTERM_PANE",
+	// "WEZTERM_EXECUTABLE",
+	// "ITERM_SESSION_ID",
+	// "KONSOLE_VERSION",
+	//"WARP_IS_LOCAL_SHELL_SESSION",
+}
+
+// reports whether the terminal environment indicates support for the Kitty graphics protocol.
+func detectKittySupport() bool {
+	inTmuxSession := inTmux()
+	if inTmuxSession && !ensureTmuxPassthrough() {
+		return false
 	}
 
-	for _, knownTerm := range knownTerminals {
-		if strings.EqualFold(termProgram, knownTerm) || strings.EqualFold(term, knownTerm) {
-			return true
+	if isKnownTerminalAllowed() {
+		return true
+	}
+
+	// Terminal-specific env vars (e.g. KITTY_WINDOW_ID) are checked with or without tmux
+	if hasKittyEnvHint() {
+		return true
+	}
+
+	// Some tmux setups preserve original TERM_PROGRAM in environment.
+	if inTmuxSession {
+		for _, envKey := range []string{"ORIG_TERM_PROGRAM", "LC_TERMINAL"} {
+			val := os.Getenv(envKey)
+			for _, knownTerm := range knownKittyTerminals {
+				if strings.EqualFold(val, knownTerm) {
+					return true
+				}
+			}
 		}
 	}
 
+	return false
+}
+
+func isKnownTerminalAllowed() bool {
+	termProgram := os.Getenv("TERM_PROGRAM")
+	term := os.Getenv("TERM")
+	for _, knownTerm := range knownKittyTerminals {
+		if strings.EqualFold(termProgram, knownTerm) ||
+			strings.Contains(strings.ToLower(term), strings.ToLower(knownTerm)) {
+			return true
+		}
+	}
+	return false
+}
+
+// hasKittyEnvHint reports whether any terminal-specific environment variable of a kitty-capable terminal is present.
+// Inside tmux these are inherited from the outer terminal, which is how the outer terminal's graphics capability can be inferred.
+func hasKittyEnvHint() bool {
+	for _, key := range kittyEnvHints {
+		if os.Getenv(key) != "" {
+			return true
+		}
+	}
 	return false
 }
 
@@ -44,7 +121,12 @@ func (p *ImagePreviewer) GetKittyClearRaw() string {
 	if !p.IsKittyCapable() {
 		return ""
 	}
-	return ansi.KittyGraphics(nil, "a=d")
+	raw, err := tmuxPassthroughWrap(ansi.KittyGraphics(nil, "a=d"))
+	if err != nil {
+		slog.Error("Failed to prepare kitty clear command for tmux passthrough", "error", err)
+		return ""
+	}
+	return raw
 }
 
 // generatePlacementID generates a unique placement ID based on file path
@@ -132,9 +214,14 @@ func (p *ImagePreviewer) renderWithKittyUsingTermCap(img image.Image, path strin
 	// Build Unicode placeholder cells for the view
 	placeholders := buildKittyPlaceholders(imgID, dstCols, dstRows)
 
+	rawTransmit, err := tmuxPassthroughWrap(transmitBuf.String())
+	if err != nil {
+		return nil, fmt.Errorf("failed to prepare kitty graphics for tmux passthrough: %w", err)
+	}
+
 	return &KittyImageResult{
 		Placeholders: placeholders,
-		RawTransmit:  transmitBuf.String(),
+		RawTransmit:  rawTransmit,
 	}, nil
 }
 
@@ -175,5 +262,16 @@ func buildKittyPlaceholders(imgID int, cols, rows int) string {
 
 // IsKittyCapable checks if the terminal supports Kitty graphics protocol
 func (p *ImagePreviewer) IsKittyCapable() bool {
-	return isKittyCapable()
+	return p.isKittyCapable()
+}
+
+func (p *ImagePreviewer) isKittyCapable() bool {
+	switch p.rendererPref {
+	case rendererANSI:
+		return false
+	case rendererKitty:
+		return true
+	default:
+		return detectKittySupport()
+	}
 }
