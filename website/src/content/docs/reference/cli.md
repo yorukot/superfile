@@ -26,6 +26,7 @@ Without a path, superfile opens [`default_directory`](/configure/superfile-confi
 | Option                  | Short   | Description                                                                                          |
 | ----------------------- | ------- | ---------------------------------------------------------------------------------------------------- |
 | `--config-file <path>`  | `-c`    | Use another config file                                                                              |
+| `--with-config-override <key=value>` | `--wco` | Override a config setting for this run. Repeatable. Same syntax as config.toml |
 | `--hotkey-file <path>`  | `--hf`  | Use another hotkey file                                                                              |
 | `--chooser-file <path>` | `--cf`  | Write the chosen file paths here and quit. See [file picker](/guides/shell-integration#file-picker). |
 | `--print-last-dir`      | `--pld` | Print the last folder on exit                                                                        |
@@ -42,6 +43,16 @@ Short options also work with one dash, such as `-pld`.
 `--fix-config-file` and `--fix-hotkeys` back up your file as `<name>.bak-<random>`, then rewrite it. Your comments are lost.
 
 :::
+
+## Config overrides
+
+Use `--with-config-override` (or `--wco`) to override settings from the loaded config file for the current run without modifying the file. Each value uses TOML `key=value` syntax. Repeat the flag to override multiple settings.
+
+```bash
+spf --wco 'debug=true' \
+    --wco 'theme="gruvbox"' \
+    --wco 'sidebar_sections=["home","pinned"]'
+```
 
 ## Commands
 
