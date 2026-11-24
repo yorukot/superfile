@@ -1,10 +1,13 @@
 package internal
 
 import (
+	"context"
+	"errors"
 	"log/slog"
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
@@ -213,5 +216,39 @@ func NewSpfErrorModalMsg(m spferror.Model, reqID int) SpfErrorModalUpdateMsg {
 
 func (msg SpfErrorModalUpdateMsg) ApplyToModel(m *model) tea.Cmd {
 	m.spfError = msg.m
+	return nil
+}
+
+type DirSizeMsg struct {
+	BaseMessage
+
+	result filepanel.DirSizeResult
+}
+
+func NewDirSizeMsg(result filepanel.DirSizeResult, reqID int) DirSizeMsg {
+	return DirSizeMsg{
+		result: result,
+		BaseMessage: BaseMessage{
+			reqID: reqID,
+		},
+	}
+}
+
+func (msg DirSizeMsg) ApplyToModel(m *model) tea.Cmd {
+	applied := false
+	for i := range m.fileModel.FilePanels {
+		if m.fileModel.FilePanels[i].ApplyDirSizeResult(msg.result) {
+			applied = true
+		}
+	}
+	if !applied {
+		slog.Debug("DirSizeMsg for cancelled or restarted calculation. Ignoring",
+			"path", msg.result.Location, "id", msg.GetReqID())
+		return nil
+	}
+	if msg.result.Err != nil && !errors.Is(msg.result.Err, context.Canceled) {
+		slog.Error("Error while calculating directory size", "path", msg.result.Location, "error", msg.result.Err)
+		m.notifyModel = notify.New(true, "Cannot calculate directory size", msg.result.Err.Error(), notify.NoAction)
+	}
 	return nil
 }
