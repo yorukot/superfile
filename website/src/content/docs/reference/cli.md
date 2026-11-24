@@ -23,18 +23,18 @@ Without a path, superfile opens [`default_directory`](/configure/superfile-confi
 
 ## Options
 
-| Option                  | Short   | Description                                                                                          |
-| ----------------------- | ------- | ---------------------------------------------------------------------------------------------------- |
-| `--config-file <path>`  | `-c`    | Use another config file                                                                              |
-| `--with-config-override <key=value>` | `--wco` | Override a config setting for this run. Repeatable. Same syntax as config.toml |
-| `--hotkey-file <path>`  | `--hf`  | Use another hotkey file                                                                              |
-| `--chooser-file <path>` | `--cf`  | Write the chosen file paths here and quit. See [file picker](/guides/shell-integration#file-picker). |
-| `--print-last-dir`      | `--pld` | Print the last folder on exit                                                                        |
-| `--fix-config-file`     | `--fch` | Add missing settings to the config file                                                              |
-| `--fix-hotkeys`         | `--fh`  | Add missing hotkeys to the hotkey file                                                               |
-| `--debug-info`          | `--di`  | Print versions, paths and installed tools, for bug reports                                           |
-| `--version`             | `-v`    | Print the version                                                                                    |
-| `--help`                | `-h`    | Print the help                                                                                       |
+| Option                               | Short   | Description                                                                                          |
+| ------------------------------------ | ------- | ---------------------------------------------------------------------------------------------------- |
+| `--config-file <path>`               | `-c`    | Use another config file                                                                              |
+| `--with-config-override <key=value>` | `--wco` | Override a config setting for this run. Repeatable. Same syntax as config.toml                       |
+| `--hotkey-file <path>`               | `--hf`  | Use another hotkey file                                                                              |
+| `--chooser-file <path>`              | `--cf`  | Write the chosen file paths here and quit. See [file picker](/guides/shell-integration#file-picker). |
+| `--print-last-dir`                   | `--pld` | Print the last folder on exit                                                                        |
+| `--fix-config-file`                  | `--fch` | Add missing settings to the config file                                                              |
+| `--fix-hotkeys`                      | `--fh`  | Add missing hotkeys to the hotkey file                                                               |
+| `--debug-info`                       | `--di`  | Print versions, paths and installed tools, for bug reports                                           |
+| `--version`                          | `-v`    | Print the version                                                                                    |
+| `--help`                             | `-h`    | Print the help                                                                                       |
 
 Short options also work with one dash, such as `-pld`.
 
