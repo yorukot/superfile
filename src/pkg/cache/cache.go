@@ -69,8 +69,11 @@ func (c *Cache[T]) Set(key string, obj T) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
-	// Check if we need to evict entries
-	if len(c.cache) >= c.maxEntries {
+	// Only evict when we are about to insert a NEW entry. Overwriting an
+	// existing key does not grow the cache, so running evictOldest in that
+	// case would drop an unrelated entry (e.g. refreshing the newest key at
+	// capacity used to evict its oldest sibling).
+	if _, exists := c.cache[key]; !exists && len(c.cache) >= c.maxEntries {
 		c.evictOldest()
 	}
 
