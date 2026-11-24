@@ -14,6 +14,7 @@ const (
 	FileModelMinWidth       = filepanel.MinWidth
 	FilePreviewResizingText = "Resizing..."
 	FilePreviewLoadingText  = "Loading..."
+	PercentDivisor          = 100
 )
 
 var ErrMaximumPanelCount = errors.New("maximum panel count reached")
