@@ -27,9 +27,9 @@ import (
 // initialConfig load and handle all configuration files (spf config,Hotkeys
 // themes) setted up. Processes input directories and returns toggle states.
 
-//nolint:nonamedreturns // Named results distinguish the two boolean toggle states.
+//nolint:nonamedreturns // Named results distinguish the boolean toggle states.
 func initialConfig(firstPanelPaths []string) (toggleDotFile bool,
-	toggleFooter bool, zClient *zoxidelib.Client) {
+	toggleFooter bool, toggleSidebar bool, zClient *zoxidelib.Client) {
 	// Open log stream
 	file, err := os.OpenFile(variable.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, utils.LogFilePerm)
 
@@ -90,8 +90,9 @@ func initialConfig(firstPanelPaths []string) (toggleDotFile bool,
 
 	toggleDotFile = utils.ReadBoolFile(variable.ToggleDotFile, false)
 	toggleFooter = utils.ReadBoolFile(variable.ToggleFooter, true)
+	toggleSidebar = utils.ReadBoolFile(variable.ToggleSidebar, true)
 
-	return toggleDotFile, toggleFooter, zClient
+	return toggleDotFile, toggleFooter, toggleSidebar, zClient
 }
 
 func updateFirstFilePanelPaths(firstPanelPaths []string, cwd string, zClient *zoxidelib.Client) {
