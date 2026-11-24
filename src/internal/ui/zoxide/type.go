@@ -25,6 +25,9 @@ type Model struct {
 	// Height is dynamically adjusted based on content
 	maxHeight int
 
+	// Visible results configuration
+	maxVisibleResults int
+
 	// Request tracking for async queries
 	reqCnt int
 }

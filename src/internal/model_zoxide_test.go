@@ -131,6 +131,32 @@ func TestZoxide(t *testing.T) {
 		assert.Greater(t, updatedMaxHeight, initialMaxHeight, "MaxHeight should increase with larger window")
 	})
 
+	t.Run("Zoxide configurable modal size and visible results", func(t *testing.T) {
+		origWidth := common.Config.ZoxideModalWidth
+		origHeight := common.Config.ZoxideModalHeight
+		origResults := common.Config.ZoxideMaxVisibleResults
+		defer func() {
+			common.Config.ZoxideModalWidth = origWidth
+			common.Config.ZoxideModalHeight = origHeight
+			common.Config.ZoxideMaxVisibleResults = origResults
+		}()
+
+		common.Config.ZoxideModalWidth = 70
+		common.Config.ZoxideModalHeight = 60
+		common.Config.ZoxideMaxVisibleResults = 10
+
+		p := setupProgAndOpenZoxide(t, zClient, dir1)
+		fullW := DefaultTestModelWidth
+		fullH := DefaultTestModelHeight
+
+		expectedWidth := fullW * 70 / 100
+		expectedHeight := fullH * 60 / 100
+
+		assert.Equal(t, expectedWidth, p.getModel().zoxideModal.GetWidth())
+		assert.Equal(t, expectedHeight, p.getModel().zoxideModal.GetMaxHeight())
+		assert.Equal(t, 10, p.getModel().zoxideModal.GetConfiguredMaxVisibleResults())
+	})
+
 	t.Run("Zoxide 'z' key suppression on open", func(t *testing.T) {
 		p := setupProgAndOpenZoxide(t, zClient, dir1)
 		assert.Empty(t, p.getModel().zoxideModal.GetTextInputValue(),
