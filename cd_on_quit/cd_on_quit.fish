@@ -1,12 +1,12 @@
 function spf
-    # Ask the binary where it writes the lastdir file, so this works for every
-    # installation method (Homebrew, package managers, manual install, ...)
-    set spf_last_dir (command spf path-list --lastdir-file)
+    # Each session gets its own file, so concurrent sessions can't cd into
+    # each other's directory
+    set -l spf_cwd_file (mktemp)
 
-    command spf $argv
+    command spf --cwd-file $spf_cwd_file $argv
 
-    if test -f "$spf_last_dir"
-        source "$spf_last_dir"
-        rm -f -- "$spf_last_dir" >> /dev/null
+    if test -s "$spf_cwd_file"
+        cd -- (cat -- "$spf_cwd_file")
     end
+    rm -f -- "$spf_cwd_file" >> /dev/null
 end

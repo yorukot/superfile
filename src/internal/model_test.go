@@ -206,6 +206,45 @@ func TestQuit(t *testing.T) {
 		err = os.Remove(lastDirFile)
 		require.NoError(t, err)
 	})
+
+	t.Run("Cwd file gets the plain path on cd quit", func(t *testing.T) {
+		lastDirFile := filepath.Join(variable.SuperFileStateDir, "lastdir")
+		require.NoError(t, os.MkdirAll(filepath.Dir(lastDirFile), 0o755))
+		cwdFile := filepath.Join(t.TempDir(), "cwd")
+		variable.SetCwdFile(cwdFile)
+		t.Cleanup(func() {
+			variable.SetCwdFile("")
+			os.Remove(lastDirFile)
+		})
+		m := defaultTestModel(testDir)
+
+		cmd := TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.CdQuit[0]))
+
+		assert.Equal(t, quitDone, m.modelQuitState)
+		assert.True(t, IsTeaQuit(cmd))
+
+		data, err := os.ReadFile(cwdFile)
+		require.NoError(t, err)
+		assert.Equal(t, testDir, string(data), "Cwd file should contain only the path")
+
+		// The older lastdir file is still written
+		data, err = os.ReadFile(lastDirFile)
+		require.NoError(t, err)
+		assert.Equal(t, "cd '"+testDir+"'", string(data))
+	})
+
+	t.Run("Cwd file is not written on normal quit", func(t *testing.T) {
+		cwdFile := filepath.Join(t.TempDir(), "cwd")
+		variable.SetCwdFile(cwdFile)
+		t.Cleanup(func() { variable.SetCwdFile("") })
+		m := defaultTestModel(testDir)
+
+		cmd := TeaUpdate(m, utils.TeaRuneKeyMsg(common.Hotkeys.Quit[0]))
+
+		assert.Equal(t, quitDone, m.modelQuitState)
+		assert.True(t, IsTeaQuit(cmd))
+		assert.NoFileExists(t, cwdFile)
+	})
 }
 
 func TestChooserFile(t *testing.T) {

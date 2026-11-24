@@ -625,6 +625,13 @@ func (m *model) quitSuperfile(cdOnQuit bool) {
 	variable.SetLastDir(currentDir)
 
 	if cdOnQuit {
+		// The caller specified file gets the plain path, so write it before escaping
+		if variable.CwdFile != "" {
+			err := os.WriteFile(variable.CwdFile, []byte(currentDir), utils.ConfigFilePerm)
+			if err != nil {
+				slog.Error("Error during writing cwd file", "error", err)
+			}
+		}
 		// escape single quote
 		currentDir = strings.ReplaceAll(currentDir, "'", "'\\''")
 		err := os.WriteFile(variable.LastDirFile, []byte("cd '"+currentDir+"'"), utils.ConfigFilePerm)
