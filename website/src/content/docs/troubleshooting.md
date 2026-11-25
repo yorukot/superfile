@@ -24,10 +24,19 @@ Try these things below:
 
 ## Images show as colored blocks
 
-superfile only uses the Kitty graphics protocol in [supported terminals](/getting-started/image-preview#image-rendering). Try these things below:
+superfile only uses Kitty graphics or Sixel in [supported terminals](/getting-started/image-preview#image-rendering). Try these things below:
 
 - Check your terminal with `echo $TERM $TERM_PROGRAM`
 - Run superfile outside tmux
+- If your terminal supports Kitty graphics or Sixel but isn't detected, set [`image_renderer`](/configure/superfile-config#image_renderer)
+
+## Image previews are blank
+
+Windows Terminal versions before 1.22 don't support Sixel, so the image area stays empty. Update Windows Terminal, or set [`image_renderer = "ansi"`](/configure/superfile-config#image_renderer).
+
+## Images look broken or leave marks behind
+
+If images are garbled, misplaced or leave parts behind, your terminal may not fully support the method superfile picked. Set [`image_renderer = "ansi"`](/configure/superfile-config#image_renderer) to use colored half-blocks instead.
 
 ## PDF or video files show "Unsupported formats"
 

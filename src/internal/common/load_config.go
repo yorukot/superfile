@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"runtime"
+	"strings"
 
 	"github.com/charmbracelet/x/ansi"
 	"github.com/pelletier/go-toml/v2"
@@ -82,6 +83,13 @@ func ValidateConfig(c *ConfigType) error {
 				),
 			)
 		}
+	}
+
+	switch strings.ToLower(c.ImageRenderer) {
+	case "", "auto", "kitty", "sixel", "ansi":
+	default:
+		return errors.New(LoadConfigError("image_renderer",
+			"Image renderer must be one of: auto, kitty, sixel, ansi."))
 	}
 
 	if c.DefaultSortType < 0 || c.DefaultSortType > 4 {

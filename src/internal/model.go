@@ -19,6 +19,7 @@ import (
 	"charm.land/lipgloss/v2"
 	"github.com/barasher/go-exiftool"
 
+	"github.com/yorukot/superfile/src/internal/ui/filemodel"
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 	"github.com/yorukot/superfile/src/internal/ui/metadata"
 	"github.com/yorukot/superfile/src/internal/ui/notify"
@@ -75,6 +76,15 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		resizeCmd = m.handleWindowResize(msg)
+		// The renderer repaints the whole screen, erasing any Sixel image.
+		m.fileModel.InvalidateSixel()
+	case editorFinishedMsg, tea.ResumeMsg:
+		// Returning from an external program or suspend repaints the screen.
+		m.fileModel.InvalidateSixel()
+	case filemodel.SixelDrawMsg:
+		updateCmd = m.fileModel.HandleSixelDraw(msg)
+	case tea.RawMsg:
+		updateCmd = m.fileModel.HandleSixelRaw(msg)
 	case tea.MouseMsg:
 		m.handleMouseMsg(msg)
 	case tea.KeyPressMsg:
@@ -107,8 +117,25 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	metadataCmd = m.getMetadataCmd()
 
+	// Must come after everything that can change the preview or overlays.
+	sixelCmd := m.fileModel.SyncSixel(m.isPreviewCovered())
+
 	return m, tea.Batch(sidebarCmd, helpMenuCmd, inputCmd, updateCmd,
-		panelCmd, metadataCmd, filePreviewCmd, resizeCmd)
+		panelCmd, metadataCmd, filePreviewCmd, resizeCmd, sixelCmd)
+}
+
+// isPreviewCovered reports whether the view currently draws something over,
+// or instead of, the preview panel: an overlay, or a full-screen warning.
+// Keep in sync with viewContent and updateRenderForOverlay.
+func (m *model) isPreviewCovered() bool {
+	if !m.firstLoadingComplete ||
+		m.fullHeight < common.MinimumHeight || m.fullWidth < common.MinimumWidth ||
+		m.fileModel.SinglePanelWidth < filepanel.MinWidth {
+		return true
+	}
+	return m.spfError.IsOpen() || m.helpMenu.IsOpen() || m.promptModal.IsOpen() ||
+		m.zoxideModal.IsOpen() || m.sortModal.IsOpen() || m.firstUse ||
+		m.typingModal.open || m.notifyModel.IsOpen()
 }
 
 func (m *model) handleMouseMsg(msg tea.MouseMsg) {

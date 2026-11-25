@@ -31,7 +31,11 @@ superfile uses the Kitty graphics protocol when `TERM` or `TERM_PROGRAM` is one 
 kitty  xterm-kitty  ghostty  WezTerm  iTerm2  Konsole  WarpTerminal
 ```
 
-Everywhere else, including inside tmux, images are drawn with colored half-block characters. Sixel is not supported.
+In Windows Terminal 1.22 or later, superfile uses Sixel. This includes WSL running inside Windows Terminal, but not tmux or another terminal started from it.
+
+Everywhere else, including inside tmux, images are drawn with colored half-block characters.
+
+To choose the method yourself, set [`image_renderer`](/configure/superfile-config#image_renderer) to `"kitty"`, `"sixel"` or `"ansi"` (half-blocks). Use `"sixel"` for other terminals that support Sixel, such as foot or mlterm.
 
 :::note
 

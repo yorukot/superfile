@@ -18,7 +18,21 @@ type Model struct {
 	contentWidth  int
 	contentHeight int
 
-	loading            bool
+	loading bool
+
+	// sixel is the Sixel image shown by content, if any. content then has
+	// marker cells where the image goes. See filepreview.SixelMarker.
+	sixel *filepreview.SixelImage
+	// sixelAlt is true when content uses SixelMarkerAlt instead of SixelMarker.
+	sixelAlt bool
+	// drawnSixelAlt is the sixelAlt of the image most recently drawn on the
+	// terminal. See setSixel.
+	drawnSixelAlt bool
+	// sixelHidden hides the Sixel image, e.g. while an overlay is open, by
+	// showing hiddenContent (content with plain spaces instead of markers).
+	sixelHidden   bool
+	hiddenContent string
+
 	imagePreviewer     *filepreview.ImagePreviewer
 	batCmd             string
 	thumbnailGenerator *filepreview.ThumbnailGenerator

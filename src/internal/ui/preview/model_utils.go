@@ -1,9 +1,54 @@
 package preview
 
-import "log/slog"
+import (
+	"log/slog"
+	"strings"
+
+	filepreview "github.com/yorukot/superfile/src/pkg/file_preview"
+)
 
 func (m *Model) GetContent() string {
+	if m.sixelHidden && m.sixel != nil {
+		return m.hiddenContent
+	}
 	return m.content
+}
+
+// GetSixel returns the Sixel image shown by the current content, or nil.
+func (m *Model) GetSixel() *filepreview.SixelImage {
+	return m.sixel
+}
+
+// SetSixelHidden hides or shows the Sixel image. While hidden, the marker
+// cells are replaced with plain spaces, so the renderer rewrites them, which
+// erases the image from the terminal.
+func (m *Model) SetSixelHidden(hidden bool) {
+	m.sixelHidden = hidden
+}
+
+// MarkSixelDrawn records that the current Sixel image is being drawn on the
+// terminal, so the next image uses the other marker.
+func (m *Model) MarkSixelDrawn() {
+	m.drawnSixelAlt = m.sixelAlt
+}
+
+// setSixel records that content shows a Sixel image. Must be called right
+// after setContent.
+func (m *Model) setSixel(img *filepreview.SixelImage) {
+	m.sixel = img
+	// Use the other marker than the image last drawn, so the cells under
+	// this image always differ from the cells under that one: every cell is
+	// then rewritten, erasing it, before this one is drawn. Flipping on every
+	// image isn't enough: Bubble Tea only shows the latest view at each frame,
+	// so with two images in one frame, the third would match the first.
+	m.sixelAlt = !m.drawnSixelAlt
+	if m.sixelAlt {
+		m.content = strings.ReplaceAll(m.content, filepreview.SixelMarker, filepreview.SixelMarkerAlt)
+	}
+	m.hiddenContent = strings.NewReplacer(
+		filepreview.SixelMarker, " ",
+		filepreview.SixelMarkerAlt, " ",
+	).Replace(m.content)
 }
 
 func (m *Model) GetContentWidth() int {
@@ -38,6 +83,8 @@ func (m *Model) setContent(content string, width int, height int, location strin
 	m.contentHeight = height
 	m.location = location
 	m.loading = false
+	m.sixel = nil
+	m.hiddenContent = ""
 }
 
 func (m *Model) SetEmptyWithDimensions(width int, height int) {

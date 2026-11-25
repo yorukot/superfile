@@ -7,7 +7,6 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
-	"github.com/yorukot/superfile/src/internal/common"
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 	"github.com/yorukot/superfile/src/internal/ui/preview"
 )
@@ -79,6 +78,9 @@ func (m *Model) UpdatePreviewPanel(msg preview.UpdateMsg) tea.Cmd {
 		return nil
 	}
 	m.FilePreview.Apply(msg)
+	// New content replaces any Sixel image on screen. If it is a Sixel image
+	// itself, SyncSixel schedules drawing it.
+	m.InvalidateSixel()
 
 	// For Kitty images, transmit image data directly to the terminal
 	if raw := msg.GetRawTransmit(); raw != "" {
@@ -105,14 +107,9 @@ func (m *Model) GetFilePreviewCmd(forcePreviewRender bool) tea.Cmd {
 	m.FilePreview.SetLocation(selectedItem.Location)
 	m.FilePreview.SetLoading()
 
-	// HACK!!!. fileModel must not be aware of other dimensions. but...
-	// Unfortunately, previewPanel isn't completely 'under' fileModel
 	// Note: Must save the dimensions for the closure of the Cmd to avoid
 	// problems
-	fullModalWidth := m.Width + common.Config.SidebarWidth
-	if common.Config.SidebarWidth != 0 {
-		fullModalWidth += common.BorderPadding
-	}
+	fullModalWidth := m.fullModalWidth()
 	width := m.ExpectedPreviewWidth
 	height := m.Height
 
@@ -122,9 +119,8 @@ func (m *Model) GetFilePreviewCmd(forcePreviewRender bool) tea.Cmd {
 		"path", selectedItem.Location, "w", width, "h", height)
 
 	return func() tea.Msg {
-		content, rawTransmit := m.FilePreview.RenderWithPath(selectedItem.Location, width, height, fullModalWidth)
-		return preview.NewUpdateMsg(selectedItem.Location, content, rawTransmit,
-			width, height, reqCnt)
+		result := m.FilePreview.RenderWithPath(selectedItem.Location, width, height, fullModalWidth)
+		return preview.NewUpdateMsg(selectedItem.Location, result, width, height, reqCnt)
 	}
 }
 

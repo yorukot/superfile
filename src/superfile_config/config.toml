@@ -37,6 +37,12 @@ default_open_file_preview = true
 # image?
 show_image_preview = true
 
+#-- Image Renderer
+# How to draw images in the preview panel. "auto" detects the best option
+# for your terminal: Kitty graphics, then Sixel (Windows Terminal), then
+# ANSI half-blocks. Set "kitty", "sixel" or "ansi" to force one.
+image_renderer = "auto"
+
 #-- File Info Footer
 # Should we display a footer in the file panel that provides more file information?
 show_panel_footer_info = true

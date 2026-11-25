@@ -166,7 +166,7 @@ func TestFilePreviewRenderWithDimensions(t *testing.T) {
 			require.NoError(t, err)
 
 			m := New()
-			render, _ := m.RenderWithPath(filePath, tt.width, tt.height, tt.width)
+			render := m.RenderWithPath(filePath, tt.width, tt.height, tt.width).Content
 			res := ansi.Strip(render)
 
 			assert.Equal(t, tt.expectedPreview, res, "filePath = %s", filePath)

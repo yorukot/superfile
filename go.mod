@@ -29,6 +29,7 @@ require github.com/charmbracelet/lipgloss v0.10.0 // indirect
 
 require (
 	github.com/Unpackerr/iso9660 v0.0.3 // indirect
+	github.com/bits-and-blooms/bitset v1.24.6 // indirect
 	github.com/cavaliergopher/cpio v1.0.1 // indirect
 	github.com/cavaliergopher/rpm v1.3.0 // indirect
 	github.com/charmbracelet/colorprofile v0.4.3 // indirect
