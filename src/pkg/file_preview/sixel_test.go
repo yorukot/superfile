@@ -120,6 +120,21 @@ func TestRenderWithSixel(t *testing.T) {
 	assert.Error(t, err)
 }
 
+// After drawing an image, the terminal moves the cursor below it, and scrolls
+// the screen if the image ended on the last row. The preview can reach the
+// bottom of the screen, so the image must never cover the area's last row.
+func TestRenderWithSixelKeepsLastRowFree(t *testing.T) {
+	t.Setenv("WT_SESSION", "test") // use Windows Terminal's 10x20 cell
+	p := NewImagePreviewer()
+	for _, maxHeight := range []int{2, 3, 7, 30, 41} {
+		for _, size := range [][2]int{{200, 1400}, {300, 700}, {1920, 1080}, {16, 16}, {1000, 3}} {
+			_, img, err := p.renderWithSixel(newTestImage(size[0], size[1]), 60, maxHeight)
+			require.NoError(t, err)
+			assert.Less(t, img.OffsetY+img.Rows, maxHeight, "%v in 60x%d", size, maxHeight)
+		}
+	}
+}
+
 func TestRenderWithSixelFillsArea(t *testing.T) {
 	t.Setenv("WT_SESSION", "test") // use Windows Terminal's 10x20 cell
 	p := NewImagePreviewer()
@@ -131,7 +146,7 @@ func TestRenderWithSixelFillsArea(t *testing.T) {
 	}{
 		{"small image is enlarged", 100, 50, 60, 15, "\"1;1;600;300"},
 		{"partial last row is kept", 1920, 1080, 60, 17, "\"1;1;600;338"},
-		{"tall image limited by height", 300, 700, 26, 30, "\"1;1;257;600"},
+		{"tall image leaves the last row free", 300, 700, 25, 29, "\"1;1;249;580"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

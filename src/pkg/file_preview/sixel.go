@@ -116,7 +116,16 @@ func (p *ImagePreviewer) renderWithSixel(img image.Image, maxWidth, maxHeight in
 	if bounds.Dx() <= 0 || bounds.Dy() <= 0 {
 		return "", nil, fmt.Errorf("image has no pixels (%dx%d)", bounds.Dx(), bounds.Dy())
 	}
-	width, height, cols, rows := fitImageInPixels(bounds.Dx(), bounds.Dy(), maxWidth, maxHeight, cellSize)
+	// Keep the image off the area's last row. After drawing an image, the
+	// terminal moves the cursor to the line below it, and scrolls the whole
+	// screen if there isn't one: the preview can reach the bottom of the screen
+	// (no footer, no border). The image is centred in the full area, so the
+	// last row is always left blank.
+	imageMaxHeight := maxHeight
+	if imageMaxHeight > 1 {
+		imageMaxHeight--
+	}
+	width, height, cols, rows := fitImageInPixels(bounds.Dx(), bounds.Dy(), maxWidth, imageMaxHeight, cellSize)
 
 	// Resize, not Fit: Fit never enlarges, and a small image would then sit in
 	// the top-left corner of its cells instead of filling them.
