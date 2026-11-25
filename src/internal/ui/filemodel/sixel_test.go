@@ -1,6 +1,7 @@
 package filemodel
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -60,12 +61,58 @@ func TestSyncSixelDrawsOnceAtPreviewPosition(t *testing.T) {
 	cmd := m.SyncSixel(false)
 	assert.Nil(t, m.SyncSixel(false), "no second draw while the image is still shown")
 
-	draw := runDraw(t, m, cmd)
+	raw := runRaw(t, runDraw(t, m, cmd))
+	// Preview starts at column 100-40 = 60; offset (2, 3) gives 0-based (62, 3).
+	// tea.Raw writes fmt.Sprint of the message.
+	assert.Equal(t, "\x1b7\x1b[4;63H<dcs>\x1b8", fmt.Sprint(raw.Msg))
+	assert.Nil(t, m.HandleSixelRaw(raw), "nothing to repair when the preview is unchanged")
+}
+
+// runRaw runs a draw command and returns the raw output message.
+func runRaw(t *testing.T, draw tea.Cmd) tea.RawMsg {
+	t.Helper()
 	require.NotNil(t, draw)
 	raw, ok := draw().(tea.RawMsg)
 	require.True(t, ok)
-	// Preview starts at column 100-40 = 60; offset (2, 3) gives 0-based (62, 3).
-	assert.Equal(t, "\x1b7\x1b[4;63H<dcs>\x1b8", raw.Msg)
+	return raw
+}
+
+func TestHandleSixelRawRepaintsAfterStaleDraw(t *testing.T) {
+	tests := []struct {
+		name   string
+		change func(m *Model)
+	}{
+		{"overlay opened", func(m *Model) { m.SyncSixel(true) }},
+		{"another image", func(m *Model) {
+			applySixel(m, "/other.png")
+			m.SyncSixel(false)
+		}},
+		{"loading the next preview", func(m *Model) {
+			m.FilePreview.SetLoading()
+			m.SyncSixel(false)
+		}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := newSixelTestModel(t)
+			draw := runDraw(t, m, m.SyncSixel(false))
+
+			// The preview changes after the draw was checked, but before its
+			// raw output reached the terminal.
+			tt.change(m)
+			raw := runRaw(t, draw)
+
+			cmd := m.HandleSixelRaw(raw)
+			require.NotNil(t, cmd, "the stale image must be erased")
+			assert.Equal(t, tea.ClearScreen(), cmd())
+		})
+	}
+}
+
+func TestHandleSixelRawIgnoresOtherRawOutput(t *testing.T) {
+	m := newSixelTestModel(t)
+	m.SyncSixel(true)
+	assert.Nil(t, m.HandleSixelRaw(tea.RawMsg{Msg: "\x1b_Ga=d\x1b\\"}))
 }
 
 func TestSyncSixelHiddenWhileCovered(t *testing.T) {
@@ -89,6 +136,7 @@ func hasMarker(s string) bool {
 func TestApplySixelAlternatesMarkers(t *testing.T) {
 	m := newSixelTestModel(t)
 	first := m.FilePreview.GetContent()
+	require.NotNil(t, runDraw(t, m, m.SyncSixel(false)))
 	applySixel(m, "/img.png")
 	second := m.FilePreview.GetContent()
 
@@ -96,6 +144,21 @@ func TestApplySixelAlternatesMarkers(t *testing.T) {
 	assert.True(t, hasMarker(second))
 	assert.NotEqual(t, first, second,
 		"consecutive images use different markers, so every cell is rewritten between them")
+}
+
+func TestApplySixelMarkersDifferFromLastDrawnImage(t *testing.T) {
+	m := newSixelTestModel(t)
+	drawn := m.FilePreview.GetContent()
+	require.NotNil(t, runDraw(t, m, m.SyncSixel(false)))
+
+	// Two more images arrive within one frame, so Bubble Tea shows only the
+	// last. Its cells must still differ from those of the image on screen.
+	applySixel(m, "/b.png")
+	m.SyncSixel(false)
+	applySixel(m, "/c.png")
+	m.SyncSixel(false)
+
+	assert.NotEqual(t, drawn, m.FilePreview.GetContent())
 }
 
 func TestSyncSixelDropsStaleDraws(t *testing.T) {

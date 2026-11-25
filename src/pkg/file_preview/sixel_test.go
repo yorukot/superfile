@@ -50,10 +50,24 @@ func TestSelectRenderer(t *testing.T) {
 }
 
 func TestIsSixelCapable(t *testing.T) {
+	inherited := []string{"TERM_PROGRAM", "TMUX", "STY", "ZELLIJ"}
+	for _, env := range inherited {
+		t.Setenv(env, "")
+	}
+
 	t.Setenv("WT_SESSION", "")
 	assert.False(t, isSixelCapable())
 	t.Setenv("WT_SESSION", "0f6a2a1e-0000-0000-0000-000000000000")
 	assert.True(t, isSixelCapable())
+
+	// WT_SESSION is inherited by multiplexers and terminals started from
+	// Windows Terminal, which may not pass Sixel through.
+	for _, env := range inherited {
+		t.Run(env, func(t *testing.T) {
+			t.Setenv(env, "set")
+			assert.False(t, isSixelCapable())
+		})
+	}
 }
 
 func TestFitImageInCells(t *testing.T) {
@@ -104,6 +118,32 @@ func TestRenderWithSixel(t *testing.T) {
 
 	_, _, err = p.renderWithSixel(newTestImage(10, 10), 0, 10)
 	assert.Error(t, err)
+}
+
+func TestRenderWithSixelFillsArea(t *testing.T) {
+	t.Setenv("WT_SESSION", "test") // use Windows Terminal's 10x20 cell
+	p := NewImagePreviewer()
+	tests := []struct {
+		name               string
+		imgW, imgH         int
+		wantCols, wantRows int
+		wantRaster         string
+	}{
+		{"small image is enlarged", 100, 50, 60, 15, "\"1;1;600;300"},
+		{"partial last row is kept", 1920, 1080, 60, 17, "\"1;1;600;338"},
+		{"tall image limited by height", 300, 700, 26, 30, "\"1;1;257;600"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, img, err := p.renderWithSixel(newTestImage(tt.imgW, tt.imgH), 60, 30)
+			require.NoError(t, err)
+			assert.Equal(t, tt.wantCols, img.Cols, "cols")
+			assert.Equal(t, tt.wantRows, img.Rows, "rows")
+			assert.Equal(t, (60-tt.wantCols)/2, img.OffsetX, "centred horizontally")
+			assert.Equal(t, (30-tt.wantRows)/2, img.OffsetY, "centred vertically")
+			assert.Contains(t, img.DCS, tt.wantRaster, "image is scaled to fill its cells")
+		})
+	}
 }
 
 func TestSixelPlacement(t *testing.T) {

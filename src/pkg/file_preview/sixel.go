@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"image"
+	"math"
 	"os"
 	"strings"
 
@@ -71,8 +72,20 @@ func (s *SixelImage) Placement(originX, originY int) string {
 // isSixelCapable reports whether the terminal is known to support Sixel.
 // Only Windows Terminal is detected for now; other terminals can use the
 // image_renderer config option.
+//
+// WT_SESSION is inherited by everything started from a Windows Terminal tab,
+// so it is ignored inside a multiplexer or another terminal (which sets
+// TERM_PROGRAM; Windows Terminal doesn't). Those may not pass Sixel through.
 func isSixelCapable() bool {
-	return isWindowsTerminal()
+	if !isWindowsTerminal() {
+		return false
+	}
+	for _, env := range []string{"TERM_PROGRAM", "TMUX", "STY", "ZELLIJ"} {
+		if os.Getenv(env) != "" {
+			return false
+		}
+	}
+	return true
 }
 
 func isWindowsTerminal() bool {
@@ -100,9 +113,14 @@ func (p *ImagePreviewer) renderWithSixel(img image.Image, maxWidth, maxHeight in
 
 	cellSize := p.sixelCellSize()
 	bounds := img.Bounds()
-	cols, rows := fitImageInCells(bounds.Dx(), bounds.Dy(), maxWidth, maxHeight, cellSize)
+	if bounds.Dx() <= 0 || bounds.Dy() <= 0 {
+		return "", nil, fmt.Errorf("image has no pixels (%dx%d)", bounds.Dx(), bounds.Dy())
+	}
+	width, height, cols, rows := fitImageInPixels(bounds.Dx(), bounds.Dy(), maxWidth, maxHeight, cellSize)
 
-	scaled := imaging.Fit(img, cols*cellSize.PixelsPerColumn, rows*cellSize.PixelsPerRow, imaging.Lanczos)
+	// Resize, not Fit: Fit never enlarges, and a small image would then sit in
+	// the top-left corner of its cells instead of filling them.
+	scaled := imaging.Resize(img, width, height, imaging.Lanczos)
 
 	var payload bytes.Buffer
 	if err := (&sixel.Encoder{}).Encode(&payload, scaled); err != nil {
@@ -135,6 +153,22 @@ func buildSixelBlock(s *SixelImage, maxWidth, maxHeight int) string {
 		}
 	}
 	return strings.Join(lines, "\n")
+}
+
+// fitImageInPixels returns the largest pixel size, within maxWidth x maxHeight
+// cells, that keeps the image's aspect ratio, and the cells it covers. Only
+// the last column and row of cells can be partly empty.
+func fitImageInPixels(imgWidth, imgHeight, maxWidth, maxHeight int,
+	cellSize TerminalCellSize) (int, int, int, int) {
+	areaWidth := maxWidth * cellSize.PixelsPerColumn
+	areaHeight := maxHeight * cellSize.PixelsPerRow
+	scale := min(float64(areaWidth)/float64(imgWidth), float64(areaHeight)/float64(imgHeight))
+
+	width := max(1, min(int(math.Round(float64(imgWidth)*scale)), areaWidth))
+	height := max(1, min(int(math.Round(float64(imgHeight)*scale)), areaHeight))
+	cols := (width + cellSize.PixelsPerColumn - 1) / cellSize.PixelsPerColumn
+	rows := (height + cellSize.PixelsPerRow - 1) / cellSize.PixelsPerRow
+	return width, height, cols, rows
 }
 
 // fitImageInCells returns the largest cell size, within maxWidth x maxHeight,

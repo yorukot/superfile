@@ -28,8 +28,11 @@ superfile only uses Kitty graphics or Sixel in [supported terminals](/getting-st
 
 - Check your terminal with `echo $TERM $TERM_PROGRAM`
 - Run superfile outside tmux
-- In Windows Terminal, update to version 1.22 or later
 - If your terminal supports Kitty graphics or Sixel but isn't detected, set [`image_renderer`](/configure/superfile-config#image_renderer)
+
+## Image previews are blank
+
+Windows Terminal versions before 1.22 don't support Sixel, so the image area stays empty. Update Windows Terminal, or set [`image_renderer = "ansi"`](/configure/superfile-config#image_renderer).
 
 ## Images look broken or leave marks behind
 

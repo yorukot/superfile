@@ -31,7 +31,7 @@ superfile uses the Kitty graphics protocol when `TERM` or `TERM_PROGRAM` is one 
 kitty  xterm-kitty  ghostty  WezTerm  iTerm2  Konsole  WarpTerminal
 ```
 
-In Windows Terminal 1.22 or later, superfile uses Sixel. This includes WSL running inside Windows Terminal.
+In Windows Terminal 1.22 or later, superfile uses Sixel. This includes WSL running inside Windows Terminal, but not tmux or another terminal started from it.
 
 Everywhere else, including inside tmux, images are drawn with colored half-block characters.
 

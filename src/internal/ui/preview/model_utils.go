@@ -26,14 +26,22 @@ func (m *Model) SetSixelHidden(hidden bool) {
 	m.sixelHidden = hidden
 }
 
+// MarkSixelDrawn records that the current Sixel image is being drawn on the
+// terminal, so the next image uses the other marker.
+func (m *Model) MarkSixelDrawn() {
+	m.drawnSixelAlt = m.sixelAlt
+}
+
 // setSixel records that content shows a Sixel image. Must be called right
 // after setContent.
 func (m *Model) setSixel(img *filepreview.SixelImage) {
 	m.sixel = img
-	// Alternate the marker so the cells under this image always differ from
-	// the cells under the previous one: every cell is then rewritten,
-	// erasing the previous image, before this one is drawn.
-	m.sixelAlt = !m.sixelAlt
+	// Use the other marker than the image last drawn, so the cells under
+	// this image always differ from the cells under that one: every cell is
+	// then rewritten, erasing it, before this one is drawn. Flipping on every
+	// image isn't enough: Bubble Tea only shows the latest view at each frame,
+	// so with two images in one frame, the third would match the first.
+	m.sixelAlt = !m.drawnSixelAlt
 	if m.sixelAlt {
 		m.content = strings.ReplaceAll(m.content, filepreview.SixelMarker, filepreview.SixelMarkerAlt)
 	}

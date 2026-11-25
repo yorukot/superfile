@@ -23,8 +23,11 @@ type Model struct {
 	// sixel is the Sixel image shown by content, if any. content then has
 	// marker cells where the image goes. See filepreview.SixelMarker.
 	sixel *filepreview.SixelImage
-	// sixelAlt alternates the marker character between Sixel images.
+	// sixelAlt is true when content uses SixelMarkerAlt instead of SixelMarker.
 	sixelAlt bool
+	// drawnSixelAlt is the sixelAlt of the image most recently drawn on the
+	// terminal. See setSixel.
+	drawnSixelAlt bool
 	// sixelHidden hides the Sixel image, e.g. while an overlay is open, by
 	// showing hiddenContent (content with plain spaces instead of markers).
 	sixelHidden   bool

@@ -83,6 +83,8 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.fileModel.InvalidateSixel()
 	case filemodel.SixelDrawMsg:
 		updateCmd = m.fileModel.HandleSixelDraw(msg)
+	case tea.RawMsg:
+		updateCmd = m.fileModel.HandleSixelRaw(msg)
 	case tea.MouseMsg:
 		m.handleMouseMsg(msg)
 	case tea.KeyPressMsg:

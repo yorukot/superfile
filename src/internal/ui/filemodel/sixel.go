@@ -63,15 +63,49 @@ func (m *Model) SyncSixel(hidden bool) tea.Cmd {
 	})
 }
 
+// sixelPlacement is the raw output drawing a Sixel image. It carries the
+// generation it was drawn for, so HandleSixelRaw can tell if it went stale.
+type sixelPlacement struct {
+	gen int
+	seq string
+}
+
+// String returns the escape sequences. tea.Raw writes the String() value.
+func (p sixelPlacement) String() string {
+	return p.seq
+}
+
 // HandleSixelDraw returns the command drawing the Sixel image, or nil if msg
 // is stale.
 func (m *Model) HandleSixelDraw(msg SixelDrawMsg) tea.Cmd {
-	if msg.gen != m.sixel.gen || !m.sixel.drawn || !m.sixelVisible() {
+	if !m.sixelDrawCurrent(msg.gen) {
 		slog.Debug("Dropping stale Sixel draw", "gen", msg.gen, "currentGen", m.sixel.gen)
 		return nil
 	}
 	x, y := m.previewContentOrigin()
-	return tea.Raw(m.FilePreview.GetSixel().Placement(x, y))
+	m.FilePreview.MarkSixelDrawn()
+	return tea.Raw(sixelPlacement{gen: msg.gen, seq: m.FilePreview.GetSixel().Placement(x, y)})
+}
+
+// HandleSixelRaw checks a Sixel image that was just written to the terminal.
+// Bubble Tea writes raw output before the model sees it, and the command
+// returned by HandleSixelDraw runs asynchronously, so the preview may have
+// changed in between, with the image painted over newer content. Then it
+// returns a command that repaints the whole screen, erasing it.
+func (m *Model) HandleSixelRaw(msg tea.RawMsg) tea.Cmd {
+	placement, ok := msg.Msg.(sixelPlacement)
+	if !ok || m.sixelDrawCurrent(placement.gen) {
+		return nil
+	}
+	slog.Debug("Stale Sixel image was drawn, repainting", "gen", placement.gen, "currentGen", m.sixel.gen)
+	m.InvalidateSixel()
+	return tea.ClearScreen
+}
+
+// sixelDrawCurrent reports whether a draw scheduled as gen is still the
+// latest, and the image is still visible.
+func (m *Model) sixelDrawCurrent(gen int) bool {
+	return gen == m.sixel.gen && m.sixel.drawn && m.sixelVisible()
 }
 
 // sixelVisible reports whether the preview panel currently shows its Sixel
