@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -68,5 +70,51 @@ func TestBuildOpenArgsEmptyCommand(t *testing.T) {
 		require.Error(t, err)
 		assert.Empty(t, program)
 		assert.Nil(t, args)
+	}
+}
+
+// A configured executable path may contain spaces, e.g. an app bundle on macOS.
+// It must stay one path instead of being split at the spaces.
+func TestBuildOpenArgsExistingPathWithSpaces(t *testing.T) {
+	dir := t.TempDir()
+	programPath := filepath.Join(dir, "My Player")
+	require.NoError(t, os.WriteFile(programPath, []byte("#!/bin/sh\n"), 0o755))
+
+	program, args, err := buildOpenArgs(programPath, "/home/user/song.mp3")
+	require.NoError(t, err)
+	assert.Equal(t, programPath, program)
+	assert.Equal(t, []string{"/home/user/song.mp3"}, args)
+}
+
+// A program path with spaces needs quoting to be combined with arguments.
+func TestBuildOpenArgsQuotedPathWithArguments(t *testing.T) {
+	dir := t.TempDir()
+	programPath := filepath.Join(dir, "My Player")
+	require.NoError(t, os.WriteFile(programPath, []byte("#!/bin/sh\n"), 0o755))
+
+	program, args, err := buildOpenArgs(`"`+programPath+`" --fullscreen`, "/home/user/song.mp3")
+	require.NoError(t, err)
+	assert.Equal(t, programPath, program)
+	assert.Equal(t, []string{"--fullscreen", "/home/user/song.mp3"}, args)
+}
+
+func TestSplitOpenCommand(t *testing.T) {
+	tests := []struct {
+		name    string
+		command string
+		want    []string
+	}{
+		{name: "plain tokens", command: "mpv --force-window=yes", want: []string{"mpv", "--force-window=yes"}},
+		{name: "extra whitespace", command: "  mpv \t --flag  ", want: []string{"mpv", "--flag"}},
+		{name: "double quoted path", command: `"/a b/player" -x`, want: []string{"/a b/player", "-x"}},
+		{name: "single quoted path", command: `'/a b/player' -x`, want: []string{"/a b/player", "-x"}},
+		{name: "empty", command: "", want: nil},
+		{name: "only whitespace", command: "   ", want: nil},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, splitOpenCommand(tt.command))
+		})
 	}
 }
