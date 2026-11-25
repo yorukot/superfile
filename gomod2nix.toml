@@ -6,8 +6,8 @@ schema = 3
     hash = 'sha256-0PFf3lMornz1C2eR7WRZ1iTEu59AD+1fdwPS6j+AQ2c='
 
   [mod.'charm.land/bubbletea/v2']
-    version = 'v2.1.2'
-    hash = 'sha256-OTyyRPYTVMVUVp+OeLTWhAYwfYBiBUBmrZAXAWeBj1E='
+    version = 'v2.1.3'
+    hash = 'sha256-mDvbI+zdWRDa84Kd49ORhpukfV1BHQu8RFuDVvA5xTY='
 
   [mod.'charm.land/lipgloss/v2']
     version = 'v2.1.1'
