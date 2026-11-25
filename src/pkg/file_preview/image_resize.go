@@ -9,61 +9,48 @@ import (
 	"github.com/rwcarlsen/goexif/exif"
 )
 
-// prepareImageForPreview handles the complete image preparation pipeline
-func prepareImageForPreview(data []byte) (image.Image, int, int, error) {
-	imgReader := bytes.NewReader(data)
-
-	img, _, err := image.Decode(imgReader)
+// prepareImageForPreview decodes data, shrinks it to fit a maxWidth x maxHeight
+// pixel box, and applies the EXIF orientation.
+func prepareImageForPreview(data []byte, maxWidth, maxHeight int) (image.Image, error) {
+	img, _, err := image.Decode(bytes.NewReader(data))
 	if err != nil {
-		return nil, 0, 0, err
+		return nil, err
 	}
 
-	// Store original dimensions
-	originalWidth := img.Bounds().Dx()
-	originalHeight := img.Bounds().Dy()
-
-	// Adjust orientation based on EXIF data
-	exifReader := bytes.NewReader(data)
-	img = adjustImageOrientation(exifReader, img)
-
-	// Limit resolution to 1080p
-	img = limitImageResolution(img, originalWidth, originalHeight)
-
-	return img, originalWidth, originalHeight, nil
-}
-
-// limitImageResolution limits image resolution to 1080p while maintaining aspect ratio
-func limitImageResolution(img image.Image, originalWidth, originalHeight int) image.Image {
-	const maxImageWidth = 1920
-	const maxImageHeight = 1080
-
-	// Only resize if the image is larger than 1080p
-	if originalWidth > maxImageWidth || originalHeight > maxImageHeight {
-		resizedImg := imaging.Fit(img, maxImageWidth, maxImageHeight, imaging.Lanczos)
-		return resizedImg
+	orientation := exifOrientation(data)
+	if orientation >= exifOrientationTranspose && orientation <= exifOrientationRotate90 {
+		// These orientations swap width and height, so fit the stored image
+		// into the swapped box and rotate the small result.
+		maxWidth, maxHeight = maxHeight, maxWidth
 	}
 
-	return img
+	// Box averages every source pixel, which is the right filter for a large
+	// shrink and costs much less than Lanczos on a full-size photo.
+	if img.Bounds().Dx() > maxWidth || img.Bounds().Dy() > maxHeight {
+		img = imaging.Fit(img, maxWidth, maxHeight, imaging.Box)
+	}
+
+	return adjustOrientation(img, orientation), nil
 }
 
-// adjustImageOrientation adjusts image orientation based on EXIF data
-func adjustImageOrientation(r *bytes.Reader, img image.Image) image.Image {
-	exifData, err := exif.Decode(r)
+// exifOrientation returns the EXIF orientation tag of data, or 1 when it has none
+func exifOrientation(data []byte) int {
+	exifData, err := exif.Decode(bytes.NewReader(data))
 	if err != nil {
 		slog.Error("exif error", "error", err)
-		return img
+		return 1
 	}
 	tag, err := exifData.Get(exif.Orientation)
 	if err != nil {
 		slog.Error("exif orientation error", "error", err)
-		return img
+		return 1
 	}
 	orientation, err := tag.Int(0)
 	if err != nil {
 		slog.Error("exif orientation value error", "error", err)
-		return img
+		return 1
 	}
-	return adjustOrientation(img, orientation)
+	return orientation
 }
 
 // adjustOrientation applies the specified orientation transformation to the image

@@ -152,16 +152,21 @@ func (p *ImagePreviewer) ImagePreviewWithRenderer(path string, maxWidth int, max
 		return "", "", err
 	}
 
-	// Use the new image preparation pipeline
-	img, originalWidth, originalHeight, err := prepareImageForPreview(data)
+	// Shrink the image to the pixels the preview pane can show. ANSI draws two
+	// pixel rows per cell, and Kitty draws the cell's real pixel size.
+	boxWidth, boxHeight := maxWidth, maxHeight*heightScaleFactor
+	if renderer == RendererKitty {
+		cellSize := p.terminalCap.GetTerminalCellSize()
+		boxWidth, boxHeight = maxWidth*cellSize.PixelsPerColumn, maxHeight*cellSize.PixelsPerRow
+	}
+	img, err := prepareImageForPreview(data, boxWidth, boxHeight)
 	if err != nil {
 		return "", "", err
 	}
 
 	switch renderer {
 	case RendererKitty:
-		result, err := p.renderWithKittyUsingTermCap(img, path, originalWidth,
-			originalHeight, maxWidth, maxHeight, sideAreaWidth)
+		result, err := p.renderWithKittyUsingTermCap(img, path, maxWidth, maxHeight, sideAreaWidth)
 		if err != nil {
 			slog.Error("Kitty renderer failed, falling back to ANSI", "error", err)
 			render, ansiErr := p.ANSIRenderer(img, defaultBGColor, maxWidth, maxHeight)
