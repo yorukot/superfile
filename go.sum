@@ -1,7 +1,7 @@
 charm.land/bubbles/v2 v2.2.1 h1:Fq1+qm5hV6GkvzLQDhCBpXXE5tLgvh1PRriCLwSvIQU=
 charm.land/bubbles/v2 v2.2.1/go.mod h1:wdMgn+sje1KNXdwFizIWjbf328fIUBxqEmJ/vYPo8yc=
-charm.land/bubbletea/v2 v2.1.2 h1:vB3XAcHhLB2gR3HOHpwO3lHB3nbvaowIgL3e5x/DUZo=
-charm.land/bubbletea/v2 v2.1.2/go.mod h1:xWHeyxIX9/wiFU2kgPW04ojOZyTzrWf+8lGjUCaftiU=
+charm.land/bubbletea/v2 v2.1.3 h1:UasShJ8x3xVS5RfnHRJ8eRBKeXQOf+ulC+W3R3kQO/k=
+charm.land/bubbletea/v2 v2.1.3/go.mod h1:prmZH2MRzgJvolhYyC8JLNa7Whju9O5/nmrVhoXJizw=
 charm.land/lipgloss/v2 v2.1.1 h1:F+vKWis9Kz3MFRsbICSDFtT1ZwVL+8f+36Dtg+OpKwc=
 charm.land/lipgloss/v2 v2.1.1/go.mod h1:k79y/56yThpkJvbwyrcHr8MyZF42e84Q5fW9Ibu6LFc=
 github.com/Unpackerr/iso9660 v0.0.3 h1:WXXFIcmDLhnsKhXjPg2moUmHxhoUmIX7FLxrtqHJ7yQ=
