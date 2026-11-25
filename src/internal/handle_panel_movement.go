@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"errors"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -97,13 +98,94 @@ func (m *model) executeOpenCommand() {
 		openCommand = extEditor
 	}
 
-	cmd := exec.Command(openCommand, filePath)
+	// The configured command may carry its own arguments (e.g. "mpv --force-window=yes"),
+	// the same way editor commands do. The file path is appended after them.
+	program, args, err := buildOpenArgs(openCommand, filePath)
+	if err != nil {
+		slog.Error("Invalid open command", "error", err, "command", openCommand, "ext", ext)
+		return
+	}
+
+	cmd := exec.Command(program, args...) //nolint:gosec // Open command is intentionally user-configurable.
 	utils.DetachFromTerminal(cmd)
-	err := cmd.Start()
+	err = cmd.Start()
 	if err != nil {
 		// TODO: This kind of errors should go to user facing pop ups
 		slog.Error("Error while open file with", "error", err)
 	}
+}
+
+// buildOpenArgs splits a configured open command into the program to run and
+// its arguments, with filePath appended last. The command may include its own
+// arguments, e.g. "mpv --force-window=yes".
+//
+// A value that names an existing file is kept as a single executable path, so
+// that app bundles such as "/Applications/My Player.app/Contents/MacOS/player"
+// are not split at their spaces. When such a path also needs arguments, quote
+// it: "\"/Applications/My Player.app/Contents/MacOS/player\" --fullscreen".
+func buildOpenArgs(openCommand, filePath string) (string, []string, error) {
+	command := strings.TrimSpace(openCommand)
+	if command == "" {
+		return "", nil, errors.New("open command is empty")
+	}
+	if isExistingPath(command) {
+		return command, []string{filePath}, nil
+	}
+	parts := splitOpenCommand(command)
+	if len(parts) == 0 {
+		return "", nil, errors.New("open command is empty")
+	}
+	return parts[0], append(parts[1:], filePath), nil
+}
+
+// splitOpenCommand splits a command line into tokens on unquoted whitespace.
+// Text inside single or double quotes is kept together, so a program path that
+// contains spaces can be passed as the first token.
+func splitOpenCommand(command string) []string {
+	var (
+		tokens   []string
+		current  strings.Builder
+		quote    rune
+		hasToken bool
+	)
+	for _, r := range command {
+		switch {
+		case quote != 0:
+			if r == quote {
+				quote = 0
+			} else {
+				current.WriteRune(r)
+			}
+		case r == '\'' || r == '"':
+			quote = r
+			hasToken = true
+		case r == ' ' || r == '\t':
+			if hasToken {
+				tokens = append(tokens, current.String())
+				current.Reset()
+				hasToken = false
+			}
+		default:
+			current.WriteRune(r)
+			hasToken = true
+		}
+	}
+	if hasToken {
+		tokens = append(tokens, current.String())
+	}
+	return tokens
+}
+
+// isExistingPath reports whether command names an existing file that can be
+// launched as it is. Values without spaces or quotes are skipped, since
+// splitting cannot change them.
+func isExistingPath(command string) bool {
+	if !strings.ContainsAny(command, " \t\"'") {
+		// No spaces or quoting, so splitting cannot change the value.
+		return false
+	}
+	info, err := os.Stat(command)
+	return err == nil && !info.IsDir()
 }
 
 // Switch to the directory where the sidebar cursor is located

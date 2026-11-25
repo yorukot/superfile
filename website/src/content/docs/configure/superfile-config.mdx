@@ -387,7 +387,8 @@ Enables the zoxide navigation modal.
 Allows users to map file extensions to commands used to open them. The file path will be appended as the last argument.
 
 - Write the extension in lowercase, without the dot.
-- Use a program name only, without arguments.
+- The command may include its own arguments, separated by spaces. They are passed to the program before the file path.
+- If the program path itself contains spaces, put it in quotes when you also pass arguments, e.g. `"\"/Applications/My Player.app/Contents/MacOS/player\" --fullscreen"`.
 - Use GUI programs. The program runs outside the terminal, so terminal editors like `nvim` don't work here; use `e` for those.
 - Only works on Linux and macOS.
 
@@ -401,6 +402,7 @@ Must be at the very end of the file
 [open_with]
 xopp = "xournalpp"
 pdf = "zathura"
+mp3 = "mpv --force-window=yes"
 png = "feh"
 ```
 
