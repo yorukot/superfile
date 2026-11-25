@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"errors"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -97,13 +98,32 @@ func (m *model) executeOpenCommand() {
 		openCommand = extEditor
 	}
 
-	cmd := exec.Command(openCommand, filePath)
+	// The configured command may carry its own arguments (e.g. "mpv --force-window=yes"),
+	// the same way editor commands do. The file path is appended after them.
+	program, args, err := buildOpenArgs(openCommand, filePath)
+	if err != nil {
+		slog.Error("Invalid open command", "error", err, "command", openCommand, "ext", ext)
+		return
+	}
+
+	cmd := exec.Command(program, args...) //nolint:gosec // Open command is intentionally user-configurable.
 	utils.DetachFromTerminal(cmd)
-	err := cmd.Start()
+	err = cmd.Start()
 	if err != nil {
 		// TODO: This kind of errors should go to user facing pop ups
 		slog.Error("Error while open file with", "error", err)
 	}
+}
+
+// buildOpenArgs splits a configured open command into the program to run and
+// its arguments, with filePath appended last. The command may include its own
+// arguments, e.g. "mpv --force-window=yes".
+func buildOpenArgs(openCommand, filePath string) (string, []string, error) {
+	parts := strings.Fields(openCommand)
+	if len(parts) == 0 {
+		return "", nil, errors.New("open command is empty")
+	}
+	return parts[0], append(parts[1:], filePath), nil
 }
 
 // Switch to the directory where the sidebar cursor is located
