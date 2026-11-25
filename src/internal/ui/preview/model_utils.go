@@ -1,6 +1,10 @@
 package preview
 
-import "log/slog"
+import (
+	"log/slog"
+
+	tea "charm.land/bubbletea/v2"
+)
 
 func (m *Model) GetContent() string {
 	return m.content
@@ -59,6 +63,17 @@ func (m *Model) CleanUp() {
 			slog.Error("Error While cleaning up TempDirectory", "error", err)
 		}
 	}
+}
+
+// ClearKittyImages returns a tea.Cmd that clears any Kitty graphics images
+// currently displayed in the terminal. This should be called before opening
+// overlays (like the help menu) to prevent image previews from showing through.
+func (m *Model) ClearKittyImages() tea.Cmd {
+	raw := m.imagePreviewer.GetKittyClearRaw()
+	if raw == "" {
+		return nil
+	}
+	return tea.Raw([]byte(raw))
 }
 
 func (m *Model) IsOpen() bool {
