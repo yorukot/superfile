@@ -10,6 +10,7 @@ import (
 
 	"github.com/yorukot/superfile/src/internal/ui/filepanel"
 	"github.com/yorukot/superfile/src/internal/ui/processbar"
+	"github.com/yorukot/superfile/src/internal/ui/spferror"
 	"github.com/yorukot/superfile/src/pkg/utils"
 )
 
@@ -82,7 +83,8 @@ func (m *model) createOperation(
 		return NewCreateOperationMsg(state, reqID)
 	}
 	processor := makeCreateProcessor(location, p, processBarModel)
-	msg := m.runFileProcessor(processor, finalizer, items, reqID)
+	runner := m.setupFileProcessorRunner([]*spferror.UserAction{spferror.OkAction()})
+	msg := runner(processor, finalizer, items, reqID)
 	return msg
 }
 

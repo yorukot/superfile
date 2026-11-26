@@ -1,6 +1,9 @@
 package spferror
 
 import (
+	"slices"
+	"strings"
+
 	"github.com/yorukot/superfile/src/internal/common"
 	processbar "github.com/yorukot/superfile/src/internal/ui/processbar"
 
@@ -19,50 +22,15 @@ func NewFileListError(fileList []string,
 	return &FileListErrorState{fileList: fileList, continuationFun: continuationFun, finalizer: finalizer}
 }
 
-func (fles *FileListErrorState) Skip(runner processbar.ProcessRunner, reqID int) tea.Msg {
+func Skip(fles *FileListErrorState, runner processbar.ProcessRunner, reqID int) tea.Msg {
 	if len(fles.fileList) <= 1 {
-		return fles.Abort(runner, reqID)
+		return Abort(fles, runner, reqID)
 	}
 	return runner(fles.continuationFun, fles.finalizer, fles.fileList[1:], reqID)
 }
 
-func (fles *FileListErrorState) Abort(runner processbar.ProcessRunner, reqID int) tea.Msg {
+func Abort(fles *FileListErrorState, runner processbar.ProcessRunner, reqID int) tea.Msg {
 	return runner(fles.continuationFun, fles.finalizer, []string{}, reqID)
-}
-
-type Model struct {
-	open    bool
-	title   string
-	content string
-	state   *FileListErrorState
-}
-
-func New(open bool, title string, content string, state *FileListErrorState) Model {
-	return Model{
-		open:    open,
-		title:   title,
-		content: content,
-		state:   state,
-	}
-}
-
-func (m *Model) IsOpen() bool {
-	return m.open
-}
-
-func (m *Model) Open() {
-	m.open = true
-}
-
-func (m *Model) Close() *FileListErrorState {
-	m.open = false
-	tmpState := m.state
-	m.state = nil
-	return tmpState
-}
-
-func (m *Model) State() *FileListErrorState {
-	return m.state
 }
 
 func KeySkip() []string {
@@ -73,12 +41,90 @@ func KeyAbort() []string {
 	return common.Hotkeys.Quit
 }
 
+type UserActionType int
+type ActionKeyChecker func(key string) bool
+type Action func(fles *FileListErrorState, runner processbar.ProcessRunner, reqID int) tea.Msg
+
+type UserAction struct {
+	Title      string
+	KeyChecker ActionKeyChecker
+	Run        Action
+}
+
+func SkipAction() *UserAction {
+	return &UserAction{
+		Title:      " (" + KeySkip()[0] + ") Skip ",
+		KeyChecker: func(msg string) bool { return slices.Contains(KeySkip(), msg) },
+		Run:        Skip,
+	}
+}
+
+func AbortAction() *UserAction {
+	return &UserAction{
+		Title:      " (" + KeyAbort()[0] + ") Abort ",
+		KeyChecker: func(msg string) bool { return slices.Contains(KeyAbort(), msg) },
+		Run:        Abort,
+	}
+}
+
+func OkAction() *UserAction {
+	return &UserAction{
+		Title:      common.ModalOkayInputText,
+		KeyChecker: func(msg string) bool { return slices.Contains(common.Hotkeys.ConfirmTyping, msg) },
+		Run:        Abort,
+	}
+}
+
+type Model struct {
+	open    bool
+	title   string
+	content string
+	state   *FileListErrorState
+	actions []*UserAction
+}
+
+func New(open bool, title string, content string, state *FileListErrorState, actions []*UserAction) Model {
+	return Model{
+		open:    open,
+		title:   title,
+		content: content,
+		state:   state,
+		actions: actions,
+	}
+}
+
+func (m *Model) GetActions() []*UserAction {
+	return m.actions
+}
+
+func (m *Model) IsOpen() bool {
+	return m.open
+}
+
+func (m *Model) Open() {
+	m.open = true
+}
+
+func (m *Model) Close() (*FileListErrorState, []*UserAction) {
+	m.open = false
+	tmpState := m.state
+	m.state = nil
+	tmpActions := m.actions
+	m.actions = nil
+	return tmpState, tmpActions
+}
+
+func (m *Model) State() *FileListErrorState {
+	return m.state
+}
+
 func (m *Model) Render() string {
 	// TODO: needs "skip all" and "retry" buttons
-	skip := common.ModalConfirm.Render(" (" + KeySkip()[0] + ") Skip ")
-	abort := common.ModalCancel.Render(" (" + KeyAbort()[0] + ") Abort ")
-
-	tip := skip + common.ModalInputSpacingText + abort
+	var buttonTitles = make([]string, 0, len(m.actions))
+	for _, v := range m.actions {
+		buttonTitles = append(buttonTitles, common.ModalConfirm.Render(v.Title))
+	}
+	tip := strings.Join(buttonTitles, common.ModalInputSpacingText)
 
 	var errHeader = common.ModalErrorStyle.Render("Error")
 	return common.ModalBorderStyle(common.ModalHeight, common.ModalWidth).
