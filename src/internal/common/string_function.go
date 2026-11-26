@@ -84,6 +84,7 @@ func FilePanelItemRenderWithIcon(
 	isDir bool,
 	isLink bool,
 	isSelected bool,
+	isActive bool,
 	bgColor color.Color,
 ) string {
 	style := GetElementIcon(name, isDir, isLink, Config.Nerdfont)
@@ -95,21 +96,28 @@ func FilePanelItemRenderWithIcon(
 		return ""
 	}
 	return StringColorRender(lipgloss.Color(style.Color), bgColor).
-		Background(bgColor).Render(iconData) +
-		FilePanelItemRender(name, filenameWidth, isSelected, bgColor, lipgloss.Left)
+		Render(iconData) +
+		FilePanelItemRender(name, filenameWidth, isSelected, isActive, lipgloss.Left)
 }
+
 func FilePanelItemRender(data string,
 	width int,
 	isSelected bool,
-	bgColor color.Color,
+	isActive bool,
 	alignment lipgloss.Position,
 ) string {
 	outputData := ansi.Truncate(data, width, "...")
+	isActive = isActive && Config.CursorStyle == CursorStyleHighlight
 	style := FilePanelStyle
-	if isSelected {
+	switch {
+	case isSelected && isActive:
+		style = FilePanelItemSelectedActiveStyle
+	case isSelected:
 		style = FilePanelItemSelectedStyle
+	case isActive:
+		style = FilePanelItemActiveStyle
 	}
-	return style.Background(bgColor).Width(width).Align(alignment).Render(outputData)
+	return style.Width(width).Align(alignment).Render(outputData)
 }
 
 func ClipboardPrettierName(name string, width int, isDir bool, isLink bool, isSelected bool) string {

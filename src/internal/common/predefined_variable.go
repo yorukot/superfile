@@ -30,6 +30,12 @@ const (
 	PermanentDeleteWarnContent = "This operation cannot be undone and your data will be completely lost."
 )
 
+// Cursor style types
+const (
+	CursorStyleArrow     = "arrow"
+	CursorStyleHighlight = "highlight"
+)
+
 const (
 	MinimumHeight = 24
 	MinimumWidth  = 60
