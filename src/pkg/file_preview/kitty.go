@@ -21,6 +21,7 @@ func isKittyCapable() bool {
 	// tmux masks the underlying terminal through TERM/TERM_PROGRAM.
 	knownTerminals := []string{
 		"ghostty",
+		"kwi",
 		"WezTerm",
 		"iTerm2",
 		"xterm-kitty",
