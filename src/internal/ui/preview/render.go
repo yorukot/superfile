@@ -202,6 +202,12 @@ func (m *Model) RenderWithPath(
 	}
 
 	if m.thumbnailGenerator != nil && m.thumbnailGenerator.SupportsExt(ext) {
+		// Guard before the expensive thumbnail-generation subprocess: if the user
+		// has disabled image preview, skip thumbnail generation entirely so that
+		// ffmpeg (or any other generator) is never spawned.
+		if !common.Config.ShowImagePreview {
+			return r.AddLines(common.FilePreviewImagePreviewDisabledText).Render(), kittyClear
+		}
 		thumbnailPath, err := m.thumbnailGenerator.GetThumbnailOrGenerate(itemPath)
 		if err != nil {
 			slog.Error("Error generating thumbnail", "error", err)
