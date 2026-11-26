@@ -33,6 +33,9 @@ type Model struct {
 	// key is file location, value order of selection
 	selected           map[string]int
 	selectOrderCounter int
+	// selectionAnchor is the location a later range selection extends from. An
+	// empty value means no anchor has been set yet.
+	selectionAnchor    string
 	element            []Element
 	DirectoryRecords   map[string]directoryRecord
 	Rename             textinput.Model
