@@ -531,6 +531,10 @@ func (m *model) viewContent() string {
 		slog.Error("Invalid layout", "error", err)
 	}
 
+	// Publish the hit-test regions for the frame about to be drawn, so that
+	// mouse events resolve against what the user actually sees.
+	m.updateMouseRegions()
+
 	return m.updateRenderForOverlay(m.mainComponentsRender())
 }
 
