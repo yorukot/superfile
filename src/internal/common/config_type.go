@@ -86,6 +86,7 @@ type ConfigType struct {
 	// IgnoreMissingFields controls whether warnings about missing TOML fields are suppressed.
 	IgnoreMissingFields   bool `toml:"ignore_missing_fields"    comment:"\nWhether to ignore warnings about missing fields in the config file."`
 	PageScrollSize        int  `toml:"page_scroll_size"         comment:"\nNumber of lines to scroll for PgUp/PgDown keys (0: full page, default behavior)."`
+	WheelScrollSpeed      int  `toml:"wheel_scroll_speed"       comment:"\nLines to scroll per mouse wheel tick (1-20, default: 5)."`
 	FilePanelExtraColumns int  `toml:"file_panel_extra_columns" comment:"\nCount of extra columns in file panel in addition to file name. When option equal 0 then feature is disabled."`
 	FilePanelNamePercent  int  `toml:"file_panel_name_percent"  comment:"\nPercentage of file panel width allocated to file names (25-100). Higher values give more space to names, less to extra columns."`
 
@@ -142,6 +143,7 @@ type HotkeysType struct {
 	FocusOnProcessBar []string `toml:"focus_on_process_bar" comment:"change focus"`
 	FocusOnSidebar    []string `toml:"focus_on_sidebar"`
 	FocusOnMetaData   []string `toml:"focus_on_metadata"`
+	FocusOnPreview    []string `toml:"focus_on_preview"`
 
 	FilePanelItemCreate []string `toml:"file_panel_item_create" comment:"create file/directory and rename "`
 	FilePanelItemRename []string `toml:"file_panel_item_rename"`
