@@ -10,7 +10,13 @@ on:
 
 permissions:
   contents: read
+  issues: write
   pull-requests: write
+
+# Queue runs for the same PR so a run can't overwrite labels that an overlapping run just added.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  queue: max
 
 jobs:
   labeler:
@@ -19,3 +25,13 @@ jobs:
       - uses: actions/labeler@v6
         with:
           sync-labels: true
+
+      # Runs after the labeler: with sync-labels it rewrites the whole label list,
+      # so a label added by a parallel workflow could be dropped.
+      - name: Add awaiting review label
+        if: ${{ !cancelled() && github.event.action != 'synchronize' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: gh pr edit "$PR_NUMBER" --repo "$REPO" --add-label "awaiting pr review"
