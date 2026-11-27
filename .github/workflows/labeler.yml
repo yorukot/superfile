@@ -13,6 +13,11 @@ permissions:
   issues: write
   pull-requests: write
 
+# Queue runs for the same PR so a run can't overwrite labels that an overlapping run just added.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  queue: max
+
 jobs:
   labeler:
     runs-on: ubuntu-latest
