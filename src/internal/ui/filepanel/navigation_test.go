@@ -25,10 +25,16 @@ func testModel(cursor int, renderIndex int, height int, mode PanelMode,
 }
 
 func Test_filePanelUpDown(t *testing.T) {
+	originalCursorWrap := common.Config.FilePanelCursorWrap
+	defer func() {
+		common.Config.FilePanelCursorWrap = originalCursorWrap
+	}()
+
 	testdata := []struct {
 		name           string
 		panel          Model
 		listDown       bool
+		noWrap         bool
 		expectedCursor int
 		expectedRender int
 	}{
@@ -75,6 +81,30 @@ func Test_filePanelUpDown(t *testing.T) {
 			expectedRender: 3,
 		},
 		{
+			name:           "Down movement at bottom without wrap",
+			panel:          testModelWithElemCount(9, 3, 12, 10),
+			listDown:       true,
+			noWrap:         true,
+			expectedCursor: 9,
+			expectedRender: 3,
+		},
+		{
+			name:           "Up movement at top without wrap",
+			panel:          testModelWithElemCount(0, 0, 12, 10),
+			listDown:       false,
+			noWrap:         true,
+			expectedCursor: 0,
+			expectedRender: 0,
+		},
+		{
+			name:           "Down movement within range without wrap",
+			panel:          testModelWithElemCount(6, 0, 12, 10),
+			listDown:       true,
+			noWrap:         true,
+			expectedCursor: 7,
+			expectedRender: 1,
+		},
+		{
 			name:           "Down movement on empty panel",
 			panel:          testModelWithElemCount(0, 0, 12, 0),
 			listDown:       true,
@@ -92,6 +122,7 @@ func Test_filePanelUpDown(t *testing.T) {
 
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
+			common.Config.FilePanelCursorWrap = !tt.noWrap
 			if tt.listDown {
 				tt.panel.ListDown()
 			} else {
@@ -190,11 +221,17 @@ func TestPgUpDown(t *testing.T) {
 }
 
 func TestItemSelectUpDown(t *testing.T) {
+	originalCursorWrap := common.Config.FilePanelCursorWrap
+	defer func() {
+		common.Config.FilePanelCursorWrap = originalCursorWrap
+	}()
+
 	testdata := []struct {
 		name             string
 		panel            Model
 		panelToSelect    []string
 		selectDown       bool
+		noWrap           bool
 		expectedCursor   int
 		expectedRender   int
 		expectedSelected map[string]int
@@ -250,6 +287,19 @@ func TestItemSelectUpDown(t *testing.T) {
 			expectedSelected: map[string]int{"/tmp/file2.txt": 1},
 		},
 		{
+			name: "Selection at boundary without wrap",
+			panel: testModel(1, 0, 12, SelectMode, []Element{
+				{Name: "file1.txt", Location: "/tmp/file1.txt"},
+				{Name: "file2.txt", Location: "/tmp/file2.txt"},
+			}),
+			panelToSelect:    []string{},
+			selectDown:       true,
+			noWrap:           true,
+			expectedCursor:   1, // stays on the last item
+			expectedRender:   0,
+			expectedSelected: map[string]int{"/tmp/file2.txt": 1},
+		},
+		{
 			name: "Selection persistence across moves",
 			panel: testModel(1, 0, 12, SelectMode, []Element{
 				{Name: "file1.txt", Location: "/tmp/file1.txt"},
@@ -275,6 +325,7 @@ func TestItemSelectUpDown(t *testing.T) {
 
 	for _, tt := range testdata {
 		t.Run(tt.name, func(t *testing.T) {
+			common.Config.FilePanelCursorWrap = !tt.noWrap
 			tt.panel.SetSelectedAll(tt.panelToSelect)
 
 			if tt.selectDown {
